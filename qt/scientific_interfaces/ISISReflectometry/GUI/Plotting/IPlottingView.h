@@ -22,6 +22,8 @@ public:
   virtual void notifyPlotTiledClicked() = 0;
   virtual void notifyPlotOverplotClicked() = 0;
   virtual void notifyPlotIndividualClicked() = 0;
+  virtual void notifyAddToExistingPlotChanged() = 0;
+  virtual void notifyPlotSelectionChanged() = 0;
 };
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL IPlottingView {
@@ -34,6 +36,10 @@ public:
   virtual std::vector<std::string> selectedWorkspaceNames() const = 0;
   virtual PlotOutputType selectedPlotOutputType() const = 0;
   virtual PlotOutputOptions selectedPlotOutputOptions() const = 0;
+  virtual bool addToExistingPlot() const = 0;
+  virtual bool plotTiledVertically() const = 0;
+  virtual void setActivePlotAvailable(bool available) = 0;
+  virtual void setActivePlotOverplotCompatible(bool compatible) = 0;
   virtual QWidget *plotParent() = 0;
   virtual bool confirmPlottingMultipleItems(size_t plotCount) const = 0;
 };

@@ -18,6 +18,8 @@ namespace ISISReflectometry {
 class MANTIDQT_ISISREFLECTOMETRY_DLL Plotter : public IPlotter {
 public:
   void plot(PlotRequest const &request) const override;
+  bool hasActiveFigure() const override;
+  bool canOverplotActiveFigure() const override;
 };
 
 } // namespace ISISReflectometry

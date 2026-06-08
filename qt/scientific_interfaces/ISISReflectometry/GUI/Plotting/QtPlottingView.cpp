@@ -7,6 +7,7 @@
 #include "QtPlottingView.h"
 #include "WorkspaceTreeView.h"
 #include <QBrush>
+#include <QCheckBox>
 #include <QColor>
 #include <QComboBox>
 #include <QMessageBox>
@@ -16,6 +17,7 @@
 #include <QSignalBlocker>
 #include <QStandardItem>
 #include <QStyledItemDelegate>
+#include <QTimer>
 #include <algorithm>
 #include <stdexcept>
 #include <vector>
@@ -68,6 +70,10 @@ PlotSelectionBehaviour selectionBehaviour(PlotOutputType outputType) {
 
 bool plotOutputTypeSupportsOverplot(PlotOutputType outputType) { return outputType != PlotOutputType::DetectorMap; }
 
+bool plotOutputTypeSupportsAddToExistingPlot(PlotOutputType outputType) {
+  return outputType != PlotOutputType::DetectorMap;
+}
+
 bool plotOutputTypeExcludesPostprocessedGroupOutputs(PlotOutputType outputType) {
   return outputType == PlotOutputType::Alignment || outputType == PlotOutputType::DetectorMap;
 }
@@ -88,20 +94,50 @@ bool hasEnoughSelectedItemsForMultiPlot(size_t selectedItemCount, size_t selecte
   return selectedItemCount >= minimumSelectedItemsForMultiPlot(outputType);
 }
 
-bool shouldEnablePlotIndividual(bool outputOptionsEnabled, size_t selectedItemCount) {
-  return outputOptionsEnabled && hasSelectedItems(selectedItemCount);
+bool hasEnoughSelectedItemsForAddToExistingPlot(size_t selectedItemCount) {
+  return hasSelectedItems(selectedItemCount);
+}
+
+bool hasEnoughSelectedItemsForOverplot(size_t selectedItemCount, size_t selectedWorkspaceGroupCount,
+                                       PlotOutputType outputType, bool addToExistingPlot) {
+  return addToExistingPlot
+             ? hasEnoughSelectedItemsForAddToExistingPlot(selectedItemCount)
+             : hasEnoughSelectedItemsForMultiPlot(selectedItemCount, selectedWorkspaceGroupCount, outputType);
+}
+
+bool hasEnoughSelectedItemsForTiledPlot(size_t selectedItemCount, size_t selectedWorkspaceGroupCount,
+                                        PlotOutputType outputType, bool addToExistingPlot) {
+  return addToExistingPlot
+             ? hasEnoughSelectedItemsForAddToExistingPlot(selectedItemCount)
+             : hasEnoughSelectedItemsForMultiPlot(selectedItemCount, selectedWorkspaceGroupCount, outputType);
+}
+
+bool shouldEnablePlotIndividual(bool outputOptionsEnabled, size_t selectedItemCount, bool addToExistingPlot) {
+  return outputOptionsEnabled && !addToExistingPlot && hasSelectedItems(selectedItemCount);
 }
 
 bool shouldEnablePlotOverplot(bool outputOptionsEnabled, size_t selectedItemCount, size_t selectedWorkspaceGroupCount,
-                              PlotOutputType outputType) {
+                              PlotOutputType outputType, bool addToExistingPlot, bool activePlotOverplotCompatible) {
   return outputOptionsEnabled && plotOutputTypeSupportsOverplot(outputType) &&
-         hasEnoughSelectedItemsForMultiPlot(selectedItemCount, selectedWorkspaceGroupCount, outputType);
+         (!addToExistingPlot || activePlotOverplotCompatible) &&
+         hasEnoughSelectedItemsForOverplot(selectedItemCount, selectedWorkspaceGroupCount, outputType,
+                                           addToExistingPlot);
 }
 
 bool shouldEnablePlotTiled(bool outputOptionsEnabled, size_t selectedItemCount, size_t selectedWorkspaceGroupCount,
-                           PlotOutputType outputType) {
-  return outputOptionsEnabled &&
-         hasEnoughSelectedItemsForMultiPlot(selectedItemCount, selectedWorkspaceGroupCount, outputType);
+                           PlotOutputType outputType, bool addToExistingPlot) {
+  return outputOptionsEnabled && hasEnoughSelectedItemsForTiledPlot(selectedItemCount, selectedWorkspaceGroupCount,
+                                                                    outputType, addToExistingPlot);
+}
+
+bool shouldEnablePlotTiledVertically(bool outputOptionsEnabled, size_t selectedItemCount) {
+  return outputOptionsEnabled && hasSelectedItems(selectedItemCount);
+}
+
+bool shouldEnableAddToExistingPlot(bool outputOptionsEnabled, bool activePlotAvailable,
+                                   bool activePlotOverplotCompatible, PlotOutputType outputType) {
+  return outputOptionsEnabled && activePlotAvailable && activePlotOverplotCompatible &&
+         plotOutputTypeSupportsAddToExistingPlot(outputType);
 }
 
 QString displayName(PlotOutputType outputType) {
@@ -175,7 +211,8 @@ public:
 } // namespace
 
 QtPlottingView::QtPlottingView(QWidget *parent)
-    : QWidget(parent), m_notifyee(nullptr), m_outputOptionsEnabled(false), m_updatingSelection(false) {
+    : QWidget(parent), m_notifyee(nullptr), m_outputOptionsEnabled(false), m_activePlotAvailable(false),
+      m_activePlotOverplotCompatible(false), m_updatingSelection(false) {
   initLayout();
 }
 
@@ -199,6 +236,9 @@ void QtPlottingView::initLayout() {
           [this](QItemSelection const &selected, QItemSelection const &deselected) {
             updateChildSelection(deselected, QItemSelectionModel::Deselect);
             updateChildSelection(selected, QItemSelectionModel::Select);
+            if (m_notifyee) {
+              m_notifyee->notifyPlotSelectionChanged();
+            }
             updatePlotButtonEnabledStates();
           });
   connect(m_ui.plotPreset, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, [this](int) {
@@ -221,6 +261,20 @@ void QtPlottingView::initLayout() {
       m_notifyee->notifyPlotIndividualClicked();
     }
   });
+  connect(m_ui.addToExistingPlot, &QCheckBox::stateChanged, this, [this](int) {
+    if (m_notifyee) {
+      m_notifyee->notifyAddToExistingPlotChanged();
+    }
+    updatePlotButtonEnabledStates();
+  });
+  auto *activePlotAvailabilityTimer = new QTimer(this);
+  activePlotAvailabilityTimer->setInterval(1000);
+  connect(activePlotAvailabilityTimer, &QTimer::timeout, this, [this]() {
+    if (m_notifyee) {
+      m_notifyee->notifyPlotSelectionChanged();
+    }
+  });
+  activePlotAvailabilityTimer->start();
   setOutputOptionControlsEnabled(false);
 }
 
@@ -247,22 +301,34 @@ void QtPlottingView::setAvailablePlotOutputTypes(std::vector<PlotOutputType> con
 
 void QtPlottingView::setOutputOptionControlsEnabled(bool enabled) {
   m_outputOptionsEnabled = enabled;
-  updatePlotButtonEnabledStates();
   m_ui.plotPreset->setEnabled(enabled);
   m_ui.detectorMapYAxis->setEnabled(enabled);
   m_ui.detectorMapXAxis->setEnabled(enabled);
   m_ui.alignmentXAxis->setEnabled(enabled);
+  updatePlotButtonEnabledStates();
 }
 
 void QtPlottingView::updatePlotButtonEnabledStates() {
   auto const selectedWorkspaceCount = selectedWorkspaceNames().size();
   auto const selectedWorkspaceGroupCount = selectedWorkspaceGroupCountForCurrentPlotOutputType();
   auto const plotOutputType = selectedPlotOutputType();
-  m_ui.plotIndividual->setEnabled(shouldEnablePlotIndividual(m_outputOptionsEnabled, selectedWorkspaceCount));
+  auto const addToExistingEnabled = shouldEnableAddToExistingPlot(m_outputOptionsEnabled, m_activePlotAvailable,
+                                                                  m_activePlotOverplotCompatible, plotOutputType);
+  if (!addToExistingEnabled && m_ui.addToExistingPlot->isChecked()) {
+    QSignalBlocker blocker(m_ui.addToExistingPlot);
+    m_ui.addToExistingPlot->setChecked(false);
+  }
+  auto const addToExisting = addToExistingPlot();
+  m_ui.addToExistingPlot->setEnabled(addToExistingEnabled);
+  m_ui.plotIndividual->setEnabled(
+      shouldEnablePlotIndividual(m_outputOptionsEnabled, selectedWorkspaceCount, addToExisting));
   m_ui.plotOverplot->setEnabled(shouldEnablePlotOverplot(m_outputOptionsEnabled, selectedWorkspaceCount,
-                                                         selectedWorkspaceGroupCount, plotOutputType));
-  m_ui.plotTiled->setEnabled(shouldEnablePlotTiled(m_outputOptionsEnabled, selectedWorkspaceCount,
-                                                   selectedWorkspaceGroupCount, plotOutputType));
+                                                         selectedWorkspaceGroupCount, plotOutputType, addToExisting,
+                                                         m_activePlotOverplotCompatible));
+  auto const plotTiledEnabled = shouldEnablePlotTiled(m_outputOptionsEnabled, selectedWorkspaceCount,
+                                                      selectedWorkspaceGroupCount, plotOutputType, addToExisting);
+  m_ui.plotTiled->setEnabled(plotTiledEnabled);
+  m_ui.plotTiledVertically->setEnabled(shouldEnablePlotTiledVertically(m_outputOptionsEnabled, selectedWorkspaceCount));
 }
 
 void QtPlottingView::updatePlotOutputProperties() {
@@ -280,6 +346,7 @@ void QtPlottingView::updatePlotOutputProperties() {
   m_ui.alignmentXAxisLabel->setVisible(showAlignmentProperties);
   m_ui.alignmentXAxis->setVisible(showAlignmentProperties);
   setWorkspaceItemsMutedForCurrentPlotOutputType();
+  updatePlotButtonEnabledStates();
 }
 
 void QtPlottingView::clearWorkspaceSelection() {
@@ -387,6 +454,24 @@ PlotOutputOptions QtPlottingView::selectedPlotOutputOptions() const {
   return {selectedPlotOutputType(), static_cast<DetectorMapXAxis>(m_ui.detectorMapXAxis->currentData().toInt()),
           static_cast<DetectorMapYAxis>(m_ui.detectorMapYAxis->currentData().toInt()),
           static_cast<AlignmentXAxis>(m_ui.alignmentXAxis->currentData().toInt())};
+}
+
+bool QtPlottingView::addToExistingPlot() const { return m_ui.addToExistingPlot->isChecked(); }
+
+bool QtPlottingView::plotTiledVertically() const { return m_ui.plotTiledVertically->isChecked(); }
+
+void QtPlottingView::setActivePlotAvailable(bool available) {
+  m_activePlotAvailable = available;
+  if (!available) {
+    QSignalBlocker blocker(m_ui.addToExistingPlot);
+    m_ui.addToExistingPlot->setChecked(false);
+  }
+  updatePlotButtonEnabledStates();
+}
+
+void QtPlottingView::setActivePlotOverplotCompatible(bool compatible) {
+  m_activePlotOverplotCompatible = compatible;
+  updatePlotButtonEnabledStates();
 }
 
 QWidget *QtPlottingView::plotParent() { return window(); }

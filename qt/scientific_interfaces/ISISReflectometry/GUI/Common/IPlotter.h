@@ -17,6 +17,8 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL IPlotter {
 public:
   virtual ~IPlotter() = default;
   virtual void plot(PlotRequest const &request) const = 0;
+  virtual bool hasActiveFigure() const = 0;
+  virtual bool canOverplotActiveFigure() const = 0;
 };
 
 } // namespace ISISReflectometry

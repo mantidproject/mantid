@@ -35,7 +35,8 @@ inline bool operator==(PlotOptions const &lhs, PlotOptions const &rhs) {
 inline bool operator!=(PlotOptions const &lhs, PlotOptions const &rhs) { return !(lhs == rhs); }
 
 inline bool operator==(PlotRequest const &lhs, PlotRequest const &rhs) {
-  return lhs.workspaces == rhs.workspaces && lhs.options == rhs.options && lhs.parentWidget == rhs.parentWidget;
+  return lhs.workspaces == rhs.workspaces && lhs.options == rhs.options && lhs.parentWidget == rhs.parentWidget &&
+         lhs.addToExistingPlot == rhs.addToExistingPlot && lhs.tiledVertically == rhs.tiledVertically;
 }
 
 inline bool operator!=(PlotRequest const &lhs, PlotRequest const &rhs) { return !(lhs == rhs); }

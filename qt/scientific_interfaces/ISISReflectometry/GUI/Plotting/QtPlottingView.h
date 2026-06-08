@@ -27,6 +27,10 @@ public:
   std::vector<std::string> selectedWorkspaceNames() const override;
   PlotOutputType selectedPlotOutputType() const override;
   PlotOutputOptions selectedPlotOutputOptions() const override;
+  bool addToExistingPlot() const override;
+  bool plotTiledVertically() const override;
+  void setActivePlotAvailable(bool available) override;
+  void setActivePlotOverplotCompatible(bool compatible) override;
   QWidget *plotParent() override;
   bool confirmPlottingMultipleItems(size_t plotCount) const override;
 
@@ -69,6 +73,8 @@ private:
   QStandardItemModel m_workspaceModel;
   PlottingViewSubscriber *m_notifyee;
   bool m_outputOptionsEnabled;
+  bool m_activePlotAvailable;
+  bool m_activePlotOverplotCompatible;
   bool m_updatingSelection;
 };
 

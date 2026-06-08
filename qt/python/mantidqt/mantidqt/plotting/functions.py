@@ -233,7 +233,7 @@ def use_imshow(ws):
 
 
 @manage_workspace_names
-def pcolormesh(workspaces, fig=None, color_norm=None, normalize_by_bin_width=None):
+def pcolormesh(workspaces, fig=None, color_norm=None, normalize_by_bin_width=None, vertical=False):
     """
     Create a figure containing pcolor subplots
 
@@ -253,7 +253,7 @@ def pcolormesh(workspaces, fig=None, color_norm=None, normalize_by_bin_width=Non
     # extend in number of columns if the number of plottables is not a square number
     workspaces_len = len(workspaces)
     # constrained layout since adding colour bar later
-    fig, axes, nrows, ncols = create_subplots(workspaces_len, fig=fig, layout_engine="constrained")
+    fig, axes, nrows, ncols = create_subplots(workspaces_len, fig=fig, layout_engine="constrained", vertical=vertical)
 
     plots = []
     row_idx, col_idx = 0, 0
@@ -285,6 +285,7 @@ def pcolormesh(workspaces, fig=None, color_norm=None, normalize_by_bin_width=Non
 
     axes = axes.ravel()
     colorbar = fig.colorbar(pcm, ax=axes)
+    colorbar.ax.set_label("<colorbar>")
     add_colorbar_label(colorbar, axes)
 
     if fig.canvas.manager is not None:

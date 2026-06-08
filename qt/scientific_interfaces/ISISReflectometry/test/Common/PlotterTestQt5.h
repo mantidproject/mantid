@@ -16,6 +16,8 @@
 #include <QWidget>
 #include <boost/python/extract.hpp>
 #include <cxxtest/TestSuite.h>
+#include <map>
+#include <utility>
 
 class PlotterTestQt5 : public CxxTest::TestSuite {
 public:
@@ -123,6 +125,21 @@ public:
     }
   }
 
+  void testTiledDetectorMapPlotUsesSingleSharedColorbar() {
+    closeAllFigures();
+    createWorkspace("ws1");
+    createWorkspace("ws2");
+
+    MantidQt::CustomInterfaces::ISISReflectometry::Plotter plotter;
+    plotter.plot({{"ws1", "ws2"},
+                  MantidQt::CustomInterfaces::ISISReflectometry::detectorMapPlotOptions(
+                      MantidQt::CustomInterfaces::ISISReflectometry::DetectorMapXAxis::Lambda,
+                      MantidQt::CustomInterfaces::ISISReflectometry::DetectorMapYAxis::Theta,
+                      MantidQt::CustomInterfaces::ISISReflectometry::PlotLayout::Tiled)});
+
+    TS_ASSERT_EQUALS(currentFigureColorbarCount(), 1);
+  }
+
   void testTiledPlotKeepsWorkspaceGroupMembersOnSameAxis() {
     closeAllFigures();
     createWorkspaceGroup("alignment_1", {"alignment_1_raw", "alignment_1_calc", "alignment_1_peak"});
@@ -140,6 +157,51 @@ public:
     for (auto const lineCount : lineCounts) {
       TS_ASSERT_EQUALS(lineCount, 3);
     }
+  }
+
+  void testVerticallyTiledPlotPlacesSecondAxisBelowFirstAxis() {
+    closeAllFigures();
+    createWorkspace("ws1");
+    createWorkspace("ws2");
+
+    MantidQt::CustomInterfaces::ISISReflectometry::Plotter plotter;
+    plotter.plot({{"ws1", "ws2"},
+                  MantidQt::CustomInterfaces::ISISReflectometry::reflectivityCurvePlotOptions(
+                      MantidQt::CustomInterfaces::ISISReflectometry::PlotOutputType::ReflectivityCurve,
+                      MantidQt::CustomInterfaces::ISISReflectometry::PlotLayout::Tiled),
+                  nullptr,
+                  false,
+                  true});
+
+    auto const axisPositions = currentFigureAxisPositionsExcludingColorbars();
+    TS_ASSERT_EQUALS(axisPositions.size(), 2);
+    TS_ASSERT_EQUALS(axisPositions[0], std::make_pair(0, 0));
+    TS_ASSERT_EQUALS(axisPositions[1], std::make_pair(1, 0));
+  }
+
+  void testVerticallyTiledDetectorMapPlotPlacesSecondAxisBelowFirstAxis() {
+    closeAllFigures();
+    createWorkspace("ws1");
+    createWorkspace("ws2");
+
+    MantidQt::CustomInterfaces::ISISReflectometry::Plotter plotter;
+    plotter.plot({{"ws1", "ws2"},
+                  MantidQt::CustomInterfaces::ISISReflectometry::detectorMapPlotOptions(
+                      MantidQt::CustomInterfaces::ISISReflectometry::DetectorMapXAxis::Lambda,
+                      MantidQt::CustomInterfaces::ISISReflectometry::DetectorMapYAxis::Theta,
+                      MantidQt::CustomInterfaces::ISISReflectometry::PlotLayout::Tiled),
+                  nullptr,
+                  false,
+                  true});
+
+    auto const axisPositions = currentFigureAxisPositionsExcludingColorbars();
+    TS_ASSERT_EQUALS(axisPositions.size(), 2);
+    TS_ASSERT_EQUALS(axisPositions[0], std::make_pair(0, 0));
+    TS_ASSERT_EQUALS(axisPositions[1], std::make_pair(1, 0));
+    auto const imageCounts = currentFigureImageCountsByPositionExcludingColorbars();
+    TS_ASSERT_EQUALS(imageCounts.at(std::make_pair(0, 0)), 1);
+    TS_ASSERT_EQUALS(imageCounts.at(std::make_pair(1, 0)), 1);
+    TS_ASSERT_EQUALS(currentFigureColorbarCount(), 1);
   }
 
 private:
@@ -191,11 +253,83 @@ private:
     for (auto index = 0; index < axesCount; ++index) {
       auto const axis = MantidQt::Widgets::Common::Python::Object(axes[index]);
       auto const axisLabel = boost::python::extract<std::string>(axis.attr("get_label")())();
-      if (axisLabel != "<colorbar>") {
+      if (isPlotAxis(axis, axisLabel)) {
         labels.emplace_back(boost::python::extract<std::string>(axis.attr("get_ylabel")())());
       }
     }
     return labels;
+  }
+
+  std::vector<std::pair<int, int>> currentFigureAxisPositionsExcludingColorbars() {
+    Mantid::PythonInterface::GlobalInterpreterLock lock;
+    MantidQt::Widgets::Common::Python::Object pyplot{
+        MantidQt::Widgets::Common::Python::NewRef(PyImport_ImportModule("matplotlib.pyplot"))};
+    auto const figure = MantidQt::Widgets::Common::Python::Object(pyplot.attr("gcf")());
+    auto const axes = figure.attr("axes");
+    auto const axesCount = MantidQt::Widgets::Common::Python::Len(axes);
+    auto positions = std::vector<std::pair<int, int>>{};
+    for (auto index = 0; index < axesCount; ++index) {
+      auto const axis = MantidQt::Widgets::Common::Python::Object(axes[index]);
+      auto const axisLabel = boost::python::extract<std::string>(axis.attr("get_label")())();
+      if (isPlotAxis(axis, axisLabel)) {
+        if (PyObject_HasAttrString(axis.ptr(), "_mantid_tiled_row") != 0 &&
+            PyObject_HasAttrString(axis.ptr(), "_mantid_tiled_col") != 0) {
+          positions.emplace_back(boost::python::extract<int>(axis.attr("_mantid_tiled_row"))(),
+                                 boost::python::extract<int>(axis.attr("_mantid_tiled_col"))());
+        } else {
+          auto const subplotSpec = axis.attr("get_subplotspec")();
+          auto const rowSpan = subplotSpec.attr("rowspan");
+          auto const colSpan = subplotSpec.attr("colspan");
+          positions.emplace_back(boost::python::extract<int>(rowSpan.attr("start"))(),
+                                 boost::python::extract<int>(colSpan.attr("start"))());
+        }
+      }
+    }
+    return positions;
+  }
+
+  bool isPlotAxis(MantidQt::Widgets::Common::Python::Object const &axis, std::string const &axisLabel) {
+    return axisLabel != "<colorbar>" && PyObject_HasAttrString(axis.ptr(), "_colorbar") == 0 &&
+           !(axisLabel == "mantid" && MantidQt::Widgets::Common::Python::Len(axis.attr("get_lines")()) == 0 &&
+             MantidQt::Widgets::Common::Python::Len(axis.attr("get_images")()) == 0);
+  }
+
+  std::map<std::pair<int, int>, int> currentFigureImageCountsByPositionExcludingColorbars() {
+    Mantid::PythonInterface::GlobalInterpreterLock lock;
+    MantidQt::Widgets::Common::Python::Object pyplot{
+        MantidQt::Widgets::Common::Python::NewRef(PyImport_ImportModule("matplotlib.pyplot"))};
+    auto const figure = MantidQt::Widgets::Common::Python::Object(pyplot.attr("gcf")());
+    auto const axes = figure.attr("axes");
+    auto const axesCount = MantidQt::Widgets::Common::Python::Len(axes);
+    auto imageCounts = std::map<std::pair<int, int>, int>{};
+    for (auto index = 0; index < axesCount; ++index) {
+      auto const axis = MantidQt::Widgets::Common::Python::Object(axes[index]);
+      auto const axisLabel = boost::python::extract<std::string>(axis.attr("get_label")())();
+      if (isPlotAxis(axis, axisLabel)) {
+        auto const position = std::make_pair(boost::python::extract<int>(axis.attr("_mantid_tiled_row"))(),
+                                             boost::python::extract<int>(axis.attr("_mantid_tiled_col"))());
+        imageCounts[position] = static_cast<int>(MantidQt::Widgets::Common::Python::Len(axis.attr("get_images")()));
+      }
+    }
+    return imageCounts;
+  }
+
+  int currentFigureColorbarCount() {
+    Mantid::PythonInterface::GlobalInterpreterLock lock;
+    MantidQt::Widgets::Common::Python::Object pyplot{
+        MantidQt::Widgets::Common::Python::NewRef(PyImport_ImportModule("matplotlib.pyplot"))};
+    auto const figure = MantidQt::Widgets::Common::Python::Object(pyplot.attr("gcf")());
+    auto const axes = figure.attr("axes");
+    auto const axesCount = MantidQt::Widgets::Common::Python::Len(axes);
+    auto count = 0;
+    for (auto index = 0; index < axesCount; ++index) {
+      auto const axis = MantidQt::Widgets::Common::Python::Object(axes[index]);
+      auto const axisLabel = boost::python::extract<std::string>(axis.attr("get_label")())();
+      if (axisLabel == "<colorbar>" || PyObject_HasAttrString(axis.ptr(), "_colorbar") != 0) {
+        ++count;
+      }
+    }
+    return count;
   }
 
   std::string currentFigureAxisLabel(int const axisIndex, char const *labelGetter) {

@@ -69,6 +69,8 @@ struct MANTIDQT_ISISREFLECTOMETRY_DLL PlotRequest {
   std::vector<std::string> workspaces;
   PlotOptions options;
   QWidget *parentWidget{nullptr};
+  bool addToExistingPlot{false};
+  bool tiledVertically{false};
 };
 
 MANTIDQT_ISISREFLECTOMETRY_DLL PlotOptions reflectivityCurvePlotOptions(PlotOutputType outputType, PlotLayout layout);

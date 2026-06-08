@@ -99,6 +99,20 @@
       </widget>
      </item>
      <item>
+      <widget class="QCheckBox" name="addToExistingPlot">
+       <property name="text">
+        <string>Add to existing plot</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="plotTiledVertically">
+       <property name="text">
+        <string>Plot tiled vertically</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="verticalSpacer">
        <property name="orientation">
         <enum>Qt::Vertical</enum>

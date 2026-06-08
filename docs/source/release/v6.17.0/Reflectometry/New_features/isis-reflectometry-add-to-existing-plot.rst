@@ -1,0 +1,1 @@
+- The ISIS Reflectometry plotting tab now allows selected outputs to be added to the active plot, either overlaid or as new tiled axes, with an option to fill tiled plots vertically.

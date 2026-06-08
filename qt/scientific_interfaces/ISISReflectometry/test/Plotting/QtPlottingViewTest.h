@@ -10,6 +10,7 @@
 
 #include <QApplication>
 #include <QBrush>
+#include <QCheckBox>
 #include <QColor>
 #include <QComboBox>
 #include <QItemSelectionModel>
@@ -91,6 +92,8 @@ public:
     assertButton(optionsLayout->itemAt(10)->widget(), "plotIndividual", "Plot");
     assertButton(optionsLayout->itemAt(11)->widget(), "plotOverplot", "Plot over");
     assertButton(optionsLayout->itemAt(12)->widget(), "plotTiled", "Plot tiled");
+    assertCheckBox(optionsLayout->itemAt(13)->widget(), "addToExistingPlot", "Add to existing plot");
+    assertCheckBox(optionsLayout->itemAt(14)->widget(), "plotTiledVertically", "Plot tiled vertically");
   }
 
   void testPlotButtonsAreDisabledWhenNothingIsSelected() {
@@ -123,6 +126,88 @@ public:
     assertPlotButtonsEnabled(view, true, false, false);
   }
 
+  void testAddToExistingPlotIsDisabledWhenNoActivePlotIsAvailable() {
+    QtPlottingView view;
+
+    view.setOutputOptionsEnabled(true);
+
+    TS_ASSERT(!view.findChild<QCheckBox *>("addToExistingPlot")->isEnabled());
+  }
+
+  void testAddToExistingPlotIsEnabledWhenActivePlotIsAvailable() {
+    QtPlottingView view;
+
+    view.setOutputOptionsEnabled(true);
+    view.setActivePlotAvailable(true);
+    view.setActivePlotOverplotCompatible(true);
+
+    TS_ASSERT(view.findChild<QCheckBox *>("addToExistingPlot")->isEnabled());
+  }
+
+  void testAddToExistingPlotIsDisabledForDetectorMap() {
+    QtPlottingView view;
+    view.setAvailablePlotOutputTypes({PlotOutputType::ReflectivityCurve, PlotOutputType::DetectorMap});
+    view.setOutputOptionsEnabled(true);
+    view.setActivePlotAvailable(true);
+    view.setActivePlotOverplotCompatible(true);
+    auto plotPreset = view.findChild<QComboBox *>("plotPreset");
+
+    plotPreset->setCurrentIndex(1);
+
+    TS_ASSERT(!view.findChild<QCheckBox *>("addToExistingPlot")->isEnabled());
+  }
+
+  void testAddToExistingPlotIsDisabledWhenActivePlotIsIncompatible() {
+    QtPlottingView view;
+
+    view.setOutputOptionsEnabled(true);
+    view.setActivePlotAvailable(true);
+    view.setActivePlotOverplotCompatible(false);
+
+    TS_ASSERT(!view.findChild<QCheckBox *>("addToExistingPlot")->isEnabled());
+  }
+
+  void testPlotButtonIsDisabledWhenAddingToExistingPlot() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItemsWithGroups(1));
+    view.setOutputOptionsEnabled(true);
+    view.setActivePlotAvailable(true);
+    view.setActivePlotOverplotCompatible(true);
+    auto tree = workspaceTree(view);
+
+    click(tree, workspaceIndex(tree));
+    view.findChild<QCheckBox *>("addToExistingPlot")->setChecked(true);
+
+    TS_ASSERT(!view.findChild<QPushButton *>("plotIndividual")->isEnabled());
+    TS_ASSERT(view.addToExistingPlot());
+  }
+
+  void testSingleSelectionEnablesMultiPlotButtonsWhenAddingToExistingPlot() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItemsWithGroups(1));
+    view.setOutputOptionsEnabled(true);
+    view.setActivePlotAvailable(true);
+    view.setActivePlotOverplotCompatible(true);
+    auto tree = workspaceTree(view);
+
+    click(tree, workspaceIndex(tree));
+    view.findChild<QCheckBox *>("addToExistingPlot")->setChecked(true);
+
+    assertPlotButtonsEnabled(view, false, true, true);
+  }
+
+  void testPlotTiledVerticallyIsEnabledWhenSingleWorkspaceIsSelected() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItemsWithGroups(1));
+    view.setOutputOptionsEnabled(true);
+    auto tree = workspaceTree(view);
+
+    click(tree, workspaceIndex(tree));
+
+    TS_ASSERT(!view.findChild<QPushButton *>("plotTiled")->isEnabled());
+    TS_ASSERT(view.findChild<QCheckBox *>("plotTiledVertically")->isEnabled());
+  }
+
   void testAllPlotButtonsAreEnabledForMultipleSelectedWorkspaces() {
     QtPlottingView view;
     view.setWorkspaceItems(workspaceItems());
@@ -132,6 +217,37 @@ public:
     click(tree, groupIndex(tree));
 
     assertPlotButtonsEnabled(view, true, true, true);
+  }
+
+  void testPlotOverButtonIsDisabledWhenAddingToIncompatibleExistingPlot() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItemsWithGroups(2));
+    view.setOutputOptionsEnabled(true);
+    view.setActivePlotAvailable(true);
+    auto tree = workspaceTree(view);
+
+    click(tree, groupIndex(tree, 0));
+    click(tree, groupIndex(tree, 1), Qt::ControlModifier);
+    view.findChild<QCheckBox *>("addToExistingPlot")->setChecked(true);
+
+    TS_ASSERT(!view.findChild<QCheckBox *>("addToExistingPlot")->isEnabled());
+    TS_ASSERT(!view.addToExistingPlot());
+    assertPlotButtonsEnabled(view, true, true, true);
+  }
+
+  void testPlotOverButtonIsEnabledWhenAddingToCompatibleExistingPlot() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItemsWithGroups(2));
+    view.setOutputOptionsEnabled(true);
+    view.setActivePlotAvailable(true);
+    auto tree = workspaceTree(view);
+
+    click(tree, groupIndex(tree, 0));
+    click(tree, groupIndex(tree, 1), Qt::ControlModifier);
+    view.setActivePlotOverplotCompatible(true);
+    view.findChild<QCheckBox *>("addToExistingPlot")->setChecked(true);
+
+    assertPlotButtonsEnabled(view, false, true, true);
   }
 
   void testPlotOverButtonIsDisabledForDetectorMap() {
@@ -761,10 +877,13 @@ public:
     view.findChild<QPushButton *>("plotTiled")->click();
     view.findChild<QPushButton *>("plotOverplot")->click();
     view.findChild<QPushButton *>("plotIndividual")->click();
+    view.setActivePlotAvailable(true);
+    view.findChild<QCheckBox *>("addToExistingPlot")->setChecked(true);
 
     TS_ASSERT_EQUALS(subscriber.tiledClicked, 1);
     TS_ASSERT_EQUALS(subscriber.overplotClicked, 1);
     TS_ASSERT_EQUALS(subscriber.individualClicked, 1);
+    TS_ASSERT_EQUALS(subscriber.addToExistingPlotChanged, 1);
   }
 
 private:
@@ -773,10 +892,13 @@ private:
     void notifyPlotTiledClicked() override { ++tiledClicked; }
     void notifyPlotOverplotClicked() override { ++overplotClicked; }
     void notifyPlotIndividualClicked() override { ++individualClicked; }
+    void notifyAddToExistingPlotChanged() override { ++addToExistingPlotChanged; }
+    void notifyPlotSelectionChanged() override {}
 
     int tiledClicked{0};
     int overplotClicked{0};
     int individualClicked{0};
+    int addToExistingPlotChanged{0};
   };
 
   void assertButton(QWidget const *widget, std::string const &objectName, std::string const &text) const {
@@ -784,6 +906,13 @@ private:
     TS_ASSERT(button);
     TS_ASSERT_EQUALS(button->objectName().toStdString(), objectName);
     TS_ASSERT_EQUALS(button->text().toStdString(), text);
+  }
+
+  void assertCheckBox(QWidget const *widget, std::string const &objectName, std::string const &text) const {
+    auto const checkBox = dynamic_cast<QCheckBox const *>(widget);
+    TS_ASSERT(checkBox);
+    TS_ASSERT_EQUALS(checkBox->objectName().toStdString(), objectName);
+    TS_ASSERT_EQUALS(checkBox->text().toStdString(), text);
   }
 
   void assertPlotButtonsEnabled(QtPlottingView &view, bool individual, bool overplot, bool tiled) const {
@@ -890,6 +1019,8 @@ private:
   }
 
   QModelIndex groupIndex(QTreeView *tree) const { return tree->model()->index(0, 0); }
+
+  QModelIndex groupIndex(QTreeView *tree, int group) const { return tree->model()->index(group, 0); }
 
   QModelIndex groupOutputTypeIndex(QTreeView *tree) const { return tree->model()->index(0, 1); }
 

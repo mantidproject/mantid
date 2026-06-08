@@ -35,6 +35,10 @@ public:
   MOCK_CONST_METHOD0(selectedWorkspaceNames, std::vector<std::string>());
   MOCK_CONST_METHOD0(selectedPlotOutputType, PlotOutputType());
   MOCK_CONST_METHOD0(selectedPlotOutputOptions, PlotOutputOptions());
+  MOCK_CONST_METHOD0(addToExistingPlot, bool());
+  MOCK_CONST_METHOD0(plotTiledVertically, bool());
+  MOCK_METHOD1(setActivePlotAvailable, void(bool));
+  MOCK_METHOD1(setActivePlotOverplotCompatible, void(bool));
   MOCK_METHOD0(plotParent, QWidget *());
   MOCK_CONST_METHOD1(confirmPlottingMultipleItems, bool(size_t));
 };
@@ -501,6 +505,60 @@ public:
     presenter.notifyPlotOverplotClicked();
   }
 
+  void testPlotOverplotAddsSelectedWorkspacesToExistingPlotWhenRequested() {
+    NiceMock<MockPlottingView> view;
+    NiceMock<MockPlotter> plotter;
+    PlotOptionsProvider plotOptionsProvider;
+    NiceMock<MockPlottingModel> plottingModel;
+    PlottingPresenter presenter(&view, plotter, plotOptionsProvider, plottingModel);
+    auto const workspaces = std::vector<std::string>{"IvsQ_12345", "IvsQ_22345"};
+    auto const selectedWorkspaces = workspaceSelections(workspaces);
+    auto const outputOptions = PlotOutputOptions{PlotOutputType::ReflectivityCurve};
+
+    populateSelections(presenter, view, workspaces);
+    EXPECT_CALL(view, addToExistingPlot()).WillRepeatedly(Return(true));
+    EXPECT_CALL(plotter, canOverplotActiveFigure()).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(view, selectedWorkspaceNames()).Times(1).WillOnce(Return(workspaces));
+    EXPECT_CALL(view, selectedPlotOutputOptions()).Times(1).WillOnce(Return(outputOptions));
+    EXPECT_CALL(plottingModel, workspacesForPlotting(selectedWorkspaces, outputOptions))
+        .Times(1)
+        .WillOnce(Return(workspaces));
+    EXPECT_CALL(plotter,
+                plot(PlotRequest{workspaces,
+                                 reflectivityCurvePlotOptions(PlotOutputType::ReflectivityCurve, PlotLayout::Overplot),
+                                 nullptr, true}))
+        .Times(1);
+
+    presenter.notifyPlotOverplotClicked();
+  }
+
+  void testPlotOverplotFallsBackToTiledWhenExistingPlotIsIncompatible() {
+    NiceMock<MockPlottingView> view;
+    NiceMock<MockPlotter> plotter;
+    PlotOptionsProvider plotOptionsProvider;
+    NiceMock<MockPlottingModel> plottingModel;
+    PlottingPresenter presenter(&view, plotter, plotOptionsProvider, plottingModel);
+    auto const workspaces = std::vector<std::string>{"IvsQ_12345", "IvsQ_22345"};
+    auto const selectedWorkspaces = workspaceSelections(workspaces);
+    auto const outputOptions = PlotOutputOptions{PlotOutputType::ReflectivityCurve};
+
+    populateSelections(presenter, view, workspaces);
+    EXPECT_CALL(view, addToExistingPlot()).WillRepeatedly(Return(true));
+    EXPECT_CALL(plotter, canOverplotActiveFigure()).Times(1).WillOnce(Return(false));
+    EXPECT_CALL(view, selectedWorkspaceNames()).Times(1).WillOnce(Return(workspaces));
+    EXPECT_CALL(view, selectedPlotOutputOptions()).Times(1).WillOnce(Return(outputOptions));
+    EXPECT_CALL(plottingModel, workspacesForPlotting(selectedWorkspaces, outputOptions))
+        .Times(1)
+        .WillOnce(Return(workspaces));
+    EXPECT_CALL(
+        plotter,
+        plot(PlotRequest{workspaces, reflectivityCurvePlotOptions(PlotOutputType::ReflectivityCurve, PlotLayout::Tiled),
+                         nullptr, true}))
+        .Times(1);
+
+    presenter.notifyPlotOverplotClicked();
+  }
+
   void testPlotOverplotWarnsAndCancelsWhenPlottingFiveItems() {
     NiceMock<MockPlottingView> view;
     NiceMock<MockPlotter> plotter;
@@ -546,6 +604,86 @@ public:
         .Times(1);
 
     presenter.notifyPlotTiledClicked();
+  }
+
+  void testPlotTiledAddsSelectedWorkspacesToExistingPlotWhenRequested() {
+    NiceMock<MockPlottingView> view;
+    NiceMock<MockPlotter> plotter;
+    PlotOptionsProvider plotOptionsProvider;
+    NiceMock<MockPlottingModel> plottingModel;
+    PlottingPresenter presenter(&view, plotter, plotOptionsProvider, plottingModel);
+    auto const workspaces = std::vector<std::string>{"IvsQ_12345", "IvsQ_22345"};
+    auto const selectedWorkspaces = workspaceSelections(workspaces);
+    auto const outputOptions = PlotOutputOptions{PlotOutputType::ReflectivityCurve};
+
+    populateSelections(presenter, view, workspaces);
+    EXPECT_CALL(view, addToExistingPlot()).WillRepeatedly(Return(true));
+    EXPECT_CALL(view, selectedWorkspaceNames()).Times(1).WillOnce(Return(workspaces));
+    EXPECT_CALL(view, selectedPlotOutputOptions()).Times(1).WillOnce(Return(outputOptions));
+    EXPECT_CALL(plottingModel, workspacesForPlotting(selectedWorkspaces, outputOptions))
+        .Times(1)
+        .WillOnce(Return(workspaces));
+    EXPECT_CALL(
+        plotter,
+        plot(PlotRequest{workspaces, reflectivityCurvePlotOptions(PlotOutputType::ReflectivityCurve, PlotLayout::Tiled),
+                         nullptr, true}))
+        .Times(1);
+
+    presenter.notifyPlotTiledClicked();
+  }
+
+  void testPlotTiledPassesVerticalOptionToPlotter() {
+    NiceMock<MockPlottingView> view;
+    NiceMock<MockPlotter> plotter;
+    PlotOptionsProvider plotOptionsProvider;
+    NiceMock<MockPlottingModel> plottingModel;
+    PlottingPresenter presenter(&view, plotter, plotOptionsProvider, plottingModel);
+    auto const workspaces = std::vector<std::string>{"IvsQ_12345", "IvsQ_22345"};
+    auto const selectedWorkspaces = workspaceSelections(workspaces);
+    auto const outputOptions = PlotOutputOptions{PlotOutputType::ReflectivityCurve};
+
+    populateSelections(presenter, view, workspaces);
+    EXPECT_CALL(view, plotTiledVertically()).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(view, selectedWorkspaceNames()).Times(1).WillOnce(Return(workspaces));
+    EXPECT_CALL(view, selectedPlotOutputOptions()).Times(1).WillOnce(Return(outputOptions));
+    EXPECT_CALL(plottingModel, workspacesForPlotting(selectedWorkspaces, outputOptions))
+        .Times(1)
+        .WillOnce(Return(workspaces));
+    EXPECT_CALL(
+        plotter,
+        plot(PlotRequest{workspaces, reflectivityCurvePlotOptions(PlotOutputType::ReflectivityCurve, PlotLayout::Tiled),
+                         nullptr, false, true}))
+        .Times(1);
+
+    presenter.notifyPlotTiledClicked();
+  }
+
+  void testAddToExistingPlotChangedUpdatesActivePlotCompatibility() {
+    NiceMock<MockPlottingView> view;
+    NiceMock<MockPlotter> plotter;
+    PlotOptionsProvider plotOptionsProvider;
+    NiceMock<MockPlottingModel> plottingModel;
+    PlottingPresenter presenter(&view, plotter, plotOptionsProvider, plottingModel);
+
+    EXPECT_CALL(plotter, hasActiveFigure()).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(view, setActivePlotAvailable(true)).Times(1);
+    EXPECT_CALL(plotter, canOverplotActiveFigure()).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(view, setActivePlotOverplotCompatible(true)).Times(1);
+
+    presenter.notifyAddToExistingPlotChanged();
+  }
+
+  void testPlotSelectionChangedUpdatesActivePlotAvailability() {
+    NiceMock<MockPlottingView> view;
+    NiceMock<MockPlotter> plotter;
+    PlotOptionsProvider plotOptionsProvider;
+    NiceMock<MockPlottingModel> plottingModel;
+    PlottingPresenter presenter(&view, plotter, plotOptionsProvider, plottingModel);
+
+    EXPECT_CALL(plotter, hasActiveFigure()).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(view, setActivePlotAvailable(true)).Times(1);
+
+    presenter.notifyPlotSelectionChanged();
   }
 
   void testPlotTiledWarnsAndCancelsWhenPlottingFiveItems() {

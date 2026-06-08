@@ -23,6 +23,14 @@ namespace {
 using SelectionMap = std::unordered_map<std::string, PlottingWorkspaceSelection>;
 auto constexpr multiplePlotItemWarningThreshold = 5;
 
+PlotLayout layoutForAddToExistingOverplot(bool addToExistingPlot, bool activePlotOverplotCompatible) {
+  return addToExistingPlot && !activePlotOverplotCompatible ? PlotLayout::Tiled : PlotLayout::Overplot;
+}
+
+bool activePlotOverplotCompatibleForRequest(bool addToExistingPlot, IPlotter const &plotter) {
+  return !addToExistingPlot || plotter.canOverplotActiveFigure();
+}
+
 Mantid::API::Workspace_sptr retrieveWorkspaceIfPresent(std::string const &workspaceName) {
   if (workspaceName.empty()) {
     return nullptr;
@@ -177,9 +185,17 @@ void PlottingPresenter::notifyRunsTableChanged(RunsTable const &runsTable) {
 
 void PlottingPresenter::notifyPlotTiledClicked() { plotSelectedWorkspaces(PlotLayout::Tiled); }
 
-void PlottingPresenter::notifyPlotOverplotClicked() { plotSelectedWorkspaces(PlotLayout::Overplot); }
+void PlottingPresenter::notifyPlotOverplotClicked() {
+  auto const addToExistingPlot = m_view->addToExistingPlot();
+  plotSelectedWorkspaces(layoutForAddToExistingOverplot(
+      addToExistingPlot, activePlotOverplotCompatibleForRequest(addToExistingPlot, *m_plotter)));
+}
 
 void PlottingPresenter::notifyPlotIndividualClicked() { plotSelectedWorkspaces(PlotLayout::Individual); }
+
+void PlottingPresenter::notifyAddToExistingPlotChanged() { updateActivePlotAvailability(); }
+
+void PlottingPresenter::notifyPlotSelectionChanged() { updateActivePlotAvailability(); }
 
 std::vector<PlottingWorkspaceTreeItem> PlottingPresenter::makeWorkspaceItems(RunsTable const &runsTable) {
   auto workspaceItems = std::vector<PlottingWorkspaceTreeItem>{};
@@ -258,6 +274,8 @@ void PlottingPresenter::plotSelectedWorkspaces(PlotLayout layout) const {
 
   auto const options = m_plotOptionsProvider->optionsFor(outputOptions, layout);
   auto *plotParent = m_view->plotParent();
+  auto const addToExistingPlot = m_view->addToExistingPlot();
+  auto const tiledVertically = layout == PlotLayout::Tiled && m_view->plotTiledVertically();
   if (workspacesToPlot.size() >= multiplePlotItemWarningThreshold &&
       !m_view->confirmPlottingMultipleItems(workspacesToPlot.size())) {
     return;
@@ -265,16 +283,25 @@ void PlottingPresenter::plotSelectedWorkspaces(PlotLayout layout) const {
 
   if (layout == PlotLayout::Individual) {
     for (auto const &workspace : workspacesToPlot) {
-      m_plotter->plot({{workspace}, options, plotParent});
+      m_plotter->plot({{workspace}, options, plotParent, addToExistingPlot, tiledVertically});
     }
+    updateActivePlotAvailability();
     return;
   }
 
-  m_plotter->plot({workspacesToPlot, options, plotParent});
+  m_plotter->plot({workspacesToPlot, options, plotParent, addToExistingPlot, tiledVertically});
+  updateActivePlotAvailability();
 }
 
 void PlottingPresenter::updateWidgetEnabledState() {
   m_view->setOutputOptionsEnabled(!isProcessing() && !isAutoreducing());
+  updateActivePlotAvailability();
+}
+
+void PlottingPresenter::updateActivePlotAvailability() const {
+  auto const activePlotAvailable = m_plotter->hasActiveFigure();
+  m_view->setActivePlotAvailable(activePlotAvailable);
+  m_view->setActivePlotOverplotCompatible(activePlotAvailable && m_plotter->canOverplotActiveFigure());
 }
 
 void PlottingPresenter::updateAvailablePlotOutputTypes(std::string const &instrumentName) {

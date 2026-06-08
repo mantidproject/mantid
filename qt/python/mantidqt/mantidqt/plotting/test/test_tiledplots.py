@@ -23,7 +23,7 @@ import mantid.plots  # noqa
 from mantid.api import AnalysisDataService, WorkspaceFactory
 from unittest import mock
 from mantidqt.dialogs.spectraselectordialog import SpectraSelection
-from mantid.plots.plotfunctions import manage_workspace_names, get_plot_fig
+from mantid.plots.plotfunctions import add_tiled_axes, create_subplots, manage_workspace_names, get_plot_fig, plot_on_axis
 from mantidqt.plotting.functions import plot_from_names
 
 
@@ -113,6 +113,140 @@ class TiledPlotsTest(TestCase):
 
         self.assertEqual(axes[0].get_xscale(), "log")
         self.assertEqual(axes[0].get_yscale(), "log")
+
+    def test_add_tiled_axes_preserves_existing_axes_and_adds_new_axes(self):
+        fig, axes = get_plot_fig(overplot=False, axes_num=2)
+
+        new_axes = add_tiled_axes(fig, axes_num=2)
+
+        self.assertEqual(4, len(fig.axes))
+        self.assertEqual(2, len(new_axes))
+        self.assertEqual(list(axes), fig.axes[:2])
+        self.assertEqual(new_axes, fig.axes[2:])
+
+    def test_add_tiled_axes_does_not_reset_layout_engine_if_figure_has_colorbar(self):
+        fig, axes = get_plot_fig(overplot=False, axes_num=1)
+        image = axes[0].imshow([[0, 1], [1, 0]])
+        fig.colorbar(image, ax=axes[0])
+
+        new_axes = add_tiled_axes(fig, axes_num=1)
+
+        self.assertEqual(3, len(fig.axes))
+        self.assertEqual(1, len(new_axes))
+
+    def test_add_tiled_axes_with_colorbar_figure_draws_after_adding_line_axis(self):
+        fig, axes = get_plot_fig(overplot=False, axes_num=1)
+        image = axes[0].imshow([[0, 1], [1, 0]])
+        fig.colorbar(image, ax=axes[0])
+
+        add_tiled_axes(fig, axes_num=1)
+
+        fig.canvas.draw()
+
+    def test_add_tiled_axes_repeatedly_uses_unique_positions_up_to_four_axes(self):
+        fig, axes = get_plot_fig(overplot=False, axes_num=1)
+
+        add_tiled_axes(fig, axes_num=1)
+        add_tiled_axes(fig, axes_num=1, vertical=True)
+        add_tiled_axes(fig, axes_num=1)
+
+        plot_axes = [ax for ax in fig.axes if ax.get_label() != "<colorbar>"]
+        positions = {(ax._mantid_tiled_row, ax._mantid_tiled_col) for ax in plot_axes}
+        self.assertEqual(4, len(plot_axes))
+        self.assertEqual(positions, {(0, 0), (0, 1), (1, 0), (1, 1)})
+        self.assertEqual((axes[0]._mantid_tiled_row, axes[0]._mantid_tiled_col), (0, 0))
+
+    def test_add_tiled_axes_repeatedly_with_colorbars_uses_unique_positions_up_to_four_axes(self):
+        fig, axes = get_plot_fig(overplot=False, axes_num=1)
+        image = axes[0].imshow([[0, 1], [1, 0]])
+        fig.colorbar(image, ax=axes[0])
+
+        add_tiled_axes(fig, axes_num=1)
+        add_tiled_axes(fig, axes_num=1, vertical=True)
+        add_tiled_axes(fig, axes_num=1)
+
+        plot_axes = [ax for ax in fig.axes if ax.get_label() != "<colorbar>"]
+        positions = {(ax._mantid_tiled_row, ax._mantid_tiled_col) for ax in plot_axes}
+        self.assertEqual(4, len(plot_axes))
+        self.assertEqual(positions, {(0, 0), (0, 1), (1, 0), (1, 1)})
+        fig.canvas.draw()
+
+    def test_labelled_colorbar_is_ignored_when_adding_tiled_axes(self):
+        fig, axes = get_plot_fig(overplot=False, axes_num=1)
+        image = axes[0].imshow([[0, 1], [1, 0]])
+        colorbar = fig.colorbar(image, ax=axes[0])
+        colorbar.ax.set_label("<colorbar>")
+
+        new_axes = add_tiled_axes(fig, axes_num=1)
+
+        self.assertEqual(fig.axes[1].get_label(), "<colorbar>")
+        self.assertEqual((fig.axes[0]._mantid_tiled_row, fig.axes[0]._mantid_tiled_col), (0, 0))
+        self.assertEqual((new_axes[0]._mantid_tiled_row, new_axes[0]._mantid_tiled_col), (0, 1))
+
+    def test_plot_on_axis_only_plots_on_supplied_axis(self):
+        fig, axes = get_plot_fig(overplot=False, axes_num=2)
+
+        plot_on_axis(["test_ws"], axes[1], wksp_indices=[0])
+
+        self.assertEqual(0, len(axes[0].get_lines()))
+        self.assertEqual(1, len(axes[1].get_lines()))
+        self.assertEqual(2, len(fig.axes))
+
+    def test_add_tiled_axes_vertical_adds_new_axes_to_free_positions_first(self):
+        fig, axes = get_plot_fig(overplot=False, axes_num=2)
+
+        new_axes = add_tiled_axes(fig, axes_num=2, vertical=True)
+
+        self.assertEqual(4, len(fig.axes))
+        self.assertEqual(2, len(new_axes))
+        self.assertEqual(new_axes, fig.axes[2:])
+        self.assertEqual(list(axes), fig.axes[:2])
+        self.assertEqual(axes[0].get_subplotspec().rowspan.start, 0)
+        self.assertEqual(axes[0].get_subplotspec().colspan.start, 0)
+        self.assertEqual(axes[1].get_subplotspec().rowspan.start, 0)
+        self.assertEqual(axes[1].get_subplotspec().colspan.start, 1)
+        self.assertEqual(new_axes[0].get_subplotspec().rowspan.start, 1)
+        self.assertEqual(new_axes[0].get_subplotspec().colspan.start, 0)
+        self.assertEqual(new_axes[1].get_subplotspec().rowspan.start, 1)
+        self.assertEqual(new_axes[1].get_subplotspec().colspan.start, 1)
+
+    def test_add_tiled_axes_vertical_after_horizontal_add_uses_free_position_below_first_axis(self):
+        fig, axes = get_plot_fig(overplot=False, axes_num=1)
+        horizontal_axes = add_tiled_axes(fig, axes_num=1)
+
+        vertical_axes = add_tiled_axes(fig, axes_num=1, vertical=True)
+
+        self.assertEqual(3, len(fig.axes))
+        self.assertEqual(axes[0].get_subplotspec().rowspan.start, 0)
+        self.assertEqual(axes[0].get_subplotspec().colspan.start, 0)
+        self.assertEqual(horizontal_axes[0].get_subplotspec().rowspan.start, 0)
+        self.assertEqual(horizontal_axes[0].get_subplotspec().colspan.start, 1)
+        self.assertEqual(vertical_axes[0].get_subplotspec().rowspan.start, 1)
+        self.assertEqual(vertical_axes[0].get_subplotspec().colspan.start, 0)
+
+    def test_add_tiled_axes_vertical_adds_second_axis_below_existing_axis(self):
+        fig, axes = get_plot_fig(overplot=False, axes_num=1)
+
+        new_axes = add_tiled_axes(fig, axes_num=1, vertical=True)
+
+        self.assertEqual(2, len(fig.axes))
+        self.assertEqual(1, len(new_axes))
+        self.assertEqual(list(axes), fig.axes[:1])
+        self.assertEqual(new_axes, fig.axes[1:])
+        self.assertEqual(axes[0].get_subplotspec().rowspan.start, 0)
+        self.assertEqual(axes[0].get_subplotspec().colspan.start, 0)
+        self.assertEqual(new_axes[0].get_subplotspec().rowspan.start, 1)
+        self.assertEqual(new_axes[0].get_subplotspec().colspan.start, 0)
+
+    def test_create_subplots_vertical_places_second_axis_below_first_axis(self):
+        _, axes, nrows, ncols = create_subplots(2, vertical=True)
+
+        self.assertEqual(2, nrows)
+        self.assertEqual(1, ncols)
+        self.assertEqual(axes[0][0].get_subplotspec().rowspan.start, 0)
+        self.assertEqual(axes[0][0].get_subplotspec().colspan.start, 0)
+        self.assertEqual(axes[1][0].get_subplotspec().rowspan.start, 1)
+        self.assertEqual(axes[1][0].get_subplotspec().colspan.start, 0)
 
     def test_tiled_plot_from_multiple_workspaces_no_errors(self):
         workspaces = ["test_ws", "test_ws_2"]
