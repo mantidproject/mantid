@@ -766,12 +766,14 @@ public:
     HistogramDx dx(9, 0.);
 
     double nan = std::numeric_limits<double>::quiet_NaN();
-    // Add a Infinity
+    // Add a NaN as signal and error
     y[0] = nan;
+    e[0] = nan;
     MatrixWorkspace_sptr lhsWS = createWorkspace(x, y, e, dx);
 
-    // Remove infinity
+    // Remove NaN
     y[0] = y[1];
+    e[0] = e[1];
     MatrixWorkspace_sptr rhsWS = createWorkspace(x, y, e, dx);
 
     auto ret = do_stitch1D(lhsWS, rhsWS);
@@ -779,10 +781,13 @@ public:
     MatrixWorkspace_sptr outWs = ret.get<0>();
     double scaleFactor = ret.get<1>();
 
-    TSM_ASSERT("ScaleFactor should not be Infinity", !std::isinf(scaleFactor));
+    TSM_ASSERT("ScaleFactor should not be NaN", !std::isnan(scaleFactor));
 
     auto outY = outWs->readY(0);
-    TSM_ASSERT("Nans should be put back", std::isnan(outY[0]));
+    TSM_ASSERT("Nans should be put back into Y Values", std::isnan(outY[0]));
+
+    auto outE = outWs->readE(0);
+    TSM_ASSERT("Nans should be put back into E Values", std::isnan(outE[0]));
   }
 };
 

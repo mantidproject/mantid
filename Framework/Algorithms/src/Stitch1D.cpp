@@ -53,11 +53,26 @@ bool hasInvalidY(const Mantid::Algorithms::Stitch1D::SpecialValueIndexes &specia
          hasSpecialValue(specialValues.infY, spectrumIndex, binIndex);
 }
 
+bool hasInvalidE(const Mantid::Algorithms::Stitch1D::SpecialValueIndexes &specialValues, const size_t spectrumIndex,
+                 const size_t binIndex) {
+  return hasSpecialValue(specialValues.nanE, spectrumIndex, binIndex) ||
+         hasSpecialValue(specialValues.infE, spectrumIndex, binIndex);
+}
+
 double specialYValue(const Mantid::Algorithms::Stitch1D::SpecialValueIndexes &lhsSpecialValues,
                      const Mantid::Algorithms::Stitch1D::SpecialValueIndexes &rhsSpecialValues,
                      const size_t spectrumIndex, const size_t binIndex) {
   if (hasSpecialValue(lhsSpecialValues.infY, spectrumIndex, binIndex) ||
       hasSpecialValue(rhsSpecialValues.infY, spectrumIndex, binIndex))
+    return std::numeric_limits<double>::infinity();
+  return std::numeric_limits<double>::quiet_NaN();
+}
+
+double specialEValue(const Mantid::Algorithms::Stitch1D::SpecialValueIndexes &lhsSpecialValues,
+                     const Mantid::Algorithms::Stitch1D::SpecialValueIndexes &rhsSpecialValues,
+                     const size_t spectrumIndex, const size_t binIndex) {
+  if (hasSpecialValue(lhsSpecialValues.infE, spectrumIndex, binIndex) ||
+      hasSpecialValue(rhsSpecialValues.infE, spectrumIndex, binIndex))
     return std::numeric_limits<double>::infinity();
   return std::numeric_limits<double>::quiet_NaN();
 }
@@ -577,17 +592,17 @@ void Stitch1D::exec() {
     maskInPlace(a1 + 1, static_cast<int>(lhs->blocksize()), lhs);
     // Mask out everything BEFORE the overlap region as a new workspace.
     maskInPlace(0, a2, rhs);
-    MatrixWorkspace_sptr overlapave;
+    MatrixWorkspace_sptr overlapMeans;
     if (hasNonzeroErrors(overlap1) && hasNonzeroErrors(overlap2)) {
-      overlapave = weightedMean(overlap1, overlap2);
+      overlapMeans = weightedMean(overlap1, overlap2);
     } else {
       g_log.information("Using un-weighted mean for Stitch1D overlap mean");
       MatrixWorkspace_sptr sum = overlap1 + overlap2;
-      overlapave = sum * 0.5;
+      overlapMeans = sum * 0.5;
     }
     if (m_useValidDataOnly)
-      useValidOverlapData(overlapave, overlap1, overlap2, m_lhsSpecialValues, m_rhsSpecialValues, a1, a2);
-    result = lhs + overlapave + rhs;
+      useValidOverlapData(overlapMeans, overlap1, overlap2, m_lhsSpecialValues, m_rhsSpecialValues, a1, a2);
+    result = lhs + overlapMeans + rhs;
     if (m_useValidDataOnly)
       reinsertSpecialValuesWithoutValidData(result, m_lhsSpecialValues, m_rhsSpecialValues, a1, a2);
     else
@@ -701,6 +716,8 @@ void Stitch1D::reinsertSpecialValuesWithoutValidData(const MatrixWorkspace_sptr 
     for (size_t j = static_cast<size_t>(a1 + 1); j < static_cast<size_t>(a2); ++j) {
       if (hasInvalidY(lhsSpecialValues, i, j) && hasInvalidY(rhsSpecialValues, i, j))
         sourceY[j] = specialYValue(lhsSpecialValues, rhsSpecialValues, i, j);
+      if (hasInvalidE(lhsSpecialValues, i, j) && hasInvalidE(rhsSpecialValues, i, j))
+        sourceE[j] = specialEValue(lhsSpecialValues, rhsSpecialValues, i, j);
     }
 
     PARALLEL_END_INTERRUPT_REGION
