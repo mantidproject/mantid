@@ -172,6 +172,9 @@ class CalibrationInfo:
         self.fit_peak_shape = peak_shape
 
     # functional
+    def is_texture_group(self) -> bool:
+        return self.get_group() in self.config.texture_groups if self.config else False
+
     def set_grouping_filepath_from_prm_filepath(self) -> None:
         """
         If there is a prm filepath declared, assign the xml filepath as the grouping filepath

@@ -196,7 +196,7 @@ def create_new_calibration(calibration, rb_num, plot_output, save_dir, full_cali
     calib_dirs = [path.join(save_dir, "Calibration", "")]
     if rb_num:
         calib_dirs.append(path.join(save_dir, "User", rb_num, "Calibration", ""))
-        if calibration.group in calibration.config.texture_groups:
+        if calibration.is_texture_group():
             calib_dirs.pop(0)  # only save to RB directory to limit number files saved
 
     for calib_dir in calib_dirs:
@@ -471,7 +471,7 @@ def focus_run(sample_paths, plot_output, rb_num, calibration, save_dir, full_cal
     ws_van_foc, van_run = process_vanadium(calibration, full_calib)
 
     # directories for saved focused data
-    calib_is_texture = calibration.group in calibration.config.texture_groups
+    calib_is_texture = calibration.is_texture_group()
     focus_sub_dir = path.join("Focus", calibration.get_foc_ws_suffix()) if calib_is_texture else "Focus"
     focus_dirs = [path.join(save_dir, focus_sub_dir)]
     if rb_num:

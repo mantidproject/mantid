@@ -33,7 +33,7 @@ class FocusModelTest(unittest.TestCase):
         self.calibration.get_foc_ws_suffix.return_value = "bank"
         self.calibration.group = ENGINX_GROUP.BOTH
         self.calibration.config = MagicMock()
-        self.calibration.config.texture_groups = (ENGINX_GROUP.TEXTURE30, ENGINX_GROUP.TEXTURE20)
+        self.calibration.is_texture_group.return_value = False  # BOTH is not a texture group
 
     def tearDown(self):
         shutil.rmtree(self.test_dir)
@@ -204,6 +204,7 @@ class FocusModelTest(unittest.TestCase):
         mock_apply_van.return_value = sample_foc_ws  # xunit = dSpacing
         mock_conv_units.return_value = sample_foc_ws  # xunit = TOF
         self.calibration.group = ENGINX_GROUP.TEXTURE20
+        self.calibration.is_texture_group.return_value = True
         self.calibration.get_foc_ws_suffix.return_value = "Texture20"
         mock_save_out.return_value = ["Nexus files"], ["GSS files"], ["Combined files"]
 
