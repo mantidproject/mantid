@@ -23,16 +23,36 @@
       <value val="111" />
     </parameter>
 
+    <parameter name="peak-start">
+      <value val="55000" />
+    </parameter>
+
+    <parameter name="peak-end">
+      <value val="57000" />
+    </parameter>
+
+    <parameter name="back-start">
+      <value val="61000" />
+    </parameter>
+
+    <parameter name="back-end">
+      <value val="63000" />
+    </parameter>
+
+    <parameter name="Workflow.DetectorsGroupingFile" type="string">
+      <value val="OSIRIS_Si_Detectors_Grouping.xml" />
+    </parameter>
+
+  </component-link>
+
+  <component-link name="silicon">
+
     <parameter name="Efixed">
       <value val="2.082" />
     </parameter>
 
     <parameter name="resolution">
-      <value val="0.00075" />
-    </parameter>
-
-    <parameter name="Workflow.DetectorsGroupingFile" type="string">
-      <value val="OSIRIS_Si_Detectors_Grouping.xml" />
+      <value val="0.015" />
     </parameter>
 
   </component-link>
