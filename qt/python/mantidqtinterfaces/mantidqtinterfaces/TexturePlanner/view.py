@@ -40,6 +40,9 @@ _TRANSMISSION_WEIGHTING_TOOLTIP = (
     "One weighting per included orientation: the smallest transmission factor of each orientation "
     "normalised against the largest across all orientations (least absorbing = 1.0, more absorbing > 1.0)."
 )
+_SSCANSS_TOOLTIP = "Write the included orientations to a .angles file that can be loaded into SScanSS-2."
+_EULER_TOOLTIP = "Write the included orientations to an Euler angle .txt file (using the axes defined in the settings)."
+_MATRIX_TOOLTIP = "Write the included orientations to a flattened rotation matrix .txt file."
 
 
 class TexturePlannerView(QMainWindow, Ui_texplan):
@@ -113,6 +116,8 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         self.create_workspace_table()
         self.hide_axis_columns()
 
+        self.init_tool_tips()
+
         self.make_box_toggleable(self.grpLoadShape, self.set_load_shape_visible, initial_state=True)
         self.make_box_toggleable(self.grpSetMaterial, self.set_set_material_visible)
         self.make_box_toggleable(self.initOrientation, self.set_init_rotations_visible)
@@ -146,6 +151,21 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         super().closeEvent(event)
 
     def init_tool_tips(self):
+        # Sample setup
+        self.btnSTL.setToolTip("Load a sample shape from a mesh (.stl) file.")
+        self.btnXML.setToolTip("Load a sample shape from a Constructive Solid Geometry (CSG) definition (.xml file).")
+        self.btnSetMaterial.setToolTip("Set the sample material using the SetSampleMaterial algorithm.")
+        for spn, axis in ((self.spnInitX, "X"), (self.spnInitY, "Y"), (self.spnInitZ, "Z")):
+            spn.setToolTip(
+                f"Rotation about the instrument {axis} axis defining the shape's initial orientation, "
+                "before the sample positioner repositions it (degrees)."
+            )
+        for spn, axis in ((self.spnInitPX, "X"), (self.spnInitPY, "Y"), (self.spnInitPZ, "Z")):
+            spn.setToolTip(
+                f"Starting {axis} position of the shape relative to the instrument components, before the sample positioner repositions it."
+            )
+
+        # Sample directions
         self.lineedit_RD.setToolTip("Label for the first (PF: in-plane) intrinsic sample direction")
         self.lineedit_RD0.setToolTip("X component of the first intrinsic sample direction")
         self.lineedit_RD1.setToolTip("Y component of the first intrinsic sample direction")
@@ -158,6 +178,66 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         self.lineedit_TD0.setToolTip("X component of the third intrinsic sample direction")
         self.lineedit_TD1.setToolTip("Y component of the third intrinsic sample direction")
         self.lineedit_TD2.setToolTip("Z component of the third intrinsic sample direction")
+        self.updateDirs.setToolTip("Apply the entered sample directions. Must be clicked for direction changes to take effect.")
+
+        # Experimental setup
+        self.cmbInstr.setToolTip(
+            "Select the instrument: a fully supported instrument (ENGINX or IMAT), or Custom for another Mantid instrument."
+        )
+        self.cmbGroup.setToolTip(
+            "Select the virtual detector grouping. Pre-set options exist for ENGINX and IMAT; custom XML definitions can also be loaded."
+        )
+        self.edt_custom_instr.setToolTip(
+            "Name of the Mantid instrument to use. The box turns red and Update Instrument stays disabled "
+            "until the text matches a known instrument."
+        )
+        self.finder_grouping.setToolTip(
+            "Detector grouping file to use. If it is incompatible with the selected instrument, Update Instrument stays disabled."
+        )
+        self.btnUpdateInstr.setToolTip("Update the experiment with the current instrument and grouping options.")
+        self.combo_shapeMethod.setToolTip("Gauge volume definition: choose a pre-set, a custom CSG definition, or No Gauge Volume.")
+        self.finder_gauge_vol.setToolTip("Custom gauge volume CSG (.xml) definition.")
+        self.setGV.setToolTip("Apply the current gauge volume definition to the experiment.")
+        self.btnOrient.setToolTip(
+            "Load orientations from a .txt file of Euler angles or flattened rotation matrices; "
+            "the type is detected from the number of entries per row."
+        )
+
+        # Goniometers
+        self.spnNumAxes.setToolTip("Number of active goniometer axes for the sample positioner.")
+        self.spnStepSize.setToolTip("Degrees incremented or decremented by a single arrow click on the Angle fields.")
+        self.spnIndex.setToolTip("Row of the Orientation Table shown in the Axes below and highlighted in the Pole Figure Display.")
+        self.addOrientation.setToolTip("Add a duplicate of the current orientation to the end of the Orientation Table.")
+        for i in range(6):
+            getattr(self, f"edtVec{i}").setToolTip(f"Rotation axis vector for goniometer axis {i} (axis 0 is the outermost).")
+            getattr(self, f"cmbSense{i}").setToolTip(f"Sense of rotation for goniometer axis {i}.")
+            getattr(self, f"spnAngle{i}").setToolTip(f"Rotation angle for goniometer axis {i} (degrees).")
+
+        # Displays
+        self.grpSampleFigure.setToolTip(
+            "Lab view: the sample oriented on the chosen instrument. Visibility of overlays is set in the settings."
+        )
+        self.grpPoleFigure.setToolTip(
+            "Pole figure coverage for the included orientations (or estimated transmission values when that option is enabled)."
+        )
+        self.chkTransmission.setToolTip(
+            "Show estimated transmission values per virtual detector (Monte Carlo) instead of pole figure coverage."
+        )
+
+        # Orientation table
+        self.tableWidget.setToolTip(
+            "Axis information for every orientation. Use Include to choose orientations for the pole figure and outputs, "
+            "and Select to mark rows for deletion."
+        )
+        self.selectAll.setToolTip("Tick the Select box on every orientation.")
+        self.deselectAll.setToolTip("Clear the Select box on every orientation.")
+        self.deleteSelected.setToolTip("Remove all orientations whose Select box is ticked.")
+
+        # Outputs
+        self.finder_save_dir.setToolTip("Directory to save the output files into.")
+        self.saveFileLine.setToolTip("File name for the output file.")
+        self.cmbExportFormat.setToolTip("Type of file to write.")
+        self.btnExport.setToolTip("Write the selected export file to the save directory.")
 
     def set_on_num_gonio_updated(self, slot):
         self.spnNumAxes.valueChanged.connect(slot)
@@ -240,9 +320,17 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
 
     def populate_export_formats(self):
         self.cmbExportFormat.addItems(BASE_EXPORT_FORMATS)
-        # keep the explanatory hint the old "Save Reference Workspace" button carried
-        ref_idx = self.cmbExportFormat.findText(EXPORT_REFERENCE_WS)
-        self.cmbExportFormat.setItemData(ref_idx, _REFERENCE_WS_TOOLTIP, QtCore.Qt.ToolTipRole)
+        # per-item hints so the documented behaviour of each format is discoverable in the combo
+        item_tooltips = {
+            EXPORT_SSCANSS: _SSCANSS_TOOLTIP,
+            EXPORT_EULER: _EULER_TOOLTIP,
+            EXPORT_MATRIX: _MATRIX_TOOLTIP,
+            EXPORT_REFERENCE_WS: _REFERENCE_WS_TOOLTIP,
+        }
+        for text, tooltip in item_tooltips.items():
+            idx = self.cmbExportFormat.findText(text)
+            if idx != -1:
+                self.cmbExportFormat.setItemData(idx, tooltip, QtCore.Qt.ToolTipRole)
 
     def get_export_format(self):
         return self.cmbExportFormat.currentText()
