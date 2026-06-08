@@ -81,7 +81,7 @@ Focus
 
 3. Tick the ``Plot Focused Workspace`` option and click ``Focus``. It should produce a plot of a single spectrum for bank 2.
 
-4. In the ``Calibration`` group and load in an existing calibration for both banks e.g. `ENGINX_305738_all_banks.prm`
+4. In the ``Calibration`` group select an existing calibration file for both banks e.g. `ENGINX_305738_all_banks.prm` and click ``Load``.
 
 5. Click the ``Focus`` button, after completing calibration it should produce a plot.
 
