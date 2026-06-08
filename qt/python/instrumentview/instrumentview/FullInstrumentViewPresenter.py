@@ -127,10 +127,18 @@ class FullInstrumentViewPresenter:
     def _create_and_add_monitor_mesh(self) -> Optional[pv.PolyData]:
         if len(self._model.monitor_positions) == 0 or not self._view.is_show_monitors_checkbox_checked():
             return None
-        monitor_point_cloud = self.create_poly_data_mesh(self._model.monitor_positions)
-        monitor_point_cloud["colours"] = self.generate_single_colour(len(self._model.monitor_positions), 1, 0, 0, 1)
-        self._view.add_rgba_mesh(monitor_point_cloud, scalars="colours")
-        return monitor_point_cloud
+        return self._create_and_add_component_point_mesh(np.array(self._model.monitor_positions), 1, 0, 0)
+
+    def _create_and_add_sample_position_mesh(self) -> Optional[pv.PolyData]:
+        if self._model.sample_position is None or not self._view.is_show_sample_position_checkbox_checked():
+            return None
+        return self._create_and_add_component_point_mesh(np.array([self._model.sample_position]), 0, 1, 0)
+
+    def _create_and_add_component_point_mesh(self, points: np.ndarray, red: float, green: float, blue: float) -> pv.PolyData:
+        point_cloud = self.create_poly_data_mesh(points)
+        point_cloud["colours"] = self.generate_single_colour(len(points), red, green, blue, 1)
+        self._view.add_rgba_mesh(point_cloud, scalars="colours")
+        return point_cloud
 
     def on_export_workspace_clicked(self) -> None:
         self._model.save_line_plot_workspace_to_ads()
@@ -255,6 +263,7 @@ class FullInstrumentViewPresenter:
         renderer.add_masked_mesh_to_plotter(self._view.main_plotter, self._masked_mesh)
 
         monitor_mesh = self._create_and_add_monitor_mesh()
+        sample_position_mesh = self._create_and_add_sample_position_mesh()
 
         renderer.set_parallel_view(self._view.main_plotter)
 
@@ -266,6 +275,8 @@ class FullInstrumentViewPresenter:
         self._masked_mesh.transform(self._transform, inplace=True)
         if monitor_mesh is not None:
             monitor_mesh.transform(self._transform, inplace=True)
+        if sample_position_mesh is not None:
+            sample_position_mesh.transform(self._transform, inplace=True)
 
         self._view.enable_or_disable_mask_widgets()
         self._view.enable_or_disable_aspect_ratio_box()
@@ -641,6 +652,9 @@ class FullInstrumentViewPresenter:
         self._model.delete_peaks_on_all_selected_detectors(self._view.selected_peaks_workspaces())
 
     def on_show_monitors_check_box_clicked(self) -> None:
+        self.update_plotter()
+
+    def on_show_sample_position_check_box_clicked(self) -> None:
         self.update_plotter()
 
     def on_component_tree_item_selected(self, component_indices: np.ndarray) -> None:
