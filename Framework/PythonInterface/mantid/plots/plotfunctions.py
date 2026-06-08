@@ -358,17 +358,14 @@ def add_tiled_axes(fig, axes_num, layout_engine="tight", vertical=False):
     :param vertical: If True then fill tiled positions top-to-bottom first, then left-to-right.
     :return: A list containing the new axes.
     """
-    existing_axes = [ax for ax in fig.axes if not is_colorbar_axis(ax)]
+    existing_axes = list(fig.axes)
     existing_axes_num = len(existing_axes)
     nplots = existing_axes_num + axes_num
     nrows, ncols = tiled_axes_layout(nplots)
     if vertical:
         nrows, ncols = ncols, nrows
 
-    if figure_has_colorbar_axes(fig):
-        fig.set_layout_engine(None)
-    else:
-        fig.set_layout_engine(layout=layout_engine)
+    fig.set_layout_engine(layout=layout_engine)
     grid_spec = GridSpec(nrows, ncols, fig)
 
     occupied_positions = set()
@@ -424,18 +421,6 @@ def existing_axis_grid_position(axis, fallback_index, nrows, ncols, vertical=Fal
             if row < nrows and col < ncols:
                 return row, col
     return tiled_axis_grid_position(fallback_index, nrows, ncols, vertical)
-
-
-def figure_has_colorbar_axes(fig):
-    return any(is_colorbar_axis(ax) for ax in fig.axes)
-
-
-def is_colorbar_axis(axis):
-    return axis.get_label() == "<colorbar>" or hasattr(axis, "_colorbar") or is_support_axis(axis)
-
-
-def is_support_axis(axis):
-    return axis.get_label() == "mantid" and len(axis.get_lines()) == 0 and len(axis.get_images()) == 0
 
 
 def stored_axis_tiled_position(axis):

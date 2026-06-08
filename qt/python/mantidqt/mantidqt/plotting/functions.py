@@ -253,21 +253,15 @@ def pcolormesh(workspaces, fig=None, color_norm=None, normalize_by_bin_width=Non
     # extend in number of columns if the number of plottables is not a square number
     workspaces_len = len(workspaces)
     # constrained layout since adding colour bar later
-    fig, axes, nrows, ncols = create_subplots(workspaces_len, fig=fig, layout_engine="constrained", vertical=vertical)
+    fig, axes, _, _ = create_subplots(workspaces_len, fig=fig, layout_engine="constrained", vertical=vertical)
 
     plots = []
-    row_idx, col_idx = 0, 0
-    for subplot_idx in range(nrows * ncols):
-        ax = axes[row_idx][col_idx]
+    axes = axes.ravel()
+    for subplot_idx, ax in enumerate(axes):
         if subplot_idx < workspaces_len:
             ws = workspaces[subplot_idx]
             pcm = pcolormesh_on_axis(ax, ws, color_norm, normalize_by_bin_width)
             plots.append(pcm)
-            if col_idx < ncols - 1:
-                col_idx += 1
-            else:
-                row_idx += 1
-                col_idx = 0
 
             if ConfigService.getString("plots.ShowMinorTicks").lower() == "on":
                 ax.minorticks_on()
@@ -283,7 +277,6 @@ def pcolormesh(workspaces, fig=None, color_norm=None, normalize_by_bin_width=Non
     for pt in plots:
         pt.set_clim(colorbar_min, colorbar_max)
 
-    axes = axes.ravel()
     colorbar = fig.colorbar(pcm, ax=axes)
     colorbar.ax.set_label("<colorbar>")
     add_colorbar_label(colorbar, axes)

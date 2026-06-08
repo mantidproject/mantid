@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtPlottingView.h"
+#include "PlotOutputTypeProperties.h"
 #include "WorkspaceTreeView.h"
 #include <QBrush>
 #include <QCheckBox>
@@ -18,7 +19,6 @@
 #include <QStandardItem>
 #include <QStyledItemDelegate>
 #include <QTimer>
-#include <algorithm>
 #include <stdexcept>
 #include <vector>
 
@@ -29,87 +29,28 @@ auto constexpr itemTypeRole = Qt::UserRole + 1;
 auto constexpr outputTypeRole = Qt::UserRole + 2;
 auto constexpr workspaceNameRole = Qt::UserRole + 3;
 
-struct PlotSelectionBehaviour {
-  std::vector<PlottingWorkspaceTreeItemType> selectableItemTypes;
-  std::vector<PlottingWorkspaceOutputType> includedWorkspaceOutputTypes;
-};
-
 int plotOutputTypeIndex(PlotOutputType outputType) { return static_cast<int>(outputType); }
 
 auto const metadataTextColour = QColor(112, 112, 112);
+auto constexpr minimumSelectedItemsForMultiPlot = size_t{2};
 
 template <typename Enum> int enumIndex(Enum value) { return static_cast<int>(value); }
-
-template <typename T> bool contains(std::vector<T> const &values, T value) {
-  return std::find(values.cbegin(), values.cend(), value) != values.cend();
-}
-
-PlotSelectionBehaviour freeSelectionBehaviour() {
-  return {{PlottingWorkspaceTreeItemType::Group, PlottingWorkspaceTreeItemType::Run,
-           PlottingWorkspaceTreeItemType::WorkspaceGroup, PlottingWorkspaceTreeItemType::Workspace},
-          {PlottingWorkspaceOutputType::IvsQ, PlottingWorkspaceOutputType::IvsLambda,
-           PlottingWorkspaceOutputType::IvsQBinned}};
-}
-
-PlotSelectionBehaviour selectionBehaviour(PlotOutputType outputType) {
-  switch (outputType) {
-  case PlotOutputType::SpinAsymmetry:
-    return {{PlottingWorkspaceTreeItemType::Group, PlottingWorkspaceTreeItemType::Run,
-             PlottingWorkspaceTreeItemType::WorkspaceGroup},
-            {PlottingWorkspaceOutputType::IvsQBinned}};
-  case PlotOutputType::ReflectivityCurve:
-    return {{PlottingWorkspaceTreeItemType::Group, PlottingWorkspaceTreeItemType::Run,
-             PlottingWorkspaceTreeItemType::WorkspaceGroup, PlottingWorkspaceTreeItemType::Workspace},
-            {PlottingWorkspaceOutputType::IvsQ, PlottingWorkspaceOutputType::IvsQBinned}};
-  case PlotOutputType::DetectorMap:
-  case PlotOutputType::Alignment:
-    return freeSelectionBehaviour();
-  }
-  throw std::runtime_error("Unexpected reflectometry plot output type.");
-}
-
-bool plotOutputTypeSupportsOverplot(PlotOutputType outputType) { return outputType != PlotOutputType::DetectorMap; }
-
-bool plotOutputTypeSupportsAddToExistingPlot(PlotOutputType outputType) {
-  return outputType != PlotOutputType::DetectorMap;
-}
-
-bool plotOutputTypeExcludesPostprocessedGroupOutputs(PlotOutputType outputType) {
-  return outputType == PlotOutputType::Alignment || outputType == PlotOutputType::DetectorMap;
-}
-
-bool plotOutputTypeRequiresWorkspaceGroupsForMultiPlot(PlotOutputType outputType) {
-  return outputType == PlotOutputType::SpinAsymmetry;
-}
-
-size_t minimumSelectedItemsForMultiPlot(PlotOutputType /* outputType */) { return 2; }
 
 bool hasSelectedItems(size_t selectedItemCount) { return selectedItemCount > 0; }
 
 bool hasEnoughSelectedItemsForMultiPlot(size_t selectedItemCount, size_t selectedWorkspaceGroupCount,
-                                        PlotOutputType outputType) {
-  if (plotOutputTypeRequiresWorkspaceGroupsForMultiPlot(outputType)) {
-    return selectedWorkspaceGroupCount >= minimumSelectedItemsForMultiPlot(outputType);
+                                        PlotOutputTypeProperties const &plotProperties) {
+  if (plotProperties.requiresWorkspaceGroupsForMultiPlot()) {
+    return selectedWorkspaceGroupCount >= minimumSelectedItemsForMultiPlot;
   }
-  return selectedItemCount >= minimumSelectedItemsForMultiPlot(outputType);
+  return selectedItemCount >= minimumSelectedItemsForMultiPlot;
 }
 
-bool hasEnoughSelectedItemsForAddToExistingPlot(size_t selectedItemCount) {
-  return hasSelectedItems(selectedItemCount);
-}
-
-bool hasEnoughSelectedItemsForOverplot(size_t selectedItemCount, size_t selectedWorkspaceGroupCount,
-                                       PlotOutputType outputType, bool addToExistingPlot) {
+bool hasEnoughSelectedItemsForMultiOutputPlot(size_t selectedItemCount, size_t selectedWorkspaceGroupCount,
+                                              PlotOutputTypeProperties const &plotProperties, bool addToExistingPlot) {
   return addToExistingPlot
-             ? hasEnoughSelectedItemsForAddToExistingPlot(selectedItemCount)
-             : hasEnoughSelectedItemsForMultiPlot(selectedItemCount, selectedWorkspaceGroupCount, outputType);
-}
-
-bool hasEnoughSelectedItemsForTiledPlot(size_t selectedItemCount, size_t selectedWorkspaceGroupCount,
-                                        PlotOutputType outputType, bool addToExistingPlot) {
-  return addToExistingPlot
-             ? hasEnoughSelectedItemsForAddToExistingPlot(selectedItemCount)
-             : hasEnoughSelectedItemsForMultiPlot(selectedItemCount, selectedWorkspaceGroupCount, outputType);
+             ? hasSelectedItems(selectedItemCount)
+             : hasEnoughSelectedItemsForMultiPlot(selectedItemCount, selectedWorkspaceGroupCount, plotProperties);
 }
 
 bool shouldEnablePlotIndividual(bool outputOptionsEnabled, size_t selectedItemCount, bool addToExistingPlot) {
@@ -117,17 +58,18 @@ bool shouldEnablePlotIndividual(bool outputOptionsEnabled, size_t selectedItemCo
 }
 
 bool shouldEnablePlotOverplot(bool outputOptionsEnabled, size_t selectedItemCount, size_t selectedWorkspaceGroupCount,
-                              PlotOutputType outputType, bool addToExistingPlot, bool activePlotOverplotCompatible) {
-  return outputOptionsEnabled && plotOutputTypeSupportsOverplot(outputType) &&
+                              PlotOutputTypeProperties const &plotProperties, bool addToExistingPlot,
+                              bool activePlotOverplotCompatible) {
+  return outputOptionsEnabled && plotProperties.supportsOverplot() &&
          (!addToExistingPlot || activePlotOverplotCompatible) &&
-         hasEnoughSelectedItemsForOverplot(selectedItemCount, selectedWorkspaceGroupCount, outputType,
-                                           addToExistingPlot);
+         hasEnoughSelectedItemsForMultiOutputPlot(selectedItemCount, selectedWorkspaceGroupCount, plotProperties,
+                                                  addToExistingPlot);
 }
 
 bool shouldEnablePlotTiled(bool outputOptionsEnabled, size_t selectedItemCount, size_t selectedWorkspaceGroupCount,
-                           PlotOutputType outputType, bool addToExistingPlot) {
-  return outputOptionsEnabled && hasEnoughSelectedItemsForTiledPlot(selectedItemCount, selectedWorkspaceGroupCount,
-                                                                    outputType, addToExistingPlot);
+                           PlotOutputTypeProperties const &plotProperties, bool addToExistingPlot) {
+  return outputOptionsEnabled && hasEnoughSelectedItemsForMultiOutputPlot(
+                                     selectedItemCount, selectedWorkspaceGroupCount, plotProperties, addToExistingPlot);
 }
 
 bool shouldEnablePlotTiledVertically(bool outputOptionsEnabled, size_t selectedItemCount) {
@@ -135,23 +77,9 @@ bool shouldEnablePlotTiledVertically(bool outputOptionsEnabled, size_t selectedI
 }
 
 bool shouldEnableAddToExistingPlot(bool outputOptionsEnabled, bool activePlotAvailable,
-                                   bool activePlotOverplotCompatible, PlotOutputType outputType) {
+                                   bool activePlotOverplotCompatible, PlotOutputTypeProperties const &plotProperties) {
   return outputOptionsEnabled && activePlotAvailable && activePlotOverplotCompatible &&
-         plotOutputTypeSupportsAddToExistingPlot(outputType);
-}
-
-QString displayName(PlotOutputType outputType) {
-  switch (outputType) {
-  case PlotOutputType::ReflectivityCurve:
-    return "Reflectivity Curve";
-  case PlotOutputType::DetectorMap:
-    return "Detector Map";
-  case PlotOutputType::SpinAsymmetry:
-    return "Spin Asymmetry";
-  case PlotOutputType::Alignment:
-    return "Alignment";
-  }
-  throw std::runtime_error("Unexpected reflectometry plot output type.");
+         plotProperties.supportsAddToExistingPlot();
 }
 
 QString displayName(PlottingWorkspaceTreeItemType itemType) {
@@ -287,7 +215,7 @@ void QtPlottingView::setAvailablePlotOutputTypes(std::vector<PlotOutputType> con
   QSignalBlocker blocker(m_ui.plotPreset);
   m_ui.plotPreset->clear();
   for (auto const outputType : outputTypes) {
-    m_ui.plotPreset->addItem(displayName(outputType), plotOutputTypeIndex(outputType));
+    m_ui.plotPreset->addItem(plotOutputTypeProperties(outputType).displayName(), plotOutputTypeIndex(outputType));
   }
   auto const previousIndex = m_ui.plotPreset->findData(plotOutputTypeIndex(previouslySelected));
   if (previousIndex >= 0) {
@@ -311,9 +239,9 @@ void QtPlottingView::setOutputOptionControlsEnabled(bool enabled) {
 void QtPlottingView::updatePlotButtonEnabledStates() {
   auto const selectedWorkspaceCount = selectedWorkspaceNames().size();
   auto const selectedWorkspaceGroupCount = selectedWorkspaceGroupCountForCurrentPlotOutputType();
-  auto const plotOutputType = selectedPlotOutputType();
+  auto const &plotProperties = plotOutputTypeProperties(selectedPlotOutputType());
   auto const addToExistingEnabled = shouldEnableAddToExistingPlot(m_outputOptionsEnabled, m_activePlotAvailable,
-                                                                  m_activePlotOverplotCompatible, plotOutputType);
+                                                                  m_activePlotOverplotCompatible, plotProperties);
   if (!addToExistingEnabled && m_ui.addToExistingPlot->isChecked()) {
     QSignalBlocker blocker(m_ui.addToExistingPlot);
     m_ui.addToExistingPlot->setChecked(false);
@@ -323,28 +251,25 @@ void QtPlottingView::updatePlotButtonEnabledStates() {
   m_ui.plotIndividual->setEnabled(
       shouldEnablePlotIndividual(m_outputOptionsEnabled, selectedWorkspaceCount, addToExisting));
   m_ui.plotOverplot->setEnabled(shouldEnablePlotOverplot(m_outputOptionsEnabled, selectedWorkspaceCount,
-                                                         selectedWorkspaceGroupCount, plotOutputType, addToExisting,
+                                                         selectedWorkspaceGroupCount, plotProperties, addToExisting,
                                                          m_activePlotOverplotCompatible));
   auto const plotTiledEnabled = shouldEnablePlotTiled(m_outputOptionsEnabled, selectedWorkspaceCount,
-                                                      selectedWorkspaceGroupCount, plotOutputType, addToExisting);
+                                                      selectedWorkspaceGroupCount, plotProperties, addToExisting);
   m_ui.plotTiled->setEnabled(plotTiledEnabled);
   m_ui.plotTiledVertically->setEnabled(shouldEnablePlotTiledVertically(m_outputOptionsEnabled, selectedWorkspaceCount));
 }
 
 void QtPlottingView::updatePlotOutputProperties() {
-  auto const outputType = selectedPlotOutputType();
-  auto const showDetectorMapProperties = outputType == PlotOutputType::DetectorMap;
-  auto const showAlignmentProperties = outputType == PlotOutputType::Alignment;
-  auto const showProperties = showDetectorMapProperties || showAlignmentProperties;
+  auto const &plotProperties = plotOutputTypeProperties(selectedPlotOutputType());
 
-  m_ui.plotPropertiesTopSeparator->setVisible(showProperties);
-  m_ui.plotPropertiesBottomSeparator->setVisible(showProperties);
-  m_ui.detectorMapYAxisLabel->setVisible(showDetectorMapProperties);
-  m_ui.detectorMapYAxis->setVisible(showDetectorMapProperties);
-  m_ui.detectorMapXAxisLabel->setVisible(showDetectorMapProperties);
-  m_ui.detectorMapXAxis->setVisible(showDetectorMapProperties);
-  m_ui.alignmentXAxisLabel->setVisible(showAlignmentProperties);
-  m_ui.alignmentXAxis->setVisible(showAlignmentProperties);
+  m_ui.plotPropertiesTopSeparator->setVisible(plotProperties.showsPlotProperties());
+  m_ui.plotPropertiesBottomSeparator->setVisible(plotProperties.showsPlotProperties());
+  m_ui.detectorMapYAxisLabel->setVisible(plotProperties.showsDetectorMapProperties());
+  m_ui.detectorMapYAxis->setVisible(plotProperties.showsDetectorMapProperties());
+  m_ui.detectorMapXAxisLabel->setVisible(plotProperties.showsDetectorMapProperties());
+  m_ui.detectorMapXAxis->setVisible(plotProperties.showsDetectorMapProperties());
+  m_ui.alignmentXAxisLabel->setVisible(plotProperties.showsAlignmentProperties());
+  m_ui.alignmentXAxis->setVisible(plotProperties.showsAlignmentProperties());
   setWorkspaceItemsMutedForCurrentPlotOutputType();
   updatePlotButtonEnabledStates();
 }
@@ -530,12 +455,12 @@ std::string QtPlottingView::workspaceName(QModelIndex const &index) const {
 }
 
 bool QtPlottingView::isSelectableForCurrentPlotOutputType(QModelIndex const &index) const {
-  auto const behaviour = selectionBehaviour(selectedPlotOutputType());
+  auto const &plotProperties = plotOutputTypeProperties(selectedPlotOutputType());
   auto const indexItemType = itemType(index);
   if (isPostprocessedGroupOutputExcludedForCurrentPlotOutputType(index)) {
     return false;
   }
-  if (!contains(behaviour.selectableItemTypes, indexItemType)) {
+  if (!plotProperties.allowsItemType(indexItemType)) {
     return false;
   }
   if (indexItemType == PlottingWorkspaceTreeItemType::Workspace) {
@@ -551,11 +476,11 @@ bool QtPlottingView::isWorkspaceIncludedForCurrentPlotOutputType(QModelIndex con
   if (isPostprocessedGroupOutputExcludedForCurrentPlotOutputType(index)) {
     return false;
   }
-  return contains(selectionBehaviour(selectedPlotOutputType()).includedWorkspaceOutputTypes, outputType(index));
+  return plotOutputTypeProperties(selectedPlotOutputType()).includesWorkspaceOutput(outputType(index));
 }
 
 bool QtPlottingView::isPostprocessedGroupOutputExcludedForCurrentPlotOutputType(QModelIndex const &index) const {
-  return plotOutputTypeExcludesPostprocessedGroupOutputs(selectedPlotOutputType()) &&
+  return plotOutputTypeProperties(selectedPlotOutputType()).excludesPostprocessedGroupOutputs() &&
          isPostprocessedGroupOutputItem(index);
 }
 

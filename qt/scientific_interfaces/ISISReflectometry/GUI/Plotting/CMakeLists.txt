@@ -1,4 +1,6 @@
-set(PLOTTING_SRC_FILES PlottingModel.cpp PlottingPresenter.cpp QtPlottingView.cpp WorkspaceTreeView.cpp)
+set(PLOTTING_SRC_FILES PlotOutputTypeProperties.cpp PlottingModel.cpp PlottingPresenter.cpp QtPlottingView.cpp
+                       WorkspaceTreeView.cpp
+)
 
 # Include files aren't required, but this makes them appear in Visual Studio IMPORTANT: Include files are required in
 # the MOC_FILES set. Scroll down to find it.
@@ -8,6 +10,7 @@ set(PLOTTING_INC_FILES
     PlottingPresenter.h
     IPlottingPresenter.h
     IPlottingView.h
+    PlotOutputTypeProperties.h
     PlottingWorkspace.h
     QtPlottingView.h
     WorkspaceTreeView.h
