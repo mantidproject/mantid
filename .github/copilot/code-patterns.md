@@ -21,7 +21,7 @@ namespace Mantid::Algorithms {
 
 /**
  * Brief description of algorithm
- * Longer description explaining what it does, parameters, and usage.
+ * Longer description explaining what it does, parameters, and usage. And this a test comment
  *
  * @author Author Name
  * @date YYYY-MM-DD
