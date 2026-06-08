@@ -74,6 +74,8 @@ signals:
 private slots:
   /// Handle an instrument seelction
   void updateInstrument(const QString &name);
+  /// Handle an instrument selection from the current index changing
+  void updateInstrument();
 
 private:
   void handleConfigChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);

@@ -62,7 +62,7 @@ DEFAULT_SCRIPT_CONTENT += (
 )
 
 # Flags defining a standard Window
-WINDOW_STANDARD_FLAGS = Qt.WindowFlags(Qt.Window)
+WINDOW_STANDARD_FLAGS = Qt.Window
 
 # Flags defining our meaning of keeping figure windows on top.
 # On Windows the standard Qt.Window flags + setting a parent keeps the widget on top

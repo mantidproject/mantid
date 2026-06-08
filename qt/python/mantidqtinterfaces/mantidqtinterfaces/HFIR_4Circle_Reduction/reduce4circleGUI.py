@@ -2171,7 +2171,7 @@ class MainWindow(QMainWindow):
         :return:
         """
         dlg = refineubfftsetup.RefineUBFFTSetupDialog(self)
-        if dlg.exec_():
+        if dlg.exec():
             # Do stuff with values
             min_d, max_d, tolerance = dlg.get_values()
         else:

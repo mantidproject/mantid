@@ -58,7 +58,7 @@ CollapsiblePanel::CollapsiblePanel(const QString &caption, QWidget *parent)
   m_layout = new QVBoxLayout(this);
   m_label = new CollapsiblePanelLabel(caption, this);
   m_layout->addWidget(m_label);
-  m_layout->setMargin(0);
+  m_layout->setContentsMargins(0, 0, 0, 0);
   setLayout(m_layout);
   connect(m_label, SIGNAL(collapseOrExpand()), this, SLOT(collapsedOrExpanded()));
 }

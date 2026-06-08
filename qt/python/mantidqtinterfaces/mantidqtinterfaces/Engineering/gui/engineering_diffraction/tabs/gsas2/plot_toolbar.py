@@ -25,7 +25,7 @@ class GSAS2PlotToolbar(MantidNavigationToolbar):
         super().__init__(canvas, parent, coordinates)
 
         # Adjust icon size or they are too small in PyQt5 by default
-        dpi_ratio = QtWidgets.QApplication.instance().desktop().physicalDpiX() / 100
+        dpi_ratio = QtWidgets.QApplication.instance().primaryScreen().physicalDotsPerInchX() / 100
         self.setIconSize(QtCore.QSize(int(24 * dpi_ratio), int(24 * dpi_ratio)))
 
     def on_home_clicked(self):

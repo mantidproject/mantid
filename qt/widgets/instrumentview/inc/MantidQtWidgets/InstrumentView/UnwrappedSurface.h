@@ -32,7 +32,6 @@ class IPeaksWorkspace;
 }
 } // namespace Mantid
 
-class QGLWidget;
 class GL3DWidget;
 
 namespace MantidQt {

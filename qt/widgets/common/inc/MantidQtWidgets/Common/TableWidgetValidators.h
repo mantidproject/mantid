@@ -7,6 +7,7 @@
 #pragma once
 #include "DllOption.h"
 #include <QLineEdit>
+#include <QRegularExpression>
 #include <qstyleditemdelegate.h>
 #include <string>
 
@@ -29,7 +30,7 @@ public:
   QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &) const override;
 
 private:
-  QRegExp m_validator;
+  QRegularExpression m_validator;
 };
 
 class EXPORT_OPT_MANTIDQT_COMMON NumericInputDelegate : public QStyledItemDelegate {

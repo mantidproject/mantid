@@ -18,4 +18,4 @@ ws = Load("HRP39187.RAW")
 
 app = QApplication([])
 window = SampleLogs(ws)
-app.exec_()
+app.exec()

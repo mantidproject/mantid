@@ -420,7 +420,7 @@ class PeriodicTable(QtWidgets.QWidget):
          pt = PeriodicTable()
          pt.sigElementClicked.connect(pt.elementToggle)
          pt.show()
-         app.exec_()
+         app.exec()
 
     To print all selected elements each time a new element is selected::
 

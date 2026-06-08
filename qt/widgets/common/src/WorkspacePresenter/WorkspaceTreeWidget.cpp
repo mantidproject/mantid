@@ -41,6 +41,7 @@
 #include <QMenu>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QRegularExpression>
 #include <QSignalMapper>
 
 using namespace MantidQt::API;
@@ -204,7 +205,7 @@ void WorkspaceTreeWidget::setupWidgetLayout() {
   m_workspaceFilter->setToolTip("Type here to filter the workspaces");
 
   auto *layout = new QVBoxLayout();
-  layout->setMargin(0);
+  layout->setContentsMargins(0, 0, 0, 0);
   layout->addLayout(buttonLayout);
   layout->addWidget(m_workspaceFilter);
   layout->addWidget(m_tree);
@@ -531,7 +532,7 @@ std::string WorkspaceTreeWidget::getFilterText() const { return m_workspaceFilte
 
 void WorkspaceTreeWidget::filterWorkspaces(const std::string &filterText) {
   const QString text = QString::fromStdString(filterText).trimmed();
-  QRegExp filterRegEx(text, Qt::CaseInsensitive);
+  QRegularExpression filterRegEx(text, QRegularExpression::CaseInsensitiveOption);
 
   // show all items
   QTreeWidgetItemIterator unhideIter(m_tree);

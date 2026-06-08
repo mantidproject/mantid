@@ -44,4 +44,4 @@ if SNAPRedGUI is not None:
 
     if not within_mantid:
         # start the main application
-        sys.exit(app.exec_())
+        sys.exit(app.exec())

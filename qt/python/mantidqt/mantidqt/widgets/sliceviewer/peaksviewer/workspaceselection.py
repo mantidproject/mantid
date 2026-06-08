@@ -69,7 +69,7 @@ class PeaksWorkspaceSelectorPresenter:
                   to indicate no selection or None to indicate cancellation.
         """
         view = self._view
-        result = view.exec_()
+        result = view.exec()
         if result == view.Accepted:
             return view.selected_peaks_workspaces()
         else:

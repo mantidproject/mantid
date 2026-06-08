@@ -253,7 +253,7 @@ class CodeCompleter(object):
                 self._add_to_completions(self._get_module_call_tips("matplotlib.pyplot"))
         self._add_to_completions(python_keywords)
 
-        self.editor.enableAutoCompletion(CodeEditor.AcsAPIs)
+        self.editor.enableAutoCompletion(CodeEditor.AutoCompletionSource.AcsAPIs)
         self.editor.updateCompletionAPI(self.completions)
 
     @property

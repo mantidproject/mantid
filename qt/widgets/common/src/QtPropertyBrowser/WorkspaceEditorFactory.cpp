@@ -18,7 +18,7 @@ WorkspaceEditor::WorkspaceEditor(QtProperty *property, QtStringPropertyManager *
   this->insertItem(0, "");
   auto currentValue = m_manager->value(m_property);
   this->setCurrentIndex(this->findText(currentValue));
-  connect(this, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(updateProperty(const QString &)));
+  connect(this, SIGNAL(currentTextChanged(const QString &)), this, SLOT(updateProperty(const QString &)));
 }
 
 void WorkspaceEditor::updateProperty(const QString &text) { m_manager->setValue(m_property, text); }

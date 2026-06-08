@@ -223,8 +223,8 @@ class InstrumentSetupWidget(QtWidgets.QWidget):
         self.editS2.setText(QString(format(self.S2, ".2f")))
         self.editDetZ.setText(QString(format(self.DetZ, ".1f")))
         self.editEi.setText(QString(format(self.Ei, ".1f")))
-        self.editEi.setFixedWidth(metrics.width("8888.88"))
-        self.editS2.setFixedWidth(metrics.width("888.88"))
+        self.editEi.setFixedWidth(metrics.horizontalAdvance("8888.88"))
+        self.editS2.setFixedWidth(metrics.horizontalAdvance("888.88"))
         # fast checkbox
         self.fast = QtWidgets.QCheckBox("Fast", self)
         self.fast.toggle()
@@ -236,7 +236,7 @@ class InstrumentSetupWidget(QtWidgets.QWidget):
         # goniometer settings
         self.labelGon = QtWidgets.QLabel("Goniometer")
         self.tableViewGon = QtWidgets.QTableView(self)
-        self.tableViewGon.setMinimumWidth(metrics.width("Minimum ") * 8)
+        self.tableViewGon.setMinimumWidth(metrics.horizontalAdvance("Minimum ") * 8)
         self.tableViewGon.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
         self.tableViewGon.verticalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
 
@@ -494,4 +494,4 @@ if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     mainForm = InstrumentSetupWidget()
     mainForm.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

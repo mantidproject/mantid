@@ -57,8 +57,12 @@ def text_font():
     """
     global _TEXT_FONT_CACHE
     if _TEXT_FONT_CACHE is None:
-        fontdb = QFontDatabase()
-        families = fontdb.families()
+        # QFontDatabase is fully static in Qt6 and can no longer be instantiated,
+        # whereas in Qt5 families() is an instance method.
+        try:
+            families = QFontDatabase.families()
+        except TypeError:
+            families = QFontDatabase().families()
         for family in MONOSPACE:
             if family in families:
                 _TEXT_FONT_CACHE = QFont(family)

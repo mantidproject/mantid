@@ -9,8 +9,8 @@
 
 from abc import ABCMeta, abstractmethod
 
-from qtpy.QtCore import QRegExp
-from qtpy.QtGui import QDoubleValidator, QIntValidator, QRegExpValidator
+from qtpy.QtCore import QRegularExpression
+from qtpy.QtGui import QDoubleValidator, QIntValidator, QRegularExpressionValidator
 from qtpy.QtWidgets import QListWidgetItem, QMessageBox, QFileDialog, QMainWindow, QLineEdit
 from mantid.kernel import Logger, UsageService, FeatureType
 from enum import Enum
@@ -726,7 +726,7 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
         msg.setStandardButtons(QMessageBox.Ok)
         msg.setDefaultButton(QMessageBox.Ok)
         msg.setEscapeButton(QMessageBox.Ok)
-        msg.exec_()
+        msg.exec()
 
     def display_save_file_box(self, title, default_path, file_filter):
         filename = QFileDialog.getSaveFileName(self, title, default_path, filter=file_filter)
@@ -816,8 +816,8 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
         self.q_1d_step_line_edit.setEnabled(not is_variable)
         if is_variable:
             comma_separated_floats_regex_string = r"^(\s*[-+]?[0-9]*\.?[0-9]*)(\s*,\s*[-+]?[0-9]*\.?[0-9]*)+\s*$"
-            reg_ex = QRegExp(comma_separated_floats_regex_string)
-            validator = QRegExpValidator(reg_ex)
+            reg_ex = QRegularExpression(comma_separated_floats_regex_string)
+            validator = QRegularExpressionValidator(reg_ex)
             self.q_1d_min_line_edit.setValidator(validator)
 
             self.q_min_label.setText("Rebin String")

@@ -37,7 +37,6 @@ LocalParameterEditor::LocalParameterEditor(QWidget *parent, int index, double va
     : QWidget(parent), m_index(index), m_value(QString::number(value, 'g', 16)), m_fixed(fixed), m_tie(tie),
       m_constraint(constraint), m_othersFixed(othersFixed), m_allOthersFixed(allOthersFixed), m_othersTied(othersTied) {
   auto layout = new QHBoxLayout(this);
-  layout->setMargin(0);
   layout->setSpacing(0);
   layout->setContentsMargins(0, 0, 0, 0);
 

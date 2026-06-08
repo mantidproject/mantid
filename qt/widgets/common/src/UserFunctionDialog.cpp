@@ -503,7 +503,7 @@ InputFunctionNameDialog::InputFunctionNameDialog(QWidget *parent, const QString 
     m_category->setCurrentIndex(index);
   }
   layout->addWidget(m_category);
-  connect(m_category, SIGNAL(currentIndexChanged(const QString &)), parent, SLOT(selectCategory(const QString &)));
+  connect(m_category, SIGNAL(currentTextChanged(const QString &)), parent, SLOT(selectCategory(const QString &)));
   layout->addWidget(new QLabel("Enter a name for the new function"));
   m_name = new QLineEdit();
   layout->addWidget(m_name);

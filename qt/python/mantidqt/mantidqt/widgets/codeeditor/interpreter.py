@@ -257,11 +257,11 @@ class PythonFileInterpreter(QWidget):
 
     def set_whitespace_visible(self):
         self.editor.setEolVisibility(True)
-        self.editor.setWhitespaceVisibility(CodeEditor.WsVisible)
+        self.editor.setWhitespaceVisibility(CodeEditor.WhitespaceVisibility.WsVisible)
 
     def set_whitespace_invisible(self):
         self.editor.setEolVisibility(False)
-        self.editor.setWhitespaceVisibility(CodeEditor.WsInvisible)
+        self.editor.setWhitespaceVisibility(CodeEditor.WhitespaceVisibility.WsInvisible)
 
     def toggle_comment(self):
         self.code_commenter.toggle_comment()

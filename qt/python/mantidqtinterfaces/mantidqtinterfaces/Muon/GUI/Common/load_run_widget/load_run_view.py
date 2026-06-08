@@ -130,8 +130,8 @@ class LoadRunWidgetView(QtWidgets.QWidget):
 
     def set_run_edit_regex(self):
         # The regular expression string here is "^[0-9]*([0-9]+[,-]{0,1})*[0-9]+$"
-        regex = QtCore.QRegExp(run_utils.run_string_regex)
-        validator = QtGui.QRegExpValidator(regex)
+        regex = QtCore.QRegularExpression(run_utils.run_string_regex)
+        validator = QtGui.QRegularExpressionValidator(regex)
         self.run_edit.setValidator(validator)
 
     def set_run_edit_text(self, text):

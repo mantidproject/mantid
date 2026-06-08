@@ -58,7 +58,7 @@ def main(cmdargs=sys.argv):
 
     show_help_page(relativeUrl=args.relativeUrl, onlineBaseUrl=args.online_base_url)
 
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
 
 
 if __name__ == "__main__":

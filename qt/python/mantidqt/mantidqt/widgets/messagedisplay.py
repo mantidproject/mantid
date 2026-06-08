@@ -107,7 +107,7 @@ class MessageDisplay(MessageDisplay_cpp):
         return qmenu
 
     def showContextMenu(self, q_position):
-        self.generateContextMenu().exec_(self.mapToGlobal(q_position))
+        self.generateContextMenu().exec(self.mapToGlobal(q_position))
 
     def show_all_scripts(self):
         if not self.showAllScriptOutput():

@@ -29,4 +29,4 @@ if Garnet is not None:
     garnet = Garnet()
     garnet.show()
     if not within_mantid:
-        sys.exit(app.exec_())
+        sys.exit(app.exec())

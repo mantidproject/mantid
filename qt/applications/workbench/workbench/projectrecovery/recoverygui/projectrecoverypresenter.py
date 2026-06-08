@@ -34,7 +34,7 @@ class ProjectRecoveryPresenter(object):
 
         try:
             self.current_view = ProjectRecoveryWidgetView(self, parent)
-            self.current_view.exec_()
+            self.current_view.exec()
         except Exception as e:
             if isinstance(e, KeyboardInterrupt):
                 raise
@@ -67,7 +67,7 @@ class ProjectRecoveryPresenter(object):
 
         try:
             self.current_view = RecoveryFailureView(self, parent)
-            self.current_view.exec_()
+            self.current_view.exec()
         except Exception as e:
             if isinstance(e, KeyboardInterrupt):
                 raise

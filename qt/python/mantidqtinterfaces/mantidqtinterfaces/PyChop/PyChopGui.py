@@ -560,7 +560,7 @@ class PyChopGui(QMainWindow):
         msg = QMessageBox()
         msg.setText(str(message))
         msg.setStandardButtons(QMessageBox.Ok)
-        msg.exec_()
+        msg.exec()
 
     def loadYaml(self):
         yaml_file = QFileDialog().getOpenFileName(self.mainWidget, "Open Instrument YAML File", self.folder, "Files (*.yaml)")
@@ -612,7 +612,7 @@ class PyChopGui(QMainWindow):
         newname.editingFinished.connect(lambda: overwriteCB(2))
         layout.addWidget(newname, 2, 1)
         msg.setLayout(layout)
-        msg.exec_()
+        msg.exec()
         newname = str(newname.text())
         if not newname or newname in self.instruments:
             self.errormessage("Invalid instrument name. Cancelling load.")
@@ -737,7 +737,7 @@ class PyChopGui(QMainWindow):
         self.txtwin.resize(400, 600)
         self.txtwin.show()
         self.txtloop = QEventLoop()
-        self.txtloop.exec_()
+        self.txtloop.exec()
 
     def saveText(self, *args):
         # The args are not used, but button clicked returns a bool for cheked state
@@ -810,7 +810,7 @@ class PyChopGui(QMainWindow):
             self.hlpwin.resize(370, 300)
             self.hlpwin.show()
             self.hlploop = QEventLoop()
-            self.hlploop.exec_()
+            self.hlploop.exec()
 
     def _catch(self, fn):
         # Wrapper to catch exceptions in callbacks

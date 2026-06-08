@@ -14,7 +14,8 @@
 
 #include <QDebug>
 #include <QFileInfo>
-#include <QRegExpValidator>
+#include <QRegularExpression>
+#include <QRegularExpressionValidator>
 #include <stdexcept>
 
 using namespace Mantid::API;
@@ -51,8 +52,8 @@ ISISCalibration::ISISCalibration(IDataReduction *idrUI, QWidget *parent)
   m_uiForm.ppResolution->setCanvasColour(QColor(240, 240, 240));
   m_uiForm.ppCalibration->watchADS(false);
   m_uiForm.ppResolution->watchADS(false);
-  m_uiForm.leScale->setValidator(new QRegExpValidator(QRegExp("\\d+(\\.\\d*)?")));
-  m_uiForm.leResolutionScale->setValidator(new QRegExpValidator(QRegExp("\\d+(\\.\\d*)?")));
+  m_uiForm.leScale->setValidator(new QRegularExpressionValidator(QRegularExpression("\\d+(\\.\\d*)?")));
+  m_uiForm.leResolutionScale->setValidator(new QRegularExpressionValidator(QRegularExpression("\\d+(\\.\\d*)?")));
   auto *doubleEditorFactory = new DoubleEditorFactory();
 
   // CAL PROPERTY TREE

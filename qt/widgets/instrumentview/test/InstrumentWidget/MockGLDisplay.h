@@ -9,7 +9,6 @@
 
 #include "MantidQtWidgets/InstrumentView/IGLDisplay.h"
 
-#include <QGLWidget>
 #include <QString>
 #include <gmock/gmock.h>
 #include <stddef.h>

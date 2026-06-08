@@ -35,4 +35,4 @@ else:
                 drillInterface = DrillView()
         drillInterface.show()
         if not within_mantid:
-            sys.exit(app.exec_())
+            sys.exit(app.exec())

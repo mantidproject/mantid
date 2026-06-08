@@ -9,12 +9,13 @@
 
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
 #include <MantidQtWidgets/Spectroscopy/OutputWidget/OutputNamePresenter.h>
+#include <QRegularExpression>
 #include <string>
 
 namespace MantidQt::CustomInterfaces {
 OutputNameView::OutputNameView(QWidget *parent) : QWidget(parent) {
   m_uiForm.setupUi(this);
-  auto const validator = new QRegExpValidator(QRegExp("[a-zA-Z-_0-9]*"));
+  auto const validator = new QRegularExpressionValidator(QRegularExpression("[a-zA-Z-_0-9]*"));
   m_uiForm.leLabel->setValidator(validator);
   connect(m_uiForm.leLabel, &QLineEdit::editingFinished, this, &OutputNameView::notifyUpdateOutputLabel);
 }

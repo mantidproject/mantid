@@ -15,7 +15,7 @@
 #include <QMessageBox>
 #include <QPalette>
 #include <QPushButton>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QtAlgorithms>
 
 #include <algorithm>
@@ -494,7 +494,7 @@ void MantidWSIndexWidget::initOptionsBoxes() {
     if (m_advanced && isSuitableForContourOrSurfacePlot()) {
       m_plotOptions->addItem(SURFACE_PLOT);
       m_plotOptions->addItem(CONTOUR_PLOT);
-      connect(m_plotOptions, SIGNAL(currentIndexChanged(const QString &)), this,
+      connect(m_plotOptions, SIGNAL(currentTextChanged(const QString &)), this,
               SLOT(onPlotOptionChanged(const QString &)));
     }
     m_optionsBox->addWidget(m_plotOptionLabel);
@@ -541,7 +541,7 @@ void MantidWSIndexWidget::initLogs() {
 
   m_outer->addWidget(m_logOptionsGroup);
 
-  connect(m_logSelector, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(onLogSelected(const QString &)));
+  connect(m_logSelector, SIGNAL(currentTextChanged(const QString &)), this, SLOT(onLogSelected(const QString &)));
 }
 
 /**
@@ -896,15 +896,16 @@ Interval::Interval(int start, int end) { init(start, end); }
 Interval::Interval(const QString &intervalString) {
   // Check to see if string is of the correct format, and then parse.
   // An interval can either be "n" or "n-m" where n and m are integers
-  const QString patternSingle("^\\d+$");     // E.g. "2" or "712"
-  const QString patternRange("^\\d+-\\d+$"); // E.g. "2-4" or "214-200"
-  const QRegExp regExpSingle(patternSingle);
-  const QRegExp regExpRange(patternRange);
+  const QString patternSingle("\\d+");     // E.g. "2" or "712"
+  const QString patternRange("\\d+-\\d+"); // E.g. "2-4" or "214-200"
+  // use anchored patterns to make sure the whole string matches, not just part of it.
+  const QRegularExpression regExpSingle(QRegularExpression::anchoredPattern(patternSingle));
+  const QRegularExpression regExpRange(QRegularExpression::anchoredPattern(patternRange));
 
-  if (regExpSingle.exactMatch(intervalString)) {
+  if (regExpSingle.match(intervalString).hasMatch()) {
     int single = intervalString.toInt();
     init(single, single);
-  } else if (regExpRange.exactMatch(intervalString)) {
+  } else if (regExpRange.match(intervalString).hasMatch()) {
     QStringList range = intervalString.split("-");
     int first = range[0].toInt();
     int last = range[1].toInt();
@@ -1221,10 +1222,11 @@ QValidator::State IntervalListValidator::validate(QString &input, int &pos) cons
   if (IntervalList::isParsable(input, m_intervalList))
     return QValidator::Acceptable;
 
-  const QString pattern("^(\\d|-|,)*$");
-  const QRegExp regExp(pattern);
+  const QString pattern("(\\d|-|,)*");
+  // use anchored patterns to make sure the whole string matches, not just part of it.
+  const QRegularExpression regExp(QRegularExpression::anchoredPattern(pattern));
 
-  if (regExp.exactMatch(input))
+  if (regExp.match(input).hasMatch())
     return QValidator::Intermediate;
 
   return QValidator::Invalid;

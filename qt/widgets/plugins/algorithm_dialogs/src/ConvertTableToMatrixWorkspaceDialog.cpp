@@ -9,7 +9,6 @@
 // Qt
 #include <QCheckBox>
 #include <QComboBox>
-#include <QDesktopWidget>
 #include <QFileInfo>
 #include <QUrl>
 
@@ -114,7 +113,7 @@ void ConvertTableToMatrixWorkspaceDialog::initLayout() {
       m_form.cbInputWorkspace->setCurrentIndex(i);
     }
   }
-  connect(m_form.cbInputWorkspace, SIGNAL(currentIndexChanged(const QString &)), this,
+  connect(m_form.cbInputWorkspace, SIGNAL(currentTextChanged(const QString &)), this,
           SLOT(fillColumnNames(const QString &)));
   fillColumnNames(m_form.cbInputWorkspace->currentText());
 }

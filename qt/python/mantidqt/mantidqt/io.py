@@ -55,7 +55,7 @@ def open_a_file_dialog(parent=None, default_suffix=None, directory=None, file_fi
     dialog.fileSelected.connect(_set_last_save)
 
     # Wait for dialog to finish before allowing continuation of code
-    if dialog.exec_() == QDialog.Rejected:
+    if dialog.exec() == QDialog.Rejected:
         return None
 
     filename = _LAST_SAVE_DIRECTORY

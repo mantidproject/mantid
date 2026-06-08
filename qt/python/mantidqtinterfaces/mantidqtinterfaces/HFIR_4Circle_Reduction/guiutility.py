@@ -519,7 +519,7 @@ def get_value(parent=None):
     :return:
     """
     dialog = GetValueDialog(parent)
-    result = dialog.exec_()
+    result = dialog.exec()
     value = dialog.get_value()
 
     return value, result == QDialog.Accepted
@@ -541,7 +541,7 @@ def get_value_from_dialog(parent, title, details, label_name="Equation"):
     dialog.show_message(details)
 
     # launch and get result
-    result = dialog.exec_()
+    result = dialog.exec()
     print("Method get_value_from_dialog: returned result is {}".format(result))
     if result is False:
         return None
@@ -562,7 +562,7 @@ def show_message(parent=None, message="show message here!", message_type="info")
     # dialog.set_name('Teset new name')
     dialog.show_message(message)
     dialog.set_message_type(message)
-    result = dialog.exec_()
+    result = dialog.exec()
     # Dialog object: dialog still exists after exec_()
 
     return result

@@ -27,7 +27,7 @@ from workbench.widgets.settings.presenter import SettingsPresenter
 # -----------------------------------------------------------------------------
 from qtpy.QtCore import QByteArray, QEventLoop, Qt, QPoint, QSize, QCoreApplication
 from qtpy.QtGui import QColor, QFontDatabase, QGuiApplication, QIcon, QPixmap
-from qtpy.QtWidgets import QApplication, QDesktopWidget, QFileDialog, QMainWindow, QSplashScreen, QMessageBox
+from qtpy.QtWidgets import QApplication, QFileDialog, QMainWindow, QSplashScreen, QMessageBox
 from mantidqt.algorithminputhistory import AlgorithmInputHistory
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.widgets import manageuserdirectories
@@ -705,13 +705,12 @@ class MainWindow(QMainWindow):
         self.ipythonconsole.console.reset_font()
 
         # make sure main window is smaller than the desktop
-        desktop = QDesktopWidget()
-
-        # this gives the maximum screen number if the position is off screen
-        screen = desktop.screenNumber(window_pos)
+        # find the screen containing the window position, falling back to the
+        # primary screen if the position is off screen
+        screen = qapp.screenAt(window_pos) or qapp.primaryScreen()
 
         # recalculate the window size
-        desktop_geom = desktop.availableGeometry(screen)
+        desktop_geom = screen.availableGeometry()
         w = min(desktop_geom.size().width(), window_size.width())
         h = min(desktop_geom.size().height(), window_size.height())
         window_size = QSize(w, h)

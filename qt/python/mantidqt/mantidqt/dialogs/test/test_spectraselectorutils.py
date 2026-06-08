@@ -39,14 +39,14 @@ class SpectraSelectionUtilsTest(unittest.TestCase):
         # dialog_mock
         mock_SpectraSelectionDialog.return_value = mock_SpectraSelectionDialog
         mock_SpectraSelectionDialog.Rejected = QDialog.Rejected
-        mock_SpectraSelectionDialog.exec_.return_value = mock_SpectraSelectionDialog.Rejected
+        mock_SpectraSelectionDialog.exec.return_value = mock_SpectraSelectionDialog.Rejected
         mock_SpectraSelectionDialog.decision = QDialog.Rejected
         mock_SpectraSelectionDialog.selection = None
         mock_SpectraSelectionDialog.get_compatible_workspaces.return_value = [self._multi_spec_ws]
 
         selection = get_spectra_selection([self._multi_spec_ws])
 
-        mock_SpectraSelectionDialog.exec_.assert_called_once_with()
+        mock_SpectraSelectionDialog.exec.assert_called_once_with()
         self.assertTrue(selection is None)
 
     @mock.patch("mantidqt.dialogs.spectraselectorutils.SpectraSelectionDialog")

@@ -177,7 +177,7 @@ class MatrixWorkspaceDisplayView(QTabWidget):
         index_of_selected_column = header.logicalIndexAt(position)
         if index_of_selected_column not in [x.column() for x in table.selectionModel().selectedColumns()]:
             table.selectColumn(index_of_selected_column)
-        context_menu.exec_(header.mapToGlobal(position))
+        context_menu.exec(header.mapToGlobal(position))
 
     def spectra_context_menu_opened(self, position):
         """
@@ -193,7 +193,7 @@ class MatrixWorkspaceDisplayView(QTabWidget):
         index_of_selected_row = header.logicalIndexAt(position)
         if index_of_selected_row not in [x.row() for x in table.selectionModel().selectedRows()]:
             table.selectRow(index_of_selected_row)
-        context_menu.exec_(header.mapToGlobal(position))
+        context_menu.exec(header.mapToGlobal(position))
 
     def setup_plot_bin_actions(self, context_menu, table):
         plot_bin_action = QAction(self.GRAPH_ICON, "Plot bin (values only)", self)

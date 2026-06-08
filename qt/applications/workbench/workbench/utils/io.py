@@ -17,7 +17,7 @@ def input_qinputdialog(prompt: str = "") -> str:
     dlg = QInputDialog()
     dlg.setInputMode(QInputDialog.TextInput)
     dlg.setLabelText(str(prompt) if prompt is not None else "")
-    accepted = dlg.exec_()
+    accepted = dlg.exec()
     if accepted:
         return dlg.textValue()
     else:

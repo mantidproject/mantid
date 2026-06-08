@@ -36,7 +36,7 @@ def initialize_matplotlib():
     # Set our defaults
     reset_rcparams_to_default()
     # Set figure DPI scaling to monitor DPI
-    mpl.rcParams["figure.dpi"] = QApplication.instance().desktop().physicalDpiX()
+    mpl.rcParams["figure.dpi"] = QApplication.instance().primaryScreen().physicalDotsPerInchX()
     # Hide warning made by matplotlib before checking our backend.
     warnings.filterwarnings("ignore", message="Starting a Matplotlib GUI outside of the main thread will likely fail.")
     # Disabling default key shortcuts for toggling axes scale

@@ -217,7 +217,7 @@ class TableWorkspaceDisplayView(QTableView):
         menu_main.addAction(sort_ascending)
         menu_main.addAction(sort_descending)
 
-        menu_main.exec_(self.mapToGlobal(position))
+        menu_main.exec(self.mapToGlobal(position))
 
     def make_separator(self, horizontalHeader):
         separator1 = QAction(horizontalHeader)

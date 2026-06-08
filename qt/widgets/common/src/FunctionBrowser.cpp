@@ -48,7 +48,7 @@ FunctionBrowser::FunctionBrowser(QWidget *parent, bool multi, const std::vector<
   auto treeView = new FunctionTreeView(this, multi, categories);
   m_presenter = std::make_unique<FunctionMultiDomainPresenter>(treeView);
   QHBoxLayout *layout = new QHBoxLayout(this);
-  layout->setMargin(0);
+  layout->setContentsMargins(0, 0, 0, 0);
   layout->addWidget(treeView);
   connect(m_presenter.get(), SIGNAL(functionStructureChanged()), this, SIGNAL(functionStructureChanged()));
   connect(m_presenter.get(), SIGNAL(parameterChanged(std::string const &, std::string const &)), this,

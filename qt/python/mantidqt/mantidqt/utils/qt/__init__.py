@@ -20,7 +20,7 @@ import warnings
 from qtpy import QT_VERSION
 from qtpy.QtCore import QPoint
 from qtpy.QtGui import QKeySequence
-from qtpy.QtWidgets import QAction, QMenu, QDesktopWidget
+from qtpy.QtWidgets import QAction, QApplication, QMenu
 
 # Must be called before trying to import module with a deprecation warning
 warnings.filterwarnings(action="ignore", category=DeprecationWarning, module=".*uic.*")
@@ -192,12 +192,12 @@ def toQSettings(settings):
 def ensure_widget_is_on_screen(widget):
     """If the supplied widget is off the screen it will be moved so it is on the screen.
     The widget must already be 'shown'"""
-    # this gives the maximum screen number if the position is off screen
-    desktop = QDesktopWidget()
-    screen = desktop.screenNumber(widget.pos())
+    # find the screen containing the widget position, falling back to the
+    # primary screen if the position is off screen
+    screen = QApplication.screenAt(widget.pos()) or QApplication.primaryScreen()
 
     # get the window size
-    desktop_geom = desktop.availableGeometry(screen)
+    desktop_geom = screen.availableGeometry()
     # get the widget dimensions with any os added extras
     widget_geom = widget.frameGeometry()
     # and position it on the supplied desktop screen

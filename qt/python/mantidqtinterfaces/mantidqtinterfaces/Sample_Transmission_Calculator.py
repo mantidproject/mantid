@@ -18,4 +18,4 @@ else:
 planner = stc_gui.SampleTransmissionCalculator(parent, flags)
 planner.show()
 if not within_mantid:
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

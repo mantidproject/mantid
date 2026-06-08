@@ -316,7 +316,7 @@ QFrame *InstrumentWidgetRenderTab::setupAxisFrame() {
 
   m_resetViewFrame->setLayout(axisViewLayout);
 
-  connect(mAxisCombo, SIGNAL(currentIndexChanged(const QString &)), m_instrWidget,
+  connect(mAxisCombo, SIGNAL(currentTextChanged(const QString &)), m_instrWidget,
           SLOT(setViewDirection(const QString &)));
 
   connect(m_freezeRotation, SIGNAL(toggled(bool)), m_instrWidget, SLOT(freezeRotation(bool)));

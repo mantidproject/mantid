@@ -18,7 +18,7 @@ You can run this widget independently by for example:
 
     app = QApplication([])
     window = InstrumentView(ws)
-    app.exec_()
+    app.exec()
 """
 
 from mantidqt.project.decoderfactory import DecoderFactory

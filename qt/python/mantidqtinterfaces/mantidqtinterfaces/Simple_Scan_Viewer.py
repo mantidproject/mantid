@@ -31,4 +31,4 @@ else:
             scan_viewer = SimpleScanViewerPresenter()
     scan_viewer.show()
     if not within_mantid:
-        sys.exit(app.exec_())
+        sys.exit(app.exec())

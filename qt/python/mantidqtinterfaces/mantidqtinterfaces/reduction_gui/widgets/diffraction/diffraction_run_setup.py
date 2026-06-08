@@ -9,8 +9,8 @@
 # This is my first attempt to make a tab from quasi-scratch
 ################################################################################
 from qtpy.QtWidgets import QDialog, QFrame
-from qtpy.QtCore import QRegExp
-from qtpy.QtGui import QDoubleValidator, QIntValidator, QRegExpValidator
+from qtpy.QtCore import QRegularExpression
+from qtpy.QtGui import QDoubleValidator, QIntValidator, QRegularExpressionValidator
 from mantidqtinterfaces.reduction_gui.widgets.base_widget import BaseWidget
 from mantid.kernel import Logger
 from reduction_gui.reduction.diffraction.diffraction_run_setup_script import RunSetupScript
@@ -23,8 +23,8 @@ except ImportError:
 
 
 def generateRegExpValidator(widget, expression):
-    rx = QRegExp(expression)
-    return QRegExpValidator(rx, widget)
+    rx = QRegularExpression(expression)
+    return QRegularExpressionValidator(rx, widget)
 
 
 class RunSetupWidget(BaseWidget):
@@ -516,4 +516,4 @@ class RunSetupWidget(BaseWidget):
                 self.ui = load_ui(__file__, "../../../ui/diffraction/diffraction_info.ui", baseinstance=self)
 
         dialog = HelpDialog(self)
-        dialog.exec_()
+        dialog.exec()

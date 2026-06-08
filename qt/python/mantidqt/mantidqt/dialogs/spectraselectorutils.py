@@ -49,7 +49,7 @@ def get_spectra_selection(workspaces, parent_widget=None, show_colorfill_btn=Fal
         selection_dlg = SpectraSelectionDialog(
             workspaces, parent=parent_widget, show_colorfill_btn=show_colorfill_btn, overplot=overplot, advanced=advanced
         )
-        res = selection_dlg.exec_()
+        res = selection_dlg.exec()
         if res == SpectraSelectionDialog.Rejected:
             # cancelled
             return None

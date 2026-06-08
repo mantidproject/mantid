@@ -34,4 +34,4 @@ def exception_logger(main_window, exc_type, exc_value, exc_traceback):
             main_window.close()
     else:
         # show the exception message without the traceback
-        WorkbenchErrorMessageBox(main_window, "".join(traceback.format_exception_only(exc_type, exc_value))).exec_()
+        WorkbenchErrorMessageBox(main_window, "".join(traceback.format_exception_only(exc_type, exc_value))).exec()

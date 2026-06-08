@@ -479,11 +479,11 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
             if data_view.ax.xaxis.contains(event)[0] or any(tick.contains(event)[0] for tick in data_view.ax.get_xticklabels()):
                 editor = SliceViewXAxisEditor(data_view.canvas, data_view.ax, self.dimensions_changed)
                 editor.move(QCursor.pos())
-                editor.exec_()
+                editor.exec()
             elif data_view.ax.yaxis.contains(event)[0] or any(tick.contains(event)[0] for tick in data_view.ax.get_yticklabels()):
                 editor = SliceViewYAxisEditor(data_view.canvas, data_view.ax, self.dimensions_changed)
                 editor.move(QCursor.pos())
-                editor.exec_()
+                editor.exec()
 
     def key_pressed(self, event) -> None:
         pass

@@ -17,9 +17,9 @@
 #include <tuple>
 #include <utility>
 
+#include <QDoubleValidator>
 #include <QLabel>
 #include <QMessageBox>
-#include <QRegExpValidator>
 #include <QSizePolicy>
 #include <QSpacerItem>
 #include <QSplitter>
@@ -133,7 +133,7 @@ QWidget *ALFAnalysisView::createPlotToolbar() {
 
   auto toolbarWidget = new QWidget();
   auto *toolbarLayout = new QHBoxLayout(toolbarWidget);
-  toolbarLayout->setMargin(0);
+  toolbarLayout->setContentsMargins(0, 0, 0, 0);
   toolbarLayout->addItem(new QSpacerItem(80, 0, QSizePolicy::Expanding, QSizePolicy::Fixed));
   toolbarLayout->addWidget(m_exportToADS);
   toolbarLayout->addWidget(m_externalPlot);

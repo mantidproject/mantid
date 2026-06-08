@@ -191,7 +191,7 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
   radioLayout->addWidget(m_masking_on);
   radioLayout->addWidget(m_roi_on);
   radioLayout->addWidget(m_grouping_on);
-  radioLayout->setMargin(0);
+  radioLayout->setContentsMargins(0, 0, 0, 0);
   auto *radioGroup = new QGroupBox();
   radioGroup->setStyleSheet("border: none;");
   radioGroup->setLayout(radioLayout);

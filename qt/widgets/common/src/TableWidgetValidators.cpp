@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/TableWidgetValidators.h"
+#include <QRegularExpressionValidator>
 #include <stdexcept>
 
 namespace {
@@ -49,12 +50,12 @@ std::string getRegexValidatorString(const RegexValidatorStrings &validatorMask) 
 QString makeQStringNumber(double value, int precision) { return QString::number(value, 'f', precision); }
 
 RegexInputDelegate::RegexInputDelegate(QWidget *parent, const std::string &validator)
-    : QStyledItemDelegate(parent), m_validator(QRegExp(QString::fromStdString(validator))) {}
+    : QStyledItemDelegate(parent), m_validator(QRegularExpression(QString::fromStdString(validator))) {}
 
 QWidget *RegexInputDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem & /*option*/,
                                           const QModelIndex & /*index*/) const {
   auto lineEdit = new QLineEdit(parent);
-  auto validator = new QRegExpValidator(m_validator, parent);
+  auto validator = new QRegularExpressionValidator(m_validator, parent);
   lineEdit->setValidator(validator);
   return lineEdit;
 }

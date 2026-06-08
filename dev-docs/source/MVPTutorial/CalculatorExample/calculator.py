@@ -25,4 +25,4 @@ if __name__ == "__main__":
     model = Model()
     presenter = Presenter(view, model)
     view.show()
-    app.exec_()
+    app.exec()

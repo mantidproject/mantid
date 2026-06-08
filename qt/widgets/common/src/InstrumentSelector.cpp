@@ -39,7 +39,7 @@ InstrumentSelector::InstrumentSelector(QWidget *parent, bool init)
     config.addObserver(m_changeObserver);
   }
 
-  connect(this, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(updateInstrument(const QString &)));
+  connect(this, SIGNAL(currentIndexChanged(int)), this, SLOT(updateInstrument()));
 }
 
 /**
@@ -202,6 +202,12 @@ void InstrumentSelector::updateInstrument(const QString &name) {
     emit instrumentSelectionChanged(m_selectedInstrument);
   }
 }
+
+/**
+ * Handle an instrument being selected via the current index changing.
+ * Forwards the current text to the named overload.
+ */
+void InstrumentSelector::updateInstrument() { updateInstrument(currentText()); }
 
 //------------------------------------------------------
 // Private non-slot member functions

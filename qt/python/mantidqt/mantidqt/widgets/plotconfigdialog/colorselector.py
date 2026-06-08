@@ -8,8 +8,8 @@
 
 from mantid.plots.utility import convert_color_to_hex
 from matplotlib import rcParams
-from qtpy.QtCore import QRegExp
-from qtpy.QtGui import QColor, QRegExpValidator
+from qtpy.QtCore import QRegularExpression
+from qtpy.QtGui import QColor, QRegularExpressionValidator
 from qtpy.QtWidgets import QWidget, QLineEdit, QPushButton, QHBoxLayout, QColorDialog
 
 
@@ -34,7 +34,7 @@ class ColorSelector(QWidget):
         self.prev_color = self.initial_color.name()
 
         # Color input only allows valid hex codes.
-        re = QRegExp("^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$")
+        re = QRegularExpression("^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$")
         validator = ColorValidator(re, self.line_edit, self)
         self.line_edit.setValidator(validator)
 
@@ -85,9 +85,9 @@ class ColorSelector(QWidget):
         self.prev_color = color
 
 
-class ColorValidator(QRegExpValidator):
+class ColorValidator(QRegularExpressionValidator):
     def __init__(self, regexp, widget, color_selector):
-        QRegExpValidator.__init__(self, regexp, widget)
+        QRegularExpressionValidator.__init__(self, regexp, widget)
         self.color_selector = color_selector
 
     def fixup(self, text):

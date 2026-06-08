@@ -31,7 +31,7 @@ class DrillHeaderView(QHeaderView):
 
         # set the minimum section size
         cellMargin = self.style().pixelMetric(QStyle.PM_FocusFrameHMargin, None, self)
-        minCellSize = self.fontMetrics().width("....") + 2 * cellMargin + 1
+        minCellSize = self.fontMetrics().horizontalAdvance("....") + 2 * cellMargin + 1
         headerMargin = self.style().pixelMetric(QStyle.PM_HeaderMargin, None, self)
         minHeaderSize = self.BUTTON_SIZE + 2 * headerMargin + 1
         self.setMinimumSectionSize(max(minCellSize, minHeaderSize))

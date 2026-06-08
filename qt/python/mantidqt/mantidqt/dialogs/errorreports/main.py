@@ -50,7 +50,7 @@ def main(argv: Sequence[str] = None) -> int:
     form = CrashReportPage(show_continue_terminate=False)
     presenter = ErrorReporterPresenter(form, exit_code_str, command_line_args.application, command_line_args.workbench_pid)
     presenter.show_view()
-    app.exec_()
+    app.exec()
 
     return exit_code
 

@@ -167,12 +167,12 @@ class DNSElasticSCPlotView(DNSView):
     def change_dxdy(self):
         if self.initial_values:
             dxdy_dialog = DNSdxdyDialog(parent=self, dx=self.initial_values["dx"], dy=self.initial_values["dy"])
-            dxdy_dialog.exec_()
+            dxdy_dialog.exec()
 
     def change_omega_offset(self):
         if self.initial_values:
             omega_offset_dialog = DNSOmegaOffsetDialog(parent=self, omega_offset=self.initial_values["omega_offset"])
-            omega_offset_dialog.exec_()
+            omega_offset_dialog.exec()
 
     # gui options
     def _zooming_event(self, event):

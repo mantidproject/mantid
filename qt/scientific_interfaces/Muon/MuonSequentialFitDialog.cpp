@@ -171,7 +171,7 @@ void MuonSequentialFitDialog::initDiagnosisTable() {
 
   // Make the table fill all the available space and columns be resized to fit
   // contents
-  m_ui.diagnosisTable->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+  m_ui.diagnosisTable->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
   // Make rows alternate bg colors for better user experience
   m_ui.diagnosisTable->setAlternatingRowColors(true);
