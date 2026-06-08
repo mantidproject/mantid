@@ -63,7 +63,7 @@ class EnggUtilsTest(unittest.TestCase):
         prm_fname = "prm.prm"
         mock_path.join.return_value = prm_fname
         mock_path.splitext.return_value = (prm_fname.replace(".prm", ""), None)
-        self.calibration.group.banks = None  # no bank data e.g. custom
+        self.calibration.get_group_banks.return_value = None  # no bank data e.g. custom
         self.calibration.generate_output_file_name.return_value = prm_fname
         self.calibration.get_calibration_table.return_value = "cal_table"  # no bank data e.g. custom
         save_dir = "savedir"
