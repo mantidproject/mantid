@@ -137,7 +137,7 @@ class ErrorReporterPresenter(object):
         self._view.show()
 
     def show_view_blocking(self):
-        self._view.exec_()
+        self._view.exec()
 
     def show_more_details(self):
         error_reporter = ErrorReporter(

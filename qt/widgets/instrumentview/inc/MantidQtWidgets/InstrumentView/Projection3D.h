@@ -11,7 +11,6 @@
 
 #include "MantidGeometry/IComponent.h"
 
-#include <QGLWidget>
 #include <QString>
 
 #include <memory>

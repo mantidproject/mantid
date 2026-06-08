@@ -286,7 +286,7 @@ void QtBoolEdit::mousePressEvent(QMouseEvent *event) {
 QtKeySequenceEdit::QtKeySequenceEdit(QWidget *parent) : QWidget(parent), m_num(0), m_lineEdit(new QLineEdit(this)) {
   auto *layout = new QHBoxLayout(this);
   layout->addWidget(m_lineEdit);
-  layout->setMargin(0);
+  layout->setContentsMargins(0, 0, 0, 0);
   m_lineEdit->installEventFilter(this);
   m_lineEdit->setReadOnly(true);
   m_lineEdit->setFocusProxy(this);

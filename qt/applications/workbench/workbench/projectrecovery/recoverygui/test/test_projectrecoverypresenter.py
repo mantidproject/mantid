@@ -42,7 +42,7 @@ class ProjectRecoveryPresenterTest(unittest.TestCase):
         self.prp.start_mantid_normally_called = True
 
         self.assertTrue(self.prp.start_recovery_view())
-        self.assertEqual(1, self.prp.current_view.exec_.call_count)
+        self.assertEqual(1, self.prp.current_view.exec.call_count)
 
     @mock.patch(PATCH_PROJECT_RECOVERY_VIEW)
     def test_start_recovery_view_model_has_a_failed_run(self, _):
@@ -50,7 +50,7 @@ class ProjectRecoveryPresenterTest(unittest.TestCase):
         self.prp.model.has_failed_run = True
 
         self.assertTrue(not self.prp.start_recovery_view())
-        self.assertEqual(1, self.prp.current_view.exec_.call_count)
+        self.assertEqual(1, self.prp.current_view.exec.call_count)
 
     @mock.patch(PATCH_PROJECT_RECOVERY_VIEW)
     def test_start_recovery_view_successful_run(self, _):
@@ -58,7 +58,7 @@ class ProjectRecoveryPresenterTest(unittest.TestCase):
         self.prp.model.has_failed_run = False
 
         self.assertTrue(self.prp.start_recovery_view())
-        self.assertEqual(1, self.prp.current_view.exec_.call_count)
+        self.assertEqual(1, self.prp.current_view.exec.call_count)
 
     @mock.patch(PATCH_PROJECT_RECOVERY_MODEL)
     @mock.patch(PATCH_PROJECT_RECOVERY_FAILURE_VIEW)
@@ -67,7 +67,7 @@ class ProjectRecoveryPresenterTest(unittest.TestCase):
         self.prp.start_mantid_normally_called = True
 
         self.assertTrue(self.prp.start_recovery_failure())
-        self.assertEqual(1, self.prp.current_view.exec_.call_count)
+        self.assertEqual(1, self.prp.current_view.exec.call_count)
 
     @mock.patch(PATCH_PROJECT_RECOVERY_MODEL)
     @mock.patch(PATCH_PROJECT_RECOVERY_FAILURE_VIEW)
@@ -84,7 +84,7 @@ class ProjectRecoveryPresenterTest(unittest.TestCase):
         model.return_value.has_failed_run = True
 
         self.assertTrue(not self.prp.start_recovery_failure())
-        self.assertEqual(1, self.prp.current_view.exec_.call_count)
+        self.assertEqual(1, self.prp.current_view.exec.call_count)
 
     @mock.patch(PATCH_PROJECT_RECOVERY_FAILURE_VIEW)
     @mock.patch(PATCH_PROJECT_RECOVERY_MODEL)
@@ -93,7 +93,7 @@ class ProjectRecoveryPresenterTest(unittest.TestCase):
         model.return_value.has_failed_run = False
 
         self.assertTrue(self.prp.start_recovery_failure())
-        self.assertEqual(1, self.prp.current_view.exec_.call_count)
+        self.assertEqual(1, self.prp.current_view.exec.call_count)
 
     @mock.patch(PATCH_PROJECT_RECOVERY_FAILURE_VIEW)
     @mock.patch(PATCH_PROJECT_RECOVERY_MODEL)

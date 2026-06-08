@@ -21,4 +21,4 @@ else:
 reducer = reduce4circleGUI.MainWindow(parent, flags)  # the main ui class in this file
 reducer.show()
 if not within_mantid:
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

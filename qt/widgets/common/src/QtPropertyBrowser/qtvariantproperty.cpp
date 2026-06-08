@@ -91,6 +91,7 @@
 #include <QDate>
 #include <QIcon>
 #include <QLocale>
+#include <QRegularExpression>
 #include <QVariant>
 
 #if defined(Q_CC_MSVC)
@@ -430,9 +431,9 @@ void QtVariantPropertyManagerPrivate::slotValueChanged(const QtProperty *propert
   valueChanged(property, QVariant(val));
 }
 
-void QtVariantPropertyManagerPrivate::slotRegExpChanged(const QtProperty *property, const QRegExp &regExp) {
+void QtVariantPropertyManagerPrivate::slotRegExpChanged(const QtProperty *property, const QRegularExpression &regExp) {
   if (QtVariantProperty *varProp = m_internalToProperty.value(property, 0))
-    emit q_ptr->attributeChanged(varProp, m_regExpAttribute, QVariant(regExp));
+    emit q_ptr->attributeChanged(varProp, m_regExpAttribute, QVariant::fromValue(regExp));
 }
 
 void QtVariantPropertyManagerPrivate::slotValueChanged(const QtProperty *property, const QDate &val) {
@@ -846,11 +847,11 @@ QtVariantPropertyManager::QtVariantPropertyManager(QObject *parent) : QtAbstract
   auto *stringPropertyManager = new QtStringPropertyManager(this);
   d_ptr->m_typeToPropertyManager[QVariant::String] = stringPropertyManager;
   d_ptr->m_typeToValueType[QVariant::String] = QVariant::String;
-  d_ptr->m_typeToAttributeToAttributeType[QVariant::String][d_ptr->m_regExpAttribute] = QVariant::RegExp;
+  d_ptr->m_typeToAttributeToAttributeType[QVariant::String][d_ptr->m_regExpAttribute] = QVariant::RegularExpression;
   connect(stringPropertyManager, SIGNAL(valueChanged(QtProperty *, const QString &)), this,
           SLOT(slotValueChanged(const QtProperty *, const QString &)));
-  connect(stringPropertyManager, SIGNAL(regExpChanged(QtProperty *, const QRegExp &)), this,
-          SLOT(slotRegExpChanged(const QtProperty *, const QRegExp &)));
+  connect(stringPropertyManager, SIGNAL(regExpChanged(QtProperty *, const QRegularExpression &)), this,
+          SLOT(slotRegExpChanged(const QtProperty *, const QRegularExpression &)));
   // DatePropertyManager
   auto *datePropertyManager = new QtDatePropertyManager(this);
   d_ptr->m_typeToPropertyManager[QVariant::Date] = datePropertyManager;
@@ -1541,7 +1542,7 @@ void QtVariantPropertyManager::setAttribute(QtProperty *property, const QString 
     return;
   } else if (auto *stringManager = qobject_cast<QtStringPropertyManager *>(manager)) {
     if (attribute == d_ptr->m_regExpAttribute)
-      stringManager->setRegExp(internProp, value.value<QRegExp>());
+      stringManager->setRegExp(internProp, value.value<QRegularExpression>());
     return;
   } else if (auto *dateManager = qobject_cast<QtDatePropertyManager *>(manager)) {
     if (attribute == d_ptr->m_maximumAttribute)

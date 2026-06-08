@@ -335,7 +335,7 @@ class FigureInteraction(object):
             nonlocal action_taken
             action_taken = True
             editor.move(QCursor.pos())
-            editor.exec_()
+            editor.exec()
 
         for ax in axes:
             if ax.title.contains(event)[0]:
@@ -417,7 +417,7 @@ class FigureInteraction(object):
         for marker in markers:
             self._single_marker_menu(menu, marker)
 
-        menu.exec_(QCursor.pos())
+        menu.exec(QCursor.pos())
 
     def _single_marker_menu(self, menu, marker):
         """
@@ -471,7 +471,7 @@ class FigureInteraction(object):
             self._add_plot_type_option_menu(menu, event.inaxes)
             self._add_legend_toggle_action(menu, event)
 
-        menu.exec_(QCursor.pos())
+        menu.exec(QCursor.pos())
 
     def _add_axis_scale_menus(self, menu, ax):
         """Add the Axis scale options menus to the given menu"""
@@ -665,7 +665,7 @@ class FigureInteraction(object):
 
         def move_and_show(editor):
             editor.move(QCursor.pos())
-            editor.exec_()
+            editor.exec()
 
         move_and_show(GlobalMarkerEditor(self.canvas, self.markers, self.valid_lines, self.valid_colors))
 
@@ -742,7 +742,7 @@ class FigureInteraction(object):
 
         def move_and_show(editor):
             editor.move(QCursor.pos())
-            editor.exec_()
+            editor.exec()
 
         used_names = [str(_marker.name) for _marker in self.markers]
         QApplication.restoreOverrideCursor()

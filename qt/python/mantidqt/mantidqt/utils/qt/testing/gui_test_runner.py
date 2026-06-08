@@ -181,7 +181,7 @@ def open_in_window(widget_or_name, script, attach_debugger=True, pause=0, close_
                 raise e
 
     if not in_workbench:
-        ret = app.exec_()
+        ret = app.exec()
         if not is_cli and script_runner is not None and script_runner.error is not None:
             raise script_runner.error
     else:

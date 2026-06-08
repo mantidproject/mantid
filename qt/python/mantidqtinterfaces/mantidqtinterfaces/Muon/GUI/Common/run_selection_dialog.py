@@ -41,7 +41,7 @@ class RunSelectionDialog(QtWidgets.QDialog):
     @staticmethod
     def get_run(current_runs, instrument, parent=None):
         dialog = RunSelectionDialog(current_runs, instrument, parent)
-        result = dialog.exec_()
+        result = dialog.exec()
         run = dialog.run()
         index = dialog.index()
         return (run, index, result == QtWidgets.QDialog.Accepted)

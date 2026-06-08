@@ -155,7 +155,7 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         msg.setText("Changing instrument will reset the interface, continue?")
         msg.setWindowTitle("Changing Instrument")
         msg.setStandardButtons(QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel)
-        retval = msg.exec_()
+        retval = msg.exec()
         if retval == 1024:
             # The "OK" code
             return 1
@@ -171,7 +171,7 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         self.time_zero_label.setText("Time Zero : ")
 
         self.time_zero_edit = QtWidgets.QLineEdit(self)
-        timezero_validator = QtGui.QRegExpValidator(QtCore.QRegExp(valid_float_regex), self.time_zero_edit)
+        timezero_validator = QtGui.QRegularExpressionValidator(QtCore.QRegularExpression(valid_float_regex), self.time_zero_edit)
         self.time_zero_edit.setValidator(timezero_validator)
         self.time_zero_edit.setText("")
 
@@ -229,7 +229,7 @@ class InstrumentWidgetView(QtWidgets.QWidget):
 
         self.first_good_data_edit = QtWidgets.QLineEdit(self)
 
-        first_good_data_validator = QtGui.QRegExpValidator(QtCore.QRegExp(valid_float_regex), self.time_zero_edit)
+        first_good_data_validator = QtGui.QRegularExpressionValidator(QtCore.QRegularExpression(valid_float_regex), self.time_zero_edit)
         self.first_good_data_edit.setValidator(first_good_data_validator)
         self.first_good_data_edit.setText("")
 
@@ -287,7 +287,9 @@ class InstrumentWidgetView(QtWidgets.QWidget):
 
         self.last_good_data_edit = QtWidgets.QLineEdit(self)
 
-        last_good_data_validator = QtGui.QRegExpValidator(QtCore.QRegExp(valid_float_regex), self.first_good_data_edit)
+        last_good_data_validator = QtGui.QRegularExpressionValidator(
+            QtCore.QRegularExpression(valid_float_regex), self.first_good_data_edit
+        )
         self.last_good_data_edit.setValidator(last_good_data_validator)
         self.last_good_data_edit.setText("")
 
@@ -342,7 +344,9 @@ class InstrumentWidgetView(QtWidgets.QWidget):
     def setup_double_pulse_row(self):
         self.double_pulse_data_edit = QtWidgets.QLineEdit(self)
 
-        double_pulse_data_validator = QtGui.QRegExpValidator(QtCore.QRegExp(valid_float_regex), self.double_pulse_data_edit)
+        double_pulse_data_validator = QtGui.QRegularExpressionValidator(
+            QtCore.QRegularExpression(valid_float_regex), self.double_pulse_data_edit
+        )
         self.double_pulse_data_edit.setValidator(double_pulse_data_validator)
         self.double_pulse_data_edit.setText("0.33")
 
@@ -411,7 +415,7 @@ class InstrumentWidgetView(QtWidgets.QWidget):
             "2,-0.035,10: from 2 rebin in Logarithmic bins of 0.035 up to 10;\n"
             "0,100,10000,200,20000: from 0 rebin in steps of 100 to 10,000 then steps of 200 to 20,000"
         )
-        variable_validator = QtGui.QRegExpValidator(QtCore.QRegExp(r"^(\s*-?\d+(\.\d+)?)(\s*,\s*-?\d+(\.\d+)?)*$"))
+        variable_validator = QtGui.QRegularExpressionValidator(QtCore.QRegularExpression(r"^(\s*-?\d+(\.\d+)?)(\s*,\s*-?\d+(\.\d+)?)*$"))
         self.rebin_variable_edit.setValidator(variable_validator)
 
         self.rebin_layout = QtWidgets.QHBoxLayout()

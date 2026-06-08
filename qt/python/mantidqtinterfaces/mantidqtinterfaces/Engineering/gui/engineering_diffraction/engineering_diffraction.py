@@ -13,8 +13,8 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.presenter import
 from .tabs.common import SavedirObserver
 
 
-from qtpy.QtCore import QRegExp
-from qtpy.QtGui import QRegExpValidator
+from qtpy.QtCore import QRegularExpression
+from qtpy.QtGui import QRegularExpressionValidator
 
 Ui_main_window, _ = load_ui(__file__, "main_window.ui")
 
@@ -54,8 +54,8 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         self.presenter = self.setup_presenter()
 
         # RB number validator
-        q_reg_exp = QRegExp(r"(?!.* /|.*/ )(?!.* \\|.*\\ )(?!^ )[a-zA-Z0-9-_ ]+(?!.*[/\\]{3,})[a-zA-Z0-9-_/\\ ]+")
-        validator = QRegExpValidator(q_reg_exp, self.lineEdit_RBNumber)
+        q_reg_exp = QRegularExpression(r"(?!.* /|.*/ )(?!.* \\|.*\\ )(?!^ )[a-zA-Z0-9-_ ]+(?!.*[/\\]{3,})[a-zA-Z0-9-_/\\ ]+")
+        validator = QRegularExpressionValidator(q_reg_exp, self.lineEdit_RBNumber)
         self.lineEdit_RBNumber.setValidator(validator)
 
         # setup that can only happen with presenter created

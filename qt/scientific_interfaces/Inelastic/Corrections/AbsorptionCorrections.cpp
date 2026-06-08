@@ -13,7 +13,8 @@
 #include "MantidQtWidgets/Spectroscopy/InterfaceUtils.h"
 #include "MantidQtWidgets/Spectroscopy/RunWidget/RunView.h"
 
-#include <QRegExpValidator>
+#include <QRegularExpression>
+#include <QRegularExpressionValidator>
 #include <QSignalBlocker>
 
 using namespace Mantid::API;
@@ -114,8 +115,8 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_uiForm.runWidget));
   setOutputPlotOptionsPresenter(m_uiForm.ipoPlotOptions, PlotWidget::SpectraBin, "", actions);
 
-  QRegExp regex(R"([A-Za-z0-9\-\(\)]*)");
-  QValidator *formulaValidator = new QRegExpValidator(regex, this);
+  QRegularExpression regex(R"([A-Za-z0-9\-\(\)]*)");
+  QValidator *formulaValidator = new QRegularExpressionValidator(regex, this);
   m_uiForm.leSampleChemicalFormula->setValidator(formulaValidator);
   m_uiForm.leCanChemicalFormula->setValidator(formulaValidator);
 

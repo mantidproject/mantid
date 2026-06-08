@@ -150,4 +150,4 @@ if __name__ == "__main__":
 
     mainForm = MatrixUBInputWidget(inputol)
     mainForm.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

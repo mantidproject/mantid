@@ -159,7 +159,7 @@ class SampleLogsView(QSplitter, ObservingView):
         plotAction.triggered.connect(self.presenter.new_plot_logs)
         plotAction = menu.addAction("Print selected")
         plotAction.triggered.connect(self.presenter.print_selected_logs)
-        menu.exec_(event.globalPos())
+        menu.exec(event.globalPos())
 
     def set_model(self, model):
         """Set the model onto the table"""

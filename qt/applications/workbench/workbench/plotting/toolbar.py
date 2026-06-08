@@ -95,7 +95,7 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
         super().__init__(canvas, parent, coordinates)
 
         # Adjust icon size or they are too small in PyQt5 by default
-        dpi_ratio = QtWidgets.QApplication.instance().desktop().physicalDpiX() / 100
+        dpi_ratio = QtWidgets.QApplication.instance().primaryScreen().physicalDotsPerInchX() / 100
         self.setIconSize(QtCore.QSize(int(24 * dpi_ratio), int(24 * dpi_ratio)))
 
     def toggle_crosshair(self, enable=None):
@@ -157,7 +157,7 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
         printer = QtPrintSupport.QPrinter(QtPrintSupport.QPrinter.HighResolution)
         printer.setOrientation(QtPrintSupport.QPrinter.Landscape)
         print_dlg = QtPrintSupport.QPrintDialog(printer)
-        if print_dlg.exec_() == QtWidgets.QDialog.Accepted:
+        if print_dlg.exec() == QtWidgets.QDialog.Accepted:
             painter = QtGui.QPainter(printer)
             page_size = printer.pageRect()
             pixmap = self.canvas.grab().scaled(page_size.width(), page_size.height(), QtCore.Qt.KeepAspectRatio)

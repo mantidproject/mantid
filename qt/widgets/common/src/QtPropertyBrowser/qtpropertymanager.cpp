@@ -97,6 +97,7 @@
 #include <QMap>
 #include <QMetaEnum>
 #include <QPainter>
+#include <QRegularExpression>
 #include <QStyle>
 #include <QStyleOption>
 #include <QTimer>
@@ -868,9 +869,10 @@ class QtStringPropertyManagerPrivate {
   Q_DECLARE_PUBLIC(QtStringPropertyManager)
 public:
   struct Data {
-    Data() : regExp(QString(QLatin1Char('*')), Qt::CaseSensitive, QRegExp::Wildcard) {}
+    // Default to a pattern that matches anything (equivalent to the old wildcard "*").
+    Data() : regExp(QStringLiteral(".*")) {}
     QString val;
-    QRegExp regExp;
+    QRegularExpression regExp;
   };
 
   using PropertyValueMap = QMap<const QtProperty *, Data>;
@@ -910,7 +912,7 @@ public:
 
 /**
     \fn void QtStringPropertyManager::regExpChanged(QtProperty *property, const
-   QRegExp &regExp)
+   QRegularExpression &regExp)
 
     This signal is emitted whenever a property created by this manager
     changes its currenlty set regular expression, passing a pointer to
@@ -955,8 +957,9 @@ QString QtStringPropertyManager::value(const QtProperty *property) const {
 
     \sa setRegExp()
 */
-QRegExp QtStringPropertyManager::regExp(const QtProperty *property) const {
-  return getData<QRegExp>(d_ptr->m_values, &QtStringPropertyManagerPrivate::Data::regExp, property, QRegExp());
+QRegularExpression QtStringPropertyManager::regExp(const QtProperty *property) const {
+  return getData<QRegularExpression>(d_ptr->m_values, &QtStringPropertyManagerPrivate::Data::regExp, property,
+                                     QRegularExpression());
 }
 
 /**
@@ -990,7 +993,10 @@ void QtStringPropertyManager::setValue(QtProperty *property, const QString &val)
   if (data.val == val)
     return;
 
-  if (data.regExp.isValid() && !data.regExp.exactMatch(val))
+  // Use an anchored regular expression to ensure that the whole string matches the pattern, not just a substring.
+  const QRegularExpression anchoredRegExp(QRegularExpression::anchoredPattern(data.regExp.pattern()),
+                                          data.regExp.patternOptions());
+  if (data.regExp.isValid() && !anchoredRegExp.match(val).hasMatch())
     return;
 
   data.val = val;
@@ -1006,7 +1012,7 @@ void QtStringPropertyManager::setValue(QtProperty *property, const QString &val)
 
     \sa regExp(), setValue(), regExpChanged()
 */
-void QtStringPropertyManager::setRegExp(QtProperty *property, const QRegExp &regExp) {
+void QtStringPropertyManager::setRegExp(QtProperty *property, const QRegularExpression &regExp) {
   const QtStringPropertyManagerPrivate::PropertyValueMap::iterator it = d_ptr->m_values.find(property);
   if (it == d_ptr->m_values.end())
     return;

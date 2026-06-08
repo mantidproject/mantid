@@ -89,6 +89,7 @@
 
 #include "qtpropertybrowser.h"
 #include <QIcon>
+#include <QRegularExpression>
 #include <QVariant>
 
 QT_BEGIN_NAMESPACE
@@ -171,7 +172,7 @@ private:
   Q_PRIVATE_SLOT(d_func(), void slotDecimalsChanged(const QtProperty *, int))
   Q_PRIVATE_SLOT(d_func(), void slotValueChanged(const QtProperty *, bool))
   Q_PRIVATE_SLOT(d_func(), void slotValueChanged(const QtProperty *, const QString &))
-  Q_PRIVATE_SLOT(d_func(), void slotRegExpChanged(const QtProperty *, const QRegExp &))
+  Q_PRIVATE_SLOT(d_func(), void slotRegExpChanged(const QtProperty *, const QRegularExpression &))
   Q_PRIVATE_SLOT(d_func(), void slotValueChanged(const QtProperty *, const QDate &))
   Q_PRIVATE_SLOT(d_func(), void slotRangeChanged(const QtProperty *, const QDate &, const QDate &))
   Q_PRIVATE_SLOT(d_func(), void slotValueChanged(const QtProperty *, const QTime &))
@@ -242,7 +243,7 @@ public:
   void slotDecimalsChanged(const QtProperty *property, int prec);
   void slotValueChanged(const QtProperty *property, bool val);
   void slotValueChanged(const QtProperty *property, const QString &val);
-  void slotRegExpChanged(const QtProperty *property, const QRegExp &regExp);
+  void slotRegExpChanged(const QtProperty *property, const QRegularExpression &regExp);
   void slotValueChanged(const QtProperty *property, const QDate &val);
   void slotRangeChanged(const QtProperty *property, const QDate &min, const QDate &max);
   void slotValueChanged(const QtProperty *property, const QTime &val);

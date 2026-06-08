@@ -12,6 +12,8 @@
 #include "MantidQtWidgets/Common/TableWidgetValidators.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
 #include "MantidQtWidgets/Spectroscopy/InterfaceUtils.h"
+#include <QRegularExpression>
+#include <QRegularExpressionValidator>
 #include <qcheckbox.h>
 #include <utility>
 
@@ -23,7 +25,7 @@ namespace MantidQt::CustomInterfaces::Inelastic {
 ConvolutionAddWorkspaceDialog::ConvolutionAddWorkspaceDialog(QWidget *parent) : QDialog(parent) {
   m_uiForm.setupUi(this);
   const auto validatorString = QString::fromStdString(getRegexValidatorString(RegexValidatorStrings::SpectraValidator));
-  m_uiForm.leWorkspaceIndices->setValidator(new QRegExpValidator(QRegExp(validatorString), this));
+  m_uiForm.leWorkspaceIndices->setValidator(new QRegularExpressionValidator(QRegularExpression(validatorString), this));
   setAllSpectraSelectionEnabled(false);
 
   connect(m_uiForm.dsWorkspace, &DataSelector::dataReady, this, &ConvolutionAddWorkspaceDialog::workspaceChanged);

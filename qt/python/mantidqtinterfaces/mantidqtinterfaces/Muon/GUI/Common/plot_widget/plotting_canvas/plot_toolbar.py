@@ -38,7 +38,7 @@ class PlotToolbar(MantidNavigationToolbar):
         self.range_changed_notifier = GenericObservable()
 
         # Adjust icon size, or they are too small in PyQt5 by default
-        dpi_ratio = QtWidgets.QApplication.instance().desktop().physicalDpiX() / 100
+        dpi_ratio = QtWidgets.QApplication.instance().primaryScreen().physicalDotsPerInchX() / 100
         self.setIconSize(QtCore.QSize(int(24 * dpi_ratio), int(24 * dpi_ratio)))
 
     def toggle_legend(self):
