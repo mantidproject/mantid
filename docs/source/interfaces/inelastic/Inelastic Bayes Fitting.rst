@@ -152,6 +152,8 @@ Options
 | Save Result          | Saves the result in the default save directory                                             |
 +----------------------+--------------------------------------------------------------------------------------------+
 
+.. _bayes-fitting-stretch:
+
 Stretch
 -------
 
