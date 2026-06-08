@@ -305,8 +305,6 @@ class FullInstrumentViewModel:
         return detector_table_indices_for_parent_subtrees(
             selected_indices=selected_indices,
             component_idxs=self._component_idxs,
-            detector_ids=self._detector_ids[selected_indices],
-            detector_info=self._workspace.detectorInfo(),
             component_info=self._workspace.componentInfo(),
             pickable_mask=pickable_mask,
         )
