@@ -23,26 +23,28 @@ InstrumentViewer
 
 New features
 ############
-- (`#41169 <https://github.com/mantidproject/mantid/pull/41169>`_) In the **new** :ref:`Instrument Viewer <InstrumentViewer>`, peak selection no longer requires constantly clicking buttons for adding and deleting peaks. Now peak selection is triggered with a peak selection mode that lets you continually select detectors and add (left mouse click) and delete (right mouse click) peaks without extra clicking or moving the mouse around.
-- (`#41437 <https://github.com/mantidproject/mantid/pull/41437>`_) In the **new** :ref:`Instrument Viewer <InstrumentViewer>`, Detector Info box now shows up at the bottom and is hidden when no detectors are selected or when too many detectors (more than 3) are selected. This should reduce the visual clutter on the GUI.
-- (`#41184 <https://github.com/mantidproject/mantid/pull/41184>`_) In the **new** :ref:`Instrument Viewer <InstrumentViewer>`, the "Draw Shapes" option is now stored in the Mantid properties file, and the option is applied when the view is opened. This means that if you check "Draw Shapes", close the view, and open it again, it will still be checked and shapes will be drawn. The option is stored under the key "InstrumentView.DrawShapes".
-- (`#40841 <https://github.com/mantidproject/mantid/pull/40841>`_) In the **new** :ref:`Instrument Viewer <InstrumentViewer>`, a new ellipse widget for selecting detectors has been added.
-- (`#40850 <https://github.com/mantidproject/mantid/pull/40850>`_) In the **new** :ref:`Instrument Viewer <InstrumentViewer>`, an option to draw detectors using their actual geometric shapes instead of as points has been added.
-- (`#41001 <https://github.com/mantidproject/mantid/pull/41001>`_) In the **new** :ref:`Instrument Viewer <InstrumentViewer>`, an option to display counts on a log scale is added.
-- (`#40830 <https://github.com/mantidproject/mantid/pull/40830>`_) In the **new** :ref:`Instrument Viewer <InstrumentViewer>`, reset buttons for the contour and integration range sliders have been added.
-- (`#40811 <https://github.com/mantidproject/mantid/pull/40811>`_) The **new** :ref:`Instrument Viewer <InstrumentViewer>` now displays the component tree from the IDF and allows you to select one or more components in that tree.
-- (`#41221 <https://github.com/mantidproject/mantid/pull/41221>`_) The **new** :ref:`Instrument Viewer <InstrumentViewer>` now updates the counts data when the integration range has min == max.
-- (`#41054 <https://github.com/mantidproject/mantid/pull/41054>`_) The **new** :ref:`Instrument Viewer <InstrumentViewer>` now allows Groupings and Masks to be saved as `.cal` files.
-- (`#41348 <https://github.com/mantidproject/mantid/pull/41348>`_) The projection is flipped in the **new** :ref:`Instrument Viewer <InstrumentViewer>` along the beam axis (from the instrument) instead of the z-axis.
-- (`#41315 <https://github.com/mantidproject/mantid/pull/41315>`_) The :ref:`ISIS Reflectometry Interface <interface-isis-refl>` now supports the **new** :ref:`Instrument Viewer <InstrumentViewer>` as an option.
+- Updates to the **new** Instrument Viewer:
+    - (`#41169 <https://github.com/mantidproject/mantid/pull/41169>`_) Peak selection no longer requires constantly clicking buttons for adding and deleting peaks. Now peak selection is triggered with a peak selection mode that lets you continually select detectors and add (left mouse click) and delete (right mouse click) peaks without extra clicking or moving the mouse around.
+    - (`#41437 <https://github.com/mantidproject/mantid/pull/41437>`_) The Detector Info box now shows up at the bottom and is hidden when no detectors are selected or when too many detectors (more than 3) are selected. This should reduce the visual clutter on the GUI.
+    - (`#41184 <https://github.com/mantidproject/mantid/pull/41184>`_) The "Draw Shapes" option is now stored in the Mantid properties file, and the option is applied when the view is opened. This means that if you check "Draw Shapes", close the view, and open it again, it will still be checked and shapes will be drawn. The option is stored under the key "InstrumentView.DrawShapes".
+    - (`#40841 <https://github.com/mantidproject/mantid/pull/40841>`_) A new ellipse widget for selecting detectors has been added.
+    - (`#40850 <https://github.com/mantidproject/mantid/pull/40850>`_) An option to draw detectors using their actual geometric shapes instead of as points has been added.
+    - (`#41001 <https://github.com/mantidproject/mantid/pull/41001>`_) An option to display counts on a log scale is added.
+    - (`#40830 <https://github.com/mantidproject/mantid/pull/40830>`_) New reset buttons for the contour and integration range sliders have been added.
+    - (`#40811 <https://github.com/mantidproject/mantid/pull/40811>`_) It displays the component tree from the IDF and allows you to select one or more components in that tree.
+    - (`#41221 <https://github.com/mantidproject/mantid/pull/41221>`_) It now updates the counts data when the integration range has min == max.
+    - (`#41054 <https://github.com/mantidproject/mantid/pull/41054>`_) It now allows Groupings and Masks to be saved as `.cal` files.
+    - (`#41348 <https://github.com/mantidproject/mantid/pull/41348>`_) The projection is flipped along the beam axis (from the instrument) instead of the z-axis.
+- (`#41315 <https://github.com/mantidproject/mantid/pull/41315>`_) The :ref:`ISIS Reflectometry Interface <interface-isis-refl>` now supports the **new** Instrument Viewer as an option.
 
 Bugfixes
 ############
-- (`#41201 <https://github.com/mantidproject/mantid/pull/41201>`_) The **new** :ref:`Instrument Viewer <InstrumentViewer>` exits without an error message when the interface is closed while certain operations are still processing.
-- (`#41051 <https://github.com/mantidproject/mantid/pull/41051>`_) The **new** :ref:`Instrument Viewer <InstrumentViewer>` no longer crashes when a ``LOQ`` workspace is open and side-by-side projection is selected.
-- (`#41221 <https://github.com/mantidproject/mantid/pull/41221>`_) The **new** :ref:`Instrument Viewer <InstrumentViewer>` no longer crashes when the integration range is edited through text boxes and window is closed.
-- (`#41413 <https://github.com/mantidproject/mantid/pull/41413>`_) The **new** :ref:`Instrument Viewer <InstrumentViewer>` no longer crashes when masking all detectors.
-- (`#40834 <https://github.com/mantidproject/mantid/pull/40834>`_) In the **new** :ref:`Instrument Viewer <InstrumentViewer>`, mouse wheel events on the projection and units combo boxes are no longer triggered when the mouse is hovering over them. This prevents the projection and units from being changed unintentionally when scrolling with the mouse wheel.
+- Issues resolved for the **new** Instrument Viewer:
+    - (`#40834 <https://github.com/mantidproject/mantid/pull/40834>`_) The mouse wheel events on the projection and units combo boxes are no longer triggered when the mouse is hovering over them. This prevents the projection and units from being changed unintentionally when scrolling with the mouse wheel.
+    - (`#41051 <https://github.com/mantidproject/mantid/pull/41051>`_) It no longer crashes when a ``LOQ`` workspace is open and side-by-side projection is selected.
+    - (`#41221 <https://github.com/mantidproject/mantid/pull/41221>`_) It no longer crashes when the integration range is edited through text boxes and window is closed.
+    - (`#41413 <https://github.com/mantidproject/mantid/pull/41413>`_) It no longer crashes when masking all detectors.
+    - (`#41201 <https://github.com/mantidproject/mantid/pull/41201>`_) It exits without an error message when the interface is closed while certain operations are still processing.
 
 
 SliceViewer
