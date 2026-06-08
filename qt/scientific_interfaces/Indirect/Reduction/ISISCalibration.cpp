@@ -16,6 +16,7 @@
 #include <QFileInfo>
 #include <QRegularExpression>
 #include <QRegularExpressionValidator>
+#include <optional>
 #include <stdexcept>
 
 using namespace Mantid::API;
@@ -31,6 +32,13 @@ Value getValueOr(const Map &map, const Key &key, const Value &defaultValue) {
   } catch (std::out_of_range &) {
     return defaultValue;
   }
+}
+
+std::optional<std::pair<double, double>> getInstrumentTofRange(QMap<QString, QString> const &instrumentDetails,
+                                                               QString const &startKey, QString const &endKey) {
+  if (!instrumentDetails.contains(startKey) || !instrumentDetails.contains(endKey))
+    return std::nullopt;
+  return std::make_pair(instrumentDetails.value(startKey).toDouble(), instrumentDetails.value(endKey).toDouble());
 }
 
 } // namespace
@@ -267,12 +275,12 @@ void ISISCalibration::setRangeLimits(MantidWidgets::RangeSelector *rangeSelector
 
 void ISISCalibration::setPeakRangeLimits(const double &peakMin, const double &peakMax) {
   auto calibrationPeak = m_uiForm.ppCalibration->getRangeSelector("CalPeak");
-  setRangeLimits(calibrationPeak, peakMin, peakMax, "CalELow", "CalEHigh");
+  setRangeLimits(calibrationPeak, peakMin, peakMax, "CalPeakMin", "CalPeakMax");
 }
 
 void ISISCalibration::setBackgroundRangeLimits(const double &backgroundMin, const double &backgroundMax) {
   auto background = m_uiForm.ppCalibration->getRangeSelector("CalBackground");
-  setRangeLimits(background, backgroundMin, backgroundMax, "CalStart", "CalEnd");
+  setRangeLimits(background, backgroundMin, backgroundMax, "CalBackMin", "CalBackMax");
 }
 
 void ISISCalibration::setResolutionSpectraRange(const double &minimum, const double &maximum) {
@@ -392,8 +400,23 @@ void ISISCalibration::setDefaultInstDetails(QMap<QString, QString> const &instru
 
   disconnect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &ISISCalibration::calUpdateRS);
   disconnectRangeSelectors();
-  if (dataX.back() <= getValueOr(ranges, "peak-end-tof", 0.0) ||
-      dataX.front() >= getValueOr(ranges, "peak-start-tof", 0.0)) {
+
+  // Prefer raw IDF TOF parameters ("peak-start"/"peak-end", "back-start"/"back-end") when present and consistent with
+  // the loaded data. Otherwise fall back to the TOF ranges derived by converting the instrument's energy defaults
+  // ("peak-start-tof" etc., produced by getRangesFromInstrument()).
+  auto const idfPeakRange = getInstrumentTofRange(instrumentDetails, "peak-start", "peak-end");
+  auto const idfBackgroundRange = getInstrumentTofRange(instrumentDetails, "back-start", "back-end");
+  auto const fitsInData = [&](std::pair<double, double> const &range) {
+    return range.first >= dataX.front() && range.second <= dataX.back();
+  };
+  auto const useIdfRanges =
+      idfPeakRange && idfBackgroundRange && fitsInData(*idfPeakRange) && fitsInData(*idfBackgroundRange);
+
+  if (useIdfRanges) {
+    setPeakRange(idfPeakRange->first, idfPeakRange->second);
+    setBackgroundRange(idfBackgroundRange->first, idfBackgroundRange->second);
+  } else if (dataX.back() <= getValueOr(ranges, "peak-end-tof", 0.0) ||
+             dataX.front() >= getValueOr(ranges, "peak-start-tof", 0.0)) {
     setPeakRange((3.0 * dataX.front() + dataX.back()) / 4.0, (dataX.front() + 3.0 * dataX.back()) / 4.0);
     setBackgroundRange(dataX.front(), (7.0 * dataX.front() + dataX.back()) / 8.0);
   } else {
@@ -625,9 +648,9 @@ void ISISCalibration::calUpdateRS(QtProperty *prop, double val) {
   } else if (prop == m_properties["CalPeakMax"]) {
     setRangeSelectorMax(m_properties["CalPeakMin"], m_properties["CalPeakMax"], calPeak, val);
   } else if (prop == m_properties["CalBackMin"]) {
-    setRangeSelectorMin(m_properties["CalPeakMin"], m_properties["CalBackMax"], calBackground, val);
+    setRangeSelectorMin(m_properties["CalBackMin"], m_properties["CalBackMax"], calBackground, val);
   } else if (prop == m_properties["CalBackMax"]) {
-    setRangeSelectorMax(m_properties["CalPeakMin"], m_properties["CalBackMax"], calBackground, val);
+    setRangeSelectorMax(m_properties["CalBackMin"], m_properties["CalBackMax"], calBackground, val);
   } else if (prop == m_properties["ResStart"]) {
     setRangeSelectorMin(m_properties["ResStart"], m_properties["ResEnd"], resBackground, val);
   } else if (prop == m_properties["ResEnd"]) {
@@ -744,6 +767,8 @@ IAlgorithm_sptr ISISCalibration::energyTransferReductionAlgorithm(const QString 
   reductionAlg->setProperty("SumFiles", m_uiForm.ckSumFiles->isChecked());
   reductionAlg->setProperty("OutputWorkspace", "__IndirectCalibration_reduction");
   reductionAlg->setProperty("SpectraRange", resolutionDetectorRangeString().toStdString());
+  // Group all spectra into one to reduce the runtime of the energy transfer reduction used for calibration plotting.
+  reductionAlg->setProperty("GroupingMethod", "All");
   reductionAlg->setProperty("LoadLogFiles", m_uiForm.ckLoadLogFiles->isChecked());
   return reductionAlg;
 }
