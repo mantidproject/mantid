@@ -190,7 +190,7 @@ class DGSPlannerGUI(QtWidgets.QWidget):
                     i += 1
                     progressDialog.setValue(i)
                     progressDialog.setLabelText("Creating workspace %d of %d..." % (i, self.iterations))
-                    QtWidgets.qApp.processEvents()
+                    QtWidgets.QApplication.instance().processEvents()
                     if progressDialog.wasCanceled():
                         self.progress_canceled = True
                         progressDialog.close()
@@ -351,7 +351,7 @@ class DGSPlannerGUI(QtWidgets.QWidget):
         for i in range(self.iterations):
             progressDialog.setValue(i)
             progressDialog.setLabelText("Calculating orientation %d of %d..." % (i, self.iterations))
-            QtWidgets.qApp.processEvents()
+            QtWidgets.QApplication.instance().processEvents()
             if progressDialog.wasCanceled():
                 self.progress_canceled = True
                 progressDialog.close()

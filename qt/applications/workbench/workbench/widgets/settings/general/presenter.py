@@ -100,7 +100,12 @@ class GeneralSettings(SettingsPresenterBase):
         if font_string is not None:
             font_string = self._model.get_font().split(",")
             if len(font_string) > 2:
-                font = QFontDatabase().font(font_string[0], font_string[-1], int(font_string[1]))
+                # QFontDatabase.font is static in Qt6 (the class can no longer be instantiated)
+                # but an instance method in Qt5.
+                try:
+                    font = QFontDatabase.font(font_string[0], font_string[-1], int(font_string[1]))
+                except TypeError:
+                    font = QFontDatabase().font(font_string[0], font_string[-1], int(font_string[1]))
         font_dialog = self._view.create_font_dialog(self._view, font)
         font_dialog.fontSelected.connect(self.action_font_selected)
 
