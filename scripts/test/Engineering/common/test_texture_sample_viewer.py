@@ -170,6 +170,20 @@ class TextureCorrectionModelTest(unittest.TestCase):
         self.assertEqual(arrow_lens[1], 2)  # max distance along D2(-z) are the 4 points at z = -2 -> d = 2
         self.assertEqual(arrow_lens[2], 1)  # max distance along D3(+x) are the 4 points at x = 1 -> d = 1
 
+    def test_get_scaled_intrinsic_sample_directions_in_lab_frame_with_offset_scat_centre(self):
+        # offset cube with scat_centre at its centre should yield half-bounding-box arrow lengths
+        ax_transform = self.get_default_ax_transform()
+        rotation_matrix = np.eye(3)
+        offset = np.array((3.0, -2.0, 5.0))
+        sample_mesh = self.get_cube_mesh(2) + offset  # 2x2x2 cube centred on `offset`
+        rd, nd, td, arrow_lens = get_scaled_intrinsic_sample_directions_in_lab_frame(
+            ax_transform, rotation_matrix, sample_mesh, scale=1, scat_centre=offset
+        )
+        # without the scat_centre fix these would be (offset projected onto each axis) + 1 instead of 1
+        self.assertEqual(arrow_lens[0], 1)  # D1(+y): half side length
+        self.assertEqual(arrow_lens[1], 1)  # D2(+z): half side length
+        self.assertEqual(arrow_lens[2], 1)  # D3(+x): half side length
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -13,7 +13,7 @@ from mantid.api import AnalysisDataService as ADS
 from mantid.simpleapi import CreateSampleWorkspace, SetGoniometer, SetSample
 from Engineering.common.xml_shapes import get_cube_xml
 
-from Engineering.texture.correction.correction_model import TextureCorrectionModel
+from Engineering.texture.correction.correction_model import TextureCorrectionModel, read_attenuation_coefficient_at_value
 
 correction_model_path = "Engineering.texture.correction.correction_model"
 texture_helper_path = "Engineering.texture.texture_helper"
@@ -185,7 +185,7 @@ class TextureCorrectionModelTest(unittest.TestCase):
 
         mock_convert.return_value = mock_ws
 
-        coefs = self.model.read_attenuation_coefficient_at_value(self.ws_name, 2.0, "Wavelength")
+        coefs = read_attenuation_coefficient_at_value(self.ws_name, 2.0, "Wavelength")
         self.assertEqual(len(coefs), 1)
         # bin centres are 1.5 and 2.5, so expect a value halfway between 2 and 4
         self.assertEqual(coefs[0], 3)
@@ -398,7 +398,7 @@ class TextureCorrectionModelTest(unittest.TestCase):
     @patch(correction_model_path + ".TextureCorrectionModel.apply_corrections")
     @patch(correction_model_path + ".TextureCorrectionModel.calc_divergence")
     @patch(correction_model_path + ".TextureCorrectionModel.write_atten_val_table")
-    @patch(correction_model_path + ".TextureCorrectionModel.read_attenuation_coefficient_at_value")
+    @patch(correction_model_path + ".read_attenuation_coefficient_at_value")
     @patch(correction_model_path + ".TextureCorrectionModel.calc_absorption")
     @patch(correction_model_path + ".TextureCorrectionModel.define_gauge_volume")
     def test_calc_all_corrections(
