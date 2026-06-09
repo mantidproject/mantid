@@ -26,14 +26,16 @@
 # * 6.6.20230314.1458+ill - a nightly build with an extra local version specifier to denote useful information
 # * 6.6.0+somechanges - a "local" version specifier to denote specific added features
 
-# package version should be from versioningit
-
-# PKG_VERSION is defined by rattler-build - use the value if it was supplied to ensure consistency
+# Prefer the version injected by the packaging environment so the conda recipe version, CMake version, and Python
+# package metadata stay aligned.
 if(DEFINED ENV{PKG_VERSION})
   message(STATUS "Using version from environment=$ENV{PKG_VERSION}")
   set(_version_str "$ENV{PKG_VERSION}")
+elseif(DEFINED ENV{MANTID_VERSION})
+  message(STATUS "Using version from environment=$ENV{MANTID_VERSION}")
+  set(_version_str "$ENV{MANTID_VERSION}")
 else()
-  # Use versioningit to compute version number to match conda-build
+  # Fall back to versioningit outside of packaging builds.
   execute_process(
     COMMAND "${Python_EXECUTABLE}" -m versioningit
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}

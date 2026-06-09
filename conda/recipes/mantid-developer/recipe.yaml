@@ -54,7 +54,7 @@ requirements:
     - qtpy ${{ qtpy }}
     - quasielasticbayes ${{ quasielasticbayes }}
     - quickbayes ${{ quickbayes }}
-    - rattler-build ==0.51.0
+    - rattler-build 0.64.*
     - rattler-index
     - requests>=2.32.4
     - scipy ${{ scipy }}

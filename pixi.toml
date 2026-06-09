@@ -28,8 +28,8 @@ docs-build = { features = ["docs-build"], no-default-feature = true }
 docs-migration = { features = ["docs-migration"], no-default-feature = true }
 
 [feature.rattler-builder.dependencies]
-rattler-build = "==0.51.0"
-versioningit = ">=2.1"
+rattler-build = ">=0.65.1,<0.66"
+versioningit = ">=3.3.0,<4"
 rattler-index = ">=0.27.6,<0.28"
 
 [feature.rattler-builder.target.linux-64.dependencies]
@@ -130,7 +130,7 @@ setuptools = ">=80.9.0,<81"
 superqt = ">=0.7.6,<0.8"
 tbb-devel = "2021.*"
 toml = ">=0.10.2"
-versioningit = ">=2.1"
+versioningit = ">=3.3.0,<4.1"
 zlib = ">=1.3.1,<2"
 # Documentation dependencies
 doxygen = "1.9.*"
