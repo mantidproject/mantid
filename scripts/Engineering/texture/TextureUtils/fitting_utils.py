@@ -7,10 +7,11 @@
 
 import numpy as np
 from os import path
+
 from mantid.simpleapi import SaveNexus, logger, CreateEmptyTableWorkspace, Fit
 from mantid.simpleapi import ConvertUnits, Rebunch, Rebin, SumSpectra, AppendSpectra, CloneWorkspace, CropWorkspace
-from mantid.api import AnalysisDataService as ADS, MultiDomainFunction, FunctionFactory
-from typing import Optional, Sequence, Tuple
+from mantid.api import AnalysisDataService as ADS, MultiDomainFunction, FunctionFactory, CompositeFunction
+from typing import Sequence, Tuple, List
 from mantid.dataobjects import Workspace2D
 from plugins.algorithms.IntegratePeaks1DProfile import get_eval_ws, calc_sigma_from_summation
 from Engineering.EnggUtils import convert_TOFerror_to_derror
@@ -19,17 +20,17 @@ from mantid.kernel import DeltaEModeType, UnitConversion
 from plugins.algorithms.peakdata_utils import PeakData
 
 
-def crop_and_rebin(ws, out_ws, lower, upper, rebin_params):
+def crop_and_rebin(ws: Workspace2D | str, out_ws: str, lower: float, upper: float, rebin_params: str | Sequence[float]) -> None:
     CropWorkspace(ws, lower, upper, OutputWorkspace="__tmp_peak_window")
     Rebin("__tmp_peak_window", rebin_params, OutputWorkspace=out_ws)
 
 
-def _get_max_bin(ws):
+def _get_max_bin(ws: Workspace2D) -> np.ndarray:
     xdat = ws.extractX()
     return np.diff(xdat, axis=1).max()
 
 
-def crop_wss_and_combine(wss, peak, lower, upper, output):
+def crop_wss_and_combine(wss: Sequence[Workspace2D | str], peak: float, lower: float, upper: float, output: str) -> Workspace2D:
     cropped_rebinned_wss = [f"rebin_ws_{peak}_0"]
     peak_window_ws = CropWorkspace(wss[0], lower, upper, OutputWorkspace="__peak_window_crop")
     rebin_params = (lower, _get_max_bin(peak_window_ws), upper)
@@ -43,7 +44,7 @@ def crop_wss_and_combine(wss, peak, lower, upper, output):
     return SumSpectra(f"rebin_ws_{peak}", OutputWorkspace=output), cropped_rebinned_wss
 
 
-def _make_composite(peak_func, bg_func):
+def _make_composite(peak_func: str, bg_func: str) -> CompositeFunction:
     """Build a CompositeFunction from existing C++ function objects without
     serialising them (which would discard workspace references, fixed-parameter
     state, etc.).  NumDeriv is NOT set so that each member function uses its own
@@ -56,7 +57,9 @@ def _make_composite(peak_func, bg_func):
     return comp
 
 
-def fit_initial_summed_spectra(wss, peaks, peak_window, fit_kwargs, peak_func_name):
+def fit_initial_summed_spectra(
+    wss: Sequence[Workspace2D | str], peaks: Sequence[float], peak_window: float, fit_kwargs: dict, peak_func_name: str
+) -> Tuple[Sequence[Tuple[float, float]], Sequence[Workspace2D]]:
     x0_lims = []
     all_peak_crop_wss = []
     for i, peak in enumerate(peaks):
@@ -111,7 +114,7 @@ def get_initial_fit_function_and_kwargs_from_specs(
     peak: float,
     x_window: tuple[float, float],
     x0_window: tuple[float, float],
-    parameters_to_tie: Optional[Sequence[str]],
+    parameters_to_tie: Sequence[str] | None,
     peak_func_name: str,
     bg_func_name: str,
     tie_bkg: bool,
@@ -224,12 +227,12 @@ def rerun_fit_with_new_ws(
     new_ws: Workspace2D,
     x0_frac_move: float,
     iters: int,
-    parameters_to_fix: Optional[Sequence[str]] = None,
-    parameters_to_tie: Optional[Sequence[str]] = None,
+    parameters_to_fix: Sequence[str] | None = None,
+    parameters_to_tie: Sequence[str] | None = None,
     tie_background: bool = False,
     is_final: bool = False,
     last_fit_ic: bool = False,
-):
+) -> Tuple[Fit, dict]:
     # update the input workspace in the fitting kwargs
     for k in md_fit_kwargs.keys():
         if "InputWorkspace" in k:
@@ -316,7 +319,7 @@ def rerun_fit_with_new_ws(
     ), md_fit_kwargs
 
 
-def _get_default_param_ties(peak_func_name, parameters_to_tie):
+def _get_default_param_ties(peak_func_name: str, parameters_to_tie: Sequence[str] | None) -> Sequence[str]:
     if not parameters_to_tie:
         match peak_func_name:
             case "BackToBackExponential":
@@ -326,7 +329,7 @@ def _get_default_param_ties(peak_func_name, parameters_to_tie):
     return parameters_to_tie
 
 
-def calc_intens_and_sigma_arrays(fit_result):
+def calc_intens_and_sigma_arrays(fit_result: Fit) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     function = fit_result["Function"]
     ndoms = function.nDomains()
     intens = np.zeros(ndoms)
@@ -349,13 +352,13 @@ def fit_all_peaks(
     save_dir: str,
     override_dir: bool = False,
     i_over_sigma_thresh: float = 2.0,
-    nan_replacement: Optional[str] = "zeros",
-    no_fit_value_dict: Optional[dict] = None,
+    nan_replacement: str | None = "zeros",
+    no_fit_value_dict: dict | None = None,
     smooth_vals: Sequence[int] = (3, 2),
     tied_bkgs: Sequence[bool] = (False, True),
     final_fit_raw: bool = True,
-    parameters_to_tie: Optional[Sequence[str]] = None,
-    subsequent_fit_param_fix: Optional[Sequence[str]] = None,
+    parameters_to_tie: Sequence[str] | None = None,
+    subsequent_fit_param_fix: Sequence[str] | None = None,
     peak_func_name: str = "BackToBackExponential",
     last_fit_ic: bool = False,
     max_fit_iters: int = 50,
@@ -551,7 +554,7 @@ def fit_all_peaks(
 # ~fitting utility functions~
 
 
-def _tie_bkg(function, approx_bkgs, ties):
+def _tie_bkg(function: MultiDomainFunction, approx_bkgs: np.ndarray, ties: List[str]) -> Tuple[MultiDomainFunction, List[str]]:
     function[0][1]["A0"] = np.mean(approx_bkgs)
     for idom in range(1, function.nDomains()):
         for ipar_bg in range(function[idom][1].nParams()):
@@ -597,7 +600,7 @@ def _get_grouping_from_ws_log(ws: Workspace2D) -> str:
     return grouping
 
 
-def get_default_values(params, no_fit_dict):
+def get_default_values(params: Sequence[str], no_fit_dict: dict) -> dict:
     defaults = dict(zip(params, [np.nan for _ in params]))
     if isinstance(no_fit_dict, dict):
         for k, v in no_fit_dict.items():
@@ -605,7 +608,7 @@ def get_default_values(params, no_fit_dict):
     return defaults
 
 
-def replace_nans(vals: np.ndarray, method: Optional[str] = None) -> np.ndarray:
+def replace_nans(vals: np.ndarray, method: str | None = None) -> np.ndarray:
     if not method:
         return vals
     if method == "zeros":

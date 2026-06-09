@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from dataclasses import dataclass
-from typing import Dict, Tuple, Optional, Sequence, Type
+from typing import Dict, Tuple, Sequence, Type
 from enum import Enum
 
 
@@ -51,8 +51,8 @@ class DetectorGroupInfo:
     ws_name: str
     suffix: str
     foc_ws_suffix: str
-    grouping_file: Optional[str] = None  # only banks/texture groups ship with a grouping file
-    bank_args: Optional[str] = None  # GroupNames arg for CreateGroupingWorkspace (bank groups only)
+    grouping_file: str | None = None  # only banks/texture groups ship with a grouping file
+    bank_args: str | None = None  # GroupNames arg for CreateGroupingWorkspace (bank groups only)
 
 
 @dataclass(frozen=True)
@@ -253,7 +253,7 @@ CONFIGS: Dict[str, InstrumentConfig] = {
 }
 
 
-def get_instr_config(instrument: Optional[str]) -> Optional[InstrumentConfig]:
+def get_instr_config(instrument: str | None) -> InstrumentConfig | None:
     if instrument is None:
         return None
     key = instrument.upper()

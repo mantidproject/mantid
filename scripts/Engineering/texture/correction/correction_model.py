@@ -25,7 +25,7 @@ from mantid.api import AnalysisDataService as ADS
 from os import path, makedirs
 from scipy import interpolate
 from Engineering.common.texture_sample_viewer import has_valid_shape
-from typing import Optional, Sequence, Union, Tuple
+from typing import Sequence, Union, Tuple
 from mantid.dataobjects import Workspace2D
 from Engineering.common.calibration_info import CalibrationInfo
 from Engineering.texture.texture_helper import get_gauge_vol_str, load_all_orientations
@@ -79,10 +79,10 @@ class TextureCorrectionModel:
         self,
         wss: Sequence[Workspace2D],
         out_wss: Sequence[str],
-        root_dir: Optional[str] = None,
-        abs_args: Optional[dict] = None,
-        atten_args: Optional[dict] = None,
-        div_args: Optional[dict] = None,
+        root_dir: str | None = None,
+        abs_args: dict | None = None,
+        atten_args: dict | None = None,
+        div_args: dict | None = None,
     ) -> None:
         corrected_file_paths = []
         for i, ws in enumerate(wss):
@@ -163,7 +163,7 @@ class TextureCorrectionModel:
     # ~~~~~ General Utility Functions ~~~~~~~~~~~~~
 
     @staticmethod
-    def _save_corrected_files(ws: str, root_dir: str, dir_name: str, rb_num: Optional[str], is_texture: bool) -> str:
+    def _save_corrected_files(ws: str, root_dir: str, dir_name: str, rb_num: str | None, is_texture: bool) -> str:
         filepath = ""
         save_dirs = [path.join(root_dir, dir_name)]
         if rb_num:
@@ -213,8 +213,8 @@ class TextureCorrectionModel:
         wss: Sequence[Workspace2D],
         txt_file: str,
         use_euler: bool,
-        euler_scheme: Optional[str] = None,
-        euler_sense: Optional[str] = None,
+        euler_scheme: str | None = None,
+        euler_sense: str | None = None,
     ) -> None:
         load_all_orientations(wss, txt_file, use_euler, euler_scheme, euler_sense)
 
@@ -275,7 +275,7 @@ class TextureCorrectionModel:
     # ~~~~~ Gauge Volume Functions ~~~~~~~~~~~~~
 
     @staticmethod
-    def define_gauge_volume(ws: Workspace2D, preset: str, custom: Optional[str]) -> None:
+    def define_gauge_volume(ws: Workspace2D, preset: str, custom: str | None) -> None:
         gauge_str = get_gauge_vol_str(preset, custom)
         if gauge_str:
             DefineGaugeVolume(ws, gauge_str)
@@ -316,8 +316,8 @@ class TextureCorrectionModel:
         vals: Sequence[float],
         eval_val: float,
         unit: str,
-        rb_num: Optional[str],
-        calibration: Optional[CalibrationInfo],
+        rb_num: str | None,
+        calibration: CalibrationInfo | None,
         root_dir: str,
     ) -> None:
         out_ws = self.get_atten_table_name(ws, eval_val, unit)
@@ -337,7 +337,7 @@ class TextureCorrectionModel:
         self.set_reference_ws(f"{rb_num}_reference_workspace")
         LoadEmptyInstrument(InstrumentName=instr, OutputWorkspace=self.reference_ws)
 
-    def save_reference_file(self, rb_num: str, current_calib: Optional[CalibrationInfo], root_dir: Optional[str]) -> None:
+    def save_reference_file(self, rb_num: str, current_calib: CalibrationInfo | None, root_dir: str | None) -> None:
         if self.reference_ws and ADS.doesExist(self.reference_ws):
             self._save_corrected_files(self.reference_ws, root_dir, "ReferenceWorkspaces", rb_num, self.is_texture(current_calib))
 
