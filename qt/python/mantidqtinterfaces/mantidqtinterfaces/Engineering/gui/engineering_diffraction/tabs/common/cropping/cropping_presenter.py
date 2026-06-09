@@ -8,10 +8,11 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.crop
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.cropping.cropping_model import CroppingModel
 from enum import Enum
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT
+from typing import Any
 
 
 class CroppingPresenter(object):
-    def __init__(self, parent, view=None, model=None):
+    def __init__(self, parent: Any, view: CroppingView | None = None, model: CroppingModel | None = None):
         self.parent = parent
         self.model = model or CroppingModel()
         self.view = view or CroppingView(parent)
@@ -104,13 +105,13 @@ class CroppingPresenter(object):
             self.view.set_crop_invalid_indicator_hidden()
             self.spectra_valid = True
 
-    def set_cropping_options(self):
+    def set_cropping_options(self) -> None:
         # cropping options is given as a tuple of (GROUP, description, file input?, spectra input?)
         options = [option[1] for option in self.model.get_cropping_options(self.instrument)]
         self.view.set_combo_options(options)
 
-    def set_instrument_override(self, instrument):
-        instrument = INSTRUMENT_DICT[instrument]
+    def set_instrument_override(self, instrument_index: int) -> None:
+        instrument = INSTRUMENT_DICT[instrument_index]
         # self.view.set_instrument_override(instrument) # don't think this is needed as it is just a subsection
         self.instrument = instrument
         # update the cropping option combo box
