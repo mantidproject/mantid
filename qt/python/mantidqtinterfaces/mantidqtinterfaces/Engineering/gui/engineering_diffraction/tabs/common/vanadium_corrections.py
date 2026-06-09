@@ -7,18 +7,20 @@
 
 from mantid.simpleapi import logger, Load, NormaliseByCurrent, Integration, ReplaceSpecialValues, ApplyDiffCal, ConvertUnits
 from mantid.simpleapi import AnalysisDataService as Ads
+from mantid.api import MatrixWorkspace
 
 from Engineering.common import path_handling
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
+
+from typing import Tuple
 
 VANADIUM_INPUT_WORKSPACE_NAME = "engggui_vanadium_ws"
 PROCESSED_WORKSPACE_NAME = "engggui_vanadium_processed_instrument"
 INTEGRATED_WORKSPACE_NAME = "engggui_vanadium_integration"
 
 
-def fetch_correction_workspaces(vanadium_path: str, instrument: str):
-    # -> Workspace2D, Workspace2D
+def fetch_correction_workspaces(vanadium_path: str, instrument: str) -> Tuple[MatrixWorkspace, MatrixWorkspace]:
     """
     Fetch workspaces from the ADS or create new ones.
     :param vanadium_path: The path to the requested vanadium run raw data.
@@ -33,7 +35,7 @@ def fetch_correction_workspaces(vanadium_path: str, instrument: str):
     return van_integration_ws, van_processed_inst_ws
 
 
-def check_workspaces_exist(run_no) -> bool:
+def check_workspaces_exist(run_no: int | str) -> bool:
     """
     Check the vanadium workspaces are loaded into the ADS
     :return: True if both are present, false otherwise
@@ -41,10 +43,11 @@ def check_workspaces_exist(run_no) -> bool:
     return Ads.doesExist(str(run_no) + "_" + PROCESSED_WORKSPACE_NAME) and Ads.doesExist(str(run_no) + "_" + INTEGRATED_WORKSPACE_NAME)
 
 
-def create_vanadium_corrections(vanadium_path: str, instrument: str):  # -> Workspace, Workspace
+def create_vanadium_corrections(vanadium_path: str, instrument: str) -> Tuple[MatrixWorkspace, MatrixWorkspace] | None:
     """
     Runs the vanadium correction algorithm.
     :param vanadium_path: The path to the vanadium data.
+    :param instrument: instrument name.
     :return: The integrated workspace and the processed instrument workspace generated.
     """
     try:
@@ -73,7 +76,7 @@ def create_vanadium_corrections(vanadium_path: str, instrument: str):  # -> Work
     return integral_ws, processed_ws
 
 
-def _calculate_vanadium_integral(van_ws, run_no):  # -> Workspace
+def _calculate_vanadium_integral(van_ws: MatrixWorkspace, run_no: str) -> MatrixWorkspace:
     """
     Calculate the integral of the normalised vanadium workspace
     :param van_ws: Chosen vanadium run workspace
@@ -86,7 +89,9 @@ def _calculate_vanadium_integral(van_ws, run_no):  # -> Workspace
     return ws_integ
 
 
-def _calculate_vanadium_processed_instrument(van_ws, full_calib_ws, integral_ws, run_no):  # -> Workspace
+def _calculate_vanadium_processed_instrument(
+    van_ws: MatrixWorkspace, full_calib_ws: MatrixWorkspace, integral_ws: MatrixWorkspace, run_no: str
+) -> MatrixWorkspace:
     """
     Calculate the processed whole-instrument workspace
     :param van_ws: Chosen vanadium run workspace

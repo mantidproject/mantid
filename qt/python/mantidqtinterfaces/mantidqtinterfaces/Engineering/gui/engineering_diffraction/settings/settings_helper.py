@@ -5,9 +5,10 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from qtpy.QtCore import QSettings
+from typing import Any, Type
 
 
-def set_setting(group, prefix, setting_name, value):
+def set_setting(group: str, prefix: str, setting_name: str, value: Any) -> None:
     """
     Change or add a setting in the mantid .ini file.
     :param group: Settings group to pull from.
@@ -21,7 +22,7 @@ def set_setting(group, prefix, setting_name, value):
     settings.endGroup()
 
 
-def get_setting(group, prefix, setting_name, return_type=str):
+def get_setting(group: str, prefix: str, setting_name: str, return_type: Type = str) -> Any:
     """
     Get a setting from the .ini file of mantid settings.
 

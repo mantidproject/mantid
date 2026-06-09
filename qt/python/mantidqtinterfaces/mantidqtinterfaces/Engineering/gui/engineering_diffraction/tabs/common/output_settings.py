@@ -9,7 +9,8 @@ Holds some common constants across all tabs.
 """
 
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
-from numpy import array, concatenate
+from numpy import array, concatenate, ndarray
+from typing import Tuple
 
 INTERFACES_SETTINGS_GROUP = "CustomInterfaces"
 ENGINEERING_PREFIX = "EngineeringDiffraction2/"
@@ -30,7 +31,7 @@ def get_timeout() -> int:
     return int(timeout) if timeout else 100
 
 
-def get_texture_axes_transform():
+def get_texture_axes_transform() -> Tuple[ndarray, Tuple[str, str, str]]:
     rd_str = get_setting(INTERFACES_SETTINGS_GROUP, ENGINEERING_PREFIX, "rd_dir")
     nd_str = get_setting(INTERFACES_SETTINGS_GROUP, ENGINEERING_PREFIX, "nd_dir")
     td_str = get_setting(INTERFACES_SETTINGS_GROUP, ENGINEERING_PREFIX, "td_dir")
