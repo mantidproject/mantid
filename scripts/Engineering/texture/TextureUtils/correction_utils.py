@@ -7,29 +7,29 @@
 
 from Engineering.texture.correction.correction_model import TextureCorrectionModel
 from mantid.simpleapi import logger
-from typing import Optional, Sequence, Union, Tuple
+from typing import Sequence, Union, Tuple
 
 
 def run_abs_corr(
     wss: Sequence[str],
-    ref_ws: Optional[str] = None,
-    orientation_file: Optional[str] = None,
-    orient_file_is_euler: Optional[bool] = None,
-    euler_scheme: Optional[str] = None,
-    euler_axes_sense: Optional[str] = None,
+    ref_ws: str | None = None,
+    orientation_file: str | None = None,
+    orient_file_is_euler: bool | None = None,
+    euler_scheme: str | None = None,
+    euler_axes_sense: str | None = None,
     copy_ref: bool = False,
     include_abs_corr: bool = False,
-    monte_carlo_args: Optional[str] = None,
-    gauge_vol_preset: Optional[str] = None,
-    gauge_vol_shape_file: Optional[str] = None,
+    monte_carlo_args: str | None = None,
+    gauge_vol_preset: str | None = None,
+    gauge_vol_shape_file: str | None = None,
     include_atten_table: bool = False,
-    eval_point: Optional[Union[str, float]] = None,
-    eval_units: Optional[str] = None,
+    eval_point: str | float | None = None,
+    eval_units: str | None = None,
     root_dir: str = ".",
     include_div_corr: bool = False,
-    div_hoz: Optional[float] = None,
-    div_vert: Optional[float] = None,
-    det_hoz: Optional[float] = None,
+    div_hoz: float | None = None,
+    div_vert: float | None = None,
+    det_hoz: float | None = None,
     clear_ads_after: bool = True,
 ) -> None:
     """
@@ -103,22 +103,22 @@ def run_abs_corr(
 
 
 def validate_abs_corr_inputs(
-    ref_ws: Optional[str] = None,
-    orientation_file: Optional[str] = None,
-    orient_file_is_euler: Optional[bool] = None,
-    euler_scheme: Optional[str] = None,
-    euler_axes_sense: Optional[str] = None,
+    ref_ws: str | None = None,
+    orientation_file: str | None = None,
+    orient_file_is_euler: bool | None = None,
+    euler_scheme: str | None = None,
+    euler_axes_sense: str | None = None,
     copy_ref: bool = False,
     include_abs_corr: bool = False,
-    gauge_vol_preset: Optional[str] = None,
-    gauge_vol_shape_file: Optional[str] = None,
+    gauge_vol_preset: str | None = None,
+    gauge_vol_shape_file: str | None = None,
     include_atten_table: bool = False,
-    eval_point: Optional[Union[str, float]] = None,
-    eval_units: Optional[str] = None,
+    eval_point: str | float | None = None,
+    eval_units: str | None = None,
     include_div_corr: bool = False,
-    div_hoz: Optional[float] = None,
-    div_vert: Optional[float] = None,
-    det_hoz: Optional[float] = None,
+    div_hoz: float | None = None,
+    div_vert: float | None = None,
+    det_hoz: float | None = None,
 ) -> Tuple[bool, str]:
     error_msg = ""
     # validate inputs

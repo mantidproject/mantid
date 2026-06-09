@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from typing import Sequence, Optional
+from typing import Sequence
 
 from mantid.simpleapi import Load, logger
 from Engineering.EnggUtils import focus_run, create_new_calibration
@@ -21,11 +21,11 @@ class BaseEngInstrument:
         save_dir: str,
         full_inst_calib_path: str,
         instrument: str,
-        prm_path: Optional[str] = None,
-        ceria_run: Optional[str] = None,
-        group: Optional[Enum] = None,
-        groupingfile_path: Optional[str] = None,
-        spectrum_num: Optional[str] = None,
+        prm_path: str | None = None,
+        ceria_run: str | None = None,
+        group: Enum | None = None,
+        groupingfile_path: str | None = None,
+        spectrum_num: str | None = None,
     ) -> None:
         # init attributes
         self.calibration = CalibrationInfo()

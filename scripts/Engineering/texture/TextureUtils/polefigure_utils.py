@@ -10,7 +10,7 @@ from os import path
 from Engineering.texture.polefigure.polefigure_model import TextureProjection
 from mantid.simpleapi import logger
 from mantid.api import AnalysisDataService as ADS
-from typing import Optional, Sequence, Union
+from typing import Sequence, Any
 from Engineering.texture.xtal_helper import get_xtal_structure
 from Engineering.texture.texture_helper import plot_pole_figure
 
@@ -27,14 +27,14 @@ def create_pf(
     scatter: bool = True,
     scat_vol_pos: Sequence[float] = (0.0, 0.0, 0.0),
     projection_method: str = "Azimuthal",
-    params: Optional[Sequence[str]] = None,
-    xtal_input: Optional[str] = None,
-    xtal_args: Optional[Sequence[str]] = None,
-    hkl: Optional[Sequence[int]] = None,
-    readout_column: Optional[str] = None,
-    kernel: Optional[float] = None,
-    chi2_thresh: Optional[float] = None,
-    peak_thresh: Optional[float] = None,
+    params: Sequence[str] | None = None,
+    xtal_input: str | None = None,
+    xtal_args: Sequence[str] | None = None,
+    hkl: Sequence[int] | None = None,
+    readout_column: str | None = None,
+    kernel: float | None = None,
+    chi2_thresh: float | None = None,
+    peak_thresh: float | None = None,
     override_dir: bool = False,
     create_combined_output: bool = False,
     debug_info_level: int = 0,
@@ -132,7 +132,7 @@ def create_pf(
         logger.debug("Ignoring a problem with the plt.get_edgecolor. This is (probably) fine")
 
 
-def make_iterable(param):
+def make_iterable(param: Any) -> Sequence[Any]:
     """
     take a single parameter and make a single value in a list
 
@@ -149,18 +149,18 @@ def create_pf_loop(
     dir2: Sequence[float],
     dir3: Sequence[float],
     dir_names: Sequence[str],
-    scatter: Union[str, bool],
+    scatter: str | bool,
     scat_vol_pos: Sequence[float],
     save_root: str,
     exp_name: str,
     projection_method: str,
-    xtal_input: Optional[str] = None,
-    xtal_args: Optional[Sequence[str]] = None,
-    hkls: Optional[Union[Sequence[Sequence[int]], Sequence[int]]] = None,
-    readout_columns: Optional[Union[str, Sequence[str]]] = None,
-    kernel: Optional[float] = None,
-    chi2_thresh: Optional[float] = None,
-    peak_thresh: Optional[float] = None,
+    xtal_input: str | None = None,
+    xtal_args: Sequence[str] | None = None,
+    hkls: Sequence[Sequence[int]] | Sequence[int] | None = None,
+    readout_columns: str | Sequence[str] | None = None,
+    kernel: float | None = None,
+    chi2_thresh: float | None = None,
+    peak_thresh: float | None = None,
     create_combined_output: bool = False,
     debug_info_level: int = 0,
     save_ascii: bool = True,

@@ -11,7 +11,7 @@ from mantid.fitfunctions import FunctionWrapper, CompositeFunctionWrapper
 from mantid.api import FunctionFactory
 from mantid.geometry import CrystalStructure, ReflectionGenerator, PointGroupFactory, PointGroup
 from mantid.kernel import V3D, logger, UnitConversion, DeltaEModeType
-from typing import Optional, TYPE_CHECKING, Sequence, Any
+from typing import TYPE_CHECKING, Sequence, Any
 from scipy.optimize import least_squares
 from plugins.algorithms.poldi_utils import simulate_2d_data, get_dspac_array_from_ws
 from abc import ABC, abstractmethod
@@ -133,7 +133,7 @@ class BackToBackGauss(PeakProfile):
 
 
 class Phase:
-    def __init__(self, crystal_structure: CrystalStructure, hkls: Optional[np.ndarray] = None):
+    def __init__(self, crystal_structure: CrystalStructure, hkls: np.ndarray | None = None):
         self.unit_cell = crystal_structure.getUnitCell()
         # check initial unit cell compatible with spacegroup
         self.spgr = crystal_structure.getSpaceGroup()
@@ -192,12 +192,12 @@ class Phase:
             [key for key, value in self.labels.items() if value in [idx.start if isinstance(idx, slice) else idx for idx in self.ipars]]
         )
 
-    def set_params(self, pars: np.ndarray[float]):
+    def set_params(self, pars: np.ndarray[float]) -> None:
         for ipar, par in enumerate(pars):
             self.alatt[self.ipars[ipar]] = par
         self.unit_cell.set(*self.alatt)
 
-    def set_hkls(self, hkls: Sequence[np.ndarray], do_sort: bool = True):
+    def set_hkls(self, hkls: Sequence[np.ndarray], do_sort: bool = True) -> None:
         self.hkls = []
         for hkl in hkls:
             hkl_vec = V3D(*hkl)
@@ -209,7 +209,7 @@ class Phase:
             # sort by descending d-spacing
             self.hkls = [self.hkls[ipk] for ipk in np.argsort(self.calc_dspacings())[::-1]]
 
-    def set_hkls_from_dspac_limits(self, dmin: float, dmax: float):
+    def set_hkls_from_dspac_limits(self, dmin: float, dmax: float) -> None:
         xtal = CrystalStructure(" ".join([str(par) for par in self.alatt]), self.spgr.getHMSymbol(), "")
         generator = ReflectionGenerator(xtal)
         self.set_hkls(generator.getUniqueHKLs(dmin, dmax))
@@ -223,7 +223,7 @@ class Phase:
     def nparams(self) -> int:
         return len(self.ipars)
 
-    def merge_reflections(self, decimal_places=4):
+    def merge_reflections(self, decimal_places=4) -> None:
         _, ihkls = np.unique((self.calc_dspacings() * (10**decimal_places)).astype(int), return_index=True)
         self.hkls = [self.hkls[ipk] for ipk in np.sort(ihkls)]
 
@@ -268,7 +268,7 @@ class MtdFuncMixin:
 
 
 class PawleyPatternBase(MtdFuncMixin, ABC):
-    def __init__(self, ws: Workspace2D, phases: Phase | Sequence[Phase], profile: PeakProfile, bg_func: Optional[FunctionWrapper] = None):
+    def __init__(self, ws: Workspace2D, phases: Phase | Sequence[Phase], profile: PeakProfile, bg_func: FunctionWrapper | None = None):
         self.ws = ws
         self.phases = phases
         self.alatt_params = [phase.get_params() for phase in self.phases]
@@ -289,7 +289,7 @@ class PawleyPatternBase(MtdFuncMixin, ABC):
         self.make_profile_function(bg_func)
         self.initial_params = None
 
-    def make_profile_function(self, bg_func: Optional[FunctionWrapper] = None):
+    def make_profile_function(self, bg_func: FunctionWrapper | None = None) -> None:
         self.comp_func = CompositeFunctionWrapper()
         for iphase, phase in enumerate(self.phases):
             for ipk in range(phase.nhkls()):
@@ -298,7 +298,7 @@ class PawleyPatternBase(MtdFuncMixin, ABC):
             self.comp_func += bg_func
         self.comp_func.function.setAttributeValue("NumDeriv", True)
 
-    def update_profile_function(self):
+    def update_profile_function(self) -> None:
         self.profile.p = self.profile_params
         self.inst.p = self.inst_params
         istart = 0
@@ -331,7 +331,7 @@ class PawleyPatternBase(MtdFuncMixin, ABC):
             bool
         )
 
-    def set_params(self, params: np.ndarray[float]):
+    def set_params(self, params: np.ndarray[float]) -> None:
         # set alatt
         istart = 0
         for iphase, phase in enumerate(self.phases):
@@ -355,24 +355,24 @@ class PawleyPatternBase(MtdFuncMixin, ABC):
         if len(self.bg_params) > 0:
             self.bg_params = params[iend:]
 
-    def _validate_profile_params(self, param_name: str, iphase: int):
+    def _validate_profile_params(self, param_name: str, iphase: int) -> None:
         if iphase > ((plen := len(self.phases)) - 1):
             raise ValueError(f"Phase with index: {iphase} does not exists. Number of phases is {plen}")
         elif param_name not in self.profile.labels.keys():
             raise ValueError(f"Invalid profile parameter name: {param_name}, for profile {self.profile.func_name}")
 
-    def _validate_phase_params(self, param_name: str, iphase: int):
+    def _validate_phase_params(self, param_name: str, iphase: int) -> None:
         if iphase > ((plen := len(self.phases)) - 1):
             raise ValueError(f"Phase with index: {iphase} does not exists. Number of phases is {plen}")
         elif param_name not in self.phases[iphase].get_param_names():
             raise ValueError(f"Parameter {param_name} is not a parameter of Phase")
 
-    def set_free_params(self, free_params: np.ndarray[float]):
+    def set_free_params(self, free_params: np.ndarray[float]) -> None:
         params = self.get_params()
         params[self.get_isfree()] = free_params
         self.set_params(params)
 
-    def set_profile_free_param(self, is_free: bool, param_name: str, iphase: int):
+    def set_profile_free_param(self, is_free: bool, param_name: str, iphase: int) -> None:
         self._validate_profile_params(param_name, iphase)
         self.profile_isfree[iphase][self.profile.labels[param_name]] = is_free
 
@@ -380,7 +380,7 @@ class PawleyPatternBase(MtdFuncMixin, ABC):
         self._validate_profile_params(param_name, iphase)
         return self.profile_isfree[iphase][self.profile.labels[param_name]]
 
-    def set_profile_param(self, param_value: float, param_name: str, iphase: int):
+    def set_profile_param(self, param_value: float, param_name: str, iphase: int) -> None:
         self._validate_profile_params(param_name, iphase)
         self.profile_params[iphase][self.profile.labels[param_name]] = param_value
 
@@ -388,7 +388,7 @@ class PawleyPatternBase(MtdFuncMixin, ABC):
         self._validate_profile_params(param_name, iphase)
         return self.profile_params[iphase][self.profile.labels[param_name]]
 
-    def set_phase_param(self, param_value: float, param_name: str, iphase: int):
+    def set_phase_param(self, param_value: float, param_name: str, iphase: int) -> None:
         self._validate_phase_params(param_name, iphase)
         self.alatt_params[iphase][self.phases[iphase].labels[param_name]] = param_value
 
@@ -396,7 +396,7 @@ class PawleyPatternBase(MtdFuncMixin, ABC):
         self._validate_phase_params(param_name, iphase)
         return self.alatt_params[iphase][self.phases[iphase].labels[param_name]]
 
-    def set_phase_free_param(self, is_free: float, param_name: str, iphase: int):
+    def set_phase_free_param(self, is_free: float, param_name: str, iphase: int) -> None:
         self._validate_phase_params(param_name, iphase)
         self.alatt_isfree[iphase][self.phases[iphase].labels[param_name]] = is_free
 
@@ -414,12 +414,12 @@ class PawleyPatternBase(MtdFuncMixin, ABC):
         self.update_profile_function()
         return res
 
-    def undo_fit(self):
+    def undo_fit(self) -> None:
         if self.initial_params is not None:
             self.set_free_params(self.initial_params)
 
     @staticmethod
-    def get_parameter_errors(res: OptimizeResult, cond_thresh=1e8):
+    def get_parameter_errors(res: OptimizeResult, cond_thresh=1e8) -> np.ndarray[float]:
         hessian = res.jac.T @ res.jac
         cond_num = np.linalg.cond(hessian)
         if not np.isfinite(cond_num) or cond_num > cond_thresh:
@@ -471,12 +471,12 @@ class PawleyPattern1D(PawleyPatternBase):
     def eval_resids(self, params: np.ndarray[float]) -> np.ndarray[float]:
         return self.ws.readY(self.ispec) - self.eval_profile(params)
 
-    def get_eval_workspace(self, **kwargs):
+    def get_eval_workspace(self, **kwargs) -> Workspace2D:
         if "OutputWorkspace" not in kwargs:
             kwargs["OutputWorkspace"] = f"{self.ws.name()}_eval"
         return EvaluateFunction(Function=self.comp_func, InputWorkspace=self.ws, WorkspaceIndex=self.ispec, **kwargs)
 
-    def fit_no_constraints(self, **kwargs):
+    def fit_no_constraints(self, **kwargs) -> Fit:
         # select cost function
         default_kwargs = {
             "Minimizer": "Levenberg-Marquardt",
@@ -493,7 +493,7 @@ class PawleyPattern1D(PawleyPatternBase):
         [self.comp_func.setParameter(ipar, res.Function.getParamValue(ipar)) for ipar in range(self.comp_func.nParams())]
         return res
 
-    def estimate_initial_params(self):
+    def estimate_initial_params(self) -> None:
         ws_eval = self.get_eval_workspace(StoreInADS=False)
         ppval = np.polyfit(ws_eval.readY(1), ws_eval.readY(0), 1)
         scale, bg = ppval
@@ -507,7 +507,7 @@ class PawleyPattern1D(PawleyPatternBase):
                 self.bg_params[ipar] = bg
         self.update_profile_function()
 
-    def fit_background(self, **kwargs) -> OptimizeResult:
+    def fit_background(self, **kwargs) -> OptimizeResult | None:
         if len(self.bg_params) == 0:
             return
         default_kwargs = {"xtol": 1e-5, "diff_step": 1e-3, "x_scale": "jac", "verbose": 2}
@@ -580,7 +580,7 @@ class PawleyPattern2D(Poldi2DEvalMixin, PawleyPatternBase):
         self.update_profile_function()
 
     @staticmethod
-    def make_1d_ws(ws: Workspace2D):
+    def make_1d_ws(ws: Workspace2D) -> Workspace2D:
         dspacs = get_dspac_array_from_ws(ws)
         return CreateWorkspace(
             DataX=dspacs,
@@ -591,7 +591,7 @@ class PawleyPattern2D(Poldi2DEvalMixin, PawleyPatternBase):
             EnableLogging=False,
         )
 
-    def set_global_scale(self, global_scale: bool):
+    def set_global_scale(self, global_scale: bool) -> None:
         self.global_scale = global_scale
         if not self.global_scale:
             # check if a peak intensity is fixed in any phase
@@ -603,7 +603,7 @@ class PawleyPattern2D(Poldi2DEvalMixin, PawleyPatternBase):
                 self.bg_params[:] = 0
                 self.bg_isfree[:] = False
 
-    def set_params_from_pawley1d(self, pawley1d: PawleyPattern1D):
+    def set_params_from_pawley1d(self, pawley1d: PawleyPattern1D) -> None:
         if len(pawley1d.phases) != len(self.phases):
             logger.error("PawleyPattern1D object has a different number of phases.")
             return
@@ -617,7 +617,7 @@ class PawleyPattern2D(Poldi2DEvalMixin, PawleyPatternBase):
         if intens_changed:
             self._estimate_intensities()
 
-    def estimate_initial_params(self):
+    def estimate_initial_params(self) -> None:
         self._estimate_intensities()
 
     def eval_profile(self, params: np.ndarray[float]) -> np.ndarray[float]:
@@ -625,14 +625,14 @@ class PawleyPattern2D(Poldi2DEvalMixin, PawleyPatternBase):
         self.update_profile_function()
         return self.comp_func(self.ws_1d.readX(0))
 
-    def _estimate_intensities(self):
+    def _estimate_intensities(self) -> None:
         # scale intensities
         ws_sim = self.eval_2d(self.get_free_params())
         ppval = np.polyfit(ws_sim.extractY().flat, self.ws.extractY().flat, 1)
         for iphase in range(len(self.phases)):
             self.intens[iphase] *= ppval[0]
 
-    def create_no_constriants_fit(self):
+    def create_no_constriants_fit(self) -> PawleyPattern2DNoConstraints:
         return PawleyPattern2DNoConstraints(self.ws, self.comp_func, self.global_scale, self.lambda_max)
 
     def fit(self, *args, **kwargs) -> OptimizeResult:
@@ -654,7 +654,7 @@ class PawleyPattern2DNoConstraints(MtdFuncMixin, Poldi2DEvalMixin):
         self.set_global_scale(global_scale)
         self.initial_params = None
 
-    def get_peak_intensity_param_name(self):
+    def get_peak_intensity_param_name(self) -> str:
         pk_func = FunctionFactory.Instance().createPeakFunction(self.comp_func[0].name)
         pk_func.setIntensity(1.0)
         return next(pk_func.getParamName(ipar) for ipar in range(pk_func.nParams()) if pk_func.isExplicitlySet(ipar))
@@ -662,7 +662,7 @@ class PawleyPattern2DNoConstraints(MtdFuncMixin, Poldi2DEvalMixin):
     def get_npks(self) -> int:
         return len(self.comp_func) - 1 if self.has_bg else len(self.comp_func)
 
-    def set_global_scale(self, global_scale: bool):
+    def set_global_scale(self, global_scale: bool) -> None:
         self.global_scale = global_scale
         if not self.global_scale:
             npks = self.get_npks()

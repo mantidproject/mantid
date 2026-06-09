@@ -7,9 +7,10 @@
 
 from os import scandir
 from pathlib import Path
+from typing import Sequence
 
 
-def find_all_files(directory):
+def find_all_files(directory: str) -> Sequence[str]:
     """
     find all the files in a directory
 
@@ -19,7 +20,7 @@ def find_all_files(directory):
         return [entry.path for entry in entries if entry.is_file()]
 
 
-def mk(dir_path: str):
+def mk(dir_path: str) -> None:
     """
     make a directory
 

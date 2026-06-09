@@ -9,7 +9,7 @@ from mantid.simpleapi import logger, Load
 from Engineering.EnginX import EnginX
 from Engineering.IMAT import IMAT
 from mantid.api import AnalysisDataService as ADS
-from typing import Optional, Sequence
+from typing import Sequence
 from Engineering.common.instrument_config import get_instr_config
 
 from Engineering.texture.TextureUtils.io import mk
@@ -21,10 +21,10 @@ def run_focus_script(
     van_run: str,
     ceria_run: str,
     full_instr_calib: str,
-    grouping: Optional[str] = None,
-    prm_path: Optional[str] = None,
-    spectrum_num: Optional[str] = None,
-    groupingfile_path: Optional[str] = None,
+    grouping: str | None = None,
+    prm_path: str | None = None,
+    spectrum_num: str | None = None,
+    groupingfile_path: str | None = None,
 ) -> None:
     """
     Focus data for use in a texture analysis pipeline. Currently only ENGIN-X is supported,
@@ -67,7 +67,7 @@ def run_focus_script(
     model.main()
 
 
-def _get_instrument_from_ws_list(wss):
+def _get_instrument_from_ws_list(wss: Sequence[str]) -> str | None:
     instruments = set()
     for ws_str in wss:
         if ADS.doesExist(ws_str):
