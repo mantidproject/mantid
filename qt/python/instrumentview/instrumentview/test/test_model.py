@@ -252,6 +252,15 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         np.testing.assert_equal(model._detector_is_picked, [False, True, False])
         np.testing.assert_equal(model._point_picked_detectors, [False, True, False])
 
+    def test_workspace_index_from_pickable_index(self):
+        model, _ = self._setup_model([1, 2, 3])
+        model._is_valid = np.array([True, True, True])
+        model._is_masked = np.array([False, False, False])
+        model._is_selected_in_tree = np.array([True, True, True])
+        model._workspace_indices = np.array([11, 22, 33])
+        self.assertEqual(model.workspace_index_from_pickable_index(1), 22)
+        self.assertIsNone(model.workspace_index_from_pickable_index(4))
+
     def test_detectors_with_no_spectra(self):
         self._setup_mocks([1, 20, 300, 400], monitors=np.array(["no", "no", "n/a", "yes"]))
         mock_workspace = self._create_mock_workspace([1, 20, 300, 400])
@@ -406,6 +415,19 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model._integration_workspace = mock_workspace
         self.assertEqual(model.integration_limits, (1, 50))
 
+    def test_integration_limits_ragged_workspace_calls_read_x_with_python_int(self):
+        model, mock_workspace = self._setup_model([1, 2, 3])
+        mock_workspace.isRaggedWorkspace.return_value = True
+
+        def read_x_rejecting_numpy_int(i):
+            if isinstance(i, np.integer):
+                raise TypeError(f"No to-python (by-value) converter found for C++ type: {type(i)}")
+            return np.array([0.0, 1.0, 2.0])
+
+        mock_workspace.readX.side_effect = read_x_rejecting_numpy_int
+        model._integration_workspace = mock_workspace
+        model._calculate_and_set_full_integration_range(model._is_valid)
+
     def test_integration_limits_on_non_ragged_workspace(self):
         model, mock_workspace = self._setup_model([1, 2, 3])
         mock_workspace.isRaggedWorkspace.return_value = False
@@ -423,10 +445,13 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         monitor_positions = model.monitor_positions
         self.assertEqual(len(monitor_positions), 2)
 
+    @mock.patch.object(FullInstrumentViewModel, "_match_workspace_unit", return_value=1.0)
     @mock.patch("instrumentview.FullInstrumentViewModel.ConvertUnits")
     @mock.patch("instrumentview.FullInstrumentViewModel.ExtractSpectra")
     @mock.patch.object(FullInstrumentViewModel, "picked_workspace_indices", new_callable=mock.PropertyMock)
-    def test_extract_spectra_for_picked_detectors(self, mock_picked_workspace_indices, mock_extract_spectra, mock_convert_units):
+    def test_extract_spectra_for_picked_detectors(
+        self, mock_picked_workspace_indices, mock_extract_spectra, mock_convert_units, _mock_match_unit
+    ):
         model, mock_workspace = self._setup_model([1, 2, 3])
         mock_picked_workspace_indices.return_value = [1, 2]
         model.extract_spectra_for_line_plot("TOF", False)
@@ -445,13 +470,14 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         self.assertIsNone(model.line_plot_workspace)
         mock_extract_spectra.assert_not_called()
 
+    @mock.patch.object(FullInstrumentViewModel, "_match_workspace_unit", return_value=1.0)
     @mock.patch("instrumentview.FullInstrumentViewModel.ConvertUnits")
     @mock.patch("instrumentview.FullInstrumentViewModel.Rebin")
     @mock.patch("instrumentview.FullInstrumentViewModel.SumSpectra")
     @mock.patch("instrumentview.FullInstrumentViewModel.ExtractSpectra")
     @mock.patch.object(FullInstrumentViewModel, "picked_workspace_indices", new_callable=mock.PropertyMock)
     def test_extract_spectra_sum(
-        self, mock_picked_workspace_indices, mock_extract_spectra, mock_sum_spectra, mock_rebin, mock_convert_units
+        self, mock_picked_workspace_indices, mock_extract_spectra, mock_sum_spectra, mock_rebin, mock_convert_units, _mock_match_unit
     ):
         model, mock_workspace = self._setup_model([1, 2, 3])
         mock_workspace.isCommonBins.return_value = False
@@ -467,13 +493,14 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_rebin.assert_called_once_with(InputWorkspace=mock_workspace, Params=[0, 1, 2], EnableLogging=False, StoreInADS=False)
         mock_sum_spectra.assert_called_once_with(InputWorkspace=mock_workspace, EnableLogging=False, StoreInADS=False)
 
+    @mock.patch.object(FullInstrumentViewModel, "_match_workspace_unit", return_value=1.0)
     @mock.patch("instrumentview.FullInstrumentViewModel.ConvertUnits")
     @mock.patch("instrumentview.FullInstrumentViewModel.Rebin")
     @mock.patch("instrumentview.FullInstrumentViewModel.SumSpectra")
     @mock.patch("instrumentview.FullInstrumentViewModel.ExtractSpectra")
     @mock.patch.object(FullInstrumentViewModel, "picked_workspace_indices", new_callable=mock.PropertyMock)
     def test_extract_spectra_sum_common_bins(
-        self, mock_picked_workspace_indices, mock_extract_spectra, mock_sum_spectra, mock_rebin, mock_convert_units
+        self, mock_picked_workspace_indices, mock_extract_spectra, mock_sum_spectra, mock_rebin, mock_convert_units, _mock_match_unit
     ):
         model, mock_workspace = self._setup_model([1, 2, 3])
         mock_workspace.isCommonBins.return_value = True
@@ -489,12 +516,13 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_rebin.assert_not_called()
         mock_sum_spectra.assert_called_once_with(InputWorkspace=mock_workspace, EnableLogging=False, StoreInADS=False)
 
+    @mock.patch.object(FullInstrumentViewModel, "_match_workspace_unit", return_value=1.0)
     @mock.patch("instrumentview.FullInstrumentViewModel.ConvertUnits")
     @mock.patch("instrumentview.FullInstrumentViewModel.SumSpectra")
     @mock.patch("instrumentview.FullInstrumentViewModel.ExtractSpectra")
     @mock.patch.object(FullInstrumentViewModel, "picked_workspace_indices", new_callable=mock.PropertyMock)
     def test_extract_spectra_sum_one_spectra(
-        self, mock_picked_workspace_indices, mock_extract_spectra, mock_sum_spectra, mock_convert_units
+        self, mock_picked_workspace_indices, mock_extract_spectra, mock_sum_spectra, mock_convert_units, _mock_match_unit
     ):
         model, mock_workspace = self._setup_model([1, 2, 3])
         mock_picked_workspace_indices.return_value = [2]
@@ -507,11 +535,14 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_workspace.applyBinEdgesFromAnotherWorkspace.assert_not_called()
         mock_sum_spectra.assert_not_called()
 
+    @mock.patch.object(FullInstrumentViewModel, "_match_workspace_unit", return_value=1.0)
     @mock.patch("instrumentview.FullInstrumentViewModel.ConvertUnits")
     @mock.patch("instrumentview.FullInstrumentViewModel.ExtractSpectra")
     @mock.patch.object(FullInstrumentViewModel, "picked_workspace_indices", new_callable=mock.PropertyMock)
     @mock.patch("instrumentview.FullInstrumentViewModel.AnalysisDataService")
-    def test_save_line_plot_workspace_to_ads(self, mock_ads, mock_picked_workspace_indices, mock_extract_spectra, mock_convert_units):
+    def test_save_line_plot_workspace_to_ads(
+        self, mock_ads, mock_picked_workspace_indices, mock_extract_spectra, mock_convert_units, _mock_match_unit
+    ):
         model, _ = self._setup_model([1, 2, 3])
         mock_picked_workspace_indices.return_value = [1, 2]
         model.extract_spectra_for_line_plot("TOF", False)
