@@ -98,8 +98,28 @@ class BasicFittingContextTest(unittest.TestCase):
     def test_that_single_fit_functions_with_composite_does_not_assert_false_when_num_of_datasets_equal_nfunctions(self):
         comp_function = FunctionFactory.createFunction("CompositeFunction")
         comp_function.add(FunctionFactory.createFunction("FlatBackground"))
-        comp_function.add(FunctionFactory.createFunction("FlatBackground"))
+        comp_function.add(FunctionFactory.createFunction("BackToBackExponential"))
         self.fitting_context.dataset_names = ["Name1", "Name2"]
+        self.single_fit_functions = [comp_function]
+        self.fitting_context.single_fit_functions = self.single_fit_functions
+        self.assertEqual(self.fitting_context.single_fit_functions, self.single_fit_functions)
+
+    def test_that_single_fit_functions_with_composite_assert_false_when_num_of_datasets_not_equal_nfunctions(self):
+        comp_function = FunctionFactory.createFunction("CompositeFunction")
+        comp_function.add(FunctionFactory.createFunction("FlatBackground"))
+        comp_function.add(FunctionFactory.createFunction("BackToBackExponential"))
+        comp_function.add(FunctionFactory.createFunction("Gaussian"))
+        self.fitting_context.dataset_names = ["Name1", "Name2"]
+        self.single_fit_functions = [comp_function]
+        with self.assertRaises(AssertionError) as context:
+            self.fitting_context.single_fit_functions = self.single_fit_functions
+            self.assertEqual(str(context.exception), "The number of functions=3 is not equal to the number of datasets=2.")
+
+    def test_that_single_fit_functions_with_composite_does_not_assert_false(self):
+        comp_function = FunctionFactory.createFunction("CompositeFunction")
+        comp_function.add(FunctionFactory.createFunction("FlatBackground"))
+        comp_function.add(FunctionFactory.createFunction("Gaussian"))
+        self.fitting_context.dataset_names = ["Name1"]
         self.single_fit_functions = [comp_function]
         self.fitting_context.single_fit_functions = self.single_fit_functions
         self.assertEqual(self.fitting_context.single_fit_functions, self.single_fit_functions)
