@@ -12,8 +12,8 @@ New Features
 Bugfixes
 --------
 - (`#41303 <https://github.com/mantidproject/mantid/pull/41303>`_) The :ref:`Error Bars Settings <PlotSettings>` (CapSize, Cap Thickness, Width, Error Every) are now correctly applied when plotting a spectrum with errors.
-- (`#41295 <https://github.com/mantidproject/mantid/pull/41295>`_) :ref:`Colorfill Plots <Colorfill_Plots>` now support over plotting with a ``TableWorkspace``, issuing a warning instead of raising an exception.
-- (`#41515 <https://github.com/mantidproject/mantid/pull/41515>`_) The :ref:`Algorithm toolbox <WorkbenchAlgorithmToolbox>` now allows populating algorithms without the previously open dialog menus crashing.
+- (`#41295 <https://github.com/mantidproject/mantid/pull/41295>`_) :ref:`Colorfill Plots <Colorfill_Plots>` now allow over plotting with a ``TableWorkspace``, issuing a warning instead of raising an exception.
+- (`#41515 <https://github.com/mantidproject/mantid/pull/41515>`_) The :ref:`algm-StartLiveData` GUI no longer crashes when processing is set to **algorithm** and the user is searching for an algorithm in the dropdown menu in the ``Processing Step`` tab.
 - (`#41389 <https://github.com/mantidproject/mantid/pull/41389>`_) The :ref:`Messages Window <WorkbenchMessagesWindow>` now prints logs that are more readable in both *light* and *dark* mode at all logging levels.
 - (`#41083 <https://github.com/mantidproject/mantid/pull/41083>`_) The :ref:`Superplot <WorkbenchSuperplot>` documentation is now correctly launched when the plot is a ``Superplot`` and the *Help* button is clicked.
 
