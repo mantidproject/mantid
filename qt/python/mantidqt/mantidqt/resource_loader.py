@@ -34,7 +34,12 @@ def register_resources():
             raise RuntimeError(f"Failed to register mantidqt resources: {_RCC_PATH}")
         return
     # Qt5 fallback: importing the generated module runs qInitResources() as a side effect.
-    from mantidqt import resources  # noqa: F401
+    try:
+        from mantidqt import resources  # noqa: F401
+    except (ModuleNotFoundError, ImportError) as exc:
+        raise RuntimeError(
+            f"mantidqt resources not found. Expected '{_RCC_PATH}' or a generated 'mantidqt.resources' module."
+        ) from exc
 
 
 def cleanup_resources():
