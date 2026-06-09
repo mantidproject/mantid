@@ -5,6 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import re
+from typing import Tuple, Sequence
+from enum import Enum
+
 from Engineering.common.instrument_config import get_instr_config
 
 ENGINX_MAX_SPECTRA = 2400  # 2512 spectra appear in the ws. But from testing, anything > 2400 doesn't work.
@@ -13,7 +16,7 @@ SPLITTING_REGEX = ",|-"
 
 
 class CroppingModel(object):
-    def validate_and_clean_spectrum_numbers(self, numbers):
+    def validate_and_clean_spectrum_numbers(self, numbers: str) -> Tuple[str, str]:
         numbers = numbers.strip()
         try:
             if self.validate_spectrum_numbers(numbers):
@@ -24,7 +27,7 @@ class CroppingModel(object):
         except ValueError as e:
             return str(e), ""
 
-    def validate_spectrum_numbers(self, numbers):
+    def validate_spectrum_numbers(self, numbers: str) -> bool:
         if self._validate_numeric_or_valid_punct(numbers):
             if "-" in numbers or "," in numbers:
                 return self._validate_spectra_list(numbers)
@@ -33,27 +36,27 @@ class CroppingModel(object):
         return False
 
     @staticmethod
-    def _validate_numeric_or_valid_punct(string):
+    def _validate_numeric_or_valid_punct(string: str) -> bool:
         if all(c.isdigit() or c in VALID_PUNCT for c in string):
             return True
         else:
             raise ValueError("Invalid characters entered. Only numeric characters, ',', and '-' are allowed.")
 
-    def _validate_spectra_list(self, numbers):
+    def _validate_spectra_list(self, numbers: str) -> bool:
         numbers = re.split(SPLITTING_REGEX, numbers)
         return all(self.validate_spectrum(i) for i in numbers)
 
     @staticmethod
-    def validate_spectrum(number):
+    def validate_spectrum(number: str) -> bool:
         number = number.strip()
         return number.isdigit() and 1 <= int(number) <= ENGINX_MAX_SPECTRA
 
-    def _clean_spectrum_numbers(self, numbers):
+    def _clean_spectrum_numbers(self, numbers: str) -> str:
         numbers = [word.strip() for word in numbers.split(",")]
         return ",".join([self._clean_ranges(i) for i in numbers])
 
     @staticmethod
-    def _clean_ranges(word):
+    def _clean_ranges(word: str) -> str:
         if "-" in word:
             nums = word.split("-")
             num1, num2 = (i.strip() for i in nums)
@@ -67,6 +70,6 @@ class CroppingModel(object):
         return word
 
     @staticmethod
-    def get_cropping_options(instrument):
+    def get_cropping_options(instrument: str) -> Sequence[Tuple[Enum, str, bool, bool]]:
         config = get_instr_config(instrument)
         return config.interactive_grouping_options

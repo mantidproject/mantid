@@ -8,9 +8,12 @@
 
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT, create_error_message
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.cropping.cropping_presenter import CroppingPresenter
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration.model import CalibrationModel
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration.view import CalibrationView
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting, set_setting
 from Engineering.common.calibration_info import CalibrationInfo
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
+from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing
 
 from mantidqt.utils.asynchronous import AsyncTask
 from mantid.simpleapi import logger
@@ -19,7 +22,7 @@ from Engineering.common.instrument_config import get_instr_config
 
 
 class CalibrationPresenter(object):
-    def __init__(self, model, view):
+    def __init__(self, model: CalibrationModel, view: CalibrationView):
         self.model = model
         self.view = view
         self.worker = None
@@ -39,7 +42,7 @@ class CalibrationPresenter(object):
         self.cropping_widget = CroppingPresenter(parent=self.view, view=self.view.get_cropping_widget())
         self.show_cropping(False)
 
-    def connect_view_signals(self):
+    def connect_view_signals(self) -> None:
         self.view.set_on_calibrate_clicked(self.on_calibrate_clicked)
         self.view.set_enable_controls_connection(self.set_calibrate_controls_enabled)
         self.view.set_update_field_connection(self.set_field_value)
@@ -47,7 +50,7 @@ class CalibrationPresenter(object):
         self.view.set_on_radio_existing_toggled(self.set_load_existing_enabled)
         self.view.set_on_check_cropping_state_changed(self.show_cropping)
 
-    def update_calibration_from_view(self):
+    def update_calibration_from_view(self) -> None:
         van_file = self.view.get_vanadium_filename()
         config = get_instr_config(self.instrument)
         self.current_calibration.clear()
@@ -73,7 +76,7 @@ class CalibrationPresenter(object):
             # ensure the updated group is translated to an updated group_ws
             self.current_calibration.update_group_ws_from_group()
 
-    def on_calibrate_clicked(self):
+    def on_calibrate_clicked(self) -> None:
         if self.view.get_new_checked() and self._validate():
             self.update_calibration_from_view()
             self.start_calibration_worker(self.view.get_plot_output())
@@ -86,7 +89,7 @@ class CalibrationPresenter(object):
             output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, f"last_vanadium_run_{self.instrument}", van_run
         )
 
-    def start_calibration_worker(self, plot_output):
+    def start_calibration_worker(self, plot_output: bool) -> None:
         """
         Calibrate the data in a separate thread so as to not freeze the GUI.
         """
@@ -99,15 +102,16 @@ class CalibrationPresenter(object):
         self.set_calibrate_controls_enabled(False)
         self.worker.start()
 
-    def _on_error(self, error_info):
+    def _on_error(self, error_info: int) -> None:
         logger.error(str(error_info))
         self.emit_enable_button_signal()
 
-    def _on_success(self, success_info):
+    def _on_success(self, success_info: int) -> None:
+        logger.debug(str(success_info))
         self._notify_updated_calibration()
         self.emit_enable_button_signal()
 
-    def _notify_updated_calibration(self):
+    def _notify_updated_calibration(self) -> None:
         self.calibration_notifier.notify_subscribers(self.current_calibration)
         set_setting(
             output_settings.INTERFACES_SETTINGS_GROUP,
@@ -117,11 +121,11 @@ class CalibrationPresenter(object):
         )
         self.prm_filepath_notifier_gsas2.notify_subscribers(self.model.get_last_prm_file_gsas2())
 
-    def _notify_calibration_subscribers_of_instrument_change(self):
+    def _notify_calibration_subscribers_of_instrument_change(self) -> None:
         self.calibration_notifier.notify_subscribers(None)
         self.prm_filepath_notifier_gsas2.notify_subscribers(None)
 
-    def set_field_value(self):
+    def set_field_value(self) -> None:
         self.view.set_sample_text(self.current_calibration.get_ceria_path())
 
     def load_last_calibration(self) -> None:
@@ -139,18 +143,18 @@ class CalibrationPresenter(object):
             self.view.set_load_checked(False)
             self.view.set_file_text_with_search("")
 
-    def set_instrument_override(self, instrument):
-        instrument = INSTRUMENT_DICT[instrument]
+    def set_instrument_override(self, instrument_index: int) -> None:
+        instrument = INSTRUMENT_DICT[instrument_index]
         self.view.set_instrument_override(instrument)
         self.instrument = instrument
         self.set_last_van_path()
         self.load_last_calibration()
         self._notify_calibration_subscribers_of_instrument_change()
 
-    def set_rb_num(self, rb_num):
+    def set_rb_num(self, rb_num: str | None) -> None:
         self.rb_num = rb_num
 
-    def _validate(self):
+    def _validate(self) -> bool:
         # Do nothing if run numbers are invalid or view is searching.
         if self.view.is_searching():
             create_error_message(self.view, "Mantid is searching for data files. Please wait.")
@@ -170,16 +174,16 @@ class CalibrationPresenter(object):
                 return False
         return True
 
-    def validate_path(self):
+    def validate_path(self) -> bool:
         return self.view.get_path_valid()
 
-    def emit_enable_button_signal(self):
+    def emit_enable_button_signal(self) -> None:
         self.view.sig_enable_controls.emit(True)
 
-    def set_calibrate_controls_enabled(self, enabled):
+    def set_calibrate_controls_enabled(self, enabled: bool) -> None:
         self.view.set_calibrate_button_enabled(enabled)
 
-    def set_create_new_enabled(self, enabled):
+    def set_create_new_enabled(self, enabled: bool) -> None:
         self.view.set_sample_enabled(enabled)
         if enabled:
             self.set_calibrate_button_text("Calibrate")
@@ -187,7 +191,7 @@ class CalibrationPresenter(object):
             self.view.set_check_cropping_enabled(True)
             self.find_files()
 
-    def set_load_existing_enabled(self, enabled):
+    def set_load_existing_enabled(self, enabled: bool) -> None:
         self.view.set_path_enabled(enabled)
         if enabled:
             self.set_calibrate_button_text("Load")
@@ -195,10 +199,10 @@ class CalibrationPresenter(object):
             self.view.set_check_cropping_enabled(False)
             self.view.set_check_cropping_checked(False)
 
-    def set_calibrate_button_text(self, text):
+    def set_calibrate_button_text(self, text: str) -> None:
         self.view.set_calibrate_button_text(text)
 
-    def set_last_van_path(self):
+    def set_last_van_path(self) -> None:
         last_van_path = get_setting(
             output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, f"last_vanadium_run_{self.instrument}"
         )
@@ -207,17 +211,22 @@ class CalibrationPresenter(object):
         else:
             self.view.set_van_file_text_with_search("")
 
-    def find_files(self):
+    def find_files(self) -> None:
         self.view.find_sample_files()
 
-    def show_cropping(self, show):
+    def show_cropping(self, show: bool) -> None:
         self.view.set_cropping_widget_visibility(show)
 
-    def add_prm_gsas2_subscriber(self, obs):
+    def add_prm_gsas2_subscriber(self, obs: GenericObserverWithArgPassing) -> None:
         self.prm_filepath_notifier_gsas2.add_subscriber(obs)
 
-    def get_default_fitting_peak(self):
-        return get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, f"default_peak_{self.instrument}")
+    def get_default_fitting_peak(self) -> str:
+        return get_setting(
+            output_settings.INTERFACES_SETTINGS_GROUP,
+            output_settings.ENGINEERING_PREFIX,
+            f"default_peak_{self.instrument}",
+            return_type=str,
+        )
 
     # -----------------------
     # Observers / Observables
