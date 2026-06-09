@@ -37,9 +37,7 @@ def register_resources():
     try:
         from mantidqt import resources  # noqa: F401
     except (ModuleNotFoundError, ImportError) as exc:
-        raise RuntimeError(
-            f"mantidqt resources not found. Expected '{_RCC_PATH}' or a generated 'mantidqt.resources' module."
-        ) from exc
+        raise RuntimeError(f"mantidqt resources not found. Expected '{_RCC_PATH}' or a generated 'mantidqt.resources' module.") from exc
 
 
 def cleanup_resources():
