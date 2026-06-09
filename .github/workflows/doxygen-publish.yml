@@ -25,15 +25,15 @@ jobs:
           filters: .github/filters.yaml
 
       - uses: ./.github/actions/setup-pixi
-        if: ${{ steps.changes.outputs.doxygen == 'true' || steps.changes.outputs.cpp == 'true' }}
+        if: ${{ steps.changes.outputs.doxygen == 'true' }}
 
       - uses: ./.github/actions/doxygen-build
         name: build doxygen
-        if: ${{ steps.changes.outputs.doxygen == 'true' || steps.changes.outputs.cpp == 'true' }}
+        if: ${{ steps.changes.outputs.doxygen == 'true' }}
 
       # publish documentation if on main branch of mantidproject/mantid
       - name: Checkout Doxygen repository
-        if: ${{ steps.changes.outputs.doxygen == 'true' || steps.changes.outputs.cpp == 'true' }}
+        if: ${{ steps.changes.outputs.doxygen == 'true' }}
         uses: actions/checkout@v6
         with:
           repository: mantidproject/doxygen
@@ -41,13 +41,13 @@ jobs:
           token: ${{ secrets.DOXYGEN_REPO_TOKEN }}
 
       - name: Copy Doxygen artifacts
-        if: ${{ steps.changes.outputs.doxygen == 'true' || steps.changes.outputs.cpp == 'true' }}
+        if: ${{ steps.changes.outputs.doxygen == 'true' }}
         run: |
           rm -rf doxygen_repo/* # delete old version of the repository
           cp -r $GITHUB_WORKSPACE/build/doxygen/html/* doxygen_repo/
 
       - name: Commit Doxygen and push
-        if: ${{ steps.changes.outputs.doxygen == 'true' || steps.changes.outputs.cpp == 'true' }}
+        if: ${{ steps.changes.outputs.doxygen == 'true' }}
         working-directory: doxygen_repo
         run: |
           git config user.name "github-actions[bot]"

@@ -517,4 +517,4 @@ class SANSInstrumentWidget(BaseWidget):
                 self.ui = load_ui(__file__, "../../../ui/sans/eqsans_info.ui", baseinstance=self)
 
         dialog = HelpDialog(self)
-        dialog.exec_()
+        dialog.exec()

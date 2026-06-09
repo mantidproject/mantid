@@ -173,16 +173,19 @@ PolarizationCorrections ExperimentPresenter::polarizationCorrectionsFromView() {
   auto const &polCorrOptionString = m_view->getPolarizationCorrectionOption();
   auto const &polCorrType = polarizationCorrectionTypeFromString(polCorrOptionString);
 
-  if (polCorrType == PolarizationCorrectionType::None || polCorrType == PolarizationCorrectionType::ParameterFile) {
+  if (polCorrType == PolarizationCorrectionType::None) {
     return PolarizationCorrections(polCorrType);
   }
-  auto const &fredrikzeSpinStateOrder = m_view->getFredrikzeSpinStateOrder();
+  if (polCorrType == PolarizationCorrectionType::ParameterFile) {
+    return PolarizationCorrections(polCorrType, std::nullopt, m_view->getInputSpinStateOrder());
+  }
+  auto const &inputSpinStateOrder = m_view->getInputSpinStateOrder();
   if (polCorrOptionString == "FilePath") {
     auto const &polCorrFilePath = m_view->getPolarizationEfficienciesFilePath();
     showPolCorrFilePathValidity(polCorrFilePath);
-    return PolarizationCorrections(polCorrType, polCorrFilePath, fredrikzeSpinStateOrder);
+    return PolarizationCorrections(polCorrType, polCorrFilePath, inputSpinStateOrder);
   }
-  return PolarizationCorrections(polCorrType, m_view->getPolarizationEfficienciesWorkspace(), fredrikzeSpinStateOrder);
+  return PolarizationCorrections(polCorrType, m_view->getPolarizationEfficienciesWorkspace(), inputSpinStateOrder);
 }
 
 void ExperimentPresenter::showPolCorrFilePathValidity(std::string const &filePath) {
@@ -248,19 +251,25 @@ void ExperimentPresenter::updatePolarizationCorrectionEnabledState() {
   }
   auto const &polCorrOption = m_view->getPolarizationCorrectionOption();
   m_view->enablePolarizationCorrections();
-  if (polCorrOption == "ParameterFile" || polCorrOption == "None") {
+  if (polCorrOption == "None") {
     disablePolarizationEfficiencies();
+    return;
+  }
+  if (polCorrOption == "ParameterFile") {
+    m_view->setPolarizationEfficienciesWorkspaceMode();
+    m_view->disablePolarizationEfficiencies();
+    m_view->enableInputSpinStateOrder();
     return;
   }
   if (polCorrOption == "Workspace") {
     m_view->enablePolarizationEfficiencies();
-    m_view->enableFredrikzeSpinStateOrder();
+    m_view->enableInputSpinStateOrder();
     m_view->setPolarizationEfficienciesWorkspaceMode();
     return;
   }
   if (polCorrOption == "FilePath") {
     m_view->enablePolarizationEfficiencies();
-    m_view->enableFredrikzeSpinStateOrder();
+    m_view->enableInputSpinStateOrder();
     m_view->setPolarizationEfficienciesFilePathMode();
     return;
   }
@@ -269,7 +278,7 @@ void ExperimentPresenter::updatePolarizationCorrectionEnabledState() {
 void ExperimentPresenter::disablePolarizationEfficiencies() {
   m_view->setPolarizationEfficienciesWorkspaceMode();
   m_view->disablePolarizationEfficiencies();
-  m_view->disableFredrikzeSpinStateOrder();
+  m_view->disableInputSpinStateOrder();
 }
 
 void ExperimentPresenter::updateFloodCorrectionEnabledState() {
@@ -448,7 +457,7 @@ void ExperimentPresenter::updateViewFromModel() {
   m_view->setPolarizationEfficienciesFilePath("");
   if (m_model.polarizationCorrections().workspace())
     m_view->setPolarizationEfficienciesWorkspace(m_model.polarizationCorrections().workspace().value());
-  m_view->setFredrikzeSpinStateOrder(m_model.polarizationCorrections().fredrikzeSpinStateOrder());
+  m_view->setInputSpinStateOrder(m_model.polarizationCorrections().inputSpinStateOrder());
   m_view->setFloodCorrectionType(floodCorrectionTypeToString(m_model.floodCorrections().correctionType()));
   if (m_model.floodCorrections().workspace())
     m_view->setFloodWorkspace(m_model.floodCorrections().workspace().value());

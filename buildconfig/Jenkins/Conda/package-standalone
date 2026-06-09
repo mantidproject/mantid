@@ -22,6 +22,8 @@
 #   --git-tag: The version tag to pin the locally-built mantid packages in the installer
 #              environment. Required to prevent the solver silently picking a remote version
 #              instead of the locally-built one.
+#   --skip-docs: Skip mantiddocs installation. Required for branches (like ornl-next) that
+#                don't build mantiddocs. Uses online documentation only.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source $SCRIPT_DIR/pixi-utils
@@ -51,6 +53,7 @@ fi
 STANDALONE_PACKAGE_SUFFIX=
 PLATFORM=""
 GIT_TAG=""
+SKIP_DOCS=false
 while [ ! $# -eq 0 ]
 do
     case "$1" in
@@ -63,6 +66,8 @@ do
         --git-tag)
             GIT_TAG="$2"
             shift ;;
+        --skip-docs)
+            SKIP_DOCS=true ;;
         *)
             echo "Argument not accepted: $1"
             exit 1
@@ -94,11 +99,14 @@ if [ -z "${GIT_TAG}" ]; then
 fi
 # Strip leading 'v' to match the version format used by versioningit in package-conda
 MANTID_VERSION="${GIT_TAG#v}"
-echo "Pinning mantidworkbench and mantiddocs to version: ${MANTID_VERSION}"
+echo "Pinning mantidworkbench to version: ${MANTID_VERSION}"
 
 PACKAGING_ARGS="-c ${LOCAL_CHANNEL} -v ${MANTID_VERSION}"
 if [ -n "${STANDALONE_PACKAGE_SUFFIX}" ]; then
     PACKAGING_ARGS="${PACKAGING_ARGS} -s ${STANDALONE_PACKAGE_SUFFIX}"
+fi
+if [ "${SKIP_DOCS}" = true ]; then
+    PACKAGING_ARGS="${PACKAGING_ARGS} --skip-docs"
 fi
 
 if [[ $OSTYPE == 'msys'* ]]; then

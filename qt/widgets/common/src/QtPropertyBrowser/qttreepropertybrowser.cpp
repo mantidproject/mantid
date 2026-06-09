@@ -107,9 +107,7 @@ QString translateUtf8Encoded(const char *context, const char *key, const char *d
 }
 } // namespace
 
-#if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
-#endif
 
 class QtPropertyEditorView;
 
@@ -383,7 +381,7 @@ static QIcon drawIndicatorIcon(const QPalette &palette, QStyle *style) {
 
 void QtTreePropertyBrowserPrivate::init(QWidget *parent, const QStringList &options, bool darkTopLevel) {
   auto *layout = new QHBoxLayout(parent);
-  layout->setMargin(0);
+  layout->setContentsMargins(0, 0, 0, 0);
   m_treeWidget = new QtPropertyEditorView(parent, darkTopLevel);
   m_treeWidget->setEditorPrivate(this);
   m_treeWidget->setIconSize(QSize(18, 18));
@@ -707,8 +705,8 @@ QtTreePropertyBrowser::QtTreePropertyBrowser(QWidget *parent, const QStringList 
   d_ptr->q_ptr = this;
 
   d_ptr->init(this, options, darkTopLevel);
-  connect(this, SIGNAL(currentItemChanged(QtBrowserItem *)), this,
-          SLOT(slotCurrentBrowserItemChanged(QtBrowserItem *)));
+  connect(this, SIGNAL(currentItemChanged(const QtBrowserItem *)), this,
+          SLOT(slotCurrentBrowserItemChanged(const QtBrowserItem *)));
 }
 
 /**
@@ -996,6 +994,4 @@ QTreeWidget *QtTreePropertyBrowser::treeWidget() { return d_ptr->treeWidget(); }
 
 void QtTreePropertyBrowser::closeEditor() { d_ptr->closeEditor(); }
 
-#if QT_VERSION >= 0x040400
 QT_END_NAMESPACE
-#endif

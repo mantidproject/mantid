@@ -13,6 +13,7 @@
 #include <QClipboard>
 #include <QMenu>
 #include <QMessageBox>
+#include <QRegularExpression>
 #include <limits>
 #include <utility>
 
@@ -263,7 +264,7 @@ void EditLocalParameterDialog::copy() {
 /// Paste a list of values from the clipboard.
 void EditLocalParameterDialog::paste() {
   auto text = QApplication::clipboard()->text();
-  auto vec = text.split(QRegExp("\\s|,"), Qt::SkipEmptyParts);
+  auto vec = text.split(QRegularExpression("\\s|,"), Qt::SkipEmptyParts);
   auto n = qMin(vec.size(), m_uiForm.tableWidget->rowCount());
   // prepare for pasting data
   auto deleg = static_cast<LocalParameterItemDelegate *>(m_uiForm.tableWidget->itemDelegateForColumn(valueColumn));

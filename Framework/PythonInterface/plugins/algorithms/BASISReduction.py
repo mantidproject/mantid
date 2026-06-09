@@ -604,7 +604,7 @@ the first two hours"""
 
     def _make_run_file(self, run):
         r"""
-        Make name like BSS_24234_event.nxs
+        Make name like BSS_24234
 
         Parameters
         ----------
@@ -614,9 +614,10 @@ the first two hours"""
         Returns
         -------
         str
-            events file name
+            run file name without extension, allowing FileFinder to locate the
+            correct file regardless of format (.nxs.h5, _event.nxs, etc.)
         """
-        return "{0}_{1}_event.nxs".format(self._short_inst, str(run))
+        return "{0}_{1}".format(self._short_inst, str(run))
 
     def _sum_runs(self, run_set, sam_ws):
         r"""

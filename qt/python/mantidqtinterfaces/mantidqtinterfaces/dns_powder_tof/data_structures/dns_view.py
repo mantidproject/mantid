@@ -144,7 +144,7 @@ class DNSView(QWidget):
             error_dialog.setIcon(QMessageBox.Warning)
         error_dialog.setText(message)
         error_dialog.setWindowTitle("Error")
-        error_dialog.exec_()
+        error_dialog.exec()
 
     def show_status_message(self, message="", time=1, clear=False):
         """

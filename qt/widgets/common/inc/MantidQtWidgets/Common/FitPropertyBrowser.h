@@ -400,7 +400,7 @@ private slots:
   void stringChanged(QtProperty *prop);
   void filenameChanged(QtProperty *prop);
   void columnChanged(QtProperty *prop);
-  void currentItemChanged(QtBrowserItem * /*current*/);
+  void currentItemChanged(const QtBrowserItem * /*current*/);
   void vectorDoubleChanged(QtProperty *prop);
   void vectorSizeChanged(QtProperty *prop);
   void addTie();

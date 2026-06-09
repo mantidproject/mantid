@@ -4,12 +4,15 @@ Inelastic Changes
 
 New Features
 ------------
-.. amalgamate:: Inelastic/New_features
+- (`#41228 <https://github.com/mantidproject/mantid/pull/41228>`_) The :ref:`Absorption Corrections<absorption_corrections>` tab now has an improved UI which displays existing elements better and adds new features.
 
 
 Bugfixes
 --------
-.. amalgamate:: Inelastic/Bugfixes
+- (`#41250 <https://github.com/mantidproject/mantid/pull/41250>`_) The :ref:`Stretch <bayes-fitting-stretch>` tab now verifies workspaces have more than one bin before creating :ref:`Colorfill_Plots`.
+- (`#41228 <https://github.com/mantidproject/mantid/pull/41228>`_) The :ref:`Container Subtraction <container-subtraction>` interface no longer deletes the subtracted workspace from the ADS when the window is closed.
+- (`#41228 <https://github.com/mantidproject/mantid/pull/41228>`_) The :ref:`Corrections <interface-inelastic-corrections>` interface no longer hangs on close after using a container-subtracted workspace in the :ref:`Apply Absorption corrections <apply_absorp_correct>` tab.
+- (`#41228 <https://github.com/mantidproject/mantid/pull/41228>`_) The :ref:`Container Subtraction <container-subtraction>` interface now includes an output-name widget for labelling outputs in the ADS.
 
 
 Algorithms
@@ -17,10 +20,10 @@ Algorithms
 
 New features
 ############
-.. amalgamate:: Inelastic/Algorithms/New_features
 
 Bugfixes
 ############
-.. amalgamate:: Inelastic/Algorithms/Bugfixes
+- (`#41121 <https://github.com/mantidproject/mantid/pull/41121>`_) The :ref:`BayesStretch <algm-BayesStretch>` algorithm now appends each workspace name in the fit workspaces group with the selected backend option of either ``quickbayes`` or ``quasielasticbayes`` from the :ref:`Stretch <bayes-fitting-stretch>` tab.
+- (`#41121 <https://github.com/mantidproject/mantid/pull/41121>`_) Additionally, a duplicate ``Stretch`` word has been removed from the names of workspaces in the fit workspace group created by the :ref:`BayesStretch2 <algm-BayesStretch2>` algorithm when the selected backend option is ``quickbayes`` in the :ref:`Stretch <bayes-fitting-stretch>` tab.
 
 :ref:`Release 6.16.0 <v6.16.0>`

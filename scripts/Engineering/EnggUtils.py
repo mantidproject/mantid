@@ -4,13 +4,14 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from numpy import array, degrees, isfinite, reshape
+from numpy import array, degrees, isfinite, reshape, nan, diff
 from os import path, makedirs
 from shutil import copy2
 
 from mantid.api import AnalysisDataService as ADS, AlgorithmManager
 from mantid.kernel import IntArrayProperty, UnitConversion, DeltaEModeType, logger, UnitParams
 import mantid.simpleapi as mantid  # required to call EnggUtils funcs from algorithms to avoid simpleapi error
+from mantid.dataobjects import EventWorkspace
 from Engineering.common import path_handling
 
 ENGINX_BANKS = ["", "North", "South", "Both: North, South", "1", "2"]  # used in EnggCalibrate, EnggVanadiumCorrections
@@ -508,7 +509,8 @@ def focus_run(sample_paths, plot_output, rb_num, calibration, save_dir, full_cal
 
     # Plot the output
     if output_workspaces:
-        mantid.DeleteWorkspace(VAN_CURVE_REBINNED_NAME)
+        if ADS.doesExist(VAN_CURVE_REBINNED_NAME):
+            mantid.DeleteWorkspace(VAN_CURVE_REBINNED_NAME)
         if plot_output:
             _plot_focused_workspaces(output_workspaces)
 
@@ -620,9 +622,21 @@ def _smooth_vanadium(van_ws_foc):
 
 def _apply_vanadium_norm(sample_ws_foc, van_ws_foc):
     # divide by curves - automatically corrects for solid angle, det efficiency and lambda dep. flux
+
+    # depending on what data is in event mode or not, different algorithms will be required
+    if not isinstance(sample_ws_foc, EventWorkspace):
+        sample_ws_foc = _apply_vanadium_norm_histogram(sample_ws_foc, van_ws_foc)
+    else:
+        sample_ws_foc = _apply_vanadium_norm_event(sample_ws_foc, van_ws_foc)
+    return sample_ws_foc
+
+
+def _apply_vanadium_norm_histogram(sample_ws_foc, van_ws_foc, xmin=0.45):
+    # if Histogram data want to ragged crop to avoid zeroing out of scope bins which will affect fitting
     sample_ws_foc = mantid.CropWorkspaceRagged(
-        InputWorkspace=sample_ws_foc, OutputWorkspace=sample_ws_foc.name(), XMin=0.45, XMax=float("inf")
+        InputWorkspace=sample_ws_foc, OutputWorkspace=sample_ws_foc.name(), XMin=xmin, XMax=float("inf")
     )
+    # the vanadium curve will need to be rebinned to match shape
     van_ws_foc_rb = mantid.RebinToWorkspace(
         WorkspaceToRebin=van_ws_foc, WorkspaceToMatch=sample_ws_foc, OutputWorkspace=VAN_CURVE_REBINNED_NAME
     )  # copy so as not to lose data
@@ -632,6 +646,27 @@ def _apply_vanadium_norm(sample_ws_foc, van_ws_foc):
     sample_ws_foc = mantid.ReplaceSpecialValues(
         InputWorkspace=sample_ws_foc, OutputWorkspace=sample_ws_foc.name(), NaNValue=0, NaNError=0.0, InfinityValue=0, InfinityError=0.0
     )
+    return sample_ws_foc
+
+
+def _apply_vanadium_norm_event(sample_ws_foc, van_ws_foc, xmin=0.45):
+    sample_ws_foc = mantid.CropWorkspace(InputWorkspace=sample_ws_foc, OutputWorkspace=sample_ws_foc.name(), XMin=xmin, XMax=float("inf"))
+    # alter the bins attached to the event workspace (used for histogram conversion) to remove any bins before the crop
+    nspec = sample_ws_foc.getNumberHistograms()
+    if nspec > 1:
+        deltas = [diff(sample_ws_foc.readX(ispec)).mean() for ispec in range(nspec)]
+        mantid.RebinRagged(
+            InputWorkspace=sample_ws_foc,
+            XMin=[xmin] * nspec,
+            XMax=[nan] * nspec,
+            Delta=deltas,
+            OutputWorkspace=sample_ws_foc.name(),
+        )
+    # divide by vanadium curve
+    sample_ws_foc = mantid.Divide(
+        LHSWorkspace=sample_ws_foc, RHSWorkspace=van_ws_foc, OutputWorkspace=sample_ws_foc.name(), AllowDifferentNumberSpectra=False
+    )
+    # should not be any special values with event data
     return sample_ws_foc
 
 

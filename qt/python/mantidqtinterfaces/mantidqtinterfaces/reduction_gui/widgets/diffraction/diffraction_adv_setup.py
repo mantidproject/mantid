@@ -259,7 +259,7 @@ class AdvancedSetupWidget(BaseWidget):
                 self.ui = load_ui(__file__, "../../../ui/diffraction/diffraction_info.ui", baseinstance=self)
 
         dialog = HelpDialog(self)
-        dialog.exec_()
+        dialog.exec()
 
     def _show_concept_help(self, concept):
         InterfaceManager().showHelpPage(f"concepts/{concept}.html")

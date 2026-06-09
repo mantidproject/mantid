@@ -29,11 +29,11 @@ jobs:
           filters: .github/filters.yaml
 
       - uses: ./.github/actions/setup-pixi
-        if: ${{ steps.changes.outputs.doxygen == 'true' || steps.changes.outputs.cpp == 'true' }}
+        if: ${{ steps.changes.outputs.doxygen == 'true' }}
 
       - uses: ./.github/actions/doxygen-build
         name: Build doxygen
-        if: ${{ steps.changes.outputs.doxygen == 'true' || steps.changes.outputs.cpp == 'true' }}
+        if: ${{ steps.changes.outputs.doxygen == 'true' }}
 
 
   build-and-test:
@@ -87,19 +87,27 @@ jobs:
           fetch-depth: 100
           fetch-tags: true
 
+      - uses: dorny/paths-filter@v4
+        id: changes
+        with:
+          filters: .github/filters.yaml
+
       - name: Install pixi
         uses: ./.github/actions/setup-pixi
+        if: ${{ steps.changes.outputs.code_changes == 'true' }}
 
       - name: Clean build tree
+        if: ${{ steps.changes.outputs.code_changes == 'true' }}
         # supplying --clean-build or CLEAN_BUILD=true should be added here
         run: ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/clean-builder ${GITHUB_WORKSPACE}
 
       - name: Determine if a PR build
-        if: ${{ github.event_name == 'pull_request' }}
+        if: ${{ github.event_name == 'pull_request' && steps.changes.outputs.code_changes == 'true' }}
         # telling jenkins scripts this is a PR build
         run: echo "JOB_NAME=pull_requests" >> $GITHUB_ENV
 
       - name: Build code
+        if: ${{ steps.changes.outputs.code_changes == 'true' }}
         run: |
           echo "For Jenkins scripts JOB_NAME=${JOB_NAME}"
           cd ${GITHUB_WORKSPACE}
@@ -108,6 +116,7 @@ jobs:
           echo "::remove-matcher owner=gcc-problem-matcher::"
 
       - name: Run unit tests
+        if: ${{ steps.changes.outputs.code_changes == 'true' }}
         id: testunit
         run: |
           cd ${GITHUB_WORKSPACE}
@@ -134,7 +143,7 @@ jobs:
           files: build/Testing/*unittest.xml
 
       - name: Run system tests
-        if: matrix.os == 'Linux'
+        if: ${{ matrix.os == 'Linux' && steps.changes.outputs.code_changes == 'true' }}
         id: testsystem
         run: |
           cd ${GITHUB_WORKSPACE}

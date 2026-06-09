@@ -16,7 +16,7 @@
 #include <string>
 #include <unordered_map>
 
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QScrollArea>
 
 namespace MantidQt {
@@ -86,7 +86,7 @@ private:
     tabScrollArea->setWidgetResizable(true);
 
     QWidget *tabContent = new QWidget(tabScrollArea);
-    tabContent->setObjectName("tab" + QString::fromStdString(name).remove(QRegExp("[ ,()]")));
+    tabContent->setObjectName("tab" + QString::fromStdString(name).remove(QRegularExpression("[ ,()]")));
     tabScrollArea->setWidget(tabContent);
     tabScrollArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 

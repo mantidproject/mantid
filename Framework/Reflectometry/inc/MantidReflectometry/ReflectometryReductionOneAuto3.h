@@ -114,11 +114,6 @@ private:
   /// Populate algorithmic correction properties
   void determineCorrectionAlgorithm(const Instrument_const_sptr &instrument);
   void populateAlgorithmicCorrectionProperties(const Mantid::API::IAlgorithm_sptr &alg);
-  std::string findPolarizationCorrectionMethod(const API::MatrixWorkspace_sptr &efficiencies);
-  std::string findPolarizationCorrectionOption(const std::string &correctionMethod,
-                                               const WorkspaceGroup_sptr &groupIvsLam);
-  std::string getFredrikzeInputSpinStateOrder(const std::string &correctionMethod);
-  /// Get a polarization efficiencies workspace.
   std::tuple<API::MatrixWorkspace_sptr, std::string, std::string, std::string>
   getPolarizationEfficiencies(const WorkspaceGroup_sptr &groupIvsLam);
   WorkspaceGroup_sptr applyPolarizationCorrection(const WorkspaceGroup_sptr &outputIvsLam,
@@ -138,9 +133,7 @@ private:
   void setOutputPropertyFromChild(const Algorithm_sptr &alg, std::string const &name);
   void setOutputPropertiesFromChild(const Algorithm_sptr &alg);
   processGroupMembersOutput processGroupMembers(const Algorithm::WorkspaceVector &members, std::string const &runNumber,
-                                                std::vector<std::string> const &taskOrder,
-                                                const std::vector<WorkspaceNames> &workspaceNames = {},
-                                                const bool reduced = false);
+                                                std::vector<std::string> const &taskOrder, const bool reduced = false);
   WorkspaceGroup_sptr groupWorkspaces(const std::vector<std::string> &workspaceNames,
                                       std::string const &outputName = "");
   RROOutputs performCoreReduction(MatrixWorkspace_sptr inputWS, const std::vector<std::string> &taskOrder = {},

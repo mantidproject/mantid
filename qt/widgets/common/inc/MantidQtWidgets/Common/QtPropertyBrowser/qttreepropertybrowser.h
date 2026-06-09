@@ -97,9 +97,7 @@
 #include <QStyleOptionButton>
 #include <QTreeWidget>
 
-#if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
-#endif
 
 class QTreeWidgetItem;
 class QtTreePropertyBrowserPrivate;
@@ -352,6 +350,4 @@ private:
   mutable QWidget *m_editedWidget;
 };
 
-#if QT_VERSION >= 0x040400
 QT_END_NAMESPACE
-#endif

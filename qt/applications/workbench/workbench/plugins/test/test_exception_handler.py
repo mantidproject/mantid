@@ -30,7 +30,7 @@ class ExceptionHandlerTest(unittest.TestCase):
 
         self.assertEqual(1, mock_logger.error.call_count)
         self.assertEqual(1, mock_WorkbenchErrorMessageBox.call_count)
-        mock_errorbox.exec_.assert_called_once_with()
+        mock_errorbox.exec.assert_called_once_with()
 
     @patch("workbench.plugins.exception_handler.CrashReportPage")
     @patch("workbench.plugins.exception_handler.logger")

@@ -34,7 +34,7 @@ jobs:
 
       - name: Setup pixi
         if: steps.changes.outputs.devsite == 'true'
-        uses: prefix-dev/setup-pixi@v0.9.5
+        uses: prefix-dev/setup-pixi@v0.9.6
         with:
           pixi-version: v${{ steps.pixi-version.outputs.version }}
           frozen: true

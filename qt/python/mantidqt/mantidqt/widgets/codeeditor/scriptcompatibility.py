@@ -73,7 +73,7 @@ def permission_box_to_prepend_import():
     msg_box.setInformativeText("Would you like to add a line to import the Mantid API?")
     msg_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
     msg_box.setDefaultButton(QMessageBox.Yes)
-    permission = msg_box.exec_()
+    permission = msg_box.exec()
     if permission == QMessageBox.Yes:
         return True
     return False

@@ -51,7 +51,7 @@ requirements:
   run:
     - mantid == ${{ version }}
     - matplotlib ${{ matplotlib }}
-    - ${{ pin_compatible("qscintilla2", upper_bound="x.x") }}
+    - qscintilla2 ${{ qscintilla2 }}
     - ${{ pin_compatible("qt-main", upper_bound="x.x") }}
     - qtpy ${{ qtpy }}
     - python

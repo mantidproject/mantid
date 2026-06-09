@@ -77,7 +77,7 @@ class SANSCatalogWidget(BaseWidget):
         """Create a menu for the tableWidget and associated actions"""
         tw_menu = QMenu("Menu", self)
         tw_menu.addAction(self.copyAction)
-        tw_menu.exec_(self.mapToGlobal(point))
+        tw_menu.exec(self.mapToGlobal(point))
 
     def is_running(self, is_running):
         """

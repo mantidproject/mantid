@@ -203,16 +203,15 @@ void StartLiveDataDialog::initLayout() {
 
   connect(ui.chkPreserveEvents, SIGNAL(toggled(bool)), this, SLOT(chkPreserveEventsToggled()));
 
-  connect(ui.cmbConnListener, SIGNAL(currentIndexChanged(const QString &)), this,
+  connect(ui.cmbConnListener, SIGNAL(currentTextChanged(const QString &)), this,
           SLOT(setDefaultAccumulationMethod(const QString &)));
-  connect(ui.cmbConnListener, SIGNAL(currentIndexChanged(const QString &)), this,
+  connect(ui.cmbConnListener, SIGNAL(currentTextChanged(const QString &)), this,
           SLOT(initListenerPropLayout(const QString &)));
-  connect(ui.cmbInstrument, SIGNAL(currentIndexChanged(const QString &)), this,
-          SLOT(updateUiElements(const QString &)));
-  connect(ui.cmbInstrument, SIGNAL(currentIndexChanged(const QString &)), this,
+  connect(ui.cmbInstrument, SIGNAL(currentTextChanged(const QString &)), this, SLOT(updateUiElements(const QString &)));
+  connect(ui.cmbInstrument, SIGNAL(currentTextChanged(const QString &)), this,
           SLOT(updateConnectionChoices(const QString &)));
 
-  connect(ui.cmbConnection, SIGNAL(currentIndexChanged(const QString &)), this,
+  connect(ui.cmbConnection, SIGNAL(currentTextChanged(const QString &)), this,
           SLOT(updateConnectionDetails(const QString &)));
 
   QLayout *buttonLayout = this->createDefaultButtonLayout();

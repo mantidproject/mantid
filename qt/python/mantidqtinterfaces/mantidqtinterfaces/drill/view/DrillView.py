@@ -423,7 +423,7 @@ class DrillView(QMainWindow):
         """
         Open the Mantid user directories manager.
         """
-        manageuserdirectories.ManageUserDirectories(self).exec_()
+        manageuserdirectories.ManageUserDirectories(self).exec()
 
     def showContextMenu(self, pos):
         """

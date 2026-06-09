@@ -1,0 +1,1 @@
+- Modifications made to :ref:`algm-ReflectometryReductionOneAuto` and :ref:`algm-Stitch1DMany` so that all workspaces output from ISIS polarized Reflectometry reductions use consistent spin-state suffixes.

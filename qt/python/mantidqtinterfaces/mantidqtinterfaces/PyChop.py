@@ -34,4 +34,4 @@ else:
 window = PyChopGui.PyChopGui(parent, flags)
 window.show()
 if not within_mantid:
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

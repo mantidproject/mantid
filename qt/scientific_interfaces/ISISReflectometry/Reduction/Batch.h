@@ -30,6 +30,11 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL Batch final : public IBatch {
 public:
   Batch(Experiment const &experiment, Instrument const &instrument, RunsTable &runsTable, Slicing const &slicing);
 
+  // This object acts as a non-owning view. Prevent construction from temporary objects to avoid dangling references.
+  Batch(Experiment &&, Instrument const &, RunsTable &, Slicing const &) = delete;
+  Batch(Experiment const &, Instrument &&, RunsTable &, Slicing const &) = delete;
+  Batch(Experiment const &, Instrument const &, RunsTable &, Slicing &&) = delete;
+
   Experiment const &experiment() const override;
   Instrument const &instrument() const override;
   RunsTable const &runsTable() const override;

@@ -203,7 +203,7 @@ class MantidNavigationToolbar(NavigationToolbar2, QToolBar):
         dia = SubplotToolQt(self.canvas.figure, self.canvas.parent())
         dia.setWindowIcon(QIcon(image))
         dia.setWindowTitle(MantidStandardNavigationTools.CONFIGURE.tooltip)
-        dia.exec_()
+        dia.exec()
 
     def set_action_enabled(self, text: str, state: bool):
         """

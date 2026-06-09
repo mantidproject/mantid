@@ -303,7 +303,7 @@ class ReductionGUI(QMainWindow):
             dialog = InstrDialog()
         else:
             dialog = InstrDialog(self._instrument_list)
-        dialog.exec_()
+        dialog.exec()
         if dialog.result() == 1:
             self._instrument = dialog.instr_combo.currentText()
             self._facility = dialog.facility_combo.currentText()
@@ -540,7 +540,7 @@ def start():
     reducer.setup_layout(load_last=True)
     reducer.show()
     if not within_mantid:
-        sys.exit(app.exec_())
+        sys.exit(app.exec())
 
 
 if __name__ == "__main__":

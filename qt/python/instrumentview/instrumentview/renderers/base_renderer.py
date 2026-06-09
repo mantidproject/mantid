@@ -21,6 +21,21 @@ class InstrumentRenderer(ABC):
     or shape-based rendering (slower, geometrically accurate).
     """
 
+    def __init__(self) -> None:
+        super().__init__()
+        self._mouse_move_observer_id = None
+        self._left_button_observer_id = None
+        self._picking_tolerance: float = 0.01
+
+    def _clear_observers(self, plotter):
+        style = plotter.iren.style
+        if self._mouse_move_observer_id is not None:
+            style.RemoveObserver(self._mouse_move_observer_id)
+        if self._left_button_observer_id is not None:
+            style.RemoveObserver(self._left_button_observer_id)
+        self._mouse_move_observer_id = None
+        self._left_button_observer_id = None
+
     @abstractmethod
     def build_detector_mesh(self, positions: np.ndarray, flip_beam: bool, model) -> pv.PolyData:
         """Build the visual mesh for unmasked detectors.
@@ -91,7 +106,7 @@ class InstrumentRenderer(ABC):
         """Add the masked detector mesh to the plotter."""
 
     @abstractmethod
-    def enable_picking(self, plotter: BackgroundPlotter, callback: Callable[[int], None]) -> None:
+    def enable_picking(self, plotter: BackgroundPlotter, callback: Callable[[int], None], hover: bool = False) -> None:
         """Set up picking interaction on the plotter.
 
         Parameters
@@ -129,6 +144,15 @@ class InstrumentRenderer(ABC):
         label : str
             Scalar array name.
         """
+
+    def _effective_picking_tolerance(self, hover: bool) -> float:
+        """Return the tolerance to pass to the VTK picker.
+
+        Hover picking uses a 25 % larger tolerance so that moving the mouse
+        over nearby detectors feels responsive without sacrificing click
+        precision.
+        """
+        return self._picking_tolerance * 1.25 if hover else self._picking_tolerance
 
     def set_parallel_view(self, plotter):
         plotter.view_xy()

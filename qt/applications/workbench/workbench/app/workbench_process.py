@@ -68,7 +68,9 @@ def qapplication():
         # The report is sent when the FrameworkManager kicks up
         UsageService.setApplicationName(APPNAME)
 
-        app.setAttribute(Qt.AA_UseHighDpiPixmaps)
+        # High-DPI pixmaps are always enabled in Qt6, where this attribute was removed
+        if hasattr(Qt, "AA_UseHighDpiPixmaps"):
+            app.setAttribute(Qt.AA_UseHighDpiPixmaps)
         if hasattr(Qt, "AA_DisableWindowContextHelpButton"):
             app.setAttribute(Qt.AA_DisableWindowContextHelpButton)
 
@@ -177,7 +179,7 @@ def create_and_launch_workbench(app, command_line_options):
                 AboutPresenter(main_window).show()
 
         # lift-off!
-        exit_value = app.exec_()
+        exit_value = app.exec()
     except BaseException:
         # We count this as a crash
         import traceback

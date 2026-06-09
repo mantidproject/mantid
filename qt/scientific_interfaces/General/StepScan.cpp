@@ -113,8 +113,8 @@ void StepScan::cleanupWorkspaces() {
   m_uiForm.launchInstView->setEnabled(false);
   m_uiForm.plotVariable->setEnabled(false);
   // Disconnect anything listening to the comboboxes
-  m_uiForm.plotVariable->disconnect(SIGNAL(currentIndexChanged(const QString &)));
-  m_uiForm.normalization->disconnect(SIGNAL(currentIndexChanged(const QString &)));
+  m_uiForm.plotVariable->disconnect(SIGNAL(currentTextChanged(const QString &)));
+  m_uiForm.normalization->disconnect(SIGNAL(currentTextChanged(const QString &)));
 }
 
 /** Slot that is called when the live data button is clicked
@@ -509,9 +509,9 @@ void StepScan::runStepScanAlg() {
 
   // Now that the algorithm's been run, connect up the signal to change the plot
   // variable
-  connect(m_uiForm.plotVariable, SIGNAL(currentIndexChanged(const QString &)), SLOT(generateCurve(const QString &)));
+  connect(m_uiForm.plotVariable, SIGNAL(currentTextChanged(const QString &)), SLOT(generateCurve(const QString &)));
   // and the one if the normalisation's been changed
-  connect(m_uiForm.normalization, SIGNAL(currentIndexChanged(const QString &)), SLOT(updateForNormalizationChange()));
+  connect(m_uiForm.normalization, SIGNAL(currentTextChanged(const QString &)), SLOT(updateForNormalizationChange()));
   // Create the plot for the first time
   generateCurve(m_uiForm.plotVariable->currentText());
 }

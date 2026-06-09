@@ -10,8 +10,8 @@ import numpy as np
 import mantid
 from mantid.kernel import logger
 from qtpy import QtWidgets, QtCore
-from qtpy.QtGui import QDoubleValidator, QRegExpValidator
-from qtpy.QtCore import QRegExp
+from qtpy.QtGui import QDoubleValidator, QRegularExpressionValidator
+from qtpy.QtCore import QRegularExpression
 from mantidqt.MPLwidgets import FigureCanvas, NavigationToolbar2QT
 from matplotlib.figure import Figure
 from scipy import constants
@@ -100,7 +100,7 @@ class QECoverageGUI(QtWidgets.QWidget):
         ei_tip = "Incident Energy in meV.\nAccepts several comma separated values.\nNo negative values allowed."
         self.direct_ei_input.setToolTip(ei_tip)
         comma_sep_postv_floats_regex_str = r"^(\s*\+?[0-9]*\.?[0-9]*)(\s*,\s*\+?[0-9]*\.?[0-9]*)+\s*$"
-        comma_sep_floats_validator = QRegExpValidator(QRegExp(comma_sep_postv_floats_regex_str))
+        comma_sep_floats_validator = QRegularExpressionValidator(QRegularExpression(comma_sep_postv_floats_regex_str))
         self.direct_ei_input.setValidator(comma_sep_floats_validator)
         self.invalid_ei_msg = (
             "\nEi provided was invalid, Ei should be a positive float or a sequence of positive floats separated by commas"

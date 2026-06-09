@@ -123,6 +123,8 @@ std::pair<int, int> RectangularDetector::getXYForDetectorID(const int detectorID
   return std::pair<int, int>(std::get<0>(xyz), std::get<1>(xyz));
 }
 
+V3D RectangularDetector::getPosAtXY(const int x, const int y) const { return GridDetector::getPosAtXYZ(x, y, 0); }
+
 //-------------------------------------------------------------------------------------------------
 /** Returns the position of the center of the pixel at x,y, relative to the
  * center
@@ -133,6 +135,12 @@ std::pair<int, int> RectangularDetector::getXYForDetectorID(const int detectorID
  * @return a V3D vector of the relative position
  */
 V3D RectangularDetector::getRelativePosAtXY(int x, int y) const { return GridDetector::getRelativePosAtXYZ(x, y, 0); }
+
+void RectangularDetector::getBoundingBoxAtXY(const int x, const int y, BoundingBox &box) const {
+  GridDetector::getBoundingBoxAtXYZ(x, y, 0, box);
+}
+
+bool RectangularDetector::inBoundsXY(int x, int y) const { return GridDetector::inBoundsXYZ(x, y, 0); }
 
 //-------------------------------------------------------------------------------------------------
 /** Initialize a RectangularDetector by creating all of the pixels
@@ -185,17 +193,13 @@ void RectangularDetector::initialize(std::shared_ptr<IObject> shape, int xpixels
 void RectangularDetector::testIntersectionWithChildren(Track &testRay,
                                                        std::deque<IComponent_const_sptr> & /*searchQueue*/) const {
   /// Base point (x,y,z) = position of pixel 0,0
-  V3D basePoint;
+  V3D basePoint = getPosAtXY(0, 0);
 
   /// Vertical (y-axis) basis vector of the detector
-  V3D vertical;
+  V3D vertical = getPosAtXY(0, ypixels() - 1) - basePoint;
 
   /// Horizontal (x-axis) basis vector of the detector
-  V3D horizontal;
-
-  basePoint = getAtXY(0, 0)->getPos();
-  horizontal = getAtXY(xpixels() - 1, 0)->getPos() - basePoint;
-  vertical = getAtXY(0, ypixels() - 1)->getPos() - basePoint;
+  V3D horizontal = getPosAtXY(xpixels() - 1, 0) - basePoint;
 
   // The beam direction
   V3D beam = testRay.direction();

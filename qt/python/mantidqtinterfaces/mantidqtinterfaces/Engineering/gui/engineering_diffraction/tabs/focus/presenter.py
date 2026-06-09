@@ -65,7 +65,7 @@ class FocusPresenter(object):
             return
         focus_paths = self.view.get_focus_filenames()
         if self._number_of_files_warning(focus_paths):
-            self.start_focus_worker(focus_paths, self.view.get_plot_output(), self.rb_num, self.current_calibration)
+            self.start_focus_worker(focus_paths, self.view.get_focus_plot_output(), self.rb_num, self.current_calibration)
 
     def start_focus_worker(self, focus_paths: list, plot_output: bool, rb_num: str, calibration: CalibrationInfo) -> None:
         """

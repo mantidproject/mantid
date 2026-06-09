@@ -22,4 +22,4 @@ else:
 reducer = eventFilterGUI.MainWindow(parent, flags)  # the main ui class in this file is called MainWindow
 reducer.show()
 if not within_mantid:
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

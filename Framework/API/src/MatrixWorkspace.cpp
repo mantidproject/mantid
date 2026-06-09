@@ -2160,8 +2160,8 @@ void MatrixWorkspace::buildDefaultSpectrumDefinitions() {
 void MatrixWorkspace::rebuildDetectorIDGroupings() {
   const auto &detInfo = detectorInfo();
   const auto detInfo_scanCount = detInfo.scanCount(); // cache value outside of the loop
-  const auto &allDetIDs = detInfo.detectorIDs();
-  const auto allDetIDs_size = allDetIDs.size(); // cache value outside of the loop
+  // Use size() directly; avoid detectorIDs()
+  const auto allDetIDs_size = detInfo.size();
   const auto &specDefs = m_indexInfo->spectrumDefinitions();
   const auto indexInfoSize = static_cast<int64_t>(m_indexInfo->size());
   enum class ErrorCode { None, InvalidDetIndex, InvalidTimeIndex };
@@ -2180,7 +2180,7 @@ void MatrixWorkspace::rebuildDetectorIDGroupings() {
       } else if (index.second >= detInfo_scanCount) { // timeIndex is second
         errorValue = ErrorCode::InvalidTimeIndex;
       } else {
-        detIDs.insert(allDetIDs[detIndex]);
+        detIDs.insert(detInfo.detid(detIndex));
       }
     }
     spec.setDetectorIDs(std::move(detIDs));

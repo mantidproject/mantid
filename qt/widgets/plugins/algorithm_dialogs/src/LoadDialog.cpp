@@ -13,7 +13,6 @@
 // Qt
 #include <QCheckBox>
 #include <QComboBox>
-#include <QDesktopWidget>
 #include <QFileInfo>
 #include <QScreen>
 #include <QUrl>

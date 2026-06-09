@@ -9,7 +9,7 @@
 #include "../DllConfig.h"
 #include "MantidKernel/System.h"
 #include "ui_OutputName.h"
-#include <QRegExpValidator>
+#include <QRegularExpressionValidator>
 #include <QWidget>
 
 namespace MantidQt {

@@ -745,19 +745,9 @@ void LoadPLN::loadParameters(const std::string &hdfFile, API::LogManager &logm) 
   MapNeXusToProperty<std::string>(entry, "sample/name", "unknown", logm, "SampleName", "", 0);
   MapNeXusToProperty<std::string>(entry, "sample/description", "unknown", logm, "SampleDescription", "", 0);
 
-  // if dataset index > 0 need to add an offset to the start time
-  Types::Core::DateAndTime startTime(GetNeXusValue<std::string>(entry, "start_time", "2000-01-01T00:00:00", 0));
-  if (m_datasetIndex > 0) {
-    auto baseTime = GetNeXusValue<int32_t>(entry, "instrument/detector/start_time", 0, 0);
-    auto nthTime = GetNeXusValue<int32_t>(entry, "instrument/detector/start_time", 0, m_datasetIndex);
-
-    Types::Core::time_duration duration =
-        boost::posix_time::microseconds((static_cast<int64_t>(nthTime) - static_cast<int64_t>(baseTime)) * 1'000'000);
-    Types::Core::DateAndTime startDataset(startTime + duration);
-    m_startRun = startDataset.toISO8601String();
-  } else {
-    m_startRun = startTime.toISO8601String();
-  }
+  auto baseTime = GetNeXusValue<int32_t>(entry, "instrument/detector/start_time", 0, m_datasetIndex);
+  uint64_t baseTimeNSec = static_cast<uint64_t>(baseTime) * 1'000'000'000;
+  m_startRun = Types::Core::DateAndTime(ANSTO::Anxs::epochRelDateTimeBase(baseTimeNSec)).toISO8601String();
 
   // Add support for instrument running in lambda on two mode.
   // Added as UI option as the available instrument parameters
@@ -790,7 +780,7 @@ void LoadPLN::loadEnvironParameters(const std::string &hdfFile, API::LogManager 
   auto time_str = logm.getPropertyValueAsType<std::string>("end_time");
 
   // load the environment variables for the dataset loaded
-  auto tags = ANSTO::filterDatasets(entry, "data/", "^[A-Z]{1,3}[0-9]{1,3}[A-Z]{1,3}[0-9]{1,3}$");
+  auto tags = ANSTO::filterDatasets(entry, "data/", "^[A-Z]{1,3}[0-9]{1,3}[A-Za-z]{1,9}[0-9]{0,3}$");
   for (const auto &tag : tags) {
     MapNeXusToSeries<double>(entry, "data/" + tag, 0.0, logm, time_str, "env_" + tag, 1.0, m_datasetIndex);
   }
@@ -860,6 +850,11 @@ void LoadPLN::exec() {
 
   // dataset index to be loaded
   m_datasetIndex = getProperty(SelectDatasetStr);
+  if (m_datasetIndex < 0) {
+    std::string message("Negative dataset index provided, reset to zero!");
+    g_log.warning(message);
+    m_datasetIndex = 0;
+  }
 
   // if path provided build the file path from the directory name and dataset
   // number from the hdf file, however if this is not a valid path then try
