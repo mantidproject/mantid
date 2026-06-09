@@ -219,6 +219,9 @@ void SumSpectra::exec() {
   auto spectrumInfo = localworkspace->spectrumInfo();
   m_numberOfSpectra = static_cast<int>(localworkspace->getNumberHistograms());
   numMasked = determineIndices(spectrumInfo, m_numberOfSpectra);
+  if (m_indices.empty()) {
+    throw std::runtime_error("No spectra selected for summing. Check the input parameters.");
+  }
   numSpectra = m_indices.size();
   m_yLength = localworkspace->y(m_indices.front()).size();
 
