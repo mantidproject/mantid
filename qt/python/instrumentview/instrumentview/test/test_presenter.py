@@ -547,6 +547,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
 
     def test_create_and_add_sample_position_mesh_checkbox_checked(self):
         self._mock_view.is_show_sample_position_checkbox_checked.return_value = True
+        self._model._sample_position = np.array([0.0, 0.0, 0.0])
         self._presenter._create_and_add_sample_position_mesh()
         self._mock_view.add_rgba_mesh.assert_called_once()
 
