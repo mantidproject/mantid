@@ -296,9 +296,8 @@ size_t SumSpectra::determineIndices(SpectrumInfo const &spectrumInfo, const size
 
   // try the list form first
   const std::vector<int> indices_list = getProperty("ListOfWorkspaceIndices");
-  for (const int idx : indices_list) {
-    m_indices.push_back(static_cast<size_t>(idx));
-  }
+  std::transform(indices_list.cbegin(), indices_list.cend(), std::back_inserter(m_indices),
+                 [](const int idx) { return static_cast<size_t>(idx); });
 
   // add the range specified by the user
   // this has been checked to be 0<= m_minWsInd <= maxIndex <=
