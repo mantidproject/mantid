@@ -25,7 +25,7 @@ from mantid.api import AnalysisDataService as ADS
 from os import path, makedirs
 from scipy import interpolate
 from Engineering.common.texture_sample_viewer import has_valid_shape
-from typing import Sequence, Union, Tuple
+from typing import Sequence, Tuple
 from mantid.dataobjects import Workspace2D
 from Engineering.common.calibration_info import CalibrationInfo
 from Engineering.texture.texture_helper import get_gauge_vol_str, load_all_orientations
@@ -120,8 +120,8 @@ class TextureCorrectionModel:
         ws: str,
         out_ws: str,
         root_dir: str,
-        abs_corr: Union[float, str] = 1.0,
-        div_corr: Union[float, str] = 1.0,
+        abs_corr: float | str = 1.0,
+        div_corr: float | str = 1.0,
     ) -> str:
         ws = ADS.retrieve(ws)
         temp_ws = ConvertUnits(ws, Target="dSpacing", StoreInADS=False)
@@ -290,7 +290,7 @@ class TextureCorrectionModel:
         return out_dict
 
     @staticmethod
-    def _parse_param_values(string: str) -> Union[bool, int, str]:
+    def _parse_param_values(string: str) -> bool | int | str:
         l_string = string.lower()
         if l_string == "true":
             return True
