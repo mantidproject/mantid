@@ -2,8 +2,7 @@
 include(QtTargetFunctions)
 
 # Resource compiler for PyQt5. PyQt6 does not ship a Python resource compiler (pyrcc was removed in Qt6), so this is
-# only wired up for the Qt5 build; the Qt6 workbench resource story is a separate follow-up (see
-# qt/applications/workbench).
+# only wired up for the Qt5 build; the Qt6 build compiles a binary .rcc with Qt's own rcc instead (see below).
 if((ENABLE_WORKBENCH OR BUILD_MANTIDQT)
    AND NOT PYRCC5_CMD
    AND MANTID_QT_VERSION EQUAL 5

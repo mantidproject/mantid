@@ -28,7 +28,7 @@ else()
 endif()
 
 # Resource files. Resource compilation needs a Python resource compiler (PYRCC5_CMD), which only exists for PyQt5. For
-# Qt6 a stub workbench_resources target is created instead - PyQt6 resource handling is a separate follow-up.
+# Qt6 a binary .rcc is compiled with Qt's own rcc instead (see the else branch below).
 set(_images_qrc_file ${CMAKE_CURRENT_LIST_DIR}/resources.qrc)
 if(PYRCC5_CMD)
   if(WIN32)
