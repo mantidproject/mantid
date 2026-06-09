@@ -10,6 +10,7 @@
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/Objects/IObject.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
 
 namespace Mantid {
@@ -38,12 +39,18 @@ public:
 
   API::MatrixWorkspace_sptr m_inputWS; ///< A pointer to the input workspace
   double m_cubeSide;                   ///< Element size of raster
-  const Geometry::IObject_sptr getGaugeVolumeObject();
   const Kernel::V3D calcAveragePosition(const std::vector<Kernel::V3D> &pos);
   const Kernel::V3D rasterizeGaugeVolumeAndCalculateMeanElementPosition(const Kernel::V3D beamDirection,
                                                                         const Geometry::IObject_sptr integrationVolume,
                                                                         const Geometry::IObject_sptr sampleObject);
   const Geometry::IObject_sptr extractValidSampleObject(const API::Sample &sample);
+  /// Rasterise the workspace's lab-frame GaugeVolume directly, transforming each candidate voxel
+  /// into the sample shape's frame via gonioR.inv() before testing it against the sample. Keeping
+  /// the gauge in its own frame avoids inflating its axis-aligned bounding box for non-axis-aligned
+  /// goniometer rotations, which would otherwise admit voxels lying outside the actual gauge
+  /// volume. Returns the mean accepted position directly in the lab frame.
+  const Kernel::V3D rasterizeLabGaugeAndCalculateMeanElementPosition(const Geometry::IObject &sampleObject,
+                                                                     const Kernel::Matrix<double> &gonioR);
 
 private:
   /// Initialisation code

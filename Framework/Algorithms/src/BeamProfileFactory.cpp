@@ -13,6 +13,9 @@
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidKernel/V3D.h"
 
+#include <algorithm>
+#include <cmath>
+
 namespace Mantid::Algorithms {
 std::unique_ptr<IBeamProfile> BeamProfileFactory::createBeamProfile(const Geometry::Instrument &instrument,
                                                                     const API::Sample &sample) {
@@ -36,18 +39,22 @@ std::unique_ptr<IBeamProfile> BeamProfileFactory::createBeamProfile(const Geomet
   if (!sample.getShape().hasValidShape() && !sample.hasEnvironment()) {
     throw std::invalid_argument("Cannot determine beam profile without a sample shape and environment");
   }
-  Kernel::V3D bbox;
-  Kernel::V3D bboxCentre;
+  Kernel::V3D bboxMin;
+  Kernel::V3D bboxMax;
   if (sample.getShape().hasValidShape()) {
-    bbox = sample.getShape().getBoundingBox().width();
-    bboxCentre = sample.getShape().getBoundingBox().centrePoint();
+    bboxMin = sample.getShape().getBoundingBox().minPoint();
+    bboxMax = sample.getShape().getBoundingBox().maxPoint();
   } else {
-    bbox = sample.getEnvironment().boundingBox().width();
-    bboxCentre = sample.getEnvironment().boundingBox().centrePoint();
+    bboxMin = sample.getEnvironment().boundingBox().minPoint();
+    bboxMax = sample.getEnvironment().boundingBox().maxPoint();
   }
-  // beam profile always centred on zero so set half width = centre + sample half width
-  const double beamWidth = 2 * bboxCentre[frame->pointingHorizontal()] + bbox[frame->pointingHorizontal()];
-  const double beamHeight = 2 * bboxCentre[frame->pointingUp()] + bbox[frame->pointingUp()];
+  // Beam profile is always centred on zero, so its half-extent must reach the furthest sample face
+  // from the origin on either side. Using 2*max(|min|, |max|) keeps the beam valid when the sample
+  // is offset and/or rotated such that its bbox lies entirely in a negative half-space.
+  const auto hor = frame->pointingHorizontal();
+  const auto up = frame->pointingUp();
+  const double beamWidth = 2 * std::max(std::abs(bboxMin[hor]), std::abs(bboxMax[hor]));
+  const double beamHeight = 2 * std::max(std::abs(bboxMin[up]), std::abs(bboxMax[up]));
   return std::make_unique<RectangularBeamProfile>(*frame, source->getPos(), beamWidth, beamHeight);
 }
 } // namespace Mantid::Algorithms

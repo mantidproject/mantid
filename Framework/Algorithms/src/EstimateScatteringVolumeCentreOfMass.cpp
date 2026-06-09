@@ -10,11 +10,13 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Rasterize.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
 #include <unordered_map>
 
@@ -70,20 +72,32 @@ void EstimateScatteringVolumeCentreOfMass::exec() {
   }
   m_cubeSide *= it->second; // now in m
 
-  // Retrieve the Sample Shape Geometry
-  const Geometry::IObject_sptr sampleObject = extractValidSampleObject(m_inputWS->mutableSample());
-
-  // Retrieve the illumination volume (we assume the sample is fully illuminated hence the volume is the same as the
-  // sample, unless a Gauge Volume has been defined)
+  // The sample shape on the workspace already has any initial rotation baked into its definition,
+  // so it is expressed in the sample shape's own frame. The workspace's goniometer R describes
+  // the additional rotation from that frame into the lab frame. The gauge volume (if any) is
+  // defined in the lab frame.
   //
-  // NB: here we expect the gauge volume object to be the illumination volume in the lab frame, as such,
-  // it is not required to be wholly within the sample shape (this will likely be the main use case for this alg)
-  const Geometry::IObject_sptr integrationVolume =
-      m_inputWS->run().hasProperty("GaugeVolume") ? getGaugeVolumeObject() : sampleObject;
+  // When a gauge volume is present we rasterise it in the lab frame and transform each candidate
+  // voxel into the sample shape's frame via R.inv() to test inclusion against the sample. Doing
+  // the intersection this way - rather than rotating the gauge into the sample frame - keeps the
+  // gauge's axis-aligned bounding box tight even for non-axis-aligned rotations; rotating the
+  // gauge would inflate its bbox and silently admit voxels outside the actual gauge volume.
+  //
+  // With no gauge volume the illumination volume equals the sample, so we rasterise the sample
+  // in its own frame (where the rasterise loop only ever accepts points inside the sample anyway)
+  // and rotate the resulting mean position into the lab frame.
+  const Geometry::IObject_sptr sampleObject = extractValidSampleObject(m_inputWS->mutableSample());
+  const Kernel::Matrix<double> gonioR = m_inputWS->run().getGoniometer().getR();
 
-  const V3D averagePos =
-      rasterizeGaugeVolumeAndCalculateMeanElementPosition(beamDirection, integrationVolume, sampleObject);
-  setProperty("CentreOfMass", std::vector<double>(averagePos));
+  V3D averagePosInLabFrame;
+  if (m_inputWS->run().hasProperty("GaugeVolume")) {
+    averagePosInLabFrame = rasterizeLabGaugeAndCalculateMeanElementPosition(*sampleObject, gonioR);
+  } else {
+    const V3D averagePosInShapeFrame =
+        rasterizeGaugeVolumeAndCalculateMeanElementPosition(beamDirection, sampleObject, sampleObject);
+    averagePosInLabFrame = gonioR * averagePosInShapeFrame;
+  }
+  setProperty("CentreOfMass", std::vector<double>(averagePosInLabFrame));
 }
 
 /// Calculate as raster of the illumination volume, evaluating which points are within the sample geometry.
@@ -117,15 +131,67 @@ const Geometry::IObject_sptr EstimateScatteringVolumeCentreOfMass::extractValidS
   }
 }
 
-const Geometry::IObject_sptr EstimateScatteringVolumeCentreOfMass::getGaugeVolumeObject() {
-  g_log.information("Calculating scattering within the gauge volume defined on "
-                    "the input workspace");
+const V3D EstimateScatteringVolumeCentreOfMass::rasterizeLabGaugeAndCalculateMeanElementPosition(
+    const Geometry::IObject &sampleObject, const Kernel::Matrix<double> &gonioR) {
+  g_log.information("Calculating scattering within the gauge volume defined on the input workspace");
+  const std::string xml = m_inputWS->run().getProperty("GaugeVolume")->value();
+  const Geometry::IObject_sptr gauge = Geometry::ShapeFactory().createShape(xml);
 
-  // Retrieve and create the gauge volume shape
-  const Geometry::IObject_sptr volume =
-      ShapeFactory().createShape(m_inputWS->run().getProperty("GaugeVolume")->value());
+  Kernel::Matrix<double> gonioRInv(gonioR);
+  gonioRInv.Invert();
+  const bool gonioIsIdentity = (gonioR == Kernel::Matrix<double>(3, 3, true));
 
-  return volume;
+  const auto bbox = gauge->getBoundingBox();
+  const double xLength = bbox.xMax() - bbox.xMin();
+  const double yLength = bbox.yMax() - bbox.yMin();
+  const double zLength = bbox.zMax() - bbox.zMin();
+  const auto numXSlices = static_cast<size_t>(xLength / m_cubeSide);
+  const auto numYSlices = static_cast<size_t>(yLength / m_cubeSide);
+  const auto numZSlices = static_cast<size_t>(zLength / m_cubeSide);
+  if (numXSlices == 0 || numYSlices == 0 || numZSlices == 0) {
+    const std::string mess("Gauge volume is too small for the chosen ElementSize - "
+                           "try reducing the ElementSize");
+    g_log.error(mess);
+    throw std::runtime_error(mess);
+  }
+  const double dx = xLength / static_cast<double>(numXSlices);
+  const double dy = yLength / static_cast<double>(numYSlices);
+  const double dz = zLength / static_cast<double>(numZSlices);
+
+  V3D sum(0.0, 0.0, 0.0);
+  size_t count = 0;
+  for (size_t i = 0; i < numZSlices; ++i) {
+    const double z = (static_cast<double>(i) + 0.5) * dz + bbox.zMin();
+    for (size_t j = 0; j < numYSlices; ++j) {
+      const double y = (static_cast<double>(j) + 0.5) * dy + bbox.yMin();
+      for (size_t k = 0; k < numXSlices; ++k) {
+        const double x = (static_cast<double>(k) + 0.5) * dx + bbox.xMin();
+        const V3D pLab(x, y, z);
+        // Reject voxels outside the actual (lab-frame) gauge volume. For an axis-aligned gauge
+        // the bbox is tight and this is a no-op, but for any non-axis-aligned authored gauge
+        // it correctly clips the iteration to the gauge interior.
+        if (!gauge->isValid(pLab)) {
+          continue;
+        }
+        // Test inclusion against the sample shape in its own frame.
+        const V3D pShape = gonioIsIdentity ? pLab : gonioRInv * pLab;
+        if (!sampleObject.isValid(pShape)) {
+          continue;
+        }
+        sum += pLab;
+        ++count;
+      }
+    }
+  }
+  if (count == 0) {
+    const std::string mess("Failed to find any voxels inside both the gauge volume and the sample "
+                           "shape - check sample shape and gauge volume are defined correctly or "
+                           "try reducing the ElementSize");
+    g_log.error(mess);
+    throw std::runtime_error(mess);
+  }
+  sum /= static_cast<double>(count);
+  return sum;
 }
 
 const V3D EstimateScatteringVolumeCentreOfMass::calcAveragePosition(const std::vector<V3D> &pos) {

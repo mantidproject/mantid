@@ -19,6 +19,7 @@
 #define NO_IMPORT_ARRAY
 #include <numpy/arrayobject.h>
 
+using Mantid::Geometry::BoundingBox;
 using Mantid::Geometry::IObject;
 using Mantid::Geometry::MeshObject;
 using namespace Mantid::PythonInterface::Converters;
@@ -50,5 +51,8 @@ void export_MeshObject() {
   register_ptr_to_python<MeshObject *>();
 
   class_<MeshObject, boost::python::bases<IObject>, boost::noncopyable>("MeshObject", no_init)
-      .def("getMesh", &wrapMeshWithNDArray, (arg("self")), "Get the vertices, grouped by triangles, from mesh");
+      .def("getMesh", &wrapMeshWithNDArray, (arg("self")), "Get the vertices, grouped by triangles, from mesh")
+
+      .def("getBoundingBox", (const BoundingBox &(MeshObject::*)() const) & MeshObject::getBoundingBox, arg("self"),
+           return_value_policy<copy_const_reference>(), "Return the axis-aligned bounding box for this shape");
 }

@@ -25,9 +25,20 @@ from Engineering.texture.texture_helper import (
     get_debug_info,
     save_texture_ws_ascii,
     generous_rebin,
+    ster_proj,
+    azim_proj,
+    ster_proj_xy,
+    azim_proj_xy,
+    get_alpha_beta_from_cart,
+    ring,
+    project_orientation,
+    vec_string_to_norm_array,
+    define_gauge_volume,
+    get_scattering_centre,
 )
 import numpy as np
 from os import path
+from scipy.spatial.transform import Rotation
 
 texture_utils_path = "Engineering.texture.texture_helper"
 
@@ -650,6 +661,251 @@ class TestSaveTextureWsAsciiSystem(unittest.TestCase):
 
         expected = os.path.join(self.save_dir, "__spec_a.txt")
         self.assertTrue(os.path.isfile(expected), f"Expected output file not found: {expected}")
+
+
+class TestProjections(unittest.TestCase):
+    def test_ster_proj_equator_maps_to_unit_circle(self):
+        # beta = pi/2 (equator) should map to radius 1
+        alphas = np.array([0.0, np.pi / 2])
+        betas = np.array([np.pi / 2, np.pi / 2])
+        i = np.array([5.0, 7.0])
+
+        out = ster_proj(alphas, betas, i)
+
+        self.assertEqual(out.shape, (2, 3))
+        # alpha=0 -> (1, 0), alpha=pi/2 -> (0, 1)
+        np.testing.assert_allclose(out[0, :2], [1.0, 0.0], atol=1e-12)
+        np.testing.assert_allclose(out[1, :2], [0.0, 1.0], atol=1e-12)
+        # intensity column is carried through unchanged
+        np.testing.assert_array_equal(out[:, 2], i)
+
+    def test_ster_proj_north_pole_maps_to_origin(self):
+        # beta = 0 maps to the centre of the projection
+        out = ster_proj(np.array([0.0]), np.array([0.0]), np.array([1.0]))
+        np.testing.assert_allclose(out[0, :2], [0.0, 0.0], atol=1e-12)
+
+    def test_azim_proj_equator_maps_to_unit_circle(self):
+        alphas = np.array([0.0, np.pi / 2])
+        betas = np.array([np.pi / 2, np.pi / 2])
+        i = np.array([5.0, 7.0])
+
+        out = azim_proj(alphas, betas, i)
+
+        self.assertEqual(out.shape, (2, 3))
+        np.testing.assert_allclose(out[0, :2], [1.0, 0.0], atol=1e-12)
+        np.testing.assert_allclose(out[1, :2], [0.0, 1.0], atol=1e-12)
+        np.testing.assert_array_equal(out[:, 2], i)
+
+    def test_azim_proj_origin_maps_to_centre(self):
+        out = azim_proj(np.array([0.0]), np.array([0.0]), np.array([3.0]))
+        np.testing.assert_allclose(out[0, :2], [0.0, 0.0], atol=1e-12)
+
+    def test_ster_proj_xy_matches_ster_proj_without_intensity(self):
+        alphas = np.array([0.3, 1.2, 2.5])
+        betas = np.array([0.4, 0.9, 1.4])
+
+        out_xy = ster_proj_xy(alphas, betas)
+        out_full = ster_proj(alphas, betas, np.zeros_like(alphas))
+
+        self.assertEqual(out_xy.shape, (3, 2))
+        np.testing.assert_allclose(out_xy, out_full[:, :2], atol=1e-12)
+
+    def test_azim_proj_xy_matches_azim_proj_without_intensity(self):
+        alphas = np.array([0.3, 1.2, 2.5])
+        betas = np.array([0.4, 0.9, 1.4])
+
+        out_xy = azim_proj_xy(alphas, betas)
+        out_full = azim_proj(alphas, betas, np.zeros_like(alphas))
+
+        self.assertEqual(out_xy.shape, (3, 2))
+        np.testing.assert_allclose(out_xy, out_full[:, :2], atol=1e-12)
+
+
+class TestGetAlphaBetaFromCart(unittest.TestCase):
+    def test_known_unit_vectors(self):
+        # columns: +x, +y, +z
+        q = np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
+        out = get_alpha_beta_from_cart(q)
+
+        self.assertEqual(out.shape, (3, 2))
+        # +x: alpha=atan2(0,1)=0,    beta=acos(0)=pi/2
+        np.testing.assert_allclose(out[0], [0.0, np.pi / 2], atol=1e-12)
+        # +y: alpha=atan2(0,0)=0,    beta=acos(1)=0
+        np.testing.assert_allclose(out[1], [0.0, 0.0], atol=1e-12)
+        # +z: alpha=atan2(1,0)=pi/2, beta=acos(0)=pi/2
+        np.testing.assert_allclose(out[2], [np.pi / 2, np.pi / 2], atol=1e-12)
+
+    def test_southern_points_are_inverted_to_northern_hemisphere(self):
+        # a southern point (y < 0) is flipped through the origin, so it must give
+        # the same (alpha, beta) as its northern mirror image
+        north = np.array([[0.3], [0.8], [0.5]])
+        north = north / np.linalg.norm(north)
+        south = -north
+        np.testing.assert_allclose(get_alpha_beta_from_cart(south), get_alpha_beta_from_cart(north), atol=1e-12)
+
+    def test_values_outside_unit_range_are_clipped(self):
+        # y = 1.5 would give nan from arccos without the clip to [-1, 1]
+        q = np.array([[0.0], [1.5], [0.0]])
+        out = get_alpha_beta_from_cart(q)
+        self.assertFalse(np.any(np.isnan(out)))
+        np.testing.assert_allclose(out[0, 1], 0.0, atol=1e-12)
+
+    def test_does_not_mutate_input(self):
+        q = np.array([[0.0], [1.5], [0.0]])
+        q_copy = q.copy()
+        get_alpha_beta_from_cart(q)
+        np.testing.assert_array_equal(q, q_copy)
+
+    def test_invalid_shape_raises_value_error(self):
+        with self.assertRaises(ValueError):
+            get_alpha_beta_from_cart(np.zeros((2, 5)))
+        with self.assertRaises(ValueError):
+            get_alpha_beta_from_cart(np.zeros(3))
+
+
+class TestRing(unittest.TestCase):
+    def test_ring_shape(self):
+        out = ring(np.array((0.0, 0.0, 1.0)), r=1, res=50)
+        self.assertEqual(out.shape, (3, 50))
+
+    def test_ring_about_z_lies_in_xy_plane_at_radius(self):
+        r = 2.0
+        out = ring(np.array((0.0, 0.0, 1.0)), r=r, res=100)
+        # all z components approx 0
+        np.testing.assert_allclose(out[2], 0.0, atol=1e-12)
+        # all points at radius r from the origin in the xy plane
+        radii = np.sqrt(out[0] ** 2 + out[1] ** 2)
+        np.testing.assert_allclose(radii, r, atol=1e-12)
+
+    def test_ring_is_perpendicular_to_axis(self):
+        axis = np.array((1.0, 0.0, 0.0))
+        out = ring(axis, r=1.5, res=80)
+        # every point should be perpendicular to the axis (dot product ~ 0)
+        dots = axis @ out
+        np.testing.assert_allclose(dots, 0.0, atol=1e-12)
+
+    def test_ring_offset_translates_ring(self):
+        # offsetting should rigidly translate every point by the offset (about z the
+        # rotation is the identity, so the shift is applied exactly)
+        axis = np.array((0.0, 0.0, 1.0))
+        offset = (1.0, 2.0, 3.0)
+        base = ring(axis, r=1, res=60)
+        shifted = ring(axis, r=1, res=60, offset=offset)
+        diff = shifted - base
+        expected = np.broadcast_to(np.array(offset)[:, None], diff.shape)
+        np.testing.assert_allclose(diff, expected, atol=1e-9)
+
+
+class TestProjectOrientation(unittest.TestCase):
+    def test_identity_rotation_matches_direct_projection(self):
+        detQs_lab = np.array([[1.0, 0.0, 0.0], [0.0, 0.0, 1.0]])
+        ax_transform = np.eye(3)
+        R = Rotation.identity()
+
+        out = project_orientation(R, detQs_lab, ax_transform, "ster")
+
+        cart = get_alpha_beta_from_cart(detQs_lab.T)
+        expected = ster_proj_xy(*cart.T)
+        self.assertEqual(out.shape, (2, 2))
+        np.testing.assert_allclose(out, expected, atol=1e-12)
+
+    def test_azimuthal_branch_used_when_not_ster(self):
+        detQs_lab = np.array([[1.0, 0.0, 0.0], [0.0, 0.0, 1.0]])
+        ax_transform = np.eye(3)
+        R = Rotation.identity()
+
+        out = project_orientation(R, detQs_lab, ax_transform, "azim")
+
+        cart = get_alpha_beta_from_cart(detQs_lab.T)
+        expected = azim_proj_xy(*cart.T)
+        np.testing.assert_allclose(out, expected, atol=1e-12)
+
+
+class TestVecStringToNormArray(unittest.TestCase):
+    def test_normalises_simple_vectors(self):
+        np.testing.assert_allclose(vec_string_to_norm_array("3,0,0"), [1.0, 0.0, 0.0])
+        np.testing.assert_allclose(vec_string_to_norm_array("0,0,5"), [0.0, 0.0, 1.0])
+
+    def test_normalises_diagonal_vector(self):
+        out = vec_string_to_norm_array("1,1,1")
+        np.testing.assert_allclose(out, np.full(3, 1 / np.sqrt(3)))
+        np.testing.assert_allclose(np.linalg.norm(out), 1.0)
+
+    @patch(texture_utils_path + ".logger")
+    def test_wrong_length_logs_error_and_returns_x_axis(self, mock_logger):
+        out = vec_string_to_norm_array("1,2")
+        np.testing.assert_array_equal(out, [1, 0, 0])
+        mock_logger.error.assert_called_once()
+
+    @patch(texture_utils_path + ".logger")
+    def test_unparsable_values_log_error_and_return_x_axis(self, mock_logger):
+        out = vec_string_to_norm_array("a,b,c")
+        np.testing.assert_array_equal(out, [1, 0, 0])
+        mock_logger.error.assert_called_once()
+
+
+class TestDefineGaugeVolume(unittest.TestCase):
+    @patch(texture_utils_path + ".DefineGaugeVolume")
+    def test_applies_gauge_volume_when_string_given(self, mock_define):
+        ws = MagicMock()
+        define_gauge_volume(ws, "<xml/>")
+        mock_define.assert_called_once_with(ws, "<xml/>")
+
+    @patch(texture_utils_path + ".DefineGaugeVolume")
+    def test_does_nothing_when_string_is_none(self, mock_define):
+        define_gauge_volume(MagicMock(), None)
+        mock_define.assert_not_called()
+
+    @patch(texture_utils_path + ".DefineGaugeVolume")
+    def test_does_nothing_when_string_is_empty(self, mock_define):
+        define_gauge_volume(MagicMock(), "")
+        mock_define.assert_not_called()
+
+
+class TestGetScatteringCentre(unittest.TestCase):
+    @staticmethod
+    def _make_ws(has_gauge_vol, extents=(0.01, 0.01, 0.01)):
+        ws = MagicMock()
+        ws.run.return_value.hasProperty.return_value = has_gauge_vol
+        ws.sample.return_value.getShape.return_value.getBoundingBox.return_value.width.return_value = list(extents)
+        return ws
+
+    @patch(texture_utils_path + ".EstimateScatteringVolumeCentreOfMass", return_value=[0.1, 0.2, 0.3])
+    def test_with_gauge_volume_uses_1mm_elements(self, mock_estimate):
+        ws = self._make_ws(has_gauge_vol=True)
+        out = get_scattering_centre(ws)
+
+        np.testing.assert_array_equal(out, [0.1, 0.2, 0.3])
+        _, kwargs = mock_estimate.call_args
+        self.assertEqual(kwargs["ElementSize"], 1)
+        self.assertEqual(kwargs["ElementUnits"], "mm")
+
+    @patch(texture_utils_path + ".EstimateScatteringVolumeCentreOfMass", return_value=[0.0, 0.0, 0.0])
+    def test_cubic_shape_without_gauge_volume_uses_factor_of_5(self, mock_estimate):
+        ws = self._make_ws(has_gauge_vol=False, extents=(0.01, 0.01, 0.01))
+        get_scattering_centre(ws)
+
+        _, kwargs = mock_estimate.call_args
+        self.assertAlmostEqual(kwargs["ElementSize"], 0.01 / 5)
+        self.assertEqual(kwargs["ElementUnits"], "m")
+
+    @patch(texture_utils_path + ".EstimateScatteringVolumeCentreOfMass", return_value=[0.0, 0.0, 0.0])
+    def test_elongated_shape_without_gauge_volume_uses_factor_of_2(self, mock_estimate):
+        # longest / shortest >= 5 (a wire-like shape) -> only 2 elements across the short side
+        ws = self._make_ws(has_gauge_vol=False, extents=(0.001, 0.001, 0.1))
+        get_scattering_centre(ws)
+
+        _, kwargs = mock_estimate.call_args
+        self.assertAlmostEqual(kwargs["ElementSize"], 0.001 / 2)
+
+    @patch(texture_utils_path + ".logger")
+    @patch(texture_utils_path + ".EstimateScatteringVolumeCentreOfMass", side_effect=RuntimeError("outside gauge volume"))
+    def test_falls_back_to_origin_on_runtime_error(self, mock_estimate, mock_logger):
+        ws = self._make_ws(has_gauge_vol=True)
+        out = get_scattering_centre(ws)
+
+        np.testing.assert_array_equal(out, [0.0, 0.0, 0.0])
+        mock_logger.warning.assert_called_once()
 
 
 if __name__ == "__main__":
