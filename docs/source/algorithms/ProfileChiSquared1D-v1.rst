@@ -14,8 +14,8 @@ This algorithm explores the surface of the :math:`\chi^{2}` around its minimum a
 The value of the output property is a base name for two output table workspaces: '<Output>_errors' and '<Output>_pdf'.
 The former workspace contains parameter error estimates and the latter shows :math:`\chi^{2}`'s 1d slices along each parameter.
 
-The procedure for calculating errors of parameters is described in Chapter 15 of Numerical recipes in C [1] and Chapter 9
-of Statistical Data Analysis [2]. Here, we summarise the main results.
+The procedure for calculating errors of parameters is described in Chapter 15 of Numerical recipes in C [1]_ and Chapter 9
+of Statistical Data Analysis [2]_. Here, we summarise the main results.
 
 Consider the input dataset :math:`D_0`, with fit parameters :math:`\mathbf a_0`. Assuming Gaussian noise in the data, it is possible
 to create :math:`n` artificial datasets :math:`D_j` for :math:`j=1,2,..,n`. If we were to run the fit on each dataset,
@@ -173,10 +173,8 @@ the parameter value.
 References
 ----------
 
-[1] William H. Press, Saul A. Teukolsky, William T. Vetterling, and Brian P. Flannery. 1992.
-Numerical recipes in C (2nd ed.): the art of scientific computing. Cambridge University Press, USA.
-
-[2] G. Cowan, Statistical Data Analysis, Clarendon, Oxford, 1998
+.. [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, and Brian P. Flannery. 1992. Numerical recipes in C (2nd ed.): the art of scientific computing. Cambridge University Press, USA.
+.. [2] \G. Cowan, Statistical Data Analysis, Clarendon, Oxford, 1998
 
 
 .. categories::

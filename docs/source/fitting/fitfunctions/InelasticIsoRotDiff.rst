@@ -41,7 +41,7 @@ for :math:`Q\cdot Radius<20`, a comfortable upper bound for the vast majority of
 References
 ----------
 
-.. [1] M. Bee, "Quasielastic Neutron Scattering", Taylor & Francis, 1988.
+.. [1] \M. Bee, "Quasielastic Neutron Scattering", Taylor & Francis, 1988.
 
 Usage
 -----

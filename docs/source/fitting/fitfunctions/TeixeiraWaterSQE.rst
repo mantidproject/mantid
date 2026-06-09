@@ -34,7 +34,7 @@ dimensionality of the diffusion problem (:math:`N=3` for diffusion in a volume).
 References
 ----------
 
-.. [1] J. Teixeira, M.-C. Bellissent-Funel, S. H. Chen, and A. J. Dianoux. `Phys. Rev. A, 31:1913–1917 <http://dx.doi.org/10.1103/PhysRevA.31.1913>`__
+.. [1] \J. Teixeira, M.-C. Bellissent-Funel, S. H. Chen, and A. J. Dianoux. `Phys. Rev. A, 31:1913–1917 <http://dx.doi.org/10.1103/PhysRevA.31.1913>`__
 
 .. properties::
 

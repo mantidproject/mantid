@@ -32,7 +32,7 @@ where:
 References
 ----------
 
-.. [1] M. Bée, Chemical Physics 292, 121-141 (2003) <https://www.sciencedirect.com/science/article/abs/pii/S030101040300257X>
+.. [1] \M. Bée, Chemical Physics 292, 121-141 (2003) <https://www.sciencedirect.com/science/article/abs/pii/S030101040300257X>
 
 .. categories::
 
