@@ -9,11 +9,11 @@ from mantid.kernel import logger
 from mantid.simpleapi import Load
 
 
-def get_run_number_from_path(run_path, instrument):
+def get_run_number_from_path(run_path: str, instrument: str) -> str:
     return path.splitext(path.basename(run_path))[0].replace(instrument, "").lstrip("0")
 
 
-def load_workspace(file_path):
+def load_workspace(file_path: str) -> None:
     try:
         return Load(Filename=file_path, OutputWorkspace="engggui_calibration_sample_ws")
     except Exception as e:

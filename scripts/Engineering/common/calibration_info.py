@@ -12,13 +12,19 @@ from mantid.dataobjects import GroupingWorkspace
 from os import path
 from mantid.simpleapi import Load, LoadDetectorsGroupingFile, CreateGroupingWorkspace, SaveDetectorsGrouping
 from mantid.kernel import logger
-from typing import Optional, Sequence
+from typing import Sequence, Type
 from Engineering.common.instrument_config import get_instr_config
 from enum import Enum
 
 
 class CalibrationInfo:
-    def __init__(self, group=None, instrument=None, ceria_path=None, vanadium_path=None):
+    def __init__(
+        self,
+        group: Type[Enum] | None = None,
+        instrument: str | None = None,
+        ceria_path: str | None = None,
+        vanadium_path: str | None = None,
+    ):
         self.group = group
         self.instrument = instrument
         self.config = get_instr_config(instrument)
@@ -70,35 +76,35 @@ class CalibrationInfo:
             return self.config.group_info[self.group].banks
         return []
 
-    def get_group_description(self) -> Optional[str]:
+    def get_group_description(self) -> str | None:
         if self.group:
             return self.config.group_info[self.group].description
 
-    def get_group_file(self) -> Optional[str]:
+    def get_group_file(self) -> str | None:
         if self.group:
             return self.config.group_info[self.group].grouping_file
 
-    def get_calibration_table(self) -> Optional[str]:
+    def get_calibration_table(self) -> str | None:
         return self.calibration_table
 
-    def get_ceria_path(self) -> Optional[str]:
+    def get_ceria_path(self) -> str | None:
         return self.ceria_path
 
-    def get_ceria_runno(self) -> Optional[str]:
+    def get_ceria_runno(self) -> str | None:
         if self.ceria_path and self.instrument:
             return path_handling.get_run_number_from_path(self.ceria_path, self.instrument)
 
-    def get_vanadium_path(self) -> Optional[str]:
+    def get_vanadium_path(self) -> str | None:
         return self.vanadium_path
 
-    def get_vanadium_runno(self) -> Optional[str]:
+    def get_vanadium_runno(self) -> str | None:
         if self.vanadium_path and self.instrument:
             return path_handling.get_run_number_from_path(self.vanadium_path, self.instrument)
 
-    def get_instrument(self) -> Optional[str]:
+    def get_instrument(self) -> str | None:
         return self.instrument
 
-    def get_prm_filepath(self) -> Optional[str]:
+    def get_prm_filepath(self) -> str | None:
         return self.prm_filepath
 
     def get_group(self) -> Enum:
@@ -119,7 +125,7 @@ class CalibrationInfo:
         elif self.group == self.config.group.CROPPED and self.spectra_list_str:
             self.extra_group_suffix = f"_{self.spectra_list_str}"
 
-    def set_prm_filepath(self, prm_filepath: Optional[str]) -> None:
+    def set_prm_filepath(self, prm_filepath: str | None) -> None:
         self.prm_filepath = prm_filepath
 
     def set_calibration_table(self, cal_table: str) -> None:
@@ -223,7 +229,7 @@ class CalibrationInfo:
             logger.warning("Only save grouping workspace for custom or cropped groupings.")
         return
 
-    def generate_output_file_name(self, group: Optional[Enum] = None, ext: str = ".prm") -> str:
+    def generate_output_file_name(self, group: Type[Enum] | None = None, ext: str = ".prm") -> str:
         """
         Generate an output filename in the form INSTRUMENT_ceriaRunNo_BANKS
         :param ext: Extension to be used on the saved file
