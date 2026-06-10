@@ -11,6 +11,7 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common impo
 from Engineering.common.calibration_info import CalibrationInfo
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration.model import load_full_instrument_calibration
 import os
+from typing import List
 
 
 class FocusModel(object):
@@ -20,17 +21,17 @@ class FocusModel(object):
         self._last_focused_files_gsas2 = []
         self._last_focused_files_combined = []
 
-    def get_last_focused_files(self):
+    def get_last_focused_files(self) -> List[str]:
         return self._last_focused_files
 
-    def get_last_focused_files_gsas2(self):
+    def get_last_focused_files_gsas2(self) -> List[str]:
         return self._last_focused_files_gsas2
 
-    def get_last_focused_files_texture(self):
+    def get_last_focused_files_texture(self) -> List[str]:
         return self._last_focused_files_combined
 
     @staticmethod
-    def get_last_directory(filepaths):
+    def get_last_directory(filepaths: List[str]) -> str | None:
         directories = set()
         directory = None
         for filepath in filepaths:
@@ -41,7 +42,7 @@ class FocusModel(object):
 
     def focus_run(
         self,
-        sample_paths: list,
+        sample_paths: List[str],
         plot_output: bool,
         rb_num: str,
         calibration: CalibrationInfo,
