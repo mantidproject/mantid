@@ -30,7 +30,10 @@
 %End
 };
 
-%Exception std::exception(SIP_Exception) /PyName=BaseCppError/
+// Marked /Default/ so every wrapped call converts C++ exceptions to Python without a
+// per-function throw() specifier (the throw() exception specification is deprecated in
+// sip v6 and removed in v7). Opt a function out with a trailing `noexcept`.
+%Exception std::exception(SIP_Exception) /PyName=BaseCppError, Default/
 {
 %TypeHeaderCode
 #include <exception>
