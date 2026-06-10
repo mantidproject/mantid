@@ -111,7 +111,7 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
     def set_on_calc_pf_clicked(self, slot: Callable) -> None:
         self.btn_calc_pf.clicked.connect(slot)
 
-    def set_include_scatter_corr(self, val: bool):
+    def set_include_scatter_corr(self, val: bool) -> None:
         self.check_scatt.setChecked(val)
 
     def set_on_check_inc_scatt_corr_state_changed(self, slot: Callable) -> None:
@@ -236,7 +236,7 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
                 if checkbox:
                     checkbox.setChecked(selected)
 
-    def set_default_files(self, filepaths: Iterable[str], directory: str) -> None:
+    def set_default_files(self, filepaths: Iterable[str], directory: str | None) -> None:
         if not filepaths:
             return
         self.finder_texture_ws.setUserInput(",".join(filepaths))
@@ -270,5 +270,5 @@ class TextureView(QtWidgets.QWidget, Ui_texture):
         self.label_param.setVisible(vis)
         self.combo_param.setVisible(vis)
 
-    def set_instrument_override(self, instrument: str):
+    def set_instrument_override(self, instrument: str) -> None:
         self.finder_texture_ws.setInstrumentOverride(instrument)

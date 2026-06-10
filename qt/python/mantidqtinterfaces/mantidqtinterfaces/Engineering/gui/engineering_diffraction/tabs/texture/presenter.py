@@ -266,7 +266,7 @@ class TexturePresenter:
         self.correction_notifier.notify_subscribers("Pole Figure Created")
 
     @staticmethod
-    def _on_worker_error(error_info: AsyncTaskFailure):
+    def _on_worker_error(error_info: AsyncTaskFailure) -> None:
         logger.error(str(error_info))
 
     def plot_pf(self, save_dirs: List[str]) -> None:

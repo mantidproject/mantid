@@ -22,7 +22,7 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
     sig_view_shape_requested = QtCore.Signal(str)
     alg_ui_finished = QtCore.Signal()
 
-    def __init__(self, parent: QtWidgets.QWidget = None, instrument: str = "ENGINX"):
+    def __init__(self, parent: QtWidgets.QWidget | None = None, instrument: str = "ENGINX"):
         super(TextureCorrectionView, self).__init__(parent)
         self.setupUi(self)
         self.init_tool_tips()

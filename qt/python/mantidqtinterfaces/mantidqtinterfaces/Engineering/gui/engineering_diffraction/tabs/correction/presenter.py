@@ -163,7 +163,7 @@ class TextureCorrectionPresenter(AlgorithmObserver):
         if not div_err and not atten_err:
             self.model.calc_all_corrections(wss, out_wss, output_settings.get_output_path(), abs_args, atten_args, div_args)
 
-    def get_abs_args(self) -> Dict[str, str]:
+    def get_abs_args(self) -> Dict[str, str] | None:
         if self.view.include_absorption():
             return {
                 "gauge_vol_preset": self.view.get_shape_method(),
@@ -213,7 +213,7 @@ class TextureCorrectionPresenter(AlgorithmObserver):
     def open_set_material_dialog(self) -> None:
         self._open_alg_dialog("SetSampleMaterial")
 
-    def _open_alg_dialog(self, alg_str: str, enabled: Sequence[str] = ("InputWorkspace",), disabled: Sequence[str] = ("",)):
+    def _open_alg_dialog(self, alg_str: str, enabled: Sequence[str] = ("InputWorkspace",), disabled: Sequence[str] = ("",)) -> None:
         manager = InterfaceManager()
         dialog = manager.createDialogFromName(alg_str, -1, self.view, False, self.model.get_alg_preset_values(), "", enabled, disabled)
         dialog.addAlgorithmObserver(self)

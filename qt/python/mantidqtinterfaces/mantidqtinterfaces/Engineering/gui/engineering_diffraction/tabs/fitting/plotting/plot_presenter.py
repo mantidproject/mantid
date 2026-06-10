@@ -159,11 +159,11 @@ class FittingPlotPresenter(object):
     # Fit Asynchronous Thread
     # =======================
 
-    def _on_worker_success(self, async_success: AsyncTaskSuccess):
+    def _on_worker_success(self, async_success: AsyncTaskSuccess) -> None:
         self.fitprop_list = async_success.output
 
     @staticmethod
-    def _on_worker_error(async_failure: AsyncTaskFailure | None = None):
+    def _on_worker_error(async_failure: AsyncTaskFailure | None = None) -> None:
         error_message = str(async_failure)
         if "KeyboardInterrupt" not in error_message:
             logger.error(str(async_failure))
@@ -219,7 +219,7 @@ class FittingPlotPresenter(object):
         else:
             self.set_progress_bar_zero()
 
-    def set_final_state_progress_bar(self, output_list: List[Dict[str, str]] | None, status: str | None = None):
+    def set_final_state_progress_bar(self, output_list: List[Dict[str, str]] | None, status: str | None = None) -> None:
         if not status:
             status = output_list[-1]["status"].lower()
         if "success" in status:

@@ -197,7 +197,7 @@ class ProjectionModel(TextureProjection):
     def get_grouping(self) -> str:
         return self.grouping
 
-    def get_hkl(self) -> Tuple[int, int, int]:
+    def get_hkl(self) -> Tuple[int, int, int] | None:
         return self.hkl
 
     def get_projection_method(self) -> str:
