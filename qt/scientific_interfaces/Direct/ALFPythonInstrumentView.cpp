@@ -1,11 +1,11 @@
 #include "ALFPythonInstrumentView.h"
 #include "ALFInstrumentPresenter.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/MatrixWorkspace.h"
+// #include "MantidAPI/AnalysisDataService.h"
+// #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/Common/Python/Sip.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
-#include "StubInstrumentActor.h"
+// #include "StubInstrumentActor.h"
 
 #include <QWidget>
 #include <boost/python/extract.hpp>
@@ -48,12 +48,14 @@ Python::Object newPresenterWithLogging() {
 namespace MantidQt::CustomInterfaces {
 
 ALFPythonInstrumentView::ALFPythonInstrumentView(QWidget *parent)
-    : ALFInstrumentViewBase(parent), Python::InstanceHolder(newPresenterWithLogging()) {
+    : ALFInstrumentViewBase(parent), Python::InstanceHolder(newPresenterWithLogging()) {}
+
+void ALFPythonInstrumentView::setUpInstrument(std::string const &workspaceName) {
   GlobalInterpreterLock lock;
-  boost::python::object result = pyobj().attr("get_workspace_name")();
-  auto const workspaceName = boost::python::extract<std::string>(result)();
+  boost::python::object result = pyobj().attr("update_view")(workspaceName);
   m_actor = std::make_unique<MantidWidgets::InstrumentActor>(workspaceName, *messageHandler);
   m_actor->initialize(true, true);
+  m_workspaceName = workspaceName;
 }
 
 QWidget *ALFPythonInstrumentView::getInstrumentView() {
@@ -88,6 +90,15 @@ void ALFPythonInstrumentView::ensureCallbackRelay(QWidget *instrumentView) {
 }
 
 void ALFPythonInstrumentView::notifyWholeTubeSelected() {
+  m_presenter->notifyTubesSelected(getSelectedDetectors());
+  m_presenter->notifyShapeChanged();
+  return;
+}
+
+std::vector<DetectorTube> ALFPythonInstrumentView::getSelectedDetectors() const {
+  // TODO: Figure out where to reset the instrument actor instead of doing it everytime
+  m_actor = std::make_unique<MantidWidgets::InstrumentActor>(m_workspaceName, *messageHandler);
+  m_actor->initialize(true, true);
   try {
     GlobalInterpreterLock lock;
     boost::python::object result = pyobj().attr("selected_detector_indices_by_tube")();
@@ -99,16 +110,18 @@ void ALFPythonInstrumentView::notifyWholeTubeSelected() {
       boost::python::stl_input_iterator<std::size_t> innerBegin(listObj), innerEnd;
       tubes.emplace_back(innerBegin, innerEnd);
     }
-    m_presenter->notifyTubesSelected(tubes);
+    g_log.notice() << "ALFPythonInstrumentView::getSelectedDetectors()" << "\n";
+    g_log.notice() << "tubes: " << tubes.size() << "\n";
+    return tubes;
   } catch (boost::python::error_already_set &) {
     g_log.error() << PythonException(true).what() << "\n";
-    return;
+    return {{}};
   } catch (std::exception const &ex) {
     g_log.error() << ex.what() << "\n";
-    return;
+    return {{}};
   } catch (...) {
     g_log.error("Unknown exception getting ALF Python instrument view widget");
-    return;
+    return {{}};
   }
 }
 
@@ -127,5 +140,4 @@ MantidWidgets::IInstrumentActor const &ALFPythonInstrumentView::getInstrumentAct
   }
 }
 
-std::vector<DetectorTube> ALFPythonInstrumentView::getSelectedDetectors() const { return {}; }
 } // namespace MantidQt::CustomInterfaces

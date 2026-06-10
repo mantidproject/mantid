@@ -39,7 +39,7 @@ public:
   explicit ALFPythonInstrumentView(QWidget *parent = nullptr);
   ~ALFPythonInstrumentView() noexcept override = default;
 
-  void setUpInstrument(std::string const &fileName) override {};
+  void setUpInstrument(std::string const &fileName) override;
 
   QWidget *getInstrumentView() override;
 
@@ -59,6 +59,7 @@ private:
 
   mutable std::unique_ptr<MantidWidgets::InstrumentActor> m_actor;
   std::unique_ptr<MantidWidgets::IMessageHandler> messageHandler = std::make_unique<MantidWidgets::MessageHandler>();
+  std::string m_workspaceName;
 
   // private slots:
   //   void reconnectInstrumentActor();

@@ -8,10 +8,9 @@
 from instrumentview.alfview.ALFInstrumentViewView import ALFInstrumentViewView
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
 from instrumentview.FullInstrumentViewPresenter import FullInstrumentViewPresenter
-from instrumentview.Projections.ProjectionType import ProjectionType
 from instrumentview.ComponentSelectionUtils import subtrees_of_component_indices
 
-from mantid.simpleapi import CreateSampleWorkspace
+from mantid.simpleapi import CreateSampleWorkspace, AnalysisDataService
 from qtpy.QtCore import QObject, QMetaObject, Q_ARG
 
 
@@ -23,9 +22,20 @@ class ALFInstrumentViewPresenter(FullInstrumentViewPresenter):
     """
 
     def __init__(self, view=None):
-        _placeholder_ws = CreateSampleWorkspace(InstrumentName="ALF", StoreInADS=True, OutputWorkspace="test_alfview")
-        super().__init__(ALFInstrumentViewView(), FullInstrumentViewModel(_placeholder_ws))
-        self._view.set_default_projection(ProjectionType.SIDE_BY_SIDE)
+        _placeholder_ws = CreateSampleWorkspace(InstrumentName="ALF", StoreInADS=False, OutputWorkspace="test_alfview")
+        self.init_view_and_model(_placeholder_ws)
+
+    def update_view(self, ws_name: str):
+        ws = AnalysisDataService.retrieve(ws_name)
+        if ws is None:
+            return
+        self.init_view_and_model(ws)
+
+    def init_view_and_model(self, ws):
+        super().__init__(ALFInstrumentViewView(), FullInstrumentViewModel(ws))
+        self._view._select_bank_tube.toggle()
+        self._view._show_shapes_check_box.setChecked(False)
+        # self._view.set_default_projection(ProjectionType.SIDE_BY_SIDE)
 
     def selected_detector_ids(self):
         return []
@@ -44,5 +54,8 @@ class ALFInstrumentViewPresenter(FullInstrumentViewPresenter):
         super().update_picked_detectors_on_view()
         self.notify_cpp_callback("notify_whole_tube_selected")
 
-    def get_workspace_name(self):
-        return self._model._workspace.name()
+    # def get_workspace_name(self):
+    #     return self._model._workspace.name()
+
+    def _update_line_plot_ws_and_draw(self, unit: str) -> None:
+        pass
