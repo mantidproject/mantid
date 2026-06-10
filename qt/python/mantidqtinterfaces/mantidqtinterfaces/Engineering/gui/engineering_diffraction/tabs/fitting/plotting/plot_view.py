@@ -181,7 +181,9 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
     def show_fit_progress_bar(self) -> None:
         self.fit_progress_bar.show()
 
-    def set_progress_bar(self, status: str, minimum: int | float, maximum: int | float, value: int | float, style_sheet: str) -> None:
+    def set_progress_bar(
+        self, status: str | None, minimum: int | float, maximum: int | float, value: int | float, style_sheet: str
+    ) -> None:
         self.fit_progress_bar.setToolTip(str(status))
         self.fit_progress_bar.setMinimum(minimum)
         self.fit_progress_bar.setMaximum(maximum)
