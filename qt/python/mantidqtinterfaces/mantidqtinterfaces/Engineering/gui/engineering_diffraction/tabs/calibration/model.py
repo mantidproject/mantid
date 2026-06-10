@@ -33,7 +33,7 @@ class CalibrationModel(object):
         self._saved_prm_file = EnggUtils.load_existing_calibration_files(calibration)
 
 
-def load_full_instrument_calibration(instrument: str) -> Workspace2D:
+def load_full_instrument_calibration(instrument: str) -> Workspace2D | None:
     if ADS.doesExist(f"full_inst_calib_{instrument}"):
         full_calib = ADS.retrieve(f"full_inst_calib_{instrument}")
     else:

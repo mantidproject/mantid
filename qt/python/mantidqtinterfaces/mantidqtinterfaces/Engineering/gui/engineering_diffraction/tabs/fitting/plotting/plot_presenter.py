@@ -148,8 +148,8 @@ class FittingPlotPresenter(object):
     def fit_completed(
         self,
         fit_props: List[Dict[str, Dict[str, str | bool]]],
-        loaded_ws_list: List[MatrixWorkspace],
-        active_ws_list: List[MatrixWorkspace],
+        loaded_ws_list: List[str],
+        active_ws_list: List[str],
         log_workspace_name: str,
     ) -> None:
         if fit_props:
