@@ -131,26 +131,28 @@ if(COVERAGE)
 endif()
 
 set(QT_MIN_VERSION 5.15)
-set(QT6_MIN_VERSION 6.5)
+set(QT6_MIN_VERSION 6.11)
 
 if(ENABLE_WORKBENCH OR BUILD_MANTIDQT)
   # Resolve the requested major version using Qt's own multi-version convention. This sets QT_VERSION_MAJOR, which the
   # rest of the GUI build keys off.
   if(MANTID_QT_VERSION EQUAL 6)
+    set(_qt_min_version ${QT6_MIN_VERSION})
     find_package(
-      QT NAMES Qt6 ${QT6_MIN_VERSION}
+      QT ${QT6_MIN_VERSION} NAMES Qt6
       COMPONENTS Core Gui Widgets OpenGL Test
       REQUIRED
     )
   else()
+    set(_qt_min_version ${QT_MIN_VERSION})
     find_package(
-      QT NAMES Qt5 ${QT_MIN_VERSION}
+      QT ${QT_MIN_VERSION} NAMES Qt5
       COMPONENTS Core Gui Widgets OpenGL Test
       REQUIRED
     )
   endif()
   find_package(
-    Qt${QT_VERSION_MAJOR}
+    Qt${QT_VERSION_MAJOR} ${_qt_min_version}
     COMPONENTS Core Gui Widgets OpenGL Test
     REQUIRED
   )
