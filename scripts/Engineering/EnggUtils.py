@@ -8,14 +8,16 @@ from numpy import array, degrees, isfinite, reshape, nan, diff, ndarray
 from os import path, makedirs
 from shutil import copy2
 
-from Engineering.common.calibration_info import CalibrationInfo
 from mantid.api import AnalysisDataService as ADS, AlgorithmManager, MatrixWorkspace
 from mantid.kernel import IntArrayProperty, UnitConversion, DeltaEModeType, logger, UnitParams
 import mantid.simpleapi as mantid  # required to call EnggUtils funcs from algorithms to avoid simpleapi error
 from mantid.dataobjects import EventWorkspace, Workspace2D, TableWorkspace
 from Engineering.common import path_handling
-from typing import Tuple, Sequence, List
+from typing import Tuple, Sequence, List, TYPE_CHECKING
 from mantid.geometry import Detector, Instrument
+
+if TYPE_CHECKING:
+    from Engineering.common.calibration_info import CalibrationInfo
 
 ENGINX_BANKS = ["", "North", "South", "Both: North, South", "1", "2"]  # used in EnggCalibrate, EnggVanadiumCorrections
 ENGINX_MASK_BIN_MINS = [0, 19930, 39960, 59850, 79930]  # used in EnggFocus
@@ -32,7 +34,7 @@ XUNIT_SUFFIXES = {"d-Spacing": "dSpacing", "Time-of-flight": "TOF"}  # to put in
 
 
 def plot_tof_vs_d_from_calibration(
-    diag_ws: Workspace2D, ws_foc: Workspace2D, dspacing: Sequence[float], calibration: CalibrationInfo
+    diag_ws: Workspace2D, ws_foc: Workspace2D, dspacing: Sequence[float], calibration: "CalibrationInfo"
 ) -> None:
     """
     Plot fitted TOF vs expected d-spacing from diagnostic workspaces output from mantid.PDCalibration
@@ -175,7 +177,12 @@ def default_ceria_expected_peak_windows(final: bool = False) -> Sequence[float]:
 
 
 def create_new_calibration(
-    calibration: CalibrationInfo, rb_num: str, plot_output: bool, save_dir: str, full_calib: Workspace2D, copy_params_in_calib: bool = True
+    calibration: "CalibrationInfo",
+    rb_num: str,
+    plot_output: bool,
+    save_dir: str,
+    full_calib: Workspace2D,
+    copy_params_in_calib: bool = True,
 ) -> str:
     """
     Create a new calibration from a ceria run
@@ -215,7 +222,7 @@ def create_new_calibration(
     return prm_filepath  # only from last calib_dir
 
 
-def write_prm_file(ws_foc: Workspace2D, prm_savepath: str, calibration: CalibrationInfo, spec_nums: Sequence[int] | None = None):
+def write_prm_file(ws_foc: Workspace2D, prm_savepath: str, calibration: "CalibrationInfo", spec_nums: Sequence[int] | None = None):
     """
     Save GSAS prm file for ENGINX data - for specification see manual
     https://subversion.xray.aps.anl.gov/EXPGUI/gsas/all/GSAS%20Manual.pdf
@@ -259,7 +266,7 @@ def write_prm_file(ws_foc: Workspace2D, prm_savepath: str, calibration: Calibrat
         fout.writelines(lines)
 
 
-def load_existing_calibration_files(calibration: CalibrationInfo) -> str | None:
+def load_existing_calibration_files(calibration: "CalibrationInfo") -> str | None:
     # load prm
     prm_filepath = calibration.prm_filepath
     if not path.exists(prm_filepath):
@@ -305,7 +312,7 @@ def make_diff_consts_table(ws_foc: Workspace2D) -> TableWorkspace:
 
 
 def run_calibration(
-    ceria_ws: MatrixWorkspace, calibration: CalibrationInfo, full_instrument_cal_ws: Workspace2D, copy_params_in_calib: bool = True
+    ceria_ws: MatrixWorkspace, calibration: "CalibrationInfo", full_instrument_cal_ws: Workspace2D, copy_params_in_calib: bool = True
 ) -> Tuple[Workspace2D, TableWorkspace, Workspace2D]:
     """
     Creates Engineering calibration files with PDCalibration
@@ -379,7 +386,7 @@ def _remove_existing_output_workspaces(ws_name: str) -> None:
         ADS.remove(ws_name)
 
 
-def create_output_files(calibration_dir: str, calibration: CalibrationInfo, ws_foc: Workspace2D) -> str:
+def create_output_files(calibration_dir: str, calibration: "CalibrationInfo", ws_foc: Workspace2D) -> str:
     """
     Create output files (.prm for GSAS and .nxs of calibration table) from the algorithms in the specified directory
     :param calibration_dir: The directory to save the files into.
@@ -465,7 +472,7 @@ def focus_run(
     sample_paths: Sequence[str],
     plot_output: bool,
     rb_num: str | None,
-    calibration: CalibrationInfo,
+    calibration: "CalibrationInfo",
     save_dir: str,
     full_calib: Workspace2D | str,
 ) -> Tuple[List[str], List[str], List[str]] | None:
@@ -553,7 +560,7 @@ def _check_ws_foc_and_ws_van_foc(ws_foc: MatrixWorkspace, ws_van_foc: MatrixWork
 
 
 def process_vanadium(
-    calibration: CalibrationInfo, full_calib: Workspace2D, extra_suffix: str | None = None
+    calibration: "CalibrationInfo", full_calib: Workspace2D, extra_suffix: str | None = None
 ) -> Tuple[Workspace2D, Workspace2D]:
     van_run = path_handling.get_run_number_from_path(calibration.get_vanadium_path(), calibration.get_instrument())
     van_foc_name = CURVES_PREFIX + calibration.get_group_suffix()
@@ -615,14 +622,14 @@ def _load_run_and_convert_to_dSpacing(filepath: str, instrument: str, full_calib
 
 
 def _focus_run_and_apply_roi_calibration(
-    ws: MatrixWorkspace, calibration: CalibrationInfo, ws_foc_name: str | None = None
+    ws: MatrixWorkspace, calibration: "CalibrationInfo", ws_foc_name: str | None = None
 ) -> MatrixWorkspace:
     ws_foc = _focus_run(ws, calibration, ws_foc_name)
     ws_foc = _apply_roi_calibration(ws_foc, calibration)
     return ws_foc
 
 
-def _focus_run(ws: MatrixWorkspace, calibration: CalibrationInfo, ws_foc_name: str | None = None) -> MatrixWorkspace:
+def _focus_run(ws: MatrixWorkspace, calibration: "CalibrationInfo", ws_foc_name: str | None = None) -> MatrixWorkspace:
     if not ws_foc_name:
         ws_foc_name = ws.name() + "_" + FOCUSED_OUTPUT_WORKSPACE_NAME + calibration.get_foc_ws_suffix()
     ws_foc = mantid.DiffractionFocussing(InputWorkspace=ws, OutputWorkspace=ws_foc_name, GroupingWorkspace=calibration.get_group_ws())
@@ -630,7 +637,7 @@ def _focus_run(ws: MatrixWorkspace, calibration: CalibrationInfo, ws_foc_name: s
     return ws_foc
 
 
-def _apply_roi_calibration(focused_ws: MatrixWorkspace, calibration: CalibrationInfo) -> MatrixWorkspace:
+def _apply_roi_calibration(focused_ws: MatrixWorkspace, calibration: "CalibrationInfo") -> MatrixWorkspace:
     focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws, OutputWorkspace=focused_ws.name(), Target="TOF")
     mantid.ApplyDiffCal(InstrumentWorkspace=focused_ws, CalibrationWorkspace=calibration.get_calibration_table())
     focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws, OutputWorkspace=focused_ws.name(), Target="dSpacing")
