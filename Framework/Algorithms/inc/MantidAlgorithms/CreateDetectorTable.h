@@ -54,7 +54,6 @@ private:
   API::ITableWorkspace_sptr table;
   const API::SpectrumInfo *spectrumInfo;
   const Geometry::DetectorInfo *detectorInfo;
-  bool signedThetaParamRetrieved;
   bool showSignedTwoTheta; // If true, signedVersion of the two theta
   Geometry::PointingAlong beamAxisIndex;
   double sampleDist;
@@ -81,6 +80,7 @@ private:
   void getDiffConst(size_t wsIndex, double &difa, double &difc, double &difcUnc, double &tzero);
   void writeRowToTable(const int row, const DetectorRowData &data);
   DetectorRowData calculateWsIdxData(size_t wsIndex);
+  bool retrieveSignedThetaParameter();
 };
 
 /// Converts a list to a string, shortened if necessary

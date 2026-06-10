@@ -156,14 +156,13 @@ void CreateDetectorTable::setup() {
 
   beamAxisIndex = ws->getInstrument()->getReferenceFrame()->pointingAlongBeam();
   sampleDist = ws->getInstrument()->getSample()->getPos()[beamAxisIndex];
-  signedThetaParamRetrieved = false;
-  showSignedTwoTheta = false; // If true, signedVersion of the two theta
 
   if (workspaceIndices.empty()) {
     workspaceIndices = std::vector<int>(ws->getNumberHistograms());
     std::iota(workspaceIndices.begin(), workspaceIndices.end(), 0);
   }
 
+  showSignedTwoTheta = retrieveSignedThetaParameter(); // If true, signedVersion of the two theta
   table = WorkspaceFactory::Instance().createTable("TableWorkspace");
 }
 
@@ -318,19 +317,18 @@ void CreateDetectorTable::writeRowToTable(const int row, const DetectorRowData &
   }
 }
 
+bool CreateDetectorTable::retrieveSignedThetaParameter() {
+  const std::vector<std::string> &parameters = spectrumInfo->detector(static_cast<size_t>(workspaceIndices[0]))
+                                                   .getStringParameter("show-signed-theta", true); // recursive
+  return (!parameters.empty() && find(parameters.begin(), parameters.end(), "Always") != parameters.end());
+}
+
 CreateDetectorTable::DetectorRowData CreateDetectorTable::calculateWsIdxData(const size_t wsIndex) {
   DetectorRowData data;
 
   // Geometry
   if (!spectrumInfo->hasDetectors(wsIndex))
     throw std::runtime_error("No detectors found.");
-  if (!signedThetaParamRetrieved) {
-    const std::vector<std::string> &parameters =
-        spectrumInfo->detector(wsIndex).getStringParameter("show-signed-theta", true); // recursive
-    showSignedTwoTheta =
-        (!parameters.empty() && find(parameters.begin(), parameters.end(), "Always") != parameters.end());
-    signedThetaParamRetrieved = true;
-  }
 
   // wsIndex
   data.wsIndex = static_cast<int>(wsIndex);
