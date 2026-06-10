@@ -45,6 +45,9 @@ class FittingPlotPresenter(object):
         self._rb_num = None
         self.view.set_subscriber_for_function_changed(self.handle_convolve_peaks_added)
 
+    def set_instrument(self, instrument):
+        self.view.fit_browser.set_default_peak_from_settings(instrument)
+
     def setup_toolbar(self):
         self.view.set_slot_for_display_all()
         self.view.set_slot_for_fit_toggled(self.fit_toggle)

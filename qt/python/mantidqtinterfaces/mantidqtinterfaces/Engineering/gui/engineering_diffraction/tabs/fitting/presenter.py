@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.data_handling.data_widget import FittingDataWidget
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.plotting.plot_presenter import FittingPlotPresenter
 from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing, GenericObserver
@@ -119,3 +120,6 @@ class FittingPresenter(object):
     def set_rb_num(self, rb_num):
         self._rb_num = rb_num
         self.plot_widget.set_rb_num(rb_num)
+
+    def set_instrument_override(self, instrument):
+        self.plot_widget.set_instrument(INSTRUMENT_DICT[instrument])
