@@ -35,7 +35,7 @@ set(TEST_FILES
     Common/DecoderTest.h
     Common/DetectorTest.h
     Common/EncoderTest.h
-    Common/PlotterTestQt5.h
+    Common/PlotterTest.h
     Experiment/ExperimentPresenterTest.h
     Experiment/LookupTableValidatorTest.h
     Experiment/ExperimentOptionDefaultsTest.h

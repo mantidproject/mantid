@@ -47,5 +47,5 @@ check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
 
 # Prefix for test name=PythonAlgorithms
 set(PYUNITTEST_QT_API pyqt${MANTID_QT_VERSION}) # force to use the configured Qt version
-pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python.DNSReductionQt5 ${TEST_PY_FILES})
+pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python.DNSReductionQt${MANTID_QT_VERSION} ${TEST_PY_FILES})
 unset(PYUNITTEST_QT_API)
