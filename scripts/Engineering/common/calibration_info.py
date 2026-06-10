@@ -12,7 +12,7 @@ from mantid.dataobjects import GroupingWorkspace
 from os import path
 from mantid.simpleapi import Load, LoadDetectorsGroupingFile, CreateGroupingWorkspace, SaveDetectorsGrouping
 from mantid.kernel import logger
-from typing import Sequence, Type
+from typing import Sequence
 from Engineering.common.instrument_config import get_instr_config
 from enum import Enum
 
@@ -20,7 +20,7 @@ from enum import Enum
 class CalibrationInfo:
     def __init__(
         self,
-        group: Type[Enum] | None = None,
+        group: Enum | None = None,
         instrument: str | None = None,
         ceria_path: str | None = None,
         vanadium_path: str | None = None,
@@ -229,7 +229,7 @@ class CalibrationInfo:
             logger.warning("Only save grouping workspace for custom or cropped groupings.")
         return
 
-    def generate_output_file_name(self, group: Type[Enum] | None = None, ext: str = ".prm") -> str:
+    def generate_output_file_name(self, group: Enum | None = None, ext: str = ".prm") -> str:
         """
         Generate an output filename in the form INSTRUMENT_ceriaRunNo_BANKS
         :param ext: Extension to be used on the saved file

@@ -237,7 +237,7 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
                     selected.append(self.table_loaded_data.item(row, 0).text())
         return selected
 
-    def set_all_workspaces_selected(self, selected: List[str]) -> None:
+    def set_all_workspaces_selected(self, selected: bool) -> None:
         for row in range(self.table_loaded_data.rowCount()):
             cell_widget = self.table_loaded_data.cellWidget(row, 4)
             if cell_widget:

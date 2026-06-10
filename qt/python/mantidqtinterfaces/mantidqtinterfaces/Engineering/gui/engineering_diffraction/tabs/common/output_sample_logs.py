@@ -136,7 +136,7 @@ class SampleLogsGroupWorkspace(object):
             write_table_row(ADS.retrieve(log + self._suffix), avg_and_stdev, irow)
         self.update_log_group_name()
 
-    def remove_log_rows(self, row_numbers=Iterable):
+    def remove_log_rows(self, row_numbers: Iterable) -> None:
         DeleteTableRows(TableWorkspace=self._log_workspaces, Rows=list(row_numbers))
         self.update_log_group_name()
 
