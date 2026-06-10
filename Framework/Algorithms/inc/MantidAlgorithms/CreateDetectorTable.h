@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/Column.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -57,6 +58,7 @@ private:
   bool showSignedTwoTheta; // If true, signedVersion of the two theta
   Geometry::PointingAlong beamAxisIndex;
   double sampleDist;
+  std::vector<API::Column_sptr> m_columnCache;
   /// Initialisation code
   struct DetectorRowData {
     int wsIndex = 0;

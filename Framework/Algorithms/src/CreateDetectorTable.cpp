@@ -199,9 +199,11 @@ void CreateDetectorTable::createColumns() {
     colNames.emplace_back("V3D", "Position");
   }
 
+  m_columnCache.reserve(colNames.size());
   // Set the column names
   for (size_t col = 0; col < colNames.size(); ++col) {
     auto column = table->addColumn(colNames.at(col).first, colNames.at(col).second);
+    m_columnCache.push_back(column);
     column->setPlotType(0);
   }
   return;
@@ -288,32 +290,38 @@ void CreateDetectorTable::getDiffConst(size_t wsIndex, double &difa, double &dif
 
 void CreateDetectorTable::writeRowToTable(const int row, const DetectorRowData &data) {
   TableRow colValues = table->getRow(static_cast<size_t>(row));
-  colValues << static_cast<int>(data.wsIndex);
-  colValues << data.specNo;
+  size_t columnIndex = 0;
+  m_columnCache[columnIndex++]->cell<int>(row) = static_cast<int>(data.wsIndex);
+  m_columnCache[columnIndex++]->cell<int>(row) = data.specNo;
   if (oneRowPerDetectorID) {
     // Populate detector column with first det id in set
-    colValues << static_cast<int>(*data.detIds.begin());
+    m_columnCache[columnIndex++]->cell<int>(row) = static_cast<int>(*data.detIds.begin());
   } else {
     // Populate detector column with a truncated string of all det ids
-    colValues << createTruncatedList(data.detIds);
+    m_columnCache[columnIndex++]->cell<std::string>(row) = createTruncatedList(data.detIds);
   }
   if (isScanning) {
-    colValues << data.timeIndexes;
+    m_columnCache[columnIndex++]->cell<std::string>(row) = data.timeIndexes;
   }
   if (includeData) {
-    colValues << data.dataY0 << data.dataE0; // data
+    m_columnCache[columnIndex++]->cell<double>(row) = data.dataY0;
+    m_columnCache[columnIndex++]->cell<double>(row) = data.dataE0;
   }
-  colValues << data.R << data.theta;
+  m_columnCache[columnIndex++]->cell<double>(row) = data.R;
+  m_columnCache[columnIndex++]->cell<double>(row) = data.theta;
   if (calcQ) {
-    colValues << data.q;
+    m_columnCache[columnIndex++]->cell<double>(row) = data.q;
   }
-  colValues << data.phi;       // rtp
-  colValues << data.isMonitor; // monitor
+  m_columnCache[columnIndex++]->cell<double>(row) = data.phi;
+  m_columnCache[columnIndex++]->cell<std::string>(row) = data.isMonitor;
   if (hasDiffConstants) {
-    colValues << data.difa << data.difc << data.difcUnc << data.tzero;
+    m_columnCache[columnIndex++]->cell<double>(row) = data.difa;
+    m_columnCache[columnIndex++]->cell<double>(row) = data.difc;
+    m_columnCache[columnIndex++]->cell<double>(row) = data.difcUnc;
+    m_columnCache[columnIndex++]->cell<double>(row) = data.tzero;
   }
   if (includeDetectorPosition) {
-    colValues << data.detPosition;
+    m_columnCache[columnIndex++]->cell<Kernel::V3D>(row) = data.detPosition;
   }
 }
 
