@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from typing import Callable, List
+from typing import Callable, List, Dict
 from qtpy import QtWidgets
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QCursor
@@ -172,7 +172,7 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
     def hide_fit_progress_bar(self) -> None:
         self.fit_progress_bar.hide()
 
-    def set_find_peaks_convolve_button_status(self, status: str) -> None:
+    def set_find_peaks_convolve_button_status(self, status: bool) -> None:
         if self.fit_browser.isVisible() is False:
             self.toolbar.set_action_enabled("FindPeaksConvolve", False)
         else:
@@ -251,7 +251,7 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
             ax.autoscale()
         self.update_figure()
 
-    def read_fitprop_from_browser(self) -> None:
+    def read_fitprop_from_browser(self) -> Dict[Dict[str, str | bool]] | None:
         return self.fit_browser.read_current_fitprop()
 
     def update_browser(self, status: str, func_str: str, setup_name: str) -> None:

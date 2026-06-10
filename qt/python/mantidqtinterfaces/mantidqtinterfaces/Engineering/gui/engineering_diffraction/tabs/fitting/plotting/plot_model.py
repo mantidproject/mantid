@@ -66,7 +66,7 @@ class FittingPlotModel(object):
 
     def update_fit(
         self,
-        fit_props: List[Dict[str, Dict]],
+        fit_props: List[Dict[str, Dict[str, str | bool]]],
         loaded_ws_list: List[MatrixWorkspace],
         active_ws_list: List[MatrixWorkspace],
         log_workspace_name: str,

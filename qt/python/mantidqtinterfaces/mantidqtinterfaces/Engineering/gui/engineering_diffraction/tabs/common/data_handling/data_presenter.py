@@ -63,7 +63,7 @@ class FittingDataPresenter(object):
     def get_active_ws_list(self) -> List[str]:
         return self.model.get_active_ws_name_list()
 
-    def get_loaded_ws_list(self) -> List[MatrixWorkspace]:
+    def get_loaded_ws_list(self) -> List[str]:
         return self.model.get_loaded_ws_list()
 
     def get_log_ws_group_name(self) -> str:

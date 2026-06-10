@@ -10,11 +10,8 @@ from os import path
 
 from mantid.simpleapi import SaveNexus, logger, CreateEmptyTableWorkspace, Fit
 from mantid.simpleapi import ConvertUnits, Rebunch, Rebin, SumSpectra, AppendSpectra, CloneWorkspace, CropWorkspaceRagged, Load
-from pathlib import Path
-from Engineering.EnginX import EnginX
-from Engineering.IMAT import IMAT
 from mantid.api import AnalysisDataService as ADS, MultiDomainFunction, FunctionFactory
-from typing import Optional, Sequence, Tuple
+from typing import Sequence, Tuple, List
 from mantid.dataobjects import Workspace2D
 from plugins.algorithms.IntegratePeaks1DProfile import get_eval_ws, calc_sigma_from_summation
 from Engineering.EnggUtils import convert_TOFerror_to_derror
@@ -32,7 +29,9 @@ def _get_max_bin(ws: Workspace2D) -> np.ndarray:
     return max(np.diff(ws.readX(i)).max() for i in range(ws.getNumberHistograms()))
 
 
-def crop_wss_and_combine(wss: Sequence[Workspace2D | str], peak: float, lower: float, upper: float, output: str) -> Workspace2D:
+def crop_wss_and_combine(
+    wss: Sequence[Workspace2D | str], peak: float, lower: float, upper: float, output: str
+) -> Tuple[Workspace2D, List[str]]:
     cropped_rebinned_wss = [f"rebin_ws_{peak}_0"]
     peak_window_ws = CropWorkspaceRagged(wss[0], lower, upper, OutputWorkspace="__peak_window_crop")
     rebin_params = (lower, _get_max_bin(peak_window_ws), upper)
@@ -46,7 +45,7 @@ def crop_wss_and_combine(wss: Sequence[Workspace2D | str], peak: float, lower: f
     return SumSpectra(f"rebin_ws_{peak}", OutputWorkspace=output), cropped_rebinned_wss
 
 
-def _make_composite(peak_func: str, bg_func: str) -> CompositeFunction:
+def _make_composite(peak_func: IFunction, bg_func: IFunction) -> CompositeFunction:
     """Build a CompositeFunction from existing C++ function objects without
     serialising them (which would discard workspace references, fixed-parameter
     state, etc.).  NumDeriv is NOT set so that each member function uses its own
