@@ -9,7 +9,7 @@ from os import path, makedirs
 from shutil import copy2
 
 from Engineering.common.calibration_info import CalibrationInfo
-from mantid.api import AnalysisDataService as ADS, AlgorithmManager
+from mantid.api import AnalysisDataService as ADS, AlgorithmManager, MatrixWorkspace
 from mantid.kernel import IntArrayProperty, UnitConversion, DeltaEModeType, logger, UnitParams
 import mantid.simpleapi as mantid  # required to call EnggUtils funcs from algorithms to avoid simpleapi error
 from mantid.dataobjects import EventWorkspace, Workspace2D, TableWorkspace
@@ -305,7 +305,7 @@ def make_diff_consts_table(ws_foc: Workspace2D) -> TableWorkspace:
 
 
 def run_calibration(
-    ceria_ws: Workspace2D, calibration: CalibrationInfo, full_instrument_cal_ws: Workspace2D, copy_params_in_calib: bool = True
+    ceria_ws: MatrixWorkspace, calibration: CalibrationInfo, full_instrument_cal_ws: Workspace2D, copy_params_in_calib: bool = True
 ) -> Tuple[Workspace2D, TableWorkspace, Workspace2D]:
     """
     Creates Engineering calibration files with PDCalibration
@@ -538,7 +538,7 @@ def _get_difc(ws: Workspace2D, ind: int) -> float:
     return ws.spectrumInfo().diffractometerConstants(ind)[UnitParams.difc]
 
 
-def _check_ws_foc_and_ws_van_foc(ws_foc: Workspace2D, ws_van_foc: Workspace2D) -> None:
+def _check_ws_foc_and_ws_van_foc(ws_foc: MatrixWorkspace, ws_van_foc: MatrixWorkspace) -> None:
     try:
         num_foc, num_van = ws_foc.getNumberHistograms(), ws_van_foc.getNumberHistograms()
         assert num_foc == num_van
@@ -614,13 +614,15 @@ def _load_run_and_convert_to_dSpacing(filepath: str, instrument: str, full_calib
     return ws
 
 
-def _focus_run_and_apply_roi_calibration(ws: Workspace2D, calibration: CalibrationInfo, ws_foc_name: str | None = None) -> Workspace2D:
+def _focus_run_and_apply_roi_calibration(
+    ws: MatrixWorkspace, calibration: CalibrationInfo, ws_foc_name: str | None = None
+) -> MatrixWorkspace:
     ws_foc = _focus_run(ws, calibration, ws_foc_name)
     ws_foc = _apply_roi_calibration(ws_foc, calibration)
     return ws_foc
 
 
-def _focus_run(ws: Workspace2D, calibration: CalibrationInfo, ws_foc_name: str | None = None) -> Workspace2D:
+def _focus_run(ws: MatrixWorkspace, calibration: CalibrationInfo, ws_foc_name: str | None = None) -> MatrixWorkspace:
     if not ws_foc_name:
         ws_foc_name = ws.name() + "_" + FOCUSED_OUTPUT_WORKSPACE_NAME + calibration.get_foc_ws_suffix()
     ws_foc = mantid.DiffractionFocussing(InputWorkspace=ws, OutputWorkspace=ws_foc_name, GroupingWorkspace=calibration.get_group_ws())
@@ -628,18 +630,18 @@ def _focus_run(ws: Workspace2D, calibration: CalibrationInfo, ws_foc_name: str |
     return ws_foc
 
 
-def _apply_roi_calibration(focused_ws: Workspace2D, calibration: CalibrationInfo) -> Workspace2D:
+def _apply_roi_calibration(focused_ws: MatrixWorkspace, calibration: CalibrationInfo) -> MatrixWorkspace:
     focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws, OutputWorkspace=focused_ws.name(), Target="TOF")
     mantid.ApplyDiffCal(InstrumentWorkspace=focused_ws, CalibrationWorkspace=calibration.get_calibration_table())
     focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws, OutputWorkspace=focused_ws.name(), Target="dSpacing")
     return focused_ws
 
 
-def _smooth_vanadium(van_ws_foc: Workspace2D) -> Workspace2D:
+def _smooth_vanadium(van_ws_foc: MatrixWorkspace) -> Workspace2D:
     return mantid.EnggEstimateFocussedBackground(InputWorkspace=van_ws_foc, OutputWorkspace=van_ws_foc, NIterations=1, XWindow=0.08)
 
 
-def _apply_vanadium_norm(sample_ws_foc: Workspace2D, van_ws_foc: Workspace2D) -> Workspace2D:
+def _apply_vanadium_norm(sample_ws_foc: MatrixWorkspace, van_ws_foc: MatrixWorkspace) -> Workspace2D:
     # divide by curves - automatically corrects for solid angle, det efficiency and lambda dep. flux
 
     # depending on what data is in event mode or not, different algorithms will be required
