@@ -10,7 +10,7 @@ from mantid.simpleapi import (
 )
 import numpy as np
 from mantid.api import AnalysisDataService as ADS
-from typing import Sequence, Tuple
+from typing import Sequence, Tuple, List, Dict
 from os import path, makedirs
 from Engineering.common.texture_sample_viewer import has_valid_shape
 from Engineering.texture.xtal_helper import get_xtal_structure
@@ -97,7 +97,7 @@ class TextureProjection:
     # ~~~~~ General Utility functions ~~~~~~~~
 
     @staticmethod
-    def get_save_dirs(root_dir: str, dir_name: str, rb_num: str | None, grouping: str | None = "GROUP") -> Sequence[str]:
+    def get_save_dirs(root_dir: str, dir_name: str, rb_num: str | None, grouping: str | None = "GROUP") -> List[str]:
         save_dirs = [path.join(root_dir, dir_name)]
         if rb_num:
             save_dirs.append(path.join(root_dir, "User", rb_num, dir_name, grouping))
@@ -113,7 +113,7 @@ class TextureProjection:
             if ascii:
                 save_texture_ws_ascii(ws, save_dir)
 
-    def get_ws_info(self, ws_name: str, parameter_file: str, select: bool = True) -> dict:
+    def get_ws_info(self, ws_name: str, parameter_file: str, select: bool = True) -> Dict[str, str]:
         return {
             "shape": "Not set" if self._has_no_valid_shape(ws_name) else "set",
             "fit_parameters": parameter_file,
@@ -152,9 +152,9 @@ class TextureProjection:
     # ~~~~~ Crystal Structure helper functions ~~~~~~~~
 
     @staticmethod
-    def parse_hkl(H: str, K: str, L: str) -> Sequence[int] | None:
+    def parse_hkl(H: str | int, K: str | int, L: str | int) -> Tuple[int, int, int] | None:
         try:
-            return [int(H), int(K), int(L)]
+            return int(H), int(K), int(L)
         except Exception:
             return None
 

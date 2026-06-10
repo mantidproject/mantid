@@ -123,5 +123,5 @@ class FittingPresenter(object):
         self._rb_num = rb_num
         self.plot_widget.set_rb_num(rb_num)
 
-    def set_instrument_override(self, instrument_index) -> None:
+    def set_instrument_override(self, instrument_index: int) -> None:
         self.plot_widget.set_instrument(INSTRUMENT_DICT[instrument_index])

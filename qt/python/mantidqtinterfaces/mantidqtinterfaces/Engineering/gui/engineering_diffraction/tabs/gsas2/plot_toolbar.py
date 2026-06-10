@@ -28,6 +28,6 @@ class GSAS2PlotToolbar(MantidNavigationToolbar):
         dpi_ratio = QtWidgets.QApplication.instance().primaryScreen().physicalDotsPerInchX() / 100
         self.setIconSize(QtCore.QSize(int(24 * dpi_ratio), int(24 * dpi_ratio)))
 
-    def on_home_clicked(self):
+    def on_home_clicked(self) -> None:
         self.sig_home_clicked.emit()
         self.push_current()

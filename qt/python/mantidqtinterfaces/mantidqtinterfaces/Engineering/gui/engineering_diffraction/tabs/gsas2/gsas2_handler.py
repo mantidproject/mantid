@@ -8,7 +8,7 @@
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import List
 import os
 import fnmatch
 import json
@@ -81,9 +81,9 @@ class GSAS2Config:
         number_of_regions: The number of regions to configure.
     """
 
-    limits: Optional[List[Union[int, float]]] = field(default_factory=list)
-    mantid_pawley_reflections: Optional[List[Union[str, int]]] = None
-    override_cell_lengths: Optional[List[List[float]]] = None
+    limits: List[int | float] | None = field(default_factory=list)
+    mantid_pawley_reflections: List[str | int] | None = None
+    override_cell_lengths: List[List[float]] | None = None
     d_spacing_min: float = 1.0
     number_of_regions: int = 1
 
@@ -124,7 +124,7 @@ class GSAS2Handler(object):
 
     def __init__(
         self,
-        path_to_gsas2: Union[str, Path],
+        path_to_gsas2: str | Path,
         save_directories: SaveDirectories,
         refinement_settings: RefinementSettings,
         file_paths: FilePaths,
@@ -140,14 +140,14 @@ class GSAS2Handler(object):
         self.config = config
 
         # GSAS-II configuration
-        self._gsas2_python_path: Optional[Path] = None
+        self._gsas2_python_path: Path | None = None
         self.os_platform: str = platform.system()
         self.python_binaries: List[str] = []
 
         # Validate inputs
         self.validate_inputs()
 
-    def _validate_and_set_path_to_gsas2(self, path_to_gsas2: Union[str, Path]) -> None:
+    def _validate_and_set_path_to_gsas2(self, path_to_gsas2: str | Path) -> None:
         """
         Validates and sets the path_to_gsas2 attribute.
 
