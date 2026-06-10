@@ -67,8 +67,8 @@ class FittingPlotModel(object):
     def update_fit(
         self,
         fit_props: List[Dict[str, Dict[str, str | bool]]],
-        loaded_ws_list: List[MatrixWorkspace],
-        active_ws_list: List[MatrixWorkspace],
+        loaded_ws_list: List[str],
+        active_ws_list: List[str],
         log_workspace_name: str,
     ) -> None:
         for fit_prop in fit_props:
@@ -145,9 +145,7 @@ class FittingPlotModel(object):
         diff_consts = si.diffractometerConstants(0)  # output is a UnitParametersMap
         return diff_consts
 
-    def create_fit_tables(
-        self, loaded_ws_list: List[MatrixWorkspace], active_ws_list: List[MatrixWorkspace], log_workspace_name: str
-    ) -> None:
+    def create_fit_tables(self, loaded_ws_list: List[str], active_ws_list: List[str], log_workspace_name: str) -> None:
         wslist = []  # ws to be grouped
         # extract fit parameters and errors
         nruns = len(loaded_ws_list)  # num of rows of output workspace
@@ -196,7 +194,7 @@ class FittingPlotModel(object):
         summary_tables = self.create_bank_fit_summary_tables_by_run(self.get_fit_results(), active_ws_list)
         wslist.extend(summary_tables.values())
 
-    def create_bank_fit_summary_tables_by_run(self, fit_results: Dict, active_ws_list: List[MatrixWorkspace]) -> Dict[str, TableWorkspace]:
+    def create_bank_fit_summary_tables_by_run(self, fit_results: Dict, active_ws_list: List[str]) -> Dict[str, TableWorkspace]:
         """
         Create one TableWorkspace per run, summarizing fit parameters for each bank.
         For use in Texture Analysis Pipeline
@@ -252,7 +250,7 @@ class FittingPlotModel(object):
 
                 table.addRow(row)
 
-            self._save_files(table_name, "FitParameters", grouping)
+            self._save_files(table_name, "FitParameters", fit_peak, grouping)
             summary_tables[run] = table
 
         return summary_tables
@@ -273,7 +271,7 @@ class FittingPlotModel(object):
 
     @staticmethod
     def _get_param_labels_and_peak_label(
-        all_params: Sequence[str], use_short_names: bool, fit_results: Dict, banks_sorted: List[MatrixWorkspace]
+        all_params: Sequence[str], use_short_names: bool, fit_results: Dict, banks_sorted: List[str]
     ) -> Tuple[List[str], str]:
         param_labels = []
         fit_peak = ""
@@ -291,9 +289,8 @@ class FittingPlotModel(object):
 
     @staticmethod
     def _create_metadata_dicts(
-        active_ws_list: List[MatrixWorkspace], fit_results: Dict
-    ) -> Tuple[Dict[str, List[Tuple[str, str]]], Dict[str, str], Dict[str, str]]:
-        print(active_ws_list)
+        active_ws_list: List[str], fit_results: Dict
+    ) -> Tuple[Dict[str, List[Tuple[int | str, str]]], Dict[str, str], Dict[str, str]]:
         run_to_banks = defaultdict(list)
         run_to_prefix = {}
         run_to_group = {}
@@ -329,7 +326,7 @@ class FittingPlotModel(object):
 
         return run_to_banks, run_to_prefix, run_to_group
 
-    def _save_files(self, ws: MatrixWorkspace, dir_name: str, peak: str, grouping: str = "") -> None:
+    def _save_files(self, ws: str, dir_name: str, peak: str, grouping: str = "") -> None:
         root_dir = output_settings.get_output_path()
         save_dirs = [path.join(root_dir, dir_name, peak)]
         if self._rb_num:

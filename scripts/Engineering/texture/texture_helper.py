@@ -519,7 +519,7 @@ def azim_proj(alphas: np.ndarray, betas: np.ndarray, i: np.ndarray) -> np.ndarra
     return out
 
 
-def _retrieve_ws_object(ws: str | Workspace2D | TableWorkspace) -> Workspace2D:
+def _retrieve_ws_object(ws: str | Workspace2D | TableWorkspace) -> Workspace2D | TableWorkspace:
     if isinstance(ws, str):
         return ADS.retrieve(ws)
     return ws
@@ -539,7 +539,7 @@ def generous_rebin(ws: str | Workspace2D, out_ws: str, StoreInADS: bool = True) 
     return Rebin(InputWorkspace=ws, Params=(minX, diffX, maxX), OutputWorkspace=out_ws, StoreInADS=StoreInADS)
 
 
-def save_texture_ws_ascii(ws: str | Workspace2D, save_dir: str, StoreInADS: bool = False) -> None:
+def save_texture_ws_ascii(ws: str, save_dir: str, StoreInADS: bool = False) -> None:
     try:
         SaveAscii(InputWorkspace=ws, Filename=path.join(save_dir, ws + ".txt"), Separator="Tab")
     except RuntimeError:

@@ -553,7 +553,7 @@ def _check_ws_foc_and_ws_van_foc(ws_foc: Workspace2D, ws_van_foc: Workspace2D) -
 
 
 def process_vanadium(
-    calibration: CalibrationInfo, full_calib: Workspace2D | str, extra_suffix: str | None = None
+    calibration: CalibrationInfo, full_calib: Workspace2D, extra_suffix: str | None = None
 ) -> Tuple[Workspace2D, Workspace2D]:
     van_run = path_handling.get_run_number_from_path(calibration.get_vanadium_path(), calibration.get_instrument())
     van_foc_name = CURVES_PREFIX + calibration.get_group_suffix()
@@ -600,7 +600,7 @@ def _plot_focused_workspaces(ws_names: Sequence[str]) -> None:
         fig.show()
 
 
-def _load_run_and_convert_to_dSpacing(filepath: str, instrument: str, full_calib: Workspace2D | str):
+def _load_run_and_convert_to_dSpacing(filepath: str, instrument: str, full_calib: Workspace2D):
     runno = path_handling.get_run_number_from_path(filepath, instrument)
     ws = mantid.Load(Filename=filepath, OutputWorkspace=str(runno))
     if ws.getRun().getProtonCharge() > 0:
