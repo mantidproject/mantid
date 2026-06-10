@@ -7,7 +7,7 @@
 
 from Engineering.texture.correction.correction_model import TextureCorrectionModel
 from mantid.simpleapi import logger
-from typing import Sequence, Union, Tuple
+from typing import Sequence, Tuple
 
 
 def run_abs_corr(
@@ -142,7 +142,7 @@ def validate_abs_corr_inputs(
                 error_msg += r"If custom gauge volume required, must provide shape xml as file.\n"
 
     if include_atten_table:
-        if not (isinstance(eval_point, Union[str, float]) and isinstance(eval_units, str)):
+        if not (isinstance(eval_point, str | float) and isinstance(eval_units, str)):
             error_msg += r"If attenuation table required, must provide valid point and units.\n"
 
     if include_div_corr:

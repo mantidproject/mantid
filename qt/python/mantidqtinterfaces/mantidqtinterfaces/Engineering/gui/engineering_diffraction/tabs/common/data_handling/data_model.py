@@ -105,7 +105,7 @@ class FittingDataModel(object):
         return self._data_workspaces.get_active_ws_name(loaded_ws_name)
 
     # handle ADS remove. name workspace has already been deleted
-    def remove_workspace(self, name: str) -> MatrixWorkspace:
+    def remove_workspace(self, name: str) -> MatrixWorkspace | None:
         ws_loaded = self._data_workspaces.get(name, None)
         if ws_loaded:
             bgsub_ws_name = self._data_workspaces[name].bgsub_ws_name

@@ -228,7 +228,7 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
             self.fit_browser.show()
             self.fit_progress_bar.show()
 
-    def remove_ws_from_fitbrowser(self, ws: MatrixWorkspace):
+    def remove_ws_from_fitbrowser(self, ws: MatrixWorkspace) -> None:
         # only one spectrum per workspace
         try:
             self.fit_browser.removeWorkspaceAndSpectra(ws.name())

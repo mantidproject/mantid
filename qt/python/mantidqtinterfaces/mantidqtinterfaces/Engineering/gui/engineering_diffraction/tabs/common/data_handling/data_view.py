@@ -45,7 +45,7 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
     sig_enable_inspect_bg_button = QtCore.Signal(bool)
     finder_data: FilteredFileFinderWidget
 
-    def __init__(self, parent: QtWidgets.QWidget = None):
+    def __init__(self, parent: QtWidgets.QWidget | None = None):
         super(FittingDataView, self).__init__(parent)
         self.setupUi(self)
         # file finder
@@ -96,7 +96,7 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
     # Component Setters
     # =================
 
-    def set_default_files(self, filepaths: Sequence[str], directory: str):
+    def set_default_files(self, filepaths: Sequence[str], directory: str | None) -> None:
         if not filepaths:
             return
         self.finder_data.setUserInput(",".join(filepaths))

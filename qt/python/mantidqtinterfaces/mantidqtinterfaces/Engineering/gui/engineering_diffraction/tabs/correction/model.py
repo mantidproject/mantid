@@ -70,7 +70,7 @@ class CorrectionModel(TextureCorrectionModel):
         return {"hoz": div_hoz, "vert": div_vert, "det_hoz": det_hoz}, False
 
     @staticmethod
-    def try_convert_float(val: Any, param: str):
+    def try_convert_float(val: Any, param: str) -> Tuple[str, float]:
         try:
             return "", float(val)
         except ValueError:

@@ -45,7 +45,7 @@ class FittingPlotModel(object):
         ax.plot(ws, **plot_kwargs)
         self.plotted_workspaces.add(ws)
 
-    def remove_workspace_from_plot(self, ws: str, ax: MantidAxes):
+    def remove_workspace_from_plot(self, ws: str, ax: MantidAxes) -> None:
         if ws in self.plotted_workspaces:
             self._remove_workspace_from_plot(ws, ax)
             self.plotted_workspaces.remove(ws)
