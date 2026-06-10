@@ -45,7 +45,7 @@ using return_readonly_numpy = return_value_policy<Policies::VectorRefToNumpy<Con
 
 PyObject *numpyArrayFromVector(const std::vector<V3D> &vec) {
   const size_t n_detectors = vec.size();
-  const size_t vec_size = 3;
+  constexpr size_t vec_size = 3;
   npy_intp dims[2] = {static_cast<npy_intp>(n_detectors), vec_size};
   PyObject *numpy_array = PyArray_SimpleNew(2, dims, NPY_DOUBLE);
   if (!numpy_array) {
