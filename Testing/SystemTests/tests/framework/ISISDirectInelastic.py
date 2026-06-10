@@ -517,7 +517,7 @@ class LETReduction(systemtesting.MantidSystemTest):
 
     def requiredMemoryMB(self):
         """Far too slow for managed workspaces. They're tested in other places."""
-        return 6000
+        return 5500
 
     def runTest(self):
         """
