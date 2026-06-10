@@ -11,6 +11,7 @@
 #include "MantidQtWidgets/Common/FileFinderWidget.h"
 #include "MantidQtWidgets/Common/WorkspaceSelector.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
+#include <QStringList>
 
 using MantidQt::API::FileFinderWidget;
 using MantidQt::MantidWidgets::DataSelector;
@@ -19,8 +20,6 @@ using MantidQt::MantidWidgets::WorkspaceSelector;
 class QLineEdit;
 class QLabel;
 class QString;
-// QStringList is a typedef (QList<QString>) in Qt6 and cannot be forward-declared as a class
-#include <QStringList>
 
 namespace MantidQt {
 namespace CustomInterfaces {

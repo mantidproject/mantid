@@ -99,7 +99,7 @@ set(MANTIDWORKBENCH_EXEC "-c \"from workbench.app.main import main; main()\"")
 # used by mantidworkbench
 if(ENABLE_WORKBENCH)
   configure_file(
-    ${CMAKE_SOURCE_DIR}/buildconfig/CMake/Packaging/launch_mantidworkbench.sh.in
+    ${CMAKE_MODULE_PATH}/Packaging/launch_mantidworkbench.sh.in
     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launch_mantidworkbench.sh @ONLY
   )
   # Needs to be executable
@@ -108,8 +108,7 @@ if(ENABLE_WORKBENCH)
   )
 endif()
 configure_file(
-  ${CMAKE_SOURCE_DIR}/buildconfig/CMake/Packaging/AddPythonPath.py.in
-  ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/AddPythonPath.py @ONLY
+  ${CMAKE_MODULE_PATH}/Packaging/AddPythonPath.py.in ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/AddPythonPath.py @ONLY
 )
 # Needs to be executable
 execute_process(COMMAND "chmod" "+x" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/AddPythonPath.py" OUTPUT_QUIET ERROR_QUIET)
@@ -148,7 +147,7 @@ fi"
 
     # workbench launcher for tbbmalloc
     configure_file(
-      ${CMAKE_SOURCE_DIR}/buildconfig/CMake/Packaging/launch_mantidworkbench.sh.in
+      ${CMAKE_MODULE_PATH}/Packaging/launch_mantidworkbench.sh.in
       ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidworkbench.sh.install${DEST_FILENAME_SUFFIX} @ONLY
     )
     install(

@@ -42,14 +42,6 @@ else()
     message(STATUS "QT_RCC_CMD not set (Qt${MANTID_QT_VERSION}): skipping mantidqt resource compilation")
     add_custom_target(mantidqt_resources ALL)
   endif()
-  # Safety net: a resources.py left over from a previous Qt5 build hard-codes `from PyQt5 import QtCore` and would crash
-  # if the loader's fallback ever imported it. Rewrite a stale module's import to qtpy so it stays loadable.
-  set(_stale_res_py ${CMAKE_CURRENT_LIST_DIR}/mantidqt/resources.py)
-  if(EXISTS ${_stale_res_py})
-    execute_process(
-      COMMAND ${Python_EXECUTABLE} ${CMAKE_SOURCE_DIR}/buildconfig/CMake/rewrite_resources_import.py ${_stale_res_py}
-    )
-  endif()
 endif()
 
 add_dependencies(

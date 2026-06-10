@@ -113,8 +113,6 @@ if(BUILD_MANTIDFRAMEWORK)
   find_package(HDF4 REQUIRED)
   find_package(MuParser REQUIRED)
   find_package(JsonCPP 0.7.0 REQUIRED)
-  # No explicit version: Eigen3Config uses same-major-version compatibility, so a "3.4" request rejects Eigen 5.x.
-  # Mantid builds against both 3.4 and 5.x.
   find_package(Eigen3 REQUIRED)
 
   if(ENABLE_OPENCASCADE)

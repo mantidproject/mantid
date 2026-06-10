@@ -64,11 +64,12 @@ if(PYRCC5_CMD)
       # Write resources.qrc.BUILD_TYPE
       file(WRITE ${_paths_qrc_file} ${_qrc_file_contents})
 
-      # Add command to generate resources.py file
+      # Add command to generate resources.py file (pyrcc5 + rewrite the PyQt5 import to qtpy)
+      set(_qrc_files "${_images_qrc_file} ${_paths_qrc_file}")
+      configure_file(create_resources.cmake.in create_resources_${BUILD_TYPE}.cmake @ONLY)
       add_custom_command(
         OUTPUT ${_output_res_py}
-        COMMAND ${PYRCC5_CMD} -o ${_output_res_py} ${_images_qrc_file} ${_paths_qrc_file}
-        COMMAND ${Python_EXECUTABLE} ${CMAKE_SOURCE_DIR}/buildconfig/CMake/rewrite_resources_import.py ${_output_res_py}
+        COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/create_resources_${BUILD_TYPE}.cmake
         COMMENT "Generating workbench resources module for ${BUILD_TYPE}: ${_output_res_py}"
         DEPENDS ${_images_qrc_file} ${_paths_qrc_file}
       )
@@ -105,10 +106,12 @@ if(PYRCC5_CMD)
         COMPONENT Runtime
       )
     endif()
+    # pyrcc5 + rewrite the PyQt5 import to qtpy
+    set(_qrc_files "${_images_qrc_file}")
+    configure_file(create_resources.cmake.in create_resources.cmake @ONLY)
     add_custom_command(
       OUTPUT ${_output_res_py}
-      COMMAND ${PYRCC5_CMD} -o ${_output_res_py} ${_images_qrc_file}
-      COMMAND ${Python_EXECUTABLE} ${CMAKE_SOURCE_DIR}/buildconfig/CMake/rewrite_resources_import.py ${_output_res_py}
+      COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/create_resources.cmake
       COMMENT "Generating workbench resources module"
       DEPENDS ${_images_qrc_file}
     )
@@ -134,16 +137,6 @@ else()
   else()
     message(STATUS "QT_RCC_CMD not set (Qt${MANTID_QT_VERSION}): skipping workbench resource compilation")
     add_custom_target(workbench_resources ALL)
-  endif()
-
-  # Safety net: the runtime loader prefers the .rcc above, but a resources.py left over from a previous Qt5 build
-  # hard-codes `from PyQt5 import QtCore` and would crash if it were ever imported as the fallback. Rewrite a stale
-  # module's import to qtpy so that path stays loadable too.
-  set(_stale_res_py ${CMAKE_CURRENT_LIST_DIR}/workbench/app/resources.py)
-  if(EXISTS ${_stale_res_py})
-    execute_process(
-      COMMAND ${Python_EXECUTABLE} ${CMAKE_SOURCE_DIR}/buildconfig/CMake/rewrite_resources_import.py ${_stale_res_py}
-    )
   endif()
 endif()
 

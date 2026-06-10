@@ -165,8 +165,6 @@ class EAGroupingTablePresenter(object):
         self._view.enable_updates()
 
     def to_analyse_data_checkbox_changed(self, state, group_name):
-        # checkState() returns a Qt.CheckState enum; under PyQt6 this no longer
-        # compares equal to the raw int 2, so compare against the enum member.
         group_added = state == Qt.CheckState.Checked
         if group_added:
             self._model.add_group_to_analysis(group_name)
