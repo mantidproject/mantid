@@ -14,7 +14,13 @@ import pyvista as pv
 
 from instrumentview.renderers.base_renderer import InstrumentRenderer
 from instrumentview.renderers.point_cloud_renderer import PointCloudRenderer
-from instrumentview.renderers.shape_renderer import ShapeRenderer, _triangles_to_verts_faces, _make_fallback_shape
+from instrumentview.renderers.shape_renderer import (
+    ShapeRenderer,
+    _triangles_to_verts_faces,
+    _make_fallback_shape,
+    _extract_quad_from_cylinder_shapeinfo,
+    _extract_quad_from_cuboid_shapeinfo,
+)
 from instrumentview.Projections.ProjectionType import ProjectionType
 
 
@@ -220,9 +226,168 @@ class TestTrianglesToVertsFaces(unittest.TestCase):
 
 class TestFallbackShape(unittest.TestCase):
     def test_returns_tetrahedron(self):
-        verts, faces = _make_fallback_shape()
+        verts, faces, face_size = _make_fallback_shape()
         self.assertEqual(verts.shape, (4, 3))
         self.assertEqual(faces.shape, (4, 3))
+        self.assertEqual(face_size, 3)
+
+
+class TestExtractQuadFromCuboidShapeinfo(unittest.TestCase):
+    """Tests for _extract_quad_from_cuboid_shapeinfo."""
+
+    def _make_v3d(self, x, y, z):
+        v = MagicMock()
+        v.X.return_value = float(x)
+        v.Y.return_value = float(y)
+        v.Z.return_value = float(z)
+        return v
+
+    def _make_cuboid_si(self, x_min=-0.005, x_max=0.005, y_min=-0.005, y_max=0.005, z_front=-0.0005, z_back=0.0005):
+        si = MagicMock()
+        si.cuboidGeometry.return_value = {
+            "leftFrontBottom": self._make_v3d(x_min, y_min, z_front),
+            "leftFrontTop": self._make_v3d(x_min, y_max, z_front),
+            "leftBackBottom": self._make_v3d(x_min, y_min, z_back),
+            "rightFrontBottom": self._make_v3d(x_max, y_min, z_front),
+        }
+        return si
+
+    def test_rectangular_cuboid_returns_quad(self):
+        si = self._make_cuboid_si()
+        result = _extract_quad_from_cuboid_shapeinfo(si)
+        self.assertIsNotNone(result)
+        quad_verts, quad_faces = result
+        self.assertEqual(quad_verts.shape, (4, 3))
+        self.assertEqual(quad_faces.shape, (1, 4))
+
+    def test_quad_corners_derived_from_shapeinfo(self):
+        """Quad X/Y extents should come directly from the ShapeInfo corner points."""
+        si = self._make_cuboid_si(x_min=-0.01, x_max=0.01, y_min=-0.005, y_max=0.005)
+        result = _extract_quad_from_cuboid_shapeinfo(si)
+        self.assertIsNotNone(result)
+        quad_verts, _ = result
+        np.testing.assert_allclose(np.sort(np.unique(quad_verts[:, 0])), [-0.01, 0.01], atol=1e-10)
+        np.testing.assert_allclose(np.sort(np.unique(quad_verts[:, 1])), [-0.005, 0.005], atol=1e-10)
+
+    def test_quad_z_at_mid_depth(self):
+        """Quad Z should be the midpoint of z_front and z_back."""
+        si = self._make_cuboid_si(z_front=-0.002, z_back=0.006)
+        result = _extract_quad_from_cuboid_shapeinfo(si)
+        self.assertIsNotNone(result)
+        quad_verts, _ = result
+        np.testing.assert_allclose(quad_verts[:, 2], 0.002, atol=1e-10)
+
+    def test_cube_shaped_detector_uses_xy_face(self):
+        """Equal extents on all axes: quad must span X/Y at mid-Z."""
+        s = 0.0127
+        si = self._make_cuboid_si(x_min=-s, x_max=s, y_min=-s, y_max=s, z_front=-s, z_back=s)
+        result = _extract_quad_from_cuboid_shapeinfo(si)
+        self.assertIsNotNone(result)
+        quad_verts, _ = result
+        np.testing.assert_allclose(quad_verts[:, 2], 0.0, atol=1e-10)
+        np.testing.assert_allclose(np.sort(np.unique(quad_verts[:, 0])), [-s, s], atol=1e-10)
+        np.testing.assert_allclose(np.sort(np.unique(quad_verts[:, 1])), [-s, s], atol=1e-10)
+
+    def test_zero_xy_extent_returns_none(self):
+        """A degenerate cuboid with no XY extent should return None."""
+        si = self._make_cuboid_si(x_min=0.0, x_max=0.0, y_min=0.0, y_max=0.0, z_front=-0.01, z_back=0.01)
+        result = _extract_quad_from_cuboid_shapeinfo(si)
+        self.assertIsNone(result)
+
+    def test_exception_in_cuboid_geometry_returns_none(self):
+        si = MagicMock()
+        si.cuboidGeometry.side_effect = RuntimeError("bad shape")
+        self.assertIsNone(_extract_quad_from_cuboid_shapeinfo(si))
+
+
+class TestExtractQuadFromCylinderShapeinfo(unittest.TestCase):
+    """Tests for _extract_quad_from_cylinder_shapeinfo."""
+
+    def _make_v3d(self, x, y, z):
+        v = MagicMock()
+        v.X.return_value = float(x)
+        v.Y.return_value = float(y)
+        v.Z.return_value = float(z)
+        return v
+
+    def _make_cylinder_si(self, bottom_base=(0.0, 0.0, 0.0), axis=(0.0, 1.0, 0.0), radius=0.004, height=0.00203320):
+        """Return a mock ShapeInfo whose cylinderGeometry() describes a cylinder."""
+        si = MagicMock()
+        si.cylinderGeometry.return_value = {
+            "centreOfBottomBase": self._make_v3d(*bottom_base),
+            "axis": self._make_v3d(*axis),
+            "radius": radius,
+            "height": height,
+        }
+        return si
+
+    # --- WISH-like Y-axis cylinder (axis along local Y, bottom base at origin) ---
+
+    def test_wish_cylinder_returns_quad(self):
+        si = self._make_cylinder_si()
+        result = _extract_quad_from_cylinder_shapeinfo(si)
+        self.assertIsNotNone(result)
+        quad_verts, quad_faces = result
+        self.assertEqual(quad_verts.shape, (4, 3))
+        self.assertEqual(quad_faces.shape, (1, 4))
+
+    def test_wish_cylinder_quad_spans_correct_height(self):
+        """Quad height (along Y axis) should equal cylinder height."""
+        height = 0.00203320
+        si = self._make_cylinder_si(axis=(0.0, 1.0, 0.0), height=height)
+        quad_verts, _ = _extract_quad_from_cylinder_shapeinfo(si)
+        y_min, y_max = quad_verts[:, 1].min(), quad_verts[:, 1].max()
+        self.assertAlmostEqual(y_max - y_min, height, places=8)
+
+    def test_wish_cylinder_quad_spans_correct_width(self):
+        """Quad width (along the s_hat direction) should equal 2*radius."""
+        radius = 0.004
+        si = self._make_cylinder_si(axis=(0.0, 1.0, 0.0), radius=radius)
+        quad_verts, _ = _extract_quad_from_cylinder_shapeinfo(si)
+        x_min, x_max = quad_verts[:, 0].min(), quad_verts[:, 0].max()
+        self.assertAlmostEqual(x_max - x_min, 2 * radius, places=8)
+
+    def test_wish_cylinder_quad_lies_in_xy_plane(self):
+        """For Y-axis cylinder, quad should lie in the local XY plane (z=0)."""
+        si = self._make_cylinder_si(axis=(0.0, 1.0, 0.0))
+        quad_verts, _ = _extract_quad_from_cylinder_shapeinfo(si)
+        np.testing.assert_allclose(quad_verts[:, 2], 0.0, atol=1e-12)
+
+    def test_wish_cylinder_normal_faces_negative_z(self):
+        """Normal = e1 x e2 should point in the (0, 0, ±1) direction for Y-axis cylinder."""
+        si = self._make_cylinder_si(axis=(0.0, 1.0, 0.0))
+        quad_verts, _ = _extract_quad_from_cylinder_shapeinfo(si)
+        e1 = quad_verts[1] - quad_verts[0]
+        e2 = quad_verts[3] - quad_verts[0]
+        normal = np.cross(e1, e2)
+        normal /= np.linalg.norm(normal)
+        self.assertAlmostEqual(abs(normal[2]), 1.0, places=6)
+
+    # --- Z-axis cylinder (axis parallel to sample direction) ---
+
+    def test_z_axis_cylinder_falls_back_gracefully(self):
+        """Cylinder with axis parallel to sample dir (0,0,1) should still return a quad."""
+        si = self._make_cylinder_si(axis=(0.0, 0.0, 1.0), bottom_base=(0.0, 0.0, -0.05), height=0.1)
+        result = _extract_quad_from_cylinder_shapeinfo(si)
+        self.assertIsNotNone(result)
+        quad_verts, _ = result
+        self.assertEqual(quad_verts.shape, (4, 3))
+
+    # --- Error / degenerate cases ---
+
+    def test_zero_axis_returns_none(self):
+        si = self._make_cylinder_si(axis=(0.0, 0.0, 0.0))
+        self.assertIsNone(_extract_quad_from_cylinder_shapeinfo(si))
+
+    def test_exception_in_cylinder_geometry_returns_none(self):
+        si = MagicMock()
+        si.cylinderGeometry.side_effect = RuntimeError("bad shape")
+        self.assertIsNone(_extract_quad_from_cylinder_shapeinfo(si))
+
+    def test_quad_faces_correct_vertex_indices(self):
+        si = self._make_cylinder_si()
+        _, quad_faces = _extract_quad_from_cylinder_shapeinfo(si)
+        np.testing.assert_array_equal(quad_faces[0], [0, 1, 2, 3])
 
 
 class TestShapeRenderer(unittest.TestCase):
@@ -657,7 +822,6 @@ class TestShapeRenderer(unittest.TestCase):
 
         det_info = MagicMock()
         det_info.size.return_value = n_detectors
-        # Each detector has a unique position
 
         def position(i):
             pos = MagicMock()
@@ -675,10 +839,15 @@ class TestShapeRenderer(unittest.TestCase):
             det_info.indexOf.side_effect = lambda did: int(did)
         det_info.detectorIDs.return_value = list(range(n_detectors))
 
+        # Bulk methods required by precompute() — identity quaternions (scipy [x,y,z,w]) and unit scales
+        det_info.allRotations.return_value = np.tile([0.0, 0.0, 0.0, 1.0], (n_detectors, 1))
+        det_info.allScaleFactors.return_value = np.ones((n_detectors, 3))
+        det_info.allPositions.return_value = np.column_stack([np.arange(n_detectors, dtype=float), np.zeros((n_detectors, 2))])
+
         comp_info = MagicMock()
         comp_info.hasValidShape.return_value = True
 
-        # Create a simple triangle mesh for each shape
+        # Create a simple triangle mesh for each shape (non-cuboid/cylinder so getMesh path is used)
         triangle_mesh = np.array(
             [
                 [[0.0, 0.0, 0.0], [0.01, 0.0, 0.0], [0.0, 0.01, 0.0]],
@@ -690,28 +859,15 @@ class TestShapeRenderer(unittest.TestCase):
         for i in range(n_detectors):
             shape = MagicMock()
             if same_shape:
-                shape.getShapeXML.return_value = "<cuboid>same_shape</cuboid>"
+                shape.getShapeXML.return_value = "<sphere>same_shape</sphere>"
             else:
-                shape.getShapeXML.return_value = f"<cuboid>shape_{i % 2}</cuboid>"
+                shape.getShapeXML.return_value = f"<sphere>shape_{i % 2}</sphere>"
             shape.getMesh.return_value = triangle_mesh.copy()
+            # shapeInfo().shape() returns a MagicMock — does not match GeometryShape.CYLINDER/CUBOID,
+            # so precompute() falls through to the getMesh() path for these mock shapes.
             shape_objs.append(shape)
 
         comp_info.shape.side_effect = lambda idx: shape_objs[idx]
-
-        # Rotation: identity quaternion
-        identity_quat = MagicMock()
-        identity_quat.real.return_value = 1.0
-        identity_quat.imagI.return_value = 0.0
-        identity_quat.imagJ.return_value = 0.0
-        identity_quat.imagK.return_value = 0.0
-        comp_info.rotation.return_value = identity_quat
-
-        # Scale: unit scale
-        unit_scale = MagicMock()
-        unit_scale.X.return_value = 1.0
-        unit_scale.Y.return_value = 1.0
-        unit_scale.Z.return_value = 1.0
-        comp_info.scaleFactor.return_value = unit_scale
 
         workspace.componentInfo.return_value = comp_info
         workspace.detectorInfo.return_value = det_info

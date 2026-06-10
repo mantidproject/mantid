@@ -3,7 +3,7 @@
 # Copyright &copy; 2025 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
-# SPDX - License - Identifier: GPL - 3.0 +
+# SPDX - License - Identifier: GPL-3.0+
 import unittest
 from unittest import mock
 from unittest.mock import MagicMock
@@ -214,10 +214,12 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
         self.assertIsNone(self._view._shape_overlay_manager)
 
     @mock.patch("instrumentview.FullInstrumentViewWindow.ConfigService")
-    def test_store_draw_shapes_option_stores_yes_when_checked(self, mock_config):
-        self._view._show_shapes_check_box.setChecked(True)
-        self._view.store_draw_shapes_option()
-        mock_config.Instance.return_value.__setitem__.assert_called_once_with(self._view._DRAW_SHAPES_SETTING_STRING, "Yes")
+    def test_store_render_mode_option_stores_current_text(self, mock_config):
+        self._view._render_mode_combo_box.setCurrentText(self._view._RENDER_MODE_RAW_SHAPES)
+        self._view.store_render_mode_option()
+        mock_config.Instance.return_value.__setitem__.assert_called_once_with(
+            self._view._RENDER_MODE_SETTING_STRING, self._view._RENDER_MODE_RAW_SHAPES
+        )
 
     def test_on_axes_click_left_calls_presenter_with_left(self):
         event = MagicMock()
@@ -228,10 +230,9 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
         self._view._presenter.on_peak_selected_in_lineplot.assert_called_once_with(5.0, "left")
 
     @mock.patch("instrumentview.FullInstrumentViewWindow.ConfigService")
-    def test_store_draw_shapes_option_stores_no_when_unchecked(self, mock_config):
-        self._view._show_shapes_check_box.setChecked(False)
-        self._view.store_draw_shapes_option()
-        mock_config.Instance.return_value.__setitem__.assert_called_once_with(self._view._DRAW_SHAPES_SETTING_STRING, "No")
+    def test_get_render_mode_option_returns_current_text(self, mock_config):
+        self._view._render_mode_combo_box.setCurrentText(self._view._RENDER_MODE_POINTS)
+        self.assertEqual(self._view.get_render_mode_option(), self._view._RENDER_MODE_POINTS)
 
     @mock.patch("instrumentview.FullInstrumentViewWindow.FigureCanvas")
     @mock.patch("qtpy.QtWidgets.QHBoxLayout.addWidget")
@@ -239,13 +240,13 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
     @mock.patch("qtpy.QtWidgets.QSplitter.addWidget")
     @mock.patch("instrumentview.FullInstrumentViewWindow.BackgroundPlotter")
     @mock.patch("instrumentview.FullInstrumentViewWindow.ConfigService")
-    def test_draw_shapes_checkbox_initialised_checked_when_config_is_yes(
+    def test_render_mode_combo_initialised_to_points_when_config_not_recognised(
         self, mock_config, mock_plotter, mock_splitter, mock_v_layout, mock_h_layout, mock_canvas
     ):
-        mock_config.Instance.return_value.__getitem__.return_value = "Yes"
+        mock_config.Instance.return_value.__getitem__.return_value = "UnknownValue"
         with mock.patch("mantidqt.utils.qt.qappthreadcall.force_method_calls_to_qapp_thread"):
             view = FullInstrumentViewWindow()
-        self.assertTrue(view.is_show_shapes_checkbox_checked())
+        self.assertEqual(view.get_render_mode_option(), view._RENDER_MODE_POINTS)
 
     @mock.patch("instrumentview.FullInstrumentViewWindow.FigureCanvas")
     @mock.patch("qtpy.QtWidgets.QHBoxLayout.addWidget")
@@ -253,13 +254,27 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
     @mock.patch("qtpy.QtWidgets.QSplitter.addWidget")
     @mock.patch("instrumentview.FullInstrumentViewWindow.BackgroundPlotter")
     @mock.patch("instrumentview.FullInstrumentViewWindow.ConfigService")
-    def test_draw_shapes_checkbox_initialised_unchecked_when_config_is_no(
+    def test_render_mode_combo_initialised_to_full_shapes_when_config_is_full_shapes(
         self, mock_config, mock_plotter, mock_splitter, mock_v_layout, mock_h_layout, mock_canvas
     ):
-        mock_config.Instance.return_value.__getitem__.return_value = "No"
+        mock_config.Instance.return_value.__getitem__.return_value = self._view._RENDER_MODE_RAW_SHAPES
         with mock.patch("mantidqt.utils.qt.qappthreadcall.force_method_calls_to_qapp_thread"):
             view = FullInstrumentViewWindow()
-        self.assertFalse(view.is_show_shapes_checkbox_checked())
+        self.assertEqual(view.get_render_mode_option(), self._view._RENDER_MODE_RAW_SHAPES)
+
+    @mock.patch("instrumentview.FullInstrumentViewWindow.FigureCanvas")
+    @mock.patch("qtpy.QtWidgets.QHBoxLayout.addWidget")
+    @mock.patch("qtpy.QtWidgets.QVBoxLayout.addWidget")
+    @mock.patch("qtpy.QtWidgets.QSplitter.addWidget")
+    @mock.patch("instrumentview.FullInstrumentViewWindow.BackgroundPlotter")
+    @mock.patch("instrumentview.FullInstrumentViewWindow.ConfigService")
+    def test_render_mode_combo_initialised_to_shapes_fast_when_config_is_shapes_fast(
+        self, mock_config, mock_plotter, mock_splitter, mock_v_layout, mock_h_layout, mock_canvas
+    ):
+        mock_config.Instance.return_value.__getitem__.return_value = self._view._RENDER_MODE_SHAPES_FAST
+        with mock.patch("mantidqt.utils.qt.qappthreadcall.force_method_calls_to_qapp_thread"):
+            view = FullInstrumentViewWindow()
+        self.assertEqual(view.get_render_mode_option(), self._view._RENDER_MODE_SHAPES_FAST)
 
     def test_on_axes_click_right_calls_presenter_with_right(self):
         event = MagicMock()
