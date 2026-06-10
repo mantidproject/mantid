@@ -28,7 +28,7 @@ from instrumentview.Projections.Projection import Projection
 from instrumentview.Projections.ProjectionType import ProjectionType
 from instrumentview.renderers.base_renderer import InstrumentRenderer
 from instrumentview.ComponentSelectionUtils import get_beam_axis, reflect_points_in_axis
-from mantid.geometry import GeometryShape
+from mantid.geometry import GeometryShape, ShapeInfo, CSGObject
 from mantid.kernel import logger
 
 
@@ -98,17 +98,9 @@ class ShapeRenderer(InstrumentRenderer):
                     si = shape_obj.shapeInfo()
                     shape_type = si.shape()
                     if self._use_optimised_shapes and shape_type == GeometryShape.CYLINDER:
-                        quad = _extract_quad_from_cylinder_shapeinfo(si)
-                        if quad is not None:
-                            shape_cache[key] = (quad[0], quad[1], 4)
-                        else:
-                            shape_cache[key] = self._shape_from_raw_mesh(shape_obj)
+                        shape_cache[key] = self._extract_optimised_shape(shape_obj, shape_type, si, _extract_quad_from_cylinder_shapeinfo)
                     elif self._use_optimised_shapes and shape_type == GeometryShape.CUBOID:
-                        quad = _extract_quad_from_cuboid_shapeinfo(si)
-                        if quad is not None:
-                            shape_cache[key] = (quad[0], quad[1], 4)
-                        else:
-                            shape_cache[key] = self._shape_from_raw_mesh(shape_obj)
+                        shape_cache[key] = self._extract_optimised_shape(shape_obj, shape_type, si, _extract_quad_from_cuboid_shapeinfo)
                     else:
                         shape_cache[key] = self._shape_from_raw_mesh(shape_obj)
                 except Exception:
@@ -128,6 +120,19 @@ class ShapeRenderer(InstrumentRenderer):
         self._beam_axis = get_beam_axis(self._workspace)
         self._precomputed = True
         logger.information(f"ShapeRenderer: precomputed {n_det} detectors, {len(shape_cache)} unique shapes")
+
+    def _extract_optimised_shape(
+        self,
+        shape: CSGObject,
+        shape_type: GeometryShape,
+        shape_info: ShapeInfo,
+        extract_method: Callable[[ShapeInfo], Optional[tuple[np.ndarray, np.ndarray]]],
+    ) -> tuple[np.ndarray, np.ndarray, int]:
+        """Try to extract a compact shape representation (e.g. 4-vertex quad) from the ShapeInfo."""
+        quad = extract_method(shape_info)
+        if quad is not None:
+            return quad[0], quad[1], 4
+        return self._shape_from_raw_mesh(shape)
 
     def _shape_from_raw_mesh(self, shape_obj) -> tuple[np.ndarray, np.ndarray, int]:
         """Convert the mesh from ``shapeObj.getMesh()`` to
@@ -519,7 +524,7 @@ def _make_fallback_shape() -> tuple[np.ndarray, np.ndarray, int]:
     return verts, faces, 3
 
 
-def _extract_quad_from_cylinder_shapeinfo(si) -> tuple[np.ndarray, np.ndarray] | None:
+def _extract_quad_from_cylinder_shapeinfo(si: ShapeInfo) -> tuple[np.ndarray, np.ndarray] | None:
     """Extract a 4-vertex quad approximating the face of a cylindrical detector.
 
     The quad has width ``2 * radius`` (across the cylinder) and height equal to
