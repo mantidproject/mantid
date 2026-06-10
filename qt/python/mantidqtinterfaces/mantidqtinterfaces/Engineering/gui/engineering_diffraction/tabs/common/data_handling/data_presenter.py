@@ -14,7 +14,7 @@ from mantidqt.utils.observer_pattern import GenericObservable, GenericObserverWi
 from mantid.api import AnalysisDataService as ADS, MatrixWorkspace
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.data_handling.data_model import FittingDataModel
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.data_handling.data_view import FittingDataView
-from typing import Sequence, List, Set
+from typing import Sequence, List, Set, TypeAlias
 
 
 class FittingDataPresenter(object):
@@ -335,7 +335,7 @@ class FittingDataPresenter(object):
         self.view.remove_all()
 
 
-RowOrWs = int | str
+RowOrWs: TypeAlias = int | str
 
 
 class TwoWayRowDict(dict):
