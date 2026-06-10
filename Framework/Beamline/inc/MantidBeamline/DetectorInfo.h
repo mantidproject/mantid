@@ -68,6 +68,7 @@ public:
   const Eigen::Vector3d &position(const std::pair<size_t, size_t> &index) const;
   const Eigen::Quaterniond &rotation(const size_t index) const;
   const Eigen::Quaterniond &rotation(const std::pair<size_t, size_t> &index) const;
+  Eigen::Vector3d scaleFactor(const size_t index) const;
   void setPosition(const size_t index, const Eigen::Vector3d &position);
   void setPosition(const std::pair<size_t, size_t> &index, const Eigen::Vector3d &position);
   void setRotation(const size_t index, const Eigen::Quaterniond &rotation);

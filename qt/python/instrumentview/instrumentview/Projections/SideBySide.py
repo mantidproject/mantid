@@ -87,6 +87,7 @@ class SideBySide(Projection, projection_types={ProjectionType.SIDE_BY_SIDE: {"ax
         detector_component_indices = np.where(np.isin(all_detector_ids, detector_ids))[0]
         self._component_index_detector_id_map = dict(zip(detector_component_indices, detector_ids))
         self._detector_id_component_index_map = {id: c for c, id in self._component_index_detector_id_map.items()}
+        self._all_detector_positions = workspace.detectorInfo().allPositions()
         super().__init__(type, **kwargs)
 
     def _find_and_correct_x_gap(self) -> None:
@@ -171,7 +172,7 @@ class SideBySide(Projection, projection_types={ProjectionType.SIDE_BY_SIDE: {"ax
             flat_bank = FlatBankInfo()
             flat_bank.bank_type = "tube"
             flat_bank.detector_id_position_map.clear()
-            flat_bank.reference_position = np.array(component_info.position(int(detector_component_indices[0])))
+            flat_bank.reference_position = self._all_detector_positions[int(detector_component_indices[0])]
             normal = np.array(self._calculator.calculateBankNormal(component_info, group))
             rotation = self._calculator.calcBankRotation(
                 flat_bank.reference_position,
@@ -184,7 +185,7 @@ class SideBySide(Projection, projection_types={ProjectionType.SIDE_BY_SIDE: {"ax
             flat_bank.rotation = Rotation.from_quat([rotation[1], rotation[2], rotation[3], rotation[0]])
             flat_bank.detector_ids = detectors
             flat_bank.relative_projected_positions = self._calculate_projected_positions(
-                np.array([component_info.position(int(d)) for d in detector_component_indices]), normal, flat_bank
+                self._all_detector_positions[detector_component_indices], normal, flat_bank
             )
             flat_bank.dimensions = np.max(flat_bank.relative_projected_positions, axis=0) - np.min(
                 flat_bank.relative_projected_positions, axis=0

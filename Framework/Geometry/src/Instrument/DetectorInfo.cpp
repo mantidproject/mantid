@@ -329,6 +329,16 @@ Kernel::V3D DetectorInfo::position(const std::pair<size_t, size_t> &index) const
   return Kernel::toV3D(m_detectorInfo->position(index));
 }
 
+/// Returns the absolute positions of all detectors in a vector ordered by index.
+std::vector<Kernel::V3D> DetectorInfo::allPositions() const {
+  std::vector<Kernel::V3D> positions;
+  positions.reserve(size());
+  for (size_t i = 0; i < size(); ++i) {
+    positions.push_back(position(i));
+  }
+  return positions;
+}
+
 /// Returns the rotation of the detector with given index.
 Kernel::Quat DetectorInfo::rotation(const size_t index) const {
   return Kernel::toQuat(m_detectorInfo->rotation(index));
@@ -337,6 +347,27 @@ Kernel::Quat DetectorInfo::rotation(const size_t index) const {
 /// Returns the rotation of the detector with given index.
 Kernel::Quat DetectorInfo::rotation(const std::pair<size_t, size_t> &index) const {
   return Kernel::toQuat(m_detectorInfo->rotation(index));
+}
+
+/// Returns the absolute rotations of all detectors in a vector ordered by index.
+std::vector<Kernel::Quat> DetectorInfo::allRotations() const {
+  std::vector<Kernel::Quat> rotations;
+  rotations.reserve(size());
+  for (size_t i = 0; i < size(); ++i) {
+    rotations.push_back(rotation(i));
+  }
+  return rotations;
+}
+
+/// Returns the scale factors of all detectors in a vector ordered by index.
+std::vector<Kernel::V3D> DetectorInfo::allScaleFactors() const {
+  std::vector<Kernel::V3D> scaleFactors;
+  scaleFactors.reserve(size());
+  for (size_t i = 0; i < size(); ++i) {
+    const auto scale = m_detectorInfo->scaleFactor(i);
+    scaleFactors.push_back(Kernel::toV3D(scale));
+  }
+  return scaleFactors;
 }
 
 /// Set the mask flag of the detector with given index. Not thread safe.
