@@ -20,6 +20,7 @@ New features
 
 Bugfixes
 ############
+- (`#41202 <https://github.com/mantidproject/mantid/pull/41202>`_) A bug in :ref:`WeightedMeanOfWorkspace <algm-WeightedMeanOfWorkspace>` where output errors were computed as :math:`\sqrt{\mathrm{weightSum}}` instead of :math:`1/\sqrt{\mathrm{weightSum}}` has been corrected. This affects :ref:`DgsReduction <algm-DgsReduction>` (including the Absolute Units tab in the GUI), DPDFReduction, and :ref:`MDNorm <algm-MDNorm>` workflows. **Warning:** Results from previous releases may contain inflated uncertainties and should be reprocessed.
 - (`#40975 <https://github.com/mantidproject/mantid/pull/40975>`_) :ref:`SaveSESANS <algm-SaveSESANS>` and :ref:`SaveCanSAS1D <algm-SaveCanSAS1D>` have been updated to include the decimal point (i.e ``1.0``) when outputting data, even if the data is an integer.
 - (`#40712 <https://github.com/mantidproject/mantid/pull/40712>`_) :ref:`ConjoinWorkspaces <algm-ConjoinWorkspaces>` no longer has a fencepost (off-by-one) error when determining spectrum numbers.
 - (`#40755 <https://github.com/mantidproject/mantid/pull/40755>`_) :ref:`LoadEmptyInstrument <algm-LoadEmptyInstrument>` will now load instruments from a wider class of NeXus files.
@@ -32,7 +33,6 @@ Bugfixes
 - (`#41039 <https://github.com/mantidproject/mantid/pull/41039>`_) :ref:`SumSpectra <algm-SumSpectra>` has been updated to correctly propagate errors for weighted sum calculations.
 - (`#41131 <https://github.com/mantidproject/mantid/pull/41131>`_) :ref:`algm-EnggEstimateFocussedBackground` will no longer throw an error related to writing to a read-only destination.
 - (`#41150 <https://github.com/mantidproject/mantid/pull/41150>`_) :ref:`MaskBTP <algm-MaskBTP>` now supports name and short-name for instrument IMAGINE.
-- (`#41202 <https://github.com/mantidproject/mantid/pull/41202>`_) A bug in :ref:`WeightedMeanOfWorkspace <algm-WeightedMeanOfWorkspace>` where output errors were computed as :math:`\sqrt{\mathrm{weightSum}}` instead of :math:`1/\sqrt{\mathrm{weightSum}}` has been corrected. This affects :ref:`DgsReduction <algm-DgsReduction>` (including the Absolute Units tab in the GUI), DPDFReduction, and :ref:`MDNorm <algm-MDNorm>` workflows. **Warning:** Results from previous releases may contain inflated uncertainties and should be reprocessed.
 - (`#41215 <https://github.com/mantidproject/mantid/pull/41215>`_) :ref:`algm-LoadEventNexus` will no longer appear to hang when loading a single bank on the TOPAZ or MANDI instruments, and will no longer throw an error on completion. The loaded instrument will contain only the specified bank, with no other components.
 - (`#41256 <https://github.com/mantidproject/mantid/pull/41256>`_) :ref:`algm-LoadMask` will now throw an error if given an invalid file.
 - (`#41259 <https://github.com/mantidproject/mantid/pull/41259>`_) :ref:`algm-BASISReduction` has been updated to throw an error if a mask workspace cannot be found.
