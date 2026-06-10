@@ -30,9 +30,11 @@
 %End
 };
 
-// Marked /Default/ so every wrapped call converts C++ exceptions to Python without a
-// per-function throw() specifier (the throw() exception specification is deprecated in
-// sip v6 and removed in v7). Opt a function out with a trailing `noexcept`.
+// Marked /Default/ so functions without an explicit exception specifier still convert any
+// C++ exception to Python (as BaseCppError). The deprecated throw() specifier is therefore
+// only kept where a specific Python type is required - e.g. throw(std::invalid_argument)
+// maps to ValueError - because sip v6 offers no non-deprecated way to express that per
+// function; such mappings collapse to BaseCppError if the throw() is dropped.
 %Exception std::exception(SIP_Exception) /PyName=BaseCppError, Default/
 {
 %TypeHeaderCode
