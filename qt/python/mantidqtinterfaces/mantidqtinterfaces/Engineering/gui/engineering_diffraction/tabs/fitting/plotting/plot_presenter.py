@@ -58,14 +58,14 @@ class FittingPlotPresenter(object):
         self.view.set_slot_for_legend_toggled()
         self.view.set_slot_for_find_peaks_convolve(self.run_find_peaks_convolve)
 
-    def add_workspace_to_plot(self, ws: str) -> None:
+    def add_workspace_to_plot(self, ws: MatrixWorkspace) -> None:
         axes = self.view.get_axes()
         for ax in axes:
             self.model.add_workspace_to_plot(ws, ax, PLOT_KWARGS)
         self.view.update_figure()
         self.set_progress_bar_zero()
 
-    def remove_workspace_from_plot(self, ws: str) -> None:
+    def remove_workspace_from_plot(self, ws: MatrixWorkspace) -> None:
         for ax in self.view.get_axes():
             self.model.remove_workspace_from_plot(ws, ax)
             self.view.remove_ws_from_fitbrowser(ws)

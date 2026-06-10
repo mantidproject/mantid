@@ -38,14 +38,14 @@ class FittingPlotModel(object):
     # Plotting
     # ===============
 
-    def get_plotted_workspaces(self) -> Set[str]:
+    def get_plotted_workspaces(self) -> Set[MatrixWorkspace]:
         return self.plotted_workspaces
 
-    def add_workspace_to_plot(self, ws: str, ax: MantidAxes, plot_kwargs: Dict) -> None:
+    def add_workspace_to_plot(self, ws: MatrixWorkspace, ax: MantidAxes, plot_kwargs: Dict) -> None:
         ax.plot(ws, **plot_kwargs)
         self.plotted_workspaces.add(ws)
 
-    def remove_workspace_from_plot(self, ws: str, ax: MantidAxes) -> None:
+    def remove_workspace_from_plot(self, ws: MatrixWorkspace, ax: MantidAxes) -> None:
         if ws in self.plotted_workspaces:
             self._remove_workspace_from_plot(ws, ax)
             self.plotted_workspaces.remove(ws)
@@ -53,7 +53,7 @@ class FittingPlotModel(object):
             ax.cla()
 
     @staticmethod
-    def _remove_workspace_from_plot(ws: str, ax: MantidAxes) -> None:
+    def _remove_workspace_from_plot(ws: MatrixWorkspace, ax: MantidAxes) -> None:
         ax.remove_workspace_artists(ws)
 
     def remove_all_workspaces_from_plot(self, ax: MantidAxes) -> None:

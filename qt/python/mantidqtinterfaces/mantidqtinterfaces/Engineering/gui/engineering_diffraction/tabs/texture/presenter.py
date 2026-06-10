@@ -16,7 +16,7 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common impo
     CalibrationObserver,
 )
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.show_sample.show_sample_presenter import ShowSamplePresenter
-from typing import Callable, TYPE_CHECKING, List, Sequence, Tuple, Any
+from typing import Callable, TYPE_CHECKING, List, Sequence, Tuple, Any, Type
 
 if TYPE_CHECKING:
     from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.texture.model import ProjectionModel
@@ -300,7 +300,7 @@ class TexturePresenter:
         self.view.finder_texture_tables.setLastDirectory(save_dir)
 
     @staticmethod
-    def _get_setting(setting_name, return_type=str) -> Any:
+    def _get_setting(setting_name, return_type: Type = str) -> Any:
         return get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, setting_name, return_type)
 
     # ------- UI state tracking ----------------------

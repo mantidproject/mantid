@@ -258,7 +258,7 @@ class TextureCorrectionPresenter(AlgorithmObserver):
         self.view.update_reference_info_section(*self.model.get_reference_info())
 
     @staticmethod
-    def _get_setting(setting_name, return_type: Type = str) -> Any:
+    def _get_setting(setting_name: str, return_type: Type = str) -> Any:
         return get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, setting_name, return_type)
 
     def add_correction_subscriber(self, obs: GenericObserverWithArgPassing) -> None:
