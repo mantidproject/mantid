@@ -198,6 +198,7 @@ void CreateDetectorTable::createColumns() {
     colNames.emplace_back("V3D", "Position");
   }
 
+  m_columnCache.clear();
   m_columnCache.reserve(colNames.size());
   // Set the column names
   for (size_t col = 0; col < colNames.size(); ++col) {
