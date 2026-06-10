@@ -48,7 +48,13 @@ Python::Object newPresenterWithLogging() {
 namespace MantidQt::CustomInterfaces {
 
 ALFPythonInstrumentView::ALFPythonInstrumentView(QWidget *parent)
-    : ALFInstrumentViewBase(parent), Python::InstanceHolder(newPresenterWithLogging()) {}
+    : ALFInstrumentViewBase(parent), Python::InstanceHolder(newPresenterWithLogging()) {
+  GlobalInterpreterLock lock;
+  boost::python::object result = pyobj().attr("get_workspace_name")();
+  auto const workspaceName = boost::python::extract<std::string>(result)();
+  m_actor = std::make_unique<MantidWidgets::InstrumentActor>(workspaceName, *messageHandler);
+  m_actor->initialize(true, true);
+}
 
 QWidget *ALFPythonInstrumentView::getInstrumentView() {
   try {
@@ -108,15 +114,6 @@ void ALFPythonInstrumentView::notifyWholeTubeSelected() {
 
 MantidWidgets::IInstrumentActor const &ALFPythonInstrumentView::getInstrumentActor() const {
   try {
-    GlobalInterpreterLock lock;
-    boost::python::object result = pyobj().attr("get_workspace_name")();
-    auto const workspaceName = boost::python::extract<std::string>(result)();
-    auto const workspace = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-        Mantid::API::AnalysisDataService::Instance().retrieve(workspaceName));
-    if (!workspace) {
-      throw std::runtime_error("ALF instrument view workspace is not a MatrixWorkspace");
-    }
-    m_actor = std::make_unique<MantidWidgets::StubInstrumentActor>(workspace);
     return *m_actor;
   } catch (boost::python::error_already_set &) {
     g_log.error() << PythonException(true).what() << "\n";

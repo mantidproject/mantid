@@ -10,7 +10,9 @@
 #include "ALFPythonCallbackRelay.h"
 #include "DllConfig.h"
 #include "IALFInstrumentView.h"
+#include "MantidQtWidgets/Common/MessageHandler.h"
 #include "MantidQtWidgets/Common/Python/Object.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #include "StubInstrumentActor.h"
 
 #include <memory>
@@ -55,7 +57,8 @@ private:
 
   ALFPythonCallbackRelay *m_callbackRelay{nullptr};
 
-  mutable std::unique_ptr<MantidWidgets::StubInstrumentActor> m_actor;
+  mutable std::unique_ptr<MantidWidgets::InstrumentActor> m_actor;
+  std::unique_ptr<MantidWidgets::IMessageHandler> messageHandler = std::make_unique<MantidWidgets::MessageHandler>();
 
   // private slots:
   //   void reconnectInstrumentActor();

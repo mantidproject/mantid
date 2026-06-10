@@ -23,7 +23,7 @@ class ALFInstrumentViewPresenter(FullInstrumentViewPresenter):
     """
 
     def __init__(self, view=None):
-        _placeholder_ws = CreateSampleWorkspace(InstrumentName="ALF", StoreInADS=False, OutputWorkspace="test_alfview")
+        _placeholder_ws = CreateSampleWorkspace(InstrumentName="ALF", StoreInADS=True, OutputWorkspace="test_alfview")
         super().__init__(ALFInstrumentViewView(), FullInstrumentViewModel(_placeholder_ws))
         self._view.set_default_projection(ProjectionType.SIDE_BY_SIDE)
 
