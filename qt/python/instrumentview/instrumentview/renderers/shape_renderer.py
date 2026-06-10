@@ -31,6 +31,9 @@ from instrumentview.ComponentSelectionUtils import get_beam_axis, reflect_points
 from mantid.geometry import GeometryShape, ShapeInfo, CSGObject
 from mantid.kernel import logger
 
+_AXIS_PARALLEL_TOLERANCE = 1e-12  # minimum norm to treat a vector as non-degenerate
+_CROSS_PRODUCT_TOLERANCE = 1e-6  # minimum cross-product norm before falling back to alternative axis
+
 
 class ShapeRenderer(InstrumentRenderer):
     """Renders detectors as their true geometric shapes (cuboids, cylinders, …).
@@ -547,7 +550,7 @@ def _extract_quad_from_cylinder_shapeinfo(si: ShapeInfo) -> tuple[np.ndarray, np
         return None
 
     axis_norm = np.linalg.norm(axis_raw)
-    if axis_norm < 1e-12:
+    if axis_norm < _AXIS_PARALLEL_TOLERANCE:
         return None
     a_hat = axis_raw / axis_norm
 
@@ -558,12 +561,12 @@ def _extract_quad_from_cylinder_shapeinfo(si: ShapeInfo) -> tuple[np.ndarray, np
     sample_dir = np.array([0.0, 0.0, -1.0])
     s_raw = np.cross(sample_dir, a_hat)
     s_norm = np.linalg.norm(s_raw)
-    if s_norm < 1e-6:
+    if s_norm < _CROSS_PRODUCT_TOLERANCE:
         # Axis is nearly parallel to sample direction — try X, then Y as fallback
         for fallback in (np.array([1.0, 0.0, 0.0]), np.array([0.0, 1.0, 0.0])):
             s_raw = np.cross(fallback, a_hat)
             s_norm = np.linalg.norm(s_raw)
-            if s_norm >= 1e-6:
+            if s_norm >= _CROSS_PRODUCT_TOLERANCE:
                 break
         else:
             return None
@@ -614,7 +617,7 @@ def _extract_quad_from_cuboid_shapeinfo(si) -> tuple[np.ndarray, np.ndarray] | N
     y_min, y_max = lfb.Y(), lft.Y()
     z_front, z_back = lfb.Z(), lbb.Z()
 
-    if abs(x_max - x_min) < 1e-12 and abs(y_max - y_min) < 1e-12:
+    if abs(x_max - x_min) < _AXIS_PARALLEL_TOLERANCE and abs(y_max - y_min) < _AXIS_PARALLEL_TOLERANCE:
         return None
 
     mid_z = (z_front + z_back) * 0.5
