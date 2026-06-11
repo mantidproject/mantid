@@ -20,6 +20,7 @@ from qtpy.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+from typing import Callable
 
 
 class _WheelIgnoreFilter(QtCore.QObject):
@@ -70,7 +71,7 @@ class TexturePlannerSettingsView(QDialog):
     # Group Builders
     # ================
 
-    def _build_vis_group(self):
+    def _build_vis_group(self) -> QGroupBox:
         group = QGroupBox("Visualisation Settings")
         form = QFormLayout()
 
@@ -92,7 +93,7 @@ class TexturePlannerSettingsView(QDialog):
         group.setLayout(form)
         return group
 
-    def _build_stl_group(self):
+    def _build_stl_group(self) -> QGroupBox:
         group = QGroupBox("STL Loading Settings")
         form = QFormLayout()
 
@@ -121,7 +122,7 @@ class TexturePlannerSettingsView(QDialog):
         group.setLayout(form)
         return group
 
-    def _build_orientation_group(self):
+    def _build_orientation_group(self) -> QGroupBox:
         group = QGroupBox("Orientation File Settings")
         form = QFormLayout()
 
@@ -134,7 +135,7 @@ class TexturePlannerSettingsView(QDialog):
         group.setLayout(form)
         return group
 
-    def _build_mc_group(self):
+    def _build_mc_group(self) -> QGroupBox:
         group = QGroupBox("Monte Carlo Absorption Settings")
         form = QFormLayout()
 
@@ -156,7 +157,7 @@ class TexturePlannerSettingsView(QDialog):
         group.setLayout(form)
         return group
 
-    def _build_attenuation_group(self):
+    def _build_attenuation_group(self) -> QGroupBox:
         group = QGroupBox("Attenuation Settings")
         form = QFormLayout()
 
@@ -179,7 +180,7 @@ class TexturePlannerSettingsView(QDialog):
     # Wheel Filter
     # ================
 
-    def _install_wheel_ignore_filter(self):
+    def _install_wheel_ignore_filter(self) -> None:
         self._wheel_filter = _WheelIgnoreFilter(self)
         scroll_widgets = (
             self.stl_scale_combo,
@@ -199,7 +200,7 @@ class TexturePlannerSettingsView(QDialog):
     # Tool Tips
     # ================
 
-    def init_tool_tips(self):
+    def init_tool_tips(self) -> None:
         self.stl_scale_combo.setToolTip("Units of the STL file's coordinates")
         self.stl_x_deg.setToolTip("Rotation around the X axis applied when loading the STL file (degrees)")
         self.stl_y_deg.setToolTip("Rotation around the Y axis applied when loading the STL file (degrees)")
@@ -229,133 +230,133 @@ class TexturePlannerSettingsView(QDialog):
     # Slot Connectors
     # ================
 
-    def set_on_ok_clicked(self, slot):
+    def set_on_ok_clicked(self, slot: Callable) -> None:
         self.button_box.accepted.connect(slot)
 
-    def set_on_cancel_clicked(self, slot):
+    def set_on_cancel_clicked(self, slot: Callable) -> None:
         self.button_box.rejected.connect(slot)
 
-    def set_on_apply_clicked(self, slot):
+    def set_on_apply_clicked(self, slot: Callable) -> None:
         self.button_box.button(QDialogButtonBox.Apply).clicked.connect(slot)
 
     # ================
     # Getters
     # ================
 
-    def get_show_directions(self):
+    def get_show_directions(self) -> bool:
         return self.show_directions.isChecked()
 
-    def get_show_goniometers(self):
+    def get_show_goniometers(self) -> bool:
         return self.show_goniometers.isChecked()
 
-    def get_show_incident_beam(self):
+    def get_show_incident_beam(self) -> bool:
         return self.show_incident_beam.isChecked()
 
-    def get_show_ks(self):
+    def get_show_ks(self) -> bool:
         return self.show_ks.isChecked()
 
-    def get_show_scattered_beam(self):
+    def get_show_scattered_beam(self) -> bool:
         return self.show_scattered_beam.isChecked()
 
-    def get_stl_scale(self):
+    def get_stl_scale(self) -> str:
         return self.stl_scale_combo.currentText()
 
-    def get_stl_x_deg(self):
+    def get_stl_x_deg(self) -> float:
         return self.stl_x_deg.value()
 
-    def get_stl_y_deg(self):
+    def get_stl_y_deg(self) -> float:
         return self.stl_y_deg.value()
 
-    def get_stl_z_deg(self):
+    def get_stl_z_deg(self) -> float:
         return self.stl_z_deg.value()
 
-    def get_stl_translation(self):
+    def get_stl_translation(self) -> str:
         return self.stl_translation.text()
 
-    def get_orient_axes(self):
+    def get_orient_axes(self) -> str:
         return self.orient_axes.text()
 
-    def get_orient_senses(self):
+    def get_orient_senses(self) -> str:
         return self.orient_senses.text()
 
-    def get_mc_events(self):
+    def get_mc_events(self) -> float:
         return self.mc_events.value()
 
-    def get_mc_max_scatter(self):
+    def get_mc_max_scatter(self) -> float:
         return self.mc_max_scatter.value()
 
-    def get_mc_simulate_in(self):
+    def get_mc_simulate_in(self) -> str:
         return self.mc_simulate_in.currentText()
 
-    def get_mc_resimulate(self):
+    def get_mc_resimulate(self) -> bool:
         return self.mc_resimulate.isChecked()
 
-    def get_att_point(self):
+    def get_att_point(self) -> float:
         return self.att_point.value()
 
-    def get_att_unit(self):
+    def get_att_unit(self) -> str:
         return self.att_unit.currentText()
 
-    def get_att_use_data_range(self):
+    def get_att_use_data_range(self) -> bool:
         return self.att_use_data_range.isChecked()
 
     # ================
     # Setters
     # ================
 
-    def set_show_directions(self, val):
-        self.show_directions.setChecked(bool(val))
+    def set_show_directions(self, check: bool) -> None:
+        self.show_directions.setChecked(check)
 
-    def set_show_goniometers(self, val):
-        return self.show_goniometers.setChecked(bool(val))
+    def set_show_goniometers(self, check: bool) -> None:
+        self.show_goniometers.setChecked(check)
 
-    def set_show_incident_beam(self, val):
-        return self.show_incident_beam.setChecked(bool(val))
+    def set_show_incident_beam(self, check: bool) -> None:
+        self.show_incident_beam.setChecked(check)
 
-    def set_show_ks(self, val):
-        return self.show_ks.setChecked(bool(val))
+    def set_show_ks(self, check: bool) -> None:
+        self.show_ks.setChecked(check)
 
-    def set_show_scattered_beam(self, val):
-        return self.show_scattered_beam.setChecked(bool(val))
+    def set_show_scattered_beam(self, check: bool) -> None:
+        self.show_scattered_beam.setChecked(check)
 
-    def set_stl_scale(self, text):
-        self.stl_scale_combo.setCurrentText(str(text))
+    def set_stl_scale(self, text: str) -> None:
+        self.stl_scale_combo.setCurrentText(text)
 
-    def set_stl_x_deg(self, val):
-        self.stl_x_deg.setValue(float(val))
+    def set_stl_x_deg(self, val: float) -> None:
+        self.stl_x_deg.setValue(val)
 
-    def set_stl_y_deg(self, val):
-        self.stl_y_deg.setValue(float(val))
+    def set_stl_y_deg(self, val: float) -> None:
+        self.stl_y_deg.setValue(val)
 
-    def set_stl_z_deg(self, val):
-        self.stl_z_deg.setValue(float(val))
+    def set_stl_z_deg(self, val: float) -> None:
+        self.stl_z_deg.setValue(val)
 
-    def set_stl_translation(self, text):
-        self.stl_translation.setText(str(text))
+    def set_stl_translation(self, text: str) -> None:
+        self.stl_translation.setText(text)
 
-    def set_orient_axes(self, text):
-        self.orient_axes.setText(str(text))
+    def set_orient_axes(self, text: str) -> None:
+        self.orient_axes.setText(text)
 
-    def set_orient_senses(self, text):
-        self.orient_senses.setText(str(text))
+    def set_orient_senses(self, text: str) -> None:
+        self.orient_senses.setText(text)
 
-    def set_mc_events(self, val):
+    def set_mc_events(self, val: float) -> None:
         self.mc_events.setValue(int(val))
 
-    def set_mc_max_scatter(self, val):
+    def set_mc_max_scatter(self, val: float) -> None:
         self.mc_max_scatter.setValue(int(val))
 
-    def set_mc_simulate_in(self, text):
-        self.mc_simulate_in.setCurrentText(str(text))
+    def set_mc_simulate_in(self, text: str) -> None:
+        self.mc_simulate_in.setCurrentText(text)
 
-    def set_mc_resimulate(self, val):
-        self.mc_resimulate.setChecked(bool(val))
+    def set_mc_resimulate(self, check: bool) -> None:
+        self.mc_resimulate.setChecked(check)
 
-    def set_att_point(self, val):
-        self.att_point.setValue(float(val))
+    def set_att_point(self, val: float) -> None:
+        self.att_point.setValue(val)
 
-    def set_att_unit(self, text):
-        self.att_unit.setCurrentText(str(text))
+    def set_att_unit(self, text: str) -> None:
+        self.att_unit.setCurrentText(text)
 
-    def set_att_use_data_range(self, val):
-        self.att_use_data_range.setChecked(bool(val))
+    def set_att_use_data_range(self, check: bool) -> None:
+        self.att_use_data_range.setChecked(check)

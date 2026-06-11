@@ -4,9 +4,9 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-
-from qtpy.QtWidgets import QMainWindow, QHeaderView, QTableWidgetItem, QCheckBox, QWidget, QHBoxLayout, QPushButton, QToolBar
+from qtpy.QtWidgets import QMainWindow, QHeaderView, QTableWidgetItem, QCheckBox, QWidget, QHBoxLayout, QPushButton, QToolBar, QGroupBox
 from qtpy import QtCore
+from qtpy.QtGui import QCloseEvent
 from mantidqt.utils.qt import load_ui
 from mantidqt.icons import get_icon
 from mantid.kernel import FeatureType
@@ -14,9 +14,10 @@ from mantid import UsageService
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
+from matplotlib.axes import Axes
 from qtpy.QtWidgets import QVBoxLayout
 from functools import partial
-
+from typing import Callable, List, Tuple
 
 Ui_texplan, _ = load_ui(__file__, "texture_planner.ui")
 
@@ -131,7 +132,7 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         # register startup
         UsageService.registerFeatureUsage(FeatureType.Interface, "TexturePlanner", False)
 
-    def _setup_settings_toolbar(self):
+    def _setup_settings_toolbar(self) -> None:
         toolbar = QToolBar("Main Toolbar", self)
         self.btn_settings = QPushButton()
         self.btn_settings.setIcon(get_icon("mdi.settings", "black", 1.2))
@@ -139,18 +140,18 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         toolbar.addWidget(self.btn_settings)
         self.addToolBar(QtCore.Qt.BottomToolBarArea, toolbar)
 
-    def set_on_settings_clicked(self, slot):
+    def set_on_settings_clicked(self, slot: Callable) -> None:
         self.btn_settings.clicked.connect(slot)
 
-    def set_on_close(self, slot):
+    def set_on_close(self, slot: Callable) -> None:
         self._on_close = slot
 
-    def closeEvent(self, event):
+    def closeEvent(self, event: QCloseEvent):
         if self._on_close is not None:
             self._on_close()
         super().closeEvent(event)
 
-    def init_tool_tips(self):
+    def init_tool_tips(self) -> None:
         # Sample setup
         self.btnSTL.setToolTip("Load a sample shape from a mesh (.stl) file.")
         self.btnXML.setToolTip("Load a sample shape from a Constructive Solid Geometry (CSG) definition (.xml file).")
@@ -239,86 +240,86 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         self.cmbExportFormat.setToolTip("Type of file to write.")
         self.btnExport.setToolTip("Write the selected export file to the save directory.")
 
-    def set_on_num_gonio_updated(self, slot):
+    def set_on_num_gonio_updated(self, slot: Callable) -> None:
         self.spnNumAxes.valueChanged.connect(slot)
 
-    def set_on_step_updated(self, slot):
+    def set_on_step_updated(self, slot: Callable) -> None:
         self.spnStepSize.valueChanged.connect(slot)
 
-    def set_on_update_dirs(self, slot):
+    def set_on_update_dirs(self, slot: Callable) -> None:
         self.updateDirs.clicked.connect(slot)
 
-    def set_on_gonio_vec_updated(self, slot):
+    def set_on_gonio_vec_updated(self, slot: Callable) -> None:
         for i, gonio_vec in enumerate(self.gonio_vecs):
             gonio_vec.editingFinished.connect(partial(slot, i))
 
-    def set_on_gonio_sense_updated(self, slot):
+    def set_on_gonio_sense_updated(self, slot: Callable) -> None:
         for i, gonio_sense in enumerate(self.gonio_senses):
             gonio_sense.currentTextChanged.connect(partial(slot, i))
 
-    def set_on_gonio_angle_updated(self, slot):
+    def set_on_gonio_angle_updated(self, slot: Callable) -> None:
         for i, gonio_angle in enumerate(self.gonio_angles):
             gonio_angle.valueChanged.connect(partial(slot, i))
 
-    def set_on_group_changed(self, slot):
+    def set_on_group_changed(self, slot: Callable) -> None:
         self.cmbGroup.currentTextChanged.connect(slot)
 
-    def set_on_add_orientation_clicked(self, slot):
+    def set_on_add_orientation_clicked(self, slot: Callable) -> None:
         self.addOrientation.clicked.connect(slot)
 
-    def set_on_current_index_changed(self, slot):
+    def set_on_current_index_changed(self, slot: Callable) -> None:
         self.spnIndex.valueChanged.connect(slot)
 
-    def set_on_stl_file_changed(self, slot):
+    def set_on_stl_file_changed(self, slot: Callable) -> None:
         self.finder_stl.fileFindingFinished.connect(slot)
 
-    def set_on_xml_file_changed(self, slot):
+    def set_on_xml_file_changed(self, slot: Callable) -> None:
         self.finder_xml.fileFindingFinished.connect(slot)
 
-    def set_on_orient_file_changed(self, slot):
+    def set_on_orient_file_changed(self, slot: Callable) -> None:
         self.finder_orient.fileFindingFinished.connect(slot)
 
-    def set_on_save_dir_changed(self, slot):
+    def set_on_save_dir_changed(self, slot: Callable) -> None:
         self.finder_save_dir.fileFindingFinished.connect(slot)
 
-    def set_on_save_file_changed(self, slot):
+    def set_on_save_file_changed(self, slot: Callable) -> None:
         self.saveFileLine.textEdited.connect(slot)
 
-    def set_on_load_stl_clicked(self, slot):
+    def set_on_load_stl_clicked(self, slot: Callable) -> None:
         self.btnSTL.clicked.connect(slot)
 
-    def set_on_load_xml_clicked(self, slot):
+    def set_on_load_xml_clicked(self, slot: Callable) -> None:
         self.btnXML.clicked.connect(slot)
 
-    def set_on_set_material_clicked(self, slot):
+    def set_on_set_material_clicked(self, slot: Callable) -> None:
         self.btnSetMaterial.clicked.connect(slot)
 
-    def set_on_material_set(self, slot):
+    def set_on_material_set(self, slot: Callable) -> None:
         self.sig_material_set.connect(slot)
 
-    def signal_material_set(self):
+    def signal_material_set(self) -> None:
         self.sig_material_set.emit()
 
-    def set_current_material(self, material):
+    def set_current_material(self, material: str) -> None:
         # material is the chemical formula / name currently set on the sample, or "" if unset
         self.lblCurrentMaterialValue.setText(material or "Not set")
 
-    def set_on_load_orient_clicked(self, slot):
+    def set_on_load_orient_clicked(self, slot: Callable) -> None:
         self.btnOrient.clicked.connect(slot)
 
-    def set_on_set_gauge_volume_clicked(self, slot):
+    def set_on_set_gauge_volume_clicked(self, slot: Callable) -> None:
         self.setGV.clicked.connect(slot)
 
-    def set_on_select_all_clicked(self, slot):
+    def set_on_select_all_clicked(self, slot: Callable) -> None:
         self.selectAll.clicked.connect(slot)
 
-    def set_on_deselect_all_clicked(self, slot):
+    def set_on_deselect_all_clicked(self, slot: Callable) -> None:
         self.deselectAll.clicked.connect(slot)
 
-    def set_on_delete_selected_clicked(self, slot):
+    def set_on_delete_selected_clicked(self, slot: Callable) -> None:
         self.deleteSelected.clicked.connect(slot)
 
-    def populate_export_formats(self):
+    def populate_export_formats(self) -> None:
         self.cmbExportFormat.addItems(BASE_EXPORT_FORMATS)
         # per-item hints so the documented behaviour of each format is discoverable in the combo
         item_tooltips = {
@@ -332,10 +333,10 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
             if idx != -1:
                 self.cmbExportFormat.setItemData(idx, tooltip, QtCore.Qt.ToolTipRole)
 
-    def get_export_format(self):
+    def get_export_format(self) -> str:
         return self.cmbExportFormat.currentText()
 
-    def set_transmission_weighting_available(self, available):
+    def set_transmission_weighting_available(self, available: bool) -> None:
         # the transmission weighting export only makes sense once transmission has been estimated,
         # so its entry is added to / removed from the combo as the estimate is toggled
         idx = self.cmbExportFormat.findText(EXPORT_TRANSMISSION_WEIGHTING)
@@ -346,226 +347,226 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         elif not available and idx != -1:
             self.cmbExportFormat.removeItem(idx)
 
-    def set_on_export_clicked(self, slot):
+    def set_on_export_clicked(self, slot: Callable) -> None:
         self.btnExport.clicked.connect(slot)
 
-    def set_on_show_transmission_toggled(self, slot):
+    def set_on_show_transmission_toggled(self, slot: Callable) -> None:
         self.chkTransmission.toggled.connect(slot)
 
-    def set_on_init_x_changed(self, slot):
+    def set_on_init_x_changed(self, slot: Callable) -> None:
         self.spnInitX.valueChanged.connect(slot)
 
-    def set_on_init_y_changed(self, slot):
+    def set_on_init_y_changed(self, slot: Callable) -> None:
         self.spnInitY.valueChanged.connect(slot)
 
-    def set_on_init_z_changed(self, slot):
+    def set_on_init_z_changed(self, slot: Callable) -> None:
         self.spnInitZ.valueChanged.connect(slot)
 
-    def set_on_init_px_changed(self, slot):
+    def set_on_init_px_changed(self, slot: Callable) -> None:
         self.spnInitPX.valueChanged.connect(slot)
 
-    def set_on_init_py_changed(self, slot):
+    def set_on_init_py_changed(self, slot: Callable) -> None:
         self.spnInitPY.valueChanged.connect(slot)
 
-    def set_on_init_pz_changed(self, slot):
+    def set_on_init_pz_changed(self, slot: Callable) -> None:
         self.spnInitPZ.valueChanged.connect(slot)
 
-    def set_on_instrument_changed(self, slot):
+    def set_on_instrument_changed(self, slot: Callable) -> None:
         self.cmbInstr.currentTextChanged.connect(slot)
 
-    def set_on_custom_instrument_name_changed(self, slot):
+    def set_on_custom_instrument_name_changed(self, slot: Callable) -> None:
         self.edt_custom_instr.textChanged.connect(slot)
 
-    def set_on_custom_instrument_name_committed(self, slot):
+    def set_on_custom_instrument_name_committed(self, slot: Callable) -> None:
         # fires when editing finishes (focus lost / Enter), gating the expensive grouping check
         self.edt_custom_instr.editingFinished.connect(slot)
 
-    def set_on_grouping_file_changed(self, slot):
+    def set_on_grouping_file_changed(self, slot: Callable) -> None:
         self.finder_grouping.fileFindingFinished.connect(slot)
 
-    def set_on_update_instrument_clicked(self, slot):
+    def set_on_update_instrument_clicked(self, slot: Callable) -> None:
         self.btnUpdateInstr.clicked.connect(slot)
 
     @QtCore.Slot(bool)
-    def _on_any_include_toggled(self):
+    def _on_any_include_toggled(self) -> None:
         self.sig_include_state_changed.emit()
 
     @QtCore.Slot(bool)
-    def _on_any_select_toggled(self):
+    def _on_any_select_toggled(self) -> None:
         self.sig_select_state_changed.emit()
 
     # getters
-    def get_stl_string(self):
+    def get_stl_string(self) -> str:
         fnames = self.finder_stl.getFilenames()
         return fnames[0] if len(fnames) > 0 else ""
 
-    def get_xml_string(self):
+    def get_xml_string(self) -> str:
         fnames = self.finder_xml.getFilenames()
         return fnames[0] if len(fnames) > 0 else ""
 
-    def get_orientation_file(self):
+    def get_orientation_file(self) -> str:
         fnames = self.finder_orient.getFilenames()
         return fnames[0] if len(fnames) > 0 else ""
 
-    def get_save_dir(self):
+    def get_save_dir(self) -> str:
         fnames = self.finder_save_dir.getFilenames()
         return fnames[0] if len(fnames) > 0 else ""
 
-    def get_save_filename(self):
+    def get_save_filename(self) -> str:
         return self.saveFileLine.text()
 
-    def get_rd_name(self):
+    def get_rd_name(self) -> str:
         return self.lineedit_RD.text()
 
-    def get_nd_name(self):
+    def get_nd_name(self) -> str:
         return self.lineedit_ND.text()
 
-    def get_td_name(self):
+    def get_td_name(self) -> str:
         return self.lineedit_TD.text()
 
-    def get_rd_dir(self):
+    def get_rd_dir(self) -> str:
         return ",".join([self.lineedit_RD0.text(), self.lineedit_RD1.text(), self.lineedit_RD2.text()])
 
-    def get_td_dir(self):
+    def get_td_dir(self) -> str:
         return ",".join([self.lineedit_TD0.text(), self.lineedit_TD1.text(), self.lineedit_TD2.text()])
 
-    def get_nd_dir(self):
+    def get_nd_dir(self) -> str:
         return ",".join([self.lineedit_ND0.text(), self.lineedit_ND1.text(), self.lineedit_ND2.text()])
 
-    def get_num_gonios(self):
+    def get_num_gonios(self) -> int:
         return int(self.spnNumAxes.value())
 
-    def get_step_size(self):
+    def get_step_size(self) -> float:
         return self.spnStepSize.value()
 
-    def get_lab_figure(self):
+    def get_lab_figure(self) -> Figure:
         return self.lab_figure
 
-    def get_lab_ax(self):
+    def get_lab_ax(self) -> Axes:
         return self.lab_ax
 
-    def get_pf_ax(self):
+    def get_pf_ax(self) -> Axes:
         return self.pf_ax
 
-    def get_vecs(self):
+    def get_vecs(self) -> List[str]:
         return [x.text() for x in self.gonio_vecs]
 
-    def get_senses(self):
+    def get_senses(self) -> List[str]:
         return [x.currentText() for x in self.gonio_senses]
 
-    def get_angles(self):
+    def get_angles(self) -> List[str]:
         return [x.text() for x in self.gonio_angles]
 
-    def get_group(self):
+    def get_group(self) -> str:
         return self.cmbGroup.currentText()
 
-    def get_instrument(self):
+    def get_instrument(self) -> str:
         return self.cmbInstr.currentText()
 
-    def get_custom_instrument_name(self):
+    def get_custom_instrument_name(self) -> str:
         return self.edt_custom_instr.text().strip()
 
-    def get_grouping_file(self):
+    def get_grouping_file(self) -> str:
         fnames = self.finder_grouping.getFilenames()
         return fnames[0] if len(fnames) > 0 else ""
 
-    def get_current_index(self):
+    def get_current_index(self) -> int:
         return int(self.spnIndex.value()) - 1
 
-    def get_include_indices(self):
+    def get_include_indices(self) -> List[int]:
         return self._read_checkbox_column_states(6)
 
-    def get_select_indices(self):
+    def get_select_indices(self) -> List[int]:
         return self._read_checkbox_column_states(7)
 
-    def get_show_transmission(self):
+    def get_show_transmission(self) -> List[int]:
         return self.chkTransmission.isChecked()
 
-    def get_init_x(self):
+    def get_init_x(self) -> float:
         return self.spnInitX.value()
 
-    def get_init_y(self):
+    def get_init_y(self) -> float:
         return self.spnInitY.value()
 
-    def get_init_z(self):
+    def get_init_z(self) -> float:
         return self.spnInitZ.value()
 
-    def get_init_px(self):
+    def get_init_px(self) -> float:
         return self.spnInitPX.value()
 
-    def get_init_py(self):
+    def get_init_py(self) -> float:
         return self.spnInitPY.value()
 
-    def get_init_pz(self):
+    def get_init_pz(self) -> float:
         return self.spnInitPZ.value()
 
-    def get_shape_method(self):
+    def get_shape_method(self) -> str:
         return self.combo_shapeMethod.currentText()
 
-    def get_custom_shape(self):
+    def get_custom_shape(self) -> str | None:
         fnames = self.finder_gauge_vol.getFilenames()
         return fnames[0] if len(fnames) > 0 else None
 
     # setters
 
-    def set_rd_name(self, text):
+    def set_rd_name(self, text: str) -> None:
         self.lineedit_RD.setText(text)
 
-    def set_nd_name(self, text):
+    def set_nd_name(self, text: str) -> None:
         self.lineedit_ND.setText(text)
 
-    def set_td_name(self, text):
+    def set_td_name(self, text: str) -> None:
         self.lineedit_TD.setText(text)
 
-    def set_rd_dir(self, vec):
+    def set_rd_dir(self, vec: Tuple[int | float, int | float, int | float]) -> None:
         self.lineedit_RD0.setText(str(vec[0]))
         self.lineedit_RD1.setText(str(vec[1]))
         self.lineedit_RD2.setText(str(vec[2]))
 
-    def set_td_dir(self, vec):
+    def set_td_dir(self, vec: Tuple[int | float, int | float, int | float]) -> None:
         self.lineedit_TD0.setText(str(vec[0]))
         self.lineedit_TD1.setText(str(vec[1]))
         self.lineedit_TD2.setText(str(vec[2]))
 
-    def set_nd_dir(self, vec):
+    def set_nd_dir(self, vec: Tuple[int | float, int | float, int | float]) -> None:
         self.lineedit_ND0.setText(str(vec[0]))
         self.lineedit_ND1.setText(str(vec[1]))
         self.lineedit_ND2.setText(str(vec[2]))
 
-    def set_max_ind(self, ind):
+    def set_max_ind(self, ind: int) -> None:
         self.spnIndex.setMaximum(ind)
 
-    def set_step_size(self, val):
+    def set_step_size(self, val: float) -> None:
         self.spnStepSize.setValue(val)
         self.set_angle_steps()
 
-    def set_angle_steps(self):
+    def set_angle_steps(self) -> None:
         step_size = self.get_step_size()
         for ang in self.gonio_angles:
             ang.setSingleStep(step_size)
 
-    def set_num_gonios(self, val):
+    def set_num_gonios(self, val: int) -> None:
         self.spnNumAxes.setValue(val)
 
-    def set_current_index(self, val):
+    def set_current_index(self, val: int) -> None:
         self.spnIndex.setValue(val + 1)
 
-    def set_vecs(self, vecs):
+    def set_vecs(self, vecs: List[str]) -> None:
         for i in range(6):
             self.gonio_vecs[i].setText(vecs[i])
 
-    def set_senses(self, senses):
+    def set_senses(self, senses: List[str]) -> None:
         for i in range(6):
             self.gonio_senses[i].setCurrentText(senses[i])
 
-    def set_angles(self, angles):
+    def set_angles(self, angles: List[str]) -> None:
         for i in range(6):
             self.gonio_angles[i].setValue(angles[i])
 
-    def set_show_transmission(self, val):
-        return self.chkTransmission.setChecked(val)
+    def set_show_transmission(self, check: bool) -> None:
+        self.chkTransmission.setChecked(check)
 
-    def _setup_pf_plot(self):
+    def _setup_pf_plot(self) -> None:
         self.pf_figure = Figure(layout="constrained")
         self.pf_canvas = FigureCanvas(self.pf_figure)
         self.pf_canvas.setMinimumHeight(400)
@@ -578,7 +579,7 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         layout.addWidget(self.pf_toolbar)
         layout.addWidget(self.pf_canvas)
 
-    def _setup_lab_plot(self):
+    def _setup_lab_plot(self) -> None:
         self.lab_figure = Figure(layout="constrained")
         self.lab_canvas = FigureCanvas(self.lab_figure)
         self.lab_canvas.setMinimumHeight(400)
@@ -589,22 +590,22 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         self.labCanvas.setLayout(layout)
         layout.addWidget(self.lab_canvas)
 
-    def set_instrument_options(self, instrs):
+    def set_instrument_options(self, instrs: List[str]) -> None:
         self.cmbInstr.insertItems(0, instrs)
         self.cmbInstr.addItem(CUSTOM_INSTRUMENT)
 
-    def is_custom_instrument(self):
+    def is_custom_instrument(self) -> bool:
         return self.cmbInstr.currentText() == CUSTOM_INSTRUMENT
 
     @staticmethod
-    def set_gonio_axis_enabled(gonio, val):
-        gonio.setEnabled(val)
+    def set_gonio_axis_enabled(gonio, check: bool) -> None:
+        gonio.setEnabled(check)
 
-    def hide_axis_columns(self):
+    def hide_axis_columns(self) -> None:
         for i in range(6):
             self.tableWidget.setColumnHidden(i, not i < self.get_num_gonios())
 
-    def set_angle_limits(self):
+    def set_angle_limits(self) -> None:
         for angs in self.gonio_angles:
             angs.setMinimum(-360)
             angs.setMaximum(360)
@@ -612,12 +613,12 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
             angs.setMinimum(-360)
             angs.setMaximum(360)
 
-    def set_translation_step(self, step_size):
+    def set_translation_step(self, step_size: float) -> None:
         self.spnInitPX.setSingleStep(step_size)
         self.spnInitPY.setSingleStep(step_size)
         self.spnInitPZ.setSingleStep(step_size)
 
-    def set_translation_limits(self, min, max):
+    def set_translation_limits(self, min: float, max: float) -> None:
         self.spnInitPX.setMinimum(min)
         self.spnInitPX.setMaximum(max)
         self.spnInitPY.setMinimum(min)
@@ -625,7 +626,7 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         self.spnInitPZ.setMinimum(min)
         self.spnInitPZ.setMaximum(max)
 
-    def setup_group_options(self, groups):
+    def setup_group_options(self, groups: List[str]) -> None:
         self.cmbGroup.blockSignals(True)
         try:
             self.cmbGroup.clear()
@@ -633,32 +634,32 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         finally:
             self.cmbGroup.blockSignals(False)
 
-    def set_group_enabled(self, enabled):
+    def set_group_enabled(self, enabled: bool) -> None:
         # disabled when a custom instrument locks the group to its only (custom) option
         self.cmbGroup.setEnabled(enabled)
 
-    def set_custom_instrument_name_visible(self, visible):
+    def set_custom_instrument_name_visible(self, visible: bool) -> None:
         self.lblCustomInstr.setVisible(visible)
         self.edt_custom_instr.setVisible(visible)
 
-    def set_grouping_finder_visible(self, visible):
+    def set_grouping_finder_visible(self, visible: bool) -> None:
         self.finder_grouping.setVisible(visible)
 
-    def clear_grouping_file(self):
+    def clear_grouping_file(self) -> None:
         self.finder_grouping.clear()
 
-    def set_grouping_file_problem(self, message):
+    def set_grouping_file_problem(self, message: str) -> None:
         # empty message clears the problem indicator on the finder
         self.finder_grouping.setFileProblem(message)
 
-    def set_custom_instrument_valid(self, valid):
+    def set_custom_instrument_valid(self, valid: bool) -> None:
         # red border while the typed name does not match a known IDF
         self.edt_custom_instr.setStyleSheet("" if valid else "QLineEdit { border: 1px solid red; }")
 
-    def set_update_instrument_enabled(self, enabled):
+    def set_update_instrument_enabled(self, enabled: bool) -> None:
         self.btnUpdateInstr.setEnabled(enabled)
 
-    def create_workspace_table(self):
+    def create_workspace_table(self) -> None:
         table_column_headers = ("Axis0", "Axis1", "Axis2", "Axis3", "Axis4", "Axis5", "Include", "Select")
         n_col = len(table_column_headers)
         self.tableWidget.setColumnCount(n_col)
@@ -669,7 +670,7 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         [header.setSectionResizeMode(ind, QHeaderView.Stretch) for ind in range(n_col - 2)]
         header.setSectionResizeMode(n_col - 1, QHeaderView.ResizeToContents)
 
-    def add_table_row(self, row, axes_strings, include, select):
+    def add_table_row(self, row: int, axes_strings: List[str], include: bool, select: bool) -> None:
         # axes:
         for i in range(6):
             self.tableWidget.setItem(row, i, QTableWidgetItem(axes_strings[i]))
@@ -682,7 +683,7 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         select_checkbox = QCheckBox()
         self.add_checkbox(select_checkbox, select, self._on_any_select_toggled, row, 7)
 
-    def add_checkbox(self, checkbox, val, slot, row, col):
+    def add_checkbox(self, checkbox: QCheckBox, val: bool, slot: Callable | None, row: int, col: int) -> None:
         checkbox.setChecked(val)
         checkbox.toggled.connect(slot)
         cell_widget = QWidget()
@@ -692,19 +693,19 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         layout.setContentsMargins(0, 0, 0, 0)
         self.tableWidget.setCellWidget(row, col, cell_widget)
 
-    def set_load_stl_enabled(self, enabled):
+    def set_load_stl_enabled(self, enabled: bool) -> None:
         self.btnSTL.setEnabled(enabled)
 
-    def set_load_xml_enabled(self, enabled):
+    def set_load_xml_enabled(self, enabled: bool) -> None:
         self.btnXML.setEnabled(enabled)
 
-    def set_load_orientation_enabled(self, enabled):
+    def set_load_orientation_enabled(self, enabled: bool) -> None:
         self.btnOrient.setEnabled(enabled)
 
-    def set_outputs_enabled(self, enabled):
+    def set_outputs_enabled(self, enabled: bool) -> None:
         self.btnExport.setEnabled(enabled)
 
-    def _read_checkbox_column_states(self, col):
+    def _read_checkbox_column_states(self, col: int) -> bool:
         checked = []
         for row in range(self.tableWidget.rowCount()):
             cell_widget = self.tableWidget.cellWidget(row, col)
@@ -715,37 +716,37 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         return checked
 
     @staticmethod
-    def make_box_toggleable(box, slot=None, initial_state=False):
+    def make_box_toggleable(box: QGroupBox, slot: Callable | None = None, initial_state: bool = False) -> None:
         box.setCheckable(True)
         box.setChecked(initial_state)
         if slot:
             slot(initial_state)
             box.toggled.connect(slot)
 
-    def set_load_shape_visible(self, vis):
+    def set_load_shape_visible(self, vis: bool) -> None:
         # only toggle our own widgets; FileFinderWidget has internally-hidden children
         for w in (self.finder_stl, self.btnSTL, self.label_or, self.finder_xml, self.btnXML):
             w.setVisible(vis)
 
-    def set_set_material_visible(self, vis):
+    def set_set_material_visible(self, vis: bool) -> None:
         self.set_box_children_visible(self.grpSetMaterial, vis)
 
-    def set_init_rotations_visible(self, vis):
+    def set_init_rotations_visible(self, vis: bool) -> None:
         self.set_box_children_visible(self.initOrientation, vis)
 
-    def set_init_position_visible(self, vis):
+    def set_init_position_visible(self, vis: bool) -> None:
         self.set_box_children_visible(self.initPosition, vis)
 
-    def set_sample_directions_visible(self, vis):
+    def set_sample_directions_visible(self, vis: bool) -> None:
         self.set_box_children_visible(self.grpDirectionWidgets, vis)
 
     @staticmethod
-    def set_box_children_visible(box, vis):
+    def set_box_children_visible(box: QGroupBox, vis: bool) -> None:
         children = box.findChildren(QWidget)
         for widget in children:
             widget.setVisible(vis)
 
-    def set_gauge_vol_visible(self, vis):
+    def set_gauge_vol_visible(self, vis: bool) -> None:
         # only toggle the gauge-volume controls we own; recursing into FileFinderWidget
         # would override its internally-hidden widgets (live button, multi-entry box, etc.)
         self.combo_shapeMethod.setVisible(vis)
@@ -753,20 +754,20 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         self.clearGV.setVisible(vis)
         self.finder_gauge_vol.setVisible(vis and self.get_shape_method() == "Custom Shape")
 
-    def set_finder_gauge_vol_visible(self, visible):
+    def set_finder_gauge_vol_visible(self, visible: bool) -> None:
         self.finder_gauge_vol.setVisible(visible and self.grpGaugeVol.isChecked())
 
-    def set_set_gauge_vol_enabled(self, enabled):
+    def set_set_gauge_vol_enabled(self, enabled: bool) -> None:
         self.setGV.setEnabled(enabled)
 
-    def set_on_clear_gauge_volume_clicked(self, slot):
+    def set_on_clear_gauge_volume_clicked(self, slot: Callable) -> None:
         self.clearGV.clicked.connect(slot)
 
-    def set_on_gauge_vol_group_toggled(self, slot):
+    def set_on_gauge_vol_group_toggled(self, slot: Callable) -> None:
         self.grpGaugeVol.toggled.connect(slot)
 
-    def set_on_gauge_vol_state_changed(self, slot):
+    def set_on_gauge_vol_state_changed(self, slot: Callable) -> None:
         self.combo_shapeMethod.currentIndexChanged.connect(slot)
 
-    def set_on_gauge_vol_file_changed(self, slot):
+    def set_on_gauge_vol_file_changed(self, slot: Callable) -> None:
         self.finder_gauge_vol.filesFoundChanged.connect(slot)

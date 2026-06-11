@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from typing import Callable, Dict, Any
 
 from mantidqtinterfaces.TexturePlanner.settings.settings_model import TexturePlannerSettingsModel
 
@@ -19,26 +20,26 @@ class TexturePlannerSettingsPresenter(object):
         self.view.set_on_cancel_clicked(self.close)
         self.view.set_on_apply_clicked(self.save_settings)
 
-    def set_on_settings_applied(self, slot):
+    def set_on_settings_applied(self, slot: Callable) -> None:
         self._on_settings_applied = slot
 
-    def load_settings_from_file_or_default(self):
+    def load_settings_from_file_or_default(self) -> None:
         """Called on interface startup to restore previously saved settings into the model."""
         settings = self.settings_model.get_settings_dict()
         self._apply_settings_to_texture_model(settings)
 
-    def show(self):
+    def show(self) -> None:
         self._populate_view_from_texture_model()
         self.view.show()
 
-    def close(self):
+    def close(self) -> None:
         self.view.close()
 
-    def save_and_close(self):
+    def save_and_close(self) -> None:
         self.save_settings()
         self.close()
 
-    def save_settings(self):
+    def save_settings(self) -> None:
         settings = self._collect_settings_from_view()
         self.settings_model.set_settings_dict(settings)
         self._apply_settings_to_texture_model(settings)
@@ -49,7 +50,7 @@ class TexturePlannerSettingsPresenter(object):
     # Internal helpers
     # ========================
 
-    def _collect_settings_from_view(self):
+    def _collect_settings_from_view(self) -> Dict[str, Any]:
         return {
             "directions": self.view.get_show_directions(),
             "goniometers": self.view.get_show_goniometers(),
@@ -72,7 +73,7 @@ class TexturePlannerSettingsPresenter(object):
             "att_use_data_range": self.view.get_att_use_data_range(),
         }
 
-    def _apply_settings_to_texture_model(self, settings):
+    def _apply_settings_to_texture_model(self, settings: Dict[str, Any]) -> None:
         self.texture_model.vis_settings["directions"] = settings["directions"]
         self.texture_model.vis_settings["goniometers"] = settings["goniometers"]
         self.texture_model.vis_settings["incident"] = settings["incident"]
@@ -98,7 +99,7 @@ class TexturePlannerSettingsPresenter(object):
 
         self.texture_model.transmission_use_data_range = settings["att_use_data_range"]
 
-    def _populate_view_from_texture_model(self):
+    def _populate_view_from_texture_model(self) -> None:
         """Populate the settings dialog fields from the current state of the texture model."""
         vis = self.texture_model.vis_settings
         self.view.set_show_directions(vis["directions"])

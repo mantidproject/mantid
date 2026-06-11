@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from qtpy.QtCore import QSettings
+from typing import Dict, Any, Type
 
 INTERFACES_SETTINGS_GROUP = "CustomInterfaces"
 TEXTURE_PLANNER_PREFIX = "TexturePlanner/"
@@ -56,7 +57,7 @@ DEFAULT_SETTINGS = {
 
 
 class TexturePlannerSettingsModel:
-    def get_settings_dict(self):
+    def get_settings_dict(self) -> Dict[str, Any]:
         """Load all settings from QSettings, falling back to defaults for any missing entry."""
         settings = {}
         for name, return_type in SETTINGS_DICT.items():
@@ -64,14 +65,14 @@ class TexturePlannerSettingsModel:
             settings[name] = value if (value != "" and value is not None) else DEFAULT_SETTINGS[name]
         return settings
 
-    def set_settings_dict(self, settings):
+    def set_settings_dict(self, settings: Dict[str, Any]) -> None:
         """Persist all settings to QSettings."""
         for name, value in settings.items():
             if name in SETTINGS_DICT:
                 self._set_setting(name, value)
 
     @staticmethod
-    def _get_setting(name, return_type=str):
+    def _get_setting(name: str, return_type: Type = str) -> Any:
         qs = QSettings()
         qs.beginGroup(INTERFACES_SETTINGS_GROUP)
         if return_type is bool:
@@ -88,7 +89,7 @@ class TexturePlannerSettingsModel:
         return value
 
     @staticmethod
-    def _set_setting(name, value):
+    def _set_setting(name: str, value: Any) -> None:
         qs = QSettings()
         qs.beginGroup(INTERFACES_SETTINGS_GROUP)
         qs.setValue(TEXTURE_PLANNER_PREFIX + name, value)
