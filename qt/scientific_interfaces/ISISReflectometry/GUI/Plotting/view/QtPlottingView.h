@@ -28,7 +28,7 @@ public:
   /// Enable or disable plot output controls while reduction state changes.
   void setOutputSelectionEnabled(bool enabled) override;
   /// Replace the available plot output types in the output selector.
-  void setAvailablePlotOutputTypes(std::vector<PlotOutputType> const &outputTypes) override;
+  void setAvailablePlotOutputTypes(std::vector<PlotOutputType> const &outputTypes) override final;
   /// Replace the workspace tree contents.
   void setWorkspaceItems(std::vector<PlottingWorkspaceTreeItem> const &items) override;
   /// Return names of selected workspace leaf nodes.
