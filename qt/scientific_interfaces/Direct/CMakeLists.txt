@@ -20,7 +20,6 @@ set(MOC_FILES
     ALFInstrumentViewBase.h
     ALFInstrumentWidget.h
     ALFView.h
-    StubInstrumentActor.h
 )
 
 set(INC_FILES
@@ -33,7 +32,6 @@ set(INC_FILES
     DetectorTube.h
     DllConfig.h
     ALFPythonCallbackRelay.h
-    StubInstrumentActor.h
     IALFAlgorithmManagerSubscriber.h
     IALFInstrumentView.h
 )
