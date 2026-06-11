@@ -74,11 +74,11 @@ class TexturePlannerSettingsPresenter(object):
         }
 
     def _apply_settings_to_texture_model(self, settings: Dict[str, Any]) -> None:
-        self.texture_model.vis_settings["directions"] = settings["directions"]
-        self.texture_model.vis_settings["goniometers"] = settings["goniometers"]
-        self.texture_model.vis_settings["incident"] = settings["incident"]
-        self.texture_model.vis_settings["ks"] = settings["ks"]
-        self.texture_model.vis_settings["scattered"] = settings["scattered"]
+        self.texture_model.plotter.vis_settings["directions"] = settings["directions"]
+        self.texture_model.plotter.vis_settings["goniometers"] = settings["goniometers"]
+        self.texture_model.plotter.vis_settings["incident"] = settings["incident"]
+        self.texture_model.plotter.vis_settings["ks"] = settings["ks"]
+        self.texture_model.plotter.vis_settings["scattered"] = settings["scattered"]
 
         self.texture_model.workspaces.stl_kwargs["Scale"] = settings["stl_scale"]
         self.texture_model.workspaces.stl_kwargs["XDegrees"] = settings["stl_x_degrees"]
@@ -86,22 +86,22 @@ class TexturePlannerSettingsPresenter(object):
         self.texture_model.workspaces.stl_kwargs["ZDegrees"] = settings["stl_z_degrees"]
         self.texture_model.workspaces.stl_kwargs["TranslationVector"] = settings["stl_translation_vector"]
 
-        self.texture_model.orientation_kwargs["Axes"] = settings["orientation_axes"]
-        self.texture_model.orientation_kwargs["Senses"] = settings["orientation_senses"]
+        self.texture_model.orientations.orientation_kwargs["Axes"] = settings["orientation_axes"]
+        self.texture_model.orientations.orientation_kwargs["Senses"] = settings["orientation_senses"]
 
-        self.texture_model.mc_kwargs["EventsPerPoint"] = settings["mc_events_per_point"]
-        self.texture_model.mc_kwargs["MaxScatterPtAttempts"] = settings["mc_max_scatter_attempts"]
-        self.texture_model.mc_kwargs["SimulateScatteringPointIn"] = settings["mc_simulate_in"]
-        self.texture_model.mc_kwargs["ResimulateTracksForDifferentWavelengths"] = settings["mc_resimulate"]
+        self.texture_model.absorption.mc_kwargs["EventsPerPoint"] = settings["mc_events_per_point"]
+        self.texture_model.absorption.mc_kwargs["MaxScatterPtAttempts"] = settings["mc_max_scatter_attempts"]
+        self.texture_model.absorption.mc_kwargs["SimulateScatteringPointIn"] = settings["mc_simulate_in"]
+        self.texture_model.absorption.mc_kwargs["ResimulateTracksForDifferentWavelengths"] = settings["mc_resimulate"]
 
         self.texture_model.workspaces.attenuation_kwargs["point"] = settings["att_point"]
         self.texture_model.workspaces.attenuation_kwargs["unit"] = settings["att_unit"]
 
-        self.texture_model.transmission_use_data_range = settings["att_use_data_range"]
+        self.texture_model.plotter.transmission_use_data_range = settings["att_use_data_range"]
 
     def _populate_view_from_texture_model(self) -> None:
         """Populate the settings dialog fields from the current state of the texture model."""
-        vis = self.texture_model.vis_settings
+        vis = self.texture_model.plotter.vis_settings
         self.view.set_show_directions(vis["directions"])
         self.view.set_show_goniometers(vis["goniometers"])
         self.view.set_show_incident_beam(vis["incident"])
@@ -115,11 +115,11 @@ class TexturePlannerSettingsPresenter(object):
         self.view.set_stl_z_deg(stl["ZDegrees"])
         self.view.set_stl_translation(stl["TranslationVector"])
 
-        orient = self.texture_model.orientation_kwargs
+        orient = self.texture_model.orientations.orientation_kwargs
         self.view.set_orient_axes(orient["Axes"])
         self.view.set_orient_senses(orient["Senses"])
 
-        mc = self.texture_model.mc_kwargs
+        mc = self.texture_model.absorption.mc_kwargs
         self.view.set_mc_events(mc["EventsPerPoint"])
         self.view.set_mc_max_scatter(mc["MaxScatterPtAttempts"])
         self.view.set_mc_simulate_in(mc["SimulateScatteringPointIn"])
@@ -128,4 +128,4 @@ class TexturePlannerSettingsPresenter(object):
         att = self.texture_model.workspaces.attenuation_kwargs
         self.view.set_att_point(att["point"])
         self.view.set_att_unit(att["unit"])
-        self.view.set_att_use_data_range(self.texture_model.transmission_use_data_range)
+        self.view.set_att_use_data_range(self.texture_model.plotter.transmission_use_data_range)
