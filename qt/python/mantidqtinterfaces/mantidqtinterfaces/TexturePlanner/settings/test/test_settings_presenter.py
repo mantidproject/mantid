@@ -38,17 +38,17 @@ SETTINGS_FIXTURE = {
 
 def _make_texture_model():
     m = MagicMock()
-    m.vis_settings = {"directions": False, "goniometers": True, "incident": False, "ks": True, "scattered": False}
+    m.plotter.vis_settings = {"directions": False, "goniometers": True, "incident": False, "ks": True, "scattered": False}
     m.workspaces.stl_kwargs = {"Scale": "cm", "XDegrees": 0.0, "YDegrees": 0.0, "ZDegrees": "0", "TranslationVector": "0,0,0"}
-    m.orientation_kwargs = {"Axes": "YXY", "Senses": "-1,-1,-1"}
-    m.mc_kwargs = {
+    m.orientations.orientation_kwargs = {"Axes": "YXY", "Senses": "-1,-1,-1"}
+    m.absorption.mc_kwargs = {
         "EventsPerPoint": 50,
         "MaxScatterPtAttempts": 10000,
         "SimulateScatteringPointIn": "SampleOnly",
         "ResimulateTracksForDifferentWavelengths": False,
     }
     m.workspaces.attenuation_kwargs = {"point": 1.5, "unit": "dSpacing"}
-    m.transmission_use_data_range = False
+    m.plotter.transmission_use_data_range = False
     return m
 
 
@@ -106,18 +106,18 @@ class TestTexturePlannerSettingsPresenter_LoadFromFileOrDefault(unittest.TestCas
 
         mock_model_cls.return_value.get_settings_dict.assert_called_once_with()
         # vis_settings updated from fixture
-        self.assertEqual(texture_model.vis_settings["directions"], True)
-        self.assertEqual(texture_model.vis_settings["goniometers"], False)
+        self.assertEqual(texture_model.plotter.vis_settings["directions"], True)
+        self.assertEqual(texture_model.plotter.vis_settings["goniometers"], False)
         # stl_kwargs updated
         self.assertEqual(texture_model.workspaces.stl_kwargs["Scale"], "mm")
         self.assertEqual(texture_model.workspaces.stl_kwargs["XDegrees"], 1.0)
         # orientation_kwargs updated
-        self.assertEqual(texture_model.orientation_kwargs["Axes"], "XYZ")
+        self.assertEqual(texture_model.orientations.orientation_kwargs["Axes"], "XYZ")
         # mc_kwargs updated (note key remapping)
-        self.assertEqual(texture_model.mc_kwargs["EventsPerPoint"], 100)
-        self.assertEqual(texture_model.mc_kwargs["MaxScatterPtAttempts"], 5000)
-        self.assertEqual(texture_model.mc_kwargs["SimulateScatteringPointIn"], "Container")
-        self.assertIs(texture_model.mc_kwargs["ResimulateTracksForDifferentWavelengths"], True)
+        self.assertEqual(texture_model.absorption.mc_kwargs["EventsPerPoint"], 100)
+        self.assertEqual(texture_model.absorption.mc_kwargs["MaxScatterPtAttempts"], 5000)
+        self.assertEqual(texture_model.absorption.mc_kwargs["SimulateScatteringPointIn"], "Container")
+        self.assertIs(texture_model.absorption.mc_kwargs["ResimulateTracksForDifferentWavelengths"], True)
         # attenuation point/unit updated (material is no longer a persistent setting)
         self.assertEqual(texture_model.workspaces.attenuation_kwargs["point"], 2.5)
         self.assertEqual(texture_model.workspaces.attenuation_kwargs["unit"], "Wavelength")
@@ -188,10 +188,10 @@ class TestTexturePlannerSettingsPresenter_SaveSettings(unittest.TestCase):
 
         presenter.save_settings()
 
-        self.assertEqual(texture_model.vis_settings["directions"], True)
+        self.assertEqual(texture_model.plotter.vis_settings["directions"], True)
         self.assertEqual(texture_model.workspaces.stl_kwargs["TranslationVector"], "1,2,3")
-        self.assertEqual(texture_model.orientation_kwargs["Senses"], "1,-1,1")
-        self.assertIs(texture_model.mc_kwargs["ResimulateTracksForDifferentWavelengths"], True)
+        self.assertEqual(texture_model.orientations.orientation_kwargs["Senses"], "1,-1,1")
+        self.assertIs(texture_model.absorption.mc_kwargs["ResimulateTracksForDifferentWavelengths"], True)
 
     def test_invokes_on_settings_applied_callback_if_registered(self, mock_model_cls):
         view = _make_view_returning(SETTINGS_FIXTURE)

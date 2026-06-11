@@ -18,7 +18,7 @@ from Engineering.texture.texture_helper import (
     ring,
     ster_proj_xy,
 )
-from typing import Protocol, ValuesView, List, Dict, ItemsView
+from typing import Protocol, ValuesView, List, ItemsView
 from abc import abstractmethod
 from mantid.api import MatrixWorkspace
 from scipy.spatial.transform import Rotation
@@ -92,15 +92,11 @@ class _BaseModelType(Protocol):
     orientations: _OrientationTableType
     geometry: _GeometryType
 
-    vis_settings: Dict[str, bool]
-    gon_colors: List[str]
     gonio_index: int
     ax_transform: np.ndarray
     dir_names: List[str]
     projection: str
     plot_transmission: bool
-    transmission_use_data_range: bool
-    dir_cols: List[str]
 
 
 class TexturePlotter:
@@ -112,6 +108,13 @@ class TexturePlotter:
 
     def __init__(self, model: _BaseModelType):
         self._model = model
+        # visual / rendering config owned by the plotter (the colour/label constants plus the
+        # visualisation toggles the settings dialog writes to)
+        self.gon_colors = ("hotpink", "orange", "purple", "goldenrod", "plum", "saddlebrown")
+        self.dir_cols = ("red", "green", "blue")
+        self.vis_settings = {"directions": True, "goniometers": True, "incident": True, "ks": True, "scattered": False}
+        # when True the transmission plot colour scale spans the data range; otherwise it is fixed to [0, 1]
+        self.transmission_use_data_range = False
 
     def update_plot(
         self, vecs: List[np.ndarray], senses: List[float], angles: List[float], fig: Figure, lab_ax: Axes, proj_ax: Axes, current_index: int
@@ -171,17 +174,17 @@ class TexturePlotter:
                 gon_ring = np.flip(gon_ring, axis=1)  # reverse the ring if the angle is negative
             pos_ind = int(np.abs(angle) / 360 * _ring_res)
 
-            if m.vis_settings["goniometers"]:
-                lab_ax.plot(*gon_ring[:, : pos_ind + 1], color=m.gon_colors[i])
+            if self.vis_settings["goniometers"]:
+                lab_ax.plot(*gon_ring[:, : pos_ind + 1], color=self.gon_colors[i])
                 lab_ax.plot(*gon_ring[:, pos_ind:], color="grey")
                 lab_ax.quiver(
                     *np.zeros(3),
                     *g_vec * extent * 2,
-                    color=m.gon_colors[i],
+                    color=self.gon_colors[i],
                     ls=("-", "--")[int(i != m.gonio_index)],
                     label=f"Axis {i}",
                 )
-        if m.vis_settings["goniometers"]:
+        if self.vis_settings["goniometers"]:
             lab_ax.legend()
         return g_vecs
 
@@ -195,7 +198,7 @@ class TexturePlotter:
         sample_model.gauge_vol_str = m.workspaces.gauge_volume_str
         fig.sca(lab_ax)
         plot_sample_only(fig, rot_mesh, 0.5, "grey")
-        if m.vis_settings["directions"]:
+        if self.vis_settings["directions"]:
             sample_model.plot_sample_directions(m.ax_transform, m.dir_names, scat_centre=scat_centre)
         lim = extent * n_gon / 1.5
         lab_ax.set_xlim([-lim, lim])
@@ -210,12 +213,12 @@ class TexturePlotter:
         comp_info = m.workspaces.ws.componentInfo()
         ki = scat_centre - np.array(comp_info.sourcePosition())
         ki = (ki / np.linalg.norm(ki)) * extent * n_gon / 0.75
-        if m.vis_settings["incident"]:
+        if self.vis_settings["incident"]:
             lab_ax.quiver(*(-ki), *ki, arrow_length_ratio=0.05, color="black", alpha=0.25)
 
-        if m.vis_settings["ks"]:
+        if self.vis_settings["ks"]:
             self._draw_quiver_bundle(lab_ax, m.geometry.detQs_lab, scat_centre, extent, "dodgerblue", linestyle="--")
-        if m.vis_settings["scattered"]:
+        if self.vis_settings["scattered"]:
             self._draw_quiver_bundle(lab_ax, np.asarray(m.geometry.det_k), scat_centre, extent, "grey")
 
     @staticmethod
@@ -248,7 +251,7 @@ class TexturePlotter:
     def _draw_pole_figure(self, proj_ax: Axes, g_pole_xy: np.ndarray, current_index: int) -> None:
         m = self._model
         for i, gP in enumerate(g_pole_xy):
-            pc = m.gon_colors[i]
+            pc = self.gon_colors[i]
             fc = "None" if i != m.gonio_index else pc
             if np.isclose(np.linalg.norm(gP), 1):
                 proj_ax.plot((gP[1], -gP[1]), (gP[0], -gP[0]), color=pc, ls=("-", "--")[int(i != m.gonio_index)])
@@ -270,7 +273,7 @@ class TexturePlotter:
             included = [o for o in m.orientations.values() if o.include]
             all_pf_xy = np.concatenate([o.pf_points for o in included], axis=0)
             all_transmissions = np.concatenate([o.transmission for o in included], axis=0)
-            clim_kwargs = {} if m.transmission_use_data_range else {"vmin": 0, "vmax": 1}
+            clim_kwargs = {} if self.transmission_use_data_range else {"vmin": 0, "vmax": 1}
             scatt = proj_ax.scatter(all_pf_xy[:, 1], all_pf_xy[:, 0], s=20, c=all_transmissions, cmap="jet", **clim_kwargs)
             cax = proj_ax.inset_axes([0.9, 0.15, 0.05, 0.7])
             proj_ax.figure.colorbar(scatt, cax=cax)
@@ -281,7 +284,7 @@ class TexturePlotter:
         proj_ax.set_xlim(-1.5, 1.5)
         proj_ax.set_ylim(-1.5, 1.5)
         for i, bv in enumerate(np.eye(2)):
-            proj_ax.quiver(*np.array((-1, -1)), *bv, color=m.dir_cols[-1 + i], scale=5)
+            proj_ax.quiver(*np.array((-1, -1)), *bv, color=self.dir_cols[-1 + i], scale=5)
         proj_ax.add_patch(plt.Circle((0, 0), 1, color="grey", fill=False, linestyle="-"))
         proj_ax.annotate(m.dir_names[0], (-0.95, -0.8))
         proj_ax.annotate(m.dir_names[2], (-0.8, -0.95))

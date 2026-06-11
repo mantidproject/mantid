@@ -56,6 +56,8 @@ class _OrientationTableType(Protocol):
     """For the purpose of type hinting while this module is orphaned
     Will be removed and replaced with actual model before final PR"""
 
+    orientation_kwargs: dict
+
     @abstractmethod
     def values(self) -> ValuesView[_OrientationType]:
         pass
@@ -68,8 +70,6 @@ class _BaseModelType(Protocol):
     workspaces: _WorkspaceManagerType
     instrument: _InstrumentType
     orientations: _OrientationTableType
-    n_output_points: int
-    orientation_kwargs: dict
 
 
 class OrientationExporter:
@@ -92,8 +92,7 @@ class OrientationExporter:
         save_file = os.path.join(save_dir, filename + ".angles")
         for orientation in self._included():
             angs = convert_to_sscanss_frame(orientation.R.as_matrix())
-            for _ in range(self._model.n_output_points):
-                lines.append(f"{np.round(angs[0], 2)}\t{np.round(angs[1], 2)}\t{np.round(angs[2], 2)}\n")
+            lines.append(f"{np.round(angs[0], 2)}\t{np.round(angs[1], 2)}\t{np.round(angs[2], 2)}\n")
         with open(save_file, "w") as f:
             f.writelines(header + lines)
         logger.notice(f"Orientation data written to '{save_file}' as Sscanss2 Angles")
@@ -103,22 +102,20 @@ class OrientationExporter:
         save_file = os.path.join(save_dir, filename + ".txt")
         for orientation in self._included():
             rot_mat = orientation.R.as_matrix().reshape(-1)
-            for _ in range(self._model.n_output_points):
-                lines.append("\t".join(str(x) for x in rot_mat) + "\n")
+            lines.append("\t".join(str(x) for x in rot_mat) + "\n")
         with open(save_file, "w") as f:
             f.writelines(lines)
         logger.notice(f"Orientation data written to '{save_file}' as Rotation Matrices")
 
     def output_as_euler(self, save_dir: str, filename: str) -> None:
-        axes = self._model.orientation_kwargs["Axes"]
-        senses = self._model.orientation_kwargs["Senses"].split(",")
+        axes = self._model.orientations.orientation_kwargs["Axes"]
+        senses = self._model.orientations.orientation_kwargs["Senses"].split(",")
         lines = []
         save_file = os.path.join(save_dir, filename + ".txt")
         for orientation in self._included():
             raw = orientation.R.as_euler(axes, degrees=True)
             angle_strs = [str(float(sense) * raw[i]) for i, sense in enumerate(senses)]
-            for _ in range(self._model.n_output_points):
-                lines.append("\t".join(angle_strs) + "\n")
+            lines.append("\t".join(angle_strs) + "\n")
         with open(save_file, "w") as f:
             f.writelines(lines)
         logger.notice(f"Orientation data written to '{save_file}' as Euler Angles with Scheme ({axes}) and Senses ({','.join(senses)})")

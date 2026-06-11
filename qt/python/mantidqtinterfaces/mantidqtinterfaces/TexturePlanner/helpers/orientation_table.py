@@ -12,19 +12,6 @@ from typing import List, Tuple, Sequence
 from scipy.spatial.transform import Rotation
 from mantid.kernel import logger
 from Engineering.texture.texture_helper import vec_string_to_norm_array
-from typing import Protocol
-from abc import abstractmethod
-
-
-class _BaseModelType(Protocol):
-    """For the purpose of type hinting while this module is orphaned
-    Will be removed and replaced with actual model before final PR"""
-
-    orientation_kwargs: dict
-
-    @abstractmethod
-    def update_gonio_index(self, num_gonios: int) -> int:
-        pass
 
 
 MAX_GONIOMETERS = 6
@@ -61,16 +48,17 @@ class OrientationTable:
     include / delete / load-from-file / goniometer-string IO).
 
     Holds the table-level state (saved_orientations, orientation_index,
-    n_gonio) and reads cross-cutting settings (orientation_kwargs) from the
-    parent model via a back-reference.
+    n_gonio) and the Euler goniometer convention (orientation_kwargs) used when
+    loading orientation files.
     """
 
     # Returned by load_orientation_file when the file is not in Euler-angles format
     # (matrix format, or an error path). Falls back to a 3-axis (YXY) goniometer view.
     _DEFAULT_NUM_AXES = 3
 
-    def __init__(self, model: _BaseModelType):
-        self._model = model
+    def __init__(self):
+        # Euler goniometer convention used when loading orientation files (Axes scheme + Senses).
+        self.orientation_kwargs = {"Axes": "YXY", "Senses": "-1,-1,-1"}
         self.sense_vals = {"Clockwise": -1, "Counterclockwise": 1}  # mantid convention
         self.sense_names = {"-1": "Clockwise", "1": "Counterclockwise"}
         self.axis_dict = {"x": (1, 0, 0), "y": (0, 1, 0), "z": (0, 0, 1)}
@@ -106,10 +94,6 @@ class OrientationTable:
 
     def set_n_gonio(self, val: int) -> None:
         self.n_gonio = val
-
-    def update_gonio_index(self, num_gonios: int) -> int:
-        # delegates to the model so the gonio_index lives in one place
-        return self._model.update_gonio_index(num_gonios)
 
     # setting values from elsewhere ---------------------------------------
 
@@ -235,8 +219,8 @@ class OrientationTable:
             self.update_gRs(vecs, senses, angles, new_index)
 
     def _load_euler_orientations(self, goniometer_lists: List[List[float]], num_entries: int) -> int:
-        axes = self._model.orientation_kwargs["Axes"]
-        senses = self._model.orientation_kwargs["Senses"].split(",")
+        axes = self.orientation_kwargs["Axes"]
+        senses = self.orientation_kwargs["Senses"].split(",")
         num_ax, num_senses = len(axes), len(senses)
         errors = []
         if num_entries != num_ax:

@@ -30,40 +30,20 @@ class TexturePlannerModel(object):
     """
 
     def __init__(self, instrument: str = "ENGINX", projection: str = "azimuthal"):
-        # cross-cutting visual / display settings
-        self.gon_colors = ("hotpink", "orange", "purple", "goldenrod", "plum", "saddlebrown")
-        self.dir_cols = ("red", "green", "blue")
+        # cross-cutting projection settings (shared between the plotter and the projection orchestration)
         self.ax_transform = np.eye(3)
         self.dir_names = ["D1", "D2", "D3"]
         self.projection = projection
-        self.vis_settings = {"directions": True, "goniometers": True, "incident": True, "ks": True, "scattered": False}
 
         # currently-selected goniometer (controls which axis is highlighted in the plot)
         self.gonio_index = 0
 
         # output / plot toggles
-        self.n_output_points = 1
         self.plot_transmission = False
-        # when True the transmission plot colour scale spans the data range; otherwise it is fixed to [0, 1]
-        self.transmission_use_data_range = False
-
-        # euler_file_settings (used by orientation loader + exporter)
-        self.orientation_kwargs = {"Axes": "YXY", "Senses": "-1,-1,-1"}
-
-        # MonteCarloAbsorption settings (filled in once workspaces collaborator exists)
-        self.mc_kwargs = None
 
         # collaborators
         self.workspaces = WorkspaceManager(self)
-        self.mc_kwargs = {
-            "InputWorkspace": self.workspaces.WS_MC_INPUT,
-            "OutputWorkspace": self.workspaces.WS_MC_OUTPUT,
-            "EventsPerPoint": 50,
-            "MaxScatterPtAttempts": int(1e4),
-            "SimulateScatteringPointIn": "SampleOnly",
-            "ResimulateTracksForDifferentWavelengths": False,
-        }
-        self.orientations = OrientationTable(self)
+        self.orientations = OrientationTable()
         self.geometry = DetectorGeometry(self)
         self.absorption = AbsorptionCalculator(self)
         self.exporter = OrientationExporter(self)

@@ -43,7 +43,6 @@ class _BaseModelType(Protocol):
     workspaces: _WorkspaceManagerType
     orientations: Any
     geometry: Any
-    mc_kwargs: dict
 
 
 class AbsorptionCalculator:
@@ -52,6 +51,16 @@ class AbsorptionCalculator:
 
     def __init__(self, model: _BaseModelType):
         self._model = model
+        # MonteCarloAbsorption settings; the in/out workspace names come from the workspace manager,
+        # which the model constructs before this collaborator.
+        self.mc_kwargs = {
+            "InputWorkspace": model.workspaces.WS_MC_INPUT,
+            "OutputWorkspace": model.workspaces.WS_MC_OUTPUT,
+            "EventsPerPoint": 50,
+            "MaxScatterPtAttempts": int(1e4),
+            "SimulateScatteringPointIn": "SampleOnly",
+            "ResimulateTracksForDifferentWavelengths": False,
+        }
 
     def calc_for_index(self, index: int) -> None:
         m = self._model
@@ -66,7 +75,7 @@ class AbsorptionCalculator:
         self._set_mc_sample_state(wsm, mc_ws, R)
 
         try:
-            MonteCarloAbsorption(**m.mc_kwargs)
+            MonteCarloAbsorption(**self.mc_kwargs)
             transmission = read_attenuation_coefficient_at_value(
                 wsm.WS_MC_OUTPUT, wsm.attenuation_kwargs["point"], wsm.attenuation_kwargs["unit"]
             )[m.geometry.starting_ind :]

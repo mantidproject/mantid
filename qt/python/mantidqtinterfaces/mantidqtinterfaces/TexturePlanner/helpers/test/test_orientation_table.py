@@ -9,7 +9,7 @@ import tempfile
 import unittest
 import numpy as np
 
-from unittest.mock import patch, MagicMock, call
+from unittest.mock import patch, call
 from scipy.spatial.transform import Rotation
 
 from mantidqtinterfaces.TexturePlanner.helpers.orientation_table import (
@@ -22,14 +22,10 @@ from mantidqtinterfaces.TexturePlanner.helpers.orientation_table import (
 file_path = "mantidqtinterfaces.TexturePlanner.helpers.orientation_table"
 
 
-def _make_model(axes="xyz", senses="1,1,1"):
-    model = MagicMock()
-    model.orientation_kwargs = {"Axes": axes, "Senses": senses}
-    return model
-
-
 def _make_table(axes="xyz", senses="1,1,1"):
-    return OrientationTable(_make_model(axes=axes, senses=senses))
+    table = OrientationTable()
+    table.orientation_kwargs = {"Axes": axes, "Senses": senses}
+    return table
 
 
 class TestOrientation_Copy(unittest.TestCase):
@@ -108,15 +104,6 @@ class TestOrientationTable_IndexAndCount(unittest.TestCase):
         tab = _make_table()
         tab.set_n_gonio(4)
         self.assertEqual(tab.n_gonio, 4)
-
-    def test_update_gonio_index_delegates_to_model(self):
-        tab = _make_table()
-        tab._model.update_gonio_index.return_value = 3
-
-        result = tab.update_gonio_index(5)
-
-        tab._model.update_gonio_index.assert_called_once_with(5)
-        self.assertEqual(result, 3)
 
 
 class TestOrientationTable_GetTableInfo(unittest.TestCase):

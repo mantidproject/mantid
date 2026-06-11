@@ -34,7 +34,6 @@ class _BaseModelType(Protocol):
     orientations: Any
     instrument: Any
     geometry: Any
-    mc_kwargs: dict
 
 
 class WorkspaceManager:

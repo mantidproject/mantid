@@ -69,13 +69,24 @@ def _make_model(
     return model
 
 
+def _make_plotter(model):
+    # the plotter now owns its visual config (colours + vis toggles); mirror the values the test set
+    # on the model mock so tests can keep configuring behaviour through _make_model(...)
+    plotter = TexturePlotter(model)
+    plotter.vis_settings = model.vis_settings
+    plotter.gon_colors = model.gon_colors
+    plotter.dir_cols = model.dir_cols
+    plotter.transmission_use_data_range = model.transmission_use_data_range
+    return plotter
+
+
 class TestTexturePlotter_UpdatePlot(unittest.TestCase):
     @patch(file_path + ".plot_sample_only")
     @patch(file_path + ".ShowSampleModel")
     def test_orchestrates_helpers_in_order(self, mock_show_sample, mock_plot_sample):
         model = _make_model()
         # stub the internal helpers so we only verify orchestration
-        plotter = TexturePlotter(model)
+        plotter = _make_plotter(model)
         plotter._draw_goniometers = MagicMock(return_value=[np.array([1.0, 0.0, 0.0])])
         plotter._draw_sample_and_axes = MagicMock()
         plotter._draw_beam_and_detectors = MagicMock()
@@ -129,7 +140,7 @@ class TestTexturePlotter_UpdatePlot(unittest.TestCase):
         model.workspaces.ws.run.return_value.getGoniometer.return_value = gonio
         model.workspaces.updated_mesh_ws.sample.return_value.getShape.return_value.getMesh.return_value = np.ones((2, 3, 3))
 
-        plotter = TexturePlotter(model)
+        plotter = _make_plotter(model)
         plotter._draw_goniometers = MagicMock(return_value=[np.array([1.0, 0.0, 0.0])])
         plotter._draw_sample_and_axes = MagicMock()
         plotter._draw_beam_and_detectors = MagicMock()
@@ -152,7 +163,7 @@ class TestTexturePlotter_DrawGoniometers(unittest.TestCase):
     def test_skipped_entirely_when_goniometers_vis_off(self, mock_ring):
         self._stub_ring(mock_ring)
         model = _make_model(vis_settings={"goniometers": False, "directions": True, "incident": True, "ks": True, "scattered": True})
-        plotter = TexturePlotter(model)
+        plotter = _make_plotter(model)
         lab_ax = MagicMock()
 
         g_vecs = plotter._draw_goniometers(lab_ax, [(1.0, 0.0, 0.0)], [1], [0.0], [Rotation.identity()], 1, 1.0)
@@ -166,7 +177,7 @@ class TestTexturePlotter_DrawGoniometers(unittest.TestCase):
     def test_draws_two_segments_and_quiver_per_axis_when_visible(self, mock_ring):
         self._stub_ring(mock_ring)
         model = _make_model()
-        plotter = TexturePlotter(model)
+        plotter = _make_plotter(model)
         lab_ax = MagicMock()
 
         plotter._draw_goniometers(
@@ -192,7 +203,7 @@ class TestTexturePlotter_DrawGoniometers(unittest.TestCase):
     def test_quiver_linestyle_solid_for_active_axis_dashed_for_others(self, mock_ring):
         self._stub_ring(mock_ring)
         model = _make_model(gonio_index=1)
-        plotter = TexturePlotter(model)
+        plotter = _make_plotter(model)
         lab_ax = MagicMock()
 
         plotter._draw_goniometers(
@@ -213,7 +224,7 @@ class TestTexturePlotter_DrawGoniometers(unittest.TestCase):
     def test_returns_one_g_vec_per_input_vec(self, mock_ring):
         self._stub_ring(mock_ring)
         model = _make_model()
-        plotter = TexturePlotter(model)
+        plotter = _make_plotter(model)
 
         g_vecs = plotter._draw_goniometers(
             MagicMock(),
@@ -233,7 +244,7 @@ class TestTexturePlotter_DrawGoniometers(unittest.TestCase):
 class TestTexturePlotter_DrawSampleAndAxes(unittest.TestCase):
     def test_calls_plot_sample_only_with_grey_alpha(self, mock_show_sample, mock_plot_sample):
         model = _make_model()
-        plotter = TexturePlotter(model)
+        plotter = _make_plotter(model)
         fig = MagicMock()
         lab_ax = MagicMock()
         rot_mesh = np.ones((2, 3, 3))
@@ -245,7 +256,7 @@ class TestTexturePlotter_DrawSampleAndAxes(unittest.TestCase):
 
     def test_sets_axis_limits_and_aspect_from_extent_and_n_gon(self, mock_show_sample, mock_plot_sample):
         model = _make_model()
-        plotter = TexturePlotter(model)
+        plotter = _make_plotter(model)
         lab_ax = MagicMock()
 
         plotter._draw_sample_and_axes(MagicMock(), lab_ax, np.ones((2, 3, 3)), extent=3.0, n_gon=2, scat_centre=np.zeros(3))
@@ -260,7 +271,7 @@ class TestTexturePlotter_DrawSampleAndAxes(unittest.TestCase):
         sample_model = MagicMock()
         mock_show_sample.return_value = sample_model
         model = _make_model(vis_settings={"goniometers": True, "directions": False, "incident": True, "ks": True, "scattered": True})
-        plotter = TexturePlotter(model)
+        plotter = _make_plotter(model)
 
         plotter._draw_sample_and_axes(MagicMock(), MagicMock(), np.ones((2, 3, 3)), extent=1.0, n_gon=1, scat_centre=np.zeros(3))
 
@@ -270,7 +281,7 @@ class TestTexturePlotter_DrawSampleAndAxes(unittest.TestCase):
         sample_model = MagicMock()
         mock_show_sample.return_value = sample_model
         model = _make_model(gauge_volume_str="<gv/>")
-        plotter = TexturePlotter(model)
+        plotter = _make_plotter(model)
 
         plotter._draw_sample_and_axes(MagicMock(), MagicMock(), np.ones((2, 3, 3)), extent=1.0, n_gon=1, scat_centre=np.zeros(3))
 
@@ -280,7 +291,7 @@ class TestTexturePlotter_DrawSampleAndAxes(unittest.TestCase):
         sample_model = MagicMock()
         mock_show_sample.return_value = sample_model
         model = _make_model(gauge_volume_str=None)
-        plotter = TexturePlotter(model)
+        plotter = _make_plotter(model)
 
         plotter._draw_sample_and_axes(MagicMock(), MagicMock(), np.ones((2, 3, 3)), extent=1.0, n_gon=1, scat_centre=np.zeros(3))
 
@@ -289,7 +300,7 @@ class TestTexturePlotter_DrawSampleAndAxes(unittest.TestCase):
 
 class TestTexturePlotter_DrawBeamAndDetectors(unittest.TestCase):
     def _make_plotter_with_stubbed_quiver_bundle(self, model):
-        plotter = TexturePlotter(model)
+        plotter = _make_plotter(model)
         plotter._draw_quiver_bundle = MagicMock()
         return plotter
 
@@ -395,7 +406,7 @@ class TestTexturePlotter_ProjectGoniometerPoles(unittest.TestCase):
         mock_alpha_beta.return_value = np.array([[0.1, 0.2], [0.3, 0.4]])
         mock_ster.return_value = "ster_result"
         model = _make_model(projection="ster")
-        plotter = TexturePlotter(model)
+        plotter = _make_plotter(model)
 
         result = plotter._project_goniometer_poles(Rotation.identity(), [np.array([1.0, 0.0, 0.0])])
 
@@ -410,7 +421,7 @@ class TestTexturePlotter_ProjectGoniometerPoles(unittest.TestCase):
         mock_alpha_beta.return_value = np.array([[0.1, 0.2], [0.3, 0.4]])
         mock_azim.return_value = "azim_result"
         model = _make_model(projection="azim")
-        plotter = TexturePlotter(model)
+        plotter = _make_plotter(model)
 
         result = plotter._project_goniometer_poles(Rotation.identity(), [np.array([1.0, 0.0, 0.0])])
 
@@ -424,7 +435,7 @@ class TestTexturePlotter_ProjectGoniometerPoles(unittest.TestCase):
 class TestTexturePlotter_DrawPoleFigure(unittest.TestCase):
     def test_goniometer_pole_on_unit_circle_draws_line_segment(self):
         model = _make_model(gonio_index=0)
-        plotter = TexturePlotter(model)
+        plotter = _make_plotter(model)
         proj_ax = MagicMock()
         # a pole exactly on the unit circle (norm == 1) -> line
         g_pole_xy = [np.array([1.0, 0.0])]
@@ -435,7 +446,7 @@ class TestTexturePlotter_DrawPoleFigure(unittest.TestCase):
 
     def test_goniometer_pole_inside_unit_circle_draws_scatter(self):
         model = _make_model(gonio_index=0)
-        plotter = TexturePlotter(model)
+        plotter = _make_plotter(model)
         proj_ax = MagicMock()
         g_pole_xy = [np.array([0.1, 0.0])]  # norm < 1
 
@@ -445,7 +456,7 @@ class TestTexturePlotter_DrawPoleFigure(unittest.TestCase):
 
     def test_goniometer_pole_inactive_axis_uses_no_fill(self):
         model = _make_model(gonio_index=0)
-        plotter = TexturePlotter(model)
+        plotter = _make_plotter(model)
         proj_ax = MagicMock()
         # first pole active (index 0 == gonio_index); second pole inactive
         g_pole_xy = [np.array([0.1, 0.0]), np.array([0.0, 0.2])]
@@ -463,7 +474,7 @@ class TestTexturePlotter_DrawPoleFigure(unittest.TestCase):
         orient.include = True
         orient.pf_points = np.array([[0.1, 0.2]])
         model = _make_model(orientations={0: orient}, plot_transmission=False)
-        plotter = TexturePlotter(model)
+        plotter = _make_plotter(model)
         proj_ax = MagicMock()
 
         plotter._draw_pole_figure(proj_ax, [], current_index=0)
@@ -478,7 +489,7 @@ class TestTexturePlotter_DrawPoleFigure(unittest.TestCase):
         other.include = True
         other.pf_points = np.array([[0.1, 0.2]])
         model = _make_model(orientations={0: cur, 1: other}, plot_transmission=False)
-        plotter = TexturePlotter(model)
+        plotter = _make_plotter(model)
         proj_ax = MagicMock()
 
         plotter._draw_pole_figure(proj_ax, [], current_index=0)
@@ -490,7 +501,7 @@ class TestTexturePlotter_DrawPoleFigure(unittest.TestCase):
         orient.include = False
         orient.pf_points = np.array([[0.1, 0.2]])
         model = _make_model(orientations={0: orient}, plot_transmission=False)
-        plotter = TexturePlotter(model)
+        plotter = _make_plotter(model)
         proj_ax = MagicMock()
 
         plotter._draw_pole_figure(proj_ax, [], current_index=0)
@@ -509,7 +520,7 @@ class TestTexturePlotter_DrawPoleFigure(unittest.TestCase):
         excluded = MagicMock()
         excluded.include = False
         model = _make_model(orientations={0: a, 1: b, 2: excluded}, plot_transmission=True)
-        plotter = TexturePlotter(model)
+        plotter = _make_plotter(model)
         proj_ax = MagicMock()
         scatt_obj = MagicMock()
         proj_ax.scatter.return_value = scatt_obj
@@ -532,7 +543,7 @@ class TestTexturePlotter_DrawPoleFigure(unittest.TestCase):
         a.pf_points = np.array([[0.1, 0.2]])
         a.transmission = np.array([0.3])
         model = _make_model(orientations={0: a}, plot_transmission=True, transmission_use_data_range=True)
-        plotter = TexturePlotter(model)
+        plotter = _make_plotter(model)
         proj_ax = MagicMock()
 
         plotter._draw_pole_figure(proj_ax, [], current_index=0)
@@ -547,7 +558,7 @@ class TestTexturePlotter_DrawPoleFigure(unittest.TestCase):
 class TestTexturePlotter_DecoratePoleFigure(unittest.TestCase):
     def test_sets_aspect_limits_and_axis_off(self, mock_plt):
         model = _make_model()
-        plotter = TexturePlotter(model)
+        plotter = _make_plotter(model)
         proj_ax = MagicMock()
 
         plotter._decorate_pole_figure(proj_ax)
@@ -559,7 +570,7 @@ class TestTexturePlotter_DecoratePoleFigure(unittest.TestCase):
 
     def test_draws_two_basis_quivers(self, mock_plt):
         model = _make_model(dir_cols=["a", "b", "c"])
-        plotter = TexturePlotter(model)
+        plotter = _make_plotter(model)
         proj_ax = MagicMock()
 
         plotter._decorate_pole_figure(proj_ax)
@@ -574,7 +585,7 @@ class TestTexturePlotter_DecoratePoleFigure(unittest.TestCase):
 
     def test_adds_unit_circle_patch(self, mock_plt):
         model = _make_model()
-        plotter = TexturePlotter(model)
+        plotter = _make_plotter(model)
         proj_ax = MagicMock()
         circle = MagicMock()
         mock_plt.Circle.return_value = circle
@@ -586,7 +597,7 @@ class TestTexturePlotter_DecoratePoleFigure(unittest.TestCase):
 
     def test_annotates_with_first_and_third_dir_names(self, mock_plt):
         model = _make_model(dir_names=["A", "B", "C"])
-        plotter = TexturePlotter(model)
+        plotter = _make_plotter(model)
         proj_ax = MagicMock()
 
         plotter._decorate_pole_figure(proj_ax)

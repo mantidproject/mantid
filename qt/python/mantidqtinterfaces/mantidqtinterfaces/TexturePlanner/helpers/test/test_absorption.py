@@ -32,7 +32,7 @@ def _make_wsm(offset=(0.0, 0.0, 0.0), init_R=None, gauge_volume_str="<gv/>"):
     return wsm
 
 
-def _make_model(R=None, n_orientations=1, starting_ind=0, mc_kwargs=None):
+def _make_model(R=None, n_orientations=1, starting_ind=0):
     model = MagicMock()
     model.workspaces = _make_wsm()
     orient = MagicMock()
@@ -41,7 +41,6 @@ def _make_model(R=None, n_orientations=1, starting_ind=0, mc_kwargs=None):
     model.orientations.__getitem__.side_effect = lambda i: orient
     model.orientations.keys.return_value = list(range(n_orientations))
     model.geometry.starting_ind = starting_ind
-    model.mc_kwargs = mc_kwargs if mc_kwargs is not None else {"InputWorkspace": WS_MC_INPUT, "OutputWorkspace": WS_MC_OUTPUT}
     return model, orient
 
 
@@ -158,7 +157,7 @@ class TestAbsorptionCalculator_CalcForIndex(unittest.TestCase):
 
         calc._create_mc_ws.assert_called_once_with(model.workspaces)
         calc._set_mc_sample_state.assert_called_once_with(model.workspaces, mc_ws, orient.R)
-        mock_mc.assert_called_once_with(**model.mc_kwargs)
+        mock_mc.assert_called_once_with(**calc.mc_kwargs)
 
     def test_passes_transmission_slice_from_starting_ind(self, mock_mc, mock_read):
         calc, model, _, _ = self._make_calculator(starting_ind=2)
@@ -194,6 +193,25 @@ class TestAbsorptionCalculator_CalcForIndex(unittest.TestCase):
         calc.calc_for_index(0)
 
         mock_logger.warning.assert_called_once()
+
+
+class TestAbsorptionCalculator_Init(unittest.TestCase):
+    def test_mc_kwargs_built_from_workspace_constants(self):
+        model, _ = _make_model()
+
+        calc = AbsorptionCalculator(model)
+
+        self.assertEqual(
+            calc.mc_kwargs,
+            {
+                "InputWorkspace": WS_MC_INPUT,
+                "OutputWorkspace": WS_MC_OUTPUT,
+                "EventsPerPoint": 50,
+                "MaxScatterPtAttempts": int(1e4),
+                "SimulateScatteringPointIn": "SampleOnly",
+                "ResimulateTracksForDifferentWavelengths": False,
+            },
+        )
 
 
 class TestAbsorptionCalculator_CalcAll(unittest.TestCase):

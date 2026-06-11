@@ -41,20 +41,11 @@ class TestTexturePlannerModel_Init(unittest.TestCase):
     def test_default_attributes(self, mock_instr, mock_wsm, mock_ot, mock_dg, mock_abs, mock_exp, mock_plot):
         model = TexturePlannerModel()
 
-        self.assertEqual(model.gon_colors, ("hotpink", "orange", "purple", "goldenrod", "plum", "saddlebrown"))
-        self.assertEqual(model.dir_cols, ("red", "green", "blue"))
         np.testing.assert_array_equal(model.ax_transform, np.eye(3))
         self.assertEqual(model.dir_names, ["D1", "D2", "D3"])
         self.assertEqual(model.projection, "azimuthal")
-        self.assertEqual(
-            model.vis_settings,
-            {"directions": True, "goniometers": True, "incident": True, "ks": True, "scattered": False},
-        )
         self.assertEqual(model.gonio_index, 0)
-        self.assertEqual(model.n_output_points, 1)
         self.assertFalse(model.plot_transmission)
-        self.assertFalse(model.transmission_use_data_range)
-        self.assertEqual(model.orientation_kwargs, {"Axes": "YXY", "Senses": "-1,-1,-1"})
 
     def test_custom_instrument_and_projection(self, mock_instr, mock_wsm, mock_ot, mock_dg, mock_abs, mock_exp, mock_plot):
         model = TexturePlannerModel(instrument="IMAT", projection="stereographic")
@@ -66,30 +57,12 @@ class TestTexturePlannerModel_Init(unittest.TestCase):
         model = TexturePlannerModel()
 
         mock_wsm.assert_called_once_with(model)
-        mock_ot.assert_called_once_with(model)
+        mock_ot.assert_called_once_with()
         mock_dg.assert_called_once_with(model)
         mock_abs.assert_called_once_with(model)
         mock_exp.assert_called_once_with(model)
         mock_plot.assert_called_once_with(model)
         mock_instr.assert_called_once_with(model, "ENGINX")
-
-    def test_mc_kwargs_populated_from_workspace_constants(self, mock_instr, mock_wsm, mock_ot, mock_dg, mock_abs, mock_exp, mock_plot):
-        mock_wsm.return_value.WS_MC_INPUT = "mc_in"
-        mock_wsm.return_value.WS_MC_OUTPUT = "mc_out"
-
-        model = TexturePlannerModel()
-
-        self.assertEqual(
-            model.mc_kwargs,
-            {
-                "InputWorkspace": "mc_in",
-                "OutputWorkspace": "mc_out",
-                "EventsPerPoint": 50,
-                "MaxScatterPtAttempts": int(1e4),
-                "SimulateScatteringPointIn": "SampleOnly",
-                "ResimulateTracksForDifferentWavelengths": False,
-            },
-        )
 
 
 @_patch_collaborators

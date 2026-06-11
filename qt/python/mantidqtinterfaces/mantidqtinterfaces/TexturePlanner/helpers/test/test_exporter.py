@@ -27,14 +27,13 @@ def _make_orientation(R=None, include=True, transmission=None):
     return orient
 
 
-def _make_model(orientations=None, n_output_points=1, instr="ENGINX", axes="xyz", senses="1,1,1", init_R=None, updated_mesh_ws="neutral"):
+def _make_model(orientations=None, instr="ENGINX", axes="xyz", senses="1,1,1", init_R=None, updated_mesh_ws="neutral"):
     model = MagicMock()
     if orientations is None:
         orientations = {0: _make_orientation()}
     model.orientations.values.return_value = list(orientations.values())
-    model.n_output_points = n_output_points
     model.instrument.get_instrument.return_value = instr
-    model.orientation_kwargs = {"Axes": axes, "Senses": senses}
+    model.orientations.orientation_kwargs = {"Axes": axes, "Senses": senses}
     model.workspaces.WS_REFERENCE = WS_REFERENCE
     model.workspaces.updated_mesh_ws = updated_mesh_ws
     model.workspaces.init_R = init_R if init_R is not None else Rotation.identity()
@@ -62,15 +61,15 @@ class TestOrientationExporter_OutputAsSscanss(unittest.TestCase):
                 return f.read(), save_file
 
     @patch(file_path + ".convert_to_sscanss_frame")
-    def test_writes_header_and_one_line_per_orientation_per_output_point(self, mock_convert, mock_logger):
+    def test_writes_header_and_one_line_per_orientation(self, mock_convert, mock_logger):
         mock_convert.return_value = (10.0, 20.0, 30.0)
-        model = _make_model(orientations={0: _make_orientation(), 1: _make_orientation()}, n_output_points=2)
+        model = _make_model(orientations={0: _make_orientation(), 1: _make_orientation()})
 
         content, _ = self._run(model)
 
         lines = content.splitlines()
         self.assertEqual(lines[0], "xyz")
-        self.assertEqual(len(lines), 1 + 2 * 2)
+        self.assertEqual(len(lines), 1 + 2)
         for line in lines[1:]:
             self.assertEqual(line, "10.0\t20.0\t30.0")
 
@@ -125,12 +124,12 @@ class TestOrientationExporter_OutputAsMatrix(unittest.TestCase):
         self.assertEqual(len(values), 9)
         np.testing.assert_allclose([float(v) for v in values], np.eye(3).reshape(-1))
 
-    def test_writes_one_line_per_orientation_per_output_point(self, mock_logger):
-        model = _make_model(orientations={0: _make_orientation(), 1: _make_orientation()}, n_output_points=3)
+    def test_writes_one_line_per_orientation(self, mock_logger):
+        model = _make_model(orientations={0: _make_orientation(), 1: _make_orientation()})
 
         content, _ = self._run(model)
 
-        self.assertEqual(len(content.splitlines()), 2 * 3)
+        self.assertEqual(len(content.splitlines()), 2)
 
     def test_logs_notice_with_save_file(self, mock_logger):
         model = _make_model()
@@ -174,13 +173,13 @@ class TestOrientationExporter_OutputAsEuler(unittest.TestCase):
         values = content.splitlines()[0].split("\t")
         self.assertEqual([float(v) for v in values], [10.0, -20.0, 30.0])
 
-    def test_writes_one_line_per_orientation_per_output_point(self, mock_logger):
+    def test_writes_one_line_per_orientation(self, mock_logger):
         orient = self._make_orient_with_mock_R([0.0, 0.0, 0.0])
-        model = _make_model(orientations={0: orient, 1: orient}, n_output_points=2)
+        model = _make_model(orientations={0: orient, 1: orient})
 
         content, _ = self._run(model)
 
-        self.assertEqual(len(content.splitlines()), 2 * 2)
+        self.assertEqual(len(content.splitlines()), 2)
 
 
 @patch(file_path + ".logger")
