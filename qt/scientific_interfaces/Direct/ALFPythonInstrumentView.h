@@ -10,10 +10,10 @@
 #include "ALFPythonCallbackRelay.h"
 #include "DllConfig.h"
 #include "IALFInstrumentView.h"
+#include "MantidAPI/AnalysisDataServiceObserver.h"
 #include "MantidQtWidgets/Common/MessageHandler.h"
 #include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
-#include "StubInstrumentActor.h"
 
 #include <memory>
 #include <qwidget.h>
@@ -32,7 +32,9 @@ namespace CustomInterfaces {
 
 class ALFInstrumentWidget;
 
-class MANTIDQT_DIRECT_DLL ALFPythonInstrumentView final : public ALFInstrumentViewBase, public Python::InstanceHolder {
+class MANTIDQT_DIRECT_DLL ALFPythonInstrumentView final : public ALFInstrumentViewBase,
+                                                          public Python::InstanceHolder,
+                                                          public AnalysisDataServiceObserver {
   Q_OBJECT
 
 public:
@@ -52,6 +54,10 @@ public:
 
   void notifyWholeTubeSelected();
 
+  void replaceHandle(const std::string &wsName, const Workspace_sptr &workspace) override;
+
+  void resetActor();
+
 private:
   void ensureCallbackRelay(QWidget *instrumentView);
 
@@ -60,12 +66,6 @@ private:
   mutable std::unique_ptr<MantidWidgets::InstrumentActor> m_actor;
   std::unique_ptr<MantidWidgets::IMessageHandler> messageHandler = std::make_unique<MantidWidgets::MessageHandler>();
   std::string m_workspaceName;
-
-  // private slots:
-  //   void reconnectInstrumentActor();
-  //   void reconnectSurface();
-  //   void selectWholeTube();
-  //   void notifyWholeTubeSelected(size_t pickID);
 };
 
 } // namespace CustomInterfaces

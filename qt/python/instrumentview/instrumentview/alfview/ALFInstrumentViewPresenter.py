@@ -5,12 +5,13 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
+from typing import override
 from instrumentview.alfview.ALFInstrumentViewView import ALFInstrumentViewView
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
 from instrumentview.FullInstrumentViewPresenter import FullInstrumentViewPresenter
 from instrumentview.ComponentSelectionUtils import subtrees_of_component_indices
 
-from mantid.simpleapi import CreateSampleWorkspace, AnalysisDataService
+from mantid.simpleapi import CreateSampleWorkspace, AnalysisDataService, Rebin
 from qtpy.QtCore import QObject, QMetaObject, Q_ARG
 
 
@@ -34,7 +35,7 @@ class ALFInstrumentViewPresenter(FullInstrumentViewPresenter):
     def init_view_and_model(self, ws):
         super().__init__(ALFInstrumentViewView(), FullInstrumentViewModel(ws))
         self._view._select_bank_tube.toggle()
-        self._view._show_shapes_check_box.setChecked(False)
+        self._view._show_shapes_check_box.setChecked(True)
         # self._view.set_default_projection(ProjectionType.SIDE_BY_SIDE)
 
     def selected_detector_ids(self):
@@ -54,8 +55,11 @@ class ALFInstrumentViewPresenter(FullInstrumentViewPresenter):
         super().update_picked_detectors_on_view()
         self.notify_cpp_callback("notify_whole_tube_selected")
 
-    # def get_workspace_name(self):
-    #     return self._model._workspace.name()
-
+    @override
     def _update_line_plot_ws_and_draw(self, unit: str) -> None:
+        # Avoid plotting since as it gives some errors
         pass
+
+    def rebin_button_clicked(self, params: str) -> None:
+        # Rewrites the active workspace in the model, a miracle if it works
+        Rebin(InputWorkspace=self._model._workspace, Params=params, OutputWorkspace=self._model._workspace.name())
