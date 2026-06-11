@@ -90,9 +90,8 @@ std::vector<std::string> expandWorkspaceGroups(std::vector<std::string> const &w
 std::vector<std::vector<std::string>> groupedWorkspaceNames(std::vector<std::string> const &workspaces) {
   auto groupedWorkspaces = std::vector<std::vector<std::string>>{};
   groupedWorkspaces.reserve(workspaces.size());
-  for (auto const &workspace : workspaces) {
-    groupedWorkspaces.emplace_back(expandWorkspaceGroups({workspace}));
-  }
+  std::transform(workspaces.cbegin(), workspaces.cend(), std::back_inserter(groupedWorkspaces),
+                 [](const auto &workspace) { return expandWorkspaceGroups({workspace}); });
   return groupedWorkspaces;
 }
 
