@@ -26,6 +26,14 @@ using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 using testing::NiceMock;
 using testing::Return;
 
+MATCHER_P(WorkspaceItemsEqual, expected, "matches plotting workspace tree items") {
+  if (arg == expected)
+    return true;
+
+  *result_listener << "\nexpected: " << testing::PrintToString(expected) << "\nactual: " << testing::PrintToString(arg);
+  return false;
+}
+
 class MockPlottingView : public IPlottingView {
 public:
   MOCK_METHOD1(subscribe, void(PlottingViewSubscriber *));
@@ -143,7 +151,7 @@ public:
                                       workspaceItem("IvsQ_12345", PlottingWorkspaceOutputType::IvsQ),
                                       workspaceItem("IvsQ_binned_12345", PlottingWorkspaceOutputType::IvsQBinned)})})};
 
-    EXPECT_CALL(view, setWorkspaceItems(expected)).Times(1);
+    EXPECT_CALL(view, setWorkspaceItems(WorkspaceItemsEqual(expected))).Times(1);
 
     presenter.notifyRunsTableChanged(runsTable);
   }
@@ -156,7 +164,7 @@ public:
     auto runsTable = RunsTable({}, 0.0, ReductionJobs({Group("Group 1", {row})}));
     addWorkspaces({"IvsLam_12345", "IvsQ_12345", "IvsQ_binned_12345"});
 
-    EXPECT_CALL(view, setWorkspaceItems(std::vector<PlottingWorkspaceTreeItem>{})).Times(1);
+    EXPECT_CALL(view, setWorkspaceItems(WorkspaceItemsEqual(std::vector<PlottingWorkspaceTreeItem>{}))).Times(1);
 
     presenter.notifyRunsTableChanged(runsTable);
   }
@@ -170,7 +178,7 @@ public:
     auto const expected = std::vector<PlottingWorkspaceTreeItem>{
         groupItem("Group 1", {runItem("12345", {workspaceItem("IvsQ_12345", PlottingWorkspaceOutputType::IvsQ)})})};
 
-    EXPECT_CALL(view, setWorkspaceItems(expected)).Times(1);
+    EXPECT_CALL(view, setWorkspaceItems(WorkspaceItemsEqual(expected))).Times(1);
 
     presenter.notifyRunsTableChanged(runsTable);
   }
@@ -185,7 +193,7 @@ public:
     auto const expected = std::vector<PlottingWorkspaceTreeItem>{groupItem(
         "Group 1", {workspaceItem("Group 1", {}, "stitched_12345", PlottingWorkspaceOutputType::IvsQBinned)})};
 
-    EXPECT_CALL(view, setWorkspaceItems(expected)).Times(1);
+    EXPECT_CALL(view, setWorkspaceItems(WorkspaceItemsEqual(expected))).Times(1);
 
     presenter.notifyRunsTableChanged(runsTable);
   }
@@ -202,7 +210,7 @@ public:
                                               {workspaceItem("IvsQ_12345_1", PlottingWorkspaceOutputType::IvsQ),
                                                workspaceItem("IvsQ_12345_2", PlottingWorkspaceOutputType::IvsQ)})})})};
 
-    EXPECT_CALL(view, setWorkspaceItems(expected)).Times(1);
+    EXPECT_CALL(view, setWorkspaceItems(WorkspaceItemsEqual(expected))).Times(1);
 
     presenter.notifyRunsTableChanged(runsTable);
   }
@@ -220,7 +228,7 @@ public:
                        {workspaceItem("Group 1", {}, "stitched_12345_1", PlottingWorkspaceOutputType::IvsQBinned),
                         workspaceItem("Group 1", {}, "stitched_12345_2", PlottingWorkspaceOutputType::IvsQBinned)})})};
 
-    EXPECT_CALL(view, setWorkspaceItems(expected)).Times(1);
+    EXPECT_CALL(view, setWorkspaceItems(WorkspaceItemsEqual(expected))).Times(1);
 
     presenter.notifyRunsTableChanged(runsTable);
   }
@@ -236,7 +244,7 @@ public:
                                       {workspaceItem("Group 1", {"12345"}, "IvsQ_binned_12345",
                                                      PlottingWorkspaceOutputType::IvsQBinned)})})};
 
-    EXPECT_CALL(view, setWorkspaceItems(expected)).Times(1);
+    EXPECT_CALL(view, setWorkspaceItems(WorkspaceItemsEqual(expected))).Times(1);
 
     presenter.notifyRunsTableChanged(runsTable);
   }
@@ -382,7 +390,7 @@ public:
     auto runsTable = RunsTable({}, 0.0, ReductionJobs({group}));
     Mantid::API::AnalysisDataService::Instance().add("stitched_12345", std::make_shared<Mantid::API::WorkspaceGroup>());
 
-    EXPECT_CALL(view, setWorkspaceItems(std::vector<PlottingWorkspaceTreeItem>{})).Times(1);
+    EXPECT_CALL(view, setWorkspaceItems(WorkspaceItemsEqual(std::vector<PlottingWorkspaceTreeItem>{}))).Times(1);
 
     presenter.notifyRunsTableChanged(runsTable);
   }
