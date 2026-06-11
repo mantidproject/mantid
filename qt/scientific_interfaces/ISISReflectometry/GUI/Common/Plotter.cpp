@@ -9,21 +9,29 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+
+#pragma push_macro("slots")
+#undef slots
+
 #include "MantidPythonInterface/core/Converters/ToPyList.h"
 #include "MantidPythonInterface/core/ErrorHandling.h"
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
+
 #include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/Common/Python/QHashToDict.h"
 #include "MantidQtWidgets/Common/Python/Sip.h"
+
 #include "MantidQtWidgets/MplCpp/Plot.h"
+
+#include <boost/python/extract.hpp>
+
+#pragma pop_macro("slots")
 
 #include <QHash>
 #include <QString>
 #include <QVariant>
 #include <QWidget>
 #include <QWindow>
-
-#include <boost/python/extract.hpp>
 
 #include <algorithm>
 #include <functional>
