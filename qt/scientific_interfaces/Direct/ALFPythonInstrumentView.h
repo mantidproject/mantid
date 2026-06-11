@@ -50,7 +50,7 @@ public:
   std::vector<DetectorTube> getSelectedDetectors() const override;
 
   void clearShapes() override {};
-  void drawRectanglesAbove(std::vector<DetectorTube> const &tubes) override {};
+  void drawRectanglesAbove(std::vector<DetectorTube> const &) override {};
 
   void notifyWholeTubeSelected();
 

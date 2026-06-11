@@ -55,7 +55,7 @@ void ALFPythonInstrumentView::setUpInstrument(std::string const &workspaceName) 
   observeReplace(true);
 }
 
-void ALFPythonInstrumentView::replaceHandle(const std::string &wsName, const Workspace_sptr &workspace) {
+void ALFPythonInstrumentView::replaceHandle(const std::string &wsName, const Workspace_sptr &) {
   // Only update if replaced workspace is workspace that is open
   if (m_workspaceName != wsName) {
     return;
@@ -72,7 +72,7 @@ void ALFPythonInstrumentView::resetActor() {
 QWidget *ALFPythonInstrumentView::getInstrumentView() {
   try {
     GlobalInterpreterLock lock;
-    QWidget *instrumentView = Python::extract<QWidget>(pyobj().attr("_view"));
+    auto *instrumentView = Python::extract<QWidget>(pyobj().attr("_view"));
     ensureCallbackRelay(instrumentView);
     return instrumentView;
   } catch (boost::python::error_already_set &) {
@@ -92,8 +92,7 @@ void ALFPythonInstrumentView::ensureCallbackRelay(QWidget *instrumentView) {
     return;
 
   if (m_callbackRelay == nullptr || m_callbackRelay->parent() != instrumentView) {
-    ALFPythonCallbackRelay *existingRelay =
-        instrumentView->findChild<ALFPythonCallbackRelay *>(QStringLiteral("ALFPythonCallbackRelay"));
+    auto *existingRelay = instrumentView->findChild<ALFPythonCallbackRelay *>(QStringLiteral("ALFPythonCallbackRelay"));
     m_callbackRelay = existingRelay != nullptr ? existingRelay : new ALFPythonCallbackRelay(instrumentView);
   }
   m_callbackRelay->setCallback("notify_whole_tube_selected", [this]() { notifyWholeTubeSelected(); });
