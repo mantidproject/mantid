@@ -22,7 +22,7 @@ set(PRECOMP_HEADERS
     <QString>
     <QWidget>
     <QtCore/QVariant>
-    <QtWidgets/QAction>
+    <QAction>
     <QtWidgets/QApplication>
     <QtWidgets/QButtonGroup>
     <QtWidgets/QLabel>
