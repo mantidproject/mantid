@@ -71,7 +71,7 @@ PlotOptions spinAsymmetryPlotOptions(PlotLayout layout) {
   options.outputType = PlotOutputType::SpinAsymmetry;
   options.plotStyle = PlotStyle::Line;
   options.layout = layout;
-  options.xAxis = PlotAxis{"Qz", "", AxisScale::Linear};
+  options.xAxis = PlotAxis{"Q", "", AxisScale::Log};
   options.yAxis = PlotAxis{"Spin Asymmetry", "", AxisScale::Linear};
   options.showErrors = true;
   options.horizontalMarker = 0.0;
