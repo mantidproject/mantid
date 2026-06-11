@@ -36,7 +36,7 @@ public:
   QPushButton *cancelButton() const { return m_uiForm.pbCancel; }
 
 private:
-  virtual void initLayout();
+  virtual void initLayout() final;
   void loadProperties();
   void saveProperties();
   QListWidget *listWidget(QObject *object);

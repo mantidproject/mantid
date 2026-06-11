@@ -1260,7 +1260,7 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesPartialLog(
         if (index == 0)
           dbss << logvalueranges[index] << ", " << logvalueranges[index + 1];
         else if (index == logvalueranges.size())
-          dbss << logvalueranges[index - 1] << ", " << logvalueranges[index];
+          dbss << logvalueranges[index - 1];
         else if (valueWithinMinMax)
           dbss << logvalueranges[index - 1] << ", " << logvalueranges[index] << ", " << logvalueranges[index + 1];
         g_log.debug(dbss.str());

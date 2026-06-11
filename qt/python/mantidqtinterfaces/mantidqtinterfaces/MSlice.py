@@ -27,4 +27,4 @@ if show_gui is not None:
     app, within_mantid = get_qapplication()
     show_gui()
     if not within_mantid:
-        sys.exit(app.exec_())
+        sys.exit(app.exec())

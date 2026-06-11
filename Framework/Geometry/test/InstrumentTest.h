@@ -730,6 +730,24 @@ public:
     TSM_ASSERT_THROWS("Duplicate ID, should throw", instrument->markAsDetectorFinalize(), std::runtime_error &);
   }
 
+  void test_getMemorySize_nonzero() { TS_ASSERT_LESS_THAN(size_t{0}, instrument.getMemorySize()); }
+
+  void test_getMemorySize_scales_with_instrument_size() {
+    auto small = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    auto medium = ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    auto large = ComponentCreationHelper::createTestInstrumentCylindrical(10);
+    // check the the memory size increases with the number of detectors
+    TS_ASSERT_LESS_THAN(small->getMemorySize(), medium->getMemorySize());
+    TS_ASSERT_LESS_THAN(medium->getMemorySize(), large->getMemorySize());
+  }
+
+  void test_getMemorySize_parametrized_larger_than_base() {
+    auto base = ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    auto pmap = std::make_shared<ParameterMap>();
+    auto parametrized = std::make_shared<Instrument>(base, pmap);
+    TS_ASSERT_LESS_THAN(base->getMemorySize(), parametrized->getMemorySize());
+  }
+
 private:
   Instrument_sptr createInstrumentWithSource() {
     using Mantid::Kernel::V3D;

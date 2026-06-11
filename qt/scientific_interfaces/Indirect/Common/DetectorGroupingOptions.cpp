@@ -8,6 +8,9 @@
 #include "MantidAPI/AlgorithmProperties.h"
 #include "MantidQtWidgets/Spectroscopy/ValidationUtils.h"
 
+#include <QRegularExpression>
+#include <QRegularExpressionValidator>
+
 #include <unordered_map>
 
 namespace MantidQt {
@@ -25,8 +28,8 @@ DetectorGroupingOptions::DetectorGroupingOptions(QWidget *parent) : QWidget(pare
   connect(m_uiForm.cbGroupingOptions, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
           [=](int index) { this->handleGroupingMethodChanged(m_uiForm.cbGroupingOptions->itemText(index)); });
   connect(m_uiForm.pbSaveCustomGrouping, &QPushButton::clicked, this, &DetectorGroupingOptions::emitSaveCustomGrouping);
-  QRegExp re("([0-9]+[-:+]?[0-9]*([+]?[0-9]*)*,[ ]?)*[0-9]+[-:+]?[0-9]*([+]?[0-9]*)*");
-  m_uiForm.leCustomGroups->setValidator(new QRegExpValidator(re, this));
+  QRegularExpression re("([0-9]+[-:+]?[0-9]*([+]?[0-9]*)*,[ ]?)*[0-9]+[-:+]?[0-9]*([+]?[0-9]*)*");
+  m_uiForm.leCustomGroups->setValidator(new QRegularExpressionValidator(re, this));
 
   handleGroupingMethodChanged(QString::fromStdString(groupingMethod()));
 }

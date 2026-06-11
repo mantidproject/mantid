@@ -25,6 +25,7 @@ from numpy.testing import assert_almost_equal
 
 # local package imports
 from mantid.plots import MantidAxes
+from mantid.plots.utility import PlotNormalizationType
 from unittest import mock
 from unittest.mock import MagicMock, PropertyMock, call, patch
 from mantid.simpleapi import CreateWorkspace
@@ -144,7 +145,7 @@ class FigureInteractionTest(unittest.TestCase):
                 self.assertEqual(3, mock_list[1].addAction.call_count)
                 # 3 actions in Y-Axis submenu
                 self.assertEqual(3, mock_list[2].addAction.call_count)
-                # 2 actions in Normalization submenu
+                # 3 actions in Normalization submenu
                 self.assertEqual(2, mock_list[3].addAction.call_count)
                 # 3 actions in Colorbar submenu
                 self.assertEqual(3, mock_list[4].addAction.call_count)
@@ -186,8 +187,8 @@ class FigureInteractionTest(unittest.TestCase):
                         self.assertEqual(3, mock_list[1].addAction.call_count)
                         # 3 actions in Y-Axis submenu
                         self.assertEqual(3, mock_list[2].addAction.call_count)
-                        # 2 actions in Normalization submenu
-                        self.assertEqual(2, mock_list[3].addAction.call_count)
+                        # 3 actions in Normalization submenu
+                        self.assertEqual(3, mock_list[3].addAction.call_count)
                         # 3 actions in Colorbar submenu
                         self.assertEqual(3, mock_list[4].addAction.call_count)
 
@@ -266,7 +267,7 @@ class FigureInteractionTest(unittest.TestCase):
         fig_interactor = FigureInteraction(fig_manager_mock)
 
         ax = fig.axes[0]
-        fig_interactor._toggle_normalization(ax)
+        fig_interactor._toggle_normalization(ax, PlotNormalizationType.BIN_WIDTH)
         self.assertEqual(r"Counts ($\AA$)$^{-1}$", ax.get_ylabel())
         plot([self.ws1], spectrum_nums=[1], errors=errors, overplot=True, fig=fig)
         self.assertEqual(r"Counts ($\AA$)$^{-1}$", ax.get_ylabel())
@@ -432,10 +433,10 @@ class FigureInteractionTest(unittest.TestCase):
         mock_canvas = MagicMock(figure=fig)
         fig_manager_mock = MagicMock(canvas=mock_canvas)
         fig_interactor = FigureInteraction(fig_manager_mock)
-        fig_interactor._toggle_normalization(fig.axes[0])
+        fig_interactor._toggle_normalization(fig.axes[0], PlotNormalizationType.BIN_WIDTH)
 
         clim = fig.axes[0].images[0].get_clim()
-        fig_interactor._toggle_normalization(fig.axes[0])
+        fig_interactor._toggle_normalization(fig.axes[0], PlotNormalizationType.NONE)
         self.assertEqual(clim, fig.axes[0].images[0].get_clim())
         self.assertNotEqual((-0.1, 0.1), fig.axes[0].images[0].get_clim())
 
@@ -447,7 +448,7 @@ class FigureInteractionTest(unittest.TestCase):
         fig_interactor = FigureInteraction(fig_manager_mock)
         fig_interactor._change_colorbar_axes(LogNorm)
 
-        fig_interactor._toggle_normalization(fig.axes[0])
+        fig_interactor._toggle_normalization(fig.axes[0], PlotNormalizationType.BIN_WIDTH)
 
         self.assertTrue(isinstance(fig.axes[0].images[-1].norm, LogNorm))
 
@@ -649,7 +650,7 @@ class FigureInteractionTest(unittest.TestCase):
         mock_canvas = MagicMock(figure=fig)
         fig_manager_mock = MagicMock(canvas=mock_canvas)
         fig_interactor = FigureInteraction(fig_manager_mock)
-        fig_interactor._toggle_normalization(fig.axes[0])
+        fig_interactor._toggle_normalization(fig.axes[0], PlotNormalizationType.BIN_WIDTH)
 
         self.assertTrue(all(convert_color_to_hex(col.get_edgecolor()[0]) == "#ff9900" for col in fig.get_axes()[0].collections))
 
@@ -663,13 +664,13 @@ class FigureInteractionTest(unittest.TestCase):
         # there should be 3 axes, 2 colorplots and 1 colorbar
         self.assertEqual(3, len(fig.axes))
         fig.axes[0].tracked_workspaces.values()
-        self.assertTrue(fig.axes[0].tracked_workspaces["ws"][0].is_normalized)
-        self.assertTrue(fig.axes[1].tracked_workspaces["ws"][0].is_normalized)
+        self.assertTrue(fig.axes[0].tracked_workspaces["ws"][0].is_normalized_by_bin_width())
+        self.assertTrue(fig.axes[1].tracked_workspaces["ws"][0].is_normalized_by_bin_width())
 
-        fig_interactor._toggle_normalization(fig.axes[0])
+        fig_interactor._toggle_normalization(fig.axes[0], PlotNormalizationType.NONE)
 
-        self.assertFalse(fig.axes[0].tracked_workspaces["ws"][0].is_normalized)
-        self.assertFalse(fig.axes[1].tracked_workspaces["ws"][0].is_normalized)
+        self.assertFalse(fig.axes[0].tracked_workspaces["ws"][0].is_normalized_by_bin_width())
+        self.assertFalse(fig.axes[1].tracked_workspaces["ws"][0].is_normalized_by_bin_width())
 
     def test_marker_annotations_are_removed_and_redrawn_on_scroll_zoom(self):
         event = MagicMock()
@@ -973,11 +974,11 @@ class FigureInteractionTest(unittest.TestCase):
             decimal_tol = 7
 
         ax = fig.axes[0]
-        fig_interactor._toggle_normalization(ax)
+        fig_interactor._toggle_normalization(ax, PlotNormalizationType.BIN_WIDTH)
         assert_almost_equal(ax.lines[0].get_xdata(), [15, 25])
         assert_almost_equal(ax.lines[0].get_ydata(), [0.2, 0.3], decimal=decimal_tol)
         self.assertEqual("Counts ($\\AA$)$^{-1}$", ax.get_ylabel())
-        fig_interactor._toggle_normalization(ax)
+        fig_interactor._toggle_normalization(ax, PlotNormalizationType.NONE)
         assert_almost_equal(ax.lines[0].get_xdata(), [15, 25])
         assert_almost_equal(ax.lines[0].get_ydata(), [2, 3], decimal=decimal_tol)
         self.assertEqual("Counts", ax.get_ylabel())

@@ -1,4 +1,3 @@
-
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
@@ -60,8 +59,8 @@ ComponentInfo::ComponentInfo(
       m_parentIndices(std::move(parentIndices)), m_children(std::move(children)), m_positions(std::move(positions)),
       m_rotations(std::move(rotations)), m_scaleFactors(std::move(scaleFactors)),
       m_componentType(std::move(componentType)), m_names(std::move(names)),
-      m_size(m_assemblySortedDetectorIndices->size() + m_detectorRanges->size()), m_sourceIndex(sourceIndex),
-      m_sampleIndex(sampleIndex), m_detectorInfo(nullptr) {
+      m_size(ComponentInfo::computeTotalSize(*m_assemblySortedDetectorIndices, *m_detectorRanges)),
+      m_sourceIndex(sourceIndex), m_sampleIndex(sampleIndex), m_detectorInfo(nullptr) {
   if (m_rotations->size() != m_positions->size()) {
     throw std::invalid_argument("ComponentInfo should have been provided same "
                                 "number of postions and rotations");
@@ -74,7 +73,7 @@ ComponentInfo::ComponentInfo(
     throw std::invalid_argument("ComponentInfo should have as many rotations "
                                 "as number of components ");
   }
-  if (m_assemblySortedComponentIndices->size() + m_assemblySortedDetectorIndices->size() != m_size) {
+  if (m_assemblySortedComponentIndices->size() + totalDetectorCount() != m_size) {
     throw std::invalid_argument("ComponentInfo must have component indices "
                                 "input of same size as the sum of "
                                 "non-detector and detector components");
@@ -128,19 +127,16 @@ std::vector<size_t> ComponentInfo::detectorsInSubtree(const size_t componentInde
 
 std::vector<size_t> ComponentInfo::componentsInSubtree(const size_t componentIndex) const {
   if (isDetector(componentIndex)) {
-    /* This is a single detector. Just return the corresponding index.
-     * detectorIndex == componentIndex. Never any sub-components for detectors.
-     */
-    return std::vector<size_t>{componentIndex};
+    return {componentIndex};
   }
-  // Calculate index into our ranges (non-detector) component items.
+  std::vector<size_t> indices;
+  // Detectors first (real from flat array + virtual pixels from segments).
+  forEachDetectorInSubtree(componentIndex, [&indices](size_t idx) { indices.push_back(idx); });
+  // Non-detector components.
   const auto rangesIndex = compOffsetIndex(componentIndex);
-  const auto detRange = (*m_detectorRanges)[rangesIndex];
   const auto compRange = (*m_componentRanges)[rangesIndex];
 
   // Extract as a block
-  std::vector<size_t> indices(m_assemblySortedDetectorIndices->begin() + detRange.first,
-                              m_assemblySortedDetectorIndices->begin() + detRange.second);
   indices.insert(indices.end(), m_assemblySortedComponentIndices->begin() + compRange.first,
                  m_assemblySortedComponentIndices->begin() + compRange.second);
   return indices;
@@ -158,8 +154,13 @@ const std::vector<size_t> &ComponentInfo::children(const size_t componentIndex) 
 size_t ComponentInfo::size() const { return m_size; }
 
 size_t ComponentInfo::numberOfDetectorsInSubtree(const size_t componentIndex) const {
-  auto range = detectorRangeInSubtree(componentIndex);
-  return std::distance(range.begin(), range.end());
+  if (isDetector(componentIndex))
+    return 1;
+  // Real detectors from the flat array slice.
+  const auto rangesIndex = compOffsetIndex(componentIndex);
+  const auto detRange = (*m_detectorRanges)[rangesIndex];
+  size_t count = detRange.second - detRange.first;
+  return count;
 }
 
 bool ComponentInfo::isMonitor(const size_t componentIndex) const {
@@ -265,7 +266,8 @@ void ComponentInfo::doSetPosition(const std::pair<size_t, size_t> &index, const 
     m_detectorInfo->setPosition({subIndex, timeIndex}, m_detectorInfo->position({subIndex, timeIndex}) + offset);
   }
 
-  for (const auto &subIndex : componentRangeInSubtree(componentIndex)) {
+  const auto compRange = componentRangeInSubtree(componentIndex);
+  for (const auto &subIndex : compRange) {
     size_t offsetIndex = compOffsetIndex(subIndex);
     m_positions.access()[offsetIndex] += offset;
   }
@@ -289,7 +291,8 @@ void ComponentInfo::doSetRotation(const std::pair<size_t, size_t> &index, const 
     m_detectorInfo->setRotation({subDetIndex, timeIndex}, newRot);
   }
 
-  for (const auto &subCompIndex : componentRangeInSubtree(componentIndex)) {
+  const auto compRange = componentRangeInSubtree(componentIndex);
+  for (const auto &subCompIndex : compRange) {
     auto oldPos = position({subCompIndex, timeIndex});
     auto newPos = transform * (oldPos - compPos) + compPos;
     auto newRot = rotDelta * rotation({subCompIndex, timeIndex});
@@ -487,7 +490,7 @@ bool ComponentInfo::hasParent(const size_t componentIndex) const { return parent
 bool ComponentInfo::hasDetectorInfo() const { return m_detectorInfo != nullptr; }
 
 void ComponentInfo::setDetectorInfo(DetectorInfo *detectorInfo) {
-  if (detectorInfo && detectorInfo->size() != m_assemblySortedDetectorIndices->size()) {
+  if (detectorInfo && detectorInfo->size() != totalDetectorCount()) {
     throw std::invalid_argument("ComponentInfo must have detector indices "
                                 "input of same size as size of DetectorInfo");
   }
@@ -739,6 +742,57 @@ size_t ComponentInfo::nonDetectorSize() const {
     return m_detectorRanges->size();
   else
     return 0;
+}
+
+/** Return memory used by the component info, in bytes.
+ * @return bytes used.
+ */
+size_t ComponentInfo::getMemorySize() const {
+  size_t mem = sizeof(*this);
+
+  // Shared sorted-index and range vectors
+  const auto sharedVecMem = [](const auto &ptr) -> size_t {
+    return ptr ? sizeof(*ptr) + ptr->size() * sizeof(typename std::decay_t<decltype(*ptr)>::value_type) : 0;
+  };
+  mem += sharedVecMem(m_assemblySortedDetectorIndices);
+  mem += sharedVecMem(m_assemblySortedComponentIndices);
+  mem += sharedVecMem(m_detectorRanges);
+  mem += sharedVecMem(m_componentRanges);
+  mem += sharedVecMem(m_parentIndices);
+
+  // m_children: outer vector buffer + all inner child-index buffers
+  mem += sharedVecMem(m_children);
+  if (m_children)
+    mem += std::accumulate(m_children->cbegin(), m_children->cend(), size_t{0},
+                           [](size_t acc, const auto &v) { return acc + v.capacity() * sizeof(size_t); });
+
+  // cow_ptr'd per-component arrays (positions/rotations are scan-multiplied)
+  if (m_positions)
+    mem += sizeof(*m_positions) + m_positions->size() * sizeof(Eigen::Vector3d);
+  if (m_rotations)
+    mem += sizeof(*m_rotations) + m_rotations->size() * sizeof(Eigen::Quaterniond);
+  if (m_scaleFactors)
+    mem += sizeof(*m_scaleFactors) + m_scaleFactors->size() * sizeof(Eigen::Vector3d);
+  if (m_componentType)
+    mem += sizeof(*m_componentType) + m_componentType->size() * sizeof(ComponentType);
+
+  // m_names: string objects in the vector buffer + any heap-spilled content
+  if (m_names) {
+    mem += sizeof(*m_names) + m_names->size() * sizeof(std::string);
+    mem += std::accumulate(m_names->cbegin(), m_names->cend(), size_t{0},
+                           [](size_t acc, const auto &str) { return acc + str.capacity(); });
+  }
+
+  // m_scanIntervals: inline vector's heap buffer
+  mem += m_scanIntervals.capacity() * sizeof(std::pair<int64_t, int64_t>);
+
+  // Scanning index structures (null for non-scanning instruments)
+  if (m_indexMap)
+    mem += sizeof(*m_indexMap) + m_indexMap->size() * sizeof(std::vector<size_t>);
+  if (m_indices)
+    mem += sizeof(*m_indices) + m_indices->size() * sizeof(std::pair<size_t, size_t>);
+
+  return mem;
 }
 
 } // namespace Mantid::Beamline

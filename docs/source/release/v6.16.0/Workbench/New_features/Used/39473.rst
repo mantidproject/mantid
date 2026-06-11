@@ -1,0 +1,1 @@
+- Plots can now be normalised by :math:`Q^{-4}` (provided the X dimension is in :math:`Q`) via the right-click menu.

@@ -34,7 +34,7 @@ class DimensionWidget(QWidget):
             {'minimum':-10.05, 'number_of_bins':201, 'width':0.1, 'name':'Dim2', 'units':'C'}]
     window = DimensionWidget(dims)
     window.show()
-    app.exec_()
+    app.exec()
     """
 
     def __init__(self, dims_info, parent=None):
@@ -177,7 +177,7 @@ class Dimension(QWidget):
     app = QApplication([])
     window = Dimension({'minimum':-1.1, 'number_of_bins':11, 'width':0.2, 'name':'Dim0', 'units':'A'})
     window.show()
-    app.exec_()
+    app.exec()
     """
 
     def __init__(self, dim_info, number=0, state=State.NONE, parent=None):
@@ -336,7 +336,7 @@ class DimensionNonIntegrated(Dimension):
     window = DimensionNonIntegrated({'minimum':-1.1, 'number_of_bins':11,
                                      'width':0.2, 'name':'Dim0', 'units':'A'})
     window.show()
-    app.exec_()
+    app.exec()
     """
 
     def __init__(self, dim_info, number=0, state=State.NONE, parent=None):

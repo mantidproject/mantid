@@ -26,7 +26,7 @@ When fitting users should set :math:`T_c` as the temperature at which the peak o
 Examples
 --------
 
-An example of when this might be used is for examining the Chiral-like critical behaviour in antiferromagnet Cobalt Glycerolate[1] or in muon spin relaxation studies of critical fluctuations and diffusive spin dynamics in molecular magnets[2].
+An example of when this might be used is for examining the Chiral-like critical behaviour in antiferromagnet Cobalt Glycerolate [1]_ or in muon spin relaxation studies of critical fluctuations and diffusive spin dynamics in molecular magnets [2]_.
 
 
 .. attributes::
@@ -35,8 +35,9 @@ An example of when this might be used is for examining the Chiral-like critical 
 
 References
 ----------
-[1] Pratt, F.L, Baker, P.J., Blundell, S.J., Lancaster, T., Green, M.A., and Kurmoo, M. (2007). Chiral-Like Critical Behaviour in the Antiferromagnet Cobalt Glycerolate. Phys. Rev. Lett., Vol 99 Issue 1, 017202 `doi: 10.1103/PhysRevLett.99.017202 <https://doi.org/10.1103/PhysRevLett.99.017202>`_.
-[2] Pratt, F. et al (2009) Muon spin relaxation studies of critical fluctuations and diffusive spin dynamics in molecular magnets. Physica B: Condensed Matter, Volume 404 Issues 5–7, pp585-589 `doi: 10.1016/j.physb.2008.11.123 <https://doi.org/10.1016/j.physb.2008.11.123>`_.
+
+.. [1] Pratt, F.L, Baker, P.J., Blundell, S.J., Lancaster, T., Green, M.A., and Kurmoo, M. (2007). Chiral-Like Critical Behaviour in the Antiferromagnet Cobalt Glycerolate. Phys. Rev. Lett., Vol 99 Issue 1, 017202 `doi: 10.1103/PhysRevLett.99.017202 <https://doi.org/10.1103/PhysRevLett.99.017202>`_.
+.. [2] Pratt, F. et al (2009) Muon spin relaxation studies of critical fluctuations and diffusive spin dynamics in molecular magnets. Physica B: Condensed Matter, Volume 404 Issues 5–7, pp585-589 `doi: 10.1016/j.physb.2008.11.123 <https://doi.org/10.1016/j.physb.2008.11.123>`_.
 
 .. categories::
 

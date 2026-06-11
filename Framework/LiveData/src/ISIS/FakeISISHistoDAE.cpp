@@ -23,24 +23,6 @@ const long RECV_TIMEOUT = 60;
 
 using ISISDSDataType = enum { ISISDSUnknown = 0, ISISDSInt32 = 1, ISISDSReal32 = 2, ISISDSReal64 = 3, ISISDSChar = 4 };
 
-using isisds_open_t = struct {
-  int len;
-  // cppcheck-suppress unusedStructMember
-  int ver_major;
-  // cppcheck-suppress unusedStructMember
-  int ver_minor;
-  // cppcheck-suppress unusedStructMember
-  int pid;
-  // cppcheck-suppress unusedStructMember
-  int access_type; /* 0 =dae, 1 = crpt */
-                   // cppcheck-suppress unusedStructMember
-  int pad[1];
-  // cppcheck-suppress unusedStructMember
-  char user[32];
-  // cppcheck-suppress unusedStructMember
-  char host[64];
-};
-
 /** used for sends and replies once a connection open
  * try to align to 64 bits (8 bytes) boundaries
  */

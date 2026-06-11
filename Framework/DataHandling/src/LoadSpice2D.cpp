@@ -409,22 +409,11 @@ void LoadSpice2D::setBeamTrapRunProperty(std::map<std::string, std::string> &met
   trapMotorPositions.emplace_back(boost::lexical_cast<double>(metadata["Motor_Positions/trap_y_76mm"]));
   trapMotorPositions.emplace_back(boost::lexical_cast<double>(metadata["Motor_Positions/trap_y_101mm"]));
 
-  // Check how many traps are in use (store indexes):
-  std::vector<size_t> trapIndexInUse;
-  for (size_t i = 0; i < trapMotorPositions.size(); i++) {
-    if (trapMotorPositions[i] > 26.0) {
-      // Resting positions are below 25. Make sure we have one trap in use!
-      trapIndexInUse.emplace_back(i);
-    }
-  }
-
-  g_log.debug() << "trapIndexInUse length:" << trapIndexInUse.size() << "\n";
-
-  // store trap diameters in use
+  // store diameters for traps that are in use (resting positions are below 25mm)
   std::vector<double> trapDiametersInUse;
-  trapDiametersInUse.reserve(trapIndexInUse.size());
-  std::transform(trapIndexInUse.cbegin(), trapIndexInUse.cend(), std::back_inserter(trapDiametersInUse),
-                 [&trapDiameters](const auto index) { return trapDiameters[index]; });
+  auto posIt = trapMotorPositions.cbegin();
+  std::copy_if(trapDiameters.cbegin(), trapDiameters.cend(), std::back_inserter(trapDiametersInUse),
+               [&posIt](double) { return *posIt++ > 26.0; });
 
   g_log.debug() << "trapDiametersInUse length:" << trapDiametersInUse.size() << "\n";
 

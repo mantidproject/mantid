@@ -15,6 +15,8 @@
 
 #include <Poco/File.h>
 #include <QMessageBox>
+#include <QRegularExpression>
+#include <QRegularExpressionValidator>
 #include <algorithm>
 
 using namespace Mantid::API;
@@ -65,8 +67,8 @@ void ALCDataLoadingView::initialize() {
   m_ui.subtractCheckbox->setEnabled(false);
 
   // Regex validator for runs
-  QRegExp re("[0-9]+(,[0-9]+)*(-[0-9]+(($)|(,[0-9]+))+)*");
-  QValidator *validator = new QRegExpValidator(re, this);
+  QRegularExpression re("[0-9]+(,[0-9]+)*(-[0-9]+(($)|(,[0-9]+))+)*");
+  QValidator *validator = new QRegularExpressionValidator(re, this);
   m_ui.runs->setTextValidator(validator);
 
   m_ui.forwardEdit->setValidator(validator);

@@ -83,10 +83,10 @@ Usage
 References
 ------------
 
-.. [1] G. Placzek, (1952), *The Scattering of Neutrons by Systems of Heavy Nuclei*, Physical Review, Volume 86, Page 377-388 `doi: 10.1103/PhysRev.86.377 <https://doi.org/10.1103/PhysRev.86.377>`__
+.. [1] \G. Placzek, (1952), *The Scattering of Neutrons by Systems of Heavy Nuclei*, Physical Review, Volume 86, Page 377-388 `doi: 10.1103/PhysRev.86.377 <https://doi.org/10.1103/PhysRev.86.377>`__
 .. [2] J.G. Powles, (1973), *The analysis of a time-of-flight neutron diffractometer for amorphous materials: the structure of a molecule in a liquid*, Molecular Physics, Volume 26, Issue 6, Page 1325-1350, `doi: 10.1080/00268977300102521 <https://doi.org/10.1080/00268977300102521>`__
 .. [3] Howe, McGreevy, and Howells, J., (1989), *The analysis of liquid structure data from time-of-flight neutron diffractometry*,Journal of Physics: Condensed Matter, Volume 1, Issue 22, pp. 3433-3451, `doi: 10.1088/0953-8984/1/22/005 <https://doi.org/10.1088/0953-8984/1/22/005>`__
-.. [4] D. F. R. Mildner, B. C. Boland, R. N. Sinclair, C. G. Windsor, L. J. Bunce, and J. H. Clarke (1977) *A Cooled Polyethylene Moderator on a Pulsed Neutron Source*, Nuclear Instruments and Methods 152 437-446 `doi: 10.1016/0029-554X(78)90043-5 <https://doi.org/10.1016/0029-554X(78)90043-5>`__
+.. [4] \D. F. R. Mildner, B. C. Boland, R. N. Sinclair, C. G. Windsor, L. J. Bunce, and J. H. Clarke (1977) *A Cooled Polyethylene Moderator on a Pulsed Neutron Source*, Nuclear Instruments and Methods 152 437-446 `doi: 10.1016/0029-554X(78)90043-5 <https://doi.org/10.1016/0029-554X(78)90043-5>`__
 
 .. categories::
 

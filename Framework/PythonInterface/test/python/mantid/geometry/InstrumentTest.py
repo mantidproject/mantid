@@ -71,6 +71,11 @@ class InstrumentTest(unittest.TestCase):
         base_inst = inst.getBaseInstrument()
         self.assertEqual("testInst", base_inst.getName())
 
+    def test_getMemorySize(self):
+        mem = self.__testws.getInstrument().getMemorySize()
+        self.assertIsInstance(mem, int)
+        self.assertGreater(mem, 0)
+
 
 if __name__ == "__main__":
     unittest.main()

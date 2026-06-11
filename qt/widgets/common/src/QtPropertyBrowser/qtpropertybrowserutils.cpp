@@ -101,9 +101,7 @@ QString translateUtf8Encoded(const char *context, const char *key, const char *d
 }
 } // namespace
 
-#if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
-#endif
 
 QtCursorDatabase::QtCursorDatabase() {
   appendCursor(Qt::ArrowCursor, translateUtf8Encoded("QtCursorDatabase", "Arrow", nullptr),
@@ -288,7 +286,7 @@ void QtBoolEdit::mousePressEvent(QMouseEvent *event) {
 QtKeySequenceEdit::QtKeySequenceEdit(QWidget *parent) : QWidget(parent), m_num(0), m_lineEdit(new QLineEdit(this)) {
   auto *layout = new QHBoxLayout(this);
   layout->addWidget(m_lineEdit);
-  layout->setMargin(0);
+  layout->setContentsMargins(0, 0, 0, 0);
   m_lineEdit->installEventFilter(this);
   m_lineEdit->setReadOnly(true);
   m_lineEdit->setFocusProxy(this);
@@ -428,6 +426,4 @@ bool QtKeySequenceEdit::event(QEvent *e) {
   return QWidget::event(e);
 }
 
-#if QT_VERSION >= 0x040400
 QT_END_NAMESPACE
-#endif

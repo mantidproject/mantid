@@ -39,6 +39,7 @@
 #include <QMessageBox>
 #include <QPixmap>
 #include <QPushButton>
+#include <QRegularExpression>
 #include <QSettings>
 #include <QSignalMapper>
 #include <QTextEdit>
@@ -1743,7 +1744,7 @@ void DetectorPlotController::savePlotToWorkspace() {
   for (const QString &label : labels) {
     std::vector<double> x, y, e;
     // split the label to get the detector id and selection type
-    QStringList parts = label.split(QRegExp("[()]"));
+    QStringList parts = label.split(QRegularExpression("[()]"));
     if (label == "multiple") {
       if (X.empty()) {
         // label doesn't have any info on how to reproduce the curve:
@@ -1769,7 +1770,7 @@ void DetectorPlotController::savePlotToWorkspace() {
       }
     } else if (parts.size() == 1) {
       // second word is detector id
-      const auto detid = parts[0].split(QRegExp("\\s+"))[1].toInt();
+      const auto detid = parts[0].split(QRegularExpression("\\s+"))[1].toInt();
       prepareDataForSinglePlot(actor.getDetectorByDetID(detid), x, y, &e);
       unitX = parentWorkspace->getAxis(0)->unit()->unitID();
       // save det ids for the output workspace

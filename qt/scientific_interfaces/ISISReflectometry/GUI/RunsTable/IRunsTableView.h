@@ -28,7 +28,7 @@ public:
   virtual void notifyPlotSelectedStitchedOutputPressed() = 0;
   virtual void notifyFillDown() = 0;
 
-  virtual ~RunsTableViewSubscriber() = default;
+  ~RunsTableViewSubscriber() override = default;
 };
 
 /** @class IRunsTableView

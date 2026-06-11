@@ -10,6 +10,10 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+
+#include <QRegularExpression>
+#include <QRegularExpressionValidator>
+
 #include <utility>
 
 namespace MantidQt::MantidWidgets {
@@ -17,7 +21,7 @@ namespace MantidQt::MantidWidgets {
 AddWorkspaceDialog::AddWorkspaceDialog(QWidget *parent) : QDialog(parent) {
   m_uiForm.setupUi(this);
   const auto validatorString = QString::fromStdString(getRegexValidatorString(RegexValidatorStrings::SpectraValidator));
-  m_uiForm.leWorkspaceIndices->setValidator(new QRegExpValidator(QRegExp(validatorString), this));
+  m_uiForm.leWorkspaceIndices->setValidator(new QRegularExpressionValidator(QRegularExpression(validatorString), this));
   setAllSpectraSelectionEnabled(false);
   connect(m_uiForm.dsWorkspace, SIGNAL(filesAutoLoaded()), this, SLOT(handleAutoLoaded()));
   connect(m_uiForm.dsWorkspace, SIGNAL(dataReady(const QString &)), this, SLOT(workspaceChanged(const QString &)));

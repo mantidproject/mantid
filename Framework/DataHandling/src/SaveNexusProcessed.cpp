@@ -55,7 +55,7 @@ namespace {
  * @param numberDetectors
  * @return
  */
-bool makeMappings(const MatrixWorkspace &ws, const std::vector<int> &ws_indices,
+void makeMappings(const MatrixWorkspace &ws, const std::vector<int> &ws_indices,
                   std::vector<int32_t> &out_detector_index, std::vector<int32_t> &out_detector_count,
                   std::vector<int32_t> &out_detector_list, int &numberSpec, size_t &numberDetectors) {
 
@@ -64,10 +64,6 @@ bool makeMappings(const MatrixWorkspace &ws, const std::vector<int> &ws_indices,
       std::accumulate(ws_indices.cbegin(), ws_indices.cend(), size_t(0), [&ws](size_t sum, const auto &index) {
         return sum + ws.getSpectrum(static_cast<size_t>(index)).getDetectorIDs().size();
       });
-  if (numberDetectors < 1) {
-    return false;
-  }
-  // Start the detector group
 
   numberSpec = int(ws_indices.size());
   // allocate space for the Nexus Muon format of spectra-detector mapping
@@ -99,7 +95,6 @@ bool makeMappings(const MatrixWorkspace &ws, const std::vector<int> &ws_indices,
   }
   // Cut the extra entry at the end of detector_index
   out_detector_index.resize(numberSpec);
-  return true;
 }
 
 } // namespace
@@ -128,7 +123,7 @@ void SaveNexusProcessed::init() {
                   "Index of last spectrum to write, only for single period\n"
                   "data.");
   declareProperty(std::make_unique<ArrayProperty<int>>("WorkspaceIndexList"),
-                  "List of spectrum numbers to read, only for single period\n"
+                  "List of spectrum numbers to write, only for single period\n"
                   "data.");
 
   declareProperty("Append", false,
@@ -406,22 +401,22 @@ void SaveNexusProcessed::appendEventListData(const std::vector<T> &events, size_
  * */
 void SaveNexusProcessed::execEvent(const Mantid::Nexus::NexusFileIO *nexusFile, const bool uniformSpectra,
                                    const bool raggedSpectra, const std::vector<int> &spec) {
-  m_progress = std::make_unique<Progress>(this, m_timeProgInit, 1.0, m_eventWorkspace->getNumberEvents() * 2);
+  std::vector<int64_t> indices;
+  indices.reserve(spec.size() + 1);
+  // First we need to index the events in each spectrum
+  size_t index = 0;
+  for (auto s : spec) {
+    indices.emplace_back(index);
+    index += m_eventWorkspace->getSpectrum(s).getNumberEvents();
+  }
+  indices.emplace_back(index);
+
+  m_progress = std::make_unique<Progress>(this, m_timeProgInit, 1.0, index * 2);
 
   // Start by writing out the axes and crap
   nexusFile->writeNexusProcessedData2D(m_eventWorkspace, uniformSpectra, raggedSpectra, spec, "event_workspace", false);
 
   // Make a super long list of tofs, weights, etc.
-  std::vector<int64_t> indices;
-  indices.reserve(m_eventWorkspace->getNumberHistograms() + 1);
-  // First we need to index the events in each spectrum
-  size_t index = 0;
-  for (int wi = 0; wi < static_cast<int>(m_eventWorkspace->getNumberHistograms()); wi++) {
-    indices.emplace_back(index);
-    // Track the total # of events
-    index += m_eventWorkspace->getSpectrum(wi).getNumberEvents();
-  }
-  indices.emplace_back(index);
 
   // Initialize all the arrays
   int64_t num = index;
@@ -464,9 +459,9 @@ void SaveNexusProcessed::execEvent(const Mantid::Nexus::NexusFileIO *nexusFile, 
 
   // --- Fill in the combined event arrays ----
   PARALLEL_FOR_NO_WSP_CHECK()
-  for (int wi = 0; wi < static_cast<int>(m_eventWorkspace->getNumberHistograms()); wi++) {
+  for (int wi = 0; wi < static_cast<int>(spec.size()); wi++) {
     PARALLEL_START_INTERRUPT_REGION
-    const DataObjects::EventList &el = m_eventWorkspace->getSpectrum(wi);
+    const DataObjects::EventList &el = m_eventWorkspace->getSpectrum(spec[wi]);
 
     // This is where it will land in the output array.
     // It is okay to write in parallel since none should step on each other.
@@ -566,9 +561,8 @@ void SaveNexusProcessed::saveSpectraDetectorMapNexus(const MatrixWorkspace &ws, 
   int numberSpec = 0;
   size_t nDetectors = 0;
   /*Make the mappings needed for writing to disk*/
-  const bool mappingsToWrite =
-      makeMappings(ws, wsIndices, detector_index, detector_count, detector_list, numberSpec, nDetectors);
-  if (!mappingsToWrite)
+  makeMappings(ws, wsIndices, detector_index, detector_count, detector_list, numberSpec, nDetectors);
+  if (nDetectors == 0)
     return;
 
   // write data as Nexus sections detector{index,count,list}

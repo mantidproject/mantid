@@ -42,4 +42,4 @@ class InstrumentView:
         current_dir = os.path.dirname(__file__)
         app.setWindowIcon(QIcon(f"{current_dir}/mantidplot.png"))
         window.show()
-        app.exec_()
+        app.exec()

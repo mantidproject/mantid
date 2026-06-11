@@ -20,4 +20,4 @@
 # app = QApplication([])
 # window = SliceViewer(ws)
 # window.view.show()
-# app.exec_()
+# app.exec()

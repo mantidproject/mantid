@@ -253,7 +253,7 @@ Kernel::TimeSeriesProperty<bool> *LogParser::createPeriodLog(int period) const {
     p->addValue(it->first, (it->second == period));
   }
 
-  return std::move(p);
+  return p;
 }
 
 const std::string LogParser::currentPeriodLogName(const int period) {

@@ -74,7 +74,8 @@ void ExcludeRangeFinder::findNextExcludedRange(double p) {
     // A number at an even position in m_exclude starts an exclude
     // range
     m_startExcludedRange = *it;
-    m_endExcludeRange = *(it + 1);
+    auto tmpIt = (it + 1 == m_exclude.cend() ? m_exclude.cend() - 1 : it + 1);
+    m_endExcludeRange = *(tmpIt);
   } else {
     // A number at an odd position in m_exclude ends an exclude range
     m_startExcludedRange = *(it - 1);

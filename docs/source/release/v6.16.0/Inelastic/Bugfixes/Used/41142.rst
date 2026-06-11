@@ -1,0 +1,1 @@
+- The :ref:`Bayes Fitting interface <interface-inelastic-bayes-fitting>` ``Stretch`` tab now verifies that workspaces have more than one bin before creating :ref:`Colorfill_Plots`.

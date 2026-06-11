@@ -67,14 +67,13 @@ template <class Type> class MANTID_DATAOBJECTS_DLL TableColumn : public API::Col
 
 public:
   TableColumn() {
-    int length = sizeof(Type);
     std::string name = std::string(typeid(Type).name());
     if ((name.find('i') != std::string::npos) || (name.find('l') != std::string::npos) ||
         (name.find('x') != std::string::npos)) {
-      if (length == 4) {
+      if constexpr (sizeof(Type) == 4) {
         this->m_type = "int";
       }
-      if (length == 8) {
+      if constexpr (sizeof(Type) == 8) {
         this->m_type = "int64";
       }
     }
@@ -85,10 +84,10 @@ public:
       this->m_type = "double";
     }
     if (name.find('u') != std::string::npos) {
-      if (length == 4) {
+      if constexpr (sizeof(Type) == 4) {
         this->m_type = "uint32_t";
       }
-      if (length == 8) {
+      if constexpr (sizeof(Type) == 8) {
         this->m_type = "uint64_t";
       }
     }

@@ -18,6 +18,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 
+#include <algorithm>
 #include <functional>
 
 namespace Mantid::Algorithms {
@@ -218,8 +219,11 @@ void SumSpectra::exec() {
   auto spectrumInfo = localworkspace->spectrumInfo();
   m_numberOfSpectra = static_cast<int>(localworkspace->getNumberHistograms());
   numMasked = determineIndices(spectrumInfo, m_numberOfSpectra);
+  if (m_indices.empty()) {
+    throw std::runtime_error("No spectra selected for summing. Check the input parameters.");
+  }
   numSpectra = m_indices.size();
-  m_yLength = localworkspace->y(*(m_indices.begin())).size();
+  m_yLength = localworkspace->y(m_indices.front()).size();
 
   // determine the output spectrum number
   m_outSpecNum = getOutputSpecNo(localworkspace);
@@ -242,8 +246,8 @@ void SumSpectra::exec() {
     //-------Workspace 2D mode -----
 
     // Create the 2D workspace for the output
-    outputWorkspace = API::WorkspaceFactory::Instance().create(
-        localworkspace, 1, localworkspace->x(*(m_indices.begin())).size(), m_yLength);
+    outputWorkspace = API::WorkspaceFactory::Instance().create(localworkspace, 1,
+                                                               localworkspace->x(m_indices.front()).size(), m_yLength);
 
     // This is the (only) output spectrum
     auto &outSpec = outputWorkspace->getSpectrum(0);
@@ -259,7 +263,7 @@ void SumSpectra::exec() {
       outSpec.addDetectorIDs(localworkspace->getSpectrum(i).getDetectorIDs());
     }
 
-    Progress progress(this, 0.0, 1.0, m_yLength);
+    Progress progress(this, 0.0, 1.0, m_indices.size());
     if (localworkspace->id() == "RebinnedOutput") {
       // this version is for a special workspace that has fractional overlap information
       // Transform to real workspace types
@@ -295,7 +299,8 @@ size_t SumSpectra::determineIndices(SpectrumInfo const &spectrumInfo, const size
 
   // try the list form first
   const std::vector<int> indices_list = getProperty("ListOfWorkspaceIndices");
-  m_indices.insert(indices_list.begin(), indices_list.end());
+  std::transform(indices_list.cbegin(), indices_list.cend(), std::back_inserter(m_indices),
+                 [](const int idx) { return static_cast<size_t>(idx); });
 
   // add the range specified by the user
   // this has been checked to be 0<= m_minWsInd <= maxIndex <=
@@ -313,10 +318,15 @@ size_t SumSpectra::determineIndices(SpectrumInfo const &spectrumInfo, const size
       // only include indices that are not masked and, if requested, are not monitors.
       // the number of masked spectra is counted in numMasked.
       if (useSpectrum(spectrumInfo, static_cast<size_t>(i), m_keepMonitors, numMasked)) {
-        m_indices.insert(static_cast<size_t>(i));
+        m_indices.push_back(static_cast<size_t>(i));
       }
     }
   }
+
+  // sort and deduplicate (list and range may overlap)
+  std::sort(m_indices.begin(), m_indices.end());
+  m_indices.erase(std::unique(m_indices.begin(), m_indices.end()), m_indices.end());
+
   return numMasked;
 }
 
@@ -328,7 +338,7 @@ size_t SumSpectra::determineIndices(SpectrumInfo const &spectrumInfo, const size
  */
 specnum_t SumSpectra::getOutputSpecNo(const MatrixWorkspace_const_sptr &localworkspace) {
   // initial value - any included spectrum will do
-  specnum_t specId = localworkspace->getSpectrum(*m_indices.begin()).getSpectrumNo();
+  specnum_t specId = localworkspace->getSpectrum(m_indices.front()).getSpectrumNo();
 
   // the total number of spectra
   size_t totalSpec = localworkspace->getNumberHistograms();
@@ -386,18 +396,24 @@ void SumSpectra::doSimpleSum(MatrixWorkspace_const_sptr const &inWS, ISpectrum &
   auto &YSum = outSpec.mutableY();
   auto &YErrorSum = outSpec.mutableE();
 
-  // Loop over bins
-  for (size_t jbin = 0; jbin < m_yLength; jbin++) {
-    YSum[jbin] = 0.;
-    YErrorSum[jbin] = 0.;
-    // add the values for this bin together using simple summation
-    for (size_t iwksp : m_indices) {
-      YSum[jbin] += inWS->y(iwksp)[jbin];
-      YErrorSum[jbin] += inWS->e(iwksp)[jbin] * inWS->e(iwksp)[jbin];
+  std::fill(YSum.begin(), YSum.end(), 0.0);
+  std::fill(YErrorSum.begin(), YErrorSum.end(), 0.0);
+
+  // Loop over spectra (cache-friendly: each spectrum's data is contiguous in memory)
+  for (size_t iwksp : m_indices) {
+    const auto &y = inWS->y(iwksp);
+    const auto &e = inWS->e(iwksp);
+    for (size_t jbin = 0; jbin < m_yLength; jbin++) {
+      YSum[jbin] += y[jbin];
+      const double ev = e[jbin];
+      YErrorSum[jbin] += ev * ev;
     }
-    YErrorSum[jbin] = sqrt(YErrorSum[jbin]);
     progress.report();
   }
+  for (size_t jbin = 0; jbin < m_yLength; jbin++) {
+    YErrorSum[jbin] = std::sqrt(YErrorSum[jbin]);
+  }
+
   numZeros = 0;
 }
 
@@ -416,38 +432,42 @@ void SumSpectra::doSimpleWeightedSum(MatrixWorkspace_const_sptr const &inWS, ISp
   auto &YSum = outSpec.mutableY();
   auto &YErrorSum = outSpec.mutableE();
 
-  std::vector<size_t> nZeroes(YSum.size(), 0);
+  std::fill(YSum.begin(), YSum.end(), 0.0);
+  std::fill(YErrorSum.begin(), YErrorSum.end(), 0.0);
 
-  // Loop over bins
-  for (size_t jbin = 0; jbin < m_yLength; jbin++) {
-    double normalization = 0.;
-    YSum[jbin] = 0.;
-    YErrorSum[jbin] = 0.;
-    // loop over spectra
-    for (size_t iwksp : m_indices) {
-      double e = inWS->e(iwksp)[jbin];
-      double y = inWS->y(iwksp)[jbin];
-      if (std::isnormal(e)) {
-        double weight = 1. / (e * e);
-        normalization += weight;
-        YSum[jbin] += weight * y;
+  std::vector<double> normalization(m_yLength, 0.0);
+  std::vector<size_t> nZeroes(m_yLength, 0);
+
+  // Loop over spectra (cache-friendly: each spectrum's data is contiguous in memory)
+  for (size_t iwksp : m_indices) {
+    const auto &y = inWS->y(iwksp);
+    const auto &e = inWS->e(iwksp);
+    for (size_t jbin = 0; jbin < m_yLength; jbin++) {
+      const double ev = e[jbin];
+      if (std::isnormal(ev)) {
+        const double weight = 1.0 / (ev * ev);
+        normalization[jbin] += weight;
+        YSum[jbin] += weight * y[jbin];
       } else {
         nZeroes[jbin]++;
       }
     }
-    // apply the normalization factor
-    if (normalization != 0.) {
-      normalization = 1. / normalization;
-      YSum[jbin] *= normalization;
+    progress.report();
+  }
+  // apply the normalization factor and optional scaling
+  for (size_t jbin = 0; jbin < m_yLength; jbin++) {
+    if (normalization[jbin] != 0.) {
+      const double norm = 1.0 / normalization[jbin];
+      YSum[jbin] *= norm;
       // NOTE: the total error ends up being the root of the normalization factor
-      YErrorSum[jbin] = sqrt(normalization);
+      YErrorSum[jbin] = std::sqrt(norm);
     }
     if (m_multiplyByNumSpec) {
       // NOTE: do not include the zero-weighted values in the number of spectra
-      YSum[jbin] *= double(m_indices.size() - nZeroes[jbin]);
-      YErrorSum[jbin] *= double(m_indices.size() - nZeroes[jbin]);
+      const double scale = double(m_indices.size() - nZeroes[jbin]);
+      YSum[jbin] *= scale;
+      YErrorSum[jbin] *= scale;
     }
-    progress.report();
   }
   // add up all zeros across the bins to get the total number of spectra that were dropped from the sum
   numZeros = std::accumulate(nZeroes.begin(), nZeroes.end(), size_t(0));
@@ -473,25 +493,29 @@ void SumSpectra::doFractionalSum(RebinnedOutput_const_sptr const &inWS, Rebinned
   auto &YErrorSum = outSpec.mutableE();
   auto &FracSum = outWS->dataF(0);
 
-  // loop over bins
-  for (size_t jbin = 0; jbin < m_yLength; jbin++) {
-    YSum[jbin] = 0.;
-    YErrorSum[jbin] = 0.;
-    FracSum[jbin] = 0.;
-    // loop over spectra
-    for (size_t iwksp : m_indices) {
-      // use the mappin y' --> y * fracVal and e' --> e * fracVal where fracVal is the fractional area for this bin
-      double fracVal = (isFinalized ? inWS->readF(iwksp)[jbin] : 1.0);
-      double y = inWS->y(iwksp)[jbin] * fracVal;
-      double e = inWS->e(iwksp)[jbin] * fracVal;
-      // no do simple sum of the mapped values
-      YSum[jbin] += y;
-      YErrorSum[jbin] += e * e;
-      FracSum[jbin] += inWS->readF(iwksp)[jbin];
+  std::fill(YSum.begin(), YSum.end(), 0.0);
+  std::fill(YErrorSum.begin(), YErrorSum.end(), 0.0);
+  std::fill(FracSum.begin(), FracSum.end(), 0.0);
+
+  // Loop over spectra (cache-friendly: each spectrum's data is contiguous in memory)
+  for (size_t iwksp : m_indices) {
+    const auto &y = inWS->y(iwksp);
+    const auto &e = inWS->e(iwksp);
+    const auto &f = inWS->readF(iwksp);
+    for (size_t jbin = 0; jbin < m_yLength; jbin++) {
+      // use the mapping y' --> y * fracVal and e' --> e * fracVal where fracVal is the fractional area for this bin
+      const double fracVal = (isFinalized ? f[jbin] : 1.0);
+      const double yv = y[jbin] * fracVal;
+      const double ev = e[jbin] * fracVal;
+      // now do simple sum of the mapped values
+      YSum[jbin] += yv;
+      YErrorSum[jbin] += ev * ev;
+      FracSum[jbin] += f[jbin];
     }
-    YErrorSum[jbin] = sqrt(YErrorSum[jbin]);
     progress.report();
   }
+  for (size_t jbin = 0; jbin < m_yLength; jbin++)
+    YErrorSum[jbin] = std::sqrt(YErrorSum[jbin]);
 
   numZeros = 0;
 
@@ -522,43 +546,49 @@ void SumSpectra::doFractionalWeightedSum(RebinnedOutput_const_sptr const &inWS, 
   auto &YErrorSum = outSpec.mutableE();
   auto &FracSum = outWS->dataF(0);
 
-  std::vector<size_t> nZeroes(YSum.size(), 0);
+  std::fill(YSum.begin(), YSum.end(), 0.0);
+  std::fill(YErrorSum.begin(), YErrorSum.end(), 0.0);
+  std::fill(FracSum.begin(), FracSum.end(), 0.0);
 
-  // Loop over bins
-  for (size_t jbin = 0; jbin < m_yLength; jbin++) {
-    YSum[jbin] = 0.;
-    YErrorSum[jbin] = 0.;
-    FracSum[jbin] = 0.;
-    double normalization = 0.;
-    // loop over spectra
-    for (size_t iwksp : m_indices) {
-      // use the mappin y' --> y * fracVal and e' --> e * fracVal where fracVal is the fractional area for this bin
-      double fracVal = (isFinalized ? inWS->readF(iwksp)[jbin] : 1.0);
-      double y = inWS->y(iwksp)[jbin] * fracVal;
-      double e = inWS->e(iwksp)[jbin] * fracVal;
-      // now perform weghted sum of the mapped values
-      if (std::isnormal(e)) { // is non-zero, nan, or infinity
-        double weight = 1. / (e * e);
-        normalization += weight;
-        YSum[jbin] += weight * y;
+  std::vector<double> normalization(m_yLength, 0.0);
+  std::vector<size_t> nZeroes(m_yLength, 0);
+
+  // Loop over spectra (cache-friendly: each spectrum's data is contiguous in memory)
+  for (size_t iwksp : m_indices) {
+    const auto &y = inWS->y(iwksp);
+    const auto &e = inWS->e(iwksp);
+    const auto &f = inWS->readF(iwksp);
+    for (size_t jbin = 0; jbin < m_yLength; jbin++) {
+      // use the mapping y' --> y * fracVal and e' --> e * fracVal where fracVal is the fractional area for this bin
+      const double fracVal = (isFinalized ? f[jbin] : 1.0);
+      const double yv = y[jbin] * fracVal;
+      const double ev = e[jbin] * fracVal;
+      // now perform weighted sum of the mapped values
+      if (std::isnormal(ev)) { // is non-zero, nan, or infinity
+        const double weight = 1.0 / (ev * ev);
+        normalization[jbin] += weight;
+        YSum[jbin] += weight * yv;
       } else {
         nZeroes[jbin]++;
       }
-      FracSum[jbin] += inWS->readF(iwksp)[jbin];
+      FracSum[jbin] += f[jbin];
     }
-    // apply the normalization factor
-    if (normalization != 0.) {
-      normalization = 1. / normalization;
-      YSum[jbin] *= normalization;
+    progress.report();
+  }
+  // apply the normalization factor and optional scaling
+  for (size_t jbin = 0; jbin < m_yLength; jbin++) {
+    if (normalization[jbin] != 0.) {
+      const double norm = 1.0 / normalization[jbin];
+      YSum[jbin] *= norm;
       // NOTE: the total error is the sqrt of the normalization factor
-      YErrorSum[jbin] = sqrt(normalization);
+      YErrorSum[jbin] = std::sqrt(norm);
     }
     if (m_multiplyByNumSpec) {
       // NOTE: do not include the zero-weighted values in the number of spectra
-      YSum[jbin] *= double(m_indices.size() - nZeroes[jbin]);
-      YErrorSum[jbin] *= double(m_indices.size() - nZeroes[jbin]);
+      const double scale = double(m_indices.size() - nZeroes[jbin]);
+      YSum[jbin] *= scale;
+      YErrorSum[jbin] *= scale;
     }
-    progress.report();
   }
   numZeros = std::accumulate(nZeroes.begin(), nZeroes.end(), size_t(0));
 

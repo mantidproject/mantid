@@ -24,7 +24,7 @@ physical MD workspace of an experimental results (e.g Q-space).
 class MANTID_MDALGORITHMS_DLL PreprocessDetectorsToMD : public API::Algorithm {
 public:
   PreprocessDetectorsToMD();
-  virtual ~PreprocessDetectorsToMD() = default;
+  ~PreprocessDetectorsToMD() override = default;
 
   /// Algorithm's name for identification
   const std::string name() const override { return "PreprocessDetectorsToMD"; };

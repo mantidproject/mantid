@@ -29,7 +29,7 @@ The parameters of interest in the ``.maud`` file are:
   explained in section 1 of `Refinement of time of flight Profile
   Parameters in GSAS
   <https://www.isis.stfc.ac.uk/Pages/refinement-of-profile-parameters-with-polaris-data.pdf>`_
-  [RonSmith]_
+  [#RonSmith]_
 - Scattering angles for each bank, **theta** and **eta** (more
   normally called **phi**
 - Profile coefficients for GEM's chosen peak shape (GSAS TOF function
@@ -37,7 +37,7 @@ The parameters of interest in the ``.maud`` file are:
   **sigma-0**, **sigma-1** and **sigma-2**. These are explained on
   page 143 of the `GSAS Manual
   <http://www.ccp14.ac.uk/ccp/ccp14/ftp-mirror/gsas/public/gsas/manual/GSASManual.pdf>`_
-  [GSASManual]_
+  [#GSASManual]_
 - Sample-detector distance
 - There are also parameters for a second function, GSAS TOF function
   type 2, which are zeroed
@@ -55,12 +55,13 @@ algorithm', :ref:`SaveGDA <algm-SaveGDA>` applies a D to TOF
 conversion using the same parameters per bank (essentially faking the
 time-of-flight). See :ref:`save_gda_tof` for more details on this.
 
-*References*:
+References
+^^^^^^^^^^
 
-.. [RonSmith] Smith, R. "Refinement of time of flight Profile
+.. [#RonSmith] Smith, R. "Refinement of time of flight Profile
               Parameters in GSAS"
 
-.. [GSASManual] Larson, A. C. & Von Dreele, R. B (2004). "General
+.. [#GSASManual] Larson, A. C. & Von Dreele, R. B (2004). "General
 		Structure Analysis System (GSAS)", Los Alamos National
 		Laboratory Report LAUR 86-748
 

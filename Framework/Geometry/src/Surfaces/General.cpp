@@ -50,7 +50,7 @@ int General::setSurface(const std::string &Pstr)
   std::string Line = Pstr;
   std::string item;
   if (!Mantid::Kernel::Strings::section(Line, item) || item.length() != 2 ||
-      (tolower(item[0]) != 'g' && tolower(item[0] != 's')) || tolower(item[1]) != 'q')
+      (tolower(item[0]) != 'g' && tolower(item[0]) != 's') || tolower(item[1]) != 'q')
     return -1;
 
   double num[10];
@@ -68,11 +68,8 @@ int General::setSurface(const std::string &Pstr)
     Quadratic::BaseEqn[1] = num[1];
     Quadratic::BaseEqn[2] = num[2];
     Quadratic::BaseEqn[3] = 0.0;
-    ;
     Quadratic::BaseEqn[4] = 0.0;
-    ;
     Quadratic::BaseEqn[5] = 0.0;
-    ;
     Quadratic::BaseEqn[6] = 2 * (num[3] - num[7] * num[0]);
     Quadratic::BaseEqn[7] = 2 * (num[4] - num[8] * num[1]);
     Quadratic::BaseEqn[8] = 2 * (num[5] - num[9] * num[2]);

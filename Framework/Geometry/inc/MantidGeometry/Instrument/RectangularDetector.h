@@ -57,16 +57,19 @@ public:
   detid_t getDetectorIDAtXY(const int X, const int Y) const;
   std::pair<int, int> getXYForDetectorID(const int detectorID) const;
 
+  Kernel::V3D getPosAtXY(const int x, const int y) const;
   Kernel::V3D getRelativePosAtXY(int x, int y) const;
   void getTextureSize(int &xsize, int &ysize) const;
 
   unsigned int getTextureID() const;
   void setTextureID(unsigned int textureID);
 
-  // This should inherit the getBoundingBox implementation from  CompAssembly
-  // but
-  // the multiple inheritance seems to confuse it so we'll explicityly tell it
-  // that here
+  void getBoundingBoxAtXY(const int x, const int y, BoundingBox &box) const;
+
+  bool inBoundsXY(int x, int y) const;
+
+  // This should inherit the getBoundingBox implementation from CompAssembly but
+  // the multiple inheritance seems to confuse it so we'll explicitly tell it that here
   using CompAssembly::getBoundingBox;
 
   void testIntersectionWithChildren(Track &testRay, std::deque<IComponent_const_sptr> &searchQueue) const override;

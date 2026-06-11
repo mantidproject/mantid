@@ -89,11 +89,11 @@
 
 #include "qtpropertybrowser.h"
 
+#include <QRegularExpression>
+
 #include <utility>
 
-#if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
-#endif
 
 class QDate;
 class QTime;
@@ -222,14 +222,14 @@ public:
   ~QtStringPropertyManager() override;
 
   QString value(const QtProperty *property) const;
-  QRegExp regExp(const QtProperty *property) const;
+  QRegularExpression regExp(const QtProperty *property) const;
 
 public Q_SLOTS:
   void setValue(QtProperty *property, const QString &val);
-  void setRegExp(QtProperty *property, const QRegExp &regExp);
+  void setRegExp(QtProperty *property, const QRegularExpression &regExp);
 Q_SIGNALS:
   void valueChanged(QtProperty *property, const QString &val);
-  void regExpChanged(QtProperty *property, const QRegExp &regExp);
+  void regExpChanged(QtProperty *property, const QRegularExpression &regExp);
 
 protected:
   QString valueText(const QtProperty *property) const override;
@@ -1415,6 +1415,4 @@ private:
   QtMetaEnumWrapper(QObject *parent) : QObject(parent) {}
 };
 
-#if QT_VERSION >= 0x040400
 QT_END_NAMESPACE
-#endif

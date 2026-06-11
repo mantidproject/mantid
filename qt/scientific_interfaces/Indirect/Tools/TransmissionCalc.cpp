@@ -13,6 +13,8 @@
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "MantidQtWidgets/Spectroscopy/RunWidget/RunView.h"
 
+#include <QRegularExpression>
+#include <QRegularExpressionValidator>
 #include <QTreeWidgetItem>
 
 using namespace Mantid::API;
@@ -32,8 +34,8 @@ TransmissionCalc::TransmissionCalc(QWidget *parent) : ToolsTab(parent) {
   m_uiForm.iicInstrumentConfiguration->updateInstrumentConfigurations(
       m_uiForm.iicInstrumentConfiguration->getInstrumentName());
 
-  QRegExp chemicalFormulaRegex(R"([A-Za-z0-9\-\(\)]*)");
-  QValidator *chemicalFormulaValidator = new QRegExpValidator(chemicalFormulaRegex, this);
+  QRegularExpression chemicalFormulaRegex(R"([A-Za-z0-9\-\(\)]*)");
+  QValidator *chemicalFormulaValidator = new QRegularExpressionValidator(chemicalFormulaRegex, this);
   m_uiForm.leChemicalFormula->setValidator(chemicalFormulaValidator);
 }
 

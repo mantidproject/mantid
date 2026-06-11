@@ -92,9 +92,7 @@
 #include <QSet>
 #include <QWidget>
 
-#if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
-#endif
 
 class QtAbstractPropertyManager;
 class QtPropertyPrivate;
@@ -332,7 +330,7 @@ public:
   void setCurrentItem(QtBrowserItem * /*item*/);
 
 Q_SIGNALS:
-  void currentItemChanged(QtBrowserItem * /*_t1*/);
+  void currentItemChanged(const QtBrowserItem * /*_t1*/);
 
 public Q_SLOTS:
 
@@ -409,6 +407,4 @@ public:
   QtBrowserItem *m_currentItem;
 };
 
-#if QT_VERSION >= 0x040400
 QT_END_NAMESPACE
-#endif

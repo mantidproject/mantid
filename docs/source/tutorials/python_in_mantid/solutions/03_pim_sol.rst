@@ -133,7 +133,7 @@ C - 2D and 3D Plot ILL Data
 
     # Add a Colorbar with a label
     cbar=figC.colorbar(c)
-    cbar.set_label('Counts ($\mu s$)$^{-1}$')
+    cbar.set_label(r'Counts ($\mu s$)$^{-1}$')
 
     '''3D Plotting - Surface and Wireframe'''
 

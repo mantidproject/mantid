@@ -1837,4 +1837,41 @@ public:
     // check the file is closed
     TS_ASSERT(hdf_file_is_closed(filename));
   }
+
+  void test_copy_outlives_original() {
+    cout << "\ntest copy outlives original\n" << std::flush;
+
+    // Regression test: previously, when a File was copy-constructed (e.g. via
+    // File(shared_ptr<File>)) and the original was then destroyed, the HDF5 file
+    // handle was closed prematurely, causing getEntries() to fail with
+    // "H5Gget_objtype_by_idx failed". SharedID reference counting must keep the
+    // handle alive as long as any copy exists.
+    FileResource resource("test_nexus_copy_outlives.nxs");
+    std::string filename(resource.fullPath());
+    {
+      Mantid::Nexus::File file(filename, NXaccess::CREATE5);
+      file.makeGroup("entry", "NXentry", true);
+      file.makeGroup("instrument", "NXinstrument", false);
+      file.closeGroup();
+    }
+    TS_ASSERT(hdf_file_is_closed(filename));
+
+    // Replicate the LoadNexusProcessed pattern: construct a copy via shared_ptr,
+    // let the original go out of scope, then use the copy.
+    std::unique_ptr<Mantid::Nexus::File> copy;
+    {
+      auto original = std::make_shared<Mantid::Nexus::File>(filename, NXaccess::READ);
+      copy = std::make_unique<Mantid::Nexus::File>(original); // File(shared_ptr<File>)
+    }
+    // original is destroyed; copy must still hold the file open
+    TS_ASSERT(!hdf_file_is_closed(filename));
+
+    // getEntries() calls getCurrentObject() -> H5::H5File(m_fileID) -> getObjTypeByIdx --
+    // this is the exact call that threw "H5Gget_objtype_by_idx failed" under the old bug
+    copy->openGroup("entry", "NXentry");
+    Mantid::Nexus::Entries entries;
+    TS_ASSERT_THROWS_NOTHING(copy->getEntries(entries));
+    TS_ASSERT_EQUALS(entries.size(), 1);
+    TS_ASSERT_EQUALS(entries.at("instrument"), "NXinstrument");
+  }
 };

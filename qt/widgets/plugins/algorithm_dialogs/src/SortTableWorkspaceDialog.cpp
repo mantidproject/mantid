@@ -40,8 +40,7 @@ void SortTableWorkspaceDialog::initLayout() {
   m_form.btnAddColumn->setEnabled(false);
 
   // connect the slots
-  connect(m_form.workspace, SIGNAL(currentIndexChanged(const QString &)), this,
-          SLOT(workspaceChanged(const QString &)));
+  connect(m_form.workspace, SIGNAL(currentTextChanged(const QString &)), this, SLOT(workspaceChanged(const QString &)));
   connect(m_form.workspace, SIGNAL(emptied()), this, SLOT(clearGUI()));
   connect(m_form.cbColumnName, SIGNAL(currentIndexChanged(int)), this, SLOT(changedColumnName(int)));
   connect(m_form.btnAddColumn, SIGNAL(clicked()), this, SLOT(addColumn()));

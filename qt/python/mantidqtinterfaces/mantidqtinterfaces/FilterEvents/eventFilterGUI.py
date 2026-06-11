@@ -706,7 +706,7 @@ class MainWindow(QMainWindow):
         self._errMsgWindow.setWindowTitle("Error")
         self._errMsgWindow.setStandardButtons(QMessageBox.Ok)
         self._errMsgWindow.setText(errmsg)
-        result = self._errMsgWindow.exec_()
+        result = self._errMsgWindow.exec()
 
         return result
 

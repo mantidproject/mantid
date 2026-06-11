@@ -1,0 +1,1 @@
+- A new property ``OutputWorkspaceSuffixes`` has been added to the :ref:`algm-Stitch1DMany` algorithm, which allows users to specify custom suffixes for the child workspaces in the output group when stitching workspace groups.

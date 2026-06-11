@@ -41,7 +41,7 @@ public:
   const std::vector<int> &availableElements() override;
 
 protected:
-  void detectorSetHook() override;
+  void detectorSetHook() override final;
   std::vector<int> getGoodElements(std::vector<int> rawElements);
 
   bool isDeadElement(int index);

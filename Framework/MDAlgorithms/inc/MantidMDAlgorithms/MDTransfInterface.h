@@ -201,6 +201,11 @@ public:
    */
   virtual void setDisplayNormalization(Mantid::API::IMDWorkspace_sptr mdWorkspace,
                                        Mantid::API::MatrixWorkspace_sptr underlyingWorkspace) const = 0;
+
+  /**
+   * Updates the internal rotation matrix for classes which support this
+   */
+  virtual void updateRotMat(const std::vector<double> &newMat) { UNUSED_ARG(newMat); }
 };
 
 using MDTransf_sptr = std::shared_ptr<MDTransfInterface>;

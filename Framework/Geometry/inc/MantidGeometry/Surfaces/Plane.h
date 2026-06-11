@@ -72,7 +72,7 @@ public:
   void print() const override;
   void write(std::ostream &) const override; ///< Write in MCNPX form
 
-  void setBaseEqn() override; ///< set up to be eqn based
+  void setBaseEqn() override final; ///< set up to be eqn based
 
   int LineIntersectionWithPlane(Kernel::V3D startpt, Kernel::V3D endpt, Kernel::V3D &output);
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) override;

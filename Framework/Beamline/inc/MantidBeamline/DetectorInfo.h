@@ -54,6 +54,7 @@ public:
   bool isEquivalent(const DetectorInfo &other) const;
 
   size_t size() const;
+  size_t getMemorySize() const;
   bool isScanning() const;
 
   bool isMonitor(const size_t index) const;
@@ -67,6 +68,7 @@ public:
   const Eigen::Vector3d &position(const std::pair<size_t, size_t> &index) const;
   const Eigen::Quaterniond &rotation(const size_t index) const;
   const Eigen::Quaterniond &rotation(const std::pair<size_t, size_t> &index) const;
+  Eigen::Vector3d scaleFactor(const size_t index) const;
   void setPosition(const size_t index, const Eigen::Vector3d &position);
   void setPosition(const std::pair<size_t, size_t> &index, const Eigen::Vector3d &position);
   void setRotation(const size_t index, const Eigen::Quaterniond &rotation);
@@ -89,6 +91,10 @@ public:
    * `ComponentInfo` without component index.
    */
   friend class ComponentInfo;
+
+  /// Maps a logical detector index to its compact array offset, skipping virtual pixel ranges.
+  /// Only valid for non-virtual indices. Identity for non-virtual-bank instruments.
+  size_t compactDetectorIndex(size_t index) const noexcept { return index; }
 
 private:
   size_t linearIndex(const std::pair<size_t, size_t> &index) const;
@@ -158,7 +164,7 @@ inline void DetectorInfo::setPosition(const size_t index, const Eigen::Vector3d 
   m_positions.access()[index] = position;
 }
 
-/// Set the position of the detector with given index.
+/// Set the position of the detector with given index (scanning pair overload).
 inline void DetectorInfo::setPosition(const std::pair<size_t, size_t> &index, const Eigen::Vector3d &position) {
   m_positions.access()[linearIndex(index)] = position;
 }

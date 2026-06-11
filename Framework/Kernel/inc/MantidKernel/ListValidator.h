@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <map>
 #include <set>
+#include <type_traits>
 #include <unordered_set>
 #include <vector>
 
@@ -112,17 +113,12 @@ protected:
   std::string checkValidity(const TYPE &value) const override {
     if (m_allowedValues.end() != std::find(m_allowedValues.begin(), m_allowedValues.end(), value)) {
       return "";
-    } else {
-      // For a generic type, isEmpty always returns false, but if TYPE is std::string,
-      // then the string version of isEmpty will be used, which could be true or false.
-      if (isEmpty(value))
-        return "Select a value";
-      if (isAlias(value))
-        return "_alias";
-      std::ostringstream os;
-      os << "The value \"" << value << "\" is not in the list of allowed values";
-      return os.str();
     }
+    if (isAlias(value))
+      return "_alias";
+    std::ostringstream os;
+    os << "The value \"" << value << "\" is not in the list of allowed values";
+    return os.str();
   }
 
   /**
@@ -166,6 +162,19 @@ protected:
 
 /// ListValidator<std::string> is used heavily
 using StringListValidator = ListValidator<std::string>;
+
+template <> inline std::string ListValidator<std::string>::checkValidity(const std::string &value) const {
+  if (m_allowedValues.end() != std::find(m_allowedValues.begin(), m_allowedValues.end(), value)) {
+    return "";
+  }
+  if (value.empty())
+    return "Select a value";
+  if (isAlias(value))
+    return "_alias";
+  std::ostringstream os;
+  os << "The value \"" << value << "\" is not in the list of allowed values";
+  return os.str();
+}
 
 } // namespace Kernel
 } // namespace Mantid

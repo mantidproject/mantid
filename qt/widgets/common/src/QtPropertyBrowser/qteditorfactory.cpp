@@ -98,6 +98,8 @@
 #include <QLineEdit>
 #include <QMap>
 #include <QMenu>
+#include <QRegularExpression>
+#include <QRegularExpressionValidator>
 #include <QScrollBar>
 #include <QSpacerItem>
 #include <QSpinBox>
@@ -107,9 +109,7 @@
 #pragma warning(disable : 4786) /* MS VS 6: truncating debug info after 255 characters */
 #endif
 
-#if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
-#endif
 
 // Set a hard coded left margin to account for the indentation
 // of the tree view icon when switching to an editor
@@ -190,7 +190,7 @@ void QtSliderFactoryPrivate::slotRangeChanged(QtProperty *property, int min, int
   if (!m_createdEditors.contains(property))
     return;
 
-  QtIntPropertyManager *manager = q_ptr->propertyManager(property);
+  const QtIntPropertyManager *manager = q_ptr->propertyManager(property);
   if (!manager)
     return;
 
@@ -217,7 +217,7 @@ void QtSliderFactoryPrivate::slotSingleStepChanged(QtProperty *property, int ste
 }
 
 void QtSliderFactoryPrivate::slotSetValue(int value) {
-  QObject *object = q_ptr->sender();
+  const QObject *object = q_ptr->sender();
   const QMap<QSlider *, QtProperty *>::ConstIterator ecend = m_editorToProperty.constEnd();
   for (QMap<QSlider *, QtProperty *>::ConstIterator itEditor = m_editorToProperty.constBegin(); itEditor != ecend;
        ++itEditor) {
@@ -317,7 +317,7 @@ void QtScrollBarFactoryPrivate::slotRangeChanged(QtProperty *property, int min, 
   if (!m_createdEditors.contains(property))
     return;
 
-  QtIntPropertyManager *manager = q_ptr->propertyManager(property);
+  const QtIntPropertyManager *manager = q_ptr->propertyManager(property);
   if (!manager)
     return;
 
@@ -344,7 +344,7 @@ void QtScrollBarFactoryPrivate::slotSingleStepChanged(QtProperty *property, int 
 }
 
 void QtScrollBarFactoryPrivate::slotSetValue(int value) {
-  QObject *object = q_ptr->sender();
+  const QObject *object = q_ptr->sender();
   const QMap<QScrollBar *, QtProperty *>::ConstIterator ecend = m_editorToProperty.constEnd();
   for (QMap<QScrollBar *, QtProperty *>::ConstIterator itEditor = m_editorToProperty.constBegin(); itEditor != ecend;
        ++itEditor)
@@ -440,7 +440,7 @@ void QtCheckBoxFactoryPrivate::slotPropertyChanged(QtProperty *property, bool va
 }
 
 void QtCheckBoxFactoryPrivate::slotSetValue(bool value) {
-  QObject *object = q_ptr->sender();
+  const QObject *object = q_ptr->sender();
 
   const QMap<QtBoolEdit *, QtProperty *>::ConstIterator ecend = m_editorToProperty.constEnd();
   for (QMap<QtBoolEdit *, QtProperty *>::ConstIterator itEditor = m_editorToProperty.constBegin(); itEditor != ecend;
@@ -686,7 +686,7 @@ void QtLineEditFactoryPrivate::slotPropertyChanged(QtProperty *property, const Q
   }
 }
 
-void QtLineEditFactoryPrivate::slotRegExpChanged(QtProperty *property, const QRegExp &regExp) {
+void QtLineEditFactoryPrivate::slotRegExpChanged(QtProperty *property, const QRegularExpression &regExp) {
   if (!m_createdEditors.contains(property))
     return;
 
@@ -701,7 +701,7 @@ void QtLineEditFactoryPrivate::slotRegExpChanged(QtProperty *property, const QRe
     const QValidator *oldValidator = editor->validator();
     QValidator *newValidator = nullptr;
     if (regExp.isValid()) {
-      newValidator = new QRegExpValidator(regExp, editor);
+      newValidator = new QRegularExpressionValidator(regExp, editor);
     }
     editor->setValidator(newValidator);
     if (oldValidator)
@@ -758,8 +758,8 @@ QtLineEditFactory::~QtLineEditFactory() {
 void QtLineEditFactory::connectPropertyManager(QtStringPropertyManager *manager) {
   connect(manager, SIGNAL(valueChanged(QtProperty *, const QString &)), this,
           SLOT(slotPropertyChanged(QtProperty *, const QString &)));
-  connect(manager, SIGNAL(regExpChanged(QtProperty *, const QRegExp &)), this,
-          SLOT(slotRegExpChanged(QtProperty *, const QRegExp &)));
+  connect(manager, SIGNAL(regExpChanged(QtProperty *, const QRegularExpression &)), this,
+          SLOT(slotRegExpChanged(QtProperty *, const QRegularExpression &)));
 }
 
 /**
@@ -771,9 +771,9 @@ QWidget *QtLineEditFactory::createEditorForManager(QtStringPropertyManager *mana
                                                    QWidget *parent) {
 
   QLineEdit *editor = d_ptr->createEditor(property, parent);
-  QRegExp regExp = manager->regExp(property);
+  QRegularExpression regExp = manager->regExp(property);
   if (regExp.isValid()) {
-    QValidator *validator = new QRegExpValidator(regExp, editor);
+    QValidator *validator = new QRegularExpressionValidator(regExp, editor);
     editor->setValidator(validator);
   }
   editor->setText(manager->value(property));
@@ -791,8 +791,8 @@ QWidget *QtLineEditFactory::createEditorForManager(QtStringPropertyManager *mana
 void QtLineEditFactory::disconnectPropertyManager(QtStringPropertyManager *manager) {
   disconnect(manager, SIGNAL(valueChanged(QtProperty *, const QString &)), this,
              SLOT(slotPropertyChanged(QtProperty *, const QString &)));
-  disconnect(manager, SIGNAL(regExpChanged(QtProperty *, const QRegExp &)), this,
-             SLOT(slotRegExpChanged(QtProperty *, const QRegExp &)));
+  disconnect(manager, SIGNAL(regExpChanged(QtProperty *, const QRegularExpression &)), this,
+             SLOT(slotRegExpChanged(QtProperty *, const QRegularExpression &)));
 }
 
 // QtDateEditFactory
@@ -1184,7 +1184,7 @@ void QtKeySequenceEditorFactory::disconnectPropertyManager(QtKeySequenceProperty
 QtCharEdit::QtCharEdit(QWidget *parent) : QWidget(parent), m_lineEdit(new QLineEdit(this)) {
   auto *layout = new QHBoxLayout(this);
   layout->addWidget(m_lineEdit);
-  layout->setMargin(0);
+  layout->setContentsMargins(0, 0, 0, 0);
   m_lineEdit->installEventFilter(this);
   m_lineEdit->setReadOnly(true);
   m_lineEdit->setFocusProxy(this);
@@ -1559,6 +1559,7 @@ void QtCursorEditorFactoryPrivate::slotPropertyChanged(QtProperty *const propert
   m_updatingEnum = false;
 }
 
+// cppcheck-suppress constParameterPointer
 void QtCursorEditorFactoryPrivate::slotEnumChanged(QtProperty *property, int value) {
   if (m_updatingEnum)
     return;
@@ -1574,6 +1575,7 @@ void QtCursorEditorFactoryPrivate::slotEnumChanged(QtProperty *property, int val
 #endif
 }
 
+// cppcheck-suppress constParameterPointer
 void QtCursorEditorFactoryPrivate::slotEditorDestroyed(QObject *object) {
   // remove from m_editorToEnum map;
   // remove from m_enumToEditors map;
@@ -1588,6 +1590,7 @@ void QtCursorEditorFactoryPrivate::slotEditorDestroyed(QObject *object) {
       m_enumToEditors[enumProp].removeAll(editor);
       if (m_enumToEditors[enumProp].isEmpty()) {
         m_enumToEditors.remove(enumProp);
+        // cppcheck-suppress constVariablePointer
         QtProperty *property = m_enumToProperty.value(enumProp);
         m_enumToProperty.remove(enumProp);
         m_propertyToEnum.remove(property);
@@ -1981,6 +1984,4 @@ void QtFontEditorFactory::disconnectPropertyManager(QtFontPropertyManager *manag
   disconnect(manager, SIGNAL(valueChanged(QtProperty *, QFont)), this, SLOT(slotPropertyChanged(QtProperty *, QFont)));
 }
 
-#if QT_VERSION >= 0x040400
 QT_END_NAMESPACE
-#endif

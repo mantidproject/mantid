@@ -84,7 +84,7 @@ Click the generate a script button |GenerateAScript.png| on a `Colorfill Plot <h
    cfill.set_norm(LogNorm(vmin=0.0001, vmax=3792.3352))
    # If no ticks appear on the color bar remove the subs argument inside the LogLocator below
    cbar = fig.colorbar(cfill, ax=[axes], ticks=LogLocator(subs=np.arange(1, 10)), pad=0.06)
-   cbar.set_label('Counts ($\\mu s$)$^{-1}$')
+   cbar.set_label(r'Counts ($\mu s$)$^{-1}$')
    axes.set_title('MAR11060')
    axes.set_xlabel('Time-of-flight ($\\mu s$)')
    axes.set_ylabel('Spectrum')
@@ -173,7 +173,7 @@ Basic example of plotting a `Contour Plot <https://matplotlib.org/stable/api/_as
    axes.contour(data, levels=np.linspace(10, 60, 6), colors='yellow', alpha=0.5)
    axes.set_title('SANSLOQCan2D.nxs')
    cbar=fig.colorbar(c)
-   cbar.set_label('Counts ($\mu s$)$^{-1}$') #add text to colorbar
+   cbar.set_label(r'Counts ($\mu s$)$^{-1}$') #add text to colorbar
    fig.tight_layout()
 
    fig.show()

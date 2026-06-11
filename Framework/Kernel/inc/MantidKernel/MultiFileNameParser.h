@@ -107,6 +107,11 @@ private:
   std::string m_dirString, m_instString, m_underscoreString, m_runString, m_extString;
   /// All the valid instrument names.
   std::set<std::string, ReverseCaselessCompare> m_validInstNames;
+  /// Compound-extension leads derived from Facilities.xml. An entry like
+  /// ".nxs.h5" in a facility's FileExtensions contributes ".nxs" here so
+  /// split() can recognise the full ".nxs.h5" suffix as one extension rather
+  /// than a stem-with-dot followed by ".h5".
+  std::set<std::string> m_compoundLeadExtensions;
   /// Flag to determine if string input should be trimmed of whitespace
   bool m_trimWhiteSpaces;
 };

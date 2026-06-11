@@ -34,8 +34,8 @@ void export_EventList() {
            "Create TofEvent and add to EventList.")
       .def("addWeightedEventQuickly", &addWeightedEventToEventList,
            args("self", "tof", "weight", "errorsquare", "pulsetime"), "Create weighted TofEvent and add to eventlist")
-      .def("__iadd__", (EventList & (EventList::*)(const EventList &)) & EventList::operator+=, return_self<>(),
-           (arg("self"), arg("other")))
-      .def("__isub__", (EventList & (EventList::*)(const EventList &)) & EventList::operator-=, return_self<>(),
-           (arg("self"), arg("other")));
+      .def("__iadd__", static_cast<EventList &(EventList::*)(const EventList &)>(&EventList::operator+=),
+           return_self<>(), (arg("self"), arg("other")))
+      .def("__isub__", static_cast<EventList &(EventList::*)(const EventList &)>(&EventList::operator-=),
+           return_self<>(), (arg("self"), arg("other")));
 }

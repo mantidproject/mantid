@@ -188,7 +188,7 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
         msg.setStandardButtons(QMessageBox.Ok)
         msg.setDefaultButton(QMessageBox.Ok)
         msg.setEscapeButton(QMessageBox.Ok)
-        msg.exec_()
+        msg.exec()
 
     def display_more_details(self, user_information_text, stacktrace_text):
         self.details_dialog.set_stacktrace_text(stacktrace_text)

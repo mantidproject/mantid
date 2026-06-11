@@ -86,5 +86,7 @@ void export_Instrument() {
            "Return reference to the base instrument")
 
       .def("findRectDetectors", &Instrument::findRectDetectors, arg("self"), "Return a list of rectangular detectors.")
-      .def("findGridDetectors", &Instrument::findGridDetectors, arg("self"), "Return a list of grid detectors.");
+      .def("findGridDetectors", &Instrument::findGridDetectors, arg("self"), "Return a list of grid detectors.")
+      .def("getMemorySize", &Instrument::getMemorySize, arg("self"),
+           "Return the memory footprint of the instrument in bytes.");
 }

@@ -36,7 +36,7 @@ class MANTID_API_DLL Run : public LogManager {
 public:
   Run();
   Run(const Run &other);
-  ~Run();
+  ~Run() override;
   Run &operator=(const Run &other);
   bool operator==(const Run &other);
   bool operator!=(const Run &other);

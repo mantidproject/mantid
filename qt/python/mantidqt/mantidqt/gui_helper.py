@@ -51,7 +51,7 @@ def get_qapplication():
     reducer = eventFilterGUI.MainWindow()  # the main ui class in this file
     reducer.show()
     if not within_mantid:
-        sys.exit(app.exec_())"""
+        sys.exit(app.exec())"""
     app = QApplication.instance()
     if app:
         return app, app.applicationName().lower().startswith("mantid")

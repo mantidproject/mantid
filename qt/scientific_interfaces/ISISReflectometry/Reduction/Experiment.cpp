@@ -47,7 +47,7 @@ BackgroundSubtraction const &Experiment::backgroundSubtraction() const { return 
 PolarizationCorrections const &Experiment::polarizationCorrections() const { return m_polarizationCorrections; }
 FloodCorrections const &Experiment::floodCorrections() const { return m_floodCorrections; }
 
-TransmissionStitchOptions Experiment::transmissionStitchOptions() const { return m_transmissionStitchOptions; }
+TransmissionStitchOptions const &Experiment::transmissionStitchOptions() const { return m_transmissionStitchOptions; }
 
 const std::map<std::string, std::string> &Experiment::stitchParameters() const { return m_stitchParameters; }
 
@@ -78,18 +78,5 @@ std::optional<size_t> Experiment::getLookupRowIndexFromRow(Row const &row, doubl
     return m_lookupTable.getIndex(lookupRow.value());
   }
   return std::nullopt;
-}
-
-bool operator!=(Experiment const &lhs, Experiment const &rhs) { return !operator==(lhs, rhs); }
-
-bool operator==(Experiment const &lhs, Experiment const &rhs) {
-  return lhs.analysisMode() == rhs.analysisMode() && lhs.reductionType() == rhs.reductionType() &&
-         lhs.summationType() == rhs.summationType() && lhs.includePartialBins() == rhs.includePartialBins() &&
-         lhs.debug() == rhs.debug() && lhs.backgroundSubtraction() == rhs.backgroundSubtraction() &&
-         lhs.polarizationCorrections() == rhs.polarizationCorrections() &&
-         lhs.floodCorrections() == rhs.floodCorrections() &&
-         lhs.transmissionStitchOptions() == rhs.transmissionStitchOptions() &&
-         lhs.stitchParameters() == rhs.stitchParameters() && lhs.m_lookupTable == rhs.m_lookupTable &&
-         lhs.diagnostics() == rhs.diagnostics();
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

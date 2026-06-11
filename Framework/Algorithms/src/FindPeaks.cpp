@@ -889,6 +889,7 @@ void FindPeaks::fitSinglePeak(const API::MatrixWorkspace_sptr &input, const int 
   std::vector<double> vecbkgdparvalue(3, 0.);
   std::vector<double> vecpeakrange(3, 0.);
   int usefpdresult = findPeakBackground(input, spectrum, i_min, i_max, vecbkgdparvalue, vecpeakrange);
+  // cppcheck-suppress knownConditionTrueFalse
   if (usefpdresult < 0) {
     // Estimate background roughly for a failed case
     estimateBackground(vecX, vecY, i_min, i_max, vecbkgdparvalue);

@@ -236,7 +236,6 @@ void IntegratePeakTimeSlices::exec() {
   double Row0 = lastRow;
   double lastCol = m_COL;
   double Col0 = lastCol;
-  string spec_idList;
 
   // For quickly looking up workspace index from det id
   m_wi_to_detid_map = inpWkSpace->getDetectorIDToWorkspaceIndexMap();
@@ -246,6 +245,7 @@ void IntegratePeakTimeSlices::exec() {
   //----------------------------- get Peak extents
   //------------------------------
   try {
+    string spec_idList;
     int detID = peak.getDetectorID();
 
     // Find the workspace index for this detector ID

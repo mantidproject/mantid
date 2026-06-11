@@ -26,7 +26,7 @@ WidgetScrollbarDecorator::WidgetScrollbarDecorator(QWidget *target) : m_target(t
   // This layout replaces dialog's main layout when scrolling enabled
   m_layout = new QVBoxLayout(m_offscreen);
   m_layout->setSpacing(0);
-  m_layout->setMargin(0);
+  m_layout->setContentsMargins(0, 0, 0, 0);
 
   // QScrollArea provides scrolling functionality
   m_scrollarea = new QScrollArea(m_offscreen);

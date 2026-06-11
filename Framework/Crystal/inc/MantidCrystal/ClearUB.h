@@ -22,7 +22,7 @@ namespace Crystal {
 */
 class MANTID_CRYSTAL_DLL ClearUB : public API::Algorithm {
 public:
-  virtual ~ClearUB() = default;
+  ~ClearUB() override = default;
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {

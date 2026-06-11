@@ -69,7 +69,7 @@ public:
     setBaseEqn();
   }
   /// Generates the quadratic equation.
-  void setBaseEqn() override;
+  void setBaseEqn() override final;
   /// Writes the sphere equatation in MCNP format
   void write(std::ostream &) const override;
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) override;

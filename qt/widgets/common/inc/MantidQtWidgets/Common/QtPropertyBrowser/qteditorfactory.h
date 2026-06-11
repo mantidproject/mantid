@@ -98,9 +98,7 @@
 #include <QSpinBox>
 #include <QTimerEvent>
 
-#if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
-#endif
 
 class QColor;
 class QLabel;
@@ -326,7 +324,7 @@ private:
   Q_DECLARE_PRIVATE(QtLineEditFactory)
   Q_DISABLE_COPY(QtLineEditFactory)
   Q_PRIVATE_SLOT(d_func(), void slotPropertyChanged(QtProperty *, const QString &))
-  Q_PRIVATE_SLOT(d_func(), void slotRegExpChanged(QtProperty *, const QRegExp &))
+  Q_PRIVATE_SLOT(d_func(), void slotRegExpChanged(QtProperty *, const QRegularExpression &))
   Q_PRIVATE_SLOT(d_func(), void slotSetValue(const QString &))
   Q_PRIVATE_SLOT(d_func(), void slotEditorDestroyed(QObject *))
 };
@@ -548,7 +546,7 @@ public:
 
   Editor *createEditor(QtProperty *property, QWidget *parent);
   void initializeEditor(QtProperty *property, Editor *e);
-  void slotEditorDestroyed(QObject *object);
+  void slotEditorDestroyed(const QObject *object);
 
   PropertyToEditorListMap m_createdEditors;
   EditorToPropertyMap m_editorToProperty;
@@ -560,6 +558,7 @@ template <class Editor> Editor *EditorFactoryPrivate<Editor>::createEditor(QtPro
   return editor;
 }
 
+// cppcheck-suppress constParameterPointer
 template <class Editor> void EditorFactoryPrivate<Editor>::initializeEditor(QtProperty *property, Editor *editor) {
   typename PropertyToEditorListMap::iterator it = m_createdEditors.find(property);
   if (it == m_createdEditors.end())
@@ -568,11 +567,12 @@ template <class Editor> void EditorFactoryPrivate<Editor>::initializeEditor(QtPr
   m_editorToProperty.insert(editor, property);
 }
 
-template <class Editor> void EditorFactoryPrivate<Editor>::slotEditorDestroyed(QObject *object) {
+template <class Editor> void EditorFactoryPrivate<Editor>::slotEditorDestroyed(const QObject *object) {
   const typename EditorToPropertyMap::iterator ecend = m_editorToProperty.end();
   for (typename EditorToPropertyMap::iterator itEditor = m_editorToProperty.begin(); itEditor != ecend; ++itEditor) {
     if (itEditor.key() == object) {
       Editor *editor = itEditor.key();
+      // cppcheck-suppress constVariablePointer
       QtProperty *property = itEditor.value();
       const typename PropertyToEditorListMap::iterator pit = m_createdEditors.find(property);
       if (pit != m_createdEditors.end()) {
@@ -765,7 +765,7 @@ class QtLineEditFactoryPrivate : public EditorFactoryPrivate<QLineEdit> {
   Q_DECLARE_PUBLIC(QtLineEditFactory)
 public:
   void slotPropertyChanged(QtProperty *property, const QString &value);
-  void slotRegExpChanged(QtProperty *property, const QRegExp &regExp);
+  void slotRegExpChanged(QtProperty *property, const QRegularExpression &regExp);
   void slotSetValue(const QString &value);
 };
 
@@ -830,7 +830,7 @@ void QtSpinBoxFactoryPrivateBase<SpinBox>::slotRangeChanged(QtProperty *property
   if (!this->m_createdEditors.contains(property))
     return;
 
-  QtIntPropertyManager *manager = q_ptr->propertyManager(property);
+  const QtIntPropertyManager *manager = q_ptr->propertyManager(property);
   if (!manager)
     return;
 
@@ -858,7 +858,7 @@ void QtSpinBoxFactoryPrivateBase<SpinBox>::slotSingleStepChanged(QtProperty *pro
 }
 
 template <class SpinBox> void QtSpinBoxFactoryPrivateBase<SpinBox>::slotSetValue(int value) {
-  QObject *object = q_ptr->sender();
+  const QObject *object = q_ptr->sender();
   typename QMap<SpinBox *, QtProperty *>::ConstIterator ecend = this->m_editorToProperty.constEnd();
   for (typename QMap<SpinBox *, QtProperty *>::ConstIterator itEditor = this->m_editorToProperty.constBegin();
        itEditor != ecend; ++itEditor) {
@@ -881,6 +881,4 @@ public:
   void slotSetValue(const QTime &value);
 };
 
-#if QT_VERSION >= 0x040400
 QT_END_NAMESPACE
-#endif

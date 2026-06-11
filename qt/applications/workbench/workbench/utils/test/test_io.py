@@ -26,7 +26,7 @@ class IOTest(TestCase):
     @patch("workbench.utils.io.QInputDialog")
     def test_input_qinputdialog_return_value_is_correct_when_dialog_accepted(self, mock_QInputDialogClass):
         mock_QInputDialog = mock_QInputDialogClass()
-        mock_QInputDialog.exec_.return_value = True
+        mock_QInputDialog.exec.return_value = True
         mock_QInputDialog.textValue.return_value = "their input"
 
         user_input = input_qinputdialog()
@@ -36,6 +36,6 @@ class IOTest(TestCase):
     @patch("workbench.utils.io.QInputDialog")
     def test_input_qinputdialog_raises_RuntimeError_when_input_cancelled(self, mock_QInputDialogClass):
         mock_QInputDialog = mock_QInputDialogClass()
-        mock_QInputDialog.exec_.return_value = False
+        mock_QInputDialog.exec.return_value = False
 
         self.assertRaises(EOFError, input_qinputdialog)

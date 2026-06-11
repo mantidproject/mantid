@@ -31,6 +31,7 @@ std::string const OUTPUT_WS{"OutputWorkspace"};
 
 /// A temporary file resource lifetime manager
 struct RemoveFileAtScopeExit {
+  explicit RemoveFileAtScopeExit(std::string filename = "") : name(std::move(filename)) {}
   std::string name;
   ~RemoveFileAtScopeExit() {
     if (!name.empty()) {
@@ -193,7 +194,7 @@ API::MatrixWorkspace_sptr SofTwoThetaTOF::groupByTwoTheta(API::MatrixWorkspace_s
     filename = tempPath.string();
     generateGrouping->setProperty("GenerateParFile", false);
     // Make sure the file gets deleted at scope exit.
-    deleteThisLater.name = filename;
+    deleteThisLater = RemoveFileAtScopeExit(filename);
   } else {
     filename = static_cast<std::string>(getProperty(Prop::FILENAME));
     filename = ensureXMLExtension(filename);

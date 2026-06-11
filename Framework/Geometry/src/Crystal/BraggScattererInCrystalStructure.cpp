@@ -41,9 +41,6 @@ void BraggScattererInCrystalStructure::setPosition(const Kernel::V3D &position) 
 /// Returns the position of the scatterer.
 Kernel::V3D BraggScattererInCrystalStructure::getPosition() const { return m_position; }
 
-/// Returns the cell which is currently set.
-UnitCell BraggScattererInCrystalStructure::getCell() const { return m_cell; }
-
 /// Assigns a unit cell, which may be required for certain calculations.
 void BraggScattererInCrystalStructure::setCell(const UnitCell &cell) { m_cell = cell; }
 

@@ -66,7 +66,8 @@ private:
   void createOutputBaseNameProperty();
   void createPlotOutputProperty();
 
-  void addProperty(std::string const &name, QtProperty *prop, PropertyGetter getter, PropertySetter setter);
+  void addProperty(std::string const &name, QtProperty *prop, PropertyGetter const &getter,
+                   PropertySetter const &setter);
 
   void setStringProperty(QtProperty *prop, std::string const &value);
   std::string getStringProperty(QtProperty *prop) const;

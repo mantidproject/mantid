@@ -82,6 +82,7 @@ public:
   std::vector<size_t> componentsInSubtree(size_t componentIndex) const;
   const std::vector<size_t> &children(size_t componentIndex) const;
   size_t size() const;
+  size_t getMemorySize() const;
   QuadrilateralComponent quadrilateralComponent(const size_t componentIndex) const;
   size_t indexOf(Geometry::IComponent const *id) const;
   size_t indexOfAny(const std::string &name) const;
@@ -117,12 +118,11 @@ public:
   void setScaleFactor(const size_t componentIndex, const Kernel::V3D &scaleFactor);
   size_t root() const;
 
-  const IComponent *componentID(const size_t componentIndex) const {
-    return m_componentIds->operator[](componentIndex);
-  }
+  const IComponent *componentID(const size_t componentIndex) const { return (*m_componentIds)[componentIndex]; }
   bool hasValidShape(const size_t componentIndex) const;
 
   const Geometry::IObject &shape(const size_t componentIndex) const;
+  std::unordered_map<std::shared_ptr<const Geometry::IObject>, std::vector<size_t>> shapeToComponentIndices() const;
 
   double solidAngle(const size_t componentIndex, const Geometry::SolidAngleParams &params) const;
   BoundingBox boundingBox(const size_t componentIndex, const BoundingBox *reference = nullptr,

@@ -55,24 +55,20 @@ template <typename TYPE> double getMedian(const vector<TYPE> &data) {
     return static_cast<double>(data[0]);
 
   const bool isSorted = std::is_sorted(data.cbegin(), data.cend());
-  auto sortedDataRef = std::ref(data);
-  std::vector<TYPE> tmpSortedData;
-  if (!isSorted) {
-    tmpSortedData = data;
-    std::sort(tmpSortedData.begin(), tmpSortedData.end());
-    sortedDataRef = std::ref(std::as_const(tmpSortedData));
-  }
-
   const bool is_even = (size % 2 == 0);
-  double retVal = 0;
-  if (is_even) {
-    const auto left = static_cast<double>(sortedDataRef.get()[size / 2 - 1]);
-    const auto right = static_cast<double>(sortedDataRef.get()[size / 2]);
-    retVal = (left + right) / 2;
+  if (isSorted) {
+    if (is_even)
+      return (static_cast<double>(data[size / 2 - 1]) + static_cast<double>(data[size / 2])) / 2;
+    else
+      return static_cast<double>(data[size / 2]);
   } else {
-    retVal = static_cast<double>(sortedDataRef.get()[size / 2]);
+    std::vector<TYPE> tmpSortedData(data);
+    std::sort(tmpSortedData.begin(), tmpSortedData.end());
+    if (is_even)
+      return (static_cast<double>(tmpSortedData[size / 2 - 1]) + static_cast<double>(tmpSortedData[size / 2])) / 2;
+    else
+      return static_cast<double>(tmpSortedData[size / 2]);
   }
-  return retVal;
 }
 
 /**

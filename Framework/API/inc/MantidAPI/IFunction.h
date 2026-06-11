@@ -720,7 +720,7 @@ private:
   /// The covariance matrix of the fitting parameters
   std::shared_ptr<Kernel::Matrix<double>> m_covar;
   /// The chi-squared of the last fit
-  double m_chiSquared;
+  double m_chiSquared{0.0};
   /// Holds parameter ties
   std::vector<std::unique_ptr<ParameterTie>> m_ties;
   /// Holds the constraints added to function

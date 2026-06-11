@@ -54,7 +54,7 @@ signals:
 public slots:
 
   /// Start the fit and close dialog
-  void accept() override;
+  void accept() override final;
 
 private slots:
 

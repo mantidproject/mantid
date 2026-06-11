@@ -90,9 +90,7 @@
 #include "qtpropertybrowser.h"
 #include <QMap>
 
-#if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
-#endif
 
 class QtGroupBoxPropertyBrowserPrivate;
 class QLabel;
@@ -125,9 +123,9 @@ class QtGroupBoxPropertyBrowserPrivate {
 public:
   void init(QWidget *parent);
 
-  void propertyInserted(QtBrowserItem *index, QtBrowserItem *afterIndex);
-  void propertyRemoved(QtBrowserItem *index);
-  void propertyChanged(QtBrowserItem *index);
+  void propertyInserted(QtBrowserItem *index, const QtBrowserItem *afterIndex);
+  void propertyRemoved(const QtBrowserItem *index);
+  void propertyChanged(const QtBrowserItem *index);
   QWidget *createEditor(QtProperty *property, QWidget *parent) const { return q_ptr->createEditor(property, parent); }
 
   void slotEditorDestroyed();
@@ -153,9 +151,9 @@ private:
   void insertRow(QGridLayout *layout, int row) const;
   void removeRow(QGridLayout *layout, int row) const;
 
-  bool hasHeader(WidgetItem *item) const;
+  bool hasHeader(const WidgetItem *item) const;
 
-  QMap<QtBrowserItem *, WidgetItem *> m_indexToItem;
+  QMap<const QtBrowserItem *, WidgetItem *> m_indexToItem;
   QMap<WidgetItem *, QtBrowserItem *> m_itemToIndex;
   QMap<QWidget *, WidgetItem *> m_widgetToItem;
   QGridLayout *m_mainLayout;
@@ -163,6 +161,4 @@ private:
   QList<WidgetItem *> m_recreateQueue;
 };
 
-#if QT_VERSION >= 0x040400
 QT_END_NAMESPACE
-#endif

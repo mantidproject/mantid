@@ -192,6 +192,18 @@ class ComponentInfoTest(unittest.TestCase):
         info = self._ws.componentInfo()
         self.assertEqual(type(info.shape(0)), CSGObject)
 
+    def test_getMemorySize(self):
+        info = self._ws.componentInfo()
+        mem = info.getMemorySize()
+        self.assertIsInstance(mem, int)
+        self.assertGreater(mem, 0)
+
+    def test_getMemorySize_scales_with_instrument(self):
+        """A larger instrument should report more memory than a smaller one."""
+        small_ws = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(2, 1, False)
+        large_ws = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(100, 1, False)
+        self.assertGreater(large_ws.componentInfo().getMemorySize(), small_ws.componentInfo().getMemorySize())
+
     def test_createWorkspaceAndComponentInfo(self):
         """Try to create a workspace and see if ComponentInfo object is accessable"""
         dataX = [1, 2, 3, 4, 5]

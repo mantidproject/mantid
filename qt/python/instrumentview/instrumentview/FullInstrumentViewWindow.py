@@ -3,7 +3,7 @@
 # Copyright &copy; 2025 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
-# SPDX - License - Identifier: GPL - 3.0 +
+# SPDX - License - Identifier: GPL-3.0+
 from functools import partial, wraps
 from pyvista import PolyData
 from qtpy.QtWidgets import (
@@ -149,8 +149,12 @@ class FullInstrumentViewWindow(QMainWindow):
 class FullInstrumentViewView(QWidget):
     _detector_spectrum_fig = None
     _ASPECT_RATIO_SETTING_STRING = "InstrumentView.MaintainAspectRatio"
-    _DRAW_SHAPES_SETTING_STRING = "InstrumentView.DrawShapes"
+    _RENDER_MODE_SETTING_STRING = "InstrumentView.RenderMode"
     _FLIP_BEAM_SETTING_STRING = "InstrumentView.FlipBeam"
+    _RENDER_MODE_POINTS = "Points (Fastest)"
+    _RENDER_MODE_SHAPES_FAST = "Approximated Shapes (Fast)"
+    _RENDER_MODE_RAW_SHAPES = "Raw Shapes (Slowest)"
+    _RENDER_MODE_OPTIONS = (_RENDER_MODE_POINTS, _RENDER_MODE_SHAPES_FAST, _RENDER_MODE_RAW_SHAPES)
     _COLOURS = ["#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
 
     _overlay_meshes = []
@@ -247,6 +251,9 @@ class FullInstrumentViewView(QWidget):
         self._reset_projection.setToolTip("Resets the projection to default.")
         self._reset_projection.clicked.connect(self.reset_camera)
         self._clear_point_picked_detectors = QPushButton("Clear Mouse Picking")
+        self._hover_pick = QPushButton("Hover Pick")
+        self._hover_pick.setCheckable(True)
+        self._hover_pick.setToolTip("Use mouse hover to preview a single detector spectrum (2D projections only).")
         self._aspect_ratio_check_box = QCheckBox()
         self._aspect_ratio_check_box.setText("Maintain Aspect Ratio")
         self._aspect_ratio_check_box.setToolTip(
@@ -270,12 +277,16 @@ class FullInstrumentViewView(QWidget):
         )
         self._select_bank_tube = QPushButton("Select Bank/Tube")
         self._select_bank_tube.setCheckable(True)
-        self._show_shapes_check_box = QCheckBox()
-        self._show_shapes_check_box.setText("Draw Shapes")
-        self._show_shapes_check_box.setChecked(is_config_setting_true(self._DRAW_SHAPES_SETTING_STRING))
-        self._show_shapes_check_box.setToolTip(
-            "If checked, detectors are drawn using their actual geometric shapes "
-            "(cuboids, cylinders, etc.) instead of points. May be slower for large instruments."
+        self._render_mode_combo_box = NoWheelComboBox(self)
+        self._render_mode_combo_box.addItems(self._RENDER_MODE_OPTIONS)
+        saved_mode = ConfigService.Instance()[self._RENDER_MODE_SETTING_STRING]
+        if saved_mode not in self._RENDER_MODE_OPTIONS:
+            saved_mode = self._RENDER_MODE_POINTS
+        self._render_mode_combo_box.setCurrentText(saved_mode)
+        self._render_mode_combo_box.setToolTip(
+            "Points: draw detectors as a point cloud.\n"
+            "Shapes (Fast): draw detector shapes with optimised quad approximation.\n"
+            "Full Shapes: draw the full triangulated detector geometry."
         )
 
         self._peaks_group_box = QGroupBox("Peaks Workspaces")
@@ -381,17 +392,20 @@ class FullInstrumentViewView(QWidget):
         projection_layout = QVBoxLayout(self._projection_group_box)
         projection_first_row = QHBoxLayout()
         projection_second_row = QHBoxLayout()
+        projection_third_row = QHBoxLayout()
         projection_first_row.addWidget(self._projection_combo_box)
         projection_first_row.addWidget(self._reset_projection)
-        projection_first_row.addWidget(self._clear_point_picked_detectors)
-        projection_second_row.addWidget(self._aspect_ratio_check_box)
-        projection_second_row.addWidget(self._show_monitors_check_box)
-        projection_second_row.addWidget(self._count_scale_combo_box)
-        projection_second_row.addWidget(self._show_shapes_check_box)
-        projection_second_row.addWidget(self._flip_beam_check_box)
+        projection_second_row.addWidget(self._hover_pick)
         projection_second_row.addWidget(self._select_bank_tube)
+        projection_second_row.addWidget(self._clear_point_picked_detectors)
+        projection_third_row.addWidget(self._aspect_ratio_check_box)
+        projection_third_row.addWidget(self._flip_beam_check_box)
+        projection_third_row.addWidget(self._show_monitors_check_box)
+        projection_second_row.addWidget(self._render_mode_combo_box)
+        projection_third_row.addWidget(self._count_scale_combo_box)
         projection_layout.addLayout(projection_first_row)
         projection_layout.addLayout(projection_second_row)
+        projection_layout.addLayout(projection_third_row)
 
         lineplot_options_layout = QHBoxLayout(self._lineplot_options_group_box)
         lineplot_options_layout.addWidget((self._units_combo_box_lineplot))
@@ -487,8 +501,8 @@ class FullInstrumentViewView(QWidget):
     def store_maintain_aspect_ratio_option(self) -> None:
         self._store_checkbox_option(self._aspect_ratio_check_box, self._ASPECT_RATIO_SETTING_STRING)
 
-    def store_draw_shapes_option(self) -> None:
-        self._store_checkbox_option(self._show_shapes_check_box, self._DRAW_SHAPES_SETTING_STRING)
+    def store_render_mode_option(self) -> None:
+        ConfigService.Instance()[self._RENDER_MODE_SETTING_STRING] = self._render_mode_combo_box.currentText()
 
     def store_flip_beam_option(self) -> None:
         self._store_checkbox_option(self._flip_beam_check_box, self._FLIP_BEAM_SETTING_STRING)
@@ -509,11 +523,11 @@ class FullInstrumentViewView(QWidget):
     def is_show_monitors_checkbox_checked(self) -> bool:
         return self._show_monitors_check_box.isChecked()
 
-    def is_show_shapes_checkbox_checked(self) -> bool:
-        return self._show_shapes_check_box.isChecked()
+    def get_render_mode_option(self) -> str:
+        return self._render_mode_combo_box.currentText()
 
-    def set_show_shapes_checkbox_enabled(self, enabled: bool) -> None:
-        self._show_shapes_check_box.setEnabled(enabled)
+    def set_render_mode_combo_enabled(self, enabled: bool) -> None:
+        self._render_mode_combo_box.setEnabled(enabled)
 
     def _on_splitter_moved(self, pos, index) -> None:
         self._detector_spectrum_fig.tight_layout()
@@ -672,6 +686,7 @@ class FullInstrumentViewView(QWidget):
     def setup_connections_to_presenter(self) -> None:
         self._projection_combo_box.currentIndexChanged.connect(self._presenter.on_projection_option_changed)
         self._clear_point_picked_detectors.clicked.connect(self._presenter.on_clear_point_picked_detectors_clicked)
+        self._hover_pick.toggled.connect(self._presenter.on_hover_pick_toggled)
         self._contour_range_slider.sliderReleased.connect(self._presenter.on_contour_limits_updated)
         self._contour_range_reset.clicked.connect(self._presenter.on_contour_range_reset_clicked)
         self._integration_limit_slider.sliderReleased.connect(self._presenter.on_integration_limits_updated)
@@ -699,7 +714,7 @@ class FullInstrumentViewView(QWidget):
         self._show_monitors_check_box.clicked.connect(self._presenter.on_show_monitors_check_box_clicked)
         self._count_scale_combo_box.currentIndexChanged.connect(self._presenter.on_count_scale_selected)
         self._flip_beam_check_box.clicked.connect(self._presenter.on_flip_beam_check_box_clicked)
-        self._show_shapes_check_box.clicked.connect(self._presenter.on_show_shapes_toggled)
+        self._render_mode_combo_box.currentIndexChanged.connect(self._presenter.on_render_mode_changed)
         self._select_bank_tube.toggled.connect(self._presenter.on_select_bank_tube_toggled)
 
         self._add_connections_to_edits_and_slider(
@@ -760,10 +775,46 @@ class FullInstrumentViewView(QWidget):
                 btn.setDisabled(checked)
 
     def enable_or_disable_mask_widgets(self):
+        if self.is_hover_pick_checked():
+            for btn in self._shape_buttons:
+                if btn.isChecked():
+                    btn.toggle()
+                btn.setDisabled(True)
+            self._add_mask.setDisabled(True)
+            self._add_selection.setDisabled(True)
+            return
+
         for btn in self._shape_buttons:
             if btn.isChecked():
                 btn.toggle()
             btn.setDisabled(self.current_selected_projection() == ProjectionType.THREE_D)
+
+    def set_hover_pick_mode_enabled(self, enabled: bool) -> None:
+        if enabled:
+            self.delete_current_widget()
+
+        self._clear_point_picked_detectors.setDisabled(enabled)
+        self._add_mask.setDisabled(True)
+        self._add_selection.setDisabled(True)
+        self._sum_spectra_checkbox.setDisabled(enabled)
+        self._select_bank_tube.setDisabled(enabled)
+        self._export_workspace_button.setDisabled(enabled)
+
+        for btn in self._shape_buttons:
+            if btn.isChecked():
+                btn.toggle()
+            btn.setDisabled(enabled or self.current_selected_projection() == ProjectionType.THREE_D)
+
+    def set_hover_pick_available(self, is_available: bool) -> None:
+        self._hover_pick.setEnabled(is_available)
+
+    def set_hover_pick_checked(self, checked: bool) -> None:
+        old_state = self._hover_pick.blockSignals(True)
+        self._hover_pick.setChecked(checked)
+        self._hover_pick.blockSignals(old_state)
+
+    def is_hover_pick_checked(self) -> bool:
+        return self._hover_pick.isChecked()
 
     def delete_current_widget(self):
         if self._shape_overlay_manager is not None:
@@ -909,10 +960,12 @@ class FullInstrumentViewView(QWidget):
     @_skip_if_closing
     def set_plotter_scalar_bar_range(self, clim: tuple[int, int], label: str, display_title: str | None = None) -> None:
         """Set the range of the colours displayed, i.e. the legend"""
+        if clim[0] >= clim[1]:
+            return
         self.main_plotter.update_scalar_bar_range(clim, label)
+
         if display_title is None:
             return
-
         self.main_plotter.scalar_bars[self._presenter._counts_label].SetTitle(display_title)
 
     def set_projection_combo_options(self, options: list[str]) -> None:

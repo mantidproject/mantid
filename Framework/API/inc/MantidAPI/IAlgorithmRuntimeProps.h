@@ -13,7 +13,7 @@ namespace Mantid::API {
 class MANTID_API_DLL IAlgorithmRuntimeProps : public virtual Mantid::Kernel::IPropertyManager {
 public:
   IAlgorithmRuntimeProps() = default;
-  virtual ~IAlgorithmRuntimeProps() = default;
+  ~IAlgorithmRuntimeProps() override = default;
 
   using Mantid::Kernel::IPropertyManager::getDeclaredPropertyNames;
 

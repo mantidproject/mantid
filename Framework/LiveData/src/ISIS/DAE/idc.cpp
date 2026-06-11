@@ -69,6 +69,11 @@ int IDCopen(const char *host, int mode, int options, idc_handle_t *pfh, uint16_t
     return -1;
   }
   (*pfh) = reinterpret_cast<struct idc_info *>(malloc(sizeof(struct idc_info)));
+  if (*pfh == nullptr) {
+    IDCreport(0, 0, "Error allocating IDC handle");
+    isisds_send_close(s);
+    return -1;
+  }
   (*pfh)->s = s;
   return 0;
 }

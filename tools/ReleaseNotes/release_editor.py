@@ -85,10 +85,18 @@ def gather_release_note_directories(path: pathlib.Path) -> List[pathlib.Path]:
 def get_pr_number_and_link(release_note_path: pathlib.Path, git_token: str) -> Tuple[str, str]:
     commit_hashes = get_file_creation_commits(release_note_path)
     for commit_hash in commit_hashes:
-        headers = {"Authorization": f"token {git_token}", "Accept": "application/vnd.github.groot-preview+json"}
+        headers = {
+            "Authorization": f"Bearer {git_token}",
+            "Accept": "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28",
+        }
         url = f"https://api.github.com/repos/{GIT_REPO}/commits/{commit_hash}/pulls"
         response = requests.get(url, headers=headers, timeout=10)
         if response.status_code != 200:
+            continue
+
+        json_response = response.json()
+        if not json_response:
             continue
 
         pr = response.json()[0]

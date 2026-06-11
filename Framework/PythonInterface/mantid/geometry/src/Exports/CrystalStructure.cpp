@@ -33,6 +33,8 @@ std::vector<std::string> getScatterers(const CrystalStructure &self) {
   return scattererStrings;
 }
 
+UnitCell getCell(const CrystalStructure &self) { return self.cell(); }
+
 std::string __str__implementation(const CrystalStructure &self) {
   std::stringstream ss;
   ss << "Crystal structure with:\n";
@@ -84,7 +86,7 @@ void export_CrystalStructure() {
   class_<CrystalStructure>("CrystalStructure", no_init)
       .def(init<const std::string &, const std::string &, const std::string &>(
           (arg("unitCell"), arg("spaceGroup"), arg("scatterers"))))
-      .def("getUnitCell", &CrystalStructure::cell, arg("self"))
+      .def("getUnitCell", &getCell, arg("self"))
       .def("getSpaceGroup", &getSpaceGroup, arg("self"))
       .def("getScatterers", &getScatterers, arg("self"))
       .def("__str__", &__str__implementation)

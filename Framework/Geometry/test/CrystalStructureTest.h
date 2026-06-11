@@ -74,6 +74,30 @@ public:
     TS_ASSERT_EQUALS(structure.getScatterers()->nScatterers(), 1);
   }
 
+  void testCellReferenceReturnLvalue() {
+    // Verify that cell() returns a stable reference (not a copy) tied to
+    // the lifetime of the CrystalStructure object.
+    CrystalStructure structure("5.431 5.431 5.431", "F d -3 m", "Si 0 0 0 1.0 0.02");
+    UnitCell const &ref = structure.cell();
+    TS_ASSERT_DELTA(ref.a(), 5.431, 1e-10);
+    TS_ASSERT_DELTA(ref.b(), 5.431, 1e-10);
+    TS_ASSERT_DELTA(ref.c(), 5.431, 1e-10);
+    TS_ASSERT_DELTA(ref.alpha(), 90.0, 1e-10);
+    TS_ASSERT_DELTA(ref.beta(), 90.0, 1e-10);
+    TS_ASSERT_DELTA(ref.gamma(), 90.0, 1e-10);
+    // Same object — not a copy.
+    TS_ASSERT_EQUALS(&ref, &structure.cell());
+  }
+
+  void testCellRvalueReturnsByValue() {
+    // cell() const && returns UnitCell by value, so callers with only a
+    // temporary CrystalStructure get a safe copy rather than a dangling reference.
+    UnitCell copied = CrystalStructure("5.431 5.431 5.431", "F d -3 m", "Si 0 0 0 1.0 0.02").cell();
+    TS_ASSERT_DELTA(copied.a(), 5.431, 1e-10);
+    TS_ASSERT_DELTA(copied.b(), 5.431, 1e-10);
+    TS_ASSERT_DELTA(copied.c(), 5.431, 1e-10);
+  }
+
   void testCopyConstructor() {
     CrystalStructure one("1.2 2.3 3.4", "F d d d", "Fe 1/8 1/8 1/8 1.0 0.001");
 

@@ -51,7 +51,7 @@ public:
   BackgroundSubtraction const &backgroundSubtraction() const;
   PolarizationCorrections const &polarizationCorrections() const;
   FloodCorrections const &floodCorrections() const;
-  TransmissionStitchOptions transmissionStitchOptions() const;
+  TransmissionStitchOptions const &transmissionStitchOptions() const;
   const std::map<std::string, std::string> &stitchParameters() const;
   std::string stitchParametersString() const;
   std::vector<LookupRow> const &lookupTableRows() const;
@@ -80,9 +80,6 @@ private:
   std::map<std::string, std::string> m_stitchParameters;
   LookupTable m_lookupTable;
   bool m_diagnostics;
-
-  friend bool operator==(Experiment const &lhs, Experiment const &rhs);
-  friend bool operator!=(Experiment const &lhs, Experiment const &rhs);
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

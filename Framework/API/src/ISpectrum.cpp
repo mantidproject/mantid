@@ -153,6 +153,7 @@ ISpectrum::ISpectrum(ISpectrum &&other) : m_specNo(other.m_specNo), detectorIDs(
 }
 
 /// Copy assignment.
+// cppcheck-suppress operatorEqVarError
 ISpectrum &ISpectrum::operator=(const ISpectrum &other) {
   m_specNo = other.m_specNo;
   detectorIDs = other.detectorIDs;
@@ -164,6 +165,7 @@ ISpectrum &ISpectrum::operator=(const ISpectrum &other) {
 }
 
 /// Move assignment.
+// cppcheck-suppress operatorEqVarError
 ISpectrum &ISpectrum::operator=(ISpectrum &&other) {
   m_specNo = other.m_specNo;
   detectorIDs = std::move(other.detectorIDs);

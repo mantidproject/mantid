@@ -888,6 +888,7 @@ void ExperimentInfo::cacheDefaultDetectorGrouping() const {
     const size_t detIndex = detectorInfo().indexOf(detID);
     SpectrumDefinition specDef;
     specDef.add(detIndex);
+    // cppcheck-suppress nullPointerRedundantCheck
     m_spectrumInfo->setSpectrumDefinition(specIndex, std::move(specDef));
     m_spectrumDefinitionNeedsUpdate.at(specIndex) = 0;
     specIndex++;

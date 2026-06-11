@@ -255,5 +255,5 @@ void export_Run() {
       .def("__setitem__", &addOrReplaceProperty, (arg("self"), arg("name"), arg("value")))
       .def("__copy__", &Mantid::PythonInterface::generic__copy__<Run>)
       .def("__deepcopy__", &Mantid::PythonInterface::generic__deepcopy__<Run>)
-      .def("__eq__", &Run::operator==, arg("self"), arg("other"));
+      .def("__eq__", (&Run::operator==), arg("self"), arg("other"));
 }

@@ -27,12 +27,12 @@ app, within_mantid = get_qapplication()
 reducer_widget = DNSReductionGuiWidget(name="DNS-Reduction", app=app, within_mantid=within_mantid)
 view = reducer_widget.view
 view.setWindowTitle(view.modus_titles[reducer_widget.modus.name])
-screenShape = QtWidgets.QDesktopWidget().screenGeometry()
+screenShape = QtWidgets.QApplication.primaryScreen().geometry()
 view.resize(int(screenShape.width() * 0.6), int(screenShape.height() * 0.6))
 app_dir = os.path.dirname(__file__)
 view.show()
 if not within_mantid:
     app.setWindowIcon(QtGui.QIcon(f"{app_dir}/dns_powder_tof/dns_icon.png"))
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
 else:
     app.setWindowIcon(QtGui.QIcon(":/images/MantidIcon.ico"))

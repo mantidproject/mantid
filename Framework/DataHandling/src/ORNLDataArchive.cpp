@@ -4,20 +4,19 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include <sstream>
-
-#include "MantidAPI/ArchiveSearchFactory.h"
 #include "MantidDataHandling/ORNLDataArchive.h"
+#include "MantidAPI/ArchiveSearchFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/InternetHelper.h"
 #include "MantidKernel/Logger.h"
 
-#include <boost/regex.hpp>
+#include <boost/algorithm/string/join.hpp>
+
+#include <map>
+#include <regex>
+#include <sstream>
 
 using Mantid::Catalog::Exception::CatalogError;
 using Mantid::Catalog::ONCat::ONCat;
@@ -27,6 +26,10 @@ using Mantid::Catalog::ONCat::QueryParameter;
 using Mantid::Catalog::ONCat::QueryParameters;
 
 namespace {
+Mantid::Kernel::Logger g_log("ORNLDataArchive");
+
+const static std::regex FILE_REGEX("^(.*?)_(\\d+).*$");
+const static std::string NOT_FOUND("");
 
 std::string toUpperCase(const std::string &s) {
   std::string result(s);
@@ -34,10 +37,15 @@ std::string toUpperCase(const std::string &s) {
   return result;
 }
 
-const static boost::regex FILE_REGEX("^(.*?)_(\\d+).*$");
-const static std::string NOT_FOUND("");
-
-Mantid::Kernel::Logger g_log("ORNLDataArchive");
+/// Parse a basename like "HB2C_7000" into ("HB2C", "7000"). Returns empty
+/// strings if the basename does not match the expected pattern.
+std::pair<std::string, std::string> toInstrumentAndRunNumber(const std::string &filename) {
+  std::smatch result;
+  if (!std::regex_match(filename, result, FILE_REGEX))
+    return {"", ""};
+  assert(result.size() == 3);
+  return {toUpperCase(result[1]), result[2]};
+}
 } // namespace
 
 namespace Mantid::DataHandling {
@@ -103,16 +111,11 @@ ORNLDataArchive::getArchivePath(const std::set<std::string> &basenames,
   const auto basename = *basenames.cbegin();
 
   // Validate and parse the basename.
-  boost::smatch result;
-  if (!boost::regex_match(basename, result, FILE_REGEX)) {
+  const auto [instrument, run] = toInstrumentAndRunNumber(basename);
+  if (instrument.empty() || run.empty()) {
     g_log.debug() << "Unexpected input passed to getArchivePath():" << std::endl << basename << std::endl;
     return API::Result<std::filesystem::path>(NOT_FOUND, "Not found.");
-    ;
   }
-
-  assert(result.size() == 3);
-  const std::string instrument = toUpperCase(result[1]);
-  const std::string run = result[2];
 
   const auto &config = Mantid::Kernel::ConfigService::Instance();
   std::string facility;
@@ -191,6 +194,112 @@ ORNLDataArchive::getArchivePath(const std::set<std::string> &basenames,
   }
 
   return API::Result<std::filesystem::path>(NOT_FOUND, "Not found.");
+}
+
+const API::Result<std::vector<std::filesystem::path>>
+ORNLDataArchive::getArchivePaths(const std::vector<std::string> &hintstrs) const {
+
+  std::vector<std::filesystem::path> results(hintstrs.size());
+  if (hintstrs.empty()) {
+    // No hints to look up — return an empty success rather than a failure so
+    // callers don't need to special-case empty input.
+    return API::Result<std::vector<std::filesystem::path>>(results);
+  }
+
+  std::string instrumentName;
+  std::vector<std::string> runNumbers;
+
+  for (const auto &hintstr : hintstrs) {
+    const auto [instrument, run] = toInstrumentAndRunNumber(hintstr);
+    if (instrument.empty() || run.empty()) {
+      g_log.debug() << "Unexpected input passed to getArchivePaths():" << std::endl << hintstr << std::endl;
+      return API::Result<std::vector<std::filesystem::path>>(results, "Not found.");
+    }
+    if (instrumentName.empty()) {
+      instrumentName = instrument;
+    } else if (instrumentName != instrument) {
+      g_log.debug() << "Multiple different instruments found in hints passed to getArchivePaths():" << std::endl;
+      return API::Result<std::vector<std::filesystem::path>>(results, "Not found.");
+    }
+    runNumbers.push_back(run);
+  }
+
+  const auto &config = Mantid::Kernel::ConfigService::Instance();
+  std::string facility;
+  try {
+    facility = config.getInstrument(instrumentName).facility().name();
+    if (facility != "HFIR" && facility != "SNS") {
+      return API::Result<std::vector<std::filesystem::path>>(results, "Not found.");
+    }
+  } catch (Mantid::Kernel::Exception::NotFoundError &) {
+    g_log.debug() << "\"" << instrumentName << "\" is not an instrument known to Mantid." << std::endl;
+    return API::Result<std::vector<std::filesystem::path>>(results, "Not found.");
+  }
+
+  std::string runNumbersStr = boost::algorithm::join(runNumbers, ",");
+
+  // Note that we will only be asking for raw files with the given instrument
+  // and run number, and *not* filtering by suffix at this point.  (ONCat has
+  // a strict definition of what a file "extension" is, and has no way of
+  // filtering by, for example, "_event.nxs".)
+  const QueryParameters params{{"facility", facility},
+                               {"instrument", instrumentName},
+                               {"projection", "location"},
+                               {"tags", "type/raw"},
+                               {"sort_by", "run_number"},
+                               {"sort_direction", "ASCENDING"},
+                               {"ranges_q", "indexed.run_number:" + runNumbersStr}};
+
+  // If we've not manually set up an ONCat instance (presumably for testing
+  // purposes) then we must instead create one using the settings in the
+  // currently-running instance of Mantid, making sure to run it in an
+  // "unauthenticated" mode.  If we were to authenticate we'd be able to see
+  // more information, but that would require users logging in and publically
+  // available information is more than enough for our purposes here, anyway.
+  auto defaultOncat = ONCat::fromMantidSettings();
+  auto *oncat = m_oncat ? m_oncat.get() : defaultOncat.get();
+
+  const auto datafiles = [&]() {
+    try {
+      return oncat->list("api", "datafiles", params);
+    } catch (CatalogError &ce) {
+      g_log.debug() << "Error while calling ONCat:" << std::endl << ce.what() << std::endl;
+      return std::vector<ONCatEntity>();
+    }
+  }();
+
+  if (datafiles.size() == 0) {
+    g_log.debug() << "ONCat does not know the location of runs \"" << runNumbersStr << "\" for \"" << instrumentName
+                  << "\"." << std::endl;
+    return API::Result<std::vector<std::filesystem::path>>(results);
+  }
+
+  g_log.debug() << "All datafiles returned from ONCat:" << std::endl;
+  std::map<std::string, std::filesystem::path> runToLocation;
+  for (const auto &datafile : datafiles) {
+    g_log.debug() << datafile.toString() << std::endl;
+    const auto location = *datafile.get<std::string>("location");
+    const auto filename = std::filesystem::path(location).filename().string();
+    const auto [_, run] = toInstrumentAndRunNumber(filename);
+    if (run.empty()) {
+      continue;
+    }
+
+    // Keep the first location returned for each run.
+    // If multiple files exist for the same run, ONCat ordering determines which one we take.
+    if (!runToLocation.contains(run)) {
+      runToLocation.emplace(run, std::filesystem::path(location));
+    }
+  }
+
+  for (size_t i = 0; i < runNumbers.size(); ++i) {
+    const auto it = runToLocation.find(runNumbers[i]);
+    if (it != runToLocation.end()) {
+      results[i] = it->second;
+    }
+  }
+
+  return API::Result<std::vector<std::filesystem::path>>(results);
 }
 
 void ORNLDataArchive::setONCat(ONCat_uptr oncat) { m_oncat = std::move(oncat); }

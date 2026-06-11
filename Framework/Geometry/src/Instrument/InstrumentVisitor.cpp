@@ -318,7 +318,7 @@ size_t InstrumentVisitor::registerDetector(const IDetector &detector) {
   (*m_detectorRotations)[detectorIndex] = Kernel::toQuaterniond(detector.getRotation());
   (*m_shapes)[detectorIndex] = detector.shape();
   (*m_scaleFactors)[detectorIndex] = Kernel::toVector3d(detector.getScaleFactor());
-  if (m_instrument->isMonitorViaIndex(detectorIndex)) {
+  if (m_instrument->isMonitor(detector.getID())) {
     m_monitorIndices->emplace_back(detectorIndex);
   }
   (*m_names)[detectorIndex] = detector.getName();

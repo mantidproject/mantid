@@ -42,6 +42,7 @@
 #include "MantidNexus/H5Util.h"
 
 #include <H5Cpp.h>
+#include <cctype>
 #include <numbers>
 #include <ranges>
 #include <regex>
@@ -180,6 +181,10 @@ void AlignAndFocusPowderSlim::init() {
   declareProperty(std::make_unique<FileProperty>(PropertyNames::CAL_FILE, "", FileProperty::OptionalLoad, cal_exts),
                   "The .cal file containing the position correction factors. Either this or OffsetsWorkspace needs to "
                   "be specified.");
+  const std::vector<std::string> grp_exts{".xml", ".h5", ".hd5", ".hdf", ".cal"};
+  declareProperty(std::make_unique<FileProperty>(PropertyNames::GROUP_FILE, "", FileProperty::OptionalLoad, grp_exts),
+                  "An optional file containing grouping information. Overrides grouping from CalFileName. "
+                  "Supported formats: XML (from SaveDetectorsGrouping) and HDF5/cal (from LoadDiffCal).");
   auto mustBePosArr = std::make_shared<Kernel::ArrayBoundedValidator<double>>();
   mustBePosArr->setLower(0.0);
   declareProperty(std::make_unique<ArrayProperty<double>>(PropertyNames::X_MIN, std::vector<double>{0.1}, mustBePosArr),
@@ -354,6 +359,12 @@ void AlignAndFocusPowderSlim::exec() {
                                                          block_logs);
 
   LoadEventNexus::loadInstrument<MatrixWorkspace_sptr>(filename, wksp, ENTRY_TOP_LEVEL, this, &descriptor);
+
+  // load grouping from a separate file if provided (takes priority over grouping from CalFileName)
+  const std::string grp_filename = getPropertyValue(PropertyNames::GROUP_FILE);
+  if (!grp_filename.empty() && !groupingWS) {
+    groupingWS = this->loadGroupingFile(wksp, grp_filename);
+  }
 
   // load calibration file if provided
   const std::string cal_filename = getPropertyValue(PropertyNames::CAL_FILE);
@@ -791,6 +802,47 @@ const ITableWorkspace_sptr AlignAndFocusPowderSlim::loadCalFile(const API::Works
   g_log.debug() << "Masked detectors: " << m_masked.size() << '\n';
 
   return calibrationWS;
+}
+
+/**
+ * Load a grouping workspace from an explicit grouping file. XML files are loaded via
+ * LoadDetectorsGroupingFile; HDF5 and .cal files are loaded via LoadDiffCal.
+ */
+GroupingWorkspace_sptr AlignAndFocusPowderSlim::loadGroupingFile(const API::MatrixWorkspace_sptr &wksp,
+                                                                 const std::string &filename) {
+  g_log.debug() << "Loading grouping from file: " << filename << '\n';
+
+  // case-insensitive extension check
+  std::string lowerFilename = filename;
+  std::transform(lowerFilename.begin(), lowerFilename.end(), lowerFilename.begin(),
+                 [](unsigned char c) { return std::tolower(c); });
+
+  GroupingWorkspace_sptr groupingWS;
+  if (lowerFilename.ends_with(".xml")) {
+    // XML grouping files can carry their own instrument/date metadata. Do not
+    // supply InputWorkspace here because LoadDetectorsGroupingFile treats that
+    // as an override; without it, the child algorithm will use the instrument
+    // information embedded in the XML file.
+    auto alg = createChildAlgorithm("LoadDetectorsGroupingFile");
+    alg->setPropertyValue("InputFile", filename);
+    alg->executeAsChildAlg();
+    groupingWS = alg->getProperty("OutputWorkspace");
+  } else {
+    // HDF5 or .cal grouping file -- use LoadDiffCal as the Filename (cal file) parameter
+    auto alg = createChildAlgorithm("LoadDiffCal");
+    alg->setPropertyValue("Filename", filename);
+    if (lowerFilename.ends_with(".cal")) {
+      // .cal format requires an instrument to be provided
+      alg->setProperty("InputWorkspace", std::dynamic_pointer_cast<API::Workspace>(wksp));
+    }
+    alg->setProperty<bool>("MakeCalWorkspace", false);
+    alg->setProperty<bool>("MakeGroupingWorkspace", true);
+    alg->setProperty<bool>("MakeMaskWorkspace", false);
+    alg->setPropertyValue("WorkspaceName", "slim_grp");
+    alg->executeAsChildAlg();
+    groupingWS = alg->getProperty("OutputGroupingWorkspace");
+  }
+  return groupingWS;
 }
 
 /**

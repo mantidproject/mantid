@@ -62,7 +62,7 @@ class EXPORT_OPT_MANTIDQT_COMMON WorkspaceTreeWidget : public QWidget, public IW
 public:
   WorkspaceTreeWidget(MantidQt::MantidWidgets::MantidDisplayBase *mdb, bool viewOnly = false,
                       QWidget *parent = nullptr);
-  ~WorkspaceTreeWidget();
+  ~WorkspaceTreeWidget() override;
   void dropEvent(QDropEvent *de) override;
 
   MantidQt::MantidWidgets::WorkspacePresenterWN_wptr getPresenterWeakPtr() override;

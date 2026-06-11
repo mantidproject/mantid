@@ -3,7 +3,7 @@
 # Copyright &copy; 2025 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
-# SPDX - License - Identifier: GPL - 3.0 +
+# SPDX - License - Identifier: GPL-3.0+
 import numpy as np
 import pyvista as pv
 from queue import Queue
@@ -70,8 +70,12 @@ class FullInstrumentViewPresenter:
         self._model.setup()
         self._point_cloud_renderer = PointCloudRenderer()
         self._shape_renderer = ShapeRenderer(self._model.workspace)
+        self._shape_renderer_full = ShapeRenderer(self._model.workspace, use_optimised_shapes=False)
         self._sbs_shape_renderer = SideBySideShapeRenderer(self._model.workspace)
-        self._renderer = self._shape_renderer if view.is_show_shapes_checkbox_checked() else self._point_cloud_renderer
+        self._sbs_shape_renderer_full = SideBySideShapeRenderer(self._model.workspace, use_optimised_shapes=False)
+        self._renderer = self._get_renderer_for_mode(view.get_render_mode_option())
+        self._hover_pick_mode = False
+        self._last_hovered_point_index: Optional[int] = None
         self._select_bank_tube = False
         self.setup()
         self._callback_queue = Queue()
@@ -200,10 +204,10 @@ class FullInstrumentViewPresenter:
         self._view.set_contour_min_max_boxes(clim)
 
     def _on_projection_option_changed(self) -> None:
-        """Update the projection, enable/disable shapes checkbox, and select appropriate renderer."""
+        """Update the projection, enable/disable render mode combo, and select appropriate renderer."""
         self._model.projection_type = self._view.current_selected_projection()
-        self._view.set_show_shapes_checkbox_enabled(True)
-        self._on_show_shapes_toggled(self._view.is_show_shapes_checkbox_checked())
+        self._view.set_render_mode_combo_enabled(True)
+        self._on_render_mode_changed(self._view.get_render_mode_option())
 
     def on_projection_option_changed(self) -> None:
         self._callback_queue.put((self._on_projection_option_changed, ()))
@@ -213,8 +217,15 @@ class FullInstrumentViewPresenter:
             return
         self._model.projection_type = self._view.current_selected_projection()
         self._model.flip_beam = self._view.is_flip_beam_checkbox_checked()
+        if not self._model.is_2d_projection and self._hover_pick_mode:
+            self._hover_pick_mode = False
+            self._last_hovered_point_index = None
+            self._view.set_hover_pick_checked(False)
+        self._view.set_hover_pick_available(self._model.is_2d_projection)
+        self._view.set_hover_pick_mode_enabled(self._hover_pick_mode)
         with SuppressRendering(self._view.main_plotter):
             self._update_view_main_plotter(refresh_limits=refresh_limits)
+            self._view.set_hover_pick_mode_enabled(self._hover_pick_mode)
             self.update_detector_picker()
             self.refresh_plotter_peaks()
 
@@ -355,11 +366,53 @@ class FullInstrumentViewPresenter:
         return [x for pair in zip(min_point, max_point) for x in pair]
 
     def update_detector_picker(self) -> None:
+        if self._hover_pick_mode:
+
+            def point_hovered(point_index: int | None) -> None:
+                if point_index is None or point_index == self._last_hovered_point_index:
+                    return
+
+                self._last_hovered_point_index = point_index
+                self._update_hover_pick_plot(point_index)
+
+            self._renderer.enable_picking(self._view.main_plotter, callback=point_hovered, hover=True)
+            return
+
         def detector_picked(detector_index: int) -> None:
             self._model.update_point_picked_detectors(detector_index, self._select_bank_tube)
             self.update_picked_detectors_on_view()
 
         self._renderer.enable_picking(self._view.main_plotter, callback=detector_picked)
+
+    def on_hover_pick_toggled(self, checked: bool) -> None:
+        enabled = checked and self._model.is_2d_projection
+        self._hover_pick_mode = enabled
+        self._last_hovered_point_index = None
+
+        self._view.set_hover_pick_mode_enabled(enabled)
+        self.update_detector_picker()
+
+        if enabled:
+            self._view.clear_lineplot_overlays()
+            self._view.show_plot_for_detectors(self._model.line_plot_workspace, self._model.lineplot_limits)
+            self._view.set_selected_detector_info([])
+            self._view.set_relative_detector_angle(None)
+            self._view.remove_peak_cursor_from_lineplot()
+            return
+
+        self.update_picked_detectors_on_view()
+
+    def _update_hover_pick_plot(self, point_index: int) -> None:
+        workspace_index = self._model.workspace_index_from_pickable_index(point_index)
+        if workspace_index is None:
+            return
+        self._model.extract_spectra_for_line_plot(self._view.current_selected_lineplot_unit(), False, np.array([workspace_index]))
+        detector_info = self._model.detector_info_text_for_workspace_index(workspace_index)
+        if len(detector_info) == 0:
+            return
+        self._view.show_plot_for_detectors(self._model.line_plot_workspace, self._model.lineplot_limits)
+        self._view.set_selected_detector_info(detector_info)
+        self._view.set_relative_detector_angle(None)
 
     def update_picked_detectors_on_view(self) -> None:
         # Update to visibility shows up in real time
@@ -492,6 +545,11 @@ class FullInstrumentViewPresenter:
         return self._model.cached_keys(kind)
 
     def _update_line_plot_ws_and_draw(self, unit: str) -> None:
+        if self._hover_pick_mode:
+            if self._last_hovered_point_index is not None:
+                self._update_hover_pick_plot(self._last_hovered_point_index)
+            return
+
         self._model.extract_spectra_for_line_plot(unit, self._view.sum_spectra_selected())
         self._view.show_plot_for_detectors(self._model.line_plot_workspace, self._model.lineplot_limits)
         self._view.set_selected_detector_info(self._model.picked_detectors_info_text())
@@ -653,20 +711,24 @@ class FullInstrumentViewPresenter:
         self._model.component_tree_indices_selected(component_indices)
         self.update_plotter()
 
-    def _on_show_shapes_toggled(self, checked: bool) -> None:
-        if checked:
-            if self._model.projection_type == ProjectionType.SIDE_BY_SIDE:
-                self._renderer = self._sbs_shape_renderer
-            else:
-                self._renderer = self._shape_renderer
-        else:
-            self._renderer = self._point_cloud_renderer
+    def _get_renderer_for_mode(self, mode: str):
+        if mode == self._view._RENDER_MODE_POINTS:
+            return self._point_cloud_renderer
 
+        is_sbs = self._model.projection_type == ProjectionType.SIDE_BY_SIDE
+        if mode == self._view._RENDER_MODE_RAW_SHAPES:
+            return self._sbs_shape_renderer_full if is_sbs else self._shape_renderer_full
+
+        return self._sbs_shape_renderer if is_sbs else self._shape_renderer
+
+    def _on_render_mode_changed(self, mode: str) -> None:
+        self._renderer = self._get_renderer_for_mode(mode)
         self.update_plotter()
 
-    def on_show_shapes_toggled(self, checked: bool) -> None:
-        self._view.store_draw_shapes_option()
-        self._callback_queue.put((self._on_show_shapes_toggled, (checked,)))
+    def on_render_mode_changed(self, index: int) -> None:
+        self._view.store_render_mode_option()
+        mode = self._view.get_render_mode_option()
+        self._callback_queue.put((self._on_render_mode_changed, (mode,)))
 
     def _reload_renderers(self) -> None:
         """
@@ -675,8 +737,10 @@ class FullInstrumentViewPresenter:
         """
         self._point_cloud_renderer = PointCloudRenderer()
         self._shape_renderer = ShapeRenderer(self._model.workspace)
+        self._shape_renderer_full = ShapeRenderer(self._model.workspace, use_optimised_shapes=False)
         self._sbs_shape_renderer = SideBySideShapeRenderer(self._model.workspace)
-        self._on_show_shapes_toggled(self._view.is_show_shapes_checkbox_checked())
+        self._sbs_shape_renderer_full = SideBySideShapeRenderer(self._model.workspace, use_optimised_shapes=False)
+        self._on_render_mode_changed(self._view.get_render_mode_option())
 
     def _reload_everything(self) -> None:
         """Reload all workspace-dependent data (peaks, masks, groupings) and clear renderer cache.

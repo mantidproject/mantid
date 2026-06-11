@@ -135,7 +135,7 @@ Output:
 References
 ----------
 
-.. [1] A. Katrusiak, *Absorption Correction for Crystal-Environment Attachments from Direction Cosines*, Zeitschrift für Kristallographie - Crystalline Materials, **216** (2001) 646–647. doi: `10.1524/zkri.216.12.646.22488 <http://dx.doi.org/10.1524/zkri.216.12.646.22488>`_
+.. [1] \A. Katrusiak, *Absorption Correction for Crystal-Environment Attachments from Direction Cosines*, Zeitschrift für Kristallographie - Crystalline Materials, **216** (2001) 646–647. doi: `10.1524/zkri.216.12.646.22488 <http://dx.doi.org/10.1524/zkri.216.12.646.22488>`_
 
 
 .. categories::
