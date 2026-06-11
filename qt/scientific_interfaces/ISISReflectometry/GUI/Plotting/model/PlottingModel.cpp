@@ -400,9 +400,8 @@ workspaceGroups(std::vector<PlottingWorkspaceSelection> const &selectedWorkspace
 std::vector<std::string> selectedWorkspaceNames(std::vector<PlottingWorkspaceSelection> const &selectedWorkspaces) {
   auto workspaceNames = std::vector<std::string>{};
   workspaceNames.reserve(selectedWorkspaces.size());
-  for (auto const &workspace : selectedWorkspaces) {
-    workspaceNames.emplace_back(workspace.workspaceName);
-  }
+  std::transform(selectedWorkspaces.cbegin(), selectedWorkspaces.cend(), std::back_inserter(workspaceNames),
+                 [](const auto &workspace) { return workspace.workspaceName; });
   return workspaceNames;
 }
 
