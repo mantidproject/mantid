@@ -516,8 +516,8 @@ class LETReduction(systemtesting.MantidSystemTest):
     tolerance_is_rel_err = True
 
     def requiredMemoryMB(self):
-        """Far too slow for managed workspaces. They're tested in other places. Requires 2Gb"""
-        return 2000
+        """Far too slow for managed workspaces. They're tested in other places."""
+        return 5500
 
     def runTest(self):
         """

@@ -122,6 +122,7 @@ public:
   bool hasValidShape(const size_t componentIndex) const;
 
   const Geometry::IObject &shape(const size_t componentIndex) const;
+  std::unordered_map<std::shared_ptr<const Geometry::IObject>, std::vector<size_t>> shapeToComponentIndices() const;
 
   double solidAngle(const size_t componentIndex, const Geometry::SolidAngleParams &params) const;
   BoundingBox boundingBox(const size_t componentIndex, const BoundingBox *reference = nullptr,

@@ -3,7 +3,7 @@
 # Copyright &copy; 2026 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
-# SPDX - License - Identifier: GPL - 3.0 +
+# SPDX - License - Identifier: GPL-3.0+
 """Unit tests for the SideBySideShapeRenderer class."""
 
 import unittest
@@ -299,7 +299,7 @@ class TestSideBySideShapeRenderer(unittest.TestCase):
         ws = self._create_mock_workspace(n_detectors=1)
         self.renderer = SideBySideShapeRenderer(ws)
         self.renderer._precomputed = True
-        self.renderer._shape_cache = {0: (np.empty((0, 3)), np.empty((0, 3)))}
+        self.renderer._shape_cache = {0: (np.empty((0, 3)), np.empty((0, 3)), 3)}
         self.renderer._det_shape_keys = np.array([0])
         self.renderer._det_scales = np.array([[1.0, 1.0, 1.0]])
         self.renderer._det_rotations = np.eye(3).reshape(1, 3, 3)
@@ -350,7 +350,7 @@ class TestSideBySideShapeRenderer(unittest.TestCase):
         ws = self._create_mock_workspace(n_detectors=1)
         self.renderer = SideBySideShapeRenderer(ws)
         self.renderer._precomputed = True
-        self.renderer._shape_cache = {0: (np.empty((0, 3)), np.empty((0, 3)))}
+        self.renderer._shape_cache = {0: (np.empty((0, 3)), np.empty((0, 3)), 3)}
         self.renderer._det_shape_keys = np.array([0])
         self.renderer._det_scales = np.array([[1.0, 1.0, 1.0]])
         self.renderer._det_rotations = np.eye(3).reshape(1, 3, 3)
@@ -371,6 +371,9 @@ class TestSideBySideShapeRenderer(unittest.TestCase):
         det_info.position.side_effect = self._make_position_side_effect(n_detectors)
         det_info.indexOf.side_effect = lambda did: int(did)
         det_info.detectorIDs.return_value = list(range(n_detectors))
+        det_info.allPositions.return_value = np.array([[float(i), 0.0, 0.0] for i in range(n_detectors)])
+        det_info.allRotations.return_value = np.array([Rotation.identity().as_quat() for _ in range(n_detectors)])
+        det_info.allScaleFactors.return_value = np.array([[1.0, 1.0, 1.0] for _ in range(n_detectors)])
 
         comp_info = MagicMock()
         comp_info.hasValidShape.return_value = True
@@ -384,29 +387,17 @@ class TestSideBySideShapeRenderer(unittest.TestCase):
         )
 
         shape_objs = []
+        shape_to_indices: dict[str, list[int]] = {}
         for i in range(n_detectors):
             shape = MagicMock()
-            if same_shape:
-                shape.getShapeXML.return_value = "<cuboid>same_shape</cuboid>"
-            else:
-                shape.getShapeXML.return_value = f"<cuboid>shape_{i % 2}</cuboid>"
+            xml = "<cuboid>same_shape</cuboid>" if same_shape else f"<cuboid>shape_{i % 2}</cuboid>"
+            shape.getShapeXML.return_value = xml
             shape.getMesh.return_value = triangle_mesh.copy()
             shape_objs.append(shape)
+            shape_to_indices.setdefault(xml, []).append(i)
 
         comp_info.shape.side_effect = lambda idx: shape_objs[idx]
-
-        identity_quat = MagicMock()
-        identity_quat.real.return_value = 1.0
-        identity_quat.imagI.return_value = 0.0
-        identity_quat.imagJ.return_value = 0.0
-        identity_quat.imagK.return_value = 0.0
-        comp_info.rotation.return_value = identity_quat
-
-        unit_scale = MagicMock()
-        unit_scale.X.return_value = 1.0
-        unit_scale.Y.return_value = 1.0
-        unit_scale.Z.return_value = 1.0
-        comp_info.scaleFactor.return_value = unit_scale
+        comp_info.shapeToComponentIndices.return_value = shape_to_indices
 
         workspace.componentInfo.return_value = comp_info
         workspace.detectorInfo.return_value = det_info

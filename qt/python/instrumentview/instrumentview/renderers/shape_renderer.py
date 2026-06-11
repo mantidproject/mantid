@@ -28,7 +28,11 @@ from instrumentview.Projections.Projection import Projection
 from instrumentview.Projections.ProjectionType import ProjectionType
 from instrumentview.renderers.base_renderer import InstrumentRenderer
 from instrumentview.ComponentSelectionUtils import get_beam_axis, reflect_points_in_axis
+from mantid.geometry import GeometryShape, ShapeInfo, CSGObject
 from mantid.kernel import logger
+
+_AXIS_PARALLEL_TOLERANCE = 1e-12  # minimum norm to treat a vector as non-degenerate
+_CROSS_PRODUCT_TOLERANCE = 1e-6  # minimum cross-product norm before falling back to alternative axis
 
 
 class ShapeRenderer(InstrumentRenderer):
@@ -42,14 +46,15 @@ class ShapeRenderer(InstrumentRenderer):
     _MASKED_COLOUR = (0.25, 0.25, 0.25)
     _DEFAULT_PICKING_TOLERANCE = 0.0001
 
-    def __init__(self, workspace):
+    def __init__(self, workspace, use_optimised_shapes: bool = True):
         super().__init__()
         self._picking_tolerance = self._DEFAULT_PICKING_TOLERANCE
         self._workspace = workspace
+        self._use_optimised_shapes = use_optimised_shapes
         # Populated by ``precompute``.
         self._precomputed = False
-        # Per-unique-shape: {xml_hash: (local_verts (V,3), local_faces (F,3))}
-        self._shape_cache: dict[int, tuple[np.ndarray, np.ndarray]] = {}
+        # Per-unique-shape: {xml_hash: (local_verts (V,3), local_faces (F,3), face_size)}
+        self._shape_cache: dict[int, tuple[np.ndarray, np.ndarray, int]] = {}
         # Per-detector (all detectors, same order as _detector_ids in model):
         #   shape_key, position, rotation matrix (3x3), scale (3,)
         self._det_shape_keys: np.ndarray | None = None  # (N,) int64
@@ -75,58 +80,72 @@ class ShapeRenderer(InstrumentRenderer):
         det_info = self._workspace.detectorInfo()
         n_det = det_info.size()
 
-        shape_cache: dict[int, tuple[np.ndarray, np.ndarray]] = {}
-        det_shape_keys = np.empty(n_det, dtype=np.int64)
-        det_rotations = np.empty((n_det, 3, 3), dtype=np.float64)
-        det_scales = np.empty((n_det, 3), dtype=np.float64)
-        all_positions = np.empty((n_det, 3), dtype=np.float64)
+        shape_cache: dict[int, tuple[np.ndarray, np.ndarray, int]] = {}
+        # 0 is reserved for the fallback shape (no valid shape).
+        det_shape_keys = np.zeros(n_det, dtype=np.int64)
+        shape_cache[0] = _make_fallback_shape()
 
-        for i in range(n_det):
-            # Position (V3D → array)
-            pos = det_info.position(i)
-            all_positions[i] = [pos.X(), pos.Y(), pos.Z()]
-
-            # Rotation (Quat → scipy rotation matrix)
-            q = comp_info.rotation(i)
-            # Mantid Quat: (w, x, y, z); scipy wants (x, y, z, w)
-            rot = Rotation.from_quat([q.imagI(), q.imagJ(), q.imagK(), q.real()])
-            det_rotations[i] = rot.as_matrix()
-
-            sc = comp_info.scaleFactor(i)
-            det_scales[i] = [sc.X(), sc.Y(), sc.Z()]
-
-            # Shape — hash the XML string for fast deduplication
-            if not comp_info.hasValidShape(i):
-                det_shape_keys[i] = 0
-                if 0 not in shape_cache:
-                    shape_cache[0] = _make_fallback_shape()
+        # The returned indices cover all components; we only care about
+        # detector indices (0 .. n_det-1).
+        shape_map = comp_info.shapeToComponentIndices()
+        for xml, component_indices in shape_map.items():
+            det_indices = np.asarray(component_indices, dtype=np.int64)
+            det_indices = det_indices[det_indices < n_det]
+            if len(det_indices) == 0:
                 continue
 
-            shape_obj = comp_info.shape(i)
-            xml = shape_obj.getShapeXML()
             key = hash(xml)
-            det_shape_keys[i] = key
-
             if key not in shape_cache:
+                shape_obj = comp_info.shape(int(det_indices[0]))
                 try:
-                    raw_mesh = shape_obj.getMesh()  # (N_tri, 3, 3)
-                    if raw_mesh.size == 0:
-                        shape_cache[key] = _make_fallback_shape()
+                    si = shape_obj.shapeInfo()
+                    shape_type = si.shape()
+                    if self._use_optimised_shapes and shape_type == GeometryShape.CYLINDER:
+                        shape_cache[key] = self._extract_optimised_shape(shape_obj, shape_type, si, _extract_quad_from_cylinder_shapeinfo)
+                    elif self._use_optimised_shapes and shape_type == GeometryShape.CUBOID:
+                        shape_cache[key] = self._extract_optimised_shape(shape_obj, shape_type, si, _extract_quad_from_cuboid_shapeinfo)
                     else:
-                        verts, faces = _triangles_to_verts_faces(raw_mesh)
-                        shape_cache[key] = (verts, faces)
+                        shape_cache[key] = self._shape_from_raw_mesh(shape_obj)
                 except Exception:
                     shape_cache[key] = _make_fallback_shape()
-                    logger.information(f"ShapeRenderer: failed to get mesh for shape for detector {i}, using fallback")
+                    logger.information("ShapeRenderer: failed to get mesh for shape, using fallback")
+
+            # Assign key to all detectors sharing this shape in one vectorised step.
+            det_shape_keys[det_indices] = key
+
+        # Detectors remaining at key=0 have no valid CSG shape; the fallback is already set.
 
         self._shape_cache = shape_cache
         self._det_shape_keys = det_shape_keys
-        self._det_rotations = det_rotations
-        self._det_scales = det_scales
-        self._all_positions_3d = all_positions
+        self._det_rotations = Rotation.from_quat(det_info.allRotations()).as_matrix()
+        self._det_scales = det_info.allScaleFactors()
+        self._all_positions_3d = det_info.allPositions()
         self._beam_axis = get_beam_axis(self._workspace)
         self._precomputed = True
         logger.information(f"ShapeRenderer: precomputed {n_det} detectors, {len(shape_cache)} unique shapes")
+
+    def _extract_optimised_shape(
+        self,
+        shape: CSGObject,
+        shape_type: GeometryShape,
+        shape_info: ShapeInfo,
+        extract_method: Callable[[ShapeInfo], Optional[tuple[np.ndarray, np.ndarray]]],
+    ) -> tuple[np.ndarray, np.ndarray, int]:
+        """Try to extract a compact shape representation (e.g. 4-vertex quad) from the ShapeInfo."""
+        quad = extract_method(shape_info)
+        if quad is not None:
+            return quad[0], quad[1], 4
+        return self._shape_from_raw_mesh(shape)
+
+    def _shape_from_raw_mesh(self, shape_obj) -> tuple[np.ndarray, np.ndarray, int]:
+        """Convert the mesh from ``shapeObj.getMesh()`` to
+        deduplicated vertices and faces, plus the face size (3 for triangles).
+        """
+        raw_mesh = shape_obj.getMesh()
+        if raw_mesh.size == 0:
+            return _make_fallback_shape()
+        verts, faces = _triangles_to_verts_faces(raw_mesh)
+        return verts, faces, 3
 
     # -----------------------------------------------------------------
     # Build meshes
@@ -375,7 +394,7 @@ class ShapeRenderer(InstrumentRenderer):
             group_indices = np.where(mask)[0]  # indices into det_indices/positions arrays
             n_group = len(group_indices)
 
-            template_verts, template_faces = self._shape_cache[key]
+            template_verts, template_faces, face_size = self._shape_cache[key]
             n_verts = len(template_verts)
             n_faces = len(template_faces)
 
@@ -440,8 +459,8 @@ class ShapeRenderer(InstrumentRenderer):
             # (n_group, n_faces, 3) with broadcasting
             offset_faces = template_faces[np.newaxis, :, :] + offsets[:, np.newaxis, np.newaxis]
             # VTK format: prepend 3 to each face → (n_group*n_faces, 4)
-            flat_faces = offset_faces.reshape(-1, 3)
-            vtk_faces = np.hstack([np.full((len(flat_faces), 1), 3, dtype=np.int64), flat_faces])
+            flat_faces = offset_faces.reshape(-1, face_size)
+            vtk_faces = np.hstack([np.full((len(flat_faces), 1), face_size, dtype=np.int64), flat_faces])
 
             all_verts_list.append(flat_verts)
             all_faces_list.append(vtk_faces.ravel())
@@ -492,7 +511,7 @@ def _triangles_to_verts_faces(raw_mesh: np.ndarray) -> tuple[np.ndarray, np.ndar
     return unique_verts, faces
 
 
-def _make_fallback_shape() -> tuple[np.ndarray, np.ndarray]:
+def _make_fallback_shape() -> tuple[np.ndarray, np.ndarray, int]:
     """A tiny tetrahedron used when a detector has no valid shape."""
     s = 0.002
     verts = np.array(
@@ -505,4 +524,111 @@ def _make_fallback_shape() -> tuple[np.ndarray, np.ndarray]:
         dtype=np.float64,
     )
     faces = np.array([[0, 1, 2], [0, 1, 3], [0, 2, 3], [1, 2, 3]], dtype=np.int64)
-    return verts, faces
+    return verts, faces, 3
+
+
+def _extract_quad_from_cylinder_shapeinfo(si: ShapeInfo) -> tuple[np.ndarray, np.ndarray] | None:
+    """Extract a 4-vertex quad approximating the face of a cylindrical detector.
+
+    The quad has width ``2 * radius`` (across the cylinder) and height equal to
+    the cylinder ``height`` (along the axis), centered at the cylinder midpoint.
+    The quad normal is oriented using a fixed local-coordinate convention:
+    ``(0, 0, -1)`` is taken as the "toward sample" direction, which is the
+    standard Mantid convention for instruments that use ``components-are-facing``.
+    The per-detector rotation applied during mesh assembly then maps that local
+    direction to the correct sample-facing orientation in the global frame.
+
+    Returns ``None`` on failure so the caller falls back to the full mesh.
+    """
+    try:
+        cg = si.cylinderGeometry()
+        bottom_base = np.array([cg["centreOfBottomBase"].X(), cg["centreOfBottomBase"].Y(), cg["centreOfBottomBase"].Z()])
+        axis_raw = np.array([cg["axis"].X(), cg["axis"].Y(), cg["axis"].Z()])
+        radius = cg["radius"]
+        height = cg["height"]
+    except Exception:
+        return None
+
+    axis_norm = np.linalg.norm(axis_raw)
+    if axis_norm < _AXIS_PARALLEL_TOLERANCE:
+        return None
+    a_hat = axis_raw / axis_norm
+
+    cylinder_centre = bottom_base + a_hat * (height / 2.0)
+
+    # Local "toward sample" convention: (0, 0, -1).
+    # s_hat is perpendicular to the axis in the plane of the quad face.
+    sample_dir = np.array([0.0, 0.0, -1.0])
+    s_raw = np.cross(sample_dir, a_hat)
+    s_norm = np.linalg.norm(s_raw)
+    if s_norm < _CROSS_PRODUCT_TOLERANCE:
+        # Axis is nearly parallel to sample direction — try X, then Y as fallback
+        for fallback in (np.array([1.0, 0.0, 0.0]), np.array([0.0, 1.0, 0.0])):
+            s_raw = np.cross(fallback, a_hat)
+            s_norm = np.linalg.norm(s_raw)
+            if s_norm >= _CROSS_PRODUCT_TOLERANCE:
+                break
+        else:
+            return None
+    s_hat = s_raw / s_norm
+
+    half_h = a_hat * (height / 2.0)
+    half_w = s_hat * radius
+    # CCW winding viewed from outside (normal = a_hat × s_hat → toward sample):
+    # bottom-left → bottom-right → top-right → top-left
+    quad_verts = np.array(
+        [
+            cylinder_centre - half_h - half_w,
+            cylinder_centre - half_h + half_w,
+            cylinder_centre + half_h + half_w,
+            cylinder_centre + half_h - half_w,
+        ],
+        dtype=np.float64,
+    )
+    quad_faces = np.array([[0, 1, 2, 3]], dtype=np.int64)
+    return quad_verts, quad_faces
+
+
+def _extract_quad_from_cuboid_shapeinfo(si) -> tuple[np.ndarray, np.ndarray] | None:
+    """Extract a compact 4-vertex, 1-quad-face representation from cuboid ShapeInfo.
+
+    Places four corners in the local XY plane (the detector face plane) at the
+    mid-depth Z coordinate, derived directly from the ShapeInfo corner points
+    rather than from a triangulated mesh.
+
+    The Mantid cuboid convention stores corners as:
+    ``leftFrontBottom`` (x_min, y_min, z_front),
+    ``leftFrontTop`` (x_min, y_max, z_front),
+    ``leftBackBottom`` (x_min, y_min, z_back),
+    ``rightFrontBottom`` (x_max, y_min, z_front).
+
+    Returns ``None`` when the corners have insufficient extent to form a valid quad.
+    """
+    try:
+        cg = si.cuboidGeometry()
+        lfb = cg["leftFrontBottom"]
+        lft = cg["leftFrontTop"]
+        lbb = cg["leftBackBottom"]
+        rfb = cg["rightFrontBottom"]
+    except Exception:
+        return None
+
+    x_min, x_max = lfb.X(), rfb.X()
+    y_min, y_max = lfb.Y(), lft.Y()
+    z_front, z_back = lfb.Z(), lbb.Z()
+
+    if abs(x_max - x_min) < _AXIS_PARALLEL_TOLERANCE and abs(y_max - y_min) < _AXIS_PARALLEL_TOLERANCE:
+        return None
+
+    mid_z = (z_front + z_back) * 0.5
+    quad_verts = np.array(
+        [
+            [x_min, y_min, mid_z],
+            [x_max, y_min, mid_z],
+            [x_max, y_max, mid_z],
+            [x_min, y_max, mid_z],
+        ],
+        dtype=np.float64,
+    )
+    quad_faces = np.array([[0, 1, 2, 3]], dtype=np.int64)
+    return quad_verts, quad_faces
