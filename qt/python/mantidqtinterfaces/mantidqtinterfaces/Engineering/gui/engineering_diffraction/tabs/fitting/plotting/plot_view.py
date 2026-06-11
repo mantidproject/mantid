@@ -253,7 +253,7 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
             ax.autoscale()
         self.update_figure()
 
-    def read_fitprop_from_browser(self) -> Dict[Dict[str, str | bool]] | None:
+    def read_fitprop_from_browser(self) -> Dict[str, Dict[str, str | bool]] | None:
         return self.fit_browser.read_current_fitprop()
 
     def update_browser(self, status: str, func_str: str, setup_name: str) -> None:

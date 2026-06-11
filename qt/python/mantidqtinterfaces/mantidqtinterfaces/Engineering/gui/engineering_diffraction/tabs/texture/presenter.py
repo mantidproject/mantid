@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#
+from __future__ import annotations  # this prevents the imports from TYPE_CHECKING from being evaluated at runtime
 from mantidqt.utils.asynchronous import AsyncTask, AsyncTaskFailure
 from mantidqt.utils.observer_pattern import GenericObservable, GenericObserverWithArgPassing
 from mantid.kernel import logger

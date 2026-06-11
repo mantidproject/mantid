@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-
+from __future__ import annotations  # this prevents the imports from TYPE_CHECKING from being evaluated at runtime
 from itertools import chain
 from numpy import full, nan, max, array, vstack, mean, round
 from collections import defaultdict
