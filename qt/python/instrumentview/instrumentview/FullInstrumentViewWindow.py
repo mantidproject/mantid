@@ -3,7 +3,7 @@
 # Copyright &copy; 2025 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
-# SPDX - License - Identifier: GPL - 3.0 +
+# SPDX - License - Identifier: GPL-3.0+
 from functools import partial, wraps
 from pyvista import PolyData
 from qtpy.QtWidgets import (
@@ -125,8 +125,12 @@ class FullInstrumentViewWindow(QMainWindow):
 
     _detector_spectrum_fig = None
     _ASPECT_RATIO_SETTING_STRING = "InstrumentView.MaintainAspectRatio"
-    _DRAW_SHAPES_SETTING_STRING = "InstrumentView.DrawShapes"
+    _RENDER_MODE_SETTING_STRING = "InstrumentView.RenderMode"
     _FLIP_BEAM_SETTING_STRING = "InstrumentView.FlipBeam"
+    _RENDER_MODE_POINTS = "Points (Fastest)"
+    _RENDER_MODE_SHAPES_FAST = "Approximated Shapes (Fast)"
+    _RENDER_MODE_RAW_SHAPES = "Raw Shapes (Slowest)"
+    _RENDER_MODE_OPTIONS = (_RENDER_MODE_POINTS, _RENDER_MODE_SHAPES_FAST, _RENDER_MODE_RAW_SHAPES)
     _COLOURS = ["#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
 
     def __init__(self, parent=None, off_screen=False):
@@ -258,12 +262,16 @@ class FullInstrumentViewWindow(QMainWindow):
         )
         self._select_bank_tube = QPushButton("Select Bank/Tube")
         self._select_bank_tube.setCheckable(True)
-        self._show_shapes_check_box = QCheckBox()
-        self._show_shapes_check_box.setText("Draw Shapes")
-        self._show_shapes_check_box.setChecked(is_config_setting_true(self._DRAW_SHAPES_SETTING_STRING))
-        self._show_shapes_check_box.setToolTip(
-            "If checked, detectors are drawn using their actual geometric shapes "
-            "(cuboids, cylinders, etc.) instead of points. May be slower for large instruments."
+        self._render_mode_combo_box = NoWheelComboBox(self)
+        self._render_mode_combo_box.addItems(self._RENDER_MODE_OPTIONS)
+        saved_mode = ConfigService.Instance()[self._RENDER_MODE_SETTING_STRING]
+        if saved_mode not in self._RENDER_MODE_OPTIONS:
+            saved_mode = self._RENDER_MODE_POINTS
+        self._render_mode_combo_box.setCurrentText(saved_mode)
+        self._render_mode_combo_box.setToolTip(
+            "Points: draw detectors as a point cloud.\n"
+            "Shapes (Fast): draw detector shapes with optimised quad approximation.\n"
+            "Full Shapes: draw the full triangulated detector geometry."
         )
         projection_first_row.addWidget(self._projection_combo_box)
         projection_first_row.addWidget(self._reset_projection)
@@ -273,7 +281,7 @@ class FullInstrumentViewWindow(QMainWindow):
         projection_third_row.addWidget(self._aspect_ratio_check_box)
         projection_third_row.addWidget(self._flip_beam_check_box)
         projection_third_row.addWidget(self._show_monitors_check_box)
-        projection_third_row.addWidget(self._show_shapes_check_box)
+        projection_second_row.addWidget(self._render_mode_combo_box)
         projection_third_row.addWidget(self._count_scale_combo_box)
         projection_layout.addLayout(projection_first_row)
         projection_layout.addLayout(projection_second_row)
@@ -443,8 +451,8 @@ class FullInstrumentViewWindow(QMainWindow):
     def store_maintain_aspect_ratio_option(self) -> None:
         self._store_checkbox_option(self._aspect_ratio_check_box, self._ASPECT_RATIO_SETTING_STRING)
 
-    def store_draw_shapes_option(self) -> None:
-        self._store_checkbox_option(self._show_shapes_check_box, self._DRAW_SHAPES_SETTING_STRING)
+    def store_render_mode_option(self) -> None:
+        ConfigService.Instance()[self._RENDER_MODE_SETTING_STRING] = self._render_mode_combo_box.currentText()
 
     def store_flip_beam_option(self) -> None:
         self._store_checkbox_option(self._flip_beam_check_box, self._FLIP_BEAM_SETTING_STRING)
@@ -465,11 +473,11 @@ class FullInstrumentViewWindow(QMainWindow):
     def is_show_monitors_checkbox_checked(self) -> bool:
         return self._show_monitors_check_box.isChecked()
 
-    def is_show_shapes_checkbox_checked(self) -> bool:
-        return self._show_shapes_check_box.isChecked()
+    def get_render_mode_option(self) -> str:
+        return self._render_mode_combo_box.currentText()
 
-    def set_show_shapes_checkbox_enabled(self, enabled: bool) -> None:
-        self._show_shapes_check_box.setEnabled(enabled)
+    def set_render_mode_combo_enabled(self, enabled: bool) -> None:
+        self._render_mode_combo_box.setEnabled(enabled)
 
     def _on_splitter_moved(self, pos, index) -> None:
         self._detector_spectrum_fig.tight_layout()
@@ -656,7 +664,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._show_monitors_check_box.clicked.connect(self._presenter.on_show_monitors_check_box_clicked)
         self._count_scale_combo_box.currentIndexChanged.connect(self._presenter.on_count_scale_selected)
         self._flip_beam_check_box.clicked.connect(self._presenter.on_flip_beam_check_box_clicked)
-        self._show_shapes_check_box.clicked.connect(self._presenter.on_show_shapes_toggled)
+        self._render_mode_combo_box.currentIndexChanged.connect(self._presenter.on_render_mode_changed)
         self._select_bank_tube.toggled.connect(self._presenter.on_select_bank_tube_toggled)
 
         self._add_connections_to_edits_and_slider(

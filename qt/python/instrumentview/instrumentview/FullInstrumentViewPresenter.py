@@ -3,7 +3,7 @@
 # Copyright &copy; 2025 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
-# SPDX - License - Identifier: GPL - 3.0 +
+# SPDX - License - Identifier: GPL-3.0+
 import numpy as np
 import pyvista as pv
 from queue import Queue
@@ -70,8 +70,10 @@ class FullInstrumentViewPresenter:
         self._model.setup()
         self._point_cloud_renderer = PointCloudRenderer()
         self._shape_renderer = ShapeRenderer(self._model.workspace)
+        self._shape_renderer_full = ShapeRenderer(self._model.workspace, use_optimised_shapes=False)
         self._sbs_shape_renderer = SideBySideShapeRenderer(self._model.workspace)
-        self._renderer = self._shape_renderer if view.is_show_shapes_checkbox_checked() else self._point_cloud_renderer
+        self._sbs_shape_renderer_full = SideBySideShapeRenderer(self._model.workspace, use_optimised_shapes=False)
+        self._renderer = self._get_renderer_for_mode(view.get_render_mode_option())
         self._hover_pick_mode = False
         self._last_hovered_point_index: Optional[int] = None
         self._select_bank_tube = False
@@ -201,10 +203,10 @@ class FullInstrumentViewPresenter:
         self._view.set_contour_min_max_boxes(clim)
 
     def _on_projection_option_changed(self) -> None:
-        """Update the projection, enable/disable shapes checkbox, and select appropriate renderer."""
+        """Update the projection, enable/disable render mode combo, and select appropriate renderer."""
         self._model.projection_type = self._view.current_selected_projection()
-        self._view.set_show_shapes_checkbox_enabled(True)
-        self._on_show_shapes_toggled(self._view.is_show_shapes_checkbox_checked())
+        self._view.set_render_mode_combo_enabled(True)
+        self._on_render_mode_changed(self._view.get_render_mode_option())
 
     def on_projection_option_changed(self) -> None:
         self._callback_queue.put((self._on_projection_option_changed, ()))
@@ -703,20 +705,24 @@ class FullInstrumentViewPresenter:
         self._model.component_tree_indices_selected(component_indices)
         self.update_plotter()
 
-    def _on_show_shapes_toggled(self, checked: bool) -> None:
-        if checked:
-            if self._model.projection_type == ProjectionType.SIDE_BY_SIDE:
-                self._renderer = self._sbs_shape_renderer
-            else:
-                self._renderer = self._shape_renderer
-        else:
-            self._renderer = self._point_cloud_renderer
+    def _get_renderer_for_mode(self, mode: str):
+        if mode == self._view._RENDER_MODE_POINTS:
+            return self._point_cloud_renderer
 
+        is_sbs = self._model.projection_type == ProjectionType.SIDE_BY_SIDE
+        if mode == self._view._RENDER_MODE_RAW_SHAPES:
+            return self._sbs_shape_renderer_full if is_sbs else self._shape_renderer_full
+
+        return self._sbs_shape_renderer if is_sbs else self._shape_renderer
+
+    def _on_render_mode_changed(self, mode: str) -> None:
+        self._renderer = self._get_renderer_for_mode(mode)
         self.update_plotter()
 
-    def on_show_shapes_toggled(self, checked: bool) -> None:
-        self._view.store_draw_shapes_option()
-        self._callback_queue.put((self._on_show_shapes_toggled, (checked,)))
+    def on_render_mode_changed(self, index: int) -> None:
+        self._view.store_render_mode_option()
+        mode = self._view.get_render_mode_option()
+        self._callback_queue.put((self._on_render_mode_changed, (mode,)))
 
     def _reload_renderers(self) -> None:
         """
@@ -725,8 +731,10 @@ class FullInstrumentViewPresenter:
         """
         self._point_cloud_renderer = PointCloudRenderer()
         self._shape_renderer = ShapeRenderer(self._model.workspace)
+        self._shape_renderer_full = ShapeRenderer(self._model.workspace, use_optimised_shapes=False)
         self._sbs_shape_renderer = SideBySideShapeRenderer(self._model.workspace)
-        self._on_show_shapes_toggled(self._view.is_show_shapes_checkbox_checked())
+        self._sbs_shape_renderer_full = SideBySideShapeRenderer(self._model.workspace, use_optimised_shapes=False)
+        self._on_render_mode_changed(self._view.get_render_mode_option())
 
     def _reload_everything(self) -> None:
         """Reload all workspace-dependent data (peaks, masks, groupings) and clear renderer cache.
