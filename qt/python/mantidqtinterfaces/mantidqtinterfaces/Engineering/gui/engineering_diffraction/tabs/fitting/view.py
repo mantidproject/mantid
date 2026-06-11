@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import annotations  # this prevents the imports from TYPE_CHECKING from being evaluated at runtime
 from qtpy import QtWidgets
 from mantidqt.utils.qt import load_ui
 from typing import TYPE_CHECKING

@@ -75,7 +75,7 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
             # if no fit has been performed
             return None
 
-    def read_current_fitprop(self) -> Dict[Dict[str, str | bool]] | None:
+    def read_current_fitprop(self) -> Dict[str, Dict[str, str | bool]] | None:
         """
         Get algorithm parameters currently displayed in the UI browser (incl. defaults that user cannot change) which
         will be used as input for the sequential fit. This return does not include the output status of the last fit

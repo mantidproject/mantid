@@ -4,6 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import annotations  # this prevents the imports from TYPE_CHECKING from being evaluated at runtime
+
 from Engineering.common.calibration_info import CalibrationInfo
 from .tabs.common import CalibrationObserver, output_settings
 from .tabs.calibration.model import CalibrationModel
