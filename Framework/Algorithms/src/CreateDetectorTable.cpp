@@ -325,14 +325,15 @@ void CreateDetectorTable::writeRowToTable(const int row, const DetectorRowData &
 }
 
 bool CreateDetectorTable::retrieveSignedThetaParameter() {
-  for (int idx : workspaceIndices) {
-    if (spectrumInfo->hasDetectors(static_cast<size_t>(idx))) {
-      const std::vector<std::string> &parameters =
-          spectrumInfo->detector(static_cast<size_t>(idx)).getStringParameter("show-signed-theta", true); // recursive
-      return (!parameters.empty() && find(parameters.begin(), parameters.end(), "Always") != parameters.end());
-    }
+  const auto firstSpectraWithDetectors =
+      std::find_if(workspaceIndices.begin(), workspaceIndices.end(),
+                   [this](const auto idx) { return spectrumInfo->hasDetectors(static_cast<size_t>(idx)); });
+  if (firstSpectraWithDetectors == workspaceIndices.end()) {
+    return false;
   }
-  return false;
+  const std::vector<std::string> &parameters = spectrumInfo->detector(static_cast<size_t>(*firstSpectraWithDetectors))
+                                                   .getStringParameter("show-signed-theta", true); // recursive
+  return (!parameters.empty() && find(parameters.begin(), parameters.end(), "Always") != parameters.end());
 }
 
 CreateDetectorTable::DetectorRowData CreateDetectorTable::calculateWsIdxData(const size_t wsIndex) {
