@@ -52,7 +52,7 @@ height to the elastic peak.
 
 The interpretation of the data must also take into account the propagation of
 statistical errors (counting statistics) in the measured data as discussed by
-Wild et al [1]. If the count in channel :math:`k` is :math:`X_{k}` , then
+Wild et al [1]_. If the count in channel :math:`k` is :math:`X_{k}` , then
 :math:`X_{k}=<X_{k}>+\Delta X_{k}` where :math:`<X_{k}>` is the mean value and
 :math:`\Delta X_{k}` the error. The standard deviation for channel :math:`k` is
 :math:`\sigma k` :math:`2=<\Delta X_{k}>2` which is assumed to be given by
@@ -81,7 +81,7 @@ automatic back transform is not provided.
 References
 ----------
 
-1. U P Wild, R Holzwarth & H P Good, `Rev Sci Instr 48 1621 (1977) <http://dx.doi.org/10.1063/1.1134962>`_
+.. [1] U P Wild, R Holzwarth & H P Good, `Rev Sci Instr 48 1621 (1977) <http://dx.doi.org/10.1063/1.1134962>`_
 
 Workflow
 --------

@@ -37,7 +37,7 @@ is expressed in terms of the :math:`j_l(z)`
 References
 ----------
 
-.. [1] M. Bee, "Quasielastic Neutron Scattering", Taylor & Francis, 1988.
+.. [1] \M. Bee, "Quasielastic Neutron Scattering", Taylor & Francis, 1988.
 
 Usage
 -----
