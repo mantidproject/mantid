@@ -152,10 +152,6 @@ sphinx = ">=9.0,<10"
 agent-skill-rattler-build = ">=0.0.2,<0.0.3"
 fontconfig = "2.17.*"
 
-# qtpy resolves the binding from QT_API; force PyQt6 in this environment.
-[feature.qt6.activation.env]
-QT_API = "pyqt6"
-
 [feature.qt6.target.linux-64.dependencies]
 gxx_linux-64 = "13.*"
 xorg-libxcomposite = ">=0.4.5"
