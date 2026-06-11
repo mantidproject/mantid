@@ -21,9 +21,20 @@ from mantid.simpleapi import (
     SetSampleShape,
     TranslateSampleShape,
 )
-from mantid.api import AnalysisDataService as ADS
+from mantid.api import AnalysisDataService as ADS, MatrixWorkspace
 from Engineering.common.xml_shapes import get_cube_xml
 from Engineering.texture.texture_helper import define_gauge_volume, get_gauge_vol_str, get_scattering_centre
+from typing import Any, Protocol
+
+
+class _BaseModelType(Protocol):
+    """For the purpose of type hinting while this module is orphaned
+    Will be removed and replaced with actual model before final PR"""
+
+    orientations: Any
+    instrument: Any
+    geometry: Any
+    mc_kwargs: dict
 
 
 class WorkspaceManager:
@@ -83,12 +94,10 @@ class WorkspaceManager:
 
     DEFAULT_MATERIAL = "Fe"
 
-    def __init__(self, model):
+    def __init__(self, model: _BaseModelType):
         self._model = model
         # Several planner windows can be open simultaneously, so suffix every workspace name with a
-        # token unique to this instance. All consumers read these names off the instance (e.g.
-        # self.workspaces.WS_MC_INPUT, wsm.wsname), so shadowing the class constants here is
-        # transparent to them - no consumer needs to know about the suffix.
+        # token unique to this instance.
         self._suffix = f"_{uuid4().hex[:8]}"
         for attr in self._OWNED_WS_NAME_ATTRS:
             setattr(self, attr, getattr(self, attr) + self._suffix)
@@ -111,7 +120,7 @@ class WorkspaceManager:
         # material_ws (the ground truth), not here.
         self.attenuation_kwargs = {"point": 1.5, "unit": "dSpacing"}
 
-    def cleanup(self):
+    def cleanup(self) -> None:
         """Remove every workspace this instance owns from the ADS. Called when the planner window
         closes so the (hidden) workspaces don't accumulate across open/close cycles now that their
         names are unique per instance."""
@@ -121,14 +130,14 @@ class WorkspaceManager:
                 ADS.remove(wsname)
 
     @property
-    def instr(self):
+    def instr(self) -> str:
         return self._model.instrument.get_instrument()
 
     @property
-    def scattering_centre(self):
+    def scattering_centre(self) -> np.ndarray:
         return get_scattering_centre(self.ws)
 
-    def update_ws(self):
+    def update_ws(self) -> None:
         if self.ws:
             # rebuilding for a new instrument: _update_existing_wss copies the sample (including
             # whatever material the user set via the SetSampleMaterial dialog) onto the new
@@ -142,7 +151,7 @@ class WorkspaceManager:
         if self.gauge_volume_str:
             define_gauge_volume(self.ws, self.gauge_volume_str)
 
-    def _update_existing_wss(self):
+    def _update_existing_wss(self) -> None:
         # ws and updated_mesh_ws carry the user's initial shape rotation (init_R); it must survive the
         # instrument switch, but a plain CopySample drops it for a CSG shape (see
         # copy_sample_preserving_initial_rotation), so preserve it explicitly. mesh_ws is the pristine,
@@ -156,7 +165,7 @@ class WorkspaceManager:
         self.mesh_ws = mesh_ws
         self.updated_mesh_ws = updated_mesh_ws
 
-    def _init_wss(self):
+    def _init_wss(self) -> None:
         ws = CreateSimulationWorkspace(Instrument=self.instr, BinParams="0,0.1,5", OutputWorkspace=self.wsname, UnitX="dSpacing")
         for ispec in range(ws.getNumberHistograms()):
             ws.setY(ispec, np.ones_like(ws.readY(ispec)))
@@ -172,13 +181,13 @@ class WorkspaceManager:
         self.material_ws = CloneWorkspace(InputWorkspace=self.mesh_ws, OutputWorkspace=self.WS_MATERIAL)
         SetSampleMaterial(self.material_ws, self.DEFAULT_MATERIAL)
 
-    def _set_default_shape_on_wss(self):
+    def _set_default_shape_on_wss(self) -> None:
         SetSampleShape(self.ws, get_cube_xml("default_cube", 0.01))
         SetSampleShape(self.mesh_ws, get_cube_xml("default_cube", 0.01))
         SetSampleShape(self.updated_mesh_ws, get_cube_xml("default_cube", 0.01))
 
     @staticmethod
-    def _copy_material(source, target):
+    def _copy_material(source: MatrixWorkspace, target: MatrixWorkspace) -> None:
         # copy only the material (not shape/orientation/etc.), preserving its full definition
         # including the number/mass density
         CopySample(
@@ -191,7 +200,7 @@ class WorkspaceManager:
             CopyLattice=False,
         )
 
-    def set_material(self):
+    def set_material(self) -> None:
         """Apply the ground-truth material (material_ws) onto the shape workspaces"""
         targets = [self.ws, self.mesh_ws, self.updated_mesh_ws]
         if self.ungrouped_ws is not None:
@@ -199,14 +208,14 @@ class WorkspaceManager:
         for target in targets:
             self._copy_material(self.material_ws, target)
 
-    def get_material_name(self):
+    def get_material_name(self) -> str:
         """Chemical formula / name of the ground-truth material. Returns "" when no material is set."""
         try:
             return self.material_ws.sample().getMaterial().name()
         except (AttributeError, RuntimeError):
             return ""
 
-    def propagate_material(self):
+    def propagate_material(self) -> None:
         """Share the material the user just set via the SetSampleMaterial dialog (which only writes to
         WS_MESH_RAW) with the other workspaces. The raw mesh ws becomes the new ground truth, so it is
         captured onto material_ws as well, ensuring later shape reloads re-apply this exact material."""
@@ -217,13 +226,13 @@ class WorkspaceManager:
         for target in targets:
             self._copy_material(self.mesh_ws, target)
 
-    def load_stl(self, stl_file):
+    def load_stl(self, stl_file: str) -> None:
         LoadSampleShape(InputWorkspace=self.ws, Filename=stl_file, OutputWorkspace=self.ws, **self.stl_kwargs)
         LoadSampleShape(InputWorkspace=self.mesh_ws, Filename=stl_file, OutputWorkspace=self.mesh_ws, **self.stl_kwargs)
         LoadSampleShape(InputWorkspace=self.updated_mesh_ws, Filename=stl_file, OutputWorkspace=self.updated_mesh_ws, **self.stl_kwargs)
         self.set_material()
 
-    def load_xml(self, xml_file):
+    def load_xml(self, xml_file: str) -> None:
         with open(xml_file, "r") as f:
             xml_string = f.read()
         SetSampleShape(self.ws, xml_string)
@@ -232,11 +241,13 @@ class WorkspaceManager:
         self.set_material()
 
     @staticmethod
-    def translate_shape(ws, x_pos, y_pos, z_pos):
+    def translate_shape(ws: MatrixWorkspace, x_pos: float | int, y_pos: float | int, z_pos: float | int) -> None:
         if not (x_pos == 0.0 and y_pos == 0.0 and z_pos == 0.0):
             TranslateSampleShape(InputWorkspace=ws, TranslationVector=f"{x_pos},{y_pos},{z_pos}")
 
-    def update_initial_shape(self, x_rot, y_rot, z_rot, x_pos, y_pos, z_pos):
+    def update_initial_shape(
+        self, x_rot: float | int, y_rot: float | int, z_rot: float | int, x_pos: float | int, y_pos: float | int, z_pos: float | int
+    ) -> None:
         _tmp_ws = self._create_new_ws_with_copied_sample(self.WS_TMP, self.mesh_ws)
         self.offset = (x_pos, y_pos, z_pos)
         self.translate_shape(_tmp_ws, *self.offset)
@@ -263,10 +274,10 @@ class WorkspaceManager:
             ADS.remove(self.WS_TMP)
 
     @staticmethod
-    def _all_rots_zero(x_rot, y_rot, z_rot):
+    def _all_rots_zero(x_rot: float | int, y_rot: float | int, z_rot: float | int) -> bool:
         return np.isclose(x_rot, 0) and np.isclose(y_rot, 0) and np.isclose(z_rot, 0)
 
-    def rotate_samples_by_initial_goniometer(self):
+    def rotate_samples_by_initial_goniometer(self) -> None:
         rot_vec = self.init_R.as_rotvec(degrees=True)
         ang = np.linalg.norm(rot_vec)
         if ang == 0:
@@ -276,14 +287,16 @@ class WorkspaceManager:
         RotateSampleShape(self.wsname, f"{ang},{vec[0]},{vec[1]},{vec[2]},1")
         RotateSampleShape(self.updated_mesh_ws, f"{ang},{vec[0]},{vec[1]},{vec[2]},1")
 
-    def set_gauge_volume_str(self, preset, custom):
+    def set_gauge_volume_str(self, preset: str | None, custom: str | None) -> None:
         self.gauge_volume_str = get_gauge_vol_str(preset, custom)
         if self.gauge_volume_str:
             define_gauge_volume(self.ws, self.gauge_volume_str)
         elif self.ws.run().hasProperty("GaugeVolume"):
             DeleteLog(Workspace=self.ws, Name="GaugeVolume")
 
-    def _create_new_ws_with_copied_sample(self, new_wsname, sample_to_copy, clone=False, preserve_initial_rotation=False):
+    def _create_new_ws_with_copied_sample(
+        self, new_wsname: str, sample_to_copy: MatrixWorkspace, clone: bool = False, preserve_initial_rotation: bool = False
+    ) -> MatrixWorkspace:
         if clone:
             shape_ws = CloneWorkspace(InputWorkspace=sample_to_copy, OutputWorkspace=self._SHAPE_TMP)
         else:
@@ -300,11 +313,11 @@ class WorkspaceManager:
         return new_ws
 
     @staticmethod
-    def _shape_is_mesh(ws):
+    def _shape_is_mesh(ws: MatrixWorkspace) -> bool:
         # a loaded STL becomes a MeshObject; the default cube and a loaded CSG xml are CSGObjects.
         return type(ws.sample().getShape()).__name__ == "MeshObject"
 
-    def copy_sample_preserving_initial_rotation(self, source_ws, dest_ws):
+    def copy_sample_preserving_initial_rotation(self, source_ws: MatrixWorkspace, dest_ws: MatrixWorkspace) -> None:
         """CopySample source_ws's sample onto dest_ws while keeping source_ws's baked-in initial
         shape rotation (init_R).
 

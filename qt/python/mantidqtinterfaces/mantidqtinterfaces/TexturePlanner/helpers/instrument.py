@@ -11,10 +11,28 @@ from mantid.api import InstrumentFileFinder
 from mantid.simpleapi import CreateSimulationWorkspace, GroupDetectors
 from Engineering.EnggUtils import CALIB_DIR
 from Engineering.common.instrument_config import get_instr_config, SUPPORTED_INSTRUMENTS
+from typing import List, Sequence, Protocol
+from abc import abstractmethod
 
-# Sentinel group used when the user supplies their own grouping XML file rather than
+# Group used when the user supplies their own grouping XML file rather than
 # selecting one of an instrument's grouping presets. Also the label shown in the group combo.
 CUSTOM_GROUP = "Custom"
+
+
+class _WorkspaceManagerType(Protocol):
+    """For the purpose of type hinting while this module is orphaned
+    Will be removed and replaced with actual model before final PR"""
+
+    @abstractmethod
+    def update_ws(self) -> None:
+        pass
+
+
+class _BaseModelType(Protocol):
+    """For the purpose of type hinting while this module is orphaned
+    Will be removed and replaced with actual model before final PR"""
+
+    workspaces: _WorkspaceManagerType
 
 
 class InstrumentHelper:
@@ -27,7 +45,7 @@ class InstrumentHelper:
     }
     _DEFAULT_SUPPORTED_GROUPS = ("banks",)
 
-    def __init__(self, model, instrument="ENGINX"):
+    def __init__(self, model: _BaseModelType, instrument: str = "ENGINX"):
         self._model = model
         # instrument config
         self.instr = instrument
@@ -38,7 +56,7 @@ class InstrumentHelper:
         self.custom_grouping_file = None
 
     # instrument config -------------------------------------------------
-    def update_instrument(self, instrument):
+    def update_instrument(self, instrument: str) -> None:
         self.instr = instrument
         # custom instruments are an arbitrary (validated) IDF name with no registered
         # config, so only look one up for the supported instruments.
@@ -46,15 +64,15 @@ class InstrumentHelper:
         self._model.workspaces.update_ws()
         self.update_supported_groups()
 
-    def get_instrument(self):
+    def get_instrument(self) -> str:
         return self.instr
 
     @staticmethod
-    def get_supported_instruments():
+    def get_supported_instruments() -> List[str]:
         return SUPPORTED_INSTRUMENTS
 
     @staticmethod
-    def is_valid_instrument(name):
+    def is_valid_instrument(name: str) -> bool:
         """True if name resolves to a known instrument definition file (IDF)."""
         if not name:
             return False
@@ -64,7 +82,7 @@ class InstrumentHelper:
             return False
 
     @staticmethod
-    def is_grouping_file_applicable(instrument, grouping_path):
+    def is_grouping_file_applicable(instrument: str, grouping_path: str) -> bool:
         """Whether grouping_path can be applied to instrument.
 
         Checked on throwaway workspaces (StoreInADS=False, so the live state and the ADS are
@@ -86,19 +104,19 @@ class InstrumentHelper:
             first += 1
         return first < n_hist and all(spec_info.hasDetectors(i) for i in range(first, n_hist))
 
-    def set_group(self, group_str):
+    def set_group(self, group_str: str) -> None:
         if group_str == CUSTOM_GROUP:
             self.group = CUSTOM_GROUP
         else:
             self.group = self.config.group(group_str)
 
-    def set_custom_grouping_file(self, path):
+    def set_custom_grouping_file(self, path: str) -> None:
         self.custom_grouping_file = path
 
-    def update_supported_groups(self):
+    def update_supported_groups(self) -> None:
         self.supported_groups = self.groups_for_instrument(self.instr)
 
-    def groups_for_instrument(self, instrument):
+    def groups_for_instrument(self, instrument: str) -> Sequence[str]:
         """Grouping options offered for an instrument, without applying it to the model.
 
         Lets the view repopulate the group combo when the user merely selects a different
@@ -110,10 +128,10 @@ class InstrumentHelper:
         # custom instruments have no presets; their only grouping option is a user file
         return (CUSTOM_GROUP,)
 
-    def get_grouping_file(self):
+    def get_grouping_file(self) -> str:
         return self.config.grouping_files[self.group]
 
-    def get_grouping_path(self):
+    def get_grouping_path(self) -> str:
         if self.group == CUSTOM_GROUP:
             # user-supplied file is already an absolute path
             return self.custom_grouping_file

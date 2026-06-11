@@ -7,6 +7,8 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
+from matplotlib.axes import Axes
 
 from mantidqt.plotting.sample_shape import plot_sample_only
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.show_sample.show_sample_model import ShowSampleModel
@@ -16,6 +18,89 @@ from Engineering.texture.texture_helper import (
     ring,
     ster_proj_xy,
 )
+from typing import Protocol, ValuesView, List, Dict, ItemsView
+from abc import abstractmethod
+from mantid.api import MatrixWorkspace
+from scipy.spatial.transform import Rotation
+
+
+class _WorkspaceManagerType(Protocol):
+    """For the purpose of type hinting while this module is orphaned
+    Will be removed and replaced with actual model before final PR"""
+
+    ws: MatrixWorkspace
+    ungrouped_ws: MatrixWorkspace
+    updated_mesh_ws: MatrixWorkspace
+    wsname: str
+    gauge_volume_str: str
+    scattering_centre: np.ndarray
+
+    @abstractmethod
+    def copy_sample_preserving_initial_rotation(self, source_ws: MatrixWorkspace, dest_ws: MatrixWorkspace) -> None:
+        pass
+
+
+class _InstrumentType(Protocol):
+    """For the purpose of type hinting while this module is orphaned
+    Will be removed and replaced with actual model before final PR"""
+
+    @abstractmethod
+    def get_grouping_path(self) -> str:
+        pass
+
+
+class _OrientationType(Protocol):
+    """For the purpose of type hinting while this module is orphaned
+    Will be removed and replaced with actual model before final PR"""
+
+    include: bool
+    select: bool
+    R: Rotation
+    transmission: np.ndarray | None
+    gRs: List[Rotation]
+    pf_points: np.ndarray | None
+
+
+class _OrientationTableType(Protocol):
+    """For the purpose of type hinting while this module is orphaned
+    Will be removed and replaced with actual model before final PR"""
+
+    @abstractmethod
+    def values(self) -> ValuesView[_OrientationType]:
+        pass
+
+    @abstractmethod
+    def items(self) -> ItemsView[int, _OrientationType]:
+        pass
+
+    @abstractmethod
+    def __getitem__(self, index: int) -> _OrientationType:
+        pass
+
+
+class _GeometryType(Protocol):
+    detQs_lab: np.ndarray
+    det_k: np.ndarray
+
+
+class _BaseModelType(Protocol):
+    """For the purpose of type hinting while this module is orphaned
+    Will be removed and replaced with actual model before final PR"""
+
+    workspaces: _WorkspaceManagerType
+    instrument: _InstrumentType
+    orientations: _OrientationTableType
+    geometry: _GeometryType
+
+    vis_settings: Dict[str, bool]
+    gon_colors: List[str]
+    gonio_index: int
+    ax_transform: np.ndarray
+    dir_names: List[str]
+    projection: str
+    plot_transmission: bool
+    transmission_use_data_range: bool
+    dir_cols: List[str]
 
 
 class TexturePlotter:
@@ -25,10 +110,12 @@ class TexturePlotter:
     orientation table, visualisation settings) via back-reference.
     """
 
-    def __init__(self, model):
+    def __init__(self, model: _BaseModelType):
         self._model = model
 
-    def update_plot(self, vecs, senses, angles, fig, lab_ax, proj_ax, current_index):
+    def update_plot(
+        self, vecs: List[np.ndarray], senses: List[float], angles: List[float], fig: Figure, lab_ax: Axes, proj_ax: Axes, current_index: int
+    ) -> None:
         m = self._model
         lab_ax.clear()
         proj_ax.clear()
@@ -58,7 +145,16 @@ class TexturePlotter:
         fig.canvas.draw_idle()
         proj_ax.figure.canvas.draw_idle()
 
-    def _draw_goniometers(self, lab_ax, vecs, senses, angles, gRs, n_gon, extent):
+    def _draw_goniometers(
+        self,
+        lab_ax: Axes,
+        vecs: List[np.ndarray],
+        senses: List[float],
+        angles: List[float],
+        gRs: List[Rotation],
+        n_gon: int,
+        extent: float,
+    ) -> List[np.ndarray | int]:
         m = self._model
         g_vecs = []
         for i, vec in enumerate(vecs):
@@ -89,7 +185,9 @@ class TexturePlotter:
             lab_ax.legend()
         return g_vecs
 
-    def _draw_sample_and_axes(self, fig, lab_ax, rot_mesh, extent, n_gon, scat_centre):
+    def _draw_sample_and_axes(
+        self, fig: Figure, lab_ax: Axes, rot_mesh: np.ndarray, extent: float, n_gon: int, scat_centre: np.ndarray
+    ) -> None:
         m = self._model
         sample_model = ShowSampleModel()
         sample_model.fig = fig
@@ -107,7 +205,7 @@ class TexturePlotter:
         if m.workspaces.gauge_volume_str:
             sample_model.plot_gauge_vol()
 
-    def _draw_beam_and_detectors(self, lab_ax, scat_centre, extent, n_gon):
+    def _draw_beam_and_detectors(self, lab_ax: Axes, scat_centre: np.ndarray, extent: float, n_gon: int) -> None:
         m = self._model
         comp_info = m.workspaces.ws.componentInfo()
         ki = scat_centre - np.array(comp_info.sourcePosition())
@@ -121,7 +219,9 @@ class TexturePlotter:
             self._draw_quiver_bundle(lab_ax, np.asarray(m.geometry.det_k), scat_centre, extent, "grey")
 
     @staticmethod
-    def _draw_quiver_bundle(lab_ax, dirs, scat_centre, extent, tip_color, linestyle="-"):
+    def _draw_quiver_bundle(
+        lab_ax: Axes, dirs: np.ndarray, scat_centre: np.ndarray, extent: float, tip_color: str, linestyle: str = "-"
+    ) -> None:
         scaled = dirs * (1.25 * extent)
         tips = scaled + scat_centre[None, :]
         n = len(scaled)
@@ -139,13 +239,13 @@ class TexturePlotter:
         )
         lab_ax.scatter(tips[:, 0], tips[:, 1], tips[:, 2], color=tip_color, s=2)
 
-    def _project_goniometer_poles(self, R, g_vecs):
+    def _project_goniometer_poles(self, R: Rotation, g_vecs: List[np.ndarray | int]) -> np.ndarray:
         m = self._model
         g_pole = R.inv().apply(np.array(g_vecs)) @ m.ax_transform
         cart_g_pole = get_alpha_beta_from_cart(g_pole.T)
         return ster_proj_xy(*cart_g_pole.T) if m.projection == "ster" else azim_proj_xy(*cart_g_pole.T)
 
-    def _draw_pole_figure(self, proj_ax, g_pole_xy, current_index):
+    def _draw_pole_figure(self, proj_ax: Axes, g_pole_xy: np.ndarray, current_index: int) -> None:
         m = self._model
         for i, gP in enumerate(g_pole_xy):
             pc = m.gon_colors[i]
@@ -175,7 +275,7 @@ class TexturePlotter:
             cax = proj_ax.inset_axes([0.9, 0.15, 0.05, 0.7])
             proj_ax.figure.colorbar(scatt, cax=cax)
 
-    def _decorate_pole_figure(self, proj_ax):
+    def _decorate_pole_figure(self, proj_ax: Axes) -> None:
         m = self._model
         proj_ax.set_aspect("equal")
         proj_ax.set_xlim(-1.5, 1.5)

@@ -15,6 +15,61 @@ from mantid.simpleapi import (
 from mantid.api import AnalysisDataService as ADS
 from mantid.kernel import logger
 from Engineering.texture.TextureUtils import convert_to_sscanss_frame
+from typing import Protocol, ValuesView, Generator
+from abc import abstractmethod
+from mantid.api import MatrixWorkspace
+from scipy.spatial.transform import Rotation
+
+
+class _WorkspaceManagerType(Protocol):
+    """For the purpose of type hinting while this module is orphaned
+    Will be removed and replaced with actual model before final PR"""
+
+    updated_mesh_ws: MatrixWorkspace
+    WS_REFERENCE: str
+
+    @abstractmethod
+    def copy_sample_preserving_initial_rotation(self, source_ws: MatrixWorkspace, dest_ws: MatrixWorkspace) -> None:
+        pass
+
+
+class _InstrumentType(Protocol):
+    """For the purpose of type hinting while this module is orphaned
+    Will be removed and replaced with actual model before final PR"""
+
+    @abstractmethod
+    def get_instrument(self) -> str:
+        pass
+
+
+class _OrientationType(Protocol):
+    """For the purpose of type hinting while this module is orphaned
+    Will be removed and replaced with actual model before final PR"""
+
+    include: bool
+    select: bool
+    R: Rotation
+    transmission: np.ndarray | None
+
+
+class _OrientationTableType(Protocol):
+    """For the purpose of type hinting while this module is orphaned
+    Will be removed and replaced with actual model before final PR"""
+
+    @abstractmethod
+    def values(self) -> ValuesView[_OrientationType]:
+        pass
+
+
+class _BaseModelType(Protocol):
+    """For the purpose of type hinting while this module is orphaned
+    Will be removed and replaced with actual model before final PR"""
+
+    workspaces: _WorkspaceManagerType
+    instrument: _InstrumentType
+    orientations: _OrientationTableType
+    n_output_points: int
+    orientation_kwargs: dict
 
 
 class OrientationExporter:
@@ -25,13 +80,13 @@ class OrientationExporter:
     at write time.
     """
 
-    def __init__(self, model):
+    def __init__(self, model: _BaseModelType):
         self._model = model
 
-    def _included(self):
+    def _included(self) -> Generator[_OrientationType, None, None]:
         return (o for o in self._model.orientations.values() if o.include)
 
-    def output_as_sscanss(self, save_dir, filename):
+    def output_as_sscanss(self, save_dir: str, filename: str) -> None:
         header = ["xyz\n"]
         lines = []
         save_file = os.path.join(save_dir, filename + ".angles")
@@ -43,7 +98,7 @@ class OrientationExporter:
             f.writelines(header + lines)
         logger.notice(f"Orientation data written to '{save_file}' as Sscanss2 Angles")
 
-    def output_as_matrix(self, save_dir, filename):
+    def output_as_matrix(self, save_dir: str, filename: str) -> None:
         lines = []
         save_file = os.path.join(save_dir, filename + ".txt")
         for orientation in self._included():
@@ -54,7 +109,7 @@ class OrientationExporter:
             f.writelines(lines)
         logger.notice(f"Orientation data written to '{save_file}' as Rotation Matrices")
 
-    def output_as_euler(self, save_dir, filename):
+    def output_as_euler(self, save_dir: str, filename: str) -> None:
         axes = self._model.orientation_kwargs["Axes"]
         senses = self._model.orientation_kwargs["Senses"].split(",")
         lines = []
@@ -68,7 +123,7 @@ class OrientationExporter:
             f.writelines(lines)
         logger.notice(f"Orientation data written to '{save_file}' as Euler Angles with Scheme ({axes}) and Senses ({','.join(senses)})")
 
-    def output_transmission_weighting(self, save_dir, filename):
+    def output_transmission_weighting(self, save_dir: str, filename: str) -> None:
         """Write one transmission-weighting value per included orientation.
 
         For each included orientation we take the smallest transmission factor it produced, then

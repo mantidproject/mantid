@@ -4,7 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-
+from __future__ import annotations
+from typing import TYPE_CHECKING, List, Tuple
 from mantid.api import AlgorithmObserver
 from mantidqt.interfacemanager import InterfaceManager
 
@@ -19,9 +20,14 @@ from mantidqtinterfaces.TexturePlanner.view import (
     EXPORT_TRANSMISSION_WEIGHTING,
 )
 
+if TYPE_CHECKING:
+    from mantidqtinterfaces.TexturePlanner.model import TexturePlannerModel, FlatArrayTuple
+    from mantidqtinterfaces.TexturePlanner.view import TexturePlannerView
+    from numpy import ndarray
+
 
 class TexturePlannerPresenter(AlgorithmObserver):
-    def __init__(self, model, view):
+    def __init__(self, model: TexturePlannerModel, view: TexturePlannerView):
         super().__init__()
         self.model = model
         self.view = view
@@ -95,14 +101,14 @@ class TexturePlannerPresenter(AlgorithmObserver):
         self.refresh_update_instrument_enabled()
         self.update_material_display()
 
-    def on_close(self):
+    def on_close(self) -> None:
         # remove this instance's workspaces from the ADS so they don't linger after the window closes
         self.model.workspaces.cleanup()
 
-    def open_settings(self):
+    def open_settings(self) -> None:
         self.settings_presenter.show()
 
-    def set_view_texture_directions(self, names, vecs):
+    def set_view_texture_directions(self, names: Tuple[str, str, str], vecs: FlatArrayTuple) -> None:
         self.view.set_rd_name(names[0])
         self.view.set_nd_name(names[1])
         self.view.set_td_name(names[2])
@@ -110,42 +116,42 @@ class TexturePlannerPresenter(AlgorithmObserver):
         self.view.set_nd_dir(vecs[1])
         self.view.set_td_dir(vecs[2])
 
-    def set_model_texture_directions(self):
+    def set_model_texture_directions(self) -> None:
         self.model.set_ax_transform(self.view.get_rd_dir(), self.view.get_nd_dir(), self.view.get_td_dir())
         self.model.set_dir_names(self.view.get_rd_name(), self.view.get_nd_name(), self.view.get_td_name())
 
-    def set_model_group(self):
+    def set_model_group(self) -> None:
         self.model.instrument.set_group(self.view.get_group())
         self.model.geometry.recompute()
 
-    def set_instrument_options(self):
+    def set_instrument_options(self) -> None:
         self.view.set_instrument_options(self.model.instrument.get_supported_instruments())
 
-    def set_view_with_default_texture_directions(self):
+    def set_view_with_default_texture_directions(self) -> None:
         names, vecs = self.model.get_default_texture_directions()
         self.set_view_texture_directions(names, vecs)
 
-    def update_enabled_gonios(self, num_gonios):
+    def update_enabled_gonios(self, num_gonios: int) -> None:
         [self.view.set_gonio_axis_enabled(gon, True) for gon in self.view.gonio_axes[:num_gonios]]
         [self.view.set_gonio_axis_enabled(gon, False) for gon in self.view.gonio_axes[num_gonios:]]
 
-    def update_angle_steps(self):
+    def update_angle_steps(self) -> None:
         self.view.set_angle_steps()
 
-    def set_max_orientation_index(self):
+    def set_max_orientation_index(self) -> None:
         num_orientations = self.model.orientations.get_num_orientations()
         self.view.set_max_ind(num_orientations)
 
-    def get_vecs(self):
+    def get_vecs(self) -> List[ndarray]:
         return self.model.orientations.get_vecs(self.view.get_vecs(), self.view.get_num_gonios())
 
-    def get_senses(self):
+    def get_senses(self) -> List[float]:
         return self.model.orientations.get_senses(self.view.get_senses(), self.view.get_num_gonios())
 
-    def get_angles(self):
+    def get_angles(self) -> List[float]:
         return self.model.orientations.get_angles(self.view.get_angles(), self.view.get_num_gonios())
 
-    def on_goniometer_updated(self, goniometer_index, *args):
+    def on_goniometer_updated(self, goniometer_index: int, *args) -> None:
         self.model.set_gonio_index(goniometer_index)
         orientation_index = self.view.get_current_index()
         self.model.orientations.update_gRs(self.get_vecs(), self.get_senses(), self.get_angles(), orientation_index)
@@ -160,14 +166,14 @@ class TexturePlannerPresenter(AlgorithmObserver):
         self.update_plots()
         self.update_table()
 
-    def on_num_gonio_updated(self):
+    def on_num_gonio_updated(self) -> None:
         num_gonios = self.view.get_num_gonios()
         self.model.orientations.set_n_gonio(num_gonios)
         self.update_enabled_gonios(num_gonios)
         self.on_goniometer_updated(self.model.update_gonio_index(num_gonios))
         self.view.hide_axis_columns()
 
-    def on_directions_updated(self):
+    def on_directions_updated(self) -> None:
         self.set_model_texture_directions()
         self.model.geometry.recompute()
         self.model.update_all_projected_data()
@@ -184,7 +190,7 @@ class TexturePlannerPresenter(AlgorithmObserver):
     # grouping file yet, or an unrecognised instrument name).
     # ----------------------------------------------------------------------------------
 
-    def on_instrument_changed(self):
+    def on_instrument_changed(self) -> None:
         if self.view.is_custom_instrument():
             # a custom instrument has no presets, so its group is fixed to the custom file
             self.view.setup_group_options((CUSTOM_GROUP,))
@@ -198,32 +204,29 @@ class TexturePlannerPresenter(AlgorithmObserver):
         self.update_custom_widgets_visibility()
         self.revalidate_grouping()
 
-    def on_group_selection_changed(self):
+    def on_group_selection_changed(self) -> None:
         self.update_custom_widgets_visibility()
         self.revalidate_grouping()
 
-    def on_custom_instrument_name_changed(self):
-        # cheap, per-keystroke feedback only: red border + button state. Editing the name
-        # invalidates any earlier applicability result until the name is committed (see
-        # on_custom_instrument_name_committed), which is where the expensive check runs.
+    def on_custom_instrument_name_changed(self) -> None:
+        # per-keystroke feedback only: red border + button state
         self.view.set_custom_instrument_valid(self._custom_instrument_name_valid())
         if self.view.is_custom_instrument() and self._group_is_custom():
             self._grouping_applicable = False
             self.view.set_grouping_file_problem("")
         self.refresh_update_instrument_enabled()
 
-    def on_custom_instrument_name_committed(self):
-        # name finalised (focus lost / Enter): now safe to run the applicability check
+    def on_custom_instrument_name_committed(self) -> None:
+        # name seems finalised (box focus lost or enter pressed): now run the applicability check
         self.revalidate_grouping()
 
-    def on_grouping_file_changed(self):
+    def on_grouping_file_changed(self) -> None:
         self.revalidate_grouping()
 
-    def update_instrument_and_group(self):
+    def update_instrument_and_group(self) -> None:
         """Apply the current instrument + group selection to the model and recompute (button slot).
 
-        The button is only enabled for a valid, complete and applicable selection, so no further
-        validation is needed here."""
+        The button is only enabled for a valid, complete and applicable selection"""
         self.model.instrument.update_instrument(self._selected_instrument_name())
         if self._group_is_custom():
             self.model.instrument.set_custom_grouping_file(self.view.get_grouping_file())
@@ -231,12 +234,12 @@ class TexturePlannerPresenter(AlgorithmObserver):
         self.model.update_all_projected_data()
         self.update_plots()
 
-    def revalidate_grouping(self):
+    def revalidate_grouping(self) -> None:
         """Recompute (and cache) whether the chosen custom grouping file fits the selected
         instrument, surface a problem on the finder when it does not, and refresh the button.
 
         Called only on the infrequent triggers (file chosen, instrument changed, group changed,
-        custom name committed) - never on every name keystroke - because the check builds a
+        custom name committed) because the check builds a
         throwaway instrument workspace."""
         applicable = True
         if self._group_is_custom():
@@ -249,10 +252,10 @@ class TexturePlannerPresenter(AlgorithmObserver):
         self._grouping_applicable = applicable
         self.refresh_update_instrument_enabled()
 
-    def refresh_update_instrument_enabled(self):
+    def refresh_update_instrument_enabled(self) -> None:
         self.view.set_update_instrument_enabled(self._selection_is_applicable())
 
-    def _selection_is_applicable(self):
+    def _selection_is_applicable(self) -> bool:
         """The Update Instrument button is enabled only for a valid, complete selection:
         a known instrument (or valid custom IDF name) paired with an available group (a preset,
         or - for the custom group - a chosen grouping file confirmed applicable to the instrument)."""
@@ -260,27 +263,27 @@ class TexturePlannerPresenter(AlgorithmObserver):
         group_ok = not self._group_is_custom() or self._grouping_applicable
         return instrument_ok and group_ok
 
-    def _custom_instrument_name_valid(self):
+    def _custom_instrument_name_valid(self) -> bool:
         return self.model.instrument.is_valid_instrument(self.view.get_custom_instrument_name())
 
-    def _selected_instrument_name(self):
+    def _selected_instrument_name(self) -> str:
         if self.view.is_custom_instrument():
             return self.view.get_custom_instrument_name()
         return self.view.get_instrument()
 
-    def update_custom_widgets_visibility(self):
+    def update_custom_widgets_visibility(self) -> None:
         self.view.set_custom_instrument_name_visible(self.view.is_custom_instrument())
         self.view.set_grouping_finder_visible(self._group_is_custom())
 
-    def _group_is_custom(self):
+    def _group_is_custom(self) -> bool:
         return self.view.get_group() == CUSTOM_GROUP
 
-    def on_settings_applied(self):
+    def on_settings_applied(self) -> None:
         if self.model.plot_transmission:
             self.model.update_all_projected_data()
         self.update_plots()
 
-    def update_plots(self):
+    def update_plots(self) -> None:
         self.model.plotter.update_plot(
             self.get_vecs(),
             self.get_senses(),
@@ -291,12 +294,12 @@ class TexturePlannerPresenter(AlgorithmObserver):
             self.view.get_current_index(),
         )
 
-    def update_table(self):
+    def update_table(self) -> None:
         self.view.tableWidget.setRowCount(self.model.orientations.get_num_orientations())
         for row_index, row_info in enumerate(self.model.orientations.get_table_info()):
             self.view.add_table_row(row_index, *row_info)
 
-    def add_orientation(self):
+    def add_orientation(self) -> None:
         # add an orientation to the dictionary
         self.model.orientations.add_orientation()
         new_orientation_index = self.model.orientations.get_num_orientations() - 1
@@ -306,57 +309,56 @@ class TexturePlannerPresenter(AlgorithmObserver):
         # refresh goniometer bookkeeping for the newly-selected orientation
         self.on_goniometer_updated(self.model.gonio_index)
 
-    def update_orientation_selector(self, new_index):
+    def update_orientation_selector(self, new_index: int) -> None:
         self.view.spnIndex.setMaximum(self.model.orientations.get_num_orientations())
         self.view.set_current_index(new_index)
 
-    def setup_group_options(self):
+    def setup_group_options(self) -> None:
         self.view.setup_group_options(self.model.instrument.supported_groups)
 
-    def update_goniometer_values_from_index(self, index):
+    def update_goniometer_values_from_index(self, index: int) -> None:
         vecs, senses, angles = self.model.orientations.get_goniometer_values(index)
         self.view.set_vecs(vecs)
         self.view.set_senses(senses)
         self.view.set_angles(angles)
 
-    def on_index_changed(self):
+    def on_index_changed(self) -> None:
         updated_index = self.view.get_current_index()
         self.model.orientations.set_orientation_index(updated_index)
 
         # we now update the goniometer fields with the saved values
         self.update_goniometer_values_from_index(updated_index)
 
-    def enable_load_stl(self):
+    def enable_load_stl(self) -> None:
         self.view.set_load_stl_enabled(self.view.get_stl_string() != "")
 
-    def enable_load_xml(self):
+    def enable_load_xml(self) -> None:
         self.view.set_load_xml_enabled(self.view.get_xml_string() != "")
 
-    def enable_load_orient(self):
+    def enable_load_orient(self) -> None:
         self.view.set_load_orientation_enabled(self.view.get_orientation_file() != "")
 
-    def enable_outputs(self):
+    def enable_outputs(self) -> None:
         self.view.set_outputs_enabled(self.view.get_save_dir() != "" and self.view.get_save_filename() != "")
 
-    def load_stl(self):
+    def load_stl(self) -> None:
         self.model.workspaces.load_stl(self.view.get_stl_string())
         self.set_initial_shape()
         self.update_material_display()
 
-    def load_xml(self):
+    def load_xml(self) -> None:
         self.model.workspaces.load_xml(self.view.get_xml_string())
         self.set_initial_shape()
         self.update_material_display()
 
-    def update_material_display(self):
+    def update_material_display(self) -> None:
         self.view.set_current_material(self.model.workspaces.get_material_name())
 
-    def open_set_material_dialog(self):
+    def open_set_material_dialog(self) -> None:
         """Open the standard SetSampleMaterial dialog against the (hidden) raw mesh workspace.
 
         InputWorkspace is preset and therefore locked by the dialog, so the user never has to pick
-        one of the planner's internal "__"-prefixed workspaces. The material is set for this session
-        only - it is not persisted to the settings file."""
+        one of the planner's internal workspaces"""
         manager = InterfaceManager()
         preset = {"InputWorkspace": self.model.workspaces.WS_MESH_RAW}
         dialog = manager.createDialogFromName("SetSampleMaterial", -1, self.view, False, preset, "", (), ("InputWorkspace",))
@@ -364,20 +366,20 @@ class TexturePlannerPresenter(AlgorithmObserver):
         dialog.setModal(True)
         dialog.show()
 
-    def finishHandle(self):
+    def finishHandle(self) -> None:
         # AlgorithmObserver callback: fires on the algorithm worker thread when the SetSampleMaterial
         # dialog's algorithm finishes. Hop to the GUI thread via a Qt signal before touching
         # workspaces / redrawing plots.
         self.view.signal_material_set()
 
-    def on_material_set(self):
+    def on_material_set(self) -> None:
         # the dialog only set the material on WS_MESH_RAW; share it with the other workspaces, then
         # recompute transmission (if shown) and refresh the plots
         self.model.workspaces.propagate_material()
         self.update_material_display()
         self.on_settings_applied()
 
-    def load_orientation_file(self):
+    def load_orientation_file(self) -> None:
         num_gonios = self.model.orientations.load_orientation_file(self.view.get_orientation_file())
         # update selected number of goniometers to match
         self.view.set_num_gonios(num_gonios)
@@ -389,22 +391,22 @@ class TexturePlannerPresenter(AlgorithmObserver):
         self.update_table()
         self.update_plots()
 
-    def update_selected(self):
+    def update_selected(self) -> None:
         self.model.orientations.update_selected(self.view.get_select_indices())
 
-    def update_included(self):
+    def update_included(self) -> None:
         self.model.orientations.update_included(self.view.get_include_indices())
         self.update_plots()
 
-    def select_all(self):
+    def select_all(self) -> None:
         self.model.orientations.select_all()
         self.update_table()
 
-    def deselect_all(self):
+    def deselect_all(self) -> None:
         self.model.orientations.deselect_all()
         self.update_table()
 
-    def delete_selected(self):
+    def delete_selected(self) -> None:
         self.model.orientations.delete_selected()
         self.view.set_current_index(self.model.orientations.get_orientation_index())
         # call on index change, just in case the index happens to remain, we still need the same update
@@ -415,7 +417,7 @@ class TexturePlannerPresenter(AlgorithmObserver):
         self.update_table()
         self.update_plots()
 
-    def on_export_clicked(self):
+    def on_export_clicked(self) -> None:
         exporter = self.model.exporter
         handlers = {
             EXPORT_SSCANSS: exporter.output_as_sscanss,
@@ -426,7 +428,7 @@ class TexturePlannerPresenter(AlgorithmObserver):
         }
         handlers[self.view.get_export_format()](self.view.get_save_dir(), self.view.get_save_filename())
 
-    def set_show_transmission(self):
+    def set_show_transmission(self) -> None:
         self.update_custom_shape_finder_enabled()
         self.update_set_gauge_vol_enabled()
         show_transmission = self.view.get_show_transmission()
@@ -436,7 +438,7 @@ class TexturePlannerPresenter(AlgorithmObserver):
         self.model.update_all_projected_data()
         self.update_plots()
 
-    def set_initial_shape(self):
+    def set_initial_shape(self) -> None:
         self.model.workspaces.update_initial_shape(
             self.view.get_init_x(),
             self.view.get_init_y(),
@@ -448,24 +450,24 @@ class TexturePlannerPresenter(AlgorithmObserver):
         self.model.update_all_projected_data()
         self.update_plots()
 
-    def set_gauge_volume(self):
+    def set_gauge_volume(self) -> None:
         self.model.workspaces.set_gauge_volume_str(self.view.get_shape_method(), self.view.get_custom_shape())
         self.model.update_all_projected_data()
         self.update_plots()
 
-    def clear_gauge_volume(self):
+    def clear_gauge_volume(self) -> None:
         self.model.workspaces.set_gauge_volume_str("No Gauge Volume", None)
         self.model.update_all_projected_data()
         self.update_plots()
 
-    def update_gauge_volume_state(self):
+    def update_gauge_volume_state(self) -> None:
         self.update_custom_shape_finder_enabled()
         self.update_set_gauge_vol_enabled()
 
-    def update_custom_shape_finder_enabled(self):
+    def update_custom_shape_finder_enabled(self) -> None:
         self.view.set_finder_gauge_vol_visible(self.view.get_shape_method() == "Custom Shape")
 
-    def update_set_gauge_vol_enabled(self):
+    def update_set_gauge_vol_enabled(self) -> None:
         self.view.set_set_gauge_vol_enabled(True)
         if self.view.get_shape_method() == "Custom Shape":
             self.view.set_set_gauge_vol_enabled(self.view.get_custom_shape() is not None)

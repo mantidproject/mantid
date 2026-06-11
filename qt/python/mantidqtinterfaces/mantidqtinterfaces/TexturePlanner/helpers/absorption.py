@@ -8,19 +8,52 @@
 import numpy as np
 
 from mantid.simpleapi import ConvertUnits, CopySample, MonteCarloAbsorption, RotateSampleShape
+from mantid.api import MatrixWorkspace
 from mantid.kernel import logger
 from Engineering.texture.correction.correction_model import read_attenuation_coefficient_at_value
 from Engineering.texture.texture_helper import define_gauge_volume
+from typing import Any, Protocol, Dict, Tuple
+from abc import abstractmethod
+from scipy.spatial.transform import Rotation
+
+
+class _WorkspaceManagerType(Protocol):
+    """For the purpose of type hinting while this module is orphaned
+    Will be removed and replaced with actual model before final PR"""
+
+    WS_MC_OUTPUT: str
+    WS_MC_INPUT: str
+    wsname: str
+    attenuation_kwargs: Dict[str, str | float]
+    offset: Tuple[float | int, float | int, float | int]
+    mesh_ws: MatrixWorkspace
+    init_R: Rotation
+    gauge_volume_str: str | None
+
+    @staticmethod
+    @abstractmethod
+    def translate_shape(ws: MatrixWorkspace, x_pos: float | int, y_pos: float | int, z_pos: float | int):
+        pass
+
+
+class _BaseModelType(Protocol):
+    """For the purpose of type hinting while this module is orphaned
+    Will be removed and replaced with actual model before final PR"""
+
+    workspaces: _WorkspaceManagerType
+    orientations: Any
+    geometry: Any
+    mc_kwargs: dict
 
 
 class AbsorptionCalculator:
     """Runs MonteCarloAbsorption per orientation.
     Passes the resulting transmission factors onto the orientation table via the manager model"""
 
-    def __init__(self, model):
+    def __init__(self, model: _BaseModelType):
         self._model = model
 
-    def calc_for_index(self, index):
+    def calc_for_index(self, index: int) -> None:
         m = self._model
         wsm = m.workspaces
         # create a workspace to run the absorption calculation on
@@ -43,13 +76,13 @@ class AbsorptionCalculator:
         m.orientations.set_transmission_at_index(transmission, index)
 
     @staticmethod
-    def _create_mc_ws(wsm):
+    def _create_mc_ws(wsm: _WorkspaceManagerType) -> MatrixWorkspace:
         mc_ws = ConvertUnits(InputWorkspace=wsm.wsname, Target="Wavelength", OutputWorkspace=wsm.WS_MC_INPUT)
         mc_ws.run().getGoniometer().setR(np.eye(3))
         return mc_ws
 
     @staticmethod
-    def _set_mc_sample_state(wsm, mc_ws, R):
+    def _set_mc_sample_state(wsm: _WorkspaceManagerType, mc_ws: MatrixWorkspace, R: Rotation) -> None:
         # copy sample shape and material from mesh ws (untransformed sample - no init_R, no translation, identity goniometer)
         CopySample(
             InputWorkspace=wsm.mesh_ws,
@@ -74,6 +107,6 @@ class AbsorptionCalculator:
         # define the gauge volume
         define_gauge_volume(mc_ws, wsm.gauge_volume_str)
 
-    def calc_all(self):
+    def calc_all(self) -> None:
         for i in self._model.orientations.keys():
             self.calc_for_index(i)

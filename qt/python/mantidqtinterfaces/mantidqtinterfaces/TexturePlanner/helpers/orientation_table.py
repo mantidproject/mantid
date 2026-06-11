@@ -4,13 +4,27 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from collections.abc import KeysView, ValuesView, ItemsView
 
 import numpy as np
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import List, Tuple, Sequence
 from scipy.spatial.transform import Rotation
 from mantid.kernel import logger
 from Engineering.texture.texture_helper import vec_string_to_norm_array
+from typing import Protocol
+from abc import abstractmethod
+
+
+class _BaseModelType(Protocol):
+    """For the purpose of type hinting while this module is orphaned
+    Will be removed and replaced with actual model before final PR"""
+
+    orientation_kwargs: dict
+
+    @abstractmethod
+    def update_gonio_index(self, num_gonios: int) -> int:
+        pass
 
 
 MAX_GONIOMETERS = 6
@@ -27,8 +41,8 @@ class Orientation:
     R: Rotation = field(default_factory=Rotation.identity)
     include: bool = True
     select: bool = True
-    pf_points: Optional[np.ndarray] = None
-    transmission: Optional[np.ndarray] = None
+    pf_points: np.ndarray | None = None
+    transmission: np.ndarray | None = None
 
     def copy(self) -> "Orientation":
         return Orientation(
@@ -55,7 +69,7 @@ class OrientationTable:
     # (matrix format, or an error path). Falls back to a 3-axis (YXY) goniometer view.
     _DEFAULT_NUM_AXES = 3
 
-    def __init__(self, model):
+    def __init__(self, model: _BaseModelType):
         self._model = model
         self.sense_vals = {"Clockwise": -1, "Counterclockwise": 1}  # mantid convention
         self.sense_names = {"-1": "Clockwise", "1": "Counterclockwise"}
@@ -65,45 +79,47 @@ class OrientationTable:
         self.saved_orientations = {0: self._make_default_orientation()}
 
     # dict-like access ---------------------------------------------------
-    def __getitem__(self, index):
+    def __getitem__(self, index: int) -> Orientation:
         return self.saved_orientations[index]
 
-    def keys(self):
+    def keys(self) -> KeysView:
         return self.saved_orientations.keys()
 
-    def values(self):
+    def values(self) -> ValuesView:
         return self.saved_orientations.values()
 
-    def items(self):
+    def items(self) -> ItemsView:
         return self.saved_orientations.items()
 
     # index / count ------------------------------------------------------
-    def get_orientation_index(self):
+    def get_orientation_index(self) -> int:
         return self.orientation_index
 
-    def set_orientation_index(self, index):
+    def set_orientation_index(self, index: int) -> None:
         self.orientation_index = index
 
-    def get_num_orientations(self):
+    def get_num_orientations(self) -> int:
         return len(self.saved_orientations.keys())
 
-    def get_table_info(self):
+    def get_table_info(self) -> List[List[str | bool]]:
         return [[list(v.gonio_strings), v.include, v.select] for v in self.saved_orientations.values()]
 
-    def set_n_gonio(self, val):
+    def set_n_gonio(self, val: int) -> None:
         self.n_gonio = val
 
-    def update_gonio_index(self, num_gonios):
+    def update_gonio_index(self, num_gonios: int) -> int:
         # delegates to the model so the gonio_index lives in one place
         return self._model.update_gonio_index(num_gonios)
 
     # setting values from elsewhere ---------------------------------------
 
-    def set_transmission_at_index(self, transmission, index):
+    def set_transmission_at_index(self, transmission: np.ndarray, index: int) -> None:
         self.saved_orientations[index].transmission = transmission
 
     # rotation maths -----------------------------------------------------
-    def calc_gRs(self, vecs, senses, angles):
+    def calc_gRs(
+        self, vecs: List[Tuple[int | float, int | float, int | float]], senses: List[int | float], angles: List[int | float]
+    ) -> Tuple[List[Rotation], Rotation]:
         gRs = [Rotation.identity()]
         R = Rotation.identity()
         for i, vec in enumerate(vecs):
@@ -113,29 +129,35 @@ class OrientationTable:
             gRs.append(R)
         return gRs, R
 
-    def update_gRs(self, vecs, senses, angles, current_index):
+    def update_gRs(
+        self,
+        vecs: List[Tuple[int | float, int | float, int | float]],
+        senses: List[int | float],
+        angles: List[int | float],
+        current_index: int,
+    ) -> None:
         gRs, R = self.calc_gRs(vecs, senses, angles)
         self.saved_orientations[current_index].gRs = gRs
         self.saved_orientations[current_index].R = R
 
     # selection / inclusion / delete ------------------------------------
-    def update_selected(self, selected_inds):
+    def update_selected(self, selected_inds: Sequence[int]) -> None:
         for k, v in self.saved_orientations.items():
             v.select = k in selected_inds
 
-    def update_included(self, included_inds):
+    def update_included(self, included_inds: Sequence[int]) -> None:
         for k, v in self.saved_orientations.items():
             v.include = k in included_inds
 
-    def select_all(self):
+    def select_all(self) -> None:
         for v in self.saved_orientations.values():
             v.select = True
 
-    def deselect_all(self):
+    def deselect_all(self) -> None:
         for v in self.saved_orientations.values():
             v.select = False
 
-    def delete_selected(self):
+    def delete_selected(self) -> None:
         to_keep = [k for k, v in self.saved_orientations.items() if not v.select]
         if len(to_keep) == 0:
             self.saved_orientations = {0: self._make_default_orientation()}
@@ -144,7 +166,7 @@ class OrientationTable:
         new_orientation_index = to_keep.index(self.orientation_index) if self.orientation_index in to_keep else 0
         self.set_orientation_index(new_orientation_index)
 
-    def add_orientation(self):
+    def add_orientation(self) -> None:
         # create a new orientation, initially just as a copy of the current orientation
         self.saved_orientations[self.get_num_orientations()] = self.saved_orientations[self.orientation_index].copy()
 
@@ -158,21 +180,23 @@ class OrientationTable:
         return Orientation(gonio_strings=gonio_strings, gRs=gRs, R=R)
 
     @staticmethod
-    def get_goniometer_string(vec, sense, angle):
+    def get_goniometer_string(vec: Tuple[int | float, int | float, int | float], sense: int | float, angle: int | float) -> str:
         return f"{angle},{np.round(vec[0], 3)},{np.round(vec[1], 3)},{np.round(vec[2], 3)},{sense}"
 
-    def update_gonio_string(self, vecs, senses, angles, index):
+    def update_gonio_string(
+        self, vecs: List[Tuple[int | float, int | float, int | float]], senses: List[int | float], angles: List[int | float], index: int
+    ) -> None:
         orientation = self.saved_orientations[index]
         for i, vec in enumerate(vecs):
             orientation.gonio_strings[i] = self.get_goniometer_string(vec, senses[i], angles[i])
         for i in range(len(vecs), MAX_GONIOMETERS):
             orientation.gonio_strings[i] = self.get_goniometer_string((1, 0, 0), 1, 0)
 
-    def read_goniometer_string(self, goniometer_string):
+    def read_goniometer_string(self, goniometer_string: str) -> Tuple[str, float, float]:
         angle, v1, v2, v3, sense = goniometer_string.split(",")
         return f"{v1},{v2},{v3}", self.sense_names[sense], float(angle)
 
-    def get_goniometer_values(self, index):
+    def get_goniometer_values(self, index: int) -> Tuple[List[str], List[int | float], List[int | float]]:
         info = self.saved_orientations[index]
         vecs, senses, angles = [], [], []
         for gonio_string in info.gonio_strings:
@@ -183,7 +207,7 @@ class OrientationTable:
         return vecs, senses, angles
 
     # file loaders -------------------------------------------------------
-    def load_orientation_file(self, txt_file):
+    def load_orientation_file(self, txt_file: str) -> int:
         """Load orientations from a whitespace/comma-separated text file."""
         logger.notice("Loading Orientations from file")
         with open(txt_file, "r") as f:
@@ -199,7 +223,7 @@ class OrientationTable:
             return self._DEFAULT_NUM_AXES
         return self._load_euler_orientations(goniometer_lists, num_entries)
 
-    def _load_matrix_orientations(self, goniometer_lists):
+    def _load_matrix_orientations(self, goniometer_lists: List[List[float]]) -> None:
         vecs = [(0, 1, 0), (1, 0, 0), (0, 1, 0)]
         senses = [1, 1, 1]
         for goniometer_list in goniometer_lists:
@@ -210,7 +234,7 @@ class OrientationTable:
             self.update_gonio_string(vecs, senses, angles, new_index)
             self.update_gRs(vecs, senses, angles, new_index)
 
-    def _load_euler_orientations(self, goniometer_lists, num_entries):
+    def _load_euler_orientations(self, goniometer_lists: List[List[float]], num_entries: int) -> int:
         axes = self._model.orientation_kwargs["Axes"]
         senses = self._model.orientation_kwargs["Senses"].split(",")
         num_ax, num_senses = len(axes), len(senses)
@@ -232,13 +256,13 @@ class OrientationTable:
         return num_ax
 
     # helpers for converting view fields into typed values --------------
-    def get_vecs(self, all_vec_strings, num_gonios):
+    def get_vecs(self, all_vec_strings: List[str], num_gonios: int) -> List[np.ndarray]:
         vec_strings = all_vec_strings[:num_gonios]
         return [vec_string_to_norm_array(vec_string) for vec_string in vec_strings]
 
-    def get_senses(self, senses, num_gonios):
+    def get_senses(self, senses: List[str], num_gonios: int) -> List[float]:
         return [self.sense_vals[x] for x in senses[:num_gonios]]
 
     @staticmethod
-    def get_angles(angles, num_gonios):
+    def get_angles(angles: List[str], num_gonios: int) -> List[float]:
         return [float(x) for x in angles[:num_gonios]]

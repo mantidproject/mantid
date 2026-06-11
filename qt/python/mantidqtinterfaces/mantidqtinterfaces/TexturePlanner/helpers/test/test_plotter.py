@@ -91,14 +91,14 @@ class TestTexturePlotter_UpdatePlot(unittest.TestCase):
         lab_ax = MagicMock()
         proj_ax = MagicMock()
 
-        plotter.update_plot(["v"], [1], [10.0], fig, lab_ax, proj_ax, 0)
+        plotter.update_plot([(1, 0, 0)], [1], [10.0], fig, lab_ax, proj_ax, 0)
 
         lab_ax.clear.assert_called_once_with()
         proj_ax.clear.assert_called_once_with()
         # _draw_goniometers receives (lab_ax, vecs, senses, angles, gRs, n_gon, extent)
         gon_args = plotter._draw_goniometers.call_args.args
         self.assertIs(gon_args[0], lab_ax)
-        self.assertEqual(gon_args[1:4], (["v"], [1], [10.0]))
+        self.assertEqual(gon_args[1:4], ([(1, 0, 0)], [1], [10.0]))
         # _draw_sample_and_axes receives (fig, lab_ax, rot_mesh, extent, n_gon, scat_centre)
         sample_args = plotter._draw_sample_and_axes.call_args.args
         self.assertIs(sample_args[0], fig)

@@ -9,6 +9,41 @@ import numpy as np
 
 from mantid.simpleapi import GroupDetectors, LoadDetectorsGroupingFile
 from Engineering.texture.texture_helper import define_gauge_volume
+from typing import Protocol
+from abc import abstractmethod
+from mantid.api import MatrixWorkspace
+
+
+class _WorkspaceManagerType(Protocol):
+    """For the purpose of type hinting while this module is orphaned
+    Will be removed and replaced with actual model before final PR"""
+
+    ws: MatrixWorkspace
+    ungrouped_ws: MatrixWorkspace
+    wsname: str
+    gauge_volume_str: str
+    scattering_centre: np.ndarray
+
+    @abstractmethod
+    def copy_sample_preserving_initial_rotation(self, source_ws: MatrixWorkspace, dest_ws: MatrixWorkspace) -> None:
+        pass
+
+
+class _InstrumentType(Protocol):
+    """For the purpose of type hinting while this module is orphaned
+    Will be removed and replaced with actual model before final PR"""
+
+    @abstractmethod
+    def get_grouping_path(self) -> str:
+        pass
+
+
+class _BaseModelType(Protocol):
+    """For the purpose of type hinting while this module is orphaned
+    Will be removed and replaced with actual model before final PR"""
+
+    workspaces: _WorkspaceManagerType
+    instrument: _InstrumentType
 
 
 class DetectorGeometry:
@@ -17,7 +52,7 @@ class DetectorGeometry:
     selected detector grouping, and applies the grouping to the data workspace.
     """
 
-    def __init__(self, model):
+    def __init__(self, model: _BaseModelType):
         self._model = model
         self.det_k = None
         self.detQs_lab = None
@@ -56,17 +91,13 @@ class DetectorGeometry:
         # calculate the required det_k and detQs_lab
         self.recompute_scattering_geometry()
 
-    def _get_grouping_path(self):
+    def _get_grouping_path(self) -> str:
         return self._model.instrument.get_grouping_path()
 
     @staticmethod
-    def _apply_grouping_to_wss(wsm, grouping_path):
+    def _apply_grouping_to_wss(wsm: _WorkspaceManagerType, grouping_path: str) -> MatrixWorkspace:
         # Always regroup from the pristine ungrouped workspace; grouping the previously grouped
-        # ws by a new MapFile is very slow because each detector ID has to be located inside
-        # the already-merged spectra. Sync current sample (shape + material) onto the
-        # ungrouped baseline first so the regrouped ws inherits the user's latest sample state.
-        # The sync keeps the sample's initial rotation (init_R), which a plain CopySample would
-        # drop for a CSG shape (and which the directions/labels read off the regrouped ws).
+        # ws by a new MapFile is very slow.
         if wsm.ws is not None:
             wsm.copy_sample_preserving_initial_rotation(wsm.ws, wsm.ungrouped_ws)
         wsm.ws = GroupDetectors(
@@ -80,7 +111,7 @@ class DetectorGeometry:
             define_gauge_volume(wsm.ws, wsm.gauge_volume_str)
         return wsm.ws
 
-    def recompute_scattering_geometry(self):
+    def recompute_scattering_geometry(self) -> None:
         """Recompute det_k / detQs_lab for the current goniometer orientation.
 
         Reads the scattering centre lazily (it depends on the current goniometer R that the
