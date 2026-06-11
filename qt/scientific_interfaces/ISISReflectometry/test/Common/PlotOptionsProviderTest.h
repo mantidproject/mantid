@@ -70,7 +70,7 @@ public:
     TS_ASSERT_EQUALS(options.yAxis.label, "Theta");
   }
 
-  void testSpinAsymmetryOptionsUseQzAndAsymmetryAxes() {
+  void testSpinAsymmetryOptionsUseQAndAsymmetryAxes() {
     auto provider = PlotOptionsProvider{};
 
     auto const options = provider.optionsFor(PlotOutputType::SpinAsymmetry, PlotLayout::Overplot);
@@ -78,9 +78,10 @@ public:
     TS_ASSERT_EQUALS(options.outputType, PlotOutputType::SpinAsymmetry);
     TS_ASSERT_EQUALS(options.plotStyle, PlotStyle::Line);
     TS_ASSERT_EQUALS(options.layout, PlotLayout::Overplot);
-    TS_ASSERT_EQUALS(options.xAxis.label, "Qz");
+    TS_ASSERT_EQUALS(options.xAxis.label, "Q");
     TS_ASSERT_EQUALS(options.yAxis.label, "Spin Asymmetry");
     TS_ASSERT_EQUALS(options.yAxis.unit, "");
+    TS_ASSERT_EQUALS(options.xAxis.scale, AxisScale::Log);
     TS_ASSERT(options.showErrors);
     TS_ASSERT(options.horizontalMarker);
     TS_ASSERT_EQUALS(*options.horizontalMarker, 0.0);
