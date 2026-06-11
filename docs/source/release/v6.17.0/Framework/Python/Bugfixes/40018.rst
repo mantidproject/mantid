@@ -1,0 +1,1 @@
+- The :ref:`01_basic_plot_scripting` and :ref:`02_scripting_plots` documentation has been updated to automate the testing of the :ref:`pim_plotting` section instead of relying on manually testing the code snippets.
