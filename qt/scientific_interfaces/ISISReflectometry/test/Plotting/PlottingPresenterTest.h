@@ -804,7 +804,8 @@ private:
   }
 
   PlottingWorkspaceTreeItem runItem(std::string label, std::vector<PlottingWorkspaceTreeItem> children) {
-    return runItem("Group 1", {label}, std::move(label), std::move(children));
+    auto runNumbers = std::vector<std::string>{label};
+    return runItem("Group 1", std::move(runNumbers), std::move(label), std::move(children));
   }
 
   PlottingWorkspaceTreeItem workspaceGroupItem(std::string label, std::vector<PlottingWorkspaceTreeItem> children) {
