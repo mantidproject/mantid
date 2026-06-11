@@ -23,6 +23,14 @@ InstrumentViewer
 
 New features
 ############
+
+.. figure:: ../../images/6_16_release/points-vs-shapes.png
+   :width: 85%
+   :align: center
+   :alt: Comparison of detectors rendered as points versus shapes
+
+   Detectors rendered as points versus as their actual shapes
+
 - Updates to the **new** Instrument Viewer:
     - (`#41169 <https://github.com/mantidproject/mantid/pull/41169>`_) Peak selection no longer requires constantly clicking buttons for adding and deleting peaks. Now peak selection is triggered with a peak selection mode that lets you continually select detectors and add (left mouse click) and delete (right mouse click) peaks without extra clicking or moving the mouse around.
     - (`#41437 <https://github.com/mantidproject/mantid/pull/41437>`_) The Detector Info box now shows up at the bottom and is hidden when no detectors are selected or when too many detectors (more than 3) are selected. This should reduce the visual clutter on the GUI.
@@ -54,7 +62,5 @@ New features
 ############
 - (`#41314 <https://github.com/mantidproject/mantid/pull/41314>`_) The :ref:`SliceViewer <sliceviewer>` now supports ``inverted`` masking using the *rectangular, elliptical and polygonal* masking selectors.
 
-Bugfixes
-############
 
 :ref:`Release 6.16.0 <v6.16.0>`

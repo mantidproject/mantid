@@ -40,11 +40,6 @@ Bugfixes
 - (`#41343 <https://github.com/mantidproject/mantid/pull/41343>`_) :ref:`algm-BinMD`, :ref:`algm-SliceMD`, and :ref:`algm-MDNorm` will throw an error if the total number of bins requested is larger than the available memory.
 - (`#41517 <https://github.com/mantidproject/mantid/pull/41517>`_) A bug in :ref:`MDNorm <algm-MDNorm>` involving a missing matrix inversion during the symmetry operation has been fixed.
 
-Deprecated
-############
-
-Removed
-############
 
 Fit Functions
 -------------
@@ -53,15 +48,6 @@ New features
 ############
 - (`#41167 <https://github.com/mantidproject/mantid/pull/41167>`_) The :ref:`IkedaCarpenterPV <func-IkedaCarpenterPV>` peak function now supports analytical derivative calculation, for more information see :ref:`IkedaCarpenterPV <func-IkedaCarpenterPV-derivative>`.
 - (`#41416 <https://github.com/mantidproject/mantid/pull/41416>`_) The ``PDF`` parameter of the :ref:`FABADA Minimizer <FABADA>` has been changed from a bool to a string. This allows the user to specify the name of the output workspace for the PDF.
-
-Bugfixes
-############
-
-Deprecated
-############
-
-Removed
-############
 
 
 Data Objects
@@ -98,15 +84,12 @@ New features
 - (`#40737 <https://github.com/mantidproject/mantid/pull/40737>`_) Add support for Markdown in developer docs using `myst-parser <https://myst-parser.readthedocs.io/en/latest/index.html>`_.
 - (`#40766 <https://github.com/mantidproject/mantid/pull/40766>`_) Add :ref:`mantidprofiler <AlgorithmProfiler>` as a developer dependency on linux.
 - (`#40771 <https://github.com/mantidproject/mantid/pull/40771>`_) The memory allocator set by ``LD_PRELOAD`` has been change from ``jemalloc`` to ``tbbmalloc``.
-- (`#41058 <https://github.com/mantidproject/mantid/pull/41058>`_) Upgraded Python to 3.12. See the changes made to python `here <https://docs.python.org/3/whatsnew/3.12.html>`__.
+- (`#41058 <https://github.com/mantidproject/mantid/pull/41058>`_) Upgraded Python to 3.12. See the changes made to Python `here <https://docs.python.org/3/whatsnew/3.12.html>`__.
 - (`#41017 <https://github.com/mantidproject/mantid/pull/41017>`_) Remove dependency ``pytz`` to prefer using Python's built-in ``zoneinfo`` for time zone information.
 - (`#41034 <https://github.com/mantidproject/mantid/pull/41034>`_) Remove ``python-dateutil`` in favor of Python's ``datetime`` module.
 - (`#41071 <https://github.com/mantidproject/mantid/pull/41071>`_) New configuration files have been added for GitHub Copilot.
 - (`#41110 <https://github.com/mantidproject/mantid/pull/41110>`_) Move to `euphonic <https://github.com/pace-neutrons/Euphonic>`_ v1.6.0.
 - (`#41153 <https://github.com/mantidproject/mantid/pull/41153>`_) Updated Matplotlib from version 3.9 to version 3.10. The release notes for `version 3.10 can be found here <https://matplotlib.org/stable/users/prev_whats_new/whats_new_3.10.0.html>`_.
-
-Bugfixes
-############
 
 
 Nexus
