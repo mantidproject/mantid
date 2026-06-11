@@ -35,7 +35,7 @@ class ALFInstrumentViewPresenter(FullInstrumentViewPresenter):
     def init_view_and_model(self, ws):
         super().__init__(ALFInstrumentViewView(), FullInstrumentViewModel(ws))
         self._view._select_bank_tube.toggle()
-        self._view._show_shapes_check_box.setChecked(True)
+        self._view._render_mode_combo_box.setCurrentText(self._view._RENDER_MODE_SHAPES_FAST)
         # self._view.set_default_projection(ProjectionType.SIDE_BY_SIDE)
 
     def selected_detector_ids(self):

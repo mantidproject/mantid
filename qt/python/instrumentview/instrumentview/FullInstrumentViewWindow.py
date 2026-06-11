@@ -277,7 +277,7 @@ class FullInstrumentViewView(QWidget):
         )
         self._select_bank_tube = QPushButton("Select Bank/Tube")
         self._select_bank_tube.setCheckable(True)
-        self._render_mode_combo_box = NoWheelComboBox(self)
+        self._render_mode_combo_box = NoWheelComboBox()
         self._render_mode_combo_box.addItems(self._RENDER_MODE_OPTIONS)
         saved_mode = ConfigService.Instance()[self._RENDER_MODE_SETTING_STRING]
         if saved_mode not in self._RENDER_MODE_OPTIONS:
