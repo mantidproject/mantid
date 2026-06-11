@@ -1,0 +1,1110 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2026 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+// SPDX - License - Identifier: GPL - 3.0 +
+#pragma once
+
+#include "../../../ISISReflectometry/GUI/Plotting/view/QtPlottingView.h"
+
+#include <QApplication>
+#include <QBrush>
+#include <QCheckBox>
+#include <QColor>
+#include <QComboBox>
+#include <QItemSelectionModel>
+#include <QMouseEvent>
+#include <QPushButton>
+#include <QTreeView>
+#include <QVBoxLayout>
+#include <cxxtest/TestSuite.h>
+#include <utility>
+
+using namespace MantidQt::CustomInterfaces::ISISReflectometry;
+
+class QtPlottingViewTest : public CxxTest::TestSuite {
+public:
+  void testOnlyReflectivityCurvePresetIsAvailable() {
+    QtPlottingView view;
+    auto plotPreset = view.findChild<QComboBox *>("plotPreset");
+
+    TS_ASSERT_EQUALS(plotPreset->count(), 1);
+    TS_ASSERT_EQUALS(plotPreset->currentText().toStdString(), "Reflectivity Curve");
+    TS_ASSERT_EQUALS(view.selectedPlotOutputType(), PlotOutputType::ReflectivityCurve);
+  }
+
+  void testAvailablePlotOutputTypesUpdatesPresetOptions() {
+    QtPlottingView view;
+    auto plotPreset = view.findChild<QComboBox *>("plotPreset");
+
+    view.setAvailablePlotOutputTypes({PlotOutputType::ReflectivityCurve, PlotOutputType::DetectorMap,
+                                      PlotOutputType::SpinAsymmetry, PlotOutputType::Alignment});
+
+    TS_ASSERT_EQUALS(plotPreset->count(), 4);
+    TS_ASSERT_EQUALS(plotPreset->itemText(0).toStdString(), "Reflectivity Curve");
+    TS_ASSERT_EQUALS(plotPreset->itemText(1).toStdString(), "Detector Map");
+    TS_ASSERT_EQUALS(plotPreset->itemText(2).toStdString(), "Spin Asymmetry");
+    TS_ASSERT_EQUALS(plotPreset->itemText(3).toStdString(), "Alignment");
+  }
+
+  void testChangingPlotOutputTypeClearsWorkspaceSelection() {
+    QtPlottingView view;
+    auto plotPreset = view.findChild<QComboBox *>("plotPreset");
+    view.setAvailablePlotOutputTypes({PlotOutputType::ReflectivityCurve, PlotOutputType::SpinAsymmetry});
+    view.setWorkspaceItems(workspaceItems());
+    auto tree = workspaceTree(view);
+
+    click(tree, groupIndex(tree));
+    plotPreset->setCurrentIndex(1);
+
+    TS_ASSERT(tree->selectionModel()->selectedRows().empty());
+  }
+
+  void testUpdatingAvailablePlotOutputTypesPreservesSelectionWhenOutputTypeDoesNotChange() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItems());
+    auto tree = workspaceTree(view);
+
+    click(tree, groupIndex(tree));
+    view.setAvailablePlotOutputTypes({PlotOutputType::ReflectivityCurve, PlotOutputType::DetectorMap});
+
+    TS_ASSERT(tree->selectionModel()->isSelected(groupIndex(tree)));
+    TS_ASSERT(tree->selectionModel()->isSelected(runIndex(tree)));
+    TS_ASSERT(tree->selectionModel()->isSelected(workspaceIndex(tree)));
+  }
+
+  void testUpdatingAvailablePlotOutputTypesClearsSelectionWhenCurrentOutputTypeIsRemoved() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItems());
+    auto tree = workspaceTree(view);
+
+    click(tree, groupIndex(tree));
+    view.setAvailablePlotOutputTypes({PlotOutputType::DetectorMap});
+
+    TS_ASSERT(tree->selectionModel()->selectedRows().empty());
+  }
+
+  void testPlotButtonsHaveExpectedLabelsAndOrder() {
+    QtPlottingView view;
+    auto const optionsLayout = view.findChild<QVBoxLayout *>("optionsLayout");
+
+    assertButton(optionsLayout->itemAt(10)->widget(), "plotIndividual", "Plot");
+    assertButton(optionsLayout->itemAt(11)->widget(), "plotOverplot", "Plot over");
+    assertButton(optionsLayout->itemAt(12)->widget(), "plotTiled", "Plot tiled");
+    assertCheckBox(optionsLayout->itemAt(13)->widget(), "addToExistingPlot", "Add to existing plot");
+    assertCheckBox(optionsLayout->itemAt(14)->widget(), "plotTiledVertically", "Plot tiled vertically");
+  }
+
+  void testPlotButtonsAreDisabledWhenNothingIsSelected() {
+    QtPlottingView view;
+
+    view.setOutputSelectionEnabled(true);
+
+    assertPlotButtonsEnabled(view, false, false, false);
+  }
+
+  void testPlotButtonIsEnabledForASingleSelectedWorkspace() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItemsWithGroups(1));
+    view.setOutputSelectionEnabled(true);
+    auto tree = workspaceTree(view);
+
+    click(tree, workspaceIndex(tree));
+
+    assertPlotButtonsEnabled(view, true, false, false);
+  }
+
+  void testPlotButtonIsEnabledForAParentWithOneWorkspaceDescendant() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItemsWithGroups(1));
+    view.setOutputSelectionEnabled(true);
+    auto tree = workspaceTree(view);
+
+    click(tree, groupIndex(tree));
+
+    assertPlotButtonsEnabled(view, true, false, false);
+  }
+
+  void testAddToExistingPlotIsDisabledWhenNoActivePlotIsAvailable() {
+    QtPlottingView view;
+
+    view.setOutputSelectionEnabled(true);
+
+    TS_ASSERT(!view.findChild<QCheckBox *>("addToExistingPlot")->isEnabled());
+  }
+
+  void testAddToExistingPlotIsEnabledWhenActivePlotIsAvailable() {
+    QtPlottingView view;
+
+    view.setOutputSelectionEnabled(true);
+    view.setActivePlotAvailable(true);
+    view.setActivePlotOverplotCompatible(true);
+
+    TS_ASSERT(view.findChild<QCheckBox *>("addToExistingPlot")->isEnabled());
+  }
+
+  void testAddToExistingPlotIsDisabledForDetectorMap() {
+    QtPlottingView view;
+    view.setAvailablePlotOutputTypes({PlotOutputType::ReflectivityCurve, PlotOutputType::DetectorMap});
+    view.setOutputSelectionEnabled(true);
+    view.setActivePlotAvailable(true);
+    view.setActivePlotOverplotCompatible(true);
+    auto plotPreset = view.findChild<QComboBox *>("plotPreset");
+
+    plotPreset->setCurrentIndex(1);
+
+    TS_ASSERT(!view.findChild<QCheckBox *>("addToExistingPlot")->isEnabled());
+  }
+
+  void testAddToExistingPlotIsDisabledWhenActivePlotIsIncompatible() {
+    QtPlottingView view;
+
+    view.setOutputSelectionEnabled(true);
+    view.setActivePlotAvailable(true);
+    view.setActivePlotOverplotCompatible(false);
+
+    TS_ASSERT(!view.findChild<QCheckBox *>("addToExistingPlot")->isEnabled());
+  }
+
+  void testPlotButtonIsDisabledWhenAddingToExistingPlot() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItemsWithGroups(1));
+    view.setOutputSelectionEnabled(true);
+    view.setActivePlotAvailable(true);
+    view.setActivePlotOverplotCompatible(true);
+    auto tree = workspaceTree(view);
+
+    click(tree, workspaceIndex(tree));
+    view.findChild<QCheckBox *>("addToExistingPlot")->setChecked(true);
+
+    TS_ASSERT(!view.findChild<QPushButton *>("plotIndividual")->isEnabled());
+    TS_ASSERT(view.addToExistingPlot());
+  }
+
+  void testSingleSelectionEnablesMultiPlotButtonsWhenAddingToExistingPlot() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItemsWithGroups(1));
+    view.setOutputSelectionEnabled(true);
+    view.setActivePlotAvailable(true);
+    view.setActivePlotOverplotCompatible(true);
+    auto tree = workspaceTree(view);
+
+    click(tree, workspaceIndex(tree));
+    view.findChild<QCheckBox *>("addToExistingPlot")->setChecked(true);
+
+    assertPlotButtonsEnabled(view, false, true, true);
+  }
+
+  void testPlotTiledVerticallyIsEnabledWhenSingleWorkspaceIsSelected() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItemsWithGroups(1));
+    view.setOutputSelectionEnabled(true);
+    auto tree = workspaceTree(view);
+
+    click(tree, workspaceIndex(tree));
+
+    TS_ASSERT(!view.findChild<QPushButton *>("plotTiled")->isEnabled());
+    TS_ASSERT(view.findChild<QCheckBox *>("plotTiledVertically")->isEnabled());
+  }
+
+  void testAllPlotButtonsAreEnabledForMultipleSelectedWorkspaces() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItems());
+    view.setOutputSelectionEnabled(true);
+    auto tree = workspaceTree(view);
+
+    click(tree, groupIndex(tree));
+
+    assertPlotButtonsEnabled(view, true, true, true);
+  }
+
+  void testPlotOverButtonIsDisabledWhenAddingToIncompatibleExistingPlot() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItemsWithGroups(2));
+    view.setOutputSelectionEnabled(true);
+    view.setActivePlotAvailable(true);
+    auto tree = workspaceTree(view);
+
+    click(tree, groupIndex(tree, 0));
+    click(tree, groupIndex(tree, 1), Qt::ControlModifier);
+    view.findChild<QCheckBox *>("addToExistingPlot")->setChecked(true);
+
+    TS_ASSERT(!view.findChild<QCheckBox *>("addToExistingPlot")->isEnabled());
+    TS_ASSERT(!view.addToExistingPlot());
+    assertPlotButtonsEnabled(view, true, true, true);
+  }
+
+  void testPlotOverButtonIsEnabledWhenAddingToCompatibleExistingPlot() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItemsWithGroups(2));
+    view.setOutputSelectionEnabled(true);
+    view.setActivePlotAvailable(true);
+    auto tree = workspaceTree(view);
+
+    click(tree, groupIndex(tree, 0));
+    click(tree, groupIndex(tree, 1), Qt::ControlModifier);
+    view.setActivePlotOverplotCompatible(true);
+    view.findChild<QCheckBox *>("addToExistingPlot")->setChecked(true);
+
+    assertPlotButtonsEnabled(view, false, true, true);
+  }
+
+  void testPlotOverButtonIsDisabledForDetectorMap() {
+    QtPlottingView view;
+    view.setAvailablePlotOutputTypes({PlotOutputType::ReflectivityCurve, PlotOutputType::DetectorMap});
+    view.setWorkspaceItems(workspaceItems());
+    view.setOutputSelectionEnabled(true);
+    auto plotPreset = view.findChild<QComboBox *>("plotPreset");
+    auto tree = workspaceTree(view);
+
+    click(tree, groupIndex(tree));
+    plotPreset->setCurrentIndex(1);
+    click(tree, groupIndex(tree));
+
+    assertPlotButtonsEnabled(view, true, false, true);
+  }
+
+  void testPlotOverAndTiledButtonsAreDisabledForLooseSelectedSpinAsymmetryWorkspaces() {
+    QtPlottingView view;
+    view.setAvailablePlotOutputTypes({PlotOutputType::ReflectivityCurve, PlotOutputType::SpinAsymmetry});
+    view.setWorkspaceItems(workspaceItemsWithBinnedWorkspaces(6));
+    view.setOutputSelectionEnabled(true);
+    auto plotPreset = view.findChild<QComboBox *>("plotPreset");
+    auto tree = workspaceTree(view);
+
+    plotPreset->setCurrentIndex(1);
+    click(tree, groupIndex(tree));
+
+    assertPlotButtonsEnabled(view, true, false, false);
+  }
+
+  void testPlotOverAndTiledButtonsAreDisabledForOneSelectedSpinAsymmetryWorkspaceGroup() {
+    QtPlottingView view;
+    view.setAvailablePlotOutputTypes({PlotOutputType::ReflectivityCurve, PlotOutputType::SpinAsymmetry});
+    view.setWorkspaceItems(workspaceItemsWithBinnedWorkspaceGroups(1));
+    view.setOutputSelectionEnabled(true);
+    auto plotPreset = view.findChild<QComboBox *>("plotPreset");
+    auto tree = workspaceTree(view);
+
+    plotPreset->setCurrentIndex(1);
+    click(tree, groupIndex(tree));
+
+    assertPlotButtonsEnabled(view, true, false, false);
+  }
+
+  void testPlotOverAndTiledButtonsAreEnabledForTwoSelectedSpinAsymmetryWorkspaceGroups() {
+    QtPlottingView view;
+    view.setAvailablePlotOutputTypes({PlotOutputType::ReflectivityCurve, PlotOutputType::SpinAsymmetry});
+    view.setWorkspaceItems(workspaceItemsWithBinnedWorkspaceGroups(2));
+    view.setOutputSelectionEnabled(true);
+    auto plotPreset = view.findChild<QComboBox *>("plotPreset");
+    auto tree = workspaceTree(view);
+
+    plotPreset->setCurrentIndex(1);
+    click(tree, groupIndex(tree));
+
+    assertPlotButtonsEnabled(view, true, true, true);
+  }
+
+  void testPlotButtonsAreDisabledWhenOutputSelectionIsDisabled() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItems());
+    view.setOutputSelectionEnabled(true);
+    auto tree = workspaceTree(view);
+
+    click(tree, groupIndex(tree));
+    view.setOutputSelectionEnabled(false);
+
+    assertPlotButtonsEnabled(view, false, false, false);
+  }
+
+  void testChangingPlotOutputTypeClearsSelectionAndDisablesPlotButtons() {
+    QtPlottingView view;
+    auto plotPreset = view.findChild<QComboBox *>("plotPreset");
+    view.setAvailablePlotOutputTypes({PlotOutputType::ReflectivityCurve, PlotOutputType::SpinAsymmetry});
+    view.setWorkspaceItems(workspaceItems());
+    view.setOutputSelectionEnabled(true);
+    auto tree = workspaceTree(view);
+
+    click(tree, groupIndex(tree));
+    plotPreset->setCurrentIndex(1);
+
+    assertPlotButtonsEnabled(view, false, false, false);
+  }
+
+  void testReflectivityCurveHidesPlotOutputProperties() {
+    QtPlottingView view;
+
+    TS_ASSERT(view.findChild<QWidget *>("plotPropertiesTopSeparator")->isHidden());
+    TS_ASSERT(view.findChild<QWidget *>("plotPropertiesBottomSeparator")->isHidden());
+    TS_ASSERT(view.findChild<QWidget *>("detectorMapYAxis")->isHidden());
+    TS_ASSERT(view.findChild<QWidget *>("detectorMapXAxis")->isHidden());
+    TS_ASSERT(view.findChild<QWidget *>("alignmentXAxis")->isHidden());
+  }
+
+  void testDetectorMapShowsAxisUnitProperties() {
+    QtPlottingView view;
+    auto plotPreset = view.findChild<QComboBox *>("plotPreset");
+
+    view.setAvailablePlotOutputTypes(
+        {PlotOutputType::ReflectivityCurve, PlotOutputType::DetectorMap, PlotOutputType::Alignment});
+    plotPreset->setCurrentIndex(1);
+
+    TS_ASSERT(!view.findChild<QWidget *>("plotPropertiesTopSeparator")->isHidden());
+    TS_ASSERT(!view.findChild<QWidget *>("plotPropertiesBottomSeparator")->isHidden());
+    TS_ASSERT(!view.findChild<QWidget *>("detectorMapYAxis")->isHidden());
+    TS_ASSERT(!view.findChild<QWidget *>("detectorMapXAxis")->isHidden());
+    TS_ASSERT(view.findChild<QWidget *>("alignmentXAxis")->isHidden());
+
+    auto const selection = view.selectedPlotOutputSelection();
+    TS_ASSERT_EQUALS(selection.outputType, PlotOutputType::DetectorMap);
+    TS_ASSERT_EQUALS(selection.detectorMapYAxis, DetectorMapYAxis::DetectorId);
+    TS_ASSERT_EQUALS(selection.detectorMapXAxis, DetectorMapXAxis::TimeOfFlight);
+  }
+
+  void testDetectorMapSelectedAxisUnitPropertiesAreReturned() {
+    QtPlottingView view;
+    auto plotPreset = view.findChild<QComboBox *>("plotPreset");
+
+    view.setAvailablePlotOutputTypes({PlotOutputType::DetectorMap});
+    plotPreset->setCurrentIndex(0);
+    view.findChild<QComboBox *>("detectorMapYAxis")->setCurrentIndex(1);
+    view.findChild<QComboBox *>("detectorMapXAxis")->setCurrentIndex(1);
+
+    auto const selection = view.selectedPlotOutputSelection();
+    TS_ASSERT_EQUALS(selection.detectorMapYAxis, DetectorMapYAxis::Theta);
+    TS_ASSERT_EQUALS(selection.detectorMapXAxis, DetectorMapXAxis::Lambda);
+  }
+
+  void testAlignmentShowsXAxisUnitProperty() {
+    QtPlottingView view;
+    auto plotPreset = view.findChild<QComboBox *>("plotPreset");
+
+    view.setAvailablePlotOutputTypes({PlotOutputType::ReflectivityCurve, PlotOutputType::Alignment});
+    plotPreset->setCurrentIndex(1);
+
+    TS_ASSERT(!view.findChild<QWidget *>("plotPropertiesTopSeparator")->isHidden());
+    TS_ASSERT(!view.findChild<QWidget *>("plotPropertiesBottomSeparator")->isHidden());
+    TS_ASSERT(view.findChild<QWidget *>("detectorMapYAxis")->isHidden());
+    TS_ASSERT(view.findChild<QWidget *>("detectorMapXAxis")->isHidden());
+    TS_ASSERT(!view.findChild<QWidget *>("alignmentXAxis")->isHidden());
+
+    auto const selection = view.selectedPlotOutputSelection();
+    TS_ASSERT_EQUALS(selection.outputType, PlotOutputType::Alignment);
+    TS_ASSERT_EQUALS(selection.alignmentXAxis, AlignmentXAxis::DetectorId);
+  }
+
+  void testWorkspaceTreeHasExpectedColumnHeaders() {
+    QtPlottingView view;
+    auto tree = workspaceTree(view);
+
+    TS_ASSERT_EQUALS(tree->model()->headerData(0, Qt::Horizontal).toString().toStdString(), "Item type");
+    TS_ASSERT_EQUALS(tree->model()->headerData(1, Qt::Horizontal).toString().toStdString(), "Output type");
+    TS_ASSERT_EQUALS(tree->model()->headerData(2, Qt::Horizontal).toString().toStdString(), "Item");
+  }
+
+  void testWorkspaceTreeShowsItemTypeOutputTypeAndItemColumns() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItems());
+    auto tree = workspaceTree(view);
+
+    TS_ASSERT_EQUALS(tree->model()->data(groupIndex(tree)).toString().toStdString(), "Group");
+    TS_ASSERT_EQUALS(tree->model()->data(groupOutputTypeIndex(tree)).toString().toStdString(), "");
+    TS_ASSERT_EQUALS(tree->model()->data(groupItemIndex(tree)).toString().toStdString(), "Group 1");
+    TS_ASSERT_EQUALS(tree->model()->data(workspaceIndex(tree)).toString().toStdString(), "Workspace");
+    TS_ASSERT_EQUALS(tree->model()->data(workspaceOutputTypeIndex(tree)).toString().toStdString(), "IvsQ");
+    TS_ASSERT_EQUALS(tree->model()->data(workspaceItemIndex(tree)).toString().toStdString(), "IvsQ_12345");
+  }
+
+  void testWorkspaceTreeMetadataColumnsUseMutedText() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItems());
+    auto tree = workspaceTree(view);
+
+    TS_ASSERT_EQUALS(foregroundColour(tree, workspaceIndex(tree)), QColor(112, 112, 112));
+    TS_ASSERT_EQUALS(foregroundColour(tree, workspaceOutputTypeIndex(tree)), QColor(112, 112, 112));
+    TS_ASSERT_DIFFERS(foregroundColour(tree, workspaceItemIndex(tree)), QColor(112, 112, 112));
+  }
+
+  void testWorkspaceTreeUsesDelegateForSubtleColumnDivider() {
+    QtPlottingView view;
+    auto tree = workspaceTree(view);
+
+    TS_ASSERT_EQUALS(tree->itemDelegate()->objectName().toStdString(), "workspaceTreeItemDelegate");
+    TS_ASSERT(tree->styleSheet().isEmpty());
+  }
+
+  void testSelectingGroupSelectsChildRunsAndWorkspaces() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItems());
+    auto tree = workspaceTree(view);
+    auto group = groupIndex(tree);
+    auto run = runIndex(tree);
+    auto workspace = workspaceIndex(tree);
+
+    tree->selectionModel()->select(group, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
+
+    TS_ASSERT(tree->selectionModel()->isSelected(group));
+    TS_ASSERT(tree->selectionModel()->isSelected(run));
+    TS_ASSERT(tree->selectionModel()->isSelected(workspace));
+  }
+
+  void testSelectingRunSelectsChildWorkspaces() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItems());
+    auto tree = workspaceTree(view);
+    auto run = runIndex(tree);
+    auto workspace = workspaceIndex(tree);
+
+    tree->selectionModel()->select(run, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
+
+    TS_ASSERT(tree->selectionModel()->isSelected(run));
+    TS_ASSERT(tree->selectionModel()->isSelected(workspace));
+  }
+
+  void testDeselectingGroupDeselectsChildRunsAndWorkspaces() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItems());
+    auto tree = workspaceTree(view);
+    auto group = groupIndex(tree);
+    auto run = runIndex(tree);
+    auto workspace = workspaceIndex(tree);
+
+    tree->selectionModel()->select(group, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
+    tree->selectionModel()->select(group, QItemSelectionModel::Deselect | QItemSelectionModel::Rows);
+
+    TS_ASSERT(!tree->selectionModel()->isSelected(group));
+    TS_ASSERT(!tree->selectionModel()->isSelected(run));
+    TS_ASSERT(!tree->selectionModel()->isSelected(workspace));
+  }
+
+  void testClickingSelectedRunAgainDeselectsRunAndChildren() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItems());
+    auto tree = workspaceTree(view);
+    auto run = runIndex(tree);
+    auto workspace = workspaceIndex(tree);
+
+    click(tree, run);
+    click(tree, run);
+
+    TS_ASSERT(!tree->selectionModel()->isSelected(run));
+    TS_ASSERT(!tree->selectionModel()->isSelected(workspace));
+  }
+
+  void testControlClickSelectsNonAdjacentWorkspaceUnderDifferentParents() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItemsWithGroups(2));
+    auto tree = workspaceTree(view);
+    auto workspace1 = workspaceIndex(tree, 0, 0, 0);
+    auto workspace2 = workspaceIndex(tree, 1, 0, 0);
+
+    click(tree, workspace1);
+    click(tree, workspace2, Qt::ControlModifier);
+
+    TS_ASSERT(tree->selectionModel()->isSelected(workspace1));
+    TS_ASSERT(tree->selectionModel()->isSelected(workspace2));
+  }
+
+  void testControlClickDoesNotSelectIntermediateWorkspaces() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItemsWithGroups(3));
+    auto tree = workspaceTree(view);
+    auto workspace1 = workspaceIndex(tree, 0, 0, 0);
+    auto workspace2 = workspaceIndex(tree, 1, 0, 0);
+    auto workspace3 = workspaceIndex(tree, 2, 0, 0);
+
+    click(tree, workspace1);
+    click(tree, workspace3, Qt::ControlModifier);
+
+    TS_ASSERT(tree->selectionModel()->isSelected(workspace1));
+    TS_ASSERT(!tree->selectionModel()->isSelected(workspace2));
+    TS_ASSERT(tree->selectionModel()->isSelected(workspace3));
+  }
+
+  void testShiftClickDoesNotSelectIntermediateWorkspaces() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItemsWithGroups(3));
+    auto tree = workspaceTree(view);
+    auto workspace1 = workspaceIndex(tree, 0, 0, 0);
+    auto workspace2 = workspaceIndex(tree, 1, 0, 0);
+    auto workspace3 = workspaceIndex(tree, 2, 0, 0);
+
+    click(tree, workspace1);
+    click(tree, workspace3, Qt::ShiftModifier);
+
+    TS_ASSERT(tree->selectionModel()->isSelected(workspace1));
+    TS_ASSERT(!tree->selectionModel()->isSelected(workspace2));
+    TS_ASSERT(tree->selectionModel()->isSelected(workspace3));
+  }
+
+  void testShiftClickSelectsClickedRunAndChildren() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItemsWithGroups(3));
+    auto tree = workspaceTree(view);
+    auto workspace1 = workspaceIndex(tree, 0, 0, 0);
+    auto run3 = runIndex(tree, 2, 0);
+    auto workspace3 = workspaceIndex(tree, 2, 0, 0);
+
+    click(tree, workspace1);
+    click(tree, run3, Qt::ShiftModifier);
+
+    TS_ASSERT(tree->selectionModel()->isSelected(workspace1));
+    TS_ASSERT(tree->selectionModel()->isSelected(run3));
+    TS_ASSERT(tree->selectionModel()->isSelected(workspace3));
+  }
+
+  void testClickingParentGroupAfterSelectedRunSelectsAllDescendants() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItems());
+    auto tree = workspaceTree(view);
+    auto group = groupIndex(tree);
+    auto run = runIndex(tree);
+    auto workspace = workspaceIndex(tree);
+
+    click(tree, run);
+    click(tree, group);
+
+    TS_ASSERT(tree->selectionModel()->isSelected(group));
+    TS_ASSERT(tree->selectionModel()->isSelected(run));
+    TS_ASSERT(tree->selectionModel()->isSelected(workspace));
+  }
+
+  void testClickingWorkspaceUnderSelectedRunSwitchesSelectionToWorkspace() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItems());
+    auto tree = workspaceTree(view);
+    auto run = runIndex(tree);
+    auto workspace = workspaceIndex(tree);
+
+    click(tree, run);
+    click(tree, workspace);
+
+    TS_ASSERT(!tree->selectionModel()->isSelected(run));
+    TS_ASSERT(tree->selectionModel()->isSelected(workspace));
+  }
+
+  void testClickingRunUnderSelectedGroupSwitchesSelectionToRunAndWorkspaces() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItems());
+    auto tree = workspaceTree(view);
+    auto group = groupIndex(tree);
+    auto run = runIndex(tree);
+    auto workspace = workspaceIndex(tree);
+
+    click(tree, group);
+    click(tree, run);
+
+    TS_ASSERT(!tree->selectionModel()->isSelected(group));
+    TS_ASSERT(tree->selectionModel()->isSelected(run));
+    TS_ASSERT(tree->selectionModel()->isSelected(workspace));
+  }
+
+  void testClickingOutputTypeColumnSelectsWorkspaceRow() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItems());
+    auto tree = workspaceTree(view);
+    auto workspace = workspaceIndex(tree);
+
+    click(tree, workspaceOutputTypeIndex(tree));
+
+    TS_ASSERT(tree->selectionModel()->isSelected(workspace));
+  }
+
+  void testClickingItemColumnForGroupSelectsChildRunsAndWorkspaces() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItems());
+    auto tree = workspaceTree(view);
+    auto group = groupIndex(tree);
+    auto run = runIndex(tree);
+    auto workspace = workspaceIndex(tree);
+
+    click(tree, groupItemIndex(tree));
+
+    TS_ASSERT(tree->selectionModel()->isSelected(group));
+    TS_ASSERT(tree->selectionModel()->isSelected(run));
+    TS_ASSERT(tree->selectionModel()->isSelected(workspace));
+  }
+
+  void testShiftClickingWorkspaceUnderSelectedRunDoesNotChangeSelection() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItems());
+    auto tree = workspaceTree(view);
+    auto run = runIndex(tree);
+    auto workspace = workspaceIndex(tree);
+
+    click(tree, run);
+    click(tree, workspace, Qt::ShiftModifier);
+
+    TS_ASSERT(tree->selectionModel()->isSelected(run));
+    TS_ASSERT(tree->selectionModel()->isSelected(workspace));
+  }
+
+  void testShiftClickingRunUnderSelectedGroupDoesNotChangeSelection() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItems());
+    auto tree = workspaceTree(view);
+    auto group = groupIndex(tree);
+    auto run = runIndex(tree);
+    auto workspace = workspaceIndex(tree);
+
+    click(tree, group);
+    click(tree, run, Qt::ShiftModifier);
+
+    TS_ASSERT(tree->selectionModel()->isSelected(group));
+    TS_ASSERT(tree->selectionModel()->isSelected(run));
+    TS_ASSERT(tree->selectionModel()->isSelected(workspace));
+  }
+
+  void testDoubleClickDoesNotChangeSelection() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItemsWithGroups(2));
+    auto tree = workspaceTree(view);
+    auto workspace1 = workspaceIndex(tree, 0, 0, 0);
+    auto workspace2 = workspaceIndex(tree, 1, 0, 0);
+
+    click(tree, workspace1);
+    doubleClick(tree, workspace2);
+
+    TS_ASSERT(tree->selectionModel()->isSelected(workspace1));
+    TS_ASSERT(!tree->selectionModel()->isSelected(workspace2));
+  }
+
+  void testClickAndDragDoesNotSelectDraggedOverWorkspace() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItemsWithGroups(2));
+    auto tree = workspaceTree(view);
+    auto workspace1 = workspaceIndex(tree, 0, 0, 0);
+    auto workspace2 = workspaceIndex(tree, 1, 0, 0);
+
+    clickAndDrag(tree, workspace1, workspace2);
+
+    TS_ASSERT(tree->selectionModel()->isSelected(workspace1));
+    TS_ASSERT(!tree->selectionModel()->isSelected(workspace2));
+  }
+
+  void testSelectedWorkspaceItemsReturnsOnlyWorkspaceItems() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItems());
+    auto tree = workspaceTree(view);
+
+    click(tree, groupIndex(tree));
+
+    auto const selectedWorkspaces = view.selectedWorkspaceNames();
+    TS_ASSERT_EQUALS(selectedWorkspaces.size(), 2);
+    TS_ASSERT_EQUALS(selectedWorkspaces[0], "IvsQ_12345");
+    TS_ASSERT_EQUALS(selectedWorkspaces[1], "IvsQ_binned_12345");
+  }
+
+  void testReflectivityMutesIvsLambdaWorkspaceItems() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItemsWithBinnedOutput());
+    auto tree = workspaceTree(view);
+
+    TS_ASSERT_EQUALS(foregroundColour(tree, workspaceItemIndex(tree, 0, 0, 0)), QColor(112, 112, 112));
+    TS_ASSERT_DIFFERS(foregroundColour(tree, workspaceItemIndex(tree, 0, 0, 1)), QColor(112, 112, 112));
+    TS_ASSERT_DIFFERS(foregroundColour(tree, workspaceItemIndex(tree, 0, 0, 2)), QColor(112, 112, 112));
+    TS_ASSERT_EQUALS(backgroundColour(tree, workspaceIndex(tree, 0, 0, 0)), QColor(238, 238, 238));
+    TS_ASSERT_EQUALS(backgroundColour(tree, workspaceOutputTypeIndex(tree, 0, 0, 0)), QColor(238, 238, 238));
+    TS_ASSERT_EQUALS(backgroundColour(tree, workspaceItemIndex(tree, 0, 0, 0)), QColor(238, 238, 238));
+    TS_ASSERT_DIFFERS(backgroundColour(tree, workspaceItemIndex(tree, 0, 0, 1)), QColor(238, 238, 238));
+  }
+
+  void testReflectivityDoesNotSelectIvsLambdaWorkspaceDirectly() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItemsWithBinnedOutput());
+    auto tree = workspaceTree(view);
+    auto workspace = workspaceIndex(tree, 0, 0, 0);
+
+    click(tree, workspace);
+
+    TS_ASSERT(!tree->selectionModel()->isSelected(workspace));
+  }
+
+  void testReflectivityDoesNotSelectIvsLambdaWorkspaceGroupDirectly() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItemsWithWorkspaceGroups());
+    auto tree = workspaceTree(view);
+    auto workspaceGroup = workspaceIndex(tree, 0, 0, 0);
+
+    click(tree, workspaceGroup);
+
+    TS_ASSERT(!tree->selectionModel()->isSelected(workspaceGroup));
+  }
+
+  void testSpinAsymmetryMutesWorkspaceItemsThatCannotBeSelectedDirectly() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItemsWithBinnedOutput());
+    selectSpinAsymmetry(view);
+    auto tree = workspaceTree(view);
+
+    TS_ASSERT_EQUALS(foregroundColour(tree, workspaceItemIndex(tree, 0, 0, 0)), QColor(112, 112, 112));
+    TS_ASSERT_EQUALS(foregroundColour(tree, workspaceItemIndex(tree, 0, 0, 1)), QColor(112, 112, 112));
+    TS_ASSERT_EQUALS(foregroundColour(tree, workspaceItemIndex(tree, 0, 0, 2)), QColor(112, 112, 112));
+  }
+
+  void testSpinAsymmetryDoesNotSelectWorkspaceItemsDirectly() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItemsWithBinnedOutput());
+    selectSpinAsymmetry(view);
+    auto tree = workspaceTree(view);
+    auto workspace = workspaceIndex(tree, 0, 0, 2);
+
+    click(tree, workspace);
+
+    TS_ASSERT(!tree->selectionModel()->isSelected(workspace));
+  }
+
+  void testSpinAsymmetryCanSelectRunAndReturnsIvsQBinnedWorkspacesOnly() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItemsWithBinnedOutput());
+    selectSpinAsymmetry(view);
+    auto tree = workspaceTree(view);
+
+    click(tree, runIndex(tree));
+
+    auto const selectedWorkspaces = view.selectedWorkspaceNames();
+    TS_ASSERT(tree->selectionModel()->isSelected(runIndex(tree)));
+    TS_ASSERT_EQUALS(selectedWorkspaces.size(), 1);
+    TS_ASSERT_EQUALS(selectedWorkspaces[0], "IvsQ_binned_12345");
+  }
+
+  void testSpinAsymmetryCanSelectWorkspaceGroupWithIvsQBinnedChildren() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItemsWithWorkspaceGroups());
+    selectSpinAsymmetry(view);
+    auto tree = workspaceTree(view);
+    auto workspaceGroup = workspaceIndex(tree, 0, 0, 1);
+
+    click(tree, workspaceGroup);
+
+    auto const selectedWorkspaces = view.selectedWorkspaceNames();
+    TS_ASSERT(tree->selectionModel()->isSelected(workspaceGroup));
+    TS_ASSERT_EQUALS(selectedWorkspaces.size(), 1);
+    TS_ASSERT_EQUALS(selectedWorkspaces[0], "IvsQ_binned_group_1");
+  }
+
+  void testAlignmentMutesStitchedWorkspaceAndAssociatedWorkspaceGroup() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItemsWithStitchedOutput());
+    selectAlignment(view);
+    auto tree = workspaceTree(view);
+
+    TS_ASSERT_EQUALS(foregroundColour(tree, groupChildItemIndex(tree, 0)), QColor(112, 112, 112));
+    TS_ASSERT_EQUALS(foregroundColour(tree, groupChildItemIndex(tree, 1)), QColor(112, 112, 112));
+    TS_ASSERT_EQUALS(foregroundColour(tree, groupChildItemIndex(tree, 1, 0)), QColor(112, 112, 112));
+    TS_ASSERT_EQUALS(backgroundColour(tree, groupChildIndex(tree, 0)), QColor(238, 238, 238));
+    TS_ASSERT_EQUALS(backgroundColour(tree, groupChildIndex(tree, 1)), QColor(238, 238, 238));
+    TS_ASSERT_EQUALS(backgroundColour(tree, groupChildIndex(tree, 1, 0)), QColor(238, 238, 238));
+  }
+
+  void testAlignmentDoesNotSelectStitchedWorkspaceGroupDirectly() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItemsWithStitchedOutput());
+    selectAlignment(view);
+    auto tree = workspaceTree(view);
+    auto workspaceGroup = groupChildIndex(tree, 1);
+
+    click(tree, workspaceGroup);
+
+    TS_ASSERT(!tree->selectionModel()->isSelected(workspaceGroup));
+    TS_ASSERT(view.selectedWorkspaceNames().empty());
+  }
+
+  void testDetectorMapMutesStitchedWorkspaceAndAssociatedWorkspaceGroup() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItemsWithStitchedOutput());
+    selectDetectorMap(view);
+    auto tree = workspaceTree(view);
+
+    TS_ASSERT_EQUALS(foregroundColour(tree, groupChildItemIndex(tree, 0)), QColor(112, 112, 112));
+    TS_ASSERT_EQUALS(foregroundColour(tree, groupChildItemIndex(tree, 1)), QColor(112, 112, 112));
+    TS_ASSERT_EQUALS(foregroundColour(tree, groupChildItemIndex(tree, 1, 0)), QColor(112, 112, 112));
+    TS_ASSERT_EQUALS(backgroundColour(tree, groupChildIndex(tree, 0)), QColor(238, 238, 238));
+    TS_ASSERT_EQUALS(backgroundColour(tree, groupChildIndex(tree, 1)), QColor(238, 238, 238));
+    TS_ASSERT_EQUALS(backgroundColour(tree, groupChildIndex(tree, 1, 0)), QColor(238, 238, 238));
+  }
+
+  void testDetectorMapDoesNotSelectStitchedWorkspaceDirectly() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItemsWithStitchedOutput());
+    selectDetectorMap(view);
+    auto tree = workspaceTree(view);
+    auto workspace = groupChildIndex(tree, 0);
+
+    click(tree, workspace);
+
+    TS_ASSERT(!tree->selectionModel()->isSelected(workspace));
+    TS_ASSERT(view.selectedWorkspaceNames().empty());
+  }
+
+  void testDetectorMapDoesNotSelectStitchedWorkspaceGroupDirectly() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItemsWithStitchedOutput());
+    selectDetectorMap(view);
+    auto tree = workspaceTree(view);
+    auto workspaceGroup = groupChildIndex(tree, 1);
+
+    click(tree, workspaceGroup);
+
+    TS_ASSERT(!tree->selectionModel()->isSelected(workspaceGroup));
+    TS_ASSERT(view.selectedWorkspaceNames().empty());
+  }
+
+  void testSelectedWorkspaceNamesReturnsWorkspaceGroupChildren() {
+    QtPlottingView view;
+    view.setWorkspaceItems(workspaceItemsWithWorkspaceGroups());
+    auto tree = workspaceTree(view);
+    auto workspaceGroup = workspaceIndex(tree, 0, 0, 1);
+
+    click(tree, workspaceGroup);
+
+    auto const selectedWorkspaces = view.selectedWorkspaceNames();
+    TS_ASSERT_EQUALS(selectedWorkspaces.size(), 1);
+    TS_ASSERT_EQUALS(selectedWorkspaces[0], "IvsQ_binned_group_1");
+  }
+
+  void testPlotButtonsNotifySubscriber() {
+    QtPlottingView view;
+    TestPlottingViewSubscriber subscriber;
+    view.subscribe(&subscriber);
+    view.setWorkspaceItems(workspaceItems());
+    view.setOutputSelectionEnabled(true);
+    auto tree = workspaceTree(view);
+    click(tree, groupIndex(tree));
+
+    view.findChild<QPushButton *>("plotTiled")->click();
+    view.findChild<QPushButton *>("plotOverplot")->click();
+    view.findChild<QPushButton *>("plotIndividual")->click();
+    view.setActivePlotAvailable(true);
+    view.findChild<QCheckBox *>("addToExistingPlot")->setChecked(true);
+
+    TS_ASSERT_EQUALS(subscriber.tiledClicked, 1);
+    TS_ASSERT_EQUALS(subscriber.overplotClicked, 1);
+    TS_ASSERT_EQUALS(subscriber.individualClicked, 1);
+    TS_ASSERT_EQUALS(subscriber.addToExistingPlotChanged, 1);
+  }
+
+private:
+  class TestPlottingViewSubscriber : public PlottingViewSubscriber {
+  public:
+    void notifyPlotTiledClicked() override { ++tiledClicked; }
+    void notifyPlotOverplotClicked() override { ++overplotClicked; }
+    void notifyPlotIndividualClicked() override { ++individualClicked; }
+    void notifyAddToExistingPlotChanged() override { ++addToExistingPlotChanged; }
+    void notifyActivePlotAvailabilityChanged() override {}
+
+    int tiledClicked{0};
+    int overplotClicked{0};
+    int individualClicked{0};
+    int addToExistingPlotChanged{0};
+  };
+
+  void assertButton(QWidget const *widget, std::string const &objectName, std::string const &text) const {
+    auto const button = dynamic_cast<QPushButton const *>(widget);
+    TS_ASSERT(button);
+    TS_ASSERT_EQUALS(button->objectName().toStdString(), objectName);
+    TS_ASSERT_EQUALS(button->text().toStdString(), text);
+  }
+
+  void assertCheckBox(QWidget const *widget, std::string const &objectName, std::string const &text) const {
+    auto const checkBox = dynamic_cast<QCheckBox const *>(widget);
+    TS_ASSERT(checkBox);
+    TS_ASSERT_EQUALS(checkBox->objectName().toStdString(), objectName);
+    TS_ASSERT_EQUALS(checkBox->text().toStdString(), text);
+  }
+
+  void assertPlotButtonsEnabled(QtPlottingView &view, bool individual, bool overplot, bool tiled) const {
+    TS_ASSERT_EQUALS(view.findChild<QPushButton *>("plotIndividual")->isEnabled(), individual);
+    TS_ASSERT_EQUALS(view.findChild<QPushButton *>("plotOverplot")->isEnabled(), overplot);
+    TS_ASSERT_EQUALS(view.findChild<QPushButton *>("plotTiled")->isEnabled(), tiled);
+  }
+
+  std::vector<PlottingWorkspaceTreeItem> workspaceItems() const {
+    return {groupItem(
+        "Group 1", {runItem("12345", {workspaceItem("IvsQ_12345", PlottingWorkspaceOutputType::IvsQ),
+                                      workspaceItem("IvsQ_binned_12345", PlottingWorkspaceOutputType::IvsQBinned)})})};
+  }
+
+  std::vector<PlottingWorkspaceTreeItem> workspaceItemsWithGroups(int groups) const {
+    std::vector<PlottingWorkspaceTreeItem> items;
+    for (auto group = 1; group <= groups; ++group) {
+      auto const run = std::to_string(group) + "2345";
+      items.emplace_back(groupItem("Group " + std::to_string(group),
+                                   {runItem(run, {workspaceItem("IvsQ_" + run, PlottingWorkspaceOutputType::IvsQ)})}));
+    }
+    return items;
+  }
+
+  std::vector<PlottingWorkspaceTreeItem> workspaceItemsWithBinnedOutput() const {
+    return {groupItem(
+        "Group 1", {runItem("12345", {workspaceItem("IvsLam_12345", PlottingWorkspaceOutputType::IvsLambda),
+                                      workspaceItem("IvsQ_12345", PlottingWorkspaceOutputType::IvsQ),
+                                      workspaceItem("IvsQ_binned_12345", PlottingWorkspaceOutputType::IvsQBinned)})})};
+  }
+
+  std::vector<PlottingWorkspaceTreeItem> workspaceItemsWithBinnedWorkspaces(int workspaceCount) const {
+    auto workspaces = std::vector<PlottingWorkspaceTreeItem>{};
+    for (auto workspace = 1; workspace <= workspaceCount; ++workspace) {
+      workspaces.emplace_back(
+          workspaceItem("IvsQ_binned_" + std::to_string(workspace), PlottingWorkspaceOutputType::IvsQBinned));
+    }
+    return {groupItem("Group 1", {runItem("12345", std::move(workspaces))})};
+  }
+
+  std::vector<PlottingWorkspaceTreeItem> workspaceItemsWithBinnedWorkspaceGroups(int workspaceGroupCount) const {
+    auto workspaceGroups = std::vector<PlottingWorkspaceTreeItem>{};
+    for (auto workspaceGroup = 1; workspaceGroup <= workspaceGroupCount; ++workspaceGroup) {
+      workspaceGroups.emplace_back(
+          workspaceGroupItem("IvsQ_binned_group_" + std::to_string(workspaceGroup),
+                             {workspaceItem("IvsQ_binned_group_" + std::to_string(workspaceGroup) + "_1",
+                                            PlottingWorkspaceOutputType::IvsQBinned)}));
+    }
+    return {groupItem("Group 1", {runItem("12345", std::move(workspaceGroups))})};
+  }
+
+  std::vector<PlottingWorkspaceTreeItem> workspaceItemsWithWorkspaceGroups() const {
+    return {groupItem(
+        "Group 1",
+        {runItem("12345", {workspaceGroupItem("IvsLam_group", {workspaceItem("IvsLam_group_1",
+                                                                             PlottingWorkspaceOutputType::IvsLambda)}),
+                           workspaceGroupItem(
+                               "IvsQ_binned_group",
+                               {workspaceItem("IvsQ_binned_group_1", PlottingWorkspaceOutputType::IvsQBinned)})})})};
+  }
+
+  std::vector<PlottingWorkspaceTreeItem> workspaceItemsWithStitchedOutput() const {
+    return {groupItem(
+        "Group 1", {workspaceItem("stitched_12345", PlottingWorkspaceOutputType::IvsQBinned),
+                    workspaceGroupItem("stitched_group",
+                                       {workspaceItem("stitched_group_1", PlottingWorkspaceOutputType::IvsQBinned)})})};
+  }
+
+  PlottingWorkspaceTreeItem groupItem(std::string label, std::vector<PlottingWorkspaceTreeItem> children) const {
+    return {std::move(label),   PlottingWorkspaceTreeItemType::Group, PlottingWorkspaceOutputType::None, "", {}, "",
+            std::move(children)};
+  }
+
+  PlottingWorkspaceTreeItem runItem(std::string label, std::vector<PlottingWorkspaceTreeItem> children) const {
+    return {std::move(label),   PlottingWorkspaceTreeItemType::Run, PlottingWorkspaceOutputType::None, "", {}, "",
+            std::move(children)};
+  }
+
+  PlottingWorkspaceTreeItem workspaceGroupItem(std::string label,
+                                               std::vector<PlottingWorkspaceTreeItem> children) const {
+    auto const workspaceName = label;
+    return {std::move(label),
+            PlottingWorkspaceTreeItemType::WorkspaceGroup,
+            PlottingWorkspaceOutputType::None,
+            "",
+            {},
+            workspaceName,
+            std::move(children)};
+  }
+
+  PlottingWorkspaceTreeItem workspaceItem(std::string label, PlottingWorkspaceOutputType outputType) const {
+    auto const workspaceName = label;
+    return {std::move(label), PlottingWorkspaceTreeItemType::Workspace, outputType, "", {}, workspaceName, {}};
+  }
+
+  QTreeView *workspaceTree(QtPlottingView &view) const { return view.findChild<QTreeView *>("workspaceTree"); }
+
+  QColor foregroundColour(QTreeView *tree, QModelIndex const &index) const {
+    return tree->model()->data(index, Qt::ForegroundRole).value<QBrush>().color();
+  }
+
+  QColor backgroundColour(QTreeView *tree, QModelIndex const &index) const {
+    return tree->model()->data(index, Qt::BackgroundRole).value<QBrush>().color();
+  }
+
+  QModelIndex groupIndex(QTreeView *tree) const { return tree->model()->index(0, 0); }
+
+  QModelIndex groupIndex(QTreeView *tree, int group) const { return tree->model()->index(group, 0); }
+
+  QModelIndex groupOutputTypeIndex(QTreeView *tree) const { return tree->model()->index(0, 1); }
+
+  QModelIndex groupItemIndex(QTreeView *tree) const { return tree->model()->index(0, 2); }
+
+  QModelIndex runIndex(QTreeView *tree) const { return tree->model()->index(0, 0, groupIndex(tree)); }
+
+  QModelIndex runIndex(QTreeView *tree, int group, int run) const {
+    return tree->model()->index(run, 0, tree->model()->index(group, 0));
+  }
+
+  QModelIndex workspaceIndex(QTreeView *tree) const { return tree->model()->index(0, 0, runIndex(tree)); }
+
+  QModelIndex workspaceOutputTypeIndex(QTreeView *tree) const { return tree->model()->index(0, 1, runIndex(tree)); }
+
+  QModelIndex workspaceOutputTypeIndex(QTreeView *tree, int group, int run, int workspace) const {
+    auto const groupModelIndex = tree->model()->index(group, 0);
+    auto const runModelIndex = tree->model()->index(run, 0, groupModelIndex);
+    return tree->model()->index(workspace, 1, runModelIndex);
+  }
+
+  QModelIndex workspaceItemIndex(QTreeView *tree) const { return tree->model()->index(0, 2, runIndex(tree)); }
+
+  QModelIndex workspaceItemIndex(QTreeView *tree, int group, int run, int workspace) const {
+    auto const groupModelIndex = tree->model()->index(group, 0);
+    auto const runModelIndex = tree->model()->index(run, 0, groupModelIndex);
+    return tree->model()->index(workspace, 2, runModelIndex);
+  }
+
+  QModelIndex workspaceIndex(QTreeView *tree, int group, int run, int workspace) const {
+    auto const groupModelIndex = tree->model()->index(group, 0);
+    auto const runModelIndex = tree->model()->index(run, 0, groupModelIndex);
+    return tree->model()->index(workspace, 0, runModelIndex);
+  }
+
+  QModelIndex groupChildIndex(QTreeView *tree, int child, int grandchild = -1) const {
+    auto const groupModelIndex = groupIndex(tree);
+    auto const childIndex = tree->model()->index(child, 0, groupModelIndex);
+    return grandchild < 0 ? childIndex : tree->model()->index(grandchild, 0, childIndex);
+  }
+
+  QModelIndex groupChildItemIndex(QTreeView *tree, int child, int grandchild = -1) const {
+    auto const groupModelIndex = groupIndex(tree);
+    auto const childIndex = tree->model()->index(child, 0, groupModelIndex);
+    return grandchild < 0 ? tree->model()->index(child, 2, groupModelIndex)
+                          : tree->model()->index(grandchild, 2, childIndex);
+  }
+
+  void click(QTreeView *tree, QModelIndex const &index, Qt::KeyboardModifiers modifiers = Qt::NoModifier) const {
+    auto const position = tree->visualRect(index).center();
+    auto event = QMouseEvent(QEvent::MouseButtonPress, position, Qt::LeftButton, Qt::LeftButton, modifiers);
+    QApplication::sendEvent(tree->viewport(), &event);
+  }
+
+  void selectSpinAsymmetry(QtPlottingView &view) const {
+    view.setAvailablePlotOutputTypes({PlotOutputType::ReflectivityCurve, PlotOutputType::SpinAsymmetry});
+    view.findChild<QComboBox *>("plotPreset")->setCurrentIndex(1);
+  }
+
+  void selectAlignment(QtPlottingView &view) const {
+    view.setAvailablePlotOutputTypes({PlotOutputType::ReflectivityCurve, PlotOutputType::Alignment});
+    view.findChild<QComboBox *>("plotPreset")->setCurrentIndex(1);
+  }
+
+  void selectDetectorMap(QtPlottingView &view) const {
+    view.setAvailablePlotOutputTypes({PlotOutputType::ReflectivityCurve, PlotOutputType::DetectorMap});
+    view.findChild<QComboBox *>("plotPreset")->setCurrentIndex(1);
+  }
+
+  void doubleClick(QTreeView *tree, QModelIndex const &index, Qt::KeyboardModifiers modifiers = Qt::NoModifier) const {
+    auto const position = tree->visualRect(index).center();
+    auto event = QMouseEvent(QEvent::MouseButtonDblClick, position, Qt::LeftButton, Qt::LeftButton, modifiers);
+    QApplication::sendEvent(tree->viewport(), &event);
+  }
+
+  void clickAndDrag(QTreeView *tree, QModelIndex const &from, QModelIndex const &to) const {
+    auto const fromPosition = tree->visualRect(from).center();
+    auto const toPosition = tree->visualRect(to).center();
+    auto pressEvent = QMouseEvent(QEvent::MouseButtonPress, fromPosition, Qt::LeftButton, Qt::LeftButton, {});
+    auto moveEvent = QMouseEvent(QEvent::MouseMove, toPosition, Qt::NoButton, Qt::LeftButton, {});
+    auto releaseEvent = QMouseEvent(QEvent::MouseButtonRelease, toPosition, Qt::LeftButton, Qt::NoButton, {});
+
+    QApplication::sendEvent(tree->viewport(), &pressEvent);
+    QApplication::sendEvent(tree->viewport(), &moveEvent);
+    QApplication::sendEvent(tree->viewport(), &releaseEvent);
+  }
+};
