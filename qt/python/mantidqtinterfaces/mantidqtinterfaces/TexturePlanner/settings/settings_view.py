@@ -279,10 +279,10 @@ class TexturePlannerSettingsView(QDialog):
     def get_orient_senses(self) -> str:
         return self.orient_senses.text()
 
-    def get_mc_events(self) -> float:
+    def get_mc_events(self) -> int:
         return self.mc_events.value()
 
-    def get_mc_max_scatter(self) -> float:
+    def get_mc_max_scatter(self) -> int:
         return self.mc_max_scatter.value()
 
     def get_mc_simulate_in(self) -> str:

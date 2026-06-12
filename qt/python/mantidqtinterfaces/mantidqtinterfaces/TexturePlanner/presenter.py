@@ -18,6 +18,8 @@ from mantidqtinterfaces.TexturePlanner.view import (
     EXPORT_MATRIX,
     EXPORT_REFERENCE_WS,
     EXPORT_TRANSMISSION_WEIGHTING,
+    GAUGE_VOL_CUSTOM_SHAPE,
+    GAUGE_VOL_NONE,
 )
 
 if TYPE_CHECKING:
@@ -132,8 +134,10 @@ class TexturePlannerPresenter(AlgorithmObserver):
         self.set_view_texture_directions(names, vecs)
 
     def update_enabled_gonios(self, num_gonios: int) -> None:
-        [self.view.set_gonio_axis_enabled(gon, True) for gon in self.view.gonio_axes[:num_gonios]]
-        [self.view.set_gonio_axis_enabled(gon, False) for gon in self.view.gonio_axes[num_gonios:]]
+        for gon in self.view.gonio_axes[:num_gonios]:
+            self.view.set_gonio_axis_enabled(gon, True)
+        for gon in self.view.gonio_axes[num_gonios:]:
+            self.view.set_gonio_axis_enabled(gon, False)
 
     def update_angle_steps(self) -> None:
         self.view.set_angle_steps()
@@ -170,7 +174,7 @@ class TexturePlannerPresenter(AlgorithmObserver):
         num_gonios = self.view.get_num_gonios()
         self.model.orientations.set_n_gonio(num_gonios)
         self.update_enabled_gonios(num_gonios)
-        self.on_goniometer_updated(self.model.update_gonio_index(num_gonios))
+        self.on_goniometer_updated(self.model.clamp_gonio_index(num_gonios))
         self.view.hide_axis_columns()
 
     def on_directions_updated(self) -> None:
@@ -456,7 +460,7 @@ class TexturePlannerPresenter(AlgorithmObserver):
         self.update_plots()
 
     def clear_gauge_volume(self) -> None:
-        self.model.workspaces.set_gauge_volume_str("No Gauge Volume", None)
+        self.model.workspaces.set_gauge_volume_str(GAUGE_VOL_NONE, None)
         self.model.update_all_projected_data()
         self.update_plots()
 
@@ -465,9 +469,9 @@ class TexturePlannerPresenter(AlgorithmObserver):
         self.update_set_gauge_vol_enabled()
 
     def update_custom_shape_finder_enabled(self) -> None:
-        self.view.set_finder_gauge_vol_visible(self.view.get_shape_method() == "Custom Shape")
+        self.view.set_finder_gauge_vol_visible(self.view.get_shape_method() == GAUGE_VOL_CUSTOM_SHAPE)
 
     def update_set_gauge_vol_enabled(self) -> None:
         self.view.set_set_gauge_vol_enabled(True)
-        if self.view.get_shape_method() == "Custom Shape":
+        if self.view.get_shape_method() == GAUGE_VOL_CUSTOM_SHAPE:
             self.view.set_set_gauge_vol_enabled(self.view.get_custom_shape() is not None)

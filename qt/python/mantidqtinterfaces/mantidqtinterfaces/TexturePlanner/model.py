@@ -68,7 +68,8 @@ class TexturePlannerModel(object):
     def set_gonio_index(self, index: int) -> None:
         self.gonio_index = index
 
-    def update_gonio_index(self, num_gonios: int) -> int:
+    def clamp_gonio_index(self, num_gonios: int) -> int:
+        # the selected goniometer cannot exceed the (newly reduced) number of axes
         max_ind = num_gonios - 1
         return min(self.gonio_index, max_ind)
 
