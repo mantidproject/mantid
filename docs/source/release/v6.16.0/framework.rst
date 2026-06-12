@@ -39,6 +39,7 @@ Bugfixes
 - (`#41330 <https://github.com/mantidproject/mantid/pull/41330>`_) Rebinning operations (such as in :ref:`algm-Rebin` or :ref:`algm-RebinRagged`) that specify a range with a start and end value that are not in the correct order (start < end) will now throw an exception instead of silently producing incorrect results.
 - (`#41343 <https://github.com/mantidproject/mantid/pull/41343>`_) :ref:`algm-BinMD`, :ref:`algm-SliceMD`, and :ref:`algm-MDNorm` will throw an error if the total number of bins requested is larger than the available memory.
 - (`#41517 <https://github.com/mantidproject/mantid/pull/41517>`_) A bug in :ref:`MDNorm <algm-MDNorm>` involving a missing matrix inversion during the symmetry operation has been fixed.
+- (`#41266 <https://github.com/mantidproject/mantid/pull/41266>`_) In :ref:`algm-SaveNexusProcessed` the saving for Event Data now correctly uses the ``WorkspaceIndexList`` when one is provided.
 
 
 Fit Functions

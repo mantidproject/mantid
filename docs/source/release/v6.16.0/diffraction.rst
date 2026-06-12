@@ -18,6 +18,8 @@ New features
 - (`#41035 <https://github.com/mantidproject/mantid/pull/41035>`_) The :ref:`POLARIS ISIS Powder Scripts <create_total_scattering_pdf_polaris-isis-powder-ref>` have a new option in ``create_total_scattering_pdf``. Entering values for the ``stitch_points``, ``overlap_width``, and ``stitch_lims`` parameters will allow the output workspace to be stitched without rebinning when ``merge_banks`` is set.
 - (`#41070 <https://github.com/mantidproject/mantid/pull/41070>`_) :ref:`algm-LoadDiffCal` no longer requires the instrument to be resolvable. If the instrument definition file cannot be found or loaded, the grouping and mask workspaces are created directly from the detector IDs stored in the calibration file. This also includes a change to :ref:`algm-AlignAndFocusPowderSlim` to skip the instrument for loading the calibration information.
 - (`#41278 <https://github.com/mantidproject/mantid/pull/41278>`_) The new algorithm :ref:`algm-CylinderAbsorptionCW` was added for calculating absorption and multiple scattering corrections for cylindrical samples with constant wavelength and in-plane scattering only.
+- (`#41399 <https://github.com/mantidproject/mantid/pull/41399>`_) :ref:`algm-AlignAndFocusPowderFromFiles` has a new ``AllowSlimProcess`` property (default ``True``). When enabled and the inputs are compatible, the algorithm delegates the reduction to :ref:`algm-AlignAndFocusPowderSlim` for significantly faster processing (seconds versus tens of minutes for large datasets). Set ``AllowSlimProcess=False`` to always use the standard reduction path.
+
 
 Bugfixes
 ############
