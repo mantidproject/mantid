@@ -43,7 +43,7 @@ public:
 
   MOCK_METHOD0(generateSampleLoadWidget, QWidget *());
   MOCK_METHOD0(generateVanadiumLoadWidget, QWidget *());
-  MOCK_METHOD0(getInstrumentView, ALFInstrumentWidget *());
+  MOCK_METHOD0(getInstrumentView, QWidget *());
 
   MOCK_METHOD1(subscribePresenter, void(IALFInstrumentPresenter *presenter));
 
@@ -114,7 +114,7 @@ class MockALFInstrumentPresenter : public IALFInstrumentPresenter {
 public:
   MOCK_METHOD0(getSampleLoadWidget, QWidget *());
   MOCK_METHOD0(getVanadiumLoadWidget, QWidget *());
-  MOCK_METHOD0(getInstrumentView, ALFInstrumentWidget *());
+  MOCK_METHOD0(getInstrumentView, QWidget *());
 
   MOCK_METHOD1(subscribeAnalysisPresenter, void(IALFAnalysisPresenter *presenter));
 
