@@ -276,7 +276,6 @@ public:
     m_server->start();
     TS_ASSERT(connectListener());
     waitFor([&] { return m_server->scriptIndex() >= 3; }, std::chrono::seconds{5});
-    std::this_thread::sleep_for(std::chrono::milliseconds{100});
     auto ws = extractWithTimeout(*m_listener, std::chrono::seconds{10});
     m_server->releaseExtractGate();
     TS_ASSERT_DIFFERS(ws, nullptr);
@@ -362,13 +361,14 @@ public:
     });
     m_server->start();
     TS_ASSERT(connectListener());
-    // scriptIndex >= 5 means the PktWaitForExtract gate has been entered,
-    // which guarantees that all four earlier packets (geometry, beamline,
-    // NEW_RUN, banked-event) have been pushed onto the wire.  A short
-    // sleep then lets the listener's bg thread drain & parse them before
-    // extractData() takes the buffer.
+    // scriptIndex >= 5 means all four pre-gate packets have been sent.
+    // runState()==JoiningRun proves the bg thread has parsed the NEW_RUN
+    // packet (SNSLiveEventDataListener.cpp:700 sets m_adaraRunStatus under
+    // m_mutex).  The 20 ms residual covers the trailing BankedEvent parsed
+    // in the same bufferParse() loop shortly after.
     waitFor([&] { return m_server->scriptIndex() >= 5; }, std::chrono::seconds{5});
-    std::this_thread::sleep_for(std::chrono::milliseconds{100});
+    waitFor([&] { return m_listener->runState() == API::ILiveListener::JoiningRun; }, std::chrono::seconds{5});
+    std::this_thread::sleep_for(std::chrono::milliseconds{20});
     auto ws = extractWithTimeout(*m_listener, std::chrono::seconds{10});
     m_server->releaseExtractGate();
     TS_ASSERT_DIFFERS(ws, nullptr);
@@ -403,14 +403,17 @@ public:
     // First extract: wait for gate 1 to have been entered (scriptIndex
     // becomes 5 once PktWaitForExtract assigns m_scriptIndex = i + 1).
     waitFor([&] { return m_server->scriptIndex() >= 5; }, std::chrono::seconds{5});
-    std::this_thread::sleep_for(std::chrono::milliseconds{100});
+    waitFor([&] { return m_listener->runState() == API::ILiveListener::JoiningRun; }, std::chrono::seconds{5});
+    std::this_thread::sleep_for(std::chrono::milliseconds{20});
     auto ws1 = extractWithTimeout(*m_listener, std::chrono::seconds{10});
     TS_ASSERT_EQUALS(m_listener->runState(), API::ILiveListener::Running);
     m_server->releaseExtractGate(); // release gate 1
     // Second extract: wait for gate 2 to have been entered (scriptIndex
     // becomes 7 after END_RUN has been sent and PktWaitForExtract entered).
     waitFor([&] { return m_server->scriptIndex() >= 7; }, std::chrono::seconds{5});
-    std::this_thread::sleep_for(std::chrono::milliseconds{100});
+    // END_RUN sets m_pauseNetRead=true under m_mutex → listenerState()==ReadWait.
+    // Polling this proves the packet was parsed before extractData() runs.
+    waitFor([&] { return m_listener->listenerState() == API::ListenerState::ReadWait; }, std::chrono::seconds{5});
     auto ws2 = extractWithTimeout(*m_listener, std::chrono::seconds{10});
     m_server->releaseExtractGate(); // release gate 2
     TS_ASSERT_DIFFERS(ws1, nullptr);
@@ -439,7 +442,8 @@ public:
     m_server->start();
     TS_ASSERT(connectListener());
     waitFor([&] { return m_server->scriptIndex() >= 6; }, std::chrono::seconds{5});
-    std::this_thread::sleep_for(std::chrono::milliseconds{100});
+    waitFor([&] { return m_listener->runState() == API::ILiveListener::JoiningRun; }, std::chrono::seconds{5});
+    std::this_thread::sleep_for(std::chrono::milliseconds{20});
     auto ws = extractWithTimeout(*m_listener, std::chrono::seconds{10});
     m_server->releaseExtractGate();
     TS_ASSERT_DIFFERS(ws, nullptr);
@@ -485,13 +489,12 @@ public:
     m_server->start();
     TS_ASSERT(connectListener());
 
-    // Wait for the bg thread to have consumed all three packets and
-    // attempted initWorkspacePart2() (which must fail and stash
-    // m_backgroundException).  We poll for that exception being set by
-    // calling extractData() in a tight loop with a short timeout, since
-    // the listener does not expose m_backgroundException directly.
+    // Once the bg thread parses all three packets and initWorkspacePart2()
+    // throws on the bad XML, the exception is stashed in m_backgroundException
+    // and listenerState() returns Error.  Polling this is deterministic; it
+    // replaces a previous unconditional 200 ms sleep.
     waitFor([&] { return m_server->scriptIndex() >= 3; }, std::chrono::seconds{5});
-    std::this_thread::sleep_for(std::chrono::milliseconds{200});
+    waitFor([&] { return m_listener->listenerState() == API::ListenerState::Error; }, std::chrono::seconds{5});
 
     // The caller must see a real exception, NOT Exception::NotYet, and the
     // message must carry our InstrumentName context so the failure is
@@ -561,9 +564,14 @@ public:
     });
     m_server->start();
     TS_ASSERT(connectListener());
-    // Wait for server to have entered gate 1 (all 4 pre-gate packets sent).
+    // Server: all 4 pre-gate packets sent and gate entered.
     waitFor([&] { return m_server->scriptIndex() >= 5; }, std::chrono::seconds{5});
-    std::this_thread::sleep_for(std::chrono::milliseconds{100});
+    // Listener: NEW_RUN(10) parsed via the transition path (m_workspaceInitialized
+    // was already true from Geometry+Beamline+STATE), so m_pendingTransition=BeginRun
+    // and m_pauseNetRead=true are set atomically under m_mutex.  Polling
+    // listenerState()==ReadWait proves the packet was parsed.  (Replaces a
+    // previous unconditional 100 ms sleep that was racy on loaded CI runners.)
+    waitFor([&] { return m_listener->listenerState() == API::ListenerState::ReadWait; }, std::chrono::seconds{5});
 
     // First extract: NotYet path — doExtractData() polls startupTimeout (0.1 s)
     // then throws.  We don't assert on the result; the side effect is that
@@ -578,7 +586,6 @@ public:
 
     m_server->releaseExtractGate(); // gate 1 → server sends new geometry + events
     waitFor([&] { return m_server->scriptIndex() >= 9; }, std::chrono::seconds{5});
-    std::this_thread::sleep_for(std::chrono::milliseconds{100});
 
     auto ws2 = extractWithTimeout(*m_listener, std::chrono::seconds{10});
     m_server->releaseExtractGate(); // gate 2
@@ -608,7 +615,8 @@ public:
     TS_ASSERT(connectListener());
     // Wait for server to have entered gate 1 (NEW_RUN sent; server holding).
     waitFor([&] { return m_server->scriptIndex() >= 2; }, std::chrono::seconds{5});
-    std::this_thread::sleep_for(std::chrono::milliseconds{100});
+    // runState()==JoiningRun proves the bg thread has parsed the NEW_RUN (joining path).
+    waitFor([&] { return m_listener->runState() == API::ILiveListener::JoiningRun; }, std::chrono::seconds{5});
 
     // First extract: workspace not yet initialised → NotYet (startupTimeout=0.1 s).
     auto notYet = extractExpectingNotYet(*m_listener);
@@ -620,7 +628,7 @@ public:
 
     m_server->releaseExtractGate(); // gate 1 → server sends Geometry+Beamline+event
     waitFor([&] { return m_server->scriptIndex() >= 6; }, std::chrono::seconds{5});
-    std::this_thread::sleep_for(std::chrono::milliseconds{100});
+    std::this_thread::sleep_for(std::chrono::milliseconds{20}); // let burst drain (no clean observable)
 
     // Second extract: workspace now initialised; 1 event expected.
     auto ws = extractWithTimeout(*m_listener, std::chrono::seconds{10});
@@ -676,7 +684,7 @@ public:
     m_server->start();
     TS_ASSERT(connectListener());
     waitFor([&] { return m_server->scriptIndex() >= 5; }, std::chrono::seconds{5});
-    std::this_thread::sleep_for(std::chrono::milliseconds{200});
+    waitFor([&] { return m_listener->listenerState() == API::ListenerState::Error; }, std::chrono::seconds{5});
 
     TS_ASSERT_THROWS(extractWithTimeout(*m_listener, std::chrono::seconds{5}), const std::runtime_error &);
     // Listener must not be wedged: m_pauseNetRead was not set before the throw
@@ -701,7 +709,7 @@ public:
     m_server->start();
     TS_ASSERT(connectListener());
     waitFor([&] { return m_server->scriptIndex() >= 5; }, std::chrono::seconds{5});
-    std::this_thread::sleep_for(std::chrono::milliseconds{200});
+    waitFor([&] { return m_listener->listenerState() == API::ListenerState::Error; }, std::chrono::seconds{5});
 
     TS_ASSERT_THROWS(extractWithTimeout(*m_listener, std::chrono::seconds{5}), const std::runtime_error &);
   }
@@ -761,7 +769,8 @@ public:
     m_server->start();
     TS_ASSERT(connectListener());
     waitFor([&] { return m_server->scriptIndex() >= 8; }, std::chrono::seconds{5});
-    std::this_thread::sleep_for(std::chrono::milliseconds{100});
+    waitFor([&] { return m_listener->runState() == API::ILiveListener::JoiningRun; }, std::chrono::seconds{5});
+    std::this_thread::sleep_for(std::chrono::milliseconds{20});
     auto ws = extractWithTimeout(*m_listener, std::chrono::seconds{10});
     m_server->releaseExtractGate();
     TS_ASSERT_DIFFERS(ws, nullptr);
@@ -789,7 +798,8 @@ public:
     m_server->start();
     TS_ASSERT(connectListener());
     waitFor([&] { return m_server->scriptIndex() >= 7; }, std::chrono::seconds{5});
-    std::this_thread::sleep_for(std::chrono::milliseconds{100});
+    waitFor([&] { return m_listener->runState() == API::ILiveListener::JoiningRun; }, std::chrono::seconds{5});
+    std::this_thread::sleep_for(std::chrono::milliseconds{20});
     auto ws = extractWithTimeout(*m_listener, std::chrono::seconds{10});
     m_server->releaseExtractGate();
     TS_ASSERT_DIFFERS(ws, nullptr);
@@ -817,7 +827,8 @@ public:
     m_server->start();
     TS_ASSERT(connectListener());
     waitFor([&] { return m_server->scriptIndex() >= 7; }, std::chrono::seconds{5});
-    std::this_thread::sleep_for(std::chrono::milliseconds{100});
+    waitFor([&] { return m_listener->runState() == API::ILiveListener::JoiningRun; }, std::chrono::seconds{5});
+    std::this_thread::sleep_for(std::chrono::milliseconds{20});
     auto ws = extractWithTimeout(*m_listener, std::chrono::seconds{10});
     m_server->releaseExtractGate();
     TS_ASSERT_DIFFERS(ws, nullptr);
@@ -840,7 +851,8 @@ public:
     m_server->start();
     TS_ASSERT(connectListener());
     waitFor([&] { return m_server->scriptIndex() >= 4; }, std::chrono::seconds{5});
-    std::this_thread::sleep_for(std::chrono::milliseconds{100});
+    waitFor([&] { return m_listener->runState() == API::ILiveListener::JoiningRun; }, std::chrono::seconds{5});
+    std::this_thread::sleep_for(std::chrono::milliseconds{20});
     auto ws = extractWithTimeout(*m_listener, std::chrono::seconds{10});
     m_server->releaseExtractGate();
     TS_ASSERT_DIFFERS(ws, nullptr);
@@ -862,7 +874,8 @@ public:
     m_server->start();
     TS_ASSERT(connectListener());
     waitFor([&] { return m_server->scriptIndex() >= 5; }, std::chrono::seconds{5});
-    std::this_thread::sleep_for(std::chrono::milliseconds{100});
+    waitFor([&] { return m_listener->runState() == API::ILiveListener::JoiningRun; }, std::chrono::seconds{5});
+    std::this_thread::sleep_for(std::chrono::milliseconds{20});
     auto ws = extractWithTimeout(*m_listener, std::chrono::seconds{10});
     m_server->releaseExtractGate();
     TS_ASSERT_DIFFERS(ws, nullptr);
@@ -887,7 +900,8 @@ public:
     m_server->start();
     TS_ASSERT(connectListener());
     waitFor([&] { return m_server->scriptIndex() >= 4; }, std::chrono::seconds{5});
-    std::this_thread::sleep_for(std::chrono::milliseconds{100});
+    waitFor([&] { return m_listener->runState() == API::ILiveListener::JoiningRun; }, std::chrono::seconds{5});
+    std::this_thread::sleep_for(std::chrono::milliseconds{20});
     auto ws = extractWithTimeout(*m_listener, std::chrono::seconds{10});
     m_server->releaseExtractGate();
     TS_ASSERT_DIFFERS(ws, nullptr);
@@ -1004,10 +1018,10 @@ public:
     });
     m_server->start();
     TS_ASSERT(connectListener());
-    // Wait for the garbage to have been sent (index 2 → scriptIndex 3),
-    // then give the bg thread a moment to parse and stash the exception.
+    // Once the bg thread parses the garbage packet, it stashes an
+    // invalid_packet exception and listenerState() becomes Error.
     waitFor([&] { return m_server->scriptIndex() >= 3; }, std::chrono::seconds{5});
-    std::this_thread::sleep_for(std::chrono::milliseconds{200});
+    waitFor([&] { return m_listener->listenerState() == API::ListenerState::Error; }, std::chrono::seconds{5});
     bool threw = false;
     try {
       (void)m_listener->runState();
@@ -1164,7 +1178,8 @@ public:
     m_server->releaseExtractGate();
     // Wait for bg thread to parse through NEW_RUN (server at gate2, scriptIndex 5).
     waitFor([&] { return m_server->scriptIndex() >= 5; }, std::chrono::seconds{5});
-    std::this_thread::sleep_for(std::chrono::milliseconds{100});
+    waitFor([&] { return m_listener->runState() == API::ILiveListener::JoiningRun; }, std::chrono::seconds{5});
+    std::this_thread::sleep_for(std::chrono::milliseconds{20});
 
     // Second extract: NEW_RUN took the JoiningRun path (m_workspaceInitialized=
     // false at NEW_RUN receipt → initWorkspacePart2() called immediately, no
@@ -1197,7 +1212,8 @@ public:
     // Wait for server to be at gate (bg thread has parsed through NEW_RUN
     // and is blocked in receiveBytes()).
     waitFor([&] { return m_server->scriptIndex() >= 4; }, std::chrono::seconds{5});
-    std::this_thread::sleep_for(std::chrono::milliseconds{100});
+    waitFor([&] { return m_listener->runState() == API::ILiveListener::JoiningRun; }, std::chrono::seconds{5});
+    std::this_thread::sleep_for(std::chrono::milliseconds{20});
 
     bool threw = false;
     std::shared_ptr<API::Workspace> ws;
@@ -1286,7 +1302,8 @@ public:
     // receiveBytes() blocked at gate2 (scriptIndex→9).
     m_server->releaseExtractGate(); // gate1
     waitFor([&] { return m_server->scriptIndex() >= 9; }, std::chrono::seconds{5});
-    std::this_thread::sleep_for(std::chrono::milliseconds{100});
+    waitFor([&] { return m_listener->runState() == API::ILiveListener::JoiningRun; }, std::chrono::seconds{5});
+    std::this_thread::sleep_for(std::chrono::milliseconds{20});
 
     // Third extract: bg thread caught-up (flag=true), run-2 workspace ready.
     auto ws3 = extractWithTimeout(*m_listener, std::chrono::seconds{10});
