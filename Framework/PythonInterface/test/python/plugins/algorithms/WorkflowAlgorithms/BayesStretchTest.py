@@ -4,11 +4,17 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import platform
 import unittest
 from mantid.api import WorkspaceGroup
 from mantid.simpleapi import BayesStretch, DeleteWorkspace, Load
+from qtpy import PYQT6
+
+# quasielasticbayes is not available in the win-64 Qt6 environment (see pixi.toml)
+SKIP_WIN_QT6 = platform.system() == "Windows" and PYQT6
 
 
+@unittest.skipIf(SKIP_WIN_QT6, "quasielasticbayes is not available on Windows Qt6")
 class BayesStretchTest(unittest.TestCase):
     _res_ws = None
     _sample_ws = None

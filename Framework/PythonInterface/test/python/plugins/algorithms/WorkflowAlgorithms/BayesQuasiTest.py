@@ -9,12 +9,16 @@ import numpy as np
 from mantid.simpleapi import BayesQuasi, CreateWorkspace, DeleteWorkspace, Load
 from mantid.api import MatrixWorkspace, WorkspaceGroup
 from plugins.algorithms.WorkflowAlgorithms.BayesQuasi import _calculate_eisf
+from qtpy import PYQT6
 import platform
 
 SHOULD_SKIP = "arm" in platform.machine()
+# quasielasticbayes is not available in the win-64 Qt6 environment (see pixi.toml)
+SKIP_WIN_QT6 = platform.system() == "Windows" and PYQT6
 
 
 @unittest.skipIf(SHOULD_SKIP, "Skipping tests on ARM architecture")
+@unittest.skipIf(SKIP_WIN_QT6, "quasielasticbayes is not available on Windows Qt6")
 class BayesQuasiTest(unittest.TestCase):
     _res_ws = None
     _sample_ws = None
