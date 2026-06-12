@@ -182,10 +182,8 @@ jobs:
 
     strategy:
       matrix:
-        # Qt6 is only built on Linux for now
-        include:
-          - os: Linux
-            cmake_preset: linux-64-ci
+        # Skip Windows when the PR targets ornl-next (ORNL-specific branch, Linux only)
+        include: ${{ fromJson(github.base_ref == 'ornl-next' && '[{"os":"Linux","cmake_preset":"linux-64-ci"}]' || '[{"os":"Linux","cmake_preset":"linux-64-ci"},{"os":"Windows","cmake_preset":"win-64-ci"}]') }}
 
     runs-on:
       - ${{ (inputs.RUNNER_LABEL == '' && 'self-hosted') || inputs.RUNNER_LABEL }}
@@ -257,6 +255,14 @@ jobs:
       - name: Unit test report (Linux)
         uses: EnricoMi/publish-unit-test-result-action/linux@v2
         if: ${{ matrix.os == 'Linux' && failure() && steps.testunit.conclusion == 'failure' }}
+        with:
+          check_name: "Unit test results (Qt6 ${{ matrix.os }})"
+          check_run: false
+          files: build/Testing/*unittest.xml
+
+      - name: Unit test report (Windows)
+        uses: EnricoMi/publish-unit-test-result-action/windows/bash@v2
+        if: ${{ matrix.os == 'Windows' && failure() && steps.testunit.conclusion == 'failure' }}
         with:
           check_name: "Unit test results (Qt6 ${{ matrix.os }})"
           check_run: false
