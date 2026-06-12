@@ -86,13 +86,13 @@ rsync = "*"
 mamba = "<2"
 rattler-index = "*"
 
-# Qt6 / PyQt6 build environment, limited to linux-64 for now. This feature is fully
-# self-contained (the `qt6` environment uses no-default-feature) so it never
-# pulls the Qt5 stack from [dependencies]; it mirrors [dependencies] /
-# [target.linux-64.dependencies] with the Qt6 equivalents swapped in. Keeping
+# Qt6 / PyQt6 build environment for linux-64, win-64 and osx-arm64. This feature
+# is fully self-contained (the `qt6` environment uses no-default-feature) so it
+# never pulls the Qt5 stack from [dependencies]; it mirrors [dependencies] /
+# [target.<platform>.dependencies] with the Qt6 equivalents swapped in. Keeping
 # the Qt5 production set untouched.
 [feature.qt6]
-platforms = ["linux-64"]
+platforms = ["linux-64", "win-64", "osx-arm64"]
 
 [feature.qt6.dependencies]
 pyqt6 = ">=6.11,<7"
@@ -133,7 +133,6 @@ pystog = ">=0.6.3"
 python = "3.12.*"
 pyyaml = ">=5.4.1"
 qtpy = ">=2.4,!=2.4.2"
-quasielasticbayes = "==0.3.0"
 quickbayes = "==1.0.2"
 rattler-index = ">=0.27.4,<0.28"
 requests = ">=2.32.4"
@@ -142,6 +141,8 @@ setuptools = ">=80.9.0,<81"
 superqt = ">=0.7.6,<0.8"
 tbb-devel = ">=2022.3"
 toml = ">=0.10.2"
+libboost-devel = "1.88.*"
+libboost-python-devel = "1.88.*"
 versioningit = ">=2.1"
 zlib = ">=1.3.1,<2"
 doxygen = "1.9.*"
@@ -153,6 +154,7 @@ agent-skill-rattler-build = ">=0.0.2,<0.0.3"
 fontconfig = "2.17.*"
 
 [feature.qt6.target.linux-64.dependencies]
+quasielasticbayes = "==0.3.0"
 gxx_linux-64 = "13.*"
 xorg-libxcomposite = ">=0.4.5"
 xorg-libxcursor = ">=1.2.0"
@@ -167,13 +169,26 @@ qt6-gtk-platformtheme = ">=6.11,<7"
 libgl-devel = ">=1.7.0,<2"
 libglu = ">=9.0"
 libopenblas = "==0.3.27"
-libboost-devel = "1.88.*"
-libboost-python-devel = "1.88.*"
 mantidprofiler = ">=1.4,<2"
 mpich = ">=4.3.2,<5"
 mpi = "==1.0.1"
 libboost-mpi = "1.88.*"
 mpi4py = ">=4.1.1,<5"
+
+[feature.qt6.target.win-64.dependencies]
+# missing quasielasticbayes because win-64 build depends on the legacy m2w64/msys2 mingw runtime, which is
+# incompatible with the newer libwinpthread required by the qt6-main 6.11 vtk build chain.
+conda-wrappers = ">=1.1.3,<2"
+lib3mf = ">=2.4.1,<3"
+
+[feature.qt6.target.osx-arm64.dependencies]
+quasielasticbayes = "==0.3.0"
+clang_osx-arm64 = ">=18"
+clangxx_osx-arm64 = ">=18"
+llvm-openmp = ">=19.1.7"
+"python.app" = ">=1.4,<2"
+libcxx = ">=21.1.6,<22"
+libopenblas = "==0.3.27"
 
 [dependencies]
 cmake = ">=3.21.0"
