@@ -75,7 +75,7 @@ see http://www.mantidproject.org/IDF -->
 	  <location  x="0" y="0" z="0" rot="-24" axis-x="0" axis-y="0" axis-z="1"></location>
     </component>
   </type>
-  
+
   <type name="detector-bank-south">
     <properties />
     <component type="detector-module">
@@ -165,7 +165,7 @@ see http://www.mantidproject.org/IDF -->
   <idlist idname="monitors">
     <id start="0" end="15" />
   </idlist>
-	
+
   <idlist idname="NorthBank">
 <id start="1000" end="1511"/>
 <id start="2000" end="2511"/>

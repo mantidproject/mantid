@@ -2,6 +2,9 @@
 
 <!-- This is currently just a clone of ENGINX param file for testing the commissioning of IMAT -->
 
+<!--If North and South banks require different Bk2Bk params,
+the create a distinct ENTITY for each bank-->
+
 <!DOCTYPE parameter-file [
           <!ENTITY alpha_0    "673896.832650">
           <!ENTITY beta_0     "0.002627">

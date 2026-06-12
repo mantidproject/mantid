@@ -1,0 +1,88 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2026 ISIS Rutherford Appleton Laboratory UKRI,
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+# SPDX - License - Identifier: GPL - 3.0 +
+from typing import Tuple, TypeAlias
+
+import numpy as np
+
+from Engineering.texture.texture_helper import project_orientation, vec_string_to_norm_array
+
+from mantidqtinterfaces.TexturePlanner.helpers.absorption import AbsorptionCalculator
+from mantidqtinterfaces.TexturePlanner.helpers.detector_geometry import DetectorGeometry
+from mantidqtinterfaces.TexturePlanner.helpers.exporter import OrientationExporter
+from mantidqtinterfaces.TexturePlanner.helpers.instrument import InstrumentHelper
+from mantidqtinterfaces.TexturePlanner.helpers.orientation_table import OrientationTable
+from mantidqtinterfaces.TexturePlanner.helpers.plotter import TexturePlotter
+from mantidqtinterfaces.TexturePlanner.helpers.workspace_manager import WorkspaceManager
+
+
+FlatArrayTuple: TypeAlias = Tuple[
+    Tuple[int | float, int | float, int | float], Tuple[int | float, int | float, int | float], Tuple[int | float, int | float, int | float]
+]
+
+
+class TexturePlannerModel(object):
+    """Thin wrapper class mainly holding setting state and few cross-cutting methods and acting as a bridge between
+    functionality contained in separate collaborators classes.
+    """
+
+    def __init__(self, instrument: str = "ENGINX", projection: str = "azimuthal"):
+        # cross-cutting projection settings (shared between the plotter and the projection orchestration)
+        self.ax_transform = np.eye(3)
+        self.dir_names = ["D1", "D2", "D3"]
+        self.projection = projection
+
+        # currently-selected goniometer (controls which axis is highlighted in the plot)
+        self.gonio_index = 0
+
+        # output / plot toggles
+        self.plot_transmission = False
+
+        # collaborators
+        self.workspaces = WorkspaceManager(self)
+        self.orientations = OrientationTable()
+        self.geometry = DetectorGeometry(self)
+        self.absorption = AbsorptionCalculator(self)
+        self.exporter = OrientationExporter(self)
+        self.plotter = TexturePlotter(self)
+        self.instrument = InstrumentHelper(self, instrument)
+
+        # update instrument
+        self.instrument.update_instrument(instrument)
+
+    @staticmethod
+    def get_default_texture_directions() -> Tuple[Tuple[str, str, str], FlatArrayTuple]:
+        return ("RD", "ND", "TD"), ((1, 0, 0), (0, 1, 0), (0, 0, 1))
+
+    # cross-cutting settings setters -----------------------------------
+    def set_ax_transform(self, vec1: str, vec2: str, vec3: str) -> None:
+        vec1, vec2, vec3 = vec_string_to_norm_array(vec1), vec_string_to_norm_array(vec2), vec_string_to_norm_array(vec3)
+        self.ax_transform = np.concatenate((vec1[:, None], vec2[:, None], vec3[:, None]), axis=1)
+
+    def set_dir_names(self, name1: str, name2: str, name3: str) -> None:
+        self.dir_names = [name1, name2, name3]
+
+    def set_gonio_index(self, index: int) -> None:
+        self.gonio_index = index
+
+    def clamp_gonio_index(self, num_gonios: int) -> int:
+        # the selected goniometer cannot exceed the (newly reduced) number of axes
+        max_ind = num_gonios - 1
+        return min(self.gonio_index, max_ind)
+
+    def set_plot_transmission(self, val: bool) -> None:
+        self.plot_transmission = val
+
+    # projection orchestration -----------------------------------------
+    def update_all_projected_data(self) -> None:
+        for i in self.orientations.keys():
+            self.update_projected_data(i)
+
+    def update_projected_data(self, index: int) -> None:
+        orientation = self.orientations[index]
+        orientation.pf_points = project_orientation(orientation.R, self.geometry.detQs_lab, self.ax_transform, self.projection)
+        if self.plot_transmission:
+            self.absorption.calc_for_index(index)
