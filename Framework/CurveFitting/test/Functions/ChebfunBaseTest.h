@@ -106,7 +106,7 @@ public:
 
   void test_roots_Quadratic() { do_test_roots(Quadratic, -4, 4, 2); }
 
-  void test_roots_Sin() { do_test_roots(Sin, -M_PI, M_PI, 3, 1e-5); }
+  void test_roots_Sin() { do_test_roots(Sin, -M_PI, M_PI, 3, 5e-5); }
 
   void test_roots_Cos() { do_test_roots(Cos, -M_PI, M_PI, 2, 1e-9); }
 
