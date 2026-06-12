@@ -246,11 +246,20 @@ class MantidORSODatasetTest(unittest.TestCase):
 
     @mock.patch("mantid.utils.reflectometry.orso_helper.logger.error")
     def test_create_mandatory_header_raises_error(self, mock_logger):
-        model_def = ["air | 25 [ Si 7 | Fe 7 ] | Si", "Si | SiO2 0.5 | wat:er"]
+        model_def = ["air | Ni 100 | SiO2 0.5 | 02", "air | 25 [ Si 7 | Fe 7 ] | Si", "Si | SiO2 0.5 | wat:er"]
         for model in model_def:
             MantidORSODataset(None, None, None, None, None, None, None, model=model, validate=True)
+
+        error_messages = [call.args[0] for call in mock_logger.call_args_list]
+        if any("could not be validated because of database unavailability." in msg for msg in error_messages):
+            self.skipTest("ORSO database unavailable; validation could not be performed.")
+
         mock_logger.assert_has_calls(
             [
+                mock.call(
+                    "The provided model description 'air | Ni 100 | SiO2 0.5 | 02' contains an error. "
+                    "Please check that the string follows the correct ORSO format."
+                ),
                 mock.call(
                     "The provided model description 'air | 25 [ Si 7 | Fe 7 ] | Si' contains an error. "
                     "Please check that the string follows the correct ORSO format."
@@ -273,7 +282,7 @@ class MantidORSODatasetTest(unittest.TestCase):
         MantidORSODataset(None, None, None, None, None, None, None, model="air", validate=True)
         error_logger.assert_has_calls(
             [
-                mock.call("The provided model description 'air' could not be validated because of database unavalibility."),
+                mock.call("The provided model description 'air' could not be validated because of database unavailability."),
             ]
         )
 
