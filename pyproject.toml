@@ -28,6 +28,7 @@ lint.select = [
   "W",
   "NPY201",
   "S",
+  "INP",
 ]
 lint.ignore = [
   "E722", # bare except https://docs.astral.sh/ruff/rules/bare-except/
@@ -53,6 +54,24 @@ exclude = [
   "Testing/SystemTests/tests/framework/reference",
   "scripts/ErrorReporter/ui_errorreport.py",
 ]
+
+[tool.ruff.lint.per-file-ignores]
+"**/test/**" = ["INP001"]
+"**/tests/**" = ["INP001"]
+"**/test_helpers/**" = ["INP001"]
+"Testing/**" = ["INP001"]
+"scripts/**" = ["INP001"]
+"dev-docs/**" = ["INP001"]
+"docs/**" = ["INP001"]
+"tools/**" = ["INP001"]
+"installers/**" = ["INP001"]
+"**/setup.py" = ["INP001"]
+"conda/**" = ["INP001"]
+"buildconfig/**" = ["INP001"]
+"Framework/Doxygen/**" = ["INP001"]
+"qt/icons/**" = ["INP001"]
+"qt/python/mantidqt/resources.py" = ["INP001"]
+"Framework/DataObjects/src/**" = ["INP001"]
 
 [tool.ruff.lint.mccabe]
 max-complexity = 20
