@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "Common/DllConfig.h"
+#include "GUI/Common/PlotOptionsProvider.h"
 #include "GUI/Common/Plotter.h"
 #include "IRunsTablePresenter.h"
 #include <memory>
@@ -27,6 +28,7 @@ protected:
   std::vector<std::string> m_instruments;
   double m_thetaTolerance;
   Plotter m_plotter;
+  PlotOptionsProvider m_plotOptionsProvider;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
