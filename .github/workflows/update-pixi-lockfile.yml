@@ -10,8 +10,7 @@ on:
     - cron: 0 6 * * *
 
 env:
-  # change this between main and release-next
-  UPDATE_BRANCH: release-next
+  UPDATE_BRANCH: ${{ vars.BRANCH_TO_PUBLISH }}
 
 jobs:
   pixi-update-lockfile:

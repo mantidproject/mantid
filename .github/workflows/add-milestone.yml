@@ -15,7 +15,8 @@ jobs:
     steps:
       - uses: benelan/milestone-action@v3
         with:
-          farthest: false      # false = use current milestone by due date
+          # When the target branch == vars.BRANCH_TO_PUBLISH, set the current milestone. Otherwise set the next milestone
+          farthest: ${{ github.base_ref != vars.BRANCH_TO_PUBLISH }}
           overwrite: false     # don't overwrite if milestone already exists
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
