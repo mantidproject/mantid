@@ -484,7 +484,7 @@ class LoadWANDSCD(PythonAlgorithm):
         DeleteWorkspace(norm_replicated)
         # find the scale
         if normalize_by == "counts":
-            scale = norm.getSignalArray().mean()
+            scale = 1.0 / norm.getSignalArray().mean()
             self.getLogger().information("scale counts = {}".format(int(scale)))
         elif normalize_by == "monitor":
             scale = np.array(data.getExperimentInfo(0).run().getProperty("monitor_count").value)
