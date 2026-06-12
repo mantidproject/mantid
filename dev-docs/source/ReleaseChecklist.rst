@@ -435,6 +435,7 @@ Code Freeze
   <https://builds.mantidproject.org/view/All/job/open-release-testing/>`__. This will
   set the value of the Jenkins global property ``BRANCH_TO_PUBLISH`` to ``release-next``,
   which will re-enable package publishing for the ``release-next`` nightly pipeline.
+* Set the value of the `github actions variable <https://github.com/mantidproject/mantid/settings/variables/actions>`__ ``BRANCH_TO_PUBLISH`` to ``release-next``. This will set the target branch used by `github workflow <https://github.com/mantidproject/mantid/blob/main/.github/workflows/update-pixi-lockfile.yml>`__ for updating pixi lock file. And the same variable is also used to `determine the milestone <https://github.com/mantidproject/mantid/blob/main/.github/workflows/add-milestone.yml>`__ for pull requests without an assigned milestone.
 * Check the state of all open pull requests for this milestone and decide which
   should be kept for the release, liaise with the Release Manager on this. Move any
   pull requests not targeted for this release out of the milestone, and then change
@@ -571,6 +572,7 @@ Anaconda channel.
 *  Run the `close-release-testing <https://builds.mantidproject.org/view/All/job/close-release-testing>`__ Jenkins job.
    This will set the value of the Jenkins global property ``BRANCH_TO_PUBLISH`` to ``main``, which will re-enable package
    publishing for the ``main`` nightly pipeline.
+*  Set the value of the `github actions variable <https://github.com/mantidproject/mantid/settings/variables/actions>`__ ``BRANCH_TO_PUBLISH`` back to ``main``.
 
 **Generate DOI**
 
