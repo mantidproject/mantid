@@ -29,9 +29,10 @@
     },
     {
       "name": "unix-debug",
-      "description": "Inherited by all Unix-like presets for debugging. Overrides conda CXX flags for debugging",
+      "description": "Inherited by Unix-like presets for debugging. Overrides conda C and CXX flags for debugging",
       "hidden": true,
       "cacheVariables": {
+        "CMAKE_C_FLAGS_DEBUG": "-g -Og",
         "CMAKE_CXX_FLAGS_DEBUG": "-g -Og",
         "CMAKE_BUILD_TYPE": "Debug",
         "CMAKE_DISABLE_PRECOMPILE_HEADERS": "ON"
@@ -116,6 +117,20 @@
         "osx-default",
         "conda"
       ]
+    },
+    {
+      "name": "osx-debug-max",
+      "description": "Build options for a developer macOS build, with maximum debugging information",
+      "inherits": [
+        "osx-default",
+        "conda"
+      ],
+      "cacheVariables": {
+        "CMAKE_C_FLAGS_DEBUG": "-O0 -g3 -fno-omit-frame-pointer -fno-optimize-sibling-calls -fstandalone-debug -fno-limit-debug-info",
+        "CMAKE_CXX_FLAGS_DEBUG": "-O0 -g3 -fno-omit-frame-pointer -fno-optimize-sibling-calls -fstandalone-debug -fno-limit-debug-info",
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_DISABLE_PRECOMPILE_HEADERS": "ON"
+      }
     },
     {
       "name": "linux",
