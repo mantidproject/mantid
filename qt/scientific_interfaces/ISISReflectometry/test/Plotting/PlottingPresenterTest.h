@@ -36,25 +36,25 @@ MATCHER_P(WorkspaceItemsEqual, expected, "matches plotting workspace tree items"
 
 class MockPlottingView : public IPlottingView {
 public:
-  MOCK_METHOD1(subscribe, void(PlottingViewSubscriber *));
-  MOCK_METHOD1(setOutputSelectionEnabled, void(bool));
-  MOCK_METHOD1(setAvailablePlotOutputTypes, void(std::vector<PlotOutputType> const &));
-  MOCK_METHOD1(setWorkspaceItems, void(std::vector<PlottingWorkspaceTreeItem> const &));
-  MOCK_CONST_METHOD0(selectedWorkspaceNames, std::vector<std::string>());
-  MOCK_CONST_METHOD0(selectedPlotOutputType, PlotOutputType());
-  MOCK_CONST_METHOD0(selectedPlotOutputSelection, PlotOutputSelection());
-  MOCK_CONST_METHOD0(addToExistingPlot, bool());
-  MOCK_CONST_METHOD0(plotTiledVertically, bool());
-  MOCK_METHOD1(setActivePlotAvailable, void(bool));
-  MOCK_METHOD1(setActivePlotOverplotCompatible, void(bool));
-  MOCK_METHOD0(plotParent, QWidget *());
-  MOCK_CONST_METHOD1(confirmPlottingMultipleItems, bool(size_t));
+  MOCK_METHOD(void, subscribe, (PlottingViewSubscriber *), (override));
+  MOCK_METHOD(void, setOutputSelectionEnabled, (bool), (override));
+  MOCK_METHOD(void, setAvailablePlotOutputTypes, (std::vector<PlotOutputType> const &), (override));
+  MOCK_METHOD(void, setWorkspaceItems, (std::vector<PlottingWorkspaceTreeItem> const &), (override));
+  MOCK_METHOD(std::vector<std::string>, selectedWorkspaceNames, (), (const, override));
+  MOCK_METHOD(PlotOutputType, selectedPlotOutputType, (), (const, override));
+  MOCK_METHOD(PlotOutputSelection, selectedPlotOutputSelection, (), (const, override));
+  MOCK_METHOD(bool, addToExistingPlot, (), (const, override));
+  MOCK_METHOD(bool, plotTiledVertically, (), (const, override));
+  MOCK_METHOD(void, setActivePlotAvailable, (bool), (override));
+  MOCK_METHOD(void, setActivePlotOverplotCompatible, (bool), (override));
+  MOCK_METHOD(QWidget *, plotParent, (), (override));
+  MOCK_METHOD(bool, confirmPlottingMultipleItems, (size_t), (const, override));
 };
 
 class MockPlottingModel : public IPlottingModel {
 public:
-  MOCK_CONST_METHOD2(workspacesForPlotting, std::vector<std::string>(std::vector<PlottingWorkspaceSelection> const &,
-                                                                     PlotOutputSelection const &));
+  MOCK_METHOD(std::vector<std::string>, workspacesForPlotting,
+              (std::vector<PlottingWorkspaceSelection> const &, PlotOutputSelection const &), (const, override));
 };
 
 class PlottingPresenterTest : public CxxTest::TestSuite {
