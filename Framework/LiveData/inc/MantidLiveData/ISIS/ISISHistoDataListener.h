@@ -3,7 +3,7 @@
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
-// SPDX - License - Identifier: GPL - 3.0 +
+// SPDX-License-Identifier: GPL-3.0+
 #pragma once
 
 //----------------------------------------------------------------------
@@ -45,10 +45,11 @@ public:
 
   bool connect(const Poco::Net::SocketAddress &address) override;
   void start(Types::Core::DateAndTime startTime = Types::Core::DateAndTime()) override;
-  std::shared_ptr<API::Workspace> extractData() override;
+  std::shared_ptr<API::Workspace> doExtractData() override;
 
   bool isConnected() override;
-  ILiveListener::RunStatus runStatus() override;
+  RunStatus runState() const override;
+  API::ListenerState listenerState() const override;
   int runNumber() const override;
 
 private:

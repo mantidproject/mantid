@@ -3,7 +3,7 @@
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
-// SPDX - License - Identifier: GPL - 3.0 +
+// SPDX-License-Identifier: GPL-3.0+
 #include "MantidLiveData/FileEventDataListener.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -94,23 +94,17 @@ bool FileEventDataListener::isConnected() {
   return true; // For the time being at least
 }
 
-ILiveListener::RunStatus FileEventDataListener::runStatus() {
-  // Say we're outside a run if this is called before start is
-  if (m_nextChunk == 1) {
+ILiveListener::RunStatus FileEventDataListener::runState() const {
+  if (m_nextChunk == 1)
     return NoRun;
-  }
-  // This means the first chunk is being/has just been loaded
-  else if (m_nextChunk == 2) {
+  if (m_nextChunk == 2)
     return BeginRun;
-  }
-  // This means we've read the whole file
-  else if (m_chunkload == nullptr) {
+  if (m_chunkload == nullptr)
     return EndRun;
-  }
-  // Otherwise we're in the run
-  else
-    return Running;
+  return Running;
 }
+
+API::ListenerState FileEventDataListener::listenerState() const { return API::ListenerState::Connected; }
 
 int FileEventDataListener::runNumber() const { return m_runNumber; }
 
@@ -121,7 +115,7 @@ void FileEventDataListener::start(Types::Core::DateAndTime /*startTime*/) // Ign
   loadChunk();
 }
 
-std::shared_ptr<Workspace> FileEventDataListener::extractData() {
+std::shared_ptr<Workspace> FileEventDataListener::doExtractData() {
   // Once the end of the file is reached, this method throws to stop the calling
   // algorithm.
   // This is equivalent to the end of the run - which we still need to figure

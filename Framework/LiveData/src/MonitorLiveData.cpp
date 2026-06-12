@@ -3,7 +3,7 @@
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
-// SPDX - License - Identifier: GPL - 3.0 +
+// SPDX-License-Identifier: GPL-3.0+
 #include "MantidLiveData/MonitorLiveData.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -188,7 +188,8 @@ void MonitorLiveData::exec() {
       }
 
       // Did we just hit a run transition?
-      ILiveListener::RunStatus runStatus = listener->runStatus();
+      const auto lastEdge = listener->lastTransition();
+      const ILiveListener::RunStatus runStatus = lastEdge.value_or(listener->runState());
       if (runStatus == ILiveListener::EndRun) {
         // Need to keep track of what the run number *was* so we
         // can properly rename workspaces

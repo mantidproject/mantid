@@ -3,7 +3,7 @@
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
-// SPDX - License - Identifier: GPL - 3.0 +
+// SPDX-License-Identifier: GPL-3.0+
 #include "MantidLiveData/LoadLiveData.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Workspace.h"
@@ -472,6 +472,12 @@ void LoadLiveData::exec() {
   bool dataReset = listener->dataReset();
 
   // The listener returns a MatrixWorkspace containing the chunk of live data.
+  // Production default matches the historical 10 s hardcoded value.
+  // Tests may override via ConfigService key "LiveData.readRetryInterval" (seconds).
+  double retrySeconds = 10.0;
+  if (const auto v = ConfigService::Instance().getValue<double>("LiveData.readRetryInterval"))
+    retrySeconds = std::max(0.001, *v);
+
   Workspace_sptr chunkWS;
   bool dataNotYetGiven = true;
   while (dataNotYetGiven) {
@@ -480,10 +486,11 @@ void LoadLiveData::exec() {
       dataNotYetGiven = false;
     } catch (Exception::NotYet &ex) {
       g_log.warning() << "The " << listener->name() << " is not ready to return data: " << ex.what() << "\n";
-      g_log.warning() << "Trying again in 10 seconds - cancel the algorithm to stop.\n";
-      const int tenSeconds = 40;
-      for (int i = 0; i < tenSeconds; ++i) {
-        Poco::Thread::sleep(10000 / tenSeconds); // 250 ms
+      g_log.warning() << "Trying again in " << retrySeconds << " seconds - cancel the algorithm to stop.\n";
+      const int chunks = 40;
+      const int chunkMs = std::max(1, static_cast<int>((retrySeconds * 1000.0) / chunks));
+      for (int i = 0; i < chunks; ++i) {
+        Poco::Thread::sleep(chunkMs);
         this->interruption_point();
       }
     }

@@ -3,18 +3,21 @@
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
-// SPDX - License - Identifier: GPL - 3.0 +
+// SPDX-License-Identifier: GPL-3.0+
 #pragma once
 
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/LiveListener.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidFrameworkTestHelpers/FacilityHelper.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidLiveData/Exception.h"
 #include "MantidLiveData/LoadLiveData.h"
 #include "TestGroupDataListener.h"
 #include <cxxtest/TestSuite.h>
@@ -25,6 +28,49 @@ using namespace Mantid::LiveData;
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+
+// ---------------------------------------------------------------------------
+// PauseGatingListener — models the original LoadLiveData standalone deadlock.
+//
+// Before sub-spec 07: SNSLiveEventDataListener set m_pauseNetRead = true when
+// a BeginRun/EndRun packet arrived, and cleared it only inside runStatus().
+// Standalone LoadLiveData never called runStatus(), so extractData() saw the
+// gate still closed and returned NotYet indefinitely.
+//
+// After sub-spec 07: onBeforeExtract() clears m_pauseNetRead.  The base-class
+// extractData() calls onBeforeExtract() first, so the gate is always open by
+// the time doExtractData() runs — even when the caller is LoadLiveData alone.
+//
+// m_gateOpen starts false (gate closed, simulating post-packet pause).
+// onBeforeExtract() opens it.  doExtractData() throws NotYet while closed.
+// ---------------------------------------------------------------------------
+class PauseGatingListener : public API::LiveListener {
+public:
+  bool m_gateOpen{false};
+
+  std::string name() const override { return "PauseGatingListener"; }
+  bool supportsHistory() const override { return false; }
+  bool buffersEvents() const override { return true; }
+  bool connect(const Poco::Net::SocketAddress &) override { return true; }
+  void start(Types::Core::DateAndTime) override {}
+  bool isConnected() override { return true; }
+  bool dataReset() override { return false; }
+  ILiveListener::RunStatus runState() const override { return ILiveListener::BeginRun; }
+  API::ListenerState listenerState() const override { return API::ListenerState::Connected; }
+  int runNumber() const override { return 1; }
+
+protected:
+  void onBeforeExtract() override { m_gateOpen = true; }
+
+  std::shared_ptr<API::Workspace> doExtractData() override {
+    if (!m_gateOpen)
+      throw LiveData::Exception::NotYet(
+          "PauseGatingListener: gate not open — regression: onBeforeExtract() was not called");
+    auto ws = WorkspaceFactory::Instance().create("EventWorkspace", 2, 2, 1);
+    ws->mutableRun().addProperty("run_number", 1);
+    return ws;
+  }
+};
 
 class FakeInOutPropertyAlgorithm final : public API::Algorithm {
 public:
@@ -490,5 +536,54 @@ public:
     TS_ASSERT_EQUALS(mws->readY(1)[3], 4.0);
     TS_ASSERT_EQUALS(std::accumulate(mws->readY(1).begin(), mws->readY(1).end(), 0.0, std::plus<double>()), 16.0);
     AnalysisDataService::Instance().clear();
+  }
+
+  // -------------------------------------------------------------------------
+  // Sub-spec 08 regression: standalone LoadLiveData no longer deadlocks after
+  // a run-state boundary.
+  // -------------------------------------------------------------------------
+
+  /** Verify that standalone LoadLiveData (not driven by MonitorLiveData)
+   *  completes after a run-state boundary.
+   *
+   *  The PauseGatingListener simulates the original bug: its gate starts
+   *  closed (m_gateOpen=false), modelling SNSLiveEventDataListener setting
+   *  m_pauseNetRead=true on a BeginRun/EndRun packet.  doExtractData() throws
+   *  NotYet while the gate is closed.
+   *
+   *  The fix (sub-spec 07): the base-class extractData() calls
+   *  onBeforeExtract() before doExtractData(), so the gate is always open by
+   *  the time doExtractData() runs — even when the only caller is LoadLiveData.
+   *
+   *  If this test enters the 10-second NotYet retry loop the regression has
+   *  been re-introduced.
+   */
+  void test_standalone_LoadLiveData_no_deadlock_after_run_boundary() {
+    FacilityHelper::ScopedFacilities loadTESTFacility("unit_testing/UnitTestFacilities.xml", "TEST");
+
+    auto listener = std::make_shared<PauseGatingListener>();
+    // Pre-condition: gate starts closed.
+    TS_ASSERT(!listener->m_gateOpen);
+
+    LoadLiveData alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Instrument", "TestDataListener"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AccumulationMethod", "Replace"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "fake_gate"));
+    alg.setLiveListener(listener);
+
+    // Must complete without entering the 10-second NotYet retry loop.
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // onBeforeExtract() was called: gate is now open.
+    TS_ASSERT(listener->m_gateOpen);
+
+    // Output workspace was produced.
+    MatrixWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fake_gate"));
+    TS_ASSERT(ws);
+
+    AnalysisDataService::Instance().remove("fake_gate");
   }
 };

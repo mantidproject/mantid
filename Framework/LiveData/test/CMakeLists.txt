@@ -7,9 +7,15 @@ if(CXXTEST_FOUND)
 
   # This variable is used within the cxxtest_add_test macro to build this helper class into the test executable. It will
   # go out of scope at the end of this file so doesn't need un-setting
-  set(TESTHELPER_SRCS KafkaTesting.h KafkaTestThreadHelper.h TestDataListener.cpp TestGroupDataListener.cpp)
+  set(TESTHELPER_SRCS KafkaTesting.h KafkaTestThreadHelper.h TestDataListener.cpp TestGroupDataListener.cpp
+                      ADARAPacketBuilders.cpp MockSMSServer.cpp
+  )
 
   cxxtest_add_test(LiveDataTest ${TEST_FILES})
+
+  # TODO: this is a work-around to *force* CMake to track the test-header files. This issue should be solved globally.
+  target_sources(LiveDataTest PRIVATE ${TEST_FILES})
+
   target_link_libraries(LiveDataTest PRIVATE Mantid::LiveData)
   target_include_directories(LiveDataTest PRIVATE ../src/)
   add_framework_test_helpers(LiveDataTest)
@@ -30,4 +36,10 @@ if(CXXTEST_FOUND)
   # Run MonitorLiveDataTest in serial mode to avoid resource over-subscription problems when allowing ctest to use all
   # cores.
   set_tests_properties(LiveDataTest_MonitorLiveDataTest PROPERTIES RUN_SERIAL TRUE)
+
+  # SNSLiveEventDataListener integration tests do not run on windows.
+  if(NOT WIN32)
+    set_tests_properties(LiveDataTest_SNSLiveEventDataListenerAlgorithmIntegrationTest PROPERTIES TIMEOUT 120)
+    set_tests_properties(LiveDataTest_SNSLiveEventDataListenerTest PROPERTIES TIMEOUT 120)
+  endif()
 endif()

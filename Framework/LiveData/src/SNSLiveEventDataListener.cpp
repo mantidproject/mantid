@@ -3,7 +3,7 @@
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
-// SPDX - License - Identifier: GPL - 3.0 +
+// SPDX-License-Identifier: GPL-3.0+
 #include <ctime>
 #include <exception>
 #include <sstream> // for ostringstream
@@ -105,7 +105,7 @@ SNSLiveEventDataListener::~SNSLiveEventDataListener() {
   if (m_thread.isRunning()) {
     // Ask the thread to exit (and hope that it does - Poco doesn't
     // seem to have an equivalent to pthread_cancel
-    m_stopThread = true;
+    m_stopThread.store(true, std::memory_order_release);
     try {
       m_thread.join(RECV_TIMEOUT * 2 * 1000); // *1000 because join() wants time in milliseconds
     } catch (Poco::TimeoutException &) {
@@ -242,26 +242,33 @@ void SNSLiveEventDataListener::run() {
     {
       g_log.error("SNSLiveEventDataListener::run(): Failed to send client "
                   "hello packet. Thread exiting.");
-      m_stopThread = true;
+      m_stopThread.store(true, std::memory_order_release);
     }
 
-    while (!m_stopThread) // loop until the foreground thread tells us to stop
+    while (!m_stopThread.load(std::memory_order_acquire)) // loop until the foreground thread tells us to stop
     {
-      // cppcheck-suppress knownConditionTrueFalse
-      while (m_pauseNetRead && !m_stopThread) {
+      // Gate: only honour m_pauseNetRead when no parse is in flight.
+      // Short-circuit evaluation enforces the invariant — when
+      // m_bgThreadCaughtUp is false (i.e. we are mid-bufferParse) the pause
+      // check is skipped entirely, preventing a race where the foreground
+      // clears m_pauseNetRead while we are still mutating state.
+      while (m_bgThreadCaughtUp.load(std::memory_order_acquire) && m_pauseNetRead.load(std::memory_order_acquire) &&
+             !m_stopThread.load(std::memory_order_acquire)) {
         // foreground thread doesn't want us to process any more packets until
         // it's ready.  See comments in rxPacket( const ADARA::RunStatusPkt
         // &pkt)
         Poco::Thread::sleep(100); // 100 milliseconds
       }
 
-      // cppcheck-suppress knownConditionTrueFalse
-      if (m_stopThread) {
+      if (m_stopThread.load(std::memory_order_acquire)) {
         // it's possible that a stop request came in while we were sleeping...
         break;
       }
 
-      // Get some more data from our socket and put it in the parser's buffer
+      // receiveBytes() does NOT flip m_bgThreadCaughtUp.  A bg thread blocked
+      // in receiveBytes() (e.g. at a test gate) has a stable, fully-parsed
+      // stream state — the foreground may safely snapshot m_pendingTransition
+      // in that situation.
       unsigned int bufFillLen = bufferFillLength();
       if (bufFillLen) {
         uint8_t *bufFillAddr = bufferFillAddress();
@@ -282,11 +289,20 @@ void SNSLiveEventDataListener::run() {
         }
       }
 
+      // Close the foreground snapshot window for the duration of bufferParse()
+      // only — rxPacket() calls inside it may mutate m_pendingTransition and
+      // m_pauseNetRead under m_mutex, so the foreground must not snapshot
+      // between rxPacket() calls.
+      m_bgThreadCaughtUp.store(false, std::memory_order_release);
       std::string bufferParseLog;
       // bufferParse() wants a string where it can save log messages.
       // We don't actually use the messages for anything, though.
       int packetsParsed = bufferParse(bufferParseLog);
       bufferParseLog.clear(); // keep the string from growing without bound
+      // Reopen the snapshot window — all rxPacket() calls for this iteration
+      // have completed; m_pendingTransition and m_pauseNetRead are stable.
+      m_bgThreadCaughtUp.store(true, std::memory_order_release);
+
       if (packetsParsed == 0) {
         // No packets were parsed.  Sleep a little to let some data accumulate
         // before calling read again.  (Keeps us from spinlocking the cpu...)
@@ -313,7 +329,8 @@ void SNSLiveEventDataListener::run() {
 
     m_isConnected = false;
 
-    m_backgroundException = std::make_shared<ADARA::invalid_packet>(e);
+    if (!m_backgroundException)
+      m_backgroundException = std::make_shared<ADARA::invalid_packet>(e);
   } catch (std::runtime_error &e) { // exception handler for generic runtime
                                     // exceptions
     g_log.fatal() << "Caught a runtime exception.\n"
@@ -321,7 +338,8 @@ void SNSLiveEventDataListener::run() {
                   << "Thread will exit.\n";
     m_isConnected = false;
 
-    m_backgroundException = std::make_shared<std::runtime_error>(e);
+    if (!m_backgroundException)
+      m_backgroundException = std::make_shared<std::runtime_error>(e);
   } catch (std::invalid_argument &e) { // TimeSeriesProperty (and possibly some
                                        // other things) can throw these errors
     g_log.fatal() << "Caught an invalid argument exception.\n"
@@ -332,20 +350,23 @@ void SNSLiveEventDataListener::run() {
                                    // handler for why we set this value.
     std::string newMsg("Invalid argument exception thrown from the background thread: ");
     newMsg += e.what();
-    m_backgroundException = std::make_shared<std::runtime_error>(newMsg);
+    if (!m_backgroundException)
+      m_backgroundException = std::make_shared<std::runtime_error>(newMsg);
   } catch (std::exception &e) { // exception handler for generic exceptions
     g_log.fatal() << "Caught an exception.\n"
                   << "Exception message: " << e.what() << ".\n"
                   << "Thread will exit.\n";
     m_isConnected = false;
 
-    m_backgroundException = std::make_shared<std::runtime_error>(e.what());
+    if (!m_backgroundException)
+      m_backgroundException = std::make_shared<std::runtime_error>(e.what());
   } catch (...) { // Default exception handler
     g_log.fatal("Uncaught exception in SNSLiveEventDataListener network read thread."
                 " Thread is exiting.");
     m_isConnected = false;
 
-    m_backgroundException = std::make_shared<std::runtime_error>("Unknown error in backgound thread");
+    if (!m_backgroundException)
+      m_backgroundException = std::make_shared<std::runtime_error>("Unknown error in backgound thread");
   }
 }
 
@@ -397,7 +418,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BankedEventPkt &pkt) {
   // First, check to see if the run has been paused.  We don't process
   // the events if we're paused unless the user has specifically overridden
   // this behavior with the livelistener.keeppausedevents property.
-  if (m_runPaused && (!m_keepPausedEvents)) {
+  if (m_isDasPaused && (!m_keepPausedEvents)) {
     return false;
   }
 
@@ -633,108 +654,82 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::RunStatusPkt &pkt) {
   const bool haveRunNumber = m_eventBuffer->run().hasProperty("run_number");
 
   if (pkt.status() == ADARA::RunStatus::NEW_RUN) {
-    // Starting a new run:  update m_status and add the run_start & run_number
-    // properties
+    // Starting a new run.
 
-    if (m_status != NoRun) {
-      // Previous status should have been NoRun.  Spit out a warning if it's
-      // not.
+    if (m_adaraRunStatus != NoRun) {
+      // Previous status should have been NoRun.  Spit out a warning if it's not.
       g_log.warning() << "Unexpected start of run.  Run status should have been " << NoRun << " (NoRun), but was "
-                      << m_status << '\n';
+                      << m_adaraRunStatus << '\n';
     }
 
     if (m_workspaceInitialized) {
-      m_status = BeginRun;
+      // Transition case: NEW_RUN arrived while the workspace from the previous
+      // state is already live (e.g., SMS sends NEW_RUN after a STATE-packet init
+      // completed without an intervening END_RUN).  Apply back-pressure so the
+      // bg thread stops and the foreground can harvest the prior workspace before
+      // onBeginRun() resets it.  Run details are deferred to onBeginRun().
+      if (m_pendingTransition.has_value()) {
+        throw std::runtime_error("SNSLiveEventDataListener: pending run-state transition was not "
+                                 "consumed before a new BeginRun arrived — back-pressure invariant "
+                                 "violation.");
+      }
+      m_pendingTransition = BeginRun;
+      // Save a copy of the packet so we can call setRunDetails() in onBeginRun()
+      // after extractData() has fetched any data remaining from before this run.
+      m_deferredRunDetailsPkt = std::shared_ptr<ADARA::RunStatusPkt>(new ADARA::RunStatusPkt(pkt));
+      m_pauseNetRead.store(true, std::memory_order_release);
     } else {
-      // Pay close attention here - this gets complicated!
+      // Joining case: NEW_RUN arrived before workspace initialisation completed.
+      // This is the normal startup path: every run whose NEW_RUN arrives while
+      // m_workspaceInitialized is false takes this branch (because onEndRun()
+      // resets m_workspaceInitialized and m_dataStartTime, so initWorkspacePart2()
+      // cannot complete until the next run's NEW_RUN restores m_dataStartTime).
       //
-      // Setting m_status to "Running" is something of a little white lie.  We
-      // are in fact at the beginning of a run.  However, since we haven't yet
-      // initialized the workspace, this must be one of the first packets we've
-      // actually received.  (Probably, the user selected the option to replay
-      // history starting from the start of the current run.) Normally, when
-      // pkt->status() is NEW_RUN, we'd set the m_pauseNetRead flag to true
-      // (see below).  That would cause us to halt reading packets until the
-      // flag was reset down in runStatus().  Having m_status set to BeginRun
-      // would also cause runStatus() to reset all the data we need to
-      // initialize the workspace in preparation for a new run.  In most cases,
-      // this is exactly what we want.
-      //
-      // HOWEVER, in this particular case, we can't set m_pauseNetRead.  If we
-      // do, we will not read the Geometry and BeamMonitor packets that have
-      // the data we need to complete the workspace initialization. Until we
-      // complete the initialization, the extractData() function won't complete
-      // successfully and the runStatus() function will thus never be called.
-      // Since m_pauseNetRead is reset down in runStatus(), the whole live
-      // listener subsystem basically deadlocks.
-      //
-      // So, we can't set m_pauseNetRead.  That's OK, because we don't actually
-      // have any data from a previous run that we need to keep separate from
-      // this run (which was the whole purpose of m_pauseNetRead).  However,
-      // when the runStatus() function sees m_status == BeginRun (or EndRun),
-      // it sets m_workspaceInitialized to false and clears all the old data we
-      // used to initialize the workspace.  It does this because it thinks a
-      // run transition has happened and new initialization data will be
-      // arriving shortly.  As such, it implicitly assumes that m_pauseNetRead
-      // was set and we stopped reading packets.  In this particular case, we
-      // can't set m_pauseNetRead, and we're guaranteed to have initialized the
-      // workspace before runStatus() would ever be called. (See the previous
-      // paragraph.)  As such, the initialization data that runStatus() would
-      // clear is actually the data that we need.
-      //
-      // So, by setting m_status to Running, we avoid runStatus() wiping out our
-      // workspace initialization.  We then call setRunDetails() (which would
-      // normally happen down in runStatus(), except that we've just gone out
-      // of our way to make sure that part of runStatus() *DOESN'T* get
-      // executed) and everything runs as it should.
-      //
-      // It's debatable whether runStatus() should retain that implicit
-      // asumption of m_pauseNetRead being true, or should explicitly check its
-      // state in addition to m_status.  Either way, you're still going to need
-      // several paragraphs of comments to explain what the heck is going on.
-      m_status = Running;
+      // Transition to JoiningRun immediately — runState() now truthfully reports
+      // that the DAS is in a run.  Apply run details now so they are in place
+      // when initWorkspacePart2() completes.  We do NOT set m_pauseNetRead: the
+      // bg thread must keep reading to receive the Geometry and Beamline packets
+      // required for initialisation.  The BeginRun commit edge is queued by
+      // initWorkspacePart2() once it succeeds; onBeginRun() then advances from
+      // JoiningRun to Running without resetting any workspace state.
+      if (m_adaraRunStatus == JoiningRun) {
+        throw std::runtime_error("SNSLiveEventDataListener: received NEW_RUN while already in JoiningRun "
+                                 "— two consecutive NEW_RUN packets without an intervening END_RUN.  "
+                                 "The data stream is malformed.");
+      }
+      m_adaraRunStatus = JoiningRun;
       setRunDetails(pkt);
     }
 
-    // Add the run_number property
-    if (m_status == BeginRun) {
-      if (haveRunNumber) {
-        // run_number should not exist at this point, and if it does, we can't
-        // do much about it.
-        g_log.warning("run_number property already exists.  Current value will be "
-                      "ignored.\n"
-                      "(This should never happen.  Talk to the Mantid developers.)");
+  } else if (pkt.status() == ADARA::RunStatus::END_RUN) {
+    // Run has ended: queue the EndRun transition edge, record run_end, and
+    // set the back-pressure flag to stop parsing network packets so the
+    // foreground can harvest the finishing run's events before onEndRun()
+    // commits the state transition (m_adaraRunStatus is advanced to NoRun
+    // from onEndRun(), not here — see comments below for why we pause
+    // network reads).
+    if ((m_adaraRunStatus != Running) && (m_adaraRunStatus != JoiningRun) && (m_pendingTransition != BeginRun)) {
+      // Previous status should have been Running (or JoiningRun for a run that
+      // ended before init completed).  Spit out a warning if it's not.
+      // (If m_pendingTransition == BeginRun, the single-slot check below applies.)
+      g_log.warning() << "Unexpected end of run.  Run status should have been " << Running << " (Running), but was "
+                      << m_adaraRunStatus << '\n';
+    }
+    if (m_pendingTransition.has_value()) {
+      if (m_pendingTransition == BeginRun && m_adaraRunStatus == JoiningRun) {
+        // The run ended before the BeginRun commit edge was consumed by the
+        // foreground (run started and ended during the joining/init window).
+        // Collapse: drop the partial-run BeginRun edge and replace with EndRun.
+        // The foreground will see an EndRun transition but no preceding BeginRun,
+        // which matches the behaviour of the former "white-lie" code path.
+        m_pendingTransition.reset();
       } else {
-        // Save a copy of the packet so we can call setRunDetails() later
-        // (after extractData() has been called to fetch any data remaining
-        // from before this run start.
-        // Note: need to actually copy the contents (not just a pointer)
-        // because pkt will go away when this function returns.  And since
-        // packets don't have default constructors, we can only keep a pointer
-        // as a member, and thus have to actually allocate our deferred packet
-        // with new.  Fortunately, this doesn't happen to often, so performance
-        // isn't an issue.
-        m_deferredRunDetailsPkt = std::shared_ptr<ADARA::RunStatusPkt>(new ADARA::RunStatusPkt(pkt));
+        throw std::runtime_error("SNSLiveEventDataListener: pending run-state transition was not "
+                                 "consumed before EndRun arrived — back-pressure invariant "
+                                 "violation.");
       }
     }
-
-    // See detailed comments below for what the m_pauseNetRead flag does and the
-    // comments above about m_status for why we don't always set it.
-    if (m_workspaceInitialized) {
-      m_pauseNetRead = true;
-    }
-
-  } else if (pkt.status() == ADARA::RunStatus::END_RUN) {
-    // Run has ended:  update m_status, set the end time and set the flag
-    // to stop parsing network packets.  (see comments below for why)
-    if ((m_status != Running) && (m_status != BeginRun)) {
-      // Previous status should have been Running or BeginRun.  Spit out a
-      // warning if it's not.  (If it's BeginRun, that's fine.  It just means
-      // that the run ended before extractData() was called.)
-      g_log.warning() << "Unexpected end of run.  Run status should have been " << Running << " (Running), but was "
-                      << m_status << '\n';
-    }
-    m_status = EndRun;
+    m_pendingTransition = EndRun;
 
     // Add the run_end property
     m_eventBuffer->mutableRun().addProperty("run_end", timeFromPacket(pkt).toISO8601String());
@@ -754,10 +749,10 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::RunStatusPkt &pkt) {
     // Because of this, however, if extractData() isn't called at least once
     // per run, the network packets may start to back up and SMS may eventually
     // disconnect us.
-    // This flag will be cleared down in runStatus(), which is guaranteed to be
-    // called after extractData().
+    // This flag will be cleared in onEndRun() (called from onAfterExtract()),
+    // which is guaranteed to be called after extractData() has returned data.
 
-    m_pauseNetRead = true;
+    m_pauseNetRead.store(true, std::memory_order_release);
 
     // Set the run number & start time if we don't already have it
     if (!haveRunNumber) {
@@ -784,7 +779,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::RunStatusPkt &pkt) {
     }
   }
 
-  return m_pauseNetRead;
+  return m_pauseNetRead.load(std::memory_order_acquire);
   // If we've set m_pauseNetRead, it means we want to stop processing packets.
   // In that case, we need to return true so that we'll break out of the read()
   // loop in the packet parser.
@@ -1139,13 +1134,13 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::AnnotationPkt &pkt) {
     case ADARA::MarkerType::PAUSE:
       m_eventBuffer->mutableRun().getTimeSeriesProperty<int>(PAUSE_PROPERTY)->addValue(timeFromPacket(pkt), 1);
       g_log.information() << "Run paused\n";
-      m_runPaused = true;
+      onRunPause(true);
       break;
 
     case ADARA::MarkerType::RESUME:
       m_eventBuffer->mutableRun().getTimeSeriesProperty<int>(PAUSE_PROPERTY)->addValue(timeFromPacket(pkt), 0);
       g_log.information() << "Run resumed\n";
-      m_runPaused = false;
+      onRunPause(false);
       break;
 
     case ADARA::MarkerType::OVERALL_RUN_COMMENT:
@@ -1299,15 +1294,31 @@ void SNSLiveEventDataListener::initWorkspacePart2() {
   loadInst->setProperty("Workspace", m_eventBuffer);
   loadInst->setProperty("RewriteSpectraMap", OptionalBool(false));
 
-  loadInst->execute();
+  // Wrap LoadInstrument so a malformed Geometry/BeamlineInfo packet does
+  // not just kill the background thread silently: produce a context-rich
+  // background exception that extractData() will surface to the caller.
+  // SAXParseException::what() typically yields just "SAXParseException", so
+  // the InstrumentName / XML-length context here is what makes the failure
+  // diagnosable in tests and production.
+  try {
+    loadInst->execute();
+  } catch (std::exception &e) {
+    std::ostringstream msg;
+    msg << "SNSLiveEventDataListener: LoadInstrument failed during workspace "
+           "initialization (InstrumentName='"
+        << m_instrumentName << "', InstrumentXML length=" << m_instrumentXML.size() << " bytes): " << e.what();
+    if (!m_backgroundException)
+      m_backgroundException = std::make_shared<std::runtime_error>(msg.str());
+    throw std::runtime_error(msg.str());
+  }
 
   m_requiredLogs.clear();
-  // Clear the list.  If we have to initialize the workspace again,
-  // (at the start of another run, for example), the list will be
-  // repopulated when we receive the next geometry packet.
+  // Cleared here after a successful init (entries have served their purpose)
+  // and also at run boundaries — see onBeginRun() / onEndRun() — to prevent
+  // stale entries from blocking readyForInitPart2() on the next run.
 
   auto tmp =
-      createWorkspace<DataObjects::EventWorkspace>(m_eventBuffer->getInstrument()->getDetectorIDs(true).size(), 2, 1);
+      createWorkspace<DataObjects::EventWorkspace>(m_eventBuffer->getInstrument()->getDetectorIDs(false).size(), 2, 1);
   WorkspaceFactory::Instance().initializeFromParent(*m_eventBuffer, *tmp, true);
   if (m_eventBuffer->getNumberHistograms() != tmp->getNumberHistograms()) {
     // need to generate the spectra to detector map
@@ -1332,6 +1343,14 @@ void SNSLiveEventDataListener::initWorkspacePart2() {
   initMonitorWorkspace();
 
   m_workspaceInitialized = true;
+
+  // If we completed initialisation while joining mid-run, queue the BeginRun
+  // commit edge so the foreground advances JoiningRun -> Running on its next
+  // extractData() call.  No m_pauseNetRead: the bg thread keeps reading (there
+  // is no prior run's events to protect against mixing).
+  if (m_adaraRunStatus == JoiningRun) {
+    m_pendingTransition = BeginRun;
+  }
 }
 
 /// Creates a monitor workspace sized to the number of monitors, with the
@@ -1401,22 +1420,26 @@ void SNSLiveEventDataListener::appendEvent(const uint32_t pixelId, const double 
 /// the temporary workspace.  The temporary workspace is left empty and
 /// ready to receive more data.
 /// @return shared pointer to a workspace containing the accumulated data
-std::shared_ptr<Workspace> SNSLiveEventDataListener::extractData() {
-  // Check to see if the background thread has thrown an exception.  If so,
-  // re-throw it here.
-  if (m_backgroundException) {
-    throw(*m_backgroundException);
-  }
+std::shared_ptr<Workspace> SNSLiveEventDataListener::doExtractData() {
+  // Wait for the background thread to initialise the workspace (requires
+  // geometry + beamline packets from the SMS).  Poll for up to 10 s, then
+  // throw NotYet so the caller can cancel or retry.
+  double startupTimeout = 10.0;
+  if (const auto v = ConfigService::Instance().getValue<double>("SNSLiveEventDataListener.startupTimeout"))
+    startupTimeout = std::max(0.001, *v);
 
-  // Check whether the background thread has actually initialized the workspace
-  // (Which won't happen until the SMS sends it the packet with the geometry
-  // information in it.)
-  // First wait up to 10 seconds, then if it's still not initialized throw a
-  // NotYet exception so that the user has the opportunity to cancel.
-  static const double maxBlockTime = 10.0;
-  const DateAndTime endTime = DateAndTime::getCurrentTime() + maxBlockTime;
+  const DateAndTime endTime = DateAndTime::getCurrentTime() + startupTimeout;
   while ((!m_workspaceInitialized) && (DateAndTime::getCurrentTime() < endTime)) {
+    // Surface any fatal exception from the background thread (e.g. a bad
+    // instrument geometry packet that caused LoadInstrument to throw) so
+    // the caller sees the real cause instead of waiting out the timeout.
+    if (m_backgroundException) {
+      throw std::runtime_error(m_backgroundException->what());
+    }
     Poco::Thread::sleep(100); // 100 milliseconds
+  }
+  if (m_backgroundException) {
+    throw std::runtime_error(m_backgroundException->what());
   }
   if (!m_workspaceInitialized) {
     throw Exception::NotYet("The workspace has not yet been initialized.");
@@ -1465,75 +1488,198 @@ std::shared_ptr<Workspace> SNSLiveEventDataListener::extractData() {
   return temp;
 }
 
-/// Check the status of the current run
+// ---------------------------------------------------------------------------
+// Pure state getters
+// ---------------------------------------------------------------------------
 
-/// Called by the foreground thread to check the status of the current run
-/// @returns Returns an enum indicating beginning of a run, in the middle
-/// of a run, ending a run or not in a run.
-ILiveListener::RunStatus SNSLiveEventDataListener::runStatus() {
-  // First up, check to see if the background thread has thrown an
-  // exception.  If so, re-throw it here.
-  if (m_backgroundException) {
+ILiveListener::RunStatus SNSLiveEventDataListener::runState() const {
+  if (m_backgroundException)
     throw(*m_backgroundException);
+  std::lock_guard<std::mutex> scopedLock(m_mutex);
+  return m_adaraRunStatus;
+}
+
+bool SNSLiveEventDataListener::isPaused() const {
+  std::lock_guard<std::mutex> scopedLock(m_mutex);
+  return m_isDasPaused;
+}
+
+API::ListenerState SNSLiveEventDataListener::listenerState() const {
+  std::lock_guard<std::mutex> scopedLock(m_mutex);
+  if (m_backgroundException)
+    return API::ListenerState::Error;
+  if (!m_isConnected)
+    return API::ListenerState::Disconnected;
+  if (m_pauseNetRead.load(std::memory_order_acquire))
+    return API::ListenerState::ReadWait;
+  return API::ListenerState::Connected;
+}
+
+std::optional<ILiveListener::RunStatus> SNSLiveEventDataListener::lastTransition() const {
+  if (m_backgroundException)
+    throw(*m_backgroundException);
+  std::lock_guard<std::mutex> scopedLock(m_mutex);
+  return m_lastTransition;
+}
+
+// ---------------------------------------------------------------------------
+// onBeforeExtract / onAfterExtract — extractData() commit points
+// ---------------------------------------------------------------------------
+// BeginRun is dispatched from onBeforeExtract() so the new run's workspace
+// initialisation is in place before doExtractData() snapshots it.  EndRun is
+// dispatched from onAfterExtract() so doExtractData() can harvest the
+// finishing run's accumulated events before onEndRun() resets the buffer.
+
+void SNSLiveEventDataListener::onBeforeExtract() {
+  // Throw NotYet if the background thread is currently inside bufferParse().
+  // m_bgThreadCaughtUp is false only during bufferParse() (it is true while
+  // the bg thread is in receiveBytes(), in the pause loop, or between
+  // iterations).  An immediate load avoids a 500 ms wait.
+  // NoNetworkTest fixtures run without a bg thread, so m_thread.isRunning()
+  // short-circuits the check for them.
+  if (m_thread.isRunning() && !m_bgThreadCaughtUp.load(std::memory_order_acquire)) {
+    throw Exception::NotYet("Background thread parse is in flight; snapshot would be unsafe.");
   }
 
-  // Need to protect against m_status and m_deferredRunDetailsPkt
-  // getting out of sync in the (currently only one) case where the
-  // background thread has not been paused...
+  std::optional<RunStatus> pending;
+  {
+    std::lock_guard<std::mutex> scopedLock(m_mutex);
+    // Re-check under the lock: between the fast-path above and acquiring
+    // m_mutex the bg thread may have flipped m_bgThreadCaughtUp false and
+    // entered bufferParse().  rxPacket() holds m_mutex while mutating
+    // m_pendingTransition, so re-reading the flag here (while we hold the
+    // lock) closes the TOCTOU window — if it is now false, bufferParse() is
+    // in flight and the snapshot would be unsafe.  m_memory_order_acquire is
+    // still required because the bg stores false outside m_mutex.
+    if (m_thread.isRunning() && !m_bgThreadCaughtUp.load(std::memory_order_acquire)) {
+      throw Exception::NotYet("Background thread parse is in flight; snapshot would be unsafe.");
+    }
+    // Both NotYet gates have passed: the prior extract's edge has been
+    // delivered to the caller.  Clear it now so MonitorLiveData sees nullopt
+    // on the *next* tick rather than re-processing a stale edge.
+    // m_previousExtractCompleted is false during a NotYet retry (onAfterExtract
+    // was never reached), so the edge survives across retries (C1 invariant).
+    if (m_previousExtractCompleted) {
+      m_lastTransition.reset();
+      m_previousExtractCompleted = false;
+    }
+    pending = m_pendingTransition;
+  }
+  if (pending && *pending == BeginRun) {
+    {
+      std::lock_guard<std::mutex> scopedLock(m_mutex);
+      m_pendingTransition.reset();
+    }
+    onBeginRun();
+    {
+      std::lock_guard<std::mutex> scopedLock(m_mutex);
+      m_lastTransition = BeginRun;
+    }
+    m_pauseNetRead.store(false, std::memory_order_release);
+  }
+}
+
+void SNSLiveEventDataListener::onAfterExtract() {
+  std::optional<RunStatus> pending;
+  {
+    std::lock_guard<std::mutex> scopedLock(m_mutex);
+    pending = m_pendingTransition;
+    // m_lastTransition is NOT cleared here: clearing is deferred to the next
+    // call's onBeforeExtract() after both NotYet gates pass (guarded by
+    // m_previousExtractCompleted).  This makes BeginRun and EndRun symmetric:
+    // both are observable via lastTransition() after the extractData() that
+    // committed them returns.
+  }
+  if (pending && *pending == EndRun) {
+    {
+      std::lock_guard<std::mutex> scopedLock(m_mutex);
+      m_pendingTransition.reset();
+      m_lastTransition = EndRun;
+    }
+    onEndRun();
+    m_pauseNetRead.store(false, std::memory_order_release);
+  }
+  {
+    std::lock_guard<std::mutex> scopedLock(m_mutex);
+    m_previousExtractCompleted = true;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Run-state transition hooks
+// ---------------------------------------------------------------------------
+// Hooks acquire m_mutex themselves.  onBeginRun() is called from
+// onBeforeExtract(); onEndRun() is called from onAfterExtract().
+
+void SNSLiveEventDataListener::onBeginRun() {
   std::lock_guard<std::mutex> scopedLock(m_mutex);
 
-  // The MonitorLiveData algorithm calls this function *after* the call to
-  // extract data, which means the value we return should reflect the
-  // value that's appropriate for the events that were returned when
-  // extractData was called().
-  ILiveListener::RunStatus rv = m_status;
-
-  // It's only appropriate to return EndRun once (ie: when we've just
-  // returned the last events from the run).  After that, we need to
-  // change the status to NoRun.
-  // The same logic applies to BeginRun and Running
-  if (m_status == BeginRun || m_status == EndRun) {
-    // At run transitions, replace the old workspace with a new one
-    // (This ensures that we're not using log data and/or geometry from
-    // a previous run that are no longer valid.  SMS is guaranteed to
-    // send us new device descriptor packets at the start of every run.)
-    m_workspaceInitialized = false;
-
-    // These next 3 are what we check for in readyForInitPart2()
-    m_instrumentXML.clear();
-    m_instrumentName.clear();
-    if (m_status == EndRun) {
-      // Don't clear this for BeginRun because it was set up in the parser
-      // for the RunStatus packet that signaled the beginning of a new
-      // run and is thus already set to the correct value.
-      m_dataStartTime = Types::Core::DateAndTime();
-    }
-
-    // NOTE: It's probably not necessary to clear the instrument name
-    // and instrument XML (which is the geometry info) because these
-    // values don't ever change.  (Or at least, changing them requires
-    // changing the SMS config and restarting it and that would cause us
-    // to restart the live listener algorithm.)  That said, SMS is
-    // guaranteed to send this info out with every run transition, so
-    // we might as well ensure that we always use up-to-date data.
-
-    m_nameMap.clear();
-    initWorkspacePart1();
-
-    if (m_status == BeginRun) {
-      // Set the run details using the packet we saved from the rxPacket()
-      // function
-      setRunDetails(*m_deferredRunDetailsPkt);
-      m_deferredRunDetailsPkt.reset(); // shared_ptr, so we don't use delete
-      m_status = Running;
-    } else if (m_status == EndRun) {
-      m_status = NoRun;
-    }
+  if (m_adaraRunStatus == JoiningRun) {
+    // Joining completion path: workspace initialisation finished while in
+    // JoiningRun state.  Run details (run_number, run_start) were already
+    // applied by rxPacket(NEW_RUN) when we entered JoiningRun; the init caches
+    // (m_instrumentXML etc.) are exactly what we need — do not reset them.
+    // Simply advance to Running.
+    m_adaraRunStatus = Running;
+    return;
   }
 
-  m_pauseNetRead = false; // make sure the network reads start back up
+  // Transition path: NEW_RUN arrived while the previous workspace was live.
+  // Reset workspace initialisation so that new geometry and device-descriptor
+  // packets will be processed.
+  m_workspaceInitialized = false;
 
-  return rv;
+  // Clear the caches that depend on instrument configuration.
+  // Note: m_dataStartTime is NOT cleared here; it was set by rxPacket(RunStatusPkt)
+  // for the NEW_RUN packet and already contains the correct value.
+  m_instrumentXML.clear();
+  m_instrumentName.clear();
+  m_nameMap.clear();
+  m_requiredLogs.clear(); // stale entries from previous geometry would block readyForInitPart2()
+
+  initWorkspacePart1();
+
+  if (!m_deferredRunDetailsPkt) {
+    // Invariant: rxPacket(NEW_RUN) must have stashed the RunStatusPkt before
+    // queuing a BeginRun transition on the transition path.  Reaching here
+    // means the producer side has a bug.
+    throw std::runtime_error("SNSLiveEventDataListener::onBeginRun(): "
+                             "m_deferredRunDetailsPkt is null — invariant violation.");
+  }
+  setRunDetails(*m_deferredRunDetailsPkt);
+  m_deferredRunDetailsPkt.reset();
+
+  m_adaraRunStatus = Running;
+}
+
+void SNSLiveEventDataListener::onEndRun() {
+  std::lock_guard<std::mutex> scopedLock(m_mutex);
+
+  m_workspaceInitialized = false;
+
+  m_instrumentXML.clear();
+  m_instrumentName.clear();
+  m_dataStartTime = Types::Core::DateAndTime(); // cleared on EndRun only
+  m_nameMap.clear();
+  m_requiredLogs.clear(); // stale entries from previous geometry would block readyForInitPart2()
+
+  initWorkspacePart1();
+
+  // Re-arm the first-extract synchronisation gate for the next run, mirroring
+  // the construction-time initial value.  Without this reset, the flag would
+  // remain sticky-true across the boundary and the first extractData() of the
+  // next run would bypass the "wait for first bufferParse" guarantee.
+  m_bgThreadCaughtUp.store(false, std::memory_order_release);
+
+  m_adaraRunStatus = NoRun;
+}
+
+void SNSLiveEventDataListener::onRunPause(bool paused) {
+  // Pause state is orthogonal to run state: m_adaraRunStatus remains Running
+  // while the DAS is paused.  m_isDasPaused is read by isPaused() and by
+  // rxPacket(BankedEventPkt) to gate event appending.
+  // Called from rxPacket(AnnotationPkt) which already holds m_mutex.
+  m_isDasPaused = paused;
 }
 
 // Called by the rxPacket() functions to determine if the packet should be processed

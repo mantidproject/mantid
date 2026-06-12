@@ -247,6 +247,9 @@ Network Properties
 | ``ISISDAE.Timeout``                           | Timeout for network requests when reading live        | ``100``                         |
 |                                               | data from ISIS (in seconds)                           |                                 |
 +-----------------------------------------------+-------------------------------------------------------+---------------------------------+
+| ``LiveData.readRetryInterval``                | Packet-accumulation interval between polls of the     | ``10``                          |
+|                                               | live-data listener.                                   |                                 |
++-----------------------------------------------+-------------------------------------------------------+---------------------------------+
 | ``network.default.timeout``                   | Defines the default timeout for all network           | ``30``                          |
 |                                               | operations (in seconds).                              |                                 |
 +-----------------------------------------------+-------------------------------------------------------+---------------------------------+
@@ -269,6 +272,9 @@ Network Properties
 |                                               | SNS live-data listener.                               |                                 |
 +-----------------------------------------------+-------------------------------------------------------+---------------------------------+
 | ``SNSLiveEventDataListener.keepPausedEvents`` | Process events, even when a run has been paused.      | ``false``                       |
++-----------------------------------------------+-------------------------------------------------------+---------------------------------+
+| ``SNSLiveEventDataListener.startupTimeout``   | Listener startup; maximum time to wait for            | ``10``                          |
+|                                               | required workspace-initialization packets.            |                                 |
 +-----------------------------------------------+-------------------------------------------------------+---------------------------------+
 | ``UpdateInstrumentDefinitions.OnStartup``     | Download new instrument definition files and          |                                 |
 |                                               | ``Facilities.xml`` to ``~/.mantid/instruments``       |                                 |

@@ -3,7 +3,7 @@
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
-// SPDX - License - Identifier: GPL - 3.0 +
+// SPDX-License-Identifier: GPL-3.0+
 /*
  * SINQHMListener.h
  *
@@ -35,12 +35,19 @@ public:
 
   bool connect(const Poco::Net::SocketAddress &address) override;
   void start(Mantid::Types::Core::DateAndTime startTime = Mantid::Types::Core::DateAndTime()) override;
-  std::shared_ptr<Mantid::API::Workspace> extractData() override;
+  std::shared_ptr<Mantid::API::Workspace> doExtractData() override;
   bool isConnected() override;
-  ILiveListener::RunStatus runStatus() override;
+  ILiveListener::RunStatus runState() const override;
+  Mantid::API::ListenerState listenerState() const override;
   int runNumber() const override { return 0; }
 
   void setSpectra(const std::vector<Mantid::specnum_t> &specList) override;
+
+protected:
+  void onBeforeExtract() override;
+
+  /// Overridable in tests to avoid real HTTP requests.
+  virtual std::istream &httpRequest(const std::string &path);
 
 private:
   Poco::Net::HTTPClientSession httpcon;
@@ -51,12 +58,12 @@ private:
   int dim[3]; // @SINQ we only do 3D HM's, change when more dimensions
   std::string hmhost;
 
-  std::istream &httpRequest(const std::string &path);
   void loadDimensions();
   void doSpecialDim();
   void readHMData(const Mantid::API::IMDHistoWorkspace_sptr &ws);
   void recurseDim(int *data, const Mantid::API::IMDHistoWorkspace_sptr &ws, int currentDim, Mantid::coord_t *idx);
   int calculateCAddress(const Mantid::coord_t *pos);
 
+  ILiveListener::RunStatus m_cachedRunState{NoRun};
   ILiveListener::RunStatus oldStatus;
 };

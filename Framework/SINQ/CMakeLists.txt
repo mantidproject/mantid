@@ -124,6 +124,7 @@ set(TEST_FILES
     PoldiTimeTransformerTest.h
     PoldiTruncateDataTest.h
     ProjectMDTest.h
+    SINQHMListenerTest.h
     SliceMDHistoTest.h
     UncertainValueIOTest.h
     UncertainValueTest.h
