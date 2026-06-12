@@ -97,9 +97,11 @@ void SavePresenter::updateWidgetStateBasedOnFileFormat() const {
   if (isORSOFormat(fileFormat)) {
     m_view->enableAdditionalColumnsCheckBox();
     m_view->showModelEditTextBox();
+    m_view->showMetadataSourceSelection();
   } else {
     m_view->disableAdditionalColumnsCheckBox();
     m_view->hideModelEditTextBox();
+    m_view->hideMetadataSourceSelection();
   }
 
   // Enable/disable the save to single file checkbox for formats that support this
@@ -272,6 +274,19 @@ NamedFormat SavePresenter::formatFromIndex(int formatIndex) const {
   }
 }
 
+ORSOMetaSource SavePresenter::metaSourceFromIndex(int metaSourceIndex) const {
+  switch (metaSourceIndex) {
+  case 0:
+    return ORSOMetaSource::History;
+  case 1:
+    return ORSOMetaSource::Hybrid;
+  case 2:
+    return ORSOMetaSource::Manual;
+  default:
+    throw std::runtime_error("Unknown ORSO Meta Source");
+  }
+}
+
 FileFormatOptions SavePresenter::getSaveParametersFromView(bool const isAutoSave) const {
   return FileFormatOptions(
       /*format=*/formatFromIndex(m_view->getFileFormatIndex()),
@@ -282,7 +297,8 @@ FileFormatOptions SavePresenter::getSaveParametersFromView(bool const isAutoSave
       /*includeAdditionalColumns=*/m_view->getAdditionalColumnsCheck(),
       /*shouldSaveToSingleFile=*/isAutoSave && m_view->getSaveToSingleFileCheck(),
       /*model=*/m_view->getModel(),
-      /*model_validation=*/m_view->getValidateModelCheck());
+      /*model_validation=*/m_view->getValidateModelCheck(),
+      /*orsoMetaSource=*/metaSourceFromIndex(m_view->getMetaSourceIndex()));
 }
 
 void SavePresenter::saveWorkspaces(std::vector<std::string> const &workspaceNames,

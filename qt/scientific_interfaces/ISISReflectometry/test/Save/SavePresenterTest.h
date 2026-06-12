@@ -39,7 +39,7 @@ public:
   SavePresenterTest()
       : m_view(), m_savePath("/foo/bar/"), m_fileFormat(NamedFormat::Custom), m_prefix("testoutput_"),
         m_includeHeader(true), m_separator(","), m_includeQResolution(true), m_includeAdditionalColumns(false),
-        m_model(""), m_validation(false) {}
+        m_model(""), m_validation(false), m_metaSource(ORSOMetaSource::History) {}
 
   void tearDown() override {
     // Verifying and clearing of expectations happens when mock variables are destroyed.
@@ -623,7 +623,7 @@ private:
     expectGetSaveParametersFromView(false, false);
     auto fileFormatOptions =
         FileFormatOptions(m_fileFormat, m_prefix, m_includeHeader, m_separator, m_includeQResolution,
-                          m_includeAdditionalColumns, false, m_model, m_validation);
+                          m_includeAdditionalColumns, false, m_model, m_validation, m_metaSource);
     EXPECT_CALL(*m_fileSaver, save(m_savePath, workspaceNames, logs, fileFormatOptions)).Times(1);
   }
 
@@ -633,7 +633,7 @@ private:
     expectGetSaveParametersFromView(isSingleFileRequested, isAutoSave);
     auto fileFormatOptions =
         FileFormatOptions(m_fileFormat, m_prefix, m_includeHeader, m_separator, m_includeQResolution,
-                          m_includeAdditionalColumns, expectedSingleFileOption, m_model, m_validation);
+                          m_includeAdditionalColumns, expectedSingleFileOption, m_model, m_validation, m_metaSource);
     EXPECT_CALL(*m_fileSaver, save(m_savePath, workspaceNames, _, fileFormatOptions)).Times(1);
   }
 
@@ -784,4 +784,5 @@ private:
   bool m_includeAdditionalColumns;
   std::string m_model;
   bool m_validation;
+  ORSOMetaSource m_metaSource;
 };

@@ -31,6 +31,7 @@ public:
   MOCK_CONST_METHOD0(getSelectedParameters, std::vector<std::string>());
   MOCK_CONST_METHOD0(getFileFormatIndex, int());
   MOCK_CONST_METHOD0(getValidateModelCheck, bool());
+  MOCK_CONST_METHOD0(getMetaSourceIndex, int());
   MOCK_CONST_METHOD0(getHeaderCheck, bool());
   MOCK_CONST_METHOD0(getQResolutionCheck, bool());
   MOCK_CONST_METHOD0(getAdditionalColumnsCheck, bool());
@@ -42,6 +43,9 @@ public:
   MOCK_CONST_METHOD1(setWorkspaceList, void(const std::vector<std::string> &));
   MOCK_CONST_METHOD1(setParametersList, void(const std::vector<std::string> &));
   MOCK_METHOD0(disallowAutosave, void());
+
+  MOCK_METHOD0(showMetadataSourceSelection, void());
+  MOCK_METHOD0(hideMetadataSourceSelection, void());
 
   MOCK_METHOD0(disableAutosaveControls, void());
   MOCK_METHOD0(enableAutosaveControls, void());

@@ -10,18 +10,54 @@ from mantid.utils.reflectometry import SpinStatesORSO
 from mantid.kernel import (
     Direction,
     config,
+    FloatArrayProperty,
     StringArrayLengthValidator,
     StringArrayMandatoryValidator,
     StringArrayProperty,
+    StringListValidator,
+    EnabledWhenProperty,
     CompositeValidator,
+    PropertyCriterion,
+    logger,
 )
-from mantid.api import AlgorithmFactory, FileProperty, FileAction, PythonAlgorithm, AnalysisDataService, WorkspaceGroup
+from mantid.api import AlgorithmFactory, AlgorithmManager, FileProperty, FileAction, PythonAlgorithm, AnalysisDataService, WorkspaceGroup
 
+from functools import wraps
 from pathlib import Path
 from typing import Optional, Tuple, Union, List
 import re
 from collections import OrderedDict
+from datetime import datetime
 import numpy as np
+
+
+def construct_run_file_name_for_string(instrument_name: str, run_string: str) -> str:
+    def raise_error():
+        raise RuntimeError(f"Cannot convert {run_string} to a file name for instrument {instrument_name}")
+
+    # Check that the string is in a format that can potentially be converted to a run file name.
+    # It should optionally start with any number of letters and end with any number of digits.
+    # We ignore any file extensions.
+    match = re.fullmatch(r"(?P<prefix>[a-zA-Z]*)(?P<padding>0*)(?P<run>[0-9]+)", run_string.split(".")[0])
+    if not match:
+        raise_error()
+    match_prefix = match.group("prefix")
+    run_num = match.group("run")
+
+    instrument = config.getInstrument(instrument_name)
+    try:
+        inst_prefix = instrument.filePrefix(int(run_num))
+        # Check if there's a prefix that isn't valid for the instrument
+        if match_prefix and not match_prefix.lower() == inst_prefix.lower():
+            raise_error()
+
+        run_num_width = instrument.zeroPadding(int(run_num))
+        if len(run_num) > run_num_width:
+            raise_error()
+
+        return f"{inst_prefix}{run_num.rjust(run_num_width, '0')}"
+    except OverflowError:
+        raise_error()
 
 
 class Prop:
@@ -31,32 +67,55 @@ class Prop:
     FILENAME = "Filename"
     MODEL = "ModelDescription"
     VALIDATION = "ValidateModel"
+    META_SOURCE = "MetadataSource"
+
+    # Optional Properties for Manual Metadata Entry
+    Q_CONVERT_METHOD = "QConversionMethod"
+    REDUCTION_TIMESTAMP = "ReductionTimestamp"
+    ANGLE_FILES = "AngleFileList"
+    ANGLE_FILES_THETA = "AngleFileThetaList"
+    TRANS_FILES_1 = "FirstTransmissionFileList"
+    TRANS_FILES_2 = "SecondTransmissionFileList"
+    FLOOD_ENTRY = "FloodCorrectionSource"
+    CALIB_FILE = "CalibrationFile"
+    RESOLUTION = "Resolution"
+    SCRIPT = "ReductionScript"
 
 
-class ReflectometryDataset:
-    REDUCTION_WORKFLOW_ALG = "ReflectometryISISLoadAndProcess"
-    CONVERT_ALG = "ConvertUnits"
-    REF_ROI_ALG = "RefRoi"
+class MetadataSourceOptions:
+    FROM_HISTORY = "History"
+    HYBRID = "HistoryWherePossible"
+    MANUAL = "Manual"
 
-    _REDUCTION_ALG = "ReflectometryReductionOneAuto"
-    _RRO_ALG = "ReflectometryReductionOne"
-    _STITCH_ALG = "Stitch1DMany"
 
+class ReflectometryDatasetBase:
     def __init__(self, ws, is_ws_grp_member: bool):
         self._name: str = ""
         self._ws = ws
         self._is_ws_grp_member: bool = is_ws_grp_member
-        self._reduction_history = None
-        self._reduction_workflow_histories = []
-        self._stitch_history = None
-        self._q_conversion_history = None
+        self._reduction_timestamp: datetime = None
+        self._is_stitched: bool = False
         self._q_conversion_theta: Optional[float] = None
+        self._q_conversion_method: str = ""
         self._spin_state: str = ""
+        self._reduction_script: Optional[str] = None
+        self._angle_files: List[Tuple[str, str]] = None
+        self._transmission_files: Tuple[List[str], List[str]] = None
+        self._flood_entry: Optional[Tuple[str, str]] = None
+        self._calibration_entry: Optional[str] = None
+        self._resolution: Optional[float] = None
 
-        self._populate_histories()
-        self._populate_q_conversion_info()
-        self._set_spin_state_from_logs()
-        self._set_name()
+    def _read_only(self) -> bool:
+        return True
+
+    def check_read_only(func):
+        @wraps(func)
+        def inner(self, *args, **kwargs):
+            if self._read_only():
+                raise AttributeError("Properties cannot be manually set on this dataset.")
+            return func(self, *args, **kwargs)
+
+        return inner
 
     @property
     def name(self) -> str:
@@ -79,6 +138,150 @@ class ReflectometryDataset:
         return self._spin_state
 
     @property
+    def reduction_timestamp(self) -> datetime:
+        return self._reduction_timestamp
+
+    @property
+    def is_stitched(self) -> bool:
+        return self._is_stitched
+
+    @property
+    def is_polarized(self) -> bool:
+        return len(self._spin_state) > 0
+
+    @property
+    def q_conversion_method(self) -> str:
+        return self._q_conversion_method
+
+    @property
+    def q_conversion_theta(self) -> Optional[float]:
+        return self._q_conversion_theta
+
+    @property
+    def reduction_script(self) -> Optional[str]:
+        return self._reduction_script
+
+    @property
+    def angle_files(self) -> List[Tuple[str, str]]:
+        return self._angle_files
+
+    @property
+    def transmission_files(self) -> Tuple[List[str], List[str]]:
+        return self._transmission_files
+
+    @property
+    def flood_entry(self) -> Optional[tuple[str, str]]:
+        return self._flood_entry
+
+    @property
+    def calibration_entry(self) -> Optional[str]:
+        return self._calibration_entry
+
+    @property
+    def resolution(self) -> Optional[float]:
+        return self._resolution
+
+    @name.setter
+    @check_read_only
+    def name(self, name: str) -> None:
+        self._name = name
+
+    @spin_state.setter
+    @check_read_only
+    def spin_state(self, spin_state: str) -> None:
+        self._spin_state = spin_state
+
+    @reduction_timestamp.setter
+    @check_read_only
+    def reduction_timestamp(self, reduction_timestamp: datetime) -> None:
+        self._reduction_timestamp = reduction_timestamp
+
+    @is_stitched.setter
+    @check_read_only
+    def is_stitched(self, is_stitched: bool) -> None:
+        self._is_stitched = is_stitched
+
+    @q_conversion_method.setter
+    @check_read_only
+    def q_conversion_method(self, q_conversion_method: str) -> None:
+        self._q_conversion_method = q_conversion_method
+
+    @q_conversion_theta.setter
+    @check_read_only
+    def q_conversion_theta(self, q_conversion_theta: Optional[float]) -> None:
+        self._q_conversion_theta = q_conversion_theta
+
+    @reduction_script.setter
+    @check_read_only
+    def reduction_script(self, reduction_script: Optional[str]) -> None:
+        self._reduction_script = reduction_script
+
+    @angle_files.setter
+    @check_read_only
+    def angle_files(self, angle_files: List[Tuple[str, str]]) -> None:
+        self._angle_files = angle_files
+
+    @transmission_files.setter
+    @check_read_only
+    def transmission_files(self, transmission_files: Tuple[List[str], List[str]]) -> None:
+        self._transmission_files = transmission_files
+
+    @flood_entry.setter
+    @check_read_only
+    def flood_entry(self, flood_entry: Optional[tuple[str, str]]) -> None:
+        self._flood_entry = flood_entry
+
+    @calibration_entry.setter
+    @check_read_only
+    def calibration_entry(self, calibration_entry: Optional[str]) -> None:
+        self._calibration_entry = calibration_entry
+
+    @resolution.setter
+    @check_read_only
+    def resolution(self, resolution: Optional[float]) -> None:
+        self._resolution = resolution
+
+
+class ReflectometryDatasetManual(ReflectometryDatasetBase):
+    def _read_only(self) -> bool:
+        return False
+
+
+class ReflectometryDatasetHistory(ReflectometryDatasetBase):
+    REDUCTION_WORKFLOW_ALG = "ReflectometryISISLoadAndProcess"
+    CONVERT_ALG = "ConvertUnits"
+    REF_ROI_ALG = "RefRoi"
+    _RUN_NUM_LOG = "run_number"
+
+    _REDUCTION_ALG = "ReflectometryReductionOneAuto"
+    _RRO_ALG = "ReflectometryReductionOne"
+    _STITCH_ALG = "Stitch1DMany"
+    _CREATE_FLOOD_ALG = "CreateFloodWorkspace"
+    _REBIN_ALG = "Rebin"
+
+    def _read_only(self) -> bool:
+        return True
+
+    def __init__(self, ws, is_ws_grp_member: bool):
+        super(ReflectometryDatasetHistory, self).__init__(ws, is_ws_grp_member)
+        self._q_conversion_history = None
+        self._stitch_history = None
+        self._reduction_history = None
+        self._reduction_workflow_histories = []
+
+        self._populate_histories()
+        self._populate_q_conversion_info()
+        self._set_reduction_timestamp_from_history()
+        self._set_spin_state_from_logs()
+        self._set_name()
+        self._populate_reduction_script()
+        self._populate_angle_files()
+        self._populate_transmission_files()
+        self._populate_flood_entry()
+        self._populate_calibration_entry()
+        self._populate_resolution()
+
+    @property
     def reduction_history(self):
         return self._reduction_history
 
@@ -91,20 +294,26 @@ class ReflectometryDataset:
         return self._stitch_history
 
     @property
-    def is_stitched(self) -> bool:
-        return self._stitch_history is not None
-
-    @property
-    def is_polarized(self) -> bool:
-        return len(self._spin_state) > 0
-
-    @property
     def q_conversion_history(self):
         return self._q_conversion_history
 
-    @property
-    def q_conversion_theta(self) -> Optional[float]:
-        return self._q_conversion_theta
+    def _populate_reduction_script(self):
+        self._reduction_script = self._get_reduction_script()
+
+    def _populate_angle_files(self):
+        self._angle_files = self._get_individual_angle_files()
+
+    def _populate_transmission_files(self):
+        self._transmission_files = self._get_transmission_files()
+
+    def _populate_flood_entry(self):
+        self._flood_entry = self._get_flood_correction_entry()
+
+    def _populate_calibration_entry(self):
+        self._calibration_entry = self._get_calibration_file_entry()
+
+    def _populate_resolution(self):
+        self._resolution = self._get_resolution()
 
     def _populate_histories(self):
         ws_history = self._ws.getHistory()
@@ -118,6 +327,7 @@ class ReflectometryDataset:
                 # We want the last call to the stitch algorithm in the history
                 # (we would normally expect there to be only one)
                 self._stitch_history = history
+                self._is_stitched = True
 
         # Get the last occurrence of the reduction algorithm in the workspace history
         for history in reversed(ws_history.getAlgorithmHistories()):
@@ -131,7 +341,7 @@ class ReflectometryDataset:
                         return
 
     def _populate_q_conversion_info(self):
-        if self.is_stitched or self._reduction_history is None:
+        if self.stitch_history is not None or self._reduction_history is None:
             # Q conversion information isn't relevant for a stitched dataset
             return
 
@@ -143,6 +353,9 @@ class ReflectometryDataset:
                     break
 
         if self._q_conversion_history is None:
+            logger.warning(
+                "Unable to calculate lambda values as cannot find algorithm used for original Q conversion in the workspace history."
+            )
             return
 
         if self._q_conversion_history.name() == self.REF_ROI_ALG:
@@ -150,8 +363,10 @@ class ReflectometryDataset:
         elif self._q_conversion_history.name() == self.CONVERT_ALG:
             self._q_conversion_theta = float(np.rad2deg(self._ws.spectrumInfo().signedTwoTheta(0))) / 2.0
 
+        self._q_conversion_method = self.q_conversion_history.name()
+
     def _set_name(self):
-        if self.is_stitched:
+        if self.stitch_history is not None:
             self._name = "Stitched"
         elif self._q_conversion_theta is not None:
             self._name = f"{self._q_conversion_theta:.3f}"
@@ -170,6 +385,197 @@ class ReflectometryDataset:
         if self._ws.getRun().hasProperty(SpinStatesORSO.LOG_NAME):
             self._spin_state = self._ws.getRun().getLogData(SpinStatesORSO.LOG_NAME).value
 
+    def _set_reduction_timestamp_from_history(self):
+        """
+        Get the reduction algorithm execution date, which is in UTC, and convert it to a
+        datetime object expressed in local time
+        """
+        if not self._reduction_history:
+            return
+        try:
+            self._reduction_timestamp = MantidORSODataset.create_local_datetime_from_utc_string(
+                self._reduction_history.executionDate().toISO8601String()
+            )
+        except ValueError:
+            logger.debug("Could not parse reduction timestamp into required format - this information will be excluded from the file.")
+
+    def _get_reduction_script(self) -> Optional[str]:
+        """
+        Get the workspace reduction history as a script.
+        """
+        if self.is_ws_grp_member:
+            # We don't get an accurate history from ReflectometryISISLoadAndProcess for workspace groups, so only
+            # include this if the workspace is not part of a group
+            return None
+
+        if self.ws.getHistory().empty():
+            return None
+        alg = AlgorithmManager.createUnmanaged("GeneratePythonScript")
+        alg.initialize()
+        alg.setProperty("InputWorkspace", self.ws)
+        alg.setProperty("ExcludeHeader", True)
+        alg.execute()
+        script = alg.getPropertyValue("ScriptText")
+        return "\n".join(script.split("\n")[2:])  # trim the import statement
+
+    def _get_file_names_from_history_run_list(self, run_list: str, instrument_name: str) -> List[str]:
+        """
+        Construct the run file names from the comma-separated run list values from the history
+        of ReflectometryISISLoadAndProcess.
+        """
+        # We do this manually because using the FileFinder to look up the file is too slow for this algorithm, and we
+        # can't guarantee that the file name will be available from the history of ReflectometryISISLoadAndProcess.
+        file_names = []
+
+        for entry in run_list.split(","):
+            # The ISIS Reflectometry GUI is fairly flexible about what can be entered, so this could be a run number
+            # or file name, with or without padding, or a workspace name.
+            if AnalysisDataService.doesExist(entry):
+                # If we can find a matching workspace in the ADS then get the run number from that
+                run = AnalysisDataService.retrieve(entry).getRun()
+                if not run.hasProperty(self._RUN_NUM_LOG):
+                    raise RuntimeError(f"Cannot convert {entry} to a full run file name for instrument {instrument_name}")
+                run_string = str(run.getProperty(self._RUN_NUM_LOG).value)
+            else:
+                run_string = entry
+            file_names.append(construct_run_file_name_for_string(instrument_name, run_string))
+
+        return file_names
+
+    def _get_individual_angle_files(self) -> List[Tuple[str, str]]:
+        """
+        Find the names of the individual angle files that were used in the reduction
+        """
+        angle_files = []
+
+        for history in self.reduction_workflow_histories:
+            input_runs = history.getPropertyValue("InputRunList")
+            theta = history.getPropertyValue("ThetaIn")
+            try:
+                angle_files.extend([(file, theta) for file in self._get_file_names_from_history_run_list(input_runs, self.instrument_name)])
+            except RuntimeError as ex:
+                logger.debug(f"{ex}. Angle file information will be excluded from the file.")
+                return []
+        return angle_files
+
+    def _get_transmission_files(self) -> Tuple[List[str], List[str]]:
+        """
+        Find the names of the transmission files that were used in the reduction
+        """
+        # We use an ordered dictionary to ensure that duplicates are excluded and that the files always appear in the
+        # same order in the .ort file. Fixing the order makes it easier for us to write automated tests.
+        first_trans_files = OrderedDict()
+        second_trans_files = OrderedDict()
+
+        def add_run_file_names(run_list, trans_files):
+            if not run_list:
+                return
+            for file_name in self._get_file_names_from_history_run_list(run_list, self.instrument_name):
+                trans_files[file_name] = None
+
+        for history in self.reduction_workflow_histories:
+            try:
+                add_run_file_names(history.getPropertyValue("FirstTransmissionRunList"), first_trans_files)
+                add_run_file_names(history.getPropertyValue("SecondTransmissionRunList"), second_trans_files)
+            except RuntimeError as ex:
+                logger.debug(f"{ex}. Transmission file information will be excluded from the file.")
+                return [], []
+
+        return list(first_trans_files.keys()), list(second_trans_files.keys())
+
+    def _get_flood_correction_entry(self) -> Optional[tuple[str, str]]:
+        """
+        Get the flood correction file or workspace name from the reduction history.
+        """
+        # The flood correction may have been passed either as a full filepath or workspace name
+        # The FloodCorrection parameter says Workspace in both cases, so we don't know which we have
+        if not self.reduction_workflow_histories:
+            return None
+        flood_name = self.reduction_workflow_histories[0].getPropertyValue("FloodWorkspace")
+        if flood_name:
+            return Path(flood_name).name, "Flood correction workspace or file"
+
+        # It's possible that a flood workspace was created as the first step in the reduction
+        if self.reduction_history:
+            flood_history = self.reduction_history.getChildHistories()[0]
+            if flood_history.name() == self._CREATE_FLOOD_ALG:
+                return Path(flood_history.getPropertyValue("Filename")).name, "Flood correction run file"
+        return None
+
+    def _get_calibration_file_entry(self) -> Optional[str]:
+        """
+        Get the calibration file name from the reduction history.
+        """
+        if not self.reduction_workflow_histories:
+            return None
+        calibration_file = self.reduction_workflow_histories[0].getPropertyValue("CalibrationFile")
+        return Path(calibration_file).name if calibration_file else None
+
+    def _get_resolution(self) -> Optional[float]:
+        # Attempt to get the resolution from the workspace history
+        if self.stitch_history is not None:
+            # The absolute value of the stitch parameter of the stitch algorithm is the resolution
+            try:
+                return abs(float(self.stitch_history.getPropertyValue("Params")))
+            except ValueError:
+                logger.debug("Resolution could not be found in stitch history.")
+        if self.reduction_history:
+            for reduction_history_child in reversed(self.reduction_history.getChildHistories()):
+                if reduction_history_child.name() == self._REBIN_ALG:
+                    rebin_params = reduction_history_child.getPropertyValue("Params").split(",")
+                    if len(rebin_params) == 3:
+                        # The absolute value of the middle rebin parameter is the resolution
+                        return abs(float(rebin_params[1]))
+
+        logger.debug("Unable to find resolution from workspace history.")
+        return None
+
+
+class ReflectometryDatasetHybrid(ReflectometryDatasetHistory, ReflectometryDatasetManual):
+    """
+    This hybrid version of the datasets allows as much of the information as possible to be extracted from the history
+    and then leaves the rest with setters to be set manually.
+
+    It is intended that extraction from the history takes place at validation to give the user
+    a chance to manually enter any remaining properties.
+    """
+
+    def __init__(self, ws, is_ws_grp_member: bool):
+        super(ReflectometryDatasetHybrid, self).__init__(ws, is_ws_grp_member)
+
+    def _read_only(self):
+        return False
+
+    def get_missing_metadata_list(self) -> List:
+        """
+        Get a list of any metadata that could not be extracted from the workspace history.
+
+        TODO: Work out if this should be using the property names. Coupled too tight to the alg?
+        """
+        missing_metadata = []
+        if not self._q_conversion_method:
+            missing_metadata.append(Prop.Q_CONVERT_METHOD)
+        if self._reduction_timestamp is None:
+            missing_metadata.append(Prop.REDUCTION_TIMESTAMP)
+        if not self._angle_files:
+            missing_metadata.append(Prop.ANGLE_FILES)
+        if self._transmission_files:
+            if not self._transmission_files[0]:
+                missing_metadata.append(Prop.TRANS_FILES_1)
+            if not self._transmission_files[1]:
+                missing_metadata.append(Prop.TRANS_FILES_2)
+        else:
+            missing_metadata.extend([Prop.TRANS_FILES_1, Prop.TRANS_FILES_2])
+        if not self._flood_entry:
+            missing_metadata.append(Prop.FLOOD_ENTRY)
+        if not self._calibration_entry:
+            missing_metadata.append(Prop.CALIB_FILE)
+        if self._resolution is None:
+            missing_metadata.append(Prop.RESOLUTION)
+        if self._reduction_script is None:
+            missing_metadata.append(Prop.SCRIPT)
+        return missing_metadata
+
 
 class SaveISISReflectometryORSO(PythonAlgorithm):
     """
@@ -179,13 +585,8 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
     _FACILITY = "ISIS"
     _ISIS_DOI_PREFIX = "10.5286/ISIS.E.RB"
     _RB_NUM_LOGS = ("rb_proposal", "experiment_identifier")
-    _RUN_NUM_LOG = "run_number"
     _INVALID_HEADER_COMMENT = "Mantid@ISIS output may not be fully ORSO compliant"
     _Q_UNIT = "MomentumTransfer"
-
-    # Algorithms
-    _REBIN_ALG = "Rebin"
-    _CREATE_FLOOD_ALG = "CreateFloodWorkspace"
 
     def category(self):
         return "Reflectometry\\ISIS"
@@ -208,6 +609,64 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             StringArrayProperty(Prop.WORKSPACE_LIST, values=[], validator=mandatory_ws_list),
             doc="A list of workspace names containing the reduced reflectivity data to be saved.",
         )
+
+        meta_source_validator = StringListValidator(
+            [MetadataSourceOptions.FROM_HISTORY, MetadataSourceOptions.HYBRID, MetadataSourceOptions.MANUAL]
+        )
+        self.declareProperty(
+            name=Prop.META_SOURCE,
+            defaultValue=MetadataSourceOptions.FROM_HISTORY,
+            validator=meta_source_validator,
+            doc=f"Where the metadata in the file should be taken from. "
+            f"{MetadataSourceOptions.FROM_HISTORY}: Takes from the workspace history (Relies on ReflectometryReductionOne). "
+            f"{MetadataSourceOptions.HYBRID}: Checks workspace history, then prompts for manual input for anything not gathered."
+            f"{MetadataSourceOptions.MANUAL}: Requires all metadata to be given as properties to this algorithm.",
+        )
+
+        manual_metadata_condition = EnabledWhenProperty(Prop.META_SOURCE, PropertyCriterion.IsNotDefault)
+
+        convert_method_validator = StringListValidator(
+            [ReflectometryDatasetHistory.REDUCTION_WORKFLOW_ALG, ReflectometryDatasetHistory.CONVERT_ALG]
+        )
+        self.declareProperty(
+            name=Prop.Q_CONVERT_METHOD,
+            defaultValue=ReflectometryDatasetHistory.REDUCTION_WORKFLOW_ALG,
+            validator=convert_method_validator,
+            doc="The method used for converting from Q Space to Wavelength.",
+        )
+        self.setPropertySettings(Prop.Q_CONVERT_METHOD, manual_metadata_condition)
+
+        self.declareProperty(name=Prop.REDUCTION_TIMESTAMP, defaultValue="", doc="When the reduction took place (ISO8601 Standard).")
+        self.setPropertySettings(Prop.REDUCTION_TIMESTAMP, manual_metadata_condition)
+
+        self.declareProperty(StringArrayProperty(Prop.ANGLE_FILES, values=[]), doc="Input angle file list.")
+        self.setPropertySettings(Prop.ANGLE_FILES, manual_metadata_condition)
+
+        self.declareProperty(FloatArrayProperty(Prop.ANGLE_FILES_THETA, values=[]), doc="Input angle file list of theta values.")
+        self.setPropertySettings(Prop.ANGLE_FILES_THETA, manual_metadata_condition)
+
+        self.declareProperty(StringArrayProperty(Prop.TRANS_FILES_1, values=[]), doc="List of files used in the first transmission run.")
+        self.setPropertySettings(Prop.TRANS_FILES_1, manual_metadata_condition)
+
+        self.declareProperty(StringArrayProperty(Prop.TRANS_FILES_2, values=[]), doc="List of files used in the second transmission run.")
+        self.setPropertySettings(Prop.TRANS_FILES_2, manual_metadata_condition)
+
+        flood_entry_validator = StringArrayLengthValidator()
+        flood_entry_validator.setLengthMax(2)
+        self.declareProperty(
+            StringArrayProperty(Prop.FLOOD_ENTRY, values=["", ""], validator=flood_entry_validator),
+            doc="Entry for the flood correction. Must be in the form 'filename, comment'.",
+        )
+        self.setPropertySettings(Prop.FLOOD_ENTRY, manual_metadata_condition)
+
+        self.declareProperty(Prop.CALIB_FILE, defaultValue="", doc="Calibration file used.")
+        self.setPropertySettings(Prop.CALIB_FILE, manual_metadata_condition)
+
+        self.declareProperty(Prop.RESOLUTION, defaultValue=0.0, doc="Resolution of the run.")
+        self.setPropertySettings(Prop.RESOLUTION, manual_metadata_condition)
+
+        self.declareProperty(Prop.SCRIPT, defaultValue="", doc="Script used to perform the reduction.")
+        self.setPropertySettings(Prop.SCRIPT, manual_metadata_condition)
 
         self.declareProperty(
             name=Prop.WRITE_RESOLUTION,
@@ -263,6 +722,20 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
                 f"to save as ORSO ASCII or {MantidORSOSaver.NEXUS_FILE_EXT} to save as ORSO Nexus."
             )
 
+        if self.getPropertyValue(Prop.META_SOURCE) == MetadataSourceOptions.HYBRID and not ws_issue:
+            check_dataset = self._create_and_sort_refl_datasets()[0]
+            missing_meta = check_dataset.get_missing_metadata_list()
+            for prop in missing_meta:
+                if self.getProperty(prop).isDefault:
+                    issues[prop] = "Metadata could not be found in the workspace history. Please provide some."
+
+        angle_files = self.getProperty(Prop.ANGLE_FILES).value
+        angle_files_theta = self.getProperty(Prop.ANGLE_FILES_THETA).value
+        if len(angle_files) > 0 or len(angle_files_theta) > 0:
+            if len(angle_files) != len(angle_files_theta):
+                issues[Prop.ANGLE_FILES] = (
+                    f"Both the {Prop.ANGLE_FILES} and {Prop.ANGLE_FILES_THETA} properties must be lists of equal length. "
+                )
         return issues
 
     def _validate_ws(self, ws_name: str) -> str:
@@ -317,7 +790,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
                 ws_groups.append(ws)
         return ws_groups
 
-    def _create_and_sort_refl_datasets(self) -> List[ReflectometryDataset]:
+    def _create_and_sort_refl_datasets(self) -> List[ReflectometryDatasetBase]:
         """Retrieve the workspaces from the input list, transform them into ReflectometryDataset objects and sort them
         into the order that the datasets should appear in the ORSO file"""
         ws_groups_in_ADS = self._get_all_workspace_groups()
@@ -333,15 +806,49 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         for ws_name in self.getProperty(Prop.WORKSPACE_LIST).value:
             ws = AnalysisDataService.retrieve(ws_name)
             if isinstance(ws, WorkspaceGroup):
-                dataset_list.extend([ReflectometryDataset(child_ws, True) for child_ws in ws])
+                dataset_list.extend([self._create_single_refl_dataset(child_ws, True) for child_ws in ws])
             else:
-                dataset_list.append(ReflectometryDataset(ws, is_workspace_group_member(ws_name)))
+                dataset_list.append(self._create_single_refl_dataset(ws, is_workspace_group_member(ws_name)))
 
         # Stitched datasets should be sorted to the end of the list
         dataset_list.sort(key=lambda refl_dataset: refl_dataset.is_stitched)
         return dataset_list
 
-    def _create_orso_dataset(self, refl_dataset: ReflectometryDataset) -> MantidORSODataset:
+    def _create_single_refl_dataset(self, ws, is_child) -> ReflectometryDatasetBase:
+        match self.getPropertyValue(Prop.META_SOURCE):
+            case MetadataSourceOptions.FROM_HISTORY:
+                return ReflectometryDatasetHistory(ws, is_child)
+            case MetadataSourceOptions.HYBRID:
+                dataset = ReflectometryDatasetHybrid(ws, is_child)
+                use_default = False
+            case MetadataSourceOptions.MANUAL:
+                dataset = ReflectometryDatasetManual(ws, is_child)
+                use_default = True
+            case _:
+                raise RuntimeError("An invalid metadata source was given.")
+
+        def set_simple_dataset_value(dataset_attr: str, value, alg_prop: str):
+            if use_default or not self.getProperty(alg_prop).isDefault:
+                setattr(dataset, dataset_attr, value)
+
+        set_simple_dataset_value("q_conversion_method", self.getPropertyValue(Prop.Q_CONVERT_METHOD), Prop.Q_CONVERT_METHOD)
+        set_simple_dataset_value("reduction_timestamp", self.getPropertyValue(Prop.REDUCTION_TIMESTAMP), Prop.REDUCTION_TIMESTAMP)
+        set_simple_dataset_value("calibration_entry", self.getPropertyValue(Prop.CALIB_FILE), Prop.CALIB_FILE)
+        set_simple_dataset_value("resolution", self.getProperty(Prop.RESOLUTION).value, Prop.RESOLUTION)
+        set_simple_dataset_value("reduction_script", self.getPropertyValue(Prop.SCRIPT), Prop.SCRIPT)
+
+        if use_default or (not self.getProperty(Prop.ANGLE_FILES).isDefault and not self.getProperty(Prop.ANGLE_FILES).isDefault):
+            dataset.angle_files = zip(self.getProperty(Prop.ANGLE_FILES).value, self.getProperty(Prop.ANGLE_FILES_THETA).value)
+
+        if use_default or (not self.getProperty(Prop.TRANS_FILES_1).isDefault and not self.getProperty(Prop.TRANS_FILES_2).isDefault):
+            dataset.transmission_files = (self.getProperty(Prop.TRANS_FILES_1).value, self.getProperty(Prop.TRANS_FILES_2).value)
+
+        if use_default or not self.getProperty(Prop.FLOOD_ENTRY).isDefault:
+            dataset.flood_entry = tuple(self.getProperty(Prop.FLOOD_ENTRY).value)
+
+        return dataset
+
+    def _create_orso_dataset(self, refl_dataset: ReflectometryDatasetBase) -> MantidORSODataset:
         data_columns = self._create_data_columns(refl_dataset)
         dataset = self._create_dataset_with_mandatory_header(data_columns, refl_dataset)
         if dataset.dataset is None:
@@ -350,7 +857,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         self._add_optional_header_info(dataset, refl_dataset)
         return dataset
 
-    def _create_data_columns(self, refl_dataset: ReflectometryDataset) -> MantidORSODataColumns:
+    def _create_data_columns(self, refl_dataset: ReflectometryDatasetBase) -> MantidORSODataColumns:
         """
         Set up the column headers and data values
         """
@@ -386,34 +893,30 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
 
         return data_columns
 
-    def _convert_from_q_to_wavelength(self, refl_dataset: ReflectometryDataset, q_data: np.ndarray) -> np.ndarray:
-        q_convert_history = refl_dataset.q_conversion_history
-        if q_convert_history is None:
-            raise RuntimeError(
-                "Unable to calculate lambda values as cannot find algorithm used for original Q conversion in the workspace history."
-            )
+    def _convert_from_q_to_wavelength(self, refl_dataset: ReflectometryDatasetBase, q_data: np.ndarray) -> np.ndarray:
+        conversion_method = refl_dataset.q_conversion_method
 
-        # The method to convert back to wavelength depends on which algorithm was used to perform the conversion to Q
-        if q_convert_history.name() == ReflectometryDataset.REF_ROI_ALG:
-            return 4 * np.pi * np.sin(np.radians(refl_dataset.q_conversion_theta)) / q_data
-
-        if q_convert_history.name() == ReflectometryDataset.CONVERT_ALG:
-            alg = self.createChildAlgorithm(
-                ReflectometryDataset.CONVERT_ALG,
-                InputWorkspace=refl_dataset.ws,
-                Target="Wavelength",
-                AlignBins=False,
-                OutputWorkspace="lambdaWs",
-            )
-            alg.execute()
-            lambda_ws = alg.getProperty("OutputWorkspace").value
-            lambda_point_data = self._convert_to_point_data(lambda_ws, "lambdaPointData")
-            # There is an inverse relationship between lambda and Q, and workspace X values are in ascending order.
-            # This means the first wavelength bin in the lambda workspace is the conversion for the last Q bin in the
-            # reduced workspace.
-            return np.flip(lambda_point_data.extractX()[0])
-
-        raise RuntimeError("Unable to calculate lambda values as cannot find a supported Q conversion algorithm in the workspace history.")
+        # The method to convert back to wavelength depends on which method was used to perform the conversion to Q
+        match conversion_method:
+            case ReflectometryDatasetHistory.REF_ROI_ALG:
+                return 4 * np.pi * np.sin(np.radians(refl_dataset.q_conversion_theta)) / q_data
+            case ReflectometryDatasetHistory.CONVERT_ALG:
+                alg = self.createChildAlgorithm(
+                    ReflectometryDatasetHistory.CONVERT_ALG,
+                    InputWorkspace=refl_dataset.ws,
+                    Target="Wavelength",
+                    AlignBins=False,
+                    OutputWorkspace="lambdaWs",
+                )
+                alg.execute()
+                lambda_ws = alg.getProperty("OutputWorkspace").value
+                lambda_point_data = self._convert_to_point_data(lambda_ws, "lambdaPointData")
+                # There is an inverse relationship between lambda and Q, and workspace X values are in ascending order.
+                # This means the first wavelength bin in the lambda workspace is the conversion for the last Q bin in the
+                # reduced workspace.
+                return np.flip(lambda_point_data.extractX()[0])
+            case _:
+                raise RuntimeError("Unable to calculate lambda values. A supported conversion method was not given.")
 
     def _convert_to_point_data(self, ws, out_ws_name):
         alg = self.createChildAlgorithm("ConvertToPointData", InputWorkspace=ws, OutputWorkspace=out_ws_name)
@@ -423,7 +926,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
     def _create_dataset_with_mandatory_header(
         self,
         data_columns: MantidORSODataColumns,
-        refl_dataset: ReflectometryDataset,
+        refl_dataset: ReflectometryDatasetBase,
     ) -> MantidORSODataset:
         """
         Create a dataset with the data columns and the mandatory information populated in the header
@@ -432,7 +935,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             refl_dataset.name,
             data_columns,
             refl_dataset.ws,
-            reduction_timestamp=self._get_reduction_timestamp(refl_dataset.reduction_history),
+            refl_dataset.reduction_timestamp,
             creator_name=self.name(),
             creator_affiliation=MantidORSODataset.SOFTWARE_NAME,
             enable_instrument_settings=refl_dataset.is_polarized,  # instrument settings only for polarization data
@@ -440,7 +943,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             validate=self.getProperty(Prop.VALIDATION).value,
         )
 
-    def _add_optional_header_info(self, dataset: MantidORSODataset, refl_dataset: ReflectometryDataset) -> None:
+    def _add_optional_header_info(self, dataset: MantidORSODataset, refl_dataset: ReflectometryDatasetBase) -> None:
         """
         Populate the non_mandatory information in the header
         """
@@ -449,34 +952,33 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         dataset.set_facility(self._FACILITY)
         dataset.set_proposal_id(rb_number)
         dataset.set_doi(doi)
-        dataset.set_reduction_call(self._get_reduction_script(refl_dataset))
+        dataset.set_reduction_call(refl_dataset.reduction_script)
         if refl_dataset.is_polarized:
             dataset.set_polarization(refl_dataset.spin_state)
 
-        reduction_workflow_histories = refl_dataset.reduction_workflow_histories
-        if not refl_dataset.reduction_workflow_histories:
+        if isinstance(refl_dataset, ReflectometryDatasetHistory) and not refl_dataset.reduction_workflow_histories:
             self.log().debug(
-                f"Unable to find history for {ReflectometryDataset.REDUCTION_WORKFLOW_ALG} - some metadata will be excluded from the file."
+                f"Unable to find history for {ReflectometryDatasetHistory.REDUCTION_WORKFLOW_ALG}"
+                "- some metadata will be excluded from the file."
             )
             return
 
-        instrument_name = refl_dataset.instrument_name
-
-        for file, theta in self._get_individual_angle_files(instrument_name, reduction_workflow_histories):
+        for file, theta in refl_dataset.angle_files:
             dataset.add_measurement_data_file(file, comment=f"Reduction input angle {theta}")
 
-        first_trans_files, second_trans_files = self._get_transmission_files(instrument_name, reduction_workflow_histories)
-        for file in first_trans_files:
-            dataset.add_measurement_additional_file(file, comment="First transmission run")
+        trans_files = refl_dataset.transmission_files
+        if trans_files:
+            first_trans_files, second_trans_files = trans_files
+            for file in first_trans_files:
+                dataset.add_measurement_additional_file(file, comment="First transmission run")
+            for file in second_trans_files:
+                dataset.add_measurement_additional_file(file, comment="Second transmission run")
 
-        for file in second_trans_files:
-            dataset.add_measurement_additional_file(file, comment="Second transmission run")
-
-        flood_entry = self._get_flood_correction_entry(reduction_workflow_histories, refl_dataset.reduction_history)
+        flood_entry = refl_dataset.flood_entry
         if flood_entry:
             dataset.add_measurement_additional_file(flood_entry[0], comment=flood_entry[1])
 
-        calib_file_entry = self._get_calibration_file_entry(reduction_workflow_histories)
+        calib_file_entry = refl_dataset.calibration_entry
         if calib_file_entry:
             dataset.add_measurement_additional_file(calib_file_entry, comment="Calibration file")
 
@@ -492,176 +994,10 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
                 return rb_num, f"{self._ISIS_DOI_PREFIX}{rb_num}"
         return None, None
 
-    def _get_resolution(self, refl_dataset: ReflectometryDataset) -> Optional[float]:
+    def _get_resolution(self, refl_dataset: ReflectometryDatasetBase) -> Optional[float]:
         if not self.getProperty(Prop.WRITE_RESOLUTION).value and not self.getProperty(Prop.INCLUDE_EXTRA_COLS).value:
             return None
-
-        # Attempt to get the resolution from the workspace history
-        if refl_dataset.is_stitched:
-            # The absolute value of the stitch parameter of the stitch algorithm is the resolution
-            return abs(float(refl_dataset.stitch_history.getPropertyValue("Params")))
-
-        if refl_dataset.reduction_history:
-            rebin_alg = refl_dataset.reduction_history.getChildHistories()[-1]
-            if rebin_alg.name() == self._REBIN_ALG:
-                rebin_params = rebin_alg.getPropertyValue("Params").split(",")
-                if len(rebin_params) == 3:
-                    # The absolute value of the middle rebin parameter is the resolution
-                    return abs(float(rebin_params[1]))
-
-        self.log().debug("Unable to find resolution from workspace history.")
-        return None
-
-    def _get_reduction_timestamp(self, reduction_history):
-        """
-        Get the reduction algorithm execution date, which is in UTC, and convert it to a
-        datetime object expressed in local time
-        """
-        if not reduction_history:
-            return None
-
-        try:
-            return MantidORSODataset.create_local_datetime_from_utc_string(reduction_history.executionDate().toISO8601String())
-        except ValueError:
-            self.log().debug("Could not parse reduction timestamp into required format - this information will be excluded from the file.")
-            return None
-
-    def _get_individual_angle_files(self, instrument_name, reduction_workflow_histories) -> List[Tuple[str, str]]:
-        """
-        Find the names of the individual angle files that were used in the reduction
-        """
-        angle_files = []
-
-        for history in reduction_workflow_histories:
-            input_runs = history.getPropertyValue("InputRunList")
-            theta = history.getPropertyValue("ThetaIn")
-            try:
-                angle_files.extend([(file, theta) for file in self._get_file_names_from_history_run_list(input_runs, instrument_name)])
-            except RuntimeError as ex:
-                self.log().debug(f"{ex}. Angle file information will be excluded from the file.")
-                return []
-        return angle_files
-
-    def _get_transmission_files(self, instrument_name, reduction_workflow_histories) -> Tuple[List[str], List[str]]:
-        """
-        Find the names of the transmission files that were used in the reduction
-        """
-        # We use an ordered dictionary to ensure that duplicates are excluded and that the files always appear in the
-        # same order in the .ort file. Fixing the order makes it easier for us to write automated tests.
-        first_trans_files = OrderedDict()
-        second_trans_files = OrderedDict()
-
-        def add_run_file_names(run_list, trans_files):
-            if not run_list:
-                return
-            for file_name in self._get_file_names_from_history_run_list(run_list, instrument_name):
-                trans_files[file_name] = None
-
-        for history in reduction_workflow_histories:
-            try:
-                add_run_file_names(history.getPropertyValue("FirstTransmissionRunList"), first_trans_files)
-                add_run_file_names(history.getPropertyValue("SecondTransmissionRunList"), second_trans_files)
-            except RuntimeError as ex:
-                self.log().debug(f"{ex}. Transmission file information will be excluded from the file.")
-                return [], []
-
-        return list(first_trans_files.keys()), list(second_trans_files.keys())
-
-    def _get_file_names_from_history_run_list(self, run_list: str, instrument_name: str) -> List[str]:
-        """
-        Construct the run file names from the comma-separated run list values from the history
-        of ReflectometryISISLoadAndProcess.
-        """
-        # We do this manually because using the FileFinder to look up the file is too slow for this algorithm, and we
-        # can't guarantee that the file name will be available from the history of ReflectometryISISLoadAndProcess.
-        file_names = []
-
-        for entry in run_list.split(","):
-            # The ISIS Reflectometry GUI is fairly flexible about what can be entered, so this could be a run number
-            # or file name, with or without padding, or a workspace name.
-            if AnalysisDataService.doesExist(entry):
-                # If we can find a matching workspace in the ADS then get the run number from that
-                run = AnalysisDataService.retrieve(entry).getRun()
-                if not run.hasProperty(self._RUN_NUM_LOG):
-                    raise RuntimeError(f"Cannot convert {entry} to a full run file name for instrument {instrument_name}")
-                run_string = str(run.getProperty(self._RUN_NUM_LOG).value)
-            else:
-                run_string = entry
-            file_names.append(self._construct_run_file_name_for_string(instrument_name, run_string))
-
-        return file_names
-
-    @staticmethod
-    def _construct_run_file_name_for_string(instrument_name: str, run_string: str) -> str:
-        def raise_error():
-            raise RuntimeError(f"Cannot convert {run_string} to a file name for instrument {instrument_name}")
-
-        # Check that the string is in a format that can potentially be converted to a run file name.
-        # It should optionally start with any number of letters and end with any number of digits.
-        # We ignore any file extensions.
-        match = re.fullmatch(r"(?P<prefix>[a-zA-Z]*)(?P<padding>0*)(?P<run>[0-9]+)", run_string.split(".")[0])
-        if not match:
-            raise_error()
-        match_prefix = match.group("prefix")
-        run_num = match.group("run")
-
-        instrument = config.getInstrument(instrument_name)
-        try:
-            inst_prefix = instrument.filePrefix(int(run_num))
-            # Check if there's a prefix that isn't valid for the instrument
-            if match_prefix and not match_prefix.lower() == inst_prefix.lower():
-                raise_error()
-
-            run_num_width = instrument.zeroPadding(int(run_num))
-            if len(run_num) > run_num_width:
-                raise_error()
-
-            return f"{inst_prefix}{run_num.rjust(run_num_width, '0')}"
-        except OverflowError:
-            raise_error()
-
-    def _get_flood_correction_entry(self, reduction_workflow_histories, reduction_history) -> Optional[tuple[str, str]]:
-        """
-        Get the flood correction file or workspace name from the reduction history.
-        """
-        # The flood correction may have been passed either as a full filepath or workspace name
-        # The FloodCorrection parameter says Workspace in both cases, so we don't know which we have
-        flood_name = reduction_workflow_histories[0].getPropertyValue("FloodWorkspace")
-        if flood_name:
-            return Path(flood_name).name, "Flood correction workspace or file"
-
-        # It's possible that a flood workspace was created as the first step in the reduction
-        if reduction_history:
-            flood_history = reduction_history.getChildHistories()[0]
-            if flood_history.name() == self._CREATE_FLOOD_ALG:
-                return Path(flood_history.getPropertyValue("Filename")).name, "Flood correction run file"
-
-        return None
-
-    @staticmethod
-    def _get_calibration_file_entry(reduction_workflow_histories) -> Optional[str]:
-        """
-        Get the calibration file name from the reduction history.
-        """
-        calibration_file = reduction_workflow_histories[0].getPropertyValue("CalibrationFile")
-        return Path(calibration_file).name if calibration_file else None
-
-    def _get_reduction_script(self, refl_dataset: ReflectometryDataset) -> Optional[str]:
-        """
-        Get the workspace reduction history as a script.
-        """
-        if refl_dataset.is_ws_grp_member:
-            # We don't get an accurate history from ReflectometryISISLoadAndProcess for workspace groups, so only
-            # include this if the workspace is not part of a group
-            return None
-
-        if refl_dataset.ws.getHistory().empty():
-            return None
-
-        alg = self.createChildAlgorithm("GeneratePythonScript", InputWorkspace=refl_dataset.ws, ExcludeHeader=True)
-        alg.execute()
-        script = alg.getPropertyValue("ScriptText")
-        return "\n".join(script.split("\n")[2:])  # trim the import statement
+        return refl_dataset.resolution
 
 
 # Register algorithm with Mantid
