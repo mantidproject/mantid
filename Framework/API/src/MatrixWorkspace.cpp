@@ -2160,7 +2160,7 @@ void MatrixWorkspace::buildDefaultSpectrumDefinitions() {
 void MatrixWorkspace::rebuildDetectorIDGroupings() {
   const auto &detInfo = detectorInfo();
   const auto detInfo_scanCount = detInfo.scanCount(); // cache value outside of the loop
-  // Use size() directly; avoid detectorIDs()
+  // Use size() directly; avoid detectorIDs() to keep compact m_detectorIDs for PA instruments.
   const auto allDetIDs_size = detInfo.size();
   const auto &specDefs = m_indexInfo->spectrumDefinitions();
   const auto indexInfoSize = static_cast<int64_t>(m_indexInfo->size());

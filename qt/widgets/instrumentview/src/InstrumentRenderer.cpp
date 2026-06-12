@@ -16,6 +16,7 @@
 #include "MantidQtWidgets/InstrumentView/BankRenderingHelpers.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtWidgets/InstrumentView/OpenGLError.h"
+#include <algorithm>
 
 using namespace MantidQt::MantidWidgets;
 using Mantid::Beamline::ComponentType;
@@ -43,7 +44,8 @@ InstrumentRenderer::InstrumentRenderer(const InstrumentActor &actor)
   }
   for (size_t i = componentInfo.root(); !componentInfo.isDetector(i); --i) {
     auto type = componentInfo.componentType(i);
-    if (type == ComponentType::Rectangular || type == ComponentType::OutlineComposite || type == ComponentType::Grid) {
+    if (type == ComponentType::Rectangular || type == ComponentType::OutlineComposite || type == ComponentType::Grid ||
+        type == ComponentType::VirtualAssembly) {
       m_textures.emplace_back(componentInfo, i);
       m_reverseTextureIndexMap[i] = textureIndex;
       textureIndex++;
@@ -76,6 +78,18 @@ void InstrumentRenderer::drawComponent(const size_t i, const std::vector<bool> &
       drawGridBank(i, picking);
       updateVisited(compInfo, i, visited);
     }
+    return;
+  }
+  if (type == ComponentType::VirtualAssembly) {
+    // Always mark virtual pixels visited — even when invisible — to prevent
+    // per-pixel fallback rendering (which would generate O(N) display lists).
+    const auto *seg = compInfo.findVirtualBankByCompIdx(i);
+    if (seg)
+      std::fill(visited.begin() + static_cast<std::ptrdiff_t>(seg->firstIndex),
+                visited.begin() + static_cast<std::ptrdiff_t>(seg->lastIndex) + 1, true);
+    if (visibleComps[i])
+      drawVirtualBank(i, picking);
+    visited[i] = true;
     return;
   }
   if (type == ComponentType::Rectangular) {
@@ -155,6 +169,12 @@ void InstrumentRenderer::drawGridBank(size_t bankIndex, bool picking) {
   }
   tex.unbindTextures();
   glPopMatrix();
+}
+
+void InstrumentRenderer::drawVirtualBank(size_t bankIndex, bool picking) {
+  // VirtualAssembly banks render identically to rectangular_detector banks:
+  // a single textured quad whose geometry comes from the VirtualBankSegment.
+  drawRectangularBank(bankIndex, picking);
 }
 
 void InstrumentRenderer::drawRectangularBank(size_t bankIndex, bool picking) {

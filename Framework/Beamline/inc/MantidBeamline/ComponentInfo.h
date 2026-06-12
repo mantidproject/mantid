@@ -8,13 +8,17 @@
 
 #include "MantidBeamline/ComponentType.h"
 #include "MantidBeamline/DllConfig.h"
+#include "MantidBeamline/VirtualBankSegment.h"
 #include "MantidKernel/cow_ptr.h"
 #include <Eigen/Geometry>
 #include <Eigen/StdVector>
+#include <algorithm>
 #include <cstddef>
 #include <memory>
+#include <numeric>
 #include <string>
 #include <utility>
+#include <vector>
 
 namespace Mantid {
 namespace Beamline {
@@ -77,7 +81,7 @@ public:
       std::shared_ptr<std::vector<Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>> rotations,
       std::shared_ptr<std::vector<Eigen::Vector3d>> scaleFactors,
       std::shared_ptr<std::vector<ComponentType>> componentType, std::shared_ptr<const std::vector<std::string>> names,
-      int64_t sourceIndex, int64_t sampleIndex);
+      int64_t sourceIndex, int64_t sampleIndex, std::vector<VirtualBankSegment> virtualBanks = {});
   /// Copy assignment not permitted because of the way DetectorInfo stored
   ComponentInfo &operator=(const ComponentInfo &other) = delete;
   /// Clone method
@@ -98,7 +102,9 @@ public:
   size_t totalDetectorCount() const noexcept { return m_detectorRanges ? m_size - m_detectorRanges->size() : 0; }
 
   /// Call @p f(detectorIndex) for every detector in the subtree rooted at
-  /// @p componentIndex.  Real detector indices come from the flat array.
+  /// @p componentIndex.  Real detector indices come from the flat array;
+  /// virtual pixel indices are generated on the fly from VirtualBankSegment
+  /// ranges — no heap allocation is required for the enumeration itself.
   template <typename Callable> void forEachDetectorInSubtree(size_t componentIndex, Callable &&f) const {
     if (isDetector(componentIndex)) {
       f(componentIndex);
@@ -109,9 +115,47 @@ public:
     const auto detRange = (*m_detectorRanges)[rangesIndex];
     for (size_t i = detRange.first; i < detRange.second; ++i)
       f((*m_assemblySortedDetectorIndices)[i]);
+    // Virtual pixels synthesised from VirtualAssembly segments.
+    if (hasVirtualBanks()) {
+      const auto compRange = (*m_componentRanges)[rangesIndex];
+      for (size_t j = compRange.first; j < compRange.second; ++j) {
+        const size_t compIdx = (*m_assemblySortedComponentIndices)[j];
+        if (const auto *seg = findVirtualBankByCompIdx(compIdx))
+          for (size_t k = seg->firstIndex; k <= seg->lastIndex; ++k)
+            f(k);
+      }
+    }
   }
 
-  const Eigen::Vector3d &position(const size_t componentIndex) const;
+  /// Whether this instrument has any PixelAssembly (virtual) banks.
+  bool hasVirtualBanks() const noexcept { return !m_virtualBanks.empty(); }
+
+  /// Returns the VirtualBankSegment owning @p detectorIndex, or nullptr if
+  /// that index is not a virtual pixel.
+  const VirtualBankSegment *findVirtualSegment(size_t detectorIndex) const noexcept;
+
+  /// Maps a logical component index to its offset in the compact arrays
+  /// (m_names, m_scaleFactors, m_parentIndices, etc.).
+  /// For virtual-bank instruments only; behaviour is undefined otherwise.
+  size_t compactComponentIndex(size_t componentIndex) const noexcept;
+
+  /// Given a pointer returned by findVirtualSegment(), returns the
+  /// zero-based index of that segment within m_virtualBanks.  O(1).
+  size_t virtualBankIndex(const VirtualBankSegment *seg) const noexcept {
+    return static_cast<size_t>(seg - m_virtualBanks.data());
+  }
+
+  /// Returns the VirtualBankSegment whose bankCompIdx equals @p compIdx,
+  /// or nullptr if no VirtualAssembly bank has that component index.
+  const VirtualBankSegment *findVirtualBankByCompIdx(size_t compIdx) const noexcept {
+    auto it = std::find_if(m_virtualBanks.cbegin(), m_virtualBanks.cend(),
+                           [compIdx](const auto &seg) { return seg.bankCompIdx == compIdx; });
+    return it != m_virtualBanks.cend() ? &*it : nullptr;
+  }
+
+  // Returns by value: for virtual-bank detector indices the position is computed
+  // on demand and has no backing storage to reference.
+  Eigen::Vector3d position(const size_t componentIndex) const;
   const Eigen::Vector3d &position(const std::pair<size_t, size_t> &index) const;
   Eigen::Quaterniond rotation(const size_t componentIndex) const;
   Eigen::Quaterniond rotation(const std::pair<size_t, size_t> &index) const;
@@ -182,12 +226,36 @@ private:
   void doScaleComponent(const std::pair<size_t, size_t> &index, const Eigen::Vector3d &newScaling,
                         const ComponentInfo::Range &detectorRange);
 
+  // --- Virtual-bank compaction helpers ------------------------------------
+  /// Sorted (ascending firstIndex) virtual-bank segments for PA instruments.
+  /// Empty for instruments with no PixelAssembly banks.
+  std::vector<VirtualBankSegment> m_virtualBanks;
+
+  /// Number of non-virtual detectors (= monitors for a pure-PA instrument).
+  /// Equals m_assemblySortedDetectorIndices->size() when m_virtualBanks is empty.
+  size_t m_nNonVirtualDetectors{0};
+
+  /// Maps compact detector index k → logical detector index, for non-virtual
+  /// detectors only.  Size == m_nNonVirtualDetectors.
+  std::vector<size_t> m_nonVirtualDetectorLogicalIndices;
+
+  /// Inverse of compactComponentIndex: maps a compact array offset to the
+  /// corresponding logical component index.
+  size_t logicalComponentIndex(size_t compactIdx) const noexcept;
+
+  /// Precomputes m_nNonVirtualDetectors and m_nonVirtualDetectorLogicalIndices.
+  void buildNonVirtualDetectorTable();
+
   /// Returns realDetectors.size() + sum(virtual pixels) + detRanges.size().
   /// Used to initialise the const m_size in the constructor initialiser list,
   /// before m_virtualBanks has been moved into place.
   static size_t computeTotalSize(const std::vector<size_t> &realDetectors,
+                                 const std::vector<VirtualBankSegment> &vbanks,
                                  const std::vector<std::pair<size_t, size_t>> &detRanges) noexcept {
-    return realDetectors.size() + detRanges.size();
+    const size_t nVirtual = std::accumulate(vbanks.cbegin(), vbanks.cend(), size_t{0}, [](size_t acc, const auto &seg) {
+      return acc + seg.lastIndex - seg.firstIndex + 1;
+    });
+    return realDetectors.size() + nVirtual + detRanges.size();
   }
 };
 } // namespace Beamline

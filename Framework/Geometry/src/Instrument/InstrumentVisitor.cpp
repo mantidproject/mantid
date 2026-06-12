@@ -17,10 +17,12 @@
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidGeometry/Instrument/PixelAssembly.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 
 #include <algorithm>
+#include <limits>
 #include <memory>
 #include <numeric>
 
@@ -242,6 +244,86 @@ size_t InstrumentVisitor::registerRectangularBank(const ICompAssembly &bank) {
 }
 
 /**
+ * Register a virtual bank (PixelAssembly) — no per-pixel child objects exist.
+ *
+ * Iterates over the grid parameters to fill detector positions and rotations
+ * directly, without creating Detector objects for each pixel.
+ *
+ * NOTE: m_componentIds[detectorIndex] remains nullptr for virtual-bank pixels
+ * (there are no heap-allocated IComponent objects for them).  Code that uses
+ * the legacy ComponentID pointer for virtual pixels must handle null.
+ *
+ * @param bank : PixelAssembly being registered
+ * @return component index assigned to the bank
+ */
+size_t InstrumentVisitor::registerVirtualBank(const PixelAssembly &bank) {
+  const size_t detectorStart = m_assemblySortedDetectorIndices->size();
+  const size_t componentStart = m_assemblySortedComponentIndices->size();
+
+  // All pixels share the same shape and rotation.
+  auto const pxShape = bank.pixelShape() ? bank.pixelShape() : m_nullShape;
+  // Bank absolute rotation and position (world frame).
+  Eigen::Quaterniond const eigenRot = Kernel::toQuaterniond(bank.getRotation());
+  Eigen::Vector3d const bankPos = Kernel::toVector3d(bank.getPos());
+
+  // Determine the logical detector index range for this bank from its two
+  // fill-order endpoints.  IDs at (0,0,0) and (nx-1,ny-1,nz-1) are the first
+  // and last entries in fill order; for contiguous ID blocks the min/max of
+  // these two logical indices bound the entire bank.
+  // No entries are pushed to m_assemblySortedDetectorIndices: virtual pixels
+  // are not stored in the flat array and are enumerated on demand from the
+  // VirtualBankSegment instead.
+  const detid_t id0 = bank.referentDetectorID();
+  const detid_t idN = bank.getDetectorIDAtXYZ(
+      static_cast<int>(bank.xpixels()) - 1, static_cast<int>(bank.ypixels()) - 1, static_cast<int>(bank.zpixels()) - 1);
+  const size_t idx0 = m_detectorIdToIndexMap->at(id0);
+  const size_t idxN = m_detectorIdToIndexMap->at(idN);
+  const size_t firstDetectorIndex = std::min(idx0, idxN);
+  const size_t lastDetectorIndex = std::max(idx0, idxN);
+
+  // Register the bank as a virtual segment so DetectorInfo and ComponentInfo
+  // can compute pixel positions/rotations/parents on demand.
+  // bankCompIdx is only known after commonRegistration() returns.
+  const size_t detectorStop = detectorStart; // empty range — no flat entries
+  const size_t componentIndex = commonRegistration(bank);
+  m_componentType->emplace_back(Beamline::ComponentType::VirtualAssembly);
+  m_assemblySortedComponentIndices->emplace_back(componentIndex);
+  m_parentComponentIndices->emplace_back(componentIndex);
+  const size_t componentStop = m_assemblySortedComponentIndices->size();
+
+  m_detectorRanges->emplace_back(detectorStart, detectorStop);
+  m_componentRanges->emplace_back(componentStart, componentStop);
+  // VirtualAssembly banks have no component children — geometry is computed
+  // analytically from the VirtualBankSegment; the flat pixel list is not stored.
+  m_children->emplace_back(std::vector<size_t>{});
+
+  if (bank.npixels() > 0) {
+    Beamline::VirtualBankSegment seg;
+    seg.firstIndex = firstDetectorIndex;
+    seg.lastIndex = lastDetectorIndex;
+    seg.bankCompIdx = componentIndex; // now known
+    seg.bankPos = bankPos;
+    seg.bankRot = eigenRot;
+    seg.nx = static_cast<int>(bank.xpixels());
+    seg.ny = static_cast<int>(bank.ypixels());
+    seg.nz = static_cast<int>(bank.zpixels());
+    seg.xstart = bank.xstart();
+    seg.xstep = bank.xstep();
+    seg.ystart = bank.ystart();
+    seg.ystep = bank.ystep();
+    seg.idstart = static_cast<int32_t>(bank.referentDetectorID());
+    seg.lastDetId = static_cast<int32_t>(bank.getDetectorIDAtXYZ(seg.nx - 1, seg.ny - 1, seg.nz - 1));
+    seg.idstep = bank.idstep();
+    seg.idFillOrder = bank.idFillOrder();
+    m_virtualBankSegments.push_back(std::move(seg));
+    // Record the pixel shape once per bank (not per pixel).
+    m_virtualPixelShapes.push_back(pxShape);
+  }
+
+  return componentIndex;
+}
+
+/**
  * Register a grid bank
  * @param bank : Grid Detector
  * @return index assigned
@@ -318,6 +400,9 @@ size_t InstrumentVisitor::registerDetector(const IDetector &detector) {
   (*m_detectorRotations)[detectorIndex] = Kernel::toQuaterniond(detector.getRotation());
   (*m_shapes)[detectorIndex] = detector.shape();
   (*m_scaleFactors)[detectorIndex] = Kernel::toVector3d(detector.getScaleFactor());
+  // Use isMonitor(id) rather than isMonitorViaIndex(index): after Phase 3c the
+  // detector cache contains only non-virtual detectors, so its size no longer
+  // equals the total detector count, and index-based access would be incorrect.
   if (m_instrument->isMonitor(detector.getID())) {
     m_monitorIndices->emplace_back(detectorIndex);
   }
@@ -367,15 +452,107 @@ std::shared_ptr<const std::unordered_map<detid_t, size_t>> InstrumentVisitor::de
 }
 
 std::unique_ptr<Beamline::ComponentInfo> InstrumentVisitor::componentInfo() const {
+  if (m_virtualBankSegments.empty()) {
+    // No virtual banks: pass full-size arrays unchanged.
+    return std::make_unique<Mantid::Beamline::ComponentInfo>(
+        m_assemblySortedDetectorIndices, m_detectorRanges, m_assemblySortedComponentIndices, m_componentRanges,
+        m_parentComponentIndices, m_children, m_positions, m_rotations, m_scaleFactors, m_componentType, m_names,
+        m_sourceIndex, m_sampleIndex);
+  }
+
+  // Sort segments by firstIndex (they may have been registered in any order).
+  auto sortedSegs = m_virtualBankSegments;
+  std::sort(sortedSegs.begin(), sortedSegs.end(),
+            [](const Beamline::VirtualBankSegment &a, const Beamline::VirtualBankSegment &b) {
+              return a.firstIndex < b.firstIndex;
+            });
+
+  // Build an is-virtual mask for quick per-index lookup.
+  const size_t nDetectors = m_orderedDetectorIds->size();
+  std::vector<bool> isVirtual(nDetectors, false);
+  for (const auto &seg : sortedSegs) {
+    for (size_t i = seg.firstIndex; i <= seg.lastIndex; ++i)
+      isVirtual[i] = true;
+  }
+
+  // ------------------------------------------------------------------
+  // Compact m_names, m_scaleFactors, m_parentComponentIndices:
+  // keep only non-virtual detector entries + all non-detector entries.
+  // ------------------------------------------------------------------
+  auto compactNames = std::make_shared<std::vector<std::string>>();
+  auto compactSF = std::make_shared<std::vector<Eigen::Vector3d>>();
+  auto compactParents = std::make_shared<std::vector<size_t>>();
+
+  const size_t nNonVirtual = std::count(isVirtual.begin(), isVirtual.end(), false);
+  const size_t nNonDetectors = m_positions->size(); // non-detector components only
+  const size_t compactSize = nNonVirtual + nNonDetectors;
+
+  compactNames->reserve(compactSize);
+  compactSF->reserve(compactSize);
+  compactParents->reserve(compactSize);
+
+  // Non-virtual detector slice
+  for (size_t i = 0; i < nDetectors; ++i) {
+    if (!isVirtual[i]) {
+      compactNames->push_back((*m_names)[i]);
+      compactSF->push_back((*m_scaleFactors)[i]);
+      compactParents->push_back((*m_parentComponentIndices)[i]);
+    }
+  }
+  // Non-detector component slice (appended after detectors in the originals)
+  for (size_t i = nDetectors; i < m_parentComponentIndices->size(); ++i) {
+    compactNames->push_back((*m_names)[i]);
+    compactSF->push_back((*m_scaleFactors)[i]);
+    compactParents->push_back((*m_parentComponentIndices)[i]);
+  }
+
   return std::make_unique<Mantid::Beamline::ComponentInfo>(
       m_assemblySortedDetectorIndices, m_detectorRanges, m_assemblySortedComponentIndices, m_componentRanges,
-      m_parentComponentIndices, m_children, m_positions, m_rotations, m_scaleFactors, m_componentType, m_names,
-      m_sourceIndex, m_sampleIndex);
+      std::shared_ptr<const std::vector<size_t>>(compactParents), m_children, m_positions, m_rotations,
+      std::shared_ptr<std::vector<Eigen::Vector3d>>(compactSF), m_componentType,
+      std::shared_ptr<const std::vector<std::string>>(compactNames), m_sourceIndex, m_sampleIndex,
+      std::move(sortedSegs));
 }
 
 std::unique_ptr<Beamline::DetectorInfo> InstrumentVisitor::detectorInfo() const {
-  return std::make_unique<Mantid::Beamline::DetectorInfo>(*m_detectorPositions, *m_detectorRotations,
-                                                          *m_monitorIndices);
+  if (m_virtualBankSegments.empty()) {
+    // No virtual banks: use the original constructor (no compaction needed).
+    return std::make_unique<Mantid::Beamline::DetectorInfo>(*m_detectorPositions, *m_detectorRotations,
+                                                            *m_monitorIndices);
+  }
+
+  // Sort segments by firstIndex so that findVirtualSegment() can break early.
+  auto sortedSegs = m_virtualBankSegments;
+  std::sort(sortedSegs.begin(), sortedSegs.end(),
+            [](const Beamline::VirtualBankSegment &a, const Beamline::VirtualBankSegment &b) {
+              return a.firstIndex < b.firstIndex;
+            });
+
+  // Build a compact boolean mask: true for virtual pixel indices.
+  const size_t nTotal = m_detectorPositions->size();
+  std::vector<bool> isVirtual(nTotal, false);
+  size_t nVirtual = 0;
+  for (const auto &seg : sortedSegs) {
+    for (size_t i = seg.firstIndex; i <= seg.lastIndex; ++i)
+      isVirtual[i] = true;
+    nVirtual += seg.lastIndex - seg.firstIndex + 1;
+  }
+
+  // Compact arrays: copy only real (non-virtual) detector positions/rotations.
+  using QuatVec = std::vector<Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>;
+  std::vector<Eigen::Vector3d> compactPos;
+  QuatVec compactRot;
+  compactPos.reserve(nTotal - nVirtual);
+  compactRot.reserve(nTotal - nVirtual);
+  for (size_t i = 0; i < nTotal; ++i) {
+    if (!isVirtual[i]) {
+      compactPos.push_back((*m_detectorPositions)[i]);
+      compactRot.push_back((*m_detectorRotations)[i]);
+    }
+  }
+
+  return std::make_unique<Mantid::Beamline::DetectorInfo>(std::move(compactPos), std::move(compactRot),
+                                                          *m_monitorIndices, std::move(sortedSegs));
 }
 
 std::shared_ptr<std::vector<detid_t>> InstrumentVisitor::detectorIds() const { return m_orderedDetectorIds; }
@@ -386,10 +563,86 @@ std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>> Instrum
   // Cross link Component and Detector info objects
   compInfo->setDetectorInfo(detInfo.get());
 
-  auto compInfoWrapper =
-      std::make_unique<ComponentInfo>(std::move(compInfo), componentIds(), componentIdToIndexMap(), m_shapes);
+  // For virtual-bank instruments: build compact m_componentIds and m_shapes
+  // (omit the nullptr/placeholder entries for virtual pixel slots).
+  std::shared_ptr<const std::vector<Geometry::IComponent *>> compactIds;
+  std::shared_ptr<std::vector<std::shared_ptr<const Geometry::IObject>>> compactShapes;
+
+  if (!m_virtualBankSegments.empty()) {
+    const size_t nDetectors = m_orderedDetectorIds->size();
+
+    // Build is-virtual mask (re-use logic from componentInfo()/detectorInfo()).
+    std::vector<bool> isVirtual(nDetectors, false);
+    for (const auto &seg : m_virtualBankSegments)
+      for (size_t i = seg.firstIndex; i <= seg.lastIndex; ++i)
+        isVirtual[i] = true;
+
+    const size_t nNonVirtual = static_cast<size_t>(std::count(isVirtual.begin(), isVirtual.end(), false));
+    const size_t nNonDetectors = m_positions->size();
+    const size_t compactSize = nNonVirtual + nNonDetectors;
+
+    auto ids = std::make_shared<std::vector<Geometry::IComponent *>>();
+    ids->reserve(compactSize);
+    auto shapes = std::make_shared<std::vector<std::shared_ptr<const Geometry::IObject>>>();
+    shapes->reserve(compactSize);
+
+    // Non-virtual detector entries first, then all non-detector components.
+    for (size_t i = 0; i < nDetectors; ++i) {
+      if (!isVirtual[i]) {
+        ids->push_back((*m_componentIds)[i]);
+        shapes->push_back((*m_shapes)[i]);
+      }
+    }
+    for (size_t i = nDetectors; i < m_componentIds->size(); ++i) {
+      ids->push_back((*m_componentIds)[i]);
+      shapes->push_back((*m_shapes)[i]);
+    }
+
+    compactIds = std::move(ids);
+    compactShapes = std::move(shapes);
+  } else {
+    compactIds = componentIds();
+    compactShapes = m_shapes;
+  }
+
+  auto compInfoWrapper = std::make_unique<ComponentInfo>(std::move(compInfo), compactIds, componentIdToIndexMap(),
+                                                         compactShapes, m_virtualPixelShapes);
+
+  // For virtual-bank instruments, build compact detId arrays that omit virtual
+  // pixel entries.  Virtual pixel lookups are handled analytically via
+  // VirtualBankSegment::indexOf() / idAtIndex() in Geometry::DetectorInfo.
+  std::shared_ptr<const std::vector<detid_t>> compactDetIds;
+  std::shared_ptr<const std::unordered_map<detid_t, size_t>> detIdMap;
+  if (m_virtualBankSegments.empty()) {
+    compactDetIds = detectorIds();
+    detIdMap = detectorIdToIndexMap();
+  } else {
+    const size_t nDetectors = m_orderedDetectorIds->size();
+
+    // Re-use the isVirtual mask already computed above for compactIds/compactShapes.
+    std::vector<bool> isVirtual(nDetectors, false);
+    for (const auto &seg : m_virtualBankSegments)
+      for (size_t i = seg.firstIndex; i <= seg.lastIndex; ++i)
+        isVirtual[i] = true;
+    const size_t nNonVirtual = static_cast<size_t>(std::count(isVirtual.begin(), isVirtual.end(), false));
+
+    // Compact detector ID vector (real detectors only).
+    auto ids = std::make_shared<std::vector<detid_t>>();
+    ids->reserve(nNonVirtual);
+    auto compactMap = std::make_shared<std::unordered_map<detid_t, size_t>>();
+    compactMap->reserve(nNonVirtual);
+    for (size_t i = 0; i < nDetectors; ++i) {
+      if (!isVirtual[i]) {
+        ids->push_back((*m_orderedDetectorIds)[i]);
+        compactMap->emplace((*m_orderedDetectorIds)[i], i);
+      }
+    }
+    compactDetIds = std::move(ids);
+    detIdMap = std::move(compactMap);
+  }
+
   auto detInfoWrapper =
-      std::make_unique<DetectorInfo>(std::move(detInfo), m_instrument, detectorIds(), detectorIdToIndexMap());
+      std::make_unique<DetectorInfo>(std::move(detInfo), m_instrument, compactDetIds, std::move(detIdMap));
 
   return {std::move(compInfoWrapper), std::move(detInfoWrapper)};
 }

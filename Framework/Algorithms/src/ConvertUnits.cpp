@@ -457,7 +457,6 @@ MatrixWorkspace_sptr ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUni
       if (outSpectrumInfo.hasDetectors(i))
         outSpectrumInfo.setMasked(i, true);
     }
-
     prog.report("Convert to " + m_outputUnit->unitID());
     PARALLEL_END_INTERRUPT_REGION
   } // loop over spectra
