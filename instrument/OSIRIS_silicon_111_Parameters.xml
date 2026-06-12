@@ -7,6 +7,14 @@
       <value val="spectroscopy" />
     </parameter>
 
+    <parameter name="spectra-min">
+      <value val="1005" />
+    </parameter>
+
+    <parameter name="spectra-max">
+      <value val="2564" />
+    </parameter>
+
     <parameter name="analyser" type="string">
       <value val="silicon" />
     </parameter>
@@ -21,6 +29,10 @@
 
     <parameter name="resolution">
       <value val="0.00075" />
+    </parameter>
+
+    <parameter name="Workflow.DetectorsGroupingFile" type="string">
+      <value val="OSIRIS_Si_Detectors_Grouping.xml" />
     </parameter>
 
   </component-link>

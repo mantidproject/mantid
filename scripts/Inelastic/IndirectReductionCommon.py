@@ -716,6 +716,70 @@ def group_on_string(group_detectors, grouping_string):
     return conjoin_workspaces(*groups)
 
 
+def group_spectra_by_theta(
+    workspace: MatrixWorkspace,
+    number_of_groups: int,
+    spectra_range: List[int] = None,
+) -> MatrixWorkspace:
+    """
+    Groups spectra into theta-based bins. The 2-theta range of the valid analyser
+    detectors is divided into equal-width bins and spectra from all banks within the
+    same bin are averaged together.
+
+    @param workspace The workspace to group
+    @param number_of_groups Number of theta groups to create
+    @param spectra_range [min, max] spectrum numbers defining the analyser spectra to
+                         consider; spectra outside this range are ignored. When None,
+                         all unmasked spectra are used.
+    @return Grouped workspace
+    """
+    import numpy as np
+
+    spectrum_info = workspace.spectrumInfo()
+    num_histograms = workspace.getNumberHistograms()
+
+    # Collect (spectrum_number, 2-theta) for each valid, unmasked analyser spectrum
+    indexed_thetas = []
+    for i in range(num_histograms):
+        if not spectrum_info.hasDetectors(i) or spectrum_info.isMasked(i) or spectrum_info.isMonitor(i):
+            continue
+        spec_no = workspace.getSpectrum(i).getSpectrumNo()
+        if spectra_range is not None:
+            if spec_no < spectra_range[0] or spec_no > spectra_range[1]:
+                continue
+        indexed_thetas.append((spec_no, spectrum_info.twoTheta(i)))
+
+    if not indexed_thetas:
+        raise RuntimeError("No valid detectors found for ThetaGroups grouping.")
+
+    indices, theta_values = zip(*indexed_thetas)
+    theta_min = min(theta_values)
+    theta_max = max(theta_values)
+
+    # Divide the theta range into equal-width bins
+    bin_edges = np.linspace(theta_min, theta_max, number_of_groups + 1)
+    # Nudge the last edge so the maximum theta falls inside the last bin
+    bin_edges[-1] += 1e-10
+
+    theta_groups: List[List[int]] = [[] for _ in range(number_of_groups)]
+    for idx, theta in indexed_thetas:
+        bin_idx = int(np.searchsorted(bin_edges[1:], theta))
+        bin_idx = min(bin_idx, number_of_groups - 1)
+        theta_groups[bin_idx].append(idx)
+
+    non_empty_groups = [g for g in theta_groups if g]
+    if not non_empty_groups:
+        raise RuntimeError("No spectra could be assigned to theta groups.")
+
+    group_detectors = AlgorithmManager.create("GroupDetectors")
+    group_detectors.setChild(True)
+    group_detectors.setProperty("InputWorkspace", workspace)
+    group_detectors.setProperty("Behaviour", "Average")
+
+    groups = [create_group_from_spectra_list(group_detectors, group) for group in non_empty_groups]
+    return conjoin_workspaces(*groups)
+
+
 def group_spectra(
     workspace: str | MatrixWorkspace,
     method: str,
@@ -840,6 +904,21 @@ def group_spectra_of(
     elif grouping_method == "Groups":
         group_string = create_detector_grouping_string(number_of_groups, spectra_range[0], spectra_range[1])
         return group_on_string(group_detectors, group_string)
+    elif grouping_method == "Detectors":
+        try:
+            grouping_file = instrument.getStringParameter("Workflow.DetectorsGroupingFile")[0]
+        except IndexError:
+            raise RuntimeError(
+                "Cannot get detectors grouping file from instrument parameter file. "
+                "Ensure 'Workflow.DetectorsGroupingFile' is defined in the IPF."
+            )
+        if not os.path.isfile(grouping_file):
+            grouping_file = os.path.join(config.getString("groupingFiles.directory"), grouping_file)
+        if not os.path.isfile(grouping_file):
+            raise RuntimeError("Cannot find tube grouping file: %s" % grouping_file)
+        group_detectors.setProperty("MapFile", grouping_file)
+    elif grouping_method == "ThetaGroups":
+        return group_spectra_by_theta(workspace, number_of_groups, spectra_range)
     else:
         raise RuntimeError("Invalid grouping method %s for workspace %s" % (grouping_method, workspace.name()))
 

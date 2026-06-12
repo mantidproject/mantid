@@ -126,7 +126,7 @@ void IETPresenter::updateInstrumentConfiguration() {
   m_view->setInstrumentRebinning(rebinParams, rebinString, rebinDefault.empty(), rebinTab);
 
   // Grouping
-  m_view->setInstrumentGrouping(instrumentName);
+  m_view->setInstrumentGrouping(instrumentName, instrumentDetails.getAnalyser());
 
   // Instrument spec defaults
   bool irsORosiris = std::regex_search(instrumentName, std::regex("(^OSIRIS$)|(^IRIS$)"));
