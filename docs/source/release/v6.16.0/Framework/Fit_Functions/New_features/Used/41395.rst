@@ -1,1 +1,0 @@
-- The `PDF` parameter of the :ref:`FABADA Minimizer <FABADA>` has been changed from a bool to a string. This allows the user to specify the name of the output workspace for the PDF.

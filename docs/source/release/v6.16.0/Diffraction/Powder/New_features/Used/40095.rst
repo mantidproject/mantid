@@ -1,2 +1,0 @@
-- Add `get_profile_param`/`set_profile_param` and `get_profile_free_param`/`set_profile_free_param` functions in ``PawleyPattern`` classes to support setting a profile parameters and fixing free parameters for a given phase through a profile parameter label.
-- Add `get_phase_param`/`set_phase_param` and `get_phase_free_param`/`set_phase_free_param` functions in ``PawleyPattern`` classes to support setting phase parameters and fixing free parameters for a given phase through a phase parameter label.

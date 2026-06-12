@@ -1,1 +1,0 @@
-- The documentation of :ref:`Superplot <WorkbenchSuperplot>` is launched when the help button is clicked instead of the Basic 1D and Tiled Plots documentation.

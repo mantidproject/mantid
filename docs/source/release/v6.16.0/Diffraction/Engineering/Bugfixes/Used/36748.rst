@@ -1,1 +1,0 @@
-- The :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>` now honors the GSAS-II timeout value from the settings panel.

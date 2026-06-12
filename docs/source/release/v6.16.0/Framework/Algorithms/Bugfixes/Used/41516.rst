@@ -1,1 +1,0 @@
-- Fix symmetry bug in :ref:`MDNorm <algm-MDNorm>`

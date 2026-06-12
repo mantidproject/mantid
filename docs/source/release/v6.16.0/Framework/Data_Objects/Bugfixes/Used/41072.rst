@@ -1,2 +1,0 @@
-- adds persistence and round-trip support for the MonitorCount field on peaks
-  when saving/loading Mantid "processed" NeXus peak workspaces.
