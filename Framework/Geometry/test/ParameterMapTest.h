@@ -10,6 +10,7 @@
 #include "MantidBeamline/DetectorInfo.h"
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidGeometry/Instrument/Parameter.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
@@ -607,6 +608,80 @@ public:
     pmap.addV3D(comp, "v", Mantid::Kernel::V3D(0.123456789012345, 0.123456789012345, 0.123456789012345));
     TS_ASSERT_EQUALS(pmap.get(comp, "d")->asString(), "0.123456789012345");
     TS_ASSERT_EQUALS(pmap.get(comp, "v")->asString(), "[0.123456789012345,0.123456789012345,0.123456789012345]");
+  }
+
+  void test_addFittingParameter_keeps_entries_for_different_functions() {
+    // Two functions on the same component declare a parameter with the same short name
+    // (e.g. Bk2BkExpConvPV:Gamma and IkedaCarpenterPV:Gamma). addFittingParameter must
+    // dedupe by (name, function), so both entries should coexist.
+    ParameterMap pmap;
+    IComponent_sptr comp = m_testInstrument->getChild(0);
+    pmap.addFittingParameter(comp.get(), "Gamma", "Bk2BkExpConvPV", "1.5 , Bk2BkExpConvPV , Gamma");
+    pmap.addFittingParameter(comp.get(), "Gamma", "IkedaCarpenterPV", "2.5 , IkedaCarpenterPV , Gamma");
+
+    TS_ASSERT_EQUALS(pmap.size(), 2);
+
+    auto bk2bk = pmap.getRecursiveFittingParameter(comp.get(), "Gamma", "Bk2BkExpConvPV");
+    TS_ASSERT(bk2bk);
+    TS_ASSERT_EQUALS(bk2bk->value<Mantid::Geometry::FitParameter>().getFunction(), "Bk2BkExpConvPV");
+    TS_ASSERT_DELTA(bk2bk->value<Mantid::Geometry::FitParameter>().getValue(), 1.5, 1e-12);
+
+    auto ikedaPV = pmap.getRecursiveFittingParameter(comp.get(), "Gamma", "IkedaCarpenterPV");
+    TS_ASSERT(ikedaPV);
+    TS_ASSERT_EQUALS(ikedaPV->value<Mantid::Geometry::FitParameter>().getFunction(), "IkedaCarpenterPV");
+    TS_ASSERT_DELTA(ikedaPV->value<Mantid::Geometry::FitParameter>().getValue(), 2.5, 1e-12);
+
+    // Lookup for a function that was never registered yields nothing.
+    TS_ASSERT(!pmap.getRecursiveFittingParameter(comp.get(), "Gamma", "IkedaCarpenterMD"));
+  }
+
+  void test_addFittingParameter_replaces_only_same_function_entry() {
+    // A second add for the SAME (name, function) must replace, not duplicate.
+    ParameterMap pmap;
+    IComponent_sptr comp = m_testInstrument->getChild(0);
+    pmap.addFittingParameter(comp.get(), "Gamma", "Bk2BkExpConvPV", "1.5 , Bk2BkExpConvPV , Gamma");
+    pmap.addFittingParameter(comp.get(), "Gamma", "IkedaCarpenterPV", "2.5 , IkedaCarpenterPV , Gamma");
+
+    pmap.addFittingParameter(comp.get(), "Gamma", "Bk2BkExpConvPV", "9.9 , Bk2BkExpConvPV , Gamma");
+
+    // Still two entries — the IkedaCarpenterPV one is untouched, Bk2BkExpConvPV one is overwritten.
+    TS_ASSERT_EQUALS(pmap.size(), 2);
+
+    auto bk2bk = pmap.getRecursiveFittingParameter(comp.get(), "Gamma", "Bk2BkExpConvPV");
+    TS_ASSERT(bk2bk);
+    TS_ASSERT_DELTA(bk2bk->value<Mantid::Geometry::FitParameter>().getValue(), 9.9, 1e-12);
+
+    auto ikedaPV = pmap.getRecursiveFittingParameter(comp.get(), "Gamma", "IkedaCarpenterPV");
+    TS_ASSERT(ikedaPV);
+    TS_ASSERT_DELTA(ikedaPV->value<Mantid::Geometry::FitParameter>().getValue(), 2.5, 1e-12);
+  }
+
+  void test_getRecursiveFittingParameter_walks_up_component_tree() {
+    // Parameter declared on the parent should be visible from a child component.
+    ParameterMap pmap;
+    IComponent_sptr parent = m_testInstrument; // the instrument itself
+    IComponent_sptr child = m_testInstrument->getChild(0);
+    pmap.addFittingParameter(parent.get(), "Gamma", "IkedaCarpenterPV", "3.3 , IkedaCarpenterPV , Gamma");
+
+    auto found = pmap.getRecursiveFittingParameter(child.get(), "Gamma", "IkedaCarpenterPV");
+    TS_ASSERT(found);
+    TS_ASSERT_DELTA(found->value<Mantid::Geometry::FitParameter>().getValue(), 3.3, 1e-12);
+  }
+
+  void test_getRecursive_still_finds_one_entry_after_addFittingParameter() {
+    // Backwards-compat: callers that don't care which function the param belongs to should
+    // still get a hit from the plain getRecursive("Gamma", "fitting") path.
+    ParameterMap pmap;
+    IComponent_sptr comp = m_testInstrument->getChild(0);
+    pmap.addFittingParameter(comp.get(), "Gamma", "Bk2BkExpConvPV", "1.5 , Bk2BkExpConvPV , Gamma");
+    pmap.addFittingParameter(comp.get(), "Gamma", "IkedaCarpenterPV", "2.5 , IkedaCarpenterPV , Gamma");
+
+    auto found = pmap.getRecursive(comp.get(), "Gamma", "fitting");
+    TS_ASSERT(found);
+    // Both entries have type "fitting" with name "Gamma", so getRecursive returns whichever the
+    // multimap iterates first — we don't assert which, but we assert the FitParameter is valid.
+    const auto &fp = found->value<Mantid::Geometry::FitParameter>();
+    TS_ASSERT(fp.getFunction() == "Bk2BkExpConvPV" || fp.getFunction() == "IkedaCarpenterPV");
   }
 
 private:

@@ -1231,7 +1231,15 @@ void IFunction::setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> w
 
     for (size_t i = 0; i < nParams(); i++) {
       if (!isExplicitlySet(i)) {
-        Geometry::Parameter_sptr param = paramMap.getRecursive(detectorPtr, parameterName(i), "fitting");
+        // Use the fitting-function-aware lookup: two functions on the same component can declare a
+        // parameter with the same short name (e.g. Bk2BkExpConvPV:Gamma and IkedaCarpenterPV:Gamma).
+        // The plain getRecursive() short-circuits on the first match and would pick the wrong one.
+        Geometry::Parameter_sptr param =
+            paramMap.getRecursiveFittingParameter(detectorPtr, parameterName(i), this->name());
+        if (!param) {
+          // Fall back for IDFs that omit the function prefix (no embedded function name to match).
+          param = paramMap.getRecursive(detectorPtr, parameterName(i), "fitting");
+        }
         if (param != Geometry::Parameter_sptr()) {
           // get FitParameter
           const auto &fitParam = param->value<Geometry::FitParameter>();
