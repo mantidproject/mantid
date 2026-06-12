@@ -7,7 +7,7 @@ Powder Diffraction
 
 New features
 ############
-- (`#41373 <https://github.com/mantidproject/mantid/pull/41373>`_) Version 2 of the :ref:`PEARLTransfit <algm-PEARLTransfit-v2>` algorithm has been added, with improvements in input/output properties management.
+- (`#41373 <https://github.com/mantidproject/mantid/pull/41373>`_) Version 2 of the :ref:`PEARLTransfit <algm-PEARLTransfit-v2>` algorithm has been added, with improvements in input/output property management.
 - (`#41404 <https://github.com/mantidproject/mantid/pull/41404>`_) The ``PawleyPattern`` classes have some new getter/setter methods.
 
   - ``get_profile_param``/``set_profile_param`` and ``get_profile_free_param``/``set_profile_free_param`` functions to support setting profile parameters and fixing free parameters for a given phase through a profile parameter label.
@@ -49,15 +49,12 @@ Single Crystal Diffraction
 
 New features
 ############
-- (`#41375 <https://github.com/mantidproject/mantid/pull/40901>`_)
-
-  - Updated the IDF for MANDI with the latest detector positions calibrated with garnet.
-  - :ref:`algm-HB3AAdjustSampleNorm` now supports an optional ``OutputGroupingWorkspace`` property that produces a ``GroupingWorkspace`` mapping each ungrouped detector to its pixel group when ``Grouping`` is set to ``2x2`` or ``4x4``.
-  - :ref:`algm-LoadWANDSCD` now supports an optional ``OutputGroupingWorkspace`` property that produces a ``GroupingWorkspace`` mapping each ungrouped detector to its pixel group when ``Grouping`` is set to ``2x2`` or ``4x4``.
+  - (`#40901 <https://github.com/mantidproject/mantid/pull/40901>`_) Updated the IDF for MANDI with the latest detector positions calibrated with garnet.
+  - (`#41375 <https://github.com/mantidproject/mantid/pull/41375>`_) :ref:`algm-HB3AAdjustSampleNorm` and :ref:`algm-LoadWANDSCD` now support an optional ``OutputGroupingWorkspace`` property that produces a ``GroupingWorkspace`` mapping each ungrouped detector to its pixel group when ``Grouping`` is set to ``2x2`` or ``4x4``.
 
 
 Bugfixes
 ############
-- (`#41005 <https://github.com/mantidproject/mantid/pull/41005>`_) :ref:`algm-IntegratePeaksMD` now better handles un-indexed peaks in HKL mode, warnings are given and numeric issues with ellipse finding are avoided by falling back to spherical integration.
+- (`#41005 <https://github.com/mantidproject/mantid/pull/41005>`_) :ref:`algm-IntegratePeaksMD` now better handles un-indexed peaks in HKL mode; warnings are given and numeric issues with ellipse finding are avoided by falling back to spherical integration.
 
 :ref:`Release 6.16.0 <v6.16.0>`
