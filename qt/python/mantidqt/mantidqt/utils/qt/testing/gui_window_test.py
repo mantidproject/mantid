@@ -13,8 +13,8 @@ from unittest import TestCase
 
 from mantidqt.utils.qt.testing.gui_test_runner import open_in_window
 from qtpy.QtWidgets import QPushButton, QMenu, QAction, QApplication, QWidget
-from qtpy.QtGui import QMouseEvent
-from qtpy.QtCore import Qt, QMetaObject, QTime, QEvent
+from qtpy.QtGui import QContextMenuEvent
+from qtpy.QtCore import Qt, QMetaObject, QElapsedTimer
 from qtpy.QtTest import QTest
 
 
@@ -52,7 +52,7 @@ def discover_children(widget, child_type=QWidget):
 
 
 def get_child(widget, object_name, child_type=QWidget, timeout=3):
-    t = QTime()
+    t = QElapsedTimer()
     t.start()
     timeout *= 1000
     children = []
@@ -125,7 +125,7 @@ class GuiTestBase(object):
             var = getattr(self, var_name)
 
     def wait_for_true(self, fun, timeout_sec=1.0):
-        t = QTime()
+        t = QElapsedTimer()
         t.start()
         timeout_millisec = int(timeout_sec * 1000)
         while not fun():
@@ -166,7 +166,11 @@ class GuiTestBase(object):
         action = self.get_child(QAction, name)
         if not get_menu:
             return action
-        menus = action.associatedWidgets()
+        if hasattr(action, "associatedObjects"):
+            # Qt6: associatedWidgets() was replaced by associatedObjects(), which can also contain non-widgets
+            menus = [obj for obj in action.associatedObjects() if isinstance(obj, QWidget)]
+        else:
+            menus = action.associatedWidgets()
         if len(menus) == 0:
             raise RuntimeError("QAction {} isn't associated with any menu".format(name))
         return action, menus[0]
@@ -196,7 +200,7 @@ class GuiTestBase(object):
         yield pause
         QTest.mouseClick(widget, Qt.RightButton, Qt.NoModifier, pos)
         yield pause
-        ev = QMouseEvent(QEvent.ContextMenu, pos, Qt.RightButton, Qt.NoButton, Qt.NoModifier)
+        ev = QContextMenuEvent(QContextMenuEvent.Mouse, pos, widget.mapToGlobal(pos))
         QApplication.postEvent(widget, ev)
         yield self.wait_for_popup()
 
