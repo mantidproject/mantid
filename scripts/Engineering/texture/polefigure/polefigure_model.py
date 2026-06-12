@@ -10,7 +10,7 @@ from mantid.simpleapi import (
 )
 import numpy as np
 from mantid.api import AnalysisDataService as ADS
-from typing import Optional, Sequence, Tuple
+from typing import Sequence, Tuple, List, Dict
 from os import path, makedirs
 from Engineering.common.texture_sample_viewer import has_valid_shape
 from Engineering.texture.xtal_helper import get_xtal_structure
@@ -25,15 +25,15 @@ class TextureProjection:
     def make_pole_figure_tables(
         self,
         wss: Sequence[str],
-        peak_wss: Optional[Sequence[str]],
+        peak_wss: Sequence[str] | None,
         out_ws_name: str,
-        combined_ws_name: Optional[str],
-        hkl: Optional[Sequence[int]],
+        combined_ws_name: str | None,
+        hkl: Sequence[int] | None,
         inc_scatt_corr: bool,
         scat_vol_pos: Sequence[float],
-        chi2_thresh: Optional[float],
-        peak_thresh: Optional[float],
-        save_dirs: Optional[Sequence[str]] = None,
+        chi2_thresh: float | None,
+        peak_thresh: float | None,
+        save_dirs: Sequence[str] | None = None,
         ax_transform: Sequence[float] = np.eye(3),
         readout_col: str = "",
         include_spec_info: bool = True,
@@ -59,7 +59,7 @@ class TextureProjection:
 
     @staticmethod
     def get_pf_output_names(
-        wss: Sequence[str], fit_params: Sequence[str], hkl: Optional[Sequence[int]], readout_column: str
+        wss: Sequence[str], fit_params: Sequence[str], hkl: Sequence[int] | None, readout_column: str
     ) -> Tuple[str, str, str]:
         fws, lws = ADS.retrieve(wss[0]), ADS.retrieve(wss[-1])
         readout_column = readout_column.replace("/", "_over_")
@@ -97,7 +97,7 @@ class TextureProjection:
     # ~~~~~ General Utility functions ~~~~~~~~
 
     @staticmethod
-    def get_save_dirs(root_dir: str, dir_name: str, rb_num: Optional[str], grouping: Optional[str] = "GROUP") -> Sequence[str]:
+    def get_save_dirs(root_dir: str, dir_name: str, rb_num: str | None, grouping: str | None = "GROUP") -> List[str]:
         save_dirs = [path.join(root_dir, dir_name)]
         if rb_num:
             save_dirs.append(path.join(root_dir, "User", rb_num, dir_name, grouping))
@@ -107,13 +107,13 @@ class TextureProjection:
         return save_dirs
 
     @staticmethod
-    def _save_files(ws: str, save_dirs: Sequence[str], ascii=True) -> None:
+    def _save_files(ws: str, save_dirs: Sequence[str], ascii: bool = True) -> None:
         for save_dir in save_dirs:
             SaveNexus(InputWorkspace=ws, Filename=path.join(save_dir, ws + ".nxs"))
             if ascii:
                 save_texture_ws_ascii(ws, save_dir)
 
-    def get_ws_info(self, ws_name: str, parameter_file: str, select: bool = True) -> dict:
+    def get_ws_info(self, ws_name: str, parameter_file: str, select: bool = True) -> Dict[str, str]:
         return {
             "shape": "Not set" if self._has_no_valid_shape(ws_name) else "set",
             "fit_parameters": parameter_file,
@@ -152,9 +152,9 @@ class TextureProjection:
     # ~~~~~ Crystal Structure helper functions ~~~~~~~~
 
     @staticmethod
-    def parse_hkl(H, K, L):
+    def parse_hkl(H: str | int, K: str | int, L: str | int) -> Tuple[int, int, int] | None:
         try:
-            return [int(H), int(K), int(L)]
+            return int(H), int(K), int(L)
         except Exception:
             return None
 

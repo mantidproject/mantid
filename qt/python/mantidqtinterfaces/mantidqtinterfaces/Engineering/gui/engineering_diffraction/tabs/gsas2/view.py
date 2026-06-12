@@ -12,12 +12,16 @@ from os import path
 
 from mantidqt.utils.qt import load_ui
 from matplotlib.figure import Figure
+from matplotlib.axes import Axes
 import matplotlib.lines as lines
 from mantidqt.MPLwidgets import FigureCanvas
+from mantidqt.widgets.filefinderwidget import FileFinderWidget
 
 from mantidqt.utils.qt.line_edit_double_validator import LineEditDoubleValidator
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.filtered_file_finder import FilteredFileFinderWidget
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2.plot_toolbar import GSAS2PlotToolbar
+from matplotlib.backend_bases import PickEvent, ResizeEvent, MouseEvent, KeyEvent
+from typing import Callable, List
 
 Ui_calib, _ = load_ui(__file__, "gsas2_tab.ui")
 
@@ -45,9 +49,10 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
 
     focused_data_file_finder: FilteredFileFinderWidget
 
-    def __init__(self, parent=None, instrument="ENGINX") -> None:
+    def __init__(self, parent: QtWidgets.QWidget | None = None, instrument: str = "ENGINX") -> None:
         super(GSAS2View, self).__init__(parent)
         self.setupUi(self)
+        self.instrument = instrument
 
         self.instrument_group_file_finder.setLabelText("Instrument Group")
         self.instrument_group_file_finder.isForRunFiles(False)
@@ -117,23 +122,23 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
     # Slot Connectors
     # ===============
 
-    def set_refine_clicked(self, slot):
+    def set_refine_clicked(self, slot: Callable) -> None:
         self.refine_button.clicked.connect(slot)
 
     # =================
     # Component Setters
     # =================
 
-    def set_default_gss_files(self, filepaths):
+    def set_default_gss_files(self, filepaths: List[str]) -> None:
         self.set_default_files(filepaths, self.focused_data_file_finder)
 
-    def set_default_prm_files(self, filepath):
+    def set_default_prm_files(self, filepath: str) -> None:
         if filepath:
             self.set_default_files([filepath], self.instrument_group_file_finder)
         else:
             self.instrument_group_file_finder.setUserInput("")
 
-    def set_default_files(self, filepaths, file_finder):
+    def set_default_files(self, filepaths: List[str], file_finder: FileFinderWidget) -> None:
         if not filepaths:
             return
         file_finder.setUserInput(",".join(filepaths))
@@ -144,13 +149,13 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
         if len(directories) == 1:
             file_finder.setLastDirectory(directory)
 
-    def set_number_histograms(self, number_output_histograms):
+    def set_number_histograms(self, number_output_histograms: int) -> None:
         self.number_output_histograms_combobox.clear()
         histogram_indices_items = [str(k) for k in range(1, number_output_histograms + 1)]
         self.number_output_histograms_combobox.addItems(histogram_indices_items)
         self.number_output_histograms_combobox.setCurrentIndex(0)
 
-    def mark_project_name_invalid_when_empty(self):
+    def mark_project_name_invalid_when_empty(self) -> None:
         new_value = self.project_name_line_edit.text().strip(" \t")
         if new_value == "":
             self.project_name_invalid.show()
@@ -159,7 +164,7 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
             self.project_name_invalid.hide()
             self.project_name_invalid.setToolTip("")
 
-    def mark_checkboxes_invalid_when_empty(self):
+    def mark_checkboxes_invalid_when_empty(self) -> None:
         if (
             self.refine_microstrain_checkbox.isChecked()
             and self.refine_sigma_one_checkbox.isChecked()
@@ -175,7 +180,7 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
     # Component Getters
     # =================
 
-    def get_refinement_parameters(self):
+    def get_refinement_parameters(self) -> List[str | bool]:
         return [
             self.refinement_method_combobox.currentText(),
             self.override_unitcell_length.text(),
@@ -184,17 +189,17 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
             self.refine_gamma_y_checkbox.isChecked(),
         ]
 
-    def get_load_parameters(self):
+    def get_load_parameters(self) -> List[List[str]]:
         return [
             self.instrument_group_file_finder.getFilenames(),
             self.phase_file_finder.getFilenames(),
             self.focused_data_file_finder.getFilenames(),
         ]
 
-    def get_project_name(self):
+    def get_project_name(self) -> str:
         return self.project_name_line_edit.text()
 
-    def get_x_limits_from_line_edits(self):
+    def get_x_limits_from_line_edits(self) -> List[List[str]]:
         # if self.figure.axes[0].get_lines():  # check there is currently a valid plot
         return [[self.x_min_line_edit.text()], [self.x_max_line_edit.text()]]
 
@@ -202,7 +207,7 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
     # Force Actions
     # =================
 
-    def find_files_load_parameters(self):
+    def find_files_load_parameters(self) -> None:
         self.instrument_group_file_finder.findFiles(True)
         self.phase_file_finder.findFiles(True)
         self.focused_data_file_finder.findFiles(True)
@@ -211,7 +216,7 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
     # Plot Window Setup
     # =================
 
-    def setup_figure(self):
+    def setup_figure(self) -> None:
         self.figure = Figure()
         self.figure.canvas = FigureCanvas(self.figure)
         self.figure.canvas.mpl_connect("pick_event", self.on_press)
@@ -236,10 +241,10 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
         self.dock_window.addDockWidget(Qt.BottomDockWidgetArea, self.plot_dock)
         self.vLayout_plot.addWidget(self.dock_window)
 
-    def resizeEvent(self, QResizeEvent):
+    def resizeEvent(self, QResizeEvent: ResizeEvent) -> None:
         self.update_axes_position()
 
-    def make_undocked_plot_larger(self):
+    def make_undocked_plot_larger(self) -> None:
         # only make undocked plot larger the first time it is undocked as the undocked size gets remembered
         if self.plot_dock.isFloating() and self.has_first_undock_occurred == 0:
             factor = 1.0
@@ -254,7 +259,7 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
 
         self.update_axes_position()
 
-    def setup_toolbar(self):
+    def setup_toolbar(self) -> None:
         self.toolbar.sig_home_clicked.connect(self.display_all)
         self.toolbar.sig_home_clicked.connect(self.display_all)
 
@@ -262,14 +267,14 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
     # Plot Component Setters
     # ======================
 
-    def clear_figure(self):
+    def clear_figure(self) -> None:
         self.figure.clf()
         self.figure.add_subplot(111, projection="mantid")
         self.figure.canvas.draw()
         self.x_bounds = None
         self.y_bounds = None
 
-    def update_figure(self, plot_window_title=None):
+    def update_figure(self, plot_window_title: str | None = None) -> None:
         window_title = "GSAS-II Plot"
         if plot_window_title:
             window_title = plot_window_title
@@ -279,7 +284,7 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
         self.update_axes_position()
         self.figure.canvas.draw()
 
-    def update_axes_position(self):
+    def update_axes_position(self) -> None:
         """
         Set axes position so that labels are always visible - it deliberately ignores height of ylabel (and less
         importantly the length of xlabel). This is because the plot window typically has a very small height when docked
@@ -297,7 +302,7 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
         y0_ax = pos.y0 + 0.05 - y0_lab  # move so that xlabel left bottom corner at vertical coord 0.05
         ax.set_position([x0_ax, y0_ax, 0.95 - x0_ax, 0.95 - y0_ax])
 
-    def update_legend(self, ax):
+    def update_legend(self, ax: Axes) -> None:
         if ax.get_lines():
             ax.make_legend()
             handles, labels = ax.get_legend_handles_labels()
@@ -309,7 +314,7 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
             if ax.get_legend():
                 ax.get_legend().remove()
 
-    def display_all(self):
+    def display_all(self) -> None:
         for ax in self.get_axes():
             if ax.lines:
                 ax.relim()
@@ -324,17 +329,17 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
     # Plot Component Getters
     # ======================
 
-    def get_axes(self):
+    def get_axes(self) -> List[Axes]:
         return self.figure.axes
 
-    def get_figure(self):
+    def get_figure(self) -> Figure:
         return self.figure
 
     # ========================
     # Limits and Range Markers
     # ========================
 
-    def setup_range_markers(self, x_minimum, x_maximum):
+    def setup_range_markers(self, x_minimum: int | float, x_maximum: int | float) -> None:
         self.x_bounds = self.figure.axes[0].get_xlim()
         self.y_bounds = self.figure.axes[0].get_ylim()
         self.min_line = lines.Line2D([x_minimum, x_minimum], [self.y_bounds[0], self.y_bounds[1]], picker=5, color="green", linestyle="--")
@@ -344,7 +349,7 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
         self.figure.canvas.draw_idle()
         self.update_figure()
 
-    def on_press(self, event):
+    def on_press(self, event: PickEvent) -> None:
         if event.artist == self.min_line:
             self.min_follower = self.figure.canvas.mpl_connect("motion_notify_event", self.min_follow_mouse)
             self.min_releaser = self.figure.canvas.mpl_connect("button_release_event", self.min_release)
@@ -353,7 +358,7 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
             self.max_follower = self.figure.canvas.mpl_connect("motion_notify_event", self.max_follow_mouse)
             self.max_releaser = self.figure.canvas.mpl_connect("button_release_event", self.max_release)
 
-    def min_follow_mouse(self, event):
+    def min_follow_mouse(self, event: MouseEvent) -> None:
         if event.xdata and self.initial_x_limits[0] <= float(event.xdata) <= float(self.x_max_line_edit.text()):
             self.min_line.set_xdata([event.xdata, event.xdata])
             self.set_x_min_line_edit(event.xdata)
@@ -362,7 +367,7 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
             self.set_x_min_line_edit(self.initial_x_limits[0])
         self.figure.canvas.draw_idle()
 
-    def max_follow_mouse(self, event):
+    def max_follow_mouse(self, event: MouseEvent) -> None:
         if event.xdata and float(self.x_min_line_edit.text()) <= float(event.xdata) <= self.initial_x_limits[1]:
             self.max_line.set_xdata([event.xdata, event.xdata])
             self.set_x_max_line_edit(event.xdata)
@@ -371,15 +376,15 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
             self.set_x_max_line_edit(self.initial_x_limits[1])
         self.figure.canvas.draw_idle()
 
-    def min_release(self, event):
+    def min_release(self, event: KeyEvent) -> None:
         self.figure.canvas.mpl_disconnect(self.min_releaser)
         self.figure.canvas.mpl_disconnect(self.min_follower)
 
-    def max_release(self, event):
+    def max_release(self, event: KeyEvent) -> None:
         self.figure.canvas.mpl_disconnect(self.max_releaser)
         self.figure.canvas.mpl_disconnect(self.max_follower)
 
-    def set_initial_x_limits(self, x_minimum, x_maximum):
+    def set_initial_x_limits(self, x_minimum: float | int, x_maximum: float | int) -> None:
         self.initial_x_limits = [x_minimum, x_maximum]
         tolerance = 0.01
         self.x_min_line_edit.validator().setBottom(float(x_minimum) - tolerance)
@@ -389,7 +394,7 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
         self.x_min_line_edit.validator().last_valid_value = str("{:.2f}".format(x_minimum))
         self.x_max_line_edit.validator().last_valid_value = str("{:.2f}".format(x_maximum))
 
-    def set_min_line_from_line_edit(self):
+    def set_min_line_from_line_edit(self) -> None:
         new_value = self.x_min_line_edit.text()
         if self.min_line and new_value != "":
             new_value = float(new_value)
@@ -400,7 +405,7 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
                 self.set_x_min_line_edit(self.initial_x_limits[0])
             self.figure.canvas.draw_idle()
 
-    def set_max_line_from_line_edit(self):
+    def set_max_line_from_line_edit(self) -> None:
         new_value = self.x_max_line_edit.text()
         if self.max_line and new_value != "":
             new_value = float(new_value)
@@ -411,16 +416,16 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
                 self.set_x_max_line_edit(self.initial_x_limits[1])
             self.figure.canvas.draw_idle()
 
-    def set_x_limits(self, x_minimum, x_maximum):
+    def set_x_limits(self, x_minimum: float, x_maximum: float) -> None:
         self.set_x_limits_line_edits(x_minimum, x_maximum)
         self.setup_range_markers(x_minimum, x_maximum)
         self.set_initial_x_limits(x_minimum, x_maximum)
 
-    def set_x_limits_line_edits(self, x_min, x_max):
+    def set_x_limits_line_edits(self, x_min: float, x_max: float) -> None:
         self.set_x_min_line_edit(x_min)
         self.set_x_max_line_edit(x_max)
 
-    def set_x_min_line_edit(self, x_min):
+    def set_x_min_line_edit(self, x_min: float) -> None:
         if x_min and x_min != "":
             two_decimal_string = str("{:.2f}".format(x_min))
             self.x_min_line_edit.setText(two_decimal_string)
@@ -430,7 +435,7 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
             self.x_min_line_edit.setText(two_decimal_string)
             self.x_min_line_edit.validator().last_valid_value = two_decimal_string
 
-    def set_x_max_line_edit(self, x_max):
+    def set_x_max_line_edit(self, x_max: float) -> None:
         if x_max and x_max != "":
             two_decimal_string = str("{:.2f}".format(x_max))
             self.x_max_line_edit.setText(two_decimal_string)

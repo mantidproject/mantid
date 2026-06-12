@@ -11,11 +11,14 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common impo
 from mantid.simpleapi import logger
 from mantidqt.utils.asynchronous import AsyncTask
 from mantidqt.utils.observer_pattern import GenericObservable, GenericObserverWithArgPassing
-from mantid.api import AnalysisDataService as ADS
+from mantid.api import AnalysisDataService as ADS, MatrixWorkspace
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.data_handling.data_model import FittingDataModel
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.data_handling.data_view import FittingDataView
+from typing import Sequence, List, Set, TypeAlias
 
 
 class FittingDataPresenter(object):
-    def __init__(self, model, view):
+    def __init__(self, model: FittingDataModel, view: FittingDataView):
         self.model = model
         self.view = view
         self.worker = None
@@ -41,37 +44,37 @@ class FittingDataPresenter(object):
         self.focus_run_observer = GenericObserverWithArgPassing(self.set_default_files_tof)
         self.focus_combined_observer = GenericObserverWithArgPassing(self.set_default_files_texture)
 
-    def set_default_files_tof(self, filepaths):
+    def set_default_files_tof(self, filepaths: Sequence[str]) -> None:
         if not self.model.texture_auto_populate():
             self._set_default_files(filepaths)
 
-    def set_default_files_texture(self, filepaths):
+    def set_default_files_texture(self, filepaths: Sequence[str]) -> None:
         if self.model.texture_auto_populate():
             self.view.finder_data.set_filter_option("Unit", "dSpacing")
             self._set_default_files(filepaths)
 
-    def _set_default_files(self, filepaths):
+    def _set_default_files(self, filepaths: Sequence[str]) -> None:
         directory = self.model.get_last_directory(filepaths)
         self.view.set_default_files(filepaths, directory)
 
-    def get_sorted_active_ws_list(self):
+    def get_sorted_active_ws_list(self) -> List[str]:
         return self.model.get_active_ws_sorted_by_primary_log()
 
-    def get_active_ws_list(self):
+    def get_active_ws_list(self) -> List[str]:
         return self.model.get_active_ws_name_list()
 
-    def get_loaded_ws_list(self):
+    def get_loaded_ws_list(self) -> List[str]:
         return self.model.get_loaded_ws_list()
 
-    def get_log_ws_group_name(self):
+    def get_log_ws_group_name(self) -> str:
         return self.model.get_log_workspace_group_name()
 
-    def on_load_clicked(self):
+    def on_load_clicked(self) -> None:
         if self._validate():
             filenames = self._get_filenames()
             self._start_load_worker(filenames)
 
-    def remove_workspace(self, ws_name):
+    def remove_workspace(self, ws_name: str) -> None:
         self.plotted.discard(ws_name)
         if ws_name in self.model.get_all_workspace_names():
             if ws_name in self.model.get_loaded_workspaces():
@@ -82,7 +85,7 @@ class FittingDataPresenter(object):
         elif ws_name in self.model.get_all_log_workspaces_names():
             self.model.update_sample_log_workspace_group()
 
-    def rename_workspace(self, old_name, new_name):
+    def rename_workspace(self, old_name: str, new_name: str) -> None:
         # Note - ws.name() not updated yet so need to rely on new_name parameter
         # Also Note - ADS rename is always associated with a ADS replace so
         # rely on the replace to _repopulate_table. Prefer not to call twice
@@ -97,24 +100,25 @@ class FittingDataPresenter(object):
                 self.row_numbers[new_name] = row_no
 
     # handle ADS clear
-    def clear_workspaces(self):
+    def clear_workspaces(self) -> None:
         self.model.clear_workspaces()
         self.plotted.clear()
         self.row_numbers.clear()
         self._repopulate_table()
 
-    def replace_workspace(self, name, workspace):
+    def replace_workspace(self, name: str, workspace: MatrixWorkspace) -> None:
         if name in self.model.get_all_workspace_names():
             self.model.replace_workspace(name, workspace)
             self._repopulate_table()
 
-    def restore_table(self, clear_plotted=True):  # used when the interface is being restored from a save or crash
+    def restore_table(self, clear_plotted: bool = True) -> None:
+        # used when the interface is being restored from a save or crash
         self._repopulate_table(clear_plotted)
 
-    def _start_load_worker(self, filenames):
+    def _start_load_worker(self, filenames: str) -> None:
         """
         Load one to many files into mantid that are tracked by the interface.
-        :param filenames: Comma separated list of filenames to load
+        :param filenames: String of comma separated filenames to load
         """
         self.worker = AsyncTask(
             self.model.load_files,
@@ -125,11 +129,11 @@ class FittingDataPresenter(object):
         )
         self.worker.start()
 
-    def _on_worker_error(self, _):
+    def _on_worker_error(self, _) -> None:
         logger.error("Error occurred when loading files.")
         self._emit_enable_load_button_signal()
 
-    def _on_worker_success(self, _):
+    def _on_worker_success(self, _) -> None:
         wsnames = self.model.get_last_added()
         if self.view.get_add_to_plot():
             self.plotted.update(wsnames)
@@ -139,7 +143,7 @@ class FittingDataPresenter(object):
         # subtract background - has to be done post repopulation, can't change default in _add_row_to_table
         [self.view.set_item_checkstate(self.row_numbers[wsname], 3, True) for wsname in wsnames]
 
-    def _repopulate_table(self, clear_plotted=True):
+    def _repopulate_table(self, clear_plotted: bool = True) -> None:
         """
         Populate the table with the information from the loaded workspaces.
         Will also handle any workspaces that need to be plotted.
@@ -165,7 +169,7 @@ class FittingDataPresenter(object):
             # update row_numbers at end so _handle_table_cell_changed only acts once row is ready
             self.row_numbers[name] = i
 
-    def _remove_selected_tracked_workspaces(self):
+    def _remove_selected_tracked_workspaces(self) -> None:
         row_numbers = self._remove_selected_table_rows()
         for row_no in row_numbers:
             ws_name = self.row_numbers.pop(row_no)
@@ -175,21 +179,21 @@ class FittingDataPresenter(object):
                 self.plotted.discard(ws.name())
         self._repopulate_table()
 
-    def _remove_all_tracked_workspaces(self):
+    def _remove_all_tracked_workspaces(self) -> None:
         self.model.delete_workspaces()
         self.all_plots_removed_notifier.notify_subscribers()
         self.plotted.clear()
         self.row_numbers.clear()
         self._remove_all_table_rows()
 
-    def _plotBG(self):
+    def _plotBG(self) -> None:
         # make external figure
         row_numbers = self.view.get_selected_rows()
         for row in row_numbers:
             ws_name = self.row_numbers[row]
             self.model.plot_background_figure(ws_name)
 
-    def _handle_table_cell_changed(self, row, col):
+    def _handle_table_cell_changed(self, row: int, col: int) -> None:
         if row in self.row_numbers:
             # this is written on assumption that all columns are present.
             # events fired by view.add_table_row are queued so handler called after add_table_row completes
@@ -229,12 +233,12 @@ class FittingDataPresenter(object):
                     if not self.model.create_or_update_bgsub_ws(loaded_ws_name, bg_params):
                         self._revert_bg_sub_table_values(loaded_ws_name, row)
 
-    def _revert_bg_sub_table_values(self, loaded_ws_name, row):
+    def _revert_bg_sub_table_values(self, loaded_ws_name: str, row: int) -> None:
         original_bg_params = self.model.get_bg_params()[loaded_ws_name]
         self.view.set_table_column(row, 4, original_bg_params[1])
         self.view.set_table_column(row, 5, original_bg_params[2])
 
-    def _update_plotted_ws_with_sub_state(self, ws_name, is_sub):
+    def _update_plotted_ws_with_sub_state(self, ws_name: str, is_sub: bool) -> None:
         ws = self.model.get_loaded_workspaces()[ws_name]
         ws_bgsub = self.model.get_bgsub_workspaces()[ws_name]
         ws_bgsub_name = self.model.get_bgsub_workspace_names()[ws_name]
@@ -249,31 +253,31 @@ class FittingDataPresenter(object):
             self.plot_added_notifier.notify_subscribers(ws)
             self.plotted.add(ws_name)
 
-    def _handle_selection_changed(self):
+    def _handle_selection_changed(self) -> None:
         enable = True
         if not self.view.get_selected_rows():
             enable = False
         self._enable_inspect_bg_button(enable)
 
-    def _enable_load_button(self, enabled):
+    def _enable_load_button(self, enabled: bool) -> None:
         self.view.set_load_button_enabled(enabled)
 
-    def _emit_enable_load_button_signal(self):
+    def _emit_enable_load_button_signal(self) -> None:
         self.view.sig_enable_load_button.emit(True)
 
-    def _enable_inspect_bg_button(self, enabled):
+    def _enable_inspect_bg_button(self, enabled: bool) -> None:
         self.view.set_inspect_bg_button_enabled(enabled)
 
-    def _get_filenames(self):
+    def _get_filenames(self) -> str:
         return self.view.get_filenames_to_load()
 
-    def _is_searching(self):
+    def _is_searching(self) -> bool:
         return self.view.is_searching()
 
-    def _files_are_valid(self):
+    def _files_are_valid(self) -> bool:
         return self.view.get_filenames_valid()
 
-    def _validate(self):
+    def _validate(self) -> bool:
         if self._is_searching():
             create_error_message(self.view, "Mantid is searching for files. Please wait.")
             return False
@@ -282,7 +286,18 @@ class FittingDataPresenter(object):
             return False
         return True
 
-    def _add_row_to_table(self, ws_name, row, run_no=None, bank=None, plotted=False, bgsub=False, niter=50, xwindow=None, SG=True):
+    def _add_row_to_table(
+        self,
+        ws_name: str,
+        row: int,
+        run_no: int | str | None = None,
+        bank: int | str | None = None,
+        plotted: bool = False,
+        bgsub: bool = False,
+        niter: int = 50,
+        xwindow: float | None = None,
+        SG: bool = True,
+    ) -> None:
         words = ws_name.split("_")
         # find xwindow from ws xunit if not specified
         if not xwindow:
@@ -310,14 +325,17 @@ class FittingDataPresenter(object):
             )
             self.view.add_table_row(ws_name, "N/A", plotted, bgsub, niter, xwindow, SG)
 
-    def _remove_table_row(self, row_no):
+    def _remove_table_row(self, row_no: int) -> None:
         self.view.remove_table_row(row_no)
 
-    def _remove_selected_table_rows(self):
+    def _remove_selected_table_rows(self) -> Set[int]:
         return self.view.remove_selected()
 
-    def _remove_all_table_rows(self):
+    def _remove_all_table_rows(self) -> None:
         self.view.remove_all()
+
+
+RowOrWs: TypeAlias = int | str
 
 
 class TwoWayRowDict(dict):
@@ -325,12 +343,12 @@ class TwoWayRowDict(dict):
     Two way dictionary used to map rows to workspaces and vice versa.
     """
 
-    def pop(self, key):
+    def pop(self, key: RowOrWs) -> RowOrWs:
         value = self[key]
         self.__delitem__(key)
         return value
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: RowOrWs, value: RowOrWs) -> None:
         if key in self:
             del self[key]
         if value in self:
@@ -338,12 +356,12 @@ class TwoWayRowDict(dict):
         dict.__setitem__(self, key, value)
         dict.__setitem__(self, value, key)
 
-    def __delitem__(self, key):
+    def __delitem__(self, key: RowOrWs) -> None:
         dict.__delitem__(self, self[key])
         dict.__delitem__(self, key)
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return bool(self.keys())
 
-    def __len__(self):
-        return dict.__len__(self) / 2
+    def __len__(self) -> int:
+        return dict.__len__(self) // 2

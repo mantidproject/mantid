@@ -4,13 +4,16 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.data_handling.data_widget import FittingDataWidget
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.plotting.plot_presenter import FittingPlotPresenter
 from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing, GenericObserver
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.view import FittingView
+from typing import List, Dict
 
 
 class FittingPresenter(object):
-    def __init__(self, view):
+    def __init__(self, view: FittingView):
         self.view = view
         self.data_widget = FittingDataWidget(self.view, view=self.view.get_data_widget())
         self.plot_widget = FittingPlotPresenter(self.view, view=self.view.get_plot_widget())
@@ -44,7 +47,7 @@ class FittingPresenter(object):
 
         self._rb_num = None
 
-    def fit_all_started(self, do_sequential):
+    def fit_all_started(self, do_sequential: bool) -> None:
         if do_sequential:
             ws_name_list = self.data_widget.get_sorted_active_ws_list()
         else:
@@ -54,7 +57,7 @@ class FittingPresenter(object):
         self.disable_view(fit_all=True)
         self.plot_widget.do_fit_all_async(ws_name_list, do_sequential)
 
-    def fit_all_done(self, fit_props):
+    def fit_all_done(self, fit_props: List[Dict[str, Dict]]) -> None:
         # "all" refers to sequential/serial fit triggered in the data widget
         self.plot_widget.update_browser()
         self.plot_widget.update_progress_bar()
@@ -66,12 +69,12 @@ class FittingPresenter(object):
             self.data_widget.presenter.get_log_ws_group_name(),
         )
 
-    def fit_started(self):
+    def fit_started(self) -> None:
         # triggered in the fit property browser
         self.plot_widget.set_progress_bar_to_in_progress()
         self.disable_view()
 
-    def fit_done(self, fit_props):
+    def fit_done(self, fit_props) -> None:
         # triggered in the fit property browser
         self.enable_view()
         if fit_props:
@@ -85,37 +88,40 @@ class FittingPresenter(object):
         else:
             self.plot_widget.set_final_state_progress_bar(None, status="Failed, invalid fit.")
 
-    def find_peaks_convolve_started(self):
+    def find_peaks_convolve_started(self) -> None:
         self.plot_widget.set_progress_bar_to_in_progress()
         self.disable_view()
 
-    def find_peaks_convolve_completed(self, is_success):
+    def find_peaks_convolve_completed(self, is_success: bool) -> None:
         if is_success:
             self.plot_widget.set_progress_bar_success(status="success")
         else:
             self.plot_widget.set_progress_bar_failed(status="failed")
         self.enable_view()
 
-    def disable_view(self, _=None, fit_all=False):
+    def disable_view(self, _=None, fit_all: bool = False) -> None:
         self.data_widget.view.setEnabled(False)
         self.plot_widget.enable_view_components(False)
         if fit_all:
             self.plot_widget.view.show_cancel_button(True)
 
-    def enable_view(self, _=None, fit_all=False):
+    def enable_view(self, _=None, fit_all: bool = False) -> None:
         self.data_widget.view.setEnabled(True)
         self.plot_widget.enable_view_components(True)
         if fit_all:
             self.plot_widget.view.show_cancel_button(False)
 
-    def connect_view_signals(self):
+    def connect_view_signals(self) -> None:
         self.plot_widget.view.set_cancel_clicked(self.on_cancel_clicked)
 
-    def on_cancel_clicked(self):
+    def on_cancel_clicked(self) -> None:
         self.plot_widget.on_cancel_clicked()
         self.enable_view()
         self.plot_widget.set_progress_bar_zero()
 
-    def set_rb_num(self, rb_num):
+    def set_rb_num(self, rb_num: str) -> None:
         self._rb_num = rb_num
         self.plot_widget.set_rb_num(rb_num)
+
+    def set_instrument_override(self, instrument_index: int) -> None:
+        self.plot_widget.set_instrument(INSTRUMENT_DICT[instrument_index])

@@ -86,7 +86,7 @@ def show_texture_sample_shape(
     ax_labels: Sequence[str] = ("d1", "d2", "d3"),
     gauge_vol_preset: Optional[str] = None,
     custom_file: Optional[str] = None,
-):
+) -> None:
     """
     Show the sample present on a workspace along with the texture sample directions, and optionally a gauge volume
 
@@ -169,7 +169,7 @@ def load_all_orientations(
 # -------------------------------------------------------------------#
 
 
-def create_default_parameter_table_with_value(ws_name: str, val: float, out_ws: str):
+def create_default_parameter_table_with_value(ws_name: str, val: float, out_ws: str) -> None:
     """
     Creates an example parameter table with a row for each spectrum in the supplied workspace and the intensity value provided
 
@@ -457,7 +457,7 @@ def plot_contour_pf(
     return fig, ax
 
 
-def get_debug_info(ws: TableWorkspace):
+def get_debug_info(ws: TableWorkspace) -> Sequence[str]:
     """
     Format the rows of the Pole Figure Table as labels for points in the plot
     """
@@ -468,7 +468,7 @@ def get_debug_info(ws: TableWorkspace):
     return debug_info
 
 
-def get_pole_figure_data(ws: TableWorkspace, projection: str, readout_col: str = "I"):
+def get_pole_figure_data(ws: TableWorkspace, projection: str, readout_col: str = "I") -> np.ndarray:
     """
     Convert data in a pole figure table into a data array and project it into two dimensions
 
@@ -519,7 +519,7 @@ def azim_proj(alphas: np.ndarray, betas: np.ndarray, i: np.ndarray) -> np.ndarra
     return out
 
 
-def _retrieve_ws_object(ws: str | Workspace2D | TableWorkspace):
+def _retrieve_ws_object(ws: str | Workspace2D | TableWorkspace) -> Workspace2D | TableWorkspace:
     if isinstance(ws, str):
         return ADS.retrieve(ws)
     return ws
@@ -539,7 +539,7 @@ def generous_rebin(ws: str | Workspace2D, out_ws: str, StoreInADS: bool = True) 
     return Rebin(InputWorkspace=ws, Params=(minX, diffX, maxX), OutputWorkspace=out_ws, StoreInADS=StoreInADS)
 
 
-def save_texture_ws_ascii(ws: str | Workspace2D, save_dir: str, StoreInADS: bool = False):
+def save_texture_ws_ascii(ws: str, save_dir: str, StoreInADS: bool = False) -> None:
     try:
         SaveAscii(InputWorkspace=ws, Filename=path.join(save_dir, ws + ".txt"), Separator="Tab")
     except RuntimeError:

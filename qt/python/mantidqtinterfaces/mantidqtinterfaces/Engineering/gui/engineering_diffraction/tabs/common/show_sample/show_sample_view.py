@@ -9,7 +9,15 @@ from qtpy import QtWidgets, QtCore
 
 
 class ShowSampleView(object):
-    def add_show_button_to_table_if_shape(self, sig_view_shape_requested, table_loaded_data, ws, row, column_ind, has_shape):
+    def add_show_button_to_table_if_shape(
+        self,
+        sig_view_shape_requested: QtCore.Signal,
+        table_loaded_data: QtWidgets.QTableWidget,
+        ws: str,
+        row: int,
+        column_ind: int,
+        has_shape: bool,
+    ) -> None:
         if has_shape:
             table_loaded_data.setItem(row, column_ind, QtWidgets.QTableWidgetItem(""))
             view_btn = QtWidgets.QPushButton()

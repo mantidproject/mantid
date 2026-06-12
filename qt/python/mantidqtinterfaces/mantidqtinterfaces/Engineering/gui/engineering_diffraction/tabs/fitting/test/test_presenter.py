@@ -280,6 +280,16 @@ class FittingPresenterTest(unittest.TestCase):
 
         mock_manager.assert_has_calls([mock.call.cancel_clicked(), mock.call.enable(), mock.call.progress_bar])
 
+    def test_set_instrument_override_ENGINX(self):
+        self.presenter.plot_widget.set_instrument = mock.MagicMock()
+        self.presenter.set_instrument_override(0)
+        self.presenter.plot_widget.set_instrument.assert_called_once_with("ENGINX")
+
+    def test_set_instrument_override_IMAT(self):
+        self.presenter.plot_widget.set_instrument = mock.MagicMock()
+        self.presenter.set_instrument_override(1)
+        self.presenter.plot_widget.set_instrument.assert_called_once_with("IMAT")
+
 
 if __name__ == "__main__":
     unittest.main()

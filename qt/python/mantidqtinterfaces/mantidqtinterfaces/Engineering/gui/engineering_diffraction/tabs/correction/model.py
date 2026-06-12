@@ -6,6 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #
 import os
+from typing import Sequence, Tuple, Dict, List, Any
+
 from Engineering.texture.correction.correction_model import TextureCorrectionModel
 from mantid.kernel import logger
 from mantid.api import AnalysisDataService as ADS
@@ -14,7 +16,7 @@ from mantid.simpleapi import Load
 
 class CorrectionModel(TextureCorrectionModel):
     @staticmethod
-    def load_files(filenames):
+    def load_files(filenames: Sequence[str]) -> List[str]:
         wss = []
         for path in filenames:
             ws_name = os.path.splitext(os.path.basename(path))[0]
@@ -28,7 +30,7 @@ class CorrectionModel(TextureCorrectionModel):
                 logger.warning(f"Failed to load {path}: {e}")
         return wss
 
-    def load_ref(self, path):
+    def load_ref(self, path: str | None) -> None:
         if not path:
             return
         ws_name = os.path.splitext(os.path.basename(path))[0]
@@ -43,10 +45,10 @@ class CorrectionModel(TextureCorrectionModel):
             logger.warning(f"Failed to load {path}: {e}")
 
     @staticmethod
-    def get_out_ws_names(wss):
+    def get_out_ws_names(wss: Sequence[str]) -> List[str]:
         return [f"Corrected_{ws}" for ws in wss]
 
-    def get_atten_args(self, inc_atten, eval_point, eval_unit):
+    def get_atten_args(self, inc_atten: bool, eval_point: int | float, eval_unit: str) -> Tuple[Dict, bool]:
         if not inc_atten:
             return {}, False
         msg, eval_point = self.try_convert_float(eval_point, "Attenuation Evaluation Point")
@@ -55,7 +57,7 @@ class CorrectionModel(TextureCorrectionModel):
             return {}, True
         return {"atten_val": eval_point, "atten_units": eval_unit}, False
 
-    def get_div_args(self, inc_div, div_hoz, div_vert, det_hoz):
+    def get_div_args(self, inc_div: bool, div_hoz: float, div_vert: float, det_hoz: float) -> Tuple[Dict[str, float], bool]:
         if not inc_div:
             return {}, False
         div_hoz_msg, div_hoz = self.try_convert_float(div_hoz, "Horizontal Divergence")
@@ -68,7 +70,7 @@ class CorrectionModel(TextureCorrectionModel):
         return {"hoz": div_hoz, "vert": div_vert, "det_hoz": det_hoz}, False
 
     @staticmethod
-    def try_convert_float(val, param):
+    def try_convert_float(val: Any, param: str) -> Tuple[str, float]:
         try:
             return "", float(val)
         except ValueError:

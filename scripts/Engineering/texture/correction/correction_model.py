@@ -25,7 +25,7 @@ from mantid.api import AnalysisDataService as ADS
 from os import path, makedirs
 from scipy import interpolate
 from Engineering.common.texture_sample_viewer import has_valid_shape
-from typing import Optional, Sequence, Union, Tuple
+from typing import Sequence, Tuple
 from mantid.dataobjects import Workspace2D
 from Engineering.common.calibration_info import CalibrationInfo
 from Engineering.texture.texture_helper import get_gauge_vol_str, load_all_orientations
@@ -33,14 +33,14 @@ from Engineering.texture.texture_helper import get_gauge_vol_str, load_all_orien
 
 class TextureCorrectionModel:
     def __init__(self):
-        self.reference_ws = None
-        self.include_abs = False
-        self.include_div = False
-        self.include_atten = False
-        self.rb_num = None
-        self.calibration = None
-        self.remove_ws_after_processing = False
-        self.corrected_files = []
+        self.reference_ws: str | None = None
+        self.include_abs: bool = False
+        self.include_div: bool = False
+        self.include_atten: bool = False
+        self.rb_num: str | None = None
+        self.calibration: CalibrationInfo | None = None
+        self.remove_ws_after_processing: bool = False
+        self.corrected_files: Sequence[str] = []
 
     # ~~~~~ Correction Functions ~~~~~~~~~~~~~
 
@@ -66,7 +66,7 @@ class TextureCorrectionModel:
         CreateWorkspace(np.zeros(num_spec * 2), div, NSpec=num_spec, OutputWorkspace="_div_corr")
 
     @staticmethod
-    def get_thetas(ws):
+    def get_thetas(ws: Workspace2D) -> np.ndarray:
         spec_info = ws.spectrumInfo()
         num_spec = ws.getNumberHistograms()
         # no 2theta for monitors, we set them as nans and then replace these with 1 at the end of the calc
@@ -79,11 +79,11 @@ class TextureCorrectionModel:
         self,
         wss: Sequence[Workspace2D],
         out_wss: Sequence[str],
-        root_dir: Optional[str] = None,
-        abs_args: Optional[dict] = None,
-        atten_args: Optional[dict] = None,
-        div_args: Optional[dict] = None,
-    ):
+        root_dir: str | None = None,
+        abs_args: dict | None = None,
+        atten_args: dict | None = None,
+        div_args: dict | None = None,
+    ) -> None:
         corrected_file_paths = []
         for i, ws in enumerate(wss):
             abs_corr = 1.0
@@ -120,8 +120,8 @@ class TextureCorrectionModel:
         ws: str,
         out_ws: str,
         root_dir: str,
-        abs_corr: Union[float, str] = 1.0,
-        div_corr: Union[float, str] = 1.0,
+        abs_corr: float | str = 1.0,
+        div_corr: float | str = 1.0,
     ) -> str:
         ws = ADS.retrieve(ws)
         temp_ws = ConvertUnits(ws, Target="dSpacing", StoreInADS=False)
@@ -146,8 +146,7 @@ class TextureCorrectionModel:
 
         # save files
         CloneWorkspace(temp_ws, OutputWorkspace=out_ws, StoreInADS=True)
-        is_texture = self.calibration.get_group() in self.calibration.config.texture_groups if self.calibration else False
-        save_filepath = self._save_corrected_files(out_ws, root_dir, "AbsorptionCorrection", self.rb_num, is_texture)
+        save_filepath = self._save_corrected_files(out_ws, root_dir, "AbsorptionCorrection", self.rb_num, self.is_texture(self.calibration))
 
         # optionally remove extra files
         if self.remove_ws_after_processing:
@@ -164,7 +163,7 @@ class TextureCorrectionModel:
     # ~~~~~ General Utility Functions ~~~~~~~~~~~~~
 
     @staticmethod
-    def _save_corrected_files(ws: str, root_dir: str, dir_name: str, rb_num: Optional[str], is_texture: bool) -> str:
+    def _save_corrected_files(ws: str, root_dir: str, dir_name: str, rb_num: str | None, is_texture: bool) -> str:
         filepath = ""
         save_dirs = [path.join(root_dir, dir_name)]
         if rb_num:
@@ -178,28 +177,28 @@ class TextureCorrectionModel:
             SaveNexus(InputWorkspace=ws, Filename=path.join(save_dir, ws + ".nxs"))
         return filepath
 
-    def get_corrected_files(self):
+    def get_corrected_files(self) -> Sequence[str]:
         return self.corrected_files
 
-    def set_include_abs(self, inc: bool):
+    def set_include_abs(self, inc: bool) -> None:
         self.include_abs = inc
 
-    def set_include_atten(self, inc: bool):
+    def set_include_atten(self, inc: bool) -> None:
         self.include_atten = inc
 
-    def set_include_div(self, inc: bool):
+    def set_include_div(self, inc: bool) -> None:
         self.include_div = inc
 
-    def set_rb_num(self, rb: str):
+    def set_rb_num(self, rb: str) -> None:
         self.rb_num = rb
 
-    def set_calibration(self, calib: CalibrationInfo):
+    def set_calibration(self, calib: CalibrationInfo) -> None:
         self.calibration = calib
 
-    def set_remove_after_processing(self, flag: bool):
+    def set_remove_after_processing(self, flag: bool) -> None:
         self.remove_ws_after_processing = flag
 
-    def get_alg_preset_values(self):
+    def get_alg_preset_values(self) -> dict:
         if self.reference_ws:
             return {"InputWorkspace": self.reference_ws}
         current_workspaces = ADS.getObjectNames()
@@ -214,8 +213,8 @@ class TextureCorrectionModel:
         wss: Sequence[Workspace2D],
         txt_file: str,
         use_euler: bool,
-        euler_scheme: Optional[str] = None,
-        euler_sense: Optional[str] = None,
+        euler_scheme: str | None = None,
+        euler_sense: str | None = None,
     ) -> None:
         load_all_orientations(wss, txt_file, use_euler, euler_scheme, euler_sense)
 
@@ -276,7 +275,7 @@ class TextureCorrectionModel:
     # ~~~~~ Gauge Volume Functions ~~~~~~~~~~~~~
 
     @staticmethod
-    def define_gauge_volume(ws: Workspace2D, preset: str, custom: Optional[str]) -> None:
+    def define_gauge_volume(ws: Workspace2D, preset: str, custom: str | None) -> None:
         gauge_str = get_gauge_vol_str(preset, custom)
         if gauge_str:
             DefineGaugeVolume(ws, gauge_str)
@@ -291,7 +290,7 @@ class TextureCorrectionModel:
         return out_dict
 
     @staticmethod
-    def _parse_param_values(string) -> Union[bool, int, str]:
+    def _parse_param_values(string: str) -> bool | int | str:
         l_string = string.lower()
         if l_string == "true":
             return True
@@ -317,8 +316,8 @@ class TextureCorrectionModel:
         vals: Sequence[float],
         eval_val: float,
         unit: str,
-        rb_num: Optional[str],
-        calibration: Optional[CalibrationInfo],
+        rb_num: str | None,
+        calibration: CalibrationInfo | None,
         root_dir: str,
     ) -> None:
         out_ws = self.get_atten_table_name(ws, eval_val, unit)
@@ -330,12 +329,7 @@ class TextureCorrectionModel:
                     vals[r],
                 ]
             )
-        is_texture = (
-            self.calibration.get_group() in self.calibration.config.texture_groups
-            if (self.calibration and self.calibration.config)
-            else False
-        )
-        self._save_corrected_files(out_ws, root_dir, "AttenuationTables", rb_num, is_texture)
+        self._save_corrected_files(out_ws, root_dir, "AttenuationTables", rb_num, self.is_texture(calibration))
 
     # ~~~~~ Reference Workspace Functions ~~~~~~~~~~~~~
 
@@ -343,15 +337,14 @@ class TextureCorrectionModel:
         self.set_reference_ws(f"{rb_num}_reference_workspace")
         LoadEmptyInstrument(InstrumentName=instr, OutputWorkspace=self.reference_ws)
 
-    def save_reference_file(self, rb_num: str, current_calib: Optional[CalibrationInfo], root_dir: Optional[str]) -> None:
-        is_texture = current_calib.get_group() in current_calib.config.texture_groups if current_calib else False
+    def save_reference_file(self, rb_num: str, current_calib: CalibrationInfo | None, root_dir: str | None) -> None:
         if self.reference_ws and ADS.doesExist(self.reference_ws):
-            self._save_corrected_files(self.reference_ws, root_dir, "ReferenceWorkspaces", rb_num, is_texture)
+            self._save_corrected_files(self.reference_ws, root_dir, "ReferenceWorkspaces", rb_num, self.is_texture(current_calib))
 
     def set_reference_ws(self, ws_name: str) -> None:
         self.reference_ws = ws_name
 
-    def get_reference_ws(self):
+    def get_reference_ws(self) -> str | None:
         return self.reference_ws
 
     def get_reference_info(self) -> Tuple[str, bool, str]:
@@ -367,6 +360,12 @@ class TextureCorrectionModel:
     @staticmethod
     def _has_no_valid_shape(ws_name: str) -> bool:
         return not has_valid_shape(ws_name)
+
+    # ~~~~~~~~~ Texture Group Helper ~~~~~~~~~~~~~~~~~
+
+    @staticmethod
+    def is_texture(calibration: CalibrationInfo) -> bool:
+        return calibration.is_texture_group() if calibration else False
 
 
 def read_attenuation_coefficient_at_value(ws: str, val: float, unit: str) -> Sequence[float]:

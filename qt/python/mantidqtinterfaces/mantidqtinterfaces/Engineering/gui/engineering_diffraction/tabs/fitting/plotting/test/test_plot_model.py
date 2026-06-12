@@ -619,7 +619,7 @@ class FittingPlotModelTest(unittest.TestCase):
         self.assertTrue(saved_table_name.startswith(expected_prefix))
         self.assertTrue(saved_table_name.endswith(expected_name_fragment))
 
-        mock_save_files.assert_called_once_with(saved_table_name, "FitParameters", "Both")
+        mock_save_files.assert_called_once_with(saved_table_name, "FitParameters", "", "Both")
 
     def run_the_save_tests(self, expected_dirs, mock_makedirs, mock_save):
         mock_makedirs.assert_has_calls([call(d) for d in expected_dirs])

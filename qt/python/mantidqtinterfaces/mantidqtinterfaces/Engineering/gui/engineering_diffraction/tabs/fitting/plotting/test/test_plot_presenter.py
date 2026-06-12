@@ -58,6 +58,12 @@ class FittingPlotPresenterTest(unittest.TestCase):
         self.model.remove_all_workspaces_from_plot.assert_any_call("axis1")
         self.model.remove_all_workspaces_from_plot.assert_any_call("axis2")
 
+    def test_set_instrument(self):
+        self.view.fit_browser = mock.MagicMock()
+        self.presenter.set_instrument("IMAT")
+
+        self.view.fit_browser.set_default_peak_from_settings.assert_called_once_with("IMAT")
+
     @mock.patch(dir_path + ".AsyncTask", wraps=BlockingAsyncTaskWithCallback)
     @mock.patch(dir_path + ".Fit")
     def test_do_sequential_fit(self, mock_fit, mock_async):

@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
+from __future__ import annotations  # this prevents the imports from TYPE_CHECKING from being evaluated at runtime
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import (
     INSTRUMENT_DICT,
     create_error_message,
@@ -12,15 +13,19 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common impo
 )
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from Engineering.common.calibration_info import CalibrationInfo
-from mantidqt.utils.asynchronous import AsyncTask
+from mantidqt.utils.asynchronous import AsyncTask, AsyncTaskFailure
 from mantidqt.utils.observer_pattern import GenericObservable, GenericObserverWithArgPassing
 from mantid.kernel import logger
-
 from qtpy.QtWidgets import QMessageBox
+from typing import List, TYPE_CHECKING, Sequence
+
+if TYPE_CHECKING:
+    from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.focus.model import FocusModel
+    from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration.view import CalibrationView
 
 
 class FocusPresenter(object):
-    def __init__(self, model, view):
+    def __init__(self, model: FocusModel, view: CalibrationView):
         self.model = model
         self.view = view
         self.worker = None
@@ -44,17 +49,17 @@ class FocusPresenter(object):
         self.set_default_directories()
         self.view.set_focus_button_enabled(False)
 
-    def set_default_files(self, filepaths):
+    def set_default_files(self, filepaths: List[str]) -> None:
         directory = self.model.get_last_directory(filepaths)
         self.view.set_default_files(filepaths, directory)
 
-    def add_focus_subscriber(self, obs):
+    def add_focus_subscriber(self, obs: GenericObserverWithArgPassing) -> None:
         self.focus_run_notifier.add_subscriber(obs)
 
-    def add_focus_gsas2_subscriber(self, obs):
+    def add_focus_gsas2_subscriber(self, obs: GenericObserverWithArgPassing) -> None:
         self.focus_run_notifier_gsas2.add_subscriber(obs)
 
-    def add_focus_texture_subscriber(self, obs):
+    def add_focus_texture_subscriber(self, obs: GenericObserverWithArgPassing) -> None:
         self.focus_run_notifier_texture.add_subscriber(obs)
 
     def on_focus_clicked(self):
@@ -67,13 +72,14 @@ class FocusPresenter(object):
         if self._number_of_files_warning(focus_paths):
             self.start_focus_worker(focus_paths, self.view.get_focus_plot_output(), self.rb_num, self.current_calibration)
 
-    def start_focus_worker(self, focus_paths: list, plot_output: bool, rb_num: str, calibration: CalibrationInfo) -> None:
+    def start_focus_worker(self, focus_paths: Sequence[str], plot_output: bool, rb_num: str, calibration: CalibrationInfo) -> None:
         """
         Focus data in a separate thread to stop the main GUI from hanging.
         :param focus_paths: List of paths to the files containing the data to focus.
         :param plot_output: True if the output should be plotted.
         :param rb_num: The RB Number from the main window (often an experiment id)
         :param regions_dict: Dictionary containing the regions to focus over, mapping region_name -> grouping_ws_name
+        :param calibration: CalibrationInfo object
         """
         self.worker = AsyncTask(
             self.model.focus_run,
@@ -84,24 +90,24 @@ class FocusPresenter(object):
         self.set_focus_controls_enabled(False)
         self.worker.start()
 
-    def _on_worker_success(self):
+    def _on_worker_success(self) -> None:
         self.emit_enable_button_signal()
         self.focus_run_notifier.notify_subscribers(self.model.get_last_focused_files())
         self.focus_run_notifier_gsas2.notify_subscribers(self.model.get_last_focused_files_gsas2())
         self.focus_run_notifier_texture.notify_subscribers(self.model.get_last_focused_files_texture())
 
-    def set_instrument_override(self, instrument):
-        instrument = INSTRUMENT_DICT[instrument]
+    def set_instrument_override(self, instrument_index: int) -> None:
+        instrument = INSTRUMENT_DICT[instrument_index]
         self.view.set_instrument_override(instrument)
         self.instrument = instrument
 
-    def set_default_directories(self):
+    def set_default_directories(self) -> None:
         self.view.set_finder_last_directory(output_settings.get_output_path())
 
-    def set_rb_num(self, rb_num):
+    def set_rb_num(self, rb_num: str) -> None:
         self.rb_num = rb_num
 
-    def _validate(self):
+    def _validate(self) -> bool:
         """
         Ensure that the worker is ready to be started.
         :return: True if the worker can be started safely.
@@ -126,7 +132,7 @@ class FocusPresenter(object):
             return False
         return True
 
-    def _number_of_files_warning(self, paths):
+    def _number_of_files_warning(self, paths: Sequence[str]) -> bool:
         if len(paths) > 10:  # Just a guess on the warning for now. May change in future.
             response = QMessageBox.warning(
                 self.view,
@@ -138,18 +144,18 @@ class FocusPresenter(object):
         else:
             return True
 
-    def _on_worker_error(self, error_info):
+    def _on_worker_error(self, error_info: AsyncTaskFailure) -> None:
         logger.error(str(error_info))
         self.emit_enable_button_signal()
 
-    def set_focus_controls_enabled(self, enabled):
+    def set_focus_controls_enabled(self, enabled: bool) -> None:
         self.view.set_focus_button_enabled(enabled)
         self.view.set_plot_output_enabled(enabled)
 
-    def emit_enable_button_signal(self):
+    def emit_enable_button_signal(self) -> None:
         self.view.sig_enable_controls.emit(True)
 
-    def update_calibration(self, calibration):
+    def update_calibration(self, calibration: CalibrationInfo) -> None:
         """
         Update the current calibration following a call from a CalibrationNotifier
         :param calibration: The new current calibration.

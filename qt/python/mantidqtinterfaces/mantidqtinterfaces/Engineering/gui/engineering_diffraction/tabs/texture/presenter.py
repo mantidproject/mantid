@@ -4,8 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#
-from mantidqt.utils.asynchronous import AsyncTask
+from __future__ import annotations  # this prevents the imports from TYPE_CHECKING from being evaluated at runtime
+from mantidqt.utils.asynchronous import AsyncTask, AsyncTaskFailure
 from mantidqt.utils.observer_pattern import GenericObservable, GenericObserverWithArgPassing
 from mantid.kernel import logger
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
@@ -16,9 +16,15 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common impo
     CalibrationObserver,
 )
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.show_sample.show_sample_presenter import ShowSamplePresenter
+from typing import Callable, TYPE_CHECKING, List, Sequence, Tuple, Any, Type
+
+if TYPE_CHECKING:
+    from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.texture.model import ProjectionModel
+    from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.texture.view import TextureView
+    from numpy import ndarray
 
 
-def redraws_table(func):
+def redraws_table(func: Callable):
     def wrapper(self):
         func(self)
         self.redraw_table()
@@ -28,7 +34,7 @@ def redraws_table(func):
 
 
 class TexturePresenter:
-    def __init__(self, model, view):
+    def __init__(self, model: ProjectionModel, view: TextureView):
         # set up mvp components
         self.model = model
         self.view = view
@@ -87,7 +93,7 @@ class TexturePresenter:
     # ------- File Loaders ------------------
 
     @redraws_table
-    def load_ws_files(self):
+    def load_ws_files(self) -> None:
         filenames = self.view.finder_texture_ws.getFilenames()
         ws_names = self.model.load_files(filenames)
         for ws_name in ws_names:
@@ -97,7 +103,7 @@ class TexturePresenter:
                 self.unassigned_wss.append(ws_name)
 
     @redraws_table
-    def load_param_files(self):
+    def load_param_files(self) -> None:
         filenames = self.view.finder_texture_tables.getFilenames()
         params = self.model.load_files(filenames)
         for param in params:
@@ -105,7 +111,7 @@ class TexturePresenter:
                 self.unassigned_params.append(param)
 
     @redraws_table
-    def delete_selected_files(self):
+    def delete_selected_files(self) -> None:
         selected_wss, selected_params = self.view.get_selected_workspaces()
         for ws in selected_wss:
             # remove from ws_names
@@ -118,22 +124,22 @@ class TexturePresenter:
             else:
                 self.unassigned_wss.pop(self.unassigned_wss.index(ws))
 
-    def set_default_files(self, filepaths):
+    def set_default_files(self, filepaths: Sequence[str]) -> None:
         directory = self.model.get_last_directory(filepaths)
         self.view.set_default_files(filepaths, directory)
 
     # ---- Internal data structure logic for tracking parameter table assignments -------
 
-    def ws_has_param(self, ws):
+    def ws_has_param(self, ws: str) -> bool:
         return ws in self.ws_assignments.keys()
 
-    def param_has_ws(self, param):
+    def param_has_ws(self, param: str) -> bool:
         return param in self.param_assignments.keys()
 
-    def get_assigned_params(self):
+    def get_assigned_params(self) -> List[str]:
         return list(self.param_assignments.keys())
 
-    def unassign_params(self, params):
+    def unassign_params(self, params: List[str]) -> None:
         for param in params:
             if self.param_has_ws(param):
                 # remove assignment between ws and param
@@ -142,54 +148,54 @@ class TexturePresenter:
                 # add ws to the unassigned pile
                 self.unassigned_wss.append(assigned_ws)
 
-    def assign_unpaired_wss_and_params(self):
+    def assign_unpaired_wss_and_params(self) -> None:
         (self.unassigned_wss, self.unassigned_params, self.ws_assignments, self.param_assignments) = (
             self.model.assign_unpaired_wss_and_params(
                 self.unassigned_wss, self.unassigned_params, self.ws_assignments, self.param_assignments
             )
         )
 
-    def all_wss_have_params(self):
+    def all_wss_have_params(self) -> bool:
         return self.model.all_wss_have_params(*self.view.get_selected_workspaces())
 
-    def at_least_one_param_assigned(self):
+    def at_least_one_param_assigned(self) -> bool:
         return self.model.at_least_one_param_assigned(self.get_assigned_params())
 
-    def _has_selected_wss(self):
+    def _has_selected_wss(self) -> bool:
         selected_wss, _ = self.view.get_selected_workspaces()
         return self.model.has_selected_wss(selected_wss)
 
     # ----- Table logic -----------------
 
     @redraws_table
-    def delete_selected_param_files(self):
+    def delete_selected_param_files(self) -> None:
         selected_wss, selected_params = self.view.get_selected_workspaces()
         self.unassign_params(selected_params)
 
-    def select_all(self):
+    def select_all(self) -> None:
         self.view.set_all_workspaces_selected(True)
         self.set_crystal_inputs_enabled()
 
-    def deselect_all(self):
+    def deselect_all(self) -> None:
         self.view.set_all_workspaces_selected(False)
         self.set_crystal_inputs_enabled()
 
     # --------- Xtal Logic -------------------------------
 
     @redraws_table
-    def on_set_crystal_clicked(self):
+    def on_set_crystal_clicked(self) -> None:
         self.model.set_ws_xtal(
             self.view.get_crystal_ws_prop(), self.view.get_lattice(), self.view.get_spacegroup(), self.view.get_basis(), self.view.get_cif()
         )
 
     @redraws_table
-    def on_set_all_crystal_clicked(self):
+    def on_set_all_crystal_clicked(self) -> None:
         wss, _ = self.view.get_selected_workspaces()
         self.model.set_all_ws_xtal(wss, self.view.get_lattice(), self.view.get_spacegroup(), self.view.get_basis(), self.view.get_cif())
 
     # --------- Pole Figure Logic --------------------------
 
-    def on_calc_pf_clicked(self):
+    def on_calc_pf_clicked(self) -> None:
         wss, params = self.view.get_selected_workspaces()
         # require at least one wss to be selected
         if len(wss) == 0:
@@ -236,32 +242,34 @@ class TexturePresenter:
         self.worker = self.get_worker()
         self.worker.start()
 
-    def _get_ax_data(self):
+    @staticmethod
+    def _get_ax_data() -> Tuple[ndarray, Tuple[str, str, str]]:
         return output_settings.get_texture_axes_transform()
 
-    def set_worker(self, worker):
+    def set_worker(self, worker: AsyncTask) -> None:
         self.worker = worker
 
-    def get_worker(self):
+    def get_worker(self) -> AsyncTask:
         return self.worker
 
     def calc_pf(
         self,
-        wss,
-        params,
-    ):
+        wss: List[str],
+        params: List[str],
+    ) -> None:
         root_dir = output_settings.get_output_path()
         save_dirs = self.model.get_save_dirs(root_dir, "PoleFigureTables", self.model.get_rb_num(), self.model.get_grouping())
         self.model.exec_make_pf_tables(wss, params, save_dirs)
         self.plot_pf(save_dirs)
 
-    def _on_worker_success(self):
+    def _on_worker_success(self) -> None:
         self.correction_notifier.notify_subscribers("Pole Figure Created")
 
-    def _on_worker_error(self, error_info):
+    @staticmethod
+    def _on_worker_error(error_info: AsyncTaskFailure) -> None:
         logger.error(str(error_info))
 
-    def plot_pf(self, save_dirs):
+    def plot_pf(self, save_dirs: List[str]) -> None:
         # Get figure and canvas from view
         fig, canvas = self.view.get_plot_axis()
 
@@ -274,33 +282,34 @@ class TexturePresenter:
 
     # --------- Metadata handling --------------------
 
-    def update_calibration(self, calibration):
+    def update_calibration(self, calibration: CalibrationInfo) -> None:
         """
         Update the current calibration following a call from a CalibrationNotifier
         :param calibration: The new current calibration.
         """
         self.current_calibration = calibration
 
-    def set_instrument_override(self, instrument):
-        instrument = INSTRUMENT_DICT[instrument]
+    def set_instrument_override(self, instrument_index: int) -> None:
+        instrument = INSTRUMENT_DICT[instrument_index]
         self.view.set_instrument_override(instrument)
         self.instrument = instrument
 
-    def set_default_directories(self):
+    def set_default_directories(self) -> None:
         save_dir = output_settings.get_output_path()
         self.view.finder_texture_ws.setLastDirectory(save_dir)
         self.view.finder_texture_tables.setLastDirectory(save_dir)
 
-    def _get_setting(self, setting_name, return_type=str):
+    @staticmethod
+    def _get_setting(setting_name, return_type: Type = str) -> Any:
         return get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, setting_name, return_type)
 
     # ------- UI state tracking ----------------------
 
-    def on_selection_change(self):
+    def on_selection_change(self) -> None:
         self.update_readout_column_list()
         self.set_crystal_inputs_enabled()
 
-    def redraw_table(self):
+    def redraw_table(self) -> None:
         self.assign_unpaired_wss_and_params()
         self.update_ws_info()
         self.view.populate_workspace_table(self.ws_info)
@@ -308,7 +317,7 @@ class TexturePresenter:
         self.update_readout_column_list()
         self.set_crystal_inputs_enabled()
 
-    def update_ws_info(self):
+    def update_ws_info(self) -> None:
         ws_info = {}
         selected_ws, _ = self.view.get_selected_workspaces()
         for pos_ind, ws_name in enumerate(self.ws_names):
@@ -316,7 +325,7 @@ class TexturePresenter:
             ws_info[ws_name] = self.model.get_ws_info(ws_name, param, ws_name in selected_ws)  # maintain state of selected boxes
         self.ws_info = ws_info
 
-    def update_readout_column_list(self):
+    def update_readout_column_list(self) -> None:
         params = self.get_assigned_params()
         show_col = False
         # only if all wss have param files plotting with a column readout should be an option
@@ -327,7 +336,7 @@ class TexturePresenter:
             show_col = self.model.has_at_least_one_col(col_list)
         self.view.update_col_select_visibility(show_col)
 
-    def set_crystal_inputs_enabled(self):
+    def set_crystal_inputs_enabled(self) -> None:
         # inputs:
         has_cif = self.model.has_cif(self.view.get_cif())
         has_any_latt = self.model.has_any_latt(self.view.get_lattice(), self.view.get_spacegroup(), self.view.get_basis())
@@ -348,5 +357,5 @@ class TexturePresenter:
         self.view.btn_setCrystal.setEnabled(enabled)
         self.view.btn_setAllCrystal.setEnabled(self.model.can_set_all_crystal(enabled, self._has_selected_wss()))
 
-    def set_rb_num(self, rb_num):
+    def set_rb_num(self, rb_num: str) -> None:
         self.rb_num = rb_num

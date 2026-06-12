@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-
 from mantid.simpleapi import (
     logger,
     AverageLogData,
@@ -17,13 +16,15 @@ from mantid.simpleapi import (
 )
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
-from mantid.api import AnalysisDataService as ADS
-
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.workspace_record import FittingWorkspaceRecordContainer
+from mantid.api import AnalysisDataService as ADS, MatrixWorkspace, WorkspaceGroup
+from mantid.dataobjects import TableWorkspace
 from os import path
 from numpy import full, nan, max, mean, std
+from typing import List, Iterable, Dict
 
 
-def write_table_row(ws_table, row, irow):
+def write_table_row(ws_table: TableWorkspace, row: List, irow: int) -> None:
     if irow > ws_table.rowCount() - 1:
         ws_table.setRowCount(irow + 1)
     [ws_table.setCell(irow, icol, row[icol]) for icol in range(0, len(row))]
@@ -37,12 +38,12 @@ def _generate_workspace_name(filepath: str, suffix: str) -> str:
 class SampleLogsGroupWorkspace(object):
     def __init__(self, suffix: str):
         self._log_names = []
-        self._log_workspaces = None  # GroupWorkspace
+        self._log_workspaces = None  # WorkspaceGroup
         self._log_values = dict()  # {ws_name: {log_name: [avg, er]} }
         self._suffix = suffix
         self._run_info_name = "run_info" + self._suffix
 
-    def create_log_workspace_group(self):
+    def create_log_workspace_group(self) -> None:
         # run information table
         run_info = self.make_runinfo_table()
         self._log_workspaces = GroupWorkspaces([run_info], OutputWorkspace="logs" + self._suffix)
@@ -54,13 +55,13 @@ class SampleLogsGroupWorkspace(object):
                 log_table_ws = self.make_log_table(log)
                 self._log_workspaces.add(log_table_ws.name())
 
-    def make_log_table(self, log):
+    def make_log_table(self, log: str) -> TableWorkspace:
         ws_log = CreateEmptyTableWorkspace(OutputWorkspace=log + self._suffix)
         ws_log.addColumn(type="float", name="avg")
         ws_log.addColumn(type="float", name="stdev")
         return ws_log
 
-    def make_runinfo_table(self):
+    def make_runinfo_table(self) -> TableWorkspace:
         run_info = CreateEmptyTableWorkspace(OutputWorkspace=self._run_info_name)
         run_info.addColumn(type="str", name="Instrument")
         run_info.addColumn(type="int", name="Run")
@@ -69,7 +70,7 @@ class SampleLogsGroupWorkspace(object):
         run_info.addColumn(type="str", name="Title")
         return run_info
 
-    def update_log_workspace_group(self, data_workspaces=None):
+    def update_log_workspace_group(self, data_workspaces: FittingWorkspaceRecordContainer | None = None) -> None:
         # both ws and name needed in event a ws is renamed and ws.name() is no longer correct
 
         if not data_workspaces:
@@ -94,7 +95,7 @@ class SampleLogsGroupWorkspace(object):
             except Exception as e:
                 logger.warning(f"Unable to output log workspaces for workspace {ws_name}: " + str(e))
 
-    def add_log_to_table(self, ws_name, ws, irow):
+    def add_log_to_table(self, ws_name: str, ws: MatrixWorkspace, irow: int) -> None:
         # both ws and name needed in event a ws is renamed and ws.name() is no longer correct
         # make dict for run if doesn't exist
         if ws_name not in self._log_values:
@@ -135,21 +136,21 @@ class SampleLogsGroupWorkspace(object):
             write_table_row(ADS.retrieve(log + self._suffix), avg_and_stdev, irow)
         self.update_log_group_name()
 
-    def remove_log_rows(self, row_numbers):
+    def remove_log_rows(self, row_numbers: Iterable) -> None:
         DeleteTableRows(TableWorkspace=self._log_workspaces, Rows=list(row_numbers))
         self.update_log_group_name()
 
-    def remove_all_log_rows(self):
+    def remove_all_log_rows(self) -> None:
         for ws in self._log_workspaces:
             ws.setRowCount(0)
 
-    def delete_logs(self):
+    def delete_logs(self) -> None:
         if self._log_workspaces:
             ws_name = self._log_workspaces.name()
             self._log_workspaces = None
             DeleteWorkspace(ws_name)
 
-    def update_log_group_name(self):
+    def update_log_group_name(self) -> None:
         name = self._generate_log_group_name()
         if not name:
             self.delete_logs()
@@ -164,14 +165,14 @@ class SampleLogsGroupWorkspace(object):
             return name + self._suffix
         return ""
 
-    def get_log_values(self):
+    def get_log_values(self) -> Dict[str, Dict]:
         return self._log_values
 
-    def get_log_workspaces(self):
+    def get_log_workspaces(self) -> WorkspaceGroup | None:
         return self._log_workspaces
 
-    def update_log_value(self, new_key, old_key):
+    def update_log_value(self, new_key: str, old_key: str) -> None:
         self._log_values[new_key] = self._log_values.pop(old_key)
 
-    def clear_log_workspaces(self):
+    def clear_log_workspaces(self) -> None:
         self._log_workspaces = None
