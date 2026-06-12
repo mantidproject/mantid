@@ -256,14 +256,14 @@ class TestTexturePlannerPresenter_NumGonioUpdated(unittest.TestCase):
         model = _make_model()
         view = _make_view()
         view.get_num_gonios.return_value = 3
-        model.update_gonio_index.return_value = 0
+        model.clamp_gonio_index.return_value = 0
         presenter = TexturePlannerPresenter(model, view)
         presenter.on_goniometer_updated = MagicMock()
 
         presenter.on_num_gonio_updated()
 
         model.orientations.set_n_gonio.assert_called_with(3)
-        model.update_gonio_index.assert_called_with(3)
+        model.clamp_gonio_index.assert_called_with(3)
         presenter.on_goniometer_updated.assert_called_once_with(0)
         view.hide_axis_columns.assert_called_with()
 
