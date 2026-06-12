@@ -114,7 +114,7 @@ class OrientationExporter:
         save_file = os.path.join(save_dir, filename + ".txt")
         for orientation in self._included():
             raw = orientation.R.as_euler(axes, degrees=True)
-            angle_strs = [str(float(sense) * raw[i]) for i, sense in enumerate(senses)]
+            angle_strs = [str(np.round(float(sense) * raw[i], 2)) for i, sense in enumerate(senses)]
             lines.append("\t".join(angle_strs) + "\n")
         with open(save_file, "w") as f:
             f.writelines(lines)

@@ -212,11 +212,15 @@ class OrientationTable:
         senses = [1, 1, 1]
         for goniometer_list in goniometer_lists:
             R_mat = np.asarray(goniometer_list[:9]).reshape((3, 3))
-            angles = np.round(Rotation.from_matrix(R_mat).as_euler("YXY", degrees=True), 2)
+            R = Rotation.from_matrix(R_mat)
+            # the YXY decomposition is only used to populate the displayed goniometer fields
+            display_angles = np.round(R.as_euler("YXY", degrees=True), 2)
             self.add_orientation()
             new_index = self.get_num_orientations() - 1
-            self.update_gonio_string(vecs, senses, angles, new_index)
-            self.update_gRs(vecs, senses, angles, new_index)
+            self.update_gonio_string(vecs, senses, display_angles, new_index)
+            self.update_gRs(vecs, senses, display_angles, new_index)
+            # preserve the exact input matrix so projection / export stay faithful to the file
+            self.saved_orientations[new_index].R = R
 
     def _load_euler_orientations(self, goniometer_lists: List[List[float]], num_entries: int) -> int:
         axes = self.orientation_kwargs["Axes"]
@@ -235,8 +239,10 @@ class OrientationTable:
         for angles in goniometer_lists:
             self.add_orientation()
             new_index = self.get_num_orientations() - 1
+            # the file angles are the source of truth; use them unrounded for both the displayed
+            # string and the rotation so the two cannot disagree
             self.update_gonio_string(vecs, sense_ints, angles, new_index)
-            self.update_gRs(vecs, sense_ints, np.round(angles, 2), new_index)
+            self.update_gRs(vecs, sense_ints, angles, new_index)
         return num_ax
 
     # helpers for converting view fields into typed values --------------

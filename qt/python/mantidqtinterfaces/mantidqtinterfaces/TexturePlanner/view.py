@@ -24,6 +24,11 @@ Ui_texplan, _ = load_ui(__file__, "texture_planner.ui")
 # Label shown in the instrument combo for the user-defined instrument option.
 CUSTOM_INSTRUMENT = "Custom"
 
+# Gauge-volume method labels shown in combo_shapeMethod (must match the entries in texture_planner.ui).
+# The presenter dispatches on these, and the preset strings are passed straight to get_gauge_vol_str.
+GAUGE_VOL_CUSTOM_SHAPE = "Custom Shape"
+GAUGE_VOL_NONE = "No Gauge Volume"
+
 # Export-format labels shown in the output combo (the presenter dispatches on these strings).
 EXPORT_SSCANSS = "Sscanss2 Angles"
 EXPORT_EULER = "Euler Orientation File"
@@ -479,7 +484,7 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
     def get_select_indices(self) -> List[int]:
         return self._read_checkbox_column_states(7)
 
-    def get_show_transmission(self) -> List[int]:
+    def get_show_transmission(self) -> bool:
         return self.chkTransmission.isChecked()
 
     def get_init_x(self) -> float:
@@ -667,7 +672,8 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         self.tableWidget.setRowCount(1)
 
         header = self.tableWidget.horizontalHeader()
-        [header.setSectionResizeMode(ind, QHeaderView.Stretch) for ind in range(n_col - 2)]
+        for ind in range(n_col - 2):
+            header.setSectionResizeMode(ind, QHeaderView.Stretch)
         header.setSectionResizeMode(n_col - 1, QHeaderView.ResizeToContents)
 
     def add_table_row(self, row: int, axes_strings: List[str], include: bool, select: bool) -> None:
@@ -705,7 +711,7 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
     def set_outputs_enabled(self, enabled: bool) -> None:
         self.btnExport.setEnabled(enabled)
 
-    def _read_checkbox_column_states(self, col: int) -> bool:
+    def _read_checkbox_column_states(self, col: int) -> List[int]:
         checked = []
         for row in range(self.tableWidget.rowCount()):
             cell_widget = self.tableWidget.cellWidget(row, col)
@@ -752,7 +758,7 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         self.combo_shapeMethod.setVisible(vis)
         self.setGV.setVisible(vis)
         self.clearGV.setVisible(vis)
-        self.finder_gauge_vol.setVisible(vis and self.get_shape_method() == "Custom Shape")
+        self.finder_gauge_vol.setVisible(vis and self.get_shape_method() == GAUGE_VOL_CUSTOM_SHAPE)
 
     def set_finder_gauge_vol_visible(self, visible: bool) -> None:
         self.finder_gauge_vol.setVisible(visible and self.grpGaugeVol.isChecked())

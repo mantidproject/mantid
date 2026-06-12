@@ -115,6 +115,7 @@ class TexturePlotter:
         self.vis_settings = {"directions": True, "goniometers": True, "incident": True, "ks": True, "scattered": False}
         # when True the transmission plot colour scale spans the data range; otherwise it is fixed to [0, 1]
         self.transmission_use_data_range = False
+        self._transmission_cax = None
 
     def update_plot(
         self, vecs: List[np.ndarray], senses: List[float], angles: List[float], fig: Figure, lab_ax: Axes, proj_ax: Axes, current_index: int
@@ -250,6 +251,9 @@ class TexturePlotter:
 
     def _draw_pole_figure(self, proj_ax: Axes, g_pole_xy: np.ndarray, current_index: int) -> None:
         m = self._model
+        if self._transmission_cax is not None:
+            self._transmission_cax.remove()
+            self._transmission_cax = None
         for i, gP in enumerate(g_pole_xy):
             pc = self.gon_colors[i]
             fc = "None" if i != m.gonio_index else pc
@@ -275,8 +279,8 @@ class TexturePlotter:
             all_transmissions = np.concatenate([o.transmission for o in included], axis=0)
             clim_kwargs = {} if self.transmission_use_data_range else {"vmin": 0, "vmax": 1}
             scatt = proj_ax.scatter(all_pf_xy[:, 1], all_pf_xy[:, 0], s=20, c=all_transmissions, cmap="jet", **clim_kwargs)
-            cax = proj_ax.inset_axes([0.9, 0.15, 0.05, 0.7])
-            proj_ax.figure.colorbar(scatt, cax=cax)
+            self._transmission_cax = proj_ax.inset_axes([0.9, 0.15, 0.05, 0.7])
+            proj_ax.figure.colorbar(scatt, cax=self._transmission_cax)
 
     def _decorate_pole_figure(self, proj_ax: Axes) -> None:
         m = self._model

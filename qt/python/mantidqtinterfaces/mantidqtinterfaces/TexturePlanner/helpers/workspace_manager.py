@@ -270,7 +270,9 @@ class WorkspaceManager:
                 self.init_R = Rotation.from_euler("xyz", (x_rot, y_rot, z_rot), degrees=True)
                 self.rotate_samples_by_initial_goniometer()
         finally:
-            ADS.remove(self.WS_TMP)
+            # guard so a failure before the temp ws was created does not mask the original error
+            if ADS.doesExist(self.WS_TMP):
+                ADS.remove(self.WS_TMP)
 
     @staticmethod
     def _all_rots_zero(x_rot: float | int, y_rot: float | int, z_rot: float | int) -> bool:

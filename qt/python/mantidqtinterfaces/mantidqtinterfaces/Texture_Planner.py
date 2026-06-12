@@ -14,22 +14,21 @@ from mantidqtinterfaces.TexturePlanner.model import TexturePlannerModel
 from mantidqtinterfaces.TexturePlanner.view import TexturePlannerView
 
 app, within_mantid = get_qapplication()
+# The variable name must match the globals() key so workbench can find and reuse the existing
+# interface on relaunch (see e.g. DrILL.py); otherwise a fresh window is created every time.
 if "TexturePlanner" not in globals():
-    model = TexturePlannerModel()
-    view = TexturePlannerView()
-    presenter = TexturePlannerPresenter(model, view)
+    TexturePlanner = TexturePlannerPresenter(TexturePlannerModel(), TexturePlannerView())
 else:
-    presenter = globals()["TexturePlanner"]
+    TexturePlanner = globals()["TexturePlanner"]
     try:
-        visible = presenter.isVisible()
-    except RuntimeError:
-        # when a scan explorer is closed, the python object can linger while the underlying Qt object has been
-        # deleted. In this case, we create a new one from scratch
+        # the presenter is not a widget, so visibility is queried on its view
+        visible = TexturePlanner.view.isVisible()
+    except (RuntimeError, AttributeError):
+        # when the window is closed, the python object can linger while the underlying Qt object has
+        # been deleted. In this case, we create a new one from scratch
         visible = False
     if not visible:
-        model = TexturePlannerModel()
-        view = TexturePlannerView()
-        presenter = TexturePlannerPresenter(model, view)
-presenter.view.show()
+        TexturePlanner = TexturePlannerPresenter(TexturePlannerModel(), TexturePlannerView())
+TexturePlanner.view.show()
 if not within_mantid:
     sys.exit(app.exec_())
