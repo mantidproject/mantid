@@ -251,7 +251,9 @@ class FullInstrumentViewWindow(QMainWindow):
 
         self._aspect_ratio_check_box.setChecked(is_config_setting_true(self._ASPECT_RATIO_SETTING_STRING))
         self._show_monitors_check_box = QCheckBox()
-        self._show_monitors_check_box.setText("Show Monitors?")
+        self._show_monitors_check_box.setText("Monitors")
+        self._show_sample_position_check_box = QCheckBox()
+        self._show_sample_position_check_box.setText("Sample")
         self._count_scale_combo_box = NoWheelComboBox(self)
         self._count_scale_combo_box.setToolTip("Select display scale for integrated counts")
         self._flip_beam_check_box = QCheckBox()
@@ -281,6 +283,7 @@ class FullInstrumentViewWindow(QMainWindow):
         projection_third_row.addWidget(self._aspect_ratio_check_box)
         projection_third_row.addWidget(self._flip_beam_check_box)
         projection_third_row.addWidget(self._show_monitors_check_box)
+        projection_third_row.addWidget(self._show_sample_position_check_box)
         projection_second_row.addWidget(self._render_mode_combo_box)
         projection_third_row.addWidget(self._count_scale_combo_box)
         projection_layout.addLayout(projection_first_row)
@@ -473,6 +476,17 @@ class FullInstrumentViewWindow(QMainWindow):
     def is_show_monitors_checkbox_checked(self) -> bool:
         return self._show_monitors_check_box.isChecked()
 
+    def _on_show_monitors_toggled(self, checked: bool) -> None:
+        color = "rgb(255, 0, 0)" if checked else ""
+        self._show_monitors_check_box.setStyleSheet(f"color: {color};")
+
+    def is_show_sample_position_checkbox_checked(self) -> bool:
+        return self._show_sample_position_check_box.isChecked()
+
+    def _on_show_sample_position_toggled(self, checked: bool) -> None:
+        color = "rgb(0, 255, 0)" if checked else ""
+        self._show_sample_position_check_box.setStyleSheet(f"color: {color};")
+
     def get_render_mode_option(self) -> str:
         return self._render_mode_combo_box.currentText()
 
@@ -662,6 +676,9 @@ class FullInstrumentViewWindow(QMainWindow):
         self._delete_all_selected_peaks_button.clicked.connect(self._presenter.on_delete_all_selected_peaks_clicked)
         self._start_adding_peaks_button.toggled.connect(self._presenter.on_start_adding_peaks_toggled)
         self._show_monitors_check_box.clicked.connect(self._presenter.on_show_monitors_check_box_clicked)
+        self._show_monitors_check_box.toggled.connect(self._on_show_monitors_toggled)
+        self._show_sample_position_check_box.clicked.connect(self._presenter.on_show_sample_position_check_box_clicked)
+        self._show_sample_position_check_box.toggled.connect(self._on_show_sample_position_toggled)
         self._count_scale_combo_box.currentIndexChanged.connect(self._presenter.on_count_scale_selected)
         self._flip_beam_check_box.clicked.connect(self._presenter.on_flip_beam_check_box_clicked)
         self._render_mode_combo_box.currentIndexChanged.connect(self._presenter.on_render_mode_changed)

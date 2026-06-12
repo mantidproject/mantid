@@ -339,6 +339,24 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
         self._view._set_detector_edit_text(mock_edit, [det], lambda d: str(d.detector_id))
         mock_edit.setPlainText.assert_called_once_with("42")
 
+    def test_on_show_monitors_toggled_sets_red_color_when_checked(self):
+        self._view._on_show_monitors_toggled(True)
+        self.assertEqual(self._view._show_monitors_check_box.styleSheet(), "color: rgb(255, 0, 0);")
+
+    def test_on_show_monitors_toggled_clears_color_when_unchecked(self):
+        self._view._on_show_monitors_toggled(True)
+        self._view._on_show_monitors_toggled(False)
+        self.assertEqual(self._view._show_monitors_check_box.styleSheet(), "color: ;")
+
+    def test_on_show_sample_position_toggled_sets_green_color_when_checked(self):
+        self._view._on_show_sample_position_toggled(True)
+        self.assertEqual(self._view._show_sample_position_check_box.styleSheet(), "color: rgb(0, 255, 0);")
+
+    def test_on_show_sample_position_toggled_clears_color_when_unchecked(self):
+        self._view._on_show_sample_position_toggled(True)
+        self._view._on_show_sample_position_toggled(False)
+        self.assertEqual(self._view._show_sample_position_check_box.styleSheet(), "color: ;")
+
 
 if __name__ == "__main__":
     unittest.main()
