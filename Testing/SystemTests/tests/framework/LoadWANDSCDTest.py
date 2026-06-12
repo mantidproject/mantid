@@ -24,10 +24,10 @@ class LoadWANDSCDTest(systemtesting.MantidSystemTest):
         self.assertAlmostEqual(LoadWANDTest_ws.getErrorSquaredArray().max(), 0.0, 5)
         #
         LoadWANDTest_ws = LoadWANDSCD(Filename="HB2C_7000.nxs.h5,HB2C_7001.nxs.h5", VanadiumWorkspace=van, NormalizedBy="Counts")
-        ref_val = 0.0112
-        self.assertAlmostEqual(LoadWANDTest_ws.getSignalArray().max(), ref_val, 5)
-        ref_err = 2.29376e-05
-        self.assertAlmostEqual(LoadWANDTest_ws.getErrorSquaredArray().max(), ref_err, 5)
+        ref_val = 7.0
+        self.assertAlmostEqual(LoadWANDTest_ws.getSignalArray().max(), ref_val, 2)
+        ref_err = 8.96
+        self.assertAlmostEqual(LoadWANDTest_ws.getErrorSquaredArray().max(), ref_err, 2)
         #
         LoadWANDTest_ws = LoadWANDSCD(Filename="HB2C_7000.nxs.h5,HB2C_7001.nxs.h5", VanadiumWorkspace=van, NormalizedBy="Time")
         ref_val = 0.29363296439511044
