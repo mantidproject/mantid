@@ -1467,10 +1467,11 @@ public:
     auto composite = createComposite();
 
     const double parameterValue = 0.0;
+    const size_t parameter_ix = 0;
 
-    TS_ASSERT_EQUALS(composite->getFunction(0)->calculateStepSize(parameterValue),
+    TS_ASSERT_EQUALS(composite->getFunction(0)->calculateStepSize(parameter_ix, parameterValue),
                      std::numeric_limits<double>::epsilon() * 100);
-    TS_ASSERT_EQUALS(composite->getFunction(1)->calculateStepSize(parameterValue),
+    TS_ASSERT_EQUALS(composite->getFunction(1)->calculateStepSize(parameter_ix, parameterValue),
                      std::numeric_limits<double>::epsilon() * 100);
   }
 
@@ -1479,12 +1480,13 @@ public:
 
     const double parameterValue1 = 100.0 * std::numeric_limits<double>::min();
     const double parameterValue2 = -100.0 * std::numeric_limits<double>::min();
+    const size_t parameter_ix = 0;
 
     const double expectedStep = std::numeric_limits<double>::epsilon() * 100;
-    TS_ASSERT_EQUALS(composite->getFunction(0)->calculateStepSize(parameterValue1), expectedStep);
-    TS_ASSERT_EQUALS(composite->getFunction(0)->calculateStepSize(parameterValue2), expectedStep);
-    TS_ASSERT_EQUALS(composite->getFunction(1)->calculateStepSize(parameterValue1), expectedStep);
-    TS_ASSERT_EQUALS(composite->getFunction(1)->calculateStepSize(parameterValue2), expectedStep);
+    TS_ASSERT_EQUALS(composite->getFunction(0)->calculateStepSize(parameter_ix, parameterValue1), expectedStep);
+    TS_ASSERT_EQUALS(composite->getFunction(0)->calculateStepSize(parameter_ix, parameterValue2), expectedStep);
+    TS_ASSERT_EQUALS(composite->getFunction(1)->calculateStepSize(parameter_ix, parameterValue1), expectedStep);
+    TS_ASSERT_EQUALS(composite->getFunction(1)->calculateStepSize(parameter_ix, parameterValue2), expectedStep);
   }
 
   void test_default_calculation_of_step_size_with_larger_parameter_values() {
@@ -1492,11 +1494,16 @@ public:
 
     const double parameterValue1 = 5.0;
     const double parameterValue2 = -5.0;
+    const size_t parameter_ix = 0;
 
-    TS_ASSERT_EQUALS(composite->getFunction(0)->calculateStepSize(parameterValue1), parameterValue1 * 0.001);
-    TS_ASSERT_EQUALS(composite->getFunction(0)->calculateStepSize(parameterValue2), parameterValue2 * 0.001);
-    TS_ASSERT_EQUALS(composite->getFunction(1)->calculateStepSize(parameterValue1), parameterValue1 * 0.001);
-    TS_ASSERT_EQUALS(composite->getFunction(1)->calculateStepSize(parameterValue2), parameterValue2 * 0.001);
+    TS_ASSERT_EQUALS(composite->getFunction(0)->calculateStepSize(parameter_ix, parameterValue1),
+                     parameterValue1 * 0.001);
+    TS_ASSERT_EQUALS(composite->getFunction(0)->calculateStepSize(parameter_ix, parameterValue2),
+                     parameterValue2 * 0.001);
+    TS_ASSERT_EQUALS(composite->getFunction(1)->calculateStepSize(parameter_ix, parameterValue1),
+                     parameterValue1 * 0.001);
+    TS_ASSERT_EQUALS(composite->getFunction(1)->calculateStepSize(parameter_ix, parameterValue2),
+                     parameterValue2 * 0.001);
   }
 
   void test_sqrt_epsilon_calculation_of_step_size_with_zero_parameter_value() {
@@ -1505,10 +1512,11 @@ public:
     composite->setStepSizeMethod(IFunction::StepSizeMethod::SQRT_EPSILON);
 
     const double parameterValue = 0.0;
+    const size_t parameter_ix = 0;
 
-    TS_ASSERT_EQUALS(composite->getFunction(0)->calculateStepSize(parameterValue),
+    TS_ASSERT_EQUALS(composite->getFunction(0)->calculateStepSize(parameter_ix, parameterValue),
                      sqrt(std::numeric_limits<double>::epsilon()));
-    TS_ASSERT_EQUALS(composite->getFunction(1)->calculateStepSize(parameterValue),
+    TS_ASSERT_EQUALS(composite->getFunction(1)->calculateStepSize(parameter_ix, parameterValue),
                      sqrt(std::numeric_limits<double>::epsilon()));
   }
 
@@ -1519,12 +1527,13 @@ public:
 
     const double parameterValue1 = 0.9;
     const double parameterValue2 = -0.9;
+    const size_t parameter_ix = 0;
 
     const double expectedStep = sqrt(std::numeric_limits<double>::epsilon());
-    TS_ASSERT_EQUALS(composite->getFunction(0)->calculateStepSize(parameterValue1), expectedStep);
-    TS_ASSERT_EQUALS(composite->getFunction(0)->calculateStepSize(parameterValue2), expectedStep);
-    TS_ASSERT_EQUALS(composite->getFunction(1)->calculateStepSize(parameterValue1), expectedStep);
-    TS_ASSERT_EQUALS(composite->getFunction(1)->calculateStepSize(parameterValue2), expectedStep);
+    TS_ASSERT_EQUALS(composite->getFunction(0)->calculateStepSize(parameter_ix, parameterValue1), expectedStep);
+    TS_ASSERT_EQUALS(composite->getFunction(0)->calculateStepSize(parameter_ix, parameterValue2), expectedStep);
+    TS_ASSERT_EQUALS(composite->getFunction(1)->calculateStepSize(parameter_ix, parameterValue1), expectedStep);
+    TS_ASSERT_EQUALS(composite->getFunction(1)->calculateStepSize(parameter_ix, parameterValue2), expectedStep);
   }
 
   void test_sqrt_epsilon_calculation_of_step_size_with_large_parameter_values() {
@@ -1534,12 +1543,17 @@ public:
 
     const double parameterValue1 = 1.1;
     const double parameterValue2 = -1.1;
+    const size_t parameter_ix = 0;
 
     const double sqrtEpsilon = sqrt(std::numeric_limits<double>::epsilon());
-    TS_ASSERT_EQUALS(composite->getFunction(0)->calculateStepSize(parameterValue1), parameterValue1 * sqrtEpsilon);
-    TS_ASSERT_EQUALS(composite->getFunction(0)->calculateStepSize(parameterValue2), parameterValue2 * sqrtEpsilon);
-    TS_ASSERT_EQUALS(composite->getFunction(1)->calculateStepSize(parameterValue1), parameterValue1 * sqrtEpsilon);
-    TS_ASSERT_EQUALS(composite->getFunction(1)->calculateStepSize(parameterValue2), parameterValue2 * sqrtEpsilon);
+    TS_ASSERT_EQUALS(composite->getFunction(0)->calculateStepSize(parameter_ix, parameterValue1),
+                     parameterValue1 * sqrtEpsilon);
+    TS_ASSERT_EQUALS(composite->getFunction(0)->calculateStepSize(parameter_ix, parameterValue2),
+                     parameterValue2 * sqrtEpsilon);
+    TS_ASSERT_EQUALS(composite->getFunction(1)->calculateStepSize(parameter_ix, parameterValue1),
+                     parameterValue1 * sqrtEpsilon);
+    TS_ASSERT_EQUALS(composite->getFunction(1)->calculateStepSize(parameter_ix, parameterValue2),
+                     parameterValue2 * sqrtEpsilon);
   }
 
   void test_getNumberDomains_throws_with_inconsistent_domain_numbers() {

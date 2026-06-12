@@ -47,12 +47,14 @@ constexpr double EPSILON = std::numeric_limits<double>::epsilon();
 constexpr double MIN_DOUBLE = std::numeric_limits<double>::min();
 constexpr double STEP_PERCENTAGE = 0.001;
 
-const auto defaultStepSize = [](const double parameterValue) -> double {
+const auto defaultStepSize = [](size_t index, const double parameterValue) -> double {
+  UNUSED_ARG(index);
   return fabs(parameterValue) < 100.0 * MIN_DOUBLE / STEP_PERCENTAGE ? 100.0 * EPSILON
                                                                      : parameterValue * STEP_PERCENTAGE;
 };
 
-const auto sqrtEpsilonStepSize = [](const double parameterValue) -> double {
+const auto sqrtEpsilonStepSize = [](size_t index, const double parameterValue) -> double {
+  UNUSED_ARG(index);
   return fabs(parameterValue) < 1 ? sqrt(EPSILON) : parameterValue * sqrt(EPSILON);
 };
 
@@ -124,6 +126,12 @@ void IFunction::setProgressReporter(std::shared_ptr<Kernel::ProgressBase> report
   m_progReporter = std::move(reporter);
   m_progReporter->setNotifyStep(0.01);
 }
+
+/**
+ * Saves the CustomStepSizes
+ * @param stepSizes :: A reference to the stepSizes vector
+ */
+void IFunction::setCustomStepSizes(const std::vector<double> &stepSizes) { m_stepSizes = stepSizes; }
 
 /**
  * If a reporter object is set, reports progress with an optional message
@@ -1128,7 +1136,7 @@ void IFunction::calNumericalDeriv(const FunctionDomain &domain, Jacobian &jacobi
   for (size_t iP = 0; iP < nParam; iP++) {
     if (isActive(iP)) {
       const double val = activeParameter(iP);
-      step = calculateStepSize(val);
+      step = calculateStepSize(iP, val);
 
       const double paramPstep = val + step;
       setActiveParameter(iP, paramPstep);
@@ -1146,10 +1154,13 @@ void IFunction::calNumericalDeriv(const FunctionDomain &domain, Jacobian &jacobi
 }
 
 /** Calculates the step size to use when calculating the numerical derivative.
+ * @param parameterIndex :: The parameter index.
  * @param parameterValue :: The value of the active parameter.
  * @returns The step size to use when calculating the numerical derivative.
  */
-double IFunction::calculateStepSize(const double parameterValue) const { return m_stepSizeFunction(parameterValue); }
+double IFunction::calculateStepSize(const size_t parameterIndex, const double parameterValue) const {
+  return m_stepSizeFunction(parameterIndex, parameterValue);
+}
 
 /** Sets the function to use when calculating the step size.
  * @param method :: An enum indicating which method to use when calculating the step size.
@@ -1161,6 +1172,12 @@ void IFunction::setStepSizeMethod(const StepSizeMethod method) {
     return;
   case StepSizeMethod::SQRT_EPSILON:
     m_stepSizeFunction = sqrtEpsilonStepSize;
+    return;
+  case StepSizeMethod::CUSTOM:
+    m_stepSizeFunction = [this](size_t index, double parameterValue) -> double {
+      UNUSED_ARG(parameterValue);
+      return m_stepSizes.at(index);
+    };
     return;
   }
   throw std::invalid_argument("An invalid method for calculating the step size was provided.");
