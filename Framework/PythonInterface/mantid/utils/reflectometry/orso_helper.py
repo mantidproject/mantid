@@ -129,7 +129,7 @@ class MantidORSODataset:
                     try:
                         future.result(timeout=5.0)
                     except concurrent.futures.TimeoutError:
-                        logger.error(f"The provided model description '{model}' could not be validated because of database unavalibility.")
+                        logger.error(f"The provided model description '{model}' could not be validated because of database unavailability.")
                         self._header = None
                         return
                     except:
