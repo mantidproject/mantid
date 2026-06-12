@@ -150,6 +150,10 @@ void updateStitchProperties(AlgorithmRuntimeProps &properties,
                             std::map<std::string, std::string> const &stitchParameters) {
   AlgorithmProperties::updateFromMap(properties, stitchParameters);
 }
+
+void updateUseValidDataOnly(AlgorithmRuntimeProps &properties) {
+  AlgorithmProperties::update("UseValidDataOnly", true, properties);
+}
 } // unnamed namespace
 
 /** Create a configured algorithm for processing a group. The algorithm
@@ -182,6 +186,7 @@ std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps
   updateGroupProperties(*properties, group);
   // Override the rebin Params from the user-specified stitch params, if given
   updateStitchProperties(*properties, model.experiment().stitchParameters());
+  updateUseValidDataOnly(*properties);
   return properties;
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry::GroupProcessing

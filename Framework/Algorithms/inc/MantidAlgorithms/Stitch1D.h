@@ -33,10 +33,29 @@ public:
   /// Cross-check properties with each other @see IAlgorithm::validateInputs
   std::map<std::string, std::string> validateInputs() override;
 
-private:
-  /// Helper typedef. For storing indexes of special values per spectra per
-  /// workspace.
+  /// Helper typedef for storing special-value indexes per spectrum.
   using SpecialTypeIndexes = std::vector<std::vector<size_t>>;
+  /// Indexes of Y and E values that were NaN or infinite before processing.
+  struct SpecialValueIndexes {
+    SpecialTypeIndexes nanE;
+    SpecialTypeIndexes nanY;
+    SpecialTypeIndexes infE;
+    SpecialTypeIndexes infY;
+
+    void resize(size_t histogramCount) {
+      nanE.resize(histogramCount);
+      nanY.resize(histogramCount);
+      infE.resize(histogramCount);
+      infY.resize(histogramCount);
+    }
+  };
+
+  struct overlapBounds {
+    int a1 = -1;
+    int a2 = -1;
+  };
+
+private:
   /// Overwrites Algorithm method.
   void init() override;
   /// Overwrites Algorithm method.
@@ -49,8 +68,9 @@ private:
   /// Get the rebin parameters
   std::vector<double> getRebinParams(Mantid::API::MatrixWorkspace_const_sptr &lhsWS,
                                      Mantid::API::MatrixWorkspace_const_sptr &rhsWS, const bool scaleRHS) const;
-  /// Perform rebin
-  Mantid::API::MatrixWorkspace_sptr rebin(Mantid::API::MatrixWorkspace_sptr &input, const std::vector<double> &params);
+  /// Perform rebin and record special values that are zeroed
+  Mantid::API::MatrixWorkspace_sptr rebin(Mantid::API::MatrixWorkspace_sptr &input, const std::vector<double> &params,
+                                          SpecialValueIndexes &specialValues);
   /// Perform integration
   Mantid::API::MatrixWorkspace_sptr integration(Mantid::API::MatrixWorkspace_sptr const &input, const double start,
                                                 const double stop);
@@ -68,24 +88,26 @@ private:
   Mantid::API::MatrixWorkspace_sptr maskAllBut(int a1, int a2, Mantid::API::MatrixWorkspace_sptr &source);
   /// Mask out everything but the data in the ranges, but do it inplace.
   void maskInPlace(int a1, int a2, Mantid::API::MatrixWorkspace_sptr &source);
-  /// Add back in any special values
-  void reinsertSpecialValues(const Mantid::API::MatrixWorkspace_sptr &ws);
+  /// Add back special values only where no valid data contributes to the output
+  void reinsertSpecialValues(const Mantid::API::MatrixWorkspace_sptr &ws, const SpecialValueIndexes &lhsSpecialValues,
+                             const SpecialValueIndexes &rhsSpecialValues, overlapBounds bounds);
+  /// Use valid overlap values where exactly one workspace has an invalid signal value
+  void useValidOverlapData(const Mantid::API::MatrixWorkspace_sptr &overlap,
+                           const Mantid::API::MatrixWorkspace_sptr &lhs, const Mantid::API::MatrixWorkspace_sptr &rhs,
+                           const SpecialValueIndexes &lhsSpecialValues, const SpecialValueIndexes &rhsSpecialValues,
+                           const overlapBounds bounds);
   /// Range tolerance
   static const double range_tolerance;
   /// Scaling factors
   double m_scaleFactor;
   double m_errorScaleFactor;
+  bool m_useValidDataOnly;
   /// Scale workspace (left hand side or right hand side)
   void scaleWorkspace(API::MatrixWorkspace_sptr &ws, API::MatrixWorkspace_sptr &scaleFactorWS,
                       API::MatrixWorkspace_const_sptr &dxWS);
-  /// Index per workspace spectra of Nans
-  SpecialTypeIndexes m_nanEIndexes;
-  SpecialTypeIndexes m_nanYIndexes;
-  SpecialTypeIndexes m_nanDxIndexes;
-  /// Index per workspace spectra of Infs
-  SpecialTypeIndexes m_infEIndexes;
-  SpecialTypeIndexes m_infYIndexes;
-  SpecialTypeIndexes m_infDxIndexes;
+  /// Index per workspace spectra of special values
+  SpecialValueIndexes m_lhsSpecialValues;
+  SpecialValueIndexes m_rhsSpecialValues;
 };
 
 } // namespace Algorithms
