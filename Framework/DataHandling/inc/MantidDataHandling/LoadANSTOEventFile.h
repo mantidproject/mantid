@@ -161,7 +161,6 @@ void ReadEventFile(IReader &loader, IEventHandler &handler, IProgress &progress,
                                      hdr_packed.evt_stg_nbits_w, hdr_packed.evt_stg_nbits_wa};
 
   int32_t ind_val = 0;
-  int32_t nbits_val = 0;
   int32_t nbits_val_filled = 0;
   int32_t nbits_dt_filled = 0;
 
@@ -252,7 +251,7 @@ void ReadEventFile(IReader &loader, IEventHandler &handler, IProgress &progress,
       // fill bits of the incoming ch to the event's bitfields.
       // stop when we've filled them all, or all bits of ch are used.
       do {
-        nbits_val = (oob_event ? nbits_val_oob[ind_val] : nbits_val_neutron[ind_val]);
+        int32_t nbits_val = (oob_event ? nbits_val_oob[ind_val] : nbits_val_neutron[ind_val]);
         if (!nbits_val) {
           nbits_val_filled = 0;
           ind_val++;

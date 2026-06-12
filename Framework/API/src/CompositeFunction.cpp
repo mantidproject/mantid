@@ -557,7 +557,7 @@ void CompositeFunction::removeFunction(size_t i) {
   const IFunction_sptr fun = getFunction(i);
   // Remove ties which are no longer valid
   for (size_t j = 0; j < nParams();) {
-    ParameterTie *tie = getTie(j);
+    const ParameterTie *tie = getTie(j);
     if (tie && tie->findParametersOf(fun.get())) {
       removeTie(j);
     } else {
@@ -882,7 +882,7 @@ void CompositeFunction::setUpForFit() {
   // log a warning about a danger of not using it
   if (!getAttribute("NumDeriv").asBool()) {
     for (size_t i = 0; i < nParams(); ++i) {
-      ParameterTie *tie = getTie(i);
+      const ParameterTie *tie = getTie(i);
       if (tie && !tie->isConstant()) {
         g_log.warning() << "Numeric derivatives should be used when "
                            "non-constant ties defined.\n";

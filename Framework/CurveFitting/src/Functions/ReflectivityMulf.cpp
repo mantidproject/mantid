@@ -116,7 +116,7 @@ void ReflectivityMulf::function1D(double *out, const double *xValues, const size
     }
   }
 
-  double tmax, tmin, x, st0, ct0, ans, gauss, f;
+  double tmax, tmin, ans;
   int nit1 = nit + 1;
   std::vector<double> xnit(nit1);
   int ii, k;
@@ -145,9 +145,9 @@ void ReflectivityMulf::function1D(double *out, const double *xValues, const size
     }
 
     for (ii = 0; ii < nit1; ii++) {
-      x = xnit[ii];
-      ct0 = cos(x);
-      st0 = sin(x);
+      double x = xnit[ii];
+      double ct0 = cos(x);
+      double st0 = sin(x);
       pfn[0] = rnfn[0] * st0;
 
       for (int i = 1; i < m_nlayer + 1; i++) {
@@ -215,8 +215,8 @@ void ReflectivityMulf::function1D(double *out, const double *xValues, const size
         ans = real((ac1 * ac2) / (ac3 * ac4));
       }
 
-      gauss = (1.0 / dthetr) * exp(-0.5 * ((theta0 - x) / dthet) * (theta0 - x) / dthet);
-      f = ans * gauss;
+      double gauss = (1.0 / dthetr) * exp(-0.5 * ((theta0 - x) / dthet) * (theta0 - x) / dthet);
+      double f = ans * gauss;
       cy[j] = cy[j] + f * dt;
     }
     out[j] = (cy[j] + bgd) * scalefac;

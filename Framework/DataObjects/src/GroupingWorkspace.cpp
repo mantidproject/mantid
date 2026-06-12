@@ -138,7 +138,7 @@ namespace Mantid::Kernel {
 template <>
 DLLExport Mantid::DataObjects::GroupingWorkspace_sptr
 IPropertyManager::getValue<Mantid::DataObjects::GroupingWorkspace_sptr>(const std::string &name) const {
-  auto *prop =
+  const auto *prop =
       dynamic_cast<PropertyWithValue<Mantid::DataObjects::GroupingWorkspace_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return *prop;

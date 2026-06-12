@@ -429,7 +429,7 @@ void FindPeaks::findPeaksUsingMariscotti() {
     const auto &F = smoothedData[k_out].e();
 
     // This implements the flow chart given on page 320 of Mariscotti
-    int i0 = 0, i1 = 0, i2 = 0, i3 = 0, i4 = 0, i5 = 0;
+    int i1 = 0, i2 = 0, i3 = 0, i5 = 0;
     for (int i = 1; i < static_cast<int>(S.size()); ++i) {
 
       int M = 0;
@@ -491,7 +491,7 @@ void FindPeaks::findPeaksUsingMariscotti() {
       if (i5 && i1 && i2 && i3) // If i5 has been set then we should have the
                                 // full set and can check conditions
       {
-        i4 = i3; // Starting point for finding i4 - calculated below
+        int i4 = i3; // Starting point for finding i4 - calculated below
         double num = 0.0, denom = 0.0;
         for (int j = i3; j <= i5; ++j) {
           // Calculate i4 - it's at the minimum value of Si between i3 & i5
@@ -501,7 +501,7 @@ void FindPeaks::findPeaksUsingMariscotti() {
           num += j * S[j];
           denom += S[j];
         }
-        i0 = static_cast<int>(num / denom);
+        int i0 = static_cast<int>(num / denom);
 
         // Check we have a correctly ordered set of points. If not, reset and
         // continue

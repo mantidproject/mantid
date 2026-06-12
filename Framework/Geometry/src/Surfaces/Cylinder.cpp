@@ -359,28 +359,27 @@ void Cylinder::getBoundingBox(double &xmax, double &ymax, double &zmax, double &
   txmin = xmin;
   tymin = ymin;
   tzmin = zmin;
-  V3D xminPoint, xmaxPoint, yminPoint, ymaxPoint, zminPoint, zmaxPoint;
   // xmin and max plane
   if (m_normal[0] != 0) {
-    xminPoint = m_centre + m_normal * ((xmin - m_centre[0]) / m_normal[0]);
-    xmaxPoint = m_centre + m_normal * ((xmax - m_centre[0]) / m_normal[0]);
+    V3D xminPoint = m_centre + m_normal * ((xmin - m_centre[0]) / m_normal[0]);
+    V3D xmaxPoint = m_centre + m_normal * ((xmax - m_centre[0]) / m_normal[0]);
     listOfPoints.emplace_back(xminPoint);
     listOfPoints.emplace_back(xmaxPoint);
   }
 
   if (m_normal[1] != 0) {
     // ymin plane
-    yminPoint = m_centre + m_normal * ((ymin - m_centre[1]) / m_normal[1]);
+    V3D yminPoint = m_centre + m_normal * ((ymin - m_centre[1]) / m_normal[1]);
     // ymax plane
-    ymaxPoint = m_centre + m_normal * ((ymax - m_centre[1]) / m_normal[1]);
+    V3D ymaxPoint = m_centre + m_normal * ((ymax - m_centre[1]) / m_normal[1]);
     listOfPoints.emplace_back(yminPoint);
     listOfPoints.emplace_back(ymaxPoint);
   }
   if (m_normal[2] != 0) {
     // zmin plane
-    zminPoint = m_centre + m_normal * ((zmin - m_centre[2]) / m_normal[2]);
+    V3D zminPoint = m_centre + m_normal * ((zmin - m_centre[2]) / m_normal[2]);
     // zmax plane
-    zmaxPoint = m_centre + m_normal * ((zmax - m_centre[2]) / m_normal[2]);
+    V3D zmaxPoint = m_centre + m_normal * ((zmax - m_centre[2]) / m_normal[2]);
     listOfPoints.emplace_back(zminPoint);
     listOfPoints.emplace_back(zmaxPoint);
   }

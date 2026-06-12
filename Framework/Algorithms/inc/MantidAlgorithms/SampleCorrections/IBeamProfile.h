@@ -31,7 +31,7 @@ public:
     Kernel::V3D unitDir;
   };
 
-  IBeamProfile(const Kernel::V3D center);
+  IBeamProfile(const Kernel::V3D &center);
   IBeamProfile() = default;
   virtual ~IBeamProfile() = default;
   virtual Ray generatePoint(Kernel::PseudoRandomNumberGenerator &rng) const = 0;

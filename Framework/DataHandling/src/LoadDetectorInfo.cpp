@@ -396,7 +396,7 @@ void LoadDetectorInfo::updateParameterMap(Geometry::DetectorInfo &detectorInfo, 
                                           const double phi, const double delay, const double pressure,
                                           const double thickness) const {
 
-  const auto detCompID = detectorInfo.detector(detIndex).getComponentID();
+  const auto *detCompID = detectorInfo.detector(detIndex).getComponentID();
 
   // store detector params that are different to instrument level
   if (fabs(delay - m_instDelta) > 1e-06)

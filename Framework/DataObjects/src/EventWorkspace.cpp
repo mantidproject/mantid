@@ -721,7 +721,8 @@ namespace Mantid::Kernel {
 template <>
 DLLExport Mantid::DataObjects::EventWorkspace_sptr
 IPropertyManager::getValue<Mantid::DataObjects::EventWorkspace_sptr>(const std::string &name) const {
-  auto *prop = dynamic_cast<PropertyWithValue<Mantid::DataObjects::EventWorkspace_sptr> *>(getPointerToProperty(name));
+  const auto *prop =
+      dynamic_cast<PropertyWithValue<Mantid::DataObjects::EventWorkspace_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return *prop;
   } else {

@@ -683,10 +683,8 @@ void InstrumentDefinitionParser::setLocation(Geometry::IComponent *comp, const P
       stillTransElement = false;
     }
 
-    Kernel::V3D posTrans;
-
     if (tElem) {
-      posTrans = getRelativeTranslation(comp, tElem, angleConvertConst, deltaOffsets);
+      Kernel::V3D posTrans = getRelativeTranslation(comp, tElem, angleConvertConst, deltaOffsets);
 
       // to get the change in translation relative to current rotation of comp
       Geometry::CompAssembly compToGetRot;
