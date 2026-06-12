@@ -688,49 +688,14 @@ mtd_add_qt_library(
 # For the new help system target_link_libraries(MantidQtWidgetsCommon PRIVATE Mantid::Framework PythonInterface::mantid)
 # # This line is now removed/commented
 
-set(TEST_FILES
-    test/AlgorithmHintStrategyTest.h
-    test/BatchAlgorithmRunnerTest.h
-    test/ConvolutionFunctionModelTest.h
-    test/FileDialogHandlerTest.h
-    test/FindFilesThreadPoolManagerTest.h
-    test/FindFilesWorkerTest.h
-    test/FitPropertyBrowserTest.h
-    test/FunctionModelTest.h
-    test/FunctionMultiDomainPresenterTest.h
-    test/FunctionBrowserUtilsTest.h
-    test/LogValueFinderTest.h
-    test/ImageInfoModelMatrixWSTest.h
-    test/ImageInfoModelMDTest.h
-    test/ImageInfoPresenterTest.h
-    test/InterfaceManagerTest.h
-    test/MuonPeriodInfoTest.h
-    test/NonOrthogonalTest.h
-    test/ParseKeyValueStringTest.h
-    test/PlotAxisTest.h
-    test/ProgressableViewTest.h
-    test/ProjectSaveModelTest.h
-    test/ProjectSavePresenterTest.h
-    test/SelectionNotificationServiceTest.h
-    test/SelectionWorkspacesDialogTest.h
-    test/TrackedActionTest.h
-    test/QtJSONUtilsTest.h
-    test/WorkspaceUtilsTest.h
-    test/Batch/BuildSubtreeItemsTest.h
-    test/Batch/ExtractSubtreesTest.h
-    test/Batch/FindSubtreeRootsTest.h
-    test/Batch/QtAdaptedModelTest.h
-    test/Batch/RowLocationTest.h
-    test/WorkspacePresenter/ADSAdapterTest.h
-    test/WorkspacePresenter/WorkspacePresenterTest.h
-)
-
 set(CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/test/WidgetsCommonTestInitialization.h)
 
 set(QT5_TEST_FILES
+    test/AlgorithmHintStrategyTest.h
     test/AlgorithmRunnerTest.h
     test/AlgorithmPropertiesWidgetTest.h
     test/BatchAlgorithmRunnerTest.h
+    test/ConvolutionFunctionModelTest.h
     test/FileDialogHandlerTest.h
     test/FindFilesThreadPoolManagerTest.h
     test/FindFilesWorkerTest.h
@@ -742,26 +707,37 @@ set(QT5_TEST_FILES
     test/FitScriptGeneratorPresenterTest.h
     test/FitScriptGeneratorViewTest.h
     test/FitScriptOptionsBrowserTest.h
-    test/SelectWorkspacesDialogTest.h
+    test/FunctionBrowserUtilsTest.h
+    test/FunctionModelTest.h
+    test/FunctionMultiDomainPresenterTest.h
     test/FunctionTreeViewTest.h
     test/ImageInfoModelMatrixWSTest.h
     test/ImageInfoModelMDTest.h
     test/ImageInfoPresenterTest.h
     test/InterfaceManagerTest.h
+    test/LogValueFinderTest.h
     test/ManageUserDirectoriesTest.h
     test/MuonPeriodInfoTest.h
+    test/NonOrthogonalTest.h
+    test/ParseKeyValueStringTest.h
+    test/PlotAxisTest.h
+    test/ProgressableViewTest.h
+    test/ProjectSaveModelTest.h
+    test/ProjectSavePresenterTest.h
     test/QtJSONUtilsTest.h
     test/RepoModelTest.h
-    test/ParseKeyValueStringTest.h
+    test/SelectionNotificationServiceTest.h
+    test/SelectWorkspacesDialogTest.h
+    test/TrackedActionTest.h
     test/WorkspaceUtilsTest.h
-    test/Python/SipTest.h
+    test/AlgorithmProgress/AlgorithmProgressPresenterTest.h
+    test/AlgorithmProgress/AlgorithmProgressDialogPresenterTest.h
     test/Batch/BuildSubtreeItemsTest.h
     test/Batch/ExtractSubtreesTest.h
     test/Batch/FindSubtreeRootsTest.h
     test/Batch/QtAdaptedModelTest.h
     test/Batch/RowLocationTest.h
-    test/AlgorithmProgress/AlgorithmProgressPresenterTest.h
-    test/AlgorithmProgress/AlgorithmProgressDialogPresenterTest.h
+    test/Python/SipTest.h
     test/WorkspacePresenter/ADSAdapterTest.h
     test/WorkspacePresenter/WorkspacePresenterTest.h
 )
