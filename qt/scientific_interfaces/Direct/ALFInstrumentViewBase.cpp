@@ -19,7 +19,7 @@
 namespace MantidQt::CustomInterfaces {
 
 ALFInstrumentViewBase::ALFInstrumentViewBase(QWidget *parent)
-    : QWidget(parent), m_settingsGroup("CustomInterfaces/ALFView"), m_sample(), m_vanadium(), m_presenter() {}
+    : QWidget(parent), m_presenter(), m_settingsGroup("CustomInterfaces/ALFView"), m_sample(), m_vanadium() {}
 
 QWidget *ALFInstrumentViewBase::generateSampleLoadWidget() {
   m_sample = new API::FileFinderWidget(this);
