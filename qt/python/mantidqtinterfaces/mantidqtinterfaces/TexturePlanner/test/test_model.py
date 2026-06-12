@@ -118,19 +118,19 @@ class TestTexturePlannerModel_UpdateGonioIndex(unittest.TestCase):
         model = TexturePlannerModel()
         model.gonio_index = 1
 
-        self.assertEqual(model.update_gonio_index(num_gonios=4), 1)
+        self.assertEqual(model.clamp_gonio_index(num_gonios=4), 1)
 
     def test_clamps_to_max_when_index_exceeds(self, mock_instr, mock_wsm, mock_ot, mock_dg, mock_abs, mock_exp, mock_plot):
         model = TexturePlannerModel()
         model.gonio_index = 5
 
-        self.assertEqual(model.update_gonio_index(num_gonios=3), 2)
+        self.assertEqual(model.clamp_gonio_index(num_gonios=3), 2)
 
     def test_clamps_to_zero_when_only_one_gonio(self, mock_instr, mock_wsm, mock_ot, mock_dg, mock_abs, mock_exp, mock_plot):
         model = TexturePlannerModel()
         model.gonio_index = 4
 
-        self.assertEqual(model.update_gonio_index(num_gonios=1), 0)
+        self.assertEqual(model.clamp_gonio_index(num_gonios=1), 0)
 
 
 @_patch_collaborators
