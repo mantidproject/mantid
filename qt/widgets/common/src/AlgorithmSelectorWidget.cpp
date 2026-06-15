@@ -280,7 +280,7 @@ void AlgorithmTreeWidget::update() {
       } else {
         QString cn = subCats[0];
         QTreeWidgetItem *catItem = nullptr;
-        int n = static_cast<int>(subCats.size());
+        auto n = subCats.size();
         for (int j = 0; j < n; j++) {
           if (categories.contains(cn)) {
             catItem = categories[cn];

@@ -240,7 +240,7 @@ bool SequentialFitDialog::isFile(int row) const {
 
 bool SequentialFitDialog::isValidRangeFormat(const QString &range) const {
   // Check if range contains exactly one colon
-  int colonCount = static_cast<int>(range.count(':'));
+  auto colonCount = range.count(':');
   if (colonCount != 1) {
     return false;
   }
