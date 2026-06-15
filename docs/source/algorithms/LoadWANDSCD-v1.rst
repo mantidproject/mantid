@@ -32,7 +32,7 @@ Also, both input data and the Vanadium data will share the same grouping scheme.
 The loaded workspace is designed to be the input to :ref:`algm-ConvertWANDSCDtoQ`.
 
 Normalization
-=============
+-------------
 
 Normalization can be performed while loading the data if the necessary Vanadium data is specified.
 By default, the algorithm will try to locate the Vanadium data using IPTS and run number.
