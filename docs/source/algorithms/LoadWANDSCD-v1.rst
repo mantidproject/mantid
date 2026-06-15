@@ -17,17 +17,6 @@ it is crucial to have the correct instrument attached to the first run.
 In addition the s1 (omega rotation), duration, run_number and monitor count is read from every
 file and included in the logs of the OutputWorkspace.
 
-During a recent feature expansion, normalization can be optionally performed in the same process
-provided that the necessary Vanadium data is specified.
-By default, the algorithm will try to locate the Vanadium data using IPTS and run number.
-If failed, it will check the Vanadium filename entry to see if the data can be loaded directly
-from file.
-If neither is provided, the algorithm will try to check if the Vanadium data is provided as a
-workspace in memory.
-Currently there are three normalization scheme supported: by Count, by Monitor and by Time.
-If None is selected, no normalization will be performed and all normalization related properties
-will be ignored (on the GUI end, they will be disabled instead).
-
 If the "HB2C:CS:CrystalAlign:UBMatrix" property exists and apply goniometer tilt is true,
 it will be converted into the OrientedLattice on the OutputWorkspace.
 The goniometer tilts (sgu and sgl) are combined into the UB Matrix so that only omega (s1) needs to
@@ -40,8 +29,32 @@ usage and speed up the later reduction steps.
 In most cases you will not see a difference in reduced data with 4x4 pixel grouping.
 Also, both input data and the Vanadium data will share the same grouping scheme.
 
-The loaded workspace is designed to be the input to
-:ref:`algm-ConvertWANDSCDtoQ`.
+The loaded workspace is designed to be the input to :ref:`algm-ConvertWANDSCDtoQ`.
+
+Normalization
+=============
+
+Normalization can be performed while loading the data if the necessary Vanadium data is specified.
+By default, the algorithm will try to locate the Vanadium data using IPTS and run number.
+If that is not specified, it will check the Vanadium filename entry to see if the data can be
+loaded directly from file. If neither is provided, the algorithm will try to use Vanadium data
+provided as a workspace in memory. When a Vanadium source is provided, the data is divided by the
+Vanadium signal and then scaled according to the ``NormalizedBy`` option. If no Vanadium source is
+provided, no normalization is performed.
+
+.. list-table::
+   :header-rows: 1
+
+   * - ``NormalizedBy``
+     - Final result
+   * - ``None``
+     - ``sample_signal / vanadium_signal``
+   * - ``Counts``
+     - ``sample_signal / (vanadium_signal / mean_vanadium_signal)``
+   * - ``Monitor``
+     - ``(sample_signal / sample_monitor_count) / (vanadium_signal / vanadium_monitor_count)``
+   * - ``Time``
+     - ``(sample_signal / sample_duration) / (vanadium_signal / vanadium_duration)``
 
 Usage
 -----
