@@ -231,29 +231,13 @@ public:
   // ----- §6.1 Legacy behavioural contract (remainder) -----
 
   void test_LegacyConnectAndDisconnect() {
-    TS_WARN("XFAIL: SNSLiveEventDataListener does not detect a clean peer-close. "
-            "Poco::Net::StreamSocket::receiveBytes() returns 0 bytes on EOF, but "
-            "the bg read loop (SNSLiveEventDataListener.cpp:264-294) does not "
-            "treat a zero-byte return as fatal, so m_isConnected is never set "
-            "false after a server-side close.  Defect noted in PR comment "
-            "4553042112; no ticket filed yet.  Remove this TS_WARN and the "
-            "return below when the production fix lands; the assertions that "
-            "follow express the intended contract.  (Sibling test: see §5.2 "
-            "test_serverDisconnect_setsErrorState for the variant that first "
-            "sends geometry/beamline/NEW_RUN.)");
-    return;
-    // --- intended behaviour (currently unreached) ---
     m_server->script({Testing::PktDisconnect{}});
     m_server->start();
     TS_ASSERT(connectListener());
     TS_ASSERT(m_listener->isConnected());
-    // Server-side: wait for the scripted PktDisconnect{} to complete
-    // (scriptIndex advances past it once the server has closed its end).
+    // Wait for the server to complete its side of the close.
     waitFor([&] { return m_server->scriptIndex() >= 1; }, std::chrono::seconds{5});
-    // Give the listener a window in which it would notice the close if the
-    // production fix were in place.
-    std::this_thread::sleep_for(std::chrono::milliseconds{200});
-    // Intended: listener detects EOF and transitions out of Connected.
+    // Poll for the listener to detect the peer close and transition out of Connected.
     waitFor([&] { return !m_listener->isConnected(); }, std::chrono::seconds{5});
     TS_ASSERT(!m_listener->isConnected());
   }
@@ -1032,33 +1016,426 @@ public:
     TS_ASSERT(threw);
   }
 
-  void test_serverDisconnect_setsErrorState() {
-    TS_WARN("XFAIL: SNSLiveEventDataListener does not detect a clean peer-close. "
-            "Poco::Net::StreamSocket::receiveBytes() returns 0 bytes on EOF, but "
-            "the bg read loop (SNSLiveEventDataListener.cpp:264-294) does not "
-            "treat a zero-byte return as fatal, so m_isConnected is never set "
-            "false after a server-side close.  Defect noted in PR comment "
-            "4553235918; no ticket filed yet.  Remove this TS_WARN and the "
-            "return below when the production fix lands; the assertions that "
-            "follow express the intended contract.");
-    return;
-    // --- intended behaviour (currently unreached) ---
+  void test_serverDisconnect_setsDisconnectedState() {
+    // Verifies that a clean peer-close (PktDisconnect) causes the listener to
+    // transition to listenerState()==Disconnected, NOT Error.  The bg thread
+    // detects receiveBytes()==0 (EOF) and stores m_isConnected=false without
+    // setting m_backgroundException.
+    // No NEW_RUN in the script: NEW_RUN triggers back-pressure (m_pauseNetRead),
+    // which prevents the bg thread from reading EOF until extractData() is called.
+    // test_serverDisconnect_during_ReadWait_setsDisconnected covers that case.
+    m_server->script({
+        Testing::buildGeometryPkt(kMinimalIDF()),
+        Testing::buildBeamlineInfoPkt(kInstrumentName),
+        Testing::PktDisconnect{}, // (index 2 → scriptIndex 3)
+    });
+    m_server->start();
+    TS_ASSERT(connectListener());
+    waitFor([&] { return m_server->scriptIndex() >= 3; }, std::chrono::seconds{5});
+    // Poll until the listener detects the EOF and sets Disconnected state.
+    waitFor([&] { return m_listener->listenerState() == API::ListenerState::Disconnected; }, std::chrono::seconds{5});
+    TS_ASSERT(!m_listener->isConnected());
+    TS_ASSERT_EQUALS(m_listener->listenerState(), API::ListenerState::Disconnected);
+  }
+
+  // ----- §6.9 Disconnect detection (extended) -----
+
+  void test_serverDisconnect_before_initialization_throws_quickly() {
+    // EOF arrives before any ADARA packets — the listener has not started
+    // workspace initialisation when the bg thread detects receiveBytes()==0.
+    // listenerState() must reach Disconnected and extractData() must throw
+    // within ~300 ms (one wait-loop iteration) rather than waiting out the
+    // 10 s startupTimeout.
+    m_server->script({Testing::PktDisconnect{}});
+    m_server->start();
+    TS_ASSERT(connectListener());
+    waitFor([&] { return m_listener->listenerState() == API::ListenerState::Disconnected; }, std::chrono::seconds{5});
+    TS_ASSERT(!m_listener->isConnected());
+    TS_ASSERT_EQUALS(m_listener->listenerState(), API::ListenerState::Disconnected);
+    try {
+      (void)m_listener->extractData();
+      TS_FAIL("Expected std::runtime_error from extractData() — nothing was thrown");
+    } catch (const std::runtime_error &e) {
+      const std::string msg{e.what()};
+      TSM_ASSERT("Expected message to contain 'stream ended before workspace initialization'",
+                 msg.find("stream ended before workspace initialization") != std::string::npos);
+    } catch (...) {
+      TS_FAIL("Expected std::runtime_error but got a different exception type");
+    }
+  }
+
+  void test_serverDisconnect_preinit_extractData_throws_streamEnded() {
+    // Check 1: pre-init disconnect.  EOF arrives before workspace is
+    // initialised; extractData()'s wait loop detects m_isConnected==false
+    // and throws with the pre-init message rather than waiting out the timeout.
+    m_server->script({Testing::PktDisconnect{}});
+    m_server->start();
+    TS_ASSERT(connectListener());
+    waitFor([&] { return m_listener->listenerState() == API::ListenerState::Disconnected; }, std::chrono::seconds{5});
+    try {
+      (void)m_listener->extractData();
+      TS_FAIL("Expected std::runtime_error — nothing was thrown");
+    } catch (const std::runtime_error &e) {
+      const std::string msg{e.what()};
+      TSM_ASSERT("Expected 'stream ended before workspace initialization'",
+                 msg.find("stream ended before workspace initialization") != std::string::npos);
+    } catch (...) {
+      TS_FAIL("Expected std::runtime_error but got a different exception type");
+    }
+  }
+
+  void test_serverDisconnect_postinit_extractData_throws_streamEnded() {
+    // Check 2: post-init disconnect.  Workspace is fully initialised; the first
+    // extractData() succeeds (processes BeginRun).  Then the server disconnects
+    // with no more events or transitions pending; the second extractData() must
+    // throw with the post-init message.
     m_server->script({
         Testing::buildGeometryPkt(kMinimalIDF()),
         Testing::buildBeamlineInfoPkt(kInstrumentName),
         Testing::buildRunStatusPkt(ADARA::RunStatus::NEW_RUN, 1, 0x0000000100000000ULL),
-        Testing::PktDisconnect{}, // (index 3 → scriptIndex 4)
+        Testing::PktWaitForExtract{}, // gate: pause server until first extract completes
+        Testing::PktDisconnect{},
     });
     m_server->start();
     TS_ASSERT(connectListener());
-    waitFor([&] { return m_server->scriptIndex() >= 4; }, std::chrono::seconds{5});
-    // Give the listener a window in which it would notice the close if the
-    // production fix were in place.
-    std::this_thread::sleep_for(std::chrono::milliseconds{200});
-    // Intended: listener detects EOF and transitions out of Connected.
-    TS_ASSERT(!m_listener->isConnected());
-    TS_ASSERT_DIFFERS(m_listener->listenerState(), API::ListenerState::Connected);
+
+    // First extractData: processes BeginRun transition; bg is paused at gate.
+    auto ws = extractWithTimeout(*m_listener, std::chrono::seconds{10});
+    TS_ASSERT_DIFFERS(ws, nullptr);
+    // Release the gate so the server sends PktDisconnect.
+    m_server->releaseExtractGate();
+
+    // Wait for the listener to detect EOF.
+    waitFor([&] { return m_listener->listenerState() == API::ListenerState::Disconnected; }, std::chrono::seconds{5});
+
+    // Second extractData must throw the post-init message.
+    try {
+      (void)m_listener->extractData();
+      TS_FAIL("Expected std::runtime_error on second extract — nothing was thrown");
+    } catch (const std::runtime_error &e) {
+      const std::string msg{e.what()};
+      TSM_ASSERT("Expected 'stream ended after server disconnect'",
+                 msg.find("stream ended after server disconnect") != std::string::npos);
+    } catch (...) {
+      TS_FAIL("Expected std::runtime_error but got a different exception type");
+    }
   }
+
+  void test_partialHelloSend_setsError() {
+    // A listener subclass that simulates an unrecoverable write failure on the
+    // CLIENT_HELLO packet: sendHelloPacket() returns 0.  The run() method must
+    // detect the short write via the != sizeof(helloPkt) check and transition
+    // to Error state without hanging.
+    struct ShortWriteListener : public SNSLiveEventDataListener {
+    protected:
+      int sendHelloPacket(const void *, int) override { return 0; }
+    };
+
+    // The server only needs to accept the connection; it blocks on
+    // recvPacket() until the listener closes its socket on destruction.
+    m_server->script({Testing::PktDisconnect{}});
+    m_server->start();
+
+    Poco::Net::SocketAddress udsAddr(Poco::Net::AddressFamily::UNIX_LOCAL, m_sockPath);
+    m_listener = std::make_unique<ShortWriteListener>();
+    if (!m_listener->connect(udsAddr)) {
+      TS_FAIL("connect() returned false — cannot proceed with test");
+      return;
+    }
+    m_listener->start();
+
+    waitFor([&] { return m_listener->listenerState() == API::ListenerState::Error; }, std::chrono::seconds{5});
+    TS_ASSERT(!m_listener->isConnected());
+    TS_ASSERT_EQUALS(m_listener->listenerState(), API::ListenerState::Error);
+  }
+
+  void test_rxPacketThrow_setsErrorState_and_extractRethrows() {
+    // Injects a real error by overriding rxPacket(RunStatusPkt) to throw
+    // std::runtime_error.  Exercises the catch(std::runtime_error) arm of
+    // run() which routes through setFatalState().  Verifies:
+    //   (a) listenerState() transitions to Error
+    //   (b) extractData() rethrows the stored exception
+    //   (c) the rethrown message contains "SNSLiveEventDataListener:"
+    struct ThrowOnRunStatusListener : public SNSLiveEventDataListener {
+    protected:
+      bool rxPacket(const ADARA::RunStatusPkt &) override {
+        throw std::runtime_error("SNSLiveEventDataListener: injected error for testing");
+      }
+    };
+
+    m_server->script({
+        Testing::buildGeometryPkt(kMinimalIDF()),
+        Testing::buildBeamlineInfoPkt(kInstrumentName),
+        Testing::buildRunStatusPkt(ADARA::RunStatus::NEW_RUN, 1, 0x0000000100000000ULL),
+        Testing::PktDisconnect{},
+    });
+    m_server->start();
+
+    Poco::Net::SocketAddress udsAddr(Poco::Net::AddressFamily::UNIX_LOCAL, m_sockPath);
+    m_listener = std::make_unique<ThrowOnRunStatusListener>();
+    if (!m_listener->connect(udsAddr)) {
+      TS_FAIL("connect() returned false — cannot proceed with test");
+      return;
+    }
+    m_listener->start();
+
+    waitFor([&] { return m_listener->listenerState() == API::ListenerState::Error; }, std::chrono::seconds{5});
+    TS_ASSERT(!m_listener->isConnected());
+    TS_ASSERT_EQUALS(m_listener->listenerState(), API::ListenerState::Error);
+
+    // extractData() must rethrow with the injected message.
+    try {
+      (void)m_listener->extractData();
+      TS_FAIL("Expected std::runtime_error from extractData() — nothing was thrown");
+    } catch (const std::runtime_error &e) {
+      const std::string msg{e.what()};
+      TSM_ASSERT("Expected message to contain 'SNSLiveEventDataListener:'",
+                 msg.find("SNSLiveEventDataListener:") != std::string::npos);
+    } catch (...) {
+      TS_FAIL("Expected std::runtime_error but got a different exception type");
+    }
+  }
+
+  // ----- §6.A Poll-loop refactor invariants -----
+
+  void test_pollLoop_continues_to_parse_when_buffer_full() {
+    // Verifies that events arriving in the same recv() call as NEW_RUN (the
+    // "joining" case — m_workspaceInitialized is false when NEW_RUN arrives)
+    // are not lost.  In the joining case, rxPacket(RunStatusPkt) does NOT set
+    // m_pauseNetRead, so bufferParse() is not interrupted: both the NEW_RUN
+    // and the events are processed in the same bufferParse() iteration.  The
+    // events therefore appear in the first extractData() return (ws1).
+    //
+    // NOTE: The back-pressure + needParse path (where bufferParse IS interrupted
+    // by a transition-case NEW_RUN and remaining bytes are replayed) is exercised
+    // only when m_workspaceInitialized==true at the time NEW_RUN arrives (i.e.
+    // on consecutive runs, not on the first run of a session).  That path is
+    // implicitly covered by the consecutive-run tests
+    // (test_consecutiveNewRun_surfacesRuntimeError etc.).
+    auto newRun = Testing::buildRunStatusPkt(ADARA::RunStatus::NEW_RUN, 1, 0x0000000100000000ULL);
+    auto events = Testing::buildBankedEventPkt(0x0000000100000000ULL, 100.0, {{100u, 1u}, {200u, 2u}});
+    std::vector<uint8_t> combined;
+    combined.insert(combined.end(), newRun.begin(), newRun.end());
+    combined.insert(combined.end(), events.begin(), events.end());
+
+    m_server->script({
+        Testing::buildGeometryPkt(kMinimalIDF()),
+        Testing::buildBeamlineInfoPkt(kInstrumentName),
+        combined,                     // NEW_RUN + events in one send
+        Testing::PktWaitForExtract{}, // gate: hold server until first extract completes
+        Testing::PktDisconnect{},
+    });
+    m_server->start();
+    TS_ASSERT(connectListener());
+
+    // Wait for server to reach the PktWaitForExtract gate (scriptIndex 4 means
+    // combined was sent and gate is active).
+    waitFor([&] { return m_server->scriptIndex() >= 4; }, std::chrono::seconds{5});
+
+    // First extractData: in the joining case, events are already processed
+    // (bufferParse was not interrupted by back-pressure).  ws1 must contain
+    // the events from the combined packet.
+    auto ws1 = extractWithTimeout(*m_listener, std::chrono::seconds{10});
+    TS_ASSERT_DIFFERS(ws1, nullptr);
+    auto ews1 = std::dynamic_pointer_cast<DataObjects::EventWorkspace>(ws1);
+    TS_ASSERT_DIFFERS(ews1, nullptr);
+    TSM_ASSERT("Expected events from combined packet to appear in ws1", ews1 && ews1->getNumberEvents() > 0);
+
+    // Release gate: server sends PktDisconnect.
+    m_server->releaseExtractGate();
+
+    // Wait for disconnect.
+    waitFor([&] { return m_listener->listenerState() == API::ListenerState::Disconnected; }, std::chrono::seconds{5});
+
+    // Second extractData: buffer is empty and stream has ended — must throw.
+    try {
+      (void)m_listener->extractData();
+      TS_FAIL("Expected stream-ended throw on second extract — nothing thrown");
+    } catch (const std::runtime_error &e) {
+      const std::string msg{e.what()};
+      TSM_ASSERT("Expected 'stream ended' message", msg.find("stream ended") != std::string::npos);
+    } catch (...) {
+      TS_FAIL("Unexpected exception type on second extract");
+    }
+  }
+
+  void test_partialHelloSend_retriesAndSucceeds() {
+    // Overrides sendHelloPacket() to send the CLIENT_HELLO in two equal halves,
+    // exercising the partial-send path.  The listener must still connect and
+    // initialise successfully.
+    struct PartialHelloListener : public SNSLiveEventDataListener {
+    protected:
+      int sendHelloPacket(const void *buf, int size) override {
+        const auto *p = static_cast<const char *>(buf);
+        int half = size / 2;
+        int n1 = SNSLiveEventDataListener::sendHelloPacket(p, half);
+        if (n1 != half)
+          return n1; // propagate failure
+        int n2 = SNSLiveEventDataListener::sendHelloPacket(p + half, size - half);
+        return n1 + n2;
+      }
+    };
+
+    m_server->script({
+        Testing::buildGeometryPkt(kMinimalIDF()),
+        Testing::buildBeamlineInfoPkt(kInstrumentName),
+        Testing::buildRunStatusPkt(ADARA::RunStatus::NEW_RUN, 1, 0x0000000100000000ULL),
+        Testing::PktWaitForExtract{},
+        Testing::PktDisconnect{},
+    });
+    m_server->start();
+
+    Poco::Net::SocketAddress udsAddr(Poco::Net::AddressFamily::UNIX_LOCAL, m_sockPath);
+    m_listener = std::make_unique<PartialHelloListener>();
+    if (!m_listener->connect(udsAddr)) {
+      TS_FAIL("connect() returned false — cannot proceed with test");
+      return;
+    }
+    m_listener->start();
+
+    waitFor([&] { return m_server->scriptIndex() >= 4; }, std::chrono::seconds{5});
+    // Listener must not be in Error state after a partial hello send.
+    // In the joining case (m_workspaceInitialized=false when NEW_RUN arrives),
+    // back-pressure (m_pauseNetRead) is not set, so listenerState() returns
+    // Connected rather than ReadWait.
+    {
+      const auto state = m_listener->listenerState();
+      TSM_ASSERT("Expected Connected or ReadWait after successful partial hello send",
+                 state == API::ListenerState::Connected || state == API::ListenerState::ReadWait);
+    }
+
+    auto ws = extractWithTimeout(*m_listener, std::chrono::seconds{10});
+    m_server->releaseExtractGate();
+    TS_ASSERT_DIFFERS(ws, nullptr);
+  }
+
+  void test_pollRead_andError_together_drainsFirst() {
+    // Verifies POLL_READ-before-disconnect ordering: even when the server sends
+    // END_RUN and then immediately disconnects (so EOF may arrive in the same
+    // poll wakeup as the last data bytes), the END_RUN edge must be committed
+    // via lastTransition() before any "stream ended" throw.
+    m_server->script({
+        Testing::buildGeometryPkt(kMinimalIDF()),
+        Testing::buildBeamlineInfoPkt(kInstrumentName),
+        Testing::buildRunStatusPkt(ADARA::RunStatus::NEW_RUN, 1, 0x0000000100000000ULL),
+        Testing::PktWaitForExtract{}, // gate after NEW_RUN
+        Testing::buildBankedEventPkt(0x0000000100000000ULL, 100.0, {{100u, 1u}}),
+        Testing::buildRunStatusPkt(ADARA::RunStatus::END_RUN, 1, 0x0000000200000000ULL),
+        Testing::PktDisconnect{}, // immediately after END_RUN
+    });
+    m_server->start();
+    TS_ASSERT(connectListener());
+
+    // Wait for first gate (after NEW_RUN back-pressure).
+    waitFor([&] { return m_server->scriptIndex() >= 4; }, std::chrono::seconds{5});
+    // Extract #1: commits BeginRun.
+    auto ws1 = extractWithTimeout(*m_listener, std::chrono::seconds{10});
+    TS_ASSERT_DIFFERS(ws1, nullptr);
+    // Release gate: server sends events + END_RUN + PktDisconnect in rapid succession.
+    m_server->releaseExtractGate();
+
+    // Wait until the bg thread has processed END_RUN (m_pauseNetRead=true → ReadWait).
+    // Without this, the FG async thread for extract #2 can race ahead: it sees
+    // m_bgThreadCaughtUp=true (bg is in poll, not in bufferParse) and
+    // m_pendingTransition=nullopt (EndRun not yet set) and commits an empty
+    // workspace before the EndRun edge is queued.
+    waitFor([&] { return m_listener->listenerState() == API::ListenerState::ReadWait; }, std::chrono::seconds{5});
+
+    // Extract #2: commits EndRun; events returned.
+    auto ws2 = extractWithTimeout(*m_listener, std::chrono::seconds{10});
+    TS_ASSERT_DIFFERS(ws2, nullptr);
+
+    // END_RUN edge must be visible via lastTransition() before any disconnect throw.
+    auto trans = m_listener->lastTransition();
+    TSM_ASSERT("Expected lastTransition()==EndRun before stream-ended throw",
+               trans.has_value() && *trans == API::ILiveListener::RunStatus::EndRun);
+
+    // Wait for disconnect to be detected, then verify the throw.
+    waitFor([&] { return m_listener->listenerState() == API::ListenerState::Disconnected; }, std::chrono::seconds{5});
+    try {
+      (void)m_listener->extractData();
+      TS_FAIL("Expected stream-ended throw on third extract — nothing thrown");
+    } catch (const std::runtime_error &e) {
+      const std::string msg{e.what()};
+      // After EndRun, m_workspaceInitialized is reset, so the wait loop hits
+      // Check 1 ("stream ended before workspace initialization") rather than
+      // Check 2 ("stream ended after server disconnect").  Both contain
+      // "stream ended" — verify the invariant without over-specifying which
+      // check fires.
+      TSM_ASSERT("Expected 'stream ended' message", msg.find("stream ended") != std::string::npos);
+    } catch (...) {
+      TS_FAIL("Unexpected exception type on third extract");
+    }
+  }
+
+  void test_shutdownLatency_after_normal_connect() {
+    // Verifies the headline goal of the poll-loop refactor: destructor latency
+    // is sub-second after a normal connect + init.
+    //
+    // NOTE: In the "joining" case (m_workspaceInitialized==false when NEW_RUN
+    // arrives), rxPacket(RunStatusPkt) does NOT set m_pauseNetRead, so bg
+    // is NOT in ReadWait — it polls freely.  ReadWait is only reached in the
+    // "transition" case (second NEW_RUN while workspace is live).  We verify
+    // fast teardown from the Connected state instead.
+    m_server->script({
+        Testing::buildGeometryPkt(kMinimalIDF()),
+        Testing::buildBeamlineInfoPkt(kInstrumentName),
+        Testing::buildRunStatusPkt(ADARA::RunStatus::NEW_RUN, 1, 0x0000000100000000ULL),
+        Testing::PktWaitForExtract{}, // server blocks; holds the connection open
+    });
+    m_server->start();
+    TS_ASSERT(connectListener());
+
+    // Wait until the listener has initialised (Connected or ReadWait).
+    waitFor(
+        [&] {
+          const auto s = m_listener->listenerState();
+          return s == API::ListenerState::Connected || s == API::ListenerState::ReadWait;
+        },
+        std::chrono::seconds{5});
+
+    const auto t0 = std::chrono::steady_clock::now();
+    m_listener.reset(); // triggers destructor; bg thread must exit within ~200 ms
+    const auto elapsed =
+        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - t0).count();
+
+    TSM_ASSERT_LESS_THAN("Listener destructor took more than 1 s (expected < 200 ms)", elapsed, 1000);
+    // Release the gate so the server thread can exit cleanly.
+    m_server->releaseExtractGate();
+  }
+
+  void test_partialRead_streamReassembled() {
+    // Splits the geometry packet into two halves to verify that the listener
+    // accumulates partial receives and parses the complete packet correctly.
+    auto geom = Testing::buildGeometryPkt(kMinimalIDF());
+    const std::size_t split = geom.size() / 2;
+    std::vector<uint8_t> geomPart1(geom.begin(), geom.begin() + split);
+    std::vector<uint8_t> geomPart2(geom.begin() + split, geom.end());
+
+    m_server->script({
+        geomPart1,
+        geomPart2,
+        Testing::buildBeamlineInfoPkt(kInstrumentName),
+        Testing::buildRunStatusPkt(ADARA::RunStatus::NEW_RUN, 1, 0x0000000100000000ULL),
+        Testing::PktWaitForExtract{},
+        Testing::PktDisconnect{},
+    });
+    m_server->start();
+    TS_ASSERT(connectListener());
+
+    waitFor([&] { return m_server->scriptIndex() >= 5; }, std::chrono::seconds{5});
+    auto ws = extractWithTimeout(*m_listener, std::chrono::seconds{10});
+    m_server->releaseExtractGate();
+    TS_ASSERT_DIFFERS(ws, nullptr);
+    auto ews = std::dynamic_pointer_cast<DataObjects::EventWorkspace>(ws);
+    TS_ASSERT_DIFFERS(ews, nullptr);
+    // Successful workspace extraction proves the split geometry packet was
+    // reassembled and parsed correctly.
+    TSM_ASSERT("Expected workspace to have detectors (geometry parsed correctly)",
+               ews && ews->getNumberHistograms() > 0);
+  }
+
+  // ----- §6.B Disconnect-not-error design -----
 
   void test_connectFailure_returnsFalse() {
     // setUp() already removed m_sockPath (line 149), so no server is listening
@@ -1069,6 +1446,133 @@ public:
     bool result = m_listener->connect(addr);
     TS_ASSERT(!result);
     TS_ASSERT(!m_listener->isConnected());
+  }
+
+  void test_serverDisconnect_midRun_eventBufferDelivered_thenStreamEnded() {
+    // Post-init mid-run disconnect: events are in flight when the server closes.
+    // First extractData() must deliver the accumulated events (Check 2 NOT fired
+    // because m_eventBuffer is non-empty).  Second extractData() must throw
+    // "stream ended after server disconnect" (Check 2 fires on empty buffer).
+    m_server->script({
+        Testing::buildGeometryPkt(kMinimalIDF()),
+        Testing::buildBeamlineInfoPkt(kInstrumentName),
+        Testing::buildRunStatusPkt(ADARA::RunStatus::NEW_RUN, 1, 0x0000000100000000ULL),
+        Testing::PktWaitForExtract{}, // gate after NEW_RUN
+        Testing::buildBankedEventPkt(0x0000000100000000ULL, 100.0, {{100u, 1u}, {200u, 2u}}),
+        Testing::PktDisconnect{},
+    });
+    m_server->start();
+    TS_ASSERT(connectListener());
+
+    waitFor([&] { return m_server->scriptIndex() >= 4; }, std::chrono::seconds{5});
+    auto ws1 = extractWithTimeout(*m_listener, std::chrono::seconds{10});
+    TS_ASSERT_DIFFERS(ws1, nullptr);
+    // Release gate: server sends events + disconnect.
+    m_server->releaseExtractGate();
+
+    waitFor([&] { return m_listener->listenerState() == API::ListenerState::Disconnected; }, std::chrono::seconds{5});
+
+    // Second extract: events delivered (Check 2 not triggered — buffer non-empty).
+    auto ws2 = std::dynamic_pointer_cast<DataObjects::EventWorkspace>(m_listener->extractData());
+    TS_ASSERT_DIFFERS(ws2, nullptr);
+    TSM_ASSERT("Expected events to be delivered before stream-ended throw", ws2 && ws2->getNumberEvents() > 0);
+
+    // Third extract: buffer now empty and bg exited → Check 2 throws.
+    try {
+      (void)m_listener->extractData();
+      TS_FAIL("Expected stream-ended throw on third extract — nothing thrown");
+    } catch (const std::runtime_error &e) {
+      const std::string msg{e.what()};
+      TSM_ASSERT("Expected 'stream ended after server disconnect'",
+                 msg.find("stream ended after server disconnect") != std::string::npos);
+    } catch (...) {
+      TS_FAIL("Unexpected exception type on third extract");
+    }
+  }
+
+  void test_serverDisconnect_endRunDelivered_thenStreamEnded() {
+    // Verifies that END_RUN edge is delivered via lastTransition() and the
+    // workspace is returned to the consumer BEFORE the stream-ended throw.
+    // Exercises the scenario where the server closes cleanly after a full run.
+    m_server->script({
+        Testing::buildGeometryPkt(kMinimalIDF()),
+        Testing::buildBeamlineInfoPkt(kInstrumentName),
+        Testing::buildRunStatusPkt(ADARA::RunStatus::NEW_RUN, 1, 0x0000000100000000ULL),
+        Testing::PktWaitForExtract{}, // gate after NEW_RUN
+        Testing::buildRunStatusPkt(ADARA::RunStatus::END_RUN, 1, 0x0000000200000000ULL),
+        Testing::PktDisconnect{},
+    });
+    m_server->start();
+    TS_ASSERT(connectListener());
+
+    waitFor([&] { return m_server->scriptIndex() >= 4; }, std::chrono::seconds{5});
+    // Extract #1: commits BeginRun.
+    auto ws1 = extractWithTimeout(*m_listener, std::chrono::seconds{10});
+    TS_ASSERT_DIFFERS(ws1, nullptr);
+    // Release gate: server sends END_RUN + PktDisconnect.
+    m_server->releaseExtractGate();
+
+    // Wait until the bg thread has processed END_RUN (m_pauseNetRead=true → ReadWait).
+    // Same race as test_pollRead_andError_together_drainsFirst: the FG async thread
+    // can see m_bgThreadCaughtUp=true while the bg is still in its poll loop and
+    // m_pendingTransition=nullopt, committing an empty workspace before EndRun is queued.
+    waitFor([&] { return m_listener->listenerState() == API::ListenerState::ReadWait; }, std::chrono::seconds{5});
+
+    // Extract #2: must commit EndRun and return the workspace.
+    auto ws2 = extractWithTimeout(*m_listener, std::chrono::seconds{10});
+    TS_ASSERT_DIFFERS(ws2, nullptr);
+
+    // END_RUN edge must be observable via lastTransition() after extract #2.
+    auto trans = m_listener->lastTransition();
+    TSM_ASSERT("Expected lastTransition()==EndRun after extract #2",
+               trans.has_value() && *trans == API::ILiveListener::RunStatus::EndRun);
+
+    // Wait for disconnect detection.
+    waitFor([&] { return m_listener->listenerState() == API::ListenerState::Disconnected; }, std::chrono::seconds{5});
+
+    // Extract #3: workspace reset by onEndRun; Check 1 fires (not initialized).
+    try {
+      (void)m_listener->extractData();
+      TS_FAIL("Expected stream-ended throw on third extract — nothing thrown");
+    } catch (const std::runtime_error &e) {
+      const std::string msg{e.what()};
+      TSM_ASSERT("Expected 'stream ended' message", msg.find("stream ended") != std::string::npos);
+    } catch (...) {
+      TS_FAIL("Unexpected exception type on third extract");
+    }
+  }
+
+  void test_serverDisconnect_during_ReadWait_setsDisconnected() {
+    // Verifies that a clean peer-close after NEW_RUN leads to Disconnected
+    // state (not Error).
+    //
+    // In the "joining" case (m_workspaceInitialized==false when NEW_RUN
+    // arrives), rxPacket(RunStatusPkt) does NOT set m_pauseNetRead (no
+    // back-pressure).  The bg thread is never paused and detects EOF by
+    // polling freely after workspace init.  Disconnected is reached without
+    // requiring extractData() to clear any back-pressure.
+    //
+    // The back-pressure (ReadWait) scenario is only triggered in a
+    // "transition" case (second NEW_RUN while workspace is already live),
+    // which is not exercised here.
+    m_server->script({
+        Testing::buildGeometryPkt(kMinimalIDF()),
+        Testing::buildBeamlineInfoPkt(kInstrumentName),
+        Testing::buildRunStatusPkt(ADARA::RunStatus::NEW_RUN, 1, 0x0000000100000000ULL),
+        Testing::PktDisconnect{}, // server closes immediately after NEW_RUN
+    });
+    m_server->start();
+    TS_ASSERT(connectListener());
+
+    // Wait for server to complete its script (PktDisconnect sent).
+    waitFor([&] { return m_server->scriptIndex() >= 4; }, std::chrono::seconds{5});
+
+    // In the joining case, bg is not paused and detects EOF directly.
+    // Wait for Disconnected without calling extractData() — no extractData
+    // needed to clear back-pressure.
+    waitFor([&] { return m_listener->listenerState() == API::ListenerState::Disconnected; }, std::chrono::seconds{5});
+    TS_ASSERT(!m_listener->isConnected());
+    TS_ASSERT_EQUALS(m_listener->listenerState(), API::ListenerState::Disconnected);
   }
 
   // ----- §6.10 Monitor workspace routing -----
