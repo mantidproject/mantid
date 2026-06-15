@@ -28,7 +28,7 @@ docs-build = { features = ["docs-build"], no-default-feature = true }
 docs-migration = { features = ["docs-migration"], no-default-feature = true }
 
 [feature.rattler-builder.dependencies]
-rattler-build = ">=0.65.1,<0.66"
+rattler-build = ">=0.66.1,<0.67"
 versioningit = ">=3.3.0,<4"
 rattler-index = ">=0.27.6,<0.28"
 
