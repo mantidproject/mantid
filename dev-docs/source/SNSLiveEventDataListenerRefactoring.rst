@@ -226,7 +226,7 @@ Header summary
        ListenerState listenerState() const override;
        std::optional<RunStatus> lastTransition() const override;
 
-       int runNumber() const override { return m_runNumber; }
+       int runNumber() const override { return m_runNumber.load(); }
        bool isConnected() override;
 
    protected:
@@ -244,6 +244,10 @@ Header summary
        /// accumulated events are harvested before the workspace buffer
        /// is reset by onEndRun().
        void onAfterExtract() override;
+
+       /// Sends all bytes in buf over m_socket, retrying short writes.
+       /// Virtual so test subclasses can inject short-write/failure scenarios.
+       virtual int sendHelloPacket(const void *buf, int size);
 
        /// Explicit, named state-transition hooks.
        virtual void onBeginRun();
@@ -266,18 +270,47 @@ Header summary
        std::shared_ptr<std::runtime_error> m_backgroundException;
 
        // Existing members (unchanged)
-       int m_runNumber{0};
+       std::atomic<int> m_runNumber{0};
        DataObjects::EventWorkspace_sptr m_eventBuffer;
        bool m_workspaceInitialized{false};
        std::string m_instrumentName;
        std::string m_instrumentXML;
        /* ... etc. ... */
-       mutable std::mutex m_mutex;        ///< guards all of the above
-       bool m_pauseNetRead{false};        ///< back-pressure flag
-       bool m_isDasPaused{false};         ///< set by onRunPause(); read by isPaused()
+       mutable std::mutex m_mutex;             ///< guards all of the above
+       std::atomic<bool> m_isConnected{false}; ///< connection health
+       std::atomic<bool> m_pauseNetRead{false};      ///< back-pressure flag
+       std::atomic<bool> m_bgThreadCaughtUp{false};  ///< foreground snapshot gate
+       std::atomic<bool> m_stopThread{false};        ///< destructor shutdown signal
+       std::atomic<bool> m_isDasPaused{false};       ///< set by onRunPause(); read by isPaused()
+       std::atomic<bool> m_ignorePackets{false};     ///< see ignorePacket() / the m_ignorePackets appendix
        NameMapType m_nameMap;
        /* ... etc. ... */
    };
+
+Convention: any POD-typed member that a background thread and the
+foreground both touch is made ``std::atomic`` even when it is already
+covered by ``m_mutex`` — belt-and-suspenders rather than relying on the
+lock alone.  Concretely, per the header's own grouping
+(``SNSLiveEventDataListener.h:242-270``):
+
+- **Atomic, lock-free (no mutex needed):** ``m_isConnected``,
+  ``m_pauseNetRead``, ``m_bgThreadCaughtUp``, ``m_stopThread``,
+  ``m_isDasPaused``, ``m_runNumber``.
+- **Atomic AND mutex-guarded:** ``m_ignorePackets`` — guarded by the
+  single ``doExtractData()`` critical section on the foreground side and
+  by the parse lock on the background side (``ignorePacket()``).
+- **Mutex-guarded only:** ``m_backgroundException``, ``m_eventBuffer``,
+  ``m_adaraRunStatus``, ``m_pendingTransition``, ``m_lastTransition``,
+  ``m_instrumentXML``, ``m_instrumentName``, ``m_nameMap``,
+  ``m_requiredLogs``, ``m_deferredRunDetailsPkt``,
+  ``m_workspaceInitialized``, ``m_previousExtractCompleted``,
+  ``m_dataStartTime``, ``m_monitorLogs``, ``m_wsName``.
+
+All ``rxPacket()`` overrides now run under ``m_mutex``, acquired once by
+``run()`` around the whole ``bufferParse()`` iteration (see "Background
+reader loop" below) — do **not** acquire ``m_mutex`` inside any
+``rxPacket()`` body or any function called exclusively from one;
+``std::mutex`` is non-recursive and a second acquisition would deadlock.
 
 
 State-machine diagrams
@@ -303,7 +336,13 @@ In both diagrams:
 * The ``isPaused()`` axis is shown as a separate small subgraph; it
   is orthogonal to ``runState`` and applied immediately in the
   background thread.
-* The ``listenerState()`` axis is shown as a separate small subgraph.
+* The ``listenerState()`` axis is shown as a separate small subgraph. In
+  the post-refactor diagram it additionally carries the
+  ``Connected`` → ``Disconnected`` edge for a clean peer close, the
+  getter's ``Error`` > ``Disconnected`` > ``ReadWait`` > ``Connected``
+  precedence, and a dotted edge marking that the ``Error`` outcome is a
+  *foreground* escalation, not something the background thread itself
+  ascribes — see :ref:`sns-disconnect-not-error`.
 
 Pre-refactor: transitions committed inside ``runStatus()``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -344,7 +383,13 @@ Post-refactor: transitions committed inside ``extractData()``
          happen as part of the template-method extractData() call —
          with BeginRun dispatched in onBeforeExtract() and EndRun
          deferred to onAfterExtract() so the finishing run's events
-         are harvested first.
+         are harvested first. The listenerState axis additionally shows
+         a Connected→Disconnected edge for a clean peer close (the
+         background thread stays neutral: no fatal(), no
+         m_backgroundException) and a dotted Disconnected→Error edge
+         marking that the Error outcome is ascribed by the foreground
+         (doExtractData(), which has no recovery action available), not
+         by the background thread.
 
 In the post-refactor design the commit boundary is **the
 ``extractData()`` template method** — specifically the
@@ -735,47 +780,131 @@ Notes:
 Background reader loop
 ~~~~~~~~~~~~~~~~~~~~~~
 
-The loop has two notable changes from the pre-refactor version.
+The loop below is current as of the poll-loop refactor described in
+:ref:`sns-poll-loop-disconnect` further down this document; that
+section covers *why* it looks like this, this one just walks the
+shape of the code.
 
-First, the pause condition is short-circuited on
-``m_bgThreadCaughtUp``.  When the flag is ``false`` (i.e. a
-``bufferParse()`` iteration is in flight), the background thread never
-honours ``m_pauseNetRead`` — this prevents the foreground from
-releasing back-pressure while ``rxPacket()`` callbacks may still be
-mutating shared state.
+The pause condition is short-circuited on ``m_bgThreadCaughtUp``.
+When the flag is ``false`` (i.e. a ``bufferParse()`` iteration is in
+flight), the background thread never honours ``m_pauseNetRead`` — this
+prevents the foreground from releasing back-pressure while
+``rxPacket()`` callbacks may still be mutating shared state.
 
-Second, the ``m_bgThreadCaughtUp`` flag is stored ``false``
-immediately before ``bufferParse()`` and ``true`` immediately
-after, framing the only window during which ``onBeforeExtract()``
-must throw ``NotYet``.  ``receiveBytes()`` does **not** touch the
-flag; a background thread blocked in receive presents as caught-up.
+The ``m_bgThreadCaughtUp`` flag is stored ``false`` immediately before
+``bufferParse()`` and ``true`` immediately after, framing the only
+window during which ``onBeforeExtract()`` must throw ``NotYet``.
+``receiveBytes()`` does **not** touch the flag; a background thread
+blocked in receive (or parked in the pause gate, or blocked in
+``poll()``) presents as caught-up.
+
+Reading is now driven by a ``Poco::Net::PollSet`` with a 100 ms
+timeout instead of a blocking ``receiveBytes()`` with a 30 s socket
+timeout.  A bg-thread-local ``needParse`` flag (plain ``bool`` — only
+this thread touches it) records when ``bufferParse()`` has real work to
+do: fresh bytes were just appended, the parse buffer is full and must
+be drained to make room for more, or a prior parse was interrupted
+mid-buffer by a run-transition callback and bytes remain stranded in
+the parser's internal buffer where ``poll()`` cannot observe them (the
+last case reuses the ``needParse = true`` set when ``bufferParse()``
+returns a negative count).  When ``needParse`` is already set, the loop
+skips ``poll()`` entirely and goes straight to parsing.
 
 .. code-block:: cpp
 
    void SNSLiveEventDataListener::run() {
-       // ... unchanged setup (hello packet, etc.) ...
-       while (!m_stopThread) {
+       auto setFatalState = [this](std::shared_ptr<std::runtime_error> ex) {
+           std::lock_guard<std::mutex> lock(m_mutex);
+           m_isConnected.store(false);
+           if (!m_backgroundException)
+               m_backgroundException = std::move(ex);
+       };
+       auto fatal = [&setFatalState](const std::string &msg) {
+           g_log.fatal() << msg << '\n';
+           setFatalState(std::make_shared<std::runtime_error>(msg));
+           throw std::runtime_error(msg);
+       };
+       // ... unchanged setup (hello packet via sendHelloPacket(), etc.) ...
+
+       Poco::Net::PollSet pollSet;
+       pollSet.add(m_socket, Poco::Net::PollSet::POLL_READ);
+       bool needParse = false;
+
+       while (!m_stopThread.load(std::memory_order_acquire)) {
            // Only honour m_pauseNetRead when no parse is in flight.
-           // Short-circuit on m_bgThreadCaughtUp == false prevents a race
-           // where the foreground clears m_pauseNetRead while we are still
-           // inside bufferParse() mutating shared state.
-           while (m_bgThreadCaughtUp.load(std::memory_order_acquire)
-                  && m_pauseNetRead && !m_stopThread) {
+           while (m_bgThreadCaughtUp.load(std::memory_order_acquire) &&
+                  m_pauseNetRead.load(std::memory_order_acquire) &&
+                  !m_stopThread.load(std::memory_order_acquire)) {
                Poco::Thread::sleep(100);
            }
-           if (m_stopThread) break;
+           if (m_stopThread.load(std::memory_order_acquire)) break;
 
-           // receiveBytes() does NOT touch m_bgThreadCaughtUp.
-           // A thread blocked here presents as caught-up.
-           receiveBytes();   // fills the ADARA parse buffer
+           if (!needParse) {
+               auto ready = pollSet.poll(Poco::Timespan(0, 100000)); // 100 ms
+               if (!ready.empty()) {
+                   auto it = ready.find(m_socket);
+                   if (it != ready.end()) {
+                       const int mode = it->second;
+                       bool successfulRead = false;
+                       if (mode & Poco::Net::PollSet::POLL_READ) {
+                           unsigned int bufFillLen = bufferFillLength();
+                           if (bufFillLen) {
+                               int bytesRead = -1;
+                               try {
+                                   bytesRead = m_socket.receiveBytes(bufferFillAddress(), bufFillLen);
+                               } catch (Poco::TimeoutException &) {
+                                   bytesRead = -1; // spurious wakeup; try again next iteration
+                               } catch (Poco::Net::NetException &e) {
+                                   fatal(std::string("network read failed: ") + e.name());
+                               }
+                               if (bytesRead == 0) {
+                                   // Clean peer close.  NOT an error: no fatal(), no
+                                   // m_backgroundException.  See "disconnect is not
+                                   // an error" below for why this is deliberate.
+                                   m_isConnected.store(false);
+                                   m_bgThreadCaughtUp.store(true, std::memory_order_release);
+                                   return;
+                               }
+                               if (bytesRead > 0) {
+                                   bufferBytesAppended(bytesRead);
+                                   needParse = true;
+                                   successfulRead = true;
+                               }
+                           } else {
+                               // Parse buffer full; drain before reading more.
+                               needParse = true;
+                               successfulRead = true;
+                           }
+                       }
+                       if ((mode & Poco::Net::PollSet::POLL_ERROR) && !successfulRead) {
+                           fatal("socket poll reported error.");
+                       }
+                   }
+               }
+               // Poll timeout: needParse stays false, loop right back to poll().
+           }
 
-           // Close the foreground snapshot window for bufferParse() only.
-           m_bgThreadCaughtUp.store(false, std::memory_order_release);
-           bufferParse();    // drives rxPacket() callbacks
-           m_bgThreadCaughtUp.store(true, std::memory_order_release);
-           // Snapshot window re-opened; m_pendingTransition is now stable.
+           if (needParse) {
+               needParse = false;
+               m_bgThreadCaughtUp.store(false, std::memory_order_release);
+               int packetsParsed;
+               {
+                   // Hold m_mutex for the whole parse iteration: every rxPacket()
+                   // override now runs under the lock (see below).
+                   std::lock_guard<std::mutex> lock(m_mutex);
+                   std::string bufferParseLog;
+                   packetsParsed = bufferParse(bufferParseLog);
+               }
+               m_bgThreadCaughtUp.store(true, std::memory_order_release);
+               if (packetsParsed < 0) {
+                   // Interrupted mid-buffer by a run-transition callback; bytes
+                   // remain stranded where poll() cannot see them.
+                   needParse = true;
+               }
+           }
        }
-       // ... unchanged exception capture into m_backgroundException ...
+       // ... unchanged exception capture into m_backgroundException via the
+       // catch cascade, each arm calling setFatalState() ...
    }
 
 The ``m_pauseNetRead`` back-pressure is released by
@@ -788,6 +917,232 @@ stores ``false`` to re-arm the per-run first-extract gate (see the
 "Foreground snapshot gate" section above).  The background loop itself
 only writes the flag around ``bufferParse()``; ``onEndRun()`` is the
 only other writer.
+
+Holding ``m_mutex`` for the entire parse iteration (rather than letting
+each ``rxPacket()`` override take it individually, as the pre-refactor
+code did) makes "the caller holds ``m_mutex``" an invariant for every
+``rxPacket()`` body and its callees (``initWorkspacePart2()``,
+``appendEvent()``, etc.), fixing Coverity CIDs 1663860 and 1663859
+(accesses to ``m_adaraRunStatus`` / ``m_pendingTransition`` without the
+lock in ``initWorkspacePart2()``'s tail).  The corollary: ``m_mutex``
+is non-recursive, so no ``rxPacket()`` body or anything called
+exclusively from one may acquire ``m_mutex`` itself — ``setFatalState()``
+/ ``fatal()`` are safe because they are only reachable from ``run()``'s
+top-level catch arms and pre-parse code, never from inside
+``bufferParse()``.
+
+
+.. _sns-poll-loop-disconnect:
+
+Poll-driven reader loop and disconnect detection
+-------------------------------------------------
+
+This section covers the follow-on refactor layered on top of everything
+above: the socket read loop became event-driven, and an orderly server
+disconnect — previously invisible — is now detected and reported.
+
+Pre-existing problems
+~~~~~~~~~~~~~~~~~~~~~~
+
+- **Orderly server disconnect was completely undetected.**  When the SMS
+  server called ``close()``, ``receiveBytes()`` returned ``0``.  That
+  return value was never checked; the background thread spun
+  indefinitely, ``m_isConnected`` stayed ``true``, and ``listenerState()``
+  kept reporting ``Connected`` — the listener gave no indication that the
+  server was gone.
+
+- **The read loop was timeout-driven, not event-driven.** ``run()``
+  blocked inside ``receiveBytes()`` and relied on a 30 s socket receive
+  timeout as its only way to regain control.  This made shutdown slow (up
+  to ~60 s) and error detection sluggish, and it called ``bufferParse()``
+  unconditionally on every iteration even when there was nothing new to
+  parse.
+
+- **Termination paths were inconsistent.**  Thrown network exceptions
+  became fatal background-thread failures; a partial hello-send exited
+  the thread with no error state set at all; and orderly disconnect
+  wasn't detected in the first place.
+
+The poll loop
+~~~~~~~~~~~~~
+
+``Poco::Net::PollSet`` now waits for socket readiness with a ~100 ms
+timeout, replacing the old 30 s blocking receive.  ``receiveBytes()`` is
+only called when the socket is readable *and* the parser buffer has free
+space (``bufferFillLength() != 0``); when the buffer is full, the loop
+sets its ``needParse`` flag instead so the parser drains it before more
+bytes are read.  ``RECV_TIMEOUT`` itself is reduced from 30 s to 1 s and
+demoted to a pure backstop — actual readiness is driven by ``poll()``,
+not by the socket's own receive timeout.
+
+``bufferParse()`` runs exactly when there is work: fresh bytes were just
+appended, the parse buffer is full and must be drained to make room, or a
+prior parse was interrupted mid-buffer by a run-transition callback
+(``rxPacket(RunStatusPkt)`` returning to request a pause) and bytes
+remain stranded in the parser's internal buffer, a place ``poll()``
+cannot see.
+
+When a poll event fires, ``POLL_READ`` is drained before ``POLL_ERROR``
+is honoured.  On Linux, a peer close with pending bytes can deliver
+``EPOLLIN|EPOLLHUP`` together; draining the bytes first means the
+final ``END_RUN`` packet isn't discarded.  On macOS kqueue, ``EV_ERROR``
+(a kevent changelist failure) can co-occur with ``EVFILT_READ`` (valid
+pending data) right after a back-pressure pause; the loop's
+``successfulRead`` flag suppresses the ``POLL_ERROR`` fatal in that case
+so a transient kqueue artefact doesn't kill a perfectly healthy
+connection.
+
+.. _sns-disconnect-not-error:
+
+Disconnect is not an error — and where the error gets ascribed
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+An orderly server close is not intrinsically an error — it's something a
+correctly-implemented SMS server does routinely.  The refactor keeps that
+distinction visible by splitting the handling across two layers.
+
+**The background thread stays neutral.**  A clean peer close
+(``receiveBytes() == 0``) does **not** go through ``fatal()``.  It stores
+``m_isConnected = false``, stores ``m_bgThreadCaughtUp = true`` (so
+``onBeforeExtract()`` isn't wedged behind its ``NotYet`` gate), and
+returns.  No ``m_backgroundException`` is written, so
+``listenerState()`` reports ``Disconnected``, not ``Error``.  This is a
+deliberate reservation: a future implementation could respond to a
+disconnect by reconnecting and rescanning the ADARA stream, and nothing
+about the background thread's handling forecloses that — the condition
+was never declared fatal in the first place.
+
+**The foreground ascribes the error.**  The current implementation has
+no recovery action available, so the escalation happens one layer up:
+``doExtractData()`` throws once there is nothing left to deliver (see
+below), and that is what a consumer actually observes as failure.  The
+net effect today is ``Connected`` → ``Error``, but the ``Error`` is a
+*foreground* ascription made at the ``extractData()`` boundary —
+``listenerState()`` itself never returns ``Error`` by way of a clean
+disconnect; it stays at ``Disconnected``.
+
+This is different from every *abnormal* termination.  ``POLL_ERROR``, an
+unexpected ``Poco::Net::NetException``, an exhausted hello-send retry,
+and any ``rxPacket()`` throw all route through the same ``fatal()``
+helper, which genuinely does report ``Error``:
+
+.. code-block:: cpp
+
+   auto setFatalState = [this](std::shared_ptr<std::runtime_error> ex) {
+       std::lock_guard<std::mutex> lock(m_mutex);
+       m_isConnected.store(false);
+       if (!m_backgroundException)          // first-writer-wins
+           m_backgroundException = std::move(ex);
+   };
+   auto fatal = [&setFatalState](const std::string &msg) {
+       g_log.fatal() << msg << '\n';
+       setFatalState(std::make_shared<std::runtime_error>(msg));
+       throw std::runtime_error(msg);
+   };
+
+``listenerState()`` reads these two flags with a fixed precedence —
+``Error`` beats ``Disconnected`` beats ``ReadWait`` beats ``Connected``:
+
+.. code-block:: cpp
+
+   API::ListenerState SNSLiveEventDataListener::listenerState() const {
+       std::lock_guard<std::mutex> scopedLock(m_mutex);
+       if (m_backgroundException)        return API::ListenerState::Error;
+       if (!m_isConnected.load())         return API::ListenerState::Disconnected;
+       if (m_pauseNetRead.load())         return API::ListenerState::ReadWait;
+       return API::ListenerState::Connected;
+   }
+
+``m_backgroundException`` is first-writer-wins so the precise message
+from ``fatal()`` (or from ``rxPacket()``) is never clobbered by a more
+generic message from an outer catch arm.  This precedence and the
+first-writer-wins guard are pinned by
+``test_listenerState_Error_preempts_Disconnected``,
+``test_listenerState_Error_preempts_ReadWait``, and
+``test_backgroundException_is_first_writer_wins`` in
+``SNSLiveEventDataListenerNoNetworkTest.h``.
+
+Surfacing the disconnect to consumers
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+``doExtractData()`` performs two disconnect checks, both guarding against
+a consumer spinning forever on a dead stream:
+
+- **Check 1 (pre-init).**  If the workspace was never initialised and
+  ``m_isConnected`` is already ``false``, the wait loop breaks
+  immediately instead of waiting out the full 10 s ``startupTimeout``,
+  and throws with the message ``"stream ended before workspace
+  initialization"``.
+
+- **Check 2 (post-init).**  Once the workspace exists, ``doExtractData()``
+  only throws ``"stream ended after server disconnect"`` when there is
+  genuinely nothing left to deliver: no detector events, no *monitor*
+  events (monitor events live in a separate ``EventWorkspace`` reachable
+  via ``m_eventBuffer->monitorWorkspace()``, so checking detector events
+  alone would silently discard a final monitor-only batch), and no
+  pending run-state transition.  A final ``EndRun`` edge or a final
+  monitor-only batch is still delivered to the caller before the
+  stream-ended error is raised on the *next* call.
+
+Back-pressure defers disconnect detection (known limitation)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+While ``m_pauseNetRead`` is set (``ReadWait``), the background thread is
+parked in the pause-gate loop *above* the poll block and never calls
+``poll()`` — so it never observes a peer's FIN while paused.  The flag is
+cleared only by ``onBeforeExtract()`` and ``onAfterExtract()``, both
+foreground.  Consequently a peer close that arrives during ``ReadWait``
+is invisible until the next ``extractData()`` call releases the flag;
+the state path actually taken is the two-hop ``ReadWait`` → ``Connected``
+(on release) → ``Disconnected`` (on the next poll iteration), never a
+direct ``ReadWait`` → ``Disconnected``.
+
+The consequence worth stating plainly: if a consumer stops calling
+``extractData()`` while a transition is pending, a server that has
+already gone away is never detected — the background thread just sleeps
+in 100 ms increments forever.  In practice this is bounded only by
+``MonitorLiveData``'s own polling loop continuing to call
+``extractData()``; nothing in the listener itself bounds it.
+
+This is **future work**, out of scope for this PR: the pause-gate sleep
+could be bounded and paired with a zero-timeout ``poll()`` for EOF while
+parked, so a disconnect during back-pressure is noticed promptly instead
+of only on the next release.  It's also why
+``test_serverDisconnect_during_ReadWait_setsDisconnected`` exercises the
+*joining* path (which sets no back-pressure at all) rather than a true
+``ReadWait`` scenario — there is currently no code path that reaches
+``Disconnected`` directly from ``ReadWait``.
+
+Shutdown path
+~~~~~~~~~~~~~
+
+The destructor sets ``m_stopThread`` and then calls
+``m_socket.shutdown()`` to unblock the background thread immediately
+rather than waiting out its bounded internal timeouts.  ``shutdown()`` is
+safe to call concurrently with an in-flight ``receiveBytes()`` /
+``poll()`` on the same socket — it only issues ``shutdown(fd,
+SHUT_RDWR)`` on the shared descriptor and doesn't touch Poco's
+reference-counted ``SocketImpl``, unlike ``close()``, which would race on
+that refcount.  A shut-down socket becomes read-ready with EOF, so
+``poll()`` wakes and ``receiveBytes()`` returns ``0`` — the destructor
+reuses the same clean-peer-close path described above.  The destructor
+then waits on a bounded ``tryJoin()``, retrying a handful of times before
+a logged ``std::abort()`` as a fail-loud backstop against a wedged
+thread.  Net effect: shutdown latency drops from up to ~60 s to
+sub-second.
+
+Non-goals
+~~~~~~~~~
+
+- No reconnect or retry logic.  Briefly considered, but deemed too
+  difficult to implement at present due to the associated requirement to
+  rescan the ADARA stream — see
+  :ref:`sns-disconnect-not-error` above for why the door is nonetheless
+  left open for this in the background thread's handling.
+- No ``SocketReactor`` conversion.
+- No redesign of run-transition handling.
+- No changes to packet parsing behavior or to the back-pressure
+  invariant.
 
 
 Behaviour preservation (SNS-specific)
@@ -851,6 +1206,12 @@ Behaviour preservation (SNS-specific)
    * - Listener can be queried for its state without mutating it
      - **no**
      - yes (all queries ``const``)
+   * - Orderly server disconnect detected
+     - **no** (background thread spun forever, ``listenerState()`` kept
+       reporting ``Connected``)
+     - yes — background thread reports ``Disconnected``; ``extractData()``
+       raises once the buffered data is drained (see
+       :ref:`sns-poll-loop-disconnect`)
 
 There is one behaviour that is intentionally not preserved, and it is
 the bug the refactor exists to fix: stand-alone ``LoadLiveData``
@@ -1024,7 +1385,21 @@ thread and no network connection.  All live in
 * ``test_lastTransition_reports_EndRun_then_null_after_success``
 * ``test_background_exception_propagates_from_all_getters``
 * ``test_rxRunStatusPkt_newRun_throws_when_slot_occupied``
+* ``test_rxRunStatusPkt_newRun_joiningCase_throwsOnConsecutive``
+* ``test_rxRunStatusPkt_newRun_joiningCase_setsJoiningRun_without_pause``
 * ``test_rxRunStatusPkt_endRun_throws_when_slot_occupied``
+* ``test_rxRunStatusPkt_endRun_joiningRunCollapse_setsEndRun``
+* ``test_onBeginRun_joiningPath_preserves_instrument_data``
+* ``test_lastTransition_BeginRun_observable_after_successful_extract``
+* ``test_requiredLogs_cleared_on_run_boundaries``
+* ``test_listenerState_Error_preempts_Disconnected`` — pins that
+  ``m_backgroundException`` set together with ``!m_isConnected`` reports
+  ``Error``, not ``Disconnected`` (see :ref:`sns-disconnect-not-error`)
+* ``test_listenerState_Error_preempts_ReadWait`` — same precedence check
+  against ``m_pauseNetRead``
+* ``test_backgroundException_is_first_writer_wins`` — a second
+  ``setFatalState()`` write must not clobber the first, more precise,
+  message
 
 Integration tests — ``SNSLiveEventDataListenerTest.h``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1050,7 +1425,35 @@ Key tests include (the file is the authoritative list):
 * ``test_variableCache_replayedAfterStartCondition``
 * ``test_bgThreadCaughtUp_throwsNotYet_whenBgThreadStillReceiving``
 * ``test_bgThreadCaughtUp_proceeds_afterCaughtUp``
-* (plus additional coverage of monitors, bad pixels, disconnect, etc.)
+* ``test_bgThreadCaughtUp_resetsAtEndRun_andGatesNextRunFirstExtract``
+
+Disconnect / poll-loop coverage added for the refactor described in
+:ref:`sns-poll-loop-disconnect` — ``MockSMSServer`` gained
+``Testing::PktDisconnect{}`` plus short-write and partial-read script
+entries to drive these:
+
+* ``test_serverDisconnect_setsDisconnectedState`` — replaces the
+  previously-XFAIL'd ``test_serverDisconnect_setsErrorState``; a clean
+  peer close now reaches ``Disconnected``, not ``Error``
+* ``test_serverDisconnect_before_initialization_throws_quickly``
+* ``test_serverDisconnect_preinit_extractData_throws_streamEnded``
+* ``test_serverDisconnect_postinit_extractData_throws_streamEnded``
+* ``test_serverDisconnect_monitorOnlyFinalBatch_isDelivered``
+* ``test_serverDisconnect_midRun_eventBufferDelivered_thenStreamEnded``
+* ``test_serverDisconnect_endRunDelivered_thenStreamEnded``
+* ``test_serverDisconnect_during_ReadWait_setsDisconnected`` — see
+  the back-pressure caveat under :ref:`sns-poll-loop-disconnect`: this
+  exercises the joining path (no back-pressure set), not a true
+  ``ReadWait`` → ``Disconnected`` transition, because no such direct
+  transition exists
+* ``test_partialHelloSend_setsError``
+* ``test_partialHelloSend_retriesAndSucceeds``
+* ``test_rxPacketThrow_setsErrorState_and_extractRethrows``
+* ``test_pollLoop_continues_to_parse_when_buffer_full``
+* ``test_pollRead_andError_together_drainsFirst``
+* ``test_partialRead_streamReassembled``
+* ``test_shutdownLatency_after_normal_connect``
+* (plus additional coverage of monitors, bad pixels, etc.)
 
 Integration tests — ``SNSLiveEventDataListenerAlgorithmIntegrationTest.h``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

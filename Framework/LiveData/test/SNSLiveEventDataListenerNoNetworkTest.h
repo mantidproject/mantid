@@ -95,6 +95,14 @@ public:
     m_backgroundException = std::make_shared<std::runtime_error>(msg);
   }
 
+  void injectBackgroundExceptionIfUnset(const std::string &msg) {
+    if (!m_backgroundException)
+      m_backgroundException = std::make_shared<std::runtime_error>(msg);
+  }
+
+  void setIsConnected(bool value) { m_isConnected = value; }
+  void setPauseNetRead(bool value) { m_pauseNetRead.store(value, std::memory_order_release); }
+
   void callOnBeginRun() { onBeginRun(); }
   void callOnEndRun() { onEndRun(); }
   void callOnRunPause(bool p) { onRunPause(p); }
@@ -509,6 +517,51 @@ public:
   // -------------------------------------------------------------------------
   // Sub-spec: m_requiredLogs cleared at run boundaries
   // -------------------------------------------------------------------------
+
+  // -------------------------------------------------------------------------
+  // Sub-spec: listenerState() priority — Error beats Disconnected / ReadWait
+  // -------------------------------------------------------------------------
+
+  /** When m_backgroundException is set AND m_isConnected is false, listenerState()
+   *  must return Error (not Disconnected).  Pins the Connected→Error-no-flicker
+   *  invariant: the fatal helper sets m_backgroundException before the next
+   *  observable state read, so the foreground never sees Disconnected in between.
+   */
+  void test_listenerState_Error_preempts_Disconnected() {
+    TestableSNSListener listener;
+    listener.injectBackgroundException("synthetic fatal error");
+    listener.setIsConnected(false);
+    TS_ASSERT_EQUALS(ListenerState::Error, listener.listenerState());
+  }
+
+  /** When m_backgroundException is set AND m_pauseNetRead is true, listenerState()
+   *  must return Error (not ReadWait).  Pins that a disconnect during the
+   *  back-pressure pause loop is still reported as Error, not ReadWait.
+   */
+  void test_listenerState_Error_preempts_ReadWait() {
+    TestableSNSListener listener;
+    listener.injectBackgroundException("synthetic fatal error");
+    listener.setPauseNetRead(true);
+    TS_ASSERT_EQUALS(ListenerState::Error, listener.listenerState());
+  }
+
+  /** The fatal helper uses a first-writer-wins guard on m_backgroundException.
+   *  A second write (e.g. from the outer std::runtime_error catch arm) must not
+   *  overwrite the helper's precise message with a more generic one.
+   */
+  void test_backgroundException_is_first_writer_wins() {
+    TestableSNSListener listener;
+    listener.injectBackgroundException("first precise message");
+    listener.injectBackgroundExceptionIfUnset("second generic message");
+    bool threw = false;
+    try {
+      (void)listener.runState();
+    } catch (const std::runtime_error &e) {
+      threw = true;
+      TS_ASSERT(std::string(e.what()).find("first precise message") != std::string::npos);
+    }
+    TS_ASSERT(threw);
+  }
 
   /** m_requiredLogs must be empty after onEndRun() and after the transition
    *  path of onBeginRun().  Stale entries from a previous geometry packet
