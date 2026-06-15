@@ -90,7 +90,7 @@ class QECoverageGUI(QtWidgets.QWidget):
         for inst in self.direct_inst_list:
             self.direct_inst_box.addItem(inst)
         self.direct_grid.addWidget(self.direct_inst_box)
-        self.direct_inst_box.activated[str].connect(self.onDirectInstActivated)
+        self.direct_inst_box.textActivated.connect(self.onDirectInstActivated)
         self.direct_ei = QtWidgets.QFrame(self.tab_direct)
         self.direct_ei_grid = QtWidgets.QHBoxLayout()
         self.direct_ei.setLayout(self.direct_ei_grid)
@@ -157,7 +157,7 @@ class QECoverageGUI(QtWidgets.QWidget):
         for inst in self.indirect_inst_list:
             self.indirect_inst_box.addItem(inst)
         self.indirect_grid.addWidget(self.indirect_inst_box)
-        self.indirect_inst_box.activated[str].connect(self.onIndirectInstActivated)
+        self.indirect_inst_box.textActivated.connect(self.onIndirectInstActivated)
         self.indirect_ef = QtWidgets.QFrame(self.tab_indirect)
         self.indirect_ef_grid = QtWidgets.QHBoxLayout()
         self.indirect_ef.setLayout(self.indirect_ef_grid)
@@ -177,7 +177,7 @@ class QECoverageGUI(QtWidgets.QWidget):
         for ana in self.indirect_analysers[str(self.indirect_inst_box.currentText())]:
             self.indirect_ef_input.addItem(ana)
         self.indirect_ef_grid.addWidget(self.indirect_ef_input)
-        self.indirect_ef_input.activated[str].connect(self.onIndirectEfActivated)
+        self.indirect_ef_input.textActivated.connect(self.onIndirectEfActivated)
         self.indirect_grid.addWidget(self.indirect_ef)
         self.indirect_plotover = QtWidgets.QCheckBox("Plot Over", self.tab_indirect)
         self.indirect_plotover.setToolTip("Hold this plot?")

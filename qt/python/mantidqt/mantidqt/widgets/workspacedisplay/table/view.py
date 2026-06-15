@@ -9,12 +9,17 @@ import sys
 from functools import partial
 
 from qtpy import QtGui
-from qtpy.QtCore import QVariant, Qt, Signal, Slot
+from qtpy.QtCore import QMetaType, Qt, Signal, Slot
 from qtpy.QtGui import QKeySequence, QStandardItemModel
 from qtpy.QtWidgets import QAction, QHeaderView, QItemEditorFactory, QMenu, QMessageBox, QStyledItemDelegate, QTableView
 
 import mantidqt.icons
 from mantidqt.widgets.workspacedisplay.table.plot_type import PlotType
+
+# QVariant.Double was removed in Qt6. QItemEditorFactory.createEditor passes a QMetaType
+# id (an int); QMetaType.Double is a plain int under PyQt5 but a (non-int) enum member
+# under PyQt6, so normalise to its integer value for comparison against user_type.
+_DOUBLE_METATYPE_ID = getattr(QMetaType.Double, "value", QMetaType.Double)
 
 
 class PreciseDoubleFactory(QItemEditorFactory):
@@ -23,7 +28,7 @@ class PreciseDoubleFactory(QItemEditorFactory):
 
     def createEditor(self, user_type, parent):
         widget = super(PreciseDoubleFactory, self).createEditor(user_type, parent)
-        if user_type == QVariant.Double:
+        if user_type == _DOUBLE_METATYPE_ID:
             widget.setFrame(True)
             widget.setDecimals(16)
             widget.setRange(-sys.float_info.max, sys.float_info.max)

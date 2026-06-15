@@ -922,11 +922,14 @@ class FullInstrumentViewWindow(QMainWindow):
         """When closing, make sure to close the plotters and figure correctly to prevent errors"""
         self._closing = True
         super().closeEvent(QCloseEvent)
+        # Disconnect the editingFinished signals we connected (see _add_connections_to_edits_and_slider)
+        # rather than calling the no-argument (wildcard) QLineEdit.disconnect(), which makes Qt6 emit
+        # "wildcard call disconnects from destroyed signal" while the widgets are being torn down.
         with suppress(TypeError):
-            self._contour_range_max_edit.disconnect()
-            self._contour_range_min_edit.disconnect()
-            self._integration_limit_max_edit.disconnect()
-            self._integration_limit_min_edit.disconnect()
+            self._contour_range_max_edit.editingFinished.disconnect()
+            self._contour_range_min_edit.editingFinished.disconnect()
+            self._integration_limit_max_edit.editingFinished.disconnect()
+            self._integration_limit_min_edit.editingFinished.disconnect()
         # Shut down any callbacks before closing the plotter and the figure
         if hasattr(self, "_presenter") and self._presenter is not None:
             self._presenter.handle_close()
@@ -1070,7 +1073,7 @@ class FullInstrumentViewWindow(QMainWindow):
         return [
             self._peak_ws_list.item(row_index).text()
             for row_index in range(self._peak_ws_list.count())
-            if self._peak_ws_list.item(row_index).checkState() > 0
+            if self._peak_ws_list.item(row_index).checkState() != Qt.CheckState.Unchecked
         ]
 
     @_skip_if_closing
@@ -1164,7 +1167,7 @@ class FullInstrumentViewWindow(QMainWindow):
         return [
             list_to_read_from.item(row_index).text()
             for row_index in range(list_to_read_from.count())
-            if list_to_read_from.item(row_index).checkState() > 0
+            if list_to_read_from.item(row_index).checkState() != Qt.CheckState.Unchecked
         ]
 
     def set_new_item_key(self, kind: CurrentTab, new_key: str) -> None:

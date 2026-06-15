@@ -202,7 +202,7 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget,
   m_unitsGroup->addAction(m_lengthUnits);
   m_unitsGroup->addAction(m_phiUnits); // re #4169 disabled until fixed or removed
   m_unitsGroup->addAction(m_outOfPlaneAngleUnits);
-  connect(m_unitsMapper, SIGNAL(mapped(int)), this, SLOT(setTubeXUnits(int)));
+  connect(m_unitsMapper, SIGNAL(mappedInt(int)), this, SLOT(setTubeXUnits(int)));
 
   // Instrument display context menu actions
   m_storeCurve = new QAction("Store curve", this);
@@ -487,7 +487,7 @@ void InstrumentWidgetPickTab::plotContextMenu() {
       connect(remove, SIGNAL(triggered()), signalMapper, SLOT(map()));
       signalMapper->setMapping(remove, label);
     }
-    connect(signalMapper, SIGNAL(mapped(const QString &)), this, SLOT(removeCurve(const QString &)));
+    connect(signalMapper, SIGNAL(mappedString(const QString &)), this, SLOT(removeCurve(const QString &)));
     context.addMenu(removeCurves);
   }
 

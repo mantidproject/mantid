@@ -83,7 +83,7 @@ class PairingTableView(QtWidgets.QWidget):
         self.horizontal_layout.setObjectName("horizontalLayout")
         self.horizontal_layout.addWidget(self.add_pair_button)
         self.horizontal_layout.addWidget(self.remove_pair_button)
-        self.spacer_item = QtWidgets.QSpacerItem(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+        self.spacer_item = QtWidgets.QSpacerItem(1, 1)
         self.horizontal_layout.addItem(self.spacer_item)
         self.horizontal_layout.setAlignment(QtCore.Qt.AlignLeft)
 
@@ -257,6 +257,9 @@ class PairingTableView(QtWidgets.QWidget):
 
     def get_table_item(self, row, col):
         return self.pairing_table.item(row, col)
+
+    def get_table_item_checked(self, row, col):
+        return self.get_table_item(row, col).checkState() == QtCore.Qt.Checked
 
     def set_widget_enabled(self, row, col, enabled):
         cell_widget = self.pairing_table.cellWidget(row, col)

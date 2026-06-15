@@ -601,7 +601,7 @@ protected:
     QList<QtProperty *> members = m_prop->subProperties();
     if (members.empty())
       throw std::runtime_error("FunctionTreeView: empty vector attribute group.");
-    int n = members.size() - 1;
+    int n = static_cast<int>(members.size()) - 1;
     if (n == 0) {
       v.clear();
       return;

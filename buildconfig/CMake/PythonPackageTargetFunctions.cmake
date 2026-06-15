@@ -1,5 +1,11 @@
 # Defines functions to help deal with python packages
 
+# Directory of this module, captured at file scope where CMAKE_CURRENT_LIST_DIR is this file's location (inside a
+# function it would instead resolve to the caller's listfile). Used to locate helper scripts shipped alongside this
+# module without relying on CMAKE_MODULE_PATH, which becomes a multi-element list once Qt6 / extra-cmake-modules append
+# their own module dirs and so cannot be safely joined with a filename.
+set(_python_package_functions_dir ${CMAKE_CURRENT_LIST_DIR})
+
 # ~~~
 # Function to create links to python packages from the source tree
 # to the binary tree. It expects a setup.py to be found in
@@ -72,11 +78,12 @@ function(add_python_package pkg_name)
 
   # Generate a sitecustomize.py file in the egg link directory as setuptools no longer generates site.py for v>=49.0.0
   if(_parsed_arg_GENERATE_SITECUSTOMIZE)
+    set(_write_sitecustomize ${_python_package_functions_dir}/WriteSiteCustomize.cmake)
     add_custom_command(
       OUTPUT ${_egg_link_dir}/sitecustomize.py
-      COMMAND ${CMAKE_COMMAND} -DSITECUSTOMIZE_DIR=${_egg_link_dir} -P ${CMAKE_MODULE_PATH}/WriteSiteCustomize.cmake
+      COMMAND ${CMAKE_COMMAND} -DSITECUSTOMIZE_DIR=${_egg_link_dir} -P ${_write_sitecustomize}
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-      DEPENDS ${_setup_py} ${CMAKE_MODULE_PATH}/WriteSiteCustomize.cmake
+      DEPENDS ${_setup_py} ${_write_sitecustomize}
     )
     set(_pkg_depends ${_pkg_depends} ${_egg_link_dir}/sitecustomize.py)
   endif()

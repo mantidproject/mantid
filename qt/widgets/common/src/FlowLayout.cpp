@@ -75,7 +75,7 @@ int FlowLayout::verticalSpacing() const {
   }
 }
 
-int FlowLayout::count() const { return itemList.size(); }
+int FlowLayout::count() const { return static_cast<int>(itemList.size()); }
 
 QLayoutItem *FlowLayout::itemAt(int index) const { return itemList.value(index); }
 

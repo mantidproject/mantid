@@ -35,7 +35,7 @@ set(TEST_FILES
     Common/DecoderTest.h
     Common/DetectorTest.h
     Common/EncoderTest.h
-    Common/PlotterTestQt5.h
+    Common/PlotterTest.h
     Experiment/ExperimentPresenterTest.h
     Experiment/LookupTableValidatorTest.h
     Experiment/ExperimentOptionDefaultsTest.h
@@ -58,7 +58,7 @@ set(CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/InterfacesReflectomet
 
 mtd_add_qt_tests(
   TARGET_NAME MantidScientificInterfacesISISReflectometryTest
-  QT_VERSION 5
+  QT_VERSION ${MANTID_QT_VERSION}
   SRC ${TEST_FILES}
   INCLUDE_DIRS ../../../../Framework/CurveFitting/inc ../../../../Framework/DataObjects/inc ../GUI/Preview Preview
                Reduction
@@ -69,11 +69,13 @@ mtd_add_qt_tests(
   PARENT_DEPENDENCIES GUITests
 )
 
-add_framework_test_helpers(MantidScientificInterfacesISISReflectometryTestQt5)
+add_framework_test_helpers(MantidScientificInterfacesISISReflectometryTestQt${MANTID_QT_VERSION})
 
 if(TARGET GTest::gmock AND TARGET GTest::gtest)
 
-  target_link_libraries(MantidScientificInterfacesISISReflectometryTestQt5 PRIVATE GTest::gmock GTest::gtest)
+  target_link_libraries(
+    MantidScientificInterfacesISISReflectometryTestQt${MANTID_QT_VERSION} PRIVATE GTest::gmock GTest::gtest
+  )
 else()
-  target_link_libraries(MantidScientificInterfacesISISReflectometryTestQt5 PRIVATE gmock gtest)
+  target_link_libraries(MantidScientificInterfacesISISReflectometryTestQt${MANTID_QT_VERSION} PRIVATE gmock gtest)
 endif()

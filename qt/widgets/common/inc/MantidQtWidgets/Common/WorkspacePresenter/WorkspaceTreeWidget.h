@@ -244,7 +244,12 @@ private:
   /// Keep a map of renamed workspaces between updates
   QHash<QString, QString> m_renameMap;
   /// A mutex to lock m_renameMap and m_selectedNames for reading/writing
+  /// QMutex::Recursive was removed in Qt6 in favour of the dedicated QRecursiveMutex
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+  mutable QRecursiveMutex m_mutex;
+#else
   mutable QMutex m_mutex;
+#endif
 
 private slots:
   void handleUpdateTree(const TopLevelItems & /*items*/);

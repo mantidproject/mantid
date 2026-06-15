@@ -169,6 +169,6 @@ set(TEST_PY_FILES
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
 
 # Prefix for test name=PythonAlgorithms
-set(PYUNITTEST_QT_API pyqt5) # force to use qt5
-pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python.MuonQt5 ${TEST_PY_FILES})
+set(PYUNITTEST_QT_API pyqt${MANTID_QT_VERSION}) # force to use the configured Qt version
+pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python.MuonQt${MANTID_QT_VERSION} ${TEST_PY_FILES})
 unset(PYUNITTEST_QT_API)

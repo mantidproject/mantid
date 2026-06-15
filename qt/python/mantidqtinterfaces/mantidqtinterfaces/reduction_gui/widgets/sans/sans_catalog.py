@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 from qtpy.QtCore import Qt
-from qtpy.QtWidgets import QAction, QApplication, QFileDialog, QFrame, QMenu, QTableWidgetItem
+from qtpy.QtWidgets import QAction, QApplication, QFileDialog, QFrame, QHeaderView, QMenu, QTableWidgetItem
 from mantidqtinterfaces.reduction_gui.settings.application_settings import GeneralSettings
 from mantidqtinterfaces.reduction_gui.widgets.base_widget import BaseWidget
 from reduction_gui.reduction.scripter import BaseScriptElement
@@ -139,8 +139,8 @@ class SANSCatalogWidget(BaseWidget):
         self._content.data_set_table.setHorizontalHeaderLabels(headers)
         # Stretch the columns evenly
         h = self._content.data_set_table.horizontalHeader()
-        h.setSectionResizeMode(1)
-        h.setSectionResizeMode(1, 0)
+        h.setSectionResizeMode(QHeaderView.Stretch)
+        h.setSectionResizeMode(1, QHeaderView.Interactive)
 
         if self._catalog_cls is not None:
             dc = self._catalog_cls()

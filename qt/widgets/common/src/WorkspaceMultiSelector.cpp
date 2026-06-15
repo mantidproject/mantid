@@ -64,7 +64,7 @@ WorkspaceMultiSelector::~WorkspaceMultiSelector() { disconnectObservers(); }
  */
 void WorkspaceMultiSelector::setupTable() {
   this->setRowCount(0);
-  this->setColumnCount(headerLabels.size());
+  this->setColumnCount(static_cast<int>(headerLabels.size()));
   this->verticalHeader()->setVisible(false);
   this->horizontalHeader()->setVisible(true);
   this->setHorizontalHeaderLabels(headerLabels);

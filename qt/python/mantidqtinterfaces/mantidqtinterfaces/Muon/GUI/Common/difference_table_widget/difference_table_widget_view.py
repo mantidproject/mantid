@@ -74,7 +74,7 @@ class DifferenceTableView(QtWidgets.QWidget):
         self.horizontal_layout.setObjectName("horizontalLayout")
         self.horizontal_layout.addWidget(self.add_diff_button)
         self.horizontal_layout.addWidget(self.remove_diff_button)
-        self.spacer_item = QtWidgets.QSpacerItem(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+        self.spacer_item = QtWidgets.QSpacerItem(1, 1)
         self.horizontal_layout.addItem(self.spacer_item)
         self.horizontal_layout.setAlignment(QtCore.Qt.AlignLeft)
 
@@ -177,6 +177,9 @@ class DifferenceTableView(QtWidgets.QWidget):
 
     def get_table_item(self, row, col):
         return self.diff_table.item(row, col)
+
+    def get_table_item_checked(self, row, col):
+        return self.get_table_item(row, col).checkState() == QtCore.Qt.Checked
 
     def get_table_item_text(self, row, col):
         if diff_columns[col] == "group_1" or diff_columns[col] == "group_2":

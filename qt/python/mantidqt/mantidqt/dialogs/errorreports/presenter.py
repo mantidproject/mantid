@@ -59,7 +59,7 @@ class ErrorReporterPresenter(object):
     def do_not_share(self, continue_working=True):
         self.error_log.notice("No information shared")
         self._handle_exit(continue_working)
-        if not self._view.rememberContactInfoCheckbox.checkState():
+        if not self._view.rememberContactInfoCheckbox.isChecked():
             self.forget_contact_info()
         return -1
 
@@ -70,7 +70,7 @@ class ErrorReporterPresenter(object):
         self._handle_exit(continue_working)
 
         # Remember name and email in QSettings
-        if self._view.rememberContactInfoCheckbox.checkState():
+        if self._view.rememberContactInfoCheckbox.isChecked():
             settings = QSettings()
             settings.beginGroup(self._view.CONTACT_INFO)
             settings.setValue(self._view.NAME, new_name)

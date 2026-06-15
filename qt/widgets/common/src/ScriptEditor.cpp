@@ -263,9 +263,9 @@ void ScriptEditor::saveScript(const QString &filename) {
  * @param index :: The position of text in a line number,default value is zero
  */
 void ScriptEditor::setText(int lineno, const QString &txt, int index) {
-  int line_length = txt.length();
+  int line_length = static_cast<int>(txt.length());
   // Index is max of the length of current/new text
-  setSelection(lineno, index, lineno, qMax(line_length, this->text(lineno).length()));
+  setSelection(lineno, index, lineno, qMax(line_length, static_cast<int>(this->text(lineno).length())));
   removeSelectedText();
   insertAt(txt, lineno, index);
   setCursorPosition(lineno, line_length);
@@ -495,9 +495,9 @@ QByteArray ScriptEditor::fromMimeData(const QMimeData *source, bool &rectangular
  */
 void ScriptEditor::dropEvent(QDropEvent *de) {
   if (!de->mimeData()->hasUrls()) {
-    QDropEvent localDrop(*de);
-    // pass to base class - This handles text appropriately
-    QsciScintilla::dropEvent(&localDrop);
+    // pass to base class - This handles text appropriately. (QDropEvent's copy
+    // constructor is protected in Qt6, so forward the event directly.)
+    QsciScintilla::dropEvent(de);
   }
 }
 
@@ -550,7 +550,9 @@ void ScriptEditor::forwardKeyPressToBase(QKeyEvent *event) {
   // This does that for you!
   if (event->text() == "(") {
     auto *backspEvent = new QKeyEvent(QEvent::KeyPress, Qt::Key_Backspace, Qt::NoModifier);
-    auto *bracketEvent = new QKeyEvent(*event);
+    // QKeyEvent's copy constructor is protected in Qt6; rebuild from the original's fields
+    auto *bracketEvent = new QKeyEvent(event->type(), event->key(), event->modifiers(), event->text(),
+                                       event->isAutoRepeat(), static_cast<ushort>(event->count()));
     QsciScintilla::keyPressEvent(bracketEvent);
     QsciScintilla::keyPressEvent(backspEvent);
 

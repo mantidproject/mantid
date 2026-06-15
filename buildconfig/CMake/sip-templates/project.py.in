@@ -5,6 +5,24 @@ CMake target
 """
 from sipbuild import Builder, Project
 
+# sip v6 prints "'throw' is deprecated and will be removed in SIP v7.0.0" for every throw() exception specifier it parses. We intentionally keep those specifiers: they are the only way to map a C++ exception onto a specific Python type per function -> ValueError, relied upon by clearKeyBinding and others in the PyQt5 build (sip v4). So intercept the parser's deprecation hook for the 'throw' token only - every other deprecation message is left untouched.
+try:
+    from sipbuild.generator.parser.parser_manager import ParserManager
+
+    _original_deprecated = ParserManager.deprecated
+
+    def _deprecated_without_throw(self, p, symbol, instead=None):
+        try:
+            if p[symbol] == "throw":
+                return
+        except Exception:
+            pass
+        return _original_deprecated(self, p, symbol, instead=instead)
+
+    ParserManager.deprecated = _deprecated_without_throw
+except Exception:
+    pass
+
 
 class NoOpBuilder(Builder):
     """A 'Builder' that does nothing but satisfy the required interface"""

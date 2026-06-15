@@ -4,6 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from contextlib import suppress
+
 from qtpy.QtCore import QObject, Signal, Slot, Qt
 from qtpy.QtWidgets import QApplication
 
@@ -89,7 +91,21 @@ class FitInteractiveTool(QObject):
         """
         Disconnect the tool from everything
         """
-        QObject.disconnect(self)
+        # Disconnect each of our own signals rather than calling the no-argument (wildcard)
+        # QObject.disconnect(self): the tool is being torn down here, so a wildcard disconnect makes
+        # Qt6 emit "wildcard call disconnects from destroyed signal". Some signals may already be
+        # disconnected by the caller, so ignore the TypeError raised when a signal has no connections.
+        for signal in (
+            self.fit_range_changed,
+            self.peak_added,
+            self.peak_moved,
+            self.peak_fwhm_changed,
+            self.peak_type_changed,
+            self.add_background_requested,
+            self.add_other_requested,
+        ):
+            with suppress(TypeError):
+                signal.disconnect()
         for cid in self._cids:
             self.canvas.mpl_disconnect(cid)
         self.fit_range.remove()

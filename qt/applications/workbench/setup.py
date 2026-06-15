@@ -15,6 +15,6 @@ setup(
     version=os.environ["MANTID_VERSION_STR"],
     install_requires=["mantidqtinterfaces", "instrumentview"],
     packages=find_packages(exclude=["*.test"]),
-    package_data={"": ["*.ui"]},
+    package_data={"": ["*.ui", "*.rcc"]},
     entry_points={"gui_scripts": ["workbench = workbench.app.main:main"]},
 )

@@ -1260,13 +1260,13 @@ void Shape2DFree::resetBoundingRect() {
       if (m_polygon[i1] == m_polygon[j1]) {
         breaks.push_back(i);
         breaks.push_back(i1);
-        breaks.push_back(j1);
-        breaks.push_back(j);
+        breaks.push_back(static_cast<int>(j1));
+        breaks.push_back(static_cast<int>(j));
       }
     }
   }
   if (breaks.back() != n) {
-    breaks.push_back(n);
+    breaks.push_back(static_cast<int>(n));
   }
   using std::sort;
   sort(std::begin(breaks), std::end(breaks));

@@ -122,13 +122,13 @@ RepoModel::RepoItem *RepoModel::RepoItem::child(int row) const { return childIte
 /** Return the number of children that this entry may find.
     @return Number of children
  */
-int RepoModel::RepoItem::childCount() const { return childItems.count(); }
+int RepoModel::RepoItem::childCount() const { return static_cast<int>(childItems.count()); }
 /** Provide the row number of this entry related to its parent.
     @return It's child position.
  */
 int RepoModel::RepoItem::row() const {
   if (parentItem)
-    return parentItem->childItems.indexOf(const_cast<RepoItem *>(this));
+    return static_cast<int>(parentItem->childItems.indexOf(const_cast<RepoItem *>(this)));
   return 0;
 }
 /** Remove the given child from the childItems. Used to allow removing rows from
@@ -262,7 +262,7 @@ QVariant RepoModel::data(const QModelIndex &index, int role) const {
           } else
             return Icons::getIcon("mdi.folder-open-outline", "black", 1.2);
         } else {
-          int pos = QString(path).lastIndexOf('.');
+          int pos = static_cast<int>(QString(path).lastIndexOf('.'));
           if (pos < 0)
             return Icons::getIcon("mdi.file-question", "black", 1.2);
           if (path.contains("readme", Qt::CaseInsensitive))
@@ -420,7 +420,11 @@ bool RepoModel::setData(const QModelIndex &index, const QVariant &value, int rol
       downloading_path = QString::fromStdString(path);
       download_index = index;
       emit executingThread(true);
-      download_threads = QtConcurrent::run(download_thread, repo_ptr, path);
+      // Wrap in a lambda: Qt6 QtConcurrent::run mis-deduces a bare function pointer with
+      // by-reference args as the QPromise overload. The lambda works for both Qt5 and Qt6.
+      // repo_ptr is a member, so copy it to a local for capture.
+      auto repo = repo_ptr;
+      download_threads = QtConcurrent::run([repo, path]() mutable { return download_thread(repo, path); });
       download_watcher.setFuture(download_threads);
       ret = true;
     } else if (action == "Upload") {
@@ -460,8 +464,11 @@ bool RepoModel::setData(const QModelIndex &index, const QVariant &value, int rol
         uploading_path = QString::fromStdString(path);
         upload_index = index;
         emit executingThread(true);
-        upload_threads =
-            QtConcurrent::run(upload_thread, repo_ptr, path, form->email(), form->author(), form->comment());
+        auto repo = repo_ptr;
+        upload_threads = QtConcurrent::run(
+            [repo, path, email = form->email(), author = form->author(), comment = form->comment()]() mutable {
+              return upload_thread(repo, path, email, author, comment);
+            });
         upload_watcher.setFuture(upload_threads);
         ret = true;
       } else {
@@ -545,7 +552,10 @@ bool RepoModel::setData(const QModelIndex &index, const QVariant &value, int rol
     upload_index = index;
     uploading_path = QString::fromStdString(path);
     emit executingThread(true);
-    upload_threads = QtConcurrent::run(delete_thread, repo_ptr, path, email, uploadAuthor, comment);
+    auto repo = repo_ptr;
+    upload_threads = QtConcurrent::run([repo, path, email, uploadAuthor, comment]() mutable {
+      return delete_thread(repo, path, email, uploadAuthor, comment);
+    });
     upload_watcher.setFuture(upload_threads);
     ret = true;
   } // end delete action

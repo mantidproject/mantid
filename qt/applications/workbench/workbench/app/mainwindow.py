@@ -698,7 +698,12 @@ class MainWindow(QMainWindow):
         window_pos = settings.get("MainWindow/position", type=QPoint)
         if settings.has("MainWindow/font"):
             font_string = settings.get("MainWindow/font", type=str).split(",")
-            font = QFontDatabase().font(font_string[0], font_string[-1], int(font_string[1]))
+            # QFontDatabase.font is static in Qt6 (the class can no longer be instantiated)
+            # but an instance method in Qt5.
+            try:
+                font = QFontDatabase.font(font_string[0], font_string[-1], int(font_string[1]))
+            except TypeError:
+                font = QFontDatabase().font(font_string[0], font_string[-1], int(font_string[1]))
             qapp.setFont(font)
 
         # reset font for ipython console to ensure it stays monospace

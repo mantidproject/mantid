@@ -8,7 +8,7 @@ set(NOMOC_HEADERS inc/MantidQtWidgets/RegionSelector/DllConfig.h inc/MantidQtWid
 # Target
 mtd_add_qt_library(
   TARGET_NAME MantidQtWidgetsRegionSelector
-  QT_VERSION 5
+  QT_VERSION ${MANTID_QT_VERSION}
   SRC ${LIB_SRCS}
   NOMOC ${NOMOC_HEADERS}
   DEFS IN_MANTIDQT_REGIONSELECTOR

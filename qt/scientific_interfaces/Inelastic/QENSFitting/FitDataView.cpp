@@ -81,7 +81,7 @@ void FitDataView::subscribePresenter(IFitDataPresenter *presenter) { m_presenter
 QTableWidget *FitDataView::getDataTable() const { return m_uiForm->tbFitData; }
 
 void FitDataView::setHorizontalHeaders(const QStringList &headers) {
-  m_uiForm->tbFitData->setColumnCount(headers.size());
+  m_uiForm->tbFitData->setColumnCount(static_cast<int>(headers.size()));
   m_uiForm->tbFitData->setHorizontalHeaderLabels(headers);
   m_HeaderLabels = headers;
 
@@ -139,7 +139,7 @@ void FitDataView::updateNumCellEntry(double numEntry, size_t row, size_t column)
 bool FitDataView::isTableEmpty() const { return m_uiForm->tbFitData->rowCount() == 0; }
 
 int FitDataView::columnIndex(std::string const &name) const {
-  return m_HeaderLabels.indexOf(QString::fromStdString(name));
+  return static_cast<int>(m_HeaderLabels.indexOf(QString::fromStdString(name)));
 }
 
 void FitDataView::clearTable() { m_uiForm->tbFitData->setRowCount(0); }

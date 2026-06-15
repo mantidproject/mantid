@@ -10,7 +10,7 @@ import sys
 import traceback
 
 from qtpy.QtWidgets import QApplication
-import sip
+from qtpy import sip
 
 from mantidqt.utils.qt.plugins import setup_library_paths
 

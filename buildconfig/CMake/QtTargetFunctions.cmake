@@ -11,7 +11,7 @@ function(mtd_add_qt_library)
   _qt_versions(_qt_vers ${ARGN})
   # Create targets
   foreach(_ver ${_qt_vers})
-    if(_ver EQUAL 5 AND (ENABLE_WORKBENCH OR BUILD_MANTIDQT))
+    if((_ver EQUAL 5 OR _ver EQUAL 6) AND (ENABLE_WORKBENCH OR BUILD_MANTIDQT))
       mtd_add_qt_target(LIBRARY QT_VERSION ${_ver} ${ARGN})
     endif()
   endforeach()
@@ -25,7 +25,7 @@ function(mtd_add_qt_executable)
   _qt_versions(_qt_vers ${ARGN})
   # Create targets
   foreach(_ver ${_qt_vers})
-    if(_ver EQUAL 5 AND (ENABLE_WORKBENCH OR BUILD_MANTIDQT))
+    if((_ver EQUAL 5 OR _ver EQUAL 6) AND (ENABLE_WORKBENCH OR BUILD_MANTIDQT))
       mtd_add_qt_target(EXECUTABLE QT_VERSION ${_ver} ${ARGN})
     endif()
   endforeach()
@@ -73,10 +73,14 @@ function(mtd_add_qt_target)
       RES
       DEFS
       QT5_DEFS
+      QT6_DEFS
       INCLUDE_DIRS
       SYSTEM_INCLUDE_DIRS
       LINK_LIBS
       QT5_LINK_LIBS
+      QT6_LINK_LIBS
+      QT5_SRC
+      QT6_SRC
       MTD_QT_LINK_LIBS
       OSX_INSTALL_RPATH
       PRECOMPILED
@@ -105,6 +109,12 @@ function(mtd_add_qt_target)
     set(ALL_SRC ${PARSED_SRC} ${PARSED_QT5_SRC} ${MOC_GENERATED})
     qt5_add_resources(RES_FILES ${PARSED_RES})
     set(_qt_link_libraries Qt5::Widgets ${PARSED_QT5_LINK_LIBS})
+  elseif(PARSED_QT_VERSION EQUAL 6)
+    qt6_wrap_ui(UI_HEADERS ${PARSED_UI})
+    _internal_qt_wrap_cpp(6 MOC_GENERATED DEFS ${_all_defines} INFILES ${PARSED_MOC})
+    set(ALL_SRC ${PARSED_SRC} ${PARSED_QT6_SRC} ${MOC_GENERATED})
+    qt6_add_resources(RES_FILES ${PARSED_RES})
+    set(_qt_link_libraries Qt6::Widgets ${PARSED_QT6_LINK_LIBS})
   else()
     message(FATAL_ERROR "Unknown Qt version. Please specify only the major version.")
   endif()
@@ -168,6 +178,7 @@ function(mtd_add_qt_target)
   endif()
   set_target_properties(${_target} PROPERTIES CXX_CLANG_TIDY "")
   _disable_suggest_override(${PARSED_QT_VERSION} ${_target})
+  _disable_deprecation_warnings(${PARSED_QT_VERSION} ${_target})
   # Use public headers to populate the INTERFACE_INCLUDE_DIRECTORIES target property
   target_include_directories(${_target} PUBLIC ${_ui_dir} ${_other_ui_dirs} ${PARSED_INCLUDE_DIRS})
   if(PARSED_SYSTEM_INCLUDE_DIRS)
@@ -249,7 +260,7 @@ function(mtd_add_qt_tests)
   _qt_versions(_qt_vers ${ARGN})
   # Create test executables
   foreach(_ver ${_qt_vers})
-    if(_ver EQUAL 5 AND (ENABLE_WORKBENCH OR BUILD_MANTIDQT))
+    if((_ver EQUAL 5 OR _ver EQUAL 6) AND (ENABLE_WORKBENCH OR BUILD_MANTIDQT))
       mtd_add_qt_test_executable(QT_VERSION ${_ver} ${ARGN})
     endif()
   endforeach()
@@ -269,10 +280,13 @@ function(mtd_add_qt_test_executable)
   set(oneValueArgs TARGET_NAME QT_VERSION)
   set(multiValueArgs
       SRC
+      QT5_SRC
+      QT6_SRC
       INCLUDE_DIRS
       TEST_HELPER_SRCS
       LINK_LIBS
       QT5_LINK_LIBS
+      QT6_LINK_LIBS
       MTD_QT_LINK_LIBS
       PARENT_DEPENDENCIES
   )
@@ -289,11 +303,14 @@ function(mtd_add_qt_test_executable)
 
   # Warning suppression
   _disable_suggest_override(${PARSED_QT_VERSION} ${_target_name})
+  _disable_deprecation_warnings(${PARSED_QT_VERSION} ${_target_name})
 
   # libraries
   set(_link_libs ${PARSED_LINK_LIBS} ${_mtd_qt_libs})
   if(PARSED_QT_VERSION EQUAL 5)
     set(_link_libs Qt5::Widgets ${PARSED_QT5_LINK_LIBS} ${_link_libs})
+  elseif(PARSED_QT_VERSION EQUAL 6)
+    set(_link_libs Qt6::Widgets ${PARSED_QT6_LINK_LIBS} ${_link_libs})
   else()
     message(FATAL_ERROR "Unknown Qt version. Please specify only the major version.")
   endif()
@@ -322,15 +339,15 @@ function(_qt_versions output_list)
   # process argument list
   list(FIND ARGN "QT_VERSION" _ver_idx)
   if(_ver_idx EQUAL -1)
-    # default versions
-    set(_qt_vers 5)
+    # default to the configure-time selected version
+    set(_qt_vers ${MANTID_QT_VERSION})
   else()
     math(EXPR _ver_value_idx "${_ver_idx}+1")
     list(GET ARGN ${_ver_value_idx} _ver_value)
     list(APPEND _qt_vers ${_ver_value})
   endif()
   if(NOT (ENABLE_WORKBENCH OR ENABLE_MANTIDQT))
-    list(REMOVE_ITEM _qt_vers 5)
+    list(REMOVE_ITEM _qt_vers ${MANTID_QT_VERSION})
   endif()
   set(${output_list}
       ${_qt_vers}
@@ -378,6 +395,8 @@ function(_internal_qt_wrap_cpp qtversion moc_generated)
   foreach(_infile ${PARSED_INFILES})
     if(qtversion EQUAL 5)
       qt5_wrap_cpp(moc_generated ${_infile} OPTIONS -i -f${CMAKE_CURRENT_LIST_DIR}/${_infile} ${_moc_defs})
+    elseif(qtversion EQUAL 6)
+      qt6_wrap_cpp(moc_generated ${_infile} OPTIONS -i -f${CMAKE_CURRENT_LIST_DIR}/${_infile} ${_moc_defs})
     else()
       message(FATAL_ERROR "Unknown Qt version='${qtversion}'.")
     endif()
@@ -387,6 +406,16 @@ function(_internal_qt_wrap_cpp qtversion moc_generated)
       ${${moc_generated}}
       PARENT_SCOPE
   )
+endfunction()
+
+# Silences -Wdeprecated-declarations for Qt6 GUI targets. The Qt5->Qt6 migration surfaces many warnings from Qt APIs
+# that were deprecated in Qt6 (QMouseEvent::x()/y(), QLocale::country(), QVariant::type(), ...). We suppress them only
+# for the Qt6 build so that Qt5 builds still report deprecations and Mantid's own deprecation markers are unaffected.
+# Note: the global -Wno-deprecated does not cover -Wdeprecated-declarations; they are independent gcc/clang flags.
+function(_disable_deprecation_warnings _qt_version _target)
+  if(_qt_version EQUAL 6 AND (CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang"))
+    target_compile_options(${_target} PRIVATE -Wno-deprecated-declarations)
+  endif()
 endfunction()
 
 # Disables suggest override for versions of Qt < 5.6.2 as Q_OBJECT produces them and the cannot be avoided.

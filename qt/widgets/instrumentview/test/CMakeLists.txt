@@ -19,21 +19,21 @@ set(CXXTEST_EXTRA_HEADER_INCLUDE "${CMAKE_CURRENT_LIST_DIR}/InstrumentViewTestIn
 
 mtd_add_qt_tests(
   TARGET_NAME MantidQtWidgetsInstrumentWidgetTest
-  QT_VERSION 5
+  QT_VERSION ${MANTID_QT_VERSION}
   SRC ${TEST_FILES}
   INCLUDE_DIRS ${MOCK_HEADER_DIRS} ../../../../Framework/DataObjects/inc
   LINK_LIBS Python::Python ${CORE_MANTIDLIBS} Mantid::PythonInterfaceCore Mantid::DataObjects ${POCO_LIBRARIES}
             ${Boost_LIBRARIES}
-  QT5_LINK_LIBS Qt5::OpenGL
+  QT5_LINK_LIBS Qt5::OpenGL QT6_LINK_LIBS Qt6::OpenGL Qt6::OpenGLWidgets
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon MantidQtWidgetsInstrumentView MantidQtWidgetsMplCpp MantidQtWidgetsPlotting
   PARENT_DEPENDENCIES GUITests
 )
 
-add_framework_test_helpers(MantidQtWidgetsInstrumentWidgetTestQt5)
+add_framework_test_helpers(MantidQtWidgetsInstrumentWidgetTestQt${MANTID_QT_VERSION})
 
 if(TARGET GTest::gmock AND TARGET GTest::gtest)
 
-  target_link_libraries(MantidQtWidgetsInstrumentWidgetTestQt5 PRIVATE GTest::gmock GTest::gtest)
+  target_link_libraries(MantidQtWidgetsInstrumentWidgetTestQt${MANTID_QT_VERSION} PRIVATE GTest::gmock GTest::gtest)
 else()
-  target_link_libraries(MantidQtWidgetsInstrumentWidgetTestQt5 PRIVATE gmock gtest)
+  target_link_libraries(MantidQtWidgetsInstrumentWidgetTestQt${MANTID_QT_VERSION} PRIVATE gmock gtest)
 endif()

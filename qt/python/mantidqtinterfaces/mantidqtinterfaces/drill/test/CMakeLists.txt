@@ -1,4 +1,4 @@
-set(PYUNITTEST_QT_API pyqt5)
+set(PYUNITTEST_QT_API pyqt${MANTID_QT_VERSION})
 
 set(TEST_PY_FILES
     DrillTableWidgetTest.py

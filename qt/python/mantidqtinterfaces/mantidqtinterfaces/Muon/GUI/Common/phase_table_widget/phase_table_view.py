@@ -118,7 +118,7 @@ class PhaseTableView(QtWidgets.QWidget):
         self.phase_table_selector_label = QtWidgets.QLabel("Phase Table:")
         self.phase_table_selector_combo = QtWidgets.QComboBox()
         self.phase_table_selector_combo.setSizeAdjustPolicy(QtWidgets.QComboBox.AdjustToContents)
-        self.phase_table_selector_spacer_item = QtWidgets.QSpacerItem(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+        self.phase_table_selector_spacer_item = QtWidgets.QSpacerItem(1, 1)
 
         # Phasequad table
         self.add_phasequad_button = QtWidgets.QToolButton()
@@ -137,7 +137,7 @@ class PhaseTableView(QtWidgets.QWidget):
         self.remove_phasequad_button.setObjectName("removePhaseQuadButton")
         self.remove_phasequad_button.setToolTip("")
         self.remove_phasequad_button.setText("-")
-        self.phasequad_spacer_item = QtWidgets.QSpacerItem(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+        self.phasequad_spacer_item = QtWidgets.QSpacerItem(1, 1)
 
         # Layout
         self.phase_table_buttons_layout = QtWidgets.QHBoxLayout()
@@ -357,6 +357,9 @@ class PhaseTableView(QtWidgets.QWidget):
 
     def get_table_item(self, row, col):
         return self.phasequad_table.item(row, col)
+
+    def get_table_item_checked(self, row, col):
+        return self.get_table_item(row, col).checkState() == QtCore.Qt.Checked
 
     def get_table_item_text(self, row, col):
         return str(self.phasequad_table.item(row, col).text())

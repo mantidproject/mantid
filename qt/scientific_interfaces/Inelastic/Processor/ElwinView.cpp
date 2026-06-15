@@ -188,7 +188,7 @@ void ElwinView::setHorizontalHeaders() {
   QStringList headers;
   headers << "Workspace"
           << "WS Index";
-  m_uiForm.tbElwinData->setColumnCount(headers.size());
+  m_uiForm.tbElwinData->setColumnCount(static_cast<int>(headers.size()));
   m_uiForm.tbElwinData->setHorizontalHeaderLabels(headers);
   auto header = m_uiForm.tbElwinData->horizontalHeader();
   header->setSectionResizeMode(0, QHeaderView::Stretch);

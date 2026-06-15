@@ -24,8 +24,16 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 
 # Control which components of the project to build
-option(ENABLE_MANTIDQT "Enable Qt5-based components" ON)
-option(ENABLE_WORKBENCH "Enable Qt5-based gui" ON)
+option(ENABLE_MANTIDQT "Enable Qt-based components" ON)
+option(ENABLE_WORKBENCH "Enable Qt-based gui" ON)
+
+# Major version of Qt to build the GUI layer against (5 or 6). A single version is selected per build tree; the
+# Qt-versioned target machinery in buildconfig/CMake/QtTargetFunctions.cmake produces the matching -Qt${V} targets.
+set(MANTID_QT_VERSION
+    5
+    CACHE STRING "Major version of Qt to build against (5 or 6)"
+)
+set_property(CACHE MANTID_QT_VERSION PROPERTY STRINGS 5 6)
 
 # Option to control whether the framework libraries are built or expected to be installed
 set(MANTID_FRAMEWORK_LIB
@@ -123,24 +131,53 @@ if(COVERAGE)
 endif()
 
 set(QT_MIN_VERSION 5.15)
+set(QT6_MIN_VERSION 6.11)
 
 if(ENABLE_WORKBENCH OR BUILD_MANTIDQT)
+  # Resolve the requested major version using Qt's own multi-version convention. This sets QT_VERSION_MAJOR, which the
+  # rest of the GUI build keys off.
+  if(MANTID_QT_VERSION EQUAL 6)
+    set(_qt_min_version ${QT6_MIN_VERSION})
+    find_package(
+      QT ${QT6_MIN_VERSION} NAMES Qt6
+      COMPONENTS Core Gui Widgets OpenGL Test
+      REQUIRED
+    )
+  else()
+    set(_qt_min_version ${QT_MIN_VERSION})
+    find_package(
+      QT ${QT_MIN_VERSION} NAMES Qt5
+      COMPONENTS Core Gui Widgets OpenGL Test
+      REQUIRED
+    )
+  endif()
   find_package(
-    Qt5 ${QT_MIN_VERSION}
+    Qt${QT_VERSION_MAJOR} ${_qt_min_version}
     COMPONENTS Core Gui Widgets OpenGL Test
     REQUIRED
   )
-  if(Qt5_FOUND)
-    message(STATUS "Found Qt ${Qt5_VERSION}: ${Qt5_DIR}")
+  if(QT_VERSION_MAJOR EQUAL 6)
+    # QOpenGLWidget moved out of the OpenGL module into its own module in Qt6
+    find_package(
+      Qt6
+      COMPONENTS OpenGLWidgets
+      REQUIRED
+    )
   endif()
+  message(STATUS "Found Qt ${Qt${QT_VERSION_MAJOR}_VERSION}: ${Qt${QT_VERSION_MAJOR}_DIR}")
   if(BUILD_MANTIDQT)
-    find_package(QScintillaQt5 REQUIRED)
+    find_package(QScintillaQt${QT_VERSION_MAJOR} REQUIRED)
   endif()
-  find_package(PyQt5 REQUIRED)
+  find_package(PyQt${QT_VERSION_MAJOR} REQUIRED)
   find_package(SIP REQUIRED)
-  separate_arguments(PYQT5_SIP_FLAGS)
-  # Disable use of C++ API deprecated up to and including Qt 5.15
-  add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x060000)
+  if(QT_VERSION_MAJOR EQUAL 5)
+    # Only the legacy sip<=v4 PyQt5 path consumes these flags
+    separate_arguments(PYQT5_SIP_FLAGS)
+  endif()
+  # Disable use of C++ API deprecated before the given version. Use the same 5.15 baseline for both builds: under Qt6
+  # this keeps APIs deprecated in 6.x (e.g. QMouseEvent::pos(), QVariant::Type) available, so the migration can defer
+  # cleaning those up - only APIs actually *removed* in Qt6 must be fixed.
+  add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
 endif()
 
 # Now add in all the components

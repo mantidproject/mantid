@@ -7,6 +7,7 @@
 
 import unittest
 
+from qtpy.QtCore import Qt
 from qtpy.QtGui import QStandardItem, QStandardItemModel
 
 from mantidqtinterfaces.dns_powder_elastic.data_structures.dns_plot_list import DNSPlotListModel
@@ -31,10 +32,10 @@ class DNSPlotListModelTest(unittest.TestCase):
         self.assertIsInstance(self.plm, QStandardItemModel)
 
     def test_get_checked_item_names(self):
-        self.item.setCheckState(False)
+        self.item.setCheckState(Qt.CheckState.Unchecked)
         test_v = self.plm.get_checked_item_names()
         self.assertEqual(test_v, [])
-        self.item.setCheckState(True)
+        self.item.setCheckState(Qt.CheckState.Checked)
         test_v = self.plm.get_checked_item_names()
         self.assertEqual(test_v, ["_magnetic"])
 
@@ -47,10 +48,10 @@ class DNSPlotListModelTest(unittest.TestCase):
         self.assertEqual(test_v, ["_magnetic", "def_sf"])
 
     def test_uncheck_items(self):
-        self.item.setCheckState(True)
+        self.item.setCheckState(Qt.CheckState.Checked)
         self.plm.uncheck_items()
-        self.assertFalse(self.item.checkState())
-        self.assertFalse(self.item2.checkState())
+        self.assertEqual(self.item.checkState(), Qt.CheckState.Unchecked)
+        self.assertEqual(self.item2.checkState(), Qt.CheckState.Unchecked)
 
     def test_set_items(self):
         self.plm.set_items(["_magnetic", "def_sf", "hij"])
@@ -59,67 +60,67 @@ class DNSPlotListModelTest(unittest.TestCase):
 
     def test_get_checked_item_numbers(self):
         self.assertEqual(self.plm.get_checked_item_numbers(), [])
-        self.item.setCheckState(1)
-        self.item2.setCheckState(0)
+        self.item.setCheckState(Qt.CheckState.Checked)
+        self.item2.setCheckState(Qt.CheckState.Unchecked)
         self.assertEqual(self.plm.get_checked_item_numbers(), [0])
 
     def test_down(self):
-        self.item.setCheckState(1)
-        self.item2.setCheckState(0)
+        self.item.setCheckState(Qt.CheckState.Checked)
+        self.item2.setCheckState(Qt.CheckState.Unchecked)
         self.plm.down()
-        self.assertFalse(self.item.checkState())
-        self.assertTrue(self.item2.checkState())
+        self.assertEqual(self.item.checkState(), Qt.CheckState.Unchecked)
+        self.assertNotEqual(self.item2.checkState(), Qt.CheckState.Unchecked)
         self.plm.down()
-        self.assertTrue(self.item2.checkState())
-        self.item2.setCheckState(0)
+        self.assertNotEqual(self.item2.checkState(), Qt.CheckState.Unchecked)
+        self.item2.setCheckState(Qt.CheckState.Unchecked)
         self.plm.down()
-        self.assertFalse(self.item2.checkState())
-        self.assertTrue(self.item.checkState())
-        self.item2.setCheckState(1)
-        self.item.setCheckState(1)
+        self.assertEqual(self.item2.checkState(), Qt.CheckState.Unchecked)
+        self.assertNotEqual(self.item.checkState(), Qt.CheckState.Unchecked)
+        self.item2.setCheckState(Qt.CheckState.Checked)
+        self.item.setCheckState(Qt.CheckState.Checked)
         self.plm.down()
-        self.assertFalse(self.item2.checkState())
-        self.assertTrue(self.item.checkState())
+        self.assertEqual(self.item2.checkState(), Qt.CheckState.Unchecked)
+        self.assertNotEqual(self.item.checkState(), Qt.CheckState.Unchecked)
 
     def test_up(self):
-        self.item.setCheckState(0)
-        self.item2.setCheckState(1)
+        self.item.setCheckState(Qt.CheckState.Unchecked)
+        self.item2.setCheckState(Qt.CheckState.Checked)
         self.plm.up()
-        self.assertFalse(self.item2.checkState())
-        self.assertTrue(self.item.checkState())
+        self.assertEqual(self.item2.checkState(), Qt.CheckState.Unchecked)
+        self.assertNotEqual(self.item.checkState(), Qt.CheckState.Unchecked)
         self.plm.up()
-        self.assertFalse(self.item2.checkState())
-        self.assertTrue(self.item.checkState())
-        self.item.setCheckState(0)
+        self.assertEqual(self.item2.checkState(), Qt.CheckState.Unchecked)
+        self.assertNotEqual(self.item.checkState(), Qt.CheckState.Unchecked)
+        self.item.setCheckState(Qt.CheckState.Unchecked)
         self.plm.up()
-        self.assertFalse(self.item.checkState())
-        self.assertTrue(self.item2.checkState())
-        self.item2.setCheckState(1)
-        self.item.setCheckState(1)
+        self.assertEqual(self.item.checkState(), Qt.CheckState.Unchecked)
+        self.assertNotEqual(self.item2.checkState(), Qt.CheckState.Unchecked)
+        self.item2.setCheckState(Qt.CheckState.Checked)
+        self.item.setCheckState(Qt.CheckState.Checked)
         self.plm.up()
-        self.assertFalse(self.item.checkState())
-        self.assertTrue(self.item2.checkState())
+        self.assertEqual(self.item.checkState(), Qt.CheckState.Unchecked)
+        self.assertNotEqual(self.item2.checkState(), Qt.CheckState.Unchecked)
 
     def test_check_first(self):
-        self.item.setCheckState(0)
-        self.item2.setCheckState(0)
+        self.item.setCheckState(Qt.CheckState.Unchecked)
+        self.item2.setCheckState(Qt.CheckState.Unchecked)
         self.plm.check_first()
-        self.assertTrue(self.item.checkState())
-        self.assertFalse(self.item2.checkState())
+        self.assertNotEqual(self.item.checkState(), Qt.CheckState.Unchecked)
+        self.assertEqual(self.item2.checkState(), Qt.CheckState.Unchecked)
 
     def test_check_separated(self):
-        self.item.setCheckState(0)
-        self.item2.setCheckState(1)
+        self.item.setCheckState(Qt.CheckState.Unchecked)
+        self.item2.setCheckState(Qt.CheckState.Checked)
         self.plm.check_separated()
-        self.assertTrue(self.item.checkState())
-        self.assertFalse(self.item2.checkState())
+        self.assertNotEqual(self.item.checkState(), Qt.CheckState.Unchecked)
+        self.assertEqual(self.item2.checkState(), Qt.CheckState.Unchecked)
 
     def test_check_raw(self):
-        self.item.setCheckState(1)
-        self.item2.setCheckState(0)
+        self.item.setCheckState(Qt.CheckState.Checked)
+        self.item2.setCheckState(Qt.CheckState.Unchecked)
         self.plm.check_raw()
-        self.assertTrue(self.item2.checkState())
-        self.assertFalse(self.item.checkState())
+        self.assertNotEqual(self.item2.checkState(), Qt.CheckState.Unchecked)
+        self.assertEqual(self.item.checkState(), Qt.CheckState.Unchecked)
 
 
 if __name__ == "__main__":

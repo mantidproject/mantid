@@ -52,7 +52,7 @@ set(UI_FILES inc/MantidQtWidgets/MplCpp/Colorbar.ui)
 # Target
 mtd_add_qt_library(
   TARGET_NAME MantidQtWidgetsMplCpp
-  QT_VERSION 5
+  QT_VERSION ${MANTID_QT_VERSION}
   SRC ${LIB_SRCS}
   MOC ${MOC_HEADERS}
   NOMOC ${NOMOC_HEADERS}
