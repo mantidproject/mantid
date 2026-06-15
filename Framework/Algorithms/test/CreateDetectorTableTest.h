@@ -505,6 +505,45 @@ public:
     TS_ASSERT_EQUALS(seenIds.size(), ws->rowCount());
   }
 
+  void test_populateTableByDetID_pads_missing_detector_rows_with_invalid_values() {
+    // When a detector in detectorInfo is not mapped to any spectrum,
+    // populateTableByDetID should write a placeholder row with wsIndex=-1,
+    // specNo=-1, the correct detId, and isMonitor="n/a".
+    Workspace2D_sptr inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
+    // Clear detector IDs from spectrum 0 so det ID 1 is present in
+    // detectorInfo but not referenced by any spectrum.
+    inputWS->getSpectrum(0).clearDetectorIDs();
+
+    std::string outWSName = "det_id_padding_test";
+    CreateDetectorTable alg;
+    alg.setAlwaysStoreInADS(false);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(inputWS)));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OneRowPerDetectorID", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DetectorTableWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    TableWorkspace_sptr ws = alg.getProperty("DetectorTableWorkspace");
+    TS_ASSERT(ws);
+    if (!ws)
+      return;
+
+    // Row count equals detector count in the instrument, not the number of
+    // spectra with valid detector mappings.
+    TS_ASSERT_EQUALS(ws->rowCount(), 2);
+
+    // Row 0: det ID 1, cleared from spectrum 0 → padded with invalid sentinel values.
+    TS_ASSERT_EQUALS(ws->cell<int>(0, 0), -1);            // wsIndex sentinel
+    TS_ASSERT_EQUALS(ws->cell<int>(0, 1), -1);            // specNo sentinel
+    TS_ASSERT_EQUALS(ws->cell<int>(0, 2), 1);             // detId preserved from instrument
+    TS_ASSERT_EQUALS(ws->cell<std::string>(0, 6), "n/a"); // isMonitor sentinel
+
+    // Row 1: det ID 2, still mapped to spectrum 1 → valid data.
+    TS_ASSERT_EQUALS(ws->cell<int>(1, 1), 2); // specNo=2
+    TS_ASSERT_EQUALS(ws->cell<int>(1, 2), 2); // detId=2
+  }
+
   void test_populateTableByDetID_monitor_physics_via_calculateWsIdxData() {
     // Exercises calculateWsIdxData through the populateTableByDetID code path:
     // monitor rows should carry positive R and theta=180.

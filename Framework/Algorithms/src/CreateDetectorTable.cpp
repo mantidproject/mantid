@@ -406,6 +406,10 @@ void CreateDetectorTable::populateTableByDetID() {
     detIdToRow[wsDetIds[r]] = r;
 
   std::vector<DetectorRowData> rowData(wsDetIds.size());
+  // uint8_t avoids the bit-packing (multiple bools in one byte) of vector<bool>,
+  // which would cause data races when parallel threads write to adjacent indices
+  // in the same byte.
+  std::vector<uint8_t> writtenToRow(wsDetIds.size(), 0);
 
   PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*ws))
   for (int i = 0; i < static_cast<int>(workspaceIndices.size()); i++) {
@@ -434,11 +438,26 @@ void CreateDetectorTable::populateTableByDetID() {
       if (it != detIdToRow.end()) {
         rowData[it->second] = data;
         rowData[it->second].detIds = {detId};
+        writtenToRow[it->second] = true;
       }
     }
     PARALLEL_END_INTERRUPT_REGION
   }
   PARALLEL_CHECK_INTERRUPT_REGION
+
+  for (size_t tableRow = 0; tableRow < rowData.size(); ++tableRow) {
+    if (!writtenToRow[tableRow]) {
+      DetectorRowData errorData;
+      errorData.wsIndex = -1;
+      errorData.specNo = -1;
+      errorData.detIds = {wsDetIds[tableRow]};
+      errorData.timeIndexes = "0";
+      errorData.dataY0 = 0;
+      errorData.dataE0 = 0;
+      errorData.isMonitor = "n/a";
+      rowData[tableRow] = errorData;
+    }
+  }
 
   // Write rows in order of component index
   // Number of rows matches number of detectorIDs exactly
