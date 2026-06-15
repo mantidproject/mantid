@@ -17,6 +17,17 @@ it is crucial to have the correct instrument attached to the first run.
 In addition the s1 (omega rotation), duration, run_number and monitor count is read from every
 file and included in the logs of the OutputWorkspace.
 
+During a recent feature expansion, normalization can be optionally performed in the same process
+provided that the necessary Vanadium data is specified.
+By default, the algorithm will try to locate the Vanadium data using IPTS and run number.
+If failed, it will check the Vanadium filename entry to see if the data can be loaded directly
+from file.
+If neither is provided, the algorithm will try to check if the Vanadium data is provided as a
+workspace in memory.
+Currently there are three normalization scheme supported: by Count, by Monitor and by Time.
+If None is selected, no normalization will be performed and all normalization related properties
+will be ignored (on the GUI end, they will be disabled instead).
+
 If the "HB2C:CS:CrystalAlign:UBMatrix" property exists and apply goniometer tilt is true,
 it will be converted into the OrientedLattice on the OutputWorkspace.
 The goniometer tilts (sgu and sgl) are combined into the UB Matrix so that only omega (s1) needs to
