@@ -1,1 +1,0 @@
-- :ref:`IkedaCarpenterPV <func-IkedaCarpenterPV>` peak function now supports analytical derivative calculation, for more information see :ref:`IkedaCarpenterPV <func-IkedaCarpenterPV-derivative>`.

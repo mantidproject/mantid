@@ -1,1 +1,0 @@
-- Rebinning operations (such as in ``Rebin`` or ``RebinRagged``) that specify a range with a start and end value that are not in the correct order (start < end) will now throw an exception instead of silently producing incorrect results. This is to prevent users from accidentally specifying invalid rebinning parameters and getting unexpected outputs.

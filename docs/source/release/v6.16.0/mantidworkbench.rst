@@ -13,7 +13,7 @@ Bugfixes
 --------
 - (`#41303 <https://github.com/mantidproject/mantid/pull/41303>`_) The :ref:`Error Bars Settings <PlotSettings>` (CapSize, Cap Thickness, Width, Error Every) are now correctly applied when plotting a spectrum with errors.
 - (`#41295 <https://github.com/mantidproject/mantid/pull/41295>`_) :ref:`Colorfill Plots <Colorfill_Plots>` now allow over plotting with a ``TableWorkspace``, issuing a warning instead of raising an exception.
-- (`#41515 <https://github.com/mantidproject/mantid/pull/41515>`_) The :ref:`algm-StartLiveData` GUI no longer crashes when processing is set to **algorithm** and the user is searching for an algorithm in the dropdown menu in the ``Processing Step`` tab.
+- (`#41515 <https://github.com/mantidproject/mantid/pull/41515>`_) The :ref:`algm-StartLiveData` GUI no longer crashes when processing is set to ``algorithm`` and the user is searching for an algorithm in the dropdown menu in the ``Processing Step`` tab.
 - (`#41389 <https://github.com/mantidproject/mantid/pull/41389>`_) The :ref:`Messages Window <WorkbenchMessagesWindow>` now prints logs that are more readable in both *light* and *dark* mode at all logging levels.
 - (`#41083 <https://github.com/mantidproject/mantid/pull/41083>`_) The :ref:`Superplot <WorkbenchSuperplot>` documentation is now correctly launched when the plot is a ``Superplot`` and the *Help* button is clicked.
 
@@ -23,6 +23,14 @@ InstrumentViewer
 
 New features
 ############
+
+.. figure:: ../../images/6_16_release/points-vs-shapes.png
+   :width: 85%
+   :align: center
+   :alt: Comparison of detectors rendered as points versus shapes
+
+   Detectors rendered as points versus as their actual shapes
+
 - Updates to the **new** Instrument Viewer:
     - (`#41169 <https://github.com/mantidproject/mantid/pull/41169>`_) Peak selection no longer requires constantly clicking buttons for adding and deleting peaks. Now peak selection is triggered with a peak selection mode that lets you continually select detectors and add (left mouse click) and delete (right mouse click) peaks without extra clicking or moving the mouse around.
     - (`#41437 <https://github.com/mantidproject/mantid/pull/41437>`_) The Detector Info box now shows up at the bottom and is hidden when no detectors are selected or when too many detectors (more than 3) are selected. This should reduce the visual clutter on the GUI.
@@ -41,9 +49,9 @@ Bugfixes
 ############
 - Issues resolved for the **new** Instrument Viewer:
     - (`#40834 <https://github.com/mantidproject/mantid/pull/40834>`_) The mouse wheel events on the projection and units combo boxes are no longer triggered when the mouse is hovering over them. This prevents the projection and units from being changed unintentionally when scrolling with the mouse wheel.
-    - (`#41051 <https://github.com/mantidproject/mantid/pull/41051>`_) Now no longer crashes when a ``LOQ`` workspace is open and side-by-side projection is selected.
-    - (`#41221 <https://github.com/mantidproject/mantid/pull/41221>`_) Now no longer crashes when the integration range is edited through text boxes and window is closed.
-    - (`#41413 <https://github.com/mantidproject/mantid/pull/41413>`_) now no longer crashes when masking all detectors.
+    - (`#41051 <https://github.com/mantidproject/mantid/pull/41051>`_) No longer crashes when a ``LOQ`` workspace is open and side-by-side projection is selected.
+    - (`#41221 <https://github.com/mantidproject/mantid/pull/41221>`_) No longer crashes when the integration range is edited through text boxes and window is closed.
+    - (`#41413 <https://github.com/mantidproject/mantid/pull/41413>`_) No longer crashes when masking all detectors.
     - (`#41201 <https://github.com/mantidproject/mantid/pull/41201>`_) Now exits without an error message when the interface is closed while certain operations are still processing.
 
 
@@ -52,9 +60,7 @@ SliceViewer
 
 New features
 ############
-- (`#41314 <https://github.com/mantidproject/mantid/pull/41314>`_) The :ref:`SliceViewer <sliceviewer>` now supports ``inverted`` masking using the *rectangular, elliptical and polygonal* masking selectors.
+- (`#41314 <https://github.com/mantidproject/mantid/pull/41314>`_) The :ref:`SliceViewer <sliceviewer>` now supports ``inverted`` masking using the *rectangular*, *elliptical* and *polygonal* masking selectors.
 
-Bugfixes
-############
 
 :ref:`Release 6.16.0 <v6.16.0>`

@@ -1,1 +1,0 @@
-- In documentation for :ref:`DiffSphere <func-DiffSphere>`, :ref:`EISFDiffSphere <func-EISFDiffSphere>`, :ref:`EISFDiffSphereAlkyl <func-EISFDiffSphereAlkyl>` and :ref:`ElasticDiffSphere <func-ElasticDiffSphere>` fix typos in function formula. And code cleanups in :ref:`EISFDiffSphere <func-EISFDiffSphere>`.

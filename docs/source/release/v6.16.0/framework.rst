@@ -21,7 +21,6 @@ New features
 Bugfixes
 ############
 - (`#41202 <https://github.com/mantidproject/mantid/pull/41202>`_) A bug in :ref:`WeightedMeanOfWorkspace <algm-WeightedMeanOfWorkspace>` where output errors were computed as :math:`\sqrt{\mathrm{weightSum}}` instead of :math:`1/\sqrt{\mathrm{weightSum}}` has been corrected. This affects :ref:`DgsReduction <algm-DgsReduction>` (including the Absolute Units tab in the GUI), DPDFReduction, and :ref:`MDNorm <algm-MDNorm>` workflows. **Warning:** Results from previous releases may contain inflated uncertainties and should be reprocessed.
-- (`#40975 <https://github.com/mantidproject/mantid/pull/40975>`_) :ref:`SaveSESANS <algm-SaveSESANS>` and :ref:`SaveCanSAS1D <algm-SaveCanSAS1D>` have been updated to include the decimal point (i.e ``1.0``) when outputting data, even if the data is an integer.
 - (`#40712 <https://github.com/mantidproject/mantid/pull/40712>`_) :ref:`ConjoinWorkspaces <algm-ConjoinWorkspaces>` no longer has a fencepost (off-by-one) error when determining spectrum numbers.
 - (`#40755 <https://github.com/mantidproject/mantid/pull/40755>`_) :ref:`LoadEmptyInstrument <algm-LoadEmptyInstrument>` will now load instruments from a wider class of NeXus files.
 - (`#40817 <https://github.com/mantidproject/mantid/pull/40817>`_) :ref:`FileFinder <mantid.api.FileFinderImpl>` has been updated to more reliably determine the instrument from the hint, particularly when the instrument name contains digits.
@@ -29,7 +28,6 @@ Bugfixes
 - (`#40855 <https://github.com/mantidproject/mantid/pull/40855>`_) A performance issue in :ref:`MaskDetectors <algm-MaskDetectors>`, when using a :ref:`MatrixWorkspace <mantid.api.MatrixWorkspace>` as the source of the mask, has been fixed.
 - (`#40963 <https://github.com/mantidproject/mantid/pull/40963>`_) :ref:`LoadEventAsWorkspace2D <algm-LoadEventAsWorkspace2D>` now updates the run duration log when using parameters ``FilterByTimeStart`` and/or ``FilterByTimeStop``. The behaviour is now consistent with :ref:`LoadEventNexus <algm-LoadEventNexus>` when using the same parameters.
 - (`#40963 <https://github.com/mantidproject/mantid/pull/40963>`_) Loading with :ref:`LoadEventAsWorkspace2D <algm-LoadEventAsWorkspace2D>` and :ref:`LoadEventNexus <algm-LoadEventNexus>` with time filtering, when there are banks with no events in that time range, no longer causes the loading to hang.
-- (`#40856 <https://github.com/mantidproject/mantid/pull/40856>`_) :ref:`GenerateFlatCellWorkspaceLOQ <algm-GenerateFlatCellWorkspaceLOQ>` has been updated so that the output is prepended with the monitor spectra. An option to save the output using :ref:`SaveRKH <algm-SaveRKH>` has also been added (``OutputFlatCellFilePath``).
 - (`#41039 <https://github.com/mantidproject/mantid/pull/41039>`_) :ref:`SumSpectra <algm-SumSpectra>` has been updated to correctly propagate errors for weighted sum calculations.
 - (`#41131 <https://github.com/mantidproject/mantid/pull/41131>`_) :ref:`algm-EnggEstimateFocussedBackground` will no longer throw an error related to writing to a read-only destination.
 - (`#41150 <https://github.com/mantidproject/mantid/pull/41150>`_) :ref:`MaskBTP <algm-MaskBTP>` now supports name and short-name for instrument IMAGINE.
@@ -39,12 +37,8 @@ Bugfixes
 - (`#41330 <https://github.com/mantidproject/mantid/pull/41330>`_) Rebinning operations (such as in :ref:`algm-Rebin` or :ref:`algm-RebinRagged`) that specify a range with a start and end value that are not in the correct order (start < end) will now throw an exception instead of silently producing incorrect results.
 - (`#41343 <https://github.com/mantidproject/mantid/pull/41343>`_) :ref:`algm-BinMD`, :ref:`algm-SliceMD`, and :ref:`algm-MDNorm` will throw an error if the total number of bins requested is larger than the available memory.
 - (`#41517 <https://github.com/mantidproject/mantid/pull/41517>`_) A bug in :ref:`MDNorm <algm-MDNorm>` involving a missing matrix inversion during the symmetry operation has been fixed.
+- (`#41266 <https://github.com/mantidproject/mantid/pull/41266>`_) In :ref:`algm-SaveNexusProcessed` the saving for Event Data now correctly uses the ``WorkspaceIndexList`` when one is provided.
 
-Deprecated
-############
-
-Removed
-############
 
 Fit Functions
 -------------
@@ -53,15 +47,6 @@ New features
 ############
 - (`#41167 <https://github.com/mantidproject/mantid/pull/41167>`_) The :ref:`IkedaCarpenterPV <func-IkedaCarpenterPV>` peak function now supports analytical derivative calculation, for more information see :ref:`IkedaCarpenterPV <func-IkedaCarpenterPV-derivative>`.
 - (`#41416 <https://github.com/mantidproject/mantid/pull/41416>`_) The ``PDF`` parameter of the :ref:`FABADA Minimizer <FABADA>` has been changed from a bool to a string. This allows the user to specify the name of the output workspace for the PDF.
-
-Bugfixes
-############
-
-Deprecated
-############
-
-Removed
-############
 
 
 Data Objects
@@ -95,19 +80,15 @@ Dependencies
 
 New features
 ############
+- (`#41058 <https://github.com/mantidproject/mantid/pull/41058>`_) Upgraded Python to 3.12. See the changes made to Python `here <https://docs.python.org/3/whatsnew/3.12.html>`__.
+- (`#41153 <https://github.com/mantidproject/mantid/pull/41153>`_) Updated Matplotlib from version 3.9 to version 3.10. The release notes for `version 3.10 can be found here <https://matplotlib.org/stable/users/prev_whats_new/whats_new_3.10.0.html>`_.
 - (`#40737 <https://github.com/mantidproject/mantid/pull/40737>`_) Add support for Markdown in developer docs using `myst-parser <https://myst-parser.readthedocs.io/en/latest/index.html>`_.
 - (`#40766 <https://github.com/mantidproject/mantid/pull/40766>`_) Add :ref:`mantidprofiler <AlgorithmProfiler>` as a developer dependency on linux.
 - (`#40771 <https://github.com/mantidproject/mantid/pull/40771>`_) The memory allocator set by ``LD_PRELOAD`` has been change from ``jemalloc`` to ``tbbmalloc``.
-- (`#41058 <https://github.com/mantidproject/mantid/pull/41058>`_) Upgraded Python to 3.12. See the changes made to python `here <https://docs.python.org/3/whatsnew/3.12.html>`__.
 - (`#41017 <https://github.com/mantidproject/mantid/pull/41017>`_) Remove dependency ``pytz`` to prefer using Python's built-in ``zoneinfo`` for time zone information.
 - (`#41034 <https://github.com/mantidproject/mantid/pull/41034>`_) Remove ``python-dateutil`` in favor of Python's ``datetime`` module.
 - (`#41071 <https://github.com/mantidproject/mantid/pull/41071>`_) New configuration files have been added for GitHub Copilot.
 - (`#41110 <https://github.com/mantidproject/mantid/pull/41110>`_) Move to `euphonic <https://github.com/pace-neutrons/Euphonic>`_ v1.6.0.
-- (`#41153 <https://github.com/mantidproject/mantid/pull/41153>`_) Updated Matplotlib from version 3.9 to version 3.10. The release notes for `version 3.10 can be found here <https://matplotlib.org/stable/users/prev_whats_new/whats_new_3.10.0.html>`_.
-
-Bugfixes
-############
-
 
 Nexus
 -----

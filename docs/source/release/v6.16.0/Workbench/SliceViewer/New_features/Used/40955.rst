@@ -1,1 +1,0 @@
-- Updated the :ref:`SliceViewer <sliceviewer>` to support inverted masking using the rectangular, elliptical and polygonal masking selectors.

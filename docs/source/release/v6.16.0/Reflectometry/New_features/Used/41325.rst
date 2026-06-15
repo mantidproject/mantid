@@ -1,1 +1,0 @@
-- A new version of :ref:`algm-ReflectometryReductionOne-v3` has been introduced. This version of the algorithm is tasked based, and therefore a new property ``TaskExecutionOrder`` can be specified, enabling advanced users to customise the algorithm workflow.

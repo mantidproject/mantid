@@ -7,7 +7,7 @@ Powder Diffraction
 
 New features
 ############
-- (`#41373 <https://github.com/mantidproject/mantid/pull/41373>`_) Version 2 of the :ref:`PEARLTransfit <algm-PEARLTransfit-v2>` algorithm has been added, with improvements in input/output properties management.
+- (`#41373 <https://github.com/mantidproject/mantid/pull/41373>`_) Version 2 of the :ref:`PEARLTransfit <algm-PEARLTransfit-v2>` algorithm has been added, with improvements in input/output property management.
 - (`#41404 <https://github.com/mantidproject/mantid/pull/41404>`_) The ``PawleyPattern`` classes have some new getter/setter methods.
 
   - ``get_profile_param``/``set_profile_param`` and ``get_profile_free_param``/``set_profile_free_param`` functions to support setting profile parameters and fixing free parameters for a given phase through a profile parameter label.
@@ -18,6 +18,8 @@ New features
 - (`#41035 <https://github.com/mantidproject/mantid/pull/41035>`_) The :ref:`POLARIS ISIS Powder Scripts <create_total_scattering_pdf_polaris-isis-powder-ref>` have a new option in ``create_total_scattering_pdf``. Entering values for the ``stitch_points``, ``overlap_width``, and ``stitch_lims`` parameters will allow the output workspace to be stitched without rebinning when ``merge_banks`` is set.
 - (`#41070 <https://github.com/mantidproject/mantid/pull/41070>`_) :ref:`algm-LoadDiffCal` no longer requires the instrument to be resolvable. If the instrument definition file cannot be found or loaded, the grouping and mask workspaces are created directly from the detector IDs stored in the calibration file. This also includes a change to :ref:`algm-AlignAndFocusPowderSlim` to skip the instrument for loading the calibration information.
 - (`#41278 <https://github.com/mantidproject/mantid/pull/41278>`_) The new algorithm :ref:`algm-CylinderAbsorptionCW` was added for calculating absorption and multiple scattering corrections for cylindrical samples with constant wavelength and in-plane scattering only.
+- (`#41399 <https://github.com/mantidproject/mantid/pull/41399>`_) :ref:`algm-AlignAndFocusPowderFromFiles` has a new ``AllowSlimProcess`` property (default ``True``). When enabled and the inputs are compatible, the algorithm delegates the reduction to :ref:`algm-AlignAndFocusPowderSlim` for significantly faster processing (seconds versus tens of minutes for large datasets). Set ``AllowSlimProcess=False`` to always use the standard reduction path.
+
 
 Bugfixes
 ############
@@ -47,15 +49,12 @@ Single Crystal Diffraction
 
 New features
 ############
-- (`#41375 <https://github.com/mantidproject/mantid/pull/40901>`_)
-
-  - Updated the IDF for MANDI with the latest detector positions calibrated with garnet.
-  - :ref:`algm-HB3AAdjustSampleNorm` now supports an optional ``OutputGroupingWorkspace`` property that produces a ``GroupingWorkspace`` mapping each ungrouped detector to its pixel group when ``Grouping`` is set to ``2x2`` or ``4x4``.
-  - :ref:`algm-LoadWANDSCD` now supports an optional ``OutputGroupingWorkspace`` property that produces a ``GroupingWorkspace`` mapping each ungrouped detector to its pixel group when ``Grouping`` is set to ``2x2`` or ``4x4``.
+  - (`#40901 <https://github.com/mantidproject/mantid/pull/40901>`_) Updated the IDF for MANDI with the latest detector positions calibrated with garnet.
+  - (`#41375 <https://github.com/mantidproject/mantid/pull/41375>`_) :ref:`algm-HB3AAdjustSampleNorm` and :ref:`algm-LoadWANDSCD` now support an optional ``OutputGroupingWorkspace`` property that produces a ``GroupingWorkspace`` mapping each ungrouped detector to its pixel group when ``Grouping`` is set to ``2x2`` or ``4x4``.
 
 
 Bugfixes
 ############
-- (`#41005 <https://github.com/mantidproject/mantid/pull/41005>`_) :ref:`algm-IntegratePeaksMD` now better handles un-indexed peaks in HKL mode, warnings are given and numeric issues with ellipse finding are avoided by falling back to spherical integration.
+- (`#41005 <https://github.com/mantidproject/mantid/pull/41005>`_) :ref:`algm-IntegratePeaksMD` now better handles un-indexed peaks in HKL mode; warnings are given and numeric issues with ellipse finding are avoided by falling back to spherical integration.
 
 :ref:`Release 6.16.0 <v6.16.0>`
