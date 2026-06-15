@@ -7,7 +7,6 @@
 from mantidqtinterfaces.Muon.GUI.Common.phase_table_widget.phase_table_view import REAL_PART, IMAGINARY_PART
 from mantidqt.utils.observer_pattern import Observable, GenericObserver, GenericObservable
 import re
-from qtpy.QtCore import Qt
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming import get_fitting_workspace_name, get_run_number_from_workspace_name
 from mantidqtinterfaces.Muon.GUI.Common.utilities.run_string_utils import valid_name_regex
 
@@ -276,9 +275,8 @@ class PhaseTablePresenter(object):
 
     def handle_phasequad_table_data_changed(self, row, col):
         """Handles when either Analyse checkbox is changed"""
-        item = self.view.get_table_item(row, col)
         name = self.view.get_table_item_text(row, 0)
-        is_added = item.checkState() == Qt.CheckState.Checked
+        is_added = self.view.get_table_item_checked(row, col)
         for phasequad in self.model.group_phasequads:
             if phasequad.name == name:
                 if col == REAL_PART:

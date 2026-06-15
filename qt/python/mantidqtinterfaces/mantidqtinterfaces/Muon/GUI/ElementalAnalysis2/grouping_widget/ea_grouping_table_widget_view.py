@@ -234,6 +234,9 @@ class EAGroupingTableView(QtWidgets.QWidget):
     def get_table_item(self, row, col):
         return self.grouping_table.item(row, col)
 
+    def get_table_item_checked(self, row, col):
+        return self.get_table_item(row, col).checkState() == QtCore.Qt.Checked
+
     def set_to_analyse_state(self, row, state):
         checked_state = QtCore.Qt.Checked if state is True else QtCore.Qt.Unchecked
         item = self.get_table_item(row, INVERSE_GROUP_TABLE_COLUMNS["to_analyse"])

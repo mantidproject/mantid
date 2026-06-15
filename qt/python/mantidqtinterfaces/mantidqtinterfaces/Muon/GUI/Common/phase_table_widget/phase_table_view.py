@@ -358,6 +358,9 @@ class PhaseTableView(QtWidgets.QWidget):
     def get_table_item(self, row, col):
         return self.phasequad_table.item(row, col)
 
+    def get_table_item_checked(self, row, col):
+        return self.get_table_item(row, col).checkState() == QtCore.Qt.Checked
+
     def get_table_item_text(self, row, col):
         return str(self.phasequad_table.item(row, col).text())
 

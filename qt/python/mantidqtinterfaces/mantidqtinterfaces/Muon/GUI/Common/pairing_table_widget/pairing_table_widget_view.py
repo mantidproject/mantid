@@ -258,6 +258,9 @@ class PairingTableView(QtWidgets.QWidget):
     def get_table_item(self, row, col):
         return self.pairing_table.item(row, col)
 
+    def get_table_item_checked(self, row, col):
+        return self.get_table_item(row, col).checkState() == QtCore.Qt.Checked
+
     def set_widget_enabled(self, row, col, enabled):
         cell_widget = self.pairing_table.cellWidget(row, col)
         cell_widget.setEnabled(enabled)

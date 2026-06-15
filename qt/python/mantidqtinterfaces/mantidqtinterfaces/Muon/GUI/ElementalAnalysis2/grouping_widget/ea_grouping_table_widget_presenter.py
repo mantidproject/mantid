@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import re
-from qtpy.QtCore import Qt
 from mantidqtinterfaces.Muon.GUI.Common.utilities import run_string_utils as run_utils
 from mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.ea_group import EAGroup
 from mantidqt.utils.observer_pattern import GenericObservable
@@ -95,17 +94,17 @@ class EAGroupingTablePresenter(object):
         changed_item = self._view.get_table_item(row, col)
         workspace_name = self._view.get_table_item(row, INVERSE_GROUP_TABLE_COLUMNS["workspace_name"]).text()
 
-        to_analyse_changed = self.handle_to_analyse_column_changed(col, changed_item, workspace_name)
+        to_analyse_changed = self.handle_to_analyse_column_changed(row, col, workspace_name)
         self.handle_rebin_column_changed(col, row, changed_item)
         self.handle_rebin_option_column_changed(col, changed_item, workspace_name)
 
         self.handle_update(to_analyse_changed)
 
-    def handle_to_analyse_column_changed(self, col, changed_item, workspace_name):
+    def handle_to_analyse_column_changed(self, row, col, workspace_name):
         to_analyse_changed = False
         if col == INVERSE_GROUP_TABLE_COLUMNS["to_analyse"]:
             to_analyse_changed = True
-            self.to_analyse_data_checkbox_changed(changed_item.checkState(), workspace_name)
+            self.to_analyse_data_checkbox_changed(self._view.get_table_item_checked(row, col), workspace_name)
         return to_analyse_changed
 
     def handle_rebin_column_changed(self, col, row, changed_item):
@@ -164,8 +163,7 @@ class EAGroupingTablePresenter(object):
 
         self._view.enable_updates()
 
-    def to_analyse_data_checkbox_changed(self, state, group_name):
-        group_added = state == Qt.CheckState.Checked
+    def to_analyse_data_checkbox_changed(self, group_added, group_name):
         if group_added:
             self._model.add_group_to_analysis(group_name)
         else:
