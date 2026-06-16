@@ -426,17 +426,24 @@ void ParameterMap::addFittingParameter(const IComponent *comp, const std::string
         if (existing->type() == "fitting" && strcasecmp(existing->nameAsCString(), name.c_str()) == 0) {
           try {
             if (existing->value<FitParameter>().getFunction() == fittingFunction) {
+              g_log.debug() << "addFittingParameter: [replace] matched existing (name='" << name << "', function='"
+                            << fittingFunction << "') on component '" << comp->getName() << "'; overwriting in place\n";
               std::atomic_store(&(itr->second), param);
               return;
             }
           } catch (...) {
-            // Not a FitParameter value despite the type tag, fall through to insert.
+            // Not a FitParameter value despite the type tag
+            g_log.debug() << "addFittingParameter: [skip-match] existing 'fitting' entry (name='" << name
+                          << "') on component '" << comp->getName()
+                          << "' did not hold a FitParameter value; ignoring it and continuing search\n";
           }
         }
       }
     }
   }
 
+  g_log.debug() << "addFittingParameter: [insert] no existing match for (name='" << name << "', function='"
+                << fittingFunction << "') on component '" << comp->getName() << "'; adding new entry\n";
   m_map.insert({comp->getComponentID(), param});
 }
 
