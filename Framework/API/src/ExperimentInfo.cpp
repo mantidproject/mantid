@@ -365,7 +365,6 @@ void ExperimentInfo::populateInstrumentParameters() {
   // particular, we cannot directly change DetectorInfo since the order of
   // rotation components is not guaranteed.
   for (const auto &item : paramInfoFromIDF) {
-    const auto &nameComp = item.first;
     const auto &paramInfo = item.second;
     // Use the parameter's short name (e.g. "Alpha0"), not the cache key. The cache key may be
     // function-qualified (e.g. "IkedaCarpenterPV:Alpha0") to keep two functions on the same
@@ -397,7 +396,7 @@ void ExperimentInfo::populateInstrumentParameters() {
         populateWithParameter(paramMap, paramMapForPosAndRot, paramN, *paramInfo, runData);
       }
     } catch (std::exception &exc) {
-      g_log.information() << "Unable to add component parameter '" << nameComp.first << "'. Error: " << exc.what();
+      g_log.information() << "Unable to add component parameter '" << paramN << "'. Error: " << exc.what();
       continue;
     }
   }
