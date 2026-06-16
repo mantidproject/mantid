@@ -35,7 +35,8 @@ doxygen:
   - '1.9.*'
 
 eigen:
-  - '3.4.*'
+  - '5.*'      # [linux]
+  - '3.4.*'    # [win or osx]
 
 # Not a primary dependency, but we pin it to avoid 2.18, which breaks button icons on Linux.
 fontconfig:
@@ -128,6 +129,13 @@ pyqt:
 pyqt5_sip:
   - '<12.13'
 
+# Qt6 stack (Linux only)
+pyqt6:
+  - '>=6.11,<7'
+
+pyqt6_sip:
+  - '>=13.6,<14'
+
 # v0.45 and above addresses vtk compatibility issues by pinning in the pyvista feedstock.
 pyvista:
   - '>=0.46'
@@ -139,13 +147,19 @@ pyyaml:
 qt_main:
   - '5.15.*'
 
+# Qt6 main libraries (Linux only)
+qt6_main:
+  - '6.11.*'
+
 # 5.4.2 crashes the jupyter console. 5.5.0 raises a TypeError when using tab completion.
 qtconsole:
   - '>5.5.0'
 
-# This is the last version that is both built for Qt5 and compatible with the rest of our pins.
+# On Qt5 (win/osx) this is the last version built for Qt5 and compatible with the rest of our pins.
+# Linux builds against Qt6 and uses the newer qscintilla2.
 qscintilla2:
-  - '==2.14.1 *_0'
+  - '>=2.14.1'        # [linux]
+  - '==2.14.1 *_0'    # [win or osx]
 
 # 2.4.2 fails workbench.test_mainwindow.test_mainwindow which uses isinstance()
 qtpy:
@@ -161,7 +175,8 @@ quickbayes:
   - '==1.0.2'
 
 tbb:
-  - '2021.*'
+  - '>=2022.3'   # [linux]
+  - '2021.*'     # [win or osx]
 
 toml:
   - '>=0.10.2'

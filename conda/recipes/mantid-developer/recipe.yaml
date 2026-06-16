@@ -13,7 +13,6 @@ requirements:
     - ccache
     - cmake ${{ cmake }}
     - doxygen ${{ doxygen }}
-    - eigen ${{ eigen }}
     - euphonic ${{ euphonic }}
     - fontconfig ${{ fontconfig }}
     - graphviz ${{ graphviz }}
@@ -40,17 +39,12 @@ requirements:
     - pycifrw
     - pydantic ${{ pydantic }}
     - pyparsing ${{ pyparsing }}
-    - pyqt ${{ pyqt }}
-    - pyqt5-sip ${{ pyqt5_sip }}
     - pystog ${{ pystog }}
     - python ${{ python }}
     - pyvista ${{ pyvista }}
     - pyvistaqt
     - superqt
     - pyyaml ${{ pyyaml }}
-    - qscintilla2 ${{ qscintilla2 }}
-    - qt-main ${{ qt_main }}
-    - qtconsole ${{ qtconsole }}
     - qtpy ${{ qtpy }}
     - quasielasticbayes ${{ quasielasticbayes }}
     - quickbayes ${{ quickbayes }}
@@ -60,7 +54,6 @@ requirements:
     - scipy ${{ scipy }}
     - setuptools
     - sphinx ${{ sphinx }}
-    - tbb-devel ${{ tbb }}
     - toml ${{ toml }}
     - versioningit ${{ versioningit }}
     - zlib
@@ -73,7 +66,15 @@ requirements:
       then:
         - lz4
         - pystack
-        - qt-gtk-platformtheme
+        # Qt6 stack (Linux builds against Qt6)
+        - eigen ${{ eigen }}
+        - pyqt6 ${{ pyqt6 }}
+        - pyqt6-sip ${{ pyqt6_sip }}
+        - qscintilla2 ${{ qscintilla2 }}
+        - qt6-main ${{ qt6_main }}
+        - qtconsole-base ${{ qtconsole }}
+        - tbb-devel ${{ tbb }}
+        - qt6-gtk-platformtheme
         # OpenGL implementation:
         - libgl-devel
         - gxx_linux-64 ${{ cxx_compiler_version }}
@@ -97,6 +98,14 @@ requirements:
         - conda-wrappers
         - gdk-pixbuf ${{ gdk_pixbuf }}
         - lib3mf
+        # Qt5 stack
+        - eigen ${{ eigen }}
+        - pyqt ${{ pyqt }}
+        - pyqt5-sip ${{ pyqt5_sip }}
+        - qscintilla2 ${{ qscintilla2 }}
+        - qt-main ${{ qt_main }}
+        - qtconsole ${{ qtconsole }}
+        - tbb-devel ${{ tbb }}
     - if: osx
       then:
         - python.app
@@ -107,6 +116,14 @@ requirements:
         - llvm-openmp ${{ llvm_openmp }}
         # Development tooling:
         - libcxx
+        # Qt5 stack
+        - eigen ${{ eigen }}
+        - pyqt ${{ pyqt }}
+        - pyqt5-sip ${{ pyqt5_sip }}
+        - qscintilla2 ${{ qscintilla2 }}
+        - qt-main ${{ qt_main }}
+        - qtconsole ${{ qtconsole }}
+        - tbb-devel ${{ tbb }}
     - if: osx or linux
       then:
         - libopenblas ${{ libopenblas }}
