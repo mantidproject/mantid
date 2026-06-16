@@ -116,7 +116,7 @@ epub_uid = "Mantid Reference: " + version
 # -- Link to other projects ----------------------------------------------------
 
 intersphinx_mapping = {
-    "h5py": ("https://h5py.readthedocs.io/en/stable/", None),
+    "h5py": ("https://docs.h5py.org/en/stable/", None),
     "matplotlib": ("http://matplotlib.org", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
     "python": ("https://docs.python.org/3/", None),
