@@ -1,1 +1,0 @@
-- Improve UI layout in :ref:`Absorption Corrections<absorption_corrections>` tab.

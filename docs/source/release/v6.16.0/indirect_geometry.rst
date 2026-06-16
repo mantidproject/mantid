@@ -4,7 +4,7 @@ Indirect Geometry Changes
 
 New Features
 ------------
--  Added new parameter files for BASIS, following moderator replacement.
+- (`#41026 <https://github.com/mantidproject/mantid/pull/41026>`_) Added new parameter files for BASIS, following moderator replacement.
 
 
 Bugfixes

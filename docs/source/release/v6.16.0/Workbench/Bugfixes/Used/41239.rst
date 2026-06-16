@@ -1,1 +1,0 @@
-- The :ref:`Messages Window <WorkbenchMessagesWindow>` now prints logs that are more readable in both light and dark mode at all logging levels.

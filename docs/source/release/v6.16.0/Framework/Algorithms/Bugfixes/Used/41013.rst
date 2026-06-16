@@ -1,1 +1,0 @@
-- The :ref:`GenerateFlatCellWorkspaceLOQ <algm-GenerateFlatCellWorkspaceLOQ>` algorithm has been updated so that the output is prepended with the monitor spectrums. An option to save the output using :ref:`SaveRKH <algm-SaveRKH>` has also been added.

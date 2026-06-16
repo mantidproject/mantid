@@ -1,1 +1,0 @@
-- Fixed a crash that occurred when masking all detectors in the :ref:`Instrument Viewer <InstrumentViewer>`.

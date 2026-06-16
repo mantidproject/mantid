@@ -1,1 +1,0 @@
-- :ref:`MaskBTP <algm-MaskBTP>` now supports name and short-name for instrument IMAGINE.

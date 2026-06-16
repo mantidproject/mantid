@@ -1,1 +1,0 @@
-- In the new Instrument View, added an option to display counts on a log scale.

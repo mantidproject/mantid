@@ -4,16 +4,20 @@
 Mantid 6.16.0 Release Notes
 ===========================
 
-.. figure:: ../../images/ImageNotFound.png
+.. figure:: ../../images/6_16_release/Python-3.12.png
    :class: screenshot
    :width: 385px
    :align: right
 
-.. warning:: This release is still under construction. The changes can be found in the nightly builds on the `download page`_.
-
 We are proud to announce version 6.16.0 of Mantid.
 
-**TODO: Add paragraph summarizing big changes**
+Key features of this release include:
+
+- Upgraded to Python 3.12. See the changes made to Python `here <https://docs.python.org/3/whatsnew/3.12.html>`__.
+- A large number of new features added to the new Instrument Viewer, as detailed in the :doc:`Mantid Workbench <mantidworkbench>` release notes.
+- The Help documentation now opens in the system's default web browser instead of an embedded viewer.
+- Further improvements for texture analysis including Ikeda Carpenter peak shapes and support for IMAT. Further details are in the :doc:`Diffraction <diffraction>` release notes.
+- For ORNL instruments which use the ADARA system, it is now possible to record and playback an ADARA-packet stream. (`#40748 <https://github.com/mantidproject/mantid/pull/40748>`_ for more details).
 
 These are just some of the many improvements in this release, so please take a
 look at the release notes, which are filled with details of the

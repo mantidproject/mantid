@@ -1,2 +1,0 @@
-- :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>` now supports IMAT instrument selection.
-- :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>` now supports :ref:`IkedaCarpenterPV <func-IkedaCarpenterPV>` as a default peak option for calibration and fitting.

@@ -1,1 +1,0 @@
-- :ref:`algm-HFIRPowderReduction` now does absorption correction for the sample and vanadium using :ref:`CylinderAbsorptionCW <algm-CylinderAbsorptionCW>`
