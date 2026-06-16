@@ -47,7 +47,7 @@ Summary of impact
 
 .. _download page: http://download.mantidproject.org
 
-.. _forum: http://forum.mantidproject.org
+.. _discussion: https://github.com/mantidproject/mantid/discussions
 
 .. _GitHub release page: https://github.com/mantidproject/mantid/releases/tag/v{version}
 """
