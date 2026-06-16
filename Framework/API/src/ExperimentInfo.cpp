@@ -1265,18 +1265,28 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
       // dedupes by (component, name) and would silently overwrite the first entry with the second.
       // The fitting-function name is embedded as the second comma-separated field of the value
       // string written by populateWithParameter().
+
+      // string from populateWithParameter() is expected to be " , " (space-comma-space) separated:
+      // "m_value , m_fittingFunction , name , constraint[0] , constraint[1] , penaltyFactor , tie ,
+      // formula , formulaUnit , resultUnit , interpolation"
       if (paramType == "fitting") {
         std::string fittingFunction;
+        // Locate the second field by finding the first two commas; the fitting function is the
+        // text between them. If there are fewer than two commas the value is malformed and
+        // fittingFunction stays empty, falling back to the plain add() below.
         const auto firstComma = paramValue.find(',');
         if (firstComma != std::string::npos) {
           const auto secondComma = paramValue.find(',', firstComma + 1);
           if (secondComma != std::string::npos) {
+            // Take the raw second field, e.g. " IkedaCarpenterPV " from "3.5 , IkedaCarpenterPV , ...".
             fittingFunction = paramValue.substr(firstComma + 1, secondComma - firstComma - 1);
+            // Trim the surrounding spaces/tabs introduced by the " , " separator.
             const auto firstNonSpace = fittingFunction.find_first_not_of(" \t");
             if (firstNonSpace != std::string::npos) {
               const auto lastNonSpace = fittingFunction.find_last_not_of(" \t");
               fittingFunction = fittingFunction.substr(firstNonSpace, lastNonSpace - firstNonSpace + 1);
             } else
+              // Field was entirely whitespace (e.g. "3.5 ,  , ..."): treat as no fitting function.
               fittingFunction.clear();
           }
         }
@@ -1337,6 +1347,7 @@ void ExperimentInfo::populateWithParameter(Geometry::ParameterMap &paramMap,
     paramMapForPosAndRot.addRotationParam(paramInfo.m_component, name, paramValue, pDescription);
   } else if (category == "fitting") {
     std::ostringstream str;
+    // read parameter map relies on extracting m_fittingFunction from this string - edit with care
     str << paramInfo.m_value << " , " << paramInfo.m_fittingFunction << " , " << name << " , "
         << paramInfo.m_constraint[0] << " , " << paramInfo.m_constraint[1] << " , " << paramInfo.m_penaltyFactor
         << " , " << paramInfo.m_tie << " , " << paramInfo.m_formula << " , " << paramInfo.m_formulaUnit << " , "
