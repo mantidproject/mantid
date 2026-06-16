@@ -106,7 +106,7 @@ ninja = ">=1.10.2"
 numpy = "2.1.*"
 occt = { version = "7.*", build = "novtk*" }
 orsopy = "==1.2.1"
-pip = ">=21.0.1"
+pip = ">=21.0.1,!=26.1.*"
 poco = ">=1.14"
 pre-commit = ">=4.0"
 psutil = ">=5.8.0"
