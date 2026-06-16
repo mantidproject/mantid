@@ -67,6 +67,9 @@ class FullInstrumentViewPresenter:
         self._counts_label = "Integrated Counts"
         self._visible_label = "Visible Picked"
         self._count_scale_mode = self._LINEAR
+        self._detector_mesh: Optional[pv.PolyData] = None
+        self._pickable_mesh: Optional[pv.PolyData] = None
+        self._masked_mesh: Optional[pv.PolyData] = None
         self._model.setup()
         self._point_cloud_renderer = PointCloudRenderer()
         self._shape_renderer = ShapeRenderer(self._model.workspace)
@@ -283,13 +286,9 @@ class FullInstrumentViewPresenter:
         # Update transform needs to happen after adding to plotter
         # Uses display coordinates
         self._update_transform()
-        self._detector_mesh.transform(self._transform, inplace=True)
-        self._pickable_mesh.transform(self._transform, inplace=True)
-        self._masked_mesh.transform(self._transform, inplace=True)
-        if monitor_mesh is not None:
-            monitor_mesh.transform(self._transform, inplace=True)
-        if sample_position_mesh is not None:
-            sample_position_mesh.transform(self._transform, inplace=True)
+        for mesh in [self._detector_mesh, self._pickable_mesh, self._masked_mesh, monitor_mesh, sample_position_mesh]:
+            if mesh is not None:
+                mesh.transform(self._transform, inplace=True)
 
         self._view.enable_or_disable_mask_widgets()
         self._view.enable_or_disable_aspect_ratio_box()
