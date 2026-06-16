@@ -129,7 +129,6 @@ pyqt:
 pyqt5_sip:
   - '<12.13'
 
-# Qt6 stack (Linux only)
 pyqt6:
   - '>=6.11,<7'
 
@@ -147,7 +146,6 @@ pyyaml:
 qt_main:
   - '5.15.*'
 
-# Qt6 main libraries (Linux only)
 qt6_main:
   - '6.11.*'
 
