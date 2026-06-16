@@ -77,11 +77,11 @@ class FullInstrumentViewPresenter:
         self._hover_pick_mode = False
         self._last_hovered_point_index: Optional[int] = None
         self._select_bank_tube = False
-        self.setup()
         self._callback_queue = Queue()
         self._callback_stop_sentinel = object()
         self._callback_thread = Thread(None, self._callback_worker, daemon=True)
         self._callback_thread.start()
+        self.setup()
 
     def _callback_worker(self):
         while True:
