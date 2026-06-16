@@ -445,26 +445,24 @@ void CreateDetectorTable::populateTableByDetID() {
   }
   PARALLEL_CHECK_INTERRUPT_REGION
 
-  for (size_t tableRow = 0; tableRow < rowData.size(); ++tableRow) {
-    if (!writtenToRow[tableRow]) {
-      DetectorRowData errorData;
-      errorData.wsIndex = -1;
-      errorData.specNo = -1;
-      errorData.detIds = {wsDetIds[tableRow]};
-      errorData.timeIndexes = "0";
-      errorData.dataY0 = 0;
-      errorData.dataE0 = 0;
-      errorData.isMonitor = "n/a";
-      rowData[tableRow] = errorData;
-    }
-  }
-
   // Write rows in order of component index
   // Number of rows matches number of detectorIDs exactly
   const auto &workspaceDetectorIds = detectorInfo->detectorIDs();
   table->setRowCount(workspaceDetectorIds.size());
   for (int i = 0; i < static_cast<int>(rowData.size()); ++i) {
-    writeRowToTable(i, rowData[i]);
+    if (writtenToRow[i]) {
+      writeRowToTable(i, rowData[i]);
+    } else {
+      DetectorRowData errorData;
+      errorData.wsIndex = -1;
+      errorData.specNo = -1;
+      errorData.detIds = {wsDetIds[i]};
+      errorData.timeIndexes = "0";
+      errorData.dataY0 = 0;
+      errorData.dataE0 = 0;
+      errorData.isMonitor = "n/a";
+      writeRowToTable(i, std::move(errorData));
+    }
   }
 }
 
