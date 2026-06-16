@@ -81,6 +81,8 @@ class FullInstrumentViewPresenter:
         self._callback_stop_sentinel = object()
         self._callback_thread = Thread(None, self._callback_worker, daemon=True)
         self._callback_thread.start()
+        self.monitor_colour = (230, 55, 55)
+        self.sample_position_colour = (70, 160, 70)
         self.setup()
 
     def _callback_worker(self):
@@ -131,16 +133,16 @@ class FullInstrumentViewPresenter:
     def _create_and_add_monitor_mesh(self) -> Optional[pv.PolyData]:
         if len(self._model.monitor_positions) == 0 or not self._view.is_show_monitors_checkbox_checked():
             return None
-        return self._create_and_add_component_point_mesh(np.array(self._model.monitor_positions), 1, 0, 0)
+        return self._create_and_add_component_point_mesh(np.array(self._model.monitor_positions), self.monitor_colour)
 
     def _create_and_add_sample_position_mesh(self) -> Optional[pv.PolyData]:
         if self._model.sample_position is None or not self._view.is_show_sample_position_checkbox_checked():
             return None
-        return self._create_and_add_component_point_mesh(np.array([self._model.sample_position]), 0, 1, 0)
+        return self._create_and_add_component_point_mesh(np.array([self._model.sample_position]), self.sample_position_colour)
 
-    def _create_and_add_component_point_mesh(self, points: np.ndarray, red: float, green: float, blue: float) -> pv.PolyData:
+    def _create_and_add_component_point_mesh(self, points: np.ndarray, colour: tuple[int, int, int]) -> pv.PolyData:
         point_cloud = self.create_poly_data_mesh(points)
-        point_cloud["colours"] = self.generate_single_colour(len(points), red, green, blue, 1)
+        point_cloud["colours"] = self.generate_single_colour(len(points), colour, 1)
         self._view.add_rgba_mesh(point_cloud, scalars="colours")
         return point_cloud
 
@@ -579,12 +581,12 @@ class FullInstrumentViewPresenter:
         mesh = pv.PolyData(points, faces)
         return mesh
 
-    def generate_single_colour(self, number_of_points: int, red: float, green: float, blue: float, alpha: float) -> np.ndarray:
+    def generate_single_colour(self, number_of_points: int, colour: tuple[int, int, int], alpha: float) -> np.ndarray:
         """Returns an RGBA colours array for the given set of points, with all points the same colour"""
         rgba = np.zeros((number_of_points, 4))
-        rgba[:, 0] = red
-        rgba[:, 1] = green
-        rgba[:, 2] = blue
+        rgba[:, 0] = float(colour[0]) / 255.0  # red
+        rgba[:, 1] = float(colour[1]) / 255.0  # green
+        rgba[:, 2] = float(colour[2]) / 255.0  # blue
         rgba[:, 3] = alpha
         return rgba
 

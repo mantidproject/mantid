@@ -27,7 +27,7 @@ from qtpy.QtWidgets import (
     QTabWidget,
     QFrame,
 )
-from qtpy.QtGui import QDoubleValidator, QMovie, QDragEnterEvent, QDropEvent, QDragMoveEvent, QColor, QPalette
+from qtpy.QtGui import QDoubleValidator, QMovie, QDragEnterEvent, QDropEvent, QDragMoveEvent, QColor, QPalette, QPixmap, QIcon, QPainter
 from qtpy.QtCore import Qt, QEvent, QSize
 from qtpy.QtWidgets import QFileDialog
 from superqt import QDoubleRangeSlider
@@ -62,6 +62,8 @@ import os
 from contextlib import suppress
 from typing import Callable
 
+_LIGHT_GREY = (211, 211, 211)
+
 
 def _skip_if_closing(method):
     """Decorator that silently returns if the view is closing."""
@@ -87,6 +89,19 @@ def _ensure_overlay_manager(method):
         self._current_widget = shape
 
     return wrapper
+
+
+def _make_coloured_circle_icon(colour: tuple[int, int, int] = (211, 211, 211), size: int = 12) -> QIcon:
+    """Creates a QIcon of a filled circle of the given colour and size."""
+    pixmap = QPixmap(size, size)
+    pixmap.fill(Qt.transparent)
+    painter = QPainter(pixmap)
+    painter.setRenderHint(QPainter.Antialiasing)
+    painter.setBrush(QColor(*colour))
+    painter.setPen(Qt.NoPen)
+    painter.drawEllipse(0, 0, size, size)
+    painter.end()
+    return QIcon(pixmap)
 
 
 class WorkspaceListWidget(QListWidget):
@@ -252,8 +267,10 @@ class FullInstrumentViewWindow(QMainWindow):
         self._aspect_ratio_check_box.setChecked(is_config_setting_true(self._ASPECT_RATIO_SETTING_STRING))
         self._show_monitors_check_box = QCheckBox()
         self._show_monitors_check_box.setText("Monitors")
+        self._show_monitors_check_box.setIcon(_make_coloured_circle_icon())
         self._show_sample_position_check_box = QCheckBox()
         self._show_sample_position_check_box.setText("Sample")
+        self._show_sample_position_check_box.setIcon(_make_coloured_circle_icon())
         self._count_scale_combo_box = NoWheelComboBox(self)
         self._count_scale_combo_box.setToolTip("Select display scale for integrated counts")
         self._flip_beam_check_box = QCheckBox()
@@ -477,15 +494,15 @@ class FullInstrumentViewWindow(QMainWindow):
         return self._show_monitors_check_box.isChecked()
 
     def _on_show_monitors_toggled(self, checked: bool) -> None:
-        color = "rgb(255, 0, 0)" if checked else ""
-        self._show_monitors_check_box.setStyleSheet(f"color: {color};")
+        self._show_monitors_check_box.setIcon(_make_coloured_circle_icon(self._presenter.monitor_colour if checked else _LIGHT_GREY))
 
     def is_show_sample_position_checkbox_checked(self) -> bool:
         return self._show_sample_position_check_box.isChecked()
 
     def _on_show_sample_position_toggled(self, checked: bool) -> None:
-        color = "rgb(0, 255, 0)" if checked else ""
-        self._show_sample_position_check_box.setStyleSheet(f"color: {color};")
+        self._show_sample_position_check_box.setIcon(
+            _make_coloured_circle_icon(self._presenter.sample_position_colour if checked else _LIGHT_GREY)
+        )
 
     def get_render_mode_option(self) -> str:
         return self._render_mode_combo_box.currentText()

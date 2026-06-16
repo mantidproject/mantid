@@ -95,7 +95,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         mock_update_line_plot.assert_called_once_with("MyUnit")
 
     def test_generate_single_colour(self):
-        green_vector = self._presenter.generate_single_colour(2, 0, 1, 0, 0)
+        green_vector = self._presenter.generate_single_colour(2, (0, 255, 0), 0)
         self.assertEqual(len(green_vector), 2)
         self.assertTrue(green_vector.all(where=[0, 1, 0, 0]))
 

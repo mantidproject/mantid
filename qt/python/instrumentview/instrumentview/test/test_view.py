@@ -10,6 +10,7 @@ from unittest.mock import MagicMock
 
 import numpy as np
 from qtpy.QtCore import Qt
+from qtpy.QtGui import QIcon
 from mantidqt.utils.qt.testing import start_qapplication
 from mantid.simpleapi import CreateSampleWorkspace
 from instrumentview.FullInstrumentViewWindow import FullInstrumentViewWindow
@@ -339,23 +340,33 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
         self._view._set_detector_edit_text(mock_edit, [det], lambda d: str(d.detector_id))
         mock_edit.setPlainText.assert_called_once_with("42")
 
-    def test_on_show_monitors_toggled_sets_red_color_when_checked(self):
+    @mock.patch("instrumentview.FullInstrumentViewWindow._make_coloured_circle_icon")
+    def test_on_show_monitors_toggled_sets_presenter_color_when_checked(self, mock_icon_fn):
+        mock_icon_fn.return_value = QIcon()
+        self._view._presenter.monitor_colour = (230, 55, 55)
         self._view._on_show_monitors_toggled(True)
-        self.assertEqual(self._view._show_monitors_check_box.styleSheet(), "color: rgb(255, 0, 0);")
+        mock_icon_fn.assert_called_once_with((230, 55, 55))
 
-    def test_on_show_monitors_toggled_clears_color_when_unchecked(self):
-        self._view._on_show_monitors_toggled(True)
+    @mock.patch("instrumentview.FullInstrumentViewWindow._make_coloured_circle_icon")
+    def test_on_show_monitors_toggled_uses_grey_when_unchecked(self, mock_icon_fn):
+        mock_icon_fn.return_value = QIcon()
+        self._view._presenter.monitor_colour = (230, 55, 55)
         self._view._on_show_monitors_toggled(False)
-        self.assertEqual(self._view._show_monitors_check_box.styleSheet(), "color: ;")
+        mock_icon_fn.assert_called_once_with((211, 211, 211))
 
-    def test_on_show_sample_position_toggled_sets_green_color_when_checked(self):
+    @mock.patch("instrumentview.FullInstrumentViewWindow._make_coloured_circle_icon")
+    def test_on_show_sample_position_toggled_sets_presenter_color_when_checked(self, mock_icon_fn):
+        mock_icon_fn.return_value = QIcon()
+        self._view._presenter.sample_position_colour = (70, 160, 70)
         self._view._on_show_sample_position_toggled(True)
-        self.assertEqual(self._view._show_sample_position_check_box.styleSheet(), "color: rgb(0, 255, 0);")
+        mock_icon_fn.assert_called_once_with((70, 160, 70))
 
-    def test_on_show_sample_position_toggled_clears_color_when_unchecked(self):
-        self._view._on_show_sample_position_toggled(True)
+    @mock.patch("instrumentview.FullInstrumentViewWindow._make_coloured_circle_icon")
+    def test_on_show_sample_position_toggled_uses_grey_when_unchecked(self, mock_icon_fn):
+        mock_icon_fn.return_value = QIcon()
+        self._view._presenter.sample_position_colour = (70, 160, 70)
         self._view._on_show_sample_position_toggled(False)
-        self.assertEqual(self._view._show_sample_position_check_box.styleSheet(), "color: ;")
+        mock_icon_fn.assert_called_once_with((211, 211, 211))
 
 
 if __name__ == "__main__":
