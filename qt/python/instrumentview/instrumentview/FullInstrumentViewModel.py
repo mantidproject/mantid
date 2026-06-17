@@ -273,22 +273,26 @@ class FullInstrumentViewModel:
 
     def _calculate_and_set_full_integration_range(self, valid_indices: np.ndarray) -> None:
         workspace_indices = self._workspace_indices[valid_indices]
+        self._integration_limits = self._extract_limits_from_workspace(self._integration_workspace, workspace_indices)
+        self.full_integration_limits = self._integration_limits
+
+    def _extract_limits_from_workspace(self, workspace, workspace_indices=None) -> tuple:
+        if workspace_indices is None:
+            workspace_indices = np.arange(0, workspace.getNumberHistograms())
+
         if len(workspace_indices) == 0:
-            self._integration_limits = (0, 0)
-            self.full_integration_limits = self._integration_limits
-            return
+            return (0, 0)
 
-        if self._integration_workspace.isRaggedWorkspace():
-            first_last = np.array([self._integration_workspace.readX(int(i))[[0, -1]] for i in workspace_indices])
-            self._integration_limits = (np.min(first_last[:, 0]), np.max(first_last[:, 1]))
+        if workspace.isRaggedWorkspace():
+            first_last = np.array([workspace.readX(int(i))[[0, -1]] for i in workspace_indices])
+            return (np.min(first_last[:, 0]), np.max(first_last[:, 1]))
 
-        elif self._integration_workspace.isCommonBins():
-            self._integration_limits = tuple(self._integration_workspace.dataX(int(workspace_indices[0]))[[0, -1]])
+        elif workspace.isCommonBins():
+            return tuple(workspace.dataX(int(workspace_indices[0]))[[0, -1]])
 
         else:
-            data_x = self._integration_workspace.extractX()[workspace_indices]
-            self._integration_limits = (np.min(data_x[:, 0]), np.max(data_x[:, -1]))
-        self.full_integration_limits = self._integration_limits
+            data_x = workspace.extractX()[workspace_indices]
+            return (np.min(data_x[:, 0]), np.max(data_x[:, -1]))
 
     def set_integration_units(self, unit):
         if self.has_unit and unit != self.workspace_base_unit:
@@ -541,14 +545,7 @@ class FullInstrumentViewModel:
             ws = SumSpectra(InputWorkspace=ws, EnableLogging=False, StoreInADS=False)
 
         self.line_plot_workspace = ws
-        limits_in_base_units = [
-            self._match_workspace_unit(self._integration_workspace, workspace_indices[0], x, self._workspace)
-            for x in self.integration_limits
-        ]
-        limits_in_lineplot_units = [
-            self._match_workspace_unit(self._lineplot_ws_in_base_units, 0, x, self.line_plot_workspace) for x in limits_in_base_units
-        ]
-        self._lineplot_limits = [min(limits_in_lineplot_units), max(limits_in_lineplot_units)]
+        self._lineplot_limits = self._extract_limits_from_workspace(self.line_plot_workspace)
 
     def save_line_plot_workspace_to_ads(self) -> None:
         if self.line_plot_workspace is None or len(self.picked_workspace_indices) == 0:
@@ -579,8 +576,8 @@ class FullInstrumentViewModel:
         labels_by_pws = [pair[1] for pair in x_and_labels_by_pws]
         # Convert peak units to currently plotted units
         converted_x = [
-            [self._match_workspace_unit(self._lineplot_ws_in_base_units, 0, x, self.line_plot_workspace) for x in x_values]
-            for x_values in x_by_pws
+            [self._match_workspace_unit(self._lineplot_ws_in_base_units, i, x, self.line_plot_workspace) for x in x_values]
+            for i, x_values in enumerate(x_by_pws)
         ]
         return converted_x, labels_by_pws, selected_peaks_workspaces
 

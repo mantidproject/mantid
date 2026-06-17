@@ -454,6 +454,8 @@ class TestFullInstrumentViewModel(unittest.TestCase):
     ):
         model, mock_workspace = self._setup_model([1, 2, 3])
         mock_picked_workspace_indices.return_value = [1, 2]
+        mock_extract_spectra.return_value = mock_workspace
+        mock_convert_units.return_value = mock_workspace
         model.extract_spectra_for_line_plot("TOF", False)
         mock_extract_spectra.assert_called_once_with(
             InputWorkspace=model._workspace, WorkspaceIndexList=[1, 2], EnableLogging=False, StoreInADS=False
@@ -527,6 +529,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model, mock_workspace = self._setup_model([1, 2, 3])
         mock_picked_workspace_indices.return_value = [2]
         mock_extract_spectra.return_value = mock_workspace
+        mock_convert_units.return_value = mock_workspace
         mock_sum_spectra.return_value = mock_workspace
         model.extract_spectra_for_line_plot("Wavelength", True)
         mock_extract_spectra.assert_called_once_with(
@@ -543,8 +546,10 @@ class TestFullInstrumentViewModel(unittest.TestCase):
     def test_save_line_plot_workspace_to_ads(
         self, mock_ads, mock_picked_workspace_indices, mock_extract_spectra, mock_convert_units, _mock_match_unit
     ):
-        model, _ = self._setup_model([1, 2, 3])
+        model, mock_workspace = self._setup_model([1, 2, 3])
         mock_picked_workspace_indices.return_value = [1, 2]
+        mock_extract_spectra.return_value = mock_workspace
+        mock_convert_units.return_value = mock_workspace
         model.extract_spectra_for_line_plot("TOF", False)
         mock_extract_spectra.assert_called_once()
         model.save_line_plot_workspace_to_ads()
