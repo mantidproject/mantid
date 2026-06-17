@@ -28,15 +28,14 @@ libboost:
   - '1.86.*'  # [osx]
 
 cmake:
-  - '>=4.2,<5'
+  - '>=3.21.0'
 
 # 1.10.0 Produces a warning in Framework/Geometry/src/Crystal/HKLFilter.cpp
 doxygen:
   - '1.9.*'
 
 eigen:
-  - '5.*'      # [linux]
-  - '3.4.*'    # [win or osx]
+  - '3.4.*'
 
 # Not a primary dependency, but we pin it to avoid 2.18, which breaks button icons on Linux.
 fontconfig:
@@ -84,7 +83,7 @@ matplotlib:
   - '3.10.*'
 
 mslice:
-  - '>=2.15'
+  - '2.15.*'
 
 ninja:
   - '>=1.10.2'
@@ -118,7 +117,7 @@ scipy:
   - '>=1.16.0,<1.17'
 
 pip:
-  - '>=21.0.1,!=26.1.*'
+  - '>=21.0.1'
 
 pystog:
   - '>=0.6.3'
@@ -129,18 +128,9 @@ pyqt:
 pyqt5_sip:
   - '<12.13'
 
-pyqt6:
-  - '>=6.11,<7'
-
-pyqt6_sip:
-  - '>=13.6,<14'
-
 # v0.45 and above addresses vtk compatibility issues by pinning in the pyvista feedstock.
 pyvista:
   - '>=0.46'
-
-pyvistaqt:
-  - ">=0.11.3"
 
 pyyaml:
   - '>=5.4.1'
@@ -149,22 +139,21 @@ pyyaml:
 qt_main:
   - '5.15.*'
 
-qt6_main:
-  - '6.11.*'
-
 # 5.4.2 crashes the jupyter console. 5.5.0 raises a TypeError when using tab completion.
 qtconsole:
   - '>5.5.0'
 
-# On Qt5 (win/osx) this is the last version built for Qt5 and compatible with the rest of our pins.
-# Linux builds against Qt6 and uses the newer qscintilla2.
+# This is the last version that is both built for Qt5 and compatible with the rest of our pins.
 qscintilla2:
-  - '>=2.14.1'        # [linux]
-  - '==2.14.1 *_0'    # [win or osx]
+  - '==2.14.1 *_0'
 
 # 2.4.2 fails workbench.test_mainwindow.test_mainwindow which uses isinstance()
 qtpy:
   - '>=2.4,!=2.4.2'
+
+# We must pin this because it is known to be particularly unstable (especially in system tests).
+quasielasticbayes:
+  - '==0.3.0'
 
 # There have previously been API breaking changes in patch version updates to quickBayes,
 # so pin this to the patch version number.
@@ -172,8 +161,7 @@ quickbayes:
   - '==1.0.2'
 
 tbb:
-  - '>=2022.3'   # [linux]
-  - '2021.*'     # [win or osx]
+  - '2021.*'
 
 toml:
   - '>=0.10.2'
