@@ -28,6 +28,6 @@ to workbench should be smooth and easy.
 **Workbench can even load all of the workspaces (although not the graphs) from a saved MantidPlot Project file
 if you want to transfer ongoing work.**
 
-If you run into any problems or have any questions please ask them on our `user forum <https://forum.mantidproject.org/>`_.
+If you run into any problems or have any questions please ask them on our forum.
 
 :ref:`Release 5.1.0 <v5.1.0>`

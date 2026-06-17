@@ -71,7 +71,7 @@ time and effort helping us to make this another reliable version of Mantid.
 Throughout the Mantid project we put a lot of effort into ensuring
 Mantid is a robust and reliable product. Thank you to everyone that has
 reported any issues to us. Please keep on reporting any problems you
-have, or crashes that occur on our `forum`_.
+have, or crashes that occur on our forum.
 
 Installation packages can be found on our `download page`_
 which now links to sourceforge to mirror our download files around the world. You can also
@@ -120,8 +120,6 @@ Full Change Listings
 For a full list of all issues addressed during this release please see the `GitHub milestone`_.
 
 .. _download page: https://download.mantidproject.org
-
-.. _forum: https://forum.mantidproject.org
 
 .. _GitHub milestone: https://github.com/mantidproject/mantid/pulls?utf8=%E2%9C%93&q=is%3Apr+milestone%3A"Release+6.3"+is%3Amerged
 

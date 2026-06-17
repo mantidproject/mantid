@@ -36,7 +36,6 @@ To ensure users are aware of deprecated algorithms and other features
 
 When the code is being removed from the release that is being developed
 
-- Post to the [Mantid Forum](https://forum.mantidproject.org/)
 - E-mail the Mantid Announcements e-mail list (to join this list see our [Contact Us](https://www.mantidproject.org/contact) page.
 - Technical Working Group members will communicate the removal to the facilities they represent
 - A list of removed algorithms/features will be listed in the {ref}`release_notes` for that release
