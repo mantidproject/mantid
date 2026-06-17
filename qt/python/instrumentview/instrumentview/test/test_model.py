@@ -883,7 +883,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         ws2_wdp.detector_peaks = [
             DetectorPeaks([self._create_peak(100, 8), self._create_peak(200, 8)]),
         ]
-        mock_wdp_cls.side_effect = lambda name: {"ws1": ws1_wdp, "ws2": ws2_wdp}[name]
+        mock_wdp_cls.side_effect = lambda name, unit, limits: {"ws1": ws1_wdp, "ws2": ws2_wdp}[name]
         mock_ws1 = MagicMock()
         mock_ws2 = MagicMock()
         mock_ads.retrieve.side_effect = lambda name: {"ws1": mock_ws1, "ws2": mock_ws2}[name]
@@ -962,7 +962,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         ws1_wdp.detector_peaks = [DetectorPeaks([self._create_peak(201, 7, 2.5), self._create_peak(202, 7, 100.0)])]
         ws2_wdp = MagicMock()
         ws2_wdp.detector_peaks = [DetectorPeaks([self._create_peak(301, 7, 2.3), self._create_peak(302, 7, 50.0)])]
-        mock_wdp_cls.side_effect = lambda name: {"ws1": ws1_wdp, "ws2": ws2_wdp}[name]
+        mock_wdp_cls.side_effect = lambda name, unit, limits: {"ws1": ws1_wdp, "ws2": ws2_wdp}[name]
         mock_ws1 = MagicMock()
         mock_ws2 = MagicMock()
         mock_ads.retrieve.side_effect = lambda name: {"ws1": mock_ws1, "ws2": mock_ws2}[name]

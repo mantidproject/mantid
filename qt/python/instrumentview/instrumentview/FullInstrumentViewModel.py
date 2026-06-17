@@ -630,7 +630,7 @@ class FullInstrumentViewModel:
         )
         closest_peak_by_ws = []
         for ws_name in selected_peaks_workspaces:
-            peaks_by_detector = WorkspaceDetectorPeaks(ws_name).detector_peaks
+            peaks_by_detector = WorkspaceDetectorPeaks(ws_name, self.get_integration_units(), self.integration_limits).detector_peaks
             picked_detector_peaks = [p for p in peaks_by_detector if p.detector_id in self.picked_detector_ids]
             if len(picked_detector_peaks) == 0:
                 continue
@@ -650,7 +650,7 @@ class FullInstrumentViewModel:
 
     def delete_peaks_on_all_selected_detectors(self, selected_peaks_workspaces) -> None:
         for ws_name in selected_peaks_workspaces:
-            peaks_by_detector = WorkspaceDetectorPeaks(ws_name).detector_peaks
+            peaks_by_detector = WorkspaceDetectorPeaks(ws_name, self.get_integration_units(), self.integration_limits).detector_peaks
             picked_detector_peaks = [p for p in peaks_by_detector if p.detector_id in self.picked_detector_ids]
             if len(picked_detector_peaks) == 0:
                 continue
