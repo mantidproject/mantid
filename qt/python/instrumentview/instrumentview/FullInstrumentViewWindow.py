@@ -91,19 +91,6 @@ def _ensure_overlay_manager(method):
     return wrapper
 
 
-def _make_coloured_circle_icon(colour: tuple[int, int, int] = (211, 211, 211), size: int = 12) -> QIcon:
-    """Creates a QIcon of a filled circle of the given colour and size."""
-    pixmap = QPixmap(size, size)
-    pixmap.fill(Qt.transparent)
-    painter = QPainter(pixmap)
-    painter.setRenderHint(QPainter.Antialiasing)
-    painter.setBrush(QColor(*colour))
-    painter.setPen(Qt.NoPen)
-    painter.drawEllipse(0, 0, size, size)
-    painter.end()
-    return QIcon(pixmap)
-
-
 class WorkspaceListWidget(QListWidget):
     def __init__(self, parent):
         super().__init__(parent)
@@ -131,6 +118,32 @@ class NoWheelComboBox(QComboBox):
 
     def wheelEvent(self, event):
         event.ignore()
+
+
+class CheckBoxWithColourLabel(QCheckBox):
+    """QCheckBox that has a coloured circle next to the text."""
+
+    def __init__(self, text: str, colour: tuple[int, int, int] = _LIGHT_GREY, parent=None):
+        super().__init__(text, parent)
+        self.setStyleSheet("QCheckBox { spacing: 12px; }")
+        self.setIcon(self._make_coloured_circle_icon(colour))
+
+    def set_colour(self, colour: tuple[int, int, int]) -> None:
+        """Sets the colour of the circle next to the text."""
+        self.setIcon(self._make_coloured_circle_icon(colour))
+
+    def _make_coloured_circle_icon(self, colour: tuple[int, int, int] = _LIGHT_GREY) -> QIcon:
+        """Creates a QIcon of a filled circle of the given colour and size."""
+        size = 12
+        pixmap = QPixmap(size, size)
+        pixmap.fill(Qt.transparent)
+        painter = QPainter(pixmap)
+        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setBrush(QColor(*colour))
+        painter.setPen(Qt.NoPen)
+        painter.drawEllipse(0, 0, size, size)
+        painter.end()
+        return QIcon(pixmap)
 
 
 @run_on_qapp_thread()
@@ -265,12 +278,8 @@ class FullInstrumentViewWindow(QMainWindow):
             return ConfigService.Instance()[key].casefold() == "yes"
 
         self._aspect_ratio_check_box.setChecked(is_config_setting_true(self._ASPECT_RATIO_SETTING_STRING))
-        self._show_monitors_check_box = QCheckBox()
-        self._show_monitors_check_box.setText("Monitors")
-        self._show_monitors_check_box.setIcon(_make_coloured_circle_icon())
-        self._show_sample_position_check_box = QCheckBox()
-        self._show_sample_position_check_box.setText("Sample")
-        self._show_sample_position_check_box.setIcon(_make_coloured_circle_icon())
+        self._show_monitors_check_box = CheckBoxWithColourLabel("Monitors")
+        self._show_sample_position_check_box = CheckBoxWithColourLabel("Sample")
         self._count_scale_combo_box = NoWheelComboBox(self)
         self._count_scale_combo_box.setToolTip("Select display scale for integrated counts")
         self._flip_beam_check_box = QCheckBox()
@@ -494,15 +503,13 @@ class FullInstrumentViewWindow(QMainWindow):
         return self._show_monitors_check_box.isChecked()
 
     def _on_show_monitors_toggled(self, checked: bool) -> None:
-        self._show_monitors_check_box.setIcon(_make_coloured_circle_icon(self._presenter.monitor_colour if checked else _LIGHT_GREY))
+        self._show_monitors_check_box.set_colour(self._presenter.monitor_colour if checked else _LIGHT_GREY)
 
     def is_show_sample_position_checkbox_checked(self) -> bool:
         return self._show_sample_position_check_box.isChecked()
 
     def _on_show_sample_position_toggled(self, checked: bool) -> None:
-        self._show_sample_position_check_box.setIcon(
-            _make_coloured_circle_icon(self._presenter.sample_position_colour if checked else _LIGHT_GREY)
-        )
+        self._show_sample_position_check_box.set_colour(self._presenter.sample_position_colour if checked else _LIGHT_GREY)
 
     def get_render_mode_option(self) -> str:
         return self._render_mode_combo_box.currentText()
