@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.dataobjects import GroupingWorkspace
-from mantid.simpleapi import LoadWANDSCD
+from mantid.simpleapi import AddSampleLog, CreateMDHistoWorkspace, LoadEmptyInstrument, LoadWANDSCD
 import unittest
 import numpy as np
 
@@ -121,7 +121,7 @@ class LoadWANDApplyGoniometerTiltTest(unittest.TestCase):
         LoadWANDTest_ws.delete()
 
 
-class LoadWANDGrouping(unittest.TestCase):
+class LoadWANDGroupingTest(unittest.TestCase):
     # Full detector grid dimensions for WAND (HB2C)
     N_ROWS = 480 * 8  # 3840
     N_COLS = 512
@@ -196,6 +196,229 @@ class LoadWANDGrouping(unittest.TestCase):
         """Requesting OutputGroupingWorkspace while Grouping='None' must raise."""
         with self.assertRaises(Exception):
             LoadWANDSCD("HB2C_475936.nxs.h5", Grouping="None", OutputGroupingWorkspace="should_fail")
+
+
+class LoadWANDOutputNormalizationTest(unittest.TestCase):
+    DATA_FILES = "HB2C_7000.nxs.h5,HB2C_7001.nxs.h5"
+    VANADIUM_SIGNAL = 25.0
+    VANADIUM_MONITOR = 420.0
+    VANADIUM_DURATION = 42.0
+    SAMPLE_MONITOR = np.array([907880.0, 908651.0])
+    SAMPLE_DURATION = np.array([40.05, 40.05])
+
+    @classmethod
+    def setUpClass(cls):
+        cls.vanadium = cls._create_vanadium_workspace()
+        cls.vanadium_2x2 = cls._create_vanadium_workspace(grouping="2x2")
+        cls.vanadium_4x4 = cls._create_vanadium_workspace(grouping="4x4")
+
+    @classmethod
+    def tearDownClass(cls):
+        cls._delete_workspaces(cls.vanadium, cls.vanadium_2x2, cls.vanadium_4x4)
+
+    @classmethod
+    def _create_vanadium_workspace(cls, grouping="None"):
+        grouping_factor = {"None": 1, "2x2": 2, "4x4": 4}[grouping]
+        grouping_label = grouping.lower().replace("x", "")
+        x_bins = LoadWANDGroupingTest.N_ROWS // grouping_factor
+        y_bins = LoadWANDGroupingTest.N_COLS // grouping_factor
+        signal = np.full(y_bins * x_bins, cls.VANADIUM_SIGNAL)
+        vanadium = CreateMDHistoWorkspace(
+            Dimensionality=2,
+            Extents=f"0.5,{y_bins + 0.5},0.5,{x_bins + 0.5}",
+            SignalInput=signal,
+            ErrorInput=np.sqrt(signal),
+            NumberOfBins=f"{y_bins},{x_bins}",
+            Names="y,x",
+            Units="bin,bin",
+            OutputWorkspace=f"vanadium_normalization_input_{grouping_label}",
+        )
+        hb2c = LoadEmptyInstrument(
+            InstrumentName="HB2C",
+            OutputWorkspace=f"vanadium_normalization_source_{grouping_label}",
+        )
+        vanadium.addExperimentInfo(hb2c)
+        hb2c.delete()
+        AddSampleLog(
+            vanadium,
+            LogName="monitor_count",
+            LogText=str(cls.VANADIUM_MONITOR),
+            LogType="Number Series",
+            NumberType="Double",
+        )
+        AddSampleLog(
+            vanadium,
+            LogName="duration",
+            LogText=str(cls.VANADIUM_DURATION),
+            LogType="Number Series",
+            NumberType="Double",
+        )
+        return vanadium
+
+    @staticmethod
+    def _delete_workspaces(*workspaces):
+        for workspace in workspaces:
+            if workspace is not None:
+                workspace.delete()
+
+    def _assert_workspace_dimensions(self, workspace, expected_y_bins, expected_x_bins, expected_scan_bins):
+        self.assertEqual(workspace.getDimension(0).name, "y")
+        self.assertEqual(workspace.getDimension(0).getNBins(), expected_y_bins)
+        self.assertEqual(workspace.getDimension(1).name, "x")
+        self.assertEqual(workspace.getDimension(1).getNBins(), expected_x_bins)
+        self.assertEqual(workspace.getDimension(2).name, "scanIndex")
+        self.assertEqual(workspace.getDimension(2).getNBins(), expected_scan_bins)
+
+    def _assert_grouping_workspace(self, grouping_workspace, grouping):
+        expected_groups = (LoadWANDGroupingTest.N_ROWS // grouping) * (LoadWANDGroupingTest.N_COLS // grouping)
+        y_values = grouping_workspace.extractY().flatten()
+        self.assertIsInstance(grouping_workspace, GroupingWorkspace)
+        self.assertEqual(grouping_workspace.getNumberHistograms(), LoadWANDGroupingTest.N_ROWS * LoadWANDGroupingTest.N_COLS)
+        self.assertEqual(int(y_values.min()), 1)
+        self.assertEqual(int(y_values.max()), expected_groups)
+        self.assertEqual(int(grouping_workspace.readY(0)[0]), 1)
+        self.assertEqual(int(grouping_workspace.readY(grouping)[0]), 2)
+        self.assertEqual(int(grouping_workspace.readY(grouping * 512)[0]), (LoadWANDGroupingTest.N_COLS // grouping) + 1)
+
+    def test_output_normalization_workspace_for_counts(self):
+        data = normalization = None
+        try:
+            data, normalization = LoadWANDSCD(
+                self.DATA_FILES,
+                OutputWorkspace="counts_data",
+                VanadiumWorkspace=self.vanadium,
+                NormalizedBy="Counts",
+                NormalizeData=True,
+                OutputNormalizationWorkspace="counts_normalization",
+            )
+
+            np.testing.assert_allclose(normalization.getSignalArray(), 1.0)
+            np.testing.assert_allclose(normalization.getErrorSquaredArray(), 1.0 / self.VANADIUM_SIGNAL)
+            self.assertEqual(normalization.getSignalArray().shape, data.getSignalArray().shape)
+            self._assert_workspace_dimensions(normalization, 512, 3840, 2)
+        finally:
+            self._delete_workspaces(data, normalization)
+
+    def test_output_normalization_workspace_for_monitor(self):
+        data = normalization = None
+        try:
+            data, normalization = LoadWANDSCD(
+                self.DATA_FILES,
+                OutputWorkspace="monitor_data",
+                VanadiumWorkspace=self.vanadium,
+                NormalizedBy="Monitor",
+                NormalizeData=True,
+                OutputNormalizationWorkspace="monitor_normalization",
+            )
+
+            expected_signal = self.VANADIUM_SIGNAL * self.SAMPLE_MONITOR / self.VANADIUM_MONITOR
+            for scan_index, expected in enumerate(expected_signal):
+                np.testing.assert_allclose(normalization.getSignalArray()[..., scan_index], expected)
+
+            normalization_monitor = normalization.getExperimentInfo(0).run().getProperty("monitor_count")
+            np.testing.assert_allclose(normalization_monitor.value, np.full(len(self.SAMPLE_MONITOR), self.VANADIUM_MONITOR))
+            self.assertEqual(normalization_monitor.units, self.vanadium.getExperimentInfo(0).run().getProperty("monitor_count").units)
+        finally:
+            self._delete_workspaces(data, normalization)
+
+    def test_output_normalization_workspace_for_time(self):
+        data = normalization = None
+        try:
+            data, normalization = LoadWANDSCD(
+                self.DATA_FILES,
+                OutputWorkspace="time_data",
+                VanadiumWorkspace=self.vanadium,
+                NormalizedBy="Time",
+                NormalizeData=True,
+                OutputNormalizationWorkspace="time_normalization",
+            )
+
+            expected_signal = self.VANADIUM_SIGNAL * self.SAMPLE_DURATION / self.VANADIUM_DURATION
+            for scan_index, expected in enumerate(expected_signal):
+                np.testing.assert_allclose(normalization.getSignalArray()[..., scan_index], expected)
+
+            normalization_duration = normalization.getExperimentInfo(0).run().getProperty("duration")
+            np.testing.assert_allclose(normalization_duration.value, np.full(len(self.SAMPLE_DURATION), self.VANADIUM_DURATION))
+            self.assertEqual(normalization_duration.units, self.vanadium.getExperimentInfo(0).run().getProperty("duration").units)
+        finally:
+            self._delete_workspaces(data, normalization)
+
+    def test_output_normalization_workspace_for_none(self):
+        data = normalization = None
+        try:
+            data, normalization = LoadWANDSCD(
+                self.DATA_FILES,
+                OutputWorkspace="none_data",
+                VanadiumWorkspace=self.vanadium,
+                NormalizedBy="None",
+                NormalizeData=True,
+                OutputNormalizationWorkspace="none_normalization",
+            )
+
+            np.testing.assert_allclose(normalization.getSignalArray(), self.VANADIUM_SIGNAL)
+            np.testing.assert_allclose(normalization.getErrorSquaredArray(), self.VANADIUM_SIGNAL)
+            self.assertEqual(normalization.getSignalArray().shape, data.getSignalArray().shape)
+        finally:
+            self._delete_workspaces(data, normalization)
+
+    def test_normalize_data_false_still_outputs_normalization_workspace(self):
+        data = normalization = None
+        try:
+            data, normalization = LoadWANDSCD(
+                self.DATA_FILES,
+                OutputWorkspace="normalize_data_false_data",
+                VanadiumWorkspace=self.vanadium,
+                NormalizedBy="None",
+                NormalizeData=False,
+                OutputNormalizationWorkspace="normalize_data_false_normalization",
+            )
+
+            self.assertEqual(data.getSignalArray().max(), 7)
+            np.testing.assert_allclose(normalization.getSignalArray(), self.VANADIUM_SIGNAL)
+        finally:
+            self._delete_workspaces(data, normalization)
+
+    def test_output_normalization_and_grouping_workspaces_for_2x2_grouping(self):
+        data = normalization = grouping = None
+        try:
+            data, normalization, grouping = LoadWANDSCD(
+                self.DATA_FILES,
+                OutputWorkspace="data_2x2",
+                Grouping="2x2",
+                VanadiumWorkspace=self.vanadium_2x2,
+                NormalizedBy="Counts",
+                NormalizeData=True,
+                OutputGroupingWorkspace="grouping_2x2",
+                OutputNormalizationWorkspace="normalization_2x2",
+            )
+
+            np.testing.assert_allclose(normalization.getSignalArray(), 1.0)
+            self.assertEqual(normalization.getSignalArray().shape, data.getSignalArray().shape)
+            self._assert_workspace_dimensions(normalization, 256, 1920, 2)
+            self._assert_grouping_workspace(grouping, 2)
+        finally:
+            self._delete_workspaces(data, grouping, normalization)
+
+    def test_output_normalization_and_grouping_workspaces_for_4x4_grouping(self):
+        data = normalization = grouping = None
+        try:
+            data, normalization, grouping = LoadWANDSCD(
+                self.DATA_FILES,
+                OutputWorkspace="data_4x4",
+                Grouping="4x4",
+                VanadiumWorkspace=self.vanadium_4x4,
+                NormalizedBy="Counts",
+                NormalizeData=True,
+                OutputGroupingWorkspace="grouping_4x4",
+                OutputNormalizationWorkspace="normalization_4x4",
+            )
+
+            np.testing.assert_allclose(normalization.getSignalArray(), 1.0)
+            self.assertEqual(normalization.getSignalArray().shape, data.getSignalArray().shape)
+            self._assert_workspace_dimensions(normalization, 128, 960, 2)
+            self._assert_grouping_workspace(grouping, 4)
+        finally:
+            self._delete_workspaces(data, grouping, normalization)
 
 
 if __name__ == "__main__":

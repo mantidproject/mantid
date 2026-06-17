@@ -85,14 +85,19 @@ class LoadWANDSCD(PythonAlgorithm):
         )
         # normalization method
         self.declareProperty(
-            "NormalizedBy", "None", StringListValidator(["None", "Counts", "Monitor", "Time"]), "Normalize to Counts, Monitor, Time."
+            "NormalizedBy",
+            "None",
+            StringListValidator(["None", "Counts", "Monitor", "Time"]),
+            doc="Normalization flux. Valid options are Counts, Monitor, and Time.",
         )
+        self.declareProperty("NormalizeData", True, "When False, skip normalization even if vanadium data is provided.")
         # group normalization properties
         self.setPropertyGroup("VanadiumIPTS", "Normalization")
         self.setPropertyGroup("VanadiumRunNumber", "Normalization")
         self.setPropertyGroup("VanadiumFile", "Normalization")
         self.setPropertyGroup("VanadiumWorkspace", "Normalization")
         self.setPropertyGroup("NormalizedBy", "Normalization")
+        self.setPropertyGroup("NormalizeData", "Normalization")
 
         # Grouping info
         self.declareProperty(
@@ -108,15 +113,22 @@ class LoadWANDSCD(PythonAlgorithm):
 
         # Output workspace/data info
         self.declareProperty(
-            WorkspaceProperty("OutputWorkspace", "", optional=PropertyMode.Mandatory, direction=Direction.Output), "Output Workspace"
+            WorkspaceProperty("OutputWorkspace", "", optional=PropertyMode.Mandatory, direction=Direction.Output),
+            doc="signal for each pixel and run index. May be normalized by flux and vanadium signal.",
         )
-
+        self.declareProperty(
+            WorkspaceProperty("OutputNormalizationWorkspace", "", optional=PropertyMode.Optional, direction=Direction.Output),
+            doc="Optional: output the normalization workspace containing the product of flux and vanadium signal "
+            "for each pixel and run index.",
+        )
         self.declareProperty(
             WorkspaceProperty("OutputGroupingWorkspace", "", optional=PropertyMode.Optional, direction=Direction.Output),
             doc="Optional: output GroupingWorkspace mapping every detector's workspace index to its group ID. "
             "Only produced when Grouping is '2x2' or '4x4'.",
         )
-        self.setPropertyGroup("OutputGroupingWorkspace", "Grouping")
+        self.setPropertyGroup("OutputWorkspace", "Outputs")
+        self.setPropertyGroup("OutputNormalizationWorkspace", "Outputs")
+        self.setPropertyGroup("OutputGroupingWorkspace", "Outputs")
 
     def validateInputs(self):
         issues = dict()
@@ -149,29 +161,22 @@ class LoadWANDSCD(PythonAlgorithm):
         # load and group
         data, grouping_ws = self.load_and_group(runs, create_grouping_ws=create_grouping_ws)
 
-        # check if normalization need to be performed
-        # NOTE: the normalization will be skipped if no information regarding Vanadium is provided
-        skipNormalization = (
+        # check if any normalization work needs to be performed
+        noVanadium = (
             self.getProperty("VanadiumIPTS").isDefault
             and self.getProperty("VanadiumRunNumber").isDefault
             and self.getProperty("VanadiumFile").isDefault
             and self.getProperty("VanadiumWorkspace").isDefault
         )
-        if skipNormalization:
-            self.log().warning("No Vanadium data provided, skip normalization")
+        if noVanadium:
+            self.log().warning("No Vanadium data provided, skip any normalization-related work")
         else:
-            # attempt to get the vanadium via file
-            van_filename = self.get_va_filename()
-            if van_filename is None:
-                # try to load from memory
-                norm = self.getProperty("VanadiumWorkspace").value
+            norm = self.normalization_workspace(data, self.getProperty("NormalizedBy").value.lower())
+            if self.getProperty("NormalizeData").value:
+                data = DivideMD(LHSWorkspace=data, RHSWorkspace=norm)
+            if not self.getProperty("OutputNormalizationWorkspace").isDefault:
+                self.setProperty("OutputNormalizationWorkspace", norm)
             else:
-                norm, _ = self.load_and_group([van_filename])
-            # normalize
-            data = self.normalize(data, norm, self.getProperty("NormalizedBy").value.lower())
-            # cleanup
-            # NOTE: if va is read from memory, we will keep it in case we need it later
-            if van_filename is not None:
                 DeleteWorkspace(norm)
 
         # setup output
@@ -468,41 +473,57 @@ class LoadWANDSCD(PythonAlgorithm):
 
         return grouping_ws
 
-    def normalize(
+    def normalization_workspace(
         self,
         data: IMDHistoWorkspace,
-        norm: IMDHistoWorkspace,
         normalize_by: str,
     ) -> IMDHistoWorkspace:
-        """
-        Normalize the given data with given Va normalization workspace
-        """
-        # prep
-        norm_replicated = ReplicateMD(ShapeWorkspace=data, DataWorkspace=norm)
-        data = DivideMD(LHSWorkspace=data, RHSWorkspace=norm_replicated)
-        # reduce memory footprint
-        DeleteWorkspace(norm_replicated)
-        # find the scale
-        if normalize_by == "counts":
-            scale = 1.0 / norm.getSignalArray().mean()
-            self.getLogger().information("scale counts = {}".format(scale))
-        elif normalize_by == "monitor":
-            scale = np.array(data.getExperimentInfo(0).run().getProperty("monitor_count").value)
-            scale /= norm.getExperimentInfo(0).run().getProperty("monitor_count").value[0]
-            self.getLogger().information("scale monitor = {}".format(scale))
-        elif normalize_by == "time":
-            scale = np.array(data.getExperimentInfo(0).run().getProperty("duration").value)
-            scale /= norm.getExperimentInfo(0).run().getProperty("duration").value[0]
-            self.getLogger().information("van time = {}".format(scale))
-        elif normalize_by == "none":
-            scale = 1
+        van_filename = self.get_va_filename()  # attempt to get the vanadium via file
+        if van_filename is None:
+            norm = self.getProperty("VanadiumWorkspace").value  # try to load from memory
         else:
-            raise RuntimeError(f"Unknown normalization method: {normalize_by}!")
-        # exec
-        data.setSignalArray(data.getSignalArray() / scale)
-        data.setErrorSquaredArray(data.getErrorSquaredArray() / scale**2)
-        # return
-        return data
+            norm, _ = self.load_and_group([van_filename])
+
+        # Cast Vanadium into an MDHistoWorkspace of dimensions (pixel_x, pixel_y, data's run_index)
+        # Very important: normMD inherits the sample logs and experiment info from `data`,
+        # because ReplicateMD clones `data`.
+        normMD = ReplicateMD(ShapeWorkspace=data, DataWorkspace=norm)
+
+        def replicate_normalization_log(log_name: str) -> None:
+            """
+            Replace the selected normMD flux log values with the single Vanadium flux value,
+            preserving normMD timestamps so the log still follows the sample run index.
+            """
+            norm_log = norm.getExperimentInfo(0).run().getProperty(log_name)
+            normMD_run = normMD.getExperimentInfo(0).run()
+            normMD_log = normMD_run.getProperty(log_name)
+            values = np.full(len(normMD_log.value), norm_log.value[0])
+            add_time_series_property(log_name, normMD_run, normMD_log.times, values)
+            normMD_run.getProperty(log_name).units = norm_log.units
+
+        # find the flux ratio
+        if normalize_by == "counts":
+            flux_ratio = 1.0 / norm.getSignalArray().mean()
+            self.getLogger().information("flux ratio by counts = {}".format(flux_ratio))
+        elif normalize_by == "monitor":
+            flux_ratio = np.array(data.getExperimentInfo(0).run().getProperty("monitor_count").value)
+            flux_ratio /= norm.getExperimentInfo(0).run().getProperty("monitor_count").value[0]
+            replicate_normalization_log("monitor_count")
+            self.getLogger().information("flux ratio by monitor = {}".format(flux_ratio))
+        elif normalize_by == "time":
+            flux_ratio = np.array(data.getExperimentInfo(0).run().getProperty("duration").value)
+            flux_ratio /= norm.getExperimentInfo(0).run().getProperty("duration").value[0]
+            replicate_normalization_log("duration")
+            self.getLogger().information("flux ratio by time = {}".format(flux_ratio))
+        elif normalize_by == "none":
+            flux_ratio = 1
+        else:
+            raise RuntimeError(f"Unknown flux selection: {normalize_by}!")
+        normMD.setSignalArray(normMD.getSignalArray() * flux_ratio)
+        normMD.setErrorSquaredArray(normMD.getErrorSquaredArray() * flux_ratio**2)
+        if van_filename is not None:
+            DeleteWorkspace(norm)
+        return normMD
 
 
 def add_time_series_property(name, run, times, values):
