@@ -307,7 +307,7 @@ public:
   }
 
   void test_formula_not_specified_doesnt_throw() {
-    // If we don't specify wavelength, then we assume the formulas are working
+    // If we don't specify wavelength, then we assume the forumlas are working
     // in terms of wavelength.
     MatrixWorkspace_sptr inputWS2 = create_workspace_with_fitting_functions("");
     do_test_doesnt_throw_on_execution(inputWS2);

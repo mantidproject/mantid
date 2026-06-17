@@ -153,7 +153,7 @@ class MainWindowTest(unittest.TestCase):
             "Algorithm Descriptions",
             None,
             "Mantid Homepage",
-            "Mantid Discussion",
+            "Mantid Forum",
             "Email mantid-help@mantidproject.org",
             None,
             "About Mantid Workbench",

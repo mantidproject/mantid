@@ -243,7 +243,8 @@ Currently only the following functions can be used in a fit with "Histogram" eva
 - :ref:`func-FlatBackground`
 - :ref:`func-LinearBackground`
 
-If any other functions need to be included in the list please leave a request at mantid-help@mantidproject.org .
+If any other functions need to be included in the list please leave a request at the
+`Forum <http://forum.mantidproject.org/>`_.
 
 
 Excluding data from fit
