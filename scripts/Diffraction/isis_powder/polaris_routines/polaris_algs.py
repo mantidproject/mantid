@@ -138,12 +138,14 @@ def generate_ts_pdf(
     if debug:
         s_of_q_minus_one = mantid.CloneWorkspace(InputWorkspace=focused_ws)
 
+    # rho0 should be the per-atom number density
+    number_density_in_atoms = sample_details.material_object.get_number_density_in_atoms()
     pdf_kwargs = {
         "InputSofQType": "S(Q)-1",
         "PDFType": pdf_type,
         "Filter": lorch_filter,
         "DeltaR": delta_r,
-        "rho0": sample_details.material_object.number_density,
+        "rho0": number_density_in_atoms,
     }
     if r_lims is not None:
         pdf_kwargs.update({"RMin": r_lims[0], "RMax": r_lims[-1]})
@@ -151,7 +153,7 @@ def generate_ts_pdf(
         pdf_output = _merge_banks(focused_ws, pdf_kwargs, freq_params, q_lims, stitch_points, stitch_lims, overlap_width)
     else:
         for ws in focused_ws:
-            fast_fourier_filter(ws, rho0=sample_details.material_object.number_density, freq_params=freq_params)
+            fast_fourier_filter(ws, rho0=number_density_in_atoms, freq_params=freq_params)
         pdf_output = mantid.PDFFourierTransform(Inputworkspace="focused_ws", **pdf_kwargs)
         pdf_output = mantid.RebinToWorkspace(WorkspaceToRebin=pdf_output, WorkspaceToMatch=pdf_output[4], PreserveEvents=True)
     if not per_detector and not debug:
