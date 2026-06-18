@@ -1,5 +1,3 @@
-# this uses the action to merge special branches on push
-# https://github.com/marketplace/actions/merge-branch
 name: Merge protected branches
 
 on:
@@ -11,32 +9,26 @@ permissions:
   contents: read
 
 jobs:
-  merge-release-into-main:
+  merge-into-main:
     runs-on: ubuntu-latest
-    # run on release-next branch and do not run in forks
-    if: ${{ github.ref_name == 'release-next' && github.repository_owner == 'mantidproject' }}
+    # Do not run in forks
+    if: ${{ github.repository_owner == 'mantidproject' }}
+
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - name: Merge release-next into main
-        uses: devmasx/merge-branch@854d3ac71ed1e9deb668e0074781b81fdd6e771f # v1.4.0
         with:
-          type: now
-          target_branch: main
-          message: Merge release-next into main
-          github_token: ${{ secrets.AUTOMERGE_TOKEN }}
+          fetch-depth: 0
+          token: ${{ secrets.AUTOMERGE_TOKEN }}
 
-  merge-ornl-into-main:
-    runs-on: ubuntu-latest
-    # run on ornl-next branche and do not run in forks
-    if: ${{ github.ref_name == 'ornl-next' && github.repository_owner == 'mantidproject' }}
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Merge ${{ github.ref_name }} into main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Merge ornl-next into main
-        uses: devmasx/merge-branch@854d3ac71ed1e9deb668e0074781b81fdd6e771f # v1.4.0
-        with:
-          type: now
-          target_branch: main
-          message: Merge ornl-next into main
-          github_token: ${{ secrets.AUTOMERGE_TOKEN }}
+          git fetch origin main "${{ github.ref_name }}"
+
+          git checkout main
+          git merge --no-ff "origin/${{ github.ref_name }}" \
+            -m "Merge ${{ github.ref_name }} into main"
+
+          git push origin main
