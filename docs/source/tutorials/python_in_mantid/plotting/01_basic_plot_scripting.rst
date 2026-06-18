@@ -83,7 +83,7 @@ For setting scales, axis titles, plot titles etc. you can use:
     import matplotlib.pyplot as plt
 
     RawData = Load("MAR11015")
-    plotSpectrum(RawData,1, error_bars=True)
+    plotSpectrum(RawData, 1, error_bars=True)
 
     # Get current axes of the graph
     fig, axes = plt.gcf(), plt.gca()
@@ -157,10 +157,12 @@ Output:
     The graph_spec1 plot contains 3 spectrums
     The graph_spec2 plot contains 2 spectrums
     The graph_spec3 plot contains 6 spectrums
+
 .. testcleanup:: PlotMultipleSpectrums
 
     DeleteWorkspace(RawData1)
     DeleteWorkspace(RawData2)
+
 To overplot on the same window:
 
 .. testcode:: OverPlottingWithTwoSpectrums

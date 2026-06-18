@@ -4,7 +4,7 @@
 Formatting Plots with a script
 ==============================
 
-**Sometimes the easiest way to find out how to control part of a plot with Matplotlib is to search online for their** `documentation <https://matplotlib.org/3.2.1/index.html>`_ **! Below are some useful commands and a handful of links**
+**Sometimes the easiest way to find out how to control part of a plot with Matplotlib is to search online for their** `documentation <https://matplotlib.org/3.10.9/index.html>`_ **! Below are some useful commands and a handful of links**
 
 
 General
@@ -183,7 +183,7 @@ Useful links
 For further info, including code for producing 2D colorfill plots see:
 
 * `Mantid Plotting Examples <https://docs.mantidproject.org/nightly/plotting/index.html>`_
-* `Matplotlib Gallery <https://matplotlib.org/3.1.1/gallery/index.html>`_
+* `Matplotlib Gallery <https://matplotlib.org/3.10.9/gallery/index.html>`_
 * `Mantid Script Plotting <https://docs.mantidproject.org/nightly/api/python/mantid/plots/index.html>`_
 
 
@@ -238,7 +238,7 @@ Example Script
 
 * :ref:`plotting`
 * :ref:`06_formatting_plots`
-* `Matplotlib Keyboard Shortcuts <https://matplotlib.org/3.1.1/users/navigation_toolbar.html#navigation-keyboard-shortcuts>`_
+* `Matplotlib Keyboard Shortcuts <https://matplotlib.org/stable/users/explain/figure/interactive.html#navigation-keyboard-shortcuts>`_
 
 .. |GenerateAScript.png| image:: /images/GenerateAScript.png
    :width: 30px
