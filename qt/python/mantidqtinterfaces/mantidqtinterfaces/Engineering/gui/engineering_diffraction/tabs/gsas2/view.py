@@ -54,17 +54,24 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
         self.setupUi(self)
         self.instrument = instrument
 
-        self.instrument_group_file_finder.setLabelText("Instrument Group")
+        # Shared label-column width so the labels (and the "Selected Phase" combo
+        # in the Phase box) line up consistently across the group boxes.
+        label_min_width = 115
+
+        self.instrument_group_file_finder.setLabelText("Instrument Group File")
+        self.instrument_group_file_finder.setLabelMinWidth(label_min_width)
         self.instrument_group_file_finder.isForRunFiles(False)
         self.instrument_group_file_finder.setFileExtensions([".prm"])
         self.instrument_group_file_finder.allowMultipleFiles(True)
 
         self.phase_file_finder.setLabelText("Custom Phase File")
+        self.phase_file_finder.setLabelMinWidth(label_min_width)
         self.phase_file_finder.isForRunFiles(False)
         self.phase_file_finder.setFileExtensions([".cif"])
         self.phase_file_finder.allowMultipleFiles(True)
 
-        self.focused_data_file_finder.setLabelText("Focused Data")
+        self.focused_data_file_finder.setLabelText("Focused Data Path(s)")
+        self.focused_data_file_finder.setLabelMinWidth(label_min_width)
         self.focused_data_file_finder.isForRunFiles(False)
         self.focused_data_file_finder.setFileExtensions([".gss", ".gsa"])
         self.focused_data_file_finder.allowMultipleFiles(True)
