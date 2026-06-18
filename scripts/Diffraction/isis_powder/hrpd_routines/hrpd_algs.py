@@ -58,6 +58,8 @@ def calculate_slab_absorb_corrections(ws_to_correct, sample_details_obj):
     material_json = {"ChemicalFormula": material.chemical_formula}
     if material.number_density:
         material_json["SampleNumberDensity"] = material.number_density
+        # Honour the unit the density was supplied in so a formula-unit density is converted to atoms
+        material_json["NumberDensityUnit"] = material.number_density_unit
     if material.absorption_cross_section:
         material_json["AttenuationXSection"] = material.absorption_cross_section
     if material.scattering_cross_section:
