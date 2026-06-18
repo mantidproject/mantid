@@ -52,20 +52,23 @@ if(SIP_BUILD_EXECUTABLE)
   # version string
   execute_process(
     COMMAND ${SIP_BUILD_EXECUTABLE} --version
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     OUTPUT_VARIABLE SIP_VERSION
     OUTPUT_STRIP_TRAILING_WHITESPACE
   )
 
   # module generator
   find_program(SIP_MODULE_EXECUTABLE NAMES sip-module)
+  # Templates live next to this find module. Resolve via CMAKE_CURRENT_LIST_DIR rather than CMAKE_MODULE_PATH, which
+  # becomes a multi-element list once Qt6 / extra-cmake-modules append their module dirs (breaking a naive path join).
   # pyproject.toml template
   set(SIP_PYPROJECT_TOML_TEMPLATE
-      ${CMAKE_MODULE_PATH}/sip-templates/pyproject.toml.in
+      ${CMAKE_CURRENT_LIST_DIR}/sip-templates/pyproject.toml.in
       CACHE FILEPATH ""
   )
   # project.py template
   set(SIP_PROJECT_PY_TEMPLATE
-      ${CMAKE_MODULE_PATH}/sip-templates/project.py.in
+      ${CMAKE_CURRENT_LIST_DIR}/sip-templates/project.py.in
       CACHE FILEPATH ""
   )
 

@@ -28,7 +28,7 @@ QAbstractItemView::EditTriggers getEditTriggers() {
 namespace MantidQt::MantidWidgets::Batch {
 
 JobTreeView::JobTreeView(QStringList const &columnHeadings, Cell const &emptyCellStyle, QWidget *parent)
-    : QTreeView(parent), m_notifyee(nullptr), m_mainModel(0, columnHeadings.size(), this),
+    : QTreeView(parent), m_notifyee(nullptr), m_mainModel(0, static_cast<int>(columnHeadings.size()), this),
       m_adaptedMainModel(m_mainModel, emptyCellStyle), m_filteredModel(RowLocationAdapter(m_mainModel), this),
       m_lastEdited(QModelIndex()) {
   setModel(&m_mainModel);

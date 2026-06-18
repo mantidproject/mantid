@@ -6,7 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 // This file defines the Python bindings for the
 // _icons library.
-%Module(name=_iconsqt5)
+%Module(name=@SIP_MODULE_NAME@)
+%Feature Qt6Bindings
 
 %ModuleCode
 #include "MantidQtIcons/Icon.h"

@@ -702,7 +702,7 @@ std::shared_ptr<Mantid::API::IPeaksWorkspace> ProjectionSurface::getEditPeaksWor
  * @param ws :: Shared pointer to the deleted peaks workspace.
  */
 void ProjectionSurface::deletePeaksWorkspace(const std::shared_ptr<Mantid::API::IPeaksWorkspace> &ws) {
-  const int npeaks = m_peakShapes.size();
+  const int npeaks = static_cast<int>(m_peakShapes.size());
   for (int i = 0; i < npeaks; ++i) {
     if (m_peakShapes[i]->getPeaksWorkspace() == ws) {
       delete m_peakShapes[i];

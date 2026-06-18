@@ -280,7 +280,7 @@ void AlgorithmTreeWidget::update() {
       } else {
         QString cn = subCats[0];
         QTreeWidgetItem *catItem = nullptr;
-        int n = subCats.size();
+        auto n = subCats.size();
         for (int j = 0; j < n; j++) {
           if (categories.contains(cn)) {
             catItem = categories[cn];
@@ -362,9 +362,9 @@ void FindAlgComboBox::addAliases(AlgNamesType &algNamesList) {
 /** if a string is for an alias convert it to the algorithm name */
 QString FindAlgComboBox::stripAlias(const QString &text) const {
   QString retVal = text;
-  int foundOpen = text.indexOf("[");
+  int foundOpen = static_cast<int>(text.indexOf("["));
   if (foundOpen != -1) {
-    int foundClose = text.lastIndexOf("]");
+    int foundClose = static_cast<int>(text.lastIndexOf("]"));
     if (foundClose != -1)
       retVal = text.mid(foundOpen + 1, foundClose - foundOpen - 1);
   }

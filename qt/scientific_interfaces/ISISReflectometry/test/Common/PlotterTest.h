@@ -13,14 +13,14 @@
 #include "MantidQtWidgets/Common/Python/Object.h"
 #include <cxxtest/TestSuite.h>
 
-class PlotterTestQt5 : public CxxTest::TestSuite {
+class PlotterTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PlotterTestQt5 *createSuite() { return new PlotterTestQt5(); }
-  static void destroySuite(PlotterTestQt5 *suite) { delete suite; }
+  static PlotterTest *createSuite() { return new PlotterTest(); }
+  static void destroySuite(PlotterTest *suite) { delete suite; }
 
-  PlotterTestQt5() { Mantid::API::FrameworkManager::Instance(); }
+  PlotterTest() { Mantid::API::FrameworkManager::Instance(); }
 
   void testReflectometryPlot() {
     // Just test that it doesn't segfault when plotting as nothing is returned

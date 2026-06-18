@@ -1057,7 +1057,8 @@ public:
 void QtBrowserItemPrivate::addChild(QtBrowserItem *index, QtBrowserItem *after) {
   if (m_children.contains(index))
     return;
-  int idx = m_children.indexOf(after) + 1; // we insert after returned idx, if it was -1 then we set idx to 0;
+  int idx = static_cast<int>(m_children.indexOf(after)) +
+            1; // we insert after returned idx, if it was -1 then we set idx to 0;
   m_children.insert(idx, index);
 }
 
@@ -1290,7 +1291,7 @@ void QtAbstractPropertyBrowserPrivate::removeBrowserIndexes(QtProperty *property
 
 void QtAbstractPropertyBrowserPrivate::removeBrowserIndex(QtBrowserItem *index) {
   QList<QtBrowserItem *> children = index->children();
-  for (int i = children.count(); i > 0; i--) {
+  for (int i = static_cast<int>(children.count()); i > 0; i--) {
     removeBrowserIndex(children.at(i - 1));
   }
 

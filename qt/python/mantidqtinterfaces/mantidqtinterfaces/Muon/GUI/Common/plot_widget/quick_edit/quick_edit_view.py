@@ -126,7 +126,7 @@ class QuickEditView(QtWidgets.QWidget):
 
     @property
     def autoscale_state(self):
-        return self.autoscale.checkState()
+        return self.autoscale.isChecked()
 
     def disable_autoscale(self):
         self.autoscale.setEnabled(False)

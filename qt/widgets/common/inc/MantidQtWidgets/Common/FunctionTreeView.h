@@ -413,9 +413,9 @@ private:
 
 public:
   // Intended for testing only
-  int getNumberOfQtProperties() const { return m_properties.size(); }
-  int getNumberOfTieProperties() const { return m_ties.size(); }
-  int getNumberOfConstraintProperties() const { return m_constraints.size(); }
+  int getNumberOfQtProperties() const { return static_cast<int>(m_properties.size()); }
+  int getNumberOfTieProperties() const { return static_cast<int>(m_ties.size()); }
+  int getNumberOfConstraintProperties() const { return static_cast<int>(m_constraints.size()); }
   QRect getVisualRectFunctionProperty(std::string const &index) const;
   QRect getVisualRectParameterProperty(std::string const &index) const;
   QTreeWidget *treeWidget() const;

@@ -113,7 +113,7 @@ if(BUILD_MANTIDFRAMEWORK)
   find_package(HDF4 REQUIRED)
   find_package(MuParser REQUIRED)
   find_package(JsonCPP 0.7.0 REQUIRED)
-  find_package(Eigen3 3.4 REQUIRED)
+  find_package(Eigen3 REQUIRED NO_MODULE)
 
   if(ENABLE_OPENCASCADE)
     find_package(OpenCascade REQUIRED)

@@ -85,7 +85,7 @@ FitScriptGeneratorDataTable::FitScriptGeneratorDataTable(QWidget *parent)
   this->setSelectionBehavior(QAbstractItemView::SelectRows);
   this->setSelectionMode(QAbstractItemView::ExtendedSelection);
   this->setShowGrid(false);
-  this->setColumnCount(COLUMN_HEADINGS.size());
+  this->setColumnCount(static_cast<int>(COLUMN_HEADINGS.size()));
   this->setRowCount(0);
   this->horizontalHeader()->setHighlightSections(false);
   this->horizontalHeader()->setStretchLastSection(true);

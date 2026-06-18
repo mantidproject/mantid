@@ -6,7 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 // This file defines the Python bindings for the
 // _common library.
-%Module(name=_commonqt5)
+%Module(name=@SIP_MODULE_NAME@)
+%Feature Qt6Bindings
 
 %ModuleCode
 #include "MantidKernel/WarningSuppressions.h"
@@ -43,7 +44,8 @@ using namespace MantidQt::MantidWidgets::Batch;
 %Import QtWidgets/QtWidgetsmod.sip
 
 %Include ../sip/exceptions.sip
-%Include ../sip/string.sip
+// vector.sip already %Includes string.sip; including it here too defines the
+// std::string %MappedType twice, which the sip v6/abi-13 generator rejects.
 %Include ../sip/vector.sip
 
 %InitialisationCode
@@ -341,18 +343,18 @@ class InterfaceManager {
 using namespace MantidQt::API;
 %End
 public:
-  InterfaceManager() throw(std::exception);
+  InterfaceManager();
   AlgorithmDialog *createDialogFromName(
       const QString &algorithmName, const int version = -1,
       QWidget *parent = nullptr, bool forScript = false,
       const QHash<QString, QString> &presetValues = QHash<QString, QString>(),
       const QString &optionalMsg = QString(),
       const QStringList &enabled = QStringList(),
-      const QStringList &disabled = QStringList()) throw(std::exception);
+      const QStringList &disabled = QStringList());
 
   UserSubWindow *createSubWindow(
       const QString &interface_name,
-      QWidget *parent = nullptr) throw(std::exception);
+      QWidget *parent = nullptr);
   QStringList getUserSubWindowKeys() const;
 
   void showHelpPage(const QString &url=QString());
@@ -593,7 +595,7 @@ SIP_PYOBJECT defaultBackgroundType();
     double getPeakHeightOf(QString);
     void setPeakHeightOf(QString, double);
     double getPeakFwhmOf(QString);
-    void setPeakFwhmOf(QString, double) throw (std::invalid_argument);
+    void setPeakFwhmOf(QString, double) throw(std::invalid_argument);
     std::string getWidthParameterNameOf(QString);
     std::string getCentreParameterNameOf(QString);
     bool isParameterExplicitlySetOf(QString, std::string);
@@ -774,7 +776,7 @@ public:
     void editAtRowAbove();
     void removeRowAt(const MantidQt::MantidWidgets::Batch::RowLocation &location);
     void removeRows(std::vector<MantidQt::MantidWidgets::Batch::RowLocation> rowsToRemove);
-    void removeAllRows() throw(std::exception);
+    void removeAllRows();
     void replaceRows(std::vector<MantidQt::MantidWidgets::Batch::RowLocation> replacementPoints,
                      std::vector<std::vector<Row>> replacementLocations);
     void appendSubtreesAt(const MantidQt::MantidWidgets::Batch::RowLocation& parent,
@@ -891,6 +893,110 @@ signals:
   void cutRowsRequested();
 };
 
+// Qt6 (>= 6.7) only: PyQt6 provides a generic std::optional<TYPE> (and an
+// optional<QList<TYPE>> that mis-matches std::vector), so we override the cases it
+// can't handle with concrete specializations here. On Qt5 / Qt6 < 6.7 the templates
+// in sip/vector.sip handle these instead.
+%If (Qt6Bindings)
+// Explicit mapped type for the doubly-nested optional<vector<vector<Row>>> returned
+// by JobTreeView::selectedSubtrees(). PyQt6 provides a generic std::optional<TYPE>
+// that composes with single-level std::vector<X>, but not with this double nesting,
+// so we provide a concrete specialization (which coexists with PyQt6's generic, and
+// also works under PyQt5). Defined after the Batch::Row class so the type is known.
+%MappedType std::optional<std::vector<std::vector<Row>>>
+{
+%TypeHeaderCode
+#include <optional>
+#include <vector>
+#include "MantidQtWidgets/Common/Batch/Row.h"
+%End
+
+%ConvertFromTypeCode
+  typedef MantidQt::MantidWidgets::Batch::Row RowT;
+  const sipTypeDef *rowType = sipFindType("MantidQt::MantidWidgets::Batch::Row");
+  return optionalToPyObject(*sipCpp, [&](std::vector<std::vector<RowT>> const& outer) -> PyObject* {
+    return vectorToPythonList(outer, [&](std::vector<RowT> const& inner) -> PyObject* {
+      return vectorToPythonList(inner, [&](RowT const& row) -> PyObject* {
+        auto *heapCopy = new RowT(row);
+        return sipConvertFromType(heapCopy, rowType, sipTransferObj);
+      });
+    });
+  });
+%End
+
+%ConvertToTypeCode
+  typedef MantidQt::MantidWidgets::Batch::Row RowT;
+  const sipTypeDef *rowType = sipFindType("MantidQt::MantidWidgets::Batch::Row");
+  if (!sipIsErr) {
+    return isIterable(sipPy) || sipPy == Py_None;
+  }
+  auto cppValue = pythonObjectToOptional<std::vector<std::vector<RowT>>>(
+      sipPy, [&](PyObject* outerList) -> std::optional<std::vector<std::vector<RowT>>> {
+        return pythonListToVector<std::vector<RowT>>(outerList, [&](PyObject* innerList) -> std::optional<std::vector<RowT>> {
+          return pythonListToVector<RowT>(innerList, [&](PyObject* pyItem) -> std::optional<RowT> {
+            if (!sipCanConvertToType(pyItem, rowType, SIP_NOT_NONE)) {
+              PyErr_Format(PyExc_TypeError, "object in iterable cannot be converted to Row");
+              return std::nullopt;
+            }
+            int state;
+            auto* cppItemPtr = reinterpret_cast<RowT*>(sipConvertToType(pyItem, rowType, 0, SIP_NOT_NONE, &state, sipIsErr));
+            sipReleaseType(cppItemPtr, rowType, state);
+            return asOptional(sipIsErr, cppItemPtr);
+          });
+        });
+      });
+  return transferToSip(cppValue, sipCppPtr, sipIsErr, sipGetState(sipTransferObj));
+%End
+};
+
+// Explicit mapped type for optional<vector<RowLocation>> returned by
+// JobTreeView::selectedSubtreeRoots(). Needed because PyQt6 also defines a generic
+// std::optional<QList<TYPE>> that sip-6 erroneously matches against std::vector,
+// generating code that assigns a std::vector to a QList& reference. The concrete
+// specialization here takes precedence. Signature uses the fully-qualified type.
+%MappedType std::optional<std::vector<MantidQt::MantidWidgets::Batch::RowLocation>>
+{
+%TypeHeaderCode
+#include <optional>
+#include <vector>
+#include "MantidQtWidgets/Common/Batch/RowLocation.h"
+%End
+
+%ConvertFromTypeCode
+  typedef MantidQt::MantidWidgets::Batch::RowLocation LocT;
+  const sipTypeDef *locType = sipFindType("MantidQt::MantidWidgets::Batch::RowLocation");
+  return optionalToPyObject(*sipCpp, [&](std::vector<LocT> const& vec) -> PyObject* {
+    return vectorToPythonList(vec, [&](LocT const& item) -> PyObject* {
+      auto *heapCopy = new LocT(item);
+      return sipConvertFromType(heapCopy, locType, sipTransferObj);
+    });
+  });
+%End
+
+%ConvertToTypeCode
+  typedef MantidQt::MantidWidgets::Batch::RowLocation LocT;
+  const sipTypeDef *locType = sipFindType("MantidQt::MantidWidgets::Batch::RowLocation");
+  if (!sipIsErr) {
+    return isIterable(sipPy) || sipPy == Py_None;
+  }
+  auto cppValue = pythonObjectToOptional<std::vector<LocT>>(
+      sipPy, [&](PyObject* pythonList) -> std::optional<std::vector<LocT>> {
+        return pythonListToVector<LocT>(pythonList, [&](PyObject* pyItem) -> std::optional<LocT> {
+          if (!sipCanConvertToType(pyItem, locType, SIP_NOT_NONE)) {
+            PyErr_Format(PyExc_TypeError, "object in iterable cannot be converted to RowLocation");
+            return std::nullopt;
+          }
+          int state;
+          auto* cppItemPtr = reinterpret_cast<LocT*>(sipConvertToType(pyItem, locType, 0, SIP_NOT_NONE, &state, sipIsErr));
+          sipReleaseType(cppItemPtr, locType, state);
+          return asOptional(sipIsErr, cppItemPtr);
+        });
+      });
+  return transferToSip(cppValue, sipCppPtr, sipIsErr, sipGetState(sipTransferObj));
+%End
+};
+%End
+
 
 // ---------------------------------
 // Function Browser
@@ -913,7 +1019,7 @@ public:
     double getParameter(const std::string &funStr);
     int getNumberOfDatasets() const;
     void setNumberOfDatasets(int n);
-    void setCurrentDataset(int i) throw(std::exception);
+    void setCurrentDataset(int i);
     int getCurrentDataset() const;
     void setDatasets(const std::vector<std::string> &datasetNames);
     void addDatasets(const std::vector<std::string> &names);
@@ -926,12 +1032,12 @@ public:
     std::vector<std::string> getGlobalParameters() const;
     void setGlobalParameters(const std::vector<std::string> &globals);
     void clear();
-    void updateParameters(SIP_PYOBJECT) throw(std::exception);
+    void updateParameters(SIP_PYOBJECT);
     %MethodCode
       auto function = boost::python::extract<const Mantid::API::IFunction_sptr &>(a0)();
       sipCpp->updateParameters(*function);
     %End
-    void updateMultiDatasetParameters(SIP_PYOBJECT) throw(std::exception);
+    void updateMultiDatasetParameters(SIP_PYOBJECT);
     %MethodCode
       auto function = boost::python::extract<const Mantid::API::IFunction_sptr &>(a0)();
       sipCpp->updateMultiDatasetParameters(*function);
@@ -1032,9 +1138,9 @@ class ImageInfoWidget : public QTableWidget {
 %End
 public:
     ImageInfoWidget(QWidget *parent = nullptr);
-    void cursorAt(const double x, const double y, const double signal, const QMap<QString, QString>& extraValues) throw(std::exception);
+    void cursorAt(const double x, const double y, const double signal, const QMap<QString, QString>& extraValues);
     void setShowSignal(const bool showSignal);
-    void setWorkspace(SIP_PYOBJECT) throw(std::exception);
+    void setWorkspace(SIP_PYOBJECT);
     %MethodCode
       using boost::python::extract;
       using Mantid::PythonInterface::ExtractSharedPtr;
@@ -1051,8 +1157,8 @@ class ImageInfoWidgetMini : public QLabel {
 %End
 public:
     ImageInfoWidgetMini(QWidget *parent = nullptr);
-    void cursorAt(const double x, const double y, const double signal, const QMap<QString, QString>& extraValues) throw(std::exception);
-    void setWorkspace(SIP_PYOBJECT) throw(std::exception);
+    void cursorAt(const double x, const double y, const double signal, const QMap<QString, QString>& extraValues);
+    void setWorkspace(SIP_PYOBJECT);
     %MethodCode
       using boost::python::extract;
       using Mantid::PythonInterface::ExtractSharedPtr;
@@ -1160,7 +1266,7 @@ public:
     void clear();
     void setWidgetTitleRuns(const std::string &title);
     bool isEmpty() const ;
-    void addInfo(SIP_PYOBJECT) throw(std::exception);
+    void addInfo(SIP_PYOBJECT);
     %MethodCode
       using boost::python::extract;
       using Mantid::PythonInterface::ExtractSharedPtr;

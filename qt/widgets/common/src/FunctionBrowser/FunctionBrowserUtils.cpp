@@ -19,7 +19,7 @@ std::pair<std::string, std::string> splitParameterName(std::string const &paramN
   QString functionIndex;
   QString const initialParamName = QString::fromStdString(paramName);
   QString parameterName = initialParamName;
-  int j = initialParamName.lastIndexOf('.');
+  int j = static_cast<int>(initialParamName.lastIndexOf('.'));
   if (j > 0) {
     ++j;
     functionIndex = initialParamName.mid(0, j);

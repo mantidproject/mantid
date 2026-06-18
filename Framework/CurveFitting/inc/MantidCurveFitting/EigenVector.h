@@ -8,8 +8,14 @@
 
 #include "MantidCurveFitting/DllConfig.h"
 
+#include "MantidKernel/WarningSuppressions.h"
+
+// Eigen's code generate maybe-uninitialized warning under GCC
+GNU_DIAG_OFF("maybe-uninitialized")
 #include "Eigen/Core"
 #include "Eigen/Dense"
+GNU_DIAG_ON("maybe-uninitialized")
+
 #include "MantidCurveFitting/EigenVectorView.h"
 
 #include <ostream>

@@ -57,6 +57,7 @@ template<TYPE>
 %End
 };
 
+%If (!Qt6Bindings)
 template<TYPE>
 %MappedType std::optional<std::vector<TYPE>>
 {
@@ -98,6 +99,7 @@ template<TYPE>
     }
 %End
 };
+%End
 
 // ****************************************************
 // Specialization for std::vector<double>
@@ -131,6 +133,54 @@ template<TYPE>
   }
 %End
 };
+
+// ****************************************************
+// Specialization for QVector<double>
+// ****************************************************
+// PyQt5 provided QVector mapped types; PyQt6 does not (QVector is an alias for
+// QList in Qt6 and PyQt6 only maps QList<int/float/...>, not <double>). Guard to
+// Qt6 so we don't redefine PyQt5's QVector<double> on the Qt5 build.
+%If (Qt6Bindings)
+%MappedType QVector<double>
+{
+%TypeHeaderCode
+#include <QVector>
+%End
+
+%ConvertFromTypeCode
+  PyObject *pythonList = PyList_New(sipCpp->size());
+  if (pythonList == nullptr)
+    return nullptr;
+  for (int i = 0; i < sipCpp->size(); ++i)
+    PyList_SET_ITEM(pythonList, i, PyFloat_FromDouble(sipCpp->at(i)));
+  return pythonList;
+%End
+
+%ConvertToTypeCode
+  if (!sipIsErr) {
+    return isIterable(sipPy) || sipPy == Py_None;
+  }
+  auto *qvector = new QVector<double>();
+  PyObject *iterator = PyObject_GetIter(sipPy);
+  PyObject *item = nullptr;
+  while (iterator != nullptr && (item = PyIter_Next(iterator))) {
+    if (!PyNumber_Check(item)) {
+      Py_DECREF(item);
+      Py_DECREF(iterator);
+      delete qvector;
+      *sipIsErr = 1;
+      PyErr_Format(PyExc_TypeError, "object in iterable is not a number");
+      return 0;
+    }
+    qvector->append(PyFloat_AsDouble(item));
+    Py_DECREF(item);
+  }
+  Py_XDECREF(iterator);
+  *sipCppPtr = qvector;
+  return sipGetState(sipTransferObj);
+%End
+};
+%End
 
 // ****************************************************
 // Specialization for std::vector<int>
@@ -279,6 +329,7 @@ template<TYPE>
 // Specialization for std::vector<std::vector<TYPE>>
 // ****************************************************
 
+%If (!Qt6Bindings)
 template<TYPE>
 %MappedType std::optional<std::vector<std::vector<TYPE>>>
 {
@@ -328,3 +379,4 @@ template<TYPE>
 
 %End
 };
+%End

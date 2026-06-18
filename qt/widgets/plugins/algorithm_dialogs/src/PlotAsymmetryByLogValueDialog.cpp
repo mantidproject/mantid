@@ -41,7 +41,7 @@ using namespace MantidQt::API;
 PlotAsymmetryByLogValueDialog::PlotAsymmetryByLogValueDialog(QWidget *parent) : AlgorithmDialog(parent) {
   browseButtonMapper = new QSignalMapper();
 
-  connect(browseButtonMapper, SIGNAL(mapped(const QString &)), this, SLOT(openFileDialog(const QString &)));
+  connect(browseButtonMapper, SIGNAL(mappedString(const QString &)), this, SLOT(openFileDialog(const QString &)));
 }
 
 /**

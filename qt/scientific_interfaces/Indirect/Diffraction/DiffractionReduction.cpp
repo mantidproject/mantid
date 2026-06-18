@@ -676,7 +676,7 @@ void DiffractionReduction::runFilesFound() {
   m_runPresenter->setRunText(valid ? "Run" : "Invalid Run");
 
   // Disable sum files if only one file is given
-  int fileCount = m_uiForm.rfSampleFiles->getFilenames().size();
+  auto fileCount = m_uiForm.rfSampleFiles->getFilenames().size();
   if (fileCount < 2)
     m_uiForm.ckSumFiles->setChecked(false);
 }

@@ -7,12 +7,12 @@
 
 import sys
 
-from qtpy import PYQT5
+from qtpy import PYQT5, PYQT6
 
 from mantid.kernel import config, logger
 
 
-if not PYQT5:
+if not (PYQT5 or PYQT6):
     logger.error("Drill interface is supported only in workbench.")
 else:
     if config["default.facility"] != "ILL":

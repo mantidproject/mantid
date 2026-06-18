@@ -180,7 +180,7 @@ void PanelsSurface::setupAxes() {
 //-----------------------------------------------------------------------------------------------//
 
 void PanelsSurface::processStructured(size_t rootIndex) {
-  int index = m_flatBanks.size();
+  int index = static_cast<int>(m_flatBanks.size());
   const auto &componentInfo = m_instrActor->componentInfo();
   auto corners = this->m_calculator.retrievePanelCorners(componentInfo, rootIndex);
   auto normal = this->m_calculator.calculatePanelNormal(corners);
@@ -316,7 +316,7 @@ std::optional<size_t> PanelsSurface::processTubes(size_t rootIndex) {
     const auto &children = componentInfo.children(tube);
 #pragma omp parallel for
     for (int j = 0; j < static_cast<int>(children.size()); ++j) { // NOLINT
-      addDetector(children[j], index);
+      addDetector(children[j], static_cast<int>(index));
     }
 
     auto &udet0 = m_unwrappedDetectors[children.front()];
@@ -384,7 +384,7 @@ void PanelsSurface::processUnstructured(size_t rootIndex, std::vector<bool> &vis
     detectors.emplace_back(child);
   }
   if (detectors.size() > 1) {
-    int index = m_flatBanks.size();
+    int index = static_cast<int>(m_flatBanks.size());
     // save bank info
     auto *info = new FlatBankInfo(this);
     m_flatBanks << info;

@@ -228,7 +228,7 @@ QTableWidget *MuonPeriodInfo::getTable() const { return m_uiForm.table; }
  * Set up properties of the widgets table
  */
 void MuonPeriodInfo::setUpTable() {
-  m_uiForm.table->setColumnCount(HEADERS.size());
+  m_uiForm.table->setColumnCount(static_cast<int>(HEADERS.size()));
   m_uiForm.table->setHorizontalHeaderLabels(QStringList(HEADERS));
   m_uiForm.table->horizontalHeader()->setStyleSheet(HEADER_STYLE);
   m_uiForm.table->verticalHeader()->setVisible(false);

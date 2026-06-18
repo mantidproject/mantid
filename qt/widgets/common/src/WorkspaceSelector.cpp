@@ -348,7 +348,7 @@ void WorkspaceSelector::dropEvent(QDropEvent *de) {
   const std::lock_guard<std::mutex> lock(m_adsMutex);
   const QMimeData *mimeData = de->mimeData();
   QString text = mimeData->text();
-  int equal_pos = text.indexOf("=");
+  int equal_pos = static_cast<int>(text.indexOf("="));
   QString ws_name = text.left(equal_pos - 1);
   QString ws_name_test = text.mid(equal_pos + 7, equal_pos - 1);
 

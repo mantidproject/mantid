@@ -167,7 +167,7 @@ void FitOptionsBrowser::createCommonProperties() {
       minimizers << QString::fromStdString(minimizerOption);
     }
     m_enumManager->setEnumNames(m_minimizer, minimizers);
-    int i = m_enumManager->enumNames(m_minimizer).indexOf("Levenberg-Marquardt");
+    int i = static_cast<int>(m_enumManager->enumNames(m_minimizer).indexOf("Levenberg-Marquardt"));
     if (i >= 0) {
       m_enumManager->setValue(m_minimizer, i);
     }
@@ -535,7 +535,7 @@ QString FitOptionsBrowser::getMinimizer(QtProperty * /*unused*/) const {
  */
 void FitOptionsBrowser::setMinimizer(QtProperty * /*unused*/, const QString &value) {
   QStringList terms = value.split(',');
-  int i = m_enumManager->enumNames(m_minimizer).indexOf(terms[0]);
+  int i = static_cast<int>(m_enumManager->enumNames(m_minimizer).indexOf(terms[0]));
   m_enumManager->setValue(m_minimizer, i);
 }
 
@@ -610,7 +610,7 @@ QString FitOptionsBrowser::getStringEnumProperty(QtProperty *prop) const {
  * @param value :: The new value.
  */
 void FitOptionsBrowser::setStringEnumProperty(QtProperty *prop, const QString &value) {
-  int i = m_enumManager->enumNames(prop).indexOf(value);
+  int i = static_cast<int>(m_enumManager->enumNames(prop).indexOf(value));
   if (i >= 0)
     m_enumManager->setValue(prop, i);
 }

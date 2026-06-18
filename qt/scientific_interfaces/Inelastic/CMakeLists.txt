@@ -21,7 +21,7 @@ set(PRECOMP_HEADERS
     <QString>
     <QWidget>
     <QtCore/QVariant>
-    <QtWidgets/QAction>
+    <QAction>
     <QtWidgets/QApplication>
     <QtWidgets/QButtonGroup>
     <QtWidgets/QLabel>
@@ -36,7 +36,7 @@ set(PRECOMP_HEADERS
 
 mtd_add_qt_library(
   TARGET_NAME MantidScientificInterfacesInelastic
-  QT_VERSION 5
+  QT_VERSION ${MANTID_QT_VERSION}
   SRC ${ALL_SRC_FILES}
   MOC ${ALL_MOC_FILES}
   NOMOC ${ALL_INC_FILES}

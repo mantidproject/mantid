@@ -9,7 +9,10 @@ from workbench.config import SAVE_STATE_VERSION
 from workbench.widgets.settings.base_classes.config_settings_presenter import SettingsPresenterBase
 from workbench.widgets.settings.general.view import GeneralSettingsView
 from workbench.widgets.settings.general.general_settings_model import GeneralSettingsModel
-from workbench.widgets.settings.view_utilities.settings_view_utilities import filter_out_mousewheel_events_from_combo_or_spin_box
+from workbench.widgets.settings.view_utilities.settings_view_utilities import (
+    filter_out_mousewheel_events_from_combo_or_spin_box,
+    checkbox_state_to_bool,
+)
 
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QFontDatabase
@@ -97,7 +100,12 @@ class GeneralSettings(SettingsPresenterBase):
         if font_string is not None:
             font_string = self._model.get_font().split(",")
             if len(font_string) > 2:
-                font = QFontDatabase().font(font_string[0], font_string[-1], int(font_string[1]))
+                # QFontDatabase.font is static in Qt6 (the class can no longer be instantiated)
+                # but an instance method in Qt5.
+                try:
+                    font = QFontDatabase.font(font_string[0], font_string[-1], int(font_string[1]))
+                except TypeError:
+                    font = QFontDatabase().font(font_string[0], font_string[-1], int(font_string[1]))
         font_dialog = self._view.create_font_dialog(self._view, font)
         font_dialog.fontSelected.connect(self.action_font_selected)
 
@@ -114,15 +122,15 @@ class GeneralSettings(SettingsPresenterBase):
         self.notify_changes()
 
     def action_completion_enabled_modified(self, state):
-        self._model.set_completion_enabled(bool(state))
+        self._model.set_completion_enabled(checkbox_state_to_bool(state))
         self.notify_changes()
 
     def action_apply_dark_theme_enabled_modified(self, state):
-        self._model.set_apply_dark_theme_enabled(str(bool(state)))
+        self._model.set_apply_dark_theme_enabled(str(checkbox_state_to_bool(state)))
         self.notify_changes()
 
     def action_use_new_instrument_view_modified(self, state):
-        self._model.set_use_new_instrument_view(bool(state))
+        self._model.set_use_new_instrument_view(checkbox_state_to_bool(state))
         self.notify_changes()
 
     def setup_checkbox_signals(self):
@@ -153,19 +161,19 @@ class GeneralSettings(SettingsPresenterBase):
         self._view.use_notifications.stateChanged.connect(self.action_use_notifications_modified)
 
     def action_prompt_save_on_close(self, state):
-        self._model.set_prompt_save_on_close(bool(state))
+        self._model.set_prompt_save_on_close(checkbox_state_to_bool(state))
         self.notify_changes()
 
     def action_prompt_save_editor_modified(self, state):
-        self._model.set_prompt_on_save_editor_modified(bool(state))
+        self._model.set_prompt_on_save_editor_modified(checkbox_state_to_bool(state))
         self.notify_changes()
 
     def action_prompt_deleting_workspace(self, state):
-        self._model.set_prompt_on_deleting_workspace(bool(state))
+        self._model.set_prompt_on_deleting_workspace(checkbox_state_to_bool(state))
         self.notify_changes()
 
     def action_use_notifications_modified(self, state):
-        self._model.set_use_notifications("On" if bool(state) else "Off")
+        self._model.set_use_notifications("On" if checkbox_state_to_bool(state) else "Off")
         self.notify_changes()
 
     def load_current_setting_values(self):
@@ -198,7 +206,7 @@ class GeneralSettings(SettingsPresenterBase):
         self._view.use_new_instrument_view.setChecked(use_new_instrument_view)
 
     def action_project_recovery_enabled(self, state):
-        self._model.set_project_recovery_enabled(str(bool(state)))
+        self._model.set_project_recovery_enabled(str(checkbox_state_to_bool(state)))
         self.notify_changes()
 
     def action_time_between_recovery(self, value):
@@ -210,7 +218,7 @@ class GeneralSettings(SettingsPresenterBase):
         self.notify_changes()
 
     def action_crystallography_convention(self, state):
-        self._model.set_crystallography_convention("Crystallography" if state == Qt.Checked else "Inelastic")
+        self._model.set_crystallography_convention("Crystallography" if checkbox_state_to_bool(state) else "Inelastic")
         self.notify_changes()
 
     def action_instrument_changed(self, new_instrument):
@@ -218,11 +226,11 @@ class GeneralSettings(SettingsPresenterBase):
         self.notify_changes()
 
     def action_show_invisible_workspaces(self, state):
-        self._model.set_show_invisible_workspaces("1" if state == Qt.Checked else "0")
+        self._model.set_show_invisible_workspaces("1" if checkbox_state_to_bool(state) else "0")
         self.notify_changes()
 
     def action_use_open_gl(self, state):
-        self._model.set_use_opengl("On" if bool(state) else "Off")
+        self._model.set_use_opengl("On" if checkbox_state_to_bool(state) else "Off")
         self.notify_changes()
 
     def setup_layout_options(self):

@@ -5,12 +5,10 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import argparse
-import importlib
 import sys
 from typing import Sequence
 
 import mantid
-from qtpy import QT_VERSION
 from qtpy.QtCore import QCoreApplication, QSettings
 
 from mantidqt.dialogs.errorreports.presenter import ErrorReporterPresenter
@@ -33,8 +31,12 @@ def main(argv: Sequence[str] = None) -> int:
     if command_line_args.qtdir is not None:
         QCoreApplication.addLibraryPath(command_line_args.qtdir)
 
-    # Qt resources must be imported before QApplication starts
-    importlib.import_module(f"mantidqt.dialogs.errorreports.resources_qt{QT_VERSION[0]}")
+    # Qt resources must be imported before QApplication starts. The resources
+    # module was generated once by pyrcc5 and is checked in; the rcc data format
+    # and the qRegisterResourceData API it uses are supported by both PyQt5 and
+    # PyQt6 (which ships no resource compiler of its own), so the same module
+    # serves every binding.
+    import mantidqt.dialogs.errorreports.resources  # noqa: F401
 
     if mtd_env.is_mac():
         qtutils.force_layer_backing_BigSur()

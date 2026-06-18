@@ -69,7 +69,7 @@ class DNSPathView(DNSView):
         self._map["prop_nb"].setText("")
 
     def _toggle_editable_directories(self):
-        state = not self._map["auto_set_other_dir"].checkState()
+        state = not self._map["auto_set_other_dir"].isChecked()
         self._map["standards_dir"].setEnabled(state)
         self._map["script_dir"].setEnabled(state)
         self._map["psd_dir"].setEnabled(state)

@@ -10,5 +10,7 @@ from .gui_helper import set_matplotlib_backend
 backend = set_matplotlib_backend()  # must be at the top of this file
 if backend == "Qt5Agg":
     from matplotlib.backends.backend_qt5agg import *
+elif backend == "QtAgg":
+    from matplotlib.backends.backend_qtagg import *
 else:
     raise RuntimeError(f"Unrecognized backend {backend}")

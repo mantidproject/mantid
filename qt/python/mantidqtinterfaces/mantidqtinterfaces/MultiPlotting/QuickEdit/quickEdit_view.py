@@ -20,7 +20,7 @@ class QuickEditView(QtWidgets.QWidget):
         self.plot_selector = QtWidgets.QComboBox()
         self.plot_selector.setEditable(True)
         self.plot_selector.completer().setCompletionMode(QtWidgets.QCompleter.PopupCompletion)
-        if qtpy.PYQT5:
+        if qtpy.PYQT5 or qtpy.PYQT6:
             self.plot_selector.completer().setFilterMode(QtCore.Qt.MatchContains)
 
         self.plot_selector.addItem("All")
@@ -117,7 +117,7 @@ class QuickEditView(QtWidgets.QWidget):
 
     @property
     def autoscale_state(self):
-        return self.autoscale.checkState()
+        return self.autoscale.isChecked()
 
     def disable_autoscale(self):
         self.autoscale.setEnabled(False)

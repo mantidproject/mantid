@@ -44,18 +44,33 @@ function(mtd_add_sip_module)
     endif()
   endforeach()
 
-  # Configure final module
-  set(_module_spec ${CMAKE_CURRENT_LIST_DIR}/${PARSED_SIP_SRC})
+  # Configure the module spec. The .sip source is a template (.sip.in) whose %Module(name=@SIP_MODULE_NAME@) is filled
+  # with the Qt-version-suffixed module name (e.g. _commonqt5 / _commonqt6) so it matches the built target. It is
+  # configured into the build dir; SIP_INCLUDE_DIR (the original source dir) is forwarded so the relative %Include
+  # directives still resolve.
+  set(_sip_src_template ${CMAKE_CURRENT_LIST_DIR}/${PARSED_SIP_SRC})
+  get_filename_component(SIP_INCLUDE_DIR ${_sip_src_template} DIRECTORY)
+  set(SIP_MODULE_NAME ${PARSED_MODULE_NAME})
+  get_filename_component(_sip_src_name ${PARSED_SIP_SRC} NAME_WE)
+  set(_module_spec ${CMAKE_CURRENT_BINARY_DIR}/${_sip_src_name}.sip)
+  configure_file(${_sip_src_template} ${_module_spec} @ONLY)
   if(PARSED_PYQT_VERSION EQUAL 5)
     if(SIP_BUILD_EXECUTABLE)
       _add_sip_library(
         ${PARSED_TARGET_NAME} ${PARSED_MODULE_NAME} ${_module_spec} ${PARSED_PYQT_VERSION} _sip_include_deps
+        ${SIP_INCLUDE_DIR}
       )
     else()
-      _add_sip_library_v4(${PARSED_TARGET_NAME} ${PARSED_MODULE_NAME} ${_module_spec} _sip_include_deps)
+      _add_sip_library_v4(
+        ${PARSED_TARGET_NAME} ${PARSED_MODULE_NAME} ${_module_spec} _sip_include_deps ${SIP_INCLUDE_DIR}
+      )
     endif()
   elseif(PARSED_PYQT_VERSION EQUAL 6)
-    message(FATAL_ERROR "PyQt6 is not yet supported")
+    # PyQt6 only ships the sip >= v6 (sip-build) system; there is no legacy v4 fallback.
+    _add_sip_library(
+      ${PARSED_TARGET_NAME} ${PARSED_MODULE_NAME} ${_module_spec} ${PARSED_PYQT_VERSION} _sip_include_deps
+      ${SIP_INCLUDE_DIR}
+    )
   else()
     message(FATAL_ERROR "Unknown PYQT_VERSION: ${PARSED_PYQT_VERSION}")
   endif()
@@ -123,7 +138,15 @@ endfunction()
 #   - sip_include_deps_var: A variable containing a list of files to add as
 #                           dependencies to the target
 # ~~~
-function(_add_sip_library target_name module_name module_spec pyqt_major_version sip_include_deps_var)
+function(
+  _add_sip_library
+  target_name
+  module_name
+  module_spec
+  pyqt_major_version
+  sip_include_deps_var
+  sip_include_dir
+)
   # first produce template files for the sip-build project in the binary directory
   set(_project_dir ${CMAKE_CURRENT_BINARY_DIR})
 
@@ -132,6 +155,17 @@ function(_add_sip_library target_name module_name module_spec pyqt_major_version
   set(MODULE_SPEC_FILE ${module_spec})
   set(PYQT_MAJOR_VERSION ${pyqt_major_version})
   set(PYQT_SIP_ABI_VERSION ${PYQT${pyqt_major_version}_SIP_ABI_VERSION})
+  # Directory holding the original (source) .sip files, so relative %Include directives resolve even though the module
+  # spec lives in the build dir.
+  set(SIP_INCLUDE_DIR ${sip_include_dir})
+  # The Qt6Bindings sip feature is enabled by default; disable it for the PyQt5 build so that the version-specific
+  # %MappedType blocks select the correct implementation (Qt5/Qt6 sip timelines share no common version qualifier, so a
+  # custom feature is used instead of %If (Qt_6_x_x -)).
+  if(pyqt_major_version EQUAL 6)
+    set(SIP_DISABLED_FEATURES "[]")
+  else()
+    set(SIP_DISABLED_FEATURES "[\"Qt6Bindings\"]")
+  endif()
 
   # generate project files for sip-build
   configure_file(${SIP_PROJECT_PY_TEMPLATE} ${_project_dir}/project.py)
@@ -170,13 +204,14 @@ endfunction()
 #   - sip_include_deps_var: A variable containing a list of files to add as
 #                           dependencies to the target
 # ~~~
-function(_add_sip_library_v4 target_name module_name module_spec sip_include_deps_var)
+function(_add_sip_library_v4 target_name module_name module_spec sip_include_deps_var sip_include_dir)
   if(NOT PYQT5_SIP_DIR)
     message(FATAL_ERROR "find_package(PyQt) must have been called with the correct PyQt version")
   endif()
 
-  # Build sip command
-  list(APPEND _sip_include_flags "-I${PYQT5_SIP_DIR}")
+  # Build sip command. The module spec is configured into the build dir, so also search the original source dir for the
+  # relative %Include files.
+  list(APPEND _sip_include_flags "-I${PYQT5_SIP_DIR}" "-I${sip_include_dir}")
   set(_pyqt_sip_flags "${PYQT5_SIP_FLAGS}")
   set(_sip_generated_cpp ${CMAKE_CURRENT_BINARY_DIR}/sip${module_name}part0.cpp)
   # We also have to deal with the added complication that sip generates code that is not C++-17 compatible as it

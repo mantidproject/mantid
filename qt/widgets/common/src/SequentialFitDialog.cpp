@@ -89,7 +89,7 @@ bool SequentialFitDialog::addWorkspaces(const QStringList &wsNames) {
   if (wsNames.isEmpty())
     return false;
   int row = ui.tWorkspaces->rowCount();
-  ui.tWorkspaces->model()->insertRows(row, wsNames.size());
+  ui.tWorkspaces->model()->insertRows(row, static_cast<int>(wsNames.size()));
   int wi = m_fitBrowser->workspaceIndex();
   QAbstractItemModel *model = ui.tWorkspaces->model();
   foreach (QString wsName, wsNames) {
@@ -154,7 +154,7 @@ void SequentialFitDialog::addFile() {
     fileNames.sort();
 
     int row = ui.tWorkspaces->rowCount();
-    ui.tWorkspaces->model()->insertRows(row, fileNames.size());
+    ui.tWorkspaces->model()->insertRows(row, static_cast<int>(fileNames.size()));
     // int wi = m_fitBrowser->workspaceIndex();
     QAbstractItemModel *model = ui.tWorkspaces->model();
     foreach (QString fileName, fileNames) {
@@ -240,7 +240,7 @@ bool SequentialFitDialog::isFile(int row) const {
 
 bool SequentialFitDialog::isValidRangeFormat(const QString &range) const {
   // Check if range contains exactly one colon
-  int colonCount = range.count(':');
+  auto colonCount = range.count(':');
   if (colonCount != 1) {
     return false;
   }

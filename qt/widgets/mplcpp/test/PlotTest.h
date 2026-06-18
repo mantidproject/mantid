@@ -89,7 +89,7 @@ public:
     const std::vector<std::string> workspaces = {m_testws_name};
     const std::vector<int> index = {1};
     QHash<QString, QVariant> hash;
-    hash.insert(QString("asdasdasdasdasd"), QVariant(QString(1)));
+    hash.insert(QString("asdasdasdasdasd"), QVariant(QString("1")));
     TS_ASSERT_THROWS(plot(workspaces, index, std::nullopt, std::nullopt, std::nullopt, hash), const PythonException &)
   }
 

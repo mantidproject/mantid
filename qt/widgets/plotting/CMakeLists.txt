@@ -33,7 +33,7 @@ set(MPL_INC_FILES
 
 mtd_add_qt_library(
   TARGET_NAME MantidQtWidgetsPlotting
-  QT_VERSION 5
+  QT_VERSION ${MANTID_QT_VERSION}
   SRC ${MPL_SRC_FILES}
   MOC ${MPL_MOC_FILES}
   NOMOC ${MPL_INC_FILES}
@@ -55,7 +55,7 @@ set(CXXTEST_EXTRA_HEADER_INCLUDE "${CMAKE_CURRENT_LIST_DIR}/test/PlottingTestIni
 if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
   mtd_add_qt_tests(
     TARGET_NAME MantidQtWidgetsPlottingTest
-    QT_VERSION 5
+    QT_VERSION ${MANTID_QT_VERSION}
     INCLUDE_DIRS inc ../common/inc ../../../Framework/DataObjects/inc
     SRC ${TEST_FILES}
     LINK_LIBS ${CORE_MANTIDLIBS} Mantid::DataObjects ${POCO_LIBRARIES} ${Boost_LIBRARIES} Mantid::PythonInterfaceCore
@@ -64,12 +64,12 @@ if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
     PARENT_DEPENDENCIES GUITests
   )
 
-  add_framework_test_helpers(MantidQtWidgetsPlottingTestQt5)
+  add_framework_test_helpers(MantidQtWidgetsPlottingTestQt${MANTID_QT_VERSION})
 
   if(TARGET GTest::gmock AND TARGET GTest::gtest)
-    target_link_libraries(MantidQtWidgetsPlottingTestQt5 PRIVATE GTest::gmock GTest::gtest)
+    target_link_libraries(MantidQtWidgetsPlottingTestQt${MANTID_QT_VERSION} PRIVATE GTest::gmock GTest::gtest)
   else()
-    target_link_libraries(MantidQtWidgetsPlottingTestQt5 PRIVATE gmock gtest)
+    target_link_libraries(MantidQtWidgetsPlottingTestQt${MANTID_QT_VERSION} PRIVATE gmock gtest)
   endif()
 
 endif()

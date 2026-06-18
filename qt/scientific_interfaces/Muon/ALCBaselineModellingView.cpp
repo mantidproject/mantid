@@ -44,7 +44,7 @@ void ALCBaselineModellingView::initialize() {
 
   connect(m_ui.sections, SIGNAL(cellChanged(int, int)), SIGNAL(sectionRowModified(int)));
 
-  connect(m_selectorModifiedMapper, SIGNAL(mapped(int)), SIGNAL(sectionSelectorModified(int)));
+  connect(m_selectorModifiedMapper, SIGNAL(mappedInt(int)), SIGNAL(sectionSelectorModified(int)));
 
   connect(m_ui.help, SIGNAL(clicked()), this, SLOT(help()));
 
@@ -188,7 +188,7 @@ void ALCBaselineModellingView::sectionsContextMenu(const QPoint &widgetPoint) {
 
   // Helper mapper to map removal action to row id
   QSignalMapper removalActionMapper;
-  connect(&removalActionMapper, SIGNAL(mapped(int)), SIGNAL(removeSectionRequested(int)));
+  connect(&removalActionMapper, SIGNAL(mappedInt(int)), SIGNAL(removeSectionRequested(int)));
 
   int row = m_ui.sections->rowAt(widgetPoint.y());
   if (row != -1) {

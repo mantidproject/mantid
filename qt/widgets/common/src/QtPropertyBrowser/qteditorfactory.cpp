@@ -1202,7 +1202,7 @@ bool QtCharEdit::eventFilter(QObject *o, QEvent *e) {
       QAction *action = itAction.next();
       action->setShortcut(QKeySequence());
       QString actionString = action->text();
-      const int pos = actionString.lastIndexOf(QLatin1Char('\t'));
+      const int pos = static_cast<int>(actionString.lastIndexOf(QLatin1Char('\t')));
       if (pos > 0)
         actionString = actionString.remove(pos, actionString.length() - pos);
       action->setText(actionString);
@@ -1426,7 +1426,7 @@ void QtEnumEditorFactoryPrivate::slotEnumNamesChanged(QtProperty *property, cons
     editor->blockSignals(true);
     editor->clear();
     editor->addItems(enumNames);
-    const int nameCount = enumNames.count();
+    const auto nameCount = enumNames.count();
     for (int i = 0; i < nameCount; i++)
       editor->setItemIcon(i, enumIcons.value(i));
     editor->setCurrentIndex(manager->value(property));
@@ -1447,7 +1447,7 @@ void QtEnumEditorFactoryPrivate::slotEnumIconsChanged(QtProperty *property, cons
   while (itEditor.hasNext()) {
     QComboBox *editor = itEditor.next();
     editor->blockSignals(true);
-    const int nameCount = enumNames.count();
+    const auto nameCount = enumNames.count();
     for (int i = 0; i < nameCount; i++)
       editor->setItemIcon(i, enumIcons.value(i));
     editor->setCurrentIndex(manager->value(property));
@@ -1519,7 +1519,7 @@ QWidget *QtEnumEditorFactory::createEditorForManager(QtEnumPropertyManager *mana
   QStringList enumNames = manager->enumNames(property);
   editor->addItems(enumNames);
   QMap<int, QIcon> enumIcons = manager->enumIcons(property);
-  const int enumNamesCount = enumNames.count();
+  const auto enumNamesCount = enumNames.count();
   for (int i = 0; i < enumNamesCount; i++)
     editor->setItemIcon(i, enumIcons.value(i));
   editor->setCurrentIndex(manager->value(property));

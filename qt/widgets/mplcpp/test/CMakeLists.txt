@@ -21,7 +21,7 @@ set(CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/MplCppTestInitializat
 
 mtd_add_qt_tests(
   TARGET_NAME MantidQtWidgetsMplCppTest
-  QT_VERSION 5
+  QT_VERSION ${MANTID_QT_VERSION}
   INCLUDE_DIRS ${CMAKE_CURRENT_LIST_DIR}/../inc
   SRC ${TEST_FILES}
   LINK_LIBS Mantid::API
@@ -39,7 +39,7 @@ mtd_add_qt_tests(
 
 if(TARGET GTest::gmock AND TARGET GTest::gtest)
 
-  target_link_libraries(MantidQtWidgetsMplCppTestQt5 PRIVATE GTest::gmock GTest::gtest)
+  target_link_libraries(MantidQtWidgetsMplCppTestQt${MANTID_QT_VERSION} PRIVATE GTest::gmock GTest::gtest)
 else()
-  target_link_libraries(MantidQtWidgetsMplCppTestQt5 PRIVATE gmock gtest)
+  target_link_libraries(MantidQtWidgetsMplCppTestQt${MANTID_QT_VERSION} PRIVATE gmock gtest)
 endif()

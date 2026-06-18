@@ -13,6 +13,7 @@
 #include "Shape2D.h"
 
 #include <QList>
+#include <QObject>
 #include <QTransform>
 
 class QPainter;

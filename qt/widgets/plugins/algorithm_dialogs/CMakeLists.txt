@@ -63,13 +63,13 @@ include_directories(inc inc/MantidQtWidgets/Plugins/AlgorithmDialogs)
 
 mtd_add_qt_library(
   TARGET_NAME MantidQtWidgetsPluginsAlgorithmDialogs
-  QT_VERSION 5
+  QT_VERSION ${MANTID_QT_VERSION}
   SRC ${SRC_FILES}
   MOC ${MOC_FILES}
   NOMOC ${INC_FILES}
   UI ${UI_FILES} PRECOMPILED ${PRECOMP_HEADERS}
   LINK_LIBS ${CORE_MANTIDLIBS} ${POCO_LIBRARIES} ${Boost_LIBRARIES} ${QT_LIBRARIES} ${OPENGL_LIBRARIES}
-  QT5_LINK_LIBS Qt5::OpenGL Qt5::Qscintilla
+  QT5_LINK_LIBS Qt5::OpenGL Qt5::Qscintilla QT6_LINK_LIBS Qt6::OpenGL Qt6::OpenGLWidgets Qt6::Qscintilla
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon
   OSX_INSTALL_RPATH @loader_path/../../MacOS
   LINUX_INSTALL_RPATH "\$ORIGIN/../../${LIB_DIR}"

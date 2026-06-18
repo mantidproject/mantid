@@ -279,7 +279,13 @@ void EigenMatrix::invert() {
   if (size1() != size2()) {
     throw std::runtime_error("Matrix inverse: the matrix must be square.");
   }
-  mutator() = inspector().inverse();
+  // Evaluate into a dense temporary before assigning back. Eigen's general
+  // inverse path (PartialPivLU) solves in-place into the destination, and doing
+  // so directly into our strided, self-aliasing Map corrupts the heap (the map
+  // both supplies the source and receives the result). The temporary breaks the
+  // aliasing and gives Eigen a contiguous destination to work in.
+  const Eigen::MatrixXd inverse = inspector().inverse();
+  mutator() = inverse;
 }
 
 /// Calculate the determinant

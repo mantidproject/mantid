@@ -13,19 +13,41 @@ if(BUILD_MANTIDFRAMEWORK)
   add_dependencies(mantidqt PythonInterface)
 endif()
 
-# Configure resources data in place for ease of development. The output file is added to the toplevel gitignore
+# Resources (:/...) used by both Python and the C++ widgets. The output files are added to the toplevel gitignore.
 set(_qrc_file ${CMAKE_CURRENT_LIST_DIR}/resources.qrc)
-set(_output_res_py ${CMAKE_CURRENT_LIST_DIR}/mantidqt/resources.py)
-configure_file(create_resources.cmake.in create_resources.cmake @ONLY)
-add_custom_command(
-  OUTPUT ${_output_res_py}
-  COMMAND ${CMAKE_COMMAND} -P create_resources.cmake
-  COMMENT "Generating mantidqt resources module"
-  DEPENDS ${_qrc_file}
-)
-add_custom_target(mantidqt_resources ALL DEPENDS ${_output_res_py})
+if(PYRCC5_CMD)
+  # Qt5: generate a pyrcc5 resources.py module (its import is rewritten to be binding-agnostic).
+  set(_output_res_py ${CMAKE_CURRENT_LIST_DIR}/mantidqt/resources.py)
+  configure_file(create_resources.cmake.in create_resources.cmake @ONLY)
+  add_custom_command(
+    OUTPUT ${_output_res_py}
+    COMMAND ${CMAKE_COMMAND} -P create_resources.cmake
+    COMMENT "Generating mantidqt resources module"
+    DEPENDS ${_qrc_file}
+  )
+  add_custom_target(mantidqt_resources ALL DEPENDS ${_output_res_py})
+else()
+  # Qt6 has no Python resource compiler, so compile resources.qrc to a binary .rcc with Qt's own rcc (QT_RCC_CMD, set in
+  # qt/CMakeLists.txt) and register it at runtime via QResource.registerResource - see mantidqt/resource_loader.py.
+  set(_output_rcc ${CMAKE_CURRENT_LIST_DIR}/mantidqt/mantidqt.rcc)
+  if(QT_RCC_CMD)
+    add_custom_command(
+      OUTPUT ${_output_rcc}
+      COMMAND ${QT_RCC_CMD} --binary -o ${_output_rcc} ${_qrc_file}
+      COMMENT "Generating mantidqt binary resources (Qt${MANTID_QT_VERSION}): ${_output_rcc}"
+      DEPENDS ${_qrc_file}
+    )
+    add_custom_target(mantidqt_resources ALL DEPENDS ${_output_rcc})
+  else()
+    message(STATUS "QT_RCC_CMD not set (Qt${MANTID_QT_VERSION}): skipping mantidqt resource compilation")
+    add_custom_target(mantidqt_resources ALL)
+  endif()
+endif()
 
-add_dependencies(mantidqt mantidqt_resources mantidqt_commonqt5 mantidqt_instrumentviewqt5 mantidqt_iconsqt5)
+add_dependencies(
+  mantidqt mantidqt_resources mantidqt_commonqt${MANTID_QT_VERSION} mantidqt_instrumentviewqt${MANTID_QT_VERSION}
+  mantidqt_iconsqt${MANTID_QT_VERSION}
+)
 if(MSVC)
   # Debug builds need libraries that are linked with MSVC debug runtime
   add_custom_command(
@@ -187,5 +209,7 @@ set(PYTHON_WIDGET_QT5_ONLY_TESTS
 )
 
 # Tests
-set(PYUNITTEST_QT_API pyqt5)
-pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} mantidqt_qt5 ${PYTHON_TEST_FILES} ${PYTHON_WIDGET_QT5_ONLY_TESTS})
+set(PYUNITTEST_QT_API pyqt${MANTID_QT_VERSION})
+pyunittest_add_test(
+  ${CMAKE_CURRENT_SOURCE_DIR} mantidqt_qt${MANTID_QT_VERSION} ${PYTHON_TEST_FILES} ${PYTHON_WIDGET_QT5_ONLY_TESTS}
+)

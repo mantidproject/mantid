@@ -177,7 +177,7 @@ void QtMetaEnumProvider::initLocale() {
 
     if (!countries.isEmpty() && !m_languageToIndex.contains(language)) {
       countries = sortCountries(countries);
-      int langIdx = m_languageEnumNames.count();
+      int langIdx = static_cast<int>(m_languageEnumNames.count());
       m_indexToLanguage[langIdx] = language;
       m_languageToIndex[language] = langIdx;
       QStringList countryNames;
@@ -4759,7 +4759,7 @@ void QtFontPropertyManagerPrivate::slotFontDatabaseDelayedChange() {
     for (PropertyPropertyMap::const_iterator it = m_propertyToFamily.constBegin(); it != cend; ++it) {
       QtProperty *familyProp = it.value();
       const int oldIdx = m_enumPropertyManager->value(familyProp);
-      int newIdx = m_familyNames.indexOf(oldFamilies.at(oldIdx));
+      int newIdx = static_cast<int>(m_familyNames.indexOf(oldFamilies.at(oldIdx)));
       if (newIdx < 0)
         newIdx = 0;
       m_enumPropertyManager->setEnumNames(familyProp, m_familyNames);
@@ -4924,12 +4924,16 @@ void QtFontPropertyManager::setValue(QtProperty *property, const QFont &val) {
     return;
 
   const QFont oldVal = it.value();
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+  if (oldVal == val && oldVal.resolveMask() == val.resolveMask())
+#else
   if (oldVal == val && oldVal.resolve() == val.resolve())
+#endif
     return;
 
   it.value() = val;
 
-  int idx = d_ptr->m_familyNames.indexOf(val.family());
+  int idx = static_cast<int>(d_ptr->m_familyNames.indexOf(val.family()));
   if (idx == -1)
     idx = 0;
   bool settingValue = d_ptr->m_settingValue;
@@ -4959,7 +4963,7 @@ void QtFontPropertyManager::initializeProperty(QtProperty *property) {
   if (d_ptr->m_familyNames.empty())
     d_ptr->m_familyNames = fontDatabase()->families();
   d_ptr->m_enumPropertyManager->setEnumNames(familyProp, d_ptr->m_familyNames);
-  int idx = d_ptr->m_familyNames.indexOf(val.family());
+  int idx = static_cast<int>(d_ptr->m_familyNames.indexOf(val.family()));
   if (idx == -1)
     idx = 0;
   d_ptr->m_enumPropertyManager->setValue(familyProp, idx);
