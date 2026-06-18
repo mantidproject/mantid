@@ -13,6 +13,7 @@ import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Tuple, TypeAlias
+import Engineering
 
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
@@ -143,6 +144,10 @@ class GSAS2Model:
     Diffraction interface.
     """
 
+    _CUSTOM_PHASE = "Custom"
+
+    ReflectionType: TypeAlias = Tuple[List[int], float, int]
+
     def __init__(self) -> None:
         # Configuration and State
         self.config = GSAS2ModelConfig()
@@ -171,6 +176,9 @@ class GSAS2Model:
         self.output_state.phase_names_list = []
         self.refinement_state.crystal_structures = []
         self.user_save_directory: str | None = None
+        self.default_cif_dict: dict = {}
+
+        self.populate_default_cif_dict()
 
     def clear_input_components(self) -> None:
         """
@@ -1122,3 +1130,28 @@ class GSAS2Model:
         if len(reflection_labels) != len(reflection_positions):
             return [f"reflections_phase_{i}" for i in range(1, len(reflection_positions) + 1)]
         return reflection_labels
+
+    # ================
+    # Phase Selection
+    # ================
+
+    def phase_is_custom(self, combo_text: str) -> bool:
+        return combo_text == self._CUSTOM_PHASE
+
+    def get_phase_file(self, combo_text: str, finder_file_path: str | None) -> str:
+        if combo_text == self._CUSTOM_PHASE:
+            return finder_file_path
+        else:
+            return self.default_cif_dict[combo_text]
+
+    def populate_default_cif_dict(self) -> None:
+        # get the path to Engineering root, to anchor file search
+        phase_info_dir = os.path.join(os.path.dirname(Engineering.__file__), "ENGINX", "phase_info")
+        for filename in os.listdir(phase_info_dir):
+            if filename.endswith(".cif"):
+                self.default_cif_dict[filename[:-4]] = os.path.join(phase_info_dir, filename)
+
+    def get_cif_combo_options(self) -> List[str]:
+        defaults = list(self.default_cif_dict.keys())
+        defaults.sort()
+        return defaults + [self._CUSTOM_PHASE]

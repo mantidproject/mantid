@@ -59,7 +59,7 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
         self.instrument_group_file_finder.setFileExtensions([".prm"])
         self.instrument_group_file_finder.allowMultipleFiles(True)
 
-        self.phase_file_finder.setLabelText("Phase")
+        self.phase_file_finder.setLabelText("Custom Phase File")
         self.phase_file_finder.isForRunFiles(False)
         self.phase_file_finder.setFileExtensions([".cif"])
         self.phase_file_finder.allowMultipleFiles(True)
@@ -189,12 +189,17 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
             self.refine_gamma_y_checkbox.isChecked(),
         ]
 
-    def get_load_parameters(self) -> List[List[str]]:
-        return [
-            self.instrument_group_file_finder.getFilenames(),
-            self.phase_file_finder.getFilenames(),
-            self.focused_data_file_finder.getFilenames(),
-        ]
+    def get_instrument_group(self) -> List[str]:
+        return self.instrument_group_file_finder.getFilenames()
+
+    def get_phase(self) -> List[str]:
+        return self.phase_file_finder.getFilenames()
+
+    def get_focused_data(self) -> List[str]:
+        return self.focused_data_file_finder.getFilenames()
+
+    def get_phase_finder_file(self) -> List[str]:
+        return self.phase_file_finder.getFilenames()
 
     def get_project_name(self) -> str:
         return self.project_name_line_edit.text()
@@ -444,3 +449,20 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
             two_decimal_string = str("{:.2f}".format(self.initial_x_limits[1]))
             self.x_max_line_edit.setText(two_decimal_string)
             self.x_max_line_edit.validator().last_valid_value = two_decimal_string
+
+    # ========================
+    # CIF Selector options
+    # ========================
+
+    def set_cif_combo_options(self, options: List[str]) -> None:
+        """should only be called on init"""
+        self.cifComboBox.addItems(options)
+
+    def get_phase_combo_text(self) -> str:
+        return self.cifComboBox.currentText()
+
+    def set_phase_finder_visible(self, vis: bool) -> None:
+        self.phase_file_finder.setVisible(vis)
+
+    def on_phase_combo_update(self, slot: Callable) -> None:
+        self.cifComboBox.currentIndexChanged.connect(slot)

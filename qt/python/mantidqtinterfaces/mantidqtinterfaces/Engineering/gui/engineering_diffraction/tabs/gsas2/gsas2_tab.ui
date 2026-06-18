@@ -191,15 +191,33 @@ QGroupBox:title {
                <number>6</number>
               </property>
               <item row="0" column="0">
-               <layout class="QGridLayout" name="gridLayout">
-                <item row="1" column="0">
+               <layout class="QVBoxLayout" name="verticalLayout">
+                <item>
+                 <widget class="FileFinderWidget" name="instrument_group_file_finder" native="true"/>
+                </item>
+                <item>
+                 <layout class="QHBoxLayout">
+                  <item>
+                     <widget class="QLabel" name="label">
+                     <property name="text">
+                      <string>Selected Phase</string>
+                     </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QComboBox" name="cifComboBox">
+                   <property name="toolTip">
+                    <string>Select from default cif files</string>
+                   </property>
+                  </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
                  <widget class="FileFinderWidget" name="phase_file_finder" native="true"/>
                 </item>
-                <item row="2" column="0">
+                <item>
                  <widget class="FilteredFileFinderWidget" name="focused_data_file_finder" native="true"/>
-                </item>
-                <item row="0" column="0">
-                 <widget class="FileFinderWidget" name="instrument_group_file_finder" native="true"/>
                 </item>
                </layout>
               </item>

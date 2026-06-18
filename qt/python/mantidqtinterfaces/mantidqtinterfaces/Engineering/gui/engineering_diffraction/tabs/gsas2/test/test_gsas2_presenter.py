@@ -90,23 +90,28 @@ class TestGSAS2Presenter(unittest.TestCase):
         self.view.initial_x_limits = [17000, 51000]
 
         # no new load params
-        self.view.get_load_parameters.return_value = []
+        self._patch_parameters_from_view()
         self.assertEqual(self.presenter.get_limits_if_same_load_parameters(), None)
         # load params different
-        self.view.get_load_parameters.return_value = ["inst_DIFFERENT", "phase", "data"]
+        self._patch_parameters_from_view("inst_DIFFERENT", "phase", "data")
         self.assertEqual(self.presenter.get_limits_if_same_load_parameters(), None)
         # no current limits
         self.view.get_x_limits_from_line_edits.return_value = None
-        self.view.get_load_parameters.return_value = ["inst", "phase", "data"]
+        self._patch_parameters_from_view("inst", "phase", "data")
         self.assertEqual(self.presenter.get_limits_if_same_load_parameters(), None)
         # Success
         self.view.get_x_limits_from_line_edits.return_value = [["18000"], ["50000"]]
-        self.view.get_load_parameters.return_value = ["inst", "phase", "data"]
+        self._patch_parameters_from_view("inst", "phase", "data")
         self.assertEqual(self.presenter.get_limits_if_same_load_parameters(), [[18000.0], [50000.0]])
         # Success with limits reversed
         self.view.get_x_limits_from_line_edits.return_value = [["50000"], ["8000"]]
-        self.view.get_load_parameters.return_value = ["inst", "phase", "data"]
+        self._patch_parameters_from_view("inst", "phase", "data")
         self.assertEqual(self.presenter.get_limits_if_same_load_parameters(), [[8000.0], [50000.0]])
+
+    def _patch_parameters_from_view(self, instr=None, phase=None, data=None):
+        self.view.get_instrument_group.return_value = instr
+        self.model.get_phase_file.return_value = phase
+        self.view.get_focused_data.return_value = data
 
 
 if __name__ == "__main__":
