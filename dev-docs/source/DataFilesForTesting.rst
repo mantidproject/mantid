@@ -14,32 +14,28 @@ This page gives an overview of how data files are managed within Mantid.
 Motivation
 ##########
 
-Some unit tests use a small amount of data that is created by the test
-harness and others load data from a file. Take the example of
-``ApplyCalibrationTest``. In its first test, testSimple, it creates a
-workspace with 10 detectors using
-``WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument()``. In
-the second test, testComplex, it reads a file
-``unit_testing/MAPS_Definition_Reduced.xml``, which contains
-the definition of a MAPS instrument with the number of detectors reduced
-much to ensure it is read quickly but preserving the other properties of
-this instrument. However, new tests should avoid even loading of this
-nature unless there is a strong justification for doing so.
+Some unit tests use a small amount of data that is created by the test harness and others load data
+from a file. Take the example of ``ApplyCalibrationTest``. In its first test, testSimple, it creates
+a workspace with 10 detectors using ``WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument()``.
+In the second test, testComplex, it reads a file ``unit_testing/MAPS_Definition_Reduced.xml``, which contains
+the definition of a MAPS instrument with the number of detectors reduced much to ensure it is read
+quickly but preserving the other properties of this instrument. However, new tests should avoid even
+loading of this nature unless there is a strong justification for doing so.
 
 **Main issues:**
 
--  need to store data, mainly for testing, alongside the code
--  some data needs to be versioned
--  merging system tests back with main code requires handling large data
+-  Need to store data, mainly for testing, alongside the code
+-  Some data needs to be versioned
+-  Merging system tests back with main code requires handling large data
    files
--  git is bad at handling binary files
+-  Git is bad at handling binary files
 
 **Possible solutions:**
 
--  CMake's `ExternalData <http://www.kitware.com/source/home/post/107>`__
--  don't have any reference to data in git and force developers to
+-  CMake's `ExternalData <https://www.kitware.com/cmake-externaldata-using-large-files-with-distributed-version-control/>`__
+-  Don't have any reference to data in git and force developers to
    manage the data stored on a file server
--  extensions to git, e.g.
+-  Extensions to git, e.g.
    `git-fat <https://github.com/jedbrown/git-fat>`__,
    `git-annex <https://git-annex.branchable.com/>`__ to deal with large
    files
@@ -52,26 +48,26 @@ CMake's External Data
 #####################
 
 .. figure:: images/ExternalDataSchematic.png
-   :alt: Image originated at http://www.kitware.com/source/home/post/107
+   :alt: Image originated at https://www.kitware.com/source/files/28_86189184.jpg
    :align: center
 
-   Image originated at http://www.kitware.com/source/home/post/107
+   Image originated at https://www.kitware.com/source/files/28_86189184.jpg
 
 **Terminology:**
 
--  content - the real data
--  content link - text file containing a hash (MD5) of the real content.
+-  Content - the real data
+-  Content link - text file containing a hash (MD5) of the real content.
    The filename is the filename of the real data plus the ``.md5``
    extension
--  object - a file that stores the real data and whose name is the ``MD5``
+-  Object - a file that stores the real data and whose name is the ``MD5``
    hash of the content
 
 **Overview:**
 
--  git does not store any content, it only stores content links
--  content is stored on a remote server that can be accessed via a
+-  Git does not store any content, it only stores content links
+-  Content is stored on a remote server that can be accessed via a
    ``http`` link
--  running cmake sets up build rules so that the content is downloaded
+-  Running cmake sets up build rules so that the content is downloaded
    when dependent projects are built
 
 
@@ -116,17 +112,13 @@ corresponding tests:
 - `.../Testing/Data/SystemTest`
 - `.../Testing/Data/UnitTest`
 
-However, it is known that some developers like to reuse the same data files for
-different type of tests, therefore sometime the DocTest and SystemTest is using
-data from UnitTest, which means you should fetch all testing data before trying
-to run any test locally.
-Furthermore, this location is mostly considered as a centralized location for all
-testing data.
-But some groups prefer to treat this location for storing **input** testing data
-only, therefore the testing system will look for the reference folder mentioned
-above if it cannot find the reference data here.
-Overall, it is important to talk to the senior developers in your team to learn
-the preferred location for storing testing data.
+However, it is known that some developers like to reuse the same data files for different type of tests,
+therefore sometime the DocTest and SystemTest is using data from UnitTest, which means you should fetch
+all testing data before trying to run any test locally. Furthermore, this location is mostly considered as
+a centralized location for all testing data. But some groups prefer to treat this location for storing **input**
+testing data only, therefore the testing system will look for the reference folder mentioned above if it cannot
+find the reference data here. Overall, it is important to talk to the senior developers in your team to learn the
+preferred location for storing testing data.
 
 .. _DataFilesForTesting_AddingANewFile:
 
@@ -143,14 +135,14 @@ it would be called like this:
 
 This does the following:
 
--  computes the MD5 hash of the data, e.g.
+-  Computes the MD5 hash of the data, e.g.
    ``d6948514d78db7fe251efb6cce4a9b83``
--  stores the MD5 hash in a file called
+-  Stores the MD5 hash in a file called
    ``Testing/Data/UnitTest/INST12345.nxs.md5``
--  renames the original data file to be its md5 sum
+-  Renames the original data file to be its md5 sum
    ``Testing/Data/UnitTest/d6948514d78db7fe251efb6cce4a9b83``
--  runs ``git add Testing/Data/UnitTest/INST12345.nxs.md5``
--  tells the user to upload the file(s),
+-  Runs ``git add Testing/Data/UnitTest/INST12345.nxs.md5``
+-  Tells the user to upload the file(s),
    ``d6948514d78db7fe251efb6cce4a9b83``, to the `remote store <https://testdata.mantidproject.org/ftp/external-data/upload>`_
 
 **Notes:**
@@ -167,7 +159,11 @@ This does the following:
 Updating File(s)
 ################
 
-The workflow is the same as :ref:`adding new files <DataFilesForTesting_AddingANewFile>` except that the developer must first put the new version of the file in the right place. For the example above, it would be ``Testing/Data/UnitTest/INST12345.nxs``. Then the new ``.md5`` file and associated renamed file will be created. ``git diff`` will show that change to the contents of ``Testing/Data/UnitTest/INST12345.nxs.md5`` and that there is an untracked file with the md5 sum for a name.
+The workflow is the same as :ref:`adding new files <DataFilesForTesting_AddingANewFile>` except that
+the developer must first put the new version of the file in the right place. For the example above,
+it would be ``Testing/Data/UnitTest/INST12345.nxs``. Then the new ``.md5`` file and associated renamed
+file will be created. ``git diff`` will show that change to the contents of ``Testing/Data/UnitTest/INST12345.nxs.md5``
+and that there is an untracked file with the md5 sum for a name.
 
 
 .. _DataFilesForTesting_DeveloperSetup:
@@ -244,16 +240,27 @@ click ``New...`` to add a variable.
 On Linux/Mac you will need to set the variable in the shell profile or
 on Linux you can set it system wide in ``/etc/environment``.
 
+CMake targets downloading test data
+-----------------------------------
+
+Currently there are four CMake targets defined at `SetupDataTargets.cmake <https://github.com/mantidproject/mantid/blob/main/buildconfig/CMake/SetupDataTargets.cmake>`__ as shown below that download the test data when built. The corrsponding data will appear in the path defined by ``ExternalData_BINARY_ROOT`` CMake variable, which defaults to ``build/ExternalData``.
+
+-  ``UnitTestData`` - data required for the unit tests
+-  ``DocTestData`` - data required for the documentation tests
+-  ``StandardTestData`` - includes both data required by the unit tests and documentation tests
+-  ``SystemTestData`` - data required for the system tests.
+
+
 Troubleshooting
 ---------------
 
-If you find that your tests cannot find the data they require check the
-following gotchas:
+   If you find that your tests cannot find the data they require check the
+   following gotchas:
 
--  Check that you have re-run CMake in the build directory
--  Check that you have uploaded the original file renamed as a hash to
-   the Mantid file repository
--  Check that you have removed any user defined data search directories
-   in ``~/.mantid``
--  Check that you have rebuilt the test executable you're trying to run
--  Check that you have rebuilt the SystemTestData target
+   -  Check that you have re-run CMake in the build directory
+   -  Check that you have uploaded the original file renamed as a hash to
+      the Mantid file repository
+   -  Check that you have removed any user defined data search directories
+      in ``~/.mantid``
+   -  Check that you have rebuilt the test executable you're trying to run.
+   -  Check that you have rebuilt the corresponding CMake target for the test you are trying to run.
