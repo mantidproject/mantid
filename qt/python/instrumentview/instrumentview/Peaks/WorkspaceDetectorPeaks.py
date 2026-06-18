@@ -46,6 +46,7 @@ class WorkspaceDetectorPeaks:
         sorter = np.argsort(detector_ids)
         sorted_detector_ids = detector_ids[sorter]
         positions = np.searchsorted(sorted_detector_ids, peaks_ids)
+        positions = np.clip(positions, 0, len(sorted_detector_ids) - 1)
         ordered_indices = sorter[positions]
         valid = sorted_detector_ids[positions] == peaks_ids
         ordered_indices = ordered_indices[valid]
