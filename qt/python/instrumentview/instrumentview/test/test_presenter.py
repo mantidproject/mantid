@@ -95,7 +95,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         mock_update_line_plot.assert_called_once_with("MyUnit")
 
     def test_generate_single_colour(self):
-        green_vector = self._presenter.generate_single_colour(2, 0, 1, 0, 0)
+        green_vector = self._presenter.generate_single_colour(2, (0, 255, 0), 0)
         self.assertEqual(len(green_vector), 2)
         self.assertTrue(green_vector.all(where=[0, 1, 0, 0]))
 
@@ -560,6 +560,55 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._model._monitor_positions = [np.zeros(3)]
         self._presenter._create_and_add_monitor_mesh()
         self._mock_view.add_rgba_mesh.assert_called_once()
+
+    def test_create_and_add_monitor_mesh_no_monitors(self):
+        self._mock_view.is_show_monitors_checkbox_checked.return_value = True
+        self._model._monitor_positions = []
+        mesh = self._presenter._create_and_add_monitor_mesh()
+        self.assertIsNone(mesh)
+        self._mock_view.add_rgba_mesh.assert_not_called()
+
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.update_plotter")
+    def test_on_show_monitors_check_box_clicked_calls_update_plotter(self, mock_update_plotter):
+        self._presenter.on_show_monitors_check_box_clicked()
+        mock_update_plotter.assert_called_once()
+
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._create_and_add_sample_position_mesh")
+    def test_sample_position_mesh_added(self, mock_create_sample_mesh):
+        mock_create_sample_mesh.return_value = None
+        self._presenter._update_view_main_plotter(refresh_limits=True)
+        mock_create_sample_mesh.assert_called_once()
+        mock_create_sample_mesh.reset_mock()
+
+        mock_mesh = MagicMock()
+        mock_create_sample_mesh.return_value = mock_mesh
+        self._presenter._update_view_main_plotter(refresh_limits=True)
+        mock_create_sample_mesh.assert_called_once()
+        mock_mesh.transform.assert_called_once()
+
+    def test_create_and_add_sample_position_mesh_checkbox_unchecked(self):
+        self._mock_view.is_show_sample_position_checkbox_checked.return_value = False
+        mesh = self._presenter._create_and_add_sample_position_mesh()
+        self.assertIsNone(mesh)
+        self._mock_view.add_rgba_mesh.assert_not_called()
+
+    def test_create_and_add_sample_position_mesh_checkbox_checked(self):
+        self._mock_view.is_show_sample_position_checkbox_checked.return_value = True
+        self._model._sample_position = np.array([0.0, 0.0, 0.0])
+        self._presenter._create_and_add_sample_position_mesh()
+        self._mock_view.add_rgba_mesh.assert_called_once()
+
+    def test_create_and_add_sample_position_mesh_no_sample(self):
+        self._mock_view.is_show_sample_position_checkbox_checked.return_value = True
+        self._model._sample_position = None
+        mesh = self._presenter._create_and_add_sample_position_mesh()
+        self.assertIsNone(mesh)
+        self._mock_view.add_rgba_mesh.assert_not_called()
+
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.update_plotter")
+    def test_on_show_sample_position_check_box_clicked_calls_update_plotter(self, mock_update_plotter):
+        self._presenter.on_show_sample_position_check_box_clicked()
+        mock_update_plotter.assert_called_once()
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.set_view_integration_limits")
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.calculate_and_set_full_integration_range")

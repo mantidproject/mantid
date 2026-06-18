@@ -12,7 +12,7 @@ import numpy as np
 from qtpy.QtCore import Qt
 from mantidqt.utils.qt.testing import start_qapplication
 from mantid.simpleapi import CreateSampleWorkspace
-from instrumentview.FullInstrumentViewWindow import FullInstrumentViewWindow
+from instrumentview.FullInstrumentViewWindow import FullInstrumentViewWindow, _LIGHT_GREY
 from instrumentview.ShapeWidgets import (
     AnnulusSelectionShape,
     CircleSelectionShape,
@@ -338,6 +338,30 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
         det.detector_id = 42
         self._view._set_detector_edit_text(mock_edit, [det], lambda d: str(d.detector_id))
         mock_edit.setPlainText.assert_called_once_with("42")
+
+    def test_on_show_monitors_toggled_sets_presenter_color_when_checked(self):
+        self._view._presenter.monitor_colour = (230, 55, 55)
+        with mock.patch.object(self._view._show_monitors_check_box, "set_colour") as mock_set_colour:
+            self._view._on_show_monitors_toggled(True)
+        mock_set_colour.assert_called_once_with((230, 55, 55))
+
+    def test_on_show_monitors_toggled_uses_grey_when_unchecked(self):
+        self._view._presenter.monitor_colour = (230, 55, 55)
+        with mock.patch.object(self._view._show_monitors_check_box, "set_colour") as mock_set_colour:
+            self._view._on_show_monitors_toggled(False)
+        mock_set_colour.assert_called_once_with(_LIGHT_GREY)
+
+    def test_on_show_sample_position_toggled_sets_presenter_color_when_checked(self):
+        self._view._presenter.sample_position_colour = (70, 160, 70)
+        with mock.patch.object(self._view._show_sample_position_check_box, "set_colour") as mock_set_colour:
+            self._view._on_show_sample_position_toggled(True)
+        mock_set_colour.assert_called_once_with((70, 160, 70))
+
+    def test_on_show_sample_position_toggled_uses_grey_when_unchecked(self):
+        self._view._presenter.sample_position_colour = (70, 160, 70)
+        with mock.patch.object(self._view._show_sample_position_check_box, "set_colour") as mock_set_colour:
+            self._view._on_show_sample_position_toggled(False)
+        mock_set_colour.assert_called_once_with(_LIGHT_GREY)
 
 
 if __name__ == "__main__":

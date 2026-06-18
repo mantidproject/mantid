@@ -27,7 +27,7 @@ from qtpy.QtWidgets import (
     QTabWidget,
     QFrame,
 )
-from qtpy.QtGui import QDoubleValidator, QMovie, QDragEnterEvent, QDropEvent, QDragMoveEvent, QColor, QPalette
+from qtpy.QtGui import QDoubleValidator, QMovie, QDragEnterEvent, QDropEvent, QDragMoveEvent, QColor, QPalette, QPixmap, QIcon, QPainter
 from qtpy.QtCore import Qt, QEvent, QSize
 from qtpy.QtWidgets import QFileDialog
 from superqt import QDoubleRangeSlider
@@ -61,6 +61,8 @@ from instrumentview.ShapeOverlayManager import ShapeOverlayManager
 import os
 from contextlib import suppress
 from typing import Callable
+
+_LIGHT_GREY = (211, 211, 211)
 
 
 def _skip_if_closing(method):
@@ -116,6 +118,32 @@ class NoWheelComboBox(QComboBox):
 
     def wheelEvent(self, event):
         event.ignore()
+
+
+class CheckBoxWithColourLabel(QCheckBox):
+    """QCheckBox that has a coloured circle next to the text."""
+
+    def __init__(self, text: str, colour: tuple[int, int, int] = _LIGHT_GREY, parent=None):
+        super().__init__(text, parent)
+        self.setStyleSheet("QCheckBox { spacing: 12px; }")
+        self.setIcon(self._make_coloured_circle_icon(colour))
+
+    def set_colour(self, colour: tuple[int, int, int]) -> None:
+        """Sets the colour of the circle next to the text."""
+        self.setIcon(self._make_coloured_circle_icon(colour))
+
+    def _make_coloured_circle_icon(self, colour: tuple[int, int, int] = _LIGHT_GREY) -> QIcon:
+        """Creates a QIcon of a filled circle of the given colour and size."""
+        size = 12
+        pixmap = QPixmap(size, size)
+        pixmap.fill(Qt.transparent)
+        painter = QPainter(pixmap)
+        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setBrush(QColor(*colour))
+        painter.setPen(Qt.NoPen)
+        painter.drawEllipse(0, 0, size, size)
+        painter.end()
+        return QIcon(pixmap)
 
 
 @run_on_qapp_thread()
@@ -250,8 +278,8 @@ class FullInstrumentViewWindow(QMainWindow):
             return ConfigService.Instance()[key].casefold() == "yes"
 
         self._aspect_ratio_check_box.setChecked(is_config_setting_true(self._ASPECT_RATIO_SETTING_STRING))
-        self._show_monitors_check_box = QCheckBox()
-        self._show_monitors_check_box.setText("Show Monitors?")
+        self._show_monitors_check_box = CheckBoxWithColourLabel("Monitors")
+        self._show_sample_position_check_box = CheckBoxWithColourLabel("Sample")
         self._count_scale_combo_box = NoWheelComboBox(self)
         self._count_scale_combo_box.setToolTip("Select display scale for integrated counts")
         self._flip_beam_check_box = QCheckBox()
@@ -281,6 +309,7 @@ class FullInstrumentViewWindow(QMainWindow):
         projection_third_row.addWidget(self._aspect_ratio_check_box)
         projection_third_row.addWidget(self._flip_beam_check_box)
         projection_third_row.addWidget(self._show_monitors_check_box)
+        projection_third_row.addWidget(self._show_sample_position_check_box)
         projection_second_row.addWidget(self._render_mode_combo_box)
         projection_third_row.addWidget(self._count_scale_combo_box)
         projection_layout.addLayout(projection_first_row)
@@ -473,6 +502,15 @@ class FullInstrumentViewWindow(QMainWindow):
     def is_show_monitors_checkbox_checked(self) -> bool:
         return self._show_monitors_check_box.isChecked()
 
+    def _on_show_monitors_toggled(self, checked: bool) -> None:
+        self._show_monitors_check_box.set_colour(self._presenter.monitor_colour if checked else _LIGHT_GREY)
+
+    def is_show_sample_position_checkbox_checked(self) -> bool:
+        return self._show_sample_position_check_box.isChecked()
+
+    def _on_show_sample_position_toggled(self, checked: bool) -> None:
+        self._show_sample_position_check_box.set_colour(self._presenter.sample_position_colour if checked else _LIGHT_GREY)
+
     def get_render_mode_option(self) -> str:
         return self._render_mode_combo_box.currentText()
 
@@ -662,6 +700,9 @@ class FullInstrumentViewWindow(QMainWindow):
         self._delete_all_selected_peaks_button.clicked.connect(self._presenter.on_delete_all_selected_peaks_clicked)
         self._start_adding_peaks_button.toggled.connect(self._presenter.on_start_adding_peaks_toggled)
         self._show_monitors_check_box.clicked.connect(self._presenter.on_show_monitors_check_box_clicked)
+        self._show_monitors_check_box.toggled.connect(self._on_show_monitors_toggled)
+        self._show_sample_position_check_box.clicked.connect(self._presenter.on_show_sample_position_check_box_clicked)
+        self._show_sample_position_check_box.toggled.connect(self._on_show_sample_position_toggled)
         self._count_scale_combo_box.currentIndexChanged.connect(self._presenter.on_count_scale_selected)
         self._flip_beam_check_box.clicked.connect(self._presenter.on_flip_beam_check_box_clicked)
         self._render_mode_combo_box.currentIndexChanged.connect(self._presenter.on_render_mode_changed)
