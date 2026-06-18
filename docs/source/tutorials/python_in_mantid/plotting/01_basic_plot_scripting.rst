@@ -131,7 +131,7 @@ Output:
 
 Multiple workspaces/spectra can be plotted by providing lists within the `plotSpectrum()` or `plotBin()` functions, e.g.
 
-.. testoutput:: PlotMultipleSpectrums
+.. testcode:: PlotMultipleSpectrums
 
     RawData1 = Load("MAR11015")
     RawData2 = Load("MAR11060")
@@ -157,7 +157,10 @@ Output:
     The graph_spec1 plot contains 3 spectrums
     The graph_spec2 plot contains 2 spectrums
     The graph_spec3 plot contains 6 spectrums
+.. testcleanup:: PlotMultipleSpectrums
 
+    DeleteWorkspace(RawData1)
+    DeleteWorkspace(RawData2)
 To overplot on the same window:
 
 .. testcode:: OverPlottingWithTwoSpectrums

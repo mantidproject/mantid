@@ -148,7 +148,7 @@ Create a `tiled plot <https://matplotlib.org/devdocs/gallery/subplots_axes_and_f
     #for subplots it is useful to include the following line
     plt.tight_layout()
 
-Add an `inset plot using the mantid projection <https://matplotlib.org/3.2.1/api/_as_gen/matplotlib.figure.Figure.html?highlight=add_axes#matplotlib.figure.Figure.add_axes>`_ (`without it <https://matplotlib.org/3.1.1/api/_as_gen/mpl_toolkits.axes_grid1.inset_locator.inset_axes.html>`_ ):
+Add an `inset plot using the mantid projection <https://matplotlib.org/3.10.9/api/_as_gen/matplotlib.figure.Figure.add_axes.html>`_ (`without it <https://matplotlib.org/3.10.9/api/_as_gen/mpl_toolkits.axes_grid1.inset_locator.inset_axes.html>`_ ):
 
 .. testcode:: MantidPlottingExample
 
