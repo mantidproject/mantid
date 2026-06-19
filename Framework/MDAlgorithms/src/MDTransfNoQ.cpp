@@ -174,6 +174,10 @@ MDTransfNoQ::MDTransfNoQ() : m_NMatrixDim(0), m_YAxis(nullptr), m_Det(nullptr) {
  * @param mdWorkspace: the md workspace
  * @param underlyingWorkspace: the underlying workspace
  */
+
+std::pair<coord_t, coord_t> MDTransfNoQ::getDimBounds(size_t dim) const {
+  return std::make_pair(m_DimMin[dim], m_DimMax[dim]);
+}
 void MDTransfNoQ::setDisplayNormalization(Mantid::API::IMDWorkspace_sptr mdWorkspace,
                                           Mantid::API::MatrixWorkspace_sptr underlyingWorkspace) const {
   DisplayNormalizationSetter setter;

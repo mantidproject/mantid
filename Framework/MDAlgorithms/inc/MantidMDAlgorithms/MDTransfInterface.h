@@ -206,6 +206,8 @@ public:
    * Updates the internal rotation matrix for classes which support this
    */
   virtual void updateRotMat(const std::vector<double> &newMat) { UNUSED_ARG(newMat); }
+
+  virtual std::pair<coord_t, coord_t> getDimBounds(size_t dim) const = 0;
 };
 
 using MDTransf_sptr = std::shared_ptr<MDTransfInterface>;

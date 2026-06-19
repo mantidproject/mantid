@@ -74,6 +74,7 @@ public:
                                Mantid::API::MatrixWorkspace_sptr underlyingWorkspace) const override;
 
   void updateRotMat(const std::vector<double> &newMat) override { m_RotMat = newMat; }
+  std::pair<coord_t, coord_t> getDimBounds(size_t dim) const override;
 
 protected:
   //  directions to the detectors
