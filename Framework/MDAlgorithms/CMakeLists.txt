@@ -262,7 +262,6 @@ set(TEST_FILES
     ConvertCWPDMDToSpectraTest.h
     ConvertCWSDExpToMomentumTest.h
     ConvertCWSDMDtoHKLTest.h
-    ConvertEventsToMDTest.h
     ConvertHFIRSCDtoMDETest.h
     ConvertMDHistoToMatrixWorkspaceTest.h
     ConvertSpiceDataToRealSpaceTest.h
@@ -271,6 +270,7 @@ set(TEST_FILES
     ConvertToDiffractionMDWorkspace3Test.h
     ConvertToDiffractionMDWorkspaceTest.h
     ConvertToMDComponentsTest.h
+    ConvertToMDEventsWSTest.h
     ConvertToMDMinMaxGlobalTest.h
     ConvertToMDMinMaxLocalTest.h
     ConvertToMDTest.h

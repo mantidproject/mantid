@@ -32,13 +32,13 @@ public:
 };
 
 //
-class ConvertEventsToMDTest : public CxxTest::TestSuite {
+class ConvertToMDEventsWSTest : public CxxTest::TestSuite {
   std::unique_ptr<ConvertEvents2MDEvTestHelper> pAlg;
   Mantid::API::MatrixWorkspace_sptr m_wsEv;
 
 public:
-  static ConvertEventsToMDTest *createSuite() { return new ConvertEventsToMDTest(); }
-  static void destroySuite(ConvertEventsToMDTest *suite) { delete suite; }
+  static ConvertToMDEventsWSTest *createSuite() { return new ConvertToMDEventsWSTest(); }
+  static void destroySuite(ConvertToMDEventsWSTest *suite) { delete suite; }
 
   void setUp() override { resetAlgorithm(); }
   void tearDown() override { AnalysisDataService::Instance().remove("testMDEvWorkspace"); }
@@ -109,7 +109,49 @@ public:
     m_wsEv->mutableRun().setGoniometer(gonio, false); // Change back to not using log
   }
 
-  ConvertEventsToMDTest() {
+  void testEventWSUsingOtherDimensionsLogTimes() {
+    // We use the rot log as an extra dimension here.
+    Goniometer gonio;
+    m_wsEv->mutableRun().setGoniometer(gonio, false);
+    pAlg->setPropertyValue("OtherDimensions", "Rot");
+    pAlg->setPropertyValue("dEAnalysisMode", "Direct");
+    pAlg->setPropertyValue("MinValues", "-10,-10,-10,-100, 0");
+    pAlg->setPropertyValue("MaxValues", " 10, 10, 10, 100, 50");
+    pAlg->setProperty("UseLogTimes", true);
+
+    TS_ASSERT_THROWS_NOTHING(pAlg->execute());
+    std::shared_ptr<DataObjects::MDEventWorkspace<DataObjects::MDEvent<5>, 5>> ws =
+        std::dynamic_pointer_cast<DataObjects::MDEventWorkspace<DataObjects::MDEvent<5>, 5>>(
+            AnalysisDataService::Instance().retrieve("testMDEvWorkspace"));
+    TSM_ASSERT("It should be 5D MD workspace", ws.get());
+    TS_ASSERT_EQUALS(5, ws->getNumDims());
+    TS_ASSERT_EQUALS(900, ws->getNPoints());
+    TS_ASSERT_EQUALS("Rot", ws->getDimension(4)->getName());
+  }
+
+  void testEventWSUsingOtherDimensionsLogTimesAndGonioAxes() {
+    // We use the rot log as an extra dimension here, and half log as goniometer log, so it will register half the
+    // events"
+    Goniometer gonio;
+    gonio.pushAxis("Half", 0., 1., 0., 0.);
+    m_wsEv->mutableRun().setGoniometer(gonio, true);
+    pAlg->setPropertyValue("OtherDimensions", "Rot");
+    pAlg->setPropertyValue("dEAnalysisMode", "Direct");
+    pAlg->setPropertyValue("MinValues", "-10,-10,-10,-100, 0");
+    pAlg->setPropertyValue("MaxValues", " 10, 10, 10, 100, 50");
+    pAlg->setProperty("UseLogTimes", true);
+
+    TS_ASSERT_THROWS_NOTHING(pAlg->execute());
+    std::shared_ptr<DataObjects::MDEventWorkspace<DataObjects::MDEvent<5>, 5>> ws =
+        std::dynamic_pointer_cast<DataObjects::MDEventWorkspace<DataObjects::MDEvent<5>, 5>>(
+            AnalysisDataService::Instance().retrieve("testMDEvWorkspace"));
+    TSM_ASSERT("It should be 5D MD workspace", ws.get());
+    TS_ASSERT_EQUALS(5, ws->getNumDims());
+    TS_ASSERT_EQUALS(450, ws->getNPoints());
+    TS_ASSERT_EQUALS("Rot", ws->getDimension(4)->getName());
+  }
+
+  ConvertToMDEventsWSTest() {
     FrameworkManager::Instance();
     createEventWorkspace();
     pAlg = std::make_unique<ConvertEvents2MDEvTestHelper>();
