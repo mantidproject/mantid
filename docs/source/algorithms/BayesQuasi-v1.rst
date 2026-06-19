@@ -10,6 +10,8 @@
 Description
 -----------
 
+This algorithm has been deprecated in favour of :ref:`algm-BayesQuasi2`
+
 The model that is being fitted is that of a \delta-function (elastic component) of amplitude A(0)
 and Lorentzians of amplitude A(j) and HWHM W(j) where j=1,2,3. The whole function is then convolved
 with the resolution function. The -function and Lorentzians are intrinsically normalised to unity
@@ -33,7 +35,7 @@ Usage
 
 **Example - BayesQuasi**
 
-.. testcode:: BayesQuasiExample
+.. code-block:: python
 
     # Load in test data
     sampleWs = Load('irs26176_graphite002_red.nxs')
