@@ -9,6 +9,7 @@ New features
 ############
 - (`#41309 <https://github.com/mantidproject/mantid/pull/41309>`_) In :ref:`DGS Planner <dgsplanner-ref>`, the minimal value for the Incident Energy has been lowered from 1.0 to 0.1 meV.
 - (`#41305 <https://github.com/mantidproject/mantid/pull/41305>`_) CNCS has a new parameter file to update the calculation of T0 offset.
+- (`#41432 <https://github.com/mantidproject/mantid/pull/41432>`_) :ref:`LoadPLNnxs <algm-LoadPLNnxs>` now supports loading ANSTO PELICAN data collected with the AESS framework.
 
 MSlice
 ------
