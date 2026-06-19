@@ -423,14 +423,10 @@ Please test this on IDAaaS: an ENGINX instance should have MantidWorkbenchNightl
 
 4. In the ``Focus`` group, enter ``Sample Run #`` ``305761`` and click the ``Focus`` button.
 
-.. image:: figure:: /../../../../../docs/source/images/6_5_release/Diffraction/GSASII_tab.png
-    :align: center
-    :width: 600px
-
 5. Change to the ``GSASII`` tab. The ``Instrument Group`` path should be pre-filled to a `.prm` file output by the calibration
    and the ``Focused Data`` path should be pre-filled to the `.gss` file output from the ``Focus`` group.
 
-6. For the ``Phase`` filepath, browse to ``MANTID_INSTALL_DIRECTORY/scripts/Engineering/ENGINX/phase_info/FE_GAMMA.cif``. For the ``Project Name`` at the top, enter a string of your choice.
+6. For the ``Phase`` filepath, select ``FE_GAMMA`` from the list. For the ``Project Name`` at the top, enter a string of your choice.
 
 7. Now, click ``Refine in GSAS II``. After a few seconds, the output fit should be plotted. In the top right of the plot widget, the refined spectrum can be changed using the combo-box.
 
