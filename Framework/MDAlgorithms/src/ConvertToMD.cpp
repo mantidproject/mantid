@@ -184,6 +184,18 @@ std::map<std::string, std::string> ConvertToMD::validateInputs() {
     const auto evWs = std::dynamic_pointer_cast<const DataObjects::EventWorkspace>(inWS);
     if (!evWs) {
       result["UseLogTimes"] = "UseLogTimes requires the input to be an EventWorkspace.";
+    } else {
+      const std::vector<std::string> otherDims = getProperty("OtherDimensions");
+      for (auto &nameDim : otherDims) {
+        if (!inWS->run().hasProperty(nameDim)) {
+          result["UseLogTimes"] = "Input workspace does not have " + nameDim + " property in its logs.";
+        } else {
+          if (Kernel::Property *pProperty = inWS->run().getProperty(nameDim);
+              !dynamic_cast<TimeSeriesProperty<double> *>(pProperty)) {
+            result["UseLogTimes"] = "Property " + nameDim + " is not a time series property, log times can't be used.";
+          }
+        }
+      }
     }
   }
 
