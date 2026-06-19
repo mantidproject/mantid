@@ -8,7 +8,7 @@ New Features
 
 Deprecated
 ----------
-- (`#TBC <https://github.com/mantidproject/mantid/pull/TBC>`_) This release will be the final version to include ``quasielasticbayes`` support.
+- (`#41712 <https://github.com/mantidproject/mantid/pull/41712>`_) This release will be the final version to include ``quasielasticbayes`` support.
   The :ref:`Bayes Fitting interface <interface-inelastic-bayes-fitting>` now uses ``quickbayes`` (the new python library) by default.
   In the next release the option to use ``quasielasticbayes`` will be removed.
   The :ref:`algm-BayesQuasi` and :ref:`algm-BayesStretch` algorithms (based on ``quasielasticbayes``) have been deprecated in favour of the ``quickbayes`` replacements, :ref:`algm-BayesQuasi2` and :ref:`algm-BayesStretch2`, respectively.
