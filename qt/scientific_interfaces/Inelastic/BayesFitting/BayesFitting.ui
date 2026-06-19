@@ -105,12 +105,12 @@
         </property>
         <item>
          <property name="text">
-          <string>quasielasticbayes</string>
+          <string>quickbayes</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>quickbayes</string>
+          <string>quasielasticbayes</string>
          </property>
         </item>
        </widget>

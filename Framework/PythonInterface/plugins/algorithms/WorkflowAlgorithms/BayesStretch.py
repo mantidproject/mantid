@@ -8,11 +8,13 @@
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, WorkspaceGroupProperty, Progress
 from mantid.kernel import StringListValidator, Direction
 import mantid.simpleapi as s_api
+from mantid.utils.deprecator import deprecated_algorithm
 from mantid import config, logger
 import os
 import numpy as np
 
 
+@deprecated_algorithm("BayesStretch2", "2026-06-22")
 class BayesStretch(PythonAlgorithm):
     _sam_name = None
     _sam_ws = None

@@ -143,11 +143,11 @@ public:
   void test_notifyBackendChanged_calls_view() {
     EXPECT_CALL(*m_view, updateBackend(true)).Times(1);
 
-    m_presenter->notifyBackendChanged(BayesBackendType::QUICK_BAYES);
+    m_presenter->notifyBackendChanged(BayesBackendType::QUASI_ELASTIC_BAYES);
 
     EXPECT_CALL(*m_view, updateBackend(false)).Times(1);
 
-    m_presenter->notifyBackendChanged(BayesBackendType::QUASI_ELASTIC_BAYES);
+    m_presenter->notifyBackendChanged(BayesBackendType::QUICK_BAYES);
   }
 
   void test_notifyBackendChanged_changes_stretchAlgorithm_call() {
@@ -157,14 +157,14 @@ public:
     ON_CALL(*m_view, getRunData(true)).WillByDefault(Return(runData));
     EXPECT_CALL(*m_model, stretchAlgorithm(_, _, _, true)).Times(1);
 
-    m_presenter->notifyBackendChanged(BayesBackendType::QUICK_BAYES);
+    m_presenter->notifyBackendChanged(BayesBackendType::QUASI_ELASTIC_BAYES);
     m_presenter->handleRun();
 
     EXPECT_CALL(*m_view, getRunData(false)).Times(1);
     EXPECT_CALL(*m_model, stretchAlgorithm(_, _, _, false)).Times(1);
     ON_CALL(*m_view, getRunData(false)).WillByDefault(Return(runData));
 
-    m_presenter->notifyBackendChanged(BayesBackendType::QUASI_ELASTIC_BAYES);
+    m_presenter->notifyBackendChanged(BayesBackendType::QUICK_BAYES);
     m_presenter->handleRun();
   }
 
