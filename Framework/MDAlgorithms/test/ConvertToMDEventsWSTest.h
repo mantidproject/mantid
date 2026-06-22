@@ -131,7 +131,7 @@ public:
 
   void testEventWSUsingOtherDimensionsLogTimesAndGonioAxes() {
     // We use the rot log as an extra dimension here, and half log as goniometer log, so it will register half the
-    // events"
+    // events
     Goniometer gonio;
     gonio.pushAxis("Half", 0., 1., 0., 0.);
     m_wsEv->mutableRun().setGoniometer(gonio, true);
