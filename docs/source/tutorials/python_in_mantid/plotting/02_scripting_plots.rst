@@ -14,7 +14,7 @@ Required imports:
 
 .. testcode:: MantidPlottingExample
 
-    from mantid.simpleapi import *
+    from mantid.simpleapi import Load
     import matplotlib.pyplot as plt
 
 Access a workspace,loaded in the Workspace Toolbox, inside a script:
@@ -132,38 +132,56 @@ Alternatively, you can set a title or label to have certain `font properties <ht
 
    axes.set_xlabel(r'Time-of-flight ($\mu s$)', fontsize = 12, fontstyle = 'italic', fontweight = 'bold', fontfamily='serif')
 
-Subplots and Inset plots
-========================
-
-Create a `tiled plot <https://matplotlib.org/devdocs/gallery/subplots_axes_and_figures/subplots_demo.html>`_ (subplot)
-
-.. testcode:: MantidPlottingExample
-
-    multi_fig, multi_axes = plt.subplots(ncols=2, nrows=2, subplot_kw={'projection': 'mantid'})
-    # You've created 2x2 arrangement of plots, now plot in them:
-    multi_axes[0][0].plot(ws, specNum=1)
-    multi_axes[0][1].plot(ws, specNum=2)
-    multi_axes[1][0].plot(ws, specNum=3)
-    multi_axes[1][1].plot(ws, specNum=5)
-    #for subplots it is useful to include the following line
-    plt.tight_layout()
-
-Add an `inset plot using the mantid projection <https://matplotlib.org/3.10.9/api/_as_gen/matplotlib.figure.Figure.add_axes.html>`_ (`without it <https://matplotlib.org/3.10.9/api/_as_gen/mpl_toolkits.axes_grid1.inset_locator.inset_axes.html>`_ ):
-
-.. testcode:: MantidPlottingExample
-
-    ax_sub = multi_fig.add_axes([0.50, 0.50, 0.3, 0.25],projection='mantid') #[left, bottom, width, height]
-    ax_sub.plot(ws, specNum=6)
-
-    print("Mantid plotting example ran successfully")
+   print("Plotting example ran successfully")
 
 Output:
 
 .. testoutput:: MantidPlottingExample
 
-    Mantid plotting example ran successfully
+    Plotting example ran successfully
 
 .. testcleanup:: MantidPlottingExample
+
+    DeleteWorkspace(ws)
+
+
+Subplots and Inset plots
+========================
+
+Create a `tiled plot <https://matplotlib.org/devdocs/gallery/subplots_axes_and_figures/subplots_demo.html>`_ (subplot)
+
+.. testcode:: MantidSubplotExample
+
+    from mantid.simpleapi import Load
+    import matplotlib.pyplot as plt
+
+    ws = Load('MAR11060')
+
+    fig, axes = plt.subplots(ncols=2, nrows=2, subplot_kw={'projection': 'mantid'})
+    # You've created 2x2 arrangement of plots, now plot in them:
+    axes[0][0].plot(ws, specNum=1)
+    axes[0][1].plot(ws, specNum=2)
+    axes[1][0].plot(ws, specNum=3)
+    axes[1][1].plot(ws, specNum=5)
+    #for subplots it is useful to include the following line
+    plt.tight_layout()
+
+Add an `inset plot using the mantid projection <https://matplotlib.org/3.10.9/api/_as_gen/matplotlib.figure.Figure.add_axes.html>`_ (`without it <https://matplotlib.org/3.10.9/api/_as_gen/mpl_toolkits.axes_grid1.inset_locator.inset_axes.html>`_ ):
+
+.. testcode:: MantidSubplotExample
+
+    ax_sub = fig.add_axes([0.50, 0.50, 0.3, 0.25],projection='mantid') #[left, bottom, width, height]
+    ax_sub.plot(ws, specNum=6)
+
+    print("Subplots and Inset example ran successfully")
+
+Output:
+
+.. testoutput:: MantidSubplotExample
+
+    Subplots and Inset example ran successfully
+
+.. testcleanup:: MantidSubplotExample
 
     DeleteWorkspace(ws)
 
