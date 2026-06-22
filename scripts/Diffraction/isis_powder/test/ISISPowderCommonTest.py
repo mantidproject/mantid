@@ -7,7 +7,7 @@
 import mantid.simpleapi as mantid  # Have to import Mantid to setup paths
 import unittest
 
-from isis_powder.routines import common, common_enums
+from Diffraction.isis_powder.routines import common, common_enums
 
 
 class ISISPowderCommonTest(unittest.TestCase):

@@ -13,7 +13,7 @@ import mantid.simpleapi as mantid
 from mantid import config
 from mantid.kernel import UnitConversion, DeltaEModeType
 
-from isis_powder import HRPD, SampleDetails
+from Diffraction.isis_powder import HRPD, SampleDetails
 
 
 DIRS = config["datasearch.directories"].split(";")

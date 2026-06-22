@@ -6,9 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import mantid.simpleapi as mantid
 
-from isis_powder.hrpd_routines import hrpd_advanced_config
-from isis_powder.routines import common, absorb_corrections, sample_details, common_enums
-from isis_powder.routines.run_details import create_run_details_object, get_cal_mapping_dict
+from Diffraction.isis_powder.hrpd_routines import hrpd_advanced_config
+from Diffraction.isis_powder.routines import common, absorb_corrections, sample_details, common_enums
+from Diffraction.isis_powder.routines.run_details import create_run_details_object, get_cal_mapping_dict
 
 
 def calculate_van_absorb_corrections(ws_to_correct, multiple_scattering, msevents):

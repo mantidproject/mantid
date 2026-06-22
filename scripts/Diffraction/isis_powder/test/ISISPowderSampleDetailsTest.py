@@ -8,7 +8,7 @@ import io
 import sys
 import unittest
 
-from isis_powder.routines import sample_details
+from Diffraction.isis_powder.routines import sample_details
 from mantid.simpleapi import SetSample, CreateSampleWorkspace
 
 

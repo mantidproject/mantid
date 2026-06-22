@@ -4,10 +4,10 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from isis_powder.hrpd_routines.hrpd_enums import HRPD_MODES, HRPD_TOF_WINDOWS
-from isis_powder.routines.common import PARAM_MAPPING as COMMON_PARAM_MAPPING
-from isis_powder.routines.common_enums import EMPTY_CAN_SUBTRACTION_METHOD
-from isis_powder.routines.param_map_entry import ParamMapEntry
+from Diffraction.isis_powder.hrpd_routines.hrpd_enums import HRPD_MODES, HRPD_TOF_WINDOWS
+from Diffraction.isis_powder.routines.common import PARAM_MAPPING as COMMON_PARAM_MAPPING
+from Diffraction.isis_powder.routines.common_enums import EMPTY_CAN_SUBTRACTION_METHOD
+from Diffraction.isis_powder.routines.param_map_entry import ParamMapEntry
 
 attr_mapping = [
     ParamMapEntry(ext_name="calibration_directory", int_name="calibration_dir"),

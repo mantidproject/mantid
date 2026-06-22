@@ -7,8 +7,8 @@
 import mantid.simpleapi as mantid
 from mantid.kernel import logger
 
-import isis_powder.routines.common as common
-from isis_powder.routines.run_details import create_run_details_object, get_cal_mapping_dict
+import Diffraction.isis_powder.routines.common as common
+from Diffraction.isis_powder.routines.run_details import create_run_details_object, get_cal_mapping_dict
 import os
 
 
