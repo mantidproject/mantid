@@ -78,10 +78,11 @@ class AbsorptionCalculator:
             MonteCarloAbsorption(**self.mc_kwargs)
             transmission = read_attenuation_coefficient_at_value(
                 wsm.WS_MC_OUTPUT, wsm.attenuation_kwargs["point"], wsm.attenuation_kwargs["unit"]
-            )[m.geometry.starting_ind :]
+            )
+            transmission = [transmission[spec_ind] for spec_ind in m.geometry.spec_inds]
         except RuntimeError:
             logger.warning("MonteCarloAbsorption has failed, sample is assumed to be outside the gauge volume ")
-            transmission = np.zeros(mc_ws.getNumberHistograms() - m.geometry.starting_ind)
+            transmission = [0 for _ in m.geometry.spec_inds]
         m.orientations.set_transmission_at_index(transmission, index)
 
     @staticmethod

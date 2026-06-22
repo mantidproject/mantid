@@ -54,15 +54,15 @@ class DetectorGeometry:
 
     def __init__(self, model: _BaseModelType):
         self._model = model
-        self.det_k = None
-        self.detQs_lab = None
+        self.det_k = np.empty((0, 3), dtype=float)
+        self.detQs_lab = np.empty((0, 3), dtype=float)
         # if the group_ws contains group label 0, this is the null group; we skip it
         # when iterating over spectra by starting at starting_ind
-        self.starting_ind = 1
+        self.spec_inds = []
         # Detector group and source positions captured at the last regroup, used to
         # rebuild det_k / detQs_lab when only the scattering centre changes.
-        self._det_positions = None
-        self._source_position = None
+        self._det_positions = np.empty((0, 3), dtype=float)
+        self._source_position = np.empty((0, 3), dtype=float)
 
     def recompute(self):
         wsm = self._model.workspaces
@@ -73,19 +73,14 @@ class DetectorGeometry:
         tmp_grp = LoadDetectorsGroupingFile(InputFile=grouping_path, OutputWorkspace="tmp_grp", StoreInADS=False)
         ydat = tmp_grp.extractY()
         # if there is a null group (label 0), start the indexing at 1 to ignore it, otherwise start from 0
-        self.starting_ind = int(ydat.min() == 0)
+        starting_ind = int(ydat.min() == 0)
 
         # extract the detector positions for each spectrum in the group and the source position
         spec_info = group_ws.spectrumInfo()
         comp_info = group_ws.componentInfo()
         n_hist = group_ws.getNumberHistograms()
-        # a user-supplied (custom) grouping file can leave the leading spectrum/spectra with no
-        # detectors (an empty group); skip these so spectrumInfo.position does not raise. Keeping
-        # starting_ind a contiguous prefix offset preserves the slice AbsorptionCalculator uses to
-        # line transmission factors up with these detector positions.
-        while self.starting_ind < n_hist and not spec_info.hasDetectors(self.starting_ind):
-            self.starting_ind += 1
-        self._det_positions = np.asarray([spec_info.position(i) for i in range(self.starting_ind, n_hist)])
+        self.spec_inds = [i for i in range(starting_ind, n_hist) if spec_info.hasDetectors(i)]
+        self._det_positions = np.asarray([spec_info.position(i) for i in self.spec_inds])
         self._source_position = np.asarray(comp_info.sourcePosition())
 
         # calculate the required det_k and detQs_lab
@@ -118,7 +113,9 @@ class DetectorGeometry:
         caller is expected to have set on the workspace) and combines it with the detector
         positions captured at the last regroup.
         """
-        if self._det_positions is None:
+        if len(self.spec_inds) == 0:
+            self.det_k = np.empty((0, 3), dtype=float)
+            self.detQs_lab = np.empty((0, 3), dtype=float)
             return
         # get the current scattering centre from the workspace manager
         scattering_centre = self._model.workspaces.scattering_centre

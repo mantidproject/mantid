@@ -32,14 +32,17 @@ def _make_model(wsm=None, grouping_path="/calib/ENGINX_grouping.xml"):
 
 
 class TestDetectorGeometry_Init(unittest.TestCase):
+    def assertEmptyArray(self, arr):
+        return self.assertTrue(arr.size == 0)
+
     def test_default_attributes(self):
         dg = DetectorGeometry(_make_model())
 
-        self.assertIsNone(dg.det_k)
-        self.assertIsNone(dg.detQs_lab)
-        self.assertEqual(dg.starting_ind, 1)
-        self.assertIsNone(dg._det_positions)
-        self.assertIsNone(dg._source_position)
+        self.assertEmptyArray(dg.det_k)
+        self.assertEmptyArray(dg.detQs_lab)
+        self.assertEqual(len(dg.spec_inds), 0)
+        self.assertEmptyArray(dg._det_positions)
+        self.assertEmptyArray(dg._source_position)
 
 
 class TestDetectorGeometry_GetGroupingPath(unittest.TestCase):
@@ -105,15 +108,15 @@ class TestDetectorGeometry_ApplyGroupingToWss(unittest.TestCase):
 
 @patch(file_path + ".LoadDetectorsGroupingFile")
 class TestDetectorGeometry_Recompute(unittest.TestCase):
-    def _make_dg_with_stubs(self, group_ws=None, n_hist=4):
+    def _make_dg_with_stubs(self, n_hist=4, inds_with_dets=(0, 1, 2, 3)):
         model = _make_model()
         dg = DetectorGeometry(model)
         dg._get_grouping_path = MagicMock(return_value="/path/grp.xml")
-        if group_ws is None:
-            group_ws = MagicMock()
-            group_ws.getNumberHistograms.return_value = n_hist
-            group_ws.spectrumInfo.return_value.position.side_effect = lambda i: np.array([float(i), 0.0, 0.0])
-            group_ws.componentInfo.return_value.sourcePosition.return_value = np.array([-1.0, 0.0, 0.0])
+        group_ws = MagicMock()
+        group_ws.getNumberHistograms.return_value = n_hist
+        group_ws.spectrumInfo.return_value.hasDetectors.side_effect = lambda i: i in inds_with_dets
+        group_ws.spectrumInfo.return_value.position.side_effect = lambda i: np.array([float(i), 0.0, 0.0])
+        group_ws.componentInfo.return_value.sourcePosition.return_value = np.array([-1.0, 0.0, 0.0])
         dg._apply_grouping_to_wss = MagicMock(return_value=group_ws)
         dg.recompute_scattering_geometry = MagicMock()
         return dg, group_ws
@@ -138,25 +141,26 @@ class TestDetectorGeometry_Recompute(unittest.TestCase):
 
         mock_load_grp.assert_called_once_with(InputFile="/path/grp.xml", OutputWorkspace="tmp_grp", StoreInADS=False)
 
-    def test_starting_ind_one_when_null_group_present(self, mock_load_grp):
+    def test_ignore_first_group_when_null_group_present(self, mock_load_grp):
         dg, _ = self._make_dg_with_stubs()
         tmp_grp = MagicMock()
-        tmp_grp.extractY.return_value = np.array([[0], [1], [2]])
+        tmp_grp.extractY.return_value = np.array([[0, 1, 1, 2, 2, 3, 2]])  # group will be array of int group labels
         mock_load_grp.return_value = tmp_grp
 
         dg.recompute()
 
-        self.assertEqual(dg.starting_ind, 1)
+        self.assertEqual(dg.spec_inds, [1, 2, 3])
 
-    def test_starting_ind_zero_when_no_null_group(self, mock_load_grp):
-        dg, _ = self._make_dg_with_stubs()
+    def test_all_specs_included_when_no_null_group(self, mock_load_grp):
+        specs_with_dets = (0, 1, 2, 3)
+        dg, _ = self._make_dg_with_stubs(inds_with_dets=specs_with_dets)
         tmp_grp = MagicMock()
-        tmp_grp.extractY.return_value = np.array([[1], [2], [3]])
+        tmp_grp.extractY.return_value = np.array([[1, 2, 3, 2, 3]])
         mock_load_grp.return_value = tmp_grp
 
         dg.recompute()
 
-        self.assertEqual(dg.starting_ind, 0)
+        self.assertEqual(dg.spec_inds, list(specs_with_dets))
 
     def test_captures_det_positions_from_starting_ind(self, mock_load_grp):
         dg, group_ws = self._make_dg_with_stubs(n_hist=4)
@@ -172,17 +176,40 @@ class TestDetectorGeometry_Recompute(unittest.TestCase):
     def test_skips_leading_spectra_without_detectors(self, mock_load_grp):
         # a custom grouping file can leave the leading group empty (no detectors); these must be
         # skipped so spectrumInfo.position is never asked for a detector-less spectrum
-        dg, group_ws = self._make_dg_with_stubs(n_hist=4)
-        group_ws.spectrumInfo.return_value.hasDetectors.side_effect = lambda i: i != 0
+        dg, group_ws = self._make_dg_with_stubs(n_hist=4, inds_with_dets=(1, 2, 3))
         tmp_grp = MagicMock()
         tmp_grp.extractY.return_value = np.array([[1], [2], [3]])  # no null group -> base starting_ind=0
         mock_load_grp.return_value = tmp_grp
 
         dg.recompute()
 
-        # advanced past the empty leading spectrum at index 0
-        self.assertEqual(dg.starting_ind, 1)
+        self.assertEqual(dg.spec_inds, [1, 2, 3])
         np.testing.assert_array_equal(dg._det_positions, np.array([[1.0, 0.0, 0.0], [2.0, 0.0, 0.0], [3.0, 0.0, 0.0]]))
+
+    def test_skips_any_spectra_without_detectors(self, mock_load_grp):
+        # not sure it is likely that any of the other spectra might end up without detectors but guard in case
+        # we will make it so the first and last spectra don't have any detectors attached
+        dg, group_ws = self._make_dg_with_stubs(n_hist=4, inds_with_dets=(1, 2))
+        tmp_grp = MagicMock()
+        tmp_grp.extractY.return_value = np.array([[1, 1, 1, 2, 2, 2, 3, 3, 3]])  # no 0 ind -> no null group
+        mock_load_grp.return_value = tmp_grp
+
+        dg.recompute()
+
+        self.assertEqual(dg.spec_inds, [1, 2])
+        np.testing.assert_array_equal(dg._det_positions, np.array([[1.0, 0.0, 0.0], [2.0, 0.0, 0.0]]))
+
+    def test_handles_no_detectors(self, mock_load_grp):
+        # check sensible things happen if no spectra have detectors
+        dg, group_ws = self._make_dg_with_stubs(n_hist=4, inds_with_dets=())
+        tmp_grp = MagicMock()
+        tmp_grp.extractY.return_value = np.array([[1, 1, 1, 2, 2, 2, 3, 3, 3]])  # no 0 ind -> no null group
+        mock_load_grp.return_value = tmp_grp
+
+        dg.recompute()
+
+        self.assertEqual(dg.spec_inds, [])
+        self.assertEqual(len(dg._det_positions), 0)
 
     def test_captures_source_position_from_component_info(self, mock_load_grp):
         dg, _ = self._make_dg_with_stubs()
@@ -206,14 +233,17 @@ class TestDetectorGeometry_Recompute(unittest.TestCase):
 
 
 class TestDetectorGeometry_RecomputeScatteringGeometry(unittest.TestCase):
+    def assertEmptyArray(self, arr):
+        return self.assertTrue(arr.size == 0)
+
     def test_returns_early_when_no_det_positions(self):
         dg = DetectorGeometry(_make_model())
         # untouched, so _det_positions is None
 
         dg.recompute_scattering_geometry()
 
-        self.assertIsNone(dg.det_k)
-        self.assertIsNone(dg.detQs_lab)
+        self.assertEmptyArray(dg.det_k)
+        self.assertEmptyArray(dg.detQs_lab)
 
     def test_det_k_is_unit_vectors_from_scattering_centre_to_detectors(self):
         wsm = _make_wsm(scattering_centre=(0.0, 0.0, 0.0))
@@ -221,6 +251,7 @@ class TestDetectorGeometry_RecomputeScatteringGeometry(unittest.TestCase):
         dg = DetectorGeometry(model)
         dg._det_positions = np.array([[2.0, 0.0, 0.0], [0.0, 3.0, 0.0]])
         dg._source_position = np.array([-1.0, 0.0, 0.0])
+        dg.spec_inds = [0, 1]
 
         dg.recompute_scattering_geometry()
 
@@ -232,6 +263,9 @@ class TestDetectorGeometry_RecomputeScatteringGeometry(unittest.TestCase):
         dg = DetectorGeometry(model)
         dg._det_positions = np.array([[3.0, 0.0, 0.0]])
         dg._source_position = np.array([-1.0, 0.0, 0.0])
+        dg.spec_inds = [
+            0,
+        ]
 
         dg.recompute_scattering_geometry()
 
@@ -245,6 +279,9 @@ class TestDetectorGeometry_RecomputeScatteringGeometry(unittest.TestCase):
         # one detector perpendicular to beam: K_d=(0,1,0), beam K_i=(1,0,0) -> Q=(-1,1,0)/sqrt(2)
         dg._det_positions = np.array([[0.0, 1.0, 0.0]])
         dg._source_position = np.array([-1.0, 0.0, 0.0])
+        dg.spec_inds = [
+            0,
+        ]
 
         dg.recompute_scattering_geometry()
 
