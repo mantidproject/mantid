@@ -191,7 +191,7 @@ class Project(AnalysisDataServiceObserver):
         altered_workspace_names = []
         for ws in workspaces:
             history = ws.getHistory()
-            if not (history.size() == 1 and history.getAlgorithm(0).name() == "Load"):
+            if not (history.size() == 1 and history.getAlgorithmHistory(0).name() == "Load"):
                 altered_workspace_names.append(ws.name())
 
         return altered_workspace_names

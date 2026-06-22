@@ -251,7 +251,7 @@ class ProjectTest(unittest.TestCase):
         unaltered_workspace_history = mock.Mock()
         unaltered_workspace.getHistory.return_value = unaltered_workspace_history
         unaltered_workspace_history.size.return_value = 1
-        unaltered_workspace_history.getAlgorithm(0).name.return_value = "Load"
+        unaltered_workspace_history.getAlgorithmHistory(0).name.return_value = "Load"
 
         # Create a mock altered workspaces with history length > 1.
         altered_workspace = mock.Mock()
