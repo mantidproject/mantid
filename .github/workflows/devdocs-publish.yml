@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - name: Checkout Mantid source
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Detect changes relevant to developer site
         uses: dorny/paths-filter@v4
@@ -45,7 +45,7 @@ jobs:
 
       - name: Checkout developer site repository
         if: ${{ steps.changes.outputs.devsite == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: mantidproject/developer
           ref: gh-pages

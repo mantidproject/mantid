@@ -17,7 +17,7 @@ jobs:
         shell: bash -l {0}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: dorny/paths-filter@v4
         id: changes
@@ -34,7 +34,7 @@ jobs:
       # publish documentation if on main branch of mantidproject/mantid
       - name: Checkout Doxygen repository
         if: ${{ steps.changes.outputs.doxygen == 'true' }}
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: mantidproject/doxygen
           path: doxygen_repo

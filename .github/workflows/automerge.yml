@@ -13,7 +13,7 @@ jobs:
     # run on release-next branch and do not run in forks
     if: ${{ github.ref_name == 'release-next' && github.repository_owner == 'mantidproject' }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Merge release-next into main
         uses: devmasx/merge-branch@v1.4.0
@@ -28,7 +28,7 @@ jobs:
     # run on ornl-next branche and do not run in forks
     if: ${{ github.ref_name == 'ornl-next' && github.repository_owner == 'mantidproject' }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Merge ornl-next into main
         uses: devmasx/merge-branch@v1.4.0
