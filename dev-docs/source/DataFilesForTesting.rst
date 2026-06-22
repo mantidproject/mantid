@@ -105,11 +105,12 @@ corresponding tests:
 - `.../Testing/Data/UnitTest`
 
 However, it is known that some developers like to reuse the same data files for different type of tests,
-therefore sometime the DocTest and SystemTest is using data from UnitTest, which means you should fetch
+therefore sometimes the DocTest and SystemTest are using data from UnitTest, which means you should fetch
 all testing data before trying to run any test locally. Furthermore, this location is mostly considered as
 a centralized location for all testing data. But some groups prefer to treat this location for storing **input**
 testing data only, therefore the testing system will look for the reference folder mentioned above if it cannot
-find the reference data here. Overall, it is important to talk to the senior developers in your team to learn the
+find the reference data here. There are many examples where the same data file having to be duplicated accross multiple locations as required by the tests.
+Overall, it is important to talk to the senior developers in your team to learn the
 preferred location for storing testing data.
 
 .. _DataFilesForTesting_AddingANewFile:
