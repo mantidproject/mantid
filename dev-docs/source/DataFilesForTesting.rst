@@ -30,18 +30,10 @@ loading of this nature unless there is a strong justification for doing so.
    files
 -  Git is bad at handling binary files
 
-**Possible solutions:**
+**Implementation**
 
--  CMake's `ExternalData <https://www.kitware.com/cmake-externaldata-using-large-files-with-distributed-version-control/>`__
--  Don't have any reference to data in git and force developers to
-   manage the data stored on a file server
--  Extensions to git, e.g.
-   `git-fat <https://github.com/jedbrown/git-fat>`__,
-   `git-annex <https://git-annex.branchable.com/>`__ to deal with large
-   files
-
-We have chosen to use CMake as it is already in use as a build system
-and it doesn't involve introducing extra work with git.
+To avoid issues with storing large files in Git version control, Mantid uses CMake's `ExternalData <https://www.kitware.com/cmake-externaldata-using-large-files-with-distributed-version-control/>`__ module.
+Since CMake is already used as the build system, this does not introduce any additional Git-related workflow. ExternalData allows test data to be stored on a separate server while keeping only a reference to each file in the Git repository. Developers can add files to the data store, and CMake downloads them automatically when they are required for tests.
 
 
 CMake's External Data
@@ -240,10 +232,10 @@ click ``New...`` to add a variable.
 On Linux/Mac you will need to set the variable in the shell profile or
 on Linux you can set it system wide in ``/etc/environment``.
 
-CMake targets downloading test data
------------------------------------
+CMake targets for downloading test data
+---------------------------------------
 
-Currently there are four CMake targets defined at `SetupDataTargets.cmake <https://github.com/mantidproject/mantid/blob/main/buildconfig/CMake/SetupDataTargets.cmake>`__ as shown below that download the test data when built. The corrsponding data will appear in the path defined by ``ExternalData_BINARY_ROOT`` CMake variable, which defaults to ``build/ExternalData``.
+Currently there are four CMake targets defined at `SetupDataTargets.cmake <https://github.com/mantidproject/mantid/blob/main/buildconfig/CMake/SetupDataTargets.cmake>`__ (shown below) that download the test data when built. The corresponding data will appear in the path defined by the ``ExternalData_BINARY_ROOT`` CMake variable, which defaults to ``build/ExternalData``.
 
 -  ``UnitTestData`` - data required for the unit tests
 -  ``DocTestData`` - data required for the documentation tests
@@ -264,3 +256,11 @@ Troubleshooting
       in ``~/.mantid``
    -  Check that you have rebuilt the test executable you're trying to run.
    -  Check that you have rebuilt the corresponding CMake target for the test you are trying to run.
+
+Alternative Implementations
+###########################
+
+Before selecting CMake's ExternalData as the solution for handling large files used in testing, the following Git extensions were also considered:
+
+-  `git-fat <https://github.com/jedbrown/git-fat>`__
+-  `git-annex <https://git-annex.branchable.com/>`__
