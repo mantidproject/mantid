@@ -75,7 +75,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
             "R": np.array([i for i in range(len(detector_ids))]),
             "Theta": np.array([i for i in range(len(detector_ids))]),
             "Phi": np.array([i for i in range(len(detector_ids))]),
-            "Index": np.array([i for i in range(len(detector_ids))]),
+            "Index": np.array([-1 if m == "n/a" else i for i, m in enumerate(monitors)]),
             "Monitor": monitors,
             "Spectrum No": spectrum_no,
         }
@@ -934,7 +934,6 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         """Selects and removes the closest peak within a single workspace."""
         mock_match_units.side_effect = lambda ws_from, idx, x_from, ws_to: x_from
         model, _ = self._setup_model([7])
-        model._spectrum_nos = np.array([7])
         model._detector_is_picked = [True]
         # Peaks at 1.0 (idx=100), 2.0 (idx=101), 10.0 (idx=102); click at 2.2 -> closest is 2.0
         ws1_wdp = MagicMock()
@@ -954,7 +953,6 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         """Among multiple workspaces, chooses the peak with the smallest distance overall."""
         mock_match_units.side_effect = lambda ws_from, idx, x_from, ws_to: x_from
         model, _ = self._setup_model([1, 2, 3, 7])
-        model._spectrum_nos = np.array([1, 2, 3, 7])
         model._detector_is_picked = [False, False, False, True]
         # ws1 closest distance = |2.5 - 2.2| = 0.3 (peak_index=201)
         # ws2 closest distance = |2.3 - 2.2| = 0.1 (peak_index=301) -> ws2 should be chosen

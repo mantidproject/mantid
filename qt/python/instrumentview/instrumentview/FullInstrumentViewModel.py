@@ -94,10 +94,9 @@ class FullInstrumentViewModel:
         self._spherical_positions = np.transpose(np.vstack([r, theta, phi]))
         self._detector_positions_3d = detector_info_table.columnArray("Position")
         self._workspace_indices = detector_info_table.columnArray("Index")
-        self._spectrum_nos = detector_info_table.columnArray("Spectrum No")
         # Array of strings 'yes', 'no' and 'n/a'
         self._is_monitor = detector_info_table.columnArray("Monitor")
-        self._is_valid = self._is_monitor == "no"
+        self._is_valid = (self._is_monitor != "yes") & (self._workspace_indices != -1)
         self._component_idxs = np.arange(len(self._detector_ids))
         # TODO: Add masked column to detector table
         self._is_masked_in_ws = np.array([self._workspace.detectorInfo().isMasked(i) for i, _ in enumerate(self._detector_ids)])
@@ -156,10 +155,6 @@ class FullInstrumentViewModel:
         return self._detector_ids[self._is_masked & self._is_valid]
 
     @property
-    def spectrum_nos(self) -> np.ndarray:
-        return self._spectrum_nos[self.is_pickable]
-
-    @property
     def monitor_positions(self) -> np.ndarray:
         return self._monitor_positions
 
@@ -174,10 +169,6 @@ class FullInstrumentViewModel:
     @property
     def picked_detector_ids(self) -> np.ndarray:
         return self._detector_ids[self.is_pickable & self._detector_is_picked]
-
-    @property
-    def picked_spectrum_nos(self) -> np.ndarray:
-        return self._spectrum_nos[self.is_pickable & self._detector_is_picked]
 
     @property
     def picked_workspace_indices(self) -> np.ndarray:

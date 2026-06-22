@@ -80,6 +80,17 @@ class TestWorkspaceDetectorPeaks(unittest.TestCase):
         self.assertEqual([], x_values)
         self.assertEqual([], labels)
 
+    def test_get_positions_and_labels_peak_id_larger_than_all_detector_ids(self):
+        # Peak detector ID (999) is larger than every entry in detector_ids.
+        # np.searchsorted would return an out-of-bounds index; the valid mask must
+        # filter it out so the result is empty rather than raising an IndexError.
+        peak = Peak(999, 0, (1, 0, 0), 100, 10, 10, 10)
+        wdp = self._create_workspace_detector_peaks([DetectorPeaks([peak])])
+        detector_positions = np.array([[1, 1, 1], [2, 2, 2]])
+        detector_ids = np.array([1, 2])
+        positions, labels = wdp.get_positions_and_labels(detector_positions, detector_ids)
+        self.assertEqual(0, len(positions))
+
     @mock.patch("instrumentview.Peaks.WorkspaceDetectorPeaks.AnalysisDataService")
     def test_peaks_read_from_ads_workspace(self, peaks_mock_ads):
         test_detector_id = 4

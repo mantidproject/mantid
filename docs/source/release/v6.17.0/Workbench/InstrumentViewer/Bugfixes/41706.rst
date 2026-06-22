@@ -1,0 +1,2 @@
+- In the new Instrument View, fixed a bug when overlaying a peaks workspace with more peaks than the number of detectors in the instrument. This could happen if viewing e.g. the result of ``ExtractSpectra``.
+- In the new Instrument View, fixed a bug with drawing workspaces where some detectors are not assigned to any spectra.
