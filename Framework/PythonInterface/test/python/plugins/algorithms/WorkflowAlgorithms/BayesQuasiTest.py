@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 import numpy as np
+from mantid.kernel import ConfigService
 from mantid.simpleapi import BayesQuasi, CreateWorkspace, DeleteWorkspace, Load
 from mantid.api import MatrixWorkspace, WorkspaceGroup
 from plugins.algorithms.WorkflowAlgorithms.BayesQuasi import _calculate_eisf
@@ -28,11 +29,15 @@ class BayesQuasiTest(unittest.TestCase):
         self._resnorm_ws = Load(Filename="irs26173_graphite002_ResNorm.nxs", OutputWorkspace="irs26173_graphite002_ResNorm")
         self._num_bins = self._sample_ws.blocksize()
         self._num_hists = self._sample_ws.getNumberHistograms()
+        config_service = ConfigService.Instance()
+        self._original_deprecation_setting = config_service["algorithms.deprecated"]
+        config_service["algorithms.deprecated"] = "Log"
 
     def tearDown(self):
         """
         Remove workspaces from ADS.
         """
+        ConfigService.Instance()["algorithms.deprecated"] = self._original_deprecation_setting
         DeleteWorkspace(self._sample_ws)
         DeleteWorkspace(self._res_ws)
         DeleteWorkspace(self._resnorm_ws)

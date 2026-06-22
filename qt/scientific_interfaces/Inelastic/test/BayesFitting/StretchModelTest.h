@@ -170,7 +170,7 @@ public:
     params.sequentialFit = true;
     params.sampleBinning = 1;
 
-    auto configuredAlgorithm = m_model->stretchAlgorithm(params, "fit_ws", "contour_ws");
+    auto configuredAlgorithm = m_model->stretchAlgorithm(params, "fit_ws", "contour_ws", false);
 
     TS_ASSERT_EQUALS("BayesStretch", configuredAlgorithm->algorithm()->name());
 

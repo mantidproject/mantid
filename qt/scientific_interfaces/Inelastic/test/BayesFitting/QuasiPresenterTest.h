@@ -149,11 +149,11 @@ public:
   void test_notifyBackendChanged_calls_view() {
     EXPECT_CALL(*m_view, updateBackend(true)).Times(1);
 
-    m_presenter->notifyBackendChanged(BayesBackendType::QUASI_ELASTIC_BAYES);
+    m_presenter->notifyBackendChanged(BayesBackendType::QUICK_BAYES);
 
     EXPECT_CALL(*m_view, updateBackend(false)).Times(1);
 
-    m_presenter->notifyBackendChanged(BayesBackendType::QUICK_BAYES);
+    m_presenter->notifyBackendChanged(BayesBackendType::QUASI_ELASTIC_BAYES);
   }
 
   void test_notifyBackendChanged_alters_the_model_call() {
