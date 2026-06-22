@@ -12,13 +12,9 @@ Contact Us
 
 We are always keen for feedback, so if you have any suggestions for improving Mantid, then please contact us.
 
-1. Through the `Mantid Help Forum <https://forum.mantidproject.org/>`_. Report a problem or ask for help. Remember to tag an appropriate topic.
+1. Through the `GitHub Discussions <https://github.com/mantidproject/mantid/discussions>`_. Report a problem or ask for help. Remember to tag an appropriate topic.
 
-This is quickly accessible through the top Toolbar in Mantid "Help > Mantid Forum"
-
-.. figure:: /images/MantidHelpForum.png
-   :alt: Mantid Help Forum
-   :align: center
+This is quickly accessible through the top Toolbar in Mantid "Help > Mantid Discussion"
 
 2. Mantid Help email: mantid-help@mantidproject.org
 

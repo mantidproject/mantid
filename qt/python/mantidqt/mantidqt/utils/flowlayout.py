@@ -78,7 +78,11 @@ class FlowLayout(QLayout):
         return None
 
     def expandingDirections(self):
-        return Qt.Orientations(Qt.Orientation(0))
+        # Qt.Orientations (the QFlags wrapper) was removed in Qt6; the bare
+        # Qt.Orientation(0) is an acceptable "no expansion" value there.
+        if hasattr(Qt, "Orientations"):
+            return Qt.Orientations(Qt.Orientation(0))
+        return Qt.Orientation(0)
 
     def hasHeightForWidth(self):
         return True

@@ -1,1 +1,0 @@
-- Algorithm :ref:`algm-CreateDetectorTable` now has option `OneRowPerDetectorID`, which ensures a new row in the Detector Table is created for each detector id. The rows become ordered by the component index of the detector ids, instead of being ordered by workspace index. In workspaces that have grouped detectors, there will be several rows with the same workspace index.

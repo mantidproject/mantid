@@ -193,7 +193,7 @@ class GroupingTablePresenter(object):
             update_model = False
         if col == inverse_group_table_columns["to_analyse"]:
             update_model = False
-            self.to_analyse_data_checkbox_changed(changed_item.checkState(), row, group_name)
+            self.to_analyse_data_checkbox_changed(self._view.get_table_item_checked(row, col), row, group_name)
         if col == inverse_group_table_columns["periods"] and self.validate_periods(changed_item.text()) == RowValid.invalid_for_all_runs:
             self._view.warning_popup("One or more of the periods specified missing from all runs")
             update_model = False
@@ -254,9 +254,7 @@ class GroupingTablePresenter(object):
         invalid_groups = [group.name for group in self._model.groups if not self._validate_detector_ids_list(group.detectors)]
         self._model.remove_groups_by_name(invalid_groups)
 
-    def to_analyse_data_checkbox_changed(self, state, row, group_name):
-        group_added = True if state == 2 else False
-
+    def to_analyse_data_checkbox_changed(self, group_added, row, group_name):
         if group_added:
             self._model.add_group_to_analysis(group_name)
         else:

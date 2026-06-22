@@ -405,7 +405,7 @@ void PeakOverlay::recreateMarkers(const PeakMarker2D::Style &style) {
  * Styles are taken form g_defaultStyles
  */
 PeakMarker2D::Style PeakOverlay::getDefaultStyle(int index) {
-  index %= g_defaultStyles.size();
+  index %= static_cast<int>(g_defaultStyles.size());
   return g_defaultStyles[index];
 }
 

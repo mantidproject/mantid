@@ -1,1 +1,0 @@
-- The memory allocator set by ``LD_PRELOAD`` has been change from jemalloc to tbbmalloc.

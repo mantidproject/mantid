@@ -1,1 +1,0 @@
-- :ref:`algm-FitPeaks` and :ref:`algm-PDCalibration` now take a boolean flag ``RespectFixedPeakParameters`` to determine whether peak-shape parameters tagged as ``<\fixed>`` should remain fixed or be allowed to refine in the calibration fit (previously, this algorithm has operated under the now default value of ``False``).

@@ -290,9 +290,9 @@ void AbsorptionCorrections::handleRun() {
   }
 
   // Generate workspace names
-  int nameCutIndex = sampleWsName.lastIndexOf("_");
+  int nameCutIndex = static_cast<int>(sampleWsName.lastIndexOf("_"));
   if (nameCutIndex == -1)
-    nameCutIndex = sampleWsName.length();
+    nameCutIndex = static_cast<int>(sampleWsName.length());
 
   auto const outputWsName = sampleWsName.left(nameCutIndex) + "_" + sampleShape + "_MC_Corrections";
 

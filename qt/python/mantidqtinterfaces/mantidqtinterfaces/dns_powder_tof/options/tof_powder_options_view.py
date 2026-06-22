@@ -11,6 +11,7 @@ DNS powder TOF options tab view of DNS reduction GUI.
 
 from mantidqt.utils.qt import load_ui
 from qtpy.QtCore import Signal
+from qtpy.QtCore import Qt
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_view import DNSView
 
 
@@ -55,7 +56,7 @@ class DNSTofPowderOptionsView(DNSView):
     sig_estimate_q_and_binning = Signal()
 
     def deactivate_get_wavelength(self):
-        self._map["get_wavelength"].setCheckState(0)
+        self._map["get_wavelength"].setCheckState(Qt.CheckState.Unchecked)
 
     def _disable_sub_det_efficiency(self, state):
         self._map["vanadium_temperature"].setEnabled(state)

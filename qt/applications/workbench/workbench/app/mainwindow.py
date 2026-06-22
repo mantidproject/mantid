@@ -317,7 +317,7 @@ class MainWindow(QMainWindow):
         action_algorithm_descriptions = create_action(self, "Algorithm Descriptions", on_triggered=self.open_algorithm_descriptions_help)
         action_mantid_concepts = create_action(self, "Mantid Concepts", on_triggered=self.open_mantid_concepts_help)
         action_mantid_homepage = create_action(self, "Mantid Homepage", on_triggered=self.open_mantid_homepage)
-        action_mantid_forum = create_action(self, "Mantid Forum", on_triggered=self.open_mantid_forum)
+        action_mantid_discussion = create_action(self, "Mantid Discussion", on_triggered=self.open_mantid_discussion)
         action_support_email = create_action(self, "Email mantid-help@mantidproject.org", on_triggered=self.mantidhelp_mailto)
         action_about = create_action(self, "About Mantid Workbench", on_triggered=self.open_about)
 
@@ -327,7 +327,7 @@ class MainWindow(QMainWindow):
             action_algorithm_descriptions,
             None,
             action_mantid_homepage,
-            action_mantid_forum,
+            action_mantid_discussion,
             action_support_email,
             None,
             action_about,
@@ -680,8 +680,8 @@ class MainWindow(QMainWindow):
     def open_mantid_homepage(self):
         self.interface_manager.showWebPage("https://www.mantidproject.org")
 
-    def open_mantid_forum(self):
-        self.interface_manager.showWebPage("https://forum.mantidproject.org/")
+    def open_mantid_discussion(self):
+        self.interface_manager.showWebPage("https://github.com/mantidproject/mantid/discussions")
 
     def mantidhelp_mailto(self):
         self.interface_manager.showWebPage("mailto:mantid-help@mantidproject.org")
@@ -698,7 +698,12 @@ class MainWindow(QMainWindow):
         window_pos = settings.get("MainWindow/position", type=QPoint)
         if settings.has("MainWindow/font"):
             font_string = settings.get("MainWindow/font", type=str).split(",")
-            font = QFontDatabase().font(font_string[0], font_string[-1], int(font_string[1]))
+            # QFontDatabase.font is static in Qt6 (the class can no longer be instantiated)
+            # but an instance method in Qt5.
+            try:
+                font = QFontDatabase.font(font_string[0], font_string[-1], int(font_string[1]))
+            except TypeError:
+                font = QFontDatabase().font(font_string[0], font_string[-1], int(font_string[1]))
             qapp.setFont(font)
 
         # reset font for ipython console to ensure it stays monospace

@@ -413,7 +413,7 @@ void MessageDisplay::initActions() {
   connect(m_information, SIGNAL(triggered()), m_logLevelMapping, SLOT(map()));
   connect(m_debug, SIGNAL(triggered()), m_logLevelMapping, SLOT(map()));
 
-  connect(m_logLevelMapping, SIGNAL(mapped(int)), this, SLOT(setLogLevel(int)));
+  connect(m_logLevelMapping, SIGNAL(mappedInt(int)), this, SLOT(setLogLevel(int)));
 }
 
 /**

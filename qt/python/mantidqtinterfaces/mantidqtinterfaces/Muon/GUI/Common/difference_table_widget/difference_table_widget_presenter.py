@@ -53,7 +53,6 @@ class DifferenceTablePresenter(object):
 
     def handle_data_change(self, row, col):
         table = self._view.get_table_contents()
-        changed_item = self._view.get_table_item(row, col)
         changed_item_text = self._view.get_table_item_text(row, col)
         diff_name = self._view.get_table_item_text(row, 0)
         update_model = True
@@ -67,7 +66,7 @@ class DifferenceTablePresenter(object):
                 table[row][diff_columns.index("group_1")] = self._model.get_diffs(self._group_or_pair)[row].negative
         if diff_columns[col] == "to_analyse":
             update_model = False
-            self.to_analyse_data_checkbox_changed(changed_item.checkState(), row, diff_name)
+            self.to_analyse_data_checkbox_changed(self._view.get_table_item_checked(row, col), row, diff_name)
 
         if update_model:
             self.update_model_from_view(table)
@@ -114,8 +113,7 @@ class DifferenceTablePresenter(object):
         groups = self._model.get_names(self._group_or_pair)
         self._view.update_group_selections(groups)
 
-    def to_analyse_data_checkbox_changed(self, state, row, diff_name):
-        diff_added = True if state == 2 else False
+    def to_analyse_data_checkbox_changed(self, diff_added, row, diff_name):
         if diff_added:
             self._model.add_diff_to_analysis(diff_name)
         else:

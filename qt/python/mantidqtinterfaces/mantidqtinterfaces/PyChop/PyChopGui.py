@@ -52,11 +52,15 @@ try:
     from mantidqt.MPLwidgets import FigureCanvasQTAgg as FigureCanvas
     from mantidqt.MPLwidgets import NavigationToolbar2QT as NavigationToolbar
 except ImportError:
-    from qtpy import PYQT5, PYSIDE2
+    from qtpy import PYQT5, PYSIDE2, PYQT6, PYSIDE6
 
     if PYQT5 or PYSIDE2:
         from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
         from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+    elif PYQT6 or PYSIDE6:
+        # Qt6 uses the binding-agnostic QtAgg backend (matplotlib >= 3.5)
+        from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
+        from matplotlib.backends.backend_qtagg import NavigationToolbar2QT as NavigationToolbar
     else:
         raise RuntimeError("Do not know which matplotlib backend to set")
     from matplotlib.legend import Legend
@@ -861,7 +865,7 @@ class PyChopGui(QMainWindow):
                 self.droplabels.append(QLabel(widget[2]))
                 if "combo" in widget[3]:
                     self.dropboxes.append(QComboBox(self))
-                    self.dropboxes[-1].activated["QString"].connect(widget[5])
+                    self.dropboxes[-1].textActivated.connect(widget[5])
                     for item in widget[4]:
                         self.dropboxes[-1].addItem(item)
                     self.widgets[widget[-1]] = {"Combo": self.dropboxes[-1], "Label": self.droplabels[-1]}

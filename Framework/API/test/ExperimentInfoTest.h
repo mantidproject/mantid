@@ -14,8 +14,11 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/FitParameter.h"
+#include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/Interpolation.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/SingletonHolder.h"
 
@@ -701,6 +704,58 @@ public:
     value = pmap2.getString(det.get(), "par");
     TS_ASSERT_EQUALS(pmap2.get(det.get(), "par")->visible(), true);
     TS_ASSERT_EQUALS(value, "11;22;33;44");
+  }
+
+  void test_populateInstrumentParameters_handles_two_fitting_functions_sharing_parameter_name() {
+    // Regression test for the IDF parse bug: two functions on the same component declaring the
+    // same parameter short name (e.g. Bk2BkExpConvPV:Gamma and IkedaCarpenterPV:Gamma) used to
+    // collide in the IDF cache; the fix function-qualifies the cache key, while the runtime
+    // ParameterMap still stores entries under the short name "Gamma".
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    ExperimentInfo expt;
+    expt.setInstrument(inst);
+
+    const auto comp = inst->getChild(0).get();
+    auto makeXMLParam = [&](const std::string &fittingFunction, const std::string &value) {
+      auto interp = std::make_shared<Mantid::Kernel::Interpolation>();
+      std::string penaltyFactor;
+      // populateWithParameter indexes m_constraint at [0] and [1]; mirror the IDF parser, which
+      // always passes a 2-element vector.
+      std::vector<std::string> constraint(2, "");
+      return std::make_shared<XMLInstrumentParameter>(
+          /*logfileID*/ "", /*value*/ value, interp, /*formula*/ "", /*formulaUnit*/ "", /*resultUnit*/ "",
+          /*paramName*/ "Gamma", /*type*/ "fitting", /*tie*/ "", constraint, penaltyFactor,
+          /*fitFunc*/ fittingFunction, /*extractSingleValueAs*/ "", /*eq*/ "", comp, /*angleConvertConst*/ 1.0,
+          /*description*/ "", /*visible*/ "true");
+    };
+
+    // Insert into the cache under function-qualified keys, mirroring what InstrumentDefinitionParser
+    // now does.
+    auto &cache = inst->getLogfileCache();
+    cache.insert({{"Bk2BkExpConvPV:Gamma", comp}, makeXMLParam("Bk2BkExpConvPV", "1.5")});
+    cache.insert({{"IkedaCarpenterPV:Gamma", comp}, makeXMLParam("IkedaCarpenterPV", "2.5")});
+
+    expt.populateInstrumentParameters();
+
+    const auto &paramMap = expt.instrumentParameters();
+
+    // Both entries must be present in the runtime ParameterMap.
+    auto bk2bk = paramMap.getRecursiveFittingParameter(comp, "Gamma", "Bk2BkExpConvPV");
+    TS_ASSERT(bk2bk);
+    TS_ASSERT_EQUALS(bk2bk->value<FitParameter>().getFunction(), "Bk2BkExpConvPV");
+    TS_ASSERT_DELTA(bk2bk->value<FitParameter>().getValue(), 1.5, 1e-12);
+
+    auto ikedaPV = paramMap.getRecursiveFittingParameter(comp, "Gamma", "IkedaCarpenterPV");
+    TS_ASSERT(ikedaPV);
+    TS_ASSERT_EQUALS(ikedaPV->value<FitParameter>().getFunction(), "IkedaCarpenterPV");
+    TS_ASSERT_DELTA(ikedaPV->value<FitParameter>().getValue(), 2.5, 1e-12);
+
+    // Backwards-compat: short-name lookup must still find a fitting parameter (callers like
+    // NormaliseByDetector that don't supply a function name should keep working).
+    auto byShortName = paramMap.getRecursive(comp, "Gamma", "fitting");
+    TS_ASSERT(byShortName);
+    const auto &fp = byShortName->value<FitParameter>();
+    TS_ASSERT(fp.getFunction() == "Bk2BkExpConvPV" || fp.getFunction() == "IkedaCarpenterPV");
   }
 
 private:

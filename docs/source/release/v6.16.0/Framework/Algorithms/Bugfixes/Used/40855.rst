@@ -1,1 +1,0 @@
-- Fix performance issue in :ref:`MaskDetectors <algm-MaskDetectors>` using a ``MatrixWorkspace`` as the source of the mask

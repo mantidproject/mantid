@@ -163,7 +163,7 @@ void SortTableWorkspaceDialog::clearGUI() {
 void SortTableWorkspaceDialog::addColumn() {
   m_form.lblColumnName->setText("Column 1");
   // create controls for setting new column
-  auto newRow = m_sortColumns.size();
+  int newRow = static_cast<int>(m_sortColumns.size());
   assert(newRow <= m_columnNames.size());
   QLabel *label = new QLabel(QString("Column %1").arg(newRow + 1));
   auto *columnName = new QComboBox();
@@ -222,7 +222,7 @@ void SortTableWorkspaceDialog::removeColumn() {
   assert(m_columnNames.size() > 1);
   // remove the last column
   m_sortColumns.removeLast();
-  auto row = m_sortColumns.size();
+  int row = static_cast<int>(m_sortColumns.size());
   for (int col = 0; col < 3; ++col) {
     auto item = m_form.columnsLayout->itemAtPosition(row, col);
     if (item) {

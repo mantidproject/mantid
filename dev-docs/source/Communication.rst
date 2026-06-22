@@ -15,7 +15,7 @@ Support
 -------
 
 * Email Mantid-help@mantidproject.org goes to a short list of developers, who create tickets and assign to others.
-* `Forum <http://forum.mantidproject.org/>`__ with discussions for general and technique help requests
+* `Github Discussions <https://github.com/mantidproject/mantid/discussions>`_ for general and technique help requests
 
 Meetings & other information
 ----------------------------

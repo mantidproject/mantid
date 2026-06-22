@@ -245,11 +245,11 @@ void QtExperimentView::connectSettingsChange(QLineEdit &edit) {
 }
 
 void QtExperimentView::connectSettingsChange(QSpinBox &edit) {
-  connect(&edit, SIGNAL(valueChanged(QString const &)), this, SLOT(onSettingsChanged()));
+  connect(&edit, SIGNAL(textChanged(QString const &)), this, SLOT(onSettingsChanged()));
 }
 
 void QtExperimentView::connectSettingsChange(QDoubleSpinBox &edit) {
-  connect(&edit, SIGNAL(valueChanged(QString const &)), this, SLOT(onSettingsChanged()));
+  connect(&edit, SIGNAL(textChanged(QString const &)), this, SLOT(onSettingsChanged()));
 }
 
 void QtExperimentView::connectSettingsChange(QComboBox &edit) {
@@ -269,11 +269,11 @@ void QtExperimentView::disconnectSettingsChange(QLineEdit const &edit) {
 }
 
 void QtExperimentView::disconnectSettingsChange(QSpinBox const &edit) {
-  disconnect(&edit, SIGNAL(valueChanged(QString const &)), 0, 0);
+  disconnect(&edit, SIGNAL(textChanged(QString const &)), 0, 0);
 }
 
 void QtExperimentView::disconnectSettingsChange(QDoubleSpinBox const &edit) {
-  disconnect(&edit, SIGNAL(valueChanged(QString const &)), 0, 0);
+  disconnect(&edit, SIGNAL(textChanged(QString const &)), 0, 0);
 }
 
 void QtExperimentView::disconnectSettingsChange(QComboBox const &edit) {

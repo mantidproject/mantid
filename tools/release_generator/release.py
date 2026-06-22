@@ -40,7 +40,7 @@ time and effort helping us to make this another reliable version of Mantid.
 Throughout the Mantid project we put a lot of effort into ensuring
 Mantid is a robust and reliable product. Thank you to everyone that has
 reported any issues to us. Please keep on reporting any problems you
-have, or crashes that occur on our `forum`_.
+have, or crashes that occur on our `discussion`_.
 
 Installation packages can be found on our `download page`_
 which now links to the assets on our `GitHub release page`_, where you can also
@@ -92,7 +92,7 @@ For a full list of all issues addressed during this release please see the `GitH
 
 .. _download page: https://download.mantidproject.org
 
-.. _forum: https://forum.mantidproject.org
+.. _discussion: https://github.com/mantidproject/mantid/discussions
 
 .. _GitHub milestone: {milestone_link}
 

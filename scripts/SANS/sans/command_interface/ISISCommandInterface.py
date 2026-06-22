@@ -55,7 +55,7 @@ DefaultTrans = True
 # CommandInterfaceStateDirector global instance
 # ----------------------------------------------------------------------------------------------------------------------
 director = CommandInterfaceStateDirector(SANSFacility.ISIS)
-_plot_missing_str = "Plotting is not implemented for workbench yet, please contact us via the forum:\nhttps://forum.mantidproject.org/"
+_plot_missing_str = "Plotting is not implemented for workbench yet, please contact us via \nmantid-help@mantidproject.org"
 
 
 def deprecated(obj):

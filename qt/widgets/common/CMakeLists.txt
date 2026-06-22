@@ -648,7 +648,7 @@ endif()
 
 # Target Additional components for this module
 find_package(
-  Qt5 ${QT_MIN_VERSION}
+  Qt${MANTID_QT_VERSION}
   COMPONENTS Concurrent Help Network PrintSupport
   REQUIRED
 )
@@ -661,7 +661,7 @@ else()
   # The final module name makes no difference here - we just want the api
   add_custom_command(
     OUTPUT ${_sip_include_dir}/sip.h
-    COMMAND ${SIP_MODULE_EXECUTABLE} ARGS --sip-h --abi-version ${PYQT5_SIP_ABI_VERSION}
+    COMMAND ${SIP_MODULE_EXECUTABLE} ARGS --sip-h --abi-version ${PYQT${MANTID_QT_VERSION}_SIP_ABI_VERSION}
             --target-dir=${_sip_include_dir} dummymodulename
     COMMENT "Generating sip.h for common widgets target"
   )
@@ -669,7 +669,7 @@ endif()
 
 mtd_add_qt_library(
   TARGET_NAME MantidQtWidgetsCommon
-  QT_VERSION 5
+  QT_VERSION ${MANTID_QT_VERSION}
   SRC ${SRC_FILES}
   MOC ${QT5_MOC_FILES}
   NOMOC ${QT5_INC_FILES} ${_sip_include_dir}/sip.h
@@ -678,7 +678,18 @@ mtd_add_qt_library(
   INCLUDE_DIRS inc
   SYSTEM_INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${_sip_include_dir}
   LINK_LIBS ${TARGET_LIBRARIES} PUBLIC Mantid::PythonInterfaceCore
-  QT5_LINK_LIBS Qt5::Concurrent Qt5::Help Qt5::Network Qt5::PrintSupport Qt5::Qscintilla
+  QT5_LINK_LIBS
+    Qt5::Concurrent
+    Qt5::Help
+    Qt5::Network
+    Qt5::PrintSupport
+    Qt5::Qscintilla
+    QT6_LINK_LIBS
+    Qt6::Concurrent
+    Qt6::Help
+    Qt6::Network
+    Qt6::PrintSupport
+    Qt6::Qscintilla
   MTD_QT_LINK_LIBS MantidQtIcons
   INSTALL_DIR ${WORKBENCH_LIB_DIR}
   OSX_INSTALL_RPATH @loader_path/../MacOS @loader_path/../Frameworks
@@ -769,21 +780,21 @@ set(QT5_TEST_FILES
 if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
   mtd_add_qt_tests(
     TARGET_NAME MantidQtWidgetsCommonTest
-    QT_VERSION 5
+    QT_VERSION ${MANTID_QT_VERSION}
     SRC ${QT5_TEST_FILES}
     INCLUDE_DIRS ../../../Framework/DataObjects/inc ../../../Framework/Crystal/inc
-    LINK_LIBS ${TARGET_LIBRARIES} ${Boost_LIBRARIES} Mantid::PythonInterfaceCore Mantid::DataObjects Qt5::Test
-              Python::Python
+    LINK_LIBS ${TARGET_LIBRARIES} ${Boost_LIBRARIES} Mantid::PythonInterfaceCore Mantid::DataObjects
+              Qt${MANTID_QT_VERSION}::Test Python::Python
     MTD_QT_LINK_LIBS MantidQtWidgetsCommon
     PARENT_DEPENDENCIES GUITests
   )
 
-  add_framework_test_helpers(MantidQtWidgetsCommonTestQt5)
+  add_framework_test_helpers(MantidQtWidgetsCommonTestQt${MANTID_QT_VERSION})
 
   if(TARGET GTest::gmock AND TARGET GTest::gtest)
-    target_link_libraries(MantidQtWidgetsCommonTestQt5 PRIVATE GTest::gmock GTest::gtest)
+    target_link_libraries(MantidQtWidgetsCommonTestQt${MANTID_QT_VERSION} PRIVATE GTest::gmock GTest::gtest)
   else()
-    target_link_libraries(MantidQtWidgetsCommonTestQt5 PRIVATE gmock gtest)
+    target_link_libraries(MantidQtWidgetsCommonTestQt${MANTID_QT_VERSION} PRIVATE gmock gtest)
   endif()
   pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} MantidQtWidgetsCommonPyTest ${TEST_PY_FILES})
 endif()

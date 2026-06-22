@@ -35,6 +35,7 @@
 #include <filesystem>
 #include <memory>
 
+#include <QActionGroup>
 #include <QFileDialog>
 #include <QKeyEvent>
 #include <QMainWindow>
@@ -126,7 +127,12 @@ namespace MantidQt::MantidWidgets {
 WorkspaceTreeWidget::WorkspaceTreeWidget(MantidDisplayBase *mdb, bool viewOnly, QWidget *parent)
     : QWidget(parent), m_mantidDisplayModel(mdb), m_viewOnly(viewOnly), m_updateCount(0), m_treeUpdating(false),
       m_promptDelete(false), m_saveFileType(SaveFileType::Nexus), m_sortCriteria(SortCriteria::ByName),
-      m_sortDirection(SortDirection::Ascending), m_mutex(QMutex::Recursive) {
+      m_sortDirection(SortDirection::Ascending)
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+      ,
+      m_mutex(QMutex::Recursive) // Qt6 uses QRecursiveMutex, default-constructed
+#endif
+{
   setObjectName("exploreMantid"); // this is needed for QMainWindow::restoreState()
   m_saveMenu = new QMenu(this);
 
@@ -1320,7 +1326,8 @@ void WorkspaceTreeWidget::popupContextMenu() {
     // Tell the button what to listen for and what to do once clicked (if there
     // is anything to connect it will be set to false)
     if (!firstPass)
-      connect(m_programMapper, SIGNAL(mapped(const QString &)), this, SLOT(onClickSaveToProgram(const QString &)));
+      connect(m_programMapper, SIGNAL(mappedString(const QString &)), this,
+              SLOT(onClickSaveToProgram(const QString &)));
 
     // Rename is valid for all workspace types
     menu->addAction(m_rename);
@@ -1372,7 +1379,7 @@ void WorkspaceTreeWidget::saveToProgram() {
       (programKeysAndDetails.count("saveusing") != 0)) {
     std::string expTarget = expandEnvironmentVariables(programKeysAndDetails.find("target")->second);
 
-    QFileInfo target = QString::fromStdString(expTarget);
+    QFileInfo target(QString::fromStdString(expTarget));
     if (target.exists()) {
       try {
         // Convert to QString and create Algorithm

@@ -26,6 +26,10 @@ namespace {
 void assertProperty(IAlgorithmRuntimeProps const &props, std::string const &name, double expected) {
   TS_ASSERT_DELTA(static_cast<double>(props.getProperty(name)), expected, 1e-6);
 }
+
+void assertProperty(IAlgorithmRuntimeProps const &props, std::string const &name, bool expected) {
+  TS_ASSERT_EQUALS(static_cast<bool>(props.getProperty(name)), expected);
+}
 } // namespace
 
 class GroupProcessingAlgorithmTest : public CxxTest::TestSuite {
@@ -127,6 +131,13 @@ public:
     TS_ASSERT_EQUALS(result->getPropertyValue("key1"), "value1");
     TS_ASSERT_EQUALS(result->getPropertyValue("key2"), "value2");
     TS_ASSERT(!result->existsProperty("Params"));
+  }
+
+  void testUseValidDataOnlySetForStitching() {
+    auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
+    auto group = makeGroupWithTwoRows();
+    auto result = createAlgorithmRuntimeProps(model, group);
+    assertProperty(*result, "UseValidDataOnly", true);
   }
 
   void testLookupRowQResolutionUsedForParamsIfStitchingOptionsEmpty() {

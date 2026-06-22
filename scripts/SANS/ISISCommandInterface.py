@@ -52,10 +52,13 @@ warnings.warn(
 warnings.simplefilter("ignore", category=DeprecationWarning)
 
 try:
-    from qtpy.QtWidgets import qApp
+    # qApp was removed in Qt6; QApplication.instance() works on both PyQt5 and PyQt6
+    # (and returns None when no QApplication has been created, e.g. headless runs).
+    from qtpy.QtWidgets import QApplication
 
     def appwidgets():
-        return qApp.allWidgets()
+        app = QApplication.instance()
+        return app.allWidgets() if app is not None else []
 
 except (ImportError, RuntimeError):
 

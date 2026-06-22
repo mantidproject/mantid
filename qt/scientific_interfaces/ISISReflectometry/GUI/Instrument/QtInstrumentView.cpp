@@ -61,11 +61,11 @@ void QtInstrumentView::connectSettingsChange(QLineEdit &edit) {
 }
 
 void QtInstrumentView::connectSettingsChange(QSpinBox &edit) {
-  connect(&edit, SIGNAL(valueChanged(QString const &)), this, SLOT(onSettingsChanged()));
+  connect(&edit, SIGNAL(textChanged(QString const &)), this, SLOT(onSettingsChanged()));
 }
 
 void QtInstrumentView::connectSettingsChange(QDoubleSpinBox &edit) {
-  connect(&edit, SIGNAL(valueChanged(QString const &)), this, SLOT(onSettingsChanged()));
+  connect(&edit, SIGNAL(textChanged(QString const &)), this, SLOT(onSettingsChanged()));
 }
 
 void QtInstrumentView::connectSettingsChange(QComboBox &edit) {
@@ -81,11 +81,11 @@ void QtInstrumentView::disconnectSettingsChange(QLineEdit const &edit) {
 }
 
 void QtInstrumentView::disconnectSettingsChange(QSpinBox const &edit) {
-  disconnect(&edit, SIGNAL(valueChanged(QString const &)), this, SLOT(onSettingsChanged()));
+  disconnect(&edit, SIGNAL(textChanged(QString const &)), this, SLOT(onSettingsChanged()));
 }
 
 void QtInstrumentView::disconnectSettingsChange(QDoubleSpinBox const &edit) {
-  disconnect(&edit, SIGNAL(valueChanged(QString const &)), this, SLOT(onSettingsChanged()));
+  disconnect(&edit, SIGNAL(textChanged(QString const &)), this, SLOT(onSettingsChanged()));
 }
 
 void QtInstrumentView::disconnectSettingsChange(QComboBox const &edit) {

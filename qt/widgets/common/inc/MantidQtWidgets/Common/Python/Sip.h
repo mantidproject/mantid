@@ -8,6 +8,7 @@
 
 #include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/Python/Object.h"
+#include <QtGlobal>
 #include <sip.h>
 #include <stdexcept>
 
@@ -33,7 +34,9 @@ template <typename T> T *extract(const Object &obj) {
   sipapi->api_transfer_to(obj.ptr(), 0);
   // reinterpret to sipWrapper
   auto wrapper = reinterpret_cast<sipSimpleWrapper *>(obj.ptr());
-#if (SIP_API_MAJOR_NR == 8 && SIP_API_MINOR_NR >= 1) || SIP_API_MAJOR_NR > 8
+// PyQt6's sip.h does not define SIP_API_MAJOR_NR, but its sip ABI (>=13) provides
+// api_get_address, so select that path for Qt6 explicitly.
+#if (SIP_API_MAJOR_NR == 8 && SIP_API_MINOR_NR >= 1) || SIP_API_MAJOR_NR > 8 || QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
   return static_cast<T *>(sipapi->api_get_address(wrapper));
 #elif SIP_API_MAJOR_NR == 8
   return static_cast<T *>(wrapper->data);

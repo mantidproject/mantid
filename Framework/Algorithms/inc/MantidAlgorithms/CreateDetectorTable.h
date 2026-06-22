@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/Column.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -54,10 +55,10 @@ private:
   API::ITableWorkspace_sptr table;
   const API::SpectrumInfo *spectrumInfo;
   const Geometry::DetectorInfo *detectorInfo;
-  bool signedThetaParamRetrieved;
   bool showSignedTwoTheta; // If true, signedVersion of the two theta
   Geometry::PointingAlong beamAxisIndex;
   double sampleDist;
+  std::vector<API::Column_sptr> m_columnCache;
   /// Initialisation code
   struct DetectorRowData {
     int wsIndex = 0;
@@ -81,6 +82,7 @@ private:
   void getDiffConst(size_t wsIndex, double &difa, double &difc, double &difcUnc, double &tzero);
   void writeRowToTable(const int row, const DetectorRowData &data);
   DetectorRowData calculateWsIdxData(size_t wsIndex);
+  bool retrieveSignedThetaParameter();
 };
 
 /// Converts a list to a string, shortened if necessary

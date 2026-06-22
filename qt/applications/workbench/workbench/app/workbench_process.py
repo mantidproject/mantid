@@ -25,9 +25,11 @@ from qtpy.QtGui import QIcon, QSurfaceFormat  # noqa: E402
 from qtpy.QtWidgets import QApplication  # noqa: E402
 from qtpy.QtCore import QCoreApplication, Qt  # noqa: E402
 
-# Importing resources loads the data in. This must be imported before the
-# QApplication is created or paths to Qt's resources will not be set up correctly
-from workbench.app.resources import qCleanupResources  # noqa: E402
+# Register the workbench Qt resources. This must happen before the QApplication is
+# created or paths to Qt's resources will not be set up correctly.
+from workbench.app.resource_loader import register_resources, cleanup_resources  # noqa: E402
+
+register_resources()
 from workbench.config import APPNAME, ORG_DOMAIN, ORGANIZATION  # noqa: E402
 from workbench.widgets.about.presenter import AboutPresenter  # noqa: E402
 
@@ -206,7 +208,7 @@ def initialise_qapp_and_launch_workbench(command_line_options):
     init_mpl_gcf()
 
     # cleanup static resources at exit
-    atexit.register(qCleanupResources)
+    atexit.register(cleanup_resources)
 
     # fix/validate arguments
     if command_line_options.script is not None:

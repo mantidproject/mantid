@@ -10,4 +10,8 @@
 
 # flake8: noqa
 from .widget import AlgorithmSelectorWidget
-from mantidqt import resources
+
+# register icon resources (:/...) used by the C++ widgets
+from mantidqt.resource_loader import register_resources
+
+register_resources()

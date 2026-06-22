@@ -60,6 +60,7 @@ private:
   API::Workspace_sptr m_outputWorkspace;
 
   bool m_useManualScaleFactors = false;
+  bool m_useValidDataOnly = false;
   size_t m_scaleFactorFromPeriod = 1;
   int m_indexOfReference = 0;
 };

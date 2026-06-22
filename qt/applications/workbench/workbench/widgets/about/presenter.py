@@ -11,6 +11,7 @@ from mantid.kernel import ConfigService, logger, release_notes_url, release_date
 from mantidqt.interfacemanager import InterfaceManager
 from workbench.widgets.about.view import AboutView
 from workbench.widgets.about.usage_verification_view import UsageReportingVerificationView
+from workbench.widgets.settings.view_utilities.settings_view_utilities import checkbox_state_to_bool
 from mantidqt.widgets import manageuserdirectories
 
 
@@ -165,21 +166,22 @@ class AboutPresenter(object):
         InterfaceManager().showWebPage(url)
 
     def action_usage_data_changed(self, checkedState):
-        if not checkedState:
+        is_checked = checkbox_state_to_bool(checkedState)
+        if not is_checked:
             response = self.usage_reporting_verification_view.exec()
 
             if not response:
                 # No was clicked, or no button was clicked
                 # set the checkbox back to checked
-                checkedState = Qt.Checked
-                self.view.about_widget.chk_allow_usage_data.setCheckState(checkedState)
+                is_checked = True
+                self.view.about_widget.chk_allow_usage_data.setCheckState(Qt.Checked)
 
-        ConfigService.setString(self.USAGE_REPORTING, "1" if checkedState == Qt.Checked else "0")
+        ConfigService.setString(self.USAGE_REPORTING, "1" if is_checked else "0")
 
     def action_do_not_show_until_next_release(self, checkedState):
         settings = QSettings()
         settings.beginGroup(self.DO_NOT_SHOW_GROUP)
-        settings.setValue(self.DO_NOT_SHOW, int(checkedState))
+        settings.setValue(self.DO_NOT_SHOW, int(checkbox_state_to_bool(checkedState)))
         settings.endGroup()
 
     def action_close(self):

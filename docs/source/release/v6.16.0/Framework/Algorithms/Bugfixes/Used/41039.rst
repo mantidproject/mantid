@@ -1,1 +1,0 @@
-- The :ref:`SumSpectra <algm-SumSpectra>` algorithm has been updated to correctly propagate errors for weighted sum calculations.

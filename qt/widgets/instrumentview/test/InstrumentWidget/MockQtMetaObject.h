@@ -16,27 +16,27 @@ public:
   virtual ~MockQtMetaObject() = default;
 
   MOCK_METHOD(bool, invokeMethod,
-              (QObject *, const char *, Qt::ConnectionType, QGenericReturnArgument, QGenericArgument, QGenericArgument,
-               QGenericArgument, QGenericArgument, QGenericArgument, QGenericArgument, QGenericArgument,
-               QGenericArgument, QGenericArgument, QGenericArgument),
+              (QObject *, const char *, Qt::ConnectionType, QtInvokeReturnArgument, QtInvokeArgument, QtInvokeArgument,
+               QtInvokeArgument, QtInvokeArgument, QtInvokeArgument, QtInvokeArgument, QtInvokeArgument,
+               QtInvokeArgument, QtInvokeArgument, QtInvokeArgument),
               (const, override));
 
   MOCK_METHOD(bool, invokeMethod,
-              (QObject *, const char *, QGenericReturnArgument, QGenericArgument, QGenericArgument, QGenericArgument,
-               QGenericArgument, QGenericArgument, QGenericArgument, QGenericArgument, QGenericArgument,
-               QGenericArgument, QGenericArgument),
+              (QObject *, const char *, QtInvokeReturnArgument, QtInvokeArgument, QtInvokeArgument, QtInvokeArgument,
+               QtInvokeArgument, QtInvokeArgument, QtInvokeArgument, QtInvokeArgument, QtInvokeArgument,
+               QtInvokeArgument, QtInvokeArgument),
               (const, override));
 
   MOCK_METHOD(bool, invokeMethod,
-              (QObject *, const char *, Qt::ConnectionType, QGenericArgument, QGenericArgument, QGenericArgument,
-               QGenericArgument, QGenericArgument, QGenericArgument, QGenericArgument, QGenericArgument,
-               QGenericArgument, QGenericArgument),
+              (QObject *, const char *, Qt::ConnectionType, QtInvokeArgument, QtInvokeArgument, QtInvokeArgument,
+               QtInvokeArgument, QtInvokeArgument, QtInvokeArgument, QtInvokeArgument, QtInvokeArgument,
+               QtInvokeArgument, QtInvokeArgument),
               (const, override));
 
   MOCK_METHOD(bool, invokeMethod,
-              (QObject *, const char *, QGenericArgument, QGenericArgument, QGenericArgument, QGenericArgument,
-               QGenericArgument, QGenericArgument, QGenericArgument, QGenericArgument, QGenericArgument,
-               QGenericArgument),
+              (QObject *, const char *, QtInvokeArgument, QtInvokeArgument, QtInvokeArgument, QtInvokeArgument,
+               QtInvokeArgument, QtInvokeArgument, QtInvokeArgument, QtInvokeArgument, QtInvokeArgument,
+               QtInvokeArgument),
               (const, override));
 };
 } // namespace MantidQt::MantidWidgets

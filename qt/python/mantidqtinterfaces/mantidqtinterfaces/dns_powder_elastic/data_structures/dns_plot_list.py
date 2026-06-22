@@ -9,6 +9,7 @@
 List of workspaces for plotting.
 """
 
+from qtpy.QtCore import Qt
 from qtpy.QtGui import QStandardItem, QStandardItemModel
 
 
@@ -18,7 +19,7 @@ class DNSPlotListModel(QStandardItemModel):
     """
 
     def get_checked_item_names(self):
-        return [item.text() for item in self.get_items() if item.checkState()]
+        return [item.text() for item in self.get_items() if item.checkState() != Qt.CheckState.Unchecked]
 
     def get_items(self):
         return [self.item(i) for i in range(self.rowCount())]
@@ -28,7 +29,7 @@ class DNSPlotListModel(QStandardItemModel):
 
     def uncheck_items(self):
         for item in self.get_items():
-            item.setCheckState(0)
+            item.setCheckState(Qt.CheckState.Unchecked)
 
     def set_items(self, items):
         self.clear()
@@ -36,13 +37,13 @@ class DNSPlotListModel(QStandardItemModel):
             item = QStandardItem(dataset)
             item.setCheckable(True)
             item.setEditable(False)
-            item.setTristate(False)
+            item.setAutoTristate(False)
             self.appendRow(item)
 
     def get_checked_item_numbers(self):
         numbers = []
         for i in range(self.rowCount()):
-            if self.item(i).checkState():
+            if self.item(i).checkState() != Qt.CheckState.Unchecked:
                 numbers.append(i)
         return numbers
 
@@ -59,8 +60,8 @@ class DNSPlotListModel(QStandardItemModel):
             i = -1
         if i < self.rowCount() - 1:
             if i >= 0:
-                self.item(i).setCheckState(0)
-            self.item(i + 1).setCheckState(2)
+                self.item(i).setCheckState(Qt.CheckState.Unchecked)
+            self.item(i + 1).setCheckState(Qt.CheckState.Checked)
 
     def up(self):
         """
@@ -75,11 +76,11 @@ class DNSPlotListModel(QStandardItemModel):
             i = self.rowCount()
         if i > 0:
             if i <= self.rowCount() - 1:
-                self.item(i).setCheckState(0)
-            self.item(i - 1).setCheckState(2)
+                self.item(i).setCheckState(Qt.CheckState.Unchecked)
+            self.item(i - 1).setCheckState(Qt.CheckState.Checked)
 
     def check_first(self):
-        self.item(0).setCheckState(2)
+        self.item(0).setCheckState(Qt.CheckState.Checked)
 
     def check_separated(self):
         """
@@ -90,7 +91,7 @@ class DNSPlotListModel(QStandardItemModel):
         for item in items:
             text = item.text()
             if text.endswith("_magnetic") or text.endswith("_spin_incoh") or text.endswith("_nuclear_coh"):
-                item.setCheckState(2)
+                item.setCheckState(Qt.CheckState.Checked)
 
     def check_raw(self):
         """
@@ -101,4 +102,4 @@ class DNSPlotListModel(QStandardItemModel):
         for item in items:
             text = item.text()
             if text.endswith("_sf") or text.endswith("_nsf"):
-                item.setCheckState(2)
+                item.setCheckState(Qt.CheckState.Checked)

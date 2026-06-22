@@ -114,8 +114,8 @@ void NotebookWriter::headerComment() {
                              "* [IPython Notebook "
                              "Documentation](http://ipython.org/ipython-doc/stable/notebook/)\n"
                              "* [matplotlib Documentation](http://matplotlib.org/contents.html)\n\n"
-                             "Help requests and bug reports should be submitted to the [Mantid forum.]"
-                             "(http://forum.mantidproject.org)"));
+                             "Help requests and bug reports should be submitted to [mantid-help]"
+                             "(mailto:mantid-help@mantidproject.org)."));
 
   markdownCell(strings);
 }

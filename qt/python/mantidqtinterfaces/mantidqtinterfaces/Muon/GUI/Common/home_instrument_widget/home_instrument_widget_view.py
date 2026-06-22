@@ -263,13 +263,13 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         self.first_good_data_checkbox.stateChanged.connect(slot)
 
     def first_good_data_state(self):
-        return self.first_good_data_checkbox.checkState()
+        return self.first_good_data_checkbox.isChecked()
 
     def is_first_good_data_checked(self):
-        return self.first_good_data_checkbox.checkState()
+        return self.first_good_data_checkbox.isChecked()
 
     def on_first_good_data_checkbox_state_change(self):
-        self.first_good_data_edit_enabled(self.first_good_data_checkbox.checkState())
+        self.first_good_data_edit_enabled(self.first_good_data_checkbox.isChecked())
 
     def first_good_data_edit_enabled(self, disabled):
         self.first_good_data_edit.setEnabled(not disabled)
@@ -323,13 +323,13 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         self.last_good_data_checkbox.stateChanged.connect(slot)
 
     def last_good_data_state(self):
-        return self.last_good_data_checkbox.checkState()
+        return self.last_good_data_checkbox.isChecked()
 
     def is_last_good_data_checked(self):
-        return self.last_good_data_checkbox.checkState()
+        return self.last_good_data_checkbox.isChecked()
 
     def on_last_good_data_checkbox_state_change(self):
-        self.last_good_data_edit_enabled(self.last_good_data_checkbox.checkState())
+        self.last_good_data_edit_enabled(self.last_good_data_checkbox.isChecked())
 
     def last_good_data_edit_enabled(self, disabled):
         self.last_good_data_edit.setEnabled(not disabled)

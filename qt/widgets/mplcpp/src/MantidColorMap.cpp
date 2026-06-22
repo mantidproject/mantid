@@ -31,7 +31,7 @@ namespace MantidQt::Widgets::MplCpp {
  */
 std::pair<QString, bool> MantidColorMap::chooseColorMap(const std::pair<QString, bool> &previous, QWidget *parent) {
   static QStringList allowedCMaps{"coolwarm", "gray", "jet", "plasma", "summer", "winter", "viridis"};
-  const int currentIdx = allowedCMaps.indexOf(previous.first);
+  const int currentIdx = static_cast<int>(allowedCMaps.indexOf(previous.first));
 
   // create simple dialog to capture color map and highlight flag
   QDialog colormapDialog(parent);

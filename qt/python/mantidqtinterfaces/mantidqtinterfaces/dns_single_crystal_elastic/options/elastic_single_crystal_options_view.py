@@ -10,6 +10,7 @@ DNS single crystal elastic options tab view of DNS reduction GUI.
 """
 
 from qtpy.QtCore import Signal
+from qtpy.QtCore import Qt
 from qtpy.QtCore import QRegularExpression
 from qtpy.QtGui import QRegularExpressionValidator
 
@@ -80,7 +81,7 @@ class DNSElasticSCOptionsView(DNSView):
     sig_auto_binning_clicked = Signal()
 
     def deactivate_get_wavelength(self):
-        self._map["get_wavelength"].setCheckState(0)
+        self._map["get_wavelength"].setCheckState(Qt.CheckState.Unchecked)
 
     def _disable_det_efficiency(self, state):
         if state == 0:

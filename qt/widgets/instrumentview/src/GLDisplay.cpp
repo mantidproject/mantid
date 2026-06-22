@@ -274,7 +274,11 @@ void GLDisplay::updateDetectors() {
   }
 }
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+void GLDisplay::enterEvent(QEnterEvent *ev) {
+#else
 void GLDisplay::enterEvent(QEvent *ev) {
+#endif
   if (m_surface) {
     m_surface->enterEvent(ev);
   }

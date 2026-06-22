@@ -11,6 +11,7 @@ from mantid import ConfigService
 from mantid.api import FileFinder
 from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
+from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QApplication, QWidget
 
 from mantidqtinterfaces.Muon.GUI.Common.load_file_widget.model import BrowseFileWidgetModel
@@ -55,7 +56,7 @@ class LoadRunWidgetPresenterMultipleFileTest(unittest.TestCase):
         self.presenter.load_file_widget._view.warning_popup = mock.MagicMock()
         self.presenter.load_run_widget._view.warning_popup = mock.MagicMock()
 
-        self.view.multiple_loading_check.setCheckState(1)
+        self.view.multiple_loading_check.setCheckState(Qt.CheckState.Checked)
         self.presenter.handle_multiple_files_option_changed()
 
         self.runs = [15196, 15197]

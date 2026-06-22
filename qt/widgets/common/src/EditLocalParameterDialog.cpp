@@ -134,7 +134,7 @@ void EditLocalParameterDialog::valueChanged(int row, int col) {
 /// Set all parameters to the same value.
 /// @param value :: A new value.
 void EditLocalParameterDialog::setAllValues(double value) {
-  int n = m_values.size();
+  auto n = m_values.size();
   for (int i = 0; i < n; ++i) {
     m_values[i] = value;
     m_uiForm.tableWidget->item(i, valueColumn)->setText(makeNumber(value));
@@ -359,7 +359,7 @@ void EditLocalParameterDialog::setValueToLog(int i) {
 
 /// Set value of each parameter to log value from respective workspace
 void EditLocalParameterDialog::setAllValuesToLog() {
-  const int nValues = m_values.size();
+  const auto nValues = m_values.size();
   for (int i = 0; i < nValues; ++i) {
     setValueToLog(i);
   }

@@ -38,6 +38,4 @@ Changes in this version
 
 .. _download page: http://download.mantidproject.org
 
-.. _forum: http://forum.mantidproject.org
-
 .. _GitHub release page: https://github.com/mantidproject/mantid/releases/tag/v6.9.1

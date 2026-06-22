@@ -71,6 +71,7 @@ To set up CMake:
    ::: {.hlist columns="1"}
 
    - On Linux: `Debug`
+   - On macOS: `Debug`
    - On Windows: `DebugWithRelRuntime`
      :::
 
@@ -83,6 +84,7 @@ To set up CMake:
    ::: {.hlist columns="1"}
 
    - On Linux: `--preset=linux`
+   - On macOS: `--preset=osx`
    - On Windows: `--preset=win-ninja`
      :::
 

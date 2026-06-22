@@ -108,7 +108,7 @@ void InstrumentWidgetRenderTab::setupSurfaceTypeOptions() {
   m_surfaceTypeButton->setToolTip("Set render mode");
 
   QSignalMapper *signalMapper = new QSignalMapper(this);
-  connect(signalMapper, SIGNAL(mapped(int)), this, SLOT(setSurfaceType(int)));
+  connect(signalMapper, SIGNAL(mappedInt(int)), this, SLOT(setSurfaceType(int)));
 
   m_full3D = new QAction("Full 3D", this);
   m_full3D->setCheckable(true);
@@ -694,7 +694,7 @@ QMenu *InstrumentWidgetRenderTab::createPeaksMenu() {
     m_precisionActions.append(prec);
     m_precisionActionGroup->addAction(prec);
   }
-  connect(signalMapper, SIGNAL(mapped(int)), m_instrWidget, SLOT(setPeakLabelPrecision(int)));
+  connect(signalMapper, SIGNAL(mappedInt(int)), m_instrWidget, SLOT(setPeakLabelPrecision(int)));
   menu->addMenu(setPrecision);
 
   QAction *showRelativeIntensity = new QAction("Indicate relative intensity", this);

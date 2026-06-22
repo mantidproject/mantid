@@ -275,9 +275,8 @@ class PhaseTablePresenter(object):
 
     def handle_phasequad_table_data_changed(self, row, col):
         """Handles when either Analyse checkbox is changed"""
-        item = self.view.get_table_item(row, col)
         name = self.view.get_table_item_text(row, 0)
-        is_added = True if item.checkState() == 2 else False
+        is_added = self.view.get_table_item_checked(row, col)
         for phasequad in self.model.group_phasequads:
             if phasequad.name == name:
                 if col == REAL_PART:

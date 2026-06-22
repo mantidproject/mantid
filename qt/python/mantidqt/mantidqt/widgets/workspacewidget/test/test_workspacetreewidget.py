@@ -11,7 +11,7 @@ import unittest
 
 from mantidqt.widgets.workspacewidget.workspacetreewidget import WorkspaceTreeWidget
 from mantidqt.utils.qt.testing import start_qapplication
-import sip
+from qtpy import sip
 
 
 @start_qapplication

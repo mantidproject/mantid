@@ -33,7 +33,7 @@ public:
     auto dialog = openNonPersistingManageUserDirectories();
 
     TS_ASSERT(dialog);
-    dialog->close();
+    closeAndWaitForDeletion(dialog);
   }
 
   void test_openManageUserDirectories_while_open_returns_same_dialog() {
@@ -41,7 +41,7 @@ public:
     auto secondTimeDialog = openNonPersistingManageUserDirectories();
 
     TS_ASSERT_EQUALS(firstTimeDialog, secondTimeDialog);
-    firstTimeDialog->close();
+    closeAndWaitForDeletion(firstTimeDialog);
   }
 
   void test_openManageUserDirectories_reopen_after_closing() {
@@ -57,7 +57,7 @@ public:
     // firstTimeDialog is now unsafe
     auto secondTimeDialog = openNonPersistingManageUserDirectories();
     TS_ASSERT(secondTimeDialog);
-    secondTimeDialog->close();
+    closeAndWaitForDeletion(secondTimeDialog);
   }
 
   void test_openManageUserDirectories_reopen_after_closing_with_esc() {
@@ -74,7 +74,7 @@ public:
     // firstTimeDialog is now unsafe
     auto secondTimeDialog = openNonPersistingManageUserDirectories();
     TS_ASSERT(secondTimeDialog);
-    secondTimeDialog->close();
+    closeAndWaitForDeletion(secondTimeDialog);
   }
 
 private:
@@ -82,5 +82,16 @@ private:
     auto dialog = ManageUserDirectories::openManageUserDirectories();
     dialog->enableSaveToFile(false);
     return dialog;
+  }
+
+  // The dialog is created with Qt::WA_DeleteOnClose, so close() only posts a
+  // deferred-delete event. Spin the event loop until the widget is actually
+  // destroyed; otherwise the deletion is left pending and is flushed at process
+  // exit, after the GUI thread-local state has been torn down, which crashes
+  // under Qt6 (~QSurface calls QOpenGLContext::currentContext()).
+  void closeAndWaitForDeletion(ManageUserDirectories *dialog) {
+    QSignalSpy deletionSpy(dialog, &QObject::destroyed);
+    dialog->close();
+    TS_ASSERT(deletionSpy.wait());
   }
 };

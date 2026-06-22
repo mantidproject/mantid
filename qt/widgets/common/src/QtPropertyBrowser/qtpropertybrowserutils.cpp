@@ -146,7 +146,7 @@ QtCursorDatabase::QtCursorDatabase() {
 void QtCursorDatabase::appendCursor(Qt::CursorShape shape, const QString &name, const QIcon &icon) {
   if (m_cursorShapeToValue.contains(shape))
     return;
-  int value = m_cursorNames.count();
+  int value = static_cast<int>(m_cursorNames.count());
   m_cursorNames.append(name);
   m_cursorIcons[value] = icon;
   m_valueToCursorShape[value] = shape;
@@ -304,7 +304,7 @@ bool QtKeySequenceEdit::eventFilter(QObject *o, QEvent *e) {
       QAction *action = itAction.next();
       action->setShortcut(QKeySequence());
       QString actionString = action->text();
-      const int pos = actionString.lastIndexOf(QLatin1Char('\t'));
+      const int pos = static_cast<int>(actionString.lastIndexOf(QLatin1Char('\t')));
       if (pos > 0)
         actionString.remove(pos, actionString.length() - pos);
       action->setText(actionString);

@@ -8,7 +8,7 @@
 #
 #
 from posixpath import join as joinsettings
-from qtpy.QtCore import QSettings, QVariant
+from qtpy.QtCore import QSettings
 
 
 class UserConfig(object):
@@ -73,8 +73,10 @@ class UserConfig(object):
         try:
             return self._get_setting(option, second, type)
         except TypeError:
-            # The 'PyQt_PyObject' (1024) type is sometimes used for settings which have an unknown type.
-            value = self._get_setting(option, second, type=QVariant.typeToName(1024))
+            # The 'PyQt_PyObject' type is sometimes used for settings which have an unknown type.
+            # (QSettings.value accepts the metatype name as a string under both PyQt5 and PyQt6;
+            # the old QVariant.typeToName(1024) lookup was removed in PyQt6.)
+            value = self._get_setting(option, second, type="PyQt_PyObject")
             return value if isinstance(value, type) else type(*value)
 
     def has(self, option, second=None):

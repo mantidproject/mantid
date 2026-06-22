@@ -107,7 +107,6 @@ class PairingTablePresenter(object):
 
     def handle_data_change(self, row, col):
         table = self.get_table_contents()
-        changed_item = self._view.get_table_item(row, col)
         changed_item_text = self.get_table_item_text(row, col)
         pair_name = self.get_table_item_text(row, 0)
         update_model = True
@@ -128,7 +127,7 @@ class PairingTablePresenter(object):
                     table[row][col] = rounded_item
             case "to_analyse":
                 update_model = False
-                self.to_analyse_data_checkbox_changed(changed_item.checkState(), row, pair_name)
+                self.to_analyse_data_checkbox_changed(self._view.get_table_item_checked(row, col), row, pair_name)
             case _:
                 pass
 
@@ -178,8 +177,7 @@ class PairingTablePresenter(object):
         groups = self._model.group_names + [diff.name for diff in self._model.get_diffs("group")]
         self._view.update_group_selections(groups)
 
-    def to_analyse_data_checkbox_changed(self, state, row, pair_name):
-        pair_added = True if state == 2 else False
+    def to_analyse_data_checkbox_changed(self, pair_added, row, pair_name):
         if pair_added:
             self._model.add_pair_to_analysis(pair_name)
         else:

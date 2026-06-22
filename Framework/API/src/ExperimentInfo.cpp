@@ -365,9 +365,11 @@ void ExperimentInfo::populateInstrumentParameters() {
   // particular, we cannot directly change DetectorInfo since the order of
   // rotation components is not guaranteed.
   for (const auto &item : paramInfoFromIDF) {
-    const auto &nameComp = item.first;
     const auto &paramInfo = item.second;
-    const std::string &paramN = nameComp.first;
+    // Use the parameter's short name (e.g. "Alpha0"), not the cache key. The cache key may be
+    // function-qualified (e.g. "IkedaCarpenterPV:Alpha0") to keep two functions on the same
+    // component from clobbering each other, but downstream consumers always look up by short name.
+    const std::string &paramN = paramInfo->m_paramName;
 
     try {
       // Special case where user has specified r-position,t-position, and/or
@@ -394,7 +396,7 @@ void ExperimentInfo::populateInstrumentParameters() {
         populateWithParameter(paramMap, paramMapForPosAndRot, paramN, *paramInfo, runData);
       }
     } catch (std::exception &exc) {
-      g_log.information() << "Unable to add component parameter '" << nameComp.first << "'. Error: " << exc.what();
+      g_log.information() << "Unable to add component parameter '" << paramN << "'. Error: " << exc.what();
       continue;
     }
   }
@@ -1257,7 +1259,45 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
       // pixel positions, but we must also add the parameter below.
       if (isScaleParameter(paramName))
         adjustPositionsFromScaleFactor(compInfo, comp, paramName, getParam<double>(paramType, paramValue));
-      pmap.add(paramType, comp, paramName, paramValue, &paramDescr, paramVisibility);
+      // For fitting parameters, route through addFittingParameter so that two functions on the same
+      // component sharing a parameter short name (e.g. IkedaCarpenterPV:Gamma and
+      // Bk2BkExpConvPV:Gamma) both survive a NeXus save/load round-trip. ParameterMap::add only
+      // dedupes by (component, name) and would silently overwrite the first entry with the second.
+      // The fitting-function name is embedded as the second comma-separated field of the value
+      // string written by populateWithParameter().
+
+      // string from populateWithParameter() is expected to be " , " (space-comma-space) separated:
+      // "m_value , m_fittingFunction , name , constraint[0] , constraint[1] , penaltyFactor , tie ,
+      // formula , formulaUnit , resultUnit , interpolation"
+      if (paramType == "fitting") {
+        std::string fittingFunction;
+        // Locate the second field by finding the first two commas; the fitting function is the
+        // text between them. If there are fewer than two commas the value is malformed and
+        // fittingFunction stays empty, falling back to the plain add() below.
+        const auto firstComma = paramValue.find(',');
+        if (firstComma != std::string::npos) {
+          const auto secondComma = paramValue.find(',', firstComma + 1);
+          if (secondComma != std::string::npos) {
+            // Take the raw second field, e.g. " IkedaCarpenterPV " from "3.5 , IkedaCarpenterPV , ...".
+            fittingFunction = paramValue.substr(firstComma + 1, secondComma - firstComma - 1);
+            // Trim the surrounding spaces/tabs introduced by the " , " separator.
+            const auto firstNonSpace = fittingFunction.find_first_not_of(" \t");
+            if (firstNonSpace != std::string::npos) {
+              const auto lastNonSpace = fittingFunction.find_last_not_of(" \t");
+              fittingFunction = fittingFunction.substr(firstNonSpace, lastNonSpace - firstNonSpace + 1);
+            } else
+              // Field was entirely whitespace (e.g. "3.5 ,  , ..."): treat as no fitting function.
+              fittingFunction.clear();
+          }
+        }
+        if (!fittingFunction.empty()) {
+          pmap.addFittingParameter(comp, paramName, fittingFunction, paramValue, &paramDescr, paramVisibility);
+        } else {
+          pmap.add(paramType, comp, paramName, paramValue, &paramDescr, paramVisibility);
+        }
+      } else {
+        pmap.add(paramType, comp, paramName, paramValue, &paramDescr, paramVisibility);
+      }
     }
   }
 }
@@ -1307,11 +1347,16 @@ void ExperimentInfo::populateWithParameter(Geometry::ParameterMap &paramMap,
     paramMapForPosAndRot.addRotationParam(paramInfo.m_component, name, paramValue, pDescription);
   } else if (category == "fitting") {
     std::ostringstream str;
+    // read parameter map relies on extracting m_fittingFunction from this string - edit with care
     str << paramInfo.m_value << " , " << paramInfo.m_fittingFunction << " , " << name << " , "
         << paramInfo.m_constraint[0] << " , " << paramInfo.m_constraint[1] << " , " << paramInfo.m_penaltyFactor
         << " , " << paramInfo.m_tie << " , " << paramInfo.m_formula << " , " << paramInfo.m_formulaUnit << " , "
         << paramInfo.m_resultUnit << " , " << (*(paramInfo.m_interpolation));
-    paramMap.add("fitting", paramInfo.m_component, name, str.str(), pDescription, pVisible);
+    // Dedupe by (name, fitting function) — otherwise two functions on the same component sharing
+    // a parameter short name (e.g. Bk2BkExpConvPV:Gamma and IkedaCarpenterPV:Gamma) would clobber
+    // each other in the map.
+    paramMap.addFittingParameter(paramInfo.m_component, name, paramInfo.m_fittingFunction, str.str(), pDescription,
+                                 pVisible);
   } else if (category == "string") {
     paramMap.addString(paramInfo.m_component, name, paramInfo.m_value, pDescription, pVisible);
   } else if (category == "bool") {

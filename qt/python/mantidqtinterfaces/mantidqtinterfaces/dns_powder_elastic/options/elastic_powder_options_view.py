@@ -10,6 +10,7 @@ DNS powder elastic options tab view of DNS reduction GUI.
 """
 
 from qtpy.QtCore import Signal
+from qtpy.QtCore import Qt
 
 from mantidqt.utils.qt import load_ui
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_view import DNSView
@@ -56,7 +57,7 @@ class DNSElasticPowderOptionsView(DNSView):
     sig_auto_binning_clicked = Signal(int)
 
     def deactivate_get_wavelength(self):
-        self._map["get_wavelength"].setCheckState(False)
+        self._map["get_wavelength"].setCheckState(Qt.CheckState.Unchecked)
 
     def _disable_det_efficiency(self, state):
         if state == 0:

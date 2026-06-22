@@ -20,6 +20,7 @@
 #include <QImage>
 #include <QList>
 #include <QMap>
+#include <QObject>
 #include <QPoint>
 #include <QSize>
 #include <QStack>
@@ -254,7 +255,7 @@ public:
   void clearAlignmentPlane();
   void clearComparisonPeaks();
   bool hasPeakOverlays() const { return !m_peakShapes.isEmpty(); }
-  int getPeakOverlayCount() const { return m_peakShapes.count(); }
+  int getPeakOverlayCount() const { return static_cast<int>(m_peakShapes.count()); }
   void setPeakLabelPrecision(int n);
   int getPeakLabelPrecision() const { return m_peakLabelPrecision; }
   void setShowPeakRowsFlag(bool on);

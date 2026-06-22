@@ -9,24 +9,37 @@
 Description
 -----------
 
-This algorithm will load a series of runs into a MDHistoWorkspace that
-has dimensions x and y detector pixels vs scanIndex.
-The scanIndex is the omega rotation of the sample.
+This algorithm will load a series of runs into a MDHistoWorkspace that has dimensions x and y detector pixels
+vs scanIndex. The scanIndex is the omega rotation of the sample.
 The instrument attached to the OutputWorkspace is directly copied from the FIRST run, therefore
 it is crucial to have the correct instrument attached to the first run.
 In addition the s1 (omega rotation), duration, run_number and monitor count is read from every
 file and included in the logs of the OutputWorkspace.
 
-During a recent feature expansion, normalization can be optionally performed in the same process
-provided that the necessary Vanadium data is specified.
+Normalization can be optionally performed in the same process, provided that the necessary Vanadium data is specified.
+There's also the posibility of not normalizing the data but saving the normalization workspace
+alongside the main data workspace for later use in MDNorm.
+
 By default, the algorithm will try to locate the Vanadium data using IPTS and run number.
-If failed, it will check the Vanadium filename entry to see if the data can be loaded directly
-from file.
-If neither is provided, the algorithm will try to check if the Vanadium data is provided as a
-workspace in memory.
-Currently there are three normalization scheme supported: by Count, by Monitor and by Time.
-If None is selected, no normalization will be performed and all normalization related properties
-will be ignored (on the GUI end, they will be disabled instead).
+If failed, it will check the Vanadium filename entry to see if the data can be loaded directly from file.
+If neither is provided, the algorithm will try to check if the Vanadium data is provided as a workspace in memory.
+
+Option ``NormalizedBy`` selects the data-to-Vanadium flux ratio as:
+
+- ``Monitor``: ratio of data to Vanadium monitor counts.
+- ``Time``: ratio of data to Vanadium duration.
+- ``Counts``: 1.0 / mean Vanadium signal.
+- ``None``: 1.0
+
+If option ``NormalizeData`` is ``True``, a normalization workspace is constructed and then divided from the data:
+
+.. code-block:: python
+
+    normalization_workspace = flux_ratio * vanadium_signal
+    normalized_data = sample_signal / normalization_workspace
+
+If a workspace name is provided in ``OutputNormalizationWorkspace``,
+then ``normalization_workspace`` will be saved, irrespective of the value of ``NormalizeData``.
 
 If the "HB2C:CS:CrystalAlign:UBMatrix" property exists and apply goniometer tilt is true,
 it will be converted into the OrientedLattice on the OutputWorkspace.
@@ -40,8 +53,7 @@ usage and speed up the later reduction steps.
 In most cases you will not see a difference in reduced data with 4x4 pixel grouping.
 Also, both input data and the Vanadium data will share the same grouping scheme.
 
-The loaded workspace is designed to be the input to
-:ref:`algm-ConvertWANDSCDtoQ`.
+The loaded workspace is designed to be the input to :ref:`algm-ConvertWANDSCDtoQ`.
 
 Usage
 -----
@@ -71,18 +83,7 @@ Output:
     Sample: a 1.0, b 1.0, c 1.0; alpha 90, beta 90, gamma 90
 
 
-**Load data and Vanadium at the same time**
-
-.. code-block:: python
-
-    data = LoadWANDSCD(
-        IPTS=7776, RunNumbers='26640-27944',
-        VanadiumIPTS=7776, VanadiumRunNumber=26509,
-        NormalizedBy='Monitor',
-        )
-
-
-**Load multiple data file**
+**Load multiple data files**
 
 .. code-block:: python
 
@@ -115,6 +116,82 @@ Output:
     monitor_count = [44571,44598,44567,44869,44453,44238,44611,44120,44762,44658]
     duration = [2.05,2.05,2.03333,2.05,2.03333,2.03333,2.05,2.01667,2.05,2.05]
     run_number = [26640,26641,26642,26643,26644,26645,26646,26647,26648,26649]
+
+
+**Load data and Vanadium, normalize data**
+
+.. code-block:: python
+
+    data = LoadWANDSCD(
+        IPTS=7776, RunNumbers='26640-26700',
+        VanadiumIPTS=7776, VanadiumRunNumber=26509,
+        NormalizedBy='Monitor', NormalizeData=True
+        )
+
+
+**Load data and Vanadium. Don't normalize the output data but output the normalization workspace**
+
+.. code-block:: python
+
+    data, norm = LoadWANDSCD(
+        IPTS=7776, RunNumbers='26640-26700',
+        VanadiumIPTS=7776, VanadiumRunNumber=26509,
+        NormalizedBy='Monitor', NormalizeData=False,
+        Grouping="4x4", OutputNormalizationWorkspace='norm'
+        )
+    print(repr(norm.id()))
+    print([norm.getDimension(i).getNBins() for i in range(norm.getNumDims())])
+
+Output:
+
+.. code-block:: none
+
+    'MDHistoWorkspace'
+    [128, 960, 61]
+
+
+**Load data and Vanadium. Normalize the output data and output the grouping workspace**
+
+.. code-block:: python
+
+    data = LoadWANDSCD(
+        IPTS=7776, RunNumbers='26640-26700',
+        VanadiumIPTS=7776, VanadiumRunNumber=26509,
+        Grouping='2x2',
+        NormalizedBy='Monitor', NormalizeData=True,
+        OutputGroupingWorkspace='grouping'
+        )
+    grouping = mtd['grouping']
+    print(int(grouping.readY(255)[0]))
+
+Output:
+
+.. code-block:: none
+
+    128
+
+
+**Load data and Vanadium. Don't normalize the output data and output the normalization and grouping workspaces**
+
+.. code-block:: python
+
+    data, norm, grouping = LoadWANDSCD(
+        IPTS=7776, RunNumbers='26640-26700',
+        VanadiumIPTS=7776, VanadiumRunNumber=26509,
+        Grouping='2x2',
+        NormalizedBy='Monitor', NormalizeData=False,
+        OutputNormalizationWorkspace='norm',
+        OutputGroupingWorkspace='grouping'
+        )
+    print([norm.getDimension(i).getNBins() for i in range(norm.getNumDims())])
+    print(int(grouping.readY(255)[0]))
+
+Output:
+
+.. code-block:: none
+
+    [256, 1920, 61]
+    128
 
 
 **Load with different grouping comparing memory usage**

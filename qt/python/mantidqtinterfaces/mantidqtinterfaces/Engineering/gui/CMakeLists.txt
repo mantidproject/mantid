@@ -42,7 +42,7 @@ set(TEST_PY_FILES
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
 
 if(ENABLE_WORKBENCH)
-  set(PYUNITTEST_QT_API pyqt5)
+  set(PYUNITTEST_QT_API pyqt${MANTID_QT_VERSION})
   pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python.EngineeringDiffraction ${TEST_PY_FILES})
   unset(PYUNITTEST_QT_API)
 endif()

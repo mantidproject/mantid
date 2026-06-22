@@ -351,7 +351,12 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         # delete the object and do this for us. On macOS it was observed that closing the figure window
         # would produce an extraneous activated event that would add a new figure to the plots list
         # right after deleted the old one.
-        self.window.disconnect()
+        # Disconnect the specific signals we connected rather than calling the no-argument (wildcard)
+        # window.disconnect(): the window has WA_DeleteOnClose set and is already being destroyed at this
+        # point, so a wildcard disconnect makes Qt6 emit "wildcard call disconnects from destroyed signal".
+        self.window.activated.disconnect()
+        self.window.closing.disconnect()
+        self.window.visibility_changed.disconnect()
         self._fig_interaction.disconnect()
         self.window.close()
         if self.superplot:

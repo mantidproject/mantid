@@ -13,7 +13,7 @@ set(TEST_HELPERS ALFAnalysisMocks.h ALFInstrumentMocks.h MockALFAlgorithmManager
 
 mtd_add_qt_tests(
   TARGET_NAME MantidQtInterfacesDirectTest
-  QT_VERSION 5
+  QT_VERSION ${MANTID_QT_VERSION}
   SRC ${TEST_FILES}
   TEST_HELPER_SRCS ${TEST_HELPERS}
   INCLUDE_DIRS ../
@@ -22,11 +22,11 @@ mtd_add_qt_tests(
   PARENT_DEPENDENCIES GUITests
 )
 
-add_framework_test_helpers(MantidQtInterfacesDirectTestQt5)
+add_framework_test_helpers(MantidQtInterfacesDirectTestQt${MANTID_QT_VERSION})
 
 if(TARGET GTest::gmock AND TARGET GTest::gtest)
 
-  target_link_libraries(MantidQtInterfacesDirectTestQt5 PRIVATE GTest::gmock GTest::gtest)
+  target_link_libraries(MantidQtInterfacesDirectTestQt${MANTID_QT_VERSION} PRIVATE GTest::gmock GTest::gtest)
 else()
-  target_link_libraries(MantidQtInterfacesDirectTestQt5 PRIVATE gmock gtest)
+  target_link_libraries(MantidQtInterfacesDirectTestQt${MANTID_QT_VERSION} PRIVATE gmock gtest)
 endif()

@@ -81,7 +81,7 @@ void FindReplaceDialog::initLayout() {
   boxWrapAround->setChecked(true);
   bottomLayout->addWidget(boxWrapAround, 1, 1);
   find_options->addButton(boxWrapAround);
-  connect(find_options, SIGNAL(buttonClicked(int)), this, SLOT(resetSearchFlags()));
+  connect(find_options, SIGNAL(idClicked(int)), this, SLOT(resetSearchFlags()));
 
   auto *vb1 = new QVBoxLayout();
   vb1->addWidget(gb1);

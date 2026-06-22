@@ -132,7 +132,11 @@ void QtDisplay::keyPressEvent(QKeyEvent *event) {
   update();
 }
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+void QtDisplay::enterEvent(QEnterEvent *event) {
+#else
 void QtDisplay::enterEvent(QEvent *event) {
+#endif
   if (m_surface) {
     m_surface->enterEvent(event);
   }

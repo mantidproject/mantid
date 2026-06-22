@@ -9,6 +9,7 @@ from unittest import mock
 from mantid.api import WorkspaceGroup
 from mantid.simpleapi import CreateSampleWorkspace
 from mantidqt.utils.qt.testing import start_qapplication
+from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QWidget, QTableWidgetItem
 
 from mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_tab_model import EAGroupingTabModel
@@ -138,7 +139,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.assertEqual(self.view.num_rows(), 4)
         self.assertEqual(len(self.model.groups), 4)
         analyse_checkbox = self.view.get_table_item(0, 4)
-        self.assertEqual(analyse_checkbox.checkState(), 0)
+        self.assertEqual(analyse_checkbox.checkState(), Qt.CheckState.Unchecked)
 
         self.presenter.plot_default_case()
         self.assertCountEqual(self.context.group_context.selected_groups, ["9999; Detector 3", "9998; Detector 3"])
@@ -164,7 +165,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.assertEqual(self.view.num_rows(), 4)
         self.assertEqual(len(self.model.groups), 4)
         analyse_checkbox = self.view.get_table_item(0, 4)
-        self.assertEqual(analyse_checkbox.checkState(), 0)
+        self.assertEqual(analyse_checkbox.checkState(), Qt.CheckState.Unchecked)
 
         self.presenter.plot_default_case()
         self.assertCountEqual(self.context.group_context.selected_groups, ["9999; Detector 1", "9998; Detector 1"])
@@ -188,7 +189,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.assertEqual(self.view.num_rows(), 3)
         self.assertEqual(len(self.model.groups), 3)
         analyse_checkbox = self.view.get_table_item(0, 3)
-        self.assertEqual(analyse_checkbox.checkState(), 0)
+        self.assertEqual(analyse_checkbox.checkState(), Qt.CheckState.Unchecked)
 
         self.presenter.plot_default_case()
         self.assertCountEqual(self.context.group_context.selected_groups, ["9999; Detector 4", "9998; Detector 4"])
@@ -206,7 +207,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.assertEqual(self.view.num_rows(), 1)
         self.assertEqual(len(self.model.groups), 1)
         analyse_checkbox = self.view.get_table_item(0, 1)
-        self.assertEqual(analyse_checkbox.checkState(), 0)
+        self.assertEqual(analyse_checkbox.checkState(), Qt.CheckState.Unchecked)
 
         self.presenter.plot_default_case()
         self.assertCountEqual(self.context.group_context.selected_groups, ["9998; Detector 2"])
@@ -340,7 +341,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.presenter.handle_data_change(row, column)
 
         # Assert statements
-        self.presenter.handle_to_analyse_column_changed.assert_called_once_with(column, mock_table_item, "mock_workspace_name")
+        self.presenter.handle_to_analyse_column_changed.assert_called_once_with(row, column, "mock_workspace_name")
         self.presenter.handle_rebin_column_changed.assert_called_once_with(column, row, mock_table_item)
         self.presenter.handle_rebin_option_column_changed.assert_called_once_with(column, mock_table_item, "mock_workspace_name")
         self.presenter.handle_update.assert_called_once_with("mock_value")
@@ -351,34 +352,30 @@ class GroupingTablePresenterTest(unittest.TestCase):
     def test_handle_to_analyse_column_changed_if_column_is_to_analyse(self):
         # setup
         self.presenter.to_analyse_data_checkbox_changed = mock.Mock()
+        self.presenter._view.get_table_item_checked = mock.Mock(return_value=True)
         ws_name = "mock_workspace"
-        mock_changed_item = mock.Mock()
-        mock_changed_item.checkState.return_value = "mock_state"
+        row = 0
 
-        to_analyse_changed = self.presenter.handle_to_analyse_column_changed(
-            INVERSE_GROUP_TABLE_COLUMNS["to_analyse"], mock_changed_item, ws_name
-        )
+        to_analyse_changed = self.presenter.handle_to_analyse_column_changed(row, INVERSE_GROUP_TABLE_COLUMNS["to_analyse"], ws_name)
         # Assert statements
-        # method should return False
+        # method should return True
         self.assertEqual(to_analyse_changed, True)
-        self.presenter.to_analyse_data_checkbox_changed.assert_called_once_with("mock_state", ws_name)
-        mock_changed_item.checkState.assert_called_once()
+        self.presenter._view.get_table_item_checked.assert_called_once_with(row, INVERSE_GROUP_TABLE_COLUMNS["to_analyse"])
+        self.presenter.to_analyse_data_checkbox_changed.assert_called_once_with(True, ws_name)
 
     def test_handle_to_analyse_column_changed_if_column_is_not_to_analyse(self):
         # setup
         self.presenter.to_analyse_data_checkbox_changed = mock.Mock()
+        self.presenter._view.get_table_item_checked = mock.Mock()
         ws_name = "mock_workspace"
-        mock_changed_item = mock.Mock()
-        mock_changed_item.checkState.return_value = "mock_state"
+        row = 0
 
-        to_analyse_changed = self.presenter.handle_to_analyse_column_changed(
-            INVERSE_GROUP_TABLE_COLUMNS["workspace_name"], mock_changed_item, ws_name
-        )
+        to_analyse_changed = self.presenter.handle_to_analyse_column_changed(row, INVERSE_GROUP_TABLE_COLUMNS["workspace_name"], ws_name)
         # Assert statements
-        # method should return True
+        # method should return False
         self.assertEqual(to_analyse_changed, False)
         self.presenter.to_analyse_data_checkbox_changed.assert_not_called()
-        mock_changed_item.checkState.assert_not_called()
+        self.presenter._view.get_table_item_checked.assert_not_called()
 
     def test_handle_rebin_column_changed_when_rebin_column_is_not_changed(self):
         self.presenter._view.rebin_fixed_chosen = mock.Mock()

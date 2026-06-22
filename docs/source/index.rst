@@ -67,6 +67,6 @@ This is the documentation for Mantid |release|.
   * :ref:`deprecation_policy`, our current policy for deprecating algorithms, interfaces and other parts of Mantid.
 
 **Other Help and Documentation:**
-    * A `forum <http://forum.mantidproject.org/>`_, to ask for help, report issues, and discuss with other Mantid users.
+    * `GitHub Discussion <https://github.com/mantidproject/mantid/discussions>`_, to ask for help, report issues, and discuss with other Mantid users.
     * A built in error-reporter. We really encourage you to use this, as it helps us to make Mantid more stable in future.
     * `Developer Documentation <http://developer.mantidproject.org/>`_

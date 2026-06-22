@@ -9,10 +9,11 @@ from mantidqt.widgets.plotconfigdialog.curvestabwidget.markertabwidget.view impo
 from workbench.widgets.settings.base_classes.config_settings_presenter import SettingsPresenterBase
 from workbench.widgets.settings.plots.view import PlotsSettingsView
 from workbench.widgets.settings.plots.model import PlotsSettingsModel
-from workbench.widgets.settings.view_utilities.settings_view_utilities import filter_out_mousewheel_events_from_combo_or_spin_box
+from workbench.widgets.settings.view_utilities.settings_view_utilities import (
+    filter_out_mousewheel_events_from_combo_or_spin_box,
+    checkbox_state_to_bool,
+)
 from workbench.plotting.style import VALID_LINE_STYLE, VALID_DRAW_STYLE
-
-from qtpy.QtCore import Qt
 
 import sys
 
@@ -299,27 +300,27 @@ class PlotSettings(SettingsPresenterBase):
         self._view.colorbar_scale.currentTextChanged.connect(self.action_colorbar_scale_changed)
 
     def action_normalization_changed(self, state):
-        self._model.set_normalize_by_bin_width("On" if state == Qt.Checked else "Off")
+        self._model.set_normalize_by_bin_width("On" if checkbox_state_to_bool(state) else "Off")
         self.notify_changes()
 
     def action_show_title_changed(self, state):
-        self._model.set_show_title("On" if state == Qt.Checked else "Off")
+        self._model.set_show_title("On" if checkbox_state_to_bool(state) else "Off")
         self.notify_changes()
 
     def action_enable_grid_changed(self, state):
-        self._model.set_enable_grid("On" if state == Qt.Checked else "Off")
+        self._model.set_enable_grid("On" if checkbox_state_to_bool(state) else "Off")
         self.notify_changes()
 
     def action_show_minor_ticks_changed(self, state):
-        self._model.set_show_minor_ticks("On" if state == Qt.Checked else "Off")
+        self._model.set_show_minor_ticks("On" if checkbox_state_to_bool(state) else "Off")
         self.notify_changes()
-        self._view.show_minor_gridlines.setEnabled(state == Qt.Checked)
+        self._view.show_minor_gridlines.setEnabled(checkbox_state_to_bool(state))
 
         if not self._view.show_minor_gridlines.isEnabled():
             self._view.show_minor_gridlines.setChecked(False)
 
     def action_show_minor_gridlines_changed(self, state):
-        self._model.set_show_minor_gridlines("On" if state == Qt.Checked else "Off")
+        self._model.set_show_minor_gridlines("On" if checkbox_state_to_bool(state) else "Off")
         self.notify_changes()
 
     def action_font_combo_changed(self, font_name):
@@ -327,7 +328,7 @@ class PlotSettings(SettingsPresenterBase):
         self.notify_changes()
 
     def action_show_legend_changed(self, state):
-        self._model.set_show_legend("On" if state == Qt.Checked else "Off")
+        self._model.set_show_legend("On" if checkbox_state_to_bool(state) else "Off")
         self.notify_changes()
 
     def action_default_x_axes_changed(self, axes_scale):
@@ -343,35 +344,35 @@ class PlotSettings(SettingsPresenterBase):
         self.notify_changes()
 
     def action_show_ticks_left_changed(self, state):
-        self._model.set_show_ticks_left("On" if state == Qt.Checked else "Off")
+        self._model.set_show_ticks_left("On" if checkbox_state_to_bool(state) else "Off")
         self.notify_changes()
 
     def action_show_ticks_bottom_changed(self, state):
-        self._model.set_show_ticks_bottom("On" if state == Qt.Checked else "Off")
+        self._model.set_show_ticks_bottom("On" if checkbox_state_to_bool(state) else "Off")
         self.notify_changes()
 
     def action_show_ticks_right_changed(self, state):
-        self._model.set_show_ticks_right("On" if state == Qt.Checked else "Off")
+        self._model.set_show_ticks_right("On" if checkbox_state_to_bool(state) else "Off")
         self.notify_changes()
 
     def action_show_ticks_top_changed(self, state):
-        self._model.set_show_ticks_top("On" if state == Qt.Checked else "Off")
+        self._model.set_show_ticks_top("On" if checkbox_state_to_bool(state) else "Off")
         self.notify_changes()
 
     def action_show_labels_left_changed(self, state):
-        self._model.set_show_labels_left("On" if state == Qt.Checked else "Off")
+        self._model.set_show_labels_left("On" if checkbox_state_to_bool(state) else "Off")
         self.notify_changes()
 
     def action_show_labels_bottom_changed(self, state):
-        self._model.set_show_labels_bottom("On" if state == Qt.Checked else "Off")
+        self._model.set_show_labels_bottom("On" if checkbox_state_to_bool(state) else "Off")
         self.notify_changes()
 
     def action_show_labels_right_changed(self, state):
-        self._model.set_show_labels_right("On" if state == Qt.Checked else "Off")
+        self._model.set_show_labels_right("On" if checkbox_state_to_bool(state) else "Off")
         self.notify_changes()
 
     def action_show_labels_top_changed(self, state):
-        self._model.set_show_labels_top("On" if state == Qt.Checked else "Off")
+        self._model.set_show_labels_top("On" if checkbox_state_to_bool(state) else "Off")
         self.notify_changes()
 
     def action_major_ticks_length_changed(self, value):

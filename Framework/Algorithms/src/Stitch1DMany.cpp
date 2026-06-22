@@ -92,6 +92,10 @@ void Stitch1DMany::init() {
   declareProperty("IndexOfReference", 0, indexValidator,
                   "Index of the workspace to be used as reference for scaling, or -1 to choose the last workspace as "
                   "the reference.");
+
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("UseValidDataOnly", false, Direction::Input),
+                  "If true, invalid signal values do not contribute to overlap bins where another workspace has valid "
+                  "signal values.");
 }
 
 /// Load and validate the algorithm's properties.
@@ -213,6 +217,7 @@ std::map<std::string, std::string> Stitch1DMany::validateInputs() {
 
       m_useManualScaleFactors = this->getProperty("UseManualScaleFactors");
       m_manualScaleFactors = this->getProperty("ManualScaleFactors");
+      m_useValidDataOnly = this->getProperty("UseValidDataOnly");
 
       if (!m_manualScaleFactors.empty()) {
         if (m_manualScaleFactors.size() == 1) {
@@ -242,6 +247,7 @@ void Stitch1DMany::exec() {
     g_log.warning("The ScaleRHSWorkspace property no longer has any effect. Please see documentation on the "
                   "IndexOfReference parameter and use that instead.");
   }
+  m_useValidDataOnly = this->getProperty("UseValidDataOnly");
 
   if (m_inputWSMatrix.size() > 1) {   // groups
     std::vector<std::string> toGroup; // List of workspaces to be grouped
@@ -332,6 +338,7 @@ void Stitch1DMany::doStitch1D(std::vector<MatrixWorkspace_sptr> &toStitch,
     alg->setProperty("Params", m_params);
     alg->setProperty("ScaleRHSWorkspace", scaleRHSWorkspace);
     alg->setProperty("UseManualScaleFactor", m_useManualScaleFactors);
+    alg->setProperty("UseValidDataOnly", m_useValidDataOnly);
     if (m_useManualScaleFactors)
       alg->setProperty("ManualScaleFactor", manualScaleFactors[i - 1]);
     alg->execute();
@@ -385,6 +392,7 @@ void Stitch1DMany::doStitch1DMany(const size_t period, const bool useManualScale
   alg->setProperty("EndOverlaps", m_endOverlaps);
   alg->setProperty("Params", m_params);
   alg->setProperty("UseManualScaleFactors", useManualScaleFactors);
+  alg->setProperty("UseValidDataOnly", m_useValidDataOnly);
   if (useManualScaleFactors)
     alg->setProperty("ManualScaleFactors", m_manualScaleFactors);
   alg->setProperty("IndexOfReference", indexOfReference);

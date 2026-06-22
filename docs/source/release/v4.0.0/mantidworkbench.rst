@@ -70,7 +70,7 @@ Feedback
 
 We would be grateful of any feedback on the new interface to any of the usual means of communication:
 
-- there is a `forum thread <http://forum.mantidproject.org/t/mantid-4-0-workbench/463>`_ that can be used to report feedback
+- there is a forum thread that can be used to report feedback
 - the standard ``mantid-help`` mailing address
 - if you are at a facility then we are more than happy to come and have a chat.
 
