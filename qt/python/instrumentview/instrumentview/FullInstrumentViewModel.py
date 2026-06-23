@@ -53,6 +53,8 @@ class FullInstrumentViewModel:
     _beam_axis = np.array([0, 0, 1])
     line_plot_workspace = None
     _lineplot_ws_in_base_units_not_summed = None
+    _lineplot_ws_in_selected_units_not_summed = None
+    _line_plot_workspace = None
     _lineplot_limits = None
     _workspace_x_unit: str
     _workspace_x_unit_display: str
@@ -413,7 +415,7 @@ class FullInstrumentViewModel:
     def picked_detectors_info_text(self) -> list[DetectorInfo]:
         """For the specified detector, extract info that can be displayed in the View, and wrap it all up in a DetectorInfo class"""
 
-        if self._detector_is_picked.sum() > self.MAX_DET_INFO_SHOWN:
+        if len(self.picked_detector_ids) > self.MAX_DET_INFO_SHOWN:
             return []
 
         return self._build_detector_info_list(
@@ -554,7 +556,7 @@ class FullInstrumentViewModel:
                 min_bin_edge = np.inf
                 max_bin_edge = 0
                 min_bin_width = np.inf
-                for ws_index_i in range(len(det_ids)):
+                for ws_index_i in range(tmp_ws.getNumberHistograms()):
                     bin_edges = tmp_ws.readX(ws_index_i)
                     min_bin_edge = min(min_bin_edge, bin_edges[0])
                     max_bin_edge = max(max_bin_edge, bin_edges[-1])
@@ -616,11 +618,15 @@ class FullInstrumentViewModel:
         ]
         return converted_x, labels_by_pws, selected_peaks_workspaces
 
-    def add_peak(self, x_in_integration_unit: float, selected_peaks_workspaces: list[str]) -> str:
+    def add_peak(self, x_in_lineplot_unit: float, selected_peaks_workspaces: list[str]) -> str:
         peaks_ws = self._get_peaks_workspace_for_adding_new_peak(selected_peaks_workspaces)
         detector_id = self.picked_detector_ids[0]
         x_in_workspace_unit = self._match_workspace_unit(
-            self.line_plot_workspace, 0, x_in_integration_unit, self._lineplot_ws_in_base_units_not_summed
+            # self.line_plot_workspace, 0, x_in_integration_unit, self._lineplot_ws_in_base_units_not_summed
+            self._lineplot_ws_in_selected_units_not_summed,
+            0,
+            x_in_lineplot_unit,
+            self._lineplot_ws_in_base_units_not_summed,
         )
         AddPeak(peaks_ws, self._workspace, x_in_workspace_unit, int(detector_id))
         return peaks_ws
