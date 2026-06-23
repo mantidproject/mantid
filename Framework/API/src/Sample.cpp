@@ -27,7 +27,8 @@ using Geometry::OrientedLattice;
 using Geometry::SampleEnvironment;
 using Geometry::ShapeFactory;
 
-void saveShapeToFile(Nexus::File *file, const IObject_const_sptr &shape, const std::string tag = "") {
+namespace {
+void saveShapeToFile(Nexus::File *file, const IObject_const_sptr &shape, const std::string &tag = "") {
   std::string shapeXML;
   if (auto csgObject = std::dynamic_pointer_cast<const Mantid::Geometry::CSGObject>(shape)) {
     shapeXML = csgObject->getShapeXML();
@@ -36,9 +37,10 @@ void saveShapeToFile(Nexus::File *file, const IObject_const_sptr &shape, const s
   if (auto meshObject = std::dynamic_pointer_cast<const Mantid::Geometry::MeshObject>(shape)) {
     meshObject->saveNexus(file, tag + "shape_mesh");
   }
+  file->putAttr(tag + "shape_id", shape->id());
 }
 
-IObject_sptr loadShapeFromFile(Nexus::File *file, const std::string tag = "") {
+IObject_sptr loadShapeFromFile(Nexus::File *file, const std::string &tag = "") {
   Kernel::Material material;
   IObject_sptr shape;
   material.loadNexus(file, tag + "material");
@@ -56,8 +58,15 @@ IObject_sptr loadShapeFromFile(Nexus::File *file, const std::string tag = "") {
     return nullptr;
   }
   shape->setMaterial(material);
+  // Restore the shape id if it was saved (absent in older files)
+  if (file->hasAttr(tag + "shape_id")) {
+    std::string id;
+    file->getAttr(tag + "shape_id", id);
+    shape->setID(id);
+  }
   return shape;
 }
+} // namespace
 
 /**
  * Default constructor. Required for cow_ptr.
@@ -336,7 +345,7 @@ void Sample::saveNexus(Nexus::File *file, const std::string &group) const {
   if (m_environment) {
     file->putAttr("env_name", m_environment->name());
     auto const nElem = m_environment->nelements();
-    file->putAttr("num_env_comp", int(nElem));
+    file->writeData("num_env_comp", int(nElem));
     for (size_t i = 0; i < nElem; ++i) {
       const std::string tag = "env_" + Strings::toString(i) + "_";
       // Component 0 is the Container wrapper; save its inner shape so it can be
@@ -401,7 +410,10 @@ int Sample::loadNexus(Nexus::File *file, const std::string &group) {
       }
     }
 
-    m_shape = loadShapeFromFile(file);
+    // Only replace the default shape if the file actually defines one; otherwise
+    // keep the valid (empty) shape so callers never observe a null m_shape.
+    if (IObject_sptr loadedShape = loadShapeFromFile(file))
+      m_shape = loadedShape;
 
     // sample environment
     if (file->hasAttr("env_name")) {
@@ -409,14 +421,14 @@ int Sample::loadNexus(Nexus::File *file, const std::string &group) {
       file->getAttr("env_name", env_name);
 
       int nElem;
-      file->getAttr("num_env_comp", nElem);
-      if (nElem > 0) {
-        // component 0 is the container
-        IObject_sptr container_shape = loadShapeFromFile(file, "env_0_");
+      file->readData("num_env_comp", nElem);
+      // component 0 is the container; without a valid shape there is no environment to build
+      if (IObject_sptr container_shape = (nElem > 0) ? loadShapeFromFile(file, "env_0_") : nullptr) {
         auto env = std::make_shared<SampleEnvironment>(env_name, std::make_shared<Container>(container_shape));
         for (int i = 1; i < nElem; ++i) {
           const std::string tag = "env_" + Strings::toString(i) + "_";
-          env->add(loadShapeFromFile(file, tag));
+          if (IObject_sptr comp = loadShapeFromFile(file, tag))
+            env->add(comp);
         }
         m_environment = std::move(env);
       }

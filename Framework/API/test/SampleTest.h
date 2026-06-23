@@ -468,6 +468,25 @@ public:
     TS_ASSERT(loaded.getName().empty());
   }
 
+  // A sample with no defined shape must round-trip to a valid (empty) shape,
+  // never a null m_shape, otherwise downstream callers segfault.
+  void test_nexus_sample_without_shape() {
+    NexusTestHelper th(true);
+    th.createFile("SampleTestNoShape.nxs");
+
+    Sample sample;
+    sample.setName("NoShape");
+    sample.saveNexus(th.file.get(), "sample");
+    th.reopenFile();
+
+    Sample loaded;
+    loaded.loadNexus(th.file.get(), "sample");
+
+    TS_ASSERT(loaded.hasShape());
+    TS_ASSERT_THROWS_NOTHING(loaded.getShape().material());
+  }
+
+  // CSG environment paired with a mesh sample shape
   void test_nexus_with_csg_env() {
     NexusTestHelper th(true);
     th.createFile("SampleTestEnvCSG.nxs");
@@ -498,6 +517,7 @@ public:
 
     TS_ASSERT_EQUALS(env->nelements(), loadedEnv->nelements())
     TS_ASSERT_EQUALS(env->name(), loadedEnv->name())
+    TS_ASSERT_EQUALS(env->getContainer().id(), loadedEnv->getContainer().id())
 
     // component 0 is the Container wrapper; compare its inner shape
     validateCSGShape(dynamic_cast<const CSGObject &>(env->getContainer().getShape()),
@@ -508,13 +528,13 @@ public:
     }
   }
 
+  // Mesh environment paired with a CSG sample shape
   void test_nexus_with_mesh_env() {
     NexusTestHelper th(true);
     th.createFile("SampleTestEnvMesh.nxs");
 
     IObject_sptr csgShape =
         ComponentCreationHelper::createCappedCylinder(0.0127, 1.0, V3D(), V3D(0.0, 1.0, 0.0), "cyl");
-    ;
     std::shared_ptr<SampleEnvironment> env = createTestEnvironment(false);
     Sample sample;
     sample.setName("CSGSample");
@@ -540,6 +560,7 @@ public:
 
     TS_ASSERT_EQUALS(env->nelements(), loadedEnv->nelements())
     TS_ASSERT_EQUALS(env->name(), loadedEnv->name())
+    TS_ASSERT_EQUALS(env->getContainer().id(), loadedEnv->getContainer().id())
 
     // component 0 is the Container wrapper; compare its inner shape
     validateMeshShape(dynamic_cast<const MeshObject &>(env->getContainer().getShape()),
