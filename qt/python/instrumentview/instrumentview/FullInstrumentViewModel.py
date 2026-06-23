@@ -532,7 +532,7 @@ class FullInstrumentViewModel:
             return
 
         self._lineplot_ws_in_base_units_not_summed = ExtractSpectra(
-            InputWorkspace=self._workspace, DetectorList=det_ids.tolist(), EnableLogging=False, StoreInADS=False
+            InputWorkspace=self._workspace, DetectorList=det_ids, EnableLogging=False, StoreInADS=False
         )
         if self.has_unit and unit != self.workspace_base_unit:
             self._lineplot_ws_in_selected_units_not_summed = ConvertUnits(
@@ -587,20 +587,26 @@ class FullInstrumentViewModel:
         labels_by_pws = [pair[1] for pair in positions_and_labels_by_pws]
         return positions_by_pws, labels_by_pws, selected_peaks_workspaces
 
-    def get_peak_lineplot_overlay_arguments(self, selected_peaks_workspaces: list[str]):
+    def get_peak_lineplot_overlay_arguments(
+        self, selected_peaks_workspaces: list[str]
+    ) -> tuple[list[list[float]], list[list[str]], list[str]]:
+        if not self._lineplot_ws_in_base_units_not_summed:
+            return [], [], []
+
         selected_peaks_workspaces = [ws for ws in selected_peaks_workspaces if AnalysisDataService.doesExist(ws)]
         wrapped_workspaces = [
             WorkspaceDetectorPeaks(ws_name, self.get_integration_units(), self._integration_limits) for ws_name in selected_peaks_workspaces
         ]
-        # NOTE: Need to get x coords in workspace unit for better acuracy
         peaks_by_pws = [wws.get_x_values_and_labels(self.picked_detector_ids) for wws in wrapped_workspaces]
         labels_by_pws = [[p.label for p in peaks] for peaks in peaks_by_pws]
         # Convert peak units to currently plotted units
+        # NOTE: Need to get x coords in workspace unit for better acuracy
+        # Cannot trust units in peak workspaces
         converted_x = [
             [
                 self._match_workspace_unit(
                     self._lineplot_ws_in_base_units_not_summed,
-                    np.argwhere(self.line_plot_det_ids == p.detector_id).flatten()[0],
+                    self._lineplot_ws_in_base_units_not_summed.getIndicesFromDetectorIDs([p.detector_id])[0],
                     p.location_in_unit(self._workspace_x_unit),
                     self._lineplot_ws_in_selected_units_not_summed,
                 )

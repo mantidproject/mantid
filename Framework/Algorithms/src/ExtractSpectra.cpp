@@ -17,6 +17,8 @@
 #include "MantidKernel/BoundedValidator.h"
 
 #include <algorithm>
+#include <set>
+#include <vector>
 
 namespace {
 /// The percentage 'fuzziness' to use when comparing to bin boundaries
@@ -369,9 +371,11 @@ void ExtractSpectra::checkProperties() {
   // 3. Start and stop index
   std::vector<detid_t> detectorList = getProperty("DetectorList");
   if (!detectorList.empty()) {
-    m_workspaceIndexList = m_inputWorkspace->getIndicesFromDetectorIDs(detectorList);
+    std::vector<size_t> indicesVector = m_inputWorkspace->getIndicesFromDetectorIDs(detectorList);
+    m_workspaceIndexList = std::set<size_t>(indicesVector.begin(), indicesVector.end());
   } else {
-    m_workspaceIndexList = getProperty("WorkspaceIndexList");
+    std::vector<size_t> indicesVector = getProperty("WorkspaceIndexList");
+    m_workspaceIndexList = std::set<size_t>(indicesVector.begin(), indicesVector.end());
 
     if (m_workspaceIndexList.empty()) {
       int minSpec_i = getProperty("StartWorkspaceIndex");
@@ -382,9 +386,8 @@ void ExtractSpectra::checkProperties() {
       if (isEmpty(maxSpec_i))
         maxSpec = numberOfSpectra - 1;
       if (maxSpec - minSpec + 1 != numberOfSpectra) {
-        m_workspaceIndexList.reserve(maxSpec - minSpec + 1);
         for (size_t i = minSpec; i <= maxSpec; ++i)
-          m_workspaceIndexList.emplace_back(i);
+          m_workspaceIndexList.insert(i);
       }
     }
   }
