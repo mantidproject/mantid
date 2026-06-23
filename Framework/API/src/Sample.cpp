@@ -29,11 +29,11 @@ using Geometry::ShapeFactory;
 
 void saveShapeToFile(Nexus::File *file, const IObject_const_sptr &shape, const std::string tag = "") {
   std::string shapeXML;
-  if (auto csgObject = std::dynamic_pointer_cast<Mantid::Geometry::CSGObject>(shape)) {
+  if (auto csgObject = std::dynamic_pointer_cast<const Mantid::Geometry::CSGObject>(shape)) {
     shapeXML = csgObject->getShapeXML();
   }
   file->putAttr(tag + "shape_xml", shapeXML);
-  if (auto meshObject = std::dynamic_pointer_cast<Mantid::Geometry::MeshObject>(shape)) {
+  if (auto meshObject = std::dynamic_pointer_cast<const Mantid::Geometry::MeshObject>(shape)) {
     meshObject->saveNexus(file, tag + "shape_mesh");
   }
 }
@@ -339,7 +339,10 @@ void Sample::saveNexus(Nexus::File *file, const std::string &group) const {
     file->putAttr("num_env_comp", int(nElem));
     for (size_t i = 0; i < nElem; ++i) {
       const std::string tag = "env_" + Strings::toString(i) + "_";
-      IObject_const_sptr comp = m_environment->getComponentPtr(i);
+      // Component 0 is the Container wrapper; save its inner shape so it can be
+      // re-wrapped on load. Other components are stored as plain shapes.
+      IObject_const_sptr comp =
+          (i == 0) ? m_environment->getContainer().getShapePtr() : m_environment->getComponentPtr(i);
       saveShapeToFile(file, comp, tag);
       comp->material().saveNexus(file, tag + "material");
     }
