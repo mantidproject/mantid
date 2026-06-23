@@ -15,6 +15,7 @@
 #include "MantidDataHandling/RawFileInfo.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Glob.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/OptionalBool.h"
@@ -31,6 +32,12 @@ namespace {
  */
 inline std::string alternateDataStream(const std::filesystem::path &filePath) {
   return filePath.string() + ":checksum";
+}
+
+std::string installedOsirisIDFPath() {
+  return (std::filesystem::path(Mantid::Kernel::ConfigService::Instance().getInstrumentDirectory()) /
+          "OSIRIS_Definition.xml")
+      .string();
 }
 
 /**
@@ -530,6 +537,21 @@ std::vector<std::shared_ptr<HistogramData::HistogramX>> LoadRawHelper::getTimeCh
   return timeChannelsVec;
 }
 
+bool LoadRawHelper::shouldRewriteOsirisSiliconSpectraMap(const std::string &instrumentID,
+                                                         const DataObjects::Workspace2D_sptr &localWorkspace) const {
+  // Temporary OSIRIS silicon commissioning workaround: the current Si RAW files
+  // carry old UDET mappings, while the Si IDF uses spectra/detector IDs 1005-2564.
+  if (instrumentID != "OSIRIS" || !localWorkspace || localWorkspace->getNumberHistograms() == 0)
+    return false;
+
+  if (localWorkspace->getNumberHistograms() == 2565)
+    return true;
+
+  const auto firstSpectrum = localWorkspace->getSpectrum(0).getSpectrumNo();
+  const auto lastSpectrum = localWorkspace->getSpectrum(localWorkspace->getNumberHistograms() - 1).getSpectrumNo();
+  return firstSpectrum == 1005 && lastSpectrum == 2564;
+}
+
 /// Run the Child Algorithm LoadInstrument (or LoadInstrumentFromRaw)
 /// @param fileName :: the raw file filename
 /// @param localWorkspace :: The workspace to load the instrument for
@@ -554,9 +576,15 @@ void LoadRawHelper::runLoadInstrument(const std::string &fileName, const DataObj
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   bool executionSuccessful(true);
   try {
-    loadInst->setPropertyValue("InstrumentName", instrumentID);
+    if (shouldRewriteOsirisSiliconSpectraMap(instrumentID, localWorkspace)) {
+      g_log.information("Loading installed OSIRIS silicon IDF and rewriting spectra map");
+      loadInst->setPropertyValue("Filename", installedOsirisIDFPath());
+      loadInst->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
+    } else {
+      loadInst->setPropertyValue("InstrumentName", instrumentID);
+      loadInst->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
+    }
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
-    loadInst->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
     loadInst->execute();
   } catch (std::invalid_argument &) {
     g_log.information("Invalid argument to LoadInstrument Child Algorithm");
