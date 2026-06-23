@@ -448,9 +448,12 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_extract_spectra.return_value = mock_workspace
         mock_convert_units.return_value = mock_workspace
         model.extract_spectra_for_line_plot("TOF", False)
-        mock_extract_spectra.assert_called_once_with(
-            InputWorkspace=model._workspace, DetectorList=[1, 2], EnableLogging=False, StoreInADS=False
-        )
+        mock_extract_spectra.assert_called_once()
+        call_kwargs = mock_extract_spectra.call_args.kwargs
+        self.assertEqual(call_kwargs["InputWorkspace"], model._workspace)
+        np.testing.assert_array_equal(call_kwargs["DetectorList"], np.array([1, 2]))
+        self.assertEqual(call_kwargs["EnableLogging"], False)
+        self.assertEqual(call_kwargs["StoreInADS"], False)
         self.assertEqual(mock_convert_units.return_value, model.line_plot_workspace)
         self.assertEqual(model._current_linplot_unit, "TOF")
 
@@ -480,9 +483,17 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_sum_spectra.return_value = mock_workspace
         mock_rebin.return_value = mock_workspace
         model.extract_spectra_for_line_plot("TOF", True)
-        mock_extract_spectra.assert_called_once_with(
-            InputWorkspace=model._workspace, DetectorList=[2, 3], EnableLogging=False, StoreInADS=False
-        )
+        mock_extract_spectra.assert_called_once()
+        call_kwargs = mock_extract_spectra.call_args.kwargs
+        self.assertEqual(call_kwargs["InputWorkspace"], model._workspace)
+        self.assertEqual(call_kwargs["EnableLogging"], False)
+        self.assertEqual(call_kwargs["StoreInADS"], False)
+        # Check DetectorList - could be list or array
+        actual_list = call_kwargs["DetectorList"]
+        if isinstance(actual_list, np.ndarray):
+            np.testing.assert_array_equal(actual_list, [2, 3])
+        else:
+            self.assertEqual(actual_list, [2, 3])
         mock_rebin.assert_called_once_with(InputWorkspace=mock_workspace, Params=[0, 1, 2], EnableLogging=False, StoreInADS=False)
         mock_sum_spectra.assert_called_once_with(InputWorkspace=mock_workspace, EnableLogging=False, StoreInADS=False)
 
@@ -503,9 +514,17 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_sum_spectra.return_value = mock_workspace
         mock_rebin.return_value = mock_workspace
         model.extract_spectra_for_line_plot("TOF", True)
-        mock_extract_spectra.assert_called_once_with(
-            InputWorkspace=model._workspace, DetectorList=[2, 3], EnableLogging=False, StoreInADS=False
-        )
+        mock_extract_spectra.assert_called_once()
+        call_kwargs = mock_extract_spectra.call_args.kwargs
+        self.assertEqual(call_kwargs["InputWorkspace"], model._workspace)
+        self.assertEqual(call_kwargs["EnableLogging"], False)
+        self.assertEqual(call_kwargs["StoreInADS"], False)
+        # Check DetectorList - could be list or array
+        actual_list = call_kwargs["DetectorList"]
+        if isinstance(actual_list, np.ndarray):
+            np.testing.assert_array_equal(actual_list, [2, 3])
+        else:
+            self.assertEqual(actual_list, [2, 3])
         mock_rebin.assert_not_called()
         mock_sum_spectra.assert_called_once_with(InputWorkspace=mock_workspace, EnableLogging=False, StoreInADS=False)
 
