@@ -82,7 +82,7 @@ class AbsorptionCalculator:
             transmission = [transmission[spec_ind] for spec_ind in m.geometry.spec_inds]
         except RuntimeError:
             logger.warning("MonteCarloAbsorption has failed, sample is assumed to be outside the gauge volume ")
-            transmission = [0 for _ in m.geometry.spec_inds]
+            transmission = [0] * len(m.geometry.spec_inds)
         m.orientations.set_transmission_at_index(transmission, index)
 
     @staticmethod
