@@ -31,7 +31,7 @@ jobs:
     # The following steps use pixi to set up the development environment as specified in pixi.toml,
     # which includes pre-commit and other dependencies.
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup-pixi
         with:
           activate-environment: true
