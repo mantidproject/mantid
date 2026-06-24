@@ -20,6 +20,7 @@ from mantid.api import (
 from mantid.kernel import (
     Direction,
     EnabledWhenProperty,
+    LogicOperator,
     PropertyCriterion,
     FloatArrayProperty,
     FloatArrayLengthValidator,
@@ -85,6 +86,8 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
 
         self.declareProperty("NormaliseBy", "Time", StringListValidator(["None", "Time", "Monitor"]), "Normalise to monitor, time or None.")
 
+        self.declareProperty("NormalizeData", True, "When False, skip normalization of the output data even if vanadium data is provided.")
+
         # Alternative WS inputs
         self.declareProperty(
             "InputWorkspaces",
@@ -128,8 +131,8 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         self.declareProperty(
             "ScaleByMotorStep",
             False,
-            "If True then the intensity of the output in Q space will be scaled by the motor step size. "
-            "This will allow directly comparing the intensity of data measure with diffrent motor step sizes.",
+            "If True then the intensity of the Q-sample events output will be scaled by the motor step size. "
+            "This will allow directly comparing the intensity of data measured with different motor step sizes.",
         )
 
         # MDEvent WS Specific options for ConvertHFIRSCDtoQ
@@ -173,7 +176,7 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         self.setPropertySettings("InputWorkspaces", EnabledWhenProperty("Filename", PropertyCriterion.IsDefault))
         self.setPropertySettings("VanadiumWorkspace", EnabledWhenProperty("VanadiumFile", PropertyCriterion.IsDefault))
 
-        self.setPropertySettings("ScaleByMotorStep", EnabledWhenProperty("OutputType", PropertyCriterion.IsNotEqualTo, "Detector"))
+        self.setPropertySettings("ScaleByMotorStep", EnabledWhenProperty("OutputType", PropertyCriterion.IsEqualTo, "Q-sample events"))
 
         event_settings = EnabledWhenProperty("OutputType", PropertyCriterion.IsEqualTo, "Q-sample events")
         self.setPropertyGroup("MinValues", "MDEvent Settings")
@@ -202,12 +205,23 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         )
 
         self.declareProperty(
+            WorkspaceProperty("OutputNormalizationWorkspace", "", optional=PropertyMode.Optional, direction=Direction.Output),
+            doc="Optional: output normalization workspace of the same type as OutputWorkspace.",
+        )
+        self.setPropertySettings(
+            "OutputNormalizationWorkspace",
+            EnabledWhenProperty(
+                EnabledWhenProperty("OutputType", PropertyCriterion.IsEqualTo, "Q-sample events"),
+                EnabledWhenProperty("MergeInputs", PropertyCriterion.IsNotDefault),
+                LogicOperator.And,
+            ),
+        )
+
+        self.declareProperty(
             WorkspaceProperty("OutputGroupingWorkspace", "", optional=PropertyMode.Optional, direction=Direction.Output),
             doc="Optional: output GroupingWorkspace mapping every detector's workspace index to its group ID. "
             "Only produced when Grouping is '2x2' or '4x4'.",
         )
-        self.setPropertyGroup("Grouping", "Grouping")
-        self.setPropertyGroup("OutputGroupingWorkspace", "Grouping")
         self.setPropertySettings(
             "OutputGroupingWorkspace",
             EnabledWhenProperty("Grouping", PropertyCriterion.IsNotEqualTo, "None"),
@@ -276,6 +290,7 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         vanws = self.getProperty("VanadiumWorkspace").value
         height = self.getProperty("DetectorHeightOffset").value
         distance = self.getProperty("DetectorDistanceOffset").value
+        normalize_data = self.getProperty("NormalizeData").value
 
         wslist = []
 
@@ -339,26 +354,17 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
                     pass
 
             # Use ConvertHFIRSCDtoQ (and normalize van), or use ConvertWANDSCtoQ which handles normalization itself
-            if output == "Q-sample events":
-                norm_data = self.__normalization(scan, vanws, load_files)
-                minvals = self.getProperty("MinValues").value
-                maxvals = self.getProperty("MaxValues").value
-                merge = self.getProperty("MergeInputs").value
-                ConvertHFIRSCDtoMDE(
-                    InputWorkspace=norm_data, Wavelength=wavelength, MinValues=minvals, MaxValues=maxvals, OutputWorkspace=out_ws_name
-                )
-                DeleteWorkspace(norm_data)
-            elif output == "Q-sample histogram":
+            if output == "Q-sample histogram":
                 bin0 = self.getProperty("BinningDim0").value
                 bin1 = self.getProperty("BinningDim1").value
                 bin2 = self.getProperty("BinningDim2").value
                 # Convert to Q space and normalize with from the vanadium
                 ConvertWANDSCDtoQ(
                     InputWorkspace=scan,
-                    NormalisationWorkspace=vanws,
+                    NormalisationWorkspace=vanws if normalize_data else None,
                     Frame="Q_sample",
                     Wavelength=wavelength,
-                    NormaliseBy=self.getProperty("NormaliseBy").value,
+                    NormaliseBy=self.getProperty("NormaliseBy").value if normalize_data else "None",
                     BinningDim0=bin0,
                     BinningDim1=bin1,
                     BinningDim2=bin2,
@@ -366,8 +372,22 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
                 )
                 DeleteWorkspace(scan)
             else:
-                norm_data = self.__normalization(scan, vanws, load_files)
-                RenameWorkspace(norm_data, OutputWorkspace=out_ws_name)
+                if normalize_data:
+                    norm_data = self.__normalization(scan, vanws)
+                else:
+                    norm_data = scan
+                if output == "Detector":
+                    RenameWorkspace(norm_data, OutputWorkspace=out_ws_name)
+                elif output == "Q-sample events":
+                    minvals = self.getProperty("MinValues").value
+                    maxvals = self.getProperty("MaxValues").value
+                    merge = self.getProperty("MergeInputs").value
+                    ConvertHFIRSCDtoMDE(
+                        InputWorkspace=norm_data, Wavelength=wavelength, MinValues=minvals, MaxValues=maxvals, OutputWorkspace=out_ws_name
+                    )
+                    DeleteWorkspace(norm_data)
+                else:
+                    raise RuntimeError("Invalid output type '{}'".format(output))
 
         if has_multiple:
             out_ws_name = out_ws
@@ -532,46 +552,30 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
 
         return mtd[output_workspace_name], grouping_workspace
 
-    def __normalization(self, data, vanadium, load_files):
+    def __normalization(self, data, vanadium):
         if vanadium:
-            norm_data = ReplicateMD(ShapeWorkspace=data, DataWorkspace=vanadium)
+            norm_data = ReplicateMD(ShapeWorkspace=data, DataWorkspace=vanadium)  # `data` to be deleted later
             norm_data = DivideMD(LHSWorkspace=data, RHSWorkspace=norm_data)
-        elif load_files:
-            norm_data = data
         else:
-            norm_data = CloneMDWorkspace(data)
+            norm_data = data
 
-        if self.getProperty("ScaleByMotorStep").value and self.getProperty("OutputType").value != "Detector":
+        if self.getProperty("ScaleByMotorStep").value and self.getProperty("OutputType").value == "Q-sample events":
             run = data.getExperimentInfo(0).run()
             scan_log = "omega" if np.isclose(run.getTimeAveragedStd("phi"), 0.0) else "phi"
             scan_axis = run[scan_log].value
             scan_step = (scan_axis[-1] - scan_axis[0]) / (scan_axis.size - 1)
             norm_data *= scan_step
 
-        normaliseBy = self.getProperty("NormaliseBy").value
-
-        monitors = np.asarray(data.getExperimentInfo(0).run().getProperty("monitor").value)
-        times = np.asarray(data.getExperimentInfo(0).run().getProperty("time").value)
-
-        if load_files and vanadium:
-            DeleteWorkspace(data)
-
-        if normaliseBy == "Monitor":
-            scale = monitors
-        elif normaliseBy == "Time":
-            scale = times
-        else:
-            return norm_data
+        normaliseBy = self.getProperty("NormaliseBy").value.lower()
+        if normaliseBy in ("monitor", "time"):
+            scale = np.asarray(data.getExperimentInfo(0).run().getProperty(normaliseBy).value)
+            if vanadium:
+                scale /= vanadium.getExperimentInfo(0).run().getProperty(normaliseBy).value[0]
+            norm_data.setSignalArray(norm_data.getSignalArray() / scale)
+            norm_data.setErrorSquaredArray(norm_data.getErrorSquaredArray() / scale**2)
 
         if vanadium:
-            if normaliseBy == "Monitor":
-                scale /= vanadium.getExperimentInfo(0).run().getProperty("monitor").value[0]
-            elif normaliseBy == "Time":
-                scale /= vanadium.getExperimentInfo(0).run().getProperty("time").value[0]
-
-        norm_data.setSignalArray(norm_data.getSignalArray() / scale)
-        norm_data.setErrorSquaredArray(norm_data.getErrorSquaredArray() / scale**2)
-
+            DeleteWorkspace(data)  # clean up
         return norm_data
 
     def __move_components(self, ws, height, distance):

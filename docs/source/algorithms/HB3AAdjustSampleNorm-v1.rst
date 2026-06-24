@@ -35,7 +35,7 @@ pixel-by-pixel. The `NormaliseBy` option `time` or `monitor` uses that
 log values from the data (and vanadium if used) input and is applied
 to each scan axis step. The `ScaleByMotorStep` scales the entire data
 by the step size of either the `omega` or `chi` axis, this is only
-using when converting to Q-sample and allows the comparison of peak
+applied when ``OutputType`` is ``Q-sample events`` and allows the comparison of peak
 intensities found with :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>`
 to be directly compared between scans measured with different step
 sizes.
