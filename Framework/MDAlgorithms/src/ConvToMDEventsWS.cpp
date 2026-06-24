@@ -124,7 +124,7 @@ for computing Goniometer matrix or additional dimensions
 */
 size_t ConvToMDEventsWS::initialize(const MDWSDescription &WSD, std::shared_ptr<MDEventWSWrapper> inWSWrapper,
                                     bool ignoreZeros, bool useLogTimes) {
-  size_t numSpec = ConvToMDBase::initialize(WSD, inWSWrapper, ignoreZeros, useLogTimes);
+  size_t numSpec = ConvToMDBase::initialize(WSD, std::move(inWSWrapper), ignoreZeros, useLogTimes);
 
   m_EventWS = std::dynamic_pointer_cast<const DataObjects::EventWorkspace>(m_InWS2D);
   if (!m_EventWS)
