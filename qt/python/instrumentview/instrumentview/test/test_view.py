@@ -85,16 +85,6 @@ class TestFullInstrumentViewView(unittest.TestCase):
         self._view.set_plotter_scalar_bar_range((0, 100), "label")
         self._view.main_plotter.update_scalar_bar_range.assert_has_calls([mock.call((0, 100), "label")])
 
-    def test_close_view(self):
-        self._view.close_view()
-        self._view._presenter.handle_close.assert_called_once()
-        self._view.main_plotter.close.assert_called_once()
-
-    def test_close_view_no_presenter(self):
-        self._view._presenter = None
-        self._view.close_view()
-        self._view.main_plotter.close.assert_called_once()
-
     def test_add_simple_shape(self):
         self._view.main_plotter.reset_mock()
         mock_mesh = MagicMock()

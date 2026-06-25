@@ -34,6 +34,9 @@ class ALFInstrumentViewPresenter(FullInstrumentViewPresenter):
         self.init_view_and_model(ws)
 
     def init_view_and_model(self, ws):
+        old_view = getattr(self, "_view", None)
+        if old_view is not None:
+            old_view.close()
         super().__init__(ALFInstrumentViewView(), FullInstrumentViewModel(ws))
         self._view._select_bank_tube.toggle()
         self._view._render_mode_combo_box.setCurrentText(self._view._RENDER_MODE_SHAPES_FAST)

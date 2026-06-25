@@ -39,7 +39,6 @@ class MANTIDQT_DIRECT_DLL ALFPythonInstrumentView final : public ALFInstrumentVi
 
 public:
   explicit ALFPythonInstrumentView(QWidget *parent = nullptr);
-  ~ALFPythonInstrumentView() noexcept override = default;
 
   void setUpInstrument(std::string const &fileName) override;
 

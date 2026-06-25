@@ -504,8 +504,7 @@ class FullInstrumentViewView(QWidget):
     def closeEvent(self, event) -> None:
         """Closes view, not window"""
         self._closing = True
-        if not self.main_plotter._closed:
-            self.main_plotter.close()
+        self.main_plotter.close()
         with suppress(TypeError):
             self._contour_range_max_edit.disconnect()
             self._contour_range_min_edit.disconnect()

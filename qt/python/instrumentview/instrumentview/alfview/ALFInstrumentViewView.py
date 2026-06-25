@@ -9,6 +9,7 @@
 from qtpy.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget
 from instrumentview.FullInstrumentViewWindow import FullInstrumentViewView
 from typing import override
+from contextlib import suppress
 import re
 from qtpy.QtWidgets import QLineEdit, QPushButton
 
@@ -40,6 +41,9 @@ class ALFInstrumentViewView(FullInstrumentViewView):
         self.rebin_btn = QPushButton("Rebin")
         self.rebin_btn.setEnabled(False)  # disabled until input is valid
         self.rebin_btn.clicked.connect(self._on_rebin_clicked)
+
+        self.close_btn = QPushButton("Close")
+        self.close_btn.clicked.connect(self._on_close_clicked)
         super().__init__(parent)
 
     def _parse_rebin_args(self, text: str):
@@ -58,6 +62,21 @@ class ALFInstrumentViewView(FullInstrumentViewView):
             return
         self._presenter.rebin_button_clicked(params)
 
+    def _on_close_clicked(self):
+        super().close()
+
+    @override
+    def closeEvent(self, event):
+        # Prevent paint/update events while the underlying VTK resources are being torn down.
+        if getattr(self, "main_plotter", None) is not None:
+            with suppress(RuntimeError, AttributeError):
+                self.main_plotter.app_window.setUpdatesEnabled(False)
+            with suppress(RuntimeError, AttributeError):
+                self.main_plotter.app_window.hide()
+            with suppress(RuntimeError, AttributeError):
+                self.main_plotter.clear()
+        super().closeEvent(event)
+
     @override
     def _set_layouts(self):
         parent_layout = QHBoxLayout(self)
@@ -67,6 +86,7 @@ class ALFInstrumentViewView(FullInstrumentViewView):
         options_layout.addWidget(self._add_selection)
         options_layout.addWidget(self.rebin_btn)
         options_layout.addWidget(self.rebin_input)
+        options_layout.addWidget(self.close_btn)
         # NOTE: Widgets in the full view can be added as needed
         # options_layout.addWidget(self._select_bank_tube)
         # options_layout.addWidget(self._show_shapes_check_box)
@@ -74,4 +94,4 @@ class ALFInstrumentViewView(FullInstrumentViewView):
         options_layout.addWidget(self._spacer)
         options_widget.setFixedWidth(options_layout.sizeHint().width())
         parent_layout.addWidget(options_widget)
-        parent_layout.addWidget(self.main_plotter)
+        parent_layout.addWidget(self.main_plotter.app_window)
