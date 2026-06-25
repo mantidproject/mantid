@@ -91,17 +91,20 @@ class FullInstrumentViewPresenter:
     def _callback_worker(self):
         while True:
             item = self._callback_queue.get()
-            if item is self._callback_stop_sentinel:
-                self._callback_queue.task_done()
-                break
-            func, args = item
+            should_stop = False
             try:
-                if not self._closing:
-                    func(*args)
+                if item is self._callback_stop_sentinel:
+                    should_stop = True
+                else:
+                    func, args = item
+                    if not self._closing:
+                        func(*args)
             except Exception as e:
                 logger.error(f"Error in callback worker: {e}")
             finally:
                 self._callback_queue.task_done()
+            if should_stop:
+                break
 
     def setup(self):
         self._view.subscribe_presenter(self)
@@ -659,8 +662,6 @@ class FullInstrumentViewPresenter:
             del self._ads_observer
         if hasattr(self, "_callback_queue"):
             self._callback_queue.put(self._callback_stop_sentinel)
-
-        print("Reached close presenter")
 
     def on_sliders_unit_selected(self, value) -> None:
         self._model.set_integration_units(self._UNIT_OPTIONS[value])

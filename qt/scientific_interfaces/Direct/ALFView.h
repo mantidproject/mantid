@@ -35,6 +35,7 @@ public:
 
 protected:
   void initLayout() override;
+  void closeEvent(QCloseEvent *event) override;
 
 private slots:
   void openHelp();

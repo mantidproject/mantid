@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from typing import override
+
 from instrumentview.alfview.ALFInstrumentViewView import ALFInstrumentViewView
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
 from instrumentview.FullInstrumentViewPresenter import FullInstrumentViewPresenter
@@ -36,7 +37,6 @@ class ALFInstrumentViewPresenter(FullInstrumentViewPresenter):
         super().__init__(ALFInstrumentViewView(), FullInstrumentViewModel(ws))
         self._view._select_bank_tube.toggle()
         self._view._render_mode_combo_box.setCurrentText(self._view._RENDER_MODE_SHAPES_FAST)
-        # self._view.set_default_projection(ProjectionType.SIDE_BY_SIDE)
 
     def selected_detector_ids(self):
         return []

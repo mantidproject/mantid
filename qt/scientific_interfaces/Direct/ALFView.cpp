@@ -16,6 +16,7 @@
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/QtJobRunner.h"
 
+#include <QCloseEvent>
 #include <QSettings>
 #include <QSplitter>
 #include <QString>
@@ -57,6 +58,16 @@ ALFView::ALFView(QWidget *parent) : UserSubWindow(parent), m_instrumentPresenter
 }
 
 ALFView::~ALFView() { m_instrumentPresenter->saveSettings(); }
+
+void ALFView::closeEvent(QCloseEvent *event) {
+  // Explicitly close the Python view widget before the Qt widget hierarchy is
+  // torn down, so that its closeEvent fires and resources (e.g. VTK plotter)
+  // are cleaned up while all child widgets are still valid.
+  if (auto *widget = m_instrumentPresenter->getInstrumentView()) {
+    widget->close();
+  }
+  UserSubWindow::closeEvent(event);
+}
 
 void ALFView::disable(std::string const &reason) {
   this->setEnabled(false);

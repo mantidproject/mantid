@@ -75,6 +75,3 @@ class ALFInstrumentViewView(FullInstrumentViewView):
         options_widget.setFixedWidth(options_layout.sizeHint().width())
         parent_layout.addWidget(options_widget)
         parent_layout.addWidget(self.main_plotter)
-
-    def closeEvent(self, event):
-        super().close_view()

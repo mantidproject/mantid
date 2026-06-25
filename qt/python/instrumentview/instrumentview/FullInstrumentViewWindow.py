@@ -169,8 +169,8 @@ class FullInstrumentViewWindow(QMainWindow):
 
     def closeEvent(self, QCloseEvent: QEvent) -> None:
         """When closing, make sure to close the plotters and figure correctly to prevent errors"""
+        self.get_instrument_view_widget().close()
         super().closeEvent(QCloseEvent)
-        self.get_instrument_view_widget().close_view()
 
 
 @run_on_qapp_thread()
@@ -501,9 +501,11 @@ class FullInstrumentViewView(QWidget):
         # status_layout.addStretch()
         # left_column_home_layout.addWidget(self._status_group_box)
 
-    def close_view(self) -> None:
+    def closeEvent(self, event) -> None:
         """Closes view, not window"""
         self._closing = True
+        if not self.main_plotter._closed:
+            self.main_plotter.close()
         with suppress(TypeError):
             self._contour_range_max_edit.disconnect()
             self._contour_range_min_edit.disconnect()
@@ -512,10 +514,11 @@ class FullInstrumentViewView(QWidget):
         # Shut down any callbacks before closing the plotter and the figure
         if hasattr(self, "_presenter") and self._presenter is not None:
             self._presenter.handle_close()
-        self.main_plotter.close()
+
+        super().closeEvent(event)
 
     def close_window(self) -> None:
-        # NOTE: Triggers window close, which in turn calls close_view()
+        # NOTE: Triggers window close, which in turn closes view
         try:
             self.window().close()
         except RuntimeError:
