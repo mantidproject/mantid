@@ -16,6 +16,7 @@
 #include "MantidQtWidgets/InstrumentView/BankRenderingHelpers.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtWidgets/InstrumentView/OpenGLError.h"
+#include <cmath>
 
 using namespace MantidQt::MantidWidgets;
 using Mantid::Beamline::ComponentType;
@@ -322,8 +323,8 @@ void InstrumentRenderer::resetColors() {
         m_colors[det] = invalidColor;
       } else {
         const auto &color = rgba[det];
-        m_colors[det] =
-            GLColor(qRed(color), qGreen(color), qBlue(color), static_cast<int>(255 * (integratedValue / vmax)));
+        const int alpha = std::isnormal(vmax) ? static_cast<int>(255 * (integratedValue / vmax)) : 255;
+        m_colors[det] = GLColor(qRed(color), qGreen(color), qBlue(color), alpha);
       }
     } else {
       m_colors[det] = maskedColor;

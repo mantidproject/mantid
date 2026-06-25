@@ -40,6 +40,12 @@ void InstrumentRendererClassic::renderInstrument(const std::vector<bool> &visibl
   if (m_useDisplayList[i]) {
     glCallList(m_displayListId[i]);
   } else {
+    const auto genListId = glGenLists(1);
+    if (genListId == 0) {
+      if (OpenGLError::check("InstrumentRendererClassic::renderInstrument()")) {
+        throw Mantid::Kernel::Exception::OpenGLError("OpenGL: Failed to generate GL display list");
+      }
+    }
     m_displayListId[i] = glGenLists(1);
     m_useDisplayList[i] = true;
     glNewList(m_displayListId[i],
