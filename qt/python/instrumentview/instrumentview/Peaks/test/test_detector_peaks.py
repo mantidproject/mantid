@@ -61,24 +61,23 @@ class TestWorkspaceDetectorPeaks(unittest.TestCase):
         peak1 = Peak(10, 0, (1, 0, 0), 100, 10, 5, 2)
         peak2 = Peak(20, 1, (0, 1, 0), 200, 20, 15, 4)
         wdp = self._create_workspace_detector_peaks([DetectorPeaks([peak1]), DetectorPeaks([peak2])])
-        x_values, labels = wdp.get_x_values_and_labels("TOF", [10, 20])
-        self.assertEqual([100, 200], x_values)
-        self.assertEqual(["(1, 0, 0)", "(0, 1, 0)"], labels)
+        peaks = wdp.get_x_values_and_labels([10, 20])
+        self.assertEqual([100, 200], [peak.tof for peak in peaks])
+        self.assertEqual(["(1, 0, 0)", "(0, 1, 0)"], [peak.label for peak in peaks])
 
     def test_get_x_values_and_labels_filters_by_picked_detector_ids(self):
         peak1 = Peak(10, 0, (1, 0, 0), 100, 10, 5, 2)
         peak2 = Peak(20, 1, (0, 1, 0), 200, 20, 15, 4)
         wdp = self._create_workspace_detector_peaks([DetectorPeaks([peak1]), DetectorPeaks([peak2])])
-        x_values, labels = wdp.get_x_values_and_labels("TOF", [10])
-        self.assertEqual([100], x_values)
-        self.assertEqual(["(1, 0, 0)"], labels)
+        peaks = wdp.get_x_values_and_labels([10])
+        self.assertEqual([100], [peak.tof for peak in peaks])
+        self.assertEqual(["(1, 0, 0)"], [peak.label for peak in peaks])
 
     def test_get_x_values_and_labels_empty_when_no_matching_spectrum_numbers(self):
         peak1 = Peak(10, 0, (1, 0, 0), 100, 10, 5, 2)
         wdp = self._create_workspace_detector_peaks([DetectorPeaks([peak1])])
-        x_values, labels = wdp.get_x_values_and_labels("TOF", [99])
-        self.assertEqual([], x_values)
-        self.assertEqual([], labels)
+        peaks = wdp.get_x_values_and_labels([99])
+        self.assertEqual([], peaks)
 
     def test_get_positions_and_labels_peak_id_larger_than_all_detector_ids(self):
         # Peak detector ID (999) is larger than every entry in detector_ids.

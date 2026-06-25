@@ -399,12 +399,15 @@ class FullInstrumentViewPresenter:
 
         self.update_picked_detectors_on_view()
 
-    def _update_hover_pick_plot(self, point_index: int) -> None:
-        workspace_index = self._model.workspace_index_from_pickable_index(point_index)
-        if workspace_index is None:
+    def _update_hover_pick_plot(self, point_index: int | None) -> None:
+        if point_index is None:
             return
-        self._model.extract_spectra_for_line_plot(self._view.current_selected_lineplot_unit(), False, np.array([workspace_index]))
-        detector_info = self._model.detector_info_text_for_workspace_index(workspace_index)
+        n_pickable = int(np.count_nonzero(self._model.is_pickable))
+        if point_index < 0 or point_index >= n_pickable:
+            self._last_hovered_point_index = None
+            return
+        self._model.extract_spectra_for_line_plot(self._view.current_selected_lineplot_unit(), False, np.array([point_index]))
+        detector_info = self._model.detector_info_text_for_workspace_index(point_index)
         if len(detector_info) == 0:
             return
         self._view.show_plot_for_detectors(self._model.line_plot_workspace, self._model.lineplot_limits)

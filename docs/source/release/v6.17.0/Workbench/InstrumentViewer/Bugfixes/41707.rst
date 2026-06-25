@@ -1,0 +1,1 @@
+- New Instrument View now has correct peak lines in lineplot when the units are changed and/or the spectra in the lineplot are summed.

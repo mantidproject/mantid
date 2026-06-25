@@ -252,15 +252,6 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         np.testing.assert_equal(model._detector_is_picked, [False, True, False])
         np.testing.assert_equal(model._point_picked_detectors, [False, True, False])
 
-    def test_workspace_index_from_pickable_index(self):
-        model, _ = self._setup_model([1, 2, 3])
-        model._is_valid = np.array([True, True, True])
-        model._is_masked = np.array([False, False, False])
-        model._is_selected_in_tree = np.array([True, True, True])
-        model._workspace_indices = np.array([11, 22, 33])
-        self.assertEqual(model.workspace_index_from_pickable_index(1), 22)
-        self.assertIsNone(model.workspace_index_from_pickable_index(4))
-
     def test_detectors_with_no_spectra(self):
         self._setup_mocks([1, 20, 300, 400], monitors=np.array(["no", "no", "n/a", "yes"]))
         mock_workspace = self._create_mock_workspace([1, 20, 300, 400])
@@ -448,24 +439,29 @@ class TestFullInstrumentViewModel(unittest.TestCase):
     @mock.patch.object(FullInstrumentViewModel, "_match_workspace_unit", return_value=1.0)
     @mock.patch("instrumentview.FullInstrumentViewModel.ConvertUnits")
     @mock.patch("instrumentview.FullInstrumentViewModel.ExtractSpectra")
-    @mock.patch.object(FullInstrumentViewModel, "picked_workspace_indices", new_callable=mock.PropertyMock)
+    @mock.patch.object(FullInstrumentViewModel, "picked_detector_ids", new_callable=mock.PropertyMock)
     def test_extract_spectra_for_picked_detectors(
-        self, mock_picked_workspace_indices, mock_extract_spectra, mock_convert_units, _mock_match_unit
+        self, mock_picked_detector_ids, mock_extract_spectra, mock_convert_units, _mock_match_unit
     ):
         model, mock_workspace = self._setup_model([1, 2, 3])
-        mock_picked_workspace_indices.return_value = [1, 2]
+        mock_picked_detector_ids.return_value = np.array([1, 2])
+        mock_extract_spectra.return_value = mock_workspace
+        mock_convert_units.return_value = mock_workspace
         model.extract_spectra_for_line_plot("TOF", False)
-        mock_extract_spectra.assert_called_once_with(
-            InputWorkspace=model._workspace, WorkspaceIndexList=[1, 2], EnableLogging=False, StoreInADS=False
-        )
+        mock_extract_spectra.assert_called_once()
+        call_kwargs = mock_extract_spectra.call_args.kwargs
+        self.assertEqual(call_kwargs["InputWorkspace"], model._workspace)
+        np.testing.assert_array_equal(call_kwargs["DetectorList"], np.array([1, 2]))
+        self.assertEqual(call_kwargs["EnableLogging"], False)
+        self.assertEqual(call_kwargs["StoreInADS"], False)
         self.assertEqual(mock_convert_units.return_value, model.line_plot_workspace)
         self.assertEqual(model._current_linplot_unit, "TOF")
 
     @mock.patch("instrumentview.FullInstrumentViewModel.ExtractSpectra")
-    @mock.patch.object(FullInstrumentViewModel, "picked_workspace_indices", new_callable=mock.PropertyMock)
-    def test_extract_spectra_no_picked_detectors(self, mock_picked_workspace_indices, mock_extract_spectra):
+    @mock.patch.object(FullInstrumentViewModel, "picked_detector_ids", new_callable=mock.PropertyMock)
+    def test_extract_spectra_no_picked_detectors(self, mock_picked_detector_ids, mock_extract_spectra):
         model, _ = self._setup_model([1, 2, 3])
-        mock_picked_workspace_indices.return_value = []
+        mock_picked_detector_ids.return_value = []
         model.extract_spectra_for_line_plot("Wavelength", True)
         self.assertIsNone(model.line_plot_workspace)
         mock_extract_spectra.assert_not_called()
@@ -475,21 +471,29 @@ class TestFullInstrumentViewModel(unittest.TestCase):
     @mock.patch("instrumentview.FullInstrumentViewModel.Rebin")
     @mock.patch("instrumentview.FullInstrumentViewModel.SumSpectra")
     @mock.patch("instrumentview.FullInstrumentViewModel.ExtractSpectra")
-    @mock.patch.object(FullInstrumentViewModel, "picked_workspace_indices", new_callable=mock.PropertyMock)
+    @mock.patch.object(FullInstrumentViewModel, "picked_detector_ids", new_callable=mock.PropertyMock)
     def test_extract_spectra_sum(
-        self, mock_picked_workspace_indices, mock_extract_spectra, mock_sum_spectra, mock_rebin, mock_convert_units, _mock_match_unit
+        self, mock_picked_detector_ids, mock_extract_spectra, mock_sum_spectra, mock_rebin, mock_convert_units, _mock_match_unit
     ):
         model, mock_workspace = self._setup_model([1, 2, 3])
         mock_workspace.isCommonBins.return_value = False
-        mock_picked_workspace_indices.return_value = [1, 2]
+        mock_picked_detector_ids.return_value = np.array([2, 3])
         mock_extract_spectra.return_value = mock_workspace
         mock_convert_units.return_value = mock_workspace
         mock_sum_spectra.return_value = mock_workspace
         mock_rebin.return_value = mock_workspace
         model.extract_spectra_for_line_plot("TOF", True)
-        mock_extract_spectra.assert_called_once_with(
-            InputWorkspace=model._workspace, WorkspaceIndexList=[1, 2], EnableLogging=False, StoreInADS=False
-        )
+        mock_extract_spectra.assert_called_once()
+        call_kwargs = mock_extract_spectra.call_args.kwargs
+        self.assertEqual(call_kwargs["InputWorkspace"], model._workspace)
+        self.assertEqual(call_kwargs["EnableLogging"], False)
+        self.assertEqual(call_kwargs["StoreInADS"], False)
+        # Check DetectorList - could be list or array
+        actual_list = call_kwargs["DetectorList"]
+        if isinstance(actual_list, np.ndarray):
+            np.testing.assert_array_equal(actual_list, [2, 3])
+        else:
+            self.assertEqual(actual_list, [2, 3])
         mock_rebin.assert_called_once_with(InputWorkspace=mock_workspace, Params=[0, 1, 2], EnableLogging=False, StoreInADS=False)
         mock_sum_spectra.assert_called_once_with(InputWorkspace=mock_workspace, EnableLogging=False, StoreInADS=False)
 
@@ -498,21 +502,29 @@ class TestFullInstrumentViewModel(unittest.TestCase):
     @mock.patch("instrumentview.FullInstrumentViewModel.Rebin")
     @mock.patch("instrumentview.FullInstrumentViewModel.SumSpectra")
     @mock.patch("instrumentview.FullInstrumentViewModel.ExtractSpectra")
-    @mock.patch.object(FullInstrumentViewModel, "picked_workspace_indices", new_callable=mock.PropertyMock)
+    @mock.patch.object(FullInstrumentViewModel, "picked_detector_ids", new_callable=mock.PropertyMock)
     def test_extract_spectra_sum_common_bins(
-        self, mock_picked_workspace_indices, mock_extract_spectra, mock_sum_spectra, mock_rebin, mock_convert_units, _mock_match_unit
+        self, mock_picked_detector_ids, mock_extract_spectra, mock_sum_spectra, mock_rebin, mock_convert_units, _mock_match_unit
     ):
         model, mock_workspace = self._setup_model([1, 2, 3])
         mock_workspace.isCommonBins.return_value = True
-        mock_picked_workspace_indices.return_value = [1, 2]
+        mock_picked_detector_ids.return_value = np.array([2, 3])
         mock_extract_spectra.return_value = mock_workspace
         mock_convert_units.return_value = mock_workspace
         mock_sum_spectra.return_value = mock_workspace
         mock_rebin.return_value = mock_workspace
         model.extract_spectra_for_line_plot("TOF", True)
-        mock_extract_spectra.assert_called_once_with(
-            InputWorkspace=model._workspace, WorkspaceIndexList=[1, 2], EnableLogging=False, StoreInADS=False
-        )
+        mock_extract_spectra.assert_called_once()
+        call_kwargs = mock_extract_spectra.call_args.kwargs
+        self.assertEqual(call_kwargs["InputWorkspace"], model._workspace)
+        self.assertEqual(call_kwargs["EnableLogging"], False)
+        self.assertEqual(call_kwargs["StoreInADS"], False)
+        # Check DetectorList - could be list or array
+        actual_list = call_kwargs["DetectorList"]
+        if isinstance(actual_list, np.ndarray):
+            np.testing.assert_array_equal(actual_list, [2, 3])
+        else:
+            self.assertEqual(actual_list, [2, 3])
         mock_rebin.assert_not_called()
         mock_sum_spectra.assert_called_once_with(InputWorkspace=mock_workspace, EnableLogging=False, StoreInADS=False)
 
@@ -520,17 +532,18 @@ class TestFullInstrumentViewModel(unittest.TestCase):
     @mock.patch("instrumentview.FullInstrumentViewModel.ConvertUnits")
     @mock.patch("instrumentview.FullInstrumentViewModel.SumSpectra")
     @mock.patch("instrumentview.FullInstrumentViewModel.ExtractSpectra")
-    @mock.patch.object(FullInstrumentViewModel, "picked_workspace_indices", new_callable=mock.PropertyMock)
+    @mock.patch.object(FullInstrumentViewModel, "picked_detector_ids", new_callable=mock.PropertyMock)
     def test_extract_spectra_sum_one_spectra(
-        self, mock_picked_workspace_indices, mock_extract_spectra, mock_sum_spectra, mock_convert_units, _mock_match_unit
+        self, mock_picked_detector_ids, mock_extract_spectra, mock_sum_spectra, mock_convert_units, _mock_match_unit
     ):
         model, mock_workspace = self._setup_model([1, 2, 3])
-        mock_picked_workspace_indices.return_value = [2]
+        mock_picked_detector_ids.return_value = np.array([3])
         mock_extract_spectra.return_value = mock_workspace
+        mock_convert_units.return_value = mock_workspace
         mock_sum_spectra.return_value = mock_workspace
         model.extract_spectra_for_line_plot("Wavelength", True)
         mock_extract_spectra.assert_called_once_with(
-            InputWorkspace=model._workspace, WorkspaceIndexList=[2], EnableLogging=False, StoreInADS=False
+            InputWorkspace=model._workspace, DetectorList=[3], EnableLogging=False, StoreInADS=False
         )
         mock_workspace.applyBinEdgesFromAnotherWorkspace.assert_not_called()
         mock_sum_spectra.assert_not_called()
@@ -538,13 +551,23 @@ class TestFullInstrumentViewModel(unittest.TestCase):
     @mock.patch.object(FullInstrumentViewModel, "_match_workspace_unit", return_value=1.0)
     @mock.patch("instrumentview.FullInstrumentViewModel.ConvertUnits")
     @mock.patch("instrumentview.FullInstrumentViewModel.ExtractSpectra")
+    @mock.patch.object(FullInstrumentViewModel, "picked_detector_ids", new_callable=mock.PropertyMock)
     @mock.patch.object(FullInstrumentViewModel, "picked_workspace_indices", new_callable=mock.PropertyMock)
     @mock.patch("instrumentview.FullInstrumentViewModel.AnalysisDataService")
     def test_save_line_plot_workspace_to_ads(
-        self, mock_ads, mock_picked_workspace_indices, mock_extract_spectra, mock_convert_units, _mock_match_unit
+        self,
+        mock_ads,
+        mock_picked_workspace_indices,
+        mock_picked_detector_ids,
+        mock_extract_spectra,
+        mock_convert_units,
+        _mock_match_unit,
     ):
-        model, _ = self._setup_model([1, 2, 3])
-        mock_picked_workspace_indices.return_value = [1, 2]
+        model, mock_workspace = self._setup_model([1, 2, 3])
+        mock_picked_workspace_indices.return_value = [0, 1]
+        mock_picked_detector_ids.return_value = np.array([1, 2])
+        mock_extract_spectra.return_value = mock_workspace
+        mock_convert_units.return_value = mock_workspace
         model.extract_spectra_for_line_plot("TOF", False)
         mock_extract_spectra.assert_called_once()
         model.save_line_plot_workspace_to_ads()
@@ -1004,7 +1027,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_match_units.return_value = 2500
         peak_x = 1500
         ws = model.add_peak(peak_x, ["my_peaks_ws"])
-        mock_match_units.assert_called_once_with(model.line_plot_workspace, 0, peak_x, model._lineplot_ws_in_base_units)
+        mock_match_units.assert_called_once_with(model.line_plot_workspace, 0, peak_x, model._lineplot_ws_in_base_units_not_summed)
         mock_add_peak.assert_called_once_with("my_peaks_ws", model._workspace, 2500, 3)
         self.assertEqual("my_peaks_ws", ws)
 
@@ -1253,10 +1276,14 @@ class TestFullInstrumentViewModel(unittest.TestCase):
     def test_get_peak_lineplot_overlay_arguments_filters_nonexistent_workspaces(self, mock_wdp_cls, mock_ads, mock_match_unit):
         """Workspaces that don't exist in ADS are filtered out."""
         model, _ = self._setup_model([1, 2, 3])
+        model._detector_is_picked = np.array([True, False, False])
+        model.line_plot_det_ids = np.array([1])
+        model._lineplot_ws_in_base_units_not_summed = MagicMock()
+        model._lineplot_ws_in_selected_units_not_summed = MagicMock()
         mock_ads.doesExist.side_effect = lambda name: name == "ws1"
         mock_match_unit.side_effect = lambda ws_from, idx, x_from, ws_to: x_from
         mock_wdp = MagicMock()
-        mock_wdp.get_x_values_and_labels.return_value = ([1.5], ["label1"])
+        mock_wdp.get_x_values_and_labels.return_value = [Peak(1, 0, (1.0, 2.0, 3.0), 1.5, 1.5, 1.5, 1.5)]
         mock_wdp_cls.return_value = mock_wdp
 
         x_vals, labels, ws_names = model.get_peak_lineplot_overlay_arguments(["ws1", "ws_gone"])
@@ -1284,13 +1311,20 @@ class TestFullInstrumentViewModel(unittest.TestCase):
     def test_get_peak_lineplot_overlay_arguments_multiple_workspaces(self, mock_wdp_cls, mock_ads, mock_match_unit):
         """Returns separate x-values and labels per workspace."""
         model, _ = self._setup_model([1, 2, 3])
+        model._detector_is_picked = np.array([True, True, False])
+        model.line_plot_det_ids = np.array([1, 2])
+        model._lineplot_ws_in_base_units_not_summed = MagicMock()
+        model._lineplot_ws_in_selected_units_not_summed = MagicMock()
         mock_ads.doesExist.return_value = True
         mock_match_unit.side_effect = lambda ws_from, idx, x_from, ws_to: x_from
 
         ws1_wdp = MagicMock()
-        ws1_wdp.get_x_values_and_labels.return_value = ([100.0], ["hkl_1"])
+        ws1_wdp.get_x_values_and_labels.return_value = [Peak(1, 0, (1.0, 0.0, 0.0), 100.0, 100.0, 100.0, 100.0)]
         ws2_wdp = MagicMock()
-        ws2_wdp.get_x_values_and_labels.return_value = ([200.0, 300.0], ["hkl_2", "hkl_3"])
+        ws2_wdp.get_x_values_and_labels.return_value = [
+            Peak(2, 0, (0.0, 1.0, 0.0), 200.0, 200.0, 200.0, 200.0),
+            Peak(2, 1, (0.0, 0.0, 1.0), 300.0, 300.0, 300.0, 300.0),
+        ]
         mock_wdp_cls.side_effect = lambda name, unit, limits: {"ws1": ws1_wdp, "ws2": ws2_wdp}[name]
 
         x_vals, labels, ws_names = model.get_peak_lineplot_overlay_arguments(["ws1", "ws2"])
@@ -1298,8 +1332,8 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         self.assertEqual(ws_names, ["ws1", "ws2"])
         self.assertEqual(x_vals[0], [100.0])
         self.assertEqual(x_vals[1], [200.0, 300.0])
-        self.assertEqual(labels[0], ["hkl_1"])
-        self.assertEqual(labels[1], ["hkl_2", "hkl_3"])
+        self.assertEqual(labels[0], ["(1, 0, 0)"])
+        self.assertEqual(labels[1], ["(0, 1, 0)", "(0, 0, 1)"])
 
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel._match_workspace_unit")
     @mock.patch("instrumentview.FullInstrumentViewModel.AnalysisDataService")
@@ -1308,15 +1342,18 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         """The workspace base unit is forwarded to get_x_values_and_labels."""
         model, _ = self._setup_model([1, 2, 3])
         model._detector_is_picked = np.array([True, False, False])
+        model.line_plot_det_ids = np.array([1])
+        model._lineplot_ws_in_base_units_not_summed = MagicMock()
+        model._lineplot_ws_in_selected_units_not_summed = MagicMock()
         mock_ads.doesExist.return_value = True
         mock_match_unit.side_effect = lambda ws_from, idx, x_from, ws_to: x_from
         mock_wdp = MagicMock()
-        mock_wdp.get_x_values_and_labels.return_value = ([], [])
+        mock_wdp.get_x_values_and_labels.return_value = []
         mock_wdp_cls.return_value = mock_wdp
 
         model.get_peak_lineplot_overlay_arguments(["ws1"])
 
-        mock_wdp.get_x_values_and_labels.assert_called_once_with("dSpacing", model.picked_detector_ids)
+        mock_wdp.get_x_values_and_labels.assert_called_once_with(model.picked_detector_ids)
 
 
 if __name__ == "__main__":

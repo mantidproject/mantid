@@ -44,7 +44,7 @@ class NotebookPresenter:
         mask[indices] = True
         self._model.negate_picked_visibility(mask)
         self._pickable_mesh[self._visible_label] = self._model.picked_visibility
-        self._model.extract_spectra_for_line_plot(self._model.workspace_x_unit, sum_spectra)
+        self._model.extract_spectra_for_line_plot(self._model._workspace_x_unit, sum_spectra)
         if self._model.line_plot_workspace is None or self._model.line_plot_workspace.getNumberHistograms() == 0:
             return None
         return self._view.plot_spectra(self._model.line_plot_workspace, sum_spectra)
