@@ -73,7 +73,6 @@ private:
       m_Goniometer.setRotationAngle(m_GonioIndex[axIdx], logval);
     }
     m_tmpRot = m_Goniometer.getR() * m_Wtransf;
-    m_tmpRot.Invert();
     m_QConverter->updateRotMat(m_tmpRot.getVector());
     return true;
   }

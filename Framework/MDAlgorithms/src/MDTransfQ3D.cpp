@@ -57,7 +57,7 @@ bool MDTransfQ3D::calcMatrixCoord(const double &deltaEOrK0, std::vector<coord_t>
 * transfer and put them into initial positions (0 and 1) in the Coord vector
 *
 *@param   deltaE   input energy transfer
-*@param   &Coord  vector of MD coordinates with filled in momentum and energy
+*@param   Coord  vector of MD coordinates with filled in momentum and energy
 transfer
 
 *@return   true if all momentum and energy are within the limits requested by
@@ -70,7 +70,6 @@ bool MDTransfQ3D::calcMatrixCoord3DInelastic(const double &deltaE, std::vector<c
   Coord[3] = static_cast<coord_t>(deltaE);
   if (Coord[3] < m_DimMin[3] || Coord[3] >= m_DimMax[3])
     return false;
-
   // x,y,z refer to internal coordinate system where Z is the beam direction
   double qx{0.0}, qy{0.0}, qz{0.0};
   if (m_Emode == Kernel::DeltaEMode::Direct) {
@@ -91,14 +90,18 @@ bool MDTransfQ3D::calcMatrixCoord3DInelastic(const double &deltaE, std::vector<c
     qz = -qz;
   }
 
-  Coord[0] = static_cast<coord_t>(m_RotMat[0] * qx + m_RotMat[1] * qy + m_RotMat[2] * qz);
+  if (m_invertRot) {
+    calcMatrixCoordLinSys({qx, qy, qz}, Coord);
+  } else {
+    Coord[0] = static_cast<coord_t>(m_RotMat[0] * qx + m_RotMat[1] * qy + m_RotMat[2] * qz);
+    Coord[1] = static_cast<coord_t>(m_RotMat[3] * qx + m_RotMat[4] * qy + m_RotMat[5] * qz);
+    Coord[2] = static_cast<coord_t>(m_RotMat[6] * qx + m_RotMat[7] * qy + m_RotMat[8] * qz);
+  }
 
   if (Coord[0] < m_DimMin[0] || Coord[0] >= m_DimMax[0])
     return false;
-  Coord[1] = static_cast<coord_t>(m_RotMat[3] * qx + m_RotMat[4] * qy + m_RotMat[5] * qz);
   if (Coord[1] < m_DimMin[1] || Coord[1] >= m_DimMax[1])
     return false;
-  Coord[2] = static_cast<coord_t>(m_RotMat[6] * qx + m_RotMat[7] * qy + m_RotMat[8] * qz);
   if (Coord[2] < m_DimMin[2] || Coord[2] >= m_DimMax[2])
     return false;
 
@@ -113,7 +116,7 @@ bool MDTransfQ3D::calcMatrixCoord3DInelastic(const double &deltaE, std::vector<c
 * put it into specified (0) position in the Coord vector
 *
 *@param   k0   module of input momentum
-*@param   &Coord  vector of MD coordinates with filled in momentum and energy
+*@param   Coord  vector of MD coordinates with filled in momentum and energy
 transfer
 *@param   signal signal
 *@param   errSq error squared
@@ -136,17 +139,20 @@ bool MDTransfQ3D::calcMatrixCoord3DElastic(const double &k0, std::vector<coord_t
     qz = -qz;
   }
 
+  if (m_invertRot) {
+    calcMatrixCoordLinSys({qx, qy, qz}, Coord);
+  } else {
+    Coord[0] = static_cast<coord_t>(m_RotMat[0] * qx + m_RotMat[1] * qy + m_RotMat[2] * qz);
+    Coord[1] = static_cast<coord_t>(m_RotMat[3] * qx + m_RotMat[4] * qy + m_RotMat[5] * qz);
+    Coord[2] = static_cast<coord_t>(m_RotMat[6] * qx + m_RotMat[7] * qy + m_RotMat[8] * qz);
+  }
+
   // Dimension limits have to be converted to coord_t, otherwise floating point
   // error will cause valid events to be discarded.
-  Coord[0] = static_cast<coord_t>(m_RotMat[0] * qx + m_RotMat[1] * qy + m_RotMat[2] * qz);
   if (Coord[0] < static_cast<coord_t>(m_DimMin[0]) || Coord[0] >= static_cast<coord_t>(m_DimMax[0]))
     return false;
-
-  Coord[1] = static_cast<coord_t>(m_RotMat[3] * qx + m_RotMat[4] * qy + m_RotMat[5] * qz);
   if (Coord[1] < static_cast<coord_t>(m_DimMin[1]) || Coord[1] >= static_cast<coord_t>(m_DimMax[1]))
     return false;
-
-  Coord[2] = static_cast<coord_t>(m_RotMat[6] * qx + m_RotMat[7] * qy + m_RotMat[8] * qz);
   if (Coord[2] < static_cast<coord_t>(m_DimMin[2]) || Coord[2] >= static_cast<coord_t>(m_DimMax[2]))
     return false;
 

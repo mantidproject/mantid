@@ -75,8 +75,10 @@ public:
 
   void updateRotMat(const std::vector<double> &newMat) override { m_RotMat = newMat; }
   std::pair<coord_t, coord_t> getDimBounds(size_t dim) const override;
+  void setInvertRot(bool isInvert) override { m_invertRot = isInvert; }
 
 protected:
+  void calcMatrixCoordLinSys(const std::vector<double> &q, std::vector<coord_t> &Coord) const;
   //  directions to the detectors
   double m_ex, m_ey, m_ez;
   // the matrix which transforms the neutron momentums from laboratory to
@@ -111,6 +113,7 @@ protected:
   // untill Mantid masks spectra by 0 instead of NaNs, when switched to NaN-s --
   // remove
   int *m_pDetMasks;
+  bool m_invertRot; // whether rot matrix is not inverted prior to solving q
 
 private:
   /// how to transform workspace data in elastic case

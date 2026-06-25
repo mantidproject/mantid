@@ -150,14 +150,16 @@ size_t ConvToMDEventsWS::initialize(const MDWSDescription &WSD, std::shared_ptr<
         m_GonioIndex.push_back(n);
       }
     }
-
     const auto &dimNames = WSD.getDimNames();
     for (auto it = dimNames.cbegin() + m_NMatrixDimensions; it != dimNames.cend(); ++it) {
       m_Logs.push_back(
           std::unique_ptr<Kernel::TimeSeriesProperty<double>>(run.getTimeSeriesProperty<double>(*it)->clone()));
       m_extraDimBounds.push_back(m_QConverter->getDimBounds(it - dimNames.cbegin()));
     }
-    m_tmpRot = Kernel::DblMatrix(3, 3);
+    if (!m_GonioIndex.empty()) {
+      m_tmpRot = Kernel::DblMatrix(3, 3);
+      m_QConverter->setInvertRot(true);
+    }
   }
 
   return numSpec;
