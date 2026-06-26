@@ -114,7 +114,7 @@ class WorkspaceManager:
         self.offset = (0, 0, 0)
         self.gauge_volume_str = None
         # stl_settings
-        self.stl_kwargs = {"Scale": "cm", "XDegrees": 0, "YDegrees": 0, "ZDegrees": "0", "TranslationVector": "0,0,0"}
+        self.stl_kwargs = {"Scale": "cm", "XDegrees": 0, "YDegrees": 0, "ZDegrees": 0, "TranslationVector": "0,0,0"}
         # attenuation-point settings read by AbsorptionCalculator. The material itself lives on
         # material_ws (the ground truth), not here.
         self.attenuation_kwargs = {"point": 1.5, "unit": "dSpacing"}

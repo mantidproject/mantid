@@ -43,7 +43,7 @@ class TestWorkspaceManager_Init(unittest.TestCase):
         self.assertEqual(wm.attenuation_kwargs, {"point": 1.5, "unit": "dSpacing"})
         self.assertEqual(
             wm.stl_kwargs,
-            {"Scale": "cm", "XDegrees": 0, "YDegrees": 0, "ZDegrees": "0", "TranslationVector": "0,0,0"},
+            {"Scale": "cm", "XDegrees": 0, "YDegrees": 0, "ZDegrees": 0, "TranslationVector": "0,0,0"},
         )
 
     def test_instr_property_reads_from_model(self):
