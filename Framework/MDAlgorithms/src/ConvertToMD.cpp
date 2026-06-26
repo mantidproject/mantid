@@ -292,7 +292,7 @@ void ConvertToMD::exec() {
   copyMetaData(spws);
 
   // progress reporter
-  m_Progress.reset(new API::Progress(this, 0.0, 1.0, n_steps));
+  m_Progress = std::make_unique<Progress>(this, 0.0, 1.0, n_steps);
 
   g_log.information() << " conversion started\n";
   // DO THE JOB:
