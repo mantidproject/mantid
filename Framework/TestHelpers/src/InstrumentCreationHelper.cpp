@@ -44,6 +44,7 @@ void addFullInstrumentToWorkspace(MatrixWorkspace &workspace, bool includeMonito
     physicalPixel->setPos(0.0, ypos, detZPos);
     instrument->add(physicalPixel);
     instrument->markAsDetector(physicalPixel);
+    instrument->setXmlText("Fake XML");
     workspace.getSpectrum(i).setDetectorID(physicalPixel->getID());
   }
 
