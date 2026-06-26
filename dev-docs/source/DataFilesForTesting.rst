@@ -85,14 +85,14 @@ CMake variable and defaults to ``build/ExternalData``.
 Using Existing Data
 ###################
 
-For unit testings, there are two places files may be found:
+For unit testing, there are two places where files may be found:
 
 - `.../Testing/Data/ <https://github.com/mantidproject/mantid/tree/main/Testing/Data>`__
   for :ref:`unit test <RunningTheUnitTests>`, :ref:`doc test <DocumentationGuideForDevs>`, and :ref:`system test <SystemTests>` data
 - `.../instrument/unit_testing <https://github.com/mantidproject/mantid/tree/main/instrument/unit_testing>`__
   for test :ref:`IDF <InstrumentDefinitionFile>` files
 
-For system testings, there is one more location developers use to dump reference
+For system testing, there is one more location developers use to dump reference
 data files:
 
 - `.../Testing/SystemTests/tests/framework/reference`
@@ -104,12 +104,12 @@ corresponding tests:
 - `.../Testing/Data/SystemTest`
 - `.../Testing/Data/UnitTest`
 
-However, it is known that some developers like to reuse the same data files for different type of tests,
-therefore sometimes the DocTest and SystemTest are using data from UnitTest, which means you should fetch
-all testing data before trying to run any test locally. Furthermore, this location is mostly considered as
-a centralized location for all testing data. But some groups prefer to treat this location for storing **input**
-testing data only, therefore the testing system will look for the reference folder mentioned above if it cannot
-find the reference data here. There are many examples where the same data file having to be duplicated accross multiple locations as required by the tests.
+However, it is known that some developers like to reuse the same data files for different types of tests.
+Therefore, sometimes the DocTest and SystemTest are using data from UnitTest, which means you should fetch
+all testing data before trying to run any test locally. Furthermore, this location is mostly considered a
+centralized location for all testing data. But some groups prefer to treat this location as storing **input**
+testing data only; therefore the testing system will look for the reference folder mentioned above if it cannot
+find the reference data here. There are many examples where the same data file has to be duplicated across multiple locations as required by the tests.
 Overall, it is important to talk to the senior developers in your team to learn the
 preferred location for storing testing data.
 
@@ -132,7 +132,7 @@ This does the following:
    ``d6948514d78db7fe251efb6cce4a9b83``
 -  Stores the MD5 hash in a file called
    ``Testing/Data/UnitTest/INST12345.nxs.md5``
--  Renames the original data file to be its md5 sum
+-  Renames the original data file to its MD5 sum
    ``Testing/Data/UnitTest/d6948514d78db7fe251efb6cce4a9b83``
 -  Runs ``git add Testing/Data/UnitTest/INST12345.nxs.md5``
 -  Tells the user to upload the file(s),
@@ -206,11 +206,11 @@ Example cmake command:
 Setting With Dropbox:
 ---------------------
 
-This is for people in the ORNL dropbox share and has the effect of
+This is for people in the ORNL Dropbox share and has the effect of
 reducing external network traffic. There is a `gist
 <http://gist.github.com/peterfpeterson/638490530e37c3d8dba5>`__ for
-getting dropbox running on linux. Instead of defining the
-``MANTID_DATA_STORE`` in cmake, it is simplest to create a symbolic
+getting Dropbox running on Linux. Instead of defining the
+``MANTID_DATA_STORE`` in CMake, it is simplest to create a symbolic
 link
 
 .. code-block:: sh
@@ -222,11 +222,11 @@ Then everything will happen automatically using CMake's default behavior.
 Proxy Settings
 --------------
 
-If you are sitting behind a proxy server then the shell or Visual studio
+If you are sitting behind a proxy server, then the shell or Visual Studio
 needs to know about the proxy server. You must set the ``http_proxy``
 environment variable to ``http://HOSTNAME:PORT``.
 
-On Windows you go to ``Control Panel->System`` and
+On Windows, go to ``Control Panel->System`` and
 ``Security->System->Advanced System settings->Environment Variables`` and
 click ``New...`` to add a variable.
 
