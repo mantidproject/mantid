@@ -427,8 +427,8 @@ void MDTransfModQ::calcMatrixCoordLinSys(const std::vector<double> &q, std::vect
   // has to be recomputed multiple times, so it is not inverted prior to calculating the coordinates.
   // Deferring to a linear system solution here makes it slightly more efficient and stable.
   Eigen::Map<const Eigen::Matrix<double, 3, 3, Eigen::RowMajor>> map_rm(m_RotMat.data());
-  const Eigen::Vector3d qs = {q[0], q[1], q[2]};
-  const Eigen::PartialPivLU<Eigen::Matrix3d> lu(map_rm);
+  const Eigen::Vector3d qs(q[0], q[1], q[2]);
+  const Eigen::PartialPivLU<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>> lu(map_rm);
   Eigen::Vector3d coords = lu.solve(qs);
 
   Coord[0] = static_cast<coord_t>(coords[0]);
