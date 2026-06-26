@@ -401,7 +401,6 @@ set(MOC_FILES
     inc/MantidQtWidgets/Common/TextPropertyWidget.h
     inc/MantidQtWidgets/Common/UserSubWindow.h
     inc/MantidQtWidgets/Common/WorkspaceObserver.h
-    inc/MantidQtWidgets/Common/SelectionNotificationService.h
     inc/MantidQtWidgets/Common/AlgorithmSelectorWidget.h
     inc/MantidQtWidgets/Common/CheckboxHeader.h
     inc/MantidQtWidgets/Common/Batch/JobTreeView.h
@@ -446,7 +445,6 @@ set(MOC_FILES
     inc/MantidQtWidgets/Common/SequentialFitDialog.h
     inc/MantidQtWidgets/Common/SlicingAlgorithmDialog.h
     inc/MantidQtWidgets/Common/SlitCalculator.h
-    inc/MantidQtWidgets/Common/TrackedAction.h
     inc/MantidQtWidgets/Common/UserFunctionDialog.h
     inc/MantidQtWidgets/Common/WorkspaceSelector.h
     inc/MantidQtWidgets/Common/WorkspaceMultiSelector.h
@@ -514,7 +512,6 @@ set(INC_FILES
     inc/MantidQtWidgets/Common/MockQtAlgorithmRunner.h
     inc/MantidQtWidgets/Common/NonOrthogonal.h
     inc/MantidQtWidgets/Common/pixmaps.h
-    inc/MantidQtWidgets/Common/PlotAxis.h
     inc/MantidQtWidgets/Common/PluginLibraries.h
     inc/MantidQtWidgets/Common/PropertyWidgetFactory.h
     inc/MantidQtWidgets/Common/QScienceSpinBox.h
@@ -523,7 +520,6 @@ set(INC_FILES
     inc/MantidQtWidgets/Common/QStringUtils.h
     inc/MantidQtWidgets/Common/QtJSONUtils.h
     inc/MantidQtWidgets/Common/ScriptRepositoryView.h
-    inc/MantidQtWidgets/Common/SelectionNotificationService.h
     inc/MantidQtWidgets/Common/UserSubWindowFactory.h
     inc/MantidQtWidgets/Common/TSVSerialiser.h
     inc/MantidQtWidgets/Common/UserInputValidator.h
@@ -557,8 +553,6 @@ set(INC_FILES
     inc/MantidQtWidgets/Common/ProgressableView.h
     inc/MantidQtWidgets/Common/MockProgressableView.h
     inc/MantidQtWidgets/Common/ProgressPresenter.h
-    inc/MantidQtWidgets/Common/ProjectSavePresenter.h
-    inc/MantidQtWidgets/Common/ProjectSaveModel.h
     inc/MantidQtWidgets/Common/WorkspacePresenter/ADSAdapter.h
     inc/MantidQtWidgets/Common/WorkspacePresenter/IWorkspaceDockView.h
     inc/MantidQtWidgets/Common/WorkspacePresenter/ViewNotifiable.h
@@ -700,32 +694,17 @@ mtd_add_qt_library(
 # # This line is now removed/commented
 
 set(TEST_FILES
-    test/AlgorithmHintStrategyTest.h
     test/BatchAlgorithmRunnerTest.h
-    test/ConvolutionFunctionModelTest.h
     test/FileDialogHandlerTest.h
     test/FindFilesThreadPoolManagerTest.h
     test/FindFilesWorkerTest.h
     test/FitPropertyBrowserTest.h
-    test/FunctionModelTest.h
-    test/FunctionMultiDomainPresenterTest.h
-    test/FunctionBrowserUtilsTest.h
-    test/LogValueFinderTest.h
     test/ImageInfoModelMatrixWSTest.h
     test/ImageInfoModelMDTest.h
     test/ImageInfoPresenterTest.h
     test/InterfaceManagerTest.h
     test/MuonPeriodInfoTest.h
-    test/NonOrthogonalTest.h
     test/ParseKeyValueStringTest.h
-    test/PlotAxisTest.h
-    test/ProgressableViewTest.h
-    test/ProjectSaveModelTest.h
-    test/ProjectSavePresenterTest.h
-    test/SelectionNotificationServiceTest.h
-    test/SelectionWorkspacesDialogTest.h
-    test/TrackedActionTest.h
-    test/QtJSONUtilsTest.h
     test/WorkspaceUtilsTest.h
     test/Batch/BuildSubtreeItemsTest.h
     test/Batch/ExtractSubtreesTest.h
@@ -740,8 +719,10 @@ set(CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/test/WidgetsCommonTes
 
 set(QT5_TEST_FILES
     test/AlgorithmRunnerTest.h
+    test/AlgorithmHintStrategyTest.h
     test/AlgorithmPropertiesWidgetTest.h
     test/BatchAlgorithmRunnerTest.h
+    test/ConvolutionFunctionModelTest.h
     test/FileDialogHandlerTest.h
     test/FindFilesThreadPoolManagerTest.h
     test/FindFilesWorkerTest.h
@@ -753,17 +734,22 @@ set(QT5_TEST_FILES
     test/FitScriptGeneratorPresenterTest.h
     test/FitScriptGeneratorViewTest.h
     test/FitScriptOptionsBrowserTest.h
+    test/FunctionBrowserUtilsTest.h
+    test/FunctionModelTest.h
+    test/FunctionMultiDomainPresenterTest.h
     test/SelectWorkspacesDialogTest.h
     test/FunctionTreeViewTest.h
     test/ImageInfoModelMatrixWSTest.h
     test/ImageInfoModelMDTest.h
     test/ImageInfoPresenterTest.h
     test/InterfaceManagerTest.h
+    test/LogValueFinderTest.h
     test/ManageUserDirectoriesTest.h
     test/MuonPeriodInfoTest.h
     test/QtJSONUtilsTest.h
     test/RepoModelTest.h
     test/ParseKeyValueStringTest.h
+    test/ProgressableViewTest.h
     test/WorkspaceUtilsTest.h
     test/Python/SipTest.h
     test/Batch/BuildSubtreeItemsTest.h

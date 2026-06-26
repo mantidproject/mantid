@@ -62,7 +62,7 @@ EditLocalParameterDialog::EditLocalParameterDialog(QWidget *parent, const std::s
  */
 void EditLocalParameterDialog::doSetup(const std::string &parName, const std::vector<std::string> &datasetNames,
                                        const std::vector<std::string> &datasetDomainNames) {
-  m_logFinder = std::make_unique<LogValueFinder>(stdVectorToQStringList(datasetNames));
+  m_logFinder = std::make_unique<LogValueFinder>(datasetNames);
   // Populate list of logs
   auto *logCombo = m_uiForm.logValueSelector->getLogComboBox();
   for (const auto &logName : m_logFinder->getLogNames()) {
@@ -347,7 +347,7 @@ void EditLocalParameterDialog::setValueToLog(int i) {
 
   double value = std::numeric_limits<double>::quiet_NaN();
   try {
-    value = m_logFinder->getLogValue(logName, function, i);
+    value = m_logFinder->getLogValue(logName.toStdString(), function, i);
   } catch (const std::invalid_argument &err) {
     const auto &message = QString("Failed to get log value:\n\n %1").arg(err.what());
     QMessageBox::critical(this, "Mantid - Error", message);

@@ -87,26 +87,26 @@ public:
     ConvolutionFunctionModel model;
     TS_ASSERT_THROWS_NOTHING(model.setFunctionString("name=LinearBackground;(composite=Convolution;"
                                                      "name=Resolution;name=Lorentzian)"));
-    TS_ASSERT_EQUALS(model.backgroundPrefix()->toStdString(), "f0.");
-    TS_ASSERT_EQUALS(model.convolutionPrefix()->toStdString(), "f1.");
+    TS_ASSERT_EQUALS(model.backgroundPrefix(), "f0.");
+    TS_ASSERT_EQUALS(model.convolutionPrefix(), "f1.");
     TS_ASSERT_EQUALS(model.resolutionWorkspace(), "");
     TS_ASSERT_EQUALS(model.resolutionWorkspaceIndex(), 0);
     TS_ASSERT(!model.deltaFunctionPrefix());
     TS_ASSERT(model.peakPrefixes());
-    TS_ASSERT_EQUALS(model.peakPrefixes()->at(0).toStdString(), "f1.f1.");
+    TS_ASSERT_EQUALS(model.peakPrefixes()->at(0), "f1.f1.");
   }
 
   void test_background_after_convolution() {
     ConvolutionFunctionModel model;
     TS_ASSERT_THROWS_NOTHING(model.setFunctionString("(composite=Convolution;name=Resolution;name="
                                                      "Lorentzian);name=LinearBackground"));
-    TS_ASSERT_EQUALS(model.backgroundPrefix()->toStdString(), "f1.");
-    TS_ASSERT_EQUALS(model.convolutionPrefix()->toStdString(), "f0.");
+    TS_ASSERT_EQUALS(model.backgroundPrefix(), "f1.");
+    TS_ASSERT_EQUALS(model.convolutionPrefix(), "f0.");
     TS_ASSERT_EQUALS(model.resolutionWorkspace(), "");
     TS_ASSERT_EQUALS(model.resolutionWorkspaceIndex(), 0);
     TS_ASSERT(!model.deltaFunctionPrefix());
     TS_ASSERT(model.peakPrefixes());
-    TS_ASSERT_EQUALS(model.peakPrefixes()->at(0).toStdString(), "f0.f1.");
+    TS_ASSERT_EQUALS(model.peakPrefixes()->at(0), "f0.f1.");
   }
 
   void test_two_peaks() {
@@ -114,14 +114,14 @@ public:
     TS_ASSERT_THROWS_NOTHING(model.setFunctionString("(composite=Convolution;name=Resolution;name="
                                                      "Lorentzian;name=Lorentzian);"
                                                      "name=LinearBackground"));
-    TS_ASSERT_EQUALS(model.backgroundPrefix()->toStdString(), "f1.");
-    TS_ASSERT_EQUALS(model.convolutionPrefix()->toStdString(), "f0.");
+    TS_ASSERT_EQUALS(model.backgroundPrefix(), "f1.");
+    TS_ASSERT_EQUALS(model.convolutionPrefix(), "f0.");
     TS_ASSERT_EQUALS(model.resolutionWorkspace(), "");
     TS_ASSERT_EQUALS(model.resolutionWorkspaceIndex(), 0);
     TS_ASSERT(!model.deltaFunctionPrefix());
     TS_ASSERT(model.peakPrefixes());
-    TS_ASSERT_EQUALS(model.peakPrefixes()->at(0).toStdString(), "f0.f1.f0.");
-    TS_ASSERT_EQUALS(model.peakPrefixes()->at(1).toStdString(), "f0.f1.f1.");
+    TS_ASSERT_EQUALS(model.peakPrefixes()->at(0), "f0.f1.f0.");
+    TS_ASSERT_EQUALS(model.peakPrefixes()->at(1), "f0.f1.f1.");
   }
 
   void test_two_peaks_no_background() {
@@ -129,24 +129,24 @@ public:
     TS_ASSERT_THROWS_NOTHING(model.setFunctionString("composite=Convolution;name=Resolution;name="
                                                      "Lorentzian;name=Lorentzian"));
     TS_ASSERT(!model.backgroundPrefix());
-    TS_ASSERT_EQUALS(model.convolutionPrefix()->toStdString(), "");
+    TS_ASSERT_EQUALS(model.convolutionPrefix(), "");
     TS_ASSERT_EQUALS(model.resolutionWorkspace(), "");
     TS_ASSERT_EQUALS(model.resolutionWorkspaceIndex(), 0);
     TS_ASSERT(!model.deltaFunctionPrefix());
     TS_ASSERT(model.peakPrefixes());
-    TS_ASSERT_EQUALS(model.peakPrefixes()->at(0).toStdString(), "f1.f0.");
-    TS_ASSERT_EQUALS(model.peakPrefixes()->at(1).toStdString(), "f1.f1.");
+    TS_ASSERT_EQUALS(model.peakPrefixes()->at(0), "f1.f0.");
+    TS_ASSERT_EQUALS(model.peakPrefixes()->at(1), "f1.f1.");
   }
 
   void test_delta() {
     ConvolutionFunctionModel model;
     TS_ASSERT_THROWS_NOTHING(model.setFunctionString("(composite=Convolution;name=Resolution;name="
                                                      "DeltaFunction);name=LinearBackground"));
-    TS_ASSERT_EQUALS(model.backgroundPrefix()->toStdString(), "f1.");
-    TS_ASSERT_EQUALS(model.convolutionPrefix()->toStdString(), "f0.");
+    TS_ASSERT_EQUALS(model.backgroundPrefix(), "f1.");
+    TS_ASSERT_EQUALS(model.convolutionPrefix(), "f0.");
     TS_ASSERT_EQUALS(model.resolutionWorkspace(), "");
     TS_ASSERT_EQUALS(model.resolutionWorkspaceIndex(), 0);
-    TS_ASSERT_EQUALS(model.deltaFunctionPrefix()->toStdString(), "f0.f1.");
+    TS_ASSERT_EQUALS(model.deltaFunctionPrefix(), "f0.f1.");
     TS_ASSERT(!model.peakPrefixes());
   }
 
@@ -154,10 +154,10 @@ public:
     ConvolutionFunctionModel model;
     TS_ASSERT_THROWS_NOTHING(model.setFunctionString("composite=Convolution;name=Resolution;name=DeltaFunction"));
     TS_ASSERT(!model.backgroundPrefix());
-    TS_ASSERT_EQUALS(model.convolutionPrefix()->toStdString(), "");
+    TS_ASSERT_EQUALS(model.convolutionPrefix(), "");
     TS_ASSERT_EQUALS(model.resolutionWorkspace(), "");
     TS_ASSERT_EQUALS(model.resolutionWorkspaceIndex(), 0);
-    TS_ASSERT_EQUALS(model.deltaFunctionPrefix()->toStdString(), "f1.");
+    TS_ASSERT_EQUALS(model.deltaFunctionPrefix(), "f1.");
     TS_ASSERT(!model.peakPrefixes());
   }
 
@@ -166,13 +166,13 @@ public:
     TS_ASSERT_THROWS_NOTHING(model.setFunctionString("composite=Convolution;name=Resolution;name="
                                                      "Lorentzian;name=Lorentzian;name=DeltaFunction"));
     TS_ASSERT(!model.backgroundPrefix());
-    TS_ASSERT_EQUALS(model.convolutionPrefix()->toStdString(), "");
+    TS_ASSERT_EQUALS(model.convolutionPrefix(), "");
     TS_ASSERT_EQUALS(model.resolutionWorkspace(), "");
     TS_ASSERT_EQUALS(model.resolutionWorkspaceIndex(), 0);
-    TS_ASSERT_EQUALS(model.deltaFunctionPrefix()->toStdString(), "f1.f2.");
+    TS_ASSERT_EQUALS(model.deltaFunctionPrefix(), "f1.f2.");
     TS_ASSERT(model.peakPrefixes());
-    TS_ASSERT_EQUALS(model.peakPrefixes()->at(0).toStdString(), "f1.f0.");
-    TS_ASSERT_EQUALS(model.peakPrefixes()->at(1).toStdString(), "f1.f1.");
+    TS_ASSERT_EQUALS(model.peakPrefixes()->at(0), "f1.f0.");
+    TS_ASSERT_EQUALS(model.peakPrefixes()->at(1), "f1.f1.");
   }
 
   void test_two_peaks_delta() {
@@ -180,14 +180,14 @@ public:
     TS_ASSERT_THROWS_NOTHING(model.setFunctionString("(composite=Convolution;name=Resolution;name="
                                                      "DeltaFunction;name=Lorentzian;name=Lorentzian);"
                                                      "name=LinearBackground"));
-    TS_ASSERT_EQUALS(model.backgroundPrefix()->toStdString(), "f1.");
-    TS_ASSERT_EQUALS(model.convolutionPrefix()->toStdString(), "f0.");
+    TS_ASSERT_EQUALS(model.backgroundPrefix(), "f1.");
+    TS_ASSERT_EQUALS(model.convolutionPrefix(), "f0.");
     TS_ASSERT_EQUALS(model.resolutionWorkspace(), "");
     TS_ASSERT_EQUALS(model.resolutionWorkspaceIndex(), 0);
-    TS_ASSERT_EQUALS(model.deltaFunctionPrefix()->toStdString(), "f0.f1.f0.");
+    TS_ASSERT_EQUALS(model.deltaFunctionPrefix(), "f0.f1.f0.");
     TS_ASSERT(model.peakPrefixes());
-    TS_ASSERT_EQUALS(model.peakPrefixes()->at(0).toStdString(), "f0.f1.f1.");
-    TS_ASSERT_EQUALS(model.peakPrefixes()->at(1).toStdString(), "f0.f1.f2.");
+    TS_ASSERT_EQUALS(model.peakPrefixes()->at(0), "f0.f1.f1.");
+    TS_ASSERT_EQUALS(model.peakPrefixes()->at(1), "f0.f1.f2.");
   }
 
   void test_resolution_workspace() {
@@ -201,12 +201,12 @@ public:
     TS_ASSERT_THROWS_NOTHING(model.setFunctionString("composite=Convolution;name=Resolution,"
                                                      "Workspace=\"abc\";name=Lorentzian"));
     TS_ASSERT(!model.backgroundPrefix());
-    TS_ASSERT_EQUALS(model.convolutionPrefix()->toStdString(), "");
+    TS_ASSERT_EQUALS(model.convolutionPrefix(), "");
     TS_ASSERT_EQUALS(model.resolutionWorkspace(), "abc");
     TS_ASSERT_EQUALS(model.resolutionWorkspaceIndex(), 0);
     TS_ASSERT(!model.deltaFunctionPrefix());
     TS_ASSERT(model.peakPrefixes());
-    TS_ASSERT_EQUALS(model.peakPrefixes()->at(0).toStdString(), "f1.");
+    TS_ASSERT_EQUALS(model.peakPrefixes()->at(0), "f1.");
   }
 
   void test_Lorentzian_can_be_combined_with_additional_fit_type() {
@@ -215,12 +215,12 @@ public:
                                                      "name=Lorentzian;name=Lorentzian;name=TeixeiraWaterSQE);"
                                                      "name=LinearBackground"));
 
-    TS_ASSERT_EQUALS(model.backgroundPrefix()->toStdString(), "f1.");
-    TS_ASSERT_EQUALS(model.convolutionPrefix()->toStdString(), "f0.");
+    TS_ASSERT_EQUALS(model.backgroundPrefix(), "f1.");
+    TS_ASSERT_EQUALS(model.convolutionPrefix(), "f0.");
     TS_ASSERT(model.peakPrefixes());
-    TS_ASSERT_EQUALS(model.peakPrefixes()->at(0).toStdString(), "f0.f1.f0.");
-    TS_ASSERT_EQUALS(model.peakPrefixes()->at(1).toStdString(), "f0.f1.f1.");
-    TS_ASSERT_EQUALS(model.fitTypePrefix()->toStdString(), "f0.f1.f2.");
+    TS_ASSERT_EQUALS(model.peakPrefixes()->at(0), "f0.f1.f0.");
+    TS_ASSERT_EQUALS(model.peakPrefixes()->at(1), "f0.f1.f1.");
+    TS_ASSERT_EQUALS(model.fitTypePrefix(), "f0.f1.f2.");
   }
 
   void test_Lorentzian_can_be_combined_with_additional_fit_type_and_delta() {
@@ -230,13 +230,13 @@ public:
                                                      "name=TeixeiraWaterSQE);"
                                                      "name=LinearBackground"));
 
-    TS_ASSERT_EQUALS(model.backgroundPrefix()->toStdString(), "f1.");
-    TS_ASSERT_EQUALS(model.convolutionPrefix()->toStdString(), "f0.");
+    TS_ASSERT_EQUALS(model.backgroundPrefix(), "f1.");
+    TS_ASSERT_EQUALS(model.convolutionPrefix(), "f0.");
     TS_ASSERT(model.peakPrefixes());
-    TS_ASSERT_EQUALS(model.deltaFunctionPrefix()->toStdString(), "f0.f1.f0.");
-    TS_ASSERT_EQUALS(model.peakPrefixes()->at(0).toStdString(), "f0.f1.f1.");
-    TS_ASSERT_EQUALS(model.peakPrefixes()->at(1).toStdString(), "f0.f1.f2.");
-    TS_ASSERT_EQUALS(model.fitTypePrefix()->toStdString(), "f0.f1.f3.");
+    TS_ASSERT_EQUALS(model.deltaFunctionPrefix(), "f0.f1.f0.");
+    TS_ASSERT_EQUALS(model.peakPrefixes()->at(0), "f0.f1.f1.");
+    TS_ASSERT_EQUALS(model.peakPrefixes()->at(1), "f0.f1.f2.");
+    TS_ASSERT_EQUALS(model.fitTypePrefix(), "f0.f1.f3.");
   }
   void test_Lorentzian_can_be_combined_with_additional_fit_type_and_temp_correction() {
     auto algo = AlgorithmManager::Instance().create("CreateWorkspace");
@@ -257,12 +257,12 @@ public:
                    "(name=TeixeiraWaterSQE)", false, std::vector<double>(), false, true, 100.0);
 
     TS_ASSERT(model.peakPrefixes());
-    TS_ASSERT_EQUALS(model.backgroundPrefix().value().toStdString(), "f0.");
-    TS_ASSERT_EQUALS(model.convolutionPrefix().value().toStdString(), "f1.");
-    TS_ASSERT_EQUALS(model.peakPrefixes().value()[0].toStdString(), "f1.f1.f1.f0.");
-    TS_ASSERT_EQUALS(model.peakPrefixes().value()[1].toStdString(), "f1.f1.f1.f1.");
-    TS_ASSERT_EQUALS(model.fitTypePrefix()->toStdString(), "f1.f1.f1.f2.");
-    TS_ASSERT_EQUALS(model.tempFunctionPrefix().value().toStdString(), "f1.f1.f0.");
+    TS_ASSERT_EQUALS(model.backgroundPrefix().value(), "f0.");
+    TS_ASSERT_EQUALS(model.convolutionPrefix().value(), "f1.");
+    TS_ASSERT_EQUALS(model.peakPrefixes().value()[0], "f1.f1.f1.f0.");
+    TS_ASSERT_EQUALS(model.peakPrefixes().value()[1], "f1.f1.f1.f1.");
+    TS_ASSERT_EQUALS(model.fitTypePrefix(), "f1.f1.f1.f2.");
+    TS_ASSERT_EQUALS(model.tempFunctionPrefix().value(), "f1.f1.f0.");
   }
 
   void test_resolution_workspace_index() {
@@ -276,12 +276,12 @@ public:
     TS_ASSERT_THROWS_NOTHING(model.setFunctionString("composite=Convolution;name=Resolution,Workspace=\"abc\","
                                                      "WorkspaceIndex=3;name=Lorentzian"));
     TS_ASSERT(!model.backgroundPrefix());
-    TS_ASSERT_EQUALS(model.convolutionPrefix()->toStdString(), "");
+    TS_ASSERT_EQUALS(model.convolutionPrefix(), "");
     TS_ASSERT_EQUALS(model.resolutionWorkspace(), "abc");
     TS_ASSERT_EQUALS(model.resolutionWorkspaceIndex(), 3);
     TS_ASSERT(!model.deltaFunctionPrefix());
     TS_ASSERT(model.peakPrefixes());
-    TS_ASSERT_EQUALS(model.peakPrefixes()->at(0).toStdString(), "f1.");
+    TS_ASSERT_EQUALS(model.peakPrefixes()->at(0), "f1.");
   }
 
   void test_setModel_with_resolution_workspace_list_creates_correct_function() {
@@ -465,11 +465,11 @@ public:
     model.setModel("name=FlatBackground", fitResolutions, "(name=Lorentzian;name=Lorentzian)", "", true,
                    std::vector<double>(), false, false, 100.0);
 
-    TS_ASSERT_EQUALS(model.backgroundPrefix().value().toStdString(), "f0.");
-    TS_ASSERT_EQUALS(model.convolutionPrefix().value().toStdString(), "f1.");
-    TS_ASSERT_EQUALS(model.deltaFunctionPrefix().value().toStdString(), "f1.f1.f2.");
-    TS_ASSERT_EQUALS(model.peakPrefixes().value()[0].toStdString(), "f1.f1.f0.");
-    TS_ASSERT_EQUALS(model.peakPrefixes().value()[1].toStdString(), "f1.f1.f1.");
+    TS_ASSERT_EQUALS(model.backgroundPrefix().value(), "f0.");
+    TS_ASSERT_EQUALS(model.convolutionPrefix().value(), "f1.");
+    TS_ASSERT_EQUALS(model.deltaFunctionPrefix().value(), "f1.f1.f2.");
+    TS_ASSERT_EQUALS(model.peakPrefixes().value()[0], "f1.f1.f0.");
+    TS_ASSERT_EQUALS(model.peakPrefixes().value()[1], "f1.f1.f1.");
   }
 
   void test_component_prefixes_set_correctly_with_temp_correction() {
@@ -490,11 +490,11 @@ public:
     model.setModel("name=FlatBackground", fitResolutions, "(name=Lorentzian;name=Lorentzian)", "", false,
                    std::vector<double>(), false, true, 100.0);
 
-    TS_ASSERT_EQUALS(model.backgroundPrefix().value().toStdString(), "f0.");
-    TS_ASSERT_EQUALS(model.convolutionPrefix().value().toStdString(), "f1.");
-    TS_ASSERT_EQUALS(model.peakPrefixes().value()[0].toStdString(), "f1.f1.f1.f0.");
-    TS_ASSERT_EQUALS(model.peakPrefixes().value()[1].toStdString(), "f1.f1.f1.f1.");
-    TS_ASSERT_EQUALS(model.tempFunctionPrefix().value().toStdString(), "f1.f1.f0.");
+    TS_ASSERT_EQUALS(model.backgroundPrefix().value(), "f0.");
+    TS_ASSERT_EQUALS(model.convolutionPrefix().value(), "f1.");
+    TS_ASSERT_EQUALS(model.peakPrefixes().value()[0], "f1.f1.f1.f0.");
+    TS_ASSERT_EQUALS(model.peakPrefixes().value()[1], "f1.f1.f1.f1.");
+    TS_ASSERT_EQUALS(model.tempFunctionPrefix().value(), "f1.f1.f0.");
   }
 
   void test_component_prefixes_if_only_temp_set() {
@@ -514,8 +514,8 @@ public:
 
     model.setModel("", fitResolutions, "", "", false, std::vector<double>(), false, true, 100.0);
 
-    TS_ASSERT_EQUALS(model.convolutionPrefix().value().toStdString(), "");
-    TS_ASSERT_EQUALS(model.tempFunctionPrefix().value().toStdString(), "f1.f0.");
+    TS_ASSERT_EQUALS(model.convolutionPrefix().value(), "");
+    TS_ASSERT_EQUALS(model.tempFunctionPrefix().value(), "f1.f0.");
   }
 
   void test_component_prefixes_one_lorenzian_temp_set() {
@@ -535,10 +535,10 @@ public:
 
     model.setModel("name=FlatBackground", fitResolutions, "name=Lorentzian", "", false, std::vector<double>(), false,
                    true, 100.0);
-    TS_ASSERT_EQUALS(model.backgroundPrefix().value().toStdString(), "f0.");
-    TS_ASSERT_EQUALS(model.convolutionPrefix().value().toStdString(), "f1.");
-    TS_ASSERT_EQUALS(model.peakPrefixes().value()[0].toStdString(), "f1.f1.f1.");
-    TS_ASSERT_EQUALS(model.tempFunctionPrefix().value().toStdString(), "f1.f1.f0.");
+    TS_ASSERT_EQUALS(model.backgroundPrefix().value(), "f0.");
+    TS_ASSERT_EQUALS(model.convolutionPrefix().value(), "f1.");
+    TS_ASSERT_EQUALS(model.peakPrefixes().value()[0], "f1.f1.f1.");
+    TS_ASSERT_EQUALS(model.tempFunctionPrefix().value(), "f1.f1.f0.");
   }
 
   void test_component_prefixes_if_temp_and_delta_set() {
@@ -558,10 +558,10 @@ public:
 
     model.setModel("name=FlatBackground", fitResolutions, "name=Lorentzian", "", true, std::vector<double>(), false,
                    true, 100.0);
-    TS_ASSERT_EQUALS(model.backgroundPrefix().value().toStdString(), "f0.");
-    TS_ASSERT_EQUALS(model.convolutionPrefix().value().toStdString(), "f1.");
-    TS_ASSERT_EQUALS(model.peakPrefixes().value()[0].toStdString(), "f1.f1.f1.f1.");
-    TS_ASSERT_EQUALS(model.tempFunctionPrefix().value().toStdString(), "f1.f1.f1.f0.");
-    TS_ASSERT_EQUALS(model.deltaFunctionPrefix().value().toStdString(), "f1.f1.f0.");
+    TS_ASSERT_EQUALS(model.backgroundPrefix().value(), "f0.");
+    TS_ASSERT_EQUALS(model.convolutionPrefix().value(), "f1.");
+    TS_ASSERT_EQUALS(model.peakPrefixes().value()[0], "f1.f1.f1.f1.");
+    TS_ASSERT_EQUALS(model.tempFunctionPrefix().value(), "f1.f1.f1.f0.");
+    TS_ASSERT_EQUALS(model.deltaFunctionPrefix().value(), "f1.f1.f0.");
   }
 };
