@@ -12,6 +12,7 @@
 #include "MantidDataHandling/AlignAndFocusPowderSlim/SpectraProcessingData.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
+#include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/TimeSplitter.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/TimeROI.h"
@@ -49,8 +50,9 @@ private:
   void initCalibrationConstants(API::MatrixWorkspace_sptr &wksp, const std::vector<double> &difc_focus);
   void initCalibrationConstantsFromCalWS(const std::vector<double> &difc_focus,
                                          const API::ITableWorkspace_sptr calibrationWS);
-  const API::ITableWorkspace_sptr loadCalFile(const API::Workspace_sptr &inputWS, const std::string &filename,
-                                              DataObjects::GroupingWorkspace_sptr &groupingWS);
+  void loadCalFile(const API::Workspace_sptr &inputWS, const std::string &filename,
+                   DataObjects::GroupingWorkspace_sptr &groupingWS, API::ITableWorkspace_sptr &calibrationWS,
+                   DataObjects::MaskWorkspace_sptr &maskWS);
   DataObjects::GroupingWorkspace_sptr loadGroupingFile(const API::MatrixWorkspace_sptr &wksp,
                                                        const std::string &filename);
   void initScaleAtSample(const API::MatrixWorkspace_sptr &wksp);
@@ -82,6 +84,8 @@ private:
 namespace PropertyNames {
 const std::string FILENAME("Filename");
 const std::string CAL_FILE("CalFileName");
+const std::string CAL_WKSP("CalibrationWorkspace");
+const std::string MASK_WKSP("MaskWorkspace");
 const std::string FILTER_TIMESTART("FilterByTimeStart");
 const std::string FILTER_TIMESTOP("FilterByTimeStop");
 const std::string GROUPING_WS("GroupingWorkspace");
