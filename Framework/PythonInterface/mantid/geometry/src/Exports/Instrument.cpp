@@ -59,6 +59,9 @@ void export_Instrument() {
       .def("getDefaultView", &Instrument::getDefaultView, arg("self"), return_value_policy<copy_const_reference>(),
            "Return the name of the preferred view in instrument view.")
 
+      .def("getXmlText", &Instrument::getXmlText, arg("self"), return_value_policy<copy_const_reference>(),
+           "Return the instrument XML.")
+
       .def("getNumberDetectors", &Instrument::getNumberDetectors,
            Instrument_getNumberDetectors((arg("self"), arg("skipMonitors") = false)))
 

@@ -58,6 +58,12 @@ class InstrumentTest(unittest.TestCase):
         # put the filename back to what it was
         inst.setFilename(NAME_ORIG)
 
+    def test_getXmlText(self):
+        inst = self.__testws.getInstrument()
+        xml_text = inst.getXmlText()
+        self.assertIsInstance(xml_text, str)
+        self.assertEqual(xml_text, "Fake XML")
+
     def test_ValidDates(self):
         inst = self.__testws.getInstrument()
         valid_from = inst.getValidFromDate()
