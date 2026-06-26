@@ -615,7 +615,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.add_rgba_mesh.assert_called_once()
         mesh_arg = self._mock_view.add_rgba_mesh.call_args.args[0]
         self.assertEqual(self._mock_view.add_rgba_mesh.call_args.kwargs["scalars"], "colours")
-        # 2 triangles × 3 vertices = 6 vertices
+        # 2 triangles x 3 vertices = 6 vertices
         self.assertEqual(mesh_arg.n_points, 6)
         # colours array has 2 rows (one per triangle) with alpha=0.5
         np.testing.assert_allclose(mesh_arg["colours"][:, 3], 0.5)

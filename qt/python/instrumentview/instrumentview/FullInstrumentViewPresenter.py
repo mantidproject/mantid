@@ -147,7 +147,8 @@ class FullInstrumentViewPresenter:
             faces = faces = np.c_[np.full(n, 3, dtype=int), np.arange(n * 3).reshape(n, 3)]
             sample_shape_mesh = pv.PolyData(vertices, faces)
             sample_shape_mesh["colours"] = self.generate_single_colour(n, self.sample_position_colour, 0.5)
-            return self._view.add_rgba_mesh(sample_shape_mesh, scalars="colours")
+            self._view.add_rgba_mesh(sample_shape_mesh, scalars="colours")
+            return sample_shape_mesh
         return self._create_and_add_component_point_mesh(np.array([self._model.sample_position]), self.sample_position_colour)
 
     def _create_and_add_component_point_mesh(self, points: np.ndarray, colour: tuple[int, int, int]) -> pv.PolyData:
