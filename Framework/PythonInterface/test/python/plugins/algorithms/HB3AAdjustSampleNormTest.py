@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 import numpy as np
+from mantid.api import AlgorithmManager
 from mantid.dataobjects import GroupingWorkspace
 from mantid.simpleapi import (
     CreateMDHistoWorkspace,
@@ -13,6 +14,7 @@ from mantid.simpleapi import (
     DeleteWorkspaces,
     HB3AAdjustSampleNorm,
     LoadMD,
+    QueryMDWorkspace,
     SliceMDHisto,
     AddSampleLog,
     mtd,
@@ -157,6 +159,25 @@ class HB3AAdjustSampleNormTest(unittest.TestCase):
         self.assertEqual(data.getNEvents(), 9038)
 
         DeleteWorkspace(data)
+
+    def testValidateInputs(self):
+        # User passes an OutputNormalizationWorkspace but the conditions are not met
+        alg = AlgorithmManager.createUnmanaged("HB3AAdjustSampleNorm")
+        alg.initialize()
+        alg.setProperty("Filename", "HB3A_data.nxs")
+        alg.setProperty("OutputWorkspace", "__hb3a_out")
+        alg.setProperty("OutputNormalizationWorkspace", "__hb3a_norm")
+        issues = alg.validateInputs()
+        self.assertIn("OutputNormalizationWorkspace", issues)
+
+        # User passes MergeInputs=True with a single input file
+        alg2 = AlgorithmManager.createUnmanaged("HB3AAdjustSampleNorm")
+        alg2.initialize()
+        alg2.setProperty("Filename", "HB3A_data.nxs")
+        alg2.setProperty("OutputWorkspace", "__hb3a_out")
+        alg2.setProperty("MergeInputs", True)
+        issues2 = alg2.validateInputs()
+        self.assertIn("MergeInputs", issues2)
 
     def testDetectorNormalisation(self):
         data1 = HB3AAdjustSampleNorm(
@@ -341,6 +362,50 @@ class HB3AAdjustSampleNormTest(unittest.TestCase):
 
         # clean up
         DeleteWorkspaces(["__hb3a_out_2x2", "__hb3a_grp_2x2", "__hb3a_out_4x4", "__hb3a_grp_4x4"])
+
+    def testOutputNormalizationWorkspace(self):
+        """Verify that OutputNormalizationWorkspace is produced when NormalizeData is False,
+        OutputType is 'Q-sample events', and vanadium data is provided.
+        Both workspaces must be 3-D MDEvent workspaces. The normalization workspace is built
+        from a uniformly non-zero vanadium replicated across all detector pixels, so it has at
+        least as many events as the data workspace (which only contains pixels with non-zero
+        counts). The signal per event in each non-empty box of the normalization workspace
+        must equal vanws_signal * data_monitor / van_monitor, which is the per-step vanadium
+        intensity scaled by the monitor flux ratio used during normalization."""
+        HB3AAdjustSampleNorm(
+            InputWorkspaces=self._input_ws,
+            VanadiumWorkspace=mtd[self._van_ws],
+            OutputWorkspace="__hb3a_events_norm_ws",
+            OutputNormalizationWorkspace="__hb3a_norm_ws",
+            OutputType="Q-sample events",
+            NormaliseBy="Monitor",
+            NormalizeData=False,
+        )
+        data = mtd["__hb3a_events_norm_ws"]
+        norm = mtd["__hb3a_norm_ws"]
+
+        self.assertEqual(data.getNumDims(), 3)
+        self.assertEqual(norm.getNumDims(), 3)
+        self.assertGreater(norm.getNEvents(), 0)
+        self.assertLessEqual(data.getNEvents(), norm.getNEvents())
+
+        norm_table = QueryMDWorkspace(InputWorkspace=norm, Normalisation="none", LimitRows=False)
+        events_per_box = np.asarray(norm_table.column("Number of Events"), dtype=float)
+        signal_per_box = np.asarray(norm_table.column("Signal/none"), dtype=float)
+        non_empty_boxes = events_per_box > 0
+        monitor_values = data.getExperimentInfo(0).run().getProperty("monitor").value
+        vanadium_monitor = mtd[self._van_ws].getExperimentInfo(0).run().getProperty("monitor").value[0]
+        expected_signal_per_event = 25 * monitor_values.mean() / vanadium_monitor
+        # Each box may contain events from a single scan step, each with its own monitor count.
+        # rtol=0.04 covers the maximum relative deviation of any per-step monitor from the mean
+        # (monitor counts span 614-659 across 13 steps, a ~4% spread around the mean of 635).
+        np.testing.assert_allclose(
+            signal_per_box[non_empty_boxes] / events_per_box[non_empty_boxes],
+            expected_signal_per_event,
+            rtol=0.04,
+        )
+
+        DeleteWorkspaces(["__hb3a_events_norm_ws", "__hb3a_norm_ws", norm_table])
 
 
 if __name__ == "__main__":
