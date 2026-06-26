@@ -12,6 +12,7 @@ from mantid.simpleapi import (
     PDLoadCharacterizations,
     MaskBins,
     CreateGroupingWorkspace,
+    LoadDiffCal,
 )
 
 
@@ -186,3 +187,69 @@ class VULCAN_compare_AlignAndFocusPowderFromFiles_with_RaggedBinning(systemtesti
 
     def validate(self):
         return (self.aafps, self.aafpff)
+
+
+class VULCAN_compare_CalFileName_to_InputWorkspaces(systemtesting.MantidSystemTest):
+    """
+    Compare the output of using the CalFileName to instead providing the CalibrationWorkspace, MaskWorkspace and GroupingWorkspace
+    """
+
+    data_file = "VULCAN_189186"
+    cal_file = "VULCAN_calibrate_2019_06_27.h5"
+
+    def requiredMemoryMB(self):
+        return 1024
+
+    def requiredFiles(self):
+        return [self.data_file, self.cal_file]
+
+    def runTest(self):
+        self.aafps = "AlignAndFocusPowderSlimTest_VULCAN_AAFPowderSlim"
+        self.aafps2 = "AlignAndFocusPowderSlimTest_VULCAN_AAFPowderSlim2"
+
+        L1 = 43.755
+        L2 = [2.0145, 2.0145, 2.0156]
+        Polar = [90, 90, 150]
+        Azimuthal = [180, 0, 0]
+
+        dmin = [0.306, 0.306, 0.22]
+        dmax = [2.0, 2.2, 2.0]
+        delta = [-0.001, -0.001, -0.0003]
+
+        AlignAndFocusPowderSlim(
+            Filename=self.data_file,
+            CalFileName=self.cal_file,
+            L1=L1,
+            L2=L2,
+            Polar=Polar,
+            Azimuthal=Azimuthal,
+            XMin=dmin,
+            XMax=dmax,
+            XDelta=delta,
+            OutputWorkspace=self.aafps,
+        )
+
+        # now repeat with input cal, mask and group workspaces instead of CalFileName. Should get the same result.
+        workspaces = LoadDiffCal("./ExternalData/Testing/Data/SystemTest/VULCAN_calibrate_2019_06_27.h5")
+
+        AlignAndFocusPowderSlim(
+            Filename=self.data_file,
+            CalibrationWorkspace=workspaces.OutputCalWorkspace,
+            MaskWorkspace=workspaces.OutputMaskWorkspace,
+            GroupingWorkspace=workspaces.OutputGroupingWorkspace,
+            L1=L1,
+            L2=L2,
+            Polar=Polar,
+            Azimuthal=Azimuthal,
+            XMin=dmin,
+            XMax=dmax,
+            XDelta=delta,
+            OutputWorkspace=self.aafps2,
+        )
+
+    def validateMethod(self):
+        self.tolerance = 1e-8
+        return "ValidateWorkspaceToWorkspace"
+
+    def validate(self):
+        return (self.aafps, self.aafps2)
