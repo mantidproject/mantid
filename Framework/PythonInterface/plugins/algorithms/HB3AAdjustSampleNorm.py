@@ -216,7 +216,7 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
             EnabledWhenProperty(
                 EnabledWhenProperty(
                     EnabledWhenProperty("OutputType", PropertyCriterion.IsEqualTo, "Q-sample events"),
-                    EnabledWhenProperty("NormalizeData", PropertyCriterion.IsNotDefault),
+                    EnabledWhenProperty("NormalizeData", PropertyCriterion.IsEqualTo, "0"),
                     LogicOperator.And,
                 ),
                 EnabledWhenProperty(

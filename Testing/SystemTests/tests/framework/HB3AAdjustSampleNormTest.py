@@ -14,6 +14,9 @@ class SingleFileOutputNormalizationWorkspace(systemtesting.MantidSystemTest):
     at least as many events as the data workspace, since it covers all detector pixels
     (via vanadium replication) while the data workspace contains only pixels with counts."""
 
+    def requiredFiles(self):
+        return ["HB3A_exp0724_scan0183.nxs", "HB3A_exp0722_scan0220.nxs"]
+
     def runTest(self):
         ws_name = "SingleFileOutputNormalizationWorkspace"
         HB3AAdjustSampleNorm(
@@ -42,6 +45,9 @@ class MultiFileOutputNormalizationWorkspace(systemtesting.MantidSystemTest):
     with NormalizeData=False and MergeInputs=True. Both the merged data and normalization
     workspaces must be 3-D MDEvent workspaces. The normalization workspace must have at
     least as many events as the data workspace."""
+
+    def requiredFiles(self):
+        return ["HB3A_exp0724_scan0182.nxs", "HB3A_exp0724_scan0183.nxs", "HB3A_exp0722_scan0220.nxs"]
 
     def runTest(self):
         ws_name = "MultiFileOutputNormalizationWorkspace"
