@@ -70,7 +70,7 @@ size_t findReplicationDimension(const IMDHistoWorkspace &shapeWS, const IMDHisto
 
 /**
  * Determine the axis to use for a transpose operation.
- * @param shapeWS : Workspace to tranpose into the coordinate system of
+ * @param shapeWS : Workspace to transpose into the coordinate system of
  * @param dataWS : Workspace to transpose
  * @return Axis required for the transpose command.
  */
@@ -160,9 +160,9 @@ MDHistoWorkspace_const_sptr ReplicateMD::transposeMD(MDHistoWorkspace_sptr const
 }
 
 /**
- * Overriden validate inputs
+ * Overridden validate inputs
  *
- * @return map of propery name to problem description for any issues
+ * @return map of property name to problem description for any issues
  */
 std::map<std::string, std::string> ReplicateMD::validateInputs() {
   std::map<std::string, std::string> errorMap;
