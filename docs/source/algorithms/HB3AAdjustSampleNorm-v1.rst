@@ -41,7 +41,7 @@ to be directly compared between scans measured with different step
 sizes.
 
 Path to MDNorm
-~~~~~~~~~~~~~~
+##############
 
 Setting ``NormalizeData=False`` with ``OutputType=Q-sample events`` suppresses the division of the
 data by the vanadium and flux, and instead makes the vanadium-based normalization available as a
