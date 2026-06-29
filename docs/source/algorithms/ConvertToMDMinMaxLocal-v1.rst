@@ -63,7 +63,7 @@ Usage
 
     MD workspace limits:
     |Q|_min:   0.299713, dE_min: -50.000000
-    |Q|_max:  11.102851, dE_max:  50.000000
+    |Q|_max:  11.102852, dE_max:  50.000000
 
 **Example -- Find min-max values for Q3D transformation, while converting TOF to energy transfer :**
 
