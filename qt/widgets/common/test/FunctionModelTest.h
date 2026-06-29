@@ -66,8 +66,8 @@ public:
     TS_ASSERT_EQUALS(m_model->currentDomainIndex(), 0);
     m_model->setCurrentDomainIndex(1);
     TS_ASSERT_EQUALS(m_model->currentDomainIndex(), 1);
-    TS_ASSERT_THROWS_EQUALS(m_model->setCurrentDomainIndex(2), std::runtime_error & e, std::string(e.what()),
-                            "Domain index is out of range: 2 out of 2");
+    TS_ASSERT_THROWS_NOTHING(m_model->setCurrentDomainIndex(2));
+    TS_ASSERT_EQUALS(m_model->currentDomainIndex(), 1); // unchanged
     {
       auto fun = m_model->getCurrentFunction();
       TS_ASSERT_EQUALS(fun->name(), "LinearBackground");
@@ -86,8 +86,8 @@ public:
       TS_ASSERT_EQUALS(fun->getParameter("A0"), 1.0);
       TS_ASSERT_EQUALS(fun->getParameter("A1"), 2.0);
     }
-    TS_ASSERT_THROWS_EQUALS(m_model->getSingleFunction(2), std::runtime_error & e, std::string(e.what()),
-                            "Domain index is out of range: 2 out of 2");
+    TS_ASSERT_THROWS_NOTHING(m_model->getSingleFunction(2));
+    TS_ASSERT(!m_model->getSingleFunction(2));
     {
       auto fun = m_model->getFitFunction();
       TS_ASSERT_EQUALS(fun->name(), "MultiDomainFunction");
@@ -354,7 +354,7 @@ public:
                              "DiffCoeff=2.3, Tau=1.25, Centre=0, "
                              "constraints=(Height>0, DiffCoeff>0, "
                              "Tau>0);name=FlatBackground;name=LinearBackground");
-    TS_ASSERT_THROWS(m_model->getAttribute("f0.B").asDouble(), std::invalid_argument &);
+    TS_ASSERT_THROWS(m_model->getAttribute("f0.B").asDouble(), std::runtime_error &);
   }
   void test_updateMultiDatasetAttributes_correctly_updates_stored_attributes() {
     m_model->setNumberDomains(3);

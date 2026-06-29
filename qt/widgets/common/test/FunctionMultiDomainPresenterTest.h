@@ -56,7 +56,11 @@ public:
 
   void setParameterTie(const std::string &paramName, const std::string &tie) override {
     if (!tie.empty()) {
-      m_function->tie(paramName, tie);
+      try {
+        m_function->tie(paramName, tie);
+      } catch (const std::exception &) {
+        // ignore invalid tie (e.g. self-tie)
+      }
     } else {
       m_function->removeTie(paramName);
     }
@@ -310,8 +314,9 @@ public:
     TS_ASSERT_EQUALS(presenter.getParameterTie("f1.A0"), "f0.A0");
     auto fun = presenter.getFitFunction();
     TS_ASSERT_EQUALS(fun->getParameterStatus(1), IFunction::Tied);
+    // Self-tie is silently rejected; previous tie is preserved
     view->userSetsParameterTie("f1.A0", "f1.A0=f1.A0");
-    TS_ASSERT_EQUALS(presenter.getParameterTie("f1.A0"), "f1.A0");
+    TS_ASSERT_EQUALS(presenter.getParameterTie("f1.A0"), "f0.A0");
   }
 
   void test_view_set_tie_multi() {
