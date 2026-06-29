@@ -310,6 +310,10 @@ void ConvertToMD::exec() {
     savemd->executeAsChildAlg();
   }
 
+  if (std::vector<std::string> logname = m_Convertor->getLogTimesName(); logname.size() > 0) {
+    spws->getExperimentInfo(0)->mutableRun().addProperty("useLogTimes", logname, true);
+  }
+
   // JOB COMPLETED:
   setProperty("OutputWorkspace", std::dynamic_pointer_cast<IMDEventWorkspace>(spws));
   // free the algorithm from the responsibility for the target workspace to
