@@ -83,7 +83,7 @@ mamba = "<2"
 rattler-index = "*"
 
 # Qt-version-specific dependencies (eigen, pyqt/pyqt6, qscintilla2, qt-main/qt6-main,
-# qtconsole/qtconsole-base, tbb-devel and the gtk-platformtheme) live in the
+# qtconsole/qtconsole-base, tbb-devel) live in the
 # per-platform [target.*.dependencies] tables below: linux-64 pulls the Qt6 stack,
 # win-64 and osx-arm64 keep the Qt5 stack.
 [dependencies]
@@ -156,7 +156,6 @@ xorg-libxtst = ">=1.2.3"
 gcovr = ">=4.2"
 lz4 = ">=4.4.5,<5"
 pystack = ">=1.5.1,<2"
-qt6-gtk-platformtheme = ">=6.11,<7"
 libgl-devel = ">=1.7.0,<2"
 libglu = ">=9.0"
 libopenblas = "==0.3.27"

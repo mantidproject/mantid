@@ -63,7 +63,6 @@ requirements:
     - if: linux
       then:
         - ${{ pin_compatible("qt6-main", upper_bound="x.x") }}
-        - qt6-gtk-platformtheme
     - if: win or osx
       then:
         - ${{ pin_compatible("qt-main", upper_bound="x.x") }}

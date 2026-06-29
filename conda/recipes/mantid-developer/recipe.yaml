@@ -74,7 +74,6 @@ requirements:
         - pyqt6-sip ${{ pyqt6_sip }}
         - qt6-main ${{ qt6_main }}
         - qtconsole-base ${{ qtconsole }}
-        - qt6-gtk-platformtheme
         # OpenGL implementation:
         - libgl-devel
         - gxx_linux-64 ${{ cxx_compiler_version }}
