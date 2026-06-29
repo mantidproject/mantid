@@ -693,28 +693,6 @@ mtd_add_qt_library(
 # For the new help system target_link_libraries(MantidQtWidgetsCommon PRIVATE Mantid::Framework PythonInterface::mantid)
 # # This line is now removed/commented
 
-set(TEST_FILES
-    test/BatchAlgorithmRunnerTest.h
-    test/FileDialogHandlerTest.h
-    test/FindFilesThreadPoolManagerTest.h
-    test/FindFilesWorkerTest.h
-    test/FitPropertyBrowserTest.h
-    test/ImageInfoModelMatrixWSTest.h
-    test/ImageInfoModelMDTest.h
-    test/ImageInfoPresenterTest.h
-    test/InterfaceManagerTest.h
-    test/MuonPeriodInfoTest.h
-    test/ParseKeyValueStringTest.h
-    test/WorkspaceUtilsTest.h
-    test/Batch/BuildSubtreeItemsTest.h
-    test/Batch/ExtractSubtreesTest.h
-    test/Batch/FindSubtreeRootsTest.h
-    test/Batch/QtAdaptedModelTest.h
-    test/Batch/RowLocationTest.h
-    test/WorkspacePresenter/ADSAdapterTest.h
-    test/WorkspacePresenter/WorkspacePresenterTest.h
-)
-
 set(CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/test/WidgetsCommonTestInitialization.h)
 
 set(QT5_TEST_FILES

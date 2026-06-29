@@ -9,6 +9,9 @@
 #include "DllOption.h"
 #include "MantidKernel/Statistics.h"
 
+#include <string>
+#include <vector>
+
 namespace MantidQt {
 namespace MantidWidgets {
 
