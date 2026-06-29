@@ -435,7 +435,19 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
     def __create_normalizing_workspace(self, scan, vanws, flux_ratio):
         if not vanws:
             return None
-        normalizing_ws = ReplicateMD(ShapeWorkspace=scan, DataWorkspace=vanws, OutputWorkspace=mtd.unique_hidden_name())
+        if scan.getDimension(2).getNBins() > 1:  # more than one scan
+            normalizing_ws = ReplicateMD(
+                ShapeWorkspace=scan,
+                DataWorkspace=vanws,
+                OutputWorkspace=mtd.unique_hidden_name(),
+            )
+        else:  # we clone scan rather than vanws to keep in line with what ReplicateMD does.
+            normalizing_ws = CloneMDWorkspace(
+                InputWorkspace=scan,
+                OutputWorkspace=mtd.unique_hidden_name(),
+            )
+            normalizing_ws.setSignalArray(vanws.getSignalArray().copy())
+            normalizing_ws.setErrorSquaredArray(vanws.getErrorSquaredArray().copy())
         return self.__scaleBy(normalizing_ws, flux_ratio)
 
     def __normalized_event_data(self, scan, vanws, normalizing_ws, flux_ratio):

@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import systemtesting
-from mantid.simpleapi import HB3AAdjustSampleNorm, DeleteWorkspaces, mtd
+from mantid.simpleapi import CompareMDWorkspaces, HB3AAdjustSampleNorm, DeleteWorkspaces, mtd
 
 
 class SingleFileOutputNormalizationWorkspace(systemtesting.MantidSystemTest):
@@ -69,5 +69,33 @@ class MultiFileOutputNormalizationWorkspace(systemtesting.MantidSystemTest):
         self.assertEqual(norm.getNumDims(), 3)
         self.assertGreaterThan(data.getNEvents(), 0)
         self.assertGreaterThan(norm.getNEvents(), data.getNEvents())
+
+        DeleteWorkspaces([ws_name + "_data", ws_name + "_norm"])
+
+
+class SingleScanDataAsVanadiumOutputNormalizationWorkspace(systemtesting.MantidSystemTest):
+    """Verify that OutputNormalizationWorkspace is produced when the input data contains only one scan.
+    In this test, we reuse the same input file as data and vanadium. With `NormaliseBy="None"`,
+    it is expected that the output "Q-sample events" workspaces for the data and the normalization are equal.
+    """
+
+    def requiredFiles(self):
+        return ["HB3A_exp0722_scan0220.nxs"]
+
+    def runTest(self):
+        ws_name = "SingleScanDataAsVanadiumOutputNormalizationWorkspace"
+        HB3AAdjustSampleNorm(
+            Filename="HB3A_exp0722_scan0220.nxs",
+            VanadiumFile="HB3A_exp0722_scan0220.nxs",
+            NormaliseBy="None",
+            NormalizeData=False,
+            OutputType="Q-sample events",
+            MergeInputs=False,
+            OutputWorkspace=ws_name + "_data",
+            OutputNormalizationWorkspace=ws_name + "_norm",
+        )
+
+        comparison = CompareMDWorkspaces(Workspace1=ws_name + "_data", Workspace2=ws_name + "_norm", CheckEvents=True, IgnoreBoxID=True)
+        self.assertEqual(comparison[0], True, comparison[1])
 
         DeleteWorkspaces([ws_name + "_data", ws_name + "_norm"])
