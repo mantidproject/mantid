@@ -78,7 +78,7 @@ public:
   void setInvertRot(bool isInvert) override { m_invertRot = isInvert; }
 
 protected:
-  void calcMatrixCoordLinSys(const std::vector<double> &q, std::vector<coord_t> &Coord) const;
+  void calcMatrixCoordLinSys(double qx, double qy, double qz, std::vector<coord_t> &Coord) const;
   //  directions to the detectors
   double m_ex, m_ey, m_ez;
   // the matrix which transforms the neutron momentums from laboratory to
@@ -117,9 +117,9 @@ protected:
 
 private:
   /// how to transform workspace data in elastic case
-  inline bool calcMatrixCoordElastic(const double &k0, std::vector<coord_t> &Coord) const;
+  inline bool calcMatrixCoordElastic(double k0, std::vector<coord_t> &Coord) const;
   /// how to transform workspace data in inelastic case
-  inline bool calcMatrixCoordInelastic(const double &deltaE, std::vector<coord_t> &Coord) const;
+  inline bool calcMatrixCoordInelastic(double deltaE, std::vector<coord_t> &Coord) const;
 };
 
 } // namespace MDAlgorithms
