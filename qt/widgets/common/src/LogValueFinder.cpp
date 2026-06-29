@@ -59,7 +59,7 @@ std::vector<std::string> LogValueFinder::getLogNames() const {
  */
 double LogValueFinder::getLogValue(const std::string &logName, const Mantid::Kernel::Math::StatisticType &function,
                                    int index) const {
-  if (index > m_wsNames.size() - 1 || index < 0) {
+  if (index < 0 || static_cast<std::size_t>(index) >= m_wsNames.size()) {
     std::ostringstream message;
     message << "Index " << index << " out of range: number of workspaces = " << m_wsNames.size();
     throw std::invalid_argument(message.str());
