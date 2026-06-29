@@ -173,6 +173,16 @@ find $COPY_DIR -name *.pyc -delete
 # Delete extra DLLs
 rm -rf $COPY_DIR/bin/api-ms-win*.dll
 rm -rf $COPY_DIR/bin/libclang.dll
+# Remove Mesa's opengl32.dll (from mesalib, pulled in transitively by vtk-base
+# >=9.6 via viskores). Next to MantidWorkbench.exe it shadows the system OpenGL
+# driver and produces a black Instrument View. opengl32sw.dll (Qt's software
+# fallback) is kept. See https://github.com/mantidproject/mantid/issues/41735
+rm -f $COPY_DIR/bin/opengl32.dll
+# Drop the rest of the Mesa stack - orphaned once opengl32.dll is gone.
+rm -f $COPY_DIR/bin/libgallium_wgl.dll
+rm -f $COPY_DIR/bin/vulkan_dzn.dll
+rm -f $COPY_DIR/bin/vulkan_lvp.dll
+rm -f $COPY_DIR/bin/spirv_to_dxil.dll
 
 # Now package using NSIS
 echo "Packaging package via NSIS"
