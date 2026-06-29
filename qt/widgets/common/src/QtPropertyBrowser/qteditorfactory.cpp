@@ -190,7 +190,7 @@ void QtSliderFactoryPrivate::slotRangeChanged(QtProperty *property, int min, int
   if (!m_createdEditors.contains(property))
     return;
 
-  const QtIntPropertyManager *manager = q_ptr->propertyManager(property);
+  QtIntPropertyManager *manager = q_ptr->propertyManager(property);
   if (!manager)
     return;
 
@@ -217,7 +217,7 @@ void QtSliderFactoryPrivate::slotSingleStepChanged(QtProperty *property, int ste
 }
 
 void QtSliderFactoryPrivate::slotSetValue(int value) {
-  const QObject *object = q_ptr->sender();
+  QObject *object = q_ptr->sender();
   const QMap<QSlider *, QtProperty *>::ConstIterator ecend = m_editorToProperty.constEnd();
   for (QMap<QSlider *, QtProperty *>::ConstIterator itEditor = m_editorToProperty.constBegin(); itEditor != ecend;
        ++itEditor) {
@@ -317,7 +317,7 @@ void QtScrollBarFactoryPrivate::slotRangeChanged(QtProperty *property, int min, 
   if (!m_createdEditors.contains(property))
     return;
 
-  const QtIntPropertyManager *manager = q_ptr->propertyManager(property);
+  QtIntPropertyManager *manager = q_ptr->propertyManager(property);
   if (!manager)
     return;
 
@@ -344,7 +344,7 @@ void QtScrollBarFactoryPrivate::slotSingleStepChanged(QtProperty *property, int 
 }
 
 void QtScrollBarFactoryPrivate::slotSetValue(int value) {
-  const QObject *object = q_ptr->sender();
+  QObject *object = q_ptr->sender();
   const QMap<QScrollBar *, QtProperty *>::ConstIterator ecend = m_editorToProperty.constEnd();
   for (QMap<QScrollBar *, QtProperty *>::ConstIterator itEditor = m_editorToProperty.constBegin(); itEditor != ecend;
        ++itEditor)
@@ -440,7 +440,7 @@ void QtCheckBoxFactoryPrivate::slotPropertyChanged(QtProperty *property, bool va
 }
 
 void QtCheckBoxFactoryPrivate::slotSetValue(bool value) {
-  const QObject *object = q_ptr->sender();
+  QObject *object = q_ptr->sender();
 
   const QMap<QtBoolEdit *, QtProperty *>::ConstIterator ecend = m_editorToProperty.constEnd();
   for (QMap<QtBoolEdit *, QtProperty *>::ConstIterator itEditor = m_editorToProperty.constBegin(); itEditor != ecend;

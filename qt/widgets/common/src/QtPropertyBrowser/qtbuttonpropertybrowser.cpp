@@ -125,7 +125,7 @@ int QtButtonPropertyBrowserPrivate::gridRow(WidgetItem *item) const {
   int row = 0;
   QListIterator<WidgetItem *> it(siblings);
   while (it.hasNext()) {
-    const WidgetItem *sibling = it.next();
+    WidgetItem *sibling = it.next();
     if (sibling == item)
       return row;
     row += gridSpan(sibling);
@@ -133,7 +133,7 @@ int QtButtonPropertyBrowserPrivate::gridRow(WidgetItem *item) const {
   return -1;
 }
 
-int QtButtonPropertyBrowserPrivate::gridSpan(const WidgetItem *item) const {
+int QtButtonPropertyBrowserPrivate::gridSpan(WidgetItem *item) const {
   if (item->container && item->expanded)
     return 2;
   return 1;
@@ -229,7 +229,7 @@ void QtButtonPropertyBrowserPrivate::slotToggled(bool checked) {
 
 void QtButtonPropertyBrowserPrivate::updateLater() { QTimer::singleShot(0, q_ptr, SLOT(slotUpdate())); }
 
-void QtButtonPropertyBrowserPrivate::propertyInserted(QtBrowserItem *index, const QtBrowserItem *afterIndex) {
+void QtButtonPropertyBrowserPrivate::propertyInserted(QtBrowserItem *index, QtBrowserItem *afterIndex) {
   WidgetItem *afterItem = m_indexToItem.value(afterIndex);
   WidgetItem *parentItem = m_indexToItem.value(index->parent());
 
@@ -318,7 +318,7 @@ void QtButtonPropertyBrowserPrivate::propertyInserted(QtBrowserItem *index, cons
   updateItem(newItem);
 }
 
-void QtButtonPropertyBrowserPrivate::propertyRemoved(const QtBrowserItem *index) {
+void QtButtonPropertyBrowserPrivate::propertyRemoved(QtBrowserItem *index) {
   WidgetItem *item = m_indexToItem.value(index);
 
   m_indexToItem.remove(index);
@@ -427,14 +427,14 @@ void QtButtonPropertyBrowserPrivate::removeRow(QGridLayout *layout, int row) con
   }
 }
 
-void QtButtonPropertyBrowserPrivate::propertyChanged(const QtBrowserItem *index) {
+void QtButtonPropertyBrowserPrivate::propertyChanged(QtBrowserItem *index) {
   WidgetItem *item = m_indexToItem.value(index);
 
   updateItem(item);
 }
 
 void QtButtonPropertyBrowserPrivate::updateItem(WidgetItem *item) {
-  const QtProperty *property = m_itemToIndex[item]->property();
+  QtProperty *property = m_itemToIndex[item]->property();
   if (item->button) {
     QFont font = item->button->font();
     font.setUnderline(property->isModified());

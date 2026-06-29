@@ -158,7 +158,7 @@ void QtGroupBoxPropertyBrowserPrivate::slotUpdate() {
 
 void QtGroupBoxPropertyBrowserPrivate::updateLater() { QTimer::singleShot(0, q_ptr, SLOT(slotUpdate())); }
 
-void QtGroupBoxPropertyBrowserPrivate::propertyInserted(QtBrowserItem *index, const QtBrowserItem *afterIndex) {
+void QtGroupBoxPropertyBrowserPrivate::propertyInserted(QtBrowserItem *index, QtBrowserItem *afterIndex) {
   WidgetItem *afterItem = m_indexToItem.value(afterIndex);
   WidgetItem *parentItem = m_indexToItem.value(index->parent());
 
@@ -264,7 +264,7 @@ void QtGroupBoxPropertyBrowserPrivate::propertyInserted(QtBrowserItem *index, co
   updateItem(newItem);
 }
 
-void QtGroupBoxPropertyBrowserPrivate::propertyRemoved(const QtBrowserItem *index) {
+void QtGroupBoxPropertyBrowserPrivate::propertyRemoved(QtBrowserItem *index) {
   WidgetItem *item = m_indexToItem.value(index);
 
   m_indexToItem.remove(index);
@@ -299,7 +299,14 @@ void QtGroupBoxPropertyBrowserPrivate::propertyRemoved(const QtBrowserItem *inde
     removeRow(parentItem->layout, row);
   } else {
     WidgetItem *par = parentItem->parent;
-    QGridLayout *const l = !par ? m_mainLayout : par->layout;
+    QGridLayout *l = nullptr;
+    if (!par) {
+      l = m_mainLayout;
+      m_children.indexOf(parentItem);
+    } else {
+      l = par->layout;
+      par->children.indexOf(parentItem);
+    }
 
     if (parentItem->widget) {
       parentItem->widget->hide();
@@ -364,20 +371,20 @@ void QtGroupBoxPropertyBrowserPrivate::removeRow(QGridLayout *layout, int row) c
   }
 }
 
-bool QtGroupBoxPropertyBrowserPrivate::hasHeader(const WidgetItem *item) const {
+bool QtGroupBoxPropertyBrowserPrivate::hasHeader(WidgetItem *item) const {
   if (item->widget)
     return true;
   return false;
 }
 
-void QtGroupBoxPropertyBrowserPrivate::propertyChanged(const QtBrowserItem *index) {
+void QtGroupBoxPropertyBrowserPrivate::propertyChanged(QtBrowserItem *index) {
   WidgetItem *item = m_indexToItem.value(index);
 
   updateItem(item);
 }
 
 void QtGroupBoxPropertyBrowserPrivate::updateItem(WidgetItem *item) {
-  const QtProperty *property = m_itemToIndex[item]->property();
+  QtProperty *property = m_itemToIndex[item]->property();
   if (item->groupBox) {
     QFont font = item->groupBox->font();
     font.setUnderline(property->isModified());
