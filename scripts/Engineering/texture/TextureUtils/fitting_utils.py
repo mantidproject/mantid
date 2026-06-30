@@ -9,12 +9,13 @@ import numpy as np
 from os import path
 
 from mantid.simpleapi import SaveNexus, logger, CreateEmptyTableWorkspace, Fit
-from mantid.simpleapi import ConvertUnits, Rebunch, Rebin, SumSpectra, AppendSpectra, CloneWorkspace, CropWorkspaceRagged, Load
+from mantid.simpleapi import ConvertUnits, Rebunch, Rebin, SumSpectra, AppendSpectra, CloneWorkspace, CropWorkspaceRagged
 from mantid.api import AnalysisDataService as ADS, MultiDomainFunction, FunctionFactory
 from typing import Sequence, Tuple, List
 from mantid.dataobjects import Workspace2D
 from plugins.algorithms.IntegratePeaks1DProfile import get_eval_ws, calc_sigma_from_summation
 from Engineering.EnggUtils import convert_TOFerror_to_derror
+from mantid.api import IFunction, CompositeFunction
 
 from mantid.kernel import DeltaEModeType, UnitConversion
 from plugins.algorithms.peakdata_utils import PeakData
