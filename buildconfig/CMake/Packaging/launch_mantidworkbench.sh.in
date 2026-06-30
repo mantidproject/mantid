@@ -19,9 +19,15 @@ fi
 
 @GSETTINGS_SCHEMA_DEFINITIONS@
 
+# Force the xcb (X11/XWayland) Qt platform plugin to avoid rendering and
+# stability issues seen under the native Wayland plugin.
+if [ -z "${QT_QPA_PLATFORM}" ]; then
+    export QT_QPA_PLATFORM=xcb
+fi
+
 # Launch the workbench
 LD_PRELOAD=${LOCAL_PRELOAD} \
-    PYTHONPATH=${LOCAL_PYTHONPATH} @QT_QPA@ \
+    PYTHONPATH=${LOCAL_PYTHONPATH} \
     GSETTINGS_SCHEMA_DIR=${GSETTINGS_SCHEMA_DIR}:${GSETTINGS_MANTID_PATH} \
     @XKB_CONFIG_ROOT_COMMAND@ \
     @WRAPPER_PREFIX@$VGLRUN $GDB \
