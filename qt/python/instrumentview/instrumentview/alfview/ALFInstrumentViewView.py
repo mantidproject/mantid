@@ -9,7 +9,6 @@
 from qtpy.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget
 from instrumentview.FullInstrumentViewWindow import FullInstrumentViewView
 from typing import override
-from contextlib import suppress
 import re
 from qtpy.QtWidgets import QLineEdit, QPushButton
 
@@ -32,8 +31,6 @@ class ALFInstrumentViewView(FullInstrumentViewView):
     """
 
     def __init__(self, parent=None):
-        self._detector_figure_canvas = NullWidget()
-
         self.rebin_input = QLineEdit()
         self.rebin_input.setPlaceholderText("5.5,0.01,6")
         self.rebin_input.textChanged.connect(self._update_rebin_button_state)
@@ -42,16 +39,20 @@ class ALFInstrumentViewView(FullInstrumentViewView):
         self.rebin_btn.setEnabled(False)  # disabled until input is valid
         self.rebin_btn.clicked.connect(self._on_rebin_clicked)
 
-        self.close_btn = QPushButton("Close")
-        self.close_btn.clicked.connect(self._on_close_clicked)
         super().__init__(parent)
+
+        # NOTE: After __init__ to overwride lineplot with placeholder
+        self._detector_figure_canvas = NullWidget()
 
     def _parse_rebin_args(self, text: str):
         pattern = r"^\s*([+-]?\d*\.?\d+)\s*,\s*([+-]?\d*\.?\d+)\s*,\s*([+-]?\d*\.?\d+)\s*$"
         match = re.match(pattern, text)
-        if match:
-            return text
-        return None
+        if not match:
+            return None
+        start, step, end = map(float, match.groups())
+        if step == 0 or (end - start) * step <= 0:
+            return None
+        return text
 
     def _update_rebin_button_state(self, text: str):
         self.rebin_btn.setEnabled(self._parse_rebin_args(text) is not None)
@@ -62,21 +63,6 @@ class ALFInstrumentViewView(FullInstrumentViewView):
             return
         self._presenter.rebin_button_clicked(params)
 
-    def _on_close_clicked(self):
-        super().close()
-
-    @override
-    def closeEvent(self, event):
-        # Prevent paint/update events while the underlying VTK resources are being torn down.
-        if getattr(self, "main_plotter", None) is not None:
-            with suppress(RuntimeError, AttributeError):
-                self.main_plotter.app_window.setUpdatesEnabled(False)
-            with suppress(RuntimeError, AttributeError):
-                self.main_plotter.app_window.hide()
-            with suppress(RuntimeError, AttributeError):
-                self.main_plotter.clear()
-        super().closeEvent(event)
-
     @override
     def _set_layouts(self):
         parent_layout = QHBoxLayout(self)
@@ -86,7 +72,6 @@ class ALFInstrumentViewView(FullInstrumentViewView):
         options_layout.addWidget(self._add_selection)
         options_layout.addWidget(self.rebin_btn)
         options_layout.addWidget(self.rebin_input)
-        options_layout.addWidget(self.close_btn)
         # NOTE: Widgets in the full view can be added as needed
         # options_layout.addWidget(self._select_bank_tube)
         # options_layout.addWidget(self._show_shapes_check_box)

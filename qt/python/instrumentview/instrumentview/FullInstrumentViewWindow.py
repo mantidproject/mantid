@@ -175,7 +175,6 @@ class FullInstrumentViewWindow(QMainWindow):
 
 @run_on_qapp_thread()
 class FullInstrumentViewView(QWidget):
-    _detector_spectrum_fig = None
     _ASPECT_RATIO_SETTING_STRING = "InstrumentView.MaintainAspectRatio"
     _RENDER_MODE_SETTING_STRING = "InstrumentView.RenderMode"
     _FLIP_BEAM_SETTING_STRING = "InstrumentView.FlipBeam"
@@ -185,17 +184,6 @@ class FullInstrumentViewView(QWidget):
     _RENDER_MODE_OPTIONS = (_RENDER_MODE_POINTS, _RENDER_MODE_SHAPES_FAST, _RENDER_MODE_RAW_SHAPES)
     _COLOURS = ["#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
 
-    _overlay_meshes = []
-    _lineplot_overlays = []
-    _closing = False
-    _current_widget = None
-    _shape_overlay_manager = None
-    _default_camera_position_map = {}
-    _default_parallel_scales = {}
-    _last_selected_projection = None
-    _last_camera_position = None
-    _last_parallel_scale = None
-
     pv.global_theme.background = "black"
     pv.global_theme.font.color = "white"
 
@@ -203,6 +191,19 @@ class FullInstrumentViewView(QWidget):
         self._off_screen = off_screen
 
         super().__init__(parent)
+
+        self._overlay_meshes = []
+        self._lineplot_overlays = []
+        self._closing = False
+        self._current_widget = None
+        self._shape_overlay_manager = None
+        self._default_camera_position_map = {}
+        self._default_parallel_scales = {}
+        self._last_selected_projection = None
+        self._last_camera_position = None
+        self._last_parallel_scale = None
+        self._detector_spectrum_fig = None
+
         self._create_main_widgets()
         self._set_layouts()
 
@@ -504,7 +505,6 @@ class FullInstrumentViewView(QWidget):
     def closeEvent(self, event) -> None:
         """Closes view, not window"""
         self._closing = True
-        self.main_plotter.close()
         with suppress(TypeError):
             self._contour_range_max_edit.disconnect()
             self._contour_range_min_edit.disconnect()
@@ -513,6 +513,9 @@ class FullInstrumentViewView(QWidget):
         # Shut down any callbacks before closing the plotter and the figure
         if hasattr(self, "_presenter") and self._presenter is not None:
             self._presenter.handle_close()
+
+        # NOTE: Closing main plotter should be after presenter handle closing
+        self.main_plotter.close()
 
         super().closeEvent(event)
 

@@ -91,20 +91,17 @@ class FullInstrumentViewPresenter:
     def _callback_worker(self):
         while True:
             item = self._callback_queue.get()
-            should_stop = False
+            if item is self._callback_stop_sentinel:
+                self._callback_queue.task_done()
+                break
+            func, args = item
             try:
-                if item is self._callback_stop_sentinel:
-                    should_stop = True
-                else:
-                    func, args = item
-                    if not self._closing:
-                        func(*args)
+                if not self._closing:
+                    func(*args)
             except Exception as e:
                 logger.error(f"Error in callback worker: {e}")
             finally:
                 self._callback_queue.task_done()
-            if should_stop:
-                break
 
     def setup(self):
         self._view.subscribe_presenter(self)

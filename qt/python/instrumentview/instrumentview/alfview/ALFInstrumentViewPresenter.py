@@ -7,12 +7,13 @@
 
 from typing import override
 
+from instrumentview.Projections.ProjectionType import ProjectionType
 from instrumentview.alfview.ALFInstrumentViewView import ALFInstrumentViewView
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
 from instrumentview.FullInstrumentViewPresenter import FullInstrumentViewPresenter
 from instrumentview.ComponentSelectionUtils import subtrees_of_component_indices
 
-from mantid.simpleapi import CreateSampleWorkspace, AnalysisDataService, Rebin
+from mantid.simpleapi import CreateSampleWorkspace, Rebin
 from qtpy.QtCore import QObject, QMetaObject, Q_ARG
 
 
@@ -25,21 +26,17 @@ class ALFInstrumentViewPresenter(FullInstrumentViewPresenter):
 
     def __init__(self, view=None):
         _placeholder_ws = CreateSampleWorkspace(InstrumentName="ALF", StoreInADS=False, OutputWorkspace="test_alfview")
-        self.init_view_and_model(_placeholder_ws)
-
-    def update_view(self, ws_name: str):
-        ws = AnalysisDataService.retrieve(ws_name)
-        if ws is None:
-            return
-        self.init_view_and_model(ws)
-
-    def init_view_and_model(self, ws):
-        old_view = getattr(self, "_view", None)
-        if old_view is not None:
-            old_view.close()
-        super().__init__(ALFInstrumentViewView(), FullInstrumentViewModel(ws))
+        super().__init__(ALFInstrumentViewView(), FullInstrumentViewModel(_placeholder_ws))
         self._view._select_bank_tube.toggle()
         self._view._render_mode_combo_box.setCurrentText(self._view._RENDER_MODE_SHAPES_FAST)
+        self._view._projection_combo_box.setCurrentText(ProjectionType.CYLINDRICAL_Y.value)
+
+    def update_view(self, ws_name: str):
+        self._reset_model_workspace(ws_name)
+        self.update_plotter()
+
+        self._view.cache_default_camera_position()
+        self._view.reset_camera()
 
     def selected_detector_ids(self):
         return []
