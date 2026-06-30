@@ -29,6 +29,9 @@ void SaveDaveGrp::init() {
                         "A DAVE grouped data format file that will be created");
   this->declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>("ToMicroEV", false, Kernel::Direction::Input),
                         "Transform all energy units from milli eV to micro eV");
+  this->declareProperty(
+      std::make_unique<Kernel::PropertyWithValue<bool>>("ToQsInQENSData", false, Kernel::Direction::Input),
+      "Transform the spectrum numbers to q values");
 }
 
 /** Execute the algorithm.
@@ -42,11 +45,12 @@ void SaveDaveGrp::exec() {
     throw std::invalid_argument("Either the number of bins or the number of histograms is 0");
   std::string xcaption = ws->getAxis(0)->unit()->caption();
   std::string ycaption = ws->getAxis(1)->unit()->caption();
-  bool toQsInQENSData = (ycaption != "q");
+  bool toQsInQENSData = getProperty("ToQsInQENSData");
+  ;
   if (xcaption.length() == 0)
     xcaption = "X";
   if (ycaption.length() == 0 || ycaption == "Spectrum")
-    ycaption = "q";
+    ycaption = toQsInQENSData ? "q" : "Y";
 
   std::string filename = getProperty("Filename");
   std::ofstream file(filename.c_str());
