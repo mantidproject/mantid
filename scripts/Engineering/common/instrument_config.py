@@ -54,6 +54,7 @@ class IMAT_GROUP(Enum):
 # if a new instrument is added, add its config key to this list and group to groups (used for tests)
 SUPPORTED_INSTRUMENTS = ("ENGINX", "IMAT")
 GROUPS = (ENGINX_GROUP, IMAT_GROUP)
+PSEUDONYMS = {"ENGIN-X": "ENGINX"}
 
 
 @dataclass(frozen=True)
@@ -227,6 +228,7 @@ def get_instr_config(instrument: Optional[str]) -> Optional[InstrumentConfig]:
     if instrument is None:
         return None
     key = instrument.upper()
+    key = PSEUDONYMS.get(key, key)
     if key not in CONFIGS:
         raise RuntimeError(f"No instrument config registered for instrument='{instrument}'")
     return CONFIGS[key]

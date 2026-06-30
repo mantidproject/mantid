@@ -564,7 +564,7 @@ If using a standard grouping, no ``grouping_filepath`` or ``prm_filepath`` is re
       bank_focus_dir = os.path.join(root_dir, "Focus", "CombinedFiles")
 
       # get grouping directory name
-      calib_info = CalibrationInfo(group = GROUP(grouping))
+      calib_info = CalibrationInfo(group = GROUP(grouping), instrument = instr)
       if groupingfile_path:
          calib_info.set_grouping_file(groupingfile_path)
       elif prm_path:
@@ -646,7 +646,7 @@ Additionally to fitting the peak, the table will also contain a numerical integr
    # find and load peaks
 
    # get grouping directory name
-   calib_info = CalibrationInfo(group = GROUP(grouping))
+   calib_info = CalibrationInfo(group = GROUP(grouping), instrument = instr)
    if groupingfile_path:
       calib_info.set_grouping_file(groupingfile_path)
    elif prm_path:
