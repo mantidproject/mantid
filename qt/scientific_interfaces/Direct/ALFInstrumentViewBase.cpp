@@ -115,6 +115,7 @@ void ALFInstrumentViewBase::sampleLoaded() {
 
 void ALFInstrumentViewBase::vanadiumLoaded() {
   if (!m_vanadium->isValid()) {
+    enable();
     displayWarning(m_vanadium->getFileProblem().toStdString());
     return;
   }

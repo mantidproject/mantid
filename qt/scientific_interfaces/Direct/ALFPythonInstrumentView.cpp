@@ -134,13 +134,13 @@ std::vector<DetectorTube> ALFPythonInstrumentView::getSelectedDetectors() const 
     return tubes;
   } catch (boost::python::error_already_set &) {
     g_log.error() << PythonException(true).what() << "\n";
-    return {{}};
+    return {};
   } catch (std::exception const &ex) {
     g_log.error() << ex.what() << "\n";
-    return {{}};
+    return {};
   } catch (...) {
     g_log.error("Unknown exception getting ALF Python instrument view widget");
-    return {{}};
+    return {};
   }
 }
 } // namespace MantidQt::CustomInterfaces

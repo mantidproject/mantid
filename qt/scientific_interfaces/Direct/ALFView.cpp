@@ -57,9 +57,8 @@ ALFView::ALFView(QWidget *parent) : UserSubWindow(parent), m_instrumentPresenter
   m_instrumentPresenter->subscribeAnalysisPresenter(m_analysisPresenter.get());
 }
 
-ALFView::~ALFView() { m_instrumentPresenter->saveSettings(); }
-
 void ALFView::closeEvent(QCloseEvent *event) {
+  m_instrumentPresenter->saveSettings();
   // Explicitly close the Python view widget before the Qt widget hierarchy is
   // torn down, so that its closeEvent fires and resources (e.g. VTK plotter)
   // are cleaned up while all child widgets are still valid.
