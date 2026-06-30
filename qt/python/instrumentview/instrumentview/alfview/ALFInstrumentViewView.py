@@ -10,7 +10,7 @@ from qtpy.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget
 from instrumentview.FullInstrumentViewWindow import FullInstrumentViewView
 from typing import override
 import re
-from qtpy.QtWidgets import QLineEdit, QPushButton
+from qtpy.QtWidgets import QLineEdit, QPushButton, QSizePolicy, QSplitter
 
 
 class NullWidget:
@@ -42,7 +42,8 @@ class ALFInstrumentViewView(FullInstrumentViewView):
         super().__init__(parent)
 
         # NOTE: After __init__ to overwride lineplot with placeholder
-        self._detector_figure_canvas = NullWidget()
+        # self._detector_figure_canvas = NullWidget()
+        self._detector_info_group_box.setVisible(False)
 
     def _parse_rebin_args(self, text: str):
         pattern = r"^\s*([+-]?\d*\.?\d+)\s*,\s*([+-]?\d*\.?\d+)\s*,\s*([+-]?\d*\.?\d+)\s*$"
@@ -64,25 +65,39 @@ class ALFInstrumentViewView(FullInstrumentViewView):
         self._presenter.rebin_button_clicked(params)
 
     @override
-    def _set_layouts(self):
-        parent_layout = QHBoxLayout(self)
-        options_widget = QWidget()
-        options_layout = QVBoxLayout(options_widget)
-        options_layout.addWidget(self._add_rectangle)
-        options_layout.addWidget(self._add_selection)
-        options_layout.addWidget(self.rebin_btn)
-        options_layout.addWidget(self.rebin_input)
-        # NOTE: Widgets in the full view can be added as needed
-        # options_layout.addWidget(self._select_bank_tube)
-        # options_layout.addWidget(self._show_shapes_check_box)
-        # options_layout.addWidget(self._projection_combo_box)
-        options_layout.addWidget(self._spacer)
-        options_widget.setFixedWidth(options_layout.sizeHint().width())
-        parent_layout.addWidget(options_widget)
-        parent_layout.addWidget(self.main_plotter.app_window)
+    def set_selected_detector_info(self, detector_infos):
+        return
+
+    @override
+    def set_relative_detector_angle(self, angle):
+        return
 
     # NOTE: Ignore setting camera position because any
     # update to the view should reset it
     @override
     def set_camera_to_cached_state(self) -> None:
         return
+
+    @override
+    def _set_layouts(self):
+        parent_layout = QHBoxLayout(self)
+        options_widget = QWidget()
+        options_layout = QVBoxLayout(options_widget)
+        options_layout.addWidget(self._add_rectangle)
+        options_layout.addWidget(self._add_selection)
+        options_layout.addWidget(self._hover_pick)
+        options_layout.addWidget(self.rebin_btn)
+        options_layout.addWidget(self.rebin_input)
+        # NOTE: Widgets in the full view can be added as needed
+        # options_layout.addWidget(self._select_bank_tube)
+        # options_layout.addWidget(self._show_shapes_check_box)
+        # options_layout.addWidget(self._projection_combo_box)
+        self._detector_figure_canvas.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        options_layout.addWidget(self._detector_figure_canvas, 1)
+        options_layout.addWidget(self._spacer)
+        options_widget.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
+        splitter = QSplitter()
+        splitter.addWidget(options_widget)
+        splitter.addWidget(self.main_plotter.app_window)
+        splitter.setSizes([300, 700])  # Initial split proportions
+        parent_layout.addWidget(splitter)

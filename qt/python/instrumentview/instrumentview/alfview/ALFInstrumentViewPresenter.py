@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from typing import override
 
 from instrumentview.Projections.ProjectionType import ProjectionType
 from instrumentview.alfview.ALFInstrumentViewView import ALFInstrumentViewView
@@ -30,6 +29,7 @@ class ALFInstrumentViewPresenter(FullInstrumentViewPresenter):
         self._view._select_bank_tube.toggle()
         self._view._render_mode_combo_box.setCurrentText(self._view._RENDER_MODE_SHAPES_FAST)
         self._view._projection_combo_box.setCurrentText(ProjectionType.CYLINDRICAL_Y.value)
+        self._view.check_sum_spectra_checkbox()
 
     def update_view(self, ws_name: str):
         self._reset_model_workspace(ws_name)
@@ -51,11 +51,6 @@ class ALFInstrumentViewPresenter(FullInstrumentViewPresenter):
     def update_picked_detectors_on_view(self) -> None:
         super().update_picked_detectors_on_view()
         self.notify_cpp_callback("notify_whole_tube_selected")
-
-    @override
-    def _update_line_plot_ws_and_draw(self, unit: str) -> None:
-        # Avoid plotting since as it gives some errors
-        pass
 
     def rebin_button_clicked(self, params: str) -> None:
         # Rewrites the active workspace in the model, a miracle if it works
