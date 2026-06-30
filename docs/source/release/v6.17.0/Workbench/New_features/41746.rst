@@ -1,0 +1,1 @@
+- The sample logs viewer allows copying the selected variable name to clipboard

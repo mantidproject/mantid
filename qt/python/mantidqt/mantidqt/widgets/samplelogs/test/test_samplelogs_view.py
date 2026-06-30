@@ -43,7 +43,11 @@ class SampleLogsViewTest(unittest.TestCase, QtWidgetFinder):
         # check the workspace replaced if same name
         ws2 = CreateSampleWorkspace(OutputWorkspace="new_name", BinWidth=1000)
         assert repr(pres.model.get_ws()) == repr(ws2)
-
+        # also test copy log name to clipboard
+        pres.view.set_selected_rows([2])
+        pres.copy_selected_log_name()
+        clipboard = QApplication.clipboard()
+        self.assertEqual(clipboard.text(), "run_start")
         # delete workspace and check that the widget closes
         assert pres.view.isVisible()
         DeleteWorkspace("new_name")
