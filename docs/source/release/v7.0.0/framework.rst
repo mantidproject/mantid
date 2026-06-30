@@ -82,4 +82,4 @@ MantidWorkbench
 
 See :doc:`mantidworkbench`.
 
-:ref:`Release 6.17.0 <v6.17.0>`
+:ref:`Release 7.0.0 <v7.0.0>`
