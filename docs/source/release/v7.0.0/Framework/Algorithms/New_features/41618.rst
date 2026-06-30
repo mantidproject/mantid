@@ -1,0 +1,1 @@
+- :ref:`algm-SumSpectra` algorithm has been optimized for better performance.

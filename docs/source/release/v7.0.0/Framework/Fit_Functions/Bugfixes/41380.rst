@@ -1,0 +1,1 @@
+- In an :ref:`InstrumentParameterFile`, defined fitting parameters no longer erroneously overwrite if they have the same name but for different functions (e.g. ``Bk2BkExpConvPV:Gamma`` and ``IkedaCarpenterPV:Gamma``).

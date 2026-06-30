@@ -1,0 +1,1 @@
+- `:ref: CreateDetectorTable <algm-CreateDetectorTable>` has received some performance improvements that should speed up the algorithm significantly for large workspaces with many spectra. This algorithm is used in the new Instrument View when opening, so this should improve the performance of that interface as well.

@@ -1,0 +1,26 @@
+=========================
+Indirect Geometry Changes
+=========================
+
+New Features
+------------
+.. amalgamate:: Indirect/New_features
+
+
+Bugfixes
+--------
+.. amalgamate:: Indirect/Bugfixes
+
+
+Algorithms
+----------
+
+New features
+############
+.. amalgamate:: Indirect/Algorithms/New_features
+
+Bugfixes
+############
+.. amalgamate:: Indirect/Algorithms/Bugfixes
+
+:ref:`Release 7.0.0 <v7.0.0>`

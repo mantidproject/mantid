@@ -1,0 +1,1 @@
+- :ref:`ExtractSpectra <algm-ExtractSpectra>` no longer gives an error when the argument ``DetectorList`` is used on focused workspaces where a workspace index maps to several detector IDs.

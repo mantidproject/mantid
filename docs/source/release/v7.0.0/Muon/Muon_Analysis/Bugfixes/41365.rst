@@ -1,0 +1,1 @@
+- Added the ability to specify the location of the ``autosave.run`` (used for loading the current run) file in the Muon Analysis <Muon_Analysis-ref> and Frequency Domain Analysis <Frequency_Domain_Analysis-ref> interfaces. This allows users on platforms other than Windows to specify the location of the autosave file (location is automatically set on Windows).

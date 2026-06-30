@@ -1,0 +1,1 @@
+- In the new Instrument View, added an option to draw the sample position, and labelled the ``Monitors`` and ``Sample`` checkboxes with a coloured circle to indicate the colour of the drawn items.
