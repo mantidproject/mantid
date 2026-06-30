@@ -54,9 +54,6 @@ private:
   API::MatrixWorkspace_sptr rebin(API::MatrixWorkspace_sptr matrixws);
   API::MatrixWorkspace_sptr rebinRagged(API::MatrixWorkspace_sptr matrixws, const bool inDspace);
 
-  API::MatrixWorkspace_sptr conjoinWorkspaces(const API::MatrixWorkspace_sptr &ws1,
-                                              const API::MatrixWorkspace_sptr &ws2, size_t offset);
-
   /// Call diffraction focus to a matrix workspace.
   API::MatrixWorkspace_sptr diffractionFocus(API::MatrixWorkspace_sptr ws);
 
@@ -97,7 +94,6 @@ private:
   bool binInDspace{false};
   double xmin{0.0};
   double xmax{0.0};
-  double DIFCref{0.0};
   double minwl{0.0};
   double maxwl{0.0};
   double tmin{0.0};
@@ -106,15 +102,6 @@ private:
   void compressEventsOutputWS(const double compressEventsTolerance, const double wallClockTolerance);
   bool shouldCompressUnfocused(const double compressTolerance, const double tofmin, const double tofmax,
                                const bool hasWallClockTolerance);
-
-  /// Low resolution TOF matrix workspace
-  API::MatrixWorkspace_sptr m_lowResW;
-  /// Low resolution TOF event workspace
-  DataObjects::EventWorkspace_sptr m_lowResEW;
-  /// Flag to process low resolution workspace
-  bool m_processLowResTOF{false};
-  /// Offset to low resolution TOF spectra
-  size_t m_lowResSpecOffset{0};
 
   std::unique_ptr<API::Progress> m_progress = nullptr; ///< Progress reporting
 };

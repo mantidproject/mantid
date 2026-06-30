@@ -21,7 +21,6 @@ The way that algorithms are connected together is better described in the workfl
 - :ref:`algm-EditInstrumentGeometry`
 - :ref:`algm-LoadDetectorsGroupingFile` when grouping file is specified without a calibration file
 - :ref:`algm-LoadDiffCal`
-- :ref:`algm-AppendSpectra` only used when ``LowResRef`` is specified
 - :ref:`algm-LorentzCorrection`
 - :ref:`algm-MaskBins` for filtering out absorption resonances
 - :ref:`algm-MaskBinsFromTable` for filtering out single crystal peaks from powder data
@@ -29,7 +28,6 @@ The way that algorithms are connected together is better described in the workfl
 - :ref:`algm-Rebin`
 - :ref:`algm-ResampleX`
 - :ref:`algm-RebinRagged`
-- :ref:`algm-RemoveLowResTOF` ``CropWavelengthMin`` and ``CropWavelengthMax`` are preferred
 - :ref:`algm-RemovePromptPulse`
 - :ref:`algm-SortEvents` (event workspace only)
 
