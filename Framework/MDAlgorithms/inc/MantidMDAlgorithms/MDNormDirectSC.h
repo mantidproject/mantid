@@ -43,6 +43,9 @@ private:
   void cacheDimensionXValues();
   void calculateNormalization(const std::vector<coord_t> &otherValues, const Kernel::Matrix<coord_t> &affineTrans,
                               uint16_t expInfoIndex);
+  void calculateNormInner(const API::SpectrumInfo &spectrumInfo, const double protonCharge,
+                          const std::vector<coord_t> &otherValues, const Kernel::Matrix<coord_t> &affineTrans,
+                          std::pair<double, double> progval);
 
   void calculateIntersections(std::vector<std::array<double, 4>> &intersections, const double theta, const double phi);
 
