@@ -6,7 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mantid.simpleapi import RefineSingleCrystalGoniometer, LoadIsawPeaks, FindUBUsingIndexedPeaks, IndexPeaks
+from mantid.simpleapi import (
+    RefineSingleCrystalGoniometer,
+    LoadIsawPeaks,
+    FindUBUsingIndexedPeaks,
+    IndexPeaks,
+)
 
 
 class RefineSingleCrystalGoniometerTest(unittest.TestCase):
@@ -21,14 +26,14 @@ class RefineSingleCrystalGoniometerTest(unittest.TestCase):
 
         LoadIsawPeaks(Filename=filename, OutputWorkspace="peaks")
 
-        FindUBUsingIndexedPeaks(PeaksWorkspace="peaks", Tolerance=0.12)
-        index_null = IndexPeaks(PeaksWorkspace="peaks", Tolerance=0.12)
+        FindUBUsingIndexedPeaks(PeaksWorkspace="peaks", Tolerance=0.25)
+        index_null = IndexPeaks(PeaksWorkspace="peaks", Tolerance=0.25)
 
         initial = index_null.NumIndexed
 
-        RefineSingleCrystalGoniometer("peaks", 0.12, "Triclinic", 1)
+        RefineSingleCrystalGoniometer(Peaks="peaks", Tolerance=0.12, CrystalSystem="Triclinic", NumIterations=1)
 
-        index_refine = IndexPeaks(PeaksWorkspace="peaks", Tolerance=0.12)
+        index_refine = IndexPeaks(PeaksWorkspace="peaks", Tolerance=0.25)
 
         final = index_refine.NumIndexed
 

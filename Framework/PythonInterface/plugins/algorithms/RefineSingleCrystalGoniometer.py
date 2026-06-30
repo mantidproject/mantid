@@ -7,9 +7,28 @@
 
 from mantid.api import AlgorithmFactory, PythonAlgorithm, OrientedLatticeValidator
 from mantid.dataobjects import PeaksWorkspaceProperty
-from mantid.kernel import Direction, IntBoundedValidator, FloatBoundedValidator, StringListValidator
+from mantid.kernel import (
+    Direction,
+    IntBoundedValidator,
+    FloatBoundedValidator,
+    StringListValidator,
+    EnabledWhenProperty,
+    PropertyCriterion,
+)
 
-from mantid.simpleapi import CreateEmptyTableWorkspace, FilterPeaks, DeleteWorkspace, IndexPeaks, mtd
+from mantid.simpleapi import (
+    CreateEmptyTableWorkspace,
+    FilterPeaks,
+    DeleteWorkspace,
+    RenameWorkspace,
+    CloneWorkspace,
+    CombinePeaksWorkspaces,
+    ReorientUnitCell,
+    OptimizeLatticeForCellType,
+    FindUBUsingLatticeParameters,
+    IndexPeaks,
+    mtd,
+)
 
 import numpy as np
 
@@ -19,6 +38,10 @@ import scipy.linalg
 
 
 class RefineSingleCrystalGoniometer(PythonAlgorithm):
+    @staticmethod
+    def _count_indexed_peaks(peaks_ws_name):
+        return sum(1 for peak in mtd[peaks_ws_name] if peak.getHKL().norm2() > 0)
+
     def name(self):
         return "RefineSingleCrystalGoniometer"
 
@@ -29,30 +52,71 @@ class RefineSingleCrystalGoniometer(PythonAlgorithm):
     def summary(self):
         return (
             "Refines the UB-matrix and goniometer offsets simultaneously."
-            "This improves the indexing of the peaks for those cases when there is sample misorientation."
+            "This improves the indexing of the peaks for when there is sample misorientation."
+            "The reflections will be re-indexed to a standard orientation."
         )
 
     def PyInit(self):
         # Declare properties
 
         self.declareProperty(
-            PeaksWorkspaceProperty(name="Peaks", defaultValue="", validator=OrientedLatticeValidator(), direction=Direction.Input),
+            PeaksWorkspaceProperty(
+                name="Peaks",
+                defaultValue="",
+                validator=OrientedLatticeValidator(),
+                direction=Direction.Input,
+            ),
             doc="The PeaksWorkspace to be refined.",
         )
 
-        self.declareProperty("Tolerance", 0.12, validator=FloatBoundedValidator(lower=0.0), doc="The tolerance used in IndexPeaks.")
-
+        # Tolerance
         self.declareProperty(
-            "Cell",
-            "Triclinic",
-            validator=StringListValidator(
-                ["Fixed", "Cubic", "Rhombohedral", "Tetragonal", "Hexagonal", "Orthorhombic", "Monoclinic", "Triclinic"]
-            ),
-            doc="The cell type to optimize. Must be one of: {Fixed, Cubic, Rhombohedral, Tetragonal,"
-            + "Hexagonal, Orthorhombic, Monoclinic, Triclinic}.",
+            name="Tolerance",
+            defaultValue=0.12,
+            direction=Direction.Input,
+            validator=FloatBoundedValidator(lower=0.0),
+            doc="Indexing tolerance for algorithm TransformHKL.",
         )
 
-        self.declareProperty("NumIterations", 1, validator=IntBoundedValidator(lower=1), doc="The number of IndexPeaks iterations.")
+        # Crystal system
+        crystal_systems = [
+            "Cubic",
+            "Hexagonal",
+            "Tetragonal",
+            "Trigonal",
+            "Orthorhombic",
+            "Monoclinic",
+            "Triclinic",
+        ]
+        self.declareProperty(
+            name="CrystalSystem",
+            defaultValue="Triclinic",
+            direction=Direction.Input,
+            validator=StringListValidator(crystal_systems),
+            doc="Crystal system.",
+        )
+
+        # Lattice system (optional, for Trigonal)
+        lattice_systems = ["Rhombohedral", "Hexagonal"]
+        self.declareProperty(
+            name="LatticeSystem",
+            direction=Direction.Input,
+            defaultValue="Hexagonal",
+            validator=StringListValidator(lattice_systems),
+            doc="Lattice system (for Trigonal: Rhombohedral or Hexagonal). Defaults to CrystalSystem value.",
+        )
+        # Set up conditional visibility
+        self.setPropertySettings(
+            "LatticeSystem",
+            EnabledWhenProperty("CrystalSystem", PropertyCriterion.IsEqualTo, "Trigonal"),
+        )
+
+        self.declareProperty(
+            "NumIterations",
+            1,
+            validator=IntBoundedValidator(lower=1),
+            doc="The number of IndexPeaks iterations.",
+        )
 
     def PyExec(self):
         # Save the workspace to file in ascii format
@@ -73,7 +137,20 @@ class RefineSingleCrystalGoniometer(PythonAlgorithm):
             mtd[self.table].addColumn("float", "Requested Phi")
             mtd[self.table].addColumn("float", "Refined Phi")
 
-            ol = peaks.sample().getOrientedLattice()
+            self.peak_dict = {}
+
+            runs = np.unique(peaks.column("RunNumber")).tolist()
+
+            combine = "_combine_" + peaks.name()
+
+            crystal_system: str = self.getProperty("CrystalSystem").value
+
+            if crystal_system == "Trigonal":
+                lattice_system: str = self.getProperty("LatticeSystem").value
+            else:
+                lattice_system = crystal_system
+
+            ol = mtd[peaks.name()].sample().getOrientedLattice()
 
             self.U = ol.getU().copy()
 
@@ -84,14 +161,71 @@ class RefineSingleCrystalGoniometer(PythonAlgorithm):
             self.beta = ol.beta()
             self.gamma = ol.gamma()
 
-            self.peak_dict = {}
-
-            runs = np.unique(peaks.column("RunNumber")).tolist()
-
-            IndexPeaks(PeaksWorkspace=peaks, Tolerance=self.getProperty("Tolerance").value, CommonUBForAll=False)
-
             for i, run in enumerate(runs):
-                FilterPeaks(InputWorkspace=peaks, FilterVariable="RunNumber", FilterValue=run, Operator="=", OutputWorkspace="_tmp")
+                FilterPeaks(
+                    InputWorkspace=peaks,
+                    FilterVariable="RunNumber",
+                    FilterValue=run,
+                    Operator="=",
+                    OutputWorkspace="_tmp",
+                )
+
+                indexed = self._count_indexed_peaks("_tmp")
+
+                # Fallback: if seeded indexing is weak, re-estimate UB for this run.
+                if indexed < 3 and mtd["_tmp"].getNumberPeaks() >= 3:
+                    self.log().warning(
+                        "Run {} has only {} indexed peaks from seeded UB; falling back to FindUBUsingLatticeParameters.".format(
+                            run, indexed
+                        )
+                    )
+
+                    FindUBUsingLatticeParameters(
+                        PeaksWorkspace="_tmp",
+                        a=self.a,
+                        b=self.b,
+                        c=self.c,
+                        alpha=self.alpha,
+                        beta=self.beta,
+                        gamma=self.gamma,
+                        Tolerance=self.getProperty("Tolerance").value,
+                    )
+
+                    IndexPeaks(
+                        PeaksWorkspace="_tmp",
+                        Tolerance=self.getProperty("Tolerance").value,
+                    )
+
+                    indexed = self._count_indexed_peaks("_tmp")
+
+                self.log().notice("Optimizing lattice for run {}...".format(run))
+                self.log().notice("Using cell type {}...".format(lattice_system))
+                self.log().notice("Run has {} indexed peaks.".format(indexed))
+
+                if indexed >= 3:
+                    OptimizeLatticeForCellType(
+                        PeaksWorkspace="_tmp",
+                        CellType=lattice_system,
+                        Tolerance=self.getProperty("Tolerance").value,
+                    )
+
+                    if crystal_system == "Trigonal":
+                        ReorientUnitCell(
+                            PeaksWorkspace="_tmp",
+                            CrystalSystem=crystal_system,
+                            LatticeSystem=lattice_system,
+                            Tolerance=self.getProperty("Tolerance").value,
+                        )
+                    else:
+                        ReorientUnitCell(
+                            PeaksWorkspace="_tmp",
+                            CrystalSystem=crystal_system,
+                            Tolerance=self.getProperty("Tolerance").value,
+                        )
+                else:
+                    self.log().warning(
+                        "Run {} has fewer than 3 indexed peaks; skipping lattice optimization/reorientation for this run.".format(run)
+                    )
 
                 Q = np.array(mtd["_tmp"].column("QLab"))
                 hkl = np.array(mtd["_tmp"].column("IntHKL"))
@@ -104,9 +238,20 @@ class RefineSingleCrystalGoniometer(PythonAlgorithm):
 
                 self.peak_dict[run] = (omega, chi, phi), Q[mask], hkl[mask]
 
+                if i == 0:
+                    CloneWorkspace(InputWorkspace="_tmp", OutputWorkspace=combine)
+                else:
+                    CombinePeaksWorkspaces(
+                        LHSWorkspace=combine,
+                        RHSWorkspace="_tmp",
+                        OutputWorkspace=combine,
+                    )
+
                 DeleteWorkspace(Workspace="_tmp")
 
-            self._optimize_lattice(self.getProperty("Cell").value)
+            RenameWorkspace(InputWorkspace=combine, OutputWorkspace=peaks.name())
+
+            self._optimize_lattice(lattice_system)
 
     def _calculate_goniometer(self, omega, chi, phi):
         return Rotation.from_euler("YZY", [omega, chi, phi], degrees=True).as_matrix()
@@ -321,7 +466,11 @@ class RefineSingleCrystalGoniometer(PythonAlgorithm):
         for i, run in enumerate(self.peak_dict.keys()):
             (omega, chi, phi), Q, hkl = self.peak_dict[run]
             omega_off, chi_off, phi_off = params[i]
-            omega_prime, chi_prime, phi_prime = omega + omega_off, chi + chi_off, phi + phi_off
+            omega_prime, chi_prime, phi_prime = (
+                omega + omega_off,
+                chi + chi_off,
+                phi + phi_off,
+            )
             mtd[self.table].addRow([omega, omega_prime, chi, chi_prime, phi, phi_prime])
             R = self._calculate_goniometer(omega_prime, chi_prime, phi_prime)
             peak_dict[run] = R
