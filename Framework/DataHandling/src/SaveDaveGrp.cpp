@@ -42,10 +42,11 @@ void SaveDaveGrp::exec() {
     throw std::invalid_argument("Either the number of bins or the number of histograms is 0");
   std::string xcaption = ws->getAxis(0)->unit()->caption();
   std::string ycaption = ws->getAxis(1)->unit()->caption();
+  bool toQsInQENSData = (ycaption != "q");
   if (xcaption.length() == 0)
     xcaption = "X";
   if (ycaption.length() == 0 || ycaption == "Spectrum")
-    ycaption = "Y";
+    ycaption = "q";
 
   std::string filename = getProperty("Filename");
   std::ofstream file(filename.c_str());
@@ -86,7 +87,16 @@ void SaveDaveGrp::exec() {
     yunit = "micro eV";
   file << "# " << ycaption << " (" << yunit << ") values\n";
   double yvalue;
-  if ((*ws->getAxis(1)).length() == (nSpectra + 1)) {
+  if (toQsInQENSData) {
+    auto qsInQENSData = createChildAlgorithm("GetQsInQENSData");
+    qsInQENSData->initialize();
+    qsInQENSData->setProperty("InputWorkspace", ws->getName());
+    qsInQENSData->execute();
+    std::vector<double> qvalues = qsInQENSData->getProperty("Qvalues");
+    for (const auto &qvalue : qvalues) {
+      file << qvalue << '\n';
+    }
+  } else if ((*ws->getAxis(1)).length() == (nSpectra + 1)) {
     for (std::size_t i = 0; i < nSpectra; i++) {
       yvalue = 0.5 * (((*ws->getAxis(1))(i)) + ((*ws->getAxis(1))(i + 1)));
       if (yToMicroeV)
