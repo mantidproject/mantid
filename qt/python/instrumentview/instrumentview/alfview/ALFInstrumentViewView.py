@@ -80,3 +80,9 @@ class ALFInstrumentViewView(FullInstrumentViewView):
         options_widget.setFixedWidth(options_layout.sizeHint().width())
         parent_layout.addWidget(options_widget)
         parent_layout.addWidget(self.main_plotter.app_window)
+
+    # NOTE: Ignore setting camera position because any
+    # update to the view should reset it
+    @override
+    def set_camera_to_cached_state(self) -> None:
+        return

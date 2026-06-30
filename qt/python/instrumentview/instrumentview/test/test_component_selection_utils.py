@@ -9,7 +9,7 @@ import unittest
 import unittest.mock
 import numpy as np
 
-from instrumentview.ComponentSelectionUtils import subtrees_of_component_indices, get_beam_axis, reflect_points_in_axis
+from instrumentview.ComponentSelectionUtils import detector_component_indices_in_subtrees, get_beam_axis, reflect_points_in_axis
 
 
 class TestComponentSelectionUtils(unittest.TestCase):
@@ -31,25 +31,25 @@ class TestComponentSelectionUtils(unittest.TestCase):
 
     def test_subtrees_empty_input_returns_empty_list(self):
         """Empty input returns an empty list."""
-        result = subtrees_of_component_indices(np.array([], dtype=int), self.component_info)
+        result = detector_component_indices_in_subtrees(np.array([], dtype=int), self.component_info)
         self.assertEqual(result, [])
 
     def test_subtrees_single_index_returns_one_subtree(self):
         """Single component index returns the subtree of its parent."""
-        result = subtrees_of_component_indices(np.array([10]), self.component_info)
+        result = detector_component_indices_in_subtrees(np.array([10]), self.component_info)
         self.assertEqual(len(result), 1)
         np.testing.assert_array_equal(result[0], np.array([10, 11, 12]))
 
     def test_subtrees_different_parents_returns_multiple_subtrees(self):
         """Indices with different parents each contribute a subtree."""
-        result = subtrees_of_component_indices(np.array([10, 20]), self.component_info)
+        result = detector_component_indices_in_subtrees(np.array([10, 20]), self.component_info)
         self.assertEqual(len(result), 2)
         np.testing.assert_array_equal(result[0], np.array([10, 11, 12]))
         np.testing.assert_array_equal(result[1], np.array([20, 21]))
 
     def test_subtrees_same_parent_deduplicates(self):
         """Indices sharing a parent produce only one subtree entry."""
-        result = subtrees_of_component_indices(np.array([10, 11]), self.component_info)
+        result = detector_component_indices_in_subtrees(np.array([10, 11]), self.component_info)
         self.assertEqual(len(result), 1)
         np.testing.assert_array_equal(result[0], np.array([10, 11, 12]))
 

@@ -302,7 +302,6 @@ class FullInstrumentViewPresenter:
         else:
             self.on_contour_limits_updated()
 
-        self._view.cache_default_camera_position()
         self._view.reset_camera()
 
         # Set style after camera reset for correct camera defaults

@@ -11,7 +11,7 @@ from instrumentview.Projections.ProjectionType import ProjectionType
 from instrumentview.alfview.ALFInstrumentViewView import ALFInstrumentViewView
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
 from instrumentview.FullInstrumentViewPresenter import FullInstrumentViewPresenter
-from instrumentview.ComponentSelectionUtils import subtrees_of_component_indices
+from instrumentview.ComponentSelectionUtils import detector_component_indices_in_subtrees
 
 from mantid.simpleapi import CreateSampleWorkspace, Rebin
 from qtpy.QtCore import QObject, QMetaObject, Q_ARG
@@ -33,10 +33,7 @@ class ALFInstrumentViewPresenter(FullInstrumentViewPresenter):
 
     def update_view(self, ws_name: str):
         self._reset_model_workspace(ws_name)
-        self.update_plotter()
-
-        self._view.cache_default_camera_position()
-        self._view.reset_camera()
+        self._update_view_main_plotter(refresh_limits=True)
 
     def selected_detector_ids(self):
         return []
@@ -47,7 +44,7 @@ class ALFInstrumentViewPresenter(FullInstrumentViewPresenter):
             QMetaObject.invokeMethod(relay, b"notify", Q_ARG(str, callback_name))
 
     def selected_detector_indices_by_tube(self):
-        return subtrees_of_component_indices(
+        return detector_component_indices_in_subtrees(
             self._model._component_idxs[self._model._detector_is_picked], self._model._workspace.componentInfo()
         )
 

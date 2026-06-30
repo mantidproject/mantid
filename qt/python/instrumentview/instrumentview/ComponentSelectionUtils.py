@@ -8,7 +8,7 @@
 import numpy as np
 
 
-def subtrees_of_component_indices(component_indices: np.ndarray, component_info) -> list:
+def detector_component_indices_in_subtrees(component_indices: np.ndarray, component_info) -> list:
     """
     Return unique subtrees of the provided indices
     """
@@ -47,7 +47,7 @@ def detector_table_indices_for_parent_subtrees(
     if selected_indices.size == 0:
         return np.array([], dtype=int)
 
-    expanded_array = np.concatenate(subtrees_of_component_indices(component_idxs[selected_indices], component_info))
+    expanded_array = np.concatenate(detector_component_indices_in_subtrees(component_idxs[selected_indices], component_info))
 
     if pickable_mask is None:
         return expanded_array

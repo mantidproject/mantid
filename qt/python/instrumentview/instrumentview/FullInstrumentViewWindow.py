@@ -198,8 +198,6 @@ class FullInstrumentViewView(QWidget):
         self._closing = False
         self._current_widget = None
         self._shape_overlay_manager = None
-        self._default_camera_position_map = {}
-        self._default_parallel_scales = {}
         self._last_selected_projection = None
         self._last_camera_position = None
         self._last_parallel_scale = None
@@ -592,21 +590,10 @@ class FullInstrumentViewView(QWidget):
             self.main_plotter.camera_position = self._last_camera_position
             self.main_plotter.camera.parallel_scale = self._last_parallel_scale
 
-    def cache_default_camera_position(self) -> None:
-        self.main_plotter.reset_camera()
-        self._default_camera_position_map[self.current_selected_projection()] = self.main_plotter.camera_position
-        self._default_parallel_scales[self.current_selected_projection()] = self.main_plotter.camera.parallel_scale
-
     def reset_camera(self) -> None:
         if self._off_screen:
             return
-
-        if self.current_selected_projection() in self._default_camera_position_map.keys():
-            self.main_plotter.camera_position = self._default_camera_position_map[self.current_selected_projection()]
-            self.main_plotter.camera.parallel_scale = self._default_parallel_scales[self.current_selected_projection()]
-        else:
-            # Apply default position, in case cache not available
-            self.main_plotter.reset_camera()
+        self.main_plotter.reset_camera()
         return
 
     def _add_min_max_group_box(self, parent_vbox_layout: QVBoxLayout) -> tuple[QLineEdit, QLineEdit, QDoubleRangeSlider, QPushButton]:
