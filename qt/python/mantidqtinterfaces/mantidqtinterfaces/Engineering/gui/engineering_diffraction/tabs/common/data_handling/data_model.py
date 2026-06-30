@@ -32,7 +32,7 @@ class FittingDataModel(object):
     # Loaded Data Table
     # =================
 
-    def restore_files(self, ws_names: Dict[str, List[str | List]]) -> None:
+    def restore_files(self, ws_names: Dict[str, List[str | List | None]]) -> None:
         self._data_workspaces.add_from_names_dict(ws_names)
         for ws_name in ws_names:
             try:

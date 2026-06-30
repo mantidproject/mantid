@@ -36,6 +36,8 @@ class IMAT_GROUP(Enum):
     ROW4 = "Row4"
 
 
+INSTRUMENT_GROUP = ENGINX_GROUP | IMAT_GROUP
+
 ###### ~~~~~~~~~~~~~~~~~~~~ IMPORTANT ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # if a new instrument is added, add its config key to this list and group to groups (used for tests)
 SUPPORTED_INSTRUMENTS = ("ENGINX", "IMAT")
@@ -64,10 +66,10 @@ class InstrumentConfig:
     full_instr_calib: str
 
     # ROI/grouping
-    group: Type[Enum]
-    group_info: Dict[Enum, DetectorGroupInfo]
-    texture_groups: Sequence[Enum]
-    interactive_grouping_options: Sequence[Tuple[Enum, str, bool, bool]]  # group, description, has file input, has text input
+    group: Type[INSTRUMENT_GROUP]
+    group_info: Dict[INSTRUMENT_GROUP, DetectorGroupInfo]
+    texture_groups: Sequence[INSTRUMENT_GROUP]
+    interactive_grouping_options: Sequence[Tuple[INSTRUMENT_GROUP, str, bool, bool]]  # group, description, has file input, has text input
     peak_func: str
     funcs_to_keep_fixed: Sequence[str]
 

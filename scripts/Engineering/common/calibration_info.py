@@ -13,14 +13,13 @@ from os import path
 from mantid.simpleapi import Load, LoadDetectorsGroupingFile, CreateGroupingWorkspace, SaveDetectorsGrouping
 from mantid.kernel import logger
 from typing import Sequence
-from Engineering.common.instrument_config import get_instr_config
-from enum import Enum
+from Engineering.common.instrument_config import get_instr_config, INSTRUMENT_GROUP
 
 
 class CalibrationInfo:
     def __init__(
         self,
-        group: Enum | None = None,
+        group: INSTRUMENT_GROUP | None = None,
         instrument: str | None = None,
         ceria_path: str | None = None,
         vanadium_path: str | None = None,
@@ -107,7 +106,7 @@ class CalibrationInfo:
     def get_prm_filepath(self) -> str | None:
         return self.prm_filepath
 
-    def get_group(self) -> Enum:
+    def get_group(self) -> INSTRUMENT_GROUP:
         return self.group
 
     def get_fit_peak_shape(self) -> str:
@@ -171,7 +170,7 @@ class CalibrationInfo:
         self.grouping_filepath = grouping_filepath
         self.set_prm_filepath(None)  # clear any prm filepath as won't correspond to this grouping
 
-    def set_group(self, group: Enum) -> None:
+    def set_group(self, group: INSTRUMENT_GROUP) -> None:
         self.group = group
 
     def set_fit_peak_shape(self, peak_shape: str) -> None:
@@ -229,7 +228,7 @@ class CalibrationInfo:
             logger.warning("Only save grouping workspace for custom or cropped groupings.")
         return
 
-    def generate_output_file_name(self, group: Enum | None = None, ext: str = ".prm") -> str:
+    def generate_output_file_name(self, group: INSTRUMENT_GROUP | None = None, ext: str = ".prm") -> str:
         """
         Generate an output filename in the form INSTRUMENT_ceriaRunNo_BANKS
         :param ext: Extension to be used on the saved file

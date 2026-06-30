@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from typing import Sequence
 
-from enum import Enum
+from Engineering.common.instrument_config import INSTRUMENT_GROUP
 from Engineering.BaseEngInstrument import BaseEngInstrument
 
 
@@ -19,7 +19,7 @@ class IMAT(BaseEngInstrument):
         full_inst_calib_path: str,
         prm_path: str | None = None,
         ceria_run: str | None = None,
-        group: Enum | None = None,
+        group: INSTRUMENT_GROUP | None = None,
         groupingfile_path: str | None = None,
         spectrum_num: str | None = None,
     ) -> None:

@@ -178,7 +178,7 @@ def default_ceria_expected_peak_windows(final: bool = False) -> Sequence[float]:
 
 def create_new_calibration(
     calibration: "CalibrationInfo",
-    rb_num: str,
+    rb_num: str | None,
     plot_output: bool,
     save_dir: str,
     full_calib: Workspace2D,
