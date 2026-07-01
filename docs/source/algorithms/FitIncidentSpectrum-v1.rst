@@ -72,7 +72,7 @@ Usage
     # Add the incident spectrum to the workspace
     corrected_spectrum = incidentSpectrum(
         incident_wksp.x(0), phiMax, phiEpi, alpha, lambda1, lambda2, lambdaT)
-    incident_wksp.setY(0, corrected_spectrum)
+    incident_wksp.setSharedY(0, corrected_spectrum)
 
     # Calculate the efficiency correction for Alpha=0.693
     # and back calculate measured spectrum

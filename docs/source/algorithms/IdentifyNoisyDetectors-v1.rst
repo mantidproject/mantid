@@ -58,7 +58,7 @@ Output:
     ws = CreateSampleWorkspace()
     #make the spectra vary
     for i in range(ws.getNumberHistograms()):
-        ws.setY(i, ws.y(i)*2**i)
+        ws.setSharedY(i, ws.y(i)*2**i)
 
     wsOut = IdentifyNoisyDetectors(ws)
     sum = SumSpectra(wsOut)

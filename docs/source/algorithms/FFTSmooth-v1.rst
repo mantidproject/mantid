@@ -41,7 +41,7 @@ Usage
         noiseArray.append(noiseAmp)
 
     for j in range(ws.getNumberHistograms()):
-        ws.setY(j,ws.y(j)+noiseArray)
+        ws.setSharedY(j,ws.y(j)+noiseArray)
 
 
     wsSmooth = FFTSmooth(ws, Params='2', Version=1)

@@ -106,8 +106,8 @@ each element in python:
     edata = numpy.sqrt(ydata) # filled with 0->sqrt(800)
 
     for i in range(nrows):
-        output_ws.setX(i, xdata)
-        output_ws.setY(i, ydata)
-        output_ws.setE(i, edata)
+        output_ws.setSharedX(i, xdata)
+        output_ws.setSharedY(i, ydata)
+        output_ws.setSharedE(i, edata)
 
     self.setProperty("OutputWorkspace", output_ws)
