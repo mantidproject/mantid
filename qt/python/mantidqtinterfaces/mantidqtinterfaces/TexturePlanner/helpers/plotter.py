@@ -120,22 +120,21 @@ class TexturePlotter:
     def update_plot(
         self, vecs: List[np.ndarray], senses: List[float], angles: List[float], fig: Figure, lab_ax: Axes, proj_ax: Axes, current_index: int
     ) -> None:
-        m = self._model
         lab_ax.clear()
         proj_ax.clear()
 
-        orientation = m.orientations[current_index]
+        orientation = self._model.orientations[current_index]
         gRs = orientation.gRs
         R = orientation.R
         n_gon = len(gRs)
 
-        m.workspaces.ws.run().getGoniometer().setR(R.as_matrix())
+        self._model.workspaces.ws.run().getGoniometer().setR(R.as_matrix())
 
-        shape_mesh = m.workspaces.updated_mesh_ws.sample().getShape().getMesh().copy()
+        shape_mesh = self._model.workspaces.updated_mesh_ws.sample().getShape().getMesh().copy()
         extent = (np.linalg.norm(shape_mesh, axis=(1, 2)).max() / 2) * 1.2
         rot_mesh = R.apply(shape_mesh.reshape((-1, 3))).reshape(shape_mesh.shape)
 
-        scat_centre = m.workspaces.scattering_centre
+        scat_centre = self._model.workspaces.scattering_centre
 
         g_vecs = self._draw_goniometers(lab_ax, vecs, senses, angles, gRs, n_gon, extent)
         self._draw_sample_and_axes(fig, lab_ax, rot_mesh, extent, n_gon, scat_centre)
@@ -159,7 +158,6 @@ class TexturePlotter:
         n_gon: int,
         extent: float,
     ) -> List[np.ndarray | int]:
-        m = self._model
         g_vecs = []
         for i, vec in enumerate(vecs):
             gR = gRs[i]
@@ -182,7 +180,7 @@ class TexturePlotter:
                     *np.zeros(3),
                     *g_vec * extent * 2,
                     color=self.gon_colors[i],
-                    ls=("-", "--")[int(i != m.gonio_index)],
+                    ls=("-", "--")[int(i != self._model.gonio_index)],
                     label=f"Axis {i}",
                 )
         if self.vis_settings["goniometers"]:
@@ -192,35 +190,33 @@ class TexturePlotter:
     def _draw_sample_and_axes(
         self, fig: Figure, lab_ax: Axes, rot_mesh: np.ndarray, extent: float, n_gon: int, scat_centre: np.ndarray
     ) -> None:
-        m = self._model
         sample_model = ShowSampleModel()
         sample_model.fig = fig
-        sample_model.ws_name = m.workspaces.wsname
-        sample_model.gauge_vol_str = m.workspaces.gauge_volume_str
+        sample_model.ws_name = self._model.workspaces.wsname
+        sample_model.gauge_vol_str = self._model.workspaces.gauge_volume_str
         fig.sca(lab_ax)
         plot_sample_only(fig, rot_mesh, 0.5, "grey")
         if self.vis_settings["directions"]:
-            sample_model.plot_sample_directions(m.ax_transform, m.dir_names, scat_centre=scat_centre)
+            sample_model.plot_sample_directions(self._model.ax_transform, self._model.dir_names, scat_centre=scat_centre)
         lim = extent * n_gon / 1.5
         lab_ax.set_xlim([-lim, lim])
         lab_ax.set_ylim([-lim, lim])
         lab_ax.set_zlim([-lim, lim])
         lab_ax.set_aspect("equal")
-        if m.workspaces.gauge_volume_str:
+        if self._model.workspaces.gauge_volume_str:
             sample_model.plot_gauge_vol()
 
     def _draw_beam_and_detectors(self, lab_ax: Axes, scat_centre: np.ndarray, extent: float, n_gon: int) -> None:
-        m = self._model
-        comp_info = m.workspaces.ws.componentInfo()
+        comp_info = self._model.workspaces.ws.componentInfo()
         ki = scat_centre - np.array(comp_info.sourcePosition())
         ki = (ki / np.linalg.norm(ki)) * extent * n_gon / 0.75
         if self.vis_settings["incident"]:
             lab_ax.quiver(*(-ki), *ki, arrow_length_ratio=0.05, color="black", alpha=0.25)
 
         if self.vis_settings["ks"]:
-            self._draw_quiver_bundle(lab_ax, m.geometry.detQs_lab, scat_centre, extent, "dodgerblue", linestyle="--")
+            self._draw_quiver_bundle(lab_ax, self._model.geometry.detQs_lab, scat_centre, extent, "dodgerblue", linestyle="--")
         if self.vis_settings["scattered"]:
-            self._draw_quiver_bundle(lab_ax, np.asarray(m.geometry.det_k), scat_centre, extent, "grey")
+            self._draw_quiver_bundle(lab_ax, np.asarray(self._model.geometry.det_k), scat_centre, extent, "grey")
 
     @staticmethod
     def _draw_quiver_bundle(
@@ -244,26 +240,24 @@ class TexturePlotter:
         lab_ax.scatter(tips[:, 0], tips[:, 1], tips[:, 2], color=tip_color, s=2)
 
     def _project_goniometer_poles(self, R: Rotation, g_vecs: List[np.ndarray | int]) -> np.ndarray:
-        m = self._model
-        g_pole = R.inv().apply(np.array(g_vecs)) @ m.ax_transform
+        g_pole = R.inv().apply(np.array(g_vecs)) @ self._model.ax_transform
         cart_g_pole = get_alpha_beta_from_cart(g_pole.T)
-        return ster_proj_xy(*cart_g_pole.T) if m.projection == "ster" else azim_proj_xy(*cart_g_pole.T)
+        return ster_proj_xy(*cart_g_pole.T) if self._model.projection == "ster" else azim_proj_xy(*cart_g_pole.T)
 
     def _draw_pole_figure(self, proj_ax: Axes, g_pole_xy: np.ndarray, current_index: int) -> None:
-        m = self._model
         if self._transmission_cax is not None:
             self._transmission_cax.remove()
             self._transmission_cax = None
         for i, gP in enumerate(g_pole_xy):
             pc = self.gon_colors[i]
-            fc = "None" if i != m.gonio_index else pc
+            fc = "None" if i != self._model.gonio_index else pc
             if np.isclose(np.linalg.norm(gP), 1):
-                proj_ax.plot((gP[1], -gP[1]), (gP[0], -gP[0]), color=pc, ls=("-", "--")[int(i != m.gonio_index)])
+                proj_ax.plot((gP[1], -gP[1]), (gP[0], -gP[0]), color=pc, ls=("-", "--")[int(i != self._model.gonio_index)])
             else:
                 proj_ax.scatter(gP[1], gP[0], s=30, edgecolor=pc, facecolor=fc)
 
-        if not m.plot_transmission:
-            for i, orientation in m.orientations.items():
+        if not self._model.plot_transmission:
+            for i, orientation in self._model.orientations.items():
                 if orientation.include:
                     pf_xy = orientation.pf_points
                     if i == current_index:
@@ -274,7 +268,7 @@ class TexturePlotter:
                     pf_xy = orientation.pf_points
                     proj_ax.scatter(pf_xy[:, 1], pf_xy[:, 0], s=20, facecolor="None", edgecolor="grey", alpha=0.5)
         else:
-            included = [o for o in m.orientations.values() if o.include]
+            included = [o for o in self._model.orientations.values() if o.include]
             all_pf_xy = np.concatenate([o.pf_points for o in included], axis=0)
             all_transmissions = np.concatenate([o.transmission for o in included], axis=0)
             clim_kwargs = {} if self.transmission_use_data_range else {"vmin": 0, "vmax": 1}
@@ -283,13 +277,12 @@ class TexturePlotter:
             proj_ax.figure.colorbar(scatt, cax=self._transmission_cax)
 
     def _decorate_pole_figure(self, proj_ax: Axes) -> None:
-        m = self._model
         proj_ax.set_aspect("equal")
         proj_ax.set_xlim(-1.5, 1.5)
         proj_ax.set_ylim(-1.5, 1.5)
         for i, bv in enumerate(np.eye(2)):
             proj_ax.quiver(*np.array((-1, -1)), *bv, color=self.dir_cols[-1 + i], scale=5)
         proj_ax.add_patch(plt.Circle((0, 0), 1, color="grey", fill=False, linestyle="-"))
-        proj_ax.annotate(m.dir_names[0], (-0.95, -0.8))
-        proj_ax.annotate(m.dir_names[2], (-0.8, -0.95))
+        proj_ax.annotate(self._model.dir_names[0], (-0.95, -0.8))
+        proj_ax.annotate(self._model.dir_names[2], (-0.8, -0.95))
         proj_ax.set_axis_off()
