@@ -16,15 +16,11 @@ file_path = "mantidqtinterfaces.TexturePlanner.helpers.plotter"
 
 
 def _make_model(
-    vis_settings=None,
-    gon_colors=None,
-    dir_cols=None,
     dir_names=None,
     ax_transform=None,
     projection="ster",
     gonio_index=0,
     plot_transmission=False,
-    transmission_use_data_range=False,
     orientations=None,
     detQs_lab=None,
     det_k=None,
@@ -32,22 +28,14 @@ def _make_model(
     scattering_centre=(0.0, 0.0, 0.0),
     gauge_volume_str=None,
 ):
+    # NB: the plotter owns its visual config (vis toggles + colours + transmission clim); those are
+    # configured on the plotter itself via _make_plotter(...), not on the model.
     model = MagicMock()
-    model.vis_settings = vis_settings or {
-        "goniometers": True,
-        "directions": True,
-        "incident": True,
-        "ks": True,
-        "scattered": True,
-    }
-    model.gon_colors = gon_colors or ["red", "green", "blue"]
-    model.dir_cols = dir_cols or ["c1", "c2", "c3"]
     model.dir_names = dir_names or ["RD", "ND", "TD"]
     model.ax_transform = np.eye(3) if ax_transform is None else ax_transform
     model.projection = projection
     model.gonio_index = gonio_index
     model.plot_transmission = plot_transmission
-    model.transmission_use_data_range = transmission_use_data_range
     if orientations is None:
         orient = MagicMock()
         orient.gRs = [Rotation.identity()]
@@ -69,14 +57,19 @@ def _make_model(
     return model
 
 
-def _make_plotter(model):
-    # the plotter now owns its visual config (colours + vis toggles); mirror the values the test set
-    # on the model mock so tests can keep configuring behaviour through _make_model(...)
+def _make_plotter(model, *, vis_settings=None, gon_colors=None, dir_cols=None, transmission_use_data_range=None):
+    # the plotter owns its visual config; by default we leave the constructor defaults in place so
+    # __init__ wiring is actually exercised. Tests that intentionally drive a specific config pass
+    # the relevant override(s), which are applied on top of the real defaults.
     plotter = TexturePlotter(model)
-    plotter.vis_settings = model.vis_settings
-    plotter.gon_colors = model.gon_colors
-    plotter.dir_cols = model.dir_cols
-    plotter.transmission_use_data_range = model.transmission_use_data_range
+    if vis_settings is not None:
+        plotter.vis_settings = vis_settings
+    if gon_colors is not None:
+        plotter.gon_colors = gon_colors
+    if dir_cols is not None:
+        plotter.dir_cols = dir_cols
+    if transmission_use_data_range is not None:
+        plotter.transmission_use_data_range = transmission_use_data_range
     return plotter
 
 
@@ -162,8 +155,10 @@ class TestTexturePlotter_DrawGoniometers(unittest.TestCase):
 
     def test_skipped_entirely_when_goniometers_vis_off(self, mock_ring):
         self._stub_ring(mock_ring)
-        model = _make_model(vis_settings={"goniometers": False, "directions": True, "incident": True, "ks": True, "scattered": True})
-        plotter = _make_plotter(model)
+        model = _make_model()
+        plotter = _make_plotter(
+            model, vis_settings={"goniometers": False, "directions": True, "incident": True, "ks": True, "scattered": True}
+        )
         lab_ax = MagicMock()
 
         g_vecs = plotter._draw_goniometers(lab_ax, [(1.0, 0.0, 0.0)], [1], [0.0], [Rotation.identity()], 1, 1.0)
@@ -177,7 +172,7 @@ class TestTexturePlotter_DrawGoniometers(unittest.TestCase):
     def test_draws_two_segments_and_quiver_per_axis_when_visible(self, mock_ring):
         self._stub_ring(mock_ring)
         model = _make_model()
-        plotter = _make_plotter(model)
+        plotter = _make_plotter(model, gon_colors=["red", "green", "blue"])
         lab_ax = MagicMock()
 
         plotter._draw_goniometers(
@@ -262,16 +257,15 @@ class TestTexturePlotter_DrawSampleAndAxes(unittest.TestCase):
         plotter._draw_sample_and_axes(MagicMock(), lab_ax, np.ones((2, 3, 3)), extent=3.0, n_gon=2, scat_centre=np.zeros(3))
 
         lim = 3.0 * 2 / 1.5
-        lab_ax.set_xlim.assert_called_once_with([-lim, lim])
-        lab_ax.set_ylim.assert_called_once_with([-lim, lim])
-        lab_ax.set_zlim.assert_called_once_with([-lim, lim])
-        lab_ax.set_aspect.assert_called_once_with("equal")
+        lab_ax.set.assert_called_once_with(xlim=[-lim, lim], ylim=[-lim, lim], zlim=[-lim, lim], aspect="equal")
 
     def test_plot_sample_directions_called_only_when_directions_vis_on(self, mock_show_sample, mock_plot_sample):
         sample_model = MagicMock()
         mock_show_sample.return_value = sample_model
-        model = _make_model(vis_settings={"goniometers": True, "directions": False, "incident": True, "ks": True, "scattered": True})
-        plotter = _make_plotter(model)
+        model = _make_model()
+        plotter = _make_plotter(
+            model, vis_settings={"goniometers": True, "directions": False, "incident": True, "ks": True, "scattered": True}
+        )
 
         plotter._draw_sample_and_axes(MagicMock(), MagicMock(), np.ones((2, 3, 3)), extent=1.0, n_gon=1, scat_centre=np.zeros(3))
 
@@ -299,14 +293,15 @@ class TestTexturePlotter_DrawSampleAndAxes(unittest.TestCase):
 
 
 class TestTexturePlotter_DrawBeamAndDetectors(unittest.TestCase):
-    def _make_plotter_with_stubbed_quiver_bundle(self, model):
-        plotter = _make_plotter(model)
+    def _make_plotter_with_stubbed_quiver_bundle(self, model, vis_settings):
+        plotter = _make_plotter(model, vis_settings=vis_settings)
         plotter._draw_quiver_bundle = MagicMock()
         return plotter
 
     def test_incident_beam_drawn_only_when_vis_incident_on(self):
-        model = _make_model(vis_settings={"goniometers": True, "directions": True, "incident": True, "ks": False, "scattered": False})
-        plotter = self._make_plotter_with_stubbed_quiver_bundle(model)
+        model = _make_model()
+        vis_settings = {"goniometers": True, "directions": True, "incident": True, "ks": False, "scattered": False}
+        plotter = self._make_plotter_with_stubbed_quiver_bundle(model, vis_settings)
         lab_ax = MagicMock()
 
         plotter._draw_beam_and_detectors(lab_ax, np.zeros(3), extent=1.0, n_gon=1)
@@ -319,8 +314,9 @@ class TestTexturePlotter_DrawBeamAndDetectors(unittest.TestCase):
         self.assertEqual(kw["arrow_length_ratio"], 0.05)
 
     def test_incident_beam_skipped_when_vis_incident_off(self):
-        model = _make_model(vis_settings={"goniometers": True, "directions": True, "incident": False, "ks": False, "scattered": False})
-        plotter = self._make_plotter_with_stubbed_quiver_bundle(model)
+        model = _make_model()
+        vis_settings = {"goniometers": True, "directions": True, "incident": False, "ks": False, "scattered": False}
+        plotter = self._make_plotter_with_stubbed_quiver_bundle(model, vis_settings)
         lab_ax = MagicMock()
 
         plotter._draw_beam_and_detectors(lab_ax, np.zeros(3), extent=1.0, n_gon=1)
@@ -328,8 +324,9 @@ class TestTexturePlotter_DrawBeamAndDetectors(unittest.TestCase):
         lab_ax.quiver.assert_not_called()
 
     def test_ks_bundle_drawn_when_vis_ks_on(self):
-        model = _make_model(vis_settings={"goniometers": True, "directions": True, "incident": False, "ks": True, "scattered": False})
-        plotter = self._make_plotter_with_stubbed_quiver_bundle(model)
+        model = _make_model()
+        vis_settings = {"goniometers": True, "directions": True, "incident": False, "ks": True, "scattered": False}
+        plotter = self._make_plotter_with_stubbed_quiver_bundle(model, vis_settings)
         lab_ax = MagicMock()
         scat_centre = np.zeros(3)
 
@@ -345,8 +342,9 @@ class TestTexturePlotter_DrawBeamAndDetectors(unittest.TestCase):
         self.assertEqual(args.kwargs, {"linestyle": "--"})
 
     def test_scattered_bundle_drawn_when_vis_scattered_on(self):
-        model = _make_model(vis_settings={"goniometers": True, "directions": True, "incident": False, "ks": False, "scattered": True})
-        plotter = self._make_plotter_with_stubbed_quiver_bundle(model)
+        model = _make_model()
+        vis_settings = {"goniometers": True, "directions": True, "incident": False, "ks": False, "scattered": True}
+        plotter = self._make_plotter_with_stubbed_quiver_bundle(model, vis_settings)
         lab_ax = MagicMock()
 
         plotter._draw_beam_and_detectors(lab_ax, np.zeros(3), extent=1.0, n_gon=1)
@@ -366,7 +364,7 @@ class TestTexturePlotter_DrawQuiverBundle(unittest.TestCase):
         dirs = np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
         scat_centre = np.array([10.0, 20.0, 30.0])
 
-        TexturePlotter._draw_quiver_bundle(lab_ax, dirs, scat_centre, extent=2.0, tip_color="red")
+        _make_plotter(_make_model())._draw_quiver_bundle(lab_ax, dirs, scat_centre, extent=2.0, tip_color="red")
 
         args = lab_ax.quiver.call_args.args
         np.testing.assert_array_equal(args[0], np.array([10.0, 10.0]))
@@ -379,7 +377,9 @@ class TestTexturePlotter_DrawQuiverBundle(unittest.TestCase):
 
     def test_passes_linestyle_through_to_quiver(self):
         lab_ax = MagicMock()
-        TexturePlotter._draw_quiver_bundle(lab_ax, np.array([[1.0, 0.0, 0.0]]), np.zeros(3), extent=1.0, tip_color="red", linestyle="--")
+        _make_plotter(_make_model())._draw_quiver_bundle(
+            lab_ax, np.array([[1.0, 0.0, 0.0]]), np.zeros(3), extent=1.0, tip_color="red", linestyle="--"
+        )
 
         self.assertEqual(lab_ax.quiver.call_args.kwargs["linestyle"], "--")
 
@@ -388,7 +388,7 @@ class TestTexturePlotter_DrawQuiverBundle(unittest.TestCase):
         dirs = np.array([[1.0, 0.0, 0.0]])
         scat_centre = np.zeros(3)
 
-        TexturePlotter._draw_quiver_bundle(lab_ax, dirs, scat_centre, extent=2.0, tip_color="red")
+        _make_plotter(_make_model())._draw_quiver_bundle(lab_ax, dirs, scat_centre, extent=2.0, tip_color="red")
 
         # tips = dirs * 1.25 * extent + scat_centre = [[2.5, 0, 0]]
         scatter_args = lab_ax.scatter.call_args
@@ -446,7 +446,7 @@ class TestTexturePlotter_DrawPoleFigure(unittest.TestCase):
 
     def test_goniometer_pole_inside_unit_circle_draws_scatter(self):
         model = _make_model(gonio_index=0)
-        plotter = _make_plotter(model)
+        plotter = _make_plotter(model, gon_colors=["red", "green", "blue"])
         proj_ax = MagicMock()
         g_pole_xy = [np.array([0.1, 0.0])]  # norm < 1
 
@@ -456,7 +456,7 @@ class TestTexturePlotter_DrawPoleFigure(unittest.TestCase):
 
     def test_goniometer_pole_inactive_axis_uses_no_fill(self):
         model = _make_model(gonio_index=0)
-        plotter = _make_plotter(model)
+        plotter = _make_plotter(model, gon_colors=["red", "green", "blue"])
         proj_ax = MagicMock()
         # first pole active (index 0 == gonio_index); second pole inactive
         g_pole_xy = [np.array([0.1, 0.0]), np.array([0.0, 0.2])]
@@ -534,7 +534,7 @@ class TestTexturePlotter_DrawPoleFigure(unittest.TestCase):
         self.assertEqual(scatter_call.kwargs["vmin"], 0)
         self.assertEqual(scatter_call.kwargs["vmax"], 1)
         self.assertEqual(scatter_call.kwargs["cmap"], "jet")
-        proj_ax.inset_axes.assert_called_once_with([0.9, 0.15, 0.05, 0.7])
+        proj_ax.inset_axes.assert_called_once_with((0.9, 0.15, 0.05, 0.7))
         proj_ax.figure.colorbar.assert_called_once_with(scatt_obj, cax=proj_ax.inset_axes.return_value)
 
     def test_transmission_mode_uses_data_range_when_enabled(self):
@@ -542,8 +542,8 @@ class TestTexturePlotter_DrawPoleFigure(unittest.TestCase):
         a.include = True
         a.pf_points = np.array([[0.1, 0.2]])
         a.transmission = np.array([0.3])
-        model = _make_model(orientations={0: a}, plot_transmission=True, transmission_use_data_range=True)
-        plotter = _make_plotter(model)
+        model = _make_model(orientations={0: a}, plot_transmission=True)
+        plotter = _make_plotter(model, transmission_use_data_range=True)
         proj_ax = MagicMock()
 
         plotter._draw_pole_figure(proj_ax, [], current_index=0)
@@ -563,14 +563,12 @@ class TestTexturePlotter_DecoratePoleFigure(unittest.TestCase):
 
         plotter._decorate_pole_figure(proj_ax)
 
-        proj_ax.set_aspect.assert_called_once_with("equal")
-        proj_ax.set_xlim.assert_called_once_with(-1.5, 1.5)
-        proj_ax.set_ylim.assert_called_once_with(-1.5, 1.5)
+        proj_ax.set.assert_called_once_with(xlim=(-1.5, 1.5), ylim=(-1.5, 1.5), aspect="equal")
         proj_ax.set_axis_off.assert_called_once_with()
 
     def test_draws_two_basis_quivers(self, mock_plt):
-        model = _make_model(dir_cols=["a", "b", "c"])
-        plotter = _make_plotter(model)
+        model = _make_model()
+        plotter = _make_plotter(model, dir_cols=["a", "b", "c"])
         proj_ax = MagicMock()
 
         plotter._decorate_pole_figure(proj_ax)
