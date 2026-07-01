@@ -12,6 +12,7 @@ from typing import List, Tuple, Sequence
 from scipy.spatial.transform import Rotation
 from mantid.kernel import logger
 from Engineering.texture.texture_helper import vec_string_to_norm_array
+import re
 
 
 MAX_GONIOMETERS = 6
@@ -38,8 +39,8 @@ class Orientation:
             R=self.R,
             include=self.include,
             select=self.select,
-            pf_points=self.pf_points,
-            transmission=self.transmission,
+            pf_points=None if self.pf_points is None else self.pf_points.copy(),
+            transmission=None if self.transmission is None else self.transmission.copy(),
         )
 
 
@@ -101,9 +102,7 @@ class OrientationTable:
         self.saved_orientations[index].transmission = transmission
 
     # rotation maths -----------------------------------------------------
-    def calc_gRs(
-        self, vecs: List[Tuple[int | float, int | float, int | float]], senses: List[int | float], angles: List[int | float]
-    ) -> Tuple[List[Rotation], Rotation]:
+    def calc_gRs(self, vecs: List[Tuple[float, float, float]], senses: List[float], angles: List[float]) -> Tuple[List[Rotation], Rotation]:
         gRs = [Rotation.identity()]
         R = Rotation.identity()
         for i, vec in enumerate(vecs):
@@ -115,14 +114,17 @@ class OrientationTable:
 
     def update_gRs(
         self,
-        vecs: List[Tuple[int | float, int | float, int | float]],
-        senses: List[int | float],
-        angles: List[int | float],
+        vecs: List[Tuple[float, float, float]],
+        senses: List[float],
+        angles: List[float],
         current_index: int,
     ) -> None:
         gRs, R = self.calc_gRs(vecs, senses, angles)
-        self.saved_orientations[current_index].gRs = gRs
-        self.saved_orientations[current_index].R = R
+        orientation = self.saved_orientations[current_index]
+        orientation.gRs = gRs
+        orientation.R = R
+        orientation.pf_points = None
+        orientation.transmission = None
 
     # selection / inclusion / delete ------------------------------------
     def update_selected(self, selected_inds: Sequence[int]) -> None:
@@ -164,12 +166,13 @@ class OrientationTable:
         return Orientation(gonio_strings=gonio_strings, gRs=gRs, R=R)
 
     @staticmethod
-    def get_goniometer_string(vec: Tuple[int | float, int | float, int | float], sense: int | float, angle: int | float) -> str:
+    def get_goniometer_string(vec: Tuple[float, float, float], sense: float, angle: float) -> str:
+        sense = int(float(sense))
+        if sense not in (-1, 1):
+            raise ValueError(f"Invalid goniometer sense: {sense}")
         return f"{angle},{np.round(vec[0], 3)},{np.round(vec[1], 3)},{np.round(vec[2], 3)},{sense}"
 
-    def update_gonio_string(
-        self, vecs: List[Tuple[int | float, int | float, int | float]], senses: List[int | float], angles: List[int | float], index: int
-    ) -> None:
+    def update_gonio_string(self, vecs: List[Tuple[float, float, float]], senses: List[float], angles: List[float], index: int) -> None:
         orientation = self.saved_orientations[index]
         for i, vec in enumerate(vecs):
             orientation.gonio_strings[i] = self.get_goniometer_string(vec, senses[i], angles[i])
@@ -178,9 +181,10 @@ class OrientationTable:
 
     def read_goniometer_string(self, goniometer_string: str) -> Tuple[str, float, float]:
         angle, v1, v2, v3, sense = goniometer_string.split(",")
-        return f"{v1},{v2},{v3}", self.sense_names[sense], float(angle)
+        sense_key = str(int(float(sense)))
+        return f"{v1},{v2},{v3}", self.sense_names[sense_key], float(angle)
 
-    def get_goniometer_values(self, index: int) -> Tuple[List[str], List[int | float], List[int | float]]:
+    def get_goniometer_values(self, index: int) -> Tuple[List[str], List[float], List[float]]:
         info = self.saved_orientations[index]
         vecs, senses, angles = [], [], []
         for gonio_string in info.gonio_strings:
@@ -196,7 +200,7 @@ class OrientationTable:
         logger.notice("Loading Orientations from file")
         with open(txt_file, "r") as f:
             goniometer_strings = [line.strip().replace("\t", ",") for line in f]
-            goniometer_lists = [[float(x) for x in gs.split(",")] for gs in goniometer_strings]
+            goniometer_lists = [[float(x) for x in re.split(r"[\s,]+", gs) if x] for gs in goniometer_strings]
         if len(goniometer_lists) == 0:
             logger.warning("No orientations found in file provided")
             return self._DEFAULT_NUM_AXES
@@ -214,11 +218,12 @@ class OrientationTable:
             R_mat = np.asarray(goniometer_list[:9]).reshape((3, 3))
             R = Rotation.from_matrix(R_mat)
             # the YXY decomposition is only used to populate the displayed goniometer fields
-            display_angles = np.round(R.as_euler("YXY", degrees=True), 2)
+            euler_angles = R.as_euler("YXY", degrees=True)
+            display_angles = np.round(euler_angles, 2)
             self.add_orientation()
             new_index = self.get_num_orientations() - 1
             self.update_gonio_string(vecs, senses, display_angles, new_index)
-            self.update_gRs(vecs, senses, display_angles, new_index)
+            self.update_gRs(vecs, senses, euler_angles, new_index)
             # preserve the exact input matrix so projection / export stay faithful to the file
             self.saved_orientations[new_index].R = R
 
