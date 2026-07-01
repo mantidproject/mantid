@@ -474,7 +474,6 @@ class FullInstrumentViewView(QWidget):
         shapes_layout.addWidget(self._add_hollow_rectangle)
 
         right_column_graphics_layout = QVBoxLayout(self._right_column_graphics)
-        # right_column_graphics_layout.addWidget(self.main_plotter.app_window)
         right_column_graphics_layout.addWidget(self._graphics_vsplitter)
 
         self._graphics_vsplitter.addWidget(self.main_plotter.app_window)
@@ -485,21 +484,6 @@ class FullInstrumentViewView(QWidget):
         self._lineplot_layout = QVBoxLayout(self._lineplot_widget)
         self._lineplot_layout.addWidget(self._detector_figure_canvas)
         self._lineplot_layout.addWidget(self._plot_toolbar)
-
-        # TODO: Figure out if there is any more need of a status box
-        # status_layout = QHBoxLayout(self.status_group_box)
-        # status_label = QLabel("Loading ...")
-        # status_graphics = QLabel()
-        # status_graphics.setFixedSize(50, 50)
-        # status_graphics.setAlignment(Qt.AlignCenter)
-        # status_graphics.setScaledContents(True)
-        # spinner = QMovie(f"{os.path.dirname(__file__)}/loading.gif")
-        # status_graphics.setMovie(spinner)
-        # status_layout.addWidget(status_label)
-        # status_layout.addWidget(status_graphics)
-        # spinner.start()
-        # status_layout.addStretch()
-        # left_column_home_layout.addWidget(self._status_group_box)
 
     def closeEvent(self, event) -> None:
         """Closes view, not window"""
@@ -856,20 +840,6 @@ class FullInstrumentViewView(QWidget):
             self._shape_overlay_manager.remove_shape()
             self._shape_overlay_manager = None
         self._current_widget = None
-
-    # def _setup_units_options(self, parent: QVBoxLayout):
-    #     """Add widgets for the units options"""
-    #     hBox = QHBoxLayout()
-    #     self._export_workspace_button = QPushButton("Export Spectra to ADS", self)
-    #     hBox.addWidget(self._export_workspace_button)
-    #     self._sum_spectra_checkbox = QCheckBox(self)
-    #     self._sum_spectra_checkbox.setChecked(True)
-    #     self._sum_spectra_checkbox.setText("Sum Selected Spectra")
-    #     self._sum_spectra_checkbox.setToolTip(
-    #         "Selected spectra will be converted to d-Spacing, summed, then converted back to the desired unit."
-    #     )
-    #     hBox.addWidget(self._sum_spectra_checkbox)
-    #     parent.addLayout(hBox)
 
     def refresh_peaks_ws_list(self) -> None:
         # TODO: Very similar to other refresh list function, combine in one function

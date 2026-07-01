@@ -53,5 +53,5 @@ class ALFInstrumentViewPresenter(FullInstrumentViewPresenter):
         self.notify_cpp_callback("notify_whole_tube_selected")
 
     def rebin_button_clicked(self, params: str) -> None:
-        # Rewrites the active workspace in the model, a miracle if it works
+        # Rewrites the active workspace in the model
         Rebin(InputWorkspace=self._model._workspace, Params=params, OutputWorkspace=self._model._workspace.name())
