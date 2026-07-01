@@ -50,19 +50,18 @@ class TestWorkspaceManager_Init(unittest.TestCase):
         wm = _make_manager("IMAT")
         self.assertEqual(wm.instr, "IMAT")
 
-    def test_workspace_names_are_suffixed_from_class_base_names(self):
-        # each owned name shadows its class constant with an instance-unique suffix so several
-        # planner windows can be open at once without colliding on the ADS
+    def test_workspace_names_carry_an_instance_unique_suffix(self):
+        # every owned name gets an instance-unique suffix so several planner windows can be open at
+        # once without colliding on the ADS
         wm = _make_manager()
-        for attr in WorkspaceManager._OWNED_WS_NAME_ATTRS:
-            base = getattr(WorkspaceManager, attr)
-            self.assertTrue(getattr(wm, attr).startswith(base + "_"))
+        for name in wm._owned_ws_names:
+            self.assertRegex(name, r"^__.+_[0-9a-f]{8}$")
 
     def test_two_managers_get_distinct_workspace_names(self):
         wm1 = _make_manager()
         wm2 = _make_manager()
-        for attr in WorkspaceManager._OWNED_WS_NAME_ATTRS:
-            self.assertNotEqual(getattr(wm1, attr), getattr(wm2, attr))
+        for name1, name2 in zip(wm1._owned_ws_names, wm2._owned_ws_names):
+            self.assertNotEqual(name1, name2)
 
     @patch(file_path + ".get_scattering_centre")
     def test_scattering_centre_property_delegates_to_helper(self, mock_gsc):
@@ -83,8 +82,7 @@ class TestWorkspaceManager_Cleanup(unittest.TestCase):
         wm.cleanup()
 
         removed = [c.args[0] for c in mock_ads.remove.call_args_list]
-        expected = [getattr(wm, attr) for attr in WorkspaceManager._OWNED_WS_NAME_ATTRS]
-        self.assertEqual(removed, expected)
+        self.assertEqual(removed, list(wm._owned_ws_names))
 
     def test_skips_owned_ws_that_do_not_exist(self, mock_ads):
         wm = _make_manager()

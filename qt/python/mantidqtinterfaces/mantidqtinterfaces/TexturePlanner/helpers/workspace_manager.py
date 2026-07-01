@@ -42,64 +42,60 @@ class WorkspaceManager:
     them. Reads instrument name from the parent model via a back-reference.
     """
 
-    # Workspace names used by the planner. All start with "__" so the ADS treats them as hidden.
-    # Each holds a distinct view of the sample needed by a specific consumer:
-    #   WS_DATA          live workspace driving plots/exports: holds the translated shape with init_R
-    #                    baked into its XML goniometer tag, and carries the current orientation R on
-    #                    its run goniometer. Read by get_scattering_centre, GroupDetectors, etc.
-    #   WS_UNGROUPED     pre-group clone of WS_DATA; detector_geometry re-runs GroupDetectors against
-    #                    this whenever the group pattern changes (can't ungroup an already-grouped ws).
-    #   WS_MESH_RAW      pristine sample (no init_R, no translation, identity goniometer). Source of
-    #                    truth for absorption (which composes R*init_R itself) and for rebuilding
-    #                    WS_DATA in update_initial_shape.
-    #   WS_MESH_NEUTRAL  init_R baked in, no translation, identity goniometer. Used by the plotter
-    #                    (which applies R itself to the mesh vertices) and by the reference-ws export.
-    #   WS_REFERENCE     transient name for output_as_reference_workspace; created and removed inside
-    #                    the export call, never persists across calls.
-    #   WS_MC_INPUT      per-orientation MonteCarloAbsorption input. Rebuilt each calc_for_index with
-    #                    R*init_R baked into the shape and identity goniometer.
-    #   WS_MC_OUTPUT     MonteCarloAbsorption output (transmission factors).
-    #   WS_TMP           transient name for update_initial_shape's working copy; removed in finally.
-    #   WS_MATERIAL      dedicated holder for the ground-truth sample material. Its shape is never
-    #                    reloaded, so it survives shape changes and lets set_material re-apply the
-    #                    full material (formula + number/mass density) via CopySample rather than a
-    #                    lossy formula-only round-trip through SetSampleMaterial.
-    WS_DATA = "__texture_planning_ws"
-    WS_UNGROUPED = "__texture_planning_ws_ungrouped"
-    WS_MESH_RAW = "__texture_planning_raw_sample_mesh"
-    WS_MESH_NEUTRAL = "__texture_planning_neutral_sample_mesh"
-    WS_MATERIAL = "__texture_planning_material"
-    WS_REFERENCE = "__texture_planning_reference_ws"
-    WS_MC_INPUT = "__mc_ws"
-    WS_MC_OUTPUT = "__abs_ws"
-    WS_TMP = "__tmp_ws"
-    _SHAPE_TMP = "__shape_ws"
-
-    # The class constants above are base names. Each instance shadows them with per-instance copies
-    # carrying a unique suffix (see __init__) so that several planner windows open at once don't
-    # collide on the ADS. Listed here once so __init__ can suffix them and cleanup() can remove them.
-    _OWNED_WS_NAME_ATTRS = (
-        "WS_DATA",
-        "WS_UNGROUPED",
-        "WS_MESH_RAW",
-        "WS_MESH_NEUTRAL",
-        "WS_MATERIAL",
-        "WS_REFERENCE",
-        "WS_MC_INPUT",
-        "WS_MC_OUTPUT",
-        "WS_TMP",
-        "_SHAPE_TMP",
-    )
-
     DEFAULT_MATERIAL = "Fe"
 
     def __init__(self, model: _BaseModelType):
         self._model = model
-        # Several planner windows can be open simultaneously, so suffix every workspace name with a
-        # token unique to this instance.
-        self._suffix = f"_{uuid4().hex[:8]}"
-        for attr in self._OWNED_WS_NAME_ATTRS:
-            setattr(self, attr, getattr(self, attr) + self._suffix)
+        # Workspace names used by the planner
+        # Several planner windows could be open simultaneously, so every name carries a token unique to
+        # this instance and no two managers collide on the ADS. Each holds a distinct view of the
+        # sample needed by a specific consumer:
+        #   WS_DATA          live workspace driving plots/exports: holds the translated shape with
+        #                    init_R baked into its XML goniometer tag, and carries the current
+        #                    orientation R on its run goniometer. Read by get_scattering_centre,
+        #                    GroupDetectors, etc.
+        #   WS_UNGROUPED     pre-group clone of WS_DATA; detector_geometry re-runs GroupDetectors
+        #                    against this whenever the group pattern changes (slow to ungroup an
+        #                    already-grouped ws).
+        #   WS_MESH_RAW      pristine sample (no init_R, no translation, identity goniometer). Source
+        #                    of truth for absorption (which composes R*init_R itself) and for
+        #                    rebuilding WS_DATA in update_initial_shape.
+        #   WS_MESH_NEUTRAL  init_R baked in, no translation, identity goniometer. Used by the plotter
+        #                    (which applies R itself to the mesh vertices) and by the reference-ws export.
+        #   WS_REFERENCE     transient name for output_as_reference_workspace; created and removed inside
+        #                    the export call, never persists across calls.
+        #   WS_MC_INPUT      per-orientation MonteCarloAbsorption input. Rebuilt each calc_for_index with
+        #                    R*init_R baked into the shape and identity goniometer.
+        #   WS_MC_OUTPUT     MonteCarloAbsorption output (transmission factors).
+        #   WS_TMP           transient name for update_initial_shape's working copy; removed in finally.
+        #   WS_MATERIAL      dedicated holder for the ground-truth sample material. Its shape is never
+        #                    reloaded, so it survives shape changes and lets set_material re-apply the
+        #                    full material (formula + number/mass density) via CopySample rather than a
+        #                    round-trip through SetSampleMaterial.
+        suffix = f"_{uuid4().hex[:8]}"
+        self.WS_DATA = "__texture_planning_ws" + suffix
+        self.WS_UNGROUPED = "__texture_planning_ws_ungrouped" + suffix
+        self.WS_MESH_RAW = "__texture_planning_raw_sample_mesh" + suffix
+        self.WS_MESH_NEUTRAL = "__texture_planning_neutral_sample_mesh" + suffix
+        self.WS_MATERIAL = "__texture_planning_material" + suffix
+        self.WS_REFERENCE = "__texture_planning_reference_ws" + suffix
+        self.WS_MC_INPUT = "__mc_ws" + suffix
+        self.WS_MC_OUTPUT = "__abs_ws" + suffix
+        self.WS_TMP = "__tmp_ws" + suffix
+        self._SHAPE_TMP = "__shape_ws" + suffix
+        # Every workspace this instance owns, so cleanup() can remove them all from the ADS.
+        self._owned_ws_names = (
+            self.WS_DATA,
+            self.WS_UNGROUPED,
+            self.WS_MESH_RAW,
+            self.WS_MESH_NEUTRAL,
+            self.WS_MATERIAL,
+            self.WS_REFERENCE,
+            self.WS_MC_INPUT,
+            self.WS_MC_OUTPUT,
+            self.WS_TMP,
+            self._SHAPE_TMP,
+        )
         self.wsname = self.WS_DATA
         self.ungrouped_wsname = self.WS_UNGROUPED
         self.ws = None  # holds the translated shape with init_R
@@ -123,8 +119,7 @@ class WorkspaceManager:
         """Remove every workspace this instance owns from the ADS. Called when the planner window
         closes so the (hidden) workspaces don't accumulate across open/close cycles now that their
         names are unique per instance."""
-        for attr in self._OWNED_WS_NAME_ATTRS:
-            wsname = getattr(self, attr)
+        for wsname in self._owned_ws_names:
             if ADS.doesExist(wsname):
                 ADS.remove(wsname)
 
