@@ -4,23 +4,27 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-
+from __future__ import annotations  # this prevents the imports from TYPE_CHECKING from being evaluated at runtime
 from itertools import chain
 from numpy import full, nan, max, array, vstack, mean, round
 from collections import defaultdict
 
 from mantid import FunctionFactory
-from mantid.api import TextAxis
-from mantid.kernel import UnitConversion, DeltaEModeType
+from mantid.kernel import UnitConversion, DeltaEModeType, UnitParametersMap
 from mantid.simpleapi import logger, CreateEmptyTableWorkspace, GroupWorkspaces, CreateWorkspace, FindPeaksConvolve, SaveNexus
-from mantid.api import AnalysisDataService as ADS
+from mantid.api import AnalysisDataService as ADS, CompositeFunction, IFunction, TextAxis, MatrixWorkspace
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.output_sample_logs import write_table_row
-from mantid.api import CompositeFunction
 from mantid.fitfunctions import FunctionWrapper
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import wsname_in_instr_run_ceria_group_ispec_unit_format
 from Engineering.EnggUtils import convert_TOFerror_to_derror
 from os import path, makedirs
+from typing import Set, Dict, TYPE_CHECKING, List, Sequence, Tuple, Any
+from mantid.dataobjects import TableWorkspace
+
+
+if TYPE_CHECKING:
+    from mantid.plots import MantidAxes
 
 
 class FittingPlotModel(object):
@@ -34,14 +38,14 @@ class FittingPlotModel(object):
     # Plotting
     # ===============
 
-    def get_plotted_workspaces(self):
+    def get_plotted_workspaces(self) -> Set[MatrixWorkspace]:
         return self.plotted_workspaces
 
-    def add_workspace_to_plot(self, ws, ax, plot_kwargs):
+    def add_workspace_to_plot(self, ws: MatrixWorkspace, ax: MantidAxes, plot_kwargs: Dict) -> None:
         ax.plot(ws, **plot_kwargs)
         self.plotted_workspaces.add(ws)
 
-    def remove_workspace_from_plot(self, ws, ax):
+    def remove_workspace_from_plot(self, ws: MatrixWorkspace, ax: MantidAxes) -> None:
         if ws in self.plotted_workspaces:
             self._remove_workspace_from_plot(ws, ax)
             self.plotted_workspaces.remove(ws)
@@ -49,10 +53,10 @@ class FittingPlotModel(object):
             ax.cla()
 
     @staticmethod
-    def _remove_workspace_from_plot(ws, ax):
+    def _remove_workspace_from_plot(ws: MatrixWorkspace, ax: MantidAxes) -> None:
         ax.remove_workspace_artists(ws)
 
-    def remove_all_workspaces_from_plot(self, ax):
+    def remove_all_workspaces_from_plot(self, ax: MantidAxes) -> None:
         ax.cla()
         self.plotted_workspaces.clear()
 
@@ -60,7 +64,13 @@ class FittingPlotModel(object):
     # Fitting
     # ===============
 
-    def update_fit(self, fit_props, loaded_ws_list, active_ws_list, log_workspace_name):
+    def update_fit(
+        self,
+        fit_props: List[Dict[str, Dict[str, str | bool]]],
+        loaded_ws_list: List[str],
+        active_ws_list: List[str],
+        log_workspace_name: str,
+    ) -> None:
         for fit_prop in fit_props:
             wsname = fit_prop["properties"]["InputWorkspace"]
             self._fit_results[wsname] = {"model": fit_prop["properties"]["Function"], "status": fit_prop["status"]}
@@ -98,7 +108,7 @@ class FittingPlotModel(object):
             self._calculate_fwhm_values(wsname, fit_functions)
         self.create_fit_tables(loaded_ws_list, active_ws_list, log_workspace_name)
 
-    def _setup_peak_func_and_extract_fwhm(self, ws_name, peak_func_names, fit_func):
+    def _setup_peak_func_and_extract_fwhm(self, ws_name: str, peak_func_names: Sequence[str], fit_func: IFunction) -> None:
         fit_func_name = fit_func.name()
         if fit_func.hasParameter("FWHM"):
             return  # Avoid re-calculating of FWHM if the fit function already has it
@@ -109,7 +119,7 @@ class FittingPlotModel(object):
             key_fwhm = fit_func_name + "_fwhm"
             self._fit_results[ws_name]["results"][key_fwhm].append([peak_func.fwhm(), 0.0])
 
-    def _calculate_fwhm_values(self, ws_name, fit_functions):
+    def _calculate_fwhm_values(self, ws_name: str, fit_functions: IFunction) -> None:
         peak_func_names = FunctionFactory.getPeakFunctionNames()
         if isinstance(fit_functions, CompositeFunction):
             for func in fit_functions:
@@ -117,15 +127,15 @@ class FittingPlotModel(object):
         else:
             self._setup_peak_func_and_extract_fwhm(ws_name, peak_func_names, fit_functions)
 
-    def _convert_TOF_to_d(self, tof, ws_name):
+    def _convert_TOF_to_d(self, tof: float, ws_name: str) -> float:
         diff_consts = self._get_diff_constants(ws_name)
         return UnitConversion.run("TOF", "dSpacing", tof, 0, DeltaEModeType.Elastic, diff_consts)  # L1=0 (ignored)
 
-    def _convert_TOFerror_to_derror(self, tof_error, d, ws_name):
+    def _convert_TOFerror_to_derror(self, tof_error: float, d: float, ws_name: str) -> float:
         diff_consts = self._get_diff_constants(ws_name)
         return convert_TOFerror_to_derror(diff_consts, tof_error, d)
 
-    def _get_diff_constants(self, ws_name):
+    def _get_diff_constants(self, ws_name: str) -> UnitParametersMap:
         """
         Get diffractometer constants from workspace
         TOF = difc*d + difa*(d^2) + tzero
@@ -135,7 +145,7 @@ class FittingPlotModel(object):
         diff_consts = si.diffractometerConstants(0)  # output is a UnitParametersMap
         return diff_consts
 
-    def create_fit_tables(self, loaded_ws_list, active_ws_list, log_workspace_name):
+    def create_fit_tables(self, loaded_ws_list: List[str], active_ws_list: List[str], log_workspace_name: str) -> None:
         wslist = []  # ws to be grouped
         # extract fit parameters and errors
         nruns = len(loaded_ws_list)  # num of rows of output workspace
@@ -184,7 +194,7 @@ class FittingPlotModel(object):
         summary_tables = self.create_bank_fit_summary_tables_by_run(self.get_fit_results(), active_ws_list)
         wslist.extend(summary_tables.values())
 
-    def create_bank_fit_summary_tables_by_run(self, fit_results, active_ws_list):
+    def create_bank_fit_summary_tables_by_run(self, fit_results: Dict, active_ws_list: List[str]) -> Dict[str, TableWorkspace]:
         """
         Create one TableWorkspace per run, summarizing fit parameters for each bank.
         For use in Texture Analysis Pipeline
@@ -240,13 +250,13 @@ class FittingPlotModel(object):
 
                 table.addRow(row)
 
-            self._save_files(table_name, "FitParameters", grouping)
+            self._save_files(table_name, "FitParameters", fit_peak, grouping)
             summary_tables[run] = table
 
         return summary_tables
 
     @staticmethod
-    def create_texture_output_table(table_name, param_labels):
+    def create_texture_output_table(table_name: str, param_labels: Sequence[str]) -> TableWorkspace:
         table = CreateEmptyTableWorkspace(OutputWorkspace=table_name)
         table.addColumn("str", "Bank")
 
@@ -260,7 +270,9 @@ class FittingPlotModel(object):
         return table
 
     @staticmethod
-    def _get_param_labels_and_peak_label(all_params, use_short_names, fit_results, banks_sorted):
+    def _get_param_labels_and_peak_label(
+        all_params: Sequence[str], use_short_names: bool, fit_results: Dict, banks_sorted: List[str]
+    ) -> Tuple[List[str], str]:
         param_labels = []
         fit_peak = ""
         for param in all_params:
@@ -276,8 +288,9 @@ class FittingPlotModel(object):
         return param_labels, fit_peak
 
     @staticmethod
-    def _create_metadata_dicts(active_ws_list, fit_results):
-        print(active_ws_list)
+    def _create_metadata_dicts(
+        active_ws_list: List[str], fit_results: Dict
+    ) -> Tuple[Dict[str, List[Tuple[int | str, str]]], Dict[str, str], Dict[str, str]]:
         run_to_banks = defaultdict(list)
         run_to_prefix = {}
         run_to_group = {}
@@ -313,7 +326,7 @@ class FittingPlotModel(object):
 
         return run_to_banks, run_to_prefix, run_to_group
 
-    def _save_files(self, ws, dir_name, peak, grouping=""):
+    def _save_files(self, ws: str, dir_name: str, peak: str, grouping: str = "") -> None:
         root_dir = output_settings.get_output_path()
         save_dirs = [path.join(root_dir, dir_name, peak)]
         if self._rb_num:
@@ -328,10 +341,10 @@ class FittingPlotModel(object):
                 makedirs(save_dir)
             SaveNexus(InputWorkspace=ws, Filename=path.join(save_dir, ws + ".nxs"))
 
-    def get_fit_results(self):
+    def get_fit_results(self) -> Dict:
         return self._fit_results
 
-    def run_find_peaks_convolve(self, input_ws_name, peak_type, x_range):
+    def run_find_peaks_convolve(self, input_ws_name: str, peak_type: str, x_range: Sequence[float | int]) -> str | None:
         """
         Run FindPeaksConvolve algorithm with default values for ENGIN-X
         :param input_ws_name: Name of the input workspace to run against
@@ -364,7 +377,10 @@ class FittingPlotModel(object):
 
         return self._get_func_wrapper_str_for_peak_x_y(peak_x_values, peak_y_values, peak_type, fit_prop_ws, x_range)
 
-    def _get_func_wrapper_str_for_peak_x_y(self, peak_x_values, peak_y_values, peak_type, fit_prop_ws, x_range):
+    @staticmethod
+    def _get_func_wrapper_str_for_peak_x_y(
+        peak_x_values: Dict, peak_y_values: Dict, peak_type: str, fit_prop_ws: MatrixWorkspace, x_range: Sequence[float | int]
+    ) -> str | None:
         if set(peak_x_values.keys()) == set(peak_y_values.keys()):
             logger.notice(f"Adding {len(peak_x_values)} peaks found via FindPeaksConvolve")
             func_wrapper = None
@@ -389,15 +405,16 @@ class FittingPlotModel(object):
             logger.error("Incompatible columns returned from FindPeaksConvolve!")
         return None
 
-    def _re_organize_keys_find_peaks_convolve(self, table_ws):
+    @staticmethod
+    def _re_organize_keys_find_peaks_convolve(table_ws: TableWorkspace) -> Dict[str, Any] | None:
         if table_ws.rowCount() == 1:
             table_dict = table_ws.row(0)
             table_dict.pop("SpecIndex", None)
             return {col_name.split("_")[-1]: value for col_name, value in table_dict.items()}
         return None
 
-    def _ws_is_tof(self, wsname):
+    def _ws_is_tof(self, wsname: str) -> bool:
         return ADS.retrieve(wsname).getXDimension().getUnits() == "microsecond"
 
-    def set_rb_num(self, rb_num):
+    def set_rb_num(self, rb_num: str) -> None:
         self._rb_num = rb_num

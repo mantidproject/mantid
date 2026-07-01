@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from typing import Callable, List, Dict
 from qtpy import QtWidgets
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QCursor
@@ -15,12 +16,16 @@ from .EngDiff_fitpropertybrowser import EngDiffFitPropertyBrowser
 from workbench.plotting.toolbar import ToolbarStateManager
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.plotting.plot_toolbar import FittingPlotToolbar
 from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing, GenericObserver
+from matplotlib.backend_bases import MouseEvent, ResizeEvent
+from mantid.api import MatrixWorkspace
+from matplotlib.axes import Axes
+
 
 Ui_plot, _ = load_ui(__file__, "plot_widget.ui")
 
 
 class FittingPlotView(QtWidgets.QWidget, Ui_plot):
-    def __init__(self, parent=None):
+    def __init__(self, parent: QtWidgets.QWidget | None = None):
         super(FittingPlotView, self).__init__(parent)
         self.setupUi(self)
 
@@ -36,7 +41,7 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
 
         self.setup_figure()
 
-    def setup_figure(self):
+    def setup_figure(self) -> None:
         self.figure = Figure()
         self.figure.canvas = FigureCanvas(self.figure)
         self.figure.canvas.mpl_connect("button_press_event", self.mouse_click)
@@ -87,16 +92,18 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
         self.show_cancel_button(False)
         self.set_find_peaks_convolve_button_status(False)
 
-    def mouse_click(self, event):
+    def mouse_click(self, event: MouseEvent) -> None:
+        # warning on buttond attribute can be ignored - is because canvas is defined as type FigureCanvasBase
+        # but at runtime it will be a QT FigureCanvas
         if event.button == event.canvas.buttond.get(Qt.RightButton):
             menu = QMenu()
             self.fit_browser.add_to_menu(menu)
             menu.exec(QCursor.pos())
 
-    def resizeEvent(self, QResizeEvent):
+    def resizeEvent(self, QResizeEvent: ResizeEvent) -> None:
         self.update_axes_position()
 
-    def make_undocked_plot_larger(self):
+    def make_undocked_plot_larger(self) -> None:
         # only make undocked plot larger the first time it is undocked as the undocked size gets remembered
         if self.plot_dock.isFloating() and self.has_first_undock_occurred == 0:
             factor = 1.0
@@ -111,7 +118,7 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
 
         self.update_axes_position()
 
-    def ensure_fit_dock_closed(self):
+    def ensure_fit_dock_closed(self) -> None:
         if self.plot_dock.isFloating():
             self.plot_dock.close()
 
@@ -119,81 +126,81 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
     # Slot Connectors
     # ===============
 
-    def set_cancel_clicked(self, slot):
+    def set_cancel_clicked(self, slot: Callable) -> None:
         self.cancel_button.clicked.connect(slot)
 
     # =================
     # Component Setters
     # =================
 
-    def set_slot_for_fit_toggled(self, presenter_func):
+    def set_slot_for_fit_toggled(self, presenter_func: Callable) -> None:
         self.toolbar.sig_toggle_fit_triggered.connect(presenter_func)
 
-    def set_slot_for_display_all(self):
+    def set_slot_for_display_all(self) -> None:
         self.toolbar.sig_home_clicked.connect(self.display_all)
 
-    def set_slot_for_serial_fit(self, presenter_func):
+    def set_slot_for_serial_fit(self, presenter_func: Callable) -> None:
         self.toolbar.sig_serial_fit_clicked.connect(presenter_func)
 
-    def set_slot_for_seq_fit(self, presenter_func):
+    def set_slot_for_seq_fit(self, presenter_func: Callable) -> None:
         self.toolbar.sig_seq_fit_clicked.connect(presenter_func)
 
-    def set_slot_for_legend_toggled(self):
+    def set_slot_for_legend_toggled(self) -> None:
         self.toolbar.sig_toggle_legend.connect(self.toggle_legend)
 
-    def set_slot_for_find_peaks_convolve(self, presenter_func):
+    def set_slot_for_find_peaks_convolve(self, presenter_func: Callable) -> None:
         self.toolbar.sig_find_peaks_convolve.connect(presenter_func)
 
-    def set_subscriber_for_function_changed(self, presenter_func):
+    def set_subscriber_for_function_changed(self, presenter_func: Callable) -> None:
         func_changed_observer = GenericObserver(presenter_func)
         self.fit_browser.function_changed_notifier.add_subscriber(func_changed_observer)
 
-    def toggle_legend(self):
+    def toggle_legend(self) -> None:
         self.update_legend(self.get_axes()[0])
         self.figure.canvas.draw()
 
-    def show_cancel_button(self, show: bool):
+    def show_cancel_button(self, show: bool) -> None:
         self.cancel_button.setVisible(show)
         self.cancel_button.setEnabled(show)
 
-    def hide_fit_browser(self):
+    def hide_fit_browser(self) -> None:
         self.fit_browser.hide()
 
-    def show_fit_browser(self):
+    def show_fit_browser(self) -> None:
         self.fit_browser.show()
 
-    def hide_fit_progress_bar(self):
+    def hide_fit_progress_bar(self) -> None:
         self.fit_progress_bar.hide()
 
-    def set_find_peaks_convolve_button_status(self, status):
+    def set_find_peaks_convolve_button_status(self, status: bool) -> None:
         if self.fit_browser.isVisible() is False:
             self.toolbar.set_action_enabled("FindPeaksConvolve", False)
         else:
             self.toolbar.set_action_enabled("FindPeaksConvolve", status)
 
-    def show_fit_progress_bar(self):
+    def show_fit_progress_bar(self) -> None:
         self.fit_progress_bar.show()
 
-    def set_progress_bar(self, status, minimum, maximum, value, style_sheet):
+    def set_progress_bar(self, status: str | None, minimum: float, maximum: float, value: float, style_sheet: str) -> None:
         self.fit_progress_bar.setToolTip(str(status))
         self.fit_progress_bar.setMinimum(minimum)
         self.fit_progress_bar.setMaximum(maximum)
         self.fit_progress_bar.setValue(value)
         self.fit_progress_bar.setStyleSheet(style_sheet)
 
-    def clear_figure(self):
+    def clear_figure(self) -> None:
         self.figure.clf()
         self.figure.add_subplot(111, projection="mantid")
         self.figure.canvas.draw()
 
-    def update_figure(self):
+    def update_figure(self) -> None:
         self.toolbar.update()
         self.update_legend(self.get_axes()[0])
         self.update_axes_position()
         self.figure.canvas.draw()
         self.update_fitbrowser()
 
-    def update_axes_position(self):
+    def update_axes_position(self) -> None:
         """
         Set axes position so that labels are always visible - it deliberately ignores height of ylabel (and less
         importantly the length of xlabel). This is because the plot window typically has a very small height when docked
@@ -211,7 +218,7 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
         y0_ax = pos.y0 + 0.05 - y0_lab  # move so that xlabel left bottom corner at vertical coord 0.05
         ax.set_position([x0_ax, y0_ax, 0.95 - x0_ax, 0.95 - y0_ax])
 
-    def update_fitbrowser(self):
+    def update_fitbrowser(self) -> None:
         is_visible = self.fit_browser.isVisible()
         self.toolbar.set_fit_checkstate(False)
         self.fit_browser.hide()
@@ -221,14 +228,14 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
             self.fit_browser.show()
             self.fit_progress_bar.show()
 
-    def remove_ws_from_fitbrowser(self, ws):
+    def remove_ws_from_fitbrowser(self, ws: MatrixWorkspace) -> None:
         # only one spectrum per workspace
         try:
             self.fit_browser.removeWorkspaceAndSpectra(ws.name())
         except:
             pass  # name may not be available if ws has just been deleted
 
-    def update_legend(self, ax):
+    def update_legend(self, ax: Axes) -> None:
         if ax.get_lines():
             ax.make_legend()
             ax.get_legend().set_title("")
@@ -237,17 +244,17 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
             if ax.get_legend():
                 ax.get_legend().remove()
 
-    def display_all(self):
+    def display_all(self) -> None:
         for ax in self.get_axes():
             if ax.lines:
                 ax.relim()
             ax.autoscale()
         self.update_figure()
 
-    def read_fitprop_from_browser(self):
+    def read_fitprop_from_browser(self) -> Dict[str, Dict[str, str | bool]] | None:
         return self.fit_browser.read_current_fitprop()
 
-    def update_browser(self, status, func_str, setup_name):
+    def update_browser(self, status: str, func_str: str, setup_name: str) -> None:
         if status:
             self.fit_browser.fitResultsChanged.emit(status)
             self.fit_browser.changeWindowTitle.emit(status)
@@ -256,7 +263,7 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
                 self.fit_browser.loadFunction(func_str)
                 self.fit_browser.save_current_setup(setup_name)
 
-    def set_sequential_serial_fit_enabled(self, fit_enabled):
+    def set_sequential_serial_fit_enabled(self, fit_enabled: bool) -> None:
         self.toolbar.set_action_enabled("Serial Fit", fit_enabled)
         self.toolbar.set_action_enabled("Sequential Fit", fit_enabled)
 
@@ -264,11 +271,11 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
     # Component Getters
     # =================
 
-    def get_axes(self):
+    def get_axes(self) -> List[Axes]:
         return self.figure.axes
 
-    def get_figure(self):
+    def get_figure(self) -> Figure:
         return self.figure
 
-    def is_fit_browser_visible(self):
+    def is_fit_browser_visible(self) -> bool:
         return self.fit_browser.isVisible()

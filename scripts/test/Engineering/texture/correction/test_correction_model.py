@@ -292,8 +292,7 @@ class TextureCorrectionModelTest(unittest.TestCase):
     def test_apply_corrections_applies_default_normalisation_with_default_vals(self, mock_ads, mock_clone, mock_convert, mock_save):
         mock_calib = mock.MagicMock()
         self.model.set_calibration(mock_calib)
-        mock_calib.group = "group"
-        mock_calib.texture_groups = ("1", "2")
+        mock_calib.is_texture_group.return_value = False
         mock_ads.retrieve.return_value = self.mock_ws
         mock_convert.return_value = mock.MagicMock()
         self.model.apply_corrections("ws1", "out_ws", "dir", abs_corr=1.0, div_corr=1.0)
@@ -310,8 +309,7 @@ class TextureCorrectionModelTest(unittest.TestCase):
         # Arrange
         mock_calib = MagicMock()
         self.model.set_calibration(mock_calib)
-        mock_calib.group = "group"
-        mock_calib.texture_groups = ("1", "2")
+        mock_calib.is_texture_group.return_value = False
         ws = MagicMock()
         abs_ws = MagicMock()
         div_ws = MagicMock()
@@ -355,8 +353,7 @@ class TextureCorrectionModelTest(unittest.TestCase):
         mock_calib = MagicMock()
         self.model.set_calibration(mock_calib)
         self.model.set_rb_num("rb123")
-        mock_calib.group = "group"
-        mock_calib.texture_groups = ("1", "2")
+        mock_calib.is_texture_group.return_value = False
         ws = MagicMock()
         mock_ads.retrieve.return_value = ws
         mock_convert.return_value = ws
@@ -448,6 +445,17 @@ class TextureCorrectionModelTest(unittest.TestCase):
         )
         mock_calc_divergence.assert_called_once_with(self.mock_ws, div_args["hoz"], div_args["vert"], div_args["det_hoz"])
         mock_apply_corrections.assert_called_once_with(self.mock_ws, out_wss[0], root_dir, "_abs_corr", "_div_corr")
+
+    def test_is_texture_returns_false_when_no_calibration(self):
+        self.assertFalse(TextureCorrectionModel.is_texture(None))
+
+    def test_is_texture_delegates_to_calibration(self):
+        for is_texture in (True, False):
+            with self.subTest(is_texture=is_texture):
+                mock_calib = MagicMock()
+                mock_calib.is_texture_group.return_value = is_texture
+                self.assertEqual(TextureCorrectionModel.is_texture(mock_calib), is_texture)
+                mock_calib.is_texture_group.assert_called_once_with()
 
 
 if __name__ == "__main__":

@@ -12,13 +12,18 @@ from mantid.dataobjects import GroupingWorkspace
 from os import path
 from mantid.simpleapi import Load, LoadDetectorsGroupingFile, CreateGroupingWorkspace, SaveDetectorsGrouping
 from mantid.kernel import logger
-from typing import Optional
-from Engineering.common.instrument_config import get_instr_config
-from enum import Enum
+from typing import Sequence
+from Engineering.common.instrument_config import get_instr_config, INSTRUMENT_GROUP
 
 
 class CalibrationInfo:
-    def __init__(self, group=None, instrument=None, ceria_path=None, vanadium_path=None):
+    def __init__(
+        self,
+        group: INSTRUMENT_GROUP | None = None,
+        instrument: str | None = None,
+        ceria_path: str | None = None,
+        vanadium_path: str | None = None,
+    ):
         self.group = group
         self.instrument = instrument
         self.config = get_instr_config(instrument)
@@ -50,53 +55,58 @@ class CalibrationInfo:
 
     # getters
     def get_foc_ws_suffix(self) -> str:
-        return self._get_suffix(self.config.group_foc_ws_suffix)
+        return self._get_suffix("foc_ws_suffix")
 
     def get_group_suffix(self) -> str:
-        return self._get_suffix(self.config.group_suffix)
+        return self._get_suffix("suffix")
 
     def get_group_ws_name(self) -> str:
-        return self._get_suffix(self.config.group_ws_names)
+        return self._get_suffix("ws_name")
 
-    def _get_suffix(self, suffix_dict: dict) -> str:
+    def _get_suffix(self, attr: str) -> str:
         """Get the full suffix for the current group"""
         if self.group:
             self.set_extra_group_suffix()
-            return f"{suffix_dict[self.group]}{self.extra_group_suffix}"
+            return f"{getattr(self.config.group_info[self.group], attr)}{self.extra_group_suffix}"
         return ""
 
-    def get_group_description(self) -> Optional[str]:
+    def get_group_banks(self) -> Sequence[int]:
         if self.group:
-            return self.config.group_descriptions[self.group]
+            return self.config.group_info[self.group].banks
+        return []
 
-    def get_group_file(self) -> Optional[str]:
+    def get_group_description(self) -> str | None:
         if self.group:
-            return self.config.grouping_files[self.group]
+            return self.config.group_info[self.group].description
 
-    def get_calibration_table(self) -> Optional[str]:
+    def get_group_file(self) -> str | None:
+        if self.group:
+            return self.config.group_info[self.group].grouping_file
+
+    def get_calibration_table(self) -> str | None:
         return self.calibration_table
 
-    def get_ceria_path(self) -> Optional[str]:
+    def get_ceria_path(self) -> str | None:
         return self.ceria_path
 
-    def get_ceria_runno(self) -> Optional[str]:
+    def get_ceria_runno(self) -> str | None:
         if self.ceria_path and self.instrument:
             return path_handling.get_run_number_from_path(self.ceria_path, self.instrument)
 
-    def get_vanadium_path(self) -> Optional[str]:
+    def get_vanadium_path(self) -> str | None:
         return self.vanadium_path
 
-    def get_vanadium_runno(self) -> Optional[str]:
+    def get_vanadium_runno(self) -> str | None:
         if self.vanadium_path and self.instrument:
             return path_handling.get_run_number_from_path(self.vanadium_path, self.instrument)
 
-    def get_instrument(self) -> Optional[str]:
+    def get_instrument(self) -> str | None:
         return self.instrument
 
-    def get_prm_filepath(self) -> Optional[str]:
+    def get_prm_filepath(self) -> str | None:
         return self.prm_filepath
 
-    def get_group(self) -> Enum:
+    def get_group(self) -> INSTRUMENT_GROUP:
         return self.group
 
     def get_fit_peak_shape(self) -> str:
@@ -114,7 +124,7 @@ class CalibrationInfo:
         elif self.group == self.config.group.CROPPED and self.spectra_list_str:
             self.extra_group_suffix = f"_{self.spectra_list_str}"
 
-    def set_prm_filepath(self, prm_filepath: Optional[str]) -> None:
+    def set_prm_filepath(self, prm_filepath: str | None) -> None:
         self.prm_filepath = prm_filepath
 
     def set_calibration_table(self, cal_table: str) -> None:
@@ -160,13 +170,16 @@ class CalibrationInfo:
         self.grouping_filepath = grouping_filepath
         self.set_prm_filepath(None)  # clear any prm filepath as won't correspond to this grouping
 
-    def set_group(self, group: Enum) -> None:
+    def set_group(self, group: INSTRUMENT_GROUP) -> None:
         self.group = group
 
     def set_fit_peak_shape(self, peak_shape: str) -> None:
         self.fit_peak_shape = peak_shape
 
     # functional
+    def is_texture_group(self) -> bool:
+        return self.get_group() in self.config.texture_groups if self.config else False
+
     def set_grouping_filepath_from_prm_filepath(self) -> None:
         """
         If there is a prm filepath declared, assign the xml filepath as the grouping filepath
@@ -188,7 +201,7 @@ class CalibrationInfo:
             logger.error("Unable to load calibration file " + filepath + ". Error: " + str(e))
 
         # load in custom grouping - checks if applicable inside method
-        if not self.group.banks:
+        if not self.get_group_banks():
             self.load_custom_grouping_workspace()
         else:
             self.get_group_ws()  # creates group workspace
@@ -197,7 +210,7 @@ class CalibrationInfo:
         """
         Load a custom grouping workspace saved post calibration (e.g. when user supplied custom spectra numbers or .cal)
         """
-        if not self.group.banks:
+        if not self.get_group_banks():
             # no need to load grp ws for bank grouping
             ws_name = self.get_group_ws_name()
             self.set_grouping_filepath_from_prm_filepath()
@@ -208,14 +221,14 @@ class CalibrationInfo:
         Save grouping workspace created for custom spectra or .cal cropping.
         :param directory: directory in which to save grouping workspace
         """
-        if self.group and not self.group.banks:
+        if self.group and not self.get_group_banks():
             filename = self.generate_output_file_name(ext=".xml")
             SaveDetectorsGrouping(InputWorkspace=self.group_ws, OutputFile=path.join(directory, filename))
         else:
             logger.warning("Only save grouping workspace for custom or cropped groupings.")
         return
 
-    def generate_output_file_name(self, group: Optional[Enum] = None, ext: str = ".prm") -> str:
+    def generate_output_file_name(self, group: INSTRUMENT_GROUP | None = None, ext: str = ".prm") -> str:
         """
         Generate an output filename in the form INSTRUMENT_ceriaRunNo_BANKS
         :param ext: Extension to be used on the saved file
@@ -225,7 +238,7 @@ class CalibrationInfo:
         if not group:
             suffix = self.get_group_suffix()
         else:
-            suffix = self.config.group_suffix[group]
+            suffix = self.config.group_info[group].suffix
         return "_".join([self.instrument, self.get_ceria_runno(), suffix]) + ext
 
     def get_subplot_title(self, ispec: int) -> str:
@@ -237,9 +250,9 @@ class CalibrationInfo:
             return self.get_group_description()
         elif self.group == self.config.group.BOTH:
             return (
-                self.config.group_descriptions[self.config.group.NORTH]
+                self.config.group_info[self.config.group.NORTH].description
                 if ispec == 0
-                else self.config.group_descriptions[self.config.group.SOUTH]
+                else self.config.group_info[self.config.group.SOUTH].description
             )
         else:
             return f"{self.get_group_description()} spec: {ispec}"  # texture
@@ -255,7 +268,7 @@ class CalibrationInfo:
 
     def update_group_ws_from_group(self) -> None:
         if self.group:
-            if self.group.banks:
+            if self.get_group_banks():
                 self.create_bank_grouping_workspace()
             elif self.group == self.config.group.CROPPED:
                 self.create_grouping_workspace_from_spectra_list()
@@ -286,13 +299,13 @@ class CalibrationInfo:
         grp_ws = None
         try:
             grp_ws = LoadDetectorsGroupingFile(
-                InputFile=path.join(CALIB_DIR, self.config.grouping_files[self.group]), OutputWorkspace=ws_name
+                InputFile=path.join(CALIB_DIR, self.config.group_info[self.group].grouping_file), OutputWorkspace=ws_name
             )
         except ValueError:
             logger.notice("Grouping file not found in user directories - creating one")
-            if self.group.banks and self.group not in self.config.texture_groups:
+            if self.get_group_banks() and self.group not in self.config.texture_groups:
                 grp_ws, _, _ = CreateGroupingWorkspace(
-                    InstrumentName=self.instrument, OutputWorkspace=ws_name, GroupNames=self.config.group_bank_args[self.group]
+                    InstrumentName=self.instrument, OutputWorkspace=ws_name, GroupNames=self.config.group_info[self.group].bank_args
                 )
         if grp_ws:
             self.group_ws = grp_ws

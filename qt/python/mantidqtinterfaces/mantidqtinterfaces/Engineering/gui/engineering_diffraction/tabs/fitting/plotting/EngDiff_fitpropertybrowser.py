@@ -17,6 +17,7 @@ from mantid.simpleapi import logger
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from ast import literal_eval
+from typing import Dict, List
 
 BaseBrowser = import_qt(".._common", "mantidqt.widgets", "FitPropertyBrowser")
 
@@ -30,8 +31,7 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
     def __init__(self, canvas, toolbar_manager, parent=None):
         super(EngDiffFitPropertyBrowser, self).__init__(canvas, toolbar_manager, parent)
         # overwrite default peak with that in settings (gets init when UI opened)
-        default_peak = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "default_peak")
-        self.setDefaultPeakType(default_peak)
+        self.set_default_peak_from_settings()
         self.fit_notifier = GenericObservable()
         self.fit_enabled_notifier = GenericObservable()
         self.fit_started_notifier = GenericObservable()
@@ -39,14 +39,27 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
         self.algorithmFailed.connect(self.fitting_failed_slot)
         self.function_changed_notifier = GenericObservable()
 
-    def set_output_window_names(self):
+    def set_default_peak_from_settings(self, instrument: str = "ENGINX") -> None:
+        """
+        Set the default peak type from the instrument-specific setting.
+        :param instrument: The instrument whose default peak setting should be used.
+        """
+        default_peak = get_setting(
+            output_settings.INTERFACES_SETTINGS_GROUP,
+            output_settings.ENGINEERING_PREFIX,
+            f"default_peak_{instrument}",
+            return_type=str,
+        )
+        self.setDefaultPeakType(default_peak)
+
+    def set_output_window_names(self) -> None:
         """
          Override this function as no window
         :return: None
         """
         return None
 
-    def get_fitprop(self):
+    def get_fitprop(self) -> Dict | None:
         """
         Get the algorithm parameters updated post-fit (including output status of fit)
         :return: dictionary of parameters
@@ -62,7 +75,7 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
             # if no fit has been performed
             return None
 
-    def read_current_fitprop(self):
+    def read_current_fitprop(self) -> Dict[str, Dict[str, str | bool]] | None:
         """
         Get algorithm parameters currently displayed in the UI browser (incl. defaults that user cannot change) which
         will be used as input for the sequential fit. This return does not include the output status of the last fit
@@ -89,11 +102,11 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
         except BaseException:  # The cpp passes up an 'unknown' error if getFunctionString() fails, i.e. if no fit
             return None
 
-    def save_current_setup(self, name):
+    def save_current_setup(self, name: str) -> None:
         self.executeCustomSetupRemove(name)
         self.saveFunction(name)
 
-    def show(self):
+    def show(self) -> None:
         """
         Override the base class method. Hide the peak editing tool.
         """
@@ -106,20 +119,20 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
         super(EngDiffFitPropertyBrowser, self).show()
         self.fit_enabled_notifier.notify_subscribers(self.isFitEnabled() and self.isVisible())
 
-    def hide(self):
+    def hide(self) -> None:
         """
         Override the base class method. Hide the peak editing tool.
         """
         super(EngDiffFitPropertyBrowser, self).hide()
         self.fit_enabled_notifier.notify_subscribers(self.isFitEnabled() and self.isVisible())
 
-    def ws_is_valid(self, ws_name, warn):
+    def ws_is_valid(self, ws_name: str, warn: bool) -> bool:
         is_valid = ADS.retrieve(ws_name).getAxis(0).getUnit().caption() in ("Time-of-flight", "d-Spacing")
         if not is_valid and warn:
             logger.warning(f"Workspace {ws_name} will not be available for fitting because it doesn't have units of TOF or d-spacing")
         return is_valid
 
-    def _get_allowed_spectra(self):
+    def _get_allowed_spectra(self) -> Dict[str, List[int]]:
         """
         Get the workspaces and spectra that can be fitted from the
         tracked workspaces.
@@ -138,7 +151,7 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
                 pass
         return allowed_spectra
 
-    def _get_center_param_names(self):
+    def _get_center_param_names(self) -> List[str]:
         peak_prefixes = self.getPeakPrefixes()
         peak_center_params = []
         for peak_pre in peak_prefixes:
@@ -149,7 +162,7 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
         return peak_center_params
 
     @Slot(str)
-    def fitting_done_slot(self, name):
+    def fitting_done_slot(self, name: str) -> None:
         """
         This is called after Fit finishes to update the fit curves.
         :param name: The name of Fit's output workspace.
@@ -159,14 +172,14 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
         self.fit_notifier.notify_subscribers([self.get_fitprop()])
 
     @Slot()
-    def fitting_failed_slot(self):
+    def fitting_failed_slot(self) -> None:
         """
         This is called after Fit fails due to an exception thrown.
         """
         self.fit_notifier.notify_subscribers([])
 
     @Slot()
-    def function_changed_slot(self):
+    def function_changed_slot(self) -> None:
         """
         Update the peak editing tool after function structure has changed in
         the browser: functions added and/or removed.
@@ -176,7 +189,7 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
         self.function_changed_notifier.notify_subscribers()
 
     @Slot()
-    def fitting_started_slot(self):
+    def fitting_started_slot(self) -> None:
         """
         Set the progress bar to in progress.
         # :param name: The name of Fit's input workspace.

@@ -6,55 +6,56 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from dataclasses import dataclass
-from typing import Dict, Tuple, Optional, Sequence, Type
+from typing import Dict, Tuple, Sequence, Type
 from enum import Enum
 
 
 class ENGINX_GROUP(Enum):
-    def __new__(self, value, banks):
-        obj = object.__new__(self)
-        obj._value_ = value  # overwrite value to be first arg
-        obj.banks = banks  # set attribute bank
-        return obj
+    """Detector groups for ENGINX. The enum value is the file suffix of the .prm (for easy creation)."""
 
-    """Base Group extended for ENGINX specific groups"""
-    # value of enum is the file suffix of .prm (for easy creation)
-    #       value,  banks
-    BOTH = "banks", [1, 2]
-    NORTH = "1", [1]
-    SOUTH = "2", [2]
-    CROPPED = "Cropped", []  # pdcal results will be saved with grouping file with same suffix
-    CUSTOM = "Custom", []  # pdcal results will be saved with grouping file with same suffix
-    TEXTURE20 = "Texture20", [1, 2]
-    TEXTURE30 = "Texture30", [1, 2]
+    BOTH = "banks"
+    NORTH = "1"
+    SOUTH = "2"
+    CROPPED = "Cropped"  # pdcal results will be saved with grouping file with same suffix
+    CUSTOM = "Custom"  # pdcal results will be saved with grouping file with same suffix
+    TEXTURE20 = "Texture20"
+    TEXTURE30 = "Texture30"
 
 
 class IMAT_GROUP(Enum):
-    def __new__(self, value, banks):
-        obj = object.__new__(self)
-        obj._value_ = value  # overwrite value to be first arg
-        obj.banks = banks  # set attribute bank
-        return obj
+    """Detector groups for IMAT. The enum value is the file suffix of the .prm (for easy creation)."""
 
-    """Base Group extended for IMAT specific groups"""
-    # value of enum is the file suffix of .prm (for easy creation)
-    #       value,  banks
-    BOTH = "banks", [1, 2]
-    NORTH = "1", [1]
-    SOUTH = "2", [2]
-    CROPPED = "Cropped", []  # pdcal results will be saved with grouping file with same suffix
-    CUSTOM = "Custom", []  # pdcal results will be saved with grouping file with same suffix
-    MODULE1 = "Module1", [1, 2]
-    MODULE4 = "Module4", [1, 2]
-    ROW1 = "Row1", [1, 2]
-    ROW4 = "Row4", [1, 2]
+    BOTH = "banks"
+    NORTH = "1"
+    SOUTH = "2"
+    CROPPED = "Cropped"  # pdcal results will be saved with grouping file with same suffix
+    CUSTOM = "Custom"  # pdcal results will be saved with grouping file with same suffix
+    MODULE1 = "Module1"
+    MODULE4 = "Module4"
+    ROW1 = "Row1"
+    ROW4 = "Row4"
 
+
+INSTRUMENT_GROUP = ENGINX_GROUP | IMAT_GROUP
 
 ###### ~~~~~~~~~~~~~~~~~~~~ IMPORTANT ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # if a new instrument is added, add its config key to this list and group to groups (used for tests)
 SUPPORTED_INSTRUMENTS = ("ENGINX", "IMAT")
 GROUPS = (ENGINX_GROUP, IMAT_GROUP)
 PSEUDONYMS = {"ENGIN-X": "ENGINX"}
+
+
+@dataclass(frozen=True)
+class DetectorGroupInfo:
+    """All per-group configuration for a single detector group of an instrument."""
+
+    banks: Sequence[int]
+    description: str
+    ws_name: str
+    suffix: str
+    foc_ws_suffix: str
+    grouping_file: str | None = None  # only banks/texture groups ship with a grouping file
+    bank_args: str | None = None  # GroupNames arg for CreateGroupingWorkspace (bank groups only)
 
 
 @dataclass(frozen=True)
@@ -65,15 +66,10 @@ class InstrumentConfig:
     full_instr_calib: str
 
     # ROI/grouping
-    group: Type[Enum]
-    grouping_files: Dict[Enum, str]
-    texture_groups: Sequence[Enum]
-    group_bank_args: Dict[Enum, str]
-    group_descriptions: Dict[Enum, str]
-    group_ws_names: Dict[Enum, str]
-    group_suffix: Dict[Enum, str]
-    group_foc_ws_suffix: Dict[Enum, str]
-    interactive_grouping_options: Sequence[Tuple[Enum, str, bool, bool]]  # group, description, has file input, has text input
+    group: Type[INSTRUMENT_GROUP]
+    group_info: Dict[INSTRUMENT_GROUP, DetectorGroupInfo]
+    texture_groups: Sequence[INSTRUMENT_GROUP]
+    interactive_grouping_options: Sequence[Tuple[INSTRUMENT_GROUP, str, bool, bool]]  # group, description, has file input, has text input
     peak_func: str
     funcs_to_keep_fixed: Sequence[str]
 
@@ -89,55 +85,70 @@ CONFIGS: Dict[str, InstrumentConfig] = {
         name="ENGINX",
         full_instr_calib="ENGINX_full_instrument_calibration_193749.nxs",
         group=ENGINX_GROUP,
-        grouping_files={
-            ENGINX_GROUP.BOTH: "ENGINX_NorthAndSouth_grouping.xml",
-            ENGINX_GROUP.NORTH: "ENGINX_North_grouping.xml",
-            ENGINX_GROUP.SOUTH: "ENGINX_South_grouping.xml",
-            ENGINX_GROUP.TEXTURE20: "ENGINX_Texture20_grouping.xml",
-            ENGINX_GROUP.TEXTURE30: "ENGINX_Texture30_grouping.xml",
+        group_info={
+            ENGINX_GROUP.BOTH: DetectorGroupInfo(
+                banks=[1, 2],
+                description="North and South Banks",
+                ws_name="NorthAndSouthBank_grouping",
+                suffix="all_banks",
+                foc_ws_suffix="bank",
+                grouping_file="ENGINX_NorthAndSouth_grouping.xml",
+                bank_args="NorthBank,SouthBank",
+            ),
+            ENGINX_GROUP.NORTH: DetectorGroupInfo(
+                banks=[1],
+                description="North Bank",
+                ws_name="NorthBank_grouping",
+                suffix="bank_1",
+                foc_ws_suffix="bank_1",
+                grouping_file="ENGINX_North_grouping.xml",
+                bank_args="NorthBank",
+            ),
+            ENGINX_GROUP.SOUTH: DetectorGroupInfo(
+                banks=[2],
+                description="South Bank",
+                ws_name="SouthBank_grouping",
+                suffix="bank_2",
+                foc_ws_suffix="bank_2",
+                grouping_file="ENGINX_South_grouping.xml",
+                bank_args="SouthBank",
+            ),
+            ENGINX_GROUP.CROPPED: DetectorGroupInfo(
+                banks=[],
+                description="Custom spectrum numbers",
+                ws_name="Cropped_spectra_grouping",
+                suffix="Cropped",
+                foc_ws_suffix="Cropped",
+            ),
+            ENGINX_GROUP.CUSTOM: DetectorGroupInfo(
+                banks=[],
+                description="Custom grouping file",
+                ws_name="Custom_grouping_file",
+                suffix="Custom",
+                foc_ws_suffix="Custom",
+            ),
+            ENGINX_GROUP.TEXTURE20: DetectorGroupInfo(
+                banks=[1, 2],
+                description="Texture20",
+                ws_name="Texture20_grouping",
+                suffix="Texture20",
+                foc_ws_suffix="Texture20",
+                grouping_file="ENGINX_Texture20_grouping.xml",
+            ),
+            ENGINX_GROUP.TEXTURE30: DetectorGroupInfo(
+                banks=[1, 2],
+                description="Texture30",
+                ws_name="Texture30_grouping",
+                suffix="Texture30",
+                foc_ws_suffix="Texture30",
+                grouping_file="ENGINX_Texture30_grouping.xml",
+            ),
         },
         texture_groups=(ENGINX_GROUP.TEXTURE20, ENGINX_GROUP.TEXTURE30, ENGINX_GROUP.CUSTOM),
         calibration_tof_binning=(12000, -0.0003, 52000),
         peak_func="BackToBackExponential",
         funcs_to_keep_fixed=("IkedaCarpenterPV",),
         prm_header_template="template_ENGINX_prm_header.prm",
-        group_bank_args={ENGINX_GROUP.BOTH: "NorthBank,SouthBank", ENGINX_GROUP.NORTH: "NorthBank", ENGINX_GROUP.SOUTH: "SouthBank"},
-        group_descriptions={
-            ENGINX_GROUP.BOTH: "North and South Banks",
-            ENGINX_GROUP.NORTH: "North Bank",
-            ENGINX_GROUP.SOUTH: "South Bank",
-            ENGINX_GROUP.CROPPED: "Custom spectrum numbers",
-            ENGINX_GROUP.CUSTOM: "Custom grouping file",
-            ENGINX_GROUP.TEXTURE20: "Texture20",
-            ENGINX_GROUP.TEXTURE30: "Texture30",
-        },
-        group_ws_names={
-            ENGINX_GROUP.BOTH: "NorthAndSouthBank_grouping",
-            ENGINX_GROUP.NORTH: "NorthBank_grouping",
-            ENGINX_GROUP.SOUTH: "SouthBank_grouping",
-            ENGINX_GROUP.CROPPED: "Cropped_spectra_grouping",
-            ENGINX_GROUP.CUSTOM: "Custom_grouping_file",
-            ENGINX_GROUP.TEXTURE20: "Texture20_grouping",
-            ENGINX_GROUP.TEXTURE30: "Texture30_grouping",
-        },
-        group_suffix={
-            ENGINX_GROUP.BOTH: "all_banks",
-            ENGINX_GROUP.NORTH: "bank_1",
-            ENGINX_GROUP.SOUTH: "bank_2",
-            ENGINX_GROUP.CROPPED: "Cropped",
-            ENGINX_GROUP.CUSTOM: "Custom",
-            ENGINX_GROUP.TEXTURE20: "Texture20",
-            ENGINX_GROUP.TEXTURE30: "Texture30",
-        },
-        group_foc_ws_suffix={
-            ENGINX_GROUP.BOTH: "bank",
-            ENGINX_GROUP.NORTH: "bank_1",
-            ENGINX_GROUP.SOUTH: "bank_2",
-            ENGINX_GROUP.CROPPED: "Cropped",
-            ENGINX_GROUP.CUSTOM: "Custom",
-            ENGINX_GROUP.TEXTURE20: "Texture20",
-            ENGINX_GROUP.TEXTURE30: "Texture30",
-        },
         interactive_grouping_options=(
             (ENGINX_GROUP.CUSTOM, "Custom Grouping File", True, False),
             (ENGINX_GROUP.NORTH, "1 (North)", False, False),
@@ -149,67 +160,88 @@ CONFIGS: Dict[str, InstrumentConfig] = {
     ),
     "IMAT": InstrumentConfig(
         name="IMAT",
-        group=IMAT_GROUP,
         full_instr_calib="IMAT_full_instrument_calibration_36792.nxs",
-        grouping_files={
-            IMAT_GROUP.BOTH: "IMAT_NorthAndSouth_grouping.xml",
-            IMAT_GROUP.NORTH: "IMAT_North_grouping.xml",
-            IMAT_GROUP.SOUTH: "IMAT_South_grouping.xml",
-            IMAT_GROUP.MODULE1: "IMAT_Module1_grouping.xml",
-            IMAT_GROUP.MODULE4: "IMAT_Module4_grouping.xml",
-            IMAT_GROUP.ROW1: "IMAT_Row1_grouping.xml",
-            IMAT_GROUP.ROW4: "IMAT_Row4_grouping.xml",
+        group=IMAT_GROUP,
+        group_info={
+            IMAT_GROUP.BOTH: DetectorGroupInfo(
+                banks=[1, 2],
+                description="North and South Banks",
+                ws_name="NorthAndSouthBank_grouping",
+                suffix="all_banks",
+                foc_ws_suffix="bank",
+                grouping_file="IMAT_NorthAndSouth_grouping.xml",
+                bank_args="NorthBank,SouthBank",
+            ),
+            IMAT_GROUP.NORTH: DetectorGroupInfo(
+                banks=[1],
+                description="North Bank",
+                ws_name="NorthBank_grouping",
+                suffix="bank_1",
+                foc_ws_suffix="bank_1",
+                grouping_file="IMAT_North_grouping.xml",
+                bank_args="NorthBank",
+            ),
+            IMAT_GROUP.SOUTH: DetectorGroupInfo(
+                banks=[2],
+                description="South Bank",
+                ws_name="SouthBank_grouping",
+                suffix="bank_2",
+                foc_ws_suffix="bank_2",
+                grouping_file="IMAT_South_grouping.xml",
+                bank_args="SouthBank",
+            ),
+            IMAT_GROUP.CROPPED: DetectorGroupInfo(
+                banks=[],
+                description="Custom spectrum numbers",
+                ws_name="Cropped_spectra_grouping",
+                suffix="Cropped",
+                foc_ws_suffix="Cropped",
+            ),
+            IMAT_GROUP.CUSTOM: DetectorGroupInfo(
+                banks=[],
+                description="Custom grouping file",
+                ws_name="Custom_grouping_file",
+                suffix="Custom",
+                foc_ws_suffix="Custom",
+            ),
+            IMAT_GROUP.MODULE1: DetectorGroupInfo(
+                banks=[1, 2],
+                description="1 Group per Module",
+                ws_name="Module1",
+                suffix="Module1",
+                foc_ws_suffix="Module1",
+                grouping_file="IMAT_Module1_grouping.xml",
+            ),
+            IMAT_GROUP.MODULE4: DetectorGroupInfo(
+                banks=[1, 2],
+                description="4 Groups per Module",
+                ws_name="Module4",
+                suffix="Module4",
+                foc_ws_suffix="Module4",
+                grouping_file="IMAT_Module4_grouping.xml",
+            ),
+            IMAT_GROUP.ROW1: DetectorGroupInfo(
+                banks=[1, 2],
+                description="1 Group per Row",
+                ws_name="Row1",
+                suffix="Row1",
+                foc_ws_suffix="Row1",
+                grouping_file="IMAT_Row1_grouping.xml",
+            ),
+            IMAT_GROUP.ROW4: DetectorGroupInfo(
+                banks=[1, 2],
+                description="4 Groups per Row",
+                ws_name="Row4",
+                suffix="Row4",
+                foc_ws_suffix="Row4",
+                grouping_file="IMAT_Row4_grouping.xml",
+            ),
         },
         texture_groups=(IMAT_GROUP.CUSTOM, IMAT_GROUP.MODULE1, IMAT_GROUP.MODULE4, IMAT_GROUP.ROW1, IMAT_GROUP.ROW4),
         calibration_tof_binning=(10000, -0.0003, 80000),
         peak_func="IkedaCarpenterPV",
         funcs_to_keep_fixed=("IkedaCarpenterPV",),
         prm_header_template="template_IMAT_prm_header.prm",
-        group_bank_args={IMAT_GROUP.BOTH: "NorthBank,SouthBank", IMAT_GROUP.NORTH: "NorthBank", IMAT_GROUP.SOUTH: "SouthBank"},
-        group_descriptions={
-            IMAT_GROUP.BOTH: "North and South Banks",
-            IMAT_GROUP.NORTH: "North Bank",
-            IMAT_GROUP.SOUTH: "South Bank",
-            IMAT_GROUP.CROPPED: "Custom spectrum numbers",
-            IMAT_GROUP.CUSTOM: "Custom grouping file",
-            IMAT_GROUP.MODULE1: "1 Group per Module",
-            IMAT_GROUP.MODULE4: "4 Groups per Module",
-            IMAT_GROUP.ROW1: "1 Group per Row",
-            IMAT_GROUP.ROW4: "4 Groups per Row",
-        },
-        group_ws_names={
-            IMAT_GROUP.BOTH: "NorthAndSouthBank_grouping",
-            IMAT_GROUP.NORTH: "NorthBank_grouping",
-            IMAT_GROUP.SOUTH: "SouthBank_grouping",
-            IMAT_GROUP.CROPPED: "Cropped_spectra_grouping",
-            IMAT_GROUP.CUSTOM: "Custom_grouping_file",
-            IMAT_GROUP.MODULE1: "Module1",
-            IMAT_GROUP.MODULE4: "Module4",
-            IMAT_GROUP.ROW1: "Row1",
-            IMAT_GROUP.ROW4: "Row4",
-        },
-        group_suffix={
-            IMAT_GROUP.BOTH: "all_banks",
-            IMAT_GROUP.NORTH: "bank_1",
-            IMAT_GROUP.SOUTH: "bank_2",
-            IMAT_GROUP.CROPPED: "Cropped",
-            IMAT_GROUP.CUSTOM: "Custom",
-            IMAT_GROUP.MODULE1: "Module1",
-            IMAT_GROUP.MODULE4: "Module4",
-            IMAT_GROUP.ROW1: "Row1",
-            IMAT_GROUP.ROW4: "Row4",
-        },
-        group_foc_ws_suffix={
-            IMAT_GROUP.BOTH: "bank",
-            IMAT_GROUP.NORTH: "bank_1",
-            IMAT_GROUP.SOUTH: "bank_2",
-            IMAT_GROUP.CROPPED: "Cropped",
-            IMAT_GROUP.CUSTOM: "Custom",
-            IMAT_GROUP.MODULE1: "Module1",
-            IMAT_GROUP.MODULE4: "Module4",
-            IMAT_GROUP.ROW1: "Row1",
-            IMAT_GROUP.ROW4: "Row4",
-        },
         interactive_grouping_options=(
             (IMAT_GROUP.CUSTOM, "Custom Grouping File", True, False),
             (IMAT_GROUP.NORTH, "1 (North)", False, False),
@@ -224,7 +256,7 @@ CONFIGS: Dict[str, InstrumentConfig] = {
 }
 
 
-def get_instr_config(instrument: Optional[str]) -> Optional[InstrumentConfig]:
+def get_instr_config(instrument: str | None) -> InstrumentConfig | None:
     if instrument is None:
         return None
     key = instrument.upper()

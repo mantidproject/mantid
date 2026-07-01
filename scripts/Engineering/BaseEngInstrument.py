@@ -4,13 +4,12 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from typing import Sequence, Optional
+from typing import Sequence
 
 from mantid.simpleapi import Load, logger
 from Engineering.EnggUtils import focus_run, create_new_calibration
 from Engineering.common.calibration_info import CalibrationInfo
-from Engineering.common.instrument_config import get_instr_config
-from enum import Enum
+from Engineering.common.instrument_config import get_instr_config, INSTRUMENT_GROUP
 
 
 class BaseEngInstrument:
@@ -21,11 +20,11 @@ class BaseEngInstrument:
         save_dir: str,
         full_inst_calib_path: str,
         instrument: str,
-        prm_path: Optional[str] = None,
-        ceria_run: Optional[str] = None,
-        group: Optional[Enum] = None,
-        groupingfile_path: Optional[str] = None,
-        spectrum_num: Optional[str] = None,
+        prm_path: str | None = None,
+        ceria_run: str | None = None,
+        group: INSTRUMENT_GROUP | None = None,
+        groupingfile_path: str | None = None,
+        spectrum_num: str | None = None,
     ) -> None:
         # init attributes
         self.calibration = CalibrationInfo()
@@ -53,7 +52,7 @@ class BaseEngInstrument:
             self.setup_group(group, groupingfile_path, spectrum_num)
 
     # this can be overridden by individual instruments if they have specific group behaviour
-    def setup_group(self, group, groupingfile_path, spectrum_num):
+    def setup_group(self, group: INSTRUMENT_GROUP, groupingfile_path: str, spectrum_num: str) -> None:
         if group == self.GROUP.CUSTOM and groupingfile_path:
             self.calibration.set_grouping_file(groupingfile_path)
         elif group == self.GROUP.CROPPED and spectrum_num:

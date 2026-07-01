@@ -10,6 +10,7 @@ from os import path
 from mantidqt.utils.qt import load_ui
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.filtered_file_finder import FilteredFileFinderWidget
+from typing import Set, Dict, Callable, Sequence, Any, List
 
 Ui_data, _ = load_ui(__file__, "data_widget.ui")
 
@@ -30,7 +31,7 @@ _region_filter_values = {
 }
 
 
-def _file_filter_generator(filter_options: dict[str, str]) -> str:
+def _file_filter_generator(filter_options: Dict[str, str]) -> str:
     region_option = filter_options["Region"]
     xunit = filter_options["Unit"]
     if xunit == "No Unit Filter":
@@ -44,7 +45,7 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
     sig_enable_inspect_bg_button = QtCore.Signal(bool)
     finder_data: FilteredFileFinderWidget
 
-    def __init__(self, parent=None):
+    def __init__(self, parent: QtWidgets.QWidget | None = None):
         super(FittingDataView, self).__init__(parent)
         self.setupUi(self)
         # file finder
@@ -58,44 +59,44 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         self.finder_data.set_filter_option("Unit", "TOF")
         self.finder_data.set_filter_generator(_file_filter_generator)
 
-    def saveSettings(self):
+    def saveSettings(self) -> None:
         self.finder_data.saveSettings(output_settings.INTERFACES_SETTINGS_GROUP + "/" + output_settings.ENGINEERING_PREFIX)
 
     # =================
     # Slot Connectors
     # =================
 
-    def set_on_load_clicked(self, slot):
+    def set_on_load_clicked(self, slot: Callable) -> None:
         self.button_load.clicked.connect(slot)
 
-    def set_enable_load_button_connection(self, slot):
+    def set_enable_load_button_connection(self, slot: Callable) -> None:
         self.sig_enable_load_button.connect(slot)
 
-    def set_enable_inspect_bg_button_connection(self, slot):
+    def set_enable_inspect_bg_button_connection(self, slot: Callable) -> None:
         self.sig_enable_inspect_bg_button.connect(slot)
 
-    def set_on_remove_all_clicked(self, slot):
+    def set_on_remove_all_clicked(self, slot: Callable) -> None:
         self.button_removeAll.clicked.connect(slot)
 
-    def set_on_remove_selected_clicked(self, slot):
+    def set_on_remove_selected_clicked(self, slot: Callable) -> None:
         self.button_removeSelected.clicked.connect(slot)
 
-    def set_on_plotBG_clicked(self, slot):
+    def set_on_plotBG_clicked(self, slot: Callable) -> None:
         self.button_plotBG.clicked.connect(slot)
 
-    def set_on_table_cell_changed(self, slot):
+    def set_on_table_cell_changed(self, slot: Callable) -> None:
         # this signal gets triggered from a separate thread sometimes (eg load). So to make the handler
         # more simple, always issue as a queued signal
         self.table_selection.cellChanged.connect(slot, QtCore.Qt.QueuedConnection)
 
-    def set_table_selection_changed(self, slot):
+    def set_table_selection_changed(self, slot: Callable) -> None:
         self.table_selection.itemSelectionChanged.connect(slot)
 
     # =================
     # Component Setters
     # =================
 
-    def set_default_files(self, filepaths, directory):
+    def set_default_files(self, filepaths: Sequence[str], directory: str | None) -> None:
         if not filepaths:
             return
         self.finder_data.setUserInput(",".join(filepaths))
@@ -106,13 +107,13 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         if directory:
             self.finder_data.setLastDirectory(directory)
 
-    def set_load_button_enabled(self, enabled):
+    def set_load_button_enabled(self, enabled: bool) -> None:
         self.button_load.setEnabled(enabled)
 
-    def set_inspect_bg_button_enabled(self, enabled):
+    def set_inspect_bg_button_enabled(self, enabled: bool) -> None:
         self.button_plotBG.setEnabled(enabled)
 
-    def add_table_row(self, run_no, bank, plotted, bgsub, niter, xwindow, SG):
+    def add_table_row(self, run_no: int | str, bank: int | str, plotted: bool, bgsub: bool, niter: int, xwindow: float, SG: bool) -> None:
         row_no = self.table_selection.rowCount()
         self.table_selection.insertRow(row_no)
 
@@ -164,50 +165,50 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
             SG_check_box.setCheckState(QtCore.Qt.Unchecked)
         self.table_selection.setItem(row_no, 6, SG_check_box)
 
-    def remove_table_row(self, row_no):
+    def remove_table_row(self, row_no: int) -> None:
         self.table_selection.removeRow(row_no)
 
-    def remove_all(self):
+    def remove_all(self) -> None:
         self.table_selection.setRowCount(0)
 
-    def remove_selected(self):
+    def remove_selected(self) -> Set[int]:
         selected = self.get_selected_rows()
         for row in reversed(sorted(selected)):
             self.remove_table_row(row)
         return selected
 
-    def set_item_checkstate(self, row, col, checked):
+    def set_item_checkstate(self, row: int, col: int, checked: bool) -> None:
         if checked:
             self.get_table_item(row, col).setCheckState(QtCore.Qt.Checked)
         else:
             self.get_table_item(row, col).setCheckState(QtCore.Qt.Unchecked)
 
-    def set_table_column(self, row, col, value):
+    def set_table_column(self, row: int, col: int, value: Any) -> None:
         self.get_table_item(row, col).setData(QtCore.Qt.EditRole, int(value))
 
     # =================
     # Component Getters
     # =================
 
-    def get_filenames_to_load(self):
+    def get_filenames_to_load(self) -> str:
         return self.finder_data.getText()
 
-    def get_filenames_valid(self):
+    def get_filenames_valid(self) -> bool:
         return self.finder_data.isValid()
 
-    def get_add_to_plot(self):
+    def get_add_to_plot(self) -> bool:
         return self.check_addToPlot.isChecked()
 
-    def get_selected_rows(self):
+    def get_selected_rows(self) -> Set[int]:
         return set(index.row() for index in self.table_selection.selectedIndexes())
 
-    def get_table_item(self, row, col):
+    def get_table_item(self, row: int, col: int) -> QtWidgets.QTableWidgetItem:
         return self.table_selection.item(row, col)
 
-    def get_item_checked(self, row, col):
+    def get_item_checked(self, row: int, col: int) -> bool:
         return self.get_table_item(row, col).checkState() == QtCore.Qt.Checked
 
-    def read_bg_params_from_table(self, row):
+    def read_bg_params_from_table(self, row: int) -> List[bool | int | float]:
         isBGsub = self.get_item_checked(row, 3)
         niter = int(self.get_table_item(row, 4).text())
         xwindow = float(self.get_table_item(row, 5).text())
@@ -218,11 +219,11 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
     # State Getters
     # =================
 
-    def is_searching(self):
+    def is_searching(self) -> bool:
         return self.finder_data.isSearching()
 
 
-def create_workspace_table(table_column_headers, table_loaded_data, row_count):
+def create_workspace_table(table_column_headers: List[str], table_loaded_data: QtWidgets.QTableWidget, row_count: int) -> None:
     n_col = len(table_column_headers)
     table_loaded_data.setColumnCount(n_col)
     table_loaded_data.setHorizontalHeaderLabels(table_column_headers)

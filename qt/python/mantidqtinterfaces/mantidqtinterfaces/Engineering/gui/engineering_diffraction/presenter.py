@@ -4,7 +4,9 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import annotations  # this prevents the imports from TYPE_CHECKING from being evaluated at runtime
 
+from Engineering.common.calibration_info import CalibrationInfo
 from .tabs.common import CalibrationObserver, output_settings
 from .tabs.calibration.model import CalibrationModel
 from .tabs.calibration.view import CalibrationView
@@ -29,6 +31,11 @@ from .settings.settings_helper import get_setting, set_setting
 
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.observer_pattern import GenericObservable
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from mantidqtinterfaces.Engineering.gui.engineering_diffraction.engineering_diffraction import EngineeringDiffractionGui
 
 
 class EngineeringDiffractionPresenter(object):
@@ -55,7 +62,7 @@ class EngineeringDiffractionPresenter(object):
     # itself doesn't own the view (vice versa in this instance) and that the 'child' tabs of the presenter can be mocked
     # /subbed in for other purposes i.e. testing, agnostic of the view
 
-    def setup_calibration(self, view):
+    def setup_calibration(self, view: "EngineeringDiffractionGui") -> None:
         cal_model = CalibrationModel()
         focus_model = FocusModel()
         cal_view = CalibrationView(parent=view.tabs)
@@ -63,25 +70,25 @@ class EngineeringDiffractionPresenter(object):
         self.focus_presenter = FocusPresenter(focus_model, cal_view)
         view.tabs.addTab(cal_view, "Run Processing")
 
-    def setup_calibration_notifier(self):
+    def setup_calibration_notifier(self) -> None:
         self.calibration_presenter.calibration_notifier.add_subscriber(self.focus_presenter.calibration_observer)
         self.calibration_presenter.calibration_notifier.add_subscriber(self.calibration_observer)
 
-    def setup_correction(self, view):
+    def setup_correction(self, view: "EngineeringDiffractionGui") -> None:
         correction_model = CorrectionModel()
         correction_view = TextureCorrectionView()
         self.correction_presenter = TextureCorrectionPresenter(correction_model, correction_view)
         view.tabs.addTab(correction_view, "Absorption Correction")
         self.correction_presenter.add_correction_subscriber(self.focus_presenter.correction_observer)
 
-    def setup_fitting(self, view):
+    def setup_fitting(self, view: "EngineeringDiffractionGui") -> None:
         fitting_view = FittingView()
         self.fitting_presenter = FittingPresenter(fitting_view)
         self.focus_presenter.add_focus_subscriber(self.fitting_presenter.data_widget.presenter.focus_run_observer)
         self.focus_presenter.add_focus_texture_subscriber(self.fitting_presenter.data_widget.presenter.focus_combined_observer)
         view.tabs.addTab(fitting_view, "Fitting")
 
-    def setup_gsas2(self, view):
+    def setup_gsas2(self, view: "EngineeringDiffractionGui") -> None:
         gsas2_model = GSAS2Model()
         gsas2_view = GSAS2View(parent=view.tabs)
         self.gsas2_presenter = GSAS2Presenter(gsas2_model, gsas2_view)
@@ -89,14 +96,14 @@ class EngineeringDiffractionPresenter(object):
         self.calibration_presenter.add_prm_gsas2_subscriber(self.gsas2_presenter.prm_filepath_observer_gsas2)
         view.tabs.addTab(gsas2_view, "GSAS II")
 
-    def setup_texture(self, view):
+    def setup_texture(self, view: "EngineeringDiffractionGui") -> None:
         texture_model = ProjectionModel()
         texture_view = TextureView()
         self.texture_presenter = TexturePresenter(texture_model, texture_view)
         self.focus_presenter.add_focus_texture_subscriber(self.texture_presenter.focus_run_observer)
         view.tabs.addTab(texture_view, "Texture")
 
-    def setup_settings(self, view):
+    def setup_settings(self, view: "EngineeringDiffractionGui") -> None:
         settings_model = SettingsModel()
         settings_view = SettingsView(view)
         settings_presenter = SettingsPresenter(settings_model, settings_view)
@@ -104,21 +111,21 @@ class EngineeringDiffractionPresenter(object):
         self.settings_presenter = settings_presenter
         self.setup_savedir_notifier(view)
 
-    def setup_savedir_notifier(self, view):
+    def setup_savedir_notifier(self, view: "EngineeringDiffractionGui") -> None:
         self.settings_presenter.savedir_notifier.add_subscriber(view.savedir_observer)
 
-    def handle_close(self):
+    def handle_close(self) -> None:
         self.fitting_presenter.data_widget.ads_observer.unsubscribe()
         self.fitting_presenter.data_widget.view.saveSettings()
         self.fitting_presenter.plot_widget.view.ensure_fit_dock_closed()
 
-    def open_help_window(self):
+    def open_help_window(self) -> None:
         InterfaceManager().showCustomInterfaceHelp(self.doc, self.doc_folder)
 
-    def open_settings(self):
+    def open_settings(self) -> None:
         self.settings_presenter.show()
 
-    def update_calibration(self, calibration):
+    def update_calibration(self, calibration: CalibrationInfo) -> None:
         if calibration:
             instrument = calibration.get_instrument()
             ceria_no = calibration.get_ceria_runno()

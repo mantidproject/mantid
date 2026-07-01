@@ -11,6 +11,7 @@ from mantid.api import AnalysisDataService as ADS
 from mantid.kernel import UnitFactory
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.show_sample.show_sample_view import ShowSampleView
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.data_handling.data_view import create_workspace_table
+from typing import Callable, Dict, List, Sequence
 
 Ui_texture, _ = load_ui(__file__, "correction_tab.ui")
 
@@ -21,7 +22,7 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
     sig_view_shape_requested = QtCore.Signal(str)
     alg_ui_finished = QtCore.Signal()
 
-    def __init__(self, parent=None, instrument="ENGINX"):
+    def __init__(self, parent: QtWidgets.QWidget | None = None, instrument: str = "ENGINX"):
         super(TextureCorrectionView, self).__init__(parent)
         self.setupUi(self)
         self.init_tool_tips()
@@ -60,7 +61,7 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
 
     # ========== Setup Tool Tips ==========
 
-    def init_tool_tips(self):
+    def init_tool_tips(self) -> None:
         self.btn_loadFiles.setToolTip("Loads the selected sample runs into the table")
         self.btn_selectAll.setToolTip("Sets all of the loaded workspaces in the table to selected")
         self.btn_deselectAll.setToolTip("Sets all of the loaded workspaces in the table to unselected")
@@ -123,70 +124,70 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
         )
 
     # ========== Signal Connectors ==========
-    def set_on_apply_clicked(self, slot):
+    def set_on_apply_clicked(self, slot: Callable) -> None:
         self.btn_applyCorrections.clicked.connect(slot)
 
-    def set_on_load_orientation_clicked(self, slot):
+    def set_on_load_orientation_clicked(self, slot: Callable) -> None:
         self.btn_loadOrientation.clicked.connect(slot)
 
-    def set_enable_controls_connection(self, slot):
+    def set_enable_controls_connection(self, slot: Callable) -> None:
         self.sig_enable_controls.connect(slot)
 
-    def set_on_load_clicked(self, slot):
+    def set_on_load_clicked(self, slot: Callable) -> None:
         self.btn_loadFiles.clicked.connect(slot)
 
-    def set_on_delete_clicked(self, slot):
+    def set_on_delete_clicked(self, slot: Callable) -> None:
         self.btn_deleteSelected.clicked.connect(slot)
 
-    def set_on_select_all_clicked(self, slot):
+    def set_on_select_all_clicked(self, slot: Callable) -> None:
         self.btn_selectAll.clicked.connect(slot)
 
-    def set_on_deselect_all_clicked(self, slot):
+    def set_on_deselect_all_clicked(self, slot: Callable) -> None:
         self.btn_deselectAll.clicked.connect(slot)
 
-    def set_on_view_reference_shape_clicked(self, slot):
+    def set_on_view_reference_shape_clicked(self, slot: Callable) -> None:
         self.btn_viewRefShape.clicked.connect(slot)
 
-    def set_on_create_ref_ws_clicked(self, slot):
+    def set_on_create_ref_ws_clicked(self, slot: Callable) -> None:
         self.btn_createRefWS.clicked.connect(slot)
 
-    def set_on_set_ref_ws_orientation_clicked(self, slot):
+    def set_on_set_ref_ws_orientation_clicked(self, slot: Callable) -> None:
         self.btn_setRefOrientation.clicked.connect(slot)
 
-    def set_on_save_ref_clicked(self, slot):
+    def set_on_save_ref_clicked(self, slot: Callable) -> None:
         self.btn_saveRefWS.clicked.connect(slot)
 
-    def set_on_load_ref_clicked(self, slot):
+    def set_on_load_ref_clicked(self, slot: Callable) -> None:
         self.btn_loadRef.clicked.connect(slot)
 
-    def set_on_set_orientation_clicked(self, slot):
+    def set_on_set_orientation_clicked(self, slot: Callable) -> None:
         self.btn_setOrientation.clicked.connect(slot)
 
-    def set_on_load_sample_shape_clicked(self, slot):
+    def set_on_load_sample_shape_clicked(self, slot: Callable) -> None:
         self.btn_loadSampleShape.clicked.connect(slot)
 
-    def set_on_set_sample_shape_clicked(self, slot):
+    def set_on_set_sample_shape_clicked(self, slot: Callable) -> None:
         self.btn_setSampleShape.clicked.connect(slot)
 
-    def set_on_set_material_clicked(self, slot):
+    def set_on_set_material_clicked(self, slot: Callable) -> None:
         self.btn_setSampleMaterial.clicked.connect(slot)
 
-    def set_on_copy_ref_sample_clicked(self, slot):
+    def set_on_copy_ref_sample_clicked(self, slot: Callable) -> None:
         self.btn_copyRefSample.clicked.connect(slot)
 
-    def set_on_copy_sample_clicked(self, slot):
+    def set_on_copy_sample_clicked(self, slot: Callable) -> None:
         self.btn_copySampleToAll.clicked.connect(slot)
 
-    def set_on_view_shape_requested(self, slot):
+    def set_on_view_shape_requested(self, slot: Callable) -> None:
         self.sig_view_shape_requested.connect(slot)
 
     # ========== Table Handling ==========
-    def populate_workspace_table(self, workspace_info_list):
+    def populate_workspace_table(self, workspace_info_list: Dict) -> None:
         create_workspace_table(self.table_column_headers, self.table_loaded_data, len(workspace_info_list))
         for row, (ws, metadata) in enumerate(workspace_info_list.items()):
             self._add_table_row(row, ws, metadata)
 
-    def _add_table_row(self, row, ws, metadata):
+    def _add_table_row(self, row: int, ws: str, metadata: Dict) -> None:
         # run names:
         self.table_loaded_data.setItem(row, 0, QtWidgets.QTableWidgetItem(ws))
 
@@ -211,22 +212,22 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
         layout.setContentsMargins(0, 0, 0, 0)
         self.table_loaded_data.setCellWidget(row, 4, cell_widget)
 
-    def populate_workspace_list(self):
+    def populate_workspace_list(self) -> None:
         workspace_names = list(ADS.getObjectNames())
         self.combo_workspaceList.clear()
         self.combo_workspaceList.addItems(sorted(workspace_names))
 
-    def populate_unit_list(self):
+    def populate_unit_list(self) -> None:
         units = UnitFactory.getKeys()
         self.combo_Units.clear()
         self.combo_Units.addItems(units)
 
-    def set_default_unit(self, default_val):
+    def set_default_unit(self, default_val: str) -> None:
         units = [self.combo_Units.itemText(i) for i in range(self.combo_Units.count())]
         default_ind = units.index(default_val)
         self.combo_Units.setCurrentIndex(default_ind)
 
-    def get_selected_workspaces(self):
+    def get_selected_workspaces(self) -> List[str]:
         selected = []
         for row in range(self.table_loaded_data.rowCount()):
             cell_widget = self.table_loaded_data.cellWidget(row, 4)
@@ -236,7 +237,7 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
                     selected.append(self.table_loaded_data.item(row, 0).text())
         return selected
 
-    def set_all_workspaces_selected(self, selected):
+    def set_all_workspaces_selected(self, selected: bool) -> None:
         for row in range(self.table_loaded_data.rowCount()):
             cell_widget = self.table_loaded_data.cellWidget(row, 4)
             if cell_widget:
@@ -244,97 +245,97 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
                 if checkbox:
                     checkbox.setChecked(selected)
 
-    def update_reference_info_section(self, ws_name, shape_enabled, material):
+    def update_reference_info_section(self, ws_name: str, shape_enabled: bool, material: str) -> None:
         self.ref_frame_status.setText(ws_name)
         self.btn_viewRefShape.setEnabled(shape_enabled)
         self.ref_material_status.setText(material)
 
-    def get_file_paths(self):
+    def get_file_paths(self) -> Sequence[str]:
         return self.finder_corr.getFilenames()
 
-    def is_searching(self):
+    def is_searching(self) -> bool:
         return self.finder_corr.isSearching()
 
-    def signal_alg_finished(self):
+    def signal_alg_finished(self) -> None:
         self.alg_ui_finished.emit()
 
     # ========== Component Getters ==========
-    def get_reference_file(self):
+    def get_reference_file(self) -> str | None:
         fnames = self.finder_reference.getFilenames()
         return fnames[0] if len(fnames) > 0 else None
 
-    def get_orientation_file(self):
+    def get_orientation_file(self) -> str | None:
         fnames = self.finder_orientation_file.getFilenames()
         return fnames[0] if len(fnames) > 0 else None
 
-    def get_custom_shape(self):
+    def get_custom_shape(self) -> str | None:
         fnames = self.finder_gauge_vol.getFilenames()
         return fnames[0] if len(fnames) > 0 else None
 
-    def get_sample_reference_ws(self):
+    def get_sample_reference_ws(self) -> str:
         return self.combo_workspaceList.currentText()
 
-    def get_div_horz(self):
+    def get_div_horz(self) -> str:
         return self.line_divHorz.text()
 
-    def get_div_vert(self):
+    def get_div_vert(self) -> str:
         return self.line_divVert.text()
 
-    def get_div_det_horz(self):
+    def get_div_det_horz(self) -> str:
         return self.line_detHorz.text()
 
-    def get_shape_method(self):
+    def get_shape_method(self) -> str:
         return self.combo_shapeMethod.currentText()
 
-    def get_evaluation_value(self):
+    def get_evaluation_value(self) -> str:
         return self.line_evalVal.text()
 
-    def get_evaluation_units(self):
+    def get_evaluation_units(self) -> str:
         return self.combo_Units.currentText()
 
     # ========== Component Setters ==========
 
-    def set_include_absorption(self, val):
-        return self.check_absorption.setChecked(val)
+    def set_include_absorption(self, val: bool) -> None:
+        self.check_absorption.setChecked(val)
 
-    def set_include_divergence(self, val):
-        return self.check_divergence.setChecked(val)
+    def set_include_divergence(self, val: bool) -> None:
+        self.check_divergence.setChecked(val)
 
-    def set_include_atten_tab(self, val):
-        return self.check_attenTab.setChecked(val)
+    def set_include_atten_tab(self, val: bool) -> None:
+        self.check_attenTab.setChecked(val)
 
-    def include_absorption(self):
+    def include_absorption(self) -> bool:
         return self.check_absorption.isChecked()
 
-    def include_divergence(self):
+    def include_divergence(self) -> bool:
         return self.check_divergence.isChecked()
 
-    def include_atten_tab(self):
+    def include_atten_tab(self) -> bool:
         return self.check_attenTab.isChecked()
 
-    def set_instrument_override(self, instrument):
+    def set_instrument_override(self, instrument: str) -> None:
         self.finder_corr.setInstrumentOverride(instrument)
 
-    def setup_tabbing_order(self):
+    def setup_tabbing_order(self) -> None:
         self.finder_corr.focusProxy().setFocusPolicy(QtCore.Qt.StrongFocus)
         self.setTabOrder(self.finder_corr, self.line_orientationFile)
 
     # ============ Visibility =============
 
-    def update_absorption_section_visibility(self):
+    def update_absorption_section_visibility(self) -> None:
         self.set_absorption_section_visibility(self.include_absorption())
 
-    def update_divergence_section_visibility(self):
+    def update_divergence_section_visibility(self) -> None:
         self.set_divergence_section_visibility(self.include_divergence())
 
-    def update_atten_tab_section_visibility(self):
+    def update_atten_tab_section_visibility(self) -> None:
         self.set_atten_tab_visibility(self.include_atten_tab())
 
-    def set_absorption_section_visibility(self, vis):
+    def set_absorption_section_visibility(self, vis: bool) -> None:
         self.combo_shapeMethod.setVisible(vis)
         self.finder_gauge_vol.setVisible(vis)
 
-    def set_divergence_section_visibility(self, vis):
+    def set_divergence_section_visibility(self, vis: bool) -> None:
         self.label_divHorz.setVisible(vis)
         self.line_divHorz.setVisible(vis)
         self.label_divVert.setVisible(vis)
@@ -342,20 +343,20 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
         self.label_detHorz.setVisible(vis)
         self.line_detHorz.setVisible(vis)
 
-    def set_atten_tab_visibility(self, vis):
+    def set_atten_tab_visibility(self, vis: bool) -> None:
         self.widget_attenuationTableContainer.setVisible(vis)
 
-    def set_finder_gauge_vol_visible(self, vis):
+    def set_finder_gauge_vol_visible(self, vis: bool) -> None:
         self.finder_gauge_vol.setVisible(vis)
 
-    def set_on_check_inc_abs_corr_state_changed(self, slot):
+    def set_on_check_inc_abs_corr_state_changed(self, slot: Callable) -> None:
         self.check_absorption.stateChanged.connect(slot)
 
-    def set_on_check_inc_div_corr_state_changed(self, slot):
+    def set_on_check_inc_div_corr_state_changed(self, slot: Callable) -> None:
         self.check_divergence.stateChanged.connect(slot)
 
-    def set_on_check_att_tab_state_changed(self, slot):
+    def set_on_check_att_tab_state_changed(self, slot: Callable) -> None:
         self.check_attenTab.stateChanged.connect(slot)
 
-    def set_on_gauge_vol_state_changed(self, slot):
+    def set_on_gauge_vol_state_changed(self, slot: Callable) -> None:
         self.combo_shapeMethod.currentIndexChanged.connect(slot)

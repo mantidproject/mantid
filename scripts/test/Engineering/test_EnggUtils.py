@@ -29,7 +29,6 @@ class EnggUtilsTest(unittest.TestCase):
         self.calibration.get_foc_ws_suffix.return_value = "bank"
         self.calibration.get_vanadium_path.return_value = "van_path"
         self.calibration.config = MagicMock()
-        self.calibration.config.texture_groups = (ENGINX_GROUP.TEXTURE30, ENGINX_GROUP.TEXTURE20)
 
         self.custom_calibration = create_autospec(CalibrationInfo(), instance=True)
         self.custom_calibration.is_valid.return_value = True
@@ -39,7 +38,6 @@ class EnggUtilsTest(unittest.TestCase):
         self.custom_calibration.get_vanadium_path.return_value = "van_path"
         self.custom_calibration.group = ENGINX_GROUP.CUSTOM
         self.custom_calibration.config = MagicMock()
-        self.custom_calibration.config.texture_groups = (ENGINX_GROUP.TEXTURE30, ENGINX_GROUP.TEXTURE20)
 
         self.cropped_calibration = create_autospec(CalibrationInfo(), instance=True)
         self.cropped_calibration.is_valid.return_value = True
@@ -50,7 +48,6 @@ class EnggUtilsTest(unittest.TestCase):
 
         self.cropped_calibration.group = ENGINX_GROUP.CROPPED
         self.cropped_calibration.config = MagicMock()
-        self.cropped_calibration.config.texture_groups = (ENGINX_GROUP.TEXTURE30, ENGINX_GROUP.TEXTURE20)
 
     # tests for code used in calibration tab of UI
 
@@ -63,7 +60,7 @@ class EnggUtilsTest(unittest.TestCase):
         prm_fname = "prm.prm"
         mock_path.join.return_value = prm_fname
         mock_path.splitext.return_value = (prm_fname.replace(".prm", ""), None)
-        self.calibration.group.banks = None  # no bank data e.g. custom
+        self.calibration.get_group_banks.return_value = None  # no bank data e.g. custom
         self.calibration.generate_output_file_name.return_value = prm_fname
         self.calibration.get_calibration_table.return_value = "cal_table"  # no bank data e.g. custom
         save_dir = "savedir"
@@ -333,7 +330,7 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
         calib.get_group_ws.return_value = "grp"
         calib.get_calibration_table.return_value = "cal_table"
         calib.config = MagicMock()
-        calib.config.texture_groups = (ENGINX_GROUP.TEXTURE30, ENGINX_GROUP.TEXTURE20)
+        calib.is_texture_group.return_value = calibration_group in (ENGINX_GROUP.TEXTURE30, ENGINX_GROUP.TEXTURE20)
 
         # Setup focused sample workspace mock
         ws = MagicMock()
