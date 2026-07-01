@@ -108,7 +108,7 @@ Usage
     output = mtd['MUSR00015193; Pair; pairTest; Asym; #1_Raw']
 
 
-    print('{:.8f}'.format(output.readY(0).mean()))
+    print('{:.8f}'.format(output.y(0).mean()))
 
 Output:
 

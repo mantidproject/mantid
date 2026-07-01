@@ -34,8 +34,8 @@ Usage
    lam = ConvertUnits(InputWorkspace=tof, Target='Wavelength')
    corrected = LorentzCorrection(InputWorkspace=lam)
 
-   y = corrected.readY(2)
-   e = corrected.readE(2)
+   y = corrected.y(2)
+   e = corrected.e(2)
    # print first corrected yvalues
    print(y[1:5])
    # print first corrected evalues

@@ -57,7 +57,7 @@ Usage
    # Creates a dummy ws with a single spectrum with 100 bins.  There is exactly 1 count in every bin.
    ws = CreateSampleWorkspace("Histogram", "Flat background", NumBanks=1, BankPixelWidth=1)
 
-   time_diff = (ws.readX(0)[99] - ws.readX(0)[0])
+   time_diff = (ws.x(0)[99] - ws.x(0)[0])
 
    # Chop the workspace roughly in two.
    result = ChopData(ws, NChops=2, Step=time_diff/2)

@@ -85,7 +85,7 @@ Usage
     # Check results
     # Zero energy transfer should be around elasticBinIndex.
     for index in range(elasticBinIndex-1, elasticBinIndex+2):
-        binCentre = (convertedWs.readX(0)[index+1] + convertedWs.readX(0)[index]) / 2
+        binCentre = (convertedWs.x(0)[index+1] + convertedWs.x(0)[index]) / 2
         print('DeltaE at the centre of bin {0}: {1:0.4f}'.format(index,binCentre))
 
 Output:
@@ -146,7 +146,7 @@ Output:
     # Check results
     # Zero energy transfer should be around elasticBinIndex.
     for index in range(elasticBinIndex-1, elasticBinIndex+2):
-        binCentre = (convertedWs.readX(0)[index+1] + convertedWs.readX(0)[index]) / 2
+        binCentre = (convertedWs.x(0)[index+1] + convertedWs.x(0)[index]) / 2
         print('DeltaE at the centre of bin {0}: {1:0.4f}'.format(index,binCentre))
 
 Output:
@@ -202,9 +202,9 @@ Output:
 
     # Check results.
     print('Original TOF for the elastic peak: {0:0.1f}'.format(
-        ws.readX(0)[numpy.argmax(ws.readY(0))]))
+        ws.x(0)[numpy.argmax(ws.y(0))]))
     print('Corrected TOF for the elastic peak: {0:0.1f}'.format(
-        correctedWs.readX(0)[numpy.argmax(correctedWs.readY(0))]))
+        correctedWs.x(0)[numpy.argmax(correctedWs.y(0))]))
     print('Actual elastic TOF: {0:0.1f}'.format(elasticTOF))
 
 Output:
@@ -277,11 +277,11 @@ Output:
 
     # Check results
     print('First workspace original TOF for the elastic peak: {0:0.1f}'.format(
-        ws1.readX(0)[numpy.argmax(ws1.readY(0))]))
+        ws1.x(0)[numpy.argmax(ws1.y(0))]))
     print('EPP table corrected TOF for the elastic peak: {0:0.1f}'.format(
-        correctedWs1.readX(0)[numpy.argmax(correctedWs1.readY(0))]))
+        correctedWs1.x(0)[numpy.argmax(correctedWs1.y(0))]))
     print('Elastic TOF for the corrected second workspace: {0:0.1f}'.format(
-        correctedWs2.readX(0)[numpy.argmax(correctedWs2.readY(0))]))
+        correctedWs2.x(0)[numpy.argmax(correctedWs2.y(0))]))
 
 Output:
 

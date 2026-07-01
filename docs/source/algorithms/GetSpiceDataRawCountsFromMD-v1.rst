@@ -94,7 +94,7 @@ Usage
 
   # output
   for i in [3, 9, 44, 60]:
-      print("X[{}] = {:.5f}, Y[{}] = {:.5f}".format(i, ws.readX(0)[i], i, ws.readY(0)[i]))
+      print("X[{}] = {:.5f}, Y[{}] = {:.5f}".format(i, ws.x(0)[i], i, ws.y(0)[i]))
 
 
 .. testcleanup:: ExLoadHB2ADataToMD

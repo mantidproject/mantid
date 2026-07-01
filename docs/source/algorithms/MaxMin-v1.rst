@@ -32,7 +32,7 @@ Usage
 
    print("Maximum of each spectrum")
    for i in range(9):
-      print(wsMax.readY(i))
+      print(wsMax.y(i))
 
 Output:
 
@@ -62,7 +62,7 @@ Output:
 
    print("Minimum of each spectrum")
    for i in range(9):
-      print(wsMax.readY(i))
+      print(wsMax.y(i))
 
 Output:
 

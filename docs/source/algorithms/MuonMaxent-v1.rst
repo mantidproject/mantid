@@ -54,7 +54,7 @@ Usage
   MuonMaxent(InputWorkspace='MUSR00022725', InputPhaseTable='phases', Npts='16384', OuterIterations='9', InnerIterations='12', DefaultLevel=0.11, Factor=1.03, OutputWorkspace='freq', OutputPhaseTable='phasesOut', ReconstructedSpectra='time')
   # get data
   freq = AnalysisDataService.retrieve("freq")
-  print('frequency values {:.3f} {:.3f} {:.3f} {:.3f} {:.3f}'.format(freq.readY(0)[5], freq.readY(0)[690],freq.readY(0)[700], freq.readY(0)[710],freq.readY(0)[900]))
+  print('frequency values {:.3f} {:.3f} {:.3f} {:.3f} {:.3f}'.format(freq.y(0)[5], freq.y(0)[690],freq.y(0)[700], freq.y(0)[710],freq.y(0)[900]))
 
 Output
 ######

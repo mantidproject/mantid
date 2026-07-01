@@ -43,8 +43,8 @@ Usage
                      "Center": [0.0,0.0,0.0]})
 	SetSampleMaterial(InputWorkspace="Input", ChemicalFormula="Au",XRayAttenuationProfile="Gold_Xray_Absorption_Coefficient.dat")
 	XrayAbsorptionCorrection(InputWorkspace="Input", MuonImplantationProfile="MuonProfile",OutputWorkspace="corrections")
-	xdata = mtd["corrections"].readX(0)
-	ydata = mtd["corrections"].readY(0)
+	xdata = mtd["corrections"].x(0)
+	ydata = mtd["corrections"].y(0)
 	ylen = len(ydata)
 	print("The middle 5 correction factors in workspace are:")
 	for x in range(5):

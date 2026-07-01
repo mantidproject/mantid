@@ -156,7 +156,7 @@ Usage
     # Look at sample results:
     print('part of S(Q) and its correlation function')
     for i in range(10):
-       print('! {0:4.2f} ! {1:5f} ! {2:f} ! {3:5f} !'.format(xx[i], yy[i], Rt.readX(0)[i], Rt.readY(0)[i]))
+       print('! {0:4.2f} ! {1:5f} ! {2:f} ! {3:5f} !'.format(xx[i], yy[i], Rt.x(0)[i], Rt.y(0)[i]))
 
 
 .. testcleanup:: ExPDFFourierTransform

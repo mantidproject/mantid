@@ -55,8 +55,8 @@ Usage
 
    asymmetry = AsymmetryCalc(input, Alpha=0.5)
 
-   print('Asymmetry: {}'.format(asymmetry.readY(0)))
-   print('Errors: {}'.format(asymmetry.readE(0)))
+   print('Asymmetry: {}'.format(asymmetry.y(0)))
+   print('Errors: {}'.format(asymmetry.e(0)))
 
 Output:
 

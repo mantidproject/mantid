@@ -22,8 +22,8 @@ Usage
 
   ws = CreateWorkspace(OutputWorkspace='ws', DataX='1,1', DataY='2,2', NSpec=2)
   masked = MaskSpectra(InputWorkspace=ws, InputWorkspaceIndexType='WorkspaceIndex', InputWorkspaceIndexSet='1')
-  print('Spectrum 0 before {} after {}'.format(ws.readY(0)[0], masked.readY(0)[0]))
-  print('Spectrum 1 before {} after {}'.format(ws.readY(1)[0], masked.readY(1)[0]))
+  print('Spectrum 0 before {} after {}'.format(ws.y(0)[0], masked.y(0)[0]))
+  print('Spectrum 1 before {} after {}'.format(ws.y(1)[0], masked.y(1)[0]))
 
 Output:
 

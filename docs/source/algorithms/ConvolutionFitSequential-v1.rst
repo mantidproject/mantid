@@ -56,17 +56,17 @@ Usage
 
   print("Result has %i Spectra" %result_ws.getNumberHistograms())
 
-  print("Amplitude 0: %.3f" %(result_ws.readY(0)[0]))
-  print("Amplitude 1: %.3f" %(result_ws.readY(0)[1]))
-  print("Amplitude 2: %.3f" %(result_ws.readY(0)[2]))
+  print("Amplitude 0: %.3f" %(result_ws.y(0)[0]))
+  print("Amplitude 1: %.3f" %(result_ws.y(0)[1]))
+  print("Amplitude 2: %.3f" %(result_ws.y(0)[2]))
 
-  print("X axis at 0: %.5f" %(result_ws.readX(0)[0]))
-  print("X axis at 1: %.5f" %(result_ws.readX(0)[1]))
-  print("X axis at 2: %.5f" %(result_ws.readX(0)[2]))
+  print("X axis at 0: %.5f" %(result_ws.x(0)[0]))
+  print("X axis at 1: %.5f" %(result_ws.x(0)[1]))
+  print("X axis at 2: %.5f" %(result_ws.x(0)[2]))
 
-  print("Amplitude Err 0: %.5f" %(result_ws.readE(0)[0]))
-  print("Amplitude Err 1: %.5f" %(result_ws.readE(0)[1]))
-  print("Amplitude Err 2: %.5f" %(result_ws.readE(0)[2]))
+  print("Amplitude Err 0: %.5f" %(result_ws.e(0)[0]))
+  print("Amplitude Err 1: %.5f" %(result_ws.e(0)[1]))
+  print("Amplitude Err 2: %.5f" %(result_ws.e(0)[2]))
 
 Output:
 

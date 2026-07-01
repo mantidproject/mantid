@@ -34,12 +34,12 @@ Usage
   wsOffset = ChangeBinOffset(ws,Offset=1.0)
 
   # Check the offset
-  x1 = ws.readX(0)
-  x2 = wsOffset.readX(0)
+  x1 = ws.x(0)
+  x2 = wsOffset.x(0)
   # Test that all elements of arrays x2 and x1 differ by 1.0
   print(np.all( x2 - x1 == 1.0 ))
-  y1 = ws.readY(0)
-  y2 = wsOffset.readY(0)
+  y1 = ws.y(0)
+  y2 = wsOffset.y(0)
   # Test that arrays y2 and y1 are equal
   print(np.all( y2 == y1 ))
 

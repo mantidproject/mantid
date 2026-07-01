@@ -192,7 +192,7 @@ ws = CreateWorkspace(DataX=x, DataY=y, NSpec=1)
 if rank == 0:
     summed = GatherWorkspaces(InputWorkspace=ws, AccumulationMethod="Add", OutputWorkspace="summed")
     # If 4 processes: result = 1 + 2 + 3 + 4 = 10
-    print(f"Summed value: {summed.readY(0)[0]}")
+    print(f"Summed value: {summed.y(0)[0]}")
 else:
     GatherWorkspaces(InputWorkspace=ws, AccumulationMethod="Add")
 ```

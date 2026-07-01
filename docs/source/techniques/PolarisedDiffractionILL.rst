@@ -71,7 +71,7 @@ A very basic powder data reduction would include a vanadium reference and a samp
 	      OutputUnits='TwoTheta')
 
     SofQ = mtd['normalised_sample']
-    xAxis = SofQ[0].readX(0)  # TwoTheta axis
+    xAxis = SofQ[0].x(0)  # TwoTheta axis
     print('dS/dOmega (TwoTheta) detector position range: {:.2f}...{:.2f} (degrees)'.format(xAxis[0], xAxis[-1]))
 
 Output:
@@ -204,7 +204,7 @@ Transmission
         CadmiumTransmissionWorkspace='cadmium_transmission_ws',
         ProcessAs='EmptyBeam'
     )
-    print('Cadmium absorber transmission is {0:.3f}'.format(mtd['cadmium_transmission_ws_1'].readY(0)[0] / mtd['beam_ws_1'].readY(0)[0]))
+    print('Cadmium absorber transmission is {0:.3f}'.format(mtd['cadmium_transmission_ws_1'].y(0)[0] / mtd['beam_ws_1'].y(0)[0]))
 
     # Quartz transmission
     PolDiffILLReduction(
@@ -214,7 +214,7 @@ Transmission
         EmptyBeamWorkspace='beam_ws',
         ProcessAs='Transmission'
     )
-    print('Quartz transmission is {0:.3f}'.format(mtd['quartz_transmission_1'].readY(0)[0]))
+    print('Quartz transmission is {0:.3f}'.format(mtd['quartz_transmission_1'].y(0)[0]))
 
 Output:
 
@@ -334,7 +334,7 @@ Below is the relevant workflow diagram describing reduction steps of the quartz 
 
     SumSpectra(InputWorkspace='pol_corrections_ZPO_0', OutputWorkspace='sum',
 	       StartWorkspaceIndex=0, EndWorkspaceIndex=131)
-    print("The average polarisation efficiency in the Z direction is {0:.2f}".format(mtd['sum'].readY(0)[0] / 132.0))
+    print("The average polarisation efficiency in the Z direction is {0:.2f}".format(mtd['sum'].y(0)[0] / 132.0))
 
 Output:
 
@@ -708,7 +708,7 @@ Below is the relevant workflow diagram describing reduction steps of the vanadiu
         EmptyBeamWorkspace='beam_ws',
         ProcessAs='Transmission'
     )
-    print('Vanadium transmission is {0:.3f}'.format(mtd['vanadium_transmission_1'].readY(0)[0]))
+    print('Vanadium transmission is {0:.3f}'.format(mtd['vanadium_transmission_1'].y(0)[0]))
 
     # Vanadium reduction
     PolDiffILLReduction(
@@ -991,7 +991,7 @@ Sample normalisation
         NormaliseBy='Monitor',
         ProcessAs='Transmission'
     )
-    print('Sample transmission is {0:.3f}'.format(mtd['sample_transmission_1'].readY(0)[0]))
+    print('Sample transmission is {0:.3f}'.format(mtd['sample_transmission_1'].y(0)[0]))
 
     # Sample reduction
     PolDiffILLReduction(

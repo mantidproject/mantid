@@ -217,9 +217,9 @@ Output:
     ws=LoadDetectorsGroupingFile("test.map")
 
     #check some values
-    print("Spectrum 0 belongs to group {}".format(ws.readY(0)[0]))
-    print("Spectrum 65 belongs to group {}".format(ws.readY(65)[0]))
-    print("Spectrum 125 belongs to group {}".format(ws.readY(125)[0]))
+    print("Spectrum 0 belongs to group {}".format(ws.y(0)[0]))
+    print("Spectrum 65 belongs to group {}".format(ws.y(65)[0]))
+    print("Spectrum 125 belongs to group {}".format(ws.y(125)[0]))
 
 .. testcleanup:: LoadDetectorsGroupingFileMap
 

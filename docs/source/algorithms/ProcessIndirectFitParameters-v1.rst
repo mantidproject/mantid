@@ -49,7 +49,7 @@ Usage
 
    # Print the result
    print("{} is a {} and the Y values are:".format(wsOut, wsOut.id()))
-   print(wsOut.readY(0))
+   print(wsOut.y(0))
 
 Output:
 

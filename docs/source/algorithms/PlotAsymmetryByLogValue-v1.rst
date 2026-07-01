@@ -56,8 +56,8 @@ Usage
                                 TimeMin = 0.55,
                                 TimeMax = 12.0);
 
-   print("Y values (asymmetry): {}".format(ws.readY(0)))
-   print("X values (sample magn. field): {}".format(ws.readX(0)))
+   print("Y values (asymmetry): {}".format(ws.y(0)))
+   print("X values (sample magn. field): {}".format(ws.x(0)))
 
 Output:
 
@@ -78,9 +78,9 @@ Output:
                                 TimeMax = 12.0);
 
    print("Y values (asymmetry): [ {:.7f}  {:.7f}  {:.7f} ]".format(
-       ws.readY(0)[0],ws.readY(0)[1],ws.readY(0)[2]))
+       ws.y(0)[0],ws.y(0)[1],ws.y(0)[2]))
    print("X values (sample magn. field): [ {:.1f}  {:.1f}  {:.1f} ]".format(
-       ws.readX(0)[0],ws.readX(0)[1],ws.readX(0)[2]))
+       ws.x(0)[0],ws.x(0)[1],ws.x(0)[2]))
 
 Output:
 
@@ -102,11 +102,11 @@ Output:
                                 Red = 1,
                                 Green = 2);
 
-   print("Y values (difference): {}".format(ws.readY(0)))
-   print("Y values (red): {}".format(ws.readY(1)))
-   print("Y values (green): {}".format(ws.readY(2)))
-   print("Y values (sum): {}".format(ws.readY(3)))
-   print("X values (sample magn. field): {}".format(ws.readX(0)))
+   print("Y values (difference): {}".format(ws.y(0)))
+   print("Y values (red): {}".format(ws.y(1)))
+   print("Y values (green): {}".format(ws.y(2)))
+   print("Y values (sum): {}".format(ws.y(3)))
+   print("X values (sample magn. field): {}".format(ws.x(0)))
 
 Output:
 
@@ -138,8 +138,8 @@ Output:
 
    print("No of forward spectra used: {}".format(len(fwd_spectra)))
    print("No of backward spectra used: {}".format(len(bwd_spectra)))
-   print("Y values (asymmetry): {}".format(ws.readY(0)))
-   print("X values (sample magn. field): {}".format(ws.readX(0)))
+   print("Y values (asymmetry): {}".format(ws.y(0)))
+   print("X values (sample magn. field): {}".format(ws.x(0)))
 
 Output:
 
@@ -161,8 +161,8 @@ Output:
                                 TimeMax = 12.0,
                                 DeadTimeCorrType = 'FromRunData');
 
-   print("Y values (asymmetry): {}".format(ws.readY(0)))
-   print("X values (sample magn. field): {}".format(ws.readX(0)))
+   print("Y values (asymmetry): {}".format(ws.y(0)))
+   print("X values (sample magn. field): {}".format(ws.x(0)))
 
 Output:
 
@@ -179,8 +179,8 @@ Output:
                                 LastRun="MUSR00015191",
                                 LogValue="sample_temp",
                                 Function="Mean")
-   print("Y values (asymmetry): {}".format(ws.readY(0)))
-   print("X values (sample magn. field): {}".format(ws.readX(0)))
+   print("Y values (asymmetry): {}".format(ws.y(0)))
+   print("X values (sample magn. field): {}".format(ws.x(0)))
 
 Output:
 

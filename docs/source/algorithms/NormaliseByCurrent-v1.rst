@@ -62,8 +62,8 @@ Usage
    norm_factor = wsN.getRun().getLogData('NormalizationFactor').value
 
    #Print results
-   print("Before normalisation {}".format(ws.readY(0)))
-   print("After normalisation  {}".format(wsN.readY(0)))
+   print("Before normalisation {}".format(ws.y(0)))
+   print("After normalisation  {}".format(wsN.y(0)))
    print("Normalisation factor {}".format(norm_factor))
 
 

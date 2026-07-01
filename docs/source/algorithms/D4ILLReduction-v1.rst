@@ -66,10 +66,10 @@ General workflow
       NormaliseBy='Monitor',
       ExportAscii=False)
 
-    tthAxis = mtd[output_ws][0].readX(0)
+    tthAxis = mtd[output_ws][0].x(0)
     print('{}: 2theta range: {:.3}...{:.3}A'.format(
           mtd[output_ws][0].name(), tthAxis[0], tthAxis[-1]))
-    qAxis = mtd[output_ws][1].readX(0)
+    qAxis = mtd[output_ws][1].x(0)
     print('{}: Q range: {:.3}...{:.3}A'.format(
           mtd[output_ws][1].name(), qAxis[0], qAxis[-1]))
 

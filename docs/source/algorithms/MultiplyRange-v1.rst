@@ -23,8 +23,8 @@ Usage
 
   # Check the result
   # Get the Y values from the first spectra of the input and output workspaces
-  y = ws.readY(0)
-  yres = res.readY(0)
+  y = ws.y(0)
+  yres = res.y(0)
 
   # Print out the ratios yres[i] / y[i] for bins with indices 20 to 30
   print(yres[20:30] / y[20:30])

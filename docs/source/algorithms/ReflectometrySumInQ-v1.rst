@@ -87,7 +87,7 @@ Usage
        ComponentName='bank1',
        X=-0.008 * 4.5, Y= 0.008 * 4, Z=0.)
    # Create some fake reflected beam data.
-   Xs = reflected.readX(0)
+   Xs = reflected.x(0)
    Xs = (Xs[1:] + Xs[:-1]) / 2  # Bin edges -> points
    decay = np.exp(-(Xs - 4.) / 3.)
    span = decay < 1.

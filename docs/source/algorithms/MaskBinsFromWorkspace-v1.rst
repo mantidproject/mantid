@@ -32,7 +32,7 @@ Usage
    copiedMasksWS = MaskBinsFromWorkspace(ws, wsMasked)
 
    # Show Y values in workspaces, and the masked bin indices
-   print("After mask copying: {}".format(copiedMasksWS.readY(0)))
+   print("After mask copying: {}".format(copiedMasksWS.y(0)))
    print("Masked bin indices: {}".format(copiedMasksWS.maskedBinsIndices(0)))
 
 

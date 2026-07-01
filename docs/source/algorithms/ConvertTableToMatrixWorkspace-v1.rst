@@ -35,7 +35,7 @@ Usage
     ws=ConvertTableToMatrixWorkspace(t,"A","B","BError")
 
     print("{} is a {} and the Y values are:".format(ws,ws.id()))
-    print(ws.readY(0))
+    print(ws.y(0))
 
 Output:
 

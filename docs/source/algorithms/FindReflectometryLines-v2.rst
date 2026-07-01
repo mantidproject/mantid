@@ -31,8 +31,8 @@ Usage
    # Access individual outputs
    pos1 = mtd['pos_1']
    pos2 = mtd['pos_2']
-   print('Line position in the 1st workspace: {:.3}'.format(pos1.readY(0)[0]))
-   print('Line position in the 2nd workspace: {:.3}'.format(pos2.readY(0)[0]))
+   print('Line position in the 1st workspace: {:.3}'.format(pos1.y(0)[0]))
+   print('Line position in the 2nd workspace: {:.3}'.format(pos2.y(0)[0]))
    # With single workspaces one can use the named tuple output
    out = FindReflectometryLines('ws_1')
    print('Line position from the returned tuple: {:.3}'.format(out.LineCentre))

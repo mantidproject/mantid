@@ -92,10 +92,10 @@ Usage
                                             MonitorIntegrationWavelengthMin=4.0,
                                             MonitorIntegrationWavelengthMax=10.0)
 
-   print("{:.4f}".format(IvsLam.readY(0)[533]))
-   print("{:.4f}".format(IvsLam.readY(0)[534]))
-   print("{:.4f}".format(IvsQ.readY(0)[327]))
-   print("{:.4f}".format(IvsQ.readY(0)[328]))
+   print("{:.4f}".format(IvsLam.y(0)[533]))
+   print("{:.4f}".format(IvsLam.y(0)[534]))
+   print("{:.4f}".format(IvsQ.y(0)[327]))
+   print("{:.4f}".format(IvsQ.y(0)[328]))
 
 
 Output:
@@ -132,10 +132,10 @@ Output:
                                             MonitorIntegrationWavelengthMin=4.0,
                                             MonitorIntegrationWavelengthMax=10.0)
 
-   print("{:.4f}".format(IvsLam.readY(0)[533]))
-   print("{:.4f}".format(IvsLam.readY(0)[534]))
-   print("{:.4f}".format(IvsQ.readY(0)[327]))
-   print("{:.4f}".format(IvsQ.readY(0)[328]))
+   print("{:.4f}".format(IvsLam.y(0)[533]))
+   print("{:.4f}".format(IvsLam.y(0)[534]))
+   print("{:.4f}".format(IvsQ.y(0)[327]))
+   print("{:.4f}".format(IvsQ.y(0)[328]))
 
 
 Output:

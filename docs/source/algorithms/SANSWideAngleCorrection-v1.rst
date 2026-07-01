@@ -156,7 +156,7 @@ Usage
 
    corrected_data = SANSWideAngleCorrection(sample, transmission)
 
-   print("{:.6f} was corrected to {:.6f}.".format(sample.readY(19)[0], corrected_data.readY(19)[0]))
+   print("{:.6f} was corrected to {:.6f}.".format(sample.y(19)[0], corrected_data.y(19)[0]))
 
 Output:
 

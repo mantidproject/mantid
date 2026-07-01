@@ -47,11 +47,11 @@ Usage
                                    SpecMin=0, SpecMax=0)
 
     print('Using Gauss Model')
-    print('A0: ' + str(g_msd.readY(0)))
-    print('A1: ' + str(g_msd.readY(1)))
+    print('A0: ' + str(g_msd.y(0)))
+    print('A1: ' + str(g_msd.y(1)))
     print('Using Yi Model')
-    print('A0: ' + str(y_msd.readY(0)))
-    print('A1: ' + str(y_msd.readY(1)))
+    print('A0: ' + str(y_msd.y(0)))
+    print('A1: ' + str(y_msd.y(1)))
 
 Output (the numbers on your machine my not match exactly):
 

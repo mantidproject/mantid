@@ -202,7 +202,7 @@ Usage
              1.0, 3.0, 3.0]
 
    for i in range(0,9):
-     ws.dataY(i)[0] = values[i]
+     ws.mutableY(i)[0] = values[i]
 
    # Run the algorithm
    output = SmoothNeighbours(ws, Radius = 1.0,
@@ -246,7 +246,7 @@ Output:
              1.0, 3.0, 3.0]
 
    for i in range(0,9):
-     ws.dataY(i)[0] = values[i]
+     ws.mutableY(i)[0] = values[i]
 
    # Run the algorithm
    output = SmoothNeighbours(ws, AdjX=1, AdjY=3)
@@ -289,7 +289,7 @@ Output:
              1.0, 3.0, 3.0]
 
    for i in range(0,9):
-     ws.dataY(i)[0] = values[i]
+     ws.mutableY(i)[0] = values[i]
 
    # Run the algorithm
    output = SmoothNeighbours(ws, SumPixelsX=3, SumPixelsY=1)

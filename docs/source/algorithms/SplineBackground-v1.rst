@@ -34,13 +34,13 @@ Usage
 
    # Run algorithm with low number of spline coefficients
    out = SplineBackground(ws, WorkspaceIndex=0, NCoeff=4)
-   yout = out.readY(0)
+   yout = out.y(0)
    # Sum the squares of the differences of elements of arrays y and yout
    print('Fit quality is {}'.format(np.sum( (y - yout)**2 )))
 
    # Increase the number of spline coefficients
    out = SplineBackground(ws, WorkspaceIndex=0, NCoeff=20)
-   yout = out.readY(0)
+   yout = out.y(0)
    # Sum the squares of the differences of elements of arrays y and yout
    print('Fit quality is {}'.format(np.sum( (y - yout)**2 )))
 

@@ -28,11 +28,11 @@ ConvertUnits(InputWorkspace="NOM_P2", OutputWorkspace="NOM_P2", Target="Momentum
 
 # plot
 outws = mtd["NOM_P2"]
-x = np.array(outws.readX(0))
+x = np.array(outws.x(0))
 x = 0.5 * (x[1:] + x[:-1])
 fig, ax1 = plt.subplots(1)
 for i in range(6):
-    y = np.array(outws.readY(i))
+    y = np.array(outws.y(i))
     ax1.plot(x, y, label=f"P1+P2:Spec{i}")
 ax1.set_xlabel(r"q($\AA^{-1}$)")
 ax1.set_xlim([0.1, 15])

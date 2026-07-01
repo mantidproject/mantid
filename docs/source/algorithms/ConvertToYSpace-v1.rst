@@ -51,7 +51,7 @@ Usage
     #
     # Look at sample results:
     print('part of the converted workspace:')
-    for i in range(0,10): print("{:.9f} {:.11f} {}".format(wsY.readX(0)[i], wsY.readY(0)[i], wsY.readE(0)[i]))
+    for i in range(0,10): print("{:.9f} {:.11f} {}".format(wsY.x(0)[i], wsY.y(0)[i], wsY.e(0)[i]))
 
 
 

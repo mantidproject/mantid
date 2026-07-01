@@ -33,9 +33,9 @@ Usage
                           XMin=1, XMax=2, InsertionYIndex=0, InsertionXIndex=0)
 
    # Display the output workpace data
-   print("Output x data: {0}".format(output.readX(0)))
-   print("Output y data: {0}".format(output.readY(0)))
-   print("Output e data: {0}".format(output.readE(0)))
+   print("Output x data: {0}".format(output.x(0)))
+   print("Output y data: {0}".format(output.y(0)))
+   print("Output e data: {0}".format(output.e(0)))
 
 Output:
 

@@ -61,7 +61,7 @@ Usage
   print("LaB6: A = B = C = {:.5f}, Alpha = Beta = Gamma = {:.5f}".format(infotablews.column('Value')[infotablews.column('Name').index('A')],
                                                                          infotablews.column('Value')[infotablews.column('Name').index('Alpha')]))
 
-  maxy = max(dataws.readY(1))
+  maxy = max(dataws.y(1))
   print("Maximum peak value (calculated) = {:.5f}".format(maxy))
 
 
@@ -91,7 +91,7 @@ Output:
   reftablews = mtd["LaB6_Ref_Table"]
 
   print("Reflection table imported {} peaks.  Faked data workspace contains {} data points.".format(
-      reftablews.rowCount(), len(fakedataws.readX(0))))
+      reftablews.rowCount(), len(fakedataws.x(0))))
 
   index = 0
   print("Peak {} of ({}, {}, {}): Alpha = {:.5f}, Beta = {:.5f}, FWHM = {:.5f}".format(index, reftablews.cell(index, 0),

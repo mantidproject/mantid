@@ -89,9 +89,9 @@ Usage
   resws = mtd["PG3_Resolution"]
 
   print("Size of workspace 'PG3_Resolution' =  {}".format(resws.getNumberHistograms()))
-  print("Estimated resolution of detector of spectrum 0 =  {:.6f}".format(resws.readY(0)[0]))
-  print("Estimated resolution of detector of spectrum 100 =  {:.6f}".format(resws.readY(100)[0]))
-  print("Estimated resolution of detector of spectrum 999 =  {:.6f}".format(resws.readY(999)[0]))
+  print("Estimated resolution of detector of spectrum 0 =  {:.6f}".format(resws.y(0)[0]))
+  print("Estimated resolution of detector of spectrum 100 =  {:.6f}".format(resws.y(100)[0]))
+  print("Estimated resolution of detector of spectrum 999 =  {:.6f}".format(resws.y(999)[0]))
 
 .. testcleanup:: ExHistSimple
 
