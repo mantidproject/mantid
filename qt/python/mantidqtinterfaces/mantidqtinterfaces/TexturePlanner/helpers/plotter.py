@@ -190,10 +190,8 @@ class TexturePlotter:
     def _draw_sample_and_axes(
         self, fig: Figure, lab_ax: Axes, rot_mesh: np.ndarray, extent: float, n_gon: int, scat_centre: np.ndarray
     ) -> None:
-        sample_model = ShowSampleModel()
-        sample_model.fig = fig
-        sample_model.ws_name = self._model.workspaces.wsname
-        sample_model.gauge_vol_str = self._model.workspaces.gauge_volume_str
+        sample_model = ShowSampleModel(fig=fig, ws_name=self._model.workspaces.wsname)
+        sample_model.set_gauge_vol_str(self._model.workspaces.gauge_volume_str)
         fig.sca(lab_ax)
         plot_sample_only(fig, rot_mesh, 0.5, "grey")
         if self.vis_settings["directions"]:
