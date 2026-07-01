@@ -55,9 +55,8 @@ from mantid.simpleapi import (
     SaveNexus,
     Load,
     LoadWAND,
+    LoadEventAsWorkspace2D,
     LoadInstrument,
-    CreateWorkspace,
-    LoadNexusLogs,
     AddSampleLog,
 )
 import h5py
@@ -68,11 +67,6 @@ logger = Logger(__name__)
 
 
 class HFIRPowderReduction(DataProcessorAlgorithm):
-    MIDAS_NUM_BANKS = 7
-    MIDAS_TUBES_PER_BANK = 16
-    MIDAS_PIXELS_PER_TUBE = 512
-    MIDAS_TOTAL_PIXELS = MIDAS_NUM_BANKS * MIDAS_TUBES_PER_BANK * MIDAS_PIXELS_PER_TUBE  # 57344
-
     def name(self):
         return "HFIRPowderReduction"
 
@@ -116,6 +110,11 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         # Reduction UI properties
         # TODO: This field fields below will be autopopulated from the sample file in a future PR, handled by EWM item 13209
         self.declareProperty("Instrument", "", StringListValidator(["", "MIDAS", "WAND^2"]), "HB2 Instrument")
+        self.declareProperty(
+            FileProperty(name="IDFFilename", defaultValue="", action=FileAction.OptionalLoad, extensions=[".xml"]),
+            doc="Optional instrument definition file (IDF). If provided, it overrides the instrument geometry "
+            "that would otherwise be determined by the sample file.",
+        )
         # TODO: This field fields below will be autopopulated from the sample file in a future PR, handled by EWM item 13209
         self.declareProperty(
             "Wavelength",
@@ -820,43 +819,41 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             logger.warning("MaskAngle is not set.")
 
     def _loadMIDASData(self, filename, ws):
-        # Check if the file has the expected fields
-        with h5py.File(filename, "r") as f:
-            has_entry_fields = (
-                "/entry/monitor1/total_counts" in f
-                and "/entry/duration" in f
-                and "/entry/run_number" in f
-                and all(f"/entry/bank{b + 1}_events/event_id" in f for b in range(self.MIDAS_NUM_BANKS))
-            )
+        # MIDAS raw event files are integrated during load (no event workspace is needed),
+        # mirroring LoadWAND. LoadEventAsWorkspace2D performs the bank discovery and
+        # per-pixel integration in C++; fall back to the generic loader for processed /
+        # histogram files that it cannot read.
+        idf = self.getProperty("IDFFilename").value
+        wavelength = self.getProperty("Wavelength").value
 
-        if not has_entry_fields:
-            # Fall back to the generic MIDAS loader
+        try:
+            LoadEventAsWorkspace2D(
+                Filename=filename,
+                OutputWorkspace=ws,
+                # The X axis is unused downstream (ConvertSpectrumAxis operates on the
+                # spectrum axis), but XWidth*XCenter must be non-zero, so set them
+                # explicitly rather than relying on wavelength/wavelength_spread logs.
+                XCenter=wavelength,
+                XWidth=0.01,
+                Units="Wavelength",
+                # LoadNexusInstrumentXML defaults to True, so the geometry (and hence the
+                # spectrum count and event->pixel binning) comes from the file's embedded
+                # IDF. A user-supplied IDF is overlaid afterwards via LoadInstrument.
+                EnableLogging=False,
+            )
+        except RuntimeError:
+            logger.warning(f"LoadEventAsWorkspace2D failed for {filename}, falling back to generic Load")
             self._load_MIDAS(filename, ws)
             return
 
-        data = np.zeros(self.MIDAS_TOTAL_PIXELS, dtype=np.int64)
+        # Normalization needs these logs (gd_prtn_chrg for Monitor, duration for Time).
+        # LoadEventAsWorkspace2D is WAND-agnostic and does not set the monitor-style logs,
+        # so add them here. run_number is set by LoadEventAsWorkspace2D's metadata loading.
         with h5py.File(filename, "r") as f:
             monitor_count = f["/entry/monitor1/total_counts"][0]
             duration = f["/entry/duration"][0]
-            run_number = f["/entry/run_number"][0]
-            for b in range(self.MIDAS_NUM_BANKS):
-                data += np.bincount(
-                    f["/entry/bank" + str(b + 1) + "_events/event_id"][()],
-                    minlength=self.MIDAS_TOTAL_PIXELS,
-                )
-        CreateWorkspace(
-            DataX=[0, 1],
-            DataY=data,
-            DataE=np.sqrt(data),
-            UnitX="Empty",
-            YUnitLabel="Counts",
-            NSpec=self.MIDAS_TOTAL_PIXELS,
-            OutputWorkspace="__tmp_load",
-            EnableLogging=False,
-        )
-        LoadNexusLogs("__tmp_load", Filename=filename, EnableLogging=False)
         AddSampleLog(
-            "__tmp_load",
+            ws,
             LogName="monitor_count",
             LogType="Number",
             NumberType="Double",
@@ -864,31 +861,28 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             EnableLogging=False,
         )
         AddSampleLog(
-            "__tmp_load",
+            ws,
             LogName="gd_prtn_chrg",
             LogType="Number",
             NumberType="Double",
             LogText=str(monitor_count),
             EnableLogging=False,
         )
-        AddSampleLog("__tmp_load", LogName="run_number", LogText=str(run_number), EnableLogging=False)
         AddSampleLog(
-            "__tmp_load",
+            ws,
             LogName="duration",
             LogType="Number",
-            LogText=str(duration),
             NumberType="Double",
+            LogText=str(duration),
             EnableLogging=False,
         )
 
-        # Use the modified IDF that supports simulated data until we get real MIDAS data
-        # LoadInstrument("__tmp_load", InstrumentName="MIDAS", RewriteSpectraMap=True, EnableLogging=False)
-        LoadInstrument("__tmp_load", Filename="/SNS/users/nxw/mccode_fixed.xml", RewriteSpectraMap=True, EnableLogging=False)
+        # A user-supplied IDF overrides the geometry embedded in the sample file.
+        if idf:
+            LoadInstrument(ws, Filename=idf, RewriteSpectraMap=True, EnableLogging=False)
         # Masking is not used yet, but will be added back later
         # if self.getProperty("ApplyMask").value:
-        #     MaskBTP("__tmp_load", Pixel="1,2,511,512", EnableLogging=False)
-
-        RenameWorkspace("__tmp_load", ws, EnableLogging=False)
+        #     MaskBTP(ws, Pixel="1,2,511,512", EnableLogging=False)
 
     def PyExec(self):
         """
@@ -1045,9 +1039,11 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
 
     def _load_MIDAS(self, filename, ws):
         Load(Filename=filename, OutputWorkspace=ws, EnableLogging=False)
-        if not isinstance(ws, WorkspaceGroup):
-            # This is a temp fix for using simulated MIDAS data
-            LoadInstrument(ws, Filename="/SNS/users/nxw/mccode_fixed.xml", RewriteSpectraMap=True)
+        # By default the instrument geometry comes from the loaded sample file. Only override it
+        # when the user supplies an IDF (and the loaded workspace is not a group).
+        idf = self.getProperty("IDFFilename").value
+        if idf and not isinstance(mtd[ws], WorkspaceGroup):
+            LoadInstrument(ws, Filename=idf, RewriteSpectraMap=True)
 
     def _load_WAND_Data(self, filename, ws):
         grouping = self.getProperty("Grouping").value
@@ -1057,6 +1053,13 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         except RuntimeError:
             logger.warning(f"LoadWAND failed for {filename}, falling back to generic Load")
             Load(Filename=filename, OutputWorkspace=ws, EnableLogging=False)
+
+        # A user-supplied IDF overrides the geometry loaded above. Use RewriteSpectraMap=False
+        # so the (possibly grouped) spectrum->detector mapping that LoadWAND built is preserved
+        # and only the instrument geometry is replaced.
+        idf = self.getProperty("IDFFilename").value
+        if idf and not isinstance(mtd[ws], WorkspaceGroup):
+            LoadInstrument(ws, Filename=idf, RewriteSpectraMap=False, EnableLogging=False)
 
     def _general_load_data(self, data_type):
         instrument = self.getProperty("Instrument").value
