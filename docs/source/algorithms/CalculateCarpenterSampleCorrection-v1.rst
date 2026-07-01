@@ -61,8 +61,8 @@ Usage
     #restrict the number of wavelength points to speed up the example
     wsOut = CalculateCarpenterSampleCorrection(ws,CylinderSampleRadius=0.2)
 
-    print("Absorption Correction Output:  {}".format(wsOut.getItem(0).readY(0)))
-    print("Multiply Scattering Correction Output:  {}".format(wsOut.getItem(1).readY(0)))
+    print("Absorption Correction Output:  {}".format(wsOut.getItem(0).y(0)))
+    print("Multiply Scattering Correction Output:  {}".format(wsOut.getItem(1).y(0)))
 
 Output:
 
@@ -100,9 +100,9 @@ To reproduce what :ref:`algm-CarpenterSampleCorrection` does, you can calculate 
     # Apply both corrections
     wsOut = Minus(ws_abs_corrected, msCorr)
 
-    print("Absorption Corrected Output:  {}".format(ws_abs_corrected.readY(0)))
-    print("Multiple Scattering Corrected Output:  {}".format(ws_ms_corrected.readY(0)))
-    print("Combined Corrected Output:  {}".format(wsOut.readY(0)))
+    print("Absorption Corrected Output:  {}".format(ws_abs_corrected.y(0)))
+    print("Multiple Scattering Corrected Output:  {}".format(ws_ms_corrected.y(0)))
+    print("Combined Corrected Output:  {}".format(wsOut.y(0)))
 
 Output:
 
@@ -142,9 +142,9 @@ Output:
     # Apply both corrections
     wsOut = Minus(ws_abs_corrected, msCorr)
 
-    print("Absorption Corrected Output:  {}".format(ws_abs_corrected.readY(0)))
-    print("Multiple Scattering Corrected Output:  {}".format(ws_ms_corrected.readY(0)))
-    print("Combined Corrected Output:  {}".format(wsOut.readY(0)))
+    print("Absorption Corrected Output:  {}".format(ws_abs_corrected.y(0)))
+    print("Multiple Scattering Corrected Output:  {}".format(ws_ms_corrected.y(0)))
+    print("Combined Corrected Output:  {}".format(wsOut.y(0)))
 
 Output:
 

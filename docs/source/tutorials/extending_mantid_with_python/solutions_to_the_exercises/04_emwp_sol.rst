@@ -76,7 +76,7 @@ of the proper reduction done for the direct-geometry inelastic instruments.
             # Create the new output workspace
             _summed = WorkspaceFactory.create(_tmpws,NVectors=1)
             # Set the X values for the new workspace
-            _summed.setX(0, _tmpws.readX(0))
+            _summed.setSharedX(0, _tmpws.x(0))
 
             # Sum the rows to a single row. Two methods demonstrated:
 
@@ -94,7 +94,7 @@ of the proper reduction done for the direct-geometry inelastic instruments.
             #yin = __tmpsws.extractY()
             #npsum = numpy.sum(yin,axis=0) # Axis 0 = summing down the columns
             # and put the data to the workspace
-            #_summed.setY(0, npsum)
+            #_summed.setSharedY(0, npsum)
 
             # Store reference outside of algorithm
             self.setProperty("OutputWorkspace", _summed)

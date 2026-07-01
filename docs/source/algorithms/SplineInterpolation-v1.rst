@@ -94,7 +94,7 @@ Usage
 
     import numpy
 
-    for y in numpy.nditer(ows.readY(0)):
+    for y in numpy.nditer(ows.y(0)):
         print("%0.2f"% y)
 
 .. testoutput:: ExSplineInterpolationLinear

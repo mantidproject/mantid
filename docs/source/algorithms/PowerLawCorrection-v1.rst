@@ -30,7 +30,7 @@ Usage
 
   print("The correction counts and errors are multiplied by function 3*x^2")
   for i in range(0,wsCorrected.blocksize(),10):
-    print ("The correct value in bin {} is {:.2f} compared to {:.2f}".format(i, wsCorrected.readY(0)[i], ws.readY(0)[i]))
+    print ("The correct value in bin {} is {:.2f} compared to {:.2f}".format(i, wsCorrected.y(0)[i], ws.y(0)[i]))
 
 Output:
 

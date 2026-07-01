@@ -55,8 +55,8 @@ Usage
    ws=SofQWNormalisedPolygon(InputWorkspace=ws,QAxisBinning='-3,0.1,3',Emode='Direct',EFixed=12)
 
    print("The converted X-Y values are:")
-   Xrow=ws.readX(59);
-   Yrow=ws.readY(59);
+   Xrow=ws.x(59);
+   Yrow=ws.y(59);
    line1= " ".join('! {0:>6.2f} {1:>6.2f} '.format(Xrow[i],Yrow[i]) for i in range(0,10))
    print(line1 + " !")
    line2= " ".join('! {0:>6.2f} {1:>6.2f} '.format(Xrow[i],Yrow[i]) for i in range(10,20))

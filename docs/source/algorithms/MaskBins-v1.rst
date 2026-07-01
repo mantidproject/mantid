@@ -38,8 +38,8 @@ Usage
    wsMasked = MaskBins(ws,XMin=16,XMax=32)
 
    # Show Y values in workspaces
-   print("Before masking: {}".format(ws.readY(0)))
-   print("After masking: {}".format(wsMasked.readY(0)))
+   print("Before masking: {}".format(ws.y(0)))
+   print("After masking: {}".format(wsMasked.y(0)))
 
 
 Output:

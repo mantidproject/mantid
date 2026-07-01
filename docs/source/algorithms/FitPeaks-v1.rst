@@ -410,7 +410,7 @@ Usage
   row = param_ws.row(0)
 
   # output
-  print ('Fitted peak position: {0:.5f}'.format(peakposws.readY(0)[0]))
+  print ('Fitted peak position: {0:.5f}'.format(peakposws.y(0)[0]))
   print ("Peak 0  Centre: {0:.5f}, width: {1:.5f}, height: {2:.5f}".format(row["PeakCentre"], row["Sigma"], row["Height"]))
 
   # clean up workspaces
@@ -445,12 +445,12 @@ Output:
              FittedPeaksWorkspace='PG3_733_fitted_peaks')
 
   PG3_733_peak_positions = mtd["PG3_733_peak_positions"]
-  ep0 = PG3_733_peak_positions.readX(0)[-1]
-  ep1 = PG3_733_peak_positions.readX(0)[-2]
-  ep2 = PG3_733_peak_positions.readX(0)[-3]
-  fp0 = PG3_733_peak_positions.readY(0)[-1]
-  fp1 = PG3_733_peak_positions.readY(0)[-2]
-  fp2 = PG3_733_peak_positions.readY(0)[-3]
+  ep0 = PG3_733_peak_positions.x(0)[-1]
+  ep1 = PG3_733_peak_positions.x(0)[-2]
+  ep2 = PG3_733_peak_positions.x(0)[-3]
+  fp0 = PG3_733_peak_positions.y(0)[-1]
+  fp1 = PG3_733_peak_positions.y(0)[-2]
+  fp2 = PG3_733_peak_positions.y(0)[-3]
 
   # print data
   print ('Spectrum 1: Expected right most 3 peaks at {0:.3f}, {1:.3f}, {2:.3f}'.format(ep0, ep1, ep2))
@@ -495,8 +495,8 @@ Output:
   for ws_index in range(0, 1):
       print ('Spectrum {0}:'.format(ws_index+1))
       for peak_index in range(2, 4):
-          exp_pos = fitted_peak_pos_ws.readX(ws_index)[peak_index]
-          fit_pos = fitted_peak_pos_ws.readY(ws_index)[peak_index]
+          exp_pos = fitted_peak_pos_ws.x(ws_index)[peak_index]
+          fit_pos = fitted_peak_pos_ws.y(ws_index)[peak_index]
           print ('Expected @ {0:.3f}  Fitted @ {1:.3f}'.format(exp_pos, fit_pos))
 
   # clean

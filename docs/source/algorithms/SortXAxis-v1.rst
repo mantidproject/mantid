@@ -32,23 +32,23 @@ Usage
 
     # Print out the "Unordered X Axis"
     print("Unordered Print")
-    print(ws.readX(0))
-    print(ws.readY(0))
-    print(ws.readE(0))
+    print(ws.x(0))
+    print(ws.y(0))
+    print(ws.e(0))
 
     # Sort the X Axis in a Descending fashion
     ws = SortXAxis(InputWorkspace='ws', Ordering='Descending')
     print("In order print: Descending")
-    print(ws.readX(0))
-    print(ws.readY(0))
-    print(ws.readE(0))
+    print(ws.x(0))
+    print(ws.y(0))
+    print(ws.e(0))
 
     # Sort the X Axis in a Ascending fashion
     ws = SortXAxis(InputWorkspace='ws', Ordering='Ascending')
     print("In order print: Ascending")
-    print(ws.readX(0))
-    print(ws.readY(0))
-    print(ws.readE(0))
+    print(ws.x(0))
+    print(ws.y(0))
+    print(ws.e(0))
 
 .. testcleanup:: SortXAxis
 

@@ -83,7 +83,7 @@ Usage
 
    print("First 3 correction coefficients: ")
    for i in range(3):
-        print(round(coefs.readY(i),2))
+        print(round(coefs.y(i),2))
 
    print("Is first detector masked? {}".format(coefs.getInstrument().getDetector(1).isMasked()))
 
@@ -94,7 +94,7 @@ Usage
    corrected_data = rawdata/coefs
    print("First 3 corrected data points")
    for i in range(3):
-        print(round(corrected_data.readY(i),2))
+        print(round(corrected_data.y(i),2))
 
 Output:
 

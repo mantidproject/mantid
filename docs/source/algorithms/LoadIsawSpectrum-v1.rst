@@ -43,8 +43,8 @@ Usage
     ow = LoadIsawSpectrum(SpectraFile=filename,InstrumentName="TOPAZ")
 
         #check the results
-    print("x= {}".format(ow.readX(0)))
-    print("y= {}".format(ow.readY(0)))
+    print("x= {}".format(ow.x(0)))
+    print("y= {}".format(ow.y(0)))
 
 .. testcleanup:: LoadIsawSpectrum
 

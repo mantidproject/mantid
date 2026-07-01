@@ -219,7 +219,7 @@ Usage
    Integration(InputWorkspace=mtd['xyz'][1], OutputWorkspace='sum_coherent')
    Integration(InputWorkspace=mtd['xyz'][2], OutputWorkspace='sum_incoherent')
    Divide(LHSWorkspace='sum_incoherent', RHSWorkspace='sum_coherent', OutputWorkspace='ratio')
-   print("Ratio of spin-incoherent to nuclear coherent cross-sections measured for vanadium is equal to: {0:.0f}".format(mtd['ratio'].readY(0)[0]))
+   print("Ratio of spin-incoherent to nuclear coherent cross-sections measured for vanadium is equal to: {0:.0f}".format(mtd['ratio'].y(0)[0]))
 
 Output:
 

@@ -57,7 +57,7 @@ The following code should be saved as ``gather.py``
     if rank == 0:
         print("Number of spectra in output:", output_ws.getNumberHistograms())
         for i in range(output_ws.getNumberHistograms()):
-            print(f"Spectrum {i} Y:", output_ws.readY(i))
+            print(f"Spectrum {i} Y:", output_ws.y(i))
 
 To run:
 

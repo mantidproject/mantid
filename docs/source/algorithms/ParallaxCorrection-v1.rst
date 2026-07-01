@@ -59,7 +59,7 @@ Usage
     SetInstrumentParameter(Workspace="in", ParameterName="parallax", ComponentName="bank1", ParameterType="String", Value="1+0.1*t")
     ParallaxCorrection(InputWorkspace="in", ComponentNames="bank1", OutputWorkspace="out")
     Divide(LHSWorkspace="in", RHSWorkspace="out", OutputWorkspace="corr")
-    print("The correction is {0:.4f} for the spectrum {1}".format(mtd["corr"].readY(1000)[0], 1000))
+    print("The correction is {0:.4f} for the spectrum {1}".format(mtd["corr"].y(1000)[0], 1000))
 
 Output:
 

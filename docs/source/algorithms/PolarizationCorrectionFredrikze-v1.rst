@@ -95,7 +95,7 @@ Usage
     for i, orig in enumerate(run):
     	corrected = out[i]
     	y_idx = run[0].yIndexOfX(15.0)
-    	ratio = corrected.readY(29)[y_idx] / orig.readY(29)[y_idx]
+    	ratio = corrected.y(29)[y_idx] / orig.y(29)[y_idx]
     	print(f"Ratio of corrected {corrected.name()} and original {orig.name()} intensity at 15A: {round(ratio, 4)}")
 
 Output:
@@ -127,7 +127,7 @@ Output:
     for i, orig in enumerate(run):
     	corrected = out[i]
     	y_idx = run[0].yIndexOfX(15.0)
-    	ratio = corrected.readY(29)[y_idx] / orig.readY(29)[y_idx]
+    	ratio = corrected.y(29)[y_idx] / orig.y(29)[y_idx]
     	print(f"Ratio of corrected {corrected.name()} and original {orig.name()} intensity at 15A: {round(ratio, 4)}")
 
 .. testoutput:: PolarizationCorrectionFredrikze (PA)

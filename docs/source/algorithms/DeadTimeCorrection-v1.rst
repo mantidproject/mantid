@@ -43,7 +43,7 @@ Usage
   CreateSampleWorkspace(OutputWorkspace='in', Function="Powder Diffraction")
   DeadTimeCorrection(InputWorkspace='in', OutputWorkspace='out', Tau=0.0001, GroupingPattern='0-99,100-199')
   Divide(LHSWorkspace='out', RHSWorkspace='in', OutputWorkspace='corr')
-  print("Correction is {0:.3f}".format(mtd['corr'].readY(0)[0]))
+  print("Correction is {0:.3f}".format(mtd['corr'].y(0)[0]))
 
 Output:
 

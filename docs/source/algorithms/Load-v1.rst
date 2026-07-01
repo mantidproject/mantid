@@ -64,7 +64,7 @@ Usage
    # Load ISIS LOQ histogram dataset
    ws = Load('LOQ49886.nxs')
 
-   print("The 1st x-value of the first spectrum is: {}".format(ws.readX(0)[0]))
+   print("The 1st x-value of the first spectrum is: {}".format(ws.x(0)[0]))
 
 Output:
 

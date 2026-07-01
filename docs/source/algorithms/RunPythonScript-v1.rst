@@ -42,7 +42,7 @@ Usage
     RunPythonScript(InputWorkspace=ws,Code=script,OutputWorkspace="wsOut")
 
     wsOut = mtd["wsOut"]
-    print("The workspace contained a total of {:d} counts".format(int(wsOut.readY(0)[0])))
+    print("The workspace contained a total of {:d} counts".format(int(wsOut.y(0)[0])))
 
 Output:
 

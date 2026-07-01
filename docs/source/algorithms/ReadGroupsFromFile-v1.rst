@@ -37,7 +37,7 @@ Usage
 
    # Print the value of selected sprectra. Each corresponds to the group of the corresponding detector.
    for i in range(9):
-       print(" ".join(str(ws2.readY(16 * i + j)) for j in range(0, 20, 5)))
+       print(" ".join(str(ws2.y(16 * i + j)) for j in range(0, 20, 5)))
 
 Output:
 

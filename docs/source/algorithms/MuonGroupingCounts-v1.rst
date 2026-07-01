@@ -65,8 +65,8 @@ Usage
                                                     GroupName="fwd",
                                                     Grouping=[1, 2, 3, 4])
 
-    print("X values are : {}".format(output_workspace.readX(0)))
-    print("Y values are : {}".format(output_workspace.readY(0)))
+    print("X values are : {}".format(output_workspace.x(0)))
+    print("Y values are : {}".format(output_workspace.y(0)))
 
 
 Output:
@@ -97,8 +97,8 @@ Output:
                                                     GroupName="fwd",
                                                     Grouping=[1, 2, 3, 4])
 
-    print("X values are : {}".format(output_workspace.readX(0)))
-    print("Y values are : {}".format(output_workspace.readY(0)))
+    print("X values are : {}".format(output_workspace.x(0)))
+    print("Y values are : {}".format(output_workspace.y(0)))
 
 
 Output:
@@ -137,8 +137,8 @@ Output:
                                                     SummedPeriods=[1, 2])
 
     # We have asked for periods 1+2, with each period summing detectors 1,2,3,4
-    print("X values are : {}".format(output_workspace.readX(0)))
-    print("Y values are : {}".format(output_workspace.readY(0)))
+    print("X values are : {}".format(output_workspace.x(0)))
+    print("Y values are : {}".format(output_workspace.y(0)))
 
 
 Output:

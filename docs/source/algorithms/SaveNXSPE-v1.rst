@@ -35,7 +35,7 @@ Usage
 
    # Create dummy workspace.
    out_ws = CreateSimulationWorkspace(Instrument="MARI", BinParams="0,500,2000")
-   out_ws.setY(0, numpy.array([10.0, 50.0, 30.0, 60.0]))
+   out_ws.setSharedY(0, numpy.array([10.0, 50.0, 30.0, 60.0]))
    AddSampleLog(out_ws, 'Ei', LogText='321', LogType='Number', NumberType='Double')
    out_ws.setDistribution(True)
 
@@ -53,7 +53,7 @@ Usage
    in_ws = LoadNXSPE(file_path)
 
    ws_comparison_rez = CompareWorkspaces(out_ws,in_ws,1.e-9,CheckInstrument=False)
-   print("Contents of the first spectrum = {}.".format(in_ws.readY(0)))
+   print("Contents of the first spectrum = {}.".format(in_ws.y(0)))
    print("Initial and loaded workspaces comparison is: {}".format(str(ws_comparison_rez[0])))
    run = in_ws.getRun();
    print("Loaded workspace has attached incident energy Ei={0:.1f} and rotation angle Psi= {1:.1f}deg".format(run.getLogData('Ei').value,run.getLogData('psi').value))

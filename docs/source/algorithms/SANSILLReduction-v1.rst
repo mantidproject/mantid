@@ -141,7 +141,7 @@ This example below performs a complete reduction for D11 data.
     SANSILLReduction(Run='010446.nxs', ProcessAs='Transmission',
                      AbsorberInputWorkspace='Cdw', BeamInputWorkspace='Dbw',
                      OutputWorkspace='wc_tr', Version=1)
-    print('Water container transmission is {0:.3f}'.format(mtd['wc_tr'].readY(0)[0]))
+    print('Water container transmission is {0:.3f}'.format(mtd['wc_tr'].y(0)[0]))
 
     # Water container
     SANSILLReduction(Run='010454.nxs', ProcessAs='Container',
@@ -151,7 +151,7 @@ This example below performs a complete reduction for D11 data.
     # Water transmission
     SANSILLReduction(Run='010445.nxs', ProcessAs='Transmission',
                      AbsorberInputWorkspace='Cdw', BeamInputWorkspace='Dbw', OutputWorkspace='w_tr', Version=1)
-    print('Water transmission is {0:.3f}'.format(mtd['w_tr'].readY(0)[0]))
+    print('Water transmission is {0:.3f}'.format(mtd['w_tr'].y(0)[0]))
 
     # Water
     SANSILLReduction(Run='010453.nxs', ProcessAs='Sample', MaskedInputWorkspace='mask',
@@ -168,7 +168,7 @@ This example below performs a complete reduction for D11 data.
     # Sample container transmission
     SANSILLReduction(Run='010444.nxs', ProcessAs='Transmission',
                      AbsorberInputWorkspace='Cd', BeamInputWorkspace='Dbw', OutputWorkspace='sc_tr', Version=1)
-    print('Sample container transmission is {0:.3f}'.format(mtd['sc_tr'].readY(0)[0]))
+    print('Sample container transmission is {0:.3f}'.format(mtd['sc_tr'].y(0)[0]))
 
     # Sample container
     SANSILLReduction(Run='010460.nxs', ProcessAs='Container',
@@ -178,7 +178,7 @@ This example below performs a complete reduction for D11 data.
     # Sample transmission
     SANSILLReduction(Run='010585.nxs', ProcessAs='Transmission',
                      AbsorberInputWorkspace='Cd', BeamInputWorkspace='Dbw', OutputWorkspace='s_tr', Version=1)
-    print('Sample transmission is {0:.3f}'.format(mtd['s_tr'].readY(0)[0]))
+    print('Sample transmission is {0:.3f}'.format(mtd['s_tr'].y(0)[0]))
 
     # Sample
     SANSILLReduction(Run='010569.nxs', ProcessAs='Sample', MaskedInputWorkspace='mask',

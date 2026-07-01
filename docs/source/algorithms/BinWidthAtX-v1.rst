@@ -45,8 +45,8 @@ Usage
     rebinned = Rebin(InputWorkspace=ws, Params=[newWidth], FullBinsOnly=True)
 
     def firstAndLastBinWidths(workspace):
-        first = workspace.readX(0)[1] - workspace.readX(0)[0]
-        last = workspace.readX(0)[-1] - workspace.readX(0)[-2]
+        first = workspace.x(0)[1] - workspace.x(0)[0]
+        last = workspace.x(0)[-1] - workspace.x(0)[-2]
         return (first, last)
 
     first, last = firstAndLastBinWidths(ws)

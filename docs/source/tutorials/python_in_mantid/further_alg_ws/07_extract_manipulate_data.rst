@@ -20,7 +20,7 @@ Using a loop, read and print the first value in all spectra
 
 	for index in range(0, raw_workspace.getNumberHistograms()):
 	    #Note the round brackets followed by the square brackets
-	    print(raw_workspace.readY(index)[0])
+	    print(raw_workspace.y(index)[0])
 
 Workspace data can be read as numpy arrays, spectrum by spectrum:
 
@@ -28,9 +28,9 @@ Workspace data can be read as numpy arrays, spectrum by spectrum:
 
 	ws = Load(Filename="HRP39182.RAW")
 	for i in range(ws.getNumberHistograms()):
-	    y = ws.readY(i)
-	    x = ws.readX(i)
-	    e = ws.readE(i)
+	    y = ws.y(i)
+	    x = ws.x(i)
+	    e = ws.e(i)
 
 Warning
 -------
@@ -55,7 +55,7 @@ The data from all spectra can be obtained as a mutable multi-dimensional array i
 
 Since the *extract* methods return multi-dimensional numpy arrays. So to use  *extract* in a similar way to *read*, you need to `slice these arrays with indexing <https://numpy.org/doc/1.18/reference/arrays.indexing.html>`_.
 
-E.g. instead of `ws.readX(5)` you should use:
+E.g. instead of `ws.x(5)` you should use:
 
 .. code-block:: python
 
@@ -75,7 +75,7 @@ This allows access to the individual bins in each spectrum. E.g. to sum the y-va
 	ws = Rebin(InputWorkspace=ws, Params=1e4) # Rebin to make the looping more manageable.
 	# Outer loop. Loop over spectrum
 	for i in range(ws.getNumberHistograms()):
-	    y = ws.readY(i)
+	    y = ws.y(i)
 	    sum_counts = 0
 	    # Inner loop. Loop over bins.
 	    for j in range(ws.blocksize()):
@@ -106,9 +106,9 @@ E.g. Change the x-axis for TOF from microseconds to milliseconds:
 
     # Load and Read data
     ws = Load(Filename="HRP39182.RAW")
-    x = ws.readX(0)
-    y = ws.readY(0)
-    e = ws.readE(0)
+    x = ws.x(0)
+    y = ws.y(0)
+    e = ws.e(0)
 
     # Alter the x data
     new_x = x * 1e-3
@@ -143,6 +143,6 @@ E.g. To read out the value in the first bin for each spectrum:
         specNumber = ws.getSpectrum(i).getSpectrumNo()
 
         # read each spectrum, just the first bin
-        y = ws.readY(i)[0]
+        y = ws.y(i)[0]
 
         table.addRow([specNumber,y])

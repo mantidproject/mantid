@@ -99,8 +99,8 @@ Output:
     theta_tof_rb1 = Rebin2D(theta_tof, '100,400,20000', '0, 0.001,1', UseFractionalArea=True)
     theta_tof_rb2 = Rebin2D(theta_tof_rb1, '100,400,20000', '0, 0.004,1', UseFractionalArea=True)
     theta_tof_rb_final = Rebin2D(theta_tof,  '100,400,20000', '0, 0.004, 1', UseFractionalArea=True)
-    print(f'Signal difference = {np.median(np.abs(theta_tof_rb_final.readY(0) - theta_tof_rb2.readY(0))):.3f}')
-    print(f'Errors difference = {np.median(np.abs(theta_tof_rb_final.readE(0) - theta_tof_rb2.readE(0))):.3f}')
+    print(f'Signal difference = {np.median(np.abs(theta_tof_rb_final.y(0) - theta_tof_rb2.y(0))):.3f}')
+    print(f'Errors difference = {np.median(np.abs(theta_tof_rb_final.e(0) - theta_tof_rb2.e(0))):.3f}')
 
 .. testoutput:: ExRebinTwice
 

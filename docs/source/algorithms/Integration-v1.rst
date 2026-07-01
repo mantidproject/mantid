@@ -110,10 +110,10 @@ Usage
 
     # Check the result
     print('The result workspace has {0} spectra'.format(intg.getNumberHistograms()))
-    print('Integral of spectrum 11 is {0}'.format(intg.readY(0)[0]))
-    print('Integral of spectrum 12 is {0}'.format(intg.readY(1)[0]))
-    print('Integral of spectrum 13 is {0}'.format(intg.readY(2)[0]))
-    print('Integration range is [ {0}, {1} ]'.format(intg.readX(0)[0], intg.readX(0)[1]))
+    print('Integral of spectrum 11 is {0}'.format(intg.y(0)[0]))
+    print('Integral of spectrum 12 is {0}'.format(intg.y(1)[0]))
+    print('Integral of spectrum 13 is {0}'.format(intg.y(2)[0]))
+    print('Integration range is [ {0}, {1} ]'.format(intg.x(0)[0], intg.x(0)[1]))
 
 Output:
 
@@ -155,7 +155,7 @@ Output:
         L2 = sample.getDistance(detector)
         tof = UnitConversion.run('Energy', 'TOF', Ei, L1, L2, 0.0, DeltaEModeType.Direct, Ei)
         ys = ws.dataY(i)
-        ys += peak(tof, ws.readX(i))
+        ys += peak(tof, ws.x(i))
 
     # Fit Gaussians to the workspace.
     # Fit results will be put into a table workspace 'epps'.

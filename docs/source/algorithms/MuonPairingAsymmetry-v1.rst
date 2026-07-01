@@ -81,8 +81,8 @@ Usage
                                                       Group1=[1, 2],
                                                       Group2=[3, 4])
 
-    print("X values are : {}".format([round(float(i), 3) for i in output_workspace.readX(0)]))
-    print("Y values are : {}".format([round(float(i), 3) for i in output_workspace.readY(0)]))
+    print("X values are : {}".format([round(float(i), 3) for i in output_workspace.x(0)]))
+    print("Y values are : {}".format([round(float(i), 3) for i in output_workspace.y(0)]))
 
 
 Output:
@@ -126,8 +126,8 @@ Output:
                                                       Group2=[3, 4],
                                                       SummedPeriods=[1, 2])
 
-    print("X values are : {}".format([round(float(i), 3) for i in output_workspace.readX(0)]))
-    print("Y values are : {}".format([round(float(i), 3) for i in output_workspace.readY(0)]))
+    print("X values are : {}".format([round(float(i), 3) for i in output_workspace.x(0)]))
+    print("Y values are : {}".format([round(float(i), 3) for i in output_workspace.y(0)]))
 
 
 Output:
@@ -169,8 +169,8 @@ Output:
                                                       InputWorkspace1=group_workspace_1,
                                                       InputWorkspace2=group_workspace_2)
 
-    print("X values are : {}".format([round(float(i), 3) for i in output_workspace.readX(0)]))
-    print("Y values are : {}".format([round(float(i), 3) for i in output_workspace.readY(0)]))
+    print("X values are : {}".format([round(float(i), 3) for i in output_workspace.x(0)]))
+    print("Y values are : {}".format([round(float(i), 3) for i in output_workspace.y(0)]))
 
 
 Output:

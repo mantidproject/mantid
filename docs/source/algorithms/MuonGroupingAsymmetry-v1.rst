@@ -70,8 +70,8 @@ Usage
 
     output_workspace = output[0]
 
-    print("X values are : {}".format([round(float(i), 3) for i in output_workspace.readX(0)]))
-    print("Y values are : {}".format([round(float(i), 3) for i in output_workspace.readY(0)]))
+    print("X values are : {}".format([round(float(i), 3) for i in output_workspace.x(0)]))
+    print("Y values are : {}".format([round(float(i), 3) for i in output_workspace.y(0)]))
 
 
 Output:
@@ -117,8 +117,8 @@ Output:
     output_workspace = output[0]
 
     # We have asked for periods 1+2, with each period summing detectors 1,2
-    print("X values are : {}".format([round(float(i), 3) for i in output_workspace.readX(0)]))
-    print("Y values are : {}".format([round(float(i), 3) for i in output_workspace.readY(0)]))
+    print("X values are : {}".format([round(float(i), 3) for i in output_workspace.x(0)]))
+    print("Y values are : {}".format([round(float(i), 3) for i in output_workspace.y(0)]))
 
 
 Output:

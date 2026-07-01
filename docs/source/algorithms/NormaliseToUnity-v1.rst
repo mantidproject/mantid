@@ -32,8 +32,8 @@ Usage
    print("Normalised Workspace")
    for i in range(4):
       print("[ {:.4f}, {:.4f}, {:.4f}, {:.4f}, {:.4f} ]".format(
-            wsNorm.readY(i)[0], wsNorm.readY(i)[1], wsNorm.readY(i)[2],
-            wsNorm.readY(i)[3], wsNorm.readY(i)[4]))
+            wsNorm.y(i)[0], wsNorm.y(i)[1], wsNorm.y(i)[2],
+            wsNorm.y(i)[3], wsNorm.y(i)[4]))
 
 Output:
 

@@ -27,11 +27,11 @@ Usage
 
    # Add spectra 1 - 16 to group 1
    for i in range(0,16):
-     grouping.dataY(i)[0] = 1
+     grouping.mutableY(i)[0] = 1
 
    # Add spectra 17 - 33 to group 2
    for i in range(16,33):
-     grouping.dataY(i)[0] = 2
+     grouping.mutableY(i)[0] = 2
 
    # Spectra 34 - 64 are left in group 0, i.e. are left unused
 

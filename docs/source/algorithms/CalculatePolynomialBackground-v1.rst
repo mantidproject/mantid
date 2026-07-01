@@ -33,9 +33,9 @@ Usage
    ws_bkg_subtr = ws - bkg
 
    peakIndex = numpy.argmax(ws.extractY())
-   Y = ws.readY(0)[peakIndex]
+   Y = ws.y(0)[peakIndex]
    print('Peak height with background: {:.1f}'.format(Y))
-   Y = ws_bkg_subtr.readY(0)[peakIndex]
+   Y = ws_bkg_subtr.y(0)[peakIndex]
    print('Background subtracted peak height: {:.1f}'.format(Y))
 
 Output:

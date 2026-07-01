@@ -53,7 +53,7 @@ Usage
 
     # Simulates Load of a workspace with all necessary parameters #################
     detWS = CreateSimulationWorkspace(Instrument='MAR',BinParams=[-50,2,50],UnitX='DeltaE')
-    detWS.dataE(0)[range(0,50)]=1
+    detWS.mutableE(0)[range(0,50)]=1
     AddSampleLog(detWS,LogName='Ei',LogText='52.',LogType='Number');
 
     # Correct detectors efficiency
@@ -64,7 +64,7 @@ Usage
     # Look at sample results:
     print('part of the corrected workspace:')
     for i in range(15,30):
-       print('{} {} {:.11f} {} {:.11f}'.format(detWS.readX(0)[i],detWS.readY(0)[i],corWS.readY(0)[i],detWS.readE(0)[i],corWS.readE(0)[i]))
+       print('{} {} {:.11f} {} {:.11f}'.format(detWS.x(0)[i],detWS.y(0)[i],corWS.y(0)[i],detWS.e(0)[i],corWS.e(0)[i]))
 
 
 

@@ -33,7 +33,7 @@ Usage
   # Check source mask workspace
   nummasked = 0
   for i in range(maskws.getNumberHistograms()):
-    if maskws.readY(i)[0] > 0.5:
+    if maskws.y(i)[0] > 0.5:
       nummasked += 1
 
   # Invert mask
@@ -42,7 +42,7 @@ Usage
   # Check target mask workspace
   nummasked2 = 0
   for i in range(invmaskws.getNumberHistograms()):
-    if invmaskws.readY(i)[0] > 0.5:
+    if invmaskws.y(i)[0] > 0.5:
       nummasked2 += 1
 
   # Print out

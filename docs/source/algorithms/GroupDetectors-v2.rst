@@ -188,9 +188,9 @@ Usage
   # Check the result
   print('Number of groups is {}'.format(grouped.getNumberHistograms()))
   print('First grouped spectrum is a sum 64 input spectra:')
-  print('{:.1f} == 64 * 0.3 == {:.1f}'.format(grouped.readY(0)[0], 64 * 0.3))
+  print('{:.1f} == 64 * 0.3 == {:.1f}'.format(grouped.y(0)[0], 64 * 0.3))
   print('Second grouped spectrum is a sum 60 input spectra:')
-  print('{:.1f} == 60 * 0.3 == {:.1f}'.format(grouped.readY(1)[0], 60 * 0.3))
+  print('{:.1f} == 60 * 0.3 == {:.1f}'.format(grouped.y(1)[0], 60 * 0.3))
   # Get detector IDs of the first group
   grp0_ids = grouped.getSpectrum(0).getDetectorIDs()
   print('Number of grouped detectors is {}'.format(len(grp0_ids)))
@@ -235,7 +235,7 @@ Output
   # Check the result
   print('Number of groups is {}'.format(grouped.getNumberHistograms()))
   print('The grouped spectrum is a sum 3 input spectra:')
-  print('{:.1f} == 3 * 0.3 == {:.1f}'.format(grouped.readY(0)[0], 3 * 0.3))
+  print('{:.1f} == 3 * 0.3 == {:.1f}'.format(grouped.y(0)[0], 3 * 0.3))
 
   # Get detector IDs in the group
   grp_ids = grouped.getSpectrum(0).getDetectorIDs()
@@ -266,7 +266,7 @@ Output
   # Check the result
   print('Number of groups is {}'.format(grouped.getNumberHistograms()))
   print('The grouped spectrum is a sum 3 input spectra:')
-  print('{:.1f} == 3 * 0.3 == {:.1f}'.format(grouped.readY(0)[0], 3 * 0.3))
+  print('{:.1f} == 3 * 0.3 == {:.1f}'.format(grouped.y(0)[0], 3 * 0.3))
 
   # Get detector IDs in the group
   grp_ids = grouped.getSpectrum(0).getDetectorIDs()
@@ -296,7 +296,7 @@ Output
   # Check the result
   print('Number of groups is {}'.format(grouped.getNumberHistograms()))
   print('The grouped spectrum is a sum 3 input spectra:')
-  print('{:.1f} == 3 * 0.3 == {:.1f}'.format(grouped.readY(0)[0], 3 * 0.3))
+  print('{:.1f} == 3 * 0.3 == {:.1f}'.format(grouped.y(0)[0], 3 * 0.3))
 
   # Get detector IDs in the group
   grp_ids = grouped.getSpectrum(0).getDetectorIDs()
@@ -505,12 +505,12 @@ Output:
    ws2 = GroupDetectors(ws, GroupingPattern="0+1,3,4-6,7:9")
 
    #print result
-   print(ws2.readY(0))
-   print(ws2.readY(1))
-   print(ws2.readY(2))
-   print(ws2.readY(3))
-   print(ws2.readY(4))
-   print(ws2.readY(5))
+   print(ws2.y(0))
+   print(ws2.y(1))
+   print(ws2.y(2))
+   print(ws2.y(3))
+   print(ws2.y(4))
+   print(ws2.y(5))
 
 Output:
 

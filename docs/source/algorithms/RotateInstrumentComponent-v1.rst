@@ -163,7 +163,7 @@ Example 3: Rotating a single detector
   saws = SolidAngle( ws )
   # Collect the solid angles from the first bin in saws and save them in numpy array.
   # Numpy module makes it easy to manipulate arrays
-  sa1 = np.array( [ saws.readY(i)[0] for i in range(saws.getNumberHistograms()) ] )
+  sa1 = np.array( [ saws.y(i)[0] for i in range(saws.getNumberHistograms()) ] )
 
   # Rotate detector 33 around the Z axis by 90 degrees.
   RotateInstrumentComponent( ws, DetectorID=33, X=0,Y=0,Z=1, Angle=90 )
@@ -173,7 +173,7 @@ Example 3: Rotating a single detector
 
   # Calculate the solid angles after rotation
   saws = SolidAngle( ws )
-  sa2 = np.array( [ saws.readY(i)[0] for i in range(saws.getNumberHistograms()) ] )
+  sa2 = np.array( [ saws.y(i)[0] for i in range(saws.getNumberHistograms()) ] )
 
   # Take element by element difference of the solid angles
   diff = sa2 - sa1

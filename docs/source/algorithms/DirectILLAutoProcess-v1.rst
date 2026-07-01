@@ -214,7 +214,7 @@ Sample, single crystal
     outputs = ['sample_SofQW_087294_Ei9meV_T1.5K', 'sample_SofQW_087283_Ei9meV_T50.0K']
     for output in outputs:
         SofQW = mtd[output]
-        qAxis = SofQW.readX(0)  # Vertical axis
+        qAxis = SofQW.x(0)  # Vertical axis
         eAxis = SofQW.getAxis(1)  # Horizontal axis
         print('{}: Q range: {:.3}...{:.3}A; W range {:.3}...{:.3}meV'.format(
             output, qAxis[0], qAxis[-1], eAxis.getMin(), eAxis.getMax()))

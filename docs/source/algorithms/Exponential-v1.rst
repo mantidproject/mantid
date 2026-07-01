@@ -31,8 +31,8 @@ Usage
   res = Exponential( ws )
 
   # Check the result
-  y = ws.readY(0)
-  yres = res.readY(0)
+  y = ws.y(0)
+  yres = res.y(0)
 
   # Use numpy array calculation to apply an exponential to all elements of array y
   yexp = np.exp(y)

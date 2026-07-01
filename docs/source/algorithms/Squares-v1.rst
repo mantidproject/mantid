@@ -32,7 +32,7 @@ Usage
     ws=Squares(MaxRange='20', Preamble='Hello', Sum=True, OutputFile=savefile)
 
     print("The first five values are:")
-    print(ws.readY(0)[0:5])
+    print(ws.y(0)[0:5])
 
     #clean up the file I saved
     os.remove(savefile)

@@ -74,8 +74,8 @@ Usage
     print ("The Absorption correction is calculated to match the input workspace")
     print ("  over %i bins, ranging from  %.2f to %.2f" %
         (wsOut.blocksize(),
-        wsOut.readY(0)[0],
-        wsOut.readY(0)[wsOut.blocksize()-1]))
+        wsOut.y(0)[0],
+        wsOut.y(0)[wsOut.blocksize()-1]))
 
 Output:
 
@@ -101,8 +101,8 @@ Output:
     print ("The Absorption correction is calculated to match the input workspace")
     print ("  over %i bins, ranging from  %.2f to %.2f" %
         (wsOut.blocksize(),
-        wsOut.readY(0)[0],
-        wsOut.readY(0)[wsOut.blocksize()-1]))
+        wsOut.y(0)[0],
+        wsOut.y(0)[wsOut.blocksize()-1]))
 
 Output:
 

@@ -155,10 +155,10 @@ Usage
     run = Load(Filename='INTER00013460.nxs')
     IvsQ, IvsQ_unbinned = ReflectometryReductionOneAuto(InputWorkspace=run, ThetaIn=0.7)
 
-    print("{:.5f}".format(IvsQ_unbinned.readY(0)[106]))
-    print("{:.5f}".format(IvsQ_unbinned.readY(0)[107]))
-    print("{:.5f}".format(IvsQ.readY(0)[13]))
-    print("{:.5f}".format(IvsQ.readY(0)[14]))
+    print("{:.5f}".format(IvsQ_unbinned.y(0)[106]))
+    print("{:.5f}".format(IvsQ_unbinned.y(0)[107]))
+    print("{:.5f}".format(IvsQ.y(0)[13]))
+    print("{:.5f}".format(IvsQ.y(0)[14]))
 
 Output:
 
@@ -177,10 +177,10 @@ Output:
     trans = Load(Filename='INTER00013463.nxs')
     IvsQ, IvsQ_unbinned, IvsLam, TRANS = ReflectometryReductionOneAuto(InputWorkspace=run, FirstTransmissionRun=trans, ThetaIn=0.7)
 
-    print("{:.5f}".format(IvsQ_unbinned.readY(0)[96]))
-    print("{:.5f}".format(IvsQ_unbinned.readY(0)[97]))
-    print("{:.5f}".format(IvsQ.readY(0)[5]))
-    print("{:.5f}".format(IvsQ.readY(0)[6]))
+    print("{:.5f}".format(IvsQ_unbinned.y(0)[96]))
+    print("{:.5f}".format(IvsQ_unbinned.y(0)[97]))
+    print("{:.5f}".format(IvsQ.y(0)[5]))
+    print("{:.5f}".format(IvsQ.y(0)[6]))
 
 Output:
 
@@ -198,10 +198,10 @@ Output:
     run = Load(Filename='INTER00013460.nxs')
     IvsQ, IvsQ_unbinned = ReflectometryReductionOneAuto(InputWorkspace=run, ThetaIn=0.7, DetectorCorrectionType="RotateAroundSample", MonitorBackgroundWavelengthMin=0.0, MonitorBackgroundWavelengthMax=1.0)
 
-    print("{:.5f}".format(IvsQ_unbinned.readY(0)[106]))
-    print("{:.5f}".format(IvsQ_unbinned.readY(0)[107]))
-    print("{:.5f}".format(IvsQ.readY(0)[5]))
-    print("{:.5f}".format(IvsQ.readY(0)[6]))
+    print("{:.5f}".format(IvsQ_unbinned.y(0)[106]))
+    print("{:.5f}".format(IvsQ_unbinned.y(0)[107]))
+    print("{:.5f}".format(IvsQ.y(0)[5]))
+    print("{:.5f}".format(IvsQ.y(0)[6]))
 
 Output:
 

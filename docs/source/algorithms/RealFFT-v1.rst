@@ -52,17 +52,17 @@ Usage
 
   # Check the X axes
   print('Input starts at {:.1f} , ends at {:.1f} , the width is {:.1f}'.format(
-        ws.readX(10)[0], ws.readX(10)[-1], ws.readX(10)[-1] - ws.readX(10)[0]))
+        ws.x(10)[0], ws.x(10)[-1], ws.x(10)[-1] - ws.x(10)[0]))
   print('Forward starts at  {:.1f} , ends at {:.2f} , the width is {:.2f}'.format(
-        transform.readX(0)[0], transform.readX(0)[-1], transform.readX(0)[-1] - transform.readX(0)[0]))
+        transform.x(0)[0], transform.x(0)[-1], transform.x(0)[-1] - transform.x(0)[0]))
   print('Backward starts at {:.1f} , ends at {:.1f} , the width is {:.1f}'.format(
-        ws_back.readX(0)[0], ws_back.readX(0)[-1], ws_back.readX(0)[-1] - ws_back.readX(0)[0]))
+        ws_back.x(0)[0], ws_back.x(0)[-1], ws_back.x(0)[-1] - ws_back.x(0)[0]))
 
   # Check that the backward transform restores the original data.
   # The input spetrum values
-  y10 = ws.readY(10)
+  y10 = ws.y(10)
   # The spectrum returned from the backward RealFFT
-  y_back = ws_back.readY(0)
+  y_back = ws_back.y(0)
   # Check that they are almost equal.
   # Using numpy array calculations show that all elements of arrays y_back and y10 are very close
   print(np.all(np.abs(y_back - y10) < 1e-15))

@@ -191,7 +191,7 @@ Usage
   detid = spec.getDetectorIDs()[0]
   print('Spectrum number is {}'.format(spec.getSpectrumNo()))
   print('Detector of this spectrum is masked: {}'.format(ws.getInstrument().getDetector(detid).isMasked()))
-  y = ws.readY(0)
+  y = ws.y(0)
   print('All counts in the spectrum are 0:    {}'.format(np.all( y == 0.0 )))
 
   # Get the 2nd spectrum in the workspace
@@ -199,7 +199,7 @@ Usage
   detid = spec.getDetectorIDs()[0]
   print('Spectrum number is {}'.format(spec.getSpectrumNo()))
   print('Detector of this spectrum is masked: {}'.format(ws.getInstrument().getDetector(detid).isMasked()))
-  y = ws.readY(1)
+  y = ws.y(1)
   print('All counts in the spectrum are 0:    {}'.format(np.all( y == 0.0 )))
 
   # Get the 3rd spectrum in the workspace
@@ -207,7 +207,7 @@ Usage
   detid = spec.getDetectorIDs()[0]
   print('Spectrum number is {}'.format(spec.getSpectrumNo()))
   print('Detector of this spectrum is masked: {}'.format(ws.getInstrument().getDetector(detid).isMasked()))
-  y = ws.readY(2)
+  y = ws.y(2)
   print('All counts in the spectrum are 0:    {}'.format(np.all( y == 0.0 )))
 
   # Get the 4th spectrum in the workspace
@@ -215,7 +215,7 @@ Usage
   detid = spec.getDetectorIDs()[0]
   print('Spectrum number is {}'.format(spec.getSpectrumNo()))
   print('Detector of this spectrum is masked: {}'.format(ws.getInstrument().getDetector(detid).isMasked()))
-  y = ws.readY(3)
+  y = ws.y(3)
   print('All counts in the spectrum are 0:    {}'.format(np.all( y == 0.0 )))
 
 Output:
@@ -370,11 +370,11 @@ Output:
   masking_ws,dummy = ExtractMask( tmp )
 
   print('A masking workspace has {} spectrum'.format(masking_ws.blocksize()))
-  print('Unmasked spectrum, value = {}'.format(masking_ws.readY(0)[0]))
-  print('Masked spectrum,   value = {}'.format(masking_ws.readY(1)[0]))
-  print('Unmasked spectrum, value = {}'.format(masking_ws.readY(2)[0]))
-  print('Masked spectrum,   value = {}'.format(masking_ws.readY(3)[0]))
-  print('Unmasked spectrum, value = {}'.format(masking_ws.readY(4)[0]))
+  print('Unmasked spectrum, value = {}'.format(masking_ws.y(0)[0]))
+  print('Masked spectrum,   value = {}'.format(masking_ws.y(1)[0]))
+  print('Unmasked spectrum, value = {}'.format(masking_ws.y(2)[0]))
+  print('Masked spectrum,   value = {}'.format(masking_ws.y(3)[0]))
+  print('Unmasked spectrum, value = {}'.format(masking_ws.y(4)[0]))
   print('')
 
   # Create a data workspace
@@ -452,7 +452,7 @@ Output:
   masking_ws,_ = ExtractMask( tmp )
 
   for ind in range(0,7):
-    val = masking_ws.readY(ind)[0]
+    val = masking_ws.y(ind)[0]
     if val>0:
         print('Unmasked spectrum, value= {}'.format(val))
     else:

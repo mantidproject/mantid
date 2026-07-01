@@ -399,14 +399,14 @@ The data is accessed using the ``readX()``, ``readY()`` and ``readE()`` commands
 .. testcode:: MatrixWorkspaceData
 
   # Get the Y vector for the second row of data
-  y_data2 = ws.readY(1)
+  y_data2 = ws.y(1)
   for y in y_data2:
       print(y)
 
   # Or in loop access. Print the first value in all spectra
   for index in range(0, ws.getNumberHistograms()):
       #Note the round brackets followed by the square brackets
-      print(ws.readY(index)[0])
+      print(ws.y(index)[0])
 
 .. testoutput:: MatrixWorkspaceData
     :hide:

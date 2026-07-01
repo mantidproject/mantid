@@ -96,8 +96,8 @@ Usage
     wsCorrected = ws / wsOut
 
     print("The created workspace has one entry for each spectra: {}".format(wsOut.getNumberHistograms()))
-    print("Original y values:  {}".format(ws.readY(0)))
-    print("Corrected y values:  {}".format(wsCorrected.readY(0)))
+    print("Original y values:  {}".format(ws.y(0)))
+    print("Corrected y values:  {}".format(wsCorrected.y(0)))
 
 Output:
 

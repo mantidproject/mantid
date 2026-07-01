@@ -28,7 +28,7 @@ Usage
    out_ws = DetectorFloodWeighting(InputWorkspace=ws, Bands=[0,10], SolidAngleCorrection=False)
 
    print('Number Histograms {}'.format(out_ws.getNumberHistograms()))
-   print('Min X: {} Max X: {}'.format(out_ws.readX(0)[0], out_ws.readX(0)[1]))
+   print('Min X: {} Max X: {}'.format(out_ws.x(0)[0], out_ws.x(0)[1]))
 
 Output:
 

@@ -37,7 +37,7 @@ Usage
             AbsorptionWorkspace="Absorption",
             MultipleScatteringWorkspace="MultipleScattering"
         )
-   print(f"Absorption correction calculated value is {result.AbsorptionWorkspace.readY(0)[0]:.2f} and multiple scattering value is {result.MultipleScatteringWorkspace.readY(0)[0]:.2f}")
+   print(f"Absorption correction calculated value is {result.AbsorptionWorkspace.y(0)[0]:.2f} and multiple scattering value is {result.MultipleScatteringWorkspace.y(0)[0]:.2f}")
 
 Output:
 
@@ -63,7 +63,7 @@ Output:
             AbsorptionWorkspace="Absorption",
             MultipleScatteringWorkspace="MultipleScattering"
         )
-   print(f"Absorption correction calculated value is {result.AbsorptionWorkspace.readY(0)[0]:.2f} and multiple scattering value is {result.MultipleScatteringWorkspace.readY(0)[0]:.2f}")
+   print(f"Absorption correction calculated value is {result.AbsorptionWorkspace.y(0)[0]:.2f} and multiple scattering value is {result.MultipleScatteringWorkspace.y(0)[0]:.2f}")
 
 Output:
 

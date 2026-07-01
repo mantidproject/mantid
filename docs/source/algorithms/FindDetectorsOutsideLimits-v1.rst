@@ -38,8 +38,8 @@ Usage
     noisyDetArray= [100.0] * ws.blocksize()
 
     for i in range(0,ws.getNumberHistograms(),5):
-        ws.setY(i,np.array(deadDetArray))
-        ws.setY(i+1,np.array(noisyDetArray))
+        ws.setSharedY(i,np.array(deadDetArray))
+        ws.setSharedY(i+1,np.array(noisyDetArray))
 
     print("With just the default LowThreshold of 0")
     (wsOut,NumberOfFailures)=FindDetectorsOutsideLimits(ws)
@@ -86,8 +86,8 @@ Output:
     print("****************************************")
     selected_spec = [99,100,199,200,299,300]
     for spec in selected_spec:
-        print("full mask ws Spec N{0} is masked: {1}".format(spec,mws1.readY(spec)[0]>0.5))
-        print("part mask ws Spec N{0} is masked: {1}".format(spec,mws2.readY(spec)[0]>0.5) )
+        print("full mask ws Spec N{0} is masked: {1}".format(spec,mws1.y(spec)[0]>0.5))
+        print("part mask ws Spec N{0} is masked: {1}".format(spec,mws2.y(spec)[0]>0.5) )
     print("****************************************")
 
 Output:

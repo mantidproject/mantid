@@ -181,7 +181,7 @@ One can evaluate functions:
 
     ws = CreateWorkspace(DataX=[0,1,2,3,4,5,6,7], DataY=[5,5,5,5,5,5,5])
 
-    print(p(ws).readY(1)) # expect [  0.375   1.875   4.375   7.875  12.375  17.875  24.375]
+    print(p(ws).y(1)) # expect [  0.375   1.875   4.375   7.875  12.375  17.875  24.375]
 
 One can use numpy arrays:
 

@@ -88,7 +88,7 @@ Usage
    # Focus the data
    ws = DiffractionFocussing(InputWorkspace='ws',GroupingFileName=cal_file)
 
-   print("The 51st y-value is: %.3f" % ws.readY(0)[50])
+   print("The 51st y-value is: %.3f" % ws.y(0)[50])
 
 Output:
 
@@ -134,7 +134,7 @@ Output:
    # Focus the data with defined binning parameters
    ws = DiffractionFocussing(InputWorkspace=ws,GroupingFileName=cal_file, DMin=[0.6,1.0,2.2], DMax=[1.0,1.5,4.0], Delta=0.1)
 
-   print(f"Output has {ws.getNumberHistograms()} spectra with number of bins {len(ws.readY(0))}, {len(ws.readY(1))} and {len(ws.readY(2))}")
+   print(f"Output has {ws.getNumberHistograms()} spectra with number of bins {len(ws.y(0))}, {len(ws.y(1))} and {len(ws.y(2))}")
 
 Output:
 

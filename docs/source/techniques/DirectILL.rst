@@ -108,7 +108,7 @@ On instruments like IN4 and IN6, these steps would translate to something like t
         DiagnosticsWorkspace='diagnostics'
     )
     SofQW = mtd['SofQW']
-    qAxis = SofQW.readX(0)  # Vertical axis
+    qAxis = SofQW.x(0)  # Vertical axis
     eAxis = SofQW.getAxis(1)  # Horizontal axis
     print('S(Q,W): Q range: {:.3}...{:.3}A; W range {:.3}...{:.3}meV'.format(
         qAxis[0], qAxis[-1], eAxis.getMin(), eAxis.getMax()))
@@ -363,7 +363,7 @@ The above workflow would translate to this kind of Python script for IN4 and IN6
         DiagnosticsWorkspace='diagnostics'
     )
     SofQW = mtd['SofQW']
-    qAxis = SofQW.readX(0)  # Vertical axis
+    qAxis = SofQW.x(0)  # Vertical axis
     eAxis = SofQW.getAxis(1)  # Horizontal axis
     print('S(Q,W): Q range: {:.3}...{:.3}A; W range {:.3}...{:.3}meV'.format(
         qAxis[0], qAxis[-1], eAxis.getMin(), eAxis.getMax()))
@@ -403,8 +403,8 @@ To alleviate the situation, the output workspaces of :ref:`algm-DirectILLCollect
         OutputWorkspace='container',
         IncidentEnergyWorkspace='Ei'  # Ensure same TOF binning.
     )
-    x_sample = mtd['sample'].readX(0)
-    x_container = mtd['container'].readX(0)
+    x_sample = mtd['sample'].x(0)
+    x_container = mtd['container'].x(0)
     print("Sample's TOF axis starts at {:.4}mus, container's at {:.4}mus".format(
         x_sample[0], x_container[0]))
 
@@ -513,7 +513,7 @@ A corresponding Python script follows.
         DiagnosticsWorkspace='diagnostics'
     )
     SofQW = mtd['SofQW']
-    qAxis = SofQW.readX(0)  # Vertical axis
+    qAxis = SofQW.x(0)  # Vertical axis
     eAxis = SofQW.getAxis(1)  # Horizontal axis
     print('S(Q,W): Q range: {:.3}...{:.3}A; W range {:.3}...{:.3}meV'.format(
         qAxis[0], qAxis[-1], eAxis.getMin(), eAxis.getMax()))
@@ -730,7 +730,7 @@ Lets put it all together into a complex Python script. The script below reduces 
     outputs = ['SofQW_1.5K', 'SofQW_50K']
     for output in outputs:
         SofQW = mtd[output]
-        qAxis = SofQW.readX(0)  # Vertical axis
+        qAxis = SofQW.x(0)  # Vertical axis
         eAxis = SofQW.getAxis(1)  # Horizontal axis
         print('{}: Q range: {:.3}...{:.3}A; W range {:.3}...{:.3}meV'.format(
             output, qAxis[0], qAxis[-1], eAxis.getMin(), eAxis.getMax()))
@@ -825,7 +825,7 @@ And the same reduction, but with the use of the :ref:`algm-DirectILLAutoProcess`
     outputs = ['sample_SofQW_087294_Ei9meV_T1.5K', 'sample_SofQW_087283_Ei9meV_T50.0K']
     for output in outputs:
         SofQW = mtd[output]
-        qAxis = SofQW.readX(0)  # Vertical axis
+        qAxis = SofQW.x(0)  # Vertical axis
         eAxis = SofQW.getAxis(1)  # Horizontal axis
         print('{}: Q range: {:.3}...{:.3}A; W range {:.3}...{:.3}meV'.format(
             output, qAxis[0], qAxis[-1], eAxis.getMin(), eAxis.getMax()))

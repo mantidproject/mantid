@@ -111,7 +111,7 @@ Generate peaks from a TableWorkspace
                              BinningParameters='0,0.01,20', NumberWidths=5)
 
    for i in [92,93,94,95]:
-       print("X = {:.6f}, Y = {:.6f}".format(fromtable.readX(0)[i], fromtable.readY(0)[i]))
+       print("X = {:.6f}, Y = {:.6f}".format(fromtable.x(0)[i], fromtable.y(0)[i]))
 
 .. testcleanup:: GeneratePeakFromTable
 
@@ -139,7 +139,7 @@ Generate peaks from arrays
 
   outws = mtd["GaussianPeak"]
   for i in [92,93,94,95]:
-      print("X = {:.6f}, Y = {:.6f}".format(outws.readX(0)[i], outws.readY(0)[i]))
+      print("X = {:.6f}, Y = {:.6f}".format(outws.x(0)[i], outws.y(0)[i]))
 
 
 .. testcleanup:: GeneratePeakFromArray

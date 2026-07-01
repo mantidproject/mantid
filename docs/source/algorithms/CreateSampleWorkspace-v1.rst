@@ -85,7 +85,7 @@ Usage
 
    print("Number of spectra: {}".format(ws.getNumberHistograms()))
    print("Number of bins: {}".format(ws.blocksize()))
-   print("Each spectra has a level background of {} counts and a peak in the centre of {} counts.".format(ws.readY(0)[0], ws.readY(0)[50]))
+   print("Each spectra has a level background of {} counts and a peak in the centre of {} counts.".format(ws.y(0)[0], ws.y(0)[50]))
 
 Output:
 
@@ -105,9 +105,9 @@ Output:
    print("Number of spectra: {}".format(ws.getNumberHistograms()))
    print("Number of bins: {}".format(ws.blocksize()))
    print("Number of events: {}".format(ws.getNumberEvents()))
-   print("Event Workspaces come with bins set by default to a bin width of {}".format(ws.readX(0)[1]-ws.readX(0)[0]))
+   print("Event Workspaces come with bins set by default to a bin width of {}".format(ws.x(0)[1]-ws.x(0)[0]))
    #The data itensity of an EventWorkspce is scaled by the number of events used, so the values differ from the histogram above.
-   print("Each spectra has a level background of {} counts and a peak in the centre of {} counts.".format(ws.readY(0)[0], ws.readY(0)[50]))
+   print("Each spectra has a level background of {} counts and a peak in the centre of {} counts.".format(ws.y(0)[0], ws.y(0)[50]))
 
 Output:
 
@@ -125,16 +125,16 @@ Output:
 
    # create a workspace with Flat Background
    wsFlat = CreateSampleWorkspace("Histogram","Flat background")
-   print("Flat background has a constant value of {} counts.".format(wsFlat.readY(0)[0]))
+   print("Flat background has a constant value of {} counts.".format(wsFlat.y(0)[0]))
 
    # create a workspace with multiple peaks
    wsMulti = CreateSampleWorkspace("Histogram","Multiple Peaks")
    print("Multiple Peaks has a level background of {} counts and two gaussian peaks, the largest of which is {} counts.".
-         format(wsMulti.readY(0)[0], wsMulti.readY(0)[60]))
+         format(wsMulti.y(0)[0], wsMulti.y(0)[60]))
 
    # create a workspace with Exponential Decay
    wsExp = CreateSampleWorkspace("Histogram","Exp Decay")
-   print("Exp Decay starts high and drops rapidly to {:.2f} counts at 8,000 us (with the default binning).".format(wsExp.readY(0)[40]))
+   print("Exp Decay starts high and drops rapidly to {:.2f} counts at 8,000 us (with the default binning).".format(wsExp.y(0)[40]))
 
 Output:
 
@@ -153,9 +153,9 @@ Output:
 
    ws = CreateSampleWorkspace("Histogram","User Defined",myFunc)
 
-   print("My function defined a background of {} counts.".format(ws.readY(0)[0]))
-   print("With a peak reaching {} counts at 1,100 us,".format(ws.readY(0)[5]))
-   print("and another reaching {} counts at 10,100 us.".format(ws.readY(0)[50]))
+   print("My function defined a background of {} counts.".format(ws.y(0)[0]))
+   print("With a peak reaching {} counts at 1,100 us,".format(ws.y(0)[5]))
+   print("and another reaching {} counts at 10,100 us.".format(ws.y(0)[50]))
 
 Output:
 

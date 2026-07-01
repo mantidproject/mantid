@@ -46,9 +46,9 @@ Usage
 
     rebinned = Rebin(InputWorkspace=ws, Params=[newWidth], FullBinsOnly=True)
 
-    widths = ws.readX(0)[1:] - ws.readX(0)[:-1]
+    widths = ws.x(0)[1:] - ws.x(0)[:-1]
     print('Bin widths before rebinning: {0}'.format(widths))
-    widths = rebinned.readX(0)[1:] - rebinned.readX(0)[:-1]
+    widths = rebinned.x(0)[1:] - rebinned.x(0)[:-1]
     print('Bin widths after rebinning: {0}'.format(widths))
 
 Output:

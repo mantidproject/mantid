@@ -75,8 +75,8 @@ Usage
     ws = CreateSampleWorkspace("Histogram",NumBanks=1,BankPixelWidth=1)
     wsOut = ConvertUnits(ws,Target="Wavelength")
 
-    print("Input {}".format(ws.readX(0)[ws.blocksize()-1]))
-    print("Output {:.11f}".format(wsOut.readX(0)[wsOut.blocksize()-1]))
+    print("Input {}".format(ws.x(0)[ws.blocksize()-1]))
+    print("Output {:.11f}".format(wsOut.x(0)[wsOut.blocksize()-1]))
 
 Output:
 

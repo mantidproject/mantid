@@ -38,8 +38,8 @@ The following code loads a BOA file and prints out information about the wavelen
 
     ViewBOA(2014, 61, 6)
 
-    lambda_distribution = mtd['histogram61'].readY(0)
-    lambda_values = mtd['histogram61'].readX(0)
+    lambda_distribution = mtd['histogram61'].y(0)
+    lambda_values = mtd['histogram61'].x(0)
 
     print("The wavelength spectrum is described by {} points.".format(len(lambda_distribution)))
     print("The range covered is {0} - {1} Angstrom.".format(round(lambda_values[0], 4),round(lambda_values[-1], 4)))

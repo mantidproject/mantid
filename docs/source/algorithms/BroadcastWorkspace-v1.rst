@@ -74,8 +74,8 @@ The following code should be saved as ``broadcast.py``
     # All ranks now have the workspace
     print(f"Rank {rank}: Received workspace with {output_ws.getNumberHistograms()} spectra")
     if rank != 0:
-        print(f"Rank {rank}: First spectrum Y values: {output_ws.readY(0)}")
-        print(f"Rank {rank}: Last spectrum Y values: {output_ws.readY(2)}")
+        print(f"Rank {rank}: First spectrum Y values: {output_ws.y(0)}")
+        print(f"Rank {rank}: Last spectrum Y values: {output_ws.y(2)}")
 
 
 To run:

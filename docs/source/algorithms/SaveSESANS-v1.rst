@@ -41,7 +41,7 @@ Usage
 
    # Retrieve loaded workspace from ADS
    in_ws = mtd["in_ws"]
-   print("Y values of loaded workspace = " + str(in_ws.readY(0)))
+   print("Y values of loaded workspace = " + str(in_ws.y(0)))
 
 .. testcleanup:: LoadSESANSRoundTrip
 

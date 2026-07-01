@@ -70,7 +70,7 @@ Usage
    # Print a few arbitrary bins where higher intensities are expected
    fmt = "For TOF of {0:.3f} normalized intensity is {1:.3f}"
    for bin in [3169, 6037, 7124]:
-     print(fmt.format(focussed_ws.readX(0)[bin], focussed_ws.readY(0)[bin]))
+     print(fmt.format(focussed_ws.x(0)[bin], focussed_ws.y(0)[bin]))
 
 .. testcleanup:: ExSimpleFocussing
 

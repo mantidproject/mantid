@@ -62,8 +62,8 @@ Usage
 
     print("Input workspace is a {}".format(input_workspace.id()))
     print("Output workspace is a {}".format(output_workspace.id()))
-    print("X values are : {}".format(output_workspace[0].readX(0)))
-    print("Y values are : {}".format(output_workspace[0].readY(0)))
+    print("X values are : {}".format(output_workspace[0].x(0)))
+    print("Y values are : {}".format(output_workspace[0].y(0)))
 
 
 Output:
@@ -86,8 +86,8 @@ Output:
     output_workspace = MuonPreProcess(InputWorkspace=input_workspace,
                                                 TimeOffset=0.5)
 
-    print("X values are : {}".format(output_workspace[0].readX(0)))
-    print("Y values are : {}".format(output_workspace[0].readY(0)))
+    print("X values are : {}".format(output_workspace[0].x(0)))
+    print("Y values are : {}".format(output_workspace[0].y(0)))
 
 
 Output:
@@ -108,8 +108,8 @@ Output:
     output_workspace = MuonPreProcess(InputWorkspace=input_workspace,
                                                 RebinArgs=2)
 
-    print("X values are : {}".format(output_workspace[0].readX(0)))
-    print("Y values are : {}".format(output_workspace[0].readY(0)))
+    print("X values are : {}".format(output_workspace[0].x(0)))
+    print("Y values are : {}".format(output_workspace[0].y(0)))
 
 
 Output:
@@ -131,8 +131,8 @@ Output:
                                                 TimeMin=2,
                                                 TimeMax=4)
 
-    print("X values are : {}".format(output_workspace[0].readX(0)))
-    print("Y values are : {}".format(output_workspace[0].readY(0)))
+    print("X values are : {}".format(output_workspace[0].x(0)))
+    print("Y values are : {}".format(output_workspace[0].y(0)))
 
 
 Output:
@@ -160,8 +160,8 @@ Output:
 
     output_workspace = MuonPreProcess(InputWorkspace=input_workspace,
                                                 DeadTimeTable=dead_times)
-    print("X values are : {}".format(output_workspace[0].readX(0)))
-    print("Y values are : {}".format(output_workspace[0].readY(0).round(1)))
+    print("X values are : {}".format(output_workspace[0].x(0)))
+    print("Y values are : {}".format(output_workspace[0].y(0).round(1)))
 
 Output:
 
@@ -187,13 +187,13 @@ Output:
                                       TimeZeroTable=time_zero_table)
 
     print("X values are : [{:.0f}, {:.0f}, {:.0f}, {:.0f}, {:.0f}, {:.0f}]".format(
-        output_workspace[0].readX(0)[0],output_workspace[0].readX(0)[1],
-        output_workspace[0].readX(0)[2],output_workspace[0].readX(0)[3],
-        output_workspace[0].readX(0)[4],output_workspace[0].readX(0)[5]))
+        output_workspace[0].x(0)[0],output_workspace[0].x(0)[1],
+        output_workspace[0].x(0)[2],output_workspace[0].x(0)[3],
+        output_workspace[0].x(0)[4],output_workspace[0].x(0)[5]))
     print("Y values are : [{:.0f}, {:.0f}, {:.0f}, {:.0f}, {:.0f}]".format(
-        output_workspace[0].readY(0)[0],output_workspace[0].readY(0)[1],
-        output_workspace[0].readY(0)[2],output_workspace[0].readY(0)[3],
-        output_workspace[0].readY(0)[4]))
+        output_workspace[0].y(0)[0],output_workspace[0].y(0)[1],
+        output_workspace[0].y(0)[2],output_workspace[0].y(0)[3],
+        output_workspace[0].y(0)[4]))
 
 Output:
 

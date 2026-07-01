@@ -54,7 +54,7 @@ Usage
    outputWS = InterpolateBackground(wsGroup, interpoTemp)
 
    # Check output
-   print("Interpolated Y values are: {}".format(outputWS.readY(0)))
+   print("Interpolated Y values are: {}".format(outputWS.y(0)))
 
 Output:
 

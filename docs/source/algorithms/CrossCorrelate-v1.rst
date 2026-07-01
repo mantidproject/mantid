@@ -56,8 +56,8 @@ Usage
    OutputWorkspace = CrossCorrelate(InputWorkspace='ws', WorkspaceIndexMax=1, XMin=2, XMax=4)
 
    # Show workspaces
-   print("AutoCorrelation {}".format(OutputWorkspace.readY(0)))
-   print("CrossCorrelation {}".format(OutputWorkspace.readY(1)))
+   print("AutoCorrelation {}".format(OutputWorkspace.y(0)))
+   print("CrossCorrelation {}".format(OutputWorkspace.y(1)))
 
 .. testoutput:: ExCrossCorrelate
 

@@ -36,7 +36,7 @@ Usage
     print("index  orig  corrected")
     for i in range(5):
         print("  %i    %.2f  %.2f" %
-            (i,ws.readY(0)[i],wsOut.readY(0)[i]))
+            (i,ws.y(0)[i],wsOut.y(0)[i]))
 
 
 Output:
