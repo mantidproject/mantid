@@ -29,8 +29,14 @@ option(ENABLE_WORKBENCH "Enable Qt-based gui" ON)
 
 # Major version of Qt to build the GUI layer against (5 or 6). A single version is selected per build tree; the
 # Qt-versioned target machinery in buildconfig/CMake/QtTargetFunctions.cmake produces the matching -Qt${V} targets.
+# Linux defaults to Qt6; Windows and macOS still default to Qt5.
+if(UNIX AND NOT APPLE)
+  set(_default_qt_version 6)
+else()
+  set(_default_qt_version 5)
+endif()
 set(MANTID_QT_VERSION
-    5
+    ${_default_qt_version}
     CACHE STRING "Major version of Qt to build against (5 or 6)"
 )
 set_property(CACHE MANTID_QT_VERSION PROPERTY STRINGS 5 6)

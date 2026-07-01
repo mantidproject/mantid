@@ -47,12 +47,16 @@ requirements:
     - pyvista ${{ pyvista }}
     - pyvistaqt
     - superqt
-    - qtconsole ${{ qtconsole }}
     - ${{ pin_compatible("setuptools", upper_bound="x.x") }}
+    # qtconsole-base avoids pulling in PyQt5 on the Qt6 build
     - if: linux
       then:
+        - qtconsole-base ${{ qtconsole }}
         - pystack
         - lz4
+    - if: win or osx
+      then:
+        - qtconsole ${{ qtconsole }}
     - if: osx
       then:
         - python.app
