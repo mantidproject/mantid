@@ -196,11 +196,8 @@ class TexturePlotter:
         plot_sample_only(fig, rot_mesh, 0.5, "grey")
         if self.vis_settings["directions"]:
             sample_model.plot_sample_directions(self._model.ax_transform, self._model.dir_names, scat_centre=scat_centre)
-        lim = extent * n_gon / 1.5
-        lab_ax.set_xlim([-lim, lim])
-        lab_ax.set_ylim([-lim, lim])
-        lab_ax.set_zlim([-lim, lim])
-        lab_ax.set_aspect("equal")
+        lim = [-(abs_lim := extent * n_gon / 1.5), abs_lim]
+        lab_ax.set(xlim=lim, ylim=lim, zlim=lim, aspect="equal")
         if self._model.workspaces.gauge_volume_str:
             sample_model.plot_gauge_vol()
 
