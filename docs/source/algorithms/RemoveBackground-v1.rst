@@ -98,8 +98,8 @@ Proof of concept background removal algorithm::
        # Jacobian for the unit conversion
        Jac           = (TimeScale[1:nBins]-TimeScale[0:nBins-1])*(bg[0]/(bgT[1]-bgT[0]));
        error         = np.sqrt(Jac);
-       eGrid.setY(nspec, Jac)
-       eGrid.setE(nspec, error)
+       eGrid.setSharedY(nspec, Jac)
+       eGrid.setSharedE(nspec, error)
     else:  # signal and error for background is 0 anyway.
         pass
     #print(" bg at spectra {0} equal to : {1}".format(nspec,bg[0]))

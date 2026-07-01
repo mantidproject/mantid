@@ -69,7 +69,7 @@ Usage
     AddSampleLog(ws,"goodfrm","10","Number")
     noisyY =  np.array(ws.y(0))
     noisyY[0]=1e20
-    ws.setY(50,noisyY)
+    ws.setSharedY(50,noisyY)
     (wsOut, numFailures) = CreatePSDBleedMask(ws,MaxTubeFramerate=10, NIgnoredCentralPixels=2)
 
     print("{} spectra have been masked in wsOut".format(numFailures))
