@@ -12,7 +12,7 @@ import numpy as np
 from qtpy.QtCore import Qt
 from mantidqt.utils.qt.testing import start_qapplication
 from mantid.simpleapi import CreateSampleWorkspace
-from instrumentview.FullInstrumentViewWindow import FullInstrumentViewWindow, _LIGHT_GREY
+from instrumentview.FullInstrumentViewWindow import FullInstrumentViewView, _LIGHT_GREY
 from instrumentview.ShapeWidgets import (
     AnnulusSelectionShape,
     CircleSelectionShape,
@@ -23,7 +23,7 @@ from instrumentview.ShapeWidgets import (
 
 
 @start_qapplication
-class TestFullInstrumentViewWindow(unittest.TestCase):
+class TestFullInstrumentViewView(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls._workspace = CreateSampleWorkspace(StoreInADS=False)
@@ -35,7 +35,7 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
     @mock.patch("instrumentview.FullInstrumentViewWindow.BackgroundPlotter")
     def setUp(self, mock_plotter, mock_splitter_add_widget, mock_v_add_widget, mock_h_add_widget, mock_figure_canvas) -> None:
         with mock.patch("mantidqt.utils.qt.qappthreadcall.force_method_calls_to_qapp_thread"):
-            self._view = FullInstrumentViewWindow()
+            self._view = FullInstrumentViewView()
         self._mock_plotter = mock_plotter
         self._mock_splitter_add_widget = mock_splitter_add_widget
         self._mock_v_add_widget = mock_v_add_widget
@@ -84,18 +84,6 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
     def test_update_scalar_range(self):
         self._view.set_plotter_scalar_bar_range((0, 100), "label")
         self._view.main_plotter.update_scalar_bar_range.assert_has_calls([mock.call((0, 100), "label")])
-
-    @mock.patch("qtpy.QtWidgets.QMainWindow.closeEvent")
-    def test_close_event(self, mock_close_event):
-        self._view.closeEvent(MagicMock())
-        self.assertEqual(1, mock_close_event.call_count)
-        self._view.main_plotter.close.assert_called_once()
-
-    @mock.patch("qtpy.QtWidgets.QMainWindow.closeEvent")
-    def test_close_no_presenter(self, mock_close_event):
-        self._view._presenter = None
-        self._view.closeEvent(MagicMock())
-        self._view.main_plotter.close.assert_called_once()
 
     def test_add_simple_shape(self):
         self._view.main_plotter.reset_mock()
@@ -245,7 +233,7 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
     ):
         mock_config.Instance.return_value.__getitem__.return_value = "UnknownValue"
         with mock.patch("mantidqt.utils.qt.qappthreadcall.force_method_calls_to_qapp_thread"):
-            view = FullInstrumentViewWindow()
+            view = FullInstrumentViewView()
         self.assertEqual(view.get_render_mode_option(), view._RENDER_MODE_POINTS)
 
     @mock.patch("instrumentview.FullInstrumentViewWindow.FigureCanvas")
@@ -259,7 +247,7 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
     ):
         mock_config.Instance.return_value.__getitem__.return_value = self._view._RENDER_MODE_RAW_SHAPES
         with mock.patch("mantidqt.utils.qt.qappthreadcall.force_method_calls_to_qapp_thread"):
-            view = FullInstrumentViewWindow()
+            view = FullInstrumentViewView()
         self.assertEqual(view.get_render_mode_option(), self._view._RENDER_MODE_RAW_SHAPES)
 
     @mock.patch("instrumentview.FullInstrumentViewWindow.FigureCanvas")
@@ -273,7 +261,7 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
     ):
         mock_config.Instance.return_value.__getitem__.return_value = self._view._RENDER_MODE_SHAPES_FAST
         with mock.patch("mantidqt.utils.qt.qappthreadcall.force_method_calls_to_qapp_thread"):
-            view = FullInstrumentViewWindow()
+            view = FullInstrumentViewView()
         self.assertEqual(view.get_render_mode_option(), self._view._RENDER_MODE_SHAPES_FAST)
 
     def test_on_axes_click_right_calls_presenter_with_right(self):

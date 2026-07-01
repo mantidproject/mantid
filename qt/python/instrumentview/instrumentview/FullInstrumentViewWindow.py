@@ -27,7 +27,7 @@ from qtpy.QtWidgets import (
     QTabWidget,
     QFrame,
 )
-from qtpy.QtGui import QDoubleValidator, QMovie, QDragEnterEvent, QDropEvent, QDragMoveEvent, QColor, QPalette, QPixmap, QIcon, QPainter
+from qtpy.QtGui import QDoubleValidator, QDragEnterEvent, QDropEvent, QDragMoveEvent, QColor, QPalette, QPixmap, QIcon, QPainter
 from qtpy.QtCore import Qt, QEvent, QSize
 from qtpy.QtWidgets import QFileDialog
 from superqt import QDoubleRangeSlider
@@ -58,7 +58,6 @@ from instrumentview.ShapeWidgets import (
 )
 from instrumentview.ShapeOverlayManager import ShapeOverlayManager
 
-import os
 from contextlib import suppress
 from typing import Callable
 
@@ -92,7 +91,7 @@ def _ensure_overlay_manager(method):
 
 
 class WorkspaceListWidget(QListWidget):
-    def __init__(self, parent):
+    def __init__(self, parent=None):
         super().__init__(parent)
         self.setDragDropMode(QAbstractItemView.DropOnly)
 
@@ -151,7 +150,32 @@ class FullInstrumentViewWindow(QMainWindow):
     """View for the Instrument View window. Contains the 3D view, the projection view, boxes showing information about the selected
     detector, and a line plot of selected detector(s)"""
 
-    _detector_spectrum_fig = None
+    def __init__(self, parent=None, off_screen=False):
+        """The instrument in the given workspace will be displayed. The off_screen option is for testing or rendering an image
+        e.g. in a script."""
+        super(FullInstrumentViewWindow, self).__init__(parent)
+        self.setWindowTitle("Instrument View")
+        self._instrument_view_widget = FullInstrumentViewView(self, off_screen)
+        self.setCentralWidget(self._instrument_view_widget)
+
+        screen_geometry = self.screen().geometry()
+        self.resize(int(screen_geometry.width() * 0.8), int(screen_geometry.height() * 0.8))
+        window_geometry = self.frameGeometry()
+        center_point = screen_geometry.center()
+        window_geometry.moveCenter(center_point)
+        self.move(window_geometry.topLeft())
+
+    def get_instrument_view_widget(self) -> "FullInstrumentViewView":
+        return self._instrument_view_widget
+
+    def closeEvent(self, QCloseEvent: QEvent) -> None:
+        """When closing, make sure to close the plotters and figure correctly to prevent errors"""
+        self.get_instrument_view_widget().close()
+        super().closeEvent(QCloseEvent)
+
+
+@run_on_qapp_thread()
+class FullInstrumentViewView(QWidget):
     _ASPECT_RATIO_SETTING_STRING = "InstrumentView.MaintainAspectRatio"
     _RENDER_MODE_SETTING_STRING = "InstrumentView.RenderMode"
     _FLIP_BEAM_SETTING_STRING = "InstrumentView.FlipBeam"
@@ -161,71 +185,64 @@ class FullInstrumentViewWindow(QMainWindow):
     _RENDER_MODE_OPTIONS = (_RENDER_MODE_POINTS, _RENDER_MODE_SHAPES_FAST, _RENDER_MODE_RAW_SHAPES)
     _COLOURS = ["#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
 
+    pv.global_theme.background = "black"
+    pv.global_theme.font.color = "white"
+
     def __init__(self, parent=None, off_screen=False):
-        """The instrument in the given workspace will be displayed. The off_screen option is for testing or rendering an image
-        e.g. in a script."""
-
-        pv.global_theme.background = "black"
-        pv.global_theme.font.color = "white"
-
-        super(FullInstrumentViewWindow, self).__init__(parent)
-        self.setWindowTitle("Instrument View")
         self._off_screen = off_screen
 
-        central_widget = QWidget(self)
-        self.setCentralWidget(central_widget)
-        tab_widget = QTabWidget()
-        parent_horizontal_layout = QHBoxLayout(central_widget)
+        super().__init__(parent)
 
-        pyvista_vertical_widget = QWidget()
-        left_column_widget = QWidget()
-        tab_widget.addTab(left_column_widget, "Home")
-        pyvista_vertical_layout = QVBoxLayout(pyvista_vertical_widget)
-        left_column_layout = QVBoxLayout(left_column_widget)
+        self._overlay_meshes = []
+        self._lineplot_overlays = []
+        self._closing = False
+        self._current_widget = None
+        self._shape_overlay_manager = None
+        self._last_selected_projection = None
+        self._last_camera_position = None
+        self._last_parallel_scale = None
+        self._detector_spectrum_fig = None
 
-        left_column_scroll = QScrollArea()
-        left_column_scroll.setWidgetResizable(True)
-        left_column_scroll.setWidget(tab_widget)
-        left_column_scroll.setFrameShape(QFrame.NoFrame)
+        self._create_main_widgets()
+        self._set_layouts()
 
-        hsplitter = QSplitter(Qt.Horizontal)
-        hsplitter.addWidget(left_column_scroll)
-        hsplitter.addWidget(pyvista_vertical_widget)
-        hsplitter.setSizes([150, 200])
-        hsplitter.splitterMoved.connect(self._on_splitter_moved)
-        parent_horizontal_layout.addWidget(hsplitter)
+        UsageService.registerFeatureUsage(FeatureType.Interface, "InstrumentView2025", False)
 
-        self.main_plotter = BackgroundPlotter(show=False, menu_bar=False, toolbar=False, off_screen=off_screen)
-        pyvista_vertical_layout.addWidget(self.main_plotter.app_window)
+    def _create_main_widgets(self):
+        self._left_column_tabs = QTabWidget()
+        self._left_column_home = QWidget()
+        self._left_column_component_tree = QWidget()
+        self._left_column_scroll = QScrollArea()
+
+        self.component_tree = ComponentTreeView()
+        self.component_tree.setSelectionMode(QAbstractItemView.ExtendedSelection)
+
+        self._right_column_graphics = QWidget()
+        self._parent_hsplitter = QSplitter(Qt.Horizontal)
+        # TODO: get connections out of setup
+        self._parent_hsplitter.splitterMoved.connect(self._on_splitter_moved)
+        self.main_plotter = BackgroundPlotter(show=False, menu_bar=False, toolbar=False, off_screen=self._off_screen)
 
         self._detector_spectrum_fig = Figure()
         self._detector_spectrum_axes = self._detector_spectrum_fig.add_subplot(111, projection="mantid")
         self._detector_figure_canvas = FigureCanvas(self._detector_spectrum_fig)
         self._detector_figure_canvas.setMinimumSize(QSize(0, 0))
-        self._plot_toolbar = MantidNavigationToolbar(self._detector_figure_canvas, self)
+        self._plot_toolbar = MantidNavigationToolbar(self._detector_figure_canvas, None)
         # Unwrap matplotlib's internal callback wrappers (_StrongRef, WeakMethod)
         # to store the actual callables, so they can be re-connected later.
         # Must be done after toolbar creation so its callbacks are included.
         self._default_lineplot_callbacks = {
             cid: ref() for cid, ref in self._detector_figure_canvas.callbacks.callbacks.get("button_press_event", {}).items()
         }
-        plot_widget = QWidget()
-        plot_layout = QVBoxLayout(plot_widget)
-        plot_layout.addWidget(self._detector_figure_canvas)
-        plot_layout.addWidget(self._plot_toolbar)
+        self._lineplot_widget = QWidget()
         self._lineplot_peak_cursor = None
 
-        vsplitter = QSplitter(Qt.Vertical)
-        vsplitter.addWidget(self.main_plotter.app_window)
-        vsplitter.addWidget(plot_widget)
-        vsplitter.setStretchFactor(0, 5)
-        vsplitter.setStretchFactor(1, 4)
-        vsplitter.splitterMoved.connect(self._on_splitter_moved)
+        self._graphics_vsplitter = QSplitter(Qt.Vertical)
+        self._graphics_vsplitter.splitterMoved.connect(self._on_splitter_moved)
 
-        pyvista_vertical_layout.addWidget(vsplitter)
-
-        self._detector_group_box = QGroupBox("Detector Info")
-        detector_info_layout = QVBoxLayout(self._detector_group_box)
+        # Used as a single widget
+        self._detector_info_group_box = QGroupBox("Detector Info")
+        detector_info_layout = QVBoxLayout(self._detector_info_group_box)
         self._detector_name_edit = self._add_detector_info_boxes(detector_info_layout, "Name")
         self._detector_id_edit = self._add_detector_info_boxes(detector_info_layout, "Detector ID")
         self._detector_workspace_index_edit = self._add_detector_info_boxes(detector_info_layout, "Workspace Index")
@@ -236,9 +253,10 @@ class FullInstrumentViewWindow(QMainWindow):
         self._detector_relative_angle_edit = self._add_detector_info_boxes(detector_info_layout, "Relative Angle (degrees)")
         self.set_relative_detector_angle(None)
 
+        # Used as a single widget
         self._integration_limit_group_box = QGroupBox("Units")
         integration_box_layout = QVBoxLayout(self._integration_limit_group_box)
-        self._units_combo_box_sliders = NoWheelComboBox(self)
+        self._units_combo_box_sliders = NoWheelComboBox()
         self._units_combo_box_sliders.setToolTip("Select the units for the detectors shown.")
         integration_box_layout.addWidget(self._units_combo_box_sliders)
         (
@@ -248,18 +266,15 @@ class FullInstrumentViewWindow(QMainWindow):
             self._integration_limit_reset,
         ) = self._add_min_max_group_box(integration_box_layout)
 
+        # Used as a single widget
         self._contour_range_group_box = QGroupBox("Contour Range")
         contour_box_layout = QVBoxLayout(self._contour_range_group_box)
         self._contour_range_min_edit, self._contour_range_max_edit, self._contour_range_slider, self._contour_range_reset = (
             self._add_min_max_group_box(contour_box_layout)
         )
 
-        projection_group_box = QGroupBox("Projection")
-        projection_layout = QVBoxLayout(projection_group_box)
-        projection_first_row = QHBoxLayout()
-        projection_second_row = QHBoxLayout()
-        projection_third_row = QHBoxLayout()
-        self._projection_combo_box = NoWheelComboBox(self)
+        self._projection_group_box = QGroupBox("Projection")
+        self._projection_combo_box = NoWheelComboBox()
         self._reset_projection = QPushButton("Reset Projection")
         self._reset_projection.setToolTip("Resets the projection to default.")
         self._reset_projection.clicked.connect(self.reset_camera)
@@ -280,7 +295,7 @@ class FullInstrumentViewWindow(QMainWindow):
         self._aspect_ratio_check_box.setChecked(is_config_setting_true(self._ASPECT_RATIO_SETTING_STRING))
         self._show_monitors_check_box = CheckBoxWithColourLabel("Monitors")
         self._show_sample_position_check_box = CheckBoxWithColourLabel("Sample")
-        self._count_scale_combo_box = NoWheelComboBox(self)
+        self._count_scale_combo_box = NoWheelComboBox()
         self._count_scale_combo_box.setToolTip("Select display scale for integrated counts")
         self._flip_beam_check_box = QCheckBox()
         self._flip_beam_check_box.setText("Flip Beam")
@@ -290,7 +305,7 @@ class FullInstrumentViewWindow(QMainWindow):
         )
         self._select_bank_tube = QPushButton("Select Bank/Tube")
         self._select_bank_tube.setCheckable(True)
-        self._render_mode_combo_box = NoWheelComboBox(self)
+        self._render_mode_combo_box = NoWheelComboBox()
         self._render_mode_combo_box.addItems(self._RENDER_MODE_OPTIONS)
         saved_mode = ConfigService.Instance()[self._RENDER_MODE_SETTING_STRING]
         if saved_mode not in self._RENDER_MODE_OPTIONS:
@@ -301,38 +316,16 @@ class FullInstrumentViewWindow(QMainWindow):
             "Shapes (Fast): draw detector shapes with optimised quad approximation.\n"
             "Full Shapes: draw the full triangulated detector geometry."
         )
-        projection_first_row.addWidget(self._projection_combo_box)
-        projection_first_row.addWidget(self._reset_projection)
-        projection_second_row.addWidget(self._hover_pick)
-        projection_second_row.addWidget(self._select_bank_tube)
-        projection_second_row.addWidget(self._clear_point_picked_detectors)
-        projection_third_row.addWidget(self._aspect_ratio_check_box)
-        projection_third_row.addWidget(self._flip_beam_check_box)
-        projection_third_row.addWidget(self._show_monitors_check_box)
-        projection_third_row.addWidget(self._show_sample_position_check_box)
-        projection_second_row.addWidget(self._render_mode_combo_box)
-        projection_third_row.addWidget(self._count_scale_combo_box)
-        projection_layout.addLayout(projection_first_row)
-        projection_layout.addLayout(projection_second_row)
-        projection_layout.addLayout(projection_third_row)
 
-        peak_ws_group_box = QGroupBox("Peaks Workspaces")
-        peak_v_layout = QVBoxLayout(peak_ws_group_box)
-        peak_buttons_h_layout = QHBoxLayout()
+        self._peaks_group_box = QGroupBox("Peaks Workspaces")
         self._delete_all_selected_peaks_button = QPushButton("Delete All Peaks In Selected Detectors")
         self._start_adding_peaks_button = QPushButton("Adding/Deleting Peaks Mode")
         self._start_adding_peaks_button.setCheckable(True)
-        self._peak_ws_list = WorkspaceListWidget(self)
+        self._peak_ws_list = WorkspaceListWidget()
         self._peak_ws_list.setSizeAdjustPolicy(QListWidget.AdjustToContents)
-        peak_buttons_h_layout.addWidget(self._start_adding_peaks_button)
-        peak_buttons_h_layout.addWidget(self._delete_all_selected_peaks_button)
-        peak_v_layout.addLayout(peak_buttons_h_layout)
-        peak_v_layout.addWidget(self._peak_ws_list)
 
-        grouping_masking_group_box = QGroupBox("Grouping and Masking")
-        grouping_masking_group_layout = QVBoxLayout(grouping_masking_group_box)
-        shapes_widget = QWidget()
-        shapes_layout = QHBoxLayout(shapes_widget)
+        self._grouping_masking_group_box = QGroupBox("Grouping and Masking")
+        self._shapes_widget = QWidget()
         self._add_circle = QPushButton("Add Circle")
         self._add_circle.setCheckable(True)
         self._add_rectangle = QPushButton("Add Rectangle")
@@ -343,13 +336,10 @@ class FullInstrumentViewWindow(QMainWindow):
         self._add_annulus.setCheckable(True)
         self._add_hollow_rectangle = QPushButton("Add Hollow Rectangle")
         self._add_hollow_rectangle.setCheckable(True)
-        shapes_layout.addWidget(self._add_circle)
-        shapes_layout.addWidget(self._add_rectangle)
-        shapes_layout.addWidget(self._add_ellipse)
-        shapes_layout.addWidget(self._add_annulus)
-        shapes_layout.addWidget(self._add_hollow_rectangle)
+
         self._shape_buttons = [self._add_circle, self._add_rectangle, self._add_ellipse, self._add_annulus, self._add_hollow_rectangle]
 
+        # TODO: for the ROI and Mask tabs, should separate buttons from layout
         self._selection_tab = QWidget()
         (
             self._add_selection,
@@ -383,92 +373,141 @@ class FullInstrumentViewWindow(QMainWindow):
         self._picking_masking_tab = QTabWidget()
         self._picking_masking_tab.addTab(self._selection_tab, CurrentTab.Grouping.value)
         self._picking_masking_tab.addTab(mask_tab, CurrentTab.Masking.value)
-        grouping_masking_group_layout.addWidget(shapes_widget)
-        grouping_masking_group_layout.addWidget(self._picking_masking_tab)
 
         self.status_group_box = QGroupBox("Status")
-        status_layout = QHBoxLayout(self.status_group_box)
-        status_label = QLabel("Loading ...")
-        status_graphics = QLabel()
-        status_graphics.setFixedSize(50, 50)
-        status_graphics.setAlignment(Qt.AlignCenter)
-        status_graphics.setScaledContents(True)
-        spinner = QMovie(f"{os.path.dirname(__file__)}/loading.gif")
-        status_graphics.setMovie(spinner)
-        status_layout.addWidget(status_label)
-        status_layout.addWidget(status_graphics)
-        spinner.start()
-        status_layout.addStretch()
 
-        options_vertical_widget = QWidget()
-        options_vertical_layout = QVBoxLayout(options_vertical_widget)
-        options_vertical_layout.addWidget(self._integration_limit_group_box)
-        options_vertical_layout.addWidget(self._contour_range_group_box)
-        options_vertical_layout.addWidget(projection_group_box)
-
-        lineplot_group_box = QGroupBox("Line Plot")
-        lineplot_layout = QHBoxLayout(lineplot_group_box)
-        self._units_combo_box_lineplot = NoWheelComboBox(self)
+        self._lineplot_options_group_box = QGroupBox("Line Plot")
+        self._units_combo_box_lineplot = NoWheelComboBox()
         self._units_combo_box_lineplot.setToolTip("Select the units for the lineplot.")
-        self._export_workspace_button = QPushButton("Export Spectra to ADS", self)
-        self._sum_spectra_checkbox = QCheckBox(self)
+        self._export_workspace_button = QPushButton("Export Spectra to ADS")
+        self._sum_spectra_checkbox = QCheckBox()
         self._sum_spectra_checkbox.setChecked(True)
         self._sum_spectra_checkbox.setText("Sum Selected Spectra")
         self._sum_spectra_checkbox.setToolTip(
             "Selected spectra will be converted to d-Spacing, summed, then converted back to the desired unit."
         )
-        lineplot_layout.addWidget((self._units_combo_box_lineplot))
-        lineplot_layout.addWidget(self._export_workspace_button)
-        lineplot_layout.addWidget(self._sum_spectra_checkbox)
 
-        options_vertical_layout.addWidget(lineplot_group_box)
+        self._lists_vsplitter = QSplitter(Qt.Vertical)
 
-        vsplitter = QSplitter(Qt.Vertical)
-        vsplitter.addWidget(peak_ws_group_box)
-        vsplitter.addWidget(grouping_masking_group_box)
-        vsplitter.addWidget(self._detector_group_box)
-        self._detector_group_box.setMaximumHeight(self._detector_group_box.sizeHint().height())
-        spacer = QWidget()
-        spacer.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
-        vsplitter.addWidget(spacer)
-        vsplitter.setStretchFactor(0, 1)  # peak_ws_group_box stretches
-        vsplitter.setStretchFactor(1, 1)  # grouping_masking_group_box stretches
-        vsplitter.setStretchFactor(2, 0)  # detector_group_box fixed
-        vsplitter.setStretchFactor(3, 1)  # spacer absorbs extra space
-        vsplitter.setChildrenCollapsible(False)
+        self._spacer = QWidget()
+        self._spacer.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
 
-        options_vertical_layout.addWidget(vsplitter)
+    def _set_layouts(self):
+        parent_horizontal_layout = QHBoxLayout(self)
+        parent_horizontal_layout.addWidget(self._parent_hsplitter)
 
-        options_vertical_layout.addWidget(self.status_group_box)
-        left_column_layout.addWidget(options_vertical_widget)
+        self._parent_hsplitter.addWidget(self._left_column_scroll)
+        self._parent_hsplitter.addWidget(self._right_column_graphics)
+        self._parent_hsplitter.setSizes([150, 200])
 
-        component_tree_tab = QWidget()
-        component_layout = QVBoxLayout(component_tree_tab)
-        self.component_tree = ComponentTreeView()
-        self.component_tree.setSelectionMode(QAbstractItemView.ExtendedSelection)
-        component_layout.addWidget(self.component_tree)
-        tab_widget.addTab(component_tree_tab, "Component Tree")
+        self._left_column_scroll.setWidgetResizable(True)
+        self._left_column_scroll.setWidget(self._left_column_tabs)
+        self._left_column_scroll.setFrameShape(QFrame.NoFrame)
 
-        self._overlay_meshes = []
-        self._lineplot_overlays = []
+        self._left_column_tabs.addTab(self._left_column_home, "Home")
+        self._left_column_tabs.addTab(self._left_column_component_tree, "Component Tree")
 
-        screen_geometry = self.screen().geometry()
-        self.resize(int(screen_geometry.width() * 0.8), int(screen_geometry.height() * 0.8))
-        window_geometry = self.frameGeometry()
-        center_point = screen_geometry.center()
-        window_geometry.moveCenter(center_point)
-        self.move(window_geometry.topLeft())
+        left_column_component_layout = QVBoxLayout(self._left_column_component_tree)
+        left_column_component_layout.addWidget(self.component_tree)
 
-        self._closing = False
-        self._current_widget = None
-        self._shape_overlay_manager = None
-        self._default_camera_position_map = {}
-        self._default_parallel_scales = {}
-        self._last_selected_projection = None
-        self._last_camera_position = None
-        self._last_parallel_scale = None
+        left_column_home_layout = QVBoxLayout(self._left_column_home)
+        left_column_home_layout.addWidget(self._integration_limit_group_box)
+        left_column_home_layout.addWidget(self._contour_range_group_box)
+        left_column_home_layout.addWidget(self._projection_group_box)
+        left_column_home_layout.addWidget(self._lineplot_options_group_box)
+        left_column_home_layout.addWidget(self._lists_vsplitter)
 
-        UsageService.registerFeatureUsage(FeatureType.Interface, "InstrumentView2025", False)
+        projection_layout = QVBoxLayout(self._projection_group_box)
+        projection_first_row = QHBoxLayout()
+        projection_second_row = QHBoxLayout()
+        projection_third_row = QHBoxLayout()
+
+        projection_first_row.addWidget(self._projection_combo_box)
+        projection_first_row.addWidget(self._reset_projection)
+        projection_second_row.addWidget(self._hover_pick)
+        projection_second_row.addWidget(self._select_bank_tube)
+        projection_second_row.addWidget(self._clear_point_picked_detectors)
+        projection_third_row.addWidget(self._aspect_ratio_check_box)
+        projection_third_row.addWidget(self._flip_beam_check_box)
+        projection_third_row.addWidget(self._show_monitors_check_box)
+        projection_third_row.addWidget(self._show_sample_position_check_box)
+        projection_second_row.addWidget(self._render_mode_combo_box)
+        projection_third_row.addWidget(self._count_scale_combo_box)
+        projection_layout.addLayout(projection_first_row)
+        projection_layout.addLayout(projection_second_row)
+        projection_layout.addLayout(projection_third_row)
+
+        lineplot_options_layout = QHBoxLayout(self._lineplot_options_group_box)
+        lineplot_options_layout.addWidget((self._units_combo_box_lineplot))
+        lineplot_options_layout.addWidget(self._export_workspace_button)
+        lineplot_options_layout.addWidget(self._sum_spectra_checkbox)
+
+        self._lists_vsplitter.addWidget(self._peaks_group_box)
+        self._lists_vsplitter.addWidget(self._grouping_masking_group_box)
+        self._lists_vsplitter.addWidget(self._detector_info_group_box)
+
+        # TODO: Figure out if spacer still needed
+        self._detector_info_group_box.setMaximumHeight(self._detector_info_group_box.sizeHint().height())
+        self._lists_vsplitter.addWidget(self._spacer)
+        self._lists_vsplitter.setStretchFactor(0, 1)  # peak_ws_group_box stretches
+        self._lists_vsplitter.setStretchFactor(1, 1)  # grouping_masking_group_box stretches
+        self._lists_vsplitter.setStretchFactor(2, 0)  # detector_group_box fixed
+        self._lists_vsplitter.setStretchFactor(3, 1)  # spacer absorbs extra space
+        self._lists_vsplitter.setChildrenCollapsible(False)
+
+        peaks_layout = QVBoxLayout(self._peaks_group_box)
+        peak_buttons_h_layout = QHBoxLayout()
+        peak_buttons_h_layout.addWidget(self._start_adding_peaks_button)
+        peak_buttons_h_layout.addWidget(self._delete_all_selected_peaks_button)
+        peaks_layout.addLayout(peak_buttons_h_layout)
+        peaks_layout.addWidget(self._peak_ws_list)
+
+        grouping_masking_group_layout = QVBoxLayout(self._grouping_masking_group_box)
+        grouping_masking_group_layout.addWidget(self._shapes_widget)
+        grouping_masking_group_layout.addWidget(self._picking_masking_tab)
+
+        shapes_layout = QHBoxLayout(self._shapes_widget)
+        shapes_layout.addWidget(self._add_circle)
+        shapes_layout.addWidget(self._add_rectangle)
+        shapes_layout.addWidget(self._add_ellipse)
+        shapes_layout.addWidget(self._add_annulus)
+        shapes_layout.addWidget(self._add_hollow_rectangle)
+
+        right_column_graphics_layout = QVBoxLayout(self._right_column_graphics)
+        right_column_graphics_layout.addWidget(self._graphics_vsplitter)
+
+        self._graphics_vsplitter.addWidget(self.main_plotter.app_window)
+        self._graphics_vsplitter.addWidget(self._lineplot_widget)
+        self._graphics_vsplitter.setStretchFactor(0, 5)
+        self._graphics_vsplitter.setStretchFactor(1, 4)
+
+        self._lineplot_layout = QVBoxLayout(self._lineplot_widget)
+        self._lineplot_layout.addWidget(self._detector_figure_canvas)
+        self._lineplot_layout.addWidget(self._plot_toolbar)
+
+    def closeEvent(self, event) -> None:
+        """Closes view, not window"""
+        self._closing = True
+        with suppress(TypeError):
+            self._contour_range_max_edit.disconnect()
+            self._contour_range_min_edit.disconnect()
+            self._integration_limit_max_edit.disconnect()
+            self._integration_limit_min_edit.disconnect()
+        # Shut down any callbacks before closing the plotter and the figure
+        if hasattr(self, "_presenter") and self._presenter is not None:
+            self._presenter.handle_close()
+
+        # NOTE: Closing main plotter should be after presenter handle closing
+        self.main_plotter.close()
+
+        super().closeEvent(event)
+
+    def close_window(self) -> None:
+        # NOTE: Triggers window close, which in turn closes view
+        try:
+            self.window().close()
+        except RuntimeError:
+            pass  # Already deleted
 
     def check_sum_spectra_checkbox(self) -> None:
         self._sum_spectra_checkbox.setChecked(True)
@@ -535,21 +574,10 @@ class FullInstrumentViewWindow(QMainWindow):
             self.main_plotter.camera_position = self._last_camera_position
             self.main_plotter.camera.parallel_scale = self._last_parallel_scale
 
-    def cache_default_camera_position(self) -> None:
-        self.main_plotter.reset_camera()
-        self._default_camera_position_map[self.current_selected_projection()] = self.main_plotter.camera_position
-        self._default_parallel_scales[self.current_selected_projection()] = self.main_plotter.camera.parallel_scale
-
     def reset_camera(self) -> None:
         if self._off_screen:
             return
-
-        if self.current_selected_projection() in self._default_camera_position_map.keys():
-            self.main_plotter.camera_position = self._default_camera_position_map[self.current_selected_projection()]
-            self.main_plotter.camera.parallel_scale = self._default_parallel_scales[self.current_selected_projection()]
-        else:
-            # Apply default position, in case cache not available
-            self.main_plotter.reset_camera()
+        self.main_plotter.reset_camera()
         return
 
     def _add_min_max_group_box(self, parent_vbox_layout: QVBoxLayout) -> tuple[QLineEdit, QLineEdit, QDoubleRangeSlider, QPushButton]:
@@ -644,7 +672,7 @@ class FullInstrumentViewWindow(QMainWindow):
         pre_list_layout = QHBoxLayout()
         pre_list_layout.addWidget(add_item_btn)
         pre_list_layout.addWidget(clear_items_btn)
-        item_list = WorkspaceListWidget(self)
+        item_list = WorkspaceListWidget()
         item_list.setSizeAdjustPolicy(QListWidget.AdjustToContents)
         item_list.setSelectionMode(QAbstractItemView.NoSelection)
         post_list_layout = QHBoxLayout()
@@ -813,20 +841,6 @@ class FullInstrumentViewWindow(QMainWindow):
             self._shape_overlay_manager = None
         self._current_widget = None
 
-    def _setup_units_options(self, parent: QVBoxLayout):
-        """Add widgets for the units options"""
-        hBox = QHBoxLayout()
-        self._export_workspace_button = QPushButton("Export Spectra to ADS", self)
-        hBox.addWidget(self._export_workspace_button)
-        self._sum_spectra_checkbox = QCheckBox(self)
-        self._sum_spectra_checkbox.setChecked(True)
-        self._sum_spectra_checkbox.setText("Sum Selected Spectra")
-        self._sum_spectra_checkbox.setToolTip(
-            "Selected spectra will be converted to d-Spacing, summed, then converted back to the desired unit."
-        )
-        hBox.addWidget(self._sum_spectra_checkbox)
-        parent.addLayout(hBox)
-
     def refresh_peaks_ws_list(self) -> None:
         # TODO: Very similar to other refresh list function, combine in one function
         list_to_refresh = self._peak_ws_list
@@ -959,26 +973,11 @@ class FullInstrumentViewWindow(QMainWindow):
             return
         self.main_plotter.scalar_bars[self._presenter._counts_label].SetTitle(display_title)
 
-    def closeEvent(self, QCloseEvent: QEvent) -> None:
-        """When closing, make sure to close the plotters and figure correctly to prevent errors"""
-        self._closing = True
-        super().closeEvent(QCloseEvent)
-        # Disconnect the editingFinished signals we connected (see _add_connections_to_edits_and_slider)
-        # rather than calling the no-argument (wildcard) QLineEdit.disconnect(), which makes Qt6 emit
-        # "wildcard call disconnects from destroyed signal" while the widgets are being torn down.
-        with suppress(TypeError):
-            self._contour_range_max_edit.editingFinished.disconnect()
-            self._contour_range_min_edit.editingFinished.disconnect()
-            self._integration_limit_max_edit.editingFinished.disconnect()
-            self._integration_limit_min_edit.editingFinished.disconnect()
-        # Shut down any callbacks before closing the plotter and the figure
-        if hasattr(self, "_presenter") and self._presenter is not None:
-            self._presenter.handle_close()
-        self.main_plotter.close()
-
-    def set_projection_combo_options(self, default_index: int, options: list[str]) -> None:
+    def set_projection_combo_options(self, options: list[str]) -> None:
         self._projection_combo_box.addItems(options)
-        self._projection_combo_box.setCurrentIndex(default_index)
+
+    def set_default_projection(self, proj: ProjectionType):
+        self._projection_combo_box.setCurrentText(proj.value)
 
     def current_selected_projection(self) -> str:
         return self._projection_combo_box.currentText()
@@ -1083,7 +1082,7 @@ class FullInstrumentViewWindow(QMainWindow):
 
     def set_selected_detector_info(self, detector_infos: list[DetectorInfo]) -> None:
         """For a list of detectors, with their info wrapped up in a class, update all of the info text boxes"""
-        self._detector_group_box.setVisible(bool(detector_infos))
+        self._detector_info_group_box.setVisible(bool(detector_infos))
         self._set_detector_edit_text(self._detector_name_edit, detector_infos, lambda d: d.name)
         self._set_detector_edit_text(self._detector_id_edit, detector_infos, lambda d: str(d.detector_id))
         self._set_detector_edit_text(self._detector_workspace_index_edit, detector_infos, lambda d: str(d.workspace_index))

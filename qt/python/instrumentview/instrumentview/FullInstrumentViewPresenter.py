@@ -17,7 +17,7 @@ from mantid.simpleapi import AnalysisDataService
 from mantid.dataobjects import MaskWorkspace, GroupingWorkspace, PeaksWorkspace
 
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
-from instrumentview.FullInstrumentViewWindow import FullInstrumentViewWindow
+from instrumentview.FullInstrumentViewWindow import FullInstrumentViewView
 from instrumentview.InstrumentViewADSObserver import InstrumentViewADSObserver
 from instrumentview.ComponentTreeModel import ComponentTreeModel
 from instrumentview.ComponentTreePresenter import ComponentTreePresenter
@@ -57,7 +57,7 @@ class FullInstrumentViewPresenter:
     _XML_FILE_FILTER = "XML files (*xml)"
     _CAL_FILE_FILTER = "CAL files (*cal)"
 
-    def __init__(self, view: FullInstrumentViewWindow, model: FullInstrumentViewModel):
+    def __init__(self, view: FullInstrumentViewView, model: FullInstrumentViewModel):
         """For the given workspace, use the data from the model to plot the detectors. Also include points at the origin and
         any monitors."""
         self._view = view
@@ -105,7 +105,8 @@ class FullInstrumentViewPresenter:
 
     def setup(self):
         self._view.subscribe_presenter(self)
-        self._view.set_projection_combo_options(*self._model.get_default_projection_index_and_options())
+        self._view.set_projection_combo_options(self._model.get_projection_options())
+        self._view.set_default_projection(self._model.get_default_projection())
         self._view.setup_connections_to_presenter()
         self._view.set_contour_range_limits(self._model.counts_limits)
         self._view.set_integration_range_limits(self._model.integration_limits)
@@ -301,7 +302,6 @@ class FullInstrumentViewPresenter:
         else:
             self.on_contour_limits_updated()
 
-        self._view.cache_default_camera_position()
         self._view.reset_camera()
 
         # Set style after camera reset for correct camera defaults
@@ -598,7 +598,7 @@ class FullInstrumentViewPresenter:
 
     def _delete_workspace_callback(self, ws_name):
         if self._model.workspace.name() == ws_name:
-            self._view.close()
+            self._view.close_window()
             logger.warning(f"Workspace {ws_name} deleted, closed Experimental Instrument View.")
         else:
             self._reload_everything()
@@ -619,7 +619,7 @@ class FullInstrumentViewPresenter:
         self._callback_queue.put((self._rename_workspace_callback, (ws_old_name, ws_new_name)))
 
     def clear_workspace_callback(self):
-        self._view.close()
+        self._view.close_window()
 
     def _replace_workspace_callback(self, ws_name, ws):
         if isinstance(ws, PeaksWorkspace):
@@ -629,11 +629,14 @@ class FullInstrumentViewPresenter:
         elif isinstance(ws, GroupingWorkspace):
             self._reload_grouping_workspaces()
         elif ws_name == self._model.workspace.name():
-            self._model._workspace = AnalysisDataService.retrieve(ws_name)
-            self._model.setup()
-            self._setup_component_tree()
-            self._reload_renderers()  # Clear cached renderers before rendering
-            self.update_plotter()
+            self._reset_model_workspace(ws_name)
+
+    def _reset_model_workspace(self, ws_name):
+        self._model._workspace = AnalysisDataService.retrieve(ws_name)
+        self._model.setup()
+        self._setup_component_tree()
+        self._reload_renderers()  # Clear cached renderers before rendering
+        self.update_plotter()
 
     def replace_workspace_callback(self, ws_name, ws):
         self._callback_queue.put((self._replace_workspace_callback, (ws_name, ws)))

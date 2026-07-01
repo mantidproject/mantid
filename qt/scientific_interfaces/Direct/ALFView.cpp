@@ -12,9 +12,12 @@
 #include "ALFInstrumentModel.h"
 #include "ALFInstrumentView.h"
 #include "ALFInstrumentWidget.h"
+#include "ALFPythonInstrumentView.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/QtJobRunner.h"
 
+#include <QCloseEvent>
+#include <QSettings>
 #include <QSplitter>
 #include <QString>
 #include <QVBoxLayout>
@@ -30,8 +33,18 @@ ALFView::ALFView(QWidget *parent) : UserSubWindow(parent), m_instrumentPresenter
   auto jobRunnerInst = std::make_unique<MantidQt::API::QtJobRunner>();
   auto algorithmManagerInst = std::make_unique<ALFAlgorithmManager>(std::move(jobRunnerInst));
 
+  QSettings settings(QSettings::IniFormat, QSettings::UserScope, "mantidproject", "mantidworkbench");
+  const bool useNewInstrumentView = settings.value("InstrumentView/use_new_instrument_view", false).toBool();
+
+  IALFInstrumentView *view;
+  if (useNewInstrumentView) {
+    view = new ALFPythonInstrumentView(this);
+  } else {
+    view = new ALFInstrumentView(this);
+  }
+
   m_instrumentPresenter = std::make_unique<ALFInstrumentPresenter>(
-      new ALFInstrumentView(this), std::make_unique<ALFInstrumentModel>(), std::move(algorithmManagerInst));
+      std::move(view), std::make_unique<ALFInstrumentModel>(), std::move(algorithmManagerInst));
 
   // Algorithm manager for the analysis presenter
   auto jobRunnerAnalysis = std::make_unique<MantidQt::API::QtJobRunner>();
@@ -44,7 +57,16 @@ ALFView::ALFView(QWidget *parent) : UserSubWindow(parent), m_instrumentPresenter
   m_instrumentPresenter->subscribeAnalysisPresenter(m_analysisPresenter.get());
 }
 
-ALFView::~ALFView() { m_instrumentPresenter->saveSettings(); }
+void ALFView::closeEvent(QCloseEvent *event) {
+  m_instrumentPresenter->saveSettings();
+  // Explicitly close the Python view widget before the Qt widget hierarchy is
+  // torn down, so that its closeEvent fires and resources (e.g. VTK plotter)
+  // are cleaned up while all child widgets are still valid.
+  if (auto *widget = m_instrumentPresenter->getInstrumentView()) {
+    widget->close();
+  }
+  UserSubWindow::closeEvent(event);
+}
 
 void ALFView::disable(std::string const &reason) {
   this->setEnabled(false);

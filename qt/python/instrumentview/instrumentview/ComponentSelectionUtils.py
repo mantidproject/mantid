@@ -8,22 +8,29 @@
 import numpy as np
 
 
-def detector_indices_in_component_subtrees(component_indices: list[int], component_info) -> np.ndarray:
-    """Return indices of detectors that belong to the given component subtrees.
-
-    The returned indices are concatenated in the same order as ``component_indices``.
-    If no components are provided, an empty integer array is returned.
+def detector_component_indices_in_subtrees(component_indices: np.ndarray, component_info) -> list:
+    """
+    Return unique subtrees of the provided indices
     """
     if len(component_indices) == 0:
-        return np.array([], dtype=int)
-    return np.concatenate([component_info.detectorsInSubtree(idx) for idx in component_indices], dtype=int)
+        return []
+    seen_parents: set = set()
+    result = []
+    for cidx in component_indices:
+        parent = component_info.parent(int(cidx))
+
+        # Skip if already got that subtree
+        if parent in seen_parents:
+            continue
+
+        seen_parents.add(parent)
+        result.append(component_info.detectorsInSubtree(parent))
+    return result
 
 
 def detector_table_indices_for_parent_subtrees(
     selected_indices: np.ndarray,
-    detector_ids: np.ndarray,
     component_idxs: np.ndarray,
-    detector_info,
     component_info,
     pickable_mask: np.ndarray | None = None,
 ) -> np.ndarray:
@@ -40,20 +47,8 @@ def detector_table_indices_for_parent_subtrees(
     if selected_indices.size == 0:
         return np.array([], dtype=int)
 
-    expanded_indices: set[int] = set()
-    for i, cidx in enumerate(component_idxs[selected_indices]):
-        if not component_info.hasParent(int(cidx)):
-            expanded_indices.add(int(selected_indices[i]))
-            continue
+    expanded_array = np.concatenate(detector_component_indices_in_subtrees(component_idxs[selected_indices], component_info))
 
-        parent_index = component_info.parent(int(cidx))
-        subtree_detector_indices = component_info.detectorsInSubtree(parent_index)
-
-        sorter = np.argsort(component_idxs)
-        indices = sorter[np.searchsorted(component_idxs, subtree_detector_indices, sorter=sorter)]
-        expanded_indices.update(indices.flatten())
-
-    expanded_array = np.array(sorted(expanded_indices), dtype=int)
     if pickable_mask is None:
         return expanded_array
     return expanded_array[pickable_mask[expanded_array]]
