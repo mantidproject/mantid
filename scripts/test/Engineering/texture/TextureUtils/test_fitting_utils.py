@@ -531,6 +531,88 @@ class TextureUtilsFittingStepsTests(unittest.TestCase):
 
     @patch(f"{texture_utils_path}.Fit")
     @patch(f"{texture_utils_path}._make_composite")
+    @patch(f"{texture_utils_path}.FunctionFactory")
+    @patch(f"{texture_utils_path}.MultiDomainFunction")
+    def test_rerun_fit_with_new_ws_fixes_shared_params_instead_of_tying(
+        self,
+        mock_gen_mdf,
+        mock_func_factory,
+        mock_make_comp,
+        mock_fit,
+    ):
+        """The shared broadening params (parameters_to_tie) should be fixed per-domain at the value
+        carried through from the previous fit, NOT tied across domains - this decouples the fit."""
+        mdf = MagicMock()
+        fit_kwargs = {"SomeKwarg": 123}
+        md_fit_kwargs = {
+            "InputWorkspace": "old_ws",
+            "StartX": 10.0,
+            "EndX": 20.0,
+            "WorkspaceIndex": 0,
+            "InputWorkspace_1": "old_ws",
+            "StartX_1": 30.0,
+            "EndX_1": 40.0,
+            "WorkspaceIndex_1": 1,
+        }
+        new_ws = MagicMock()
+        new_ws.name.return_value = "new_ws"
+
+        mdf.nFunctions.return_value = 2
+
+        # previous fit's domains carry the (tied) refined A, B values we expect to be re-asserted
+        peak0, peak1 = MagicMock(), MagicMock()
+        bg0, bg1 = MagicMock(), MagicMock()
+        peak0.name.return_value = "BackToBackExponential"
+        peak1.name.return_value = "BackToBackExponential"
+        peak0.getParameterValue.side_effect = lambda p: {"I": 0.5, "X0": 10.0, "A": 1.5, "B": 2.5, "S": 1.0}[p]
+        peak1.getParameterValue.side_effect = lambda p: {"I": 4.0, "X0": 20.0, "A": 1.5, "B": 2.5, "S": 1.0}[p]
+
+        comp0, comp1 = MagicMock(), MagicMock()
+        comp0.__getitem__.side_effect = lambda i: [peak0, bg0][i]
+        comp1.__getitem__.side_effect = lambda i: [peak1, bg1][i]
+        mdf.__getitem__.side_effect = (comp0, comp1)
+
+        new_func = MagicMock()
+        mock_gen_mdf.return_value = new_func
+
+        new_peak0, new_peak1 = MagicMock(), MagicMock()
+        new_peak0.name.return_value = "BackToBackExponential"
+        new_peak1.name.return_value = "BackToBackExponential"
+        for np_mock in (new_peak0, new_peak1):
+            np_mock.nParams.return_value = 5
+            np_mock.getParamName.side_effect = lambda i: ["I", "X0", "A", "B", "S"][i]
+        mock_instance = MagicMock()
+        mock_func_factory.Instance.return_value = mock_instance
+        mock_instance.createPeakFunction.side_effect = (new_peak0, new_peak1)
+
+        mock_make_comp.side_effect = (MagicMock(), MagicMock())
+        mock_fit.return_value = MagicMock()
+
+        rerun_fit_with_new_ws(
+            mdf=mdf,
+            fit_kwargs=fit_kwargs,
+            md_fit_kwargs=md_fit_kwargs,
+            new_ws=new_ws,
+            x0_frac_move=0.1,
+            iters=50,
+            parameters_to_tie=("A", "B"),
+            tie_background=False,
+            is_final=False,
+        )
+
+        # each domain re-asserts the previous A, B value (survives setMatrixWorkspace) then fixes it
+        for new_peak in (new_peak0, new_peak1):
+            new_peak.setParameter.assert_any_call("A", 1.5)
+            new_peak.setParameter.assert_any_call("B", 2.5)
+            new_peak.fixParameter.assert_any_call("A")
+            new_peak.fixParameter.assert_any_call("B")
+
+        # the shared params must NOT be tied across domains (no f*.f0.* ties); with tie_background
+        # off there are no cross-domain ties at all, so addTies is not called
+        new_func.addTies.assert_not_called()
+
+    @patch(f"{texture_utils_path}.Fit")
+    @patch(f"{texture_utils_path}._make_composite")
     @patch(f"{texture_utils_path}._get_default_param_ties")
     @patch(f"{texture_utils_path}.FunctionFactory")
     @patch(f"{texture_utils_path}.MultiDomainFunction")
