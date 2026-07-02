@@ -295,7 +295,7 @@ std::vector<std::string> MDTransfQ3D::outputUnitID(Kernel::DeltaEMode::Type dEmo
 }
 
 bool MDTransfQ3D::calcMatrixCoord3D(double qx, double qy, double qz, std::vector<coord_t> &Coord) const {
-  std::vector<coord_t> coord(3);
+  std::array<coord_t, 3> coord{};
   if (m_invertRot) {
     calcMatrixCoordLinSys(qx, qy, qz, coord);
   }

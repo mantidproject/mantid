@@ -179,25 +179,7 @@ bool MDTransfModQ::calcMatrixCoordInelastic(double deltaE, std::vector<coord_t> 
     qy = -m_ey * m_kFixed;
     qz = kInitial - m_ez * m_kFixed;
   }
-
-  std::vector<coord_t> Q(3);
-  if (m_invertRot) {
-    calcMatrixCoordLinSys(qx, qy, qz, Q);
-  } else {
-    // transformation matrix has to be here for "Crystal AS Powder conversion
-    // mode, further specialization possible if "powder" mode defined"
-    Q[0] = static_cast<coord_t>(m_RotMat[0] * qx + m_RotMat[1] * qy + m_RotMat[2] * qz);
-    Q[1] = static_cast<coord_t>(m_RotMat[3] * qx + m_RotMat[4] * qy + m_RotMat[5] * qz);
-    Q[2] = static_cast<coord_t>(m_RotMat[6] * qx + m_RotMat[7] * qy + m_RotMat[8] * qz);
-  }
-
-  const auto Qsq = Q[0] * Q[0] + Q[1] * Q[1] + Q[2] * Q[2];
-  if (Qsq < static_cast<coord_t>(m_DimMin[0]) || Qsq >= static_cast<coord_t>(m_DimMax[0])) {
-    return false;
-  }
-  Coord[0] = sqrt(Qsq);
-
-  return true;
+  return applyCoordTransf(qx, qy, qz, Coord);
 }
 /** function calculates workspace-dependent coordinates in elastic case.
 * Namely, it calculates module of Momentum transfer
@@ -217,24 +199,9 @@ bool MDTransfModQ::calcMatrixCoordElastic(double k0, std::vector<coord_t> &Coord
   double qx = -m_ex * k0;
   double qy = -m_ey * k0;
   double qz = (1 - m_ez) * k0;
-
-  std::vector<coord_t> Q(3);
-  if (m_invertRot) {
-    calcMatrixCoordLinSys(qx, qy, qz, Q);
-  } else {
-    // transformation matrix has to be here for "Crystal AS Powder conversion
-    // mode, further specialization possible if "powder" mode defined"
-    Q[0] = static_cast<coord_t>(m_RotMat[0] * qx + m_RotMat[1] * qy + m_RotMat[2] * qz);
-    Q[1] = static_cast<coord_t>(m_RotMat[3] * qx + m_RotMat[4] * qy + m_RotMat[5] * qz);
-    Q[2] = static_cast<coord_t>(m_RotMat[6] * qx + m_RotMat[7] * qy + m_RotMat[8] * qz);
-  }
-  const auto Qsq = Q[0] * Q[0] + Q[1] * Q[1] + Q[2] * Q[2];
-  if (Qsq < static_cast<coord_t>(m_DimMin[0]) || Qsq >= static_cast<coord_t>(m_DimMax[0])) {
-    return false;
-  }
-  Coord[0] = sqrt(Qsq);
-  return true;
+  return applyCoordTransf(qx, qy, qz, Coord);
 }
+
 /** method returns the vector of input coordinates values where the transformed
  *coordinates reach its extremum values in Q or dE
  * direction.
@@ -424,7 +391,28 @@ void MDTransfModQ::setDisplayNormalization(Mantid::API::IMDWorkspace_sptr mdWork
   setter(mdWorkspace, underlyingWorkspace, isQ, m_Emode);
 }
 
-void MDTransfModQ::calcMatrixCoordLinSys(double qx, double qy, double qz, std::vector<coord_t> &Coord) const {
+bool MDTransfModQ::applyCoordTransf(double qx, double qy, double qz, std::vector<coord_t> &Coord) const {
+  std::array<coord_t, 3> Q{};
+  if (m_invertRot) {
+    calcMatrixCoordLinSys(qx, qy, qz, Q);
+  } else {
+    // transformation matrix has to be here for "Crystal AS Powder conversion
+    // mode, further specialization possible if "powder" mode defined"
+    Q[0] = static_cast<coord_t>(m_RotMat[0] * qx + m_RotMat[1] * qy + m_RotMat[2] * qz);
+    Q[1] = static_cast<coord_t>(m_RotMat[3] * qx + m_RotMat[4] * qy + m_RotMat[5] * qz);
+    Q[2] = static_cast<coord_t>(m_RotMat[6] * qx + m_RotMat[7] * qy + m_RotMat[8] * qz);
+  }
+
+  const auto Qsq = Q[0] * Q[0] + Q[1] * Q[1] + Q[2] * Q[2];
+  if (Qsq < static_cast<coord_t>(m_DimMin[0]) || Qsq >= static_cast<coord_t>(m_DimMax[0])) {
+    return false;
+  }
+  Coord[0] = sqrt(Qsq);
+
+  return true;
+}
+
+void MDTransfModQ::calcMatrixCoordLinSys(double qx, double qy, double qz, std::array<coord_t, 3> &Coord) const {
   // For some computations, e.g. continuous rotation in ConvToMDEventsWS, the rotation matrix
   // has to be recomputed multiple times, so it is not inverted prior to calculating the coordinates.
   // Deferring to a linear system solution here makes it slightly more efficient and stable.
