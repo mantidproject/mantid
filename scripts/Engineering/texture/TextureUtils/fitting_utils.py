@@ -8,7 +8,7 @@
 import numpy as np
 from os import path
 
-from mantid.simpleapi import SaveNexus, logger, CreateEmptyTableWorkspace, Fit
+from mantid.simpleapi import SaveNexus, logger, CreateEmptyTableWorkspace, Fit, FitPeaks
 from mantid.simpleapi import ConvertUnits, Rebunch, Rebin, SumSpectra, AppendSpectra, CloneWorkspace, CropWorkspaceRagged
 from mantid.api import AnalysisDataService as ADS, MultiDomainFunction, FunctionFactory
 from typing import Sequence, Tuple, List
@@ -60,10 +60,20 @@ def _make_composite(peak_func: IFunction, bg_func: IFunction) -> CompositeFuncti
 
 
 def fit_initial_summed_spectra(
-    wss: Sequence[Workspace2D | str], peaks: Sequence[float], peak_window: float, fit_kwargs: dict, peak_func_name: str
+    wss: Sequence[Workspace2D | str],
+    peaks: Sequence[float],
+    peak_window: float,
+    fit_kwargs: dict,
+    peak_func_name: str,
+    return_shared_params: bool = False,
 ) -> Tuple[Sequence[Tuple[float, float]], Sequence[Workspace2D]]:
+    # return_shared_params: if True, also return (as the middle element of the tuple) a list - one
+    # dict per peak - of the peak function parameters fitted on the summed spectrum.  These are used
+    # by the FitPeaks engine to seed the per-spectrum fits.  They are unit-consistent with that
+    # engine because both fit in the workspace's native (d-spacing) units.
     x0_lims = []
     all_peak_crop_wss = []
+    shared_params = []
     for i, peak in enumerate(peaks):
         # set the ws bounds based on the supplied peak window
         low_bound, hi_bound = peak - peak_window, peak + peak_window
@@ -107,6 +117,12 @@ def fit_initial_summed_spectra(
         out_peak_func = fit_object.Function.function.getFunction(0)
         x0 = out_peak_func.getParameterValue(cen_par_name)
         x0_lims.append((x0 * (1 - 3e-3), x0 * (1 + 3e-3)))
+        if return_shared_params:
+            shared_params.append(
+                {out_peak_func.getParamName(ip): out_peak_func.getParameterValue(ip) for ip in range(out_peak_func.nParams())}
+            )
+    if return_shared_params:
+        return x0_lims, shared_params, all_peak_crop_wss
     return x0_lims, all_peak_crop_wss
 
 
@@ -354,6 +370,165 @@ def calc_intens_and_sigma_arrays(fit_result: Fit) -> Tuple[np.ndarray, np.ndarra
     return intens, sigma, intens_over_sig, peak_limits
 
 
+# ~~~~~~~~~~~~~~~~~~~~~~ FitPeaks (multithreaded) fitting engine ~~~~~~~~~~~~~~~~~~~~~~
+#
+# FitPeaks is a C++ algorithm that fits a set of peaks across every spectrum of a workspace and
+# parallelises over spectra with OpenMP (no GIL, no ADS contention).  For the texture workflow we
+# call it once per (workspace, peak): one peak fit across all detector spectra, multithreaded.
+#
+# The focused data is in d-spacing, which is detector-independent, so a single peak centre works for
+# every spectrum and no TOF round-trip is needed.  Starting values for the peak shape parameters are
+# seeded from the high-SNR summed-spectrum fit (fit_initial_summed_spectra), keeping the good seeding
+# of the existing routine while delegating the heavy per-spectrum fitting to the parallel algorithm.
+#
+# NOTE: FitPeaks only supports the "Least squares" (weighted) or "Rwp" cost functions - it cannot use
+# the "Unweighted least squares" of the multidomain engine - so fitted values will differ and must be
+# validated against the existing engine before switching a production workflow.
+
+# large sentinel: FitPeaks leaves chi2 at DBL_MAX for peaks it rejected/failed to fit
+_FITPEAKS_BAD_CHI2 = 1e300
+
+
+def _populate_fitpeaks_output_table(
+    out_tab,
+    num_spec: int,
+    peak_param_names: Sequence[str],
+    param_table,
+    error_table,
+    i_est_vals: np.ndarray,
+    fit_mask: np.ndarray,
+    no_fit_value_dict: dict | None,
+    nan_replacement: str | None,
+) -> None:
+    """Map a single-peak FitPeaks result (parameter + error tables, one row per spectrum) onto the
+    per-(ws, peak) output table produced by the multidomain engine: columns wsindex, I_est, then for
+    each peak-function parameter p: p, p_err, p/p_err.  X0 is already in d-spacing (FitPeaks fits the
+    d-spacing workspace) so, unlike the multidomain path, it needs no TOF->d conversion."""
+    out_tab.addColumn("int", "wsindex")
+    out_tab.addColumn("double", "I_est")
+    for p in peak_param_names:
+        out_tab.addColumn("double", p)
+        out_tab.addColumn("double", f"{p}_err")
+        out_tab.addColumn("double", f"{p}/{p}_err")
+
+    # read each parameter column once (FitPeaks rows are ordered by workspace index for a single peak)
+    param_cols = {p: np.asarray(param_table.column(p), dtype=float) for p in peak_param_names}
+    err_cols = {p: np.asarray(error_table.column(p), dtype=float) for p in peak_param_names}
+
+    default_vals = get_default_values(peak_param_names, no_fit_value_dict)
+
+    table_vals = np.zeros((num_spec, 3 * len(peak_param_names) + 1))
+    for ispec in range(num_spec):
+        if fit_mask[ispec]:
+            row = [i_est_vals[ispec]]
+            for p in peak_param_names:
+                val, err = param_cols[p][ispec], err_cols[p][ispec]
+                row += [val, err, np.divide(val, err)]
+        else:
+            row = [default_vals.get("I_est", np.nan)]
+            for p in peak_param_names:
+                row += [default_vals[p], np.inf, 0.0]
+        table_vals[ispec] = row
+
+    if nan_replacement:
+        table_vals = replace_nans(table_vals, nan_replacement)
+    for i, row in enumerate(table_vals):
+        out_tab.addRow([i] + list(row))
+
+
+def _fit_all_peaks_fitpeaks(
+    wss: Sequence[str],
+    peaks: Sequence[float],
+    peak_window: float,
+    save_dir: str,
+    override_dir: bool,
+    i_over_sigma_thresh: float,
+    nan_replacement: str | None,
+    no_fit_value_dict: dict | None,
+    peak_func_name: str,
+    max_fit_iters: int,
+    fit_kwargs: dict,
+) -> None:
+    """FitPeaks-based (multithreaded) implementation of fit_all_peaks.  Seeds peak-shape starting
+    values from the summed-spectrum fit, then fits each peak across all spectra of each workspace with
+    a single FitPeaks call, and writes the same per-(ws, peak) parameter tables as the multidomain
+    engine."""
+    # seed peak centres and shape params from the high-SNR summed spectra (unit-consistent d-spacing)
+    x0_lims, shared_params, all_cropped_rebinned_wss = fit_initial_summed_spectra(
+        wss, peaks, peak_window, fit_kwargs.copy(), peak_func_name, return_shared_params=True
+    )
+
+    # peak-function parameter names (exclude background); seed everything except I (height, estimated
+    # by FitPeaks from the data) and X0 (supplied as the peak centre)
+    base_peak_func = FunctionFactory.Instance().createPeakFunction(peak_func_name)
+    peak_param_names = [base_peak_func.getParamName(i) for i in range(base_peak_func.nParams())]
+    seed_names = [p for p in peak_param_names if p not in ("I", "X0")]
+
+    # FitPeaks requires MaxFitIterations >= 49
+    max_fit_iters = max(49, max_fit_iters)
+
+    for iws, wsname in enumerate(wss):
+        logger.notice(f"Fitting Workspace: {wsname} ({iws + 1}/{len(wss)})")
+        ws = ADS.retrieve(wsname)
+        run, prefix = _get_run_and_prefix_from_ws_log(ws, wsname)
+        grouping = _get_grouping_from_ws_log(ws)
+        num_spec = ws.spectrumInfo().size()
+
+        for ipeak, peak in enumerate(peaks):
+            logger.information(f"Workspace: {wsname}, Peak: {peak}")
+            data_ws = all_cropped_rebinned_wss[ipeak][iws]  # cropped+rebinned, still d-spacing
+
+            # peak centre + tolerance from the summed-fit x0 window
+            x0_lo, x0_hi = x0_lims[ipeak]
+            centre = 0.5 * (x0_lo + x0_hi)
+            pos_tol = max(x0_hi - centre, centre - x0_lo)
+            xmin, xmax = peak - peak_window, peak + peak_window
+            seed_vals = [shared_params[ipeak][p] for p in seed_names]
+
+            out_ws = f"{prefix}{run}_{peak}_{grouping}_Fit_Parameters"
+            tag = f"{iws}_{ipeak}"
+            param_tab_name = f"__fitpeaks_params_{tag}"
+            err_tab_name = f"__fitpeaks_errs_{tag}"
+
+            FitPeaks(
+                InputWorkspace=data_ws,
+                PeakCenters=[centre],
+                PeakFunction=peak_func_name,
+                BackgroundType="Linear",
+                FitWindowBoundaryList=[xmin, xmax],
+                PeakParameterNames=seed_names,
+                PeakParameterValues=seed_vals,
+                PositionTolerance=[pos_tol],
+                ConstrainPeakPositions=True,
+                Minimizer=fit_kwargs.get("Minimizer", "Levenberg-Marquardt"),
+                CostFunction="Least squares",
+                MaxFitIterations=max_fit_iters,
+                MinimumSignalToSigmaRatio=i_over_sigma_thresh,
+                RawPeakParameters=True,
+                OutputPeakParametersWorkspace=param_tab_name,
+                OutputParameterFitErrorsWorkspace=err_tab_name,
+                FittedPeaksWorkspace=f"__fitpeaks_model_{tag}",
+                OutputWorkspace=f"__fitpeaks_pos_{tag}",
+            )
+
+            param_table = ADS.retrieve(param_tab_name)
+            error_table = ADS.retrieve(err_tab_name)
+            # FitPeaks leaves chi2 at DBL_MAX (and params at 0) for peaks it rejected - e.g. via
+            # MinimumSignalToSigmaRatio, which mirrors the i_over_sigma_thresh mask of the other engine
+            chi2 = np.asarray(param_table.column("chi2"), dtype=float)
+            fit_mask = np.isfinite(chi2) & (chi2 < _FITPEAKS_BAD_CHI2) & (chi2 > 0)
+            i_est_vals = np.asarray(param_table.column("I"), dtype=float)
+
+            out_tab = CreateEmptyTableWorkspace(OutputWorkspace=out_ws)
+            _populate_fitpeaks_output_table(
+                out_tab, num_spec, peak_param_names, param_table, error_table, i_est_vals, fit_mask, no_fit_value_dict, nan_replacement
+            )
+
+            out_file = out_ws + ".nxs"
+            out_path = path.join(save_dir, out_file) if override_dir else path.join(save_dir, grouping, str(peak), out_file)
+            SaveNexus(InputWorkspace=out_ws, Filename=out_path)
+
+
 def fit_all_peaks(
     wss: Sequence[str],
     peaks: Sequence[float],
@@ -371,6 +546,7 @@ def fit_all_peaks(
     peak_func_name: str = "BackToBackExponential",
     last_fit_ic: bool = False,
     max_fit_iters: int = 50,
+    engine: str = "fitpeaks",
 ) -> None:
     """
     Fit all the peaks given in all the spectra of all the workspaces, for use in a texture analysis workflow
@@ -397,6 +573,13 @@ def fit_all_peaks(
     subsequent_fit_param_fix: parameters which should be fixed after the initial fit (Default is None)
     peak_func_name: peak function to use, should be either BackToBackExponential or IkedaCarpenterPV
     max_fit_iters: maximum number of iterations for a single fit
+    engine: fitting engine to use.
+            "fitpeaks" (default) - hand each (ws, peak) to the FitPeaks algorithm, which fits the peak
+                across all spectra with OpenMP multithreading (fits in d-spacing, weighted least
+                squares).  Faster on many spectra; seeded from the summed-spectrum fit.
+            "multidomain" - the original iterative MultiDomainFunction fit (smoothing passes,
+                summed-centre seeding, tied-then-fixed broadening) run serially per (ws, peak).
+                Retained for comparison/validation and for the unweighted-cost behaviour.
     """
 
     # currently the only fit functions intended to be used - less flexibility here allows for less user input
@@ -418,6 +601,24 @@ def fit_all_peaks(
         "Minimizer": "Levenberg-Marquardt",
         "CostFunction": "Unweighted least squares",
     }
+
+    if engine == "fitpeaks":
+        _fit_all_peaks_fitpeaks(
+            wss,
+            peaks,
+            peak_window,
+            save_dir,
+            override_dir,
+            i_over_sigma_thresh,
+            nan_replacement,
+            no_fit_value_dict,
+            peak_func_name,
+            max_fit_iters,
+            fit_kwargs,
+        )
+        return
+    elif engine != "multidomain":
+        raise ValueError(f"Unknown fitting engine '{engine}'. Expected 'fitpeaks' or 'multidomain'.")
 
     parameters_to_tie = _get_default_param_ties(peak_func_name, parameters_to_tie)
 

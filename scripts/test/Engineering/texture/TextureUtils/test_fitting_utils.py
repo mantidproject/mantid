@@ -22,6 +22,8 @@ from Engineering.texture.TextureUtils.fitting_utils import (
     _get_run_and_prefix_from_ws_log,
     _get_grouping_from_ws_log,
     fit_all_peaks,
+    _fit_all_peaks_fitpeaks,
+    _populate_fitpeaks_output_table,
 )
 
 texture_utils_path = "Engineering.texture.TextureUtils.fitting_utils"
@@ -780,6 +782,7 @@ class TextureUtilsOverallFittingTests(unittest.TestCase):
             peak_window=0.1,
             save_dir=save_dir,
             override_dir=True,
+            engine="multidomain",
         )
 
         expected_tab_name = f"{prefix}{run_number}_{peak}_{group}_Fit_Parameters"
@@ -907,6 +910,7 @@ class TextureUtilsOverallFittingTests(unittest.TestCase):
             peak_window=0.1,
             save_dir="save",
             override_dir=True,
+            engine="multidomain",
         )
 
         expected_calls = len(wss) * len(peaks)
@@ -1053,6 +1057,7 @@ class TextureUtilsFitAllPeaksNewParamsTests(unittest.TestCase):
             peak_window=0.1,
             save_dir="save",
             peak_func_name="Gaussian",
+            engine="multidomain",
         )
 
         mock_logger.warning.assert_called_once()
@@ -1071,6 +1076,7 @@ class TextureUtilsFitAllPeaksNewParamsTests(unittest.TestCase):
                 peak_window=0.1,
                 save_dir="save",
                 peak_func_name=func_name,
+                engine="multidomain",
             )
             mock_logger.warning.assert_not_called()
 
@@ -1084,6 +1090,7 @@ class TextureUtilsFitAllPeaksNewParamsTests(unittest.TestCase):
             peak_window=0.1,
             save_dir="save",
             peak_func_name="IkedaCarpenterPV",
+            engine="multidomain",
         )
 
         _, kwargs = mock_fit_summed.call_args
@@ -1167,6 +1174,7 @@ class TextureUtilsFitAllPeaksNewParamsTests(unittest.TestCase):
             override_dir=True,
             last_fit_ic=True,
             peak_func_name="BackToBackExponential",
+            engine="multidomain",
         )
 
         # with smooth_vals=(3,2) + final_fit_raw + last_fit_ic, there should be 4 rerun calls
@@ -1177,6 +1185,157 @@ class TextureUtilsFitAllPeaksNewParamsTests(unittest.TestCase):
         last_call_args = mock_rerun_with_new.call_args_list[-1][0]
         self.assertTrue(last_call_args[-1])  # last_fit_ic
         self.assertTrue(last_call_args[-2])  # is_final
+
+
+class TextureUtilsFitPeaksEngineTests(unittest.TestCase):
+    def test_fit_initial_summed_spectra_returns_shared_params(self):
+        # exercised via a light patch set; only checks the extra return element is populated
+        with (
+            patch(f"{texture_utils_path}.Fit") as mock_fit,
+            patch(f"{texture_utils_path}._make_composite"),
+            patch(f"{texture_utils_path}._estimate_intensity_background_and_centre", return_value=(2.0, 1.0, 0.5, 1.01)),
+            patch(f"{texture_utils_path}.FunctionFactory") as mock_func_factory,
+            patch(f"{texture_utils_path}.crop_wss_and_combine") as mock_crop_and_combine,
+        ):
+            window_ws = MagicMock()
+            window_ws.readX.return_value = [1, 1.5, 2]
+            window_ws.name.return_value = "peak_window_0"
+            mock_crop_and_combine.return_value = (window_ws, ["ws1_1.0"])
+            mock_func_factory.createFunction.return_value = MagicMock()
+            mock_instance = MagicMock()
+            mock_func_factory.Instance.return_value = mock_instance
+            mock_instance.createPeakFunction.return_value = MagicMock()
+
+            out_peak_func = mock_fit.return_value.Function.function.getFunction.return_value
+            out_peak_func.nParams.return_value = 3
+            out_peak_func.getParamName.side_effect = lambda i: ["I", "X0", "A"][i]
+            # getParameterValue is called with the "X0" name (for the centre) and with integer indices
+            # (when building the shared-params dict)
+            out_peak_func.getParameterValue.side_effect = lambda k: {"X0": 1.0, 0: 100.0, 1: 1.0, 2: 0.5}[k]
+
+            x0_lims, shared_params, all_wss = fit_initial_summed_spectra(
+                ["ws1"], [1.0], 0.05, {}, "BackToBackExponential", return_shared_params=True
+            )
+
+        self.assertEqual(len(shared_params), 1)
+        self.assertEqual(shared_params[0], {"I": 100.0, "X0": 1.0, "A": 0.5})
+        self.assertEqual(all_wss, [["ws1_1.0"]])
+
+    @patch(f"{texture_utils_path}._fit_all_peaks_fitpeaks")
+    @patch(f"{texture_utils_path}.fit_initial_summed_spectra", return_value=([], []))
+    def test_fit_all_peaks_dispatches_to_fitpeaks_by_default(self, _mock_summed, mock_fitpeaks_path):
+        # default engine is "fitpeaks" - fit_all_peaks should delegate and not run the multidomain path
+        fit_all_peaks(wss=["ws"], peaks=[1.0], peak_window=0.1, save_dir="save")
+        mock_fitpeaks_path.assert_called_once()
+
+    @patch(f"{texture_utils_path}.fit_initial_summed_spectra", return_value=([], []))
+    def test_fit_all_peaks_unknown_engine_raises(self, _mock_summed):
+        with self.assertRaises(ValueError):
+            fit_all_peaks(wss=["ws"], peaks=[1.0], peak_window=0.1, save_dir="save", engine="bogus")
+
+    def test_populate_fitpeaks_output_table_columns_and_rows(self):
+        out_tab = MagicMock()
+        peak_param_names = ["I", "A", "X0"]
+        # spectrum 0 fitted, spectrum 1 masked out
+        param_table, error_table = MagicMock(), MagicMock()
+        param_cols = {"I": [10.0, 0.0], "A": [1.0, 0.0], "X0": [2.0, 0.0]}
+        err_cols = {"I": [1.0, 0.0], "A": [0.1, 0.0], "X0": [0.02, 0.0]}
+        param_table.column.side_effect = lambda p: param_cols[p]
+        error_table.column.side_effect = lambda p: err_cols[p]
+        i_est_vals = np.array([10.0, 0.0])
+        fit_mask = np.array([True, False])
+
+        _populate_fitpeaks_output_table(
+            out_tab, 2, peak_param_names, param_table, error_table, i_est_vals, fit_mask, no_fit_value_dict=None, nan_replacement=None
+        )
+
+        # columns: wsindex, I_est, then triple per param
+        out_tab.addColumn.assert_any_call("int", "wsindex")
+        out_tab.addColumn.assert_any_call("double", "I_est")
+        for p in peak_param_names:
+            out_tab.addColumn.assert_any_call("double", p)
+            out_tab.addColumn.assert_any_call("double", f"{p}_err")
+            out_tab.addColumn.assert_any_call("double", f"{p}/{p}_err")
+        # one row per spectrum
+        self.assertEqual(out_tab.addRow.call_count, 2)
+        # fitted spectrum 0: [wsindex, I_est, I, I_err, I/I_err, A, A_err, A/A_err, X0, X0_err, X0/X0_err]
+        row0 = out_tab.addRow.call_args_list[0][0][0]
+        self.assertEqual(row0[0], 0)
+        self.assertEqual(row0[2], 10.0)  # I value
+        self.assertEqual(row0[3], 1.0)  # I err
+        self.assertAlmostEqual(row0[4], 10.0)  # I / I_err
+
+    @patch(f"{texture_utils_path}.SaveNexus")
+    @patch(f"{texture_utils_path}.CreateEmptyTableWorkspace")
+    @patch(f"{texture_utils_path}._populate_fitpeaks_output_table")
+    @patch(f"{texture_utils_path}.FitPeaks")
+    @patch(f"{texture_utils_path}.FunctionFactory")
+    @patch(f"{texture_utils_path}.fit_initial_summed_spectra")
+    @patch(f"{texture_utils_path}._get_grouping_from_ws_log", return_value="TestGroup")
+    @patch(f"{texture_utils_path}._get_run_and_prefix_from_ws_log", return_value=("123456", "TEST"))
+    @patch(f"{texture_utils_path}.ADS")
+    def test_fit_all_peaks_fitpeaks_calls_fitpeaks_and_saves(
+        self,
+        mock_ads,
+        _mock_run_prefix,
+        _mock_group,
+        mock_fit_summed,
+        mock_func_factory,
+        mock_fitpeaks,
+        mock_populate,
+        mock_create_tab,
+        mock_save_nexus,
+    ):
+        # summed fit returns x0 window, shape seeds, and the cropped d-spacing ws per (peak, ws)
+        mock_fit_summed.return_value = (
+            [(0.95, 1.05)],
+            [{"A": 1.0, "B": 2.0, "S": 0.1, "I": 5.0, "X0": 1.0}],
+            [["data_ws_0"]],
+        )
+
+        # peak function param names
+        base_peak = MagicMock()
+        base_peak.nParams.return_value = 5
+        base_peak.getParamName.side_effect = lambda i: ["I", "A", "B", "X0", "S"][i]
+        mock_func_factory.Instance.return_value.createPeakFunction.return_value = base_peak
+
+        ws = MagicMock()
+        ws.spectrumInfo.return_value.size.return_value = 2
+        param_table, error_table = MagicMock(), MagicMock()
+        param_table.column.side_effect = lambda p: {"chi2": [1.0, 1e308], "I": [5.0, 0.0]}.get(p, [0.0, 0.0])
+        error_table.column.side_effect = lambda p: [0.0, 0.0]
+        mock_ads.retrieve.side_effect = lambda name: {"ws": ws}.get(name, param_table if "params" in name else error_table)
+        mock_create_tab.return_value = MagicMock()
+
+        _fit_all_peaks_fitpeaks(
+            wss=["ws"],
+            peaks=[2.03],
+            peak_window=0.02,
+            save_dir="save",
+            override_dir=True,
+            i_over_sigma_thresh=3.0,
+            nan_replacement="mean",
+            no_fit_value_dict=None,
+            peak_func_name="BackToBackExponential",
+            max_fit_iters=50,
+            fit_kwargs={"Minimizer": "Levenberg-Marquardt"},
+        )
+
+        # FitPeaks called once with the cropped d-spacing ws, the seed shape params and the s2n threshold
+        mock_fitpeaks.assert_called_once()
+        _, kw = mock_fitpeaks.call_args
+        self.assertEqual(kw["InputWorkspace"], "data_ws_0")
+        self.assertEqual(kw["PeakFunction"], "BackToBackExponential")
+        self.assertEqual(kw["BackgroundType"], "Linear")
+        self.assertEqual(kw["PeakParameterNames"], ["A", "B", "S"])
+        self.assertEqual(kw["PeakParameterValues"], [1.0, 2.0, 0.1])
+        self.assertEqual(kw["CostFunction"], "Least squares")
+        self.assertEqual(kw["MinimumSignalToSigmaRatio"], 3.0)
+        self.assertAlmostEqual(kw["PeakCenters"][0], 1.0)  # centre of the summed x0 window
+
+        # output table built and saved
+        mock_populate.assert_called_once()
+        mock_save_nexus.assert_called_once()
 
 
 if __name__ == "__main__":
