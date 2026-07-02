@@ -1,3 +1,4 @@
+from typing import Callable
 from vtkmodules.vtkInteractionStyle import vtkInteractorStyleUser, vtkInteractorStyleTrackballCamera
 from vtkmodules.vtkCommonCore import vtkCommand
 import numpy as np
@@ -9,6 +10,17 @@ class _PlotterWrapper:
     def __init__(self, plotter):
         self._plotter = plotter
         super().__init__()
+
+
+class InteractorStyles:
+    def __init__(self, plotter, picking_callback, hover_callback):
+        self.SCROLL_ZOOM_WITH_PICKING = CursorZoomInteractorStyle(plotter)
+        self.SCROLL_ZOOM_WITH_HOVER = CursorZoomInteractorStyle(plotter)
+        self.TRACKBALL = SwappedButtonTrackballCamera()
+
+        self.SCROLL_ZOOM_WITH_PICKING.set_picking_callback(picking_callback)
+        self.TRACKBALL.set_picking_callback(picking_callback)
+        self.SCROLL_ZOOM_WITH_HOVER.set_hover_callback(hover_callback)
 
 
 class CursorZoomInteractorStyle(vtkInteractorStyleUser):
@@ -35,6 +47,15 @@ class CursorZoomInteractorStyle(vtkInteractorStyleUser):
         self.AddObserver(vtkCommand.MouseWheelForwardEvent, self._on_wheel_forward)
         self.AddObserver(vtkCommand.MouseWheelBackwardEvent, self._on_wheel_backward)
         self.AddObserver(vtkCommand.RightButtonPressEvent, lambda *_: self._reset_camera())
+
+    def set_picking_callback(self, picking_callback: Callable):
+        self.RemoveObservers(vtkCommand.LeftButtonPressEvent)
+        self.AddObserver(vtkCommand.LeftButtonPressEvent, picking_callback)
+
+    def set_hover_callback(self, hover_callback: Callable):
+        self.RemoveObservers(vtkCommand.MouseMoveEvent)
+        self.AddObserver(vtkCommand.MouseMoveEvent, hover_callback)
+        self.AddObserver(vtkCommand.MouseMoveEvent, self._on_mouse_move)
 
     def _on_mouse_move(self, obj, event):
         if self._zoom_in_progress:
@@ -150,3 +171,7 @@ class SwappedButtonTrackballCamera(vtkInteractorStyleTrackballCamera):
         self.AddObserver(vtkCommand.RightButtonPressEvent, lambda *_: self.OnLeftButtonDown())
         self.AddObserver(vtkCommand.LeftButtonReleaseEvent, lambda *_: self.OnRightButtonUp())
         self.AddObserver(vtkCommand.RightButtonReleaseEvent, lambda *_: self.OnLeftButtonUp())
+
+    def set_picking_callback(self, picking_callback: Callable):
+        self.RemoveObservers(vtkCommand.LeftButtonPressEvent)
+        self.AddObserver(vtkCommand.LeftButtonPressEvent, picking_callback)

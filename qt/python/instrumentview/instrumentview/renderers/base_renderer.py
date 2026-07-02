@@ -11,8 +11,6 @@ import numpy as np
 import pyvista as pv
 from pyvistaqt import BackgroundPlotter
 
-from instrumentview.InteractorStyles import CursorZoomInteractorStyle, SwappedButtonTrackballCamera
-
 
 class InstrumentRenderer(ABC):
     """Abstract base class defining the interface for rendering detectors in the instrument view.
@@ -106,7 +104,9 @@ class InstrumentRenderer(ABC):
         """Add the masked detector mesh to the plotter."""
 
     @abstractmethod
-    def enable_picking(self, plotter: BackgroundPlotter, callback: Callable[[int], None], hover: bool = False) -> None:
+    def get_callback_tied_to_detector_index(
+        self, plotter: BackgroundPlotter, callback: Callable[[int], None], hover: bool = False
+    ) -> Callable:
         """Set up picking interaction on the plotter.
 
         Parameters
@@ -157,9 +157,3 @@ class InstrumentRenderer(ABC):
     def set_parallel_view(self, plotter):
         plotter.view_xy()
         plotter.enable_parallel_projection()
-
-    def set_interactive_style(self, plotter, is_projection):
-        if not is_projection:
-            plotter.iren.style = SwappedButtonTrackballCamera()
-            return
-        plotter.iren.style = CursorZoomInteractorStyle(plotter)
