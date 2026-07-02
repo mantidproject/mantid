@@ -5,6 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/SolidAngleParams.h"
 #include "MantidKernel/V3D.h"
 #include "MantidPythonInterface/core/GetPointer.h"
@@ -31,7 +34,11 @@ Mantid::detid_t getIDDeprecated(const IDetector &self) {
 double solidAngleDeprecated(const IDetector &self, const V3D &observer) {
   PyErr_Warn(PyExc_DeprecationWarning, "'IDetector.solidAngle' is deprecated in Mantid 7.0, "
                                        "use 'ComponentInfo.solidAngle' instead.");
-  return self.solidAngle(Mantid::Geometry::SolidAngleParams(observer));
+  // Redirect through the preferred ComponentInfo access layer. A detector's
+  // component index equals its detector index.
+  const auto &parameterMap = self.parameterMap();
+  const auto index = parameterMap.detectorInfo().indexOf(self.getID());
+  return parameterMap.componentInfo().solidAngle(index, Mantid::Geometry::SolidAngleParams(observer));
 }
 
 double getTwoThetaDeprecated(const IDetector &self, const V3D &observer, const V3D &axis) {

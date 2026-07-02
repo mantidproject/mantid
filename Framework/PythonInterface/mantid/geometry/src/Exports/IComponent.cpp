@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/IComponent.h"
+#include "MantidKernel/Quat.h"
 #include "MantidPythonInterface/core/GetPointer.h"
 
 #include <boost/python/class.hpp>
@@ -18,7 +19,6 @@ using namespace boost::python;
 GET_POINTER_SPECIALIZATION(IComponent)
 
 namespace Mantid::Kernel {
-class Quat;
 class V3D;
 } // namespace Mantid::Kernel
 

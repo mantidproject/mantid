@@ -185,4 +185,80 @@ ___________
 * As explained above, a detector index is the same thing as a component index. No translation necessary. The fact that the first 0-n component indexes are for detectors is a feature that can be leveraged.
 * A bank always has a higher component index than any of its nested components. The root is the highest component index of all. This feature can be leveraged. Consider reverse iterating through component indexes when performing operations that involve higher-level components.
 
+Migrating from the Legacy Instrument API (Python)
+-------------------------------------------------
+
+This section is the migration/deprecation plan for
+the **Python-facing** slice of the final Instrument 2.0 rollout ("Phase D").
+It records what legacy geometry API is exposed to Python,
+what each piece maps to in the ``*Info`` layers,
+and the order in which the deprecation will proceed.
+It is the reference that the code changes (and any automated call-site sweep) should follow.
+
+The *concepts* offered by the legacy tree
+(positions, name lookup, tree traversal, source/sample, shape)
+are **not** going away.
+They are being **rewritten** onto the ``*Info`` layers, and most already live there.
+What is being **deprecated** is the legacy *delivery mechanism*:
+the :py:obj:`~mantid.api.MatrixWorkspace.getInstrument` entry point
+and the legacy Python classes it hands back.
+Keeping any method on those classes keeps the class
+-- and hence the legacy backing tree --
+alive, which is exactly what this phase removes.
+
+The legacy Python surface
+#########################
+
+The following classes are exposed to Python from
+``Framework/PythonInterface/mantid/geometry/src/Exports/`` (boost::python bindings):
+
+* ``IComponent``
+* ``Component``
+* ``IObjComponent``
+* ``ObjComponent``
+* ``ICompAssembly``
+* ``CompAssembly``
+* ``ObjCompAssembly`` (exposed under the name ``IObjCompAssembly``)
+* ``IDetector``
+* ``Detector``
+* ``GridDetector``
+* ``RectangularDetector``
+* ``Instrument``
+
+The entry points that return this tree - :py:obj:`~mantid.api.MatrixWorkspace.getInstrument` and ``ExperimentInfo.getInstrument`` - are the highest-leverage deprecation targets, since they are the door to everything above.
+
+``Geometry::ParameterMap`` is *not* exposed as a Python class, so there is nothing to deprecate there directly (but see the parameter-access gap below).
+
+What to use instead
+###################
+
+Almost every legacy accessor already has a modern Python home:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - Legacy
+     - Modern replacement
+   * - ``Instrument.getComponentByName(name)``
+     - ``componentInfo().indexOfAny(name)``
+   * - ``Instrument.getDetector(id)``
+     - ``detectorInfo().indexOf(id)``
+   * - ``Instrument.getSample()`` / ``getSource()``
+     - ``componentInfo().sample()`` / ``source()`` (+ ``samplePosition``/``sourcePosition``)
+   * - tree nav ``nelements`` / ``[]`` / ``len()``
+     - ``componentInfo().children`` / ``parent`` / ``componentsInSubtree`` / ``detectorsInSubtree`` / iteration
+   * - ``IObjComponent.shape()``
+     - ``componentInfo().shape(index)``
+   * - ``IComponent.getPos()`` / ``Component.getRotation()``
+     - ``componentInfo().position(index)`` / ``rotation(index)`` / ``relativePosition``/``relativeRotation``
+   * - ``IDetector.getID()``
+     - ``detectorInfo().detectorIDs()``
+   * - ``IDetector.getTwoTheta()`` / ``getPhi()``
+     - ``detectorInfo().twoTheta(index)`` / ``azimuthal(index)``
+   * - ``Detector.isMasked()`` / ``isMonitor()``
+     - ``detectorInfo().isMasked(index)`` / ``isMonitor(index)`` (already deprecated)
+
+Remember the identity from the *Indexing* section above: a detector's component index equals its detector index, so a single index moves freely between ``ComponentInfo`` and ``DetectorInfo``.
+
 .. categories:: Concepts
