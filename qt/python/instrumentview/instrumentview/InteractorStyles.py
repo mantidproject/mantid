@@ -1,5 +1,5 @@
 from typing import Callable
-from vtkmodules.vtkInteractionStyle import vtkInteractorStyleUser, vtkInteractorStyleTrackballCamera
+from vtkmodules.vtkInteractionStyle import vtkInteractorStyleUser, vtkInteractorStyleTrackballCamera, vtkInteractorStyleRubberBandZoom
 from vtkmodules.vtkCommonCore import vtkCommand
 import numpy as np
 
@@ -17,10 +17,40 @@ class InteractorStyles:
         self.SCROLL_ZOOM_WITH_PICKING = CursorZoomInteractorStyle(plotter)
         self.SCROLL_ZOOM_WITH_HOVER = CursorZoomInteractorStyle(plotter)
         self.TRACKBALL = SwappedButtonTrackballCamera()
+        self.RUBBERBAND_ZOOM = RubberBandZoomInteractorStyle(plotter)
 
         self.SCROLL_ZOOM_WITH_PICKING.set_picking_callback(picking_callback)
         self.TRACKBALL.set_picking_callback(picking_callback)
         self.SCROLL_ZOOM_WITH_HOVER.set_hover_callback(hover_callback)
+
+
+class RubberBandZoomInteractorStyle(vtkInteractorStyleRubberBandZoom):
+    def __init__(self, plotter):
+        super().__init__()
+        self.plotter = plotter
+        self._pyvista_plotter = _PlotterWrapper(plotter)  # HACK: Wrapper for PyVista compatibility
+        self.update_default_camera_state()
+        self.AddObserver(vtkCommand.RightButtonPressEvent, lambda *_: self._reset_camera())
+
+    def update_default_camera_state(self):
+        """Re-cache the current camera state as the default (right-click reset) state.
+
+        Must be called after any operation that changes the intended full-view
+        camera state (e.g. after a fill transform is applied on resize).
+        """
+        camera = self.plotter.renderer.camera
+        self._default_position = np.array(camera.position).copy()
+        self._default_focal_point = np.array(camera.focal_point).copy()
+        self._default_parallel_scale = camera.parallel_scale
+
+    def _reset_camera(self):
+        renderer = self.plotter.renderer
+        camera = renderer.camera
+        camera.position = self._default_position.tolist()
+        camera.focal_point = self._default_focal_point.tolist()
+        camera.parallel_scale = self._default_parallel_scale
+        renderer.reset_camera_clipping_range()
+        self.plotter.render_window.Render()
 
 
 class CursorZoomInteractorStyle(vtkInteractorStyleUser):

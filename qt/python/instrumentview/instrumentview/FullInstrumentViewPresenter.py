@@ -378,6 +378,9 @@ class FullInstrumentViewPresenter:
         # Return list of xmin, xmax, ymin, ymax, zmin, zmax
         return [x for pair in zip(min_point, max_point) for x in pair]
 
+    def on_rubberband_zoom_toggled(self, _checked) -> None:
+        self._update_interactor_style()
+
     def on_hover_pick_toggled(self, checked: bool) -> None:
         enabled = checked and self._model.is_2d_projection
         self._hover_pick_mode = enabled
@@ -740,6 +743,8 @@ class FullInstrumentViewPresenter:
             return
         if self._hover_pick_mode:
             self._view.main_plotter.iren.style = self._interactor_styles.SCROLL_ZOOM_WITH_HOVER
+        elif self._view.is_rubberband_zoom_toggled() and self._model.is_2d_projection:
+            self._view.main_plotter.iren.style = self._interactor_styles.RUBBERBAND_ZOOM
         else:
             self._view.main_plotter.iren.style = self._interactor_styles.SCROLL_ZOOM_WITH_PICKING
 

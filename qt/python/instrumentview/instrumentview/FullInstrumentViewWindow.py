@@ -282,6 +282,9 @@ class FullInstrumentViewView(QWidget):
         self._hover_pick = QPushButton("Hover Pick")
         self._hover_pick.setCheckable(True)
         self._hover_pick.setToolTip("Use mouse hover to preview a single detector spectrum (2D projections only).")
+        self._rubberband_zoom = QPushButton("Rectangle Zoom")
+        self._rubberband_zoom.setCheckable(True)
+        self._rubberband_zoom.setToolTip("Zoom using left click for rectangle selection")
         self._aspect_ratio_check_box = QCheckBox()
         self._aspect_ratio_check_box.setText("Maintain Aspect Ratio")
         self._aspect_ratio_check_box.setToolTip(
@@ -424,6 +427,7 @@ class FullInstrumentViewView(QWidget):
 
         projection_first_row.addWidget(self._projection_combo_box)
         projection_first_row.addWidget(self._reset_projection)
+        projection_first_row.addWidget(self._rubberband_zoom)
         projection_second_row.addWidget(self._hover_pick)
         projection_second_row.addWidget(self._select_bank_tube)
         projection_second_row.addWidget(self._clear_point_picked_detectors)
@@ -703,6 +707,7 @@ class FullInstrumentViewView(QWidget):
         self._projection_combo_box.currentIndexChanged.connect(self._presenter.on_projection_option_changed)
         self._clear_point_picked_detectors.clicked.connect(self._presenter.on_clear_point_picked_detectors_clicked)
         self._hover_pick.toggled.connect(self._presenter.on_hover_pick_toggled)
+        self._rubberband_zoom.toggled.connect(self._presenter.on_rubberband_zoom_toggled)
         self._contour_range_slider.sliderReleased.connect(self._presenter.on_contour_limits_updated)
         self._contour_range_reset.clicked.connect(self._presenter.on_contour_range_reset_clicked)
         self._integration_limit_slider.sliderReleased.connect(self._presenter.on_integration_limits_updated)
@@ -807,6 +812,9 @@ class FullInstrumentViewView(QWidget):
             if btn.isChecked():
                 btn.toggle()
             btn.setDisabled(self.current_selected_projection() == ProjectionType.THREE_D)
+
+    def is_rubberband_zoom_toggled(self) -> bool:
+        return self._rubberband_zoom.isChecked()
 
     def set_hover_pick_mode_enabled(self, enabled: bool) -> None:
         if enabled:
