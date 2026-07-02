@@ -126,7 +126,7 @@ Alter the `font <https://matplotlib.org/3.10.8/users/explain/text/usetex.html>`_
 
 Note that the fonts available is system dependent - and you can `find available fonts here <http://jonathansoma.com/lede/data-studio/matplotlib/list-all-fonts-available-in-matplotlib-plus-samples/>`_ .
 
-Alternatively, you can set a title or label to have certain `font properties <https://matplotlib.org/3.1.1/api/text_api.html#matplotlib.text.Text>`_:
+Alternatively, you can set a title or label to have certain `font properties <https://matplotlib.org/3.10.9/api/text_api.html#matplotlib.text.Text>`_:
 
 .. testcode:: MantidPlottingExample
 
