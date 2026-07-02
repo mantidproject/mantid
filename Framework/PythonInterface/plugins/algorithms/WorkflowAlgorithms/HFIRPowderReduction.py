@@ -818,18 +818,17 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         if self.getProperty("MaskAngle").value == Property.EMPTY_DBL:
             logger.warning("MaskAngle is not set.")
 
-    def _loadMIDASData(self, filename, ws):
+    def _loadMIDASData(self, filename, wsname):
         # MIDAS raw event files are integrated during load (no event workspace is needed),
         # mirroring LoadWAND. LoadEventAsWorkspace2D performs the bank discovery and
         # per-pixel integration in C++; fall back to the generic loader for processed /
         # histogram files that it cannot read.
-        idf = self.getProperty("IDFFilename").value
         wavelength = self.getProperty("Wavelength").value
 
         try:
             LoadEventAsWorkspace2D(
                 Filename=filename,
-                OutputWorkspace=ws,
+                OutputWorkspace=wsname,
                 # The X axis is unused downstream (ConvertSpectrumAxis operates on the
                 # spectrum axis), but XWidth*XCenter must be non-zero, so set them
                 # explicitly rather than relying on wavelength/wavelength_spread logs.
@@ -843,7 +842,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             )
         except RuntimeError:
             logger.warning(f"LoadEventAsWorkspace2D failed for {filename}, falling back to generic Load")
-            self._load_MIDAS(filename, ws)
+            self._load_MIDAS(filename, wsname)
             return
 
         # Normalization needs these logs (gd_prtn_chrg for Monitor, duration for Time).
@@ -853,7 +852,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             monitor_count = f["/entry/monitor1/total_counts"][0]
             duration = f["/entry/duration"][0]
         AddSampleLog(
-            ws,
+            wsname,
             LogName="monitor_count",
             LogType="Number",
             NumberType="Double",
@@ -861,7 +860,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             EnableLogging=False,
         )
         AddSampleLog(
-            ws,
+            wsname,
             LogName="gd_prtn_chrg",
             LogType="Number",
             NumberType="Double",
@@ -869,7 +868,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             EnableLogging=False,
         )
         AddSampleLog(
-            ws,
+            wsname,
             LogName="duration",
             LogType="Number",
             NumberType="Double",
@@ -878,11 +877,10 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         )
 
         # A user-supplied IDF overrides the geometry embedded in the sample file.
-        if idf:
-            LoadInstrument(ws, Filename=idf, RewriteSpectraMap=True, EnableLogging=False)
+        self._load_IDF_if_supplied(wsname, rewrite_spectra_map=True)
         # Masking is not used yet, but will be added back later
         # if self.getProperty("ApplyMask").value:
-        #     MaskBTP(ws, Pixel="1,2,511,512", EnableLogging=False)
+        #     MaskBTP(wsname, Pixel="1,2,511,512", EnableLogging=False)
 
     def PyExec(self):
         """
@@ -1037,29 +1035,48 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         # Update the list with potentially renamed workspace
         sample_workspaces[index] = ws_name
 
-    def _load_MIDAS(self, filename, ws):
-        Load(Filename=filename, OutputWorkspace=ws, EnableLogging=False)
-        # By default the instrument geometry comes from the loaded sample file. Only override it
-        # when the user supplies an IDF (and the loaded workspace is not a group).
-        idf = self.getProperty("IDFFilename").value
-        if idf and not isinstance(mtd[ws], WorkspaceGroup):
-            LoadInstrument(ws, Filename=idf, RewriteSpectraMap=True)
+    def _load_IDF_if_supplied(self, wsname, rewrite_spectra_map):
+        """Overlay a user-supplied IDF onto the loaded workspace, if one was provided.
 
-    def _load_WAND_Data(self, filename, ws):
+        Does nothing when no IDFFilename is set. LoadInstrument cannot operate on a
+        WorkspaceGroup directly, so group members are handled individually.
+
+        rewrite_spectra_map is passed through to LoadInstrument's RewriteSpectraMap: True
+        rebuilds the spectrum->detector mapping from the new geometry, False preserves an
+        existing (e.g. grouped) mapping and only replaces the geometry.
+        """
+        idf = self.getProperty("IDFFilename").value
+        if not idf:
+            return
+        workspace = mtd[wsname]
+        names = workspace.getNames() if isinstance(workspace, WorkspaceGroup) else [wsname]
+        for name in names:
+            LoadInstrument(name, Filename=idf, RewriteSpectraMap=rewrite_spectra_map, EnableLogging=False)
+
+    def _load_MIDAS(self, filename, wsname):
+        """Fallback MIDAS loader for files LoadEventAsWorkspace2D cannot read.
+
+        _loadMIDASData is the primary path; it calls this when LoadEventAsWorkspace2D
+        raises (e.g. processed / histogram files that are not raw event data). Uses the
+        generic Load algorithm, which handles those formats.
+        """
+        Load(Filename=filename, OutputWorkspace=wsname, EnableLogging=False)
+        # A user-supplied IDF overrides the geometry that came from the loaded sample file.
+        self._load_IDF_if_supplied(wsname, rewrite_spectra_map=True)
+
+    def _load_WAND_Data(self, filename, wsname):
         grouping = self.getProperty("Grouping").value
         apply_mask = self.getProperty("ApplyMask").value
         try:
-            LoadWAND(Filename=filename, OutputWorkspace=ws, Grouping=grouping, ApplyMask=apply_mask, EnableLogging=False)
+            LoadWAND(Filename=filename, OutputWorkspace=wsname, Grouping=grouping, ApplyMask=apply_mask, EnableLogging=False)
         except RuntimeError:
             logger.warning(f"LoadWAND failed for {filename}, falling back to generic Load")
-            Load(Filename=filename, OutputWorkspace=ws, EnableLogging=False)
+            Load(Filename=filename, OutputWorkspace=wsname, EnableLogging=False)
 
         # A user-supplied IDF overrides the geometry loaded above. Use RewriteSpectraMap=False
         # so the (possibly grouped) spectrum->detector mapping that LoadWAND built is preserved
         # and only the instrument geometry is replaced.
-        idf = self.getProperty("IDFFilename").value
-        if idf and not isinstance(mtd[ws], WorkspaceGroup):
-            LoadInstrument(ws, Filename=idf, RewriteSpectraMap=False, EnableLogging=False)
+        self._load_IDF_if_supplied(wsname, rewrite_spectra_map=False)
 
     def _general_load_data(self, data_type):
         instrument = self.getProperty("Instrument").value
