@@ -24,6 +24,8 @@ namespace {
  * object
  */
 std::shared_ptr<Mantid::Geometry::IObject> getShape(const IObjComponent &self) {
+  PyErr_Warn(PyExc_DeprecationWarning, "'IObjComponent.shape' is deprecated in Mantid 7.0, "
+                                       "use 'ComponentInfo.shape' instead.");
   return std::const_pointer_cast<Mantid::Geometry::IObject>(self.shape());
 }
 } // namespace
@@ -35,5 +37,5 @@ void export_IObjComponent() {
       .def("shape", &getShape, arg("self"),
            "Get the object that represents "
            "the physical shape of this "
-           "component");
+           "component (deprecated, use ComponentInfo.shape)");
 }

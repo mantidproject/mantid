@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/IComponent.h"
-#include "MantidKernel/Quat.h"
 #include "MantidPythonInterface/core/GetPointer.h"
 
 #include <boost/python/class.hpp>
@@ -17,6 +16,11 @@ using Mantid::Geometry::IComponent;
 using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(IComponent)
+
+namespace Mantid::Kernel {
+class Quat;
+class V3D;
+} // namespace Mantid::Kernel
 
 namespace {
 /**
@@ -31,6 +35,39 @@ namespace {
  * @return The distance between self & the other component in metres
  */
 double getDistance(const IComponent &self, const IComponent &other) { return self.getDistance(other); }
+
+// Deprecation wrappers. Legacy component-tree access is being retired in favour
+// of the index-based ComponentInfo access layer. See the 'Instrument Access via
+// SpectrumInfo, DetectorInfo, ComponentInfo' concept page.
+Mantid::Kernel::V3D getPosDeprecated(const IComponent &self) {
+  PyErr_Warn(PyExc_DeprecationWarning, "'IComponent.getPos' is deprecated in Mantid 7.0, "
+                                       "use 'ComponentInfo.position' instead.");
+  return self.getPos();
+}
+
+std::string getNameDeprecated(const IComponent &self) {
+  PyErr_Warn(PyExc_DeprecationWarning, "'IComponent.getName' is deprecated in Mantid 7.0, "
+                                       "use 'ComponentInfo.name' instead.");
+  return self.getName();
+}
+
+std::string getFullNameDeprecated(const IComponent &self) {
+  PyErr_Warn(PyExc_DeprecationWarning, "'IComponent.getFullName' is deprecated in Mantid 7.0, "
+                                       "use 'ComponentInfo.name' instead.");
+  return self.getFullName();
+}
+
+std::string typeDeprecated(const IComponent &self) {
+  PyErr_Warn(PyExc_DeprecationWarning, "'IComponent.type' is deprecated in Mantid 7.0, "
+                                       "use 'ComponentInfo.componentType' instead.");
+  return self.type();
+}
+
+Mantid::Kernel::Quat getRelativeRotDeprecated(const IComponent &self) {
+  PyErr_Warn(PyExc_DeprecationWarning, "'IComponent.getRelativeRot' is deprecated in Mantid 7.0, "
+                                       "use 'ComponentInfo.relativeRotation' instead.");
+  return self.getRelativeRot();
+}
 } // namespace
 
 void export_IComponent() {
@@ -38,12 +75,18 @@ void export_IComponent() {
   register_ptr_to_python<std::shared_ptr<const IComponent>>();
 
   class_<IComponent, boost::noncopyable>("IComponent", no_init)
-      .def("getPos", &IComponent::getPos, arg("self"), "Returns the absolute position of the component")
+      .def("getPos", &getPosDeprecated, arg("self"),
+           "Returns the absolute position of the component (deprecated, use ComponentInfo.position)")
       .def("getDistance", &getDistance, (arg("self"), arg("other")),
            "Returns the distance, in metres, "
            "between this and the given component")
-      .def("getName", &IComponent::getName, arg("self"), "Returns the name of the component")
-      .def("getFullName", &IComponent::getFullName, arg("self"), "Returns full path name of component")
-      .def("type", &IComponent::type, arg("self"), "Returns the type of the component represented as a string")
-      .def("getRelativeRot", &IComponent::getRelativeRot, arg("self"), "Returns the relative rotation as a Quat");
+      .def("getName", &getNameDeprecated, arg("self"),
+           "Returns the name of the component (deprecated, use ComponentInfo.name)")
+      .def("getFullName", &getFullNameDeprecated, arg("self"),
+           "Returns full path name of component (deprecated, use ComponentInfo.name)")
+      .def("type", &typeDeprecated, arg("self"),
+           "Returns the type of the component represented as a string "
+           "(deprecated, use ComponentInfo.componentType)")
+      .def("getRelativeRot", &getRelativeRotDeprecated, arg("self"),
+           "Returns the relative rotation as a Quat (deprecated, use ComponentInfo.relativeRotation)");
 }
