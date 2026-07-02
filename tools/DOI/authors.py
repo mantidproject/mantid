@@ -33,6 +33,7 @@ _translations = {
     "JeanBilheux": "Bilheux, Jean",
     "Bilheux": "Bilheux, Jean",
     "Jose Borreguero": "Borreguero, Jose",
+    "Jose Borreguero Calvo": "Borreguero, Jose",
     "Keith Brown": "Brown, Keith",
     "Alex Buts": "Buts, Alex",
     "abuts": "Buts, Alex",
