@@ -26,7 +26,7 @@ int nelementsDeprecated(const ICompAssembly &self) {
   return self.nelements();
 }
 
-std::shared_ptr<IComponent> getItemDeprecated(ICompAssembly &self, const int index) {
+std::shared_ptr<IComponent> getItemDeprecated(const ICompAssembly &self, const int index) {
   PyErr_Warn(PyExc_DeprecationWarning, "'ICompAssembly.__getitem__' is deprecated in Mantid 7.0, "
                                        "use 'ComponentInfo.children'/'componentsInSubtree' instead.");
   return self[index];
