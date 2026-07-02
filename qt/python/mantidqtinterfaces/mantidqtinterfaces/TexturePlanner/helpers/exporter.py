@@ -14,7 +14,7 @@ from mantid.simpleapi import (
 )
 from mantid.api import AnalysisDataService as ADS
 from mantid.kernel import logger
-from Engineering.texture.TextureUtils import convert_to_sscanss_frame
+from Engineering.texture.texture_helper import convert_to_sscanss_frame
 from typing import Protocol, ValuesView, Generator
 from abc import abstractmethod
 from mantid.api import MatrixWorkspace
