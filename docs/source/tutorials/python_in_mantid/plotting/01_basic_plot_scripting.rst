@@ -165,7 +165,7 @@ Output:
 
 To overplot on the same window:
 
-.. testcode:: OverPlottingWithTwoSpectrums
+.. testcode:: OverPlottingWithTwoSpectra
 
     RawData = Load("MAR11015")
 
@@ -180,11 +180,11 @@ To overplot on the same window:
 
 Output:
 
-.. testoutput:: OverPlottingWithTwoSpectrums
+.. testoutput:: OverPlottingWithTwoSpectra
 
     The plot contains 2 spectrums
 
-.. testcleanup:: OverPlottingWithTwoSpectrums
+.. testcleanup:: OverPlottingWithTwoSpectra
 
     DeleteWorkspace("RawData")
 
