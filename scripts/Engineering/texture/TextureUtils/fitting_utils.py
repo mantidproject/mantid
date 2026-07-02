@@ -122,6 +122,9 @@ def get_initial_fit_function_and_kwargs_from_specs(
     tie_bkg: bool,
 ) -> Tuple[str, dict, Sequence[float]]:
     # modification of get_initial_fit_function_and_kwargs to just fit a peak within the x_window
+    # NB: the shared broadening params (parameters_to_tie) are tied across domains here so this
+    # initial fit establishes a single, unit-correct (TOF) value for them.  Subsequent fits
+    # (rerun_fit_with_new_ws) then hold that value fixed per-spectrum, decoupling the domains.
 
     # get the number of spectra
     si = ws.spectrumInfo()
@@ -285,23 +288,27 @@ def rerun_fit_with_new_ws(
             # don't constrain the intensity on the final fit
             new_peak.addConstraints(f"{max(intens / 2, 1e-6)}<{intens_par_name}<{intens * 2}")
         new_peak.addConstraints(f"{x0 * (1 - x0_frac_move)}<{cen_par_name}<{x0 * (1 + x0_frac_move)}")
-        # apply ties to the first domain, if ties are required
-        if idom > 0:
-            if tie_background:
-                for ipar_bg in range(bg.nParams()):
-                    par = bg.getParamName(ipar_bg)
-                    ties.append(f"f{idom}.f1.{par}=f0.f1.{par}")
-            if parameters_to_tie:
-                for par in parameters_to_tie:
-                    ties.append(f"f{idom}.f0.{par}=f0.f0.{par}")
-        # fix parameters if required
+        # tie background across domains if requested (kept - a cheap linear-background coupling that
+        # helps weak spectra share a level); the shared broadening params are fixed per-domain below
+        # rather than tied, so each spectrum's peak shape fits independently
+        if idom > 0 and tie_background:
+            for ipar_bg in range(bg.nParams()):
+                par = bg.getParamName(ipar_bg)
+                ties.append(f"f{idom}.f1.{par}=f0.f1.{par}")
+        # fix user-nominated parameters
         if parameters_to_fix:
             for param in parameters_to_fix:
                 new_peak.fixParameter(param)
-
-        # for IkedaCarpenterPV, fix instrument parameters during non-final fits to improve speed and stability
-        if not is_final and new_peak.name() == "IkedaCarpenterPV":
-            for par in ("Alpha0", "Alpha1", "Beta0", "Kappa"):
+        # Hold the shared broadening params fixed at the value carried through from the previous fit
+        # (the initial fit tied them across domains to establish one consistent value).  Fixing them
+        # here decouples the domains so the multi-domain solve is block-diagonal.  setMatrixWorkspace
+        # above can reapply the instrument parameter formulas, so re-assert the previous value before
+        # fixing - except for a freshly created IkedaCarpenterPV, whose params come from the instrument.
+        if parameters_to_tie:
+            fresh_ic = last_fit_ic and is_final
+            for par in parameters_to_tie:
+                if not fresh_ic:
+                    new_peak.setParameter(par, peak.getParameterValue(par))
                 new_peak.fixParameter(par)
 
         comp_func = _make_composite(new_peak, bg)
@@ -380,7 +387,12 @@ def fit_all_peaks(
     smooth_vals: the number of bins which should be combined together to improve SNR stats
     tied_bkgs: a bool flag for each of the subsequent fits whether the background fits should be independent for spectra
     final_fit_raw: flag for whether the final fit should be done with no smoothing
-    parameters_to_tie: parameters which should be tied across spectra. If None, defaults are used based on peak function:
+    parameters_to_tie: the shared broadening/shape parameters. On the first (coarsely rebunched)
+                       fit these are tied across spectra to establish a single, unit-correct value;
+                       every subsequent fit (including the final raw fit) then holds that value
+                       FIXED per-spectrum rather than tying, so the domains decouple and the
+                       multi-domain solve stays block-diagonal. If None, defaults are used based on
+                       peak function:
                        BackToBackExponential: ("A", "B"), IkedaCarpenterPV: ("Alpha0", "Alpha1", "Beta0", "Kappa")
     subsequent_fit_param_fix: parameters which should be fixed after the initial fit (Default is None)
     peak_func_name: peak function to use, should be either BackToBackExponential or IkedaCarpenterPV
