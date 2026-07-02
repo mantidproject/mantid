@@ -11,7 +11,7 @@ from mantid.fitfunctions import FunctionWrapper, CompositeFunctionWrapper
 from mantid.api import FunctionFactory
 from mantid.geometry import CrystalStructure, ReflectionGenerator, PointGroupFactory, PointGroup
 from mantid.kernel import V3D, logger, UnitConversion, DeltaEModeType
-from typing import TYPE_CHECKING, Sequence, Any
+from typing import TYPE_CHECKING, Sequence, Any, Optional, Tuple
 from scipy.optimize import least_squares
 from plugins.algorithms.poldi_utils import simulate_2d_data, get_dspac_array_from_ws
 from abc import ABC, abstractmethod
