@@ -992,6 +992,11 @@ class FullInstrumentViewView(QWidget):
         self.delete_current_widget()
         self.main_plotter.clear()
 
+    @_skip_if_closing
+    def enable_parallel_projection(self) -> None:
+        self.main_plotter.view_xy()
+        self.main_plotter.enable_parallel_projection()
+
     @_ensure_overlay_manager
     def add_circle_widget(self) -> None:
         """Add a circle selection shape centred on the viewport."""

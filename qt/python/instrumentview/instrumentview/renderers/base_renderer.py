@@ -153,7 +153,3 @@ class InstrumentRenderer(ABC):
         precision.
         """
         return self._picking_tolerance * 1.25 if hover else self._picking_tolerance
-
-    def set_parallel_view(self, plotter):
-        plotter.view_xy()
-        plotter.enable_parallel_projection()

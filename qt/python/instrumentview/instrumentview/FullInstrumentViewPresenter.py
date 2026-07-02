@@ -284,7 +284,7 @@ class FullInstrumentViewPresenter:
         monitor_mesh = self._create_and_add_monitor_mesh()
         sample_position_mesh = self._create_and_add_sample_position_mesh()
 
-        renderer.set_parallel_view(self._view.main_plotter)
+        self._view.enable_parallel_projection()
 
         # Update transform needs to happen after adding to plotter
         # Uses display coordinates
