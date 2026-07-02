@@ -303,6 +303,7 @@ public:
       getline(testfile, line);
       getline(testfile, line);
       TS_ASSERT_EQUALS(line, "# q () values");
+      testfile.close();
     }
     AnalysisDataService::Instance().remove(outws);
     if (std::filesystem::exists(outputFile))
