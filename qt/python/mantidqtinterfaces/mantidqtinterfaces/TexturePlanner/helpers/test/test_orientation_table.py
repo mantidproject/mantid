@@ -55,7 +55,9 @@ class TestOrientation_Copy(unittest.TestCase):
 
         self.assertFalse(clone.include)
         self.assertTrue(clone.select)
-        self.assertIs(clone.pf_points, pf)
+        # we want the arrays to carry the same values but be different objects
+        np.testing.assert_array_equal(clone.pf_points, pf)
+        self.assertIsNot(clone.pf_points, pf)
         self.assertIsNone(clone.transmission)
 
 
