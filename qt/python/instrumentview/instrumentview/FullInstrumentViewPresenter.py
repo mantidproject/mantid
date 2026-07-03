@@ -238,6 +238,7 @@ class FullInstrumentViewPresenter:
             self._view.enable_or_disable_aspect_ratio_box()
             self._view.enable_or_disable_flip_beam_box()
             self._view.enable_or_disable_hover_pick()
+            self._view.enable_or_disable_rubberband_zoom()
             self.refresh_plotter_peaks()
 
     def count_scale_combo_options(self) -> list[str]:
@@ -373,6 +374,7 @@ class FullInstrumentViewPresenter:
 
     def on_rubberband_zoom_toggled(self, _checked) -> None:
         self._update_interactor_style()
+        self._view.update_view_from_rubberband_zoom()
 
     def on_hover_pick_toggled(self, checked: bool) -> None:
         self._last_hovered_point_index = None
@@ -734,7 +736,7 @@ class FullInstrumentViewPresenter:
             return
         if self._view.is_hover_pick_mode_toggled():
             self._view.main_plotter.iren.style = self._interactor_styles.SCROLL_ZOOM_WITH_HOVER
-        elif self._view.is_rubberband_zoom_toggled() and self._model.is_2d_projection:
+        elif self._view.is_rubberband_zoom_toggled():
             self._view.main_plotter.iren.style = self._interactor_styles.RUBBERBAND_ZOOM
         else:
             self._view.main_plotter.iren.style = self._interactor_styles.SCROLL_ZOOM_WITH_PICKING

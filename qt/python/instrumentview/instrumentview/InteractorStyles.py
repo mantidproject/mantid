@@ -19,8 +19,8 @@ class InteractorStyles:
         self.TRACKBALL = SwappedButtonTrackballCamera()
         self.RUBBERBAND_ZOOM = RubberBandZoomInteractorStyle(plotter)
 
-        self.SCROLL_ZOOM_WITH_PICKING.set_picking_callback(picking_callback)
         self.TRACKBALL.set_picking_callback(picking_callback)
+        self.SCROLL_ZOOM_WITH_PICKING.set_picking_callback(picking_callback)
         self.SCROLL_ZOOM_WITH_HOVER.set_hover_callback(hover_callback)
 
 
@@ -50,7 +50,6 @@ class RubberBandZoomInteractorStyle(vtkInteractorStyleRubberBandZoom):
         camera.focal_point = self._default_focal_point.tolist()
         camera.parallel_scale = self._default_parallel_scale
         renderer.reset_camera_clipping_range()
-        self.plotter.render_window.Render()
 
 
 class CursorZoomInteractorStyle(vtkInteractorStyleUser):

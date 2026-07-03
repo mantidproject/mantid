@@ -783,6 +783,13 @@ class FullInstrumentViewView(QWidget):
     def on_toggle_add_hollow_rectangle(self, checked):
         self._on_toggle_add_shape(checked, self.add_hollow_rectangle_widget)
 
+    def reset_overlay_shapes(self, disable=False) -> None:
+        disable = disable or (self.current_selected_projection() == ProjectionType.THREE_D)
+        for btn in self._shape_buttons:
+            if btn.isChecked():
+                btn.toggle()
+            btn.setDisabled(disable)
+
     def _on_toggle_add_shape(self, checked, add_widget_function: Callable):
         if checked:
             add_widget_function()
@@ -808,13 +815,28 @@ class FullInstrumentViewView(QWidget):
             self._add_selection.setDisabled(True)
             return
 
-        for btn in self._shape_buttons:
-            if btn.isChecked():
-                btn.toggle()
-            btn.setDisabled(self.current_selected_projection() == ProjectionType.THREE_D)
+        self.reset_overlay_shapes()
 
     def is_rubberband_zoom_toggled(self) -> bool:
         return self._rubberband_zoom.isChecked()
+
+    def enable_or_disable_rubberband_zoom(self) -> None:
+        if self.current_selected_projection() == ProjectionType.THREE_D:
+            self._rubberband_zoom.setChecked(False)
+            self._rubberband_zoom.setEnabled(False)
+        if self.current_selected_projection() != ProjectionType.THREE_D:
+            self._rubberband_zoom.setEnabled(True)
+
+    def update_view_from_rubberband_zoom(self) -> None:
+        enabled = self.is_rubberband_zoom_toggled() and (self.current_selected_projection() != ProjectionType.THREE_D)
+        if enabled:
+            self._hover_pick.setChecked(False)
+            self.delete_current_widget()
+
+        self._add_mask.setDisabled(True)
+        self._add_selection.setDisabled(True)
+
+        self.reset_overlay_shapes(disable=enabled)
 
     def is_hover_pick_mode_toggled(self) -> bool:
         return self._hover_pick.isChecked()
@@ -823,6 +845,7 @@ class FullInstrumentViewView(QWidget):
         enabled = self.is_hover_pick_mode_toggled() and (self.current_selected_projection() != ProjectionType.THREE_D)
         if enabled:
             self.delete_current_widget()
+            self._rubberband_zoom.setChecked(False)
 
         self._clear_point_picked_detectors.setDisabled(enabled)
         self._add_mask.setDisabled(True)
@@ -831,14 +854,11 @@ class FullInstrumentViewView(QWidget):
         self._select_bank_tube.setDisabled(enabled)
         self._export_workspace_button.setDisabled(enabled)
 
-        for btn in self._shape_buttons:
-            if btn.isChecked():
-                btn.toggle()
-            btn.setDisabled(enabled or self.current_selected_projection() == ProjectionType.THREE_D)
+        self.reset_overlay_shapes(disable=enabled)
 
     def enable_or_disable_hover_pick(self) -> None:
-        if self.is_hover_pick_mode_toggled() and (self.current_selected_projection() == ProjectionType.THREE_D):
-            self._hover_pick.toggle()
+        if self.current_selected_projection() == ProjectionType.THREE_D:
+            self._hover_pick.setChecked(False)
             self._hover_pick.setEnabled(False)
         if self.current_selected_projection() != ProjectionType.THREE_D:
             self._hover_pick.setEnabled(True)
