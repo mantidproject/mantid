@@ -213,6 +213,8 @@ private:
   /// size of each sub-box (the one this GridBox can be split into) in
   /// correspondent direction
   double m_SubBoxSize[nd];
+  /// Precomputed reciprocal of m_SubBoxSize; replaces division with multiplication in calculateChildIndex
+  double m_SubBoxSizeInv[nd];
 
   /// How many boxes in the boxes vector? This is just to avoid boxes.size()
   /// calls.
