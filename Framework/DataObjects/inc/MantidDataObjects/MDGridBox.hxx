@@ -9,7 +9,6 @@
 #include "MantidDataObjects/MDEvent.h"
 #include "MantidDataObjects/MDGridBox.h"
 #include "MantidKernel/FunctionTask.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Task.h"
 #include "MantidKernel/ThreadPool.h"
@@ -18,6 +17,7 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Utils.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include <algorithm>
 #include <boost/math/special_functions/round.hpp>
 #include <optional>
 #include <ostream>
@@ -181,6 +181,7 @@ TMDE(MDGridBox)::MDGridBox(const MDGridBox<MDE, nd> &other, Mantid::API::BoxCont
     split[d] = other.split[d];
     splitCumul[d] = other.splitCumul[d];
     m_SubBoxSize[d] = other.m_SubBoxSize[d];
+    m_SubBoxSizeInv[d] = other.m_SubBoxSizeInv[d];
   }
   // Copy all the boxes
   m_Children.clear();
@@ -230,6 +231,7 @@ TMDE(size_t MDGridBox)::computeSizesFromSplit() {
     tot *= split[d];
     // Length of the side of a box in this dimension
     m_SubBoxSize[d] = static_cast<double>(this->extents[d].getSize()) / static_cast<double>(split[d]);
+    m_SubBoxSizeInv[d] = 1.0 / m_SubBoxSize[d];
     // Accumulate the squared diagonal length.
     diagSum += m_SubBoxSize[d] * m_SubBoxSize[d];
   }
@@ -1730,15 +1732,9 @@ TMDE(size_t MDGridBox)::calculateChildIndex(const MDE &event) const {
     // Accumulate the index
     const auto coordinate = event.getCenter(d);
     const auto offset = coordinate - this->extents[d].getMin();
-    auto childIndex = static_cast<int>(offset / m_SubBoxSize[d]);
-    if (childIndex == static_cast<int>(split[d]) && coordinate <= this->extents[d].getMax()) {
-      static Kernel::Logger mdGridBoxLog("MDGridBox");
-      mdGridBoxLog.debug() << "MDGridBox::calculateChildIndex clamping upper-boundary event: dimension=" << d
-                           << ", coordinate=" << coordinate << ", min=" << this->extents[d].getMin()
-                           << ", max=" << this->extents[d].getMax() << ", subBoxSize=" << m_SubBoxSize[d]
-                           << ", raw child index=" << childIndex << ", clamped child index=" << (split[d] - 1) << '\n';
-      childIndex = static_cast<int>(split[d] - 1);
-    }
+    const int splitD = static_cast<int>(split[d]);
+    // FP rounding can place a boundary event one index past the last valid child
+    const auto childIndex = std::min(static_cast<int>(offset * m_SubBoxSizeInv[d]), splitD - 1);
     cindex += childIndex * splitCumul[d];
   }
   return cindex;
