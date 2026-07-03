@@ -31,7 +31,7 @@ void SaveDaveGrp::init() {
                         "Transform all energy units from milli eV to micro eV");
   this->declareProperty(
       std::make_unique<Kernel::PropertyWithValue<bool>>("ToQsInQENSData", false, Kernel::Direction::Input),
-      "Transform the spectrum numbers to q values");
+      "Transform the spectrum numbers to Q values");
 }
 
 /** Execute the algorithm.
@@ -50,7 +50,7 @@ void SaveDaveGrp::exec() {
   if (xcaption.length() == 0)
     xcaption = "X";
   if (ycaption.length() == 0 || ycaption == "Spectrum")
-    ycaption = toQsInQENSData ? "q" : "Y";
+    ycaption = toQsInQENSData ? "Q" : "Y";
 
   std::string filename = getProperty("Filename");
   std::ofstream file(filename.c_str());

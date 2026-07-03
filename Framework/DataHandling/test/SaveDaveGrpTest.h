@@ -292,7 +292,7 @@ public:
       getline(testfile, line);
       TS_ASSERT_EQUALS(line, "1"); // only one bin
       getline(testfile, line);
-      TS_ASSERT_EQUALS(line, "# Number of q values");
+      TS_ASSERT_EQUALS(line, "# Number of Q values");
       getline(testfile, line);
       TS_ASSERT_EQUALS(line, "51200");
       getline(testfile, line);
@@ -302,7 +302,7 @@ public:
       TS_ASSERT_DELTA(d, 52496.4, 1);
       getline(testfile, line);
       getline(testfile, line);
-      TS_ASSERT_EQUALS(line, "# q () values");
+      TS_ASSERT_EQUALS(line, "# Q () values");
       testfile.close();
     }
     AnalysisDataService::Instance().remove(outws);
