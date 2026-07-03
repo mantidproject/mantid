@@ -272,6 +272,7 @@ public:
     TS_ASSERT_EQUALS(dataStore.doesExist(outws), true);
 
     TS_ASSERT_THROWS_NOTHING(saver->setPropertyValue("InputWorkspace", outws));
+    TS_ASSERT_THROWS_NOTHING(saver->setProperty("ToMicroEV", false));
     TS_ASSERT_THROWS_NOTHING(saver->setProperty("ToQsInQENSData", true));
     std::string outputFile("testSaveDaveGrp4.grp");
     TS_ASSERT_THROWS_NOTHING(saver->setPropertyValue("Filename", outputFile));
@@ -308,6 +309,17 @@ public:
     AnalysisDataService::Instance().remove(outws);
     if (std::filesystem::exists(outputFile))
       std::filesystem::remove(outputFile);
+  }
+
+  void test_validate_inputs() {
+    saver->setProperty("ToMicroEV", true);
+    saver->setProperty("ToQsInQENSData", true);
+    auto errors = saver->validateInputs();
+
+    TS_ASSERT_EQUALS(errors.size(), 1);
+    TS_ASSERT_EQUALS(
+        errors["ToQsInQENSData"],
+        "\'ToMicroEV\' and \'ToQsInQENSData\' can\'t be set to True at the same time.Set \'ToQsInQENSData\' to False");
   }
 
 private:

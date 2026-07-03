@@ -34,6 +34,18 @@ void SaveDaveGrp::init() {
       "Transform the spectrum numbers to Q values");
 }
 
+std::map<std::string, std::string> SaveDaveGrp::validateInputs() {
+  std::map<std::string, std::string> result;
+
+  const bool toMicroEV = getProperty("ToMicroEV");
+  const bool toQsInQENSData = getProperty("ToQsInQENSData");
+  if (toMicroEV && toQsInQENSData) {
+    result["ToQsInQENSData"] = "'ToMicroEV' and 'ToQsInQENSData' can't be set to True at the same time."
+                               "Set 'ToQsInQENSData' to False";
+  }
+  return result;
+}
+
 /** Execute the algorithm.
  */
 void SaveDaveGrp::exec() {
