@@ -17,7 +17,6 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Utils.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include <algorithm>
 #include <boost/math/special_functions/round.hpp>
 #include <optional>
 #include <ostream>
@@ -1733,8 +1732,10 @@ TMDE(size_t MDGridBox)::calculateChildIndex(const MDE &event) const {
     const auto coordinate = event.getCenter(d);
     const auto offset = coordinate - this->extents[d].getMin();
     const int splitD = static_cast<int>(split[d]);
-    // FP rounding can place a boundary event one index past the last valid child
-    const auto childIndex = std::min(static_cast<int>(offset * m_SubBoxSizeInv[d]), splitD - 1);
+    // clamp to splitD-1: FP rounding can place an in-box coordinate one slot past the last valid child
+    auto childIndex = static_cast<int>(offset * m_SubBoxSizeInv[d]);
+    if (childIndex == splitD && coordinate <= this->extents[d].getMax())
+      childIndex = splitD - 1;
     cindex += childIndex * splitCumul[d];
   }
   return cindex;
