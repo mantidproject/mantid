@@ -311,7 +311,12 @@ void ConvertToMD::exec() {
   }
 
   if (std::vector<std::string> logname = m_Convertor->getLogTimesName(); logname.size() > 0) {
-    spws->getExperimentInfo(0)->mutableRun().addProperty("useLogTimes", logname, true);
+    std::string singlestring;
+    for (auto string : logname) {
+      singlestring += string + ",";
+    }
+    singlestring.pop_back();
+    spws->getExperimentInfo(0)->mutableRun().addProperty("useLogTimes", singlestring, true);
   }
 
   // JOB COMPLETED:

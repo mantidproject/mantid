@@ -433,7 +433,6 @@ void MDNormDirectSC::cacheDimensionXValues() {
 void MDNormDirectSC::calculateNormalization(const std::vector<coord_t> &otherValues,
                                             const Kernel::Matrix<coord_t> &affineTrans, uint16_t expInfoIndex) {
   using VectorDoubleProperty = Kernel::PropertyWithValue<std::vector<double>>;
-  using VectorStringProperty = Kernel::PropertyWithValue<std::vector<std::string>>;
   const auto &currentExptInfo = *(m_inputWS->getExperimentInfo(expInfoIndex));
   const auto &spectrumInfo = currentExptInfo.spectrumInfo();
   auto *rubwLog = dynamic_cast<VectorDoubleProperty *>(currentExptInfo.getLog("RUBW_MATRIX"));
@@ -449,7 +448,12 @@ void MDNormDirectSC::calculateNormalization(const std::vector<coord_t> &otherVal
     if (!run.hasProperty(LOG_CHARGE_NAME)) {
       throw std::runtime_error("Wokspace does not contain the proton charge log. Cannot continue.");
     }
-    std::vector<std::string> lognames = (*dynamic_cast<VectorStringProperty *>(run.getProperty("useLogTimes")))();
+    std::vector<std::string> lognames;
+    std::istringstream tosplit;
+    tosplit.str((*dynamic_cast<PropertyWithValue<std::string> *>(run.getProperty("useLogTimes")))());
+    for (std::string item; std::getline(tosplit, item, ',');) {
+      lognames.push_back(item);
+    }
     std::vector<TimeSeriesProperty<double> *> logs;
     std::vector<std::pair<double, double>> logminmax;
     std::vector<size_t> moving_gonio_index;
