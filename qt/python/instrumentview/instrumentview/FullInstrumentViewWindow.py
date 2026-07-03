@@ -799,7 +799,7 @@ class FullInstrumentViewView(QWidget):
                 btn.setDisabled(checked)
 
     def enable_or_disable_mask_widgets(self):
-        if self.is_hover_pick_checked():
+        if self.is_hover_pick_mode_toggled():
             for btn in self._shape_buttons:
                 if btn.isChecked():
                     btn.toggle()
@@ -816,7 +816,11 @@ class FullInstrumentViewView(QWidget):
     def is_rubberband_zoom_toggled(self) -> bool:
         return self._rubberband_zoom.isChecked()
 
-    def set_hover_pick_mode_enabled(self, enabled: bool) -> None:
+    def is_hover_pick_mode_toggled(self) -> bool:
+        return self._hover_pick.isChecked()
+
+    def update_view_from_hover_pick_mode(self) -> None:
+        enabled = self.is_hover_pick_mode_toggled() and (self.current_selected_projection() != ProjectionType.THREE_D)
         if enabled:
             self.delete_current_widget()
 
@@ -832,16 +836,12 @@ class FullInstrumentViewView(QWidget):
                 btn.toggle()
             btn.setDisabled(enabled or self.current_selected_projection() == ProjectionType.THREE_D)
 
-    def set_hover_pick_available(self, is_available: bool) -> None:
-        self._hover_pick.setEnabled(is_available)
-
-    def set_hover_pick_checked(self, checked: bool) -> None:
-        old_state = self._hover_pick.blockSignals(True)
-        self._hover_pick.setChecked(checked)
-        self._hover_pick.blockSignals(old_state)
-
-    def is_hover_pick_checked(self) -> bool:
-        return self._hover_pick.isChecked()
+    def enable_or_disable_hover_pick(self) -> None:
+        if self.is_hover_pick_mode_toggled() and (self.current_selected_projection() == ProjectionType.THREE_D):
+            self._hover_pick.toggle()
+            self._hover_pick.setEnabled(False)
+        if self.current_selected_projection() != ProjectionType.THREE_D:
+            self._hover_pick.setEnabled(True)
 
     def delete_current_widget(self):
         if self._shape_overlay_manager is not None:

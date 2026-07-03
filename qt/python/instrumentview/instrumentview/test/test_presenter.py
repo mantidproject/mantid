@@ -147,12 +147,12 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     def test_on_hover_pick_toggled_enables_hover_mode(self):
         self._model.projection_type = ProjectionType.CYLINDRICAL_X
         self._presenter._update_interactor_style = MagicMock()
+        self._mock_view.is_hover_pick_mode_toggled.return_value = True
 
         self._presenter.on_hover_pick_toggled(True)
 
-        self.assertTrue(self._presenter._hover_pick_mode)
-        self._mock_view.set_hover_pick_mode_enabled.assert_called_once_with(True)
         self._presenter._update_interactor_style.assert_called_once()
+        self._mock_view.update_view_from_hover_pick_mode.assert_called_once()
         self._mock_view.clear_lineplot_overlays.assert_called_once()
         self._mock_view.show_plot_for_detectors.assert_called_once_with(None, None)
         self._mock_view.set_selected_detector_info.assert_called_once_with([])
@@ -160,15 +160,14 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.remove_peak_cursor_from_lineplot.assert_called_once()
 
     def test_on_hover_pick_toggled_off_restores_regular_plotting(self):
-        self._presenter._hover_pick_mode = True
         self._presenter._update_interactor_style = MagicMock()
         self._presenter.update_picked_detectors_on_view = MagicMock()
+        self._mock_view.is_hover_pick_mode_toggled.return_value = False
 
         self._presenter.on_hover_pick_toggled(False)
 
-        self.assertFalse(self._presenter._hover_pick_mode)
-        self._mock_view.set_hover_pick_mode_enabled.assert_called_once_with(False)
         self._presenter._update_interactor_style.assert_called_once()
+        self._mock_view.update_view_from_hover_pick_mode.assert_called_once()
         self._presenter.update_picked_detectors_on_view.assert_called_once()
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.on_integration_limits_reset_clicked")
@@ -176,6 +175,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.extract_spectra_for_line_plot")
     def test_unit_option_selected(self, mock_extract_spectra, mock_set_integration_units, mock_reset_integration):
         self._mock_view.sum_spectra_selected.return_value = True
+        self._mock_view.is_hover_pick_mode_toggled.return_value = False
         self._presenter.on_sliders_unit_selected(1)
         mock_set_integration_units.assert_called_once_with(self._presenter._UNIT_OPTIONS[1])
         self._mock_view.show_plot_for_detectors.assert_called_once()
@@ -243,6 +243,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._presenter._renderer.set_pickable_scalars.side_effect = lambda m, visibility, label: m.point_data.update({label: visibility})
         self._mock_view.current_selected_lineplot_unit.return_value = "TOF"
         self._mock_view.sum_spectra_selected.return_value = True
+        self._mock_view.is_hover_pick_mode_toggled.return_value = False
         self._presenter.update_picked_detectors_on_view()
         np.testing.assert_allclose(
             self._presenter._pickable_mesh.point_data[self._presenter._visible_label], self._model._detector_is_picked

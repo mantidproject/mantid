@@ -80,7 +80,6 @@ class FullInstrumentViewPresenter:
         self._sbs_shape_renderer_full = SideBySideShapeRenderer(self._model.workspace, use_optimised_shapes=False)
         self._renderer = self._get_renderer_for_mode(view.get_render_mode_option())
         self._interactor_styles = InteractorStyles(self._view.main_plotter, picking_callback=lambda: None, hover_callback=lambda: None)
-        self._hover_pick_mode = False
         self._last_hovered_point_index: Optional[int] = None
         self._select_bank_tube = False
         self._callback_queue = Queue()
@@ -233,15 +232,12 @@ class FullInstrumentViewPresenter:
             return
         self._model.projection_type = self._view.current_selected_projection()
         self._model.flip_beam = self._view.is_flip_beam_checkbox_checked()
-        if not self._model.is_2d_projection and self._hover_pick_mode:
-            self._hover_pick_mode = False
-            self._last_hovered_point_index = None
-            self._view.set_hover_pick_checked(False)
-        self._view.set_hover_pick_available(self._model.is_2d_projection)
-        self._view.set_hover_pick_mode_enabled(self._hover_pick_mode)
         with SuppressRendering(self._view.main_plotter):
             self._update_view_main_plotter(refresh_limits=refresh_limits)
-            self._view.set_hover_pick_mode_enabled(self._hover_pick_mode)
+            self._view.enable_or_disable_mask_widgets()
+            self._view.enable_or_disable_aspect_ratio_box()
+            self._view.enable_or_disable_flip_beam_box()
+            self._view.enable_or_disable_hover_pick()
             self.refresh_plotter_peaks()
 
     def count_scale_combo_options(self) -> list[str]:
@@ -293,9 +289,6 @@ class FullInstrumentViewPresenter:
             if mesh is not None:
                 mesh.transform(self._transform, inplace=True)
 
-        self._view.enable_or_disable_mask_widgets()
-        self._view.enable_or_disable_aspect_ratio_box()
-        self._view.enable_or_disable_flip_beam_box()
         # If refreshing the limits we reset both the contour and integration sliders.
         # If not, we need to manually update the contour limits to what they were set to before we added the
         # meshes above, because adding the meshes resets the contour limits in the plotter.
@@ -382,14 +375,12 @@ class FullInstrumentViewPresenter:
         self._update_interactor_style()
 
     def on_hover_pick_toggled(self, checked: bool) -> None:
-        enabled = checked and self._model.is_2d_projection
-        self._hover_pick_mode = enabled
         self._last_hovered_point_index = None
-
-        self._view.set_hover_pick_mode_enabled(enabled)
         self._update_interactor_style()
 
-        if enabled:
+        self._view.update_view_from_hover_pick_mode()
+
+        if self._view.is_hover_pick_mode_toggled() and self._model.is_2d_projection:
             self._view.clear_lineplot_overlays()
             self._view.show_plot_for_detectors(self._model.line_plot_workspace, self._model.lineplot_limits)
             self._view.set_selected_detector_info([])
@@ -545,7 +536,7 @@ class FullInstrumentViewPresenter:
         return self._model.cached_keys(kind)
 
     def _update_line_plot_ws_and_draw(self, unit: str) -> None:
-        if self._hover_pick_mode:
+        if self._view.is_hover_pick_mode_toggled():
             if self._last_hovered_point_index is not None:
                 self._update_hover_pick_plot(self._last_hovered_point_index)
             return
@@ -741,7 +732,7 @@ class FullInstrumentViewPresenter:
         if not self._model.is_2d_projection:
             self._view.main_plotter.iren.style = self._interactor_styles.TRACKBALL
             return
-        if self._hover_pick_mode:
+        if self._view.is_hover_pick_mode_toggled():
             self._view.main_plotter.iren.style = self._interactor_styles.SCROLL_ZOOM_WITH_HOVER
         elif self._view.is_rubberband_zoom_toggled() and self._model.is_2d_projection:
             self._view.main_plotter.iren.style = self._interactor_styles.RUBBERBAND_ZOOM
