@@ -1005,6 +1005,29 @@ public:
     BoxController *const bcc = b0->getBoxController();
     delete b0;
     delete bcc;
+
+    // Corner case: preserve events already assigned to a child MDBox when they
+    // lie exactly on that child box's upper boundary during serial splitting.
+    gbox_t *boundaryBox = MDEventsTestHelper::makeMDGridBox<2>();
+    boundaryBox->getBoxController()->setSplitThreshold(1);
+    boundaryBox->getBoxController()->setMaxDepth(2);
+
+    auto *boundaryChild = dynamic_cast<box_t *>(boundaryBox->getChild(0));
+    TS_ASSERT(boundaryChild);
+    for (size_t i = 0; i < 2; ++i) {
+      // Insert directly into child 0 so the event is already assigned to this
+      // MDBox when it splits. The point lies on child 0's upper y boundary.
+      coord_t centers[2] = {0.5f, 1.0f};
+      TS_ASSERT_EQUALS(boundaryChild->addEvent(MDLeanEvent<2>(2.0, 2.0, centers)), 1);
+    }
+
+    boundaryBox->splitAllIfNeeded(nullptr);
+    boundaryBox->refreshCache(nullptr);
+    TS_ASSERT_EQUALS(boundaryBox->getNPoints(), 2);
+
+    BoxController *const boundaryBc = boundaryBox->getBoxController();
+    delete boundaryBox;
+    delete boundaryBc;
   }
 
   //------------------------------------------------------------------------------------------------
@@ -1013,6 +1036,7 @@ public:
    */
   void test_splitAllIfNeeded_usingThreadPool() {
     using gbox_t = MDGridBox<MDLeanEvent<2>, 2>;
+    using box_t = MDBox<MDLeanEvent<2>, 2>;
     using ibox_t = MDBoxBase<MDLeanEvent<2>, 2>;
 
     gbox_t *b = MDEventsTestHelper::makeMDGridBox<2>();
@@ -1062,6 +1086,32 @@ public:
     BoxController *const bcc = b->getBoxController();
     delete b;
     delete bcc;
+
+    // Corner case: preserve events already assigned to a child MDBox when they
+    // lie exactly on that child box's upper boundary during threaded splitting.
+    gbox_t *boundaryBox = MDEventsTestHelper::makeMDGridBox<2>();
+    boundaryBox->getBoxController()->setSplitThreshold(1);
+    boundaryBox->getBoxController()->setMaxDepth(2);
+
+    auto *boundaryChild = dynamic_cast<box_t *>(boundaryBox->getChild(0));
+    TS_ASSERT(boundaryChild);
+    for (size_t i = 0; i < 2; ++i) {
+      // Insert directly into child 0 so the event is already assigned to this
+      // MDBox when it splits. The point lies on child 0's upper y boundary.
+      coord_t centers[2] = {0.5f, 1.0f};
+      TS_ASSERT_EQUALS(boundaryChild->addEvent(MDLeanEvent<2>(2.0, 2.0, centers)), 1);
+    }
+
+    ThreadSchedulerFIFO *boundaryTs = new ThreadSchedulerFIFO();
+    ThreadPool boundaryTp(boundaryTs);
+    boundaryBox->splitAllIfNeeded(boundaryTs);
+    boundaryTp.joinAll();
+    boundaryBox->refreshCache(nullptr);
+    TS_ASSERT_EQUALS(boundaryBox->getNPoints(), 2);
+
+    BoxController *const boundaryBc = boundaryBox->getBoxController();
+    delete boundaryBox;
+    delete boundaryBc;
   }
 
   //------------------------------------------------------------------------------------------------

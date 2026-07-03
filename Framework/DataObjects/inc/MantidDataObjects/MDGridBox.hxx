@@ -9,6 +9,7 @@
 #include "MantidDataObjects/MDEvent.h"
 #include "MantidDataObjects/MDGridBox.h"
 #include "MantidKernel/FunctionTask.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Task.h"
 #include "MantidKernel/ThreadPool.h"
@@ -1727,8 +1728,18 @@ TMDE(size_t MDGridBox)::calculateChildIndex(const MDE &event) const {
   size_t cindex(0);
   for (size_t d = 0; d < nd; d++) {
     // Accumulate the index
-    auto offset = event.getCenter(d) - this->extents[d].getMin();
-    cindex += static_cast<int>(offset / (m_SubBoxSize[d])) * splitCumul[d];
+    const auto coordinate = event.getCenter(d);
+    const auto offset = coordinate - this->extents[d].getMin();
+    auto childIndex = static_cast<int>(offset / m_SubBoxSize[d]);
+    if (childIndex == static_cast<int>(split[d]) && coordinate <= this->extents[d].getMax()) {
+      static Kernel::Logger mdGridBoxLog("MDGridBox");
+      mdGridBoxLog.debug() << "MDGridBox::calculateChildIndex clamping upper-boundary event: dimension=" << d
+                           << ", coordinate=" << coordinate << ", min=" << this->extents[d].getMin()
+                           << ", max=" << this->extents[d].getMax() << ", subBoxSize=" << m_SubBoxSize[d]
+                           << ", raw child index=" << childIndex << ", clamped child index=" << (split[d] - 1) << '\n';
+      childIndex = static_cast<int>(split[d] - 1);
+    }
+    cindex += childIndex * splitCumul[d];
   }
   return cindex;
 }
