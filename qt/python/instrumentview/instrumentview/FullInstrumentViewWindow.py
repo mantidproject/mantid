@@ -145,7 +145,6 @@ class CheckBoxWithColourLabel(QCheckBox):
         return QIcon(pixmap)
 
 
-@run_on_qapp_thread()
 class FullInstrumentViewWindow(QMainWindow):
     """View for the Instrument View window. Contains the 3D view, the projection view, boxes showing information about the selected
     detector, and a line plot of selected detector(s)"""

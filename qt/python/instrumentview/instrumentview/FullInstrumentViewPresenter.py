@@ -661,6 +661,7 @@ class FullInstrumentViewPresenter:
             del self._ads_observer
         if hasattr(self, "_callback_queue"):
             self._callback_queue.put(self._callback_stop_sentinel)
+        self._model = None
 
     def on_sliders_unit_selected(self, value) -> None:
         self._model.set_integration_units(self._UNIT_OPTIONS[value])
