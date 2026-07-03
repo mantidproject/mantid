@@ -68,6 +68,7 @@ class Prop:
     MODEL = "ModelDescription"
     VALIDATION = "ValidateModel"
     META_SOURCE = "MetadataSource"
+    IGNORED_OPTIONAL_PROPS = "IgnoredProperties"
 
     # Optional Properties for Manual Metadata Entry
     Q_CONVERT_METHOD = "QConversionMethod"
@@ -553,8 +554,6 @@ class ReflectometryDatasetHybrid(ReflectometryDatasetHistory, ReflectometryDatas
         TODO: Work out if this should be using the property names. Coupled too tight to the alg?
         """
         missing_metadata = []
-        if not self._q_conversion_method:
-            missing_metadata.append(Prop.Q_CONVERT_METHOD)
         if self._reduction_timestamp is None:
             missing_metadata.append(Prop.REDUCTION_TIMESTAMP)
         if not self._angle_files:
@@ -622,6 +621,14 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             f"{MetadataSourceOptions.HYBRID}: Checks workspace history, then prompts for manual input for anything not gathered."
             f"{MetadataSourceOptions.MANUAL}: Requires all metadata to be given as properties to this algorithm.",
         )
+
+        hybrid_only_condition = EnabledWhenProperty(Prop.META_SOURCE, PropertyCriterion.IsEqualTo, MetadataSourceOptions.HYBRID)
+
+        self.declareProperty(
+            StringArrayProperty(Prop.IGNORED_OPTIONAL_PROPS, values=[]),
+            doc=f"Properties that are not mandatory when using the '{MetadataSourceOptions.HYBRID}' metadata source.",
+        )
+        self.setPropertySettings(Prop.IGNORED_OPTIONAL_PROPS, hybrid_only_condition)
 
         manual_metadata_condition = EnabledWhenProperty(Prop.META_SOURCE, PropertyCriterion.IsNotDefault)
 
@@ -725,9 +732,13 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         if self.getPropertyValue(Prop.META_SOURCE) == MetadataSourceOptions.HYBRID and not ws_issue:
             check_dataset = self._create_and_sort_refl_datasets()[0]
             missing_meta = check_dataset.get_missing_metadata_list()
+            optional_metadata = self.getProperty(Prop.IGNORED_OPTIONAL_PROPS).value
             for prop in missing_meta:
-                if self.getProperty(prop).isDefault:
-                    issues[prop] = "Metadata could not be found in the workspace history. Please provide some."
+                if self.getProperty(prop).isDefault and prop not in optional_metadata:
+                    issues[prop] = (
+                        f"Metadata could not be found in the workspace history. "
+                        f"Please provide some or add the property name to the '{Prop.IGNORED_OPTIONAL_PROPS}' list."
+                    )
 
         angle_files = self.getProperty(Prop.ANGLE_FILES).value
         angle_files_theta = self.getProperty(Prop.ANGLE_FILES_THETA).value
