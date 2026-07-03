@@ -61,7 +61,7 @@ void SaveAlgorithmRunner::runSaveORSOAlgorithm(std::vector<std::string> const &w
   }
   auto dialog = dynamic_cast<MantidQt::API::AlgorithmDialog *>(
       interfaceManager.createDialog(alg, nullptr, false, presets, QString(), QStringList(), disabled));
-  dialog->setModal(true);
+  dialog->setModal(false);
   dialog->show();
   dialog->raise();
   dialog->activateWindow();
