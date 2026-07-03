@@ -45,8 +45,8 @@ void SaveDaveGrp::exec() {
     throw std::invalid_argument("Either the number of bins or the number of histograms is 0");
   std::string xcaption = ws->getAxis(0)->unit()->caption();
   std::string ycaption = ws->getAxis(1)->unit()->caption();
-  bool toQsInQENSData = getProperty("ToQsInQENSData");
-  ;
+  const bool toQsInQENSData = getProperty("ToQsInQENSData");
+
   if (xcaption.length() == 0)
     xcaption = "X";
   if (ycaption.length() == 0 || ycaption == "Spectrum")
