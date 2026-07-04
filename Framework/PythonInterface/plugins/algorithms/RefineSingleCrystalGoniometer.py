@@ -23,9 +23,7 @@ from mantid.simpleapi import (
     RenameWorkspace,
     CloneWorkspace,
     CombinePeaksWorkspaces,
-    ReorientUnitCell,
-    OptimizeLatticeForCellType,
-    FindUBUsingLatticeParameters,
+    FindUBUsingFFT,
     IndexPeaks,
     mtd,
 )
@@ -38,10 +36,6 @@ import scipy.linalg
 
 
 class RefineSingleCrystalGoniometer(PythonAlgorithm):
-    @staticmethod
-    def _count_indexed_peaks(peaks_ws_name):
-        return sum(1 for peak in mtd[peaks_ws_name] if peak.getHKL().norm2() > 0)
-
     def name(self):
         return "RefineSingleCrystalGoniometer"
 
@@ -52,78 +46,76 @@ class RefineSingleCrystalGoniometer(PythonAlgorithm):
     def summary(self):
         return (
             "Refines the UB-matrix and goniometer offsets simultaneously."
-            "This improves the indexing of the peaks for when there is sample misorientation."
-            "The reflections will be re-indexed to a standard orientation."
+            "This improves the indexing of the peaks for those cases when there is sample misorientation."
         )
 
     def PyInit(self):
         # Declare properties
 
         self.declareProperty(
-            PeaksWorkspaceProperty(
-                name="Peaks",
-                defaultValue="",
-                validator=OrientedLatticeValidator(),
-                direction=Direction.Input,
-            ),
+            PeaksWorkspaceProperty(name="Peaks", defaultValue="", validator=OrientedLatticeValidator(), direction=Direction.Input),
             doc="The PeaksWorkspace to be refined.",
         )
 
-        # Tolerance
-        self.declareProperty(
-            name="Tolerance",
-            defaultValue=0.12,
-            direction=Direction.Input,
-            validator=FloatBoundedValidator(lower=0.0),
-            doc="Indexing tolerance for algorithm TransformHKL.",
-        )
+        self.declareProperty("Tolerance", 0.12, validator=FloatBoundedValidator(lower=0.0), doc="The tolerance used in IndexPeaks.")
 
-        # Crystal system
-        crystal_systems = [
-            "Cubic",
-            "Hexagonal",
-            "Tetragonal",
-            "Trigonal",
-            "Orthorhombic",
-            "Monoclinic",
+        self.declareProperty(
+            "Cell",
             "Triclinic",
-        ]
-        self.declareProperty(
-            name="CrystalSystem",
-            defaultValue="Triclinic",
-            direction=Direction.Input,
-            validator=StringListValidator(crystal_systems),
-            doc="Crystal system.",
+            validator=StringListValidator(
+                ["Fixed", "Cubic", "Rhombohedral", "Tetragonal", "Hexagonal", "Orthorhombic", "Monoclinic", "Triclinic"]
+            ),
+            doc="The cell type to optimize. Must be one of: {Fixed, Cubic, Rhombohedral, Tetragonal,"
+            + "Hexagonal, Orthorhombic, Monoclinic, Triclinic}.",
         )
 
-        # Lattice system (optional, for Trigonal)
-        lattice_systems = ["Rhombohedral", "Hexagonal"]
+        self.declareProperty("NumIterations", 1, validator=IntBoundedValidator(lower=1), doc="The number of IndexPeaks iterations.")
+
         self.declareProperty(
-            name="LatticeSystem",
-            direction=Direction.Input,
-            defaultValue="Hexagonal",
-            validator=StringListValidator(lattice_systems),
-            doc="Lattice system (for Trigonal: Rhombohedral or Hexagonal). Defaults to CrystalSystem value.",
-        )
-        # Set up conditional visibility
-        self.setPropertySettings(
-            "LatticeSystem",
-            EnabledWhenProperty("CrystalSystem", PropertyCriterion.IsEqualTo, "Trigonal"),
+            "LargeOffset",
+            False,
+            doc="If True, index each run independently with FindUBUsingFFT (robust to large/unreliable "
+            "goniometer offsets) instead of a single IndexPeaks pass across all runs using the existing UB. "
+            "Runs whose independently-indexed lattice constants are inconsistent with the other runs are "
+            "logged and excluded before refinement.",
         )
 
         self.declareProperty(
-            "NumIterations",
-            1,
-            validator=IntBoundedValidator(lower=1),
-            doc="The number of IndexPeaks iterations.",
+            "MinD",
+            1.0,
+            validator=FloatBoundedValidator(lower=0.0),
+            doc="Minimum d-spacing passed to FindUBUsingFFT. Only used when LargeOffset=True.",
         )
+
+        self.declareProperty(
+            "MaxD",
+            15.0,
+            validator=FloatBoundedValidator(lower=0.0),
+            doc="Maximum d-spacing passed to FindUBUsingFFT. Only used when LargeOffset=True.",
+        )
+
+        self.declareProperty(
+            "LatticeOutlierTolerance",
+            5.0,
+            validator=FloatBoundedValidator(lower=0.0),
+            doc="Number of median-absolute-deviations a run's independently-indexed lattice constants "
+            "(a, b, c, alpha, beta, gamma) may differ from the across-run median before that run is "
+            "excluded. Only used when LargeOffset=True.",
+        )
+
+        large_offset_enabled = EnabledWhenProperty("LargeOffset", PropertyCriterion.IsNotDefault)
+        self.setPropertySettings("MinD", large_offset_enabled)
+        self.setPropertySettings("MaxD", large_offset_enabled)
+        self.setPropertySettings("LatticeOutlierTolerance", large_offset_enabled)
 
     def PyExec(self):
         # Save the workspace to file in ascii format
 
-        for n in range(self.getProperty("NumIterations").value):
-            peaks = self.getProperty("Peaks").value
+        large_offset = self.getProperty("LargeOffset").value
 
+        peaks = self.getProperty("Peaks").value
+
+        for n in range(self.getProperty("NumIterations").value):
             self.table = peaks.name() + "_#{}".format(n)
 
             CreateEmptyTableWorkspace(OutputWorkspace=self.table)
@@ -137,95 +129,31 @@ class RefineSingleCrystalGoniometer(PythonAlgorithm):
             mtd[self.table].addColumn("float", "Requested Phi")
             mtd[self.table].addColumn("float", "Refined Phi")
 
-            self.peak_dict = {}
-
             runs = np.unique(peaks.column("RunNumber")).tolist()
 
-            combine = "_combine_" + peaks.name()
-
-            crystal_system: str = self.getProperty("CrystalSystem").value
-
-            if crystal_system == "Trigonal":
-                lattice_system: str = self.getProperty("LatticeSystem").value
+            if large_offset:
+                # _index_runs_using_fft sets self.U/a/b/c/alpha/beta/gamma from
+                # the first retained run's independent indexing, since a single
+                # UB shared across all runs is not yet available at this point.
+                peaks, runs = self._index_runs_using_fft(peaks, runs)
             else:
-                lattice_system = crystal_system
+                IndexPeaks(PeaksWorkspace=peaks, Tolerance=self.getProperty("Tolerance").value, CommonUBForAll=False)
 
-            ol = mtd[peaks.name()].sample().getOrientedLattice()
+                ol = peaks.sample().getOrientedLattice()
 
-            self.U = ol.getU().copy()
+                self.U = ol.getU().copy()
 
-            self.a = ol.a()
-            self.b = ol.b()
-            self.c = ol.c()
-            self.alpha = ol.alpha()
-            self.beta = ol.beta()
-            self.gamma = ol.gamma()
+                self.a = ol.a()
+                self.b = ol.b()
+                self.c = ol.c()
+                self.alpha = ol.alpha()
+                self.beta = ol.beta()
+                self.gamma = ol.gamma()
+
+            self.peak_dict = {}
 
             for i, run in enumerate(runs):
-                FilterPeaks(
-                    InputWorkspace=peaks,
-                    FilterVariable="RunNumber",
-                    FilterValue=run,
-                    Operator="=",
-                    OutputWorkspace="_tmp",
-                )
-
-                indexed = self._count_indexed_peaks("_tmp")
-
-                # Fallback: if seeded indexing is weak, re-estimate UB for this run.
-                if indexed < 3 and mtd["_tmp"].getNumberPeaks() >= 3:
-                    self.log().warning(
-                        "Run {} has only {} indexed peaks from seeded UB; falling back to FindUBUsingLatticeParameters.".format(
-                            run, indexed
-                        )
-                    )
-
-                    FindUBUsingLatticeParameters(
-                        PeaksWorkspace="_tmp",
-                        a=self.a,
-                        b=self.b,
-                        c=self.c,
-                        alpha=self.alpha,
-                        beta=self.beta,
-                        gamma=self.gamma,
-                        Tolerance=self.getProperty("Tolerance").value,
-                    )
-
-                    IndexPeaks(
-                        PeaksWorkspace="_tmp",
-                        Tolerance=self.getProperty("Tolerance").value,
-                    )
-
-                    indexed = self._count_indexed_peaks("_tmp")
-
-                self.log().notice("Optimizing lattice for run {}...".format(run))
-                self.log().notice("Using cell type {}...".format(lattice_system))
-                self.log().notice("Run has {} indexed peaks.".format(indexed))
-
-                if indexed >= 3:
-                    OptimizeLatticeForCellType(
-                        PeaksWorkspace="_tmp",
-                        CellType=lattice_system,
-                        Tolerance=self.getProperty("Tolerance").value,
-                    )
-
-                    if crystal_system == "Trigonal":
-                        ReorientUnitCell(
-                            PeaksWorkspace="_tmp",
-                            CrystalSystem=crystal_system,
-                            LatticeSystem=lattice_system,
-                            Tolerance=self.getProperty("Tolerance").value,
-                        )
-                    else:
-                        ReorientUnitCell(
-                            PeaksWorkspace="_tmp",
-                            CrystalSystem=crystal_system,
-                            Tolerance=self.getProperty("Tolerance").value,
-                        )
-                else:
-                    self.log().warning(
-                        "Run {} has fewer than 3 indexed peaks; skipping lattice optimization/reorientation for this run.".format(run)
-                    )
+                FilterPeaks(InputWorkspace=peaks, FilterVariable="RunNumber", FilterValue=run, Operator="=", OutputWorkspace="_tmp")
 
                 Q = np.array(mtd["_tmp"].column("QLab"))
                 hkl = np.array(mtd["_tmp"].column("IntHKL"))
@@ -238,20 +166,120 @@ class RefineSingleCrystalGoniometer(PythonAlgorithm):
 
                 self.peak_dict[run] = (omega, chi, phi), Q[mask], hkl[mask]
 
-                if i == 0:
-                    CloneWorkspace(InputWorkspace="_tmp", OutputWorkspace=combine)
-                else:
-                    CombinePeaksWorkspaces(
-                        LHSWorkspace=combine,
-                        RHSWorkspace="_tmp",
-                        OutputWorkspace=combine,
-                    )
-
                 DeleteWorkspace(Workspace="_tmp")
 
-            RenameWorkspace(InputWorkspace=combine, OutputWorkspace=peaks.name())
+            self._optimize_lattice(self.getProperty("Cell").value, peaks)
 
-            self._optimize_lattice(lattice_system)
+    def _index_runs_using_fft(self, peaks, runs):
+        """
+        Index each run independently via FindUBUsingFFT and combine the consistent runs.
+
+        Used for large/unreliable goniometer offsets, where a single UB shared
+        across all runs (the ``LargeOffset=False`` path) cannot index most
+        runs. Each run is indexed on its own using FindUBUsingFFT (which does
+        not depend on the existing orientation), then the resulting lattice
+        constants are compared across runs: any run whose lattice constants
+        deviate from the across-run median by more than
+        ``LatticeOutlierTolerance`` median-absolute-deviations (in any of
+        a, b, c, alpha, beta, gamma) is logged and excluded, since an
+        inconsistent cell likely indicates a bad per-run indexing rather
+        than a real difference in the sample.
+
+        Sets self.U and self.a/b/c/alpha/beta/gamma from the first retained
+        run's independent indexing, since a single UB shared across all runs
+        (which the non-large-offset path reads these from) is not available
+        yet. These become the starting model for the joint refinement.
+
+        Parameters
+        ----------
+        peaks : PeaksWorkspace
+            Input peaks workspace containing multiple runs.
+        runs : list of int
+            Run numbers present in `peaks`.
+
+        Returns
+        -------
+        combined : PeaksWorkspace
+            Peaks workspace combining only the runs with consistent lattice
+            constants, with a common UB set from the first retained run.
+        good_runs : list of int
+            The subset of `runs` retained in `combined`, in their original
+            order.
+        """
+
+        tolerance = self.getProperty("Tolerance").value
+        min_d = self.getProperty("MinD").value
+        max_d = self.getProperty("MaxD").value
+        n_mad = self.getProperty("LatticeOutlierTolerance").value
+
+        # Captured once, before any renaming: on iterations after the first,
+        # `peaks` is a name-tracking ADS proxy (returned by the previous call's
+        # `mtd[peaks_name]`) rather than the property-bound handle used on the
+        # first iteration, and it self-invalidates the moment its ADS slot is
+        # overwritten below -- so peaks.name() must not be called again after that.
+        peaks_name = peaks.name()
+
+        lattice_params = {}
+        indexed = {}
+
+        for run in runs:
+            ws_name = "_fft_tmp_{}".format(run)
+
+            FilterPeaks(InputWorkspace=peaks, FilterVariable="RunNumber", FilterValue=run, Operator="=", OutputWorkspace=ws_name)
+
+            FindUBUsingFFT(PeaksWorkspace=ws_name, MinD=min_d, MaxD=max_d)
+
+            IndexPeaks(PeaksWorkspace=ws_name, Tolerance=tolerance, CommonUBForAll=True, UpdateUB=True)
+
+            ol = mtd[ws_name].sample().getOrientedLattice()
+            lattice_params[run] = np.array([ol.a(), ol.b(), ol.c(), ol.alpha(), ol.beta(), ol.gamma()])
+            indexed[run] = ws_name
+
+        values = np.array([lattice_params[run] for run in runs])
+        med = np.median(values, axis=0)
+        mad = np.median(np.abs(values - med), axis=0)
+        safe_mad = np.where(mad > 0, mad, 1.0)
+
+        good_runs = []
+        for run in runs:
+            deviation = np.abs(lattice_params[run] - med) / safe_mad
+            if np.any(deviation > n_mad):
+                self.log().warning(
+                    "Run {} has lattice constants a={:.4f}, b={:.4f}, c={:.4f}, alpha={:.4f}, "
+                    "beta={:.4f}, gamma={:.4f} inconsistent with the across-run median "
+                    "a={:.4f}, b={:.4f}, c={:.4f}, alpha={:.4f}, beta={:.4f}, gamma={:.4f}; "
+                    "excluding this run from refinement.".format(run, *lattice_params[run], *med)
+                )
+                DeleteWorkspace(Workspace=indexed[run])
+            else:
+                good_runs.append(run)
+
+        if not good_runs:
+            raise RuntimeError(
+                "LargeOffset indexing failed: none of the runs produced lattice constants "
+                "consistent with the across-run median. Check MinD/MaxD and LatticeOutlierTolerance."
+            )
+
+        first_run = good_runs[0]
+
+        self.U = mtd[indexed[first_run]].sample().getOrientedLattice().getU().copy()
+        self.a, self.b, self.c, self.alpha, self.beta, self.gamma = lattice_params[first_run]
+
+        combine = "_{}_large_offset".format(peaks_name)
+
+        for i, run in enumerate(good_runs):
+            ws_name = indexed[run]
+
+            if i == 0:
+                CloneWorkspace(InputWorkspace=ws_name, OutputWorkspace=combine)
+            else:
+                CombinePeaksWorkspaces(LHSWorkspace=combine, RHSWorkspace=ws_name, OutputWorkspace=combine)
+
+            DeleteWorkspace(Workspace=ws_name)
+
+        RenameWorkspace(InputWorkspace=combine, OutputWorkspace=peaks_name)
+
+        return mtd[peaks_name], good_runs
 
     def _calculate_goniometer(self, omega, chi, phi):
         return Rotation.from_euler("YZY", [omega, chi, phi], degrees=True).as_matrix()
@@ -408,7 +436,7 @@ class RefineSingleCrystalGoniometer(PythonAlgorithm):
 
         return diff + params.flatten().tolist()
 
-    def _optimize_lattice(self, cell):
+    def _optimize_lattice(self, cell, peaks):
         """
         Refine the orientation and lattice parameters under constraints.
 
@@ -416,6 +444,11 @@ class RefineSingleCrystalGoniometer(PythonAlgorithm):
         ----------
         cell : str
             Lattice centering to constrain paramters.
+        peaks : PeaksWorkspace
+            Workspace to update with the refined goniometer matrices and UB.
+            Passed explicitly rather than re-read from the "Peaks" property,
+            since LargeOffset indexing replaces that workspace with a newly
+            combined one and the property still references the original.
 
         """
 
@@ -466,16 +499,12 @@ class RefineSingleCrystalGoniometer(PythonAlgorithm):
         for i, run in enumerate(self.peak_dict.keys()):
             (omega, chi, phi), Q, hkl = self.peak_dict[run]
             omega_off, chi_off, phi_off = params[i]
-            omega_prime, chi_prime, phi_prime = (
-                omega + omega_off,
-                chi + chi_off,
-                phi + phi_off,
-            )
+            omega_prime, chi_prime, phi_prime = omega + omega_off, chi + chi_off, phi + phi_off
             mtd[self.table].addRow([omega, omega_prime, chi, chi_prime, phi, phi_prime])
             R = self._calculate_goniometer(omega_prime, chi_prime, phi_prime)
             peak_dict[run] = R
 
-        for peak in self.getProperty("Peaks").value:
+        for peak in peaks:
             run = peak.getRunNumber()
             peak.setGoniometerMatrix(peak_dict[run])
 
@@ -505,7 +534,7 @@ class RefineSingleCrystalGoniometer(PythonAlgorithm):
         if np.isclose(gamma, sig_gamma):
             sig_gamma = 0
 
-        ol = self.getProperty("Peaks").value.sample().getOrientedLattice()
+        ol = peaks.sample().getOrientedLattice()
         ol.setUB(UB)
         ol.setModUB(UB @ ol.getModHKL())
         ol.setError(sig_a, sig_b, sig_c, sig_alpha, sig_beta, sig_gamma)
