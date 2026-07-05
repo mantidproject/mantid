@@ -33,7 +33,7 @@ public:
   void function1D(double *out, const double *xValues, const size_t order) const override;
 
   void setPeakWorkspace(Mantid::API::IPeaksWorkspace_sptr &pws, const std::string &componentName,
-                        const std::vector<double> &tofs);
+                        const std::vector<double> &tofs, bool waveFromUB = false);
 
 private:
   /// temp workspace holder
@@ -41,6 +41,9 @@ private:
   mutable Mantid::API::IPeaksWorkspace_sptr m_pws;
   mutable int n_iter;
   mutable std::vector<double> m_tofs;
+  /// if true, wavelength is computed from Bragg's law using the UB matrix and
+  /// each peak's integer HKL instead of from the measured TOF (m_tofs)
+  bool m_waveFromUB{false};
 
   const bool LOGCHILDALG{false};
   const Mantid::Kernel::V3D UNSET_HKL{0, 0, 0};
