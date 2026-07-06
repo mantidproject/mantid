@@ -589,7 +589,7 @@ def _fit_all_peaks_fitpeaks(
                 # (on by default) over-subtracts and collapses the fitted peak area, so disable it
                 HighBackground=False,
                 Minimizer=fit_kwargs.get("Minimizer", "Levenberg-Marquardt"),
-                CostFunction="Least squares",
+                CostFunction="Rwp",
                 MaxFitIterations=max_fit_iters,
                 # rely on the post-fit validity check (positive area + finite chi2) rather than
                 # FitPeaks' internal signal-to-sigma pre-check, which rejected genuine weak peaks
