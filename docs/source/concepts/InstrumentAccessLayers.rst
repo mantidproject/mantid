@@ -185,32 +185,15 @@ ___________
 * As explained above, a detector index is the same thing as a component index. No translation necessary. The fact that the first 0-n component indexes are for detectors is a feature that can be leveraged.
 * A bank always has a higher component index than any of its nested components. The root is the highest component index of all. This feature can be leveraged. Consider reverse iterating through component indexes when performing operations that involve higher-level components.
 
-Migrating from the Legacy Instrument API (Python)
+Migrating from Instrument 1.0 in Python
 -------------------------------------------------
 
-This section is the migration/deprecation plan for
-the **Python-facing** slice of the final Instrument 2.0 rollout ("Phase D").
-It records what legacy geometry API is exposed to Python,
-what each piece maps to in the ``*Info`` layers,
-and the order in which the deprecation will proceed.
-It is the reference that the code changes (and any automated call-site sweep) should follow.
+This section is the migration/deprecation plan for the **Python-facing** slice of the final Instrument 2.0 rollout.
 
-The *concepts* offered by the legacy tree
-(positions, name lookup, tree traversal, source/sample, shape)
-are **not** going away.
-They are being **rewritten** onto the ``*Info`` layers, and most already live there.
-What is being **deprecated** is the legacy *delivery mechanism*:
-the :py:obj:`~mantid.api.MatrixWorkspace.getInstrument` entry point
-and the legacy Python classes it hands back.
-Keeping any method on those classes keeps the class
--- and hence the legacy backing tree --
-alive, which is exactly what this phase removes.
+Instead of using `Instrument` directly via :py:obj:`~mantid.api.MatrixWorkspace.getInstrument`, Python code should instead call to the `detectorInfo()` and `componentInfo()` methods on `MatrixWorkspace` or `ExperimentInfo`.
+These return the new `DetectorInfo` and `ComponentInfo` objects, which provide the same information as the legacy `Instrument` class, but in a more efficient way.
 
-The legacy Python surface
-#########################
-
-The following classes are exposed to Python from
-``Framework/PythonInterface/mantid/geometry/src/Exports/`` (boost::python bindings):
+The following deprecated classes are exposed to Python:
 
 * ``IComponent``
 * ``Component``
@@ -224,10 +207,6 @@ The following classes are exposed to Python from
 * ``GridDetector``
 * ``RectangularDetector``
 * ``Instrument``
-
-The entry points that return this tree - :py:obj:`~mantid.api.MatrixWorkspace.getInstrument` and ``ExperimentInfo.getInstrument`` - are the highest-leverage deprecation targets, since they are the door to everything above.
-
-``Geometry::ParameterMap`` is *not* exposed as a Python class, so there is nothing to deprecate there directly (but see the parameter-access gap below).
 
 What to use instead
 ###################
@@ -259,6 +238,7 @@ Almost every legacy accessor already has a modern Python home:
    * - ``Detector.isMasked()`` / ``isMonitor()``
      - ``detectorInfo().isMasked(index)`` / ``isMonitor(index)`` (already deprecated)
 
-Remember the identity from the *Indexing* section above: a detector's component index equals its detector index, so a single index moves freely between ``ComponentInfo`` and ``DetectorInfo``.
+Remember that a detector's component index equals its detector index,
+so a single index moves freely between ``ComponentInfo`` and ``DetectorInfo``.
 
 .. categories:: Concepts
