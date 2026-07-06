@@ -9,7 +9,7 @@ from os import path, scandir
 from Engineering.texture.correction.correction_model import TextureCorrectionModel
 from Engineering.texture.polefigure.polefigure_model import TextureProjection
 from mantid.simpleapi import SaveNexus, logger, CreateEmptyTableWorkspace, Fit
-from mantid.simpleapi import ConvertUnits, Rebunch, Rebin, SumSpectra, AppendSpectra, CloneWorkspace, CropWorkspace, Load
+from mantid.simpleapi import ConvertUnits, Rebunch, Rebin, SumSpectra, AppendSpectra, CloneWorkspace, CropWorkspaceRagged, Load
 from pathlib import Path
 from Engineering.EnginX import EnginX
 from Engineering.IMAT import IMAT
@@ -288,18 +288,17 @@ def validate_abs_corr_inputs(
 
 
 def crop_and_rebin(ws, out_ws, lower, upper, rebin_params):
-    CropWorkspace(ws, lower, upper, OutputWorkspace="__tmp_peak_window")
+    CropWorkspaceRagged(ws, lower, upper, OutputWorkspace="__tmp_peak_window")
     Rebin("__tmp_peak_window", rebin_params, OutputWorkspace=out_ws)
 
 
 def _get_max_bin(ws):
-    xdat = ws.extractX()
-    return np.diff(xdat, axis=1).max()
+    return max(np.diff(ws.readX(i)).max() for i in range(ws.getNumberHistograms()))
 
 
 def crop_wss_and_combine(wss, peak, lower, upper, output):
     cropped_rebinned_wss = [f"rebin_ws_{peak}_0"]
-    peak_window_ws = CropWorkspace(wss[0], lower, upper, OutputWorkspace="__peak_window_crop")
+    peak_window_ws = CropWorkspaceRagged(wss[0], lower, upper, OutputWorkspace="__peak_window_crop")
     rebin_params = (lower, _get_max_bin(peak_window_ws), upper)
     Rebin("__peak_window_crop", rebin_params, OutputWorkspace=f"rebin_ws_{peak}_0")
     CloneWorkspace(InputWorkspace=f"rebin_ws_{peak}_0", OutputWorkspace=f"rebin_ws_{peak}")
@@ -663,7 +662,6 @@ def fit_all_peaks(
     # we will then fix the amount this can change in the individual fits
 
     x0_lims, all_cropped_rebinned_wss = fit_initial_summed_spectra(wss, peaks, peak_window, fit_kwargs.copy(), peak_func_name)
-
     for iws, wsname in enumerate(wss):
         # notice user how far through the fitting they are (useful if any fits fail)
         logger.notice(f"Fitting Workspace: {wsname} ({iws + 1}/{len(wss)})")

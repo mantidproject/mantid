@@ -327,7 +327,7 @@ class TextureUtilsFittingUtilsTests(unittest.TestCase):
         self.assertEqual(bg0["A0"], 2.0)
 
     @patch(f"{texture_utils_path}.Rebin")
-    @patch(f"{texture_utils_path}.CropWorkspace")
+    @patch(f"{texture_utils_path}.CropWorkspaceRagged")
     def test_crop_and_rebin(self, mock_crop, mock_rebin):
         # inputs
         ws = "ws1"
@@ -346,7 +346,7 @@ class TextureUtilsFittingUtilsTests(unittest.TestCase):
     @patch(f"{texture_utils_path}.CloneWorkspace")
     @patch(f"{texture_utils_path}.Rebin")
     @patch(f"{texture_utils_path}._get_max_bin")
-    @patch(f"{texture_utils_path}.CropWorkspace")
+    @patch(f"{texture_utils_path}.CropWorkspaceRagged")
     @patch(f"{texture_utils_path}.crop_and_rebin")
     def test_crop_wss_and_combine(self, mock_crop_and_rebin, mock_crop, mock_max_bin, mock_rebin, mock_clone, mock_append, mock_sum):
         # inputs
