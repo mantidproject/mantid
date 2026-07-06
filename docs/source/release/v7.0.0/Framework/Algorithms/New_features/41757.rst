@@ -1,0 +1,1 @@
+- :ref:`algm-HFIRPowderReduction` now has an ``IDFFilename`` property to optionally override the instrument geometry from the sample file, and loads MIDAS data with :ref:`algm-LoadEventAsWorkspace2D`.

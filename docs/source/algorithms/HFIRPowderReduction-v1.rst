@@ -15,6 +15,9 @@ specified either as a list of files or as an IPTS number and a list of run numbe
 Reducing WAND^2 data with HFIRPowderReduction is very similar to using :ref:`algm-WANDPowderReduction`, but with some differences in the input parameters,
 and reduction steps are slightly modified.
 
+By default the instrument geometry is determined by the sample file. An instrument definition file (IDF) can
+optionally be supplied through the ``IDFFilename`` property to override the geometry used by the sample file.
+
 .. categories::
 
 .. sourcelink::
