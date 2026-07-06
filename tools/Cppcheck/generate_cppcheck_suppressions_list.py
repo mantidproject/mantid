@@ -9,6 +9,15 @@
 Accepts a cppcheck.xml file and generates a list of suppressions to add to
 the CppCheck_Suppressions.txt.in template file. Use this when upgrading to
 a new version of cppcheck.
+
+The cppcheck CI build runs in text mode (so its diagnostics can be annotated by the
+GitHub Actions problem matcher) and does not produce cppcheck.xml. To regenerate the XML
+this script needs, build the dedicated 'cppcheck-xml' target, which is not run in CI:
+
+    pixi run --frozen cmake --preset=cppcheck-ci ..
+    pixi run --frozen cmake --build . --target cppcheck-xml
+
+This writes the report to <build-dir>/cppcheck.xml; pass it to this script via --cppcheck_xml.
 """
 
 import argparse

@@ -1,0 +1,53 @@
+name: 'Run CppCheck'
+description: 'Configures and runs the cppcheck static-analysis target, failing on any finding'
+inputs:
+  allowed-errors-count:
+    description: |
+      If errors slip through to main this can be used to set a non-zero allowed count while those
+      errors are dealt with. This avoids breaking all builds for all developers.
+    required: false
+    default: '0'
+runs:
+  using: "composite"
+  steps:
+    - name: Run cppcheck
+      shell: bash
+      working-directory: ${{ github.workspace }}
+      env:
+        ALLOWED_ERRORS_COUNT: ${{ inputs.allowed-errors-count }}
+      run: |
+        # Create the build directory if it doesn't exist
+        [ -d build ] || mkdir build
+        cd build
+
+        # Not physical but logical cores, includes hyper threaded
+        BUILD_THREADS="$(grep -c ^processor /proc/cpuinfo)"
+
+        # Configure
+        echo "::group::Configure cmake"
+        pixi run --frozen cmake --preset=cppcheck-ci -DCPPCHECK_NUM_THREADS=$BUILD_THREADS ..
+        echo "::endgroup::"
+
+        # Run cppcheck. The diagnostics printed to stderr are what the problem matcher
+        # annotates and what we count below, so capture them while still echoing to the log.
+        # cppcheck (without --error-exitcode) returns 0 even when it finds issues; the count
+        # below is the source of truth, so don't let a non-zero pipe status abort the step.
+        echo "::group::Running cppcheck"
+        set -o pipefail
+        pixi run --frozen cmake --build . --target cppcheck 2>&1 | tee cppcheck.log || true
+        set +o pipefail
+        echo "::endgroup::"
+
+        # Mark build as passed or failed. Count every cppcheck finding (all severities), matching
+        # the previous XML behaviour where any <error> element failed the build. Exclude the
+        # "nofile:0:0: ... [checkersReport]" summary line cppcheck always prints: it has no real
+        # location and the old XML gate never counted it (it was a self-closing <error/>).
+        errors_count=$(grep -E ':[0-9]+:[0-9]+: (error|warning|style|performance|portability|information):' cppcheck.log | grep -vc '^nofile:') || true
+        if [ "$errors_count" -ne "${ALLOWED_ERRORS_COUNT}" ]; then
+          echo "CppCheck found ${errors_count} issues."
+          echo "See the annotations on the changed files, or adjust the count."
+          exit 1
+        else
+          echo "CppCheck found no issues"
+          exit 0
+        fi

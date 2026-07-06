@@ -82,8 +82,48 @@ jobs:
           if-no-files-found: warn
           path: ${{ github.workspace }}/**/env_logs/*/*.txt
 
+  cppcheck:
+    runs-on:
+      - ${{ (inputs.RUNNER_LABEL == '' && 'self-hosted') || inputs.RUNNER_LABEL }}
+      - self-hosted
+      - Linux
+      - X64
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: dorny/paths-filter@v4
+        id: changes
+        with:
+          filters: .github/filters.yaml
+
+      - name: Install pixi
+        uses: ./.github/actions/setup-pixi
+        if: ${{ steps.changes.outputs.files_cppcheck == 'true' }}
+
+      - name: Clean build tree
+        if: ${{ steps.changes.outputs.files_cppcheck == 'true' }}
+        run: ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/clean-builder ${GITHUB_WORKSPACE}
+
+      - name: Add cppcheck matcher
+        if: ${{ steps.changes.outputs.files_cppcheck == 'true' }}
+        run: echo "::add-matcher::.github/matchers/cppcheck.json"
+
+      - uses: ./.github/actions/cppcheck-build
+        name: Run cppcheck
+        if: ${{ steps.changes.outputs.files_cppcheck == 'true' }}
+
+      - name: Remove cppcheck matcher
+        if: ${{ always() && steps.changes.outputs.files_cppcheck == 'true' }}
+        run: echo "::remove-matcher owner=cppcheck::"
+
+
   build-and-test:
-    needs: [doxygen]
+    needs: [cppcheck, doxygen]
 
     strategy:
       matrix:

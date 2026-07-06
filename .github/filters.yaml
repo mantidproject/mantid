@@ -8,13 +8,15 @@ cpp: &files_cpp
 # extensions associated with python
 py: &files_py
  - '**/*.py'
-# extensions associated with python
-configuration: &files_config
- - CMakePresets.json
- - 'buildconfig/CMake/**'
+# pixi environment files
+pixi: &files_pixi
  - .pixi-version
  - pixi.lock
  - pixi.toml
+# files that affect the build configuration
+configuration: &files_config
+ - CMakePresets.json
+ - 'buildconfig/CMake/**'
  - pyproject.toml
  - setup.py
 # files that affect CI
@@ -27,6 +29,7 @@ workflows: &files_workflow
 ### filters used in individual jobs and steps
 doxygen:
  - *files_config
+ - *files_pixi
  - *files_cpp
  - 'Framework/Doxygen/**'
  - 'conda/recipes/mantid-developer/**'
@@ -34,23 +37,39 @@ doxygen:
  - '.github/filters.yaml'
  - '.github/actions/doxygen-build/**'
  - '.github/workflows/doxygen-publish.yml'
- - 'pixi.toml'
 devsite:
  - *files_config
+ - *files_pixi
  - 'dev-docs/**'
  - 'conda/recipes/mantid-developer/**'
  - 'conda/recipes/conda_build_config.yaml'
  - '.github/filters.yaml'
  - '.github/actions/devsite-build/**'
  - '.github/workflows/devdocs-publish.yml'
- - 'pixi.toml'
 code_changes:
  - *files_cpp
  - *files_py
  - *files_config
+ - *files_pixi
  - *files_workflow
  - 'Framework/**'
  - 'instrument/**'
  - 'qt/**'
  - 'scripts/**'
  - 'tools/**'
+# files that specifically affect the cppcheck job
+cppcheck: &files_cppcheck_config
+ - 'buildconfig/CMake/CppCheckSetup.cmake'
+ - 'buildconfig/CMake/FindCppcheck.cmake'
+ - 'buildconfig/CMake/CppCheck_Suppressions.txt.in'
+ - 'buildconfig/CMake/cppcheck-clean-compile-commands.py'
+ - CMakePresets.json
+ - '.github/filters.yaml'
+ - '.github/actions/cppcheck-build/**'
+ - '.github/matchers/cppcheck.json'
+ - '.github/workflows/pr_build_and_test.yml'
+# cpp source changes OR cppcheck config changes -> run cppcheck
+files_cppcheck:
+ - *files_cpp
+ - *files_cppcheck_config
+ - *files_pixi

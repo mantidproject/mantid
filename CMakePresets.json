@@ -93,8 +93,7 @@
         "conda"
       ],
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug",
-        "CPPCHECK_GENERATE_XML": "TRUE"
+        "CMAKE_BUILD_TYPE": "Debug"
       }
     },
     {

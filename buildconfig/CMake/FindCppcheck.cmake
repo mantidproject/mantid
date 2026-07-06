@@ -63,10 +63,6 @@ set(CPPCHECK_NUM_THREADS
     0
     CACHE STRING "Number of threads to use when running cppcheck"
 )
-set(CPPCHECK_GENERATE_XML
-    OFF
-    CACHE BOOL "Generate xml output files from cppcheck"
-)
 
 function(add_cppcheck _name) # additional arguments are files to ignore
   if(NOT TARGET ${_name})
@@ -102,24 +98,13 @@ function(add_cppcheck _name) # additional arguments are files to ignore
     list(APPEND _cppcheck_args "-I" ${CMAKE_CURRENT_SOURCE_DIR} "-I" "${CMAKE_CURRENT_SOURCE_DIR}/inc")
 
     # add the target
-    if(CPPCHECK_GENERATE_XML)
-      add_custom_target(
-        cppcheck_${_name}
-        COMMAND ${CPPCHECK_EXECUTABLE} ${_cppcheck_args} --xml --xml-version=2 ${_files} 2>
-                ${CMAKE_BINARY_DIR}/cppcheck-${_name}.xml
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        DEPENDS ${_files}
-        COMMENT "cppcheck_${_name}: Running cppcheck to generate cppcheck-${_name}.xml"
-      )
-    else(CPPCHECK_GENERATE_XML)
-      add_custom_target(
-        cppcheck_${_name}
-        COMMAND ${CPPCHECK_EXECUTABLE} ${_cppcheck_args} ${_files}
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        DEPENDS ${_files}
-        COMMENT "cppcheck_${_name}: Running cppcheck on ${_name} source files"
-      )
-    endif(CPPCHECK_GENERATE_XML)
+    add_custom_target(
+      cppcheck_${_name}
+      COMMAND ${CPPCHECK_EXECUTABLE} ${_cppcheck_args} ${_files}
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+      DEPENDS ${_files}
+      COMMENT "cppcheck_${_name}: Running cppcheck on ${_name} source files"
+    )
     add_dependencies(cppcheck cppcheck_${_name})
 
   endif()

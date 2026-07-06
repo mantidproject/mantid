@@ -31,15 +31,15 @@ Using the `Refspec` in the job config will mean that the pull request branch wil
 Leeroy can be manually triggered outside of the Jenkins Rebuild by running for example
 
 ```shell
-curl -u USER:PASS builds.mantidproject.org:5000/build/retry -d '{"context":"cppcheck","repo":"mantidproject/mantid","number":415}'
+curl -u USER:PASS builds.mantidproject.org:5000/build/retry -d '{"context":"Doxygen","repo":"mantidproject/mantid","number":415}'
 ```
 
-which will start the cppcheck build on pull request 415
+which will start the Doxygen build on pull request 415
 
 A cron jobs runs `/home/leeroy/cron_leeroy.sh` every 10 minutes to pick up missed builds, which executes the following type command.
 
 ```shell
-curl -u USER:PASS builds.mantidproject.org:5000/build/cron -d '{"context":"cppcheck","repo":"mantidproject/mantid"}'
+curl -u USER:PASS builds.mantidproject.org:5000/build/cron -d '{"context":"Doxygen","repo":"mantidproject/mantid"}'
 ```
 
 ## Config file (`config.json`)
@@ -86,13 +86,6 @@ curl -u USER:PASS builds.mantidproject.org:5000/build/cron -d '{"context":"cppch
         },
         {
             "github_repo": "mantidproject/mantid",
-            "jenkins_job_name": "pull_requests-cppcheck",
-            "context": "cppcheck",
-            "downstream": true,
-            "downstream_builds": ["RHEL6", "Windows", "OSX", "Doxygen", "Ubuntu + Documentation Tests", "RHEL7 + System Tests"]
-        },
-        {
-            "github_repo": "mantidproject/mantid",
             "jenkins_job_name": "pull_requests-doxygen",
             "context": "Doxygen",
             "downstream": true
@@ -101,7 +94,7 @@ curl -u USER:PASS builds.mantidproject.org:5000/build/cron -d '{"context":"cppch
             "github_repo": "mantidproject/mantid",
             "jenkins_job_name": "pull_requests-clang-format",
             "context": "ClangFormat",
-            "downstream_builds": ["cppcheck"]
+            "downstream_builds": ["RHEL6", "Windows", "OSX", "Doxygen", "Ubuntu + Documentation Tests", "RHEL7 + System Tests"]
         }
     ],
     "user": "USER",
