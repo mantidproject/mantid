@@ -1236,17 +1236,14 @@ class TextureUtilsFitPeaksEngineTests(unittest.TestCase):
     def test_populate_fitpeaks_output_table_columns_and_rows(self):
         out_tab = MagicMock()
         peak_param_names = ["I", "A", "X0"]
-        # spectrum 0 fitted, spectrum 1 masked out
-        param_table, error_table = MagicMock(), MagicMock()
-        param_cols = {"I": [10.0, 0.0], "A": [1.0, 0.0], "X0": [2.0, 0.0]}
-        err_cols = {"I": [1.0, 0.0], "A": [0.1, 0.0], "X0": [0.02, 0.0]}
-        param_table.column.side_effect = lambda p: param_cols[p]
-        error_table.column.side_effect = lambda p: err_cols[p]
+        # spectrum 0 fitted, spectrum 1 masked out - pre-sliced (de-interleaved) arrays for one ws
+        param_slices = {"I": np.array([10.0, 0.0]), "A": np.array([1.0, 0.0]), "X0": np.array([2.0, 0.0])}
+        err_slices = {"I": np.array([1.0, 0.0]), "A": np.array([0.1, 0.0]), "X0": np.array([0.02, 0.0])}
         i_est_vals = np.array([10.0, 0.0])
         fit_mask = np.array([True, False])
 
         _populate_fitpeaks_output_table(
-            out_tab, 2, peak_param_names, param_table, error_table, i_est_vals, fit_mask, no_fit_value_dict=None, nan_replacement=None
+            out_tab, 2, peak_param_names, param_slices, err_slices, i_est_vals, fit_mask, no_fit_value_dict=None, nan_replacement=None
         )
 
         # columns: wsindex, I_est, then triple per param
@@ -1265,50 +1262,99 @@ class TextureUtilsFitPeaksEngineTests(unittest.TestCase):
         self.assertEqual(row0[3], 1.0)  # I err
         self.assertAlmostEqual(row0[4], 10.0)  # I / I_err
 
+    def test_populate_fitpeaks_output_table_guards_undetermined_errors(self):
+        # a genuinely singular fit can still return a nan/inf/zero parameter error; the value/error
+        # ratio must not become nan or inf
+        out_tab = MagicMock()
+        peak_param_names = ["I", "X0"]
+        param_slices = {"I": np.array([10.0, 20.0, 30.0]), "X0": np.array([2.0, 2.0, 2.0])}
+        err_slices = {"I": np.array([1.0, 1.0, 1.0]), "X0": np.array([np.nan, 0.0, np.inf])}
+        i_est_vals = np.array([10.0, 20.0, 30.0])
+        fit_mask = np.array([True, True, True])
+
+        _populate_fitpeaks_output_table(
+            out_tab, 3, peak_param_names, param_slices, err_slices, i_est_vals, fit_mask, no_fit_value_dict=None, nan_replacement=None
+        )
+
+        # X0 columns are the last triple: [.., X0, X0_err, X0/X0_err]
+        for irow in range(3):
+            row = out_tab.addRow.call_args_list[irow][0][0]
+            x0_err, x0_ratio = row[-2], row[-1]
+            self.assertTrue(np.isfinite(x0_ratio))  # never nan/inf
+            self.assertEqual(x0_ratio, 0.0)  # undetermined error -> zero ratio
+            self.assertEqual(x0_err, np.inf)  # reported as infinite error, matching the unfit convention
+            # the valid I error still gives a normal ratio
+            self.assertAlmostEqual(row[4], i_est_vals[irow] / 1.0)
+
     @patch(f"{texture_utils_path}.SaveNexus")
     @patch(f"{texture_utils_path}.CreateEmptyTableWorkspace")
     @patch(f"{texture_utils_path}._populate_fitpeaks_output_table")
+    @patch(f"{texture_utils_path}.convert_TOFerror_to_derror", return_value=0.001)
+    @patch(f"{texture_utils_path}.DeltaEModeType")
+    @patch(f"{texture_utils_path}.UnitConversion")
+    @patch(f"{texture_utils_path}.CreateWorkspace")
+    @patch(f"{texture_utils_path}.Rebunch")
     @patch(f"{texture_utils_path}.FitPeaks")
+    @patch(f"{texture_utils_path}.ConvertUnits")
+    @patch(f"{texture_utils_path}.AppendSpectra")
+    @patch(f"{texture_utils_path}.CloneWorkspace")
     @patch(f"{texture_utils_path}.FunctionFactory")
     @patch(f"{texture_utils_path}.fit_initial_summed_spectra")
     @patch(f"{texture_utils_path}._get_grouping_from_ws_log", return_value="TestGroup")
     @patch(f"{texture_utils_path}._get_run_and_prefix_from_ws_log", return_value=("123456", "TEST"))
     @patch(f"{texture_utils_path}.ADS")
-    def test_fit_all_peaks_fitpeaks_calls_fitpeaks_and_saves(
+    def test_fit_all_peaks_fitpeaks_tof_with_smoothing_fallback(
         self,
         mock_ads,
         _mock_run_prefix,
         _mock_group,
         mock_fit_summed,
         mock_func_factory,
+        mock_clone,
+        mock_append,
+        mock_convert_units,
         mock_fitpeaks,
+        mock_rebunch,
+        mock_create_ws,
+        mock_unitconv,
+        _mock_delta_e,
+        _mock_toferr,
         mock_populate,
         mock_create_tab,
         mock_save_nexus,
     ):
-        # summed fit returns x0 window, shape seeds, and the cropped d-spacing ws per (peak, ws)
+        # two workspaces, two spectra each -> combined TOF workspace of 4 spectra for the peak.
+        # summed fit returns a 2-tuple (no shape seeds - FitPeaks loads A,B from the instrument)
         mock_fit_summed.return_value = (
             [(0.95, 1.05)],
-            [{"A": 1.0, "B": 2.0, "S": 0.1, "I": 5.0, "X0": 1.0}],
-            [["data_ws_0"]],
+            [["crop_ws0", "crop_ws1"]],  # per-workspace cropped+rebinned ws names for peak 0
         )
 
-        # peak function param names
         base_peak = MagicMock()
         base_peak.nParams.return_value = 5
         base_peak.getParamName.side_effect = lambda i: ["I", "A", "B", "X0", "S"][i]
         mock_func_factory.Instance.return_value.createPeakFunction.return_value = base_peak
 
+        # combined workspace after ConvertUnits->TOF, with 4 spectra
+        combined_tof = MagicMock()
+        combined_tof.spectrumInfo.return_value.size.return_value = 4
+        mock_convert_units.return_value = combined_tof
+        mock_unitconv.run.return_value = 5000.0  # any TOF/d value; CreateWorkspace/FitPeaks are mocked
+
         ws = MagicMock()
-        ws.spectrumInfo.return_value.size.return_value = 2
         param_table, error_table = MagicMock(), MagicMock()
-        param_table.column.side_effect = lambda p: {"chi2": [1.0, 1e308], "I": [5.0, 0.0]}.get(p, [0.0, 0.0])
-        error_table.column.side_effect = lambda p: [0.0, 0.0]
-        mock_ads.retrieve.side_effect = lambda name: {"ws": ws}.get(name, param_table if "params" in name else error_table)
+        # 4 rows: ws0 spectra (0,1) then ws1 spectra (2,3); ws1 spec 3 rejected (chi2=DBL_MAX, I=0)
+        param_table.column.side_effect = lambda p: {
+            "chi2": [1.0, 1.0, 1.0, 1e308],
+            "I": [5.0, 6.0, 7.0, 0.0],
+            "X0": [5000.0, 5000.0, 5000.0, 0.0],
+        }.get(p, [0.0] * 4)
+        error_table.column.side_effect = lambda p: [0.1] * 4
+        mock_ads.retrieve.side_effect = lambda name: ws if name in ("ws0", "ws1") else (param_table if "params" in name else error_table)
         mock_create_tab.return_value = MagicMock()
 
         _fit_all_peaks_fitpeaks(
-            wss=["ws"],
+            wss=["ws0", "ws1"],
             peaks=[2.03],
             peak_window=0.02,
             save_dir="save",
@@ -1319,23 +1365,43 @@ class TextureUtilsFitPeaksEngineTests(unittest.TestCase):
             peak_func_name="BackToBackExponential",
             max_fit_iters=50,
             fit_kwargs={"Minimizer": "Levenberg-Marquardt"},
+            smooth_vals=(3, 2),
         )
 
-        # FitPeaks called once with the cropped d-spacing ws, the seed shape params and the s2n threshold
-        mock_fitpeaks.assert_called_once()
-        _, kw = mock_fitpeaks.call_args
-        self.assertEqual(kw["InputWorkspace"], "data_ws_0")
-        self.assertEqual(kw["PeakFunction"], "BackToBackExponential")
-        self.assertEqual(kw["BackgroundType"], "Linear")
-        self.assertEqual(kw["PeakParameterNames"], ["A", "B", "S"])
-        self.assertEqual(kw["PeakParameterValues"], [1.0, 2.0, 0.1])
-        self.assertEqual(kw["CostFunction"], "Least squares")
-        self.assertEqual(kw["MinimumSignalToSigmaRatio"], 3.0)
-        self.assertAlmostEqual(kw["PeakCenters"][0], 1.0)  # centre of the summed x0 window
+        # all workspaces combined into one ws for the peak, then converted to TOF
+        mock_clone.assert_called_once_with(InputWorkspace="crop_ws0", OutputWorkspace="__fitpeaks_combined_0")
+        mock_append.assert_called_once_with("__fitpeaks_combined_0", "crop_ws1", OutputWorkspace="__fitpeaks_combined_0")
+        mock_convert_units.assert_called_once()
+        self.assertEqual(mock_convert_units.call_args.kwargs["Target"], "TOF")
 
-        # output table built and saved
-        mock_populate.assert_called_once()
-        mock_save_nexus.assert_called_once()
+        # per-spectrum TOF centres + windows built as workspaces
+        self.assertEqual(mock_create_ws.call_count, 2)
+
+        # rebunch-smoothing: one FitPeaks call on the raw data + one per smooth value (2 here)
+        self.assertEqual(mock_rebunch.call_count, 2)
+        self.assertEqual(mock_fitpeaks.call_count, 3)
+
+        # the first (raw) call fits in TOF using the per-spectrum centre/window workspaces
+        _, kw = mock_fitpeaks.call_args_list[0]
+        self.assertEqual(kw["InputWorkspace"], combined_tof)
+        self.assertEqual(kw["PeakCentersWorkspace"], "__fitpeaks_centres_0")
+        self.assertEqual(kw["FitPeakWindowWorkspace"], "__fitpeaks_windows_0")
+        self.assertEqual(kw["CostFunction"], "Least squares")
+        self.assertEqual(kw["MinimumSignalToSigmaRatio"], 0)
+        self.assertFalse(kw["HighBackground"])
+        # no d-space shape seeds and no single-value centre/window list are passed
+        self.assertNotIn("PeakParameterValues", kw)
+        self.assertNotIn("PeakParameterNames", kw)
+        self.assertNotIn("PeakCenters", kw)
+        self.assertNotIn("FitWindowBoundaryList", kw)
+
+        # result de-interleaved into one output table per workspace (2), each with 2 spectra
+        self.assertEqual(mock_populate.call_count, 2)
+        self.assertEqual(mock_save_nexus.call_count, 2)
+        # ws1's slice (rows 2,3): raw fit fills the valid spectrum (I=7), spec 3 stays unfit (I=0)
+        ws1_call = mock_populate.call_args_list[1]
+        np.testing.assert_array_equal(ws1_call[0][3]["I"], np.array([7.0, 0.0]))  # param_slices["I"] for ws1
+        np.testing.assert_array_equal(ws1_call[0][6], np.array([True, False]))  # fit_mask slice for ws1
 
 
 if __name__ == "__main__":
