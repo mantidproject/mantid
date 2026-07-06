@@ -13,6 +13,7 @@ from mantidqt.widgets.sliceviewer.views.dataview import SliceViewerDataView
 from mantidqt.widgets.sliceviewer.views.dataviewsubscriber import IDataViewSubscriber
 from mantidqt.widgets.sliceviewer.views.toolbar import ToolItemText
 from mantidqt.widgets.sliceviewer.presenters.masking import Masking
+import numpy as np
 
 
 class SliceViewerBasePresenter(IDataViewSubscriber, ABC):
@@ -44,9 +45,11 @@ class SliceViewerBasePresenter(IDataViewSubscriber, ABC):
         """
         if auto_transform and self._data_view.nonorthogonal_mode:
             to_display = self._data_view.nonortho_transform.tr
-            xmin_p, ymin_p = to_display(xlim[0], ylim[0])
-            xmax_p, ymax_p = to_display(xlim[1], ylim[1])
-            xlim, ylim = (xmin_p, xmax_p), (ymin_p, ymax_p)
+            x = np.array([xlim[0], xlim[0], xlim[1], xlim[1]])
+            y = np.array([ylim[0], ylim[1], ylim[0], ylim[1]])
+            x_p, y_p = to_display(x, y)
+            xlim = (float(np.min(x_p)), float(np.max(x_p)))
+            ylim = (float(np.min(y_p)), float(np.max(y_p)))
 
         self._data_view.set_axes_limits(xlim, ylim)
         self.data_limits_changed()
