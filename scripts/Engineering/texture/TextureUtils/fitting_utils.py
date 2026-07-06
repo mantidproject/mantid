@@ -453,6 +453,7 @@ def _fit_all_peaks_fitpeaks(
     max_fit_iters: int,
     fit_kwargs: dict,
     smooth_vals: Sequence[int] = (3, 2),
+    last_fit_ic: bool = False,
 ) -> None:
     """FitPeaks-based (multithreaded) implementation of fit_all_peaks.
 
@@ -476,12 +477,25 @@ def _fit_all_peaks_fitpeaks(
     coarser binning.
     Remaining differences from the multidomain engine are inherent to FitPeaks: weighted "Least
     squares" cost (vs unweighted), independent per-spectrum A/B (vs tied-then-fixed), and a
-    positive-area validity check (vs the post-fit I/sigma mask)."""
+    positive-area validity check (vs the post-fit I/sigma mask).
+
+    last_fit_ic mirrors the multidomain engine: the smoothing/centre-refinement passes fit the
+    requested peak_func_name, then the final authoritative (reported) fit switches to
+    IkedaCarpenterPV, seeded from a preceding raw fit with the requested function.  As with A/B above,
+    FitPeaks fits IC's instrument-dependent parameters per-spectrum (loaded from the parameter file)
+    rather than fixing them as the multidomain engine does."""
     # x0 seeds (d-spacing) and the per-workspace cropped+rebinned (common-grid) ws names per peak
     x0_lims, all_peak_crop_wss = fit_initial_summed_spectra(wss, peaks, peak_window, fit_kwargs.copy(), peak_func_name)
 
-    # raw peak-function parameter names (excluding background)
-    base_peak_func = FunctionFactory.Instance().createPeakFunction(peak_func_name)
+    # last_fit_ic: the smoothing/centre-refinement passes use the requested function; the final
+    # authoritative fit switches to IkedaCarpenterPV (unless already fitting IC)
+    final_peak_func_name = "IkedaCarpenterPV" if last_fit_ic and peak_func_name != "IkedaCarpenterPV" else peak_func_name
+
+    # raw peak-function parameter names (excluding background): seed_* names guide the refinement
+    # passes; peak_param_names (from the final function) drive the authoritative fit and output table
+    seed_base_peak_func = FunctionFactory.Instance().createPeakFunction(peak_func_name)
+    seed_peak_param_names = [seed_base_peak_func.getParamName(i) for i in range(seed_base_peak_func.nParams())]
+    base_peak_func = FunctionFactory.Instance().createPeakFunction(final_peak_func_name)
     peak_param_names = [base_peak_func.getParamName(i) for i in range(base_peak_func.nParams())]
 
     # FitPeaks requires MaxFitIterations >= 49
@@ -549,15 +563,16 @@ def _fit_all_peaks_fitpeaks(
         param_tab_name = f"__fitpeaks_params_{ipeak}"
         err_tab_name = f"__fitpeaks_errs_{ipeak}"
 
-        def _run_fitpeaks_pass(fit_ws: str, centre_seed: np.ndarray):
+        def _run_fitpeaks_pass(fit_ws: str, centre_seed: np.ndarray, pass_peak_func_name: str):
             """Run one FitPeaks pass over all spectra (full peak window), seeded with the given
-            per-spectrum TOF centres.  Returns (param_table, error_table, valid_mask)."""
+            per-spectrum TOF centres, fitting pass_peak_func_name.  Returns (param_table,
+            error_table, valid_mask)."""
             CreateWorkspace(DataX=centre_seed, DataY=np.zeros(n_total), NSpec=n_total, OutputWorkspace=centres_ws)
             FitPeaks(
                 InputWorkspace=fit_ws,
                 PeakCentersWorkspace=centres_ws,
                 FitPeakWindowWorkspace=windows_ws,
-                PeakFunction=peak_func_name,
+                PeakFunction=pass_peak_func_name,
                 BackgroundType="Linear",
                 # PositionTolerance rejects fits whose centre drifts out of the window (a post-fit
                 # check, independent of ConstrainPeakPositions).  ConstrainPeakPositions is left OFF:
@@ -593,6 +608,16 @@ def _fit_all_peaks_fitpeaks(
             valid = np.isfinite(chi2) & (chi2 < _FITPEAKS_BAD_CHI2) & (chi2 > 0) & (i_col > 0)
             return param_table, error_table, valid
 
+        def _refine_centre_seed(centre_seed: np.ndarray, valid: np.ndarray) -> np.ndarray:
+            """Carry a pass's fitted centre forward as the next pass's seed.  Only accept a refined
+            centre that lies inside the window it was fitted in - with ConstrainPeakPositions off the
+            fitted X0 can drift past the data edge, and FitPeaks rejects (fatally) a seed centre
+            outside the window on the next pass / raw fit."""
+            x0_pass = np.asarray(ADS.retrieve(param_tab_name).column("X0"), dtype=float)
+            refine = valid & np.isfinite(x0_pass) & (x0_pass > tof_lo) & (x0_pass < tof_hi)
+            centre_seed[refine] = x0_pass[refine]
+            return centre_seed
+
         # Rebunch-smoothing is used ONLY to guide the raw fit's starting centre - a rebunched fit's peak
         # position carries the bias of its coarser binning, so its parameters are never reported.  Fit
         # the progressively finer rebunched (higher-SNR) versions coarsest-first, carrying forward the
@@ -600,22 +625,23 @@ def _fit_all_peaks_fitpeaks(
         # raw (unsmoothed) data over the full window, seeded with that refined centre; only it is
         # reported, and spectra where it fails are left unfit (no smoothed fallback).
         centre_seed = tof_centre.copy()
-        if "X0" in peak_param_names:
+        if "X0" in seed_peak_param_names:
             for sv in sorted((int(s) for s in smooth_vals), reverse=True):  # coarsest first
                 sm_ws = f"__fitpeaks_smooth_{ipeak}_{sv}"
                 Rebunch(InputWorkspace=combined_tof, OutputWorkspace=sm_ws, NBunch=sv)
-                _, _, valid = _run_fitpeaks_pass(sm_ws, centre_seed)
-                x0_pass = np.asarray(ADS.retrieve(param_tab_name).column("X0"), dtype=float)
-                # only accept a refined centre that lies inside the window it was fitted in - with
-                # ConstrainPeakPositions off the fitted X0 can drift past the data edge, and FitPeaks
-                # rejects (fatally) a seed centre outside the window on the next pass / raw fit
-                refine = valid & np.isfinite(x0_pass) & (x0_pass > tof_lo) & (x0_pass < tof_hi)
-                centre_seed[refine] = x0_pass[refine]
+                _, _, valid = _run_fitpeaks_pass(sm_ws, centre_seed, peak_func_name)
+                centre_seed = _refine_centre_seed(centre_seed, valid)
+
+        # last_fit_ic: refine the centre once more with a raw fit of the requested function before the
+        # authoritative fit switches to IC (mirrors the multidomain engine seeding IC from a raw fit)
+        if final_peak_func_name != peak_func_name:
+            _, _, valid = _run_fitpeaks_pass(combined_tof, centre_seed, peak_func_name)
+            centre_seed = _refine_centre_seed(centre_seed, valid)
 
         # authoritative raw fit over the full window, seeded with the refined centres
         param_cols = {p: np.zeros(n_total) for p in peak_param_names}
         err_cols = {p: np.full(n_total, np.inf) for p in peak_param_names}
-        param_table, error_table, fit_mask_all = _run_fitpeaks_pass(combined_tof, centre_seed)
+        param_table, error_table, fit_mask_all = _run_fitpeaks_pass(combined_tof, centre_seed, final_peak_func_name)
         for p in peak_param_names:
             param_cols[p][fit_mask_all] = np.asarray(param_table.column(p), dtype=float)[fit_mask_all]
             err_cols[p][fit_mask_all] = np.asarray(error_table.column(p), dtype=float)[fit_mask_all]
@@ -743,6 +769,7 @@ def fit_all_peaks(
             max_fit_iters,
             fit_kwargs,
             smooth_vals,
+            last_fit_ic,
         )
         return
     elif engine != "multidomain":
