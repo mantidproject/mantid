@@ -85,7 +85,6 @@ def _ensure_overlay_manager(method):
             self._shape_overlay_manager = ShapeOverlayManager(self.main_plotter)
         shape = method(self, *args, **kwargs)
         self._shape_overlay_manager.set_shape(shape)
-        self._current_widget = shape
 
     return wrapper
 
@@ -196,7 +195,6 @@ class FullInstrumentViewView(QWidget):
         self._overlay_meshes = []
         self._lineplot_overlays = []
         self._closing = False
-        self._current_widget = None
         self._shape_overlay_manager = None
         self._last_selected_projection = None
         self._last_camera_position = None
@@ -798,6 +796,7 @@ class FullInstrumentViewView(QWidget):
     def _on_toggle_add_shape(self, checked, add_widget_function: Callable):
         if checked:
             add_widget_function()
+            self._presenter.on_overlaid_shape_added()
         else:
             self.delete_current_overlaid_shape()
 
@@ -859,7 +858,10 @@ class FullInstrumentViewView(QWidget):
         if self._shape_overlay_manager is not None:
             self._shape_overlay_manager.remove_shape()
             self._shape_overlay_manager = None
-        self._current_widget = None
+        self._presenter.on_overlaid_shape_removed()
+
+    def is_active_current_overlaid_shape(self) -> bool:
+        return self._shape_overlay_manager is not None
 
     def refresh_peaks_ws_list(self) -> None:
         # TODO: Very similar to other refresh list function, combine in one function

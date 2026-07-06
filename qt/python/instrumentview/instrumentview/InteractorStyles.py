@@ -16,6 +16,7 @@ class InteractorStyles:
     def __init__(self, plotter, picking_callback, hover_callback):
         self.SCROLL_ZOOM_WITH_PICKING = CursorZoomInteractorStyle(plotter)
         self.SCROLL_ZOOM_WITH_HOVER = CursorZoomInteractorStyle(plotter)
+        self.SCROLL_ZOOM_NO_PICKING = CursorZoomInteractorStyle(plotter)
         self.TRACKBALL = SwappedButtonTrackballCamera()
         self.RUBBERBAND_ZOOM = RubberBandZoomInteractorStyle(plotter)
 

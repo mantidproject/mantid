@@ -432,6 +432,12 @@ class FullInstrumentViewPresenter:
     def on_clear_point_picked_detectors_clicked(self) -> None:
         self._callback_queue.put((self._on_clear_point_picked_detectors_clicked, ()))
 
+    def on_overlaid_shape_added(self) -> None:
+        self._update_interactor_style()
+
+    def on_overlaid_shape_removed(self) -> None:
+        self._update_interactor_style()
+
     def _on_add_item_clicked(self) -> None:
         centres = self._transform_vectors_with_matrix(np.array(self._model.detector_positions), self._transform)
         mask = self._view.get_shape_mask(centres)
@@ -751,6 +757,11 @@ class FullInstrumentViewPresenter:
         if not self._model.is_2d_projection:
             self._view.main_plotter.iren.style = self._interactor_styles.TRACKBALL
             return
+
+        if self._view.is_active_current_overlaid_shape():
+            self._view.main_plotter.iren.style = self._interactor_styles.SCROLL_ZOOM_NO_PICKING
+            return
+
         if self._view.is_hover_pick_mode_toggled():
             self._view.main_plotter.iren.style = self._interactor_styles.SCROLL_ZOOM_WITH_HOVER
         elif self._view.is_rubberband_zoom_toggled():

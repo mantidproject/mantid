@@ -146,39 +146,33 @@ class TestFullInstrumentViewView(unittest.TestCase):
 
     def test_add_rectangular_widget(self) -> None:
         self._view.add_rectangular_widget()
-        self.assertIsInstance(self._view._current_widget, RectangleSelectionShape)
         self.assertIsNotNone(self._view._shape_overlay_manager)
-        self.assertIs(self._view._shape_overlay_manager.current_shape, self._view._current_widget)
+        self.assertIsInstance(self._view._shape_overlay_manager.current_shape, RectangleSelectionShape)
 
     def test_add_circle_widget(self) -> None:
         self._view.add_circle_widget()
-        self.assertIsInstance(self._view._current_widget, CircleSelectionShape)
         self.assertIsNotNone(self._view._shape_overlay_manager)
-        self.assertIs(self._view._shape_overlay_manager.current_shape, self._view._current_widget)
+        self.assertIsInstance(self._view._shape_overlay_manager.current_shape, CircleSelectionShape)
 
     def test_add_ellipse_widget(self) -> None:
         self._view.add_ellipse_widget()
-        self.assertIsInstance(self._view._current_widget, EllipseSelectionShape)
         self.assertIsNotNone(self._view._shape_overlay_manager)
-        self.assertIs(self._view._shape_overlay_manager.current_shape, self._view._current_widget)
+        self.assertIsInstance(self._view._shape_overlay_manager.current_shape, EllipseSelectionShape)
 
     def test_add_annulus_widget(self) -> None:
         self._view.add_annulus_widget()
-        self.assertIsInstance(self._view._current_widget, AnnulusSelectionShape)
         self.assertIsNotNone(self._view._shape_overlay_manager)
-        self.assertIs(self._view._shape_overlay_manager.current_shape, self._view._current_widget)
+        self.assertIsInstance(self._view._shape_overlay_manager.current_shape, AnnulusSelectionShape)
 
     def test_add_hollow_rectangle_widget(self) -> None:
         self._view.add_hollow_rectangle_widget()
-        self.assertIsInstance(self._view._current_widget, HollowRectangleSelectionShape)
         self.assertIsNotNone(self._view._shape_overlay_manager)
-        self.assertIs(self._view._shape_overlay_manager.current_shape, self._view._current_widget)
+        self.assertIsInstance(self._view._shape_overlay_manager.current_shape, HollowRectangleSelectionShape)
 
     def test_delete_current_widget(self) -> None:
         self._view.add_circle_widget()
-        self.assertIsNotNone(self._view._current_widget)
+        self.assertIsNotNone(self._view._shape_overlay_manager)
         self._view.delete_current_overlaid_shape()
-        self.assertIsNone(self._view._current_widget)
         self.assertIsNone(self._view._shape_overlay_manager)
 
     @mock.patch("instrumentview.FullInstrumentViewWindow.ConfigService")
