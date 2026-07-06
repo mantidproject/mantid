@@ -12,17 +12,18 @@ from typing import Sequence
 from mantid.kernel import logger
 from mantidqt.plotting import sample_shape
 from Engineering.common.texture_sample_viewer import get_scaled_intrinsic_sample_directions_in_lab_frame, get_xml_mesh, is_valid_mesh
+from matplotlib.figure import Figure
 
 
 class ShowSampleModel(object):
-    def __init__(self, inc_gauge_vol: bool = False, fix_axes_to_sample: bool = True):
-        self.ws_name = None
+    def __init__(self, inc_gauge_vol: bool = False, fix_axes_to_sample: bool = True, ws_name: str | None = None, fig: Figure | None = None):
+        self.ws_name = ws_name
         self.include_gauge_vol = inc_gauge_vol
         self.fix_axes_to_sample = fix_axes_to_sample
         self.gauge_vol_str = ""
-        self.fig = None
+        self.fig = fig
 
-    def set_ws_name(self, ws_name: str) -> None:
+    def set_ws_name(self, ws_name: str | None) -> None:
         self.ws_name = ws_name
 
     def set_fix_axes_to_sample(self, fix_axes: bool) -> None:
