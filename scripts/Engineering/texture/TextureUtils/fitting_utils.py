@@ -26,8 +26,8 @@ def crop_and_rebin(ws: Workspace2D | str, out_ws: str, lower: float, upper: floa
     Rebin("__tmp_peak_window", rebin_params, OutputWorkspace=out_ws)
 
 
-def _get_max_bin(ws: Workspace2D) -> np.ndarray:
-    return max(np.diff(ws.readX(i)).max() for i in range(ws.getNumberHistograms()))
+def _get_min_bin(ws: Workspace2D) -> np.ndarray:
+    return min(np.diff(ws.readX(i)).min() for i in range(ws.getNumberHistograms()))
 
 
 def crop_wss_and_combine(
@@ -35,7 +35,7 @@ def crop_wss_and_combine(
 ) -> Tuple[Workspace2D, List[str]]:
     cropped_rebinned_wss = [f"rebin_ws_{peak}_0"]
     peak_window_ws = CropWorkspaceRagged(wss[0], lower, upper, OutputWorkspace="__peak_window_crop")
-    rebin_params = (lower, _get_max_bin(peak_window_ws), upper)
+    rebin_params = (lower, _get_min_bin(peak_window_ws), upper)
     Rebin("__peak_window_crop", rebin_params, OutputWorkspace=f"rebin_ws_{peak}_0")
     CloneWorkspace(InputWorkspace=f"rebin_ws_{peak}_0", OutputWorkspace=f"rebin_ws_{peak}")
     for iws, ws in enumerate(wss[1:]):
