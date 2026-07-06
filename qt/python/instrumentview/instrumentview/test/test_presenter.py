@@ -144,6 +144,25 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
 
         self._presenter._update_hover_pick_plot.assert_called_once_with(3)
 
+    def test_on_rubberband_zoom_toggled_enables_zoom_mode(self):
+        self._presenter._update_interactor_style = MagicMock()
+
+        self._presenter.on_rubberband_zoom_toggled(True)
+
+        self._mock_view.set_start_adding_peaks_checked.assert_called_once_with(False)
+        self._mock_view.set_hover_pick_checked.assert_called_once_with(False)
+        self._mock_view.delete_current_overlaid_shape.assert_called_once()
+        self._mock_view.reset_overlay_shapes.assert_called_once_with(disable=True)
+        self._presenter._update_interactor_style.assert_called_once()
+
+    def test_on_rubberband_zoom_toggled_off_restores_regular_plotting(self):
+        self._presenter._update_interactor_style = MagicMock()
+
+        self._presenter.on_rubberband_zoom_toggled(False)
+
+        self._mock_view.reset_overlay_shapes.assert_called_once_with(disable=False)
+        self._presenter._update_interactor_style.assert_called_once()
+
     def test_on_hover_pick_toggled_enables_hover_mode(self):
         self._model.projection_type = ProjectionType.CYLINDRICAL_X
         self._presenter._update_interactor_style = MagicMock()
@@ -151,13 +170,20 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
 
         self._presenter.on_hover_pick_toggled(True)
 
-        self._presenter._update_interactor_style.assert_called_once()
-        self._mock_view.update_view_from_hover_pick_mode.assert_called_once()
+        self._mock_view.set_start_adding_peaks_checked.assert_called_once_with(False)
+        self._mock_view.set_rubberband_zoom_checked.assert_called_once_with(False)
+        self._mock_view.delete_current_overlaid_shape.assert_called_once()
         self._mock_view.clear_lineplot_overlays.assert_called_once()
         self._mock_view.show_plot_for_detectors.assert_called_once_with(None, None)
         self._mock_view.set_selected_detector_info.assert_called_once_with([])
         self._mock_view.set_relative_detector_angle.assert_called_once_with(None)
         self._mock_view.remove_peak_cursor_from_lineplot.assert_called_once()
+        self._mock_view.set_clear_point_picked_detectors_disabled.assert_called_once_with(True)
+        self._mock_view.set_sum_spectra_checkbox_disabled.assert_called_once_with(True)
+        self._mock_view.set_select_bank_tube_disabled.assert_called_once_with(True)
+        self._mock_view.set_export_workspace_button_disabled.assert_called_once_with(True)
+        self._mock_view.reset_overlay_shapes.assert_called_once_with(disable=True)
+        self._presenter._update_interactor_style.assert_called_once()
 
     def test_on_hover_pick_toggled_off_restores_regular_plotting(self):
         self._presenter._update_interactor_style = MagicMock()
@@ -166,8 +192,12 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
 
         self._presenter.on_hover_pick_toggled(False)
 
+        self._mock_view.set_clear_point_picked_detectors_disabled.assert_called_once_with(False)
+        self._mock_view.set_sum_spectra_checkbox_disabled.assert_called_once_with(False)
+        self._mock_view.set_select_bank_tube_disabled.assert_called_once_with(False)
+        self._mock_view.set_export_workspace_button_disabled.assert_called_once_with(False)
+        self._mock_view.reset_overlay_shapes.assert_called_once_with(disable=False)
         self._presenter._update_interactor_style.assert_called_once()
-        self._mock_view.update_view_from_hover_pick_mode.assert_called_once()
         self._presenter.update_picked_detectors_on_view.assert_called_once()
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.on_integration_limits_reset_clicked")

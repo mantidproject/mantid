@@ -61,30 +61,6 @@ class TestFullInstrumentViewView(unittest.TestCase):
     def test_hover_pick_button_is_checkable(self):
         self.assertTrue(self._view._hover_pick.isCheckable())
 
-    def test_update_view_from_hover_pick_mode_disables_select_bank_tube(self):
-        self._view._select_bank_tube.setEnabled(True)
-        self._view._hover_pick.setChecked(True)
-        self._view.update_view_from_hover_pick_mode()
-        self.assertFalse(self._view._select_bank_tube.isEnabled())
-
-    def test_update_view_from_hover_pick_mode_enables_select_bank_tube(self):
-        self._view._select_bank_tube.setEnabled(False)
-        self._view._hover_pick.setChecked(False)
-        self._view.update_view_from_hover_pick_mode()
-        self.assertTrue(self._view._select_bank_tube.isEnabled())
-
-    def test_update_view_from_hover_pick_mode_disables_export_spectra(self):
-        self._view._export_workspace_button.setEnabled(True)
-        self._view._hover_pick.setChecked(True)
-        self._view.update_view_from_hover_pick_mode()
-        self.assertFalse(self._view._export_workspace_button.isEnabled())
-
-    def test_update_view_from_hover_pick_mode_enables_export_spectra(self):
-        self._view._export_workspace_button.setEnabled(False)
-        self._view._hover_pick.setChecked(False)
-        self._view.update_view_from_hover_pick_mode()
-        self.assertTrue(self._view._export_workspace_button.isEnabled())
-
     def test_update_scalar_range(self):
         self._view.set_plotter_scalar_bar_range((0, 100), "label")
         self._view.main_plotter.update_scalar_bar_range.assert_has_calls([mock.call((0, 100), "label")])
@@ -201,7 +177,7 @@ class TestFullInstrumentViewView(unittest.TestCase):
     def test_delete_current_widget(self) -> None:
         self._view.add_circle_widget()
         self.assertIsNotNone(self._view._current_widget)
-        self._view.delete_current_widget()
+        self._view.delete_current_overlaid_shape()
         self.assertIsNone(self._view._current_widget)
         self.assertIsNone(self._view._shape_overlay_manager)
 

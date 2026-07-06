@@ -783,8 +783,13 @@ class FullInstrumentViewView(QWidget):
     def on_toggle_add_hollow_rectangle(self, checked):
         self._on_toggle_add_shape(checked, self.add_hollow_rectangle_widget)
 
+    def set_start_adding_peaks_checked(self, checked):
+        self._start_adding_peaks_button.setChecked(checked)
+
     def reset_overlay_shapes(self, disable=False) -> None:
         disable = disable or (self.current_selected_projection() == ProjectionType.THREE_D)
+        self._add_mask.setDisabled(disable)
+        self._add_selection.setDisabled(disable)
         for btn in self._shape_buttons:
             if btn.isChecked():
                 btn.toggle()
@@ -794,7 +799,7 @@ class FullInstrumentViewView(QWidget):
         if checked:
             add_widget_function()
         else:
-            self.delete_current_widget()
+            self.delete_current_overlaid_shape()
 
         # Enable button for applying mask/group if widget is present, disable otherwise
         self._add_mask.setEnabled(checked)
@@ -807,12 +812,7 @@ class FullInstrumentViewView(QWidget):
 
     def enable_or_disable_mask_widgets(self):
         if self.is_hover_pick_mode_toggled():
-            for btn in self._shape_buttons:
-                if btn.isChecked():
-                    btn.toggle()
-                btn.setDisabled(True)
-            self._add_mask.setDisabled(True)
-            self._add_selection.setDisabled(True)
+            self.reset_overlay_shapes(disable=True)
             return
 
         self.reset_overlay_shapes()
@@ -827,34 +827,26 @@ class FullInstrumentViewView(QWidget):
         if self.current_selected_projection() != ProjectionType.THREE_D:
             self._rubberband_zoom.setEnabled(True)
 
-    def update_view_from_rubberband_zoom(self) -> None:
-        enabled = self.is_rubberband_zoom_toggled() and (self.current_selected_projection() != ProjectionType.THREE_D)
-        if enabled:
-            self._hover_pick.setChecked(False)
-            self.delete_current_widget()
-
-        self._add_mask.setDisabled(True)
-        self._add_selection.setDisabled(True)
-
-        self.reset_overlay_shapes(disable=enabled)
-
     def is_hover_pick_mode_toggled(self) -> bool:
         return self._hover_pick.isChecked()
 
-    def update_view_from_hover_pick_mode(self) -> None:
-        enabled = self.is_hover_pick_mode_toggled() and (self.current_selected_projection() != ProjectionType.THREE_D)
-        if enabled:
-            self.delete_current_widget()
-            self._rubberband_zoom.setChecked(False)
+    def set_hover_pick_checked(self, checked):
+        self._hover_pick.setChecked(checked)
 
-        self._clear_point_picked_detectors.setDisabled(enabled)
-        self._add_mask.setDisabled(True)
-        self._add_selection.setDisabled(True)
-        self._sum_spectra_checkbox.setDisabled(enabled)
-        self._select_bank_tube.setDisabled(enabled)
-        self._export_workspace_button.setDisabled(enabled)
+    def set_rubberband_zoom_checked(self, checked):
+        self._rubberband_zoom.setChecked(checked)
 
-        self.reset_overlay_shapes(disable=enabled)
+    def set_clear_point_picked_detectors_disabled(self, disabled):
+        self._clear_point_picked_detectors.setDisabled(disabled)
+
+    def set_sum_spectra_checkbox_disabled(self, disabled):
+        self._sum_spectra_checkbox.setDisabled(disabled)
+
+    def set_select_bank_tube_disabled(self, disabled):
+        self._select_bank_tube.setDisabled(disabled)
+
+    def set_export_workspace_button_disabled(self, disabled):
+        self._export_workspace_button.setDisabled(disabled)
 
     def enable_or_disable_hover_pick(self) -> None:
         if self.current_selected_projection() == ProjectionType.THREE_D:
@@ -863,7 +855,7 @@ class FullInstrumentViewView(QWidget):
         if self.current_selected_projection() != ProjectionType.THREE_D:
             self._hover_pick.setEnabled(True)
 
-    def delete_current_widget(self):
+    def delete_current_overlaid_shape(self):
         if self._shape_overlay_manager is not None:
             self._shape_overlay_manager.remove_shape()
             self._shape_overlay_manager = None
@@ -1017,7 +1009,7 @@ class FullInstrumentViewView(QWidget):
 
     @_skip_if_closing
     def clear_main_plotter(self) -> None:
-        self.delete_current_widget()
+        self.delete_current_overlaid_shape()
         self.main_plotter.clear()
 
     @_skip_if_closing

@@ -372,22 +372,35 @@ class FullInstrumentViewPresenter:
         # Return list of xmin, xmax, ymin, ymax, zmin, zmax
         return [x for pair in zip(min_point, max_point) for x in pair]
 
-    def on_rubberband_zoom_toggled(self, _checked) -> None:
+    def on_rubberband_zoom_toggled(self, checked) -> None:
+        if checked:
+            self._view.set_start_adding_peaks_checked(False)
+            self._view.set_hover_pick_checked(False)
+            self._view.delete_current_overlaid_shape()
+        self._view.reset_overlay_shapes(disable=checked)
         self._update_interactor_style()
-        self._view.update_view_from_rubberband_zoom()
 
     def on_hover_pick_toggled(self, checked: bool) -> None:
-        self._last_hovered_point_index = None
-        self._update_interactor_style()
-
-        self._view.update_view_from_hover_pick_mode()
-
-        if self._view.is_hover_pick_mode_toggled() and self._model.is_2d_projection:
+        if checked:
+            self._view.set_start_adding_peaks_checked(False)
+            self._view.set_rubberband_zoom_checked(False)
+            self._view.delete_current_overlaid_shape()
             self._view.clear_lineplot_overlays()
             self._view.show_plot_for_detectors(self._model.line_plot_workspace, self._model.lineplot_limits)
             self._view.set_selected_detector_info([])
             self._view.set_relative_detector_angle(None)
             self._view.remove_peak_cursor_from_lineplot()
+
+        self._view.set_clear_point_picked_detectors_disabled(checked)
+        self._view.set_sum_spectra_checkbox_disabled(checked)
+        self._view.set_select_bank_tube_disabled(checked)
+        self._view.set_export_workspace_button_disabled(checked)
+        self._view.reset_overlay_shapes(disable=checked)
+
+        self._last_hovered_point_index = None
+        self._update_interactor_style()
+
+        if checked:
             return
 
         self.update_picked_detectors_on_view()
@@ -671,6 +684,8 @@ class FullInstrumentViewPresenter:
     def on_start_adding_peaks_toggled(self, checked) -> None:
         if checked:
             self._model.turn_on_single_point_picking()
+            self._view.set_rubberband_zoom_checked(False)
+            self._view.set_hover_pick_checked(False)
             self._view.add_peak_cursor_to_lineplot()
             self._view.set_delete_all_selected_peaks_button_enabled(False)
             self._view.disable_and_uncheck_selection_list()
@@ -681,6 +696,8 @@ class FullInstrumentViewPresenter:
             self._view.set_delete_all_selected_peaks_button_enabled(True)
             self._view.enable_and_restore_selection_list()
             self._on_list_item_selected(CurrentTab.Grouping)
+
+        self._view.reset_overlay_shapes(disable=checked)
 
     def on_peak_selected_in_lineplot(self, x: float, mouse_click: Literal["right", "left"]) -> None:
         if len(self._model.picked_detector_ids) == 0:
