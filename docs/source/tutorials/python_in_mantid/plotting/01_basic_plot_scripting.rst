@@ -145,18 +145,18 @@ Multiple workspaces/spectra can be plotted by providing lists within the `plotSp
     # Plot multiple spectra across multiple workspaces
     graph_spec3 = plotSpectrum([RawData1,RawData2], [0,1,3])
 
-    # Verify the number of spectrums in plots
-    print(f"The graph_spec1 plot contains {len(graph_spec1.axes[0].lines)} spectrums")
-    print(f"The graph_spec2 plot contains {len(graph_spec2.axes[0].lines)} spectrums")
-    print(f"The graph_spec3 plot contains {len(graph_spec3.axes[0].lines)} spectrums")
+    # Verify the number of spectra in plots
+    print(f"The graph_spec1 plot contains {len(graph_spec1.axes[0].lines)} spectra")
+    print(f"The graph_spec2 plot contains {len(graph_spec2.axes[0].lines)} spectra")
+    print(f"The graph_spec3 plot contains {len(graph_spec3.axes[0].lines)} spectra")
 
 Output:
 
 .. testoutput:: PlotMultipleSpectra
 
-    The graph_spec1 plot contains 3 spectrums
-    The graph_spec2 plot contains 2 spectrums
-    The graph_spec3 plot contains 6 spectrums
+    The graph_spec1 plot contains 3 spectra
+    The graph_spec2 plot contains 2 spectra
+    The graph_spec3 plot contains 6 spectra
 
 .. testcleanup:: PlotMultipleSpectra
 
@@ -175,14 +175,14 @@ To overplot on the same window:
     # Overplot on that window, without clearing it
     plotSpectrum(RawData, 1, window=graph_spec, clearWindow=False)
 
-    # Verify the number of spectrums in plot
-    print(f"The plot contains {len(graph_spec.axes[0].lines)} spectrums")
+    # Verify the number of spectra in plot
+    print(f"The plot contains {len(graph_spec.axes[0].lines)} spectra")
 
 Output:
 
 .. testoutput:: OverPlottingWithTwoSpectra
 
-    The plot contains 2 spectrums
+    The plot contains 2 spectra
 
 .. testcleanup:: OverPlottingWithTwoSpectra
 
