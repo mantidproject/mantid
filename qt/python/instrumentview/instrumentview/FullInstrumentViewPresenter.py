@@ -144,7 +144,7 @@ class FullInstrumentViewPresenter:
         if self._model.sample_shape is not None:
             n = len(self._model.sample_shape)
             vertices = self._model.sample_shape.reshape(-1, 3)
-            faces = faces = np.c_[np.full(n, 3, dtype=int), np.arange(n * 3).reshape(n, 3)]
+            faces = np.c_[np.full(n, 3, dtype=int), np.arange(n * 3).reshape(n, 3)]
             sample_shape_mesh = pv.PolyData(vertices, faces)
             sample_shape_mesh["colours"] = self.generate_single_colour(n, self.sample_position_colour, 0.5)
             self._view.add_rgba_mesh(sample_shape_mesh, scalars="colours")
