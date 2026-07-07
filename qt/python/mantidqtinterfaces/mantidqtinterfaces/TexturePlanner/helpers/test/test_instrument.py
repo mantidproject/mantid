@@ -204,11 +204,6 @@ class TestInstrumentHelper_IsValidInstrument(unittest.TestCase):
         self.assertFalse(InstrumentHelper.is_valid_instrument(""))
         mock_finder.getInstrumentFilename.assert_not_called()
 
-    def test_false_when_lookup_raises(self, mock_finder):
-        mock_finder.getInstrumentFilename.side_effect = RuntimeError("boom")
-
-        self.assertFalse(InstrumentHelper.is_valid_instrument("WISH"))
-
 
 if __name__ == "__main__":
     unittest.main()

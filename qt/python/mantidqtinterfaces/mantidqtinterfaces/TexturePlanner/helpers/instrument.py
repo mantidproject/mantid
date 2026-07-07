@@ -9,6 +9,7 @@ import os
 
 from mantid.api import InstrumentFileFinder
 from mantid.simpleapi import CreateSimulationWorkspace, GroupDetectors
+from mantid.kernel import logger
 from Engineering.EnggUtils import CALIB_DIR
 from Engineering.common.instrument_config import get_instr_config, SUPPORTED_INSTRUMENTS
 from typing import List, Sequence, Protocol
@@ -57,6 +58,8 @@ class InstrumentHelper:
 
     # instrument config -------------------------------------------------
     def update_instrument(self, instrument: str) -> None:
+        if not self.is_valid_instrument(instrument):
+            logger.error(f"Instrument Definition File for: '{instrument}' could not be found")
         self.instr = instrument
         # custom instruments are an arbitrary (validated) IDF name with no registered
         # config, so only look one up for the supported instruments.
@@ -74,12 +77,7 @@ class InstrumentHelper:
     @staticmethod
     def is_valid_instrument(name: str) -> bool:
         """True if name resolves to a known instrument definition file (IDF)."""
-        if not name:
-            return False
-        try:
-            return bool(InstrumentFileFinder.getInstrumentFilename(name))
-        except Exception:
-            return False
+        return bool(InstrumentFileFinder.getInstrumentFilename(name)) if name else False
 
     @staticmethod
     def is_grouping_file_applicable(instrument: str, grouping_path: str) -> bool:
