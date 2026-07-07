@@ -407,7 +407,7 @@ bool MDTransfModQ::applyCoordTransf(double qx, double qy, double qz, std::vector
   if (Qsq < static_cast<coord_t>(m_DimMin[0]) || Qsq >= static_cast<coord_t>(m_DimMax[0])) {
     return false;
   }
-  Coord[0] = sqrt(Qsq);
+  Coord[0] = static_cast<coord_t>(std::sqrt(Qsq));
 
   return true;
 }
