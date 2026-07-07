@@ -61,9 +61,9 @@ public:
   static RunsPresenterTest *createSuite() { return new RunsPresenterTest(); }
   static void destroySuite(RunsPresenterTest *suite) { delete suite; }
 
-  void testThrowsWhenMainPresenterHasNotBeenAccepted() {
+  void testPercentCompleteWhenMainPresenterHasNotBeenAccepted() {
     auto presenter = makePresenter(false);
-    TS_ASSERT_THROWS(presenter->percentComplete(), std::runtime_error const &);
+    TS_ASSERT_EQUALS(presenter->percentComplete(), 0);
   }
 
   RunsPresenterTest()
