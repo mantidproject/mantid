@@ -10,23 +10,31 @@ from unittest.mock import patch, MagicMock, call
 from os import path
 import numpy as np
 from Engineering.texture.TextureUtils.fitting_utils import (
-    get_initial_fit_function_and_kwargs_from_specs,
     fit_initial_summed_spectra,
-    rerun_fit_with_new_ws,
     _tie_bkg,
     crop_and_rebin,
     crop_wss_and_combine,
     _make_composite,
-    _get_default_param_ties,
-    calc_intens_and_sigma_arrays,
     _get_run_and_prefix_from_ws_log,
     _get_grouping_from_ws_log,
     fit_all_peaks,
+    _fit_parameters_path,
+)
+from Engineering.texture.TextureUtils.multidomain_engine import (
+    get_initial_fit_function_and_kwargs_from_specs,
+    rerun_fit_with_new_ws,
+    _get_default_param_ties,
+    calc_intens_and_sigma_arrays,
+    _populate_multidomain_output_table,
+)
+from Engineering.texture.TextureUtils.fitpeaks_engine import (
     _fit_all_peaks_fitpeaks,
     _populate_fitpeaks_output_table,
 )
 
 texture_utils_path = "Engineering.texture.TextureUtils.fitting_utils"
+multidomain_path = "Engineering.texture.TextureUtils.multidomain_engine"
+fitpeaks_path = "Engineering.texture.TextureUtils.fitpeaks_engine"
 
 
 class TextureUtilsFittingUtilsTests(unittest.TestCase):
@@ -278,13 +286,13 @@ class TextureUtilsFittingStepsTests(unittest.TestCase):
             any_order=False,
         )
 
-    @patch(f"{texture_utils_path}._tie_bkg")
-    @patch(f"{texture_utils_path}._make_composite")
-    @patch(f"{texture_utils_path}._estimate_intensity_background_and_centre")
+    @patch(f"{multidomain_path}._tie_bkg")
+    @patch(f"{multidomain_path}._make_composite")
+    @patch(f"{multidomain_path}._estimate_intensity_background_and_centre")
     @patch(f"{texture_utils_path}.UnitConversion")
     @patch(f"{texture_utils_path}.DeltaEModeType")
-    @patch(f"{texture_utils_path}.FunctionFactory")
-    @patch(f"{texture_utils_path}.MultiDomainFunction")
+    @patch(f"{multidomain_path}.FunctionFactory")
+    @patch(f"{multidomain_path}.MultiDomainFunction")
     def test_get_initial_fit_function_and_kwargs_from_specs(
         self, mock_gen_mdf, mock_func_factory, mock_delta_e, mock_unit_conv, mock_estimate_intens, mock_make_comp, mock_tie_bkg
     ):
@@ -395,10 +403,10 @@ class TextureUtilsFittingStepsTests(unittest.TestCase):
 
         self.assertEqual(expected_spec_kwargs, out_kwargs)
 
-    @patch(f"{texture_utils_path}.Fit")
-    @patch(f"{texture_utils_path}._make_composite")
-    @patch(f"{texture_utils_path}.FunctionFactory")
-    @patch(f"{texture_utils_path}.MultiDomainFunction")
+    @patch(f"{multidomain_path}.Fit")
+    @patch(f"{multidomain_path}._make_composite")
+    @patch(f"{multidomain_path}.FunctionFactory")
+    @patch(f"{multidomain_path}.MultiDomainFunction")
     def test_rerun_fit_with_new_ws(
         self,
         mock_gen_mdf,
@@ -531,10 +539,10 @@ class TextureUtilsFittingStepsTests(unittest.TestCase):
         self.assertIs(out_fit, fit_return)
         self.assertIs(out_md_kwargs, md_fit_kwargs)
 
-    @patch(f"{texture_utils_path}.Fit")
-    @patch(f"{texture_utils_path}._make_composite")
-    @patch(f"{texture_utils_path}.FunctionFactory")
-    @patch(f"{texture_utils_path}.MultiDomainFunction")
+    @patch(f"{multidomain_path}.Fit")
+    @patch(f"{multidomain_path}._make_composite")
+    @patch(f"{multidomain_path}.FunctionFactory")
+    @patch(f"{multidomain_path}.MultiDomainFunction")
     def test_rerun_fit_with_new_ws_fixes_shared_params_instead_of_tying(
         self,
         mock_gen_mdf,
@@ -613,11 +621,11 @@ class TextureUtilsFittingStepsTests(unittest.TestCase):
         # off there are no cross-domain ties at all, so addTies is not called
         new_func.addTies.assert_not_called()
 
-    @patch(f"{texture_utils_path}.Fit")
-    @patch(f"{texture_utils_path}._make_composite")
-    @patch(f"{texture_utils_path}._get_default_param_ties")
-    @patch(f"{texture_utils_path}.FunctionFactory")
-    @patch(f"{texture_utils_path}.MultiDomainFunction")
+    @patch(f"{multidomain_path}.Fit")
+    @patch(f"{multidomain_path}._make_composite")
+    @patch(f"{multidomain_path}._get_default_param_ties")
+    @patch(f"{multidomain_path}.FunctionFactory")
+    @patch(f"{multidomain_path}.MultiDomainFunction")
     def test_rerun_fit_with_new_ws_last_fit_ic(
         self,
         mock_gen_mdf,
@@ -704,23 +712,23 @@ class TextureUtilsOverallFittingTests(unittest.TestCase):
         param_ws.column.side_effect = _col
         return param_ws, names, vals, errs
 
-    @patch(f"{texture_utils_path}.SaveNexus")
-    @patch(f"{texture_utils_path}.CreateEmptyTableWorkspace")
+    @patch(f"{multidomain_path}.SaveNexus")
+    @patch(f"{multidomain_path}.CreateEmptyTableWorkspace")
     @patch(
-        f"{texture_utils_path}.calc_intens_and_sigma_arrays",
+        f"{multidomain_path}.calc_intens_and_sigma_arrays",
         return_value=(None, None, np.array([3.5, 5.0]), None),
     )
-    @patch(f"{texture_utils_path}.convert_TOFerror_to_derror")
+    @patch(f"{multidomain_path}.convert_TOFerror_to_derror")
     @patch(f"{texture_utils_path}.UnitConversion")
-    @patch(f"{texture_utils_path}.rerun_fit_with_new_ws")
-    @patch(f"{texture_utils_path}.get_initial_fit_function_and_kwargs_from_specs")
-    @patch(f"{texture_utils_path}.Fit")
-    @patch(f"{texture_utils_path}.Rebunch")
-    @patch(f"{texture_utils_path}.fit_initial_summed_spectra")
-    @patch(f"{texture_utils_path}.ConvertUnits")
-    @patch(f"{texture_utils_path}._get_grouping_from_ws_log")
-    @patch(f"{texture_utils_path}._get_run_and_prefix_from_ws_log")
-    @patch(f"{texture_utils_path}.ADS")
+    @patch(f"{multidomain_path}.rerun_fit_with_new_ws")
+    @patch(f"{multidomain_path}.get_initial_fit_function_and_kwargs_from_specs")
+    @patch(f"{multidomain_path}.Fit")
+    @patch(f"{multidomain_path}.Rebunch")
+    @patch(f"{multidomain_path}.fit_initial_summed_spectra")
+    @patch(f"{multidomain_path}.ConvertUnits")
+    @patch(f"{multidomain_path}._get_grouping_from_ws_log")
+    @patch(f"{multidomain_path}._get_run_and_prefix_from_ws_log")
+    @patch(f"{multidomain_path}.ADS")
     def test_fit_all_peaks_basic_fit(
         self,
         mock_ads,
@@ -827,23 +835,23 @@ class TextureUtilsOverallFittingTests(unittest.TestCase):
 
     # -------- MULTIPLE wss & peaks --------
 
-    @patch(f"{texture_utils_path}.SaveNexus")
-    @patch(f"{texture_utils_path}.CreateEmptyTableWorkspace")
+    @patch(f"{multidomain_path}.SaveNexus")
+    @patch(f"{multidomain_path}.CreateEmptyTableWorkspace")
     @patch(
-        f"{texture_utils_path}.calc_intens_and_sigma_arrays",
+        f"{multidomain_path}.calc_intens_and_sigma_arrays",
         return_value=(None, None, np.array([3.0, 3.0]), None),
     )
-    @patch(f"{texture_utils_path}.convert_TOFerror_to_derror")
+    @patch(f"{multidomain_path}.convert_TOFerror_to_derror")
     @patch(f"{texture_utils_path}.UnitConversion")
-    @patch(f"{texture_utils_path}.rerun_fit_with_new_ws")
-    @patch(f"{texture_utils_path}.get_initial_fit_function_and_kwargs_from_specs")
-    @patch(f"{texture_utils_path}.Fit")
-    @patch(f"{texture_utils_path}.Rebunch")
-    @patch(f"{texture_utils_path}.fit_initial_summed_spectra")
-    @patch(f"{texture_utils_path}.ConvertUnits")
-    @patch(f"{texture_utils_path}._get_grouping_from_ws_log")
-    @patch(f"{texture_utils_path}._get_run_and_prefix_from_ws_log")
-    @patch(f"{texture_utils_path}.ADS")
+    @patch(f"{multidomain_path}.rerun_fit_with_new_ws")
+    @patch(f"{multidomain_path}.get_initial_fit_function_and_kwargs_from_specs")
+    @patch(f"{multidomain_path}.Fit")
+    @patch(f"{multidomain_path}.Rebunch")
+    @patch(f"{multidomain_path}.fit_initial_summed_spectra")
+    @patch(f"{multidomain_path}.ConvertUnits")
+    @patch(f"{multidomain_path}._get_grouping_from_ws_log")
+    @patch(f"{multidomain_path}._get_run_and_prefix_from_ws_log")
+    @patch(f"{multidomain_path}.ADS")
     def test_fit_all_peaks_multiple_wss_and_peaks(
         self,
         mock_ads,
@@ -921,8 +929,8 @@ class TextureUtilsOverallFittingTests(unittest.TestCase):
 
     # -------- invalid tie parameter --------
 
-    @patch(f"{texture_utils_path}.FunctionFactory")
-    @patch(f"{texture_utils_path}.MultiDomainFunction")
+    @patch(f"{multidomain_path}.FunctionFactory")
+    @patch(f"{multidomain_path}.MultiDomainFunction")
     def test_get_initial_fit_function_and_kwargs_from_specs_raises_on_invalid_tie_param(self, mock_mdf, mock_factory):
         ws = MagicMock()
         si = MagicMock()
@@ -960,6 +968,64 @@ class TextureUtilsOverallFittingTests(unittest.TestCase):
             )
         self.assertIn("Invalid parameter(s) to tie", str(ctx.exception))
 
+    @patch(f"{multidomain_path}.convert_TOFerror_to_derror")
+    @patch(f"{texture_utils_path}.UnitConversion")
+    @patch(f"{multidomain_path}.ADS")
+    def test_populate_multidomain_output_table_columns_and_rows(self, mock_ads, mock_unitconv, mock_convert_toferr):
+        # spectrum 0 fitted, spectrum 1 masked out; peak params are A and X0 (X0 reported in d-spacing)
+        num_spec = 2
+        param_ws, *_ = self._make_param_table_mock(num_spec, params=("A", "X0"))
+        mock_ads.retrieve.return_value = param_ws
+        mock_unitconv.run.return_value = 1.5  # TOF -> d for X0
+        mock_convert_toferr.return_value = 0.05
+
+        ws = MagicMock()
+        si = MagicMock()
+        si.size.return_value = num_spec
+        ws.spectrumInfo.return_value = si
+
+        out_tab = MagicMock()
+        _populate_multidomain_output_table(
+            out_tab,
+            ws,
+            "smooth_ws",
+            intensity_estimates=[100.0, 200.0],
+            fit_mask=np.array([True, False]),
+            no_fit_value_dict=None,
+            nan_replacement=None,
+        )
+
+        # parameter table for the last fitted ws was retrieved
+        mock_ads.retrieve.assert_called_once_with("fit_smooth_ws_Parameters")
+
+        # columns: wsindex, I_est, then a triple per peak parameter (A, X0)
+        out_tab.addColumn.assert_any_call("int", "wsindex")
+        out_tab.addColumn.assert_any_call("double", "I_est")
+        for p in ("A", "X0"):
+            out_tab.addColumn.assert_any_call("double", p)
+            out_tab.addColumn.assert_any_call("double", f"{p}_err")
+            out_tab.addColumn.assert_any_call("double", f"{p}/{p}_err")
+
+        self.assertEqual(out_tab.addRow.call_count, num_spec)
+
+        # fitted spectrum 0: [wsindex, I_est, A, A_err, A/A_err, X0(d), X0_err(d), X0/X0_err]
+        row0 = out_tab.addRow.call_args_list[0][0][0]
+        self.assertEqual(row0[0], 0)
+        self.assertEqual(row0[1], 100.0)  # I_est
+        self.assertEqual(row0[2], 1.0)  # A value (first value in the mocked table)
+        self.assertAlmostEqual(row0[4], 1.0 / 0.1)  # A / A_err
+        self.assertEqual(row0[5], 1.5)  # X0 converted to d-spacing
+        self.assertEqual(row0[6], 0.05)  # X0 d-spacing error
+        self.assertAlmostEqual(row0[7], 1.5 / 0.05)  # X0 / X0_err
+
+        # masked spectrum 1: unfit convention -> infinite errors, zero ratios
+        row1 = out_tab.addRow.call_args_list[1][0][0]
+        self.assertEqual(row1[0], 1)
+        self.assertEqual(row1[3], np.inf)  # A_err
+        self.assertEqual(row1[4], 0.0)  # A / A_err
+        self.assertEqual(row1[6], np.inf)  # X0_err
+        self.assertEqual(row1[7], 0.0)  # X0 / X0_err
+
 
 class TextureUtilsNewFunctionsTests(unittest.TestCase):
     @patch(f"{texture_utils_path}.FunctionFactory")
@@ -974,6 +1040,14 @@ class TextureUtilsNewFunctionsTests(unittest.TestCase):
         mock_factory.createFunction.assert_called_once_with("CompositeFunction")
         comp.add.assert_has_calls([call(peak_func), call(bg_func)])
         self.assertIs(result, comp)
+
+    def test_fit_parameters_path_override_dir_is_flat(self):
+        result = _fit_parameters_path("save", True, "GROUP", 1.5, "out.nxs")
+        self.assertEqual(result, path.join("save", "out.nxs"))
+
+    def test_fit_parameters_path_nested_by_group_and_peak(self):
+        result = _fit_parameters_path("save", False, "GROUP", 1.5, "out.nxs")
+        self.assertEqual(result, path.join("save", "GROUP", "1.5", "out.nxs"))
 
     def test_get_default_param_ties_b2b(self):
         result = _get_default_param_ties("BackToBackExponential", None)
@@ -992,8 +1066,8 @@ class TextureUtilsNewFunctionsTests(unittest.TestCase):
         result = _get_default_param_ties("Gaussian", None)
         self.assertIsNone(result)
 
-    @patch(f"{texture_utils_path}.calc_sigma_from_summation")
-    @patch(f"{texture_utils_path}.get_eval_ws")
+    @patch(f"{multidomain_path}.calc_sigma_from_summation")
+    @patch(f"{multidomain_path}.get_eval_ws")
     def test_calc_intens_and_sigma_arrays(self, mock_get_eval_ws, mock_calc_sigma):
         # set up a mock fit result with 2 domains
         func = MagicMock()
@@ -1023,8 +1097,8 @@ class TextureUtilsNewFunctionsTests(unittest.TestCase):
         np.testing.assert_allclose(i_over_sig, [10.0 / 2.0, 20.0 / 5.0])
         np.testing.assert_array_equal(peak_limits, [1.5, 4.0])
 
-    @patch(f"{texture_utils_path}.calc_sigma_from_summation")
-    @patch(f"{texture_utils_path}.get_eval_ws")
+    @patch(f"{multidomain_path}.calc_sigma_from_summation")
+    @patch(f"{multidomain_path}.get_eval_ws")
     def test_calc_intens_and_sigma_arrays_zero_sigma(self, mock_get_eval_ws, mock_calc_sigma):
         func = MagicMock()
         comp0 = MagicMock()
@@ -1047,7 +1121,7 @@ class TextureUtilsNewFunctionsTests(unittest.TestCase):
 
 class TextureUtilsFitAllPeaksNewParamsTests(unittest.TestCase):
     @patch(f"{texture_utils_path}.logger")
-    @patch(f"{texture_utils_path}.fit_initial_summed_spectra")
+    @patch(f"{multidomain_path}.fit_initial_summed_spectra")
     def test_fit_all_peaks_warns_on_unsupported_peak_func(self, mock_fit_summed, mock_logger):
         mock_fit_summed.return_value = ([], [])
 
@@ -1064,7 +1138,7 @@ class TextureUtilsFitAllPeaksNewParamsTests(unittest.TestCase):
         self.assertIn("Gaussian", mock_logger.warning.call_args[0][0])
 
     @patch(f"{texture_utils_path}.logger")
-    @patch(f"{texture_utils_path}.fit_initial_summed_spectra")
+    @patch(f"{multidomain_path}.fit_initial_summed_spectra")
     def test_fit_all_peaks_no_warning_for_supported_peak_funcs(self, mock_fit_summed, mock_logger):
         mock_fit_summed.return_value = ([], [])
 
@@ -1080,7 +1154,7 @@ class TextureUtilsFitAllPeaksNewParamsTests(unittest.TestCase):
             )
             mock_logger.warning.assert_not_called()
 
-    @patch(f"{texture_utils_path}.fit_initial_summed_spectra")
+    @patch(f"{multidomain_path}.fit_initial_summed_spectra")
     def test_fit_all_peaks_passes_peak_func_name_to_summed_fit(self, mock_fit_summed):
         mock_fit_summed.return_value = ([], [])
 
@@ -1097,24 +1171,24 @@ class TextureUtilsFitAllPeaksNewParamsTests(unittest.TestCase):
         args = mock_fit_summed.call_args[0]
         self.assertEqual(args[4], "IkedaCarpenterPV")
 
-    @patch(f"{texture_utils_path}.CloneWorkspace")
-    @patch(f"{texture_utils_path}.SaveNexus")
-    @patch(f"{texture_utils_path}.CreateEmptyTableWorkspace")
+    @patch(f"{multidomain_path}.CloneWorkspace")
+    @patch(f"{multidomain_path}.SaveNexus")
+    @patch(f"{multidomain_path}.CreateEmptyTableWorkspace")
     @patch(
-        f"{texture_utils_path}.calc_intens_and_sigma_arrays",
+        f"{multidomain_path}.calc_intens_and_sigma_arrays",
         return_value=(None, None, np.array([3.5, 5.0]), None),
     )
-    @patch(f"{texture_utils_path}.convert_TOFerror_to_derror")
+    @patch(f"{multidomain_path}.convert_TOFerror_to_derror")
     @patch(f"{texture_utils_path}.UnitConversion")
-    @patch(f"{texture_utils_path}.rerun_fit_with_new_ws")
-    @patch(f"{texture_utils_path}.get_initial_fit_function_and_kwargs_from_specs")
-    @patch(f"{texture_utils_path}.Fit")
-    @patch(f"{texture_utils_path}.Rebunch")
-    @patch(f"{texture_utils_path}.fit_initial_summed_spectra")
-    @patch(f"{texture_utils_path}.ConvertUnits")
-    @patch(f"{texture_utils_path}._get_grouping_from_ws_log")
-    @patch(f"{texture_utils_path}._get_run_and_prefix_from_ws_log")
-    @patch(f"{texture_utils_path}.ADS")
+    @patch(f"{multidomain_path}.rerun_fit_with_new_ws")
+    @patch(f"{multidomain_path}.get_initial_fit_function_and_kwargs_from_specs")
+    @patch(f"{multidomain_path}.Fit")
+    @patch(f"{multidomain_path}.Rebunch")
+    @patch(f"{multidomain_path}.fit_initial_summed_spectra")
+    @patch(f"{multidomain_path}.ConvertUnits")
+    @patch(f"{multidomain_path}._get_grouping_from_ws_log")
+    @patch(f"{multidomain_path}._get_run_and_prefix_from_ws_log")
+    @patch(f"{multidomain_path}.ADS")
     def test_fit_all_peaks_last_fit_ic_adds_extra_fit_ws(
         self,
         mock_ads,
@@ -1221,7 +1295,7 @@ class TextureUtilsFitPeaksEngineTests(unittest.TestCase):
         self.assertEqual(shared_params[0], {"I": 100.0, "X0": 1.0, "A": 0.5})
         self.assertEqual(all_wss, [["ws1_1.0"]])
 
-    @patch(f"{texture_utils_path}._fit_all_peaks_fitpeaks")
+    @patch(f"{fitpeaks_path}._fit_all_peaks_fitpeaks")
     @patch(f"{texture_utils_path}.fit_initial_summed_spectra", return_value=([], []))
     def test_fit_all_peaks_dispatches_to_fitpeaks_by_default(self, _mock_summed, mock_fitpeaks_path):
         # default engine is "fitpeaks" - fit_all_peaks should delegate and not run the multidomain path
@@ -1286,23 +1360,23 @@ class TextureUtilsFitPeaksEngineTests(unittest.TestCase):
             # the valid I error still gives a normal ratio
             self.assertAlmostEqual(row[4], i_est_vals[irow] / 1.0)
 
-    @patch(f"{texture_utils_path}.SaveNexus")
-    @patch(f"{texture_utils_path}.CreateEmptyTableWorkspace")
-    @patch(f"{texture_utils_path}._populate_fitpeaks_output_table")
-    @patch(f"{texture_utils_path}.convert_TOFerror_to_derror", return_value=0.001)
+    @patch(f"{fitpeaks_path}.SaveNexus")
+    @patch(f"{fitpeaks_path}.CreateEmptyTableWorkspace")
+    @patch(f"{fitpeaks_path}._populate_fitpeaks_output_table")
+    @patch(f"{fitpeaks_path}.convert_TOFerror_to_derror", return_value=0.001)
     @patch(f"{texture_utils_path}.DeltaEModeType")
     @patch(f"{texture_utils_path}.UnitConversion")
-    @patch(f"{texture_utils_path}.CreateWorkspace")
-    @patch(f"{texture_utils_path}.Rebunch")
-    @patch(f"{texture_utils_path}.FitPeaks")
-    @patch(f"{texture_utils_path}.ConvertUnits")
-    @patch(f"{texture_utils_path}.AppendSpectra")
-    @patch(f"{texture_utils_path}.CloneWorkspace")
-    @patch(f"{texture_utils_path}.FunctionFactory")
-    @patch(f"{texture_utils_path}.fit_initial_summed_spectra")
-    @patch(f"{texture_utils_path}._get_grouping_from_ws_log", return_value="TestGroup")
-    @patch(f"{texture_utils_path}._get_run_and_prefix_from_ws_log", return_value=("123456", "TEST"))
-    @patch(f"{texture_utils_path}.ADS")
+    @patch(f"{fitpeaks_path}.CreateWorkspace")
+    @patch(f"{fitpeaks_path}.Rebunch")
+    @patch(f"{fitpeaks_path}.FitPeaks")
+    @patch(f"{fitpeaks_path}.ConvertUnits")
+    @patch(f"{fitpeaks_path}.AppendSpectra")
+    @patch(f"{fitpeaks_path}.CloneWorkspace")
+    @patch(f"{fitpeaks_path}.FunctionFactory")
+    @patch(f"{fitpeaks_path}.fit_initial_summed_spectra")
+    @patch(f"{fitpeaks_path}._get_grouping_from_ws_log", return_value="TestGroup")
+    @patch(f"{fitpeaks_path}._get_run_and_prefix_from_ws_log", return_value=("123456", "TEST"))
+    @patch(f"{fitpeaks_path}.ADS")
     def test_fit_all_peaks_fitpeaks_tof_with_smoothing_fallback(
         self,
         mock_ads,
