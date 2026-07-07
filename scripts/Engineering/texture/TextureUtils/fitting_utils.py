@@ -585,11 +585,12 @@ def _fit_all_peaks_fitpeaks(
                 ConstrainPeakPositions=False,
                 CopyLastGoodPeakParameters=False,
                 RespectFixedPeakParameters=True,
+                StrictConvergence=False,
                 # the focused peaks sit on a modest background; FitPeaks' high-background peak-stripping
                 # (on by default) over-subtracts and collapses the fitted peak area, so disable it
                 HighBackground=False,
                 Minimizer=fit_kwargs.get("Minimizer", "Levenberg-Marquardt"),
-                CostFunction="Rwp",
+                CostFunction=fit_kwargs.get("CostFunction", "Unweighted least squares"),
                 MaxFitIterations=max_fit_iters,
                 # rely on the post-fit validity check (positive area + finite chi2) rather than
                 # FitPeaks' internal signal-to-sigma pre-check, which rejected genuine weak peaks
