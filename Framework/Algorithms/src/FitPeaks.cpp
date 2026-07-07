@@ -15,6 +15,7 @@
 #include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionProperty.h"
+#include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TableRow.h"
@@ -72,6 +73,7 @@ const std::string PEAK_PARAM_TABLE("PeakParameterValueTable");
 const std::string FIT_FROM_RIGHT("FitFromRight");
 const std::string MINIMIZER("Minimizer");
 const std::string COST_FUNC("CostFunction");
+const std::string STRICT_CONVERGENCE("StrictConvergence");
 const std::string MAX_FIT_ITER("MaxFitIterations");
 const std::string BACKGROUND_Z_SCORE("FindBackgroundSigma");
 const std::string HIGH_BACKGROUND("HighBackground");
@@ -369,9 +371,14 @@ void FitPeaks::init() {
                   Kernel::IValidator_sptr(new Kernel::StartsWithValidator(minimizerOptions)),
                   "Minimizer to use for fitting.");
 
-  const std::array<string, 2> costFuncOptions = {{"Least squares", "Rwp"}};
+  const std::array<string, 3> costFuncOptions = {{"Least squares", "Rwp", "Unweighted least squares"}};
   declareProperty(PropertyNames::COST_FUNC, "Least squares",
                   Kernel::IValidator_sptr(new Kernel::ListValidator<std::string>(costFuncOptions)), "Cost functions");
+
+  declareProperty(PropertyNames::STRICT_CONVERGENCE, true,
+                  "If true, a peak fit is only accepted when the minimizer reports the exact status "
+                  "'success'. If false, fits that stop because the changes in function or parameter "
+                  "value have become too small are also accepted as converged.");
 
   auto min_max_iter = std::make_shared<BoundedValidator<int>>();
   min_max_iter->setLower(49);
@@ -594,6 +601,7 @@ void FitPeaks::processInputs() {
   // optimizer, cost function and fitting scheme
   m_minimizer = getPropertyValue(PropertyNames::MINIMIZER);
   m_costFunction = getPropertyValue(PropertyNames::COST_FUNC);
+  m_strictConvergence = getProperty(PropertyNames::STRICT_CONVERGENCE);
   m_fitPeaksFromRight = getProperty(PropertyNames::FIT_FROM_RIGHT);
   m_constrainPeaksPosition = getProperty(PropertyNames::CONSTRAIN_PEAK_POS);
   m_fitIterations = getProperty(PropertyNames::MAX_FIT_ITER);
@@ -1767,6 +1775,20 @@ double FitPeaks::fitIndividualPeak(size_t wi, const API::IAlgorithm_sptr &fitter
 }
 
 //----------------------------------------------------------------------------------------------
+/** Decide whether a Fit "OutputStatus" string should be treated as a converged fit.
+ * In strict mode only the exact status "success" is accepted. In non-strict mode the
+ * GSL tolerance-limited stopping conditions are also treated as converged.
+ */
+bool FitPeaks::fitStatusIsConverged(const std::string &fitStatus, const bool strict) {
+  if (fitStatus == API::MinimizerStatus::SUCCESS)
+    return true;
+  if (strict)
+    return false;
+  return fitStatus == API::MinimizerStatus::CHANGES_IN_FUNCTION_TOO_SMALL ||
+         fitStatus == API::MinimizerStatus::CHANGES_IN_PARAMETER_TOO_SMALL;
+}
+
+//----------------------------------------------------------------------------------------------
 /** Fit function in single domain (mostly applied for fitting peak + background)
  * with estimating peak parameters
  * This is the core fitting algorithm to deal with the simplest situation
@@ -1860,7 +1882,7 @@ double FitPeaks::fitFunctionSD(const IAlgorithm_sptr &fit, const API::IPeakFunct
   // Retrieve result
   std::string fitStatus = fit->getProperty("OutputStatus");
   double chi2{std::numeric_limits<double>::max()};
-  if (fitStatus == "success") {
+  if (fitStatusIsConverged(fitStatus, m_strictConvergence)) {
     chi2 = fit->getProperty("OutputChi2overDoF");
   }
 
@@ -1919,7 +1941,7 @@ double FitPeaks::fitFunctionMD(API::IFunction_sptr fit_function, const API::Matr
   std::string fitStatus = fit->getProperty("OutputStatus");
 
   double chi2 = DBL_MAX;
-  if (fitStatus == "success") {
+  if (fitStatusIsConverged(fitStatus, m_strictConvergence)) {
     chi2 = fit->getProperty("OutputChi2overDoF");
   }
 

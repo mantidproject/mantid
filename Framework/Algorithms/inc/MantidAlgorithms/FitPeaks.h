@@ -116,6 +116,11 @@ public:
 
   std::map<std::string, std::string> validateInputs() override;
 
+  /// Decide whether a Fit "OutputStatus" string should be treated as a converged fit.
+  /// In strict mode only the exact status "success" is accepted. In non-strict mode the
+  /// GSL tolerance-limited stopping conditions are also treated as converged.
+  static bool fitStatusIsConverged(const std::string &fitStatus, const bool strict);
+
 private:
   /// Init
   void init() override;
@@ -270,6 +275,9 @@ private:
   std::string m_minimizer;
   /// Cost function
   std::string m_costFunction;
+  /// Require an exact 'success' status to accept a fit, rather than also
+  /// accepting the "changes too small" convergence statuses
+  bool m_strictConvergence{true};
   /// Fit from right or left
   bool m_fitPeaksFromRight;
   /// Fit iterations

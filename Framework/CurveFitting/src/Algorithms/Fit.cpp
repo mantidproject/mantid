@@ -220,13 +220,13 @@ void Fit::finalizeMinimizer(size_t nIterations) {
   }
 
   if (errorString.empty()) {
-    errorString = "success";
+    errorString = API::MinimizerStatus::SUCCESS;
   }
 
   // return the status flag
   setPropertyValue("OutputStatus", errorString);
   if (!this->isChild()) {
-    auto &logStream = errorString == "success" ? g_log.notice() : g_log.warning();
+    auto &logStream = errorString == API::MinimizerStatus::SUCCESS ? g_log.notice() : g_log.warning();
     logStream << "Fit status: " << errorString << '\n';
     logStream << "Stopped after " << nIterations << " iterations" << '\n';
   }
