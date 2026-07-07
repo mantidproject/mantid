@@ -40,8 +40,9 @@ public:
   Slicing const &slicing() const override;
 
 private:
-  IBatchPresenter *m_mainPresenter;
+  IBatchPresenter *m_mainPresenter{nullptr};
   Slicing m_slicing;
+  IBatchPresenter &mainPresenter() const;
   void setUniformSlicingByNumberOfSlicesFromView();
   void setUniformSlicingByTimeFromView();
   void setCustomSlicingFromView();

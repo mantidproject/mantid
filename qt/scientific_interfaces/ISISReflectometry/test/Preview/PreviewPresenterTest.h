@@ -72,6 +72,12 @@ public:
     presenter.notifyLoadWorkspaceRequested();
   }
 
+  void test_throws_when_main_presenter_has_not_been_accepted() {
+    auto mockView = makeView();
+    auto presenter = PreviewPresenter(packDeps(mockView.get()));
+    TS_ASSERT_THROWS(presenter.notifyReductionResumed(), std::runtime_error const &);
+  }
+
   void test_notify_load_workspace_requested_does_not_load_from_file_if_in_ads() {
     auto mockModel = makeModel();
     auto mockView = makeView();

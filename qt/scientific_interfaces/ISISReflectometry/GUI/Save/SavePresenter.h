@@ -53,6 +53,7 @@ public:
 
 private:
   IBatchPresenter *m_mainPresenter;
+  IBatchPresenter &mainPresenter() const;
   bool isValidSaveDirectory(std::string const &directory);
   void onSavePathChanged();
   void warnInvalidSaveDirectory();

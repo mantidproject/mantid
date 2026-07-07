@@ -19,6 +19,7 @@
 #include "ROIType.h"
 #include "Reduction/RowExceptions.h"
 #include <memory>
+#include <stdexcept>
 
 using Mantid::API::MatrixWorkspace_sptr;
 using MantidQt::MantidWidgets::AxisID;
@@ -70,6 +71,13 @@ PreviewPresenter::PreviewPresenter(Dependencies dependencies)
 
 void PreviewPresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) { m_mainPresenter = mainPresenter; }
 
+IBatchPresenter &PreviewPresenter::mainPresenter() const {
+  if (!m_mainPresenter) {
+    throw std::runtime_error("PreviewPresenter does not have a main presenter.");
+  }
+  return *m_mainPresenter;
+}
+
 void PreviewPresenter::notifyReductionResumed() { updateWidgetEnabledState(); }
 
 void PreviewPresenter::notifyReductionPaused() { updateWidgetEnabledState(); }
@@ -81,7 +89,7 @@ void PreviewPresenter::notifyAutoreductionPaused() { updateWidgetEnabledState();
 void PreviewPresenter::notifySetYAxisSymlogChanged() { updatePlotAxes(); }
 
 void PreviewPresenter::updateWidgetEnabledState() {
-  if (m_mainPresenter->isProcessing() || m_mainPresenter->isAutoreducing()) {
+  if (mainPresenter().isProcessing() || mainPresenter().isAutoreducing()) {
     m_view->disableMainWidget();
   } else {
     m_view->enableMainWidget();
@@ -260,7 +268,7 @@ void PreviewPresenter::notifyLinePlotExportAdsRequested() { m_model->exportReduc
 
 void PreviewPresenter::notifyApplyRequested() {
   try {
-    m_mainPresenter->notifyPreviewApplyRequested();
+    mainPresenter().notifyPreviewApplyRequested();
   } catch (InvalidTableException const &ex) {
     std::ostringstream msg;
     msg << "Could not update Experiment Settings: ";
@@ -292,7 +300,7 @@ void PreviewPresenter::plotRegionSelector() {
 
   // If there are matching experiment settings already then add region selectors to
   // display these on the plot
-  auto const roiMap = m_mainPresenter->getMatchingProcessingInstructionsForPreviewRow();
+  auto const roiMap = mainPresenter().getMatchingProcessingInstructionsForPreviewRow();
   if (!roiMap.empty()) {
     clearRegionSelector();
   }
@@ -334,7 +342,7 @@ void PreviewPresenter::runSumBanks(bool const addExistingROIsToPlot) {
   // Ensure the angle is up to date so that we can check for matching experiment settings lookup rows
   m_model->setTheta(m_view->getAngle());
 
-  auto const &expSettingsDetectorROI = m_mainPresenter->getMatchingROIDetectorIDsForPreviewRow();
+  auto const &expSettingsDetectorROI = mainPresenter().getMatchingROIDetectorIDsForPreviewRow();
   if (m_plotExistingROIs) {
     auto const selectedDetectorsOnPlot = m_dockedWidgets->getSelectedDetectorIDs();
     if (selectedDetectorsOnPlot.empty()) {

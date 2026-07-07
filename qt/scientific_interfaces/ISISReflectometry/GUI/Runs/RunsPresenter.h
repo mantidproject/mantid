@@ -180,6 +180,8 @@ private:
 
   Mantid::API::IAlgorithm_sptr setupLiveDataMonitorAlgorithm();
 
+  IBatchPresenter &mainPresenter() const;
+
   void handleError(const std::string &message, const std::exception &e);
   void handleError(const std::string &message);
 

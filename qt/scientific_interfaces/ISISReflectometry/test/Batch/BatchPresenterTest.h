@@ -71,6 +71,11 @@ public:
     TS_ASSERT_EQUALS(presenter->initInstrumentList(selectedInstrument), selectedInstrument);
   }
 
+  void testThrowsWhenMainPresenterHasNotBeenAccepted() {
+    auto presenter = makePresenter(makeModel(), false);
+    TS_ASSERT_THROWS(presenter->instrumentName(), std::runtime_error const &);
+  }
+
   void testMainPresenterUpdatedWhenChangeInstrumentRequested() {
     auto presenter = makePresenter(makeModel());
     auto const instrument = std::string("POLREF");
@@ -703,7 +708,8 @@ private:
 
   std::unique_ptr<MockBatch> makeMockModel() { return std::make_unique<MockBatch>(); }
 
-  std::unique_ptr<BatchPresenterFriend> makePresenter(std::unique_ptr<IBatch> batchModel) {
+  std::unique_ptr<BatchPresenterFriend> makePresenter(std::unique_ptr<IBatch> batchModel,
+                                                      bool const acceptMainPresenter = true) {
     // Create pointers to the child presenters and pass them into the batch
     auto runsPresenter = std::make_unique<NiceMock<MockRunsPresenter>>();
     auto eventPresenter = std::make_unique<NiceMock<MockEventPresenter>>();
@@ -725,7 +731,9 @@ private:
         &m_view, std::move(batchModel), std::move(jobRunner), std::move(runsPresenter), std::move(eventPresenter),
         std::move(experimentPresenter), std::move(instrumentPresenter), std::move(savePresenter),
         std::move(previewPresenter), &m_messageHandler);
-    presenter->acceptMainPresenter(&m_mainPresenter);
+    if (acceptMainPresenter) {
+      presenter->acceptMainPresenter(&m_mainPresenter);
+    }
     // Replace the constructed job runner with a mock
     m_jobManager = new NiceMock<MockBatchJobManager>();
     presenter->m_jobManager.reset(m_jobManager);

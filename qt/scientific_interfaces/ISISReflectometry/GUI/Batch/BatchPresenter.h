@@ -106,6 +106,8 @@ public:
   void clearADSHandle() override;
 
 private:
+  IMainWindowPresenter &mainPresenter() const;
+
   bool startBatch(std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> algorithms);
   void resumeReduction();
   void notifyReductionResumed();
@@ -119,7 +121,7 @@ private:
 
   IBatchView *m_view;
   std::unique_ptr<IBatch> m_model;
-  IMainWindowPresenter *m_mainPresenter;
+  IMainWindowPresenter *m_mainPresenter{nullptr};
   std::unique_ptr<IRunsPresenter> m_runsPresenter;
   std::unique_ptr<IEventPresenter> m_eventPresenter;
   std::unique_ptr<IExperimentPresenter> m_experimentPresenter;

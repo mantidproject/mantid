@@ -646,7 +646,7 @@ void ReflectometryReductionOneAuto3::determineCorrectionAlgorithm(const Instrume
   } else {
     corrProps.type = "None";
   }
-  m_correctionProperties = corrProps;
+  m_correctionProperties = std::move(corrProps);
 }
 
 /** Set algorithmic correction properties
@@ -900,10 +900,10 @@ ReflectometryReductionOneAuto3::processGroupMembers(const Algorithm::WorkspaceVe
     if (reduced) {
       const auto &origProcessingInstructions = getPropertyValue("ProcessingInstructions");
       setPropertyValue("ProcessingInstructions", convertToSpectrumNumber("0", matrixWs));
-      allRROOutputs.push_back(performCoreReduction(matrixWs, taskOrder, false));
+      allRROOutputs.push_back(performCoreReduction(std::move(matrixWs), taskOrder, false));
       setPropertyValue("ProcessingInstructions", origProcessingInstructions);
     } else {
-      allRROOutputs.push_back(performCoreReduction(matrixWs, taskOrder));
+      allRROOutputs.push_back(performCoreReduction(std::move(matrixWs), taskOrder));
     }
   }
   return {.rroOutputs = allRROOutputs, .outputNames = allOutputNames};

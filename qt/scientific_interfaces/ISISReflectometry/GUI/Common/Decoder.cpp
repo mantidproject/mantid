@@ -68,7 +68,7 @@ void Decoder::decodeBatch(const IMainWindowView *mwv, int batchIndex, const QMap
   auto runsPresenter = dynamic_cast<RunsPresenter *>(batchPresenter->m_runsPresenter.get());
   auto runsTablePresenter = dynamic_cast<RunsTablePresenter *>(runsPresenter->m_tablePresenter.get());
   auto reductionJobs = &runsTablePresenter->m_model.m_reductionJobs;
-  auto destinationPrecision = batchPresenter->m_mainPresenter->roundPrecision();
+  auto destinationPrecision = batchPresenter->mainPresenter().roundPrecision();
   auto searcher = dynamic_cast<QtCatalogSearcher *>(runsPresenter->m_searcher.get());
   // We must do the Runs tab first because this sets the instrument, which
   // other settings may need to be correct. There is also a notification to set
