@@ -473,7 +473,7 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto3::postReductionProcessing(con
   } else {
     g_log.error("NRCalculateSlitResolution failed. Workspace in Q will not be "
                 "rebinned. Please provide dQ/Q.");
-    binnedWS = IvsQC;
+    binnedWS = std::move(IvsQC);
   }
   return binnedWS;
 }
@@ -906,7 +906,7 @@ ReflectometryReductionOneAuto3::processGroupMembers(const Algorithm::WorkspaceVe
       allRROOutputs.push_back(performCoreReduction(std::move(matrixWs), taskOrder));
     }
   }
-  return {.rroOutputs = allRROOutputs, .outputNames = allOutputNames};
+  return {.rroOutputs = std::move(allRROOutputs), .outputNames = std::move(allOutputNames)};
 }
 
 std::vector<std::string> ReflectometryReductionOneAuto3::getTaskExecutionOrder(const bool reduced,

@@ -51,7 +51,7 @@ std::vector<std::string> suffixesFromFirstInputWorkspaceGroup(Group const &group
     if (!row)
       continue;
 
-    auto const groupWSName = row->reducedWorkspaceNames().iVsQ();
+    auto const &groupWSName = row->reducedWorkspaceNames().iVsQ();
     if (!ads.doesExist(groupWSName))
       continue;
 
