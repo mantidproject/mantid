@@ -20,6 +20,7 @@ from mantid.simpleapi import (
 )
 from mantid.kernel import Direction, StringMandatoryValidator, StringListValidator
 from mantid.api import AlgorithmFactory, PythonAlgorithm, MatrixWorkspaceProperty, mtd
+from typing import Literal
 
 
 class VesuvioTransmission(PythonAlgorithm):
@@ -89,22 +90,19 @@ class VesuvioTransmission(PythonAlgorithm):
         runs = self.getPropertyValue("Runs")
         grouping = self.getPropertyValue("Grouping")
         target = self.getPropertyValue("Target")
-        rebin_enabled = self.getProperty("Rebin").value
-
-        if grouping == "TimeScan" and "-" not in runs:
-            issues["Runs"] = "For Grouping='TimeScan', Runs must be a range, e.g. '12345-12355'."
+        rebin = self.getProperty("Rebin").value
 
         if grouping == "TimeScan":
+            if "-" not in runs:
+                issues["Runs"] = "For Grouping='TimeScan', Runs must be a range, e.g. '12345-12355'."
             try:
-                lower, upper = runs.split("-")
-                lower = int(lower.strip())
-                upper = int(upper.strip())
+                lower, upper = map(int, (r.strip() for r in runs.split("-", 1)))
                 if upper < lower:
-                    issues["Runs"] = "For Grouping='TimeScan', the upper run number must be >= lower run number."
-            except Exception:
+                    issues["Runs"] = "For Grouping='TimeScan', the upper run number must be > lower run number."
+            except ValueError:
                 issues["Runs"] = "For Grouping='TimeScan', Runs must be a simple integer range, e.g. '12345-12355'."
 
-        if rebin_enabled and target != "Energy":
+        if rebin and target != "Energy":
             # Original script only rebinned the Energy case. Keep behaviour, but make this explicit.
             self.log().warning("Rebin=True is currently only applied when Target='Energy'.")
 
@@ -116,16 +114,18 @@ class VesuvioTransmission(PythonAlgorithm):
             DeleteWorkspace(Workspace=ws_name)
 
     def PyExec(self):
-        invert = self.getProperty("InvertMonitors").value
-        smooth = self.getProperty("SmoothIncidentSpectrum").value
-        grouping = self.getPropertyValue("Grouping")
-        target = self.getPropertyValue("Target")
-        reb_bool = self.getProperty("Rebin").value
-        reb_parameters = self.getPropertyValue("RebinParameters")
-        runs = self.getPropertyValue("Runs")
-        empty_runs = self.getPropertyValue("EmptyRuns")
-        name = self.getPropertyValue("OutputWorkspace")
-        calculate_cross_section = self.getProperty("CalculateXS").value
+        invert: bool = self.getProperty("InvertMonitors").value
+        smooth: bool = self.getProperty("SmoothIncidentSpectrum").value
+        rebin: bool = self.getProperty("Rebin").value
+        calculate_cross_section: bool = self.getProperty("CalculateXS").value
+
+        runs: str = self.getPropertyValue("Runs")
+        empty_runs: str = self.getPropertyValue("EmptyRuns")
+        name: str = self.getPropertyValue("OutputWorkspace")
+        reb_parameters: str = self.getPropertyValue("RebinParameters")
+
+        grouping: Literal["TimeScan", "SumOfAllRuns"] = self.getPropertyValue("Grouping")
+        target: Literal["Energy", "Wavelength"] = self.getPropertyValue("Target")
 
         # Use stable internal temporary names based on the requested output name.
         sample_ws = name + "__sample"
@@ -151,7 +151,7 @@ class VesuvioTransmission(PythonAlgorithm):
 
                 ConvertUnits(InputWorkspace=name, OutputWorkspace=name, Target=target, EMode="Elastic")
 
-                if reb_bool and target == "Energy":
+                if rebin and target == "Energy":
                     Rebin(InputWorkspace=name, Params=reb_parameters, OutputWorkspace=name, FullBinsOnly=True, PreserveEvents=True)
 
                 ExtractSingleSpectrum(InputWorkspace=name, OutputWorkspace=tmp_ws, WorkspaceIndex=0)
@@ -169,9 +169,7 @@ class VesuvioTransmission(PythonAlgorithm):
                     Divide(LHSWorkspace=tmp_ws, RHSWorkspace=name, OutputWorkspace=name)
 
             elif grouping == "TimeScan":
-                lower, upper = runs.split("-")
-                lower = int(lower.strip())
-                upper = int(upper.strip())
+                lower, upper = map(int, (r.strip() for r in runs.split("-", 1)))
 
                 LoadVesuvio(
                     Filename=str(lower), OutputWorkspace=sample_ws, SpectrumList="3-134", Mode="FoilOut", SumSpectra=True, LoadMonitors=True

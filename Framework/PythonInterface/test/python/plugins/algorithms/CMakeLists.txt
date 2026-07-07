@@ -162,6 +162,7 @@ set(TEST_PY_FILES
     VesuvioPreFitTest.py
     VesuvioResolutionTest.py
     VesuvioThicknessTest.py
+    VesuvioTransmissionTest.py
     VesuvioTOFFitTest.py
     PEARLTransfitTest.py
     PEARLTransfitV2Test.py
