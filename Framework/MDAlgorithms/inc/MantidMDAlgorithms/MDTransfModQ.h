@@ -117,9 +117,9 @@ protected:
 
 private:
   /// how to transform workspace data in elastic case
-  inline bool calcMatrixCoordElastic(double k0, std::vector<coord_t> &Coord) const;
+  inline bool calcMatrixCoordElastic(const double k0, std::vector<coord_t> &Coord) const;
   /// how to transform workspace data in inelastic case
-  inline bool calcMatrixCoordInelastic(double deltaE, std::vector<coord_t> &Coord) const;
+  inline bool calcMatrixCoordInelastic(const double deltaE, std::vector<coord_t> &Coord) const;
   //// matrix coordinate transformation of q
   inline bool applyCoordTransf(double qx, double qy, double qz, std::vector<coord_t> &Coord) const;
 };

@@ -67,7 +67,7 @@ the algorithm and false otherwise.
 * it also uses preprocessed detectors positions, which are calculated by
 PreprocessDetectors algorithm and set up by
 * calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i) method.    */
-bool MDTransfQ3D::calcMatrixCoord3DInelastic(double deltaE, std::vector<coord_t> &Coord) const {
+bool MDTransfQ3D::calcMatrixCoord3DInelastic(const double deltaE, std::vector<coord_t> &Coord) const {
   Coord[3] = static_cast<coord_t>(deltaE);
   if (Coord[3] < m_DimMin[3] || Coord[3] >= m_DimMax[3])
     return false;
@@ -110,7 +110,7 @@ false otherwise.
 * it uses preprocessed detectors positions, which are calculated by
 PreprocessDetectors algorithm and set up by
 * calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i) method. */
-bool MDTransfQ3D::calcMatrixCoord3DElastic(double k0, std::vector<coord_t> &Coord, double &signal,
+bool MDTransfQ3D::calcMatrixCoord3DElastic(const double k0, std::vector<coord_t> &Coord, double &signal,
                                            double &errSq) const {
 
   double qx = -m_ex * k0;

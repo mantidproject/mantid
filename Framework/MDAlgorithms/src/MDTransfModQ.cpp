@@ -152,7 +152,7 @@ bool MDTransfModQ::calcYDepCoordinates(std::vector<coord_t> &Coord, size_t i) {
 * transfer and put them into initial positions (0 and 1) in the Coord vector
 *
 *@param   deltaE input energy transfer
-*@param   &Coord  vector of MD coordinates with filled in momentum and energy
+*@param   Coord  vector of MD coordinates with filled in momentum and energy
 transfer
 
 *@return   true if all momentum and energy are within the limits requested by
@@ -161,7 +161,7 @@ the algorithm and false otherwise.
 * it also uses preprocessed detectors positions, which are calculated by
 PreprocessDetectors algorithm and set up by
 * calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i) method.    */
-bool MDTransfModQ::calcMatrixCoordInelastic(double deltaE, std::vector<coord_t> &Coord) const {
+bool MDTransfModQ::calcMatrixCoordInelastic(const double deltaE, std::vector<coord_t> &Coord) const {
   if (deltaE < m_DimMin[1] || deltaE >= m_DimMax[1])
     return false;
   Coord[1] = static_cast<coord_t>(deltaE);
@@ -186,7 +186,7 @@ bool MDTransfModQ::calcMatrixCoordInelastic(double deltaE, std::vector<coord_t> 
 * put it into specified (0) position in the Coord vector
 *
 *@param    k0   module of input momentum
-*@param   &Coord  vector of MD coordinates with filled in momentum and energy
+*@param   Coord  vector of MD coordinates with filled in momentum and energy
 transfer
 
 *@return   true if momentum is within the limits requested by the algorithm and
@@ -195,7 +195,7 @@ false otherwise.
 * it uses preprocessed detectors positions, which are calculated by
 PreprocessDetectors algorithm and set up by
 * calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i) method. */
-bool MDTransfModQ::calcMatrixCoordElastic(double k0, std::vector<coord_t> &Coord) const {
+bool MDTransfModQ::calcMatrixCoordElastic(const double k0, std::vector<coord_t> &Coord) const {
   double qx = -m_ex * k0;
   double qy = -m_ey * k0;
   double qz = (1 - m_ez) * k0;
