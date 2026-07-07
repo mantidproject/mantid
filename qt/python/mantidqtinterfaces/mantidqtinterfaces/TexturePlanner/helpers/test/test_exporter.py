@@ -14,7 +14,7 @@ from scipy.spatial.transform import Rotation
 
 from mantidqtinterfaces.TexturePlanner.helpers.exporter import OrientationExporter
 
-file_path = "mantidqtinterfaces.TexturePlanner.helpers.exporter"
+FILE_PATH = "mantidqtinterfaces.TexturePlanner.helpers.exporter"
 
 WS_REFERENCE = "__texture_planning_reference_ws"
 
@@ -50,7 +50,7 @@ class TestOrientationExporter_Included(unittest.TestCase):
         self.assertEqual(list(exp._included()), [kept, kept])
 
 
-@patch(file_path + ".logger")
+@patch(FILE_PATH + ".logger")
 class TestOrientationExporter_OutputAsSscanss(unittest.TestCase):
     def _run(self, model, filename="out"):
         with tempfile.TemporaryDirectory() as tmp:
@@ -60,7 +60,7 @@ class TestOrientationExporter_OutputAsSscanss(unittest.TestCase):
             with open(save_file) as f:
                 return f.read(), save_file
 
-    @patch(file_path + ".convert_to_sscanss_frame")
+    @patch(FILE_PATH + ".convert_to_sscanss_frame")
     def test_writes_header_and_one_line_per_orientation(self, mock_convert, mock_logger):
         mock_convert.return_value = (10.0, 20.0, 30.0)
         model = _make_model(orientations={0: _make_orientation(), 1: _make_orientation()})
@@ -73,7 +73,7 @@ class TestOrientationExporter_OutputAsSscanss(unittest.TestCase):
         for line in lines[1:]:
             self.assertEqual(line, "10.0\t20.0\t30.0")
 
-    @patch(file_path + ".convert_to_sscanss_frame")
+    @patch(FILE_PATH + ".convert_to_sscanss_frame")
     def test_rounds_angles_to_two_decimals(self, mock_convert, mock_logger):
         mock_convert.return_value = (1.23456, 2.34567, 3.45678)
         model = _make_model()
@@ -82,7 +82,7 @@ class TestOrientationExporter_OutputAsSscanss(unittest.TestCase):
 
         self.assertIn("1.23\t2.35\t3.46", content)
 
-    @patch(file_path + ".convert_to_sscanss_frame")
+    @patch(FILE_PATH + ".convert_to_sscanss_frame")
     def test_passes_rotation_matrix_to_convert(self, mock_convert, mock_logger):
         mock_convert.return_value = (0.0, 0.0, 0.0)
         R = Rotation.from_euler("x", 45, degrees=True)
@@ -92,7 +92,7 @@ class TestOrientationExporter_OutputAsSscanss(unittest.TestCase):
 
         np.testing.assert_allclose(mock_convert.call_args.args[0], R.as_matrix())
 
-    @patch(file_path + ".convert_to_sscanss_frame")
+    @patch(FILE_PATH + ".convert_to_sscanss_frame")
     def test_logs_notice_on_success(self, mock_convert, mock_logger):
         mock_convert.return_value = (0.0, 0.0, 0.0)
         model = _make_model()
@@ -103,7 +103,7 @@ class TestOrientationExporter_OutputAsSscanss(unittest.TestCase):
         self.assertIn(save_file, mock_logger.notice.call_args.args[0])
 
 
-@patch(file_path + ".logger")
+@patch(FILE_PATH + ".logger")
 class TestOrientationExporter_OutputAsMatrix(unittest.TestCase):
     def _run(self, model, filename="out"):
         with tempfile.TemporaryDirectory() as tmp:
@@ -140,7 +140,7 @@ class TestOrientationExporter_OutputAsMatrix(unittest.TestCase):
         self.assertIn(save_file, mock_logger.notice.call_args.args[0])
 
 
-@patch(file_path + ".logger")
+@patch(FILE_PATH + ".logger")
 class TestOrientationExporter_OutputAsEuler(unittest.TestCase):
     def _run(self, model, filename="out"):
         with tempfile.TemporaryDirectory() as tmp:
@@ -182,7 +182,7 @@ class TestOrientationExporter_OutputAsEuler(unittest.TestCase):
         self.assertEqual(len(content.splitlines()), 2)
 
 
-@patch(file_path + ".logger")
+@patch(FILE_PATH + ".logger")
 class TestOrientationExporter_OutputTransmissionWeighting(unittest.TestCase):
     def _run(self, model, filename="out"):
         with tempfile.TemporaryDirectory() as tmp:
@@ -280,7 +280,7 @@ class TestOrientationExporter_OutputTransmissionWeighting(unittest.TestCase):
         self.assertIn(save_file, mock_logger.notice.call_args.args[0])
 
 
-@patch(file_path + ".LoadEmptyInstrument")
+@patch(FILE_PATH + ".LoadEmptyInstrument")
 class TestOrientationExporter_BuildReferenceWs(unittest.TestCase):
     def test_loads_empty_instrument_into_reference_wsname(self, mock_load_instr):
         model = _make_model(instr="ENGINX")
@@ -302,9 +302,9 @@ class TestOrientationExporter_BuildReferenceWs(unittest.TestCase):
         model.workspaces.copy_sample_preserving_initial_rotation.assert_called_once_with("neutral", mock_load_instr.return_value)
 
 
-@patch(file_path + ".logger")
-@patch(file_path + ".ADS")
-@patch(file_path + ".SaveNexus")
+@patch(FILE_PATH + ".logger")
+@patch(FILE_PATH + ".ADS")
+@patch(FILE_PATH + ".SaveNexus")
 class TestOrientationExporter_OutputAsReferenceWorkspace(unittest.TestCase):
     def _make_exporter(self):
         model = _make_model()
