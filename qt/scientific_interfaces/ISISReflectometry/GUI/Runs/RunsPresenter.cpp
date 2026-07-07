@@ -429,7 +429,11 @@ SearchCriteria RunsPresenter::searchCriteria() const {
   return SearchCriteria{m_view->getSearchInstrument(), m_view->getSearchCycle(), m_view->getSearchString()};
 }
 
-int RunsPresenter::percentComplete() const { return mainPresenter().percentComplete(); }
+int RunsPresenter::percentComplete() const {
+  if (!m_mainPresenter)
+    return 0;
+  return m_mainPresenter->percentComplete();
+}
 
 void RunsPresenter::setRoundPrecision(int &precision) { m_tablePresenter->setTablePrecision(precision); }
 
