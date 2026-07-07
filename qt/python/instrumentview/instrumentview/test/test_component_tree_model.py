@@ -38,32 +38,35 @@ class TestComponentTreeModel(unittest.TestCase):
             3: np.array([3]),
         }[idx]
 
-        # Create model
         self.model = ComponentTreeModel(self.workspace)
 
     # ---------------------------
 
-    def test_tree_root_created_correctly(self):
-        """Root node should be created with correct name and index."""
-        root = self.model.tree
-        self.assertEqual(root.name, "root")
-        self.assertEqual(root.component_index, 0)
-        self.assertEqual(len(root.children), 2)
+    def test_root_index(self):
+        self.assertEqual(self.model.root_index(), 0)
 
-    def test_children_created_correctly(self):
-        """Tree should contain correct children and grandchildren."""
-        root = self.model.tree
-        child1 = root.children[0]
-        child2 = root.children[1]
+    def test_root_name(self):
+        self.assertEqual(self.model.root_name(), "root")
 
-        self.assertEqual(child1.name, "child1")
-        self.assertEqual(child1.component_index, 1)
-        self.assertEqual(len(child1.children), 1)
-        self.assertEqual(child1.children[0].name, "grandchild")
+    def test_get_children_returns_name_index_tuples(self):
+        children = self.model.get_children(0)
+        self.assertEqual(children, [("child1", 1), ("child2", 2)])
 
-        self.assertEqual(child2.name, "child2")
-        self.assertEqual(child2.component_index, 2)
-        self.assertEqual(len(child2.children), 0)
+    def test_get_children_grandchildren(self):
+        children = self.model.get_children(1)
+        self.assertEqual(children, [("grandchild", 3)])
+
+    def test_get_children_leaf_returns_empty(self):
+        self.assertEqual(self.model.get_children(2), [])
+        self.assertEqual(self.model.get_children(3), [])
+
+    def test_has_children_returns_true_for_non_leaves(self):
+        self.assertTrue(self.model.has_children(0))
+        self.assertTrue(self.model.has_children(1))
+
+    def test_has_children_returns_false_for_leaves(self):
+        self.assertFalse(self.model.has_children(2))
+        self.assertFalse(self.model.has_children(3))
 
     # ---------------------------
 
