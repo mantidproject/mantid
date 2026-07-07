@@ -140,7 +140,7 @@ private:
   /// The progress view
   ProgressableView *m_progressView;
   /// The main presenter
-  IBatchPresenter *m_mainPresenter;
+  IBatchPresenter *m_mainPresenter{nullptr};
   /// The message reporting implementation
   IReflMessageHandler *m_messageHandler;
   /// The file handler

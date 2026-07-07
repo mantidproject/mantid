@@ -28,8 +28,7 @@ using namespace Mantid::API;
  * @param view :: The view we are handling
  */
 SavePresenter::SavePresenter(ISaveView *view, std::unique_ptr<IFileSaver> saver)
-    : m_mainPresenter(nullptr), m_view(view), m_saver(std::move(saver)), m_shouldAutosave(false),
-      m_shouldSaveIndividualRows(false) {
+    : m_view(view), m_saver(std::move(saver)), m_shouldAutosave(false), m_shouldSaveIndividualRows(false) {
 
   m_view->subscribe(this);
   populateWorkspaceList();

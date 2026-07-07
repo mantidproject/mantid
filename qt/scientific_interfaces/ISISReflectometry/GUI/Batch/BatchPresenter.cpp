@@ -45,7 +45,7 @@ BatchPresenter::BatchPresenter(
     std::unique_ptr<IExperimentPresenter> experimentPresenter,
     std::unique_ptr<IInstrumentPresenter> instrumentPresenter, std::unique_ptr<ISavePresenter> savePresenter,
     std::unique_ptr<IPreviewPresenter> previewPresenter, MantidQt::MantidWidgets::IMessageHandler *messageHandler)
-    : m_view(view), m_model(std::move(model)), m_mainPresenter(nullptr), m_runsPresenter(std::move(runsPresenter)),
+    : m_view(view), m_model(std::move(model)), m_runsPresenter(std::move(runsPresenter)),
       m_eventPresenter(std::move(eventPresenter)), m_experimentPresenter(std::move(experimentPresenter)),
       m_instrumentPresenter(std::move(instrumentPresenter)), m_savePresenter(std::move(savePresenter)),
       m_previewPresenter(std::move(previewPresenter)), m_unsavedBatchFlag(false), m_jobRunner(std::move(jobRunner)),

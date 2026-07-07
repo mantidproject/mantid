@@ -50,8 +50,8 @@ RunsPresenter::RunsPresenter(IRunsView *mainView, ProgressableView *progressable
                              IFileHandler *fileHandler)
     : m_runNotifier(std::make_unique<CatalogRunNotifier>(mainView)),
       m_searcher(std::make_unique<QtCatalogSearcher>(mainView)), m_view(mainView), m_progressView(progressableView),
-      m_mainPresenter(nullptr), m_messageHandler(messageHandler), m_fileHandler(fileHandler),
-      m_instruments(std::move(instruments)), m_thetaTolerance(thetaTolerance), m_tableUnsaved{false} {
+      m_messageHandler(messageHandler), m_fileHandler(fileHandler), m_instruments(std::move(instruments)),
+      m_thetaTolerance(thetaTolerance), m_tableUnsaved{false} {
 
   assert(m_view != nullptr);
   m_view->subscribe(this);
