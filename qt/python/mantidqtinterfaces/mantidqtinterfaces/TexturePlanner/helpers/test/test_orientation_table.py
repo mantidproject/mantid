@@ -19,7 +19,7 @@ from mantidqtinterfaces.TexturePlanner.helpers.orientation_table import (
     _DEFAULT_GONIO_STRING,
 )
 
-file_path = "mantidqtinterfaces.TexturePlanner.helpers.orientation_table"
+FILE_PATH = "mantidqtinterfaces.TexturePlanner.helpers.orientation_table"
 
 
 def _make_table(axes="xyz", senses="1,1,1"):
@@ -341,7 +341,7 @@ class TestOrientationTable_MakeDefaultOrientation(unittest.TestCase):
         self.assertEqual(len(default.gRs), tab.n_gonio + 1)
 
 
-@patch(file_path + ".logger")
+@patch(FILE_PATH + ".logger")
 class TestOrientationTable_LoadOrientationFile(unittest.TestCase):
     def _write_tmp(self, content):
         with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
@@ -399,7 +399,7 @@ class TestOrientationTable_LoadOrientationFile(unittest.TestCase):
 
 
 class TestOrientationTable_FieldHelpers(unittest.TestCase):
-    @patch(file_path + ".vec_string_to_norm_array")
+    @patch(FILE_PATH + ".vec_string_to_norm_array")
     def test_get_vecs_normalises_first_n_vec_strings(self, mock_norm):
         tab = _make_table()
         mock_norm.side_effect = lambda s: f"norm({s})"
