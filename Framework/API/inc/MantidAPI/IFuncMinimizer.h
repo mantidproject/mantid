@@ -13,10 +13,26 @@
 #include "MantidAPI/ICostFunction.h"
 #include "MantidKernel/PropertyManager.h"
 
+#include <string>
+
 namespace Mantid {
 namespace API {
 // Forward declaration
 class IFitFunction;
+
+/// Canonical minimizer "OutputStatus" strings. These are the single source of truth
+/// for the status text a minimizer reports (and that consumers such as the Fit
+/// algorithm and FitPeaks compare against), so the wording only lives in one place.
+namespace MinimizerStatus {
+/// Reported when a minimizer has fully converged.
+inline const std::string SUCCESS = "success";
+/// Reported by Levenberg-Marquardt when the change in the cost function between
+/// iterations has fallen below tolerance (an essentially-converged stop).
+inline const std::string CHANGES_IN_FUNCTION_TOO_SMALL = "Changes in function value are too small";
+/// Reported by Levenberg-Marquardt when the change in the parameter values between
+/// iterations has fallen below tolerance (an essentially-converged stop).
+inline const std::string CHANGES_IN_PARAMETER_TOO_SMALL = "Changes in parameter value are too small";
+} // namespace MinimizerStatus
 
 /** An interface for function minimizers. Minimizers minimize cost functions.
 

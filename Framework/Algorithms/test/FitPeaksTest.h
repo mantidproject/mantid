@@ -12,6 +12,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAlgorithms/FitPeaks.h"
@@ -1595,6 +1596,48 @@ public:
 
     bool defaultVal = fitpeaks.getProperty("CopyLastGoodPeakParameters");
     TS_ASSERT_EQUALS(defaultVal, true);
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Test that StrictConvergence defaults to true, preserving the historical behaviour
+   * of only accepting a fit whose minimizer reports the exact status "success".
+   */
+  void test_StrictConvergenceDefaultIsTrue() {
+    FitPeaks fitpeaks;
+    fitpeaks.initialize();
+    TS_ASSERT(fitpeaks.isInitialized());
+
+    bool defaultVal = fitpeaks.getProperty("StrictConvergence");
+    TS_ASSERT_EQUALS(defaultVal, true);
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Unit test the convergence-status decision used to gate a fit result. This isolates the
+   * only behaviour StrictConvergence changes (which minimizer OutputStatus strings are treated
+   * as converged), without depending on the numeric behaviour of the child Fit algorithm.
+   */
+  void test_fitStatusIsConverged() {
+    // Use the canonical status strings the minimizer actually emits, so this test tracks
+    // the real wording rather than an independent copy that could silently drift.
+    const std::string &success = API::MinimizerStatus::SUCCESS;
+    const std::string &toleranceInF = API::MinimizerStatus::CHANGES_IN_FUNCTION_TOO_SMALL;
+    const std::string &toleranceInX = API::MinimizerStatus::CHANGES_IN_PARAMETER_TOO_SMALL;
+    const std::string failure("Failed to converge after 500 iterations.");
+
+    // "success" is always accepted, regardless of strictness
+    TS_ASSERT(FitPeaks::fitStatusIsConverged(success, true));
+    TS_ASSERT(FitPeaks::fitStatusIsConverged(success, false));
+
+    // In strict mode nothing else is accepted
+    TS_ASSERT(!FitPeaks::fitStatusIsConverged(toleranceInF, true));
+    TS_ASSERT(!FitPeaks::fitStatusIsConverged(toleranceInX, true));
+    TS_ASSERT(!FitPeaks::fitStatusIsConverged(failure, true));
+
+    // In non-strict mode the tolerance-limited stopping conditions are accepted...
+    TS_ASSERT(FitPeaks::fitStatusIsConverged(toleranceInF, false));
+    TS_ASSERT(FitPeaks::fitStatusIsConverged(toleranceInX, false));
+    // ...but a genuine non-convergence is still rejected
+    TS_ASSERT(!FitPeaks::fitStatusIsConverged(failure, false));
   }
 
   //----------------------------------------------------------------------------------------------
