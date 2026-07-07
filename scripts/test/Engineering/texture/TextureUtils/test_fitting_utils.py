@@ -116,10 +116,10 @@ class TextureUtilsFittingUtilsTests(unittest.TestCase):
     @patch(f"{texture_utils_path}.AppendSpectra")
     @patch(f"{texture_utils_path}.CloneWorkspace")
     @patch(f"{texture_utils_path}.Rebin")
-    @patch(f"{texture_utils_path}._get_max_bin")
+    @patch(f"{texture_utils_path}._get_min_bin")
     @patch(f"{texture_utils_path}.CropWorkspaceRagged")
     @patch(f"{texture_utils_path}.crop_and_rebin")
-    def test_crop_wss_and_combine(self, mock_crop_and_rebin, mock_crop, mock_max_bin, mock_rebin, mock_clone, mock_append, mock_sum):
+    def test_crop_wss_and_combine(self, mock_crop_and_rebin, mock_crop, mock_min_bin, mock_rebin, mock_clone, mock_append, mock_sum):
         # inputs
         wss = ["ws1", "ws2"]
         out = "out_ws"
@@ -127,7 +127,7 @@ class TextureUtilsFittingUtilsTests(unittest.TestCase):
         upper = 2
         peak = 1.5
 
-        mock_max_bin.return_value = 0.1
+        mock_min_bin.return_value = 0.1
 
         expected_rebin_params = (1, 0.1, 2)
 
@@ -1448,19 +1448,23 @@ class TextureUtilsFitPeaksEngineTests(unittest.TestCase):
         mock_convert_units.assert_called_once()
         self.assertEqual(mock_convert_units.call_args.kwargs["Target"], "TOF")
 
-        # per-spectrum TOF centres + windows built as workspaces
-        self.assertEqual(mock_create_ws.call_count, 2)
+        # the per-spectrum TOF window is built once; the centre-seed workspace is rebuilt per FitPeaks
+        # pass (2 smoothing passes + 1 raw fit here), so 1 window + 3 centres = 4 CreateWorkspace calls
+        self.assertEqual(mock_create_ws.call_count, 4)
 
         # rebunch-smoothing: one FitPeaks call on the raw data + one per smooth value (2 here)
         self.assertEqual(mock_rebunch.call_count, 2)
         self.assertEqual(mock_fitpeaks.call_count, 3)
 
-        # the first (raw) call fits in TOF using the per-spectrum centre/window workspaces
-        _, kw = mock_fitpeaks.call_args_list[0]
+        # smoothing passes run first (coarsest first), so the first call fits the rebunched workspace
+        self.assertEqual(mock_fitpeaks.call_args_list[0].kwargs["InputWorkspace"], "__fitpeaks_smooth_0_3")
+
+        # the authoritative raw fit is the last call: it fits in TOF using the per-spectrum centre/window workspaces
+        _, kw = mock_fitpeaks.call_args_list[-1]
         self.assertEqual(kw["InputWorkspace"], combined_tof)
         self.assertEqual(kw["PeakCentersWorkspace"], "__fitpeaks_centres_0")
         self.assertEqual(kw["FitPeakWindowWorkspace"], "__fitpeaks_windows_0")
-        self.assertEqual(kw["CostFunction"], "Least squares")
+        self.assertEqual(kw["CostFunction"], "Unweighted least squares")
         self.assertEqual(kw["MinimumSignalToSigmaRatio"], 0)
         self.assertFalse(kw["HighBackground"])
         # no d-space shape seeds and no single-value centre/window list are passed
