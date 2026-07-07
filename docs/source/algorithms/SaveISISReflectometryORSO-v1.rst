@@ -14,8 +14,8 @@ The orsopy library [#orsopy]_ is used to format and write out the file.
 Currently this algorithm is unable to collect all of the mandatory information required by the ORSO standard so it produces a file that is not fully ORSO compliant.
 A comment is included at the top of the file to reflect this. This algorithm is only suitable for use with Reflectometry data collected at the ISIS Neutron and Muon facility.
 
-The ``WorkspaceList`` passed to the algorithm should be a list of one or more reduced Reflectometry workspaces, or workspace groups, in units of momentum transfer (Q).
-For each individual workspace, the algorithm attempts to find metadata for the file header and the resolution (dQ/Q) from the instrument, workspace history and sample logs associated with the workspace.
+The ``WorkspaceList`` passed to the algorithm should be a list of one or more reduced Reflectometry workspaces, or workspace groups, in units of momentum transfer (:math:`Q`).
+For each individual workspace (When in ``History`` mode for the ``MetadataSource`` property), the algorithm attempts to find metadata for the file header and the resolution (:math:`dQ/Q`) from the instrument, workspace history and sample logs associated with the workspace.
 As a result, this algorithm may produce a file that is missing information if it is passed a workspace that wasn't reduced via the :ref:`ISIS Reflectometry Interface <interface-isis-refl>`.
 See below for further information about where the metadata and resolution are searched for in the workspace.
 
@@ -44,26 +44,60 @@ information in the name to make it unique:
 Depending on the combination of workspaces and workspace groups passed in, it is possible that duplicate dataset names will be generated. If this happens then the algorithm will give an error and
 fail to save out a file.
 
+Metadata Sources
+----------------
+
+In its default state, the algorithm will attempt to get as many of the metadata as it can from the workspace history, which requires
+that the workspace has been processed using the same workflow used in the :ref:`ISIS Reflectometry Interface <interface-isis-refl>`.
+This is not compatible with all reduction workflows, however, and so this algorith also provides methods for fine-tuning where the
+saving process sources any metadata.
+
++--------------------------+-----------------------------------------------------------------------------------------------+
+| MetadataSource           | Collection Process                                                                            |
++==========================+===============================================================================================+
+| ``History``              | The input workspace's history and sample logs will be searched for each of the metadata items.|
+|                          | Any that cannot be found will be omitted from the final saved ORSO file.                      |
++--------------------------+-----------------------------------------------------------------------------------------------+
+| ``HistoryWherePossible`` | As above, but any missing metadata will be marked as an error on the relevant algorithm       |
+|                          | property during validation. If any marked properties are not expected to be found or are not  |
+|                          | required, a list of those properties names should be given as inputs to ``IgnoredProperties``.|
++--------------------------+-----------------------------------------------------------------------------------------------+
+| ``Manual``               | Only the values entered for the relevant properties will be included in the output file. A    |
+|                          | list of the metadata and their relevant properties is included below.                         |
++--------------------------+-----------------------------------------------------------------------------------------------+
+
 Data values
 -----------
 
-The saved ORSO file contains at least three columns of data: the normal wavevector transfer (Qz), the reflectivity (R) and the error of the reflectivity.
+The saved ORSO file contains at least three columns of data: the normal wavevector transfer (:math:`Qz`), the reflectivity (:math:`R`) and the error of the reflectivity.
 The data is converted to point data using algorithm :ref:`algm-ConvertToPointData` before being saved to file.
 
 If parameter ``WriteResolution`` is set to ``True`` then the algorithm will also attempt to include a fourth column that calculates the resolution of the normal wavevector transfer as: :math:`resolution * Qz`.
-The resolution (dQ/Q) is looked up from the workspace history as follows:
+The resolution (:math:`dQ/Q`) is looked up as follows:
 
-- Find the last occurrence of :ref:`algm-Stitch1DMany` in the workspace history. If this can be found, then the absolute value of the stitch ``Params`` parameter is used for the resolution.
-- Otherwise, find the last occurrence of :ref:`algm-ReflectometryReductionOneAuto`. This algorithm makes a call to :ref:`algm-Rebin` and the absolute value of the middle rebin ``Params`` parameter is used as the resolution.
+- In ``History`` or the first step of ``HistoryWherePossible`` mode:
 
-If a resolution value cannot be found from the workspace history then the file is saved without this column included.
+  - Find the last occurrence of :ref:`algm-Stitch1DMany` in the workspace history. If this can be found, then the absolute value of the stitch ``Params`` parameter is used for the resolution.
+  - Otherwise, find the last occurrence of :ref:`algm-ReflectometryReductionOneAuto`. This algorithm makes a call to :ref:`algm-Rebin` and the absolute value of the middle rebin ``Params`` parameter is used as the resolution.
+
+- In ``Manual`` or the manual step of ``HistoryWherePossible`` mode:
+
+  - The value is taken from the ``Resolution`` property.
+
+If a resolution value cannot be found from the workspace history or from the property then the file is saved without this column included.
 
 If parameter ``IncludeAdditionalColumns`` is set to ``True`` then the value of parameter ``WriteResolution`` is ignored and the algorithm will output the four columns described above for stitched datasets.
 For non-stitched datasets there will be the four columns described above plus an additional four columns as follows:
 
-- *lambda* - the wavelength values. If the original conversion to Q was performed using :ref:`algm-RefRoi` then the Qz column values are converted back to wavelength using: :math:`\lambda=\frac{4\pi}{Q}sin(\theta)`. If the original conversion was performed using :ref:`algm-ConvertUnits` then this algorithm is used to convert back to wavelength.
+- *lambda* - the wavelength values.
+
+  - If the original conversion to Q was performed using :ref:`algm-RefRoi` then the ``Qz`` column values are converted back to wavelength using: :math:`\lambda=\frac{4\pi}{Q}sin(\theta)`.
+  - If the original conversion was performed using :ref:`algm-ConvertUnits` then this algorithm is used to convert back to wavelength.
+  - Note: The method used is either determined from the workspace history (in ``History`` or ``HistoryWherePossible`` modes) or from the ``QConversionMethod`` property (in ``Manual`` or
+    ``HistoryWherePossible`` mode. When using the ``HistoryWherePossible`` mode, the value in the workspace history will override the setting chosen in the property.)
+
 - *error of lambda* - currently assumed to be 0.
-- *incident theta* - the value of theta used for the final conversion to Q.
+- *incident theta* - the value of theta used for the final conversion to :math:`Q`.
 - *error of incident theta* - calculated as :math:`resolution * \theta`.
 
 If it is not possible to calculate the values for the additional columns then a warning is logged and they are excluded from the file.
@@ -72,39 +106,39 @@ Header Metadata
 ---------------
 
 Some of the metadata for the ORSO file header is retrieved directly from the input workspace, as detailed below.
-For values retrieved from the workspace history, if any information cannot be extracted from the history then
+For values retrieved from the workspace history, in ``History`` mode, if any information cannot be extracted from the history then
 the file is saved without this metadata included.
 
-+---------------------+-----------------------------------------------------------------------------------------------+
-| Header value        | Workspace location                                                                            |
-+=====================+===============================================================================================+
-| instrument          | The name of the instrument associated with the workspace.                                     |
-+---------------------+-----------------------------------------------------------------------------------------------+
-| start_date          | The value of the ``run_start`` sample log.                                                    |
-+---------------------+-----------------------------------------------------------------------------------------------+
-| proposalID          | The value of either the ``rb_proposal`` or ``experiment_identifier`` sample log.              |
-+---------------------+-----------------------------------------------------------------------------------------------+
-| sample name         | The workspace title (same as the value of the ``run_title`` sample log).                      |
-+---------------------+-----------------------------------------------------------------------------------------------+
-| reduction timestamp | The execution time of the last occurrence of :ref:`algm-ReflectometryReductionOneAuto` in the |
-|                     | workspace history.                                                                            |
-+---------------------+-----------------------------------------------------------------------------------------------+
-| reduction call      | The sequence of algorithm calls from the workspace history that is generated by               |
-|                     | :ref:`algm-GeneratePythonScript`. This is excluded for workspaces that are members of a       |
-|                     | workspace group.                                                                              |
-+---------------------+-----------------------------------------------------------------------------------------------+
-| measurement         | The individual file names for all of the run numbers passed to the ``InputRunList`` parameter |
-| data_files          | from all calls to :ref:`algm-ReflectometryISISLoadAndProcess` in the workspace history.       |
-+---------------------+-----------------------------------------------------------------------------------------------+
-| measurement         | The individual file names for all of the run numbers passed to parameters                     |
-| additional_files    | ``FirstTransmissionRunList`` and ``SecondTransmissionRunList`` from all calls to              |
-|                     | :ref:`algm-ReflectometryISISLoadAndProcess` in the workspace history. Also the flood          |
-|                     | correction workspace or file name and the calibration file name from                          |
-|                     | :ref:`algm-ReflectometryISISLoadAndProcess` in the workspace history.                         |
-+---------------------+-----------------------------------------------------------------------------------------------+
-|polarization         | For input workspaces containing the ``spin_state_ORSO`` sample log, polarization information  |
-|                     | will be added to the header using the ORSO format [#ORSO]_.                                   |
-+---------------------+-----------------------------------------------------------------------------------------------+
++---------------------+-----------------------------------------------------------------------------------------------+---------------------------------+
+| Header value        | Workspace location                                                                            | Manual Metadata Property        |
++=====================+===============================================================================================+=================================+
+| instrument          | The name of the instrument associated with the workspace.                                     | N/A                             |
++---------------------+-----------------------------------------------------------------------------------------------+---------------------------------+
+| start_date          | The value of the ``run_start`` sample log.                                                    | N/A                             |
++---------------------+-----------------------------------------------------------------------------------------------+---------------------------------+
+| proposalID          | The value of either the ``rb_proposal`` or ``experiment_identifier`` sample log.              | N/A                             |
++---------------------+-----------------------------------------------------------------------------------------------+---------------------------------+
+| sample name         | The workspace title (same as the value of the ``run_title`` sample log).                      | N/A                             |
++---------------------+-----------------------------------------------------------------------------------------------+---------------------------------+
+| reduction timestamp | The execution time of the last occurrence of :ref:`algm-ReflectometryReductionOneAuto` in the | ``ReductionTimestamp``          |
+|                     | workspace history.                                                                            |                                 |
++---------------------+-----------------------------------------------------------------------------------------------+---------------------------------+
+| reduction call      | The sequence of algorithm calls from the workspace history that is generated by               | ``ReductionScript``             |
+|                     | :ref:`algm-GeneratePythonScript`. This is excluded for workspaces that are members of a       |                                 |
+|                     | workspace group.                                                                              |                                 |
++---------------------+-----------------------------------------------------------------------------------------------+---------------------------------+
+| measurement         | The individual file names for all of the run numbers passed to the ``InputRunList`` parameter | | ``AngleFileList``             |
+| data_files          | from all calls to :ref:`algm-ReflectometryISISLoadAndProcess` in the workspace history.       | | ``AngleFileThetaList``        |
++---------------------+-----------------------------------------------------------------------------------------------+---------------------------------+
+| measurement         | The individual file names for all of the run numbers passed to parameters                     | | ``FirstTransmissionFileList`` |
+| additional_files    | ``FirstTransmissionRunList`` and ``SecondTransmissionRunList`` from all calls to              | | ``SecondTransmissionFileList``|
+|                     | :ref:`algm-ReflectometryISISLoadAndProcess` in the workspace history. Also the flood          | | ``FloodCorrectionSource``     |
+|                     | correction workspace or file name and the calibration file name from                          | | ``CalibrationFile``           |
+|                     | :ref:`algm-ReflectometryISISLoadAndProcess` in the workspace history.                         |                                 |
++---------------------+-----------------------------------------------------------------------------------------------+---------------------------------+
+| polarization        | For input workspaces containing the ``spin_state_ORSO`` sample log, polarization information  | N/A                             |
+|                     | will be added to the header using the ORSO format [#ORSO]_.                                   |                                 |
++---------------------+-----------------------------------------------------------------------------------------------+---------------------------------+
 
 Usage
 -----
