@@ -20,6 +20,7 @@ from mantid.api import (
 from mantid.kernel import (
     Direction,
     EnabledWhenProperty,
+    LogicOperator,
     PropertyCriterion,
     FloatArrayProperty,
     FloatArrayLengthValidator,
@@ -85,6 +86,8 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
 
         self.declareProperty("NormaliseBy", "Time", StringListValidator(["None", "Time", "Monitor"]), "Normalise to monitor, time or None.")
 
+        self.declareProperty("NormalizeData", True, "When False, skip normalization of the output data even if vanadium data is provided.")
+
         # Alternative WS inputs
         self.declareProperty(
             "InputWorkspaces",
@@ -128,8 +131,8 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         self.declareProperty(
             "ScaleByMotorStep",
             False,
-            "If True then the intensity of the output in Q space will be scaled by the motor step size. "
-            "This will allow directly comparing the intensity of data measure with diffrent motor step sizes.",
+            "If True then the intensity of the Q-sample events output will be scaled by the motor step size. "
+            "This will allow directly comparing the intensity of data measured with different motor step sizes.",
         )
 
         # MDEvent WS Specific options for ConvertHFIRSCDtoQ
@@ -173,7 +176,7 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         self.setPropertySettings("InputWorkspaces", EnabledWhenProperty("Filename", PropertyCriterion.IsDefault))
         self.setPropertySettings("VanadiumWorkspace", EnabledWhenProperty("VanadiumFile", PropertyCriterion.IsDefault))
 
-        self.setPropertySettings("ScaleByMotorStep", EnabledWhenProperty("OutputType", PropertyCriterion.IsNotEqualTo, "Detector"))
+        self.setPropertySettings("ScaleByMotorStep", EnabledWhenProperty("OutputType", PropertyCriterion.IsEqualTo, "Q-sample events"))
 
         event_settings = EnabledWhenProperty("OutputType", PropertyCriterion.IsEqualTo, "Q-sample events")
         self.setPropertyGroup("MinValues", "MDEvent Settings")
@@ -202,12 +205,34 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         )
 
         self.declareProperty(
+            WorkspaceProperty("OutputNormalizationWorkspace", "", optional=PropertyMode.Optional, direction=Direction.Output),
+            doc="Optional MDEvent output workspace containing the per-file vanadium normalization scaled by the "
+            "monitor flux ratio. Requires NormalizeData=False, OutputType='Q-sample events', and vanadium data. "
+            "When multiple inputs are provided, MergeInputs must also be True.",
+        )
+        # Enabled when: OutputType=='Q-sample events' AND NormalizeData==False AND (VanadiumFile OR VanadiumWorkspace)
+        self.setPropertySettings(
+            "OutputNormalizationWorkspace",
+            EnabledWhenProperty(
+                EnabledWhenProperty(
+                    EnabledWhenProperty("OutputType", PropertyCriterion.IsEqualTo, "Q-sample events"),
+                    EnabledWhenProperty("NormalizeData", PropertyCriterion.IsEqualTo, "0"),
+                    LogicOperator.And,
+                ),
+                EnabledWhenProperty(
+                    EnabledWhenProperty("VanadiumFile", PropertyCriterion.IsNotDefault),
+                    EnabledWhenProperty("VanadiumWorkspace", PropertyCriterion.IsNotDefault),
+                    LogicOperator.Or,
+                ),
+                LogicOperator.And,
+            ),
+        )
+
+        self.declareProperty(
             WorkspaceProperty("OutputGroupingWorkspace", "", optional=PropertyMode.Optional, direction=Direction.Output),
             doc="Optional: output GroupingWorkspace mapping every detector's workspace index to its group ID. "
             "Only produced when Grouping is '2x2' or '4x4'.",
         )
-        self.setPropertyGroup("Grouping", "Grouping")
-        self.setPropertyGroup("OutputGroupingWorkspace", "Grouping")
         self.setPropertySettings(
             "OutputGroupingWorkspace",
             EnabledWhenProperty("Grouping", PropertyCriterion.IsNotEqualTo, "None"),
@@ -257,133 +282,216 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
                 f"OutputGroupingWorkspace '{grp_ws_name}' can only be produced when Grouping is '2x2' or '4x4'"
             )
 
+        if self.getProperty("MergeInputs").value and not self.__hasMultipleInputs():
+            issues["MergeInputs"] = "MergeInputs requires more than one input file or workspace."
+
+        if self.getPropertyValue("OutputNormalizationWorkspace") != "" and not self.__saveNormalizationWorkspace():
+            norm_ws_name = self.getPropertyValue("OutputNormalizationWorkspace")
+            issues["OutputNormalizationWorkspace"] = (
+                f"OutputNormalizationWorkspace '{norm_ws_name}' can only be produced when NormalizeData is false, "
+                "OutputType is 'Q-sample events', vanadium data is provided, and MergeInputs is true when "
+                "multiple inputs are given."
+            )
+
         return issues
 
     def PyExec(self):
         load_van = not self.getProperty("VanadiumFile").isDefault
         load_files = not self.getProperty("Filename").isDefault
-
         output = self.getProperty("OutputType").value
-
-        if load_files:
-            datafiles = self.getProperty("Filename").value
-        else:
-            datafiles = list(map(str.strip, self.getProperty("InputWorkspaces").value.split(",")))
+        datafiles = self.__input_datafiles(load_files)
 
         prog = Progress(self, 0.0, 1.0, len(datafiles) + 1)
 
-        vanadiumfile = self.getProperty("VanadiumFile").value
-        vanws = self.getProperty("VanadiumWorkspace").value
         height = self.getProperty("DetectorHeightOffset").value
         distance = self.getProperty("DetectorDistanceOffset").value
-
         wslist = []
+        normalizing_wslist = []
+        grouping = self.__grouping_size()
+        out_ws_rootname = self.getPropertyValue("OutputWorkspace")
 
-        grouping = self.getProperty("Grouping").value
-        if grouping == "None":
-            grouping = 1
-        else:
-            grouping = 2 if grouping == "2x2" else 4
+        vanws = self.__load_vanadium(load_van, grouping, height, distance)
+        has_multiple = self.__hasMultipleInputs()
+        grouping_ws = None
 
-        out_ws = self.getPropertyValue("OutputWorkspace")
-        out_ws_name = out_ws
-
-        if load_van:
-            vanws = LoadMD(vanadiumfile, StoreInADS=True)
-            vanws, _ = self.__regroup_and_move(vanws, grouping, height, distance)
-
-        has_multiple = len(datafiles) > 1
-        first_iteration = True
-        for in_file in datafiles:
-            if load_files:
-                scan = LoadMD(in_file, LoadHistory=False, OutputWorkspace="__scan")
-            else:
-                scan = CloneMDWorkspace(in_file)
-
-            # Make sure the workspace has experiment info, otherwise SetGoniometer will add some, causing issues.
-            if scan.getNumExperimentInfo() == 0:
-                raise RuntimeError("No experiment info was found in '{}'".format(in_file))
-
+        for index, in_file in enumerate(datafiles):
+            scan = self.__load_scan(in_file, load_files)
             self.log().information("Detector adjustments '({},{})m'".format(height, distance))
-
-            if first_iteration:
-                create_grouping_ws = grouping > 1 and not self.getProperty("OutputGroupingWorkspace").isDefault
-                scan, grouping_ws = self.__regroup_and_move(scan, grouping, height, distance, create_grouping_ws=create_grouping_ws)
-                first_iteration = False
-            else:
-                # no need to recreate the grouping workspace in later iterations
-                scan, _ = self.__regroup_and_move(scan, grouping, height, distance)
-
+            scan, grouping_ws = self.__prepare_scan(scan, in_file, index == 0, grouping, height, distance, grouping_ws)
             prog.report()
             self.log().information("Processing '{}'".format(in_file))
 
             SetGoniometer(Workspace=scan, Axis0="omega,0,1,0,-1", Axis1="chi,0,0,1,-1", Axis2="phi,0,1,0,-1", Average=False)
-            # If processing multiple files, append the base name to the given output name
-            if has_multiple:
-                if load_files:
-                    out_ws_name = out_ws + "_" + os.path.basename(in_file).strip(",.nxs")
-                else:
-                    out_ws_name = out_ws + "_" + in_file
-                wslist.append(out_ws_name)
+            out_ws_name = self.__output_workspace_name(out_ws_rootname, in_file, has_multiple, load_files)
+            wslist.append(out_ws_name)
 
             # Get the wavelength from experiment info if it exists, or fallback on property value
             exp_info = scan.getExperimentInfo(0)
             wavelength = self.__get_wavelength(exp_info)
+            self.__ensure_run_number(exp_info)
 
-            # set the run number to be the same as scan number, this will be used for peaks
-            if not exp_info.run().hasProperty("run_number") and exp_info.run().hasProperty("scan"):
-                try:
-                    exp_info.mutableRun().addProperty("run_number", int(exp_info.run().getProperty("scan").value), True)
-                except ValueError:
-                    # scan must be a int
-                    pass
-
-            # Use ConvertHFIRSCDtoQ (and normalize van), or use ConvertWANDSCtoQ which handles normalization itself
-            if output == "Q-sample events":
-                norm_data = self.__normalization(scan, vanws, load_files)
-                minvals = self.getProperty("MinValues").value
-                maxvals = self.getProperty("MaxValues").value
-                merge = self.getProperty("MergeInputs").value
-                ConvertHFIRSCDtoMDE(
-                    InputWorkspace=norm_data, Wavelength=wavelength, MinValues=minvals, MaxValues=maxvals, OutputWorkspace=out_ws_name
-                )
-                DeleteWorkspace(norm_data)
-            elif output == "Q-sample histogram":
-                bin0 = self.getProperty("BinningDim0").value
-                bin1 = self.getProperty("BinningDim1").value
-                bin2 = self.getProperty("BinningDim2").value
-                # Convert to Q space and normalize with from the vanadium
-                ConvertWANDSCDtoQ(
-                    InputWorkspace=scan,
-                    NormalisationWorkspace=vanws,
-                    Frame="Q_sample",
-                    Wavelength=wavelength,
-                    NormaliseBy=self.getProperty("NormaliseBy").value,
-                    BinningDim0=bin0,
-                    BinningDim1=bin1,
-                    BinningDim2=bin2,
-                    OutputWorkspace=out_ws_name,
-                )
-                DeleteWorkspace(scan)
+            if output == "Q-sample histogram":
+                self.__process_q_sample_histogram(scan, vanws, wavelength, out_ws_name)
+            elif output == "Detector":
+                self.__process_detector(scan, vanws, out_ws_name)
+            elif output == "Q-sample events":
+                normalizing_ws = self.__process_q_sample_events(scan, vanws, wavelength, out_ws_name)
+                if normalizing_ws is not None:
+                    normalizing_wslist.append(normalizing_ws)
             else:
-                norm_data = self.__normalization(scan, vanws, load_files)
-                RenameWorkspace(norm_data, OutputWorkspace=out_ws_name)
+                raise RuntimeError("Invalid output type '{}'".format(output))
 
-        if has_multiple:
-            out_ws_name = out_ws
-            if output == "Q-sample events" and merge:
-                MergeMD(InputWorkspaces=wslist, OutputWorkspace=out_ws_name)
-                DeleteWorkspaces(wslist)
-            else:
-                GroupWorkspaces(InputWorkspaces=wslist, OutputWorkspace=out_ws_name)
-
-        # Delete workspaces
-        if load_van:
-            DeleteWorkspace(vanws)
-
+        out_ws_name = self.__save_output_workspace(has_multiple, output, wslist, out_ws_rootname)
         self.setProperty("OutputWorkspace", out_ws_name)
         if grouping_ws is not None:
             self.setProperty("OutputGroupingWorkspace", grouping_ws)
+
+        self.__save_output_normalization_workspace(has_multiple, normalizing_wslist)
+
+        # Clean up temporary workspaces
+        if load_van:
+            DeleteWorkspace(vanws)
+
+    def __input_datafiles(self, load_files):
+        if load_files:
+            return self.getProperty("Filename").value
+        return list(map(str.strip, self.getProperty("InputWorkspaces").value.split(",")))
+
+    def __grouping_size(self):
+        grouping = self.getProperty("Grouping").value
+        return {"None": 1, "2x2": 2, "4x4": 4}[grouping]
+
+    def __load_vanadium(self, load_van, grouping, height, distance):
+        if load_van:
+            vanws = LoadMD(self.getProperty("VanadiumFile").value, StoreInADS=True)
+            vanws, _ = self.__regroup_and_move(vanws, grouping, height, distance)
+            return vanws
+        return self.getProperty("VanadiumWorkspace").value
+
+    def __load_scan(self, in_file, load_files):
+        if load_files:
+            scan = LoadMD(in_file, LoadHistory=False, OutputWorkspace="__scan")
+        else:
+            scan = CloneMDWorkspace(in_file)
+        return scan
+
+    def __prepare_scan(self, scan, in_file, first_iteration, grouping, height, distance, grouping_ws):
+        # Make sure the workspace has experiment info, otherwise SetGoniometer will add some, causing issues.
+        if scan.getNumExperimentInfo() == 0:
+            raise RuntimeError("No experiment info was found in '{}'".format(in_file))
+
+        create_grouping_ws = first_iteration and grouping > 1 and not self.getProperty("OutputGroupingWorkspace").isDefault
+        scan, new_grouping_ws = self.__regroup_and_move(scan, grouping, height, distance, create_grouping_ws=create_grouping_ws)
+        return scan, new_grouping_ws or grouping_ws
+
+    def __output_workspace_name(self, out_ws_rootname, in_file, has_multiple, load_files):
+        if not has_multiple:
+            return out_ws_rootname
+        if load_files:
+            return out_ws_rootname + "_" + os.path.basename(in_file).strip(",.nxs")
+        return out_ws_rootname + "_" + in_file
+
+    def __ensure_run_number(self, exp_info):
+        # Set the run number to be the same as scan number, this will be used for peaks.
+        if not exp_info.run().hasProperty("run_number") and exp_info.run().hasProperty("scan"):
+            try:
+                exp_info.mutableRun().addProperty("run_number", int(exp_info.run().getProperty("scan").value), True)
+            except ValueError:
+                # scan must be an int
+                pass
+
+    def __process_q_sample_histogram(self, scan, vanws, wavelength, out_ws_name):
+        normalize_data = self.getProperty("NormalizeData").value
+        ConvertWANDSCDtoQ(
+            InputWorkspace=scan,
+            NormalisationWorkspace=vanws if normalize_data else None,
+            Frame="Q_sample",
+            Wavelength=wavelength,
+            NormaliseBy=self.getProperty("NormaliseBy").value if normalize_data else "None",
+            BinningDim0=self.getProperty("BinningDim0").value,
+            BinningDim1=self.getProperty("BinningDim1").value,
+            BinningDim2=self.getProperty("BinningDim2").value,
+            OutputWorkspace=out_ws_name,
+        )
+        DeleteWorkspace(scan)
+
+    def __process_detector(self, scan, vanws, out_ws_name):
+        if self.getProperty("NormalizeData").value:
+            scan = self.__normalize_and_divide(scan, vanws)
+        RenameWorkspace(scan, OutputWorkspace=out_ws_name)
+
+    def __process_q_sample_events(self, scan, vanws, wavelength, out_ws_name):
+        flux_ratio = self.__normaliseByScaling(scan, vanws) / self.__scaleByMotorStep(scan)
+        normalizing_ws = self.__create_normalizing_workspace(scan, vanws, flux_ratio)
+        norm_data = self.__normalized_event_data(scan, vanws, normalizing_ws, flux_ratio)
+        minvals = self.getProperty("MinValues").value
+        maxvals = self.getProperty("MaxValues").value
+        ConvertHFIRSCDtoMDE(
+            InputWorkspace=norm_data, Wavelength=wavelength, MinValues=minvals, MaxValues=maxvals, OutputWorkspace=out_ws_name
+        )
+        DeleteWorkspace(norm_data)
+        return self.__converted_normalization_workspace(normalizing_ws, wavelength, minvals, maxvals)
+
+    def __create_normalizing_workspace(self, scan, vanws, flux_ratio):
+        if not vanws:
+            return None
+        if scan.getDimension(2).getNBins() > 1:  # more than one scan
+            normalizing_ws = ReplicateMD(
+                ShapeWorkspace=scan,
+                DataWorkspace=vanws,
+                OutputWorkspace=mtd.unique_hidden_name(),
+            )
+        else:  # we clone scan rather than vanws to keep in line with what ReplicateMD does.
+            normalizing_ws = CloneMDWorkspace(
+                InputWorkspace=scan,
+                OutputWorkspace=mtd.unique_hidden_name(),
+            )
+            normalizing_ws.setSignalArray(vanws.getSignalArray().copy())
+            normalizing_ws.setErrorSquaredArray(vanws.getErrorSquaredArray().copy())
+        return self.__scaleBy(normalizing_ws, flux_ratio)
+
+    def __normalized_event_data(self, scan, vanws, normalizing_ws, flux_ratio):
+        if not self.getProperty("NormalizeData").value:
+            return scan
+        if not vanws:
+            return self.__scaleBy(scan, 1.0 / flux_ratio)
+        norm_data = DivideMD(LHSWorkspace=scan, RHSWorkspace=normalizing_ws)
+        DeleteWorkspace(scan)
+        return norm_data
+
+    def __converted_normalization_workspace(self, normalizing_ws, wavelength, minvals, maxvals):
+        if self.__saveNormalizationWorkspace():
+            return ConvertHFIRSCDtoMDE(
+                InputWorkspace=normalizing_ws,
+                Wavelength=wavelength,
+                MinValues=minvals,
+                MaxValues=maxvals,
+                OutputWorkspace=normalizing_ws.name(),  # overwrite the input MDHistoWorkspace
+            )
+        if normalizing_ws:
+            DeleteWorkspace(normalizing_ws)
+        return None
+
+    def __save_output_workspace(self, has_multiple, output, wslist, out_ws_rootname):
+        if not has_multiple:
+            return out_ws_rootname
+        if output == "Q-sample events" and self.getProperty("MergeInputs").value:
+            MergeMD(InputWorkspaces=wslist, OutputWorkspace=out_ws_rootname)
+            DeleteWorkspaces(wslist)
+        else:
+            GroupWorkspaces(InputWorkspaces=wslist, OutputWorkspace=out_ws_rootname)
+        return out_ws_rootname
+
+    def __save_output_normalization_workspace(self, has_multiple, normalizing_wslist):
+        if not self.__saveNormalizationWorkspace():
+            return
+        normalizing_ws_name = self.getPropertyValue("OutputNormalizationWorkspace")
+        if has_multiple:
+            MergeMD(InputWorkspaces=normalizing_wslist, OutputWorkspace=normalizing_ws_name)
+            DeleteWorkspaces(normalizing_wslist)
+        else:
+            RenameWorkspace(InputWorkspace=normalizing_wslist[0], OutputWorkspace=normalizing_ws_name)
+        self.setProperty("OutputNormalizationWorkspace", normalizing_ws_name)
 
     def __regroup_and_move(self, scan, grouping, height, distance, create_grouping_ws=False):
         output_workspace_name = scan.name()  # the input workspace will be modified or replaced
@@ -532,46 +640,77 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
 
         return mtd[output_workspace_name], grouping_workspace
 
-    def __normalization(self, data, vanadium, load_files):
+    def __hasMultipleInputs(self):
+        """Return True when the user has provided more than one input file or workspace.
+        :return: bool
+        """
+        if not self.getProperty("Filename").isDefault:
+            return len(self.getProperty("Filename").value) > 1
+        ws_names = [w.strip() for w in self.getProperty("InputWorkspaces").value.split(",") if w.strip()]
+        return len(ws_names) > 1
+
+    def __saveNormalizationWorkspace(self):
+        """Return True when all conditions to output the normalization workspace are met:
+        NormalizeData is False, OutputType is 'Q-sample events', vanadium data is provided
+        (via VanadiumFile or VanadiumWorkspace), and OutputNormalizationWorkspace has been
+        given a name (non-default). When multiple inputs are provided, MergeInputs must also
+        be True so that the per-file normalization workspaces can be merged into one.
+        :return: bool
+        """
+        vanadium_provided = not self.getProperty("VanadiumFile").isDefault or not self.getProperty("VanadiumWorkspace").isDefault
+        merge_ok = not self.__hasMultipleInputs() or self.getProperty("MergeInputs").value
+        return (
+            not self.getProperty("NormalizeData").value
+            and merge_ok
+            and self.getProperty("OutputType").value == "Q-sample events"
+            and vanadium_provided
+            and not self.getProperty("OutputNormalizationWorkspace").isDefault
+        )
+
+    def __scaleByMotorStep(self, ws):
+        """Return the motor step size derived from ws, so that data measured
+        with different step sizes can be directly compared.
+        :param ws: MDHistoWorkspace whose experiment info supplies the motor axis log.
+        :return: Scalar step size of the scan motor.
+        """
+        step_size = 1.0
+        if self.getProperty("ScaleByMotorStep").value:
+            run_info = ws.getExperimentInfo(0).run()
+            scan_log = "omega" if np.isclose(run_info.getTimeAveragedStd("phi"), 0.0) else "phi"
+            scan_axis = run_info[scan_log].value
+            step_size = (scan_axis[-1] - scan_axis[0]) / (scan_axis.size - 1)  # assumes all steps same as this average
+        return step_size
+
+    def __normaliseByScaling(self, data, vanadium):
+        """Return the per-step NormaliseBy scale factor array, or 1.0 when NormaliseBy is 'None'.
+        :param data: MDHistoWorkspace whose run logs supply the per-step monitor or time values.
+        :param vanadium: Vanadium MDHistoWorkspace used to divide out the vanadium monitor/time value, or None.
+        :return: 1-D numpy array of scale factors, or 1.0.
+        """
+        normaliseBy = self.getProperty("NormaliseBy").value.lower()
+        if normaliseBy not in ("monitor", "time"):
+            return 1.0
+        scale = np.asarray(data.getExperimentInfo(0).run().getProperty(normaliseBy).value)
         if vanadium:
-            norm_data = ReplicateMD(ShapeWorkspace=data, DataWorkspace=vanadium)
+            scale /= vanadium.getExperimentInfo(0).run().getProperty(normaliseBy).value[0]
+        return scale
+
+    def __scaleBy(self, ws, scalings):
+        ws.setSignalArray(ws.getSignalArray() * scalings)
+        ws.setErrorSquaredArray(ws.getErrorSquaredArray() * scalings**2)
+        return ws
+
+    def __normalize_and_divide(self, data, vanadium):
+        if vanadium:
+            norm_data = ReplicateMD(ShapeWorkspace=data, DataWorkspace=vanadium)  # `data` to be deleted later
             norm_data = DivideMD(LHSWorkspace=data, RHSWorkspace=norm_data)
-        elif load_files:
+        else:
             norm_data = data
-        else:
-            norm_data = CloneMDWorkspace(data)
-
-        if self.getProperty("ScaleByMotorStep").value and self.getProperty("OutputType").value != "Detector":
-            run = data.getExperimentInfo(0).run()
-            scan_log = "omega" if np.isclose(run.getTimeAveragedStd("phi"), 0.0) else "phi"
-            scan_axis = run[scan_log].value
-            scan_step = (scan_axis[-1] - scan_axis[0]) / (scan_axis.size - 1)
-            norm_data *= scan_step
-
-        normaliseBy = self.getProperty("NormaliseBy").value
-
-        monitors = np.asarray(data.getExperimentInfo(0).run().getProperty("monitor").value)
-        times = np.asarray(data.getExperimentInfo(0).run().getProperty("time").value)
-
-        if load_files and vanadium:
-            DeleteWorkspace(data)
-
-        if normaliseBy == "Monitor":
-            scale = monitors
-        elif normaliseBy == "Time":
-            scale = times
-        else:
-            return norm_data
+        flux_ratio = self.__normaliseByScaling(norm_data, vanadium)
+        self.__scaleBy(norm_data, 1.0 / flux_ratio)
 
         if vanadium:
-            if normaliseBy == "Monitor":
-                scale /= vanadium.getExperimentInfo(0).run().getProperty("monitor").value[0]
-            elif normaliseBy == "Time":
-                scale /= vanadium.getExperimentInfo(0).run().getProperty("time").value[0]
-
-        norm_data.setSignalArray(norm_data.getSignalArray() / scale)
-        norm_data.setErrorSquaredArray(norm_data.getErrorSquaredArray() / scale**2)
-
+            DeleteWorkspace(data)  # clean up
         return norm_data
 
     def __move_components(self, ws, height, distance):

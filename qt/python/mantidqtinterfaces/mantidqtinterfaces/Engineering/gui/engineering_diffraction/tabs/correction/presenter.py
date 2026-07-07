@@ -7,7 +7,7 @@
 #
 from mantidqt.utils.asynchronous import AsyncTask
 from mantid.api import AlgorithmObserver
-from mantidqt.utils.observer_pattern import GenericObservable
+from mantidqt.utils.observer_pattern import GenericObservable, GenericObserverWithArgPassing
 from mantid.kernel import logger
 from mantidqt.interfacemanager import InterfaceManager
 from Engineering.common.calibration_info import CalibrationInfo
@@ -19,11 +19,14 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common impo
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.show_sample.show_sample_presenter import ShowSamplePresenter
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.correction.model import CorrectionModel
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.correction.view import TextureCorrectionView
 
 from functools import wraps
+from typing import Callable, Type, List, Dict, Tuple, Sequence, Any
 
 
-def redraws_table(func):
+def redraws_table(func: Callable):
     @wraps(func)
     def wrapper(self):
         func(self)
@@ -34,7 +37,7 @@ def redraws_table(func):
 
 
 class TextureCorrectionPresenter(AlgorithmObserver):
-    def __init__(self, model, view):
+    def __init__(self, model: CorrectionModel, view: TextureCorrectionView):
         super(TextureCorrectionPresenter, self).__init__()
         self.model = model
         self.view = view
@@ -89,7 +92,7 @@ class TextureCorrectionPresenter(AlgorithmObserver):
         self.view.alg_ui_finished.connect(self._on_alg_finished)
 
     @redraws_table
-    def load_files_into_table(self):
+    def load_files_into_table(self) -> None:
         filenames = self.view.finder_corr.getFilenames()
         wss = self.model.load_files(filenames)
         for ws_name in wss:
@@ -97,17 +100,17 @@ class TextureCorrectionPresenter(AlgorithmObserver):
                 self.ws_names.append(ws_name)
 
     @redraws_table
-    def delete_selected_files(self):
+    def delete_selected_files(self) -> None:
         wss = self.view.get_selected_workspaces()
         for ws in wss:
             self.ws_names.pop(self.ws_names.index(ws))
 
-    def redraw_table(self):
+    def redraw_table(self) -> None:
         self.update_ws_info()
         self.view.populate_workspace_table(self.ws_info)
         self.view.populate_workspace_list()
 
-    def update_ws_info(self):
+    def update_ws_info(self) -> None:
         ws_info = {}
         selected = self.view.get_selected_workspaces()
         for ws_name in self.ws_names:
@@ -115,7 +118,7 @@ class TextureCorrectionPresenter(AlgorithmObserver):
         self.ws_info = ws_info
 
     @redraws_table
-    def load_all_orientations(self):
+    def load_all_orientations(self) -> None:
         wss = self.view.get_selected_workspaces()
         orientation_file = self.view.get_orientation_file()
         use_euler = self._get_setting("use_euler_angles", bool)
@@ -123,20 +126,20 @@ class TextureCorrectionPresenter(AlgorithmObserver):
         euler_sense = self._get_setting("euler_angles_sense")
         self.model.load_all_orientations(wss, orientation_file, use_euler, euler_scheme, euler_sense)
 
-    def select_all(self):
+    def select_all(self) -> None:
         self.view.set_all_workspaces_selected(True)
 
-    def deselect_all(self):
+    def deselect_all(self) -> None:
         self.view.set_all_workspaces_selected(False)
 
-    def _on_save_ref_clicked(self):
+    def _on_save_ref_clicked(self) -> None:
         self.model.save_reference_file(self.rb_num, self.current_calibration, output_settings.get_output_path())
 
-    def _on_load_ref_clicked(self):
+    def _on_load_ref_clicked(self) -> None:
         self.model.load_ref(self.view.get_reference_file())
         self.update_reference_info()
 
-    def on_apply_clicked(self):
+    def on_apply_clicked(self) -> None:
         wss = self.view.get_selected_workspaces()
         out_wss = self.model.get_out_ws_names(wss)
 
@@ -145,7 +148,7 @@ class TextureCorrectionPresenter(AlgorithmObserver):
         )
         self.worker.start()
 
-    def _apply_all_corrections(self, wss, out_wss):
+    def _apply_all_corrections(self, wss: List[str], out_wss: List[str]) -> None:
         self.model.set_include_abs(self.view.include_absorption())
         self.model.set_include_atten(self.view.include_atten_tab())
         self.model.set_include_div(self.view.include_divergence())
@@ -160,7 +163,7 @@ class TextureCorrectionPresenter(AlgorithmObserver):
         if not div_err and not atten_err:
             self.model.calc_all_corrections(wss, out_wss, output_settings.get_output_path(), abs_args, atten_args, div_args)
 
-    def get_abs_args(self):
+    def get_abs_args(self) -> Dict[str, str] | None:
         if self.view.include_absorption():
             return {
                 "gauge_vol_preset": self.view.get_shape_method(),
@@ -168,94 +171,95 @@ class TextureCorrectionPresenter(AlgorithmObserver):
                 "mc_param_str": self._get_setting("monte_carlo_params"),
             }
 
-    def get_atten_args(self):
+    def get_atten_args(self) -> Tuple[Dict, bool]:
         return self.model.get_atten_args(self.view.include_atten_tab(), self.view.get_evaluation_value(), self.view.get_evaluation_units())
 
-    def get_div_args(self):
+    def get_div_args(self) -> Tuple[Dict[str, float], bool]:
         return self.model.get_div_args(
             self.view.include_divergence(), self.view.get_div_horz(), self.view.get_div_vert(), self.view.get_div_det_horz()
         )
 
     @redraws_table
-    def _copy_sample_to_all_selected(self):
+    def _copy_sample_to_all_selected(self) -> None:
         ref_ws = self.view.get_sample_reference_ws()
         wss = self.view.get_selected_workspaces()
         self.model.copy_sample_info(ref_ws, wss)
 
     @redraws_table
-    def _copy_ref_sample_to_all_selected(self):
+    def _copy_ref_sample_to_all_selected(self) -> None:
         ref_ws = self.model.reference_ws
         if ref_ws:
             wss = self.view.get_selected_workspaces()
             self.model.copy_sample_info(ref_ws, wss, True)
 
-    def _on_worker_success(self):
+    def _on_worker_success(self) -> None:
         self.correction_notifier.notify_subscribers(self.model.get_corrected_files())
 
-    def _on_worker_error(self, error_info):
+    def _on_worker_error(self, error_info: int) -> None:
         logger.error(str(error_info))
 
-    def open_goniometer_dialog(self):
+    def open_goniometer_dialog(self) -> None:
         self._open_alg_dialog("SetGoniometer")
 
-    def open_ref_goniometer_dialog(self):
+    def open_ref_goniometer_dialog(self) -> None:
         self._open_alg_dialog("SetGoniometer", disabled=("Workspace",))
 
-    def open_load_sample_shape_dialog(self):
+    def open_load_sample_shape_dialog(self) -> None:
         self._open_alg_dialog("LoadSampleShape")
 
-    def open_set_sample_shape_dialog(self):
+    def open_set_sample_shape_dialog(self) -> None:
         self._open_alg_dialog("SetSampleShape")
 
-    def open_set_material_dialog(self):
+    def open_set_material_dialog(self) -> None:
         self._open_alg_dialog("SetSampleMaterial")
 
-    def _open_alg_dialog(self, alg_str, enabled=("InputWorkspace",), disabled=("",)):
+    def _open_alg_dialog(self, alg_str: str, enabled: Sequence[str] = ("InputWorkspace",), disabled: Sequence[str] = ("",)) -> None:
         manager = InterfaceManager()
         dialog = manager.createDialogFromName(alg_str, -1, self.view, False, self.model.get_alg_preset_values(), "", enabled, disabled)
         dialog.addAlgorithmObserver(self)
         dialog.setModal(True)
         dialog.show()
 
-    def finishHandle(self):
+    def finishHandle(self) -> None:
         # this finishHandle is called whenever a dialog created in _open_alg_dialog finishes
         # when such an alg finishes, we get our UI view to emit a signal
         self.view.signal_alg_finished()
         # this signal is then connected to on_alg_finished back here on the presenter
         # this ensures the _on_alg_finished call happens on the Qt GUI thread rather than the alg worker thread
 
-    def _on_alg_finished(self):
+    def _on_alg_finished(self) -> None:
         self.redraw_table()
         self.update_reference_info()
 
-    def set_rb_num(self, rb_num):
+    def set_rb_num(self, rb_num: str | None) -> None:
         self.rb_num = rb_num
 
-    def update_calibration(self, calibration):
+    def update_calibration(self, calibration: CalibrationInfo) -> None:
         """
         Update the current calibration following a call from a CalibrationNotifier
         :param calibration: The new current calibration.
         """
         self.current_calibration = calibration
 
-    def set_instrument_override(self, instrument):
-        instrument = INSTRUMENT_DICT[instrument]
+    def set_instrument_override(self, instrument_index: int) -> None:
+        instrument = INSTRUMENT_DICT[instrument_index]
         self.view.set_instrument_override(instrument)
         self.instrument = instrument
         self.current_calibration = CalibrationInfo(instrument=self.instrument)
 
-    def update_custom_shape_finder_vis(self):
+    def update_custom_shape_finder_vis(self) -> None:
         self.view.set_finder_gauge_vol_visible(self.view.get_shape_method() == "Custom Shape")
 
-    def on_create_ref_sample_clicked(self):
+    def on_create_ref_sample_clicked(self) -> None:
         self.model.create_reference_ws(self.rb_num, self.instrument)
         self.update_reference_info()
 
-    def update_reference_info(self):
+    def update_reference_info(self) -> None:
         self.view.update_reference_info_section(*self.model.get_reference_info())
 
-    def _get_setting(self, setting_name, return_type=str):
+    @staticmethod
+    def _get_setting(setting_name: str, return_type: Type = str) -> Any:
         return get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, setting_name, return_type)
 
-    def add_correction_subscriber(self, obs):
+    def add_correction_subscriber(self, obs: GenericObserverWithArgPassing) -> None:
         self.correction_notifier.add_subscriber(obs)

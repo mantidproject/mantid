@@ -136,7 +136,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
     _instrument = None
     _filterBadPulses = None
     _removePromptPulseWidth = None
-    _DIFCref = None
     _wavelengthMin = None
     _wavelengthMax = None
     _vanPeakFWHM = None
@@ -150,7 +149,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
     _splittersWS = None
     _splitinfotablews = None
     _normalisebycurrent = None
-    _lowResTOFoffset = None
     _focusPos = None
     _charTable = None
     iparmFile = None
@@ -220,8 +218,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             "AlignAndFocusPowderFromFiles",
             [
                 "LorentzCorrection",
-                "UnwrapRef",
-                "LowResRef",
                 "CropWavelengthMin",
                 "CropWavelengthMax",
                 "RemovePromptPulseWidth",
@@ -332,12 +328,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         infotableprop = ITableWorkspaceProperty("SplitInformationWorkspace", "", Direction.Input, PropertyMode.Optional)
         self.declareProperty(infotableprop, "Name of table workspace containing information for splitters.")
 
-        self.declareProperty(
-            "LowResolutionSpectraOffset",
-            -1,
-            "If larger and equal to 0, then process low resolution TOF and offset is the spectra number. Otherwise, ignored.",
-        )  # LowResolutionSpectraOffset
-
         self.declareProperty("NormalizeByCurrent", True, "Normalize by current")
 
         self.copyProperties("AlignAndFocusPowderFromFiles", ["AllowSlimProcess"])
@@ -393,9 +383,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         if self.getProperty("InterpolateTargetTemp").value > 0.0 and not len(self.getProperty("BackgroundNumber").value) == 2:
             issues["InterpolateTargetTemp"] = "If InterpolateTargetTemp specified, you must provide two background run numbers"
 
-        # Deprecated properties
-        if not self.getProperty("UnwrapRef").isDefault:
-            issues["UnwrapRef"] = "SNSPowderReduction property UnwrapRef is deprecated since 2025-03-24."
         return issues
 
     # pylint: disable=too-many-locals,too-many-branches,too-many-statements
@@ -417,7 +404,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self._filterBadPulses = self.getProperty("FilterBadPulses").value
         self._removePromptPulseWidth = self.getProperty("RemovePromptPulseWidth").value
         self._lorentz = self.getProperty("LorentzCorrection").value
-        self._DIFCref = self.getProperty("LowResRef").value
         self._wavelengthMin = self.getProperty("CropWavelengthMin").value
         self._wavelengthMax = self.getProperty("CropWavelengthMax").value
         self._vanPeakFWHM = self.getProperty("VanadiumFWHM").value
@@ -495,29 +481,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         # List stores the workspacename of all data workspaces that will be converted to d-spacing in the end.
         workspacelist = []
         samwksplist = []
-
-        self._lowResTOFoffset = self.getProperty("LowResolutionSpectraOffset").value
-        focuspos = self._focusPos
-        if self._lowResTOFoffset >= 0:
-            # Dealing with the parameters for editing instrument parameters
-            if "PrimaryFlightPath" in focuspos:
-                l1 = focuspos["PrimaryFlightPath"]
-                if l1 > 0:
-                    specids = focuspos["SpectrumIDs"][:]
-                    l2s = focuspos["L2"][:]
-                    polars = focuspos["Polar"][:]
-                    phis = focuspos["Azimuthal"][:]
-
-                    specids.extend(specids)
-                    l2s.extend(l2s)
-                    polars.extend(polars)
-                    phis.extend(phis)
-
-                    focuspos["SpectrumIDs"] = specids
-                    focuspos["L2"] = l2s
-                    focuspos["Polar"] = polars
-                    focuspos["Azimuthal"] = phis
-        # ENDIF
 
         # calculate absorption from first sample run
         metaws = None
@@ -954,8 +917,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             CompressTolerance=self.COMPRESS_TOL_TOF,
             CompressBinningMode=self._compressBinningMode,
             LorentzCorrection=self._lorentz,
-            LowResRef=self._DIFCref,
-            LowResSpectrumOffset=self._lowResTOFoffset,
             CropWavelengthMin=self._wavelengthMin,
             CropWavelengthMax=self._wavelengthMax,
             FrequencyLogNames=self.getProperty("FrequencyLogNames").value,
@@ -1070,8 +1031,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     CompressTolerance=self.COMPRESS_TOL_TOF,
                     CompressBinningMode=self._compressBinningMode,
                     LorentzCorrection=self._lorentz,
-                    LowResRef=self._DIFCref,
-                    LowResSpectrumOffset=self._lowResTOFoffset,
                     CropWavelengthMin=self._wavelengthMin,
                     CropWavelengthMax=self._wavelengthMax,
                     ReductionProperties="__snspowderreduction",

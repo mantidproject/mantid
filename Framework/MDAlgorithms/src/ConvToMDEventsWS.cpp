@@ -10,6 +10,25 @@
 #include "MantidMDAlgorithms/UnitsConversionHelper.h"
 
 namespace Mantid::MDAlgorithms {
+
+// This method sets a generic variable set as an extra dimensions from the log value at the event time.
+bool ConvToMDEventsWS::setGenericVariableFromLogs(const Mantid::Types::Core::DateAndTime &pT,
+                                                  std::vector<coord_t> &localCoord) const {
+  if (!m_useLogTimes || m_Logs.size() <= m_GonioIndex.size()) {
+    return true;
+  }
+  int ic(0);
+  for (size_t idxLog = m_GonioIndex.size(); idxLog < m_Logs.size(); idxLog++) {
+    auto logval = m_Logs[idxLog]->getSingleValue(pT);
+    if (std::isnan(logval) || logval < m_extraDimBounds[ic].first || logval >= m_extraDimBounds[ic].second) {
+      return false;
+    }
+    localCoord[m_NMatrixDimensions + ic] = static_cast<coord_t>(logval);
+    ic++;
+  }
+  return true;
+}
+
 /**function converts particular list of events of type T into MD workspace and
  * adds these events to the workspace itself  */
 template <class T> size_t ConvToMDEventsWS::convertEventList(size_t workspaceIndex) {
@@ -51,7 +70,6 @@ template <class T> size_t ConvToMDEventsWS::convertEventList(size_t workspaceInd
   typename std::vector<T> const *events_ptr;
   getEventsFrom(el, events_ptr);
   const typename std::vector<T> &events = *events_ptr;
-
   // Iterators to start/end
   for (auto it = events.cbegin(); it != events.cend(); it++) {
     double val = localUnitConv.convertUnits(it->tof());
@@ -59,6 +77,8 @@ template <class T> size_t ConvToMDEventsWS::convertEventList(size_t workspaceInd
     double errorSq = it->errorSquared();
     if (!setGoniometersFromLogs(it))
       continue; // skip if log value is NaN
+    if (!setGenericVariableFromLogs(it->pulseTime(), locCoord))
+      continue; // skip if log value is NaN or out of bounds
     if (!m_QConverter->calcMatrixCoord(val, locCoord, signal, errorSq))
       continue; // skip ND outside the range
 
@@ -104,7 +124,7 @@ for computing Goniometer matrix or additional dimensions
 */
 size_t ConvToMDEventsWS::initialize(const MDWSDescription &WSD, std::shared_ptr<MDEventWSWrapper> inWSWrapper,
                                     bool ignoreZeros, bool useLogTimes) {
-  size_t numSpec = ConvToMDBase::initialize(WSD, inWSWrapper, ignoreZeros, useLogTimes);
+  size_t numSpec = ConvToMDBase::initialize(WSD, std::move(inWSWrapper), ignoreZeros, useLogTimes);
 
   m_EventWS = std::dynamic_pointer_cast<const DataObjects::EventWorkspace>(m_InWS2D);
   if (!m_EventWS)
@@ -117,6 +137,8 @@ size_t ConvToMDEventsWS::initialize(const MDWSDescription &WSD, std::shared_ptr<
   if (m_useLogTimes) {
     // Saves the Q-cartesian transformation
     m_Wtransf = WSD.m_Wtransf;
+    m_NMatrixDimensions = m_QConverter->getNMatrixDimensions(WSD.getEMode(), nullptr);
+
     // Log values for Gonios
     const Mantid::API::Run &run = WSD.getInWS()->run();
     m_Goniometer = run.getGoniometer();
@@ -127,6 +149,13 @@ size_t ConvToMDEventsWS::initialize(const MDWSDescription &WSD, std::shared_ptr<
             std::unique_ptr<Kernel::TimeSeriesProperty<double>>(run.getTimeSeriesProperty<double>(ax.name)->clone()));
         m_GonioIndex.push_back(n);
       }
+    }
+
+    const auto &dimNames = WSD.getDimNames();
+    for (auto it = dimNames.cbegin() + m_NMatrixDimensions; it != dimNames.cend(); ++it) {
+      m_Logs.push_back(
+          std::unique_ptr<Kernel::TimeSeriesProperty<double>>(run.getTimeSeriesProperty<double>(*it)->clone()));
+      m_extraDimBounds.push_back(m_QConverter->getDimBounds(it - dimNames.cbegin()));
     }
     m_tmpRot = Kernel::DblMatrix(3, 3);
   }

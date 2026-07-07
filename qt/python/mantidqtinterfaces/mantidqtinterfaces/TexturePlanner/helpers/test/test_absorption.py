@@ -32,7 +32,7 @@ def _make_wsm(offset=(0.0, 0.0, 0.0), init_R=None, gauge_volume_str="<gv/>"):
     return wsm
 
 
-def _make_model(R=None, n_orientations=1, starting_ind=0):
+def _make_model(R=None, n_orientations=1, spec_inds=None):
     model = MagicMock()
     model.workspaces = _make_wsm()
     orient = MagicMock()
@@ -40,7 +40,7 @@ def _make_model(R=None, n_orientations=1, starting_ind=0):
     model.orientations = MagicMock()
     model.orientations.__getitem__.side_effect = lambda i: orient
     model.orientations.keys.return_value = list(range(n_orientations))
-    model.geometry.starting_ind = starting_ind
+    model.geometry.spec_inds = spec_inds or []
     return model, orient
 
 
@@ -139,8 +139,8 @@ class TestAbsorptionCalculator_SetMcSampleState(unittest.TestCase):
 @patch(file_path + ".read_attenuation_coefficient_at_value")
 @patch(file_path + ".MonteCarloAbsorption")
 class TestAbsorptionCalculator_CalcForIndex(unittest.TestCase):
-    def _make_calculator(self, starting_ind=0, n_hist=4):
-        model, orient = _make_model(starting_ind=starting_ind)
+    def _make_calculator(self, spec_inds, n_hist=4):
+        model, orient = _make_model(spec_inds=spec_inds)
         calc = AbsorptionCalculator(model)
         calc._create_mc_ws = MagicMock()
         mc_ws = MagicMock()
@@ -150,7 +150,7 @@ class TestAbsorptionCalculator_CalcForIndex(unittest.TestCase):
         return calc, model, orient, mc_ws
 
     def test_orchestrates_create_then_set_state_then_mc_then_set_transmission(self, mock_mc, mock_read):
-        calc, model, orient, mc_ws = self._make_calculator(starting_ind=0)
+        calc, model, orient, mc_ws = self._make_calculator(spec_inds=[0, 1, 2, 3])
         mock_read.return_value = np.array([0.1, 0.2, 0.3, 0.4])
 
         calc.calc_for_index(0)
@@ -160,7 +160,7 @@ class TestAbsorptionCalculator_CalcForIndex(unittest.TestCase):
         mock_mc.assert_called_once_with(**calc.mc_kwargs)
 
     def test_passes_transmission_slice_from_starting_ind(self, mock_mc, mock_read):
-        calc, model, _, _ = self._make_calculator(starting_ind=2)
+        calc, model, _, _ = self._make_calculator(spec_inds=[2, 3])
         mock_read.return_value = np.array([0.1, 0.2, 0.3, 0.4])
 
         calc.calc_for_index(0)
@@ -175,7 +175,7 @@ class TestAbsorptionCalculator_CalcForIndex(unittest.TestCase):
         self.assertEqual(set_call.args[1], 0)
 
     def test_zero_transmission_when_mc_absorption_raises(self, mock_mc, mock_read):
-        calc, model, _, _ = self._make_calculator(starting_ind=1, n_hist=5)
+        calc, model, _, _ = self._make_calculator(spec_inds=[1, 2, 3, 4], n_hist=5)
         mock_mc.side_effect = RuntimeError("outside gauge volume")
 
         calc.calc_for_index(0)
@@ -187,7 +187,7 @@ class TestAbsorptionCalculator_CalcForIndex(unittest.TestCase):
 
     @patch(file_path + ".logger")
     def test_logs_warning_when_mc_absorption_raises(self, mock_logger, mock_mc, mock_read):
-        calc, _, _, _ = self._make_calculator()
+        calc, _, _, _ = self._make_calculator(spec_inds=[0])
         mock_mc.side_effect = RuntimeError("boom")
 
         calc.calc_for_index(0)

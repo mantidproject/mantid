@@ -109,7 +109,7 @@ ConvToMDBase::ConvToMDBase()
       m_NSpectra(0),        // no valid spectra by default.
       m_NumThreads(-1),     // run with all cores availible
       m_ignoreZeros(false), // 0-s added to workspace
-      m_coordinateSystem(Mantid::Kernel::None) {}
+      m_coordinateSystem(Mantid::Kernel::None), m_useLogTimes(false) {}
 
 /**
  * Set the normalization options

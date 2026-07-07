@@ -6,11 +6,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 from qtpy import QtCore, QtWidgets
+from qtpy.QtGui import QCloseEvent
 from mantidqt.icons import get_icon
 from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing
 from mantidqt.utils.qt import load_ui
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.presenter import EngineeringDiffractionPresenter
 from .tabs.common import SavedirObserver
+from typing import Any, Callable
 
 
 from qtpy.QtCore import QRegularExpression
@@ -26,7 +28,7 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
 
     status_savdirMaxwidth = 300
 
-    def __init__(self, parent=None, window_flags=None):
+    def __init__(self, parent: QtWidgets.QWidget | None = None, window_flags: Any = None):
         if window_flags is not None:
             super(EngineeringDiffractionGui, self).__init__(parent, window_flags)
         else:
@@ -72,6 +74,7 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         self.set_on_instrument_changed(self.presenter.focus_presenter.set_instrument_override)
         self.set_on_rb_num_changed(self.presenter.focus_presenter.set_rb_num)
         # Fitting Tab
+        self.set_on_instrument_changed(self.presenter.fitting_presenter.set_instrument_override)
         self.set_on_rb_num_changed(self.presenter.fitting_presenter.set_rb_num)
         # Texture Tab
         self.set_on_instrument_changed(self.presenter.texture_presenter.set_instrument_override)
@@ -98,7 +101,7 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         except ImportError:
             pass
 
-    def setup_presenter(self):
+    def setup_presenter(self) -> EngineeringDiffractionPresenter:
         presenter = EngineeringDiffractionPresenter()
         presenter.setup_settings(self)  # init before fitting otherwise default peak not populated on first time opened
         presenter.setup_calibration(self)
@@ -113,39 +116,39 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         self.set_on_help_clicked(presenter.open_help_window)
         return presenter
 
-    def setup_statusbar(self):
+    def setup_statusbar(self) -> None:
         self.statusbar.addWidget(self.status_label)
         self.set_statusbar_text("No Calibration Loaded.")
         self.statusbar.addWidget(self.savedir_label)
         self.update_savedir(self.presenter.settings_presenter.settings["save_location"])
 
-    def set_statusbar_text(self, text):
+    def set_statusbar_text(self, text: str) -> None:
         self.status_label.setText(text)
 
-    def update_savedir(self, savedir):
+    def update_savedir(self, savedir: str) -> None:
         savedir_text = "SaveDir: " + savedir
         self.savedir_label.setToolTip(savedir_text)
         self.savedir_label.setText(savedir_text)
 
-    def closeEvent(self, event):
+    def closeEvent(self, event: QCloseEvent) -> None:
         self.presenter.handle_close()
         self.setParent(None)
         event.accept()
 
-    def get_rb_no(self):
+    def get_rb_no(self) -> str:
         return self.lineEdit_RBNumber.text()
 
-    def set_rb_no(self, text) -> None:
+    def set_rb_no(self, text: str) -> None:
         self.lineEdit_RBNumber.setText(text)
 
-    def set_on_help_clicked(self, slot):
+    def set_on_help_clicked(self, slot: Callable) -> None:
         self.pushButton_help.clicked.connect(slot)
 
-    def set_on_settings_clicked(self, slot):
+    def set_on_settings_clicked(self, slot: Callable) -> None:
         self.btn_settings.clicked.connect(slot)
 
-    def set_on_rb_num_changed(self, slot):
+    def set_on_rb_num_changed(self, slot: Callable) -> None:
         self.lineEdit_RBNumber.textChanged.connect(slot)
 
-    def set_on_instrument_changed(self, slot):
+    def set_on_instrument_changed(self, slot: Callable) -> None:
         self.comboBox_instrument.currentIndexChanged.connect(slot)

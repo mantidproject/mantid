@@ -33,7 +33,7 @@ public:
   MantidQt::API::IConfiguredAlgorithm_sptr stretchAlgorithm(const StretchRunData &algParams,
                                                             const std::string &fitWorkspaceName,
                                                             const std::string &contourWorkspaceNames,
-                                                            const bool useQuickBayes = false) const override;
+                                                            const bool useQuickBayes = true) const override;
 
   API::IConfiguredAlgorithm_sptr setupSaveAlgorithm(const std::string &wsName) const override;
 };

@@ -8,6 +8,7 @@
 #
 #
 from qtpy.QtCore import Qt
+from qtpy.QtWidgets import QApplication
 
 from mantidqt.widgets.observers.observing_presenter import ObservingPresenter
 from mantidqt.widgets.observers.ads_observer import WorkspaceDisplayADSObserver
@@ -65,6 +66,16 @@ class SampleLogs(ObservingPresenter):
             log = self.model.get_log(self.view.get_row_log_name(row))
             print("# {}".format(log.name))
             print(log.valueAsPrettyStr())
+
+    def copy_selected_log_name(self):
+        """Copy the name of the first selected log to the clipboard"""
+        selected_rows = self.view.get_selected_row_indexes()
+        if selected_rows:
+            log_name = self.view.get_row_log_name(selected_rows[0])
+            # 1. Get the global application clipboard instance
+            clipboard = QApplication.clipboard()
+            # 2. Set your text
+            clipboard.setText(log_name)
 
     def plot_clicked(self, event):
         """Check if figure is doubleClicked, then create new plot"""

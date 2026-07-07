@@ -4,9 +4,9 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from isis_powder.routines.param_map_entry import ParamMapEntry
-from isis_powder.routines.common import PARAM_MAPPING
-from isis_powder.routines.common_enums import EMPTY_CAN_SUBTRACTION_METHOD
+from Diffraction.isis_powder.routines.param_map_entry import ParamMapEntry
+from Diffraction.isis_powder.routines.common import PARAM_MAPPING
+from Diffraction.isis_powder.routines.common_enums import EMPTY_CAN_SUBTRACTION_METHOD
 
 
 # Maps friendly user name (ext_name) -> script name (int_name)

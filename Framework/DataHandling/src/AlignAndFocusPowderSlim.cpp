@@ -181,6 +181,14 @@ void AlignAndFocusPowderSlim::init() {
   declareProperty(std::make_unique<FileProperty>(PropertyNames::CAL_FILE, "", FileProperty::OptionalLoad, cal_exts),
                   "The .cal file containing the position correction factors. Either this or OffsetsWorkspace needs to "
                   "be specified.");
+  declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
+                      PropertyNames::CAL_WKSP, "", Direction::Input, API::PropertyMode::Optional),
+                  "Optional: A Workspace containing the calibration information. This takes precedence over the "
+                  "calibration from CalFileName.");
+  declareProperty(std::make_unique<WorkspaceProperty<DataObjects::MaskWorkspace>>(
+                      PropertyNames::MASK_WKSP, "", Direction::Input, API::PropertyMode::Optional),
+                  "Optional: A workspace giving which detectors are masked. This takes precedence over the mask "
+                  "from CalFileName.");
   const std::vector<std::string> grp_exts{".xml", ".h5", ".hd5", ".hdf", ".cal"};
   declareProperty(std::make_unique<FileProperty>(PropertyNames::GROUP_FILE, "", FileProperty::OptionalLoad, grp_exts),
                   "An optional file containing grouping information. Overrides grouping from CalFileName. "
@@ -366,11 +374,16 @@ void AlignAndFocusPowderSlim::exec() {
     groupingWS = this->loadGroupingFile(wksp, grp_filename);
   }
 
-  // load calibration file if provided
+  ITableWorkspace_sptr calibrationWS = this->getProperty(PropertyNames::CAL_WKSP);
+  MaskWorkspace_sptr maskWS = this->getProperty(PropertyNames::MASK_WKSP);
+
   const std::string cal_filename = getPropertyValue(PropertyNames::CAL_FILE);
-  ITableWorkspace_sptr calibrationWS;
   if (!cal_filename.empty()) {
-    calibrationWS = this->loadCalFile(wksp, cal_filename, groupingWS);
+    this->loadCalFile(wksp, cal_filename, groupingWS, calibrationWS, maskWS);
+  }
+
+  if (maskWS) {
+    m_masked = maskWS->getMaskedDetectors();
   }
 
   if (groupingWS) {
@@ -771,10 +784,20 @@ void AlignAndFocusPowderSlim::initCalibrationConstantsFromCalWS(const std::vecto
   }
 }
 
-const ITableWorkspace_sptr AlignAndFocusPowderSlim::loadCalFile(const API::Workspace_sptr &inputWS,
-                                                                const std::string &filename,
-                                                                GroupingWorkspace_sptr &groupingWS) {
+/**
+ * Load the calibration file, filling in only the workspaces (grouping, calibration, mask) that have not already been
+ * supplied. Supplied workspaces take precedence over the contents of the file.
+ */
+void AlignAndFocusPowderSlim::loadCalFile(const API::Workspace_sptr &inputWS, const std::string &filename,
+                                          GroupingWorkspace_sptr &groupingWS, ITableWorkspace_sptr &calibrationWS,
+                                          MaskWorkspace_sptr &maskWS) {
   const bool load_grouping = !groupingWS;
+  const bool load_calibration = !calibrationWS;
+  const bool load_mask = !maskWS;
+
+  // nothing left to load from the file
+  if (!load_grouping && !load_calibration && !load_mask)
+    return;
 
   auto alg = createChildAlgorithm("LoadDiffCal");
   alg->setPropertyValue("Filename", filename);
@@ -784,9 +807,9 @@ const ITableWorkspace_sptr AlignAndFocusPowderSlim::loadCalFile(const API::Works
     // intentionally do not supply the input workspace because h5 version can work without
     g_log.debug("Not supplying instrument information to LoadDifCal");
   }
-  alg->setProperty<bool>("MakeCalWorkspace", true);
+  alg->setProperty<bool>("MakeCalWorkspace", load_calibration);
   alg->setProperty<bool>("MakeGroupingWorkspace", load_grouping);
-  alg->setProperty<bool>("MakeMaskWorkspace", true);
+  alg->setProperty<bool>("MakeMaskWorkspace", load_mask);
   alg->setPropertyValue("WorkspaceName", "temp");
   alg->executeAsChildAlg();
 
@@ -794,14 +817,12 @@ const ITableWorkspace_sptr AlignAndFocusPowderSlim::loadCalFile(const API::Works
     g_log.debug() << "Loading grouping workspace from calibration file\n";
     groupingWS = alg->getProperty("OutputGroupingWorkspace");
   }
-
-  const ITableWorkspace_sptr calibrationWS = alg->getProperty("OutputCalWorkspace");
-
-  const MaskWorkspace_sptr maskWS = alg->getProperty("OutputMaskWorkspace");
-  m_masked = maskWS->getMaskedDetectors();
-  g_log.debug() << "Masked detectors: " << m_masked.size() << '\n';
-
-  return calibrationWS;
+  if (load_calibration) {
+    calibrationWS = alg->getProperty("OutputCalWorkspace");
+  }
+  if (load_mask) {
+    maskWS = alg->getProperty("OutputMaskWorkspace");
+  }
 }
 
 /**

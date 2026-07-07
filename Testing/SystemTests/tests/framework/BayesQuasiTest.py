@@ -26,6 +26,7 @@ class BayesQuasiTest(MantidSystemTest):
         return platform == "darwin"
 
     def runTest(self):
+        config["algorithms.deprecated"] = "Log"
         workdir = tempfile.mkdtemp(prefix="bayes_")
         config["defaultsave.directory"] = workdir
         Load(Filename=f"{self._sample_name}.nxs", OutputWorkspace=self._sample_name, LoadHistory=False)

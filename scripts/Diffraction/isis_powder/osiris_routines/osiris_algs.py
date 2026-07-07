@@ -5,16 +5,11 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-import isis_powder.routines.common as common
-from isis_powder.routines.run_details import create_run_details_object, get_cal_mapping_dict
+import Diffraction.isis_powder.routines.common as common
+from Diffraction.isis_powder.routines.run_details import create_run_details_object, get_cal_mapping_dict
 import numpy as np
 from mantid.kernel import logger
-from mantid.simpleapi import (
-    RebinToWorkspace,
-    MergeRuns,
-    ConjoinSpectra,
-    CreateWorkspace,
-)
+import mantid.simpleapi as mantid
 from mantid.api import AnalysisDataService
 
 d_range_with_time = {
@@ -112,7 +107,7 @@ def rebin_and_sum(workspaces):
             rebinned_workspaces.append(workspace)
         else:
             rebinned_workspaces.append(
-                RebinToWorkspace(
+                mantid.RebinToWorkspace(
                     WorkspaceToRebin=workspace,
                     WorkspaceToMatch=smallest_ws,
                     OutputWorkspace="rebinned",
@@ -206,7 +201,7 @@ def _correct_drange_overlap(merged_ws, drange_sets):
 def merge_dspacing_runs(focussed_runs, drange_sets, run_number):
     if len(focussed_runs) == 1:
         input_workspaces_str = ",".join([ws.name() for ws in focussed_runs[0]])
-        ConjoinSpectra(InputWorkspaces=input_workspaces_str, OutputWorkspace="OSIRIS" + run_number + WORKSPACE_SUFFIX.MERGED)
+        mantid.ConjoinSpectra(InputWorkspaces=input_workspaces_str, OutputWorkspace="OSIRIS" + run_number + WORKSPACE_SUFFIX.MERGED)
 
         joined_spectra = AnalysisDataService["OSIRIS" + run_number + WORKSPACE_SUFFIX.MERGED]
         return [_correct_drange_overlap(joined_spectra, drange_sets)]
@@ -221,7 +216,9 @@ def merge_dspacing_runs(focussed_runs, drange_sets, run_number):
     # Group workspaces located at the same index
     matched_spectra = [list(spectra) for spectra in zip(*focussed_runs)]
     # Merge workspaces located at the same index
-    merged_spectra = [MergeRuns(InputWorkspaces=spectra, OutputWorkspace=f"merged_{idx}") for idx, spectra in enumerate(matched_spectra)]
+    merged_spectra = [
+        mantid.MergeRuns(InputWorkspaces=spectra, OutputWorkspace=f"merged_{idx}") for idx, spectra in enumerate(matched_spectra)
+    ]
 
     max_x_size = max([spectra.dataX(0).size for spectra in merged_spectra])
     max_y_size = max([spectra.dataY(0).size for spectra in merged_spectra])
@@ -241,7 +238,7 @@ def merge_dspacing_runs(focussed_runs, drange_sets, run_number):
             dataY = np.append(dataY, [0] * (max_y_size - dataY.size))
             dataE = np.append(dataE, [0] * (max_e_size - dataE.size))
 
-            merged_spectra[i] = CreateWorkspace(
+            merged_spectra[i] = mantid.CreateWorkspace(
                 NSpec=1,
                 DataX=dataX,
                 DataY=dataY,
@@ -253,7 +250,7 @@ def merge_dspacing_runs(focussed_runs, drange_sets, run_number):
             )
 
     input_workspaces_str = ",".join([ws.name() for ws in merged_spectra])
-    ConjoinSpectra(InputWorkspaces=input_workspaces_str, OutputWorkspace=output_name)
+    mantid.ConjoinSpectra(InputWorkspaces=input_workspaces_str, OutputWorkspace=output_name)
 
     common.remove_intermediate_workspace([ws for ws in merged_spectra])
 

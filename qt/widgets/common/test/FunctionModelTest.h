@@ -24,7 +24,8 @@ using namespace MantidQt::MantidWidgets;
 
 namespace {
 
-QList<FunctionModelDataset> createDatasets(QStringList const &datasetNames, std::string const &spectraString) {
+QList<FunctionModelDataset> createDatasets(std::vector<std::string> const &datasetNames,
+                                           std::string const &spectraString) {
   QList<FunctionModelDataset> datasets;
   for (const auto &datasetName : datasetNames)
     datasets.append(FunctionModelDataset(datasetName, FunctionModelSpectra(spectraString)));
@@ -65,8 +66,8 @@ public:
     TS_ASSERT_EQUALS(m_model->currentDomainIndex(), 0);
     m_model->setCurrentDomainIndex(1);
     TS_ASSERT_EQUALS(m_model->currentDomainIndex(), 1);
-    TS_ASSERT_THROWS_EQUALS(m_model->setCurrentDomainIndex(2), std::runtime_error & e, std::string(e.what()),
-                            "Domain index is out of range: 2 out of 2");
+    TS_ASSERT_THROWS_NOTHING(m_model->setCurrentDomainIndex(2));
+    TS_ASSERT_EQUALS(m_model->currentDomainIndex(), 1); // unchanged
     {
       auto fun = m_model->getCurrentFunction();
       TS_ASSERT_EQUALS(fun->name(), "LinearBackground");
@@ -85,8 +86,8 @@ public:
       TS_ASSERT_EQUALS(fun->getParameter("A0"), 1.0);
       TS_ASSERT_EQUALS(fun->getParameter("A1"), 2.0);
     }
-    TS_ASSERT_THROWS_EQUALS(m_model->getSingleFunction(2), std::runtime_error & e, std::string(e.what()),
-                            "Domain index is out of range: 2 out of 2");
+    TS_ASSERT_THROWS_NOTHING(m_model->getSingleFunction(2));
+    TS_ASSERT(!m_model->getSingleFunction(2));
     {
       auto fun = m_model->getFitFunction();
       TS_ASSERT_EQUALS(fun->name(), "MultiDomainFunction");
@@ -123,7 +124,7 @@ public:
   void test_globals() {
     m_model->setFunctionString("name=LinearBackground,A0=1,A1=2");
     m_model->setNumberDomains(3);
-    QStringList globals("A1");
+    std::vector<std::string> globals{"A1"};
     m_model->setGlobalParameters(globals);
     auto fun = m_model->getFitFunction();
     TS_ASSERT(!fun->getTie(1));
@@ -132,7 +133,7 @@ public:
     auto locals = m_model->getLocalParameters();
     TS_ASSERT_EQUALS(locals[0], "A0");
     globals.clear();
-    globals << "A0";
+    globals.push_back("A0");
     m_model->setGlobalParameters(globals);
     fun = m_model->getFitFunction();
     TS_ASSERT(!fun->getTie(0));
@@ -167,7 +168,7 @@ public:
 
     m_model->setNumberDomains(2);
     m_model->setCurrentDomainIndex(0);
-    m_model->setGlobalParameters(QStringList("A0"));
+    m_model->setGlobalParameters(std::vector<std::string>{"A0"});
     m_model->setParameter("A0", 5.0);
 
     TS_ASSERT_EQUALS(m_model->getFitFunction()->asString(), "composite=MultiDomainFunction,NumDeriv=true;"
@@ -317,13 +318,14 @@ public:
                              "DiffCoeff=2.3, Tau=1.25, Centre=0, "
                              "constraints=(Height>0, DiffCoeff>0, "
                              "Tau>0);name=FlatBackground;name=LinearBackground");
-    QStringList expectedAttributes = {QString("NumDeriv"), QString("f0.Q"), QString("f0.WorkspaceIndex")};
+    std::vector<std::string> expectedAttributes = {std::string("NumDeriv"), std::string("f0.Q"),
+                                                   std::string("f0.WorkspaceIndex")};
 
     auto attributes = m_model->getAttributeNames();
 
     TS_ASSERT_EQUALS(expectedAttributes.size(), attributes.size());
 
-    for (int i = 0; i < attributes.size(); ++i) {
+    for (unsigned int i = 0; i < attributes.size(); ++i) {
       TS_ASSERT_EQUALS(attributes[i], expectedAttributes[i]);
     }
   }
@@ -352,7 +354,7 @@ public:
                              "DiffCoeff=2.3, Tau=1.25, Centre=0, "
                              "constraints=(Height>0, DiffCoeff>0, "
                              "Tau>0);name=FlatBackground;name=LinearBackground");
-    TS_ASSERT_THROWS(m_model->getAttribute("f0.B").asDouble(), std::invalid_argument &);
+    TS_ASSERT_THROWS(m_model->getAttribute("f0.B").asDouble(), std::runtime_error &);
   }
   void test_updateMultiDatasetAttributes_correctly_updates_stored_attributes() {
     m_model->setNumberDomains(3);
@@ -379,7 +381,7 @@ public:
   }
 
   void test_that_getDatasetNames_returns_the_expected_workspace_names_for_single_spectra_workspaces() {
-    auto const datasetNames = QStringList({"WSName1", "WSName2", "WSName3"});
+    auto const datasetNames = std::vector<std::string>({"WSName1", "WSName2", "WSName3"});
 
     m_model->setNumberDomains(3);
     m_model->setDatasets(datasetNames);
@@ -388,7 +390,7 @@ public:
   }
 
   void test_that_getDatasetDomainNames_returns_the_expected_domain_names_for_single_spectra_workspaces() {
-    auto const datasetNames = QStringList({"WSName1", "WSName2", "WSName3"});
+    auto const datasetNames = std::vector<std::string>({"WSName1", "WSName2", "WSName3"});
 
     m_model->setNumberDomains(3);
     m_model->setDatasets(datasetNames);
@@ -397,29 +399,30 @@ public:
   }
 
   void test_that_getDatasetNames_returns_the_expected_workspace_names_for_multi_spectra_workspaces() {
-    auto const datasets = createDatasets(QStringList({"WSName1", "WSName2"}), "0,2-3");
-
-    m_model->setNumberDomains(6);
-    m_model->setDatasets(datasets);
-
-    auto const expectedNames = QStringList({"WSName1", "WSName1", "WSName1", "WSName2", "WSName2", "WSName2"});
-    TS_ASSERT_EQUALS(m_model->getDatasetNames().size(), 6);
-    TS_ASSERT_EQUALS(m_model->getDatasetNames(), expectedNames);
-  }
-
-  void test_that_getDatasetDomainNames_returns_the_expected_domain_names_for_multi_spectra_workspaces() {
-    auto const datasets = createDatasets(QStringList({"WSName1", "WSName2"}), "0,2-3");
+    auto const datasets = createDatasets(std::vector<std::string>({"WSName1", "WSName2"}), "0,2-3");
 
     m_model->setNumberDomains(6);
     m_model->setDatasets(datasets);
 
     auto const expectedNames =
-        QStringList({"WSName1 (0)", "WSName1 (2)", "WSName1 (3)", "WSName2 (0)", "WSName2 (2)", "WSName2 (3)"});
+        std::vector<std::string>({"WSName1", "WSName1", "WSName1", "WSName2", "WSName2", "WSName2"});
+    TS_ASSERT_EQUALS(m_model->getDatasetNames().size(), 6);
+    TS_ASSERT_EQUALS(m_model->getDatasetNames(), expectedNames);
+  }
+
+  void test_that_getDatasetDomainNames_returns_the_expected_domain_names_for_multi_spectra_workspaces() {
+    auto const datasets = createDatasets(std::vector<std::string>({"WSName1", "WSName2"}), "0,2-3");
+
+    m_model->setNumberDomains(6);
+    m_model->setDatasets(datasets);
+
+    auto const expectedNames = std::vector<std::string>(
+        {"WSName1 (0)", "WSName1 (2)", "WSName1 (3)", "WSName2 (0)", "WSName2 (2)", "WSName2 (3)"});
     TS_ASSERT_EQUALS(m_model->getDatasetDomainNames(), expectedNames);
   }
 
   void test_that_getDatasetNames_and_getDatasetDomainNames_returns_the_same_number_of_names() {
-    auto const datasets = createDatasets(QStringList({"WSName1", "WSName2"}), "0,2-3");
+    auto const datasets = createDatasets(std::vector<std::string>({"WSName1", "WSName2"}), "0,2-3");
 
     m_model->setNumberDomains(6);
     m_model->setDatasets(datasets);

@@ -958,9 +958,13 @@ Parameter_sptr ParameterMap::getRecursiveFittingParameter(const IComponent *comp
   if (!comp || m_map.empty())
     return Parameter_sptr();
 
-  std::shared_ptr<const IComponent> compInFocus(comp, NoDeleting());
-  while (compInFocus != nullptr) {
-    const ComponentID id = compInFocus->getComponentID();
+  // Walk up the component tree using a raw pointer. Wrapping the externally-owned
+  // component in a shared_ptr (even with NoDeleting) makes Coverity flag it as being
+  // managed by two smart pointers; the parent shared_ptr keeps each level alive.
+  const IComponent *current = comp;
+  std::shared_ptr<const IComponent> parent;
+  while (current != nullptr) {
+    const ComponentID id = current->getComponentID();
     auto it_found = m_map.find(id);
     if (it_found != m_map.end()) {
       auto itrs = m_map.equal_range(id);
@@ -977,7 +981,8 @@ Parameter_sptr ParameterMap::getRecursiveFittingParameter(const IComponent *comp
         }
       }
     }
-    compInFocus = compInFocus->getParent();
+    parent = current->getParent();
+    current = parent.get();
   }
   return Parameter_sptr();
 }

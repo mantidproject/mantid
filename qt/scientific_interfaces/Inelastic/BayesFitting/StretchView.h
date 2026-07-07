@@ -66,7 +66,7 @@ public:
 class MANTIDQT_INELASTIC_DLL StretchView : public QWidget, public IStretchView {
   Q_OBJECT
 public:
-  explicit StretchView(QWidget *parent = nullptr, bool useQuickBayes = false);
+  explicit StretchView(QWidget *parent = nullptr, bool useQuickBayes = true);
   ~StretchView() override = default;
 
   void subscribePresenter(IStretchViewSubscriber *presenter) override;

@@ -6,9 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import mantid.simpleapi as mantid
 
-from isis_powder.routines import absorb_corrections, common
-from isis_powder.routines.run_details import create_run_details_object, get_cal_mapping_dict
-from isis_powder.gem_routines import gem_advanced_config
+from Diffraction.isis_powder.routines import absorb_corrections, common
+from Diffraction.isis_powder.routines.run_details import create_run_details_object, get_cal_mapping_dict
+from Diffraction.isis_powder.gem_routines import gem_advanced_config
 
 
 def calculate_van_absorb_corrections(ws_to_correct, multiple_scattering, is_vanadium, msevents):

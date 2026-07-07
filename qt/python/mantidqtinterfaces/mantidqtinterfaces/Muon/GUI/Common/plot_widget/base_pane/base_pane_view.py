@@ -61,7 +61,7 @@ class BasePaneView(widget, ui_plotting_view):
         """
         Adds the canvas widget (where the plotting will occur) to the widget view.
         """
-        canvas_layout = QtWidgets.QHBoxLayout(self)
+        canvas_layout = QtWidgets.QHBoxLayout()
         self.canvasFrame.setLayout(canvas_layout)
         canvas_layout.addWidget(canvas_widget)
 

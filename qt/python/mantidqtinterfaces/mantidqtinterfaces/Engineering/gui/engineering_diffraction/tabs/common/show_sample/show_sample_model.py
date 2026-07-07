@@ -12,29 +12,30 @@ from typing import Sequence
 from mantid.kernel import logger
 from mantidqt.plotting import sample_shape
 from Engineering.common.texture_sample_viewer import get_scaled_intrinsic_sample_directions_in_lab_frame, get_xml_mesh, is_valid_mesh
+from matplotlib.figure import Figure
 
 
 class ShowSampleModel(object):
-    def __init__(self, inc_gauge_vol=False, fix_axes_to_sample=True):
-        self.ws_name = None
+    def __init__(self, inc_gauge_vol: bool = False, fix_axes_to_sample: bool = True, ws_name: str | None = None, fig: Figure | None = None):
+        self.ws_name = ws_name
         self.include_gauge_vol = inc_gauge_vol
         self.fix_axes_to_sample = fix_axes_to_sample
         self.gauge_vol_str = ""
-        self.fig = None
+        self.fig = fig
 
-    def set_ws_name(self, ws_name):
+    def set_ws_name(self, ws_name: str | None) -> None:
         self.ws_name = ws_name
 
-    def set_fix_axes_to_sample(self, fix_axes):
+    def set_fix_axes_to_sample(self, fix_axes: bool) -> None:
         self.fix_axes_to_sample = fix_axes
 
-    def set_include_gauge_vol(self, inc_gauge_vol):
+    def set_include_gauge_vol(self, inc_gauge_vol: bool) -> None:
         self.include_gauge_vol = inc_gauge_vol
 
-    def set_gauge_vol_str(self, gauge_vol_str):
+    def set_gauge_vol_str(self, gauge_vol_str: str | None) -> None:
         self.gauge_vol_str = gauge_vol_str
 
-    def show_shape_plot(self, ax_transform, ax_labels):
+    def show_shape_plot(self, ax_transform: np.ndarray, ax_labels: Sequence[str]) -> None:
         try:
             self.fig = sample_shape.plot_sample_container_and_components(self.ws_name, alpha=0.5, custom_color="grey")
             self.plot_sample_directions(ax_transform, ax_labels, self.fix_axes_to_sample)

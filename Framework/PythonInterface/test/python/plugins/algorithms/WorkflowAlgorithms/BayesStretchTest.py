@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from mantid.api import WorkspaceGroup
+from mantid.kernel import ConfigService
 from mantid.simpleapi import BayesStretch, DeleteWorkspace, Load
 
 
@@ -20,6 +21,9 @@ class BayesStretchTest(unittest.TestCase):
         self._res_ws = Load(Filename="irs26173_graphite002_res.nxs", OutputWorkspace="__BayesStretchTest_Resolution")
         self._sample_ws = Load(Filename="irs26176_graphite002_red.nxs", OutputWorkspace="__BayesStretchTest_Sample")
         self._num_hists = self._sample_ws.getNumberHistograms()
+        config = ConfigService.Instance()
+        self._original_deprectation_setting = config["algorithms.deprecated"]
+        config["algorithms.deprecated"] = "Log"
 
     def tearDown(self):
         """
@@ -27,6 +31,7 @@ class BayesStretchTest(unittest.TestCase):
         """
         DeleteWorkspace(self._sample_ws)
         DeleteWorkspace(self._res_ws)
+        ConfigService.Instance()["algorithms.deprecated"] = self._original_deprectation_setting
 
     # ----------------------------------Algorithm tests----------------------------------------
 

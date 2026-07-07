@@ -9,33 +9,49 @@ import unittest
 import unittest.mock
 import numpy as np
 
-from instrumentview.ComponentSelectionUtils import detector_indices_in_component_subtrees, get_beam_axis, reflect_points_in_axis
+from instrumentview.ComponentSelectionUtils import detector_component_indices_in_subtrees, get_beam_axis, reflect_points_in_axis
 
 
 class TestComponentSelectionUtils(unittest.TestCase):
     def setUp(self):
         self.component_info = unittest.mock.MagicMock()
+        # component index -> parent index
+        self.component_info.parent.side_effect = lambda idx: {
+            10: 100,
+            11: 100,
+            20: 200,
+            30: 300,
+        }[idx]
+        # parent index -> detector indices in subtree
         self.component_info.detectorsInSubtree.side_effect = lambda idx: {
-            0: np.array([10, 11, 12]),
-            1: np.array([10, 11]),
-            2: np.array([12]),
-            3: np.array([11]),
+            100: np.array([10, 11, 12]),
+            200: np.array([20, 21]),
+            300: np.array([30]),
         }[idx]
 
-    def test_get_all_sub_detector_indices_single(self):
-        """Single index should return detectors in that subtree."""
-        result = detector_indices_in_component_subtrees([1], self.component_info)
-        np.testing.assert_array_equal(result, np.array([10, 11]))
+    def test_subtrees_empty_input_returns_empty_list(self):
+        """Empty input returns an empty list."""
+        result = detector_component_indices_in_subtrees(np.array([], dtype=int), self.component_info)
+        self.assertEqual(result, [])
 
-    def test_get_all_sub_detector_indices_multiple(self):
-        """Multiple indices should concatenate detector subtree results."""
-        result = detector_indices_in_component_subtrees([1, 2], self.component_info)
-        np.testing.assert_array_equal(result, np.array([10, 11, 12]))
+    def test_subtrees_single_index_returns_one_subtree(self):
+        """Single component index returns the subtree of its parent."""
+        result = detector_component_indices_in_subtrees(np.array([10]), self.component_info)
+        self.assertEqual(len(result), 1)
+        np.testing.assert_array_equal(result[0], np.array([10, 11, 12]))
 
-    def test_get_all_sub_detector_indices_empty(self):
-        """Empty input returns an empty detector-index array."""
-        result = detector_indices_in_component_subtrees([], self.component_info)
-        np.testing.assert_array_equal(result, np.array([], dtype=int))
+    def test_subtrees_different_parents_returns_multiple_subtrees(self):
+        """Indices with different parents each contribute a subtree."""
+        result = detector_component_indices_in_subtrees(np.array([10, 20]), self.component_info)
+        self.assertEqual(len(result), 2)
+        np.testing.assert_array_equal(result[0], np.array([10, 11, 12]))
+        np.testing.assert_array_equal(result[1], np.array([20, 21]))
+
+    def test_subtrees_same_parent_deduplicates(self):
+        """Indices sharing a parent produce only one subtree entry."""
+        result = detector_component_indices_in_subtrees(np.array([10, 11]), self.component_info)
+        self.assertEqual(len(result), 1)
+        np.testing.assert_array_equal(result[0], np.array([10, 11, 12]))
 
     def test_reflect_across_plane_perpendicular_to_x(self):
         """Reflecting across yz-plane (axis=[1,0,0]) negates x-component."""

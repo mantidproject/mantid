@@ -6,13 +6,14 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # Disable unused import warnings. The import is for user convenience
 # Bring instruments into package namespace
-from .gem import Gem  # noqa: F401
-from .hrpd import HRPD  # noqa: F401
-from .pearl import Pearl  # noqa: F401
-from .polaris import Polaris  # noqa: F401
+from .gem import Gem
+from .hrpd import HRPD
+from .osiris import Osiris
+from .pearl import Pearl
+from .polaris import Polaris
 
 # Other useful classes
-from .routines.sample_details import SampleDetails  # noqa: F401
+from .routines.sample_details import SampleDetails
 
 # Prevent users using from import *
-__all__ = []
+__all__ = [Gem, HRPD, Osiris, Pearl, Polaris, SampleDetails]

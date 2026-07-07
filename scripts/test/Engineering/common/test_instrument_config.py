@@ -34,10 +34,13 @@ class InstrumentConfigTest(unittest.TestCase):
             group = get_instr_config(instr).group
             self.assertTrue(group in GROUPS)
 
-    def test_enum_members_have_banks(self):
-        for group in GROUPS:
-            for m in group:
-                self.assertTrue(hasattr(m, "banks"))
+    def test_each_group_member_has_group_info_with_banks(self):
+        for instr in SUPPORTED_INSTRUMENTS:
+            config = get_instr_config(instr)
+            for member in config.group:
+                with self.subTest(instr=instr, member=member):
+                    self.assertIn(member, config.group_info)
+                    self.assertTrue(hasattr(config.group_info[member], "banks"))
 
 
 if __name__ == "__main__":

@@ -4,15 +4,20 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from numpy import array, degrees, isfinite, reshape, nan, diff
+from numpy import array, degrees, isfinite, reshape, nan, diff, ndarray
 from os import path, makedirs
 from shutil import copy2
 
-from mantid.api import AnalysisDataService as ADS, AlgorithmManager
+from mantid.api import AnalysisDataService as ADS, AlgorithmManager, MatrixWorkspace
 from mantid.kernel import IntArrayProperty, UnitConversion, DeltaEModeType, logger, UnitParams
 import mantid.simpleapi as mantid  # required to call EnggUtils funcs from algorithms to avoid simpleapi error
-from mantid.dataobjects import EventWorkspace
+from mantid.dataobjects import EventWorkspace, Workspace2D, TableWorkspace
 from Engineering.common import path_handling
+from typing import Tuple, Sequence, List, TYPE_CHECKING
+from mantid.geometry import Detector, Instrument
+
+if TYPE_CHECKING:
+    from Engineering.common.calibration_info import CalibrationInfo
 
 ENGINX_BANKS = ["", "North", "South", "Both: North, South", "1", "2"]  # used in EnggCalibrate, EnggVanadiumCorrections
 ENGINX_MASK_BIN_MINS = [0, 19930, 39960, 59850, 79930]  # used in EnggFocus
@@ -28,11 +33,14 @@ VAN_CURVE_REBINNED_NAME = "van_ws_foc_rb"
 XUNIT_SUFFIXES = {"d-Spacing": "dSpacing", "Time-of-flight": "TOF"}  # to put in saved focused data filename
 
 
-def plot_tof_vs_d_from_calibration(diag_ws, ws_foc, dspacing, calibration):
+def plot_tof_vs_d_from_calibration(
+    diag_ws: Workspace2D, ws_foc: Workspace2D, dspacing: Sequence[float], calibration: "CalibrationInfo"
+) -> None:
     """
     Plot fitted TOF vs expected d-spacing from diagnostic workspaces output from mantid.PDCalibration
     :param diag_ws: workspace object of group of diagnostic workspaces
     :param ws_foc: workspace object of focused data (post mantid.ApplyDiffCal with calibrated diff_consts)
+    :param dspacing: list of d-spacings
     :param calibration: CalibrationInfo object used to determine subplot axes titles
     :return:
     """
@@ -93,7 +101,7 @@ def create_spectrum_list_from_string(str_list):
     return int_list
 
 
-def default_ceria_expected_peaks(final=False):
+def default_ceria_expected_peaks(final: bool = False) -> Sequence[float]:
     """
     Get the list of expected Ceria peaks, which can be a good default for the expected peaks
     properties of algorithms like mantid.PDCalibration
@@ -122,7 +130,7 @@ def default_ceria_expected_peaks(final=False):
     return _CERIA_EXPECTED_PEAKS_FINAL if final else _CERIA_EXPECTED_PEAKS
 
 
-def default_ceria_expected_peak_windows(final=False):
+def default_ceria_expected_peak_windows(final: bool = False) -> Sequence[float]:
     """
     Get the list of windows over which to fit ceria peaks in calls to mantid.PDCalibration
     @param :: final - if true, returns a list better suited to a secondary fitting of focused banks
@@ -168,7 +176,14 @@ def default_ceria_expected_peak_windows(final=False):
 # Functions in calibration model
 
 
-def create_new_calibration(calibration, rb_num, plot_output, save_dir, full_calib, copy_params_in_calib=True):
+def create_new_calibration(
+    calibration: "CalibrationInfo",
+    rb_num: str | None,
+    plot_output: bool,
+    save_dir: str,
+    full_calib: Workspace2D,
+    copy_params_in_calib: bool = True,
+) -> str:
     """
     Create a new calibration from a ceria run
     :param calibration: CalibrationInfo object
@@ -196,7 +211,7 @@ def create_new_calibration(calibration, rb_num, plot_output, save_dir, full_cali
     calib_dirs = [path.join(save_dir, "Calibration", "")]
     if rb_num:
         calib_dirs.append(path.join(save_dir, "User", rb_num, "Calibration", ""))
-        if calibration.group in calibration.config.texture_groups:
+        if calibration.is_texture_group():
             calib_dirs.pop(0)  # only save to RB directory to limit number files saved
 
     for calib_dir in calib_dirs:
@@ -207,13 +222,13 @@ def create_new_calibration(calibration, rb_num, plot_output, save_dir, full_cali
     return prm_filepath  # only from last calib_dir
 
 
-def write_prm_file(ws_foc, prm_savepath, calibration, spec_nums=None):
+def write_prm_file(ws_foc: Workspace2D, prm_savepath: str, calibration: "CalibrationInfo", spec_nums: Sequence[int] | None = None):
     """
     Save GSAS prm file for ENGINX data - for specification see manual
     https://subversion.xray.aps.anl.gov/EXPGUI/gsas/all/GSAS%20Manual.pdf
     :param ws_foc: focused workspace (used to get detector positions and diff constants)
     :param prm_savepath: path to save prm to
-    :param spec_index: list of indices to save (e.g. can specify a particular bank)
+    :param spec_nums: list of indices to save (e.g. can specify a particular bank)
     """
     if not spec_nums:
         spec_nums = range(ws_foc.getNumberHistograms())  # one block per spectrum in ws
@@ -251,7 +266,7 @@ def write_prm_file(ws_foc, prm_savepath, calibration, spec_nums=None):
         fout.writelines(lines)
 
 
-def load_existing_calibration_files(calibration):
+def load_existing_calibration_files(calibration: "CalibrationInfo") -> str | None:
     # load prm
     prm_filepath = calibration.prm_filepath
     if not path.exists(prm_filepath):
@@ -268,7 +283,7 @@ def load_existing_calibration_files(calibration):
     return prm_filepath
 
 
-def write_diff_consts_to_table_from_prm(prm_filepath):
+def write_diff_consts_to_table_from_prm(prm_filepath: str) -> None:
     """
     read diff consntants from prm file and write in table workspace
     :param prm_filepath: path to prm file
@@ -285,7 +300,7 @@ def write_diff_consts_to_table_from_prm(prm_filepath):
         table.addRow([ispec, *diff_consts[ispec, :]])
 
 
-def make_diff_consts_table(ws_foc):
+def make_diff_consts_table(ws_foc: Workspace2D) -> TableWorkspace:
     """
     Summarise diff constants in table workspace (adapt from detector table)
     :param ws_foc: focused ceria workspace
@@ -296,7 +311,9 @@ def make_diff_consts_table(ws_foc):
         table.removeColumn(col)
 
 
-def run_calibration(ceria_ws, calibration, full_instrument_cal_ws, copy_params_in_calib=True):
+def run_calibration(
+    ceria_ws: MatrixWorkspace, calibration: "CalibrationInfo", full_instrument_cal_ws: Workspace2D, copy_params_in_calib: bool = True
+) -> Tuple[Workspace2D, TableWorkspace, Workspace2D]:
     """
     Creates Engineering calibration files with PDCalibration
     :param ceria_ws: The workspace with the ceria data.
@@ -364,12 +381,12 @@ def run_calibration(ceria_ws, calibration, full_instrument_cal_ws, copy_params_i
     return focused_ceria, cal_table, diag_ws
 
 
-def _remove_existing_output_workspaces(ws_name):
+def _remove_existing_output_workspaces(ws_name: str) -> None:
     if ADS.doesExist(ws_name):
         ADS.remove(ws_name)
 
 
-def create_output_files(calibration_dir, calibration, ws_foc):
+def create_output_files(calibration_dir: str, calibration: "CalibrationInfo", ws_foc: Workspace2D) -> str:
     """
     Create output files (.prm for GSAS and .nxs of calibration table) from the algorithms in the specified directory
     :param calibration_dir: The directory to save the files into.
@@ -381,7 +398,7 @@ def create_output_files(calibration_dir, calibration, ws_foc):
         makedirs(calibration_dir)
 
     # save grouping ws if custom or cropped
-    if not calibration.group.banks:
+    if not calibration.get_group_banks():
         calibration.save_grouping_workspace(calibration_dir)
 
     # save prm file(s)
@@ -396,7 +413,7 @@ def create_output_files(calibration_dir, calibration, ws_foc):
     # if both banks calibrated save individual banks separately as well
     if calibration.group == calibration.config.group.BOTH:
         # output a separate prm for North and South when both banks included
-        for ibank, bank in enumerate(calibration.group.banks):
+        for ibank, bank in enumerate(calibration.get_group_banks()):
             # get prm filename for individual banks by passing group enum as argument to generate_output_file_name
             prm_filepath_bank = path.join(calibration_dir, calibration.generate_output_file_name(calibration.config.group(str(ibank + 1))))
             write_prm_file(ws_foc, prm_filepath_bank, calibration, spec_nums=[ibank])
@@ -409,7 +426,7 @@ def create_output_files(calibration_dir, calibration, ws_foc):
     return prm_filepath  # if both banks, do not pass individual banks (prm_filepath_bank) to GSAS II tab
 
 
-def getParametersFromDetector(instrument, detector):
+def getParametersFromDetector(instrument: Instrument, detector: Detector) -> Sequence[str] | None:
     """
     Get BackToBackExponential parameters from highest level component in tree
     :param instrument:
@@ -427,7 +444,7 @@ def getParametersFromDetector(instrument, detector):
     return params
 
 
-def read_diff_constants_from_prm(file_path):
+def read_diff_constants_from_prm(file_path: str) -> ndarray:
     """
     :param file_path: path to prm file
     :return: (nspec x 3) array with columns difa difc tzero (in that order - same as in detector table).
@@ -444,14 +461,21 @@ def read_diff_constants_from_prm(file_path):
     return array(diff_consts)
 
 
-def _generate_table_workspace_name(bank_num):
+def _generate_table_workspace_name(bank_num: float | int) -> str:
     return "engggui_calibration_bank_" + str(bank_num)
 
 
 # Focus model functions
 
 
-def focus_run(sample_paths, plot_output, rb_num, calibration, save_dir, full_calib):
+def focus_run(
+    sample_paths: Sequence[str],
+    plot_output: bool,
+    rb_num: str | None,
+    calibration: "CalibrationInfo",
+    save_dir: str,
+    full_calib: Workspace2D | str,
+) -> Tuple[List[str], List[str], List[str]] | None:
     """
     Focus some data using the current calibration.
     :param sample_paths: The paths to the data to be focused.
@@ -471,7 +495,7 @@ def focus_run(sample_paths, plot_output, rb_num, calibration, save_dir, full_cal
     ws_van_foc, van_run = process_vanadium(calibration, full_calib)
 
     # directories for saved focused data
-    calib_is_texture = calibration.group in calibration.config.texture_groups
+    calib_is_texture = calibration.is_texture_group()
     focus_sub_dir = path.join("Focus", calibration.get_foc_ws_suffix()) if calib_is_texture else "Focus"
     focus_dirs = [path.join(save_dir, focus_sub_dir)]
     if rb_num:
@@ -517,11 +541,11 @@ def focus_run(sample_paths, plot_output, rb_num, calibration, save_dir, full_cal
     return focused_files_list, focused_files_gsas2_list, focused_files_combined_list
 
 
-def _get_difc(ws, ind):
+def _get_difc(ws: Workspace2D, ind: int) -> float:
     return ws.spectrumInfo().diffractometerConstants(ind)[UnitParams.difc]
 
 
-def _check_ws_foc_and_ws_van_foc(ws_foc, ws_van_foc):
+def _check_ws_foc_and_ws_van_foc(ws_foc: MatrixWorkspace, ws_van_foc: MatrixWorkspace) -> None:
     try:
         num_foc, num_van = ws_foc.getNumberHistograms(), ws_van_foc.getNumberHistograms()
         assert num_foc == num_van
@@ -535,7 +559,9 @@ def _check_ws_foc_and_ws_van_foc(ws_foc, ws_van_foc):
         raise AssertionError(error_msg)
 
 
-def process_vanadium(calibration, full_calib, extra_suffix=None):
+def process_vanadium(
+    calibration: "CalibrationInfo", full_calib: Workspace2D, extra_suffix: str | None = None
+) -> Tuple[Workspace2D, Workspace2D]:
     van_run = path_handling.get_run_number_from_path(calibration.get_vanadium_path(), calibration.get_instrument())
     van_foc_name = CURVES_PREFIX + calibration.get_group_suffix()
     if extra_suffix is not None:
@@ -566,7 +592,7 @@ def process_vanadium(calibration, full_calib, extra_suffix=None):
     return ws_van_foc, van_run
 
 
-def _plot_focused_workspaces(ws_names):
+def _plot_focused_workspaces(ws_names: Sequence[str]) -> None:
     # import inside func otherwise causes FindPeaksAutomaticTest to fail
     # as it checks that pyplot isn't in sys.modules
     from matplotlib.pyplot import subplots
@@ -581,7 +607,7 @@ def _plot_focused_workspaces(ws_names):
         fig.show()
 
 
-def _load_run_and_convert_to_dSpacing(filepath, instrument, full_calib):
+def _load_run_and_convert_to_dSpacing(filepath: str, instrument: str, full_calib: Workspace2D):
     runno = path_handling.get_run_number_from_path(filepath, instrument)
     ws = mantid.Load(Filename=filepath, OutputWorkspace=str(runno))
     if ws.getRun().getProtonCharge() > 0:
@@ -595,13 +621,15 @@ def _load_run_and_convert_to_dSpacing(filepath, instrument, full_calib):
     return ws
 
 
-def _focus_run_and_apply_roi_calibration(ws, calibration, ws_foc_name=None):
+def _focus_run_and_apply_roi_calibration(
+    ws: MatrixWorkspace, calibration: "CalibrationInfo", ws_foc_name: str | None = None
+) -> MatrixWorkspace:
     ws_foc = _focus_run(ws, calibration, ws_foc_name)
     ws_foc = _apply_roi_calibration(ws_foc, calibration)
     return ws_foc
 
 
-def _focus_run(ws, calibration, ws_foc_name=None):
+def _focus_run(ws: MatrixWorkspace, calibration: "CalibrationInfo", ws_foc_name: str | None = None) -> MatrixWorkspace:
     if not ws_foc_name:
         ws_foc_name = ws.name() + "_" + FOCUSED_OUTPUT_WORKSPACE_NAME + calibration.get_foc_ws_suffix()
     ws_foc = mantid.DiffractionFocussing(InputWorkspace=ws, OutputWorkspace=ws_foc_name, GroupingWorkspace=calibration.get_group_ws())
@@ -609,18 +637,18 @@ def _focus_run(ws, calibration, ws_foc_name=None):
     return ws_foc
 
 
-def _apply_roi_calibration(focused_ws, calibration):
+def _apply_roi_calibration(focused_ws: MatrixWorkspace, calibration: "CalibrationInfo") -> MatrixWorkspace:
     focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws, OutputWorkspace=focused_ws.name(), Target="TOF")
     mantid.ApplyDiffCal(InstrumentWorkspace=focused_ws, CalibrationWorkspace=calibration.get_calibration_table())
     focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws, OutputWorkspace=focused_ws.name(), Target="dSpacing")
     return focused_ws
 
 
-def _smooth_vanadium(van_ws_foc):
+def _smooth_vanadium(van_ws_foc: MatrixWorkspace) -> Workspace2D:
     return mantid.EnggEstimateFocussedBackground(InputWorkspace=van_ws_foc, OutputWorkspace=van_ws_foc, NIterations=1, XWindow=0.08)
 
 
-def _apply_vanadium_norm(sample_ws_foc, van_ws_foc):
+def _apply_vanadium_norm(sample_ws_foc: MatrixWorkspace, van_ws_foc: MatrixWorkspace) -> Workspace2D:
     # divide by curves - automatically corrects for solid angle, det efficiency and lambda dep. flux
 
     # depending on what data is in event mode or not, different algorithms will be required

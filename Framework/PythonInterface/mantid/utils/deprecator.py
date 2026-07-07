@@ -55,7 +55,7 @@ def deprecated_algorithm(new_name, deprecation_date):  # decorator factory
     def decorator_instance(cls):
         depr_msg = f'Algorithm "{cls.__name__}" is deprecated since {deprecation_date}.'
         if new_name:
-            depr_msg += ' Use "{new_name}" instead'
+            depr_msg += f' Use "{new_name}" instead'
         raise_msg = 'Configuration "algorithms.deprecated" set to raise upon use of any deprecated algorithm'
 
         cls_category = cls.category

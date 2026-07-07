@@ -39,11 +39,11 @@ class FittingPlotToolbar(MantidNavigationToolbar):
         dpi_ratio = QtWidgets.QApplication.instance().primaryScreen().physicalDotsPerInchX() / 100
         self.setIconSize(QtCore.QSize(int(24 * dpi_ratio), int(24 * dpi_ratio)))
 
-    def on_home_clicked(self):
+    def on_home_clicked(self) -> None:
         self.sig_home_clicked.emit()
         self.push_current()
 
-    def toggle_fit(self):
+    def toggle_fit(self) -> None:
         fit_action = self._actions["toggle_fit"]
         if fit_action.isChecked():
             # disable pan and zoom
@@ -53,30 +53,30 @@ class FittingPlotToolbar(MantidNavigationToolbar):
                 self.pan()
         self.sig_toggle_fit_triggered.emit()
 
-    def serial_fit(self):
+    def serial_fit(self) -> None:
         self.sig_serial_fit_clicked.emit()
 
-    def seq_fit(self):
+    def seq_fit(self) -> None:
         self.sig_seq_fit_clicked.emit()
 
-    def toggle_legend(self):
+    def toggle_legend(self) -> None:
         self.sig_toggle_legend.emit()
 
-    def run_find_peak_convolve(self):
+    def run_find_peak_convolve(self) -> None:
         self.sig_find_peaks_convolve.emit()
 
-    def get_show_legend_value(self):
+    def get_show_legend_value(self) -> bool:
         return not self._actions["toggle_legend"].isChecked()
 
-    def handle_fit_browser_close(self):
+    def handle_fit_browser_close(self) -> None:
         """
         Respond to a signal that user closed self.fit_browser by
         clicking the [x] button.
         """
         self._actions["toggle_fit"].trigger()
 
-    def trigger_fit_toggle_action(self):
+    def trigger_fit_toggle_action(self) -> None:
         self._actions["toggle_fit"].trigger()
 
-    def set_fit_checkstate(self, checkstate):
+    def set_fit_checkstate(self, checkstate: bool) -> None:
         self._actions["toggle_fit"].setChecked(checkstate)

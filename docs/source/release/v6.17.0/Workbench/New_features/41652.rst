@@ -1,0 +1,1 @@
+- Mantid on Linux has moved from Qt5 to Qt6.

@@ -1,0 +1,1 @@
+- :ref:`algm-HB3AAdjustSampleNorm` can now output an unnormalized Q-sample event workspace and a separate normalization workspace for use with :ref:`algm-MDNorm`.

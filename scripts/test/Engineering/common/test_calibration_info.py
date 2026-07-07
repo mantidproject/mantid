@@ -183,6 +183,30 @@ class TestCalibrationInfo(unittest.TestCase, SetCalibrationMixin):
 
                 self.assertEqual(calibration.get_group_suffix(), target)
 
+    def test_is_texture_group(self):
+        # ENGINX texture groups are TEXTURE20, TEXTURE30 and CUSTOM
+        test_cases = [
+            (ENGINX_GROUP.TEXTURE20, True),
+            (ENGINX_GROUP.CUSTOM, True),
+            (ENGINX_GROUP.BOTH, False),
+            (ENGINX_GROUP.NORTH, False),
+            (None, False),
+        ]
+
+        for group, target in test_cases:
+            with self.subTest(group=group, target=target):
+                calibration = CalibrationInfo(instrument="ENGINX")
+                calibration.group = group
+
+                self.assertEqual(calibration.is_texture_group(), target)
+
+    def test_is_texture_group_false_without_config(self):
+        # no instrument means no config, so the group cannot be a texture group
+        calibration = CalibrationInfo()
+        calibration.group = ENGINX_GROUP.TEXTURE20
+
+        self.assertFalse(calibration.is_texture_group())
+
 
 if __name__ == "__main__":
     unittest.main()

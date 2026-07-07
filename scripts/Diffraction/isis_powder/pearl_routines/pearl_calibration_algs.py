@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
 import mantid.simpleapi as mantid
-import isis_powder.routines.common as common
-from isis_powder.routines.common_enums import INPUT_BATCHING, WORKSPACE_UNITS
+import Diffraction.isis_powder.routines.common as common
+from Diffraction.isis_powder.routines.common_enums import INPUT_BATCHING, WORKSPACE_UNITS
 
 
 def create_calibration(

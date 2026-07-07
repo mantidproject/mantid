@@ -7,6 +7,7 @@
 import numpy as np
 from mantid.simpleapi import LoadCIF, CreateSingleValuedWorkspace
 from mantid.geometry import CrystalStructure
+from typing import Self
 
 
 class CrystalPhase:
@@ -14,19 +15,19 @@ class CrystalPhase:
         self.xtal = crystal_structure
 
     @classmethod
-    def from_cif(cls, cif_file: str):
+    def from_cif(cls, cif_file: str) -> Self:
         ws = CreateSingleValuedWorkspace(StoreInADS=False, EnableLogging=False)
         LoadCIF(ws, cif_file, StoreInADS=False)
         return CrystalPhase(ws.sample().getCrystalStructure())
 
     @classmethod
-    def from_alatt(cls, alatt: np.ndarray, space_group: str = "P 1", basis: str = ""):
+    def from_alatt(cls, alatt: np.ndarray, space_group: str = "P 1", basis: str = "") -> Self:
         alatt_str = " ".join([str(par) for par in alatt])
         xtal = CrystalStructure(alatt_str, space_group, basis)
         return CrystalPhase(xtal)
 
     @classmethod
-    def from_string(cls, lattice: str, space_group: str, basis: str):
+    def from_string(cls, lattice: str, space_group: str, basis: str) -> Self:
         xtal = CrystalStructure(lattice, space_group, basis)
         return CrystalPhase(xtal)
 

@@ -19,7 +19,7 @@ DECLARE_SUBWINDOW(BayesFitting)
 
 BayesFitting::BayesFitting(QWidget *parent)
     : InelasticInterface(parent), m_changeObserver(*this, &BayesFitting::handleDirectoryChange),
-      m_backend(BayesBackendType::QUASI_ELASTIC_BAYES) {
+      m_backend(BayesBackendType::QUICK_BAYES) {
   m_uiForm.setupUi(this);
   m_uiForm.pbSettings->setIcon(Settings::icon());
   setBackend(backendToQStr.at(m_backend));
@@ -129,9 +129,7 @@ void BayesFitting::setBackend(const QString &text) {
     m_uiForm.backendChoice->setToolTip("Old Fortran library");
   } else if (text == backendToQStr.at(BayesBackendType::QUICK_BAYES)) {
     newBackend = BayesBackendType::QUICK_BAYES;
-    m_uiForm.warningLabel->setText(
-        "Warning: the process to establish confidence in quickbayes (new Python library)\n"
-        "is ongoing. Please feedback any issues you encounter to the Mantid development team.");
+    m_uiForm.warningLabel->setText("");
     m_uiForm.backendChoice->setToolTip("New Python library");
   }
   if (newBackend != m_backend) {

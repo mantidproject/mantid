@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 import numpy as np
+from mantid.api import AlgorithmManager
 from mantid.dataobjects import GroupingWorkspace
 from mantid.simpleapi import (
     CreateMDHistoWorkspace,
@@ -13,6 +14,7 @@ from mantid.simpleapi import (
     DeleteWorkspaces,
     HB3AAdjustSampleNorm,
     LoadMD,
+    QueryMDWorkspace,
     SliceMDHisto,
     AddSampleLog,
     mtd,
@@ -21,6 +23,23 @@ from mantid.simpleapi import (
 
 class HB3AAdjustSampleNormTest(unittest.TestCase):
     _tolerance = 1.0e-7
+    _input_ws = "__hb3a_shared_input"
+    _van_ws = "__hb3a_shared_van"
+
+    @classmethod
+    def setUpClass(cls):
+        LoadMD("HB3A_data.nxs", LoadHistory=False, OutputWorkspace=cls._input_ws)
+        norm_source = HB3AAdjustSampleNorm(
+            InputWorkspaces=cls._input_ws, OutputWorkspace="__hb3a_shared_norm_source", OutputType="Detector", NormaliseBy="None"
+        )
+        cls.__createVanadiumWorkspace(norm_source, cls._van_ws)
+        DeleteWorkspace(norm_source)
+
+    @classmethod
+    def tearDownClass(cls):
+        for workspace in (cls._input_ws, cls._van_ws):
+            if mtd.doesExist(workspace):
+                DeleteWorkspace(workspace)
 
     def setUp(self):
         return
@@ -36,33 +55,40 @@ class HB3AAdjustSampleNormTest(unittest.TestCase):
         dist = np.linalg.norm([new_pos.getX() - orig_pos.getX(), new_pos.getZ() - orig_pos.getZ()])
         np.testing.assert_allclose(dist, distance, self._tolerance)
 
+    @staticmethod
+    def __createVanadiumWorkspace(source_ws, output_ws):
+        van = SliceMDHisto(source_ws, "0,0,0", "1536,512,1", OutputWorkspace=output_ws)
+        van.setSignalArray(np.full_like(van.getSignalArray(), 25))
+        van.setErrorSquaredArray(np.full_like(van.getSignalArray(), 25))
+        AddSampleLog(van, LogName="time", LogText="42", LogType="Number Series", NumberType="Double")
+        AddSampleLog(van, LogName="monitor", LogText="420", LogType="Number Series", NumberType="Double")
+        return van
+
     def testAdjustDetector(self):
         # Test a slight adjustment of the detector position
         height_adj = 0.75
         dist_adj = 0.25
-        orig = LoadMD("HB3A_data.nxs", LoadHistory=False)
         # Get the original detector position before adjustment
-        orig_pos = orig.getExperimentInfo(0).getInstrument().getDetector(1).getPos()
-        result = HB3AAdjustSampleNorm(InputWorkspaces=orig, DetectorHeightOffset=height_adj, DetectorDistanceOffset=dist_adj)
+        orig_pos = mtd[self._input_ws].getExperimentInfo(0).getInstrument().getDetector(1).getPos()
+        result = HB3AAdjustSampleNorm(InputWorkspaces=self._input_ws, DetectorHeightOffset=height_adj, DetectorDistanceOffset=dist_adj)
         # Get the updated detector position
         new_pos = result.getExperimentInfo(0).getInstrument().getDetector(1).getPos()
 
         # Verify detector adjustment
         self.__checkAdjustments(orig_pos, new_pos, height_adj, dist_adj)
 
-        DeleteWorkspaces([orig, result])
+        DeleteWorkspace(result)
 
     def testDoNotAdjustDetector(self):
         # Ensure detector position does not change when no offsets are given
-        orig = LoadMD("HB3A_data.nxs", LoadHistory=False)
-        orig_pos = orig.getExperimentInfo(0).getInstrument().getDetector(1).getPos()
-        result = HB3AAdjustSampleNorm(InputWorkspaces=orig, DetectorHeightOffset=0.0, DetectorDistanceOffset=0.0)
+        orig_pos = mtd[self._input_ws].getExperimentInfo(0).getInstrument().getDetector(1).getPos()
+        result = HB3AAdjustSampleNorm(InputWorkspaces=self._input_ws, DetectorHeightOffset=0.0, DetectorDistanceOffset=0.0)
         new_pos = result.getExperimentInfo(0).getInstrument().getDetector(1).getPos()
 
         # Verify detector adjustment
         self.__checkAdjustments(orig_pos, new_pos, 0.0, 0.0)
 
-        DeleteWorkspaces([orig, result])
+        DeleteWorkspace(result)
 
     def testInputFail(self):
         signal = range(0, 1000)
@@ -85,49 +111,138 @@ class HB3AAdjustSampleNormTest(unittest.TestCase):
 
         DeleteWorkspace(samplews)
 
+    def testDetectorNormalizeDataFalse(self):
+        data = HB3AAdjustSampleNorm(
+            InputWorkspaces=self._input_ws,
+            VanadiumWorkspace=mtd[self._van_ws],
+            OutputWorkspace="__hb3a_detector_no_norm",
+            OutputType="Detector",
+            NormaliseBy="Monitor",
+            NormalizeData=False,
+        )
+
+        self.assertEqual(data.getSignalArray().max(), 16)
+        self.assertEqual(data.getErrorSquaredArray().max(), 16)
+
+        DeleteWorkspace(data)
+
+    def testQSampleHistogramNormalizeDataFalse(self):
+        data = HB3AAdjustSampleNorm(
+            InputWorkspaces=self._input_ws,
+            VanadiumWorkspace=mtd[self._van_ws],
+            OutputWorkspace="__hb3a_histo_no_norm",
+            OutputType="Q-sample histogram",
+            NormaliseBy="Monitor",
+            NormalizeData=False,
+            BinningDim0="-5.0125,5.0125,101",
+            BinningDim1="-2.0125,3.0125,51",
+            BinningDim2="-0.0125,5.0125,51",
+        )
+
+        self.assertEqual(data.getNumDims(), 3)
+        self.assertGreater(np.nanmax(data.getSignalArray()), 0)
+
+        DeleteWorkspace(data)
+
+    def testQSampleEventsNormalizeDataFalse(self):
+        data = HB3AAdjustSampleNorm(
+            InputWorkspaces=self._input_ws,
+            VanadiumWorkspace=mtd[self._van_ws],
+            OutputWorkspace="__hb3a_events_no_norm",
+            OutputType="Q-sample events",
+            NormaliseBy="Monitor",
+            NormalizeData=False,
+            ScaleByMotorStep=True,
+        )
+
+        self.assertEqual(data.getNumDims(), 3)
+        self.assertEqual(data.getNEvents(), 9038)
+
+        DeleteWorkspace(data)
+
+    def testValidateInputs(self):
+        # User passes an OutputNormalizationWorkspace but the conditions are not met
+        alg = AlgorithmManager.createUnmanaged("HB3AAdjustSampleNorm")
+        alg.initialize()
+        alg.setProperty("Filename", "HB3A_data.nxs")
+        alg.setProperty("OutputWorkspace", "__hb3a_out")
+        alg.setProperty("OutputNormalizationWorkspace", "__hb3a_norm")
+        issues = alg.validateInputs()
+        self.assertIn("OutputNormalizationWorkspace", issues)
+
+        # User passes MergeInputs=True with a single input file
+        alg2 = AlgorithmManager.createUnmanaged("HB3AAdjustSampleNorm")
+        alg2.initialize()
+        alg2.setProperty("Filename", "HB3A_data.nxs")
+        alg2.setProperty("OutputWorkspace", "__hb3a_out")
+        alg2.setProperty("MergeInputs", True)
+        issues2 = alg2.validateInputs()
+        self.assertIn("MergeInputs", issues2)
+
     def testDetectorNormalisation(self):
-        data1 = HB3AAdjustSampleNorm("HB3A_data.nxs", OutputType="Detector", NormaliseBy="None")
+        data1 = HB3AAdjustSampleNorm(
+            InputWorkspaces=self._input_ws, OutputWorkspace="__hb3a_detector_none", OutputType="Detector", NormaliseBy="None"
+        )
         self.assertEqual(data1.getSignalArray().max(), 16)
         self.assertEqual(data1.getErrorSquaredArray().max(), 16)
 
         # normlise by time, data 2 seconds
-        data2 = HB3AAdjustSampleNorm("HB3A_data.nxs", OutputType="Detector", NormaliseBy="Time")
+        data2 = HB3AAdjustSampleNorm(
+            InputWorkspaces=self._input_ws, OutputWorkspace="__hb3a_detector_time", OutputType="Detector", NormaliseBy="Time"
+        )
         self.assertEqual(data2.getSignalArray().max(), 16 / 2)
         self.assertEqual(data2.getErrorSquaredArray().max(), 16 / 2**2)
 
         # normalize by monitor, about 621 counts
-        data3 = HB3AAdjustSampleNorm("HB3A_data.nxs", OutputType="Detector", NormaliseBy="Monitor")
+        data3 = HB3AAdjustSampleNorm(
+            InputWorkspaces=self._input_ws, OutputWorkspace="__hb3a_detector_monitor", OutputType="Detector", NormaliseBy="Monitor"
+        )
         self.assertAlmostEqual(data3.getSignalArray().max(), 16 / 621)
         self.assertAlmostEqual(data3.getErrorSquaredArray().max(), 16 / 621**2)
 
-        # create van data
-        van = SliceMDHisto(data1, "0,0,0", "1536,512,1")
-        van.setSignalArray(np.full_like(van.getSignalArray(), 25))
-        van.setErrorSquaredArray(np.full_like(van.getSignalArray(), 25))
-        AddSampleLog(van, LogName="time", LogText="42", LogType="Number Series", NumberType="Double")
-        AddSampleLog(van, LogName="monitor", LogText="420", LogType="Number Series", NumberType="Double")
-
-        data1 = HB3AAdjustSampleNorm("HB3A_data.nxs", VanadiumWorkspace=van, OutputType="Detector", NormaliseBy="None")
-        self.assertAlmostEqual(data1.getSignalArray().max(), 16 / 25)
-        self.assertAlmostEqual(data1.getErrorSquaredArray().max(), (16 / 25) ** 2 * (1 / 16 + 1 / 25))
+        data4 = HB3AAdjustSampleNorm(
+            InputWorkspaces=self._input_ws,
+            VanadiumWorkspace=mtd[self._van_ws],
+            OutputWorkspace="__hb3a_detector_van_none",
+            OutputType="Detector",
+            NormaliseBy="None",
+        )
+        self.assertAlmostEqual(data4.getSignalArray().max(), 16 / 25)
+        self.assertAlmostEqual(data4.getErrorSquaredArray().max(), (16 / 25) ** 2 * (1 / 16 + 1 / 25))
 
         # normlise by time, data 2 seconds
-        data2 = HB3AAdjustSampleNorm("HB3A_data.nxs", VanadiumWorkspace=van, OutputType="Detector", NormaliseBy="Time")
-        self.assertAlmostEqual(data2.getSignalArray().max(), 16 / 25 * 42 / 2)
-        self.assertAlmostEqual(data2.getErrorSquaredArray().max(), (16 / 25) ** 2 * (1 / 16 + 1 / 25) * (42 / 2) ** 2)
+        data5 = HB3AAdjustSampleNorm(
+            InputWorkspaces=self._input_ws,
+            VanadiumWorkspace=mtd[self._van_ws],
+            OutputWorkspace="__hb3a_detector_van_time",
+            OutputType="Detector",
+            NormaliseBy="Time",
+        )
+        self.assertAlmostEqual(data5.getSignalArray().max(), 16 / 25 * 42 / 2)
+        self.assertAlmostEqual(data5.getErrorSquaredArray().max(), (16 / 25) ** 2 * (1 / 16 + 1 / 25) * (42 / 2) ** 2)
 
         # normalize by monitor, about 621 counts
-        data3 = HB3AAdjustSampleNorm("HB3A_data.nxs", VanadiumWorkspace=van, OutputType="Detector", NormaliseBy="Monitor")
-        self.assertAlmostEqual(data3.getSignalArray().max(), 16 / 25 * 420 / 621)
-        self.assertAlmostEqual(data3.getErrorSquaredArray().max(), (16 / 25) ** 2 * (1 / 16 + 1 / 25) * (420 / 621) ** 2)
+        data6 = HB3AAdjustSampleNorm(
+            InputWorkspaces=self._input_ws,
+            VanadiumWorkspace=mtd[self._van_ws],
+            OutputWorkspace="__hb3a_detector_van_monitor",
+            OutputType="Detector",
+            NormaliseBy="Monitor",
+        )
+        self.assertAlmostEqual(data6.getSignalArray().max(), 16 / 25 * 420 / 621)
+        self.assertAlmostEqual(data6.getErrorSquaredArray().max(), (16 / 25) ** 2 * (1 / 16 + 1 / 25) * (420 / 621) ** 2)
+
+        DeleteWorkspaces([data1, data2, data3, data4, data5, data6])
 
     def testDetectorGrouping(self):
-        data = HB3AAdjustSampleNorm("HB3A_data.nxs", OutputType="Detector", NormaliseBy="None", Grouping="None")
+        data = HB3AAdjustSampleNorm(
+            InputWorkspaces=self._input_ws, OutputWorkspace="data", OutputType="Detector", NormaliseBy="None", Grouping="None"
+        )
         data_2x2 = HB3AAdjustSampleNorm(
-            "HB3A_data.nxs", OutputWorkspace="data_2x2", OutputType="Detector", NormaliseBy="None", Grouping="2x2"
+            InputWorkspaces=self._input_ws, OutputWorkspace="data_2x2", OutputType="Detector", NormaliseBy="None", Grouping="2x2"
         )
         data_4x4 = HB3AAdjustSampleNorm(
-            "HB3A_data.nxs", OutputWorkspace="data_4x4", OutputType="Detector", NormaliseBy="None", Grouping="4x4"
+            InputWorkspaces=self._input_ws, OutputWorkspace="data_4x4", OutputType="Detector", NormaliseBy="None", Grouping="4x4"
         )
 
         ref_sum = data.getSignalArray().sum()
@@ -192,7 +307,7 @@ class HB3AAdjustSampleNormTest(unittest.TestCase):
         # --- Validation: OutputGroupingWorkspace requires Grouping != 'None' ---
         with self.assertRaisesRegex(RuntimeError, "OutputGroupingWorkspace"):
             HB3AAdjustSampleNorm(
-                "HB3A_data.nxs",
+                InputWorkspaces=self._input_ws,
                 OutputType="Detector",
                 NormaliseBy="None",
                 Grouping="None",
@@ -202,7 +317,7 @@ class HB3AAdjustSampleNormTest(unittest.TestCase):
 
         # --- 2x2:
         HB3AAdjustSampleNorm(
-            "HB3A_data.nxs",
+            InputWorkspaces=self._input_ws,
             OutputType="Detector",
             NormaliseBy="None",
             Grouping="2x2",
@@ -224,7 +339,7 @@ class HB3AAdjustSampleNormTest(unittest.TestCase):
 
         # --- 4x4:
         HB3AAdjustSampleNorm(
-            "HB3A_data.nxs",
+            InputWorkspaces=self._input_ws,
             OutputType="Detector",
             NormaliseBy="None",
             Grouping="4x4",
@@ -247,6 +362,50 @@ class HB3AAdjustSampleNormTest(unittest.TestCase):
 
         # clean up
         DeleteWorkspaces(["__hb3a_out_2x2", "__hb3a_grp_2x2", "__hb3a_out_4x4", "__hb3a_grp_4x4"])
+
+    def testOutputNormalizationWorkspace(self):
+        """Verify that OutputNormalizationWorkspace is produced when NormalizeData is False,
+        OutputType is 'Q-sample events', and vanadium data is provided.
+        Both workspaces must be 3-D MDEvent workspaces. The normalization workspace is built
+        from a uniformly non-zero vanadium replicated across all detector pixels, so it has at
+        least as many events as the data workspace (which only contains pixels with non-zero
+        counts). The signal per event in each non-empty box of the normalization workspace
+        must equal vanws_signal * data_monitor / van_monitor, which is the per-step vanadium
+        intensity scaled by the monitor flux ratio used during normalization."""
+        HB3AAdjustSampleNorm(
+            InputWorkspaces=self._input_ws,
+            VanadiumWorkspace=mtd[self._van_ws],
+            OutputWorkspace="__hb3a_events_norm_ws",
+            OutputNormalizationWorkspace="__hb3a_norm_ws",
+            OutputType="Q-sample events",
+            NormaliseBy="Monitor",
+            NormalizeData=False,
+        )
+        data = mtd["__hb3a_events_norm_ws"]
+        norm = mtd["__hb3a_norm_ws"]
+
+        self.assertEqual(data.getNumDims(), 3)
+        self.assertEqual(norm.getNumDims(), 3)
+        self.assertGreater(norm.getNEvents(), 0)
+        self.assertLessEqual(data.getNEvents(), norm.getNEvents())
+
+        norm_table = QueryMDWorkspace(InputWorkspace=norm, Normalisation="none", LimitRows=False)
+        events_per_box = np.asarray(norm_table.column("Number of Events"), dtype=float)
+        signal_per_box = np.asarray(norm_table.column("Signal/none"), dtype=float)
+        non_empty_boxes = events_per_box > 0
+        monitor_values = data.getExperimentInfo(0).run().getProperty("monitor").value
+        vanadium_monitor = mtd[self._van_ws].getExperimentInfo(0).run().getProperty("monitor").value[0]
+        expected_signal_per_event = 25 * monitor_values.mean() / vanadium_monitor
+        # Each box may contain events from a single scan step, each with its own monitor count.
+        # rtol=0.04 covers the maximum relative deviation of any per-step monitor from the mean
+        # (monitor counts span 614-659 across 13 steps, a ~4% spread around the mean of 635).
+        np.testing.assert_allclose(
+            signal_per_box[non_empty_boxes] / events_per_box[non_empty_boxes],
+            expected_signal_per_event,
+            rtol=0.04,
+        )
+
+        DeleteWorkspaces(["__hb3a_events_norm_ws", "__hb3a_norm_ws", norm_table])
 
 
 if __name__ == "__main__":

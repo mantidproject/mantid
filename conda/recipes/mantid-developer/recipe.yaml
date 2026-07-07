@@ -40,8 +40,6 @@ requirements:
     - pycifrw
     - pydantic ${{ pydantic }}
     - pyparsing ${{ pyparsing }}
-    - pyqt ${{ pyqt }}
-    - pyqt5-sip ${{ pyqt5_sip }}
     - pystog ${{ pystog }}
     - python ${{ python }}
     - pyvista ${{ pyvista }}
@@ -49,8 +47,6 @@ requirements:
     - superqt
     - pyyaml ${{ pyyaml }}
     - qscintilla2 ${{ qscintilla2 }}
-    - qt-main ${{ qt_main }}
-    - qtconsole ${{ qtconsole }}
     - qtpy ${{ qtpy }}
     - quasielasticbayes ${{ quasielasticbayes }}
     - quickbayes ${{ quickbayes }}
@@ -73,7 +69,12 @@ requirements:
       then:
         - lz4
         - pystack
-        - qt-gtk-platformtheme
+        # Qt6 stack
+        - pyqt6 ${{ pyqt6 }}
+        - pyqt6-sip ${{ pyqt6_sip }}
+        - qt6-main ${{ qt6_main }}
+        - qtconsole-base ${{ qtconsole }}
+        - qt6-gtk-platformtheme
         # OpenGL implementation:
         - libgl-devel
         - gxx_linux-64 ${{ cxx_compiler_version }}
@@ -97,6 +98,11 @@ requirements:
         - conda-wrappers
         - gdk-pixbuf ${{ gdk_pixbuf }}
         - lib3mf
+        # Qt5 stack
+        - pyqt ${{ pyqt }}
+        - pyqt5-sip ${{ pyqt5_sip }}
+        - qt-main ${{ qt_main }}
+        - qtconsole ${{ qtconsole }}
     - if: osx
       then:
         - python.app
@@ -107,6 +113,11 @@ requirements:
         - llvm-openmp ${{ llvm_openmp }}
         # Development tooling:
         - libcxx
+        # Qt5 stack
+        - pyqt ${{ pyqt }}
+        - pyqt5-sip ${{ pyqt5_sip }}
+        - qt-main ${{ qt_main }}
+        - qtconsole ${{ qtconsole }}
     - if: osx or linux
       then:
         - libopenblas ${{ libopenblas }}

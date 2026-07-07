@@ -36,6 +36,7 @@ class QLresTest(systemtesting.MantidSystemTest):
     def runTest(self):
         workdir = tempfile.mkdtemp(prefix="bayes_")
         config["defaultsave.directory"] = workdir
+        config["algorithms.deprecated"] = "Log"
         prefix = "rt_"
         sname = "irs26176_graphite002_red"
         rname = "irs26173_graphite002_res"
@@ -86,6 +87,7 @@ class QuestTest(systemtesting.MantidSystemTest):
     def runTest(self):
         workdir = tempfile.mkdtemp(prefix="bayes_")
         config["defaultsave.directory"] = workdir
+        config["algorithms.deprecated"] = "Log"
         sname = "irs26176_graphite002_red"
         rname = "irs26173_graphite002_res"
 
@@ -125,6 +127,7 @@ class QSeTest(systemtesting.MantidSystemTest):
     def runTest(self):
         workdir = tempfile.mkdtemp(prefix="bayes_")
         config["defaultsave.directory"] = workdir
+        config["algorithms.deprecated"] = "Log"
         sname = "irs26176_graphite002_red"
         rname = "irs26173_graphite002_res"
         e_min = -0.5
@@ -169,6 +172,7 @@ class QLDataTest(systemtesting.MantidSystemTest):
     def runTest(self):
         workdir = tempfile.mkdtemp(prefix="bayes_")
         config["defaultsave.directory"] = workdir
+        config["algorithms.deprecated"] = "Log"
         sname = "irs26176_graphite002_red"
         rname = "irs26173_graphite002_red"
         e_min = -0.5
@@ -219,6 +223,7 @@ class QLResNormTest(systemtesting.MantidSystemTest):
     def runTest(self):
         workdir = tempfile.mkdtemp(prefix="bayes_")
         config["defaultsave.directory"] = workdir
+        config["algorithms.deprecated"] = "Log"
         sname = "irs26176_graphite002_red"
         rname = "irs26173_graphite002_res"
         rsname = "irs26173_graphite002_ResNorm"
@@ -273,6 +278,7 @@ class QLWidthTest(systemtesting.MantidSystemTest):
     def runTest(self):
         workdir = tempfile.mkdtemp(prefix="bayes_")
         config["defaultsave.directory"] = workdir
+        config["algorithms.deprecated"] = "Log"
         prefix = "wt_"
         sname = "irs26176_graphite002_red"
         rname = "irs26173_graphite002_res"

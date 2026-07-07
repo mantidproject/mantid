@@ -50,7 +50,6 @@ class AdvancedSetupScript(BaseScriptElement):
     #
     pushdatapositive = "None"
     offsetdata = 0.0
-    lowresref = ""
     cropwavelengthmin = ""
     cropwavelengthmax = ""
     removepropmppulsewidth = 50.0
@@ -98,7 +97,6 @@ class AdvancedSetupScript(BaseScriptElement):
     def createParametersList(self):
         """Create a list of parameter names for SNSPowderReductionPlus()"""
         self.parnamelist = [
-            "LowResRef",
             "CropWavelengthMin",
             "CropWavelengthMax",
             "RemovePromptPulseWidth",
@@ -155,7 +153,6 @@ class AdvancedSetupScript(BaseScriptElement):
         """Create a dictionary for parameter and parameter values for SNSPowderReductionPlus()"""
         pardict = {}
 
-        pardict["LowResRef"] = self.lowresref
         pardict["CropWavelengthMin"] = self.cropwavelengthmin
         pardict["CropWavelengthMax"] = self.cropwavelengthmax
         pardict["RemovePromptPulseWidth"] = self.removepropmppulsewidth
@@ -216,8 +213,6 @@ class AdvancedSetupScript(BaseScriptElement):
         element_list = dom.getElementsByTagName("AdvancedSetup")
         if len(element_list) > 0:
             instrument_dom = element_list[0]
-
-            self.lowresref = getFloatElement(instrument_dom, "lowresref", AdvancedSetupScript.lowresref)
 
             self.cropwavelengthmin = getFloatElement(instrument_dom, "cropwavelengthmin", AdvancedSetupScript.cropwavelengthmin)
 
@@ -314,7 +309,6 @@ class AdvancedSetupScript(BaseScriptElement):
         class_attrs_selected = [
             "pushdatapositive",
             "offsetdata",
-            "lowresref",
             "cropwavelengthmin",
             "cropwavelengthmax",
             "removepropmppulsewidth",

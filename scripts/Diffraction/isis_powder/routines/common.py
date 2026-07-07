@@ -12,8 +12,8 @@ import mantid.kernel as kernel
 import mantid.simpleapi as mantid
 from mantid.api import AnalysisDataService, WorkspaceGroup, MatrixWorkspace
 from mantid.dataobjects import Workspace2D
-from isis_powder.routines.common_enums import INPUT_BATCHING, WORKSPACE_UNITS
-from isis_powder.routines.param_map_entry import ParamMapEntry
+from Diffraction.isis_powder.routines.common_enums import INPUT_BATCHING, WORKSPACE_UNITS
+from Diffraction.isis_powder.routines.param_map_entry import ParamMapEntry
 
 # Common param mapping entries
 PARAM_MAPPING = [

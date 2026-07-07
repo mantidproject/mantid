@@ -71,9 +71,6 @@ PROPS_FOR_ALIGN = [
     "CompressStartTime",
     "CompressBinningMode",
     "LorentzCorrection",
-    "UnwrapRef",
-    "LowResRef",
-    "LowResSpectrumOffset",
     "ReductionProperties",
 ]
 PROPS_FOR_ALIGN.extend(PROPS_IN_PD_CHARACTER)
@@ -97,9 +94,6 @@ _SLIM_BLOCKING_PROPS = [
     "CompressWallClockTolerance",
     "CompressStartTime",
     "LorentzCorrection",
-    "UnwrapRef",
-    "LowResRef",
-    "LowResSpectrumOffset",
     "TMin",
     "TMax",
     "CropWavelengthMin",
@@ -232,8 +226,6 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
         if (not self.getProperty("LogAllowList").isDefault) and (not self.getProperty("LogBlockList").isDefault):
             errors["LogAllowList"] = "Cannot specify with LogBlockList"
             errors["LogBlockList"] = "Cannot specify with LogAllowList"
-        if not self.getProperty("UnwrapRef").isDefault:
-            errors["UnwrapRef"] = "AlignAndFocusPowderFromFiles property UnwrapRef is deprecated since 2025-03-24."
 
         return errors
 

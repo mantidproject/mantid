@@ -8,8 +8,10 @@ from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing, Gener
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.plotting.plot_model import FittingPlotModel
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.plotting.plot_view import FittingPlotView
 from mantid.simpleapi import Fit, logger
-from mantidqt.utils.asynchronous import AsyncTask
+from mantid.api import MatrixWorkspace
+from mantidqt.utils.asynchronous import AsyncTask, AsyncTaskSuccess, AsyncTaskFailure
 from copy import deepcopy
+from typing import List, Dict
 
 PLOT_KWARGS = {"linestyle": "", "marker": "x", "markersize": "3"}
 FAILED_STYLE_SHEET = """QProgressBar {border: 1px solid red; border-radius: 2px}"""
@@ -45,7 +47,10 @@ class FittingPlotPresenter(object):
         self._rb_num = None
         self.view.set_subscriber_for_function_changed(self.handle_convolve_peaks_added)
 
-    def setup_toolbar(self):
+    def set_instrument(self, instrument: str) -> None:
+        self.view.fit_browser.set_default_peak_from_settings(instrument)
+
+    def setup_toolbar(self) -> None:
         self.view.set_slot_for_display_all()
         self.view.set_slot_for_fit_toggled(self.fit_toggle)
         self.view.set_slot_for_serial_fit(self.do_serial_fit)
@@ -53,14 +58,14 @@ class FittingPlotPresenter(object):
         self.view.set_slot_for_legend_toggled()
         self.view.set_slot_for_find_peaks_convolve(self.run_find_peaks_convolve)
 
-    def add_workspace_to_plot(self, ws):
+    def add_workspace_to_plot(self, ws: MatrixWorkspace) -> None:
         axes = self.view.get_axes()
         for ax in axes:
             self.model.add_workspace_to_plot(ws, ax, PLOT_KWARGS)
         self.view.update_figure()
         self.set_progress_bar_zero()
 
-    def remove_workspace_from_plot(self, ws):
+    def remove_workspace_from_plot(self, ws: MatrixWorkspace) -> None:
         for ax in self.view.get_axes():
             self.model.remove_workspace_from_plot(ws, ax)
             self.view.remove_ws_from_fitbrowser(ws)
@@ -69,7 +74,7 @@ class FittingPlotPresenter(object):
         if len(self.model.get_plotted_workspaces()) == 0:
             self.view.set_find_peaks_convolve_button_status(False)
 
-    def clear_plot(self):
+    def clear_plot(self) -> None:
         for ax in self.view.get_axes():
             self.model.remove_all_workspaces_from_plot(ax)
         self.view.clear_figure()
@@ -77,23 +82,23 @@ class FittingPlotPresenter(object):
         self.set_progress_bar_zero()
         self.view.set_find_peaks_convolve_button_status(False)
 
-    def on_cancel_clicked(self):
+    def on_cancel_clicked(self) -> None:
         if self.worker:
             self.abort_worker()
             logger.warning("Fit cancelled therefore the fitpropertybrowser and output fit results may be out of sync.")
             self.fitprop_list = None
             self._finished()
 
-    def abort_worker(self):
+    def abort_worker(self) -> None:
         self.worker.abort(interrupt=False)
 
-    def enable_view_components(self, enable: bool):
+    def enable_view_components(self, enable: bool) -> None:
         # enable / disable all widgets apart from the cancel button
         self.view.fit_browser.setEnabled(enable)
         self.view.dock_window.setEnabled(enable)
         self.view.plot_dock.setEnabled(enable)
 
-    def update_browser(self):
+    def update_browser(self) -> None:
         status = None
         function_string = None
         ws_name = None
@@ -105,13 +110,13 @@ class FittingPlotPresenter(object):
             ws_name = fitprop["properties"]["InputWorkspace"]
         self.view.update_browser(status=status, func_str=function_string, setup_name=ws_name)
 
-    def do_serial_fit(self):
+    def do_serial_fit(self) -> None:
         self.fit_all_started_notifier.notify_subscribers(False)
 
-    def do_seq_fit(self):
+    def do_seq_fit(self) -> None:
         self.fit_all_started_notifier.notify_subscribers(True)
 
-    def run_find_peaks_convolve(self):
+    def run_find_peaks_convolve(self) -> None:
         self.is_waiting_convolve_peaks = False
         self.find_peaks_convolve_started_notifier.notify_subscribers()
         try:
@@ -129,7 +134,7 @@ class FittingPlotPresenter(object):
             logger.error(f"Failed to run FindPeaksConvolve for workspace:{input_ws_name}! Error:{err}")
             self.find_peaks_convolve_done_notifier.notify_subscribers(False)
 
-    def do_fit_all_async(self, ws_names_list, do_sequential=True):
+    def do_fit_all_async(self, ws_names_list: List[str], do_sequential: bool = True) -> None:
         previous_fit_browser = self.view.read_fitprop_from_browser()
         self.worker = AsyncTask(
             self.do_fit_all,
@@ -140,7 +145,13 @@ class FittingPlotPresenter(object):
         )
         self.worker.start()
 
-    def fit_completed(self, fit_props, loaded_ws_list, active_ws_list, log_workspace_name):
+    def fit_completed(
+        self,
+        fit_props: List[Dict[str, Dict[str, str | bool]]],
+        loaded_ws_list: List[str],
+        active_ws_list: List[str],
+        log_workspace_name: str,
+    ) -> None:
         if fit_props:
             self.model.update_fit(fit_props, loaded_ws_list, active_ws_list, log_workspace_name)
 
@@ -148,18 +159,20 @@ class FittingPlotPresenter(object):
     # Fit Asynchronous Thread
     # =======================
 
-    def _on_worker_success(self, async_success):
+    def _on_worker_success(self, async_success: AsyncTaskSuccess) -> None:
         self.fitprop_list = async_success.output
 
-    def _on_worker_error(self, async_failure=None):
+    @staticmethod
+    def _on_worker_error(async_failure: AsyncTaskFailure | None = None) -> None:
         error_message = str(async_failure)
         if "KeyboardInterrupt" not in error_message:
             logger.error(str(async_failure))
 
-    def _finished(self, _=None):
+    def _finished(self, _=None) -> None:
         self.fit_all_done_notifier.notify_subscribers(self.fitprop_list)
 
-    def do_fit_all(self, previous_fitprop, ws_name_list, do_sequential=True):
+    @staticmethod
+    def do_fit_all(previous_fitprop: Dict[str, Dict], ws_name_list: List[str], do_sequential: bool = True) -> List[Dict[str, Dict]]:
         prev_fitprop = previous_fitprop
         fitprop_list = []
         for ws_name in ws_name_list:
@@ -187,7 +200,7 @@ class FittingPlotPresenter(object):
     # Indeterminate Fit Progress Bar
     # ==============================
 
-    def fit_toggle(self):
+    def fit_toggle(self) -> None:
         """Toggle fit browser and tool on/off"""
         if self.view.is_fit_browser_visible():
             self.view.hide_fit_browser()
@@ -200,13 +213,13 @@ class FittingPlotPresenter(object):
                 self.view.set_find_peaks_convolve_button_status(True)
         self.set_progress_bar_zero()
 
-    def update_progress_bar(self):
+    def update_progress_bar(self) -> None:
         if self.fitprop_list:
             self.set_final_state_progress_bar(output_list=self.fitprop_list)
         else:
             self.set_progress_bar_zero()
 
-    def set_final_state_progress_bar(self, output_list, status=None):
+    def set_final_state_progress_bar(self, output_list: List[Dict[str, str]] | None, status: str | None = None) -> None:
         if not status:
             status = output_list[-1]["status"].lower()
         if "success" in status:
@@ -214,25 +227,25 @@ class FittingPlotPresenter(object):
         else:
             self.set_progress_bar_failed(status)
 
-    def set_progress_bar_failed(self, status):
+    def set_progress_bar_failed(self, status: str | None) -> None:
         self.view.set_progress_bar(status=status, minimum=0, maximum=100, value=0, style_sheet=FAILED_STYLE_SHEET)
 
-    def set_progress_bar_success(self, status):
+    def set_progress_bar_success(self, status: str | None) -> None:
         self.view.set_progress_bar(status=status, minimum=0, maximum=100, value=100, style_sheet=SUCCESS_STYLE_SHEET)
 
-    def set_progress_bar_to_in_progress(self):
+    def set_progress_bar_to_in_progress(self) -> None:
         # indeterminate progress bar
         self.view.set_progress_bar(status="fitting...", minimum=0, maximum=0, value=0, style_sheet=IN_PROGRESS_STYLE_SHEET)
 
-    def set_progress_bar_zero(self):
+    def set_progress_bar_zero(self) -> None:
         self.view.set_progress_bar(status="", minimum=0, maximum=100, value=0, style_sheet=EMPTY_STYLE_SHEET)
 
-    def handle_convolve_peaks_added(self):
+    def handle_convolve_peaks_added(self) -> None:
         if self.is_waiting_convolve_peaks:
             self.is_waiting_convolve_peaks = False
             self.find_peaks_convolve_done_notifier.notify_subscribers(True)
 
-    def set_rb_num(self, rb_num):
+    def set_rb_num(self, rb_num: str) -> None:
         self._rb_num = rb_num
         # store a record of rb_num on the model for saving
         self.model.set_rb_num(rb_num)

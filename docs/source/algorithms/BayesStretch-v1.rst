@@ -9,6 +9,8 @@
 Description
 -----------
 
+This algorithm has been deprecated in favour of :ref:`algm-BayesStretch2`
+
 This is a variation of the stretched exponential option of
 :ref:`Quasi <algm-BayesQuasi>`. For each spectrum a fit is performed
 for a grid of :math:`\beta` and :math:`\sigma` values. The distribution of goodness of fit values
@@ -22,7 +24,7 @@ Usage
 
 **Example - BayesStretch**
 
-.. testcode:: BayesStretchExample
+.. code-block:: python
 
     # Load in test data
     sample_ws = Load('irs26176_graphite002_red.nxs')

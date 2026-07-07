@@ -63,13 +63,12 @@ class AbsorptionCalculator:
         }
 
     def calc_for_index(self, index: int) -> None:
-        m = self._model
-        wsm = m.workspaces
+        wsm = self._model.workspaces
         # create a workspace to run the absorption calculation on
         mc_ws = self._create_mc_ws(wsm)
 
         # extract goniometer for run index
-        R = m.orientations[index].R
+        R = self._model.orientations[index].R
 
         # set sample state (orientated shape, material and gauge volume) for run index
         self._set_mc_sample_state(wsm, mc_ws, R)
@@ -78,11 +77,12 @@ class AbsorptionCalculator:
             MonteCarloAbsorption(**self.mc_kwargs)
             transmission = read_attenuation_coefficient_at_value(
                 wsm.WS_MC_OUTPUT, wsm.attenuation_kwargs["point"], wsm.attenuation_kwargs["unit"]
-            )[m.geometry.starting_ind :]
+            )
+            transmission = [transmission[spec_ind] for spec_ind in self._model.geometry.spec_inds]
         except RuntimeError:
             logger.warning("MonteCarloAbsorption has failed, sample is assumed to be outside the gauge volume ")
-            transmission = np.zeros(mc_ws.getNumberHistograms() - m.geometry.starting_ind)
-        m.orientations.set_transmission_at_index(transmission, index)
+            transmission = [0] * len(self._model.geometry.spec_inds)
+        self._model.orientations.set_transmission_at_index(transmission, index)
 
     @staticmethod
     def _create_mc_ws(wsm: _WorkspaceManagerType) -> MatrixWorkspace:

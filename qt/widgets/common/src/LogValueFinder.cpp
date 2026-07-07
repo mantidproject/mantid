@@ -21,7 +21,7 @@ namespace MantidQt::MantidWidgets {
  * Constructor
  * @param wsNames :: [input] Workspace names
  */
-LogValueFinder::LogValueFinder(QStringList wsNames) : m_wsNames(std::move(wsNames)) {}
+LogValueFinder::LogValueFinder(std::vector<std::string> wsNames) : m_wsNames(std::move(wsNames)) {}
 
 /**
  * Get names of all logs from the first workspace
@@ -37,7 +37,7 @@ std::vector<std::string> LogValueFinder::getLogNames() const {
   }
 
   auto &ads = AnalysisDataService::Instance();
-  const auto &wsName = m_wsNames.first().toStdString();
+  const auto &wsName = m_wsNames.front();
   if (ads.doesExist(wsName)) {
     const auto &workspace = ads.retrieveWS<MatrixWorkspace>(wsName);
     const auto &logs = workspace->run().getLogData();
@@ -57,9 +57,9 @@ std::vector<std::string> LogValueFinder::getLogNames() const {
  * @throws std::runtime_error if log cannot be found or cast
  * @throws std::invalid_argument if index is not in range
  */
-double LogValueFinder::getLogValue(const QString &logName, const Mantid::Kernel::Math::StatisticType &function,
+double LogValueFinder::getLogValue(const std::string &logName, const Mantid::Kernel::Math::StatisticType &function,
                                    int index) const {
-  if (index > m_wsNames.size() - 1 || index < 0) {
+  if (index < 0 || static_cast<std::size_t>(index) >= m_wsNames.size()) {
     std::ostringstream message;
     message << "Index " << index << " out of range: number of workspaces = " << m_wsNames.size();
     throw std::invalid_argument(message.str());
@@ -77,13 +77,13 @@ double LogValueFinder::getLogValue(const QString &logName, const Mantid::Kernel:
  * @throws std::runtime_error if log cannot be found or cast
  * @throws std::invalid_argument if workspace not found
  */
-double LogValueFinder::getLogValue(const QString &logName, const Mantid::Kernel::Math::StatisticType &function,
-                                   const QString &wsName) const {
+double LogValueFinder::getLogValue(const std::string &logName, const Mantid::Kernel::Math::StatisticType &function,
+                                   const std::string &wsName) const {
   auto &ads = AnalysisDataService::Instance();
-  const auto &workspace = wsName.toStdString();
+  const auto &workspace = wsName;
   if (ads.doesExist(workspace)) {
     const auto &ws = ads.retrieveWS<MatrixWorkspace>(workspace);
-    return ws->run().getLogAsSingleValue(logName.toStdString(), function);
+    return ws->run().getLogAsSingleValue(logName, function);
   } else {
     throw std::invalid_argument("Workspace not found: " + workspace);
   }

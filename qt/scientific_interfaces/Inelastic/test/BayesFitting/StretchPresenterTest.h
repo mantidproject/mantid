@@ -118,13 +118,13 @@ public:
 
     auto const cutIndex = runData.sampleName.find_last_of("_");
     auto const baseName = runData.sampleName.substr(0, cutIndex);
-    auto fitWorkspaceName = baseName + "_Stretch_Fit_QuasiElasticBayes";
-    auto contourWorkspaceName = baseName + "_Stretch_Contour_QuasiElasticBayes";
+    auto fitWorkspaceName = baseName + "_Stretch_Fit_QuickBayes";
+    auto contourWorkspaceName = baseName + "_Stretch_Contour_QuickBayes";
 
     ads.addOrReplace(fitWorkspaceName, m_workspace);
     ads.addOrReplace(contourWorkspaceName, m_workspace);
 
-    ON_CALL(*m_view, getRunData(false)).WillByDefault(Return(runData));
+    ON_CALL(*m_view, getRunData(true)).WillByDefault(Return(runData));
     EXPECT_CALL(*m_view, setPlotADSEnabled(false)).Times(1);
 
     EXPECT_CALL(*m_model, stretchAlgorithm(_, _, _, _)).Times(1);

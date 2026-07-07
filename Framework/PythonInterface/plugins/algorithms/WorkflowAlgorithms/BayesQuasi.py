@@ -22,6 +22,7 @@ from mantid.api import (
 )
 from mantid.kernel import StringListValidator, Direction
 import mantid.simpleapi as s_api
+from mantid.utils.deprecator import deprecated_algorithm
 from mantid import config, logger
 from IndirectCommon import (
     check_analysers_or_e_fixed,
@@ -45,6 +46,7 @@ def _calculate_eisf(
     return eisf, eisf_error
 
 
+@deprecated_algorithm("BayesQuasi", "2026-06-22")
 class BayesQuasi(PythonAlgorithm):
     _program = None
     _samWS = None

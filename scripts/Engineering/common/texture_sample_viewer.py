@@ -56,7 +56,7 @@ def get_scaled_intrinsic_sample_directions_in_lab_frame(
     return rd, nd, td, arrow_lens
 
 
-def get_mesh_vertices(mesh: np.ndarray):
+def get_mesh_vertices(mesh: np.ndarray) -> np.ndarray:
     n_faces = mesh.shape[0]
     return np.unique(mesh.reshape((n_faces * 3, 3)), axis=0)
 

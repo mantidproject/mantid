@@ -7,31 +7,25 @@
 
 from mantid.dataobjects import Workspace2D
 
-from dataclasses import dataclass
 import numpy as np
-
-
-@dataclass
-class Node:
-    name: str
-    component_index: int
-    children: list["Node"]
 
 
 class ComponentTreeModel:
     def __init__(self, workspace: Workspace2D) -> None:
         self._component_info = workspace.componentInfo()
-        self.tree = self._create_tree()
 
-    def _create_tree(self) -> Node:
-        root = int(self._component_info.root())
-        children = self._create_children(root)
-        return Node(self._component_info.name(root), root, children)
+    def root_index(self) -> int:
+        return int(self._component_info.root())
 
-    def _create_children(self, component_index: int) -> list[Node]:
+    def root_name(self) -> str:
+        return self._component_info.name(self.root_index())
+
+    def get_children(self, component_index: int) -> list[tuple[str, int]]:
         children = self._component_info.children(component_index)
-        children_nodes = [Node(self._component_info.name(int(child)), int(child), self._create_children(int(child))) for child in children]
-        return children_nodes
+        return [(self._component_info.name(int(c)), int(c)) for c in children]
+
+    def has_children(self, component_index: int) -> bool:
+        return len(self._component_info.children(component_index)) > 0
 
     def get_all_sub_component_indices(self, component_indices: list[int]) -> np.ndarray:
         if len(component_indices) == 0:

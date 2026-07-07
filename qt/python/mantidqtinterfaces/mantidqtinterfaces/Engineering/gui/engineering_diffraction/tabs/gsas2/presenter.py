@@ -4,14 +4,21 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import annotations  # this prevents the imports from TYPE_CHECKING from being evaluated at runtime
 import numpy as np
 
 from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.fitting_ads_observer import FittingADSObserver
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2.model import GSAS2Model
+    from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2.view import GSAS2View
+    from mantid.api import MatrixWorkspace
 
 
 class GSAS2Presenter(object):
-    def __init__(self, model, view, test=False):
+    def __init__(self, model: GSAS2Model, view: GSAS2View, test=False):
         self.model = model
         self.view = view
 
@@ -25,11 +32,11 @@ class GSAS2Presenter(object):
         if not test:
             self.connect_view_signals()
 
-    def connect_view_signals(self):
+    def connect_view_signals(self) -> None:
         self.view.set_refine_clicked(self.on_refine_clicked)
         self.view.number_output_histograms_combobox.currentTextChanged.connect(self.on_plot_index_changed)
 
-    def on_refine_clicked(self):
+    def on_refine_clicked(self) -> None:
         self.clear_plot()
         load_params = self.view.get_load_parameters()
         project_name = self.view.get_project_name()
@@ -43,12 +50,12 @@ class GSAS2Presenter(object):
             self.save_latest_load_parameters()
             self.model.load_focused_nxs_for_logs(load_params[2])
 
-    def on_plot_index_changed(self, new_plot_index):
+    def on_plot_index_changed(self, new_plot_index: str | int | None) -> None:
         if new_plot_index:
             if int(new_plot_index) != int(self.current_plot_index):
                 self.plot_result(new_plot_index)
 
-    def get_limits_if_same_load_parameters(self):
+    def get_limits_if_same_load_parameters(self) -> np.ndarray | None:
         new_load_params = self.view.get_load_parameters()
         if not new_load_params:
             return None
@@ -65,17 +72,17 @@ class GSAS2Presenter(object):
     # Component Setters
     # =================
 
-    def set_rb_num(self, rb_num):
+    def set_rb_num(self, rb_num: str) -> None:
         self.rb_num = rb_num
 
-    def save_latest_load_parameters(self):
+    def save_latest_load_parameters(self) -> None:
         self.latest_load_parameters = self.view.get_load_parameters()
 
     # ========
     # Plotting
     # ========
 
-    def plot_result(self, output_histogram_index):
+    def plot_result(self, output_histogram_index: str | int) -> None:
         self.clear_plot()
         axes = self.view.get_axes()
         plot_window_title = ""
@@ -85,11 +92,11 @@ class GSAS2Presenter(object):
         self.current_plot_index = output_histogram_index
         self.set_x_limits(output_histogram_index)
 
-    def clear_plot(self):
+    def clear_plot(self) -> None:
         self.view.clear_figure()
         self.current_plot_index = None
 
-    def set_x_limits(self, current_histogram_index):
+    def set_x_limits(self, current_histogram_index: str | int) -> None:
         x_minimum = self.model.x_limits.x_min[int(current_histogram_index) - 1]
         x_maximum = self.model.x_limits.x_max[int(current_histogram_index) - 1]
         self.view.set_x_limits(x_minimum, x_maximum)
@@ -98,13 +105,13 @@ class GSAS2Presenter(object):
     # Sample Logs ADS observer
     # ========================
 
-    def remove_workspace(self, ws_name):
+    def remove_workspace(self, ws_name: str) -> None:
         if ws_name in self.model.get_all_workspace_names():
             self.model.remove_workspace(ws_name)
         elif ws_name in self.model.get_log_workspaces_name():
             self.model.update_sample_log_workspace_group()
 
-    def rename_workspace(self, old_name, new_name):
+    def rename_workspace(self, old_name: str, new_name: str) -> None:
         # Note - ws.name() not updated yet so need to rely on new_name parameter
         # Also Note - ADS rename is always associated with a ADS replace so
         # rely on the replace to _repopulate_table. Prefer not to call twice
@@ -113,9 +120,9 @@ class GSAS2Presenter(object):
             self.model.update_workspace_name(old_name, new_name)
 
     # handle ADS clear
-    def clear_workspaces(self):
+    def clear_workspaces(self) -> None:
         self.model.clear_workspaces()
 
-    def replace_workspace(self, name, workspace):
+    def replace_workspace(self, name: str, workspace: MatrixWorkspace) -> None:
         if name in self.model.get_all_workspace_names():
             self.model.replace_workspace(name, workspace)

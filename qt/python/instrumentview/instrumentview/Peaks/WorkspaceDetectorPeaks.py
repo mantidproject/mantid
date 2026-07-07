@@ -53,12 +53,9 @@ class WorkspaceDetectorPeaks:
         labels = [p.label for p in np.array(self.detector_peaks)[valid]]
         return detector_positions[ordered_indices], labels
 
-    def get_x_values_and_labels(self, unit, picked_detector_ids) -> tuple[list, list]:
-        # x values for vertical markers in lineplot
+    def get_x_values_and_labels(self, picked_detector_ids) -> list[Peak]:
         picked_peaks = [p for peak in self.detector_peaks for p in peak.peaks if peak.detector_id in picked_detector_ids]
-        x_values = [p.location_in_unit(unit) for p in picked_peaks]
-        labels = [p.label for p in picked_peaks]
-        return x_values, labels
+        return picked_peaks
 
     def _is_within_limits(self, x, limits):
         return x >= min(limits) and x <= max(limits)

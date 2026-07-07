@@ -34,11 +34,27 @@ vanadium, time or monitor and motor step size. `VanadiumFile` or
 pixel-by-pixel. The `NormaliseBy` option `time` or `monitor` uses that
 log values from the data (and vanadium if used) input and is applied
 to each scan axis step. The `ScaleByMotorStep` scales the entire data
-by the step size of either the `omega` or `chi` axis, this is only
-using when converting to Q-sample and allows the comparison of peak
+by the step size of either the `omega` or `phi` axis, this is only
+applied when ``OutputType`` is ``Q-sample events`` and allows the comparison of peak
 intensities found with :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>`
 to be directly compared between scans measured with different step
 sizes.
+
+Path to MDNorm
+##############
+
+Setting ``NormalizeData=False`` with ``OutputType=Q-sample events`` suppresses the division of the
+data by the vanadium and flux, and instead makes the vanadium-based normalization available as a
+separate :py:obj:`MDEventWorkspace <mantid.api.IMDWorkspace>` via ``OutputNormalizationWorkspace``.
+The two workspaces — unnormalized data and normalization — can then be passed to
+:ref:`MDNorm <algm-MDNorm>`, which applies symmetry-correct normalization to an arbitrary Q-sample
+or HKL binning chosen after data collection. This deferred-normalization workflow avoids
+rebinning artefacts that arise when the vanadium correction is applied before converting to
+the final reciprocal-space grid.
+
+When multiple input files are provided, ``MergeInputs=True`` must also be set so that the
+per-file normalization workspaces are merged into a single output alongside the merged data
+workspace.
 
 Grouping
 --------

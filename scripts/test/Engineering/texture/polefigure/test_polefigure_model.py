@@ -113,7 +113,7 @@ class TextureProjectionTest(unittest.TestCase):
 
     def test_parse_hkl_valid(self):
         hkl = self.model.parse_hkl("1", "2", "3")
-        self.assertEqual(hkl, [1, 2, 3])
+        self.assertEqual(hkl, (1, 2, 3))
 
     def test_parse_hkl_invalid(self):
         hkl = self.model.parse_hkl("a", "b", "c")

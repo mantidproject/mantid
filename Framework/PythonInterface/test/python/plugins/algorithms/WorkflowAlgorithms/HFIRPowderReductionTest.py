@@ -2123,5 +2123,79 @@ class SampleAbsorptionCorrectionTests(unittest.TestCase):
         self.assertLess(fnorm, 10000)
 
 
+# A minimal but valid instrument definition file with a distinctive name. When applied via the
+# IDFFilename property, the loaded workspace's instrument name becomes this file's basename.
+_CUSTOM_IDF = """<?xml version='1.0' encoding='UTF-8'?>
+<instrument name="CUSTOM_IDF" valid-from="1900-01-31 23:59:59" valid-to="2100-01-31 23:59:59" last-modified="2020-01-01 00:00:00">
+  <defaults>
+    <length unit="metre"/>
+    <angle unit="degree"/>
+    <reference-frame>
+      <along-beam axis="z"/>
+      <pointing-up axis="y"/>
+      <handedness val="right"/>
+    </reference-frame>
+  </defaults>
+  <component type="moderator"><location z="-5.0"/></component>
+  <type is="Source" name="moderator"/>
+  <component type="sample-position"><location y="0.0" x="0.0" z="0.0"/></component>
+  <type is="SamplePos" name="sample-position"/>
+  <component type="detector-bank" idlist="dets"><location/></component>
+  <type name="detector-bank">
+    <component type="pixel"><location y="0.0" x="0.707" z="0.707"/></component>
+  </type>
+  <type is="detector" name="pixel">
+    <cylinder id="cyl-approx">
+      <centre-of-bottom-base p="0.0" r="0.0" t="0.0"/>
+      <axis y="1.0" x="0.0" z="0.0"/>
+      <radius val="0.0127"/>
+      <height val="0.1"/>
+    </cylinder>
+    <algebra val="cyl-approx"/>
+  </type>
+  <idlist idname="dets"><id start="1" end="1"/></idlist>
+</instrument>
+"""
+
+
+class IDFOverrideTests(unittest.TestCase):
+    """Tests for the optional IDFFilename property that overrides the instrument geometry.
+
+    When IDFFilename is supplied, the loaders overlay it with LoadInstrument, which sets the
+    workspace's instrument name to the IDF file's basename. Each test verifies the override by
+    checking the loaded workspace has the custom instrument rather than the default WAND/MIDAS one.
+    """
+
+    def setUp(self):
+        self._test_dir = tempfile.mkdtemp()
+        self._idf = os.path.join(self._test_dir, "My_Custom_IDF.xml")
+        with open(self._idf, "w") as f:
+            f.write(_CUSTOM_IDF)
+
+    def tearDown(self):
+        shutil.rmtree(self._test_dir, ignore_errors=True)
+        for name in list(mtd.getObjectNames()):
+            if mtd.doesExist(name):
+                mtd.remove(name)
+
+    def test_wand_uses_custom_idf(self):
+        algo = _create_algo(Instrument="WAND^2", IDFFilename=self._idf)
+        algo._load_WAND_Data("HB2C_7000.nxs.h5", "test_wand_custom_idf")
+        instrument_name = mtd["test_wand_custom_idf"].getInstrument().getName()
+        self.assertEqual(instrument_name, os.path.basename(self._idf))
+
+    def test_midas_uses_custom_idf(self):
+        # Save a small workspace as the MIDAS sample file. _loadMIDASData falls back to the
+        # generic loader for this (non-event) file, which then applies the custom IDF.
+        CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, BinWidth=20000, OutputWorkspace="_midas_sample")
+        midas_file = os.path.join(self._test_dir, "midas_sample.nxs")
+        SaveNexusESS(mtd["_midas_sample"], Filename=midas_file)
+
+        algo = _create_algo(Instrument="MIDAS", Wavelength=2.5, IDFFilename=self._idf)
+        algo._loadMIDASData(midas_file, "test_midas_custom_idf")
+        instrument_name = mtd["test_midas_custom_idf"].getInstrument().getName()
+        self.assertEqual(instrument_name, os.path.basename(self._idf))
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -388,6 +388,14 @@ MDTransfModQ::MDTransfModQ()
       m_Emode(Kernel::DeltaEMode::Undefined),            // uninitialized
       m_kFixed(1.), m_eFixed(1.), m_pEfixedArray(nullptr), m_pDetMasks(nullptr) {}
 
+/**
+ * @param dim dimension index for which to check bounds.
+ * @return coord_t pair with min and max bounds of selected dimension.
+ */
+std::pair<coord_t, coord_t> MDTransfModQ::getDimBounds(size_t dim) const {
+  return std::make_pair(m_DimMin[dim], m_DimMax[dim]);
+}
+
 std::vector<std::string> MDTransfModQ::getEmodes() const { return Kernel::DeltaEMode::availableTypes(); }
 
 /**

@@ -4,9 +4,14 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import annotations  # this prevents the imports from TYPE_CHECKING from being evaluated at runtime
 from mantid.api import AnalysisDataServiceObserver
 from functools import wraps
 import sys
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from mantid.api import MatrixWorkspace
 
 
 def _catch_exceptions(func):
@@ -41,7 +46,7 @@ class FittingADSObserver(AnalysisDataServiceObserver):
         self.observeClear(True)
 
     @_catch_exceptions
-    def deleteHandle(self, workspace_name, workspace):
+    def deleteHandle(self, workspace_name: str, workspace: MatrixWorkspace) -> None:
         """
         Called when the ADS deletes a workspace, removes it from the dict of tracked workspaces.
         :param workspace_name: name of the workspace
@@ -50,7 +55,7 @@ class FittingADSObserver(AnalysisDataServiceObserver):
         self.delete_callback(workspace_name)
 
     @_catch_exceptions
-    def renameHandle(self, old_workspace_name, new_workspace_name):
+    def renameHandle(self, old_workspace_name: str, new_workspace_name: str) -> None:
         """
         Called when the ADS renames a workspace, updates the dict with the new name.
         :param old_workspace_name: original name of the workspace
@@ -59,14 +64,14 @@ class FittingADSObserver(AnalysisDataServiceObserver):
         self.rename_callback(old_workspace_name, new_workspace_name)
 
     @_catch_exceptions
-    def clearHandle(self):
+    def clearHandle(self) -> None:
         """
         Called when the ADS has been cleared, removes all data.
         """
         self.clear_callback()
 
     @_catch_exceptions
-    def replaceHandle(self, name, workspace):
+    def replaceHandle(self, name: str, workspace: MatrixWorkspace) -> None:
         """
         Called when the ADS has replaced a workspace with one of the same name.
         Updates the workspace stored in the dict.
@@ -75,7 +80,7 @@ class FittingADSObserver(AnalysisDataServiceObserver):
         """
         self.replace_callback(name, workspace)
 
-    def unsubscribe(self):
+    def unsubscribe(self) -> None:
         self.observeDelete(False)
         self.observeRename(False)
         self.observeClear(False)

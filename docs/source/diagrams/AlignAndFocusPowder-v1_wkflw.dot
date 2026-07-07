@@ -13,7 +13,6 @@ digraph AlignAndFocusPowder {
     MaskBinTable
     CalibrationWorkspace
     GroupingWorkspace
-    LowResRef
     params1 [label="Params"]
     params2 [label="Params"]
   }
@@ -42,7 +41,6 @@ digraph AlignAndFocusPowder {
     rebin2            [label="Rebin v1"]
     rebin3            [label="Rebin, ResampleX, or\nRebinRagged"]
     rebinRagged       [label="RebinRagged v1"]
-    removeLowResTOF   [label="RemoveLowResTOF v1"]
     removePromptPulse [label="RemovePromptPulse v1"]
   }
 
@@ -55,7 +53,7 @@ digraph AlignAndFocusPowder {
     isDspace1         [label="Is d-space binning?"]
     isDspace2         [label="Is d-space binning?"]
     isDspace3         [label="Is d-space binning?"]
-    ifDIFCref          [label="DIFCref specified?"]
+    ifCropWL          [label="Crop wavelength?"]
     ifRaggedTof       [label="ragged rebin\nand tof binning"]
   }
 
@@ -94,13 +92,10 @@ digraph AlignAndFocusPowder {
   maskBins               -> convertUnitsD3
   convertUnitsD3          -> lorentz
 
-  lorentz                -> ifDIFCref
+  lorentz                -> ifCropWL
 
-  ifDIFCref -> convertUnitsWL2  [label="No"]
-  ifDIFCref -> removeLowResTOF  [label="Yes"]
-
-  LowResRef              -> removeLowResTOF
-  removeLowResTOF        -> convertUnitsD1
+  ifCropWL -> convertUnitsWL2  [label="Yes"]
+  ifCropWL -> isDspace2        [label="No"]
 
   convertUnitsWL2        -> cropWorkspaceWL
   cropWorkspaceWL        -> convertUnitsD1

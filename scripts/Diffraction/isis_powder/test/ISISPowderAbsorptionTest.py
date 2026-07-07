@@ -7,7 +7,7 @@
 import mantid.simpleapi as mantid
 import unittest
 
-from isis_powder.routines import absorb_corrections, SampleDetails
+from Diffraction.isis_powder.routines import absorb_corrections, SampleDetails
 
 
 class ISISPowderAbsorptionTest(unittest.TestCase):

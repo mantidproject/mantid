@@ -94,10 +94,8 @@ class CalibrationModelTest(unittest.TestCase):
         self, mock_load_ws, mock_load_cal, mock_run_cal, mock_make_diff_table, mock_create_out, mock_del
     ):
         rb_num = "1"
-        self.calibration_info.config = MagicMock()
-        self.calibration_info.config.texture_groups = (ENGINX_GROUP.TEXTURE20,)
-        # setup group TO NOT BE in config.texture_groups
-        self.calibration_info.group = ENGINX_GROUP.BOTH
+        # not a texture group, so files save to both the general and RB directories
+        self.calibration_info.is_texture_group.return_value = False
         mock_run_cal.return_value = ("foc_ceria_ws", None, None)  # focused_ceria, cal_table, diag_ws
 
         self.model.create_new_calibration(self.calibration_info, rb_num, plot_output=False, save_dir="dir", instrument=self.instrument)
@@ -119,10 +117,8 @@ class CalibrationModelTest(unittest.TestCase):
         self, mock_load_ws, mock_load_cal, mock_run_cal, mock_make_diff_table, mock_create_out, mock_del
     ):
         rb_num = "1"
-        self.calibration_info.config = MagicMock()
-        self.calibration_info.config.texture_groups = (ENGINX_GROUP.TEXTURE20,)
-        # setup group TO BE in config.texture_groups
-        self.calibration_info.group = ENGINX_GROUP.TEXTURE20
+        # a texture group, so files save only to the RB directory
+        self.calibration_info.is_texture_group.return_value = True
         mock_run_cal.return_value = ("foc_ceria_ws", None, None)  # focused_ceria, cal_table, diag_ws
 
         self.model.create_new_calibration(self.calibration_info, rb_num, plot_output=False, save_dir="dir", instrument=self.instrument)

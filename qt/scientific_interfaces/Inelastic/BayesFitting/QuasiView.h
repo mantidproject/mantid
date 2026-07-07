@@ -87,7 +87,7 @@ class QuasiView final : public QWidget, public IQuasiView {
   Q_OBJECT
 
 public:
-  QuasiView(QWidget *parent = nullptr, bool useQuickBayes = false);
+  QuasiView(QWidget *parent = nullptr, bool useQuickBayes = true);
   ~QuasiView() override = default;
 
   void subscribe(IQuasiPresenter *presenter) override;

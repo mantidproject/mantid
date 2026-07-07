@@ -75,6 +75,8 @@ void MomentsPresenter::plotNewData(std::string const &filename) {
   m_view->setPlotPropertyRange(range);
   m_view->setRangeSelector(range);
   m_view->replot();
+  m_model->setEMin(range.first);
+  m_model->setEMax(range.second);
 }
 
 /**

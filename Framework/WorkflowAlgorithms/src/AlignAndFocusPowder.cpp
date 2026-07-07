@@ -11,7 +11,6 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
@@ -78,9 +77,6 @@ const std::string POLAR("Polar");
 const std::string AZIMUTHAL("Azimuthal");
 const std::string PM_NAME("ReductionProperties");
 const std::string LORENTZ("LorentzCorrection");
-const std::string UNWRAP_REF("UnwrapRef");
-const std::string LOWRES_REF("LowResRef");
-const std::string LOWRES_SPEC_OFF("LowResSpectrumOffset");
 } // namespace PropertyNames
 
 void getTofRange(const MatrixWorkspace_const_sptr &wksp, double &tmin, double &tmax) {
@@ -215,9 +211,7 @@ void AlignAndFocusPowder::init() {
                   "Multiply each spectrum by "
                   "sin(theta) where theta is "
                   "half of the Bragg angle");
-  declareProperty(PropertyNames::UNWRAP_REF, 0., "This property is deprecated (since v6.13).");
-  declareProperty(PropertyNames::LOWRES_REF, 0., "Reference DIFC for resolution removal. Zero skips the correction");
-  declareProperty("CropWavelengthMin", 0., "Crop the data at this minimum wavelength. Overrides LowResRef.");
+  declareProperty("CropWavelengthMin", 0., "Crop the data at this minimum wavelength.");
   mapPropertyName(PropertyNames::WL_MIN, "wavelength_min");
   declareProperty("CropWavelengthMax", EMPTY_DBL(),
                   "Crop the data at this maximum wavelength. Forces use of "
@@ -234,16 +228,6 @@ void AlignAndFocusPowder::init() {
   declareProperty(std::make_unique<ArrayProperty<double>>(PropertyNames::AZIMUTHAL),
                   "Azimuthal angles (out-of-plain) for detectors");
 
-  declareProperty(PropertyNames::LOWRES_SPEC_OFF, -1,
-                  "Offset on spectrum No of low resolution spectra from high "
-                  "resolution one. "
-                  "If negative, then all the low resolution TOF will not be "
-                  "processed.  Otherwise, low resolution TOF "
-                  "will be stored in an additional set of spectra. "
-                  "If offset is equal to 0, then the low resolution will have "
-                  "same spectrum Nos as the normal ones.  "
-                  "Otherwise, the low resolution spectra will have spectrum "
-                  "IDs offset from normal ones. ");
   declareProperty(PropertyNames::PM_NAME, "__powdereduction", Direction::Input);
 }
 
@@ -292,41 +276,7 @@ std::map<std::string, std::string> AlignAndFocusPowder::validateInputs() {
         "Must have same number of values as " + PropertyNames::RESONANCE_LOWER_LIMITS;
   }
 
-  // Deprecated properties
-  if (!isDefault(PropertyNames::UNWRAP_REF)) {
-    g_log.error("AlignAndFocusPowder property UnwrapRef is deprecated since 2025-03-24.");
-  }
-
   return result;
-}
-
-template <typename NumT> struct RegLowVectorPair {
-  std::vector<NumT> reg;
-  std::vector<NumT> low;
-};
-
-template <typename NumT>
-RegLowVectorPair<NumT> splitVectors(const std::vector<NumT> &orig, const size_t numVal, const std::string &label) {
-  RegLowVectorPair<NumT> out;
-
-  // check that there is work to do
-  if (!orig.empty()) {
-    // do the spliting
-    if (orig.size() == numVal) {
-      out.reg.assign(orig.begin(), orig.end());
-      out.low.assign(orig.begin(), orig.end());
-    } else if (orig.size() == 2 * numVal) {
-      out.reg.assign(orig.begin(), orig.begin() + numVal);
-      out.low.assign(orig.begin() + numVal, orig.begin());
-    } else {
-      std::stringstream msg;
-      msg << "Input number of " << label << " ids is not equal to "
-          << "the number of histograms or empty (" << orig.size() << " != 0 or " << numVal << " or " << (2 * numVal)
-          << ")";
-      throw std::runtime_error(msg.str());
-    }
-  }
-  return out;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -381,7 +331,6 @@ void AlignAndFocusPowder::exec() {
   auto dmin = getVecPropertyFromPmOrSelf(PropertyNames::D_MINS, m_dmins);
   auto dmax = getVecPropertyFromPmOrSelf(PropertyNames::D_MAXS, m_dmaxs);
   this->getVecPropertyFromPmOrSelf(PropertyNames::RAGGED_DELTA, m_delta_ragged);
-  DIFCref = getProperty(PropertyNames::LOWRES_REF);
   const bool applyLorentz = getProperty(PropertyNames::LORENTZ);
   minwl = getProperty(PropertyNames::WL_MIN);
   maxwl = getProperty(PropertyNames::WL_MAX);
@@ -451,15 +400,6 @@ void AlignAndFocusPowder::exec() {
     xmax = m_params[2];
   }
 
-  // Low resolution
-  int lowresoffset = getProperty(PropertyNames::LOWRES_SPEC_OFF);
-  if (lowresoffset < 0) {
-    m_processLowResTOF = false;
-  } else {
-    m_processLowResTOF = true;
-    m_lowResSpecOffset = static_cast<size_t>(lowresoffset);
-  }
-
   loadCalFile(calFilename, groupFilename);
 
   // Now setup the output workspace
@@ -475,20 +415,6 @@ void AlignAndFocusPowder::exec() {
     // workspace2D
     if (m_outputW != m_inputW) {
       m_outputW = m_inputW->clone();
-    }
-  }
-
-  if (m_processLowResTOF) {
-    if (auto inputEW = std::dynamic_pointer_cast<EventWorkspace>(m_inputW)) {
-      // Make a brand new EventWorkspace
-      m_lowResEW = std::dynamic_pointer_cast<EventWorkspace>(
-          WorkspaceFactory::Instance().create("EventWorkspace", inputEW->getNumberHistograms(), 2, 1));
-
-      // Cast to the matrixOutputWS and save it
-      m_lowResW = std::dynamic_pointer_cast<MatrixWorkspace>(m_lowResEW);
-      // m_lowResW->setName(lowreswsname);
-    } else {
-      throw std::runtime_error("Input workspace is not EventWorkspace.  It is not supported now.");
     }
   }
 
@@ -652,11 +578,8 @@ void AlignAndFocusPowder::exec() {
 
   m_progress->report();
 
-  // Beyond this point, low resolution TOF workspace is considered.
+  // crop the workspace in wavelength if requested
   if (minwl > 0. || (!isEmpty(maxwl))) { // just crop the workspace
-    // turn off the low res stuff
-    m_processLowResTOF = false;
-
     if (const auto ews = std::dynamic_pointer_cast<EventWorkspace>(m_outputW))
       g_log.information() << "Number of events = " << ews->getNumberEvents() << ".\n";
 
@@ -676,58 +599,17 @@ void AlignAndFocusPowder::exec() {
     m_outputW = removeAlg->getProperty("OutputWorkspace");
     if (const auto ews = std::dynamic_pointer_cast<EventWorkspace>(m_outputW))
       g_log.information() << "Number of events = " << ews->getNumberEvents() << ".\n";
-  } else if (DIFCref > 0.) {
-    m_outputW = convertUnits(m_outputW, "TOF");
-    // this correction has some assumptions on the events being compressed
-    compressEventsOutputWS(compressEventsTolerance, wallClockTolerance);
-
-    // this is a legacy way for describing the minimum wavelength to remove from the data
-    // it is uncommon that it is used
-    g_log.information() << "running RemoveLowResTof(RefDIFC=" << DIFCref << ",K=3.22) started at "
-                        << Types::Core::DateAndTime::getCurrentTime() << "\n";
-    if (const auto ews = std::dynamic_pointer_cast<EventWorkspace>(m_outputW))
-      g_log.information() << "Number of events = " << ews->getNumberEvents() << ".\n";
-
-    API::IAlgorithm_sptr removeAlg = createChildAlgorithm("RemoveLowResTOF");
-    removeAlg->setProperty("InputWorkspace", m_outputW);
-    removeAlg->setProperty("OutputWorkspace", m_outputW);
-    removeAlg->setProperty("ReferenceDIFC", DIFCref);
-    removeAlg->setProperty("K", 3.22);
-    if (tmin > 0.)
-      removeAlg->setProperty("Tmin", tmin);
-    if (m_processLowResTOF)
-      removeAlg->setProperty("LowResTOFWorkspace", m_lowResW);
-
-    removeAlg->executeAsChildAlg();
-    m_outputW = removeAlg->getProperty("OutputWorkspace");
-    if (m_processLowResTOF)
-      m_lowResW = removeAlg->getProperty("LowResTOFWorkspace");
-  }
-  m_progress->report();
-
-  if (const auto ews = std::dynamic_pointer_cast<EventWorkspace>(m_outputW)) {
-    const size_t numhighevents = ews->getNumberEvents();
-    if (m_processLowResTOF) {
-      EventWorkspace_sptr lowes = std::dynamic_pointer_cast<EventWorkspace>(m_lowResW);
-      const size_t numlowevents = lowes->getNumberEvents();
-      g_log.information() << "Number of high TOF events = " << numhighevents << "; "
-                          << "Number of low TOF events = " << numlowevents << ".\n";
-    }
   }
   m_progress->report();
 
   // Convert units
-  if (minwl > 0. || DIFCref > 0. || (!isEmpty(maxwl))) {
+  if (minwl > 0. || (!isEmpty(maxwl))) {
     m_outputW = convertUnits(m_outputW, "dSpacing");
-    if (m_processLowResTOF)
-      m_lowResW = convertUnits(m_lowResW, "dSpacing");
   }
   m_progress->report();
 
   if (binInDspace) {
     m_outputW = rebin(m_outputW);
-    if (m_processLowResTOF)
-      m_lowResW = rebin(m_lowResW);
   }
   m_progress->report();
 
@@ -741,14 +623,10 @@ void AlignAndFocusPowder::exec() {
   if (binInDspace && m_resampleX == 0 && !m_delta_ragged.empty() && !m_dmins.empty() && !m_dmaxs.empty()) {
     // Special case where we can do ragged rebin within diffraction focus
     m_outputW = diffractionFocusRaggedRebinInDspace(m_outputW);
-    if (m_processLowResTOF)
-      m_lowResW = diffractionFocusRaggedRebinInDspace(m_lowResW);
     m_progress->report();
   } else {
     // Diffraction focus
     m_outputW = diffractionFocus(m_outputW);
-    if (m_processLowResTOF)
-      m_lowResW = diffractionFocus(m_lowResW);
     m_progress->report();
 
     // this next call should probably be in for rebin as well
@@ -756,12 +634,8 @@ void AlignAndFocusPowder::exec() {
     if (binInDspace) {
       if (m_resampleX != 0.) {
         m_outputW = rebin(m_outputW);
-        if (m_processLowResTOF)
-          m_lowResW = rebin(m_lowResW);
       } else if (!m_delta_ragged.empty()) {
         m_outputW = rebinRagged(m_outputW, true);
-        if (m_processLowResTOF)
-          m_lowResW = rebinRagged(m_lowResW, true);
       }
     }
   }
@@ -769,31 +643,12 @@ void AlignAndFocusPowder::exec() {
 
   // edit the instrument geometry
   if (m_groupWS && (m_l1 > 0 || !tths.empty() || !l2s.empty() || !phis.empty())) {
-    size_t numreg = m_outputW->getNumberHistograms();
-
     try {
-      // set up the vectors for doing everything
-      auto specidsSplit = splitVectors(specids, numreg, "specids");
-      auto tthsSplit = splitVectors(tths, numreg, "two-theta");
-      auto l2sSplit = splitVectors(l2s, numreg, "L2");
-      auto phisSplit = splitVectors(phis, numreg, "phi");
-
-      // Edit instrument
-      m_outputW = editInstrument(m_outputW, tthsSplit.reg, specidsSplit.reg, l2sSplit.reg, phisSplit.reg);
-
-      if (m_processLowResTOF) {
-        m_lowResW = editInstrument(m_lowResW, tthsSplit.low, specidsSplit.low, l2sSplit.low, phisSplit.low);
-      }
+      m_outputW = editInstrument(m_outputW, tths, specids, l2s, phis);
     } catch (std::runtime_error &e) {
       g_log.warning("Not editing instrument geometry:");
       g_log.warning(e.what());
     }
-  }
-  m_progress->report();
-
-  // Conjoin 2 workspaces if there is low resolution
-  if (m_processLowResTOF) {
-    m_outputW = conjoinWorkspaces(m_outputW, m_lowResW, m_lowResSpecOffset);
   }
   m_progress->report();
 
@@ -1044,64 +899,6 @@ API::MatrixWorkspace_sptr AlignAndFocusPowder::rebinRagged(API::MatrixWorkspace_
   alg->executeAsChildAlg();
   matrixws = alg->getProperty("OutputWorkspace");
   return matrixws;
-}
-
-//----------------------------------------------------------------------------------------------
-/** Add workspace2 to workspace1 by adding spectrum.
- */
-MatrixWorkspace_sptr AlignAndFocusPowder::conjoinWorkspaces(const API::MatrixWorkspace_sptr &ws1,
-                                                            const API::MatrixWorkspace_sptr &ws2, size_t offset) {
-  // Get information from ws1: maximum spectrum number, and store original
-  // spectrum Nos
-  size_t nspec1 = ws1->getNumberHistograms();
-  specnum_t maxspecNo1 = 0;
-  std::vector<specnum_t> origspecNos;
-  for (size_t i = 0; i < nspec1; ++i) {
-    specnum_t tmpspecNo = ws1->getSpectrum(i).getSpectrumNo();
-    origspecNos.emplace_back(tmpspecNo);
-    if (tmpspecNo > maxspecNo1)
-      maxspecNo1 = tmpspecNo;
-  }
-
-  g_log.information() << "[DBx536] Max spectrum number of ws1 = " << maxspecNo1 << ", Offset = " << offset << ".\n";
-
-  size_t nspec2 = ws2->getNumberHistograms();
-
-  // Conjoin 2 workspaces
-  Algorithm_sptr alg = this->createChildAlgorithm("AppendSpectra");
-  alg->initialize();
-  ;
-
-  alg->setProperty("InputWorkspace1", ws1);
-  alg->setProperty("InputWorkspace2", ws2);
-  alg->setProperty("OutputWorkspace", ws1);
-  alg->setProperty("ValidateInputs", false);
-
-  alg->executeAsChildAlg();
-
-  API::MatrixWorkspace_sptr outws = alg->getProperty("OutputWorkspace");
-
-  // FIXED : Restore the original spectrum Nos to spectra from ws1
-  for (size_t i = 0; i < nspec1; ++i) {
-    specnum_t tmpspecNo = outws->getSpectrum(i).getSpectrumNo();
-    outws->getSpectrum(i).setSpectrumNo(origspecNos[i]);
-
-    g_log.information() << "[DBx540] Conjoined spectrum " << i << ": restore spectrum number to "
-                        << outws->getSpectrum(i).getSpectrumNo() << " from spectrum number = " << tmpspecNo << ".\n";
-  }
-
-  // Rename spectrum number
-  if (offset >= 1) {
-    for (size_t i = 0; i < nspec2; ++i) {
-      specnum_t newspecid = maxspecNo1 + static_cast<specnum_t>((i) + offset);
-      outws->getSpectrum(nspec1 + i).setSpectrumNo(newspecid);
-      // ISpectrum* spec = outws->getSpectrum(nspec1+i);
-      // if (spec)
-      // spec->setSpectrumNo(3);
-    }
-  }
-
-  return outws;
 }
 
 void AlignAndFocusPowder::convertOffsetsToCal(DataObjects::OffsetsWorkspace_sptr &offsetsWS) {

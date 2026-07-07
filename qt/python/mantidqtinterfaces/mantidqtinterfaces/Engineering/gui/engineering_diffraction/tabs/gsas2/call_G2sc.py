@@ -195,7 +195,7 @@ def import_gsasii(gsasii_scriptable: Path) -> ModuleType:
             )
 
 
-def main():
+def main() -> None:
     # Parse Inputs from Mantid
     inputs_dict = json.loads(sys.argv[1])
 

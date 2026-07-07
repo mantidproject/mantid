@@ -11,7 +11,7 @@ import shutil
 import mantid.simpleapi as mantid
 from mantid import config
 
-from isis_powder import Pearl
+from Diffraction.isis_powder import Pearl
 
 DIRS = config["datasearch.directories"].split(";")
 

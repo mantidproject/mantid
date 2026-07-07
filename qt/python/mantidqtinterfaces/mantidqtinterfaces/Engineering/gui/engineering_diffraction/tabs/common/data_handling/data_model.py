@@ -15,9 +15,10 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.outp
     _generate_workspace_name,
 )
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.workspace_record import FittingWorkspaceRecordContainer
-from mantid.api import AnalysisDataService as ADS
+from mantid.api import AnalysisDataService as ADS, MatrixWorkspace
 from matplotlib.pyplot import subplots
 import os
+from typing import Dict, Tuple, List, Sequence, Any
 
 
 class FittingDataModel(object):
@@ -31,7 +32,7 @@ class FittingDataModel(object):
     # Loaded Data Table
     # =================
 
-    def restore_files(self, ws_names):
+    def restore_files(self, ws_names: Dict[str, List[str | List | None]]) -> None:
         self._data_workspaces.add_from_names_dict(ws_names)
         for ws_name in ws_names:
             try:
@@ -49,7 +50,7 @@ class FittingDataModel(object):
                 logger.error(f"Failed to restore workspace: {ws_name}. Error: {e}. \n Continuing loading of other files.")
         self.update_sample_log_workspace_group()
 
-    def load_files(self, filenames_string):
+    def load_files(self, filenames_string: str) -> None:
         self._last_added = []
         filenames = [name.strip() for name in filenames_string.split(",")]
         for filename in filenames:
@@ -78,11 +79,11 @@ class FittingDataModel(object):
                 logger.warning(f"File {ws_name} has already been loaded")
         self.update_sample_log_workspace_group()
 
-    def get_last_added(self):
+    def get_last_added(self) -> List[str]:
         return self._last_added
 
     @staticmethod
-    def get_last_directory(filepaths):
+    def get_last_directory(filepaths: Sequence[str]) -> str | None:
         directories = set()
         directory = None
         for filepath in filepaths:
@@ -91,20 +92,20 @@ class FittingDataModel(object):
         if len(directories) == 1:
             return directory
 
-    def get_loaded_ws_list(self):
+    def get_loaded_ws_list(self) -> List[str]:
         return list(self._data_workspaces.get_loaded_ws_dict().keys())
 
-    def get_active_ws_name_list(self):
+    def get_active_ws_name_list(self) -> List[str]:
         return self._data_workspaces.get_active_ws_name_list()
 
-    def get_active_ws(self, loaded_ws_name):
+    def get_active_ws(self, loaded_ws_name: str) -> MatrixWorkspace | None:
         return self._data_workspaces[loaded_ws_name].get_active_ws()
 
-    def get_active_ws_name(self, loaded_ws_name):
+    def get_active_ws_name(self, loaded_ws_name: str) -> str | None:
         return self._data_workspaces.get_active_ws_name(loaded_ws_name)
 
     # handle ADS remove. name workspace has already been deleted
-    def remove_workspace(self, name):
+    def remove_workspace(self, name: str) -> MatrixWorkspace | None:
         ws_loaded = self._data_workspaces.get(name, None)
         if ws_loaded:
             bgsub_ws_name = self._data_workspaces[name].bgsub_ws_name
@@ -124,10 +125,10 @@ class FittingDataModel(object):
                 self._data_workspaces[ws_loaded_name].bg_params = []
                 return removed
 
-    def replace_workspace(self, name, workspace):
+    def replace_workspace(self, name: str, workspace: MatrixWorkspace) -> None:
         self._data_workspaces.replace_workspace(name, workspace)
 
-    def update_workspace_name(self, old_name, new_name):
+    def update_workspace_name(self, old_name: str, new_name: str) -> None:
         if new_name not in self.get_all_workspace_names():
             self._data_workspaces.rename(old_name, new_name)
             current_log_values = self._sample_logs_workspace_group.get_log_values()
@@ -138,11 +139,11 @@ class FittingDataModel(object):
             self.update_sample_log_workspace_group()
 
     # handle ADS clear
-    def clear_workspaces(self):
+    def clear_workspaces(self) -> None:
         self._data_workspaces.clear()
         self.set_log_workspaces_none()
 
-    def delete_workspaces(self):
+    def delete_workspaces(self) -> List[MatrixWorkspace]:
         current_log_workspaces = self._sample_logs_workspace_group.get_log_workspaces()
         if current_log_workspaces:
             ws_name = current_log_workspaces.name()
@@ -153,7 +154,7 @@ class FittingDataModel(object):
             removed_ws_list.extend(self.delete_workspace(ws_name))
         return removed_ws_list
 
-    def delete_workspace(self, loaded_ws_name):
+    def delete_workspace(self, loaded_ws_name: str) -> List[MatrixWorkspace]:
         removed = self._data_workspaces.pop(loaded_ws_name)
         removed_ws_list = [removed.loaded_ws]
         DeleteWorkspace(removed.loaded_ws)
@@ -163,19 +164,19 @@ class FittingDataModel(object):
             self.update_sample_log_workspace_group()
         return removed_ws_list
 
-    def get_loaded_workspaces(self):
+    def get_loaded_workspaces(self) -> Dict[str, MatrixWorkspace | None]:
         return self._data_workspaces.get_loaded_ws_dict()
 
-    def get_all_workspace_names(self):
+    def get_all_workspace_names(self) -> List[str]:
         return self._data_workspaces.get_loaded_workpace_names() + self._data_workspaces.get_bgsub_workpace_names()
 
-    def get_bgsub_workspaces(self):
+    def get_bgsub_workspaces(self) -> Dict[str, MatrixWorkspace | None]:
         return self._data_workspaces.get_bgsub_ws_dict()
 
-    def get_bgsub_workspace_names(self):
+    def get_bgsub_workspace_names(self) -> Dict[str, str | None]:
         return self._data_workspaces.get_bgsub_ws_name_dict()
 
-    def get_bg_params(self):
+    def get_bg_params(self) -> Dict[str, List]:
         return self._data_workspaces.get_bg_params_dict()
 
     def create_or_update_bgsub_ws(self, ws_name, bg_params):
@@ -196,11 +197,11 @@ class FittingDataModel(object):
             logger.notice("Background workspace already calculated")
         return success_estimate_bg
 
-    def update_bgsub_status(self, ws_name, status):
+    def update_bgsub_status(self, ws_name: str, status: bool) -> None:
         if self._data_workspaces[ws_name].bg_params:
             self._data_workspaces[ws_name].bg_params[0] = status
 
-    def estimate_background(self, ws_name, niter, xwindow, doSGfilter):
+    def estimate_background(self, ws_name: str, niter: int, xwindow: float, doSGfilter: bool) -> Tuple[MatrixWorkspace, bool]:
         success = True
         try:
             ws_bg = EnggEstimateFocussedBackground(
@@ -216,7 +217,7 @@ class FittingDataModel(object):
             success = False
         return ws_bg, success
 
-    def plot_background_figure(self, ws_name):
+    def plot_background_figure(self, ws_name: str) -> None:
         def on_draw(event):
             if event.canvas.signalsBlocked():
                 # This stops infinite loop as draw() is called within this handle (and set signalsBlocked == True)
@@ -256,29 +257,29 @@ class FittingDataModel(object):
     # Sample Log access
     # =================
 
-    def get_sample_log_from_ws(self, ws_name, log_name):
+    def get_sample_log_from_ws(self, ws_name: str, log_name: str) -> Any:
         return self._data_workspaces[ws_name].loaded_ws.getRun().getLogData(log_name).value
 
-    def get_all_log_workspaces_names(self):
+    def get_all_log_workspaces_names(self) -> List[str]:
         return (
             [ws.name() for ws in self._sample_logs_workspace_group.get_log_workspaces()]
             if self._sample_logs_workspace_group.get_log_workspaces()
             else []
         )
 
-    def get_log_workspace_group_name(self):
+    def get_log_workspace_group_name(self) -> str:
         return (
             self._sample_logs_workspace_group.get_log_workspaces().name() if self._sample_logs_workspace_group.get_log_workspaces() else ""
         )
 
-    def set_log_workspaces_none(self):
+    def set_log_workspaces_none(self) -> None:
         # to be used in the event of Ads clear, as trying to reference the deleted grp ws results in an error
         self._sample_logs_workspace_group.clear_log_workspaces()
 
-    def update_sample_log_workspace_group(self):
+    def update_sample_log_workspace_group(self) -> None:
         self._sample_logs_workspace_group.update_log_workspace_group(self._data_workspaces)
 
-    def get_active_ws_sorted_by_primary_log(self):
+    def get_active_ws_sorted_by_primary_log(self) -> List[str]:
         active_ws_dict = self._data_workspaces.get_active_ws_dict()
         tof_ws_inds = [ind for ind, ws in enumerate(active_ws_dict.values()) if ws.getAxis(0).getUnit().caption() == "Time-of-flight"]
         primary_log = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "primary_log")
@@ -296,5 +297,5 @@ class FittingDataModel(object):
         return ws_list_tof
 
     @staticmethod
-    def texture_auto_populate():
+    def texture_auto_populate() -> bool:
         return get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "auto_pop_texture", bool)

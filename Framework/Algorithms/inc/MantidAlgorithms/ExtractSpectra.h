@@ -9,6 +9,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include <set>
 
 namespace Mantid {
 namespace Algorithms {
@@ -57,7 +58,7 @@ private:
   /// Flag indicating whether XMin and/or XMax has been set
   bool m_croppingInX = false;
   /// The list of workspaces to extract.
-  std::vector<size_t> m_workspaceIndexList;
+  std::set<size_t> m_workspaceIndexList;
 };
 
 } // namespace Algorithms

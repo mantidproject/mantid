@@ -12,7 +12,7 @@ import shutil
 import mantid.simpleapi as mantid
 from mantid import config
 
-from isis_powder import Polaris, SampleDetails
+from Diffraction.isis_powder import Polaris, SampleDetails
 from mantid.api import AnalysisDataService
 
 DIRS = config["datasearch.directories"].split(";")

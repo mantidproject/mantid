@@ -45,6 +45,7 @@ protected:
 private:
   // function runs the conversion on
   size_t conversionChunk(size_t workspaceIndex) override;
+  bool setGenericVariableFromLogs(const Mantid::Types::Core::DateAndTime &pT, std::vector<coord_t> &localCoord) const;
   // the pointer to the source event workspace as event ws does not work through
   // the public Matrix WS interface
   /**function converts particular type of events into MD space and add these
@@ -58,9 +59,12 @@ private:
   Geometry::Goniometer m_Goniometer;
   std::vector<std::unique_ptr<Kernel::TimeSeriesProperty<double>>> m_Logs;
   std::vector<size_t> m_GonioIndex;
+  std::vector<std::pair<coord_t, coord_t>> m_extraDimBounds;
+  unsigned int m_NMatrixDimensions{0};
+
   // Private method to update rotation matrix for a single event from log values
   template <class T> bool setGoniometersFromLogs(const T &ev) {
-    if (!m_useLogTimes)
+    if (!m_useLogTimes || m_GonioIndex.empty())
       return true;
     for (size_t axIdx = 0; axIdx < m_GonioIndex.size(); axIdx++) {
       double logval = m_Logs[axIdx]->getSingleValue(ev->pulseTime());

@@ -1,0 +1,1 @@
+- ``Instrument`` now has ``getXmlText`` exposed to python.

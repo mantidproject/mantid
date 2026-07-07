@@ -21,7 +21,7 @@ class TestNotebookPresenter(unittest.TestCase):
         self.mock_model.picked_visibility = np.array([True, False])
         self.mock_model.is_2d_projection = True
         self.mock_model.detector_ids = np.array([101, 102])
-        self.mock_model.workspace_x_unit = "Wavelength"
+        self.mock_model._workspace_x_unit = "Wavelength"
         self.mock_model.line_plot_workspace = MagicMock()
         with patch("instrumentview.NotebookPresenter.pv"):
             self._presenter = NotebookPresenter(self.mock_view, self.mock_model)
@@ -53,7 +53,7 @@ class TestNotebookPresenter(unittest.TestCase):
         np.testing.assert_array_equal(self.mock_model.negate_picked_visibility.call_args[0][0], expected_mask)
 
         self._presenter._pickable_mesh.__setitem__.assert_called_with("Visible Picked", self.mock_model.picked_visibility)
-        self.mock_model.extract_spectra_for_line_plot.assert_called_once_with(self.mock_model.workspace_x_unit, True)
+        self.mock_model.extract_spectra_for_line_plot.assert_called_once_with(self.mock_model._workspace_x_unit, True)
 
         self.mock_view.plot_spectra.assert_called_once_with(self.mock_model.line_plot_workspace, True)
         self.assertEqual(result, self.mock_view.plot_spectra.return_value)

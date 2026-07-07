@@ -62,6 +62,9 @@ def qapplication():
         argv[0] = APPNAME  # replace application name
 
         app = QApplication(argv)
+        # Don't try to use the system GTK palette instead apply the standard theme palette
+        if mtd_env.is_linux():
+            app.setPalette(app.style().standardPalette())
         app.setOrganizationName(ORGANIZATION)
         app.setOrganizationDomain(ORG_DOMAIN)
         app.setApplicationName(APPNAME)

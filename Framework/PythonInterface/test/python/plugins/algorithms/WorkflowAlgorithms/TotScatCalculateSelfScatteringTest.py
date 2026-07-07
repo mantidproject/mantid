@@ -10,7 +10,7 @@ import shutil
 import tempfile
 from mantid.simpleapi import TotScatCalculateSelfScattering
 from mantid.api import mtd
-from isis_powder import SampleDetails
+from Diffraction.isis_powder import SampleDetails
 from testhelpers import WorkspaceCreationHelper
 
 
