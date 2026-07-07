@@ -11,14 +11,14 @@ from unittest.mock import patch, MagicMock
 
 from mantidqtinterfaces.TexturePlanner.helpers.instrument import InstrumentHelper
 
-file_path = "mantidqtinterfaces.TexturePlanner.helpers.instrument"
+FILE_PATH = "mantidqtinterfaces.TexturePlanner.helpers.instrument"
 
 
 def _make_model():
     return MagicMock()
 
 
-@patch(file_path + ".get_instr_config")
+@patch(FILE_PATH + ".get_instr_config")
 class TestInstrumentHelper_Init(unittest.TestCase):
     def test_sets_defaults_without_bootstrapping(self, mock_get_cfg):
         # The model binds the helper to itself before bootstrapping via update_instrument,
@@ -40,7 +40,7 @@ class TestInstrumentHelper_Init(unittest.TestCase):
         self.assertEqual(helper.instr, "ENGINX")
 
 
-@patch(file_path + ".get_instr_config")
+@patch(FILE_PATH + ".get_instr_config")
 class TestInstrumentHelper_UpdateInstrument(unittest.TestCase):
     def test_updates_instr_config_and_workspaces(self, mock_get_cfg):
         model = _make_model()
@@ -87,7 +87,7 @@ class TestInstrumentHelper_UpdateInstrument(unittest.TestCase):
         mock_get_cfg.assert_not_called()
 
 
-@patch(file_path + ".get_instr_config")
+@patch(FILE_PATH + ".get_instr_config")
 class TestInstrumentHelper_GroupsAndInstruments(unittest.TestCase):
     def test_get_instrument_returns_current_instr(self, mock_get_cfg):
         helper = InstrumentHelper(_make_model(), instrument="IMAT")
@@ -95,7 +95,7 @@ class TestInstrumentHelper_GroupsAndInstruments(unittest.TestCase):
         self.assertEqual(helper.get_instrument(), "IMAT")
 
     def test_get_supported_instruments_delegates(self, mock_get_cfg):
-        with patch(file_path + ".SUPPORTED_INSTRUMENTS", ("ENGINX", "IMAT")):
+        with patch(FILE_PATH + ".SUPPORTED_INSTRUMENTS", ("ENGINX", "IMAT")):
             self.assertEqual(InstrumentHelper.get_supported_instruments(), ("ENGINX", "IMAT"))
 
     def test_set_group_resolves_group_from_config(self, mock_get_cfg):
@@ -118,7 +118,7 @@ class TestInstrumentHelper_GroupsAndInstruments(unittest.TestCase):
         self.assertEqual(helper.group, "Custom")
 
 
-@patch(file_path + ".get_instr_config")
+@patch(FILE_PATH + ".get_instr_config")
 class TestInstrumentHelper_GroupingPath(unittest.TestCase):
     def test_get_grouping_file_reads_from_config(self, mock_get_cfg):
         helper = InstrumentHelper(_make_model(), instrument="ENGINX")
@@ -128,7 +128,7 @@ class TestInstrumentHelper_GroupingPath(unittest.TestCase):
 
         self.assertEqual(helper.get_grouping_file(), "GRP.xml")
 
-    @patch(file_path + ".CALIB_DIR", "/calib")
+    @patch(FILE_PATH + ".CALIB_DIR", "/calib")
     def test_get_grouping_path_joins_calib_dir(self, mock_get_cfg):
         helper = InstrumentHelper(_make_model(), instrument="ENGINX")
         helper.get_grouping_file = MagicMock(return_value="GRP.xml")
@@ -143,8 +143,8 @@ class TestInstrumentHelper_GroupingPath(unittest.TestCase):
         self.assertEqual(helper.get_grouping_path(), "/abs/path/custom_grouping.xml")
 
 
-@patch(file_path + ".GroupDetectors")
-@patch(file_path + ".CreateSimulationWorkspace")
+@patch(FILE_PATH + ".GroupDetectors")
+@patch(FILE_PATH + ".CreateSimulationWorkspace")
 class TestInstrumentHelper_IsGroupingFileApplicable(unittest.TestCase):
     @staticmethod
     def _grouped_with(has_detectors):
@@ -187,7 +187,7 @@ class TestInstrumentHelper_IsGroupingFileApplicable(unittest.TestCase):
         self.assertFalse(InstrumentHelper.is_grouping_file_applicable("WISH", "/grp.xml"))
 
 
-@patch(file_path + ".InstrumentFileFinder")
+@patch(FILE_PATH + ".InstrumentFileFinder")
 class TestInstrumentHelper_IsValidInstrument(unittest.TestCase):
     def test_true_when_idf_found(self, mock_finder):
         mock_finder.getInstrumentFilename.return_value = "/instr/WISH_Definition.xml"
