@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from mantid.api import AlgorithmFactory, PythonAlgorithm, OrientedLatticeValidator
+from mantid.api import AlgorithmFactory, PythonAlgorithm
 from mantid.dataobjects import PeaksWorkspaceProperty
 from mantid.kernel import (
     Direction,
@@ -53,7 +53,7 @@ class RefineSingleCrystalGoniometer(PythonAlgorithm):
         # Declare properties
 
         self.declareProperty(
-            PeaksWorkspaceProperty(name="Peaks", defaultValue="", validator=OrientedLatticeValidator(), direction=Direction.Input),
+            PeaksWorkspaceProperty(name="Peaks", defaultValue="", direction=Direction.Input),
             doc="The PeaksWorkspace to be refined.",
         )
 
@@ -107,6 +107,17 @@ class RefineSingleCrystalGoniometer(PythonAlgorithm):
         self.setPropertySettings("MinD", large_offset_enabled)
         self.setPropertySettings("MaxD", large_offset_enabled)
         self.setPropertySettings("LatticeOutlierTolerance", large_offset_enabled)
+
+    def validateInputs(self):
+        issues = dict()
+
+        peaks = self.getProperty("Peaks").value
+        large_offset = self.getProperty("LargeOffset").value
+
+        if not large_offset and not peaks.sample().hasOrientedLattice():
+            issues["Peaks"] = "Peaks workspace must have an orientation matrix unless LargeOffset=True."
+
+        return issues
 
     def PyExec(self):
         # Save the workspace to file in ascii format

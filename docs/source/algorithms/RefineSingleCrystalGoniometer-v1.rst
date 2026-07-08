@@ -60,12 +60,11 @@ indexing rather than a real difference in the sample.
 
 .. code-block:: python
 
-    from mantid.simpleapi import RefineSingleCrystalGoniometer, LoadIsawPeaks, FindUBUsingFFT, IndexPeaks
+    from mantid.simpleapi import RefineSingleCrystalGoniometer, LoadIsawPeaks, IndexPeaks
 
     filename = "/SNS/TOPAZ/IPTS-33878/shared/unreliable_motors/peaks.nxs"
 
     LoadIsawPeaks(Filename=filename, OutputWorkspace="peaks")
-    FindUBUsingFFT(PeaksWorkspace="peaks", MinD=5, MaxD=15)
 
     RefineSingleCrystalGoniometer(
         Peaks="peaks",
