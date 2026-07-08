@@ -131,7 +131,7 @@ class RefineSingleCrystalGoniometer(PythonAlgorithm):
 
             runs = np.unique(peaks.column("RunNumber")).tolist()
 
-            if large_offset:
+            if large_offset and n == 0:
                 # _index_runs_using_fft sets self.U/a/b/c/alpha/beta/gamma from
                 # the first retained run's independent indexing, since a single
                 # UB shared across all runs is not yet available at this point.
