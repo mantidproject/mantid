@@ -23,8 +23,6 @@ from pyvistaqt import BackgroundPlotter
 from scipy.spatial.transform import Rotation
 from typing import Callable, Optional
 from vtkmodules.vtkRenderingCore import vtkCellPicker
-import os
-from concurrent.futures import ThreadPoolExecutor
 
 from instrumentview.Projections.Projection import Projection
 from instrumentview.Projections.ProjectionType import ProjectionType
@@ -93,67 +91,40 @@ class ShapeRenderer(InstrumentRenderer):
         # The returned indices cover all components; we only care about
         # detector indices (0 .. n_det-1).
         shape_map = comp_info.shapeToComponentIndices()
-
-        # --- First pass: fetch shape objects and ShapeInfo (sequential, cheap) ---
-        # We separate this from mesh computation so the expensive getMesh() calls
-        # can be parallelised in the second pass.
-        shape_work: list = []  # (key, n_dets, shape_obj, si) for new shapes only
-        xml_to_key: dict = {}
-        xml_to_det_indices: dict = {}
         for xml, component_indices in shape_map.items():
             det_indices = np.asarray(component_indices, dtype=np.int64)
             det_indices = det_indices[det_indices < n_det]
             if len(det_indices) == 0:
                 continue
+
             key = hash(xml)
-            xml_to_key[xml] = key
-            xml_to_det_indices[xml] = det_indices
             if key not in shape_cache:
                 shape_obj = comp_info.shape(int(det_indices[0]))
                 try:
                     si = shape_obj.shapeInfo()
                 except RuntimeError:
+                    logger.information("ShapeRenderer: failed to get ShapeInfo for shape")
                     si = None
-                shape_work.append((key, len(det_indices), shape_obj, si))
 
-        # --- Second pass: compute meshes in parallel ---
-        # getMesh() is a C++ CSG triangulation that releases the GIL, so threads
-        # achieve true parallelism.  Each entry in shape_work has a unique
-        # underlying C++ object (shapeToComponentIndices groups by XML string),
-        # so there is no shared mutable state between threads.
-        use_optimised = self._use_optimised_shapes
-
-        def _compute_one(args):
-            key, n_dets, shape_obj, si = args
-            try:
-                if si is None or not use_optimised:
-                    result = self._shape_from_raw_mesh(shape_obj)
-                else:
-                    shape_type = si.shape()
-                    if shape_type == GeometryShape.CYLINDER:
-                        result = self._extract_optimised_shape(shape_obj, shape_type, si, _extract_quad_from_cylinder_shapeinfo)
-                    elif shape_type == GeometryShape.CUBOID:
-                        result = self._extract_optimised_shape(shape_obj, shape_type, si, _extract_quad_from_cuboid_shapeinfo)
+                try:
+                    if si is None or not self._use_optimised_shapes:
+                        shape_cache[key] = self._shape_from_raw_mesh(shape_obj)
                     else:
-                        result = self._shape_from_raw_mesh(shape_obj)
-            except Exception:
-                result = _make_fallback_shape()
-            return key, result, n_dets
+                        shape_type = si.shape()
+                        if shape_type == GeometryShape.CYLINDER:
+                            shape_cache[key] = self._extract_optimised_shape(
+                                shape_obj, shape_type, si, _extract_quad_from_cylinder_shapeinfo
+                            )
+                        elif shape_type == GeometryShape.CUBOID:
+                            shape_cache[key] = self._extract_optimised_shape(shape_obj, shape_type, si, _extract_quad_from_cuboid_shapeinfo)
+                        else:
+                            shape_cache[key] = self._shape_from_raw_mesh(shape_obj)
+                except Exception:
+                    shape_cache[key] = _make_fallback_shape()
+                    logger.information("ShapeRenderer: failed to get mesh for shape, using fallback")
 
-        n_workers = min(len(shape_work), os.cpu_count() or 4)
-        with ThreadPoolExecutor(max_workers=n_workers) as executor:
-            computed = list(executor.map(_compute_one, shape_work))
-
-        for (
-            key,
-            result,
-            n_dets,
-        ) in computed:
-            shape_cache[key] = result
-
-        # --- Assign shape keys to detectors ---
-        for xml, key in xml_to_key.items():
-            det_shape_keys[xml_to_det_indices[xml]] = key
+            # Assign key to all detectors sharing this shape in one vectorised step.
+            det_shape_keys[det_indices] = key
 
         # Detectors remaining at key=0 have no valid CSG shape; the fallback is already set.
 
