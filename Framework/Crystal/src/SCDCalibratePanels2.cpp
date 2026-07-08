@@ -272,9 +272,9 @@ std::map<std::string, std::string> SCDCalibratePanels2::validateInputs() {
 
   // T0 has no effect on the objective function once wavelength is derived
   // from the UB matrix instead of TOF
-  bool waveFromUB = getProperty("WavelengthFromUB");
+  m_waveFromUB = getProperty("WavelengthFromUB");
   bool calibrateT0 = getProperty("CalibrateT0");
-  if (waveFromUB && calibrateT0) {
+  if (m_waveFromUB && calibrateT0) {
     issues["CalibrateT0"] = "CalibrateT0 has no effect when WavelengthFromUB is enabled, since wavelength no "
                             "longer depends on TOF.";
   }
@@ -450,7 +450,6 @@ void SCDCalibratePanels2::optimizeL1(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
   // T0 can be calibrate along with L1 to provide a more stable results
   bool caliT0 = getProperty("CalibrateT0");
   bool tuneSamplepos = getProperty("TuneSamplePosition");
-  bool waveFromUB = getProperty("WavelengthFromUB");
 
   MatrixWorkspace_sptr l1ws = getIdealQSampleAsHistogram1D(pws);
 
@@ -459,7 +458,7 @@ void SCDCalibratePanels2::optimizeL1(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
   auto objf = std::make_shared<SCDCalibratePanels2ObjFunc>();
   // NOTE: always use the original pws to get the tofs
   std::vector<double> tofs = captureTOF(pws_original);
-  objf->setPeakWorkspace(pws, "moderator", tofs, waveFromUB);
+  objf->setPeakWorkspace(pws, "moderator", tofs, m_waveFromUB);
   fitL1_alg->setProperty("Function", std::dynamic_pointer_cast<IFunction>(objf));
 
   //-- bounds&constraints def
@@ -544,8 +543,6 @@ void SCDCalibratePanels2::optimizeL1(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
 void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, const IPeaksWorkspace_sptr &pws_original,
                                         const bool &docalibsize, const double &sizesearchradius,
                                         const bool &fixdetxyratio) {
-  bool waveFromUB = getProperty("WavelengthFromUB");
-
   PARALLEL_FOR_IF(Kernel::threadSafe(*pws))
   for (int i = 0; i < static_cast<int>(m_BankNames.size()); ++i) {
     PARALLEL_START_INTERRUPT_REGION
@@ -594,7 +591,7 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, const IPeaksWo
     auto fitBank_alg = createChildAlgorithm("Fit", -1, -1, false);
     //---- setup obj fun def
     auto objf = std::make_shared<SCDCalibratePanels2ObjFunc>();
-    objf->setPeakWorkspace(pwsBanki, bankname, tofs, waveFromUB);
+    objf->setPeakWorkspace(pwsBanki, bankname, tofs, m_waveFromUB);
     fitBank_alg->setProperty("Function", std::dynamic_pointer_cast<IFunction>(objf));
 
     //---- bounds&constraints def
@@ -761,12 +758,10 @@ void SCDCalibratePanels2::optimizeT0(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
   //    orientations.
   MatrixWorkspace_sptr t0ws = getIdealQSampleAsHistogram1D(pws);
 
-  bool waveFromUB = getProperty("WavelengthFromUB");
-
   auto objf = std::make_shared<SCDCalibratePanels2ObjFunc>();
   // NOTE: always use the original pws to get the tofs
   std::vector<double> tofs = captureTOF(pws_original);
-  objf->setPeakWorkspace(pws, "none", tofs, waveFromUB);
+  objf->setPeakWorkspace(pws, "none", tofs, m_waveFromUB);
   fitT0_alg->setProperty("Function", std::dynamic_pointer_cast<IFunction>(objf));
 
   //-- bounds&constraints def
@@ -816,12 +811,10 @@ void SCDCalibratePanels2::optimizeSamplePos(IPeaksWorkspace_sptr pws, IPeaksWork
   // creat input 1DHist from qSample
   MatrixWorkspace_sptr samplePosws = getIdealQSampleAsHistogram1D(pws);
 
-  bool waveFromUB = getProperty("WavelengthFromUB");
-
   auto objf = std::make_shared<SCDCalibratePanels2ObjFunc>();
   // NOTE: always use the original pws to get the tofs
   std::vector<double> tofs = captureTOF(pws_original);
-  objf->setPeakWorkspace(pws, "none", tofs, waveFromUB);
+  objf->setPeakWorkspace(pws, "none", tofs, m_waveFromUB);
   fitSamplePos_alg->setProperty("Function", std::dynamic_pointer_cast<IFunction>(objf));
 
   //-- bounds&constraints def
@@ -1440,11 +1433,10 @@ void SCDCalibratePanels2::profileL1(Mantid::API::IPeaksWorkspace_sptr &pws,
   msgrst << "dL1\tresidual\n";
 
   // setting up as if we are doing optimization
-  bool waveFromUB = getProperty("WavelengthFromUB");
   auto objf = std::make_shared<SCDCalibratePanels2ObjFunc>();
   // NOTE: always use the original pws to get the tofs
   std::vector<double> tofs = captureTOF(pws_original);
-  objf->setPeakWorkspace(pws, "moderator", tofs, waveFromUB);
+  objf->setPeakWorkspace(pws, "moderator", tofs, m_waveFromUB);
 
   // call the obj to perform evaluation
   const int n_peaks = pws->getNumberPeaks();
@@ -1515,8 +1507,6 @@ void SCDCalibratePanels2::profileBanks(Mantid::API::IPeaksWorkspace_sptr const &
     // header to console
     g_log.notice() << "--bankname: residual\n";
   }
-  bool waveFromUB = getProperty("WavelengthFromUB");
-
   // Use OPENMP to speed up the profiling
   PARALLEL_FOR_IF(Kernel::threadSafe(*pws))
   for (int bankIndex = 0; bankIndex < static_cast<int>(m_BankNames.size()); ++bankIndex) {
@@ -1550,7 +1540,7 @@ void SCDCalibratePanels2::profileBanks(Mantid::API::IPeaksWorkspace_sptr const &
     msgrst << "dx\tdy\tdz\ttheta\tphi\trogang\tresidual\n";
     //
     auto objf = std::make_shared<SCDCalibratePanels2ObjFunc>();
-    objf->setPeakWorkspace(pwsBanki, bankname, tofs, waveFromUB);
+    objf->setPeakWorkspace(pwsBanki, bankname, tofs, m_waveFromUB);
     //
     const int n_peaks = pwsBanki->getNumberPeaks();
     std::unique_ptr<double[]> target(new double[n_peaks * 3]);
@@ -1651,11 +1641,10 @@ void SCDCalibratePanels2::profileT0(Mantid::API::IPeaksWorkspace_sptr &pws,
   msgrst << "dT0\tresidual\n";
 
   // setting up as if we are doing optimization
-  bool waveFromUB = getProperty("WavelengthFromUB");
   auto objf = std::make_shared<SCDCalibratePanels2ObjFunc>();
   // NOTE: always use the original pws to get the tofs
   std::vector<double> tofs = captureTOF(pws_original);
-  objf->setPeakWorkspace(pws, "none", tofs, waveFromUB);
+  objf->setPeakWorkspace(pws, "none", tofs, m_waveFromUB);
 
   // generate the target
   const int n_peaks = pws->getNumberPeaks();
@@ -1729,11 +1718,10 @@ void SCDCalibratePanels2::profileL1T0(Mantid::API::IPeaksWorkspace_sptr &pws,
   msgrst << "dL1\tdT0\tresidual\n";
 
   // setting up as if we are doing optimization
-  bool waveFromUB = getProperty("WavelengthFromUB");
   auto objf = std::make_shared<SCDCalibratePanels2ObjFunc>();
   // NOTE: always use the original pws to get the tofs
   std::vector<double> tofs = captureTOF(pws_original);
-  objf->setPeakWorkspace(pws, "moderator", tofs, waveFromUB);
+  objf->setPeakWorkspace(pws, "moderator", tofs, m_waveFromUB);
 
   // generate the target
   const int n_peaks = pws->getNumberPeaks();
