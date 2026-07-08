@@ -218,6 +218,7 @@ set(SYSTEST_NAMES
     VesuvioCorrectionsTest.py
     VesuvioFittingTest.py
     VesuvioLoadingTest.py
+    VesuvioTransmissionSystemTest.py
     WeightedLeastSquaresTest.py
     WishAnalysis.py
     # WishCalibrate # Skipped since 2017
