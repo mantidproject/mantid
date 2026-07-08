@@ -49,26 +49,20 @@ boost::python::object wrapMeshWithNDArray(const CSGObject *self) {
     throw std::runtime_error("Cannot plot Shapes of infinite extent.");
   }
   try {
-    std::vector<double> vertices;
-    std::vector<uint32_t> triangles;
-    {
-      Mantid::PythonInterface::ReleaseGlobalInterpreterLock releaseGIL;
-      auto localTriangulator = GeometryTriangulator(self);
-      vertices = localTriangulator.getTriangleVertices();
-      triangles = localTriangulator.getTriangleFaces();
-    }
+    std::vector<double> vertices = self->getTriangleVertices();
+    std::vector<uint32_t> triangleFaces = self->getTriangleFaces();
 
-    if (triangles.empty() || vertices.empty()) {
+    if (triangleFaces.empty() || vertices.empty()) {
       return getEmptyArrayObject();
     }
 
-    const size_t numberTriangles = triangles.size() / 3;
+    const size_t numberTriangles = triangleFaces.size() / 3;
     npy_intp dims[3] = {static_cast<npy_intp>(numberTriangles), 3, 3};
     auto *meshCoords = new double[numberTriangles * 9];
 
     const size_t vertexCapacity = vertices.size();
-    for (size_t corner = 0; corner < triangles.size(); ++corner) {
-      const size_t src = static_cast<size_t>(triangles[corner]) * 3;
+    for (size_t corner = 0; corner < triangleFaces.size(); ++corner) {
+      const size_t src = static_cast<size_t>(triangleFaces[corner]) * 3;
       const size_t dst = corner * 3;
       if (src + 2 < vertexCapacity) {
         meshCoords[dst] = vertices[src];
