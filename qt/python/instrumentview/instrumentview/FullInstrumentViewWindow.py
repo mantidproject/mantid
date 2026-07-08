@@ -210,6 +210,7 @@ class FullInstrumentViewView(QWidget):
     def _create_main_widgets(self):
         self._left_column_tabs = QTabWidget()
         self._left_column_home = QWidget()
+        self._left_column_settings = QWidget()
         self._left_column_component_tree = QWidget()
         self._left_column_scroll = QScrollArea()
 
@@ -278,9 +279,12 @@ class FullInstrumentViewView(QWidget):
         self._reset_projection.setToolTip("Resets the projection to default.")
         self._reset_projection.clicked.connect(self.reset_camera)
         self._clear_point_picked_detectors = QPushButton("Clear Mouse Picking")
+
+        self._picking_group_box = QGroupBox("Picking")
         self._hover_pick = QPushButton("Hover Pick")
         self._hover_pick.setCheckable(True)
         self._hover_pick.setToolTip("Use mouse hover to preview a single detector spectrum (2D projections only).")
+
         self._aspect_ratio_check_box = QCheckBox()
         self._aspect_ratio_check_box.setText("Maintain Aspect Ratio")
         self._aspect_ratio_check_box.setToolTip(
@@ -397,44 +401,47 @@ class FullInstrumentViewView(QWidget):
 
         self._parent_hsplitter.addWidget(self._left_column_scroll)
         self._parent_hsplitter.addWidget(self._right_column_graphics)
-        self._parent_hsplitter.setSizes([150, 200])
+        self._parent_hsplitter.setSizes([100, 200])
 
         self._left_column_scroll.setWidgetResizable(True)
         self._left_column_scroll.setWidget(self._left_column_tabs)
         self._left_column_scroll.setFrameShape(QFrame.NoFrame)
 
         self._left_column_tabs.addTab(self._left_column_home, "Home")
+        self._left_column_tabs.addTab(self._left_column_settings, "Settings")
         self._left_column_tabs.addTab(self._left_column_component_tree, "Component Tree")
 
         left_column_component_layout = QVBoxLayout(self._left_column_component_tree)
         left_column_component_layout.addWidget(self.component_tree)
 
         left_column_home_layout = QVBoxLayout(self._left_column_home)
+        left_column_home_layout.addWidget(self._projection_group_box)
         left_column_home_layout.addWidget(self._integration_limit_group_box)
         left_column_home_layout.addWidget(self._contour_range_group_box)
-        left_column_home_layout.addWidget(self._projection_group_box)
+        left_column_home_layout.addWidget(self._picking_group_box)
         left_column_home_layout.addWidget(self._lineplot_options_group_box)
         left_column_home_layout.addWidget(self._lists_vsplitter)
 
         projection_layout = QVBoxLayout(self._projection_group_box)
         projection_first_row = QHBoxLayout()
-        projection_second_row = QHBoxLayout()
-        projection_third_row = QHBoxLayout()
 
         projection_first_row.addWidget(self._projection_combo_box)
         projection_first_row.addWidget(self._reset_projection)
-        projection_second_row.addWidget(self._hover_pick)
-        projection_second_row.addWidget(self._select_bank_tube)
-        projection_second_row.addWidget(self._clear_point_picked_detectors)
-        projection_third_row.addWidget(self._aspect_ratio_check_box)
-        projection_third_row.addWidget(self._flip_beam_check_box)
-        projection_third_row.addWidget(self._show_monitors_check_box)
-        projection_third_row.addWidget(self._show_sample_position_check_box)
-        projection_second_row.addWidget(self._render_mode_combo_box)
-        projection_third_row.addWidget(self._count_scale_combo_box)
         projection_layout.addLayout(projection_first_row)
-        projection_layout.addLayout(projection_second_row)
-        projection_layout.addLayout(projection_third_row)
+
+        picking_layout = QHBoxLayout(self._picking_group_box)
+        picking_layout.addWidget(self._hover_pick)
+        picking_layout.addWidget(self._select_bank_tube)
+        picking_layout.addWidget(self._clear_point_picked_detectors)
+
+        settings_layout = QVBoxLayout(self._left_column_settings)
+        settings_layout.addWidget(self._aspect_ratio_check_box)
+        settings_layout.addWidget(self._flip_beam_check_box)
+        settings_layout.addWidget(self._show_monitors_check_box)
+        settings_layout.addWidget(self._show_sample_position_check_box)
+        settings_layout.addWidget(self._render_mode_combo_box)
+        settings_layout.addWidget(self._count_scale_combo_box)
+        settings_layout.addStretch(1)
 
         lineplot_options_layout = QHBoxLayout(self._lineplot_options_group_box)
         lineplot_options_layout.addWidget((self._units_combo_box_lineplot))
