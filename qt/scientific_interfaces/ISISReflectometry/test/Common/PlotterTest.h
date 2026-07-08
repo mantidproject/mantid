@@ -78,6 +78,30 @@ public:
                       &parent}));
   }
 
+  void testHasActiveFigureIgnoresNonReflectometryFigure() {
+    closeAllFigures();
+    createPlainMatplotlibLineFigure();
+
+    MantidQt::CustomInterfaces::ISISReflectometry::Plotter plotter;
+
+    TS_ASSERT(!plotter.hasActiveFigure());
+    TS_ASSERT(!plotter.canOverplotActiveFigure());
+  }
+
+  void testHasActiveFigureAcceptsReflectometryFigure() {
+    closeAllFigures();
+    createWorkspace("ws1");
+
+    MantidQt::CustomInterfaces::ISISReflectometry::Plotter plotter;
+    plotter.plot({{"ws1"},
+                  MantidQt::CustomInterfaces::ISISReflectometry::reflectivityCurvePlotOptions(
+                      MantidQt::CustomInterfaces::ISISReflectometry::PlotOutputType::ReflectivityCurve,
+                      MantidQt::CustomInterfaces::ISISReflectometry::PlotLayout::Individual)});
+
+    TS_ASSERT(plotter.hasActiveFigure());
+    TS_ASSERT(plotter.canOverplotActiveFigure());
+  }
+
   void testSpinAsymmetryPlotUsesConfiguredYAxisLabel() {
     closeAllFigures();
     createWorkspace("ws1");
@@ -272,17 +296,8 @@ private:
       auto const axis = MantidQt::Widgets::Common::Python::Object(axes[index]);
       auto const axisLabel = boost::python::extract<std::string>(axis.attr("get_label")())();
       if (isPlotAxis(axis, axisLabel)) {
-        if (PyObject_HasAttrString(axis.ptr(), "_mantid_tiled_row") != 0 &&
-            PyObject_HasAttrString(axis.ptr(), "_mantid_tiled_col") != 0) {
-          positions.emplace_back(boost::python::extract<int>(axis.attr("_mantid_tiled_row"))(),
-                                 boost::python::extract<int>(axis.attr("_mantid_tiled_col"))());
-        } else {
-          auto const subplotSpec = axis.attr("get_subplotspec")();
-          auto const rowSpan = subplotSpec.attr("rowspan");
-          auto const colSpan = subplotSpec.attr("colspan");
-          positions.emplace_back(boost::python::extract<int>(rowSpan.attr("start"))(),
-                                 boost::python::extract<int>(colSpan.attr("start"))());
-        }
+        positions.emplace_back(boost::python::extract<int>(axis.attr("_mantid_tiled_row"))(),
+                               boost::python::extract<int>(axis.attr("_mantid_tiled_col"))());
       }
     }
     return positions;
@@ -365,5 +380,20 @@ private:
     MantidQt::Widgets::Common::Python::Object pyplot{
         MantidQt::Widgets::Common::Python::NewRef(PyImport_ImportModule("matplotlib.pyplot"))};
     pyplot.attr("close")("all");
+  }
+
+  void createPlainMatplotlibLineFigure() {
+    Mantid::PythonInterface::GlobalInterpreterLock lock;
+    MantidQt::Widgets::Common::Python::Object pyplot{
+        MantidQt::Widgets::Common::Python::NewRef(PyImport_ImportModule("matplotlib.pyplot"))};
+    auto const result = pyplot.attr("subplots")();
+    auto const axis = MantidQt::Widgets::Common::Python::Object(result[1]);
+    MantidQt::Widgets::Common::Python::List xValues;
+    xValues.append(0.0);
+    xValues.append(1.0);
+    MantidQt::Widgets::Common::Python::List yValues;
+    yValues.append(0.0);
+    yValues.append(1.0);
+    axis.attr("plot")(xValues, yValues);
   }
 };
