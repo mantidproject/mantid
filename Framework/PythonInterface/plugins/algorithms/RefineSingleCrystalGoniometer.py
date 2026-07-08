@@ -232,63 +232,73 @@ class RefineSingleCrystalGoniometer(PythonAlgorithm):
 
         lattice_params = {}
         indexed = {}
+        success = False
 
-        for run in runs:
-            ws_name = "_fft_tmp_{}".format(run)
+        try:
+            for run in runs:
+                ws_name = "_fft_tmp_{}".format(run)
 
-            FilterPeaks(InputWorkspace=peaks, FilterVariable="RunNumber", FilterValue=run, Operator="=", OutputWorkspace=ws_name)
+                FilterPeaks(InputWorkspace=peaks, FilterVariable="RunNumber", FilterValue=run, Operator="=", OutputWorkspace=ws_name)
+                indexed[run] = ws_name
 
-            FindUBUsingFFT(PeaksWorkspace=ws_name, MinD=min_d, MaxD=max_d)
+                FindUBUsingFFT(PeaksWorkspace=ws_name, MinD=min_d, MaxD=max_d)
 
-            IndexPeaks(PeaksWorkspace=ws_name, Tolerance=tolerance, CommonUBForAll=True, UpdateUB=True)
+                IndexPeaks(PeaksWorkspace=ws_name, Tolerance=tolerance, CommonUBForAll=True, UpdateUB=True)
 
-            ol = mtd[ws_name].sample().getOrientedLattice()
-            lattice_params[run] = np.array([ol.a(), ol.b(), ol.c(), ol.alpha(), ol.beta(), ol.gamma()])
-            indexed[run] = ws_name
+                ol = mtd[ws_name].sample().getOrientedLattice()
+                lattice_params[run] = np.array([ol.a(), ol.b(), ol.c(), ol.alpha(), ol.beta(), ol.gamma()])
 
-        values = np.array([lattice_params[run] for run in runs])
-        med = np.median(values, axis=0)
-        mad = np.median(np.abs(values - med), axis=0)
-        safe_mad = np.where(mad > 0, mad, 1.0)
+            values = np.array([lattice_params[run] for run in runs])
+            med = np.median(values, axis=0)
+            mad = np.median(np.abs(values - med), axis=0)
+            safe_mad = np.where(mad > 0, mad, 1.0)
 
-        good_runs = []
-        for run in runs:
-            deviation = np.abs(lattice_params[run] - med) / safe_mad
-            if np.any(deviation > n_mad):
-                self.log().warning(
-                    "Run {} has lattice constants a={:.4f}, b={:.4f}, c={:.4f}, alpha={:.4f}, "
-                    "beta={:.4f}, gamma={:.4f} inconsistent with the across-run median "
-                    "a={:.4f}, b={:.4f}, c={:.4f}, alpha={:.4f}, beta={:.4f}, gamma={:.4f}; "
-                    "excluding this run from refinement.".format(run, *lattice_params[run], *med)
+            good_runs = []
+            for run in runs:
+                deviation = np.abs(lattice_params[run] - med) / safe_mad
+                if np.any(deviation > n_mad):
+                    self.log().warning(
+                        "Run {} has lattice constants a={:.4f}, b={:.4f}, c={:.4f}, alpha={:.4f}, "
+                        "beta={:.4f}, gamma={:.4f} inconsistent with the across-run median "
+                        "a={:.4f}, b={:.4f}, c={:.4f}, alpha={:.4f}, beta={:.4f}, gamma={:.4f}; "
+                        "excluding this run from refinement.".format(run, *lattice_params[run], *med)
+                    )
+                    DeleteWorkspace(Workspace=indexed[run])
+                    del indexed[run]
+                else:
+                    good_runs.append(run)
+
+            if not good_runs:
+                raise RuntimeError(
+                    "LargeOffset indexing failed: none of the runs produced lattice constants "
+                    "consistent with the across-run median. Check MinD/MaxD and LatticeOutlierTolerance."
                 )
-                DeleteWorkspace(Workspace=indexed[run])
-            else:
-                good_runs.append(run)
 
-        if not good_runs:
-            raise RuntimeError(
-                "LargeOffset indexing failed: none of the runs produced lattice constants "
-                "consistent with the across-run median. Check MinD/MaxD and LatticeOutlierTolerance."
-            )
+            first_run = good_runs[0]
 
-        first_run = good_runs[0]
+            self.U = mtd[indexed[first_run]].sample().getOrientedLattice().getU().copy()
+            self.a, self.b, self.c, self.alpha, self.beta, self.gamma = lattice_params[first_run]
 
-        self.U = mtd[indexed[first_run]].sample().getOrientedLattice().getU().copy()
-        self.a, self.b, self.c, self.alpha, self.beta, self.gamma = lattice_params[first_run]
+            combine = "_{}_large_offset".format(peaks_name)
 
-        combine = "_{}_large_offset".format(peaks_name)
+            for i, run in enumerate(good_runs):
+                ws_name = indexed[run]
 
-        for i, run in enumerate(good_runs):
-            ws_name = indexed[run]
+                if i == 0:
+                    CloneWorkspace(InputWorkspace=ws_name, OutputWorkspace=combine)
+                else:
+                    CombinePeaksWorkspaces(LHSWorkspace=combine, RHSWorkspace=ws_name, OutputWorkspace=combine)
 
-            if i == 0:
-                CloneWorkspace(InputWorkspace=ws_name, OutputWorkspace=combine)
-            else:
-                CombinePeaksWorkspaces(LHSWorkspace=combine, RHSWorkspace=ws_name, OutputWorkspace=combine)
+                DeleteWorkspace(Workspace=ws_name)
+                del indexed[run]
 
-            DeleteWorkspace(Workspace=ws_name)
-
-        RenameWorkspace(InputWorkspace=combine, OutputWorkspace=peaks_name)
+            RenameWorkspace(InputWorkspace=combine, OutputWorkspace=peaks_name)
+            success = True
+        finally:
+            if not success:
+                for ws_name in indexed.values():
+                    if ws_name in mtd:
+                        DeleteWorkspace(Workspace=ws_name)
 
         return mtd[peaks_name], good_runs
 
