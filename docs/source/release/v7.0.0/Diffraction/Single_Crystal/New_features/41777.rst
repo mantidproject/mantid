@@ -1,0 +1,1 @@
+- :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` has a new ``WavelengthFromUB`` option to derive each peak's wavelength from Bragg's law using the UB matrix and its integer HKL instead of from the measured TOF. This is intended for quasi-Laue workflows, where a peak's TOF-derived wavelength can be unreliable, but it also works for standard time-of-flight Laue data.
