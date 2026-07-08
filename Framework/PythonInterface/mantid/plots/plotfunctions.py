@@ -370,7 +370,7 @@ def add_tiled_axes(fig, axes_num, layout_engine="tight", vertical=False):
 
     occupied_positions = set()
     for index, ax in enumerate(existing_axes):
-        row, col = existing_axis_grid_position(ax, index, nrows, ncols, vertical)
+        row, col = existing_axis_grid_position(ax, nrows, ncols)
         occupied_positions.add((row, col))
         subplot_spec = grid_spec[row, col]
         if hasattr(ax, "set_subplotspec"):
@@ -408,19 +408,14 @@ def tiled_axis_grid_position(index, nrows, ncols, vertical=False):
     return index // ncols, index % ncols
 
 
-def existing_axis_grid_position(axis, fallback_index, nrows, ncols, vertical=False):
+def existing_axis_grid_position(axis, nrows, ncols):
     stored_position = stored_axis_tiled_position(axis)
-    if stored_position is not None:
-        row, col = stored_position
-        if row < nrows and col < ncols:
-            return row, col
-    if hasattr(axis, "get_subplotspec"):
-        subplot_spec = axis.get_subplotspec()
-        if subplot_spec is not None:
-            row, col = subplot_spec.rowspan.start, subplot_spec.colspan.start
-            if row < nrows and col < ncols:
-                return row, col
-    return tiled_axis_grid_position(fallback_index, nrows, ncols, vertical)
+    if stored_position is None:
+        raise ValueError("Existing tiled axes must have a stored Mantid tile position")
+    row, col = stored_position
+    if row >= nrows or col >= ncols:
+        raise ValueError("Existing tiled axis position is outside the new tiled layout")
+    return row, col
 
 
 def stored_axis_tiled_position(axis):

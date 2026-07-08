@@ -42,6 +42,8 @@ using namespace MantidQt::Widgets::MplCpp;
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 namespace {
+auto constexpr reflectometryFigureMarker = "_mantid_reflectometry_plot";
+
 QString scaleName(AxisScale scale) { return scale == AxisScale::Log ? QString("log") : QString("linear"); }
 
 /// Combine an axis label and unit into the matplotlib label text.
@@ -280,7 +282,15 @@ std::optional<MantidQt::Widgets::Common::Python::Object> currentFigureOrNone() {
   auto const figure = Python::Object(plotFunctions.attr("current_figure_or_none")());
   if (figure.ptr() == Py_None)
     return std::nullopt;
+  if (PyObject_HasAttrString(figure.ptr(), reflectometryFigureMarker) == 0)
+    return std::nullopt;
   return figure;
+}
+
+/// Mark a matplotlib figure as having been created by the Reflectometry plotting tab.
+void markReflectometryFigure(MantidQt::Widgets::Common::Python::Object const &figure) {
+  if (PyObject_SetAttrString(figure.ptr(), reflectometryFigureMarker, Py_True) != 0)
+    throw Mantid::PythonInterface::PythonException();
 }
 
 /// Add tiled axes to an existing figure and return the created axes.
@@ -471,6 +481,7 @@ PlottedFigure plotFigure(PlotRequest const &request, EvaluatedPlotRequest const 
 /// Apply axis labels, optional markers and window parenting after plotting.
 void applyPostPlotting(PlotRequest const &request, PlottedFigure const &plottedFigure) {
   auto const &options = request.options;
+  markReflectometryFigure(plottedFigure.figure);
   if (plottedFigure.postPlotTarget == PostPlotTarget::ColorfillAxes) {
     applyColorfillAxisLabels(plottedFigure.figure, options);
   } else if (plottedFigure.postPlotTarget == PostPlotTarget::NewAxes) {
@@ -491,6 +502,8 @@ bool Plotter::canOverplotActiveFigure() const {
 
   Mantid::PythonInterface::GlobalInterpreterLock lock;
   try {
+    if (!currentFigureOrNone().has_value())
+      return false;
     auto const plotFunctions = Python::Object(Python::NewRef(PyImport_ImportModule("mantidqt.plotting.functions")));
     return boost::python::extract<bool>(plotFunctions.attr("can_overplot")())();
   } catch (Python::ErrorAlreadySet &) {
