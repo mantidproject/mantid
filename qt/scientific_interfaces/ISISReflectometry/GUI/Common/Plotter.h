@@ -20,8 +20,6 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL Plotter : public IPlotter {
 public:
   /// Plot the requested workspaces and apply post-plot labels, markers and parent window state.
   void plot(PlotRequest const &request) const override;
-  /// Return true if matplotlib currently has an active figure.
-  bool hasActiveFigure() const override;
   /// Return true if the active figure can accept an overplotted line plot.
   bool canOverplotActiveFigure() const override;
 };

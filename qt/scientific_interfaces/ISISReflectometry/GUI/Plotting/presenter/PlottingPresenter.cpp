@@ -76,9 +76,9 @@ void PlottingPresenter::notifyPlotOverplotClicked() { plotSelectedWorkspaces(Plo
 
 void PlottingPresenter::notifyPlotIndividualClicked() { plotSelectedWorkspaces(PlotLayout::Individual); }
 
-void PlottingPresenter::notifyAddToExistingPlotChanged() { updateActivePlotAvailability(); }
+void PlottingPresenter::notifyAddToExistingPlotChanged() { updateActivePlotCompatibility(); }
 
-void PlottingPresenter::notifyActivePlotAvailabilityChanged() { updateActivePlotAvailability(); }
+void PlottingPresenter::notifyActivePlotCompatibilityChanged() { updateActivePlotCompatibility(); }
 
 void PlottingPresenter::plotSelectedWorkspaces(PlotLayout layout) const {
   auto const selectedWorkspaces = m_workspaceTree.selectedWorkspacesFor(m_view->selectedWorkspaceNames());
@@ -102,23 +102,21 @@ void PlottingPresenter::plotSelectedWorkspaces(PlotLayout layout) const {
     for (auto const &workspace : workspacesToPlot) {
       m_plotter->plot({{workspace}, options, request.plotParent, request.addToExistingPlot, request.tiledVertically});
     }
-    updateActivePlotAvailability();
+    updateActivePlotCompatibility();
     return;
   }
 
   m_plotter->plot({workspacesToPlot, options, request.plotParent, request.addToExistingPlot, request.tiledVertically});
-  updateActivePlotAvailability();
+  updateActivePlotCompatibility();
 }
 
 void PlottingPresenter::updateWidgetEnabledState() {
   m_view->setOutputSelectionEnabled(!isProcessing() && !isAutoreducing());
-  updateActivePlotAvailability();
+  updateActivePlotCompatibility();
 }
 
-void PlottingPresenter::updateActivePlotAvailability() const {
-  auto const activePlotAvailable = m_plotter->hasActiveFigure();
-  m_view->setActivePlotAvailable(activePlotAvailable);
-  m_view->setActivePlotOverplotCompatible(activePlotAvailable && m_plotter->canOverplotActiveFigure());
+void PlottingPresenter::updateActivePlotCompatibility() const {
+  m_view->setActivePlotOverplotCompatible(m_plotter->canOverplotActiveFigure());
 }
 
 void PlottingPresenter::updateAvailablePlotOutputTypes(std::string const &instrumentName) {

@@ -45,7 +45,6 @@ public:
   MOCK_METHOD(PlotOutputSelection, selectedPlotOutputSelection, (), (const, override));
   MOCK_METHOD(bool, addToExistingPlot, (), (const, override));
   MOCK_METHOD(bool, plotTiledVertically, (), (const, override));
-  MOCK_METHOD(void, setActivePlotAvailable, (bool), (override));
   MOCK_METHOD(void, setActivePlotOverplotCompatible, (bool), (override));
   MOCK_METHOD(QWidget *, plotParent, (), (override));
   MOCK_METHOD(bool, confirmPlottingMultipleItems, (size_t), (const, override));
@@ -645,25 +644,23 @@ public:
     NiceMock<MockPlottingModel> plottingModel;
     PlottingPresenter presenter(&view, plotter, plotOptionsProvider, plottingModel);
 
-    EXPECT_CALL(plotter, hasActiveFigure()).Times(1).WillOnce(Return(true));
-    EXPECT_CALL(view, setActivePlotAvailable(true)).Times(1);
     EXPECT_CALL(plotter, canOverplotActiveFigure()).Times(1).WillOnce(Return(true));
     EXPECT_CALL(view, setActivePlotOverplotCompatible(true)).Times(1);
 
     presenter.notifyAddToExistingPlotChanged();
   }
 
-  void testActivePlotAvailabilityChangedUpdatesActivePlotAvailability() {
+  void testActivePlotCompatibilityChangedUpdatesActivePlotCompatibility() {
     NiceMock<MockPlottingView> view;
     NiceMock<MockPlotter> plotter;
     PlotOptionsProvider plotOptionsProvider;
     NiceMock<MockPlottingModel> plottingModel;
     PlottingPresenter presenter(&view, plotter, plotOptionsProvider, plottingModel);
 
-    EXPECT_CALL(plotter, hasActiveFigure()).Times(1).WillOnce(Return(true));
-    EXPECT_CALL(view, setActivePlotAvailable(true)).Times(1);
+    EXPECT_CALL(plotter, canOverplotActiveFigure()).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(view, setActivePlotOverplotCompatible(true)).Times(1);
 
-    presenter.notifyActivePlotAvailabilityChanged();
+    presenter.notifyActivePlotCompatibilityChanged();
   }
 
   void testPlotTiledWarnsAndCancelsWhenPlottingFiveItems() {
