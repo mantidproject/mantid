@@ -369,8 +369,8 @@ def add_axes_to_existing_mantid_tiled_figure(fig, axes_num, layout_engine="tight
     grid_spec = GridSpec(nrows, ncols, fig)
 
     occupied_positions = set()
-    for index, ax in enumerate(existing_axes):
-        row, col = stored_tiled_axis_position(ax, nrows, ncols)
+    for ax in existing_axes:
+        row, col = stored_mantid_tiled_axis_position(ax, nrows, ncols)
         occupied_positions.add((row, col))
         ax.set_subplotspec(grid_spec[row, col])
         set_mantid_tiled_axis_position(ax, row, col)
@@ -404,21 +404,12 @@ def tiled_axis_grid_position(index, nrows, ncols, vertical=False):
     return index // ncols, index % ncols
 
 
-def stored_tiled_axis_position(axis, nrows, ncols):
-    stored_position = stored_mantid_tiled_axis_position(axis)
-    if stored_position is None:
+def stored_mantid_tiled_axis_position(axis, nrows, ncols):
+    row, col = getattr(axis, "_mantid_tiled_row", None), getattr(axis, "_mantid_tiled_col", None)
+    if row is None or col is None:
         raise ValueError("Existing tiled axes must have a stored Mantid tile position")
-    row, col = stored_position
     if row >= nrows or col >= ncols:
         raise ValueError("Existing tiled axis position is outside the new tiled layout")
-    return row, col
-
-
-def stored_mantid_tiled_axis_position(axis):
-    row = getattr(axis, "_mantid_tiled_row", None)
-    col = getattr(axis, "_mantid_tiled_col", None)
-    if row is None or col is None:
-        return None
     return row, col
 
 
