@@ -238,7 +238,7 @@ class ReorientUnitCell(PythonAlgorithm):
                     FindError=True,
                 )
                 self.log().notice("Successfully recalculated error after reorienting unit cell.")
-            except ValueError as e:
+            except (RuntimeError, ValueError) as e:
                 # Log before retrying without error recalculation, so the reason is recorded
                 # even if this retry also fails and the algorithm aborts.
                 self.log().warning(f"Reoriented unit cell but failed to recalculate error: {e}")
