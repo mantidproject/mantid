@@ -840,7 +840,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
                 setattr(dataset, dataset_attr, value)
 
         if not dataset.q_conversion_method:
-            setattr(dataset, "q_conversion_method", self.getProperyValue(Prop.Q_CONVERT_METHOD))
+            setattr(dataset, "q_conversion_method", self.getPropertyValue(Prop.Q_CONVERT_METHOD))
         set_simple_dataset_value("reduction_timestamp", self.getPropertyValue(Prop.REDUCTION_TIMESTAMP), Prop.REDUCTION_TIMESTAMP)
         set_simple_dataset_value("calibration_entry", self.getPropertyValue(Prop.CALIB_FILE), Prop.CALIB_FILE)
         set_simple_dataset_value("resolution", self.getProperty(Prop.RESOLUTION).value, Prop.RESOLUTION)
