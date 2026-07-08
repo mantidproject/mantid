@@ -10,7 +10,6 @@
 #include "MantidPythonInterface/core/Converters/NDArrayTypeIndex.h"
 #include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
 #include "MantidPythonInterface/core/GetPointer.h"
-#include "MantidPythonInterface/core/ReleaseGlobalInterpreterLock.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
