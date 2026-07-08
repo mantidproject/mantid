@@ -13,6 +13,7 @@ from Engineering.texture.TextureUtils.fitpeaks_engine import (
     _populate_fitpeaks_output_table,
     _combine_peak_crops_to_tof,
     _compute_tof_windows,
+    _estimate_peak_intensities,
 )
 
 texture_utils_path = "Engineering.texture.TextureUtils.fitting_utils"
@@ -175,7 +176,44 @@ class FitPeaksTofWindowTests(unittest.TestCase):
         np.testing.assert_array_equal(tof_hi, [25.0, 50.0])
 
 
+class FitPeaksIntensityEstimateTests(unittest.TestCase):
+    @patch(f"{fitpeaks_path}._estimate_intensity_background_and_centre")
+    def test_estimate_peak_intensities_integrates_each_spectrum_over_its_window(self, mock_estimate):
+        # per-spectrum window is resolved to bin indices via yIndexOfX, then the shared estimator's
+        # intensity (its first return value) is collected into one array - independent of any fit
+        ws = MagicMock()
+        tof_centre = np.array([100.0, 200.0])
+        tof_lo = np.array([90.0, 190.0])
+        tof_hi = np.array([110.0, 210.0])
+        # yIndexOfX(value, spec) -> a distinct index per (value, spec) so we can check the call args
+        ws.yIndexOfX.side_effect = lambda value, spec: int(value) + spec
+        # estimator returns (intensity, sigma, bg, centre); only intensity is used
+        mock_estimate.side_effect = [(11.0, 1.0, 0.5, 100.0), (22.0, 2.0, 0.5, 200.0)]
+
+        i_est = _estimate_peak_intensities(ws, tof_centre, tof_lo, tof_hi)
+
+        np.testing.assert_array_equal(i_est, np.array([11.0, 22.0]))
+        # one estimate per spectrum, each over that spectrum's [istart, iend] window and its centre
+        self.assertEqual(mock_estimate.call_count, 2)
+        mock_estimate.assert_any_call(ws, 0, 90, 110, 100.0)  # spec 0: yIndexOfX(90,0)=90, (110,0)=110
+        mock_estimate.assert_any_call(ws, 1, 191, 211, 200.0)  # spec 1: yIndexOfX(190,1)=191, (210,1)=211
+
+    @patch(f"{fitpeaks_path}._estimate_intensity_background_and_centre")
+    def test_estimate_peak_intensities_length_follows_spectrum_count(self, mock_estimate):
+        # the returned array has one entry per spectrum (length of the TOF-centre array)
+        ws = MagicMock()
+        ws.yIndexOfX.return_value = 0
+        mock_estimate.return_value = (7.0, 1.0, 0.0, 5.0)
+        tof = np.zeros(4)
+
+        i_est = _estimate_peak_intensities(ws, tof, tof, tof)
+
+        self.assertEqual(i_est.shape, (4,))
+        np.testing.assert_array_equal(i_est, np.full(4, 7.0))
+
+
 class FitPeaksEngineTests(unittest.TestCase):
+    @patch(f"{fitpeaks_path}._estimate_peak_intensities", side_effect=lambda ws, c, lo, hi: np.zeros(len(c)))
     @patch(f"{fitpeaks_path}.SaveNexus")
     @patch(f"{fitpeaks_path}.CreateEmptyTableWorkspace")
     @patch(f"{fitpeaks_path}._populate_fitpeaks_output_table")
@@ -212,6 +250,7 @@ class FitPeaksEngineTests(unittest.TestCase):
         mock_populate,
         mock_create_tab,
         mock_save_nexus,
+        _mock_estimate,
     ):
         # two workspaces, two spectra each -> combined TOF workspace of 4 spectra for the peak.
         # summed fit returns a 2-tuple (no shape seeds - FitPeaks loads A,B from the instrument)
@@ -297,6 +336,87 @@ class FitPeaksEngineTests(unittest.TestCase):
         np.testing.assert_array_equal(ws1_call[0][3]["I"], np.array([7.0, 0.0]))  # param_slices["I"] for ws1
         np.testing.assert_array_equal(ws1_call[0][6], np.array([True, False]))  # fit_mask slice for ws1
 
+    @patch(f"{fitpeaks_path}._estimate_peak_intensities", side_effect=lambda ws, c, lo, hi: np.zeros(len(c)))
+    @patch(f"{fitpeaks_path}.SaveNexus")
+    @patch(f"{fitpeaks_path}.CreateEmptyTableWorkspace")
+    @patch(f"{fitpeaks_path}._populate_fitpeaks_output_table")
+    @patch(f"{fitpeaks_path}.convert_TOFerror_to_derror", return_value=0.001)
+    @patch(f"{texture_utils_path}.DeltaEModeType")
+    @patch(f"{texture_utils_path}.UnitConversion")
+    @patch(f"{fitpeaks_path}.CreateWorkspace")
+    @patch(f"{fitpeaks_path}.Rebunch")
+    @patch(f"{fitpeaks_path}.FitPeaks")
+    @patch(f"{fitpeaks_path}.ConvertUnits")
+    @patch(f"{fitpeaks_path}.AppendSpectra")
+    @patch(f"{fitpeaks_path}.CloneWorkspace")
+    @patch(f"{fitpeaks_path}.FunctionFactory")
+    @patch(f"{fitpeaks_path}.fit_initial_summed_spectra")
+    @patch(f"{fitpeaks_path}._get_grouping_from_ws_log", return_value="TestGroup")
+    @patch(f"{fitpeaks_path}._get_run_and_prefix_from_ws_log", return_value=("123456", "TEST"))
+    @patch(f"{fitpeaks_path}.ADS")
+    def test_fit_all_peaks_fitpeaks_rejects_peaks_below_i_over_sigma_thresh(
+        self,
+        mock_ads,
+        _mock_run_prefix,
+        _mock_group,
+        mock_fit_summed,
+        mock_func_factory,
+        mock_clone,
+        mock_append,
+        mock_convert_units,
+        mock_fitpeaks,
+        mock_rebunch,
+        mock_create_ws,
+        mock_unitconv,
+        _mock_delta_e,
+        _mock_toferr,
+        mock_populate,
+        mock_create_tab,
+        mock_save_nexus,
+        _mock_estimate,
+    ):
+        # one workspace, two spectra: both converge with a positive area (so the positive-area check
+        # accepts both), but spec 1's intensity is not significant (I/I_err = 5/2 = 2.5) and must be
+        # rejected by the i_over_sigma_thresh=3.0 mask, while spec 0 (I/I_err = 5/0.1 = 50) is kept.
+        mock_fit_summed.return_value = ([(0.95, 1.05)], [["crop_ws0"]])
+        mock_func_factory.Instance.return_value.createPeakFunction.return_value = _make_peak_func_mock(["I", "A", "B", "X0", "S"])
+
+        combined_tof = MagicMock()
+        combined_tof.spectrumInfo.return_value.size.return_value = 2
+        mock_convert_units.return_value = combined_tof
+        mock_unitconv.run.return_value = 5000.0
+
+        ws = MagicMock()
+        param_table, error_table = MagicMock(), MagicMock()
+        param_table.column.side_effect = lambda p: {
+            "chi2": [1.0, 1.0],
+            "I": [5.0, 5.0],
+            "X0": [5000.0, 5000.0],
+        }.get(p, [0.0] * 2)
+        error_table.column.side_effect = lambda p: [0.1, 2.0] if p == "I" else [0.1, 0.1]
+        mock_ads.retrieve.side_effect = lambda name: ws if name == "ws0" else (param_table if "params" in name else error_table)
+        mock_create_tab.return_value = MagicMock()
+
+        _fit_all_peaks_fitpeaks(
+            wss=["ws0"],
+            peaks=[2.03],
+            peak_window=0.02,
+            save_dir="save",
+            override_dir=True,
+            i_over_sigma_thresh=3.0,
+            nan_replacement="mean",
+            no_fit_value_dict=None,
+            peak_func_name="BackToBackExponential",
+            max_fit_iters=50,
+            fit_kwargs={"Minimizer": "Levenberg-Marquardt"},
+            smooth_vals=(3, 2),
+        )
+
+        # the insignificant peak (spec 1) is masked out despite converging with a positive area
+        ws0_call = mock_populate.call_args_list[0]
+        np.testing.assert_array_equal(ws0_call[0][6], np.array([True, False]))  # fit_mask slice for ws0
+
+    @patch(f"{fitpeaks_path}._estimate_peak_intensities", side_effect=lambda ws, c, lo, hi: np.zeros(len(c)))
     @patch(f"{fitpeaks_path}.SaveNexus")
     @patch(f"{fitpeaks_path}.CreateEmptyTableWorkspace")
     @patch(f"{fitpeaks_path}._populate_fitpeaks_output_table")
@@ -333,6 +453,7 @@ class FitPeaksEngineTests(unittest.TestCase):
         mock_populate,
         mock_create_tab,
         mock_save_nexus,
+        _mock_estimate,
     ):
         # one workspace, two spectra; requested func is B2B but last_fit_ic switches the final fit to IC
         mock_fit_summed.return_value = ([(0.95, 1.05)], [["crop_ws0"]])
@@ -381,6 +502,7 @@ class FitPeaksEngineTests(unittest.TestCase):
         self.assertEqual(mock_create_tab.call_count, 1)
         self.assertEqual(mock_save_nexus.call_count, 1)
 
+    @patch(f"{fitpeaks_path}._estimate_peak_intensities", side_effect=lambda ws, c, lo, hi: np.zeros(len(c)))
     @patch(f"{fitpeaks_path}.SaveNexus")
     @patch(f"{fitpeaks_path}.CreateEmptyTableWorkspace")
     @patch(f"{fitpeaks_path}._populate_fitpeaks_output_table")
@@ -417,6 +539,7 @@ class FitPeaksEngineTests(unittest.TestCase):
         mock_populate,
         mock_create_tab,
         mock_save_nexus,
+        _mock_estimate,
     ):
         # 2 workspaces but a combined ws with 3 spectra cannot be split evenly -> de-interleave fails
         mock_fit_summed.return_value = ([(0.95, 1.05)], [["crop_ws0", "crop_ws1"]])
@@ -449,6 +572,7 @@ class FitPeaksEngineTests(unittest.TestCase):
         mock_fitpeaks.assert_not_called()
         mock_save_nexus.assert_not_called()
 
+    @patch(f"{fitpeaks_path}._estimate_peak_intensities", side_effect=lambda ws, c, lo, hi: np.zeros(len(c)))
     @patch(f"{fitpeaks_path}.SaveNexus")
     @patch(f"{fitpeaks_path}.CreateEmptyTableWorkspace")
     @patch(f"{fitpeaks_path}._populate_fitpeaks_output_table")
@@ -485,6 +609,7 @@ class FitPeaksEngineTests(unittest.TestCase):
         mock_populate,
         mock_create_tab,
         mock_save_nexus,
+        _mock_estimate,
     ):
         # a peak function without an X0 centre param: no centre seed to refine, so the smoothing passes
         # are skipped and only the single authoritative fit runs; X0 has no TOF->d conversion either
@@ -524,6 +649,7 @@ class FitPeaksEngineTests(unittest.TestCase):
         # results are still written
         self.assertEqual(mock_save_nexus.call_count, 1)
 
+    @patch(f"{fitpeaks_path}._estimate_peak_intensities", side_effect=lambda ws, c, lo, hi: np.zeros(len(c)))
     @patch(f"{fitpeaks_path}.SaveNexus")
     @patch(f"{fitpeaks_path}.CreateEmptyTableWorkspace")
     @patch(f"{fitpeaks_path}._populate_fitpeaks_output_table")
@@ -560,6 +686,7 @@ class FitPeaksEngineTests(unittest.TestCase):
         mock_populate,
         mock_create_tab,
         mock_save_nexus,
+        _mock_estimate,
     ):
         # one workspace, two peaks: the peak loop runs once per peak, each producing its own output table
         mock_fit_summed.return_value = ([(0.95, 1.05), (1.95, 2.05)], [["crop_p0"], ["crop_p1"]])

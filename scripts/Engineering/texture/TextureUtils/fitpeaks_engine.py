@@ -44,6 +44,7 @@ from .fitting_utils import (
     _d_to_tof,
     _tof_to_d,
     _fit_parameters_path,
+    _estimate_intensity_background_and_centre,
     fit_initial_summed_spectra,
     _get_run_and_prefix_from_ws_log,
     _get_grouping_from_ws_log,
@@ -53,6 +54,10 @@ from .fitting_utils import (
 
 # large sentinel: FitPeaks leaves chi2 at DBL_MAX for peaks it rejected/failed to fit
 _FITPEAKS_BAD_CHI2 = 1e300
+
+# name of the fitted peak-area parameter (shared by BackToBackExponential and IkedaCarpenterPV),
+# used both for the positive-area validity check and the I/sigma significance mask
+_INTENSITY_PARAM = "I"
 
 
 def _populate_fitpeaks_output_table(
@@ -133,6 +138,22 @@ def _compute_tof_windows(spectrum_info, centre: float, xmin: float, xmax: float)
     return tof_centre, tof_lo, tof_hi
 
 
+def _estimate_peak_intensities(ws: Workspace2D, tof_centre: np.ndarray, tof_lo: np.ndarray, tof_hi: np.ndarray) -> np.ndarray:
+    """Per-spectrum, fit-independent peak-area estimate for the I_est column: the trapezoidal
+    integral of (data - background) over each spectrum's TOF window, matching how the multidomain
+    engine derives I_est.  It is deliberately independent of the fitted I (rather than a copy of it)
+    so the two provide a real cross-check.  Each spectrum's window is resolved to bin indices via
+    yIndexOfX, as in the multidomain engine."""
+    n_total = len(tof_centre)
+    i_est = np.zeros(n_total)
+    for k in range(n_total):
+        istart = ws.yIndexOfX(tof_lo[k], k)
+        iend = ws.yIndexOfX(tof_hi[k], k)
+        intens, _, _, _ = _estimate_intensity_background_and_centre(ws, k, istart, iend, tof_centre[k])
+        i_est[k] = intens
+    return i_est
+
+
 def _fit_all_peaks_fitpeaks(
     wss: Sequence[str],
     peaks: Sequence[float],
@@ -168,9 +189,12 @@ def _fit_all_peaks_fitpeaks(
     with that centre.  Only the raw fit is reported - spectra where it fails are left unfit rather than
     falling back to a smoothed result, since a rebunched fit's peak position carries the bias of its
     coarser binning.
+    Weak peaks are rejected the same way as the multidomain engine: after the authoritative fit,
+    spectra whose fitted I/sigma is at or below i_over_sigma_thresh are treated as "no peak" and get
+    the unfit defaults.  Here sigma is the fitted intensity's covariance error (I_err) rather than
+    the multidomain engine's summation-based sigma.
     Remaining differences from the multidomain engine are inherent to FitPeaks: weighted "Least
-    squares" cost (vs unweighted), independent per-spectrum A/B (vs tied-then-fixed), and a
-    positive-area validity check (vs the post-fit I/sigma mask).
+    squares" cost (vs unweighted) and independent per-spectrum A/B (vs tied-then-fixed).
 
     last_fit_ic mirrors the multidomain engine: the smoothing/centre-refinement passes fit the
     requested peak_func_name, then the final authoritative (reported) fit switches to
@@ -215,6 +239,10 @@ def _fit_all_peaks_fitpeaks(
         si = combined_tof.spectrumInfo()
         n_total = si.size()
         tof_centre, tof_lo, tof_hi = _compute_tof_windows(si, centre, xmin, xmax)
+
+        # fit-independent per-spectrum peak-area estimate (I_est), from the raw data over each
+        # spectrum's window - computed once here since it does not depend on the fit result
+        i_est_all = _estimate_peak_intensities(combined_tof, tof_centre, tof_lo, tof_hi)
 
         # every pass (smooth and raw) fits the full peak window; the window is created once here, only
         # the per-spectrum centre seed changes between passes
@@ -281,7 +309,7 @@ def _fit_all_peaks_fitpeaks(
             param_table = ADS.retrieve(param_tab_name)
             error_table = ADS.retrieve(err_tab_name)
             chi2 = np.asarray(param_table.column("chi2"), dtype=float)
-            i_col = np.asarray(param_table.column("I"), dtype=float)
+            i_col = np.asarray(param_table.column(_INTENSITY_PARAM), dtype=float)
             # a fit is usable if it converged (finite, non-sentinel chi2) with a positive peak area
             valid = np.isfinite(chi2) & (chi2 < _FITPEAKS_BAD_CHI2) & (chi2 > 0) & (i_col > 0)
             return param_table, error_table, valid
@@ -324,6 +352,16 @@ def _fit_all_peaks_fitpeaks(
             param_cols[p][fit_mask_all] = np.asarray(param_table.column(p), dtype=float)[fit_mask_all]
             err_cols[p][fit_mask_all] = np.asarray(error_table.column(p), dtype=float)[fit_mask_all]
 
+        # reject weak peaks: a converged, positive-area fit whose intensity is not statistically
+        # significant (I/sigma at or below i_over_sigma_thresh) is treated as "no peak" so its row
+        # gets the unfit defaults.  This honours fit_all_peaks' i_over_sigma_thresh contract and
+        # mirrors the multidomain engine's post-fit I/sigma mask; sigma here is the fitted intensity's
+        # covariance error (I_err), the per-spectrum significance measure FitPeaks provides.
+        if _INTENSITY_PARAM in peak_param_names:
+            i_vals, i_errs = param_cols[_INTENSITY_PARAM], err_cols[_INTENSITY_PARAM]
+            i_over_sigma = np.divide(i_vals, i_errs, out=np.zeros_like(i_vals), where=np.isfinite(i_errs) & (i_errs > 0))
+            fit_mask_all = fit_mask_all & (i_over_sigma > i_over_sigma_thresh)
+
         # convert the fitted centre (and its error) from TOF back to d-spacing per spectrum, so the
         # output table matches the multidomain engine (which also reports X0 in d-spacing)
         if _PEAK_CENTRE_PARAM in peak_param_names:
@@ -339,8 +377,6 @@ def _fit_all_peaks_fitpeaks(
             param_cols[_PEAK_CENTRE_PARAM] = x0_d
             err_cols[_PEAK_CENTRE_PARAM] = x0_d_err
 
-        i_all = param_cols["I"]
-
         for iws in range(n_ws):
             run, prefix, grouping = ws_meta[iws]
             sl = slice(iws * n_spec, (iws + 1) * n_spec)
@@ -350,7 +386,15 @@ def _fit_all_peaks_fitpeaks(
             out_ws = f"{prefix}{run}_{peak}_{grouping}_Fit_Parameters"
             out_tab = CreateEmptyTableWorkspace(OutputWorkspace=out_ws)
             _populate_fitpeaks_output_table(
-                out_tab, n_spec, peak_param_names, param_slices, err_slices, i_all[sl], fit_mask_all[sl], no_fit_value_dict, nan_replacement
+                out_tab,
+                n_spec,
+                peak_param_names,
+                param_slices,
+                err_slices,
+                i_est_all[sl],
+                fit_mask_all[sl],
+                no_fit_value_dict,
+                nan_replacement,
             )
 
             out_file = out_ws + ".nxs"
