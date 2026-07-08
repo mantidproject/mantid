@@ -41,16 +41,16 @@ public:
   void notifyPlotOverplotClicked() override;
   /// Plot selected workspaces as separate figures.
   void notifyPlotIndividualClicked() override;
-  /// Refresh active-plot state after the add-to-existing option changes.
+  /// Refresh active-plot compatibility after the add-to-existing option changes.
   void notifyAddToExistingPlotChanged() override;
-  /// Refresh active-plot state for controls that depend on open figures.
-  void notifyActivePlotAvailabilityChanged() override;
+  /// Refresh active-plot compatibility for controls that depend on open figures.
+  void notifyActivePlotCompatibilityChanged() override;
 
 private:
   /// Evaluate selected workspaces and dispatch a plot request for the chosen layout.
   void plotSelectedWorkspaces(PlotLayout layout) const;
-  /// Update view state for active-figure availability and overplot compatibility.
-  void updateActivePlotAvailability() const;
+  /// Update view state for active-figure overplot compatibility.
+  void updateActivePlotCompatibility() const;
   /// Update output types for the selected instrument.
   void updateAvailablePlotOutputTypes(std::string const &instrumentName);
   /// Update controls that depend on reduction and autoreduction state.

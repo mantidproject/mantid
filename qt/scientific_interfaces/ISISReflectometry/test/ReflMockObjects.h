@@ -346,7 +346,6 @@ public:
 class MockPlotter : public IPlotter {
 public:
   MOCK_CONST_METHOD1(plot, void(PlotRequest const &));
-  MOCK_CONST_METHOD0(hasActiveFigure, bool());
   MOCK_CONST_METHOD0(canOverplotActiveFigure, bool());
 };
 
