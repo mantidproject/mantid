@@ -23,16 +23,6 @@ struct PresenterPlotRequest {
   bool tiledVertically;
 };
 
-/// Return the layout to use when overplotting onto the active plot is not possible.
-PlotLayout layoutForAddToExistingOverplot(bool addToExistingPlot, bool activePlotOverplotCompatible) {
-  return addToExistingPlot && !activePlotOverplotCompatible ? PlotLayout::Tiled : PlotLayout::Overplot;
-}
-
-/// Return true if a request may proceed as an overplot.
-bool activePlotOverplotCompatibleForRequest(bool addToExistingPlot, IPlotter const &plotter) {
-  return !addToExistingPlot || plotter.canOverplotActiveFigure();
-}
-
 /// Collect selected output controls and plotting target options from the view.
 PresenterPlotRequest plotRequestFor(IPlottingView &view, std::string const &instrumentName, PlotLayout layout) {
   auto outputSelection = view.selectedPlotOutputSelection();
@@ -82,11 +72,7 @@ void PlottingPresenter::notifyRunsTableChanged(RunsTable const &runsTable) {
 
 void PlottingPresenter::notifyPlotTiledClicked() { plotSelectedWorkspaces(PlotLayout::Tiled); }
 
-void PlottingPresenter::notifyPlotOverplotClicked() {
-  auto const addToExistingPlot = m_view->addToExistingPlot();
-  plotSelectedWorkspaces(layoutForAddToExistingOverplot(
-      addToExistingPlot, activePlotOverplotCompatibleForRequest(addToExistingPlot, *m_plotter)));
-}
+void PlottingPresenter::notifyPlotOverplotClicked() { plotSelectedWorkspaces(PlotLayout::Overplot); }
 
 void PlottingPresenter::notifyPlotIndividualClicked() { plotSelectedWorkspaces(PlotLayout::Individual); }
 

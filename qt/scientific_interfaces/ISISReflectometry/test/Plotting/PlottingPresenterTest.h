@@ -525,7 +525,6 @@ public:
 
     populateSelections(presenter, view, workspaces);
     EXPECT_CALL(view, addToExistingPlot()).WillRepeatedly(Return(true));
-    EXPECT_CALL(plotter, canOverplotActiveFigure()).Times(1).WillOnce(Return(true));
     EXPECT_CALL(view, selectedWorkspaceNames()).Times(1).WillOnce(Return(workspaces));
     EXPECT_CALL(view, selectedPlotOutputSelection()).Times(1).WillOnce(Return(outputSelection));
     EXPECT_CALL(plottingModel, workspacesForPlotting(selectedWorkspaces, outputSelection))
@@ -535,33 +534,6 @@ public:
                 plot(PlotRequest{workspaces,
                                  reflectivityCurvePlotOptions(PlotOutputType::ReflectivityCurve, PlotLayout::Overplot),
                                  nullptr, true}))
-        .Times(1);
-
-    presenter.notifyPlotOverplotClicked();
-  }
-
-  void testPlotOverplotFallsBackToTiledWhenExistingPlotIsIncompatible() {
-    NiceMock<MockPlottingView> view;
-    NiceMock<MockPlotter> plotter;
-    PlotOptionsProvider plotOptionsProvider;
-    NiceMock<MockPlottingModel> plottingModel;
-    PlottingPresenter presenter(&view, plotter, plotOptionsProvider, plottingModel);
-    auto const workspaces = std::vector<std::string>{"IvsQ_12345", "IvsQ_22345"};
-    auto const selectedWorkspaces = workspaceSelections(workspaces);
-    auto const outputSelection = PlotOutputSelection{PlotOutputType::ReflectivityCurve};
-
-    populateSelections(presenter, view, workspaces);
-    EXPECT_CALL(view, addToExistingPlot()).WillRepeatedly(Return(true));
-    EXPECT_CALL(plotter, canOverplotActiveFigure()).Times(1).WillOnce(Return(false));
-    EXPECT_CALL(view, selectedWorkspaceNames()).Times(1).WillOnce(Return(workspaces));
-    EXPECT_CALL(view, selectedPlotOutputSelection()).Times(1).WillOnce(Return(outputSelection));
-    EXPECT_CALL(plottingModel, workspacesForPlotting(selectedWorkspaces, outputSelection))
-        .Times(1)
-        .WillOnce(Return(workspaces));
-    EXPECT_CALL(
-        plotter,
-        plot(PlotRequest{workspaces, reflectivityCurvePlotOptions(PlotOutputType::ReflectivityCurve, PlotLayout::Tiled),
-                         nullptr, true}))
         .Times(1);
 
     presenter.notifyPlotOverplotClicked();
