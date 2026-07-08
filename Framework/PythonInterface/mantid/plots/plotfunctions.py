@@ -224,7 +224,7 @@ def plot(
 
 
 @manage_workspace_names
-def plot_on_axis(
+def plot_workspaces_on_existing_mantid_axis(
     workspaces,
     axis,
     wksp_indices=None,
@@ -240,7 +240,7 @@ def plot_on_axis(
     an existing figure.
     """
     if not isinstance(axis, MantidAxes):
-        raise TypeError("plot_on_axis requires a MantidAxes target axis")
+        raise TypeError("plot_workspaces_on_existing_mantid_axis requires a MantidAxes target axis")
 
     if plot_kwargs is None:
         plot_kwargs = {}
@@ -337,18 +337,18 @@ def create_subplots(nplots, fig=None, layout_engine="tight", vertical=False):
 
     gs = GridSpec(nrows, ncols, fig)
     ax0 = fig.add_subplot(gs[0, 0], projection=PROJECTION)
-    set_axis_tiled_position(ax0, 0, 0)
+    set_mantid_tiled_axis_position(ax0, 0, 0)
     axes[0] = ax0
     for i in range(1, nplots):
         row, col = tiled_axis_grid_position(i, nrows, ncols, vertical)
         axes[i] = fig.add_subplot(gs[row, col], projection=PROJECTION)
-        set_axis_tiled_position(axes[i], row, col)
+        set_mantid_tiled_axis_position(axes[i], row, col)
 
     axes = axes.reshape(nrows, ncols)
     return fig, axes, nrows, ncols
 
 
-def add_tiled_axes(fig, axes_num, layout_engine="tight", vertical=False):
+def add_axes_to_existing_mantid_tiled_figure(fig, axes_num, layout_engine="tight", vertical=False):
     """
     Add axes to an existing figure and arrange the existing and new axes as a tiled plot.
 
@@ -370,10 +370,10 @@ def add_tiled_axes(fig, axes_num, layout_engine="tight", vertical=False):
 
     occupied_positions = set()
     for index, ax in enumerate(existing_axes):
-        row, col = existing_axis_grid_position(ax, nrows, ncols)
+        row, col = stored_tiled_axis_position(ax, nrows, ncols)
         occupied_positions.add((row, col))
         ax.set_subplotspec(grid_spec[row, col])
-        set_axis_tiled_position(ax, row, col)
+        set_mantid_tiled_axis_position(ax, row, col)
 
     new_axes = []
     candidate_index = 0
@@ -385,7 +385,7 @@ def add_tiled_axes(fig, axes_num, layout_engine="tight", vertical=False):
                 break
         occupied_positions.add((row, col))
         new_axis = fig.add_subplot(grid_spec[row, col], projection=PROJECTION)
-        set_axis_tiled_position(new_axis, row, col)
+        set_mantid_tiled_axis_position(new_axis, row, col)
         new_axes.append(new_axis)
     return new_axes
 
@@ -404,8 +404,8 @@ def tiled_axis_grid_position(index, nrows, ncols, vertical=False):
     return index // ncols, index % ncols
 
 
-def existing_axis_grid_position(axis, nrows, ncols):
-    stored_position = stored_axis_tiled_position(axis)
+def stored_tiled_axis_position(axis, nrows, ncols):
+    stored_position = stored_mantid_tiled_axis_position(axis)
     if stored_position is None:
         raise ValueError("Existing tiled axes must have a stored Mantid tile position")
     row, col = stored_position
@@ -414,7 +414,7 @@ def existing_axis_grid_position(axis, nrows, ncols):
     return row, col
 
 
-def stored_axis_tiled_position(axis):
+def stored_mantid_tiled_axis_position(axis):
     row = getattr(axis, "_mantid_tiled_row", None)
     col = getattr(axis, "_mantid_tiled_col", None)
     if row is None or col is None:
@@ -422,7 +422,7 @@ def stored_axis_tiled_position(axis):
     return row, col
 
 
-def set_axis_tiled_position(axis, row, col):
+def set_mantid_tiled_axis_position(axis, row, col):
     axis._mantid_tiled_row = row
     axis._mantid_tiled_col = col
 

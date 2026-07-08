@@ -299,7 +299,8 @@ MantidQt::Widgets::Common::Python::Object addTiledAxesToFigure(MantidQt::Widgets
   using namespace MantidQt::Widgets::Common;
 
   auto const plotFunctions = Python::Object(Python::NewRef(PyImport_ImportModule("mantid.plots.plotfunctions")));
-  return Python::Object(plotFunctions.attr("add_tiled_axes")(figure, static_cast<int>(plotCount), "tight", vertical));
+  return Python::Object(plotFunctions.attr("add_axes_to_existing_mantid_tiled_figure")(
+      figure, static_cast<int>(plotCount), "tight", vertical));
 }
 
 /// Plot detector-map/colorfill workspaces through Mantid's Python plotting functions.
@@ -330,7 +331,7 @@ void plotOnAxis(std::vector<std::string> const &workspaces, MantidQt::Widgets::C
   if (!options.windowTitle.empty())
     kwargs["window_title"] = options.windowTitle;
   auto const args = Python::Object(Python::NewRef(Py_BuildValue("(OO)", workspaceList.ptr(), axis.ptr())));
-  plotFunctions.attr("plot_on_axis")(*args, **kwargs);
+  plotFunctions.attr("plot_workspaces_on_existing_mantid_axis")(*args, **kwargs);
 }
 
 /// Plot line workspaces using Mantid's tiled axes helper instead of the standard plot function.
