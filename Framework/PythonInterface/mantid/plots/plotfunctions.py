@@ -372,11 +372,7 @@ def add_tiled_axes(fig, axes_num, layout_engine="tight", vertical=False):
     for index, ax in enumerate(existing_axes):
         row, col = existing_axis_grid_position(ax, nrows, ncols)
         occupied_positions.add((row, col))
-        subplot_spec = grid_spec[row, col]
-        if hasattr(ax, "set_subplotspec"):
-            ax.set_subplotspec(subplot_spec)
-        else:
-            ax.set_position(subplot_spec.get_position(fig))
+        ax.set_subplotspec(grid_spec[row, col])
         set_axis_tiled_position(ax, row, col)
 
     new_axes = []
