@@ -82,9 +82,7 @@ _SLIM_REQUIRED_PROPS = ["PrimaryFlightPath", "L2", "Polar"]
 # Properties that block use of AAFPSlim entirely
 _SLIM_BLOCKING_PROPS = [
     "AbsorptionWorkspace",
-    "CalibrationWorkspace",
     "OffsetsWorkspace",
-    "MaskWorkspace",
     "MaskBinTable",
     "ResampleX",
     "RemovePromptPulseWidth",
@@ -891,6 +889,12 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
             kwargs["GroupingWorkspace"] = self.getPropertyValue(GRP_WKSP)
         elif not self.getProperty(GROUP_FILE).isDefault:
             kwargs["GroupFilename"] = self.getPropertyValue(GROUP_FILE)
+
+        # calibration and mask workspaces take precedence over the contents of CalFileName in AAFPSlim
+        if not self.getProperty(CAL_WKSP).isDefault:
+            kwargs["CalibrationWorkspace"] = self.getPropertyValue(CAL_WKSP)
+        if not self.getProperty(MASK_WKSP).isDefault:
+            kwargs["MaskWorkspace"] = self.getPropertyValue(MASK_WKSP)
 
         # chunk size
         if not self.getProperty("MaxChunkSize").isDefault and self.chunkSize > 0.0:
