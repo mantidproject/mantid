@@ -231,24 +231,20 @@ class ReorientUnitCell(PythonAlgorithm):
             self.log().notice(f"Aligning symmetry operation: {transform_name}")
             try:
                 # Try to recalculate error, but if it fails (e.g. due to too few peaks) we will still have the reoriented cell
-                (
-                    TransformHKL(
-                        PeaksWorkspace=wsname,
-                        Tolerance=self.getProperty("Tolerance").value,
-                        HKLTransform=optimal_transform,
-                        FindError=True,
-                    ),
+                TransformHKL(
+                    PeaksWorkspace=wsname,
+                    Tolerance=self.getProperty("Tolerance").value,
+                    HKLTransform=optimal_transform,
+                    FindError=True,
                 )
                 self.log().notice("Successfully recalculated error after reorienting unit cell.")
-            except Exception as e:
+            except ValueError as e:
                 # Don't recalculate error since we're only reorienting the cell
-                (
-                    TransformHKL(
-                        PeaksWorkspace=wsname,
-                        Tolerance=self.getProperty("Tolerance").value,
-                        HKLTransform=optimal_transform,
-                        FindError=False,
-                    ),
+                TransformHKL(
+                    PeaksWorkspace=wsname,
+                    Tolerance=self.getProperty("Tolerance").value,
+                    HKLTransform=optimal_transform,
+                    FindError=False,
                 )
                 self.log().warning(f"Reoriented unit cell but failed to recalculate error: {e}")
 
