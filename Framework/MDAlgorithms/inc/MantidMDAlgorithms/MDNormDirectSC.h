@@ -26,6 +26,8 @@ public:
   const std::vector<std::string> seeAlso() const override { return {"MDNormSCD", "MDNormSCDPreprocessIncoherent"}; }
   const std::string category() const override;
   const std::string summary() const override;
+  static constexpr double CHARGEBINSIZE = 1.0; // Proton charge bin size in uA.hr for useLogTimes normalization
+  static constexpr double GONIOBINSTEP = 0.25; // Bin size in angle in degrees for useLogTimes normalization
 
 private:
   void init() override;

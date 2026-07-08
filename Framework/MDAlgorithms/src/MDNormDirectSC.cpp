@@ -35,8 +35,6 @@ namespace {
 // function to  compare two intersections (h,k,l,Momentum) by Momentum
 bool compareMomentum(const std::array<double, 4> &v1, const std::array<double, 4> &v2) { return (v1[3] < v2[3]); }
 const std::string LOG_CHARGE_NAME("proton_charge");
-const double CHARGEBINSIZE = 1.0; // Proton charge bin size in uA.hr for useLogTimes normalization
-const double GONIOBINSTEP = 0.5;  // Bin size in angle in degrees for useLogTimes normalization
 } // namespace
 
 // Register the algorithm into the AlgorithmFactory
@@ -448,6 +446,10 @@ void MDNormDirectSC::calculateNormalization(const std::vector<coord_t> &otherVal
     if (!run.hasProperty(LOG_CHARGE_NAME)) {
       throw std::runtime_error("Wokspace does not contain the proton charge log. Cannot continue.");
     }
+    double normfac =
+        run.hasProperty("NormalizationFactor")
+            ? (*dynamic_cast<Kernel::PropertyWithValue<double> *>(run.getProperty("NormalizationFactor")))()
+            : 1.0;
     std::vector<std::string> lognames;
     std::istringstream tosplit;
     tosplit.str((*dynamic_cast<PropertyWithValue<std::string> *>(run.getProperty("useLogTimes")))());
@@ -455,14 +457,11 @@ void MDNormDirectSC::calculateNormalization(const std::vector<coord_t> &otherVal
       lognames.push_back(item);
     }
     std::vector<TimeSeriesProperty<double> *> logs;
-    std::vector<std::pair<double, double>> logminmax;
     std::vector<size_t> moving_gonio_index;
     for (auto name : lognames) {
       auto *log = run.getTimeSeriesProperty<double>(name);
       logs.push_back(log);
-      auto minmax = std::make_pair(log->minValue(), log->maxValue());
-      logminmax.push_back(minmax);
-      if ((minmax.second - minmax.first) > 0.1) { // Assume gonio logs in degrees
+      if ((log->maxValue() - log->minValue()) > 0.1) { // Assume gonio logs in degrees
         moving_gonio_index.push_back(logs.size() - 1);
       }
     }
@@ -471,16 +470,18 @@ void MDNormDirectSC::calculateNormalization(const std::vector<coord_t> &otherVal
     std::vector<Types::Core::DateAndTime> proton_times = protonlog->timesAsVector();
     Geometry::Goniometer gonio(run.getGoniometer());
     if (moving_gonio_index.size() == 1) {
-      // If we only have a single moving gonio, bin all its values to 0.5 degree bins and
+      // If we only have a single moving gonio, bin all its values to GONIOBINSTEP degree bins and
       // run inner loop on each binned angle
-      std::pair<double, double> minmax = logminmax[moving_gonio_index[0]];
-      std::vector<double> gonio_charge(int((minmax.second - minmax.first) / GONIOBINSTEP) + 1, 0.0);
+      const TimeROI &timeroi = run.getTimeROI();
+      std::vector<double> filteredVals = logs[moving_gonio_index[0]]->filteredValuesAsVector(&timeroi);
+      auto minmax = std::minmax_element(filteredVals.begin(), filteredVals.end());
+      std::vector<double> gonio_charge(int((*minmax.second - *minmax.first) / GONIOBINSTEP) + 1, 0.0);
       for (size_t n = 0; n < proton_charge.size(); n++) {
         double logval = logs[moving_gonio_index[0]]->getSingleValue(proton_times[n]);
-        if (std::isnan(logval)) {
+        if (std::isnan(logval) || logval > *minmax.second || logval < *minmax.first) {
           continue;
         }
-        size_t idx = size_t(floor((logval - minmax.first) / GONIOBINSTEP));
+        size_t idx = size_t(floor((logval - *minmax.first) / GONIOBINSTEP));
         gonio_charge[idx] += proton_charge[n];
       }
       m_accumulate = true;
@@ -490,11 +491,11 @@ void MDNormDirectSC::calculateNormalization(const std::vector<coord_t> &otherVal
           continue;
         }
         double nn = static_cast<double>(n);
-        gonio.setRotationAngle(moving_gonio_index[0], nn * GONIOBINSTEP + minmax.first);
+        gonio.setRotationAngle(moving_gonio_index[0], nn * GONIOBINSTEP + *minmax.first);
         m_rubw = gonio.getR() * rubwValue;
         m_rubw.Invert();
         std::pair<double, double> progval = std::make_pair(0.3 + pStep * nn, 0.3 + pStep * (nn + 1.));
-        calculateNormInner(spectrumInfo, gonio_charge[n], otherValues, affineTrans, progval);
+        calculateNormInner(spectrumInfo, gonio_charge[n] / normfac, otherValues, affineTrans, progval);
       }
     } else {
       // Otherwise run inner loop over small bins of proton charge in time
@@ -520,7 +521,7 @@ void MDNormDirectSC::calculateNormalization(const std::vector<coord_t> &otherVal
             m_rubw = gonio.getR() * rubwValue;
             m_rubw.Invert();
             std::pair<double, double> progval = std::make_pair(0.3 + pStep * nn, 0.3 + pStep * (nn + 1.));
-            calculateNormInner(spectrumInfo, charge_sum, otherValues, affineTrans, progval);
+            calculateNormInner(spectrumInfo, charge_sum / normfac, otherValues, affineTrans, progval);
           }
           charge_sum = 0;
           i0 = n;
