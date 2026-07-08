@@ -573,7 +573,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._presenter.on_show_monitors_check_box_clicked()
         mock_update_plotter.assert_called_once()
 
-    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._create_and_add_sample_position_mesh")
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._create_and_add_sample_mesh")
     def test_sample_position_mesh_added(self, mock_create_sample_mesh):
         mock_create_sample_mesh.return_value = None
         self._presenter._update_view_main_plotter(refresh_limits=True)
@@ -586,24 +586,50 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         mock_create_sample_mesh.assert_called_once()
         mock_mesh.transform.assert_called_once()
 
-    def test_create_and_add_sample_position_mesh_checkbox_unchecked(self):
+    def test_create_and_add_sample_mesh_checkbox_unchecked(self):
         self._mock_view.is_show_sample_position_checkbox_checked.return_value = False
-        mesh = self._presenter._create_and_add_sample_position_mesh()
+        mesh = self._presenter._create_and_add_sample_mesh()
         self.assertIsNone(mesh)
         self._mock_view.add_rgba_mesh.assert_not_called()
 
-    def test_create_and_add_sample_position_mesh_checkbox_checked(self):
+    def test_create_and_add_sample_mesh_no_shape_uses_point_mesh(self):
         self._mock_view.is_show_sample_position_checkbox_checked.return_value = True
         self._model._sample_position = np.array([0.0, 0.0, 0.0])
-        self._presenter._create_and_add_sample_position_mesh()
+        self._model._sample_shape = None
+        self._presenter._create_and_add_sample_mesh()
         self._mock_view.add_rgba_mesh.assert_called_once()
 
-    def test_create_and_add_sample_position_mesh_no_sample(self):
+    def test_create_and_add_sample_mesh_no_sample(self):
         self._mock_view.is_show_sample_position_checkbox_checked.return_value = True
         self._model._sample_position = None
-        mesh = self._presenter._create_and_add_sample_position_mesh()
+        mesh = self._presenter._create_and_add_sample_mesh()
         self.assertIsNone(mesh)
         self._mock_view.add_rgba_mesh.assert_not_called()
+
+    def test_create_and_add_sample_mesh_with_shape_creates_polydata(self):
+        self._mock_view.is_show_sample_position_checkbox_checked.return_value = True
+        self._model._sample_position = np.array([0.0, 0.0, 0.0])
+        # Two triangles: shape (2, 3, 3) — 2 triangles, each with 3 vertices of xyz
+        self._model._sample_shape = np.array([[[0, 0, 0], [1, 0, 0], [0, 1, 0]], [[0, 0, 0], [0, 1, 0], [0, 0, 1]]], dtype=float)
+        self._presenter._create_and_add_sample_mesh()
+        self._mock_view.add_rgba_mesh.assert_called_once()
+        mesh_arg = self._mock_view.add_rgba_mesh.call_args.args[0]
+        self.assertEqual(self._mock_view.add_rgba_mesh.call_args.kwargs["scalars"], "colours")
+        # 2 triangles x 3 vertices = 6 vertices
+        self.assertEqual(mesh_arg.n_points, 6)
+        # colours array has 2 rows (one per triangle) with alpha=0.5
+        np.testing.assert_allclose(mesh_arg["colours"][:, 3], 0.5)
+
+    def test_create_and_add_sample_mesh_with_shape_uses_sample_colour(self):
+        self._mock_view.is_show_sample_position_checkbox_checked.return_value = True
+        self._model._sample_position = np.array([0.0, 0.0, 0.0])
+        self._model._sample_shape = np.array([[[0, 0, 0], [1, 0, 0], [0, 1, 0]]], dtype=float)
+        self._presenter._create_and_add_sample_mesh()
+        mesh_arg = self._mock_view.add_rgba_mesh.call_args.args[0]
+        r, g, b = self._presenter.sample_position_colour
+        np.testing.assert_allclose(mesh_arg["colours"][0, 0], r / 255.0)
+        np.testing.assert_allclose(mesh_arg["colours"][0, 1], g / 255.0)
+        np.testing.assert_allclose(mesh_arg["colours"][0, 2], b / 255.0)
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.update_plotter")
     def test_on_show_sample_position_check_box_clicked_calls_update_plotter(self, mock_update_plotter):

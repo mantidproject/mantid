@@ -139,9 +139,17 @@ class FullInstrumentViewPresenter:
             return None
         return self._create_and_add_component_point_mesh(np.array(self._model.monitor_positions), self.monitor_colour)
 
-    def _create_and_add_sample_position_mesh(self) -> Optional[pv.PolyData]:
+    def _create_and_add_sample_mesh(self) -> Optional[pv.PolyData]:
         if self._model.sample_position is None or not self._view.is_show_sample_position_checkbox_checked():
             return None
+        if self._model.sample_shape is not None:
+            n = len(self._model.sample_shape)
+            vertices = self._model.sample_shape.reshape(-1, 3)
+            faces = np.c_[np.full(n, 3, dtype=int), np.arange(n * 3).reshape(n, 3)]
+            sample_shape_mesh = pv.PolyData(vertices, faces)
+            sample_shape_mesh["colours"] = self.generate_single_colour(n, self.sample_position_colour, 0.5)
+            self._view.add_rgba_mesh(sample_shape_mesh, scalars="colours")
+            return sample_shape_mesh
         return self._create_and_add_component_point_mesh(np.array([self._model.sample_position]), self.sample_position_colour)
 
     def _create_and_add_component_point_mesh(self, points: np.ndarray, colour: tuple[int, int, int]) -> pv.PolyData:
@@ -280,7 +288,7 @@ class FullInstrumentViewPresenter:
         renderer.add_masked_mesh_to_plotter(self._view.main_plotter, self._masked_mesh)
 
         monitor_mesh = self._create_and_add_monitor_mesh()
-        sample_position_mesh = self._create_and_add_sample_position_mesh()
+        sample_position_mesh = self._create_and_add_sample_mesh()
 
         renderer.set_parallel_view(self._view.main_plotter)
 

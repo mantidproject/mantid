@@ -121,6 +121,8 @@ class FullInstrumentViewModel:
         self.update_integration_range(True)
         self.full_counts_limits = self._counts_limits
 
+        self._sample_shape = self._get_sample_shape_from_workspace(self._workspace)
+
     @property
     def workspace(self) -> Workspace2D:
         return self._workspace
@@ -140,6 +142,14 @@ class FullInstrumentViewModel:
     @property
     def sample_position(self) -> np.ndarray:
         return self._sample_position
+
+    def _get_sample_shape_from_workspace(self, ws: Workspace2D) -> Optional[np.ndarray]:
+        shape = ws.sample().getShape()
+        return shape.getMesh() if shape.hasValidShape() else None
+
+    @property
+    def sample_shape(self) -> Optional[np.ndarray]:
+        return self._sample_shape
 
     @property
     def all_detector_ids(self) -> np.ndarray:
