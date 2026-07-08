@@ -28,8 +28,8 @@ public:
   virtual void notifyPlotIndividualClicked() = 0;
   /// Notify that the add-to-existing checkbox changed state.
   virtual void notifyAddToExistingPlotChanged() = 0;
-  /// Notify that controls depending on the active plot should be refreshed.
-  virtual void notifyActivePlotAvailabilityChanged() = 0;
+  /// Notify that controls depending on active-plot compatibility should be refreshed.
+  virtual void notifyActivePlotCompatibilityChanged() = 0;
 };
 
 /// Interface for the ISIS Reflectometry plotting tab view.
@@ -54,8 +54,6 @@ public:
   virtual bool addToExistingPlot() const = 0;
   /// Return true if tiled plots should be arranged vertically first.
   virtual bool plotTiledVertically() const = 0;
-  /// Update controls that require an active figure.
-  virtual void setActivePlotAvailable(bool available) = 0;
   /// Update controls that require the active figure to support overplotting.
   virtual void setActivePlotOverplotCompatible(bool compatible) = 0;
   /// Return the parent widget for plot windows.

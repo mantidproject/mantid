@@ -41,8 +41,6 @@ public:
   bool addToExistingPlot() const override;
   /// Return true if tiled plots should fill vertically before horizontally.
   bool plotTiledVertically() const override;
-  /// Update controls that depend on an active matplotlib figure existing.
-  void setActivePlotAvailable(bool available) override;
   /// Update controls that depend on the active figure accepting overplots.
   void setActivePlotOverplotCompatible(bool compatible) override;
   /// Return the widget to use as the parent for plot windows.
@@ -66,7 +64,6 @@ private:
   std::unique_ptr<WorkspaceTreeController> m_workspaceTree;
   PlottingViewSubscriber *m_notifyee;
   bool m_outputSelectionEnabled;
-  bool m_activePlotAvailable;
   bool m_activePlotOverplotCompatible;
 };
 

@@ -19,8 +19,6 @@ public:
   virtual ~IPlotter() = default;
   /// Plot the requested workspaces according to the supplied output options.
   virtual void plot(PlotRequest const &request) const = 0;
-  /// Return true if matplotlib currently has an active figure.
-  virtual bool hasActiveFigure() const = 0;
   /// Return true if the active figure can accept an overplotted line plot.
   virtual bool canOverplotActiveFigure() const = 0;
 };

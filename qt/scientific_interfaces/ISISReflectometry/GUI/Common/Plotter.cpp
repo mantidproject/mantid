@@ -512,17 +512,6 @@ bool Plotter::canOverplotActiveFigure() const {
   }
 }
 
-bool Plotter::hasActiveFigure() const {
-  using namespace MantidQt::Widgets::Common;
-
-  Mantid::PythonInterface::GlobalInterpreterLock lock;
-  try {
-    return currentFigureOrNone().has_value();
-  } catch (Python::ErrorAlreadySet &) {
-    throw Mantid::PythonInterface::PythonException();
-  }
-}
-
 void Plotter::plot(PlotRequest const &request) const {
   Mantid::PythonInterface::GlobalInterpreterLock lock;
 

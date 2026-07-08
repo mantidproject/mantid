@@ -126,7 +126,7 @@ public:
     assertPlotButtonsEnabled(view, true, false, false);
   }
 
-  void testAddToExistingPlotIsDisabledWhenNoActivePlotIsAvailable() {
+  void testAddToExistingPlotIsDisabledByDefault() {
     QtPlottingView view;
 
     view.setOutputSelectionEnabled(true);
@@ -134,11 +134,10 @@ public:
     TS_ASSERT(!view.findChild<QCheckBox *>("addToExistingPlot")->isEnabled());
   }
 
-  void testAddToExistingPlotIsEnabledWhenActivePlotIsAvailable() {
+  void testAddToExistingPlotIsEnabledWhenActivePlotIsCompatible() {
     QtPlottingView view;
 
     view.setOutputSelectionEnabled(true);
-    view.setActivePlotAvailable(true);
     view.setActivePlotOverplotCompatible(true);
 
     TS_ASSERT(view.findChild<QCheckBox *>("addToExistingPlot")->isEnabled());
@@ -148,7 +147,6 @@ public:
     QtPlottingView view;
     view.setAvailablePlotOutputTypes({PlotOutputType::ReflectivityCurve, PlotOutputType::DetectorMap});
     view.setOutputSelectionEnabled(true);
-    view.setActivePlotAvailable(true);
     view.setActivePlotOverplotCompatible(true);
     auto plotPreset = view.findChild<QComboBox *>("plotPreset");
 
@@ -161,7 +159,6 @@ public:
     QtPlottingView view;
 
     view.setOutputSelectionEnabled(true);
-    view.setActivePlotAvailable(true);
     view.setActivePlotOverplotCompatible(false);
 
     TS_ASSERT(!view.findChild<QCheckBox *>("addToExistingPlot")->isEnabled());
@@ -171,7 +168,6 @@ public:
     QtPlottingView view;
     view.setWorkspaceItems(workspaceItemsWithGroups(1));
     view.setOutputSelectionEnabled(true);
-    view.setActivePlotAvailable(true);
     view.setActivePlotOverplotCompatible(true);
     auto tree = workspaceTree(view);
 
@@ -186,7 +182,6 @@ public:
     QtPlottingView view;
     view.setWorkspaceItems(workspaceItemsWithGroups(1));
     view.setOutputSelectionEnabled(true);
-    view.setActivePlotAvailable(true);
     view.setActivePlotOverplotCompatible(true);
     auto tree = workspaceTree(view);
 
@@ -223,7 +218,6 @@ public:
     QtPlottingView view;
     view.setWorkspaceItems(workspaceItemsWithGroups(2));
     view.setOutputSelectionEnabled(true);
-    view.setActivePlotAvailable(true);
     auto tree = workspaceTree(view);
 
     click(tree, groupIndex(tree, 0));
@@ -239,7 +233,6 @@ public:
     QtPlottingView view;
     view.setWorkspaceItems(workspaceItemsWithGroups(2));
     view.setOutputSelectionEnabled(true);
-    view.setActivePlotAvailable(true);
     auto tree = workspaceTree(view);
 
     click(tree, groupIndex(tree, 0));
@@ -877,7 +870,7 @@ public:
     view.findChild<QPushButton *>("plotTiled")->click();
     view.findChild<QPushButton *>("plotOverplot")->click();
     view.findChild<QPushButton *>("plotIndividual")->click();
-    view.setActivePlotAvailable(true);
+    view.setActivePlotOverplotCompatible(true);
     view.findChild<QCheckBox *>("addToExistingPlot")->setChecked(true);
 
     TS_ASSERT_EQUALS(subscriber.tiledClicked, 1);
@@ -893,7 +886,7 @@ private:
     void notifyPlotOverplotClicked() override { ++overplotClicked; }
     void notifyPlotIndividualClicked() override { ++individualClicked; }
     void notifyAddToExistingPlotChanged() override { ++addToExistingPlotChanged; }
-    void notifyActivePlotAvailabilityChanged() override {}
+    void notifyActivePlotCompatibilityChanged() override {}
 
     int tiledClicked{0};
     int overplotClicked{0};
