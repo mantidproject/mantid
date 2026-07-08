@@ -305,7 +305,7 @@ class _Material(object):
         self.number_density_effective = number_density_effective
 
         self.packing_fraction = packing_fraction
-        self.number_density_unit = _normalise_number_density_unit(number_density_unit)
+        self.number_density_unit = _validate_number_density_unit(number_density_unit)
 
         # Advanced material properties
         self.absorption_cross_section = None
@@ -503,20 +503,15 @@ class _FlatPlateHolder(object):
         }
 
 
-def _normalise_number_density_unit(number_density_unit):
+def _validate_number_density_unit(number_density_unit):
     """
-    Convert a user-supplied number density unit to the exact strings accepted by SetSample's
-    NumberDensityUnit property ("Atoms" or "Formula Units"). Defaults to "Atoms" when not supplied,
-    to match legacy and default behaviour.
+    Confirm that the provided string for number density unit is a permitted string
     """
     if number_density_unit is None:
         return "Atoms"
-    normalised = str(number_density_unit).strip().lower().replace("_", " ")
-    if normalised in ("atoms", "atom"):
-        return "Atoms"
-    if normalised in ("formula units", "formula unit", "formulaunits"):
-        return "Formula Units"
-    raise ValueError(f"Invalid number_density_unit '{number_density_unit}'. Allowed values are 'Atoms' or 'Formula Units'.")
+    if number_density_unit not in ("Atoms", "Formula Units"):
+        raise ValueError(f"Invalid number_density_unit '{number_density_unit}'. Allowed values are 'Atoms' or 'Formula Units'.")
+    return number_density_unit
 
 
 def _check_value_is_physical(property_name, value):

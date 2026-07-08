@@ -584,26 +584,26 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
                 ContainerMaterial=sample_details_object.generate_container_material(),
             )
 
-    def test_normalise_number_density_unit(self):
+    def test_validate_number_density_unit(self):
         # Defaults to Atoms when not supplied (historic / Mantid default behaviour)
-        self.assertEqual(sample_details._normalise_number_density_unit(None), "Atoms")
-        # Canonical values pass through
-        self.assertEqual(sample_details._normalise_number_density_unit("Atoms"), "Atoms")
-        self.assertEqual(sample_details._normalise_number_density_unit("Formula Units"), "Formula Units")
-        # Case-insensitive and underscore-tolerant, normalised to the strings SetSample accepts
-        self.assertEqual(sample_details._normalise_number_density_unit("atoms"), "Atoms")
-        self.assertEqual(sample_details._normalise_number_density_unit("formula_units"), "Formula Units")
-        self.assertEqual(sample_details._normalise_number_density_unit("FORMULA UNITS"), "Formula Units")
-        # Anything else is rejected
-        with self.assertRaisesRegex(ValueError, "Invalid number_density_unit"):
-            sample_details._normalise_number_density_unit("kg")
+        self.assertEqual(sample_details._validate_number_density_unit(None), "Atoms")
+
+        bad_inputs = ("atoms", "formula_units", "those cheeky little guys", "FormulaUnits")
+        good_inputs = ("Atoms", "Formula Units")
+        for bad_input in bad_inputs:
+            with self.subTest(bad_input=bad_input):
+                with self.assertRaisesRegex(ValueError, "Invalid number_density_unit"):
+                    sample_details._validate_number_density_unit(bad_input)
+        for good_input in good_inputs:
+            with self.subTest(good_input=good_input):
+                self.assertEqual(sample_details._validate_number_density_unit(good_input), good_input)
 
     def test_material_constructor_number_density_unit(self):
         # Defaults to Atoms
         material_default = sample_details._Material(chemical_formula="Si", number_density=1.0)
         self.assertEqual(material_default.number_density_unit, "Atoms")
         # Stores the normalised value when supplied
-        material_formula_units = sample_details._Material(chemical_formula="Si O2", number_density=1.0, number_density_unit="formula units")
+        material_formula_units = sample_details._Material(chemical_formula="Si O2", number_density=1.0, number_density_unit="Formula Units")
         self.assertEqual(material_formula_units.number_density_unit, "Formula Units")
         # An invalid unit raises on construction
         with self.assertRaisesRegex(ValueError, "Invalid number_density_unit"):
