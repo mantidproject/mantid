@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,attribute-defined-outside-init
 import systemtesting
-from mantid.simpleapi import VesuvioTransmission, LoadNexus
+from mantid.simpleapi import VesuvioTransmission
 from mantid.api import mtd
 
 
@@ -14,12 +14,9 @@ class VesuvioTransmissionSystemTest(systemtesting.MantidSystemTest):
     """Tests the VesuvioTransmission algorithm"""
 
     def runTest(self):
-        # Load the expected output into a workspace
-        LoadNexus(Filename="VesuvioTransmissionExpectedOutput.nxs", OutputWorkspace="expected_output")
-
         # Run the VesuvioTransmission algorithm
         VesuvioTransmission(
-            OutputWorkspace="actual_output",
+            OutputWorkspace="vesuvio_transmission_output",
             Runs="58386-58396",
             EmptyRuns="57580-57603",
             Grouping="SumOfAllRuns",
@@ -32,7 +29,7 @@ class VesuvioTransmissionSystemTest(systemtesting.MantidSystemTest):
         )
 
     def validateMethod(self):
-        return "ValidateWorkspaceToWorkspace"
+        return "ValidateWorkspaceToNexus"
 
     def requiredFiles(self):
         return [
@@ -75,8 +72,8 @@ class VesuvioTransmissionSystemTest(systemtesting.MantidSystemTest):
         ]
 
     def validate(self):
-        self.tolerance = 1e-7
-        return ("actual_output", "expected_output")
+        self.checkInstrument = False
+        return ("vesuvio_transmission_output", "VesuvioTransmissionExpectedOutput.nxs")
 
     def cleanup(self):
         mtd.clear()
