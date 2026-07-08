@@ -26,6 +26,8 @@ from instrumentview.renderers.point_cloud_renderer import PointCloudRenderer
 from instrumentview.renderers.shape_renderer import ShapeRenderer
 from instrumentview.renderers.side_by_side_shape_renderer import SideBySideShapeRenderer
 
+from instrumentview.InteractorStyles import InteractorStyles
+
 from vtkmodules.vtkRenderingCore import vtkCoordinate
 
 
@@ -77,7 +79,7 @@ class FullInstrumentViewPresenter:
         self._sbs_shape_renderer = SideBySideShapeRenderer(self._model.workspace)
         self._sbs_shape_renderer_full = SideBySideShapeRenderer(self._model.workspace, use_optimised_shapes=False)
         self._renderer = self._get_renderer_for_mode(view.get_render_mode_option())
-        self._hover_pick_mode = False
+        self._interactor_styles = InteractorStyles(self._view.main_plotter, picking_callback=lambda: None, hover_callback=lambda: None)
         self._last_hovered_point_index: Optional[int] = None
         self._select_bank_tube = False
         self._callback_queue = Queue()
@@ -238,16 +240,13 @@ class FullInstrumentViewPresenter:
             return
         self._model.projection_type = self._view.current_selected_projection()
         self._model.flip_beam = self._view.is_flip_beam_checkbox_checked()
-        if not self._model.is_2d_projection and self._hover_pick_mode:
-            self._hover_pick_mode = False
-            self._last_hovered_point_index = None
-            self._view.set_hover_pick_checked(False)
-        self._view.set_hover_pick_available(self._model.is_2d_projection)
-        self._view.set_hover_pick_mode_enabled(self._hover_pick_mode)
         with SuppressRendering(self._view.main_plotter):
             self._update_view_main_plotter(refresh_limits=refresh_limits)
-            self._view.set_hover_pick_mode_enabled(self._hover_pick_mode)
-            self.update_detector_picker()
+            self._view.enable_or_disable_mask_widgets()
+            self._view.enable_or_disable_aspect_ratio_box()
+            self._view.enable_or_disable_flip_beam_box()
+            self._view.enable_or_disable_hover_pick()
+            self._view.enable_or_disable_rubberband_zoom()
             self.refresh_plotter_peaks()
 
     def count_scale_combo_options(self) -> list[str]:
@@ -290,7 +289,7 @@ class FullInstrumentViewPresenter:
         monitor_mesh = self._create_and_add_monitor_mesh()
         sample_position_mesh = self._create_and_add_sample_mesh()
 
-        renderer.set_parallel_view(self._view.main_plotter)
+        self._view.enable_parallel_projection()
 
         # Update transform needs to happen after adding to plotter
         # Uses display coordinates
@@ -299,9 +298,6 @@ class FullInstrumentViewPresenter:
             if mesh is not None:
                 mesh.transform(self._transform, inplace=True)
 
-        self._view.enable_or_disable_mask_widgets()
-        self._view.enable_or_disable_aspect_ratio_box()
-        self._view.enable_or_disable_flip_beam_box()
         # If refreshing the limits we reset both the contour and integration sliders.
         # If not, we need to manually update the contour limits to what they were set to before we added the
         # meshes above, because adding the meshes resets the contour limits in the plotter.
@@ -312,8 +308,8 @@ class FullInstrumentViewPresenter:
 
         self._view.reset_camera()
 
-        # Set style after camera reset for correct camera defaults
-        renderer.set_interactive_style(self._view.main_plotter, self._model.is_2d_projection)
+        # Reload styles after camera reset for correct camera defaults
+        self.reload_interactor_styles()
 
         self._view.set_camera_to_cached_state()
         self._view.cache_current_selected_projection()
@@ -384,39 +380,35 @@ class FullInstrumentViewPresenter:
         # Return list of xmin, xmax, ymin, ymax, zmin, zmax
         return [x for pair in zip(min_point, max_point) for x in pair]
 
-    def update_detector_picker(self) -> None:
-        if self._hover_pick_mode:
-
-            def point_hovered(point_index: int | None) -> None:
-                if point_index is None or point_index == self._last_hovered_point_index:
-                    return
-
-                self._last_hovered_point_index = point_index
-                self._update_hover_pick_plot(point_index)
-
-            self._renderer.enable_picking(self._view.main_plotter, callback=point_hovered, hover=True)
-            return
-
-        def detector_picked(detector_index: int) -> None:
-            self._model.update_point_picked_detectors(detector_index, self._select_bank_tube)
-            self.update_picked_detectors_on_view()
-
-        self._renderer.enable_picking(self._view.main_plotter, callback=detector_picked)
+    def on_rubberband_zoom_toggled(self, checked) -> None:
+        if checked:
+            self._view.set_start_adding_peaks_checked(False)
+            self._view.set_hover_pick_checked(False)
+            self._view.delete_current_overlaid_shape()
+        self._view.reset_overlay_shapes(disable=checked)
+        self._update_interactor_style()
 
     def on_hover_pick_toggled(self, checked: bool) -> None:
-        enabled = checked and self._model.is_2d_projection
-        self._hover_pick_mode = enabled
-        self._last_hovered_point_index = None
-
-        self._view.set_hover_pick_mode_enabled(enabled)
-        self.update_detector_picker()
-
-        if enabled:
+        if checked:
+            self._view.set_start_adding_peaks_checked(False)
+            self._view.set_rubberband_zoom_checked(False)
+            self._view.delete_current_overlaid_shape()
             self._view.clear_lineplot_overlays()
             self._view.show_plot_for_detectors(self._model.line_plot_workspace, self._model.lineplot_limits)
             self._view.set_selected_detector_info([])
             self._view.set_relative_detector_angle(None)
             self._view.remove_peak_cursor_from_lineplot()
+
+        self._view.set_clear_point_picked_detectors_disabled(checked)
+        self._view.set_sum_spectra_checkbox_disabled(checked)
+        self._view.set_select_bank_tube_disabled(checked)
+        self._view.set_export_workspace_button_disabled(checked)
+        self._view.reset_overlay_shapes(disable=checked)
+
+        self._last_hovered_point_index = None
+        self._update_interactor_style()
+
+        if checked:
             return
 
         self.update_picked_detectors_on_view()
@@ -447,6 +439,12 @@ class FullInstrumentViewPresenter:
 
     def on_clear_point_picked_detectors_clicked(self) -> None:
         self._callback_queue.put((self._on_clear_point_picked_detectors_clicked, ()))
+
+    def on_overlaid_shape_added(self) -> None:
+        self._update_interactor_style()
+
+    def on_overlaid_shape_removed(self) -> None:
+        self._update_interactor_style()
 
     def _on_add_item_clicked(self) -> None:
         centres = self._transform_vectors_with_matrix(np.array(self._model.detector_positions), self._transform)
@@ -567,7 +565,7 @@ class FullInstrumentViewPresenter:
         return self._model.cached_keys(kind)
 
     def _update_line_plot_ws_and_draw(self, unit: str) -> None:
-        if self._hover_pick_mode:
+        if self._view.is_hover_pick_mode_toggled():
             if self._last_hovered_point_index is not None:
                 self._update_hover_pick_plot(self._last_hovered_point_index)
             return
@@ -701,6 +699,8 @@ class FullInstrumentViewPresenter:
     def on_start_adding_peaks_toggled(self, checked) -> None:
         if checked:
             self._model.turn_on_single_point_picking()
+            self._view.set_rubberband_zoom_checked(False)
+            self._view.set_hover_pick_checked(False)
             self._view.add_peak_cursor_to_lineplot()
             self._view.set_delete_all_selected_peaks_button_enabled(False)
             self._view.disable_and_uncheck_selection_list()
@@ -711,6 +711,8 @@ class FullInstrumentViewPresenter:
             self._view.set_delete_all_selected_peaks_button_enabled(True)
             self._view.enable_and_restore_selection_list()
             self._on_list_item_selected(CurrentTab.Grouping)
+
+        self._view.reset_overlay_shapes(disable=checked)
 
     def on_peak_selected_in_lineplot(self, x: float, mouse_click: Literal["right", "left"]) -> None:
         if len(self._model.picked_detector_ids) == 0:
@@ -734,6 +736,47 @@ class FullInstrumentViewPresenter:
     def on_component_tree_item_selected(self, component_indices: np.ndarray) -> None:
         self._model.component_tree_indices_selected(component_indices)
         self.update_plotter()
+
+    def reload_interactor_styles(self):
+        def point_hovered(point_index: int | None) -> None:
+            if point_index is None or point_index == self._last_hovered_point_index:
+                return
+            self._last_hovered_point_index = point_index
+            self._update_hover_pick_plot(point_index)
+            return
+
+        def detector_picked(detector_index: int) -> None:
+            self._model.update_point_picked_detectors(detector_index, self._select_bank_tube)
+            self.update_picked_detectors_on_view()
+            return
+
+        wrapped_picking_callback = self._renderer.get_callback_tied_to_detector_index(
+            self._view.main_plotter, callback=detector_picked, hover=False
+        )
+        wrapped_hover_callback = self._renderer.get_callback_tied_to_detector_index(
+            self._view.main_plotter, callback=point_hovered, hover=True
+        )
+
+        self._interactor_styles = InteractorStyles(
+            self._view.main_plotter, picking_callback=wrapped_picking_callback, hover_callback=wrapped_hover_callback
+        )
+        self._update_interactor_style()
+
+    def _update_interactor_style(self):
+        if not self._model.is_2d_projection:
+            self._view.main_plotter.iren.style = self._interactor_styles.TRACKBALL
+            return
+
+        if self._view.is_active_current_overlaid_shape():
+            self._view.main_plotter.iren.style = self._interactor_styles.SCROLL_ZOOM_NO_PICKING
+            return
+
+        if self._view.is_hover_pick_mode_toggled():
+            self._view.main_plotter.iren.style = self._interactor_styles.SCROLL_ZOOM_WITH_HOVER
+        elif self._view.is_rubberband_zoom_toggled():
+            self._view.main_plotter.iren.style = self._interactor_styles.RUBBERBAND_ZOOM
+        else:
+            self._view.main_plotter.iren.style = self._interactor_styles.SCROLL_ZOOM_WITH_PICKING
 
     def _get_renderer_for_mode(self, mode: str):
         if mode == self._view._RENDER_MODE_POINTS:

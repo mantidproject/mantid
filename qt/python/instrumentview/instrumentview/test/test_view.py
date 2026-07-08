@@ -61,26 +61,6 @@ class TestFullInstrumentViewView(unittest.TestCase):
     def test_hover_pick_button_is_checkable(self):
         self.assertTrue(self._view._hover_pick.isCheckable())
 
-    def test_set_hover_pick_mode_enabled_disables_select_bank_tube(self):
-        self._view._select_bank_tube.setEnabled(True)
-        self._view.set_hover_pick_mode_enabled(True)
-        self.assertFalse(self._view._select_bank_tube.isEnabled())
-
-    def test_set_hover_pick_mode_disabled_enables_select_bank_tube(self):
-        self._view.set_hover_pick_mode_enabled(True)
-        self._view.set_hover_pick_mode_enabled(False)
-        self.assertTrue(self._view._select_bank_tube.isEnabled())
-
-    def test_set_hover_pick_mode_enabled_disables_export_spectra(self):
-        self._view._export_workspace_button.setEnabled(True)
-        self._view.set_hover_pick_mode_enabled(True)
-        self.assertFalse(self._view._export_workspace_button.isEnabled())
-
-    def test_set_hover_pick_mode_disabled_enables_export_spectra(self):
-        self._view.set_hover_pick_mode_enabled(True)
-        self._view.set_hover_pick_mode_enabled(False)
-        self.assertTrue(self._view._export_workspace_button.isEnabled())
-
     def test_update_scalar_range(self):
         self._view.set_plotter_scalar_bar_range((0, 100), "label")
         self._view.main_plotter.update_scalar_bar_range.assert_has_calls([mock.call((0, 100), "label")])
@@ -166,39 +146,33 @@ class TestFullInstrumentViewView(unittest.TestCase):
 
     def test_add_rectangular_widget(self) -> None:
         self._view.add_rectangular_widget()
-        self.assertIsInstance(self._view._current_widget, RectangleSelectionShape)
         self.assertIsNotNone(self._view._shape_overlay_manager)
-        self.assertIs(self._view._shape_overlay_manager.current_shape, self._view._current_widget)
+        self.assertIsInstance(self._view._shape_overlay_manager.current_shape, RectangleSelectionShape)
 
     def test_add_circle_widget(self) -> None:
         self._view.add_circle_widget()
-        self.assertIsInstance(self._view._current_widget, CircleSelectionShape)
         self.assertIsNotNone(self._view._shape_overlay_manager)
-        self.assertIs(self._view._shape_overlay_manager.current_shape, self._view._current_widget)
+        self.assertIsInstance(self._view._shape_overlay_manager.current_shape, CircleSelectionShape)
 
     def test_add_ellipse_widget(self) -> None:
         self._view.add_ellipse_widget()
-        self.assertIsInstance(self._view._current_widget, EllipseSelectionShape)
         self.assertIsNotNone(self._view._shape_overlay_manager)
-        self.assertIs(self._view._shape_overlay_manager.current_shape, self._view._current_widget)
+        self.assertIsInstance(self._view._shape_overlay_manager.current_shape, EllipseSelectionShape)
 
     def test_add_annulus_widget(self) -> None:
         self._view.add_annulus_widget()
-        self.assertIsInstance(self._view._current_widget, AnnulusSelectionShape)
         self.assertIsNotNone(self._view._shape_overlay_manager)
-        self.assertIs(self._view._shape_overlay_manager.current_shape, self._view._current_widget)
+        self.assertIsInstance(self._view._shape_overlay_manager.current_shape, AnnulusSelectionShape)
 
     def test_add_hollow_rectangle_widget(self) -> None:
         self._view.add_hollow_rectangle_widget()
-        self.assertIsInstance(self._view._current_widget, HollowRectangleSelectionShape)
         self.assertIsNotNone(self._view._shape_overlay_manager)
-        self.assertIs(self._view._shape_overlay_manager.current_shape, self._view._current_widget)
+        self.assertIsInstance(self._view._shape_overlay_manager.current_shape, HollowRectangleSelectionShape)
 
     def test_delete_current_widget(self) -> None:
         self._view.add_circle_widget()
-        self.assertIsNotNone(self._view._current_widget)
-        self._view.delete_current_widget()
-        self.assertIsNone(self._view._current_widget)
+        self.assertIsNotNone(self._view._shape_overlay_manager)
+        self._view.delete_current_overlaid_shape()
         self.assertIsNone(self._view._shape_overlay_manager)
 
     @mock.patch("instrumentview.FullInstrumentViewWindow.ConfigService")

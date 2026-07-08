@@ -250,25 +250,23 @@ class ShapeRenderer(InstrumentRenderer):
             show_edges=False,
         )
 
-    def enable_picking(self, plotter: BackgroundPlotter, callback: Callable[[int], None], hover: bool = False) -> None:
+    def get_callback_tied_to_detector_index(
+        self, plotter: BackgroundPlotter, callback: Callable[[int], None], hover: bool = False
+    ) -> Callable:
         """Set up left-click cell picking on the shape surface.  *callback* receives ``(detector_index: int)``."""
-        plotter.disable_picking()
 
         if plotter.off_screen:
-            return
+            return lambda _obj, _event: None
 
         c2d = self._cell_to_detector
         picker = vtkCellPicker()
         picker.SetTolerance(self._effective_picking_tolerance(hover))
-        interactor = plotter.iren
-
-        self._clear_observers(plotter)
 
         def _on_pick(_obj, _event):
             if c2d is None:
                 return
             # Get the current mouse position from the interactor
-            x, y = interactor.get_event_position()
+            x, y = plotter.iren.get_event_position()
             # Perform the pick operation
             pick_result = picker.Pick(x, y, 0, plotter.renderer)
             if pick_result > 0:
@@ -277,10 +275,7 @@ class ShapeRenderer(InstrumentRenderer):
                 if cell_id >= 0:
                     callback(int(c2d[cell_id]))
 
-        if hover:
-            self._mouse_move_observer_id = plotter.iren.style.AddObserver("MouseMoveEvent", _on_pick)
-        else:
-            self._left_button_observer_id = plotter.iren.style.AddObserver("LeftButtonPressEvent", _on_pick)
+        return _on_pick
 
     def set_detector_scalars(self, mesh: pv.PolyData, counts: np.ndarray, label: str) -> None:
         if self._cell_to_detector is not None and len(counts) > 0:
