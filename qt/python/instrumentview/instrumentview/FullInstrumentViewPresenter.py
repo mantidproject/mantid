@@ -458,6 +458,7 @@ class FullInstrumentViewPresenter:
             mask = self._model.expand_pickable_mask_to_parent_subtrees(mask)
         new_key = self._model.add_new_detector_key(mask.tolist(), self._view.get_current_selected_tab())
         self._view.set_new_item_key(self._view.get_current_selected_tab(), new_key)
+        self._view.set_add_shape_button_enabled(False)
 
     def on_select_bank_tube_toggled(self, checked: bool) -> None:
         self._select_bank_tube = checked

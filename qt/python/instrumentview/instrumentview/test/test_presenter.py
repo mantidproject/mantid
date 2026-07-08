@@ -246,6 +246,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._presenter._on_add_item_clicked()
         np.testing.assert_array_equal(self._model.add_new_detector_key.call_args.args[0], mock_mask.tolist())
         self._mock_view.set_new_item_key.assert_called_once_with(CurrentTab.Grouping, "mock_key")
+        self._mock_view.set_add_shape_button_enabled.assert_called_once_with(False)
 
     def test_on_add_selection_clicked_select_bank_tube_expands_mask(self):
         mask = np.array([False, True, False], dtype=bool)

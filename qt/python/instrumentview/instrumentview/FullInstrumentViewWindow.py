@@ -86,6 +86,8 @@ def _ensure_overlay_manager(method):
         shape = method(self, *args, **kwargs)
         self._shape_overlay_manager.set_shape(shape)
         self._current_widget = shape
+        self._add_mask.setEnabled(True)
+        self._add_selection.setEnabled(True)
 
     return wrapper
 
@@ -329,18 +331,19 @@ class FullInstrumentViewView(QWidget):
 
         self._grouping_masking_group_box = QGroupBox("Grouping and Masking")
         self._shapes_widget = QWidget()
-        self._add_circle = QPushButton("Add Circle")
-        self._add_circle.setCheckable(True)
-        self._add_rectangle = QPushButton("Add Rectangle")
-        self._add_rectangle.setCheckable(True)
-        self._add_ellipse = QPushButton("Add Ellipse")
-        self._add_ellipse.setCheckable(True)
-        self._add_annulus = QPushButton("Add Annulus")
-        self._add_annulus.setCheckable(True)
-        self._add_hollow_rectangle = QPushButton("Add Hollow Rectangle")
-        self._add_hollow_rectangle.setCheckable(True)
-
-        self._shape_buttons = [self._add_circle, self._add_rectangle, self._add_ellipse, self._add_annulus, self._add_hollow_rectangle]
+        self._shape_options = [
+            ("Circle", self.add_circle_widget),
+            ("Rectangle", self.add_rectangular_widget),
+            ("Ellipse", self.add_ellipse_widget),
+            ("Annulus", self.add_annulus_widget),
+            ("Hollow Rectangle", self.add_hollow_rectangle_widget),
+        ]
+        self._shape_selector_combo_box = NoWheelComboBox()
+        self._shape_selector_combo_box.addItems([label for label, _ in self._shape_options])
+        self._shape_selector_combo_box.setToolTip("Select a shape to add to the projection.")
+        self._add_shape_button = QPushButton("Add Shape")
+        self._add_shape_button.setToolTip("Add or replace the selected shape.")
+        self._add_shape_button.setCheckable(True)
 
         # TODO: for the ROI and Mask tabs, should separate buttons from layout
         self._selection_tab = QWidget()
@@ -473,11 +476,8 @@ class FullInstrumentViewView(QWidget):
         grouping_masking_group_layout.addWidget(self._picking_masking_tab)
 
         shapes_layout = QHBoxLayout(self._shapes_widget)
-        shapes_layout.addWidget(self._add_circle)
-        shapes_layout.addWidget(self._add_rectangle)
-        shapes_layout.addWidget(self._add_ellipse)
-        shapes_layout.addWidget(self._add_annulus)
-        shapes_layout.addWidget(self._add_hollow_rectangle)
+        shapes_layout.addWidget(self._shape_selector_combo_box)
+        shapes_layout.addWidget(self._add_shape_button)
 
         right_column_graphics_layout = QVBoxLayout(self._right_column_graphics)
         right_column_graphics_layout.addWidget(self._graphics_vsplitter)
@@ -561,6 +561,9 @@ class FullInstrumentViewView(QWidget):
 
     def set_render_mode_combo_enabled(self, enabled: bool) -> None:
         self._render_mode_combo_box.setEnabled(enabled)
+
+    def set_add_shape_button_enabled(self, enabled: bool) -> None:
+        self._add_shape_button.setChecked(enabled)
 
     def _on_splitter_moved(self, pos, index) -> None:
         self._detector_spectrum_fig.tight_layout()
@@ -755,68 +758,45 @@ class FullInstrumentViewView(QWidget):
             self._presenter.on_integration_limits_updated,
         )
 
-        self._add_circle.toggled.connect(self.on_toggle_add_circle)
-        self._add_rectangle.toggled.connect(self.on_toggle_add_rectangle)
-        self._add_ellipse.toggled.connect(self.on_toggle_add_ellipse)
-        self._add_annulus.toggled.connect(self.on_toggle_add_annulus)
-        self._add_hollow_rectangle.toggled.connect(self.on_toggle_add_hollow_rectangle)
+        self._add_shape_button.toggled.connect(self.add_selected_shape)
 
         self._add_mask.clicked.connect(self._presenter.on_add_item_clicked)
         self._add_mask.setDisabled(True)
         self._add_selection.clicked.connect(self._presenter.on_add_item_clicked)
         self._add_selection.setDisabled(True)
 
-    def on_toggle_add_circle(self, checked):
-        self._on_toggle_add_shape(checked, self.add_circle_widget)
-
-    def on_toggle_add_rectangle(self, checked):
-        self._on_toggle_add_shape(checked, self.add_rectangular_widget)
-
-    def on_toggle_add_ellipse(self, checked):
-        self._on_toggle_add_shape(checked, self.add_ellipse_widget)
-
     def is_select_bank_tube_checked(self) -> bool:
         return self._select_bank_tube.isChecked()
 
-    def on_toggle_add_annulus(self, checked):
-        self._on_toggle_add_shape(checked, self.add_annulus_widget)
-
-    def on_toggle_add_hollow_rectangle(self, checked):
-        self._on_toggle_add_shape(checked, self.add_hollow_rectangle_widget)
-
-    def _on_toggle_add_shape(self, checked, add_widget_function: Callable):
-        if checked:
-            add_widget_function()
-        else:
+    def add_selected_shape(self, checked: bool = False) -> None:
+        if not checked:
             self.delete_current_widget()
+            return
 
-        # Enable button for applying mask/group if widget is present, disable otherwise
-        self._add_mask.setEnabled(checked)
-        self._add_selection.setEnabled(checked)
+        selected_shape = self._shape_selector_combo_box.currentText()
+        for label, add_widget_function in self._shape_options:
+            if label == selected_shape:
+                add_widget_function()
+                return
 
-        # Disable buttons for adding more widgets if widget is already present, enable otherwise
-        for btn in self._shape_buttons:
-            if btn != self.sender():
-                btn.setDisabled(checked)
+    def _set_shape_controls_enabled(self, enabled: bool) -> None:
+        self._shape_selector_combo_box.setEnabled(enabled)
+        self._add_shape_button.setEnabled(enabled)
 
     def enable_or_disable_mask_widgets(self):
         if self.is_hover_pick_checked():
-            for btn in self._shape_buttons:
-                if btn.isChecked():
-                    btn.toggle()
-                btn.setDisabled(True)
+            self.delete_current_widget()
+            self._set_shape_controls_enabled(False)
             self._add_mask.setDisabled(True)
             self._add_selection.setDisabled(True)
             return
 
-        for btn in self._shape_buttons:
-            if btn.isChecked():
-                btn.toggle()
-            btn.setDisabled(self.current_selected_projection() == ProjectionType.THREE_D)
+        self._set_shape_controls_enabled(True)
 
     def set_hover_pick_mode_enabled(self, enabled: bool) -> None:
         if enabled:
             self.delete_current_widget()
+            self._set_shape_controls_enabled(False)
 
         self._clear_point_picked_detectors.setDisabled(enabled)
         self._add_mask.setDisabled(True)
@@ -824,11 +804,6 @@ class FullInstrumentViewView(QWidget):
         self._sum_spectra_checkbox.setDisabled(enabled)
         self._select_bank_tube.setDisabled(enabled)
         self._export_workspace_button.setDisabled(enabled)
-
-        for btn in self._shape_buttons:
-            if btn.isChecked():
-                btn.toggle()
-            btn.setDisabled(enabled or self.current_selected_projection() == ProjectionType.THREE_D)
 
     def set_hover_pick_available(self, is_available: bool) -> None:
         self._hover_pick.setEnabled(is_available)
@@ -846,6 +821,8 @@ class FullInstrumentViewView(QWidget):
             self._shape_overlay_manager.remove_shape()
             self._shape_overlay_manager = None
         self._current_widget = None
+        self._add_mask.setDisabled(True)
+        self._add_selection.setDisabled(True)
 
     def refresh_peaks_ws_list(self) -> None:
         # TODO: Very similar to other refresh list function, combine in one function
