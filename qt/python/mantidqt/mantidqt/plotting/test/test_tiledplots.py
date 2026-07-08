@@ -23,7 +23,12 @@ import mantid.plots  # noqa
 from mantid.api import AnalysisDataService, WorkspaceFactory
 from unittest import mock
 from mantidqt.dialogs.spectraselectordialog import SpectraSelection
-from mantid.plots.plotfunctions import add_axes_to_existing_mantid_tiled_figure, manage_workspace_names, get_plot_fig
+from mantid.plots.plotfunctions import (
+    add_axes_to_existing_mantid_tiled_figure,
+    get_plot_fig,
+    manage_workspace_names,
+    stored_mantid_tiled_axis_position,
+)
 from mantidqt.plotting.functions import plot_from_names
 
 
@@ -130,6 +135,24 @@ class TiledPlotsTest(TestCase):
 
         with self.assertRaisesRegex(ValueError, "stored Mantid tile position"):
             add_axes_to_existing_mantid_tiled_figure(fig, axes_num=1)
+
+    def test_stored_mantid_tiled_axis_position_returns_stored_position(self):
+        fig, axes = get_plot_fig(overplot=False, axes_num=1)
+
+        self.assertEqual((0, 0), stored_mantid_tiled_axis_position(axes[0], nrows=1, ncols=1))
+
+    def test_stored_mantid_tiled_axis_position_requires_stored_position(self):
+        fig = plt.figure()
+        axis = fig.add_subplot(111, projection="mantid")
+
+        with self.assertRaisesRegex(ValueError, "stored Mantid tile position"):
+            stored_mantid_tiled_axis_position(axis, nrows=1, ncols=1)
+
+    def test_stored_mantid_tiled_axis_position_requires_position_inside_layout(self):
+        fig, axes = get_plot_fig(overplot=False, axes_num=1)
+
+        with self.assertRaisesRegex(ValueError, "outside the new tiled layout"):
+            stored_mantid_tiled_axis_position(axes[0], nrows=0, ncols=1)
 
     def test_tiled_plot_from_multiple_workspaces_no_errors(self):
         workspaces = ["test_ws", "test_ws_2"]
