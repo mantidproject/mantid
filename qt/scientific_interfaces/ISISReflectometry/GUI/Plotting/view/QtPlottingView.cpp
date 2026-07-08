@@ -73,16 +73,14 @@ bool shouldEnablePlotTiledVertically(bool outputSelectionEnabled, size_t selecte
 }
 
 /// Return true if the add-to-existing option should be enabled.
-bool shouldEnableAddToExistingPlot(bool outputSelectionEnabled, bool activePlotAvailable,
-                                   bool activePlotOverplotCompatible, PlotOutputTypeProperties const &plotProperties) {
-  return outputSelectionEnabled && activePlotAvailable && activePlotOverplotCompatible &&
-         plotProperties.supportsAddToExistingPlot();
+bool shouldEnableAddToExistingPlot(bool outputSelectionEnabled, bool activePlotOverplotCompatible,
+                                   PlotOutputTypeProperties const &plotProperties) {
+  return outputSelectionEnabled && activePlotOverplotCompatible && plotProperties.supportsAddToExistingPlot();
 }
 } // namespace
 
 QtPlottingView::QtPlottingView(QWidget *parent)
-    : QWidget(parent), m_notifyee(nullptr), m_outputSelectionEnabled(false), m_activePlotAvailable(false),
-      m_activePlotOverplotCompatible(false) {
+    : QWidget(parent), m_notifyee(nullptr), m_outputSelectionEnabled(false), m_activePlotOverplotCompatible(false) {
   initLayout();
 }
 
@@ -102,7 +100,7 @@ void QtPlottingView::initLayout() {
             m_workspaceTree->updateChildSelection(deselected, QItemSelectionModel::Deselect);
             m_workspaceTree->updateChildSelection(selected, QItemSelectionModel::Select);
             if (m_notifyee) {
-              m_notifyee->notifyActivePlotAvailabilityChanged();
+              m_notifyee->notifyActivePlotCompatibilityChanged();
             }
             updatePlotButtonEnabledStates();
           });
@@ -132,14 +130,14 @@ void QtPlottingView::initLayout() {
     }
     updatePlotButtonEnabledStates();
   });
-  auto *activePlotAvailabilityTimer = new QTimer(this);
-  activePlotAvailabilityTimer->setInterval(1000);
-  connect(activePlotAvailabilityTimer, &QTimer::timeout, this, [this]() {
+  auto *activePlotCompatibilityTimer = new QTimer(this);
+  activePlotCompatibilityTimer->setInterval(1000);
+  connect(activePlotCompatibilityTimer, &QTimer::timeout, this, [this]() {
     if (m_notifyee) {
-      m_notifyee->notifyActivePlotAvailabilityChanged();
+      m_notifyee->notifyActivePlotCompatibilityChanged();
     }
   });
-  activePlotAvailabilityTimer->start();
+  activePlotCompatibilityTimer->start();
   setOutputSelectionControlsEnabled(false);
 }
 
@@ -177,8 +175,8 @@ void QtPlottingView::updatePlotButtonEnabledStates() {
   auto const selectedWorkspaceCount = selectedWorkspaceNames().size();
   auto const selectedWorkspaceGroupCount = m_workspaceTree->selectedWorkspaceGroupCount();
   auto const &plotProperties = plotOutputTypeProperties(selectedPlotOutputType());
-  auto const addToExistingEnabled = shouldEnableAddToExistingPlot(m_outputSelectionEnabled, m_activePlotAvailable,
-                                                                  m_activePlotOverplotCompatible, plotProperties);
+  auto const addToExistingEnabled =
+      shouldEnableAddToExistingPlot(m_outputSelectionEnabled, m_activePlotOverplotCompatible, plotProperties);
   if (!addToExistingEnabled && m_ui.addToExistingPlot->isChecked()) {
     QSignalBlocker blocker(m_ui.addToExistingPlot);
     m_ui.addToExistingPlot->setChecked(false);
@@ -239,15 +237,6 @@ PlotOutputSelection QtPlottingView::selectedPlotOutputSelection() const {
 bool QtPlottingView::addToExistingPlot() const { return m_ui.addToExistingPlot->isChecked(); }
 
 bool QtPlottingView::plotTiledVertically() const { return m_ui.plotTiledVertically->isChecked(); }
-
-void QtPlottingView::setActivePlotAvailable(bool available) {
-  m_activePlotAvailable = available;
-  if (!available) {
-    QSignalBlocker blocker(m_ui.addToExistingPlot);
-    m_ui.addToExistingPlot->setChecked(false);
-  }
-  updatePlotButtonEnabledStates();
-}
 
 void QtPlottingView::setActivePlotOverplotCompatible(bool compatible) {
   m_activePlotOverplotCompatible = compatible;

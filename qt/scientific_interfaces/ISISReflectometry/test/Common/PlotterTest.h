@@ -84,11 +84,10 @@ public:
 
     MantidQt::CustomInterfaces::ISISReflectometry::Plotter plotter;
 
-    TS_ASSERT(!plotter.hasActiveFigure());
     TS_ASSERT(!plotter.canOverplotActiveFigure());
   }
 
-  void testHasActiveFigureAcceptsReflectometryFigure() {
+  void testCanOverplotActiveFigureAcceptsReflectometryFigure() {
     closeAllFigures();
     createWorkspace("ws1");
 
@@ -98,7 +97,6 @@ public:
                       MantidQt::CustomInterfaces::ISISReflectometry::PlotOutputType::ReflectivityCurve,
                       MantidQt::CustomInterfaces::ISISReflectometry::PlotLayout::Individual)});
 
-    TS_ASSERT(plotter.hasActiveFigure());
     TS_ASSERT(plotter.canOverplotActiveFigure());
   }
 
