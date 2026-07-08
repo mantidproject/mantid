@@ -26,14 +26,18 @@ namespace {
 // description accessors are intentionally not deprecated yet; they have no
 // ComponentInfo equivalent and await the parameter-map redesign.)
 Mantid::Kernel::Quat getRotationDeprecated(const Component &self) {
-  PyErr_Warn(PyExc_DeprecationWarning, "'Component.getRotation' is deprecated in Mantid 7.0, "
-                                       "use 'ComponentInfo.rotation' instead.");
+  PyErr_Warn(PyExc_DeprecationWarning, "'Component.getRotation()' is deprecated in Mantid 7.0, "
+                                       "use 'ComponentInfo.rotation' instead. "
+                                       "For more information, see the instrument access layers concept page: "
+                                       "https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html");
   return self.getRotation();
 }
 
 Mantid::Kernel::V3D getRelativePosDeprecated(const Component &self) {
   PyErr_Warn(PyExc_DeprecationWarning, "'Component.getRelativePos' is deprecated in Mantid 7.0, "
-                                       "use 'ComponentInfo.relativePosition' instead.");
+                                       "use 'ComponentInfo.relativePosition' instead. "
+                                       "For more information, see the instrument access layers concept page: "
+                                       "https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html");
   return self.getRelativePos();
 }
 

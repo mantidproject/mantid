@@ -22,13 +22,17 @@ namespace {
 // SpectrumInfo, DetectorInfo, ComponentInfo' concept page.
 int nelementsDeprecated(const ICompAssembly &self) {
   PyErr_Warn(PyExc_DeprecationWarning, "'ICompAssembly.nelements'/'len()' is deprecated in Mantid 7.0, "
-                                       "use 'ComponentInfo.componentsInSubtree' instead.");
+                                       "use 'ComponentInfo.componentsInSubtree' instead. "
+                                       "For more information, see the instrument access layers concept page: "
+                                       "https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html");
   return self.nelements();
 }
 
 std::shared_ptr<IComponent> getItemDeprecated(const ICompAssembly &self, const int index) {
   PyErr_Warn(PyExc_DeprecationWarning, "'ICompAssembly.__getitem__' is deprecated in Mantid 7.0, "
-                                       "use 'ComponentInfo.children'/'componentsInSubtree' instead.");
+                                       "use 'ComponentInfo.children'/'componentsInSubtree' instead. "
+                                       "For more information, see the instrument access layers concept page: "
+                                       "https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html");
   return self[index];
 }
 } // namespace
