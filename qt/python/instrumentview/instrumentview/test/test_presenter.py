@@ -32,6 +32,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view._RENDER_MODE_SHAPES_FAST = "Approximated Shapes (Fast)"
         self._mock_view._RENDER_MODE_RAW_SHAPES = "Raw Shapes (Slowest)"
         self._mock_view.is_select_bank_tube_checked.return_value = False
+        self._mock_view.get_contour_limits.return_value = (0.0, 1.0)
         self._mock_view.selected_peaks_workspaces.return_value = []
         self._ws = CreateSampleWorkspace(OutputWorkspace="TestFullInstrumentViewPresenter", EnableLogging=False)
         self._model = FullInstrumentViewModel(self._ws)
@@ -60,6 +61,15 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._presenter.update_plotter()
         self.assertEqual(self._model.projection_type, ProjectionType.CYLINDRICAL_Y)
         self._mock_view.clear_main_plotter.assert_called()
+
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.on_integration_limits_reset_clicked")
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.on_contour_limits_updated")
+    def test_update_plotter_false_preserves_contour_limits(self, mock_on_contour_limits_updated, mock_on_integration_limits_reset):
+        """Test that update_plotter(False) preserves contour limits by calling on_contour_limits_updated
+        instead of resetting them via on_integration_limits_reset_clicked."""
+        self._presenter.update_plotter(False)
+        mock_on_contour_limits_updated.assert_called_once()
+        mock_on_integration_limits_reset.assert_not_called()
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.on_contour_range_reset_clicked")
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.update_integration_range")
