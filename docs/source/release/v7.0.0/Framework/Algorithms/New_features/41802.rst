@@ -1,0 +1,1 @@
+- :ref:`algm-MDNormDirectSC` can now handle MDEvent workspaces created by :ref:`algm-ConvertToMD` with the ``UseLogTimes`` property.
