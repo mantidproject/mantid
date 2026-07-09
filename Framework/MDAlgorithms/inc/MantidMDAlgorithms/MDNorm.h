@@ -26,7 +26,8 @@ public:
   const std::string category() const override;
   const std::string summary() const override;
   const std::vector<std::string> seeAlso() const override {
-    return {"CropWorkspaceForMDNorm", "MDNormSCD", "MDNormDirectSC", "RecalculateTrajectoriesExtents"};
+    return {"CropWorkspaceForMDNorm", "MDNormSCD", "MDNormDirectSC", "RecalculateTrajectoriesExtents",
+            "ConvertHFIRSCDtoMDE"};
   }
 
 private:
@@ -55,6 +56,9 @@ private:
 
   /// Bin(MD) input Background workspace
   DataObjects::MDHistoWorkspace_sptr binBackgroundWS(const std::vector<Geometry::SymmetryOperation> &symmetryOps);
+
+  /// Bin(MD) MonoSCDNormalizationWorkspace (monochromatic single crystal diffraction)
+  DataObjects::MDHistoWorkspace_sptr binNormalizationWS(const std::vector<Geometry::SymmetryOperation> &symmetryOps);
 
   /// build symmetry matrix
   Mantid::Kernel::DblMatrix buildSymmetryMatrix(const Geometry::SymmetryOperation &so);

@@ -552,7 +552,14 @@ void MDNorm::exec() {
   // Calculate (BinMD) input sample MDE to MDH and create noramlization MDH from
   // it
   auto outputDataWS = binInputWS(symmetryOps);
-  createNormalizationWS(*outputDataWS);
+  if (m_monochromatic) {
+    // Monochromatic single crystal diffraction (WAND, DEMAND): the normalization is a
+    // pre-computed MDEventWorkspace, binned identically to the data instead of being
+    // calculated from solid angle/flux trajectories.
+    m_normWS = binNormalizationWS(symmetryOps);
+  } else {
+    createNormalizationWS(*outputDataWS);
+  }
   this->setProperty("OutputNormalizationWorkspace", m_normWS);
   this->setProperty("OutputDataWorkspace", outputDataWS);
 
@@ -568,28 +575,31 @@ void MDNorm::exec() {
   }
 
   m_numExptInfos = outputDataWS->getNumExperimentInfo();
-  // loop over all experiment infos
-  for (uint16_t expInfoIndex = 0; expInfoIndex < m_numExptInfos; expInfoIndex++) {
-    // Check for other dimensions if we could measure anything in the original
-    // data
-    bool skipNormalization = false;
-    const std::vector<coord_t> otherValues = getValuesFromOtherDimensions(skipNormalization, expInfoIndex);
+  if (!m_monochromatic) {
+    // loop over all experiment infos, computing the normalization from solid angle/flux
+    // trajectories (TOF only; for monochromatic input, m_normWS was already binned above)
+    for (uint16_t expInfoIndex = 0; expInfoIndex < m_numExptInfos; expInfoIndex++) {
+      // Check for other dimensions if we could measure anything in the original
+      // data
+      bool skipNormalization = false;
+      const std::vector<coord_t> otherValues = getValuesFromOtherDimensions(skipNormalization, expInfoIndex);
 
-    cacheDimensionXValues();
+      cacheDimensionXValues();
 
-    if (!skipNormalization) {
-      size_t symmOpsIndex = 0;
-      for (const auto &so : symmetryOps) {
-        calculateNormalization(otherValues, so, expInfoIndex, symmOpsIndex);
-        symmOpsIndex++;
+      if (!skipNormalization) {
+        size_t symmOpsIndex = 0;
+        for (const auto &so : symmetryOps) {
+          calculateNormalization(otherValues, so, expInfoIndex, symmOpsIndex);
+          symmOpsIndex++;
+        }
+
+      } else {
+        g_log.warning("Binning limits are outside the limits of the MDWorkspace. "
+                      "Not applying normalization.");
       }
-
-    } else {
-      g_log.warning("Binning limits are outside the limits of the MDWorkspace. "
-                    "Not applying normalization.");
+      // if more than one experiment info, keep accumulating
+      m_accumulate = true;
     }
-    // if more than one experiment info, keep accumulating
-    m_accumulate = true;
   }
 
   API::IMDWorkspace_sptr out(nullptr);
@@ -1230,6 +1240,21 @@ MDNorm::binBackgroundWS(const std::vector<Geometry::SymmetryOperation> &symmetry
 DataObjects::MDHistoWorkspace_sptr MDNorm::binInputWS(const std::vector<Geometry::SymmetryOperation> &symmetryOps) {
   std::map<std::string, std::string> parameters = getBinParameters();
   return binMDEventWorkspace(m_inputWS, "TemporaryDataWorkspace", "OutputDataWorkspace", symmetryOps, parameters);
+}
+
+/**
+ * Bin(MD) MonoSCDNormalizationWorkspace with the exact same bin parameters used for
+ * InputWorkspace, so that the normalization ends up on the same grid as the data.
+ * getBinParameters() is a pure function of m_inputWS/m_isRLU/the current property values, none
+ * of which change during exec(), so calling it again here (rather than threading through the
+ * map built in binInputWS) reproduces an identical parameters map.
+ */
+DataObjects::MDHistoWorkspace_sptr
+MDNorm::binNormalizationWS(const std::vector<Geometry::SymmetryOperation> &symmetryOps) {
+  std::map<std::string, std::string> parameters = getBinParameters();
+  Mantid::API::IMDEventWorkspace_sptr monoNormInputWS = this->getProperty("MonoSCDNormalizationWorkspace");
+  return binMDEventWorkspace(monoNormInputWS, "TemporaryNormalizationWorkspace", "OutputNormalizationWorkspace",
+                             symmetryOps, parameters);
 }
 
 /**
