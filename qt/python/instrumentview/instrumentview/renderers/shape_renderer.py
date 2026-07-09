@@ -411,15 +411,17 @@ class ShapeRenderer(InstrumentRenderer):
                 projection_scales = per_detector_scales[group_indices][:, np.newaxis, np.newaxis]
                 tiled = tiled * projection_scales
 
+                # Rotate only the detectors flagged for rotation; leave others axis-aligned.
                 rotate_mask = per_detector_rotate[group_indices]
+                group_rots = rotations[group_indices[rotate_mask]]
+                tiled[rotate_mask] = tiled[rotate_mask] @ group_rots.transpose(0, 2, 1)
                 group_pos = detector_positions[group_indices][:, np.newaxis, :]  # (n_group, 1, 3)
             else:
-                rotate_mask = np.ones(n_group).astype(bool)
+                # All detectors are rotated — apply directly without boolean masking.
+                group_rots = rotations[group_indices]
+                tiled = tiled @ group_rots.transpose(0, 2, 1)
                 group_pos = self._all_positions_3d[detector_indices[group_indices]][:, np.newaxis, :]
 
-            # Rotate
-            group_rots = rotations[group_indices[rotate_mask]]
-            tiled[rotate_mask] = np.einsum("nij,nvj->nvi", group_rots, tiled[rotate_mask])
             # Translate
             tiled = tiled + group_pos
 
