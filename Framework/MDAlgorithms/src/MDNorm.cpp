@@ -134,6 +134,16 @@ void MDNorm::init() {
   setPropertyGroup("SolidAngleWorkspace", "Vanadium normalization");
   setPropertyGroup("FluxWorkspace", "Vanadium normalization");
 
+  // monochromatic single crystal diffraction (WAND, DEMAND)
+  declareProperty(std::make_unique<WorkspaceProperty<API::IMDEventWorkspace>>("MonoSCDNormalizationWorkspace", "",
+                                                                              Direction::Input, PropertyMode::Optional),
+                  "An (optional) input MDEventWorkspace containing a pre-computed normalization "
+                  "for monochromatic single crystal diffraction (e.g. produced by "
+                  "ConvertHFIRSCDtoMDE). Must be in Q_sample frame with the same number of "
+                  "dimensions as InputWorkspace. Cannot be used together with "
+                  "SolidAngleWorkspace/FluxWorkspace or BackgroundWorkspace.");
+  setPropertyGroup("MonoSCDNormalizationWorkspace", "monochromatic-SCD");
+
   // Define slicing
   for (std::size_t i = 0; i < 6; i++) {
     std::string propName = "Dimension" + Strings::toString(i) + "Name";
