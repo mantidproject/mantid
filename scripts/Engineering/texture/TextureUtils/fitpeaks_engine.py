@@ -173,34 +173,18 @@ def _fit_all_peaks_fitpeaks(
 
     For each peak, every workspace's spectra are combined (they were already cropped+rebinned onto a
     common grid and appended by crop_wss_and_combine during the summed-spectrum seeding step) into one
-    workspace, and a single FitPeaks call fits that peak across all of them at once.  FitPeaks
-    parallelises over spectra with OpenMP, so this one giant call runs (n_workspaces * n_spectra)
-    peak fits concurrently - the maximum parallel width FitPeaks offers (folding the different peaks
-    into the same call would not widen it, as each thread fits its spectrum's peaks sequentially, and
-    would forfeit the per-peak window).  The flat result table is then de-interleaved back into the
-    per-(ws, peak) parameter tables produced by the multidomain engine.
+    workspace, and a single FitPeaks call fits that peak across all of them at once.
 
-    The fit is done in TOF (the combined d-spacing workspace is converted to TOF) so the fitted peak
-    area (I) is in the same units as the multidomain engine; A and B are loaded from the instrument
-    parameter file by FitPeaks, as in the multidomain engine.  X0 is converted back to d-spacing for
-    the output table.  Rebunch-smoothing is used only to guide the fit: each peak is fit on the
-    progressively finer rebunched (higher-SNR) versions solely to refine the per-spectrum centre seed,
-    then the final, authoritative fit is on the raw (unsmoothed) data over the full peak window, seeded
-    with that centre.  Only the raw fit is reported - spectra where it fails are left unfit rather than
-    falling back to a smoothed result, since a rebunched fit's peak position carries the bias of its
-    coarser binning.
-    Weak peaks are rejected the same way as the multidomain engine: after the authoritative fit,
+    The fit is done in TOF with X0 converted back to d-spacing for the output table.
+    Rebunch-smoothing is used to guide the fit for poor SNR: each peak is fit on the
+    progressively finer rebunched versions to refine the per-spectrum centre seed,
+    then the final fit is on the raw (unsmoothed) data over the full peak window, seeded
+    with that centre.
+
+    Weak peaks are rejected the same way as the multidomain engine: after the final fit,
     spectra whose fitted I/sigma is at or below i_over_sigma_thresh are treated as "no peak" and get
-    the unfit defaults.  Here sigma is the fitted intensity's covariance error (I_err) rather than
-    the multidomain engine's summation-based sigma.
-    Remaining differences from the multidomain engine are inherent to FitPeaks: weighted "Least
-    squares" cost (vs unweighted) and independent per-spectrum A/B (vs tied-then-fixed).
+    the unfit defaults."""
 
-    last_fit_ic mirrors the multidomain engine: the smoothing/centre-refinement passes fit the
-    requested peak_func_name, then the final authoritative (reported) fit switches to
-    IkedaCarpenterPV, seeded from a preceding raw fit with the requested function.  As with A/B above,
-    FitPeaks fits IC's instrument-dependent parameters per-spectrum (loaded from the parameter file)
-    rather than fixing them as the multidomain engine does."""
     # x0 seeds (d-spacing) and the per-workspace cropped+rebinned (common-grid) ws names per peak
     x0_lims, all_peak_crop_wss = fit_initial_summed_spectra(wss, peaks, peak_window, fit_kwargs.copy(), peak_func_name)
 
@@ -311,7 +295,7 @@ def _fit_all_peaks_fitpeaks(
             chi2 = np.asarray(param_table.column("chi2"), dtype=float)
             i_col = np.asarray(param_table.column(_INTENSITY_PARAM), dtype=float)
             # a fit is usable if it converged (finite, non-sentinel chi2) with a positive peak area
-            valid = np.isfinite(chi2) & (chi2 < _FITPEAKS_BAD_CHI2) & (chi2 > 0) & (i_col > 0)
+            valid = np.isfinite(chi2) & (chi2 < _FITPEAKS_BAD_CHI2) & (chi2 >= 0) & (i_col > 0)
             return param_table, error_table, valid
 
         def _refine_centre_seed(centre_seed: np.ndarray, valid: np.ndarray) -> np.ndarray:

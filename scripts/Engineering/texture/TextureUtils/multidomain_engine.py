@@ -100,6 +100,10 @@ def get_initial_fit_function_and_kwargs_from_specs(
         istart = ws_tof.yIndexOfX(tof_start, ispec)
         iend = ws_tof.yIndexOfX(tof_end, ispec)
 
+        # throw if the window is zero-sized
+        if iend - istart <= 0:
+            raise ValueError(f"Peak window for spectrum {ispec} does not contain any bins")
+
         # get param estimates
         intens, sigma, bg, centre = _estimate_intensity_background_and_centre(ws_tof, ispec, istart, iend, tof_peak)
         intensity_estimates.append(intens)
@@ -200,8 +204,11 @@ def rerun_fit_with_new_ws(
         x0 = peak.getParameterValue(_PEAK_CENTRE_PARAM)
         key_suffix = f"_{idom}" if idom > 0 else ""
 
+        switching_to_ic = last_fit_ic and is_final and peak.name() != "IkedaCarpenterPV"
+        peak_name = "IkedaCarpenterPV" if switching_to_ic else peak.name()
+
         # create fresh peak as ties are causing problems
-        if last_fit_ic and is_final:
+        if switching_to_ic:
             # set X0 and I BEFORE setMatrixWorkspace so that the instrument
             # parameter file formulas for SigmaSquared and Gamma are evaluated
             # at the correct peak centre rather than at X0=0 (default)
@@ -209,8 +216,7 @@ def rerun_fit_with_new_ws(
             new_peak.setParameter(_PEAK_INTENSITY_PARAM, intens)
             new_peak.setMatrixWorkspace(new_ws, idom, md_fit_kwargs["StartX" + key_suffix], md_fit_kwargs["EndX" + key_suffix])
             # if we have changed to IC for the last fit we will just use default parameter ties
-            if peak.name() != "IkedaCarpenter":
-                parameters_to_tie = _get_default_param_ties("IkedaCarpenterPV", None)
+            parameters_to_tie = _get_default_param_ties("IkedaCarpenterPV", None)
         else:
             for param in _param_names(new_peak):
                 new_peak.setParameter(param, peak.getParameterValue(param))
@@ -240,7 +246,7 @@ def rerun_fit_with_new_ws(
         # above can reapply the instrument parameter formulas, so re-assert the previous value before
         # fixing - except for a freshly created IkedaCarpenterPV, whose params come from the instrument.
         if parameters_to_tie:
-            fresh_ic = last_fit_ic and is_final
+            fresh_ic = switching_to_ic
             for par in parameters_to_tie:
                 if not fresh_ic:
                     new_peak.setParameter(par, peak.getParameterValue(par))
@@ -264,7 +270,7 @@ def rerun_fit_with_new_ws(
 
 
 def _get_default_param_ties(peak_func_name: str, parameters_to_tie: Sequence[str] | None) -> Sequence[str]:
-    if not parameters_to_tie:
+    if parameters_to_tie is None:
         match peak_func_name:
             case "BackToBackExponential":
                 parameters_to_tie = ("A", "B")
