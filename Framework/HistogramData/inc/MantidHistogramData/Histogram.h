@@ -106,11 +106,22 @@ public:
   const HistogramX &x() const { return *m_x; }
   const HistogramY &y() const { return *m_y; }
   const HistogramE &e() const { return *m_e; }
-  const HistogramDx &dx() const { return *m_dx; }
+  // Dx is optional and, unlike X/Y/E, is not guaranteed to have been set. Lazily initialize it to
+  // zeros on first access, consistent with the legacy dataDx()/readDx() accessors below, which have
+  // always behaved this way (see the comment on the legacy Dx interface further down).
+  const HistogramDx &dx() const {
+    if (!m_dx)
+      m_dx = Kernel::make_cow<HistogramDx>(size(), 0.0);
+    return *m_dx;
+  }
   HistogramX &mutableX() & { return m_x.access(); }
   HistogramY &mutableY() & { return m_y.access(); }
   HistogramE &mutableE() & { return m_e.access(); }
-  HistogramDx &mutableDx() & { return m_dx.access(); }
+  HistogramDx &mutableDx() & {
+    if (!m_dx)
+      m_dx = Kernel::make_cow<HistogramDx>(size(), 0.0);
+    return m_dx.access();
+  }
 
   Kernel::cow_ptr<HistogramX> sharedX() const { return m_x; }
   Kernel::cow_ptr<HistogramY> sharedY() const { return m_y; }

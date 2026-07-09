@@ -604,7 +604,9 @@ void export_MatrixWorkspace() {
       .def("e", &eData, return_readonly_numpy(), args("self", "workspaceIndex"),
            "Creates a read-only numpy wrapper around the E data at the given index")
       .def("dx", &dxData, return_readonly_numpy(), args("self", "workspaceIndex"),
-           "Creates a read-only numpy wrapper around the Dx data at the given index")
+           "Creates a read-only numpy wrapper around the Dx data at the given index. "
+           "If :class:`~mantid.api.MatrixWorkspace.hasDx` is False for this index, "
+           "the Dx data is first initialized to zeros.")
       .def("readX", &readXDeprecated, (arg("self"), arg("workspaceIndex")), return_readonly_numpy(),
            "Creates a read-only numpy wrapper "
            "around the original X data at the "
@@ -641,7 +643,9 @@ void export_MatrixWorkspace() {
            "Raises a RuntimeError for :class:`~mantid.api.IEventWorkspace`, since "
            "non-const access to E data is not possible for event data.")
       .def("mutableDx", &mutableDxData, return_readwrite_numpy(), args("self", "workspaceIndex"),
-           "Creates a writable numpy wrapper around the Dx data at the given index")
+           "Creates a writable numpy wrapper around the Dx data at the given index. "
+           "If :class:`~mantid.api.MatrixWorkspace.hasDx` is False for this index, "
+           "the Dx data is first initialized to zeros.")
       .def("dataX", &dataXDeprecated, return_readwrite_numpy(), args("self", "workspaceIndex"),
            "Creates a writable numpy wrapper around the original X data at the "
            "given index (deprecated, use "
