@@ -81,6 +81,7 @@ const std::string POSITION_TOL("PositionTolerance");
 const std::string POSITION_TOL_MODE("PositionToleranceMode");
 const std::string PEAK_MIN_HEIGHT("MinimumPeakHeight");
 const std::string CONSTRAIN_PEAK_POS("ConstrainPeakPositions");
+const std::string CALC_UNCONSTRAINED_ERRORS("CalculateUnconstrainedErrors");
 const std::string COPY_LAST_GOOD_PEAK_PARAMS("CopyLastGoodPeakParameters");
 const std::string RESPECT_FIXED_PEAK_PARAMS("RespectFixedPeakParameters");
 const std::string OUTPUT_WKSP_MODEL("FittedPeaksWorkspace");
@@ -420,6 +421,15 @@ void FitPeaks::init() {
                   "(highest Y value position) and "
                   "the peak width either estimted by observation or calculate.");
 
+  declareProperty(PropertyNames::CALC_UNCONSTRAINED_ERRORS, false,
+                  "If true, and a peak-position constraint is applied during fitting "
+                  "(ConstrainPeakPositions or PositionToleranceMode='Constrain'), the reported "
+                  "parameter errors are recomputed from the unconstrained cost function at the fitted "
+                  "values. A position constraint contributes curvature to the Hessian that the error "
+                  "calculation inverts, which reduces the reported position error; enabling this option "
+                  "instead reports the covariance error from the data alone. Costs one extra "
+                  "(zero-iteration) fit per constrained peak.");
+
   declareProperty(PropertyNames::COPY_LAST_GOOD_PEAK_PARAMS, true,
                   "If true, initial peak parameters (with the exception of peak centre) "
                   "may be copied from the last successfully fit peak in the spectra.");
@@ -639,6 +649,7 @@ void FitPeaks::processInputs() {
   m_constrainPeaksPosition = getProperty(PropertyNames::CONSTRAIN_PEAK_POS);
   const std::string posTolMode = getProperty(PropertyNames::POSITION_TOL_MODE);
   m_constrainByPositionTolerance = (posTolMode == "Constrain");
+  m_calculateUnconstrainedErrors = getProperty(PropertyNames::CALC_UNCONSTRAINED_ERRORS);
   m_fitIterations = getProperty(PropertyNames::MAX_FIT_ITER);
   m_copyLastGoodPeakParameters = getProperty(PropertyNames::COPY_LAST_GOOD_PEAK_PARAMS);
   m_respectFixedPeakParameters = getProperty(PropertyNames::RESPECT_FIXED_PEAK_PARAMS);
@@ -1896,15 +1907,15 @@ double FitPeaks::fitFunctionSD(const IAlgorithm_sptr &fit, const API::IPeakFunct
   // Constrain mode (tolerance-based centre bound) and ConstrainPeakPositions (width-based bound)
   // are mutually exclusive - validateInputs rejects enabling both - so at most one branch runs.
   const bool constrainByTolerance = m_constrainByPositionTolerance && peak_pos_tolerance > 0.;
+  bool positionConstrained = false;
   if (constrainByTolerance) {
-    // bound the fitted centre to expected_peak_center +/- tolerance during the fit.  Unlike the
-    // ConstrainPeakPositions branch below, the position error is recomputed after the fit without
-    // this penalty (see recalculateErrorsWithoutConstraint) so it stays a genuine covariance error.
+    // bound the fitted centre to expected_peak_center +/- tolerance during the fit
     std::stringstream peak_center_constraint;
     peak_center_constraint << (expected_peak_center - peak_pos_tolerance) << " < f0."
                            << peak_function->getCentreParameterName() << " < "
                            << (expected_peak_center + peak_pos_tolerance);
     fit->setProperty("Constraints", peak_center_constraint.str());
+    positionConstrained = true;
   } else if (m_constrainPeaksPosition) {
     // set up a constraint on peak position
     double peak_center = peak_function->centre();
@@ -1913,6 +1924,7 @@ double FitPeaks::fitFunctionSD(const IAlgorithm_sptr &fit, const API::IPeakFunct
     peak_center_constraint << (peak_center - 0.5 * peak_width) << " < f0." << peak_function->getCentreParameterName()
                            << " < " << (peak_center + 0.5 * peak_width);
     fit->setProperty("Constraints", peak_center_constraint.str());
+    positionConstrained = true;
   }
 
   // Execute fit and get result of fitting background
@@ -1937,8 +1949,9 @@ double FitPeaks::fitFunctionSD(const IAlgorithm_sptr &fit, const API::IPeakFunct
   double chi2{std::numeric_limits<double>::max()};
   if (fitStatusIsConverged(fitStatus, m_strictConvergence)) {
     chi2 = fit->getProperty("OutputChi2overDoF");
-    if (constrainByTolerance) {
-      // replace the boundary-penalty-contaminated parameter errors with genuine covariance errors
+    if (m_calculateUnconstrainedErrors && positionConstrained) {
+      // re-report the parameter errors from the unconstrained cost function so the position
+      // constraint's contribution to the Hessian does not reduce them (see the method comment)
       recalculateErrorsWithoutConstraint(peak_function, bkgd_function, dataws, wsindex, peak_range);
     }
   }
@@ -1948,12 +1961,13 @@ double FitPeaks::fitFunctionSD(const IAlgorithm_sptr &fit, const API::IPeakFunct
 
 //----------------------------------------------------------------------------------------------
 /** Recompute the fitting errors of an already-fitted peak+background without any peak-position
- * boundary constraint.  Mantid implements a boundary constraint as a penalty term whose second
- * derivative is folded into the Hessian that CalcErrors inverts, so a centre resting against the
- * bound is reported with a spuriously small position error.  Re-running Fit at the converged
- * parameters with zero iterations and no constraint evaluates the covariance of the pure
- * (unpenalized) cost function, and Fit writes the resulting genuine errors back onto the shared
- * function objects.  The parameter values are left unchanged (no iterations are taken).
+ * boundary constraint.  Boundary constraint are implemented as a penalty term so the second
+ * derivative of the penalty is folded into the Hessian that CalcErrors inverts.
+ * So a parameter near the boundary is reported with a greatly reduced position error that reflects
+ * the size of the constraint as well as the data.
+ *
+ * Re-running Fit at the converged parameters with zero iterations and no constraint evaluates the
+ * covariance of the unpenalized cost function, i.e. the error from the data alone
  */
 void FitPeaks::recalculateErrorsWithoutConstraint(const API::IPeakFunction_sptr &peak_function,
                                                   const API::IBackgroundFunction_sptr &bkgd_function,

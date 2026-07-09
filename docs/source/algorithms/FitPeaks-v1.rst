@@ -229,6 +229,17 @@ PositionToleranceMode
   ``PositionTolerance`` must be specified when using this mode, and ``ConstrainPeakPositions``
   must be set to ``false``: both bound the centre during the fit, so they are mutually exclusive.
 
+CalculateUnconstrainedErrors
+============================
+
+When a peak-position constraint is applied during fitting — either ``ConstrainPeakPositions`` or
+``PositionToleranceMode='Constrain'`` — the constraint contributes curvature to the Hessian that
+the error calculation inverts, so the reported position error reflects the constraint as well as
+the data. If ``CalculateUnconstrainedErrors`` is ``True``, the parameter errors are recomputed
+from the unconstrained cost function at the fitted parameter values, i.e. the covariance error
+from the data alone. This costs one extra (zero-iteration) fit per constrained peak. It defaults
+to ``False`` and has no effect when no position constraint is applied.
+
 Algorithm Configurations
 ########################
 

@@ -1055,6 +1055,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PositionToleranceMode", "Constrain"));
     // Constrain mode is mutually exclusive with the width-based ConstrainPeakPositions bound
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("ConstrainPeakPositions", false));
+    // recompute the reported errors free of the position constraint
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("CalculateUnconstrainedErrors", true));
 
     fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS_ptc");
     fitpeaks.setProperty("RawPeakParameters", true);
@@ -1179,6 +1181,80 @@ public:
     TS_ASSERT(!fitpeaks.isExecuted());
 
     AnalysisDataService::Instance().remove(data_ws_name);
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Test that CalculateUnconstrainedErrors also applies to the ConstrainPeakPositions path: with
+   * that constraint active the fit still succeeds and reports finite, positive centre errors
+   * recomputed from the unconstrained cost function.
+   * @brief test_calculateUnconstrainedErrorsWithConstrainPeakPositions
+   */
+  void test_calculateUnconstrainedErrorsWithConstrainPeakPositions() {
+    g_log.notice() << "TEST CALCULATE UNCONSTRAINED ERRORS WITH CONSTRAIN PEAK POSITIONS";
+
+    const std::string data_ws_name("FitPeaksTest_ws_cue");
+
+    std::vector<string> peakparnames;
+    std::vector<double> peakparvalues;
+    createGaussParameters(peakparnames, peakparvalues);
+
+    generateTestDataGaussian(data_ws_name);
+
+    FitPeaks fitpeaks;
+    fitpeaks.initialize();
+    fitpeaks.setRethrows(true);
+    TS_ASSERT(fitpeaks.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("InputWorkspace", data_ws_name));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", 0));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 2));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCenters", "5.0, 10.0"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitWindowBoundaryList", "2.5, 6.5, 8.0, 12.0"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitFromRight", true));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakParameterNames", peakparnames));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakParameterValues", peakparvalues));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("HighBackground", false));
+    // width-based position constraint, with unconstrained error recalculation enabled
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("ConstrainPeakPositions", true));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("CalculateUnconstrainedErrors", true));
+
+    fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS_cue");
+    fitpeaks.setProperty("RawPeakParameters", true);
+    fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS_cue");
+    fitpeaks.setPropertyValue("OutputParameterFitErrorsWorkspace", "FitErrorsWS_cue");
+
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.execute());
+    TS_ASSERT(fitpeaks.isExecuted());
+    if (!fitpeaks.isExecuted())
+      return;
+
+    API::ITableWorkspace_sptr error_table =
+        std::dynamic_pointer_cast<API::ITableWorkspace>(AnalysisDataService::Instance().retrieve("FitErrorsWS_cue"));
+    TS_ASSERT(error_table);
+    if (!error_table)
+      return;
+    const std::vector<std::string> colNames = error_table->getColumnNames();
+    size_t centreCol = colNames.size();
+    for (size_t i = 0; i < colNames.size(); ++i)
+      if (colNames[i] == "PeakCentre")
+        centreCol = i;
+    TS_ASSERT(centreCol < colNames.size());
+    if (centreCol >= colNames.size())
+      return;
+    bool any_positive_error = false;
+    for (size_t irow = 0; irow < error_table->rowCount(); ++irow) {
+      const double centre_err = error_table->cell<double>(irow, centreCol);
+      TS_ASSERT(std::isfinite(centre_err));
+      TS_ASSERT_LESS_THAN_EQUALS(0.0, centre_err);
+      if (centre_err > 0.0)
+        any_positive_error = true;
+    }
+    TS_ASSERT(any_positive_error);
+
+    AnalysisDataService::Instance().remove(data_ws_name);
+    AnalysisDataService::Instance().remove("PeakPositionsWS_cue");
+    AnalysisDataService::Instance().remove("PeakParametersWS_cue");
+    AnalysisDataService::Instance().remove("FitErrorsWS_cue");
   }
 
   //----------------------------------------------------------------------------------------------

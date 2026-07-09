@@ -338,6 +338,11 @@ private:
   /// centre during fitting (bounded by expected_centre +/- tolerance) instead of
   /// only being checked after the fit
   bool m_constrainByPositionTolerance{false};
+  /// when true, and a peak-position constraint was applied (ConstrainPeakPositions
+  /// or PositionToleranceMode=Constrain), the reported parameter errors are
+  /// recomputed from the unconstrained cost function so the constraint penalty does
+  /// not distort them
+  bool m_calculateUnconstrainedErrors{false};
 
   /// peak windows
   std::vector<std::vector<double>> m_peakWindowVector;
