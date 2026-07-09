@@ -113,6 +113,35 @@ class WorkspaceListWidget(QListWidget):
                 item.setCheckState(Qt.Checked)
         event.acceptProposedAction()
 
+    def refresh_items(
+        self, keys_from_ads: list[str], keys_cached_in_model: list[str] | None = None, colours: list[str] | None = None
+    ) -> None:
+        keys_in_current_list = [self.item(i).text() for i in range(self.count())]
+
+        # Keys from ADS but not yet in list
+        for key in keys_from_ads:
+            if key not in keys_in_current_list:
+                item = QListWidgetItem(key, self)
+                item.setCheckState(Qt.Unchecked)
+
+        # Remove keys that are neither in cache (if provided) nor in ADS
+        for i in range(self.count() - 1, -1, -1):
+            item = self.item(i)
+            if item.text() in keys_from_ads:
+                continue
+            if keys_cached_in_model is not None and item.text() in keys_cached_in_model:
+                continue
+            removed = self.takeItem(i)
+            del removed
+
+        if colours is None or len(colours) == 0:
+            return
+
+        for list_i in range(self.count()):
+            list_item = self.item(list_i)
+            colour = colours[list_i % len(colours)]
+            list_item.setForeground(QColor(colour))
+
 
 class NoWheelComboBox(QComboBox):
     """QComboBox that ignores mouse wheel events unless it has focus."""
@@ -281,7 +310,7 @@ class FullInstrumentViewView(QWidget):
         self._reset_projection.clicked.connect(self.reset_camera)
         self._clear_point_picked_detectors = QPushButton("Clear Mouse Picking")
 
-        self._picking_group_box = QGroupBox("Picking")
+        self._picking_group_box = QGroupBox("Picking/Interaction")
         self._hover_pick = QPushButton("Hover Pick")
         self._hover_pick.setCheckable(True)
         self._hover_pick.setToolTip("Use mouse hover to preview a single detector spectrum (2D projections only).")
@@ -431,10 +460,10 @@ class FullInstrumentViewView(QWidget):
 
         projection_first_row.addWidget(self._projection_combo_box)
         projection_first_row.addWidget(self._reset_projection)
-        projection_first_row.addWidget(self._rubberband_zoom)
         projection_layout.addLayout(projection_first_row)
 
         picking_layout = QHBoxLayout(self._picking_group_box)
+        picking_layout.addWidget(self._rubberband_zoom)
         picking_layout.addWidget(self._hover_pick)
         picking_layout.addWidget(self._select_bank_tube)
         picking_layout.addWidget(self._clear_point_picked_detectors)
@@ -840,49 +869,13 @@ class FullInstrumentViewView(QWidget):
         return self._shape_overlay_manager is not None
 
     def refresh_peaks_ws_list(self) -> None:
-        # TODO: Very similar to other refresh list function, combine in one function
-        list_to_refresh = self._peak_ws_list
-        keys_from_workspaces_in_ads = self._presenter.peaks_workspaces_in_ads()
-        keys_in_current_list = [list_to_refresh.item(i).text() for i in range(list_to_refresh.count())]
-
-        # Keys from ads but not yet in list
-        for key in keys_from_workspaces_in_ads:
-            if key not in keys_in_current_list:
-                item = QListWidgetItem(key, list_to_refresh)
-                item.setCheckState(Qt.Unchecked)
-
-        # Remove keys that are not in ads
-        for i in range(list_to_refresh.count() - 1, -1, -1):
-            item = list_to_refresh.item(i)
-            if item.text() not in keys_from_workspaces_in_ads:
-                removed = list_to_refresh.takeItem(i)
-                del removed
-
-        # Update peaks list colours
-        for list_i in range(self._peak_ws_list.count()):
-            list_item = self._peak_ws_list.item(list_i)
-            colour = self._COLOURS[list_i % len(self._COLOURS)]
-            list_item.setForeground(QColor(colour))
+        self._peak_ws_list.refresh_items(self._presenter.peaks_workspaces_in_ads(), colours=self._COLOURS)
 
     def refresh_workspaces_in_list(self, kind: CurrentTab) -> None:
         list_to_refresh = self._mask_list if kind is CurrentTab.Masking else self._selection_list
-
-        keys_from_workspaces_in_ads = self._presenter.get_list_keys_from_workspaces_in_ads(kind)
-        keys_in_current_list = [list_to_refresh.item(i).text() for i in range(list_to_refresh.count())]
-        keys_cached_in_model = self._presenter.cached_keys(kind)
-
-        # Keys from ads but not yet in list
-        for key in keys_from_workspaces_in_ads:
-            if key not in keys_in_current_list:
-                item = QListWidgetItem(key, list_to_refresh)
-                item.setCheckState(Qt.Unchecked)
-
-        # Remove keys that are not cached in model and not in ads
-        for i in range(list_to_refresh.count() - 1, -1, -1):
-            item = list_to_refresh.item(i)
-            if item.text() not in keys_cached_in_model and item.text() not in keys_from_workspaces_in_ads:
-                removed = list_to_refresh.takeItem(i)
-                del removed
+        list_to_refresh.refresh_items(
+            self._presenter.get_list_keys_from_workspaces_in_ads(kind), keys_cached_in_model=self._presenter.cached_keys(kind)
+        )
 
     def _cache_and_uncheck_list(self, list_widget: WorkspaceListWidget) -> dict:
         cache = {}
