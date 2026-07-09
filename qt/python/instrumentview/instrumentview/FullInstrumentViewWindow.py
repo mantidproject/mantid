@@ -85,9 +85,7 @@ def _ensure_overlay_manager(method):
             self._shape_overlay_manager = ShapeOverlayManager(self.main_plotter)
         shape = method(self, *args, **kwargs)
         self._shape_overlay_manager.set_shape(shape)
-        self._current_widget = shape
-        self._add_mask.setEnabled(True)
-        self._add_selection.setEnabled(True)
+        self._presenter.on_overlaid_shape_added()
 
     return wrapper
 
@@ -391,7 +389,7 @@ class FullInstrumentViewView(QWidget):
         self._save_grouping_to_xml.setText("Save Grouping to XML")
         self._save_grouping_to_cal.setText("Save Grouping to CAL")
 
-        mask_tab = QWidget()
+        self._mask_tab = QWidget()
         (
             self._add_mask,
             self._clear_masks,
@@ -400,7 +398,7 @@ class FullInstrumentViewView(QWidget):
             self._save_mask_to_xml,
             self._save_mask_to_cal,
             self._overwrite_mask,
-        ) = self._add_tab(mask_tab, "Mask")
+        ) = self._add_tab(self._mask_tab, "Mask")
         self._save_mask_to_ws.setText("Save Mask to ADS")
         self._save_mask_to_xml.setText("Save Mask to XML")
         self._save_mask_to_cal.setText("Save Mask to CAL")
@@ -408,7 +406,7 @@ class FullInstrumentViewView(QWidget):
 
         self._picking_masking_tab = QTabWidget()
         self._picking_masking_tab.addTab(self._selection_tab, CurrentTab.Grouping.value)
-        self._picking_masking_tab.addTab(mask_tab, CurrentTab.Masking.value)
+        self._picking_masking_tab.addTab(self._mask_tab, CurrentTab.Masking.value)
 
         self.status_group_box = QGroupBox("Status")
 
@@ -566,14 +564,18 @@ class FullInstrumentViewView(QWidget):
         option = "Yes" if checkbox.isChecked() else "No"
         ConfigService.Instance()[config_key] = option
 
+    def set_add_selection_and_mask_buttons_enabled(self, enabled: bool):
+        self._add_mask.setEnabled(enabled)
+        self._add_selection.setEnabled(enabled)
+
     def set_aspect_ratio_box_enabled(self, enabled):
         self._aspect_ratio_check_box.setEnabled(enabled)
 
-    def is_flip_beam_checkbox_checked(self) -> bool:
-        return self._flip_beam_check_box.isChecked()
-
     def set_flip_beam_box_enabled(self, enabled):
         self._flip_beam_check_box.setEnabled(enabled)
+
+    def is_flip_beam_checkbox_checked(self) -> bool:
+        return self._flip_beam_check_box.isChecked()
 
     def is_show_monitors_checkbox_checked(self) -> bool:
         return self._show_monitors_check_box.isChecked()
@@ -592,9 +594,6 @@ class FullInstrumentViewView(QWidget):
 
     def set_render_mode_combo_enabled(self, enabled: bool) -> None:
         self._render_mode_combo_box.setEnabled(enabled)
-
-    def set_add_shape_button_enabled(self, enabled: bool) -> None:
-        self._add_shape_button.setChecked(enabled)
 
     def _on_splitter_moved(self, pos, index) -> None:
         self._detector_spectrum_fig.tight_layout()
@@ -821,11 +820,6 @@ class FullInstrumentViewView(QWidget):
     def is_rubberband_zoom_toggled(self) -> bool:
         return self._rubberband_zoom.isChecked()
 
-    def set_hover_pick_mode_enabled(self, enabled: bool) -> None:
-        if enabled:
-            self.delete_current_overlaid_shape()
-            self.set_overlaid_shape_controls_enabled(False)
-
     def set_hover_pick_checked(self, checked: bool) -> None:
         self._hover_pick.setChecked(checked)
 
@@ -860,9 +854,6 @@ class FullInstrumentViewView(QWidget):
         if self._shape_overlay_manager is not None:
             self._shape_overlay_manager.remove_shape()
             self._shape_overlay_manager = None
-        self._current_widget = None
-        self._add_mask.setDisabled(True)
-        self._add_selection.setDisabled(True)
         self._presenter.on_overlaid_shape_removed()
 
     def is_active_current_overlaid_shape(self) -> bool:
@@ -898,6 +889,12 @@ class FullInstrumentViewView(QWidget):
     def enable_and_restore_selection_list(self) -> None:
         self._restore_list(self._selection_list, self._selection_list_cache)
         self._selection_tab.setEnabled(True)
+
+    def set_list_enabled(self, kind: CurrentTab, enabled: bool):
+        if kind is CurrentTab.Grouping:
+            self._selection_tab.setEnabled(enabled)
+        elif kind is CurrentTab.Masking:
+            self._mask_tab.setEnabled(enabled)
 
     def select_peaks_workspace(self, peaks_ws: str) -> None:
         for list_i in range(self._peak_ws_list.count()):

@@ -7,7 +7,7 @@
 import numpy as np
 import pyvista as pv
 from queue import Queue
-from typing import Literal, Optional
+from typing import Literal, Optional, cast
 from instrumentview.Globals import CurrentTab
 from threading import Thread
 
@@ -449,9 +449,11 @@ class FullInstrumentViewPresenter:
 
     def on_overlaid_shape_added(self) -> None:
         self._update_interactor_style()
+        self._view.set_add_selection_and_mask_buttons_enabled(True)
 
     def on_overlaid_shape_removed(self) -> None:
         self._update_interactor_style()
+        self._view.set_add_selection_and_mask_buttons_enabled(False)
 
     def _on_add_item_clicked(self) -> None:
         centres = self._transform_vectors_with_matrix(np.array(self._model.detector_positions), self._transform)
@@ -463,7 +465,7 @@ class FullInstrumentViewPresenter:
             mask = self._model.expand_pickable_mask_to_parent_subtrees(mask)
         new_key = self._model.add_new_detector_key(mask.tolist(), self._view.get_current_selected_tab())
         self._view.set_new_item_key(self._view.get_current_selected_tab(), new_key)
-        self._view.set_add_shape_button_enabled(False)
+        self._view.set_overlaid_shape_controls_checked(False)
 
     def on_select_bank_tube_toggled(self, checked: bool) -> None:
         self._select_bank_tube = checked
@@ -673,7 +675,8 @@ class FullInstrumentViewPresenter:
             del self._ads_observer
         if hasattr(self, "_callback_queue"):
             self._callback_queue.put(self._callback_stop_sentinel)
-        self._model = None
+        # Drop presenter->model reference on close while keeping _model non-optional for static typing.
+        self._model = cast(FullInstrumentViewModel, None)
 
     def on_sliders_unit_selected(self, value) -> None:
         self._model.set_integration_units(self._UNIT_OPTIONS[value])
@@ -714,9 +717,10 @@ class FullInstrumentViewPresenter:
             self._view.remove_peak_cursor_from_lineplot()
             self._view.enable_and_restore_selection_list()
 
-        self._view.set_delete_all_selected_peaks_button_enabled(not checked)
         self._on_list_item_selected(CurrentTab.Grouping)
-        self._view.set_add_shape_button_enabled(not checked)
+        self._view.set_list_enabled(CurrentTab.Masking, not checked)
+        self._view.set_delete_all_selected_peaks_button_enabled(not checked)
+        self._view.set_overlaid_shape_controls_enabled(not checked)
 
     def on_peak_selected_in_lineplot(self, x: float, mouse_click: Literal["right", "left"]) -> None:
         if len(self._model.picked_detector_ids) == 0:
