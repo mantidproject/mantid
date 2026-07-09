@@ -27,6 +27,12 @@ class ErrorReportPresenterTest(unittest.TestCase):
         self.errorreport_mock = errorreport_patcher.start()
         self.errorreport_mock.return_value = self.errorreport_mock_instance
 
+        self.q_settings_mock_instance = mock.MagicMock()
+        q_settings_patcher = mock.patch(f"{self.PRESENTER_CLS_PATH}.QSettings")
+        self.addCleanup(q_settings_patcher.stop)
+        self.q_settings_mock = q_settings_patcher.start()
+        self.q_settings_mock.return_value = self.q_settings_mock_instance
+
         self.view = mock.MagicMock()
         self.exit_code = 255
         self.app_name = "ErrorReportPresenterTest"
@@ -53,6 +59,25 @@ class ErrorReportPresenterTest(unittest.TestCase):
         self.logger_mock_instance.notice.assert_called_once_with("No information shared")
         self.logger_mock_instance.error.assert_called_once_with("Terminated by user.")
         self.assertEqual(self.view.quit.call_count, 1)
+
+    def test_remember_me_ticked_stores_user_info_on_local_qsettings_when_do_not_share_is_clicked(self):
+        self.view.rememberContactInfoCheckbox.isChecked.return_value = True
+
+        self.error_report_presenter.do_not_share(False, "MantidUser", "MantidUser@mail.com")
+
+        self.q_settings_mock_instance.beginGroup.assert_called_once()
+        self.q_settings_mock_instance.endGroup.assert_called_once()
+        self.q_settings_mock_instance.setValue.assert_has_calls(
+            [mock.call(self.view.NAME, "MantidUser"), mock.call(self.view.EMAIL, "MantidUser@mail.com")]
+        )
+
+    def test_remember_me_unticked_does_not_store_user_info_on_local_qsettings_when_do_not_share_is_clicked(self):
+        self.view.rememberContactInfoCheckbox.isChecked.return_value = False
+
+        self.error_report_presenter.do_not_share(False, "MantidUser", "MantidUser@mail.com")
+        self.q_settings_mock_instance.beginGroup.assert_called_once()
+        self.q_settings_mock_instance.endGroup.assert_called_once()
+        self.q_settings_mock_instance.setValue.assert_has_calls([mock.call(self.view.NAME, ""), mock.call(self.view.EMAIL, "")])
 
     def test_send_error_report_to_server_calls_ErrorReport_correctly(self):
         name = "John Smith"
