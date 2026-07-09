@@ -48,6 +48,7 @@ jobs:
           - mantidworkbench
           - mantiddocs
     steps:
+      - uses: ./.github/actions/setup-pixi
       - uses: neutrons/gh-actions/pkg-remove@a1e1c8b4123ced6c66fe57b9a60a56a6e4bf6861 # v1
         with:
           anaconda_token: ${{ secrets.ANACONDA_TOKEN }}
@@ -71,6 +72,7 @@ jobs:
           - mantidworkbench
           - mantiddocs
     steps:
+      - uses: ./.github/actions/setup-pixi
       - uses: neutrons/gh-actions/pkg-remove@a1e1c8b4123ced6c66fe57b9a60a56a6e4bf6861 # v1
         with:
           anaconda_token: ${{ secrets.ANACONDA_TOKEN_MANTIDORNL }}
