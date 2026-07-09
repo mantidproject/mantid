@@ -421,5 +421,16 @@ class TestOrientationTable_FieldHelpers(unittest.TestCase):
         self.assertEqual(result, [1.0, 2.0, 3.5])
 
 
+class TestOrientationTable_GoniometerDataValidator(unittest.TestCase):
+    def test_validate_gR_data_logs_error_when_unequal_len_inputs(self):
+        tab = _make_table()
+        with self.assertRaisesRegex(ValueError, "Goniometer data lists have unequal lengths:"):
+            tab._validate_gR_data([(1, 0, 0), (0, 1, 0)], [1, -1], [0, 90, 360])
+
+    def test_validate_gR_data_logs_no_error_when_valid(self):
+        tab = _make_table()
+        self.assertIsNone(tab._validate_gR_data([(1, 0, 0), (0, 1, 0)], [1, 1], [-45, 45]))
+
+
 if __name__ == "__main__":
     unittest.main()

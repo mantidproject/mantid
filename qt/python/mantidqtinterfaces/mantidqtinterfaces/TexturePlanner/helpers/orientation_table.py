@@ -103,6 +103,7 @@ class OrientationTable:
 
     # rotation maths -----------------------------------------------------
     def calc_gRs(self, vecs: List[Tuple[float, float, float]], senses: List[float], angles: List[float]) -> Tuple[List[Rotation], Rotation]:
+        self._validate_gR_data(vecs, senses, angles)  # throws an error if these lists have become different lengths
         gRs = [Rotation.identity()]
         R = Rotation.identity()
         for i, vec in enumerate(vecs):
@@ -173,6 +174,7 @@ class OrientationTable:
         return f"{angle},{np.round(vec[0], 3)},{np.round(vec[1], 3)},{np.round(vec[2], 3)},{sense}"
 
     def update_gonio_string(self, vecs: List[Tuple[float, float, float]], senses: List[float], angles: List[float], index: int) -> None:
+        self._validate_gR_data(vecs, senses, angles)  # throws an error if these lists have become different lengths
         orientation = self.saved_orientations[index]
         for i, vec in enumerate(vecs):
             orientation.gonio_strings[i] = self.get_goniometer_string(vec, senses[i], angles[i])
@@ -261,3 +263,10 @@ class OrientationTable:
     @staticmethod
     def get_angles(angles: List[str], num_gonios: int) -> List[float]:
         return [float(x) for x in angles[:num_gonios]]
+
+    # validation helper
+
+    @staticmethod
+    def _validate_gR_data(vecs, senses, angles) -> None:
+        if len({len(vecs), len(senses), len(angles)}) != 1:
+            raise ValueError(f"Goniometer data lists have unequal lengths: vecs={len(vecs)}, senses={len(senses)}, angles={len(angles)}")
