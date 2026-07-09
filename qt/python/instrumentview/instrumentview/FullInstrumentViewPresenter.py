@@ -124,7 +124,7 @@ class FullInstrumentViewPresenter:
         )
         self._view.hide_status_box()
         self._select_bank_tube = self._view.is_select_bank_tube_checked()
-        self.update_plotter()
+        self.update_plotter(False)
 
         if self._model.workspace_base_unit in self._UNIT_OPTIONS:
             self._view.set_unit_combo_box_index(self._UNIT_OPTIONS.index(self._model.workspace_base_unit))
