@@ -32,6 +32,8 @@ from mantid.simpleapi import (
     Rebunch,
     CloneWorkspace,
     AppendSpectra,
+    EstimatePeakIntensities,
+    DeleteWorkspace,
 )
 from mantid.api import AnalysisDataService as ADS, FunctionFactory
 from mantid.dataobjects import Workspace2D
@@ -44,7 +46,6 @@ from .fitting_utils import (
     _d_to_tof,
     _tof_to_d,
     _fit_parameters_path,
-    _estimate_intensity_background_and_centre,
     fit_initial_summed_spectra,
     _get_run_and_prefix_from_ws_log,
     _get_grouping_from_ws_log,
@@ -58,6 +59,13 @@ _FITPEAKS_BAD_CHI2 = 1e300
 # name of the fitted peak-area parameter (shared by BackToBackExponential and IkedaCarpenterPV),
 # used both for the positive-area validity check and the I/sigma significance mask
 _INTENSITY_PARAM = "I"
+
+# fractional bound on the fitted centre applied to every fit pass - the guiding rebunch-smoothing
+# passes and the authoritative raw fit alike: each centre is constrained (PositionToleranceMode=
+# "Constrain" with PositionToleranceFractional=True) to within this fraction of its per-spectrum fit
+# window width of the seeded centre, so a low-SNR fit cannot pull the centre far from the summed-fit
+# position.
+_WINDOW_TOL_FRAC = 0.025
 
 
 def _populate_fitpeaks_output_table(
@@ -138,19 +146,22 @@ def _compute_tof_windows(spectrum_info, centre: float, xmin: float, xmax: float)
     return tof_centre, tof_lo, tof_hi
 
 
-def _estimate_peak_intensities(ws: Workspace2D, tof_centre: np.ndarray, tof_lo: np.ndarray, tof_hi: np.ndarray) -> np.ndarray:
+def _estimate_peak_intensities(ws: Workspace2D, windows_ws: str) -> np.ndarray:
     """Per-spectrum, fit-independent peak-area estimate for the I_est column: the trapezoidal
-    integral of (data - background) over each spectrum's TOF window, matching how the multidomain
-    engine derives I_est.  It is deliberately independent of the fitted I (rather than a copy of it)
-    so the two provide a real cross-check.  Each spectrum's window is resolved to bin indices via
-    yIndexOfX, as in the multidomain engine."""
-    n_total = len(tof_centre)
-    i_est = np.zeros(n_total)
-    for k in range(n_total):
-        istart = ws.yIndexOfX(tof_lo[k], k)
-        iend = ws.yIndexOfX(tof_hi[k], k)
-        intens, _, _, _ = _estimate_intensity_background_and_centre(ws, k, istart, iend, tof_centre[k])
-        i_est[k] = intens
+    integral of (data - background) over each spectrum's TOF window.  It is deliberately independent
+    of the fitted I (rather than a copy of it) so the two provide a real cross-check.
+
+    The per-spectrum skew-background + windowed integral is delegated to the multithreaded C++
+    EstimatePeakIntensities algorithm, reusing the same per-spectrum window workspace (FitPeaks
+    FitPeakWindowWorkspace convention) that guides the fit passes.  A single peak is estimated here, so
+    the result table's Intensity column is already in spectrum order."""
+    table_ws = "__fitpeaks_i_est_table"
+    try:
+        table = EstimatePeakIntensities(InputWorkspace=ws, PeakWindowWorkspace=windows_ws, OutputWorkspace=table_ws)
+        i_est = np.asarray(table.column("Intensity"), dtype=float)
+    finally:
+        if ADS.doesExist(table_ws):
+            DeleteWorkspace(table_ws)
     return i_est
 
 
@@ -179,7 +190,9 @@ def _fit_all_peaks_fitpeaks(
     Rebunch-smoothing is used to guide the fit for poor SNR: each peak is fit on the
     progressively finer rebunched versions to refine the per-spectrum centre seed,
     then the final fit is on the raw (unsmoothed) data over the full peak window, seeded
-    with that centre.
+    with that centre.  Every pass (smoothing and final) constrains the peak centre to
+    within +/-10% of its per-spectrum seed so a low-SNR fit cannot pull it far from the
+    summed-fit position.
 
     Weak peaks are rejected the same way as the multidomain engine: after the final fit,
     spectra whose fitted I/sigma is at or below i_over_sigma_thresh are treated as "no peak" and get
@@ -224,18 +237,19 @@ def _fit_all_peaks_fitpeaks(
         n_total = si.size()
         tof_centre, tof_lo, tof_hi = _compute_tof_windows(si, centre, xmin, xmax)
 
-        # fit-independent per-spectrum peak-area estimate (I_est), from the raw data over each
-        # spectrum's window - computed once here since it does not depend on the fit result
-        i_est_all = _estimate_peak_intensities(combined_tof, tof_centre, tof_lo, tof_hi)
-
-        # every pass (smooth and raw) fits the full peak window; the window is created once here, only
-        # the per-spectrum centre seed changes between passes
+        # every fit pass (smooth and raw) and the I_est estimate share one per-spectrum window
+        # workspace (FitPeaks FitPeakWindowWorkspace convention: [lo, hi] per spectrum); only the
+        # per-spectrum centre seed changes between fit passes, so the window is created once here
         centres_ws = f"__fitpeaks_centres_{ipeak}"
         windows_ws = f"__fitpeaks_windows_{ipeak}"
         window_x = np.empty(2 * n_total)
         window_x[0::2] = tof_lo
         window_x[1::2] = tof_hi
         CreateWorkspace(DataX=window_x, DataY=np.zeros(2 * n_total), NSpec=n_total, OutputWorkspace=windows_ws)
+
+        # fit-independent per-spectrum peak-area estimate (I_est) over the same windows, from the raw
+        # data - computed once here since it does not depend on the fit result
+        i_est_all = _estimate_peak_intensities(combined_tof, windows_ws)
 
         # a single position tolerance (TOF) generous enough to span each spectrum's window, so the
         # per-spectrum fit window is the effective bound (mirrors the multidomain position freedom)
@@ -252,10 +266,21 @@ def _fit_all_peaks_fitpeaks(
         param_tab_name = f"__fitpeaks_params_{ipeak}"
         err_tab_name = f"__fitpeaks_errs_{ipeak}"
 
-        def _run_fitpeaks_pass(fit_ws: str, centre_seed: np.ndarray, pass_peak_func_name: str):
+        def _run_fitpeaks_pass(
+            fit_ws: str,
+            centre_seed: np.ndarray,
+            pass_peak_func_name: str,
+            pos_tolerance: float = pos_tol,
+            pos_tol_mode: str = "Check",
+            pos_tol_fractional: bool = False,
+        ):
             """Run one FitPeaks pass over all spectra (full peak window), seeded with the given
-            per-spectrum TOF centres, fitting pass_peak_func_name.  Returns (param_table,
-            error_table, valid_mask)."""
+            per-spectrum TOF centres, fitting pass_peak_func_name.  pos_tol_mode selects how
+            pos_tolerance is applied: "Check" only rejects a post-fit centre outside the tolerance,
+            while "Constrain" additionally bounds the centre to seed +/- pos_tolerance during the fit.
+            With pos_tol_fractional=True pos_tolerance is a fraction of each spectrum's own fit
+            window width (FitPeaks scales it per spectrum), giving a per-spectrum bound from one value.
+            Returns (param_table, error_table, valid_mask)."""
             CreateWorkspace(DataX=centre_seed, DataY=np.zeros(n_total), NSpec=n_total, OutputWorkspace=centres_ws)
             FitPeaks(
                 InputWorkspace=fit_ws,
@@ -263,18 +288,14 @@ def _fit_all_peaks_fitpeaks(
                 FitPeakWindowWorkspace=windows_ws,
                 PeakFunction=pass_peak_func_name,
                 BackgroundType="Linear",
-                # PositionTolerance rejects fits whose centre drifts out of the window (a post-fit
-                # check, independent of ConstrainPeakPositions).  ConstrainPeakPositions is left OFF:
-                # it adds a +/-0.5*FWHM boundary constraint on the centre, and Mantid implements
-                # constraints as penalty terms whose curvature is folded into the Hessian that
-                # CalcErrors inverts - so a weak peak pushed against that boundary gets a spuriously
-                # tiny (near-singular) position error.  Without it the fit reports a genuine covariance
-                # error, and PositionTolerance still bounds the result.
-                PositionTolerance=[pos_tol],
+                PositionTolerance=[pos_tolerance],
+                PositionToleranceMode=pos_tol_mode,
+                PositionToleranceFractional=pos_tol_fractional,
                 ConstrainPeakPositions=False,
                 CopyLastGoodPeakParameters=False,
                 RespectFixedPeakParameters=True,
                 StrictConvergence=False,
+                CalculateUnconstrainedErrors=True,
                 # the focused peaks sit on a modest background; FitPeaks' high-background peak-stripping
                 # (on by default) over-subtracts and collapses the fitted peak area, so disable it
                 HighBackground=False,
@@ -287,7 +308,7 @@ def _fit_all_peaks_fitpeaks(
                 RawPeakParameters=True,
                 OutputPeakParametersWorkspace=param_tab_name,
                 OutputParameterFitErrorsWorkspace=err_tab_name,
-                FittedPeaksWorkspace=f"__fitpeaks_model_{ipeak}",
+                FittedPeaksWorkspace=f"__{fit_ws}_model_{ipeak}",
                 OutputWorkspace=f"__fitpeaks_pos_{ipeak}",
             )
             param_table = ADS.retrieve(param_tab_name)
@@ -319,19 +340,43 @@ def _fit_all_peaks_fitpeaks(
             for sv in sorted((int(s) for s in smooth_vals), reverse=True):  # coarsest first
                 sm_ws = f"__fitpeaks_smooth_{ipeak}_{sv}"
                 Rebunch(InputWorkspace=combined_tof, OutputWorkspace=sm_ws, NBunch=sv)
-                _, _, valid = _run_fitpeaks_pass(sm_ws, centre_seed, peak_func_name)
+                # constrain this guiding pass's centre to a fraction of each spectrum's own fit window
+                # so a coarse, low-SNR rebunched fit cannot drag the centre far from the summed-fit position
+                _, _, valid = _run_fitpeaks_pass(
+                    sm_ws,
+                    centre_seed,
+                    peak_func_name,
+                    pos_tolerance=_WINDOW_TOL_FRAC,
+                    pos_tol_mode="Constrain",
+                    pos_tol_fractional=True,
+                )
                 centre_seed = _refine_centre_seed(centre_seed, valid)
 
         # last_fit_ic: refine the centre once more with a raw fit of the requested function before the
         # authoritative fit switches to IC (mirrors the multidomain engine seeding IC from a raw fit)
         if final_peak_func_name != peak_func_name:
-            _, _, valid = _run_fitpeaks_pass(combined_tof, centre_seed, peak_func_name)
+            _, _, valid = _run_fitpeaks_pass(
+                combined_tof,
+                centre_seed,
+                peak_func_name,
+                pos_tolerance=_WINDOW_TOL_FRAC,
+                pos_tol_mode="Constrain",
+                pos_tol_fractional=True,
+            )
             centre_seed = _refine_centre_seed(centre_seed, valid)
 
-        # authoritative raw fit over the full window, seeded with the refined centres
+        # authoritative raw fit over the full window, seeded with the refined centres and constrained
+        # to a fraction of each spectrum's fit window so the reported centre stays anchored to the summed fit
         param_cols = {p: np.zeros(n_total) for p in peak_param_names}
         err_cols = {p: np.full(n_total, np.inf) for p in peak_param_names}
-        param_table, error_table, fit_mask_all = _run_fitpeaks_pass(combined_tof, centre_seed, final_peak_func_name)
+        param_table, error_table, fit_mask_all = _run_fitpeaks_pass(
+            combined_tof,
+            centre_seed,
+            final_peak_func_name,
+            pos_tolerance=_WINDOW_TOL_FRAC,
+            pos_tol_mode="Constrain",
+            pos_tol_fractional=True,
+        )
         for p in peak_param_names:
             param_cols[p][fit_mask_all] = np.asarray(param_table.column(p), dtype=float)[fit_mask_all]
             err_cols[p][fit_mask_all] = np.asarray(error_table.column(p), dtype=float)[fit_mask_all]

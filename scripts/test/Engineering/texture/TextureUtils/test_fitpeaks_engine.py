@@ -177,43 +177,49 @@ class FitPeaksTofWindowTests(unittest.TestCase):
 
 
 class FitPeaksIntensityEstimateTests(unittest.TestCase):
-    @patch(f"{fitpeaks_path}._estimate_intensity_background_and_centre")
-    def test_estimate_peak_intensities_integrates_each_spectrum_over_its_window(self, mock_estimate):
-        # per-spectrum window is resolved to bin indices via yIndexOfX, then the shared estimator's
-        # intensity (its first return value) is collected into one array - independent of any fit
+    @patch(f"{fitpeaks_path}.DeleteWorkspace")
+    @patch(f"{fitpeaks_path}.ADS")
+    @patch(f"{fitpeaks_path}.EstimatePeakIntensities")
+    def test_estimate_peak_intensities_reads_intensity_column(self, mock_alg, mock_ads, mock_delete):
+        # delegates to the C++ EstimatePeakIntensities over the shared per-spectrum window workspace,
+        # returning its Intensity column (already in spectrum order for a single peak)
         ws = MagicMock()
-        tof_centre = np.array([100.0, 200.0])
-        tof_lo = np.array([90.0, 190.0])
-        tof_hi = np.array([110.0, 210.0])
-        # yIndexOfX(value, spec) -> a distinct index per (value, spec) so we can check the call args
-        ws.yIndexOfX.side_effect = lambda value, spec: int(value) + spec
-        # estimator returns (intensity, sigma, bg, centre); only intensity is used
-        mock_estimate.side_effect = [(11.0, 1.0, 0.5, 100.0), (22.0, 2.0, 0.5, 200.0)]
+        windows_ws = "__windows"
+        table = MagicMock()
+        table.column.return_value = [11.0, 22.0]
+        mock_alg.return_value = table
+        mock_ads.doesExist.return_value = True
 
-        i_est = _estimate_peak_intensities(ws, tof_centre, tof_lo, tof_hi)
+        i_est = _estimate_peak_intensities(ws, windows_ws)
 
         np.testing.assert_array_equal(i_est, np.array([11.0, 22.0]))
-        # one estimate per spectrum, each over that spectrum's [istart, iend] window and its centre
-        self.assertEqual(mock_estimate.call_count, 2)
-        mock_estimate.assert_any_call(ws, 0, 90, 110, 100.0)  # spec 0: yIndexOfX(90,0)=90, (110,0)=110
-        mock_estimate.assert_any_call(ws, 1, 191, 211, 200.0)  # spec 1: yIndexOfX(190,1)=191, (210,1)=211
+        table.column.assert_called_once_with("Intensity")
+        # the input workspace and the shared window workspace are passed straight through
+        kwargs = mock_alg.call_args.kwargs
+        self.assertIs(kwargs["InputWorkspace"], ws)
+        self.assertEqual(kwargs["PeakWindowWorkspace"], windows_ws)
+        # the temporary result table is cleaned up
+        mock_delete.assert_called_once_with("__fitpeaks_i_est_table")
 
-    @patch(f"{fitpeaks_path}._estimate_intensity_background_and_centre")
-    def test_estimate_peak_intensities_length_follows_spectrum_count(self, mock_estimate):
-        # the returned array has one entry per spectrum (length of the TOF-centre array)
+    @patch(f"{fitpeaks_path}.DeleteWorkspace")
+    @patch(f"{fitpeaks_path}.ADS")
+    @patch(f"{fitpeaks_path}.EstimatePeakIntensities")
+    def test_estimate_peak_intensities_length_follows_intensity_column(self, mock_alg, mock_ads, _mock_delete):
+        # the returned array has one entry per spectrum (length of the Intensity column)
         ws = MagicMock()
-        ws.yIndexOfX.return_value = 0
-        mock_estimate.return_value = (7.0, 1.0, 0.0, 5.0)
-        tof = np.zeros(4)
+        table = MagicMock()
+        table.column.return_value = [7.0, 7.0, 7.0, 7.0]
+        mock_alg.return_value = table
+        mock_ads.doesExist.return_value = False
 
-        i_est = _estimate_peak_intensities(ws, tof, tof, tof)
+        i_est = _estimate_peak_intensities(ws, "__windows")
 
         self.assertEqual(i_est.shape, (4,))
         np.testing.assert_array_equal(i_est, np.full(4, 7.0))
 
 
 class FitPeaksEngineTests(unittest.TestCase):
-    @patch(f"{fitpeaks_path}._estimate_peak_intensities", side_effect=lambda ws, c, lo, hi: np.zeros(len(c)))
+    @patch(f"{fitpeaks_path}._estimate_peak_intensities", side_effect=lambda ws, windows_ws: np.zeros(ws.spectrumInfo().size()))
     @patch(f"{fitpeaks_path}.SaveNexus")
     @patch(f"{fitpeaks_path}.CreateEmptyTableWorkspace")
     @patch(f"{fitpeaks_path}._populate_fitpeaks_output_table")
@@ -336,7 +342,7 @@ class FitPeaksEngineTests(unittest.TestCase):
         np.testing.assert_array_equal(ws1_call[0][3]["I"], np.array([7.0, 0.0]))  # param_slices["I"] for ws1
         np.testing.assert_array_equal(ws1_call[0][6], np.array([True, False]))  # fit_mask slice for ws1
 
-    @patch(f"{fitpeaks_path}._estimate_peak_intensities", side_effect=lambda ws, c, lo, hi: np.zeros(len(c)))
+    @patch(f"{fitpeaks_path}._estimate_peak_intensities", side_effect=lambda ws, windows_ws: np.zeros(ws.spectrumInfo().size()))
     @patch(f"{fitpeaks_path}.SaveNexus")
     @patch(f"{fitpeaks_path}.CreateEmptyTableWorkspace")
     @patch(f"{fitpeaks_path}._populate_fitpeaks_output_table")
@@ -416,7 +422,7 @@ class FitPeaksEngineTests(unittest.TestCase):
         ws0_call = mock_populate.call_args_list[0]
         np.testing.assert_array_equal(ws0_call[0][6], np.array([True, False]))  # fit_mask slice for ws0
 
-    @patch(f"{fitpeaks_path}._estimate_peak_intensities", side_effect=lambda ws, c, lo, hi: np.zeros(len(c)))
+    @patch(f"{fitpeaks_path}._estimate_peak_intensities", side_effect=lambda ws, windows_ws: np.zeros(ws.spectrumInfo().size()))
     @patch(f"{fitpeaks_path}.SaveNexus")
     @patch(f"{fitpeaks_path}.CreateEmptyTableWorkspace")
     @patch(f"{fitpeaks_path}._populate_fitpeaks_output_table")
@@ -502,7 +508,7 @@ class FitPeaksEngineTests(unittest.TestCase):
         self.assertEqual(mock_create_tab.call_count, 1)
         self.assertEqual(mock_save_nexus.call_count, 1)
 
-    @patch(f"{fitpeaks_path}._estimate_peak_intensities", side_effect=lambda ws, c, lo, hi: np.zeros(len(c)))
+    @patch(f"{fitpeaks_path}._estimate_peak_intensities", side_effect=lambda ws, windows_ws: np.zeros(ws.spectrumInfo().size()))
     @patch(f"{fitpeaks_path}.SaveNexus")
     @patch(f"{fitpeaks_path}.CreateEmptyTableWorkspace")
     @patch(f"{fitpeaks_path}._populate_fitpeaks_output_table")
@@ -572,7 +578,7 @@ class FitPeaksEngineTests(unittest.TestCase):
         mock_fitpeaks.assert_not_called()
         mock_save_nexus.assert_not_called()
 
-    @patch(f"{fitpeaks_path}._estimate_peak_intensities", side_effect=lambda ws, c, lo, hi: np.zeros(len(c)))
+    @patch(f"{fitpeaks_path}._estimate_peak_intensities", side_effect=lambda ws, windows_ws: np.zeros(ws.spectrumInfo().size()))
     @patch(f"{fitpeaks_path}.SaveNexus")
     @patch(f"{fitpeaks_path}.CreateEmptyTableWorkspace")
     @patch(f"{fitpeaks_path}._populate_fitpeaks_output_table")
@@ -649,7 +655,7 @@ class FitPeaksEngineTests(unittest.TestCase):
         # results are still written
         self.assertEqual(mock_save_nexus.call_count, 1)
 
-    @patch(f"{fitpeaks_path}._estimate_peak_intensities", side_effect=lambda ws, c, lo, hi: np.zeros(len(c)))
+    @patch(f"{fitpeaks_path}._estimate_peak_intensities", side_effect=lambda ws, windows_ws: np.zeros(ws.spectrumInfo().size()))
     @patch(f"{fitpeaks_path}.SaveNexus")
     @patch(f"{fitpeaks_path}.CreateEmptyTableWorkspace")
     @patch(f"{fitpeaks_path}._populate_fitpeaks_output_table")
