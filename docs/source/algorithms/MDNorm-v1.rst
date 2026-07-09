@@ -68,6 +68,54 @@ There are symmetrization options for the data. To achieve this option, one can u
 a space group name, a point group name, or a list of symmetry operations. More information about symmetry operations can be found
 :ref:`here <Symmetry groups>` and :ref:`here <Point and space groups>`
 
+Monochromatic Single Crystal Diffraction
+-----------------------------------------
+For monochromatic single crystal diffraction instruments (e.g. WAND, DEMAND), where there is no time-of-flight
+trajectory to integrate, the normalization can instead be supplied directly as a pre-computed
+`MonoSCDNormalizationWorkspace`. This must be an :py:obj:`MDEventWorkspace <mantid.api.IMDEventWorkspace>` in the
+`Q_sample` frame, with the same number of dimensions as `InputWorkspace`, typically produced by
+:ref:`ConvertHFIRSCDtoMDE <algm-ConvertHFIRSCDtoMDE>` from the same detector-space data used to build
+`InputWorkspace` (see :ref:`LoadWANDSCD <algm-LoadWANDSCD>` and :ref:`HB3AAdjustSampleNorm <algm-HB3AAdjustSampleNorm>`,
+both of which can produce a matching normalization workspace).
+
+`MonoSCDNormalizationWorkspace` is binned with the exact same basis vectors, extents, and symmetry operations as
+`InputWorkspace`, so the two end up on identical grids before dividing. It cannot be used together with
+`SolidAngleWorkspace`/`FluxWorkspace` (the two normalization methods are mutually exclusive), or with
+`BackgroundWorkspace` (background subtraction is not yet supported for this mode). `InputWorkspace` must not have a
+`DeltaE` dimension (monochromatic single crystal diffraction is elastic only), and must carry a `wavelength` sample
+log -- set automatically by `ConvertHFIRSCDtoMDE` -- confirming it originates from a monochromatic instrument.
+
+Unlike the time-of-flight case, there is no `MDNorm_low`/`MDNorm_high` log requirement (those are set by
+:ref:`CropWorkspaceForMDNorm <algm-CropWorkspaceForMDNorm>`, a time-of-flight-only step). If a Q dimension's binning
+is left unspecified, it is integrated over the workspace's own extents rather than a theoretical maximum momentum
+transfer.
+
+**Example - MDNorm for WAND/DEMAND**
+
+.. code-block:: python
+
+   data, norm, _ = LoadWANDSCD(IPTS=7776, RunNumbers='26640-26700',
+                               VanadiumIPTS=7776, VanadiumRunNumber=26509,
+                               Grouping='4x4', NormalizedBy='Monitor', NormalizeData=False,
+                               OutputWorkspace='data', OutputNormalizationWorkspace='norm')
+   SetGoniometer(Workspace='data', Axis0='s1,0,1,0,1')
+   SetGoniometer(Workspace='norm', Axis0='s1,0,1,0,1')
+   ConvertHFIRSCDtoMDE(InputWorkspace='data', Wavelength=1.488, OutputWorkspace='data_md')
+   ConvertHFIRSCDtoMDE(InputWorkspace='norm', Wavelength=1.488, OutputWorkspace='norm_md')
+
+   MDNorm(InputWorkspace='data_md',
+          MonoSCDNormalizationWorkspace='norm_md',
+          RLU=False,
+          Dimension0Name='QDimension0',
+          Dimension0Binning='-5,0.05,5',
+          Dimension1Name='QDimension1',
+          Dimension1Binning='-5,0.05,5',
+          Dimension2Name='QDimension2',
+          Dimension2Binning='-5,0.05,5',
+          OutputWorkspace='result',
+          OutputDataWorkspace='dataMD',
+          OutputNormalizationWorkspace='normMD')
+
 Using Background
 ----------------
 Starting with Mantid 6.1, the algorithm allows efficient processing of the background. In previous versions one used to
