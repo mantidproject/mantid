@@ -267,9 +267,42 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
   if ((inputWS->getNumDims() > 3) && (inputWS->getDimension(3)->getName() == "DeltaE")) {
     diffraction = false;
   }
-  if (diffraction) {
-    API::MatrixWorkspace_const_sptr solidAngleWS = getProperty("SolidAngleWorkspace");
-    API::MatrixWorkspace_const_sptr fluxWS = getProperty("FluxWorkspace");
+
+  // Optional pre-computed normalization workspace for monochromatic single crystal diffraction
+  // (e.g. WAND, DEMAND). This is an alternative to SolidAngleWorkspace/FluxWorkspace.
+  Mantid::API::IMDEventWorkspace_sptr monoNormWS = this->getProperty("MonoSCDNormalizationWorkspace");
+  bool monochromatic = bool(monoNormWS);
+  API::MatrixWorkspace_const_sptr solidAngleWS = getProperty("SolidAngleWorkspace");
+  API::MatrixWorkspace_const_sptr fluxWS = getProperty("FluxWorkspace");
+
+  if (monochromatic) {
+    if (!diffraction) {
+      errorMessage.emplace("MonoSCDNormalizationWorkspace", "MonoSCDNormalizationWorkspace can only be used for "
+                                                            "diffraction (InputWorkspace must not have a DeltaE "
+                                                            "dimension)");
+    }
+    if (solidAngleWS || fluxWS) {
+      errorMessage.emplace("MonoSCDNormalizationWorkspace", "MonoSCDNormalizationWorkspace cannot be used together "
+                                                            "with SolidAngleWorkspace/FluxWorkspace");
+    }
+    if (bkgdWS) {
+      errorMessage.emplace("MonoSCDNormalizationWorkspace", "MonoSCDNormalizationWorkspace cannot currently be used "
+                                                            "together with BackgroundWorkspace");
+    }
+    if (monoNormWS->getNumDims() < 3) {
+      errorMessage.emplace("MonoSCDNormalizationWorkspace", "MonoSCDNormalizationWorkspace must be at least 3D");
+    } else {
+      if (monoNormWS->getNumDims() != inputWS->getNumDims()) {
+        errorMessage.emplace("MonoSCDNormalizationWorkspace", "MonoSCDNormalizationWorkspace must have the same "
+                                                              "number of dimensions as InputWorkspace");
+      }
+      for (size_t i = 0; i < 3; i++) {
+        if (monoNormWS->getDimension(i)->getMDFrame().name() != Mantid::Geometry::QSample::QSampleName) {
+          errorMessage.emplace("MonoSCDNormalizationWorkspace", "MonoSCDNormalizationWorkspace must be in Q_sample");
+        }
+      }
+    }
+  } else if (diffraction) {
     if (solidAngleWS == nullptr) {
       errorMessage.emplace("SolidAngleWorkspace", "SolidAngleWorkspace is required for diffraction");
     }
@@ -277,21 +310,30 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
       errorMessage.emplace("FluxWorkspace", "FluxWorkspace is required for diffraction");
     }
   }
-  // Check for property MDNorm_low and MDNorm_high
+  // Check for property MDNorm_low and MDNorm_high (TOF only), or, for monochromatic
+  // input, that a wavelength log is present (set by e.g. ConvertHFIRSCDtoMDE)
   size_t nExperimentInfos = inputWS->getNumExperimentInfo();
   if (nExperimentInfos == 0) {
     errorMessage.emplace("InputWorkspace", "There must be at least one experiment info");
   } else {
     for (size_t iExpInfo = 0; iExpInfo < nExperimentInfos; iExpInfo++) {
       auto &currentExptInfo = *(inputWS->getExperimentInfo(static_cast<uint16_t>(iExpInfo)));
-      if (!currentExptInfo.run().hasProperty("MDNorm_low")) {
-        errorMessage.emplace("InputWorkspace", "Missing MDNorm_low log. Please "
-                                               "use CropWorkspaceForMDNorm "
-                                               "before converting to MD");
-      }
-      if (!currentExptInfo.run().hasProperty("MDNorm_high")) {
-        errorMessage.emplace("InputWorkspace", "Missing MDNorm_high log. Please use "
-                                               "CropWorkspaceForMDNorm before converting to MD");
+      if (monochromatic) {
+        if (!currentExptInfo.run().hasProperty("wavelength")) {
+          errorMessage.emplace("InputWorkspace", "Missing wavelength log. InputWorkspace does not look like it was "
+                                                 "produced by ConvertHFIRSCDtoMDE, as expected when "
+                                                 "MonoSCDNormalizationWorkspace is provided");
+        }
+      } else {
+        if (!currentExptInfo.run().hasProperty("MDNorm_low")) {
+          errorMessage.emplace("InputWorkspace", "Missing MDNorm_low log. Please "
+                                                 "use CropWorkspaceForMDNorm "
+                                                 "before converting to MD");
+        }
+        if (!currentExptInfo.run().hasProperty("MDNorm_high")) {
+          errorMessage.emplace("InputWorkspace", "Missing MDNorm_high log. Please use "
+                                                 "CropWorkspaceForMDNorm before converting to MD");
+        }
       }
     }
   }

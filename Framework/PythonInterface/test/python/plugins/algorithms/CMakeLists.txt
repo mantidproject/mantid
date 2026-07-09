@@ -106,6 +106,7 @@ set(TEST_PY_FILES
     MaskDetectorsIfTest.py
     MaskWorkspaceToCalFileTest.py
     MatchPeaksTest.py
+    MDNormTest.py
     MeanTest.py
     MedianBinWidthTest.py
     MergeCalFilesTest.py
