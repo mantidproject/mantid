@@ -138,6 +138,7 @@ set(SYSTEST_NAMES
     MDNormBackgroundHYSPECTest.py
     MDNormCORELLITest.py
     MDNormHYSPECTest.py
+    MDNormMonochromaticSCDTest.py
     MDWorkspaceTests.py
     MonteCarloAbsorptionCorrTest.py
     MPIAlgorithmsExecuteTest.py
