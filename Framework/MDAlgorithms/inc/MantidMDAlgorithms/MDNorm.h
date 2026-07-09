@@ -115,6 +115,9 @@ private:
   double m_Ei;
   /// Flag indicating if the input workspace is from diffraction
   bool m_diffraction;
+  /// Flag indicating a pre-computed MonoSCDNormalizationWorkspace was provided
+  /// (monochromatic single crystal diffraction, e.g. WAND, DEMAND)
+  bool m_monochromatic;
   /// Flag to accumulate normalization
   bool m_accumulate;
   /// Flag to indicate that the energy dimension is integrated

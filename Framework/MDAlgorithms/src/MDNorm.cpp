@@ -63,7 +63,7 @@ DECLARE_ALGORITHM(MDNorm)
 MDNorm::MDNorm()
     : m_normWS(), m_inputWS(), m_isRLU(false), m_UB(3, 3, true), m_W(3, 3, true), m_transformation(), m_hX(), m_kX(),
       m_lX(), m_eX(), m_hIdx(-1), m_kIdx(-1), m_lIdx(-1), m_eIdx(-1), m_numExptInfos(0), m_Ei(0.0), m_diffraction(true),
-      m_accumulate(false), m_dEIntegrated(true), m_samplePos(), m_beamDir(), convention("") {}
+      m_monochromatic(false), m_accumulate(false), m_dEIntegrated(true), m_samplePos(), m_beamDir(), convention("") {}
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string MDNorm::name() const { return "MDNorm"; }
@@ -523,6 +523,8 @@ void MDNorm::exec() {
   m_isRLU = getProperty("RLU");
   // get the workspaces
   m_inputWS = this->getProperty("InputWorkspace");
+  Mantid::API::IMDEventWorkspace_sptr monoNormInputWS = this->getProperty("MonoSCDNormalizationWorkspace");
+  m_monochromatic = bool(monoNormInputWS);
   const auto &exptInfoZero = *(m_inputWS->getExperimentInfo(0));
   auto source = exptInfoZero.getInstrument()->getSource();
   auto sample = exptInfoZero.getInstrument()->getSample();
@@ -708,35 +710,39 @@ std::map<std::string, std::string> MDNorm::getBinParameters() {
   m_W = DblMatrix(W);
   m_W.Transpose();
 
-  // Find maximum Q
-  auto &exptInfo0 = *(m_inputWS->getExperimentInfo(static_cast<uint16_t>(0)));
-  auto upperLimitsVector =
-      (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double>> *>(exptInfo0.getLog("MDNorm_high"))))();
-  double maxQ;
-  if (m_diffraction) {
-    maxQ = 2. * (*std::max_element(upperLimitsVector.begin(), upperLimitsVector.end()));
-  } else {
-    double Ei;
-    double maxDE = *std::max_element(upperLimitsVector.begin(), upperLimitsVector.end());
-    auto loweLimitsVector =
-        (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double>> *>(exptInfo0.getLog("MDNorm_low"))))();
-    double minDE = *std::min_element(loweLimitsVector.begin(), loweLimitsVector.end());
-    if (exptInfo0.run().hasProperty("Ei")) {
-      Kernel::Property *eiprop = exptInfo0.run().getProperty("Ei");
-      Ei = boost::lexical_cast<double>(eiprop->value());
-      if (Ei <= 0) {
-        throw std::invalid_argument("Ei stored in the workspace is not positive");
-      }
+  // Find maximum Q. Not applicable to monochromatic input: there is no
+  // MDNorm_low/MDNorm_high (TOF-only, set by CropWorkspaceForMDNorm), so Q-dimension
+  // extents fall back to the plain workspace extents below (see m_isRLU branch).
+  double maxQ = 0.;
+  if (!m_monochromatic) {
+    auto &exptInfo0 = *(m_inputWS->getExperimentInfo(static_cast<uint16_t>(0)));
+    auto upperLimitsVector =
+        (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double>> *>(exptInfo0.getLog("MDNorm_high"))))();
+    if (m_diffraction) {
+      maxQ = 2. * (*std::max_element(upperLimitsVector.begin(), upperLimitsVector.end()));
     } else {
-      throw std::invalid_argument("Could not find Ei value in the workspace.");
-    }
-    const double energyToK = 8.0 * M_PI * M_PI * PhysicalConstants::NeutronMass * PhysicalConstants::meV * 1e-20 /
-                             (PhysicalConstants::h * PhysicalConstants::h);
-    double ki = std::sqrt(energyToK * Ei);
-    double kfmin = std::sqrt(energyToK * (Ei - minDE));
-    double kfmax = std::sqrt(energyToK * (Ei - maxDE));
+      double Ei;
+      double maxDE = *std::max_element(upperLimitsVector.begin(), upperLimitsVector.end());
+      auto loweLimitsVector =
+          (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double>> *>(exptInfo0.getLog("MDNorm_low"))))();
+      double minDE = *std::min_element(loweLimitsVector.begin(), loweLimitsVector.end());
+      if (exptInfo0.run().hasProperty("Ei")) {
+        Kernel::Property *eiprop = exptInfo0.run().getProperty("Ei");
+        Ei = boost::lexical_cast<double>(eiprop->value());
+        if (Ei <= 0) {
+          throw std::invalid_argument("Ei stored in the workspace is not positive");
+        }
+      } else {
+        throw std::invalid_argument("Could not find Ei value in the workspace.");
+      }
+      const double energyToK = 8.0 * M_PI * M_PI * PhysicalConstants::NeutronMass * PhysicalConstants::meV * 1e-20 /
+                               (PhysicalConstants::h * PhysicalConstants::h);
+      double ki = std::sqrt(energyToK * Ei);
+      double kfmin = std::sqrt(energyToK * (Ei - minDE));
+      double kfmax = std::sqrt(energyToK * (Ei - maxDE));
 
-    maxQ = ki + std::max(kfmin, kfmax);
+      maxQ = ki + std::max(kfmin, kfmax);
+    }
   }
   size_t basisVectorIndex = 0;
   std::vector<coord_t> transformation;
@@ -768,7 +774,10 @@ std::map<std::string, std::string> MDNorm::getBinParameters() {
       // get the extents an number of bins
       coord_t dimMax = dimension->getMaximum();
       coord_t dimMin = dimension->getMinimum();
-      if (m_isRLU) {
+      // For monochromatic input there is no TOF-derived maxQ, so fall back to the
+      // workspace's own Q extents (same as the non-RLU case) rather than scaling by
+      // the lattice parameters.
+      if (m_isRLU && !m_monochromatic) {
         Mantid::Geometry::OrientedLattice ol;
         ol.setUB(m_UB * m_W); // note that this is already multiplied by 2Pi
         if (dimIndex == 0) {
