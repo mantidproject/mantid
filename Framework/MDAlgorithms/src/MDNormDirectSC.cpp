@@ -225,16 +225,18 @@ std::string MDNormDirectSC::inputEnergyMode() const {
   const auto &hist = m_inputWS->getHistory();
   const size_t nalgs = hist.size();
   const auto &lastAlgHist = hist.getAlgorithmHistory(nalgs - 1);
-  const auto &penultimateAlgHist = hist.getAlgorithmHistory(nalgs - 2);
 
   std::string emode;
   if (lastAlgHist->name() == "ConvertToMD") {
-    emode = lastAlgHist->getPropertyValue("dEAnalysisMode");
-  } else if ((lastAlgHist->name() == "Load" || lastAlgHist->name() == "LoadMD") &&
-             penultimateAlgHist->name() == "ConvertToMD") {
     // get dEAnalysisMode
-    emode = penultimateAlgHist->getPropertyValue("dEAnalysisMode");
+    emode = lastAlgHist->getPropertyValue("dEAnalysisMode");
   } else {
+    if ((lastAlgHist->name() == "Load" || lastAlgHist->name() == "LoadMD") && nalgs > 1) {
+      const auto &penultimateAlgHist = hist.getAlgorithmHistory(nalgs - 2);
+      if (penultimateAlgHist->name() == "ConvertToMD") {
+        return penultimateAlgHist->getPropertyValue("dEAnalysisMode");
+      }
+    }
     throw std::invalid_argument("The last algorithm in the history of the "
                                 "input workspace is not ConvertToMD");
   }
