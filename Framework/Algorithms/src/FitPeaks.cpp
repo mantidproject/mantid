@@ -79,6 +79,7 @@ const std::string BACKGROUND_Z_SCORE("FindBackgroundSigma");
 const std::string HIGH_BACKGROUND("HighBackground");
 const std::string POSITION_TOL("PositionTolerance");
 const std::string POSITION_TOL_MODE("PositionToleranceMode");
+const std::string POSITION_TOL_FRACTIONAL("PositionToleranceFractional");
 const std::string PEAK_MIN_HEIGHT("MinimumPeakHeight");
 const std::string CONSTRAIN_PEAK_POS("ConstrainPeakPositions");
 const std::string CALC_UNCONSTRAINED_ERRORS("CalculateUnconstrainedErrors");
@@ -412,6 +413,13 @@ void FitPeaks::init() {
                   "constraint penalty so it remains a genuine covariance error. Requires "
                   "PositionTolerance to be specified.");
 
+  declareProperty(PropertyNames::POSITION_TOL_FRACTIONAL, false,
+                  "If true, each PositionTolerance value is interpreted as a fraction of this peak's "
+                  "fit window width rather than an absolute value: the effective tolerance becomes "
+                  "tolerance*(window_max - window_min). Because the fit window can differ per spectrum "
+                  "(e.g. via FitPeakWindowWorkspace), this gives a per-spectrum tolerance. Applies to "
+                  "both the 'Check' and 'Constrain' modes.");
+
   declareProperty(PropertyNames::PEAK_MIN_HEIGHT, 0.,
                   "Used for validating peaks before and after fitting. If a peak's observed/estimated or "
                   "fitted height is under this value, the peak will be marked as error.");
@@ -649,6 +657,7 @@ void FitPeaks::processInputs() {
   m_constrainPeaksPosition = getProperty(PropertyNames::CONSTRAIN_PEAK_POS);
   const std::string posTolMode = getProperty(PropertyNames::POSITION_TOL_MODE);
   m_constrainByPositionTolerance = (posTolMode == "Constrain");
+  m_fractionalPositionTolerance = getProperty(PropertyNames::POSITION_TOL_FRACTIONAL);
   m_calculateUnconstrainedErrors = getProperty(PropertyNames::CALC_UNCONSTRAINED_ERRORS);
   m_fitIterations = getProperty(PropertyNames::MAX_FIT_ITER);
   m_copyLastGoodPeakParameters = getProperty(PropertyNames::COPY_LAST_GOOD_PEAK_PARAMS);
@@ -1368,11 +1377,15 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
       std::shared_ptr<FitPeaksAlgorithm::PeakFitPreCheckResult> peak_pre_check_result =
           std::make_shared<FitPeaksAlgorithm::PeakFitPreCheckResult>();
       // in Constrain mode the fitted centre is bounded by expected_peak_pos +/- tolerance; a
-      // non-positive tolerance (the default, or Check mode) leaves the centre unconstrained here
-      const double peak_pos_tolerance =
-          (m_constrainByPositionTolerance && !m_peakPosTolCase234 && peak_index < m_peakPosTolerances.size())
-              ? m_peakPosTolerances[peak_index]
-              : -1.0;
+      // non-positive tolerance (the default, or Check mode) leaves the centre unconstrained here.
+      // When PositionToleranceFractional is set the tolerance is a fraction of this peak's fit
+      // window width, so scale it here to an absolute bound.
+      double peak_pos_tolerance = -1.0;
+      if (m_constrainByPositionTolerance && !m_peakPosTolCase234 && peak_index < m_peakPosTolerances.size()) {
+        peak_pos_tolerance = m_peakPosTolerances[peak_index];
+        if (m_fractionalPositionTolerance)
+          peak_pos_tolerance *= (peak_window_i.second - peak_window_i.first);
+      }
       cost = fitIndividualPeak(wi, peak_fitter, expected_peak_pos, peak_pos_tolerance, peak_window_i,
                                observe_peak_width, peakfunction, bkgdfunction, peak_pre_check_result);
       if (peak_pre_check_result->isIndividualPeakRejected())
@@ -1482,6 +1495,11 @@ bool FitPeaks::processSinglePeakFitResult(size_t wsindex, size_t peakindex, cons
     if (peakindex >= m_peakPosTolerances.size())
       throw std::runtime_error("Peak tolerance out of index");
     postol = m_peakPosTolerances[peakindex];
+    // fractional tolerance: scale by this peak's fit window width to an absolute bound
+    if (m_fractionalPositionTolerance) {
+      const std::pair<double, double> fitwindow = m_getPeakFitWindow(wsindex, peakindex);
+      postol *= (fitwindow.second - fitwindow.first);
+    }
   }
 
   // get peak position and analyze the fitting is good or not by various

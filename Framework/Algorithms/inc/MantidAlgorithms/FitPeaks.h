@@ -338,6 +338,11 @@ private:
   /// centre during fitting (bounded by expected_centre +/- tolerance) instead of
   /// only being checked after the fit
   bool m_constrainByPositionTolerance{false};
+  /// when true, each PositionTolerance value is interpreted as a fraction of this
+  /// peak's (per-spectrum) fit window width rather than an absolute value, so the
+  /// effective tolerance is tolerance*(window_max - window_min).  Orthogonal to the
+  /// Check/Constrain mode - it rescales the tolerance used by either.
+  bool m_fractionalPositionTolerance{false};
   /// when true, and a peak-position constraint was applied (ConstrainPeakPositions
   /// or PositionToleranceMode=Constrain), the reported parameter errors are
   /// recomputed from the unconstrained cost function so the constraint penalty does

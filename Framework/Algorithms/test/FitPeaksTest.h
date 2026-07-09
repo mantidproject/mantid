@@ -1121,6 +1121,96 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
+  /** Test PositionToleranceFractional: each PositionTolerance value is interpreted as a fraction of
+   * that peak's fit window width, so peaks with different window widths get proportionally different
+   * absolute tolerances.  Two peaks (at 5.0 and 10.0) are given fit windows of different widths (1.4
+   * and 4.0) and expected positions offset by the same absolute amount, so their freely-fitted
+   * centres end up equidistant from expectation.  A single fractional tolerance is chosen so its
+   * window-scaled bound clears the wide-window peak but not the narrow-window one; the same tolerance
+   * applied as an absolute value (fractional off) rejects both, proving the tolerance is scaled by
+   * window width rather than used verbatim.
+   * @brief test_positionToleranceFractional
+   */
+  void test_positionToleranceFractional() {
+    g_log.notice() << "TEST POSITION TOLERANCE FRACTIONAL";
+
+    const std::string data_ws_name("FitPeaksTest_ws_ptf");
+
+    std::vector<string> peakparnames;
+    std::vector<double> peakparvalues;
+    createGaussParameters(peakparnames, peakparvalues);
+
+    generateTestDataGaussian(data_ws_name);
+
+    // true data peaks (spectrum 0) are at 5.0 and 10.0; the expected positions below (5.4, 10.4) are
+    // offset by the same absolute amount (0.4) so each freely-fitted centre ends up 0.4 from expected.
+    // peak0 has a narrow fit window (5.7-4.3 = 1.4) and peak1 a wide one (12.0-8.0 = 4.0).
+    const double fraction = 0.2;
+    // fractional bounds: peak0 -> 0.2*1.4 = 0.28 (< 0.4 offset -> rejected),
+    //                    peak1 -> 0.2*4.0 = 0.80 (> 0.4 offset -> accepted)
+
+    auto runFit = [&](bool fractional, const std::string &suffix) -> std::vector<double> {
+      FitPeaks fitpeaks;
+      fitpeaks.initialize();
+      fitpeaks.setRethrows(true);
+      TS_ASSERT(fitpeaks.isInitialized());
+
+      TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("InputWorkspace", data_ws_name));
+      TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", 0));
+      TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 0));
+      // expected positions offset from the true peaks (5.0, 10.0) by 0.4, with unequal fit windows
+      TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCenters", "5.4, 10.4"));
+      TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitWindowBoundaryList", "4.3, 5.7, 8.0, 12.0"));
+      TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakParameterNames", peakparnames));
+      TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakParameterValues", peakparvalues));
+      TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("HighBackground", false));
+      // free fit (converges to the true data peak) with a post-fit Check against the tolerance
+      TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("ConstrainPeakPositions", false));
+      TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PositionTolerance", std::vector<double>{fraction}));
+      TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PositionToleranceMode", "Check"));
+      TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PositionToleranceFractional", fractional));
+
+      fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS_" + suffix);
+      fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS_" + suffix);
+      fitpeaks.setProperty("FittedPeaksWorkspace", "FittedPeaksWS_" + suffix);
+
+      TS_ASSERT_THROWS_NOTHING(fitpeaks.execute());
+      TS_ASSERT(fitpeaks.isExecuted());
+
+      API::MatrixWorkspace_sptr out_ws = std::dynamic_pointer_cast<API::MatrixWorkspace>(
+          AnalysisDataService::Instance().retrieve("PeakPositionsWS_" + suffix));
+      TS_ASSERT(out_ws);
+      std::vector<double> positions = out_ws ? out_ws->histogram(0).y().rawData() : std::vector<double>{};
+
+      AnalysisDataService::Instance().remove("PeakPositionsWS_" + suffix);
+      AnalysisDataService::Instance().remove("PeakParametersWS_" + suffix);
+      AnalysisDataService::Instance().remove("FittedPeaksWS_" + suffix);
+      return positions;
+    };
+
+    // fractional tolerance: the narrow-window peak is rejected (negative position flag) because its
+    // window-scaled bound (0.28) is smaller than the 0.4 offset, while the wide-window peak passes (0.80)
+    const std::vector<double> frac_positions = runFit(true, "ptf_frac");
+    TS_ASSERT_EQUALS(frac_positions.size(), 2);
+    if (frac_positions.size() == 2) {
+      TS_ASSERT_LESS_THAN(frac_positions[0], 0.0);
+      TS_ASSERT_LESS_THAN(0.0, frac_positions[1]);
+      TS_ASSERT_DELTA(frac_positions[1], 10.0, 0.05);
+    }
+
+    // same tolerance applied as an absolute value (0.2) rejects the wide-window peak too, since
+    // 0.4 > 0.2 - confirming the fractional flag, not some unrelated effect, is what let it pass
+    const std::vector<double> abs_positions = runFit(false, "ptf_abs");
+    TS_ASSERT_EQUALS(abs_positions.size(), 2);
+    if (abs_positions.size() == 2) {
+      TS_ASSERT_LESS_THAN(abs_positions[0], 0.0);
+      TS_ASSERT_LESS_THAN(abs_positions[1], 0.0);
+    }
+
+    AnalysisDataService::Instance().remove(data_ws_name);
+  }
+
+  //----------------------------------------------------------------------------------------------
   /** Test that PositionToleranceMode="Constrain" is rejected when no PositionTolerance is given,
    * since there is nothing to constrain the centre against.
    * @brief test_positionToleranceConstrainRequiresTolerance

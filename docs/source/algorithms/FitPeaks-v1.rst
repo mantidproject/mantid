@@ -229,6 +229,18 @@ PositionToleranceMode
   ``PositionTolerance`` must be specified when using this mode, and ``ConstrainPeakPositions``
   must be set to ``false``: both bound the centre during the fit, so they are mutually exclusive.
 
+PositionToleranceFractional
+===========================
+
+By default each ``PositionTolerance`` value is an absolute distance in the fit's x-unit. If
+``PositionToleranceFractional`` is ``True``, each value is instead interpreted as a *fraction* of
+that peak's fit window width, so the effective tolerance becomes
+``tolerance * (window_max - window_min)``. Because the fit window can differ per spectrum (for
+example when supplied via ``FitPeakWindowWorkspace``), this yields a per-spectrum tolerance from a
+single fractional value — e.g. ``PositionTolerance=[0.25]`` bounds each spectrum's centre to within
+a quarter of its own fit window width of the expected position. It applies to both the ``Check`` and
+``Constrain`` modes and defaults to ``False``.
+
 CalculateUnconstrainedErrors
 ============================
 
