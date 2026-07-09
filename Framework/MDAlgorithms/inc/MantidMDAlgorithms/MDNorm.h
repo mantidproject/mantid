@@ -44,6 +44,15 @@ private:
   /// Bin(MD) input MDE workspace
   DataObjects::MDHistoWorkspace_sptr binInputWS(const std::vector<Geometry::SymmetryOperation> &symmetryOps);
 
+  /// Bin(MD), per symmetry operation, an MDEventWorkspace using pre-computed bin parameters.
+  /// Shared by binInputWS and (for monochromatic-SCD input) binNormalizationWS, so that data
+  /// and normalization end up on identical grids.
+  DataObjects::MDHistoWorkspace_sptr binMDEventWorkspace(const API::IMDEventWorkspace_sptr &ws,
+                                                         const std::string &temporaryWSPropertyName,
+                                                         const std::string &outputWSPropertyName,
+                                                         const std::vector<Geometry::SymmetryOperation> &symmetryOps,
+                                                         const std::map<std::string, std::string> &parameters);
+
   /// Bin(MD) input Background workspace
   DataObjects::MDHistoWorkspace_sptr binBackgroundWS(const std::vector<Geometry::SymmetryOperation> &symmetryOps);
 

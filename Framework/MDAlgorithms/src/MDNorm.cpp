@@ -1228,13 +1228,35 @@ MDNorm::binBackgroundWS(const std::vector<Geometry::SymmetryOperation> &symmetry
  * @return MDHistoWorkspace as a result of the binning
  */
 DataObjects::MDHistoWorkspace_sptr MDNorm::binInputWS(const std::vector<Geometry::SymmetryOperation> &symmetryOps) {
-  Mantid::API::IMDHistoWorkspace_sptr tempDataWS = this->getProperty("TemporaryDataWorkspace");
-  Mantid::API::Workspace_sptr outputWS;
   std::map<std::string, std::string> parameters = getBinParameters();
+  return binMDEventWorkspace(m_inputWS, "TemporaryDataWorkspace", "OutputDataWorkspace", symmetryOps, parameters);
+}
 
-  // check that our input matches the temporary workspaces
-  if (tempDataWS)
-    validateBinningForTemporaryDataWorkspace(parameters, tempDataWS);
+/**
+ * Bin(MD), per symmetry operation, an MDEventWorkspace using pre-computed bin parameters,
+ * accumulating across symmetry operations via temporaryWSPropertyName. Used both to bin the
+ * data (via binInputWS) and, for monochromatic-SCD input, to bin the pre-computed
+ * normalization workspace (via binNormalizationWS) with the exact same parameters, so both
+ * end up on identical grids.
+ * @param ws: the MDEventWorkspace to bin
+ * @param temporaryWSPropertyName: name of the MDNorm property holding an optional
+ * accumulation workspace (e.g. "TemporaryDataWorkspace" or "TemporaryNormalizationWorkspace")
+ * @param outputWSPropertyName: name of the MDNorm property used to name the BinMD output
+ * (e.g. "OutputDataWorkspace" or "OutputNormalizationWorkspace")
+ * @param symmetryOps: symmetry operations to apply
+ * @param parameters: bin parameters, as returned by getBinParameters(), bound to InputWorkspace
+ */
+DataObjects::MDHistoWorkspace_sptr
+MDNorm::binMDEventWorkspace(const API::IMDEventWorkspace_sptr &ws, const std::string &temporaryWSPropertyName,
+                            const std::string &outputWSPropertyName,
+                            const std::vector<Geometry::SymmetryOperation> &symmetryOps,
+                            const std::map<std::string, std::string> &parameters) {
+  Mantid::API::IMDHistoWorkspace_sptr tempWS = this->getProperty(temporaryWSPropertyName);
+  Mantid::API::Workspace_sptr outputWS;
+
+  // check that our input matches the temporary workspace
+  if (tempWS)
+    validateBinningForTemporaryDataWorkspace(parameters, tempWS);
 
   double soIndex = 0;
   std::vector<size_t> qDimensionIndices;
@@ -1253,17 +1275,17 @@ DataObjects::MDHistoWorkspace_sptr MDNorm::binInputWS(const std::vector<Geometry
     double fraction = 1. / static_cast<double>(symmetryOps.size());
     auto binMD = createChildAlgorithm("BinMD", soIndex * 0.3 * fraction, (soIndex + 1) * 0.3 * fraction);
     binMD->setPropertyValue("AxisAligned", "0");
-    binMD->setProperty("InputWorkspace", m_inputWS);
-    binMD->setProperty("TemporaryDataWorkspace", tempDataWS);
+    binMD->setProperty("InputWorkspace", ws);
+    binMD->setProperty("TemporaryDataWorkspace", tempWS);
     binMD->setPropertyValue("NormalizeBasisVectors", "0");
-    binMD->setPropertyValue("OutputWorkspace", getPropertyValue("OutputDataWorkspace"));
+    binMD->setPropertyValue("OutputWorkspace", getPropertyValue(outputWSPropertyName));
     // set binning properties
     size_t qindex = 0;
     for (const auto &p : parameters) {
       auto key = p.first;
       auto value = p.second;
       std::stringstream basisVector;
-      std::vector<double> projection(m_inputWS->getNumDims(), 0.);
+      std::vector<double> projection(ws->getNumDims(), 0.);
       // value is a string that can start with QDimension0, etc, but contain
       // other stuff. Do not use ==
       determineBasisVector(qindex, value, Qtransform, projection, basisVector, qDimensionIndices);
@@ -1286,9 +1308,9 @@ DataObjects::MDHistoWorkspace_sptr MDNorm::binInputWS(const std::vector<Geometry
 
     // set the temporary workspace to be the output workspace, so it keeps
     // adding different symmetries
-    tempDataWS = std::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
-    tempDataWS->clearOriginalWorkspaces();
-    tempDataWS->clearTransforms();
+    tempWS = std::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
+    tempWS->clearOriginalWorkspaces();
+    tempWS->clearTransforms();
     soIndex += 1;
   }
 
