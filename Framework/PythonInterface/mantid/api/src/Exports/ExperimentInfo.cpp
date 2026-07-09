@@ -12,6 +12,7 @@
 #include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument_fwd.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/core/Converters/PySequenceToVector.h"
 #include "MantidPythonInterface/core/Converters/ToPyList.h"
@@ -43,6 +44,15 @@ list getResourceFilenames(const std::string &prefix, const list &fileFormats, co
                                                  Converters::PySequenceToVector<std::string>(directoryNames)(), date));
 }
 
+Mantid::Geometry::Instrument_const_sptr getInstrumentDeprecated(const ExperimentInfo &self) {
+  PyErr_Warn(PyExc_DeprecationWarning,
+             "'ExperimentInfo.getInstrument()' is deprecated in Mantid 7.0. "
+             "Use the componentInfo(), detectorInfo() and spectrumInfo() access layers instead. "
+             "See the 'Instrument Access via SpectrumInfo, DetectorInfo, ComponentInfo' concept page, "
+             "located at: https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html");
+  return self.getInstrument();
+}
+
 std::string getInstrumentFilenameWarn(const std::string &instName, const std::string &date = "") {
   PyErr_Warn(PyExc_DeprecationWarning, "ExperimentInfo.getInstrumentFilename() is deprecated.\n"
                                        "Use InstrumentFileFinder.getInstrumentFilename() instead.");
@@ -68,8 +78,9 @@ void export_ExperimentInfo() {
   register_ptr_to_python<std::shared_ptr<ExperimentInfo>>();
 
   class_<ExperimentInfo, boost::noncopyable>("ExperimentInfo", no_init)
-      .def("getInstrument", &ExperimentInfo::getInstrument, return_value_policy<RemoveConstSharedPtr>(), args("self"),
-           "Returns the :class:`~mantid.geometry.Instrument` for this run.")
+      .def("getInstrument", &getInstrumentDeprecated, return_value_policy<RemoveConstSharedPtr>(), args("self"),
+           "Returns the :class:`~mantid.geometry.Instrument` for this run "
+           "(deprecated, use the componentInfo/detectorInfo/spectrumInfo access layers).")
       // InstrumentFileFinder binds Kept for backwards compat.
       .def("getResourceFilenames", &getResourceFilenames,
            (arg("prefix"), arg("fileFormats"), arg("directoryNames"), arg("date")),

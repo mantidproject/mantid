@@ -60,7 +60,7 @@ SCDCalibratePanels2ObjFunc::SCDCalibratePanels2ObjFunc() {
 }
 
 void SCDCalibratePanels2ObjFunc::setPeakWorkspace(IPeaksWorkspace_sptr &pws, const std::string &componentName,
-                                                  const std::vector<double> &tofs) {
+                                                  const std::vector<double> &tofs, bool waveFromUB) {
   m_pws = pws->clone();
   m_cmpt = componentName;
 
@@ -74,6 +74,10 @@ void SCDCalibratePanels2ObjFunc::setPeakWorkspace(IPeaksWorkspace_sptr &pws, con
 
   // Get the experimentally measured TOFs
   m_tofs = tofs;
+
+  // If true, function1D derives wavelength from Bragg's law using the UB
+  // matrix instead of from m_tofs
+  m_waveFromUB = waveFromUB;
 
   // Set the iteration count
   n_iter = 0;
@@ -138,9 +142,6 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues, 
   // calculate residual
   // double residual = 0.0;
   for (int i = 0; i < pws->getNumberPeaks(); ++i) {
-    // use the provided cached tofs
-    const double tof = m_tofs[i];
-
     Peak pk = Peak(pws->getPeak(i));
     // update instrument
     // - this will update the instrument position attached to the peak
@@ -148,13 +149,41 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues, 
     pk.setInstrument(pws->getInstrument());
     // update detector ID
     pk.setDetectorID(pk.getDetectorID());
-    // calculate&set wavelength based on new instrument
-    Units::Wavelength wl;
-    wl.initialize(pk.getL1(), 0,
-                  {{UnitParams::l2, pk.getL2()},
-                   {UnitParams::twoTheta, pk.getScattering()},
-                   {UnitParams::efixed, pk.getInitialEnergy()}});
-    pk.setWavelength(wl.singleFromTOF(tof + dT0));
+
+    if (m_waveFromUB && pk.getIntHKL() != UNSET_HKL) {
+      // Derive the wavelength from Bragg's law using the UB matrix and the
+      // peak's integer HKL, rather than from the measured TOF. This decouples
+      // the calibration from the TOF-to-wavelength conversion, which matters
+      // for quasi-Laue workflows (where a peak's TOF-derived wavelength can
+      // be unreliable) and is required for pure Laue data, which has no
+      // meaningful per-peak TOF at all.
+      //
+      // NOTE: for a cubic standard (commonly used for calibration), UB = U*B
+      // with B = (1/a)*I, so the target Q = 2*pi*U*B*hkl points along U*hkl
+      // regardless of the lattice constant a -- a only rescales the magnitude,
+      // which is exactly what gets absorbed into the wavelength solved here.
+      // So for cubic samples this calibration is driven purely by the integer
+      // HKL indexing and the sample/goniometer orientation U, independent of
+      // the actual lattice constant (i.e. independent of the calibration
+      // standard's material). This does not hold for lower-symmetry cells,
+      // where B is not isotropic and the cell shape does affect Q's direction.
+      const DblMatrix &ubm = pws->sample().getOrientedLattice().getUB();
+      V3D qv_target = ubm * pk.getIntHKL();
+      qv_target *= 2 * M_PI;
+      const double dSpacing = 2 * M_PI / qv_target.norm();
+      const double theta = 0.5 * pk.getScattering();
+      pk.setWavelength(2 * dSpacing * std::sin(theta));
+    } else {
+      // use the provided cached tofs
+      const double tof = m_tofs[i];
+      // calculate&set wavelength based on new instrument
+      Units::Wavelength wl;
+      wl.initialize(pk.getL1(), 0,
+                    {{UnitParams::l2, pk.getL2()},
+                     {UnitParams::twoTheta, pk.getScattering()},
+                     {UnitParams::efixed, pk.getInitialEnergy()}});
+      pk.setWavelength(wl.singleFromTOF(tof + dT0));
+    }
 
     V3D qv = pk.getQSampleFrame();
     for (int j = 0; j < 3; ++j)

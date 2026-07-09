@@ -1,0 +1,81 @@
+name: 'Delete old nightly artifacts'
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Cleanup target to run'
+        required: false
+        default: all
+        type: choice
+        options:
+          - all
+          - github-releases
+          - anaconda-packages
+      dry_run:
+        description: 'Print Anaconda packages that would be removed without deleting them'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  delete-old-nightly-releases:
+    if: ${{ github.repository_owner == 'mantidproject' && (github.event_name != 'workflow_dispatch' || github.event.inputs.target == 'all' || github.event.inputs.target == 'github-releases') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: thomashampson/delete-older-releases@main
+        with:
+          keep_latest: 3
+          # Nightly tags are of the form v{major}.{minor}.{date}.{time}
+          delete_tag_regex: v\d+\.\d+\.\d{8}\.\d{4}
+          prerelease_only: true
+          delete_tags: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  delete-old-nightly-anaconda-packages-mantid:
+    if: ${{ github.repository_owner == 'mantidproject' && (github.event_name != 'workflow_dispatch' || github.event.inputs.target == 'all' || github.event.inputs.target == 'anaconda-packages') }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package_name:
+          - mantid
+          - mantid-developer
+          - mantidmpi
+          - mantidqt
+          - mantidworkbench
+          - mantiddocs
+    steps:
+      - uses: neutrons/gh-actions/pkg-remove@a1e1c8b4123ced6c66fe57b9a60a56a6e4bf6861 # v1
+        with:
+          anaconda_token: ${{ secrets.ANACONDA_TOKEN }}
+          organization: mantid
+          package_name: ${{ matrix.package_name }}
+          label: nightly
+          keep: '3'
+          dry_run: ${{ github.event.inputs.dry_run || 'false' }}
+
+  delete-old-nightly-anaconda-packages-mantid-ornl:
+    if: ${{ github.repository_owner == 'mantidproject' && (github.event_name != 'workflow_dispatch' || github.event.inputs.target == 'all' || github.event.inputs.target == 'anaconda-packages') }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package_name:
+          - mantid
+          - mantid-developer
+          - mantidmpi
+          - mantidqt
+          - mantidworkbench
+          - mantiddocs
+    steps:
+      - uses: neutrons/gh-actions/pkg-remove@a1e1c8b4123ced6c66fe57b9a60a56a6e4bf6861 # v1
+        with:
+          anaconda_token: ${{ secrets.ANACONDA_TOKEN_MANTIDORNL }}
+          organization: mantid-ornl
+          package_name: ${{ matrix.package_name }}
+          label: nightly
+          keep: '3'
+          dry_run: ${{ github.event.inputs.dry_run || 'false' }}

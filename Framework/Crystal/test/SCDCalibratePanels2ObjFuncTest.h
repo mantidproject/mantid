@@ -235,6 +235,88 @@ public:
     }
   }
 
+  /**
+   * @brief WavelengthFromUB must derive wavelength (and therefore |Q|) purely
+   *        from the UB matrix and integer HKL, independent of TOF.
+   */
+  void test_wavelength_from_ub() {
+    g_log.notice() << "test_wavelength_from_ub() starts.\n";
+
+    // Unperturbed instrument: only the wavelength source (TOF vs Bragg's law)
+    // differs between the objective functions constructed below.
+    PeaksWorkspace_sptr pws = m_pws->clone();
+    Mantid::API::IPeaksWorkspace_sptr ipws = std::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(pws);
+    const std::string bankname = "bank27";
+
+    const int n_peaks = pws->getNumberPeaks();
+    TS_ASSERT_EQUALS(n_peaks, 11076);
+
+    // real, measured TOFs vs. deliberately wrong ones, offset by 5ms
+    std::vector<double> realTofs;
+    std::vector<double> wrongTofs;
+    for (int i = 0; i < n_peaks; ++i) {
+      const double tof = pws->getPeak(i).getTOF();
+      realTofs.emplace_back(tof);
+      wrongTofs.emplace_back(tof + 5000.0);
+    }
+
+    double useless[5];
+    size_t order(1000);
+
+    // -- WavelengthFromUB=True: TOF must play no role at all --
+    SCDCalibratePanels2ObjFunc funcUBReal;
+    funcUBReal.initialize();
+    funcUBReal.setPeakWorkspace(ipws, bankname, realTofs, true /*waveFromUB*/);
+    std::unique_ptr<double[]> outUBReal(new double[n_peaks * 3]);
+    funcUBReal.function1D(outUBReal.get(), useless, order);
+
+    SCDCalibratePanels2ObjFunc funcUBWrong;
+    funcUBWrong.initialize();
+    funcUBWrong.setPeakWorkspace(ipws, bankname, wrongTofs, true /*waveFromUB*/);
+    std::unique_ptr<double[]> outUBWrong(new double[n_peaks * 3]);
+    funcUBWrong.function1D(outUBWrong.get(), useless, order);
+
+    for (int i = 0; i < n_peaks * 3; ++i)
+      TS_ASSERT_DELTA(outUBReal[i], outUBWrong[i], 1e-10);
+
+    // -- |Q| must exactly match the ideal |2*pi*UB*hkl|, since the wavelength
+    //    was solved via Bragg's law for exactly that condition --
+    DblMatrix ub = pws->sample().getOrientedLattice().getUB();
+    const V3D unsetHKL(0, 0, 0);
+    for (int i = 0; i < n_peaks; ++i) {
+      V3D hkl = pws->getPeak(i).getIntHKL();
+      if (hkl == unsetHKL)
+        continue;
+      V3D target = ub * hkl;
+      target *= 2 * PI;
+      V3D qcalc(outUBReal[i * 3], outUBReal[i * 3 + 1], outUBReal[i * 3 + 2]);
+      TS_ASSERT_DELTA(qcalc.norm(), target.norm(), 1e-8);
+    }
+
+    // -- Sanity check: with WavelengthFromUB=False, TOF does matter, so the
+    //    same real-vs-wrong TOFs must now give different Q --
+    SCDCalibratePanels2ObjFunc funcTOFReal;
+    funcTOFReal.initialize();
+    funcTOFReal.setPeakWorkspace(ipws, bankname, realTofs, false);
+    std::unique_ptr<double[]> outTOFReal(new double[n_peaks * 3]);
+    funcTOFReal.function1D(outTOFReal.get(), useless, order);
+
+    SCDCalibratePanels2ObjFunc funcTOFWrong;
+    funcTOFWrong.initialize();
+    funcTOFWrong.setPeakWorkspace(ipws, bankname, wrongTofs, false);
+    std::unique_ptr<double[]> outTOFWrong(new double[n_peaks * 3]);
+    funcTOFWrong.function1D(outTOFWrong.get(), useless, order);
+
+    bool anyDifferent = false;
+    for (int i = 0; i < n_peaks * 3; ++i) {
+      if (std::abs(outTOFReal[i] - outTOFWrong[i]) > 1e-6) {
+        anyDifferent = true;
+        break;
+      }
+    }
+    TS_ASSERT(anyDifferent);
+  }
+
 private:
   /**
    * @brief Adjust the position of a component through translation and rotation

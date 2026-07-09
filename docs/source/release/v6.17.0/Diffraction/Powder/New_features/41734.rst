@@ -1,1 +1,0 @@
-- :ref:`algm-AlignAndFocusPowderSlim` now accepts a ``CalibrationWorkspace`` and a ``MaskWorkspace``. When supplied, these take precedence over the corresponding information in ``CalFileName``.

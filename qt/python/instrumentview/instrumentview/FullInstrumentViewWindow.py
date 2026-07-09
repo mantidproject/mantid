@@ -197,7 +197,6 @@ class FullInstrumentViewView(QWidget):
         self._overlay_meshes = []
         self._lineplot_overlays = []
         self._closing = False
-        self._current_widget = None
         self._shape_overlay_manager = None
         self._last_selected_projection = None
         self._last_camera_position = None
@@ -286,7 +285,9 @@ class FullInstrumentViewView(QWidget):
         self._hover_pick = QPushButton("Hover Pick")
         self._hover_pick.setCheckable(True)
         self._hover_pick.setToolTip("Use mouse hover to preview a single detector spectrum (2D projections only).")
-
+        self._rubberband_zoom = QPushButton("Rectangle Zoom")
+        self._rubberband_zoom.setCheckable(True)
+        self._rubberband_zoom.setToolTip("Zoom using left click for rectangle selection")
         self._aspect_ratio_check_box = QCheckBox()
         self._aspect_ratio_check_box.setText("Maintain Aspect Ratio")
         self._aspect_ratio_check_box.setToolTip(
@@ -430,6 +431,7 @@ class FullInstrumentViewView(QWidget):
 
         projection_first_row.addWidget(self._projection_combo_box)
         projection_first_row.addWidget(self._reset_projection)
+        projection_first_row.addWidget(self._rubberband_zoom)
         projection_layout.addLayout(projection_first_row)
 
         picking_layout = QHBoxLayout(self._picking_group_box)
@@ -712,6 +714,7 @@ class FullInstrumentViewView(QWidget):
         self._projection_combo_box.currentIndexChanged.connect(self._presenter.on_projection_option_changed)
         self._clear_point_picked_detectors.clicked.connect(self._presenter.on_clear_point_picked_detectors_clicked)
         self._hover_pick.toggled.connect(self._presenter.on_hover_pick_toggled)
+        self._rubberband_zoom.toggled.connect(self._presenter.on_rubberband_zoom_toggled)
         self._contour_range_slider.sliderReleased.connect(self._presenter.on_contour_limits_updated)
         self._contour_range_reset.clicked.connect(self._presenter.on_contour_range_reset_clicked)
         self._integration_limit_slider.sliderReleased.connect(self._presenter.on_integration_limits_updated)
@@ -770,7 +773,7 @@ class FullInstrumentViewView(QWidget):
 
     def add_selected_shape(self, checked: bool = False) -> None:
         if not checked:
-            self.delete_current_widget()
+            self.delete_current_overlaid_shape()
             return
 
         selected_shape = self._shape_selector_combo_box.currentText()
@@ -779,50 +782,78 @@ class FullInstrumentViewView(QWidget):
                 add_widget_function()
                 return
 
-    def _set_shape_controls_enabled(self, enabled: bool) -> None:
+    def set_overlaid_shape_controls_enabled(self, enabled: bool) -> None:
         self._shape_selector_combo_box.setEnabled(enabled)
         self._add_shape_button.setEnabled(enabled)
+        if not enabled:
+            self._add_shape_button.setChecked(False)
 
     def enable_or_disable_mask_widgets(self):
-        if self.is_hover_pick_checked():
-            self.delete_current_widget()
-            self._set_shape_controls_enabled(False)
-            self._add_mask.setDisabled(True)
-            self._add_selection.setDisabled(True)
-            return
+        self.set_overlaid_shape_controls_enabled(self.current_selected_projection() != ProjectionType.THREE_D)
 
-        self._set_shape_controls_enabled(True)
+    def is_rubberband_zoom_toggled(self) -> bool:
+        return self._rubberband_zoom.isChecked()
 
     def set_hover_pick_mode_enabled(self, enabled: bool) -> None:
         if enabled:
-            self.delete_current_widget()
-            self._set_shape_controls_enabled(False)
+            self.delete_current_overlaid_shape()
+            self.set_overlaid_shape_controls_enabled(False)
 
-        self._clear_point_picked_detectors.setDisabled(enabled)
-        self._add_mask.setDisabled(True)
-        self._add_selection.setDisabled(True)
-        self._sum_spectra_checkbox.setDisabled(enabled)
-        self._select_bank_tube.setDisabled(enabled)
-        self._export_workspace_button.setDisabled(enabled)
+    def enable_or_disable_rubberband_zoom(self) -> None:
+        if self.current_selected_projection() == ProjectionType.THREE_D:
+            self._rubberband_zoom.setChecked(False)
+            self._rubberband_zoom.setEnabled(False)
+        else:
+            self._rubberband_zoom.setEnabled(True)
+
+    def is_hover_pick_mode_toggled(self) -> bool:
+        return self._hover_pick.isChecked()
 
     def set_hover_pick_available(self, is_available: bool) -> None:
         self._hover_pick.setEnabled(is_available)
 
     def set_hover_pick_checked(self, checked: bool) -> None:
-        old_state = self._hover_pick.blockSignals(True)
         self._hover_pick.setChecked(checked)
-        self._hover_pick.blockSignals(old_state)
 
     def is_hover_pick_checked(self) -> bool:
         return self._hover_pick.isChecked()
 
-    def delete_current_widget(self):
+    def set_rubberband_zoom_checked(self, checked):
+        self._rubberband_zoom.setChecked(checked)
+
+    def set_clear_point_picked_detectors_disabled(self, disabled):
+        self._clear_point_picked_detectors.setDisabled(disabled)
+
+    def set_sum_spectra_checkbox_disabled(self, disabled):
+        self._sum_spectra_checkbox.setDisabled(disabled)
+
+    def set_select_bank_tube_disabled(self, disabled):
+        self._select_bank_tube.setDisabled(disabled)
+
+    def set_start_adding_peaks_checked(self, checked):
+        self._start_adding_peaks_button.setChecked(checked)
+
+    def set_export_workspace_button_disabled(self, disabled):
+        self._export_workspace_button.setDisabled(disabled)
+
+    def enable_or_disable_hover_pick(self) -> None:
+        if self.current_selected_projection() == ProjectionType.THREE_D:
+            self._hover_pick.setChecked(False)
+            self._hover_pick.setEnabled(False)
+        else:
+            self._hover_pick.setEnabled(True)
+
+    def delete_current_overlaid_shape(self):
         if self._shape_overlay_manager is not None:
             self._shape_overlay_manager.remove_shape()
             self._shape_overlay_manager = None
         self._current_widget = None
         self._add_mask.setDisabled(True)
         self._add_selection.setDisabled(True)
+        self._presenter.on_overlaid_shape_removed()
+
+    def is_active_current_overlaid_shape(self) -> bool:
+        return self._shape_overlay_manager is not None
 
     def refresh_peaks_ws_list(self) -> None:
         # TODO: Very similar to other refresh list function, combine in one function
@@ -972,8 +1003,13 @@ class FullInstrumentViewView(QWidget):
 
     @_skip_if_closing
     def clear_main_plotter(self) -> None:
-        self.delete_current_widget()
+        self.delete_current_overlaid_shape()
         self.main_plotter.clear()
+
+    @_skip_if_closing
+    def enable_parallel_projection(self) -> None:
+        self.main_plotter.view_xy()
+        self.main_plotter.enable_parallel_projection()
 
     @_ensure_overlay_manager
     def add_circle_widget(self) -> None:
