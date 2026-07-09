@@ -537,14 +537,14 @@ class FullInstrumentViewView(QWidget):
         option = "Yes" if checkbox.isChecked() else "No"
         ConfigService.Instance()[config_key] = option
 
-    def enable_or_disable_aspect_ratio_box(self) -> None:
-        self._aspect_ratio_check_box.setDisabled(self.current_selected_projection() == ProjectionType.THREE_D)
+    def set_aspect_ratio_box_enabled(self, enabled):
+        self._aspect_ratio_check_box.setEnabled(enabled)
 
     def is_flip_beam_checkbox_checked(self) -> bool:
         return self._flip_beam_check_box.isChecked()
 
-    def enable_or_disable_flip_beam_box(self) -> None:
-        self._flip_beam_check_box.setDisabled(self.current_selected_projection() in [ProjectionType.THREE_D, ProjectionType.SIDE_BY_SIDE])
+    def set_flip_beam_box_enabled(self, enabled):
+        self._flip_beam_check_box.setEnabled(enabled)
 
     def is_show_monitors_checkbox_checked(self) -> bool:
         return self._show_monitors_check_box.isChecked()
@@ -785,11 +785,9 @@ class FullInstrumentViewView(QWidget):
     def set_overlaid_shape_controls_enabled(self, enabled: bool) -> None:
         self._shape_selector_combo_box.setEnabled(enabled)
         self._add_shape_button.setEnabled(enabled)
-        if not enabled:
-            self._add_shape_button.setChecked(False)
 
-    def enable_or_disable_mask_widgets(self):
-        self.set_overlaid_shape_controls_enabled(self.current_selected_projection() != ProjectionType.THREE_D)
+    def set_overlaid_shape_controls_checked(self, checked: bool) -> None:
+        self._add_shape_button.setChecked(checked)
 
     def is_rubberband_zoom_toggled(self) -> bool:
         return self._rubberband_zoom.isChecked()
@@ -799,27 +797,20 @@ class FullInstrumentViewView(QWidget):
             self.delete_current_overlaid_shape()
             self.set_overlaid_shape_controls_enabled(False)
 
-    def enable_or_disable_rubberband_zoom(self) -> None:
-        if self.current_selected_projection() == ProjectionType.THREE_D:
-            self._rubberband_zoom.setChecked(False)
-            self._rubberband_zoom.setEnabled(False)
-        else:
-            self._rubberband_zoom.setEnabled(True)
-
-    def is_hover_pick_mode_toggled(self) -> bool:
-        return self._hover_pick.isChecked()
-
-    def set_hover_pick_available(self, is_available: bool) -> None:
-        self._hover_pick.setEnabled(is_available)
-
     def set_hover_pick_checked(self, checked: bool) -> None:
         self._hover_pick.setChecked(checked)
 
-    def is_hover_pick_checked(self) -> bool:
+    def set_hover_pick_enabled(self, enabled: bool) -> None:
+        self._hover_pick.setEnabled(enabled)
+
+    def is_hover_pick_mode_checked(self) -> bool:
         return self._hover_pick.isChecked()
 
     def set_rubberband_zoom_checked(self, checked):
         self._rubberband_zoom.setChecked(checked)
+
+    def set_rubberband_zoom_enabled(self, enabled):
+        self._rubberband_zoom.setEnabled(enabled)
 
     def set_clear_point_picked_detectors_disabled(self, disabled):
         self._clear_point_picked_detectors.setDisabled(disabled)
@@ -835,13 +826,6 @@ class FullInstrumentViewView(QWidget):
 
     def set_export_workspace_button_disabled(self, disabled):
         self._export_workspace_button.setDisabled(disabled)
-
-    def enable_or_disable_hover_pick(self) -> None:
-        if self.current_selected_projection() == ProjectionType.THREE_D:
-            self._hover_pick.setChecked(False)
-            self._hover_pick.setEnabled(False)
-        else:
-            self._hover_pick.setEnabled(True)
 
     def delete_current_overlaid_shape(self):
         if self._shape_overlay_manager is not None:

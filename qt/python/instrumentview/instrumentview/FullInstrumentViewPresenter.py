@@ -232,6 +232,18 @@ class FullInstrumentViewPresenter:
         self._view.set_render_mode_combo_enabled(True)
         self._on_render_mode_changed(self._view.get_render_mode_option())
 
+        if self._view.current_selected_projection() == ProjectionType.THREE_D:
+            self._view.set_rubberband_zoom_checked(False)
+            self._view.set_overlaid_shape_controls_checked(False)
+            self._view.set_hover_pick_checked(False)
+
+        enabled = self._view.current_selected_projection() != ProjectionType.THREE_D
+        self._view.set_rubberband_zoom_enabled(enabled)
+        self._view.set_overlaid_shape_controls_enabled(enabled)
+        self._view.set_hover_pick_enabled(enabled)
+        self._view.set_aspect_ratio_box_enabled(enabled)
+        self._view.set_flip_beam_box_enabled(enabled)
+
     def on_projection_option_changed(self) -> None:
         self._callback_queue.put((self._on_projection_option_changed, ()))
 
@@ -242,11 +254,6 @@ class FullInstrumentViewPresenter:
         self._model.flip_beam = self._view.is_flip_beam_checkbox_checked()
         with SuppressRendering(self._view.main_plotter):
             self._update_view_main_plotter(refresh_limits=refresh_limits)
-            self._view.enable_or_disable_mask_widgets()
-            self._view.enable_or_disable_aspect_ratio_box()
-            self._view.enable_or_disable_flip_beam_box()
-            self._view.enable_or_disable_hover_pick()
-            self._view.enable_or_disable_rubberband_zoom()
             self.refresh_plotter_peaks()
 
     def count_scale_combo_options(self) -> list[str]:
@@ -475,8 +482,6 @@ class FullInstrumentViewPresenter:
             self._update_line_plot_ws_and_draw(self._view.current_selected_lineplot_unit())
         else:
             self.update_picked_detectors_on_view()
-            # NOTE: This is required explicitly
-            self._view.enable_or_disable_mask_widgets()
 
     def on_list_item_selected(self, kind: CurrentTab) -> None:
         self._callback_queue.put((self._on_list_item_selected, (kind,)))
@@ -566,7 +571,7 @@ class FullInstrumentViewPresenter:
         return self._model.cached_keys(kind)
 
     def _update_line_plot_ws_and_draw(self, unit: str) -> None:
-        if self._view.is_hover_pick_mode_toggled():
+        if self._view.is_hover_pick_mode_checked():
             if self._last_hovered_point_index is not None:
                 self._update_hover_pick_plot(self._last_hovered_point_index)
             return
@@ -770,7 +775,7 @@ class FullInstrumentViewPresenter:
             self._view.main_plotter.iren.style = self._interactor_styles.SCROLL_ZOOM_NO_PICKING
             return
 
-        if self._view.is_hover_pick_mode_toggled():
+        if self._view.is_hover_pick_mode_checked():
             self._view.main_plotter.iren.style = self._interactor_styles.SCROLL_ZOOM_WITH_HOVER
         elif self._view.is_rubberband_zoom_toggled():
             self._view.main_plotter.iren.style = self._interactor_styles.RUBBERBAND_ZOOM
