@@ -52,7 +52,6 @@ public:
   virtual std::vector<std::string> getSelectedParameters() const = 0;
   virtual int getFileFormatIndex() const = 0;
   virtual bool getValidateModelCheck() const = 0;
-  virtual int getMetaSourceIndex() const = 0;
   virtual bool getHeaderCheck() const = 0;
   virtual bool getQResolutionCheck() const = 0;
   virtual bool getAdditionalColumnsCheck() const = 0;
@@ -64,9 +63,6 @@ public:
   virtual void setWorkspaceList(const std::vector<std::string> &) const = 0;
   virtual void setParametersList(const std::vector<std::string> &) const = 0;
   virtual void disallowAutosave() = 0;
-
-  virtual void showMetadataSourceSelection() = 0;
-  virtual void hideMetadataSourceSelection() = 0;
 
   virtual void disableAutosaveControls() = 0;
   virtual void enableAutosaveControls() = 0;

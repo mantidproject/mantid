@@ -32,8 +32,7 @@ void SaveAlgorithmRunner::runSaveAsciiAlgorithm(const Mantid::API::Workspace_spt
 void SaveAlgorithmRunner::runSaveORSOAlgorithm(std::vector<std::string> const &workspaceNames,
                                                std::string const &savePath, const bool &includeQResolution,
                                                const bool &includeAdditionalColumns,
-                                               std::string const &modelDescription, const bool &validateModel,
-                                               const std::string &metaSource) const {
+                                               std::string const &modelDescription, const bool &validateModel) const {
   auto alg = Mantid::API::AlgorithmManager::Instance().create("SaveISISReflectometryORSO");
   alg->setRethrows(true);
   alg->setProperty("WorkspaceList", workspaceNames);
@@ -42,28 +41,6 @@ void SaveAlgorithmRunner::runSaveORSOAlgorithm(std::vector<std::string> const &w
   alg->setProperty("IncludeAdditionalColumns", includeAdditionalColumns);
   alg->setProperty("ModelDescription", modelDescription);
   alg->setProperty("ValidateModel", validateModel);
-  alg->setProperty("MetadataSource", metaSource);
-  if (metaSource == "History") {
-    alg->execute();
-    return;
-  }
-  API::InterfaceManager interfaceManager;
-  QHash<QString, QString> presets;
-  QStringList disabled;
-  const std::vector<Mantid::Kernel::Property *> props = alg->getProperties();
-  std::vector<Mantid::Kernel::Property *>::const_iterator p = props.cbegin();
-  for (; p != props.cend(); ++p) {
-    if (!(**p).isDefault()) {
-      QString property_name = QString::fromStdString((**p).name());
-      presets.insert(property_name, QString::fromStdString((**p).value()));
-      disabled.append(property_name);
-    }
-  }
-  auto dialog = dynamic_cast<MantidQt::API::AlgorithmDialog *>(
-      interfaceManager.createDialog(alg, nullptr, false, presets, QString(), QStringList(), disabled));
-  dialog->setModal(false);
-  dialog->show();
-  dialog->raise();
-  dialog->activateWindow();
+  alg->execute();
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
