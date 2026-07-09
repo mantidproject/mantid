@@ -93,10 +93,10 @@ class SavePlot1DAsJson(PythonAlgorithm):
             # or title?
             # title = "%s - spectrum %d" % (workspace.getTitle(), spectrum_no)
             arr = [
-                list(workspace.readX(i)),
-                list(workspace.readY(i)),
-                list(workspace.readE(i)),
-                list(workspace.readDx(i)),
+                list(workspace.x(i)),
+                list(workspace.y(i)),
+                list(workspace.e(i)),
+                list(workspace.dx(i)),
             ]
             serialized["data"][spectrum_no] = arr
             continue

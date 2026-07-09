@@ -217,8 +217,8 @@ class DataSet(object):
         points
         """
         if self.is_loaded():
-            x = mtd[self._ws_name].readX(0)
-            y = mtd[self._ws_name].readY(0)
+            x = mtd[self._ws_name].x(0)
+            y = mtd[self._ws_name].y(0)
             xmin = x[0]
             xmax = x[len(x) - 1]
 
@@ -281,7 +281,7 @@ class DataSet(object):
         self.load()
 
         # Keep track of dQ
-        dq = mtd[self._ws_name].readDx(0)
+        dq = mtd[self._ws_name].dx(0)
 
         Scale(InputWorkspace=self._ws_name, OutputWorkspace=self._ws_scaled, Operation="Multiply", Factor=self._scale)
 
@@ -291,10 +291,10 @@ class DataSet(object):
             dq_scaled[i] = dq[i]
 
         if xmin is not None and xmax is not None:
-            x = mtd[self._ws_scaled].readX(0)
+            x = mtd[self._ws_scaled].x(0)
             dx = dq_scaled
-            y = mtd[self._ws_scaled].readY(0)
-            e = mtd[self._ws_scaled].readE(0)
+            y = mtd[self._ws_scaled].y(0)
+            e = mtd[self._ws_scaled].e(0)
 
             x_trim = []
             dx_trim = []
@@ -362,7 +362,7 @@ class DataSet(object):
                 point_data_ws = "%s_" % self._ws_name
                 ConvertToPointData(InputWorkspace=self._ws_name, OutputWorkspace=point_data_ws)
                 # Copy over the resolution
-                dq_original = mtd[self._ws_name].readDx(0)
+                dq_original = mtd[self._ws_name].dx(0)
                 dq_points = mtd[point_data_ws].dataDx(0)
                 for i in range(len(dq_points)):
                     dq_points[i] = dq_original[i]
@@ -371,11 +371,11 @@ class DataSet(object):
             self._ws_scaled = self._ws_name + "_scaled"
             if update_range:
                 self._restricted_range = restricted_range
-                self._xmin = min(mtd[self._ws_name].readX(0))
-                self._xmax = max(mtd[self._ws_name].readX(0))
+                self._xmin = min(mtd[self._ws_name].x(0))
+                self._xmax = max(mtd[self._ws_name].x(0))
                 if restricted_range:
-                    y = mtd[self._ws_name].readY(0)
-                    x = mtd[self._ws_name].readX(0)
+                    y = mtd[self._ws_name].y(0)
+                    x = mtd[self._ws_name].x(0)
 
                     for i in range(len(y)):
                         if y[i] != 0.0:
@@ -386,7 +386,7 @@ class DataSet(object):
                             self._xmax = x[i]
                             break
 
-            self._npts = len(mtd[self._ws_name].readY(0))
+            self._npts = len(mtd[self._ws_name].y(0))
             self._last_applied_scale = 1.0
 
     def scale_to_unity(self, xmin=None, xmax=None):
@@ -394,9 +394,9 @@ class DataSet(object):
         Compute a scaling factor for which the average of the
         data is 1 in the specified region
         """
-        x = mtd[self._ws_name].readX(0)
-        y = mtd[self._ws_name].readY(0)
-        e = mtd[self._ws_name].readE(0)
+        x = mtd[self._ws_name].x(0)
+        y = mtd[self._ws_name].y(0)
+        e = mtd[self._ws_name].e(0)
         sum_cts = 0.0
         sum_err = 0.0
         for i in range(len(y)):
@@ -422,9 +422,9 @@ class DataSet(object):
         if xmax is None:
             xmax = self._xmax
 
-        x = mtd[self._ws_name].readX(0)
-        y = mtd[self._ws_name].readY(0)
-        e = mtd[self._ws_name].readE(0)
+        x = mtd[self._ws_name].x(0)
+        y = mtd[self._ws_name].y(0)
+        e = mtd[self._ws_name].e(0)
 
         is_histo = len(x) == len(y) + 1
         if not is_histo and len(x) != len(y):

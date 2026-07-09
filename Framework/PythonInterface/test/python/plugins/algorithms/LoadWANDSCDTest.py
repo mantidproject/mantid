@@ -147,15 +147,15 @@ class LoadWANDGroupingTest(unittest.TestCase):
         self.assertEqual(int(y_values.min()), 1)
 
         # Spot-check: workspace index 0  → pixel (x=0, y=0) → group 1
-        self.assertEqual(int(grp_ws.readY(0)[0]), 1)
+        self.assertEqual(int(grp_ws.y(0)[0]), 1)
         # Spot-check: workspace index 1  → pixel (x=0, y=1) → group 1  (same 2×2 block as index 0)
-        self.assertEqual(int(grp_ws.readY(1)[0]), 1)
+        self.assertEqual(int(grp_ws.y(1)[0]), 1)
         # Spot-check: workspace index 2  → pixel (x=0, y=2) → group 2  (next 2×2 block along y)
-        self.assertEqual(int(grp_ws.readY(2)[0]), 2)
+        self.assertEqual(int(grp_ws.y(2)[0]), 2)
         # Spot-check: workspace index 512 → pixel (x=1, y=0) → shares 2×2 block with index 0 → group 1
-        self.assertEqual(int(grp_ws.readY(512)[0]), 1)
+        self.assertEqual(int(grp_ws.y(512)[0]), 1)
         # Spot-check: workspace index 1024 → pixel (x=2, y=0) → first group of x_idx=1 row → group (512//2)+1 = 257
-        self.assertEqual(int(grp_ws.readY(1024)[0]), (self.N_COLS // grouping) + 1)
+        self.assertEqual(int(grp_ws.y(1024)[0]), (self.N_COLS // grouping) + 1)
 
         # detector ID stored
         self.assertEqual(grp_ws.getSpectrum(0).getDetectorIDs()[0], 0)
@@ -168,7 +168,7 @@ class LoadWANDGroupingTest(unittest.TestCase):
         self.assertEqual(len(detectorID), expected_groups)
         self.assertEqual(len(detectorID), len(twotheta))
         # each stored detector ID maps to a valid group (det_id == workspace index for WAND)
-        self.assertTrue(all(grp_ws.readY(int(d))[0] >= 1 for d in detectorID))
+        self.assertTrue(all(grp_ws.y(int(d))[0] >= 1 for d in detectorID))
 
         ws.delete()
         grp_ws.delete()
@@ -276,9 +276,9 @@ class LoadWANDOutputNormalizationTest(unittest.TestCase):
         self.assertEqual(grouping_workspace.getNumberHistograms(), LoadWANDGroupingTest.N_ROWS * LoadWANDGroupingTest.N_COLS)
         self.assertEqual(int(y_values.min()), 1)
         self.assertEqual(int(y_values.max()), expected_groups)
-        self.assertEqual(int(grouping_workspace.readY(0)[0]), 1)
-        self.assertEqual(int(grouping_workspace.readY(grouping)[0]), 2)
-        self.assertEqual(int(grouping_workspace.readY(grouping * 512)[0]), (LoadWANDGroupingTest.N_COLS // grouping) + 1)
+        self.assertEqual(int(grouping_workspace.y(0)[0]), 1)
+        self.assertEqual(int(grouping_workspace.y(grouping)[0]), 2)
+        self.assertEqual(int(grouping_workspace.y(grouping * 512)[0]), (LoadWANDGroupingTest.N_COLS // grouping) + 1)
 
     def test_output_normalization_workspace_for_counts(self):
         data = normalization = None
