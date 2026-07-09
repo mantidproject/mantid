@@ -165,22 +165,33 @@ private:
 
   // Peak fitting suite
   double fitIndividualPeak(size_t wi, const API::IAlgorithm_sptr &fitter, const double expected_peak_center,
-                           const std::pair<double, double> &fitwindow, const bool estimate_peak_width,
-                           const API::IPeakFunction_sptr &peakfunction, const API::IBackgroundFunction_sptr &bkgdfunc,
+                           const double peak_pos_tolerance, const std::pair<double, double> &fitwindow,
+                           const bool estimate_peak_width, const API::IPeakFunction_sptr &peakfunction,
+                           const API::IBackgroundFunction_sptr &bkgdfunc,
                            const std::shared_ptr<FitPeaksAlgorithm::PeakFitPreCheckResult> &pre_check_result);
 
   /// Methods to fit functions (general)
   double fitFunctionSD(const API::IAlgorithm_sptr &fit, const API::IPeakFunction_sptr &peak_function,
                        const API::IBackgroundFunction_sptr &bkgd_function, const API::MatrixWorkspace_sptr &dataws,
                        size_t wsindex, const std::pair<double, double> &peak_range, const double &expected_peak_center,
-                       bool estimate_peak_width, bool estimate_background);
+                       const double peak_pos_tolerance, bool estimate_peak_width, bool estimate_background);
+
+  /// Re-evaluate parameter fitting errors free of any peak-position boundary
+  /// constraint penalty, so a constrained centre still reports a genuine
+  /// covariance error rather than the spuriously small one produced when the
+  /// penalty curvature is folded into the Hessian that CalcErrors inverts.
+  void recalculateErrorsWithoutConstraint(const API::IPeakFunction_sptr &peak_function,
+                                          const API::IBackgroundFunction_sptr &bkgd_function,
+                                          const API::MatrixWorkspace_sptr &dataws, size_t wsindex,
+                                          const std::pair<double, double> &peak_range);
 
   double fitFunctionMD(API::IFunction_sptr fit_function, const API::MatrixWorkspace_sptr &dataws, const size_t wsindex,
                        const std::pair<double, double> &vec_xmin, const std::pair<double, double> &vec_xmax);
 
   /// fit a single peak with high background
   double fitFunctionHighBackground(const API::IAlgorithm_sptr &fit, const std::pair<double, double> &fit_window,
-                                   const size_t &ws_index, const double &expected_peak_center, bool observe_peak_shape,
+                                   const size_t &ws_index, const double &expected_peak_center,
+                                   const double peak_pos_tolerance, bool observe_peak_shape,
                                    const API::IPeakFunction_sptr &peakfunction,
                                    const API::IBackgroundFunction_sptr &bkgdfunc);
 
@@ -323,6 +334,10 @@ private:
   /// from 'observation' (3) calculated from instrument resolution
   Algorithms::PeakParameterHelper::EstimatePeakWidth m_peakWidthEstimateApproach;
   bool m_constrainPeaksPosition;
+  /// when true, PositionTolerance is applied as an active constraint on the peak
+  /// centre during fitting (bounded by expected_centre +/- tolerance) instead of
+  /// only being checked after the fit
+  bool m_constrainByPositionTolerance{false};
 
   /// peak windows
   std::vector<std::vector<double>> m_peakWindowVector;

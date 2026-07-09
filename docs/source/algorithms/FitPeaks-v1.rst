@@ -208,14 +208,26 @@ the peak widths, instead.
 Tolerance on Fitting Peaks Positions
 ####################################
 
-Tolerance will be always checked!
-
 * Uniform tolerance
 
 * Non-uniform tolerance
 
 * Case 2, 3 and 4
 
+PositionToleranceMode
+=====================
+
+``PositionTolerance`` can be applied in two ways, selected by ``PositionToleranceMode``:
+
+* ``Check`` (default) — the tolerance is only a post-fit acceptance criterion. The peak
+  centre is fit freely (within its fit window) and a fitted centre that ends up further than
+  the tolerance from its expected position is rejected. This is the historical behaviour.
+
+* ``Constrain`` — the tolerance additionally bounds the peak centre *during* the fit, to
+  ``expected position +/- tolerance``. This is useful when a well-determined expected position
+  (e.g. carried forward from a higher-SNR fit) should keep a weak peak's centre from wandering.
+  ``PositionTolerance`` must be specified when using this mode, and ``ConstrainPeakPositions``
+  must be set to ``false``: both bound the centre during the fit, so they are mutually exclusive.
 
 Algorithm Configurations
 ########################

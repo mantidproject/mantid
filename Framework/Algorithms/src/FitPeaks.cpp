@@ -78,6 +78,7 @@ const std::string MAX_FIT_ITER("MaxFitIterations");
 const std::string BACKGROUND_Z_SCORE("FindBackgroundSigma");
 const std::string HIGH_BACKGROUND("HighBackground");
 const std::string POSITION_TOL("PositionTolerance");
+const std::string POSITION_TOL_MODE("PositionToleranceMode");
 const std::string PEAK_MIN_HEIGHT("MinimumPeakHeight");
 const std::string CONSTRAIN_PEAK_POS("ConstrainPeakPositions");
 const std::string COPY_LAST_GOOD_PEAK_PARAMS("CopyLastGoodPeakParameters");
@@ -400,6 +401,16 @@ void FitPeaks::init() {
                   "List of tolerance on fitted peak positions against given peak positions."
                   "If there is only one value given, then ");
 
+  const std::vector<std::string> posTolModes{"Check", "Constrain"};
+  declareProperty(PropertyNames::POSITION_TOL_MODE, "Check", std::make_shared<StringListValidator>(posTolModes),
+                  "How PositionTolerance is applied. 'Check' (default): the tolerance is only a "
+                  "post-fit acceptance criterion - a fitted centre further than the tolerance from "
+                  "its expected position is rejected. 'Constrain': the tolerance additionally bounds "
+                  "the peak centre during the fit (expected position +/- tolerance). Unlike "
+                  "ConstrainPeakPositions, the reported position error is recomputed free of the "
+                  "constraint penalty so it remains a genuine covariance error. Requires "
+                  "PositionTolerance to be specified.");
+
   declareProperty(PropertyNames::PEAK_MIN_HEIGHT, 0.,
                   "Used for validating peaks before and after fitting. If a peak's observed/estimated or "
                   "fitted height is under this value, the peak will be marked as error.");
@@ -479,6 +490,28 @@ std::map<std::string, std::string> FitPeaks::validateInputs() {
           PropertyNames::START_WKSP_INDEX + " must be less than or equal to " + PropertyNames::STOP_WKSP_INDEX;
       issues[PropertyNames::START_WKSP_INDEX] = msg;
       issues[PropertyNames::STOP_WKSP_INDEX] = msg;
+    }
+  }
+
+  // Constrain mode bounds the centre by expected position +/- tolerance, so an explicit
+  // tolerance must be supplied - there is nothing to constrain against otherwise.
+  const std::string posTolMode = getPropertyValue(PropertyNames::POSITION_TOL_MODE);
+  if (posTolMode == "Constrain") {
+    const std::vector<double> posTolerances = getProperty(PropertyNames::POSITION_TOL);
+    if (posTolerances.empty()) {
+      issues[PropertyNames::POSITION_TOL] =
+          "PositionTolerance must be specified when PositionToleranceMode is 'Constrain'.";
+    }
+    // ConstrainPeakPositions and Constrain mode both bound the peak centre during fitting, so they
+    // are mutually exclusive.  ConstrainPeakPositions defaults to true, so 'Constrain' mode requires
+    // it to be explicitly set to false - avoiding two overlapping constraints on the same parameter.
+    const bool constrainPeakPositions = getProperty(PropertyNames::CONSTRAIN_PEAK_POS);
+    if (constrainPeakPositions) {
+      const std::string msg = "PositionToleranceMode='Constrain' and ConstrainPeakPositions both "
+                              "constrain the peak centre during fitting and are mutually exclusive. "
+                              "Set ConstrainPeakPositions to false to use 'Constrain' mode.";
+      issues[PropertyNames::CONSTRAIN_PEAK_POS] = msg;
+      issues[PropertyNames::POSITION_TOL_MODE] = msg;
     }
   }
 
@@ -604,6 +637,8 @@ void FitPeaks::processInputs() {
   m_strictConvergence = getProperty(PropertyNames::STRICT_CONVERGENCE);
   m_fitPeaksFromRight = getProperty(PropertyNames::FIT_FROM_RIGHT);
   m_constrainPeaksPosition = getProperty(PropertyNames::CONSTRAIN_PEAK_POS);
+  const std::string posTolMode = getProperty(PropertyNames::POSITION_TOL_MODE);
+  m_constrainByPositionTolerance = (posTolMode == "Constrain");
   m_fitIterations = getProperty(PropertyNames::MAX_FIT_ITER);
   m_copyLastGoodPeakParameters = getProperty(PropertyNames::COPY_LAST_GOOD_PEAK_PARAMS);
   m_respectFixedPeakParameters = getProperty(PropertyNames::RESPECT_FIXED_PEAK_PARAMS);
@@ -1321,8 +1356,14 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
       // do fitting with peak and background function (no analysis at this point)
       std::shared_ptr<FitPeaksAlgorithm::PeakFitPreCheckResult> peak_pre_check_result =
           std::make_shared<FitPeaksAlgorithm::PeakFitPreCheckResult>();
-      cost = fitIndividualPeak(wi, peak_fitter, expected_peak_pos, peak_window_i, observe_peak_width, peakfunction,
-                               bkgdfunction, peak_pre_check_result);
+      // in Constrain mode the fitted centre is bounded by expected_peak_pos +/- tolerance; a
+      // non-positive tolerance (the default, or Check mode) leaves the centre unconstrained here
+      const double peak_pos_tolerance =
+          (m_constrainByPositionTolerance && !m_peakPosTolCase234 && peak_index < m_peakPosTolerances.size())
+              ? m_peakPosTolerances[peak_index]
+              : -1.0;
+      cost = fitIndividualPeak(wi, peak_fitter, expected_peak_pos, peak_pos_tolerance, peak_window_i,
+                               observe_peak_width, peakfunction, bkgdfunction, peak_pre_check_result);
       if (peak_pre_check_result->isIndividualPeakRejected())
         fit_result->setBadRecord(peak_index, -1.);
 
@@ -1734,8 +1775,8 @@ bool FitPeaks::fitBackground(const size_t &ws_index, const std::pair<double, dou
 /** Fit an individual peak
  */
 double FitPeaks::fitIndividualPeak(size_t wi, const API::IAlgorithm_sptr &fitter, const double expected_peak_center,
-                                   const std::pair<double, double> &fitwindow, const bool estimate_peak_width,
-                                   const API::IPeakFunction_sptr &peakfunction,
+                                   const double peak_pos_tolerance, const std::pair<double, double> &fitwindow,
+                                   const bool estimate_peak_width, const API::IPeakFunction_sptr &peakfunction,
                                    const API::IBackgroundFunction_sptr &bkgdfunc,
                                    const std::shared_ptr<FitPeaksAlgorithm::PeakFitPreCheckResult> &pre_check_result) {
   pre_check_result->setNumberOfSubmittedIndividualPeaks(1);
@@ -1763,12 +1804,12 @@ double FitPeaks::fitIndividualPeak(size_t wi, const API::IAlgorithm_sptr &fitter
 
   if (m_highBackground) {
     // fit peak with high background!
-    cost = fitFunctionHighBackground(fitter, fitwindow, wi, expected_peak_center, estimate_peak_width, peakfunction,
-                                     bkgdfunc);
+    cost = fitFunctionHighBackground(fitter, fitwindow, wi, expected_peak_center, peak_pos_tolerance,
+                                     estimate_peak_width, peakfunction, bkgdfunc);
   } else {
     // fit peak and background
     cost = fitFunctionSD(fitter, peakfunction, bkgdfunc, m_inputMatrixWS, wi, fitwindow, expected_peak_center,
-                         estimate_peak_width, true);
+                         peak_pos_tolerance, estimate_peak_width, true);
   }
 
   return cost;
@@ -1798,7 +1839,7 @@ double FitPeaks::fitFunctionSD(const IAlgorithm_sptr &fit, const API::IPeakFunct
                                const API::IBackgroundFunction_sptr &bkgd_function,
                                const API::MatrixWorkspace_sptr &dataws, size_t wsindex,
                                const std::pair<double, double> &peak_range, const double &expected_peak_center,
-                               bool estimate_peak_width, bool estimate_background) {
+                               const double peak_pos_tolerance, bool estimate_peak_width, bool estimate_background) {
   std::stringstream errorid;
   errorid << "(WorkspaceIndex=" << wsindex << " PeakCentre=" << expected_peak_center << ")";
 
@@ -1852,7 +1893,19 @@ double FitPeaks::fitFunctionSD(const IAlgorithm_sptr &fit, const API::IPeakFunct
   fit->setProperty("EndX", peak_range.second);
   fit->setProperty("IgnoreInvalidData", true);
 
-  if (m_constrainPeaksPosition) {
+  // Constrain mode (tolerance-based centre bound) and ConstrainPeakPositions (width-based bound)
+  // are mutually exclusive - validateInputs rejects enabling both - so at most one branch runs.
+  const bool constrainByTolerance = m_constrainByPositionTolerance && peak_pos_tolerance > 0.;
+  if (constrainByTolerance) {
+    // bound the fitted centre to expected_peak_center +/- tolerance during the fit.  Unlike the
+    // ConstrainPeakPositions branch below, the position error is recomputed after the fit without
+    // this penalty (see recalculateErrorsWithoutConstraint) so it stays a genuine covariance error.
+    std::stringstream peak_center_constraint;
+    peak_center_constraint << (expected_peak_center - peak_pos_tolerance) << " < f0."
+                           << peak_function->getCentreParameterName() << " < "
+                           << (expected_peak_center + peak_pos_tolerance);
+    fit->setProperty("Constraints", peak_center_constraint.str());
+  } else if (m_constrainPeaksPosition) {
     // set up a constraint on peak position
     double peak_center = peak_function->centre();
     double peak_width = peak_function->fwhm();
@@ -1884,9 +1937,71 @@ double FitPeaks::fitFunctionSD(const IAlgorithm_sptr &fit, const API::IPeakFunct
   double chi2{std::numeric_limits<double>::max()};
   if (fitStatusIsConverged(fitStatus, m_strictConvergence)) {
     chi2 = fit->getProperty("OutputChi2overDoF");
+    if (constrainByTolerance) {
+      // replace the boundary-penalty-contaminated parameter errors with genuine covariance errors
+      recalculateErrorsWithoutConstraint(peak_function, bkgd_function, dataws, wsindex, peak_range);
+    }
   }
 
   return chi2;
+}
+
+//----------------------------------------------------------------------------------------------
+/** Recompute the fitting errors of an already-fitted peak+background without any peak-position
+ * boundary constraint.  Mantid implements a boundary constraint as a penalty term whose second
+ * derivative is folded into the Hessian that CalcErrors inverts, so a centre resting against the
+ * bound is reported with a spuriously small position error.  Re-running Fit at the converged
+ * parameters with zero iterations and no constraint evaluates the covariance of the pure
+ * (unpenalized) cost function, and Fit writes the resulting genuine errors back onto the shared
+ * function objects.  The parameter values are left unchanged (no iterations are taken).
+ */
+void FitPeaks::recalculateErrorsWithoutConstraint(const API::IPeakFunction_sptr &peak_function,
+                                                  const API::IBackgroundFunction_sptr &bkgd_function,
+                                                  const API::MatrixWorkspace_sptr &dataws, size_t wsindex,
+                                                  const std::pair<double, double> &peak_range) {
+  // fit on clones so the caller's functions (still attached to the constrained fit's composite) are
+  // untouched, then copy the recomputed errors back.  The clones carry the fitted parameter values,
+  // and with zero iterations and no constraint the fit only evaluates the covariance at those values.
+  IPeakFunction_sptr peak_clone = std::dynamic_pointer_cast<IPeakFunction>(peak_function->clone());
+  IBackgroundFunction_sptr bkgd_clone = std::dynamic_pointer_cast<IBackgroundFunction>(bkgd_function->clone());
+  CompositeFunction_sptr comp_func = std::make_shared<API::CompositeFunction>();
+  comp_func->addFunction(peak_clone);
+  comp_func->addFunction(bkgd_clone);
+
+  IAlgorithm_sptr fit;
+  try {
+    fit = createChildAlgorithm("Fit", -1, -1, false);
+  } catch (Exception::NotFoundError &) {
+    throw std::runtime_error("The FitPeaks algorithm requires the CurveFitting library");
+  }
+
+  fit->setProperty("Function", std::dynamic_pointer_cast<IFunction>(comp_func));
+  fit->setProperty("InputWorkspace", dataws);
+  fit->setProperty("WorkspaceIndex", static_cast<int>(wsindex));
+  fit->setProperty("MaxIterations", 0); // evaluate errors at the fitted values; do not re-fit
+  fit->setProperty("StartX", peak_range.first);
+  fit->setProperty("EndX", peak_range.second);
+  fit->setProperty("IgnoreInvalidData", true);
+  fit->setProperty("CalcErrors", true);
+  fit->setProperty("Minimizer", m_minimizer);
+  fit->setProperty("CostFunction", m_costFunction);
+
+  try {
+    fit->execute();
+  } catch (const std::exception &e) {
+    // the error re-evaluation is non-essential: keep the constrained fit's errors if it fails
+    // rather than discarding an otherwise good fit
+    g_log.debug() << "Unconstrained error re-evaluation failed: " << e.what() << "\n";
+    return;
+  }
+  if (!fit->isExecuted())
+    return;
+
+  // overwrite only the errors; the parameter values remain those of the constrained fit
+  for (size_t i = 0; i < peak_function->nParams(); ++i)
+    peak_function->setError(i, peak_clone->getError(i));
+  for (size_t i = 0; i < bkgd_function->nParams(); ++i)
+    bkgd_function->setError(i, bkgd_clone->getError(i));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1952,7 +2067,8 @@ double FitPeaks::fitFunctionMD(API::IFunction_sptr fit_function, const API::Matr
 /// Fit peak with high background
 double FitPeaks::fitFunctionHighBackground(const IAlgorithm_sptr &fit, const std::pair<double, double> &fit_window,
                                            const size_t &ws_index, const double &expected_peak_center,
-                                           bool observe_peak_shape, const API::IPeakFunction_sptr &peakfunction,
+                                           const double peak_pos_tolerance, bool observe_peak_shape,
+                                           const API::IPeakFunction_sptr &peakfunction,
                                            const API::IBackgroundFunction_sptr &bkgdfunc) {
   assert(m_linearBackgroundFunction);
 
@@ -1975,9 +2091,11 @@ double FitPeaks::fitFunctionHighBackground(const IAlgorithm_sptr &fit, const std
   // Create a new workspace
   API::MatrixWorkspace_sptr reduced_bkgd_ws = createMatrixWorkspace(vec_x, vec_y, vec_e);
 
-  // Fit peak with background
+  // Fit peak with background.  This intermediate fit on background-reduced data only refines the
+  // peak shape to seed the final fit, so it is left unconstrained (-1.0); the tolerance constraint
+  // is anchored to expected_peak_center and applied on the authoritative final fit below.
   fitFunctionSD(fit, peakfunction, bkgdfunc, reduced_bkgd_ws, 0, {vec_x.front(), vec_x.back()}, expected_peak_center,
-                observe_peak_shape, false);
+                -1.0, observe_peak_shape, false);
 
   // add the reduced background back
   bkgdfunc->setParameter(0, bkgdfunc->getParameter(0) + high_bkgd_function->getParameter(0));
@@ -1985,7 +2103,7 @@ double FitPeaks::fitFunctionHighBackground(const IAlgorithm_sptr &fit, const std
                                 high_bkgd_function->getParameter(1));
 
   double cost = fitFunctionSD(fit, peakfunction, bkgdfunc, m_inputMatrixWS, ws_index, {vec_x.front(), vec_x.back()},
-                              expected_peak_center, false, false);
+                              expected_peak_center, peak_pos_tolerance, false, false);
 
   return cost;
 }
