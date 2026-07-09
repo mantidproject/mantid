@@ -185,4 +185,60 @@ ___________
 * As explained above, a detector index is the same thing as a component index. No translation necessary. The fact that the first 0-n component indexes are for detectors is a feature that can be leveraged.
 * A bank always has a higher component index than any of its nested components. The root is the highest component index of all. This feature can be leveraged. Consider reverse iterating through component indexes when performing operations that involve higher-level components.
 
+Migrating from Instrument 1.0 in Python
+-------------------------------------------------
+
+This section is the migration/deprecation plan for the **Python-facing** slice of the final Instrument 2.0 rollout.
+
+Instead of using `Instrument` directly via :py:obj:`~mantid.api.MatrixWorkspace.getInstrument`, Python code should instead call to the `detectorInfo()` and `componentInfo()` methods on `MatrixWorkspace` or `ExperimentInfo`.
+These return the new `DetectorInfo` and `ComponentInfo` objects, which provide the same information as the legacy `Instrument` class, but in a more efficient way.
+
+The following deprecated classes are exposed to Python:
+
+* ``IComponent``
+* ``Component``
+* ``IObjComponent``
+* ``ObjComponent``
+* ``ICompAssembly``
+* ``CompAssembly``
+* ``ObjCompAssembly`` (exposed under the name ``IObjCompAssembly``)
+* ``IDetector``
+* ``Detector``
+* ``GridDetector``
+* ``RectangularDetector``
+* ``Instrument``
+
+What to use instead
+###################
+
+Almost every legacy accessor already has a modern Python home:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - Legacy
+     - Modern replacement
+   * - ``Instrument.getComponentByName(name)``
+     - ``componentInfo().indexOfAny(name)``
+   * - ``Instrument.getDetector(id)``
+     - ``detectorInfo().indexOf(id)``
+   * - ``Instrument.getSample()`` / ``getSource()``
+     - ``componentInfo().sample()`` / ``source()`` (+ ``samplePosition``/``sourcePosition``)
+   * - tree nav ``nelements`` / ``[]`` / ``len()``
+     - ``componentInfo().children`` / ``parent`` / ``componentsInSubtree`` / ``detectorsInSubtree`` / iteration
+   * - ``IObjComponent.shape()``
+     - ``componentInfo().shape(index)``
+   * - ``IComponent.getPos()`` / ``Component.getRotation()``
+     - ``componentInfo().position(index)`` / ``rotation(index)`` / ``relativePosition``/``relativeRotation``
+   * - ``IDetector.getID()``
+     - ``detectorInfo().detectorIDs()``
+   * - ``IDetector.getTwoTheta()`` / ``getPhi()``
+     - ``detectorInfo().twoTheta(index)`` / ``azimuthal(index)``
+   * - ``Detector.isMasked()`` / ``isMonitor()``
+     - ``detectorInfo().isMasked(index)`` / ``isMonitor(index)`` (already deprecated)
+
+Remember that a detector's component index equals its detector index,
+so a single index moves freely between ``ComponentInfo`` and ``DetectorInfo``.
+
 .. categories:: Concepts

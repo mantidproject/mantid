@@ -9,7 +9,7 @@ import numpy as np
 from testhelpers import WorkspaceCreationHelper
 from mantid.kernel import V3D
 from mantid.kernel import Quat
-from mantid.geometry import CSGObject
+from mantid.geometry import ComponentType, CSGObject
 from mantid.simpleapi import CloneWorkspace, CreateWorkspace
 
 
@@ -192,6 +192,23 @@ class ComponentInfoTest(unittest.TestCase):
         info = self._ws.componentInfo()
         self.assertEqual(type(info.shape(0)), CSGObject)
 
+    def test_solidAngle(self):
+        """Check the solid angle of a detector as seen from an observer is returned"""
+        info = self._ws.componentInfo()
+        solid_angle = info.solidAngle(0, info.samplePosition())
+        self.assertIsInstance(solid_angle, float)
+        self.assertGreater(solid_angle, 0.0)
+
+    def test_componentType(self):
+        """Check the ComponentType is returned for representative components"""
+        info = self._ws.componentInfo()
+        # The leading indices are detectors
+        self.assertEqual(info.componentType(0), ComponentType.Detector)
+        self.assertEqual(info.componentType(1), ComponentType.Detector)
+        # Non-detector components report a non-Detector type
+        self.assertIsInstance(info.componentType(info.root()), ComponentType)
+        self.assertNotEqual(info.componentType(info.root()), ComponentType.Detector)
+
     def test_getMemorySize(self):
         info = self._ws.componentInfo()
         mem = info.getMemorySize()
@@ -347,6 +364,19 @@ class ComponentInfoTest(unittest.TestCase):
             info.shape(-1)
         self.assertEqual(type(info.shape(0)), CSGObject)
         self.assertEqual(type(info.shape(5)), CSGObject)
+
+    def test_solidAngle_extreme(self):
+        info = self._ws.componentInfo()
+        with self.assertRaises(OverflowError):
+            info.solidAngle(-1, info.samplePosition())
+        self.assertIsInstance(info.solidAngle(0, info.samplePosition()), float)
+
+    def test_componentType_extreme(self):
+        info = self._ws.componentInfo()
+        with self.assertRaises(OverflowError):
+            info.componentType(-1)
+        self.assertIsInstance(info.componentType(0), ComponentType)
+        self.assertIsInstance(info.componentType(5), ComponentType)
 
     """
     ----------------------------------------------------------------------------
@@ -514,6 +544,20 @@ class ComponentInfoTest(unittest.TestCase):
             info.shape("Shape")
         with self.assertRaises(TypeError):
             info.shape(11.32)
+
+    def test_solidAngle_exceptional(self):
+        info = self._ws.componentInfo()
+        with self.assertRaises(TypeError):
+            info.solidAngle("Zero", info.samplePosition())
+        with self.assertRaises(TypeError):
+            info.solidAngle(0, "observer")
+
+    def test_componentType_exceptional(self):
+        info = self._ws.componentInfo()
+        with self.assertRaises(TypeError):
+            info.componentType("Type")
+        with self.assertRaises(TypeError):
+            info.componentType(0.12)
 
     def test_basic_iterator(self):
         info = self._ws.componentInfo()

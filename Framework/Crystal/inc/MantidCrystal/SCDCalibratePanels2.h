@@ -133,6 +133,10 @@ private:
 
   /// unique vars for a given instance of calibration
   double m_a = 0.0, m_b = 0.0, m_c = 0.0, m_alpha = 0.0, m_beta = 0.0, m_gamma = 0.0, m_T0 = 0.0;
+  /// if true, wavelength is derived from Bragg's law using the UB matrix
+  /// instead of from the measured TOF; cached from the WavelengthFromUB
+  /// property in validateInputs()
+  bool m_waveFromUB{false};
   bool LOGCHILDALG{true};
   int maxFitIterations{500};
   const int MINIMUM_PEAKS_PER_BANK{6};

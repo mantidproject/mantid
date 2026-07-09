@@ -76,6 +76,21 @@ instrument:
    Regular users are recommended to stay away from this section as running parameter space profiling is very time consuming, and
    the results are often irrelevant to the data reduction.
 
+7) By default, each peak's calculated wavelength (and therefore Q) is derived from its measured TOF and the
+   instrument geometry being tested. Setting `WavelengthFromUB` instead derives the wavelength from Bragg's
+   law using the UB matrix and the peak's integer HKL, which removes any dependence on the TOF-to-wavelength
+   conversion. This is intended for quasi-Laue workflows, where a peak's TOF-derived wavelength can be
+   unreliable, but it also works for standard time-of-flight Laue data. Since wavelength no longer depends on
+   TOF in this mode, `CalibrateT0` has no effect and cannot be combined with `WavelengthFromUB`.
+
+   For a **cubic** calibration standard specifically, this makes the calibration depend only on the integer
+   HKL indexing and the sample/goniometer orientation, not on the lattice constant of the standard. This is
+   because UB = U*B and, for a cubic cell, B is just (1/a) times the identity matrix, so the direction of the
+   target Q = 2*pi*U*B*hkl is set entirely by U and the HKL -- the lattice constant `a` only rescales the
+   magnitude, which is exactly what `WavelengthFromUB` absorbs into the solved wavelength. Lower-symmetry
+   cells do not have this property, since their B matrix is not isotropic and the cell shape then does affect
+   the direction of Q.
+
 Usage
 -----
 

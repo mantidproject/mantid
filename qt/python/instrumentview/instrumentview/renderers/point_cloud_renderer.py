@@ -87,31 +87,26 @@ class PointCloudRenderer(InstrumentRenderer):
         )
 
     # --------------------------------------------------------------- picking
-    def enable_picking(self, plotter: BackgroundPlotter, callback: Callable[[int], None], hover: bool = False) -> None:
+    def get_callback_tied_to_detector_index(
+        self, plotter: BackgroundPlotter, callback: Callable[[int], None], hover: bool = False
+    ) -> Callable:
         """Set up left-click point picking.  *callback* receives ``(detector_index: int)``."""
-        plotter.disable_picking()
 
         if plotter.off_screen:
-            return
+            return lambda _obj, _event: None
 
         picker = vtkPointPicker()
         picker.SetTolerance(self._effective_picking_tolerance(hover))
-        interactor = plotter.iren
-
-        self._clear_observers(plotter)
 
         def _on_pick(_obj, _event):
-            x, y = interactor.get_event_position()
+            x, y = plotter.iren.get_event_position()
             pick_result = picker.Pick(x, y, 0, plotter.renderer)
             if pick_result > 0:
                 point_id = picker.GetPointId()
                 if point_id >= 0:
                     callback(point_id)
 
-        if hover:
-            self._mouse_move_observer_id = plotter.iren.style.AddObserver("MouseMoveEvent", _on_pick)
-        else:
-            self._left_button_observer_id = plotter.iren.style.AddObserver("LeftButtonPressEvent", _on_pick)
+        return _on_pick
 
     # -------------------------------------------------------------- scalars
     def set_detector_scalars(self, mesh: pv.PolyData, counts: np.ndarray, label: str) -> None:

@@ -277,6 +277,77 @@ class SavedNexusWithAllowSlimProcess(systemtesting.MantidSystemTest):
         return None
 
 
+def _slimAlgorithmRan(output_ws):
+    """Return True if AlignAndFocusPowderSlim appears anywhere in the history of *output_ws*.
+
+    AlignAndFocusPowderFromFiles records AlignAndFocusPowderSlim as a nested child when it
+    delegates to the fast path, so the history has to be searched recursively.
+    """
+
+    def _search(alg_history):
+        if alg_history.name() == "AlignAndFocusPowderSlim":
+            return True
+        for i in range(alg_history.childHistorySize()):
+            if _search(alg_history.getChildAlgorithmHistory(i)):
+                return True
+        return False
+
+    return any(_search(alg) for alg in mtd[output_ws].getHistory().getAlgorithmHistories())
+
+
+class AllowSlimProcessWithCalMask(systemtesting.MantidSystemTest):
+    """Verify that AlignAndFocusPowderFromFiles delegates to AlignAndFocusPowderSlim when using the CalibrationWorkspace and
+    MaskWorkspace inputs."""
+
+    cal_file = "PG3_FERNS_d4832_2011_08_24.cal"
+    data_file = "PG3_9829_event.nxs"
+
+    def cleanup(self):
+        return True
+
+    def requiredMemoryMB(self):
+        return 3 * 1024  # GiB
+
+    def requiredFiles(self):
+        return [self.cal_file, self.data_file]
+
+    def runTest(self):
+        input_ws = "cal_mask_slim_input"
+        output_ws = "cal_mask_slim_output"
+
+        # calibration table, mask and grouping workspaces all derived from the calibration file
+        LoadEventNexus(Filename=self.data_file, OutputWorkspace=input_ws, MetaDataOnly=True)
+        LoadDiffCal(Filename=self.cal_file, InputWorkspace=input_ws, WorkspaceName="PG3")
+
+        AlignAndFocusPowderFromFiles(
+            Filename=self.data_file,
+            OutputWorkspace=output_ws,
+            Params=(0.5, -0.004, 7),
+            Dspacing=True,
+            CalibrationWorkspace="PG3_cal",
+            MaskWorkspace="PG3_mask",
+            PrimaryFlightPath=60,
+            L2=3.18,
+            Polar=90,
+            Azimuthal=0,
+            PreserveEvents=False,
+            AllowSlimProcess=True,
+        )
+
+        self.assertTrue(AnalysisDataService.doesExist(output_ws), f"Expected output workspace '{output_ws}' to be created")
+        self.assertGreaterThan(mtd[output_ws].getNumberHistograms(), 0, "Expected output workspace to contain spectra")
+        self.assertTrue(
+            _slimAlgorithmRan(output_ws),
+            "Expected AlignAndFocusPowderFromFiles to delegate to AlignAndFocusPowderSlim, but it was not found in the history",
+        )
+
+    def validateMethod(self):
+        return None
+
+    def validate(self):
+        return None
+
+
 class CompressedCompare(systemtesting.MantidSystemTest):
     # this test is very similar to SNAPRedux.Simple
 

@@ -1,4 +1,5 @@
-from vtkmodules.vtkInteractionStyle import vtkInteractorStyleUser, vtkInteractorStyleTrackballCamera
+from typing import Callable
+from vtkmodules.vtkInteractionStyle import vtkInteractorStyleUser, vtkInteractorStyleTrackballCamera, vtkInteractorStyleRubberBandZoom
 from vtkmodules.vtkCommonCore import vtkCommand
 import numpy as np
 
@@ -9,6 +10,47 @@ class _PlotterWrapper:
     def __init__(self, plotter):
         self._plotter = plotter
         super().__init__()
+
+
+class InteractorStyles:
+    def __init__(self, plotter, picking_callback, hover_callback):
+        self.SCROLL_ZOOM_WITH_PICKING = CursorZoomInteractorStyle(plotter)
+        self.SCROLL_ZOOM_WITH_HOVER = CursorZoomInteractorStyle(plotter)
+        self.SCROLL_ZOOM_NO_PICKING = CursorZoomInteractorStyle(plotter)
+        self.TRACKBALL = SwappedButtonTrackballCamera()
+        self.RUBBERBAND_ZOOM = RubberBandZoomInteractorStyle(plotter)
+
+        self.TRACKBALL.set_picking_callback(picking_callback)
+        self.SCROLL_ZOOM_WITH_PICKING.set_picking_callback(picking_callback)
+        self.SCROLL_ZOOM_WITH_HOVER.set_hover_callback(hover_callback)
+
+
+class RubberBandZoomInteractorStyle(vtkInteractorStyleRubberBandZoom):
+    def __init__(self, plotter):
+        super().__init__()
+        self.plotter = plotter
+        self._pyvista_plotter = _PlotterWrapper(plotter)  # HACK: Wrapper for PyVista compatibility
+        self.update_default_camera_state()
+        self.AddObserver(vtkCommand.RightButtonPressEvent, lambda *_: self._reset_camera())
+
+    def update_default_camera_state(self):
+        """Re-cache the current camera state as the default (right-click reset) state.
+
+        Must be called after any operation that changes the intended full-view
+        camera state (e.g. after a fill transform is applied on resize).
+        """
+        camera = self.plotter.renderer.camera
+        self._default_position = np.array(camera.position).copy()
+        self._default_focal_point = np.array(camera.focal_point).copy()
+        self._default_parallel_scale = camera.parallel_scale
+
+    def _reset_camera(self):
+        renderer = self.plotter.renderer
+        camera = renderer.camera
+        camera.position = self._default_position.tolist()
+        camera.focal_point = self._default_focal_point.tolist()
+        camera.parallel_scale = self._default_parallel_scale
+        renderer.reset_camera_clipping_range()
 
 
 class CursorZoomInteractorStyle(vtkInteractorStyleUser):
@@ -35,6 +77,15 @@ class CursorZoomInteractorStyle(vtkInteractorStyleUser):
         self.AddObserver(vtkCommand.MouseWheelForwardEvent, self._on_wheel_forward)
         self.AddObserver(vtkCommand.MouseWheelBackwardEvent, self._on_wheel_backward)
         self.AddObserver(vtkCommand.RightButtonPressEvent, lambda *_: self._reset_camera())
+
+    def set_picking_callback(self, picking_callback: Callable):
+        self.RemoveObservers(vtkCommand.LeftButtonPressEvent)
+        self.AddObserver(vtkCommand.LeftButtonPressEvent, picking_callback)
+
+    def set_hover_callback(self, hover_callback: Callable):
+        self.RemoveObservers(vtkCommand.MouseMoveEvent)
+        self.AddObserver(vtkCommand.MouseMoveEvent, hover_callback)
+        self.AddObserver(vtkCommand.MouseMoveEvent, self._on_mouse_move)
 
     def _on_mouse_move(self, obj, event):
         if self._zoom_in_progress:
@@ -150,3 +201,7 @@ class SwappedButtonTrackballCamera(vtkInteractorStyleTrackballCamera):
         self.AddObserver(vtkCommand.RightButtonPressEvent, lambda *_: self.OnLeftButtonDown())
         self.AddObserver(vtkCommand.LeftButtonReleaseEvent, lambda *_: self.OnRightButtonUp())
         self.AddObserver(vtkCommand.RightButtonReleaseEvent, lambda *_: self.OnLeftButtonUp())
+
+    def set_picking_callback(self, picking_callback: Callable):
+        self.RemoveObservers(vtkCommand.LeftButtonPressEvent)
+        self.AddObserver(vtkCommand.LeftButtonPressEvent, picking_callback)
