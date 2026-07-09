@@ -6,8 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
+from mantid import mtd
 from mantid.dataobjects import GroupingWorkspace
-from mantid.simpleapi import Load
+from mantid.simpleapi import DeleteWorkspace, Load, LoadEmptyInstrument
 from IndirectReductionCommon import (
     create_detector_grouping_string,
     create_grouping_string,
@@ -15,6 +16,7 @@ from IndirectReductionCommon import (
     create_range_string,
     group_spectra_by_theta,
     group_spectra_of,
+    remove_edge_pixels,
     _excluded_detector_ids,
     _get_x_range_when_bins_vary,
 )
@@ -57,15 +59,15 @@ class IndirectReductionCommonTest(unittest.TestCase):
         grouping_workspace = create_grouping_workspace(self._workspace, "osiris_041_RES10.cal")
 
         self.assertTrue(isinstance(grouping_workspace, GroupingWorkspace))
-        self.assertEquals(2562, grouping_workspace.getNumberHistograms())
+        self.assertEqual(2562, grouping_workspace.getNumberHistograms())
 
     def test_excluded_detector_ids_returns_the_expected_detector_ids(self):
         grouping_workspace = create_grouping_workspace(self._workspace, "osiris_041_RES10.cal")
 
         excluded_ids = _excluded_detector_ids(grouping_workspace)
 
-        self.assertEquals(2458, len(excluded_ids))
-        self.assertEquals([i for i in range(16, 116)], excluded_ids[:100])
+        self.assertEqual(2458, len(excluded_ids))
+        self.assertEqual([i for i in range(16, 116)], excluded_ids[:100])
 
     def test_get_x_range_when_bins_vary_returns_the_expected_min_and_max_x(self):
         grouping_workspace = create_grouping_workspace(self._workspace, "osiris_041_RES10.cal")
@@ -129,6 +131,32 @@ class GroupSpectraDetectorsTest(unittest.TestCase):
     def test_raises_when_detectors_grouping_file_parameter_is_missing(self):
         with self.assertRaisesRegex(RuntimeError, "Workflow.DetectorsGroupingFile"):
             group_spectra_of(self._pg_workspace, method="Detectors")
+
+
+class EdgePixelRemovalTest(unittest.TestCase):
+    """Tests for remove_edge_pixels using Mantid mask-file infrastructure."""
+
+    def test_remove_edge_pixels_removes_320_spectra_from_osiris(self):
+        ws_name = "__test_osiris_edge"
+        LoadEmptyInstrument(InstrumentName="OSIRIS", OutputWorkspace=ws_name)
+        initial = mtd[ws_name].getNumberHistograms()
+        remove_edge_pixels(ws_name)
+        # 56 upper tubes * 4 edge pixels + 48 lower tubes * 2 edge pixels = 320
+        self.assertEqual(initial - (56 * 4 + 48 * 2), mtd[ws_name].getNumberHistograms())
+        remaining = {mtd[ws_name].getSpectrum(i).getSpectrumNo() for i in range(mtd[ws_name].getNumberHistograms())}
+        self.assertNotIn(1005, remaining)
+        self.assertNotIn(2564, remaining)
+        self.assertIn(1009, remaining)
+        self.assertIn(2562, remaining)
+        DeleteWorkspace(ws_name)
+
+    def test_remove_edge_pixels_is_no_op_for_non_silicon_instrument(self):
+        ws_name = "__test_iris_edge"
+        LoadEmptyInstrument(InstrumentName="IRIS", OutputWorkspace=ws_name)
+        initial = mtd[ws_name].getNumberHistograms()
+        remove_edge_pixels(ws_name)
+        self.assertEqual(initial, mtd[ws_name].getNumberHistograms())
+        DeleteWorkspace(ws_name)
 
 
 if __name__ == "__main__":

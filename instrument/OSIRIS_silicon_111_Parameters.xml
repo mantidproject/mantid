@@ -8,11 +8,11 @@
     </parameter>
 
     <parameter name="spectra-min">
-      <value val="1005" />
+      <value val="1009" />
     </parameter>
 
     <parameter name="spectra-max">
-      <value val="2564" />
+      <value val="2562" />
     </parameter>
 
     <parameter name="analyser" type="string">
