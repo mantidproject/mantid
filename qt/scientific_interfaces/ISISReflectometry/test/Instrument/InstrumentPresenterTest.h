@@ -50,7 +50,8 @@ public:
 
   void testThrowsWhenMainPresenterHasNotBeenAccepted() {
     auto presenter = makePresenter(std::make_unique<MockInstrumentOptionDefaults>(), false);
-    TS_ASSERT_THROWS(presenter.notifySettingsChanged(), std::runtime_error const &);
+    TS_ASSERT_THROWS_EQUALS(presenter.notifySettingsChanged(), std::runtime_error const &e, std::string(e.what()),
+                            "InstrumentPresenter does not have a main presenter.");
   }
 
   void testSetValidWavelengthRange() {

@@ -75,7 +75,8 @@ public:
   void test_throws_when_main_presenter_has_not_been_accepted() {
     auto mockView = makeView();
     auto presenter = PreviewPresenter(packDeps(mockView.get()));
-    TS_ASSERT_THROWS(presenter.notifyReductionResumed(), std::runtime_error const &);
+    TS_ASSERT_THROWS_EQUALS(presenter.notifyReductionResumed(), std::runtime_error const &e, std::string(e.what()),
+                            "PreviewPresenter does not have a main presenter.");
   }
 
   void test_notify_load_workspace_requested_does_not_load_from_file_if_in_ads() {

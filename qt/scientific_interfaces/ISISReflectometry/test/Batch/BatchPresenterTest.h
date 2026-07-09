@@ -73,7 +73,8 @@ public:
 
   void testThrowsWhenMainPresenterHasNotBeenAccepted() {
     auto presenter = makePresenter(makeModel(), false);
-    TS_ASSERT_THROWS(presenter->instrumentName(), std::runtime_error const &);
+    TS_ASSERT_THROWS_EQUALS(presenter->instrumentName(), std::runtime_error const &e, std::string(e.what()),
+                            "BatchPresenter does not have a main presenter.");
   }
 
   void testMainPresenterUpdatedWhenChangeInstrumentRequested() {

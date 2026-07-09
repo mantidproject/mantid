@@ -605,7 +605,8 @@ public:
 
   void testThrowsWhenMainPresenterHasNotBeenAccepted() {
     auto presenter = makePresenter(makeDefaults(), makeEmptyExperiment(), false);
-    TS_ASSERT_THROWS(presenter.notifyReductionResumed(), std::runtime_error const &);
+    TS_ASSERT_THROWS_EQUALS(presenter.notifyReductionResumed(), std::runtime_error const &e, std::string(e.what()),
+                            "ExperimentPresenter does not have a main presenter.");
   }
 
   void testChangingLookupRowNotifiesMainPresenter() {

@@ -46,7 +46,8 @@ public:
 
   void testThrowsWhenMainPresenterHasNotBeenAccepted() {
     auto presenter = makePresenter(false);
-    TS_ASSERT_THROWS(presenter.notifyReductionResumed(), std::runtime_error const &);
+    TS_ASSERT_THROWS_EQUALS(presenter.notifyReductionResumed(), std::runtime_error const &e, std::string(e.what()),
+                            "EventPresenter does not have a main presenter.");
   }
 
   void testInitializesWithStateFromViewWhenChangingToUniformSlicingByTime() {

@@ -55,7 +55,8 @@ public:
 
   void testThrowsWhenMainPresenterHasNotBeenAccepted() {
     auto presenter = makePresenter(false);
-    TS_ASSERT_THROWS(presenter.notifySettingsChanged(), std::runtime_error const &);
+    TS_ASSERT_THROWS_EQUALS(presenter.notifySettingsChanged(), std::runtime_error const &e, std::string(e.what()),
+                            "SavePresenter does not have a main presenter.");
   }
 
   void testSetWorkspaceListOnConstruction() {

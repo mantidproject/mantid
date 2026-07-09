@@ -40,7 +40,8 @@ public:
 
   void testThrowsWhenMainPresenterHasNotBeenAccepted() {
     auto presenter = makePresenterWithoutMainPresenter(m_view);
-    TS_ASSERT_THROWS(presenter.notifyResumeReductionRequested(), std::runtime_error const &);
+    TS_ASSERT_THROWS_EQUALS(presenter.notifyResumeReductionRequested(), std::runtime_error const &e,
+                            std::string(e.what()), "RunsTablePresenter does not have a main presenter.");
   }
 
   void testResumeReductionNotifiesParent() {
