@@ -103,7 +103,7 @@ if(TARGET Boost::python${Python_VERSION_MAJOR}${Python_VERSION_MINOR})
 else()
   set(PUBLIC_TARGETS Python::NumPy ${BoostPython_LIBRARIES})
 endif()
-if(USE_PYTHON_DYNAMIC_LIB)
+if(USE_PYTHON_DYNAMIC_LIB OR APPLE)
   list(APPEND PUBLIC_TARGETS Python::Python)
 endif()
 # Dependencies
