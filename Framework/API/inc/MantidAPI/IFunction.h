@@ -733,7 +733,7 @@ private:
   /// whether the function usage has been registered
   bool m_isRegistered{false};
   /// The method used to calculate the step size
-  StepSizeMethod m_stepSizeMethod;
+  StepSizeMethod m_stepSizeMethod{StepSizeMethod::DEFAULT};
   /// The custom step sizes for the derivative
   std::vector<double> m_stepSizes;
 

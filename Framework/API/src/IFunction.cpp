@@ -83,8 +83,7 @@ const std::vector<std::string> EXCLUDEUSAGE = {"CompositeFunction"};
 /**
  * Constructor
  */
-IFunction ::IFunction()
-    : m_isParallel(false), m_handler(nullptr), m_chiSquared(0.0), m_stepSizeMethod(StepSizeMethod::DEFAULT) {}
+IFunction ::IFunction() : m_isParallel(false), m_handler(nullptr), m_chiSquared(0.0) {}
 
 /**
  * Destructor
