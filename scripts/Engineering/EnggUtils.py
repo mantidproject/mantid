@@ -774,13 +774,13 @@ def _correct_full_calib_for_offset_scattering_com(ws: MatrixWorkspace, full_cali
 
     Additionally this formualtion assumes that L2 can be calculated using this C.O.M and the as-defined detector positions
     in the IDF. The calibration is however done to correct for these deviations, so we need to find a way to correct
-    the calibartion DIFCs solely for the COM offset.
+    the calibration DIFCs solely for the COM offset.
 
 
     Broadly this means: DIFC_t = k.G(r, e) where G is a function of the scattering C.O.M, r, and the detector position
     errors e.
 
-    To correct this we that, to a first order approximation G(r,e) = H(r)F(e)
+    To correct this we can say, to a first order approximation, G(r,e) = H(r)F(e)
 
     This gives DIFC_t = k.H(r).F(e)
 
