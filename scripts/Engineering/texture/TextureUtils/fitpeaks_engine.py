@@ -12,9 +12,11 @@
 # call it once per (workspace, peak): one peak fit across all detector spectra, multithreaded.
 #
 # The focused data is in d-spacing, which is detector-independent, so a single peak centre works for
-# every spectrum and no TOF round-trip is needed.  Starting values for the peak shape parameters are
-# seeded from the high-SNR summed-spectrum fit (fit_initial_summed_spectra), keeping the good seeding
-# of the existing routine while delegating the heavy per-spectrum fitting to the parallel algorithm.
+# every spectrum and no TOF round-trip is needed.  The per-spectrum centre is seeded from the high-SNR
+# summed-spectrum fit (fit_initial_summed_spectra); the peak-shape starting values come from the
+# instrument parameters and are then refined per-spectrum by carrying each rebunch-smoothing pass's
+# fitted shape forward (see _fit_all_peaks_fitpeaks), while the heavy per-spectrum fitting is
+# delegated to the parallel algorithm.
 #
 # The shared seeding, cropping and small helpers live in fitting_utils; this module composes them.
 
@@ -65,7 +67,7 @@ _INTENSITY_PARAM = "I"
 # "Constrain" with PositionToleranceFractional=True) to within this fraction of its per-spectrum fit
 # window width of the seeded centre, so a low-SNR fit cannot pull the centre far from the summed-fit
 # position.
-_WINDOW_TOL_FRAC = 0.025
+_WINDOW_TOL_FRAC = 0.05
 
 
 def _populate_fitpeaks_output_table(
@@ -187,12 +189,15 @@ def _fit_all_peaks_fitpeaks(
     workspace, and a single FitPeaks call fits that peak across all of them at once.
 
     The fit is done in TOF with X0 converted back to d-spacing for the output table.
-    Rebunch-smoothing is used to guide the fit for poor SNR: each peak is fit on the
-    progressively finer rebunched versions to refine the per-spectrum centre seed,
-    then the final fit is on the raw (unsmoothed) data over the full peak window, seeded
-    with that centre.  Every pass (smoothing and final) constrains the peak centre to
-    within +/-10% of its per-spectrum seed so a low-SNR fit cannot pull it far from the
-    summed-fit position.
+    Rebunch-smoothing guides the fit for poor SNR: each peak is fit on the progressively finer
+    rebunched (higher-SNR) versions, coarsest-first, and each pass's per-spectrum result is carried
+    forward as the next pass's starting values - the fitted centre (via PeakCentersWorkspace) and the
+    fitted peak-shape parameters (via a per-spectrum PeakParameterValueTable, excluding the centre and
+    the rebunch-scale-dependent intensity).  The final, authoritative fit is on the raw (unsmoothed)
+    data over the full window, seeded with those carried centre and shape; only it is reported, and
+    spectra where it fails are left unfit (no smoothed fallback).  Every pass (smoothing and final)
+    constrains the peak centre to within +/-10% of its per-spectrum seed so a low-SNR fit cannot pull
+    it far from the summed-fit position.
 
     Weak peaks are rejected the same way as the multidomain engine: after the final fit,
     spectra whose fitted I/sigma is at or below i_over_sigma_thresh are treated as "no peak" and get
@@ -211,6 +216,15 @@ def _fit_all_peaks_fitpeaks(
     seed_peak_param_names = _param_names(seed_base_peak_func)
     base_peak_func = FunctionFactory.Instance().createPeakFunction(final_peak_func_name)
     peak_param_names = _param_names(base_peak_func)
+
+    # peak-shape parameters carried per-spectrum from one smoothing pass to the next (as the next
+    # pass's PeakParameterValueTable starting values).  The centre is excluded - it is seeded/refined
+    # per-spectrum through PeakCentersWorkspace (a table X0 would override that).  The intensity is
+    # excluded too - it is a peak area whose scale changes with the rebunch bin width, so a value
+    # fitted at one NBunch mis-seeds the next; FitPeaks re-estimates it per-spectrum each pass.  What
+    # remains (the decay/width shape, e.g. A/B/S or the alphas/sigma/gamma) is binning-invariant in
+    # TOF, so carrying the higher-SNR fitted value forward gives a weak peak a better shape seed.
+    seed_carry_names = [p for p in seed_peak_param_names if p not in (_PEAK_CENTRE_PARAM, _INTENSITY_PARAM)]
 
     # FitPeaks requires MaxFitIterations >= 49
     max_fit_iters = max(49, max_fit_iters)
@@ -265,6 +279,7 @@ def _fit_all_peaks_fitpeaks(
 
         param_tab_name = f"__fitpeaks_params_{ipeak}"
         err_tab_name = f"__fitpeaks_errs_{ipeak}"
+        seed_tab_name = f"__fitpeaks_seed_{ipeak}"
 
         def _run_fitpeaks_pass(
             fit_ws: str,
@@ -273,6 +288,7 @@ def _fit_all_peaks_fitpeaks(
             pos_tolerance: float = pos_tol,
             pos_tol_mode: str = "Check",
             pos_tol_fractional: bool = False,
+            seed_table: str | None = None,
         ):
             """Run one FitPeaks pass over all spectra (full peak window), seeded with the given
             per-spectrum TOF centres, fitting pass_peak_func_name.  pos_tol_mode selects how
@@ -280,14 +296,22 @@ def _fit_all_peaks_fitpeaks(
             while "Constrain" additionally bounds the centre to seed +/- pos_tolerance during the fit.
             With pos_tol_fractional=True pos_tolerance is a fraction of each spectrum's own fit
             window width (FitPeaks scales it per spectrum), giving a per-spectrum bound from one value.
+            seed_table, if given, is a PeakParameterValueTable of per-spectrum shape starting values
+            (from the previous pass, see _build_seed_table); its columns must be parameters of
+            pass_peak_func_name, so the caller only supplies it for passes fitting that function.
             Returns (param_table, error_table, valid_mask)."""
             CreateWorkspace(DataX=centre_seed, DataY=np.zeros(n_total), NSpec=n_total, OutputWorkspace=centres_ws)
+            # per-spectrum shape seed: FitPeaks applies these AFTER setCentre, but the table excludes
+            # X0 so the per-spectrum PeakCentersWorkspace centre is preserved.  The table property does
+            # not resolve a name string via simpleapi, so pass the retrieved TableWorkspace object.
+            shape_seed_kwargs = {"PeakParameterValueTable": ADS.retrieve(seed_table)} if seed_table else {}
             FitPeaks(
                 InputWorkspace=fit_ws,
                 PeakCentersWorkspace=centres_ws,
                 FitPeakWindowWorkspace=windows_ws,
                 PeakFunction=pass_peak_func_name,
                 BackgroundType="Linear",
+                **shape_seed_kwargs,
                 PositionTolerance=[pos_tolerance],
                 PositionToleranceMode=pos_tol_mode,
                 PositionToleranceFractional=pos_tol_fractional,
@@ -329,6 +353,25 @@ def _fit_all_peaks_fitpeaks(
             centre_seed[refine] = x0_pass[refine]
             return centre_seed
 
+        def _build_seed_table(valid: np.ndarray) -> str:
+            """Build the per-spectrum PeakParameterValueTable for the next pass from the pass just
+            run (param_tab_name).  One column per carried shape parameter and one row per spectrum in
+            workspace-index order (FitPeaks maps table row -> workspace index).  A spectrum whose fit
+            was not valid (or a non-finite fitted value) is written as NaN, which FitPeaks reads as
+            'no seed for this spectrum/parameter' and leaves at the value from the instrument
+            parameters - so a failed guiding fit never poisons the next pass's shape seed."""
+            src = ADS.retrieve(param_tab_name)
+            cols = {p: np.asarray(src.column(p), dtype=float) for p in seed_carry_names}
+            tab = CreateEmptyTableWorkspace(OutputWorkspace=seed_tab_name)
+            for p in seed_carry_names:
+                tab.addColumn("double", p)
+            for ispec in range(n_total):
+                if valid[ispec]:
+                    tab.addRow([v if np.isfinite(v := cols[p][ispec]) else np.nan for p in seed_carry_names])
+                else:
+                    tab.addRow([np.nan] * len(seed_carry_names))
+            return seed_tab_name
+
         # Rebunch-smoothing is used ONLY to guide the raw fit's starting centre - a rebunched fit's peak
         # position carries the bias of its coarser binning, so its parameters are never reported.  Fit
         # the progressively finer rebunched (higher-SNR) versions coarsest-first, carrying forward the
@@ -336,6 +379,9 @@ def _fit_all_peaks_fitpeaks(
         # raw (unsmoothed) data over the full window, seeded with that refined centre; only it is
         # reported, and spectra where it fails are left unfit (no smoothed fallback).
         centre_seed = tof_centre.copy()
+        # per-spectrum shape seed carried between passes; None on the first pass (shape then comes
+        # from the instrument parameters), then each pass's fitted shape guides the next
+        seed_table = None
         if _PEAK_CENTRE_PARAM in seed_peak_param_names:
             for sv in sorted((int(s) for s in smooth_vals), reverse=True):  # coarsest first
                 sm_ws = f"__fitpeaks_smooth_{ipeak}_{sv}"
@@ -349,8 +395,10 @@ def _fit_all_peaks_fitpeaks(
                     pos_tolerance=_WINDOW_TOL_FRAC,
                     pos_tol_mode="Constrain",
                     pos_tol_fractional=True,
+                    seed_table=seed_table,
                 )
                 centre_seed = _refine_centre_seed(centre_seed, valid)
+                seed_table = _build_seed_table(valid)  # carry this pass's shape into the next
 
         # last_fit_ic: refine the centre once more with a raw fit of the requested function before the
         # authoritative fit switches to IC (mirrors the multidomain engine seeding IC from a raw fit)
@@ -362,8 +410,10 @@ def _fit_all_peaks_fitpeaks(
                 pos_tolerance=_WINDOW_TOL_FRAC,
                 pos_tol_mode="Constrain",
                 pos_tol_fractional=True,
+                seed_table=seed_table,
             )
             centre_seed = _refine_centre_seed(centre_seed, valid)
+            seed_table = _build_seed_table(valid)
 
         # authoritative raw fit over the full window, seeded with the refined centres and constrained
         # to a fraction of each spectrum's fit window so the reported centre stays anchored to the summed fit
@@ -376,6 +426,10 @@ def _fit_all_peaks_fitpeaks(
             pos_tolerance=_WINDOW_TOL_FRAC,
             pos_tol_mode="Constrain",
             pos_tol_fractional=True,
+            # the carried shape table's columns are peak_func_name's parameters, so it is only a valid
+            # seed when the final fit has not switched functions (last_fit_ic); otherwise let FitPeaks
+            # estimate IC's shape from the instrument parameters and observation
+            seed_table=seed_table if final_peak_func_name == peak_func_name else None,
         )
         for p in peak_param_names:
             param_cols[p][fit_mask_all] = np.asarray(param_table.column(p), dtype=float)[fit_mask_all]
