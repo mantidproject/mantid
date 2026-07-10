@@ -52,7 +52,7 @@ Usage
   workspace = Rebin(workspace, "1,10000, 100000")
 
   # Set monitor 4  (at workspace index 3) to  [3, 2, 1, 0, 0, 0, 0, 0, 5, 4]
-  dataY = workspace.dataY(3)
+  dataY = workspace.mutableY(3)
   y_values = [3, 2, 1, 0, 0, 0, 0, 0, 5, 4]
   for index in range(0, 10):
       dataY[index] = y_values [index]
@@ -62,7 +62,7 @@ Usage
   output_workspace = UnwrapMonitorsInTOF(InputWorkspace=workspace, WavelengthMin=5, WavelengthMax=20)
 
   # Inspect the unwrapped data
-  dataY_doubled = output_workspace.dataY(3)
+  dataY_doubled = output_workspace.y(3)
   print("The number of bins is {0} and is expected to be 20.".format(len(dataY_doubled)))
   print("The monitor 4 entries are: {0}.".format(dataY_doubled))
 

@@ -62,7 +62,7 @@ of the build system where the above datafiles do not exist.
     Q = ws.getAxis(1).extractValues()
     for i in range(len(Q)-1):
         qv = ( (Q[i]+Q[i+1])*0.5 ) / 4 / np.pi
-        y = ws.dataY(i)
+        y = ws.mutableY(i)
         y *= np.exp(-16*qv*qv)
     ws_corr = MagFormFactorCorrection(ws, IonName='Fe3', FormFactorWorkspace='Fe3FF')
 

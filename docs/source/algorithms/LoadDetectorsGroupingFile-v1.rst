@@ -170,13 +170,13 @@ Usage
 
     sid=0
     print(format_string.format(ws.getDetector(sid).getName(), ws.getDetector(sid).getID(),
-	  sid, ws.dataY(sid)[0]))
+	  sid, ws.y(sid)[0]))
     sid=2500
     print(format_string.format(ws.getDetector(sid).getName(), ws.getDetector(sid).getID(),
-	  sid, ws.dataY(sid)[0]))
+	  sid, ws.y(sid)[0]))
     sid=5000
     print(format_string.format(ws.getDetector(sid).getName(), ws.getDetector(sid).getID(),
-	  sid, ws.dataY(sid)[0]))
+	  sid, ws.y(sid)[0]))
 
 .. testcleanup:: LoadDetectorsGroupingFile
 

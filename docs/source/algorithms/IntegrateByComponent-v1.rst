@@ -38,19 +38,19 @@ Usage
 
     #Check some values
     print("For LevelsUp=1 we found that:")
-    print(" - two pixels in the same tube have the same value {}".format(ws1.dataY(1)[0]==ws1.dataY(100)[0]))
-    print(" - two pixels in different tubes have the same value {}".format(ws1.dataY(1)[0]==ws1.dataY(200)[0]))
-    print(" - two pixels in different banks have the same value {}".format(ws1.dataY(1)[0]==ws1.dataY(2000)[0]))
+    print(" - two pixels in the same tube have the same value {}".format(ws1.y(1)[0]==ws1.y(100)[0]))
+    print(" - two pixels in different tubes have the same value {}".format(ws1.y(1)[0]==ws1.y(200)[0]))
+    print(" - two pixels in different banks have the same value {}".format(ws1.y(1)[0]==ws1.y(2000)[0]))
 
     print("For LevelsUp=2 we found that:")
-    print(" - two pixels in the same tube have the same value {}".format(ws2.dataY(1)[0]==ws2.dataY(100)[0]))
-    print(" - two pixels in different tubes have the same value {}".format(ws2.dataY(1)[0]==ws2.dataY(200)[0]))
-    print(" - two pixels in different banks have the same value {}".format(ws2.dataY(1)[0]==ws2.dataY(2000)[0]))
+    print(" - two pixels in the same tube have the same value {}".format(ws2.y(1)[0]==ws2.y(100)[0]))
+    print(" - two pixels in different tubes have the same value {}".format(ws2.y(1)[0]==ws2.y(200)[0]))
+    print(" - two pixels in different banks have the same value {}".format(ws2.y(1)[0]==ws2.y(2000)[0]))
 
     print("For LevelsUp=4 we found that:")
-    print(" - two pixels in the same tube have the same value {}".format(ws0.dataY(1)[0]==ws0.dataY(100)[0]))
-    print(" - two pixels in different tubes have the same value {}".format(ws0.dataY(1)[0]==ws0.dataY(200)[0]))
-    print(" - two pixels in different banks have the same value {}".format(ws0.dataY(1)[0]==ws0.dataY(2000)[0]))
+    print(" - two pixels in the same tube have the same value {}".format(ws0.y(1)[0]==ws0.y(100)[0]))
+    print(" - two pixels in different tubes have the same value {}".format(ws0.y(1)[0]==ws0.y(200)[0]))
+    print(" - two pixels in different banks have the same value {}".format(ws0.y(1)[0]==ws0.y(2000)[0]))
 
 
 .. testcleanup:: IntegrateByComponent

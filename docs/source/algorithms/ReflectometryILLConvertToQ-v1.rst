@@ -183,7 +183,7 @@ Output:
    print('Number of points in R00: {}'.format(len(R00.x(0))))
    print('X unit in R11: ' + R11.getAxis(0).getUnit().unitID())
    print('Number of points in R11: {}'.format(len(R11.x(0))))
-   print('Size of Q resolution data: {}'.format(len(R11.readDx(0))))
+   print('Size of Q resolution data: {}'.format(len(R11.dx(0))))
 
 Output:
 

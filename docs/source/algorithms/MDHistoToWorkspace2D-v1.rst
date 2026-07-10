@@ -36,7 +36,7 @@ Usage
 
    # print 6th group of 4 bins in both input and output workspaces
    print("part of MD workspace {}".format(input.getSignalArray()[1,1]))
-   print("corresponding part of 2D workspace {}".format(output.dataY(5) ))
+   print("corresponding part of 2D workspace {}".format(output.y(5) ))
 
 Output:
 

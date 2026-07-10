@@ -58,8 +58,8 @@ Usage
        X=-0.008 * 4.5, Y= -0.008 * 4.5, Z=0.)
    # Fill intensity for pixels in the beam
    for i in [44, 45, 54, 55]:
-       direct.dataY(i).fill(1.)
-       direct.dataE(i).fill(0.1)
+       direct.mutableY(i).fill(1.)
+       direct.mutableE(i).fill(0.1)
    # Group detectors to form a 'line detector'. The line is vertical in this case.
    groupingPattern=''
    for row in range(10):
@@ -92,7 +92,7 @@ Usage
    decay = np.exp(-(Xs - 4.) / 3.)
    span = decay < 1.
    for i in [44, 45, 54, 55]:
-       Ys = reflected.dataY(i)
+       Ys = reflected.mutableY(i)
        Ys.fill(1.)
        Ys[span] = decay[span]
    reflected = GroupDetectors(

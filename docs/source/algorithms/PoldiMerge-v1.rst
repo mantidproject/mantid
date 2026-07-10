@@ -45,7 +45,7 @@ This small usage example merges two compatible POLDI-files which have been loade
     total_6903 = SumSpectra(spectra_6903)
 
     # The result has one spectrum with one bin, which contains the total counts.
-    counts_6903 = int(total_6903.dataY(0)[0])
+    counts_6903 = int(total_6903.y(0)[0])
     print("6903 contains a total of {} counts.".format(counts_6903))
 
     # The same with the second data file
@@ -55,7 +55,7 @@ This small usage example merges two compatible POLDI-files which have been loade
     spectra_6904 = Integration(histo_6904)
     total_6904 = SumSpectra(spectra_6904)
 
-    counts_6904 = int(total_6904.dataY(0)[0])
+    counts_6904 = int(total_6904.y(0)[0])
     print("6904 contains a total of {} counts.".format(counts_6904))
 
     # Now PoldiMerge is used to merge the two raw spectra by supplying a list of workspace names.
@@ -66,7 +66,7 @@ This small usage example merges two compatible POLDI-files which have been loade
     spectra_summed = Integration(histo_summed)
     total_summed = SumSpectra(spectra_summed)
 
-    print("6903+6904 contains a total of {} counts.".format(int(total_summed.dataY(0)[0])))
+    print("6903+6904 contains a total of {} counts.".format(int(total_summed.y(0)[0])))
     print("Summing the counts of the single data files leads to {} counts.".format(int(counts_6903 + counts_6904)))
 
 Output:

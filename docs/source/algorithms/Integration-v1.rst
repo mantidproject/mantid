@@ -154,7 +154,7 @@ Output:
         detector = ws.getDetector(i)
         L2 = sample.getDistance(detector)
         tof = UnitConversion.run('Energy', 'TOF', Ei, L1, L2, 0.0, DeltaEModeType.Direct, Ei)
-        ys = ws.dataY(i)
+        ys = ws.mutableY(i)
         ys += peak(tof, ws.x(i))
 
     # Fit Gaussians to the workspace.
@@ -174,8 +174,8 @@ Output:
         RangeLowerList=lowerLimits,
         RangeUpperList=upperLimits)
 
-    print('Intensity of the first peak: {:.5}'.format(totalIntensity.dataY(0)[0]))
-    print('Intensity of the last peak: {:.5}'.format(totalIntensity.dataY(nHisto-1)[0]))
+    print('Intensity of the first peak: {:.5}'.format(totalIntensity.y(0)[0]))
+    print('Intensity of the last peak: {:.5}'.format(totalIntensity.y(nHisto-1)[0]))
 
 Output:
 

@@ -389,7 +389,7 @@ Accessing Data
 A Matrix Workspace is essentially a 2D list of binned data where a workspace index, starting at 0, gives access to the data fields in each spectra.
 
 
-The data is accessed using the ``readX()``, ``readY()`` and ``readE()`` commands. Each of these commands takes a number that refers to the index on the workspace and returns a list of the data for that workspace index, i.e
+The data is accessed using the ``x()``, ``y()`` and ``e()`` commands. Each of these commands takes a number that refers to the index on the workspace and returns a list of the data for that workspace index, i.e
 
 .. testsetup:: MatrixWorkspaceData
 

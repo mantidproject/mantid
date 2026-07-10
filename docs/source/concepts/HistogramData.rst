@@ -139,8 +139,11 @@ Basic changes have been merged (soon after the 3.7 release).
 We will then work on reducing the use of the old interface (``readX()``, ``dataX()``, ``readY()``, ...) as much as possible.
 After that, more features will follow.
 
-We also want to expose most parts of the ``HistogramData`` module to Python, but no schedule has been decided yet.
-Parts of the old interface will be kept alive for now, in particular to maintain support for the old Python interface.
+The preferred ``x()``/``y()``/``e()``/``dx()`` and ``mutableX()``/``mutableY()``/``mutableE()``/``mutableDx()``
+accessors are now also exposed to Python on :class:`~mantid.api.MatrixWorkspace`, replacing the legacy
+``readX()``/``dataX()`` (etc.) interface there as well. Parts of the old interface will be kept alive for now,
+in particular to maintain support for existing Python scripts, but calling them now emits a
+``DeprecationWarning`` naming the replacement.
 
 Overview
 ########

@@ -36,9 +36,9 @@ However, vertical profiles over distribution data will be non-distributions, alb
     # line is a workspace created by LineProfile
     axis = line.getAxis(1)
     height = axis.getMax() - axis.getMin()
-    Ys = line.dataY(0)
+    Ys = line.mutableY(0)
     Ys *= height
-    Es = line.dataE(0)
+    Es = line.mutableE(0)
     Es *= height
 
 Usage
@@ -150,10 +150,10 @@ Output:
     for iVert in range(wsInTheta.getNumberHistograms()):
         for iHor in range(wsInTheta.blocksize()):
             if iVert + iHor < 60:
-                ys = wsInTheta.dataY(iVert)
+                ys = wsInTheta.mutableY(iVert)
                 ys[iHor] = numpy.nan
             elif iVert + iHor > 120:
-                ys = wsInTheta.dataY(iVert)
+                ys = wsInTheta.mutableY(iVert)
                 ys[iHor] = numpy.nan
 
     centre = 0.6

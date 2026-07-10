@@ -71,7 +71,7 @@ Output:
     ws = CreateSimulationWorkspace('MARI','0,1,10')
     nh = ws.getNumberHistograms()
     for ind in range(nh):
-        y = ws.dataY(ind)
+        y = ws.mutableY(ind)
         if ind>=100 and ind < 300:
             y.fill(100)
         else:

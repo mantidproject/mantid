@@ -400,26 +400,26 @@ Output
    # Group detectors
    wsg0 = GroupDetectors(ws,SpectraList=[1,2,3],KeepUngroupedSpectra=True,Behaviour='Sum')
    print("Grouped first 3 spectra results in workspace with {0} spectra and the grouped spectra is spectrum 0:".format(wsg0.getNumberHistograms()))
-   print(wsg0.dataY(0))
+   print(wsg0.y(0))
    print("First unaffected spectrum is now spectrum 1, former spectrum 4:")
-   print(wsg0.dataY(1) )
+   print(wsg0.y(1) )
    print("*********************************************************")
 
    # Group detectors differently
    wsg1 = GroupDetectors(ws,SpectraList=[2,3,4],KeepUngroupedSpectra=True,Behaviour='Sum')
    print("Grouped 3 spectra starting with second results in workspace with {0} spectra and the grouped spectra is spectrum 0:".format(wsg1.getNumberHistograms()))
-   print(wsg1.dataY(0))
+   print(wsg1.y(0))
    print("First unaffected spectrum is now spectrum 1, former spectrum 0:")
-   print(wsg1.dataY(1))
+   print(wsg1.y(1))
    print("*********************************************************")
 
    # Group detectors in a chain:
    wsg2 = GroupDetectors(wsg0,SpectraList=[4,5,6],KeepUngroupedSpectra=True,Behaviour='Sum')
    print("Grouped 6 spectra 3x3 twice results in workspace with {0} spectra and the grouped spectra is spectrum 0 and 1:".format(wsg2.getNumberHistograms()))
-   print(wsg2.dataY(0))
-   print(wsg2.dataY(1))
+   print(wsg2.y(0))
+   print(wsg2.y(1))
    print("First unaffected spectrum is now spectrum 3, former spectrum 7:")
-   print(wsg2.dataY(2))
+   print(wsg2.y(2))
    print("*********************************************************")
 
 Output:
@@ -475,10 +475,10 @@ Output:
    wsg = GroupDetectors(ws,MapFile=file_name,KeepUngroupedSpectra=True,Behaviour='Sum')
 
    print("Grouped workspace has {0} spectra".format(wsg.getNumberHistograms()))
-   print("spectrum 1 (sum of spectra 1-3): {}".format(wsg.dataY(0)))
-   print("spectrum 2 (sum of spectra 4-6): {}".format(wsg.dataY(1)))
-   print("spectrum 3 (sum of spectra 7-8): {}".format(wsg.dataY(2)))
-   print("spectrum 4 (sum of spectra 9-10): {}".format(wsg.dataY(3)))
+   print("spectrum 1 (sum of spectra 1-3): {}".format(wsg.y(0)))
+   print("spectrum 2 (sum of spectra 4-6): {}".format(wsg.y(1)))
+   print("spectrum 3 (sum of spectra 7-8): {}".format(wsg.y(2)))
+   print("spectrum 4 (sum of spectra 9-10): {}".format(wsg.y(3)))
 
 .. testcleanup:: ExGroupDetectorsWithMap
 

@@ -72,7 +72,7 @@ Usage
 
     out = FlipperEfficiency(group, SpinStates="00, 11, 10, 01")
 
-    print("Flipper efficiency at a wavelength of {:.1f} Å is ".format(mtd['out'].dataX(0)[3]) + str(mtd['out'].dataY(0)[3]))
+    print("Flipper efficiency at a wavelength of {:.1f} Å is ".format(mtd['out'].x(0)[3]) + str(mtd['out'].y(0)[3]))
 
 Output:
 
