@@ -47,14 +47,12 @@ constexpr double EPSILON = std::numeric_limits<double>::epsilon();
 constexpr double MIN_DOUBLE = std::numeric_limits<double>::min();
 constexpr double STEP_PERCENTAGE = 0.001;
 
-const auto defaultStepSize = [](size_t index, const double parameterValue) -> double {
-  UNUSED_ARG(index);
+const auto defaultStepSize = [](const double parameterValue) -> double {
   return fabs(parameterValue) < 100.0 * MIN_DOUBLE / STEP_PERCENTAGE ? 100.0 * EPSILON
                                                                      : parameterValue * STEP_PERCENTAGE;
 };
 
-const auto sqrtEpsilonStepSize = [](size_t index, const double parameterValue) -> double {
-  UNUSED_ARG(index);
+const auto sqrtEpsilonStepSize = [](const double parameterValue) -> double {
   return fabs(parameterValue) < 1 ? sqrt(EPSILON) : parameterValue * sqrt(EPSILON);
 };
 
@@ -86,7 +84,7 @@ const std::vector<std::string> EXCLUDEUSAGE = {"CompositeFunction"};
  * Constructor
  */
 IFunction ::IFunction()
-    : m_isParallel(false), m_handler(nullptr), m_chiSquared(0.0), m_stepSizeFunction(defaultStepSize) {}
+    : m_isParallel(false), m_handler(nullptr), m_chiSquared(0.0), m_stepSizeMethod(StepSizeMethod::DEFAULT) {}
 
 /**
  * Destructor
@@ -1159,29 +1157,21 @@ void IFunction::calNumericalDeriv(const FunctionDomain &domain, Jacobian &jacobi
  * @returns The step size to use when calculating the numerical derivative.
  */
 double IFunction::calculateStepSize(const size_t parameterIndex, const double parameterValue) const {
-  return m_stepSizeFunction(parameterIndex, parameterValue);
+  switch (m_stepSizeMethod) {
+  case StepSizeMethod::DEFAULT:
+    return defaultStepSize(parameterValue);
+  case StepSizeMethod::SQRT_EPSILON:
+    return sqrtEpsilonStepSize(parameterValue);
+  case StepSizeMethod::CUSTOM:
+    return m_stepSizes.at(parameterIndex);
+  }
+  throw std::invalid_argument("An invalid method for calculating the step size was provided.");
 }
 
 /** Sets the function to use when calculating the step size.
  * @param method :: An enum indicating which method to use when calculating the step size.
  */
-void IFunction::setStepSizeMethod(const StepSizeMethod method) {
-  switch (method) {
-  case StepSizeMethod::DEFAULT:
-    m_stepSizeFunction = defaultStepSize;
-    return;
-  case StepSizeMethod::SQRT_EPSILON:
-    m_stepSizeFunction = sqrtEpsilonStepSize;
-    return;
-  case StepSizeMethod::CUSTOM:
-    m_stepSizeFunction = [this](size_t index, double parameterValue) -> double {
-      UNUSED_ARG(parameterValue);
-      return m_stepSizes.at(index);
-    };
-    return;
-  }
-  throw std::invalid_argument("An invalid method for calculating the step size was provided.");
-}
+void IFunction::setStepSizeMethod(const StepSizeMethod method) { m_stepSizeMethod = method; }
 
 /** Initialize the function providing it the workspace
  * @param workspace :: The workspace to set

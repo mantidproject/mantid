@@ -732,8 +732,8 @@ private:
   std::vector<ParameterTie *> m_orderedTies;
   /// whether the function usage has been registered
   bool m_isRegistered{false};
-  /// The function used to calculate the step size
-  std::function<double(size_t, double)> m_stepSizeFunction;
+  /// The method used to calculate the step size
+  StepSizeMethod m_stepSizeMethod;
   /// The custom step sizes for the derivative
   std::vector<double> m_stepSizes;
 
