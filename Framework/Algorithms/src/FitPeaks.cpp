@@ -37,8 +37,10 @@
 #include "MantidKernel/StartsWithValidator.h"
 #include "MantidKernel/VectorHelper.h"
 
+#include "MantidAPI/Column.h"
 #include "boost/algorithm/string.hpp"
 #include "boost/algorithm/string/trim.hpp"
+#include <cmath>
 #include <limits>
 #include <utility>
 
@@ -352,8 +354,10 @@ void FitPeaks::init() {
                   "List of peak parameters' names");
   declareProperty(std::make_unique<ArrayProperty<double>>(PropertyNames::PEAK_PARAM_VALUES),
                   "List of peak parameters' value");
-  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>(PropertyNames::PEAK_PARAM_TABLE, "",
-                                                                      Direction::Input, PropertyMode::Optional),
+  // declared against the ITableWorkspace interface (not the concrete TableWorkspace) so a table can
+  // be supplied from Python, where table workspaces are exposed as ITableWorkspace
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(PropertyNames::PEAK_PARAM_TABLE, "",
+                                                                       Direction::Input, PropertyMode::Optional),
                   "Name of the an optional workspace, whose each column "
                   "corresponds to given peak parameter names, "
                   "and each row corresponds to a subset of spectra.");
@@ -746,8 +750,12 @@ void FitPeaks::processInputFunctions() {
     convertParametersNameToIndex();
     // m_uniformProfileStartingValue = true;
   } else if ((!partablename.empty()) && m_peakParamNames.empty()) {
-    // use non-uniform starting value of peak parameters
-    m_profileStartingValueTable = getProperty(partablename);
+    // use non-uniform (per-spectrum) starting values of peak parameters.  The table's columns are
+    // peak-function parameter names; convertParametersNameToIndex() picks the column names up (see
+    // its m_profileStartingValueTable branch) and maps them to parameter indexes, and the matching
+    // per-spectrum starting values are read from the table row in decideToEstimatePeakParams.
+    m_profileStartingValueTable = getProperty(PropertyNames::PEAK_PARAM_TABLE);
+    convertParametersNameToIndex();
   } else if (peakfunctiontype != "Gaussian") {
     // user specifies nothing
     g_log.warning("Neither parameter value table nor initial "
@@ -1367,7 +1375,7 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
       // re-applied as the baseline rather than falling back to function defaults.
       auto useUserSpecifedIfGiven =
           !(samePeakCrossSpectrum || (neighborPeakSameSpectrum && m_copyLastGoodPeakParameters));
-      bool observe_peak_width = decideToEstimatePeakParams(useUserSpecifedIfGiven, peakfunction);
+      bool observe_peak_width = decideToEstimatePeakParams(useUserSpecifedIfGiven, wi, peakfunction);
 
       if (observe_peak_width && m_peakWidthEstimateApproach == EstimatePeakWidth::NoEstimation) {
         g_log.warning("Peak width can be estimated as ZERO.  The result can be wrong");
@@ -1431,14 +1439,21 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
  * user specified starting value
  * @param firstPeakInSpectrum :: flag whether the given peak is the first peak
  * in the spectrum
+ * @param wsindex :: workspace index of the spectrum being fitted, used to pick the
+ * matching row when starting values are supplied per-spectrum via PeakParameterValueTable
  * @param peak_function :: peak function to set parameter values to
  * @return :: flag whether the peak width shall be observed
  */
-bool FitPeaks::decideToEstimatePeakParams(const bool firstPeakInSpectrum,
+bool FitPeaks::decideToEstimatePeakParams(const bool firstPeakInSpectrum, const size_t wsindex,
                                           const API::IPeakFunction_sptr &peak_function) {
   // should observe the peak width if the user didn't supply all of the peak
   // function parameters
   bool observe_peak_shape(m_initParamIndexes.size() != peak_function->nParams());
+
+  // when starting values come from a per-spectrum table, this spectrum must have a matching row;
+  // if it does not, fall back to estimating the peak shape from the data by observation
+  if (m_profileStartingValueTable && wsindex >= m_profileStartingValueTable->rowCount())
+    return true;
 
   if (!m_initParamIndexes.empty()) {
     // user specifies starting value of peak parameters
@@ -1447,8 +1462,18 @@ bool FitPeaks::decideToEstimatePeakParams(const bool firstPeakInSpectrum,
       // first peak.  using the user-specified value
       for (size_t i = 0; i < m_initParamIndexes.size(); ++i) {
         const size_t param_index = m_initParamIndexes[i];
-        const double param_value = m_initParamValues[i];
-        peak_function->setParameter(param_index, param_value);
+        // a supplied name that is not a parameter of this peak function was flagged with an
+        // out-of-range index by convertParametersNameToIndex; skip it rather than throw
+        if (param_index >= peak_function->nParams())
+          continue;
+        // per-spectrum starting value from the table row for this spectrum, else the uniform value
+        const double param_value = m_profileStartingValueTable
+                                       ? m_profileStartingValueTable->getColumn(i)->toDouble(wsindex)
+                                       : m_initParamValues[i];
+        // a non-finite table cell means "no seed for this spectrum/parameter": leave the value
+        // calculated from the instrument parameters (setMatrixWorkspace) in place for that one
+        if (std::isfinite(param_value))
+          peak_function->setParameter(param_index, param_value);
       }
     } else {
       // using the fitted paramters from the previous fitting result

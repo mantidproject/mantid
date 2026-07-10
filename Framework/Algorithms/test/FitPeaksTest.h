@@ -18,6 +18,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAlgorithms/FitPeaks.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/Logger.h"
@@ -416,6 +417,74 @@ public:
     AnalysisDataService::Instance().remove("PeakPositionsWS_ePP");
     AnalysisDataService::Instance().remove("FittedPeaksWS_ePP");
     AnalysisDataService::Instance().remove("PeakParametersWS_ePP");
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Test that per-spectrum starting values supplied through PeakParameterValueTable are consumed.
+   * The table has one column per peak parameter and one row per spectrum (row index -> workspace
+   * index); a non-finite cell means "no starting value for that spectrum/parameter".  This exercises
+   * the table branch of convertParametersNameToIndex and the per-row read in decideToEstimatePeakParams
+   * (previously the per-row values were never applied).
+   */
+  void test_peakParameterValueTable() {
+    const std::string data_ws_name("FitPeaksTest_ws_pPVT");
+    generateTestDataGaussian(data_ws_name);
+
+    // per-spectrum starting values; spectrum 1's Sigma is NaN to exercise the "no seed for this
+    // cell" path (the value is left as calculated rather than overwritten)
+    ITableWorkspace_sptr value_table = std::make_shared<DataObjects::TableWorkspace>();
+    value_table->addColumn("double", "Height");
+    value_table->addColumn("double", "Sigma");
+    value_table->addColumn("double", "PeakCentre");
+    const std::vector<double> heights{2.0, 4.0, 3.0};
+    const std::vector<double> sigmas{0.15, std::nan(""), 0.19};
+    const std::vector<double> centres{5.0, 5.01, 5.03};
+    for (size_t i = 0; i < 3; ++i) {
+      API::TableRow row = value_table->appendRow();
+      row << heights[i] << sigmas[i] << centres[i];
+    }
+    AnalysisDataService::Instance().addOrReplace("FitPeaksTest_valueTable", value_table);
+
+    FitPeaks fitpeaks;
+    fitpeaks.initialize();
+    fitpeaks.setRethrows(true);
+    TS_ASSERT(fitpeaks.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("InputWorkspace", data_ws_name));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", 0));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 2));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCenters", "5.0"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitWindowBoundaryList", "2.5, 6.5"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakParameterValueTable", "FitPeaksTest_valueTable"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("HighBackground", false));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("ConstrainPeakPositions", false));
+
+    fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS_pPVT");
+    fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS_pPVT");
+    fitpeaks.setProperty("FittedPeaksWorkspace", "FittedPeaksWS_pPVT");
+
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.execute());
+    TS_ASSERT(fitpeaks.isExecuted());
+    if (!fitpeaks.isExecuted())
+      return;
+
+    API::MatrixWorkspace_sptr main_out_ws = std::dynamic_pointer_cast<API::MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve("PeakPositionsWS_pPVT"));
+    TS_ASSERT(main_out_ws);
+    TS_ASSERT_EQUALS(main_out_ws->getNumberHistograms(), 3);
+
+    // each spectrum's single peak fits near its d ~ 5 position (from generateTestDataGaussian), so the
+    // per-row read path executed cleanly across all three spectra (incl. the NaN Sigma cell)
+    TS_ASSERT_DELTA(main_out_ws->histogram(0).y()[0], 5.0, 1.E-2);
+    TS_ASSERT_DELTA(main_out_ws->histogram(1).y()[0], 5.01, 1.E-2);
+    TS_ASSERT_DELTA(main_out_ws->histogram(2).y()[0], 5.03, 1.E-2);
+
+    // clean up
+    AnalysisDataService::Instance().remove(data_ws_name);
+    AnalysisDataService::Instance().remove("FitPeaksTest_valueTable");
+    AnalysisDataService::Instance().remove("PeakPositionsWS_pPVT");
+    AnalysisDataService::Instance().remove("FittedPeaksWS_pPVT");
+    AnalysisDataService::Instance().remove("PeakParametersWS_pPVT");
   }
 
   //----------------------------------------------------------------------------------------------

@@ -222,7 +222,8 @@ private:
   API::MatrixWorkspace_sptr createMatrixWorkspace(const std::vector<double> &vec_x, const std::vector<double> &vec_y,
                                                   const std::vector<double> &vec_e);
 
-  bool decideToEstimatePeakParams(const bool firstPeakInSpectrum, const API::IPeakFunction_sptr &peak_function);
+  bool decideToEstimatePeakParams(const bool firstPeakInSpectrum, const size_t wsindex,
+                                  const API::IPeakFunction_sptr &peak_function);
 
   /// Process the result from fitting a single peak
   bool processSinglePeakFitResult(size_t wsindex, size_t peakindex, const double cost,
