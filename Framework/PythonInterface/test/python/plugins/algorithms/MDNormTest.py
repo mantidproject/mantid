@@ -7,7 +7,7 @@
 import unittest
 
 from mantid.api import AlgorithmManager
-from mantid.simpleapi import CreateMDWorkspace, CreateSampleWorkspace, DeleteWorkspace, LoadEmptyInstrument, mtd
+from mantid.simpleapi import CreateMDWorkspace, CreateSampleWorkspace, DeleteWorkspace, LoadEmptyInstrument, SetUB, mtd
 
 
 class MDNormTest(unittest.TestCase):
@@ -27,7 +27,7 @@ class MDNormTest(unittest.TestCase):
         self._workspace_names.append(ws.name())
         return ws
 
-    def _make_mde(self, ndims=3, frame="QSample", wavelength=None, mdnorm_logs=False):
+    def _make_mde(self, ndims=3, frame="QSample", wavelength=None, mdnorm_logs=False, oriented_lattice=False):
         if ndims == 3:
             names = "Q_x,Q_y,Q_z"
             units = "A^-1,A^-1,A^-1"
@@ -57,6 +57,8 @@ class MDNormTest(unittest.TestCase):
             ws.getExperimentInfo(0).run().addProperty("MDNorm_high", [10.0], True)
         if ndims > 3:
             ws.getExperimentInfo(0).run().addProperty("Ei", 20.0, True)
+        if oriented_lattice:
+            SetUB(ws, 5, 5, 5, 90, 90, 90)
         return ws
 
     @staticmethod
@@ -125,6 +127,16 @@ class MDNormTest(unittest.TestCase):
         alg.setProperty("MonoSCDNormalizationWorkspace", norm)
         issues = alg.validateInputs()
         self.assertIn("MonoSCDNormalizationWorkspace", issues)
+
+    def test_allows_rlu_true_for_monochromatic_input(self):
+        data = self._make_mde(wavelength=1.5, oriented_lattice=True)
+        norm = self._make_mde(wavelength=1.5, oriented_lattice=True)
+        alg = self._setup_alg()
+        alg.setProperty("InputWorkspace", data)
+        alg.setProperty("MonoSCDNormalizationWorkspace", norm)
+        alg.setProperty("RLU", True)
+        issues = alg.validateInputs()
+        self.assertEqual(issues, {})
 
     def test_normalization_workspace_dimension_mismatch(self):
         data = self._make_mde(ndims=3, wavelength=1.5)

@@ -720,9 +720,15 @@ std::map<std::string, std::string> MDNorm::getBinParameters() {
   m_W = DblMatrix(W);
   m_W.Transpose();
 
-  // Find maximum Q. Not applicable to monochromatic input: there is no
-  // MDNorm_low/MDNorm_high (TOF-only, set by CropWorkspaceForMDNorm), so Q-dimension
-  // extents fall back to the plain workspace extents below (see m_isRLU branch).
+  // Find maximum Q, an isotropic bound used below to set the default HKL bin extents
+  // (only consumed when a Q dimension's binning is left automatic/step-only, see the
+  // m_isRLU branch below). For TOF input this comes from the physical wavelength/TOF
+  // window each detector reaches (MDNorm_low/MDNorm_high logs, set by
+  // CropWorkspaceForMDNorm). Monochromatic input has no such trajectory -- each event
+  // is a single measured Q_sample point -- so maxQ is instead estimated from the
+  // workspace's own data-occupied extents: the box-tree's tight bounding box (not the
+  // nominal/arbitrary MinValues/MaxValues used at MD-conversion time), converted to an
+  // isotropic bound by taking the modulus of its farthest corner from the origin.
   double maxQ = 0.;
   if (!m_monochromatic) {
     auto &exptInfo0 = *(m_inputWS->getExperimentInfo(static_cast<uint16_t>(0)));
@@ -753,6 +759,12 @@ std::map<std::string, std::string> MDNorm::getBinParameters() {
 
       maxQ = ki + std::max(kfmin, kfmax);
     }
+  } else {
+    auto dataExtents = m_inputWS->getMinimumExtents();
+    double qx = std::max(std::fabs(dataExtents[0].getMin()), std::fabs(dataExtents[0].getMax()));
+    double qy = std::max(std::fabs(dataExtents[1].getMin()), std::fabs(dataExtents[1].getMax()));
+    double qz = std::max(std::fabs(dataExtents[2].getMin()), std::fabs(dataExtents[2].getMax()));
+    maxQ = std::sqrt(qx * qx + qy * qy + qz * qz);
   }
   size_t basisVectorIndex = 0;
   std::vector<coord_t> transformation;
@@ -784,10 +796,7 @@ std::map<std::string, std::string> MDNorm::getBinParameters() {
       // get the extents an number of bins
       coord_t dimMax = dimension->getMaximum();
       coord_t dimMin = dimension->getMinimum();
-      // For monochromatic input there is no TOF-derived maxQ, so fall back to the
-      // workspace's own Q extents (same as the non-RLU case) rather than scaling by
-      // the lattice parameters.
-      if (m_isRLU && !m_monochromatic) {
+      if (m_isRLU) {
         Mantid::Geometry::OrientedLattice ol;
         ol.setUB(m_UB * m_W); // note that this is already multiplied by 2Pi
         if (dimIndex == 0) {

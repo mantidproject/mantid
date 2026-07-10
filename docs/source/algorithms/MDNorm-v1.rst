@@ -86,9 +86,12 @@ both of which can produce a matching normalization workspace).
 log -- set automatically by `ConvertHFIRSCDtoMDE` -- confirming it originates from a monochromatic instrument.
 
 Unlike the time-of-flight case, there is no `MDNorm_low`/`MDNorm_high` log requirement (those are set by
-:ref:`CropWorkspaceForMDNorm <algm-CropWorkspaceForMDNorm>`, a time-of-flight-only step). If a Q dimension's binning
-is left unspecified, it is integrated over the workspace's own extents rather than a theoretical maximum momentum
-transfer.
+:ref:`CropWorkspaceForMDNorm <algm-CropWorkspaceForMDNorm>`, a time-of-flight-only step), since each event already
+corresponds to a single measured `Q_sample` point rather than a trajectory to integrate. If `RLU` is `True` and a Q
+dimension's binning is left unspecified (or given only a step size), its default extent is still estimated the same
+way as for time-of-flight data -- scaled by the crystal's lattice parameters -- except the underlying momentum bound
+comes from the workspace's own data-occupied extents (a box-tree bounding box) rather than an instrumental
+wavelength/time-of-flight window.
 
 **Example - MDNorm for WAND/DEMAND**
 
