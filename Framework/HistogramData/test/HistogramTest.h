@@ -905,6 +905,22 @@ public:
     TS_ASSERT_THROWS(hist.setSharedE(data2), const std::logic_error &);
   }
 
+  void test_dx_triggers_creation() {
+    Histogram hist(Points(2));
+    TS_ASSERT_THROWS_NOTHING(hist.dx());
+    TS_ASSERT_EQUALS(hist.dx().size(), 2);
+    TS_ASSERT_EQUALS(hist.dx()[0], 0.0);
+    TS_ASSERT_EQUALS(hist.dx()[1], 0.0);
+  }
+
+  void test_mutableDx_triggers_creation() {
+    Histogram hist(Points(2));
+    TS_ASSERT_THROWS_NOTHING(hist.mutableDx());
+    TS_ASSERT_EQUALS(hist.mutableDx().size(), 2);
+    TS_ASSERT_EQUALS(hist.mutableDx()[0], 0.0);
+    TS_ASSERT_EQUALS(hist.mutableDx()[1], 0.0);
+  }
+
   void test_setPointStandardDeviations_point_data() {
     Histogram hist(Points(2));
     TS_ASSERT_THROWS_NOTHING(hist.setPointStandardDeviations(std::vector<double>{1.0, 2.0}));
