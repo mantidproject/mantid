@@ -144,11 +144,11 @@ void Fit::readProperties() {
   const std::string stepSizeMethod = getPropertyValue("StepSizeMethod");
   if (stepSizeMethod == "Custom") {
     const std::vector<double> customStepSizes = getProperty("CustomStepSizes");
-    size_t np = m_function->nParams();
-    if (customStepSizes.size() != np) {
+    size_t nparams = m_function->nParams();
+    if (customStepSizes.size() != nparams) {
       g_log.error()
           << "The 'CustomStepSizes' list must be the same lenght as the number of parameters. The list should contain "
-          << np << " values.\n";
+          << nparams << " values.\n";
     }
     m_function->setCustomStepSizes(customStepSizes);
   }
@@ -317,15 +317,15 @@ void Fit::createOutput() {
       }
     }
 
-    size_t np = m_function->nParams();
+    size_t nparams = m_function->nParams();
     size_t ia = 0;
-    for (size_t i = 0; i < np; i++) {
+    for (size_t i = 0; i < nparams; i++) {
       if (!m_function->isActive(i))
         continue;
       Mantid::API::TableRow row = covariance->appendRow();
       row << m_function->parameterName(i);
       size_t ja = 0;
-      for (size_t j = 0; j < np; j++) {
+      for (size_t j = 0; j < nparams; j++) {
         if (!m_function->isActive(j))
           continue;
         if (j == i)
