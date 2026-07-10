@@ -90,6 +90,7 @@ target_precompile_headers(
 target_include_directories(
   ${_target_name} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
 )
+target_include_directories(${_target_name} SYSTEM PUBLIC $<BUILD_INTERFACE:${Python_INCLUDE_DIRS}>)
 
 # Set the name of the generated library
 set_target_properties(
