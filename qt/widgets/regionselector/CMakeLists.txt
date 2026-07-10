@@ -13,7 +13,7 @@ mtd_add_qt_library(
   NOMOC ${NOMOC_HEADERS}
   DEFS IN_MANTIDQT_REGIONSELECTOR
   INCLUDE_DIRS inc ${Boost_INCLUDE_DIRS}
-  LINK_LIBS Mantid::PythonInterfaceCore Mantid::API
+  LINK_LIBS Mantid::PythonInterfaceCore Mantid::API Python::Python
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon
   INSTALL_DIR ${WORKBENCH_LIB_DIR}
   OSX_INSTALL_RPATH @loader_path/../MacOS @loader_path/../Frameworks
