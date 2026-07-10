@@ -54,7 +54,7 @@ jobs:
           mkdir -p "$project_dir"
           cat > "$project_dir/pixi.toml" <<'EOF'
           [workspace]
-          channels = ["mantid/label/nightly", "mantid", "neutrons"]
+          channels = ["conda-forge", "mantid/label/nightly", "mantid", "neutrons"]
           platforms = ["linux-64"]
 
           [dependencies]
