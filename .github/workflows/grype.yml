@@ -60,7 +60,7 @@ jobs:
           [dependencies]
           mantidworkbench = "*"
           mslice = "*"
-          pystog = "*"
+          pystog = ">=0.6.3"
           EOF
 
           echo "project_dir=$project_dir" >> "$GITHUB_OUTPUT"
