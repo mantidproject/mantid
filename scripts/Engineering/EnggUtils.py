@@ -616,8 +616,11 @@ def _load_run_and_convert_to_dSpacing(filepath: str, instrument: str, full_calib
         logger.warning(f"Run {ws.name()} has invalid proton charge.")
         mantid.DeleteWorkspace(ws)
         return None
-    mantid.ApplyDiffCal(InstrumentWorkspace=ws, CalibrationWorkspace=full_calib)
+    cal = _correct_full_calib_for_offset_scattering_com(ws, full_calib) if _can_calculate_scattering_com(ws) else full_calib
+    mantid.ApplyDiffCal(InstrumentWorkspace=ws, CalibrationWorkspace=cal)
     ws = mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws.name(), Target="dSpacing")
+    if cal is not full_calib:
+        mantid.DeleteWorkspace(cal)
     return ws
 
 
@@ -747,6 +750,49 @@ def _save_output_files(focus_dirs, sample_ws_foc, calibration, van_run, rb_num=N
 
 def _generate_output_file_name(inst, sample_run_no, van_run_no, suffix, xunit, ext=""):
     return "_".join([inst, sample_run_no, van_run_no, suffix, xunit]) + ext
+
+
+def _correct_full_calib_for_offset_scattering_com(ws, full_calib):
+    com = mantid.EstimateScatteringVolumeCentreOfMass(ws)
+
+    # per-detector ratio of DIFC1(at com) / DIFC(at (0,0,0))
+    difc0 = mantid.CalculateDIFC(InputWorkspace=ws, OutputWorkspace="__difc0", StoreInADS=False)
+
+    # extract sample information
+    sample = ws.getInstrument().getSample()
+    orig, name = sample.getPos(), sample.getFullName()
+
+    # move the nominal sample location to the scattering COM and calculate the DIFCs from here
+    mantid.MoveInstrumentComponent(Workspace=ws, ComponentName=name, X=com.X(), Y=com.Y(), Z=com.Z(), RelativePosition=False)
+    difc1 = mantid.CalculateDIFC(InputWorkspace=ws, OutputWorkspace="__difc1", StoreInADS=False)
+
+    # move the sample back to avoid any issues down the line
+    mantid.MoveInstrumentComponent(Workspace=ws, ComponentName=name, X=orig.X(), Y=orig.Y(), Z=orig.Z(), RelativePosition=False)
+
+    # scale DIFC column only, per detector; leave DIFA/TZERO untouched
+    cal = mantid.CloneWorkspace(InputWorkspace=full_calib, OutputWorkspace="__full_calib_com")
+    difc_col, detid_col = cal.column("difc"), cal.column("detid")
+    for irow, detid in enumerate(detid_col):
+        cal.setCell("difc", irow, difc_col[irow] * difc1.getValue(detid) / difc0.getValue(detid))
+
+    return cal
+
+
+def _can_calculate_scattering_com(ws):
+    run = ws.getRun()
+    do_com_calc = run.hasProperty("GaugeVolume") and run.sample().getShape().hasValidShape()
+    if do_com_calc:
+        logger.notice(
+            f"Workspace {ws.name()} has a Gauge Volume and Sample Shape defined - Calibration DIFCs will "
+            f"be adjusted to account for any offset in the scattering volume centre of mass"
+        )
+    else:
+        logger.notice(
+            f"Workspace {ws.name()} does not have a Gauge Volume and Sample Shape defined - use of calibration DIFCs "
+            f"assume the gauge volume is fully within the sample. "
+            f"If this is not correct, please define sample shape and gauge volume."
+        )
+    return do_com_calc
 
 
 # DEPRECATED FUNCTIONS BELOW
