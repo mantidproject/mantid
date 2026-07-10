@@ -144,13 +144,17 @@ void Fit::readProperties() {
   const std::string stepSizeMethod = getPropertyValue("StepSizeMethod");
   if (stepSizeMethod == "Custom") {
     const std::vector<double> customStepSizes = getProperty("CustomStepSizes");
-    size_t nparams = m_function->nParams();
+    const size_t nparams = m_function->nParams();
     if (customStepSizes.size() != nparams) {
       g_log.error()
           << "The 'CustomStepSizes' list must be the same lenght as the number of parameters. The list should contain "
           << nparams << " values.\n";
     }
     m_function->setCustomStepSizes(customStepSizes);
+    for (size_t i = 0; i < nparams; i++) {
+      g_log.debug() << "The step size of " << m_function->parameterName(i) << " has been set to " << customStepSizes[i]
+                    << "\n";
+    }
   }
 }
 
