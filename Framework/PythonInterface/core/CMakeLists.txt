@@ -103,8 +103,10 @@ if(TARGET Boost::python${Python_VERSION_MAJOR}${Python_VERSION_MINOR})
 else()
   set(PUBLIC_TARGETS Python::NumPy ${BoostPython_LIBRARIES})
 endif()
-if(USE_PYTHON_DYNAMIC_LIB OR APPLE)
+if(USE_PYTHON_DYNAMIC_LIB)
   list(APPEND PUBLIC_TARGETS Python::Python)
+elseif(TARGET Python::Module)
+  list(APPEND PUBLIC_TARGETS Python::Module)
 endif()
 # Dependencies
 target_link_libraries(
