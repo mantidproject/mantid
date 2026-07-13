@@ -10,7 +10,7 @@ import unittest
 
 from mantid import FileFinder
 from mantid.api import AnalysisDataService, WorkspaceGroup
-from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces
+from mantid.simpleapi import CreateSampleWorkspace, CropWorkspace, GroupWorkspaces
 from mantid.kernel import V3D
 from testhelpers import assertRaisesNothing, create_algorithm, WorkspaceCreationHelper
 from testhelpers.tempfile_wrapper import TemporaryFileHelper
@@ -23,6 +23,7 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
 
     _DET_ID_LABEL = "detectorid"
     _THETA_LABEL = "theta_offset"
+    _ANGLE_LABEL = "angle"
     _COLUMN_NUM_ERROR = "Calibration file should contain two space de-limited columns"
     _COLUMN_LABELS_ERROR = "Incorrect column labels in calibration file"
 
@@ -185,6 +186,167 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         output_ws = AnalysisDataService.retrieve(output_ws_name)
         self._check_final_theta_values(ws, output_ws, calibration_data={det_id: theta_offset})
 
+    def test_absolute_theta_calibration_uses_detector_index_order_and_factor_of_two(self):
+        input_ws_name = "test_1234"
+        ws = self._create_sample_workspace(input_ws_name)
+        angles = [0.05 * index for index in range(ws.getNumberHistograms())]
+        self.temp_calibration_file = TemporaryFileHelper(fileContent=self._absolute_calibration_file_content(angles), extension=".dat")
+
+        output_ws_name = "test_calibrated"
+        experiment_specular_index = 4
+        calibration_specular_index = 4
+        args = {
+            "InputWorkspace": ws,
+            "CalibrationFile": self.temp_calibration_file.getName(),
+            "CalibrationAngleType": "Absolute",
+            "AbsoluteAngleType": "Theta",
+            "CalibrationSpecularPixelIndex": calibration_specular_index,
+            "ExperimentSpecularPixelIndex": experiment_specular_index,
+            "OutputWorkspace": output_ws_name,
+        }
+        self._assert_run_algorithm_succeeds(args, [input_ws_name, output_ws_name])
+
+        output_ws = AnalysisDataService.retrieve(output_ws_name)
+        self._check_absolute_final_theta_values(
+            ws, output_ws, angles, calibration_specular_index, experiment_specular_index, angle_multiplier=2.0
+        )
+
+    def test_absolute_two_theta_calibration_does_not_apply_factor_of_two(self):
+        input_ws_name = "test_1234"
+        ws = self._create_sample_workspace(input_ws_name)
+        angles = [0.05 * index for index in range(ws.getNumberHistograms())]
+        self.temp_calibration_file = TemporaryFileHelper(fileContent=self._absolute_calibration_file_content(angles), extension=".dat")
+
+        output_ws_name = "test_calibrated"
+        experiment_specular_index = 4
+        calibration_specular_index = 4
+        args = {
+            "InputWorkspace": ws,
+            "CalibrationFile": self.temp_calibration_file.getName(),
+            "CalibrationAngleType": "Absolute",
+            "AbsoluteAngleType": "TwoTheta",
+            "CalibrationSpecularPixelIndex": calibration_specular_index,
+            "ExperimentSpecularPixelIndex": experiment_specular_index,
+            "OutputWorkspace": output_ws_name,
+        }
+        self._assert_run_algorithm_succeeds(args, [input_ws_name, output_ws_name])
+
+        output_ws = AnalysisDataService.retrieve(output_ws_name)
+        self._check_absolute_final_theta_values(
+            ws, output_ws, angles, calibration_specular_index, experiment_specular_index, angle_multiplier=1.0
+        )
+
+    def test_absolute_calibration_interpolates_fractional_specular_indexes(self):
+        input_ws_name = "test_1234"
+        ws = self._create_sample_workspace(input_ws_name)
+        angles = [0.05 * index for index in range(ws.getNumberHistograms())]
+        self.temp_calibration_file = TemporaryFileHelper(fileContent=self._absolute_calibration_file_content(angles), extension=".dat")
+
+        output_ws_name = "test_calibrated"
+        experiment_specular_index = 4.5
+        calibration_specular_index = 4.5
+        args = {
+            "InputWorkspace": ws,
+            "CalibrationFile": self.temp_calibration_file.getName(),
+            "CalibrationAngleType": "Absolute",
+            "AbsoluteAngleType": "Theta",
+            "CalibrationSpecularPixelIndex": calibration_specular_index,
+            "ExperimentSpecularPixelIndex": experiment_specular_index,
+            "OutputWorkspace": output_ws_name,
+        }
+        self._assert_run_algorithm_succeeds(args, [input_ws_name, output_ws_name])
+
+        output_ws = AnalysisDataService.retrieve(output_ws_name)
+        self._check_absolute_final_theta_values(
+            ws, output_ws, angles, calibration_specular_index, experiment_specular_index, angle_multiplier=2.0
+        )
+
+    def test_absolute_calibration_uses_detector_spectra_in_cropped_workspace(self):
+        input_ws_name = "test_1234"
+        ws = self._create_sample_workspace(input_ws_name)
+        ws = CropWorkspace(InputWorkspace=ws, StartWorkspaceIndex=2, EndWorkspaceIndex=6, OutputWorkspace=input_ws_name)
+        angles = [0.05 * index for index in range(ws.getNumberHistograms())]
+        self.temp_calibration_file = TemporaryFileHelper(fileContent=self._absolute_calibration_file_content(angles), extension=".dat")
+
+        output_ws_name = "test_calibrated"
+        experiment_specular_index = 2
+        calibration_specular_index = 2
+        args = {
+            "InputWorkspace": ws,
+            "CalibrationFile": self.temp_calibration_file.getName(),
+            "CalibrationAngleType": "Absolute",
+            "CalibrationSpecularPixelIndex": calibration_specular_index,
+            "ExperimentSpecularPixelIndex": experiment_specular_index,
+            "OutputWorkspace": output_ws_name,
+        }
+        self._assert_run_algorithm_succeeds(args, [input_ws_name, output_ws_name])
+
+        output_ws = AnalysisDataService.retrieve(output_ws_name)
+        self._check_absolute_final_theta_values(
+            ws, output_ws, angles, calibration_specular_index, experiment_specular_index, angle_multiplier=2.0
+        )
+
+    def test_absolute_calibration_allows_columns_reversed_in_file(self):
+        input_ws_name = "test_1234"
+        ws = self._create_sample_workspace(input_ws_name)
+        angles = [0.05 * index for index in range(ws.getNumberHistograms())]
+        self.temp_calibration_file = TemporaryFileHelper(
+            fileContent=self._absolute_calibration_file_content(angles, reverse=True), extension=".dat"
+        )
+
+        output_ws_name = "test_calibrated"
+        args = {
+            "InputWorkspace": ws,
+            "CalibrationFile": self.temp_calibration_file.getName(),
+            "CalibrationAngleType": "Absolute",
+            "CalibrationSpecularPixelIndex": 4,
+            "ExperimentSpecularPixelIndex": 4,
+            "OutputWorkspace": output_ws_name,
+        }
+        self._assert_run_algorithm_succeeds(args, [input_ws_name, output_ws_name])
+
+        output_ws = AnalysisDataService.retrieve(output_ws_name)
+        self._check_absolute_final_theta_values(ws, output_ws, angles, 4, 4, angle_multiplier=2.0)
+
+    def test_absolute_calibration_uses_row_order_not_detector_id_values(self):
+        input_ws_name = "test_1234"
+        ws = self._create_sample_workspace(input_ws_name)
+        angles = [0.05 * index for index in range(ws.getNumberHistograms())]
+        calibration_lines = [f"{self._DET_ID_LABEL} {self._ANGLE_LABEL}\n"]
+        for index, angle in enumerate(angles):
+            calibration_lines.append(f"{1000 + index} {angle}\n")
+        self.temp_calibration_file = TemporaryFileHelper(fileContent="".join(calibration_lines), extension=".dat")
+
+        output_ws_name = "test_calibrated"
+        args = {
+            "InputWorkspace": ws,
+            "CalibrationFile": self.temp_calibration_file.getName(),
+            "CalibrationAngleType": "Absolute",
+            "CalibrationSpecularPixelIndex": 4,
+            "ExperimentSpecularPixelIndex": 4,
+            "OutputWorkspace": output_ws_name,
+        }
+        self._assert_run_algorithm_succeeds(args, [input_ws_name, output_ws_name])
+
+        output_ws = AnalysisDataService.retrieve(output_ws_name)
+        self._check_absolute_final_theta_values(ws, output_ws, angles, 4, 4, angle_multiplier=2.0)
+
+    def test_absolute_calibration_raises_if_specular_index_out_of_range(self):
+        input_ws_name = "test_1234"
+        ws = self._create_sample_workspace(input_ws_name)
+        angles = [0.05 * index for index in range(ws.getNumberHistograms())]
+        self.temp_calibration_file = TemporaryFileHelper(fileContent=self._absolute_calibration_file_content(angles), extension=".dat")
+
+        args = {
+            "InputWorkspace": ws,
+            "CalibrationFile": self.temp_calibration_file.getName(),
+            "CalibrationAngleType": "Absolute",
+            "CalibrationSpecularPixelIndex": len(angles),
+            "ExperimentSpecularPixelIndex": 4,
+            "OutputWorkspace": "test_calibrated",
+        }
+        self._assert_run_algorithm_raises_exception(args, "CalibrationSpecularPixelIndex must be in the range")
+
     def _check_final_theta_values(self, input_ws, output_ws, calibration_data=None):
         if not calibration_data:
             calibration_data = self.calibration_data
@@ -202,6 +364,48 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
             expected_two_theta = ((two_theta_in * self._RAD_TO_DEG) + theta_offset) * self._DEG_TO_RAD if theta_offset else two_theta_in
 
             self.assertAlmostEqual(two_theta_out, expected_two_theta, msg=f"Unexpected theta value for detector {det_id}")
+
+    def _check_absolute_final_theta_values(
+        self, input_ws, output_ws, absolute_calibration_angles, calibration_specular_index, experiment_specular_index, angle_multiplier
+    ):
+        info_in = input_ws.spectrumInfo()
+        info_out = output_ws.spectrumInfo()
+        experiment_specular_two_theta = self._interpolate_experiment_two_theta(info_in, experiment_specular_index)
+        calibration_specular_angle = self._interpolate(absolute_calibration_angles, calibration_specular_index)
+
+        for index in range(input_ws.getNumberHistograms()):
+            relative_calibration_angle = self._interpolate(absolute_calibration_angles, index) - calibration_specular_angle
+            expected_two_theta = (experiment_specular_two_theta - angle_multiplier * relative_calibration_angle) * self._DEG_TO_RAD
+            self.assertAlmostEqual(info_out.signedTwoTheta(index), expected_two_theta, msg=f"Unexpected theta value for index {index}")
+
+    @staticmethod
+    def _absolute_calibration_file_content(angles, reverse=False):
+        if reverse:
+            lines = ["angle detectorid\n"]
+            lines.extend(f"{angle} {index}\n" for index, angle in enumerate(angles))
+        else:
+            lines = ["detectorid angle\n"]
+            lines.extend(f"{index} {angle}\n" for index, angle in enumerate(angles))
+        return "".join(lines)
+
+    def _interpolate_experiment_two_theta(self, spectrum_info, index):
+        lower_index = math.floor(index)
+        upper_index = math.ceil(index)
+        lower_two_theta = spectrum_info.signedTwoTheta(lower_index) * self._RAD_TO_DEG
+        upper_two_theta = spectrum_info.signedTwoTheta(upper_index) * self._RAD_TO_DEG
+        return self._interpolate_between(index, lower_index, lower_two_theta, upper_index, upper_two_theta)
+
+    def _interpolate(self, values, index):
+        lower_index = math.floor(index)
+        upper_index = math.ceil(index)
+        return self._interpolate_between(index, lower_index, values[lower_index], upper_index, values[upper_index])
+
+    @staticmethod
+    def _interpolate_between(index, lower_index, lower_value, upper_index, upper_value):
+        if lower_index == upper_index:
+            return lower_value
+        fraction = (index - lower_index) / (upper_index - lower_index)
+        return lower_value + fraction * (upper_value - lower_value)
 
     def _create_sample_workspace(self, name):
         """Creates a workspace with 9 detectors. Only detector IDs 11 to 14 will have calibration data"""
