@@ -49,7 +49,7 @@ Metadata Sources
 
 In its default state, the algorithm will attempt to get as many of the metadata as it can from the workspace history, which requires
 that the workspace has been processed using the same workflow used in the :ref:`ISIS Reflectometry Interface <interface-isis-refl>`.
-This is not compatible with all reduction workflows, however, and so this algorith also provides methods for fine-tuning where the
+This is not compatible with all reduction workflows, however, and so this algorithm also provides methods for fine-tuning where the
 saving process sources any metadata.
 
 +--------------------------+-----------------------------------------------------------------------------------------------+
