@@ -1,0 +1,89 @@
+name: Grype Scan
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/grype.yml
+      - .grype.yaml
+  schedule:
+    - cron: '0 12 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Run the install and scan but skip SARIF upload'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  scan-package:
+    if: ${{ github.repository_owner == 'mantidproject' }}
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+
+    steps:
+      - name: Checkout workflow dependencies
+        uses: actions/checkout@v7
+        with:
+          sparse-checkout: |
+            .github/workflows/grype.yml
+            .github/actions/setup-pixi/
+            .grype.yaml
+            .pixi-version
+          sparse-checkout-cone-mode: false
+
+      - name: Setup pixi
+        uses: ./.github/actions/setup-pixi
+
+      - name: Create temporary pixi project
+        id: pixi-project
+        shell: bash
+        run: |
+          project_dir="${RUNNER_TEMP}/grype-scan"
+          mkdir -p "$project_dir"
+          cat > "$project_dir/pixi.toml" <<'EOF'
+          [workspace]
+          channels = ["conda-forge", "mantid/label/nightly", "mantid", "neutrons"]
+          platforms = ["linux-64"]
+
+          [dependencies]
+          mantidworkbench = "*"
+          mslice = "*"
+          pystog = ">=0.6.3"
+          EOF
+
+          echo "project_dir=$project_dir" >> "$GITHUB_OUTPUT"
+          echo "environment_dir=$project_dir/.pixi/envs/default" >> "$GITHUB_OUTPUT"
+
+      - name: Log temporary pixi project
+        shell: bash
+        run: cat "${{ steps.pixi-project.outputs.project_dir }}/pixi.toml"
+
+      - name: Install scan environment
+        shell: bash
+        run: pixi install --manifest-path "${{ steps.pixi-project.outputs.project_dir }}/pixi.toml"
+
+      - name: Scan with Grype
+        id: scan
+        uses: anchore/scan-action@v7
+        with:
+          path: ${{ steps.pixi-project.outputs.environment_dir }}
+          fail-build: false
+          only-fixed: true
+
+      - name: Upload vulnerability report
+        if: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.dry_run != 'true' }}
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: ${{ steps.scan.outputs.sarif }}

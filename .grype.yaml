@@ -1,0 +1,4 @@
+ignore:
+  - package:
+      name: python
+      type: binary
