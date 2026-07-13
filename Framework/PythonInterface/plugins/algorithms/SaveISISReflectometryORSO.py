@@ -31,7 +31,7 @@ from datetime import datetime
 import numpy as np
 
 
-def construct_run_file_name_for_string(instrument_name: str, run_string: str) -> str:
+def construct_run_file_name_from_string(instrument_name: str, run_string: str) -> str:
     def raise_error():
         raise RuntimeError(f"Cannot convert {run_string} to a file name for instrument {instrument_name}")
 
@@ -439,7 +439,7 @@ class ReflectometryDatasetHistory(ReflectometryDatasetBase):
                 run_string = str(run.getProperty(self._RUN_NUM_LOG).value)
             else:
                 run_string = entry
-            file_names.append(construct_run_file_name_for_string(instrument_name, run_string))
+            file_names.append(construct_run_file_name_from_string(instrument_name, run_string))
 
         return file_names
 
