@@ -90,6 +90,7 @@ target_precompile_headers(
 target_include_directories(
   ${_target_name} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
 )
+target_include_directories(${_target_name} SYSTEM PUBLIC $<BUILD_INTERFACE:${Python_INCLUDE_DIRS}>)
 
 # Set the name of the generated library
 set_target_properties(
@@ -104,6 +105,8 @@ else()
 endif()
 if(USE_PYTHON_DYNAMIC_LIB)
   list(APPEND PUBLIC_TARGETS Python::Python)
+elseif(TARGET Python::Module)
+  list(APPEND PUBLIC_TARGETS Python::Module)
 endif()
 # Dependencies
 target_link_libraries(

@@ -28,7 +28,7 @@ libboost:
   - '1.86.*'  # [osx]
 
 cmake:
-  - '>=3.21.0'
+  - '>=4.2,<5'
 
 # 1.10.0 Produces a warning in Framework/Geometry/src/Crystal/HKLFilter.cpp
 doxygen:
