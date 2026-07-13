@@ -1,5 +1,12 @@
 name: 'Delete old nightly artifacts'
 on:
+  pull_request:
+    paths:
+      - .github/actions/setup-pixi/
+      - .github/workflows/delete-old-nightlies.yml
+      - .pixi-version
+      - pixi.lock
+      - pixi.toml
   schedule:
     - cron: '0 2 * * *'
   workflow_dispatch:
@@ -54,6 +61,8 @@ jobs:
           sparse-checkout: |
             .github/actions/setup-pixi/
             .pixi-version
+            pixi.lock
+            pixi.toml
           sparse-checkout-cone-mode: false
       - uses: ./.github/actions/setup-pixi
       - uses: neutrons/gh-actions/pkg-remove@a1e1c8b4123ced6c66fe57b9a60a56a6e4bf6861 # v1
@@ -63,7 +72,7 @@ jobs:
           package_name: ${{ matrix.package_name }}
           label: nightly
           keep: '3'
-          dry_run: ${{ github.event.inputs.dry_run || 'false' }}
+          dry_run: ${{ github.event.inputs.dry_run || github.event_name != 'schedule' }}
 
   delete-old-nightly-anaconda-packages-mantid-ornl:
     if: ${{ github.repository_owner == 'mantidproject' && (github.event_name != 'workflow_dispatch' || github.event.inputs.target == 'all' || github.event.inputs.target == 'anaconda-packages') }}
@@ -85,6 +94,8 @@ jobs:
           sparse-checkout: |
             .github/actions/setup-pixi/
             .pixi-version
+            pixi.lock
+            pixi.toml
           sparse-checkout-cone-mode: false
       - uses: ./.github/actions/setup-pixi
       - uses: neutrons/gh-actions/pkg-remove@a1e1c8b4123ced6c66fe57b9a60a56a6e4bf6861 # v1
@@ -94,4 +105,4 @@ jobs:
           package_name: ${{ matrix.package_name }}
           label: nightly
           keep: '3'
-          dry_run: ${{ github.event.inputs.dry_run || 'false' }}
+          dry_run: ${{ github.event.inputs.dry_run || github.event_name != 'schedule' }}
