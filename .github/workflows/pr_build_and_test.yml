@@ -35,6 +35,52 @@ jobs:
         name: Build doxygen
         if: ${{ steps.changes.outputs.doxygen == 'true' }}
 
+  conda-packaging-linux:
+    needs: [doxygen]
+    runs-on:
+      - ${{ (inputs.RUNNER_LABEL == '' && 'self-hosted') || inputs.RUNNER_LABEL }}
+      - self-hosted
+      - Linux
+      - X64
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 100
+          fetch-tags: true
+          path: source
+
+      - uses: dorny/paths-filter@v4
+        id: changes
+        with:
+          filters: .github/filters.yaml
+
+      - uses: ./.github/actions/setup-pixi
+        if: ${{ steps.changes.outputs.code_changes == 'true' }}
+
+      - name: Build conda packages
+        if: ${{ steps.changes.outputs.code_changes == 'true' }}
+        run: |
+          rm -rf ${GITHUB_WORKSPACE}/conda-bld
+          bash -ex ${GITHUB_WORKSPACE}/source/buildconfig/Jenkins/Conda/package-conda ${GITHUB_WORKSPACE} --build-mantid --build-qt --build-docs --build-workbench
+
+      - name: Upload conda packages
+        uses: actions/upload-artifact@v7
+        with:
+          name: conda_packages
+          if-no-files-found: error
+          path: ${{ github.workspace }}/conda-bld/**/*.conda
+
+      - name: Upload conda environment logs
+        uses: actions/upload-artifact@v7
+        with:
+          name: env_logs
+          if-no-files-found: warn
+          path: ${{ github.workspace }}/**/env_logs/*/*.txt
 
   build-and-test:
     needs: [doxygen]
