@@ -136,6 +136,145 @@ list getSpectrumNumbers(const MatrixWorkspace &self) {
 }
 
 /**
+ * The following xData/yData/eData/dxData and mutableXData/mutableYData/mutableEData/mutableDxData
+ * functions expose MatrixWorkspace::x/y/e/dx and MatrixWorkspace::mutableX/mutableY/mutableE/mutableDx
+ * to Python. HistogramX/Y/E/Dx are not std::vector<double> themselves, so we go via rawData() to
+ * obtain the plain vector that the numpy return-value policies require. For the mutable variants,
+ * calling the mutable*() accessor first still triggers the copy-on-write detach; the numpy wrapper
+ * is made writable by the WrapReadWrite return-value policy used at the .def() call site, not by
+ * the const-ness of this function's return type (mutableRawData() is intentionally protected).
+ */
+const Mantid::MantidVec &xData(MatrixWorkspace &self, const size_t index) { return self.x(index).rawData(); }
+const Mantid::MantidVec &yData(MatrixWorkspace &self, const size_t index) { return self.y(index).rawData(); }
+const Mantid::MantidVec &eData(MatrixWorkspace &self, const size_t index) { return self.e(index).rawData(); }
+const Mantid::MantidVec &dxData(MatrixWorkspace &self, const size_t index) { return self.dx(index).rawData(); }
+
+const Mantid::MantidVec &mutableXData(MatrixWorkspace &self, const size_t index) {
+  return self.mutableX(index).rawData();
+}
+const Mantid::MantidVec &mutableYData(MatrixWorkspace &self, const size_t index) {
+  return self.mutableY(index).rawData();
+}
+const Mantid::MantidVec &mutableEData(MatrixWorkspace &self, const size_t index) {
+  return self.mutableE(index).rawData();
+}
+const Mantid::MantidVec &mutableDxData(MatrixWorkspace &self, const size_t index) {
+  return self.mutableDx(index).rawData();
+}
+
+/**
+ * Adds a deprecation warning to the readX call to warn about using x instead
+ * @param self A reference to the calling object
+ * @param index The workspace index to retrieve
+ * @returns xData(self, index)
+ */
+const Mantid::MantidVec &readXDeprecated(MatrixWorkspace &self, const size_t index) {
+  PyErr_Warn(PyExc_DeprecationWarning,
+             "`MatrixWorkspace.readX()` is deprecated in Mantid 7.0, use `MatrixWorkspace.x()` instead. "
+             "For more information, see the Histogram data concept page: "
+             "https://docs.mantidproject.org/nightly/concepts/HistogramData.html");
+  return xData(self, index);
+}
+
+/**
+ * Adds a deprecation warning to the readY call to warn about using y instead
+ * @param self A reference to the calling object
+ * @param index The workspace index to retrieve
+ * @returns yData(self, index)
+ */
+const Mantid::MantidVec &readYDeprecated(MatrixWorkspace &self, const size_t index) {
+  PyErr_Warn(PyExc_DeprecationWarning,
+             "`MatrixWorkspace.readY()` is deprecated in Mantid 7.0, use `MatrixWorkspace.y()` instead. "
+             "For more information, see the Histogram data concept page: "
+             "https://docs.mantidproject.org/nightly/concepts/HistogramData.html");
+  return yData(self, index);
+}
+
+/**
+ * Adds a deprecation warning to the readE call to warn about using e instead
+ * @param self A reference to the calling object
+ * @param index The workspace index to retrieve
+ * @returns eData(self, index)
+ */
+const Mantid::MantidVec &readEDeprecated(MatrixWorkspace &self, const size_t index) {
+  PyErr_Warn(PyExc_DeprecationWarning,
+             "`MatrixWorkspace.readE()` is deprecated in Mantid 7.0, use `MatrixWorkspace.e()` instead. "
+             "For more information, see the Histogram data concept page: "
+             "https://docs.mantidproject.org/nightly/concepts/HistogramData.html");
+  return eData(self, index);
+}
+
+/**
+ * Adds a deprecation warning to the readDx call to warn about using dx instead
+ * @param self A reference to the calling object
+ * @param index The workspace index to retrieve
+ * @returns dxData(self, index)
+ */
+const Mantid::MantidVec &readDxDeprecated(MatrixWorkspace &self, const size_t index) {
+  PyErr_Warn(PyExc_DeprecationWarning,
+             "`MatrixWorkspace.readDx()` is deprecated in Mantid 7.0, use `MatrixWorkspace.dx()` instead. "
+             "For more information, see the Histogram data concept page: "
+             "https://docs.mantidproject.org/nightly/concepts/HistogramData.html");
+  return dxData(self, index);
+}
+
+/**
+ * Adds a deprecation warning to the dataX call to warn about using mutableX instead
+ * @param self A reference to the calling object
+ * @param index The workspace index to retrieve
+ * @returns mutableXData(self, index)
+ */
+const Mantid::MantidVec &dataXDeprecated(MatrixWorkspace &self, const size_t index) {
+  PyErr_Warn(PyExc_DeprecationWarning,
+             "`MatrixWorkspace.dataX()` is deprecated in Mantid 7.0, use `MatrixWorkspace.mutableX()` instead. "
+             "For more information, see the Histogram data concept page: "
+             "https://docs.mantidproject.org/nightly/concepts/HistogramData.html");
+  return mutableXData(self, index);
+}
+
+/**
+ * Adds a deprecation warning to the dataY call to warn about using mutableY instead
+ * @param self A reference to the calling object
+ * @param index The workspace index to retrieve
+ * @returns mutableYData(self, index)
+ */
+const Mantid::MantidVec &dataYDeprecated(MatrixWorkspace &self, const size_t index) {
+  PyErr_Warn(PyExc_DeprecationWarning,
+             "`MatrixWorkspace.dataY()` is deprecated in Mantid 7.0, use `MatrixWorkspace.mutableY()` instead. "
+             "For more information, see the Histogram data concept page: "
+             "https://docs.mantidproject.org/nightly/concepts/HistogramData.html");
+  return mutableYData(self, index);
+}
+
+/**
+ * Adds a deprecation warning to the dataE call to warn about using mutableE instead
+ * @param self A reference to the calling object
+ * @param index The workspace index to retrieve
+ * @returns mutableEData(self, index)
+ */
+const Mantid::MantidVec &dataEDeprecated(MatrixWorkspace &self, const size_t index) {
+  PyErr_Warn(PyExc_DeprecationWarning,
+             "`MatrixWorkspace.dataE()` is deprecated in Mantid 7.0, use `MatrixWorkspace.mutableE()` instead. "
+             "For more information, see the Histogram data concept page: "
+             "https://docs.mantidproject.org/nightly/concepts/HistogramData.html");
+  return mutableEData(self, index);
+}
+
+/**
+ * Adds a deprecation warning to the dataDx call to warn about using mutableDx instead
+ * @param self A reference to the calling object
+ * @param index The workspace index to retrieve
+ * @returns mutableDxData(self, index)
+ */
+const Mantid::MantidVec &dataDxDeprecated(MatrixWorkspace &self, const size_t index) {
+  PyErr_Warn(PyExc_DeprecationWarning,
+             "`MatrixWorkspace.dataDx()` is deprecated in Mantid 7.0, use `MatrixWorkspace.mutableDx()` instead. "
+             "For more information, see the Histogram data concept page: "
+             "https://docs.mantidproject.org/nightly/concepts/HistogramData.html");
+  return mutableDxData(self, index);
+}
+
+/**
  * Set the X values from an python array-style object
  * @param self :: A reference to the calling object
  * @param wsIndex :: The workspace index for the spectrum to set
@@ -458,39 +597,71 @@ void export_MatrixWorkspace() {
 
       //--------------------------------------- Read spectrum data
       //-------------------------
-      .def("readX", &MatrixWorkspace::readX, (arg("self"), arg("workspaceIndex")), return_readonly_numpy(),
+      .def("x", &xData, return_readonly_numpy(), args("self", "workspaceIndex"),
+           "Creates a read-only numpy wrapper around the X data at the given index")
+      .def("y", &yData, return_readonly_numpy(), args("self", "workspaceIndex"),
+           "Creates a read-only numpy wrapper around the Y data at the given index")
+      .def("e", &eData, return_readonly_numpy(), args("self", "workspaceIndex"),
+           "Creates a read-only numpy wrapper around the E data at the given index")
+      .def("dx", &dxData, return_readonly_numpy(), args("self", "workspaceIndex"),
+           "Creates a read-only numpy wrapper around the Dx data at the given index. "
+           "If :class:`~mantid.api.MatrixWorkspace.hasDx` is False for this index, "
+           "the Dx data is first initialized to zeros.")
+      .def("readX", &readXDeprecated, (arg("self"), arg("workspaceIndex")), return_readonly_numpy(),
            "Creates a read-only numpy wrapper "
            "around the original X data at the "
-           "given index")
-      .def("readY", &MatrixWorkspace::readY, return_readonly_numpy(), args("self", "workspaceIndex"),
+           "given index (deprecated, use "
+           ":class:`~mantid.api.MatrixWorkspace.x` instead)")
+      .def("readY", &readYDeprecated, return_readonly_numpy(), args("self", "workspaceIndex"),
            "Creates a read-only numpy wrapper "
            "around the original Y data at the "
-           "given index")
-      .def("readE", &MatrixWorkspace::readE, return_readonly_numpy(), args("self", "workspaceIndex"),
+           "given index (deprecated, use "
+           ":class:`~mantid.api.MatrixWorkspace.y` instead)")
+      .def("readE", &readEDeprecated, return_readonly_numpy(), args("self", "workspaceIndex"),
            "Creates a read-only numpy wrapper "
            "around the original E data at the "
-           "given index")
-      .def("readDx", &MatrixWorkspace::readDx, return_readonly_numpy(), args("self", "workspaceIndex"),
+           "given index (deprecated, use "
+           ":class:`~mantid.api.MatrixWorkspace.e` instead)")
+      .def("readDx", &readDxDeprecated, return_readonly_numpy(), args("self", "workspaceIndex"),
            "Creates a read-only numpy wrapper "
            "around the original Dx data at the "
-           "given index")
+           "given index (deprecated, use "
+           ":class:`~mantid.api.MatrixWorkspace.dx` instead)")
       .def("hasDx", &MatrixWorkspace::hasDx, args("self", "workspaceIndex"),
            "Returns True if the spectrum uses the DX (X Error) array, else "
            "False.")
       //--------------------------------------- Write spectrum data
       //------------------------
-      .def("dataX", (data_modifier)&MatrixWorkspace::dataX, return_readwrite_numpy(), args("self", "workspaceIndex"),
+      .def("mutableX", &mutableXData, return_readwrite_numpy(), args("self", "workspaceIndex"),
+           "Creates a writable numpy wrapper around the X data at the given index")
+      .def("mutableY", &mutableYData, return_readwrite_numpy(), args("self", "workspaceIndex"),
+           "Creates a writable numpy wrapper around the Y data at the given index. "
+           "Raises a RuntimeError for :class:`~mantid.api.IEventWorkspace`, since "
+           "non-const access to Y data is not possible for event data.")
+      .def("mutableE", &mutableEData, return_readwrite_numpy(), args("self", "workspaceIndex"),
+           "Creates a writable numpy wrapper around the E data at the given index. "
+           "Raises a RuntimeError for :class:`~mantid.api.IEventWorkspace`, since "
+           "non-const access to E data is not possible for event data.")
+      .def("mutableDx", &mutableDxData, return_readwrite_numpy(), args("self", "workspaceIndex"),
+           "Creates a writable numpy wrapper around the Dx data at the given index. "
+           "If :class:`~mantid.api.MatrixWorkspace.hasDx` is False for this index, "
+           "the Dx data is first initialized to zeros.")
+      .def("dataX", &dataXDeprecated, return_readwrite_numpy(), args("self", "workspaceIndex"),
            "Creates a writable numpy wrapper around the original X data at the "
-           "given index")
-      .def("dataY", (data_modifier)&MatrixWorkspace::dataY, return_readwrite_numpy(), args("self", "workspaceIndex"),
+           "given index (deprecated, use "
+           ":class:`~mantid.api.MatrixWorkspace.mutableX` instead)")
+      .def("dataY", &dataYDeprecated, return_readwrite_numpy(), args("self", "workspaceIndex"),
            "Creates a writable numpy wrapper around the original Y data at the "
-           "given index")
-      .def("dataE", (data_modifier)&MatrixWorkspace::dataE, return_readwrite_numpy(), args("self", "workspaceIndex"),
+           "given index (deprecated, use "
+           ":class:`~mantid.api.MatrixWorkspace.mutableY` instead)")
+      .def("dataE", &dataEDeprecated, return_readwrite_numpy(), args("self", "workspaceIndex"),
            "Creates a writable numpy wrapper around the original E data at the "
-           "given index")
-      .def("dataDx", (data_modifier)&MatrixWorkspace::dataDx, return_readwrite_numpy(), args("self", "workspaceIndex"),
+           "given index (deprecated, use "
+           ":class:`~mantid.api.MatrixWorkspace.mutableE` instead)")
+      .def("dataDx", &dataDxDeprecated, return_readwrite_numpy(), args("self", "workspaceIndex"),
            "Creates a writable numpy wrapper around the original Dx data at "
-           "the given index")
+           "the given index (deprecated, use "
+           ":class:`~mantid.api.MatrixWorkspace.mutableDx` instead)")
       .def("setX", &setXFromPyObject, args("self", "workspaceIndex", "x"),
            "Set X values from a python list or numpy array. It performs a "
            "simple copy into the array.")

@@ -26,7 +26,9 @@ class SavePlot1DAsJsonTest(unittest.TestCase):
         alg_test = run_algorithm("SavePlot1DAsJson", InputWorkspace=datawsname, JsonFilename=out_path)
         # executed?
         self.assertTrue(alg_test.isExecuted())
-        # Verify ....
+        # Verify .... JsonFilename is a FileProperty, so its resolved value is the actual
+        # location the file was saved to (relative to defaultsave.directory if not absolute)
+        out_path = alg_test.getPropertyValue("JsonFilename")
         d = json.load(open(out_path))[datawsname]
         self.assertEqual(d["type"], "point")
         self._checkData(d, E, intensity, err, dE=dQ)
@@ -44,7 +46,9 @@ class SavePlot1DAsJsonTest(unittest.TestCase):
         alg_test = run_algorithm("SavePlot1DAsJson", InputWorkspace=datawsname, JsonFilename=out_path)
         # Executed?
         self.assertTrue(alg_test.isExecuted())
-        # Verify ....
+        # Verify .... JsonFilename is a FileProperty, so its resolved value is the actual
+        # location the file was saved to (relative to defaultsave.directory if not absolute)
+        out_path = alg_test.getPropertyValue("JsonFilename")
         d = json.load(open(out_path))[datawsname]
         self._checkData(d, E, intensity, err)
         # test overwrite
@@ -62,7 +66,9 @@ class SavePlot1DAsJsonTest(unittest.TestCase):
         alg_test = run_algorithm("SavePlot1DAsJson", InputWorkspace=datawsname, JsonFilename=out_path)
         # executed?
         self.assertTrue(alg_test.isExecuted())
-        # Verify ....
+        # Verify .... JsonFilename is a FileProperty, so its resolved value is the actual
+        # location the file was saved to (relative to defaultsave.directory if not absolute)
+        out_path = alg_test.getPropertyValue("JsonFilename")
         d = json.load(open(out_path))[datawsname]
         self._checkData(d, E, intensity_1, err)
         self._checkData(d, E, intensity_2, err2, ID="2")
@@ -80,7 +86,9 @@ class SavePlot1DAsJsonTest(unittest.TestCase):
         alg_test = run_algorithm("SavePlot1DAsJson", InputWorkspace=datawsname, JsonFilename=out_path, PlotName=plotname)
         # executed?
         self.assertTrue(alg_test.isExecuted())
-        # Verify ....
+        # Verify .... JsonFilename is a FileProperty, so its resolved value is the actual
+        # location the file was saved to (relative to defaultsave.directory if not absolute)
+        out_path = alg_test.getPropertyValue("JsonFilename")
         d = json.load(open(out_path))[plotname]
         self._checkData(d, E, intensity, err)
         # Delete the output file
