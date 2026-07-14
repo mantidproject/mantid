@@ -27,13 +27,16 @@ Usage
 
 .. testcode:: Ex
 
+    import os
+
     # Run converter
     inst_name = "CNCS"
-    ConvertSnsRoiFileToMask("cncs_roi.txt", inst_name, ".")
+    out_dir = config["defaultsave.directory"] or os.getcwd()
+    ConvertSnsRoiFileToMask("cncs_roi.txt", inst_name, OutputDirectory=out_dir)
 
     # To test, load data and mask
     ws = Load("CNCS_7860_event.nxs")
-    mask_file = inst_name + "_Mask.xml"
+    mask_file = os.path.join(out_dir, inst_name + "_Mask.xml")
     mask = LoadMask(inst_name, mask_file, RefWorkspace = ws)
     MaskDetectors(ws, MaskedWorkspace=mask)
 
@@ -53,7 +56,7 @@ Output:
 .. testcleanup:: Ex
 
     import os
-    os.remove(os.path.join(".", mask_file))
+    os.remove(mask_file)
 
 .. categories::
 

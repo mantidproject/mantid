@@ -29,7 +29,7 @@ a contrived example will be created.
     ws = SofQW(ws, QAxisBinning=[0.2,0.2,3], EMode="Direct", EFixed=3.0)
     print("Workspace size = ( {} , {} )".format(ws.getNumberHistograms(), ws.blocksize()))
     import os
-    savefile = os.path.join(config["default.savedirectory"], "CNCS_7860_sqw.grp")
+    savefile = os.path.join(config["defaultsave.directory"], "CNCS_7860_sqw.grp")
     SaveDaveGrp(ws, Filename=savefile)
     print("File created: {}".format(os.path.exists(savefile)))
     ifile = open(savefile, 'r')

@@ -124,7 +124,7 @@ Output:
    import os, csv
 
    ws_name = 'ws_focussed'
-   pos_filename = 'detectors_pos.csv'
+   pos_filename = os.path.join(config["defaultsave.directory"], 'detectors_pos.csv')
    # Note that this is a small file which is not very meaningful but simple enough for
    # this test to run fast. Please user your (proper) run file.
    Load('ENGINX00213855focussed.nxs', OutputWorkspace=ws_name)

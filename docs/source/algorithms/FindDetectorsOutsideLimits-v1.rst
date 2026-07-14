@@ -38,8 +38,8 @@ Usage
     noisyDetArray= [100.0] * ws.blocksize()
 
     for i in range(0,ws.getNumberHistograms(),5):
-        ws.setSharedY(i,np.array(deadDetArray))
-        ws.setSharedY(i+1,np.array(noisyDetArray))
+        ws.setY(i,np.array(deadDetArray))
+        ws.setY(i+1,np.array(noisyDetArray))
 
     print("With just the default LowThreshold of 0")
     (wsOut,NumberOfFailures)=FindDetectorsOutsideLimits(ws)

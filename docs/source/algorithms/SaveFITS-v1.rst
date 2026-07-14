@@ -49,7 +49,8 @@ Usage
     wsg = LoadFITS(Filename='FITS_small_01.fits', LoadAsRectImg=1, OutputWorkspace=wsg_name)
     ws = wsg.getItem(0)
 
-    save_name = 'out_fits_example.fits'
+    import os
+    save_name = os.path.join(config["defaultsave.directory"], 'out_fits_example.fits')
     SaveFITS(Filename=save_name, InputWorkspace=ws)
 
     wsg_reload_name = 'images_reloaded'

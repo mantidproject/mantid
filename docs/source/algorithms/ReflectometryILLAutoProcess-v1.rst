@@ -104,7 +104,7 @@ Usage
 .. testcleanup:: SingleAngle
 
     import os
-    os.remove("ws_0.out")
+    os.remove(os.path.join(config["defaultsave.directory"], "ws_0.out"))
 
 **Example - Multiple Angles**
 
@@ -138,8 +138,8 @@ Usage
 .. testcleanup:: MultipleAngles
 
     import os
-    os.remove("ws_0.out")
-    os.remove("ws_1.out")
+    os.remove(os.path.join(config["defaultsave.directory"], "ws_0.out"))
+    os.remove(os.path.join(config["defaultsave.directory"], "ws_1.out"))
 
 **Example - Full treatment with 3 angles and multiple numors summed**
 

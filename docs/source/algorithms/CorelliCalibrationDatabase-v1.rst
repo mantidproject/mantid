@@ -104,7 +104,7 @@ Usage
                 "# str , double , double , double , double , double , double , double\n" \
                 "20011117,1.0001,-2.0002,3.003,4,-23.3,98.02,0"
 
-    calib_dir = 'sim_corelli_cal'
+    calib_dir = os.path.join(config["defaultsave.directory"], 'sim_corelli_cal')
     if not os.path.exists(calib_dir):
         os.mkdir(calib_dir)
 
@@ -126,14 +126,14 @@ Usage
 
     # save for powder calibration database
     CorelliCalibrationDatabase(InputWorkspace='input', InputCalibrationPatchWorkspace='calib_table',
-                                     DatabaseDirectory='sim_corelli_cal',
+                                     DatabaseDirectory=calib_dir,
                                      OutputWorkspace='mergedcalibrationtable')
 
     # check
     print('Number of components = {}'.format(mtd['mergedcalibrationtable'].rowCount()))
-    bank1_file = os.path.join('sim_corelli_cal', 'bank1.csv')
+    bank1_file = os.path.join(calib_dir, 'bank1.csv')
     print('bank1 file {} exist = {}'.format(bank1_file, os.path.exists(bank1_file)))
-    calib_file = os.path.join('sim_corelli_cal', 'corelli_instrument_20200220.csv')
+    calib_file = os.path.join(calib_dir, 'corelli_instrument_20200220.csv')
     print('calibration file {} exist = {}'.format(calib_file, os.path.exists(calib_file)))
 
 Output:
