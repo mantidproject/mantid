@@ -48,7 +48,6 @@ requirements:
     - pyyaml ${{ pyyaml }}
     - qscintilla2 ${{ qscintilla2 }}
     - qtpy ${{ qtpy }}
-    - quasielasticbayes ${{ quasielasticbayes }}
     - quickbayes ${{ quickbayes }}
     - rattler-build ==0.51.0
     - rattler-index

@@ -84,7 +84,6 @@ public:
 
     EXPECT_CALL(*m_view, enableView(true)).Times(1);
     ON_CALL(*m_model, isResolution(workspaceName)).WillByDefault(Return(true));
-    EXPECT_CALL(*m_view, enableUseResolution(true)).Times(1);
     EXPECT_CALL(*m_model, setResolution(workspaceName)).Times(1);
 
     m_presenter->handleResolutionInputReady(workspaceName);
@@ -144,29 +143,6 @@ public:
     EXPECT_CALL(*m_view, setLoadHistory(loadHistory)).Times(1);
 
     m_presenter->setLoadHistory(loadHistory);
-  }
-
-  void test_notifyBackendChanged_calls_view() {
-    EXPECT_CALL(*m_view, updateBackend(true)).Times(1);
-
-    m_presenter->notifyBackendChanged(BayesBackendType::QUICK_BAYES);
-
-    EXPECT_CALL(*m_view, updateBackend(false)).Times(1);
-
-    m_presenter->notifyBackendChanged(BayesBackendType::QUASI_ELASTIC_BAYES);
-  }
-
-  void test_notifyBackendChanged_alters_the_model_call() {
-    ON_CALL(*m_view, resolutionName()).WillByDefault(Return("res_ws"));
-    EXPECT_CALL(*m_model, setupBayesQuasi2Algorithm(_, _, _, _, _, _)).Times(1);
-
-    m_presenter->notifyBackendChanged(BayesBackendType::QUICK_BAYES);
-    m_presenter->handleRun();
-
-    EXPECT_CALL(*m_model, setupBayesQuasiAlgorithm(_, _, _, _, _, _, _, _, _, _, _, _, _)).Times(1);
-
-    m_presenter->notifyBackendChanged(BayesBackendType::QUASI_ELASTIC_BAYES);
-    m_presenter->handleRun();
   }
 
 private:

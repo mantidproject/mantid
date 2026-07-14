@@ -48,7 +48,6 @@ void QuasiPresenter::handleSampleInputReady(std::string const &workspaceName) {
 
 void QuasiPresenter::handleResolutionInputReady(std::string const &workspaceName) {
   m_view->enableView(true);
-  m_view->enableUseResolution(m_model->isResolution(workspaceName));
   m_model->setResolution(workspaceName);
 }
 
@@ -138,17 +137,6 @@ void QuasiPresenter::handleValidation(IUserInputValidator *validator) const {
   validator->checkDataSelectorIsValid("Sample", m_view->sampleSelector());
   validator->checkDataSelectorIsValid("Resolution", m_view->resolutionSelector());
 
-  // check that the ResNorm file is valid if we are using it
-  if (m_view->useResolution()) {
-    validator->checkDataSelectorIsValid("ResNorm", m_view->resNormSelector());
-  }
-
-  // check fixed width file exists
-  auto const *fixWidthFinder = m_view->fixWidthFileFinder();
-  if (m_view->fixWidth() && !fixWidthFinder->isValid()) {
-    validator->checkFileFinderWidgetIsValid("Width", fixWidthFinder);
-  }
-
   // check eMin and eMax values
   if (m_view->eMin() >= m_view->eMax())
     validator->addErrorMessage("EMin must be strictly less than EMax.\n");
@@ -185,26 +173,13 @@ void QuasiPresenter::handleRun() {
   // Construct an output base name for the output workspaces
   auto const resType = resolutionName.substr(resolutionName.length() - 3);
   auto const programName = program == "QL" ? resType == "res" ? "QLr" : "QLd" : program;
-  auto const algoType = m_useQuickBayes ? "_quickbayes" : "_quasielasticbayes";
-  auto const baseName = sampleName.substr(0, sampleName.length() - 3) + programName + algoType;
+  auto const baseName = sampleName.substr(0, sampleName.length() - 3) + programName;
 
   API::IConfiguredAlgorithm_sptr bayesQuasiAlgorithm;
-  if (m_useQuickBayes) {
-    bayesQuasiAlgorithm =
-        m_model->setupBayesQuasi2Algorithm(program, baseName, background, eMin, eMax, m_view->elasticPeak());
-  } else {
-    bayesQuasiAlgorithm = m_model->setupBayesQuasiAlgorithm(
-        m_view->resNormName(), m_view->fixWidthName(), program, baseName, background, eMin, eMax,
-        m_view->sampleBinning(), m_view->resolutionBinning(), m_view->elasticPeak(), m_view->fixWidth(),
-        m_view->useResolution(), m_view->sequentialFit());
-  }
+  bayesQuasiAlgorithm =
+      m_model->setupBayesQuasi2Algorithm(program, baseName, background, eMin, eMax, m_view->elasticPeak());
 
   m_algorithmRunner->execute(bayesQuasiAlgorithm);
-}
-
-void QuasiPresenter::notifyBackendChanged(const BayesBackendType &backend) {
-  m_useQuickBayes = (backend == BayesBackendType::QUICK_BAYES);
-  m_view->updateBackend(m_useQuickBayes);
 }
 
 void QuasiPresenter::runComplete(IAlgorithm_sptr const &algorithm, bool const error) {

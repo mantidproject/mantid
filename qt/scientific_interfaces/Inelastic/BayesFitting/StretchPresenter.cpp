@@ -47,21 +47,15 @@ void StretchPresenter::handleRun() {
 
   m_view->setPlotADSEnabled(false);
 
-  StretchRunData algParams = m_view->getRunData(m_useQuickBayes);
+  StretchRunData algParams = m_view->getRunData();
 
   auto const cutIndex = algParams.sampleName.find_last_of("_");
   auto const baseName = algParams.sampleName.substr(0, cutIndex);
-  auto const fitSuffix = m_useQuickBayes ? "_QuickBayes" : "_QuasiElasticBayes";
-  m_fitWorkspaceName = baseName + "_Stretch_Fit" + fitSuffix;
-  m_contourWorkspaceName = baseName + "_Stretch_Contour" + fitSuffix;
+  m_fitWorkspaceName = baseName + "_Stretch_Fit";
+  m_contourWorkspaceName = baseName + "_Stretch_Contour";
 
-  auto stretch = m_model->stretchAlgorithm(algParams, m_fitWorkspaceName, m_contourWorkspaceName, m_useQuickBayes);
+  auto stretch = m_model->stretchAlgorithm(algParams, m_fitWorkspaceName, m_contourWorkspaceName);
   m_algorithmRunner->execute(stretch);
-}
-
-void StretchPresenter::notifyBackendChanged(const BayesBackendType &backend) {
-  m_useQuickBayes = (backend == BayesBackendType::QUICK_BAYES);
-  m_view->updateBackend(m_useQuickBayes);
 }
 
 void StretchPresenter::runComplete(IAlgorithm_sptr const &algorithm, bool const error) {

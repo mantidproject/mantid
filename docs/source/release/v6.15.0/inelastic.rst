@@ -17,6 +17,6 @@ New features
 
 Bugfixes
 ############
-- (`#40650 <https://github.com/mantidproject/mantid/pull/40650>`_) :ref:`BayesQuasi <algm-BayesQuasi>` now respects the ``OutputWorkspaceProb`` and ``OutputWorkspaceResult`` parameters.
+- (`#40650 <https://github.com/mantidproject/mantid/pull/40650>`_) BayesQuasi now respects the ``OutputWorkspaceProb`` and ``OutputWorkspaceResult`` parameters.
 
 :ref:`Release 6.15.0 <v6.15.0>`

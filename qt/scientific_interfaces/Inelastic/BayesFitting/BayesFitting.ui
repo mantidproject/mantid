@@ -85,37 +85,6 @@
        </spacer>
       </item>
       <item>
-       <widget class="QLabel" name="warningLabel">
-        <property name="styleSheet">
-         <string notr="true">QLabel { color : red; }</string>
-        </property>
-        <property name="text">
-        </property>
-        <property name="textFormat">
-         <enum>Qt::AutoText</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QComboBox" name="backendChoice">
-        <property name="toolTip">
-        </property>
-        <property name="currentIndex">
-         <number>0</number>
-        </property>
-        <item>
-         <property name="text">
-          <string>quickbayes</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>quasielasticbayes</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item>
        <widget class="QPushButton" name="pbManageDirs">
         <property name="text">
          <string>Manage Directories</string>

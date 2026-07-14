@@ -13,7 +13,6 @@ set(SYSTEST_NAMES
     AlignComponentsTest.py
     # ARCSReductionTest  # Test skipped due to NaN Comparison. See Issue #38088
     BASISTest.py
-    BayesQuasiTest.py
     BilbySANSDataProcessorTest.py
     # BuildSQWTest  # Tests skipped due to missing data.
     CalMuonDeadTimeTest.py

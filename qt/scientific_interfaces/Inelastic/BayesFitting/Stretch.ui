@@ -147,13 +147,6 @@
               </item>
              </widget>
             </item>
-            <item row="0" column="4">
-             <widget class="QCheckBox" name="chkSequentialFit">
-              <property name="text">
-               <string>Sequential Fit</string>
-              </property>
-             </widget>
-            </item>
             <item row="0" column="3">
              <widget class="QCheckBox" name="chkElasticPeak">
               <property name="text">

@@ -27,7 +27,6 @@ static const std::string TAB_NAME = "Quasi";
 struct PlotType {
   inline static const std::string ALL = "All";
   inline static const std::string AMPLITUDE = "Amplitude";
-  inline static const std::string FWHM = "FWHM";
   inline static const std::string PROB = "Prob";
   inline static const std::string GAMMA = "Gamma";
 };
@@ -50,20 +49,19 @@ QColor toQColor(std::string const &colour) {
 namespace MantidQt::CustomInterfaces {
 using namespace InterfaceUtils;
 
-QuasiView::QuasiView(QWidget *parent, bool useQuickBayes)
+QuasiView::QuasiView(QWidget *parent)
     : QWidget(parent), m_dblManager(new QtDoublePropertyManager()), m_propTree(new QtTreePropertyBrowser()),
       m_properties(), m_dblEditorFactory(new DoubleEditorFactory()), m_presenter() {
   m_uiForm.setupUi(parent);
 
   m_propTree->setFactoryForManager(m_dblManager, m_dblEditorFactory);
-  updateBackend(useQuickBayes);
+  setupFitOptions();
+  setupPropertyBrowser();
+  setupPlotOptions();
 
   auto eRangeSelector = m_uiForm.ppPlot->addRangeSelector("QuasiERange");
   connect(eRangeSelector, &MantidWidgets::RangeSelector::minValueChanged, this, &QuasiView::minEValueChanged);
   connect(eRangeSelector, &MantidWidgets::RangeSelector::maxValueChanged, this, &QuasiView::maxEValueChanged);
-
-  connect(m_uiForm.chkFixWidth, &QCheckBox::toggled, m_uiForm.mwFixWidthDat, &FileFinderWidget::setEnabled);
-  connect(m_uiForm.chkUseResNorm, &QCheckBox::toggled, m_uiForm.dsResNorm, &DataSelector::setEnabled);
 
   connect(m_uiForm.dsSample, &DataSelector::dataReady, this, &QuasiView::notifySampleInputReady);
   connect(m_uiForm.dsSample, &DataSelector::filesAutoLoaded, this, &QuasiView::notifyFileAutoLoaded);
@@ -94,46 +92,14 @@ DataSelector *QuasiView::sampleSelector() const { return m_uiForm.dsSample; }
 
 DataSelector *QuasiView::resolutionSelector() const { return m_uiForm.dsResolution; }
 
-DataSelector *QuasiView::resNormSelector() const { return m_uiForm.dsResNorm; }
-
-FileFinderWidget *QuasiView::fixWidthFileFinder() const { return m_uiForm.mwFixWidthDat; }
-
-void QuasiView::updateBackend(bool useQuickBayes) {
-  setupFitOptions(useQuickBayes);
-  setupPropertyBrowser(useQuickBayes);
-  setupPlotOptions(useQuickBayes);
-}
-
-void QuasiView::setupFitOptions(bool useQuickBayes) {
+void QuasiView::setupFitOptions() {
   m_uiForm.cbBackground->clear();
-  if (useQuickBayes) {
-    m_uiForm.cbBackground->addItem(QString::fromStdString(BackgroundType::LINEAR));
-    m_uiForm.cbBackground->addItem(QString::fromStdString(BackgroundType::FLAT));
-    m_uiForm.cbBackground->addItem(QString::fromStdString(BackgroundType::ZERO));
-
-    m_uiForm.chkFixWidth->hide();
-    m_uiForm.mwFixWidthDat->hide();
-
-    m_uiForm.chkUseResNorm->hide();
-    m_uiForm.dsResNorm->hide();
-
-    m_uiForm.chkSequentialFit->hide();
-  } else {
-    m_uiForm.cbBackground->addItem(QString::fromStdString(BackgroundType::SLOPING));
-    m_uiForm.cbBackground->addItem(QString::fromStdString(BackgroundType::FLAT));
-    m_uiForm.cbBackground->addItem(QString::fromStdString(BackgroundType::ZERO));
-
-    m_uiForm.chkFixWidth->show();
-    m_uiForm.mwFixWidthDat->show();
-
-    m_uiForm.dsResNorm->show();
-    m_uiForm.chkUseResNorm->show();
-
-    m_uiForm.chkSequentialFit->show();
-  }
+  m_uiForm.cbBackground->addItem(QString::fromStdString(BackgroundType::LINEAR));
+  m_uiForm.cbBackground->addItem(QString::fromStdString(BackgroundType::FLAT));
+  m_uiForm.cbBackground->addItem(QString::fromStdString(BackgroundType::ZERO));
 }
 
-void QuasiView::setupPropertyBrowser(bool useQuickBayes) {
+void QuasiView::setupPropertyBrowser() {
   auto const EMin = m_properties.contains("EMin") ? m_properties["EMin"]->valueText().toDouble() : 0.0;
   auto const EMax = m_properties.contains("EMax") ? m_properties["EMax"]->valueText().toDouble() : 0.0;
 
@@ -153,37 +119,15 @@ void QuasiView::setupPropertyBrowser(bool useQuickBayes) {
   m_propTree->addProperty(m_properties["EMin"]);
   m_propTree->addProperty(m_properties["EMax"]);
 
-  if (!useQuickBayes) {
-    m_properties["SampleBinning"] = m_dblManager->addProperty("Sample Binning");
-    m_properties["ResBinning"] = m_dblManager->addProperty("Resolution Binning");
-
-    m_dblManager->setDecimals(m_properties["SampleBinning"], INT_DECIMALS);
-    m_dblManager->setDecimals(m_properties["ResBinning"], INT_DECIMALS);
-
-    m_propTree->addProperty(m_properties["SampleBinning"]);
-    m_propTree->addProperty(m_properties["ResBinning"]);
-
-    m_dblManager->setValue(m_properties["SampleBinning"], 1);
-    m_dblManager->setMinimum(m_properties["SampleBinning"], 1);
-    m_dblManager->setValue(m_properties["ResBinning"], 1);
-    m_dblManager->setMinimum(m_properties["ResBinning"], 1);
-  }
   InterfaceUtils::formatTreeWidget(m_propTree, m_properties);
 }
 
-void QuasiView::setupPlotOptions(bool useQuickBayes) {
+void QuasiView::setupPlotOptions() {
   m_uiForm.cbPlot->clear();
-  if (useQuickBayes) {
-    m_uiForm.cbPlot->addItem(QString::fromStdString(PlotType::ALL));
-    m_uiForm.cbPlot->addItem(QString::fromStdString(PlotType::AMPLITUDE));
-    m_uiForm.cbPlot->addItem(QString::fromStdString(PlotType::GAMMA));
-    m_uiForm.cbPlot->addItem(QString::fromStdString(PlotType::PROB));
-  } else {
-    m_uiForm.cbPlot->addItem(QString::fromStdString(PlotType::ALL));
-    m_uiForm.cbPlot->addItem(QString::fromStdString(PlotType::AMPLITUDE));
-    m_uiForm.cbPlot->addItem(QString::fromStdString(PlotType::FWHM));
-    m_uiForm.cbPlot->addItem(QString::fromStdString(PlotType::PROB));
-  }
+  m_uiForm.cbPlot->addItem(QString::fromStdString(PlotType::ALL));
+  m_uiForm.cbPlot->addItem(QString::fromStdString(PlotType::AMPLITUDE));
+  m_uiForm.cbPlot->addItem(QString::fromStdString(PlotType::GAMMA));
+  m_uiForm.cbPlot->addItem(QString::fromStdString(PlotType::PROB));
 }
 
 void QuasiView::notifySampleInputReady(QString const &workspaceName) {
@@ -279,10 +223,6 @@ std::string QuasiView::sampleName() const { return m_uiForm.dsSample->getCurrent
 
 std::string QuasiView::resolutionName() const { return m_uiForm.dsResolution->getCurrentDataName().toStdString(); }
 
-std::string QuasiView::resNormName() const { return m_uiForm.dsResNorm->getCurrentDataName().toStdString(); }
-
-std::string QuasiView::fixWidthName() const { return m_uiForm.mwFixWidthDat->getFirstFilename().toStdString(); }
-
 std::string QuasiView::programName() const { return m_uiForm.cbProgram->currentText().toStdString(); }
 
 std::string QuasiView::backgroundName() const { return m_uiForm.cbBackground->currentText().toStdString(); }
@@ -297,13 +237,7 @@ int QuasiView::sampleBinning() const { return m_properties["SampleBinning"]->val
 
 int QuasiView::resolutionBinning() const { return m_properties["ResBinning"]->valueText().toInt(); }
 
-bool QuasiView::useResolution() const { return m_uiForm.chkUseResNorm->isChecked(); }
-
-bool QuasiView::fixWidth() const { return m_uiForm.chkFixWidth->isChecked(); }
-
 bool QuasiView::elasticPeak() const { return m_uiForm.chkElasticPeak->isChecked(); }
-
-bool QuasiView::sequentialFit() const { return m_uiForm.chkSequentialFit->isChecked(); }
 
 void QuasiView::setPlotResultEnabled(bool const enable) {
   m_uiForm.pbPlot->setEnabled(enable);
@@ -311,12 +245,6 @@ void QuasiView::setPlotResultEnabled(bool const enable) {
 }
 
 void QuasiView::setSaveResultEnabled(bool const enable) { m_uiForm.pbSave->setEnabled(enable); }
-
-void QuasiView::enableUseResolution(bool const enable) {
-  m_uiForm.chkUseResNorm->setEnabled(enable);
-  if (!enable)
-    m_uiForm.chkUseResNorm->setChecked(false);
-}
 
 void QuasiView::enableView(bool const enable) {
   m_uiForm.dsSample->setEnabled(enable);
@@ -344,14 +272,11 @@ void QuasiView::setFileExtensionsByName(bool const filter) {
 void QuasiView::setLoadHistory(bool const loadHistory) {
   m_uiForm.dsSample->setLoadProperty("LoadHistory", loadHistory);
   m_uiForm.dsResolution->setLoadProperty("LoadHistory", loadHistory);
-  m_uiForm.dsResNorm->setLoadProperty("LoadHistory", loadHistory);
 }
 
 void QuasiView::loadSettings(const QSettings &settings) {
   m_uiForm.dsSample->readSettings(settings.group());
   m_uiForm.dsResolution->readSettings(settings.group());
-  m_uiForm.dsResNorm->readSettings(settings.group());
-  m_uiForm.mwFixWidthDat->readSettings(settings.group());
 }
 
 } // namespace MantidQt::CustomInterfaces

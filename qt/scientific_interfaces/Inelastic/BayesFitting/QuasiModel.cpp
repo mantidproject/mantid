@@ -98,37 +98,6 @@ std::optional<std::string> QuasiModel::curveColour(std::string const &label) con
   return std::nullopt;
 }
 
-API::IConfiguredAlgorithm_sptr
-QuasiModel::setupBayesQuasiAlgorithm(std::string const &resNormName, std::string const &fixWidthName,
-                                     std::string const &program, std::string const &baseName,
-                                     std::string const &background, double const eMin, double const eMax,
-                                     int const sampleBinning, int const resolutionBinning, bool const elasticPeak,
-                                     bool const fixWidth, bool const useResNorm, bool const sequentialFit) const {
-  auto properties = std::make_unique<AlgorithmRuntimeProps>();
-  properties->setProperty("Program", program);
-  properties->setProperty("SampleWorkspace", m_sampleWorkspace->getName());
-  properties->setProperty("ResolutionWorkspace", m_resolutionWorkspace->getName());
-  properties->setProperty("OutputWorkspaceFit", baseName + "_Fit");
-  properties->setProperty("OutputWorkspaceProb", baseName + "_Prob");
-  properties->setProperty("OutputWorkspaceResult", baseName + "_Result");
-  properties->setProperty("Elastic", elasticPeak);
-  properties->setProperty("ResNormWorkspace", resNormName);
-  properties->setProperty("Background", background);
-  properties->setProperty("MinRange", eMin);
-  properties->setProperty("MaxRange", eMax);
-  properties->setProperty("SampleBins", sampleBinning);
-  properties->setProperty("ResolutionBins", resolutionBinning);
-  properties->setProperty("FixedWidth", fixWidth);
-  properties->setProperty("UseResNorm", useResNorm);
-  properties->setProperty("WidthFile", fixWidthName);
-  properties->setProperty("Loop", sequentialFit);
-
-  auto quasiAlgorithm = algorithmManager.create("BayesQuasi");
-  quasiAlgorithm->initialize();
-
-  return std::make_shared<API::ConfiguredAlgorithm>(std::move(quasiAlgorithm), std::move(properties));
-}
-
 API::IConfiguredAlgorithm_sptr QuasiModel::setupBayesQuasi2Algorithm(std::string const &program,
                                                                      std::string const &baseName,
                                                                      std::string const &background, double const eMin,

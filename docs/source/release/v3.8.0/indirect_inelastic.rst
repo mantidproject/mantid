@@ -17,7 +17,7 @@ Bayes
 Stretch
 ~~~~~~~
 
-- Previously the Quest script was used to drive the Bayes stretch interface. This functionality has been ported to the algorithm :ref:`BayesStretch <algm-BayesStretch>`.
+- Previously the Quest script was used to drive the Bayes stretch interface. This functionality has been ported to the algorithm BayesStretch.
 
 Corrections
 ###########

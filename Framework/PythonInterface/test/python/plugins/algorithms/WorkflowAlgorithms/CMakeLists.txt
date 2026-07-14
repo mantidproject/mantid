@@ -3,8 +3,6 @@
 set(TEST_PY_FILES
     AddSampleLogMultipleTest.py
     ApplyPaalmanPingsCorrectionTest.py
-    BayesQuasiTest.py
-    BayesStretchTest.py
     BayesQuasi2Test.py
     BayesStretch2Test.py
     QuickBayesHelperTest.py

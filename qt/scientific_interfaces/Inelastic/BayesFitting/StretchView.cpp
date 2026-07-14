@@ -21,7 +21,6 @@ static const unsigned int INT_DECIMALS = 0;
 Mantid::Kernel::Logger g_log("Stretch");
 
 struct BackgroundType {
-  inline static const std::string SLOPING = "Sloping";
   inline static const std::string FLAT = "Flat";
   inline static const std::string ZERO = "Zero";
   inline static const std::string LINEAR = "Linear";
@@ -29,7 +28,6 @@ struct BackgroundType {
 
 struct PlotType {
   inline static const std::string ALL = "All";
-  inline static const std::string SIGMA = "Sigma";
   inline static const std::string BETA = "Beta";
   inline static const std::string FWHM = "FWHM";
 };
@@ -37,7 +35,7 @@ struct PlotType {
 } // namespace
 
 namespace MantidQt::CustomInterfaces {
-StretchView::StretchView(QWidget *parent, bool useQuickBayes)
+StretchView::StretchView(QWidget *parent)
     : m_dblManager(new QtDoublePropertyManager()), m_properties(), m_propTree(new QtTreePropertyBrowser()),
       m_dblEdFac(new DoubleEditorFactory()) {
   m_uiForm.setupUi(parent);
@@ -47,10 +45,11 @@ StretchView::StretchView(QWidget *parent, bool useQuickBayes)
   auto eRangeSelector = m_uiForm.ppPlot->addRangeSelector("StretchERange");
   connect(eRangeSelector, &MantidWidgets::RangeSelector::minValueChanged, this, &StretchView::minValueChanged);
   connect(eRangeSelector, &MantidWidgets::RangeSelector::maxValueChanged, this, &StretchView::maxValueChanged);
-  updateBackend(useQuickBayes);
+  setupFitOptions();
+  setupPropertyBrowser();
+  setupPlotOptions();
 
   connect(m_uiForm.dsSample, &DataSelector::dataReady, this, &StretchView::handleSampleInputReady);
-  connect(m_uiForm.chkSequentialFit, &QCheckBox::toggled, m_uiForm.cbPlot, &QComboBox::setEnabled);
 
   connect(m_uiForm.spPreviewSpectrum, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this,
           &StretchView::previewSpecChanged);
@@ -103,28 +102,14 @@ void StretchView::propertiesUpdated(QtProperty *prop, double val) {
   connect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &StretchView::propertiesUpdated);
 }
 
-void StretchView::updateBackend(bool useQuickBayes) {
-  setupFitOptions(useQuickBayes);
-  setupPropertyBrowser(useQuickBayes);
-  setupPlotOptions(useQuickBayes);
-}
-
-void StretchView::setupFitOptions(bool useQuickBayes) {
+void StretchView::setupFitOptions() {
   m_uiForm.cbBackground->clear();
-  if (useQuickBayes) {
-    m_uiForm.cbBackground->addItem(QString::fromStdString(BackgroundType::LINEAR));
-    m_uiForm.cbBackground->addItem(QString::fromStdString(BackgroundType::FLAT));
-    m_uiForm.cbBackground->addItem(QString::fromStdString(BackgroundType::ZERO));
-    m_uiForm.chkSequentialFit->hide();
-  } else {
-    m_uiForm.cbBackground->addItem(QString::fromStdString(BackgroundType::SLOPING));
-    m_uiForm.cbBackground->addItem(QString::fromStdString(BackgroundType::FLAT));
-    m_uiForm.cbBackground->addItem(QString::fromStdString(BackgroundType::ZERO));
-    m_uiForm.chkSequentialFit->show();
-  }
+  m_uiForm.cbBackground->addItem(QString::fromStdString(BackgroundType::LINEAR));
+  m_uiForm.cbBackground->addItem(QString::fromStdString(BackgroundType::FLAT));
+  m_uiForm.cbBackground->addItem(QString::fromStdString(BackgroundType::ZERO));
 }
 
-void StretchView::setupPropertyBrowser(bool useQuickBayes) {
+void StretchView::setupPropertyBrowser() {
   auto const EMin = m_properties.contains("EMin") ? m_properties["EMin"]->valueText().toDouble() : 0.0;
   auto const EMax = m_properties.contains("EMax") ? m_properties["EMax"]->valueText().toDouble() : 0.0;
   auto const beta = m_properties.contains("Beta") ? m_properties["Beta"]->valueText().toInt() : 50;
@@ -143,14 +128,10 @@ void StretchView::setupPropertyBrowser(bool useQuickBayes) {
   addPropToTree<int>("Beta", beta, INT_DECIMALS, 1, 200);
   addPropToTree<int>("Sigma", sigma, INT_DECIMALS, 1, 200);
 
-  if (useQuickBayes) {
-    addPropToTree<double>("startBeta", 0.5, NUM_DECIMALS, 0.5, 1.0);
-    addPropToTree<double>("endBeta", 1.0, NUM_DECIMALS, 0.5, 1.001);
-    addPropToTree<double>("startSigma(FWHM)", 0.01, NUM_DECIMALS, 0.0, 1.0);
-    addPropToTree<double>("endSigma(FWHM)", 0.2, NUM_DECIMALS, 0.0, 1.0);
-  } else {
-    addPropToTree<int>("SampleBinning", 1, INT_DECIMALS, 1);
-  }
+  addPropToTree<double>("startBeta", 0.5, NUM_DECIMALS, 0.5, 1.0);
+  addPropToTree<double>("endBeta", 1.0, NUM_DECIMALS, 0.5, 1.001);
+  addPropToTree<double>("startSigma(FWHM)", 0.01, NUM_DECIMALS, 0.0, 1.0);
+  addPropToTree<double>("endSigma(FWHM)", 0.2, NUM_DECIMALS, 0.0, 1.0);
   formatTreeWidget(m_propTree, m_properties);
 }
 
@@ -162,17 +143,11 @@ void StretchView::formatTreeWidget(QtTreePropertyBrowser *treeWidget,
     treeWidget->setBackgroundColor(treeWidget->topLevelItem(item), QColor(246, 246, 246));
 }
 
-void StretchView::setupPlotOptions(bool useQuickBayes) {
+void StretchView::setupPlotOptions() {
   m_uiForm.cbPlot->clear();
-  if (useQuickBayes) {
-    m_uiForm.cbPlot->addItem(QString::fromStdString(PlotType::ALL));
-    m_uiForm.cbPlot->addItem(QString::fromStdString(PlotType::FWHM));
-    m_uiForm.cbPlot->addItem(QString::fromStdString(PlotType::BETA));
-  } else {
-    m_uiForm.cbPlot->addItem(QString::fromStdString(PlotType::ALL));
-    m_uiForm.cbPlot->addItem(QString::fromStdString(PlotType::SIGMA));
-    m_uiForm.cbPlot->addItem(QString::fromStdString(PlotType::BETA));
-  }
+  m_uiForm.cbPlot->addItem(QString::fromStdString(PlotType::ALL));
+  m_uiForm.cbPlot->addItem(QString::fromStdString(PlotType::FWHM));
+  m_uiForm.cbPlot->addItem(QString::fromStdString(PlotType::BETA));
 }
 
 void StretchView::handleSampleInputReady(const QString &filename) {
@@ -239,7 +214,7 @@ void StretchView::validateUserInput(IUserInputValidator *validator) const {
   validator->checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
 }
 
-StretchRunData StretchView::getRunData(bool useQuickBayes) const {
+StretchRunData StretchView::getRunData() const {
   auto const sampleName = m_uiForm.dsSample->getCurrentDataName().toStdString();
   auto const resName = m_uiForm.dsResolution->getCurrentDataName().toStdString();
   auto const background = m_uiForm.cbBackground->currentText().toStdString();
@@ -252,15 +227,10 @@ StretchRunData StretchView::getRunData(bool useQuickBayes) const {
 
   auto stretchData = StretchRunData(sampleName, resName, background, eMin, eMax, beta, sigma, elasticPeak);
 
-  if (useQuickBayes) {
-    stretchData.startBeta = m_properties["startBeta"]->valueText().toDouble();
-    stretchData.endBeta = m_properties["endBeta"]->valueText().toDouble();
-    stretchData.startFWHM = m_properties["startSigma(FWHM)"]->valueText().toDouble();
-    stretchData.endFWHM = m_properties["endSigma(FWHM)"]->valueText().toDouble();
-  } else {
-    stretchData.sampleBinning = m_properties["SampleBinning"]->valueText().toInt();
-    stretchData.sequentialFit = m_uiForm.chkSequentialFit->isChecked();
-  }
+  stretchData.startBeta = m_properties["startBeta"]->valueText().toDouble();
+  stretchData.endBeta = m_properties["endBeta"]->valueText().toDouble();
+  stretchData.startFWHM = m_properties["startSigma(FWHM)"]->valueText().toDouble();
+  stretchData.endFWHM = m_properties["endSigma(FWHM)"]->valueText().toDouble();
   return stretchData;
 }
 

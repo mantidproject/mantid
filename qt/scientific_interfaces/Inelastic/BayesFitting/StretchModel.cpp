@@ -15,8 +15,7 @@ namespace MantidQt::CustomInterfaces {
 
 MantidQt::API::IConfiguredAlgorithm_sptr StretchModel::stretchAlgorithm(const StretchRunData &algParams,
                                                                         const std::string &fitWorkspaceName,
-                                                                        const std::string &contourWorkspaceName,
-                                                                        const bool useQuickBayes) const {
+                                                                        const std::string &contourWorkspaceName) const {
   auto properties = std::make_unique<AlgorithmRuntimeProps>();
 
   properties->setProperty("SampleWorkspace", algParams.sampleName);
@@ -28,20 +27,13 @@ MantidQt::API::IConfiguredAlgorithm_sptr StretchModel::stretchAlgorithm(const St
   properties->setProperty("OutputWorkspaceFit", fitWorkspaceName);
   properties->setProperty("OutputWorkspaceContour", contourWorkspaceName);
   properties->setProperty("Background", algParams.backgroundName);
+  properties->setProperty("NumberFWHM", algParams.sigma);
+  properties->setProperty("StartBeta", algParams.startBeta);
+  properties->setProperty("EndBeta", algParams.endBeta);
+  properties->setProperty("StartFWHM", algParams.startFWHM);
+  properties->setProperty("EndFWHM", algParams.endFWHM);
 
-  if (useQuickBayes) {
-    properties->setProperty("NumberFWHM", algParams.sigma);
-    properties->setProperty("StartBeta", algParams.startBeta);
-    properties->setProperty("EndBeta", algParams.endBeta);
-    properties->setProperty("StartFWHM", algParams.startFWHM);
-    properties->setProperty("EndFWHM", algParams.endFWHM);
-  } else {
-    properties->setProperty("NumberSigma", algParams.sigma);
-    properties->setProperty("SampleBins", algParams.sampleBinning);
-    properties->setProperty("Loop", algParams.sequentialFit);
-  }
-
-  std::string const algorithmName = useQuickBayes ? "BayesStretch2" : "BayesStretch";
+  std::string const algorithmName = "BayesStretch2";
   auto stretch = AlgorithmManager::Instance().create(algorithmName);
   stretch->initialize();
 

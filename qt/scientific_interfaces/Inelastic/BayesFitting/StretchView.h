@@ -37,16 +37,15 @@ public:
   virtual void applySettings(std::map<std::string, QVariant> const &settings) = 0;
   virtual void validateUserInput(IUserInputValidator *validator) const = 0;
 
-  virtual StretchRunData getRunData(bool useQuickBayes) const = 0;
+  virtual StretchRunData getRunData() const = 0;
   virtual CurrentPreviewData getCurrentPreviewData() const = 0;
   virtual std::string getPlotType() const = 0;
   virtual std::string getPlotContour() const = 0;
   virtual IRunView *getRunWidget() const = 0;
 
-  virtual void updateBackend(bool useQuickBayes) = 0;
-  virtual void setupFitOptions(bool useQuickBayes) = 0;
-  virtual void setupPropertyBrowser(bool useQuickBayes) = 0;
-  virtual void setupPlotOptions(bool useQuickBayes) = 0;
+  virtual void setupFitOptions() = 0;
+  virtual void setupPropertyBrowser() = 0;
+  virtual void setupPlotOptions() = 0;
 
   virtual void setFileExtensionsByName(bool filter) = 0;
   virtual void setLoadHistory(bool doLoadHistory) = 0;
@@ -66,7 +65,7 @@ public:
 class MANTIDQT_INELASTIC_DLL StretchView : public QWidget, public IStretchView {
   Q_OBJECT
 public:
-  explicit StretchView(QWidget *parent = nullptr, bool useQuickBayes = true);
+  explicit StretchView(QWidget *parent = nullptr);
   ~StretchView() override = default;
 
   void subscribePresenter(IStretchViewSubscriber *presenter) override;
@@ -74,16 +73,15 @@ public:
   void applySettings(std::map<std::string, QVariant> const &settings) override;
   void validateUserInput(IUserInputValidator *validator) const override;
 
-  StretchRunData getRunData(bool useQuickBayes) const override;
+  StretchRunData getRunData() const override;
   CurrentPreviewData getCurrentPreviewData() const override;
   std::string getPlotType() const override;
   std::string getPlotContour() const override;
   IRunView *getRunWidget() const override;
 
-  void updateBackend(bool useQuickBayes) override;
-  void setupFitOptions(bool useQuickBayes) override;
-  void setupPropertyBrowser(bool useQuickBayes) override;
-  void setupPlotOptions(bool useQuickBayes) override;
+  void setupFitOptions() override;
+  void setupPropertyBrowser() override;
+  void setupPlotOptions() override;
 
   void setFileExtensionsByName(bool filter) override;
   void setLoadHistory(bool doLoadHistory) override;

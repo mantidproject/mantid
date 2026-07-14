@@ -10,7 +10,7 @@
 Description
 -----------
 
-This algorithm replaces :ref:`BayesQuasi <algm-BayesQuasi>`.
+This algorithm replaces BayesQuasi (removed since version 7.0.0).
 
 The algorithm has two modes, `QL` and `QSe`.
 These two modes are the same, except for the fitting function being used.
@@ -24,7 +24,7 @@ a delta function (if elastic) and one of the following:
 The output includes a workspace of the fitting parameters, the loglikelihoods (the least negative is the most likely fit)
 and the fits (interpolated back onto the original sample binning).
 
-The stretched exponential results for the FWHM are different to :ref:`BayesQuasi <algm-BayesQuasi>`, as shown by the figure below.
+The stretched exponential results for the FWHM are different to BayesQuasi, as shown by the figure below.
 However, the new results agree with the FWHM values for fitting a single Lorentzian ('QL').
 The new method provides FWHM results that are comparable for all :math:`Q` values (green and black data), unlike the original code that has a divergence for low :math`Q` values.
 

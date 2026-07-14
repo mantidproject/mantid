@@ -1,0 +1,1 @@
+- Removed the backend selection combo box from the :ref:`Inelastic Bayes Fitting interface <interface-inelastic-bayes-fitting>` after the ``quasielasticbayes`` library (and the algorithms which depended on it) was removed. The output workspaces no longer have a suffix indicating which backend was used to create them.

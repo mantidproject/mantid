@@ -18,11 +18,9 @@ namespace MantidQt::CustomInterfaces {
 DECLARE_SUBWINDOW(BayesFitting)
 
 BayesFitting::BayesFitting(QWidget *parent)
-    : InelasticInterface(parent), m_changeObserver(*this, &BayesFitting::handleDirectoryChange),
-      m_backend(BayesBackendType::QUICK_BAYES) {
+    : InelasticInterface(parent), m_changeObserver(*this, &BayesFitting::handleDirectoryChange) {
   m_uiForm.setupUi(this);
   m_uiForm.pbSettings->setIcon(Settings::icon());
-  setBackend(backendToQStr.at(m_backend));
 
   // Connect Poco Notification Observer
   Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
@@ -64,7 +62,6 @@ void BayesFitting::initLayout() {
   connect(m_uiForm.pbSettings, &QPushButton::clicked, this, &BayesFitting::settings);
   connect(m_uiForm.pbHelp, &QPushButton::clicked, this, &BayesFitting::help);
   connect(m_uiForm.pbManageDirs, &QPushButton::clicked, this, &BayesFitting::manageUserDirectories);
-  connect(m_uiForm.backendChoice, &QComboBox::currentTextChanged, this, &BayesFitting::setBackend);
 
   InelasticInterface::initLayout();
 }
@@ -118,27 +115,6 @@ void BayesFitting::applySettings(std::map<std::string, QVariant> const &settings
 }
 
 std::string BayesFitting::documentationPage() const { return "Inelastic Bayes Fitting"; }
-
-void BayesFitting::setBackend(const QString &text) {
-  BayesBackendType newBackend = m_backend;
-  if (text == backendToQStr.at(BayesBackendType::QUASI_ELASTIC_BAYES)) {
-    newBackend = BayesBackendType::QUASI_ELASTIC_BAYES;
-    m_uiForm.warningLabel->setText(
-        "Warning: quasielasticbayes (old Fortran library) is deprecated. This library will be\n"
-        "removed once confidence in quickbayes (new Python library) has been established.");
-    m_uiForm.backendChoice->setToolTip("Old Fortran library");
-  } else if (text == backendToQStr.at(BayesBackendType::QUICK_BAYES)) {
-    newBackend = BayesBackendType::QUICK_BAYES;
-    m_uiForm.warningLabel->setText("");
-    m_uiForm.backendChoice->setToolTip("New Python library");
-  }
-  if (newBackend != m_backend) {
-    m_backend = newBackend;
-    for (const auto &tab : m_bayesTabs) {
-      tab.second->notifyBackendChanged(m_backend);
-    }
-  }
-}
 
 BayesFitting::~BayesFitting() = default;
 

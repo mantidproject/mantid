@@ -23,18 +23,6 @@ Settings
 ?
   Opens this help page.
 
-Backend selection box
-  This drop down selects whether to use the ``quasielasticbayes`` or ``quickbayes`` package as the underlying model for
-  the Quasi and Stretch tabs.
-
-  +------------------------+-----------------------------------------------------------------------------------+
-  | Backend selected       | Underlying algorithms                                                             |
-  +========================+===================================================================================+
-  | ``quasielasticbayes``  | :ref:`BayesQuasi <algm-BayesQuasi>`   & :ref:`BayesStretch <algm-BayesStretch>`   |
-  +------------------------+-----------------------------------------------------------------------------------+
-  | ``quickbayes``         | :ref:`BayesQuasi2 <algm-BayesQuasi2>` & :ref:`BayesStretch2 <algm-BayesStretch2>` |
-  +------------------------+-----------------------------------------------------------------------------------+
-
 Manage Directories
   Opens the Manage Directories dialog allowing you to change your search directories
   and default save directory and enable/disable data archive search.
@@ -168,10 +156,6 @@ model selected.
 Options
 ~~~~~~~
 
-There are some parameters exclusive of either ``quasielasticbayes`` or ``quickbayes`` model that change automatically
-depending on the backend selection.
-For both models:
-
 +----------------------+--------------------------------------------------------------------------------------------+
 | Parameter            | Description                                                                                |
 +======================+============================================================================================+
@@ -200,18 +184,6 @@ For both models:
 | Plot Contour         | Produces a contour plot of the selected workspaces                                         |
 +----------------------+--------------------------------------------------------------------------------------------+
 | Save Result          | Saves the result in the default save directory                                             |
-+----------------------+--------------------------------------------------------------------------------------------+
-
-For ``quasielastic`` model there are also the following parameters:
-
-+----------------------+--------------------------------------------------------------------------------------------+
-| Sequential Fit       | Enabled multiple fitting iterations                                                        |
-+----------------------+--------------------------------------------------------------------------------------------+
-| Sample Binning       | Sample binning to use                                                                      |
-+----------------------+--------------------------------------------------------------------------------------------+
-
-While for ``quickbayes`` the additional parameters are:
-
 +----------------------+--------------------------------------------------------------------------------------------+
 | Start Beta           | Initial value of Beta                                                                      |
 +----------------------+--------------------------------------------------------------------------------------------+

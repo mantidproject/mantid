@@ -42,12 +42,6 @@ public:
   virtual std::optional<std::string> curveColour(std::string const &label) const = 0;
 
   virtual MantidQt::API::IConfiguredAlgorithm_sptr
-  setupBayesQuasiAlgorithm(std::string const &resNormName, std::string const &fixWidthName, std::string const &program,
-                           std::string const &baseName, std::string const &background, double const eMin,
-                           double const eMax, int const sampleBinning, int const resolutionBinning,
-                           bool const elasticPeak, bool const fixWidth, bool const useResNorm,
-                           bool const sequentialFit) const = 0;
-  virtual MantidQt::API::IConfiguredAlgorithm_sptr
   setupBayesQuasi2Algorithm(std::string const &program, std::string const &baseName, std::string const &background,
                             double const eMin, double const eMax, bool const elasticPeak) const = 0;
   virtual MantidQt::API::IConfiguredAlgorithm_sptr setupSaveAlgorithm(Mantid::API::Workspace_sptr workspace) const = 0;
@@ -78,12 +72,6 @@ public:
 
   std::optional<std::string> curveColour(std::string const &label) const override;
 
-  MantidQt::API::IConfiguredAlgorithm_sptr
-  setupBayesQuasiAlgorithm(std::string const &resNormName, std::string const &fixWidthName, std::string const &program,
-                           std::string const &baseName, std::string const &background, double const eMin,
-                           double const eMax, int const sampleBinning, int const resolutionBinning,
-                           bool const elasticPeak, bool const fixWidth, bool const useResNorm,
-                           bool const sequentialFit) const override;
   MantidQt::API::IConfiguredAlgorithm_sptr
   setupBayesQuasi2Algorithm(std::string const &program, std::string const &baseName, std::string const &background,
                             double const eMin, double const eMax, bool const elasticPeak) const override;

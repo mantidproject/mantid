@@ -27,7 +27,7 @@ New Features
 
 Bugfixes
 --------
-- Algorithm :ref:`BayesQuasi <algm-BayesQuasi>` no longer throws an ``index out of range`` error when using a sample with a numeric axis.
+- Algorithm BayesQuasi no longer throws an ``index out of range`` error when using a sample with a numeric axis.
 - The :ref:`Elwin Tab <elwin>` of the :ref:`Data Processor Interface <interface-inelastic-data-processor>` no longer freezes when running the tab.
 - The :ref:`Convolution <convfit>` of the :ref:`QENS Fitting interface <interface-inelastic-qens-fitting>` no longer crashes when attempting to fix all ``IsoDiffRot`` parameters from the ``EditLocalParameter`` dialog.
 - When the ADS is cleared of workspaces that are used to run fits on an open :ref:`QENS Fitting interface <interface-inelastic-qens-fitting>`, a warning message now pops up when clicking on the ``Run`` button.

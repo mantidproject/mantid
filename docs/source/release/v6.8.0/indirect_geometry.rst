@@ -19,8 +19,8 @@ Algorithms
 
 New features
 ############
-- Added :ref:`BayesQuasi2 <algm-BayesQuasi2>`, based on the quickBayes package, as a replacement for the now deprecated :ref:`BayesQuasi <algm-BayesQuasi>`.
-- Added :ref:`BayesStretch2 <algm-BayesStretch2>`, based on the quickBayes package, as a replacement for the now deprecated :ref:`BayesStretch <algm-BayesStretch>`.
+- Added :ref:`BayesQuasi2 <algm-BayesQuasi2>`, based on the quickBayes package, as a replacement for the now deprecated BayesQuasi.
+- Added :ref:`BayesStretch2 <algm-BayesStretch2>`, based on the quickBayes package, as a replacement for the now deprecated BayesStretch.
 
 Bugfixes
 ############

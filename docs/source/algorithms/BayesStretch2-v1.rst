@@ -14,7 +14,7 @@ This is a variation of the stretched exponential option of
 for a grid of :math:`\beta` a FWHM values. The unnormalised probability
 is given for the :math:`z` values.
 
-This routine replaces the :ref:`BayesStretch <algm-BayesStretch>` algorithm.
+This routine replaces the BayesStretch algorithm (removed since version 7.0.0).
 
 
 .. categories::

@@ -11,7 +11,7 @@ Deprecated
 - (`#41712 <https://github.com/mantidproject/mantid/pull/41712>`_) This release will be the final version to include ``quasielasticbayes`` support.
   The :ref:`Bayes Fitting interface <interface-inelastic-bayes-fitting>` now uses ``quickbayes`` (the new python library) by default.
   In the next release the option to use ``quasielasticbayes`` will be removed.
-  The :ref:`algm-BayesQuasi` and :ref:`algm-BayesStretch` algorithms (based on ``quasielasticbayes``) have been deprecated in favour of the ``quickbayes`` replacements, :ref:`algm-BayesQuasi2` and :ref:`algm-BayesStretch2`, respectively.
+  The BayesQuasi and BayesStretch algorithms (based on ``quasielasticbayes``) have been deprecated in favour of the ``quickbayes`` replacements, :ref:`algm-BayesQuasi2` and :ref:`algm-BayesStretch2`, respectively.
 
 Bugfixes
 --------
@@ -29,7 +29,7 @@ New features
 
 Bugfixes
 ############
-- (`#41121 <https://github.com/mantidproject/mantid/pull/41121>`_) The :ref:`BayesStretch <algm-BayesStretch>` algorithm now appends each workspace name in the fit workspaces group with the selected backend option of either ``quickbayes`` or ``quasielasticbayes`` from the :ref:`Stretch <bayes-fitting-stretch>` tab.
+- (`#41121 <https://github.com/mantidproject/mantid/pull/41121>`_) The BayesStretch algorithm now appends each workspace name in the fit workspaces group with the selected backend option of either ``quickbayes`` or ``quasielasticbayes`` from the :ref:`Stretch <bayes-fitting-stretch>` tab.
 - (`#41121 <https://github.com/mantidproject/mantid/pull/41121>`_) Additionally, a duplicate ``Stretch`` word has been removed from the names of workspaces in the fit workspace group created by the :ref:`BayesStretch2 <algm-BayesStretch2>` algorithm when the selected backend option is ``quickbayes`` in the :ref:`Stretch <bayes-fitting-stretch>` tab.
 
 :ref:`Release 6.16.0 <v6.16.0>`

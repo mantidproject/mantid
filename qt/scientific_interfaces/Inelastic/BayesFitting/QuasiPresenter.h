@@ -63,8 +63,6 @@ public:
 
   void loadSettings(const QSettings &settings) override;
 
-  void notifyBackendChanged(const BayesBackendType &backend) override;
-
 protected:
   void runComplete(IAlgorithm_sptr const &algorithm, bool const error) override;
 
