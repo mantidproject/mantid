@@ -6,6 +6,14 @@ import pathlib
 import sys
 
 
+def _matcher_path(uri: str, repo_root: pathlib.Path) -> str:
+    path = pathlib.Path(uri)
+    if path.is_absolute():
+        return path.as_posix()
+
+    return (repo_root / path).as_posix()
+
+
 def main() -> int:
     report_path = pathlib.Path(sys.argv[1])
 
@@ -13,7 +21,6 @@ def main() -> int:
         report = json.load(handle)
 
     repo_root = pathlib.Path(os.environ["GITHUB_WORKSPACE"]).resolve()
-    repo_root_with_sep = repo_root.as_posix().rstrip("/") + "/"
     severities = {
         "error": "error",
         "warning": "warning",
@@ -37,7 +44,7 @@ def main() -> int:
 
                 line = region.get("startLine", 1)
                 column = region.get("startColumn", 1)
-                file_path = repo_root_with_sep + uri.lstrip("/")
+                file_path = _matcher_path(uri, repo_root)
                 print(f"{file_path}:{line}:{column}: {level}: {message} [{rule_id}]")
 
     return 0

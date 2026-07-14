@@ -17,10 +17,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-permissions:
-  contents: read
-  security-events: write
-
 jobs:
   doxygen:
     runs-on: ubuntu-latest
@@ -124,13 +120,6 @@ jobs:
       - name: Remove cppcheck matcher
         if: ${{ always() && steps.changes.outputs.files_cppcheck == 'true' }}
         run: echo "::remove-matcher owner=cppcheck::"
-
-      - name: Upload cppcheck SARIF to GitHub
-        uses: github/codeql-action/upload-sarif@v4
-        if: ${{ always() && steps.changes.outputs.files_cppcheck == 'true' && hashFiles('build/cppcheck.sarif') != '' }}
-        with:
-          sarif_file: ${{ github.workspace }}/build/cppcheck.sarif
-          category: cppcheck
 
       - name: Upload cppcheck SARIF report
         uses: actions/upload-artifact@v7
