@@ -23,6 +23,9 @@ class MDNormWANDTest(systemtesting.MantidSystemTest):
     identical, then feed both into MDNorm via MonoSCDNormalizationWorkspace. Since data and
     normalization are identical, every non-empty output bin must be exactly 1.0."""
 
+    def requiredFiles(self):
+        return ["HB2C_WANDSCD_data.nxs"]
+
     def skipTests(self):
         return _skip_test()
 
@@ -70,6 +73,9 @@ class MDNormWANDRLUTest(systemtesting.MantidSystemTest):
     binning path for monochromatic-SCD input, including the box-tree-derived maxQ estimate
     used to set default Q-dimension extents. Data and normalization are still identical, so
     every non-empty output bin must still be exactly 1.0, regardless of RLU."""
+
+    def requiredFiles(self):
+        return ["HB2C_WANDSCD_data.nxs"]
 
     def skipTests(self):
         return _skip_test()
