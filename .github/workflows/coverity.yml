@@ -88,6 +88,20 @@ jobs:
             exit 1
           fi
 
+      - name: Convert report to SARIF
+        run: |
+          ls -lah ${COVERITY_DIR}
+          ${COVERITY_DIR}/SARIF/cov-format-sarif-for-github.js --inputFile ${REPORT_FILE} --outputFile ${GITHUB_WORKSPACE}/build/coverity.sarif
+
+      - name: Upload cppcheck SARIF report
+        uses: actions/upload-artifact@v7
+        if: ${{ always() && hashFiles('build/coverity.sarif') != '' }}
+        with:
+          name: coverity_sarif_report
+          if-no-files-found: warn
+          path: ${GITHUB_WORKSPACE}/build/coverity.sarif
+
+
       - name: Upload result
         # only run on schedule or workflow_dispatch when the secret is available
         if: ${{ github.ref == 'refs/heads/main' }}
