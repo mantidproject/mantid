@@ -36,8 +36,13 @@ runs:
         pixi run --frozen cmake --build . --target cppcheck-sarif
         echo "::endgroup::"
 
+        if [ ! -s cppcheck.sarif ]; then
+          echo "CppCheck did not produce build/cppcheck.sarif"
+          exit 1
+        fi
+
         # Mark build as passed or failed using the SARIF report.
-        errors_count=$(python -c 'import json, sys; report = json.load(open(sys.argv[1])); print(sum(len(run.get("results", [])) for run in report.get("runs", [])))' cppcheck.sarif) || true
+        errors_count=$(python -c 'import json, sys; report = json.load(open(sys.argv[1])); print(sum(len(run.get("results", [])) for run in report.get("runs", [])))' cppcheck.sarif)
         if [ "$errors_count" -ne "${ALLOWED_ERRORS_COUNT}" ]; then
           echo "CppCheck found ${errors_count} issues."
           echo "See the archived SARIF report, or adjust the count."
