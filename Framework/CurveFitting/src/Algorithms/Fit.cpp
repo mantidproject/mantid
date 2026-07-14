@@ -149,9 +149,9 @@ void Fit::readProperties() {
     const std::vector<double> customStepSizes = getProperty("CustomStepSizes");
     const size_t nParams = m_function->nParams();
     if (customStepSizes.size() != nParams) {
-      g_log.error()
-          << "The 'CustomStepSizes' list must be the same length as the number of parameters. The list should contain "
-          << nParams << " values.\n";
+      throw std::invalid_argument(
+          "The 'CustomStepSizes' list must be the same length as the number of parameters. The list should contain " +
+          std::to_string(nParams) + " values.\n");
     }
     m_function->setCustomStepSizes(customStepSizes);
     for (size_t i = 0; i < nParams; i++) {

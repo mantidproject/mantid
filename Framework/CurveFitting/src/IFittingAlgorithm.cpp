@@ -30,6 +30,10 @@ namespace Mantid::CurveFitting {
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
+const std::string DEFAULT_STEP_SIZE = "Default";
+const std::string SQRT_EPSILON_STEP_SIZE = "Sqrt epsilon";
+const std::string CUSTOM_STEP_SIZE = "Custom";
+
 //----------------------------------------------------------------------------------------------
 namespace {
 /// Create a domain creator for a particular function and workspace pair.
@@ -98,11 +102,12 @@ void IFittingAlgorithm::init() {
                   "centre of each bin. If it is \"Histogram\" then function is "
                   "integrated within the bin and the integrals returned.",
                   Kernel::Direction::Input);
-  const std::array<std::string, 3> stepSizes = {{"Default", "Sqrt epsilon", "Custom"}};
+  const std::array<std::string, 3> stepSizes = {{DEFAULT_STEP_SIZE, SQRT_EPSILON_STEP_SIZE, CUSTOM_STEP_SIZE}};
   declareProperty(
       "StepSizeMethod", "Default", Kernel::IValidator_sptr(new Kernel::ListValidator<std::string>(stepSizes)),
       "The way the step size is calculated for numerical derivatives. See the section about step sizes in the Fit "
-      "algorithm documentation to understand the difference between \"Default\", \"Sqrt epsilon\" and \"Custom\".",
+      "algorithm documentation to understand the difference between \"" +
+          DEFAULT_STEP_SIZE + "\", \"" + SQRT_EPSILON_STEP_SIZE + "\" and \"" + CUSTOM_STEP_SIZE + "\".",
       Kernel::Direction::Input);
   declareProperty("PeakRadius", 0,
                   "A value of the peak radius the peak functions should use. A "
@@ -184,9 +189,9 @@ void IFittingAlgorithm::setFunction() {
 void IFittingAlgorithm::setStepSizeMethod() {
   if (m_function) {
     const std::string stepSizeMethod = getProperty("StepSizeMethod");
-    if (stepSizeMethod == "Sqrt epsilon") {
+    if (stepSizeMethod == SQRT_EPSILON_STEP_SIZE) {
       m_function->setStepSizeMethod(IFunction::StepSizeMethod::SQRT_EPSILON);
-    } else if (stepSizeMethod == "Custom") {
+    } else if (stepSizeMethod == CUSTOM_STEP_SIZE) {
       m_function->setStepSizeMethod(IFunction::StepSizeMethod::CUSTOM);
       const std::vector<double> customStepSizes = getProperty("CustomStepSizes");
       m_function->setCustomStepSizes(customStepSizes);
