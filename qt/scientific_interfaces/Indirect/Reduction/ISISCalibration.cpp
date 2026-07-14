@@ -327,7 +327,9 @@ void ISISCalibration::handleRun() {
   // Configure the resolution algorithm
   if (m_uiForm.ckCreateResolution->isChecked()) {
     m_outputResolutionName = outputWorkspaceNameStem + "_res";
-    m_batchAlgoRunner->addAlgorithm(resolutionAlgorithm(filenames));
+    auto resAlgInputProps = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
+    resAlgInputProps->setPropertyValue("CalibrationWorkspace", m_outputCalibrationName.toStdString());
+    m_batchAlgoRunner->addAlgorithm(resolutionAlgorithm(filenames), std::move(resAlgInputProps));
 
     if (m_uiForm.ckSmoothResolution->isChecked())
       addRuntimeSmoothing(m_outputResolutionName);
@@ -570,6 +572,11 @@ void ISISCalibration::calSetDefaultResolution(const MatrixWorkspace_const_sptr &
       std::pair<double, double> backgroundERange(-res * minScaleFactor + offset, -res * maxScaleFactor + offset);
       auto resBackground = m_uiForm.ppResolution->getRangeSelector("ResBackground");
       setRangeSelector(resBackground, m_properties["ResStart"], m_properties["ResEnd"], backgroundERange);
+
+      auto widthParams = comp->getNumberParameter("resolution-rebin-width", true);
+      if (!widthParams.empty()) {
+        m_dblManager->setValue(m_properties["ResEWidth"], widthParams[0]);
+      }
     }
   }
 }
