@@ -312,12 +312,11 @@ void LoadHFIRSANS::permuteTubes(std::vector<int> &data) {
     // permutation that takes us from a tube ID in the IDF to a tube ID in the
     // XML file
     std::vector<size_t> perm{0, 2, 4, 6, 1, 3, 5, 7};
-    size_t newStartPixelID, oldStartPixelID;
-    for (size_t e = 0; e < nEightPacks; ++e) {               // iterate over all eightpacks
-      for (size_t t = 0; t < 8; t++) {                       // iterate over each tube in an eightpack
-        newStartPixelID = (t + 8 * e) * nPixelPerTube;       // t+8*e is the new tube ID
-        oldStartPixelID = (perm[t] + 8 * e) * nPixelPerTube; // perm[t]+8*e is the old tube ID
-        for (size_t p = 0; p < nPixelPerTube; p++) {         // copy the "contents of the tube"
+    for (size_t e = 0; e < nEightPacks; ++e) {                      // iterate over all eightpacks
+      for (size_t t = 0; t < 8; t++) {                              // iterate over each tube in an eightpack
+        size_t newStartPixelID = (t + 8 * e) * nPixelPerTube;       // t+8*e is the new tube ID
+        size_t oldStartPixelID = (perm[t] + 8 * e) * nPixelPerTube; // perm[t]+8*e is the old tube ID
+        for (size_t p = 0; p < nPixelPerTube; p++) {                // copy the "contents of the tube"
           temp[p + newStartPixelID] = data[p + oldStartPixelID];
         }
       }

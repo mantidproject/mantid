@@ -284,7 +284,7 @@ int64_t ICat4Catalog::getNumberOfSearchResults(const CatalogSearchParam &inputs)
   query.insert(0, "SELECT COUNT(DISTINCT inves)");
 
   auto searchResults = performSearch(icat, query);
-  auto numRes = dynamic_cast<xsd__long *>(searchResults.at(0));
+  const auto *numRes = dynamic_cast<xsd__long *>(searchResults.at(0));
 
   if (numRes) {
     g_log.debug() << "The number of paging results returned in "

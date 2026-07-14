@@ -36,7 +36,7 @@ namespace Mantid::Kernel {
 template <>
 MANTID_API_DLL Mantid::API::IPeaksWorkspace_sptr
 IPropertyManager::getValue<Mantid::API::IPeaksWorkspace_sptr>(const std::string &name) const {
-  auto *prop = dynamic_cast<PropertyWithValue<Mantid::API::IPeaksWorkspace_sptr> *>(getPointerToProperty(name));
+  const auto *prop = dynamic_cast<PropertyWithValue<Mantid::API::IPeaksWorkspace_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return *prop;
   } else {

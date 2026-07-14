@@ -89,7 +89,7 @@ bool FileDescriptor::isAscii(FILE *file, const size_t nbytes) {
   // Call it a binary file if we find a non-ascii character in the
   // first nbytes bytes of the file.
   bool result = true;
-  for (char *p = dataArray; p < pend; ++p) {
+  for (const char *p = dataArray; p < pend; ++p) {
     auto ch = static_cast<unsigned long>(*p);
     if (!(ch <= 0x7F)) {
       result = false;

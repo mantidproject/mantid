@@ -1098,7 +1098,7 @@ public:
       WriteScalar<voffset_t>(buf_.data() + field_location->id, pos);
     }
     ClearOffsets();
-    auto vt1 = reinterpret_cast<voffset_t *>(buf_.data());
+    const auto vt1 = reinterpret_cast<voffset_t *>(buf_.data());
     auto vt1_size = ReadScalar<voffset_t>(vt1);
     auto vt_use = GetSize();
     // See if we already have generated a vtable with this exact same

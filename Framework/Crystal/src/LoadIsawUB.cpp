@@ -49,13 +49,12 @@ void LoadIsawUB::exec() {
   std::ifstream in(Filename.c_str());
 
   Kernel::DblMatrix ub(3, 3);
-  std::string s;
   double val;
 
   // Read the ISAW UB matrix
   for (size_t row = 0; row < 3; row++) {
     for (size_t col = 0; col < 3; col++) {
-      s = getWord(in, true);
+      std::string s = getWord(in, true);
       if (!convert(s, val))
         throw std::runtime_error("The string '" + s + "' in the file was not understood as a number.");
       ub[row][col] = val;

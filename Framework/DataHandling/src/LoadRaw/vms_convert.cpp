@@ -255,9 +255,9 @@ struct vax_double {
 #if WORDS_BIGENDIAN
 static int maybe_flip_bytes(void *p, size_t n) {
   unsigned i;
-  unsigned char c_tmp, *c_p = (unsigned char *)p;
+  unsigned char *c_p = (unsigned char *)p;
   for (i = 0; i < n / 2; i++) {
-    c_tmp = c_p[i];
+    unsigned char c_tmp = c_p[i];
     c_p[i] = c_p[n - i - 1];
     c_p[n - i - 1] = c_tmp;
   }

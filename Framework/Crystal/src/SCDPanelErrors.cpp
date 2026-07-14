@@ -186,7 +186,6 @@ void SCDPanelErrors::eval(double xshift, double yshift, double zshift, double xr
   for (int i = 0; i < inputP->getNumberPeaks(); i++) {
     const DataObjects::Peak &peak = inputP->getPeak(i);
     V3D hkl = V3D(boost::math::iround(peak.getH()), boost::math::iround(peak.getK()), boost::math::iround(peak.getL()));
-    V3D Q2 = lattice.qFromHKL(hkl);
     try {
       if (hkl == V3D(0, 0, 0))
         throw std::runtime_error("unindexed peak");
@@ -195,6 +194,7 @@ void SCDPanelErrors::eval(double xshift, double yshift, double zshift, double xr
 
       wl.initialize(peak2.getL1(), 0, {{UnitParams::l2, peak2.getL2()}, {UnitParams::twoTheta, peak2.getScattering()}});
       peak2.setWavelength(wl.singleFromTOF(peak.getTOF() + tShift));
+      V3D Q2 = lattice.qFromHKL(hkl);
       V3D Q3 = peak2.getQSampleFrame();
       out[i * 3] = Q3[0] - Q2[0];
       out[i * 3 + 1] = Q3[1] - Q2[1];
