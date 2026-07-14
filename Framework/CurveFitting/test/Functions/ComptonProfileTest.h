@@ -29,17 +29,17 @@ public:
 
   void test_initialized_object_has_expected_parameters() {
     auto profile = createFunction();
-    static const size_t nparams(1);
+    static const size_t nParams(1);
 
-    TS_ASSERT_EQUALS(nparams, profile->nParams());
+    TS_ASSERT_EQUALS(nParams, profile->nParams());
 
     // Test names as they are used in scripts
     if (profile->nParams() > 0) {
-      const char *expectedParams[nparams] = {"Mass"};
-      std::unordered_set<std::string> expectedParamStr(expectedParams, expectedParams + nparams);
+      const char *expectedParams[nParams] = {"Mass"};
+      std::unordered_set<std::string> expectedParamStr(expectedParams, expectedParams + nParams);
       std::vector<std::string> actualNames = profile->getParameterNames();
 
-      for (size_t i = 0; i < nparams; ++i) {
+      for (size_t i = 0; i < nParams; ++i) {
         const std::string &name = actualNames[i];
         size_t keyCount = expectedParamStr.count(name);
         TSM_ASSERT_EQUALS("Expected " + name + " to be found as parameter but it was not.", 1, keyCount);

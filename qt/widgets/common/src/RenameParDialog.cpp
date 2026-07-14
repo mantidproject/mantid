@@ -22,9 +22,9 @@ RenameParDialog::RenameParDialog(std::vector<std::string> old_params, const std:
     : QDialog(parent), m_old_params(std::move(old_params)), m_new_params(new_params) {
   m_uiForm.setupUi(this);
   QAbstractItemModel *model = m_uiForm.tableWidget->model();
-  int nparams(static_cast<int>(new_params.size()));
-  model->insertRows(0, nparams);
-  for (int row = 0; row < nparams; ++row) {
+  int nParams(static_cast<int>(new_params.size()));
+  model->insertRows(0, nParams);
+  for (int row = 0; row < nParams; ++row) {
     QString par = QString::fromStdString(new_params[row]);
     model->setData(model->index(row, 0), par);
     model->setData(model->index(row, 1), par);
