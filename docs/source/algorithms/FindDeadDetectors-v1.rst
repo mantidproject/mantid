@@ -35,13 +35,13 @@ Usage
     #set some detectors as dead
     #First - very dead all bins have zero counts
     vd_data=[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]
-    ws.setSharedY(10,np.array(vd_data))
+    ws.setY(10,np.array(vd_data))
     #second - drop off some counts, then drops to 0
     do_data=[2.0,5.0,4.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0]
-    ws.setSharedY(15,np.array(do_data))
+    ws.setY(15,np.array(do_data))
     #third strange some counts, then drops to 0, then recovers
     str_data=[0.4,5.0,0.001,0.0,0.0,0.0,0.0,0.0,1.0,1.0]
-    ws.setSharedY(20,np.array(str_data))
+    ws.setY(20,np.array(str_data))
 
     print("With no range will find very dead")
     (wsOut,detList) = FindDeadDetectors(ws)

@@ -37,7 +37,7 @@ Usage
    yArray[2] = float("-inf")
    yArray[3] = float("NaN")
    yArray[4] = 8e-7
-   ws.setSharedY(0,yArray)
+   ws.setY(0,yArray)
 
    ws = ReplaceSpecialValues(ws,NaNValue=0,InfinityValue=1000,
     BigNumberThreshold=1000, BigNumberValue=1000,
@@ -72,7 +72,7 @@ Output:
 
     wsYArray = np.array(ws.y(0))
     wsYArray[0] = valueDiff
-    ws.setSharedY(0, wsYArray)
+    ws.setY(0, wsYArray)
     ws = ReplaceSpecialValues(ws, SmallNumberThreshold=1e-6)
 
     print("Before\t\t After")

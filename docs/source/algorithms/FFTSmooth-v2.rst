@@ -62,7 +62,7 @@ Usage
         noiseArray.append(noiseAmp)
 
     for j in range(ws.getNumberHistograms()):
-        ws.setSharedY(j,ws.y(j)+noiseArray)
+        ws.setY(j,ws.y(j)+noiseArray)
 
 
     wsSmooth = FFTSmooth(ws, Params='2')
@@ -107,7 +107,7 @@ Output:
         noiseArray.append(noiseAmp)
 
     for j in range(ws.getNumberHistograms()):
-        ws.setSharedY(j,ws.y(j)+noiseArray)
+        ws.setY(j,ws.y(j)+noiseArray)
 
 
     wsButter2_2 = FFTSmooth(ws, Filter="Butterworth", Params='2,2', AllSpectra=True)
