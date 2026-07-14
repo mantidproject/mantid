@@ -83,11 +83,11 @@ of the proper reduction done for the direct-geometry inelastic instruments.
             #----- 1: Direct workspace access -----
             # Uses less memory as it avoids a copy of the data
 
-            # dataY returns an array we can modify on the new workspace
+            # mutableY returns an array we can modify on the new workspace
             # note _summed at this point has all its y-values = 0
-            sumy = _summed.dataY(0) # initialise sumy with zeros
+            sumy = _summed.mutableY(0) # initialise sumy with zeros
             for i in range(_tmpws.getNumberHistograms()):
-                sumy += _tmpws.dataY(i)
+                sumy += _tmpws.y(i)
 
             #----- 2: Extract to numpy and sum ----
             # Uses more memory as extract copies to data (uncomment to see working)
