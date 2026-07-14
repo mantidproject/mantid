@@ -113,9 +113,17 @@ jobs:
         if: ${{ steps.changes.outputs.files_cppcheck == 'true' }}
         run: ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/clean-builder ${GITHUB_WORKSPACE}
 
+      - name: Add cppcheck matcher
+        if: ${{ steps.changes.outputs.files_cppcheck == 'true' }}
+        run: echo "::add-matcher::.github/matchers/cppcheck.json"
+
       - uses: ./.github/actions/cppcheck-build
         name: Run cppcheck
         if: ${{ steps.changes.outputs.files_cppcheck == 'true' }}
+
+      - name: Remove cppcheck matcher
+        if: ${{ always() && steps.changes.outputs.files_cppcheck == 'true' }}
+        run: echo "::remove-matcher owner=cppcheck::"
 
       - name: Upload cppcheck SARIF to GitHub
         uses: github/codeql-action/upload-sarif@v4
