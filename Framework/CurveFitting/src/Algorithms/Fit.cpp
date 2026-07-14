@@ -20,6 +20,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/StartsWithValidator.h"
 #include "MantidKernel/UsageService.h"
@@ -92,6 +93,8 @@ void Fit::initConcrete() {
                   "(default is false, ignored if CreateOutput is false and "
                   "Output is an empty string).");
   declareProperty("CustomStepSizes", std::vector<double>{}, "Custom step sizes for numerical derivatives.");
+  setPropertySettings("CustomStepSizes", std::make_unique<Kernel::EnabledWhenProperty>(
+                                             "StepSizeMethod", Kernel::ePropertyCriterion::IS_EQUAL_TO, "Custom"));
 }
 
 std::map<std::string, std::string> Fit::validateInputs() {
@@ -147,7 +150,7 @@ void Fit::readProperties() {
     const size_t nparams = m_function->nParams();
     if (customStepSizes.size() != nparams) {
       g_log.error()
-          << "The 'CustomStepSizes' list must be the same lenght as the number of parameters. The list should contain "
+          << "The 'CustomStepSizes' list must be the same length as the number of parameters. The list should contain "
           << nparams << " values.\n";
     }
     m_function->setCustomStepSizes(customStepSizes);
