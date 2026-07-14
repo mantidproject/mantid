@@ -41,6 +41,9 @@ runs:
           exit 1
         fi
 
+        # GitHub code scanning maps repo-relative paths more reliably than runner-local absolute paths.
+        pixi run python ${GITHUB_WORKSPACE}/.github/actions/cppcheck-build/pathreplace.py cppcheck.sarif
+
         # Mark build as passed or failed using the SARIF report.
         errors_count=$(python -c 'import json, sys; report = json.load(open(sys.argv[1])); print(sum(len(run.get("results", [])) for run in report.get("runs", [])))' cppcheck.sarif)
         if [ "$errors_count" -ne "${ALLOWED_ERRORS_COUNT}" ]; then
