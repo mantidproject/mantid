@@ -20,6 +20,9 @@ runs:
         [ -d build ] || mkdir build
         cd build
 
+        # Remove old results if they exist so the artifact always reflects this run.
+        rm -f cppcheck.sarif
+
         # Not physical but logical cores, includes hyper threaded
         BUILD_THREADS="$(grep -c ^processor /proc/cpuinfo)"
 
@@ -28,24 +31,16 @@ runs:
         pixi run --frozen cmake --preset=cppcheck-ci -DCPPCHECK_NUM_THREADS=$BUILD_THREADS ..
         echo "::endgroup::"
 
-        # Run cppcheck. The diagnostics printed to stderr are what the problem matcher
-        # annotates and what we count below, so capture them while still echoing to the log.
-        # cppcheck (without --error-exitcode) returns 0 even when it finds issues; the count
-        # below is the source of truth, so don't let a non-zero pipe status abort the step.
+        # Run cppcheck in SARIF mode so the report can be archived and consumed by SARIF tools.
         echo "::group::Running cppcheck"
-        set -o pipefail
-        pixi run --frozen cmake --build . --target cppcheck 2>&1 | tee cppcheck.log || true
-        set +o pipefail
+        pixi run --frozen cmake --build . --target cppcheck-sarif
         echo "::endgroup::"
 
-        # Mark build as passed or failed. Count every cppcheck finding (all severities), matching
-        # the previous XML behaviour where any <error> element failed the build. Exclude the
-        # "nofile:0:0: ... [checkersReport]" summary line cppcheck always prints: it has no real
-        # location and the old XML gate never counted it (it was a self-closing <error/>).
-        errors_count=$(grep -E ':[0-9]+:[0-9]+: (error|warning|style|performance|portability|information):' cppcheck.log | grep -vc '^nofile:') || true
+        # Mark build as passed or failed using the SARIF report.
+        errors_count=$(python -c 'import json, sys; report = json.load(open(sys.argv[1])); print(sum(len(run.get("results", [])) for run in report.get("runs", [])))' cppcheck.sarif) || true
         if [ "$errors_count" -ne "${ALLOWED_ERRORS_COUNT}" ]; then
           echo "CppCheck found ${errors_count} issues."
-          echo "See the annotations on the changed files, or adjust the count."
+          echo "See the archived SARIF report, or adjust the count."
           exit 1
         else
           echo "CppCheck found no issues"

@@ -36,7 +36,7 @@ jobs:
         if: ${{ steps.changes.outputs.doxygen == 'true' }}
 
   conda-packaging-linux:
-    needs: [doxygen]
+    needs: [cppcheck, doxygen]
     runs-on:
       - ${{ (inputs.RUNNER_LABEL == '' && 'self-hosted') || inputs.RUNNER_LABEL }}
       - self-hosted
@@ -109,17 +109,17 @@ jobs:
         if: ${{ steps.changes.outputs.files_cppcheck == 'true' }}
         run: ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/clean-builder ${GITHUB_WORKSPACE}
 
-      - name: Add cppcheck matcher
-        if: ${{ steps.changes.outputs.files_cppcheck == 'true' }}
-        run: echo "::add-matcher::.github/matchers/cppcheck.json"
-
       - uses: ./.github/actions/cppcheck-build
         name: Run cppcheck
         if: ${{ steps.changes.outputs.files_cppcheck == 'true' }}
 
-      - name: Remove cppcheck matcher
+      - name: Upload cppcheck SARIF report
+        uses: actions/upload-artifact@v7
         if: ${{ always() && steps.changes.outputs.files_cppcheck == 'true' }}
-        run: echo "::remove-matcher owner=cppcheck::"
+        with:
+          name: cppcheck_sarif_report
+          if-no-files-found: warn
+          path: ${{ github.workspace }}/build/cppcheck.sarif
 
 
   build-and-test:
