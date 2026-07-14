@@ -17,9 +17,9 @@ A ``.dat`` calibration file must be provided via the ``CalibrationFile`` propert
 The ``CalibrationAngleType`` property controls the meaning of the calibration values:
 
 - ``Offset``: the file should contain two, space-delimited columns labelled ``detectorid`` and ``theta_offset`` (the labels are not case-sensitive). The detector IDs are the IDs for the detector pixels that should be moved. The theta offsets are the change required to the two theta value for each detector, in degrees.
-- ``Absolute``: the file should contain two, space-delimited columns labelled ``detectorid`` and ``angle``. The data rows are treated as an ordered list of detector index and absolute angle values. In this mode the first column is used for ordering only; detector IDs are resolved from the non-monitor detector spectra in the input workspace. The absolute angle values are converted to two theta offsets internally.
+- ``Absolute``: the file should contain two, space-delimited columns labelled ``detectorindex`` and ``angle`` (the labels are not case-sensitive). The detector index is matched against the non-monitor detector spectra in the input workspace, in workspace-index order. The absolute angle values are converted to two theta offsets internally.
 
-For absolute calibration files, ``AbsoluteAngleType`` specifies whether the supplied absolute values are ``Theta`` or ``TwoTheta`` values. ``Theta`` values are converted to detector two theta by applying a factor of two. ``CalibrationSpecularPixelIndex`` gives the specular pixel index in the calibration file, and ``ExperimentSpecularPixelIndex`` gives the specular pixel index in the input workspace. These indices may be fractional, in which case linear interpolation is used.
+For absolute calibration files, ``AbsoluteAngleType`` specifies whether the supplied absolute values are ``Theta`` or ``TwoTheta`` values. ``Theta`` values are converted to detector two theta by applying a factor of two. ``CalibrationSpecularPixelIndex`` gives the specular pixel index in the detector-index coordinate system of the calibration file, and ``ExperimentSpecularPixelIndex`` gives the specular pixel index in the detector-index coordinate system of the input workspace after monitors are ignored. These indices may be fractional, in which case linear interpolation is used.
 
 The ``DetectorCorrectionType`` property is passed to :ref:`algm-SpecularReflectionPositionCorrect` and controls whether pixels are moved by a vertical shift or rotated around the sample.
 
@@ -42,12 +42,12 @@ The below is an example of a valid absolute-angle calibration file:
 
 .. code-block:: none
 
-    detectorid angle
-    0 0.45
-    1 0.47
-    2 0.49
+    detectorindex angle
+    11 3.074720743
+    12 3.069434420
+    13 3.063999483
 
-For absolute input, all non-monitor detector spectra in the input workspace are considered in workspace-index order.
+For absolute input, all non-monitor detector spectra in the input workspace are considered in workspace-index order. Only detector indexes covered by the absolute-angle calibration file are moved; monitors and detector indexes outside the calibration range are left unchanged. Detector indexes in the calibration file must be integer and contiguous. Fractional specular pixel indexes are still supported by linear interpolation between the neighbouring detector-index rows.
 
 Usage
 -------

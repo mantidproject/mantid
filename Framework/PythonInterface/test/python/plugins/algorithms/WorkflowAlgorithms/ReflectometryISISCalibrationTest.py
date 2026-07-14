@@ -10,7 +10,7 @@ import unittest
 
 from mantid import FileFinder
 from mantid.api import AnalysisDataService, WorkspaceGroup
-from mantid.simpleapi import CreateSampleWorkspace, CropWorkspace, GroupWorkspaces
+from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces
 from mantid.kernel import V3D
 from testhelpers import assertRaisesNothing, create_algorithm, WorkspaceCreationHelper
 from testhelpers.tempfile_wrapper import TemporaryFileHelper
@@ -22,6 +22,7 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
     _DEG_TO_RAD = math.pi / 180.0
 
     _DET_ID_LABEL = "detectorid"
+    _DET_INDEX_LABEL = "detectorindex"
     _THETA_LABEL = "theta_offset"
     _ANGLE_LABEL = "angle"
     _COLUMN_NUM_ERROR = "Calibration file should contain two space de-limited columns"
@@ -261,16 +262,17 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
             ws, output_ws, angles, calibration_specular_index, experiment_specular_index, angle_multiplier=2.0
         )
 
-    def test_absolute_calibration_uses_detector_spectra_in_cropped_workspace(self):
+    def test_absolute_calibration_uses_detector_index_values_to_align_with_input_workspace(self):
         input_ws_name = "test_1234"
         ws = self._create_sample_workspace(input_ws_name)
-        ws = CropWorkspace(InputWorkspace=ws, StartWorkspaceIndex=2, EndWorkspaceIndex=6, OutputWorkspace=input_ws_name)
-        angles = [0.05 * index for index in range(ws.getNumberHistograms())]
+        first_calibrated_detector_index = 2
+        last_calibrated_detector_index = 6
+        angles = {index: 0.05 * index for index in range(first_calibrated_detector_index, last_calibrated_detector_index + 1)}
         self.temp_calibration_file = TemporaryFileHelper(fileContent=self._absolute_calibration_file_content(angles), extension=".dat")
 
         output_ws_name = "test_calibrated"
-        experiment_specular_index = 2
-        calibration_specular_index = 2
+        experiment_specular_index = 4
+        calibration_specular_index = 4
         args = {
             "InputWorkspace": ws,
             "CalibrationFile": self.temp_calibration_file.getName(),
@@ -308,13 +310,13 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         output_ws = AnalysisDataService.retrieve(output_ws_name)
         self._check_absolute_final_theta_values(ws, output_ws, angles, 4, 4, angle_multiplier=2.0)
 
-    def test_absolute_calibration_uses_row_order_not_detector_id_values(self):
+    def test_absolute_calibration_uses_detector_index_values_not_row_order(self):
         input_ws_name = "test_1234"
         ws = self._create_sample_workspace(input_ws_name)
-        angles = [0.05 * index for index in range(ws.getNumberHistograms())]
-        calibration_lines = [f"{self._DET_ID_LABEL} {self._ANGLE_LABEL}\n"]
-        for index, angle in enumerate(angles):
-            calibration_lines.append(f"{1000 + index} {angle}\n")
+        angles = {2: 0.10, 3: 0.15, 4: 0.20, 5: 0.25, 6: 0.30}
+        calibration_lines = [f"{self._DET_INDEX_LABEL} {self._ANGLE_LABEL}\n"]
+        for index in sorted(angles, reverse=True):
+            calibration_lines.append(f"{index} {angles[index]}\n")
         self.temp_calibration_file = TemporaryFileHelper(fileContent="".join(calibration_lines), extension=".dat")
 
         output_ws_name = "test_calibrated"
@@ -347,6 +349,39 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         }
         self._assert_run_algorithm_raises_exception(args, "CalibrationSpecularPixelIndex must be in the range")
 
+    def test_absolute_calibration_raises_if_detector_index_is_fractional(self):
+        input_ws_name = "test_1234"
+        ws = self._create_sample_workspace(input_ws_name)
+        self.temp_calibration_file = TemporaryFileHelper(
+            fileContent=f"{self._DET_INDEX_LABEL} {self._ANGLE_LABEL}\n2.5 0.10\n3 0.15\n", extension=".dat"
+        )
+
+        args = {
+            "InputWorkspace": ws,
+            "CalibrationFile": self.temp_calibration_file.getName(),
+            "CalibrationAngleType": "Absolute",
+            "CalibrationSpecularPixelIndex": 3,
+            "ExperimentSpecularPixelIndex": 3,
+            "OutputWorkspace": "test_calibrated",
+        }
+        self._assert_run_algorithm_raises_exception(args, "detector indexes should be integers")
+
+    def test_absolute_calibration_raises_if_detector_indexes_are_not_contiguous(self):
+        input_ws_name = "test_1234"
+        ws = self._create_sample_workspace(input_ws_name)
+        angles = {2: 0.10, 3: 0.15, 5: 0.25}
+        self.temp_calibration_file = TemporaryFileHelper(fileContent=self._absolute_calibration_file_content(angles), extension=".dat")
+
+        args = {
+            "InputWorkspace": ws,
+            "CalibrationFile": self.temp_calibration_file.getName(),
+            "CalibrationAngleType": "Absolute",
+            "CalibrationSpecularPixelIndex": 3,
+            "ExperimentSpecularPixelIndex": 3,
+            "OutputWorkspace": "test_calibrated",
+        }
+        self._assert_run_algorithm_raises_exception(args, "Absolute calibration detector indexes must be contiguous")
+
     def _check_final_theta_values(self, input_ws, output_ws, calibration_data=None):
         if not calibration_data:
             calibration_data = self.calibration_data
@@ -371,21 +406,30 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         info_in = input_ws.spectrumInfo()
         info_out = output_ws.spectrumInfo()
         experiment_specular_two_theta = self._interpolate_experiment_two_theta(info_in, experiment_specular_index)
-        calibration_specular_angle = self._interpolate(absolute_calibration_angles, calibration_specular_index)
+        calibration_specular_angle = self._interpolate_calibration_angle(absolute_calibration_angles, calibration_specular_index)
+        calibration_detector_indexes = self._calibration_detector_indexes(absolute_calibration_angles)
+        first_calibrated_detector_index = calibration_detector_indexes[0]
+        last_calibrated_detector_index = calibration_detector_indexes[-1]
 
         for index in range(input_ws.getNumberHistograms()):
-            relative_calibration_angle = self._interpolate(absolute_calibration_angles, index) - calibration_specular_angle
-            expected_two_theta = (experiment_specular_two_theta - angle_multiplier * relative_calibration_angle) * self._DEG_TO_RAD
+            if first_calibrated_detector_index <= index <= last_calibrated_detector_index:
+                relative_calibration_angle = (
+                    self._interpolate_calibration_angle(absolute_calibration_angles, index) - calibration_specular_angle
+                )
+                expected_two_theta_degrees = experiment_specular_two_theta - angle_multiplier * relative_calibration_angle
+                expected_two_theta = expected_two_theta_degrees * self._DEG_TO_RAD
+            else:
+                expected_two_theta = info_in.signedTwoTheta(index)
             self.assertAlmostEqual(info_out.signedTwoTheta(index), expected_two_theta, msg=f"Unexpected theta value for index {index}")
 
-    @staticmethod
-    def _absolute_calibration_file_content(angles, reverse=False):
+    def _absolute_calibration_file_content(self, angles, reverse=False):
+        angle_items = angles.items() if isinstance(angles, dict) else enumerate(angles)
         if reverse:
-            lines = ["angle detectorid\n"]
-            lines.extend(f"{angle} {index}\n" for index, angle in enumerate(angles))
+            lines = [f"{self._ANGLE_LABEL} {self._DET_INDEX_LABEL}\n"]
+            lines.extend(f"{angle} {index}\n" for index, angle in angle_items)
         else:
-            lines = ["detectorid angle\n"]
-            lines.extend(f"{index} {angle}\n" for index, angle in enumerate(angles))
+            lines = [f"{self._DET_INDEX_LABEL} {self._ANGLE_LABEL}\n"]
+            lines.extend(f"{index} {angle}\n" for index, angle in angle_items)
         return "".join(lines)
 
     def _interpolate_experiment_two_theta(self, spectrum_info, index):
@@ -399,6 +443,22 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         lower_index = math.floor(index)
         upper_index = math.ceil(index)
         return self._interpolate_between(index, lower_index, values[lower_index], upper_index, values[upper_index])
+
+    def _interpolate_calibration_angle(self, values, index):
+        if not isinstance(values, dict):
+            values = dict(enumerate(values))
+        if index in values:
+            return values[index]
+
+        lower_index = math.floor(index)
+        upper_index = math.ceil(index)
+        return self._interpolate_between(index, lower_index, values[lower_index], upper_index, values[upper_index])
+
+    @staticmethod
+    def _calibration_detector_indexes(values):
+        if isinstance(values, dict):
+            return sorted(values)
+        return list(range(len(values)))
 
     @staticmethod
     def _interpolate_between(index, lower_index, lower_value, upper_index, upper_value):

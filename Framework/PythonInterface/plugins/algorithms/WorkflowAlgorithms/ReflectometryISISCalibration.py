@@ -31,6 +31,7 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
     _COMMENT_PREFIX = "#"
     _NUM_COLUMNS_REQUIRED = 2
     _DET_ID_LABEL = "detectorid"
+    _DET_INDEX_LABEL = "detectorindex"
     _THETA_LABEL = "theta_offset"
     _ANGLE_LABEL = "angle"
     _OFFSET = "Offset"
@@ -64,7 +65,7 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         )
         self.declareProperty(
             FileProperty(self._CALIBRATION_FILE, "", action=FileAction.OptionalLoad, direction=Direction.Input, extensions=["dat"]),
-            doc="Calibration data file containing a list of detector IDs and offsets, or an ordered list of absolute angles.",
+            doc="Calibration data file containing a list of detector IDs and offsets, or detector indexes and absolute angles.",
         )
         self.declareProperty(
             self._CALIBRATION_ANGLE_TYPE,
@@ -169,8 +170,8 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         return scanned_theta_offsets
 
     def _parse_absolute_calibration_file(self, filepath):
-        """Create an ordered list of absolute angles from the calibration file."""
-        calibration_angles = []
+        """Create a dictionary of detector indexes and absolute angles from the calibration file."""
+        calibration_angles = {}
         with open(filepath, "r") as file:
             labels_checked = False
 
@@ -178,7 +179,7 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
                 if len(entries) != self._NUM_COLUMNS_REQUIRED:
                     raise RuntimeError(
                         "Calibration file should contain two space de-limited columns, "
-                        f"labelled as {self._DET_ID_LABEL} and {self._ANGLE_LABEL}"
+                        f"labelled as {self._DET_INDEX_LABEL} and {self._ANGLE_LABEL}"
                     )
 
                 if not labels_checked:
@@ -187,10 +188,15 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
                     continue
 
                 try:
-                    float(entries[self._det_id_col_idx])
-                    calibration_angles.append(float(entries[self._angle_col_idx]))
+                    detector_index = float(entries[self._det_id_col_idx])
+                    if not detector_index.is_integer():
+                        raise ValueError
+                    calibration_angles[int(detector_index)] = float(entries[self._angle_col_idx])
                 except ValueError:
-                    error_message = f"Invalid data in calibration file entry {entries} - detector indexes and angles should be numeric"
+                    error_message = (
+                        f"Invalid data in calibration file entry {entries} - detector indexes should be integers "
+                        "and angles should be numeric"
+                    )
                     raise ValueError(error_message)
 
             if len(calibration_angles) == 0:
@@ -230,7 +236,7 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
 
     def _check_absolute_file_column_labels(self, row_entries):
         """Check that an absolute-angle file contains the required column labels."""
-        valid_labels = collections.Counter([self._DET_ID_LABEL, self._ANGLE_LABEL])
+        valid_labels = collections.Counter([self._DET_INDEX_LABEL, self._ANGLE_LABEL])
 
         first_label = row_entries[self._det_id_col_idx].lower()
         second_label = row_entries[self._angle_col_idx].lower()
@@ -241,7 +247,7 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
                 self._angle_col_idx = 0
                 self._det_id_col_idx = 1
         else:
-            raise ValueError(f"Incorrect column labels in calibration file - should be {self._DET_ID_LABEL} and {self._ANGLE_LABEL}")
+            raise ValueError(f"Incorrect column labels in calibration file - should be {self._DET_INDEX_LABEL} and {self._ANGLE_LABEL}")
 
     def _clone_workspace(self, ws):
         clone_alg = self.createChildAlgorithm("CloneWorkspace", InputWorkspace=ws)
@@ -288,7 +294,7 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         return (current_two_theta * self._RAD_TO_DEG) + theta_offset
 
     def _convert_absolute_angles_to_offsets(self, ws, absolute_calibration_angles):
-        """Convert ordered absolute angles to detector ID keyed twoTheta offsets."""
+        """Convert detector-indexed absolute angles to detector ID keyed twoTheta offsets."""
         detector_spectrum_indices = self._detector_spectrum_indices(ws)
         self._validate_absolute_calibration_inputs(detector_spectrum_indices, absolute_calibration_angles)
 
@@ -297,13 +303,21 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         experiment_specular_two_theta = self._interpolate_experiment_two_theta(
             spectrum_info, detector_spectrum_indices, experiment_specular_index
         )
-        calibration_specular_angle = self._interpolate(absolute_calibration_angles, self._calibration_specular_pixel_index())
+        calibration_specular_angle = self._interpolate_calibration_angle(
+            absolute_calibration_angles, self._calibration_specular_pixel_index()
+        )
         two_theta_conversion_factor = 2.0 if self._absolute_angle_type() == self._THETA else 1.0
 
         offsets = {}
-        for pixel_index_to_calibrate, spectrum_index in enumerate(detector_spectrum_indices):
+        calibration_detector_indexes = sorted(absolute_calibration_angles)
+        first_calibration_detector_index = calibration_detector_indexes[0]
+        last_calibration_detector_index = calibration_detector_indexes[-1]
+        for detector_index, spectrum_index in enumerate(detector_spectrum_indices):
+            if detector_index < first_calibration_detector_index or detector_index > last_calibration_detector_index:
+                continue
+
             angle_relative_to_calibration_specular = (
-                self._interpolate(absolute_calibration_angles, pixel_index_to_calibrate) - calibration_specular_angle
+                self._interpolate_calibration_angle(absolute_calibration_angles, detector_index) - calibration_specular_angle
             )
             # Use the angle between this pixel and the calibration specular pixel to place it relative to the
             # experiment specular pixel.
@@ -314,16 +328,27 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         return offsets
 
     def _validate_absolute_calibration_inputs(self, detector_spectrum_indices, absolute_calibration_angles):
-        if len(detector_spectrum_indices) > len(absolute_calibration_angles):
-            raise RuntimeError(
-                "Absolute calibration file does not contain enough detector angle values "
-                f"for the input workspace: {len(absolute_calibration_angles)} values for {len(detector_spectrum_indices)} detectors"
-            )
+        if len(detector_spectrum_indices) == 0:
+            raise RuntimeError("Absolute calibration requires at least one non-monitor detector in the input workspace")
+
+        calibration_detector_indexes = sorted(absolute_calibration_angles)
+        first_calibration_detector_index = calibration_detector_indexes[0]
+        last_calibration_detector_index = calibration_detector_indexes[-1]
+        last_experiment_detector_index = len(detector_spectrum_indices) - 1
+        expected_detector_indexes = list(range(first_calibration_detector_index, last_calibration_detector_index + 1))
+        if calibration_detector_indexes != expected_detector_indexes:
+            raise RuntimeError("Absolute calibration detector indexes must be contiguous")
+
+        if first_calibration_detector_index > last_experiment_detector_index or last_calibration_detector_index < 0:
+            raise RuntimeError("Absolute calibration file detector indexes do not overlap the input workspace detector indexes")
         self._validate_interpolation_index(
-            self._calibration_specular_pixel_index(), len(absolute_calibration_angles), "CalibrationSpecularPixelIndex"
+            self._calibration_specular_pixel_index(),
+            first_calibration_detector_index,
+            last_calibration_detector_index,
+            "CalibrationSpecularPixelIndex",
         )
         self._validate_interpolation_index(
-            self._experiment_specular_pixel_index(), len(detector_spectrum_indices), "ExperimentSpecularPixelIndex"
+            self._experiment_specular_pixel_index(), 0, last_experiment_detector_index, "ExperimentSpecularPixelIndex"
         )
 
     @staticmethod
@@ -343,9 +368,9 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         return int(next(iter(detector_ids)))
 
     @staticmethod
-    def _validate_interpolation_index(index, size, property_name):
-        if index < 0 or index > size - 1:
-            raise RuntimeError(f"{property_name} must be in the range 0 to {size - 1}")
+    def _validate_interpolation_index(index, lower_bound, upper_bound, property_name):
+        if index < lower_bound or index > upper_bound:
+            raise RuntimeError(f"{property_name} must be in the range {lower_bound} to {upper_bound}")
 
     def _interpolate_experiment_two_theta(self, spectrum_info, detector_spectrum_indices, detector_index):
         lower_pixel_index = int(math.floor(detector_index))
@@ -358,6 +383,20 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         lower_index = int(math.floor(index))
         upper_index = int(math.ceil(index))
         return self._interpolate_between(index, lower_index, values[lower_index], upper_index, values[upper_index])
+
+    def _interpolate_calibration_angle(self, values_by_detector_index, detector_index):
+        if detector_index in values_by_detector_index:
+            return values_by_detector_index[detector_index]
+
+        lower_detector_index = int(math.floor(detector_index))
+        upper_detector_index = int(math.ceil(detector_index))
+        return self._interpolate_between(
+            detector_index,
+            lower_detector_index,
+            values_by_detector_index[lower_detector_index],
+            upper_detector_index,
+            values_by_detector_index[upper_detector_index],
+        )
 
     @staticmethod
     def _interpolate_between(index, lower_index, lower_value, upper_index, upper_value):
