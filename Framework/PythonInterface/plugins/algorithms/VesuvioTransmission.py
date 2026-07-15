@@ -28,10 +28,6 @@ class VesuvioTransmission(PythonAlgorithm):
     Evaluate the transmission spectrum on the VESUVIO spectrometer for measured
     sample and empty run numbers.
 
-    This version declares OutputWorkspace as a real Mantid output workspace
-    property and explicitly sets it at the end of PyExec(). This allows Mantid
-    to attach the PythonAlgorithm call to the output workspace history when the
-    algorithm is run from within Mantid.
     """
 
     def name(self):
@@ -44,8 +40,6 @@ class VesuvioTransmission(PythonAlgorithm):
         return "Inelastic\\Indirect\\Vesuvio"
 
     def PyInit(self):
-        # IMPORTANT FOR HISTORY:
-        # This must be an OUTPUT workspace property, not just an input string.
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output), doc="Output transmission workspace")
 
         self.declareProperty(
@@ -67,7 +61,7 @@ class VesuvioTransmission(PythonAlgorithm):
         self.declareProperty(
             "Target", "Energy", StringListValidator(["Energy", "Wavelength"]), doc="Target unit for the final transmission spectrum."
         )
-        self.declareProperty("Rebin", False, doc="If true, rebin the final summed transmission spectrum.")
+        self.declareProperty("Rebin", False, doc="If the rebin parameters string is given, rebin the final summed transmission spectrum. If the string is empty, this step is skipped.")
         self.declareProperty(
             "RebinParameters",
             "0.6,-0.005,1.e7",
@@ -219,8 +213,6 @@ class VesuvioTransmission(PythonAlgorithm):
                 Divide(LHSWorkspace=xs_name, RHSWorkspace=tmp_ws, OutputWorkspace=xs_name)
                 Scale(InputWorkspace=xs_name, Factor=10000, OutputWorkspace=xs_name)
 
-            # IMPORTANT FOR HISTORY:
-            # Attach the produced workspace to the declared output property.
             self.setProperty("OutputWorkspace", mtd[name])
 
         finally:
