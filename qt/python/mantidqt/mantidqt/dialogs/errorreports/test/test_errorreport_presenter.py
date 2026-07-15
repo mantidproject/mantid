@@ -61,9 +61,7 @@ class ErrorReportPresenterTest(unittest.TestCase):
         self.assertEqual(self.view.quit.call_count, 1)
 
     def test_remember_me_ticked_stores_user_info_on_local_qsettings_when_do_not_share_is_clicked(self):
-        self.view.rememberContactInfoCheckbox.isChecked.return_value = True
-
-        self.error_report_presenter.do_not_share(False, "MantidUser", "MantidUser@mail.com")
+        self.error_report_presenter.do_not_share(False, True, "MantidUser", "MantidUser@mail.com")
 
         self.q_settings_mock_instance.beginGroup.assert_called_once()
         self.q_settings_mock_instance.endGroup.assert_called_once()
@@ -72,9 +70,8 @@ class ErrorReportPresenterTest(unittest.TestCase):
         )
 
     def test_remember_me_unticked_does_not_store_user_info_on_local_qsettings_when_do_not_share_is_clicked(self):
-        self.view.rememberContactInfoCheckbox.isChecked.return_value = False
+        self.error_report_presenter.do_not_share(False, False, "MantidUser", "MantidUser@mail.com")
 
-        self.error_report_presenter.do_not_share(False, "MantidUser", "MantidUser@mail.com")
         self.q_settings_mock_instance.beginGroup.assert_called_once()
         self.q_settings_mock_instance.endGroup.assert_called_once()
         self.q_settings_mock_instance.setValue.assert_has_calls([mock.call(self.view.NAME, ""), mock.call(self.view.EMAIL, "")])
@@ -110,11 +107,12 @@ class ErrorReportPresenterTest(unittest.TestCase):
         email = "john.smith@example.com"
         text_box = "Details about error"
         continue_working = False
+        remember_checkbox = False
         share = True
         self.error_report_presenter._send_report_to_server = mock.MagicMock(return_value=201)
         self.error_report_presenter._handle_exit = mock.MagicMock()
 
-        self.error_report_presenter.error_handler(continue_working, share, name, email, text_box)
+        self.error_report_presenter.error_handler(continue_working, remember_checkbox, share, name, email, text_box)
 
         self.error_report_presenter._send_report_to_server.assert_called_once_with(
             share_identifiable=True, name=name, email=email, uptime=mock.ANY, text_box=text_box
@@ -126,11 +124,12 @@ class ErrorReportPresenterTest(unittest.TestCase):
         email = "john.smith@example.com"
         text_box = "Details about error"
         continue_working = True
+        remember_checkbox = False
         share = False
         self.error_report_presenter._send_report_to_server = mock.MagicMock()
         self.error_report_presenter._handle_exit = mock.MagicMock()
 
-        self.error_report_presenter.error_handler(continue_working, share, name, email, text_box)
+        self.error_report_presenter.error_handler(continue_working, remember_checkbox, share, name, email, text_box)
 
         self.assertEqual(self.error_report_presenter._send_report_to_server.call_count, 0)
         self.error_report_presenter._handle_exit.assert_called_once_with(True)
