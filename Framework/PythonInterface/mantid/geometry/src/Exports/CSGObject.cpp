@@ -48,31 +48,32 @@ boost::python::object wrapMeshWithNDArray(const CSGObject *self) {
     throw std::runtime_error("Cannot plot Shapes of infinite extent.");
   }
   try {
-    std::vector<double> vertices = self->getTriangleVertices();
-    std::vector<uint32_t> triangleFaces = self->getTriangleFaces();
+    const std::vector<double> *vertices = &self->getTriangleVertices();
+    const std::vector<uint32_t> *triangleFaces = &self->getTriangleFaces();
+    std::unique_ptr<GeometryTriangulator> localTriangulator;
 
-    if (triangleFaces.empty() || vertices.empty()) {
-      auto localTriangulator = GeometryTriangulator(self);
-      vertices = localTriangulator.getTriangleVertices();
-      triangleFaces = localTriangulator.getTriangleFaces();
+    if (triangleFaces->empty() || vertices->empty()) {
+      localTriangulator = std::make_unique<GeometryTriangulator>(self);
+      vertices = &localTriangulator->getTriangleVertices();
+      triangleFaces = &localTriangulator->getTriangleFaces();
     }
 
-    if (triangleFaces.empty() || vertices.empty()) {
+    if (triangleFaces->empty() || vertices->empty()) {
       return getEmptyArrayObject();
     }
 
-    const size_t numberTriangles = triangleFaces.size() / 3;
+    const size_t numberTriangles = triangleFaces->size() / 3;
     npy_intp dims[3] = {static_cast<npy_intp>(numberTriangles), 3, 3};
     auto *meshCoords = new double[numberTriangles * 9];
 
-    const size_t vertexCapacity = vertices.size();
-    for (size_t corner = 0; corner < triangleFaces.size(); ++corner) {
-      const size_t src = static_cast<size_t>(triangleFaces[corner]) * 3;
+    const size_t vertexCapacity = vertices->size();
+    for (size_t corner = 0; corner < triangleFaces->size(); ++corner) {
+      const size_t src = static_cast<size_t>((*triangleFaces)[corner]) * 3;
       const size_t dst = corner * 3;
       if (src + 2 < vertexCapacity) {
-        meshCoords[dst] = vertices[src];
-        meshCoords[dst + 1] = vertices[src + 1];
-        meshCoords[dst + 2] = vertices[src + 2];
+        meshCoords[dst] = (*vertices)[src];
+        meshCoords[dst + 1] = (*vertices)[src + 1];
+        meshCoords[dst + 2] = (*vertices)[src + 2];
       } else {
         meshCoords[dst] = 0.0;
         meshCoords[dst + 1] = 0.0;
