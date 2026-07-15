@@ -18,7 +18,7 @@ from mantid.simpleapi import (
     Scale,
     Integration,
 )
-from mantid.kernel import Direction, StringMandatoryValidator, StringListValidator
+from mantid.kernel import Direction, StringMandatoryValidator, StringListValidator, RebinParamsValidator
 from mantid.api import AlgorithmFactory, PythonAlgorithm, MatrixWorkspaceProperty, mtd
 from typing import Literal
 
@@ -61,13 +61,18 @@ class VesuvioTransmission(PythonAlgorithm):
         self.declareProperty(
             "Target", "Energy", StringListValidator(["Energy", "Wavelength"]), doc="Target unit for the final transmission spectrum."
         )
-        self.declareProperty("Rebin", False, doc="If the rebin parameters string is given, rebin the final summed transmission spectrum. If the string is empty, this step is skipped.")
+        self.declareProperty(
+            "Rebin",
+            False,
+            doc="If the rebin parameters string is given, rebin the final summed "
+            "transmission spectrum. If the string is empty, this step is skipped.",
+        )
         self.declareProperty(
             "RebinParameters",
-            "0.6,-0.005,1.e7",
-            StringMandatoryValidator(),
+            [0.6, -0.005, 1.0e7],
+            RebinParamsValidator(AllowEmpty=True),
             direction=Direction.Input,
-            doc="Mantid Rebin parameters, e.g. '0.6,-0.005,1.e7'. Used for Energy target only.",
+            doc="Mantid Rebin parameters list, e.g. '[0.6,-0.005,1.e7]'. Used for Energy target only.",
         )
         self.declareProperty(
             "CalculateXS", False, doc="If true, also calculate a normalised effective cross-section workspace named '<OutputWorkspace>_XS'."

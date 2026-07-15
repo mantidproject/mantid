@@ -22,7 +22,7 @@ class VesuvioTransmissionSystemTest(systemtesting.MantidSystemTest):
             Grouping="SumOfAllRuns",
             Target="Energy",
             Rebin=True,
-            RebinParameters="0.6,-0.03,1.e6",
+            RebinParameters=[0.6, -0.03, 1.0e6],
             CalculateXS=False,
             InvertMonitors=False,
             SmoothIncidentSpectrum=False,
