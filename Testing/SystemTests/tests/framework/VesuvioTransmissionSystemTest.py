@@ -23,7 +23,7 @@ class VesuvioTransmissionSystemTest(systemtesting.MantidSystemTest):
             Target="Energy",
             Rebin=True,
             RebinParameters=[0.6, -0.03, 1.0e6],
-            CalculateXS=False,
+            CalculateXS=True,
             InvertMonitors=False,
             SmoothIncidentSpectrum=False,
         )
@@ -69,11 +69,17 @@ class VesuvioTransmissionSystemTest(systemtesting.MantidSystemTest):
             "VESUVIO00058395.raw",
             "VESUVIO00058396.raw",
             "VesuvioTransmissionExpectedOutput.nxs",
+            "VesuvioTransmissionExpectedOutputXS.nxs",
         ]
 
     def validate(self):
         self.checkInstrument = False
-        return ("vesuvio_transmission_output", "VesuvioTransmissionExpectedOutput.nxs")
+        return (
+            "vesuvio_transmission_output",
+            "VesuvioTransmissionExpectedOutput.nxs",
+            "vesuvio_transmission_output_XS",
+            "VesuvioTransmissionExpectedOutputXS.nxs",
+        )
 
     def cleanup(self):
         mtd.clear()
