@@ -94,8 +94,9 @@ void Fit::initConcrete() {
                   "(default is false, ignored if CreateOutput is false and "
                   "Output is an empty string).");
   declareProperty("CustomStepSizes", std::vector<double>{}, "Custom step sizes for numerical derivatives.");
-  setPropertySettings("CustomStepSizes", std::make_unique<Kernel::EnabledWhenProperty>(
-                                             "StepSizeMethod", Kernel::ePropertyCriterion::IS_EQUAL_TO, "Custom"));
+  setPropertySettings("CustomStepSizes",
+                      std::make_unique<Kernel::EnabledWhenProperty>(
+                          "StepSizeMethod", Kernel::ePropertyCriterion::IS_EQUAL_TO, CUSTOM_STEP_SIZE));
 }
 
 std::map<std::string, std::string> Fit::validateInputs() {
@@ -119,10 +120,10 @@ std::map<std::string, std::string> Fit::validateInputs() {
 
   const std::string stepSizeMethod = getPropertyValue("StepSizeMethod");
   const std::vector<double> customStepSizes = getProperty("CustomStepSizes");
-  if (stepSizeMethod == Mantid::CurveFitting::CUSTOM_STEP_SIZE && customStepSizes.empty()) {
+  if (stepSizeMethod == CUSTOM_STEP_SIZE && customStepSizes.empty()) {
     issues["CustomStepSizes"] = "CustomStepSizes must be provided when StepSizeMethod is set to Custom.";
   }
-  if (stepSizeMethod != Mantid::CurveFitting::CUSTOM_STEP_SIZE && !customStepSizes.empty()) {
+  if (stepSizeMethod != CUSTOM_STEP_SIZE && !customStepSizes.empty()) {
     issues["CustomStepSizes"] = "CustomStepSizes can only be provided when StepSizeMethod is set to Custom.";
   }
 
@@ -146,7 +147,7 @@ void Fit::readProperties() {
   m_maxIterations = static_cast<size_t>(intMaxIterations);
 
   const std::string stepSizeMethod = getPropertyValue("StepSizeMethod");
-  if (stepSizeMethod == Mantid::CurveFitting::CUSTOM_STEP_SIZE) {
+  if (stepSizeMethod == CUSTOM_STEP_SIZE) {
     const std::vector<double> customStepSizes = getProperty("CustomStepSizes");
     const size_t nParams = m_function->nParams();
     if (customStepSizes.size() != nParams) {
