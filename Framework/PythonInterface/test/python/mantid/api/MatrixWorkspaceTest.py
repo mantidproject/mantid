@@ -222,23 +222,30 @@ class MatrixWorkspaceTest(unittest.TestCase):
         test_ws.setSharedDx(ws_index, dxvalues)
         self.assertTrue(np.array_equal(dxvalues, test_ws.dx(ws_index)))
 
-    def test_set_shared_y_e_dx_raise_on_size_mismatch(self):
+    def test_set_shared_x_y_e_dx_raise_on_size_mismatch(self):
         nvectors = 1
         xlength = 11
         ylength = 10
 
         test_ws = WorkspaceFactory.create("Workspace2D", nvectors, xlength, ylength)
+
+        wrong_length_xvalues = np.ones(xlength - 1)
+        self.assertRaises(RuntimeError, test_ws.setSharedX, 0, wrong_length_xvalues)
 
         wrong_length_values = np.ones(ylength - 1)
         self.assertRaises(RuntimeError, test_ws.setSharedY, 0, wrong_length_values)
         self.assertRaises(RuntimeError, test_ws.setSharedE, 0, wrong_length_values)
         self.assertRaises(RuntimeError, test_ws.setSharedDx, 0, wrong_length_values)
 
-    def test_set_y_e_dx_are_deprecated_in_favour_of_set_shared_y_e_dx(self):
+    def test_set_x_y_e_dx_are_deprecated_in_favour_of_set_shared_x_y_e_dx(self):
         nvectors = 1
         xlength = 11
         ylength = 10
         test_ws = WorkspaceFactory.create("Workspace2D", nvectors, xlength, ylength)
+
+        xvalues = np.linspace(0, 1, xlength)
+        with self.assertWarns(DeprecationWarning):
+            test_ws.setX(0, xvalues)
 
         values = np.ones(ylength)
         for method_name in ("setY", "setE", "setDx"):
