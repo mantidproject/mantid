@@ -1,0 +1,18 @@
+{
+  "problemMatcher": [
+    {
+      "owner": "cppcheck",
+      "severity": "warning",
+      "pattern": [
+        {
+          "regexp": "^(.*?/mantid/)(.*?):(\\d+):(\\d+): (?:error|warning|style|performance|portability|information): (.*?)(?: \\[[a-zA-Z0-9_.-]+\\])?$",
+          "fromPath": 1,
+          "file": 2,
+          "line": 3,
+          "column": 4,
+          "message": 5
+        }
+      ]
+    }
+  ]
+}

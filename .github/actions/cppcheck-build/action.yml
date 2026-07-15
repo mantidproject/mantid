@@ -1,0 +1,59 @@
+name: 'Run CppCheck'
+description: 'Configures and runs the cppcheck static-analysis target, failing on any finding'
+inputs:
+  allowed-errors-count:
+    description: |
+      If errors slip through to main this can be used to set a non-zero allowed count while those
+      errors are dealt with. This avoids breaking all builds for all developers.
+    required: false
+    default: '0'
+runs:
+  using: "composite"
+  steps:
+    - name: Run cppcheck
+      shell: bash
+      working-directory: ${{ github.workspace }}
+      env:
+        ALLOWED_ERRORS_COUNT: ${{ inputs.allowed-errors-count }}
+      run: |
+        # Create the build directory if it doesn't exist
+        [ -d build ] || mkdir build
+        cd build
+
+        # Remove old results if they exist so the artifact always reflects this run.
+        rm -f cppcheck.sarif
+
+        # Not physical but logical cores, includes hyper threaded
+        BUILD_THREADS="$(grep -c ^processor /proc/cpuinfo)"
+
+        # Configure
+        echo "::group::Configure cmake"
+        pixi run --frozen cmake --preset=cppcheck-ci -DCPPCHECK_NUM_THREADS=$BUILD_THREADS ..
+        echo "::endgroup::"
+
+        # Run cppcheck in SARIF mode so the report can be archived and consumed by SARIF tools.
+        echo "::group::Running cppcheck"
+        pixi run --frozen cmake --build . --target cppcheck-sarif
+        echo "::endgroup::"
+
+        if [ ! -s cppcheck.sarif ]; then
+          echo "CppCheck did not produce build/cppcheck.sarif"
+          exit 1
+        fi
+
+        echo "Digest cppcheck SARIF for problem matcher"
+        pixi run python ${GITHUB_WORKSPACE}/.github/actions/cppcheck-build/sarif_to_gcc.py cppcheck.sarif
+
+        # Rewrite artifact paths after log emission so downloaded SARIF files point at repo-relative paths.
+        pixi run python ${GITHUB_WORKSPACE}/.github/actions/cppcheck-build/pathreplace.py cppcheck.sarif
+
+        # Mark build as passed or failed using the SARIF report.
+        errors_count=$(python3 -c 'import json, sys; report = json.load(open(sys.argv[1])); print(sum(len(run.get("results", [])) for run in report.get("runs", [])))' cppcheck.sarif)
+        if [ "$errors_count" -ne "${ALLOWED_ERRORS_COUNT}" ]; then
+          echo "CppCheck found ${errors_count} issues."
+          echo "See the archived SARIF report, or adjust the count."
+          exit 1
+        else
+          echo "CppCheck found no issues"
+          exit 0
+        fi
