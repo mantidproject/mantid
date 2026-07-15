@@ -556,7 +556,7 @@ void MDNorm::exec() {
     // Monochromatic single crystal diffraction (WAND, DEMAND): the normalization is a
     // pre-computed MDEventWorkspace, binned identically to the data instead of being
     // calculated from solid angle/flux trajectories.
-    m_normWS = binNormalizationWS(symmetryOps);
+    m_normWS = binMonoSCDNormalizationWS(symmetryOps);
   } else {
     createNormalizationWS(*outputDataWS);
   }
@@ -1264,7 +1264,7 @@ DataObjects::MDHistoWorkspace_sptr MDNorm::binInputWS(const std::vector<Geometry
  * map built in binInputWS) reproduces an identical parameters map.
  */
 DataObjects::MDHistoWorkspace_sptr
-MDNorm::binNormalizationWS(const std::vector<Geometry::SymmetryOperation> &symmetryOps) {
+MDNorm::binMonoSCDNormalizationWS(const std::vector<Geometry::SymmetryOperation> &symmetryOps) {
   std::map<std::string, std::string> parameters = getBinParameters();
   Mantid::API::IMDEventWorkspace_sptr monoNormInputWS = this->getProperty("MonoSCDNormalizationWorkspace");
   return binMDEventWorkspace(monoNormInputWS, "TemporaryNormalizationWorkspace", "OutputNormalizationWorkspace",
@@ -1275,7 +1275,7 @@ MDNorm::binNormalizationWS(const std::vector<Geometry::SymmetryOperation> &symme
  * Bin(MD), per symmetry operation, an MDEventWorkspace using pre-computed bin parameters,
  * accumulating across symmetry operations via temporaryWSPropertyName. Used both to bin the
  * data (via binInputWS) and, for monochromatic-SCD input, to bin the pre-computed
- * normalization workspace (via binNormalizationWS) with the exact same parameters, so both
+ * normalization workspace (via binMonoSCDNormalizationWS) with the exact same parameters, so both
  * end up on identical grids.
  * @param ws: the MDEventWorkspace to bin
  * @param temporaryWSPropertyName: name of the MDNorm property holding an optional

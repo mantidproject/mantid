@@ -46,7 +46,7 @@ private:
   DataObjects::MDHistoWorkspace_sptr binInputWS(const std::vector<Geometry::SymmetryOperation> &symmetryOps);
 
   /// Bin(MD), per symmetry operation, an MDEventWorkspace using pre-computed bin parameters.
-  /// Shared by binInputWS and (for monochromatic-SCD input) binNormalizationWS, so that data
+  /// Shared by binInputWS and (for monochromatic-SCD input) binMonoSCDNormalizationWS, so that data
   /// and normalization end up on identical grids.
   DataObjects::MDHistoWorkspace_sptr binMDEventWorkspace(const API::IMDEventWorkspace_sptr &ws,
                                                          const std::string &temporaryWSPropertyName,
@@ -58,7 +58,8 @@ private:
   DataObjects::MDHistoWorkspace_sptr binBackgroundWS(const std::vector<Geometry::SymmetryOperation> &symmetryOps);
 
   /// Bin(MD) MonoSCDNormalizationWorkspace (monochromatic single crystal diffraction)
-  DataObjects::MDHistoWorkspace_sptr binNormalizationWS(const std::vector<Geometry::SymmetryOperation> &symmetryOps);
+  DataObjects::MDHistoWorkspace_sptr
+  binMonoSCDNormalizationWS(const std::vector<Geometry::SymmetryOperation> &symmetryOps);
 
   /// build symmetry matrix
   Mantid::Kernel::DblMatrix buildSymmetryMatrix(const Geometry::SymmetryOperation &so);
