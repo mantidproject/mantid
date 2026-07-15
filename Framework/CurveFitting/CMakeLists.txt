@@ -368,6 +368,7 @@ set(INC_FILES
     inc/MantidCurveFitting/SeqDomain.h
     inc/MantidCurveFitting/SeqDomainSpectrumCreator.h
     inc/MantidCurveFitting/SpecialFunctionSupport.h
+    inc/MantidCurveFitting/StepSizeConstants.h
     inc/MantidCurveFitting/TableWorkspaceDomainCreator.h
 )
 

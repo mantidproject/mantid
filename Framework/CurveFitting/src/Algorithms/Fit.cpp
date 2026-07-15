@@ -9,6 +9,7 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
+#include "MantidCurveFitting/StepSizeConstants.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/Expression.h"
@@ -118,10 +119,10 @@ std::map<std::string, std::string> Fit::validateInputs() {
 
   const std::string stepSizeMethod = getPropertyValue("StepSizeMethod");
   const std::vector<double> customStepSizes = getProperty("CustomStepSizes");
-  if (stepSizeMethod == "Custom" && customStepSizes.empty()) {
+  if (stepSizeMethod == Mantid::CurveFitting::CUSTOM_STEP_SIZE && customStepSizes.empty()) {
     issues["CustomStepSizes"] = "CustomStepSizes must be provided when StepSizeMethod is set to Custom.";
   }
-  if (stepSizeMethod != "Custom" && !customStepSizes.empty()) {
+  if (stepSizeMethod != Mantid::CurveFitting::CUSTOM_STEP_SIZE && !customStepSizes.empty()) {
     issues["CustomStepSizes"] = "CustomStepSizes can only be provided when StepSizeMethod is set to Custom.";
   }
 
@@ -145,7 +146,7 @@ void Fit::readProperties() {
   m_maxIterations = static_cast<size_t>(intMaxIterations);
 
   const std::string stepSizeMethod = getPropertyValue("StepSizeMethod");
-  if (stepSizeMethod == "Custom") {
+  if (stepSizeMethod == Mantid::CurveFitting::CUSTOM_STEP_SIZE) {
     const std::vector<double> customStepSizes = getProperty("CustomStepSizes");
     const size_t nParams = m_function->nParams();
     if (customStepSizes.size() != nParams) {

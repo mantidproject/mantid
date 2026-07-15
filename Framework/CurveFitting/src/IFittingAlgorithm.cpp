@@ -13,6 +13,7 @@
 #include "MantidCurveFitting/LatticeDomainCreator.h"
 #include "MantidCurveFitting/MultiDomainCreator.h"
 #include "MantidCurveFitting/SeqDomainSpectrumCreator.h"
+#include "MantidCurveFitting/StepSizeConstants.h"
 #include "MantidCurveFitting/TableWorkspaceDomainCreator.h"
 
 #include "MantidAPI/CostFunctionFactory.h"
@@ -29,10 +30,6 @@ namespace Mantid::CurveFitting {
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-
-const std::string DEFAULT_STEP_SIZE = "Default";
-const std::string SQRT_EPSILON_STEP_SIZE = "Sqrt epsilon";
-const std::string CUSTOM_STEP_SIZE = "Custom";
 
 //----------------------------------------------------------------------------------------------
 namespace {
