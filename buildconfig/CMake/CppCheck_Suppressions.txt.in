@@ -56,6 +56,8 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FindPeaks.c
 // but they are from separate traceFromSample() calls on a mutated tracer object
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/Peak.cpp
 // startTime>m_roi.back() at line 97 is always false given the matching guard at line 86; the condition
+// is retained in the else-if chain for clarity alongside the preceding front() and back() bounds checks
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/TimeROI.cpp:97
 // endX is reassigned to XValues.back() in the out-of-range branch but m_maxX is set directly afterward;
 // the assignment is dead in that branch but kept for consistency with the warning message
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/Fit1D.cpp:379

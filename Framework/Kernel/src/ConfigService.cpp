@@ -295,8 +295,6 @@ std::string checkForBadConfigOptions(const std::string &filename, const std::str
       // do nothing
     } else if (line.find("FilterChannel") != std::string::npos) {
       is_ok = false;
-    } else if (line.find("FilterChannel") != std::string::npos) {
-      is_ok = false;
     }
 
     // Print warning to error channel and comment out offending line
