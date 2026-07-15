@@ -69,7 +69,7 @@ Usage
   print("The correction for the data by the user defined function.")
   print("In this case: " + correction_formula)
   for i in range(0,wsCorrected.blocksize(),10):
-    print("The correct value in bin {} is {:.2f} compared to {:.2f}".format(i,wsCorrected.readY(0)[i],ws.readY(0)[i]))
+    print("The correct value in bin {} is {:.2f} compared to {:.2f}".format(i,wsCorrected.y(0)[i],ws.y(0)[i]))
 
 Output:
 

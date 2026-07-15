@@ -73,9 +73,9 @@ Usage
    print('Reflectivity X unit: ' + reflectivityQ.getAxis(0).getUnit().unitID())
    print('Is reflectivityLambda histogram? {}'.format(reflectivityLambda.isHistogramData()))
    print('Is reflectivityQ histogram? {}'.format(reflectivityQ.isHistogramData()))
-   print('Number of bins in reflectivityLambda: {}'.format(len(reflectivityLambda.readX(0))))
+   print('Number of bins in reflectivityLambda: {}'.format(len(reflectivityLambda.x(0))))
    # There is a lot less points due to grouping
-   print('Number of points in reflectivityQ: {}'.format(len(reflectivityQ.readX(0))))
+   print('Number of points in reflectivityQ: {}'.format(len(reflectivityQ.x(0))))
    # The Q resolution is saved in the Dx field
    print('Has reflectivityQ Dx? {}'.format(reflectivityQ.hasDx(0)))
 
@@ -180,10 +180,10 @@ Output:
    )
 
    print('X unit in R00: ' + R00.getAxis(0).getUnit().unitID())
-   print('Number of points in R00: {}'.format(len(R00.readX(0))))
+   print('Number of points in R00: {}'.format(len(R00.x(0))))
    print('X unit in R11: ' + R11.getAxis(0).getUnit().unitID())
-   print('Number of points in R11: {}'.format(len(R11.readX(0))))
-   print('Size of Q resolution data: {}'.format(len(R11.readDx(0))))
+   print('Number of points in R11: {}'.format(len(R11.x(0))))
+   print('Size of Q resolution data: {}'.format(len(R11.dx(0))))
 
 Output:
 

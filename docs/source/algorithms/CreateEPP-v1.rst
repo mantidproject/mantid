@@ -67,8 +67,8 @@ Usage
         detector = ws.getDetector(i)
         L2 = sample.getDistance(detector)
         tof = UnitConversion.run('Energy', 'TOF', Ei, L1, L2, 0.0, DeltaEModeType.Direct, Ei)
-        ys =ws.dataY(i)
-        ys += peak(ws.dataX(i), tof)
+        ys =ws.mutableY(i)
+        ys += peak(ws.x(i), tof)
     # The 'Ei' sample log shall hold the incident energy.
     ws.mutableRun().addProperty('Ei', Ei, True)
 

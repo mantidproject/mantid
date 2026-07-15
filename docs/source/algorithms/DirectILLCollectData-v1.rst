@@ -152,8 +152,8 @@ For usage of this algorithm as part of the direct geometry data reduction, check
     raw_wl = ConvertUnits(raw, 'Wavelength')
     # Elastic peak is around channel 150
     print('Wavelength from sample logs: {:.3}A'.format(raw.run().getProperty('wavelength').value))
-    print("'raw' wavelength at channel 150: {:.3}A (incorrect!)".format(raw_wl.readX(0)[149]))
-    print("'preprocessed' wavelength at channel 150: {:.3}A".format(preprocessed_wl.readX(0)[149]))
+    print("'raw' wavelength at channel 150: {:.3}A (incorrect!)".format(raw_wl.x(0)[149]))
+    print("'preprocessed' wavelength at channel 150: {:.3}A".format(preprocessed_wl.x(0)[149]))
 
 Output:
 

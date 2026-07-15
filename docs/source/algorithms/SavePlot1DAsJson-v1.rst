@@ -33,7 +33,7 @@ Usage
       DataX = E, DataY = I, DataE = err, NSpec = 1,
       UnitX = "Energy")
   # output path
-  out_json = "myplot.json"
+  out_json = os.path.join(config["defaultsave.directory"], "myplot.json")
   # run algorithm
   SavePlot1DAsJson(InputWorkspace=dataws, JsonFilename=out_json, PlotName="myplot")
 

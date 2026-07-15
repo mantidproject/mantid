@@ -64,9 +64,9 @@ to convert units from TOF to energy.
     # FIND GUESS PEAKS
     allEiWs=GetAllEi(ws,Monitor1SpecID=1,Monitor2SpecID=2)
     # Analyze results
-    allEi = allEiWs.readX(0);
-    peakHeight = allEiWs.readY(0);
-    peakWidth  = allEiWs.readE(0);
+    allEi = allEiWs.x(0);
+    peakHeight = allEiWs.y(0);
+    peakWidth  = allEiWs.e(0);
 
     # Check if peaks positions are indeed correct:
     #-------------------------------------------------------------

@@ -193,9 +193,9 @@ Usage
   # output
   ws = mtd["Exp0231Reduced"]
 
-  vecx = ws.readX(0)
-  vecy = ws.readY(0)
-  vece = ws.readE(0)
+  vecx = ws.x(0)
+  vecy = ws.y(0)
+  vece = ws.e(0)
 
   for i in [100, 100, 1101, 1228]:
     print("2theta = {:.6f}, Y = {:.6f}, E = {:.6f}".format(vecx[i], vecy[i], vece[i]))

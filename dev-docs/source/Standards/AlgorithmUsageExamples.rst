@@ -40,8 +40,8 @@ The example below show the proposed way to format an usage example in reStructur
       # rebin from min to max with size bin = 2
       ws = Rebin(ws, 2)
 
-      print "The rebinned X values are: " + str(ws.readX(0))
-      print "The rebinned Y values are: " + str(ws.readY(0))
+      print "The rebinned X values are: " + str(ws.x(0))
+      print "The rebinned Y values are: " + str(ws.y(0))
 
 
    Output:
@@ -124,7 +124,7 @@ There are many ways to create sample workspaces. For example :ref:`CreateMDHisto
       print("Fitted sigma value is: %.2f" % paramTable.column(1)[2])
       # fitWorkspace contains the data, the calculated and the difference patterns
       print "Number of spectra in fitWorkspace is: " +  str(fitWorkspace.getNumberHistograms())
-      print("The 20th y-value of the calculated pattern: %.4f" % fitWorkspace.readY(1)[19])
+      print("The 20th y-value of the calculated pattern: %.4f" % fitWorkspace.y(1)[19])
 
    .. testcleanup:: ExFitPeak
 
@@ -204,7 +204,7 @@ as shown in the example below. This will generate a note to the user explaining 
       # Load ISIS LOQ histogram dataset
       ws = Load('LOQ49886.nxs')
 
-      print "The 1st x-value of the first spectrum is: " + str(ws.readX(0)[0])
+      print "The 1st x-value of the first spectrum is: " + str(ws.x(0)[0])
 
    .. testcleanup:: ExLoadISISnexusHist
 

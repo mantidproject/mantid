@@ -79,8 +79,8 @@ Usage
                                    Precision=0.2)
 
    # Get the data
-   intensity = wsOut.readY(0)
-   bin_boundaries = wsOut.readX(0)
+   intensity = wsOut.y(0)
+   bin_boundaries = wsOut.x(0)
    energy_transfer = 0.5*(bin_boundaries[1:]+bin_boundaries[:-1])
    # at DeltaE=5meV, Q makes an angle of 55.7 degrees with incident beam
    # If polarization angle is -10 degrees, the intensity should be 0

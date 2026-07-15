@@ -31,8 +31,8 @@ Usage
        Function='User Defined', UserDefinedFunction=spectrum, BankDistanceFromSample = 1.5)
    # Shift monitor Y and E data
    shift = -70
-   ws.setY(0, numpy.roll(ws.readY(0), shift))
-   ws.setE(0, numpy.roll(ws.readE(0), shift))
+   ws.setY(0, numpy.roll(ws.y(0), shift))
+   ws.setE(0, numpy.roll(ws.e(0), shift))
    calibratedE_i = GetEiMonDet(DetectorWorkspace=ws,
        DetectorWorkspaceIndexSet="1-100", MonitorIndex=0)
 
@@ -58,8 +58,8 @@ Output:
      Function='User Defined', UserDefinedFunction=spectrum, BankDistanceFromSample = 1.5)
    # Shift monitor Y and E data
    shift = -70
-   ws.setY(0, numpy.roll(ws.readY(0), shift))
-   ws.setE(0, numpy.roll(ws.readE(0), shift))
+   ws.setY(0, numpy.roll(ws.y(0), shift))
+   ws.setE(0, numpy.roll(ws.e(0), shift))
    ExtractMonitors(ws, DetectorWorkspace='detectors', MonitorWorkspace='monitors')
    monitorEPPs = FindEPP('monitors')
    calibratedE_i = GetEiMonDet(DetectorWorkspace='detectors',

@@ -45,8 +45,8 @@ Usage
     #
     # check results:
 
-    print('Log10 for spectra 0:  {}'.format(ws.readY(0)))
-    print('Log10 for Err spectra 0:  {}'.format(ws.readE(0)[0:4]))
+    print('Log10 for spectra 0:  {}'.format(ws.y(0)))
+    print('Log10 for Err spectra 0:  {}'.format(ws.e(0)[0:4]))
 
 .. testcleanup:: ExLogarithm
 

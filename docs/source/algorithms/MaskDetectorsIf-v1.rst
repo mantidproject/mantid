@@ -32,7 +32,7 @@ Usage
    ws = CreateSampleWorkspace()
    # One spectrum has lower counts than the rest
    badIndex = 3
-   Ys = ws.dataY(badIndex)
+   Ys = ws.mutableY(badIndex)
    Ys *= 0.01
    integral = Integration(ws)
    MaskDetectorsIf(integral, Operator='Less', Value=10., OutputWorkspace=integral)

@@ -38,8 +38,8 @@ Usage
    ows = ApplyDetailedBalance(InputWorkspace='ws',OutputWorkspace='ows',Temperature='100', OutputUnits='Frequency')
 
    print("The Y values in the Output Workspace are")
-   print(ows.readY(0)[0:5])
-   print(ows.readY(0)[5:10])
+   print(ows.y(0)[0:5])
+   print(ows.y(0)[5:10])
 
 Output:
 

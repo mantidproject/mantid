@@ -32,8 +32,8 @@ Usage
   AddSampleLog(ws, LogName='wavelength_spread', LogText='1.0', LogType='Number Series')
   out = HFIRSANS2Wavelength(InputWorkspace=ws)
   print(out.blocksize())
-  print(out.readX(0)[0])
-  print(out.readX(0)[1])
+  print(out.x(0)[0])
+  print(out.x(0)[1])
   print(out.getAxis(0).getUnit().caption())
 
 Output:

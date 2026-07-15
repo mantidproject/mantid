@@ -65,8 +65,8 @@ Usage
 
     # Check the output
     print("out has {0} bins with x-axis as: {1}, {2}, {3}, {4}, {5}, {6}".
-          format(out.blocksize(), out.readX(0)[0], out.readX(0)[1], out.readX(0)[2],
-                 out.readX(0)[3], out.readX(0)[4], out.readX(0)[5]))
+          format(out.blocksize(), out.x(0)[0], out.x(0)[1], out.x(0)[2],
+                 out.x(0)[3], out.x(0)[4], out.x(0)[5]))
 
 Output:
 
@@ -94,7 +94,7 @@ Output:
 
     # Check the output
     print("out has {0} bins with x-axis as: {1}, {2}, {3}".
-          format(out.blocksize(), out.readX(0)[0], out.readX(0)[1], out.readX(0)[2]))
+          format(out.blocksize(), out.x(0)[0], out.x(0)[1], out.x(0)[2]))
 
 Output:
 
@@ -126,8 +126,8 @@ Output:
 
     # Check the output
     print("out has {0} bins with x-axis as: {1}, {2}, {3}, {4}, {5}, {6}".
-          format(out.blocksize(), out.readX(0)[0], out.readX(0)[1], out.readX(0)[2],
-          out.readX(0)[3], out.readX(0)[4], out.readX(0)[5]))
+          format(out.blocksize(), out.x(0)[0], out.x(0)[1], out.x(0)[2],
+          out.x(0)[3], out.x(0)[4], out.x(0)[5]))
 
 Output:
 

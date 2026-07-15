@@ -35,8 +35,8 @@ Usage
 
     new=CropWorkspaceRagged(ws,x_min,x_max)
 
-    print("The number of bins in spectrum 1 is: {}".format(new.readX(0).size))
-    print("The number of bins in spectrum 2 is: {}".format(new.readX(1).size))
+    print("The number of bins in spectrum 1 is: {}".format(new.x(0).size))
+    print("The number of bins in spectrum 2 is: {}".format(new.x(1).size))
 
 Output:
 
@@ -70,7 +70,7 @@ mentioned above, ``numpy.nan`` or ``math.nan`` can both be used.
     gr=PDFFourierTransform(InputWorkspace='FQ', OutputWorkspace='Gr',
                         Direction="Backward", DeltaR=.02)
     for j in range(10,13):
-            print("y values: {:.4f}".format(gr.readY(0)[j]))
+            print("y values: {:.4f}".format(gr.y(0)[j]))
 
 Output:
 

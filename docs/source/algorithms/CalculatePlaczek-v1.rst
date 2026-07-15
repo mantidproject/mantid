@@ -24,9 +24,9 @@ For this particular algorithm:
   * For the second order correction, the incident spectrum along with its first and second derivate are needed.
   * It is implicitly assumed that
 
-    * ``IncidentSpectra.readY(0)`` returns the incident spectrum.
-    * ``IncidentSpectra.readY(1)`` returns the first order derivative.
-    * ``IncidentSpectra.readY(2)`` returns the second order derivative.
+    * ``IncidentSpectra.y(0)`` returns the incident spectrum.
+    * ``IncidentSpectra.y(1)`` returns the first order derivative.
+    * ``IncidentSpectra.y(2)`` returns the second order derivative.
 
 * The algorithm will try to extract temperature from the sample log if it is not provided. However, this will be a simple average without any additional consideration about outliers or bad reading. Therefore, it is recommended to provide a sample temperature in Kelvin explicitly.
 

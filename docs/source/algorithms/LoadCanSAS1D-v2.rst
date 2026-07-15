@@ -49,7 +49,7 @@ Usage
    SaveCanSAS1D(out_ws, file_path)
    in_ws = LoadCanSAS1D(file_path)
 
-   print("Contents of the file = {}.".format(in_ws.readY(0)))
+   print("Contents of the file = {}.".format(in_ws.y(0)))
 
 .. testcleanup:: ExSimpleSavingRoundtrip
 

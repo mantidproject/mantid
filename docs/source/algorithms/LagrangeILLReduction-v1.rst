@@ -48,7 +48,7 @@ Usage
 
     run = result.getRun()
     times = run.getLogData('time').value
-    eis = result.readX(0)
+    eis = result.x(0)
     temperatures = run.getLogData('temperature').value
 
     fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})

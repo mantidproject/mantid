@@ -62,14 +62,14 @@ Usage
         noiseArray.append(noiseAmp)
 
     for j in range(ws.getNumberHistograms()):
-        ws.setY(j,ws.readY(j)+noiseArray)
+        ws.setY(j,ws.y(j)+noiseArray)
 
 
     wsSmooth = FFTSmooth(ws, Params='2')
 
     print("bin Orig  Smoothed")
     for i in range (0,100,10):
-        print("{}  {:.2f}  {:.2f}".format(i, ws.readY(0)[i], wsSmooth.readY(0)[i]))
+        print("{}  {:.2f}  {:.2f}".format(i, ws.y(0)[i], wsSmooth.y(0)[i]))
 
 
 .. figure:: /images/FFTSmoothZeroing.png
@@ -107,7 +107,7 @@ Output:
         noiseArray.append(noiseAmp)
 
     for j in range(ws.getNumberHistograms()):
-        ws.setY(j,ws.readY(j)+noiseArray)
+        ws.setY(j,ws.y(j)+noiseArray)
 
 
     wsButter2_2 = FFTSmooth(ws, Filter="Butterworth", Params='2,2', AllSpectra=True)
@@ -116,7 +116,7 @@ Output:
 
     print("bin Orig  2_2   5_2   20_2")
     for i in range (0,100,10):
-        print("{}  {:.2f}  {:.2f}  {:.2f}  {:.2f}".format(i, ws.readY(0)[i], wsButter2_2.readY(0)[i], wsButter5_2.readY(0)[i], wsButter20_2.readY(0)[i]))
+        print("{}  {:.2f}  {:.2f}  {:.2f}  {:.2f}".format(i, ws.y(0)[i], wsButter2_2.y(0)[i], wsButter5_2.y(0)[i], wsButter20_2.y(0)[i]))
 
 
 .. figure:: /images/FFTSmoothZeroingButter.png

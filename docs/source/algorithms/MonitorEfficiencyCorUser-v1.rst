@@ -43,7 +43,7 @@ Usage
     print('{} {}'.format( wsSample.blocksize(), wsNorm.blocksize()))
     # Check calculation of normalisation coefficient between input and output workspaces
     wsCheck = Divide(wsSample,wsNorm)
-    print("Coefficient of proportionality between Input and Output of MonitorEfficiencyCorUser algorithm: {:.3f}".format(wsCheck.readY(102)[1]))
+    print("Coefficient of proportionality between Input and Output of MonitorEfficiencyCorUser algorithm: {:.3f}".format(wsCheck.y(102)[1]))
     # Read the values of the incident energy and of the monitor counts from the SampleLogs of wsSample
     monitor_counts = float(mtd['wsSample'].getRun().getLogData('monitor_counts').value)
     Ei = float(mtd['wsSample'].getRun().getLogData('Ei').value)

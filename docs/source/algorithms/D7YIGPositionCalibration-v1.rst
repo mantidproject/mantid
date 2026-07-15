@@ -85,7 +85,7 @@ Output:
 .. testcleanup:: D7YIGCalibrationIntermediateExample
 
     import os
-    os.remove("test_intermediateWavelength.xml")
+    os.remove(os.path.join(config["defaultsave.directory"], "test_intermediateWavelength.xml"))
 
 .. [#Fennell] T. Fennell, L. Mangin-Thro, H.Mutka, G.J. Nilsen, A.R. Wildes.
    *Wavevector and energy resolution of the polarized diffuse scattering spectrometer D7*,

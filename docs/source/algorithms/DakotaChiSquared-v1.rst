@@ -37,7 +37,7 @@ Usage
 
     #Test to see if everything is ok
     print("Chi squared is {}".format(result[0]))
-    print("Residuals are {}".format(result[1].dataY(0)))
+    print("Residuals are {}".format(result[1].y(0)))
     #and the content of the file
     f = open(chifile,'r')
     chistr=f.read()

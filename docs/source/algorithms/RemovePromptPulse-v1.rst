@@ -31,8 +31,8 @@ Usage
     #The prompt pulses at 50Hz are at 0, 2e4, 4e4, 6e4,8e4 microseconds
 
     #do some checks
-    x=w1.dataX(0)
-    y=w1.dataY(0)
+    x=w1.x(0)
+    y=w1.y(0)
 
     print("Y( {} ) =  {:.1f}".format(x[100], y[100]))
     print("Y( {} ) =  {:.1f}".format(x[1000], y[1000]))

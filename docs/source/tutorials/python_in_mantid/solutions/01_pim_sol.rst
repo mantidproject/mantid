@@ -135,7 +135,7 @@ For point 5., you are expected to open the docs page for :ref:`algm-ConvertUnits
     ws = ConvertUnits(scaled, Target = 'DeltaE', EFixed = 4.7728189558864003, EMode = 'Direct') # See explanation above
     wsCorrected = DetectorEfficiencyCorUser(ws)
 
-    print("The corrected value in spectrum with ws index {}, bin {} is {:.2f} compared to {:.2f}".format(6,4,wsCorrected.readY(6)[4],ws.readY(6)[4]))
+    print("The corrected value in spectrum with ws index {}, bin {} is {:.2f} compared to {:.2f}".format(6,4,wsCorrected.y(6)[4],ws.y(6)[4]))
 
 Output:
 

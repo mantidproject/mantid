@@ -88,12 +88,12 @@ Usage
    wsN = NormaliseToMonitor( ws, MonitorID=1 )
 
    print("Without normalisation")
-   print("Monitor ID=1 {:.3f}, {:.3f}".format(ws.readY(0)[0], ws.readY(0)[1]))
-   print("Selected data {:.6f}, {:.6f}".format(ws.readY(6)[0], ws.readY(3)[1]))
+   print("Monitor ID=1 {:.3f}, {:.3f}".format(ws.y(0)[0], ws.y(0)[1]))
+   print("Selected data {:.6f}, {:.6f}".format(ws.y(6)[0], ws.y(3)[1]))
 
    print("With Normalisation")
-   print("Monitor ID=1 {:.3f}, {:.3f}".format(wsN.readY(0)[0], wsN.readY(0)[1]))
-   print("Selected data {:.6f}, {:.6f}".format(wsN.readY(6)[0], wsN.readY(3)[1]))
+   print("Monitor ID=1 {:.3f}, {:.3f}".format(wsN.y(0)[0], wsN.y(0)[1]))
+   print("Selected data {:.6f}, {:.6f}".format(wsN.y(6)[0], wsN.y(3)[1]))
 
 Output:
 

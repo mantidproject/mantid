@@ -105,9 +105,9 @@ Usage
     WorkflowAlgorithmRunner('Scale', SetupTable=setupTable, InputOutputMap=ioMap)
 
     # Print some results
-    print('Original input value: {0}'.format(mtd['ws2'].dataY(0)[0]))
-    print('After scaling by 100: {0}'.format(mtd['scaled_ws2'].dataY(0)[0]))
-    print('After further scaling by 0.42: {0}'.format(mtd['ws1'].dataY(0)[0]))
+    print('Original input value: {0}'.format(mtd['ws2'].y(0)[0]))
+    print('After scaling by 100: {0}'.format(mtd['scaled_ws2'].y(0)[0]))
+    print('After further scaling by 0.42: {0}'.format(mtd['ws1'].y(0)[0]))
 
 .. testoutput:: ScaleExample
 

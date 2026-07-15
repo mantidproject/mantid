@@ -31,7 +31,7 @@ Usage
    import numpy as np
    ws = CreateSampleWorkspace(BankPixelWidth=1)
 
-   yArray = np.array(ws.readY(0))
+   yArray = np.array(ws.y(0))
    yArray[0] = 8e80
    yArray[1] = float("inf")
    yArray[2] = float("-inf")
@@ -46,7 +46,7 @@ Usage
    print("i\tBefore\tAfter")
    print("-\t------\t-----")
    for i in range(5):
-       print("{}\t{}\t{}".format(i, yArray[i],ws.readY(0)[i]))
+       print("{}\t{}\t{}".format(i, yArray[i],ws.y(0)[i]))
 
 Output:
 
@@ -70,13 +70,13 @@ Output:
     value2 = 1.00000003
     valueDiff = value1 - value2
 
-    wsYArray = np.array(ws.readY(0))
+    wsYArray = np.array(ws.y(0))
     wsYArray[0] = valueDiff
     ws.setY(0, wsYArray)
     ws = ReplaceSpecialValues(ws, SmallNumberThreshold=1e-6)
 
     print("Before\t\t After")
-    print("{0:.11e}\t{1:.1f}".format(wsYArray[0], ws.readY(0)[0]))
+    print("{0:.11e}\t{1:.1f}".format(wsYArray[0], ws.y(0)[0]))
 
 Output:
 

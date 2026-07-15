@@ -65,7 +65,7 @@ Proof of concept background removal algorithm::
     ws1s = ExtractSingleSpectrum(wsParent,0);
     ws1s = ConvertUnits(ws1s,'DeltaE','Direct',Ei);
     ws1s = Rebin(ws1s,Params=[e_min,dE,e_max]);
-    e_bins = ws1s.dataX(0);
+    e_bins = ws1s.x(0);
     nBins = e_bins.size;
 
     x=[e_bins[i] for i in xrange(0,nBins)]
@@ -81,7 +81,7 @@ Proof of concept background removal algorithm::
     Tgrid = mtd['Tgrid'];
     eGrid = mtd['eGrid'];
     nHist = Tgrid.getNumberHistograms();
-    nBins = Tgrid.dataX(0).size;
+    nBins = Tgrid.x(0).size;
 
   if not('Bg' in mtd):
     Bg=Rebin(InputWorkspace=groupedFilename,  Params=[bgRange[0],bgRange[1]-bgRange[0],bgRange[1]],PreserveEvents=False)
@@ -91,10 +91,10 @@ Proof of concept background removal algorithm::
 
   # Assign constant background to the Time grid workspace, minding different time bin width
   for nspec in xrange(0,nHist):
-    bg            = Bg.dataY(nspec)
+    bg            = Bg.y(nspec)
     if bg[0]>0:
-       bgT           = Bg.dataX(nspec)
-       TimeScale     = Tgrid.dataX(nspec);
+       bgT           = Bg.x(nspec)
+       TimeScale     = Tgrid.x(nspec);
        # Jacobian for the unit conversion
        Jac           = (TimeScale[1:nBins]-TimeScale[0:nBins-1])*(bg[0]/(bgT[1]-bgT[0]));
        error         = np.sqrt(Jac);
@@ -196,14 +196,14 @@ Usage
    Result   = RemoveBackground(Result,BkgWorkspace='Bg',EMode='Direct');
 
    # Get access to the results
-   XS = Sample.dataX(0);
-   XR = Result .dataX(0);
+   XS = Sample.x(0);
+   XR = Result .x(0);
 
-   YS = Sample.dataY(0);
-   YR = Result .dataY(0);
+   YS = Sample.y(0);
+   YR = Result .y(0);
 
-   ES = Sample.dataE(0);
-   ER = Result .dataE(0);
+   ES = Sample.e(0);
+   ER = Result .e(0);
 
    # print first spectra, Note invalid error calculations
    print("| x sampl  | x result | S sample | S no bg  | Err samp | Err no_bg|")

@@ -34,7 +34,7 @@ Usage
 
    # Load it back in and inspect what we have.
    reloaded_data = LoadAscii(file_path)
-   print("The data read back in is " + str(reloaded_data.readY(0)))
+   print("The data read back in is " + str(reloaded_data.y(0)))
    # N.B. Mantid does not properly support reloading files output from 'SaveNISTDAT'
    # Above, the reloaded file is vastly altered from the original
    # due to the conversion performed upon running 'SaveNISTDAT'.

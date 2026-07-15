@@ -52,7 +52,7 @@ Usage
     flux=Rebin(InputWorkspace=flux,Params='1.85,10,10')
     for i in range(flux.getNumberHistograms()):
         el=flux.getSpectrum(i)
-        el.divide(flux.readY(i)[0],0)
+        el.divide(flux.y(i)[0],0)
     flux=Rebin(InputWorkspace=flux,Params='1.85,10,10')
     flux=IntegrateFlux(flux)
     SaveNexus(InputWorkspace=flux, Filename="/home/3y9/Desktop/TOPAZ/spectra.nxs")

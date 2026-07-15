@@ -76,10 +76,10 @@ Usage
     output_wksp = Multiply(LHSWorkspace=input_wksp, RHSWorkspace=corr_wksp)
     output_wksp_with_wave_range = Multiply(LHSWorkspace=input_wksp, RHSWorkspace=corr_wksp_with_wave_range)
 
-    print('Input workspace: {}'.format(input_wksp.readY(0)[:5]))
-    print('Correction workspace: {}'.format(corr_wksp.readY(0)[:5]))
-    print('Output workspace: {}'.format(output_wksp.readY(0)[:5]))
-    print('Output workspace using WavelengthRange: {}'.format(output_wksp_with_wave_range.readY(0)[:5]))
+    print('Input workspace: {}'.format(input_wksp.y(0)[:5]))
+    print('Correction workspace: {}'.format(corr_wksp.y(0)[:5]))
+    print('Output workspace: {}'.format(output_wksp.y(0)[:5]))
+    print('Output workspace using WavelengthRange: {}'.format(output_wksp_with_wave_range.y(0)[:5]))
 
 Output:
 
@@ -113,10 +113,10 @@ Output:
     output_wksp = Multiply(LHSWorkspace=input_wksp, RHSWorkspace=corr_wksp)
     output_wksp_with_wave_range = Multiply(LHSWorkspace=input_wksp, RHSWorkspace=corr_wksp_with_wave_range)
 
-    print('Input workspace: {}'.format(input_wksp.readY(0)[:5]))
-    print('Correction workspace: {}'.format(corr_wksp.readY(0)[:5]))
-    print('Output workspace: {}'.format(output_wksp.readY(0)[:5]))
-    print('Output workspace using WavelengthRange: {}'.format(output_wksp_with_wave_range.readY(0)[:5]))
+    print('Input workspace: {}'.format(input_wksp.y(0)[:5]))
+    print('Correction workspace: {}'.format(corr_wksp.y(0)[:5]))
+    print('Output workspace: {}'.format(output_wksp.y(0)[:5]))
+    print('Output workspace using WavelengthRange: {}'.format(output_wksp_with_wave_range.y(0)[:5]))
 
 Output:
 
@@ -152,10 +152,10 @@ Output:
     output_wksp = Multiply(LHSWorkspace=input_wksp, RHSWorkspace=corr_wksp)
     output_wksp_with_wave_range = Multiply(LHSWorkspace=input_wksp, RHSWorkspace=corr_wksp_with_wave_range)
 
-    print('Input workspace: {}'.format(input_wksp.readY(0)[:5]))
-    print('Correction workspace: {}'.format(corr_wksp.readY(0)[:5]))
-    print('Output workspace: {}'.format(output_wksp.readY(0)[:5]))
-    print('Output workspace using WavelengthRange: {}'.format(output_wksp_with_wave_range.readY(0)[:5]))
+    print('Input workspace: {}'.format(input_wksp.y(0)[:5]))
+    print('Correction workspace: {}'.format(corr_wksp.y(0)[:5]))
+    print('Output workspace: {}'.format(output_wksp.y(0)[:5]))
+    print('Output workspace using WavelengthRange: {}'.format(output_wksp_with_wave_range.y(0)[:5]))
 
 Output:
 
@@ -195,10 +195,10 @@ Output:
     output_wksp = Multiply(LHSWorkspace=input_wksp, RHSWorkspace=corr_wksp)
     output_wksp_with_wave_range = Multiply(LHSWorkspace=input_wksp, RHSWorkspace=corr_wksp_with_wave_range)
 
-    print('Input workspace: {}'.format(input_wksp.readY(0)[:5]))
-    print('Correction workspace: {}'.format(corr_wksp.readY(0)[:5]))
-    print('Output workspace: {}'.format(output_wksp.readY(0)[:5]))
-    print('Output workspace using WavelengthRange: {}'.format(output_wksp_with_wave_range.readY(0)[:5]))
+    print('Input workspace: {}'.format(input_wksp.y(0)[:5]))
+    print('Correction workspace: {}'.format(corr_wksp.y(0)[:5]))
+    print('Output workspace: {}'.format(output_wksp.y(0)[:5]))
+    print('Output workspace using WavelengthRange: {}'.format(output_wksp_with_wave_range.y(0)[:5]))
 
 Output:
 
@@ -219,20 +219,20 @@ The transmission of a sample can be measured as :math:`e^{-\rho T \sigma_t (\lam
 
     ws = CalculateSampleTransmission(WavelengthRange='2.0, 0.1, 10.0',
                                      ChemicalFormula='H2-O')
-    print('Transmission: {} ...'.format(ws.readY(0)[:3]))
+    print('Transmission: {} ...'.format(ws.y(0)[:3]))
 
     corr_wksp = CalculateEfficiencyCorrection(WavelengthRange="2.0, 0.1, 10.0",
                                               Density=0.1,
                                               Thickness=0.1,
                                               ChemicalFormula="H2-O",
                                               XSectionType="TotalXSection")
-    dataX = corr_wksp.readX(0)
-    dataY = np.ones(len(corr_wksp.readX(0)))
+    dataX = corr_wksp.x(0)
+    dataY = np.ones(len(corr_wksp.x(0)))
     ones = CreateWorkspace(dataX, dataY, UnitX="Wavelength")
     efficiency = Divide(LHSWorkspace=ones, RHSWorkspace=corr_wksp) # 1 + -1 * transmission
     negative_trans = Minus(LHSWorkspace=efficiency, RHSWorkspace=ones) # -1 * transmission
     transmission = Multiply(LHSWOrkspace=negative_trans, RHSWorkspace=-1.*ones)
-    print('Transmission using efficiency correction: {} ...'.format(transmission.readY(0)[:3]))
+    print('Transmission using efficiency correction: {} ...'.format(transmission.y(0)[:3]))
 
 Output:
 
@@ -304,7 +304,7 @@ To first back out the measured spectrum of Milder et al. [1]_, the incident spec
     lambdaT = 1.58
 
     # Add the incident spectrum to the workspace
-    corrected_spectrum = incidentSpectrum(incident_wksp.readX(0),
+    corrected_spectrum = incidentSpectrum(incident_wksp.x(0),
                                           phiMax, phiEpi, alpha,
                                           lambda1, lambda2, lambdaT)
     incident_wksp.setY(0, corrected_spectrum)
@@ -317,9 +317,9 @@ To first back out the measured spectrum of Milder et al. [1]_, the incident spec
     eff2_wksp = CalculateEfficiencyCorrection(InputWorkspace=measured_wksp, Alpha=0.693)
     recorrected_wksp = Multiply(LHSWorkspace=measured_wksp, RHSWorkspace=eff2_wksp)
 
-    print('Measured incident spectrum: {}'.format(measured_wksp.readY(0)[:5]))
-    print('Corrected incident spectrum: {}'.format(incident_wksp.readY(0)[:5]))
-    print('Re-corrected incident spectrum: {}'.format(recorrected_wksp.readY(0)[:5]))
+    print('Measured incident spectrum: {}'.format(measured_wksp.y(0)[:5]))
+    print('Corrected incident spectrum: {}'.format(incident_wksp.y(0)[:5]))
+    print('Re-corrected incident spectrum: {}'.format(recorrected_wksp.y(0)[:5]))
 
 Output:
 

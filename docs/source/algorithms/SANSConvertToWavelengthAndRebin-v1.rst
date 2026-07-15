@@ -32,7 +32,7 @@ Usage
                                                         WavelengthStep="1", WavelengthStepType="Lin",
                                                         RebinMode="Rebin")
     first_workspace = converted_ws_group.getItem(0)
-    print("There should be 4 values and got {}.".format(len(first_workspace.dataX(0))))
+    print("There should be 4 values and got {}.".format(len(first_workspace.x(0))))
 
 .. testcleanup:: ExSANSConvertToWavelengthAndRebin
 

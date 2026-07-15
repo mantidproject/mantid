@@ -57,9 +57,9 @@ Usage
    corrected, background = VesuvioCalculateGammaBackground(tof_ws, ComptonFunction=mass_function,
                                                     WorkspaceIndexList=0)
 
-   print("First 5 values of input: {}".format(tof_ws.readY(0)[0:4]))
-   print("First 5 values of background: {}".format(background.readY(0)[0:4]))
-   print("First 5 values of corrected: {}".format(corrected.readY(0)[0:4]))
+   print("First 5 values of input: {}".format(tof_ws.y(0)[0:4]))
+   print("First 5 values of background: {}".format(background.y(0)[0:4]))
+   print("First 5 values of corrected: {}".format(corrected.y(0)[0:4]))
 
 Output:
 

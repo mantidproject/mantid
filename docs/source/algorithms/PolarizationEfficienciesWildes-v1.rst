@@ -129,7 +129,7 @@ Usage
 
    PolarizationEfficienciesWildes('nonMag', 'mag', Flippers='00,01,10,11', IncludeDiagnosticOutputs=False, OutputFpEfficiency="fp", OutputFaEfficiency="fa", OutputPolarizerEfficiency="p", OutputAnalyserEfficiency="a")
    fp = AnalysisDataService.retrieve("fp")
-   print("Polarizing flipper efficiency is: {:.4}".format(fp.readY(0)[0]))
+   print("Polarizing flipper efficiency is: {:.4}".format(fp.y(0)[0]))
 
 Output:
 

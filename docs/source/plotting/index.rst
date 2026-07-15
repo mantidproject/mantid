@@ -409,7 +409,7 @@ above, but we add a fit, In the bottom part we add the difference.
    # the second is the fit, the third is the difference. Subsequent spectra are the calculated
    # functions of each of the components of the fit (here LinearBackground and Gaussian)
    # Note that the difference spectrum has 0 errors. One can copy the errors from data
-   result.OutputWorkspace.setE(2,result.OutputWorkspace.readE(0))
+   result.OutputWorkspace.setE(2,result.OutputWorkspace.e(0))
 
    #do the plotting
    fig, [ax_top, ax_bottom] = plt.subplots(figsize=(9, 6),

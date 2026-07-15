@@ -28,14 +28,14 @@ Usage
     ws_multi = CreateSampleWorkspace("Histogram", "Multiple Peaks")
 
     print("Is the workspace a distribution? {}".format(ws_multi.isDistribution()))
-    print("The workspace has a level background of {} counts.".format(ws_multi.readY(0)[0]))
-    print("The largest of which is {} counts.\n".format(ws_multi.readY(0)[60]))
+    print("The workspace has a level background of {} counts.".format(ws_multi.y(0)[0]))
+    print("The largest of which is {} counts.\n".format(ws_multi.y(0)[60]))
 
     ConvertToDistribution(ws_multi)
 
     print("Is the workspace a distribution? {}".format(ws_multi.isDistribution()))
-    print("The workspace has a level background of {} counts.".format(ws_multi.readY(0)[0]))
-    print("The largest of which is {} counts.".format(ws_multi.readY(0)[60]))
+    print("The workspace has a level background of {} counts.".format(ws_multi.y(0)[0]))
+    print("The largest of which is {} counts.".format(ws_multi.y(0)[60]))
 
 Output:
 

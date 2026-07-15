@@ -76,7 +76,7 @@ Usage
     print("Fitted sigma value is: {:.1f}".format(paramTable.column(1)[2]))
     # fitWorkspace contains the data, the calculated and the difference patterns
     print("Number of spectra in fitWorkspace is: {}".format(fitWorkspace.getNumberHistograms()))
-    print("The 989th y-value of the fitted curve: {:.3f}".format(fitWorkspace.readY(1)[989]))
+    print("The 989th y-value of the fitted curve: {:.3f}".format(fitWorkspace.y(1)[989]))
 
 Output:
 

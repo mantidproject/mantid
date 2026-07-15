@@ -25,12 +25,12 @@ Usage
    five = CreateSingleValuedWorkspace(5)
 
    print("Number of histograms: {}".format(five.getNumberHistograms()))
-   print("Length of y array: {}".format(len(five.readY(0))))
-   print("Length of e array: {}".format(len(five.readE(0))))
-   print("Length of x array: {}".format(len(five.readX(0))))
+   print("Length of y array: {}".format(len(five.y(0))))
+   print("Length of e array: {}".format(len(five.e(0))))
+   print("Length of x array: {}".format(len(five.x(0))))
 
-   print("y value: {}".format(five.readY(0)))
-   print("e value: {}".format(five.readE(0)))
+   print("y value: {}".format(five.y(0)))
+   print("e value: {}".format(five.e(0)))
 
 Output:
 
@@ -50,12 +50,12 @@ Output:
    five = CreateSingleValuedWorkspace(5, 0.1)
 
    print("Number of histograms: {}".format(five.getNumberHistograms()))
-   print("Length of y array: {}".format(len(five.readY(0))))
-   print("Length of e array: {}".format(len(five.readE(0))))
-   print("Length of x array: {}".format(len(five.readX(0))))
+   print("Length of y array: {}".format(len(five.y(0))))
+   print("Length of e array: {}".format(len(five.e(0))))
+   print("Length of x array: {}".format(len(five.x(0))))
 
-   print("y value: {}".format(five.readY(0)))
-   print("e value: {}".format(five.readE(0)))
+   print("y value: {}".format(five.y(0)))
+   print("e value: {}".format(five.e(0)))
 
 Output:
 

@@ -41,7 +41,7 @@ Usage
     for i in range(output.getNumberOfEntries()):
         print('Slice '  + str(i))
         for j in range(output[i].getNumberHistograms()):
-            print('{:.8f}'.format(output[i].dataY(j)[0]))
+            print('{:.8f}'.format(output[i].y(j)[0]))
 
 Output:
 

@@ -37,20 +37,20 @@ Loading a Workspace2D and extracting some basic details:
     print("X-Unit: "  + str(xUnit.unitID() + ', ' + xUnit.caption() + ', ' + str(xUnit.symbol())))
 
     # Get x-axis data as a NumPy array
-    xData = ws2D.readX(9683)
+    xData = ws2D.x(9683)
     print("X-Data type: " + str(type(xData)))
     print("X-Data:")
     print(xData)
 
     # Get y-axis data and error data
     print("Y-Data:")
-    print(ws2D.readY(9683))
+    print(ws2D.y(9683))
     print("E-Data:")
-    print(ws2D.readE(9683))
+    print(ws2D.e(9683))
 
     # Looping over each spectrum and obtaining a read-only reference to the counts
     for i in range(ws2D.getNumberHistograms()):
-        counts = ws2D.readY(i)
+        counts = ws2D.y(i)
 
 
 Working with EventWorkspaces

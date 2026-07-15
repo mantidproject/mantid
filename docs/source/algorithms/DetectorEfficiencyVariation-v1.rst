@@ -46,7 +46,7 @@ Usage
 
     wsBase=CreateSampleWorkspace()
     ws=CreateSampleWorkspace()
-    noisyY =  np.array(ws.readY(0))
+    noisyY =  np.array(ws.y(0))
     noisyY[0]=1e20
     ws.setY(50,noisyY)
 

@@ -41,14 +41,14 @@ Usage
         noiseArray.append(noiseAmp)
 
     for j in range(ws.getNumberHistograms()):
-        ws.setY(j,ws.readY(j)+noiseArray)
+        ws.setY(j,ws.y(j)+noiseArray)
 
 
     wsSmooth = FFTSmooth(ws, Params='2', Version=1)
 
     print("bin Orig  Smoothed")
     for i in range (0,100,10):
-        print("{}  {:.2f}  {:.2f}".format(i, ws.readY(0)[i], wsSmooth.readY(0)[i]))
+        print("{}  {:.2f}  {:.2f}".format(i, ws.y(0)[i], wsSmooth.y(0)[i]))
 
 
 .. figure:: /images/FFTSmoothZeroing.png

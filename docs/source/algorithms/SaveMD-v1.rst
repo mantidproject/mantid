@@ -29,7 +29,7 @@ Usage
     ws = CreateMDHistoWorkspace(SignalInput='1,2,3,4,5,6,7,8,9', ErrorInput='1,1,1,1,1,1,1,1,1', Dimensionality='2',
                                 Extents='-1,1,-1,1', NumberOfBins='3,3', Names='A,B', Units='U,T')
     import os
-    savefile = os.path.join(config["default.savedirectory"], "mdhws.nxs")
+    savefile = os.path.join(config["defaultsave.directory"], "mdhws.nxs")
     SaveMD(ws, Filename=savefile, Version=1)
     print("File created: {}".format(os.path.exists(savefile)))
 

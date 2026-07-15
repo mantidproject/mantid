@@ -45,8 +45,8 @@ Usage
                                              ApplyToMonitors = False)
 
     # We should have effectively halfed the data values
-    in_y = ws_sample.dataY(0)
-    out_y = out_ws.dataY(0)
+    in_y = ws_sample.y(0)
+    out_y = out_ws.y(0)
 
     print("The first bin of the first spectrum of the input was {:.1f}".format(in_y[0]))
     print("After the dark run correction it is {:.2f}".format(out_y[0]))

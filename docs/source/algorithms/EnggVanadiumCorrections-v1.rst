@@ -120,7 +120,7 @@ Usage
                           EndWorkspaceIndex=ws_idx+idx_count)
    fmt = "For workspace index {0:d} the spectrum integration is {1:.3f}"
    for i in range(idx_count):
-      print(fmt.format(ws_idx+i, integ_ws.readY(i)[0]))
+      print(fmt.format(ws_idx+i, integ_ws.y(i)[0]))
 
 .. testcleanup:: ExVanadiumCorr
 

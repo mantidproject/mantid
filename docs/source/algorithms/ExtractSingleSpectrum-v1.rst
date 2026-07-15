@@ -22,14 +22,14 @@ Usage
     ws = CreateSampleWorkspace()
     print("Workspace %s contains %i spectra" % (ws, ws.getNumberHistograms()))
     print("Counts for every 10th bin for workspace index 5")
-    print(", ".join(["{:.1f}".format(y) for y in ws.readY(5)[0:100:10]]))
+    print(", ".join(["{:.1f}".format(y) for y in ws.y(5)[0:100:10]]))
 
     wsOut = ExtractSingleSpectrum(ws,WorkspaceIndex=5)
     print("After extracting one spectra at workspace index 5")
 
     print("Workspace %s contains %i spectra" % (wsOut, wsOut.getNumberHistograms()))
     print("Counts for every 10th bin for workspace index 0 (now it's 0 as wsOut only contains 1 spectra)")
-    print(", ".join(["{:.1f}".format(y) for y in wsOut.readY(0)[0:100:10]]))
+    print(", ".join(["{:.1f}".format(y) for y in wsOut.y(0)[0:100:10]]))
 
 
 Output:

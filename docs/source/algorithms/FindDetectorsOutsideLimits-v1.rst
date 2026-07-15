@@ -71,7 +71,7 @@ Output:
     ws = CreateSimulationWorkspace('MARI','0,1,10')
     nh = ws.getNumberHistograms()
     for ind in range(nh):
-        y = ws.dataY(ind)
+        y = ws.mutableY(ind)
         if ind>=100 and ind < 300:
             y.fill(100)
         else:
@@ -86,8 +86,8 @@ Output:
     print("****************************************")
     selected_spec = [99,100,199,200,299,300]
     for spec in selected_spec:
-        print("full mask ws Spec N{0} is masked: {1}".format(spec,mws1.readY(spec)[0]>0.5))
-        print("part mask ws Spec N{0} is masked: {1}".format(spec,mws2.readY(spec)[0]>0.5) )
+        print("full mask ws Spec N{0} is masked: {1}".format(spec,mws1.y(spec)[0]>0.5))
+        print("part mask ws Spec N{0} is masked: {1}".format(spec,mws2.y(spec)[0]>0.5) )
     print("****************************************")
 
 Output:

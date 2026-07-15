@@ -31,7 +31,7 @@ Usage
   # create 4 sample workspaces with different intensities
   for n in range(1,5):
       ws = CreateSampleWorkspace(WorkspaceType='Event', Function='Flat background', BinWidth=10000, NumEvents=n*1000, NumBanks=2, BankPixelWidth=1, OutputWorkspace=f"w{n}")
-      print(f"Input workspace w{n} intensity = ", ws.readY(0))
+      print(f"Input workspace w{n} intensity = ", ws.y(0))
 
   # create a grouping workspace, group by bank
   CreateGroupingWorkspace(InputWorkspace='w1', GroupDetectorsBy='bank', OutputWorkspace='groups')
@@ -39,13 +39,13 @@ Usage
 
   # select only the lowest 25% intensity workspaces
   background = GenerateGoniometerIndependentBackground('w1,w2,w3,w4', GroupingFile="/tmp/groups.xml", PercentMin=0, PercentMax=25)
-  print("Background intensity, lowest 25% =", background.readY(0))
+  print("Background intensity, lowest 25% =", background.y(0))
   # select only the highest 25% intensity workspaces
   background = GenerateGoniometerIndependentBackground('w1,w2,w3,w4', GroupingFile="/tmp/groups.xml", PercentMin=75, PercentMax=100)
-  print("Background intensity, highest 25% =", background.readY(0))
+  print("Background intensity, highest 25% =", background.y(0))
   # select only the middle 50%intensity workspaces
   background = GenerateGoniometerIndependentBackground('w1,w2,w3,w4', GroupingFile="/tmp/groups.xml", PercentMin=25, PercentMax=75)
-  print("Background intensity, middle 50% =", background.readY(0))
+  print("Background intensity, middle 50% =", background.y(0))
 
 Output:
 

@@ -49,7 +49,7 @@ The following example shows how to calculate the residuals following a fit perfo
     # Calculate residuals
     residuals_Si = PoldiAnalyseResiduals(MeasuredCountData=data_Si, FittedCountData="fit_result_Si_2D", MaxIterations=5)
 
-    residual_data = residuals_Si.readY(0)
+    residual_data = residuals_Si.y(0)
 
     print("Residuals are in the range: [ {:.2f} ,  {:.2f} ]".format(round(min(residual_data), 2), round(max(residual_data), 2)))
 

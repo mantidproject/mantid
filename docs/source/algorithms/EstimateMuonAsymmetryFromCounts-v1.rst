@@ -47,8 +47,8 @@ Usage
    run = input.getRun()
    run.addProperty("goodfrm","10","None",True)
    output,unnorm=EstimateMuonAsymmetryFromCounts(InputWorkspace=input,spectra=0,NormalizationTable=tab,StartX=1,EndX=5,OutputUnNormData=True)
-   print("Asymmetry   :  {}".format(['{0:.2f}'.format(value) for value in output.readY(0)]))
-   print("Unnormalized:  {}".format(['{0:.2f}'.format(value) for value in unnorm.readY(0)]))
+   print("Asymmetry   :  {}".format(['{0:.2f}'.format(value) for value in output.y(0)]))
+   print("Unnormalized:  {}".format(['{0:.2f}'.format(value) for value in unnorm.y(0)]))
    print("Normalization constant: {0:.2f}".format(tab.column(0)[0]))
 
 Output:
@@ -79,7 +79,7 @@ Output:
 
    output=EstimateMuonAsymmetryFromCounts(InputWorkspace=input,spectra=0,NormalizationTable=tab,StartX=1,EndX=5,NormalizationIn=20.0)
 
-   print("Asymmetry:  {}".format(['{0:.2f}'.format(value) for value in output.readY(0)]))
+   print("Asymmetry:  {}".format(['{0:.2f}'.format(value) for value in output.y(0)]))
    print("Normalization constant: {0:.2f}".format(tab.column(0)[0]))
 
 Output:

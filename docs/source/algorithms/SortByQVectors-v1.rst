@@ -26,7 +26,7 @@ Usage
     SortByQVectors(InputWorkspace='ws')
     ws0 = ws[0]
     for i in range(0, ws0.getNumberHistograms()):
-        print('{:.8f}'.format(ws0.dataY(i)[0]))
+        print('{:.8f}'.format(ws0.y(i)[0]))
 
 Output:
 

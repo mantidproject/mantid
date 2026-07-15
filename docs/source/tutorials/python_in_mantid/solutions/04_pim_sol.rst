@@ -31,7 +31,7 @@ A - Create a MatrixWorkspace
     ''' ----------- Part One Solution using nested loop and implementing a max condition by hand ----------- '''
     new_y = []
     for i in range(ws.getNumberHistograms()):
-        y = ws.readY(i)
+        y = ws.y(i)
         maxY = -1
         # Inner loop. Loop over bins.
         for j in range(nbins):
@@ -45,7 +45,7 @@ A - Create a MatrixWorkspace
     ''' ----------- Part One Solution  using nested loop and implementing an inbuild max function ----------- '''
     new_y = []
     for i in range(ws.getNumberHistograms()):
-        y = ws.readY(i)
+        y = ws.y(i)
         maxY = -1.0
         # Inner loop. Loop over bins.
         for j in range(nbins):
@@ -57,7 +57,7 @@ A - Create a MatrixWorkspace
     ''' ----------- Part One Solution  using single loop and numpy max function ----------- '''
     new_y = []
     for i in range(ws.getNumberHistograms()):
-        y = ws.readY(i)
+        y = ws.y(i)
         maxY = np.max(y)
         new_y.append(maxY)
 
@@ -82,7 +82,7 @@ B - Create a TableWorkspace
     table.addColumn('double', 'Max')
     table.addColumn('double', 'Min')
     for i in range(ws.getNumberHistograms()):
-        y = ws.readY(i)
+        y = ws.y(i)
         maxY = np.max(y)
         minY = np.min(y)
         specNumber = ws.getSpectrum(i).getSpectrumNo()

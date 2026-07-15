@@ -58,7 +58,7 @@ Usage
 
     # Find the difference between the workspaces
     workspace_diff = Minus(workspace_copy, input_workspace)
-    diffs = np.round(workspace_diff.readY(0),4)
+    diffs = np.round(workspace_diff.y(0),4)
     # The counts in workspace diff should be a flat line corresponding to the background
     print("Differences in counts are: {}".format(diffs))
 
@@ -99,7 +99,7 @@ Output:
 
     # Find the difference between the workspaces
     workspace_diff = Minus(workspace_copy, input_workspace)
-    diffs = np.round(workspace_diff.readY(0), 4)
+    diffs = np.round(workspace_diff.y(0), 4)
     # The counts in workspace diff should be a flat line corresponding to the background
     print("Difference in first count is: {}".format(diffs[0]))
     print("Difference in middle count is: {}".format(diffs[int(len(diffs)/2)]))

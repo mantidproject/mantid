@@ -170,13 +170,13 @@ Usage
 
     sid=0
     print(format_string.format(ws.getDetector(sid).getName(), ws.getDetector(sid).getID(),
-	  sid, ws.dataY(sid)[0]))
+	  sid, ws.y(sid)[0]))
     sid=2500
     print(format_string.format(ws.getDetector(sid).getName(), ws.getDetector(sid).getID(),
-	  sid, ws.dataY(sid)[0]))
+	  sid, ws.y(sid)[0]))
     sid=5000
     print(format_string.format(ws.getDetector(sid).getName(), ws.getDetector(sid).getID(),
-	  sid, ws.dataY(sid)[0]))
+	  sid, ws.y(sid)[0]))
 
 .. testcleanup:: LoadDetectorsGroupingFile
 
@@ -217,9 +217,9 @@ Output:
     ws=LoadDetectorsGroupingFile("test.map")
 
     #check some values
-    print("Spectrum 0 belongs to group {}".format(ws.readY(0)[0]))
-    print("Spectrum 65 belongs to group {}".format(ws.readY(65)[0]))
-    print("Spectrum 125 belongs to group {}".format(ws.readY(125)[0]))
+    print("Spectrum 0 belongs to group {}".format(ws.y(0)[0]))
+    print("Spectrum 65 belongs to group {}".format(ws.y(65)[0]))
+    print("Spectrum 125 belongs to group {}".format(ws.y(125)[0]))
 
 .. testcleanup:: LoadDetectorsGroupingFileMap
 

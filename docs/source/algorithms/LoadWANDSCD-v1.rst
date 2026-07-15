@@ -162,7 +162,7 @@ Output:
         OutputGroupingWorkspace='grouping'
         )
     grouping = mtd['grouping']
-    print(int(grouping.readY(255)[0]))
+    print(int(grouping.y(255)[0]))
 
 Output:
 
@@ -184,7 +184,7 @@ Output:
         OutputGroupingWorkspace='grouping'
         )
     print([norm.getDimension(i).getNBins() for i in range(norm.getNumDims())])
-    print(int(grouping.readY(255)[0]))
+    print(int(grouping.y(255)[0]))
 
 Output:
 

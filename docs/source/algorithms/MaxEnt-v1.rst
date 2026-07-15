@@ -178,12 +178,12 @@ and the reconstructed image, i.e. Fourier transform (right).
    CreateWorkspace(OutputWorkspace='inputws',DataX=X,DataY=Y,DataE=E,NSpec=1)
    evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='inputws', A=0.0001)
 
-   print("First  reconstructed coefficient: {:.3f}".format(data.readY(0)[5]))
-   print("Second reconstructed coefficient: {:.3f}".format(data.readY(0)[10]))
-   print("Third  reconstructed coefficient: {:.3f}".format(data.readY(0)[20]))
-   print("Fourth reconstructed coefficient: {:.3f}".format(data.readY(0)[12]))
-   print("Fifth  reconstructed coefficient: {:.3f}".format(data.readY(0)[14]))
-   print("Number of iterations: "+str( len(evolAngle.readX(0))))
+   print("First  reconstructed coefficient: {:.3f}".format(data.y(0)[5]))
+   print("Second reconstructed coefficient: {:.3f}".format(data.y(0)[10]))
+   print("Third  reconstructed coefficient: {:.3f}".format(data.y(0)[20]))
+   print("Fourth reconstructed coefficient: {:.3f}".format(data.y(0)[12]))
+   print("Fifth  reconstructed coefficient: {:.3f}".format(data.y(0)[14]))
+   print("Number of iterations: "+str( len(evolAngle.x(0))))
 
 Output:
 
@@ -218,9 +218,9 @@ and :ref:`algm-FFT` (right).
    # Compare MaxEnt to FFT
    imageFFT = FFT(InputWorkspace='MUSR00022725')
 
-   print("Image at {:.3f}: {:.3f}".format(image.readX(0)[44], image.readY(0)[44]))
-   print("Image at {:.3f}: {:.3f}".format(image.readX(0)[46], image.readY(0)[46]))
-   print("Image at {:.3f}: {:.3f}".format(image.readX(0)[48], image.readY(0)[48]))
+   print("Image at {:.3f}: {:.3f}".format(image.x(0)[44], image.y(0)[44]))
+   print("Image at {:.3f}: {:.3f}".format(image.x(0)[46], image.y(0)[46]))
+   print("Image at {:.3f}: {:.3f}".format(image.x(0)[48], image.y(0)[48]))
    # check background is not nosiy
    def getInt(originalX,originalY,xMin,xMax):
       import numpy as np
@@ -232,9 +232,9 @@ and :ref:`algm-FFT` (right).
               xData.append(originalX[j])
       return np.trapz(x=xData,y=np.sqrt(yData))
    # Do not change these numbers - they test if noise has been added to the alg
-   print("Negative background {:.6f}".format(getInt(image.readX(0), image.readY(0),-30,-2 )))
-   print("Positive background {:.6f}".format(getInt(image.readX(0), image.readY(0),2,30 )))
-   print ("Number of iterations: "+str( len(evolAngle.readX(0))))
+   print("Negative background {:.6f}".format(getInt(image.x(0), image.y(0),-30,-2 )))
+   print("Positive background {:.6f}".format(getInt(image.x(0), image.y(0),2,30 )))
+   print ("Number of iterations: "+str( len(evolAngle.x(0))))
 
 Output:
 
@@ -264,13 +264,13 @@ and its imaginary part (right).
    # Compare MaxEnt to FFT
    imageFFT = FFT(InputWorkspace='EMU00020884')
 
-   print("Image (real part) at {:.3f}: {:.3f}".format(image.readX(0)[129], image.readY(0)[129]))
-   print("Image (real part) at  {:.3f}:  {:.3f}".format(image.readX(0)[135], image.readY(0)[135]))
-   print("Image (real part) at  {:.3f}: {:.3f}".format(image.readX(0)[141], image.readY(0)[141]))
-   print("Image (imaginary part) at {:.3f}: {:.3f}".format(image.readX(1)[129], image.readY(1)[129]))
-   print("Image (imaginary part) at  {:.3f}:  {:.3f}".format(image.readX(1)[135], image.readY(1)[135]))
-   print("Image (imaginary part) at  {:.3f}:  {:.3f}".format(image.readX(1)[141], image.readY(1)[141]))
-   print ("Number of iterations: "+str( len(evolAngle.readX(0))))
+   print("Image (real part) at {:.3f}: {:.3f}".format(image.x(0)[129], image.y(0)[129]))
+   print("Image (real part) at  {:.3f}:  {:.3f}".format(image.x(0)[135], image.y(0)[135]))
+   print("Image (real part) at  {:.3f}: {:.3f}".format(image.x(0)[141], image.y(0)[141]))
+   print("Image (imaginary part) at {:.3f}: {:.3f}".format(image.x(1)[129], image.y(1)[129]))
+   print("Image (imaginary part) at  {:.3f}:  {:.3f}".format(image.x(1)[135], image.y(1)[135]))
+   print("Image (imaginary part) at  {:.3f}:  {:.3f}".format(image.x(1)[141], image.y(1)[141]))
+   print ("Number of iterations: "+str( len(evolAngle.x(0))))
 
 Output:
 
@@ -314,10 +314,10 @@ the original and reconstructed data (left), and the reconstructed image (right).
    CreateWorkspace(OutputWorkspace='ws',DataX=X+X,DataY=YRe+YIm,DataE=E+E,NSpec=2)
    evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='ws', ComplexData=True, A=0.001)
 
-   print("Image (real part) at {:.3f}: {:.3f}".format(image.readX(0)[102], image.readY(0)[102]))
-   print("Image (real part) at {:.3f}: {:.3f}".format(image.readX(0)[103], image.readY(0)[103]))
-   print("Image (real part) at {:.3f}: {:.3f}".format(image.readX(0)[104], image.readY(0)[104]))
-   print ("Number of iterations: "+str( len(evolAngle.readX(0))))
+   print("Image (real part) at {:.3f}: {:.3f}".format(image.x(0)[102], image.y(0)[102]))
+   print("Image (real part) at {:.3f}: {:.3f}".format(image.x(0)[103], image.y(0)[103]))
+   print("Image (real part) at {:.3f}: {:.3f}".format(image.x(0)[104], image.y(0)[104]))
+   print ("Number of iterations: "+str( len(evolAngle.x(0))))
 
 Output:
 
@@ -369,11 +369,11 @@ image in order to obtain smooth results).
    evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='ws', ComplexData=True, A=0.001, PositiveImage=False)
    evolChiP, evolAngleP, imageP, dataP = MaxEnt(InputWorkspace='ws', ComplexData=True, A=0.001, PositiveImage=True)
 
-   print("Image at {:.3f}: {:.3f} (PositiveImage=False), {:.3f} (PositiveImage=True)".format(image.readX(0)[102], image.readY(0)[102], imageP.readY(0)[102]))
-   print("Image at {:.3f}: {:.3f} (PositiveImage=False), {:.3f} (PositiveImage=True)".format(image.readX(0)[103], image.readY(0)[103], imageP.readY(0)[103]))
-   print("Image at {:.3f}: {:.3f} (PositiveImage=False), {:.3f} (PositiveImage=True)".format(image.readX(0)[104], image.readY(0)[104], imageP.readY(0)[102]))
-   print ("Number of iterations: "+str( len(evolAngle.readX(0))))
-   print ("Number of iterations: "+str( len(evolAngleP.readX(0))))
+   print("Image at {:.3f}: {:.3f} (PositiveImage=False), {:.3f} (PositiveImage=True)".format(image.x(0)[102], image.y(0)[102], imageP.y(0)[102]))
+   print("Image at {:.3f}: {:.3f} (PositiveImage=False), {:.3f} (PositiveImage=True)".format(image.x(0)[103], image.y(0)[103], imageP.y(0)[103]))
+   print("Image at {:.3f}: {:.3f} (PositiveImage=False), {:.3f} (PositiveImage=True)".format(image.x(0)[104], image.y(0)[104], imageP.y(0)[102]))
+   print ("Number of iterations: "+str( len(evolAngle.x(0))))
+   print ("Number of iterations: "+str( len(evolAngleP.x(0))))
 
 Output:
 
@@ -446,19 +446,19 @@ shows how to combine two workspaces with complex data.
    CreateWorkspace(OutputWorkspace='ws1',DataX=X+X,DataY=YRe+YIm,DataE=E+E,NSpec=2)
    evolChiP, evolAngleP, imageP, dataP = MaxEnt(InputWorkspace='ws1', ComplexData=True, A=0.001, PositiveImage=True)
 
-   print ("Number of iterations dataset1 separate: "+str( len(evolAngleP.readX(0))))
+   print ("Number of iterations dataset1 separate: "+str( len(evolAngleP.x(0))))
 
    CreateWorkspace(OutputWorkspace='ws2',DataX=X2+X2,DataY=YRe2+YIm2,DataE=E2+E2,NSpec=2)
    evolChiP2, evolAngleP2, imageP2, dataP2 = MaxEnt(InputWorkspace='ws2', ComplexData=True, A=0.001, PositiveImage=True)
 
-   print ("Number of iterations dataset2 separate: "+str( len(evolAngleP2.readX(0))))
+   print ("Number of iterations dataset2 separate: "+str( len(evolAngleP2.x(0))))
 
    # Combine the two workspaces
    CreateWorkspace(OutputWorkspace='wsCombined',DataX=X+X2+X+X2,DataY=YRe+YRe2+YIm+YIm2,DataE=E+E2+E+E2,NSpec=4)
    evolChiC, evolAngleC, imageC, dataC = MaxEnt(InputWorkspace='wsCombined', ComplexData=True, A=0.001, PositiveImage=True)
 
-   print ("Number of iterations dataset1 combined: "+str( len(evolAngleC.readX(0))))
-   print ("Number of iterations dataset2 combined: "+str( len(evolAngleC.readX(1))))
+   print ("Number of iterations dataset1 combined: "+str( len(evolAngleC.x(0))))
+   print ("Number of iterations dataset2 combined: "+str( len(evolAngleC.x(1))))
 
 Output:
 
@@ -492,10 +492,10 @@ from the default 1.0; the dataset contains 270 data points and here set to be sl
    evolChi1, evolAngle1, image1, data1 = MaxEnt(InputWorkspace='ws', A=0.0001, MaxIterations=2500, ResolutionFactor=1, ChiTargetOverN=300.0/270.0)
    evolChi2, evolAngle2, image2, data2 = MaxEnt(InputWorkspace='ws', A=0.0001, MaxIterations=5000, ResolutionFactor=2, ChiTargetOverN=300.0/270.0)
 
-   print("Image at {:.3f}: {:.3f} (ResolutionFactor=1)".format(image1.readX(0)[135], image1.readY(0)[135]))
-   print("Image at {:.3f}: {:.3f} (ResolutionFactor=2)".format(image2.readX(0)[270], image2.readY(0)[270]))
-   print ("Number of iterations: "+str( len(evolAngle1.readX(0))))
-   print ("Number of iterations: "+str( len(evolAngle2.readX(0))))
+   print("Image at {:.3f}: {:.3f} (ResolutionFactor=1)".format(image1.x(0)[135], image1.y(0)[135]))
+   print("Image at {:.3f}: {:.3f} (ResolutionFactor=2)".format(image2.x(0)[270], image2.y(0)[270]))
+   print ("Number of iterations: "+str( len(evolAngle1.x(0))))
+   print ("Number of iterations: "+str( len(evolAngle2.x(0))))
 
 Output:
 
@@ -524,10 +524,10 @@ a zoom into the region :math:`0.82 < x < 1.44` and :math:`-0.187 < y < 0.004`.
    evolChi20, evolAngle20, image20, data20 = MaxEnt(InputWorkspace='ws', A=0.0001, MaxIterations=50000, ResolutionFactor=20)
    evolChi40, evolAngle40, image40, data40 = MaxEnt(InputWorkspace='ws', A=0.0001, MaxIterations=75000, ResolutionFactor=40)
 
-   print ("Number of iterations: "+str( len(evolAngle1.readX(0))))
-   print ("Number of iterations: "+str( len(evolAngle10.readX(0))))
-   print ("Number of iterations: "+str( len(evolAngle20.readX(0))))
-   print ("Number of iterations: "+str( len(evolAngle40.readX(0))))
+   print ("Number of iterations: "+str( len(evolAngle1.x(0))))
+   print ("Number of iterations: "+str( len(evolAngle10.x(0))))
+   print ("Number of iterations: "+str( len(evolAngle20.x(0))))
+   print ("Number of iterations: "+str( len(evolAngle40.x(0))))
 
 Output:
 
@@ -609,15 +609,15 @@ These usage examples merely demonstrate how to use the adjustments and are not r
 
    evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='inputws', DataLinearAdj='linadj', DataConstAdj='constadj',A=0.001)
 
-   print("Reconstruction at 05 of first spectrum: {:.3f}".format(data.readY(0)[5]))
-   print("Reconstruction at 10 of first spectrum: {:.3f}".format(data.readY(0)[10]))
-   print("Reconstruction at 15 of first spectrum: {:.3f}".format(data.readY(0)[15]))
-   print("Reconstruction at 05 of third spectrum: {:.3f}".format(data.readY(2)[5]))
-   print("Reconstruction at 10 of third spectrum: {:.3f}".format(data.readY(2)[10]))
-   print("Reconstruction at 15 of third spectrum: {:.3f}".format(data.readY(2)[15]))
-   print("Number of iterations of first spectrum: "+str( len(evolAngle.readX(0))))
-   print("Number of iterations of second spectrum: "+str( len(evolAngle.readX(1))))
-   print("Number of iterations of third spectrum: "+str( len(evolAngle.readX(2))))
+   print("Reconstruction at 05 of first spectrum: {:.3f}".format(data.y(0)[5]))
+   print("Reconstruction at 10 of first spectrum: {:.3f}".format(data.y(0)[10]))
+   print("Reconstruction at 15 of first spectrum: {:.3f}".format(data.y(0)[15]))
+   print("Reconstruction at 05 of third spectrum: {:.3f}".format(data.y(2)[5]))
+   print("Reconstruction at 10 of third spectrum: {:.3f}".format(data.y(2)[10]))
+   print("Reconstruction at 15 of third spectrum: {:.3f}".format(data.y(2)[15]))
+   print("Number of iterations of first spectrum: "+str( len(evolAngle.x(0))))
+   print("Number of iterations of second spectrum: "+str( len(evolAngle.x(1))))
+   print("Number of iterations of third spectrum: "+str( len(evolAngle.x(2))))
 
 Output:
 
@@ -716,12 +716,12 @@ This is done by setting the *PerSpectrumImage* property to *false*.
 
    evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='inputws', ComplexData=True, DataLinearAdj='linadj', DataConstAdj='constadj',A=0.001, PerSpectrumReconstruction=False)
 
-   print("Reconstruction at 05 of first spectrum: {:.3f}".format(data.readY(0)[5]))
-   print("Reconstruction at 10 of first spectrum: {:.3f}".format(data.readY(0)[10]))
-   print("Reconstruction at 15 of first spectrum: {:.3f}".format(data.readY(0)[15]))
-   print("Reconstruction at 05 of third spectrum: {:.3f}".format(data.readY(2)[5]))
-   print("Reconstruction at 10 of third spectrum: {:.3f}".format(data.readY(2)[10]))
-   print("Reconstruction at 15 of third spectrum: {:.3f}".format(data.readY(2)[15]))
+   print("Reconstruction at 05 of first spectrum: {:.3f}".format(data.y(0)[5]))
+   print("Reconstruction at 10 of first spectrum: {:.3f}".format(data.y(0)[10]))
+   print("Reconstruction at 15 of first spectrum: {:.3f}".format(data.y(0)[15]))
+   print("Reconstruction at 05 of third spectrum: {:.3f}".format(data.y(2)[5]))
+   print("Reconstruction at 10 of third spectrum: {:.3f}".format(data.y(2)[10]))
+   print("Reconstruction at 15 of third spectrum: {:.3f}".format(data.y(2)[15]))
 
 Output:
 

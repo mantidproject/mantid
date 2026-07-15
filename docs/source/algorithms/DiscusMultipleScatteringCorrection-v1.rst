@@ -375,13 +375,13 @@ The double scatter profile shows a similar shape to the analytic result calculat
 
    # reverse w axis because Discus w = Ef-Ei (opposite to Mantid)
    for i in range(mtd['MuscatResults_Scatter_1'].getNumberHistograms()):
-       y = np.flip(mtd['MuscatResults_Scatter_1'].dataY(i),0)
-       e = np.flip(mtd['MuscatResults_Scatter_1'].dataE(i),0)
+       y = np.flip(mtd['MuscatResults_Scatter_1'].y(i),0)
+       e = np.flip(mtd['MuscatResults_Scatter_1'].e(i),0)
        mtd['MuscatResults_Scatter_1'].setY(i,y.tolist())
        mtd['MuscatResults_Scatter_1'].setE(i,e)
    for i in range(mtd['MuscatResults_Scatter_2'].getNumberHistograms()):
-       y = np.flip(mtd['MuscatResults_Scatter_2'].dataY(i),0)
-       e = np.flip(mtd['MuscatResults_Scatter_2'].dataE(i),0)
+       y = np.flip(mtd['MuscatResults_Scatter_2'].y(i),0)
+       e = np.flip(mtd['MuscatResults_Scatter_2'].e(i),0)
        mtd['MuscatResults_Scatter_2'].setY(i,y.tolist())
        mtd['MuscatResults_Scatter_2'].setE(i,e)
 

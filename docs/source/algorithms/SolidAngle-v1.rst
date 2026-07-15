@@ -55,8 +55,8 @@ Usage
     ws = CreateSampleWorkspace()
     wsOut = SolidAngle(ws)
 
-    print('Solid angle of Spectra 1 in Bank 1: %.2e' % wsOut.readY(0)[0])
-    print('Solid angle of Spectra 101 in Bank 2: %.2e' % wsOut.readY(100)[0])
+    print('Solid angle of Spectra 1 in Bank 1: %.2e' % wsOut.y(0)[0])
+    print('Solid angle of Spectra 101 in Bank 2: %.2e' % wsOut.y(100)[0])
 
 
 Output:
@@ -76,11 +76,11 @@ Output:
    wingDet = SolidAngle(InputWorkspace='BIOSANS', OutputWorkspace='wing_detector',
                         Method='VerticalWing', StartWorkspaceIndex=49154, EndWorkspaceIndex=90113)
    # both are zero where nothing was calculated
-   print('Solid angle where main was not calculated: %.2e' % mainDet.readY(1)[0])
-   print('Solid angle where wing was not calculated: %.2e' % wingDet.readY(1)[0])
+   print('Solid angle where main was not calculated: %.2e' % mainDet.y(1)[0])
+   print('Solid angle where wing was not calculated: %.2e' % wingDet.y(1)[0])
    # both have values where they were calculated
-   print('Solid angle where main was calculated: %.2e' % mainDet.readY(2)[0])
-   print('Solid angle where wing was calculated: %.2e' % wingDet.readY(49155)[0])
+   print('Solid angle where main was calculated: %.2e' % mainDet.y(2)[0])
+   print('Solid angle where wing was calculated: %.2e' % wingDet.y(49155)[0])
 
 
 Output:

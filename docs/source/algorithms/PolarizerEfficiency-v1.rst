@@ -58,7 +58,7 @@ Usage
     eCell = CreateSampleWorkspace('Histogram', Function='User Defined', UserDefinedFunction='name=UserFunction,Formula=(1 + tanh(0.0733 * 12 * x * 0.2))/2',XUnit='Wavelength', xMin='1',XMax='8', BinWidth='1', NumBanks='1', BankPixelWidth='1')
 
     psm = PolarizerEfficiency(grp, eCell)
-    print("Polarizer efficiency at a wavelength of " + str(mtd['psm'].dataX(0)[3]) + " Å is " + str(mtd['psm'].dataY(0)[3]))
+    print("Polarizer efficiency at a wavelength of " + str(mtd['psm'].x(0)[3]) + " Å is " + str(mtd['psm'].y(0)[3]))
 
 Output:
 

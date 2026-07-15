@@ -101,8 +101,8 @@ Usage
        TOFChannelWidth=57.
    )
 
-   qs = outws.readX(0)
-   dqs = outws.readDx(0)
+   qs = outws.x(0)
+   dqs = outws.dx(0)
    print('First reflectivity point Qz = {:.4f} +- {:.4f} A-1'.format(qs[0], dqs[0]))
    print('and last Qz = {:.4f} +- {:.4f} A-1'.format(qs[-1], dqs[-1]))
 

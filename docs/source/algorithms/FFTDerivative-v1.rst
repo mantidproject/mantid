@@ -25,7 +25,7 @@ Usage
 
     print("bin Orig  1st    2nd   3rd")
     for i in range (41,67,5):
-        print("{}  {:.2f}  {:.2f}  {:.2f}  {:.2f}".format(i, wsOriginal.readY(0)[i], wsOrder1.readY(0)[i], wsOrder2.readY(0)[i], wsOrder3.readY(0)[i]))
+        print("{}  {:.2f}  {:.2f}  {:.2f}  {:.2f}".format(i, wsOriginal.y(0)[i], wsOrder1.y(0)[i], wsOrder2.y(0)[i], wsOrder3.y(0)[i]))
 
 .. figure:: /images/FFTDerivativeExample.png
     :align: right

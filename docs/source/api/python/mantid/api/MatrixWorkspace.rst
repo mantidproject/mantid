@@ -389,7 +389,7 @@ Accessing Data
 A Matrix Workspace is essentially a 2D list of binned data where a workspace index, starting at 0, gives access to the data fields in each spectra.
 
 
-The data is accessed using the ``readX()``, ``readY()`` and ``readE()`` commands. Each of these commands takes a number that refers to the index on the workspace and returns a list of the data for that workspace index, i.e
+The data is accessed using the ``x()``, ``y()`` and ``e()`` commands. Each of these commands takes a number that refers to the index on the workspace and returns a list of the data for that workspace index, i.e
 
 .. testsetup:: MatrixWorkspaceData
 
@@ -399,14 +399,14 @@ The data is accessed using the ``readX()``, ``readY()`` and ``readE()`` commands
 .. testcode:: MatrixWorkspaceData
 
   # Get the Y vector for the second row of data
-  y_data2 = ws.readY(1)
+  y_data2 = ws.y(1)
   for y in y_data2:
       print(y)
 
   # Or in loop access. Print the first value in all spectra
   for index in range(0, ws.getNumberHistograms()):
       #Note the round brackets followed by the square brackets
-      print(ws.readY(index)[0])
+      print(ws.y(index)[0])
 
 .. testoutput:: MatrixWorkspaceData
     :hide:

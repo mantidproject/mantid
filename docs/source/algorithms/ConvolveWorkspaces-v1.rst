@@ -36,7 +36,7 @@ Usage
     # calculate convolution
     ws3 = ConvolveWorkspaces(ws1, ws2)
 
-    print("Output:  {}".format(ws3.readY(0)))
+    print("Output:  {}".format(ws3.y(0)))
 
 Output:
 

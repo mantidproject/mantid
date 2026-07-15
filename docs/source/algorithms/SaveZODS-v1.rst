@@ -98,7 +98,7 @@ Output:
 .. testcleanup:: SaveZODSEx
 
     import os
-    os.remove("ZODS.h5")
+    os.remove(savefile)
 
 .. categories::
 

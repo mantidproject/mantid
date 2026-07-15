@@ -40,8 +40,8 @@ Usage
    OutputWorkspace = CropWorkspace(InputWorkspace=ws,XMin=10.0,XMax=40.0)
 
    # Show workspaces
-   print("TOF Before CropWorkspace {}".format(ws.readX(0)))
-   print("TOF After CropWorkspace {}".format(OutputWorkspace.readX(0)))
+   print("TOF Before CropWorkspace {}".format(ws.x(0)))
+   print("TOF After CropWorkspace {}".format(OutputWorkspace.x(0)))
 
 Output:
 

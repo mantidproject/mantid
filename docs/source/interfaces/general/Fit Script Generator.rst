@@ -158,9 +158,9 @@ Usage Example for Simultaneous Fitting
     irs26176_red = Load(Filename=r'irs26176_graphite002_red.nxs')
 
     # Create a background workspace
-    y_values = np.zeros(len(irs26176_red.dataY(0)) * irs26176_red.getNumberHistograms())
-    y_values[:len(irs26176_red.dataY(0))] = 1.0
-    background = CreateWorkspace(DataX=irs26176_red.dataX(0), DataY=y_values, NSpec=irs26176_red.getNumberHistograms(), UnitX='DeltaE', Distribution=True, ParentWorkspace='irs26176_red')
+    y_values = np.zeros(len(irs26176_red.y(0)) * irs26176_red.getNumberHistograms())
+    y_values[:len(irs26176_red.mutableY(0))] = 1.0
+    background = CreateWorkspace(DataX=irs26176_red.mutableX(0), DataY=y_values, NSpec=irs26176_red.getNumberHistograms(), UnitX='DeltaE', Distribution=True, ParentWorkspace='irs26176_red')
 
     # Add the background
     Plus(LHSWorkspace=irs26176_red, RHSWorkspace='background', OutputWorkspace='irs26176_red')

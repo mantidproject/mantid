@@ -37,7 +37,7 @@ Usage
     # Create a workspace with a single bank and 9x9 pixels.
     ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=9)
     import os
-    group_file = os.path.join(config["default.savedirectory"], "mygroup.xml")
+    group_file = os.path.join(config["defaultsave.directory"], "mygroup.xml")
     # Want to get nine groups of 3x3
     SpatialGrouping(ws, group_file, SearchDistance=10)
     print("File created: {}".format(os.path.exists(group_file)))

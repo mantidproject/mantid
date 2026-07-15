@@ -148,12 +148,12 @@ Output:
                 Sig0Masked.append(ind)
                 Det0Masked.append(det.getID())
             #  1:1 map generated from instrument definitions
-            if mask1to1ws.readY(ind)[0]>0.5:
+            if mask1to1ws.y(ind)[0]>0.5:
                 det = mask1to1ws.getDetector(ind)
                 MaskedSp1to1.append(ind)
                 MaskedDet1to1.append(det.getID())
             # Real spectra-detector map:
-            if maskRealSDM.readY(ind)[0]>0.5:
+            if maskRealSDM.y(ind)[0]>0.5:
                 det = maskRealSDM.getDetector(ind)
                 MaskedSp_R.append(ind)
                 MaskedDet_R.append(det.getID())

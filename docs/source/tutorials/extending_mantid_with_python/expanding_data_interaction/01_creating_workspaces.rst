@@ -38,7 +38,7 @@ The above code will create a new 2D workspace filled with zeroes. The
 ``setProperty`` call is important as it is required for Mantid to store the
 workspace outside of the algorithm.
 
-To set the data in the workspace use the ``data[X,Y,E]`` member of the
+To set the data in the workspace use the ``mutable[X,Y,E]`` member of the
 workspace like so:
 
 .. code-block:: python
@@ -50,9 +50,9 @@ workspace like so:
     output_ws = WorkspaceFactory.create("Workspace2D", NVectors=nrows,
                                         XLength=nbins+1, YLength=nbins)
     for i in range(nrows):
-        xdata = output_ws.dataX(i)
-        ydata = output_ws.dataY(i)
-        edata = output_ws.dataE(i)
+        xdata = output_ws.mutableX(i)
+        ydata = output_ws.mutableY(i)
+        edata = output_ws.mutableE(i)
         for j in range(nbins):
             xdata[j] = j
             ydata[j] = i*i

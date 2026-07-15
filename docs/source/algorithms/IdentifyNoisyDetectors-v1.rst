@@ -40,9 +40,9 @@ Usage
 
     ws = CreateSampleWorkspace()
     wsOut = IdentifyNoisyDetectors(ws)
-    print('The output workspace is filled with {:.0f} for good detectors and 0 for noisy ones.'.format( wsOut.readY(0)[0]))
+    print('The output workspace is filled with {:.0f} for good detectors and 0 for noisy ones.'.format( wsOut.y(0)[0]))
     sum = SumSpectra(wsOut)
-    print("{:.0f} good spectra left".format(sum.readY(0)[0]))
+    print("{:.0f} good spectra left".format(sum.y(0)[0]))
 
 Output:
 
@@ -58,11 +58,11 @@ Output:
     ws = CreateSampleWorkspace()
     #make the spectra vary
     for i in range(ws.getNumberHistograms()):
-        ws.setY(i, ws.readY(i)*2**i)
+        ws.setY(i, ws.y(i)*2**i)
 
     wsOut = IdentifyNoisyDetectors(ws)
     sum = SumSpectra(wsOut)
-    print('{:.0f} good spectra left from an original {:.0f}.'.format(sum.readY(0)[0], wsOut.getNumberHistograms()))
+    print('{:.0f} good spectra left from an original {:.0f}.'.format(sum.y(0)[0], wsOut.getNumberHistograms()))
 
 Output:
 

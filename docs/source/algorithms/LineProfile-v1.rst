@@ -36,9 +36,9 @@ However, vertical profiles over distribution data will be non-distributions, alb
     # line is a workspace created by LineProfile
     axis = line.getAxis(1)
     height = axis.getMax() - axis.getMin()
-    Ys = line.dataY(0)
+    Ys = line.mutableY(0)
     Ys *= height
-    Es = line.dataE(0)
+    Es = line.mutableE(0)
     Es *= height
 
 Usage
@@ -64,8 +64,8 @@ Usage
         End=13000
     )
 
-    indexMax = numpy.argmax(horProfile.readY(0))
-    epp = horProfile.readX(0)[indexMax]
+    indexMax = numpy.argmax(horProfile.y(0))
+    epp = horProfile.x(0)[indexMax]
     print('Elastic peak at {}'.format(epp))
 
 Output:
@@ -114,7 +114,7 @@ Output:
         # Notice the overlapping TOFs. This is because partial bins are
         # included in their entirety.
         print('Average intensity between {} and {} microsec: {:.03}'.format(
-            tofStart, tofEnd, cut.readY(0)[0]))
+            tofStart, tofEnd, cut.y(0)[0]))
 
 Output:
 
@@ -150,10 +150,10 @@ Output:
     for iVert in range(wsInTheta.getNumberHistograms()):
         for iHor in range(wsInTheta.blocksize()):
             if iVert + iHor < 60:
-                ys = wsInTheta.dataY(iVert)
+                ys = wsInTheta.mutableY(iVert)
                 ys[iHor] = numpy.nan
             elif iVert + iHor > 120:
-                ys = wsInTheta.dataY(iVert)
+                ys = wsInTheta.mutableY(iVert)
                 ys[iHor] = numpy.nan
 
     centre = 0.6
@@ -162,15 +162,15 @@ Output:
 
     # When no NaNs are present both modes give the same result.
     iElastic = sumCutWS.blocksize() // 2
-    y = sumCutWS.readY(0)[iElastic]
-    e = sumCutWS.readE(0)[iElastic]
+    y = sumCutWS.y(0)[iElastic]
+    e = sumCutWS.e(0)[iElastic]
     print('Sum profile at elastic peak: {:.8f} +/- {:.10f}'.format(y, e))
 
     # The weighting is apparent when the profile crosses some
     # special values.
     iEdge = sumCutWS.blocksize() // 6
-    y = sumCutWS.readY(0)[iEdge]
-    e = sumCutWS.readE(0)[iEdge]
+    y = sumCutWS.y(0)[iEdge]
+    e = sumCutWS.e(0)[iEdge]
     print('Sum profile near NaNs: {:.11f} +/- {:.11f}'.format(y, e))
 
 .. testoutput:: SumMode

@@ -63,7 +63,7 @@ Usage
 
     # Add the incident spectrum to the workspace
     corrected_spectrum = incidentSpectrum(
-        incident_wksp.readX(0), phi_max, phi_epi, alpha, lambda_1, lambda_2, lambda_t)
+        incident_wksp.x(0), phi_max, phi_epi, alpha, lambda_1, lambda_2, lambda_t)
     incident_wksp.setY(0, corrected_spectrum)
 
     incident_spectrum = FitIncidentSpectrum(

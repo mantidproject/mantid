@@ -25,7 +25,7 @@ Usage
   ws = MaskInstrument(InputWorkspace=ws, DetectorIDs='100,102-104')
   # Detectors are masked but data and mask data is zeroed
   for i in range(6):
-    print("Detector {} masked: {:5} data {}".format(i, str(ws.getDetector(i).isMasked()), ws.readY(i)[0]))
+    print("Detector {} masked: {:5} data {}".format(i, str(ws.getDetector(i).isMasked()), ws.y(i)[0]))
 
 Output:
 

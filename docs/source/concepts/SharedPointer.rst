@@ -43,7 +43,7 @@ Using a shared pointer
 
 Shared pointer can be used just like any pointer.
 
-``workspacePointer->readX(1);``
+``workspacePointer->x(1);``
 
 The only real differences are when casting the pointer instead of
 

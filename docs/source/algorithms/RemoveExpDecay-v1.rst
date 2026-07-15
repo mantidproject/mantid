@@ -34,7 +34,7 @@ Usage
 
    output = RemoveExpDecay(input)
 
-   print("Exp. decay removed: {}".format(output.readY(0)))
+   print("Exp. decay removed: {}".format(output.y(0)))
 
 Output:
 
@@ -69,7 +69,7 @@ Output:
 
   output = RemoveExpDecay(ws)# Print the result
   for j in range(4):
-      print ("Exp. decay removed: {}".format(output.readY(j)))
+      print ("Exp. decay removed: {}".format(output.y(j)))
 
 Output:
 

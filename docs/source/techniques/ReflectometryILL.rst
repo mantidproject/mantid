@@ -80,7 +80,7 @@ via `BraggAngle` property. This rotation takes place in either in horizontal or 
    )
 
    print("Number of TOF bins: {}".format(ws.blocksize()))
-   print("Min/max of TOF: {:.3f}, {:.3f}".format(ws.readX(0)[0], ws.readX(0)[-1]))
+   print("Min/max of TOF: {:.3f}, {:.3f}".format(ws.x(0)[0], ws.x(0)[-1]))
 
 Output:
 
@@ -374,7 +374,7 @@ The example below shows a silicon oxide reduction with coherent summation at two
       GlobalScaleFactor=0.13
    )
    print("Number of output workspaces: {}".format(mtd[name].getNumberOfEntries()))
-   print("Momentum exchange ranges: {:.4f}, {:.4f}".format(mtd[name][2].readX(0)[0], mtd[name][2].readX(0)[-1]))
+   print("Momentum exchange ranges: {:.4f}, {:.4f}".format(mtd[name][2].x(0)[0], mtd[name][2].x(0)[-1]))
    print('X unit: ' + mtd[name][0].getAxis(0).getUnit().unitID())
 
 .. testoutput:: D17DetectorAngleCoherent
@@ -388,7 +388,7 @@ The example below shows a silicon oxide reduction with coherent summation at two
     mtd.clear()
     import os
     for i in range(2):
-        os.remove(f"{name}_{i}.out")
+        os.remove(os.path.join(config["defaultsave.directory"], f"{name}_{i}.out"))
 
 D17 user angle, incoherent summation
 ------------------------------------
@@ -434,7 +434,7 @@ The example below shows a quartz reduction with incoherent summation at four dif
       ReflHighAngleBkgWidth=10,
    )
    print("Number of output workspaces: {}".format(mtd[name].getNumberOfEntries()))
-   print("Momentum exchange ranges: {:.4f}, {:.4f}".format(mtd[name][2].readX(0)[0], mtd[name][2].readX(0)[-1]))
+   print("Momentum exchange ranges: {:.4f}, {:.4f}".format(mtd[name][2].x(0)[0], mtd[name][2].x(0)[-1]))
    print('X unit: ' + mtd[name][0].getAxis(0).getUnit().unitID())
 
 .. testoutput:: D17UserAngleQuartz
@@ -448,7 +448,7 @@ The example below shows a quartz reduction with incoherent summation at four dif
     mtd.clear()
     import os
     for i in range(4):
-        os.remove(f"{name}_{i}.out")
+        os.remove(os.path.join(config["defaultsave.directory"], f"{name}_{i}.out"))
 
 FIGARO detector angle, gravity correction
 -----------------------------------------
@@ -500,7 +500,7 @@ This reduction includes the gravity correction, which is set explicitly via `Cor
 	 CorrectGravity=True
    )
    print("Number of output workspaces: {}".format(mtd[name].getNumberOfEntries()))
-   print("Momentum exchange ranges: {:.4f}, {:.4f}".format(mtd[name][2].readX(0)[0], mtd[name][2].readX(0)[-1]))
+   print("Momentum exchange ranges: {:.4f}, {:.4f}".format(mtd[name][2].x(0)[0], mtd[name][2].x(0)[-1]))
    print('X unit: ' + mtd[name][2].getAxis(0).getUnit().unitID())
 
 .. testoutput:: FIGARODetectorAngleGravityCorrection
@@ -514,7 +514,7 @@ This reduction includes the gravity correction, which is set explicitly via `Cor
     mtd.clear()
     import os
     for i in range(2):
-        os.remove(f"{name}_{i}.out")
+        os.remove(os.path.join(config["defaultsave.directory"], f"{name}_{i}.out"))
 
 References
 ----------

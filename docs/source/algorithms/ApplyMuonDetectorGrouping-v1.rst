@@ -83,19 +83,19 @@ Usage
 
 
     output_rebin = mtd['MUSR00015193; Group; Test; Counts; #1']
-    print("Total counts (rebinned) : {0:.0f}".format( sum(output_rebin.readY(0))) )
+    print("Total counts (rebinned) : {0:.0f}".format( sum(output_rebin.y(0))) )
 
     output_noRebin = mtd['MUSR00015193; Group; Test; Counts; #1_Raw']
-    print("Total counts (no rebin) : {0:.0f}\n".format(sum(output_noRebin.readY(0))) )
+    print("Total counts (no rebin) : {0:.0f}\n".format(sum(output_noRebin.y(0))) )
 
 
-    print("Time range (original) : {0:.3f} - {1:.3f} mus".format(mtd['MuonAnalysis_1'].readX(0)[0],mtd['MuonAnalysis_1'].readX(0)[-1]))
-    print("Time range (no rebin) : {0:.3f} - {1:.3f} mus".format(output_noRebin.readX(0)[0],output_noRebin.readX(0)[-1]))
-    print("Time range (rebinned) : {0:.3f} - {1:.3f} mus\n".format(output_rebin.readX(0)[0],output_rebin.readX(0)[-1]))
+    print("Time range (original) : {0:.3f} - {1:.3f} mus".format(mtd['MuonAnalysis_1'].x(0)[0],mtd['MuonAnalysis_1'].x(0)[-1]))
+    print("Time range (no rebin) : {0:.3f} - {1:.3f} mus".format(output_noRebin.x(0)[0],output_noRebin.x(0)[-1]))
+    print("Time range (rebinned) : {0:.3f} - {1:.3f} mus\n".format(output_rebin.x(0)[0],output_rebin.x(0)[-1]))
 
-    print("Time step (original)  : {0:.3f} mus".format(mtd['MuonAnalysis_1'].readX(0)[1]-mtd['MuonAnalysis_1'].readX(0)[0]))
-    print("Time step (no rebin)  : {0:.3f} mus".format(output_noRebin.readX(0)[1]-output_noRebin.readX(0)[0]))
-    print("Time step (rebinned)  : {0:.3f} mus".format(output_rebin.readX(0)[1]-output_rebin.readX(0)[0]))
+    print("Time step (original)  : {0:.3f} mus".format(mtd['MuonAnalysis_1'].x(0)[1]-mtd['MuonAnalysis_1'].x(0)[0]))
+    print("Time step (no rebin)  : {0:.3f} mus".format(output_noRebin.x(0)[1]-output_noRebin.x(0)[0]))
+    print("Time step (rebinned)  : {0:.3f} mus".format(output_rebin.x(0)[1]-output_rebin.x(0)[0]))
 
 Output:
 
