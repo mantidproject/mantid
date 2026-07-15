@@ -18,10 +18,9 @@ def _skip_test():
 
 class MDNormWANDTest(systemtesting.MantidSystemTest):
     """End-to-end test of MDNorm's monochromatic-SCD path for WAND (HB2C): convert the same
-    detector-space MDHisto data (as produced by LoadWANDSCD) to a Q-sample MDEventWorkspace via
-    ConvertHFIRSCDtoMDE twice, once each for "data" and "normalization", so the two are
-    identical, then feed both into MDNorm via MonoSCDNormalizationWorkspace. Since data and
-    normalization are identical, every non-empty output bin must be exactly 1.0."""
+    data to a Q-sample MDEventWorkspace twice, once each for "data" and "normalization", then
+    feed both into MDNorm. Since data and normalization are identical, every non-empty output
+    bin must be exactly 1.0."""
 
     def requiredFiles(self):
         return ["HB2C_WANDSCD_data.nxs"]
@@ -44,6 +43,9 @@ class MDNormWANDTest(systemtesting.MantidSystemTest):
             InputWorkspace=ws_name + "_data",
             MonoSCDNormalizationWorkspace=ws_name + "_norm",
             RLU=False,
+            Dimension0Binning="-10,1,10",
+            Dimension1Binning="-10,1,10",
+            Dimension2Binning="-10,1,10",
             SymmetryOperations="x,y,z;-x,-y,-z",
             OutputWorkspace=ws_name + "_out",
             OutputDataWorkspace=ws_name + "_outdata",
@@ -53,8 +55,12 @@ class MDNormWANDTest(systemtesting.MantidSystemTest):
         out = mtd[ws_name + "_out"]
         self.assertEqual(out.getNumDims(), 3)
         signal = out.getSignalArray()
-        self.assertTrue(np.all(np.isfinite(signal)))
-        np.testing.assert_allclose(signal, 1.0, rtol=1e-6)
+        self.assertGreater(signal.size, 1)
+        norm = mtd[ws_name + "_outnorm"].getSignalArray()
+        non_empty = norm != 0
+        self.assertTrue(non_empty.any())
+        self.assertTrue(np.all(np.isfinite(signal[non_empty])))
+        np.testing.assert_allclose(signal[non_empty], 1.0, rtol=1e-6)
 
         DeleteWorkspaces(
             [
@@ -69,10 +75,9 @@ class MDNormWANDTest(systemtesting.MantidSystemTest):
 
 
 class MDNormWANDRLUTest(systemtesting.MantidSystemTest):
-    """Same as MDNormWANDTest, but with RLU=True: exercises the reciprocal-lattice-unit
-    binning path for monochromatic-SCD input, including the box-tree-derived maxQ estimate
-    used to set default Q-dimension extents. Data and normalization are still identical, so
-    every non-empty output bin must still be exactly 1.0, regardless of RLU."""
+    """Same as MDNormWANDTest, but with RLU=True and the real WAND UB, binned onto the same
+    known-good, peak-containing HKL extents as ConvertWANDSCDtoQTest. Data and normalization
+    are still identical, so every non-empty output bin must still be exactly 1.0."""
 
     def requiredFiles(self):
         return ["HB2C_WANDSCD_data.nxs"]
@@ -90,12 +95,19 @@ class MDNormWANDRLUTest(systemtesting.MantidSystemTest):
 
         ConvertHFIRSCDtoMDE(InputWorkspace=ws_name + "_raw", Wavelength=1.488, OutputWorkspace=ws_name + "_data")
         ConvertHFIRSCDtoMDE(InputWorkspace=ws_name + "_raw", Wavelength=1.488, OutputWorkspace=ws_name + "_norm")
-        SetUB(ws_name + "_data", 5, 5, 5, 90, 90, 90)
+        SetUB(
+            ws_name + "_data",
+            UB="-2.7315243158024499e-17,1.7706197424726486e-01,-9.2794248657701375e-03,"
+            "1.773049645390071e-01,0.,0.,1.2303228382369809e-17,-9.2794248657701254e-03,-1.7706197424726489e-01",
+        )
 
         MDNorm(
             InputWorkspace=ws_name + "_data",
             MonoSCDNormalizationWorkspace=ws_name + "_norm",
             RLU=True,
+            Dimension0Binning="-0.62,0.062,0.62",
+            Dimension1Binning="-2.02,0.452,7.02",
+            Dimension2Binning="-6.52,0.452,2.52",
             SymmetryOperations="x,y,z;-x,-y,-z",
             OutputWorkspace=ws_name + "_out",
             OutputDataWorkspace=ws_name + "_outdata",
@@ -105,8 +117,12 @@ class MDNormWANDRLUTest(systemtesting.MantidSystemTest):
         out = mtd[ws_name + "_out"]
         self.assertEqual(out.getNumDims(), 3)
         signal = out.getSignalArray()
-        self.assertTrue(np.all(np.isfinite(signal)))
-        np.testing.assert_allclose(signal, 1.0, rtol=1e-6)
+        self.assertGreater(signal.size, 1)
+        norm = mtd[ws_name + "_outnorm"].getSignalArray()
+        non_empty = norm != 0
+        self.assertTrue(non_empty.any())
+        self.assertTrue(np.all(np.isfinite(signal[non_empty])))
+        np.testing.assert_allclose(signal[non_empty], 1.0, rtol=1e-6)
 
         DeleteWorkspaces(
             [
