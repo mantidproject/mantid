@@ -393,15 +393,27 @@ void ISISCalibration::setDefaultInstDetails(QMap<QString, QString> const &instru
     return;
   QFileInfo fi(filename);
   QString wsname = fi.baseName();
-  if (!Mantid::API::AnalysisDataService::Instance().doesExist(wsname.toStdString())) {
-    loadFile(filename.toStdString(), wsname.toStdString(), spectraMin, spectraMax);
-  }
-  const auto input =
-      std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsname.toStdString()));
+  // Force reload with the new analyser's spectra range so the preview plot
+  // reflects the switched analyser (otherwise the cached ws from the previous
+  // analyser is reused and the plot never refreshes).
+  auto &ads = Mantid::API::AnalysisDataService::Instance();
+  if (ads.doesExist(wsname.toStdString()))
+    ads.remove(wsname.toStdString());
+  loadFile(filename.toStdString(), wsname.toStdString(), spectraMin, spectraMax);
+  const auto input = std::dynamic_pointer_cast<MatrixWorkspace>(ads.retrieve(wsname.toStdString()));
   const auto &dataX = input->x(0);
 
   disconnect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &ISISCalibration::calUpdateRS);
   disconnectRangeSelectors();
+
+  // Refresh the preview plot with the reloaded (new-analyser) workspace and
+  // widen range-selector limits before assigning peak/background values so
+  // they don't get clamped to the previous plot's X range.
+  m_uiForm.ppCalibration->clear();
+  m_uiForm.ppCalibration->addSpectrum("Raw", input, 0);
+  m_uiForm.ppCalibration->resizeX();
+  setPeakRangeLimits(dataX.front(), dataX.back());
+  setBackgroundRangeLimits(dataX.front(), dataX.back());
 
   // Prefer raw IDF TOF parameters ("peak-start"/"peak-end", "back-start"/"back-end") when present and consistent with
   // the loaded data. Otherwise fall back to the TOF ranges derived by converting the instrument's energy defaults
@@ -433,6 +445,10 @@ void ISISCalibration::setDefaultInstDetails(QMap<QString, QString> const &instru
 
   connect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &ISISCalibration::calUpdateRS);
   connectRangeSelectors();
+
+  m_uiForm.ppCalibration->replot();
+  m_lastCalPlotFilename = filename;
+
   // plot energy to correctly set the res plot
   calPlotEnergy();
 }
