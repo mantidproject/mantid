@@ -404,11 +404,6 @@ class ReflectometryDatasetHistory(ReflectometryDatasetBase):
         """
         Get the workspace reduction history as a script.
         """
-        if self.is_ws_grp_member:
-            # We don't get an accurate history from ReflectometryISISLoadAndProcess for workspace groups, so only
-            # include this if the workspace is not part of a group
-            return None
-
         if self.ws.getHistory().empty():
             return None
         alg = AlgorithmManager.createUnmanaged("GeneratePythonScript")
