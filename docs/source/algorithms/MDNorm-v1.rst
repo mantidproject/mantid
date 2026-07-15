@@ -93,7 +93,9 @@ way as for time-of-flight data -- scaled by the crystal's lattice parameters -- 
 comes from the workspace's own data-occupied extents (a box-tree bounding box) rather than an instrumental
 wavelength/time-of-flight window.
 
-**Example - MDNorm for WAND/DEMAND**
+**Example - MDNorm for WAND**
+
+`RLU=True` requires a UB matrix on `InputWorkspace`, set here via `SetUB` for illustration.
 
 .. code-block:: python
 
@@ -105,10 +107,42 @@ wavelength/time-of-flight window.
    SetGoniometer(Workspace='norm', Axis0='s1,0,1,0,1')
    ConvertHFIRSCDtoMDE(InputWorkspace='data', Wavelength=1.488, OutputWorkspace='data_md')
    ConvertHFIRSCDtoMDE(InputWorkspace='norm', Wavelength=1.488, OutputWorkspace='norm_md')
+   SetUB(Workspace='data_md', a=5.5, b=6.0, c=8.0, u='1,0,0', v='0,1,0')
 
    MDNorm(InputWorkspace='data_md',
           MonoSCDNormalizationWorkspace='norm_md',
-          RLU=False,
+          RLU=True,
+          Dimension0Name='QDimension0',
+          Dimension0Binning='-5,0.05,5',
+          Dimension1Name='QDimension1',
+          Dimension1Binning='-5,0.05,5',
+          Dimension2Name='QDimension2',
+          Dimension2Binning='-5,0.05,5',
+          OutputWorkspace='result',
+          OutputDataWorkspace='dataMD',
+          OutputNormalizationWorkspace='normMD')
+
+**Example - MDNorm for DEMAND**
+
+DEMAND uses a single `HB3AAdjustSampleNorm` call (rather than WAND's `LoadWANDSCD` +
+`ConvertHFIRSCDtoMDE` pair) to produce the data and normalization workspaces. As above,
+`RLU=True` requires a UB matrix on `InputWorkspace`, set here via `SetUB` for illustration.
+
+.. code-block:: python
+
+   data, norm = HB3AAdjustSampleNorm(Filename='HB3A_exp0724_scan0182.nxs, HB3A_exp0724_scan0183.nxs',
+                                      VanadiumFile='HB3A_exp0722_scan0220.nxs',
+                                      NormaliseBy='Time',
+                                      NormalizeData=False,
+                                      OutputType='Q-sample events',
+                                      MergeInputs=True,
+                                      OutputWorkspace='data',
+                                      OutputNormalizationWorkspace='norm')
+   SetUB(Workspace='data', a=5.5, b=6.0, c=8.0, u='1,0,0', v='0,1,0')
+
+   MDNorm(InputWorkspace='data',
+          MonoSCDNormalizationWorkspace='norm',
+          RLU=True,
           Dimension0Name='QDimension0',
           Dimension0Binning='-5,0.05,5',
           Dimension1Name='QDimension1',
