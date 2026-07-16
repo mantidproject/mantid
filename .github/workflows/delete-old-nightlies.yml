@@ -63,7 +63,7 @@ jobs:
             pixi.toml
           sparse-checkout-cone-mode: false
       - uses: ./.github/actions/setup-pixi
-      - uses: neutrons/gh-actions/pkg-remove@225d73f1a9e96b7dfff4f64ca1eddc8fb2e01cb3 # test version
+      - uses: neutrons/gh-actions/pkg-remove@0e90b67c2f71113d1aa022f7e3dd057369e9c572 # test version
         with:
           anaconda_token: ${{ secrets.ANACONDA_TOKEN }}
           organization: mantid
@@ -96,7 +96,7 @@ jobs:
             pixi.toml
           sparse-checkout-cone-mode: false
       - uses: ./.github/actions/setup-pixi
-      - uses: neutrons/gh-actions/pkg-remove@225d73f1a9e96b7dfff4f64ca1eddc8fb2e01cb3 # test version
+      - uses: neutrons/gh-actions/pkg-remove@0e90b67c2f71113d1aa022f7e3dd057369e9c572 # test version
         with:
           anaconda_token: ${{ secrets.ANACONDA_TOKEN_MANTIDORNL }}
           organization: mantid-ornl
