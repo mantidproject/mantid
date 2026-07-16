@@ -155,7 +155,7 @@ GenerateFlatCellWorkspaceLOQ::normalizeBanks(std::span<double> values) const {
 }
 
 std::vector<double> GenerateFlatCellWorkspaceLOQ::extractIntegratedValues(const API::MatrixWorkspace_sptr &ws) const {
-  const size_t nHist =->y(NumberHistograms();
+  const size_t nHist = ws->getNumberHistograms();
   std::vector<double> values;
   values.reserve(nHist);
   for (size_t i = 0; i < nHist; ++i) {

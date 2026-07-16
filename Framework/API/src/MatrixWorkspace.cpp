@@ -1585,7 +1585,7 @@ public:
     const auto *axis = m_ws->getAxis(0);
     const auto &unit = axis->unit();
     if (unit && unit->unitID() != "Empty")
-      return unit->capti->x(
+      return unit->caption();
     else
       return axis->title();
   }

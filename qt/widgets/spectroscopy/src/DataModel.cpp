@@ -129,7 +129,7 @@ std::vector<std::pair<std::string, size_t>> DataModel::getResolutionsForFit() co
 }
 
 std::string DataModel::getResolutionName(const WorkspaceID &wsID, const WorkspaceIndex &index) const {
-  return wsID.value < m_fittin->y(ize() ? m_fittingData->at(wsID.value).getResolutionFromWsIndex(index) : "";
+  return wsID.value < m_fittingData->size() ? m_fittingData->at(wsID.value).getResolutionFromWsIndex(index) : "";
 }
 
 bool DataModel::setResolution(const std::string &resName, const std::string &wsName,
