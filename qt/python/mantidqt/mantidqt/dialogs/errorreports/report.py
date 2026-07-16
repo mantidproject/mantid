@@ -127,10 +127,10 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
         self.quit_signal.emit()
 
     def fullShare(self):
-        self.action.emit(self.continue_working, self.get_remember_checkbox, True, self.input_name, self.input_email, self.input_text)
+        self.action.emit(self.continue_working, self.remember_contact_info, True, self.input_name, self.input_email, self.input_text)
 
     def noShare(self):
-        self.action.emit(self.continue_working, self.get_remember_checkbox, False, self.input_name, self.input_email, self.input_text)
+        self.action.emit(self.continue_working, self.remember_contact_info, False, self.input_name, self.input_email, self.input_text)
 
     def close_reporter(self, status):
         if status == 201 or status == -1:
@@ -219,5 +219,5 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
         return self.radioButtonContinue.isChecked()
 
     @property
-    def get_remember_checkbox(self):
+    def remember_contact_info(self):
         return self.rememberContactInfoCheckbox.isChecked()
