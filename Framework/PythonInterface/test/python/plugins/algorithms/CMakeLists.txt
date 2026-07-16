@@ -129,6 +129,7 @@ set(TEST_PY_FILES
     SaveGEMMAUDParamFileTest.py
     SaveNexusPDTest.py
     SaveMDHistoToVTKTest.py
+    SaveMDToAsciiTest.py
     SaveGSSCWTest.py
     SaveHKLCWTest.py
     SaveINSTest.py

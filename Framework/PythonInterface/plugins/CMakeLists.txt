@@ -185,6 +185,7 @@ set(PYTHON_PLUGINS
     algorithms/SaveINS.py
     algorithms/SaveISISReflectometryORSO.py
     algorithms/SaveMDHistoToVTK.py
+    algorithms/SaveMDToAscii.py
     algorithms/SaveNexusPD.py
     algorithms/SaveP2D.py
     algorithms/SavePlot1DAsJson.py
