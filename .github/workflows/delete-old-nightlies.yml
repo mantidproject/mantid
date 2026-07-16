@@ -5,8 +5,6 @@ on:
       - .github/actions/setup-pixi/
       - .github/workflows/delete-old-nightlies.yml
       - .pixi-version
-      - pixi.lock
-      - pixi.toml
   schedule:
     - cron: '0 2 * * *'
   workflow_dispatch:
@@ -65,7 +63,7 @@ jobs:
             pixi.toml
           sparse-checkout-cone-mode: false
       - uses: ./.github/actions/setup-pixi
-      - uses: neutrons/gh-actions/pkg-remove@a1e1c8b4123ced6c66fe57b9a60a56a6e4bf6861 # v1
+      - uses: neutrons/gh-actions/pkg-remove@225d73f1a9e96b7dfff4f64ca1eddc8fb2e01cb3 # test version
         with:
           anaconda_token: ${{ secrets.ANACONDA_TOKEN }}
           organization: mantid
@@ -98,7 +96,7 @@ jobs:
             pixi.toml
           sparse-checkout-cone-mode: false
       - uses: ./.github/actions/setup-pixi
-      - uses: neutrons/gh-actions/pkg-remove@a1e1c8b4123ced6c66fe57b9a60a56a6e4bf6861 # v1
+      - uses: neutrons/gh-actions/pkg-remove@225d73f1a9e96b7dfff4f64ca1eddc8fb2e01cb3 # test version
         with:
           anaconda_token: ${{ secrets.ANACONDA_TOKEN_MANTIDORNL }}
           organization: mantid-ornl
