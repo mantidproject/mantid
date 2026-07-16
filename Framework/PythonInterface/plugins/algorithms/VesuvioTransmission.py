@@ -64,8 +64,7 @@ class VesuvioTransmission(PythonAlgorithm):
         self.declareProperty(
             "Rebin",
             False,
-            doc="If the rebin parameters string is given, rebin the final summed "
-            "transmission spectrum. If the string is empty, this step is skipped.",
+            doc="If rebin is true, rebin the final summed transmission spectrum"
         )
         self.declareProperty(
             "RebinParameters",
@@ -104,7 +103,8 @@ class VesuvioTransmission(PythonAlgorithm):
         if rebin and target != "Energy":
             # Original script only rebinned the Energy case. Keep behaviour, but make this explicit.
             self.log().warning("Rebin=True is currently only applied when Target='Energy'.")
-
+     if not reb_parameters:
+         issues["RebinParameters"] = "When Rebin is set to True, need to provide a non-empty string for RebinParameters"
         return issues
 
     def _delete_if_exists(self, ws_name):
