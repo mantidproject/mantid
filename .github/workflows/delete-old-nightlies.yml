@@ -24,6 +24,10 @@ on:
         default: false
         type: boolean
 
+env:
+  ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN || 'unset_token' }}
+  ANACONDA_TOKEN_MANTIDORNL: ${{ secrets.ANACONDA_TOKEN_MANTIDORNL || 'unset_token' }}
+
 jobs:
   releases:
     if: ${{ github.repository_owner == 'mantidproject' && (github.event_name != 'workflow_dispatch' || github.event.inputs.target == 'all' || github.event.inputs.target == 'github-releases') }}
@@ -65,7 +69,7 @@ jobs:
       - uses: ./.github/actions/setup-pixi
       - uses: neutrons/gh-actions/pkg-remove@61a36cc23945ebd0d0cfbbac47bf126d5af6e3a6 # test version
         with:
-          anaconda_token: ${{ secrets.ANACONDA_TOKEN }}
+          anaconda_token: ${{ env.ANACONDA_TOKEN }}
           organization: mantid
           package_name: ${{ matrix.package_name }}
           label: nightly
@@ -98,7 +102,7 @@ jobs:
       - uses: ./.github/actions/setup-pixi
       - uses: neutrons/gh-actions/pkg-remove@61a36cc23945ebd0d0cfbbac47bf126d5af6e3a6 # test version
         with:
-          anaconda_token: ${{ secrets.ANACONDA_TOKEN_MANTIDORNL }}
+          anaconda_token: ${{ env.ANACONDA_TOKEN_MANTIDORNL }}
           organization: mantid-ornl
           package_name: ${{ matrix.package_name }}
           label: nightly
