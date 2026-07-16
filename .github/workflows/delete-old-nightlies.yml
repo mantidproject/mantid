@@ -67,14 +67,14 @@ jobs:
             pixi.toml
           sparse-checkout-cone-mode: false
       - uses: ./.github/actions/setup-pixi
-      - uses: neutrons/gh-actions/pkg-remove@619696bee3525e7bdb8383e3f57ce4bba602d771 # test version
+      - uses: neutrons/gh-actions/pkg-remove@ae14e70c9a8cbbd84437711b4ee5cda8d2b50298 # test version
         with:
           anaconda_token: ${{ env.ANACONDA_TOKEN }}
           organization: mantid
           package_name: ${{ matrix.package_name }}
           label: nightly
           keep: '3'
-          dry_run: ${{ github.event.inputs.dry_run || github.event_name != 'schedule' }}
+          dry_run: false
 
   anaconda-mantid-ornl:
     if: ${{ github.repository_owner == 'mantidproject' && (github.event_name != 'workflow_dispatch' || github.event.inputs.target == 'all' || github.event.inputs.target == 'anaconda-packages') }}
@@ -100,7 +100,7 @@ jobs:
             pixi.toml
           sparse-checkout-cone-mode: false
       - uses: ./.github/actions/setup-pixi
-      - uses: neutrons/gh-actions/pkg-remove@619696bee3525e7bdb8383e3f57ce4bba602d771 # test version
+      - uses: neutrons/gh-actions/pkg-remove@ae14e70c9a8cbbd84437711b4ee5cda8d2b50298 # test version
         with:
           anaconda_token: ${{ env.ANACONDA_TOKEN_MANTIDORNL }}
           organization: mantid-ornl
