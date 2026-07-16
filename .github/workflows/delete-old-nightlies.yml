@@ -25,7 +25,7 @@ on:
         type: boolean
 
 jobs:
-  delete-old-nightly-releases:
+  releases:
     if: ${{ github.repository_owner == 'mantidproject' && (github.event_name != 'workflow_dispatch' || github.event.inputs.target == 'all' || github.event.inputs.target == 'github-releases') }}
     runs-on: ubuntu-latest
     steps:
@@ -39,7 +39,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  delete-old-nightly-anaconda-packages-mantid:
+  anaconda-mantid:
     if: ${{ github.repository_owner == 'mantidproject' && (github.event_name != 'workflow_dispatch' || github.event.inputs.target == 'all' || github.event.inputs.target == 'anaconda-packages') }}
     runs-on: ubuntu-latest
     strategy:
@@ -72,7 +72,7 @@ jobs:
           keep: '3'
           dry_run: ${{ github.event.inputs.dry_run || github.event_name != 'schedule' }}
 
-  delete-old-nightly-anaconda-packages-mantid-ornl:
+  anaconda-mantid-ornl:
     if: ${{ github.repository_owner == 'mantidproject' && (github.event_name != 'workflow_dispatch' || github.event.inputs.target == 'all' || github.event.inputs.target == 'anaconda-packages') }}
     runs-on: ubuntu-latest
     strategy:
