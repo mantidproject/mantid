@@ -61,11 +61,7 @@ class VesuvioTransmission(PythonAlgorithm):
         self.declareProperty(
             "Target", "Energy", StringListValidator(["Energy", "Wavelength"]), doc="Target unit for the final transmission spectrum."
         )
-        self.declareProperty(
-            "Rebin",
-            False,
-            doc="If rebin is true, rebin the final summed transmission spectrum"
-        )
+        self.declareProperty("Rebin", False, doc="If rebin is true, rebin the final summed transmission spectrum")
         self.declareProperty(
             "RebinParameters",
             [0.6, -0.005, 1.0e7],
@@ -103,8 +99,6 @@ class VesuvioTransmission(PythonAlgorithm):
         if rebin and target != "Energy":
             # Original script only rebinned the Energy case. Keep behaviour, but make this explicit.
             self.log().warning("Rebin=True is currently only applied when Target='Energy'.")
-     if not reb_parameters:
-         issues["RebinParameters"] = "When Rebin is set to True, need to provide a non-empty string for RebinParameters"
         return issues
 
     def _delete_if_exists(self, ws_name):
