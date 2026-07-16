@@ -1,0 +1,1 @@
+- Sped up new Instrument View by creating the component tree lazily, i.e. only when a component in the tree is expanded. This will give a speed-up of a few seconds for large instruments.

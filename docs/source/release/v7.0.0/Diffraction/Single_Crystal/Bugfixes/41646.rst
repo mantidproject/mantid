@@ -1,0 +1,1 @@
+- Fixed the ``Counts`` vanadium normalization option in :ref:`algm-LoadWANDSCD` so detector counts are scaled by the mean vanadium signal when applying the vanadium correction.

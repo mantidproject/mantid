@@ -1,0 +1,4 @@
+- The ``SNSLiveEventDataListener`` state machine is refactored to simplify its structure, remove race conditions,
+  and make all state transitions explicit.  These changes primarily add to the
+  ``ILiveListener`` interface, deprecating its ``runStatus`` method,
+  but otherwise leave most ``ILiveListener`` implementations largely unchanged.

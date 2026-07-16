@@ -1,0 +1,1 @@
+- :ref:`FileFinder <mantid.api.FileFinderImpl>` and :py:obj:`MultipleFileProperty <mantid.api.MultipleFileProperty>` now resolve multi-run hint strings (ranges and lists) in a single batched archive lookup for HFIR and SNS data, replacing the previous per-run network round trips to ONCat.

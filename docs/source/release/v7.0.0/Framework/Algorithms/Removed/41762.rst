@@ -1,0 +1,1 @@
+- Removed the deprecated BayesQuasi and BayesStretch algorithms, which were based on the ``quasielasticbayes`` library. Users should now use the new ``quickbayes`` replacements, :ref:`algm-BayesQuasi2` and :ref:`algm-BayesStretch2`, respectively.
