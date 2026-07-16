@@ -45,9 +45,10 @@ private:
   void cacheDimensionXValues();
   void calculateNormalization(const std::vector<coord_t> &otherValues, const Kernel::Matrix<coord_t> &affineTrans,
                               uint16_t expInfoIndex);
+  void calculateNormContinuous(const std::vector<coord_t> &otherValues, const Kernel::Matrix<coord_t> &affineTrans,
+                               uint16_t expInfoIndex);
   void calculateNormInner(const API::SpectrumInfo &spectrumInfo, const double protonCharge,
-                          const std::vector<coord_t> &otherValues, const Kernel::Matrix<coord_t> &affineTrans,
-                          std::pair<double, double> progval);
+                          const std::vector<coord_t> &otherValues, const Kernel::Matrix<coord_t> &affineTrans);
 
   void calculateIntersections(std::vector<std::array<double, 4>> &intersections, const double theta, const double phi);
 
@@ -77,6 +78,8 @@ private:
   bool m_accumulate{false};
   /// number of experiment infos
   uint16_t m_numExptInfos;
+  /// Progress bar
+  std::unique_ptr<API::Progress> m_progress;
 };
 
 } // namespace MDAlgorithms

@@ -48,7 +48,7 @@ public:
      (if such conversion is necessary) */
   UnitsConversionHelper &getUnitConversionHelper() { return m_UnitConversion; }
   // This value is used by ConvertToMD to set a property as a flag for BinMD/MDNorm
-  std::vector<std::string> getLogTimesName() { return m_useLogTimesName; }
+  std::vector<std::string> getTimeLogsName() { return m_timeLogsName; }
 
 protected:
   // pointer to input matrix workspace;
@@ -88,7 +88,7 @@ protected:
   Mantid::Kernel::SpecialCoordinateSystem m_coordinateSystem;
   /// Flag to use log values corresponding to event pulse time instead of average values
   bool m_useLogTimes;
-  std::vector<std::string> m_useLogTimesName;
+  std::vector<std::string> m_timeLogsName;
 
 private:
   /** internal function which do one peace of work, which should be performed by

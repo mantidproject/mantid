@@ -310,10 +310,11 @@ void ConvertToMD::exec() {
     savemd->executeAsChildAlg();
   }
 
-  if (std::vector<std::string> logname = m_Convertor->getLogTimesName(); logname.size() > 0) {
+  if (const auto logname = m_Convertor->getTimeLogsName(); logname.size() > 0) {
     std::string singlestring;
+    singlestring.reserve(2 * logname.size());
     for (auto string : logname) {
-      singlestring += string + ",";
+      singlestring.append(string).append(1, ',');
     }
     singlestring.pop_back();
     spws->getExperimentInfo(0)->mutableRun().addProperty("useLogTimes", singlestring, true);
