@@ -51,7 +51,7 @@ if(CPPCHECK_EXECUTABLE)
       -UQT_TESTCASE_BUILDDIR
   )
 
-  # Arguments shared by the text ('cppcheck'), xml ('cppcheck-xml') and SARIF ('cppcheck-sarif') targets.
+  # Arguments shared by the text ('cppcheck') and SARIF ('cppcheck-sarif') targets.
   set(_cppcheck_args "${CPPCHECK_ARGS}")
   if(CPPCHECK_NUM_THREADS GREATER 0)
     list(APPEND _cppcheck_args -j ${CPPCHECK_NUM_THREADS})
@@ -60,11 +60,6 @@ if(CPPCHECK_EXECUTABLE)
   # The 'cppcheck' target (run in CI) prints gcc-style diagnostics to stderr so they can be picked up by a problem
   # matcher. '_cppcheck_source_dirs' is empty in --project mode but kept for parity.
   set(_cppcheck_text_args ${_cppcheck_args} ${CPPCHECK_TEMPLATE_ARG} "${_cppcheck_source_dirs}")
-
-  # The 'cppcheck-xml' target writes an xml report to cppcheck.xml (cppcheck emits the report on stderr, hence the
-  # redirect). It is used for the HTML report and can also be used to regenerate the suppressions input when upgrading
-  # cppcheck.
-  set(_cppcheck_xml_args ${_cppcheck_args} --xml --xml-version=2 "${_cppcheck_source_dirs}")
 
   # The 'cppcheck-sarif' target writes a SARIF report to cppcheck.sarif. This can be consumed by GitHub code scanning
   # and by tools/Cppcheck/generate_cppcheck_suppressions_list.py when upgrading cppcheck.
@@ -90,19 +85,6 @@ if(CPPCHECK_EXECUTABLE)
       COMMENT "Running cppcheck"
     )
     set_target_properties(cppcheck PROPERTIES EXCLUDE_FROM_ALL TRUE)
-  endif()
-
-  # generate the xml-report target (used for the HTML report and to refresh the suppressions list)
-  if(NOT TARGET cppcheck-xml)
-    add_custom_target(
-      cppcheck-xml
-      COMMAND ${Python_EXECUTABLE} ${CMAKE_MODULE_PATH}/cppcheck-clean-compile-commands.py
-              ${CMAKE_BINARY_DIR}/compile_commands.json --outfile ${CMAKE_BINARY_DIR}/compile_commands_cppcheck.json
-      COMMAND ${CPPCHECK_EXECUTABLE} ${_cppcheck_xml_args} 2> ${CMAKE_BINARY_DIR}/cppcheck.xml
-      WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-      COMMENT "Running cppcheck (writing xml report to cppcheck.xml)"
-    )
-    set_target_properties(cppcheck-xml PROPERTIES EXCLUDE_FROM_ALL TRUE)
   endif()
 
   # generate the SARIF-report target (used for SARIF consumers and to refresh the suppressions list)
