@@ -103,4 +103,4 @@ jobs:
           package_name: ${{ matrix.package_name }}
           label: nightly
           keep: '3'
-          dry_run: ${{ github.event.inputs.dry_run || github.event_name != 'schedule' }}
+          dry_run: false
