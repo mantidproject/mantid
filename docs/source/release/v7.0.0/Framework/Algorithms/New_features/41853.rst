@@ -1,0 +1,1 @@
+- A new algorithm :ref:`algm-SaveMDToAscii` has been added to save an :py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>` to a plain ASCII file, with configurable exclusion of integrated dimensions, normalization, column separator and numeric precision.
