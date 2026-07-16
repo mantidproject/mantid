@@ -46,7 +46,7 @@ class VesuvioTransmissionSystemTest(systemtesting.MantidSystemTest):
         LoadNexus(Filename="VesuvioTransmissionTimeScanExpectedOutput.nxs", OutputWorkspace="expected_output_time_scan")
         LoadNexus(Filename="VesuvioTransmissionTimeScanExpectedOutputXS.nxs", OutputWorkspace="expected_output_time_scan_XS")
 
-        # Preprocess the file to replace the inf and NaNs to enable comparison
+        # Preprocess the workspaces to replace the inf and NaNs to enable comparison
         for ws in [
             mtd["expected_output_time_scan"],
             mtd["vesuvio_transmission_time_scan"],
