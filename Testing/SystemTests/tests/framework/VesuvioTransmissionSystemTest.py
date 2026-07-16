@@ -14,12 +14,26 @@ class VesuvioTransmissionSystemTest(systemtesting.MantidSystemTest):
     """Tests the VesuvioTransmission algorithm"""
 
     def runTest(self):
-        # Run the VesuvioTransmission algorithm
+        # Run the VesuvioTransmission algorithm - grouping SumOfAllRuns
         VesuvioTransmission(
-            OutputWorkspace="vesuvio_transmission_output",
+            OutputWorkspace="vesuvio_transmission_grouping_sumofallruns_output",
             Runs="58386-58396",
             EmptyRuns="57580-57603",
             Grouping="SumOfAllRuns",
+            Target="Energy",
+            Rebin=True,
+            RebinParameters=[0.6, -0.03, 1.0e6],
+            CalculateXS=True,
+            InvertMonitors=False,
+            SmoothIncidentSpectrum=False,
+        )
+
+        # Run the VesuvioTransmission algorithm - grouping TimeScan
+        VesuvioTransmission(
+            OutputWorkspace="vesuvio_transmission_grouping_timescan_output",
+            Runs="58386-58396",
+            EmptyRuns="57580-57603",
+            Grouping="TimeScan",
             Target="Energy",
             Rebin=True,
             RebinParameters=[0.6, -0.03, 1.0e6],
@@ -68,17 +82,23 @@ class VesuvioTransmissionSystemTest(systemtesting.MantidSystemTest):
             "VESUVIO00058394.raw",
             "VESUVIO00058395.raw",
             "VESUVIO00058396.raw",
-            "VesuvioTransmissionExpectedOutput.nxs",
-            "VesuvioTransmissionExpectedOutputXS.nxs",
+            "VesuvioTransmissionGroupingSumOfAllRunsExpectedOutput.nxs",
+            "VesuvioTransmissionGroupingSumOfAllRunsExpectedOutputXS.nxs",
+            "VesuvioTransmissionGroupingTimescanExpectedOutput.nxs",
+            "VesuvioTransmissionGroupingTimescanExpectedOutputXS.nxs",
         ]
 
     def validate(self):
         self.checkInstrument = False
         return (
-            "vesuvio_transmission_output",
-            "VesuvioTransmissionExpectedOutput.nxs",
-            "vesuvio_transmission_output_XS",
-            "VesuvioTransmissionExpectedOutputXS.nxs",
+            "vesuvio_transmission_grouping_sumofallruns_output",
+            "VesuvioTransmissionGroupingSumOfAllRunsExpectedOutput.nxs",
+            "vesuvio_transmission_grouping_sumofallruns_output_XS",
+            "VesuvioTransmissionGroupingSumOfAllRunsExpectedOutputXS.nxs",
+            "vesuvio_transmission_grouping_timescan_output",
+            "VesuvioTransmissionGroupingTimescanExpectedOutput.nxs",
+            "vesuvio_transmission_grouping_timescan_output_XS",
+            "VesuvioTransmissionGroupingTimescanExpectedOutputXS.nxs",
         )
 
     def cleanup(self):
