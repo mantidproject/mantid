@@ -19,7 +19,7 @@ from mantid.simpleapi import (
     Integration,
 )
 from mantid.kernel import Direction, StringMandatoryValidator, StringListValidator, RebinParamsValidator
-from mantid.api import AlgorithmFactory, PythonAlgorithm, MatrixWorkspaceProperty, mtd
+from mantid.api import AlgorithmFactory, PythonAlgorithm, MatrixWorkspaceProperty, mtd, Progress
 from typing import Literal
 
 
@@ -137,6 +137,9 @@ class VesuvioTransmission(PythonAlgorithm):
 
         try:
             if grouping == "SumOfAllRuns":
+                prog = Progress(self, start=0, end=1, nreports=2)
+                prog.report("LoadVesuvio ...")
+
                 LoadVesuvio(
                     Filename=runs, OutputWorkspace=sample_ws, SpectrumList="3-134", Mode="FoilOut", SumSpectra=True, LoadMonitors=True
                 )
@@ -144,6 +147,7 @@ class VesuvioTransmission(PythonAlgorithm):
                     Filename=empty_runs, OutputWorkspace=empty_ws, SpectrumList="3-134", Mode="FoilOut", SumSpectra=True, LoadMonitors=True
                 )
 
+                prog.report("Calculating ...")
                 RebinToWorkspace(WorkspaceToRebin=empty_mon, WorkspaceToMatch=sample_mon, PreserveEvents=True, OutputWorkspace=empty_mon)
 
                 Divide(LHSWorkspace=sample_mon, RHSWorkspace=empty_mon, OutputWorkspace=name)
@@ -168,6 +172,9 @@ class VesuvioTransmission(PythonAlgorithm):
                     Divide(LHSWorkspace=tmp_ws, RHSWorkspace=name, OutputWorkspace=name)
 
             elif grouping == "TimeScan":
+                prog = Progress(self, start=0, end=1, nreports=2)
+                prog.report("LoadVesuvio ...")
+
                 lower, upper = map(int, (r.strip() for r in runs.split("-", 1)))
 
                 LoadVesuvio(
@@ -177,6 +184,7 @@ class VesuvioTransmission(PythonAlgorithm):
                     Filename=empty_runs, OutputWorkspace=empty_ws, SpectrumList="3-134", Mode="FoilOut", SumSpectra=True, LoadMonitors=True
                 )
 
+                prog.report("Calculate ...")
                 RebinToWorkspace(WorkspaceToRebin=empty_mon, WorkspaceToMatch=sample_mon, PreserveEvents=True, OutputWorkspace=empty_mon)
 
                 Divide(LHSWorkspace=sample_mon, RHSWorkspace=empty_mon, OutputWorkspace=name)
@@ -186,8 +194,11 @@ class VesuvioTransmission(PythonAlgorithm):
                 RebinToWorkspace(WorkspaceToRebin=tmp_ws, WorkspaceToMatch=name, OutputWorkspace=tmp_ws)
                 Divide(LHSWorkspace=name, RHSWorkspace=tmp_ws, OutputWorkspace=name)
 
+                prog.resetNumSteps(upper - lower, start=0.0, end=1.0)
+
                 for run in range(lower + 1, upper + 1):
                     self.log().information("Processing run {}".format(run))
+                    prog.report("Appending Spectra ...")
 
                     LoadVesuvio(
                         Filename=str(run),
