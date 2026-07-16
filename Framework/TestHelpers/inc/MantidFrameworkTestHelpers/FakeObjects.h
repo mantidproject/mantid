@@ -68,11 +68,11 @@ public:
 
   void copyDataFrom(const ISpectrum &other) override { other.copyDataInto(*this); }
 
-  void setX(const Mantid::Kernel::cow_ptr<Mantid::HistogramData::HistogramX> &X) override { m_histogram.setX(X); }
+  void setX(const Mantid::Kernel::cow_ptr<Mantid::HistogramData::HistogramX> &X) override { m_histogram.setSharedX(X); }
   MantidVec &dataX() override { return m_histogram.dataX(); }
   const MantidVec &dataX() const override { return m_histogram.dataX(); }
-  const MantidVec &readX() const override { return m_histogram.readX(); }
-  Mantid::Kernel::cow_ptr<Mantid::HistogramData::HistogramX> ptrX() const override { return m_histogram.ptrX(); }
+  const MantidVec &readX() const override { return m_histogram.x(); }
+  Mantid::Kernel::cow_ptr<Mantid::HistogramData::HistogramX> ptrX() const override { return m_histogram.sharedX(); }
 
   MantidVec &dataDx() override { return m_histogram.dataDx(); }
   const MantidVec &dataDx() const override { return m_histogram.dataDx(); }
@@ -144,7 +144,7 @@ public:
       return 0;
     }
     size_t numY = m_vec[0].dataY().size();
-    if (std::any_of(m_vec.cbegin(), m_vec.cend(), [numY](auto it) { return it.dataY().size() != numY; })) {
+    if (std::any_of(m_vec.cbegin(), m_vec.cend(), [numY](auto it) { return it.mutableY().size() != numY; })) {
       throw std::logic_error("non-constant number of bins");
     }
     return numY;

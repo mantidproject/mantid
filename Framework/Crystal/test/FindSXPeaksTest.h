@@ -26,7 +26,7 @@ using namespace Mantid::DataObjects;
 // Helper method to overwrite spectra.
 void overWriteSpectraY(size_t histo, const Workspace2D_sptr &workspace, const std::vector<double> &Yvalues) {
 
-  workspace->dataY(histo) = Yvalues;
+  workspace->mutableY(histo) = Yvalues;
 }
 
 // Helper method to make what will be recognised as a single peak.
@@ -243,9 +243,9 @@ public:
   void testSpectrumWithNaNValuesDoesNotThrow() {
     Workspace2D_sptr workspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 3);
     // move instrument component so peak
-    workspace->dataY(0) = std::vector<double>(3, -1.0);
-    workspace->dataY(1) = std::vector<double>{1.0, std::nan(""), 2.0};
-    workspace->dataY(2) = std::vector<double>(3, std::nan(""));
+    workspace->mutableY(0) = std::vector<double>(3, -1.0);
+    workspace->mutableY(1) = std::vector<double>{1.0, std::nan(""), 2.0};
+    workspace->mutableY(2) = std::vector<double>(3, std::nan(""));
     auto alg = createFindSXPeaks(workspace);
     alg->setProperty("PeakFindingStrategy", "AllPeaks");
     alg->setProperty("AbsoluteBackground", "0");

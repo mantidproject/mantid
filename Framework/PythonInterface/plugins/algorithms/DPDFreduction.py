@@ -448,7 +448,7 @@ class DPDFreduction(api.PythonAlgorithm):
         intercept = y_start
         slope = (y_end - y_start) / (nonnull_i_theta_end - nonnull_i_theta_start)
         for null_i_theta in range(1 + nonnull_i_theta_start, nonnull_i_theta_end):
-            workspace.dataY(null_i_theta)[:] = intercept + slope * (null_i_theta - nonnull_i_theta_start)  # linear interpolation
+            workspace.mutableY(null_i_theta)[:] = intercept + slope * (null_i_theta - nonnull_i_theta_start)  # linear interpolation
 
 
 # Register algorithm with Mantid.

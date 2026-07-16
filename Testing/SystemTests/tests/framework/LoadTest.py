@@ -157,9 +157,9 @@ class LoadTests(unittest.TestCase):
         self.assertEqual(149, data.getNumberHistograms())
         self.assertEqual(24974, data.blocksize())
 
-        self.assertAlmostEqual(9.0, data.readX(2)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(46352.0, data.readY(2)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(215.29514625276622, data.readE(2)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(9.0, data.x(2)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(46352.0, data.y(2)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(215.29514625276622, data.e(2)[1], places=DIFF_PLACES)
 
         deleted_names = ["TSC15352", "TSC15353"]
         for name in deleted_names:
@@ -176,18 +176,18 @@ class LoadTests(unittest.TestCase):
         self.assertEqual(149, data.getNumberHistograms())
         self.assertEqual(24974, data.blocksize())
 
-        self.assertAlmostEqual(9.0, data.readX(2)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(46352.0, data.readY(2)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(215.29514625276622, data.readE(2)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(9.0, data.x(2)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(46352.0, data.y(2)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(215.29514625276622, data.e(2)[1], places=DIFF_PLACES)
 
         # Second group
         data = summed_data[1]
         self.assertEqual(149, data.getNumberHistograms())
         self.assertEqual(24974, data.blocksize())
 
-        self.assertAlmostEqual(9.0, data.readX(2)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(35640.0, data.readY(2)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(188.78559267062727, data.readE(2)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(9.0, data.x(2)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(35640.0, data.y(2)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(188.78559267062727, data.e(2)[1], places=DIFF_PLACES)
 
         deleted_names = ["TSC15352", "TSC15353", "TSC15354"]
         for name in deleted_names:
@@ -202,9 +202,9 @@ class LoadTests(unittest.TestCase):
         self.assertEqual(149, data.getNumberHistograms())
         self.assertEqual(24974, data.blocksize())
 
-        self.assertAlmostEqual(9.0, data.readX(2)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(46352.0, data.readY(2)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(215.29514625276622, data.readE(2)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(9.0, data.x(2)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(46352.0, data.y(2)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(215.29514625276622, data.e(2)[1], places=DIFF_PLACES)
 
     def test_sum_range_operator_with_step_sums_to_single_workspace(self):
         data = Load("TSC15352-15354:2.raw", OutputWorkspace=self.wsname)
@@ -213,9 +213,9 @@ class LoadTests(unittest.TestCase):
         self.assertEqual(149, data.getNumberHistograms())
         self.assertEqual(24974, data.blocksize())
 
-        self.assertAlmostEqual(9.0, data.readX(2)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(35640.0, data.readY(2)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(188.78559267062727, data.readE(2)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(9.0, data.x(2)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(35640.0, data.y(2)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(188.78559267062727, data.e(2)[1], places=DIFF_PLACES)
 
     def test_plus_operator_for_input_groups(self):
         summed_data = Load("OFFSPEC10791+10792.raw", OutputWorkspace=self.wsname)
@@ -228,18 +228,18 @@ class LoadTests(unittest.TestCase):
         self.assertEqual(245, data.getNumberHistograms())
         self.assertEqual(5000, data.blocksize())
 
-        self.assertAlmostEqual(25.0, data.readX(1)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(4.0, data.readY(1)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(2.0, data.readE(1)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(25.0, data.x(1)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(4.0, data.y(1)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(2.0, data.e(1)[1], places=DIFF_PLACES)
 
         # Second group
         data = summed_data[1]
         self.assertEqual(245, data.getNumberHistograms())
         self.assertEqual(5000, data.blocksize())
 
-        self.assertAlmostEqual(25.0, data.readX(1)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(1.0, data.readY(1)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(1.0, data.readE(1)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(25.0, data.x(1)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(1.0, data.y(1)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(1.0, data.e(1)[1], places=DIFF_PLACES)
 
 
 # ====================================================================================

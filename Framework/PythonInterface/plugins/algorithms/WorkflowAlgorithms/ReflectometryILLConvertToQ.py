@@ -143,7 +143,7 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
             ws = self._divide_by_direct(ws, direct_ws)
 
         if not self.getProperty("ThetaCorrection").isDefault:
-            ws.setX(0, ws.readX(0) * theta_ws_in_q.readY(0))
+            ws.setSharedX(0, ws.x(0) * theta_ws_in_q.y(0))
 
         self._finalize(ws)
 
@@ -221,8 +221,8 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
                 if sum_type == common.SUM_IN_LAMBDA:
                     if direct_ws.blocksize() != input_ws.blocksize():
                         issues[Prop.DIRECT_FOREGROUND_WS] = "Number of bins does not match with InputWorkspace."
-                    direct_xs = direct_ws.readX(0)
-                    input_xs = input_ws.readX(0)
+                    direct_xs = direct_ws.x(0)
+                    input_xs = input_ws.x(0)
                     if direct_xs[0] != input_xs[0] or direct_xs[-1] != input_xs[-1]:
                         issues[Prop.DIRECT_FOREGROUND_WS] = "Binning does not match with InputWorkspace."
         return issues
@@ -283,7 +283,7 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
             return chopperGap * constants.m_n / constants.h / chopperPeriod * x_s * 1e-10 + openingAngle / 360.0
 
         instrument = ws.getInstrument()
-        x_bins = ws.readX(0)
+        x_bins = ws.x(0)
         xs = (x_bins[:-1] + x_bins[1:]) / 2.0
         reflected_opening = opening(instrument, ws.run(), xs)
         direct_opening = opening(instrument, direct_ws.run(), xs)
@@ -370,9 +370,9 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
         q_ws_name = self._names.withSuffix("{}in_momentum_transfer".format(extra_label))
         q_ws = CreateWorkspace(
             OutputWorkspace=q_ws_name,
-            DataX=ws.readX(0),
-            DataY=direct_ws.readY(0)[::-1],  # Invert data because wavelength is inversely proportional to Q.
-            DataE=direct_ws.readE(0)[::-1],
+            DataX=ws.x(0),
+            DataY=direct_ws.y(0)[::-1],  # Invert data because wavelength is inversely proportional to Q.
+            DataE=direct_ws.e(0)[::-1],
             Dx=ws.readDx(0),
             UnitX=ws.getAxis(0).getUnit().unitID(),
             ParentWorkspace=direct_ws,

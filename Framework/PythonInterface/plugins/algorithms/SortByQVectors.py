@@ -55,7 +55,7 @@ class SortByQVectors(PythonAlgorithm):
                 # extract the spectrum
                 ws = mtd[wsName.strip()]
                 for s in range(0, ws.getNumberHistograms()):
-                    y_s = ws.readY(s)
+                    y_s = ws.y(s)
                     stuple = (self.GetXValue(y_s), s)
                     sortStat.append(stuple)
                 sortStat.sort()

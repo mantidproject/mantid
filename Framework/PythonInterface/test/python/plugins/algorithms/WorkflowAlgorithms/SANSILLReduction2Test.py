@@ -52,14 +52,14 @@ class SANSILLReduction2Test(unittest.TestCase):
         self.assertAlmostEqual(run.getLogData("BeamCenterY").value, -0.0027, delta=1e-4)
         self._check_output(mtd["fl"], 1, 1)
         self._check_process_flag(mtd["fl"], "EmptyBeam")
-        self.assertAlmostEqual(mtd["fl"].readY(0)[0], 738.538, delta=1e-3)
-        self.assertAlmostEqual(mtd["fl"].readE(0)[0], 0.957, delta=1e-3)
+        self.assertAlmostEqual(mtd["fl"].y(0)[0], 738.538, delta=1e-3)
+        self.assertAlmostEqual(mtd["fl"].e(0)[0], 0.957, delta=1e-3)
 
     def test_transmission(self):
         SANSILLReduction(Runs="010414", ProcessAs="EmptyBeam", OutputWorkspace="eb", OutputFluxWorkspace="fl", NormaliseBy="Monitor")
         SANSILLReduction(Runs="010585", ProcessAs="Transmission", FluxWorkspace="fl", OutputWorkspace="tr", NormaliseBy="Monitor")
-        self.assertAlmostEqual(mtd["tr"].readY(0)[0], 0.642, delta=1e-3)
-        self.assertAlmostEqual(mtd["tr"].readE(0)[0], 0.0019, delta=1e-4)
+        self.assertAlmostEqual(mtd["tr"].y(0)[0], 0.642, delta=1e-3)
+        self.assertAlmostEqual(mtd["tr"].e(0)[0], 0.0019, delta=1e-4)
         self._check_process_flag(mtd["tr"], "Transmission")
         self._check_output(mtd["tr"], 1, 1)
 
@@ -118,7 +118,7 @@ class SANSILLReduction2Test(unittest.TestCase):
         self._check_output(mtd["sens"], 1, 320 * 320 + 2)
         self._check_process_flag(mtd["sens"], "Water")
         for spec_no in range(mtd["sens"].getNumberHistograms()):
-            self.assertFalse(np.isnan(mtd["sens"].readY(spec_no)))
+            self.assertFalse(np.isnan(mtd["sens"].y(spec_no)))
 
     def _check_process_flag(self, ws, value):
         self.assertTrue(ws.getRun().getLogData("ProcessedAs").value, value)

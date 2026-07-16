@@ -202,7 +202,7 @@ class RunDescriptorTest(unittest.TestCase):
         run_ws_monitors = Rebin(run_ws_monitors, Params="1,-0.01,20000")
         run_ws.setMonitorWorkspace(run_ws_monitors)
 
-        x = run_ws_monitors.readX(0)
+        x = run_ws_monitors.x(0)
         dx = x[1:] - x[:-1]
         min_step0 = min(dx)
 
@@ -214,7 +214,7 @@ class RunDescriptorTest(unittest.TestCase):
         self.assertEqual(mon_ws.getNumberHistograms(), 3)
         self.assertEqual(mon_ws.getIndexFromSpectrumNumber(3), 2)
 
-        x = mon_ws.readX(0)
+        x = mon_ws.x(0)
         dx = x[1:] - x[:-1]
         min_step1 = min(dx)
         max_step1 = max(dx)
@@ -302,7 +302,7 @@ class RunDescriptorTest(unittest.TestCase):
         self.assertTrue(rez[0])
 
         wsc = PropertyManager.sample_run.get_workspace()
-        x = wsc.readX(0)
+        x = wsc.x(0)
         self.assertAlmostEqual(x[0], 2000)
         self.assertAlmostEqual(x[-1], 5000)
 
@@ -310,7 +310,7 @@ class RunDescriptorTest(unittest.TestCase):
         self.assertTrue("SR_#1/2#ws_monitors" in mtd)
 
         ws1 = PropertyManager.sample_run.chop_ws_part(ws1, (10000, 100, 20000), True, 2, 2)
-        x = ws1.readX(0)
+        x = ws1.x(0)
         self.assertAlmostEqual(x[0], 10000)
         self.assertAlmostEqual(x[-1], 20000)
 

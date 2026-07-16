@@ -371,9 +371,9 @@ public:
     MantidVec y_data{1., 2., 3.};
     MantidVec e_data{1., 1., 1.};
     HistogramBuilder builder;
-    builder.setX(x_data);
-    builder.setY(y_data);
-    builder.setE(e_data);
+    builder.setSharedX(x_data);
+    builder.setSharedY(y_data);
+    builder.setSharedE(e_data);
     parent->setHistogram(1, builder.build());
     TS_ASSERT(parent->isRaggedWorkspace());
 

@@ -682,7 +682,7 @@ def _apply_vanadium_norm_event(sample_ws_foc, van_ws_foc, xmin=0.45):
     # alter the bins attached to the event workspace (used for histogram conversion) to remove any bins before the crop
     nspec = sample_ws_foc.getNumberHistograms()
     if nspec > 1:
-        deltas = [diff(sample_ws_foc.readX(ispec)).mean() for ispec in range(nspec)]
+        deltas = [diff(sample_ws_foc.x(ispec)).mean() for ispec in range(nspec)]
         mantid.RebinRagged(
             InputWorkspace=sample_ws_foc,
             XMin=[xmin] * nspec,
@@ -946,7 +946,7 @@ def get_detector_ids_for_bank(bank):
         bank_int = [bank_int]
 
     for i in range(grouping.getNumberHistograms()):
-        if grouping.readY(i)[0] in bank_int:
+        if grouping.y(i)[0] in bank_int:
             detector_ids.add(grouping.getDetector(i).getID())
 
     mantid.DeleteWorkspace(grouping)

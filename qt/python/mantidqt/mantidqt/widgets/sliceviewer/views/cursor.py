@@ -123,9 +123,9 @@ class MoveMouseCursor:
         new_global_pos = canvas.mapToGlobal(QPoint(xp, yp))
         cur_global_pos = QCursor.pos()
         if new_pos_data[0] == cur_pos_data[0]:
-            new_global_pos.setX(cur_global_pos.x())
+            new_global_pos.setSharedX(cur_global_pos.x())
         if new_pos_data[1] == cur_pos_data[1]:
-            new_global_pos.setY(cur_global_pos.y())
+            new_global_pos.setSharedY(cur_global_pos.y())
 
         QCursor.setPos(new_global_pos)
 

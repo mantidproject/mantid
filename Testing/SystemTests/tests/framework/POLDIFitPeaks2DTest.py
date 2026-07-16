@@ -97,11 +97,11 @@ class POLDIFitPeaks2DTest(systemtesting.MantidSystemTest):
                 calculatedSpectrum1D = mtd[wsName % (dataFile, "calculated")]
                 referenceSpectrum1D = mtd[wsName % (dataFile, "reference")]
 
-                xDataCalc = calculatedSpectrum1D.readX(0)
-                yDataCalc = calculatedSpectrum1D.readY(0)
+                xDataCalc = calculatedSpectrum1D.x(0)
+                yDataCalc = calculatedSpectrum1D.y(0)
 
-                xDataRef = referenceSpectrum1D.readX(0)
-                yDataRef = referenceSpectrum1D.readY(0)
+                xDataRef = referenceSpectrum1D.x(0)
+                yDataRef = referenceSpectrum1D.y(0)
 
                 indices = np.nonzero(yDataRef)
                 maxDifference = np.abs(np.max((yDataCalc[indices] - yDataRef[indices]) / yDataCalc[indices]))

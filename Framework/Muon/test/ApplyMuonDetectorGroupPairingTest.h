@@ -235,17 +235,17 @@ public:
 
     // Current behaviour is to convert bin edge x-values to bin centre x-values
     // (point data) so there is on fewer x-value now.
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.050, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.450, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.950, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[0], 0.050, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[4], 0.450, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[9], 0.950, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.4692, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], 1.0000, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.6119, 0.0001);
+    TS_ASSERT_DELTA(wsOut->y(0)[0], -0.4692, 0.0001);
+    TS_ASSERT_DELTA(wsOut->y(0)[4], 1.0000, 0.0001);
+    TS_ASSERT_DELTA(wsOut->y(0)[9], -0.6119, 0.0001);
 
     // The error calculation as per Issue #5035
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.04212, 0.00001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.06946, 0.00001);
+    TS_ASSERT_DELTA(wsOut->e(0)[0], 0.04212, 0.00001);
+    TS_ASSERT_DELTA(wsOut->e(0)[9], 0.06946, 0.00001);
   }
 
   void test_timeOffsetShiftsTimeAxisCorrectly() {
@@ -262,9 +262,9 @@ public:
 
     // Account for the bin edges to point data conversion
     double shift = 0.2 + 0.05;
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], ws->readX(0)[0] + shift, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], ws->readX(0)[4] + shift, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[9], ws->readX(0)[9] + shift, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[0], ws->x(0)[0] + shift, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[4], ws->x(0)[4] + shift, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[9], ws->x(0)[9] + shift, 0.001);
   }
 
   void test_throwsIfRequestedDetectorIDsNotInWorkspace() {
@@ -293,18 +293,18 @@ public:
         std::dynamic_pointer_cast<MatrixWorkspace>(setup.wsGroup->getItem("inputGroup; Pair; test; Asym; #1_Raw"));
 
     // Summation of periods occurs before asymmetry calculation
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.050, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.450, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.950, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[0], 0.050, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[4], 0.450, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[9], 0.950, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.5755, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], -0.5368, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.4963, 0.0001);
+    TS_ASSERT_DELTA(wsOut->y(0)[0], -0.5755, 0.0001);
+    TS_ASSERT_DELTA(wsOut->y(0)[4], -0.5368, 0.0001);
+    TS_ASSERT_DELTA(wsOut->y(0)[9], -0.4963, 0.0001);
 
     // The error calculation as per Issue #5035
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.03625, 0.00001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.03420, 0.00001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.03208, 0.00001);
+    TS_ASSERT_DELTA(wsOut->e(0)[0], 0.03625, 0.00001);
+    TS_ASSERT_DELTA(wsOut->e(0)[4], 0.03420, 0.00001);
+    TS_ASSERT_DELTA(wsOut->e(0)[9], 0.03208, 0.00001);
   }
 
   void test_subtractingPeriodsGivesCorrectAsymmetryValues() {
@@ -322,18 +322,18 @@ public:
 
     // Summation of periods occurs before asymmetry calculation
     // Subtraction of periods occurs AFTER asymmetry calculation
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.050, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.450, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.950, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[0], 0.050, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[4], 0.450, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[9], 0.950, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.0153, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], -0.0130, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.0108, 0.0001);
+    TS_ASSERT_DELTA(wsOut->y(0)[0], -0.0153, 0.0001);
+    TS_ASSERT_DELTA(wsOut->y(0)[4], -0.0130, 0.0001);
+    TS_ASSERT_DELTA(wsOut->y(0)[9], -0.0108, 0.0001);
 
     // The error calculation as per Issue #5035
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.0619, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.0585, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.0550, 0.0001);
+    TS_ASSERT_DELTA(wsOut->e(0)[0], 0.0619, 0.0001);
+    TS_ASSERT_DELTA(wsOut->e(0)[4], 0.0585, 0.0001);
+    TS_ASSERT_DELTA(wsOut->e(0)[9], 0.0550, 0.0001);
   }
 
   void test_applyingDeadTimeCorrectionGivesCorrectAsymmetryValues() {
@@ -358,17 +358,17 @@ public:
     auto wsOut =
         std::dynamic_pointer_cast<MatrixWorkspace>(setup.wsGroup->getItem("inputGroup; Pair; test; Asym; #1_Raw"));
 
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.050, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.450, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.950, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[0], 0.050, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[4], 0.450, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[9], 0.950, 0.001);
 
     // Dead time applied before asymmetry
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.5181, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], 1.0000, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.6350, 0.0001);
+    TS_ASSERT_DELTA(wsOut->y(0)[0], -0.5181, 0.0001);
+    TS_ASSERT_DELTA(wsOut->y(0)[4], 1.0000, 0.0001);
+    TS_ASSERT_DELTA(wsOut->y(0)[9], -0.6350, 0.0001);
 
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.0386, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.0668, 0.0001);
+    TS_ASSERT_DELTA(wsOut->e(0)[0], 0.0386, 0.0001);
+    TS_ASSERT_DELTA(wsOut->e(0)[9], 0.0668, 0.0001);
   }
 
   void test_asymmetryValuesCorrectWhenEnteringWorkspacesByHand() {
@@ -395,17 +395,17 @@ public:
     auto wsOut =
         std::dynamic_pointer_cast<MatrixWorkspace>(setup.wsGroup->getItem("inputGroup; Pair; test; Asym; #1_Raw"));
 
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.050, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.450, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.950, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[0], 0.050, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[4], 0.450, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[9], 0.950, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.1388, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], 0.2900, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.02262, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[0], -0.1388, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[4], 0.2900, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[9], -0.02262, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.2421, 0.001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.4737, 0.001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.3950, 0.001);
+    TS_ASSERT_DELTA(wsOut->e(0)[0], 0.2421, 0.001);
+    TS_ASSERT_DELTA(wsOut->e(0)[4], 0.4737, 0.001);
+    TS_ASSERT_DELTA(wsOut->e(0)[9], 0.3950, 0.001);
   }
 
   void test_inputWorkspaceWithMultipleSpectraFails() {

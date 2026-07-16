@@ -226,7 +226,7 @@ def _medianDeltaTheta(ws):
 def _minMaxQ(ws):
     """Estimate the start and end q bins for a S(theta, w) workspace."""
     Ei = ws.run().getProperty("Ei").value * 1e-3 * constants.e  # in Joules
-    xs = ws.readX(0)
+    xs = ws.x(0)
     minW = xs[0] * 1e-3 * constants.e  # in Joules
     maxEf = Ei - minW
     # In Ånströms

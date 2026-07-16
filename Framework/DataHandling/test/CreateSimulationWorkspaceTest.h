@@ -55,8 +55,8 @@ public:
 
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 12120);
     const size_t expectedNBins = 103;
-    TS_ASSERT_EQUALS(outputWS->readY(0).size(), expectedNBins);
-    TS_ASSERT_EQUALS(outputWS->readE(0).size(), expectedNBins);
+    TS_ASSERT_EQUALS(outputWS->y(0).size(), expectedNBins);
+    TS_ASSERT_EQUALS(outputWS->e(0).size(), expectedNBins);
 
     doBinCheck(outputWS, expectedNBins + 1);
     doInstrumentCheck(outputWS, "HET", 12120);
@@ -154,14 +154,14 @@ public:
   void test_Bin_Errors() {
     auto outputWS = runAlgorithm("HET");
 
-    const Mantid::MantidVec &bins = outputWS->readE(0);
+    const Mantid::MantidVec &bins = outputWS->e(0);
     for (size_t i = 0; i < bins.size(); ++i) {
-      TS_ASSERT_DELTA(bins[i], sqrt(outputWS->readY(0)[i]), 1e-10);
+      TS_ASSERT_DELTA(bins[i], sqrt(outputWS->y(0)[i]), 1e-10);
     }
 
     // Re-run to verify errors are 0 when flag is unset
     outputWS = runAlgorithm("HET", "", "", false);
-    const Mantid::MantidVec &binsNoErr = outputWS->readE(0);
+    const Mantid::MantidVec &binsNoErr = outputWS->e(0);
     for (size_t i = 0; i < binsNoErr.size(); ++i) {
       TS_ASSERT_DELTA(binsNoErr[i], 0.0, 1e-10);
     }
@@ -187,9 +187,9 @@ private:
   }
 
   void doBinCheck(const Mantid::API::MatrixWorkspace_sptr &outputWS, const size_t expectedSize) {
-    TS_ASSERT_EQUALS(outputWS->readX(0).size(), expectedSize);
+    TS_ASSERT_EQUALS(outputWS->x(0).size(), expectedSize);
     // Check bins are correct
-    const Mantid::MantidVec &bins = outputWS->readX(0);
+    const Mantid::MantidVec &bins = outputWS->x(0);
     for (size_t i = 0; i < bins.size(); ++i) {
       const double expected = -30.0 + static_cast<double>(i) * 3;
       TS_ASSERT_DELTA(bins[i], expected, 1e-10);

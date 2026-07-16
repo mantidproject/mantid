@@ -57,7 +57,7 @@ void Workspace2D::init(const std::size_t &NVectors, const std::size_t &XLength, 
   HistogramData::Counts y(YLength);
   HistogramData::CountStandardDeviations e(YLength);
   Histogram1D spec(HistogramData::getHistogramXMode(XLength, YLength), HistogramData::Histogram::YMode::Counts);
-  spec.setX(x);
+  spec.setSharedX(x);
   spec.setCounts(y);
   spec.setCountStandardDeviations(e);
   for (size_t i = 0; i < data.size(); i++) {
@@ -244,8 +244,8 @@ void Workspace2D::setImageYAndE(const API::MantidImage &imageY, const API::Manti
       size_t spec = start + static_cast<size_t>(i) * width;
       auto pE = rowE.begin();
       for (auto pY = rowY.begin(); pY != rowY.end() && pE != rowE.end(); ++pY, ++pE, ++spec) {
-        data[spec]->dataY()[0] = *pY;
-        data[spec]->dataE()[0] = *pE;
+        data[spec]->mutableY()[0] = *pY;
+        data[spec]->mutableE()[0] = *pE;
       }
     }
   } else {
@@ -269,18 +269,18 @@ void Workspace2D::setImageYAndE(const API::MantidImage &imageY, const API::Manti
 
       const auto &rowY = imageY[i];
       const auto &rowE = imageE[i];
-      data[i]->dataY() = rowY;
-      data[i]->dataE() = rowE;
+      data[i]->mutableY() = rowY;
+      data[i]->mutableE() = rowE;
     }
     // X values. Set first spectrum and copy/propagate that one to all the other
     // spectra
     PARALLEL_FOR_IF(parallelExecution)
     for (int i = 0; i < static_cast<int>(width) + 1; ++i) {
-      data[0]->dataX()[i] = i * scale_1;
+      data[0]->mutableX()[i] = i * scale_1;
     }
     PARALLEL_FOR_IF(parallelExecution)
     for (int i = 1; i < static_cast<int>(height); ++i) {
-      data[i]->setX(data[0]->ptrX());
+      data[i]->setSharedX(data[0]->sharedX());
     }
   }
 }
@@ -329,9 +329,9 @@ void Workspace2D::generateHistogram(const std::size_t index, const MantidVec &X,
     throw std::range_error("Workspace2D::generateHistogram, histogram number out of range");
   // output data arrays are implicitly filled by function
   const auto &spec = this->getSpectrum(index);
-  const MantidVec &currentX = spec.readX();
-  const MantidVec &currentY = spec.readY();
-  const MantidVec &currentE = spec.readE();
+  const MantidVec &currentX = spec.x();
+  const MantidVec &currentY = spec.y();
+  const MantidVec &currentE = spec.e();
   if (X.size() <= 1)
     throw std::runtime_error("Workspace2D::generateHistogram(): X vector must be at least length 2");
   Y.resize(X.size() - 1, 0);

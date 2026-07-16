@@ -285,7 +285,7 @@ private:
         return;
       setDefaultXRange();
       TS_ASSERT_DIFFERS(nData, 0);
-      auto &Y = outputWorkspace->readY(1);
+      auto &Y = outputWorkspace->y(1);
       size_t j = 0;
       for (size_t i = 0; i < nData; ++i) {
         if (xValues[i] <= StartX || xValues[i] >= EndX)

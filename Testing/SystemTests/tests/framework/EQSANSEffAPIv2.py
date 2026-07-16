@@ -54,7 +54,7 @@ class EQSANSEff(systemtesting.MantidSystemTest):
     def validate(self):
         # Be more tolerant with the output, mainly because of the errors.
         # The following tolerance check the errors up to the third digit.
-        mtd["EQSANS_1466_event_Iq"].dataE(0)[0] = 8.13907
+        mtd["EQSANS_1466_event_Iq"].mutableE(0)[0] = 8.13907
         self.tolerance = 0.1
         self.disableChecking.append("Instrument")
         self.disableChecking.append("Sample")

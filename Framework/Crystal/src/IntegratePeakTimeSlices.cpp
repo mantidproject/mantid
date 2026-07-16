@@ -786,8 +786,8 @@ void IntegratePeakTimeSlices::FindPlane(V3D &center, V3D &xvec, V3D &yvec, doubl
   IDetector_const_sptr det = peak.getDetector();
   V3D detPos = det->getPos();
 
-  center.setX(detPos.X());
-  center.setY(detPos.Y());
+  center.setSharedX(detPos.X());
+  center.setSharedY(detPos.Y());
   center.setZ(detPos.Z());
 
   std::shared_ptr<const Detector> dett = std::dynamic_pointer_cast<const Detector>(det);
@@ -805,11 +805,11 @@ void IntegratePeakTimeSlices::FindPlane(V3D &center, V3D &xvec, V3D &yvec, doubl
   Qt.rotate(xaxis0);
   xaxis0.normalize();
 
-  xvec.setX(xaxis0.X());
-  xvec.setY(xaxis0.Y());
+  xvec.setSharedX(xaxis0.X());
+  xvec.setSharedY(xaxis0.Y());
   xvec.setZ(xaxis0.Z());
-  yvec.setX(yaxis0.X());
-  yvec.setY(yaxis0.Y());
+  yvec.setSharedX(yaxis0.X());
+  yvec.setSharedY(yaxis0.Y());
   yvec.setZ(yaxis0.Z());
   ROW = peak.getRow();
   COL = peak.getCol();
@@ -1517,9 +1517,9 @@ void IntegratePeakTimeSlices::SetUpData1(API::MatrixWorkspace_sptr &Data,
     m_AttributeValues->EdgeX = 0;
 
   auto pX = Kernel::make_cow<HistogramData::HistogramX>(std::move(xRef));
-  Data->setX(0, pX);
-  Data->setX(1, pX);
-  Data->setX(2, pX);
+  Data->setSharedX(0, pX);
+  Data->setSharedX(1, pX);
+  Data->setSharedX(2, pX);
 
   ws->setCounts(0, yvalB);
   ws->setCountStandardDeviations(0, errB);

@@ -28,13 +28,13 @@ V3R::V3R(const std::vector<int> &vector) {
 const RationalNumber &V3R::x() const { return m_x; }
 
 /// Assigns a new value to the x-component
-void V3R::setX(const RationalNumber &newX) { m_x = newX; }
+void V3R::setSharedX(const RationalNumber &newX) { m_x = newX; }
 
 /// Returns the y-component of the vector
 const RationalNumber &V3R::y() const { return m_y; }
 
 /// Assigns a new value to the y-component
-void V3R::setY(const RationalNumber &newY) { m_y = newY; }
+void V3R::setSharedY(const RationalNumber &newY) { m_y = newY; }
 
 /// Returns the z-component of the vector
 const RationalNumber &V3R::z() const { return m_z; }

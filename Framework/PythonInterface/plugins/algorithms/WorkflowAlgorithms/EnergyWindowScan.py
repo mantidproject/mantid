@@ -208,7 +208,7 @@ class EnergyWindowScan(DataProcessorAlgorithm):
         divide_alg.setProperty("OutputWorkspace", self._scan_ws + "_eisf")
         divide_alg.execute()
 
-        x_values = mtd[self._scan_ws + "_el_eq1"].readX(0)
+        x_values = mtd[self._scan_ws + "_el_eq1"].x(0)
         num_hist = mtd[self._scan_ws + "_el_eq1"].getNumberHistograms()
         if len(x_values) < 2 and self._msdfit:
             logger.warning("Unable to perform MSDFit")

@@ -126,9 +126,9 @@ void GroupToXResolution::exec() {
     pointIndex += pickSize;
   }
   HistogramData::HistogramBuilder constructionYard;
-  constructionYard.setX(std::move(outXs));
-  constructionYard.setY(std::move(outYs));
-  constructionYard.setE(std::move(outEs));
+  constructionYard.setSharedX(std::move(outXs));
+  constructionYard.setSharedY(std::move(outYs));
+  constructionYard.setSharedE(std::move(outEs));
   constructionYard.setDx(std::move(outDxs));
   constructionYard.setDistribution(false);
   API::MatrixWorkspace_sptr outWS = DataObjects::create<DataObjects::Workspace2D>(*inWS, constructionYard.build());

@@ -350,7 +350,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         AddSampleLog(Workspace=workspace, LogName="two_theta", LogText=str(two_theta_degrees), LogType="Number", LogUnit="degree")
 
         # Get an array with the center wavelength value for each bin
-        wl_values = workspace.readX(0)
+        wl_values = workspace.x(0)
 
         AddSampleLog(Workspace=workspace, LogName="lambda_min", LogText=str(wl_values[0]), LogType="Number", LogUnit="Angstrom")
         AddSampleLog(Workspace=workspace, LogName="lambda_max", LogText=str(wl_values[-1]), LogType="Number", LogUnit="Angstrom")
@@ -520,7 +520,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         # Replace NaNs by zeros
         q_rebin = ReplaceSpecialValues(InputWorkspace=q_rebin, OutputWorkspace=str(q_rebin), NaNValue=0.0, NaNError=0.0)
         # Crop to non-zero values
-        data_y = q_rebin.readY(0)
+        data_y = q_rebin.y(0)
         low_q = None
         high_q = None
         for i in range(len(data_y)):
@@ -538,7 +538,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
             if crop:
                 low_q += 1
                 high_q -= 1
-            data_x = q_rebin.readX(0)
+            data_x = q_rebin.x(0)
             q_rebin = CropWorkspace(InputWorkspace=q_rebin, OutputWorkspace=str(q_rebin), XMin=data_x[low_q], XMax=data_x[high_q])
         elif cleanup:
             logger.error("Data is all zeros. Check your TOF ranges.")

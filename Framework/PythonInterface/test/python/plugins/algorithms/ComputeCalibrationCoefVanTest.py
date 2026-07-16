@@ -71,8 +71,8 @@ class ComputeCalibrationCoefVanTest(unittest.TestCase):
         wsoutput = AnalysisDataService.retrieve(outputWorkspaceName)
 
         for i in range(wsoutput.getNumberHistograms()):
-            self.assertEqual(100.0, wsoutput.readY(i)[0])
-            self.assertEqual(10.0, wsoutput.readE(i)[0])
+            self.assertEqual(100.0, wsoutput.y(i)[0])
+            self.assertEqual(10.0, wsoutput.e(i)[0])
 
         DeleteWorkspace(wsoutput)
 
@@ -177,8 +177,8 @@ class ComputeCalibrationCoefVanTest(unittest.TestCase):
         self.assertTrue(alg_test.isExecuted())
         wsoutput = AnalysisDataService.retrieve(outputWorkspaceName)
         for i in range(wsoutput.getNumberHistograms()):
-            self.assertEqual(100.0, wsoutput.readY(i)[0])
-            self.assertEqual(10.0, wsoutput.readE(i)[0])
+            self.assertEqual(100.0, wsoutput.y(i)[0])
+            self.assertEqual(10.0, wsoutput.e(i)[0])
 
         DeleteWorkspace(wsoutput)
 
@@ -190,8 +190,8 @@ class ComputeCalibrationCoefVanTest(unittest.TestCase):
             DeleteWorkspace(self._table)
 
     def _checkDWF(self, wsoutput, temperature):
-        self.assertEqual(100.0, wsoutput.readY(0)[0])
-        self.assertEqual(10.0, wsoutput.readE(0)[0])
+        self.assertEqual(100.0, wsoutput.y(0)[0])
+        self.assertEqual(10.0, wsoutput.e(0)[0])
         if temperature == 0.0:
             integral = 0.5
         elif temperature == 293.0:
@@ -201,8 +201,8 @@ class ComputeCalibrationCoefVanTest(unittest.TestCase):
         mvan = 0.001 * 50.942 / N_A
         Bcoef = 3.0 * integral * 1e20 * hbar * hbar / (2.0 * mvan * k * 389.0)
         dwf = np.exp(-1.0 * Bcoef * (4.0 * np.pi * np.sin(0.5 * np.radians(15.0)) / 4.0) ** 2)
-        self.assertAlmostEqual(100.0 / dwf, wsoutput.readY(1)[0], places=12)
-        self.assertAlmostEqual(10.0 / dwf, wsoutput.readE(1)[0], places=12)
+        self.assertAlmostEqual(100.0 / dwf, wsoutput.y(1)[0], places=12)
+        self.assertAlmostEqual(10.0 / dwf, wsoutput.e(1)[0], places=12)
 
 
 if __name__ == "__main__":

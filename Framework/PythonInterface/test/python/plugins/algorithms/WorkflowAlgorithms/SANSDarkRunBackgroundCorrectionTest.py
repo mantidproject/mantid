@@ -504,25 +504,25 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
         ws = alg_load.getProperty("OutputWorkspace").value
 
         if as_dark_run:
-            ws.setY(0, ws.dataY(0) * 0.0 + monY)
-            ws.setE(0, ws.dataE(0) * 0.0 + monE)
-            ws.setY(1, ws.dataY(1) * 0.0 + monY)
-            ws.setE(1, ws.dataE(1) * 0.0 + monE)
+            ws.setSharedY(0, ws.dataY(0) * 0.0 + monY)
+            ws.setSharedE(0, ws.dataE(0) * 0.0 + monE)
+            ws.setSharedY(1, ws.dataY(1) * 0.0 + monY)
+            ws.setSharedE(1, ws.dataE(1) * 0.0 + monE)
 
             for element in range(2, ws.getNumberHistograms()):
-                ws.setY(element, ws.dataY(element) * 0.0 + dataY)
-                ws.setE(element, ws.dataE(element) * 0.0 + dataE)
+                ws.setSharedY(element, ws.dataY(element) * 0.0 + dataY)
+                ws.setSharedE(element, ws.dataE(element) * 0.0 + dataE)
 
         else:
-            ws.setY(0, ws.dataY(0) * 0.0 + monY)
-            ws.setE(0, ws.dataE(0) * 0.0 + monE)
-            ws.setY(1, ws.dataY(1) * 0.0 + monY)
-            ws.setE(1, ws.dataE(1) * 0.0 + monE)
+            ws.setSharedY(0, ws.dataY(0) * 0.0 + monY)
+            ws.setSharedE(0, ws.dataE(0) * 0.0 + monE)
+            ws.setSharedY(1, ws.dataY(1) * 0.0 + monY)
+            ws.setSharedE(1, ws.dataE(1) * 0.0 + monE)
 
             # Set the detector Y and E to 4 and 0.4
             for element in range(2, ws.getNumberHistograms()):
-                ws.setY(element, ws.dataY(element) * 0.0 + dataY)
-                ws.setE(element, ws.dataE(element) * 0.0 + dataE)
+                ws.setSharedY(element, ws.dataY(element) * 0.0 + dataY)
+                ws.setSharedE(element, ws.dataE(element) * 0.0 + dataE)
 
         return ws
 

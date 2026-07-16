@@ -199,7 +199,7 @@ class SANSAbsoluteScale(PythonAlgorithm):
         alg.setPropertyValue("DetectorList", det_list_str)
         alg.execute()
         det_count_ws = alg.getProperty("OutputWorkspace").value
-        det_count = det_count_ws.readY(0)[0]
+        det_count = det_count_ws.y(0)[0]
         Logger("SANSAbsoluteScale").information("Reference detector counts: %g" % det_count)
         if det_count <= 0:
             Logger("SANSAbsoluteScale").error("Bad reference detector count: check your beam parameters")

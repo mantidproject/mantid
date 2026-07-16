@@ -21,7 +21,7 @@ class SaveVulcanGSSTest(unittest.TestCase):
         data_ws_name = "Test_1Spec_Workspace"
         self._create_data_workspace(data_ws_name, num_spec=1)
         # data_ws = AnalysisDataService.retrieve(data_ws_name)
-        # print ('VecX: {0}'.format(data_ws.readX(0)))
+        # print ('VecX: {0}'.format(data_ws.x(0)))
 
         bin_ws_name = "SimpleBinRefTable"
 

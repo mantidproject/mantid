@@ -83,11 +83,11 @@ class LoadFullprofFileTest(unittest.TestCase):
         # 3. Check data
         dataws = AnalysisDataService.retrieve("Data")
         self.assertEqual(dataws.getNumberHistograms(), 4)
-        self.assertEqual(len(dataws.readX(0)), 36)
+        self.assertEqual(len(dataws.x(0)), 36)
 
         #    value
-        self.assertEqual(dataws.readX(0)[13], 5026.3223)
-        self.assertEqual(dataws.readY(1)[30], 0.3819)
+        self.assertEqual(dataws.x(0)[13], 5026.3223)
+        self.assertEqual(dataws.y(1)[30], 0.3819)
 
         # 4. Clean
         os.remove(prffilename)

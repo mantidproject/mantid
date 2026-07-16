@@ -1706,8 +1706,8 @@ class CrystalFieldFitTest(unittest.TestCase):
 
         EvaluateFunction(cf.makeMultiSpectrumFunction(), InputWorkspace=ws0, InputWorkspace_1=ws1, OutputWorkspace="out")
         out = mtd["out"]
-        out0 = out[0].readY(1)
-        out1 = out[1].readY(1)
+        out0 = out[0].y(1)
+        out1 = out[1].y(1)
 
         self.assertTrue(np.all(out0 / y0 > 2.49))
         self.assertTrue(np.all(out0 / y0 < 2.51))

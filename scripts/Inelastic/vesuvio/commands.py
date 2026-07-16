@@ -915,9 +915,9 @@ def _create_parameter_workspace(num_spec, param_table):
 def _read_table_into_workspace(workspace, table_workspace, spectrum, name):
     workspace.getAxis(0).setLabel(spectrum, name)
     for idx in range(table_workspace.rowCount()):
-        workspace.dataX(idx)[spectrum] = spectrum
-        workspace.dataY(idx)[spectrum] = table_workspace.column("Value")[idx]
-        workspace.dataE(idx)[spectrum] = table_workspace.column("Error")[idx]
+        workspace.mutableX(idx)[spectrum] = spectrum
+        workspace.mutableY(idx)[spectrum] = table_workspace.column("Value")[idx]
+        workspace.mutableE(idx)[spectrum] = table_workspace.column("Error")[idx]
 
 
 def _conjoin_groups(workspace_groups):

@@ -140,7 +140,7 @@ class MatchAndMergeWorkspaces(DataProcessorAlgorithm):
     def fit_x_lims_to_match_histogram_bins(ws_conjoined, x_min, x_max):
         bin_width = np.inf
         for i in range(x_min.size):
-            pdf_x_array = ws_conjoined.readX(i)
+            pdf_x_array = ws_conjoined.x(i)
             x_min[i] = pdf_x_array[np.amin(np.where(pdf_x_array >= x_min[i]))]
             x_max[i] = pdf_x_array[np.amax(np.where(pdf_x_array <= x_max[i]))]
             bin_width = min(pdf_x_array[1] - pdf_x_array[0], bin_width)

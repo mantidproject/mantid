@@ -144,7 +144,7 @@ class StitchByBackground(DataProcessorAlgorithm):
             for side in range(2):
                 ws = workspaces[stitch_index + side]
                 i_bin_of_stitch = ws.yIndexOfX(stitch_point)
-                background_func = f"name=LinearBackground, A0={ws.readY(0)[i_bin_of_stitch]}, A1={0};"
+                background_func = f"name=LinearBackground, A0={ws.y(0)[i_bin_of_stitch]}, A1={0};"
                 fit_result = Fit(
                     Function=background_func,
                     InputWorkspace=ws,
@@ -174,11 +174,11 @@ class StitchByBackground(DataProcessorAlgorithm):
             subtracted_ws = CropWorkspaceRagged(
                 InputWorkspace=subtracted_ws, OutputWorkspace=subtracted_ws.name(), **crop_kwargs, StoreInADS=False
             )
-            x.extend(subtracted_ws.readX(0)[:-1])
-            y.extend(subtracted_ws.readY(0))
-            e.extend(subtracted_ws.readE(0))
+            x.extend(subtracted_ws.x(0)[:-1])
+            y.extend(subtracted_ws.y(0))
+            e.extend(subtracted_ws.e(0))
         # Add the final bin edge.
-        x.append(subtracted_ws.readX(0)[-1])
+        x.append(subtracted_ws.x(0)[-1])
         return x, y, e
 
     def crop_output(self, stitched_ws):

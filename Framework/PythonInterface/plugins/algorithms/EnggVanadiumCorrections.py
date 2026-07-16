@@ -166,7 +166,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
         blocksize = van_curves_ws.blocksize()
         for i in range(0, ws.getNumberHistograms()):
             scale_factor = van_integration_ws.cell(i, 0) / blocksize
-            ws.setY(i, np.divide(ws.dataY(i), scale_factor))
+            ws.setSharedY(i, np.divide(ws.dataY(i), scale_factor))
 
     def _apply_pix_by_pix_correction(self, ws, van_curves_ws):
         """
@@ -232,7 +232,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
         integration_spectra = mantid.CreateEmptyTableWorkspace(OutputWorkspace="__vanIntegTbl")
         integration_spectra.addColumn("double", "Spectra Integration")
         for i in range(vanadium_integration_ws.getNumberHistograms()):
-            integration_spectra.addRow([vanadium_integration_ws.readY(i)[0]])
+            integration_spectra.addRow([vanadium_integration_ws.y(i)[0]])
 
         return integration_spectra
 
@@ -297,7 +297,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
             raise ValueError("The workspace does not have exactly one histogram. Inconsistency found.")
 
         # without these min/max parameters 'BSpline' would completely misbehave
-        x_values = vanadium_ws.readX(0)
+        x_values = vanadium_ws.x(0)
         start_x = min(x_values)
         end_x = max(x_values)
 
@@ -403,7 +403,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
 
             for i in idxs:
                 # take values of the second spectrum of the workspace (fit simulation - fitted curve)
-                ws.setY(i, np.divide(ws.dataY(i), rebinned_fit_curve.readY(1)))
+                ws.setSharedY(i, np.divide(ws.dataY(i), rebinned_fit_curve.y(1)))
 
         # finally, convert back to ToF
         EnggUtils.convert_to_TOF(self, ws)

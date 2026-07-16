@@ -222,8 +222,8 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
         # Apply the averaged value to all pixels. Set values to unity. Don't
         # divide workspaces as this will alter the y unit.
         for index in range(0, dark_run_integrated.getNumberHistograms()):
-            dark_run_integrated.dataY(index)[0] = 1.0
-            dark_run_integrated.dataE(index)[0] = 1.0
+            dark_run_integrated.mutableY(index)[0] = 1.0
+            dark_run_integrated.mutableE(index)[0] = 1.0
 
         # Now that we have a unity workspace multiply with the unit value
         return self._scale_dark_run(dark_run_integrated, averaged_value)
@@ -278,8 +278,8 @@ class DarkRunMonitorAndDetectorRemover(object):
             error = dark_run.dataE(ws_index)
             data = data * 0
             error = error * 0
-            dark_run.setY(ws_index, data)
-            dark_run.setE(ws_index, error)
+            dark_run.setSharedY(ws_index, data)
+            dark_run.setSharedE(ws_index, error)
 
         return dark_run
 
@@ -415,8 +415,8 @@ class DarkRunMonitorAndDetectorRemover(object):
         """
         counter = 0
         for ws_index, dummy_det_id in monitor_list:
-            dark_run.setY(ws_index, list_dataY[counter])
-            dark_run.setE(ws_index, list_dataE[counter])
+            dark_run.setSharedY(ws_index, list_dataY[counter])
+            dark_run.setSharedE(ws_index, list_dataE[counter])
             counter += 1
         return dark_run
 
@@ -438,8 +438,8 @@ class DarkRunMonitorAndDetectorRemover(object):
         for ws_index, det_id in monitor_list:
             # Only add the data back for the specified monitors
             if det_id in selected_monitors:
-                dark_run.setY(ws_index, list_dataY[counter])
-                dark_run.setE(ws_index, list_dataE[counter])
+                dark_run.setSharedY(ws_index, list_dataY[counter])
+                dark_run.setSharedE(ws_index, list_dataE[counter])
             counter += 1
         return dark_run
 

@@ -46,8 +46,8 @@ class VesuvioTOFFitTest(unittest.TestCase):
         output_ws = alg.getProperty("OutputWorkspace").value
 
         self.assertEqual(7, output_ws.getNumberHistograms())
-        self.assertAlmostEqual(50.0, output_ws.readX(0)[0])
-        self.assertAlmostEqual(562.0, output_ws.readX(0)[-1])
+        self.assertAlmostEqual(50.0, output_ws.x(0)[0])
+        self.assertAlmostEqual(562.0, output_ws.x(0)[-1])
 
         # Expected values
         expected_peak_height_spec1 = 0.4663805
@@ -56,8 +56,8 @@ class VesuvioTOFFitTest(unittest.TestCase):
         expected_bin_index_spec2 = 159
 
         # Peak height and bin index
-        peak_height_spec1, bin_index_spec1 = self._get_peak_height_and_bin_index(output_ws.readY(0))
-        peak_height_spec2, bin_index_spec2 = self._get_peak_height_and_bin_index(output_ws.readY(1))
+        peak_height_spec1, bin_index_spec1 = self._get_peak_height_and_bin_index(output_ws.y(0))
+        peak_height_spec2, bin_index_spec2 = self._get_peak_height_and_bin_index(output_ws.y(1))
 
         # Check first spectra matches expected
         self.assertTrue(self._equal_within_tolerance(expected_peak_height_spec1, peak_height_spec1))
@@ -107,8 +107,8 @@ class VesuvioTOFFitTest(unittest.TestCase):
         output_ws = alg.getProperty("OutputWorkspace").value
 
         self.assertEqual(7, output_ws.getNumberHistograms())
-        self.assertAlmostEqual(50.0, output_ws.readX(0)[0])
-        self.assertAlmostEqual(562.0, output_ws.readX(0)[-1])
+        self.assertAlmostEqual(50.0, output_ws.x(0)[0])
+        self.assertAlmostEqual(562.0, output_ws.x(0)[-1])
 
         # Expected values
         expected_peak_height_spec1 = 0.523506
@@ -117,8 +117,8 @@ class VesuvioTOFFitTest(unittest.TestCase):
         expected_bin_index_spec2 = 158
 
         # Peak height and bin index
-        peak_height_spec1, bin_index_spec1 = self._get_peak_height_and_bin_index(output_ws.readY(0))
-        peak_height_spec2, bin_index_spec2 = self._get_peak_height_and_bin_index(output_ws.readY(1))
+        peak_height_spec1, bin_index_spec1 = self._get_peak_height_and_bin_index(output_ws.y(0))
+        peak_height_spec2, bin_index_spec2 = self._get_peak_height_and_bin_index(output_ws.y(1))
 
         # Check first spectra matches expected
         self.assertTrue(self._equal_within_tolerance(expected_peak_height_spec1, peak_height_spec1))
@@ -148,15 +148,15 @@ class VesuvioTOFFitTest(unittest.TestCase):
         output_ws = alg.getProperty("OutputWorkspace").value
 
         self.assertEqual(8, output_ws.getNumberHistograms())
-        self.assertAlmostEqual(50.0, output_ws.readX(0)[0])
-        self.assertAlmostEqual(562.0, output_ws.readX(0)[-1])
+        self.assertAlmostEqual(50.0, output_ws.x(0)[0])
+        self.assertAlmostEqual(562.0, output_ws.x(0)[-1])
 
         # Expected values
         expected_peak_height_spec1 = 0.4663805
         expected_bin_index_spec1 = 59
 
         # Peak height and bin index
-        peak_height_spec1, bin_index_spec1 = self._get_peak_height_and_bin_index(output_ws.readY(0))
+        peak_height_spec1, bin_index_spec1 = self._get_peak_height_and_bin_index(output_ws.y(0))
 
         # Check first spectra matches expected
         self.assertTrue(self._equal_within_tolerance(expected_peak_height_spec1, peak_height_spec1))
@@ -166,7 +166,7 @@ class VesuvioTOFFitTest(unittest.TestCase):
         if sys.platform != "darwin":
             expected_peak_height_spec2 = 0.1295382
             expected_bin_index_spec2 = 159
-            peak_height_spec2, bin_index_spec2 = self._get_peak_height_and_bin_index(output_ws.readY(1))
+            peak_height_spec2, bin_index_spec2 = self._get_peak_height_and_bin_index(output_ws.y(1))
 
             # Check second spectra matches expected
             self.assertTrue(self._equal_within_tolerance(expected_peak_height_spec2, peak_height_spec2))

@@ -506,8 +506,8 @@ void DiscusMultipleScatteringCorrection::exec() {
 
   MatrixWorkspace_sptr sigmaSSWS = getProperty("ScatteringCrossSection");
   if (sigmaSSWS)
-    m_sigmaSS = std::make_shared<DiscusData1D>(
-        DiscusData1D{sigmaSSWS->getSpectrum(0).readX(), sigmaSSWS->getSpectrum(0).readY()});
+    m_sigmaSS =
+        std::make_shared<DiscusData1D>(DiscusData1D{sigmaSSWS->getSpectrum(0).x(), sigmaSSWS->getSpectrum(0).y()});
 
   // for inelastic we could calculate the qmax based on the min\max w in the S(Q,w) but that
   // would bake as assumption that S(Q,w)=0 beyond the limits of the supplied data
@@ -640,8 +640,8 @@ void DiscusMultipleScatteringCorrection::exec() {
           noAbsSimulationWS->getSpectrum(i).mutableY() += weights;
           noAbsSimulationWS->getSpectrum(i).mutableE() += weightsErrors;
         } else {
-          noAbsSimulationWS->getSpectrum(i).dataY()[std::get<1>(kInW[bin])] = weights[0];
-          noAbsSimulationWS->getSpectrum(i).dataE()[std::get<1>(kInW[bin])] = weightsErrors[0];
+          noAbsSimulationWS->getSpectrum(i).mutableY()[std::get<1>(kInW[bin])] = weights[0];
+          noAbsSimulationWS->getSpectrum(i).mutableE()[std::get<1>(kInW[bin])] = weightsErrors[0];
         }
 
         for (int ne = 0; ne < nScatters; ne++) {
@@ -653,8 +653,8 @@ void DiscusMultipleScatteringCorrection::exec() {
             simulationWSs[ne]->getSpectrum(i).mutableY() += weights;
             simulationWSs[ne]->getSpectrum(i).mutableE() += weightsErrors;
           } else {
-            simulationWSs[ne]->getSpectrum(i).dataY()[std::get<1>(kInW[bin])] = weights[0];
-            simulationWSs[ne]->getSpectrum(i).dataE()[std::get<1>(kInW[bin])] = weightsErrors[0];
+            simulationWSs[ne]->getSpectrum(i).mutableY()[std::get<1>(kInW[bin])] = weights[0];
+            simulationWSs[ne]->getSpectrum(i).mutableE()[std::get<1>(kInW[bin])] = weightsErrors[0];
           }
         }
 

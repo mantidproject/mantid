@@ -471,9 +471,9 @@ void ParameterMap::addPositionCoordinate(const IComponent *comp, const std::stri
   // adjust position
 
   if (name == posx())
-    position.setX(value);
+    position.setSharedX(value);
   else if (name == posy())
-    position.setY(value);
+    position.setSharedY(value);
   else if (name == posz())
     position.setZ(value);
   else {

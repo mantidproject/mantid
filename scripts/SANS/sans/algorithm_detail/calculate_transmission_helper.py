@@ -171,13 +171,13 @@ def get_masked_det_ids_from_mask_file(mask_file_path, idf_path):
 def yield_masked_det_ids(masking_workspace):
     """
     For some reason Detector.isMasked() does not work for MaskingWorkspaces.
-    We use masking_ws.readY(ws_index)[0] == 1 instead.
+    We use masking_ws.y(ws_index)[0] == 1 instead.
 
     :param masking_workspace: a mask workspace
     :return: a list of detector ids
     """
     for ws_index in range(masking_workspace.getNumberHistograms()):
-        if masking_workspace.readY(ws_index)[0] == 1:
+        if masking_workspace.y(ws_index)[0] == 1:
             yield masking_workspace.getDetector(ws_index).getID()
 
 

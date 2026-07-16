@@ -478,7 +478,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                     ReferenceWorkspace=outputSamples[self.stitch_reference_index],
                     OutputScaleFactorsWorkspace=stitch_params_ws,
                 )
-                mtd[stitched].getRun().addProperty("stitch_scale_factors", list(mtd[stitch_params_ws].readY(0)), True)
+                mtd[stitched].getRun().addProperty("stitch_scale_factors", list(mtd[stitch_params_ws].y(0)), True)
                 DeleteWorkspace(stitch_params_ws)
                 outputSamples.append(stitched)
             except RuntimeError as re:
@@ -528,8 +528,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                     RenameWorkspace(InputWorkspace=old_name, OutputWorkspace=new_name)
                     ConvertToPointData(InputWorkspace=new_name, OutputWorkspace=new_name)
                     ReplaceSpecialValues(InputWorkspace=new_name, OutputWorkspace=new_name, NaNValue=0)
-                    y = mtd[new_name].readY(0)
-                    x = mtd[new_name].readX(0)
+                    y = mtd[new_name].y(0)
+                    x = mtd[new_name].x(0)
                     nonzero = np.nonzero(y)
                     CropWorkspace(InputWorkspace=new_name, XMin=x[nonzero][0] - 1, XMax=x[nonzero][-1], OutputWorkspace=new_name)
                     suffix = self.createCustomSuffix(new_name)

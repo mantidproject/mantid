@@ -83,8 +83,8 @@ void ConvertCWSDMDtoHKL::exec() {
   // Test indexing.  Will be delete soon
   if (false) {
     Kernel::V3D qsample; // [1.36639,-2.52888,-4.77349]
-    qsample.setX(1.36639);
-    qsample.setY(-2.52888);
+    qsample.setSharedX(1.36639);
+    qsample.setSharedY(-2.52888);
     qsample.setZ(-4.77349);
 
     std::vector<Kernel::V3D> vec_qsample;

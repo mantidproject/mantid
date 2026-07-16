@@ -312,10 +312,10 @@ void VesuvioCalculateGammaBackground::calculateBackgroundSingleFoil(std::vector<
   for (size_t i = 0; i < NTHETA; ++i) {
     double thetaZeroRad = (foilInfo.thetaMin + (static_cast<double>(i) + 0.5) * thetaStep) * DEG2RAD;
     elementPos.setZ(m_foilRadius * cos(thetaZeroRad));
-    elementPos.setX(m_foilRadius * sin(thetaZeroRad));
+    elementPos.setSharedX(m_foilRadius * sin(thetaZeroRad));
     for (size_t j = 0; j < NUP; ++j) {
       double ypos = m_foilUpMin + (static_cast<double>(j) + 0.5) * upStep;
-      elementPos.setY(ypos);
+      elementPos.setSharedY(ypos);
       foilPar.l2 = m_samplePos.distance(elementPos);
       foilPar.theta = acos(m_foilRadius * cos(thetaZeroRad) / foilPar.l2); // scattering angle in radians
 

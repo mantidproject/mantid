@@ -123,7 +123,7 @@ void FindCenterOfMassPosition::exec() {
         continue;
 
       // Get the current spectrum
-      const MantidVec &YIn = inputWS->readY(i);
+      const MantidVec &YIn = inputWS->y(i);
       auto y = static_cast<double>((i - n_monitors) % n_pixel_x);
       double x = floor(static_cast<double>(i - n_monitors) / n_pixel_y);
 

@@ -634,8 +634,8 @@ API::MatrixWorkspace_sptr GeneratePeaks::createOutputWorkspace() {
                      << "Using input worksapce to generate output workspace!\n";
 
     HistogramBuilder builder;
-    builder.setX(inputWS->x(0).size());
-    builder.setY(inputWS->y(0).size());
+    builder.setSharedX(inputWS->x(0).size());
+    builder.setSharedY(inputWS->y(0).size());
 
     builder.setDistribution(inputWS->isDistribution());
     outputWS = create<MatrixWorkspace>(*inputWS, builder.build());

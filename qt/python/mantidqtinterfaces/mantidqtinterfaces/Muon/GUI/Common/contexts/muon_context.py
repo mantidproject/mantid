@@ -321,7 +321,7 @@ class MuonContext(object):
 
     def _get_x_data(self, name):
         tmp = retrieve_ws(name)
-        return tmp.readX(0)
+        return tmp.x(0)
 
     def _average_by_bin_widths(self, ws_name, dt):
         # convert to Histogram to get bin widths and divide by how much bin widths have changed

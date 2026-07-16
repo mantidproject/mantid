@@ -426,11 +426,11 @@ def _individual_run_focusing(
 
 
 def _crop_vanadium_to_percent_of_max(vanadium_ws, input_ws, output_workspace, min_value, max_value):
-    vanadium_spectrum = vanadium_ws.readY(0)
+    vanadium_spectrum = vanadium_ws.y(0)
     if not vanadium_spectrum.any():
         return mantid.CloneWorkspace(inputWorkspace=input_ws, OutputWorkspace=output_workspace)
 
-    x_list = input_ws.readX(0)
+    x_list = input_ws.x(0)
     min_index = x_list.searchsorted(min_value)
     max_index = x_list.searchsorted(max_value)
     sliced_vanadium_spectrum = vanadium_spectrum[min_index:max_index:1]

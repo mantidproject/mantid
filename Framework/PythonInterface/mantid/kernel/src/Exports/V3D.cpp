@@ -66,11 +66,11 @@ void setV3DItem(V3D &self, int index, double value) {
   switch (index) {
   case -3:
   case 0:
-    self.setX(value);
+    self.setSharedX(value);
     break;
   case -2:
   case 1:
-    self.setY(value);
+    self.setSharedY(value);
     break;
   case -1:
   case 2:
@@ -99,8 +99,8 @@ public:
   }
 
   static void setstate(V3D &vector, dict state) {
-    vector.setX(extract<double>(state['x']));
-    vector.setY(extract<double>(state['y']));
+    vector.setSharedX(extract<double>(state['x']));
+    vector.setSharedY(extract<double>(state['y']));
     vector.setZ(extract<double>(state['z']));
   }
 };

@@ -95,8 +95,8 @@ bool BinaryOperation::handleSpecialDivideMinus() {
     } else if (this->name() == "Minus") {
       // x - workspace = x + (workspace * -1)
       MatrixWorkspace_sptr minusOne = create<WorkspaceSingleValue>(1, Points(1));
-      minusOne->dataY(0)[0] = -1.0;
-      minusOne->dataE(0)[0] = 0.0;
+      minusOne->mutableY(0)[0] = -1.0;
+      minusOne->mutableE(0)[0] = 0.0;
 
       // workspace * -1
       auto mult = createChildAlgorithm("Multiply", 0.0, 0.5, true);
@@ -576,9 +576,9 @@ void BinaryOperation::doSingleSpectrum() {
     } else {
       // -------- The rhs is a histogram ---------
       // Pull m_out the m_rhs spectrum
-      const MantidVec &rhsX = m_rhs->readX(0);
-      const MantidVec &rhsY = m_rhs->readY(0);
-      const MantidVec &rhsE = m_rhs->readE(0);
+      const MantidVec &rhsX = m_rhs->x(0);
+      const MantidVec &rhsY = m_rhs->y(0);
+      const MantidVec &rhsE = m_rhs->e(0);
 
       // Now loop over the spectra of the left hand side calling the virtual
       // function
@@ -702,8 +702,7 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
         }
 
         // Reach here? Do the division
-        performEventBinaryOperation(m_eout->getSpectrum(i), m_rhs->readX(rhs_wi), m_rhs->readY(rhs_wi),
-                                    m_rhs->readE(rhs_wi));
+        performEventBinaryOperation(m_eout->getSpectrum(i), m_rhs->x(rhs_wi), m_rhs->y(rhs_wi), m_rhs->e(rhs_wi));
 
         // Free up memory on the RHS if that is possible
         if (m_ClearRHSWorkspace)

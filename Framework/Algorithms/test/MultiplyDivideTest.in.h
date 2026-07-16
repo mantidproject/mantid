@@ -1023,13 +1023,13 @@ public:
     //Zero some data to test mask propagation
     for( int j = 0; j < nHist; ++j )
     {
-      work_in1->dataY(0)[j] = 0.0;
-      work_in1->dataY(2)[j] = 0.0;
-      work_in1->dataY(7)[j] = 0.0;
+      work_in1->mutableY(0)[j] = 0.0;
+      work_in1->mutableY(2)[j] = 0.0;
+      work_in1->mutableY(7)[j] = 0.0;
 
-      work_in2->dataY(0)[j] = 0.0;
-      work_in2->dataY(2)[j] = 0.0;
-      work_in2->dataY(7)[j] = 0.0;
+      work_in2->mutableY(0)[j] = 0.0;
+      work_in2->mutableY(2)[j] = 0.0;
+      work_in2->mutableY(7)[j] = 0.0;
     }
 
     Divide helper;

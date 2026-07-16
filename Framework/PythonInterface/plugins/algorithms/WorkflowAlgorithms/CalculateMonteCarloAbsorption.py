@@ -762,7 +762,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         logger.information("Waves for the dummy workspace: " + str(waves))
         nhist = workspace.getNumberHistograms()
         for idx in range(nhist):
-            workspace.setX(idx, waves)
+            workspace.setSharedX(idx, waves)
 
         if self._isis_instrument:
             workspace.replaceAxis(1, SpectraAxis.create(workspace))

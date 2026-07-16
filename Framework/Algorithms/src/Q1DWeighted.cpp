@@ -142,7 +142,7 @@ void Q1DWeighted::bootstrap(const MatrixWorkspace_const_sptr &inputWS) {
   m_nSpec = inputWS->getNumberHistograms();
 
   // get the number of wavelength bins / samples in the input, note that the input is a histogram
-  m_nBins = inputWS->readY(0).size();
+  m_nBins = inputWS->y(0).size();
 
   m_wedgesParameters = std::vector<Q1DWeighted::Wedge>();
 

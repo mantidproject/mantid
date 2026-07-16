@@ -57,8 +57,8 @@ def combineDataMulti(
         # TODO: distinguishing between a group and a individual workspace is unnecessary for an algorithm.
         #       But custom group behavior WILL be required.
         if defaultoverlaps:
-            overlapLow = w2.readX(0)[0]
-            overlapHigh = 0.5 * max(w1.readX(0))
+            overlapLow = w2.x(0)[0]
+            overlapHigh = 0.5 * max(w1.x(0))
         else:
             overlapLow = beg_overlap[i + 1]
             overlapHigh = end_overlap[i]

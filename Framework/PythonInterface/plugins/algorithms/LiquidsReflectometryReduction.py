@@ -314,7 +314,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         # Replace NaNs by zeros
         q_rebin = ReplaceSpecialValues(InputWorkspace=q_rebin, OutputWorkspace=name_output_ws, NaNValue=0.0, NaNError=0.0)
         # Crop to non-zero values
-        data_y = q_rebin.readY(0)
+        data_y = q_rebin.y(0)
         low_q = None
         high_q = None
         for i in range(len(data_y)):
@@ -331,7 +331,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             if crop:
                 low_q += 1
                 high_q -= 1
-            data_x = q_rebin.readX(0)
+            data_x = q_rebin.x(0)
             q_rebin = CropWorkspace(InputWorkspace=q_rebin, OutputWorkspace=str(q_rebin), XMin=data_x[low_q], XMax=data_x[high_q])
         else:
             logger.error("Data is all zeros. Check your TOF ranges.")

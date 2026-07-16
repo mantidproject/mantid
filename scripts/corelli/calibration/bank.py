@@ -187,8 +187,8 @@ def collect_bank_fit_results(
         for spectrum_index in range(workspace.getNumberHistograms()):
             fit_result_name = axis.label(spectrum_index)
             fit_result_names.append(fit_result_name)
-            fit_results_values[fit_result_name] = workspace.readY(spectrum_index)
-            fit_results_errors[fit_result_name] = workspace.readE(spectrum_index)
+            fit_results_values[fit_result_name] = workspace.y(spectrum_index)
+            fit_results_errors[fit_result_name] = workspace.e(spectrum_index)
 
     if parameters_table_group is not None:
         workspace = mtd[str(parameters_table_group)]

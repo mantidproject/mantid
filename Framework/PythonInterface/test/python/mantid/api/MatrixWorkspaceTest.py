@@ -151,9 +151,9 @@ class MatrixWorkspaceTest(unittest.TestCase):
             self.assertEqual(type(arr), np.ndarray)
             self.assertFalse(arr.flags.writeable)
 
-        x = self._test_ws.readX(0)
-        y = self._test_ws.readY(0)
-        e = self._test_ws.readE(0)
+        x = self._test_ws.x(0)
+        y = self._test_ws.y(0)
+        e = self._test_ws.e(0)
         dx = self._test_ws.readDx(0)
 
         for attr in [x, y, e, dx]:
@@ -281,18 +281,18 @@ class MatrixWorkspaceTest(unittest.TestCase):
         ws_index = 1
 
         values = np.linspace(0, 1, xlength)
-        test_ws.setX(ws_index, values)
-        ws_values = test_ws.readX(ws_index)
+        test_ws.setSharedX(ws_index, values)
+        ws_values = test_ws.x(ws_index)
         self.assertTrue(np.array_equal(values, ws_values))
 
         values = np.ones(ylength)
-        test_ws.setY(ws_index, values)
-        ws_values = test_ws.readY(ws_index)
+        test_ws.setSharedY(ws_index, values)
+        ws_values = test_ws.y(ws_index)
         self.assertTrue(np.array_equal(values, ws_values))
 
         values = np.sqrt(values)
-        test_ws.setE(ws_index, values)
-        ws_values = test_ws.readE(ws_index)
+        test_ws.setSharedE(ws_index, values)
+        ws_values = test_ws.e(ws_index)
         self.assertTrue(np.array_equal(values, ws_values))
 
     def test_setxy_data_coerced_correctly_to_float64(self):
@@ -302,8 +302,8 @@ class MatrixWorkspaceTest(unittest.TestCase):
         ydata = np.arange(nbins)
         ws = WorkspaceFactory.create("Workspace2D", NVectors=nspec, XLength=nbins + 1, YLength=nbins)
         for i in range(nspec):
-            ws.setX(i, xdata)
-            ws.setY(i, ydata)
+            ws.setSharedX(i, xdata)
+            ws.setSharedY(i, ydata)
 
         # Verify
         x_expected, y_expected = np.vstack((xdata, xdata)), np.vstack((ydata, ydata))
@@ -319,9 +319,9 @@ class MatrixWorkspaceTest(unittest.TestCase):
         edata = [0.1] * nbins
         ws = WorkspaceFactory.create("Workspace2D", NVectors=nspec, XLength=nbins + 1, YLength=nbins)
         for i in range(nspec):
-            ws.setX(i, xdata)
-            ws.setY(i, ydata)
-            ws.setE(i, edata)
+            ws.setSharedX(i, xdata)
+            ws.setSharedY(i, ydata)
+            ws.setSharedE(i, edata)
         # Verify
         xdata, ydata, edata = np.array(xdata), np.array(ydata), np.array(edata)
         x_expected, y_expected, e_expected = np.vstack((xdata, xdata)), np.vstack((ydata, ydata)), np.vstack((edata, edata))
@@ -372,11 +372,11 @@ class MatrixWorkspaceTest(unittest.TestCase):
                 y_arr = y_np
                 e_arr = e_np
             for j in range(blocksize):
-                self.assertEqual(x_arr[j], workspace.readX(i)[j])
-                self.assertEqual(y_arr[j], workspace.readY(i)[j])
-                self.assertEqual(e_arr[j], workspace.readE(i)[j])
+                self.assertEqual(x_arr[j], workspace.x(i)[j])
+                self.assertEqual(y_arr[j], workspace.y(i)[j])
+                self.assertEqual(e_arr[j], workspace.e(i)[j])
             # Extra X boundary
-            self.assertEqual(x_arr[blocksize], workspace.readX(i)[blocksize])
+            self.assertEqual(x_arr[blocksize], workspace.x(i)[blocksize])
 
     def test_data_members_give_writable_numpy_array(self):
         def do_numpy_test(arr):
@@ -398,7 +398,7 @@ class MatrixWorkspaceTest(unittest.TestCase):
         ynow = y[0]
         ynow *= 2.5
         y[0] = ynow
-        self.assertEqual(self._test_ws.readY(0)[0], ynow)
+        self.assertEqual(self._test_ws.y(0)[0], ynow)
 
     def test_operators_with_workspaces_in_ADS(self):
         run_algorithm("CreateWorkspace", OutputWorkspace="a", DataX=[1.0, 2.0, 3.0], DataY=[2.0, 3.0], DataE=[2.0, 3.0], UnitX="TOF")
@@ -609,8 +609,8 @@ class MatrixWorkspaceTest(unittest.TestCase):
         rebin = WorkspaceFactory.create("RebinnedOutput", 2, 3, 2)
         self.assertFalse(rebin.nonZeroF())
         fv = rebin.readF(1)
-        rebin.dataY(1)[:] = 10.0
-        rebin.dataE(1)[:] = 1.0
+        rebin.mutableY(1)[:] = 10.0
+        rebin.mutableE(1)[:] = 1.0
         twos = np.ones(len(fv)) * 2.0
         rebin.setF(1, twos)
         self.assertTrue(rebin.nonZeroF())
@@ -618,31 +618,31 @@ class MatrixWorkspaceTest(unittest.TestCase):
         rebin.setSqrdErrors(False)
         rebin.unfinalize()
         self.assertFalse(rebin.isFinalized())
-        yv = rebin.readY(1)
-        ev = rebin.readE(1)
+        yv = rebin.y(1)
+        ev = rebin.e(1)
         self.assertAlmostEqual(yv[0], 10.0)
         self.assertAlmostEqual(ev[0], 1.0)
 
         rebin.finalize(True)
         self.assertTrue(rebin.isFinalized())
         self.assertTrue(rebin.hasSqrdErrors())
-        yv = rebin.readY(1)
-        ev = rebin.readE(1)
+        yv = rebin.y(1)
+        ev = rebin.e(1)
         self.assertAlmostEqual(yv[0], 5.0)
         self.assertAlmostEqual(ev[0], 0.25)
 
         rebin.finalize(False)
         self.assertTrue(rebin.isFinalized())
         self.assertFalse(rebin.hasSqrdErrors())
-        yv = rebin.readY(1)
-        ev = rebin.readE(1)
+        yv = rebin.y(1)
+        ev = rebin.e(1)
         self.assertAlmostEqual(yv[0], 5.0)
         self.assertAlmostEqual(ev[0], 0.5)
 
         rebin.unfinalize()
         self.assertFalse(rebin.isFinalized())
-        yv = rebin.readY(1)
-        ev = rebin.readE(1)
+        yv = rebin.y(1)
+        ev = rebin.e(1)
         self.assertAlmostEqual(yv[0], 10.0)
         self.assertAlmostEqual(ev[0], 1.0)
 

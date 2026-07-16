@@ -270,7 +270,7 @@ def difc_plot2d(calib_new, calib_old=None, instr_ws=None, mask=None, vrange=(0, 
         instr_ws = f"{instr_name}_instr"
     det_tmp = SolidAngle(InputWorkspace=instr_ws, OutputWorkspace="detector_tmp")
     for wksp_index in range(info.size()):
-        maximum_solid_angle = max(maximum_solid_angle, det_tmp.readY(wksp_index)[0])
+        maximum_solid_angle = max(maximum_solid_angle, det_tmp.y(wksp_index)[0])
 
     # Convert to degrees for plotting
     theta_array = np.rad2deg(theta_array)
@@ -376,13 +376,13 @@ def collect_peaks(wksp: Union[str, TableWorkspace], outputname: str, donor: Unio
     # convert the d-space table to a Workspace2d
     output = __create_outputws(donor, numSpec, numPeaks)
     for i in range(numSpec):  # TODO get the detID correct
-        output.setX(i, peaks)
+        output.setSharedX(i, peaks)
         if infotype == "strain":
-            output.setY(i, __calculate_strain(wksp.row(i), peaks))
+            output.setSharedY(i, __calculate_strain(wksp.row(i), peaks))
         elif infotype == "difference":
-            output.setY(i, __calculate_difference(wksp.row(i), peaks))
+            output.setSharedY(i, __calculate_difference(wksp.row(i), peaks))
         elif infotype == "dspacing":
-            output.setY(i, __calculate_dspacing(wksp.row(i)))
+            output.setSharedY(i, __calculate_dspacing(wksp.row(i)))
         else:
             raise ValueError(f"Do not know how to calculate {infotype}")
 
@@ -436,8 +436,8 @@ def collect_fit_result(
     for i in range(len(wsindex_unique)):
         start = int(np.searchsorted(wsindex, wsindex_unique[i]))
         i = int(i)  # to be compliant with mantid API
-        output.setX(i, peaks)
-        output.setY(i, observable[start : start + numPeaks])
+        output.setSharedX(i, peaks)
+        output.setSharedY(i, observable[start : start + numPeaks])
     mtd.addOrReplace(outputname, output)
     return mtd[outputname]
 
@@ -455,11 +455,11 @@ def extract_peak_info(wksp: Union[str, Workspace2D], outputname: str, peak_posit
     numSpec = wksp.getNumberHistograms()
 
     # get the index into the x/y arrays of the peak position
-    peak_index = wksp.readX(0).searchsorted(peak_position)
+    peak_index = wksp.x(0).searchsorted(peak_position)
 
     # create a workspace to put the result into
     single = WorkspaceFactory.create("Workspace2D", NVectors=1, XLength=wksp.getNumberHistograms(), YLength=wksp.getNumberHistograms())
-    single.setTitle("d-spacing={}\\A".format(wksp.readX(0)[peak_index]))
+    single.setTitle("d-spacing={}\\A".format(wksp.x(0)[peak_index]))
 
     # get a handle to map the detector positions
     detids = wksp.detectorInfo().detectorIDs()
@@ -475,8 +475,8 @@ def extract_peak_info(wksp: Union[str, Workspace2D], outputname: str, peak_posit
             x[wksp_index] = detids[start_detid + wksp_index]
         else:
             x[wksp_index] = wksp_index
-        y[wksp_index] = wksp.readY(wksp_index)[peak_index]
-        e[wksp_index] = wksp.readE(wksp_index)[peak_index]
+        y[wksp_index] = wksp.y(wksp_index)[peak_index]
+        e[wksp_index] = wksp.e(wksp_index)[peak_index]
 
     # add the workspace to the AnalysisDataService
     mtd.addOrReplace(outputname, single)

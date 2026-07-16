@@ -64,7 +64,7 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
         IndirectILLEnergyTransfer(**args)
 
         self._check_workspace_group(mtd["red"], 2, 18, 1017)
-        deltaE = mtd["red"][0].readX(0)
+        deltaE = mtd["red"][0].x(0)
         bsize = mtd["red"][0].blocksize()
         self.assertAlmostEqual(deltaE[bsize // 2], 0, 4)
         self.assertTrue(deltaE[-1] > -deltaE[0])
@@ -75,7 +75,7 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
         res = IndirectILLEnergyTransfer(**args)
         self._check_workspace_group(res, 1, 18, 1024)
 
-        deltaE = res[0].readX(0)
+        deltaE = res[0].x(0)
         bsize = res[0].blocksize()
         self.assertEqual(deltaE[bsize // 2], 0)
         self.assertTrue(deltaE[-1] > -deltaE[0])

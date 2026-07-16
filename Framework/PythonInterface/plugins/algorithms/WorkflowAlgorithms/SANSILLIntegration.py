@@ -567,7 +567,7 @@ class SANSILLIntegration(PythonAlgorithm):
         """Calculates, sets as dX and returns the resolution"""
         if self._resolution != "None":
             if res is None:
-                x = mtd[ws].readX(0)
+                x = mtd[ws].x(0)
                 mid_x = (x[1:] + x[:-1]) / 2
                 res = self._deltaQ(mid_x)
             for i in range(mtd[ws].getNumberHistograms()):

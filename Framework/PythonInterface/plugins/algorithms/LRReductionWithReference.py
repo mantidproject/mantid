@@ -118,7 +118,7 @@ class LRReductionWithReference(DataProcessorAlgorithm):
         )
 
         # Calculate the theoretical reflectivity for normalization using Refl1D
-        q = norm_wksp.readX(0)
+        q = norm_wksp.x(0)
         model_json = self.getProperty("Refl1DModelParameters").value
         model_dict = json.loads(model_json)
         model_reflectivity = self.calculate_reflectivity(model_dict, q)

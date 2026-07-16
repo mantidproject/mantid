@@ -615,8 +615,8 @@ class TestGenerousRebinSystem(unittest.TestCase):
         result = generous_rebin(ws_in, "rebinned_ws", StoreInADS=True)
 
         self.assertEqual(result.getNumberHistograms(), 2)
-        x0 = result.readX(0)
-        x1 = result.readX(1)
+        x0 = result.x(0)
+        x1 = result.x(1)
         np.testing.assert_array_equal(x0, x1)
         self.assertAlmostEqual(x0[0], 1.0)
         self.assertAlmostEqual(x0[-1], 3.0)

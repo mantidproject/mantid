@@ -19,7 +19,7 @@ class FlatPlatePaalmanPingsCorrectionTest(systemtesting.MantidSystemTest):
         val[:, 0:2] = 2.602
         val[:, -2:] = 31.974
         for i in range(18):
-            ws.setX(i, val[i, :])
+            ws.setSharedX(i, val[i, :])
 
     def do_FlatPlatePaalmanPingsTest(self, ws, ws_can, mode, name, sample_thickness=0.2, can_front_thickness=0.05, can_back_thickness=0.05):
         """

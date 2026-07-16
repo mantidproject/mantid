@@ -529,7 +529,7 @@ MantidVec &EventWorkspace::dataE(const std::size_t /*index*/) {
 /** Deprecated, use x() instead.
  * @return the const data X vector at a given workspace index
  * @param index :: workspace index   */
-const MantidVec &EventWorkspace::dataX(const std::size_t index) const { return getSpectrum(index).readX(); }
+const MantidVec &EventWorkspace::dataX(const std::size_t index) const { return getSpectrum(index).x(); }
 
 /** Deprecated, use dx() instead.
  * @return the const data X error vector at a given workspace index
@@ -539,18 +539,18 @@ const MantidVec &EventWorkspace::dataDx(const std::size_t index) const { return 
 /** Deprecated, use y() instead.
  * @return the const data Y vector at a given workspace index
  * @param index :: workspace index   */
-const MantidVec &EventWorkspace::dataY(const std::size_t index) const { return getSpectrum(index).readY(); }
+const MantidVec &EventWorkspace::dataY(const std::size_t index) const { return getSpectrum(index).y(); }
 
 /** Deprecated, use e() instead.
  * @return the const data E (error) vector at a given workspace index
  * @param index :: workspace index   */
-const MantidVec &EventWorkspace::dataE(const std::size_t index) const { return getSpectrum(index).readE(); }
+const MantidVec &EventWorkspace::dataE(const std::size_t index) const { return getSpectrum(index).e(); }
 
 /** Deprecated, use sharedX() instead.
  * @return a pointer to the X data vector at a given workspace index
  * @param index :: workspace index   */
 Kernel::cow_ptr<HistogramData::HistogramX> EventWorkspace::refX(const std::size_t index) const {
-  return getSpectrum(index).ptrX();
+  return getSpectrum(index).sharedX();
 }
 
 /** Using the event data in the event list, generate a histogram of it w.r.t

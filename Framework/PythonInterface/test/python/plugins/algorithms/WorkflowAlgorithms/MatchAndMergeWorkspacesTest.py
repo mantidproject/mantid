@@ -47,8 +47,8 @@ class MatchAndMergeWorkspacesTest(unittest.TestCase):
         ws_merged = MatchAndMergeWorkspaces(InputWorkspaces="ws_group", XMin=x_min, XMax=x_max)
         self.assertIsInstance(ws_merged, MatrixWorkspace)
         self.assertEqual(ws_merged.getNumberHistograms(), 1)
-        self.assertAlmostEqual(min(ws_merged.dataX(0)), 0, places=0)
-        self.assertAlmostEqual(max(ws_merged.dataX(0)), 50, places=0)
+        self.assertAlmostEqual(min(ws_merged.mutableX(0)), 0, places=0)
+        self.assertAlmostEqual(max(ws_merged.mutableX(0)), 50, places=0)
 
     def test_MatchAndMergeWorkspaces_produces_correct_range(self):
         x_min = np.array([2, 5, 10, 15, 20])
@@ -56,8 +56,8 @@ class MatchAndMergeWorkspacesTest(unittest.TestCase):
         ws_merged = MatchAndMergeWorkspaces(InputWorkspaces="ws_group", XMin=x_min, XMax=x_max)
         self.assertIsInstance(ws_merged, MatrixWorkspace)
         self.assertEqual(ws_merged.getNumberHistograms(), 1)
-        self.assertAlmostEqual(min(ws_merged.dataX(0)), 2, places=0)
-        self.assertAlmostEqual(max(ws_merged.dataX(0)), 45, places=0)
+        self.assertAlmostEqual(min(ws_merged.mutableX(0)), 2, places=0)
+        self.assertAlmostEqual(max(ws_merged.mutableX(0)), 45, places=0)
 
     def test_MatchAndMergeWorkspaces_accepts_a_list_of_workspaces(self):
         x_min = np.array([2, 5, 10])
@@ -67,8 +67,8 @@ class MatchAndMergeWorkspacesTest(unittest.TestCase):
         ws_merged = MatchAndMergeWorkspaces(InputWorkspaces=ws_list, XMin=x_min, XMax=x_max)
         self.assertIsInstance(ws_merged, MatrixWorkspace)
         self.assertEqual(ws_merged.getNumberHistograms(), 1)
-        self.assertAlmostEqual(min(ws_merged.dataX(0)), 2, places=0)
-        self.assertAlmostEqual(max(ws_merged.dataX(0)), 30, places=0)
+        self.assertAlmostEqual(min(ws_merged.mutableX(0)), 2, places=0)
+        self.assertAlmostEqual(max(ws_merged.mutableX(0)), 30, places=0)
 
     def test_MatchAndMergeWorkspaces_accepts_a_mixture_of_ws_size(self):
         x_min = np.array([2, 5, 10, 15, 20])
@@ -79,8 +79,8 @@ class MatchAndMergeWorkspacesTest(unittest.TestCase):
         ws_merged = MatchAndMergeWorkspaces(InputWorkspaces=ws_list, XMin=x_min, XMax=x_max)
         self.assertIsInstance(ws_merged, MatrixWorkspace)
         self.assertEqual(ws_merged.getNumberHistograms(), 1)
-        self.assertAlmostEqual(min(ws_merged.dataX(0)), 2, places=0)
-        self.assertAlmostEqual(max(ws_merged.dataX(0)), 45, places=0)
+        self.assertAlmostEqual(min(ws_merged.mutableX(0)), 2, places=0)
+        self.assertAlmostEqual(max(ws_merged.mutableX(0)), 45, places=0)
 
     def test_MatchAndMergeWorkspaces_fails_with_wrong_number_min_limits(self):
         x_min = np.array([0])

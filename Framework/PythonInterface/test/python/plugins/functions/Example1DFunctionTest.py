@@ -37,9 +37,9 @@ class _InternalMakeLinear(PythonAlgorithm):
             # add some noise
             nominal_y += random.random() * amplitude
 
-            wspace.dataX(0)[i] = x_value
-            wspace.dataY(0)[i] = nominal_y
-            wspace.dataE(0)[i] = 1
+            wspace.mutableX(0)[i] = x_value
+            wspace.mutableY(0)[i] = nominal_y
+            wspace.mutableE(0)[i] = 1
             prog_reporter.report("Setting %dth bin in workspace" % (i - 1))
 
         self.setProperty("OutputWorkspace", wspace)  # Stores the workspace as the given name

@@ -93,9 +93,9 @@ void EQSANSMonitorTOF::exec() {
     frame_offset = tmp_frame_width * (static_cast<int>(frame_tof0 / tmp_frame_width));
 
   // Find the new binning first
-  const MantidVec XIn = inputWS->readX(0); // Copy here to avoid holding on to
-                                           // reference for too long (problem
-                                           // with managed workspaces)
+  const MantidVec XIn = inputWS->x(0); // Copy here to avoid holding on to
+                                       // reference for too long (problem
+                                       // with managed workspaces)
 
   // Since we are swapping the low-TOF and high-TOF regions around the cutoff
   // value,
@@ -130,8 +130,8 @@ void EQSANSMonitorTOF::exec() {
   // Keep a copy of the input data since we may end up overwriting it
   // if the input workspace is equal to the output workspace.
   // This is necessary since we are shuffling around the TOF bins.
-  const MantidVec YIn = MantidVec(inputWS->readY(0));
-  const MantidVec EIn = MantidVec(inputWS->readE(0));
+  const MantidVec YIn = MantidVec(inputWS->y(0));
+  const MantidVec EIn = MantidVec(inputWS->e(0));
 
   MantidVec &XOut = outputWS->dataX(0);
   MantidVec &YOut = outputWS->dataY(0);

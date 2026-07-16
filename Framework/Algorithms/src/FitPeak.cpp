@@ -349,8 +349,8 @@ API::MatrixWorkspace_sptr FitOneSinglePeak::genFitWindowWS() {
     ysize = vecY.size() - i_minFitX;
 
   HistogramBuilder builder;
-  builder.setX(size);
-  builder.setY(ysize);
+  builder.setSharedX(size);
+  builder.setSharedY(ysize);
   MatrixWorkspace_sptr purePeakWS = create<Workspace2D>(1, builder.build());
 
   auto &vecX = m_dataWS->x(m_wsIndex);
@@ -1411,8 +1411,8 @@ void FitPeak::setupOutput(const std::map<std::string, double> &m_fitErrorPeakFun
   const size_t sizex = vecoutx.size();
   const auto sizey = sizex;
   HistogramBuilder builder;
-  builder.setX(sizex);
-  builder.setY(sizey);
+  builder.setSharedX(sizex);
+  builder.setSharedY(sizey);
   MatrixWorkspace_sptr outws = create<Workspace2D>(nspec, builder.build());
   // Calculate again
   FunctionDomain1DVector domain(vecoutx);

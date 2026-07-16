@@ -45,7 +45,7 @@ class SANSWideAngleCorrection(PythonAlgorithm):
         trans = self.getProperty("TransmissionData").value
 
         # check transmission input workspace
-        if len(trans.dataX(0)) != len(wd.dataX(0)):
+        if len(trans.mutableX(0)) != len(wd.dataX(0)):
             raise RuntimeError("Uncompatible sizes. Transmission must have the same bins of sample values")
         if min(trans.dataY(0)) < 0:
             raise RuntimeError("Invalid workspace for transmission, it does not accept negative values.")
@@ -83,9 +83,9 @@ class SANSWideAngleCorrection(PythonAlgorithm):
                 to_l = (np.power(to, A) - 1) / (np.log(to) * A)
                 to_err_l = (np.power(to_e, A) - 1) / (np.log(to_e) * A)
                 # applying the data to the workspace
-                trans_wc.setY(i, to_l)
-                trans_wc.setE(i, to_err_l)
-                trans_wc.setX(i, x_bins)
+                trans_wc.setSharedY(i, to_l)
+                trans_wc.setSharedE(i, to_err_l)
+                trans_wc.setSharedX(i, x_bins)
             except:
                 self.getLogger().warning("WideAngleCorrection error: " + str(sys.exc_info()[2]))
 

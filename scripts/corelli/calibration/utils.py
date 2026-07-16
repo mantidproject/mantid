@@ -131,10 +131,10 @@ def preprocess_banks(input_workspace: str, output_workspace: str) -> Workspace2D
 
     _ws = mtd[output_workspace]
     for i in range(0, _ws.getNumberHistograms(), PIXELS_PER_TUBE):
-        _data = np.array([_ws.readY(me) for me in range(i, i + PIXELS_PER_TUBE)])
+        _data = np.array([_ws.y(me) for me in range(i, i + PIXELS_PER_TUBE)])
         _data = clean_signals(_data)
         for j in range(PIXELS_PER_TUBE):
-            _ws.setY(i + j, _data[j])  # This apprently is the correct way to update Y
+            _ws.setSharedY(i + j, _data[j])  # This apprently is the correct way to update Y
 
     return _ws
 

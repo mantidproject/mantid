@@ -134,9 +134,9 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
             col_y = num_col * i + 1
             col_e = num_col * i + 2
 
-            data_y = ws.readY(row)
-            data_x = ws.readX(row)
-            data_e = ws.readE(row)
+            data_y = ws.y(row)
+            data_x = ws.x(row)
+            data_e = ws.e(row)
 
             for j in range(row_size):
                 table_ws.setCell(j, col_x, data_x[j])
@@ -169,8 +169,8 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
             col_e = num_cols * i + 2
 
             for j in range(num_rows):
-                data_y = ws.readY(j)
-                data_e = ws.readE(j)
+                data_y = ws.y(j)
+                data_e = ws.e(j)
 
                 if i == 0:
                     if ws.axes() > 1:

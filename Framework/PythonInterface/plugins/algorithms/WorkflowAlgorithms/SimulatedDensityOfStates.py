@@ -685,8 +685,8 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
         bin_width = self.getProperty("BinWidth").value
         if bin_width != 1:
-            x_min = out_ws.readX(0)[0] - (bin_width / 2.0)
-            x_max = out_ws.readX(0)[-1] + (bin_width / 2.0)
+            x_min = out_ws.x(0)[0] - (bin_width / 2.0)
+            x_max = out_ws.x(0)[-1] + (bin_width / 2.0)
             rebin_param = "%f, %f, %f" % (x_min, bin_width, x_max)
             out_ws = s_api.Rebin(Inputworkspace=out_ws, Params=rebin_param, OutputWorkspace=out_ws)
 

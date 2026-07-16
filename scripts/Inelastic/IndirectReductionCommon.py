@@ -248,7 +248,7 @@ def chop_workspace(workspace, monitor_index):
     # Chop data if required
     try:
         chop_threshold = workspace.getInstrument().getNumberParameter("Workflow.ChopDataIfGreaterThan")[0]
-        x_max = workspace.readX(0)[-1]
+        x_max = workspace.x(0)[-1]
         chopped_data = x_max > chop_threshold
     except IndexError:
         logger.warning("Chop threshold not found in instrument parameters")
@@ -532,7 +532,7 @@ def identify_bad_detectors(workspace_name):
 
         # Convert workspace to a list of spectra
         num_spec = workspace_mask.getNumberHistograms()
-        masked_spec = [workspace_mask.getSpectrum(i).getSpectrumNo() for i in range(0, num_spec) if workspace_mask.readY(i)[0] == 0.0]
+        masked_spec = [workspace_mask.getSpectrum(i).getSpectrumNo() for i in range(0, num_spec) if workspace_mask.y(i)[0] == 0.0]
 
     logger.debug("Masked spectra for workspace %s: %s" % (workspace_name, str(masked_spec)))
 
@@ -561,8 +561,8 @@ def unwrap_monitor(workspace_name):
         if unwrap == "Always":
             should_unwrap = True
         elif unwrap == "BaseOnTimeRegime":
-            mon_time = mtd[monitor_workspace_name].readX(0)[0]
-            det_time = mtd[workspace_name].readX(0)[0]
+            mon_time = mtd[monitor_workspace_name].x(0)[0]
+            det_time = mtd[workspace_name].x(0)[0]
             should_unwrap = mon_time == det_time
         else:
             should_unwrap = False
@@ -914,7 +914,7 @@ def fold_chopped(workspace_name):
         ranges.append((x_min, x_max))
         DeleteWorkspace(Workspace=ws)
 
-    data_x = mtd[merged_ws].readX(0)
+    data_x = mtd[merged_ws].x(0)
     data_y = []
     data_e = []
 
@@ -1198,7 +1198,7 @@ def rebin_reduction(workspace_name, rebin_string, multi_frame_rebin_string, num_
             # extract the binning parameters from the first spectrum.
             # there is probably a better way to calculate the binning parameters, but this
             # gets the right answer.
-            xaxis = mtd[workspace_name].readX(0)
+            xaxis = mtd[workspace_name].x(0)
             params = []
             for i, x in enumerate(xaxis):
                 params.append(x)

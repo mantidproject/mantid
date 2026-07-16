@@ -32,14 +32,14 @@ class IN4(systemtesting.MantidSystemTest):
 
         # Wide-angle detectors are at ws indices 0-299
         for i in range(0, 300):
-            x = (corr.readX(i)[:-1] + corr.readX(i)[1:]) / 2.0
+            x = (corr.x(i)[:-1] + corr.x(i)[1:]) / 2.0
             e = Ei - x
-            assert_almost_equal(corr.readY(i), eff_factor(e, wide_angle_corr))
+            assert_almost_equal(corr.y(i), eff_factor(e, wide_angle_corr))
         # Rosace detectors are at ws indices 300-395
         for i in range(300, 396):
-            x = (corr.readX(i)[:-1] + corr.readX(i)[1:]) / 2.0
+            x = (corr.x(i)[:-1] + corr.x(i)[1:]) / 2.0
             e = Ei - x
-            assert_almost_equal(corr.readY(i), eff_factor(e, rosace_corr))
+            assert_almost_equal(corr.y(i), eff_factor(e, rosace_corr))
 
 
 class IN5(systemtesting.MantidSystemTest):
@@ -58,9 +58,9 @@ class IN5(systemtesting.MantidSystemTest):
 
         corr_at_Ei = tube_corr(Ei)
         for i in range(corr.getNumberHistograms()):
-            x = (corr.readX(i)[:-1] + corr.readX(i)[1:]) / 2.0
+            x = (corr.x(i)[:-1] + corr.x(i)[1:]) / 2.0
             e = Ei - x
-            assert_almost_equal(corr.readY(i), corr_at_Ei / tube_corr(e))
+            assert_almost_equal(corr.y(i), corr_at_Ei / tube_corr(e))
 
 
 class IN6(systemtesting.MantidSystemTest):
@@ -84,6 +84,6 @@ class IN6(systemtesting.MantidSystemTest):
 
         corr_at_Ei = det_corr(numpy.array([Ei]))[0]
         for i in range(corr.getNumberHistograms()):
-            x = (corr.readX(i)[:-1] + corr.readX(i)[1:]) / 2.0
+            x = (corr.x(i)[:-1] + corr.x(i)[1:]) / 2.0
             e = Ei - x
-            assert_almost_equal(corr.readY(i), corr_at_Ei / det_corr(e))
+            assert_almost_equal(corr.y(i), corr_at_Ei / det_corr(e))

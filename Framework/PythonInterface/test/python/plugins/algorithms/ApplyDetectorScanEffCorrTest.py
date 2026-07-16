@@ -30,8 +30,8 @@ class ApplyDetectorScanEffCorrTest(unittest.TestCase):
 
         calibrated_ws = ApplyDetectorScanEffCorr(input_ws, calibration_ws)
         for i in range(6):
-            self.assertEqual(calibrated_ws.readY(i), input_ws.readY(i) * (i + 1))
-            self.assertEqual(calibrated_ws.readE(i), input_ws.readE(i) * (i + 1))
+            self.assertEqual(calibrated_ws.y(i), input_ws.y(i) * (i + 1))
+            self.assertEqual(calibrated_ws.e(i), input_ws.e(i) * (i + 1))
 
     def test_simple_scanning_case(self):
         input_ws = CreateSampleWorkspace(NumMonitors=0, NumBanks=6, BankPixelWidth=1, XMin=0, XMax=1, BinWidth=1, NumScanPoints=2)
@@ -45,8 +45,8 @@ class ApplyDetectorScanEffCorrTest(unittest.TestCase):
         expected = np.repeat(calibration_y, 2)
         calibrated_ws = ApplyDetectorScanEffCorr(input_ws, calibration_ws)
         for i in range(12):
-            self.assertEqual(calibrated_ws.readY(i), input_ws.readY(i) * expected[i])
-            self.assertEqual(calibrated_ws.readE(i), input_ws.readE(i) * expected[i])
+            self.assertEqual(calibrated_ws.y(i), input_ws.y(i) * expected[i])
+            self.assertEqual(calibrated_ws.e(i), input_ws.e(i) * expected[i])
 
     def test_mismatched_workspace_size(self):
         input_ws = CreateSampleWorkspace(NumMonitors=0, NumBanks=7, BankPixelWidth=1, XMin=0, XMax=1, BinWidth=1)
@@ -79,7 +79,7 @@ class ApplyDetectorScanEffCorrTest(unittest.TestCase):
 
         for det in range(7 * 12):
             for bin in range(5):
-                self.assertEqual(calibrated_ws.readY(det)[bin], input_ws.readY(det)[bin] * to_multiply[det][bin])
+                self.assertEqual(calibrated_ws.y(det)[bin], input_ws.y(det)[bin] * to_multiply[det][bin])
 
     def test_masking(self):
         LoadILLDiffraction(Filename="ILL/D2B/508093.nxs", OutputWorkspace="scan")

@@ -68,8 +68,8 @@ void EQSANSPatchSensitivity::exec() {
       if (spectrumInfo.isMonitor(iDet))
         continue;
 
-      const MantidVec &YValues = inputWS->readY(iDet);
-      const MantidVec &YErrors = inputWS->readE(iDet);
+      const MantidVec &YValues = inputWS->y(iDet);
+      const MantidVec &YErrors = inputWS->e(iDet);
 
       // If this detector is masked, skip to the next one
       if (spectrumInfo.isMasked(iDet))

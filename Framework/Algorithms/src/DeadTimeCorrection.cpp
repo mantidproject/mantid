@@ -118,7 +118,7 @@ void DeadTimeCorrection::exec() {
   for (int index = 0; index < static_cast<int>(grouped->getNumberHistograms()); ++index) {
     PARALLEL_START_INTERRUPT_REGION
     progress.report("Performing the correction for the group at index " + std::to_string(index));
-    auto correction = grouped->readY(index);
+    auto correction = grouped->y(index);
     for (size_t bin = 0; bin < correction.size(); bin++) {
       auto &y = correction[bin];
       if (y >= 1.0 / tau) {

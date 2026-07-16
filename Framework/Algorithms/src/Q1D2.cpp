@@ -400,8 +400,8 @@ void Q1D2::pixelWeight(const API::MatrixWorkspace_const_sptr &pixelAdj, const si
   }
   // this input multiplies up the adjustment if it exists
   if (pixelAdj) {
-    weight *= pixelAdj->readY(wsIndex)[0];
-    error = weight * pixelAdj->readE(wsIndex)[0];
+    weight *= pixelAdj->y(wsIndex)[0];
+    error = weight * pixelAdj->e(wsIndex)[0];
   } else {
     error = 0.0;
   }

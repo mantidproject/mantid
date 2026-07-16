@@ -523,7 +523,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
             try:
                 det_x = ws.getDetector(ws_idx).getPos().getX()
                 if det_x < boundaries[0] or det_x > boundaries[1]:
-                    ws.dataY(ws_idx)[0] = 1
+                    ws.mutableY(ws_idx)[0] = 1
             except RuntimeError:
                 # Ignore detectors that can't be found in the IDF
                 continue

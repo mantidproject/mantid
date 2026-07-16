@@ -171,7 +171,7 @@ class POLDILoadRunsTest(systemtesting.MantidSystemTest):
 
         ws2015 = AnalysisDataService.retrieve("ws_data_977")
         self.assertEqual(ws2015.getNumberHistograms(), 400)
-        self.assertEqual(len(ws2015.readX(0)), 125)
+        self.assertEqual(len(ws2015.x(0)), 125)
         self.assertTrue(ws2015.run().hasProperty("chopperspeed"))
 
         self.clearAnalysisDataService()

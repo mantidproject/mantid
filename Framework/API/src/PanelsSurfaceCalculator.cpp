@@ -100,8 +100,8 @@ PanelsSurfaceCalculator::retrievePanelCorners(const Mantid::Geometry::ComponentI
   for (auto &corner : corners) {
     auto x = corner.X();
     auto y = corner.Y();
-    corner.setX(x == xmin ? x - xoff : x + xoff);
-    corner.setY(y == ymin ? y - yoff : y + yoff);
+    corner.setSharedX(x == xmin ? x - xoff : x + xoff);
+    corner.setSharedY(y == ymin ? y - yoff : y + yoff);
   }
 
   return corners;

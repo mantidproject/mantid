@@ -587,7 +587,7 @@ class FitFunctionsTest(unittest.TestCase):
 
         c = CompositeFunctionWrapper(l0, l1)
         cws = EvaluateFunction(c, ws, OutputWorkspace="out")
-        cvals = cws.readY(1)
+        cvals = cws.y(1)
         self.assertAlmostEqual(cvals[0], 5.5)
         self.assertAlmostEqual(cvals[1], 6.5)
         self.assertAlmostEqual(cvals[2], 7.5)
@@ -595,7 +595,7 @@ class FitFunctionsTest(unittest.TestCase):
 
         p = ProductFunctionWrapper(l0, l1)
         pws = EvaluateFunction(p, ws, OutputWorkspace="out")
-        pvals = pws.readY(1)
+        pvals = pws.y(1)
         self.assertAlmostEqual(pvals[0], 4.5)
         self.assertAlmostEqual(pvals[1], 10.5)
         self.assertAlmostEqual(pvals[2], 12.5)
@@ -603,7 +603,7 @@ class FitFunctionsTest(unittest.TestCase):
 
         sq = Polynomial(attributes={"n": 2}, A0=0, A1=0.0, A2=1.0)
         sqws = EvaluateFunction(sq, ws, OutputWorkspace="out")
-        sqvals = sqws.readY(1)
+        sqvals = sqws.y(1)
         self.assertAlmostEqual(sqvals[0], 0.25)
         self.assertAlmostEqual(sqvals[1], 2.25)
         self.assertAlmostEqual(sqvals[2], 6.25)
@@ -619,12 +619,12 @@ class FitFunctionsTest(unittest.TestCase):
 
         s1 = c + p
         s1ws = EvaluateFunction(s1, ws, OutputWorkspace="out")
-        s1vals = s1ws.readY(1)
+        s1vals = s1ws.y(1)
         self.assertAlmostEqual(s1vals[0], 10.0)
 
         s2 = p + c
         s2ws = EvaluateFunction(s2, ws, OutputWorkspace="out")
-        s2vals = s2ws.readY(1)
+        s2vals = s2ws.y(1)
         self.assertAlmostEqual(s2vals[0], 10.0)
 
     def test_evaluation_by_single_value(self):
@@ -644,7 +644,7 @@ class FitFunctionsTest(unittest.TestCase):
         ws = CreateWorkspace(DataX=[0, 1, 2, 3], DataY=[5, 5, 5])
         sq = Polynomial(n=2, A0=0, A1=0, A2=1)
         outWs = sq(ws)
-        sqvals = outWs.readY(1)
+        sqvals = outWs.y(1)
         self.assertAlmostEqual(sqvals[0], 0.25)
         self.assertAlmostEqual(sqvals[1], 2.25)
         self.assertAlmostEqual(sqvals[2], 6.25)
@@ -773,7 +773,7 @@ class FitFunctionsTest(unittest.TestCase):
         g = FunctionWrapper("Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)
         ws = CreateWorkspace(DataX=[0, 1, 2, 3, 4], DataY=[5, 5, 5, 5])
 
-        dom = FunctionDomain1DVector(ws.readX(0))
+        dom = FunctionDomain1DVector(ws.x(0))
         out = g.functionDeriv(dom)
 
         self.assertAlmostEqual(out.get(0, 0), 0.0000000000000008323969676981107)
@@ -792,7 +792,7 @@ class FitFunctionsTest(unittest.TestCase):
         g = FunctionWrapper("Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)
         ws = CreateWorkspace(DataX=[0, 1, 2, 3, 4], DataY=[5, 5, 5, 5])
 
-        dom = FunctionDomain1DHistogram(ws.readX(0))
+        dom = FunctionDomain1DHistogram(ws.x(0))
         out = g.functionDeriv(dom)
 
         self.assertAlmostEqual(out.get(0, 0), 0.00000000000009592326932761353)

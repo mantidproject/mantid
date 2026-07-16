@@ -251,11 +251,11 @@ class MuonMaxent(PythonAlgorithm):
             for i in range(POINTS_ngroups + len(deadDetectors)):
                 if i + 1 in deadDetectors:
                     offset += 1
-                    phaseconvWS.dataX(i)[0] = 0.0
-                    phaseconvWS.dataY(i)[0] = 0.0
+                    phaseconvWS.mutableX(i)[0] = 0.0
+                    phaseconvWS.mutableY(i)[0] = 0.0
                 else:
-                    phaseconvWS.dataX(i)[0] = 0.0
-                    phaseconvWS.dataY(i)[0] = filePHASE[i - offset]
+                    phaseconvWS.mutableX(i)[0] = 0.0
+                    phaseconvWS.mutableY(i)[0] = filePHASE[i - offset]
         else:
             phaseconvWS = None
         return phaseconvWS
@@ -268,7 +268,7 @@ class MuonMaxent(PythonAlgorithm):
         ws, deadDetectors = removeDeadDetectors(originalWS)
 
         # crop off odd sized bins at start and end (if present)
-        xv = ws.readX(0)
+        xv = ws.x(0)
         rg0 = 0
         rg9 = len(xv)
         while rg9 > rg0 and abs((2 * xv[rg9 - 2] - xv[rg9 - 3] - xv[rg9 - 1]) / (xv[rg9 - 1] - xv[rg9 - 3])) > 0.001:
@@ -276,22 +276,22 @@ class MuonMaxent(PythonAlgorithm):
         while rg9 > rg0 and abs((2 * xv[rg0 + 1] - xv[rg0] - xv[rg0 + 2]) / (xv[rg0 + 2] - xv[rg0])) > 0.001:
             rg0 = rg0 + 1
         self.checkRValues(rg9, rg0, xv, mylog)
-        RUNDATA_res = (ws.readX(0)[rg9 - 1] - ws.readX(0)[rg0]) / (rg9 - rg0 - 1.0)  # assume linear!
+        RUNDATA_res = (ws.x(0)[rg9 - 1] - ws.x(0)[rg0]) / (rg9 - rg0 - 1.0)  # assume linear!
         mylog.notice("resolution {0} us".format(RUNDATA_res))
-        CHANNELS_itzero = rg0 + int(math.floor(-ws.readX(0)[rg0] / RUNDATA_res))
+        CHANNELS_itzero = rg0 + int(math.floor(-ws.x(0)[rg0] / RUNDATA_res))
         # Bin with t0 in it. note, may be negative for pre-cropped
         # data. Remove +0.5
         TZERO_fine = (
-            ws.readX(0)[CHANNELS_itzero] + ws.readX(0)[CHANNELS_itzero + 1]
+            ws.x(0)[CHANNELS_itzero] + ws.x(0)[CHANNELS_itzero + 1]
         ) / 2.0  # since it's not an exact boundary. Error if t0<0 or t0 is in an odd sized bin
         mylog.notice(
             "time zero bin has boundaries {} and {} giving tzero={}".format(
-                ws.readX(0)[CHANNELS_itzero], ws.readX(0)[CHANNELS_itzero + 1], TZERO_fine
+                ws.x(0)[CHANNELS_itzero], ws.x(0)[CHANNELS_itzero + 1], TZERO_fine
             )
         )
         t1stgood = self.getProperty("FirstGoodTime").value
         CHANNELS_i1stgood = rg0 + max(
-            int(math.floor((t1stgood - ws.readX(0)[rg0]) / RUNDATA_res + 1.0)), 0
+            int(math.floor((t1stgood - ws.x(0)[rg0]) / RUNDATA_res + 1.0)), 0
         )  # was 1.0. i1stgood is first bin with purely good data in it (and good sized)
         FLAGS_fixphase = self.getProperty("FixPhases").value
         FLAGS_fitdead = self.getProperty("FitDeadTime").value
@@ -302,7 +302,7 @@ class MuonMaxent(PythonAlgorithm):
 
         tlast = self.getProperty("LastGoodTime").value
         ilast = min(
-            rg0 + int(math.floor((tlast - ws.readX(0)[rg0]) / RUNDATA_res)), rg9 - 1
+            rg0 + int(math.floor((tlast - ws.x(0)[rg0]) / RUNDATA_res)), rg9 - 1
         )  # first bin with some bad data in it, or end (excluding bad sized bins)
         nhisto = ws.getNumberHistograms()
         POINTS_nhists = nhisto
@@ -312,7 +312,7 @@ class MuonMaxent(PythonAlgorithm):
         mylog.notice("channels t0={0} tgood={1} to {2}".format(CHANNELS_itzero, CHANNELS_i1stgood, CHANNELS_itotal))
         DATALL_rdata = np.zeros([nhisto, ilast])
         for i in range(nhisto):
-            DATALL_rdata[i, :] = ws.readY(i)[:ilast]
+            DATALL_rdata[i, :] = ws.y(i)[:ilast]
         PULSES_npulse = self.getPulse()
         PULSES_def = self.getProperty("DefaultLevel").value
         FAC_factor = self.getProperty("Factor").value
@@ -423,8 +423,8 @@ class MuonMaxent(PythonAlgorithm):
         fchan = np.linspace(0.0, MAXPAGE_n * fperchan / 135.5e-4, MAXPAGE_n, endpoint=False)
         # write results! Frequency spectra
         outSpec = WorkspaceFactory.create(ws, NVectors=1, XLength=MAXPAGE_n, YLength=MAXPAGE_n)
-        outSpec.dataX(0)[:] = fchan
-        outSpec.dataY(0)[:] = MAXPAGE_f
+        outSpec.mutableX(0)[:] = fchan
+        outSpec.mutableY(0)[:] = MAXPAGE_f
         outSpec.getAxis(0).setUnit("Label").setLabel("Field", "Gauss")
         outSpec.setYUnitLabel("Probability")
         self.setProperty("OutputWorkspace", outSpec)
@@ -470,11 +470,11 @@ class MuonMaxent(PythonAlgorithm):
             for j in range(POINTS_ngroups + len(deadDetectors)):
                 if j + 1 in deadDetectors:
                     offset += 1
-                    recSpec.dataX(j)[:] = originalWS.dataX(j)[k1 : k2 + 1]
-                    recSpec.dataY(j)[:] = np.zeros(k2 - k1)
+                    recSpec.mutableX(j)[:] = originalWS.dataX(j)[k1 : k2 + 1]
+                    recSpec.mutableY(j)[:] = np.zeros(k2 - k1)
                 else:
-                    recSpec.dataX(j)[:] = originalWS.dataX(j)[k1 : k2 + 1]
-                    recSpec.dataY(j)[:] = OUTSPEC_guess[i1:i2, j - offset]
+                    recSpec.mutableX(j)[:] = originalWS.dataX(j)[k1 : k2 + 1]
+                    recSpec.mutableY(j)[:] = OUTSPEC_guess[i1:i2, j - offset]
             self.setProperty("ReconstructedSpectra", recSpec)
         if phaseconvWS:
             self.setProperty("PhaseConvergenceTable", phaseconvWS)

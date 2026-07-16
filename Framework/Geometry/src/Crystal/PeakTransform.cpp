@@ -94,8 +94,8 @@ boost::regex PeakTransform::getFreePeakAxisRegex() const {
 Mantid::Kernel::V3D PeakTransform::transform(const Mantid::Kernel::V3D &original) const {
   // Will have the plots x, y, and z aligned to the correct h, k, l value.
   Mantid::Kernel::V3D transformedPeakPosition;
-  transformedPeakPosition.setX(original[m_indexOfPlotX]);
-  transformedPeakPosition.setY(original[m_indexOfPlotY]);
+  transformedPeakPosition.setSharedX(original[m_indexOfPlotX]);
+  transformedPeakPosition.setSharedY(original[m_indexOfPlotY]);
   transformedPeakPosition.setZ(original[m_indexOfPlotZ]);
   return transformedPeakPosition;
 }
@@ -103,8 +103,8 @@ Mantid::Kernel::V3D PeakTransform::transform(const Mantid::Kernel::V3D &original
 Mantid::Kernel::V3D PeakTransform::transformBack(const Mantid::Kernel::V3D &transformed) const {
   // Will have the plots x, y, and z aligned to the correct h, k, l value.
   Mantid::Kernel::V3D originalPeakPosition;
-  originalPeakPosition.setX(transformed[m_indexOfPeakX]);
-  originalPeakPosition.setY(transformed[m_indexOfPeakY]);
+  originalPeakPosition.setSharedX(transformed[m_indexOfPeakX]);
+  originalPeakPosition.setSharedY(transformed[m_indexOfPeakY]);
   originalPeakPosition.setZ(transformed[m_indexOfPeakZ]);
   return originalPeakPosition;
 }

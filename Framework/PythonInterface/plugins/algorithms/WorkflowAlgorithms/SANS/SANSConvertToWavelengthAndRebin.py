@@ -169,10 +169,10 @@ class SANSConvertToWavelengthAndRebin(DataProcessorAlgorithm):
         # The lowest wavelength value is to be found in the spectrum located at workspaces index 0 is a very
         # strong assumption, but it existed in the previous implementation.
         if wavelength_low is None or wavelength_low == Property.EMPTY_DBL:
-            wavelength_low = min(workspace.readX(0))
+            wavelength_low = min(workspace.x(0))
 
         if wavelength_high is None or wavelength_high == Property.EMPTY_DBL:
-            wavelength_high = max(workspace.readX(0))
+            wavelength_high = max(workspace.x(0))
 
         wavelength_step = self.getProperty("WavelengthStep").value
         step_type = RangeStepType(self.getProperty("WavelengthStepType").value)

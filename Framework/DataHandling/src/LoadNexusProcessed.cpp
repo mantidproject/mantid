@@ -1785,7 +1785,7 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadNonEventEntry(NXData &wksp_cls
 
     // now check for NaN at end of X which would signify ragged binning
     for (size_t i = 0; i < local_workspace->getNumberHistograms(); i++) {
-      const auto &x = local_workspace->readX(i);
+      const auto &x = local_workspace->x(i);
       const auto idx =
           std::distance(x.rbegin(), std::find_if_not(x.rbegin(), x.rend(), [](auto val) { return std::isnan(val); }));
       if (idx > 0)

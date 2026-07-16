@@ -30,15 +30,15 @@ class CompressEventsTesting(systemtesting.MantidSystemTest):
             for name in (outname, wkspname):  # first out of place, then in place
                 CompressEvents(InputWorkspace=wkspname, OutputWorkspace=name, WallClockTolerance=10.0)
                 integral = Integration(InputWorkspace=name, RangeUpper=20000.0)
-                compress10s = integral.readY(0)[0]
+                compress10s = integral.y(0)[0]
 
                 CompressEvents(InputWorkspace=wkspname, OutputWorkspace=name, WallClockTolerance=3600.0)
                 integral = Integration(InputWorkspace=name, RangeUpper=20000.0)
-                compress1h = integral.readY(0)[0]
+                compress1h = integral.y(0)[0]
 
                 CompressEvents(InputWorkspace=wkspname, OutputWorkspace=name)
                 integral = Integration(InputWorkspace=name, RangeUpper=20000.0)
-                compressfull = integral.readY(0)[0]
+                compressfull = integral.y(0)[0]
 
                 if not (totalEvents == compress10s == compress1h == compressfull):
                     msg = "{} total={:.0f} 10s={:.0f} 1h={:.0f} full={:.0f}".format(

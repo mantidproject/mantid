@@ -42,15 +42,15 @@ class FindSXPeaksConvolveTest(unittest.TestCase):
         axis.setUnit("TOF")
         # fake peak centred on ispec=25 (detid=74) and TOF=5 - near middle of bank
         peak_1D = array([0, 0, 0, 0, 8, 12, 8, 0, 0, 0, 0, 0, 0])
-        cls.ws.setY(25, cls.ws.readY(30) + peak_1D)
+        cls.ws.setSharedY(25, cls.ws.y(30) + peak_1D)
         for ispec in [18, 24, 25, 26, 32]:
-            cls.ws.setY(ispec, cls.ws.readY(ispec) + peak_1D)
-            cls.ws.setE(ispec, sqrt(cls.ws.readY(ispec)))
+            cls.ws.setSharedY(ispec, cls.ws.y(ispec) + peak_1D)
+            cls.ws.setSharedE(ispec, sqrt(cls.ws.y(ispec)))
         # fake peak centred on ispec=12 (detid=61) and TOF=7 - near detector edge
-        cls.ws.setY(12, cls.ws.readY(12) + peak_1D[::-1])
+        cls.ws.setSharedY(12, cls.ws.y(12) + peak_1D[::-1])
         for ispec in [5, 11, 12, 13, 19]:
-            cls.ws.setY(ispec, cls.ws.readY(ispec) + peak_1D[::-1])
-            cls.ws.setE(ispec, sqrt(cls.ws.readY(ispec)))
+            cls.ws.setSharedY(ispec, cls.ws.y(ispec) + peak_1D[::-1])
+            cls.ws.setSharedE(ispec, sqrt(cls.ws.y(ispec)))
         # Add back-to-back exponential params
         LoadParameterFile(cls.ws, ParameterXML=XML_PARAMS)
 

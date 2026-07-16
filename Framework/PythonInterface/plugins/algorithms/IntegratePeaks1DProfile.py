@@ -524,7 +524,7 @@ class PeakFunctionGenerator:
         for ii, ispec in enumerate(ispecs):
             # check stats in pixel
             intens, sigma, bg = self._estimate_intensity_and_background(ws, ispec, istart, iend)
-            self.ysum.flat[ii] = ws.readY(ispec)[istart:iend].sum()
+            self.ysum.flat[ii] = ws.y(ispec)[istart:iend].sum()
             avg_bg += bg
             peak_mask[ii] = sigma > 0 and intens / sigma > MIN_INTENS_OVER_SIGMA  # low threshold for initial fit
             if peak_mask[ii]:
@@ -577,12 +577,12 @@ class PeakFunctionGenerator:
 
     @staticmethod
     def _estimate_intensity_and_background(ws: Workspace2D, ispec: int, istart: int, iend: int) -> Tuple[float, float, float]:
-        bin_width = np.diff(ws.readX(ispec)[istart:iend])
+        bin_width = np.diff(ws.x(ispec)[istart:iend])
         bin_width = np.hstack((bin_width, bin_width[-1]))  # easier than checking iend and istart not out of bounds
-        y = ws.readY(ispec)[istart:iend]
+        y = ws.y(ispec)[istart:iend]
         if not np.any(y > 0):
             return 0.0, 0.0, 0.0
-        e = ws.readE(ispec)[istart:iend]
+        e = ws.e(ispec)[istart:iend]
         ibg, _ = PeakData.find_bg_pts_seed_skew(y)
         bg = np.mean(y[ibg])
         intensity = np.sum((y - bg) * bin_width)
@@ -679,12 +679,10 @@ class LineProfileResult:
 
     def _init_foc_data(self, fit_result, fit_mask):
         ndoms = fit_result["Function"].nDomains()
-        ydat = np.array([get_eval_ws(fit_result["OutputWorkspace"], idom, ndoms).readY(0) for idom in range(ndoms) if fit_mask[idom]])
-        edat_sq = (
-            np.array([get_eval_ws(fit_result["OutputWorkspace"], idom, ndoms).readE(0) for idom in range(ndoms) if fit_mask[idom]]) ** 2
-        )
-        yfit = np.array([get_eval_ws(fit_result["OutputWorkspace"], idom, ndoms).readY(1) for idom in range(ndoms) if fit_mask[idom]])
-        self.tofs = get_eval_ws(fit_result["OutputWorkspace"], 0, ndoms).readX(0)
+        ydat = np.array([get_eval_ws(fit_result["OutputWorkspace"], idom, ndoms).y(0) for idom in range(ndoms) if fit_mask[idom]])
+        edat_sq = np.array([get_eval_ws(fit_result["OutputWorkspace"], idom, ndoms).e(0) for idom in range(ndoms) if fit_mask[idom]]) ** 2
+        yfit = np.array([get_eval_ws(fit_result["OutputWorkspace"], idom, ndoms).y(1) for idom in range(ndoms) if fit_mask[idom]])
+        self.tofs = get_eval_ws(fit_result["OutputWorkspace"], 0, ndoms).x(0)
         self.tofs = 0.5 * (self.tofs[1:] + self.tofs[:-1])
         self.yfoc = ydat.sum(axis=0)
         self.efoc = np.sqrt(edat_sq.sum(axis=0))
@@ -766,7 +764,7 @@ def calc_intens_and_sigma_arrays(fit_result, error_strategy):
             sigma[idom] = peak_func.intensityError()
         else:
             ws_fit = get_eval_ws(fit_result["OutputWorkspace"], idom, ndoms)
-            sigma[idom], peak_limits[idom] = calc_sigma_from_summation(ws_fit.readX(0), ws_fit.readE(0) ** 2, ws_fit.readY(3))
+            sigma[idom], peak_limits[idom] = calc_sigma_from_summation(ws_fit.x(0), ws_fit.e(0) ** 2, ws_fit.y(3))
     ivalid = ~np.isclose(sigma, 0)
     intens_over_sig[ivalid] = intens[ivalid] / sigma[ivalid]
     return intens, sigma, intens_over_sig, peak_limits

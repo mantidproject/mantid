@@ -69,11 +69,11 @@ class EQSANSIQOutput(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance = 0.2
-        mtd["EQSANS_1466_event_Iq"].dataY(0)[0] = 269.687
-        mtd["EQSANS_1466_event_Iq"].dataE(0)[0] = 16.4977
-        mtd["EQSANS_1466_event_Iq"].dataE(0)[1] = 6.78
-        mtd["EQSANS_1466_event_Iq"].dataY(0)[2] = 11.3157
-        mtd["EQSANS_1466_event_Iq"].dataE(0)[2] = 1.23419
+        mtd["EQSANS_1466_event_Iq"].mutableY(0)[0] = 269.687
+        mtd["EQSANS_1466_event_Iq"].mutableE(0)[0] = 16.4977
+        mtd["EQSANS_1466_event_Iq"].mutableE(0)[1] = 6.78
+        mtd["EQSANS_1466_event_Iq"].mutableY(0)[2] = 11.3157
+        mtd["EQSANS_1466_event_Iq"].mutableE(0)[2] = 1.23419
         self.disableChecking.append("Instrument")
         self.disableChecking.append("Sample")
         self.disableChecking.append("SpectraMap")

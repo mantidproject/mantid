@@ -56,7 +56,7 @@ public:
     V3R vector;
     TS_ASSERT_EQUALS(vector.x(), 0);
 
-    TS_ASSERT_THROWS_NOTHING(vector.setX(RationalNumber(1, 4)));
+    TS_ASSERT_THROWS_NOTHING(vector.setSharedX(RationalNumber(1, 4)));
     TS_ASSERT_EQUALS(vector.x(), RationalNumber(1, 4));
   }
 
@@ -64,7 +64,7 @@ public:
     V3R vector;
     TS_ASSERT_EQUALS(vector.y(), 0);
 
-    TS_ASSERT_THROWS_NOTHING(vector.setY(RationalNumber(1, 4)));
+    TS_ASSERT_THROWS_NOTHING(vector.setSharedY(RationalNumber(1, 4)));
     TS_ASSERT_EQUALS(vector.y(), RationalNumber(1, 4));
   }
 
@@ -347,7 +347,7 @@ public:
   void testIntegerComparison() {
     V3R zeros;
     TS_ASSERT_EQUALS(zeros, 0);
-    zeros.setX(RationalNumber(1, 2));
+    zeros.setSharedX(RationalNumber(1, 2));
     TS_ASSERT_DIFFERS(zeros, 0);
   }
 

@@ -23,9 +23,9 @@ def _plot_with_options(axes_option, workspace, options_list, plot_number):
     """
     ws_plot = ConvertToPointData(workspace)
     if options_list["errorbars"]:
-        axes_option.errorbar(ws_plot.readX(0), ws_plot.readY(0), yerr=ws_plot.readE(0), label=workspace.name())
+        axes_option.errorbar(ws_plot.x(0), ws_plot.y(0), yerr=ws_plot.e(0), label=workspace.name())
     else:
-        axes_option.plot(ws_plot.readX(0), ws_plot.readY(0), label=workspace.name())
+        axes_option.plot(ws_plot.x(0), ws_plot.y(0), label=workspace.name())
 
     axes_option.grid(options_list["grid"])
     axes_option.set_xscale(options_list["xScale"])

@@ -72,8 +72,8 @@ MaskWorkspace::MaskWorkspace(const API::MatrixWorkspace_const_sptr &parent) : Sp
 void MaskWorkspace::clearMask() {
   std::size_t nHist = this->getNumberHistograms();
   for (std::size_t i = 0; i < nHist; ++i) {
-    this->dataY(i)[0] = LIVE_VALUE;
-    this->dataE(i)[0] = ERROR_VALUE;
+    this->mutableY(i)[0] = LIVE_VALUE;
+    this->mutableE(i)[0] = ERROR_VALUE;
   }
 
   // Clear the mask flags
@@ -203,7 +203,7 @@ bool MaskWorkspace::isMasked(const std::set<detid_t> &detectorIDs) const {
  * Use this method with MaskWorkspace that doesn't have an instrument.
  */
 bool MaskWorkspace::isMaskedIndex(const std::size_t wkspIndex) const {
-  return (this->dataY(wkspIndex)[0] != LIVE_VALUE); // if is not live it should masked
+  return (this->mutableY(wkspIndex)[0] != LIVE_VALUE); // if is not live it should masked
 }
 
 /**
@@ -238,7 +238,7 @@ void MaskWorkspace::setMaskedIndex(const std::size_t wkspIndex, const bool mask)
   if (mask)
     value = DEAD_VALUE;
 
-  this->dataY(wkspIndex)[0] = value;
+  this->mutableY(wkspIndex)[0] = value;
 }
 
 /**

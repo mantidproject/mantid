@@ -225,8 +225,8 @@ public:
 
     // Check the outputs between both weighted mean algorithms.
     for (size_t j = 0; j < s1.size(); ++j) {
-      TS_ASSERT_DELTA(weighted_mean_matrix->readY(0)[j], weighted_mean_md->signalAt(j), 0.0001);
-      TS_ASSERT_DELTA(std::pow(weighted_mean_matrix->readE(0)[j], 2), weighted_mean_md->errorSquaredAt(j), 0.0001);
+      TS_ASSERT_DELTA(weighted_mean_matrix->y(0)[j], weighted_mean_md->signalAt(j), 0.0001);
+      TS_ASSERT_DELTA(std::pow(weighted_mean_matrix->e(0)[j], 2), weighted_mean_md->errorSquaredAt(j), 0.0001);
     }
 
     // Clean up.

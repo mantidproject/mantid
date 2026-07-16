@@ -103,7 +103,7 @@ public:
       BinEdges axis(NUMBINS, LinearGenerator(0.0, BIN_DELTA));
 
       // Try setting a single axis, make sure it doesn't throw
-      retVal->setX(2, axis.cowData());
+      retVal->setSharedX(2, axis.cowData());
 
       // Set all the histograms at once.
       retVal->setAllX(axis);
@@ -128,7 +128,7 @@ public:
 
     // Are the returned arrays the right size?
     const EventList el(ew->getSpectrum(1));
-    TS_ASSERT_EQUALS(el.readX().size(), NUMBINS);
+    TS_ASSERT_EQUALS(el.x().size(), NUMBINS);
     boost::scoped_ptr<MantidVec> Y(el.makeDataY());
     boost::scoped_ptr<MantidVec> E(el.makeDataE());
     TS_ASSERT_EQUALS(Y->size(), NUMBINS - 1);
@@ -212,9 +212,9 @@ public:
 
     // Didn't set X? well all the histograms show a single bin
     const EventList el(ew->getSpectrum(1));
-    TS_ASSERT_EQUALS(el.readX().size(), 2);
-    TS_ASSERT_EQUALS(el.readX()[0], 0.0);
-    TS_ASSERT_EQUALS(el.readX()[1], std::numeric_limits<double>::min());
+    TS_ASSERT_EQUALS(el.x().size(), 2);
+    TS_ASSERT_EQUALS(el.x()[0], 0.0);
+    TS_ASSERT_EQUALS(el.x()[1], std::numeric_limits<double>::min());
     boost::scoped_ptr<MantidVec> Y(el.makeDataY());
     TS_ASSERT_EQUALS(Y->size(), 1);
     TS_ASSERT_EQUALS((*Y)[0], 0.0);
@@ -297,13 +297,13 @@ public:
     // Create A DIFFERENT x-axis for histogramming.
     auto axis = Kernel::make_cow<HistogramData::HistogramX>(NUMBINS / 2, LinearGenerator(0.0, 2.0 * BIN_DELTA));
 
-    ew->setX(0, axis);
+    ew->setSharedX(0, axis);
     const EventList el(ew->getSpectrum(0));
-    TS_ASSERT_EQUALS(el.readX()[0], 0);
-    TS_ASSERT_EQUALS(el.readX()[1], BIN_DELTA * 2);
+    TS_ASSERT_EQUALS(el.x()[0], 0);
+    TS_ASSERT_EQUALS(el.x()[1], BIN_DELTA * 2);
 
     // Are the returned arrays the right size?
-    TS_ASSERT_EQUALS(el.readX().size(), NUMBINS / 2);
+    TS_ASSERT_EQUALS(el.x().size(), NUMBINS / 2);
 
     boost::scoped_ptr<MantidVec> Y(el.makeDataY());
     boost::scoped_ptr<MantidVec> E(el.makeDataE());
@@ -316,7 +316,7 @@ public:
 
     // But pixel 1 is the same, 2 events in the bin
     const EventList el1(ew->getSpectrum(1));
-    TS_ASSERT_EQUALS(el1.readX()[1], BIN_DELTA * 1);
+    TS_ASSERT_EQUALS(el1.x()[1], BIN_DELTA * 1);
     boost::scoped_ptr<MantidVec> Y1(el1.makeDataY());
     TS_ASSERT_EQUALS((*Y1)[1], 2);
   }
@@ -563,17 +563,17 @@ public:
     const auto &inSpec = ew2->getSpectrum(0);
     const auto &inSpec300 = ew2->getSpectrum(300);
 
-    const MantidVec &data0 = inSpec.readY();
-    const MantidVec &e300 = inSpec300.readE();
+    const MantidVec &data0 = inSpec.y();
+    const MantidVec &e300 = inSpec300.e();
     TS_ASSERT_EQUALS(data0.size(), NUMBINS - 1);
 
     // Fill up the MRU to make data0 drop off
     for (size_t i = 0; i < 200; i++)
-      MantidVec otherData = ew2->readY(i);
+      MantidVec otherData = ew2->y(i);
 
     // data0 and e300 are now invalid references!
-    TS_ASSERT_DIFFERS(&data0, &inSpec.readY());
-    TS_ASSERT_DIFFERS(&e300, &inSpec.readE());
+    TS_ASSERT_DIFFERS(&data0, &inSpec.y());
+    TS_ASSERT_DIFFERS(&e300, &inSpec.e());
 
     // MRU is full
     TS_ASSERT_EQUALS(ew2->MRUSize(), 50);
@@ -666,27 +666,27 @@ public:
     EventWorkspace_sptr ew1 = WorkspaceCreationHelper::createEventWorkspace2(numpixels, 100);
     PARALLEL_FOR_IF(do_parallel)
     for (int i = 0; i < numpixels; i += 3) {
-      const MantidVec &Y = ew1->readY(i);
+      const MantidVec &Y = ew1->y(i);
       TS_ASSERT_DELTA(Y[0], 2.0, 1e-5);
-      const MantidVec &E = ew1->readE(i);
+      const MantidVec &E = ew1->e(i);
       TS_ASSERT_DELTA(E[0], M_SQRT2, 1e-5);
 
       // Vector with 10 bins, 10 wide
       MantidVec X;
       for (size_t j = 0; j < 11; j++)
         X.emplace_back(static_cast<double>(j) * 10.0);
-      ew1->setX(i, make_cow<HistogramX>(X));
+      ew1->setSharedX(i, make_cow<HistogramX>(X));
 
       // Now it should be 20 in that spot
-      const MantidVec &Y_now = ew1->readY(i);
+      const MantidVec &Y_now = ew1->y(i);
       TS_ASSERT_DELTA(Y_now[0], 20.0, 1e-5);
-      const MantidVec &E_now = ew1->readE(i);
+      const MantidVec &E_now = ew1->e(i);
       TS_ASSERT_DELTA(E_now[0], sqrt(20.0), 1e-5);
 
       // But the other pixel is still 2.0
-      const MantidVec &Y_other = ew1->readY(i + 1);
+      const MantidVec &Y_other = ew1->y(i + 1);
       TS_ASSERT_DELTA(Y_other[0], 2.0, 1e-5);
-      const MantidVec &E_other = ew1->readE(i + 1);
+      const MantidVec &E_other = ew1->e(i + 1);
       TS_ASSERT_DELTA(E_other[0], M_SQRT2, 1e-5);
     }
     // suppress unused argument when built without openmp.
@@ -769,11 +769,11 @@ public:
     // Calling isCommonBins() sets the flag m_isCommonBinsFlagSet
     TS_ASSERT(ws->isCommonBins())
     // Calling dataX should unset the flag m_isCommonBinsFlagSet
-    ws->dataX(0)[0] += 0.0;
+    ws->mutableX(0)[0] += 0.0;
     // m_isCommonBinsFlagSet is false, so this will re-validate and notice that
     // dataX is still identical.
     TS_ASSERT(ws->isCommonBins())
-    ws->dataX(0)[0] += 0.1;
+    ws->mutableX(0)[0] += 0.1;
     // m_isCommonBinsFlagSet is false, so this will re-validate and notice that
     // dataX(0) is now different from dataX(1).
     TS_ASSERT(!ws->isCommonBins())
@@ -781,7 +781,7 @@ public:
     // Check methods not inherited from MatrixWorkspace
     ws->setAllX(edges);
     TS_ASSERT(ws->isCommonBins())
-    ws->dataX(0)[0] -= 0.1;
+    ws->mutableX(0)[0] -= 0.1;
     TS_ASSERT(!ws->isCommonBins())
     ws->resetAllXToSingleBin();
     TS_ASSERT(ws->isCommonBins())
@@ -791,9 +791,9 @@ public:
     int numEvents = 2;
     int numHistograms = 2;
     EventWorkspace_const_sptr ws = WorkspaceCreationHelper::createRandomEventWorkspace(numEvents, numHistograms);
-    TS_ASSERT_THROWS_NOTHING(ws->readY(0));
+    TS_ASSERT_THROWS_NOTHING(ws->y(0));
     TS_ASSERT_THROWS_NOTHING(ws->dataY(0));
-    TS_ASSERT_THROWS_NOTHING(ws->readE(0));
+    TS_ASSERT_THROWS_NOTHING(ws->e(0));
     TS_ASSERT_THROWS_NOTHING(ws->dataE(0));
   }
 

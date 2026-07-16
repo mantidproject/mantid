@@ -272,9 +272,9 @@ def _reportDiagnostics(reportWS, dataWS, diagnosticsWS, dataColumn, diagnosedCol
             reportWS.addColumn("double", diagnosedColumn, _PLOT_TYPE_Y)
     maskedSpectra = set()
     for i in range(dataWS.getNumberHistograms()):
-        diagnosed = int(diagnosticsWS.readY(i)[0])
+        diagnosed = int(diagnosticsWS.y(i)[0])
         if reportWS is not None:
-            y = dataWS.readY(i)[0]
+            y = dataWS.y(i)[0]
             reportWS.setCell(dataColumn, i, y)
             reportWS.setCell(diagnosedColumn, i, diagnosed)
         if diagnosed != 0:
@@ -290,7 +290,7 @@ def _reportMasking(reportWS, maskWS, maskedColumn):
             reportWS.addColumn("double", maskedColumn, _PLOT_TYPE_Y)
     maskedSpectra = set()
     for i in range(maskWS.getNumberHistograms()):
-        masked = int(maskWS.readY(i)[0])
+        masked = int(maskWS.y(i)[0])
         if reportWS is not None:
             reportWS.setCell(maskedColumn, i, masked)
         if masked != 0:
@@ -598,8 +598,8 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
             indexShift = -min(begin, end + 1)
             while comp(i, begin):
                 index = i + indexShift
-                if maskWS.readY(i) == 0:
-                    Ys[index] = numpy.sum(ws.readY(i))
+                if maskWS.y(i) == 0:
+                    Ys[index] = numpy.sum(ws.y(i))
                 else:
                     Ys[index] = 0.0
                 i += step

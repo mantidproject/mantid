@@ -205,9 +205,9 @@ public:
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), EndWorkspaceIndex - StartWorkspaceIndex + 1);
 
     for (size_t i = 0; i < output2D->getNumberHistograms(); i++) {
-      MantidVec X = output2D->readX(i);
-      MantidVec Y = output2D->readY(i);
-      MantidVec E = output2D->readE(i);
+      MantidVec X = output2D->x(i);
+      MantidVec Y = output2D->y(i);
+      MantidVec E = output2D->e(i);
       TS_ASSERT_EQUALS(X.size(), 2);
       TS_ASSERT_EQUALS(Y.size(), 1);
       TS_ASSERT_DELTA(Y[0], 20.0, 1e-6);
@@ -300,7 +300,7 @@ public:
 
     double x[lenX] = {-1, -0.8, -0.6, -0.4, -0.2, -2.22045e-16, 0.2, 0.4, 0.6, 0.8, 1};
     for (unsigned int i = 0; i < lenX; i++) {
-      ws->dataX(0)[i] = x[i];
+      ws->mutableX(0)[i] = x[i];
       // Generate some rounding errors. Note: if you increase errors by making
       // this more complicated,
       // you'll eventually make Integration "fail".
@@ -310,18 +310,18 @@ public:
       // different from the
       // initial -0.2 that Integration will fail to catch one bin and because of
       // that some tests will fail.
-      ws->dataX(0)[i] /= 2.5671;
-      ws->dataX(0)[i] *= 13.3;
-      ws->dataX(0)[i] /= 13.3;
-      ws->dataX(0)[i] *= 2.5671;
+      ws->mutableX(0)[i] /= 2.5671;
+      ws->mutableX(0)[i] *= 13.3;
+      ws->mutableX(0)[i] /= 13.3;
+      ws->mutableX(0)[i] *= 2.5671;
     }
     double y[lenY] = {0, 0, 0, 2, 2, 2, 2, 0, 0, 0};
     for (unsigned int i = 0; i < lenY; i++) {
-      ws->dataY(0)[i] = y[i];
+      ws->mutableY(0)[i] = y[i];
     }
     double e[lenE] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     for (unsigned int i = 0; i < lenE; i++) {
-      ws->dataE(0)[i] = e[i];
+      ws->mutableE(0)[i] = e[i];
     }
     AnalysisDataService::Instance().add(inWsName, ws);
   }
@@ -390,9 +390,9 @@ public:
 
     for (int j = 0; j < 5; ++j) {
       for (int k = 0; k < 5; ++k) {
-        space2D->dataX(j)[k] = 0.9 * k;
-        space2D->dataY(j)[k] = 2 * k + double(j);
-        space2D->dataE(j)[k] = 1.0;
+        space2D->mutableX(j)[k] = 0.9 * k;
+        space2D->mutableY(j)[k] = 2 * k + double(j);
+        space2D->mutableE(j)[k] = 1.0;
       }
     }
 
@@ -415,14 +415,14 @@ public:
     TS_ASSERT_EQUALS(output->blocksize(), 1);
     TS_ASSERT(output->isHistogramData());
 
-    TS_ASSERT_DELTA(output->readX(0).front(), -0.5 * 0.9, 1e-14);
-    TS_ASSERT_DELTA(output->readX(0).back(), 4.5 * 0.9, 1e-14);
+    TS_ASSERT_DELTA(output->x(0).front(), -0.5 * 0.9, 1e-14);
+    TS_ASSERT_DELTA(output->x(0).back(), 4.5 * 0.9, 1e-14);
 
-    TS_ASSERT_DELTA(output->readY(0)[0], 20 * 0.9, 1e-14);
-    TS_ASSERT_DELTA(output->readY(1)[0], 25 * 0.9, 1e-14);
-    TS_ASSERT_DELTA(output->readY(2)[0], 30 * 0.9, 1e-14);
-    TS_ASSERT_DELTA(output->readY(3)[0], 35 * 0.9, 1e-14);
-    TS_ASSERT_DELTA(output->readY(4)[0], 40 * 0.9, 1e-14);
+    TS_ASSERT_DELTA(output->y(0)[0], 20 * 0.9, 1e-14);
+    TS_ASSERT_DELTA(output->y(1)[0], 25 * 0.9, 1e-14);
+    TS_ASSERT_DELTA(output->y(2)[0], 30 * 0.9, 1e-14);
+    TS_ASSERT_DELTA(output->y(3)[0], 35 * 0.9, 1e-14);
+    TS_ASSERT_DELTA(output->y(4)[0], 40 * 0.9, 1e-14);
 
     AnalysisDataService::Instance().remove(outWsName);
   }
@@ -435,9 +435,9 @@ public:
 
     for (int j = 0; j < 5; ++j) {
       for (int k = 0; k < 5; ++k) {
-        space2D->dataX(j)[k] = k * (1.0 + 1.0 * k);
-        space2D->dataY(j)[k] = 2 * k + double(j);
-        space2D->dataE(j)[k] = 1.0;
+        space2D->mutableX(j)[k] = k * (1.0 + 1.0 * k);
+        space2D->mutableY(j)[k] = 2 * k + double(j);
+        space2D->mutableE(j)[k] = 1.0;
       }
     }
 
@@ -460,14 +460,14 @@ public:
     TS_ASSERT_EQUALS(output->blocksize(), 1);
     TS_ASSERT(output->isHistogramData());
 
-    TS_ASSERT_EQUALS(output->readX(0).front(), -1.0);
-    TS_ASSERT_EQUALS(output->readX(0).back(), 24.0);
+    TS_ASSERT_EQUALS(output->x(0).front(), -1.0);
+    TS_ASSERT_EQUALS(output->x(0).back(), 24.0);
 
-    TS_ASSERT_EQUALS(output->readY(0)[0], 132.0);
-    TS_ASSERT_EQUALS(output->readY(1)[0], 157.0);
-    TS_ASSERT_EQUALS(output->readY(2)[0], 182.0);
-    TS_ASSERT_EQUALS(output->readY(3)[0], 207.0);
-    TS_ASSERT_EQUALS(output->readY(4)[0], 232.0);
+    TS_ASSERT_EQUALS(output->y(0)[0], 132.0);
+    TS_ASSERT_EQUALS(output->y(1)[0], 157.0);
+    TS_ASSERT_EQUALS(output->y(2)[0], 182.0);
+    TS_ASSERT_EQUALS(output->y(3)[0], 207.0);
+    TS_ASSERT_EQUALS(output->y(4)[0], 232.0);
 
     AnalysisDataService::Instance().remove(outWsName);
   }

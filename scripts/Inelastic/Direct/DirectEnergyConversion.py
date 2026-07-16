@@ -1552,8 +1552,8 @@ class DirectEnergyConversion(object):
                 continue
             if data_specInfo.isMasked(i):
                 continue
-            sig = data_ws.readY(i)[0]
-            err = data_ws.readE(i)[0]
+            sig = data_ws.y(i)[0]
+            err = data_ws.e(i)[0]
             if sig != sig:  # ignore NaN (hopefully it will mean mask some day)
                 continue
             if (err <= 0) or (sig <= 0):  # count Inf and negative||zero readings.

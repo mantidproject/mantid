@@ -184,8 +184,8 @@ void SpecialWorkspace2D::setValue(const detid_t detectorID, const double value, 
     msg << "SpecialWorkspace2D::setValue(): Input Detector ID = " << detectorID << " Is Invalid";
     throw std::invalid_argument(msg.str());
   } else {
-    this->dataY(it->second)[0] = value;
-    this->dataE(it->second)[0] = error;
+    this->mutableY(it->second)[0] = value;
+    this->mutableE(it->second)[0] = error;
   }
 }
 
@@ -275,9 +275,9 @@ void SpecialWorkspace2D::binaryAND(const std::shared_ptr<const SpecialWorkspace2
     double y2 = ws->dataY(i)[0];
 
     if (y1 < 1.0E-10 || y2 < 1.0E-10) {
-      this->dataY(i)[0] = 0.0;
+      this->mutableY(i)[0] = 0.0;
     } else {
-      this->dataY(i)[0] += y2;
+      this->mutableY(i)[0] += y2;
     }
   }
 }
@@ -295,13 +295,13 @@ void SpecialWorkspace2D::binaryOR(const std::shared_ptr<const SpecialWorkspace2D
     if (y2 > y1) {
       max = y2;
     }
-    this->dataY(i)[0] = max;
+    this->mutableY(i)[0] = max;
 
     /*
 if (y1 < 1.0E-10 && y2 < 1.0E-10){
-  this->dataY(i)[0] = 0.0;
+  this->mutableY(i)[0] = 0.0;
 } else {
-  this->dataY(i)[0] += y2;
+  this->mutableY(i)[0] += y2;
 }
 */
   }
@@ -316,11 +316,11 @@ void SpecialWorkspace2D::binaryXOR(const std::shared_ptr<const SpecialWorkspace2
     double y1 = this->dataY(i)[0];
     double y2 = ws->dataY(i)[0];
     if (y1 < 1.0E-10 && y2 < 1.0E-10) {
-      this->dataY(i)[0] = 0.0;
+      this->mutableY(i)[0] = 0.0;
     } else if (y1 > 1.0E-10 && y2 > 1.0E-10) {
-      this->dataY(i)[0] = 0.0;
+      this->mutableY(i)[0] = 0.0;
     } else {
-      this->dataY(i)[0] = 1.0;
+      this->mutableY(i)[0] = 1.0;
     }
   }
 }
@@ -333,9 +333,9 @@ void SpecialWorkspace2D::binaryNOT() {
   for (size_t i = 0; i < this->getNumberHistograms(); i++) {
     double y1 = this->dataY(i)[0];
     if (y1 < 1.0E-10) {
-      this->dataY(i)[0] = 1.0;
+      this->mutableY(i)[0] = 1.0;
     } else {
-      this->dataY(i)[0] = 0.0;
+      this->mutableY(i)[0] = 0.0;
     }
   }
 }
@@ -390,9 +390,9 @@ void SpecialWorkspace2D::copyFrom(std::shared_ptr<const SpecialWorkspace2D> sour
   for (size_t ispec = 0; ispec < this->getNumberHistograms(); ispec++) {
 
     // 1.1 Check size
-    const MantidVec &inx = sourcews->readX(ispec);
-    const MantidVec &iny = sourcews->readY(ispec);
-    const MantidVec &ine = sourcews->readE(ispec);
+    const MantidVec &inx = sourcews->x(ispec);
+    const MantidVec &iny = sourcews->y(ispec);
+    const MantidVec &ine = sourcews->e(ispec);
 
     MantidVec &outx = this->dataX(ispec);
     MantidVec &outy = this->dataY(ispec);

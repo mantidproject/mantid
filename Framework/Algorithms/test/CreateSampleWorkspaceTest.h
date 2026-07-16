@@ -101,9 +101,9 @@ public:
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), numHist * numScanPoints);
     TS_ASSERT_EQUALS(ws->blocksize(), numBins);
 
-    TS_ASSERT_EQUALS(ws->getAxis(0)->unit()->unitID(), xUnit);
+    TS_ASSERT_EQUALS(ws->x(s(0)->unit()->unitID(), xUnit);
     TS_ASSERT_EQUALS(ws->readX(0)[0], xMin);
-    if (ws->blocksize() == static_cast<size_t>(numBins)) {
+    if (ws->blocksize() ->x(c_cast<size_t>(numBins)) {
       TS_ASSERT_DELTA(ws->readX(0)[numBins], xMax, binWidth);
     }
 
@@ -205,11 +205,11 @@ public:
     // type
     MatrixWorkspace_sptr ws = createSampleWorkspace(outWSName);
     if (!ws)
-      return;
-    TS_ASSERT_DELTA(ws->readY(0)[20], 0.3, 0.0001);
-    TS_ASSERT_DELTA(ws->readY(0)[40], 0.3, 0.0001);
-    TS_ASSERT_DELTA(ws->readY(0)[50], 10.3, 0.0001);
-    TS_ASSERT_DELTA(ws->readY(0)[60], 0.3, 0.0001);
+      return;->y(
+    TS_ASSERT_DELTA(ws->y(0)[20], 0.3, 0.0001);
+    TS_ASSERT_DELTA(ws->y(0)[40], 0.3, 0.0001);
+    TS_ASSERT_DELTA(ws->y(0)[50], 10.3, 0.0001);
+    TS_ASSERT_DELTA(ws->y(0)[60], 0.3, 0.0001);
     TS_ASSERT_DELTA(ws->readY(0)[80], 0.3, 0.0001);
 
     // Remove workspace from the data service.
@@ -236,11 +236,11 @@ public:
     //      background Y = 0.3*25 = 7.5 => int(7.5)=7
     //      peak Y = 10.3*25 = 257.5 => int(257.5)=257
     // Therefore in total we lose 0.5*100*200=10000 events
-    TS_ASSERT_EQUALS(ws->getNumberEvents(), 190000);
-    TS_ASSERT_DELTA(ws->readY(0)[20], 7, 0.0001);
-    TS_ASSERT_DELTA(ws->readY(0)[40], 7, 0.0001);
-    TS_ASSERT_DELTA(ws->readY(0)[50], 257, 0.0001);
-    TS_ASSERT_DELTA(ws->readY(0)[60], 7, 0.0001);
+    TS_ASSERT_EQUALS(w->y(mberEvents(), 190000);
+    TS_ASSERT_DELTA(ws->y(0)[20], 7, 0.0001);
+    TS_ASSERT_DELTA(ws->y(0)[40], 7, 0.0001);
+    TS_ASSERT_DELTA(ws->y(0)[50], 257, 0.0001);
+    TS_ASSERT_DELTA(ws->y(0)[60], 7, 0.0001);
     TS_ASSERT_DELTA(ws->readY(0)[80], 7, 0.0001);
 
     // Remove workspace from the data service.
@@ -254,12 +254,12 @@ public:
 
     auto ws = std::dynamic_pointer_cast<IEventWorkspace>(createSampleWorkspace(
         outWSName, "Event", "Flat background", "", 2, 1, 1000, false, "DeltaE", -10., 19., 0.5, 1));
-    TS_ASSERT_EQUALS(ws->getNumberEvents(), 1972);
+    TS_ASSERT_EQUALS(ws->y(berEvents(), 1972);
     TS_ASSERT_EQUALS(ws->readY(0).size(), 58);
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2);
 
     for (auto i = 0; i < 58; ++i) {
-      for (auto j = 0; j < 2; ++j)
+      for (auto j = 0; j <->y(
         TS_ASSERT_DELTA(ws->readY(j)[i], 17., 1E-7);
     }
 
@@ -289,10 +289,10 @@ public:
     // type
     MatrixWorkspace_sptr ws = createSampleWorkspace(outWSName, "Histogram", "Multiple Peaks");
     if (!ws)
-      return;
-    TS_ASSERT_DELTA(ws->readY(0)[20], 0.3, 0.0001);
-    TS_ASSERT_DELTA(ws->readY(0)[40], 0.3, 0.0001);
-    TS_ASSERT_DELTA(ws->readY(0)[60], 8.3, 0.0001);
+      return;->y(
+    TS_ASSERT_DELTA(ws->y(0)[20], 0.3, 0.0001);
+    TS_ASSERT_DELTA(ws->y(0)[40], 0.3, 0.0001);
+    TS_ASSERT_DELTA(ws->y(0)[60], 8.3, 0.0001);
     TS_ASSERT_DELTA(ws->readY(0)[80], 0.3, 0.0001);
 
     // Remove workspace from the data service.
@@ -307,10 +307,10 @@ public:
     // type
     MatrixWorkspace_sptr ws = createSampleWorkspace(outWSName, "Event", "Flat background");
     if (!ws)
-      return;
-    TS_ASSERT_DELTA(ws->readY(0)[20], 10.0, 0.0001);
-    TS_ASSERT_DELTA(ws->readY(0)[40], 10.0, 0.0001);
-    TS_ASSERT_DELTA(ws->readY(0)[60], 10.0, 0.0001);
+      return;->y(
+    TS_ASSERT_DELTA(ws->y(0)[20], 10.0, 0.0001);
+    TS_ASSERT_DELTA(ws->y(0)[40], 10.0, 0.0001);
+    TS_ASSERT_DELTA(ws->y(0)[60], 10.0, 0.0001);
     TS_ASSERT_DELTA(ws->readY(0)[80], 10.0, 0.0001);
 
     // Remove workspace from the data service.
@@ -325,10 +325,10 @@ public:
     // type
     MatrixWorkspace_sptr ws = createSampleWorkspace(outWSName, "Event", "Exp Decay");
     if (!ws)
-      return;
-    TS_ASSERT_DELTA(ws->readY(0)[20], 3.0, 0.0001);
-    TS_ASSERT_DELTA(ws->readY(0)[40], 0.0, 0.0001);
-    TS_ASSERT_DELTA(ws->readY(0)[60], 0.0, 0.0001);
+      return;->y(
+    TS_ASSERT_DELTA(ws->y(0)[20], 3.0, 0.0001);
+    TS_ASSERT_DELTA(ws->y(0)[40], 0.0, 0.0001);
+    TS_ASSERT_DELTA(ws->y(0)[60], 0.0, 0.0001);
     TS_ASSERT_DELTA(ws->readY(0)[80], 0.0, 0.0001);
 
     // Remove workspace from the data service.
@@ -347,9 +347,9 @@ public:
     MatrixWorkspace_sptr ws = createSampleWorkspace(outWSName, "Histogram", "User Defined", myFunc, 2, 10, 1000, false,
                                                     "TOF", -100, 20100, 200);
     if (!ws)
-      return;
-    TS_ASSERT_DELTA(ws->readY(0)[5], 80.5, 0.0001);
-    TS_ASSERT_DELTA(ws->readY(0)[20], 0.5, 0.0001);
+      return;->y(
+    TS_ASSERT_DELTA(ws->y(0)[5], 80.5, 0.0001);
+    TS_ASSERT_DELTA(ws->y(0)[20], 0.5, 0.0001);
     TS_ASSERT_DELTA(ws->readY(0)[50], 50.5, 0.0001);
 
     // Remove workspace from the data service.
@@ -364,11 +364,11 @@ public:
     // type
     MatrixWorkspace_sptr ws = createSampleWorkspace(outWSName);
     if (!ws)
-      return;
-    TS_ASSERT_DELTA(ws->readY(0)[20], 0.3, 0.5);
-    TS_ASSERT_DELTA(ws->readY(0)[40], 0.3, 0.5);
-    TS_ASSERT_DELTA(ws->readY(0)[50], 10.3, 0.5);
-    TS_ASSERT_DELTA(ws->readY(0)[60], 0.3, 0.5);
+      return;->y(
+    TS_ASSERT_DELTA(ws->y(0)[20], 0.3, 0.5);
+    TS_ASSERT_DELTA(ws->y(0)[40], 0.3, 0.5);
+    TS_ASSERT_DELTA(ws->y(0)[50], 10.3, 0.5);
+    TS_ASSERT_DELTA(ws->y(0)[60], 0.3, 0.5);
     TS_ASSERT_DELTA(ws->readY(0)[80], 0.3, 0.5);
 
     // Remove workspace from the data service.
@@ -383,11 +383,11 @@ public:
     // type
     MatrixWorkspace_sptr ws = createSampleWorkspace(outWSName, "Event");
     if (!ws)
-      return;
-    TS_ASSERT_DELTA(ws->readY(0)[20], 7, 50);
-    TS_ASSERT_DELTA(ws->readY(0)[40], 7, 50);
-    TS_ASSERT_DELTA(ws->readY(0)[50], 257, 50);
-    TS_ASSERT_DELTA(ws->readY(0)[60], 7, 50);
+      return;->y(
+    TS_ASSERT_DELTA(ws->y(0)[20], 7, 50);
+    TS_ASSERT_DELTA(ws->y(0)[40], 7, 50);
+    TS_ASSERT_DELTA(ws->y(0)[50], 257, 50);
+    TS_ASSERT_DELTA(ws->y(0)[60], 7, 50);
     TS_ASSERT_DELTA(ws->readY(0)[80], 7, 50);
 
     // Remove workspace from the data service.
@@ -472,16 +472,16 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
 
-    TS_ASSERT(outWS->spectrumInfo().isMonitor(0));
-    TS_ASSERT_DELTA(outWS->readY(0)[40], 0.3, 0.0001);
+    TS_ASSERT(outWS->spec->y(().isMonitor(0));
+    TS_ASSERT_DELTA(outWS->y(0)[40], 0.3, 0.0001);
     TS_ASSERT_DELTA(outWS->readY(0)[50], 10.3, 0.0001);
 
-    TS_ASSERT(outWS->spectrumInfo().isMonitor(1));
-    TS_ASSERT_DELTA(outWS->readY(1)[40], 0.3, 0.0001);
+    TS_ASSERT(outWS->spec->y(().isMonitor(1));
+    TS_ASSERT_DELTA(outWS->y(1)[40], 0.3, 0.0001);
     TS_ASSERT_DELTA(outWS->readY(1)[50], 10.3, 0.0001);
 
-    TS_ASSERT(!outWS->spectrumInfo().isMonitor(2));
-    TS_ASSERT_DELTA(outWS->readY(2)[40], 0.3, 0.0001);
+    TS_ASSERT(!outWS->spe->y(o().isMonitor(2));
+    TS_ASSERT_DELTA(outWS->y(2)[40], 0.3, 0.0001);
     TS_ASSERT_DELTA(outWS->readY(2)[50], 10.3, 0.0001);
 
     // Remove workspace from the data service.
@@ -502,16 +502,16 @@ public:
 
     TS_ASSERT_EQUALS(ews->getNumberEvents(), 191900);
 
-    TS_ASSERT(ews->spectrumInfo().isMonitor(0));
-    TS_ASSERT_DELTA(ews->readY(0)[50], 257, 0.0001);
+    TS_ASSERT(ews->spec->y(().isMonitor(0));
+    TS_ASSERT_DELTA(ews->y(0)[50], 257, 0.0001);
     TS_ASSERT_DELTA(ews->readY(0)[60], 7, 0.0001);
 
-    TS_ASSERT(ews->spectrumInfo().isMonitor(1));
-    TS_ASSERT_DELTA(ews->readY(1)[50], 257, 0.0001);
+    TS_ASSERT(ews->spec->y(().isMonitor(1));
+    TS_ASSERT_DELTA(ews->y(1)[50], 257, 0.0001);
     TS_ASSERT_DELTA(ews->readY(1)[60], 7, 0.0001);
 
-    TS_ASSERT(!ews->spectrumInfo().isMonitor(2));
-    TS_ASSERT_DELTA(ews->readY(2)[50], 257, 0.0001);
+    TS_ASSERT(!ews->spe->y(o().isMonitor(2));
+    TS_ASSERT_DELTA(ews->y(2)[50], 257, 0.0001);
     TS_ASSERT_DELTA(ews->readY(2)[60], 7, 0.0001);
 
     // Remove workspace from the data service.

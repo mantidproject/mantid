@@ -2014,11 +2014,11 @@ void QtLocalePropertyManager::uninitializeProperty(QtProperty *property) {
 void QtPointPropertyManagerPrivate::slotIntChanged(const QtProperty *property, int value) {
   if (QtProperty *xprop = m_xToProperty.value(property, 0)) {
     QPoint p = m_values[xprop];
-    p.setX(value);
+    p.setSharedX(value);
     q_ptr->setValue(xprop, p);
   } else if (QtProperty *yprop = m_yToProperty.value(property, 0)) {
     QPoint p = m_values[yprop];
-    p.setY(value);
+    p.setSharedY(value);
     q_ptr->setValue(yprop, p);
   }
 }
@@ -2193,11 +2193,11 @@ void QtPointPropertyManager::uninitializeProperty(QtProperty *property) {
 void QtPointFPropertyManagerPrivate::slotDoubleChanged(const QtProperty *property, double value) {
   if (QtProperty *prop = m_xToProperty.value(property, 0)) {
     QPointF p = m_values[prop].val;
-    p.setX(value);
+    p.setSharedX(value);
     q_ptr->setValue(prop, p);
   } else if (QtProperty *prop = m_yToProperty.value(property, 0)) {
     QPointF p = m_values[prop].val;
-    p.setY(value);
+    p.setSharedY(value);
     q_ptr->setValue(prop, p);
   }
 }

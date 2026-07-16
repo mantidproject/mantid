@@ -137,8 +137,8 @@ class FindPeaksAutomatic(DataProcessorAlgorithm):
         # Convert the data to point data
         prog_reporter.report("Converting to point data")
         raw_data_ws = ConvertToPointData(error_ws, StoreInADS=False)
-        raw_xvals = raw_data_ws.readX(0).copy()
-        raw_yvals = raw_data_ws.readY(0).copy()
+        raw_xvals = raw_data_ws.x(0).copy()
+        raw_yvals = raw_data_ws.y(0).copy()
 
         raw_xvals, raw_yvals, raw_error = self.crop_data(raw_xvals, raw_yvals, raw_error, prog_reporter)
 
@@ -169,12 +169,12 @@ class FindPeaksAutomatic(DataProcessorAlgorithm):
         except ValueError:
             raise ValueError("Spectrum number is not valid")
 
-        raw_xvals = self.getProperty("InputWorkspace").value.readX(index).copy()
-        raw_yvals = self.getProperty("InputWorkspace").value.readY(index).copy()
+        raw_xvals = self.getProperty("InputWorkspace").value.x(index).copy()
+        raw_yvals = self.getProperty("InputWorkspace").value.y(index).copy()
         prog_reporter.report("Loaded data")
 
         # If the data does not have errors use poisson statistics create an workspace with added errors
-        raw_error = self.getProperty("InputWorkspace").value.readE(index).copy()
+        raw_error = self.getProperty("InputWorkspace").value.e(index).copy()
         if len(np.argwhere(raw_error > 0)) == 0:
             raw_error = np.sqrt(raw_yvals)
             error_ws = CreateWorkspace(DataX=raw_xvals, DataY=raw_yvals, DataE=raw_error, StoreInADS=False)

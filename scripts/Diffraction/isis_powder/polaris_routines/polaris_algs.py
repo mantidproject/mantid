@@ -127,7 +127,7 @@ def generate_ts_pdf(
 
     if enforce_high_q_to_1:
         constant_background = mantid.CreateSingleValuedWorkspace(
-            DataValue=focused_ws[-1].readY(0)[-1], OutputWorkspace=f"{run_number}_correction_offset_s_q_1"
+            DataValue=focused_ws[-1].y(0)[-1], OutputWorkspace=f"{run_number}_correction_offset_s_q_1"
         )
         print(
             f"Forcing values of S(Q)-1 to zero by subtraction of a constant: {constant_background.dataY(0)}. "

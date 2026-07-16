@@ -299,7 +299,7 @@ class FullInstrumentViewModel:
             return (0, 0)
 
         if workspace.isRaggedWorkspace():
-            first_last = np.array([workspace.readX(int(i))[[0, -1]] for i in workspace_indices])
+            first_last = np.array([workspace.x(int(i))[[0, -1]] for i in workspace_indices])
             return (np.min(first_last[:, 0]), np.max(first_last[:, 1]))
 
         elif workspace.isCommonBins():
@@ -557,7 +557,7 @@ class FullInstrumentViewModel:
                 max_bin_edge = 0
                 min_bin_width = np.inf
                 for ws_index_i in range(tmp_ws.getNumberHistograms()):
-                    bin_edges = tmp_ws.readX(ws_index_i)
+                    bin_edges = tmp_ws.x(ws_index_i)
                     min_bin_edge = min(min_bin_edge, bin_edges[0])
                     max_bin_edge = max(max_bin_edge, bin_edges[-1])
                     min_bin_width = min(min_bin_width, np.min(np.diff(bin_edges)))

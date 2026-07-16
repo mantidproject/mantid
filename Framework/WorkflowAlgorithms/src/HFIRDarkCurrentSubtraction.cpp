@@ -128,10 +128,10 @@ void HFIRDarkCurrentSubtraction::exec() {
 
   // Zero out timer and monitor so that we don't subtract them out
   for (size_t i = 0; i < scaledDarkWS->dataY(0).size(); i++) {
-    scaledDarkWS->dataY(DEFAULT_TIMER_ID)[i] = 0.0;
-    scaledDarkWS->dataE(DEFAULT_TIMER_ID)[i] = 0.0;
-    scaledDarkWS->dataY(DEFAULT_MONITOR_ID)[i] = 0.0;
-    scaledDarkWS->dataE(DEFAULT_MONITOR_ID)[i] = 0.0;
+    scaledDarkWS->mutableY(DEFAULT_TIMER_ID)[i] = 0.0;
+    scaledDarkWS->mutableE(DEFAULT_TIMER_ID)[i] = 0.0;
+    scaledDarkWS->mutableY(DEFAULT_MONITOR_ID)[i] = 0.0;
+    scaledDarkWS->mutableE(DEFAULT_MONITOR_ID)[i] = 0.0;
   }
   auto minusAlg = createChildAlgorithm("Minus", 0.5, 0.7);
   minusAlg->setProperty("LHSWorkspace", inputWS);

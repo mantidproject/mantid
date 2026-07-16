@@ -335,7 +335,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         self._nperiods = raw_group.size()
         first_ws = raw_group[0]
         foil_out = WorkspaceFactory.create(first_ws)
-        x_values = first_ws.readX(0)
+        x_values = first_ws.x(0)
         self.foil_out = foil_out
 
         foil_map = SpectraToFoilPeriodMap(self._nperiods)
@@ -357,10 +357,10 @@ class LoadVesuvio(LoadEmptyVesuvio):
             dataY = foil_out.dataY(ws_index)
             dataE = foil_out.dataE(ws_index)
             for group_index in raw_grp_indices:
-                dataY += raw_group[group_index].readY(ws_index)
-                dataE += np.square(raw_group[group_index].readE(ws_index))
+                dataY += raw_group[group_index].y(ws_index)
+                dataE += np.square(raw_group[group_index].e(ws_index))
             np.sqrt(dataE, dataE)
-            foil_out.setX(ws_index, x_values)
+            foil_out.setSharedX(ws_index, x_values)
 
             if len(runs) > 1:
                 # Create monitor workspace for normalisation
@@ -370,7 +370,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
                 data_kwargs = {"NVectors": nhists, "XLength": nmonitor_bins, "YLength": nmonitor_bins}
                 mon_out = WorkspaceFactory.create(first_mon_ws, **data_kwargs)
 
-                mon_raw_t = self._raw_monitors[0].readX(0)
+                mon_raw_t = self._raw_monitors[0].x(0)
                 delay = mon_raw_t[2] - mon_raw_t[1]
                 # The original EVS loader, raw.for/rawb.for, does this. Done here to match results
                 mon_raw_t = mon_raw_t - delay
@@ -383,11 +383,11 @@ class LoadVesuvio(LoadEmptyVesuvio):
                 outY = mon_out.dataY(ws_index)
                 for grp_index in raw_grp_indices:
                     raw_ws = self._raw_monitors[grp_index]
-                    outY += raw_ws.readY(self._mon_index)
+                    outY += raw_ws.y(self._mon_index)
 
                 # Normalise by monitor
                 indices_in_range = np.where((self.mon_pt_times >= self._mon_norm_start) & (self.mon_pt_times < self._mon_norm_end))
-                mon_values = mon_out.readY(ws_index)
+                mon_values = mon_out.y(ws_index)
                 mon_values_sum = np.sum(mon_values[indices_in_range])
                 foil_state = foil_out.dataY(ws_index)
                 foil_state *= self._mon_scale / mon_values_sum
@@ -573,14 +573,14 @@ class LoadVesuvio(LoadEmptyVesuvio):
         self._nperiods = nperiods
 
         # Cache delta_t values
-        raw_t = first_ws.readX(0)
+        raw_t = first_ws.x(0)
         delay = raw_t[2] - raw_t[1]
         # The original EVS loader, raw.for/rawb.for, does this. Done here to match results
         raw_t = raw_t - delay
         self.pt_times = raw_t[1:]
         self.delta_t = raw_t[1:] - raw_t[:-1]
 
-        mon_raw_t = self._raw_monitors[0].readX(0)
+        mon_raw_t = self._raw_monitors[0].x(0)
         delay = mon_raw_t[2] - mon_raw_t[1]
         # The original EVS loader, raw.for/rawb.for, does this. Done here to match results
         mon_raw_t = mon_raw_t - delay
@@ -738,7 +738,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         wsindex = self._ws_index  # The current spectra to examine
         for i in range(self._nperiods):
             # Gets the sum(1,2) of the yvalues at the bin indexs
-            yvalues = self._raw_grp[i].readY(wsindex)
+            yvalues = self._raw_grp[i].y(wsindex)
             self.sum1[i] = np.sum(yvalues[sum1_indices])
             self.sum2[i] = np.sum(yvalues[sum2_indices])
             if self.sum2[i] != 0.0:
@@ -848,12 +848,12 @@ class LoadVesuvio(LoadEmptyVesuvio):
         delta_t = self.delta_t  # Bin width
         for grp_index in raw_grp_indices:
             raw_ws = self._raw_grp[grp_index]
-            outY += raw_ws.readY(wsindex)
+            outY += raw_ws.y(wsindex)
             self.sum3[sum_index] += self.sum2[grp_index]
 
         # Errors are calculated from counts
         eout = np.sqrt(outY) / delta_t
-        foil_ws.setE(wsindex, eout)
+        foil_ws.setSharedE(wsindex, eout)
         outY /= delta_t
 
         # monitors
@@ -863,7 +863,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         outY = mon_ws.dataY(wsindex)
         for grp_index in raw_grp_indices:
             raw_ws = self._raw_monitors[grp_index]
-            outY += raw_ws.readY(self._mon_index)
+            outY += raw_ws.y(self._mon_index)
 
         outY /= self.delta_tmon
 
@@ -882,7 +882,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
             Applies monitor normalization to the given foil spectrum from the given
             monitor spectrum.
             """
-            mon_values = mon_ws.readY(wsindex)
+            mon_values = mon_ws.y(wsindex)
             mon_values_sum = np.sum(mon_values[indices_in_range])
             foil_state = foil_ws.dataY(wsindex)
             foil_state *= self._mon_scale / mon_values_sum
@@ -903,7 +903,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         # Indices where the given condition is true
         range_indices = np.where((self.pt_times >= self._foil_out_norm_start) & (self.pt_times < self._foil_out_norm_end))
         wsindex = self._ws_index
-        cout = self.foil_out.readY(wsindex)
+        cout = self.foil_out.y(wsindex)
         sum_out = np.sum(cout[range_indices])
 
         def normalise_to_out(foil_ws, foil_type):
@@ -936,7 +936,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         else:
             raise RuntimeError("Unknown difference type requested: %d" % self._diff_opt)
 
-        self.foil_out.setX(wsindex, self.pt_times)
+        self.foil_out.setSharedX(wsindex, self.pt_times)
 
     def _calculate_thin_difference(self, ws_index):
         """
@@ -948,14 +948,14 @@ class LoadVesuvio(LoadEmptyVesuvio):
         # Counts
         cout = self.foil_out.dataY(ws_index)
         if self._spectra_type == BACKWARD:
-            cout -= self.foil_thin.readY(ws_index)
+            cout -= self.foil_thin.y(ws_index)
         else:
             cout *= -1.0
-            cout += self.foil_thin.readY(ws_index)
+            cout += self.foil_thin.y(ws_index)
 
         # Errors
         eout = self.foil_out.dataE(ws_index)
-        ethin = self.foil_thin.readE(ws_index)
+        ethin = self.foil_thin.e(ws_index)
         np.sqrt((eout**2 + ethin**2), eout)  # The second argument makes it happen in place
 
     def _calculate_double_difference(self, ws_index):
@@ -969,13 +969,13 @@ class LoadVesuvio(LoadEmptyVesuvio):
         cout = self.foil_out.dataY(ws_index)
         one_min_beta = 1.0 - self._beta
         cout *= one_min_beta
-        cout -= self.foil_thin.readY(ws_index)
-        cout += self._beta * self.foil_thick.readY(ws_index)
+        cout -= self.foil_thin.y(ws_index)
+        cout += self._beta * self.foil_thick.y(ws_index)
 
         # Errors
         eout = self.foil_out.dataE(ws_index)
-        ethin = self.foil_thin.readE(ws_index)
-        ethick = self.foil_thick.readE(ws_index)
+        ethin = self.foil_thin.e(ws_index)
+        ethick = self.foil_thick.e(ws_index)
         # The second argument makes it happen in place
         np.sqrt((one_min_beta * eout) ** 2 + ethin**2 + (self._beta**2) * ethick**2, eout)
 
@@ -987,11 +987,11 @@ class LoadVesuvio(LoadEmptyVesuvio):
         """
         # Counts
         cout = self.foil_out.dataY(ws_index)
-        cout -= self.foil_thick.readY(ws_index)
+        cout -= self.foil_thick.y(ws_index)
 
         # Errors
         eout = self.foil_out.dataE(ws_index)
-        ethick = self.foil_thick.readE(ws_index)
+        ethick = self.foil_thick.e(ws_index)
         np.sqrt((eout**2 + ethick**2), eout)  # The second argument makes it happen in place
 
     def _sum_all_spectra(self):
@@ -1003,7 +1003,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         # foil_out has all spectra in order specified by input
         foil_start = 0
         for idx_out in range(len(self._spectra)):
-            ws_out.setX(idx_out, self.foil_out.readX(foil_start))
+            ws_out.setSharedX(idx_out, self.foil_out.x(foil_start))
             summed_set = self._spectra[idx_out]
             nsummed = len(summed_set)
             y_out, e_out = ws_out.dataY(idx_out), ws_out.dataE(idx_out)
@@ -1011,8 +1011,8 @@ class LoadVesuvio(LoadEmptyVesuvio):
             spec_out.setSpectrumNo(self.foil_out.getSpectrum(foil_start).getSpectrumNo())
             spec_out.clearDetectorIDs()
             for foil_idx in range(foil_start, foil_start + nsummed):
-                y_out += self.foil_out.readY(foil_idx)
-                foil_err = self.foil_out.readE(foil_idx)
+                y_out += self.foil_out.y(foil_idx)
+                foil_err = self.foil_out.e(foil_idx)
                 e_out += foil_err * foil_err  # gaussian errors
                 in_ids = self.foil_out.getSpectrum(foil_idx).getDetectorIDs()
                 for det_id in in_ids:

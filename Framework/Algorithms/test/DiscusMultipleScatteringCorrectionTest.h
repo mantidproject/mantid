@@ -399,7 +399,7 @@ public:
     for (auto i = 0; i < 4; i++) {
       ws2->mutableY(0)[i] = pow(2 * i, 2);
     }
-    DiscusData1D data{ws2->getSpectrum(0).readX(), ws2->getSpectrum(0).readY()};
+    DiscusData1D data{ws2->getSpectrum(0).x(), ws2->getSpectrum(0).y()};
     auto interpY = alg.interpolateGaussian(data, 2.0);
     TS_ASSERT_EQUALS(interpY, exp(9.0));
 
@@ -414,7 +414,7 @@ public:
     auto ws = Mantid::DataObjects::create<Workspace2D>(
         1, Mantid::HistogramData::Histogram(Mantid::HistogramData::Points({0., 4., 16.}),
                                             Mantid::HistogramData::Counts({0., 2., 4.})));
-    auto interpY = alg.interpolateSquareRoot(DiscusData1D{ws->getSpectrum(0).readX(), ws->getSpectrum(0).readY()}, 9.0);
+    auto interpY = alg.interpolateSquareRoot(DiscusData1D{ws->getSpectrum(0).x(), ws->getSpectrum(0).y()}, 9.0);
     TS_ASSERT_EQUALS(interpY, 3.0);
   }
 
@@ -443,7 +443,7 @@ public:
         1, Mantid::HistogramData::Histogram(Mantid::HistogramData::Points({0., 1., 2., 3.}),
                                             Mantid::HistogramData::Frequencies({1., 1., 1., 2.})));
     std::vector<double> testResultX, testResultY;
-    DiscusData1D data{ws->getSpectrum(0).readX(), ws->getSpectrum(0).readY()};
+    DiscusData1D data{ws->getSpectrum(0).x(), ws->getSpectrum(0).y()};
     alg.integrateCumulative(data, 0., 2.2, testResultX, testResultY, true);
     TS_ASSERT_EQUALS(testResultY[3], 2.22);
     testResultX.clear();

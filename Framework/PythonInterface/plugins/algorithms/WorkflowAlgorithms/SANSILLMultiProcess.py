@@ -1093,7 +1093,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                 ReferenceWorkspace=inputs[self.getProperty("StitchReferenceIndex").value],
                 **kwargs,
             )
-            mtd[output].getRun().addProperty("stitch_scale_factors", list(mtd[output_scale_factors].readY(0)), True)
+            mtd[output].getRun().addProperty("stitch_scale_factors", list(mtd[output_scale_factors].y(0)), True)
             return [output, output_scale_factors]
         except RuntimeError as e:
             self.log().error("Unable to stitch, consider stitching manually: " + str(e))
@@ -1140,7 +1140,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         RenameWorkspace(tr, name)
         tr_ws = mtd[name]
         for i in range(tr_ws.getNumberHistograms()):
-            tr_ws.setX(i, [wavelength])
+            tr_ws.setSharedX(i, [wavelength])
         tr_ws.getAxis(0).setUnit("Wavelength")
         return name
 

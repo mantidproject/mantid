@@ -25,9 +25,9 @@ class ElementalAnalysisContextTest(unittest.TestCase):
     def assert_workspace_equal(self, workspace1, workspace2):
         self.assertEqual(workspace1.getNumberHistograms(), workspace2.getNumberHistograms())
         for i in range(workspace1.getNumberHistograms()):
-            self.assertTrue(np.array_equal(workspace1.readX(i), workspace2.readX(i)))
-            self.assertTrue(np.array_equal(workspace1.readY(i), workspace2.readY(i)))
-            self.assertTrue(np.array_equal(workspace1.readE(i), workspace2.readE(i)))
+            self.assertTrue(np.array_equal(workspace1.x(i), workspace2.x(i)))
+            self.assertTrue(np.array_equal(workspace1.y(i), workspace2.y(i)))
+            self.assertTrue(np.array_equal(workspace1.e(i), workspace2.e(i)))
 
     def assert_context_empty(self):
         self.assertEqual(len(self.context.data_context.current_runs), 0)

@@ -58,7 +58,7 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
         self.assertEqual(outWS.blocksize(), 1)
         spectrumInfo = outWS.spectrumInfo()
         for i in range(outWS.getNumberHistograms()):
-            self.assertEqual(outWS.readY(i)[0], 0)
+            self.assertEqual(outWS.y(i)[0], 0)
             self.assertFalse(spectrumInfo.isMasked(i))
 
     def testBackgroundDiagnostics(self):
@@ -93,7 +93,7 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
         spectrumInfo = outWS.spectrumInfo()
         for i in range(spectraCount):
             self.assertFalse(spectrumInfo.isMasked(i))
-            ys = outWS.readY(i)
+            ys = outWS.y(i)
             if i in highBkgIndices + lowBkgIndices:
                 self.assertEqual(ys[0], 1)
             else:
@@ -138,7 +138,7 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
         self.assertEqual(outWS.getNumberHistograms(), beamWS.getNumberHistograms())
         self.assertEqual(outWS.blocksize(), 1)
         for i in range(outWS.getNumberHistograms()):
-            ys = outWS.readY(i)
+            ys = outWS.y(i)
             if i >= 92 and i < 105:
                 self.assertEqual(ys[0], 1)
             else:
@@ -176,7 +176,7 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
         spectrumInfo = outWS.spectrumInfo()
         for i in range(spectraCount):
             self.assertFalse(spectrumInfo.isMasked(i))
-            ys = outWS.readY(i)
+            ys = outWS.y(i)
             if i in highPeakIndices + lowPeakIndices:
                 self.assertEqual(ys[0], 1)
             else:
@@ -202,7 +202,7 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
         self.assertEqual(outWS.getNumberHistograms(), spectraCount)
         self.assertEqual(outWS.blocksize(), 1)
         for i in range(spectraCount):
-            Ys = outWS.readY(i)
+            Ys = outWS.y(i)
             detector = outWS.getDetector(i)
             componentName = detector.getFullName()
             if "tube_1" in componentName:

@@ -607,9 +607,9 @@ public:
     double y59 = 0.2857;
     double y86 = 649.464;
 
-    TS_ASSERT_DELTA(outws->readY(1)[25], y25, 0.1);
-    TS_ASSERT_DELTA(outws->readY(1)[59], y59, 0.0001);
-    TS_ASSERT_DELTA(outws->readY(1)[86], y86, 0.001);
+    TS_ASSERT_DELTA(outws->y(1)[25], y25, 0.1);
+    TS_ASSERT_DELTA(outws->y(1)[59], y59, 0.0001);
+    TS_ASSERT_DELTA(outws->y(1)[86], y86, 0.001);
 
     // 5. Clean
     AnalysisDataService::Instance().remove("Data");
@@ -710,9 +710,9 @@ public:
     double y59 = 0.2857;
     double y86 = 649.464;
 
-    TS_ASSERT_DELTA(outws->readY(1)[25], y25, 0.1);
-    TS_ASSERT_DELTA(outws->readY(1)[59], y59, 0.0001);
-    TS_ASSERT_DELTA(outws->readY(1)[86], y86, 0.001);
+    TS_ASSERT_DELTA(outws->y(1)[25], y25, 0.1);
+    TS_ASSERT_DELTA(outws->y(1)[59], y59, 0.0001);
+    TS_ASSERT_DELTA(outws->y(1)[86], y86, 0.001);
 
     // 5. Clean
     AnalysisDataService::Instance().remove("Data");
@@ -792,7 +792,7 @@ public:
 
     // Check background (last point)
     double bkgdx = outws->x(1).back() * 0.001 + 101.0;
-    TS_ASSERT_DELTA(outws->readY(1).back(), bkgdx, 1.0);
+    TS_ASSERT_DELTA(outws->y(1).back(), bkgdx, 1.0);
 
     // Clean
     AnalysisDataService::Instance().remove("Data");

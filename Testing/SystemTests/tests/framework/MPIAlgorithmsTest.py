@@ -85,10 +85,10 @@ def test_broadcast_basic():
     assert_equal(output_ws.blocksize(), 100, "Block size")
 
     x_expected = np.linspace(0, 10, 101)
-    x_actual = output_ws.readX(0)
+    x_actual = output_ws.x(0)
     np.testing.assert_array_almost_equal(x_actual, x_expected, err_msg="X data")
 
-    y_spectrum0 = output_ws.readY(0)
+    y_spectrum0 = output_ws.y(0)
     assert_equal(len(y_spectrum0), 100, "Y data length")
     np.testing.assert_array_equal(y_spectrum0[:10], np.arange(10), err_msg="Y data pattern")
 
@@ -110,10 +110,10 @@ def test_broadcast_chunked():
     assert_equal(output_ws.blocksize(), 1000, "Block size")
 
     x_expected = np.linspace(0, 100, 1001)
-    np.testing.assert_array_almost_equal(output_ws.readX(0), x_expected, err_msg="X data after chunked broadcast")
+    np.testing.assert_array_almost_equal(output_ws.x(0), x_expected, err_msg="X data after chunked broadcast")
 
-    y0 = output_ws.readY(0)
-    y1 = output_ws.readY(1)
+    y0 = output_ws.y(0)
+    y1 = output_ws.y(1)
     assert np.sum(y0) != np.sum(y1), "Different spectra should have different Y sums"
 
 
@@ -150,13 +150,13 @@ def test_broadcast_nonshared_x():
     assert_equal(output_ws.getNumberHistograms(), 2, "Number of histograms")
 
     # Verify different X arrays
-    x0 = output_ws.readX(0)
-    x1 = output_ws.readX(1)
+    x0 = output_ws.x(0)
+    x1 = output_ws.x(1)
     np.testing.assert_array_equal(x0, np.array([0.0, 1.0, 2.0, 3.0, 4.0]), err_msg="First X array")
     np.testing.assert_array_equal(x1, np.array([0.0, 2.0, 4.0, 6.0, 8.0]), err_msg="Second X array")
 
-    np.testing.assert_array_equal(output_ws.readY(0), np.array([1.0, 2.0, 3.0, 4.0]), err_msg="First Y array")
-    np.testing.assert_array_equal(output_ws.readY(1), np.array([5.0, 6.0, 7.0, 8.0]), err_msg="Second Y array")
+    np.testing.assert_array_equal(output_ws.y(0), np.array([1.0, 2.0, 3.0, 4.0]), err_msg="First Y array")
+    np.testing.assert_array_equal(output_ws.y(1), np.array([5.0, 6.0, 7.0, 8.0]), err_msg="Second Y array")
 
 
 def test_gather_append():
@@ -175,14 +175,14 @@ def test_gather_append():
         expected_spectra = 2 * size
         assert_equal(output_ws.getNumberHistograms(), expected_spectra, "Number of histograms")
 
-        y0 = output_ws.readY(0)
+        y0 = output_ws.y(0)
         np.testing.assert_array_equal(y0, np.ones(50), err_msg="Rank 0 data")
-        y2 = output_ws.readY(2)
+        y2 = output_ws.y(2)
         np.testing.assert_array_equal(y2, np.ones(50) * 2, err_msg="Rank 1 data")
 
         for r in range(size):
             spectrum_idx = r * 2
-            y_data = output_ws.readY(spectrum_idx)
+            y_data = output_ws.y(spectrum_idx)
             np.testing.assert_array_equal(y_data, np.ones(50) * (r + 1), err_msg=f"Rank {r} data")
     else:
         GatherWorkspaces(InputWorkspace=input_ws, AccumulationMethod="Append", ChunkSize=0)
@@ -205,12 +205,12 @@ def test_gather_add():
         expected_sum = sum(range(size))
 
         for spec_idx in range(3):
-            y_data = output_ws.readY(spec_idx)
+            y_data = output_ws.y(spec_idx)
             np.testing.assert_array_equal(y_data, np.ones(50) * expected_sum, err_msg=f"Spectrum {spec_idx} summed values")
 
         expected_error = 0.1 * np.sqrt(size)
         for spec_idx in range(3):
-            e_data = output_ws.readE(spec_idx)
+            e_data = output_ws.e(spec_idx)
             np.testing.assert_array_almost_equal(e_data, np.ones(50) * expected_error, err_msg=f"Spectrum {spec_idx} error propagation")
     else:
         GatherWorkspaces(InputWorkspace=input_ws, AccumulationMethod="Add", ChunkSize=1)
@@ -236,12 +236,12 @@ def test_gather_large_chunk():
         assert_equal(output_ws.getNumberHistograms(), expected_spectra, "Number of histograms")
         assert_equal(output_ws.blocksize(), 500, "Block size")
 
-        y0_0 = output_ws.readY(0)
+        y0_0 = output_ws.y(0)
         expected_y0_0 = np.sin(x[:-1] + 0)
         np.testing.assert_array_almost_equal(y0_0, expected_y0_0, decimal=5, err_msg="Rank 0, spectrum 0 data")
 
         if size > 1:
-            y1_0 = output_ws.readY(20)
+            y1_0 = output_ws.y(20)
             expected_y1_0 = np.sin(x[:-1] + 1)
             np.testing.assert_array_almost_equal(y1_0, expected_y1_0, decimal=5, err_msg="Rank 1, spectrum 0 data")
     else:
@@ -261,12 +261,12 @@ def test_broadcast_then_gather():
     else:
         broadcasted = BroadcastWorkspace(BroadcasterRank=0, OutputWorkspace="combined_broadcast")
 
-    y_broadcast = broadcasted.readY(0)
+    y_broadcast = broadcasted.y(0)
     np.testing.assert_array_equal(y_broadcast, np.ones(25) * 10.0, err_msg="Broadcast Y data")
 
     modified = Scale(InputWorkspace=broadcasted, Factor=rank + 1, OutputWorkspace="combined_modified")
 
-    y_scaled = modified.readY(0)
+    y_scaled = modified.y(0)
     expected_scaled = np.ones(25) * 10.0 * (rank + 1)
     np.testing.assert_array_equal(y_scaled, expected_scaled, err_msg=f"Rank {rank} scaled data")
 
@@ -276,7 +276,7 @@ def test_broadcast_then_gather():
         assert_equal(gathered.getNumberHistograms(), size, "Number of histograms")
 
         for r in range(size):
-            y_data = gathered.readY(r)
+            y_data = gathered.y(r)
             expected = np.ones(25) * 10.0 * (r + 1)
             np.testing.assert_array_equal(y_data, expected, err_msg=f"Rank {r} gathered data")
     else:
@@ -294,11 +294,11 @@ def test_gather_error_propagation():
     if rank == 0:
         output_ws = GatherWorkspaces(InputWorkspace=input_ws, AccumulationMethod="Add", OutputWorkspace="gather_error_output")
 
-        y_vals = output_ws.readY(0)
+        y_vals = output_ws.y(0)
         expected_y = np.ones(10) * 5.0 * size
         np.testing.assert_array_equal(y_vals, expected_y, err_msg="Summed Y values")
 
-        e_vals = output_ws.readE(0)
+        e_vals = output_ws.e(0)
         expected_error = np.ones(10) * 2.0 * np.sqrt(size)
         np.testing.assert_array_equal(e_vals, expected_error, err_msg="Error propagation (quadrature)")
     else:
@@ -313,8 +313,8 @@ def test_broadcast_real_workspace():
 
         original_nspec = input_ws.getNumberHistograms()
         original_nbins = input_ws.blocksize()
-        original_y0 = input_ws.readY(0).copy()
-        original_x0 = input_ws.readX(0).copy()
+        original_y0 = input_ws.y(0).copy()
+        original_x0 = input_ws.x(0).copy()
 
         output_ws = BroadcastWorkspace(InputWorkspace=input_ws, BroadcasterRank=0, ChunkSize=0, OutputWorkspace="real_ws_broadcast")
     else:
@@ -332,8 +332,8 @@ def test_broadcast_real_workspace():
     assert_equal(output_ws.getNumberHistograms(), original_nspec, "Number of histograms")
     assert_equal(output_ws.blocksize(), original_nbins, "Block size")
 
-    np.testing.assert_array_almost_equal(output_ws.readY(0), original_y0, decimal=10, err_msg="Y data")
-    np.testing.assert_array_almost_equal(output_ws.readX(0), original_x0, decimal=10, err_msg="X data")
+    np.testing.assert_array_almost_equal(output_ws.y(0), original_y0, decimal=10, err_msg="Y data")
+    np.testing.assert_array_almost_equal(output_ws.x(0), original_x0, decimal=10, err_msg="X data")
 
     if rank == 0:
         logger.information(f"Successfully broadcast workspace: {original_nspec} spectra, {original_nbins} bins")
@@ -356,10 +356,10 @@ def test_gather_real_workspace():
         assert_equal(output_ws.getNumberHistograms(), expected_nspec, "Total number of histograms")
         assert_equal(output_ws.blocksize(), original_nbins, "Block size")
 
-        original_y0 = input_ws.readY(0)
+        original_y0 = input_ws.y(0)
         for r in range(size):
             spectrum_idx = r * original_nspec
-            gathered_y = output_ws.readY(spectrum_idx)
+            gathered_y = output_ws.y(spectrum_idx)
             np.testing.assert_array_almost_equal(gathered_y, original_y0, decimal=10, err_msg=f"Rank {r} first spectrum data")
 
         logger.information(f"Successfully gathered {size} workspaces: {expected_nspec} total spectra")

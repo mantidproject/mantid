@@ -96,8 +96,8 @@ void MagFormFactorCorrection::exec() {
 
   if (!ffwsStr.empty()) {
     HistogramBuilder builder;
-    builder.setX(Qvals.size());
-    builder.setY(FF.size());
+    builder.setSharedX(Qvals.size());
+    builder.setSharedY(FF.size());
     MatrixWorkspace_sptr ffws = create<Workspace2D>(1, builder.build());
     ffws->mutableX(0).assign(Qvals.begin(), Qvals.end());
     ffws->mutableY(0).assign(FF.begin(), FF.end());

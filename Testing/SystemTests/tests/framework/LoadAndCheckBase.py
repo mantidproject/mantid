@@ -51,8 +51,8 @@ class LoadAndCheckBase(systemtesting.MantidSystemTest, metaclass=ABCMeta):
 
     def do_check_workspace_shape(self, ws1, ws2):
         self.assertTrue(ws1.getNumberHistograms(), ws2.getNumberHistograms())
-        self.assertEqual(len(ws1.readX(0)), len(ws2.readX(0)))
-        self.assertEqual(len(ws1.readY(0)), len(ws2.readY(0)))
+        self.assertEqual(len(ws1.x(0)), len(ws2.x(0)))
+        self.assertEqual(len(ws1.y(0)), len(ws2.y(0)))
 
     def do_check_instrument_applied(self, ws1, ws2):
         instrument_name = self.get_expected_instrument_name()

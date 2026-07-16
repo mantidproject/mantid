@@ -137,7 +137,7 @@ std::vector<double> XrayAbsorptionCorrection::normaliseMuonIntensity(MantidVec m
 std::vector<Kernel::V3D> XrayAbsorptionCorrection::calculateMuonPos(API::MatrixWorkspace_sptr &muonProfile,
                                                                     const API::MatrixWorkspace_sptr &inputWS,
                                                                     double detectorDistance) {
-  const MantidVec muonDepth = muonProfile->readX(0);
+  const MantidVec muonDepth = muonProfile->x(0);
   Kernel::V3D const muonPoint = {0.0, 0.0, detectorDistance};
   Kernel::V3D toStart = {0.0, 0.0, -1.0};
   const Geometry::IObject *shape = &inputWS->sample().getShape();
@@ -171,7 +171,7 @@ void XrayAbsorptionCorrection::exec() {
   MatrixWorkspace_sptr pointDataWS = convtoPoints->getProperty("OutputWorkspace");
 
   MatrixWorkspace_sptr muonProfile = getProperty("MuonImplantationProfile");
-  MantidVec muonIntensity = muonProfile->readY(0);
+  MantidVec muonIntensity = muonProfile->y(0);
   std::vector<double> normalisedMuonIntensity = normaliseMuonIntensity(muonIntensity);
   double detectorAngle = getProperty("DetectorAngle");
   double detectorDistance = getProperty("DetectorDistance");
@@ -180,7 +180,7 @@ void XrayAbsorptionCorrection::exec() {
 
   for (size_t j = 0; j < inputWS->getNumberHistograms(); j++) {
     auto &yData = outputWS->mutableY(j);
-    MantidVec xData = pointDataWS->readX(j);
+    MantidVec xData = pointDataWS->x(j);
     for (size_t i = 0; i < xData.size(); i++) {
       double totalFactor{0};
       for (size_t k = 0; k < normalisedMuonIntensity.size(); k++) {

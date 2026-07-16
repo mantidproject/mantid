@@ -231,8 +231,8 @@ void Integration::integrateSpectrum(const API::ISpectrum &inSpec, API::ISpectrum
   // values regardless of whether they're 'in range' for this spectrum
   // Have to do this here, ahead of the 'continue' a bit down from here.
   if (incPartBins) {
-    outSpec.dataX()[0] = lowerLimit;
-    outSpec.dataX()[1] = upperLimit;
+    outSpec.mutableX()[0] = lowerLimit;
+    outSpec.mutableX()[1] = upperLimit;
   }
 
   if (lowerLimit == EMPTY_DBL()) {

@@ -733,9 +733,9 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         q_data = orso_data[:, 0]
         r_data = orso_data[:, 1]
         sr_data = orso_data[:, 2]
-        self.assertTrue(np.allclose(q_data, expected_data.readX(0), atol=1e-10, equal_nan=True))
-        self.assertTrue(np.allclose(r_data, expected_data.readY(0), atol=1e-10, equal_nan=True))
-        self.assertTrue(np.allclose(sr_data, expected_data.readE(0), atol=1e-10, equal_nan=True))
+        self.assertTrue(np.allclose(q_data, expected_data.x(0), atol=1e-10, equal_nan=True))
+        self.assertTrue(np.allclose(r_data, expected_data.y(0), atol=1e-10, equal_nan=True))
+        self.assertTrue(np.allclose(sr_data, expected_data.e(0), atol=1e-10, equal_nan=True))
         if resolution is not None:
             sq_data = orso_data[:, 3]
             self.assertTrue(np.allclose(sq_data, q_data * resolution, atol=1e-10, equal_nan=True))

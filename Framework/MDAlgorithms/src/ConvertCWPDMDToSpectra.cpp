@@ -548,18 +548,18 @@ void ConvertCWPDMDToSpectra::linearInterpolation(const API::MatrixWorkspace_sptr
     bool onsearch = true;
     size_t minNonZeroIndex = 0;
     while (onsearch) {
-      if (matrixws->readY(i)[minNonZeroIndex] > infinitesimal)
+      if (matrixws->y(i)[minNonZeroIndex] > infinitesimal)
         onsearch = false;
       else
         ++minNonZeroIndex;
 
-      if (minNonZeroIndex == matrixws->readY(i).size())
+      if (minNonZeroIndex == matrixws->y(i).size())
         onsearch = false;
     }
-    size_t maxNonZeroIndex = matrixws->readY(i).size() - 1;
+    size_t maxNonZeroIndex = matrixws->y(i).size() - 1;
     onsearch = true;
     while (onsearch) {
-      if (matrixws->readY(i)[maxNonZeroIndex] > infinitesimal)
+      if (matrixws->y(i)[maxNonZeroIndex] > infinitesimal)
         onsearch = false;
       else if (maxNonZeroIndex == 0)
         onsearch = false;
@@ -567,32 +567,32 @@ void ConvertCWPDMDToSpectra::linearInterpolation(const API::MatrixWorkspace_sptr
         --maxNonZeroIndex;
     }
     g_log.debug() << "iMinNonZero = " << minNonZeroIndex << ", iMaxNonZero = " << maxNonZeroIndex
-                  << " Workspace index = " << i << ", Y size = " << matrixws->readY(i).size() << "\n";
+                  << " Workspace index = " << i << ", Y size = " << matrixws->y(i).size() << "\n";
     if (minNonZeroIndex >= maxNonZeroIndex)
       throw std::runtime_error("It is not right!");
 
     // Do linear interpolation for zero count values
     for (size_t j = minNonZeroIndex + 1; j < maxNonZeroIndex; ++j) {
-      if (matrixws->readY(i)[j] < infinitesimal) {
+      if (matrixws->y(i)[j] < infinitesimal) {
         // Do interpolation
         // gives y = y_0 + (y_1-y_0)\frac{x - x_0}{x_1-x_0}
 
-        double leftx = matrixws->readX(i)[j - 1];
-        double lefty = matrixws->readY(i)[j - 1];
+        double leftx = matrixws->x(i)[j - 1];
+        double lefty = matrixws->y(i)[j - 1];
         bool findnonzeroy = true;
         size_t iright = j + 1;
         while (findnonzeroy) {
-          if (matrixws->readY(i)[iright] > infinitesimal)
+          if (matrixws->y(i)[iright] > infinitesimal)
             findnonzeroy = false;
           else
             ++iright;
         }
-        double rightx = matrixws->readX(i)[iright];
-        double righty = matrixws->readY(i)[iright];
-        double curx = matrixws->readX(i)[j];
+        double rightx = matrixws->x(i)[iright];
+        double righty = matrixws->y(i)[iright];
+        double curx = matrixws->x(i)[j];
         double curinterpoy = lefty + (righty - lefty) * (curx - leftx) / (rightx - leftx);
-        matrixws->dataY(i)[j] = curinterpoy;
-        matrixws->dataE(i)[j] = sqrt(curinterpoy);
+        matrixws->mutableY(i)[j] = curinterpoy;
+        matrixws->mutableE(i)[j] = sqrt(curinterpoy);
       }
     }
 

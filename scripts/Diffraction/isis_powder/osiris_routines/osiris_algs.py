@@ -192,8 +192,8 @@ def _correct_drange_overlap(merged_ws, drange_sets):
                 data_y[z] = 1
 
         # apply scalar data to result workspace
-        merged_ws.setY(i, merged_ws.dataY(i) / data_y)
-        merged_ws.setE(i, merged_ws.dataE(i) / data_y)
+        merged_ws.setSharedY(i, merged_ws.dataY(i) / data_y)
+        merged_ws.setSharedE(i, merged_ws.dataE(i) / data_y)
 
     return merged_ws
 
@@ -226,9 +226,9 @@ def merge_dspacing_runs(focussed_runs, drange_sets, run_number):
 
     for i in range(len(merged_spectra)):
         if (
-            merged_spectra[i].dataX(0).size != max_x_size
-            or merged_spectra[i].dataY(0).size != max_y_size
-            or merged_spectra[i].dataE(0).size != max_e_size
+            merged_spectra[i].mutableX(0).size != max_x_size
+            or merged_spectra[i].mutableY(0).size != max_y_size
+            or merged_spectra[i].mutableE(0).size != max_e_size
         ):
             dataX = merged_spectra[i].dataX(0)
             dataY = merged_spectra[i].dataY(0)

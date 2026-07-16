@@ -245,7 +245,7 @@ class CrystalFieldMultiSite(object):
         out = alg.getProperty("OutputWorkspace").value
         # Create copies of the x and y because `out` goes out of scope when this method returns
         # and x and y get deallocated
-        return np.array(out.readX(0)), np.array(out.readY(1))
+        return np.array(out.x(0)), np.array(out.y(1))
 
     def makeSpectrumFunction(self, i=0):
         """Form a definition string for the CrystalFieldSpectrum function

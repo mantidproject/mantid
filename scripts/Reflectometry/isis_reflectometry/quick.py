@@ -580,10 +580,10 @@ def nrPNRCorrection(Wksp, crho, calpha, cAp, cPp):
 
         CloneWorkspace(Ip, OutputWorkspace="PCalpha")
         CropWorkspace(InputWorkspace="PCalpha", OutputWorkspace="PCalpha", StartWorkspaceIndex="0", EndWorkspaceIndex="0")
-        # a1=alpha.readY(0)
+        # a1=alpha.y(0)
         # for i in range(0,len(a1)):
-        # alpha.dataY(0)[i]=0.0
-        # alpha.dataE(0)[i]=0.0
+        # alpha.mutableY(0)[i]=0.0
+        # alpha.mutableE(0)[i]=0.0
         CloneWorkspace("PCalpha", OutputWorkspace="PCrho")
         CloneWorkspace("PCalpha", OutputWorkspace="PCAp")
         CloneWorkspace("PCalpha", OutputWorkspace="PCPp")
@@ -592,10 +592,10 @@ def nrPNRCorrection(Wksp, crho, calpha, cAp, cPp):
         # for i in range(0,len(a1)):
         # x=(alpha.dataX(0)[i]+alpha.dataX(0)[i])/2.0
         # for j in range(0,4):
-        # alpha.dataY(0)[i]=alpha.dataY(0)[i]+calpha[j]*x**j
-        # rho.dataY(0)[i]=rho.dataY(0)[i]+crho[j]*x**j
-        # Ap.dataY(0)[i]=Ap.dataY(0)[i]+cAp[j]*x**j
-        # Pp.dataY(0)[i]=Pp.dataY(0)[i]+cPp[j]*x**j
+        # alpha.mutableY(0)[i]=alpha.dataY(0)[i]+calpha[j]*x**j
+        # rho.mutableY(0)[i]=rho.dataY(0)[i]+crho[j]*x**j
+        # Ap.mutableY(0)[i]=Ap.dataY(0)[i]+cAp[j]*x**j
+        # Pp.mutableY(0)[i]=Pp.dataY(0)[i]+cPp[j]*x**j
         PolynomialCorrection(InputWorkspace="PCalpha", OutputWorkspace="PCalpha", Coefficients=calpha, Operation="Multiply")
         PolynomialCorrection(InputWorkspace="PCrho", OutputWorkspace="PCrho", Coefficients=crho, Operation="Multiply")
         PolynomialCorrection(InputWorkspace="PCAp", OutputWorkspace="PCAp", Coefficients=cAp, Operation="Multiply")

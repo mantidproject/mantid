@@ -326,15 +326,15 @@ MatrixWorkspace_sptr create2DWorkspaceRagged(int version) {
   }
 
   Mantid::HistogramData::HistogramBuilder builder;
-  builder.setX(x_data);
-  builder.setY(y_data);
-  builder.setE(e_data);
+  builder.setSharedX(x_data);
+  builder.setSharedY(y_data);
+  builder.setSharedE(e_data);
   raggedWS->setHistogram(0, builder.build());
 
   Mantid::HistogramData::HistogramBuilder builder2;
-  builder2.setX(x_data2);
-  builder2.setY(y_data2);
-  builder2.setE(e_data2);
+  builder2.setSharedX(x_data2);
+  builder2.setSharedY(y_data2);
+  builder2.setSharedE(e_data2);
   raggedWS->setHistogram(1, builder2.build());
 
   return raggedWS;
@@ -854,7 +854,7 @@ EventWorkspace_sptr createGroupedEventWorkspace(std::vector<std::vector<int>> co
     for (size_t g = 0; g < groups.size(); g++) {
       // Create the x-axis for histogramming.
       const double x0 = xOffset * static_cast<double>(g);
-      retVal->setX(g, make_cow<HistogramX>(numBins, LinearGenerator(x0, binDelta)));
+      retVal->setSharedX(g, make_cow<HistogramX>(numBins, LinearGenerator(x0, binDelta)));
     }
   }
 

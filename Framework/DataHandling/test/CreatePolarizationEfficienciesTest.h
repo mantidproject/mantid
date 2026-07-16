@@ -89,41 +89,41 @@ public:
     TS_ASSERT_EQUALS(axis1->label(2), "Rho");
     TS_ASSERT_EQUALS(axis1->label(3), "Alpha");
 
-    TS_ASSERT_DELTA(outWS->readY(0)[0], 1.0, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(0)[1], 1.0, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(0)[2], 1.0, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(0)[3], 1.0, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(0)[4], 1.0, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(0)[5], 1.0, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(0)[6], 1.0, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(0)[7], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(0)[0], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(0)[1], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(0)[2], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(0)[3], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(0)[4], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(0)[5], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(0)[6], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(0)[7], 1.0, 1e-15);
 
-    TS_ASSERT_DELTA(outWS->readY(1)[0], 0.25, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(1)[1], 0.75, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(1)[2], 1.25, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(1)[3], 1.75, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(1)[4], 2.25, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(1)[5], 2.75, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(1)[6], 3.25, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(1)[7], 3.75, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(1)[0], 0.25, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(1)[1], 0.75, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(1)[2], 1.25, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(1)[3], 1.75, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(1)[4], 2.25, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(1)[5], 2.75, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(1)[6], 3.25, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(1)[7], 3.75, 1e-15);
 
-    TS_ASSERT_DELTA(outWS->readY(2)[0], 0.0625, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(2)[1], 0.5625, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(2)[2], 1.5625, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(2)[3], 3.0625, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(2)[4], 5.0625, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(2)[5], 7.5625, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(2)[6], 10.5625, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(2)[7], 14.0625, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(2)[0], 0.0625, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(2)[1], 0.5625, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(2)[2], 1.5625, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(2)[3], 3.0625, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(2)[4], 5.0625, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(2)[5], 7.5625, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(2)[6], 10.5625, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(2)[7], 14.0625, 1e-15);
 
-    TS_ASSERT_DELTA(outWS->readY(3)[0], 0.015625, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(3)[1], 0.421875, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(3)[2], 1.953125, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(3)[3], 5.359375, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(3)[4], 11.390625, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(3)[5], 20.796875, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(3)[6], 34.328125, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(3)[7], 52.734375, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(3)[0], 0.015625, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(3)[1], 0.421875, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(3)[2], 1.953125, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(3)[3], 5.359375, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(3)[4], 11.390625, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(3)[5], 20.796875, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(3)[6], 34.328125, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(3)[7], 52.734375, 1e-15);
   }
 
   void test_histo_partial() {
@@ -148,23 +148,23 @@ public:
     TS_ASSERT_EQUALS(axis1->label(0), "Pp");
     TS_ASSERT_EQUALS(axis1->label(1), "Rho");
 
-    TS_ASSERT_DELTA(outWS->readY(0)[0], 1.0, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(0)[1], 1.0, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(0)[2], 1.0, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(0)[3], 1.0, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(0)[4], 1.0, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(0)[5], 1.0, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(0)[6], 1.0, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(0)[7], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(0)[0], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(0)[1], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(0)[2], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(0)[3], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(0)[4], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(0)[5], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(0)[6], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(0)[7], 1.0, 1e-15);
 
-    TS_ASSERT_DELTA(outWS->readY(1)[0], 0.0625, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(1)[1], 0.5625, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(1)[2], 1.5625, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(1)[3], 3.0625, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(1)[4], 5.0625, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(1)[5], 7.5625, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(1)[6], 10.5625, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(1)[7], 14.0625, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(1)[0], 0.0625, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(1)[1], 0.5625, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(1)[2], 1.5625, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(1)[3], 3.0625, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(1)[4], 5.0625, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(1)[5], 7.5625, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(1)[6], 10.5625, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(1)[7], 14.0625, 1e-15);
   }
 
   void test_points() {
@@ -193,45 +193,45 @@ public:
     TS_ASSERT_EQUALS(axis1->label(2), "Rho");
     TS_ASSERT_EQUALS(axis1->label(3), "Alpha");
 
-    TS_ASSERT_DELTA(outWS->readY(0)[0], 1.0, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(0)[1], 1.0, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(0)[2], 1.0, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(0)[3], 1.0, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(0)[4], 1.0, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(0)[5], 1.0, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(0)[6], 1.0, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(0)[7], 1.0, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(0)[8], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(0)[0], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(0)[1], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(0)[2], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(0)[3], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(0)[4], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(0)[5], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(0)[6], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(0)[7], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(0)[8], 1.0, 1e-15);
 
-    TS_ASSERT_DELTA(outWS->readY(1)[0], 0.0, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(1)[1], 0.5, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(1)[2], 1.0, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(1)[3], 1.5, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(1)[4], 2.0, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(1)[5], 2.5, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(1)[6], 3.0, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(1)[7], 3.5, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(1)[8], 4.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(1)[0], 0.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(1)[1], 0.5, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(1)[2], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(1)[3], 1.5, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(1)[4], 2.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(1)[5], 2.5, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(1)[6], 3.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(1)[7], 3.5, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(1)[8], 4.0, 1e-15);
 
-    TS_ASSERT_DELTA(outWS->readY(2)[0], 0.0, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(2)[1], 0.25, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(2)[2], 1.0, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(2)[3], 2.25, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(2)[4], 4.0, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(2)[5], 6.25, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(2)[6], 9.0, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(2)[7], 12.25, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(2)[8], 16.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(2)[0], 0.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(2)[1], 0.25, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(2)[2], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(2)[3], 2.25, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(2)[4], 4.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(2)[5], 6.25, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(2)[6], 9.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(2)[7], 12.25, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(2)[8], 16.0, 1e-15);
 
-    TS_ASSERT_DELTA(outWS->readY(3)[0], 0.0, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(3)[1], 0.125, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(3)[2], 1.0, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(3)[3], 3.375, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(3)[4], 8.0, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(3)[5], 15.625, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(3)[6], 27.0, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(3)[7], 42.875, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(3)[8], 64.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(3)[0], 0.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(3)[1], 0.125, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(3)[2], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(3)[3], 3.375, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(3)[4], 8.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(3)[5], 15.625, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(3)[6], 27.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(3)[7], 42.875, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(3)[8], 64.0, 1e-15);
   }
 
   void test_histo_wildes() {
@@ -260,41 +260,41 @@ public:
     TS_ASSERT_EQUALS(axis1->label(2), "F1");
     TS_ASSERT_EQUALS(axis1->label(3), "F2");
 
-    TS_ASSERT_DELTA(outWS->readY(0)[0], 1.0, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(0)[1], 1.0, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(0)[2], 1.0, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(0)[3], 1.0, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(0)[4], 1.0, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(0)[5], 1.0, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(0)[6], 1.0, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(0)[7], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(0)[0], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(0)[1], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(0)[2], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(0)[3], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(0)[4], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(0)[5], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(0)[6], 1.0, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(0)[7], 1.0, 1e-15);
 
-    TS_ASSERT_DELTA(outWS->readY(1)[0], 0.25, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(1)[1], 0.75, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(1)[2], 1.25, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(1)[3], 1.75, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(1)[4], 2.25, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(1)[5], 2.75, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(1)[6], 3.25, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(1)[7], 3.75, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(1)[0], 0.25, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(1)[1], 0.75, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(1)[2], 1.25, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(1)[3], 1.75, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(1)[4], 2.25, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(1)[5], 2.75, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(1)[6], 3.25, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(1)[7], 3.75, 1e-15);
 
-    TS_ASSERT_DELTA(outWS->readY(2)[0], 0.0625, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(2)[1], 0.5625, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(2)[2], 1.5625, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(2)[3], 3.0625, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(2)[4], 5.0625, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(2)[5], 7.5625, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(2)[6], 10.5625, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(2)[7], 14.0625, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(2)[0], 0.0625, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(2)[1], 0.5625, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(2)[2], 1.5625, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(2)[3], 3.0625, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(2)[4], 5.0625, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(2)[5], 7.5625, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(2)[6], 10.5625, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(2)[7], 14.0625, 1e-15);
 
-    TS_ASSERT_DELTA(outWS->readY(3)[0], 0.015625, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(3)[1], 0.421875, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(3)[2], 1.953125, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(3)[3], 5.359375, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(3)[4], 11.390625, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(3)[5], 20.796875, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(3)[6], 34.328125, 1e-15);
-    TS_ASSERT_DELTA(outWS->readY(3)[7], 52.734375, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(3)[0], 0.015625, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(3)[1], 0.421875, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(3)[2], 1.953125, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(3)[3], 5.359375, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(3)[4], 11.390625, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(3)[5], 20.796875, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(3)[6], 34.328125, 1e-15);
+    TS_ASSERT_DELTA(outWS->y(3)[7], 52.734375, 1e-15);
   }
 
 private:

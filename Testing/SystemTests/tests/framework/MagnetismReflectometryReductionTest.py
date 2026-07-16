@@ -202,7 +202,7 @@ class MagnetismReflectometryReductionEmptyCurve(systemtesting.MantidSystemTest):
 
     def validate(self):
         empty_component = mtd["r42100_reduced"][1]  # the second workspace in the GroupWorkspace is the empty one
-        return np.all(empty_component.readY(0) < 1e-9)  # reflectivity curve has only zeroes
+        return np.all(empty_component.y(0) < 1e-9)  # reflectivity curve has only zeroes
 
 
 class MRFilterCrossSectionsTest(systemtesting.MantidSystemTest):

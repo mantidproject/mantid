@@ -485,8 +485,8 @@ bool ConvertCWSDExpToMomentum::getInputs(bool virtualinstrument, std::string &er
     if (sourcepos.size() != 3)
       errss << "SourcePosition must have 3 items.  Input has " << sourcepos.size() << " instead.\n";
     else {
-      m_sourcePos.setX(sourcepos[0]);
-      m_sourcePos.setY(sourcepos[1]);
+      m_sourcePos.setSharedX(sourcepos[0]);
+      m_sourcePos.setSharedY(sourcepos[1]);
       m_sourcePos.setZ(sourcepos[2]);
     }
 
@@ -494,8 +494,8 @@ bool ConvertCWSDExpToMomentum::getInputs(bool virtualinstrument, std::string &er
     if (samplepos.size() != 3) {
       errss << "SamplePosition must have 3 items.  Input has " << samplepos.size() << " instead.\n";
     } else {
-      m_samplePos.setX(samplepos[0]);
-      m_samplePos.setY(samplepos[1]);
+      m_samplePos.setSharedX(samplepos[0]);
+      m_samplePos.setSharedY(samplepos[1]);
       m_samplePos.setZ(samplepos[2]);
     }
   }

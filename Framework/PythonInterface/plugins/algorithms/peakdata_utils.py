@@ -235,9 +235,9 @@ class PeakData:
         for irow in range(signal.shape[0]):
             for icol in range(signal.shape[1]):
                 ispec = int(ispecs[irow, icol])
-                signal[irow, icol, :] = self.ws.readY(ispec)
-                errors[irow, icol, :] = self.ws.readE(ispec)
-                xvals = self.ws.readX(ispec)
+                signal[irow, icol, :] = self.ws.y(ispec)
+                errors[irow, icol, :] = self.ws.e(ispec)
+                xvals = self.ws.x(ispec)
                 if len(xvals) > signal.shape[-1]:
                     xvals = 0.5 * (xvals[:-1] + xvals[1:])  # convert to bin centers
                 xcens[irow, icol, :] = xvals
@@ -278,9 +278,9 @@ class PeakData:
         exec_simpleapi_alg("RebinToWorkspace", WorkspaceToRebin=ws_bg_foc, WorkspaceToMatch=ws_pk_foc, OutputWorkspace=ws_bg_foc)
         exec_simpleapi_alg("Subtract", LHSWorkspace=ws_pk_foc, RHSWorkspace=ws_bg_foc, OutputWorkspace=ws_pk_foc)
         ws_pk_foc = AnalysisDataService.retrieve(ws_pk_foc)
-        self.ypk = ws_pk_foc.readY(0).copy()
-        self.epk_sq = ws_pk_foc.readE(0).copy() ** 2
-        self.xpk = ws_pk_foc.readX(0).copy()
+        self.ypk = ws_pk_foc.y(0).copy()
+        self.epk_sq = ws_pk_foc.e(0).copy() ** 2
+        self.xpk = ws_pk_foc.x(0).copy()
         if len(self.xpk) > len(self.ypk):
             self.xpk = 0.5 * (self.xpk[:-1] + self.xpk[1:])  # convert to bin centers
         exec_simpleapi_alg("DeleteWorkspaces", WorkspaceList=[ws_bg_foc, ws_pk_foc, scale])
@@ -347,7 +347,7 @@ def round_up_to_odd_number(number):
 
 def get_bin_width_at_tof(ws, ispec, tof):
     itof = ws.yIndexOfX(tof, ispec)
-    return ws.readX(ispec)[itof + 1] - ws.readX(ispec)[itof]
+    return ws.x(ispec)[itof + 1] - ws.x(ispec)[itof]
 
 
 def set_peak_intensity(pk, intens, sigma, do_lorz_cor):

@@ -45,8 +45,8 @@ class DirectILLIntegrateVanadiumTest(unittest.TestCase):
         self.assertEqual(outWS.getNumberHistograms(), ws.getNumberHistograms())
         self.assertEqual(outWS.blocksize(), 1)
         for i in range(outWS.getNumberHistograms()):
-            self.assertGreater(outWS.readY(i)[0], float(i + 1) * numBins)
-            self.assertGreater(outWS.readE(i)[0], numpy.sqrt(float(i + 1) * numBins))
+            self.assertGreater(outWS.y(i)[0], float(i + 1) * numBins)
+            self.assertGreater(outWS.e(i)[0], numpy.sqrt(float(i + 1) * numBins))
 
     def testIntegrationWithoutDebyeWallerCorrection(self):
         ws = self._cloneTestWorkspace()
@@ -70,8 +70,8 @@ class DirectILLIntegrateVanadiumTest(unittest.TestCase):
         self.assertEqual(outWS.getNumberHistograms(), ws.getNumberHistograms())
         self.assertEqual(outWS.blocksize(), 1)
         for i in range(outWS.getNumberHistograms()):
-            self.assertEqual(outWS.readY(i)[0], float(i + 1) * numBins)
-            self.assertAlmostEqual(outWS.readE(i)[0], numpy.sqrt(float(i + 1) * numBins))
+            self.assertEqual(outWS.y(i)[0], float(i + 1) * numBins)
+            self.assertAlmostEqual(outWS.e(i)[0], numpy.sqrt(float(i + 1) * numBins))
 
     def testZeroMasking(self):
         ws = self._cloneTestWorkspace()
@@ -90,10 +90,10 @@ class DirectILLIntegrateVanadiumTest(unittest.TestCase):
         spectrumInfo = outWS.spectrumInfo()
         for i in range(outWS.getNumberHistograms()):
             if i in zeroIndices:
-                self.assertEqual(outWS.readY(i)[0], 0.0)
+                self.assertEqual(outWS.y(i)[0], 0.0)
                 self.assertTrue(spectrumInfo.isMasked(i))
             else:
-                self.assertGreater(outWS.readY(i)[0], 0.0)
+                self.assertGreater(outWS.y(i)[0], 0.0)
                 self.assertFalse(spectrumInfo.isMasked(i))
 
     def _cloneTestWorkspace(self, wsName=None):

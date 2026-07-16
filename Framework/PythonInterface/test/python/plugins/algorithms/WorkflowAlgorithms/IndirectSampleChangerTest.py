@@ -43,8 +43,8 @@ class IndirectSampleChangerTest(unittest.TestCase):
         self._execute_IndirectSampleChanger()
 
         scan_ws = get_ads_workspace("iris72462_to_iris72465_scan_eisf")
-        self.assertEqual(round(scan_ws.readY(0)[0], 7), 0.795287)
-        self.assertEqual(round(scan_ws.readY(1)[0], 7), 0.837118)
+        self.assertEqual(round(scan_ws.y(0)[0], 7), 0.795287)
+        self.assertEqual(round(scan_ws.y(1)[0], 7), 0.837118)
 
     def test_multiple_samples(self):
         """
@@ -55,12 +55,12 @@ class IndirectSampleChangerTest(unittest.TestCase):
         self._execute_IndirectSampleChanger()
 
         scan_ws = get_ads_workspace("iris72462_to_iris72464_scan_eisf")
-        self.assertEqual(round(scan_ws.readY(0)[0], 7), 0.795287)
-        self.assertEqual(round(scan_ws.readY(1)[0], 7), 0.8005723)
+        self.assertEqual(round(scan_ws.y(0)[0], 7), 0.795287)
+        self.assertEqual(round(scan_ws.y(1)[0], 7), 0.8005723)
 
         scan_ws = get_ads_workspace("iris72463_to_iris72465_scan_eisf")
-        self.assertEqual(round(scan_ws.readY(0)[0], 7), 0.837118)
-        self.assertEqual(round(scan_ws.readY(1)[0], 7), 0.8447051)
+        self.assertEqual(round(scan_ws.y(0)[0], 7), 0.837118)
+        self.assertEqual(round(scan_ws.y(1)[0], 7), 0.8447051)
 
     def test_msdFit(self):
         """
@@ -71,12 +71,12 @@ class IndirectSampleChangerTest(unittest.TestCase):
         self._execute_IndirectSampleChanger()
 
         eisf_ws = get_ads_workspace("iris72462_to_iris72465_scan_eisf")
-        self.assertEqual(round(eisf_ws.readY(0)[0], 7), 0.795287)
-        self.assertEqual(round(eisf_ws.readY(1)[0], 7), 0.837118)
+        self.assertEqual(round(eisf_ws.y(0)[0], 7), 0.795287)
+        self.assertEqual(round(eisf_ws.y(1)[0], 7), 0.837118)
 
         msd_ws = get_ads_workspace("iris72462_to_iris72465_scan_msd")
-        self.assertEqual(round(msd_ws.readY(0)[1], 7), 0.2456879)
-        self.assertEqual(round(msd_ws.readY(1)[2], 7), 0.5845778)
+        self.assertEqual(round(msd_ws.y(0)[1], 7), 0.2456879)
+        self.assertEqual(round(msd_ws.y(1)[2], 7), 0.5845778)
 
     def test_that_IndirectSampleChanger_will_raise_an_error_when_given_run_numbers_in_the_wrong_order(self):
         self.assertRaisesRegex(

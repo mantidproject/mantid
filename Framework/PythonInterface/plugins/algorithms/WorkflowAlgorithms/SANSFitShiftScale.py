@@ -234,7 +234,7 @@ class SANSFitShiftScale(DataProcessorAlgorithm):
         min_q = None
         max_q = None
 
-        front_dataX = front_data.readX(0)
+        front_dataX = front_data.x(0)
 
         front_size = len(front_dataX)
         front_q_min = None
@@ -245,7 +245,7 @@ class SANSFitShiftScale(DataProcessorAlgorithm):
         else:
             raise RuntimeError("The FRONT detector does not seem to contain q values")
 
-        rear_dataX = rear_data.readX(0)
+        rear_dataX = rear_data.x(0)
 
         rear_size = len(rear_dataX)
         rear_q_min = None

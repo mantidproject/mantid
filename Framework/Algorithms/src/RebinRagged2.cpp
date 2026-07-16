@@ -200,9 +200,9 @@ void RebinRagged::exec() {
 
         // Create and set the output histogram
         HistogramBuilder builder;
-        builder.setX(XValues_new.rawData());
-        builder.setY(y_data);
-        builder.setE(e_data);
+        builder.setSharedX(XValues_new.rawData());
+        builder.setSharedY(y_data);
+        builder.setSharedE(e_data);
         builder.setDistribution(dist);
         outputWS->setHistogram(hist, builder.build());
 
@@ -223,9 +223,9 @@ void RebinRagged::exec() {
       inputWS = inputWS->clone();
       for (int hist = 0; hist < histnumber; ++hist) {
         HistogramBuilder builder;
-        builder.setX(inputWS->histogram(hist).binEdges().rawData());
-        builder.setY(inputWS->readY(hist));
-        builder.setE(inputWS->readE(hist));
+        builder.setSharedX(inputWS->histogram(hist).binEdges().rawData());
+        builder.setSharedY(inputWS->y(hist));
+        builder.setSharedE(inputWS->e(hist));
         if (inputWS->hasDx(dist))
           builder.setDx(inputWS->readDx(hist));
         builder.setDistribution(dist);
@@ -271,9 +271,9 @@ void RebinRagged::exec() {
       // convert output to point data
       for (int hist = 0; hist < histnumber; ++hist) {
         HistogramBuilder builder;
-        builder.setX(outputWS->histogram(hist).points().rawData());
-        builder.setY(outputWS->readY(hist));
-        builder.setE(outputWS->readE(hist));
+        builder.setSharedX(outputWS->histogram(hist).points().rawData());
+        builder.setSharedY(outputWS->y(hist));
+        builder.setSharedE(outputWS->e(hist));
         if (outputWS->hasDx(hist))
           builder.setDx(outputWS->readDx(hist));
         builder.setDistribution(dist);

@@ -261,10 +261,10 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         @param ws_frame1: frame 1 workspace object
         @param ws_frame2: frame 2 workspace object
         """
-        iq_f1 = ws_frame1.readY(0)
-        iq_f2 = ws_frame2.readY(0)
-        q_f1 = ws_frame1.readX(0)
-        q_f2 = ws_frame2.readX(0)
+        iq_f1 = ws_frame1.y(0)
+        iq_f2 = ws_frame2.y(0)
+        q_f1 = ws_frame1.x(0)
+        q_f2 = ws_frame2.x(0)
         scale_f1 = 0.0
         scale_f2 = 0.0
         scale_factor = 1.0

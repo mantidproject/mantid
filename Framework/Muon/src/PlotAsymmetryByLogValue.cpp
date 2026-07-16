@@ -804,8 +804,8 @@ void PlotAsymmetryByLogValue::calcIntAsymmetry(const MatrixWorkspace_sptr &ws_re
                                                double &Y, double &E) {
   if (!m_int) { //  "Differential asymmetry"
     HistogramBuilder builder;
-    builder.setX(ws_red->x(0).size());
-    builder.setY(ws_red->y(0).size());
+    builder.setSharedX(ws_red->x(0).size());
+    builder.setSharedY(ws_red->y(0).size());
     builder.setDistribution(ws_red->isDistribution());
     MatrixWorkspace_sptr tmpWS = create<MatrixWorkspace>(*ws_red, 1, builder.build());
     for (size_t i = 0; i < tmpWS->y(0).size(); i++) {

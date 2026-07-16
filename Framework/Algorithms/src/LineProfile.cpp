@@ -100,9 +100,9 @@ struct IndexLimits {
 Workspace2D_sptr makeOutput(const MatrixWorkspace &parent, const LineDirection direction, std::vector<double> &&Xs,
                             std::vector<double> &&Ys, std::vector<double> &&Es) {
   HistogramBuilder builder;
-  builder.setX(std::move(Xs));
-  builder.setY(std::move(Ys));
-  builder.setE(std::move(Es));
+  builder.setSharedX(std::move(Xs));
+  builder.setSharedY(std::move(Ys));
+  builder.setSharedE(std::move(Es));
   builder.setDistribution(direction == LineDirection::horizontal && parent.isDistribution());
   return create<Workspace2D>(parent, 1, builder.build());
 }

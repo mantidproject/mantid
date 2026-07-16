@@ -70,11 +70,11 @@ class ReflectometryReductionOne2Test(unittest.TestCase):
             NumMonitors=0,
             OutputWorkspace=name,
         )
-        ws.setY(0, empty)
-        ws.setY(1, background)
-        ws.setY(2, peak)
-        ws.setY(3, background)
-        ws.setY(4, empty)
+        ws.setSharedY(0, empty)
+        ws.setSharedY(1, background)
+        ws.setSharedY(2, peak)
+        ws.setSharedY(3, background)
+        ws.setSharedY(4, empty)
 
     def _check_history(self, ws, expected, unroll=True):
         """Return true if algorithm names listed in algorithmNames are found in the

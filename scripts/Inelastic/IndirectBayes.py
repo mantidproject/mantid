@@ -27,7 +27,7 @@ def CalcErange(inWS, ns, erange, binWidth):
 
     # get data from input workspace
     _, X, Y, E = GetXYE(inWS, ns, array_len)
-    Xdata = mtd[inWS].readX(0)
+    Xdata = mtd[inWS].x(0)
 
     # get all x values within the energy range
     rangeMask = (Xdata >= erange[0]) & (Xdata <= erange[1])
@@ -55,10 +55,10 @@ def CalcErange(inWS, ns, erange, binWidth):
 
 
 def GetXYE(inWS, n, array_len):
-    Xin = mtd[inWS].readX(n)
+    Xin = mtd[inWS].x(n)
     N = len(Xin) - 1  # get no. points from length of x array
-    Yin = mtd[inWS].readY(n)
-    Ein = mtd[inWS].readE(n)
+    Yin = mtd[inWS].y(n)
+    Ein = mtd[inWS].e(n)
     X = pad_array(Xin, array_len)
     Y = pad_array(Yin, array_len)
     E = pad_array(Ein, array_len)

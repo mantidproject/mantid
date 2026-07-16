@@ -427,9 +427,9 @@ void ResampleX::exec() {
       PARALLEL_START_INTERRUPT_REGION
       // get const references to input Workspace arrays (no copying)
       // TODO: replace with HistogramX/Y/E when VectorHelper::rebin is updated
-      const MantidVec &XValues = inputWS->readX(wkspIndex);
-      const MantidVec &YValues = inputWS->readY(wkspIndex);
-      const MantidVec &YErrors = inputWS->readE(wkspIndex);
+      const MantidVec &XValues = inputWS->x(wkspIndex);
+      const MantidVec &YValues = inputWS->y(wkspIndex);
+      const MantidVec &YErrors = inputWS->e(wkspIndex);
 
       // get references to output workspace data (no copying)
       // TODO: replace with HistogramX/Y/E when VectorHelper::rebin is updated

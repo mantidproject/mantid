@@ -105,9 +105,9 @@ private:
     const size_t nspectra = ws->getNumberHistograms();
     MantidVec yv;
     for (size_t i = 0; i < nspectra; i++) {
-      yv = ws->readY(i);
-      size_t index = nbins / 2; // This position should yield ws->readX(i).at(index)==0.0
-      double x = ws->readX(i).at(index);
+      yv = ws->y(i);
+      size_t index = nbins / 2; // This position should yield ws->x(i).at(index)==0.0
+      double x = ws->x(i).at(index);
       double h = yv.at(index) * exp(exponentFactor * x); // remove the quantum-correction from ws
       double goldStandard = value / (1 + static_cast<double>(i));
       double error1 = DBL_EPSILON * std::sqrt(static_cast<double>(yv.size())); // rounding error if value==0
@@ -131,8 +131,8 @@ private:
     for (size_t i = 0; i < nspectra; i++) {
       double goldStandard =
           (1 + static_cast<double>(i)) * value; // recall each spectra was created with a different stdev
-      xv = ws->readX(i);
-      yv = ws->readY(i);
+      xv = ws->x(i);
+      yv = ws->y(i);
       double sum = 0.0;
       double average = 0.0;
       MantidVec::iterator itx = xv.begin();
@@ -163,13 +163,13 @@ private:
     for (size_t i = 0; i < nspectra; i++) {
       double goldStandard =
           ps2meV * (1 + static_cast<double>(i)) * value; // recall each spectra was created with a different stdev
-      double dx = (-2.0) * ws->readX(i).at(0);           // extent along the X-axis
-      yv = ws->readY(i);
-      size_t index = nbins / 2; // This position should yield ws->readX(i).at(index)==0.0
-      double x = ws->readX(i).at(index);
+      double dx = (-2.0) * ws->x(i).at(0);               // extent along the X-axis
+      yv = ws->y(i);
+      size_t index = nbins / 2; // This position should yield ws->x(i).at(index)==0.0
+      double x = ws->x(i).at(index);
       double factor = exp(exponentFactor * x);
       double h = yv.at(index) * exp(x);
-      xv = ws->readX(i);
+      xv = ws->x(i);
       MantidVec::iterator itx = xv.begin();
       double sum = 0.0;
       for (double &y : yv) {

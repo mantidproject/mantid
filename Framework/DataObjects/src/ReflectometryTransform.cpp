@@ -194,7 +194,7 @@ void createVerticalAxis(MatrixWorkspace *const ws, const MantidVec &xAxisVec, co
   verticalAxisRaw->title() = caption;
   auto xAxis = Kernel::make_cow<HistogramData::HistogramX>(xAxisVec);
   for (size_t i = 0; i < nBins; ++i) {
-    ws->setX(i, xAxis);
+    ws->setSharedX(i, xAxis);
     double qzIncrement = ((1 / gradY) * (static_cast<double>(i) + 1) + cyToUnit);
     verticalAxisRaw->setValue(i, qzIncrement);
   }
@@ -278,9 +278,9 @@ ReflectometryTransform::executeMD(const Mantid::API::MatrixWorkspace_const_sptr 
 
   auto spectraAxis = inputWs->getAxis(1);
   for (size_t index = 0; index < inputWs->getNumberHistograms(); ++index) {
-    auto counts = inputWs->readY(index);
-    auto wavelengths = inputWs->readX(index);
-    auto errors = inputWs->readE(index);
+    auto counts = inputWs->y(index);
+    auto wavelengths = inputWs->x(index);
+    auto errors = inputWs->e(index);
     const size_t nInputBins = wavelengths.size() - 1;
     const double twoTheta = spectraAxis->getValue(index);
     m_calculator->setTwoTheta(twoTheta);
@@ -329,9 +329,9 @@ ReflectometryTransform::execute(const Mantid::API::MatrixWorkspace_const_sptr &i
   // for each.
   auto spectraAxis = inputWs->getAxis(1);
   for (size_t index = 0; index < inputWs->getNumberHistograms(); ++index) {
-    auto counts = inputWs->readY(index);
-    auto wavelengths = inputWs->readX(index);
-    auto errors = inputWs->readE(index);
+    auto counts = inputWs->y(index);
+    auto wavelengths = inputWs->x(index);
+    auto errors = inputWs->e(index);
     const size_t nInputBins = wavelengths.size() - 1;
     const double twoTheta = spectraAxis->getValue(index);
     m_calculator->setTwoTheta(twoTheta);
@@ -347,8 +347,8 @@ ReflectometryTransform::execute(const Mantid::API::MatrixWorkspace_const_sptr &i
         const auto outIndexX = static_cast<int>((gradD0 * _d0) + cxToIndex);
         const auto outIndexZ = static_cast<int>((gradD1 * _d1) + cyToIndex);
 
-        ws->dataY(outIndexZ)[outIndexX] += counts[binIndex];
-        ws->dataE(outIndexZ)[outIndexX] += errors[binIndex];
+        ws->mutableY(outIndexZ)[outIndexX] += counts[binIndex];
+        ws->mutableE(outIndexZ)[outIndexX] += errors[binIndex];
       }
     }
   }
@@ -448,9 +448,9 @@ ReflectometryTransform::executeNormPoly(const MatrixWorkspace_const_sptr &inputW
     const double twoThetaLower = twoTheta - twoThetaHalfWidth;
     const double twoThetaUpper = twoTheta + twoThetaHalfWidth;
 
-    const MantidVec &X = inputWS->readX(i);
-    const MantidVec &Y = inputWS->readY(i);
-    const MantidVec &E = inputWS->readE(i);
+    const MantidVec &X = inputWS->x(i);
+    const MantidVec &Y = inputWS->y(i);
+    const MantidVec &E = inputWS->e(i);
     for (size_t j = 0; j < nBins; ++j) {
       const double lamLower = X[j];
       const double lamUpper = X[j + 1];

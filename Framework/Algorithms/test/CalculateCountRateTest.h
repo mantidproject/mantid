@@ -277,8 +277,8 @@ public:
       return;
 
     TS_ASSERT_EQUALS(testVisWS->getNumberHistograms(), 120);
-    auto X = testVisWS->readX(0);
-    auto Y = testVisWS->readY(0);
+    auto X = testVisWS->x(0);
+    auto Y = testVisWS->y(0);
     TS_ASSERT_EQUALS(X.size(), 201);
     TS_ASSERT_EQUALS(Y.size(), 200);
   }
@@ -309,8 +309,8 @@ public:
     API::MatrixWorkspace_sptr testVisWS = alg.getProperty("VisualizationWs");
     TS_ASSERT(testVisWS);
     TS_ASSERT_EQUALS(testVisWS->getNumberHistograms(), 100);
-    const MantidVec &X = testVisWS->readX(0);
-    const MantidVec &Y = testVisWS->readY(0);
+    const MantidVec &X = testVisWS->x(0);
+    const MantidVec &Y = testVisWS->y(0);
     TS_ASSERT_EQUALS(X.size(), 201);
     TS_ASSERT_EQUALS(Y.size(), 200);
     auto Yax = dynamic_cast<API::NumericAxis *>(testVisWS->getAxis(1));
@@ -329,7 +329,7 @@ public:
       return;
 
     for (size_t i = 0; i < testVisWS->getNumberHistograms(); ++i) {
-      const MantidVec &Y = testVisWS->readY(i);
+      const MantidVec &Y = testVisWS->y(i);
       double sum = std::accumulate(Y.begin(), Y.end(), 0.);
       TSM_ASSERT_DELTA("Incorrect counts at index: " + boost::lexical_cast<std::string>(i), counts[i], sum, 1.e-6);
     }
@@ -442,7 +442,7 @@ public:
     // different time steps make results unstable
     for (size_t i = 1; i < testVisWS->getNumberHistograms() - 1; ++i) {
       const HistogramData::HistogramY &Y = testVisWS->y(i);
-      // const MantidVec &Y = testVisWS->readY(i); // -- better for debugging as
+      // const MantidVec &Y = testVisWS->y(i); // -- better for debugging as
       // one can see what is inside
       double sum = std::accumulate(Y.begin(), Y.end(), 0.);
       TSM_ASSERT_DELTA("Incorrect counts at index: " + std::to_string(i), counts[i], sum, 1.e-6);

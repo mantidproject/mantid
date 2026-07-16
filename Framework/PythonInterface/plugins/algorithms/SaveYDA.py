@@ -218,7 +218,7 @@ class SaveYDA(PythonAlgorithm):
             slicethis["z"] = FlowList()
             slicethis["z"].append(val)
 
-            xax = ws.readX(i)
+            xax = ws.x(i)
             # get the bin centers not the bin edges
             xcenters = self._get_bin_centers(xax)
             # x axis is NumericAxis in energy transfer units

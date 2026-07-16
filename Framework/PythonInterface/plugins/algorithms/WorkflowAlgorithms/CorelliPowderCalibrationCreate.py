@@ -668,7 +668,7 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
 
         # Generate the summary data
         for status, handle in handles.items():
-            counts, bin_boundaries = handle.extractY(), handle.readX(0)
+            counts, bin_boundaries = handle.extractY(), handle.x(0)
             bin_centers = (bin_boundaries[:-1] + bin_boundaries[1:]) / 2  # all bin widths are the same
             means = np.sum(counts * bin_centers, axis=1) / np.sum(counts, axis=1)  # means.shape = (bank_count,)
             stds = np.sum(counts * bin_centers**2, axis=1) / np.sum(counts, axis=1) - means**2

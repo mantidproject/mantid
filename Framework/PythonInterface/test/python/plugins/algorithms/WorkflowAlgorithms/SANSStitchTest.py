@@ -200,7 +200,7 @@ class SANSStitchTest(unittest.TestCase):
 
         self.assertEqual(out_scale_factor, in_scale_factor)
         self.assertEqual(out_shift_factor, in_shift_factor)
-        y_array = out_ws.readY(0)
+        y_array = out_ws.y(0)
 
         expected_y_array = [1.5] * 9
         np.testing.assert_equal(y_array, expected_y_array)
@@ -269,7 +269,7 @@ class SANSStitchTest(unittest.TestCase):
 
         self.assertTrue(isinstance(out_ws, MatrixWorkspace))
 
-        y_array = out_ws.readY(0)
+        y_array = out_ws.y(0)
 
         expected_y_array = [0.5] * 9
 
@@ -316,9 +316,9 @@ class SANSStitchTest(unittest.TestCase):
         self.assertEqual(out_scale_factor, 1.0)
         self.assertEqual(out_shift_factor, -5.0)
 
-        y_array = out_ws.readY(0)
+        y_array = out_ws.y(0)
 
-        expected_y_array = lab_workspace.readY(0)  # We scale and shift to the back (lab) detectors
+        expected_y_array = lab_workspace.y(0)  # We scale and shift to the back (lab) detectors
 
         np.testing.assert_equal(y_array, expected_y_array)
 
@@ -369,7 +369,7 @@ class SANSStitchTest(unittest.TestCase):
 
         out_ws = alg.getProperty("OutputWorkspace").value
 
-        y_array = out_ws.readY(0)
+        y_array = out_ws.y(0)
 
         expected_y_array = [7497.5, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 7502, 10.0]  # We scale and shift to the back (lab) detectors
 
@@ -413,9 +413,9 @@ class SANSStitchTest(unittest.TestCase):
         alg.execute()
         out_ws = alg.getProperty("OutputWorkspace").value
 
-        y_array = out_ws.readY(0)
+        y_array = out_ws.y(0)
 
-        expected_y_array = lab_workspace.readY(0)  # We scale and shift to the back (lab) detectors
+        expected_y_array = lab_workspace.y(0)  # We scale and shift to the back (lab) detectors
         np.testing.assert_equal(y_array, expected_y_array)
 
     def test_scale_only_without_can(self):
@@ -456,9 +456,9 @@ class SANSStitchTest(unittest.TestCase):
         alg.execute()
         out_ws = alg.getProperty("OutputWorkspace").value
 
-        y_array = out_ws.readY(0)
+        y_array = out_ws.y(0)
 
-        expected_y_array = lab_workspace.readY(0)  # We scale and shift to the back (lab) detectors
+        expected_y_array = lab_workspace.y(0)  # We scale and shift to the back (lab) detectors
 
         np.testing.assert_equal(y_array, expected_y_array)
 
@@ -504,7 +504,7 @@ class SANSStitchTest(unittest.TestCase):
 
         self.assertTrue(isinstance(out_ws, MatrixWorkspace))
 
-        y_array = out_ws.readY(0)
+        y_array = out_ws.y(0)
 
         expected_y_array = [0.5] * 5 + [1.5] * 4
 
@@ -552,7 +552,7 @@ class SANSStitchTest(unittest.TestCase):
 
         self.assertTrue(isinstance(out_ws, MatrixWorkspace))
 
-        y_array = out_ws.readY(0)
+        y_array = out_ws.y(0)
 
         expected_y_array = [0.5] * 2 + [1.0] * 5 + [1.5] * 2
 
@@ -602,7 +602,7 @@ class SANSStitchTest(unittest.TestCase):
 
         self.assertTrue(isinstance(out_ws, MatrixWorkspace))
 
-        y_array = out_ws.readY(0)
+        y_array = out_ws.y(0)
 
         expected_y_array = [0.5] * 9
         np.testing.assert_equal(y_array, expected_y_array)
@@ -651,7 +651,7 @@ class SANSStitchTest(unittest.TestCase):
 
         self.assertTrue(isinstance(out_ws, MatrixWorkspace))
 
-        y_array = out_ws.readY(0)
+        y_array = out_ws.y(0)
 
         expected_y_array = [1.0] + [1.5] * 8
 
@@ -701,7 +701,7 @@ class SANSStitchTest(unittest.TestCase):
 
         self.assertTrue(isinstance(out_ws, MatrixWorkspace))
 
-        y_array = out_ws.readY(0)
+        y_array = out_ws.y(0)
 
         expected_y_array = [0.5] * 5 + [1.5] * 4
 

@@ -811,7 +811,7 @@ void MatrixWorkspace::getIntegratedSpectra(std::vector<double> &out, const doubl
   PARALLEL_FOR_IF(this->threadSafe())
   for (int wksp_index = 0; wksp_index < static_cast<int>(this->getNumberHistograms()); wksp_index++) {
     // Get Handle to data
-    const Mantid::MantidVec &xData = this->readX(wksp_index);
+    const Mantid::MantidVec &xData = this->x(wksp_index);
     const auto &yData = this->y(wksp_index);
     // If it is a 1D workspace, no need to integrate
     if ((xData.size() <= 1 + histogramOffset) && (!yData.empty())) {
@@ -1358,9 +1358,9 @@ size_t MatrixWorkspace::getMemorySize() const {
  */
 size_t MatrixWorkspace::getMemorySizeForXAxes() const {
   size_t total = 0;
-  auto lastX = this->refX(0);
+  auto lastX = this->sharedX(0);
   for (size_t wi = 0; wi < getNumberHistograms(); wi++) {
-    auto X = this->refX(wi);
+    auto X = this->sharedX(wi);
     // If the pointers are the same
     if (!(X == lastX) || wi == 0)
       total += (*X).size() * sizeof(double);
@@ -1585,7 +1585,7 @@ public:
     const auto *axis = m_ws->getAxis(0);
     const auto &unit = axis->unit();
     if (unit && unit->unitID() != "Empty")
-      return unit->caption();
+      return unit->capti->x(
     else
       return axis->title();
   }

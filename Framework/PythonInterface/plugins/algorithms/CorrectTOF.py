@@ -103,8 +103,8 @@ class CorrectTOF(PythonAlgorithm):
                 det = instrument.getDetector(outws.getSpectrum(idx).getDetectorIDs()[0])
                 sdd = det.getDistance(sample)
                 t2_el = sdd * 1.0e6 / velocity  # microseconds
-                newX = inputws.readX(idx) + t2_el - t_fit[idx]
-                outws.setX(idx, newX)
+                newX = inputws.x(idx) + t2_el - t_fit[idx]
+                outws.setSharedX(idx, newX)
 
         self.setProperty("OutputWorkspace", outws)
 

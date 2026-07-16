@@ -75,13 +75,13 @@ public:
     TS_ASSERT_THROWS_NOTHING(result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
                                  AnalysisDataService::Instance().retrieve(outputWS)));
     // These should be extremely close to one another (a fraction of a %)
-    TS_ASSERT_DELTA(result->readY(0).front(), flatws->readY(0).front(), 0.00001);
-    TS_ASSERT_DELTA(result->readY(0).back(), flatws->readY(0).back(), 0.00001);
-    TS_ASSERT_DELTA(result->readY(0)[8], flatws->readY(0)[8], 0.00001);
+    TS_ASSERT_DELTA(result->y(0).front(), flatws->y(0).front(), 0.00001);
+    TS_ASSERT_DELTA(result->y(0).back(), flatws->y(0).back(), 0.00001);
+    TS_ASSERT_DELTA(result->y(0)[8], flatws->y(0)[8], 0.00001);
     // Check a few actual numbers as well
-    TS_ASSERT_DELTA(result->readY(0).front(), 0.4953, 0.0001);
-    TS_ASSERT_DELTA(result->readY(0).back(), 0.0318, 0.0001);
-    TS_ASSERT_DELTA(result->readY(0)[4], 0.1463, 0.0001);
+    TS_ASSERT_DELTA(result->y(0).front(), 0.4953, 0.0001);
+    TS_ASSERT_DELTA(result->y(0).back(), 0.0318, 0.0001);
+    TS_ASSERT_DELTA(result->y(0)[4], 0.1463, 0.0001);
 
     AnalysisDataService::Instance().remove(flatWS);
     AnalysisDataService::Instance().remove(outputWS);
@@ -129,10 +129,10 @@ public:
     TS_ASSERT_THROWS_NOTHING(result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
                                  AnalysisDataService::Instance().retrieve(outputWS)));
     // These should be somewhat close to one another (within a couple of %)
-    Mantid::MantidVec y0 = result->readY(0);
-    TS_ASSERT_DELTA(y0.front() / cylws->readY(0).front(), 1.0, 0.02);
-    TS_ASSERT_DELTA(y0[4] / cylws->readY(0)[4], 1.0, 0.02);
-    TS_ASSERT_DELTA(y0[7] / cylws->readY(0)[7], 1.0, 0.02);
+    Mantid::MantidVec y0 = result->y(0);
+    TS_ASSERT_DELTA(y0.front() / cylws->y(0).front(), 1.0, 0.02);
+    TS_ASSERT_DELTA(y0[4] / cylws->y(0)[4], 1.0, 0.02);
+    TS_ASSERT_DELTA(y0[7] / cylws->y(0)[7], 1.0, 0.02);
     // Check a few actual numbers as well
     TS_ASSERT_DELTA(y0.front(), 0.7266, 0.0001);
     TS_ASSERT_DELTA(y0.back(), 0.2164, 0.0001);
@@ -162,10 +162,10 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
                                  AnalysisDataService::Instance().retrieve("gauge")));
-    TS_ASSERT_LESS_THAN(result->readY(0).front(), y0.front());
-    TS_ASSERT_LESS_THAN(result->readY(0).back(), y0.back());
-    TS_ASSERT_LESS_THAN(result->readY(0)[1], y0[1]);
-    TS_ASSERT_LESS_THAN(result->readY(0).back(), result->readY(0).front());
+    TS_ASSERT_LESS_THAN(result->y(0).front(), y0.front());
+    TS_ASSERT_LESS_THAN(result->y(0).back(), y0.back());
+    TS_ASSERT_LESS_THAN(result->y(0)[1], y0[1]);
+    TS_ASSERT_LESS_THAN(result->y(0).back(), result->y(0).front());
 
     AnalysisDataService::Instance().remove(cylWS);
     AnalysisDataService::Instance().remove(outputWS);
@@ -275,16 +275,15 @@ public:
     Mantid::API::MatrixWorkspace_sptr samWS;
     TS_ASSERT_THROWS_NOTHING(samWS = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
                                  AnalysisDataService::Instance().retrieve(SAM_WS)));
-    const auto &samValues = samWS->readY(0);
+    const auto &samValues = samWS->y(0);
     Mantid::API::MatrixWorkspace_sptr canWS;
     TS_ASSERT_THROWS_NOTHING(canWS = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
                                  AnalysisDataService::Instance().retrieve(CAN_WS)));
-    const auto &canValues = canWS->readY(0);
+    const auto &canValues = canWS->y(0);
     TS_ASSERT_EQUALS(samValues.size(), canValues.size());
     // the actual compare - sample should absorb more
     for (size_t i = 0; i < NUM_VALS; ++i) {
-      std::cout << "values[" << i << "] " << samWS->readX(0)[i] << " : " << samValues[i] << " and " << canValues[i]
-                << '\n';
+      std::cout << "values[" << i << "] " << samWS->x(0)[i] << " : " << samValues[i] << " and " << canValues[i] << '\n';
       TS_ASSERT(samValues[i] < canValues[i])
     }
 

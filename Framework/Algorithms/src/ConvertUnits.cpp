@@ -312,7 +312,7 @@ MatrixWorkspace_sptr ConvertUnits::convertQuickly(const API::MatrixWorkspace_con
     PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
     for (int64_t j = 1; j < numberOfSpectra_i; ++j) {
       PARALLEL_START_INTERRUPT_REGION
-      outputWS->setX(j, xVals);
+      outputWS->setSharedX(j, xVals);
       prog.report("Convert to " + m_outputUnit->unitID());
       PARALLEL_END_INTERRUPT_REGION
     }
@@ -402,7 +402,7 @@ MatrixWorkspace_sptr ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUni
   size_t checkIndex = 0;
   spectrumInfo.getDetectorValues(*fromUnit, *outputUnit, emode, signedTheta, checkIndex, upmap);
   // copy the X values for the check
-  auto checkXValues = inputWS->readX(checkIndex);
+  auto checkXValues = inputWS->x(checkIndex);
   try {
     // Convert the input unit to time-of-flight
     checkFromUnit->toTOF(checkXValues, emptyVec, l1, emode, upmap);
@@ -621,7 +621,7 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(const Mantid::API::
     std::vector<MantidVec::difference_type> lastBins(numSpec);
     int maxBins = 0;
     for (size_t i = 0; i < numSpec; ++i) {
-      const MantidVec &X = workspace->readX(i);
+      const MantidVec &X = workspace->x(i);
       auto end = std::lower_bound(X.cbegin(), X.cend(), 1.0e-10 * DBL_MAX);
       MantidVec::difference_type bins = end - X.cbegin();
       lastBins[i] = bins;

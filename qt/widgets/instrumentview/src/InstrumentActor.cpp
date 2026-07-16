@@ -939,11 +939,11 @@ void InstrumentActor::rotateToLookAt(const Mantid::Kernel::V3D &eye, const Manti
   if (x.nullVector()) {
     // up || eye
     if (z.X() != 0.0) {
-      x.setY(1.0);
+      x.setSharedY(1.0);
     } else if (z.Y() != 0.0) {
       x.setZ(1.0);
     } else {
-      x.setX(1.0);
+      x.setSharedX(1.0);
     }
   }
   x.normalize();

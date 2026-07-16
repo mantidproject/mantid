@@ -569,7 +569,7 @@ class TestUtils(unittest.TestCase):
         workspace = LoadEmptyInstrument(InstrumentName="CORELLI", MakeEventWorkspace=False, OutputWorkspace="uncalibrated")
         # the workspace index for the first pixel in bank87/sixteenpack/tube12 is 355075
         for pixel_index in range(256):
-            workspace.dataY(355075 + pixel_index)[:] = counts[pixel_index]
+            workspace.mutableY(355075 + pixel_index)[:] = counts[pixel_index]
         self.workspace = "uncalibrated"
         self.table = "calibTable"
         self.calibrated_y = y
@@ -609,7 +609,7 @@ class TestUtils(unittest.TestCase):
         intputws = TestUtils.cases["124023_bank10"]  # try to use existing data
         preprocess_banks(intputws, "_ws")
         _ws = mtd["_ws"]
-        sig = np.array([_ws.readY(i) for i in range(_ws.getNumberHistograms())])
+        sig = np.array([_ws.y(i) for i in range(_ws.getNumberHistograms())])
         rst = np.array([sig.mean(), sig.std(), np.median(sig), sig.sum()])
         np.testing.assert_allclose(rst, ref)
 
@@ -627,7 +627,7 @@ class TestUtils(unittest.TestCase):
                 config.appendDataSearchDir(path.join(directory, "CORELLI", "calibration"))
                 break
         workspace = load_banks(path.join(data_dir, "CORELLI_123454_bank58.nxs"), "58", output_workspace="jambalaya")
-        self.assertAlmostEqual(workspace.readY(42)[0], 13297.0)
+        self.assertAlmostEqual(workspace.y(42)[0], 13297.0)
         DeleteWorkspaces(["jambalaya"])
 
     def test_trim_calibration_table(self):

@@ -201,7 +201,7 @@ class SANSStitch(DataProcessorAlgorithm):
             # Strip zeros is only possible on 1D workspaces
             return ws
 
-        y_vals = ws.readY(0)
+        y_vals = ws.y(0)
         length = len(y_vals)
         # Find the first non-zero value
         start = 0
@@ -217,7 +217,7 @@ class SANSStitch(DataProcessorAlgorithm):
                 stop = j
                 break
         # Find the appropriate X values and call CropWorkspace
-        x_vals = ws.readX(0)
+        x_vals = ws.x(0)
         start_x = x_vals[start]
         # Make sure we're inside the bin that we want to crop
         if len(y_vals) == len(x_vals):
@@ -242,7 +242,7 @@ class SANSStitch(DataProcessorAlgorithm):
 
     def _check_bins(self, merge_min, merge_max, cF, cR):
         if cF.yIndexOfX(merge_min) == cR.yIndexOfX(merge_max):
-            return cF.readX(0)[cR.yIndexOfX(merge_max) + 1]
+            return cF.x(0)[cR.yIndexOfX(merge_max) + 1]
         else:
             return merge_max
 
@@ -494,8 +494,8 @@ class QErrorCorrectionForMergedWorkspaces(object):
 
         q_resolution_front = count_ws_front.readDx(0)
         q_resolution_rear = count_ws_rear.readDx(0)
-        counts_front = count_ws_front.readY(0)
-        counts_rear = count_ws_rear.readY(0)
+        counts_front = count_ws_front.y(0)
+        counts_rear = count_ws_rear.y(0)
 
         # We need to make sure that the workspaces match in length
         if (len(q_resolution_front) != len(q_resolution_rear)) or (len(counts_front) != len(counts_rear)):

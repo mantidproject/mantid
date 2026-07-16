@@ -245,7 +245,7 @@ void MaxEnt::validateBinEdges(const std::string &wsName, std::map<std::string, s
   MatrixWorkspace_const_sptr ws = getProperty(wsName);
   if (ws) {
 
-    Kernel::EqualBinsChecker binChecker(ws->readX(0), BIN_WIDTH_ERROR_LEVEL, warningLevel);
+    Kernel::EqualBinsChecker binChecker(ws->x(0), BIN_WIDTH_ERROR_LEVEL, warningLevel);
     const std::string binError = binChecker.validate();
     if (!binError.empty()) {
       messages[wsName] = binError;
@@ -421,8 +421,8 @@ void MaxEnt::exec() {
   for (size_t i = 0; i < outImageWS->getNumberHistograms(); ++i)
     outImageWS->getSpectrum(i).setDetectorID(static_cast<detid_t>(i + 1));
   HistogramBuilder builder;
-  builder.setX(npointsX);
-  builder.setY(npoints);
+  builder.setSharedX(npointsX);
+  builder.setSharedY(npoints);
   builder.setDistribution(inWS->isDistribution());
   outDataWS = create<MatrixWorkspace>(*inWS, 2 * nDataSpec, builder.build());
 

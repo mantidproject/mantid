@@ -74,8 +74,8 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
         self.setProperty("Result", result)
 
     def getData(self, ws, wkspIndex, label=""):
-        x = ws.readX(wkspIndex)
-        y = ws.readY(wkspIndex)
+        x = ws.x(wkspIndex)
+        y = ws.y(wkspIndex)
         if x.size == y.size + 1:
             x = (x[:-1] + x[1:]) * 0.5
 

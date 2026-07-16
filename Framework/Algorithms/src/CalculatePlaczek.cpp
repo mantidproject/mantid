@@ -186,13 +186,13 @@ std::map<std::string, std::string> CalculatePlaczek::validateInputs() {
       issues["IncidentSpectra"] = "Need three spectra here for second order calculation.";
     } else {
       // if there are the correct number of spectra make sure all are not empty
-      if (incidentWS->readY(0).empty()) {
+      if (incidentWS->y(0).empty()) {
         issues["IncidentSpectra"] = "Flux is empty";
       }
-      if (incidentWS->readY(1).empty()) {
+      if (incidentWS->y(1).empty()) {
         issues["IncidentSpectra"] = "First order derivate of the incident spectrum is empty";
       }
-      if (incidentWS->readY(2).empty()) {
+      if (incidentWS->y(2).empty()) {
         issues["IncidentSpectra"] = "Second order derivate of the incident spectrum is empty";
       }
     }
@@ -202,10 +202,10 @@ std::map<std::string, std::string> CalculatePlaczek::validateInputs() {
       issues["IncidentSpectra"] = "Need two spectra here for first order calculation.";
     } else {
       // if there are the correct number of spectra make sure all are not empty
-      if (incidentWS->readY(0).empty()) {
+      if (incidentWS->y(0).empty()) {
         issues["IncidentSpectra"] = "Flux is empty";
       }
-      if (incidentWS->readY(1).empty()) {
+      if (incidentWS->y(1).empty()) {
         issues["IncidentSpectra"] = "First order derivate of the incident spectrum is empty";
       }
     }
@@ -221,13 +221,13 @@ std::map<std::string, std::string> CalculatePlaczek::validateInputs() {
         issues["EfficiencySpectra"] = "Need three spectra here for second order calculation.";
       } else {
         // if there are the correct number of spectra make sure all are not empty
-        if (efficiencyWS->readY(0).empty()) {
+        if (efficiencyWS->y(0).empty()) {
           issues["EfficiencySpectra"] = "Detector efficiency is empty";
         }
-        if (efficiencyWS->readY(1).empty()) {
+        if (efficiencyWS->y(1).empty()) {
           issues["EfficiencySpectra"] = "First order derivate of the efficiency spectrum is empty";
         }
-        if (efficiencyWS->readY(2).empty()) {
+        if (efficiencyWS->y(2).empty()) {
           issues["EfficiencySpectra"] = "Second order derivate of the efficiency spectrum is empty";
         }
       }
@@ -237,10 +237,10 @@ std::map<std::string, std::string> CalculatePlaczek::validateInputs() {
         issues["EfficiencySpectra"] = "Need two spectra here for first order calculation.";
       } else {
         // if there are the correct number of spectra make sure all are not empty
-        if (efficiencyWS->readY(0).empty()) {
+        if (efficiencyWS->y(0).empty()) {
           issues["EfficiencySpectra"] = "Detector efficiency is empty";
         }
-        if (efficiencyWS->readY(1).empty()) {
+        if (efficiencyWS->y(1).empty()) {
           issues["EfficiencySpectra"] = "First order derivate of the efficiency spectrum is empty";
         }
       }
@@ -460,8 +460,8 @@ std::vector<double> CalculatePlaczek::getFluxCoefficient1() {
 
   const API::MatrixWorkspace_sptr incidentWS = getProperty("IncidentSpectra");
   const auto xLambda = incidentWS->getSpectrum(0).points();
-  const auto &incident = incidentWS->readY(0);
-  const auto &incidentPrime = incidentWS->readY(1);
+  const auto &incident = incidentWS->y(0);
+  const auto &incidentPrime = incidentWS->y(1);
   // phi1 = lambda * phi'(lambda)/phi(lambda)
   for (size_t i = 0; i < xLambda.size(); i++) {
     phi1.emplace_back(xLambda[i] * incidentPrime[i] / incident[i]);
@@ -480,8 +480,8 @@ std::vector<double> CalculatePlaczek::getFluxCoefficient2() {
 
   const API::MatrixWorkspace_sptr incidentWS = getProperty("IncidentSpectra");
   const auto xLambda = incidentWS->getSpectrum(0).points();
-  const auto &incident = incidentWS->readY(0);
-  const auto &incidentPrime2 = incidentWS->readY(2);
+  const auto &incident = incidentWS->y(0);
+  const auto &incidentPrime2 = incidentWS->y(2);
   // phi2 = lambda^2 * phi''(lambda)/phi(lambda)
   for (size_t i = 0; i < xLambda.size(); i++) {
     phi2.emplace_back(xLambda[i] * xLambda[i] * incidentPrime2[i] / incident[i]);
@@ -507,8 +507,8 @@ std::vector<double> CalculatePlaczek::getEfficiencyCoefficient1() {
   if (efficiencyWS) {
     // Use the formula
     // eps1 = k * eps'/eps, k = 2pi/lambda
-    std::vector<double> eps = efficiencyWS->readY(0);
-    std::vector<double> epsPrime = efficiencyWS->readY(1);
+    std::vector<double> eps = efficiencyWS->y(0);
+    std::vector<double> epsPrime = efficiencyWS->y(1);
     for (size_t i = 0; i < xLambda.size(); i++) {
       double lambda = xLambda[i];
       double k = 2.0 * M_PI / lambda;
@@ -545,8 +545,8 @@ std::vector<double> CalculatePlaczek::getEfficiencyCoefficient2() {
   if (efficiencyWS) {
     // Use the formula
     // eps1 = k^2 * eps''/eps, k = 2pi/lambda
-    std::vector<double> eps = efficiencyWS->readY(0);
-    std::vector<double> epsPrime2 = efficiencyWS->readY(2);
+    std::vector<double> eps = efficiencyWS->y(0);
+    std::vector<double> epsPrime2 = efficiencyWS->y(2);
     for (size_t i = 0; i < xLambda.size(); i++) {
       double lambda = xLambda[i];
       double k = 2.0 * M_PI / lambda;

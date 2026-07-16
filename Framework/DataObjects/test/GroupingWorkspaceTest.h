@@ -51,7 +51,7 @@ public:
     // Set the group numbers
     for (std::size_t group = 0; group < NUM_BANKS; group++)
       for (std::size_t i = 0; i < PIXELS_PER_BANK; i++)
-        ws->dataY(group * PIXELS_PER_BANK + i)[0] = double(group + 1);
+        ws->mutableY(group * PIXELS_PER_BANK + i)[0] = double(group + 1);
 
     // Get the map
     std::map<detid_t, int> map;
@@ -108,7 +108,7 @@ public:
     // Set the group numbers
     for (std::size_t group = 0; group < NUM_BANKS; group++)
       for (std::size_t i = 0; i < PIXELS_PER_BANK; i++)
-        ws->dataY(group * PIXELS_PER_BANK + i)[0] = double(group + 1);
+        ws->mutableY(group * PIXELS_PER_BANK + i)[0] = double(group + 1);
     cloned = ws->clone();
 
     // Get the map
@@ -158,8 +158,8 @@ public:
     GroupingWorkspace_sptr ws(new GroupingWorkspace());
     // create a groupingworkspace with 2 groups
     ws->initialize(100, 1, 1);
-    ws->dataY(0)[0] = 1;
-    ws->dataY(1)[0] = 2;
+    ws->mutableY(0)[0] = 1;
+    ws->mutableY(1)[0] = 2;
     TS_ASSERT_EQUALS(ws->getTotalGroups(), 3);
   }
 
@@ -167,8 +167,8 @@ public:
     GroupingWorkspace_sptr ws(new GroupingWorkspace());
     // create a groupingworkspace with 2 groups
     ws->initialize(100, 1, 1);
-    ws->dataY(0)[0] = 1;
-    ws->dataY(1)[0] = 2;
+    ws->mutableY(0)[0] = 1;
+    ws->mutableY(1)[0] = 2;
     TS_ASSERT_EQUALS(ws->getGroupIDs().size(), 3);
     TS_ASSERT_EQUALS(ws->getGroupIDs()[0], -1);
     TS_ASSERT_EQUALS(ws->getGroupIDs()[1], 1);

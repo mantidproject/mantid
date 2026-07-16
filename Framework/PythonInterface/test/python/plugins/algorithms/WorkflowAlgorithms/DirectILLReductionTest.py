@@ -195,7 +195,7 @@ class DirectILLReductionTest(unittest.TestCase):
         self.assertTrue(mtd.doesExist(outWSName))
         ws = mtd[outWSName]
         self.assertEqual(ws.getAxis(0).getUnit().unitID(), "DeltaE")
-        xs = ws.readX(0)
+        xs = ws.x(0)
         assert_almost_equal(xs, numpy.arange(E0, E1 + 0.01, dE))
 
     def testHybridERebinningSingleUserRange(self):
@@ -214,7 +214,7 @@ class DirectILLReductionTest(unittest.TestCase):
         self.assertTrue(mtd.doesExist(outWSName))
         ws = mtd[outWSName]
         self.assertEqual(ws.getAxis(0).getUnit().unitID(), "DeltaE")
-        xs = ws.readX(0)
+        xs = ws.x(0)
         assert_almost_equal(xs, numpy.arange(E0, E1 + 0.01, dE))
 
     def testHybridERebinningUserConstrainedAutoRange(self):
@@ -232,7 +232,7 @@ class DirectILLReductionTest(unittest.TestCase):
         self.assertTrue(mtd.doesExist(outWSName))
         ws = mtd[outWSName]
         self.assertEqual(ws.getAxis(0).getUnit().unitID(), "DeltaE")
-        xs = ws.readX(0)
+        xs = ws.x(0)
         self.assertEqual(xs[0], E0)
         self.assertEqual(xs[-1], E1)
 
@@ -252,7 +252,7 @@ class DirectILLReductionTest(unittest.TestCase):
         self.assertTrue(mtd.doesExist(outWSName))
         ws = mtd[outWSName]
         self.assertEqual(ws.getAxis(0).getUnit().unitID(), "MomentumTransfer")
-        xs = ws.readX(0)
+        xs = ws.x(0)
         assert_almost_equal(xs, numpy.arange(Q0, Q1, dQ))
 
     def testQRebinningBinWidthOnly(self):
@@ -264,7 +264,7 @@ class DirectILLReductionTest(unittest.TestCase):
         self.assertTrue(mtd.doesExist(outWSName))
         ws = mtd[outWSName]
         self.assertEqual(ws.getAxis(0).getUnit().unitID(), "MomentumTransfer")
-        xs = ws.readX(0)
+        xs = ws.x(0)
         self.assertGreater(len(xs), 3)
         dx = xs[1:] - xs[:-1]
         # Bin widths may differ at the edges.

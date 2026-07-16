@@ -182,7 +182,7 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         table.copy_cells(current_table)
 
         # Value should be the same as that taken from the workspace.
-        y_from_ws = ws.readY(histogram_index)[y_index]
+        y_from_ws = ws.y(histogram_index)[y_index]
         self.assertEqual(str(y_from_ws), self.mock_clip)
 
     @patch(show_mouse_toast_package)

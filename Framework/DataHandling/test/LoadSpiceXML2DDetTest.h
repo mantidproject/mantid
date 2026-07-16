@@ -76,15 +76,15 @@ public:
 
     size_t numspec = outws->getNumberHistograms();
     TS_ASSERT_EQUALS(numspec, 256);
-    size_t numx = outws->readX(0).size();
-    size_t numy = outws->readY(0).size();
+    size_t numx = outws->x(0).size();
+    size_t numy = outws->y(0).size();
     TS_ASSERT_EQUALS(numx, 256);
     TS_ASSERT_EQUALS(numy, 256);
 
     // Check the value
     double totalcounts = 0;
     for (size_t i = 0; i < numspec; ++i) {
-      const MantidVec &vecY = outws->readY(i);
+      const MantidVec &vecY = outws->y(i);
       size_t numy = vecY.size();
       for (size_t j = 0; j < numy; ++j)
         totalcounts += vecY[j];
@@ -92,7 +92,7 @@ public:
     TS_ASSERT_DELTA(totalcounts, 8049.00, 0.000001);
 
     // check max count
-    TS_ASSERT_DELTA(outws->readY(120)[135], 4., 0.000001);
+    TS_ASSERT_DELTA(outws->y(120)[135], 4., 0.000001);
 
     // Check the sample logs loaded from XML node
     // monitor counts
@@ -168,9 +168,9 @@ public:
 
     // test signal value on various pixels
     // pixel at (256, 1): column 1
-    TS_ASSERT_DELTA(outws->readY(255)[0], 1.0, 0.0001);
+    TS_ASSERT_DELTA(outws->y(255)[0], 1.0, 0.0001);
     // pixel at (254, 256): colun 256
-    TS_ASSERT_DELTA(outws->readY(255 * 256 + 138)[0], 2.0, 0.00001);
+    TS_ASSERT_DELTA(outws->y(255 * 256 + 138)[0], 2.0, 0.00001);
 
     // Instrument
     TS_ASSERT(outws->getInstrument());
@@ -315,9 +315,9 @@ public:
     // Value
     // test signal value on various pixels
     // pixel at (256, 1): column 1
-    TS_ASSERT_DELTA(outws->readY(255)[0], 1.0, 0.0001);
+    TS_ASSERT_DELTA(outws->y(255)[0], 1.0, 0.0001);
     // pixel at (254, 256): colun 256
-    TS_ASSERT_DELTA(outws->readY(255 * 256 + 138)[0], 2.0, 0.00001);
+    TS_ASSERT_DELTA(outws->y(255 * 256 + 138)[0], 2.0, 0.00001);
 
     // Instrument
     TS_ASSERT(outws->getInstrument());
@@ -405,9 +405,9 @@ public:
     // Value
     // test signal value on various pixels
     // pixel at (256, 1): column 1
-    TS_ASSERT_DELTA(outws->readY(255)[0], 1.0, 0.0001);
+    TS_ASSERT_DELTA(outws->y(255)[0], 1.0, 0.0001);
     // pixel at (254, 256): colun 256
-    TS_ASSERT_DELTA(outws->readY(255 * 256 + 138)[0], 2.0, 0.00001);
+    TS_ASSERT_DELTA(outws->y(255 * 256 + 138)[0], 2.0, 0.00001);
 
     // Instrument
     TS_ASSERT(outws->getInstrument());
@@ -503,9 +503,9 @@ public:
     // Value
     // test signal value on various pixels
     // pixel at (256, 1): column 1
-    TS_ASSERT_DELTA(outws->readY(255)[0], 1.0, 0.0001);
+    TS_ASSERT_DELTA(outws->y(255)[0], 1.0, 0.0001);
     // pixel at (254, 256): column 256
-    TS_ASSERT_DELTA(outws->readY(255 * 256 + 138)[0], 2.0, 0.00001);
+    TS_ASSERT_DELTA(outws->y(255 * 256 + 138)[0], 2.0, 0.00001);
 
     // Instrument
     TS_ASSERT(outws->getInstrument());
@@ -610,9 +610,9 @@ public:
     // Value
     // test signal value on various pixels
     // pixel at (256, 1): column 1
-    TS_ASSERT_DELTA(outws->readY(255)[0], 1.0, 0.0001);
+    TS_ASSERT_DELTA(outws->y(255)[0], 1.0, 0.0001);
     // pixel at (254, 256): colun 256
-    TS_ASSERT_DELTA(outws->readY(255 * 256 + 138)[0], 2.0, 0.00001);
+    TS_ASSERT_DELTA(outws->y(255 * 256 + 138)[0], 2.0, 0.00001);
 
     // Instrument
     TS_ASSERT(outws->getInstrument());
@@ -691,9 +691,9 @@ public:
     // Value
     // test signal value on various pixels
     // pixel at (256, 1): column 1
-    TS_ASSERT_DELTA(outws->readY(0)[0], 60000., 0.0001);
-    TS_ASSERT_DELTA(outws->readY(1)[0], 50000., 0.0001);
-    TS_ASSERT_DELTA(outws->readY(2)[0], 40000., 0.0001);
+    TS_ASSERT_DELTA(outws->y(0)[0], 60000., 0.0001);
+    TS_ASSERT_DELTA(outws->y(1)[0], 50000., 0.0001);
+    TS_ASSERT_DELTA(outws->y(2)[0], 40000., 0.0001);
 
     // Clean
     AnalysisDataService::Instance().remove("Exp0335_S0038F");

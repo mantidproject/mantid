@@ -103,9 +103,9 @@ private:
 
   void checkDataItem(const MatrixWorkspace_sptr &work_in1, const MatrixWorkspace_sptr &work_in2,
                      const MatrixWorkspace_sptr &work_out1, size_t i, size_t ws2Index) {
-    double sig1 = work_in1->readY(i / work_in1->blocksize())[i % work_in1->blocksize()];
-    double sig2 = work_in2->readY(ws2Index / work_in1->blocksize())[ws2Index % work_in1->blocksize()];
-    double sig3 = work_out1->readY(i / work_in1->blocksize())[i % work_in1->blocksize()];
+    double sig1 = work_in1->y(i / work_in1->blocksize())[i % work_in1->blocksize()];
+    double sig2 = work_in2->y(ws2Index / work_in1->blocksize())[ws2Index % work_in1->blocksize()];
+    double sig3 = work_out1->y(i / work_in1->blocksize())[i % work_in1->blocksize()];
     TS_ASSERT_DELTA((sig1 + sig2) / 3 + 5, sig3, 0.0001);
     // Note err calculation not checked due to complexity.
   }

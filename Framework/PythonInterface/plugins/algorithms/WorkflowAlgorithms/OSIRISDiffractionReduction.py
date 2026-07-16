@@ -608,9 +608,9 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
                 for i in range(len(merged_spectra)):
                     if (
-                        merged_spectra[i].dataX(0).size != max_x_size
-                        or merged_spectra[i].dataY(0).size != max_y_size
-                        or merged_spectra[i].dataE(0).size != max_e_size
+                        merged_spectra[i].mutableX(0).size != max_x_size
+                        or merged_spectra[i].mutableY(0).size != max_y_size
+                        or merged_spectra[i].mutableE(0).size != max_e_size
                     ):
                         dataX = merged_spectra[i].dataX(0)
                         dataY = merged_spectra[i].dataY(0)
@@ -686,8 +686,8 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
             result_y = result_y / data_y
             result_e = result_e / data_e
 
-            output_ws.setY(i, result_y)
-            output_ws.setE(i, result_e)
+            output_ws.setSharedY(i, result_y)
+            output_ws.setSharedE(i, result_e)
 
         self.setProperty("OutputWorkspace", output_ws)
 

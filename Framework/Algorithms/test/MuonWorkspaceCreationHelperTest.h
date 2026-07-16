@@ -79,22 +79,22 @@ public:
 
     MatrixWorkspace_sptr ws = createCountsWorkspace(2, 10, 0.0);
 
-    Mantid::MantidVec vecX1 = ws->getSpectrum(0).readX();
-    Mantid::MantidVec vecX2 = ws->getSpectrum(1).readX();
+    Mantid::MantidVec vecX1 = ws->getSpectrum(0).x();
+    Mantid::MantidVec vecX2 = ws->getSpectrum(1).x();
     TS_ASSERT_DELTA(vecX1.at(0), 0.000, 0.001);
     TS_ASSERT_DELTA(vecX1.at(9), 0.900, 0.001);
     TS_ASSERT_DELTA(vecX2.at(0), 0.000, 0.001);
     TS_ASSERT_DELTA(vecX2.at(9), 0.900, 0.001);
 
-    Mantid::MantidVec vecY1 = ws->getSpectrum(0).readY();
-    Mantid::MantidVec vecY2 = ws->getSpectrum(1).readY();
+    Mantid::MantidVec vecY1 = ws->getSpectrum(0).y();
+    Mantid::MantidVec vecY2 = ws->getSpectrum(1).y();
     TS_ASSERT_DELTA(vecY1.at(0), 0, 0.1);
     TS_ASSERT_DELTA(vecY1.at(9), 9, 0.1);
     TS_ASSERT_DELTA(vecY2.at(0), 10, 0.1);
     TS_ASSERT_DELTA(vecY2.at(9), 19, 0.1);
 
-    Mantid::MantidVec vecE1 = ws->getSpectrum(0).readE();
-    Mantid::MantidVec vecE2 = ws->getSpectrum(1).readE();
+    Mantid::MantidVec vecE1 = ws->getSpectrum(0).e();
+    Mantid::MantidVec vecE2 = ws->getSpectrum(1).e();
     TS_ASSERT_DELTA(vecE1.at(0), 0.005, 0.0001);
     TS_ASSERT_DELTA(vecE1.at(9), 0.005, 0.0001);
     TS_ASSERT_DELTA(vecE2.at(0), 0.005, 0.0001);
@@ -123,22 +123,22 @@ public:
 
     MatrixWorkspace_sptr ws = createAsymmetryWorkspace(2, 10);
 
-    Mantid::MantidVec vecX1 = ws->getSpectrum(0).readX();
-    Mantid::MantidVec vecX2 = ws->getSpectrum(1).readX();
+    Mantid::MantidVec vecX1 = ws->getSpectrum(0).x();
+    Mantid::MantidVec vecX2 = ws->getSpectrum(1).x();
     TS_ASSERT_DELTA(vecX1.at(0), 0.000, 0.001);
     TS_ASSERT_DELTA(vecX1.at(9), 0.900, 0.001);
     TS_ASSERT_DELTA(vecX2.at(0), 0.000, 0.001);
     TS_ASSERT_DELTA(vecX2.at(9), 0.900, 0.001);
 
-    Mantid::MantidVec vecY1 = ws->getSpectrum(0).readY();
-    Mantid::MantidVec vecY2 = ws->getSpectrum(1).readY();
+    Mantid::MantidVec vecY1 = ws->getSpectrum(0).y();
+    Mantid::MantidVec vecY2 = ws->getSpectrum(1).y();
     TS_ASSERT_DELTA(vecY1.at(0), 12.46, 0.01);
     TS_ASSERT_DELTA(vecY1.at(9), 2.76, 0.01);
     TS_ASSERT_DELTA(vecY2.at(0), 24.78, 0.01);
     TS_ASSERT_DELTA(vecY2.at(9), 6.21, 0.01);
 
-    Mantid::MantidVec vecE1 = ws->getSpectrum(0).readE();
-    Mantid::MantidVec vecE2 = ws->getSpectrum(1).readE();
+    Mantid::MantidVec vecE1 = ws->getSpectrum(0).e();
+    Mantid::MantidVec vecE2 = ws->getSpectrum(1).e();
     TS_ASSERT_DELTA(vecE1.at(0), 0.005, 0.0001);
     TS_ASSERT_DELTA(vecE1.at(9), 0.005, 0.0001);
     TS_ASSERT_DELTA(vecE2.at(0), 0.005, 0.0001);
@@ -150,8 +150,8 @@ public:
     yDataCounts yData = yDataCounts();
     MatrixWorkspace_sptr ws = createAsymmetryWorkspace(5, 10, yData);
 
-    Mantid::MantidVec vecY1 = ws->getSpectrum(0).readY();
-    Mantid::MantidVec vecY2 = ws->getSpectrum(4).readY();
+    Mantid::MantidVec vecY1 = ws->getSpectrum(0).y();
+    Mantid::MantidVec vecY2 = ws->getSpectrum(4).y();
     TS_ASSERT_DELTA(vecY1.at(0), 0.0, 0.01);
     TS_ASSERT_DELTA(vecY1.at(9), 9.0, 0.01);
     TS_ASSERT_DELTA(vecY2.at(0), 40.0, 0.01);
@@ -193,15 +193,15 @@ public:
 
     MatrixWorkspace_sptr ws1 = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("MuonDataPeriod_1"));
 
-    Mantid::MantidVec vecX1 = ws1->getSpectrum(0).readX();
-    Mantid::MantidVec vecX2 = ws1->getSpectrum(1).readX();
+    Mantid::MantidVec vecX1 = ws1->getSpectrum(0).x();
+    Mantid::MantidVec vecX2 = ws1->getSpectrum(1).x();
     TS_ASSERT_DELTA(vecX1.at(0), 0.000, 0.001);
     TS_ASSERT_DELTA(vecX1.at(9), 0.900, 0.001);
     TS_ASSERT_DELTA(vecX2.at(0), 0.000, 0.001);
     TS_ASSERT_DELTA(vecX2.at(9), 0.900, 0.001);
 
-    Mantid::MantidVec vecY1 = ws1->getSpectrum(0).readY();
-    Mantid::MantidVec vecY2 = ws1->getSpectrum(1).readY();
+    Mantid::MantidVec vecY1 = ws1->getSpectrum(0).y();
+    Mantid::MantidVec vecY2 = ws1->getSpectrum(1).y();
     TS_ASSERT_DELTA(vecY1.at(0), 1, 0.1);
     TS_ASSERT_DELTA(vecY1.at(9), 10, 0.1);
     TS_ASSERT_DELTA(vecY2.at(0), 11, 0.1);
@@ -209,15 +209,15 @@ public:
 
     MatrixWorkspace_sptr ws5 = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("MuonDataPeriod_5"));
 
-    Mantid::MantidVec vecY3 = ws5->getSpectrum(0).readY();
-    Mantid::MantidVec vecY4 = ws5->getSpectrum(1).readY();
+    Mantid::MantidVec vecY3 = ws5->getSpectrum(0).y();
+    Mantid::MantidVec vecY4 = ws5->getSpectrum(1).y();
     TS_ASSERT_DELTA(vecY3.at(0), 5, 0.1);
     TS_ASSERT_DELTA(vecY3.at(9), 14, 0.1);
     TS_ASSERT_DELTA(vecY4.at(0), 15, 0.1);
     TS_ASSERT_DELTA(vecY4.at(9), 24, 0.1);
 
-    Mantid::MantidVec vecE1 = ws1->getSpectrum(0).readE();
-    Mantid::MantidVec vecE2 = ws1->getSpectrum(1).readE();
+    Mantid::MantidVec vecE1 = ws1->getSpectrum(0).e();
+    Mantid::MantidVec vecE2 = ws1->getSpectrum(1).e();
     TS_ASSERT_DELTA(vecE1.at(0), 0.005, 0.0001);
     TS_ASSERT_DELTA(vecE1.at(9), 0.005, 0.0001);
     TS_ASSERT_DELTA(vecE2.at(0), 0.005, 0.0001);

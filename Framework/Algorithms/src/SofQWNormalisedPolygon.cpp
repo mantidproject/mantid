@@ -115,8 +115,8 @@ std::pair<double, double> cylinderTwoThetaRange(const Mantid::Geometry::Detector
   Mantid::Kernel::V3D basis1{1., 0., 0.};
   if (geometry.axis.X() != 0. && geometry.axis.Z() != 0) {
     const auto inverseXZSumSq = 1. / (pow<2>(geometry.axis.X()) + pow<2>(geometry.axis.Z()));
-    basis1.setX(std::sqrt(1. - pow<2>(geometry.axis.X()) * inverseXZSumSq));
-    basis1.setY(geometry.axis.X() * std::sqrt(inverseXZSumSq));
+    basis1.setSharedX(std::sqrt(1. - pow<2>(geometry.axis.X()) * inverseXZSumSq));
+    basis1.setSharedY(geometry.axis.X() * std::sqrt(inverseXZSumSq));
   }
   const Mantid::Kernel::V3D basis2 = geometry.axis.cross_prod(basis1);
   const std::array<double, 8> angles{

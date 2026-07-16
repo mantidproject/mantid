@@ -1553,7 +1553,7 @@ private:
     auto retVal = createWorkspace<Workspace2D>(1, size, size - 1);
     double j = 0.5;
     for (int i = 0; i < size; i++) {
-      retVal->dataX(0)[i] = j;
+      retVal->mutableX(0)[i] = j;
       j += 0.75;
     }
     retVal->setCounts(0, size - 1, 3.0);
