@@ -129,6 +129,27 @@ class SaveMDToAsciiTest(unittest.TestCase):
         self.assertEqual(header_lines[1].strip(), "# Run: 12345")
         self.assertIn("A Intensity Error", header_lines[2])
 
+    def test_extra_header_literal_backslash_n_treated_as_newline(self):
+        # A literal backslash-n (as opposed to an embedded newline character) is what a user
+        # typing into a single-line text field would produce; it should be treated the same way.
+        ws = CreateMDHistoWorkspace(
+            Dimensionality=1,
+            Extents="0,2",
+            SignalInput=[1, 2],
+            ErrorInput=[1, 1],
+            NumberOfBins="2",
+            Names="A",
+            Units="U",
+        )
+        SaveMDToAscii(InputWorkspace=ws, Filename=self.tmp_file.name, ExtraHeader=r"test1\ntest2")
+
+        with open(self.tmp_file.name) as f:
+            header_lines = [line for line in f if line.startswith("#")]
+        self.assertEqual(len(header_lines), 4)
+        self.assertEqual(header_lines[0].strip(), "# test1")
+        self.assertEqual(header_lines[1].strip(), "# test2")
+        self.assertIn("A Intensity Error", header_lines[2])
+
     def test_exclude_integrated_dimensions_true_by_default(self):
         ws = CreateMDHistoWorkspace(
             Dimensionality=3,
