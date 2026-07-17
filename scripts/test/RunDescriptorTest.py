@@ -424,9 +424,9 @@ class RunDescriptorTest(unittest.TestCase):
         propman = self.prop_man
         propman.sample_run = [11001, 11001]
         ws = PropertyManager.sample_run.get_workspace()
-        test_val1 = ws.dataY(3)[0]
-        test_val2 = ws.dataY(6)[100]
-        test_val3 = ws.dataY(50)[200]
+        test_val1 = ws.y(3)[0]
+        test_val2 = ws.y(6)[100]
+        test_val3 = ws.y(50)[200]
         self.assertEqual(ws.name(), "SR_MAR011001")
         self.assertEqual(ws.getNEvents(), 2455286)
 
@@ -436,18 +436,18 @@ class RunDescriptorTest(unittest.TestCase):
         ws = PropertyManager.sample_run.get_workspace()
         self.assertEqual(ws.name(), "SR_MAR011001SumOf2")
 
-        self.assertEqual(2 * test_val1, ws.dataY(3)[0])
-        self.assertEqual(2 * test_val2, ws.dataY(6)[100])
-        self.assertEqual(2 * test_val3, ws.dataY(50)[200])
+        self.assertEqual(2 * test_val1, ws.y(3)[0])
+        self.assertEqual(2 * test_val2, ws.y(6)[100])
+        self.assertEqual(2 * test_val3, ws.y(50)[200])
 
         propman.sample_run = "MAR11001.raw,11001.nxs,MAR11001.raw"
         self.assertFalse("SR_MAR011001SumOf2" in mtd)
         ws = PropertyManager.sample_run.get_workspace()
         self.assertEqual(ws.name(), "SR_MAR011001SumOf3")
 
-        self.assertEqual(3 * test_val1, ws.dataY(3)[0])
-        self.assertEqual(3 * test_val2, ws.dataY(6)[100])
-        self.assertEqual(3 * test_val3, ws.dataY(50)[200])
+        self.assertEqual(3 * test_val1, ws.y(3)[0])
+        self.assertEqual(3 * test_val2, ws.y(6)[100])
+        self.assertEqual(3 * test_val3, ws.y(50)[200])
 
         # TODO: Partial sum is not implemented. Should it?
         # propman.sum_runs = 2

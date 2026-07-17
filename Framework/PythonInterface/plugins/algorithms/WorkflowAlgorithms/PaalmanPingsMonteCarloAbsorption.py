@@ -880,7 +880,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         :param workspace:   The workspace to crop.
         :return:            The cropped workspace.
         """
-        x = workspace.dataX(0)
+        x = workspace.x(0)
         xmin = x[0]
         xmax = x[1]
         crop_alg = self.createChildAlgorithm("CropWorkspace", enableLogging=False)

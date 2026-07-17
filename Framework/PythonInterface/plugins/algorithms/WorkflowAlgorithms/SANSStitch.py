@@ -247,17 +247,17 @@ class SANSStitch(DataProcessorAlgorithm):
             return merge_max
 
     def _check_merge_range(self, merge_min, merge_max, q_LAB, q_HAB, logger):
-        if merge_min < min(q_HAB.dataX(0)):
-            merge_min = min(q_HAB.dataX(0))
+        if merge_min < min(q_HAB.x(0)):
+            merge_min = min(q_HAB.x(0))
             logger.warning("Minimum merge region less than data overlap setting to HAB minimum q")
-        elif merge_min > max(q_LAB.dataX(0)):
-            merge_min = max(q_LAB.dataX(0))
+        elif merge_min > max(q_LAB.x(0)):
+            merge_min = max(q_LAB.x(0))
             logger.warning("Minimum merge region greater than data overlap setting to LAB maximum q")
-        if merge_max > max(q_LAB.dataX(0)):
-            merge_max = max(q_LAB.dataX(0))
+        if merge_max > max(q_LAB.x(0)):
+            merge_max = max(q_LAB.x(0))
             logger.warning("Maximum merge region greater than data overlap setting to LAB maximum q")
-        elif merge_max < min(q_HAB.dataX(0)):
-            merge_max = min(q_HAB.dataX(0))
+        elif merge_max < min(q_HAB.x(0)):
+            merge_max = min(q_HAB.x(0))
             logger.warning("Maximum merge region less than data overlap setting to HAB minimum q")
 
         return merge_min, merge_max
@@ -271,14 +271,14 @@ class SANSStitch(DataProcessorAlgorithm):
 
         mask_alg.setProperty("InputWorkspace", cF)
         mask_alg.setProperty("OutputWorkspace", EMPTY_NAME)
-        mask_alg.setProperty("XMin", min(cF.dataX(0)))
+        mask_alg.setProperty("XMin", min(cF.x(0)))
         mask_alg.setProperty("XMax", merge_min)
         mask_alg.execute()
         cF = mask_alg.getProperty("OutputWorkspace").value
 
         mask_alg.setProperty("InputWorkspace", nF)
         mask_alg.setProperty("OutputWorkspace", EMPTY_NAME)
-        mask_alg.setProperty("XMin", min(nF.dataX(0)))
+        mask_alg.setProperty("XMin", min(nF.x(0)))
         mask_alg.setProperty("XMax", merge_min)
         mask_alg.execute()
         nF = mask_alg.getProperty("OutputWorkspace").value
@@ -286,14 +286,14 @@ class SANSStitch(DataProcessorAlgorithm):
         mask_alg.setProperty("InputWorkspace", cR)
         mask_alg.setProperty("OutputWorkspace", EMPTY_NAME)
         mask_alg.setProperty("XMin", merge_max)
-        mask_alg.setProperty("XMax", max(cR.dataX(0)))
+        mask_alg.setProperty("XMax", max(cR.x(0)))
         mask_alg.execute()
         cR = mask_alg.getProperty("OutputWorkspace").value
 
         mask_alg.setProperty("InputWorkspace", nR)
         mask_alg.setProperty("OutputWorkspace", EMPTY_NAME)
         mask_alg.setProperty("XMin", merge_max)
-        mask_alg.setProperty("XMax", max(nR.dataX(0)))
+        mask_alg.setProperty("XMax", max(nR.x(0)))
         mask_alg.execute()
         nR = mask_alg.getProperty("OutputWorkspace").value
         return cR, cF, nR, nF
@@ -341,8 +341,8 @@ class SANSStitch(DataProcessorAlgorithm):
         if not mode == Mode.NoneFit:
             scale_factor, shift_factor = self._run_fit(q_high_angle, q_low_angle, scale_factor, shift_factor, fit_min, fit_max)
 
-        min_q = min(min(q_high_angle.dataX(0)), min(q_low_angle.dataX(0)))
-        max_q = max(max(q_high_angle.dataX(0)), max(q_low_angle.dataX(0)))
+        min_q = min(min(q_high_angle.x(0)), min(q_low_angle.x(0)))
+        max_q = max(max(q_high_angle.x(0)), max(q_low_angle.x(0)))
 
         # Crop our input workspaces
         cF = self._crop_to_x_range(cF, min_q, max_q)

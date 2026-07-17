@@ -354,8 +354,8 @@ class LoadVesuvio(LoadEmptyVesuvio):
             else:
                 raise RuntimeError("Unknown single foil mode: %s." % self._diff_opt)
 
-            dataY = foil_out.dataY(ws_index)
-            dataE = foil_out.dataE(ws_index)
+            dataY = foil_out.y(ws_index)
+            dataE = foil_out.e(ws_index)
             for group_index in raw_grp_indices:
                 dataY += raw_group[group_index].y(ws_index)
                 dataE += np.square(raw_group[group_index].e(ws_index))
@@ -380,7 +380,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
                     mon_periods = (5, 6)
                     raw_grp_indices = foil_map.get_indices(spectrum_no, mon_periods)
 
-                outY = mon_out.dataY(ws_index)
+                outY = mon_out.y(ws_index)
                 for grp_index in raw_grp_indices:
                     raw_ws = self._raw_monitors[grp_index]
                     outY += raw_ws.y(self._mon_index)
@@ -389,9 +389,9 @@ class LoadVesuvio(LoadEmptyVesuvio):
                 indices_in_range = np.where((self.mon_pt_times >= self._mon_norm_start) & (self.mon_pt_times < self._mon_norm_end))
                 mon_values = mon_out.y(ws_index)
                 mon_values_sum = np.sum(mon_values[indices_in_range])
-                foil_state = foil_out.dataY(ws_index)
+                foil_state = foil_out.y(ws_index)
                 foil_state *= self._mon_scale / mon_values_sum
-                err = foil_out.dataE(ws_index)
+                err = foil_out.e(ws_index)
                 err *= self._mon_scale / mon_values_sum
 
         ip_file = self.getPropertyValue(INST_PAR_PROP)
@@ -844,7 +844,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         # index that corresponds to workspace in group based on foil state
         raw_grp_indices = self.foil_map.get_indices(self._spectrum_no, foil_periods)
         wsindex = self._ws_index  # Spectra number - monitors(2) - 1
-        outY = foil_ws.dataY(wsindex)  # Initialise outY list to correct length with 0s
+        outY = foil_ws.y(wsindex)  # Initialise outY list to correct length with 0s
         delta_t = self.delta_t  # Bin width
         for grp_index in raw_grp_indices:
             raw_ws = self._raw_grp[grp_index]
@@ -860,7 +860,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         if mon_periods is None:
             mon_periods = foil_periods
         raw_grp_indices = self.foil_map.get_indices(self._spectrum_no, mon_periods)
-        outY = mon_ws.dataY(wsindex)
+        outY = mon_ws.y(wsindex)
         for grp_index in raw_grp_indices:
             raw_ws = self._raw_monitors[grp_index]
             outY += raw_ws.y(self._mon_index)
@@ -884,9 +884,9 @@ class LoadVesuvio(LoadEmptyVesuvio):
             """
             mon_values = mon_ws.y(wsindex)
             mon_values_sum = np.sum(mon_values[indices_in_range])
-            foil_state = foil_ws.dataY(wsindex)
+            foil_state = foil_ws.y(wsindex)
             foil_state *= self._mon_scale / mon_values_sum
-            err = foil_ws.dataE(wsindex)
+            err = foil_ws.e(wsindex)
             err *= self._mon_scale / mon_values_sum
 
         monitor_normalization(self.foil_out, self.mon_out)
@@ -907,14 +907,14 @@ class LoadVesuvio(LoadEmptyVesuvio):
         sum_out = np.sum(cout[range_indices])
 
         def normalise_to_out(foil_ws, foil_type):
-            values = foil_ws.dataY(wsindex)
+            values = foil_ws.y(wsindex)
             sum_values = np.sum(values[range_indices])
             if sum_values == 0.0:
                 self.getLogger().warning("No counts in %s foil spectrum %d." % (foil_type, self._spectrum_no))
                 sum_values = 1.0
             norm_factor = sum_out / sum_values
             values *= norm_factor
-            errors = foil_ws.dataE(wsindex)
+            errors = foil_ws.e(wsindex)
             errors *= norm_factor
 
         normalise_to_out(self.foil_thin, "thin")
@@ -946,7 +946,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
          @param ws_index :: The current workspace index
         """
         # Counts
-        cout = self.foil_out.dataY(ws_index)
+        cout = self.foil_out.y(ws_index)
         if self._spectra_type == BACKWARD:
             cout -= self.foil_thin.y(ws_index)
         else:
@@ -954,7 +954,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
             cout += self.foil_thin.y(ws_index)
 
         # Errors
-        eout = self.foil_out.dataE(ws_index)
+        eout = self.foil_out.e(ws_index)
         ethin = self.foil_thin.e(ws_index)
         np.sqrt((eout**2 + ethin**2), eout)  # The second argument makes it happen in place
 
@@ -966,14 +966,14 @@ class LoadVesuvio(LoadEmptyVesuvio):
         The output will be stored in cout
         @param ws_index :: The current index being processed
         """
-        cout = self.foil_out.dataY(ws_index)
+        cout = self.foil_out.y(ws_index)
         one_min_beta = 1.0 - self._beta
         cout *= one_min_beta
         cout -= self.foil_thin.y(ws_index)
         cout += self._beta * self.foil_thick.y(ws_index)
 
         # Errors
-        eout = self.foil_out.dataE(ws_index)
+        eout = self.foil_out.e(ws_index)
         ethin = self.foil_thin.e(ws_index)
         ethick = self.foil_thick.e(ws_index)
         # The second argument makes it happen in place
@@ -986,11 +986,11 @@ class LoadVesuvio(LoadEmptyVesuvio):
         @param ws_index :: The current index being processed
         """
         # Counts
-        cout = self.foil_out.dataY(ws_index)
+        cout = self.foil_out.y(ws_index)
         cout -= self.foil_thick.y(ws_index)
 
         # Errors
-        eout = self.foil_out.dataE(ws_index)
+        eout = self.foil_out.e(ws_index)
         ethick = self.foil_thick.e(ws_index)
         np.sqrt((eout**2 + ethick**2), eout)  # The second argument makes it happen in place
 
@@ -1006,7 +1006,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
             ws_out.setSharedX(idx_out, self.foil_out.x(foil_start))
             summed_set = self._spectra[idx_out]
             nsummed = len(summed_set)
-            y_out, e_out = ws_out.dataY(idx_out), ws_out.dataE(idx_out)
+            y_out, e_out = ws_out.y(idx_out), ws_out.e(idx_out)
             spec_out = ws_out.getSpectrum(idx_out)
             spec_out.setSpectrumNo(self.foil_out.getSpectrum(foil_start).getSpectrumNo())
             spec_out.clearDetectorIDs()

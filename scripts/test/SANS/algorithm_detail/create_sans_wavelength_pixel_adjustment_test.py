@@ -87,7 +87,7 @@ class CreateSANSWavelengthPixelAdjustmentTest(unittest.TestCase):
     def _get_workspace(data):
         workspace = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=1, XMin=1, XMax=11, BinWidth=2, XUnit="Wavelength", StoreInADS=False)
 
-        data_y = workspace.dataY(0)
+        data_y = workspace.y(0)
         for index in range(len(data_y)):
             data_y[index] = data[index]
         return workspace
@@ -122,7 +122,7 @@ class CreateSANSWavelengthPixelAdjustmentTest(unittest.TestCase):
         self.assertEqual(pixel_adjustment, None)
         self.assertEqual(wavelength_adjustment.getNumberHistograms(), 1)
         expected = np.array(data_trans) * np.array(data_norm)
-        data_y = wavelength_adjustment.dataY(0)
+        data_y = wavelength_adjustment.y(0)
         for (
             e1,
             e2,
@@ -156,7 +156,7 @@ class CreateSANSWavelengthPixelAdjustmentTest(unittest.TestCase):
         self.assertEqual(pixel_adjustment, None)
         self.assertEqual(wavelength_adjustment.getNumberHistograms(), 1)
         expected = np.array(data_trans) * np.array(data_norm) * np.array(expected_direct_file_workspace)
-        data_y = wavelength_adjustment.dataY(0)
+        data_y = wavelength_adjustment.y(0)
         for (
             e1,
             e2,

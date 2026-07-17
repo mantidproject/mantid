@@ -1146,14 +1146,14 @@ class TestErrorPropagationFitAndRescale(unittest.TestCase):
         f_return, r_return = su.get_error_corrected_front_and_rear_data_sets(front, rear, x_min, x_max)
 
         # Assert
-        self.assertEqual(5, len(f_return.dataX(0)))
-        self.assertEqual(5, len(r_return.dataX(0)))
+        self.assertEqual(5, len(f_return.x(0)))
+        self.assertEqual(5, len(r_return.x(0)))
 
         expected_errors_in_rear = [np.sqrt(5), np.sqrt(5), np.sqrt(5), np.sqrt(5)]
-        self.assertEqual(expected_errors_in_rear[0], r_return.dataE(0)[0])
-        self.assertEqual(expected_errors_in_rear[1], r_return.dataE(0)[1])
-        self.assertEqual(expected_errors_in_rear[2], r_return.dataE(0)[2])
-        self.assertEqual(expected_errors_in_rear[3], r_return.dataE(0)[3])
+        self.assertEqual(expected_errors_in_rear[0], r_return.e(0)[0])
+        self.assertEqual(expected_errors_in_rear[1], r_return.e(0)[1])
+        self.assertEqual(expected_errors_in_rear[2], r_return.e(0)[2])
+        self.assertEqual(expected_errors_in_rear[3], r_return.e(0)[3])
 
         # Clean up
         DeleteWorkspace(front)
@@ -1175,8 +1175,8 @@ class TestGetCorrectQResolution(unittest.TestCase):
         # Act
         su.correct_q_resolution_for_can(orig, can, result)
         # Assert
-        dx_orig = orig.dataDx(0)
-        dx_result = result.dataDx(0)
+        dx_orig = orig.dx(0)
+        dx_result = result.dx(0)
         self.assertTrue(result.hasDx(0))
         for index in range(0, len(dx_orig)):
             self.assertEqual(dx_orig[index], dx_result[index])

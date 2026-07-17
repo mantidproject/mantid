@@ -45,9 +45,9 @@ class SANSWideAngleCorrection(PythonAlgorithm):
         trans = self.getProperty("TransmissionData").value
 
         # check transmission input workspace
-        if len(trans.mutableX(0)) != len(wd.dataX(0)):
+        if len(trans.mutableX(0)) != len(wd.x(0)):
             raise RuntimeError("Uncompatible sizes. Transmission must have the same bins of sample values")
-        if min(trans.dataY(0)) < 0:
+        if min(trans.y(0)) < 0:
             raise RuntimeError("Invalid workspace for transmission, it does not accept negative values.")
 
         # check input sample has associated instrument
@@ -64,9 +64,9 @@ class SANSWideAngleCorrection(PythonAlgorithm):
         trans_wc = WorkspaceFactory.create(wd)
 
         # get the values of transmission (data, error, binning)
-        to = np.array(trans.dataY(0))
-        to_e = np.array(trans.dataE(0))
-        x_bins = np.array(wd.dataX(0))
+        to = np.array(trans.y(0))
+        to_e = np.array(trans.e(0))
+        x_bins = np.array(wd.x(0))
 
         # get the position of the sample and the instrument
         sample_pos = wd.getInstrument().getSample().getPos()

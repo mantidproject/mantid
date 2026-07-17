@@ -124,7 +124,7 @@ class SANSSConvertToWavelengthImplementationTest(unittest.TestCase):
         output_workspace = output_workspaces.getItem(0)
         self.assertTrue(isinstance(output_workspace, EventWorkspace))
         # Check the rebinning part
-        data_x0 = output_workspace.dataX(0)
+        data_x0 = output_workspace.x(0)
         self.assertEqual(len(data_x0), 10)
         self.assertEqual(data_x0[0], 1.0)
         self.assertEqual(data_x0[-1], 10.0)
@@ -152,7 +152,7 @@ class SANSSConvertToWavelengthImplementationTest(unittest.TestCase):
         self.assertTrue(isinstance(output_workspace, EventWorkspace))
 
         # Check the rebinning part
-        data_x0 = output_workspace.dataX(0)
+        data_x0 = output_workspace.x(0)
         self.assertEqual(data_x0[0], 1.0)
         expected_upper_bound = 5.27471197274
         self.assertEqual(round(data_x0[-1], 11), expected_upper_bound)
@@ -183,7 +183,7 @@ class SANSSConvertToWavelengthImplementationTest(unittest.TestCase):
 
         for i, (expected, ws) in enumerate(zip(expected_x_data, output_workspaces)):
             x_expected_bins = numpy.arange(expected[0], expected[1] + 1, step=1)  # Emulate x bin data with interval 1
-            self.assertTrue(numpy.array_equal(x_expected_bins, ws.dataX(0)), f"Ws index {i} was not equal")
+            self.assertTrue(numpy.array_equal(x_expected_bins, ws.x(0)), f"Ws index {i} was not equal")
 
 
 if __name__ == "__main__":

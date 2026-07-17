@@ -160,8 +160,8 @@ def _createFlatBkg(ws, wsType, windowWidth, wsNames, algorithmLogging):
         AveragingWindowWidth=windowWidth,
         EnableLogging=algorithmLogging,
     )
-    firstBinStart = bkgWS.dataX(0)[0]
-    firstBinEnd = bkgWS.dataX(0)[1]
+    firstBinStart = bkgWS.x(0)[0]
+    firstBinEnd = bkgWS.x(0)[1]
     bkgWS = CropWorkspace(InputWorkspace=bkgWS, OutputWorkspace=bkgWS, XMin=firstBinStart, XMax=firstBinEnd, EnableLogging=algorithmLogging)
     return bkgWS
 
@@ -860,8 +860,8 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                     self.log().warning(
                         "Fitting to monitor data failed. Integrating the intensity over " + "the entire TOF range for normalisation."
                     )
-                    begin = monWS.dataX(monIndex)[0]
-                    end = monWS.dataX(monIndex)[-1]
+                    begin = monWS.x(monIndex)[0]
+                    end = monWS.x(monIndex)[-1]
                 else:
                     sigma = eppRow["Sigma"]
                     centre = eppRow["PeakCentre"]

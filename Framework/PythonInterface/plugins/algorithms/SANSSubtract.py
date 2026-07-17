@@ -149,7 +149,7 @@ class SANSSubtract(PythonAlgorithm):
         output = op.getProperty("OutputWorkspace").value
 
         # Put back dQ
-        dq_scaled = output.dataDx(0)
+        dq_scaled = output.dx(0)
         for i in range(len(dq)):
             dq_scaled[i] = dq[i]
 

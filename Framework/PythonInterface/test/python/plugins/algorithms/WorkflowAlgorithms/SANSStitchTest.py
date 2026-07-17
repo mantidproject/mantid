@@ -766,7 +766,7 @@ class SANSStitchTest(unittest.TestCase):
         expected_entries = (1.0 + 3.0) / (2.0 + 4.0)
         delta = 1e-5
         for index in range(0, 2):
-            for element in out_ws.dataY(index):
+            for element in out_ws.y(index):
                 self.assertTrue(abs(expected_entries - element) < delta)
 
 

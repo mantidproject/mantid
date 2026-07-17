@@ -303,7 +303,7 @@ class FullInstrumentViewModel:
             return (np.min(first_last[:, 0]), np.max(first_last[:, 1]))
 
         elif workspace.isCommonBins():
-            return tuple(workspace.dataX(int(workspace_indices[0]))[[0, -1]])
+            return tuple(workspace.x(int(workspace_indices[0]))[[0, -1]])
 
         else:
             data_x = workspace.extractX()[workspace_indices]
@@ -634,8 +634,8 @@ class FullInstrumentViewModel:
     def _match_workspace_unit(self, ws_from, idx, x_from: float, ws_to):
 
         # Find closest dataX cell in integration workspace and get the value of that cell in self._workspace
-        data_x_from = ws_from.dataX(int(idx))[:]
-        data_x_to = ws_to.dataX(int(idx))[:]
+        data_x_from = ws_from.x(int(idx))[:]
+        data_x_to = ws_to.x(int(idx))[:]
 
         # ConvertUnits does not output one-to-one dataX for momentum transfer
         # Need to use inverse of dataX to get correct one-to-one match of dataX

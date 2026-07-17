@@ -225,7 +225,7 @@ class SaveYDA(PythonAlgorithm):
             xx = [float(j) for j in xcenters]
             slicethis["x"] = FlowList(xx)
 
-            ys = ws.dataY(i)
+            ys = ws.y(i)
             # y is dataY of the workspace
             yy = [float(round(j, 14)) for j in ys]
             slicethis["y"] = FlowList(yy)

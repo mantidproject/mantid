@@ -826,7 +826,7 @@ def _extract_parameters_from_workspace(workspace):
         parameters[spectrum] = [dict() for _ in range(profile_number)]
 
         for index, parameter_name in enumerate(parameter_names):
-            parameters[spectrum][profile_indices[index]][parameter_name] = workspace.dataY(index)[spectrum]
+            parameters[spectrum][profile_indices[index]][parameter_name] = workspace.y(index)[spectrum]
     return parameters
 
 

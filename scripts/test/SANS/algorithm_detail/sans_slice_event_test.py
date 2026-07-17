@@ -77,7 +77,7 @@ class SANSSliceEventTest(unittest.TestCase):
 
         self.assertEqual(slice_factor, 0.2)
         self.assertLess(output_workspace.getNumberEvents(), workspace.getNumberEvents())
-        self.assertLess(output_workspace_monitor.dataY(0)[0], monitor_workspace.dataY(0)[0])
+        self.assertLess(output_workspace_monitor.y(0)[0], monitor_workspace.y(0)[0])
 
 
 if __name__ == "__main__":

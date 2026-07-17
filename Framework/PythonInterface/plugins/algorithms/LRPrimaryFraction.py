@@ -60,8 +60,8 @@ class LRPrimaryFraction(PythonAlgorithm):
         )
         workspace = Transpose(InputWorkspace=workspace)
 
-        data_y = workspace.dataY(0)
-        data_e = workspace.dataE(0)
+        data_y = workspace.y(0)
+        data_e = workspace.e(0)
 
         # Compute average background on each side
         avg_bck = 0

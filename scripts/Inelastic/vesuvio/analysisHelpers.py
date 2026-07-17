@@ -386,7 +386,7 @@ def correct_for_gamma_background(ws_name, first_spectrum, last_spectrum, sample_
             InputWorkspace=ws_name, ComptonFunction=sample_properties, WorkspaceIndexList=ws_index
         )
         for bin in range(gamma_background_correction.blocksize()):
-            gamma_background_correction.mutableY(ws_index)[bin] = tmp_bkg.dataY(0)[bin]
+            gamma_background_correction.mutableY(ws_index)[bin] = tmp_bkg.y(0)[bin]
             gamma_background_correction.mutableE(ws_index)[bin] = 0.0
     sapi.RenameWorkspace(InputWorkspace="gamma_background_correction", OutputWorkspace=str(ws_name) + "_gamma_background")
     safe_delete_ws("tmp_cor")
@@ -438,7 +438,7 @@ def convert_to_y_space_and_symmetrise(ws_name, mass):
     for j in range(tmp.getNumberHistograms()):
         for k in range(tmp.blocksize()):
             tmp.mutableE(j)[k] = 0.0
-            if np.isnan(tmp.dataY(j)[k]):
+            if np.isnan(tmp.y(j)[k]):
                 ws.mutableY(j)[k] = 0.0
                 tmp.mutableY(j)[k] = 0.0
             if tmp.mutableY(j)[k] != 0:
@@ -450,8 +450,8 @@ def convert_to_y_space_and_symmetrise(ws_name, mass):
     ws = sapi.mtd[ws_name + "_JoY_sum"]
     tmp = sapi.CloneWorkspace(InputWorkspace=ws_name + "_JoY_sum")
     for k in range(tmp.blocksize()):
-        tmp.mutableE(0)[k] = (ws.dataE(0)[k] + ws.dataE(0)[ws.blocksize() - 1 - k]) / 2.0
-        tmp.mutableY(0)[k] = (ws.dataY(0)[k] + ws.dataY(0)[ws.blocksize() - 1 - k]) / 2.0
+        tmp.mutableE(0)[k] = (ws.e(0)[k] + ws.e(0)[ws.blocksize() - 1 - k]) / 2.0
+        tmp.mutableY(0)[k] = (ws.y(0)[k] + ws.y(0)[ws.blocksize() - 1 - k]) / 2.0
     sapi.RenameWorkspace(InputWorkspace="tmp", OutputWorkspace=ws_name + "_JoY_sym")
     normalise_workspace(ws_name + "_JoY_sym")
     return max_Y

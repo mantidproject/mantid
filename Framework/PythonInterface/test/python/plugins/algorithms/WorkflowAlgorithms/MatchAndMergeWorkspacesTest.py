@@ -131,7 +131,7 @@ class MatchAndMergeWorkspacesTest(unittest.TestCase):
         x_max_ex = np.array([-1, 20, 30, 40, 45])
         ws_merged_ex = MatchAndMergeWorkspaces(InputWorkspaces=ws_group_large, XMin=x_min_ex, XMax=x_max_ex)
         self.assertEqual(ws_merged_ex.getNumberHistograms(), 1)
-        self.assertNotEqual(ws_merged.dataX(0)[0], ws_merged_ex.dataX(0)[0])
+        self.assertNotEqual(ws_merged.x(0)[0], ws_merged_ex.x(0)[0])
 
     def test_excluding_banks_fails_with_wrong_input(self):
         x_min = np.array([2, -1, 10, -1, 20])

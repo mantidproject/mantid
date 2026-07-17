@@ -797,8 +797,8 @@ class PolDiffILLReduction(PythonAlgorithm):
             CloneWorkspace(InputWorkspace=empty, OutputWorkspace=background)
             for pixel_no in range(mtd[background].getNumberHistograms()):
                 time_channels = mtd[background].x(pixel_no)
-                counts = mtd[background].dataY(pixel_no)
-                errors = mtd[background].dataE(pixel_no)
+                counts = mtd[background].y(pixel_no)
+                errors = mtd[background].e(pixel_no)
                 ep_index = np.abs(time_channels - elastic_peaks[pixel_no]).argmin()
                 # at this point bins should still be equidistant
                 bin_width = (time_channels[-1] - time_channels[0]) / np.size(time_channels)
@@ -942,8 +942,8 @@ class PolDiffILLReduction(PythonAlgorithm):
             empty_no = entry_no if entry_no < max_empty else entry_no % max_empty
             background = mtd[empty_ws][empty_no].name()
             for pixel_no in range(entry.getNumberHistograms()):
-                counts = entry.dataY(pixel_no)
-                errors = entry.dataE(pixel_no)
+                counts = entry.y(pixel_no)
+                errors = entry.e(pixel_no)
                 time_channels = mtd[background].x(pixel_no)
                 empty_counts = mtd[background].y(pixel_no)
                 ep_index = np.abs(time_channels - elastic_peaks[pixel_no]).argmin()
@@ -1411,7 +1411,7 @@ class PolDiffILLReduction(PythonAlgorithm):
             for pixel_no in range(entry.getNumberHistograms()):
                 tof_deltaE_0 = tof_deltaE_0_odd if pixel_no % 2 == 0 else tof_deltaE_0_even
                 tof_correction = peak_positions[pixel_no] - tof_deltaE_0
-                time_axis = entry.dataX(pixel_no)
+                time_axis = entry.x(pixel_no)
                 time_axis -= tof_correction
         if self._debug:
             clone_name = "{}_epp_calibrated".format(ws)

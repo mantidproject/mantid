@@ -143,7 +143,7 @@ class EQSANSDQPositiveOutput(systemtesting.MantidSystemTest):
         Reduce1D()
 
     def validate(self):
-        dq = mtd["EQSANS_1466_event_Iq"].dataDx(0)
+        dq = mtd["EQSANS_1466_event_Iq"].dx(0)
         for x in dq:
             if x < 0:
                 return False

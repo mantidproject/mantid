@@ -164,8 +164,8 @@ def load_monitors(self, property_manager):
     det_list = ",".join(det_list)
 
     # Ensuring that the binning is uniform
-    spec0 = empty_ws.dataX(0)
-    spec_last = empty_ws.dataX(empty_ws.getNumberHistograms() - 1)
+    spec0 = empty_ws.x(0)
+    spec_last = empty_ws.x(empty_ws.getNumberHistograms() - 1)
     if abs(sum(spec0) - sum(spec_last)) > 0.000001:
         alg = _execute(
             "ExtractSingleSpectrum", {"InputWorkspace": empty_ws, "OutputWorkspace": "__reference_binning", "WorkspaceIndex": det_list[0]}

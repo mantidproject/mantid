@@ -90,7 +90,7 @@ class ApplyToReducedDataTest(systemtesting.MantidSystemTest):
         # the errors won't quite be the same. Increase the tolerance value
         # and replace the error on the first and last points by 1.0.
         self.tolerance = 0.00001
-        data_e = mtd["reflectivity_119816"].dataE(0)
+        data_e = mtd["reflectivity_119816"].e(0)
         data_e[0] = 1.0
         data_e[len(data_e) - 1] = 1.0
 

@@ -259,7 +259,7 @@ def divide_by_number_of_detectors_in_bank(focussed_data, cal_filepath):
     )
     n_pixel = numpy.zeros(focussed_data.getNumberHistograms())
     for ws_index in range(cal_workspace.getNumberHistograms()):
-        grouping = cal_workspace.dataY(ws_index)
+        grouping = cal_workspace.y(ws_index)
         if grouping[0] > 0:
             n_pixel[int(grouping[0] - 1)] += 1
     number_detectors_in_bank_ws = mantid.CreateWorkspace(DataY=n_pixel, DataX=[0, 1], NSpec=focussed_data.getNumberHistograms())

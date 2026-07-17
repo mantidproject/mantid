@@ -48,10 +48,10 @@ class SwapWidthsTest(unittest.TestCase):
                 second_fwhm_idx = i
 
         # Get Y Data for input/result
-        in_first_fwhm = self._input_ws.dataY(first_fwhm_idx)
-        in_second_fwhm = self._input_ws.dataY(second_fwhm_idx)
-        result_first_fwhm = result.dataY(0)
-        result_second_fwhm = result.dataY(1)
+        in_first_fwhm = self._input_ws.y(first_fwhm_idx)
+        in_second_fwhm = self._input_ws.y(second_fwhm_idx)
+        result_first_fwhm = result.y(0)
+        result_second_fwhm = result.y(1)
 
         # Check data is correct after swap
         for i in range(0, len(in_first_fwhm)):

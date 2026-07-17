@@ -538,13 +538,13 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         # If there is more than one partial workspace need to sum first spectrum of all
         if len(partial_workspaces) > 1:
             initial_partial_ws = partial_workspaces[0]
-            data_x = initial_partial_ws.dataX(0)
-            dos_specs = np.zeros_like(initial_partial_ws.dataY(0))
-            stick_specs = np.zeros_like(initial_partial_ws.dataY(0))
+            data_x = initial_partial_ws.x(0)
+            dos_specs = np.zeros_like(initial_partial_ws.y(0))
+            stick_specs = np.zeros_like(initial_partial_ws.y(0))
 
             for partial_ws in partial_workspaces:
-                dos_specs += partial_ws.dataY(0)
-                stick_specs += partial_ws.dataY(1)
+                dos_specs += partial_ws.y(0)
+                stick_specs += partial_ws.y(1)
 
             stick_specs[stick_specs > 0.0] = self.getProperty("StickHeight").value
 

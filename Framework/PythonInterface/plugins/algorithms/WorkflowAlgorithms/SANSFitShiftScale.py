@@ -78,10 +78,10 @@ class SANSFitShiftScale(DataProcessorAlgorithm):
         fit_min = self.getProperty("FitMin").value
         fit_max = self.getProperty("FitMax").value
 
-        if fit_min < min(hab.dataX(0)):
-            fit_min = min(hab.dataX(0))
-        if fit_max > max(lab.dataX(0)):
-            fit_max = max(lab.dataX(0))
+        if fit_min < min(hab.x(0)):
+            fit_min = min(hab.x(0))
+        if fit_max > max(lab.x(0)):
+            fit_max = max(lab.x(0))
 
         if not mode == Mode.NoneFit and fit_max <= fit_min:
             raise RuntimeError(
@@ -178,8 +178,8 @@ class SANSFitShiftScale(DataProcessorAlgorithm):
         # The front_data_corrected data set is used as the fit model. Setting the IgnoreInvalidData on the Fit algorithm
         # will not have any ignore Nans in the model, but only in the data. Hence this will lead to unreadable
         # error messages of the fit algorithm. We need to catch this before the algorithm starts
-        y_model = front_data_corrected.dataY(0)
-        y_data = rear_data_corrected.dataY(0)
+        y_model = front_data_corrected.y(0)
+        y_data = rear_data_corrected.y(0)
         if any([np.isnan(element) for element in y_model]) or any([np.isnan(element) for element in y_data]):
             raise RuntimeError(
                 "Trying to merge the two reduced data sets for HAB and LAB failed. "
@@ -287,8 +287,8 @@ class ErrorTransferFromModelToData(object):
         # Now transfer the error from front data to the rear data workspace
         # This works only if we have a single QMod spectrum in the workspaces
         for i in range(0, front_data_cropped.getNumberHistograms()):
-            front_error = front_data_cropped.dataE(i)
-            rear_error = rear_data_cropped.dataE(i)
+            front_error = front_data_cropped.e(i)
+            rear_error = rear_data_cropped.e(i)
 
             rear_error_squared = rear_error * rear_error
             front_error_squared = front_error * front_error

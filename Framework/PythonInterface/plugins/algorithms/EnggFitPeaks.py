@@ -386,7 +386,7 @@ class EnggFitPeaks(PythonAlgorithm):
                                       ParentWorkspace=in_wks)
         target_units = 'TOF'
         wsTo = sapi.ConvertUnits(InputWorkspace=ws_from, Target=target_units)
-        peaks_ToF = wsTo.dataX(0)
+        peaks_ToF = wsTo.x(0)
         values = [peaks_ToF[i] for i in range(0,len(peaks_ToF))]
 
         @param expected_peaks :: vector of expected peaks, in dSpacing units

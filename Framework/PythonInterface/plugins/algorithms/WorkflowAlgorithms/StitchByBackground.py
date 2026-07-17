@@ -54,8 +54,8 @@ class StitchByBackground(DataProcessorAlgorithm):
                 return errors  # Everything below relies on data from a MatrixWorkspace.
             ws_list.append(ws)
 
-        data_upper = ws_list[-1].dataX(0)[-1]
-        data_lower = ws_list[0].dataX(0)[0]
+        data_upper = ws_list[-1].x(0)[-1]
+        data_lower = ws_list[0].x(0)[0]
 
         if upper_bound > data_upper:
             errors["CropUpperBound"] = f"{upper_bound} is outside the upper limit of the data ({data_upper})."
@@ -75,8 +75,8 @@ class StitchByBackground(DataProcessorAlgorithm):
 
         invalid_points = []
         for i, stitch_point in enumerate(stitch_points_list):
-            left_upper = ws_list[i].dataX(0)[-1]
-            right_lower = ws_list[i + 1].dataX(0)[0]
+            left_upper = ws_list[i].x(0)[-1]
+            right_lower = ws_list[i + 1].x(0)[0]
             if not (right_lower <= stitch_point <= left_upper):
                 invalid_points.append(f"{stitch_point} is not between {right_lower} and {left_upper}")
         if invalid_points:

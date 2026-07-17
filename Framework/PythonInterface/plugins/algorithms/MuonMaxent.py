@@ -158,7 +158,7 @@ class MuonMaxent(PythonAlgorithm):
                 raise Exception("Grouping workspace has a different number of spectra")
             GROUPING_group = np.zeros([nhisto], dtype=int)
             for hh in range(POINTS_nhists):
-                GROUPING_group[hh] = int(gwsp.dataY(hh)[0] - 1)
+                GROUPING_group[hh] = int(gwsp.y(hh)[0] - 1)
             POINTS_ngroups = np.amax(GROUPING_group) + 1
         elif self.getProperty("GroupTable").isDefault:
             # no table provided, map 1:1 and use all spectra
@@ -462,18 +462,16 @@ class MuonMaxent(PythonAlgorithm):
             k1 = CHANNELS_i1stgood
             i1 = k1 - CHANNELS_itzero  # channel range in guess, etc (t0 at start)
             i2 = k2 - CHANNELS_itzero
-            mylog.notice(
-                "i1={} i2={} k1={} k2={} len(srcX)={} len(guess)={}".format(i1, i2, k1, k2, len(ws.dataX(0)), OUTSPEC_guess.shape[0])
-            )
+            mylog.notice("i1={} i2={} k1={} k2={} len(srcX)={} len(guess)={}".format(i1, i2, k1, k2, len(ws.x(0)), OUTSPEC_guess.shape[0]))
             recSpec = WorkspaceFactory.create(ws, NVectors=POINTS_ngroups + len(deadDetectors), XLength=i2 - i1 + 1, YLength=i2 - i1)
             offset = 0
             for j in range(POINTS_ngroups + len(deadDetectors)):
                 if j + 1 in deadDetectors:
                     offset += 1
-                    recSpec.mutableX(j)[:] = originalWS.dataX(j)[k1 : k2 + 1]
+                    recSpec.mutableX(j)[:] = originalWS.x(j)[k1 : k2 + 1]
                     recSpec.mutableY(j)[:] = np.zeros(k2 - k1)
                 else:
-                    recSpec.mutableX(j)[:] = originalWS.dataX(j)[k1 : k2 + 1]
+                    recSpec.mutableX(j)[:] = originalWS.x(j)[k1 : k2 + 1]
                     recSpec.mutableY(j)[:] = OUTSPEC_guess[i1:i2, j - offset]
             self.setProperty("ReconstructedSpectra", recSpec)
         if phaseconvWS:

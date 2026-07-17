@@ -158,7 +158,7 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
         # The workspace needs to be scaled to match the SANS data. This is done by the normalization_factor
         # In addition we need to spread the integrated signal evenly over all bins of the SANS data set.
         # Note that we assume here a workspace with common bins.
-        num_bins = len(workspace.dataY(0))
+        num_bins = len(workspace.y(0))
         scale_factor = normalization_ratio / float(num_bins)
 
         return self._scale_dark_run(dark_run_integrated, scale_factor)
@@ -215,7 +215,7 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
 
         # Get the single value out of the summed workspace and divide it
         # by the number of pixels
-        summed_value = dark_run_summed.dataY(0)[0]
+        summed_value = dark_run_summed.y(0)[0]
         num_pixels = dark_run_integrated.getNumberHistograms()
         averaged_value = summed_value / float(num_pixels)
 
@@ -274,8 +274,8 @@ class DarkRunMonitorAndDetectorRemover(object):
         # Since we only have around 10 or so monitors
         # we set them manually to 0
         for ws_index, dummy_det_id in monitor_list:
-            data = dark_run.dataY(ws_index)
-            error = dark_run.dataE(ws_index)
+            data = dark_run.y(ws_index)
+            error = dark_run.e(ws_index)
             data = data * 0
             error = error * 0
             dark_run.setSharedY(ws_index, data)
@@ -400,8 +400,8 @@ class DarkRunMonitorAndDetectorRemover(object):
         list_dataY = []
         list_dataE = []
         for ws_index, dummy_det_id in monitor_list:
-            list_dataY.append(np.copy(dark_run.dataY(ws_index)))
-            list_dataE.append(np.copy(dark_run.dataE(ws_index)))
+            list_dataY.append(np.copy(dark_run.y(ws_index)))
+            list_dataE.append(np.copy(dark_run.e(ws_index)))
         return list_dataY, list_dataE
 
     def _set_all_monitors(self, dark_run, list_dataY, list_dataE, monitor_list):

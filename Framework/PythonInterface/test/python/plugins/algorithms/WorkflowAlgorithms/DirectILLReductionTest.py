@@ -34,7 +34,7 @@ class DirectILLReductionTest(unittest.TestCase):
         run_algorithm("DirectILLIntegrateVanadium", **kwargs)
         vanadiumWS = mtd[self._VANADIUM_WS_NAME]
         for i in range(vanadiumWS.getNumberHistograms()):
-            vanadiumYs = vanadiumWS.dataY(i)
+            vanadiumYs = vanadiumWS.y(i)
             vanadiumYs.fill(1.0)
         mtd.remove(inWSName)
 

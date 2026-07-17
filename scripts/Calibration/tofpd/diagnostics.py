@@ -254,13 +254,13 @@ def difc_plot2d(calib_new, calib_old=None, instr_ws=None, mask=None, vrange=(0, 
         pos = info.position(det_id)
         phi = np.arctan2(pos[0], pos[1])
         theta = np.arccos(pos[2] / pos.norm())
-        if use_mask and mtd[str(mask)].dataY(det_id):
+        if use_mask and mtd[str(mask)].y(det_id):
             masked_theta_array.append(theta)
             masked_phi_array.append(phi)
         else:
             theta_array.append(theta)
             phi_array.append(phi)
-            percent = 100.0 * np.sum(np.abs(delta.dataY(det_id))) / np.sum(ws_old.dataY(det_id))
+            percent = 100.0 * np.sum(np.abs(delta.y(det_id))) / np.sum(ws_old.y(det_id))
             value_array.append(percent)
 
     # Use the largest solid angle for circle radius
@@ -466,9 +466,9 @@ def extract_peak_info(wksp: Union[str, Workspace2D], outputname: str, peak_posit
     have_detids = bool(len(detids) > 0)
 
     # fill in the data values
-    x = single.dataX(0)
-    y = single.dataY(0)
-    e = single.dataE(0)
+    x = single.x(0)
+    y = single.y(0)
+    e = single.e(0)
     start_detid = np.searchsorted(detids, 0)
     for wksp_index in range(numSpec):
         if have_detids:
@@ -537,8 +537,8 @@ def plot_peakd(
         single = extract_peak_info(wksp, "single", peak)
 
         # get x and y arrays from single peak ws
-        x = single.dataX(0)
-        y = single.dataY(0)
+        x = single.x(0)
+        y = single.y(0)
 
         # filter out any nans
         y_val = y[~np.isnan(y)]
@@ -594,7 +594,7 @@ def plot_peakd(
         region_cnts = [0] * len(regions)
         for peak in plotted_peaks:
             single = extract_peak_info(wksp, "single", peak)
-            y = single.dataY(0)
+            y = single.y(0)
             for i in range(len(regions)):
                 det_start = single.yIndexOfX(regions[i][0])
                 det_end = single.yIndexOfX(regions[i][1])
@@ -652,8 +652,8 @@ def plot_corr(tof_ws):
 
     for workspaceIndex in range(numHist):
         # Get Pearson correlation coefficient for each detector
-        x = tof_ws.dataY(workspaceIndex)
-        y = tof_ws.dataX(workspaceIndex)
+        x = tof_ws.y(workspaceIndex)
+        y = tof_ws.x(workspaceIndex)
 
         mask = np.logical_not(np.isnan(x))
         if np.sum(mask) > 1:
@@ -715,8 +715,8 @@ def plot_peak_info(wksp: Union[str, TableWorkspace], peak_positions: Union[float
     markers = ["x", ".", "^", "s", "d", "h", "p", "v"]
     for i in range(nbanks):
         for j in range(len(workspaces)):
-            x = workspaces[j].dataX(i)
-            data = workspaces[j].dataY(i)
+            x = workspaces[j].x(i)
+            data = workspaces[j].y(i)
             # Cycle through marker list if there are too many banks
             marker = i % len(markers)
             ax[j].plot(x, data, marker=markers[marker], ls="None", label="bank{}".format(i))

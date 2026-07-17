@@ -326,8 +326,8 @@ class LRScalingFactors(PythonAlgorithm):
         # Remove prompt pulse bin, replace the y value by the
         # average and give it a very large error.
         x_values = mtd[f_ws].x(0)
-        y_values = mtd[f_ws].dataY(0)
-        e_values = mtd[f_ws].dataE(0)
+        y_values = mtd[f_ws].y(0)
+        e_values = mtd[f_ws].e(0)
         # We will create a cleaned up workspace without the bins
         # corresponding to the prompt pulses
         x_clean = []

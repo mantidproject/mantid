@@ -569,7 +569,7 @@ class ISISPowderCommonTest(unittest.TestCase):
         # Add Good Proton Charge Log
         mantid.AddSampleLog(Workspace=ws, LogName="gd_prtn_chrg", LogText=prtn_charge, LogType="Number")
 
-        self.assertEqual(initial_value, ws.dataY(0)[0])
+        self.assertEqual(initial_value, ws.y(0)[0])
         common.run_normalise_by_current(ws)
         self.assertAlmostEqual(expected_value, ws.mutableY(0)[0], delta=1e-8)
 

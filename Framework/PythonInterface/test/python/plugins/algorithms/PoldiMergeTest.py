@@ -52,12 +52,12 @@ class PoldiMergeTest(unittest.TestCase):
 
         self.assertTrue(isinstance(output, MatrixWorkspace))
 
-        dataX = output.dataX(0)
+        dataX = output.x(0)
         self.assertEqual(dataX[0], 0.0)
         self.assertEqual(dataX[-1], 3.0)
         self.assertEqual(len(dataX), 4)
 
-        dataY = output.dataY(0)
+        dataY = output.y(0)
         self.assertEqual(dataY[0], 2.0)
         self.assertEqual(dataY[1], 2.0)
         self.assertEqual(len(dataY), 4)
@@ -69,12 +69,12 @@ class PoldiMergeTest(unittest.TestCase):
 
         self.assertTrue(isinstance(output, MatrixWorkspace))
 
-        dataX = output.dataX(0)
+        dataX = output.x(0)
         self.assertEqual(dataX[0], 0.0)
         self.assertEqual(dataX[-1], 3.0)
         self.assertEqual(len(dataX), 4)
 
-        dataY = output.dataY(0)
+        dataY = output.y(0)
         self.assertEqual(dataY[0], 2.0)
         self.assertEqual(dataY[1], 2.0)
         self.assertEqual(len(dataY), 4)

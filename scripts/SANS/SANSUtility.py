@@ -310,7 +310,7 @@ def isEventWorkspace(ws_reference):
 
 def getBinsBoundariesFromWorkspace(ws_reference):
     ws_reference = getWorkspaceReference(ws_reference)
-    Xvalues = ws_reference.dataX(0)
+    Xvalues = ws_reference.x(0)
     binning = str(Xvalues[0])
     binGap = Xvalues[1] - Xvalues[0]
     binning = binning + "," + str(binGap)
@@ -1768,8 +1768,8 @@ def get_error_corrected_front_and_rear_data_sets(front_data, rear_data, q_min, q
 
     # Now transfer the error from front data to the rear data workspace
     # This works only if we have a single QMod spectrum in the workspaces
-    front_error = front_data_cropped.dataE(0)
-    rear_error = rear_data_cropped.dataE(0)
+    front_error = front_data_cropped.e(0)
+    rear_error = rear_data_cropped.e(0)
 
     rear_error_squared = rear_error * rear_error
     front_error_squared = front_error * front_error
@@ -1822,7 +1822,7 @@ def correct_q_resolution_for_can(original_workspace, can_workspace, subtracted_w
     @param subtracted_workspace: the subtracted workspace
     """
     if original_workspace.getNumberHistograms() == 1 and original_workspace.hasDx(0):
-        subtracted_workspace.setDx(0, original_workspace.dataDx(0))
+        subtracted_workspace.setDx(0, original_workspace.dx(0))
 
 
 def correct_q_resolution_for_merged(count_ws_front, count_ws_rear, output_ws, scale):

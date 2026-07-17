@@ -34,9 +34,9 @@ Plus(LHSWorkspace=input, RHSWorkspace=input, OutputWorkspace=output)
         RunPythonScript(InputWorkspace="ws", Code=code, OutputWorkspace="ws_out")
         ws_out = mtd["ws_out"]
 
-        self.assertAlmostEqual(ws_out.dataY(0)[0], 2.0, 3)
-        self.assertAlmostEqual(ws_out.dataY(0)[1], 4.0, 3)
-        self.assertAlmostEqual(ws_out.dataY(0)[2], 6.0, 3)
+        self.assertAlmostEqual(ws_out.y(0)[0], 2.0, 3)
+        self.assertAlmostEqual(ws_out.y(0)[1], 4.0, 3)
+        self.assertAlmostEqual(ws_out.y(0)[2], 6.0, 3)
 
     # Use an operation that sets 'output' to a workspace proxy
     def test_usingOperators(self):
@@ -44,9 +44,9 @@ Plus(LHSWorkspace=input, RHSWorkspace=input, OutputWorkspace=output)
         RunPythonScript(InputWorkspace="ws", Code=code, OutputWorkspace="ws_out")
         ws_out = mtd["ws_out"]
 
-        self.assertAlmostEqual(ws_out.dataY(0)[0], 5.0, 3)
-        self.assertAlmostEqual(ws_out.dataY(0)[1], 10.0, 3)
-        self.assertAlmostEqual(ws_out.dataY(0)[2], 15.0, 3)
+        self.assertAlmostEqual(ws_out.y(0)[0], 5.0, 3)
+        self.assertAlmostEqual(ws_out.y(0)[1], 10.0, 3)
+        self.assertAlmostEqual(ws_out.y(0)[2], 15.0, 3)
 
     def test_input_MatrixWorkspace_has_correct_python_type_when_executed(self):
         code = """from mantid.api import MatrixWorkspace

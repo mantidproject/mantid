@@ -14,7 +14,7 @@ X_OFFSET = 0.001
 def x_limits_of_workspace(workspace_name: str, default_limits: tuple = (DEFAULT_X_LOWER, DEFAULT_X_UPPER)) -> tuple:
     """Returns the x data limits of a provided workspace."""
     if workspace_name is not None and check_if_workspace_exist(workspace_name):
-        x_data = retrieve_ws(workspace_name).dataX(0)
+        x_data = retrieve_ws(workspace_name).x(0)
         if len(x_data) > 0:
             x_data.sort()
             x_lower, x_higher = x_data[0], x_data[-1]

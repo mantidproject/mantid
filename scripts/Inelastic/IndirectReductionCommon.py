@@ -909,8 +909,8 @@ def fold_chopped(workspace_name):
 
     ranges = []
     for ws in mtd[workspace_name].getNames():
-        x_min = mtd[ws].dataX(0)[0]
-        x_max = mtd[ws].dataX(0)[-1]
+        x_min = mtd[ws].x(0)[0]
+        x_max = mtd[ws].x(0)[-1]
         ranges.append((x_min, x_max))
         DeleteWorkspace(Workspace=ws)
 

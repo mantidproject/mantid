@@ -26,9 +26,9 @@ class SampleTransmissionCalculatorModel(object):
             density=input_dict["density"],
             thickness=input_dict["thickness"],
         )
-        output_key["x"] = transmission_ws.dataX(0)
-        output_key["y"] = transmission_ws.dataY(0)
-        output_key["scattering"] = transmission_ws.dataY(1)[0]
+        output_key["x"] = transmission_ws.x(0)
+        output_key["y"] = transmission_ws.y(0)
+        output_key["scattering"] = transmission_ws.y(1)[0]
         return output_key
 
     @staticmethod

@@ -28,7 +28,7 @@ def create_workspace():
 
 def create_workspace_with_dead_detectors():
     inputData = CreateSimulationWorkspace("MUSR", "0,1,32")
-    xData = (inputData.dataX(0)[1:] + inputData.dataX(0)[:-1]) / 2.0
+    xData = (inputData.x(0)[1:] + inputData.x(0)[:-1]) / 2.0
     for j in range(inputData.getNumberHistograms()):
         if j == 42 or j == 24:
             inputData.mutableY(j)[:] = np.zeros(len(xData))

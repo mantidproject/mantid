@@ -79,7 +79,7 @@ class TotScatCalculateSelfScattering(DataProcessorAlgorithm):
                         incident_index = i
         monitor = ExtractSpectra(InputWorkspace=raw_ws, WorkspaceIndexList=[incident_index])
         monitor = ConvertUnits(InputWorkspace=monitor, Target="Wavelength")
-        x_data = monitor.dataX(0)
+        x_data = monitor.x(0)
         min_x = np.min(x_data)
         max_x = np.max(x_data)
         width_x = (max_x - min_x) / x_data.size
@@ -121,7 +121,7 @@ class TotScatCalculateSelfScattering(DataProcessorAlgorithm):
         for index in range(self_scattering_correction.getNumberHistograms()):
             spec_info = self_scattering_correction.spectrumInfo()
             if not spec_info.isMasked(index) and not spec_info.isMonitor(index):
-                ssc_x_data = np.ma.masked_invalid(self_scattering_correction.dataX(index))
+                ssc_x_data = np.ma.masked_invalid(self_scattering_correction.x(index))
                 if np.min(ssc_x_data) < ssc_min_x:
                     ssc_min_x = np.min(ssc_x_data)
                 if np.max(ssc_x_data) > ssc_max_x:
@@ -142,7 +142,7 @@ class TotScatCalculateSelfScattering(DataProcessorAlgorithm):
     def divide_by_number_of_detectors_in_bank(self, self_scattering_correction, cal_workspace):
         n_pixel = np.zeros(self_scattering_correction.getNumberHistograms())
         for i in range(cal_workspace.getNumberHistograms()):
-            grouping = cal_workspace.dataY(i)
+            grouping = cal_workspace.y(i)
             if grouping[0] > 0:
                 n_pixel[int(grouping[0] - 1)] += 1
         correction_ws = CreateWorkspace(DataY=n_pixel, DataX=[0, 1], NSpec=self_scattering_correction.getNumberHistograms())

@@ -26,8 +26,8 @@ class DirectILLIntegrateVanadiumTest(unittest.TestCase):
     def testIntegrationWithDebyeWallerCorrection(self):
         ws = self._cloneTestWorkspace()
         for i in range(ws.getNumberHistograms()):
-            ws.dataY(i).fill(float(i + 1))
-            ws.dataE(i).fill(numpy.sqrt(float(i + 1)))
+            ws.y(i).fill(float(i + 1))
+            ws.e(i).fill(numpy.sqrt(float(i + 1)))
         numBins = ws.blocksize()
         eppWSName = "eppWS"
         self._EPPTable(ws, eppWSName)
@@ -51,8 +51,8 @@ class DirectILLIntegrateVanadiumTest(unittest.TestCase):
     def testIntegrationWithoutDebyeWallerCorrection(self):
         ws = self._cloneTestWorkspace()
         for i in range(ws.getNumberHistograms()):
-            ws.dataY(i).fill(float(i + 1))
-            ws.dataE(i).fill(numpy.sqrt(float(i + 1)))
+            ws.y(i).fill(float(i + 1))
+            ws.e(i).fill(numpy.sqrt(float(i + 1)))
         numBins = ws.blocksize()
         eppWSName = "eppWS"
         self._EPPTable(ws, eppWSName)
@@ -77,7 +77,7 @@ class DirectILLIntegrateVanadiumTest(unittest.TestCase):
         ws = self._cloneTestWorkspace()
         zeroIndices = [5, 23]
         for i in zeroIndices:
-            ws.dataY(i).fill(0.0)
+            ws.y(i).fill(0.0)
         eppWSName = "eppWS"
         self._EPPTable(ws, eppWSName)
         outWSName = "outWS"

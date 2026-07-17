@@ -178,7 +178,7 @@ class POLDILoadRunsTest(systemtesting.MantidSystemTest):
 
     def compareWorkspaces(self, left, right):
         for i in range(left.getNumberHistograms()):
-            self.assertTrue(np.array_equal(left.dataY(i), right.dataY(i)))
+            self.assertTrue(np.array_equal(left.y(i), right.y(i)))
 
     def clearAnalysisDataService(self):
         AnalysisDataService.clear()

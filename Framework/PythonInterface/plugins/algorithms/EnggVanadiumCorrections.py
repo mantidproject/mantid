@@ -166,7 +166,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
         blocksize = van_curves_ws.blocksize()
         for i in range(0, ws.getNumberHistograms()):
             scale_factor = van_integration_ws.cell(i, 0) / blocksize
-            ws.setSharedY(i, np.divide(ws.dataY(i), scale_factor))
+            ws.setSharedY(i, np.divide(ws.y(i), scale_factor))
 
     def _apply_pix_by_pix_correction(self, ws, van_curves_ws):
         """
@@ -403,7 +403,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
 
             for i in idxs:
                 # take values of the second spectrum of the workspace (fit simulation - fitted curve)
-                ws.setSharedY(i, np.divide(ws.dataY(i), rebinned_fit_curve.y(1)))
+                ws.setSharedY(i, np.divide(ws.y(i), rebinned_fit_curve.y(1)))
 
         # finally, convert back to ToF
         EnggUtils.convert_to_TOF(self, ws)

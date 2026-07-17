@@ -211,7 +211,7 @@ class DRangeToWorkspaceMap(object):
         return TIME_REGIME_TO_DRANGE[self._time_regime_of(workspace)]
 
     def _time_regime_of(self, workspace):
-        time_regime = workspace.dataX(0)[0]
+        time_regime = workspace.x(0)[0]
         time_regimes = sorted(TIME_REGIME_TO_DRANGE.keys())
         num_regimes = len(time_regimes)
 
@@ -602,9 +602,9 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                     for idx, spectra in enumerate(matched_spectra)
                 ]
 
-                max_x_size = max([spectra.dataX(0).size for spectra in merged_spectra])
-                max_y_size = max([spectra.dataY(0).size for spectra in merged_spectra])
-                max_e_size = max([spectra.dataE(0).size for spectra in merged_spectra])
+                max_x_size = max([spectra.x(0).size for spectra in merged_spectra])
+                max_y_size = max([spectra.y(0).size for spectra in merged_spectra])
+                max_e_size = max([spectra.e(0).size for spectra in merged_spectra])
 
                 for i in range(len(merged_spectra)):
                     if (
@@ -612,9 +612,9 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                         or merged_spectra[i].mutableY(0).size != max_y_size
                         or merged_spectra[i].mutableE(0).size != max_e_size
                     ):
-                        dataX = merged_spectra[i].dataX(0)
-                        dataY = merged_spectra[i].dataY(0)
-                        dataE = merged_spectra[i].dataE(0)
+                        dataX = merged_spectra[i].x(0)
+                        dataY = merged_spectra[i].y(0)
+                        dataE = merged_spectra[i].e(0)
 
                         dataX = np.append(dataX, [dataX[-1]] * (max_x_size - dataX.size))
                         dataY = np.append(dataY, [0] * (max_y_size - dataY.size))
@@ -667,7 +667,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
         # apply scalar data to result workspace
         for i in range(0, output_ws.getNumberHistograms()):
-            data_x = output_ws.dataX(i)
+            data_x = output_ws.x(i)
             data_y = []
             data_e = []
             for j in range(0, len(data_x) - 1):
@@ -680,8 +680,8 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                     data_y.append(1)
                     data_e.append(1)
 
-            result_y = output_ws.dataY(i)
-            result_e = output_ws.dataE(i)
+            result_y = output_ws.y(i)
+            result_e = output_ws.e(i)
 
             result_y = result_y / data_y
             result_e = result_e / data_e

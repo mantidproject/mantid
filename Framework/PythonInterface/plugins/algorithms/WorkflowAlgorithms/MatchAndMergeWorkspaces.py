@@ -124,7 +124,7 @@ class MatchAndMergeWorkspaces(DataProcessorAlgorithm):
         largest_range_spectrum = 0
         for i in range(len(ws_list)):
             for j in range(ws_list[i].getNumberHistograms()):
-                x_data = ws_list[i].dataX(j)
+                x_data = ws_list[i].x(j)
                 x_min = min(np.min(x_data), x_min)
                 x_max = max(np.max(x_data), x_max)
                 x_num = max(x_data.size, x_num)

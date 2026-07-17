@@ -42,7 +42,7 @@ class SANSSaveTest(unittest.TestCase):
             workspace = convert_alg.getProperty("OutputWorkspace").value
 
         if with_zero_errors:
-            errors = workspace.dataE(0)
+            errors = workspace.e(0)
             errors[0] = 0.0
             errors[14] = 0.0
             errors[45] = 0.0
@@ -213,7 +213,7 @@ class SANSSaveTest(unittest.TestCase):
         load_alg = create_unmanaged_algorithm(load_name, **load_options)
         load_alg.execute()
         reloaded_workspace = load_alg.getProperty("OutputWorkspace").value
-        errors = reloaded_workspace.dataE(0)
+        errors = reloaded_workspace.e(0)
         # Make sure that the errors are not zero
         self.assertGreater(errors[0], 1.0)
         self.assertGreater(errors[14], 1.0)

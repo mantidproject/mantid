@@ -478,7 +478,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
         if not len(tube_ws_index_list) == DetectorInfo.NUM_PIXELS_IN_TUBE:
             raise RuntimeError(f"Found incorrect number of workspace indices for tube id {tube_id}")
 
-        return [ws.dataY(ws_index)[0] for ws_index in tube_ws_index_list]
+        return [ws.y(ws_index)[0] for ws_index in tube_ws_index_list]
 
     def _find_strip_edge_pixels_for_tube(self, tube_id: int, ws, threshold: int, first_pixel: int, last_pixel: int) -> list[int]:
         """Finds the pixel numbers that correspond to the edges of the strips in each tube.
@@ -792,7 +792,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
         margin = fit_params.getMargin()
 
         # Get values around the expected center
-        right_limit = len(ws.dataY(0))
+        right_limit = len(ws.y(0))
         start = max(int(peak_centre - outedge - margin), 0)
         end = min(int(peak_centre + inedge + margin), right_limit)
         width = (end - start) / 3.0
@@ -814,7 +814,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
         margin = fit_params.getMargin()
 
         # Get values around the expected center
-        all_values = ws.dataY(0)
+        all_values = ws.y(0)
         right_limit = len(all_values)
         values = all_values[max(int(peak_centre - margin), 0) : min(int(peak_centre + margin), right_limit)]
 
@@ -857,7 +857,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
         """
 
         # Create input workspace for fitting - get all the counts for the tube from the integrated workspace
-        y_data = [ws.dataY(i)[0] for i in ws_ids]
+        y_data = [ws.y(i)[0] for i in ws_ids]
         if len(y_data) == 0:
             raise RuntimeError("Cannot find any counts for the tube in the integrated workspace")
 
@@ -886,8 +886,8 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
             peak_positions.append(peak_centre)
 
             # Calculate the values for the diagnostic workspace of fitted values
-            fitt_y_values.append(copy.copy(fit_ws.dataY(1)))
-            fitt_x_values.append(copy.copy(fit_ws.dataX(1)))
+            fitt_y_values.append(copy.copy(fit_ws.y(1)))
+            fitt_x_values.append(copy.copy(fit_ws.x(1)))
 
         # Calculate the average resolution
         if resolution_params:
@@ -1050,10 +1050,10 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
         threshold = self.getProperty(Prop.CVALUE_THRESHOLD).value
         # Find the tubes with cvalues above the threshold
         cvalues_above_threshold = []
-        for i in range(len(cvalues.dataY(0))):
-            cvalue = cvalues.dataY(0)[i]
+        for i in range(len(cvalues.y(0))):
+            cvalue = cvalues.y(0)[i]
             if cvalue > threshold:
-                module, tube_num = self._get_tube_module_and_number(int(cvalues.dataX(0)[i]))
+                module, tube_num = self._get_tube_module_and_number(int(cvalues.x(0)[i]))
                 msg = f"Module {module}, tube {tube_num} has cvalue {cvalue}"
                 cvalues_above_threshold.append(msg + "\n")
                 self.log().notice(msg)

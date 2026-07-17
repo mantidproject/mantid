@@ -291,7 +291,7 @@ class IndirectQuickRun(DataProcessorAlgorithm):
         if exists_in_ads(elf_workspace_name):
             elf_workspace = mtd[elf_workspace_name]
             if isinstance(elf_workspace, MatrixWorkspace):
-                return elf_workspace.dataX(0)
+                return elf_workspace.x(0)
         return None
 
     def _perform_width_fit(self):

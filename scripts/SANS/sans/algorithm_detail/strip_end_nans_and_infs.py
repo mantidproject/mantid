@@ -40,7 +40,7 @@ def strip_end_nans(workspace, parent_alg=None):
     # Make sure we're inside the bin that we want to crop. This is part of the old framework. It looks like a bug fix,
     # hence we leave it in here for now. In general this is risky, and it should be a fraction of a bin width by which
     # we increase the end value
-    is_point_data = len(workspace.dataX(0)) == len(workspace.dataY(0))
+    is_point_data = len(workspace.x(0)) == len(workspace.y(0))
     if is_point_data:
         end_q = 1.001 * q_values[end_index]
     else:

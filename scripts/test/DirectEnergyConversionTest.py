@@ -190,7 +190,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
             NumBanks=1, BankPixelWidth=4, NumEvents=10000, XUnit="DeltaE", XMin=-5, XMax=15, BinWidth=0.1, function="Flat background"
         )
         LoadInstrument(mono_ws, InstrumentName="MARI", RewriteSpectraMap=True)
-        sig = mono_ws.dataY(0)
+        sig = mono_ws.y(0)
         sig[:] = 0
 
         tReducer.wb_run = mono_ws
@@ -262,7 +262,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
             CreateWorkspace(OutputWorkspace="TOF_WS", NSpec=1, DataX=tof, DataY=y, UnitX="TOF", ParentWorkspace="_ws_template")
             EnWs = ConvertUnits(InputWorkspace="TOF_WS", Target="Energy", EMode="Elastic")
 
-            eni = EnWs.dataX(0)
+            eni = EnWs.x(0)
             for samp, rez in zip(eni, en_range):
                 self.assertAlmostEqual(samp, rez)
 
@@ -290,7 +290,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
             CreateWorkspace(OutputWorkspace="TOF_WS", NSpec=1, DataX=tof, DataY=y, UnitX="TOF", ParentWorkspace="_ws_template")
             EnWs = ConvertUnits(InputWorkspace="TOF_WS", Target="Energy", EMode="Elastic")
 
-            eni = EnWs.dataX(0)
+            eni = EnWs.x(0)
             for samp, rez in zip(eni, en_range):
                 self.assertAlmostEqual(samp, rez)
 
@@ -301,7 +301,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         LoadInstrument(run_monitors, InstrumentName="MARI", RewriteSpectraMap=True)
         ConvertUnits(InputWorkspace="run_monitors", OutputWorkspace="run_monitors", Target="TOF")
         run_monitors = mtd["run_monitors"]
-        tof = run_monitors.dataX(3)
+        tof = run_monitors.x(3)
         tMin = tof[0]
         tMax = tof[-1]
         run = CreateSampleWorkspace(
@@ -390,7 +390,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         LoadInstrument(run_monitors, InstrumentName="MARI", RewriteSpectraMap=True)
         ConvertUnits(InputWorkspace="run_monitors", OutputWorkspace="run_monitors", Target="TOF")
         run_monitors = mtd["run_monitors"]
-        tof = run_monitors.dataX(3)
+        tof = run_monitors.x(3)
         tMin = tof[0]
         tMax = tof[-1]
         run = CreateSampleWorkspace(
@@ -458,7 +458,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         LoadInstrument(run_monitors, InstrumentName="MARI", RewriteSpectraMap=True)
         ConvertUnits(InputWorkspace="run_monitors", OutputWorkspace="run_monitors", Target="TOF")
         run_monitors = mtd["run_monitors"]
-        tof = run_monitors.dataX(3)
+        tof = run_monitors.x(3)
         tMin = tof[0]
         tMax = tof[-1]
         run = CreateSampleWorkspace(
@@ -531,7 +531,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         LoadInstrument(run_monitors, InstrumentName="MARI", RewriteSpectraMap=True)
         ConvertUnits(InputWorkspace="run_monitors", OutputWorkspace="run_monitors", Target="TOF")
         run_monitors = mtd["run_monitors"]
-        tof = run_monitors.dataX(3)
+        tof = run_monitors.x(3)
         tMin = tof[0]
         tMax = tof[-1]
         run = CreateSampleWorkspace(

@@ -56,7 +56,7 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         self.assertEqual(red_ws.getNumberHistograms(), 1)
 
         self.assertEqual(red_ws.blocksize(), 10)
-        data_x = red_ws.dataX(0)
+        data_x = red_ws.x(0)
         self.assertAlmostEqual(data_x[0], 3.0)
         self.assertAlmostEqual(data_x[-1], 4.0)
 

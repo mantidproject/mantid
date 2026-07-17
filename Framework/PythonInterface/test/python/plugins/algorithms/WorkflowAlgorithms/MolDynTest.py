@@ -54,7 +54,7 @@ class MolDynTest(unittest.TestCase):
         self.assertEqual(moldyn_group[0].name(), "NaF_DISF_Sqw-total")
 
         # Get max enery from result workspace
-        x_data = moldyn_group[0].dataX(0)
+        x_data = moldyn_group[0].x(0)
         x_max = x_data[len(x_data) - 1]
 
         # Check that it is less that what was passed to algorithm
@@ -69,7 +69,7 @@ class MolDynTest(unittest.TestCase):
         self.assertEqual(moldyn_group[0].name(), "NaF_DISF_Sqw-total")
 
         # Get max and min energy from result workspace
-        x_data = moldyn_group[0].dataX(0)
+        x_data = moldyn_group[0].x(0)
         x_max = x_data[len(x_data) - 1]
         x_min = x_data[0]
 

@@ -489,7 +489,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         AddSampleLog(Workspace=q_workspace, LogName="lambda_min", LogText=str(lambda_min), LogType="Number", LogUnit="Angstrom")
         AddSampleLog(Workspace=q_workspace, LogName="lambda_max", LogText=str(lambda_max), LogType="Number", LogUnit="Angstrom")
 
-        data_x = q_workspace.dataX(0)
+        data_x = q_workspace.x(0)
         for i in range(len(data_x)):
             data_x[i] = constant / data_x[i]
         q_workspace = SortXAxis(InputWorkspace=q_workspace, OutputWorkspace=str(q_workspace))
@@ -544,7 +544,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
             logger.error("Data is all zeros. Check your TOF ranges.")
 
         # Clean up the workspace for backward compatibility
-        data_y = q_rebin.dataY(0)
+        data_y = q_rebin.y(0)
 
         if self.getProperty("AcceptNullReflectivity").value is False and sum(data_y) == 0:
             raise RuntimeError("The reflectivity is all zeros: check your peak selection")
@@ -595,8 +595,8 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         lambda_max = ws.getRun().getProperty("lambda_max").value
         dq_over_q = np.min(res) / np.tan(theta)
 
-        data_x = ws.dataX(0)
-        data_dx = ws.dataDx(0)
+        data_x = ws.x(0)
+        data_dx = ws.dx(0)
         dwl = (lambda_max - lambda_min) / len(data_x) / np.sqrt(12.0)
         for i in range(len(data_x)):
             dq_theta = data_x[i] * dq_over_q
