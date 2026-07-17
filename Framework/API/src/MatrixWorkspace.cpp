@@ -1576,7 +1576,7 @@ private:
 class MWXDimension : public Mantid::Geometry::IMDDimension {
 public:
   MWXDimension(const MatrixWorkspace *ws, std::string dimensionId)
-      : m_ws(ws), m_X(ws->x(0)), m_dimensionId(std::move(dimensionId)),
+      : m_ws(ws), m_X(ws->x(0).rawData()), m_dimensionId(std::move(dimensionId)),
         m_frame(std::make_unique<Geometry::GeneralFrame>(m_ws->getAxis(0)->unit()->label(),
                                                          m_ws->getAxis(0)->unit()->label())) {}
 
