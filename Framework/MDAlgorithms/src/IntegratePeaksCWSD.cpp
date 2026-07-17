@@ -124,8 +124,8 @@ void IntegratePeaksCWSD::processInputs() {
     // assigned peak center
     if (peak_center.size() != 3)
       throw std::invalid_argument("PeakCentre must have 3 elements.");
-    m_peakCenter.setSharedX(peak_center[0]);
-    m_peakCenter.setSharedY(peak_center[1]);
+    m_peakCenter.setX(peak_center[0]);
+    m_peakCenter.setY(peak_center[1]);
     m_peakCenter.setZ(peak_center[2]);
     // no use input peak workspace
     m_haveInputPeakWS = false;

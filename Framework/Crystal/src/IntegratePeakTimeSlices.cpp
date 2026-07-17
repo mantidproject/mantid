@@ -786,8 +786,8 @@ void IntegratePeakTimeSlices::FindPlane(V3D &center, V3D &xvec, V3D &yvec, doubl
   IDetector_const_sptr det = peak.getDetector();
   V3D detPos = det->getPos();
 
-  center.setSharedX(detPos.X());
-  center.setSharedY(detPos.Y());
+  center.setX(detPos.X());
+  center.setY(detPos.Y());
   center.setZ(detPos.Z());
 
   std::shared_ptr<const Detector> dett = std::dynamic_pointer_cast<const Detector>(det);
@@ -805,11 +805,11 @@ void IntegratePeakTimeSlices::FindPlane(V3D &center, V3D &xvec, V3D &yvec, doubl
   Qt.rotate(xaxis0);
   xaxis0.normalize();
 
-  xvec.setSharedX(xaxis0.X());
-  xvec.setSharedY(xaxis0.Y());
+  xvec.setX(xaxis0.X());
+  xvec.setY(xaxis0.Y());
   xvec.setZ(xaxis0.Z());
-  yvec.setSharedX(yaxis0.X());
-  yvec.setSharedY(yaxis0.Y());
+  yvec.setX(yaxis0.X());
+  yvec.setY(yaxis0.Y());
   yvec.setZ(yaxis0.Z());
   ROW = peak.getRow();
   COL = peak.getCol();

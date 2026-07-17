@@ -154,7 +154,7 @@ class MatrixWorkspaceTest(unittest.TestCase):
         x = self._test_ws.x(0)
         y = self._test_ws.y(0)
         e = self._test_ws.e(0)
-        dx = self._test_ws.readDx(0)
+        dx = self._test_ws.dx(0)
 
         for attr in [x, y, e, dx]:
             do_numpy_test(attr)
@@ -172,10 +172,10 @@ class MatrixWorkspaceTest(unittest.TestCase):
         for attr in [x, y, e, dx]:
             do_numpy_test(attr)
 
-        self.assertTrue(np.array_equal(x, self._test_ws.readX(0)))
-        self.assertTrue(np.array_equal(y, self._test_ws.readY(0)))
-        self.assertTrue(np.array_equal(e, self._test_ws.readE(0)))
-        self.assertTrue(np.array_equal(dx, self._test_ws.readDx(0)))
+        self.assertTrue(np.array_equal(x, self._test_ws.x(0)))
+        self.assertTrue(np.array_equal(y, self._test_ws.y(0)))
+        self.assertTrue(np.array_equal(e, self._test_ws.e(0)))
+        self.assertTrue(np.array_equal(dx, self._test_ws.dx(0)))
 
     def test_mutable_data_members_give_writable_numpy_array(self):
         def do_numpy_test(arr):

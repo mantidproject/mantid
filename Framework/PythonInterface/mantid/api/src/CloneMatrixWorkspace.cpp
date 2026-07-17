@@ -52,7 +52,7 @@ PyArrayObject *cloneArray(const MatrixWorkspace &workspace, DataField field, con
     stride = workspace.x(0).size();
     dataAccesor = &MatrixWorkspace::readX;
   } else if (field == DxValues) {
-    stride = workspace.readDx(0).size();
+    stride = workspace.dx(0).size();
     dataAccesor = &MatrixWorkspace::readDx;
   } else {
     stride = workspace.blocksize();

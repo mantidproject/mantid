@@ -129,13 +129,13 @@ public:
     auto const out = applyFloodWorkspace(inputWS, cropped);
 
     // Histograms without Flood Spectra data are not modified
-    TS_ASSERT_DELTA(out->y(0), inputWS->y(0), DELTA);
-    TS_ASSERT_DELTA(out->y(1), inputWS->y(1), DELTA);
+    TS_ASSERT_DELTA(out->y(0).rawData(), inputWS->y(0).rawData(), DELTA);
+    TS_ASSERT_DELTA(out->y(1).rawData(), inputWS->y(1).rawData(), DELTA);
 
     int const refactor = 5; // how bigger is bin size in input with respect to initial flood ws
     // Histograms with Flood Spectra are rebinned prior to flood correction
-    TS_ASSERT_DELTA(out->y(2), std::vector<double>(20, 2 / 0.8 * refactor), DELTA);
-    TS_ASSERT_DELTA(out->y(3), std::vector<double>(20, 2 / 0.9 * refactor), DELTA);
+    TS_ASSERT_DELTA(out->y(2).rawData(), std::vector<double>(20, 2 / 0.8 * refactor), DELTA);
+    TS_ASSERT_DELTA(out->y(3).rawData(), std::vector<double>(20, 2 / 0.9 * refactor), DELTA);
   }
 
   void test_flood_doesnt_transform_spectra_that_are_missing_in_flood_workspace_for_single_bin_file() {

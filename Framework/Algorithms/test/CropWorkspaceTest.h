@@ -314,8 +314,8 @@ public:
     TS_ASSERT_EQUALS(output->blocksize(), input->blocksize());
 
     for (size_t i = 0; i < 5; ++i) {
-      const MantidVec &iX = input->x(i);
-      const MantidVec &oX = output->x(i);
+      Mantid::HistogramData::HistogramX const &iX = input->x(i);
+      Mantid::HistogramData::HistogramX const &oX = output->x(i);
       for (size_t j = 0; j < iX.size(); j++) {
         TS_ASSERT_EQUALS(iX[j], oX[j]);
       }

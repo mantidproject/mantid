@@ -507,8 +507,8 @@ std::vector<double> CalculatePlaczek::getEfficiencyCoefficient1() {
   if (efficiencyWS) {
     // Use the formula
     // eps1 = k * eps'/eps, k = 2pi/lambda
-    std::vector<double> eps = efficiencyWS->y(0);
-    std::vector<double> epsPrime = efficiencyWS->y(1);
+    Mantid::HistogramData::HistogramY const &eps = efficiencyWS->y(0);
+    Mantid::HistogramData::HistogramY const &epsPrime = efficiencyWS->y(1);
     for (size_t i = 0; i < xLambda.size(); i++) {
       double lambda = xLambda[i];
       double k = 2.0 * M_PI / lambda;
@@ -545,8 +545,8 @@ std::vector<double> CalculatePlaczek::getEfficiencyCoefficient2() {
   if (efficiencyWS) {
     // Use the formula
     // eps1 = k^2 * eps''/eps, k = 2pi/lambda
-    std::vector<double> eps = efficiencyWS->y(0);
-    std::vector<double> epsPrime2 = efficiencyWS->y(2);
+    Mantid::HistogramData::HistogramY const &eps = efficiencyWS->y(0);
+    Mantid::HistogramData::HistogramY const &epsPrime2 = efficiencyWS->y(2);
     for (size_t i = 0; i < xLambda.size(); i++) {
       double lambda = xLambda[i];
       double k = 2.0 * M_PI / lambda;

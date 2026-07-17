@@ -203,7 +203,7 @@ bool MaskWorkspace::isMasked(const std::set<detid_t> &detectorIDs) const {
  * Use this method with MaskWorkspace that doesn't have an instrument.
  */
 bool MaskWorkspace::isMaskedIndex(const std::size_t wkspIndex) const {
-  return (this->mutableY(wkspIndex)[0] != LIVE_VALUE); // if is not live it should masked
+  return (this->y(wkspIndex)[0] != LIVE_VALUE); // if is not live it should masked
 }
 
 /**

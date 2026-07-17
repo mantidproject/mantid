@@ -202,7 +202,7 @@ MWPropertiesWidget::MWPropertiesWidget(InputWorkspaceWidget *parent) : DynamicPr
         Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString()).get());
     if (ws) {
       m_workspaceIndex->setRange(0, static_cast<int>(ws->getNumberHistograms()));
-      const Mantid::MantidVec &x = ws->x(0);
+      auto const &x = ws->x(0);
       if (!x.empty()) {
         m_startX->setText(QString::number(x.front()));
         m_endX->setText(QString::number(x.back()));

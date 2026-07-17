@@ -883,7 +883,7 @@ class TestQErrorCorrectionForMergedWorkspaces(unittest.TestCase):
 
         dx_expected_0 = (dx_front[0] * y_front[0] * scale + dx_rear[0] * y_rear[0]) / (y_front[0] * scale + y_rear[0])
         dx_expected_1 = (dx_front[1] * y_front[1] * scale + dx_rear[1] * y_rear[1]) / (y_front[1] * scale + y_rear[1])
-        dx_result = result.readDx(0)
+        dx_result = result.dx(0)
         self.assertEqual(len(dx_result), 2)
         self.assertEqual(dx_result[0], dx_expected_0)
         self.assertEqual(dx_result[1], dx_expected_1)

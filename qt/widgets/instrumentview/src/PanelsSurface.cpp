@@ -548,8 +548,8 @@ void PanelsSurface::spreadBanks() {
     QPointF dir = centre - m_origin;
     qreal length = sqrt(dir.x() * dir.x() + dir.y() * dir.y());
     if (length < 1e-5) {
-      dir.setSharedX(1.0);
-      dir.setSharedY(0.0);
+      dir.setX(1.0);
+      dir.setY(0.0);
     } else {
       dir /= length;
     }

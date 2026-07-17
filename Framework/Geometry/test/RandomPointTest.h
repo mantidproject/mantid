@@ -273,14 +273,14 @@ public:
 
     Mantid::Kernel::V3D basis2;
     if (basis.X() == 0) {
-      basis2.setSharedX(1.);
+      basis2.setX(1.);
     } else if (basis.Y() == 0) {
-      basis2.setSharedY(1.);
+      basis2.setY(1.);
     } else if (basis.Z() == 0) {
       basis2.setZ(1.);
     } else {
-      basis2.setSharedX(-basis.Y());
-      basis2.setSharedY(basis.X());
+      basis2.setX(-basis.Y());
+      basis2.setY(basis.X());
       basis2.normalize();
     }
     const Mantid::Kernel::V3D basis3{basis.cross_prod(basis2)};

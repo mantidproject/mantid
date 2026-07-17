@@ -382,7 +382,7 @@ def get_spectrum(workspace, wkspIndex, normalization: PlotNormalizationType, wit
     if withDy:
         dy = workspace.e(wkspIndex)
     if withDx and workspace.getSpectrum(wkspIndex).hasDx():
-        dx = workspace.readDx(wkspIndex)
+        dx = workspace.dx(wkspIndex)
 
     if workspace.isHistogramData():
         boundary_points = points_from_boundaries(x)
@@ -473,7 +473,7 @@ def get_bins(workspace, bin_index, withDy=False, withDx=False):
             if withDy:
                 dy.append(workspace.e(int(row_index))[bin_index])
             if withDx:
-                dx.append(workspace.readDx(int(row_index))[bin_index])
+                dx.append(workspace.dx(int(row_index))[bin_index])
 
     return x_values, y_values, dy, dx
 

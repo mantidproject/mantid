@@ -101,7 +101,7 @@ public:
       const std::string name = "pixel-" + std::to_string(i) + ")";
       const auto index = componentInfo.indexOfAny(name);
       auto position = componentInfo.position(index);
-      position.setSharedY(position.Y() + 0.33);
+      position.setY(position.Y() + 0.33);
       componentInfo.setPosition(index, position);
     }
     input->getAxis(0)->setUnit("DeltaE");

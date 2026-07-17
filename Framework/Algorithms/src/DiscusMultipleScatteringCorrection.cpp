@@ -444,7 +444,7 @@ void DiscusMultipleScatteringCorrection::addWorkspaceToDiscus2DData(const Geomet
   auto specAxis = dynamic_cast<NumericAxis *>(SQWS->getAxis(1));
   std::vector<DiscusData1D> data;
   for (size_t i = 0; i < SQWS->getNumberHistograms(); i++) {
-    data.emplace_back(SQWS->histogram(i).dataX(), SQWS->histogram(i).dataY());
+    data.emplace_back(SQWS->x(i).rawData(), SQWS->y(i).rawData());
   }
   ComponentWorkspaceMapping SQWSMapping{
       shape, matName,
@@ -506,8 +506,7 @@ void DiscusMultipleScatteringCorrection::exec() {
 
   MatrixWorkspace_sptr sigmaSSWS = getProperty("ScatteringCrossSection");
   if (sigmaSSWS)
-    m_sigmaSS =
-        std::make_shared<DiscusData1D>(DiscusData1D{sigmaSSWS->getSpectrum(0).x(), sigmaSSWS->getSpectrum(0).y()});
+    m_sigmaSS = std::make_shared<DiscusData1D>(sigmaSSWS->x(0).rawData(), sigmaSSWS->y(0).rawData());
 
   // for inelastic we could calculate the qmax based on the min\max w in the S(Q,w) but that
   // would bake as assumption that S(Q,w)=0 beyond the limits of the supplied data
@@ -1019,7 +1018,7 @@ void DiscusMultipleScatteringCorrection::calculateQSQIntegralAsFunctionOfK(Compo
       // Calculate the integral for a range of k values. Not massively important which k values but choose them here
       // based on the q points in the S(Q) profile and the initial k values incident on the sample
       std::set<double> kValues(specialKs.begin(), specialKs.end());
-      const std::vector<double> qValues = SQWSMapping.SQ->histogram(0).X;
+      const std::vector<double> &qValues = SQWSMapping.SQ->histogram(0).X;
       for (auto q : qValues) {
         if (q > 0)
           kValues.insert(q / 2);
@@ -1046,7 +1045,7 @@ void DiscusMultipleScatteringCorrection::calculateQSQIntegralAsFunctionOfK(Compo
         }
       }
     }
-    auto QSQScaleFactor = std::make_shared<DiscusData1D>(DiscusData1D{finalkValues, QSQIntegrals});
+    auto QSQScaleFactor = std::make_shared<DiscusData1D>(finalkValues, QSQIntegrals);
     SQWSMapping.QSQScaleFactor = QSQScaleFactor;
   }
 }

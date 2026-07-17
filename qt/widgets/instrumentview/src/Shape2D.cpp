@@ -837,8 +837,8 @@ void Shape2DSector::refit() {
     qreal xDiff = bRectBottomRight.x() - BBox.bottomRight().x();
     qreal yDiff = bRectBottomRight.y() - BBox.bottomRight().y();
 
-    m_center.setSharedX(m_center.x() + xDiff);
-    m_center.setSharedY(m_center.y() + yDiff);
+    m_center.setX(m_center.x() + xDiff);
+    m_center.setY(m_center.y() + yDiff);
     resetBoundingRect();
   }
 }
@@ -874,14 +874,14 @@ void Shape2DSector::computeScaling(const QPointF &BBoxCorner, const QPointF &BBo
   slope = QVector2D(BBoxCorner - BBoxOpposedCorner);
   xPos = (bRectCorner - BBoxCorner).x();
   yPos = slope.y() * xPos / slope.x(); // TODO : check if non zero
-  xProj.setSharedX(xPos);
-  xProj.setSharedY(yPos);
+  xProj.setX(xPos);
+  xProj.setY(yPos);
 
   yPos = (bRectCorner - BBoxCorner).y();
   xPos = slope.x() * yPos / slope.y();
 
-  yProj.setSharedX(xPos);
-  yProj.setSharedY(yPos);
+  yProj.setX(xPos);
+  yProj.setY(yPos);
 
   if (slope.x() != 0 && slope.y() != 0) {
     if (distanceBetween(xProj, QPointF(0, 0)) < distanceBetween(yProj, QPointF(0, 0))) {
@@ -907,8 +907,8 @@ void Shape2DSector::computeScaling(const QPointF &BBoxCorner, const QPointF &BBo
 
   m_innerRadius *= ratio;
   m_outerRadius = ratio != 0 ? m_outerRadius * ratio : 1e-4;
-  m_center.setSharedX((m_center.x() - BBoxOpposedCorner.x()) * ratio + BBoxOpposedCorner.x());
-  m_center.setSharedY((m_center.y() - BBoxOpposedCorner.y()) * ratio + BBoxOpposedCorner.y());
+  m_center.setX((m_center.x() - BBoxOpposedCorner.x()) * ratio + BBoxOpposedCorner.x());
+  m_center.setY((m_center.y() - BBoxOpposedCorner.y()) * ratio + BBoxOpposedCorner.y());
 }
 
 /**

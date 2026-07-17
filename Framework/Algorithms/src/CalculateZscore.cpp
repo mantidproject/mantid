@@ -66,8 +66,8 @@ void CalculateZscore::exec() {
   size_t sizey = inpWS->y(0).size();
 
   HistogramBuilder builder;
-  builder.setSharedX(sizex);
-  builder.setSharedY(sizey);
+  builder.setX(sizex);
+  builder.setY(sizey);
   builder.setDistribution(inpWS->isDistribution());
   Workspace2D_sptr outWS = create<Workspace2D>(numspec, builder.build());
 

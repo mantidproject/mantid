@@ -55,8 +55,8 @@ void FFTDerivative::execComplexFFT() {
   // possible edge effects.
 
   HistogramBuilder builder;
-  builder.setSharedX(nx + ny);
-  builder.setSharedY(ny + ny);
+  builder.setX(nx + ny);
+  builder.setY(ny + ny);
   builder.setDistribution(inWS->isDistribution());
   MatrixWorkspace_sptr copyWS = create<MatrixWorkspace>(*inWS, 1, builder.build());
 

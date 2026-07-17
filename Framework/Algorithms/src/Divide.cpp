@@ -121,8 +121,8 @@ void Divide::setOutputUnits(const API::MatrixWorkspace_const_sptr lhs, const API
 void Divide::performEventBinaryOperation(DataObjects::EventList &lhs, const DataObjects::EventList &rhs) {
   // We must histogram the rhs event list to divide.
   MantidVec rhsY, rhsE;
-  rhs.generateHistogram(rhs.x(), rhsY, rhsE);
-  lhs.divide(rhs.x(), rhsY, rhsE);
+  rhs.generateHistogram(rhs.x().rawData(), rhsY, rhsE);
+  lhs.divide(rhs.x().rawData(), rhsY, rhsE);
 }
 
 /** Carries out the binary operation IN-PLACE on a single EventList,

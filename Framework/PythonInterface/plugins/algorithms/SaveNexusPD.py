@@ -129,7 +129,7 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
         temp.attrs["longname"] = self.AXES_DICT[name]
 
         if writeDx:  # optional
-            arr = wksp.readDx(index)
+            arr = wksp.dx(index)
             if reverse:  # reverse the array
                 arr = arr[::-1]
 
@@ -258,7 +258,7 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
             nxinstrument = self._createInstrument(nxentry)
 
             for i in range(wksp.getNumberHistograms()):
-                writeDx = not np.all(wksp.readDx(i) == 0)
+                writeDx = not np.all(wksp.dx(i) == 0)
 
                 dataname = "spectrum_%d" % wksp.getSpectrum(i).getSpectrumNo()
 

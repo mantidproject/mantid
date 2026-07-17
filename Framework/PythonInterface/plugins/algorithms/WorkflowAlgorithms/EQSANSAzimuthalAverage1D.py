@@ -310,7 +310,7 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
 
         # Dq is not propagated by scale, so do it by hand
         # First, store Dq
-        dq = ws_frame1.readDx(0)
+        dq = ws_frame1.dx(0)
 
         alg = AlgorithmManager.create("Scale")
         alg.initialize()

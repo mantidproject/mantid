@@ -857,8 +857,8 @@ public:
     if (wsReloaded) {
       TS_ASSERT_EQUALS(wsReloaded->getNumberHistograms(), 2);
       // Verify bin edges from spectra 1 and 3 were saved, not 0 or 2
-      TS_ASSERT_EQUALS(wsReloaded->readX(0), ws->readX(1));
-      TS_ASSERT_EQUALS(wsReloaded->readX(1), ws->readX(3));
+      TS_ASSERT_EQUALS(wsReloaded->x(0).rawData(), ws->x(1).rawData());
+      TS_ASSERT_EQUALS(wsReloaded->x(1).rawData(), ws->x(3).rawData());
       // Verify events from spectra 1 and 3 were saved, not 0 or 2
       TS_ASSERT_EQUALS(wsReloaded->getSpectrum(0).getNumberEvents(), ws->getSpectrum(1).getNumberEvents());
       TS_ASSERT_EQUALS(wsReloaded->getSpectrum(1).getNumberEvents(), ws->getSpectrum(3).getNumberEvents());
@@ -949,8 +949,8 @@ public:
       Histogram_sptr rval = std::make_shared<Histogram>(Histogram::XMode::Points, Histogram::YMode::Counts);
       rval->resize(N_x); // resizes x: Points
       rval->setCounts(Counts(N_x));
-      rval->setCountStandardDevia->x(untSta->x(iations(N_x));
-->y(->y(
+      rval->setCountStandardDeviations(CountStandardDeviations(N_x));
+
       auto &vx = rval->mutableX();
       auto &vy = rval->mutableY();
       auto &ve = rval->mutableE();
@@ -999,8 +999,8 @@ public:
 
     // check the X and Y values
     for (std::size_t i = 0; i < ws->getNumberHistograms(); ++i) {
-      TS_ASSERT_EQUALS(wsReloaded->readX(i), ws->readX(i));
-      TS_ASSERT_EQUALS(wsReloaded->readY(i), ws->readY(i));
+      TS_ASSERT_EQUALS(wsReloaded->x(i), ws->x(i));
+      TS_ASSERT_EQUALS(wsReloaded->x(i), ws->x(i));
     }
 
     AnalysisDataService::Instance().remove("testSpace");

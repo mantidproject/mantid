@@ -381,8 +381,8 @@ V3D V3DFromHKLColumnExtractor::getHKLFromString(const std::string &hklString) co
   }
 
   V3D hkl;
-  hkl.setSharedX(boost::lexical_cast<double>(indicesStr[0]));
-  hkl.setSharedY(boost::lexical_cast<double>(indicesStr[1]));
+  hkl.setX(boost::lexical_cast<double>(indicesStr[0]));
+  hkl.setY(boost::lexical_cast<double>(indicesStr[1]));
   hkl.setZ(boost::lexical_cast<double>(indicesStr[2]));
 
   return hkl;

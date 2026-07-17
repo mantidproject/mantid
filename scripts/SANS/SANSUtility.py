@@ -1860,8 +1860,8 @@ def correct_q_resolution_for_merged(count_ws_front, count_ws_rear, output_ws, sc
     if not count_ws_rear.hasDx(0) or not count_ws_front.hasDx(0):
         return
 
-    q_resolution_front = count_ws_front.readDx(0)
-    q_resolution_rear = count_ws_rear.readDx(0)
+    q_resolution_front = count_ws_front.dx(0)
+    q_resolution_rear = count_ws_rear.dx(0)
     counts_front = count_ws_front.y(0)
     counts_rear = count_ws_rear.y(0)
 

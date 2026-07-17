@@ -113,7 +113,7 @@ public:
 
     auto &sampleX = SampleWS->x(0);
     auto &sampleY = SampleWS->y(0);
-    // const MantidVec & sampleE = SampleWS->e(0);
+    // Mantid::HistogramData::HistogramE const & sampleE = SampleWS->e(0);
     for (size_t i = 0; i < sampleY.size(); i++) {
       TS_ASSERT_DELTA(dataX[i], sampleX[i], 1.e-7);
       TS_ASSERT_DELTA(dataY[i], sampleY[i], 1.e-7);
@@ -142,7 +142,7 @@ public:
     auto &resultX = result->x(0);
     auto &resultY = result->y(0);
 
-    // const MantidVec & sampleE = SampleWS->e(0);
+    // Mantid::HistogramData::HistogramE const & sampleE = SampleWS->e(0);
     for (size_t i = 0; i < sampleY.size(); i++) {
       TS_ASSERT_DELTA(resultX[i], sampleX[i], 1.e-7);
       TS_ASSERT_DELTA(resultY[i], sampleY[i], 1.e-7);
@@ -171,7 +171,7 @@ public:
     auto &resultX = result->x(0);
     auto &resultY = result->y(0);
 
-    // const MantidVec & sampleE = SampleWS->e(0);
+    // Mantid::HistogramData::HistogramE const & sampleE = SampleWS->e(0);
     for (size_t i = 0; i < sampleY.size(); i++) {
       TS_ASSERT_DELTA(resultX[i], sampleX[i], 1.e-7);
       TS_ASSERT_DELTA(resultY[i], sampleY[i], 1.e-7);
@@ -215,7 +215,7 @@ public:
     auto &resY = result->y(0);
     auto &resE = result->e(0);
 
-    // const MantidVec & sampleE = SampleWS->e(0);
+    // Mantid::HistogramData::HistogramE const & sampleE = SampleWS->e(0);
     for (size_t i = 0; i < resY.size(); i++) {
       TS_ASSERT_DELTA(resY[i], 0, 1.e-7);
       TS_ASSERT_DELTA(resE[i], 1000., 1.e-3);

@@ -37,15 +37,17 @@ MatrixWorkspace_sptr EventWorkspaceHelpers::convertEventTo2D(const MatrixWorkspa
     outputW->getSpectrum(i).copyInfoFrom(inputW->getSpectrum(i));
     outputW->setSharedX(i, inputW->sharedX(i));
 
-    MantidVec &Yout = outputW->dataY(i);
-    const MantidVec &Yin = inputW->y(i);
-    for (size_t j = 0; j < numBins; j++)
+    Mantid::HistogramData::HistogramY &Yout = outputW->mutableY(i);
+    Mantid::HistogramData::HistogramY const &Yin = inputW->y(i);
+    for (size_t j = 0; j < numBins; j++) {
       Yout[j] = Yin[j];
+    }
 
-    MantidVec &Eout = outputW->dataE(i);
-    const MantidVec &Ein = inputW->e(i);
-    for (size_t j = 0; j < numBins; j++)
+    Mantid::HistogramData::HistogramE &Eout = outputW->mutableE(i);
+    Mantid::HistogramData::HistogramE const &Ein = inputW->e(i);
+    for (size_t j = 0; j < numBins; j++) {
       Eout[j] = Ein[j];
+    }
   }
 
   return outputW;

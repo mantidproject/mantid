@@ -563,13 +563,14 @@ public:
     const auto &inSpec = ew2->getSpectrum(0);
     const auto &inSpec300 = ew2->getSpectrum(300);
 
-    const MantidVec &data0 = inSpec.y();
-    const MantidVec &e300 = inSpec300.e();
+    Mantid::HistogramData::HistogramY const &data0 = inSpec.y();
+    Mantid::HistogramData::HistogramE const &e300 = inSpec300.e();
     TS_ASSERT_EQUALS(data0.size(), NUMBINS - 1);
 
     // Fill up the MRU to make data0 drop off
-    for (size_t i = 0; i < 200; i++)
-      MantidVec otherData = ew2->y(i);
+    for (size_t i = 0; i < 200; i++) {
+      auto const &otherData = ew2->y(i);
+    }
 
     // data0 and e300 are now invalid references!
     TS_ASSERT_DIFFERS(&data0, &inSpec.y());
@@ -666,9 +667,9 @@ public:
     EventWorkspace_sptr ew1 = WorkspaceCreationHelper::createEventWorkspace2(numpixels, 100);
     PARALLEL_FOR_IF(do_parallel)
     for (int i = 0; i < numpixels; i += 3) {
-      const MantidVec &Y = ew1->y(i);
+      Mantid::HistogramData::HistogramY const &Y = ew1->y(i);
       TS_ASSERT_DELTA(Y[0], 2.0, 1e-5);
-      const MantidVec &E = ew1->e(i);
+      Mantid::HistogramData::HistogramE const &E = ew1->e(i);
       TS_ASSERT_DELTA(E[0], M_SQRT2, 1e-5);
 
       // Vector with 10 bins, 10 wide
@@ -678,15 +679,15 @@ public:
       ew1->setSharedX(i, make_cow<HistogramX>(X));
 
       // Now it should be 20 in that spot
-      const MantidVec &Y_now = ew1->y(i);
+      Mantid::HistogramData::HistogramY const &Y_now = ew1->y(i);
       TS_ASSERT_DELTA(Y_now[0], 20.0, 1e-5);
-      const MantidVec &E_now = ew1->e(i);
+      Mantid::HistogramData::HistogramE const &E_now = ew1->e(i);
       TS_ASSERT_DELTA(E_now[0], sqrt(20.0), 1e-5);
 
       // But the other pixel is still 2.0
-      const MantidVec &Y_other = ew1->y(i + 1);
+      Mantid::HistogramData::HistogramY const &Y_other = ew1->y(i + 1);
       TS_ASSERT_DELTA(Y_other[0], 2.0, 1e-5);
-      const MantidVec &E_other = ew1->e(i + 1);
+      Mantid::HistogramData::HistogramE const &E_other = ew1->e(i + 1);
       TS_ASSERT_DELTA(E_other[0], M_SQRT2, 1e-5);
     }
     // suppress unused argument when built without openmp.

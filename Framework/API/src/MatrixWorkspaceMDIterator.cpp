@@ -90,8 +90,8 @@ inline void MatrixWorkspaceMDIterator::calcWorkspacePos(size_t newWI) {
   if (newWI != m_workspaceIndex) {
     m_workspaceIndex = newWI;
     // Copy the vectors. This is more thread-safe
-    m_X = m_ws->x(m_workspaceIndex);
-    m_Y = m_ws->y(m_workspaceIndex);
+    m_X = m_ws->x(m_workspaceIndex).rawData();
+    m_Y = m_ws->y(m_workspaceIndex).rawData();
     m_errorIsCached = false;
     m_center[1] = m_dimY->getX(m_workspaceIndex);
 
@@ -192,7 +192,7 @@ signal_t MatrixWorkspaceMDIterator::getSignal() const { return m_Y[m_xIndex]; }
 /// Returns the error for this box, same as innerError
 signal_t MatrixWorkspaceMDIterator::getError() const {
   if (!m_errorIsCached) {
-    m_E = m_ws->e(m_workspaceIndex);
+    m_E = m_ws->e(m_workspaceIndex).rawData();
     m_errorIsCached = true;
   }
 

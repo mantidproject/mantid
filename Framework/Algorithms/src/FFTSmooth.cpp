@@ -57,8 +57,8 @@ void FFTSmooth::exec() {
   auto dn = static_cast<int>(m_inWS->y(0).size());
 
   HistogramBuilder builder;
-  builder.setSharedX(m_inWS->x(0).size() + dn);
-  builder.setSharedY(m_inWS->y(0).size() + dn);
+  builder.setX(m_inWS->x(0).size() + dn);
+  builder.setY(m_inWS->y(0).size() + dn);
   builder.setDistribution(m_inWS->isDistribution());
   API::MatrixWorkspace_sptr symmWS = create<Workspace2D>(*m_inWS, 1, builder.build());
 
@@ -120,8 +120,8 @@ void FFTSmooth::exec() {
   API::MatrixWorkspace_sptr tmpWS = fft->getProperty("OutputWorkspace");
 
   // Create output
-  builder.setSharedX(m_inWS->x(0).size());
-  builder.setSharedY(m_inWS->y(0).size());
+  builder.setX(m_inWS->x(0).size());
+  builder.setY(m_inWS->y(0).size());
   builder.setDistribution(m_inWS->isDistribution());
   API::MatrixWorkspace_sptr outWS = create<MatrixWorkspace>(*m_inWS, 1, builder.build());
 
@@ -146,8 +146,8 @@ void FFTSmooth::truncate(int n) {
     ny = 1;
   int nx = m_unfilteredWS->isHistogramData() ? ny + 1 : ny;
   HistogramBuilder builder;
-  builder.setSharedX(nx);
-  builder.setSharedY(ny);
+  builder.setX(nx);
+  builder.setY(ny);
   builder.setDistribution(m_unfilteredWS->isDistribution());
   m_filteredWS = create<MatrixWorkspace>(*m_unfilteredWS, 2, builder.build());
 
@@ -182,8 +182,8 @@ void FFTSmooth::zero(int n) {
     ny = 1;
 
   HistogramBuilder builder;
-  builder.setSharedX(mx);
-  builder.setSharedY(my);
+  builder.setX(mx);
+  builder.setY(my);
   builder.setDistribution(m_unfilteredWS->isDistribution());
   m_filteredWS = create<MatrixWorkspace>(*m_unfilteredWS, 2, builder.build());
 

@@ -678,7 +678,7 @@ public:
       TS_ASSERT(!alg.isExecuted());
       return WorkspaceGroup_sptr();
     }
-    TS_ASSERT(alg.isExec->y(
+    TS_ASSERT(alg.isExecuted())
     Workspace_sptr out1 = AnalysisDataService::Instance().retrieve("D");
     WorkspaceGroup_sptr group = std::dynamic_pointer_cast<WorkspaceGroup>(out1);
 
@@ -691,7 +691,7 @@ public:
       return group;
     ws2 = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(1));
     if (group->getNumberOfEntries() < 3)
-      return group;->y(
+      return group;
     ws3 = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(2));
     return group;
   }
@@ -704,10 +704,10 @@ public:
   /// All groups are the same size
   void test_processGroups_allSameSize() {
     WorkspaceGroup_sptr group = do_test_groups("A", "A_1,A_2,A_3", "B", "B_1,B_2,B_3", "C", "C_1,C_2,C_3");
-->y(
+
     TS_ASSERT_EQUALS(ws1->getName(), "D_1");
     TS_ASSERT_EQUALS(ws1->getTitle(), "A_1+B_1+C_1");
-    TS_ASSERT_EQUALS(ws1->readY(0)[0], 234);
+    TS_ASSERT_EQUALS(ws1->y(0)[0], 234);
     TS_ASSERT_EQUALS(ws2->getName(), "D_2");
     TS_ASSERT_EQUALS(ws2->getTitle(), "A_2+B_2+C_2");
     TS_ASSERT_EQUALS(ws3->getName(), "D_3");
@@ -717,10 +717,10 @@ public:
   /// All groups are the same size, but they don't all match the rigid naming
   void test_processGroups_allSameSize_namesNotSimilar() {
     WorkspaceGroup_sptr group = do_test_groups("A", "A_1,A_2,A_3", "B", "B_1,B_2,B_3", "C", "alice,bob,charlie");
-->y(
+
     TS_ASSERT_EQUALS(ws1->getName(), "A_1_B_1_alice_D");
     TS_ASSERT_EQUALS(ws1->getTitle(), "A_1+B_1+alice");
-    TS_ASSERT_EQUALS(ws1->readY(0)[0], 234);
+    TS_ASSERT_EQUALS(ws1->y(0)[0], 234);
     TS_ASSERT_EQUALS(ws2->getName(), "A_2_B_2_bob_D");
     TS_ASSERT_EQUALS(ws2->getTitle(), "A_2+B_2+bob");
     TS_ASSERT_EQUALS(ws3->getName(), "A_3_B_3_charlie_D");
@@ -730,10 +730,10 @@ public:
   /// One input is a group, rest are singles
   void test_processGroups_onlyOneGroup() {
     WorkspaceGroup_sptr group = do_test_groups("A", "A_1,A_2,A_3", "B", "", "C", "");
-->y(
+
     TS_ASSERT_EQUALS(ws1->getName(), "D_1");
     TS_ASSERT_EQUALS(ws1->getTitle(), "A_1+B+C");
-    TS_ASSERT_EQUALS(ws1->readY(0)[0], 234);
+    TS_ASSERT_EQUALS(ws1->y(0)[0], 234);
     TS_ASSERT_EQUALS(ws2->getName(), "D_2");
     TS_ASSERT_EQUALS(ws2->getTitle(), "A_2+B+C");
     TS_ASSERT_EQUALS(ws3->getName(), "D_3");
@@ -743,23 +743,23 @@ public:
   /// One optional WorkspaceProperty is not specified
   void test_processGroups_optionalInput() {
     WorkspaceGroup_sptr group = do_test_groups("A", "A_1,A_2,A_3", "B", "", "", "");
-->y(
+
     TS_ASSERT_EQUALS(ws1->getName(), "D_1");
     TS_ASSERT_EQUALS(ws1->getTitle(), "A_1+B+");
-    TS_ASSERT_EQUALS(ws1->readY(0)[0], 234);
+    TS_ASSERT_EQUALS(ws1->y(0)[0], 234);
     TS_ASSERT_EQUALS(ws2->getName(), "D_2");
     TS_ASSERT_EQUALS(ws2->getTitle(), "A_2+B+");
     TS_ASSERT_EQUALS(ws3->getName(), "D_3");
     TS_ASSERT_EQUALS(ws3->getTitle(), "A_3+B+");
   }
-->y(
+
   /// One optional WorkspaceProperty is not specified
   void test_processGroups_twoGroups_and_optionalInput() {
     WorkspaceGroup_sptr group = do_test_groups("A", "A_1,A_2,A_3", "", "", "C", "C_1,C_2,C_3");
 
     TS_ASSERT_EQUALS(ws1->getName(), "D_1");
     TS_ASSERT_EQUALS(ws1->getTitle(), "A_1++C_1");
-    TS_ASSERT_EQUALS(ws1->readY(0)[0], 234);
+    TS_ASSERT_EQUALS(ws1->y(0)[0], 234);
     TS_ASSERT_EQUALS(ws2->getName(), "D_2");
     TS_ASSERT_EQUALS(ws2->getTitle(), "A_2++C_2");
     TS_ASSERT_EQUALS(ws3->getName(), "D_3");
@@ -772,7 +772,7 @@ public:
 
     TS_ASSERT_EQUALS(ws1->getName(), "D_1");
     TS_ASSERT_EQUALS(ws1->getTitle(), "A_1+B+C");
-    TS_ASSERT_EQUALS(ws1->readY(0)[0], 234);
+    TS_ASSERT_EQUALS(ws1->y(0)[0], 234);
   }
 
   /// Two inputs are groups with one member (each)
@@ -781,8 +781,8 @@ public:
 
     TS_ASSERT_EQUALS(ws1->getName(), "D_1");
     TS_ASSERT_EQUALS(ws1->getTitle(), "A_1+B_1+C");
-    TS_ASSERT_EQUALS(ws1->readY(0)[0], 234);
-  }->y(
+    TS_ASSERT_EQUALS(ws1->y(0)[0], 234);
+  }
 
   void test_processGroups_failOnGroupMemberErrorMessage() {
     makeWorkspaceGroup("A", "A_1,A_2,A_3");
@@ -795,7 +795,7 @@ public:
     alg.setPropertyValue("WsNameToFail", "A_2");
 
     try {
-      alg.execute();->y(
+      alg.execute();
       TS_FAIL("Exception wasn't thrown");
     } catch (std::runtime_error &e) {
       std::string msg(e.what());
@@ -808,10 +808,10 @@ public:
   /// Rewrite first input group
   void test_processGroups_rewriteFirstGroup() {
     WorkspaceGroup_sptr group = do_test_groups("D", "D1,D2,D3", "B", "B1,B2,B3", "C", "C1,C2,C3");
-->y(
+
     TS_ASSERT_EQUALS(ws1->getName(), "D1");
     TS_ASSERT_EQUALS(ws1->getTitle(), "D1+B1+C1");
-    TS_ASSERT_EQUALS(ws1->readY(0)[0], 234);
+    TS_ASSERT_EQUALS(ws1->y(0)[0], 234);
     TS_ASSERT_EQUALS(ws2->getName(), "D2");
     TS_ASSERT_EQUALS(ws2->getTitle(), "D2+B2+C2");
     TS_ASSERT_EQUALS(ws3->getName(), "D3");
@@ -824,7 +824,7 @@ public:
 
     TS_ASSERT_EQUALS(ws1->getName(), "D1");
     TS_ASSERT_EQUALS(ws1->getTitle(), "A1+D1+C1");
-    TS_ASSERT_EQUALS(ws1->readY(0)[0], 234);
+    TS_ASSERT_EQUALS(ws1->y(0)[0], 234);
     TS_ASSERT_EQUALS(ws2->getName(), "D2");
     TS_ASSERT_EQUALS(ws2->getTitle(), "A2+D2+C2");
     TS_ASSERT_EQUALS(ws3->getName(), "D3");
@@ -837,7 +837,7 @@ public:
 
     TS_ASSERT_EQUALS(ws1->getName(), "D1");
     TS_ASSERT_EQUALS(ws1->getTitle(), "A1+D1+D1");
-    TS_ASSERT_EQUALS(ws1->readY(0)[0], 234);
+    TS_ASSERT_EQUALS(ws1->y(0)[0], 234);
     TS_ASSERT_EQUALS(ws2->getName(), "D2");
     TS_ASSERT_EQUALS(ws2->getTitle(), "A2+D2+D2");
     TS_ASSERT_EQUALS(ws3->getName(), "D3");

@@ -183,7 +183,7 @@ double DiffractionEventCalibrateDetectors::intensity(double x, double y, double 
   g_log.debug() << tim << " to Rebin\n";
 
   // Find point of peak centre
-  const MantidVec &yValues = outputW->y(0);
+  Mantid::HistogramData::HistogramY const &yValues = outputW->y(0);
   auto it = std::max_element(yValues.begin(), yValues.end());
   double peakHeight = *it;
   if (peakHeight == 0)

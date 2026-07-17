@@ -21,24 +21,24 @@ public:
 
   void test_missing_x_failure() {
     HistogramBuilder builder;
-    builder.setSharedY(5);
+    builder.setY(5);
     TS_ASSERT_THROWS_EQUALS(builder.build(), const std::runtime_error &e, std::string(e.what()),
                             "HistogramBuilder: No X data has been set");
   }
 
   void test_missing_y_failure() {
     HistogramBuilder builder;
-    builder.setSharedX(5);
+    builder.setX(5);
     TS_ASSERT_THROWS_EQUALS(builder.build(), const std::runtime_error &e, std::string(e.what()),
                             "HistogramBuilder: No Y data has been set");
   }
 
   void test_size_failures() {
     HistogramBuilder builder;
-    builder.setSharedX(5);
-    builder.setSharedY(3);
+    builder.setX(5);
+    builder.setY(3);
     TS_ASSERT_THROWS(builder.build(), const std::logic_error &);
-    builder.setSharedY(6);
+    builder.setY(6);
     TS_ASSERT_THROWS(builder.build(), const std::logic_error &);
     builder.setDx(3);
     TS_ASSERT_THROWS(builder.build(), const std::logic_error &);
@@ -46,8 +46,8 @@ public:
 
   void test_build_from_size() {
     HistogramBuilder builder;
-    builder.setSharedX(5);
-    builder.setSharedY(5);
+    builder.setX(5);
+    builder.setY(5);
     const auto hist = builder.build();
     TS_ASSERT_EQUALS(hist.x().size(), 5);
     TS_ASSERT_EQUALS(hist.y().size(), 5);
@@ -57,8 +57,8 @@ public:
 
   void test_build_from_size_distribution() {
     HistogramBuilder builder;
-    builder.setSharedX(5);
-    builder.setSharedY(5);
+    builder.setX(5);
+    builder.setY(5);
     builder.setDistribution(true);
     const auto hist = builder.build();
     TS_ASSERT_EQUALS(hist.x().size(), 5);
@@ -69,8 +69,8 @@ public:
 
   void test_build_Dx() {
     HistogramBuilder builder;
-    builder.setSharedX(5);
-    builder.setSharedY(5);
+    builder.setX(5);
+    builder.setY(5);
     builder.setDx(5);
     const auto hist = builder.build();
     TS_ASSERT_EQUALS(hist.x().size(), 5);
@@ -81,8 +81,8 @@ public:
 
   void test_build_Dx_with_bin_edges() {
     HistogramBuilder builder;
-    builder.setSharedX(5);
-    builder.setSharedY(4);
+    builder.setX(5);
+    builder.setY(4);
     builder.setDx(4);
     const auto hist = builder.build();
     TS_ASSERT_EQUALS(hist.x().size(), 5);

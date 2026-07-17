@@ -390,13 +390,13 @@ void SpecialWorkspace2D::copyFrom(std::shared_ptr<const SpecialWorkspace2D> sour
   for (size_t ispec = 0; ispec < this->getNumberHistograms(); ispec++) {
 
     // 1.1 Check size
-    const MantidVec &inx = sourcews->x(ispec);
-    const MantidVec &iny = sourcews->y(ispec);
-    const MantidVec &ine = sourcews->e(ispec);
+    Mantid::HistogramData::HistogramX const &inx = sourcews->x(ispec);
+    Mantid::HistogramData::HistogramY const &iny = sourcews->y(ispec);
+    Mantid::HistogramData::HistogramE const &ine = sourcews->e(ispec);
 
-    MantidVec &outx = this->dataX(ispec);
-    MantidVec &outy = this->dataY(ispec);
-    MantidVec &oute = this->dataE(ispec);
+    Mantid::HistogramData::HistogramX &outx = this->mutableX(ispec);
+    Mantid::HistogramData::HistogramY &outy = this->mutableY(ispec);
+    Mantid::HistogramData::HistogramE &oute = this->mutableE(ispec);
 
     if (inx.size() != outx.size() || iny.size() != outy.size() || ine.size() != oute.size()) {
       throw std::invalid_argument("X, Y, E size different within spectrum");

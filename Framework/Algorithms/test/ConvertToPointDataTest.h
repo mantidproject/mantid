@@ -71,9 +71,9 @@ public:
 
     TS_ASSERT_EQUALS(outputWS->isHistogramData(), false);
     for (int i = 0; i < numSpectra; ++i) {
-      const Mantid::MantidVec &yValues = outputWS->y(i);
-      const Mantid::MantidVec &xValues = outputWS->x(i);
-      const Mantid::MantidVec &eValues = outputWS->e(i);
+      auto const &yValues = outputWS->y(i);
+      auto const &xValues = outputWS->x(i);
+      auto const &eValues = outputWS->e(i);
 
       // The X size should be now equal to the number of bins
       TS_ASSERT_EQUALS(xValues.size(), numBins);
@@ -116,9 +116,9 @@ public:
 
     TS_ASSERT_EQUALS(outputWS->isHistogramData(), false);
     for (int i = 0; i < numSpectra; ++i) {
-      const Mantid::MantidVec &yValues = outputWS->y(i);
-      const Mantid::MantidVec &xValues = outputWS->x(i);
-      const Mantid::MantidVec &eValues = outputWS->e(i);
+      auto const &yValues = outputWS->y(i);
+      auto const &xValues = outputWS->x(i);
+      auto const &eValues = outputWS->e(i);
 
       // The X size should be now equal to the number of bins
       TS_ASSERT_EQUALS(xValues.size(), numBins);
@@ -180,10 +180,10 @@ public:
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 2);
 
     // check the data
-    const Mantid::MantidVec &Y0 = outputWS->y(0);
-    const Mantid::MantidVec &X0 = outputWS->x(0);
-    const Mantid::MantidVec &Y1 = outputWS->y(1);
-    const Mantid::MantidVec &X1 = outputWS->x(1);
+    auto const &Y0 = outputWS->y(0);
+    auto const &X0 = outputWS->x(0);
+    auto const &Y1 = outputWS->y(1);
+    auto const &X1 = outputWS->x(1);
     TS_ASSERT_EQUALS(Y0.size(), 3);
     TS_ASSERT_EQUALS(X0.size(), 3);
     TS_ASSERT_EQUALS(Y1.size(), 2);

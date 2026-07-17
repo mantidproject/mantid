@@ -713,7 +713,7 @@ public:
 
       // Make the histogram we are multiplying.
       MantidVec Y, E;
-      MantidVec X = this->makeX(BIN_DELTA, 10);
+      auto const &X = this->makeX(BIN_DELTA, 10);
       el.generateHistogram(X, Y, E);
 
       for (std::size_t i = 0; i < Y.size(); i++) {
@@ -735,7 +735,7 @@ public:
 
       // Make the histogram we are multiplying.
       MantidVec Y, E;
-      MantidVec X = this->makeX(BIN_DELTA, 10);
+      auto const &X = this->makeX(BIN_DELTA, 10);
       el.generateHistogram(X, Y, E);
 
       for (std::size_t i = 0; i < Y.size(); i++) {
@@ -756,7 +756,7 @@ public:
 
       // Make the histogram we are multiplying.
       MantidVec Y, E;
-      MantidVec X = this->makeX(BIN_DELTA);
+      auto const &X = this->makeX(BIN_DELTA);
       el.generateHistogram(X, Y, E);
 
       for (std::size_t i = 0; i < Y.size(); i++) {
@@ -775,7 +775,7 @@ public:
       // Multiply with an error
       TS_ASSERT_THROWS_NOTHING(el.multiply(2.0, M_SQRT2));
       MantidVec Y, E;
-      MantidVec X = this->makeX(BIN_DELTA);
+      auto const &X = this->makeX(BIN_DELTA);
       el.generateHistogram(X, Y, E);
 
       for (std::size_t i = 0; i < Y.size(); i++) {
@@ -935,7 +935,7 @@ public:
     // Now do set up an X axis.
     this->test_setX();
     const EventList el3(el);
-    MantidVec X = el3.x();
+    auto const &X = el3.x();
     boost::scoped_ptr<MantidVec> Y3(el3.makeDataY());
     // Histogram is 0, since I cleared all the events
     for (std::size_t i = 0; i < X.size() - 1; i++) {
@@ -962,7 +962,7 @@ public:
       this->test_setX();       // Set it up
       const EventList el3(el); // need to copy to a const method in order to
                                // access the data directly.
-      MantidVec X = el3.x();
+      auto const &X = el3.x();
       boost::scoped_ptr<MantidVec> Y(el3.makeDataY());
       boost::scoped_ptr<MantidVec> E(el3.makeDataE());
       TS_ASSERT_EQUALS(Y->size(), X.size() - 1);
@@ -990,7 +990,7 @@ public:
     // Do we have the same data in X?
     TS_ASSERT(eList.x() == shared_x);
 
-    MantidVec X = eList.x();
+    auto const &X = eList.x().rawData();
     MantidVec Y;
     MantidVec E;
 
@@ -1023,7 +1023,7 @@ public:
     // Do we have the same data in X?
     TS_ASSERT(eList.x() == shared_x);
 
-    MantidVec X = eList.x();
+    auto const &X = eList.x().rawData();
     MantidVec Y;
     MantidVec E;
 
@@ -1045,7 +1045,7 @@ public:
     // Do we have the same data in X?
     TS_ASSERT(eList.x() == shared_x);
 
-    MantidVec X = eList.x();
+    auto const &X = eList.x().rawData();
     MantidVec Y;
     MantidVec E;
 
@@ -1101,7 +1101,7 @@ public:
     // Do we have the same data in X?
     TS_ASSERT(el.x() == shared_x);
 
-    MantidVec X = el.x();
+    auto const &X = el.x().rawData();
     MantidVec Y;
     MantidVec E;
 
@@ -1151,7 +1151,7 @@ public:
 
     const EventList el3(el); // need to copy to a const method in order to
                              // access the data directly.
-    MantidVec X = el3.x();
+    auto const &X = el3.x();
     boost::scoped_ptr<MantidVec> Y(el3.makeDataY());
     boost::scoped_ptr<MantidVec> E(el3.makeDataE());
     TS_ASSERT_EQUALS(Y->size(), X.size() - 1);
@@ -1171,7 +1171,7 @@ public:
     this->test_setX();       // Set it up
     const EventList el3(el); // need to copy to a const method in order to
                              // access the data directly.
-    MantidVec X = el3.x();
+    auto const &X = el3.x();
     boost::scoped_ptr<MantidVec> Y(el3.makeDataY());
     boost::scoped_ptr<MantidVec> E(el3.makeDataE());
     TS_ASSERT_EQUALS(Y->size(), X.size() - 1);
@@ -1198,7 +1198,7 @@ public:
     // Get them back
     const EventList el3(el); // need to copy to a const method in order to
                              // access the data directly.
-    MantidVec X = el3.x();
+    auto const &X = el3.x();
     boost::scoped_ptr<MantidVec> Y(el3.makeDataY());
     TS_ASSERT_EQUALS(Y->size(), X.size() - 1);
 
@@ -1219,7 +1219,7 @@ public:
     el.setSharedX(make_cow<HistogramX>(shared_x));
     const EventList el3(el); // need to copy to a const method in order to
                              // access the data directly.
-    MantidVec X = el3.x();
+    auto const &X = el3.x();
     boost::scoped_ptr<MantidVec> Y(el3.makeDataY());
     TS_ASSERT_EQUALS(Y->size(), X.size() - 1);
     for (std::size_t i = 0; i < Y->size(); i++) {
@@ -1231,7 +1231,7 @@ public:
     this->fake_data();
     this->test_setX();
     const EventList el3(el);
-    MantidVec X = el3.x();
+    auto const &X = el3.x();
     boost::scoped_ptr<MantidVec> Y(el3.makeDataY());
     TS_ASSERT_EQUALS(Y->size(), X.size() - 1);
     for (std::size_t i = 0; i < X.size() - 1; i++) {
@@ -1271,7 +1271,7 @@ public:
   //  {
   //    std::vector<WeightedEvent> events;
   //    events.emplace_back(WeightedEvent(1.0, 0, 2.0, 16.0) );
-  //    MantidVec X, Y, E;
+  //    auto const &X, Y, E;
   //    X.emplace_back(0.0);
   //    X.emplace_back(10.0);
   //    EventList::histogramForWeightsHelper(events, X, Y, E);
@@ -2698,9 +2698,9 @@ public:
   void test_readYE_throws_without_MRU() {
     const EventList el;
     TS_ASSERT_THROWS(el.y(), const std::runtime_error &);
-    TS_ASSERT_THROWS(el.dataY(), const std::runtime_error &);
+    TS_ASSERT_THROWS(el.mutableY(), const std::runtime_error &);
     TS_ASSERT_THROWS(el.e(), const std::runtime_error &);
-    TS_ASSERT_THROWS(el.dataE(), const std::runtime_error &);
+    TS_ASSERT_THROWS(el.mutableE(), const std::runtime_error &);
   }
 
   void test_counts_works_without_MRU() {

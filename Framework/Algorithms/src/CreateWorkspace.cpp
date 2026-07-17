@@ -142,15 +142,15 @@ void CreateWorkspace::exec() {
   std::size_t xSize{dataX.size()};
   HistogramBuilder histogramBuilder;
   if (commonX) {
-    histogramBuilder.setSharedX(dataX);
+    histogramBuilder.setX(dataX);
   } else {
     if (xSize % nSpec != 0) {
       throw std::invalid_argument("Length of DataX must be divisible by NSpec");
     }
     xSize /= nSpec;
-    histogramBuilder.setSharedX(xSize);
+    histogramBuilder.setX(xSize);
   }
-  histogramBuilder.setSharedY(ySize);
+  histogramBuilder.setY(ySize);
 
   if (!dX.empty()) {
     if (dX.size() != dataY.size())

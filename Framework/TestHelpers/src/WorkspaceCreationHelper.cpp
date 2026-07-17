@@ -326,15 +326,15 @@ MatrixWorkspace_sptr create2DWorkspaceRagged(int version) {
   }
 
   Mantid::HistogramData::HistogramBuilder builder;
-  builder.setSharedX(x_data);
-  builder.setSharedY(y_data);
-  builder.setSharedE(e_data);
+  builder.setX(x_data);
+  builder.setY(y_data);
+  builder.setE(e_data);
   raggedWS->setHistogram(0, builder.build());
 
   Mantid::HistogramData::HistogramBuilder builder2;
-  builder2.setSharedX(x_data2);
-  builder2.setSharedY(y_data2);
-  builder2.setSharedE(e_data2);
+  builder2.setX(x_data2);
+  builder2.setY(y_data2);
+  builder2.setE(e_data2);
   raggedWS->setHistogram(1, builder2.build());
 
   return raggedWS;

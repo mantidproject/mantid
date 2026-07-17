@@ -62,9 +62,7 @@ public:
   bool isError() const { return readE().empty(); }
 
   /// Gets the memory size of the histogram
-  size_t getMemorySize() const override {
-    return ((readX().size() + readY().size() + readE().size()) * sizeof(double));
-  }
+  size_t getMemorySize() const override { return ((x().size() + y().size() + e().size()) * sizeof(double)); }
 
 private:
   using ISpectrum::copyDataInto;

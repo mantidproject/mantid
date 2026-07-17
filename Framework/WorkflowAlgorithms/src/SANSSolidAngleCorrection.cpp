@@ -38,7 +38,7 @@ static double getYTubeAngle(const SpectrumInfo &spectrumInfo, size_t i) {
 
   // Get the projection of that vector on the X-Z plane
   V3D inPlane = V3D(sampleDetVec);
-  inPlane.setSharedY(0.0);
+  inPlane.setY(0.0);
 
   // This is the angle between the sample-to-detector vector
   // and its project on the X-Z plane.

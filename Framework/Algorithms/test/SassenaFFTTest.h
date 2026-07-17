@@ -103,9 +103,8 @@ private:
   void checkHeight(DataObjects::Workspace2D_const_sptr &ws, const double &value, const double &exponentFactor) {
     const double frErr = 1E-03; // allowed fractional error
     const size_t nspectra = ws->getNumberHistograms();
-    MantidVec yv;
     for (size_t i = 0; i < nspectra; i++) {
-      yv = ws->y(i);
+      auto const &yv = ws->y(i);
       size_t index = nbins / 2; // This position should yield ws->x(i).at(index)==0.0
       double x = ws->x(i).at(index);
       double h = yv.at(index) * exp(exponentFactor * x); // remove the quantum-correction from ws
@@ -126,17 +125,16 @@ private:
   void checkAverage(DataObjects::Workspace2D_const_sptr &ws, const double &value, const double &exponentFactor) {
     const double frErr = 1E-03; // allowed fractional error
     const size_t nspectra = ws->getNumberHistograms();
-    MantidVec yv, xv;
     double factor; // remove the detailed balance condition
     for (size_t i = 0; i < nspectra; i++) {
       double goldStandard =
           (1 + static_cast<double>(i)) * value; // recall each spectra was created with a different stdev
-      xv = ws->x(i);
-      yv = ws->y(i);
+      auto const &xv = ws->x(i);
+      auto const &yv = ws->y(i);
       double sum = 0.0;
       double average = 0.0;
-      MantidVec::iterator itx = xv.begin();
-      for (double &y : yv) {
+      auto itx = xv.begin();
+      for (double const &y : yv) {
         factor = exp(exponentFactor * (*itx));
         sum += y * factor;
         average += y * (*itx) * factor;
@@ -159,20 +157,19 @@ private:
   void checkSigma(DataObjects::Workspace2D_const_sptr &ws, const double &value, const double &exponentFactor) {
     const double frErr = 1E-03; // allowed fractional error
     const size_t nspectra = ws->getNumberHistograms();
-    MantidVec yv, xv;
     for (size_t i = 0; i < nspectra; i++) {
       double goldStandard =
           ps2meV * (1 + static_cast<double>(i)) * value; // recall each spectra was created with a different stdev
       double dx = (-2.0) * ws->x(i).at(0);               // extent along the X-axis
-      yv = ws->y(i);
+      auto const &yv = ws->y(i);
       size_t index = nbins / 2; // This position should yield ws->x(i).at(index)==0.0
       double x = ws->x(i).at(index);
       double factor = exp(exponentFactor * x);
       double h = yv.at(index) * exp(x);
-      xv = ws->x(i);
-      MantidVec::iterator itx = xv.begin();
+      auto const &xv = ws->x(i);
+      auto itx = xv.begin();
       double sum = 0.0;
-      for (double &y : yv) {
+      for (double const &y : yv) {
         factor = exp(exponentFactor * (*itx));
         sum += y * factor;
         ++itx;

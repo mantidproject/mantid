@@ -585,7 +585,7 @@ public:
     h.setCounts(0);
     auto &y = h.y();
     auto old_address = &y;
-    h.setPoints(y);
+    h.setCounts(y);
     TS_ASSERT_EQUALS(&h.y(), old_address);
   }
 

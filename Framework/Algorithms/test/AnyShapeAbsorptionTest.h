@@ -129,7 +129,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
                                  AnalysisDataService::Instance().retrieve(outputWS)));
     // These should be somewhat close to one another (within a couple of %)
-    Mantid::MantidVec y0 = result->y(0);
+    auto const &y0 = result->y(0);
     TS_ASSERT_DELTA(y0.front() / cylws->y(0).front(), 1.0, 0.02);
     TS_ASSERT_DELTA(y0[4] / cylws->y(0)[4], 1.0, 0.02);
     TS_ASSERT_DELTA(y0[7] / cylws->y(0)[7], 1.0, 0.02);

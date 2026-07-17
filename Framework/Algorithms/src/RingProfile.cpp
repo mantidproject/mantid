@@ -316,7 +316,7 @@ void RingProfile::checkInputsForNumericWorkspace(const API::MatrixWorkspace_sptr
   // and the last value.
 
   // check that centre is inside the range available for the instrument
-  const MantidVec &refX = inputWS->x(inputWS->getNumberHistograms() / 2);
+  Mantid::HistogramData::HistogramX const &refX = inputWS->x(inputWS->getNumberHistograms() / 2);
   // get the limits of the axis 0 (X)
   double min_v_x, max_v_x;
   min_v_x = std::min(refX[0], refX.back());

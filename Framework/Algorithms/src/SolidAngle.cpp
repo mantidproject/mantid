@@ -68,12 +68,12 @@ private:
 
 struct AlphaAngleVertical : public AlphaAngleCalculator {
   using AlphaAngleCalculator::AlphaAngleCalculator;
-  void project(V3D &v) const override { v.setSharedY(0.0); }
+  void project(V3D &v) const override { v.setY(0.0); }
 };
 
 struct AlphaAngleHorizontal : public AlphaAngleCalculator {
   using AlphaAngleCalculator::AlphaAngleCalculator;
-  void project(V3D &v) const override { v.setSharedX(0.0); }
+  void project(V3D &v) const override { v.setX(0.0); }
 };
 
 /**

@@ -110,7 +110,7 @@ MatrixWorkspace_sptr medianWorkspaceLocal(const MatrixWorkspace_sptr &ws) {
   for (int i = 0; i < static_cast<int>(nSpectra); ++i) {
     const size_t wsIndex = static_cast<size_t>(i);
     auto &y = out->mutableY(wsIndex);
-    y = std::vector<double>(1, median(ws->y(wsIndex)));
+    y = std::vector<double>(1, median(ws->y(wsIndex).rawData()));
   }
   return out;
 }

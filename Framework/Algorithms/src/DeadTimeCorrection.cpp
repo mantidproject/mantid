@@ -140,7 +140,7 @@ void DeadTimeCorrection::exec() {
         errors *= correction[0];
       } else {
         spectrum *= correction;
-        errors *= correction;
+        errors *= correction.rawData();
       }
     }
     PARALLEL_END_INTERRUPT_REGION

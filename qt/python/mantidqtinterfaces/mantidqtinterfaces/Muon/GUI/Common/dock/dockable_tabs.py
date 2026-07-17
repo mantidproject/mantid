@@ -253,8 +253,8 @@ class DetachableTabWidget(QtWidgets.QTabWidget):
             if event.button() == QtCore.Qt.LeftButton:
                 self.drag_start_pos = event.pos()
 
-            self.drag_end_pos.setSharedX(0)
-            self.drag_end_pos.setSharedY(0)
+            self.drag_end_pos.setX(0)
+            self.drag_end_pos.setY(0)
 
             self.drag_initiated = False
 

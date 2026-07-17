@@ -51,19 +51,19 @@ public:
     const MatrixWorkspace_const_sptr outWS = runAlgorithm(alg, inWS);
 
     // specific checks
-    const MantidVec &outX = outWS->x(0);
+    Mantid::HistogramData::HistogramX const &outX = outWS->x(0);
     TS_ASSERT_EQUALS(outX.size(), 3);
     TS_ASSERT_DELTA(outX[0], -1.0, 1e-6);
     TS_ASSERT_DELTA(outX[1], 0.0, 1e-6);
     TS_ASSERT_DELTA(outX[2], 1.0, 1e-6);
 
-    const MantidVec &outY0 = outWS->y(0);
+    Mantid::HistogramData::HistogramY const &outY0 = outWS->y(0);
     TS_ASSERT_EQUALS(outY0.size(), 3);
     TS_ASSERT_DELTA(outY0[0], -0.018902, 1e-6);
     TS_ASSERT_DELTA(outY0[1], 1.0, 1e-6);
     TS_ASSERT_DELTA(outY0[2], -0.018902, 1e-6);
 
-    const MantidVec &outY1 = outWS->y(1);
+    Mantid::HistogramData::HistogramY const &outY1 = outWS->y(1);
     TS_ASSERT_EQUALS(outY1.size(), 3);
     TS_ASSERT_DELTA(outY1[0], -0.681363, 1e-6);
     TS_ASSERT_DELTA(outY1[1], 0.168384, 1e-6);
@@ -89,19 +89,19 @@ public:
     const MatrixWorkspace_const_sptr outWS = runAlgorithm(alg, inWS);
 
     // Specific checks
-    const MantidVec &outX = outWS->x(0);
+    Mantid::HistogramData::HistogramX const &outX = outWS->x(0);
     TS_ASSERT_EQUALS(outX.size(), 3);
     TS_ASSERT_DELTA(outX[0], -1.0, 1e-6);
     TS_ASSERT_DELTA(outX[1], 0.0, 1e-6);
     TS_ASSERT_DELTA(outX[2], 1.0, 1e-6);
 
-    const MantidVec &outY0 = outWS->y(0);
+    Mantid::HistogramData::HistogramY const &outY0 = outWS->y(0);
     TS_ASSERT_EQUALS(outY0.size(), 3);
     TS_ASSERT_DELTA(outY0[0], -0.018902, 1e-6);
     TS_ASSERT_DELTA(outY0[1], 1.0, 1e-6);
     TS_ASSERT_DELTA(outY0[2], -0.018902, 1e-6);
 
-    const MantidVec &outY1 = outWS->y(1);
+    Mantid::HistogramData::HistogramY const &outY1 = outWS->y(1);
     TS_ASSERT_EQUALS(outY1.size(), 3);
     TS_ASSERT_DELTA(outY1[0], -0.681363, 1e-6);
     TS_ASSERT_DELTA(outY1[1], 0.168384, 1e-6);
@@ -117,15 +117,15 @@ public:
     const MatrixWorkspace_const_sptr outWS = runAlgorithm(alg, inWS);
 
     // specific checks
-    const MantidVec &outX = outWS->x(0);
+    Mantid::HistogramData::HistogramX const &outX = outWS->x(0);
     TS_ASSERT_EQUALS(outX.size(), 1);
     TS_ASSERT_DELTA(outX[0], 0.0, 1e-6);
 
-    const MantidVec &outY0 = outWS->y(0);
+    Mantid::HistogramData::HistogramY const &outY0 = outWS->y(0);
     TS_ASSERT_EQUALS(outY0.size(), 1);
     TS_ASSERT_DELTA(outY0[0], 1.0, 1e-6);
 
-    const MantidVec &outY1 = outWS->y(1);
+    Mantid::HistogramData::HistogramY const &outY1 = outWS->y(1);
     TS_ASSERT_EQUALS(outY1.size(), 1);
     TS_ASSERT_DELTA(outY1[0], -1.0, 1e-6);
   }

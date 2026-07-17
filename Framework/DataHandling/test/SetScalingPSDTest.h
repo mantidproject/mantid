@@ -139,7 +139,7 @@ private:
     for (int i = 0; i < ndets; ++i) {
       auto oldPos = spectrumInfo.position(i);
       // Move in Y only
-      oldPos.setSharedY(oldPos.Y() - m_y_offset * (i + 1));
+      oldPos.setY(oldPos.Y() - m_y_offset * (i + 1));
       double l2, theta, phi;
       oldPos.getSpherical(l2, theta, phi);
       const auto &detector = spectrumInfo.detector(i);

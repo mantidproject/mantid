@@ -123,10 +123,10 @@ public:
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 2);
 
     // check the data
-    const Mantid::MantidVec &Y0 = outputWS->y(0);
-    const Mantid::MantidVec &X0 = outputWS->x(0);
-    const Mantid::MantidVec &Y1 = outputWS->y(1);
-    const Mantid::MantidVec &X1 = outputWS->x(1);
+    auto const &Y0 = outputWS->y(0);
+    auto const &X0 = outputWS->x(0);
+    auto const &Y1 = outputWS->y(1);
+    auto const &X1 = outputWS->x(1);
     TS_ASSERT_EQUALS(Y0.size(), 3);
     TS_ASSERT_EQUALS(X0.size(), 4);
     TS_ASSERT_EQUALS(Y1.size(), 2);

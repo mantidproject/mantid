@@ -278,8 +278,8 @@ void PreprocessDetectorsToMD::processDetectorsPositions(const API::MatrixWorkspa
     double ex = sPhi * cos(azim);
     double ey = sPhi * sin(azim);
 
-    detDir[liveDetectorsCount].setSharedX(ex);
-    detDir[liveDetectorsCount].setSharedY(ey);
+    detDir[liveDetectorsCount].setX(ex);
+    detDir[liveDetectorsCount].setY(ey);
     detDir[liveDetectorsCount].setZ(ez);
 
     // double sinTheta=sin(0.5*polar);
@@ -381,8 +381,8 @@ void PreprocessDetectorsToMD::buildFakeDetectorsPositions(const API::MatrixWorks
     double ex = 0.;
     double ey = 0.;
 
-    detDir[i].setSharedX(ex);
-    detDir[i].setSharedY(ey);
+    detDir[i].setX(ex);
+    detDir[i].setY(ey);
     detDir[i].setZ(ez);
   }
   //

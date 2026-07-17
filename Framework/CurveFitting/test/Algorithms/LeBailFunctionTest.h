@@ -187,8 +187,8 @@ public:
 
     // Calculate peak
     MatrixWorkspace_sptr testws = createDataWorkspace(1);
-    const vector<double> vecX = testws->x(0);
-    const vector<double> vecY = testws->y(0);
+    const vector<double> vecX = testws->x(0).rawData();
+    const vector<double> vecY = testws->y(0).rawData();
 
     // Calculate peak intensities
     vector<double> summedpeaksvalue(vecY.size(), 0.);
@@ -288,12 +288,12 @@ public:
 
     // Prepare data
     MatrixWorkspace_sptr dataws = createDataWorkspace(2);
-    const MantidVec &vecX = dataws->x(0);
-    const MantidVec &vecY = dataws->y(0);
+    Mantid::HistogramData::HistogramX const &vecX = dataws->x(0);
+    Mantid::HistogramData::HistogramY const &vecY = dataws->y(0);
     vector<double> vecoutput(vecY.size(), 0.);
 
     // Calculate peaks' intensities
-    lebailfunction.calculatePeaksIntensities(vecX, vecY, vecoutput);
+    lebailfunction.calculatePeaksIntensities(vecX.rawData(), vecY.rawData(), vecoutput);
 
     // Check
     size_t ipeak1 = 6;

@@ -1028,9 +1028,9 @@ public:
     // for applying to octahedron
     V3D output;
     double interval = 1.0 / static_cast<double>(dimension - 1);
-    output.setSharedX((static_cast<double>(index % dimension)) * interval);
+    output.setX((static_cast<double>(index % dimension)) * interval);
     index /= dimension;
-    output.setSharedY((static_cast<double>(index % dimension)) * interval);
+    output.setY((static_cast<double>(index % dimension)) * interval);
     index /= dimension;
     output.setZ((static_cast<double>(index % dimension)) * interval);
     return output;

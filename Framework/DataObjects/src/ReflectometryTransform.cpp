@@ -448,9 +448,9 @@ ReflectometryTransform::executeNormPoly(const MatrixWorkspace_const_sptr &inputW
     const double twoThetaLower = twoTheta - twoThetaHalfWidth;
     const double twoThetaUpper = twoTheta + twoThetaHalfWidth;
 
-    const MantidVec &X = inputWS->x(i);
-    const MantidVec &Y = inputWS->y(i);
-    const MantidVec &E = inputWS->e(i);
+    Mantid::HistogramData::HistogramX const &X = inputWS->x(i);
+    Mantid::HistogramData::HistogramY const &Y = inputWS->y(i);
+    Mantid::HistogramData::HistogramE const &E = inputWS->e(i);
     for (size_t j = 0; j < nBins; ++j) {
       const double lamLower = X[j];
       const double lamUpper = X[j + 1];

@@ -216,10 +216,10 @@ public:
     TS_ASSERT(alg.isExecuted());
     auto outWS = WorkspaceCreationHelper::getWS<MatrixWorkspace>("mfun_Workspace");
 
-    const Mantid::MantidVec &Y00 = ws->y(0);
-    const Mantid::MantidVec &Y0 = outWS->y(0);
-    const Mantid::MantidVec &Y = outWS->y(1);
-    const Mantid::MantidVec &R = outWS->y(2);
+    auto const &Y00 = ws->y(0);
+    auto const &Y0 = outWS->y(0);
+    auto const &Y = outWS->y(1);
+    auto const &R = outWS->y(2);
     for (size_t i = 0; i < Y.size(); i++) {
       TS_ASSERT_EQUALS(Y00[i], Y0[i]);
       TS_ASSERT_DELTA(Y0[i], Y[i], 0.1);

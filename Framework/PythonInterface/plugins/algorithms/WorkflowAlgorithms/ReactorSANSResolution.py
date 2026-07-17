@@ -93,8 +93,8 @@ class ReactorSANSResolution(PythonAlgorithm):
             )
             res_factor += math.pow(k * pixel_size_x / sample_detector_distance, 2) / 12.0
 
-            for i in range(len(input_ws.readDx(0))):
-                if len(input_ws.readDx(0)) == len(input_ws.x(0)):
+            for i in range(len(input_ws.dx(0))):
+                if len(input_ws.dx(0)) == len(input_ws.x(0)):
                     center = input_ws.x(0)[i]
                 else:
                     center = 0.5 * (input_ws.x(0)[i] + input_ws.x(0)[i + 1])

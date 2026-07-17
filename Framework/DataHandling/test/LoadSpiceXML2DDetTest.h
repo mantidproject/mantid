@@ -84,7 +84,7 @@ public:
     // Check the value
     double totalcounts = 0;
     for (size_t i = 0; i < numspec; ++i) {
-      const MantidVec &vecY = outws->y(i);
+      Mantid::HistogramData::HistogramY const &vecY = outws->y(i);
       size_t numy = vecY.size();
       for (size_t j = 0; j < numy; ++j)
         totalcounts += vecY[j];

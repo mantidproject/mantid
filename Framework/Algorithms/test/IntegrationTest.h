@@ -205,9 +205,9 @@ public:
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), EndWorkspaceIndex - StartWorkspaceIndex + 1);
 
     for (size_t i = 0; i < output2D->getNumberHistograms(); i++) {
-      MantidVec X = output2D->x(i);
-      MantidVec Y = output2D->y(i);
-      MantidVec E = output2D->e(i);
+      auto const &X = output2D->x(i);
+      auto const &Y = output2D->y(i);
+      auto const &E = output2D->e(i);
       TS_ASSERT_EQUALS(X.size(), 2);
       TS_ASSERT_EQUALS(Y.size(), 1);
       TS_ASSERT_DELTA(Y[0], 20.0, 1e-6);

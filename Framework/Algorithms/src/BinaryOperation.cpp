@@ -576,9 +576,9 @@ void BinaryOperation::doSingleSpectrum() {
     } else {
       // -------- The rhs is a histogram ---------
       // Pull m_out the m_rhs spectrum
-      const MantidVec &rhsX = m_rhs->x(0);
-      const MantidVec &rhsY = m_rhs->y(0);
-      const MantidVec &rhsE = m_rhs->e(0);
+      Mantid::HistogramData::HistogramX const &rhsX = m_rhs->x(0);
+      Mantid::HistogramData::HistogramY const &rhsY = m_rhs->y(0);
+      Mantid::HistogramData::HistogramE const &rhsE = m_rhs->e(0);
 
       // Now loop over the spectra of the left hand side calling the virtual
       // function
@@ -588,7 +588,7 @@ void BinaryOperation::doSingleSpectrum() {
       for (int64_t i = 0; i < numHists; ++i) {
         PARALLEL_START_INTERRUPT_REGION
         // Perform the operation on the event list on the output (== lhs)
-        performEventBinaryOperation(m_eout->getSpectrum(i), rhsX, rhsY, rhsE);
+        performEventBinaryOperation(m_eout->getSpectrum(i), rhsX.rawData(), rhsY.rawData(), rhsE.rawData());
         m_progress->report(this->name());
         PARALLEL_END_INTERRUPT_REGION
       }
@@ -702,7 +702,8 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
         }
 
         // Reach here? Do the division
-        performEventBinaryOperation(m_eout->getSpectrum(i), m_rhs->x(rhs_wi), m_rhs->y(rhs_wi), m_rhs->e(rhs_wi));
+        performEventBinaryOperation(m_eout->getSpectrum(i), m_rhs->x(rhs_wi).rawData(), m_rhs->y(rhs_wi).rawData(),
+                                    m_rhs->e(rhs_wi).rawData());
 
         // Free up memory on the RHS if that is possible
         if (m_ClearRHSWorkspace)

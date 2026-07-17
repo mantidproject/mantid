@@ -146,8 +146,8 @@ void ConvertSpectrumAxis::exec() {
   // Create the output workspace. Can't re-use the input one because we'll be
   // re-ordering the spectra.
   HistogramBuilder builder;
-  builder.setSharedX(nxBins);
-  builder.setSharedY(nBins);
+  builder.setX(nxBins);
+  builder.setY(nBins);
   builder.setDistribution(inputWS->isDistribution());
   MatrixWorkspace_sptr outputWS = create<MatrixWorkspace>(*inputWS, indexMap.size(), builder.build());
   // Now set up a new, numeric axis holding the theta values corresponding to

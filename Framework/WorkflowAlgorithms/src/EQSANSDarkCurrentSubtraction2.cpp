@@ -206,9 +206,9 @@ void EQSANSDarkCurrentSubtraction2::exec() {
     if (spectrumInfo.isMasked(i))
       continue;
 
-    const MantidVec &YDarkValues = scaledDarkWS->y(i);
-    const MantidVec &YDarkErrors = scaledDarkWS->e(i);
-    const MantidVec &XValues = inputWS->x(i);
+    Mantid::HistogramData::HistogramY const &YDarkValues = scaledDarkWS->y(i);
+    Mantid::HistogramData::HistogramE const &YDarkErrors = scaledDarkWS->e(i);
+    Mantid::HistogramData::HistogramX const &XValues = inputWS->x(i);
     MantidVec &YValues = inputWS->dataY(i);
     MantidVec &YErrors = inputWS->dataE(i);
     for (int j = 0; j < nBins; j++) {

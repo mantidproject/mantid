@@ -329,9 +329,9 @@ void Workspace2D::generateHistogram(const std::size_t index, const MantidVec &X,
     throw std::range_error("Workspace2D::generateHistogram, histogram number out of range");
   // output data arrays are implicitly filled by function
   const auto &spec = this->getSpectrum(index);
-  const MantidVec &currentX = spec.x();
-  const MantidVec &currentY = spec.y();
-  const MantidVec &currentE = spec.e();
+  Mantid::HistogramData::HistogramX const &currentX = spec.x();
+  Mantid::HistogramData::HistogramY const &currentY = spec.y();
+  Mantid::HistogramData::HistogramE const &currentE = spec.e();
   if (X.size() <= 1)
     throw std::runtime_error("Workspace2D::generateHistogram(): X vector must be at least length 2");
   Y.resize(X.size() - 1, 0);
@@ -342,11 +342,12 @@ void Workspace2D::generateHistogram(const std::size_t index, const MantidVec &X,
   {                                       // VectorHelper::rebin, assumes bin boundaries, even if
     std::vector<double> histX;            // it is a distribution!
     histX.resize(currentX.size() + 1);
-    Mantid::Kernel::VectorHelper::convertToBinBoundary(currentX, histX);
-    Mantid::Kernel::VectorHelper::rebin(histX, currentY, currentE, X, Y, E, true);
+    Mantid::Kernel::VectorHelper::convertToBinBoundary(currentX.rawData(), histX);
+    Mantid::Kernel::VectorHelper::rebin(histX, currentY.rawData(), currentE.rawData(), X, Y, E, true);
   } else // assume x_size = y_size + 1
   {
-    Mantid::Kernel::VectorHelper::rebin(currentX, currentY, currentE, X, Y, E, this->isDistribution());
+    Mantid::Kernel::VectorHelper::rebin(currentX.rawData(), currentY.rawData(), currentE.rawData(), X, Y, E,
+                                        this->isDistribution());
   }
 }
 

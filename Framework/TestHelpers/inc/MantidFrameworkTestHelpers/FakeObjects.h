@@ -70,8 +70,8 @@ public:
 
   void setX(const Mantid::Kernel::cow_ptr<Mantid::HistogramData::HistogramX> &X) override { m_histogram.setSharedX(X); }
   MantidVec &dataX() override { return m_histogram.dataX(); }
-  const MantidVec &dataX() const override { return m_histogram.dataX(); }
-  const MantidVec &readX() const override { return m_histogram.x(); }
+  const MantidVec &dataX() const override { return m_histogram.x().rawData(); }
+  const MantidVec &readX() const override { return m_histogram.x().rawData(); }
   Mantid::Kernel::cow_ptr<Mantid::HistogramData::HistogramX> ptrX() const override { return m_histogram.sharedX(); }
 
   MantidVec &dataDx() override { return m_histogram.dataDx(); }
@@ -81,8 +81,8 @@ public:
   MantidVec &dataY() override { return m_histogram.dataY(); }
   MantidVec &dataE() override { return m_histogram.dataE(); }
 
-  const MantidVec &dataY() const override { return m_histogram.dataY(); }
-  const MantidVec &dataE() const override { return m_histogram.dataE(); }
+  const MantidVec &dataY() const override { return m_histogram.y().rawData(); }
+  const MantidVec &dataE() const override { return m_histogram.e().rawData(); }
 
   size_t getMemorySize() const override { return readY().size() * sizeof(double) * 2; }
 

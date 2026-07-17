@@ -1759,7 +1759,7 @@ public:
       TSM_ASSERT("dataDx should allow access to the spectrum",
                  std::all_of(std::begin(dataDx), std::end(dataDx), compareValueForSpecificWorkspaceIndex));
 
-      auto &readDx = ws.readDx(index);
+      auto &readDx = ws.dx(index);
       TSM_ASSERT("readDx should allow access to the spectrum",
                  std::all_of(std::begin(readDx), std::end(readDx), compareValueForSpecificWorkspaceIndex));
 

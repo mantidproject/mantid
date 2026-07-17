@@ -293,7 +293,7 @@ class EQSANSDQOutput(systemtesting.MantidSystemTest):
             0,
         ]
 
-        dq = mtd["EQSANS_1466_event_Iq"].readDx(0)
+        dq = mtd["EQSANS_1466_event_Iq"].dx(0)
         diff = [math.fabs(dq_ref[i] - dq[i]) < 0.0001 for i in range(7, 100)]
         output = reduce(lambda x, y: x and y, diff)
         if not output:
@@ -444,7 +444,7 @@ class EQSANSDQOutput_FS(systemtesting.MantidSystemTest):
             0,
         ]
 
-        dq = mtd["EQSANS_4061_event_frame1_Iq"].readDx(0)
+        dq = mtd["EQSANS_4061_event_frame1_Iq"].dx(0)
         diff = [math.fabs(dq_ref[i] - dq[i]) < 0.0001 for i in range(7, 100)]
         output = reduce(lambda x, y: x and y, diff)
 
