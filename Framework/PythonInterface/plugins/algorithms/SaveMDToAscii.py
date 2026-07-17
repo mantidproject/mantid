@@ -64,7 +64,9 @@ class SaveMDToAscii(PythonAlgorithm):
             direction=Direction.Input,
             doc="Normalization to apply to the signal and error before writing. 'FromWorkspace' (default) uses "
             "the workspace's own displayNormalizationHisto() setting. The other choices force that "
-            "normalization regardless of what the workspace reports.",
+            "normalization regardless of what the workspace reports: 'NumEventsNormalization' divides by the "
+            "number of events in each bin, and 'VolumeNormalization' multiplies by the workspace's inverse "
+            "bin volume.",
         )
         self.declareProperty(
             name="Separator",
@@ -127,6 +129,10 @@ class SaveMDToAscii(PythonAlgorithm):
             nev = ws.getNumEventsArray()
             signal = signal / nev
             err2 = err2 / (nev * nev)
+        elif normalization == MDNormalization.VolumeNormalization:
+            inverse_volume = ws.getInverseVolume()
+            signal = signal * inverse_volume
+            err2 = err2 * (inverse_volume * inverse_volume)
         error = np.sqrt(err2)
 
         if signal.ndim != len(dims):

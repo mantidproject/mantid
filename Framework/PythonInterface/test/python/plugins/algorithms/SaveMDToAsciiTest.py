@@ -205,7 +205,10 @@ class SaveMDToAsciiTest(unittest.TestCase):
         np.testing.assert_allclose(data[:, 2], [2, 6, 4, 8])
         np.testing.assert_allclose(data[:, 3], [2, 2, 2, 2])
 
-    def test_normalization_volume_normalization_does_not_divide_by_events(self):
+    def test_normalization_volume_normalization_divides_by_bin_volume(self):
+        # 2x2 bins over a 2x2 extent: each bin is 1x1, so inverse volume is 1 and this
+        # normalization is a no-op here; see test_normalization_volume_normalization_scales_by_inverse_volume
+        # for a case where the bin volume is not 1.
         ws = CreateMDHistoWorkspace(
             Dimensionality=2,
             Extents="0,2,0,2",
@@ -222,6 +225,24 @@ class SaveMDToAsciiTest(unittest.TestCase):
         data = np.loadtxt(self.tmp_file.name)
         np.testing.assert_allclose(data[:, 2], [2, 6, 4, 8])
         np.testing.assert_allclose(data[:, 3], [2, 2, 2, 2])
+
+    def test_normalization_volume_normalization_scales_by_inverse_volume(self):
+        # 2 bins over a 4-wide extent: each bin has volume 2, so inverse volume is 0.5.
+        ws = CreateMDHistoWorkspace(
+            Dimensionality=1,
+            Extents="0,4",
+            SignalInput=[2, 4],
+            ErrorInput=[2, 4],
+            NumberOfBins="2",
+            Names="A",
+            Units="U",
+        )
+
+        SaveMDToAscii(InputWorkspace=ws, Filename=self.tmp_file.name, Normalization="VolumeNormalization")
+
+        data = np.loadtxt(self.tmp_file.name)
+        np.testing.assert_allclose(data[:, 1], [1, 2])
+        np.testing.assert_allclose(data[:, 2], [1, 2])
 
     def test_separator_choices(self):
         separators = {"CSV": ",", "Tab": "\t", "Space": " ", "Colon": ":", "SemiColon": ";"}

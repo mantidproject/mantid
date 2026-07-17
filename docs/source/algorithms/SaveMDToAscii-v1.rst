@@ -22,9 +22,9 @@ there would be no dimension columns left to write.
 
 Normalization defaults to whatever the workspace itself declares via its display normalization
 (:py:obj:`MDNormalization <mantid.api.MDNormalization>`, as set for example by :ref:`algm-BinMD` or
-:ref:`algm-ConvertToMD`); only ``NumEventsNormalization`` changes what is written, dividing Intensity and
-Error by the number of events in each bin. Set ``Normalization`` explicitly to override the workspace's own
-setting.
+:ref:`algm-ConvertToMD`). Set ``Normalization`` explicitly to override the workspace's own setting:
+``NumEventsNormalization`` divides Intensity and Error by the number of events in each bin, and
+``VolumeNormalization`` multiplies Intensity and Error by the workspace's inverse bin volume.
 
 ``Separator`` and ``CustomSeparator`` control the column delimiter used in the output file.
 ``Precision`` controls the number of significant digits used for the numeric columns (Intensity, Error, and
