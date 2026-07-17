@@ -138,7 +138,7 @@ class SaveMDToAscii(PythonAlgorithm):
             signal = np.squeeze(signal)
             error = np.squeeze(error)
 
-        columns = [d.flatten() for d in broadcast_arrays] + [signal.flatten(), error.flatten()]
+        columns = [d.ravel() for d in broadcast_arrays] + [signal.ravel(), error.ravel()]
         data_to_write = np.column_stack(columns)
 
         separator = self._resolve_separator()
