@@ -18,7 +18,6 @@ from mantid.kernel import (
     FloatBoundedValidator,
     PropertyCriterion,
     StringListValidator,
-    VisibleWhenProperty,
 )
 import csv
 import collections
@@ -29,7 +28,6 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
     _WORKSPACE = "InputWorkspace"
     _CALIBRATION_FILE = "CalibrationFile"
     _INSTRUMENT_WORKFLOW = "InstrumentWorkflow"
-    _CALIBRATION_ANGLE_TYPE = "CalibrationAngleType"
     _SPECULAR_PIXEL_INDEX = "SpecularPixelIndex"
     _EXPERIMENT_ANGLE = "ExperimentAngle"
     _DETECTOR_CORRECTION_TYPE = "DetectorCorrectionType"
@@ -87,12 +85,6 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
             StringListValidator([self._DEFAULT_WORKFLOW, self._POLREF_WORKFLOW]),
             "The instrument workflow that defines how the calibration file should be interpreted.",
         )
-        self.declareProperty(
-            self._CALIBRATION_ANGLE_TYPE,
-            self._OFFSET,
-            StringListValidator([self._OFFSET, self._ABSOLUTE]),
-            "Internal calibration-file interpretation. Set InstrumentWorkflow instead.",
-        )
         non_negative_double = FloatBoundedValidator()
         non_negative_double.setLower(0.0)
         self.declareProperty(
@@ -105,10 +97,6 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
             self._EXPERIMENT_ANGLE,
             0.0,
             "The experiment theta angle in degrees. Required for the POLREF workflow.",
-        )
-        self.setPropertySettings(
-            self._CALIBRATION_ANGLE_TYPE,
-            VisibleWhenProperty(self._INSTRUMENT_WORKFLOW, PropertyCriterion.IsEqualTo, "ShowInternalCalibrationAngleType"),
         )
         polref_workflow_enabled = EnabledWhenProperty(self._INSTRUMENT_WORKFLOW, PropertyCriterion.IsEqualTo, self._POLREF_WORKFLOW)
         self.setPropertySettings(self._SPECULAR_PIXEL_INDEX, polref_workflow_enabled)
@@ -128,6 +116,7 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         # Set the expected order of the columns in the calibration file
         self._det_id_col_idx = 0
         self._angle_col_idx = 1
+        self._calibration_angle_type = self._ABSOLUTE if self._is_polref_workflow() else self._OFFSET
 
         try:
             calibration_data = self._parse_calibration_file(self._calibration_filepath)
@@ -152,7 +141,7 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
 
     def _parse_calibration_file(self, filepath):
         """Parse calibration data from the calibration file."""
-        if self._calibration_angle_type() == self._ABSOLUTE:
+        if self._calibration_angle_type == self._ABSOLUTE:
             return self._parse_absolute_calibration_file(filepath)
         else:
             return self._parse_offset_calibration_file(filepath)
@@ -277,7 +266,7 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         calibration_ws = self._clone_workspace(ws)
         det_info = calibration_ws.detectorInfo()
 
-        if self._calibration_angle_type() == self._ABSOLUTE:
+        if self._calibration_angle_type == self._ABSOLUTE:
             calibration_data = self._convert_absolute_angles_to_offsets(calibration_ws, calibration_data)
 
         correction_alg = self.createChildAlgorithm("SpecularReflectionPositionCorrect")
@@ -332,8 +321,8 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
 
             calibration_two_theta = 2.0 * self._interpolate_calibration_angle(absolute_calibration_angles, detector_index)
             two_theta_relative_to_calibration_specular = calibration_two_theta - calibration_specular_two_theta
-            # By default, the angular space in the calib input map seems to be inverted when compared to the Mantid coordinate system.
-            # If this was not the case, we would do `experiment_specular_two_theta - two_theta_relative_to_calibration_specular`
+            # POLREF calibration-map angle decreases with detector index, while workspace signed two theta increases.
+            # This inverts the calibration-map relative offset before anchoring it at the experiment specular two theta.
             experiment_two_theta = experiment_specular_two_theta - two_theta_relative_to_calibration_specular
             workspace_two_theta = ws.spectrumInfo().signedTwoTheta(spectrum_index) * self._RAD_TO_DEG
             offsets[self._single_detector_id(ws, spectrum_index)] = experiment_two_theta - workspace_two_theta
@@ -357,7 +346,7 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
             self._specular_pixel_index(),
             first_calibration_detector_index,
             last_calibration_detector_index,
-            "CalibrationSpecularPixelIndex",
+            self._SPECULAR_PIXEL_INDEX,
         )
         if self._specular_pixel_index() > last_experiment_detector_index:
             raise RuntimeError(f"SpecularPixelIndex must be in the range 0 to {last_experiment_detector_index}")
@@ -404,15 +393,12 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         fraction = (index - lower_index) / (upper_index - lower_index)
         return lower_value + fraction * (upper_value - lower_value)
 
-    def _calibration_angle_type(self):
-        if self._is_polref_workflow():
-            return self._ABSOLUTE
-        return self._OFFSET
-
     def _is_polref_workflow(self):
         return self.getPropertyValue(self._INSTRUMENT_WORKFLOW) == self._POLREF_WORKFLOW
 
     def _detector_correction_type(self):
+        if self._is_polref_workflow() and self.getProperty(self._DETECTOR_CORRECTION_TYPE).isDefault:
+            return self._ROTATE_AROUND_SAMPLE
         return self.getPropertyValue(self._DETECTOR_CORRECTION_TYPE)
 
     def _specular_pixel_index(self):
