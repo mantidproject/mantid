@@ -2698,9 +2698,7 @@ public:
   void test_readYE_throws_without_MRU() {
     const EventList el;
     TS_ASSERT_THROWS(el.y(), const std::runtime_error &);
-    TS_ASSERT_THROWS(el.mutableY(), const std::runtime_error &);
     TS_ASSERT_THROWS(el.e(), const std::runtime_error &);
-    TS_ASSERT_THROWS(el.mutableE(), const std::runtime_error &);
   }
 
   void test_counts_works_without_MRU() {

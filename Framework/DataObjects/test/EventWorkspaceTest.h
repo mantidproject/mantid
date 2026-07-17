@@ -569,7 +569,7 @@ public:
 
     // Fill up the MRU to make data0 drop off
     for (size_t i = 0; i < 200; i++) {
-      auto const &otherData = ew2->y(i);
+      static_cast<void>(ew2->y(i));
     }
 
     // data0 and e300 are now invalid references!
