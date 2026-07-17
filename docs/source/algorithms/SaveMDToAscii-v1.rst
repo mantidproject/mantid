@@ -30,6 +30,10 @@ setting.
 ``Precision`` controls the number of significant digits used for the numeric columns (Intensity, Error, and
 the dimension coordinates).
 
+If ``ExtraHeader`` is set to a non-empty string, it is written at the top of the file's header, above the
+column names and shape lines. Every line is prefixed with ``#``, the same as the rest of the header; if
+``ExtraHeader`` itself spans multiple lines, each one is prefixed individually.
+
 Usage
 -----
 

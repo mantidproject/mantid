@@ -43,6 +43,14 @@ class SaveMDToAscii(PythonAlgorithm):
             doc="Output filename.",
         )
         self.declareProperty(
+            name="ExtraHeader",
+            defaultValue="",
+            direction=Direction.Input,
+            doc="If not empty, this text is written at the top of the file's header, above the column names "
+            "and shape lines. Each line is prefixed with '#', the same as the rest of the header; if this "
+            "text spans multiple lines, every one of them is prefixed individually.",
+        )
+        self.declareProperty(
             name="ExcludeIntegratedDimensions",
             defaultValue=True,
             direction=Direction.Input,
@@ -128,8 +136,13 @@ class SaveMDToAscii(PythonAlgorithm):
         columns = [d.flatten() for d in broadcast_arrays] + [signal.flatten(), error.flatten()]
         data_to_write = np.column_stack(columns)
 
-        header = " ".join(d.name for d in dims) + " Intensity Error"
-        header += "\nshape: " + "x".join(str(d.getNBins()) for d in dims)
+        header_lines = []
+        extra_header = self.getPropertyValue("ExtraHeader")
+        if extra_header:
+            header_lines.append(extra_header)
+        header_lines.append(" ".join(d.name for d in dims) + " Intensity Error")
+        header_lines.append("shape: " + "x".join(str(d.getNBins()) for d in dims))
+        header = "\n".join(header_lines)
 
         separator = self._resolve_separator()
         precision = self.getProperty("Precision").value

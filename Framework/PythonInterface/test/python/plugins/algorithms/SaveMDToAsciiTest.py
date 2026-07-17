@@ -51,6 +51,60 @@ class SaveMDToAsciiTest(unittest.TestCase):
         )
         np.testing.assert_allclose(data, expected)
 
+    def test_extra_header_default_empty_adds_nothing(self):
+        ws = CreateMDHistoWorkspace(
+            Dimensionality=1,
+            Extents="0,2",
+            SignalInput=[1, 2],
+            ErrorInput=[1, 1],
+            NumberOfBins="2",
+            Names="A",
+            Units="U",
+        )
+        SaveMDToAscii(InputWorkspace=ws, Filename=self.tmp_file.name)
+
+        with open(self.tmp_file.name) as f:
+            header_lines = [line for line in f if line.startswith("#")]
+        self.assertEqual(len(header_lines), 2)
+        self.assertIn("A Intensity Error", header_lines[0])
+
+    def test_extra_header_written_as_first_header_line(self):
+        ws = CreateMDHistoWorkspace(
+            Dimensionality=1,
+            Extents="0,2",
+            SignalInput=[1, 2],
+            ErrorInput=[1, 1],
+            NumberOfBins="2",
+            Names="A",
+            Units="U",
+        )
+        SaveMDToAscii(InputWorkspace=ws, Filename=self.tmp_file.name, ExtraHeader="Collected on 2026-07-17, run 12345")
+
+        with open(self.tmp_file.name) as f:
+            header_lines = [line for line in f if line.startswith("#")]
+        self.assertEqual(len(header_lines), 3)
+        self.assertIn("Collected on 2026-07-17, run 12345", header_lines[0])
+        self.assertIn("A Intensity Error", header_lines[1])
+
+    def test_extra_header_multiline_each_line_prefixed(self):
+        ws = CreateMDHistoWorkspace(
+            Dimensionality=1,
+            Extents="0,2",
+            SignalInput=[1, 2],
+            ErrorInput=[1, 1],
+            NumberOfBins="2",
+            Names="A",
+            Units="U",
+        )
+        SaveMDToAscii(InputWorkspace=ws, Filename=self.tmp_file.name, ExtraHeader="Sample: NaCl powder\nRun: 12345")
+
+        with open(self.tmp_file.name) as f:
+            header_lines = [line for line in f if line.startswith("#")]
+        self.assertEqual(len(header_lines), 4)
+        self.assertEqual(header_lines[0].strip(), "# Sample: NaCl powder")
+        self.assertEqual(header_lines[1].strip(), "# Run: 12345")
+        self.assertIn("A Intensity Error", header_lines[2])
+
     def test_exclude_integrated_dimensions_true_by_default(self):
         ws = CreateMDHistoWorkspace(
             Dimensionality=3,
