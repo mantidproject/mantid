@@ -143,15 +143,16 @@ class SaveMDToAscii(PythonAlgorithm):
         columns = [d.flatten() for d in broadcast_arrays] + [signal.flatten(), error.flatten()]
         data_to_write = np.column_stack(columns)
 
+        separator = self._resolve_separator()
+
         header_lines = []
         extra_header = self.getPropertyValue("ExtraHeader")
         if extra_header:
             header_lines.append(extra_header)
-        header_lines.append(" ".join(d.name for d in dims) + " Intensity Error")
+        header_lines.append(separator.join([*(d.name for d in dims), "Intensity", "Error"]))
         header_lines.append("shape: " + "x".join(str(d.getNBins()) for d in dims))
         header = "\n".join(header_lines)
 
-        separator = self._resolve_separator()
         precision = self.getProperty("Precision").value
         if precision == Property.EMPTY_INT:
             precision = _DEFAULT_PRECISION

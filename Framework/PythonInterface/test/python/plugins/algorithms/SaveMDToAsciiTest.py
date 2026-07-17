@@ -264,6 +264,43 @@ class SaveMDToAsciiTest(unittest.TestCase):
                 fields = data_lines[0].strip().split(char)
                 self.assertEqual(len(fields), 3)
 
+    def test_header_column_names_use_configured_separator(self):
+        separators = {"CSV": ",", "Tab": "\t", "Space": " ", "Colon": ":", "SemiColon": ";"}
+        for name, char in separators.items():
+            with self.subTest(separator=name):
+                ws = CreateMDHistoWorkspace(
+                    Dimensionality=1,
+                    Extents="0,2",
+                    SignalInput=[1, 2],
+                    ErrorInput=[1, 1],
+                    NumberOfBins="2",
+                    Names="A",
+                    Units="U",
+                )
+                SaveMDToAscii(InputWorkspace=ws, Filename=self.tmp_file.name, Separator=name)
+
+                with open(self.tmp_file.name) as f:
+                    header_lines = [line for line in f if line.startswith("#")]
+                column_header = header_lines[0].lstrip("#").strip()
+                self.assertEqual(column_header.split(char), ["A", "Intensity", "Error"])
+
+    def test_header_column_names_use_custom_separator(self):
+        ws = CreateMDHistoWorkspace(
+            Dimensionality=1,
+            Extents="0,2",
+            SignalInput=[1, 2],
+            ErrorInput=[1, 1],
+            NumberOfBins="2",
+            Names="A",
+            Units="U",
+        )
+        SaveMDToAscii(InputWorkspace=ws, Filename=self.tmp_file.name, Separator="UserDefined", CustomSeparator="|")
+
+        with open(self.tmp_file.name) as f:
+            header_lines = [line for line in f if line.startswith("#")]
+        column_header = header_lines[0].lstrip("#").strip()
+        self.assertEqual(column_header.split("|"), ["A", "Intensity", "Error"])
+
     def test_separator_userdefined_with_custom(self):
         ws = CreateMDHistoWorkspace(
             Dimensionality=1,
