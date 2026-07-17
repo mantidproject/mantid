@@ -102,7 +102,7 @@ public:
     }
   }
   double &at(size_t pos) {
-    if (pos < 0 || pos >= m_data.size()) {
+    if (pos >= m_data.size()) {
       throw std::out_of_range("invalid access for full length vector type");
     } else {
       return m_data[pos];
