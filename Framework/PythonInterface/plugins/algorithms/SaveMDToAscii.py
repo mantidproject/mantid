@@ -87,7 +87,8 @@ class SaveMDToAscii(PythonAlgorithm):
             defaultValue=Property.EMPTY_INT,
             validator=IntBoundedValidator(lower=1),
             direction=Direction.Input,
-            doc="Number of significant digits for the numeric columns. If not set, a default of 6 is used.",
+            doc="Number of digits after the decimal point in scientific notation for the numeric columns. "
+            "If not set, a default of 6 is used.",
         )
 
     def validateInputs(self):

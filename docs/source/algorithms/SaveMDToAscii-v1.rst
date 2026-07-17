@@ -27,8 +27,8 @@ Normalization defaults to whatever the workspace itself declares via its display
 ``VolumeNormalization`` multiplies Intensity and Error by the workspace's inverse bin volume.
 
 ``Separator`` and ``CustomSeparator`` control the column delimiter used in the output file.
-``Precision`` controls the number of significant digits used for the numeric columns (Intensity, Error, and
-the dimension coordinates).
+``Precision`` controls the number of digits after the decimal point in scientific notation used for the
+numeric columns (Intensity, Error, and the dimension coordinates).
 
 If ``ExtraHeader`` is set to a non-empty string, it is written at the top of the file's header, above the
 column names and shape lines. Every line is prefixed with ``#``, the same as the rest of the header; if
