@@ -14,10 +14,8 @@ _DEFAULT_PRECISION = 6
 
 def _dim2array(d):
     """Bin-centre coordinates along dimension d, as a 1D numpy array of length d.getNBins()."""
-    dmin = d.getMinimum()
-    dmax = d.getMaximum()
-    dstep = d.getX(1) - d.getX(0)
-    return np.arange(dmin + dstep / 2, dmax, dstep)
+    boundaries = np.array([d.getX(i) for i in range(d.getNBins() + 1)])
+    return 0.5 * (boundaries[:-1] + boundaries[1:])
 
 
 class SaveMDToAscii(PythonAlgorithm):

@@ -51,6 +51,30 @@ class SaveMDToAsciiTest(unittest.TestCase):
         )
         np.testing.assert_allclose(data, expected)
 
+    def test_bin_centres_correct_for_bin_count_prone_to_float_drift(self):
+        # 7 bins over a 0-1 extent gives a step (1/7) that is not exactly representable
+        # in binary floating point; np.arange(start, stop, step) can drop or add an
+        # extra element here due to accumulated rounding, producing the wrong number
+        # of bin centres (see _dim2array).
+        nbins = 7
+        ws = CreateMDHistoWorkspace(
+            Dimensionality=1,
+            Extents="0,1",
+            SignalInput=list(range(nbins)),
+            ErrorInput=[1] * nbins,
+            NumberOfBins=str(nbins),
+            Names="A",
+            Units="U",
+        )
+
+        SaveMDToAscii(InputWorkspace=ws, Filename=self.tmp_file.name)
+
+        data = np.loadtxt(self.tmp_file.name)
+        self.assertEqual(data.shape[0], nbins)
+        halfstep = 0.5 / nbins
+        np.testing.assert_allclose(data[0, 0], halfstep)
+        np.testing.assert_allclose(data[-1, 0], 1 - halfstep)
+
     def test_extra_header_default_empty_adds_nothing(self):
         ws = CreateMDHistoWorkspace(
             Dimensionality=1,
