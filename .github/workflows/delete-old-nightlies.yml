@@ -18,7 +18,7 @@ on:
           - all
           - github-releases
           - anaconda-packages
-      dry_run:
+      dry-run:
         description: 'Print Anaconda packages that would be removed without deleting them'
         required: false
         default: false
@@ -56,7 +56,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package_name:
+        package-name:
           - mantid
           - mantid-developer
           - mantidmpi
@@ -79,14 +79,14 @@ jobs:
             pixi.toml
           sparse-checkout-cone-mode: false
       - uses: ./.github/actions/setup-pixi
-      - uses: neutrons/gh-actions/pkg-remove@ae14e70c9a8cbbd84437711b4ee5cda8d2b50298 # test version
+      - uses: neutrons/gh-actions/pkg-remove@eb7a7c6fcfd0cda1a7b238329afc0afd09a4f4af # v2
         with:
-          anaconda_token: ${{ env.ANACONDA_TOKEN }}
+          anaconda-token: ${{ env.ANACONDA_TOKEN }}
           organization: mantid
-          package_name: ${{ matrix.package_name }}
+          package-name: ${{ matrix.package-name }}
           label: nightly
           keep: '3'
-          dry_run: false
+          dry-run: ${{ github.event.inputs.dry-run || github.event_name != 'schedule' }}
 
   anaconda-mantid-ornl:
     if: ${{ github.repository_owner == 'mantidproject' && (github.event_name != 'workflow_dispatch' || github.event.inputs.target == 'all' || github.event.inputs.target == 'anaconda-packages') }}
@@ -94,7 +94,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package_name:
+        package-name:
           - mantid
           - mantid-developer
           - mantidmpi
@@ -117,11 +117,11 @@ jobs:
             pixi.toml
           sparse-checkout-cone-mode: false
       - uses: ./.github/actions/setup-pixi
-      - uses: neutrons/gh-actions/pkg-remove@ae14e70c9a8cbbd84437711b4ee5cda8d2b50298 # test version
+      - uses: neutrons/gh-actions/pkg-remove@eb7a7c6fcfd0cda1a7b238329afc0afd09a4f4af # v2
         with:
-          anaconda_token: ${{ env.ANACONDA_TOKEN_MANTIDORNL }}
+          anaconda-token: ${{ env.ANACONDA_TOKEN_MANTIDORNL }}
           organization: mantid-ornl
-          package_name: ${{ matrix.package_name }}
+          package-name: ${{ matrix.package-name }}
           label: nightly
           keep: '3'
-          dry_run: ${{ github.event.inputs.dry_run || github.event_name != 'schedule' }}
+          dry-run: ${{ github.event.inputs.dry-run || github.event_name != 'schedule' }}
