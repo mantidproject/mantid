@@ -10,9 +10,13 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidHistogramData/HistogramDx.h"
+#include "MantidHistogramData/HistogramE.h"
+#include "MantidHistogramData/HistogramX.h"
 #include "MantidHistogramData/HistogramY.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidKernel/make_cow.h"
 
 #include "MantidPythonInterface/api/CloneMatrixWorkspace.h"
 #include "MantidPythonInterface/api/RegisterWorkspacePtrToPython.h"
@@ -312,6 +316,114 @@ void setEFromPyObject(MatrixWorkspace &self, const size_t wsIndex, const boost::
  */
 void setDxFromPyObject(MatrixWorkspace &self, const size_t wsIndex, const boost::python::object &values) {
   setSpectrumFromPyObject(self, &MatrixWorkspace::dataDx, wsIndex, values);
+}
+
+/**
+ * Adds a deprecation warning to the setX call to warn about using setSharedX instead
+ * @param self A reference to the calling object
+ * @param wsIndex The workspace index for the spectrum to set
+ * @param values A numpy array. The length must match the size of the spectrum
+ */
+void setXDeprecated(MatrixWorkspace &self, const size_t wsIndex, const boost::python::object &values) {
+  PyErr_Warn(PyExc_DeprecationWarning,
+             "`MatrixWorkspace.setX()` is deprecated in Mantid 7.0, use `MatrixWorkspace.setSharedX()` instead. "
+             "For more information, see the Histogram data concept page: "
+             "https://docs.mantidproject.org/nightly/concepts/HistogramData.html");
+  setXFromPyObject(self, wsIndex, values);
+}
+
+/**
+ * Adds a deprecation warning to the setY call to warn about using setSharedY instead
+ * @param self A reference to the calling object
+ * @param wsIndex The workspace index for the spectrum to set
+ * @param values A numpy array. The length must match the size of the spectrum
+ */
+void setYDeprecated(MatrixWorkspace &self, const size_t wsIndex, const boost::python::object &values) {
+  PyErr_Warn(PyExc_DeprecationWarning,
+             "`MatrixWorkspace.setY()` is deprecated in Mantid 7.0, use `MatrixWorkspace.setSharedY()` instead. "
+             "For more information, see the Histogram data concept page: "
+             "https://docs.mantidproject.org/nightly/concepts/HistogramData.html");
+  setYFromPyObject(self, wsIndex, values);
+}
+
+/**
+ * Adds a deprecation warning to the setE call to warn about using setSharedE instead
+ * @param self A reference to the calling object
+ * @param wsIndex The workspace index for the spectrum to set
+ * @param values A numpy array. The length must match the size of the spectrum
+ */
+void setEDeprecated(MatrixWorkspace &self, const size_t wsIndex, const boost::python::object &values) {
+  PyErr_Warn(PyExc_DeprecationWarning,
+             "`MatrixWorkspace.setE()` is deprecated in Mantid 7.0, use `MatrixWorkspace.setSharedE()` instead. "
+             "For more information, see the Histogram data concept page: "
+             "https://docs.mantidproject.org/nightly/concepts/HistogramData.html");
+  setEFromPyObject(self, wsIndex, values);
+}
+
+/**
+ * Adds a deprecation warning to the setDx call to warn about using setSharedDx instead
+ * @param self A reference to the calling object
+ * @param wsIndex The workspace index for the spectrum to set
+ * @param values A numpy array. The length must match the size of the spectrum
+ */
+void setDxDeprecated(MatrixWorkspace &self, const size_t wsIndex, const boost::python::object &values) {
+  PyErr_Warn(PyExc_DeprecationWarning,
+             "`MatrixWorkspace.setDx()` is deprecated in Mantid 7.0, use `MatrixWorkspace.setSharedDx()` instead. "
+             "For more information, see the Histogram data concept page: "
+             "https://docs.mantidproject.org/nightly/concepts/HistogramData.html");
+  setDxFromPyObject(self, wsIndex, values);
+}
+
+/**
+ * Converts a python array-style object into a vector of doubles
+ * @param values :: A numpy array or python sequence
+ * @returns The extracted data as a std::vector<double>
+ */
+std::vector<double> extractVectorFromPyObject(const boost::python::object &values) {
+  if (NDArray::check(values)) {
+    return NDArrayToVector<double>(values)();
+  }
+  return PySequenceToVector<double>(values)();
+}
+
+/**
+ * Set the X values by sharing a new copy-on-write array built from a python array-style object
+ * @param self :: A reference to the calling object
+ * @param wsIndex :: The workspace index for the spectrum to set
+ * @param values :: A numpy array. The length must match the size of the spectrum.
+ */
+void setSharedXFromPyObject(MatrixWorkspace &self, const size_t wsIndex, const boost::python::object &values) {
+  self.setSharedX(wsIndex, make_cow<Mantid::HistogramData::HistogramX>(extractVectorFromPyObject(values)));
+}
+
+/**
+ * Set the Y values by sharing a new copy-on-write array built from a python array-style object
+ * @param self :: A reference to the calling object
+ * @param wsIndex :: The workspace index for the spectrum to set
+ * @param values :: A numpy array. The length must match the size of the spectrum.
+ */
+void setSharedYFromPyObject(MatrixWorkspace &self, const size_t wsIndex, const boost::python::object &values) {
+  self.setSharedY(wsIndex, make_cow<Mantid::HistogramData::HistogramY>(extractVectorFromPyObject(values)));
+}
+
+/**
+ * Set the E values by sharing a new copy-on-write array built from a python array-style object
+ * @param self :: A reference to the calling object
+ * @param wsIndex :: The workspace index for the spectrum to set
+ * @param values :: A numpy array. The length must match the size of the spectrum.
+ */
+void setSharedEFromPyObject(MatrixWorkspace &self, const size_t wsIndex, const boost::python::object &values) {
+  self.setSharedE(wsIndex, make_cow<Mantid::HistogramData::HistogramE>(extractVectorFromPyObject(values)));
+}
+
+/**
+ * Set the Dx values by sharing a new copy-on-write array built from a python array-style object
+ * @param self :: A reference to the calling object
+ * @param wsIndex :: The workspace index for the spectrum to set
+ * @param values :: A numpy array. The length must match the size of the spectrum.
+ */
+void setSharedDxFromPyObject(MatrixWorkspace &self, const size_t wsIndex, const boost::python::object &values) {
+  self.setSharedDx(wsIndex, make_cow<Mantid::HistogramData::HistogramDx>(extractVectorFromPyObject(values)));
 }
 
 std::vector<double> getIntegratedCountsForWorkspaceIndices(MatrixWorkspace &self,
@@ -662,18 +774,34 @@ void export_MatrixWorkspace() {
            "Creates a writable numpy wrapper around the original Dx data at "
            "the given index (deprecated, use "
            ":class:`~mantid.api.MatrixWorkspace.mutableDx` instead)")
-      .def("setX", &setXFromPyObject, args("self", "workspaceIndex", "x"),
+      .def("setX", &setXDeprecated, args("self", "workspaceIndex", "x"),
            "Set X values from a python list or numpy array. It performs a "
-           "simple copy into the array.")
-      .def("setY", &setYFromPyObject, args("self", "workspaceIndex", "y"),
+           "simple copy into the array (deprecated, use "
+           ":class:`~mantid.api.MatrixWorkspace.setSharedX` instead)")
+      .def("setY", &setYDeprecated, args("self", "workspaceIndex", "y"),
            "Set Y values from a python list or numpy array. It performs a "
-           "simple copy into the array.")
-      .def("setE", &setEFromPyObject, args("self", "workspaceIndex", "e"),
+           "simple copy into the array (deprecated, use "
+           ":class:`~mantid.api.MatrixWorkspace.setSharedY` instead)")
+      .def("setE", &setEDeprecated, args("self", "workspaceIndex", "e"),
            "Set E values from a python list or numpy array. It performs a "
-           "simple copy into the array.")
-      .def("setDx", &setDxFromPyObject, args("self", "workspaceIndex", "dX"),
+           "simple copy into the array (deprecated, use "
+           ":class:`~mantid.api.MatrixWorkspace.setSharedE` instead)")
+      .def("setDx", &setDxDeprecated, args("self", "workspaceIndex", "dX"),
            "Set Dx values from a python list or numpy array. It performs a "
-           "simple copy into the array.")
+           "simple copy into the array (deprecated, use "
+           ":class:`~mantid.api.MatrixWorkspace.setSharedDx` instead)")
+      .def("setSharedX", &setSharedXFromPyObject, args("self", "workspaceIndex", "x"),
+           "Set the X data at the given index by building a new copy-on-write array "
+           "from a python list or numpy array and sharing it into the workspace.")
+      .def("setSharedY", &setSharedYFromPyObject, args("self", "workspaceIndex", "y"),
+           "Set the Y data at the given index by building a new copy-on-write array "
+           "from a python list or numpy array and sharing it into the workspace.")
+      .def("setSharedE", &setSharedEFromPyObject, args("self", "workspaceIndex", "e"),
+           "Set the E data at the given index by building a new copy-on-write array "
+           "from a python list or numpy array and sharing it into the workspace.")
+      .def("setSharedDx", &setSharedDxFromPyObject, args("self", "workspaceIndex", "dX"),
+           "Set the Dx data at the given index by building a new copy-on-write array "
+           "from a python list or numpy array and sharing it into the workspace.")
 
       // --------------------------------------- Extract data
       // ------------------------------
