@@ -627,12 +627,10 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
 
         manual_metadata_condition = EnabledWhenProperty(Prop.META_SOURCE, PropertyCriterion.IsNotDefault)
 
-        convert_method_validator = StringListValidator(
-            [ReflectometryDatasetHistory.REDUCTION_WORKFLOW_ALG, ReflectometryDatasetHistory.CONVERT_ALG]
-        )
+        convert_method_validator = StringListValidator([ReflectometryDatasetHistory.REF_ROI_ALG, ReflectometryDatasetHistory.CONVERT_ALG])
         self.declareProperty(
             name=Prop.Q_CONVERT_METHOD,
-            defaultValue=ReflectometryDatasetHistory.REDUCTION_WORKFLOW_ALG,
+            defaultValue=ReflectometryDatasetHistory.REF_ROI_ALG,
             validator=convert_method_validator,
             doc="The method used for converting from Q Space to Wavelength.",
         )
