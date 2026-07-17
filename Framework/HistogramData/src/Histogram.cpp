@@ -123,10 +123,24 @@ FrequencyStandardDeviations Histogram::frequencyStandardDeviations() const {
 
 /** Sets the internal x-data pointer of the Histogram.
 
-  Throws if the size does not match the current size. */
+  The new x-data must be consistent with the stored y- and dx-data: for
+  XMode::BinEdges there must be one more edge than data points (unless both are
+  empty), for XMode::Points the sizes must be equal. Throws if this invariant
+  would be broken. If the Histogram holds no data points (e.g. during
+  construction, or for event data where counts are computed on demand) it is
+  not yet constrained and any size is accepted. */
 void Histogram::setSharedX(const Kernel::cow_ptr<HistogramX> &x) & {
-  if (m_x->size() != x->size())
+  size_t targetSize = x->size();
+  // 0 edges -> 0 points, otherwise points are 1 less than edges.
+  if (xMode() == XMode::BinEdges && targetSize > 0) {
+    --targetSize;
+  }
+  if (m_y && !m_y->empty() && m_y->size() != targetSize) {
     throw std::logic_error("Histogram::setSharedX: size mismatch\n");
+  }
+  if (m_dx && !m_dx->empty() && m_dx->size() != targetSize) {
+    throw std::logic_error("Histogram::setSharedX: size mismatch with Dx data\n");
+  }
   m_x = x;
 }
 
