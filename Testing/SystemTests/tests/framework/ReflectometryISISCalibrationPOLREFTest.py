@@ -33,10 +33,10 @@ class ReflectometryISISCalibrationPOLREFAbsoluteThetaTest(systemtesting.MantidSy
         self._output_ws = ReflectometryISISCalibration(
             InputWorkspace=ws,
             CalibrationFile=self._calibration_map_path,
-            CalibrationAngleType="Absolute",
-            AbsoluteAngleType="Theta",
+            InstrumentWorkflow="POLREF",
             CalibrationSpecularPixelIndex=self._SPECULAR_PIXEL,
             ExperimentSpecularPixelIndex=self._SPECULAR_PIXEL,
+            ExperimentAngle=1.82805474,
             DetectorCorrectionType="RotateAroundSample",
             OutputWorkspace="polref_calibrated",
         )

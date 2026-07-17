@@ -187,7 +187,7 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         output_ws = AnalysisDataService.retrieve(output_ws_name)
         self._check_final_theta_values(ws, output_ws, calibration_data={det_id: theta_offset})
 
-    def test_absolute_theta_calibration_uses_detector_index_order_and_factor_of_two(self):
+    def test_polref_workflow_uses_detector_index_order_and_theta_factor_of_two(self):
         input_ws_name = "test_1234"
         ws = self._create_sample_workspace(input_ws_name)
         angles = [0.05 * index for index in range(ws.getNumberHistograms())]
@@ -196,48 +196,24 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         output_ws_name = "test_calibrated"
         experiment_specular_index = 4
         calibration_specular_index = 4
+        experiment_angle = 0.5
         args = {
             "InputWorkspace": ws,
             "CalibrationFile": self.temp_calibration_file.getName(),
-            "CalibrationAngleType": "Absolute",
-            "AbsoluteAngleType": "Theta",
+            "InstrumentWorkflow": "POLREF",
             "CalibrationSpecularPixelIndex": calibration_specular_index,
             "ExperimentSpecularPixelIndex": experiment_specular_index,
+            "ExperimentAngle": experiment_angle,
             "OutputWorkspace": output_ws_name,
         }
         self._assert_run_algorithm_succeeds(args, [input_ws_name, output_ws_name])
 
         output_ws = AnalysisDataService.retrieve(output_ws_name)
-        self._check_absolute_final_theta_values(
-            ws, output_ws, angles, calibration_specular_index, experiment_specular_index, angle_multiplier=2.0
+        self._check_polref_final_theta_values(
+            ws, output_ws, angles, calibration_specular_index, experiment_specular_index, experiment_angle
         )
 
-    def test_absolute_two_theta_calibration_does_not_apply_factor_of_two(self):
-        input_ws_name = "test_1234"
-        ws = self._create_sample_workspace(input_ws_name)
-        angles = [0.05 * index for index in range(ws.getNumberHistograms())]
-        self.temp_calibration_file = TemporaryFileHelper(fileContent=self._absolute_calibration_file_content(angles), extension=".dat")
-
-        output_ws_name = "test_calibrated"
-        experiment_specular_index = 4
-        calibration_specular_index = 4
-        args = {
-            "InputWorkspace": ws,
-            "CalibrationFile": self.temp_calibration_file.getName(),
-            "CalibrationAngleType": "Absolute",
-            "AbsoluteAngleType": "TwoTheta",
-            "CalibrationSpecularPixelIndex": calibration_specular_index,
-            "ExperimentSpecularPixelIndex": experiment_specular_index,
-            "OutputWorkspace": output_ws_name,
-        }
-        self._assert_run_algorithm_succeeds(args, [input_ws_name, output_ws_name])
-
-        output_ws = AnalysisDataService.retrieve(output_ws_name)
-        self._check_absolute_final_theta_values(
-            ws, output_ws, angles, calibration_specular_index, experiment_specular_index, angle_multiplier=1.0
-        )
-
-    def test_absolute_calibration_interpolates_fractional_specular_indexes(self):
+    def test_polref_workflow_interpolates_fractional_specular_indexes(self):
         input_ws_name = "test_1234"
         ws = self._create_sample_workspace(input_ws_name)
         angles = [0.05 * index for index in range(ws.getNumberHistograms())]
@@ -246,23 +222,24 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         output_ws_name = "test_calibrated"
         experiment_specular_index = 4.5
         calibration_specular_index = 4.5
+        experiment_angle = 0.5
         args = {
             "InputWorkspace": ws,
             "CalibrationFile": self.temp_calibration_file.getName(),
-            "CalibrationAngleType": "Absolute",
-            "AbsoluteAngleType": "Theta",
+            "InstrumentWorkflow": "POLREF",
             "CalibrationSpecularPixelIndex": calibration_specular_index,
             "ExperimentSpecularPixelIndex": experiment_specular_index,
+            "ExperimentAngle": experiment_angle,
             "OutputWorkspace": output_ws_name,
         }
         self._assert_run_algorithm_succeeds(args, [input_ws_name, output_ws_name])
 
         output_ws = AnalysisDataService.retrieve(output_ws_name)
-        self._check_absolute_final_theta_values(
-            ws, output_ws, angles, calibration_specular_index, experiment_specular_index, angle_multiplier=2.0
+        self._check_polref_final_theta_values(
+            ws, output_ws, angles, calibration_specular_index, experiment_specular_index, experiment_angle
         )
 
-    def test_absolute_calibration_uses_detector_index_values_to_align_with_input_workspace(self):
+    def test_polref_workflow_uses_detector_index_values_to_align_with_input_workspace(self):
         input_ws_name = "test_1234"
         ws = self._create_sample_workspace(input_ws_name)
         first_calibrated_detector_index = 2
@@ -273,22 +250,24 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         output_ws_name = "test_calibrated"
         experiment_specular_index = 4
         calibration_specular_index = 4
+        experiment_angle = 0.5
         args = {
             "InputWorkspace": ws,
             "CalibrationFile": self.temp_calibration_file.getName(),
-            "CalibrationAngleType": "Absolute",
+            "InstrumentWorkflow": "POLREF",
             "CalibrationSpecularPixelIndex": calibration_specular_index,
             "ExperimentSpecularPixelIndex": experiment_specular_index,
+            "ExperimentAngle": experiment_angle,
             "OutputWorkspace": output_ws_name,
         }
         self._assert_run_algorithm_succeeds(args, [input_ws_name, output_ws_name])
 
         output_ws = AnalysisDataService.retrieve(output_ws_name)
-        self._check_absolute_final_theta_values(
-            ws, output_ws, angles, calibration_specular_index, experiment_specular_index, angle_multiplier=2.0
+        self._check_polref_final_theta_values(
+            ws, output_ws, angles, calibration_specular_index, experiment_specular_index, experiment_angle
         )
 
-    def test_absolute_calibration_allows_columns_reversed_in_file(self):
+    def test_polref_workflow_allows_columns_reversed_in_file(self):
         input_ws_name = "test_1234"
         ws = self._create_sample_workspace(input_ws_name)
         angles = [0.05 * index for index in range(ws.getNumberHistograms())]
@@ -300,17 +279,18 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         args = {
             "InputWorkspace": ws,
             "CalibrationFile": self.temp_calibration_file.getName(),
-            "CalibrationAngleType": "Absolute",
+            "InstrumentWorkflow": "POLREF",
             "CalibrationSpecularPixelIndex": 4,
             "ExperimentSpecularPixelIndex": 4,
+            "ExperimentAngle": 0.5,
             "OutputWorkspace": output_ws_name,
         }
         self._assert_run_algorithm_succeeds(args, [input_ws_name, output_ws_name])
 
         output_ws = AnalysisDataService.retrieve(output_ws_name)
-        self._check_absolute_final_theta_values(ws, output_ws, angles, 4, 4, angle_multiplier=2.0)
+        self._check_polref_final_theta_values(ws, output_ws, angles, 4, 4, 0.5)
 
-    def test_absolute_calibration_uses_detector_index_values_not_row_order(self):
+    def test_polref_workflow_uses_detector_index_values_not_row_order(self):
         input_ws_name = "test_1234"
         ws = self._create_sample_workspace(input_ws_name)
         angles = {2: 0.10, 3: 0.15, 4: 0.20, 5: 0.25, 6: 0.30}
@@ -323,17 +303,18 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         args = {
             "InputWorkspace": ws,
             "CalibrationFile": self.temp_calibration_file.getName(),
-            "CalibrationAngleType": "Absolute",
+            "InstrumentWorkflow": "POLREF",
             "CalibrationSpecularPixelIndex": 4,
             "ExperimentSpecularPixelIndex": 4,
+            "ExperimentAngle": 0.5,
             "OutputWorkspace": output_ws_name,
         }
         self._assert_run_algorithm_succeeds(args, [input_ws_name, output_ws_name])
 
         output_ws = AnalysisDataService.retrieve(output_ws_name)
-        self._check_absolute_final_theta_values(ws, output_ws, angles, 4, 4, angle_multiplier=2.0)
+        self._check_polref_final_theta_values(ws, output_ws, angles, 4, 4, 0.5)
 
-    def test_absolute_calibration_raises_if_specular_index_out_of_range(self):
+    def test_polref_workflow_raises_if_specular_index_out_of_range(self):
         input_ws_name = "test_1234"
         ws = self._create_sample_workspace(input_ws_name)
         angles = [0.05 * index for index in range(ws.getNumberHistograms())]
@@ -342,14 +323,64 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         args = {
             "InputWorkspace": ws,
             "CalibrationFile": self.temp_calibration_file.getName(),
-            "CalibrationAngleType": "Absolute",
+            "InstrumentWorkflow": "POLREF",
             "CalibrationSpecularPixelIndex": len(angles),
             "ExperimentSpecularPixelIndex": 4,
+            "ExperimentAngle": 0.5,
             "OutputWorkspace": "test_calibrated",
         }
         self._assert_run_algorithm_raises_exception(args, "CalibrationSpecularPixelIndex must be in the range")
 
-    def test_absolute_calibration_raises_if_detector_index_is_fractional(self):
+    def test_polref_workflow_raises_if_experiment_specular_index_is_outside_calibration_range(self):
+        input_ws_name = "test_1234"
+        ws = self._create_sample_workspace(input_ws_name)
+        angles = {2: 0.10, 3: 0.15, 4: 0.20, 5: 0.25, 6: 0.30}
+        self.temp_calibration_file = TemporaryFileHelper(fileContent=self._absolute_calibration_file_content(angles), extension=".dat")
+
+        args = {
+            "InputWorkspace": ws,
+            "CalibrationFile": self.temp_calibration_file.getName(),
+            "InstrumentWorkflow": "POLREF",
+            "CalibrationSpecularPixelIndex": 4,
+            "ExperimentSpecularPixelIndex": 1,
+            "ExperimentAngle": 0.5,
+            "OutputWorkspace": "test_calibrated",
+        }
+        self._assert_run_algorithm_raises_exception(args, "ExperimentSpecularPixelIndex must be in the range")
+
+    def test_polref_workflow_requires_experiment_angle(self):
+        input_ws_name = "test_1234"
+        ws = self._create_sample_workspace(input_ws_name)
+        angles = [0.05 * index for index in range(ws.getNumberHistograms())]
+        self.temp_calibration_file = TemporaryFileHelper(fileContent=self._absolute_calibration_file_content(angles), extension=".dat")
+
+        args = {
+            "InputWorkspace": ws,
+            "CalibrationFile": self.temp_calibration_file.getName(),
+            "InstrumentWorkflow": "POLREF",
+            "CalibrationSpecularPixelIndex": 4,
+            "ExperimentSpecularPixelIndex": 4,
+            "OutputWorkspace": "test_calibrated",
+        }
+        self._assert_run_algorithm_raises_exception(args, "ExperimentAngle must be provided for the POLREF workflow")
+
+    def test_default_workflow_ignores_calibration_angle_type(self):
+        input_ws_name = "test_1234"
+        ws = self._create_sample_workspace(input_ws_name)
+
+        output_ws_name = "test_calibrated"
+        args = {
+            "InputWorkspace": ws,
+            "CalibrationFile": self._CALIBRATION_TEST_DATA,
+            "CalibrationAngleType": "Absolute",
+            "OutputWorkspace": output_ws_name,
+        }
+        self._assert_run_algorithm_succeeds(args, [input_ws_name, output_ws_name])
+
+        output_ws = AnalysisDataService.retrieve(output_ws_name)
+        self._check_final_theta_values(ws, output_ws)
+
+    def test_polref_workflow_raises_if_detector_index_is_fractional(self):
         input_ws_name = "test_1234"
         ws = self._create_sample_workspace(input_ws_name)
         self.temp_calibration_file = TemporaryFileHelper(
@@ -359,14 +390,15 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         args = {
             "InputWorkspace": ws,
             "CalibrationFile": self.temp_calibration_file.getName(),
-            "CalibrationAngleType": "Absolute",
+            "InstrumentWorkflow": "POLREF",
             "CalibrationSpecularPixelIndex": 3,
             "ExperimentSpecularPixelIndex": 3,
+            "ExperimentAngle": 0.5,
             "OutputWorkspace": "test_calibrated",
         }
         self._assert_run_algorithm_raises_exception(args, "detector indexes should be integers")
 
-    def test_absolute_calibration_raises_if_detector_indexes_are_not_contiguous(self):
+    def test_polref_workflow_raises_if_detector_indexes_are_not_contiguous(self):
         input_ws_name = "test_1234"
         ws = self._create_sample_workspace(input_ws_name)
         angles = {2: 0.10, 3: 0.15, 5: 0.25}
@@ -375,9 +407,10 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         args = {
             "InputWorkspace": ws,
             "CalibrationFile": self.temp_calibration_file.getName(),
-            "CalibrationAngleType": "Absolute",
+            "InstrumentWorkflow": "POLREF",
             "CalibrationSpecularPixelIndex": 3,
             "ExperimentSpecularPixelIndex": 3,
+            "ExperimentAngle": 0.5,
             "OutputWorkspace": "test_calibrated",
         }
         self._assert_run_algorithm_raises_exception(args, "Absolute calibration detector indexes must be contiguous")
@@ -400,13 +433,20 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
 
             self.assertAlmostEqual(two_theta_out, expected_two_theta, msg=f"Unexpected theta value for detector {det_id}")
 
-    def _check_absolute_final_theta_values(
-        self, input_ws, output_ws, absolute_calibration_angles, calibration_specular_index, experiment_specular_index, angle_multiplier
+    def _check_polref_final_theta_values(
+        self,
+        input_ws,
+        output_ws,
+        absolute_calibration_angles,
+        calibration_specular_index,
+        experiment_specular_index,
+        experiment_angle,
     ):
         info_in = input_ws.spectrumInfo()
         info_out = output_ws.spectrumInfo()
-        experiment_specular_two_theta = self._interpolate_experiment_two_theta(info_in, experiment_specular_index)
         calibration_specular_angle = self._interpolate_calibration_angle(absolute_calibration_angles, calibration_specular_index)
+        experiment_specular_angle = self._interpolate_calibration_angle(absolute_calibration_angles, experiment_specular_index)
+        experiment_specular_two_theta = 2.0 * (experiment_angle - (experiment_specular_angle - calibration_specular_angle))
         calibration_detector_indexes = self._calibration_detector_indexes(absolute_calibration_angles)
         first_calibrated_detector_index = calibration_detector_indexes[0]
         last_calibrated_detector_index = calibration_detector_indexes[-1]
@@ -416,7 +456,7 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
                 relative_calibration_angle = (
                     self._interpolate_calibration_angle(absolute_calibration_angles, index) - calibration_specular_angle
                 )
-                expected_two_theta_degrees = experiment_specular_two_theta - angle_multiplier * relative_calibration_angle
+                expected_two_theta_degrees = experiment_specular_two_theta - 2.0 * relative_calibration_angle
                 expected_two_theta = expected_two_theta_degrees * self._DEG_TO_RAD
             else:
                 expected_two_theta = info_in.signedTwoTheta(index)
@@ -431,18 +471,6 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
             lines = [f"{self._DET_INDEX_LABEL} {self._ANGLE_LABEL}\n"]
             lines.extend(f"{index} {angle}\n" for index, angle in angle_items)
         return "".join(lines)
-
-    def _interpolate_experiment_two_theta(self, spectrum_info, index):
-        lower_index = math.floor(index)
-        upper_index = math.ceil(index)
-        lower_two_theta = spectrum_info.signedTwoTheta(lower_index) * self._RAD_TO_DEG
-        upper_two_theta = spectrum_info.signedTwoTheta(upper_index) * self._RAD_TO_DEG
-        return self._interpolate_between(index, lower_index, lower_two_theta, upper_index, upper_two_theta)
-
-    def _interpolate(self, values, index):
-        lower_index = math.floor(index)
-        upper_index = math.ceil(index)
-        return self._interpolate_between(index, lower_index, values[lower_index], upper_index, values[upper_index])
 
     def _interpolate_calibration_angle(self, values, index):
         if not isinstance(values, dict):

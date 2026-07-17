@@ -12,7 +12,14 @@ from mantid.api import (
     FileProperty,
     PropertyMode,
 )
-from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator, PropertyCriterion, StringListValidator
+from mantid.kernel import (
+    Direction,
+    EnabledWhenProperty,
+    FloatBoundedValidator,
+    PropertyCriterion,
+    StringListValidator,
+    VisibleWhenProperty,
+)
 import csv
 import collections
 import math
@@ -21,10 +28,10 @@ import math
 class ReflectometryISISCalibration(DataProcessorAlgorithm):
     _WORKSPACE = "InputWorkspace"
     _CALIBRATION_FILE = "CalibrationFile"
+    _INSTRUMENT_WORKFLOW = "InstrumentWorkflow"
     _CALIBRATION_ANGLE_TYPE = "CalibrationAngleType"
-    _ABSOLUTE_ANGLE_TYPE = "AbsoluteAngleType"
-    _CALIBRATION_SPECULAR_PIXEL_INDEX = "CalibrationSpecularPixelIndex"
-    _EXPERIMENT_SPECULAR_PIXEL_INDEX = "ExperimentSpecularPixelIndex"
+    _SPECULAR_PIXEL_INDEX = "SpecularPixelIndex"
+    _EXPERIMENT_ANGLE = "ExperimentAngle"
     _DETECTOR_CORRECTION_TYPE = "DetectorCorrectionType"
     _OUTPUT_WORKSPACE = "OutputWorkspace"
 
@@ -36,8 +43,8 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
     _ANGLE_LABEL = "angle"
     _OFFSET = "Offset"
     _ABSOLUTE = "Absolute"
-    _THETA = "Theta"
-    _TWO_THETA = "TwoTheta"
+    _DEFAULT_WORKFLOW = "Default"
+    _POLREF_WORKFLOW = "POLREF"
     _VERTICAL_SHIFT = "VerticalShift"
     _ROTATE_AROUND_SAMPLE = "RotateAroundSample"
     _RAD_TO_DEG = 180.0 / math.pi
@@ -52,7 +59,7 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
 
     def summary(self):
         """Return a summary of the algorithm."""
-        return "Corrects the positions of detector pixels using offsets or absolute angles provided in a calibration file."
+        return "Corrects detector pixel positions using a calibration file and a selected instrument workflow."
 
     def seeAlso(self):
         """Return a list of related algorithm names."""
@@ -64,39 +71,48 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
             doc="An input workspace or workspace group.",
         )
         self.declareProperty(
-            FileProperty(self._CALIBRATION_FILE, "", action=FileAction.OptionalLoad, direction=Direction.Input, extensions=["dat"]),
-            doc="Calibration data file containing a list of detector IDs and offsets, or detector indexes and absolute angles.",
+            FileProperty(
+                self._CALIBRATION_FILE,
+                "",
+                action=FileAction.OptionalLoad,
+                direction=Direction.Input,
+                extensions=["dat"],
+            ),
+            doc="Calibration data file containing detector IDs and offsets for the default workflow, "
+            "or detector indexes and absolute theta values for the POLREF workflow.",
+        )
+        self.declareProperty(
+            self._INSTRUMENT_WORKFLOW,
+            self._DEFAULT_WORKFLOW,
+            StringListValidator([self._DEFAULT_WORKFLOW, self._POLREF_WORKFLOW]),
+            "The instrument workflow that defines how the calibration file should be interpreted.",
         )
         self.declareProperty(
             self._CALIBRATION_ANGLE_TYPE,
             self._OFFSET,
             StringListValidator([self._OFFSET, self._ABSOLUTE]),
-            "Whether the calibration file contains twoTheta offsets or absolute detector angles.",
-        )
-        self.declareProperty(
-            self._ABSOLUTE_ANGLE_TYPE,
-            self._THETA,
-            StringListValidator([self._THETA, self._TWO_THETA]),
-            "Whether absolute detector angle values are theta or twoTheta values.",
+            "Internal calibration-file interpretation. Set InstrumentWorkflow instead.",
         )
         non_negative_double = FloatBoundedValidator()
         non_negative_double.setLower(0.0)
         self.declareProperty(
-            self._CALIBRATION_SPECULAR_PIXEL_INDEX,
+            self._SPECULAR_PIXEL_INDEX,
             0.0,
             non_negative_double,
-            "The detector index of the specular pixel in the absolute calibration file.",
+            "The detector index of the specular pixel in the subject run.",
         )
         self.declareProperty(
-            self._EXPERIMENT_SPECULAR_PIXEL_INDEX,
+            self._EXPERIMENT_ANGLE,
             0.0,
-            non_negative_double,
-            "The detector index of the specular pixel in the input workspace.",
+            "The experiment theta angle in degrees. Required for the POLREF workflow.",
         )
-        absolute_angle_enabled = EnabledWhenProperty(self._CALIBRATION_ANGLE_TYPE, PropertyCriterion.IsEqualTo, self._ABSOLUTE)
-        self.setPropertySettings(self._ABSOLUTE_ANGLE_TYPE, absolute_angle_enabled)
-        self.setPropertySettings(self._CALIBRATION_SPECULAR_PIXEL_INDEX, absolute_angle_enabled)
-        self.setPropertySettings(self._EXPERIMENT_SPECULAR_PIXEL_INDEX, absolute_angle_enabled)
+        self.setPropertySettings(
+            self._CALIBRATION_ANGLE_TYPE,
+            VisibleWhenProperty(self._INSTRUMENT_WORKFLOW, PropertyCriterion.IsEqualTo, "ShowInternalCalibrationAngleType"),
+        )
+        polref_workflow_enabled = EnabledWhenProperty(self._INSTRUMENT_WORKFLOW, PropertyCriterion.IsEqualTo, self._POLREF_WORKFLOW)
+        self.setPropertySettings(self._SPECULAR_PIXEL_INDEX, polref_workflow_enabled)
+        self.setPropertySettings(self._EXPERIMENT_ANGLE, polref_workflow_enabled)
         self.declareProperty(
             self._DETECTOR_CORRECTION_TYPE,
             self._VERTICAL_SHIFT,
@@ -104,7 +120,8 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
             "Whether detectors should be shifted vertically or rotated around the sample position.",
         )
         self.declareProperty(
-            WorkspaceProperty(self._OUTPUT_WORKSPACE, "", direction=Direction.Output), doc="The calibrated output workspace."
+            WorkspaceProperty(self._OUTPUT_WORKSPACE, "", direction=Direction.Output),
+            doc="The calibrated output workspace.",
         )
 
     def PyExec(self):
@@ -129,6 +146,8 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         self._calibration_filepath = self.getPropertyValue(self._CALIBRATION_FILE)
         if not self._calibration_filepath:
             issues[self._CALIBRATION_FILE] = "Calibration file path must be provided"
+        if self._is_polref_workflow() and self.getProperty(self._EXPERIMENT_ANGLE).isDefault:
+            issues[self._EXPERIMENT_ANGLE] = "ExperimentAngle must be provided for the POLREF workflow"
         return issues
 
     def _parse_calibration_file(self, filepath):
@@ -298,15 +317,10 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         detector_spectrum_indices = self._detector_spectrum_indices(ws)
         self._validate_absolute_calibration_inputs(detector_spectrum_indices, absolute_calibration_angles)
 
-        experiment_specular_index = self._experiment_specular_pixel_index()
-        spectrum_info = ws.spectrumInfo()
-        experiment_specular_two_theta = self._interpolate_experiment_two_theta(
-            spectrum_info, detector_spectrum_indices, experiment_specular_index
+        calibration_specular_two_theta = 2.0 * self._interpolate_calibration_angle(
+            absolute_calibration_angles, self._specular_pixel_index()
         )
-        calibration_specular_angle = self._interpolate_calibration_angle(
-            absolute_calibration_angles, self._calibration_specular_pixel_index()
-        )
-        two_theta_conversion_factor = 2.0 if self._absolute_angle_type() == self._THETA else 1.0
+        experiment_specular_two_theta = 2.0 * self._experiment_angle()
 
         offsets = {}
         calibration_detector_indexes = sorted(absolute_calibration_angles)
@@ -316,15 +330,13 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
             if detector_index < first_calibration_detector_index or detector_index > last_calibration_detector_index:
                 continue
 
-            angle_relative_to_calibration_specular = (
-                self._interpolate_calibration_angle(absolute_calibration_angles, detector_index) - calibration_specular_angle
-            )
-            # Use the angle between this pixel and the calibration specular pixel to place it relative to the
-            # experiment specular pixel.
-            relative_two_theta = two_theta_conversion_factor * angle_relative_to_calibration_specular
-            calibrated_two_theta = experiment_specular_two_theta - relative_two_theta
-            experiment_two_theta = spectrum_info.signedTwoTheta(spectrum_index) * self._RAD_TO_DEG
-            offsets[self._single_detector_id(ws, spectrum_index)] = calibrated_two_theta - experiment_two_theta
+            calibration_two_theta = 2.0 * self._interpolate_calibration_angle(absolute_calibration_angles, detector_index)
+            two_theta_relative_to_calibration_specular = calibration_two_theta - calibration_specular_two_theta
+            # By default, the angular space in the calib input map seems to be inverted when compared to the Mantid coordinate system.
+            # If this was not the case, we would do `experiment_specular_two_theta - two_theta_relative_to_calibration_specular`
+            experiment_two_theta = experiment_specular_two_theta - two_theta_relative_to_calibration_specular
+            workspace_two_theta = ws.spectrumInfo().signedTwoTheta(spectrum_index) * self._RAD_TO_DEG
+            offsets[self._single_detector_id(ws, spectrum_index)] = experiment_two_theta - workspace_two_theta
         return offsets
 
     def _validate_absolute_calibration_inputs(self, detector_spectrum_indices, absolute_calibration_angles):
@@ -342,14 +354,13 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         if first_calibration_detector_index > last_experiment_detector_index or last_calibration_detector_index < 0:
             raise RuntimeError("Absolute calibration file detector indexes do not overlap the input workspace detector indexes")
         self._validate_interpolation_index(
-            self._calibration_specular_pixel_index(),
+            self._specular_pixel_index(),
             first_calibration_detector_index,
             last_calibration_detector_index,
             "CalibrationSpecularPixelIndex",
         )
-        self._validate_interpolation_index(
-            self._experiment_specular_pixel_index(), 0, last_experiment_detector_index, "ExperimentSpecularPixelIndex"
-        )
+        if self._specular_pixel_index() > last_experiment_detector_index:
+            raise RuntimeError(f"SpecularPixelIndex must be in the range 0 to {last_experiment_detector_index}")
 
     @staticmethod
     def _detector_spectrum_indices(ws):
@@ -371,18 +382,6 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
     def _validate_interpolation_index(index, lower_bound, upper_bound, property_name):
         if index < lower_bound or index > upper_bound:
             raise RuntimeError(f"{property_name} must be in the range {lower_bound} to {upper_bound}")
-
-    def _interpolate_experiment_two_theta(self, spectrum_info, detector_spectrum_indices, detector_index):
-        lower_pixel_index = int(math.floor(detector_index))
-        upper_pixel_index = int(math.ceil(detector_index))
-        lower_two_theta = spectrum_info.signedTwoTheta(detector_spectrum_indices[lower_pixel_index]) * self._RAD_TO_DEG
-        upper_two_theta = spectrum_info.signedTwoTheta(detector_spectrum_indices[upper_pixel_index]) * self._RAD_TO_DEG
-        return self._interpolate_between(detector_index, lower_pixel_index, lower_two_theta, upper_pixel_index, upper_two_theta)
-
-    def _interpolate(self, values, index):
-        lower_index = int(math.floor(index))
-        upper_index = int(math.ceil(index))
-        return self._interpolate_between(index, lower_index, values[lower_index], upper_index, values[upper_index])
 
     def _interpolate_calibration_angle(self, values_by_detector_index, detector_index):
         if detector_index in values_by_detector_index:
@@ -406,19 +405,21 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         return lower_value + fraction * (upper_value - lower_value)
 
     def _calibration_angle_type(self):
-        return self.getPropertyValue(self._CALIBRATION_ANGLE_TYPE)
+        if self._is_polref_workflow():
+            return self._ABSOLUTE
+        return self._OFFSET
 
-    def _absolute_angle_type(self):
-        return self.getPropertyValue(self._ABSOLUTE_ANGLE_TYPE)
+    def _is_polref_workflow(self):
+        return self.getPropertyValue(self._INSTRUMENT_WORKFLOW) == self._POLREF_WORKFLOW
 
     def _detector_correction_type(self):
         return self.getPropertyValue(self._DETECTOR_CORRECTION_TYPE)
 
-    def _calibration_specular_pixel_index(self):
-        return self.getProperty(self._CALIBRATION_SPECULAR_PIXEL_INDEX).value
+    def _specular_pixel_index(self):
+        return self.getProperty(self._SPECULAR_PIXEL_INDEX).value
 
-    def _experiment_specular_pixel_index(self):
-        return self.getProperty(self._EXPERIMENT_SPECULAR_PIXEL_INDEX).value
+    def _experiment_angle(self):
+        return self.getProperty(self._EXPERIMENT_ANGLE).value
 
 
 AlgorithmFactory.subscribe(ReflectometryISISCalibration)

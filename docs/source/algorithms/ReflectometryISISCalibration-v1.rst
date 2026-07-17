@@ -14,12 +14,12 @@ This algorithm adjusts the positions of individual detector pixels in a workspac
 
 A ``.dat`` calibration file must be provided via the ``CalibrationFile`` property. Lines beginning with ``#`` are ignored.
 
-The ``CalibrationAngleType`` property controls the meaning of the calibration values:
+The ``InstrumentWorkflow`` property controls the meaning of the calibration values:
 
-- ``Offset``: the file should contain two, space-delimited columns labelled ``detectorid`` and ``theta_offset`` (the labels are not case-sensitive). The detector IDs are the IDs for the detector pixels that should be moved. The theta offsets are the change required to the two theta value for each detector, in degrees.
-- ``Absolute``: the file should contain two, space-delimited columns labelled ``detectorindex`` and ``angle`` (the labels are not case-sensitive). The detector index is matched against the non-monitor detector spectra in the input workspace, in workspace-index order. The absolute angle values are converted to two theta offsets internally.
+- ``Default``: the file should contain two, space-delimited columns labelled ``detectorid`` and ``theta_offset`` (the labels are not case-sensitive). The detector IDs are the IDs for the detector pixels that should be moved. The theta offsets are the change required to the two theta value for each detector, in degrees.
+- ``POLREF``: the file should contain two, space-delimited columns labelled ``detectorindex`` and ``angle`` (the labels are not case-sensitive). The detector index is matched against the non-monitor detector spectra in the input workspace, in workspace-index order. The angles are absolute detector theta values in degrees and are converted to two theta offsets internally.
 
-For absolute calibration files, ``AbsoluteAngleType`` specifies whether the supplied absolute values are ``Theta`` or ``TwoTheta`` values. ``Theta`` values are converted to detector two theta by applying a factor of two. ``CalibrationSpecularPixelIndex`` gives the specular pixel index in the detector-index coordinate system of the calibration file, and ``ExperimentSpecularPixelIndex`` gives the specular pixel index in the detector-index coordinate system of the input workspace after monitors are ignored. These indices may be fractional, in which case linear interpolation is used.
+For the ``POLREF`` workflow, ``ExperimentAngle`` is the experiment theta angle in degrees, ``CalibrationSpecularPixelIndex`` is the specular pixel index in the calibration-file detector-index coordinate system, and ``ExperimentSpecularPixelIndex`` is the fitted specular pixel index for the experiment. These indices may be fractional, in which case linear interpolation is used on the calibration file. The experiment fitted pixel is not used as a workspace-geometry anchor; instead the experiment theta is corrected by the calibration-file angular difference between the experiment and calibration specular pixels.
 
 The ``DetectorCorrectionType`` property is passed to :ref:`algm-SpecularReflectionPositionCorrect` and controls whether pixels are moved by a vertical shift or rotated around the sample.
 
@@ -38,7 +38,7 @@ For each detector pixel in the calibration file, the algorithm finds the existin
 
 Only the detectors specified in the file will be moved, all other detectors in the workspace will remain in their original positions.
 
-The below is an example of a valid absolute-angle calibration file:
+The below is an example of a valid POLREF calibration file:
 
 .. code-block:: none
 
@@ -47,7 +47,7 @@ The below is an example of a valid absolute-angle calibration file:
     12 3.069434420
     13 3.063999483
 
-For absolute input, all non-monitor detector spectra in the input workspace are considered in workspace-index order. Only detector indexes covered by the absolute-angle calibration file are moved; monitors and detector indexes outside the calibration range are left unchanged. Detector indexes in the calibration file must be integer and contiguous. Fractional specular pixel indexes are still supported by linear interpolation between the neighbouring detector-index rows.
+For POLREF input, all non-monitor detector spectra in the input workspace are considered in workspace-index order. Only detector indexes covered by the calibration file are moved; monitors and detector indexes outside the calibration range are left unchanged. Detector indexes in the calibration file must be integer and contiguous. Fractional specular pixel indexes are still supported by linear interpolation between the neighbouring detector-index rows.
 
 Usage
 -------
