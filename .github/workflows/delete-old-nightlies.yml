@@ -18,17 +18,28 @@ on:
           - all
           - github-releases
           - anaconda-packages
-      dry_run:
+      dry-run:
         description: 'Print Anaconda packages that would be removed without deleting them'
         required: false
         default: false
         type: boolean
 
+env:
+  # the secrets are only available on branches in the main repository
+  RELEASES_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN || 'unset_token' }}
+  ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN || 'unset_token' }}
+  ANACONDA_TOKEN_MANTIDORNL: ${{ secrets.ANACONDA_TOKEN_MANTIDORNL || 'unset_token' }}
+
 jobs:
-  delete-old-nightly-releases:
+  releases:
     if: ${{ github.repository_owner == 'mantidproject' && (github.event_name != 'workflow_dispatch' || github.event.inputs.target == 'all' || github.event.inputs.target == 'github-releases') }}
     runs-on: ubuntu-latest
     steps:
+      - name: fail if GITHUB_TOKEN is unavailable
+        if: ${{ env.RELEASES_GITHUB_TOKEN == 'unset_token' }}
+        run: |
+          echo "RELEASES_GITHUB_TOKEN is unset_token. The GITHUB_TOKEN secret is not available in this workflow context."
+          exit 1
       - uses: thomashampson/delete-older-releases@main
         with:
           keep_latest: 3
@@ -37,15 +48,15 @@ jobs:
           prerelease_only: true
           delete_tags: true
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ env.RELEASES_GITHUB_TOKEN }}
 
-  delete-old-nightly-anaconda-packages-mantid:
+  anaconda-mantid:
     if: ${{ github.repository_owner == 'mantidproject' && (github.event_name != 'workflow_dispatch' || github.event.inputs.target == 'all' || github.event.inputs.target == 'anaconda-packages') }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        package_name:
+        package-name:
           - mantid
           - mantid-developer
           - mantidmpi
@@ -53,6 +64,11 @@ jobs:
           - mantidworkbench
           - mantiddocs
     steps:
+      - name: fail if ANACONDA_TOKEN is unavailable
+        if: ${{ env.ANACONDA_TOKEN == 'unset_token' }}
+        run: |
+          echo "ANACONDA_TOKEN is unset_token. The ANACONDA_TOKEN secret is not available in this workflow context."
+          exit 1
       - name: check out setup-pixi action
         uses: actions/checkout@v7
         with:
@@ -63,22 +79,22 @@ jobs:
             pixi.toml
           sparse-checkout-cone-mode: false
       - uses: ./.github/actions/setup-pixi
-      - uses: neutrons/gh-actions/pkg-remove@a1e1c8b4123ced6c66fe57b9a60a56a6e4bf6861 # v1
+      - uses: neutrons/gh-actions/pkg-remove@eb7a7c6fcfd0cda1a7b238329afc0afd09a4f4af # v2
         with:
-          anaconda_token: ${{ secrets.ANACONDA_TOKEN }}
+          anaconda-token: ${{ env.ANACONDA_TOKEN }}
           organization: mantid
-          package_name: ${{ matrix.package_name }}
+          package-name: ${{ matrix.package-name }}
           label: nightly
           keep: '3'
-          dry_run: ${{ github.event.inputs.dry_run || github.event_name != 'schedule' }}
+          dry-run: ${{ github.event.inputs.dry-run || github.event_name != 'schedule' }}
 
-  delete-old-nightly-anaconda-packages-mantid-ornl:
+  anaconda-mantid-ornl:
     if: ${{ github.repository_owner == 'mantidproject' && (github.event_name != 'workflow_dispatch' || github.event.inputs.target == 'all' || github.event.inputs.target == 'anaconda-packages') }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        package_name:
+        package-name:
           - mantid
           - mantid-developer
           - mantidmpi
@@ -86,6 +102,11 @@ jobs:
           - mantidworkbench
           - mantiddocs
     steps:
+      - name: fail if ANACONDA_TOKEN_MANTIDORNL is unavailable
+        if: ${{ env.ANACONDA_TOKEN_MANTIDORNL == 'unset_token' }}
+        run: |
+          echo "ANACONDA_TOKEN_MANTIDORNL is unset_token. The ANACONDA_TOKEN_MANTIDORNL secret is not available in this workflow context."
+          exit 1
       - name: check out setup-pixi action
         uses: actions/checkout@v7
         with:
@@ -96,11 +117,11 @@ jobs:
             pixi.toml
           sparse-checkout-cone-mode: false
       - uses: ./.github/actions/setup-pixi
-      - uses: neutrons/gh-actions/pkg-remove@a1e1c8b4123ced6c66fe57b9a60a56a6e4bf6861 # v1
+      - uses: neutrons/gh-actions/pkg-remove@eb7a7c6fcfd0cda1a7b238329afc0afd09a4f4af # v2
         with:
-          anaconda_token: ${{ secrets.ANACONDA_TOKEN_MANTIDORNL }}
+          anaconda-token: ${{ env.ANACONDA_TOKEN_MANTIDORNL }}
           organization: mantid-ornl
-          package_name: ${{ matrix.package_name }}
+          package-name: ${{ matrix.package-name }}
           label: nightly
           keep: '3'
-          dry_run: ${{ github.event.inputs.dry_run || github.event_name != 'schedule' }}
+          dry-run: ${{ github.event.inputs.dry-run || github.event_name != 'schedule' }}
