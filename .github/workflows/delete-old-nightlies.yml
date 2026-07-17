@@ -5,8 +5,6 @@ on:
       - .github/actions/setup-pixi/
       - .github/workflows/delete-old-nightlies.yml
       - .pixi-version
-      - pixi.lock
-      - pixi.toml
   schedule:
     - cron: '0 2 * * *'
   workflow_dispatch:
