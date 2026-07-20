@@ -56,10 +56,9 @@ boost::python::object wrapMeshWithNDArray(const CSGObject *self) {
       localTriangulator = std::make_unique<GeometryTriangulator>(self);
       vertices = &localTriangulator->getTriangleVertices();
       triangleFaces = &localTriangulator->getTriangleFaces();
-    }
-
-    if (triangleFaces->empty() || vertices->empty()) {
-      return getEmptyArrayObject();
+      if (triangleFaces->empty() || vertices->empty()) {
+        return getEmptyArrayObject();
+      }
     }
 
     const size_t numberTriangles = triangleFaces->size() / 3;
