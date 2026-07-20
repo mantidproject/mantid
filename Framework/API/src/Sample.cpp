@@ -413,7 +413,7 @@ int Sample::loadNexus(Nexus::File *file, const std::string &group) {
     // Only replace the default shape if the file actually defines one; otherwise
     // keep the valid (empty) shape so callers never observe a null m_shape.
     if (IObject_sptr loadedShape = loadShapeFromFile(file))
-      m_shape = loadedShape;
+      m_shape = std::move(loadedShape);
 
     // sample environment
     if (file->hasAttr("env_name")) {
