@@ -146,8 +146,7 @@ class SaveMDToAscii(PythonAlgorithm):
         header_lines = []
         extra_header = self.getPropertyValue("ExtraHeader")
         if extra_header:  # in case `\n` was interpreted as a literal string
-            header_lines.append(extra_header.replace("\\n", "\n"))
-            header_lines.append(extra_header.replace("\\t", "\t"))
+            header_lines.append(extra_header.replace("\\n", "\n").replace("\\t", "\t"))
         header_lines.append(separator.join([*(d.name for d in dims), "Intensity", "Error"]))
         header_lines.append("shape: " + "x".join(str(d.getNBins()) for d in dims))
         header = "\n".join(header_lines)
