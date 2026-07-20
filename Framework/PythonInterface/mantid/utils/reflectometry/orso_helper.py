@@ -130,7 +130,7 @@ class MantidORSODataset:
 
     @staticmethod
     def _create_file(filename: str, timestamp: Optional[datetime] = None, comment: Optional[str] = None) -> File:
-        return File(filename, timestamp, comment)
+        return File(file=filename, timestamp=timestamp, comment=comment)
 
     def _create_mandatory_header(
         self,
