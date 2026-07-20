@@ -30,9 +30,9 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
     _INSTRUMENT_WORKFLOW = "InstrumentWorkflow"
     _SPECULAR_PIXEL_INDEX = "SpecularPixelIndex"
     _EXPERIMENT_ANGLE = "ExperimentAngle"
-    _DETECTOR_CORRECTION_TYPE = "DetectorCorrectionType"
     _OUTPUT_WORKSPACE = "OutputWorkspace"
 
+    _POSITION_CORRECTION_TYPE = "DetectorCorrectionType"
     _COMMENT_PREFIX = "#"
     _NUM_COLUMNS_REQUIRED = 2
     _DET_ID_LABEL = "detectorid"
@@ -76,6 +76,22 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
             expected_keys = list(range(self.first_key(), self.last_key() + 1))
             if self.keys() != expected_keys:
                 raise RuntimeError("Absolute calibration detector indexes must be contiguous")
+
+    class WorkflowOptions:
+        def __init__(
+            self,
+            calibration_angle_type,
+            detector_correction_type,
+            enabled_properties=None,
+            require_contiguous_calibration_keys=False,
+        ):
+            self.calibration_angle_type = calibration_angle_type
+            self.detector_correction_type = detector_correction_type
+            self.enabled_properties = set(enabled_properties or [])
+            self.require_contiguous_calibration_keys = require_contiguous_calibration_keys
+
+        def enable_property(self, property_name):
+            return property_name in self.enabled_properties
 
     def category(self):
         """Return the categories of the algorithm."""
@@ -128,15 +144,8 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
             0.0,
             "The experiment theta angle in degrees. Required for the POLREF workflow.",
         )
-        polref_workflow_enabled = EnabledWhenProperty(self._INSTRUMENT_WORKFLOW, PropertyCriterion.IsEqualTo, self._POLREF_WORKFLOW)
-        self.setPropertySettings(self._SPECULAR_PIXEL_INDEX, polref_workflow_enabled)
-        self.setPropertySettings(self._EXPERIMENT_ANGLE, polref_workflow_enabled)
-        self.declareProperty(
-            self._DETECTOR_CORRECTION_TYPE,
-            self._VERTICAL_SHIFT,
-            StringListValidator([self._VERTICAL_SHIFT, self._ROTATE_AROUND_SAMPLE]),
-            "Whether detectors should be shifted vertically or rotated around the sample position.",
-        )
+        self._enable_property_when_workflow_option_enables(self._SPECULAR_PIXEL_INDEX)
+        self._enable_property_when_workflow_option_enables(self._EXPERIMENT_ANGLE)
         self.declareProperty(
             WorkspaceProperty(self._OUTPUT_WORKSPACE, "", direction=Direction.Output),
             doc="The calibrated output workspace.",
@@ -146,7 +155,7 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         # Set the expected order of the columns in the calibration file
         self._det_id_col_idx = 0
         self._angle_col_idx = 1
-        self._calibration_angle_type = self._ABSOLUTE if self._is_polref_workflow() else self._OFFSET
+        self._workflow_options = self._selected_workflow_options()
 
         try:
             calibration_data = self._parse_calibration_file(self._calibration_filepath)
@@ -165,14 +174,18 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         self._calibration_filepath = self.getPropertyValue(self._CALIBRATION_FILE)
         if not self._calibration_filepath:
             issues[self._CALIBRATION_FILE] = "Calibration file path must be provided"
-        if self._is_polref_workflow() and self.getProperty(self._EXPERIMENT_ANGLE).isDefault:
+        workflow_options = self._selected_workflow_options()
+        if workflow_options.enable_property(self._EXPERIMENT_ANGLE) and self.getProperty(self._EXPERIMENT_ANGLE).isDefault:
             issues[self._EXPERIMENT_ANGLE] = "ExperimentAngle must be provided for the POLREF workflow"
         return issues
 
     def _parse_calibration_file(self, filepath):
         """Parse calibration data from the calibration file."""
-        if self._calibration_angle_type == self._ABSOLUTE:
-            return self.CalibrationData(self._parse_absolute_calibration_file(filepath), require_contiguous_keys=True)
+        if self._workflow_options.calibration_angle_type == self._ABSOLUTE:
+            return self.CalibrationData(
+                self._parse_absolute_calibration_file(filepath),
+                require_contiguous_keys=self._workflow_options.require_contiguous_calibration_keys,
+            )
         else:
             return self.CalibrationData(self._parse_offset_calibration_file(filepath))
 
@@ -296,7 +309,7 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         calibration_ws = self._clone_workspace(ws)
         det_info = calibration_ws.detectorInfo()
 
-        if self._calibration_angle_type == self._ABSOLUTE:
+        if self._workflow_options.calibration_angle_type == self._ABSOLUTE:
             calibration_data = self._convert_absolute_angles_to_offsets(calibration_ws, calibration_data)
 
         correction_alg = self.createChildAlgorithm("SpecularReflectionPositionCorrect")
@@ -307,7 +320,7 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         correction_alg.setProperty("InputWorkspace", calibration_ws)
         correction_alg.setProperty("MoveFixedDetectors", True)
         correction_alg.setProperty("OutputWorkspace", calibration_ws)
-        correction_alg.setProperty(self._DETECTOR_CORRECTION_TYPE, self._detector_correction_type())
+        correction_alg.setProperty(self._POSITION_CORRECTION_TYPE, self._workflow_options.detector_correction_type)
 
         for det_id, theta_offset in calibration_data.items():
             if theta_offset == 0:
@@ -413,13 +426,35 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         fraction = (index - lower_index) / (upper_index - lower_index)
         return lower_value + fraction * (upper_value - lower_value)
 
-    def _is_polref_workflow(self):
-        return self.getPropertyValue(self._INSTRUMENT_WORKFLOW) == self._POLREF_WORKFLOW
+    def _selected_workflow_options(self):
+        return self._workflow_options_by_name()[self.getPropertyValue(self._INSTRUMENT_WORKFLOW)]
 
-    def _detector_correction_type(self):
-        if self._is_polref_workflow() and self.getProperty(self._DETECTOR_CORRECTION_TYPE).isDefault:
-            return self._ROTATE_AROUND_SAMPLE
-        return self.getPropertyValue(self._DETECTOR_CORRECTION_TYPE)
+    def _workflow_options_by_name(self):
+        return {
+            self._DEFAULT_WORKFLOW: self.WorkflowOptions(
+                calibration_angle_type=self._OFFSET,
+                detector_correction_type=self._VERTICAL_SHIFT,
+            ),
+            self._POLREF_WORKFLOW: self.WorkflowOptions(
+                calibration_angle_type=self._ABSOLUTE,
+                detector_correction_type=self._ROTATE_AROUND_SAMPLE,
+                enabled_properties={self._SPECULAR_PIXEL_INDEX, self._EXPERIMENT_ANGLE},
+                require_contiguous_calibration_keys=True,
+            ),
+        }
+
+    def _enable_property_when_workflow_option_enables(self, property_name):
+        workflow_names = [
+            workflow_name
+            for workflow_name, workflow_options in self._workflow_options_by_name().items()
+            if workflow_options.enable_property(property_name)
+        ]
+        if len(workflow_names) != 1:
+            raise RuntimeError(f"Expected one workflow to enable {property_name}; found {workflow_names}")
+        self.setPropertySettings(
+            property_name,
+            EnabledWhenProperty(self._INSTRUMENT_WORKFLOW, PropertyCriterion.IsEqualTo, workflow_names[0]),
+        )
 
     def _specular_pixel_index(self):
         return self.getProperty(self._SPECULAR_PIXEL_INDEX).value

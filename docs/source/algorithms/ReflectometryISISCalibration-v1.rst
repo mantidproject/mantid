@@ -21,7 +21,7 @@ The ``InstrumentWorkflow`` property controls the meaning of the calibration valu
 
 For the ``POLREF`` workflow, ``ExperimentAngle`` is the experiment theta angle in degrees, and ``SpecularPixelIndex`` is the fitted specular pixel index for the experiment. The same ``SpecularPixelIndex`` is used in the calibration-file detector-index coordinate system and in the input workspace detector-index coordinate system. It may be fractional, in which case linear interpolation is used on the calibration file.
 
-The ``DetectorCorrectionType`` property is passed to :ref:`algm-SpecularReflectionPositionCorrect` and controls whether pixels are moved by a vertical shift or rotated around the sample. If ``DetectorCorrectionType`` is left at its default value, the ``Default`` workflow uses ``VerticalShift`` and the ``POLREF`` workflow uses ``RotateAroundSample``.
+The selected ``InstrumentWorkflow`` controls how detector positions are corrected. The ``Default`` workflow applies detector corrections as vertical shifts. The ``POLREF`` workflow rotates detectors around the sample.
 
 The POLREF calibration map has an inverted angular coordinate relative to Mantid's signed two theta coordinate for the workspace: in current POLREF maps, the calibration-file ``angle`` decreases as detector index increases, while the workspace signed two theta increases.
 

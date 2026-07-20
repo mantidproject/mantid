@@ -389,9 +389,12 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         }
         self._assert_run_algorithm_raises_exception(args, "ExperimentAngle must be provided for the POLREF workflow")
 
-    def test_calibration_angle_type_is_not_a_public_property(self):
+    def test_internal_properties_are_not_public_properties(self):
         alg = create_algorithm("ReflectometryISISCalibration")
-        self.assertNotIn("CalibrationAngleType", [prop.name for prop in alg.getProperties()])
+        property_names = [prop.name for prop in alg.getProperties()]
+
+        self.assertNotIn("CalibrationAngleType", property_names)
+        self.assertNotIn("DetectorCorrectionType", property_names)
 
     def test_calibration_data_preserves_values_and_provides_sorted_keys(self):
         calibration_data = ReflectometryISISCalibration.CalibrationData({3: 0.3, 1: 0.1})
@@ -407,6 +410,16 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
             {1: 0.1, 3: 0.3},
             True,
         )
+
+    def test_workflow_options_enable_property_only_for_configured_properties(self):
+        workflow_options = ReflectometryISISCalibration.WorkflowOptions(
+            calibration_angle_type="Absolute",
+            detector_correction_type="RotateAroundSample",
+            enabled_properties={"SpecularPixelIndex"},
+        )
+
+        self.assertTrue(workflow_options.enable_property("SpecularPixelIndex"))
+        self.assertFalse(workflow_options.enable_property("ExperimentAngle"))
 
     def test_polref_workflow_raises_if_detector_index_is_fractional(self):
         input_ws_name = "test_1234"
