@@ -175,82 +175,46 @@ void GeometryTriangulator::OCAnalyzeObject() {
     }
   }
 
-  setupPoints();
-  setupFaces();
+  setupMesh();
 }
 
-size_t GeometryTriangulator::numPoints() const {
-  size_t countVert = 0;
-  if (m_objSurface != nullptr) {
-    TopExp_Explorer Ex;
-    for (Ex.Init(*m_objSurface, TopAbs_FACE); Ex.More(); Ex.Next()) {
-      TopoDS_Face F = TopoDS::Face(Ex.Current());
-      TopLoc_Location L;
-      Handle(Poly_Triangulation) facing = BRep_Tool::Triangulation(F, L);
-      countVert += static_cast<size_t>(facing->NbNodes());
-    }
-  }
-  return countVert;
-}
+void GeometryTriangulator::setupMesh() {
+  m_points.clear();
+  m_faces.clear();
+  m_nPoints = 0;
+  m_nFaces = 0;
+  if (m_objSurface == nullptr)
+    return;
 
-size_t GeometryTriangulator::numFaces() const {
-  size_t countFace = 0;
-  if (m_objSurface != nullptr) {
-    TopExp_Explorer Ex;
-    for (Ex.Init(*m_objSurface, TopAbs_FACE); Ex.More(); Ex.Next()) {
-      TopoDS_Face F = TopoDS::Face(Ex.Current());
-      TopLoc_Location L;
-      Handle(Poly_Triangulation) facing = BRep_Tool::Triangulation(F, L);
-      countFace += static_cast<size_t>(facing->NbTriangles());
-    }
-  }
-  return countFace;
-}
+  int maxindex = 0;
+  TopExp_Explorer Ex;
+  for (Ex.Init(*m_objSurface, TopAbs_FACE); Ex.More(); Ex.Next()) {
+    TopoDS_Face F = TopoDS::Face(Ex.Current());
+    TopLoc_Location L;
+    Handle(Poly_Triangulation) facing = BRep_Tool::Triangulation(F, L);
+    if (facing.IsNull())
+      continue;
 
-void GeometryTriangulator::setupPoints() {
-  m_nPoints = numPoints();
-  if (m_nPoints > 0) {
-    size_t index = 0;
-    m_points.resize(m_nPoints * 3);
-    TopExp_Explorer Ex;
-    for (Ex.Init(*m_objSurface, TopAbs_FACE); Ex.More(); Ex.Next()) {
-      TopoDS_Face F = TopoDS::Face(Ex.Current());
-      TopLoc_Location L;
-      Handle(Poly_Triangulation) facing = BRep_Tool::Triangulation(F, L);
-      for (Standard_Integer i = 1; i <= (facing->NbNodes()); i++) {
-        const auto pnt = getNode(facing, i);
-        m_points[index * 3 + 0] = pnt.X();
-        m_points[index * 3 + 1] = pnt.Y();
-        m_points[index * 3 + 2] = pnt.Z();
-        index++;
-      }
+    for (Standard_Integer i = 1; i <= facing->NbNodes(); i++) {
+      const auto pnt = getNode(facing, i);
+      m_points.push_back(pnt.X());
+      m_points.push_back(pnt.Y());
+      m_points.push_back(pnt.Z());
     }
-  }
-}
 
-void GeometryTriangulator::setupFaces() {
-  m_nFaces = numFaces();
-  if (m_nFaces > 0) {
-    m_faces.resize(m_nFaces * 3);
-    TopExp_Explorer Ex;
-    int maxindex = 0;
-    size_t index = 0;
-    for (Ex.Init(*m_objSurface, TopAbs_FACE); Ex.More(); Ex.Next()) {
-      TopoDS_Face F = TopoDS::Face(Ex.Current());
-      TopLoc_Location L;
-      Handle(Poly_Triangulation) facing = BRep_Tool::Triangulation(F, L);
-      for (Standard_Integer i = 1; i <= (facing->NbTriangles()); i++) {
-        Poly_Triangle trian = getTriangle(facing, i);
-        Standard_Integer index1, index2, index3;
-        trian.Get(index1, index2, index3);
-        m_faces[index * 3 + 0] = static_cast<uint32_t>(maxindex + index1 - 1);
-        m_faces[index * 3 + 1] = static_cast<uint32_t>(maxindex + index2 - 1);
-        m_faces[index * 3 + 2] = static_cast<uint32_t>(maxindex + index3 - 1);
-        index++;
-      }
-      maxindex += facing->NbNodes();
+    for (Standard_Integer i = 1; i <= facing->NbTriangles(); i++) {
+      Poly_Triangle trian = getTriangle(facing, i);
+      Standard_Integer index1, index2, index3;
+      trian.Get(index1, index2, index3);
+      m_faces.push_back(static_cast<uint32_t>(maxindex + index1 - 1));
+      m_faces.push_back(static_cast<uint32_t>(maxindex + index2 - 1));
+      m_faces.push_back(static_cast<uint32_t>(maxindex + index3 - 1));
     }
+    maxindex += facing->NbNodes();
   }
+
+  m_nPoints = m_points.size() / 3;
+  m_nFaces = m_faces.size() / 3;
 }
 #endif
 

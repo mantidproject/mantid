@@ -48,34 +48,42 @@ boost::python::object wrapMeshWithNDArray(const CSGObject *self) {
     throw std::runtime_error("Cannot plot Shapes of infinite extent.");
   }
   try {
-    auto localTriangulator = GeometryTriangulator(self);
-    const auto &vertices = localTriangulator.getTriangleVertices();
-    const auto &triangles = localTriangulator.getTriangleFaces();
-    const size_t &numberTriangles = localTriangulator.numTriangleFaces();
-    npy_intp dims[3] = {static_cast<npy_intp>(numberTriangles), 3, 3};
+    const std::vector<double> *vertices = &self->getTriangleVertices();
+    const std::vector<uint32_t> *triangleFaces = &self->getTriangleFaces();
+    std::unique_ptr<GeometryTriangulator> localTriangulator;
 
-    if (numberTriangles == 0 || vertices.empty() || triangles.empty()) {
-      return getEmptyArrayObject();
+    if (triangleFaces->empty() || vertices->empty()) {
+      localTriangulator = std::make_unique<GeometryTriangulator>(self);
+      vertices = &localTriangulator->getTriangleVertices();
+      triangleFaces = &localTriangulator->getTriangleFaces();
+      if (triangleFaces->empty() || vertices->empty()) {
+        return getEmptyArrayObject();
+      }
     }
 
-    size_t totalSize = dims[0] * dims[1] * dims[2];
-    auto *meshCoords = new double[totalSize];
-    std::fill(meshCoords, meshCoords + totalSize, 0.0);
+    const size_t numberTriangles = triangleFaces->size() / 3;
+    npy_intp dims[3] = {static_cast<npy_intp>(numberTriangles), 3, 3};
+    auto *meshCoords = new double[numberTriangles * 9];
 
-    // Copy triangle data with bounds checking
-    for (size_t corner_index = 0; corner_index < triangles.size() && corner_index < totalSize; ++corner_index) {
-      for (size_t xyz = 0; xyz < 3; xyz++) {
-        size_t vertex_idx = triangles[corner_index];
-        if (vertex_idx * 3 + xyz < vertices.size()) {
-          meshCoords[3 * corner_index + xyz] = vertices[3 * vertex_idx + xyz];
-        }
-      } // for each coordinate of that corner
-    } // for each corner of the triangle
+    const size_t vertexCapacity = vertices->size();
+    for (size_t corner = 0; corner < triangleFaces->size(); ++corner) {
+      const size_t src = static_cast<size_t>((*triangleFaces)[corner]) * 3;
+      const size_t dst = corner * 3;
+      if (src + 2 < vertexCapacity) {
+        meshCoords[dst] = (*vertices)[src];
+        meshCoords[dst + 1] = (*vertices)[src + 1];
+        meshCoords[dst + 2] = (*vertices)[src + 2];
+      } else {
+        meshCoords[dst] = 0.0;
+        meshCoords[dst + 1] = 0.0;
+        meshCoords[dst + 2] = 0.0;
+      }
+    }
+
     PyObject *ndarray = Impl::wrapWithNDArray(meshCoords, 3, dims, NumpyWrapMode::ReadOnly, OwnershipMode::Python);
     return object(handle<>(ndarray));
 
   } catch (const std::exception &e) {
-    // Return empty array on failure
     g_log.error(e.what());
     return getEmptyArrayObject();
   }

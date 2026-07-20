@@ -58,10 +58,7 @@ private:
                                               /// Analyze the object
                                               /// OpenCascade analysis of object surface
   void OCAnalyzeObject();
-  size_t numPoints() const;
-  size_t numFaces() const;
-  void setupPoints();
-  void setupFaces();
+  void setupMesh(); ///< Single-pass extraction of points and faces from OC surface
 
 public:
   /// Return OpenCascade surface.

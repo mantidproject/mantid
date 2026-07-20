@@ -66,6 +66,9 @@ class ShapeRenderer(InstrumentRenderer):
         self._faces_per_detector: np.ndarray | None = None  # (N,)
         # Reference to the most recently built detector surface mesh
         self._detector_mesh_ref: pv.PolyData | None = None
+        # Sorted detector-ID arrays for O(M log N) lookup in _resolve_detector_indices
+        self._sorted_det_ids: np.ndarray | None = None  # sorted detector IDs
+        self._sorted_det_info_indices: np.ndarray | None = None  # detectorInfo index for each sorted ID
 
     # -----------------------------------------------------------------
     # Pre-computation: fetch shape meshes and detector transforms once
@@ -99,13 +102,23 @@ class ShapeRenderer(InstrumentRenderer):
                 shape_obj = comp_info.shape(int(det_indices[0]))
                 try:
                     si = shape_obj.shapeInfo()
-                    shape_type = si.shape()
-                    if self._use_optimised_shapes and shape_type == GeometryShape.CYLINDER:
-                        shape_cache[key] = self._extract_optimised_shape(shape_obj, shape_type, si, _extract_quad_from_cylinder_shapeinfo)
-                    elif self._use_optimised_shapes and shape_type == GeometryShape.CUBOID:
-                        shape_cache[key] = self._extract_optimised_shape(shape_obj, shape_type, si, _extract_quad_from_cuboid_shapeinfo)
-                    else:
+                except RuntimeError:
+                    logger.information("ShapeRenderer: failed to get ShapeInfo for shape")
+                    si = None
+
+                try:
+                    if si is None or not self._use_optimised_shapes:
                         shape_cache[key] = self._shape_from_raw_mesh(shape_obj)
+                    else:
+                        shape_type = si.shape()
+                        if shape_type == GeometryShape.CYLINDER:
+                            shape_cache[key] = self._extract_optimised_shape(
+                                shape_obj, shape_type, si, _extract_quad_from_cylinder_shapeinfo
+                            )
+                        elif shape_type == GeometryShape.CUBOID:
+                            shape_cache[key] = self._extract_optimised_shape(shape_obj, shape_type, si, _extract_quad_from_cuboid_shapeinfo)
+                        else:
+                            shape_cache[key] = self._shape_from_raw_mesh(shape_obj)
                 except Exception:
                     shape_cache[key] = _make_fallback_shape()
                     logger.information("ShapeRenderer: failed to get mesh for shape, using fallback")
@@ -117,12 +130,21 @@ class ShapeRenderer(InstrumentRenderer):
 
         self._shape_cache = shape_cache
         self._det_shape_keys = det_shape_keys
-        self._det_rotations = Rotation.from_quat(det_info.allRotations()).as_matrix()
+        all_rotations = np.asarray(det_info.allRotations())
+        self._det_rotations = Rotation.from_quat(all_rotations).as_matrix()
         self._det_scales = det_info.allScaleFactors()
         self._all_positions_3d = det_info.allPositions()
         self._beam_axis = get_beam_axis(self._workspace)
+
+        # Build sorted lookup for _resolve_detector_indices — avoids a Python
+        # loop over every detector on each render call.
+        all_det_ids = np.asarray(det_info.detectorIDs(), dtype=np.int64)
+        sort_order = np.argsort(all_det_ids)
+        self._sorted_det_ids = all_det_ids[sort_order]
+        self._sorted_det_info_indices = sort_order.astype(np.int64)
+
         self._precomputed = True
-        logger.information(f"ShapeRenderer: precomputed {n_det} detectors, {len(shape_cache)} unique shapes")
+        logger.information(f"ShapeRenderer.precomputed {n_det} detectors, {len(shape_cache)} unique shapes")
 
     def _extract_optimised_shape(
         self,
@@ -296,21 +318,18 @@ class ShapeRenderer(InstrumentRenderer):
 
     def _resolve_detector_indices(self, detector_ids: np.ndarray) -> np.ndarray:
         """Return indices into ``self._all_positions_3d`` for the detectors
-        represented by *positions*.
+        represented by *detector_ids*.
 
-        The model stores ``_detector_ids`` for all detectors in the same order
-        as the arrays in the ``CreateDetectorTable`` output.  We need to map
-        those to the ``detectorInfo`` indices used during precomputation.
-
-        We match by looking up the detector IDs that correspond to the
-        pickable/masked subset and converting them via ``detectorInfo.indexOf``.
+        Uses the sorted lookup table built in ``precompute`` so the mapping is
+        a single O(M log N) ``np.searchsorted`` call rather than a Python loop.
         """
-        det_info = self._workspace.detectorInfo()
+        if self._sorted_det_ids is not None:
+            ids = np.asarray(detector_ids, dtype=np.int64)
+            pos = np.searchsorted(self._sorted_det_ids, ids)
+            return self._sorted_det_info_indices[pos]
 
-        # Convert detector IDs → detectorInfo indices (vectorised via the
-        # C++ call).  ``detectorInfo().indexOf(id)`` works element-wise in C++
-        # but not in Python, so we loop.  For large instruments this is fast
-        # because it's just a dict lookup in C++.
+        # Fallback before precompute has run (should not normally be reached).
+        det_info = self._workspace.detectorInfo()
         indices = np.empty(len(detector_ids), dtype=np.int64)
         for i, did in enumerate(detector_ids):
             indices[i] = det_info.indexOf(int(did))
