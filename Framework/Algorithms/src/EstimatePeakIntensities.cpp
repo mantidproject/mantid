@@ -82,23 +82,20 @@ double centralMoment3(const double s1, const double s2, const double s3, const d
 /// positively skewed as a result of the sorting but at this point removal of the largest background point is expected
 /// to result in a net increase in the magnitude of the positive skew (see example below)
 ///
-///     |                     |
-///     |                     |
-///     ||                    ||                      |
-///     ||                    ||                      |
-///     |||                   |||                     ||                    |
-///  || ||| |                 ||||||                  |||||                 ||||                     ||| ||
-/// ||||||||||                ||||||||||              |||||||||             ||||||||                 ||||||| ||||||
-/// 0123456789    sort->      4561280379  peel->      561280379   peel->    61280379    peel->       1280379 peel->
-/// 280379
+///     |                 |
+///     |                 |
+///     ||                ||                  |
+///     ||                ||                  |
+///     |||               |||                 ||                    |
+///  || ||| |             ||||||              |||||                 ||||                 |||              ||
+/// ||||||||||            ||||||||||          |||||||||             ||||||||             |||||||          ||||||
+/// 0123456789   sort->   4561280379  peel->  561280379   peel->    61280379    peel->   1280379  peel->  280379
 ///
-///                           mean = 2.5              mean = 2.0           mean = 1.625             mean = 1.42 mean
-///                           = 1.33 moment = 9.3            moment = 2.67        moment = 0.227           moment =
-///                           0.035            moment = 0.074
+///                       mean = 2.5          mean = 2.0           mean = 1.625          mean = 1.42      mean= 1.33
+///                       moment = 9.3        moment = 2.67        moment = 0.227        moment = 0.035   moment = 0.074
 ///
-///                                                   delta = -ve          delta = -ve              delta = -ve delta =
-///                                                   +ve (STOP)
-///
+///                                           delta = -ve          delta = -ve           delta = -ve      delta = +ve
+///                                                                                                        (REJECT)
 double estimateSkewBackground(const std::vector<double> &y) {
   const size_t n = y.size();
   if (n == 0)
