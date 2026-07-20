@@ -21,19 +21,9 @@ The ``InstrumentWorkflow`` property controls the meaning of the calibration valu
 
 For the ``POLREF`` workflow, ``ExperimentAngle`` is the experiment theta angle in degrees, and ``SpecularPixelIndex`` is the fitted specular pixel index for the experiment. The same ``SpecularPixelIndex`` is used in the calibration-file detector-index coordinate system and in the input workspace detector-index coordinate system. It may be fractional, in which case linear interpolation is used on the calibration file.
 
-The POLREF calibration map has an inverted angular coordinate relative to Mantid's signed two theta coordinate for the workspace: in current POLREF maps, the calibration-file ``angle`` decreases as detector index increases, while the workspace signed two theta increases. The relative calibration-map angle is therefore subtracted from the experiment specular two theta:
-
-.. code-block:: none
-
-    desired_two_theta = 2 * ExperimentAngle - 2 * (angle(detectorindex) - angle(SpecularPixelIndex))
-
-The algorithm then converts this desired absolute two theta value to the offset passed to :ref:`algm-SpecularReflectionPositionCorrect`:
-
-.. code-block:: none
-
-    theta_offset = desired_two_theta - current_workspace_two_theta
-
 The ``DetectorCorrectionType`` property is passed to :ref:`algm-SpecularReflectionPositionCorrect` and controls whether pixels are moved by a vertical shift or rotated around the sample. If ``DetectorCorrectionType`` is left at its default value, the ``Default`` workflow uses ``VerticalShift`` and the ``POLREF`` workflow uses ``RotateAroundSample``.
+
+The POLREF calibration map has an inverted angular coordinate relative to Mantid's signed two theta coordinate for the workspace: in current POLREF maps, the calibration-file ``angle`` decreases as detector index increases, while the workspace signed two theta increases.
 
 The below is an example of a valid calibration file:
 
