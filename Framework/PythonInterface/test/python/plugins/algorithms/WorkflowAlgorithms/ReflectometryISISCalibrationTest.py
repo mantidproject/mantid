@@ -12,6 +12,7 @@ from mantid import FileFinder
 from mantid.api import AnalysisDataService, WorkspaceGroup
 from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces
 from mantid.kernel import V3D
+from ReflectometryISISCalibration import ReflectometryISISCalibration
 from testhelpers import assertRaisesNothing, create_algorithm, WorkspaceCreationHelper
 from testhelpers.tempfile_wrapper import TemporaryFileHelper
 
@@ -186,6 +187,21 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
 
         output_ws = AnalysisDataService.retrieve(output_ws_name)
         self._check_final_theta_values(ws, output_ws, calibration_data={det_id: theta_offset})
+
+    def test_calibration_successful_with_non_contiguous_default_detector_ids(self):
+        theta_offsets = {11: 0.05, 13: -0.03}
+        calibration_lines = [f"{self._DET_ID_LABEL} {self._THETA_LABEL}\n"]
+        calibration_lines.extend(f"{det_id} {theta_offset}\n" for det_id, theta_offset in theta_offsets.items())
+        self.temp_calibration_file = TemporaryFileHelper(fileContent="".join(calibration_lines), extension=".dat")
+        input_ws_name = "test_1234"
+        ws = self._create_sample_workspace(input_ws_name)
+
+        output_ws_name = "test_calibrated"
+        args = {"InputWorkspace": ws, "CalibrationFile": self.temp_calibration_file.getName(), "OutputWorkspace": output_ws_name}
+        self._assert_run_algorithm_succeeds(args, [input_ws_name, output_ws_name])
+
+        output_ws = AnalysisDataService.retrieve(output_ws_name)
+        self._check_final_theta_values(ws, output_ws, calibration_data=theta_offsets)
 
     def test_polref_workflow_uses_detector_index_order_and_theta_factor_of_two(self):
         input_ws_name = "test_1234"
@@ -376,6 +392,21 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
     def test_calibration_angle_type_is_not_a_public_property(self):
         alg = create_algorithm("ReflectometryISISCalibration")
         self.assertNotIn("CalibrationAngleType", [prop.name for prop in alg.getProperties()])
+
+    def test_calibration_data_preserves_values_and_provides_sorted_keys(self):
+        calibration_data = ReflectometryISISCalibration.CalibrationData({3: 0.3, 1: 0.1})
+
+        self.assertEqual([1, 3], calibration_data.keys())
+        self.assertEqual({3: 0.3, 1: 0.1}, dict(calibration_data.items()))
+
+    def test_calibration_data_can_require_contiguous_keys(self):
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Absolute calibration detector indexes must be contiguous",
+            ReflectometryISISCalibration.CalibrationData,
+            {1: 0.1, 3: 0.3},
+            True,
+        )
 
     def test_polref_workflow_raises_if_detector_index_is_fractional(self):
         input_ws_name = "test_1234"

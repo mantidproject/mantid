@@ -47,6 +47,36 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
     _ROTATE_AROUND_SAMPLE = "RotateAroundSample"
     _RAD_TO_DEG = 180.0 / math.pi
 
+    class CalibrationData:
+        def __init__(self, data, require_contiguous_keys=False):
+            self._data = dict(data)
+            if require_contiguous_keys:
+                self.validate_contiguous_keys()
+
+        @property
+        def data(self):
+            return self._data
+
+        def items(self):
+            return self._data.items()
+
+        def keys(self):
+            return sorted(self._data)
+
+        def first_key(self):
+            return self.keys()[0]
+
+        def last_key(self):
+            return self.keys()[-1]
+
+        def in_range(self, key):
+            return self.first_key() <= key <= self.last_key()
+
+        def validate_contiguous_keys(self):
+            expected_keys = list(range(self.first_key(), self.last_key() + 1))
+            if self.keys() != expected_keys:
+                raise RuntimeError("Absolute calibration detector indexes must be contiguous")
+
     def category(self):
         """Return the categories of the algorithm."""
         return "Reflectometry\\ISIS;Workflow\\Reflectometry"
@@ -142,9 +172,9 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
     def _parse_calibration_file(self, filepath):
         """Parse calibration data from the calibration file."""
         if self._calibration_angle_type == self._ABSOLUTE:
-            return self._parse_absolute_calibration_file(filepath)
+            return self.CalibrationData(self._parse_absolute_calibration_file(filepath), require_contiguous_keys=True)
         else:
-            return self._parse_offset_calibration_file(filepath)
+            return self.CalibrationData(self._parse_offset_calibration_file(filepath))
 
     def _parse_offset_calibration_file(self, filepath):
         """Create a dictionary of detector IDs and theta offsets from the calibration file."""
@@ -307,45 +337,35 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         self._validate_absolute_calibration_inputs(detector_spectrum_indices, absolute_calibration_angles)
 
         calibration_specular_two_theta = 2.0 * self._interpolate_calibration_angle(
-            absolute_calibration_angles, self._specular_pixel_index()
+            absolute_calibration_angles.data, self._specular_pixel_index()
         )
         experiment_specular_two_theta = 2.0 * self._experiment_angle()
 
         offsets = {}
-        calibration_detector_indexes = sorted(absolute_calibration_angles)
-        first_calibration_detector_index = calibration_detector_indexes[0]
-        last_calibration_detector_index = calibration_detector_indexes[-1]
         for detector_index, spectrum_index in enumerate(detector_spectrum_indices):
-            if detector_index < first_calibration_detector_index or detector_index > last_calibration_detector_index:
+            if not absolute_calibration_angles.in_range(detector_index):
                 continue
 
-            calibration_two_theta = 2.0 * self._interpolate_calibration_angle(absolute_calibration_angles, detector_index)
+            calibration_two_theta = 2.0 * self._interpolate_calibration_angle(absolute_calibration_angles.data, detector_index)
             two_theta_relative_to_calibration_specular = calibration_two_theta - calibration_specular_two_theta
             # POLREF calibration-map angle decreases with detector index, while workspace signed two theta increases.
             # This inverts the calibration-map relative offset before anchoring it at the experiment specular two theta.
             experiment_two_theta = experiment_specular_two_theta - two_theta_relative_to_calibration_specular
             workspace_two_theta = ws.spectrumInfo().signedTwoTheta(spectrum_index) * self._RAD_TO_DEG
             offsets[self._single_detector_id(ws, spectrum_index)] = experiment_two_theta - workspace_two_theta
-        return offsets
+        return self.CalibrationData(offsets)
 
     def _validate_absolute_calibration_inputs(self, detector_spectrum_indices, absolute_calibration_angles):
         if len(detector_spectrum_indices) == 0:
             raise RuntimeError("Absolute calibration requires at least one non-monitor detector in the input workspace")
-
-        calibration_detector_indexes = sorted(absolute_calibration_angles)
-        first_calibration_detector_index = calibration_detector_indexes[0]
-        last_calibration_detector_index = calibration_detector_indexes[-1]
         last_experiment_detector_index = len(detector_spectrum_indices) - 1
-        expected_detector_indexes = list(range(first_calibration_detector_index, last_calibration_detector_index + 1))
-        if calibration_detector_indexes != expected_detector_indexes:
-            raise RuntimeError("Absolute calibration detector indexes must be contiguous")
-
-        if first_calibration_detector_index > last_experiment_detector_index or last_calibration_detector_index < 0:
+        if absolute_calibration_angles.first_key() > last_experiment_detector_index or absolute_calibration_angles.last_key() < 0:
             raise RuntimeError("Absolute calibration file detector indexes do not overlap the input workspace detector indexes")
+
         self._validate_interpolation_index(
             self._specular_pixel_index(),
-            first_calibration_detector_index,
-            last_calibration_detector_index,
+            absolute_calibration_angles.first_key(),
+            absolute_calibration_angles.last_key(),
             self._SPECULAR_PIXEL_INDEX,
         )
         if self._specular_pixel_index() > last_experiment_detector_index:
