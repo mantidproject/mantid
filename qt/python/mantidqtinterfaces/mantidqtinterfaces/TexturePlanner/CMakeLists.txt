@@ -8,6 +8,11 @@ set(TEST_PY_FILES
     helpers/test/test_instrument.py
     helpers/test/test_orientation_table.py
     helpers/test/test_exporter.py
+    settings/test/test_settings_model.py
+    settings/test/test_settings_presenter.py
+    test/test_model.py
+    test/test_presenter.py
+    test/test_view_functional.py
 )
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
