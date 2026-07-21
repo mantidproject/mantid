@@ -772,7 +772,7 @@ def _correct_full_calib_for_offset_scattering_com(ws: MatrixWorkspace, full_cali
 
     If this assumption is not true L1, L2 and most importantly (read: biggest error) sin(theta) will be wrong.
 
-    Additionally this formualtion assumes that L2 can be calculated using this C.O.M and the as-defined detector positions
+    Additionally this formulation assumes that L2 can be calculated using this C.O.M and the as-defined detector positions
     in the IDF. The calibration is however done to correct for these deviations, so we need to find a way to correct
     the calibration DIFCs solely for the COM offset.
 
