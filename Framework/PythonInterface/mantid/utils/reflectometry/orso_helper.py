@@ -149,16 +149,18 @@ class MantidORSODataset:
                 with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
                     future = executor.submit(SampleModel(stack=model).resolve_to_layers)
                     try:
-                        future.result(timeout=5.0)
+                        layers = future.result(timeout=5.0)
+                        if "could not locate density information for material" in str(layers):
+                            logger.error(
+                                f"The provided model description '{model}' contains an error because the "
+                                "density information of atleast one of the materials in the stack couldn't "
+                                "be located. Please check that the string follows the correct ORSO format "
+                                "and the materials in the stack are defined correctly"
+                            )
+                            self._header = None
+                            return
                     except concurrent.futures.TimeoutError:
                         logger.error(f"The provided model description '{model}' could not be validated because of database unavailability.")
-                        self._header = None
-                        return
-                    except:
-                        logger.error(
-                            f"The provided model description '{model}' contains an error. "
-                            "Please check that the string follows the correct ORSO format."
-                        )
                         self._header = None
                         return
             sample = Sample(name=ws.getTitle(), model=model)

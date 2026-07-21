@@ -257,16 +257,22 @@ class MantidORSODatasetTest(unittest.TestCase):
         mock_logger.assert_has_calls(
             [
                 mock.call(
-                    "The provided model description 'air | Ni 100 | SiO2 0.5 | 02' contains an error. "
-                    "Please check that the string follows the correct ORSO format."
+                    "The provided model description 'air | Ni 100 | SiO2 0.5 | 02' contains an error because the "
+                    "density information of atleast one of the materials in the stack couldn't "
+                    "be located. Please check that the string follows the correct ORSO format "
+                    "and the materials in the stack are defined correctly"
                 ),
                 mock.call(
-                    "The provided model description 'air | 25 [ Si 7 | Fe 7 ] | Si' contains an error. "
-                    "Please check that the string follows the correct ORSO format."
+                    "The provided model description 'air | 25 [ Si 7 | Fe 7 ] | Si' contains an error because the "
+                    "density information of atleast one of the materials in the stack couldn't "
+                    "be located. Please check that the string follows the correct ORSO format "
+                    "and the materials in the stack are defined correctly"
                 ),
                 mock.call(
-                    "The provided model description 'Si | SiO2 0.5 | wat:er' contains an error. "
-                    "Please check that the string follows the correct ORSO format."
+                    "The provided model description 'Si | SiO2 0.5 | wat:er' contains an error because the "
+                    "density information of atleast one of the materials in the stack couldn't "
+                    "be located. Please check that the string follows the correct ORSO format "
+                    "and the materials in the stack are defined correctly"
                 ),
             ]
         )
