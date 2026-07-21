@@ -206,7 +206,20 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         self._assert_run_algorithm_succeeds(args, [input_ws_name, output_ws_name])
 
         output_ws = AnalysisDataService.retrieve(output_ws_name)
-        self._check_polref_final_theta_values(ws, output_ws, angles, specular_spectrum_number, experiment_angle)
+        self._check_polref_final_theta_values(
+            output_ws,
+            {
+                1: 1.35,
+                2: 1.25,
+                3: 1.15,
+                4: 1.05,
+                5: 0.95,
+                6: 0.85,
+                7: 0.75,
+                8: 0.65,
+                9: 0.55,
+            },
+        )
 
     def test_polref_workflow_inverts_descending_calibration_map_angles(self):
         input_ws_name = "test_1234"
@@ -228,7 +241,20 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         self._assert_run_algorithm_succeeds(args, [input_ws_name, output_ws_name])
 
         output_ws = AnalysisDataService.retrieve(output_ws_name)
-        self._check_polref_final_theta_values(ws, output_ws, angles, specular_spectrum_number, experiment_angle)
+        self._check_polref_final_theta_values(
+            output_ws,
+            {
+                1: 0.70,
+                2: 0.80,
+                3: 0.90,
+                4: 1.00,
+                5: 1.10,
+                6: 1.20,
+                7: 1.30,
+                8: 1.40,
+                9: 1.50,
+            },
+        )
         self.assertGreater(
             output_ws.spectrumInfo().signedTwoTheta(self._workspace_index_for_spectrum_number(output_ws, specular_spectrum_number + 1)),
             output_ws.spectrumInfo().signedTwoTheta(self._workspace_index_for_spectrum_number(output_ws, specular_spectrum_number)),
@@ -326,7 +352,7 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         self._assert_run_algorithm_succeeds(args, [input_ws_name, output_ws_name])
 
         output_ws = AnalysisDataService.retrieve(output_ws_name)
-        self._check_polref_final_theta_values(ws, output_ws, angles, 4, 0.5)
+        self._check_polref_final_theta_values(output_ws, {2: 1.20, 3: 1.10, 4: 1.00, 5: 0.90})
 
     def _check_final_theta_values(self, input_ws, output_ws, calibration_data=None):
         if not calibration_data:
@@ -346,32 +372,14 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
 
             self.assertAlmostEqual(two_theta_out, expected_two_theta, msg=f"Unexpected theta value for detector {det_id}")
 
-    def _check_polref_final_theta_values(
-        self,
-        input_ws,
-        output_ws,
-        absolute_calibration_angles,
-        specular_spectrum_number,
-        experiment_angle,
-    ):
-        info_in = input_ws.spectrumInfo()
+    def _check_polref_final_theta_values(self, output_ws, expected_two_theta_degrees_by_spectrum_number):
         info_out = output_ws.spectrumInfo()
-        calibration_specular_angle = self._interpolate_calibration_angle(absolute_calibration_angles, specular_spectrum_number)
-        experiment_specular_two_theta = 2.0 * experiment_angle
-        calibration_spectrum_numbers = self._calibration_spectrum_numbers(absolute_calibration_angles)
-        first_calibrated_spectrum_number = calibration_spectrum_numbers[0]
-        last_calibrated_spectrum_number = calibration_spectrum_numbers[-1]
 
-        for index in range(input_ws.getNumberHistograms()):
-            spectrum_number = input_ws.getSpectrum(index).getSpectrumNo()
-            if first_calibrated_spectrum_number <= spectrum_number <= last_calibrated_spectrum_number:
-                relative_calibration_angle = (
-                    self._interpolate_calibration_angle(absolute_calibration_angles, spectrum_number) - calibration_specular_angle
-                )
-                expected_two_theta_degrees = experiment_specular_two_theta - 2.0 * relative_calibration_angle
-                expected_two_theta = expected_two_theta_degrees * self._DEG_TO_RAD
-            else:
-                expected_two_theta = info_in.signedTwoTheta(index)
+        for index in range(output_ws.getNumberHistograms()):
+            spectrum_number = output_ws.getSpectrum(index).getSpectrumNo()
+            if spectrum_number not in expected_two_theta_degrees_by_spectrum_number:
+                continue
+            expected_two_theta = expected_two_theta_degrees_by_spectrum_number[spectrum_number] * self._DEG_TO_RAD
             self.assertAlmostEqual(
                 info_out.signedTwoTheta(index), expected_two_theta, msg=f"Unexpected theta value for spectrum {spectrum_number}"
             )
@@ -386,36 +394,12 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
             lines.extend(f"{index} {angle}\n" for index, angle in angle_items)
         return "".join(lines)
 
-    def _interpolate_calibration_angle(self, values, index):
-        if not isinstance(values, dict):
-            values = dict(enumerate(values, start=1))
-        if index in values:
-            return values[index]
-
-        calibration_indexes = sorted(values)
-        lower_index = max(calibration_index for calibration_index in calibration_indexes if calibration_index < index)
-        upper_index = min(calibration_index for calibration_index in calibration_indexes if calibration_index > index)
-        return self._interpolate_between(index, lower_index, values[lower_index], upper_index, values[upper_index])
-
-    @staticmethod
-    def _calibration_spectrum_numbers(values):
-        if isinstance(values, dict):
-            return sorted(values)
-        return list(range(1, len(values) + 1))
-
     @staticmethod
     def _workspace_index_for_spectrum_number(ws, spectrum_number):
         for index in range(ws.getNumberHistograms()):
             if ws.getSpectrum(index).getSpectrumNo() == spectrum_number:
                 return index
         raise RuntimeError(f"Spectrum number {spectrum_number} not found in workspace")
-
-    @staticmethod
-    def _interpolate_between(index, lower_index, lower_value, upper_index, upper_value):
-        if lower_index == upper_index:
-            return lower_value
-        fraction = (index - lower_index) / (upper_index - lower_index)
-        return lower_value + fraction * (upper_value - lower_value)
 
     def _create_sample_workspace(self, name):
         """Creates a workspace with 9 detectors. Only detector IDs 11 to 14 will have calibration data"""
