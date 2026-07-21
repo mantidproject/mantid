@@ -6,24 +6,21 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 
-from mantid.simpleapi import LoadEmptyInstrument, ReflectometryISISCalibration
+from mantid.simpleapi import Load, ReflectometryISISCalibration
 import systemtesting
 
 
 class ReflectometryISISCalibrationPOLREFTest(systemtesting.MantidSystemTest):
     _POLREF_CALIBRATION_MAP = "POLREF_calibration_map.dat"
-    _POLREF_DATA_FILE = "POLREF00032130.nxs"
+    _POLREF_DATA_FILE = "POLREF00032130"
     _REFERENCE_FILE = "POLREF00032130_pixels_adjusted.nxs"
     _SPECULAR_PIXEL = 280.0
     _OUTPUT_FILE = "polref_calibrated"
 
     def runTest(self):
-
-        ws = LoadEmptyInstrument(InstrumentName="POLREF", OutputWorkspace="polref_input")
-
-        self._input_ws = ws
-        self._output_ws = ReflectometryISISCalibration(
-            InputWorkspace=ws,
+        group_ws = Load(Filename=self._POLREF_DATA_FILE, OutputWorkspace=self._POLREF_DATA_FILE)
+        output_ws = ReflectometryISISCalibration(
+            InputWorkspace=self._POLREF_DATA_FILE,
             CalibrationFile=self._POLREF_CALIBRATION_MAP,
             InstrumentWorkflow="POLREF",
             SpecularPixelSpectrumNo=self._SPECULAR_PIXEL,
@@ -31,20 +28,21 @@ class ReflectometryISISCalibrationPOLREFTest(systemtesting.MantidSystemTest):
             OutputWorkspace=self._OUTPUT_FILE,
         )
 
-        self._specular_index = self._workspace_index_for_spectrum_number(ws, int(round(self._SPECULAR_PIXEL)))
-        self._check_geometry_changed_in_polref_scattering_plane()
+        for i in range(len(group_ws)):
+            spec_index = self._workspace_index_for_spectrum_number(group_ws[i], int(round(self._SPECULAR_PIXEL)))
+            self._check_geometry_changed_in_polref_scattering_plane(spec_index, group_ws[i], output_ws[i])
 
     def validate(self):
         return self._OUTPUT_FILE, self._REFERENCE_FILE
 
     def requiredFiles(self):
-        return [self._POLREF_DATA_FILE, self._POLREF_CALIBRATION_MAP]
+        return [self._POLREF_DATA_FILE + ".nxs", self._POLREF_CALIBRATION_MAP]
 
-    def _check_geometry_changed_in_polref_scattering_plane(self):
-        det_info_in = self._input_ws.detectorInfo()
-        det_info_out = self._output_ws.detectorInfo()
-        position_in = det_info_in.position(self._specular_index)
-        position_out = det_info_out.position(self._specular_index)
+    def _check_geometry_changed_in_polref_scattering_plane(self, spec_index, input, output):
+        det_info_in = input.detectorInfo()
+        det_info_out = output.detectorInfo()
+        position_in = det_info_in.position(spec_index)
+        position_out = det_info_out.position(spec_index)
 
         self.assertDelta(position_in.Y(), position_out.Y(), 1e-12)
         self.assertTrue(abs(position_in.X() - position_out.X()) > 1e-8)
