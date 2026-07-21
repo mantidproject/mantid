@@ -100,7 +100,6 @@ protected:
   void displayWarning(const std::string &warning);
   virtual void addTableEntry(FitDomainIndex row);
   void setNumericQAxis(const std::string &wsName);
-  void handleDataAdded(MantidWidgets::IAddWorkspaceDialog const *dialog);
 
   IFitTab *m_tab;
   IDataModel *m_model;

@@ -158,7 +158,7 @@ void FitDataPresenter::handleAddNumericData(MantidWidgets::IAddWorkspaceDialog c
       setNumericQAxis(wsName);
       addWorkspace(wsName, wsDialog->workspaceIndices());
       updateTableFromModel();
-      m_tab->handleDataAdded(dialog);
+      m_tab->handleNumericDataAdded();
     } catch (const std::runtime_error &ex) {
       displayWarning(ex.what());
     } catch (const std::invalid_argument &ex) {
@@ -173,10 +173,6 @@ void FitDataPresenter::updateTableFromModel() {
   for (auto domainIndex = FitDomainIndex{0}; domainIndex < getNumberOfDomains(); domainIndex++) {
     addTableEntry(domainIndex);
   }
-}
-
-void FitDataPresenter::handleDataAdded(MantidWidgets::IAddWorkspaceDialog const *dialog) {
-  m_tab->handleDataAdded(dialog);
 }
 
 WorkspaceID FitDataPresenter::getNumberOfWorkspaces() const { return m_model->getNumberOfWorkspaces(); }

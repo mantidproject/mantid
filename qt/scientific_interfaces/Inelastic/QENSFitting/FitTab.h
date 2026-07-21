@@ -30,6 +30,7 @@ public:
   // Used by FitDataPresenter
   virtual std::string tabName() const = 0;
   virtual void handleDataAdded(IAddWorkspaceDialog const *dialog) = 0;
+  virtual void handleNumericDataAdded() = 0;
   virtual void handleDataChanged() = 0;
   virtual void handleDataRemoved() = 0;
   virtual void handleTableStartXChanged(double startX, WorkspaceID workspaceID, WorkspaceIndex workspaceIndex) = 0;
@@ -93,6 +94,7 @@ public:
   std::string tabName() const override;
 
   void handleDataAdded(IAddWorkspaceDialog const *dialog) override;
+  void handleNumericDataAdded() override;
   void handleDataChanged() override;
   void handleDataRemoved() override;
   void handleTableStartXChanged(double startX, WorkspaceID workspaceID, WorkspaceIndex workspaceIndex) override;

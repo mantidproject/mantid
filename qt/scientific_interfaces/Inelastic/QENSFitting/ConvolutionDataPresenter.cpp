@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ConvolutionDataPresenter.h"
 #include "ConvolutionAddWorkspaceDialog.h"
+#include "FitTab.h"
 
 namespace MantidQt::CustomInterfaces::Inelastic {
 
@@ -33,7 +34,7 @@ void ConvolutionDataPresenter::handleAddNumericData(MantidWidgets::IAddWorkspace
       setNumericQAxis(resName);
       setResolution(resName, wsName, convDialog->workspaceIndices());
       updateTableFromModel();
-      handleDataAdded(dialog);
+      m_tab->handleNumericDataAdded();
     } catch (const std::runtime_error &ex) {
       displayWarning(ex.what());
     } catch (const std::invalid_argument &ex) {
