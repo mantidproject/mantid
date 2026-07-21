@@ -13,7 +13,9 @@ import systemtesting
 class ReflectometryISISCalibrationPOLREFTest(systemtesting.MantidSystemTest):
     _POLREF_CALIBRATION_MAP = "POLREF_calibration_map.dat"
     _POLREF_DATA_FILE = "POLREF00032130.nxs"
+    _REFERENCE_FILE = "POLREF00032130_pixels_adjusted.nxs"
     _SPECULAR_PIXEL = 280.0
+    _OUTPUT_FILE = "polref_calibrated"
 
     def runTest(self):
 
@@ -26,14 +28,17 @@ class ReflectometryISISCalibrationPOLREFTest(systemtesting.MantidSystemTest):
             InstrumentWorkflow="POLREF",
             SpecularPixelSpectrumNo=self._SPECULAR_PIXEL,
             ExperimentAngle=0.95,
-            OutputWorkspace="polref_calibrated",
+            OutputWorkspace=self._OUTPUT_FILE,
         )
 
         self._specular_index = self._workspace_index_for_spectrum_number(ws, int(round(self._SPECULAR_PIXEL)))
         self._check_geometry_changed_in_polref_scattering_plane()
 
     def validate(self):
-        return True
+        return self._OUTPUT_FILE, self._REFERENCE_FILE
+
+    def requiredFiles(self):
+        return [self._POLREF_DATA_FILE, self._POLREF_CALIBRATION_MAP]
 
     def _check_geometry_changed_in_polref_scattering_plane(self):
         det_info_in = self._input_ws.detectorInfo()
