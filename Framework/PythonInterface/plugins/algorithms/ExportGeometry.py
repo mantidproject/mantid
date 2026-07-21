@@ -79,26 +79,6 @@ class ExportGeometry(PythonAlgorithm):
         )
         self.declareProperty(FileProperty(name="Filename", defaultValue="", action=FileAction.Save, extensions=[".xml"]), doc="Save file")
 
-    @staticmethod
-    def _component_index(component, component_info):
-        r"""Resolve a Components entry, which may be a bare name or a (partial) full
-        path such as 'CORELLI/A row/bank1/sixteenpack', to its ComponentInfo index.
-
-        Mirrors the walk performed by the legacy Instrument.getComponentByName: the first
-        path segment is located anywhere in the instrument, then each remaining segment is
-        located within the subtree of the previous one.
-        """
-        parts = component.split("/")
-        index = component_info.indexOfAny(parts[0])
-        for part in parts[1:]:
-            try:
-                index = next(
-                    int(c) for c in component_info.componentsInSubtree(index) if int(c) != index and component_info.name(int(c)) == part
-                )
-            except StopIteration:
-                raise ValueError(f"No component named '{part}' found within '{parts[0]}' while resolving '{component}'")
-        return index
-
     def validateInputs(self):
         issues = {}
 

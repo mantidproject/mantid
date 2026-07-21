@@ -11,7 +11,6 @@ from mantid.simpleapi import (
     ConvertUnits,
     CloneWorkspace,
     CreateSampleWorkspace,
-    LoadEmptyInstrument,
     Max,
     MoveInstrumentComponent,
     CreateEmptyTableWorkspace,
@@ -21,39 +20,10 @@ from mantid.simpleapi import (
 from mantid.api import AlgorithmFactory
 from mantid.kernel import V3D
 
-# the plugin module itself (as opposed to the generated simpleapi function above),
-# needed to instantiate the python algorithm class directly and exercise its private methods
-import AlignComponents as AlignComponentsModule
-
 
 class AlignComponentsTest(unittest.TestCase):
-    def test_component_index_resolves_nested_path(self):
-        r"""
-        Regression test for a bug where AlignComponents._component_index resolved a
-        '/'-qualified ComponentList entry (e.g. 'bank7/sixteenpack') to the first
-        path segment that is globally unique ('bank7') instead of walking down to the
-        leaf component ('sixteenpack') that the full path actually identifies. In the
-        CORELLI instrument (and others with the same convention) an intermediate path
-        segment is a pure positioning frame placed at <location/> (i.e. at its parent's
-        location), while the real detector-bank position lives on the leaf 'sixteenpack'
-        component nested inside it. Resolving to the frame instead of the leaf silently
-        substitutes the wrong position/rotation, which is what made
-        CorelliPowderCalibrationCreate fit component offsets around the wrong starting
-        point (systemtest CorelliPowderCalibrationTest).
-        """
-        ws = LoadEmptyInstrument(InstrumentName="CORELLI", OutputWorkspace="corelli_empty")
-        component_info = ws.componentInfo()
-
-        alg = AlignComponentsModule.AlignComponents()
-        resolved_index = alg._component_index("bank7/sixteenpack", component_info)
-        bank_index = component_info.indexOfAny("bank7")
-
-        # must resolve to the leaf, not to the intermediate positioning frame
-        self.assertEqual(component_info.name(resolved_index), "sixteenpack")
-        self.assertNotEqual(resolved_index, bank_index)
-
-        # the frame sits at <location/> (its parent's position); the leaf carries the real offset
-        self.assertFalse(np.allclose(component_info.position(bank_index), component_info.position(resolved_index)))
+    # Regression coverage for '/'-qualified ComponentList path resolution (e.g. 'bank7/sixteenpack')
+    # now lives in component_info_utilsTest.py, against the shared resolve_component_index() helper.
 
     def testAlignComponentsPosition(self):
         r"""

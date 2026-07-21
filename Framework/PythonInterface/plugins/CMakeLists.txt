@@ -366,6 +366,7 @@ set(PYTHON_PLUGINS
     functions/BivariateGaussian.py
     functions/ChudleyElliot.py
     functions/CombGaussLorentzKT.py
+    functions/component_info_utils.py
     functions/CompositePCRmagnet.py
     functions/DampedBessel.py
     functions/EISFDiffCylinder.py
