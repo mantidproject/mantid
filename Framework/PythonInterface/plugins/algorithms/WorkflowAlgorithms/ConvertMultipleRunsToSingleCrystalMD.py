@@ -246,6 +246,7 @@ class ConvertMultipleRunsToSingleCrystalMD(DataProcessorAlgorithm):
             CopyInstrumentParameters(OutputWorkspace=ws_name, InputWorkspace=self.getProperty("CopyInstrumentParameters").value)
         if self._masking:
             if not mtd.doesExist("__mask"):
+                component_info = mtd[ws_name].componentInfo()
                 LoadMask(
                     Instrument=mtd[ws_name].getInstrumentName(),
                     InputFile=self.getProperty("MaskFile").value,

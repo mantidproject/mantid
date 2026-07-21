@@ -173,6 +173,7 @@ class MDNormSCDPreprocessIncoherent(DataProcessorAlgorithm):
             LoadIsawDetCal(InputWorkspace="__van", Filename=self.getProperty("DetCal").value)
 
         if _masking:
+            van_component_info = mtd["__van"].componentInfo()
             LoadMask(
                 Instrument=mtd["__van"].getInstrumentName(),
                 InputFile=self.getProperty("MaskFile").value,

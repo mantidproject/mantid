@@ -262,6 +262,7 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
             LoadNexus(Filename=self.getProperty("Flux").value, OutputWorkspace="__flux")
 
         if _masking:
+            sa_component_info = mtd["__sa"].componentInfo()
             LoadMask(
                 Instrument=mtd["__sa"].getInstrumentName(),
                 InputFile=self.getProperty("MaskFile").value,
