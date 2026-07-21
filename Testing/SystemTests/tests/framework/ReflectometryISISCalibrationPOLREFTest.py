@@ -34,12 +34,12 @@ class ReflectometryISISCalibrationPOLREFAbsoluteThetaTest(systemtesting.MantidSy
             InputWorkspace=ws,
             CalibrationFile=self._calibration_map_path,
             InstrumentWorkflow="POLREF",
-            SpecularPixelIndex=self._SPECULAR_PIXEL,
+            SpecularPixelSpectrumNo=self._SPECULAR_PIXEL,
             ExperimentAngle=1.82805474,
             OutputWorkspace="polref_calibrated",
         )
 
-        self._specular_index = int(round(self._SPECULAR_PIXEL))
+        self._specular_index = self._workspace_index_for_spectrum_number(ws, int(round(self._SPECULAR_PIXEL)))
         self._check_geometry_changed_in_polref_scattering_plane()
 
     def validate(self):
@@ -54,3 +54,10 @@ class ReflectometryISISCalibrationPOLREFAbsoluteThetaTest(systemtesting.MantidSy
         self.assertDelta(position_in.Y(), position_out.Y(), 1e-12)
         self.assertTrue(abs(position_in.X() - position_out.X()) > 1e-8)
         self.assertTrue(abs(position_in.Z() - position_out.Z()) > 1e-8)
+
+    @staticmethod
+    def _workspace_index_for_spectrum_number(ws, spectrum_number):
+        for index in range(ws.getNumberHistograms()):
+            if ws.getSpectrum(index).getSpectrumNo() == spectrum_number:
+                return index
+        raise RuntimeError(f"Spectrum number {spectrum_number} not found in workspace")

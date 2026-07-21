@@ -17,13 +17,13 @@ A ``.dat`` calibration file must be provided via the ``CalibrationFile`` propert
 The ``InstrumentWorkflow`` property controls the meaning of the calibration values:
 
 - ``Default``: the file should contain two, space-delimited columns labelled ``detectorid`` and ``theta_offset`` (the labels are not case-sensitive). The detector IDs are the IDs for the detector pixels that should be moved. The theta offsets are the change required to the two theta value for each detector, in degrees.
-- ``POLREF``: the file should contain two, space-delimited columns labelled ``detectorindex`` and ``angle`` (the labels are not case-sensitive). The detector index is matched against the non-monitor detector spectra in the input workspace, in workspace-index order. The angles are absolute detector theta values in degrees and are converted to two theta offsets internally.
+- ``POLREF``: the file should contain two, space-delimited columns labelled ``spectrumnumber`` and ``angle`` (the labels are not case-sensitive). The spectrum number is matched against the spectrum number of each non-monitor detector spectrum in the input workspace. The angles are absolute detector theta values in degrees and are converted to two theta offsets internally.
 
-For the ``POLREF`` workflow, ``ExperimentAngle`` is the experiment theta angle in degrees, and ``SpecularPixelIndex`` is the fitted specular pixel index for the experiment. The same ``SpecularPixelIndex`` is used in the calibration-file detector-index coordinate system and in the input workspace detector-index coordinate system. It may be fractional, in which case linear interpolation is used on the calibration file.
+For the ``POLREF`` workflow, ``ExperimentAngle`` is the experiment theta angle in degrees, and ``SpecularPixelSpectrumNo`` is the fitted specular pixel spectrum number for the experiment. The same ``SpecularPixelSpectrumNo`` is used in the calibration-file spectrum-number coordinate system and in the input workspace spectrum-number coordinate system. It may be fractional, in which case linear interpolation is used on the calibration file.
 
 The selected ``InstrumentWorkflow`` controls how detector positions are corrected. The ``Default`` workflow applies detector corrections as vertical shifts. The ``POLREF`` workflow rotates detectors around the sample.
 
-The POLREF calibration map has an inverted angular coordinate relative to Mantid's signed two theta coordinate for the workspace: in current POLREF maps, the calibration-file ``angle`` decreases as detector index increases, while the workspace signed two theta increases.
+The POLREF calibration map has an inverted angular coordinate relative to Mantid's signed two theta coordinate for the workspace: in current POLREF maps, the calibration-file ``angle`` decreases as spectrum number increases, while the workspace signed two theta increases.
 
 The below is an example of a valid calibration file:
 
@@ -44,12 +44,12 @@ The below is an example of a valid POLREF calibration file:
 
 .. code-block:: none
 
-    detectorindex angle
+    spectrumnumber angle
     11 3.074720743
     12 3.069434420
     13 3.063999483
 
-For POLREF input, all non-monitor detector spectra in the input workspace are considered in workspace-index order. Only detector indexes covered by the calibration file are moved; monitors and detector indexes outside the calibration range are left unchanged. Detector indexes in the calibration file must be integer and contiguous. Fractional specular pixel indexes are still supported by linear interpolation between the neighbouring detector-index rows.
+For POLREF input, all non-monitor detector spectra in the input workspace are considered. Only spectrum numbers covered by the calibration file range are moved; monitors and spectrum numbers outside the calibration range are left unchanged. Spectrum numbers in the calibration file must be integer. Missing spectrum numbers inside the calibration range, for example dead pixels, are supported by linear interpolation between the neighbouring spectrum-number rows. Fractional specular pixel spectrum numbers are also supported by the same interpolation.
 
 Usage
 -------
