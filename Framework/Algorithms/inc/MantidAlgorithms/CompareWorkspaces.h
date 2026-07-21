@@ -130,11 +130,11 @@ private:
   /// Report progress of comparison
   std::unique_ptr<API::Progress> m_progress = nullptr;
 
-  /// Variable states if one wants to compare workspaces in parallell. This
-  /// usully true but if one wants to look at the comparison logs, parallell
+  /// Variable states if one wants to compare workspaces in parallel. This
+  /// usually true but if one wants to look at the comparison logs, parallel
   /// comparison make things complicated as
   /// logs from different threads are mixed together.  In this case, it is
-  /// better not to do parallell comparison.
+  /// better not to do parallel comparison.
   bool m_parallelComparison{false};
 };
 
