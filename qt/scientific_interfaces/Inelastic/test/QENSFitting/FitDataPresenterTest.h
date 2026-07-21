@@ -20,6 +20,9 @@
 #include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
 #include "MockObjects.h"
 
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 #include "MantidKernel/WarningSuppressions.h"
 
@@ -66,6 +69,15 @@ public:
   }
 
   virtual void updateSelectedSpectra() override {}
+};
+
+// Exposes the protected setNumericQAxis method so that the axis/unit
+// conversion logic behind the "Add Numeric Workspace" button can be tested
+// directly, without needing to drive the real Qt dialog widgets.
+class TestableFitDataPresenter : public FitDataPresenter {
+public:
+  using FitDataPresenter::FitDataPresenter;
+  using FitDataPresenter::setNumericQAxis;
 };
 
 } // namespace
@@ -115,7 +127,7 @@ public:
     m_model = std::make_unique<NiceMock<MockDataModel>>();
     m_table = createEmptyTableWidget(5, 5);
     ON_CALL(*m_view, getDataTable()).WillByDefault(Return(m_table.get()));
-    m_presenter = std::make_unique<FitDataPresenter>(m_tab.get(), m_model.get(), m_view.get());
+    m_presenter = std::make_unique<TestableFitDataPresenter>(m_tab.get(), m_model.get(), m_view.get());
     m_workspace = createWorkspace(5);
     m_ads = std::make_unique<SetUpADSWithWorkspace>("TestWs", m_workspace);
   }
@@ -182,6 +194,65 @@ public:
     TS_ASSERT_EQUALS(m_presenter->getQValuesForData(), qValues)
   }
 
+  ///----------------------------------------------------------------------
+  /// Unit Tests for the "Add Numeric Workspace" feature
+  ///----------------------------------------------------------------------
+
+  void test_setNumericQAxis_converts_non_numeric_axis_to_numeric_with_momentum_transfer_unit() {
+    auto ws = createWorkspace(5);
+    TS_ASSERT(!ws->getAxis(1)->isNumeric());
+
+    std::vector<double> originalValues;
+    for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
+      originalValues.push_back(ws->getAxis(1)->getValue(i));
+    }
+    m_ads->addOrReplace("NumericWs", ws);
+
+    m_presenter->setNumericQAxis("NumericWs");
+
+    auto *axis = ws->getAxis(1);
+    TS_ASSERT(axis->isNumeric());
+    TS_ASSERT_EQUALS(axis->unit()->unitID(), "MomentumTransfer");
+    for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
+      TS_ASSERT_EQUALS(axis->getValue(i), originalValues[i]);
+    }
+  }
+
+  void test_setNumericQAxis_sets_unit_when_axis_is_already_numeric_with_wrong_unit() {
+    auto ws = createWorkspace(5);
+    std::vector<double> const qValues{0.1, 0.2, 0.3, 0.4, 0.5};
+    ws->replaceAxis(1, std::make_unique<NumericAxis>(qValues));
+    TS_ASSERT(ws->getAxis(1)->isNumeric());
+    TS_ASSERT_DIFFERS(ws->getAxis(1)->unit()->unitID(), "MomentumTransfer");
+    m_ads->addOrReplace("NumericWs", ws);
+
+    m_presenter->setNumericQAxis("NumericWs");
+
+    auto *axis = ws->getAxis(1);
+    TS_ASSERT(axis->isNumeric());
+    TS_ASSERT_EQUALS(axis->unit()->unitID(), "MomentumTransfer");
+    for (size_t i = 0; i < qValues.size(); ++i) {
+      TS_ASSERT_EQUALS(axis->getValue(i), qValues[i]);
+    }
+  }
+
+  void test_setNumericQAxis_leaves_axis_unchanged_when_already_numeric_with_momentum_transfer_unit() {
+    auto ws = createWorkspace(5);
+    std::vector<double> const qValues{0.1, 0.2, 0.3, 0.4, 0.5};
+    ws->replaceAxis(1, std::make_unique<NumericAxis>(qValues));
+    ws->getAxis(1)->setUnit("MomentumTransfer");
+    m_ads->addOrReplace("NumericWs", ws);
+
+    m_presenter->setNumericQAxis("NumericWs");
+
+    auto *axis = ws->getAxis(1);
+    TS_ASSERT(axis->isNumeric());
+    TS_ASSERT_EQUALS(axis->unit()->unitID(), "MomentumTransfer");
+    for (size_t i = 0; i < qValues.size(); ++i) {
+      TS_ASSERT_EQUALS(axis->getValue(i), qValues[i]);
+    }
+  }
+
 private:
   void deleteSetup() {
     m_presenter.reset();
@@ -203,7 +274,7 @@ private:
   std::unique_ptr<NiceMock<MockFitTab>> m_tab;
   std::unique_ptr<NiceMock<MockFitDataView>> m_view;
   std::unique_ptr<NiceMock<MockDataModel>> m_model;
-  std::unique_ptr<FitDataPresenter> m_presenter;
+  std::unique_ptr<TestableFitDataPresenter> m_presenter;
 
   MatrixWorkspace_sptr m_workspace;
   std::unique_ptr<SetUpADSWithWorkspace> m_ads;
