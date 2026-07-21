@@ -64,6 +64,8 @@ protected:
 
 protected slots:
   virtual void showAddWorkspaceDialog();
+  virtual void showAddNumericWorkspaceDialog();
+  void notifyAddNumericData(MantidWidgets::IAddWorkspaceDialog *dialog);
 
 private slots:
   void notifyRemoveClicked();

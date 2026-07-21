@@ -51,6 +51,21 @@ void ConvolutionDataView::showAddWorkspaceDialog() {
   dialog->show();
 }
 
+void ConvolutionDataView::showAddNumericWorkspaceDialog() {
+  auto dialog = new ConvolutionAddWorkspaceDialog(parentWidget());
+  connect(dialog, &ConvolutionAddWorkspaceDialog::addData, this, &ConvolutionDataView::notifyAddNumericData);
+
+  auto tabName = m_presenter->tabName();
+  dialog->setAttribute(Qt::WA_DeleteOnClose);
+  dialog->setWSSuffices(InterfaceUtils::getSampleWSSuffixes(tabName));
+  dialog->setFBSuffices({".*"});
+  dialog->setResolutionWSSuffices(InterfaceUtils::getResolutionWSSuffixes(tabName));
+  dialog->setResolutionFBSuffices({".*"});
+  dialog->setLoadProperty("LoadHistory", SettingsHelper::loadHistory());
+  dialog->updateSelectedSpectra();
+  dialog->show();
+}
+
 void ConvolutionDataView::addTableEntry(size_t row, FitDataRow const &newRow) {
   FitDataView::addTableEntry(row, newRow);
 

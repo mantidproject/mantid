@@ -28,6 +28,7 @@ public:
   virtual std::string tabName() const = 0;
 
   virtual void handleAddData(MantidWidgets::IAddWorkspaceDialog const *dialog) = 0;
+  virtual void handleAddNumericData(MantidWidgets::IAddWorkspaceDialog const *dialog) = 0;
   virtual void handleRemoveClicked() = 0;
   virtual void handleUnifyClicked() = 0;
   virtual void handleCellChanged(int row, int column) = 0;
@@ -86,6 +87,7 @@ public:
   std::vector<std::string> getWorkspaceNames() const;
 
   void handleAddData(MantidWidgets::IAddWorkspaceDialog const *dialog) override;
+  void handleAddNumericData(MantidWidgets::IAddWorkspaceDialog const *dialog) override;
   void handleRemoveClicked() override;
   void handleUnifyClicked() override;
   void handleCellChanged(int row, int column) override;
@@ -97,6 +99,8 @@ protected:
   IFitDataView const *getView() const;
   void displayWarning(const std::string &warning);
   virtual void addTableEntry(FitDomainIndex row);
+  void setNumericQAxis(const std::string &wsName);
+  void handleDataAdded(MantidWidgets::IAddWorkspaceDialog const *dialog);
 
   IFitTab *m_tab;
   IDataModel *m_model;

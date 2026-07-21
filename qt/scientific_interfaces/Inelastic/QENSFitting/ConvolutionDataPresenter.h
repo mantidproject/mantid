@@ -23,6 +23,7 @@ public:
   void setResolution(const std::string &resName, const std::string &wsName,
                      const FunctionModelSpectra &spectra) override;
   bool addWorkspaceFromDialog(IAddWorkspaceDialog const *dialog) override;
+  void handleAddNumericData(MantidWidgets::IAddWorkspaceDialog const *dialog) override;
 
 protected:
   void addTableEntry(FitDomainIndex row) override;

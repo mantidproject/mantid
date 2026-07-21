@@ -30,6 +30,7 @@ protected:
 
 protected slots:
   void showAddWorkspaceDialog() override;
+  void showAddNumericWorkspaceDialog() override;
 };
 
 } // namespace Inelastic

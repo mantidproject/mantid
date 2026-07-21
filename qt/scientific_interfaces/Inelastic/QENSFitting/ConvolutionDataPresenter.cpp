@@ -23,6 +23,25 @@ bool ConvolutionDataPresenter::addWorkspaceFromDialog(IAddWorkspaceDialog const 
   return false;
 }
 
+void ConvolutionDataPresenter::handleAddNumericData(MantidWidgets::IAddWorkspaceDialog const *dialog) {
+  if (const auto convDialog = dynamic_cast<ConvolutionAddWorkspaceDialog const *>(dialog)) {
+    try {
+      auto const wsName = convDialog->workspaceName();
+      setNumericQAxis(wsName);
+      addWorkspace(wsName, convDialog->workspaceIndices());
+      auto const resName = convDialog->resolutionName();
+      setNumericQAxis(resName);
+      setResolution(resName, wsName, convDialog->workspaceIndices());
+      updateTableFromModel();
+      handleDataAdded(dialog);
+    } catch (const std::runtime_error &ex) {
+      displayWarning(ex.what());
+    } catch (const std::invalid_argument &ex) {
+      displayWarning(ex.what());
+    }
+  }
+}
+
 void ConvolutionDataPresenter::setResolution(const std::string &resName, const std::string &wsName,
                                              const FunctionModelSpectra &spectra) {
   if (!m_model->setResolution(resName, wsName, spectra)) {
