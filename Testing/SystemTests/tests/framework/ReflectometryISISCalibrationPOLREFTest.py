@@ -5,25 +5,15 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-import os
 
-from mantid import FileFinder
 from mantid.simpleapi import LoadEmptyInstrument, ReflectometryISISCalibration
 import systemtesting
 
 
-class ReflectometryISISCalibrationPOLREFAbsoluteThetaTest(systemtesting.MantidSystemTest):
+class ReflectometryISISCalibrationPOLREFTest(systemtesting.MantidSystemTest):
     _POLREF_CALIBRATION_MAP = "POLREF_calibration_map.dat"
     _POLREF_DATA_FILE = "POLREF00032130.nxs"
     _SPECULAR_PIXEL = 280.0
-
-    def skipTests(self):
-        self._calibration_map_path = FileFinder.getFullPath(self._POLREF_CALIBRATION_MAP)
-        if not self._calibration_map_path:
-            self._calibration_map_path = os.path.abspath(
-                os.path.join(os.path.dirname(__file__), "../../../Data/SystemTest", self._POLREF_CALIBRATION_MAP)
-            )
-        return not os.path.exists(self._calibration_map_path)
 
     def runTest(self):
 
@@ -32,10 +22,10 @@ class ReflectometryISISCalibrationPOLREFAbsoluteThetaTest(systemtesting.MantidSy
         self._input_ws = ws
         self._output_ws = ReflectometryISISCalibration(
             InputWorkspace=ws,
-            CalibrationFile=self._calibration_map_path,
+            CalibrationFile=self._POLREF_CALIBRATION_MAP,
             InstrumentWorkflow="POLREF",
             SpecularPixelSpectrumNo=self._SPECULAR_PIXEL,
-            ExperimentAngle=1.82805474,
+            ExperimentAngle=0.95,
             OutputWorkspace="polref_calibrated",
         )
 
