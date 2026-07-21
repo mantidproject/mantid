@@ -212,6 +212,41 @@ public:
     TS_ASSERT_THROWS((values = {0.1, 0.2, 0.3}), const std::logic_error &);
   }
 
+  // An empty vector is not constrained yet, so assignment may grow it. This
+  // supports initializing spectra via, e.g., ws.mutableX(i) = vec; any
+  // subsequent size change of the non-empty vector still throws.
+  void test_assignment_into_empty_may_grow() {
+    FixedLengthVectorTester values(0);
+    TS_ASSERT_THROWS_NOTHING((values = {0.1, 0.2, 0.3}));
+    TS_ASSERT_EQUALS(values.size(), 3);
+    TS_ASSERT_EQUALS(values[2], 0.3);
+    TS_ASSERT_THROWS((values = {0.1, 0.2}), const std::logic_error &);
+  }
+
+  void test_vector_assignment_into_empty_may_grow() {
+    std::vector<double> const src{3.6, 9.7};
+    FixedLengthVectorTester values(0);
+    TS_ASSERT_THROWS_NOTHING(values = src);
+    TS_ASSERT_EQUALS(values.size(), 2);
+    TS_ASSERT_EQUALS(values[1], 9.7);
+  }
+
+  void test_copy_assignment_into_empty_may_grow() {
+    const FixedLengthVectorTester src(2, 0.1);
+    FixedLengthVectorTester dest(0);
+    TS_ASSERT_THROWS_NOTHING(dest = src);
+    TS_ASSERT_EQUALS(dest.size(), 2);
+    TS_ASSERT_EQUALS(dest[0], 0.1);
+  }
+
+  void test_range_assign_into_empty_may_grow() {
+    std::vector<double> const src{3.6, 9.7, 8.5};
+    FixedLengthVectorTester dest(0);
+    TS_ASSERT_THROWS_NOTHING(dest.assign(src.cbegin(), src.cend()));
+    TS_ASSERT_EQUALS(dest.size(), 3);
+    TS_ASSERT_EQUALS(dest[2], 8.5);
+  }
+
   void test_vector_constructor() {
     const std::vector<double> vector(2, 0.1);
     FixedLengthVectorTester values(vector);

@@ -12,6 +12,7 @@
 #include <limits>
 #include <numeric>
 #include <stdexcept>
+#include <string>
 #include <vector>
 
 namespace Mantid {
@@ -111,15 +112,21 @@ protected:
   std::vector<double> &mutableRawData() { return m_data; }
 
 private:
-  template <class Other> void checkAssignmentSize(const Other &other) const {
-    if (size() != other.size())
-      throw std::logic_error("FixedLengthVector::operator=: size mismatch");
+  /** Throws if the assignment would change the length of a non-empty vector.
+
+    An empty vector is not constrained yet (e.g., the data of a spectrum that
+    is still being initialized), so it may grow by assignment; any data set
+    afterwards is validated against the new length by the Histogram setters. */
+  void checkAssignmentSize(size_t const otherSize) const {
+    if (!empty() && size() != otherSize) {
+      throw std::logic_error("FixedLengthVector: size mismatch (" + std::to_string(size()) +
+                             " != " + std::to_string(otherSize) +
+                             "); the data arrays of a non-empty histogram cannot be resized individually. Use the "
+                             "Histogram setters instead, e.g. setBinEdges, setPoints, setCounts, or setHistogram.");
+    }
   }
 
-  void checkAssignmentSize(const size_t &size) const {
-    if (this->size() != size)
-      throw std::logic_error("FixedLengthVector::assign: size mismatch");
-  }
+  template <class Other> void checkAssignmentSize(const Other &other) const { checkAssignmentSize(other.size()); }
 
   std::vector<double> m_data;
 
