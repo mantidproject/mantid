@@ -1121,6 +1121,51 @@ public:
     }
   }
 
+  void test_serverDisconnect_monitorOnlyFinalBatch_isDelivered() {
+    // doExtractData()'s Check 2 (SNSLiveEventDataListener.cpp) must not treat
+    // a final batch as empty when it contains ONLY monitor events.  Monitor
+    // events live in the separate EventWorkspace returned by
+    // m_eventBuffer->monitorWorkspace(), so gating solely on
+    // m_eventBuffer->getNumberEvents() would discard them and throw
+    // "stream ended after server disconnect" instead of delivering the data.
+    m_server->script({
+        Testing::buildGeometryPkt(kMinimalIDF()),
+        Testing::buildBeamlineInfoPkt(kInstrumentName),
+        Testing::buildRunStatusPkt(ADARA::RunStatus::NEW_RUN, 1, 0x0000000100000000ULL),
+        Testing::PktWaitForExtract{}, // gate: pause server until first extract completes
+        Testing::buildBeamMonitorPkt(0x0000000200000000ULL, 0u, {500u, 600u}), // monitor-only, no banked events
+        Testing::PktDisconnect{},
+    });
+    m_server->start();
+    TS_ASSERT(connectListener());
+
+    // First extractData: processes BeginRun transition; bg is paused at gate.
+    auto ws = extractWithTimeout(*m_listener, std::chrono::seconds{10});
+    TS_ASSERT_DIFFERS(ws, nullptr);
+    // Release the gate so the server sends the monitor-only batch, then disconnects.
+    m_server->releaseExtractGate();
+
+    // Wait for the listener to detect EOF.
+    waitFor([&] { return m_listener->listenerState() == API::ListenerState::Disconnected; }, std::chrono::seconds{5});
+
+    // Second extractData must succeed (not throw) and deliver the monitor events.
+    auto ws2 = extractWithTimeout(*m_listener, std::chrono::seconds{5});
+    TS_ASSERT_DIFFERS(ws2, nullptr);
+    auto ews2 = std::dynamic_pointer_cast<DataObjects::EventWorkspace>(ws2);
+    TS_ASSERT_DIFFERS(ews2, nullptr);
+    if (!ews2)
+      return;
+    // No detector events were sent in this batch.
+    TS_ASSERT_EQUALS(static_cast<int>(ews2->getNumberEvents()), 0);
+    // The monitor sub-workspace must exist and carry the beam-monitor events.
+    auto monWs2 = ews2->monitorWorkspace();
+    TS_ASSERT_DIFFERS(monWs2, nullptr);
+    auto monEws2 = std::dynamic_pointer_cast<DataObjects::EventWorkspace>(monWs2);
+    TS_ASSERT_DIFFERS(monEws2, nullptr);
+    if (monEws2)
+      TS_ASSERT_LESS_THAN(0, static_cast<int>(monEws2->getNumberEvents()));
+  }
+
   void test_partialHelloSend_setsError() {
     // A listener subclass that simulates an unrecoverable write failure on the
     // CLIENT_HELLO packet: sendHelloPacket() returns 0.  The run() method must

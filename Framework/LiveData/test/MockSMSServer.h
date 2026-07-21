@@ -27,14 +27,10 @@ struct PktDisconnect {};
 struct PktWaitForExtract {}; // gate: blocks until the test signals
                              // (used to deterministically interleave
                              //  extractData() with packet delivery).
-struct PktAbruptClose {};    // closes the client socket immediately without
-                             // draining any queued sends, maximising the chance
-                             // the client poll sees EPOLLHUP (POLL_ERROR) rather
-                             // than a readable-then-EOF sequence.
 
 using ScriptEntry = std::variant<std::vector<uint8_t>, // raw packet bytes (preferred — built by
                                                        // the helpers in §5 of subspec02)
-                                 PktGarbage, PktDisconnect, PktWaitForExtract, PktAbruptClose>;
+                                 PktGarbage, PktDisconnect, PktWaitForExtract>;
 
 class MockSMSServer {
 public:

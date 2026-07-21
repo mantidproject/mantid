@@ -47,7 +47,7 @@ public:
   API::ListenerState listenerState() const override;
   std::optional<RunStatus> lastTransition() const override;
 
-  int runNumber() const override { return m_runNumber; };
+  int runNumber() const override { return m_runNumber.load(); };
 
   bool isConnected() override;
 
@@ -146,10 +146,17 @@ private:
   // Both values are designed to be passed straight into the TofEvent
   // constructor.
 
-  int m_runNumber{0};
+  /// Atomic as belt-and-suspenders (POD member touched cross-thread): written
+  /// under m_mutex by setRunDetails() (bg parse path / onBeginRun()), read
+  /// lock-free by the inline runNumber() getter.
+  std::atomic<int> m_runNumber{0};
   DataObjects::EventWorkspace_sptr m_eventBuffer;
   ///< Used to buffer events between calls to extractData()
 
+  /// Workspace title, composed as <instrumentName><runNumber> once both are
+  /// known.  Written under the parse lock in initWorkspacePart2(); applied to
+  /// the extracted workspace under the doExtractData() critical section;
+  /// cleared at run boundaries in onBeginRun()/onEndRun().
   std::string m_wsName;
   detid2index_map m_indexMap;        // maps pixel id's to workspace indexes
   detid2index_map m_monitorIndexMap; // Same as above for the monitor workspace
@@ -207,7 +214,11 @@ private:
   void replayVariableCache();
 
   // ---------------------------------------------------------------------------
-  bool m_ignorePackets{false}; // used by filterPacket() below...
+  /// Used by ignorePacket() below.  Guarded by the doExtractData() critical
+  /// section on the foreground side (read at the top of doExtractData()) and
+  /// by the parse lock on the background side (ignorePacket()); also atomic
+  /// as belt-and-suspenders (POD member touched cross-thread).
+  std::atomic<bool> m_ignorePackets{false};
   bool m_filterUntilRunStart{false};
 
   // Called by the rxPacket() functions to determine if the packet should be
@@ -235,13 +246,22 @@ protected:
   //
   // Atomic (lock-free, no mutex needed):
   //   m_isConnected, m_pauseNetRead, m_bgThreadCaughtUp, m_stopThread,
-  //   m_isDasPaused.
+  //   m_isDasPaused, m_runNumber.
+  //
+  // Atomic AND mutex-guarded (belt-and-suspenders convention: any POD-typed
+  // member that needs cross-thread protection is made atomic even though it
+  // is also covered by the lock, rather than relying on the lock alone):
+  //   m_ignorePackets — guarded by the single doExtractData() critical section
+  //   on the foreground side and by the parse lock on the background side
+  //   (ignorePacket()).
   //
   // Mutex-guarded (always access under m_mutex):
   //   m_backgroundException, m_eventBuffer, m_adaraRunStatus,
   //   m_pendingTransition, m_lastTransition, m_instrumentXML,
   //   m_instrumentName, m_nameMap, m_requiredLogs, m_deferredRunDetailsPkt,
-  //   m_workspaceInitialized, m_previousExtractCompleted.
+  //   m_workspaceInitialized, m_previousExtractCompleted, m_dataStartTime,
+  //   m_monitorLogs, m_wsName.  (m_monitorLogs and m_wsName are accessed on
+  //   the foreground side only inside the doExtractData() critical section.)
   //
   // All rxPacket() overrides run under m_mutex, acquired once by run()
   // around bufferParse().  Do NOT acquire m_mutex inside any rxPacket() body

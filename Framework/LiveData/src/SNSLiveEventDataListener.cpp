@@ -4,6 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX-License-Identifier: GPL-3.0+
+#include <cstdlib> // for std::abort
 #include <ctime>
 #include <exception>
 #include <sstream> // for ostringstream
@@ -106,22 +107,50 @@ SNSLiveEventDataListener::SNSLiveEventDataListener()
 SNSLiveEventDataListener::~SNSLiveEventDataListener() {
   // Stop the background thread
   if (m_thread.isRunning()) {
-    // Ask the thread to exit (and hope that it does - Poco doesn't
-    // seem to have an equivalent to pthread_cancel
+    // Ask the thread to exit.  run()'s loop re-checks m_stopThread every
+    // iteration between bounded waits (100 ms pause-loop sleep, 100 ms
+    // pollSet.poll() timeout, 1 s RECV_TIMEOUT on receiveBytes()), so it
+    // should notice within about a second.
     m_stopThread.store(true, std::memory_order_release);
+
+    // Unblock the thread immediately rather than waiting out those timeouts:
+    // shut down both directions of the socket.  This is safe to call
+    // concurrently with the background thread's in-flight receiveBytes() /
+    // poll() on the same StreamSocket — shutdown() only issues shutdown(fd,
+    // SHUT_RDWR) on the shared descriptor and does not touch Poco's
+    // reference-counted SocketImpl, unlike close() (which would race on that
+    // refcount).  A shut-down socket becomes read-ready with EOF, so poll()
+    // wakes and receiveBytes() returns 0, which run() already treats as a
+    // clean peer-close.  If the socket was never connected or is already
+    // closed, shutdown() throws; there is nothing left to unblock.
     try {
-      m_thread.join(5000); // 5 s — generous but not 60 s; bg thread now exits within ~100 ms
-    } catch (Poco::TimeoutException &) {
-      // And just what do we do here?!?
-      // Log a message, sure, but other than that we can either hang the
-      // Mantid process waiting for a thread that will apparently never exit
-      // or segfault because the ADARA::read() is going to try to write to
-      // a buffer that's going to be deleted.
-      // Chose segfault - at least that's obvious.
-      g_log.fatal() << "SNSLiveEventDataListener failed to shut down its "
-                    << "background thread!  This should never happen and "
-                    << "Mantid is pretty much guaranteed to crash shortly.  "
-                    << "Talk to the Mantid developer team.\n";
+      m_socket.shutdown();
+    } catch (...) {
+    }
+
+    // Wait for the thread to actually exit before returning — i.e. before any
+    // member is destroyed.  Never proceed while the thread is still running:
+    // doing so previously let the background thread read freed memory after
+    // a join() timeout ("Chose segfault - at least that's obvious").  Because
+    // the socket shutdown above removes the only wait that could exceed the
+    // per-iteration bound, the first tryJoin() below is expected to succeed;
+    // the retry cap and abort() are a fail-loud backstop for the "should
+    // never happen" case where the thread is still wedged regardless.
+    constexpr int JOIN_TIMEOUT_MS = 5000;
+    constexpr int MAX_JOIN_ATTEMPTS = 6; // ~30 s total, then a controlled crash
+    for (int attempt = 1; !m_thread.tryJoin(JOIN_TIMEOUT_MS); ++attempt) {
+      if (attempt >= MAX_JOIN_ATTEMPTS) {
+        // Log first: g_log.fatal() writes synchronously, so the diagnostic is
+        // emitted before abort() raises SIGABRT.  A controlled crash here is
+        // preferable to both a silent use-after-free and an unbounded hang.
+        g_log.fatal() << "SNSLiveEventDataListener: background thread did not exit within "
+                      << (JOIN_TIMEOUT_MS * MAX_JOIN_ATTEMPTS / 1000)
+                      << " s of socket shutdown; aborting to avoid use-after-free.\n";
+        std::abort();
+      }
+      g_log.warning() << "SNSLiveEventDataListener: still waiting for the background thread "
+                         "to exit after socket shutdown (attempt "
+                      << attempt << " of " << MAX_JOIN_ATTEMPTS << ")...\n";
     }
   }
 }
@@ -1426,6 +1455,15 @@ void SNSLiveEventDataListener::initWorkspacePart2() {
 
   initMonitorWorkspace();
 
+  // Compose the workspace title from the instrument name and run number, now
+  // that both are known: readyForInitPart2() guarantees m_instrumentName is
+  // non-empty, and m_runNumber is already set on both the joining path
+  // (rxPacket(NEW_RUN) -> setRunDetails()) and the transition path
+  // (onBeginRun() -> setRunDetails(), which runs before initWorkspacePart2()
+  // is reached again for that run).  Applied to the extracted workspace's
+  // title in doExtractData().
+  m_wsName = m_instrumentName + std::to_string(m_runNumber.load());
+
   m_workspaceInitialized = true;
 
   // If we completed initialisation while joining mid-run, queue the BeginRun
@@ -1534,57 +1572,78 @@ std::shared_ptr<Workspace> SNSLiveEventDataListener::doExtractData() {
       break;
     Poco::Thread::sleep(100); // 100 milliseconds
   }
+  using namespace DataObjects;
+
+  // From here through the workspace swap below, hold m_mutex as a single
+  // critical section.  Everything in this region reads or mutates state that
+  // the background thread also touches under the parse lock inside
+  // bufferParse(): m_backgroundException, m_workspaceInitialized,
+  // m_ignorePackets, m_eventBuffer (including its Run / TimeSeriesProperty
+  // internals via initializeFromParent()), m_monitorLogs, and
+  // m_pendingTransition.  A narrower lock here previously left several of
+  // those reads unguarded.  No deadlock risk: the background thread only ever
+  // acquires m_mutex inside bufferParse() and never blocks on the foreground
+  // while holding it, so this simply serializes extract-vs-parse (the
+  // intended back-pressure).  NOTE: this lock must NOT extend back over the
+  // init-wait sleep loop above — holding it there would starve the background
+  // thread that sets m_workspaceInitialized.
+  EventWorkspace_sptr temp;
   {
     std::lock_guard<std::mutex> lock(m_mutex);
     if (m_backgroundException)
       throw std::runtime_error(m_backgroundException->what());
     if (!m_workspaceInitialized)
       throw Exception::NotYet("The workspace has not yet been initialized.");
-  }
 
-  // Throw if the request was for data from the start of a run, but we're not
-  // yet in a run.
-  if (m_ignorePackets) // This variable is (un)set in ignorePacket()
-  {
-    throw Exception::NotYet("Waiting for a run to start.");
-  }
+    // Throw if the request was for data from the start of a run, but we're
+    // not yet in a run.
+    if (m_ignorePackets.load()) // This variable is (un)set in ignorePacket()
+    {
+      throw Exception::NotYet("Waiting for a run to start.");
+    }
 
-  using namespace DataObjects;
+    // Make a brand new EventWorkspace
+    temp = std::dynamic_pointer_cast<EventWorkspace>(
+        API::WorkspaceFactory::Instance().create("EventWorkspace", m_eventBuffer->getNumberHistograms(), 2, 1));
 
-  // Make a brand new EventWorkspace
-  EventWorkspace_sptr temp = std::dynamic_pointer_cast<EventWorkspace>(
-      API::WorkspaceFactory::Instance().create("EventWorkspace", m_eventBuffer->getNumberHistograms(), 2, 1));
+    // Copy geometry over.
+    API::WorkspaceFactory::Instance().initializeFromParent(*m_eventBuffer, *temp, false);
 
-  // Copy geometry over.
-  API::WorkspaceFactory::Instance().initializeFromParent(*m_eventBuffer, *temp, false);
+    // Apply the title composed in initWorkspacePart2() (instrument name + run number).
+    temp->setTitle(m_wsName);
 
-  // Clear out the old logs, except for the most recent entry
-  temp->mutableRun().clearOutdatedTimeSeriesLogValues();
+    // Clear out the old logs, except for the most recent entry
+    temp->mutableRun().clearOutdatedTimeSeriesLogValues();
 
-  // Clear out old monitor logs
-  for (auto &monitorLog : m_monitorLogs) {
-    temp->mutableRun().removeProperty(monitorLog);
-  }
-  m_monitorLogs.clear();
+    // Clear out old monitor logs
+    for (auto &monitorLog : m_monitorLogs) {
+      temp->mutableRun().removeProperty(monitorLog);
+    }
+    m_monitorLogs.clear();
 
-  // Create a fresh monitor workspace and insert into the new 'main' workspace
-  auto monitorBuffer = m_eventBuffer->monitorWorkspace();
-  if (monitorBuffer) {
-    auto newMonitorBuffer =
-        WorkspaceFactory::Instance().create("EventWorkspace", monitorBuffer->getNumberHistograms(), 1, 1);
-    WorkspaceFactory::Instance().initializeFromParent(*monitorBuffer, *newMonitorBuffer, false);
-    temp->setMonitorWorkspace(newMonitorBuffer);
-  }
+    // Create a fresh monitor workspace and insert into the new 'main' workspace
+    auto monitorBuffer = m_eventBuffer->monitorWorkspace();
+    if (monitorBuffer) {
+      auto newMonitorBuffer =
+          WorkspaceFactory::Instance().create("EventWorkspace", monitorBuffer->getNumberHistograms(), 1, 1);
+      WorkspaceFactory::Instance().initializeFromParent(*monitorBuffer, *newMonitorBuffer, false);
+      temp->setMonitorWorkspace(newMonitorBuffer);
+    }
 
-  // Check 2: if the bg thread exited cleanly (clean disconnect) and there is
-  // nothing left to deliver — no events and no pending run-state transition —
-  // throw so consumers don't spin on empty workspaces indefinitely.
-  {
-    std::lock_guard<std::mutex> scopedLock(m_mutex);
-    if (!m_isConnected.load() && !m_pendingTransition && m_eventBuffer->getNumberEvents() == 0) {
+    // Check 2: if the bg thread exited cleanly (clean disconnect) and there is
+    // nothing left to deliver — no detector events, no monitor events, and no
+    // pending run-state transition — throw so consumers don't spin on empty
+    // workspaces indefinitely.  Monitor events live in the separate
+    // EventWorkspace returned by m_eventBuffer->monitorWorkspace(), so
+    // m_eventBuffer->getNumberEvents() alone would silently discard a final
+    // batch that contains only monitor data.
+    const auto monitorEventsBuffer = std::dynamic_pointer_cast<EventWorkspace>(monitorBuffer);
+    const std::size_t monitorEvents = monitorEventsBuffer ? monitorEventsBuffer->getNumberEvents() : 0;
+    if (!m_isConnected.load() && !m_pendingTransition && m_eventBuffer->getNumberEvents() == 0 && monitorEvents == 0) {
       throw std::runtime_error("SNSLiveEventDataListener: stream ended after server disconnect.");
     }
-    // Lock the mutex and swap the workspaces
+
+    // Swap the workspaces
     std::swap(m_eventBuffer, temp);
   } // mutex automatically unlocks here
 
@@ -1736,6 +1795,8 @@ void SNSLiveEventDataListener::onBeginRun() {
   m_instrumentName.clear();
   m_nameMap.clear();
   m_requiredLogs.clear(); // stale entries from previous geometry would block readyForInitPart2()
+  m_wsName.clear();       // recomposed by initWorkspacePart2() once the new run's
+                          // instrument name and run number are both known again
 
   initWorkspacePart1();
 
@@ -1762,6 +1823,8 @@ void SNSLiveEventDataListener::onEndRun() {
   m_dataStartTime = Types::Core::DateAndTime(); // cleared on EndRun only
   m_nameMap.clear();
   m_requiredLogs.clear(); // stale entries from previous geometry would block readyForInitPart2()
+  m_wsName.clear();       // recomposed by initWorkspacePart2() once the next run's
+                          // instrument name and run number are both known
 
   initWorkspacePart1();
 

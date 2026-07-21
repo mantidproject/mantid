@@ -190,18 +190,6 @@ struct MockSMSServer::Impl {
           m_scriptIndex = i + 1;
           return;
 
-        } else if (std::holds_alternative<PktAbruptClose>(entry)) {
-          // On UDS, close() delivers recv()==0 to the peer regardless of
-          // SO_LINGER / fd tricks.  Use Poco's close so Poco owns the fd
-          // lifetime and there is no double-close when the socket is destroyed.
-          try {
-            m_clientSocket.close();
-          } catch (...) {
-          }
-          std::lock_guard<std::mutex> lock(m_mutex);
-          m_scriptIndex = i + 1;
-          return;
-
         } else if (std::holds_alternative<PktWaitForExtract>(entry)) {
           // Wait until releaseExtractGate() is called, or until watchdog fires
           std::unique_lock<std::mutex> lock(m_mutex);
