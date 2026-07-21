@@ -8,6 +8,7 @@ cpp: &files_cpp
 # extensions associated with python
 py: &files_py
  - '**/*.py'
+ - '!docs/**/*.py'
 # pixi environment files
 pixi: &files_pixi
  - .pixi-version

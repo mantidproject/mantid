@@ -33,3 +33,6 @@ def setup(app):
       app: The main Sphinx application object
     """
     app.add_directive("summary", SummaryDirective)
+
+
+# this line has been added to test the filter
