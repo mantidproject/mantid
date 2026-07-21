@@ -130,6 +130,9 @@ void FitDataPresenter::handleAddData(MantidWidgets::IAddWorkspaceDialog const *d
 }
 
 void FitDataPresenter::setNumericQAxis(const std::string &wsName) {
+  if (wsName.empty()) {
+    return;
+  }
   auto ws = AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(wsName);
   if (!ws) {
     return;
