@@ -37,33 +37,31 @@ ConvolutionDataView::ConvolutionDataView(const QStringList &headers, QWidget *pa
 }
 
 void ConvolutionDataView::showAddWorkspaceDialog() {
-  auto dialog = new ConvolutionAddWorkspaceDialog(parentWidget());
-  connect(dialog, &ConvolutionAddWorkspaceDialog::addData, this, &ConvolutionDataView::notifyAddData);
-
   auto tabName = m_presenter->tabName();
-  dialog->setAttribute(Qt::WA_DeleteOnClose);
-  dialog->setWSSuffices(InterfaceUtils::getSampleWSSuffixes(tabName));
-  dialog->setFBSuffices(InterfaceUtils::getSampleFBSuffixes(tabName));
-  dialog->setResolutionWSSuffices(InterfaceUtils::getResolutionWSSuffixes(tabName));
-  dialog->setResolutionFBSuffices(InterfaceUtils::getResolutionFBSuffixes(tabName));
-  dialog->setLoadProperty("LoadHistory", SettingsHelper::loadHistory());
-  dialog->updateSelectedSpectra();
-  dialog->show();
+  auto dialog = createAddWorkspaceDialog(InterfaceUtils::getSampleFBSuffixes(tabName),
+                                         InterfaceUtils::getResolutionFBSuffixes(tabName));
+  connect(dialog, &ConvolutionAddWorkspaceDialog::addData, this, &ConvolutionDataView::notifyAddData);
 }
 
 void ConvolutionDataView::showAddNumericWorkspaceDialog() {
-  auto dialog = new ConvolutionAddWorkspaceDialog(parentWidget());
+  auto dialog = createAddWorkspaceDialog({".*"}, {".*"});
   connect(dialog, &ConvolutionAddWorkspaceDialog::addData, this, &ConvolutionDataView::notifyAddNumericData);
+}
 
+ConvolutionAddWorkspaceDialog *
+ConvolutionDataView::createAddWorkspaceDialog(const QStringList &sampleFileSuffixes,
+                                              const QStringList &resolutionFileSuffixes) const {
+  auto dialog = new ConvolutionAddWorkspaceDialog(parentWidget());
   auto tabName = m_presenter->tabName();
   dialog->setAttribute(Qt::WA_DeleteOnClose);
   dialog->setWSSuffices(InterfaceUtils::getSampleWSSuffixes(tabName));
-  dialog->setFBSuffices({".*"});
+  dialog->setFBSuffices(sampleFileSuffixes);
   dialog->setResolutionWSSuffices(InterfaceUtils::getResolutionWSSuffixes(tabName));
-  dialog->setResolutionFBSuffices({".*"});
+  dialog->setResolutionFBSuffices(resolutionFileSuffixes);
   dialog->setLoadProperty("LoadHistory", SettingsHelper::loadHistory());
   dialog->updateSelectedSpectra();
   dialog->show();
+  return dialog;
 }
 
 void ConvolutionDataView::addTableEntry(size_t row, FitDataRow const &newRow) {
