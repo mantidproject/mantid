@@ -662,7 +662,7 @@ public:
   }
 
   void setUp() override {
-    std::string resFileName = "ResolutionTestResolution.res";
+    std::string resFileName = "ResolutionTestResolution_fit.res";
     std::ofstream fil(resFileName.c_str());
 
     double N = 117;
@@ -685,7 +685,7 @@ public:
   }
 
   void tearDown() override {
-    std::string resFileName = "ResolutionTestResolution.res";
+    std::string resFileName = "ResolutionTestResolution_fit.res";
     std::filesystem::path phandle(resFileName);
     if (std::filesystem::exists(phandle)) {
       std::filesystem::remove(phandle);
@@ -734,7 +734,7 @@ public:
 
     fit.setPropertyValue("Function", "composite=Convolution,"
                                      "FixResolution=true,NumDeriv=true;name=Resolution,FileName="
-                                     "\"ResolutionTestResolution.res\","
+                                     "\"ResolutionTestResolution_fit.res\","
                                      "WorkspaceIndex=0;name=ResolutionTest_Gauss,c=5,h=2,s=1");
     fit.setPropertyValue("InputWorkspace", "ResolutionTest_WS");
     fit.setPropertyValue("WorkspaceIndex", "0");
