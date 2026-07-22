@@ -13,11 +13,15 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/EstimatePeakIntensities.h"
+#include "MantidHistogramData/Histogram.h"
 
 #include <cmath>
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::Histogram;
+using Mantid::HistogramData::Points;
 
 namespace {
 
@@ -46,17 +50,30 @@ MatrixWorkspace_sptr makeWindowWS(const std::vector<double> &winX) {
   return ws;
 }
 
-ITableWorkspace_sptr runAlg(const MatrixWorkspace_sptr &in, const std::vector<double> &winX) {
+/// Ragged window workspace: each spectrum holds its own X list, so spectra may define different
+/// numbers of [min, max] pairs.
+MatrixWorkspace_sptr makeRaggedWindowWS(const std::vector<std::vector<double>> &winX) {
+  MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", winX.size(), 2, 1);
+  for (size_t sp = 0; sp < winX.size(); ++sp)
+    ws->setHistogram(sp, Histogram(Points(winX[sp]), Counts(winX[sp].size(), 0.0)));
+  return ws;
+}
+
+ITableWorkspace_sptr runAlgWithWindowWS(const MatrixWorkspace_sptr &in, const MatrixWorkspace_sptr &win) {
   EstimatePeakIntensities alg;
   alg.setChild(true);
   alg.setLogging(false);
   alg.initialize();
   alg.setProperty("InputWorkspace", in);
-  alg.setProperty("PeakWindowWorkspace", makeWindowWS(winX));
+  alg.setProperty("PeakWindowWorkspace", win);
   alg.setPropertyValue("OutputWorkspace", "__unused_for_child");
   alg.execute();
   TS_ASSERT(alg.isExecuted());
   return alg.getProperty("OutputWorkspace");
+}
+
+ITableWorkspace_sptr runAlg(const MatrixWorkspace_sptr &in, const std::vector<double> &winX) {
+  return runAlgWithWindowWS(in, makeWindowWS(winX));
 }
 } // namespace
 
@@ -115,6 +132,46 @@ public:
     TS_ASSERT_EQUALS(out->cell<int>(2, 1), 0);            // WorkspaceIndex of third row
     TS_ASSERT_DELTA(out->cell<double>(2, 2), 8.0, 1e-9);  // Intensity of peak 1 on spectrum 0
     TS_ASSERT_DELTA(out->cell<double>(3, 5), 4.5, 1e-12); // empty spectrum -> midpoint of [2.5, 6.5]
+  }
+
+  void test_ragged_windows_with_longer_first_spectrum() {
+    // spectrum 0 defines two peaks, spectrum 1 only one; the table is sized by the longest spectrum
+    // and (peak 1, spectrum 1) is padded with a zero estimate and a NaN centre
+    auto out = runAlgWithWindowWS(makeInputWS(), makeRaggedWindowWS({{0.5, 6.5, 2.5, 6.5}, {0.5, 6.5}}));
+    TS_ASSERT_EQUALS(out->rowCount(), 4);
+    TS_ASSERT_DELTA(out->cell<double>(0, 2), 8.0, 1e-9);  // (p0, s0) from its own window
+    TS_ASSERT_DELTA(out->cell<double>(1, 5), 3.5, 1e-12); // (p0, s1) midpoint of [0.5, 6.5]
+    TS_ASSERT_DELTA(out->cell<double>(2, 2), 8.0, 1e-9);  // (p1, s0) second window of spectrum 0
+    TS_ASSERT_EQUALS(out->cell<int>(3, 0), 1);            // (p1, s1) has no window
+    TS_ASSERT_EQUALS(out->cell<int>(3, 1), 1);
+    TS_ASSERT_DELTA(out->cell<double>(3, 2), 0.0, 1e-12);
+    TS_ASSERT_DELTA(out->cell<double>(3, 3), 0.0, 1e-12);
+    TS_ASSERT_DELTA(out->cell<double>(3, 4), 0.0, 1e-12);
+    TS_ASSERT(std::isnan(out->cell<double>(3, 5)));
+  }
+
+  void test_ragged_windows_with_longer_later_spectrum() {
+    // the reverse case: spectrum 0 is the short one, so the peak count cannot be taken from it and
+    // spectrum 1's second window must still be read within its own length
+    auto out = runAlgWithWindowWS(makeInputWS(), makeRaggedWindowWS({{0.5, 6.5}, {0.5, 6.5, 2.5, 6.5}}));
+    TS_ASSERT_EQUALS(out->rowCount(), 4);
+    TS_ASSERT_DELTA(out->cell<double>(0, 2), 8.0, 1e-9);  // (p0, s0)
+    TS_ASSERT_DELTA(out->cell<double>(1, 5), 3.5, 1e-12); // (p0, s1) midpoint of [0.5, 6.5]
+    TS_ASSERT(std::isnan(out->cell<double>(2, 5)));       // (p1, s0) has no window
+    TS_ASSERT_DELTA(out->cell<double>(2, 2), 0.0, 1e-12);
+    TS_ASSERT_DELTA(out->cell<double>(3, 5), 4.5, 1e-12); // (p1, s1) midpoint of [2.5, 6.5]
+  }
+
+  void test_odd_length_in_a_later_spectrum_is_rejected() {
+    // the pair check applies to every spectrum, not just the first
+    EstimatePeakIntensities alg;
+    alg.setChild(true);
+    alg.setLogging(false);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", makeInputWS());
+    alg.setProperty("PeakWindowWorkspace", makeRaggedWindowWS({{0.5, 6.5}, {0.5, 6.5, 2.5}}));
+    alg.setPropertyValue("OutputWorkspace", "__unused_for_child");
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
   }
 
   void test_odd_length_window_is_rejected() {

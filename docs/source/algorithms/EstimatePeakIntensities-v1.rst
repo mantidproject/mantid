@@ -14,7 +14,10 @@ over a window. The ``PeakWindowWorkspace`` gives per-spectrum windows following 
 :ref:`algm-FitPeaks` ``FitPeakWindowWorkspace`` convention: one spectrum per ``InputWorkspace``
 spectrum, each holding ``2*nPeaks`` X values arranged as ``[min0, max0, min1, max1, ...]``. Because
 the window is read per spectrum, the same peak may occupy a different window in each spectrum (for
-example a single d-spacing peak mapped onto each detector's TOF). For each peak and spectrum it:
+example a single d-spacing peak mapped onto each detector's TOF). A ragged ``PeakWindowWorkspace`` is
+accepted: every spectrum must hold a non-zero even number of X values, but spectra may hold different
+numbers of pairs, in which case the number of peaks is taken from the spectrum holding the most and a
+spectrum holding fewer covers only the leading peak indices. For each peak and spectrum it:
 
 #. resolves the integration window ``[min, max]`` to bin indices;
 #. estimates the background as the mean of the "background" points selected by a *skew-seed* method:
@@ -30,7 +33,22 @@ the estimate previously computed in Python by the Engineering texture peak-fitti
 The result is a :py:obj:`TableWorkspace <mantid.api.ITableWorkspace>` with one row per (peak,
 spectrum), laid out peak-major, with the columns *PeakIndex*, *WorkspaceIndex*, *Intensity*,
 *Sigma*, *Background* and *PeakCentre*. A spectrum whose window contains no positive data is reported
-with zero *Intensity*, *Sigma* and *Background*, and its *PeakCentre* is the window midpoint.
+with zero *Intensity*, *Sigma* and *Background*, and its *PeakCentre* is the window midpoint. A peak
+index beyond the number of pairs held by a given spectrum (only possible with a ragged
+``PeakWindowWorkspace``) is likewise reported with zeros, but with a NaN *PeakCentre*, since there is
+no window whose midpoint could be reported.
+
+.. warning::
+
+   *PeakIndex* is only the position of the ``[min, max]`` pair within that spectrum's window list. The
+   algorithm never identifies peaks, so rows sharing a *PeakIndex* correspond to the same physical
+   (d-spacing) peak **only if** the caller built ``PeakWindowWorkspace`` so that the n-th pair refers
+   to the same peak in every spectrum. If the windows for a spectrum are ordered differently, or a
+   spectrum omits a peak that another spectrum includes (shifting every later pair down by one), then
+   grouping the table by *PeakIndex* mixes different peaks together. This is easy to hit with a ragged
+   ``PeakWindowWorkspace``: to keep the indices aligned, give every spectrum the same number of pairs
+   in the same peak order, and use a window containing no positive data (rather than dropping the
+   pair) for a peak that is absent from a spectrum.
 
 Usage
 -----
