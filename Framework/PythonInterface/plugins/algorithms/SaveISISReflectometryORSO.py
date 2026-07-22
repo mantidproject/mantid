@@ -10,7 +10,6 @@ from mantid.utils.reflectometry import SpinStatesORSO
 from mantid.kernel import (
     Direction,
     config,
-    FloatArrayProperty,
     StringArrayLengthValidator,
     StringArrayMandatoryValidator,
     StringArrayProperty,
@@ -29,6 +28,7 @@ import re
 from collections import OrderedDict
 from datetime import datetime
 import numpy as np
+import json
 
 
 def construct_run_file_name_from_string(instrument_name: str, run_string: str) -> str:
@@ -71,16 +71,27 @@ class Prop:
     IGNORED_OPTIONAL_PROPS = "IgnoredProperties"
 
     # Optional Properties for Manual Metadata Entry
+    META_JSON = "DatasetSpecificMetadata"
     Q_CONVERT_METHOD = "QConversionMethod"
     REDUCTION_TIMESTAMP = "ReductionTimestamp"
-    ANGLE_FILES = "AngleFileList"
-    ANGLE_FILES_THETA = "AngleFileThetaList"
     TRANS_FILES_1 = "FirstTransmissionFileList"
     TRANS_FILES_2 = "SecondTransmissionFileList"
     FLOOD_ENTRY = "FloodCorrectionSource"
     CALIB_FILE = "CalibrationFile"
-    RESOLUTION = "Resolution"
-    SCRIPT = "ReductionScript"
+
+
+class MetaDictKeys:
+    DATASET_NAME = "dataset-name"
+    SAMPLE = "sample-information"
+    STITCHED = "is-stitched"
+    POLARIZATION = "polarization"
+    RESOLUTION = "resolution"
+    ANGLE_FILES = "data-files"
+    ANGLE_FILES_FILENAME = "file-name"
+    ANGLE_FILES_ANGLE = "angle"
+    SCRIPT = "reduction-call"
+
+    GROUP_MEMBERS = "group-members"
 
 
 class MetadataSourceOptions:
@@ -551,8 +562,6 @@ class ReflectometryDatasetHybrid(ReflectometryDatasetHistory, ReflectometryDatas
         missing_metadata = []
         if self._reduction_timestamp is None:
             missing_metadata.append(Prop.REDUCTION_TIMESTAMP)
-        if not self._angle_files:
-            missing_metadata.append(Prop.ANGLE_FILES)
         if self._transmission_files:
             if not self._transmission_files[0]:
                 missing_metadata.append(Prop.TRANS_FILES_1)
@@ -564,10 +573,6 @@ class ReflectometryDatasetHybrid(ReflectometryDatasetHistory, ReflectometryDatas
             missing_metadata.append(Prop.FLOOD_ENTRY)
         if not self._calibration_entry:
             missing_metadata.append(Prop.CALIB_FILE)
-        if self._resolution is None:
-            missing_metadata.append(Prop.RESOLUTION)
-        if self._reduction_script is None:
-            missing_metadata.append(Prop.SCRIPT)
         return missing_metadata
 
 
@@ -627,6 +632,14 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
 
         manual_metadata_condition = EnabledWhenProperty(Prop.META_SOURCE, PropertyCriterion.IsNotDefault)
 
+        self.declareProperty(
+            name=Prop.META_JSON,
+            defaultValue="",
+            doc=f"A JSON string for assigning metadata to the datasets that will be produced by the given {Prop.WORKSPACE_LIST}. "
+            f"Please see the algorithm documentation for details on how this JSON string should be structured.",
+        )
+        self.setPropertySettings(Prop.META_JSON, manual_metadata_condition)
+
         convert_method_validator = StringListValidator([ReflectometryDatasetHistory.REF_ROI_ALG, ReflectometryDatasetHistory.CONVERT_ALG])
         self.declareProperty(
             name=Prop.Q_CONVERT_METHOD,
@@ -638,12 +651,6 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
 
         self.declareProperty(name=Prop.REDUCTION_TIMESTAMP, defaultValue="", doc="When the reduction took place (ISO8601 Standard).")
         self.setPropertySettings(Prop.REDUCTION_TIMESTAMP, manual_metadata_condition)
-
-        self.declareProperty(StringArrayProperty(Prop.ANGLE_FILES, values=[]), doc="Input angle file list.")
-        self.setPropertySettings(Prop.ANGLE_FILES, manual_metadata_condition)
-
-        self.declareProperty(FloatArrayProperty(Prop.ANGLE_FILES_THETA, values=[]), doc="Input angle file list of theta values.")
-        self.setPropertySettings(Prop.ANGLE_FILES_THETA, manual_metadata_condition)
 
         self.declareProperty(StringArrayProperty(Prop.TRANS_FILES_1, values=[]), doc="List of files used in the first transmission run.")
         self.setPropertySettings(Prop.TRANS_FILES_1, manual_metadata_condition)
@@ -661,12 +668,6 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
 
         self.declareProperty(Prop.CALIB_FILE, defaultValue="", doc="Calibration file used.")
         self.setPropertySettings(Prop.CALIB_FILE, manual_metadata_condition)
-
-        self.declareProperty(Prop.RESOLUTION, defaultValue=0.0, doc="Resolution of the run.")
-        self.setPropertySettings(Prop.RESOLUTION, manual_metadata_condition)
-
-        self.declareProperty(Prop.SCRIPT, defaultValue="", doc="Script used to perform the reduction.")
-        self.setPropertySettings(Prop.SCRIPT, manual_metadata_condition)
 
         self.declareProperty(
             name=Prop.WRITE_RESOLUTION,
@@ -732,14 +733,6 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
                         f"Metadata could not be found in the workspace history. "
                         f"Please provide some or add the property name to the '{Prop.IGNORED_OPTIONAL_PROPS}' list."
                     )
-
-        angle_files = self.getProperty(Prop.ANGLE_FILES).value
-        angle_files_theta = self.getProperty(Prop.ANGLE_FILES_THETA).value
-        if len(angle_files) > 0 or len(angle_files_theta) > 0:
-            if len(angle_files) != len(angle_files_theta):
-                issues[Prop.ANGLE_FILES] = (
-                    f"Both the {Prop.ANGLE_FILES} and {Prop.ANGLE_FILES_THETA} properties must be lists of equal length. "
-                )
         return issues
 
     def _validate_ws(self, ws_name: str) -> str:
@@ -803,19 +796,28 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             return False
 
         dataset_list = []
+        try:
+            manual_metadata = json.loads(self.getPropertyValue(Prop.META_JSON))
+        except json.JSONDecodeError:
+            manual_metadata = None
 
         for ws_name in self.getProperty(Prop.WORKSPACE_LIST).value:
             ws = AnalysisDataService.retrieve(ws_name)
+            try:
+                ws_meta = manual_metadata[ws_name] if manual_metadata else None
+            except KeyError:
+                # There wasn't a manual metadata entry for this workspace.
+                ws_meta = None
             if isinstance(ws, WorkspaceGroup):
-                dataset_list.extend([self._create_single_refl_dataset(child_ws, True) for child_ws in ws])
+                dataset_list.extend([self._create_single_refl_dataset(child_ws, True, metadata_dict=ws_meta) for child_ws in ws])
             else:
-                dataset_list.append(self._create_single_refl_dataset(ws, is_workspace_group_member(ws_name)))
+                dataset_list.append(self._create_single_refl_dataset(ws, is_workspace_group_member(ws_name), metadata_dict=ws_meta))
 
         # Stitched datasets should be sorted to the end of the list
         dataset_list.sort(key=lambda refl_dataset: refl_dataset.is_stitched)
         return dataset_list
 
-    def _create_single_refl_dataset(self, ws, is_child) -> ReflectometryDatasetBase:
+    def _create_single_refl_dataset(self, ws, is_child, metadata_dict=None) -> ReflectometryDatasetBase:
         match self.getPropertyValue(Prop.META_SOURCE):
             case MetadataSourceOptions.FROM_HISTORY:
                 return ReflectometryDatasetHistory(ws, is_child)
@@ -828,19 +830,24 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             case _:
                 raise RuntimeError("An invalid metadata source was given.")
 
-        def set_simple_dataset_value(dataset_attr: str, value, alg_prop: str):
+        def set_simple_dataset_value_from_property(dataset_attr: str, value, alg_prop: str) -> None:
             if use_default or not self.getProperty(alg_prop).isDefault:
                 setattr(dataset, dataset_attr, value)
 
+        def set_dataset_value_from_meta_dict(dataset_attr: str, key: str, meta_dict: dict) -> None:
+            if meta_dict is None:
+                return
+            try:
+                setattr(dataset, dataset_attr, meta_dict[key])
+            except KeyError:
+                logger.debug(f"An entry for '{key}' was not found in {Prop.META_JSON}. It will not be included in the output file.")
+
         if not dataset.q_conversion_method:
             setattr(dataset, "q_conversion_method", self.getPropertyValue(Prop.Q_CONVERT_METHOD))
-        set_simple_dataset_value("reduction_timestamp", self.getPropertyValue(Prop.REDUCTION_TIMESTAMP), Prop.REDUCTION_TIMESTAMP)
-        set_simple_dataset_value("calibration_entry", self.getPropertyValue(Prop.CALIB_FILE), Prop.CALIB_FILE)
-        set_simple_dataset_value("resolution", self.getProperty(Prop.RESOLUTION).value, Prop.RESOLUTION)
-        set_simple_dataset_value("reduction_script", self.getPropertyValue(Prop.SCRIPT), Prop.SCRIPT)
-
-        if use_default or (not self.getProperty(Prop.ANGLE_FILES).isDefault and not self.getProperty(Prop.ANGLE_FILES).isDefault):
-            dataset.angle_files = zip(self.getProperty(Prop.ANGLE_FILES).value, self.getProperty(Prop.ANGLE_FILES_THETA).value)
+        set_simple_dataset_value_from_property(
+            "reduction_timestamp", self.getPropertyValue(Prop.REDUCTION_TIMESTAMP), Prop.REDUCTION_TIMESTAMP
+        )
+        set_simple_dataset_value_from_property("calibration_entry", self.getPropertyValue(Prop.CALIB_FILE), Prop.CALIB_FILE)
 
         if use_default or (not self.getProperty(Prop.TRANS_FILES_1).isDefault and not self.getProperty(Prop.TRANS_FILES_2).isDefault):
             dataset.transmission_files = (self.getProperty(Prop.TRANS_FILES_1).value, self.getProperty(Prop.TRANS_FILES_2).value)
@@ -848,6 +855,29 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         if use_default or not self.getProperty(Prop.FLOOD_ENTRY).isDefault:
             dataset.flood_entry = tuple(self.getProperty(Prop.FLOOD_ENTRY).value)
 
+        if metadata_dict is None:
+            return dataset
+
+        set_dataset_value_from_meta_dict("resolution", MetaDictKeys.RESOLUTION, metadata_dict)
+        set_dataset_value_from_meta_dict("reduction_script", MetaDictKeys.SCRIPT, metadata_dict)
+        set_dataset_value_from_meta_dict("is_stitched", MetaDictKeys.STITCHED, metadata_dict)
+
+        try:
+            group_member_dict = metadata_dict[MetaDictKeys.GROUP_MEMBERS][ws.name()]
+            set_dataset_value_from_meta_dict("name", MetaDictKeys.DATASET_NAME, group_member_dict)
+            set_dataset_value_from_meta_dict("spin_state", MetaDictKeys.POLARIZATION, group_member_dict)
+        except KeyError:
+            set_dataset_value_from_meta_dict("name", MetaDictKeys.DATASET_NAME, metadata_dict)
+            set_dataset_value_from_meta_dict("spin_state", MetaDictKeys.POLARIZATION, metadata_dict)
+
+        try:
+            dataset.angle_files = [
+                (angle_dict[MetaDictKeys.ANGLE_FILES_FILENAME], angle_dict[MetaDictKeys.ANGLE_FILES_ANGLE])
+                for angle_dict in metadata_dict[MetaDictKeys.ANGLE_FILES]
+            ]
+        except KeyError:
+            # One of angle-files, or the two sub-keys wasn't found. Just move on.
+            pass
         return dataset
 
     def _create_orso_dataset(self, refl_dataset: ReflectometryDatasetBase) -> MantidORSODataset:
