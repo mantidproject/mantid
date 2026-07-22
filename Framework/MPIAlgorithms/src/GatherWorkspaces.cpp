@@ -297,7 +297,7 @@ void GatherWorkspaces::execEvent() {
         size_t index = wi; // accum == "Add"
         if (accum == "Append")
           index = wi + i * m_totalSpec;
-        outputWorkspace->mutableX(index) = m_eventW->x(wi);
+        outputWorkspace->setSharedX(index, m_eventW->sharedX(wi));
         outputWorkspace->getSpectrum(index) += out_values[i];
         const auto &inSpec = m_eventW->getSpectrum(wi);
         auto &outSpec = outputWorkspace->getSpectrum(index);
