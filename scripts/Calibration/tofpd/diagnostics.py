@@ -466,9 +466,9 @@ def extract_peak_info(wksp: Union[str, Workspace2D], outputname: str, peak_posit
     have_detids = bool(len(detids) > 0)
 
     # fill in the data values
-    x = single.x(0)
-    y = single.y(0)
-    e = single.e(0)
+    x = single.mutableX(0)
+    y = single.mutableY(0)
+    e = single.mutableE(0)
     start_detid = np.searchsorted(detids, 0)
     for wksp_index in range(numSpec):
         if have_detids:

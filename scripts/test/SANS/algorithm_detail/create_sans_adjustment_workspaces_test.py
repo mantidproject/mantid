@@ -53,7 +53,7 @@ class CreateSANSAdjustmentWorkspacesTest(unittest.TestCase):
         )
 
         for hist in range(monitor_workspace.getNumberHistograms()):
-            data_y = monitor_workspace.y(hist)
+            data_y = monitor_workspace.mutableY(hist)
             for index in range(len(data_y)):
                 data_y[index] = value
             # This will be the background bin
@@ -80,7 +80,7 @@ class CreateSANSAdjustmentWorkspacesTest(unittest.TestCase):
         ws = Rebin(InputWorkspace=ws, Params=rebin_string, StoreInADS=False)
         # Set all entries to value
         for hist in range(ws.getNumberHistograms()):
-            data_y = ws.y(hist)
+            data_y = ws.mutableY(hist)
             for index in range(len(data_y)):
                 data_y[index] = value
             # This will be the background bin

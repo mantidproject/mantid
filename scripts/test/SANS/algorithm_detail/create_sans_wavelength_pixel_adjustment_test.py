@@ -87,7 +87,7 @@ class CreateSANSWavelengthPixelAdjustmentTest(unittest.TestCase):
     def _get_workspace(data):
         workspace = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=1, XMin=1, XMax=11, BinWidth=2, XUnit="Wavelength", StoreInADS=False)
 
-        data_y = workspace.y(0)
+        data_y = workspace.mutableY(0)
         for index in range(len(data_y)):
             data_y[index] = data[index]
         return workspace

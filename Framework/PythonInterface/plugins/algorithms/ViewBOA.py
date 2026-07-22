@@ -56,7 +56,7 @@ class ViewBOA(PythonAlgorithm):
 
     def TOFToLambda(self, wsname, CD):
         ws2d = mtd[wsname]
-        tofdata = ws2d.x(0)
+        tofdata = ws2d.mutableX(0)
         for i in range(len(tofdata)):
             tofdata[i] = (3.9560346e-7 * (tofdata[i] * 1.0e-7 / CD)) * 1.0e10
 

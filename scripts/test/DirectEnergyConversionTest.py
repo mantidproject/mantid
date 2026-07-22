@@ -190,7 +190,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
             NumBanks=1, BankPixelWidth=4, NumEvents=10000, XUnit="DeltaE", XMin=-5, XMax=15, BinWidth=0.1, function="Flat background"
         )
         LoadInstrument(mono_ws, InstrumentName="MARI", RewriteSpectraMap=True)
-        sig = mono_ws.y(0)
+        sig = mono_ws.mutableY(0)
         sig[:] = 0
 
         tReducer.wb_run = mono_ws

@@ -625,7 +625,7 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
             upperIdx = thresholdIndex(mainWS, maskWS, mid, end, threshold)
             if lowerIdx != upperIdx:
                 for j in range(upperIdx - lowerIdx + 1):
-                    ys = beamStopDiagnosticsWS.y(lowerIdx + j)
+                    ys = beamStopDiagnosticsWS.mutableY(lowerIdx + j)
                     ys[0] = 1.0
         return beamStopDiagnosticsWS
 

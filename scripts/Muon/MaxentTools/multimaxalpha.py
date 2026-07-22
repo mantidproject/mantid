@@ -128,8 +128,8 @@ def MULTIMAX(
         if phaseconvWS:
             offset = 0
             for k in range(POINTS_ngroups + len(deadDetectors)):
-                phaseConvX_k = phaseconvWS.x(k)
-                phaseConvY_k = phaseconvWS.y(k)
+                phaseConvX_k = phaseconvWS.mutableX(k)
+                phaseConvY_k = phaseconvWS.mutableY(k)
                 if k + 1 in deadDetectors:
                     offset += 1
                     phaseConvX_k[j + 1] = (j + 1) * 1.0

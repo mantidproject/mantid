@@ -38,10 +38,10 @@ class ComputeCalibrationCoefVanTest(unittest.TestCase):
         self._table = FindEPP(input_ws, OutputWorkspace="table")
         AddSampleLog(self._input_ws, LogName="wavelength", LogText="4.0", LogType="Number", LogUnit="Angstrom")
         for i in range(input_ws.getNumberHistograms()):
-            y = input_ws.y(i)
+            y = input_ws.mutableY(i)
             y.fill(0.0)
             y[51] = 100.0
-            e = input_ws.e(i)
+            e = input_ws.mutableE(i)
             e.fill(0.0)
             e[51] = 10.0
 

@@ -149,9 +149,9 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
             # calculate array of Debye-Waller factors
             dwf = self.calculate_dwf()
             for idx in range(nhist):
-                ys = outws.y(idx)
+                ys = outws.mutableY(idx)
                 ys /= dwf[idx]
-                es = outws.e(idx)
+                es = outws.mutableE(idx)
                 es /= dwf[idx]
         prog_reporter.report("Done")
         self.setProperty("OutputWorkspace", outws)

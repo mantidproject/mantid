@@ -176,8 +176,8 @@ class LRReflectivityOutput(PythonAlgorithm):
 
         # Take the first rebinned histo as our output
         data_x = mtd[scaled_ws_list[0] + "_histo"].x(0)
-        data_y = mtd[scaled_ws_list[0] + "_histo"].y(0)
-        data_e = mtd[scaled_ws_list[0] + "_histo"].e(0)
+        data_y = mtd[scaled_ws_list[0] + "_histo"].mutableY(0)
+        data_e = mtd[scaled_ws_list[0] + "_histo"].mutableE(0)
 
         # Skip first point and last one
         points_to_skip = 1

@@ -98,7 +98,7 @@ class ReactorSANSResolution(PythonAlgorithm):
                     center = input_ws.x(0)[i]
                 else:
                     center = 0.5 * (input_ws.x(0)[i] + input_ws.x(0)[i + 1])
-                input_ws.dx(0)[i] = math.sqrt(res_factor + math.pow((center * d_wvl), 2) / 6.0)
+                input_ws.mutableDx(0)[i] = math.sqrt(res_factor + math.pow((center * d_wvl), 2) / 6.0)
         else:
             raise RuntimeError("ReactorSANSResolution could not find all the run parameters needed to compute the resolution.")
 

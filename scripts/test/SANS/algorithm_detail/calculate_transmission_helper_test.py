@@ -44,7 +44,7 @@ class CalculateTransmissionHelperTest(unittest.TestCase):
         workspace = Rebin(workspace, "1,20,80")
         # For each spectrum we set the first two entries to 2 and the other two entries to 4.
         for index in range(workspace.getNumberHistograms()):
-            data_y = workspace.y(index)
+            data_y = workspace.mutableY(index)
             data_y[0] = 2.0
             data_y[1] = 2.0
             data_y[2] = 4.0

@@ -80,6 +80,10 @@ class MockWorkspace:
         self.readY = StrictMock(return_value=read_return)
         self.readE = StrictMock(return_value=read_return)
         self.readDx = StrictMock(return_value=read_return)
+        self.x = StrictMock(return_value=read_return)
+        self.y = StrictMock(return_value=read_return)
+        self.e = StrictMock(return_value=read_return)
+        self.dx = StrictMock(return_value=read_return)
         self.axes = StrictMock(return_value=axes)
         self.hasMaskedBins = None
         self.maskedBinsIndices = None

@@ -42,7 +42,7 @@ class SANSSaveTest(unittest.TestCase):
             workspace = convert_alg.getProperty("OutputWorkspace").value
 
         if with_zero_errors:
-            errors = workspace.e(0)
+            errors = workspace.mutableE(0)
             errors[0] = 0.0
             errors[14] = 0.0
             errors[45] = 0.0

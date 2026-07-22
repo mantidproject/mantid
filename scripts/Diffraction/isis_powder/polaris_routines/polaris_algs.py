@@ -377,7 +377,7 @@ def fast_fourier_filter(ws, rho0, freq_params=None):
         # apply filter so that g(r)=0 for r < rmin => RDF(r)=0, G(r)~-r
         ws = mantid.mtd[ws_name]
         r_data = ws.x(0)
-        y_data = ws.y(0)
+        y_data = ws.mutableY(0)
         for i in range(len(r_data)):
             if r_data[i] < r_min and i < len(y_data):  # ws will be points but cope if it's bin edges
                 y_data[i] = 0.0

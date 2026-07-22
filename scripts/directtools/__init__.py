@@ -88,9 +88,9 @@ def _denormalizeline(line):
     """Multiplies line workspace by the line width."""
     axis = line.getAxis(1)
     height = axis.getMax() - axis.getMin()
-    Ys = line.y(0)
+    Ys = line.mutableY(0)
     Ys *= height
-    Es = line.e(0)
+    Es = line.mutableE(0)
     Es *= height
 
 
@@ -282,8 +282,8 @@ def _removesingularity(ws, epsilon):
     """Find the bin nearest to X = 0, and if -epsilon <= bin centre < epsilon, set Y and E to zero."""
     for i in range(ws.getNumberHistograms()):
         xs = ws.x(i)
-        ys = ws.y(i)
-        es = ws.e(i)
+        ys = ws.mutableY(i)
+        es = ws.mutableE(i)
         if len(xs) != len(ys):
             xs = _bincentres(xs)
         binIndex = numpy.argmin(numpy.abs(xs))

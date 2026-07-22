@@ -1769,7 +1769,7 @@ def get_error_corrected_front_and_rear_data_sets(front_data, rear_data, q_min, q
     # Now transfer the error from front data to the rear data workspace
     # This works only if we have a single QMod spectrum in the workspaces
     front_error = front_data_cropped.e(0)
-    rear_error = rear_data_cropped.e(0)
+    rear_error = rear_data_cropped.mutableE(0)
 
     rear_error_squared = rear_error * rear_error
     front_error_squared = front_error * front_error

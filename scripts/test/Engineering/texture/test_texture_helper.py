@@ -522,7 +522,7 @@ class TestGenerousRebin(unittest.TestCase):
     def _make_mock_ws(self, x_arrays, instrument_name="ENGIN-X"):
         mock_ws = MagicMock()
         mock_ws.getNumberHistograms.return_value = len(x_arrays)
-        mock_ws.readX.side_effect = lambda i: np.array(x_arrays[i])
+        mock_ws.x.side_effect = lambda i: np.array(x_arrays[i])
         mock_ws.getInstrumentName.return_value = instrument_name
         return mock_ws
 

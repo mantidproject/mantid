@@ -323,7 +323,7 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         output_ws = alg.getProperty("OutputWorkspace").value
 
         # ... then put Dq back
-        dq_output = output_ws.dx(0)
+        dq_output = output_ws.mutableDx(0)
         for i in range(len(dq_output)):
             dq_output[i] = dq[i]
 

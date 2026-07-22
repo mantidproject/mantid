@@ -16,7 +16,7 @@ class IN4(systemtesting.MantidSystemTest):
             "ILL/IN4/084446.nxs", ElasticChannel="Default Elastic Channel", FlatBkg="Flat Bkg OFF", Normalisation="Normalisation OFF"
         )
         for i in range(ws.getNumberHistograms()):
-            ws.y(i).fill(1)
+            ws.mutableY(i).fill(1)
         dE = ConvertUnits(ws, "DeltaE", "Direct")
         corr = DetectorEfficiencyCorUser(dE)
         Ei = corr.run().get("Ei").value
@@ -48,7 +48,7 @@ class IN5(systemtesting.MantidSystemTest):
             "ILL/IN5/104007.nxs", ElasticChannel="Default Elastic Channel", FlatBkg="Flat Bkg OFF", Normalisation="Normalisation OFF"
         )
         for i in range(ws.getNumberHistograms()):
-            ws.y(i).fill(1)
+            ws.mutableY(i).fill(1)
         dE = ConvertUnits(ws, "DeltaE", "Direct")
         corr = DetectorEfficiencyCorUser(dE)
         Ei = corr.run().get("Ei").value
@@ -69,7 +69,7 @@ class IN6(systemtesting.MantidSystemTest):
             "ILL/IN6/164192.nxs", ElasticChannel="Default Elastic Channel", FlatBkg="Flat Bkg OFF", Normalisation="Normalisation OFF"
         )
         for i in range(ws.getNumberHistograms()):
-            ws.y(i).fill(1)
+            ws.mutableY(i).fill(1)
         dE = ConvertUnits(ws, "DeltaE", "Direct")
         corr = DetectorEfficiencyCorUser(dE)
         Ei = corr.run().get("Ei").value

@@ -286,7 +286,7 @@ class DataSet(object):
         Scale(InputWorkspace=self._ws_name, OutputWorkspace=self._ws_scaled, Operation="Multiply", Factor=self._scale)
 
         # Put back dQ
-        dq_scaled = mtd[self._ws_scaled].dx(0)
+        dq_scaled = mtd[self._ws_scaled].mutableDx(0)
         for i in range(len(dq_scaled)):
             dq_scaled[i] = dq[i]
 
@@ -316,12 +316,12 @@ class DataSet(object):
                 ParentWorkspace=self._ws_name,
             )
 
-            dq_scaled = mtd[self._ws_scaled].dx(0)
+            dq_scaled = mtd[self._ws_scaled].mutableDx(0)
             for i in range(len(dq_scaled)):
                 dq_scaled[i] = dx_trim[i]
         else:
-            y_scaled = mtd[self._ws_scaled].y(0)
-            e_scaled = mtd[self._ws_scaled].e(0)
+            y_scaled = mtd[self._ws_scaled].mutableY(0)
+            e_scaled = mtd[self._ws_scaled].mutableE(0)
             for i in range(self._skip_first):
                 y_scaled[i] = 0
                 e_scaled[i] = 0
@@ -363,7 +363,7 @@ class DataSet(object):
                 ConvertToPointData(InputWorkspace=self._ws_name, OutputWorkspace=point_data_ws)
                 # Copy over the resolution
                 dq_original = mtd[self._ws_name].dx(0)
-                dq_points = mtd[point_data_ws].dx(0)
+                dq_points = mtd[point_data_ws].mutableDx(0)
                 for i in range(len(dq_points)):
                     dq_points[i] = dq_original[i]
 
@@ -624,7 +624,7 @@ class Stitcher(object):
 
         CreateWorkspace(DataX=x, DataY=y, DataE=e, OutputWorkspace=ws_combined, UnitX="MomentumTransfer", ParentWorkspace=first_ws)
 
-        dxtmp = mtd[ws_combined].dx(0)
+        dxtmp = mtd[ws_combined].mutableDx(0)
 
         # Fill out dQ
         npts = len(dxtmp)

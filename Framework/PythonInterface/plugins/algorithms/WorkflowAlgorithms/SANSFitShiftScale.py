@@ -288,7 +288,7 @@ class ErrorTransferFromModelToData(object):
         # This works only if we have a single QMod spectrum in the workspaces
         for i in range(0, front_data_cropped.getNumberHistograms()):
             front_error = front_data_cropped.e(i)
-            rear_error = rear_data_cropped.e(i)
+            rear_error = rear_data_cropped.mutableE(i)
 
             rear_error_squared = rear_error * rear_error
             front_error_squared = front_error * front_error

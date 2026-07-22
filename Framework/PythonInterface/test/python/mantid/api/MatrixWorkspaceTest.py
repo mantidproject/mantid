@@ -383,10 +383,10 @@ class MatrixWorkspaceTest(unittest.TestCase):
             self.assertEqual(type(arr), np.ndarray)
             self.assertTrue(arr.flags.writeable)
 
-        x = self._test_ws.x(0)
-        y = self._test_ws.y(0)
-        e = self._test_ws.e(0)
-        dx = self._test_ws.dx(0)
+        x = self._test_ws.mutableX(0)
+        y = self._test_ws.mutableY(0)
+        e = self._test_ws.mutableE(0)
+        dx = self._test_ws.mutableDx(0)
 
         for attr in [x, y, e, dx]:
             do_numpy_test(attr)

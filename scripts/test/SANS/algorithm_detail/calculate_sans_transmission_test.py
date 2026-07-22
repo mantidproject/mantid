@@ -194,7 +194,7 @@ class CalculateSansTransmissionTest(unittest.TestCase):
         # Now set specified monitors to specified values
         if data is not None:
             for key, value in list(data.items()):
-                data_y = workspace.y(key)
+                data_y = workspace.mutableY(key)
                 for index in range(len(data_y)):
                     data_y[index] = value[index]
         return workspace
