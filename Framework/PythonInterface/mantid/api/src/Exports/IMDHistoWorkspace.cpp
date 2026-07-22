@@ -186,11 +186,11 @@ void setNumEventsArray(IMDHistoWorkspace &self, const NDArray &numEvents) {
   throwIfSizeIncorrect(self, numEvents, "setNumEventsArray");
   object rav = numEvents.attr("ravel")("F");
   object flattened = rav.attr("flat");
-  auto length = len(flattened);
+  const auto length = static_cast<size_t>(len(flattened));
   // Buffer conversions first so a failed Python-to-double extraction cannot partially modify the workspace.
   std::vector<double> values;
-  values.reserve(static_cast<size_t>(length));
-  for (auto i = 0; i < length; ++i) {
+  values.reserve(length);
+  for (size_t i = 0; i < length; ++i) {
     values.emplace_back(extract<double>(flattened[i])());
   }
   auto *dest = self.mutableNumEventsArray();
