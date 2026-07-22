@@ -597,7 +597,7 @@ class TestMaterialAndSettings(_FunctionalTestBase):
 class TestWindowClose(_FunctionalTestBase):
     def test_closing_window_removes_this_instances_workspaces(self):
         wsm = self.model.workspaces
-        owned = [getattr(wsm, attr) for attr in wsm._OWNED_WS_NAME_ATTRS]
+        owned = [wsname for wsname in wsm._owned_ws_names]
         # the model bootstraps the persistent planner workspaces on construction
         self.assertTrue(ADS.doesExist(wsm.wsname))
 

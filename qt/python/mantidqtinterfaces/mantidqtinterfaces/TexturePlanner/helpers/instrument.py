@@ -127,7 +127,7 @@ class InstrumentHelper:
         return (CUSTOM_GROUP,)
 
     def get_grouping_file(self) -> str:
-        return self.config.grouping_files[self.group]
+        return self.config.group_info[self.group].grouping_file
 
     def get_grouping_path(self) -> str:
         if self.group == CUSTOM_GROUP:
