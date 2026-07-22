@@ -57,5 +57,9 @@ function fixup_qt() {
 
   find "$bundle_conda_prefix" -name 'qt.conf' -delete
   cp "$qt_conf" "$bundle_conda_prefix"/bin/qt.conf
-  cp "$qt_conf" "$bundle_conda_prefix"/libexec/qt.conf
+
+  # libexec directory seems to no longer exist with Qt6 on macOS, so make the copy conditional.
+  if [ -d "$bundle_conda_prefix/libexec" ]; then
+    cp "$qt_conf" "$bundle_conda_prefix/libexec/qt.conf"
+  fi
 }
