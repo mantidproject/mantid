@@ -12,7 +12,7 @@ from sans.common.configurations import Configurations
 from sans.common.enums import DetectorType, SANSInstrument, ReductionMode, RangeStepType, RebinType, DataType, FitType
 from sans.state.StateObjects.StateMoveDetectors import StateMoveZOOM
 from sans.test_helper.user_file_test_helper import create_user_file, sample_user_file
-from sans.user_file.settings_tags import DetectorId, TransId
+from sans.user_file.settings_tags import DetectorId, TransId, FitId, fit_general
 from sans.user_file.txt_parsers.UserFileReaderAdapter import UserFileReaderAdapter
 from sans.user_file.user_file_reader import UserFileReader
 
@@ -233,6 +233,101 @@ class ParsedDictConverterTest(unittest.TestCase):
         self.assertIsInstance(state_move, StateMoveZOOM)
         self.assertAlmostEqual(0.0, state_move.monitor_4_offset)
         self.assertAlmostEqual(-5.0 / self.MM_TO_M, state_move.monitor_5_offset)
+
+    def test_fit_transmission_state_for_both_legacy(self):
+        user_file_path = create_user_file(sample_user_file)
+
+        mocked_sans = self.create_mock_inst_file_information(SANSInstrument.SANS2D)
+
+        parser = UserFileReaderAdapter(user_file_name=user_file_path, file_information=mocked_sans)
+        state_adjustment = parser.get_state_adjustment(file_information=None)
+
+        fit_can = state_adjustment.calculate_transmission.fit[DataType.CAN.value]
+        fit_sample = state_adjustment.calculate_transmission.fit[DataType.SAMPLE.value]
+        self.assertAlmostEqual(fit_can.wavelength_high, 12.5)
+        self.assertAlmostEqual(fit_can.wavelength_low, 1.5)
+        self.assertAlmostEqual(fit_sample.wavelength_high, 12.5)
+        self.assertAlmostEqual(fit_sample.wavelength_low, 1.5)
+        self.assertEqual(fit_sample.fit_type, FitType.LOGARITHMIC)
+        self.assertEqual(fit_can.fit_type, FitType.LOGARITHMIC)
+
+    def test_fit_transmission_state_for_sample_only_legacy(self):
+        trans_sample_only_user_file = sample_user_file.replace("FIT/TRANS/LOG 1.5 12.5", "FIT/TRANS/SAMPLE/LOG 1.2 9.0")
+        user_file_path = create_user_file(trans_sample_only_user_file)
+
+        mocked_sans = self.create_mock_inst_file_information(SANSInstrument.SANS2D)
+
+        parser = UserFileReaderAdapter(user_file_name=user_file_path, file_information=mocked_sans)
+        state_adjustment = parser.get_state_adjustment(file_information=None)
+
+        fit_can = state_adjustment.calculate_transmission.fit[DataType.CAN.value]
+        fit_sample = state_adjustment.calculate_transmission.fit[DataType.SAMPLE.value]
+        self.assertAlmostEqual(fit_can.wavelength_high, 9.0)
+        self.assertAlmostEqual(fit_can.wavelength_low, 1.2)
+        self.assertEqual(fit_sample.fit_type, FitType.LOGARITHMIC)
+        self.assertEqual(fit_can.fit_type, FitType.NO_FIT)
+
+    def test_fit_transmission_state_update(self):
+        user_file_path = create_user_file(sample_user_file)
+
+        mocked_sans = self.create_mock_inst_file_information(SANSInstrument.SANS2D)
+
+        parser = UserFileReaderAdapter(user_file_name=user_file_path, file_information=mocked_sans)
+        state_adjustment = parser.get_state_adjustment(file_information=None)
+
+        fit_can = state_adjustment.calculate_transmission.fit[DataType.CAN.value]
+        fit_sample = state_adjustment.calculate_transmission.fit[DataType.SAMPLE.value]
+
+        self.assertAlmostEqual(fit_can.wavelength_high, 12.5)
+        self.assertAlmostEqual(fit_can.wavelength_low, 1.5)
+        self.assertAlmostEqual(fit_sample.wavelength_high, 12.5)
+        self.assertAlmostEqual(fit_sample.wavelength_low, 1.5)
+        self.assertEqual(fit_sample.fit_type, FitType.LOGARITHMIC)
+        self.assertEqual(fit_can.fit_type, FitType.LOGARITHMIC)
+
+        # Now we update the current transmission state (i.e. from command interface)
+        new_transmission_values = {FitId.GENERAL: [fit_general(1.0, 12.0, FitType.LOGARITHMIC, DataType.SAMPLE, 0)]}
+        parser._cached_result = new_transmission_values
+        parser.get_state_calculate_transmission()
+        new_state_adjustment = parser.get_state_adjustment(file_information=None)
+
+        fit_can = new_state_adjustment.calculate_transmission.fit[DataType.CAN.value]
+        fit_sample = new_state_adjustment.calculate_transmission.fit[DataType.SAMPLE.value]
+        self.assertAlmostEqual(fit_sample.wavelength_high, 12.0)
+        self.assertAlmostEqual(fit_sample.wavelength_low, 1.0)
+        self.assertEqual(fit_sample.fit_type, FitType.LOGARITHMIC)
+        self.assertEqual(fit_can.fit_type, FitType.NO_FIT)
+
+    def test_fit_transmission_state_clear_setting(self):
+        user_file_path = create_user_file(sample_user_file)
+        mocked_sans = self.create_mock_inst_file_information(SANSInstrument.SANS2D)
+
+        parser = UserFileReaderAdapter(user_file_name=user_file_path, file_information=mocked_sans)
+        state_adjustment = parser.get_state_adjustment(file_information=None)
+
+        fit_can = state_adjustment.calculate_transmission.fit[DataType.CAN.value]
+        fit_sample = state_adjustment.calculate_transmission.fit[DataType.SAMPLE.value]
+
+        self.assertAlmostEqual(fit_can.wavelength_high, 12.5)
+        self.assertAlmostEqual(fit_can.wavelength_low, 1.5)
+        self.assertAlmostEqual(fit_sample.wavelength_high, 12.5)
+        self.assertAlmostEqual(fit_sample.wavelength_low, 1.5)
+        self.assertEqual(fit_sample.fit_type, FitType.LOGARITHMIC)
+        self.assertEqual(fit_can.fit_type, FitType.LOGARITHMIC)
+
+        # Now we update the current transmission state ,clearing the fit for the sample, so only the can will be fit (
+        # i.e. from command interface)
+        new_transmission_values = {FitId.GENERAL: [fit_general(1.0, 12.0, FitType.NO_FIT, DataType.SAMPLE, 0)]}
+        parser._cached_result = new_transmission_values
+        parser.get_state_calculate_transmission()
+        new_state_adjustment = parser.get_state_adjustment(file_information=None)
+
+        fit_can = new_state_adjustment.calculate_transmission.fit[DataType.CAN.value]
+        fit_sample = new_state_adjustment.calculate_transmission.fit[DataType.SAMPLE.value]
+        self.assertAlmostEqual(fit_can.wavelength_high, 12.0)
+        self.assertAlmostEqual(fit_can.wavelength_low, 1.0)
+        self.assertEqual(fit_sample.fit_type, FitType.NO_FIT)
+        self.assertEqual(fit_can.fit_type, FitType.LOGARITHMIC)
 
 
 if __name__ == "__main__":
