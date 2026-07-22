@@ -124,7 +124,9 @@ class TestInstrumentHelper_GroupingPath(unittest.TestCase):
         helper = InstrumentHelper(_make_model(), instrument="ENGINX")
         helper.group = "grp_obj"
         helper.config = MagicMock()
-        helper.config.grouping_files = {"grp_obj": "GRP.xml"}
+        mock_group_info = MagicMock()
+        mock_group_info.grouping_file = "GRP.xml"
+        helper.config.group_info = {"grp_obj": mock_group_info}
 
         self.assertEqual(helper.get_grouping_file(), "GRP.xml")
 
