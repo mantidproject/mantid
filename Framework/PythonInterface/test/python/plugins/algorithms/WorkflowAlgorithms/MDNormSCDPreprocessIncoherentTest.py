@@ -6,10 +6,28 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 import numpy as np
-from mantid.simpleapi import MDNormSCDPreprocessIncoherent
+from mantid.simpleapi import Load, MDNormSCDPreprocessIncoherent
 
 
 class MDNormSCDPreprocessIncoherentTest(unittest.TestCase):
+    def testMaskingBranchUsesMatchingInstrumentName(self):
+        r"""
+        Regression coverage for the masking branch's instrument-name lookup: LoadMask is given
+        Instrument=componentInfo().name(componentInfo().root()) rather than the deprecated
+        getInstrument().getName(). This asserts the two produce an identical string for the
+        exact vanadium workspace the algorithm loads, i.e. the conversion is behaviour-preserving.
+
+        Coverage does not extend to actually running LoadMask/MaskDetectors end-to-end here: doing
+        so exposed a pre-existing, unrelated environment issue - the historical CNCS_7860 file's
+        geometry has 51203 detectors, while LoadMask(Instrument="CNCS", ...) builds its reference
+        workspace from the environment's bundled (newer) CNCS IDF, which has 51204 - so
+        MaskDetectors always raises "Instrument's detector numbers mismatch" regardless of which
+        detector IDs are masked or which API produced the instrument name string.
+        """
+        van = Load(Filename="CNCS_7860", OutputWorkspace="__van")
+        component_info = van.componentInfo()
+        self.assertEqual(component_info.name(component_info.root()), van.getInstrument().getName())
+
     def testCNCS(self):
         # CNCS_7860 is not an incoherent scatterer but for this test
         # it doesn't matter

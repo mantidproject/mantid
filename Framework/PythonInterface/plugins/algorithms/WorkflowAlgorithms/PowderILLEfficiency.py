@@ -461,9 +461,13 @@ class PowderILLEfficiency(PythonAlgorithm):
         Configures the calibration with GlobalSummedReference2D method (D2B)
         @param : first raw ws name in the list
         """
-        inst = mtd[raw_ws].getInstrument()
-        self._n_tubes = inst.getComponentByName("detectors").nelements()
-        self._n_pixels_per_tube = inst.getComponentByName("detectors/tube_1").nelements()
+        component_info = mtd[raw_ws].componentInfo()
+        det_index = component_info.indexOfAny("detectors")
+        tube_index = next(
+            int(c) for c in component_info.componentsInSubtree(det_index) if int(c) != det_index and component_info.name(int(c)) == "tube_1"
+        )
+        self._n_tubes = len(component_info.children(det_index))
+        self._n_pixels_per_tube = len(component_info.children(tube_index))
         # self._n_scans_per_file = mtd[raw_ws].getRun().getLogData('ScanSteps').value
         self._n_scans_per_file = 25  # TODO: In v2 this should be freely variable
         self._scan_points = self._n_scans_per_file * self._n_scan_files
