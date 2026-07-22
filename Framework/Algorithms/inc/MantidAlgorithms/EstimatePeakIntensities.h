@@ -13,8 +13,7 @@
 #include <string>
 #include <vector>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 /** EstimatePeakIntensities : fit-independent, per-spectrum estimate of a peak's background and
   integrated intensity over a window.
@@ -43,5 +42,4 @@ private:
   std::map<std::string, std::string> validateInputs() override;
 };
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms
