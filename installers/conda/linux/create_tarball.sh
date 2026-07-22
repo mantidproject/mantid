@@ -163,7 +163,7 @@ if [ "$skip_docs" = false ]; then
 else
   echo "Skipping mantiddocs installation (will use online documentation)"
 fi
-conda_packages+=(mslice jq)
+conda_packages+=(mslice)
 
 echo "Creating conda environment in '$bundle_conda_prefix'"
 "$CONDA_EXE" create --quiet --prefix "$bundle_conda_prefix" --copy \
@@ -171,20 +171,11 @@ echo "Creating conda environment in '$bundle_conda_prefix'"
   "${conda_packages[@]}"
 echo
 
-# Determine version information
-version=$("$CONDA_EXE" list --prefix "$bundle_conda_prefix" '^mantid$' --json | \
-  "$bundle_conda_prefix"/bin/jq --raw-output --args '.[0].version' "$mantid_pkg_info")
-echo "Bundling mantid version $version"
-echo
-
-# Remove jq
-"$CONDA_EXE" remove --quiet --prefix "$bundle_conda_prefix" --yes jq
-
 # Trim and fixup bundle
 trim_conda "$bundle_conda_prefix"
 fixup_bundle "$bundle_conda_prefix" "$bundle_icon"
 add_resources "$bundle_conda_prefix" "$bundle_icon"
 
 # Create tarball and compress
-version_name="$bundle_name"-"$version"
+version_name="$bundle_name"-"$mantid_version"
 create_tarball "$version_name" "$bundle_name"
