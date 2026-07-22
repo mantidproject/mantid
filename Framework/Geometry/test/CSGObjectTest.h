@@ -132,9 +132,10 @@ public:
     TS_ASSERT(clone);
     original.reset();
 
-    TS_ASSERT_THROWS_NOTHING(clone->getGeometryHandler()->numberOfTriangles());
-    TS_ASSERT_EQUALS(3 * clone->numberOfVertices(), clone->getTriangleVertices().size());
-    TS_ASSERT_EQUALS(3 * clone->numberOfTriangles(), clone->getTriangleFaces().size());
+    auto handler = clone->getGeometryHandler();
+    TS_ASSERT_THROWS_NOTHING(handler->numberOfTriangles());
+    TS_ASSERT_EQUALS(3 * handler->numberOfPoints(), clone->getTriangleVertices().size());
+    TS_ASSERT_EQUALS(3 * handler->numberOfTriangles(), clone->getTriangleFaces().size());
   }
 
   void testIsOnSideCappedCylinder() {
