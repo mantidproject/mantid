@@ -135,9 +135,9 @@ public:
     TS_ASSERT_EQUALS(h.dataE()[12], 0.0);
   }
   void testsetgetXPointer() {
-    auto px = std::make_shared<HistogramX>(0);
-    h.setX(px);
-    TS_ASSERT_EQUALS(&(*h.ptrX()), &(*px));
+    auto px = std::make_shared<HistogramX>(nel);
+    h.setSharedX(px);
+    TS_ASSERT_EQUALS(&(*h.sharedX()), &(*px));
   }
   void testsetgetDataYPointer() {
     h.setCounts(pa);

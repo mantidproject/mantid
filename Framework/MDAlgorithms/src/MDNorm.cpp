@@ -63,7 +63,7 @@ DECLARE_ALGORITHM(MDNorm)
 MDNorm::MDNorm()
     : m_normWS(), m_inputWS(), m_isRLU(false), m_UB(3, 3, true), m_W(3, 3, true), m_transformation(), m_hX(), m_kX(),
       m_lX(), m_eX(), m_hIdx(-1), m_kIdx(-1), m_lIdx(-1), m_eIdx(-1), m_numExptInfos(0), m_Ei(0.0), m_diffraction(true),
-      m_accumulate(false), m_dEIntegrated(true), m_samplePos(), m_beamDir(), convention("") {}
+      m_monochromatic(false), m_accumulate(false), m_dEIntegrated(true), m_samplePos(), m_beamDir(), convention("") {}
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string MDNorm::name() const { return "MDNorm"; }
@@ -133,6 +133,16 @@ void MDNorm::init() {
                   "Mandatory for diffraction. No effect on direct geometry inelastic");
   setPropertyGroup("SolidAngleWorkspace", "Vanadium normalization");
   setPropertyGroup("FluxWorkspace", "Vanadium normalization");
+
+  // monochromatic single crystal diffraction (WAND, DEMAND)
+  declareProperty(std::make_unique<WorkspaceProperty<API::IMDEventWorkspace>>("MonoSCDNormalizationWorkspace", "",
+                                                                              Direction::Input, PropertyMode::Optional),
+                  "An (optional) input MDEventWorkspace containing a pre-computed normalization "
+                  "for monochromatic single crystal diffraction (e.g. produced by "
+                  "ConvertHFIRSCDtoMDE). Must be in Q_sample frame with the same number of "
+                  "dimensions as InputWorkspace. Cannot be used together with "
+                  "SolidAngleWorkspace/FluxWorkspace or BackgroundWorkspace.");
+  setPropertyGroup("MonoSCDNormalizationWorkspace", "monochromatic-SCD");
 
   // Define slicing
   for (std::size_t i = 0; i < 6; i++) {
@@ -257,9 +267,42 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
   if ((inputWS->getNumDims() > 3) && (inputWS->getDimension(3)->getName() == "DeltaE")) {
     diffraction = false;
   }
-  if (diffraction) {
-    API::MatrixWorkspace_const_sptr solidAngleWS = getProperty("SolidAngleWorkspace");
-    API::MatrixWorkspace_const_sptr fluxWS = getProperty("FluxWorkspace");
+
+  // Optional pre-computed normalization workspace for monochromatic single crystal diffraction
+  // (e.g. WAND, DEMAND). This is an alternative to SolidAngleWorkspace/FluxWorkspace.
+  Mantid::API::IMDEventWorkspace_sptr monoNormWS = this->getProperty("MonoSCDNormalizationWorkspace");
+  bool monochromatic = bool(monoNormWS);
+  API::MatrixWorkspace_const_sptr solidAngleWS = getProperty("SolidAngleWorkspace");
+  API::MatrixWorkspace_const_sptr fluxWS = getProperty("FluxWorkspace");
+
+  if (monochromatic) {
+    if (!diffraction) {
+      errorMessage.emplace("MonoSCDNormalizationWorkspace", "MonoSCDNormalizationWorkspace can only be used for "
+                                                            "diffraction (InputWorkspace must not have a DeltaE "
+                                                            "dimension)");
+    }
+    if (solidAngleWS || fluxWS) {
+      errorMessage.emplace("MonoSCDNormalizationWorkspace", "MonoSCDNormalizationWorkspace cannot be used together "
+                                                            "with SolidAngleWorkspace/FluxWorkspace");
+    }
+    if (bkgdWS) {
+      errorMessage.emplace("MonoSCDNormalizationWorkspace", "MonoSCDNormalizationWorkspace cannot currently be used "
+                                                            "together with BackgroundWorkspace");
+    }
+    if (monoNormWS->getNumDims() < 3) {
+      errorMessage.emplace("MonoSCDNormalizationWorkspace", "MonoSCDNormalizationWorkspace must be at least 3D");
+    } else {
+      if (monoNormWS->getNumDims() != inputWS->getNumDims()) {
+        errorMessage.emplace("MonoSCDNormalizationWorkspace", "MonoSCDNormalizationWorkspace must have the same "
+                                                              "number of dimensions as InputWorkspace");
+      }
+      for (size_t i = 0; i < 3; i++) {
+        if (monoNormWS->getDimension(i)->getMDFrame().name() != Mantid::Geometry::QSample::QSampleName) {
+          errorMessage.emplace("MonoSCDNormalizationWorkspace", "MonoSCDNormalizationWorkspace must be in Q_sample");
+        }
+      }
+    }
+  } else if (diffraction) {
     if (solidAngleWS == nullptr) {
       errorMessage.emplace("SolidAngleWorkspace", "SolidAngleWorkspace is required for diffraction");
     }
@@ -267,21 +310,30 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
       errorMessage.emplace("FluxWorkspace", "FluxWorkspace is required for diffraction");
     }
   }
-  // Check for property MDNorm_low and MDNorm_high
+  // Check for property MDNorm_low and MDNorm_high (TOF only), or, for monochromatic
+  // input, that a wavelength log is present (set by e.g. ConvertHFIRSCDtoMDE)
   size_t nExperimentInfos = inputWS->getNumExperimentInfo();
   if (nExperimentInfos == 0) {
     errorMessage.emplace("InputWorkspace", "There must be at least one experiment info");
   } else {
     for (size_t iExpInfo = 0; iExpInfo < nExperimentInfos; iExpInfo++) {
       auto &currentExptInfo = *(inputWS->getExperimentInfo(static_cast<uint16_t>(iExpInfo)));
-      if (!currentExptInfo.run().hasProperty("MDNorm_low")) {
-        errorMessage.emplace("InputWorkspace", "Missing MDNorm_low log. Please "
-                                               "use CropWorkspaceForMDNorm "
-                                               "before converting to MD");
-      }
-      if (!currentExptInfo.run().hasProperty("MDNorm_high")) {
-        errorMessage.emplace("InputWorkspace", "Missing MDNorm_high log. Please use "
-                                               "CropWorkspaceForMDNorm before converting to MD");
+      if (monochromatic) {
+        if (!currentExptInfo.run().hasProperty("wavelength")) {
+          errorMessage.emplace("InputWorkspace", "Missing wavelength log. InputWorkspace does not look like it was "
+                                                 "produced by ConvertHFIRSCDtoMDE, as expected when "
+                                                 "MonoSCDNormalizationWorkspace is provided");
+        }
+      } else {
+        if (!currentExptInfo.run().hasProperty("MDNorm_low")) {
+          errorMessage.emplace("InputWorkspace", "Missing MDNorm_low log. Please "
+                                                 "use CropWorkspaceForMDNorm "
+                                                 "before converting to MD");
+        }
+        if (!currentExptInfo.run().hasProperty("MDNorm_high")) {
+          errorMessage.emplace("InputWorkspace", "Missing MDNorm_high log. Please use "
+                                                 "CropWorkspaceForMDNorm before converting to MD");
+        }
       }
     }
   }
@@ -471,6 +523,8 @@ void MDNorm::exec() {
   m_isRLU = getProperty("RLU");
   // get the workspaces
   m_inputWS = this->getProperty("InputWorkspace");
+  Mantid::API::IMDEventWorkspace_sptr monoNormInputWS = this->getProperty("MonoSCDNormalizationWorkspace");
+  m_monochromatic = bool(monoNormInputWS);
   const auto &exptInfoZero = *(m_inputWS->getExperimentInfo(0));
   auto source = exptInfoZero.getInstrument()->getSource();
   auto sample = exptInfoZero.getInstrument()->getSample();
@@ -498,7 +552,14 @@ void MDNorm::exec() {
   // Calculate (BinMD) input sample MDE to MDH and create noramlization MDH from
   // it
   auto outputDataWS = binInputWS(symmetryOps);
-  createNormalizationWS(*outputDataWS);
+  if (m_monochromatic) {
+    // Monochromatic single crystal diffraction (WAND, DEMAND): the normalization is a
+    // pre-computed MDEventWorkspace, binned identically to the data instead of being
+    // calculated from solid angle/flux trajectories.
+    m_normWS = binMonoSCDNormalizationWS(symmetryOps);
+  } else {
+    createNormalizationWS(*outputDataWS);
+  }
   this->setProperty("OutputNormalizationWorkspace", m_normWS);
   this->setProperty("OutputDataWorkspace", outputDataWS);
 
@@ -514,28 +575,31 @@ void MDNorm::exec() {
   }
 
   m_numExptInfos = outputDataWS->getNumExperimentInfo();
-  // loop over all experiment infos
-  for (uint16_t expInfoIndex = 0; expInfoIndex < m_numExptInfos; expInfoIndex++) {
-    // Check for other dimensions if we could measure anything in the original
-    // data
-    bool skipNormalization = false;
-    const std::vector<coord_t> otherValues = getValuesFromOtherDimensions(skipNormalization, expInfoIndex);
+  if (!m_monochromatic) {
+    // loop over all experiment infos, computing the normalization from solid angle/flux
+    // trajectories (TOF only; for monochromatic input, m_normWS was already binned above)
+    for (uint16_t expInfoIndex = 0; expInfoIndex < m_numExptInfos; expInfoIndex++) {
+      // Check for other dimensions if we could measure anything in the original
+      // data
+      bool skipNormalization = false;
+      const std::vector<coord_t> otherValues = getValuesFromOtherDimensions(skipNormalization, expInfoIndex);
 
-    cacheDimensionXValues();
+      cacheDimensionXValues();
 
-    if (!skipNormalization) {
-      size_t symmOpsIndex = 0;
-      for (const auto &so : symmetryOps) {
-        calculateNormalization(otherValues, so, expInfoIndex, symmOpsIndex);
-        symmOpsIndex++;
+      if (!skipNormalization) {
+        size_t symmOpsIndex = 0;
+        for (const auto &so : symmetryOps) {
+          calculateNormalization(otherValues, so, expInfoIndex, symmOpsIndex);
+          symmOpsIndex++;
+        }
+
+      } else {
+        g_log.warning("Binning limits are outside the limits of the MDWorkspace. "
+                      "Not applying normalization.");
       }
-
-    } else {
-      g_log.warning("Binning limits are outside the limits of the MDWorkspace. "
-                    "Not applying normalization.");
+      // if more than one experiment info, keep accumulating
+      m_accumulate = true;
     }
-    // if more than one experiment info, keep accumulating
-    m_accumulate = true;
   }
 
   API::IMDWorkspace_sptr out(nullptr);
@@ -656,35 +720,56 @@ std::map<std::string, std::string> MDNorm::getBinParameters() {
   m_W = DblMatrix(W);
   m_W.Transpose();
 
-  // Find maximum Q
-  auto &exptInfo0 = *(m_inputWS->getExperimentInfo(static_cast<uint16_t>(0)));
-  auto upperLimitsVector =
-      (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double>> *>(exptInfo0.getLog("MDNorm_high"))))();
-  double maxQ;
-  if (m_diffraction) {
-    maxQ = 2. * (*std::max_element(upperLimitsVector.begin(), upperLimitsVector.end()));
-  } else {
-    double Ei;
-    double maxDE = *std::max_element(upperLimitsVector.begin(), upperLimitsVector.end());
-    auto loweLimitsVector =
-        (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double>> *>(exptInfo0.getLog("MDNorm_low"))))();
-    double minDE = *std::min_element(loweLimitsVector.begin(), loweLimitsVector.end());
-    if (exptInfo0.run().hasProperty("Ei")) {
-      Kernel::Property *eiprop = exptInfo0.run().getProperty("Ei");
-      Ei = boost::lexical_cast<double>(eiprop->value());
-      if (Ei <= 0) {
-        throw std::invalid_argument("Ei stored in the workspace is not positive");
-      }
+  // Find maximum Q, an isotropic bound used below to set the default HKL bin extents
+  // (only consumed when a Q dimension's binning is left automatic/step-only, see the
+  // m_isRLU branch below). For TOF input this comes from the physical wavelength/TOF
+  // window each detector reaches (MDNorm_low/MDNorm_high logs, set by
+  // CropWorkspaceForMDNorm). Monochromatic input has no such trajectory -- each event
+  // is a single measured Q_sample point -- so maxQ is instead estimated from the
+  // workspace's own data-occupied extents: the box-tree's tight bounding box (not the
+  // nominal/arbitrary MinValues/MaxValues used at MD-conversion time), converted to an
+  // isotropic bound by taking the modulus of its farthest corner from the origin.
+  double maxQ = 0.;
+  if (!m_monochromatic) {
+    auto &exptInfo0 = *(m_inputWS->getExperimentInfo(static_cast<uint16_t>(0)));
+    auto upperLimitsVector =
+        (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double>> *>(exptInfo0.getLog("MDNorm_high"))))();
+    if (m_diffraction) {
+      maxQ = 2. * (*std::max_element(upperLimitsVector.begin(), upperLimitsVector.end()));
     } else {
-      throw std::invalid_argument("Could not find Ei value in the workspace.");
-    }
-    const double energyToK = 8.0 * M_PI * M_PI * PhysicalConstants::NeutronMass * PhysicalConstants::meV * 1e-20 /
-                             (PhysicalConstants::h * PhysicalConstants::h);
-    double ki = std::sqrt(energyToK * Ei);
-    double kfmin = std::sqrt(energyToK * (Ei - minDE));
-    double kfmax = std::sqrt(energyToK * (Ei - maxDE));
+      double Ei;
+      double maxDE = *std::max_element(upperLimitsVector.begin(), upperLimitsVector.end());
+      auto loweLimitsVector =
+          (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double>> *>(exptInfo0.getLog("MDNorm_low"))))();
+      double minDE = *std::min_element(loweLimitsVector.begin(), loweLimitsVector.end());
+      if (exptInfo0.run().hasProperty("Ei")) {
+        Kernel::Property *eiprop = exptInfo0.run().getProperty("Ei");
+        Ei = boost::lexical_cast<double>(eiprop->value());
+        if (Ei <= 0) {
+          throw std::invalid_argument("Ei stored in the workspace is not positive");
+        }
+      } else {
+        throw std::invalid_argument("Could not find Ei value in the workspace.");
+      }
+      const double energyToK = 8.0 * M_PI * M_PI * PhysicalConstants::NeutronMass * PhysicalConstants::meV * 1e-20 /
+                               (PhysicalConstants::h * PhysicalConstants::h);
+      double ki = std::sqrt(energyToK * Ei);
+      double kfmin = std::sqrt(energyToK * (Ei - minDE));
+      double kfmax = std::sqrt(energyToK * (Ei - maxDE));
 
-    maxQ = ki + std::max(kfmin, kfmax);
+      maxQ = ki + std::max(kfmin, kfmax);
+    }
+  } else {
+    // getMinimumExtents() walks the box tree to the given depth and unions the extents of
+    // populated boxes found there; its default depth of 2 can be much looser than the box
+    // tree's actual depth for sparser inputs (measured up to ~3.7x tighter per-axis bounds by
+    // depth 4 on real WAND/DEMAND data), while costing at most tens of milliseconds even for
+    // O(1e7)-event workspaces, so a fixed depth of 4 is used here instead of the default.
+    auto dataExtents = m_inputWS->getMinimumExtents(4);
+    double qx = std::max(std::fabs(dataExtents[0].getMin()), std::fabs(dataExtents[0].getMax()));
+    double qy = std::max(std::fabs(dataExtents[1].getMin()), std::fabs(dataExtents[1].getMax()));
+    double qz = std::max(std::fabs(dataExtents[2].getMin()), std::fabs(dataExtents[2].getMax()));
+    maxQ = std::sqrt(qx * qx + qy * qy + qz * qz);
   }
   size_t basisVectorIndex = 0;
   std::vector<coord_t> transformation;
@@ -1167,13 +1252,50 @@ MDNorm::binBackgroundWS(const std::vector<Geometry::SymmetryOperation> &symmetry
  * @return MDHistoWorkspace as a result of the binning
  */
 DataObjects::MDHistoWorkspace_sptr MDNorm::binInputWS(const std::vector<Geometry::SymmetryOperation> &symmetryOps) {
-  Mantid::API::IMDHistoWorkspace_sptr tempDataWS = this->getProperty("TemporaryDataWorkspace");
-  Mantid::API::Workspace_sptr outputWS;
   std::map<std::string, std::string> parameters = getBinParameters();
+  return binMDEventWorkspace(m_inputWS, "TemporaryDataWorkspace", "OutputDataWorkspace", symmetryOps, parameters);
+}
 
-  // check that our input matches the temporary workspaces
-  if (tempDataWS)
-    validateBinningForTemporaryDataWorkspace(parameters, tempDataWS);
+/**
+ * Bin(MD) MonoSCDNormalizationWorkspace with the exact same bin parameters used for
+ * InputWorkspace, so that the normalization ends up on the same grid as the data.
+ * getBinParameters() is a pure function of m_inputWS/m_isRLU/the current property values, none
+ * of which change during exec(), so calling it again here (rather than threading through the
+ * map built in binInputWS) reproduces an identical parameters map.
+ */
+DataObjects::MDHistoWorkspace_sptr
+MDNorm::binMonoSCDNormalizationWS(const std::vector<Geometry::SymmetryOperation> &symmetryOps) {
+  std::map<std::string, std::string> parameters = getBinParameters();
+  Mantid::API::IMDEventWorkspace_sptr monoNormInputWS = this->getProperty("MonoSCDNormalizationWorkspace");
+  return binMDEventWorkspace(monoNormInputWS, "TemporaryNormalizationWorkspace", "OutputNormalizationWorkspace",
+                             symmetryOps, parameters);
+}
+
+/**
+ * Bin(MD), per symmetry operation, an MDEventWorkspace using pre-computed bin parameters,
+ * accumulating across symmetry operations via temporaryWSPropertyName. Used both to bin the
+ * data (via binInputWS) and, for monochromatic-SCD input, to bin the pre-computed
+ * normalization workspace (via binMonoSCDNormalizationWS) with the exact same parameters, so both
+ * end up on identical grids.
+ * @param ws: the MDEventWorkspace to bin
+ * @param temporaryWSPropertyName: name of the MDNorm property holding an optional
+ * accumulation workspace (e.g. "TemporaryDataWorkspace" or "TemporaryNormalizationWorkspace")
+ * @param outputWSPropertyName: name of the MDNorm property used to name the BinMD output
+ * (e.g. "OutputDataWorkspace" or "OutputNormalizationWorkspace")
+ * @param symmetryOps: symmetry operations to apply
+ * @param parameters: bin parameters, as returned by getBinParameters(), bound to InputWorkspace
+ */
+DataObjects::MDHistoWorkspace_sptr
+MDNorm::binMDEventWorkspace(const API::IMDEventWorkspace_sptr &ws, const std::string &temporaryWSPropertyName,
+                            const std::string &outputWSPropertyName,
+                            const std::vector<Geometry::SymmetryOperation> &symmetryOps,
+                            const std::map<std::string, std::string> &parameters) {
+  Mantid::API::IMDHistoWorkspace_sptr tempWS = this->getProperty(temporaryWSPropertyName);
+  Mantid::API::Workspace_sptr outputWS;
+
+  // check that our input matches the temporary workspace
+  if (tempWS)
+    validateBinningForTemporaryDataWorkspace(parameters, tempWS);
 
   double soIndex = 0;
   std::vector<size_t> qDimensionIndices;
@@ -1192,17 +1314,17 @@ DataObjects::MDHistoWorkspace_sptr MDNorm::binInputWS(const std::vector<Geometry
     double fraction = 1. / static_cast<double>(symmetryOps.size());
     auto binMD = createChildAlgorithm("BinMD", soIndex * 0.3 * fraction, (soIndex + 1) * 0.3 * fraction);
     binMD->setPropertyValue("AxisAligned", "0");
-    binMD->setProperty("InputWorkspace", m_inputWS);
-    binMD->setProperty("TemporaryDataWorkspace", tempDataWS);
+    binMD->setProperty("InputWorkspace", ws);
+    binMD->setProperty("TemporaryDataWorkspace", tempWS);
     binMD->setPropertyValue("NormalizeBasisVectors", "0");
-    binMD->setPropertyValue("OutputWorkspace", getPropertyValue("OutputDataWorkspace"));
+    binMD->setPropertyValue("OutputWorkspace", getPropertyValue(outputWSPropertyName));
     // set binning properties
     size_t qindex = 0;
     for (const auto &p : parameters) {
       auto key = p.first;
       auto value = p.second;
       std::stringstream basisVector;
-      std::vector<double> projection(m_inputWS->getNumDims(), 0.);
+      std::vector<double> projection(ws->getNumDims(), 0.);
       // value is a string that can start with QDimension0, etc, but contain
       // other stuff. Do not use ==
       determineBasisVector(qindex, value, Qtransform, projection, basisVector, qDimensionIndices);
@@ -1225,9 +1347,9 @@ DataObjects::MDHistoWorkspace_sptr MDNorm::binInputWS(const std::vector<Geometry
 
     // set the temporary workspace to be the output workspace, so it keeps
     // adding different symmetries
-    tempDataWS = std::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
-    tempDataWS->clearOriginalWorkspaces();
-    tempDataWS->clearTransforms();
+    tempWS = std::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
+    tempWS->clearOriginalWorkspaces();
+    tempWS->clearTransforms();
     soIndex += 1;
   }
 

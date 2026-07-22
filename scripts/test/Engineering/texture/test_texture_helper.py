@@ -35,6 +35,7 @@ from Engineering.texture.texture_helper import (
     vec_string_to_norm_array,
     define_gauge_volume,
     get_scattering_centre,
+    convert_to_sscanss_frame,
 )
 import numpy as np
 from os import path
@@ -906,6 +907,46 @@ class TestGetScatteringCentre(unittest.TestCase):
 
         np.testing.assert_array_equal(out, [0.0, 0.0, 0.0])
         mock_logger.warning.assert_called_once()
+
+
+class TestConvertToSscanssFrame(unittest.TestCase):
+    def test_identity_maps_to_zero_angles(self):
+        out = convert_to_sscanss_frame(np.eye(3))
+        self.assertEqual(out.shape, (3,))
+        np.testing.assert_allclose(out, [0.0, 0.0, 0.0], atol=1e-12)
+
+    def test_rotation_about_z_maps_to_negated_x_angle(self):
+        # M sends XYZ z-axis onto the sscanss x-axis, so a rotation about z becomes a
+        # rotation about x; the sense is flipped so the angle is negated.
+        theta = 30.0
+        rot = Rotation.from_euler("z", theta, degrees=True).as_matrix()
+        out = convert_to_sscanss_frame(rot)
+        np.testing.assert_allclose(out, [-theta, 0.0, 0.0], atol=1e-9)
+
+    def test_rotation_about_x_maps_to_negated_y_angle(self):
+        # XYZ x-axis maps onto the sscanss y-axis
+        theta = 45.0
+        rot = Rotation.from_euler("x", theta, degrees=True).as_matrix()
+        out = convert_to_sscanss_frame(rot)
+        np.testing.assert_allclose(out, [0.0, -theta, 0.0], atol=1e-9)
+
+    def test_rotation_about_y_maps_to_negated_z_angle(self):
+        # XYZ y-axis maps onto the sscanss z-axis
+        theta = 60.0
+        rot = Rotation.from_euler("y", theta, degrees=True).as_matrix()
+        out = convert_to_sscanss_frame(rot)
+        np.testing.assert_allclose(out, [0.0, 0.0, -theta], atol=1e-9)
+
+    def test_result_is_a_valid_rotation_roundtrip(self):
+        # the returned Euler angles must describe the same physical rotation expressed in
+        # the permuted, sign-flipped sscanss frame
+        rot = Rotation.from_euler("xyz", [10.0, 20.0, 30.0], degrees=True).as_matrix()
+        angles = convert_to_sscanss_frame(rot)
+
+        M = np.array([[0, 0, 1], [1, 0, 0], [0, 1, 0]])
+        recovered = Rotation.from_euler("xyz", -angles, degrees=True).as_matrix()
+        expected = M @ rot @ M.T
+        np.testing.assert_allclose(recovered, expected, atol=1e-9)
 
 
 if __name__ == "__main__":

@@ -106,6 +106,7 @@ set(TEST_PY_FILES
     MaskDetectorsIfTest.py
     MaskWorkspaceToCalFileTest.py
     MatchPeaksTest.py
+    MDNormTest.py
     MeanTest.py
     MedianBinWidthTest.py
     MergeCalFilesTest.py
@@ -129,6 +130,7 @@ set(TEST_PY_FILES
     SaveGEMMAUDParamFileTest.py
     SaveNexusPDTest.py
     SaveMDHistoToVTKTest.py
+    SaveMDToAsciiTest.py
     SaveGSSCWTest.py
     SaveHKLCWTest.py
     SaveINSTest.py
@@ -162,6 +164,7 @@ set(TEST_PY_FILES
     VesuvioPreFitTest.py
     VesuvioResolutionTest.py
     VesuvioThicknessTest.py
+    VesuvioTransmissionTest.py
     VesuvioTOFFitTest.py
     PEARLTransfitTest.py
     PEARLTransfitV2Test.py

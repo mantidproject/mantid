@@ -45,7 +45,7 @@ requirements:
     - ${{ pin_compatible("python", upper_bound="x.x") }}
     - matplotlib ${{ matplotlib }}
     - pyvista ${{ pyvista }}
-    - pyvistaqt
+    - pyvistaqt ${{ pyvistaqt }}
     - superqt
     - ${{ pin_compatible("setuptools", upper_bound="x.x") }}
     # qtconsole-base avoids pulling in PyQt5 on the Qt6 build

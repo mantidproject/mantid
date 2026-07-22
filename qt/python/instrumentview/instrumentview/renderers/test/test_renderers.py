@@ -11,6 +11,7 @@ from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pyvista as pv
+from scipy.spatial.transform import Rotation
 
 from instrumentview.renderers.base_renderer import InstrumentRenderer
 from instrumentview.renderers.point_cloud_renderer import PointCloudRenderer
@@ -782,6 +783,82 @@ class TestShapeRenderer(unittest.TestCase):
         observer_fn = self.renderer.get_callback_tied_to_detector_index(plotter, callback, hover=True)
         observer_fn(None, None)
         callback.assert_not_called()
+
+    def test_assemble_mesh_rotation_applied_correctly_via_matmul(self):
+        """_assemble_mesh applies per-detector rotation via batched matmul (@ operator).
+
+        A 90° rotation about Z maps (1, 0, 0) -> (0, 1, 0).  Verify the
+        assembled mesh vertices reflect this exactly.
+        """
+        self._refresh_render_with_mock_workspace(n_detectors=1)
+
+        template_verts = np.array([[0.1, 0.0, 0.0], [-0.1, 0.0, 0.0], [0.0, 0.1, 0.0]], dtype=np.float64)
+        template_faces = np.array([[0, 1, 2]], dtype=np.int64)
+        shape_key = 777
+        self.renderer._shape_cache = {shape_key: (template_verts, template_faces, 3)}
+        self.renderer._det_shape_keys = np.array([shape_key], dtype=np.int64)
+
+        rot_90z = Rotation.from_euler("z", 90, degrees=True).as_matrix()
+        self.renderer._det_rotations = rot_90z[np.newaxis]  # (1, 3, 3)
+        self.renderer._det_scales = np.ones((1, 3))
+        self.renderer._all_positions_3d = np.array([[0.0, 0.0, 0.0]])
+
+        mesh, _, _ = self.renderer._assemble_mesh(
+            detector_indices=np.array([0]),
+            detector_positions=np.array([[0.0, 0.0, 0.0]]),
+            projection=None,
+        )
+
+        expected = (rot_90z @ template_verts.T).T  # (3, 3): rotate each row-vertex
+        np.testing.assert_allclose(mesh.points, expected, atol=1e-10)
+
+    def test_assemble_mesh_all_detectors_in_group_rotated_without_boolean_mask(self):
+        """In the non-SIDE_BY_SIDE path every detector is rotated via a single
+        batched matmul — no per-detector boolean mask is applied.
+
+        Two detectors share the same template shape but carry different
+        rotations (identity and 90° about Z).  Both must produce independently
+        correct vertices, confirming the vectorised path applies each detector's
+        own rotation matrix without skipping any entry.
+        """
+        self._refresh_render_with_mock_workspace(n_detectors=2)
+
+        template_verts = np.array([[0.1, 0.0, 0.0], [-0.1, 0.0, 0.0], [0.0, 0.1, 0.0]], dtype=np.float64)
+        template_faces = np.array([[0, 1, 2]], dtype=np.int64)
+        shape_key = 888
+        self.renderer._shape_cache = {shape_key: (template_verts, template_faces, 3)}
+        self.renderer._det_shape_keys = np.array([shape_key, shape_key], dtype=np.int64)
+
+        rot_90z = Rotation.from_euler("z", 90, degrees=True).as_matrix()
+        self.renderer._det_rotations = np.stack([np.eye(3), rot_90z])  # (2, 3, 3)
+        self.renderer._det_scales = np.ones((2, 3))
+        self.renderer._all_positions_3d = np.array([[0.0, 0.0, 0.0], [2.0, 0.0, 0.0]])
+
+        mesh, _, _ = self.renderer._assemble_mesh(
+            detector_indices=np.array([0, 1]),
+            detector_positions=np.array([[0.0, 0.0, 0.0], [2.0, 0.0, 0.0]]),
+            projection=None,
+        )
+
+        # Both detectors share shape_key=888, so they are processed in a single
+        # group.  Vertex layout: detector 0 occupies rows 0-2, detector 1 rows 3-5.
+
+        # Detector 0: identity rotation, no translation offset
+        np.testing.assert_allclose(
+            mesh.points[:3],
+            template_verts,
+            atol=1e-10,
+            err_msg="Identity-rotation detector must preserve template vertices",
+        )
+
+        # Detector 1: 90° Z rotation then translated to [2, 0, 0]
+        expected_det1 = (template_verts @ rot_90z.T) + np.array([2.0, 0.0, 0.0])
+        np.testing.assert_allclose(
+            mesh.points[3:],
+            expected_det1,
+            atol=1e-10,
+            err_msg="90°-Z-rotation detector must have rotated and translated vertices",
+        )
 
     # ------------------------------------------------------------------
     # Helper methods to create mock objects

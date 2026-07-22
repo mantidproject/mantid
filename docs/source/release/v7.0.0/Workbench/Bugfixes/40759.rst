@@ -1,0 +1,2 @@
+- The Error Reporter Dialog now does not erase the local contact information of the user after clicking ``Don't share any information``. This information is never shared if the button
+  ``Don't share any information`` is clicked.

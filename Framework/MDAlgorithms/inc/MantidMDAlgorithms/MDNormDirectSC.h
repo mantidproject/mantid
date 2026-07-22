@@ -26,6 +26,10 @@ public:
   const std::vector<std::string> seeAlso() const override { return {"MDNormSCD", "MDNormSCDPreprocessIncoherent"}; }
   const std::string category() const override;
   const std::string summary() const override;
+  static constexpr double CHARGEBINSIZE = 1.0;    // Proton charge bin size in uA.hr for useLogTimes normalization
+  static constexpr double GONIOBINSTEP = 0.25;    // Bin size in angle in degrees for useLogTimes normalization
+  static constexpr double MINPROTONCHARGE = 0.1;  // Proton charge below which an angle will be ignored as no data
+  static constexpr double STATIONARYANGLIM = 0.1; // Angle size (degrees) below which a gonio is considered stationary
 
 private:
   void init() override;
@@ -39,9 +43,14 @@ private:
   std::vector<coord_t> getValuesFromOtherDimensions(bool &skipNormalization, uint16_t expInfoIndex = 0) const;
   Kernel::Matrix<coord_t> findIntergratedDimensions(const std::vector<coord_t> &otherDimValues,
                                                     bool &skipNormalization);
+  void initializeLogTimes();
   void cacheDimensionXValues();
   void calculateNormalization(const std::vector<coord_t> &otherValues, const Kernel::Matrix<coord_t> &affineTrans,
                               uint16_t expInfoIndex);
+  void calculateNormContinuous(const std::vector<coord_t> &otherValues, const Kernel::Matrix<coord_t> &affineTrans,
+                               uint16_t expInfoIndex);
+  void calculateNormInner(const API::SpectrumInfo &spectrumInfo, const double protonCharge,
+                          const std::vector<coord_t> &otherValues, const Kernel::Matrix<coord_t> &affineTrans);
 
   void calculateIntersections(std::vector<std::array<double, 4>> &intersections, const double theta, const double phi);
 
@@ -71,6 +80,8 @@ private:
   bool m_accumulate{false};
   /// number of experiment infos
   uint16_t m_numExptInfos;
+  /// Progress bar
+  std::unique_ptr<API::Progress> m_progress;
 };
 
 } // namespace MDAlgorithms

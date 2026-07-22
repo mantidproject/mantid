@@ -1,0 +1,1 @@
+- :ref:`MDNorm <algm-MDNorm>` can now normalize monochromatic single crystal diffraction data (e.g. WAND, DEMAND) using a pre-computed normalization workspace, via the new ``MonoSCDNormalizationWorkspace`` property.

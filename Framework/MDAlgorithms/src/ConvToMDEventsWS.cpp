@@ -148,6 +148,7 @@ size_t ConvToMDEventsWS::initialize(const MDWSDescription &WSD, std::shared_ptr<
         m_Logs.push_back(
             std::unique_ptr<Kernel::TimeSeriesProperty<double>>(run.getTimeSeriesProperty<double>(ax.name)->clone()));
         m_GonioIndex.push_back(n);
+        m_timeLogsName.push_back(ax.name);
       }
     }
     const auto &dimNames = WSD.getDimNames();

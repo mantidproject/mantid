@@ -113,9 +113,9 @@ class LoadVesuvio(LoadEmptyVesuvio):
             RUN_PROP,
             "",
             StringMandatoryValidator(),
-            doc="The run numbers that should be loaded. E.g."
-            "14188  - for single run"
-            "14188-14195 - for summed consecutive runs"
+            doc="The run numbers that should be loaded. E.g. "
+            "14188 - for single run; "
+            "14188-14195 - for summed consecutive runs; "
             "14188,14195 - for summed non-consecutive runs",
         )
 

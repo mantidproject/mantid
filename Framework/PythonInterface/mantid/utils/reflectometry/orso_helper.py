@@ -65,9 +65,31 @@ class MantidORSODataset:
         creator_name: str,
         creator_affiliation: str,
         enable_instrument_settings: bool,
-        model: str,
-        validate: bool,
+        model: Optional[str] = "",
+        validate: Optional[bool] = False,
     ) -> None:
+        """
+        A helper class in Mantid used to define and manage an ORSO dataset.
+
+        :param dataset_name: The name of the dataset.
+        :type dataset_name: str
+        :param data_columns: The data columns containing the data and header information.
+        :type data_columns: MantidORSODataColumns
+        :param ws: The workspace containing the metadata used to create sample and experiment entries for the DataSource.
+        :type ws: MatrixWorkspace
+        :param reduction_timestamp: The reduction timestamp.
+        :type reduction_timestamp: datetime
+        :param creator_name: The creator name.
+        :type creator_name: str
+        :param creator_affiliation: The creator affiliation.
+        :type creator_affiliation: str
+        :param enable_instrument_settings: If ``True``, Instrument settings are passed to the DataSource.
+        :type enable_instrument_settings: bool
+        :param model: The model description, for example ``air | Ni 100 | SiO2 0.5 | Si``.
+        :type model: str
+        :param validate: If ``True``, validates the syntax of the model description using the orsopy library.
+        :type validate: bool
+        """
         self._data_columns = data_columns
         self._header = None
 
@@ -117,7 +139,7 @@ class MantidORSODataset:
         reduction_timestamp: datetime,
         creator_name: str,
         creator_affiliation: str,
-        model: str,
+        model: Optional[str] = "",
         validate: Optional[bool] = False,
         enable_instrument_settings: Optional[bool] = None,
     ) -> None:

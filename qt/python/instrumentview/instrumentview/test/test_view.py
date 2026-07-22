@@ -61,6 +61,14 @@ class TestFullInstrumentViewView(unittest.TestCase):
     def test_hover_pick_button_is_checkable(self):
         self.assertTrue(self._view._hover_pick.isCheckable())
 
+    def test_shape_selector_initialised(self):
+        self.assertEqual(
+            [self._view._shape_selector_combo_box.itemText(i) for i in range(self._view._shape_selector_combo_box.count())],
+            ["Circle", "Rectangle", "Ellipse", "Annulus", "Hollow Rectangle"],
+        )
+        self.assertTrue(self._view._add_shape_button.isCheckable())
+        self.assertEqual(self._view._add_shape_button.text(), "Add Shape")
+
     def test_update_scalar_range(self):
         self._view.set_plotter_scalar_bar_range((0, 100), "label")
         self._view.main_plotter.update_scalar_bar_range.assert_has_calls([mock.call((0, 100), "label")])
@@ -81,18 +89,14 @@ class TestFullInstrumentViewView(unittest.TestCase):
             mock_mesh, scalars=mock_scalars, rgba=True, pickable=False, render_points_as_spheres=True, point_size=10
         )
 
-    @mock.patch("instrumentview.FullInstrumentViewWindow.QListWidgetItem")
-    def test_refresh_peaks_ws_list(self, mock_qlist_widget_item):
+    def test_refresh_peaks_ws_list(self):
         mock_list = MagicMock()
-        mock_item = MagicMock()
-        mock_item.text.return_value = "existing_ws"
-        mock_list.item.return_value = mock_item
-        mock_list.count.return_value = 1
         self._view._peak_ws_list = mock_list
         self._view._presenter.peaks_workspaces_in_ads.return_value = ["existing_ws", "new_ws"]
+
         self._view.refresh_peaks_ws_list()
-        # Only the new workspace should trigger QListWidgetItem creation
-        mock_qlist_widget_item.assert_called_once()
+
+        mock_list.refresh_items.assert_called_once_with(["existing_ws", "new_ws"], colours=self._view._COLOURS)
 
     def test_clear_overlay_meshes(self):
         mock_meshes = (MagicMock(), MagicMock())
@@ -168,6 +172,20 @@ class TestFullInstrumentViewView(unittest.TestCase):
         self._view.add_hollow_rectangle_widget()
         self.assertIsNotNone(self._view._shape_overlay_manager)
         self.assertIsInstance(self._view._shape_overlay_manager.current_shape, HollowRectangleSelectionShape)
+
+    def test_add_selected_shape_uses_dropdown_choice(self) -> None:
+        self._view._shape_selector_combo_box.setCurrentText("Ellipse")
+        self._view.add_selected_shape(True)
+        self.assertIsNotNone(self._view._shape_overlay_manager)
+        self.assertIsInstance(self._view._shape_overlay_manager.current_shape, EllipseSelectionShape)
+
+    def test_unchecking_add_shape_button_clears_current_widget(self) -> None:
+        self._view._add_shape_button.setChecked(True)
+        self._view.add_circle_widget()
+        self.assertIsNotNone(self._view._shape_overlay_manager)
+        self.assertIsNotNone(self._view._shape_overlay_manager.current_shape)
+        self._view.add_selected_shape(False)
+        self.assertIsNone(self._view._shape_overlay_manager)
 
     def test_delete_current_widget(self) -> None:
         self._view.add_circle_widget()

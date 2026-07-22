@@ -85,7 +85,7 @@ public:
 
   ResolutionTest()
       : resH(3), resS(acos(0.)), N(117), DX(10), X0(-DX / 2), dX(DX / (N - 1)), yErr(0),
-        resFileName("ResolutionTestResolution.res") {}
+        resFileName("ResolutionTestResolution_res.res") {}
 
   void setUp() override {
     std::ofstream fil(resFileName.c_str());

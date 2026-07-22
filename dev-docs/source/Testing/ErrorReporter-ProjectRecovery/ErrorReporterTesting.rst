@@ -49,7 +49,7 @@ Error Reporter test
 
 - Cause a crash by running the ``Segfault`` algorithm, Workbench should close
 - This should cause an error reporter dialog saying Mantid has thrown an unexpected exception
-- The private contact details from Test 1 should **NOT** be displayed and the ``Remember Me`` checkbox should **NOT** be ticked
+- The private contact details from Test 1 should be displayed as the ``Remember Me`` checkbox was ticked when closing the reporter
 - In the ``Name`` box enter ``Public`` and in the ``Email`` box enter ``public@public.com``
 - Input some additional information into the main textbox. Try to include characters that need to be escaped such as ``"``
 - Tick the ``Remember Me`` checkbox
@@ -79,7 +79,7 @@ Error Reporter test
 - Load the file ``Training_Exercise3a_SNS.nxs``
 - Run the ``NormaliseToMonitor`` algorithm
 - This should cause an error reporter dialog saying Mantid has thrown an unexpected exception
-- The shared contact details from test 2 should be displayed and the ``Remember Me`` checkbox ticked
+- The shared contact details from test 3 should be displayed and the ``Remember Me`` checkbox ticked
 - Click the ``Show More Details`` button to open the Show More Details dialog. This should show user details such as OS.
 - Input some additional information into the main textbox. Try to include characters that need to be escaped such as ``"``
 - Leave the ``Name`` box EMPTY and in the ``Email`` box enter ``public2@public.com``
@@ -87,7 +87,7 @@ Error Reporter test
 - Make sure the ``Continue`` radio button is checked
 - Click the ``Yes, share information`` button
 - You should be returned to the main Mantid window
-- Check with the database admin that an error report was sent **WITH** a name, email, stacktrace and a textbox.
+- Check with the database admin that an error report was sent **WITH** the name as ``Not provided``, but the correct email, stacktrace and textbox.
 
 ---------------
 
@@ -97,7 +97,7 @@ Error Reporter test
 - Run the ``NormaliseToMonitor`` algorithm
 - This should cause an error reporter dialog saying Mantid has thrown an unexpected exception
 - Only the ``public2@public.com`` email from test 4 should be displayed in the email box and the ``Remember Me`` checkbox ticked.
-- In the `Name` box enter ``Public3`` and in the ``Email`` box enter ``public3@public.com``
+- In the ``Name`` box enter ``Public3`` and in the ``Email`` box enter ``public3@public.com``
 - Input some additional information into the main textbox. Try to include characters that need to be escaped such as ``"``
 - Tick the ``Remember Me`` checkbox
 - Make sure the ``Terminate`` radio button is checked
@@ -113,11 +113,21 @@ Error Reporter test
 - Run the ``NormaliseToMonitor`` algorithm
 - This should cause an error reporter dialog saying Mantid has thrown an unexpected exception
 - The shared contact details from test 5 should be displayed and the ``Remember Me`` checkbox ticked
-- Close the error reporter and MantidWorkbench
+- Make sure the ``Continue`` radio button is checked
+- Untick the ``Remember Me`` checkbox and click the ``Dont' share any information`` button
+- MantidWorkbench should still be opened
+- Run the ``NormaliseToMonitor`` algorithm again
+- This should cause an error reporter dialog saying Mantid has thrown an unexpected exception
+- The ``Name`` and ``Email`` boxes should be empty and the ``Remember Me`` checkbox unticked
+- Click the ``Don't share any information`` button
 
 --------------
 
 7. Open your ``Mantid.user.properties`` file
+
+.. note::
+   To quickly locate the path to the user properties file you can type: ``ConfigService.getUserFilename()`` on the ``IPython`` terminal session
+   running on the testing instance of ``MantidWorkbench``
 
 - Add the incorrect rooturl ``errorreports.rooturl = https://fake.mantidproject.org`` anywhere in the file (correct url is ``https://errorreports.mantidproject.org``)
 - This will cause the error reporter to fail to send the report

@@ -185,6 +185,7 @@ set(PYTHON_PLUGINS
     algorithms/SaveINS.py
     algorithms/SaveISISReflectometryORSO.py
     algorithms/SaveMDHistoToVTK.py
+    algorithms/SaveMDToAscii.py
     algorithms/SaveNexusPD.py
     algorithms/SaveP2D.py
     algorithms/SavePlot1DAsJson.py
@@ -216,6 +217,7 @@ set(PYTHON_PLUGINS
     algorithms/VesuvioResolution.py
     algorithms/VesuvioTOFFit.py
     algorithms/VesuvioThickness.py
+    algorithms/VesuvioTransmission.py
     algorithms/ViewBOA.py
     algorithms/VisionReduction.py
     algorithms/dnsdata.py

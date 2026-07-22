@@ -1,0 +1,1 @@
+- The :ref:`algm-VesuvioTransmission` algorithm has been added which evaluates the transmission spectrum on the ``VESUVIO`` spectrometer for measured sample and empty run numbers.

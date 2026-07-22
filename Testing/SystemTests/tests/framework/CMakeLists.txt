@@ -136,7 +136,9 @@ set(SYSTEST_NAMES
     MaxEntTest.py
     MDNormBackgroundHYSPECTest.py
     MDNormCORELLITest.py
+    MDNormDEMANDTest.py
     MDNormHYSPECTest.py
+    MDNormWANDTest.py
     MDWorkspaceTests.py
     MonteCarloAbsorptionCorrTest.py
     MPIAlgorithmsExecuteTest.py
@@ -217,6 +219,7 @@ set(SYSTEST_NAMES
     VesuvioCorrectionsTest.py
     VesuvioFittingTest.py
     VesuvioLoadingTest.py
+    VesuvioTransmissionSystemTest.py
     WeightedLeastSquaresTest.py
     WishAnalysis.py
     # WishCalibrate # Skipped since 2017

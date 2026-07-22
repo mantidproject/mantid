@@ -15,6 +15,7 @@
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -33,6 +34,7 @@ using namespace Mantid::Kernel;
 namespace {
 // function to  compare two intersections (h,k,l,Momentum) by Momentum
 bool compareMomentum(const std::array<double, 4> &v1, const std::array<double, 4> &v2) { return (v1[3] < v2[3]); }
+const std::string LOG_CHARGE_NAME("proton_charge");
 } // namespace
 
 // Register the algorithm into the AlgorithmFactory
@@ -87,6 +89,8 @@ void MDNormDirectSC::init() {
   solidAngleValidator->add<InstrumentValidator>();
   solidAngleValidator->add<CommonBinsValidator>();
 
+  m_progress = std::make_unique<API::Progress>(this, 0, 1, 1);
+
   declareProperty(std::make_unique<WorkspaceProperty<>>("SolidAngleWorkspace", "", Direction::Input,
                                                         PropertyMode::Optional, solidAngleValidator),
                   "An input workspace containing integrated vanadium (a measure of the "
@@ -132,7 +136,13 @@ void MDNormDirectSC::exec() {
 
   m_numExptInfos = outputWS->getNumExperimentInfo();
   // loop over all experiment infos
+  m_progress->resetNumSteps(m_numExptInfos, 0.3, 1.0);
   for (uint16_t expInfoIndex = 0; expInfoIndex < m_numExptInfos; expInfoIndex++) {
+    const auto &currentExptInfo = *(m_inputWS->getExperimentInfo(expInfoIndex));
+    if (!currentExptInfo.run().hasProperty("RUBW_MATRIX")) {
+      throw std::runtime_error("Wokspace does not contain a log entry for the RUBW matrix."
+                               "Cannot continue.");
+    }
     // Check for other dimensions if we could measure anything in the original
     // data
     bool skipNormalization = false;
@@ -141,13 +151,18 @@ void MDNormDirectSC::exec() {
     cacheDimensionXValues();
 
     if (!skipNormalization) {
-      calculateNormalization(otherValues, affineTrans, expInfoIndex);
+      if (currentExptInfo.run().hasProperty("useLogTimes")) {
+        calculateNormContinuous(otherValues, affineTrans, expInfoIndex);
+      } else {
+        calculateNormalization(otherValues, affineTrans, expInfoIndex);
+      }
     } else {
       g_log.warning("Binning limits are outside the limits of the MDWorkspace. "
                     "Not applying normalization.");
     }
     // if more than one experiment info, keep accumulating
     m_accumulate = true;
+    m_progress->report();
   }
 
   // Set the display normalization based on the input workspace
@@ -223,16 +238,18 @@ std::string MDNormDirectSC::inputEnergyMode() const {
   const auto &hist = m_inputWS->getHistory();
   const size_t nalgs = hist.size();
   const auto &lastAlgHist = hist.getAlgorithmHistory(nalgs - 1);
-  const auto &penultimateAlgHist = hist.getAlgorithmHistory(nalgs - 2);
 
   std::string emode;
   if (lastAlgHist->name() == "ConvertToMD") {
-    emode = lastAlgHist->getPropertyValue("dEAnalysisMode");
-  } else if ((lastAlgHist->name() == "Load" || lastAlgHist->name() == "LoadMD") &&
-             penultimateAlgHist->name() == "ConvertToMD") {
     // get dEAnalysisMode
-    emode = penultimateAlgHist->getPropertyValue("dEAnalysisMode");
+    emode = lastAlgHist->getPropertyValue("dEAnalysisMode");
   } else {
+    if ((lastAlgHist->name() == "Load" || lastAlgHist->name() == "LoadMD") && nalgs > 1) {
+      const auto &penultimateAlgHist = hist.getAlgorithmHistory(nalgs - 2);
+      if (penultimateAlgHist->name() == "ConvertToMD") {
+        return penultimateAlgHist->getPropertyValue("dEAnalysisMode");
+      }
+    }
     throw std::invalid_argument("The last algorithm in the history of the "
                                 "input workspace is not ConvertToMD");
   }
@@ -428,23 +445,130 @@ void MDNormDirectSC::cacheDimensionXValues() {
  */
 void MDNormDirectSC::calculateNormalization(const std::vector<coord_t> &otherValues,
                                             const Kernel::Matrix<coord_t> &affineTrans, uint16_t expInfoIndex) {
-  constexpr double energyToK = 8.0 * M_PI * M_PI * PhysicalConstants::NeutronMass * PhysicalConstants::meV * 1e-20 /
-                               (PhysicalConstants::h * PhysicalConstants::h);
-  const auto &currentExptInfo = *(m_inputWS->getExperimentInfo(expInfoIndex));
   using VectorDoubleProperty = Kernel::PropertyWithValue<std::vector<double>>;
+  const auto &currentExptInfo = *(m_inputWS->getExperimentInfo(expInfoIndex));
+  const auto &spectrumInfo = currentExptInfo.spectrumInfo();
   auto *rubwLog = dynamic_cast<VectorDoubleProperty *>(currentExptInfo.getLog("RUBW_MATRIX"));
-  if (!rubwLog) {
-    throw std::runtime_error("Wokspace does not contain a log entry for the RUBW matrix."
-                             "Cannot continue.");
-  } else {
-    Kernel::DblMatrix rubwValue((*rubwLog)()); // includes the 2*pi factor but not goniometer for now :)
-    m_rubw = currentExptInfo.run().getGoniometerMatrix() * rubwValue;
-    m_rubw.Invert();
-  }
+  Kernel::DblMatrix rubwValue((*rubwLog)()); // includes the 2*pi factor but not goniometer for now :)
+  m_rubw = currentExptInfo.run().getGoniometerMatrix() * rubwValue;
+  m_rubw.Invert();
   const double protonCharge = currentExptInfo.run().getProtonCharge();
 
-  const auto &spectrumInfo = currentExptInfo.spectrumInfo();
+  calculateNormInner(spectrumInfo, protonCharge, otherValues, affineTrans);
+}
 
+/**
+ * Computes the normalization for the input workspace for the case of a continous rotation
+ * @param otherValues non HKLE dimensions
+ * @param affineTrans affine matrix
+ * @param expInfoIndex current experiment info index
+ */
+void MDNormDirectSC::calculateNormContinuous(const std::vector<coord_t> &otherValues,
+                                             const Kernel::Matrix<coord_t> &affineTrans, uint16_t expInfoIndex) {
+  using VectorDoubleProperty = Kernel::PropertyWithValue<std::vector<double>>;
+  const auto &currentExptInfo = *(m_inputWS->getExperimentInfo(expInfoIndex));
+  const auto &spectrumInfo = currentExptInfo.spectrumInfo();
+  auto *rubwLog = dynamic_cast<VectorDoubleProperty *>(currentExptInfo.getLog("RUBW_MATRIX"));
+  Kernel::DblMatrix rubwValue((*rubwLog)()); // includes the 2*pi factor but not goniometer for now :)
+
+  // MDEventWS was created with the "useLogTimes" option: should be only a single expInfo, but
+  // gonios vary with time - we now coarse-bin it to compute the normalisation.
+  const Run &run = currentExptInfo.run();
+  if (!run.hasProperty(LOG_CHARGE_NAME)) {
+    throw std::runtime_error("Wokspace does not contain the proton charge log. Cannot continue.");
+  }
+
+  double progressStart = 0.3 + 0.7 * expInfoIndex / m_numExptInfos;
+  double progressEnd = 0.3 + 0.7 * (expInfoIndex + 1) / m_numExptInfos;
+  double normfac = run.hasProperty("NormalizationFactor")
+                       ? (*dynamic_cast<Kernel::PropertyWithValue<double> *>(run.getProperty("NormalizationFactor")))()
+                       : 1.0;
+  std::istringstream tosplit;
+  tosplit.str((*dynamic_cast<PropertyWithValue<std::string> *>(run.getProperty("useLogTimes")))());
+  std::vector<TimeSeriesProperty<double> *> logs;
+  std::vector<size_t> movingGonioIndex;
+  const TimeSeriesProperty<double> *protonlog = run.getTimeSeriesProperty<double>(LOG_CHARGE_NAME);
+  std::vector<double> protonCharge = protonlog->valuesAsVector();
+  std::vector<Types::Core::DateAndTime> protonTimes = protonlog->timesAsVector();
+  Geometry::Goniometer gonio(run.getGoniometer());
+
+  for (std::string name; std::getline(tosplit, name, ',');) {
+    auto *log = run.getTimeSeriesProperty<double>(name);
+    logs.push_back(log);
+    if ((log->maxValue() - log->minValue()) > STATIONARYANGLIM) { // Assume gonio logs in degrees
+      movingGonioIndex.push_back(logs.size() - 1);
+    }
+  }
+
+  if (movingGonioIndex.size() == 1) {
+    // If we only have a single moving gonio, bin all its values to GONIOBINSTEP degree bins and
+    // run inner loop on each binned angle
+    const TimeROI &timeroi = run.getTimeROI();
+    const auto &gonioAxLog = logs[movingGonioIndex[0]];
+    std::vector<double> filteredVals = gonioAxLog->filteredValuesAsVector(&timeroi);
+    const auto &[min, max] = std::minmax_element(filteredVals.begin(), filteredVals.end());
+    std::vector<double> gonioCharge(static_cast<int>((*max - *min) / GONIOBINSTEP) + 1, 0.0);
+    for (size_t n = 0; n < protonCharge.size(); n++) {
+      double logval = gonioAxLog->getSingleValue(protonTimes[n]);
+      if (std::isnan(logval) || logval > *max || logval < *min) {
+        continue;
+      }
+      auto idx = static_cast<size_t>(floor((logval - *min) / GONIOBINSTEP));
+      gonioCharge[idx] += protonCharge[n];
+    }
+    m_accumulate = true;
+    m_progress->resetNumSteps(static_cast<int64_t>(gonioCharge.size()), progressStart, progressEnd);
+    for (size_t n = 0; n < gonioCharge.size(); n++) {
+      if (gonioCharge[n] < MINPROTONCHARGE) {
+        continue;
+      }
+      auto nn = static_cast<double>(n);
+      gonio.setRotationAngle(movingGonioIndex[0], nn * GONIOBINSTEP + *min);
+      m_rubw = gonio.getR() * rubwValue;
+      m_rubw.Invert();
+      calculateNormInner(spectrumInfo, gonioCharge[n] / normfac, otherValues, affineTrans);
+      m_progress->report();
+    }
+  } else {
+    // Otherwise run inner loop over small bins of proton charge in time
+    double chargeSum = 0.0;
+    size_t i0 = 0;
+    bool skipIter = false;
+    m_progress->resetNumSteps(static_cast<int64_t>(protonCharge.size()), progressStart, progressEnd);
+    for (size_t n = 0; n < protonCharge.size(); n++) {
+      chargeSum += protonCharge[n];
+      if (chargeSum > CHARGEBINSIZE) {
+        size_t mid = static_cast<int>(floor(static_cast<double>(n - i0) / 2.));
+        skipIter = false;
+        for (size_t gAx = 0; gAx < gonio.getNumberAxes(); gAx++) {
+          double logval = logs[gAx]->getSingleValue(protonTimes[mid]);
+          if (std::isnan(logval)) {
+            skipIter = true;
+            continue;
+          }
+          gonio.setRotationAngle(gAx, logval);
+        }
+        if (!skipIter) {
+          m_rubw = gonio.getR() * rubwValue;
+          m_rubw.Invert();
+          calculateNormInner(spectrumInfo, chargeSum / normfac, otherValues, affineTrans);
+        }
+        chargeSum = 0;
+        i0 = n;
+      }
+      m_progress->report();
+    }
+  }
+  if (m_numExptInfos > 1) {
+    m_progress->resetNumSteps(m_numExptInfos - expInfoIndex, progressStart, 1.0);
+  }
+}
+
+void MDNormDirectSC::calculateNormInner(const API::SpectrumInfo &spectrumInfo, const double protonCharge,
+                                        const std::vector<coord_t> &otherValues,
+                                        const Kernel::Matrix<coord_t> &affineTrans) {
+  constexpr double energyToK = 8.0 * M_PI * M_PI * PhysicalConstants::NeutronMass * PhysicalConstants::meV * 1e-20 /
+                               (PhysicalConstants::h * PhysicalConstants::h);
   // Mapping
   const auto ndets = static_cast<int64_t>(spectrumInfo.size());
   bool haveSA = false;
@@ -459,74 +583,69 @@ void MDNormDirectSC::calculateNormalization(const std::vector<coord_t> &otherVal
   std::vector<std::atomic<signal_t>> signalArray(m_normWS->getNPoints());
   std::vector<std::array<double, 4>> intersections;
   std::vector<coord_t> pos, posNew;
-  double progStep = 0.7 / m_numExptInfos;
-  auto prog =
-      std::make_unique<API::Progress>(this, 0.3 + progStep * expInfoIndex, 0.3 + progStep * (expInfoIndex + 1.), ndets);
 
-PRAGMA_OMP(parallel for private(intersections, pos, posNew))
-for (int64_t i = 0; i < ndets; i++) {
-  PARALLEL_START_INTERRUPT_REGION
+  PRAGMA_OMP(parallel for private(intersections, pos, posNew))
+  for (int64_t i = 0; i < ndets; i++) {
+    PARALLEL_START_INTERRUPT_REGION
 
-  if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i)) {
-    continue;
-  }
-  const auto &detector = spectrumInfo.detector(i);
-  double theta = detector.getTwoTheta(m_samplePos, m_beamDir);
-  double phi = detector.getPhi();
-  // If the detector is a group, this should be the ID of the first detector
-  const auto detID = detector.getID();
+    if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i)) {
+      continue;
+    }
+    const auto &detector = spectrumInfo.detector(i);
+    double theta = detector.getTwoTheta(m_samplePos, m_beamDir);
+    double phi = detector.getPhi();
+    // If the detector is a group, this should be the ID of the first detector
+    const auto detID = detector.getID();
 
-  // Intersections
-  this->calculateIntersections(intersections, theta, phi);
-  if (intersections.empty())
-    continue;
-
-  // Get solid angle for this contribution
-  double solid = protonCharge;
-  if (haveSA) {
-    solid = solidAngleWS->y(solidAngDetToIdx.find(detID)->second)[0] * protonCharge;
-  }
-  // Compute final position in HKL
-  // pre-allocate for efficiency and copy non-hkl dim values into place
-  pos.resize(vmdDims + otherValues.size() + 1);
-  std::copy(otherValues.begin(), otherValues.end(), pos.begin() + vmdDims);
-  pos.emplace_back(1.f);
-  auto intersectionsBegin = intersections.begin();
-  for (auto it = intersectionsBegin + 1; it != intersections.end(); ++it) {
-    const auto &curIntSec = *it;
-    const auto &prevIntSec = *(it - 1);
-    // the full vector isn't used so compute only what is necessary
-    double delta = (curIntSec[3] * curIntSec[3] - prevIntSec[3] * prevIntSec[3]) / energyToK;
-    if (delta < 1e-10)
-      continue; // Assume zero contribution if difference is small
-
-    // Average between two intersections for final position
-    std::transform(curIntSec.data(), curIntSec.data() + vmdDims, prevIntSec.data(), pos.begin(),
-                   [](const double rhs, const double lhs) { return static_cast<coord_t>(0.5 * (rhs + lhs)); });
-
-    // transform kf to energy transfer
-    pos[3] = static_cast<coord_t>(m_Ei - pos[3] * pos[3] / energyToK);
-    affineTrans.multiplyPoint(pos, posNew);
-    size_t linIndex = m_normWS->getLinearIndexAtCoord(posNew.data());
-    if (linIndex == size_t(-1))
+    // Intersections
+    this->calculateIntersections(intersections, theta, phi);
+    if (intersections.empty())
       continue;
 
-    // signal = integral between two consecutive intersections *solid angle
-    // *PC
-    double signal = solid * delta;
-    Mantid::Kernel::AtomicOp(signalArray[linIndex], signal, std::plus<signal_t>());
-  }
-  prog->report();
+    // Get solid angle for this contribution
+    double solid = protonCharge;
+    if (haveSA) {
+      solid = solidAngleWS->y(solidAngDetToIdx.find(detID)->second)[0] * protonCharge;
+    }
+    // Compute final position in HKL
+    // pre-allocate for efficiency and copy non-hkl dim values into place
+    pos.resize(vmdDims + otherValues.size() + 1);
+    std::copy(otherValues.begin(), otherValues.end(), pos.begin() + vmdDims);
+    pos.emplace_back(1.f);
+    auto intersectionsBegin = intersections.begin();
+    for (auto it = intersectionsBegin + 1; it != intersections.end(); ++it) {
+      const auto &curIntSec = *it;
+      const auto &prevIntSec = *(it - 1);
+      // the full vector isn't used so compute only what is necessary
+      double delta = (curIntSec[3] * curIntSec[3] - prevIntSec[3] * prevIntSec[3]) / energyToK;
+      if (delta < 1e-10)
+        continue; // Assume zero contribution if difference is small
 
-  PARALLEL_END_INTERRUPT_REGION
-}
-PARALLEL_CHECK_INTERRUPT_REGION
-if (m_accumulate) {
-  std::transform(signalArray.cbegin(), signalArray.cend(), m_normWS->getSignalArray(), m_normWS->mutableSignalArray(),
-                 [](const std::atomic<signal_t> &a, const signal_t &b) { return a + b; });
-} else {
-  std::copy(signalArray.cbegin(), signalArray.cend(), m_normWS->mutableSignalArray());
-}
+      // Average between two intersections for final position
+      std::transform(curIntSec.data(), curIntSec.data() + vmdDims, prevIntSec.data(), pos.begin(),
+                     [](const double rhs, const double lhs) { return static_cast<coord_t>(0.5 * (rhs + lhs)); });
+
+      // transform kf to energy transfer
+      pos[3] = static_cast<coord_t>(m_Ei - pos[3] * pos[3] / energyToK);
+      affineTrans.multiplyPoint(pos, posNew);
+      size_t linIndex = m_normWS->getLinearIndexAtCoord(posNew.data());
+      if (linIndex == static_cast<size_t>(-1))
+        continue;
+
+      // signal = integral between two consecutive intersections *solid angle
+      // *PC
+      double signal = solid * delta;
+      Mantid::Kernel::AtomicOp(signalArray[linIndex], signal, std::plus<signal_t>());
+    }
+    PARALLEL_END_INTERRUPT_REGION
+  }
+  PARALLEL_CHECK_INTERRUPT_REGION
+  if (m_accumulate) {
+    std::transform(signalArray.cbegin(), signalArray.cend(), m_normWS->getSignalArray(), m_normWS->mutableSignalArray(),
+                   [](const std::atomic<signal_t> &a, const signal_t &b) { return a + b; });
+  } else {
+    std::copy(signalArray.cbegin(), signalArray.cend(), m_normWS->mutableSignalArray());
+  }
 }
 
 /**

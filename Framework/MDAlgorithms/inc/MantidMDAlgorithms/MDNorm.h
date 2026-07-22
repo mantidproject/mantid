@@ -26,7 +26,8 @@ public:
   const std::string category() const override;
   const std::string summary() const override;
   const std::vector<std::string> seeAlso() const override {
-    return {"CropWorkspaceForMDNorm", "MDNormSCD", "MDNormDirectSC", "RecalculateTrajectoriesExtents"};
+    return {"CropWorkspaceForMDNorm", "MDNormSCD", "MDNormDirectSC", "RecalculateTrajectoriesExtents",
+            "ConvertHFIRSCDtoMDE"};
   }
 
 private:
@@ -44,8 +45,21 @@ private:
   /// Bin(MD) input MDE workspace
   DataObjects::MDHistoWorkspace_sptr binInputWS(const std::vector<Geometry::SymmetryOperation> &symmetryOps);
 
+  /// Bin(MD), per symmetry operation, an MDEventWorkspace using pre-computed bin parameters.
+  /// Shared by binInputWS and (for monochromatic-SCD input) binMonoSCDNormalizationWS, so that data
+  /// and normalization end up on identical grids.
+  DataObjects::MDHistoWorkspace_sptr binMDEventWorkspace(const API::IMDEventWorkspace_sptr &ws,
+                                                         const std::string &temporaryWSPropertyName,
+                                                         const std::string &outputWSPropertyName,
+                                                         const std::vector<Geometry::SymmetryOperation> &symmetryOps,
+                                                         const std::map<std::string, std::string> &parameters);
+
   /// Bin(MD) input Background workspace
   DataObjects::MDHistoWorkspace_sptr binBackgroundWS(const std::vector<Geometry::SymmetryOperation> &symmetryOps);
+
+  /// Bin(MD) MonoSCDNormalizationWorkspace (monochromatic single crystal diffraction)
+  DataObjects::MDHistoWorkspace_sptr
+  binMonoSCDNormalizationWS(const std::vector<Geometry::SymmetryOperation> &symmetryOps);
 
   /// build symmetry matrix
   Mantid::Kernel::DblMatrix buildSymmetryMatrix(const Geometry::SymmetryOperation &so);
@@ -115,6 +129,9 @@ private:
   double m_Ei;
   /// Flag indicating if the input workspace is from diffraction
   bool m_diffraction;
+  /// Flag indicating a pre-computed MonoSCDNormalizationWorkspace was provided
+  /// (monochromatic single crystal diffraction, e.g. WAND, DEMAND)
+  bool m_monochromatic;
   /// Flag to accumulate normalization
   bool m_accumulate;
   /// Flag to indicate that the energy dimension is integrated

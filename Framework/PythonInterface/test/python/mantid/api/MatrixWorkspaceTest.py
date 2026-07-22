@@ -159,6 +159,99 @@ class MatrixWorkspaceTest(unittest.TestCase):
         for attr in [x, y, e, dx]:
             do_numpy_test(attr)
 
+    def test_x_y_e_dx_give_readonly_numpy_array(self):
+        def do_numpy_test(arr):
+            self.assertEqual(type(arr), np.ndarray)
+            self.assertFalse(arr.flags.writeable)
+
+        x = self._test_ws.x(0)
+        y = self._test_ws.y(0)
+        e = self._test_ws.e(0)
+        dx = self._test_ws.dx(0)
+
+        for attr in [x, y, e, dx]:
+            do_numpy_test(attr)
+
+        self.assertTrue(np.array_equal(x, self._test_ws.readX(0)))
+        self.assertTrue(np.array_equal(y, self._test_ws.readY(0)))
+        self.assertTrue(np.array_equal(e, self._test_ws.readE(0)))
+        self.assertTrue(np.array_equal(dx, self._test_ws.readDx(0)))
+
+    def test_mutable_data_members_give_writable_numpy_array(self):
+        def do_numpy_test(arr):
+            self.assertEqual(type(arr), np.ndarray)
+            self.assertTrue(arr.flags.writeable)
+
+        x = self._test_ws.mutableX(0)
+        y = self._test_ws.mutableY(0)
+        e = self._test_ws.mutableE(0)
+        dx = self._test_ws.mutableDx(0)
+
+        for attr in [x, y, e, dx]:
+            do_numpy_test(attr)
+
+        self._do_numpy_comparison(self._test_ws, x, y, e, 0)
+
+        # Can we change something
+        ynow = y[0]
+        ynow *= 2.5
+        y[0] = ynow
+        self.assertEqual(self._test_ws.y(0)[0], ynow)
+
+    def test_set_shared_x_y_e_dx_sets_expected_values(self):
+        nvectors = 2
+        xlength = 11
+        ylength = 10
+
+        test_ws = WorkspaceFactory.create("Workspace2D", nvectors, xlength, ylength)
+        ws_index = 1
+
+        xvalues = np.linspace(0, 1, xlength)
+        test_ws.setSharedX(ws_index, xvalues)
+        self.assertTrue(np.array_equal(xvalues, test_ws.x(ws_index)))
+
+        yvalues = np.ones(ylength)
+        test_ws.setSharedY(ws_index, yvalues)
+        self.assertTrue(np.array_equal(yvalues, test_ws.y(ws_index)))
+
+        evalues = np.sqrt(yvalues)
+        test_ws.setSharedE(ws_index, evalues)
+        self.assertTrue(np.array_equal(evalues, test_ws.e(ws_index)))
+
+        dxvalues = np.full(ylength, 0.1)
+        test_ws.setSharedDx(ws_index, dxvalues)
+        self.assertTrue(np.array_equal(dxvalues, test_ws.dx(ws_index)))
+
+    def test_set_shared_x_y_e_dx_raise_on_size_mismatch(self):
+        nvectors = 1
+        xlength = 11
+        ylength = 10
+
+        test_ws = WorkspaceFactory.create("Workspace2D", nvectors, xlength, ylength)
+
+        wrong_length_xvalues = np.ones(xlength - 1)
+        self.assertRaises(RuntimeError, test_ws.setSharedX, 0, wrong_length_xvalues)
+
+        wrong_length_values = np.ones(ylength - 1)
+        self.assertRaises(RuntimeError, test_ws.setSharedY, 0, wrong_length_values)
+        self.assertRaises(RuntimeError, test_ws.setSharedE, 0, wrong_length_values)
+        self.assertRaises(RuntimeError, test_ws.setSharedDx, 0, wrong_length_values)
+
+    def test_set_x_y_e_dx_are_deprecated_in_favour_of_set_shared_x_y_e_dx(self):
+        nvectors = 1
+        xlength = 11
+        ylength = 10
+        test_ws = WorkspaceFactory.create("Workspace2D", nvectors, xlength, ylength)
+
+        xvalues = np.linspace(0, 1, xlength)
+        with self.assertWarns(DeprecationWarning):
+            test_ws.setX(0, xvalues)
+
+        values = np.ones(ylength)
+        for method_name in ("setY", "setE", "setDx"):
+            with self.assertWarns(DeprecationWarning):
+                getattr(test_ws, method_name)(0, values)
+
     def test_setting_spectra_from_array_of_incorrect_length_raises_error(self):
         nvectors = 2
         xlength = 11

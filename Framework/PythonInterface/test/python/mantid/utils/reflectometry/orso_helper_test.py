@@ -422,8 +422,6 @@ class MantidORSODatasetTest(unittest.TestCase):
             "",
             "",
             enable_instrument_settings=polarized,
-            model="",
-            validate=False,
         )
 
     def _check_mantid_default_header(self, orso_dataset, dataset_name, ws, reduction_timestamp, creator_name, creator_affiliation):

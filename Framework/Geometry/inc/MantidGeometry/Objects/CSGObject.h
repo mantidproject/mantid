@@ -177,6 +177,9 @@ public:
   /// Getter for the shape xml
   std::string getShapeXML() const;
 
+  const std::vector<uint32_t> &getTriangleFaces() const;
+  const std::vector<double> &getTriangleVertices() const;
+
 private:
   int procPair(std::string &lineStr, std::map<int, std::unique_ptr<Rule>> &ruleMap, int &compUnit) const;
   std::unique_ptr<CompGrp> procComp(std::unique_ptr<Rule>) const;
@@ -225,9 +228,6 @@ private:
   void updateGeometryHandler();
   size_t numberOfTriangles() const;
   size_t numberOfVertices() const;
-  /// for solid angle from triangulation
-  const std::vector<uint32_t> &getTriangleFaces() const;
-  const std::vector<double> &getTriangleVertices() const;
   /// original shape xml used to generate this object.
   std::string m_shapeXML;
   /// Optional string identifier

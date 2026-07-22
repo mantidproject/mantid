@@ -58,3 +58,8 @@ class WriteToSignal(QObject):
                 pass
         # always write to the message log
         self.sig_write_received.emit(txt)
+
+    def fileno(self):
+        if self._original_out is not None and hasattr(self._original_out, "fileno"):
+            return self._original_out.fileno()
+        raise UnsupportedOperation("fileno not available for WriteToSignal object")
