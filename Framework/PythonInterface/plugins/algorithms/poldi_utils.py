@@ -156,16 +156,19 @@ def get_instrument_settings_from_log(ws: Workspace2D) -> Tuple[float, np.ndarray
     :return t0_const: TZERO diffractometer constant for instrument
     :return l1_chop: path length from source to chopper (m)
     """
-    inst = ws.getInstrument()
-    source = inst.getSource()  # might not need these
-    chopper = inst.getComponentByName("chopper")
-    l1_chop = (chopper.getPos() - source.getPos()).norm()
+    # kept only for parameter access (t0/t0_const), which has no *Info equivalent
+    chopper = ws.getInstrument().getComponentByName("chopper")
     t0, t0_const = get_t0_parameters(chopper)
+
+    component_info = ws.componentInfo()
+    chopper_index = component_info.indexOfAny("chopper")
+    l1_chop = (component_info.position(chopper_index) - component_info.sourcePosition()).norm()
     chopper_speed = ws.run().getPropertyAsSingleValue("chopperspeed")  # rpm
     cycle_time = _calc_cycle_time_from_chopper_speed(chopper_speed)  # mus
     # get chopper offsets in time (stored as x position of child components of chopper)
-    nslits = chopper.nelements()
-    slit_offsets = np.array([(chopper[islit].getPos()[0] + t0) * cycle_time for islit in range(nslits)])
+    slit_offsets = np.array(
+        [(component_info.position(int(islit))[0] + t0) * cycle_time for islit in component_info.children(chopper_index)]
+    )
     return cycle_time, slit_offsets, t0_const, l1_chop
 
 
