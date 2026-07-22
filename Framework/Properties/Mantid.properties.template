@@ -222,8 +222,6 @@ interfaces.categories.hidden =
 
 # ScriptRepository Properties:
 
-# Url for the WebServer that support the upload of the files that the users want to share
-UploaderWebServer = @MANTIDPUBLISHER@
 # Local system path for the script repository.
 ScriptLocalRepository =
 # Base Url for the remote script repository. Not necessarily accessible, it is used to construct longer URLs

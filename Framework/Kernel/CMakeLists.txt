@@ -612,7 +612,6 @@ set(DATADIRS
     ${ExternalData_BINARY_ROOT}/Testing/Data/UnitTest;${ExternalData_BINARY_ROOT}/Testing/Data/DocTest;${MANTID_ROOT}/instrument
 )
 set(COLORMAPS_FOLDER ${MANTID_ROOT}/installers/colormaps/)
-set(MANTIDPUBLISHER "https://upload.mantidproject.org/scriptrepository?debug=1")
 
 set(CONSOLEPATTERN "%s-[%p] %t")
 set(CONSOLECHANNELCLASS "ConsoleChannel")
@@ -648,7 +647,6 @@ set(UPDATE_INSTRUMENT_DEFINTITIONS "${ENABLE_NETWORK_ACCESS}")
 set(CHECK_FOR_NEW_MANTID_VERSION "${ENABLE_NETWORK_ACCESS}")
 set(ENABLE_USAGE_REPORTS "${ENABLE_NETWORK_ACCESS}")
 set(DATADIRS "")
-set(MANTIDPUBLISHER "https://upload.mantidproject.org/scriptrepository")
 
 # For a framework-only (e.g. MPI) build some of these are not relevant and should be left empty to avoid warnings on
 # starting Mantid

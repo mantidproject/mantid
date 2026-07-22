@@ -32,7 +32,7 @@ struct ScriptInfo {
       - REMOTE_ONLY: it exists only at the remote repository.
       - LOCAL_ONLY: it exists only at the local folder.
       - REMOTE_CHANGED: it has been changed remotely, may be updated.
-      - LOCAL_CHANGED: it has been modified locally, may be published.
+      - LOCAL_CHANGED: it has been modified locally.
       - BOTH_CHANGED: modified locally and remotelly.
       - BOTH_UNCHANGED: the local file is a copy of the remotely one.
 
@@ -140,7 +140,10 @@ promote its usage. In order to enhance the usage, it is necessary:
   - List all scripts available at the repository
   - Download selected scripts.
   - Check for updates
-  - Allow to publish users scripts/folders.
+
+@note The repository is read-only from Mantid: scripts may be downloaded and
+kept up to date, but they can not be published or deleted through this
+interface.
 
 ScriptRepository may show all the files inside the script repository through
 ScriptRepository::listFiles.
@@ -168,12 +171,6 @@ remotely and
 not up-to-date, or even, being modified locally and remotely. Use
 ScriptRepository::fileStatus in
 order to get these informations of any file.
-
-The user may decide to upload one of his file or folder, to share it. This is
-possible through
-the ScriptRepository::upload. The same command may be used to publish also some
-updates made to an
-already shared file.
 
 Finally, the ScriptRepository have to check periodically the remote repository
 (https://github.com/mantidproject/scripts), but it will be done indirectly
@@ -460,83 +457,6 @@ public:
      @return List with all the files automatically downloaded.
   */
   virtual std::vector<std::string> check4Update() = 0;
-
-  /**
-     Upload the local file/folder to be available at the remote repository.
-     After this, this file/folder will be available for every, being published
-     as with the same license as the mantid framework itself.
-
-     The user is not allowed to upload files that are marked as BOTH_CHANGED. It
-     must first download the file (wich will make a copy of the local one), than
-     update the downloaded file with the user own changes. At this point, he may
-     published his file.
-
-     @note This operation requires internet connection.
-
-     @param file_path for the file/folder to be published. For folders, it will
-            publish all the files inside the folder.
-            (Empty folders will not be accepted).
-
-     @param comment Allows to give information of the last changes, updates on
-            a given file/folder. It differs from description, in the sense, that
-            it may inform just what changed from the last version, while, the
-            description must provide information about the scope of the file.
-
-     @param author An string that may identify who is the responsible for
-    changing
-            that file. It may be a nick name, or an e-mail, or even a code, but,
-            it it necessary that it identifies who was responsible for changing
-            the file.
-
-     @param email An string that identifies the email of the author.
-
-
-    @exception ScriptRepoException may be triggered for an attempt to publish an
-               empty folder, a file not present locally, because the file, or
-    one
-               of the files inside the folder are marked as BOTH_CHANGED, or
-    even
-               failure to connect to the remote repository.
-
-
-   */
-  virtual void upload(const std::string &file_path, const std::string &comment, const std::string &author,
-                      const std::string &email) = 0;
-
-  /**
-     Delete the file from the remote repository (it does not touch the local
-    copy).
-     After this, the file will not be available for anyone among the users. As
-    so,
-     it is required a justification of why to remove (the comment), and the
-    current
-     rule accept that only the owner of the file (which is considered the last
-    one
-     to use the file) is allowed to remove it.
-
-     The file will be removed from the central repository (git)
-
-     @note This operation requires internet connection.
-
-     @param file_path for the file to be deleted. It will not accept deleting
-    folders for
-            security reason.
-
-     @param comment The reson of why deleting this entry.
-
-     @param author An string that may identify who is requesting to delete the
-    file.
-            It accept only the last author to remove it.
-
-     @param email An string that identifies the email of the author.
-
-    @exception ScriptRepoException may be triggered for an attempt to delete
-    folders,
-               or a non existent file, or not allowed operation, or any network
-    erros.
-   */
-  virtual void remove(const std::string &file_path, const std::string &comment, const std::string &author,
-                      const std::string &email) = 0;
 
   /** Define the file patterns that will not be listed in listFiles.
       This is important to force the ScriptRepository to not list hidden files,

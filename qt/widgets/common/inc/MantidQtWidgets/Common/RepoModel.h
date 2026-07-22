@@ -17,10 +17,6 @@
 #include <QVariant>
 #include <QWidget>
 
-class QLineEdit;
-class QCheckBox;
-class QTextEdit;
-
 namespace MantidQt {
 namespace API {
 
@@ -30,10 +26,7 @@ const QString LOCALCHANGED = "LOCAL_CHANGED";
 const QString REMOTECHANGED = "REMOTE_CHANGED";
 const QString BOTHUNCHANGED = "UPDATED";
 const QString BOTHCHANGED = "CHANGED";
-const QString UPLOADST = "UPLOADING";
 const QString DOWNLOADST = "DOWNLOADING";
-const QString PROTECTEDENTRY = "protected";
-const QString DELETABLEENTRY = "deletable";
 
 /** RepoModel : Wrapper for ScriptRepository to fit the Model View Qt Framework.
 
@@ -60,7 +53,7 @@ const QString DELETABLEENTRY = "deletable";
 
    Through these methods, the RepoModel will be able to provide access to the
   ScriptRepository
-   service. Allowing the users to upload and download files and folders.
+   service. Allowing the users to download files and folders.
 
    Some extra services are provided, to allow the classes to show the
   description of the files
@@ -125,41 +118,6 @@ class EXPORT_OPT_MANTIDQT_COMMON RepoModel : public QAbstractItemModel {
     const RepoItem &operator=(const RepoItem &);
   };
 
-  class UploadForm : public QDialog {
-  public:
-    UploadForm(const QString &file2upload, QWidget *parent = nullptr);
-    ~UploadForm() override;
-    QString email();
-    QString author();
-    QString comment();
-    bool saveInfo();
-    void setEmail(const QString & /*email*/);
-    void setAuthor(const QString & /*author*/);
-    void lastSaveOption(bool option);
-
-  protected:
-    QLineEdit *author_le;
-    QLineEdit *email_le;
-    QCheckBox *save_ck;
-    QTextEdit *comment_te;
-  };
-
-  /** Auxiliary Dialog to get the option from the user about removing the
-   * entries
-   *  from the local folder or the central repository. When removing from
-   * central
-   *  repository, it will allow also to provide the justification.
-   */
-  class DeleteQueryBox : public QMessageBox {
-  public:
-    DeleteQueryBox(const QString &path, QWidget *parent = nullptr);
-    ~DeleteQueryBox() override;
-    QString comment();
-
-  private:
-    QTextEdit *comment_te;
-  };
-
 public:
   /// constructor
   RepoModel(QObject *parent = nullptr);
@@ -189,7 +147,6 @@ public:
   static const QString &updatedSt();
   static const QString &bothChangedSt();
   static const QString &downloadSt();
-  static const QString &uploadSt();
 
   QString fileDescription(const QModelIndex &index);
   QString filePath(const QModelIndex &index);
@@ -228,24 +185,6 @@ private:
   bool isDownloading(const QModelIndex &index) const;
 private slots:
   void downloadFinished();
-
-private:
-  // handle connection to the uploader server in thread
-  // this connection are used to upload or deleting files.
-
-  // QFuture variable, used to check if the thread is running, alive, etc...
-  QFuture<QString> upload_threads;
-  // The mechanism to have a call back function executed after finishing the
-  // thread
-  QFutureWatcher<QString> upload_watcher;
-  // keep track of the file being used to the connection with uploader
-  QString uploading_path;
-  QModelIndex upload_index;
-  // check if the file pointed by the index is inside a connection with uploader
-  bool isUploading(const QModelIndex &index) const;
-private slots:
-  // call back method executed after finishing the thread
-  void uploadFinished();
 };
 
 } // namespace API

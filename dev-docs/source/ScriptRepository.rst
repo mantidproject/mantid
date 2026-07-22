@@ -18,12 +18,12 @@ The design criteria from the user perspective were:
 
 - ability to list available content without having to download the whole repository
 - ability to download just the content selected by the user
-- ability to publish content, along with identifying information:
 
-  - ``Author Name``
-  - ``Author Email``
-
-- ability to delete content authored by the user
+.. note::
+   Mantid originally also allowed users to publish content to, and delete their own
+   content from, the repository. That capability has been removed from Mantid: the
+   script repository is now read-only from the client side. Content is contributed
+   by interacting with the `GitHub repository <github-repository_>`_ directly.
 
 Overview
 --------
@@ -59,7 +59,8 @@ It provides capabilities to:
 
 - download an index of the repository without fetching the content itself (see below)
 - fetch requested content from the repository
-- upload/delete requested content from the repository
+- upload/delete requested content from the repository. Mantid no longer calls these
+  endpoints, though the backend still implements them.
 
 The backend requires a clone of the repository in order to push/pull content.
 The cloned repository connected to the backend must be configured with an

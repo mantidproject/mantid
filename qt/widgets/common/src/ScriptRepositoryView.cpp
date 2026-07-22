@@ -33,9 +33,9 @@ Mantid::Kernel::Logger g_log("ScriptRepositoryView");
 const QString install_mantid_label =
     "<html><head/><body><p>The <span style=\" font-weight:600;\">"
     "Script Repository</span> allows you to:</p>"
-    "<p>  * Share your scripts and reduction algorithms;</p>"
     "<p>  * Get <span style=\" font-weight:600;\">Mantid</span> Scripts from "
-    "the mantid developers and the community. </p>"
+    "the mantid developers and the community;</p>"
+    "<p>  * Keep those scripts up to date automatically. </p>"
     "<p><span style=\" font-style:italic;\">"
     "N.B. The installation usually requires a couple of minutes, depending on "
     "your network bandwidth. </span></p>"
@@ -63,8 +63,8 @@ const QString dir_not_empty_label = "<html><head/><body><p>The directory/folder 
                                     "empty</p>"
                                     "<p>Are you sure that you want to install the script repository here? All "
                                     "the files and directories found in "
-                                    "the selected directory/folder could be shared in the repository by "
-                                    "mistake.</p>"
+                                    "the selected directory/folder will be listed as part of the "
+                                    "repository.</p>"
                                     "<p>If you are not sure, please choose 'no' and then select an empty (or "
                                     "newly created) directory/folder.</p>"
                                     "<p>If this is your home directory, desktop or similar you should "
@@ -86,8 +86,7 @@ const QString dir_not_empty_label = "<html><head/><body><p>The directory/folder 
  *  In normal condition, it will create the widget (Ui::ScriptRepositoryView)
  *and populate it with the
  *  RepoModel, and define the delegates ScriptRepositoryView::RepoDelegate and
- *ScriptRepositoryView::CheckBoxDelegate
- *  and ScriptRepositoryView::RemoveEntryDelegate.
+ *ScriptRepositoryView::CheckBoxDelegate.
  *
  */
 ScriptRepositoryView::ScriptRepositoryView(QWidget *parent) : MantidDialog(parent), ui(new Ui::ScriptRepositoryView) {
@@ -137,7 +136,6 @@ ScriptRepositoryView::ScriptRepositoryView(QWidget *parent) : MantidDialog(paren
   ui->repo_treeView->setModel(model);
   ui->repo_treeView->setItemDelegateForColumn(1, new RepoDelegate(this));
   ui->repo_treeView->setItemDelegateForColumn(2, new CheckBoxDelegate(this));
-  ui->repo_treeView->setItemDelegateForColumn(3, new RemoveEntryDelegate(this));
   ui->repo_treeView->setColumnWidth(0, 290);
 
   // stablish the connections.
@@ -340,6 +338,9 @@ void ScriptRepositoryView::RepoDelegate::paint(QPainter *painter, const QStyleOp
   // get the state and chose the best fit icon
   QString state = index.model()->data(index, Qt::DisplayRole).toString();
   auto icon = getIcon(state);
+  // entries with no action available (purely local ones) get no button at all
+  if (icon.isNull())
+    return;
 
   // define the region to draw the icon
   QRect buttonRect(option.rect);
@@ -368,12 +369,10 @@ QIcon ScriptRepositoryView::RepoDelegate::getIcon(const QString &state) const {
     icon = Icons::getIcon("mdi.transfer-down");
   } else if (state == RepoModel::updatedSt())
     icon = Icons::getIcon("mdi.check-bold");
-  else if (state == RepoModel::localOnlySt() || state == RepoModel::localChangedSt())
-    icon = Icons::getIcon("mdi.upload");
   else if (state == RepoModel::downloadSt())
     icon = Icons::getIcon("mdi.progress-download");
-  else if (state == RepoModel::uploadSt())
-    icon = Icons::getIcon("mdi.progress-upload");
+  // local-only and locally-changed entries have no remote action, so they
+  // deliberately get a null icon
   return icon;
 }
 
@@ -389,8 +388,8 @@ QIcon ScriptRepositoryView::RepoDelegate::getIcon(const QString &state) const {
  *  It will filter the event in order to get the Left-Click of mouse. If it gets
  *the
  *  click of the mouse, it will trigger the action:
- *   - Upload: if the file/folder is local_only or local_changed
- *   - No Action when the entry is in Updated state.
+ *   - No Action when the entry is in Updated state, or is local only or
+ *     locally changed (there is nothing to fetch).
  *   - Download: for the other cases
  *
  * @param event: The event given by the framework
@@ -405,12 +404,10 @@ bool ScriptRepositoryView::RepoDelegate::editorEvent(QEvent *event, QAbstractIte
   // if event is mouse click
   if (event->type() == QEvent::MouseButtonPress) {
     QString value = model->data(index, Qt::DisplayRole).toString();
-    QString action = "Download";
-    if (value == RepoModel::localOnlySt() || value == RepoModel::localChangedSt())
-      action = "Upload";
-    if (value == RepoModel::updatedSt())
+    // these entries have nothing to fetch from the central repository
+    if (value == RepoModel::updatedSt() || value == RepoModel::localOnlySt() || value == RepoModel::localChangedSt())
       return false; // ignore
-    return model->setData(index, action, Qt::EditRole);
+    return model->setData(index, "Download", Qt::EditRole);
   } else {
     return true; // Does not allow others events to be processed (example:
                  // double-click)
@@ -512,94 +509,6 @@ bool ScriptRepositoryView::CheckBoxDelegate::editorEvent(QEvent *event, QAbstrac
   } else {
     // QStyledItemDelegate::editorEvent(event, model, option, index);
     return true; // Does not allow the event to be catched by another one
-  }
-}
-/////////////////////
-// RemoveEntryDelegate
-/////////////////////
-
-ScriptRepositoryView::RemoveEntryDelegate::RemoveEntryDelegate(QObject *parent) : QStyledItemDelegate(parent) {}
-/** Draws the column 3 (delete) of ScriptRepositoryView.
- *
- *  This function is called every time the ScriptRepository needs to
- *draw the widget for the delete column of the file/folder inside the
- *ScriptRepository.  It displays a trash icon to indicate user that it
- *is used to remove entries.
- *
- * @param painter: Required to draw the widget
- * @param option: Provided by the framework and has information
- *displaying the widget.
- * @param index: Identifies the entry inside the RepoModel (indirectly
- * the file / folder).
- */
-void ScriptRepositoryView::RemoveEntryDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
-                                                      const QModelIndex &index) const {
-
-  if (!index.isValid())
-    return;
-  if (painter->device() == nullptr)
-    return;
-
-  QIcon icon;
-  // get the state and chose the best fit icon
-  QString entry_type = index.model()->data(index, Qt::DisplayRole).toString();
-
-  if (entry_type == "protected")
-    return;
-
-  icon = Icons::getIcon("mdi.trash-can");
-
-  // define the region to draw the icon
-  QRect buttonRect(option.rect);
-  int min_val = buttonRect.width() < buttonRect.height() ? buttonRect.width() : buttonRect.height();
-  // make it square
-  buttonRect.setWidth(min_val);
-  buttonRect.setHeight(min_val);
-  buttonRect.moveCenter(option.rect.center());
-
-  // define the options to draw a push button with the icon displayed
-  QStyleOptionButton button;
-  button.rect = buttonRect;
-  button.icon = icon;
-  int icon_size = (int)(min_val * .8);
-  button.iconSize = QSize(icon_size, icon_size);
-  button.state = QStyle::State_Enabled;
-  // draw a push button
-  QApplication::style()->drawControl(QStyle::CE_PushButton, &button, painter);
-}
-
-/** Reacts to the iteraction with the user when he clicks on the buttons
- *displayed at paint.
- *
- *  Clicking on the delete icon there is only on available action (to delete the
- *entry). So,
- *  it is enough to get the event that the user interact with the pushbutton to
- *decide what
- *  to do.
- *
- *  It will filter the event in order to get the Left-Click of mouse. If it gets
- *the
- *  click of the mouse, it will trigger the action delete to the model
- *
- * @param event: The event given by the framework
- * @param model: Pointer to the model needed to retrive the status of the entry
- * @param index: identifies the entry (file/folder)
- * @param option: Provided by the framewor, and passed on to the base class.
- * @return true if it handles or false to ignore.
- */
-bool ScriptRepositoryView::RemoveEntryDelegate::editorEvent(QEvent *event, QAbstractItemModel *model,
-                                                            const QStyleOptionViewItem & /*option*/,
-                                                            const QModelIndex &index) {
-  // if event is mouse click
-  if (event->type() == QEvent::MouseButtonPress) {
-    QString entry = index.model()->data(index, Qt::DisplayRole).toString();
-    if (entry == "protected")
-      return true;
-    QString action = "delete";
-    return model->setData(index, action, Qt::EditRole);
-  } else {
-    return true; // Does not allow others events to be processed (example:
-                 // double-click)
   }
 }
 
