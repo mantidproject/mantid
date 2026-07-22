@@ -4,6 +4,7 @@ from mantid.simpleapi import (
     CreatePeaksWorkspace,
     FindUBFromScatteringPlane,
     LoadEmptyInstrument,
+    CombinePeaksWorkspaces,
     AddPeakHKL,
     ClearUB,
     IndexPeaks,
@@ -72,6 +73,46 @@ class FindUBFromScatteringPlaneTest(unittest.TestCase):
         vertical_dir = peaks1.getInstrument().getReferenceFrame().vecPointingUp()
         self.index_peaks_helper(self.peaks1, 0.01)
         self.up_helper(vertical_dir, self.vertical_dir, peaks1)
+
+    def test_uses_peak_reference_frame_not_workspace_instrument(self):
+        r"""
+        Regression test: the algorithm must derive 'vertical_dir' from the peak's own
+        reference frame (peak.getReferenceFrame()), not from peaks_workspace.getInstrument()
+        .getReferenceFrame(). SXD's reference frame has Y pointing up; POLREF's has Z pointing
+        up. CombinePeaksWorkspaces clones the LHS workspace (here, an empty POLREF one) for the
+        output's own instrument, while each combined peak keeps its own originating instrument
+        (here, the SXD peak from RHS) — so the output's getInstrument() and its getPeak(0)
+        disagree on which way is "up".
+
+        'vertical_dir' is used internally as the rotation axis that aligns the arbitrary UB's
+        calculated Q-sample vector to the peak's observed one; picking the wrong axis (e.g.
+        POLREF's Z instead of SXD's Y here) generally cannot converge that alignment to a tight
+        tolerance. index_peaks_helper's tight tolerance (0.01) is therefore a real, discriminating
+        check here, unlike up_helper (see its use elsewhere in this file), which is a no-op:
+        UnitCell.recAngle(v, v) is mathematically always 0 by the identity v^T*Gstar*v = |B*v|^2,
+        regardless of the lattice's orientation, so it cannot distinguish a correct UB from a
+        wrong one when both arguments come from the same reference frame.
+        """
+        peaks1 = self.peaks1
+        SetUB(peaks1, u=[1, -0.83, 0], v=[1, 0.83, 0], a=5.4, b=5.4, c=5.4, alpha=90, beta=90, gamma=90)
+        AddPeakHKL(peaks1, [2, 2, 0])
+        ClearUB(peaks1)
+        sxd_up = peaks1.getPeak(0).getReferenceFrame().vecPointingUp()
+
+        empty_polref = LoadEmptyInstrument(InstrumentName="POLREF", OutputWorkspace="empty_POLREF")
+        polref_peaks = CreatePeaksWorkspace(InstrumentWorkspace=empty_polref, NumberOfPeaks=0, OutputWorkspace="polref_peaks")
+        polref_up = polref_peaks.getInstrument().getReferenceFrame().vecPointingUp()
+        # sanity check: the two candidate reference frames genuinely disagree
+        self.assertFalse(np.allclose(np.array(sxd_up), np.array(polref_up)))
+
+        combined = CombinePeaksWorkspaces(LHSWorkspace=polref_peaks, RHSWorkspace=peaks1, OutputWorkspace="combined")
+        self.assertTrue(np.allclose(np.array(combined.getInstrument().getReferenceFrame().vecPointingUp()), np.array(polref_up)))
+        self.assertTrue(np.allclose(np.array(combined.getPeak(0).getReferenceFrame().vecPointingUp()), np.array(sxd_up)))
+
+        FindUBFromScatteringPlane(
+            Vector1=[1, -1, 0], Vector2=[1, 1, 0], a=5.4, b=5.4, c=5.4, alpha=90, beta=90, gamma=90, PeaksWorkspace="combined"
+        )
+        self.index_peaks_helper(combined, 0.01)
 
     def test_multiple_peaks_provided(self):
         peaks1 = self.peaks1

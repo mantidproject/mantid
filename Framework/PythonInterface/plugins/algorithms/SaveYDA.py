@@ -187,13 +187,17 @@ class SaveYDA(PythonAlgorithm):
 
         # if y axis is SpectrumAxis
         if ax.isSpectra:
-            samplePos = ws.getInstrument().getSample().getPos()
-            sourcePos = ws.getInstrument().getSource().getPos()
-            beamPos = samplePos - sourcePos
+            # computed from the (possibly grouped) detector position rather than via
+            # spectrum_info.twoTheta(i): the latter averages each detector's individual
+            # two-theta, while this averages positions first then takes one angle,
+            # matching the legacy behaviour of a DetectorGroup's getPos()/getTwoTheta().
+            spectrum_info = ws.spectrumInfo()
+            component_info = ws.componentInfo()
+            sample_pos = component_info.samplePosition()
+            beam_dir = sample_pos - component_info.sourcePosition()
             for i in range(nHist):
-                detector = ws.getDetector(i)
                 # convert radians to degrees
-                twoTheta = detector.getTwoTheta(samplePos, beamPos) * 180 / math.pi
+                twoTheta = (spectrum_info.position(i) - sample_pos).angle(beam_dir) * 180 / math.pi
                 twoTheta = round(twoTheta, 14)
                 bin.append(twoTheta)
         elif ax.length() == nHist:

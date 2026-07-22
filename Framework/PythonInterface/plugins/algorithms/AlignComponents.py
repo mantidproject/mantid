@@ -35,6 +35,7 @@ from mantid.kernel import (
     V3D,
 )
 import mantid.simpleapi as api
+from plugins.functions.component_info_utils import resolve_component_index
 
 
 class AlignComponents(PythonAlgorithm):
@@ -378,8 +379,16 @@ class AlignComponents(PythonAlgorithm):
         if len(components) <= 0 and not source_or_sample:
             issues["ComponentList"] = "Must supply components"
         else:
-            get_component = api.mtd[wks_name].getInstrument().getComponentByName
-            components = [component for component in components if get_component(component) is None]
+            component_info = api.mtd[wks_name].componentInfo()
+
+            def component_missing(name):
+                try:
+                    resolve_component_index(name, component_info)
+                    return False
+                except (ValueError, RuntimeError):
+                    return True
+
+            components = [component for component in components if component_missing(component)]
             if len(components) > 0:
                 issues["ComponentList"] = 'Instrument has no component "' + ",".join(components) + '"'
         if wks_name == "__alignedWorkspace":
@@ -464,20 +473,20 @@ class AlignComponents(PythonAlgorithm):
             self._optionsDict[rotation_option] = False
 
         # First fit L1 if selected for Source and/or Sample
-        sample_position_begin = api.mtd[wks_name].getInstrument().getSample().getPos()
+        component_info = api.mtd[wks_name].componentInfo()
+        sample_position_begin = component_info.position(component_info.sample())
         for component in "Source", "Sample":  # fit first the source position, then the sample position
             if self.getProperty("Fit" + component + "Position").value:
                 self._move = True
-                if component == "Sample":
-                    comp = api.mtd[wks_name].getInstrument().getSample()
-                else:
-                    comp = api.mtd[wks_name].getInstrument().getSource()
-                componentName = comp.getFullName()
-                logger.notice("Working on " + componentName + " Starting position is " + str(comp.getPos()))
+                component_info = api.mtd[wks_name].componentInfo()
+                comp_index = component_info.sample() if component == "Sample" else component_info.source()
+                componentName = component_info.name(comp_index)
+                comp_pos = component_info.position(comp_index)
+                logger.notice("Working on " + componentName + " Starting position is " + str(comp_pos))
                 firstIndex = 0
                 lastIndex = detector_count - 1
 
-                self._initialPos = [comp.getPos().getX(), comp.getPos().getY(), comp.getPos().getZ(), 0, 0, 0]  # no rotation
+                self._initialPos = [comp_pos.getX(), comp_pos.getY(), comp_pos.getZ(), 0, 0, 0]  # no rotation
 
                 # Set up x0 and bounds lists
                 x0List = []  # initial X, Y, Z coordinates
@@ -507,8 +516,11 @@ class AlignComponents(PythonAlgorithm):
 
                 # Save translation and rotations, if requested
                 if saving_adjustments:
-                    instrument = api.mtd[wks_name].getInstrument()
-                    name_finder = {"Source": instrument.getSource().getName(), "Sample": instrument.getSample().getName()}
+                    component_info = api.mtd[wks_name].componentInfo()
+                    name_finder = {
+                        "Source": component_info.name(component_info.source()),
+                        "Sample": component_info.name(component_info.sample()),
+                    }
                     component_adjustments = [name_finder[component]] + xmap[:3] + [0.0] * 4  # no rotations
                     adjustments_table.addRow(component_adjustments)
 
@@ -516,10 +528,13 @@ class AlignComponents(PythonAlgorithm):
                 kwargs = dict(X=xmap[0], Y=xmap[1], Z=xmap[2], RelativePosition=False, EnableLogging=False)
                 api.MoveInstrumentComponent(wks_name, componentName, **kwargs)  # adjust workspace
                 api.MoveInstrumentComponent(output_workspace, componentName, **kwargs)  # adjust workspace
-                comp = api.mtd[wks_name].getInstrument().getComponentByName(componentName)
-                logger.notice("Finished " + componentName + " Final position is " + str(comp.getPos()))
+                component_info = api.mtd[wks_name].componentInfo()
+                comp_index = component_info.sample() if component == "Sample" else component_info.source()
+                comp_pos = component_info.position(comp_index)
+                logger.notice("Finished " + componentName + " Final position is " + str(comp_pos))
                 self._move = False
-        sample_position_end = api.mtd[wks_name].getInstrument().getSample().getPos()
+        component_info = api.mtd[wks_name].componentInfo()
+        sample_position_end = component_info.position(component_info.sample())
 
         # Now fit all the remaining components, if any
         components = self.getProperty("ComponentList").value
@@ -540,30 +555,27 @@ class AlignComponents(PythonAlgorithm):
             if lastDetID - firstDetID != lastIndex - firstIndex:
                 raise RuntimeError("TOFS detid doesn't match instrument")
 
-            comp = api.mtd[wks_name].getInstrument().getComponentByName(component)
-            eulerAngles: List[float] = comp.getRotation().getEulerAngles(self._eulerConvention)
+            component_info = api.mtd[wks_name].componentInfo()
+            comp_index = resolve_component_index(component, component_info)
+            comp_pos = component_info.position(comp_index)
+            eulerAngles: List[float] = component_info.rotation(comp_index).getEulerAngles(self._eulerConvention)
 
             logger.notice(
-                "Working on "
-                + comp.getFullName()
-                + " Starting position is "
-                + str(comp.getPos())
-                + " Starting rotation is "
-                + str(eulerAngles)
+                "Working on " + component + " Starting position is " + str(comp_pos) + " Starting rotation is " + str(eulerAngles)
             )
 
             x0List = []
             self._initialPos = [
-                comp.getPos().getX(),
-                comp.getPos().getY(),
-                comp.getPos().getZ(),
+                comp_pos.getX(),
+                comp_pos.getY(),
+                comp_pos.getZ(),
                 eulerAngles[0],
                 eulerAngles[1],
                 eulerAngles[2],
             ]
 
             # Distance between the original position of the sample and the original position of the component
-            comp_sample_distance_begin = (comp.getPos() - sample_position_begin).norm()
+            comp_sample_distance_begin = (comp_pos - sample_position_begin).norm()
 
             boundsList = []
 
@@ -601,9 +613,10 @@ class AlignComponents(PythonAlgorithm):
             # Apply the results to the output workspace
             xmap = self._mapOptions(results.x)
 
-            comp = api.mtd[wks_name].getInstrument().getComponentByName(component)  # adjusted component
+            component_info = api.mtd[wks_name].componentInfo()  # adjusted component
+            comp_pos = component_info.position(resolve_component_index(component, component_info))
             # Distance between the adjusted position of the sample and the adjusted position of the component
-            comp_sample_distance_end = (comp.getPos() - sample_position_end).norm()
+            comp_sample_distance_end = (comp_pos - sample_position_end).norm()
 
             component_adjustments = [0.0] * 7  # 3 for translation, 3 for rotation axis, 1 for rotation angle
             component_displacements = [0.0] * 7  # 1 for distnace, 3 for translation, 3 for Euler angles
@@ -632,15 +645,16 @@ class AlignComponents(PythonAlgorithm):
             if saving_displacements and (self._move or self._rotate):
                 displacements_table.addRow([component] + component_displacements)
 
-            # Need to grab the component object again, as things have changed
-            comp = api.mtd[wks_name].getInstrument().getComponentByName(component)  # adjusted component
+            # Need to grab the component again, as things have changed
+            component_info = api.mtd[wks_name].componentInfo()
+            comp_index = resolve_component_index(component, component_info)
             logger.notice(
                 "Finished "
-                + comp.getFullName()
+                + component
                 + " Final position is "
-                + str(comp.getPos())
+                + str(component_info.position(comp_index))
                 + " Final rotation is "
-                + str(comp.getRotation().getEulerAngles(self._eulerConvention))
+                + str(component_info.rotation(comp_index).getEulerAngles(self._eulerConvention))
             )
 
             prog.report()
@@ -745,31 +759,13 @@ class AlignComponents(PythonAlgorithm):
         # calculate the fractional peak center deviations, then sum their absolute values
         return np.sum(np.abs((peaks_d - self.peaks_ref) / self.peaks_ref))
 
-    def _unique_name(self, component, component_info):
-        r"""Given the full name (or part of the full name) of a component, find the part
-        of the name that is unique in the whole instrument.
-
-        Example: the unique name for 'CORELLI/A row/bank1/sixteenpack' is 'bank1'. There's only
-        one 'bank1' in the whole instrument
-
-        @param str component: (partial) full name of the component assembly
-        @param mantid.geometry.componentInfo component_info: object holding information for the instrument components
-        @return str: the unique name
-        """
-        name_parts = sorted(component.split("/"), reverse=True)
-        for part in name_parts:
-            if component_info.uniqueName(part):
-                return part
-        raise RuntimeError("Could not find a unique name for {component}")
-
     def _firstAndLastDetID(self, component, component_info):
         r"""first and last detector ID's in a component
         @param str component: name of the component assembly
         @param mantid.geometry.componentInfo component_info: object holding information for the instrument components
         @return tuple: firt and last detector ID's
         """
-        unique_name = self._unique_name(component, component_info)
-        index = component_info.indexOfAny(unique_name)  # component-info index
+        index = resolve_component_index(component, component_info)  # component-info index
         # component-info indexes for all detector pixels in this components
         index_all = sorted(component_info.detectorsInSubtree(index))
         # find the detector-ID for the first and last component-info indexes

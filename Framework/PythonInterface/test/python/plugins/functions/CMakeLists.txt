@@ -7,6 +7,7 @@ set(TEST_PY_FILES
     BesselTest.py
     ChudleyElliotTest.py
     CombGaussLorentzKTTest.py
+    component_info_utilsTest.py
     DampedBesselTest.py
     CompositePCRmagnetTest.py
     EISFDiffSphereTest.py

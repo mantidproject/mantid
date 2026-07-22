@@ -473,11 +473,22 @@ class EnggFitPeaks(PythonAlgorithm):
         Returns:
         input values converted from dSpacing to ToF
         """
-        det = ws.getDetector(wks_index)
-
         # Current detector parameters
-        detL2 = det.getDistance(ws.getInstrument().getSample())
-        detTwoTheta = ws.detectorTwoTheta(det)
+        spectrum_info = ws.spectrumInfo()
+        if spectrum_info.isMonitor(wks_index):
+            # spectrum_info.l2()/twoTheta() throw or diverge for monitors (see SpectrumInfo.cpp);
+            # replicate the legacy IDetector.getDistance()/getTwoTheta(), which computed the raw
+            # geometric value unconditionally, since this workspace's spectra are not guaranteed
+            # to exclude monitors.
+            component_info = ws.componentInfo()
+            sample_pos = component_info.samplePosition()
+            beam_dir = sample_pos - component_info.sourcePosition()
+            det_pos = spectrum_info.position(wks_index)
+            detL2 = det_pos.distance(sample_pos)
+            detTwoTheta = (det_pos - sample_pos).angle(beam_dir)
+        else:
+            detL2 = spectrum_info.l2(wks_index)
+            detTwoTheta = spectrum_info.twoTheta(wks_index)
 
         # hard coded equation to convert dSpacing -> TOF for the single detector
         # Values (in principle, expected peak positions) in TOF for the detector
