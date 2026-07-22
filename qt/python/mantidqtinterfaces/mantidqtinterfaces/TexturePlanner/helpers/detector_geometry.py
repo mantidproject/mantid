@@ -4,46 +4,18 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import annotations
 
 import numpy as np
 
 from mantid.simpleapi import GroupDetectors, LoadDetectorsGroupingFile
 from Engineering.texture.texture_helper import define_gauge_volume
-from typing import Protocol
-from abc import abstractmethod
+from typing import TYPE_CHECKING
 from mantid.api import MatrixWorkspace
 
-
-class _WorkspaceManagerType(Protocol):
-    """For the purpose of type hinting while this module is orphaned
-    Will be removed and replaced with actual model before final PR"""
-
-    ws: MatrixWorkspace
-    ungrouped_ws: MatrixWorkspace
-    wsname: str
-    gauge_volume_str: str
-    scattering_centre: np.ndarray
-
-    @abstractmethod
-    def copy_sample_preserving_initial_rotation(self, source_ws: MatrixWorkspace, dest_ws: MatrixWorkspace) -> None:
-        pass
-
-
-class _InstrumentType(Protocol):
-    """For the purpose of type hinting while this module is orphaned
-    Will be removed and replaced with actual model before final PR"""
-
-    @abstractmethod
-    def get_grouping_path(self) -> str:
-        pass
-
-
-class _BaseModelType(Protocol):
-    """For the purpose of type hinting while this module is orphaned
-    Will be removed and replaced with actual model before final PR"""
-
-    workspaces: _WorkspaceManagerType
-    instrument: _InstrumentType
+if TYPE_CHECKING:
+    from mantidqtinterfaces.TexturePlanner.model import TexturePlannerModel
+    from mantidqtinterfaces.TexturePlanner.helpers.workspace_manager import WorkspaceManager
 
 
 class DetectorGeometry:
@@ -52,7 +24,7 @@ class DetectorGeometry:
     selected detector grouping, and applies the grouping to the data workspace.
     """
 
-    def __init__(self, model: _BaseModelType):
+    def __init__(self, model: TexturePlannerModel):
         self._model = model
         self.det_k = np.empty((0, 3), dtype=float)
         self.detQs_lab = np.empty((0, 3), dtype=float)
@@ -90,7 +62,7 @@ class DetectorGeometry:
         return self._model.instrument.get_grouping_path()
 
     @staticmethod
-    def _apply_grouping_to_wss(wsm: _WorkspaceManagerType, grouping_path: str) -> MatrixWorkspace:
+    def _apply_grouping_to_wss(wsm: WorkspaceManager, grouping_path: str) -> MatrixWorkspace:
         # Always regroup from the pristine ungrouped workspace; grouping the previously grouped
         # ws by a new MapFile is very slow.
         if wsm.ws is not None:

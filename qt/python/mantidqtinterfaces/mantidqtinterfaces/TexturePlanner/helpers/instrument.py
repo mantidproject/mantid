@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import annotations
 
 import os
 
@@ -12,28 +13,14 @@ from mantid.simpleapi import CreateSimulationWorkspace, GroupDetectors
 from mantid.kernel import logger
 from Engineering.EnggUtils import CALIB_DIR
 from Engineering.common.instrument_config import get_instr_config, SUPPORTED_INSTRUMENTS
-from typing import List, Sequence, Protocol
-from abc import abstractmethod
+from typing import TYPE_CHECKING, List, Sequence
+
+if TYPE_CHECKING:
+    from mantidqtinterfaces.TexturePlanner.model import TexturePlannerModel
 
 # Group used when the user supplies their own grouping XML file rather than
 # selecting one of an instrument's grouping presets. Also the label shown in the group combo.
 CUSTOM_GROUP = "Custom"
-
-
-class _WorkspaceManagerType(Protocol):
-    """For the purpose of type hinting while this module is orphaned
-    Will be removed and replaced with actual model before final PR"""
-
-    @abstractmethod
-    def update_ws(self) -> None:
-        pass
-
-
-class _BaseModelType(Protocol):
-    """For the purpose of type hinting while this module is orphaned
-    Will be removed and replaced with actual model before final PR"""
-
-    workspaces: _WorkspaceManagerType
 
 
 class InstrumentHelper:
@@ -46,7 +33,7 @@ class InstrumentHelper:
     }
     _DEFAULT_SUPPORTED_GROUPS = ("banks",)
 
-    def __init__(self, model: _BaseModelType, instrument: str = "ENGINX"):
+    def __init__(self, model: TexturePlannerModel, instrument: str = "ENGINX"):
         self._model = model
         # instrument config
         self.instr = instrument

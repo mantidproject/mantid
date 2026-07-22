@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import annotations
 
 from uuid import uuid4
 
@@ -24,16 +25,10 @@ from mantid.simpleapi import (
 from mantid.api import AnalysisDataService as ADS, MatrixWorkspace
 from Engineering.common.xml_shapes import get_cube_xml
 from Engineering.texture.texture_helper import define_gauge_volume, get_gauge_vol_str, get_scattering_centre
-from typing import Any, Protocol
+from typing import TYPE_CHECKING
 
-
-class _BaseModelType(Protocol):
-    """For the purpose of type hinting while this module is orphaned
-    Will be removed and replaced with actual model before final PR"""
-
-    orientations: Any
-    instrument: Any
-    geometry: Any
+if TYPE_CHECKING:
+    from mantidqtinterfaces.TexturePlanner.model import TexturePlannerModel
 
 
 class WorkspaceManager:
@@ -44,7 +39,7 @@ class WorkspaceManager:
 
     DEFAULT_MATERIAL = "Fe"
 
-    def __init__(self, model: _BaseModelType):
+    def __init__(self, model: TexturePlannerModel):
         self._model = model
         # Workspace names used by the planner
         # Several planner windows could be open simultaneously, so every name carries a token unique to
