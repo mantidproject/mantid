@@ -1321,7 +1321,6 @@ MDNorm::binMDEventWorkspace(const API::IMDEventWorkspace_sptr &ws, const std::st
     // set binning properties
     size_t qindex = 0;
     for (const auto &p : parameters) {
-      auto key = p.first;
       auto value = p.second;
       std::stringstream basisVector;
       std::vector<double> projection(ws->getNumDims(), 0.);
@@ -1338,7 +1337,7 @@ MDNorm::binMDEventWorkspace(const API::IMDEventWorkspace_sptr &ws, const std::st
         value = basisVector.str();
       }
 
-      binMD->setPropertyValue(key, value);
+      binMD->setPropertyValue(p.first, value);
       qindex++;
     }
     // execute algorithm
