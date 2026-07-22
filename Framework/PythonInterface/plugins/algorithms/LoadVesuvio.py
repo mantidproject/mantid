@@ -954,7 +954,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
             cout += self.foil_thin.y(ws_index)
 
         # Errors
-        eout = self.foil_out.e(ws_index)
+        eout = self.foil_out.mutableE(ws_index)
         ethin = self.foil_thin.e(ws_index)
         np.sqrt((eout**2 + ethin**2), eout)  # The second argument makes it happen in place
 
@@ -973,7 +973,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         cout += self._beta * self.foil_thick.y(ws_index)
 
         # Errors
-        eout = self.foil_out.e(ws_index)
+        eout = self.foil_out.mutableE(ws_index)
         ethin = self.foil_thin.e(ws_index)
         ethick = self.foil_thick.e(ws_index)
         # The second argument makes it happen in place
@@ -990,7 +990,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         cout -= self.foil_thick.y(ws_index)
 
         # Errors
-        eout = self.foil_out.e(ws_index)
+        eout = self.foil_out.mutableE(ws_index)
         ethick = self.foil_thick.e(ws_index)
         np.sqrt((eout**2 + ethick**2), eout)  # The second argument makes it happen in place
 
@@ -1006,7 +1006,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
             ws_out.setSharedX(idx_out, self.foil_out.x(foil_start))
             summed_set = self._spectra[idx_out]
             nsummed = len(summed_set)
-            y_out, e_out = ws_out.y(idx_out), ws_out.e(idx_out)
+            y_out, e_out = ws_out.mutableY(idx_out), ws_out.mutableE(idx_out)
             spec_out = ws_out.getSpectrum(idx_out)
             spec_out.setSpectrumNo(self.foil_out.getSpectrum(foil_start).getSpectrumNo())
             spec_out.clearDetectorIDs()
