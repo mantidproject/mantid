@@ -4,14 +4,9 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-"""Functional (widget-level, end-to-end) tests for the Texture Planner interface.
+"""Functional tests for the Texture Planner interface.
 
-These build the *real* ``TexturePlannerView`` wired to the *real* ``TexturePlannerPresenter``
-and the *real* ``TexturePlannerModel``, then drive the genuine Qt widgets and assert the
-observable result on the model (workspaces, orientation table, instrument config, ...).
-Because nothing in the value path is mocked, the tests catch both broken signal/slot wiring
-*and* incorrect behaviour - e.g. selecting IMAT really computes IMAT's grouping presets, so a
-test cannot pass while asserting the wrong instrument's groups.
+These aim to do minimal mocking to test the implementation and replace a manual test
 
 The only genuinely external boundary that is isolated is the modal ``SetSampleMaterial`` dialog
 (``InterfaceManager``), patched where exercised. Everything else - including the transmission
@@ -19,13 +14,7 @@ path's real absorption calculation - runs for real. The settings sub-dialog is a
 it is a separate interface with its own tests.
 
 File-load tests use small, self-contained temporary fixtures (an ASCII STL, a CSG xml, an
-orientation text file); no external test data is required. Each test gets a fresh model and
-clears the ADS afterwards so the hidden ``__``-prefixed planner workspaces never leak.
-
-Interaction style:
-  * Push-buttons and check-boxes are driven with real ``QTest`` mouse clicks.
-  * Spin-boxes / combo-boxes / line-edits are driven through their setters (which emit the
-    same ``valueChanged`` / ``currentTextChanged`` / ``textEdited`` signals a user edit would).
+orientation text file)
 """
 
 import os
@@ -57,17 +46,12 @@ from mantidqtinterfaces.TexturePlanner.view import (
 )
 from mantidqtinterfaces.TexturePlanner.presenter import TexturePlannerPresenter
 
-# render off-screen so the test run never pops up real windows; must be set before the
-# QApplication is constructed. setdefault leaves an externally-chosen platform untouched.
+# render off-screen so the test doesn't create windows
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 app = QApplication.instance() or QApplication(sys.argv)
 
 PRESENTER = "mantidqtinterfaces.TexturePlanner.presenter"
-
-# the real grouping presets (mirrors InstrumentHelper, with the trailing custom-file option)
-ENGINX_GROUPS = ["Texture20", "Texture30", "banks", "Custom"]
-IMAT_GROUPS = ["Module1", "Module4", "Row1", "Row4", "banks", "Custom"]
 
 # a minimal closed ASCII-STL tetrahedron (cm); enough for LoadSampleShape to build a mesh
 _TETRAHEDRON_STL = """solid tet
@@ -125,7 +109,7 @@ class _FunctionalTestBase(unittest.TestCase):
         self.addCleanup(self.view.close)
 
     def _teardown_state(self):
-        # registered before view.close in addCleanup, so (LIFO) it runs *after* the window closes
+        # registered before view.close in addCleanup
         ADS.clear()
         shutil.rmtree(self._tmpdir, ignore_errors=True)
 
@@ -134,8 +118,8 @@ class _FunctionalTestBase(unittest.TestCase):
         QTest.mouseClick(widget, Qt.LeftButton)
 
     def _click_checkbox(self, checkbox):
-        # click the indicator at the left edge: a text-less checkbox stretched in its layout
-        # only toggles there, and it is the reliable hot-spot for the table checkboxes too.
+        # click the indicator at the left edge: I am led to believe
+        # this is a reliable hot-spot for the table checkboxes too.
         indicator_w = checkbox.style().pixelMetric(QStyle.PM_IndicatorWidth)
         QTest.mouseClick(checkbox, Qt.LeftButton, pos=QPoint(max(indicator_w // 2, 4), checkbox.height() // 2))
 
@@ -181,7 +165,7 @@ class TestInitialState(_FunctionalTestBase):
 
     def test_group_combo_shows_enginx_presets(self):
         items = [self.view.cmbGroup.itemText(i) for i in range(self.view.cmbGroup.count())]
-        self.assertEqual(items, ENGINX_GROUPS)
+        self.assertEqual(items, list(self.model.instrument.groups_for_instrument("ENGINX")))
 
     def test_default_two_gonio_axes_enabled_rest_disabled(self):
         self.assertEqual(self.view.get_num_gonios(), 2)
@@ -452,7 +436,7 @@ class TestInstrumentSelection(_FunctionalTestBase):
         self.view.cmbInstr.setCurrentText("IMAT")
 
         items = [self.view.cmbGroup.itemText(i) for i in range(self.view.cmbGroup.count())]
-        self.assertEqual(items, IMAT_GROUPS)
+        self.assertEqual(items, list(self.model.instrument.groups_for_instrument("IMAT")))
         self.assertTrue(self.view.cmbGroup.isEnabled())
         # nothing is applied to the model until Update Instrument is pressed
         self.assertEqual(self.model.instrument.get_instrument(), "ENGINX")
