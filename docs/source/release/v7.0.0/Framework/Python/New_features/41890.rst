@@ -1,0 +1,1 @@
+- :py:obj:`MDHistoWorkspace <mantid.dataobjects.MDHistoWorkspace>` now provides ``setNumEventsArray`` to overwrite the number-of-events array from a numpy array, mirroring the existing ``setSignalArray`` and ``setErrorSquaredArray`` methods. Any link to the original ``MDEventWorkspace`` is cleared so downstream rebinning or slicing cannot bypass the manually-set values.
