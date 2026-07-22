@@ -159,6 +159,7 @@ void FitDataPresenter::handleAddNumericData(MantidWidgets::IAddWorkspaceDialog c
       addWorkspace(wsName, wsDialog->workspaceIndices());
       updateTableFromModel();
       m_tab->handleNumericDataAdded();
+      m_tab->handleDataChanged();
     } catch (const std::runtime_error &ex) {
       displayWarning(ex.what());
     } catch (const std::invalid_argument &ex) {

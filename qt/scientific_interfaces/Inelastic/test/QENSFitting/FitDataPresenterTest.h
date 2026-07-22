@@ -137,6 +137,7 @@ public:
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_view.get()));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_model.get()));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_tab.get()));
 
     deleteSetup();
   }
@@ -198,6 +199,34 @@ public:
   /// Unit Tests for the "Add Numeric Workspace" feature
   ///----------------------------------------------------------------------
 
+  void test_handleAddNumericData_adds_the_workspace_updates_the_table_and_refreshes_the_plot() {
+    auto dialog = std::make_unique<MantidQt::MantidWidgets::AddWorkspaceDialog>(nullptr);
+
+    InSequence seq;
+    EXPECT_CALL(*m_model, addWorkspace(An<const std::string &>(), _)).Times(Exactly(1));
+    EXPECT_CALL(*m_view, clearTable()).Times(Exactly(1));
+    EXPECT_CALL(*m_tab, handleNumericDataAdded()).Times(Exactly(1));
+    // handleDataChanged is what makes the plot pick up the new data. Without it
+    // the row appears in the table but no spectra are plotted.
+    EXPECT_CALL(*m_tab, handleDataChanged()).Times(Exactly(1));
+
+    m_presenter->handleAddNumericData(dialog.get());
+  }
+
+  void test_handleAddNumericData_does_nothing_if_the_dialog_is_not_an_add_workspace_dialog() {
+    auto dialog = std::make_unique<MockDialog>();
+
+    EXPECT_CALL(*m_model, addWorkspace(An<const std::string &>(), _)).Times(Exactly(0));
+    EXPECT_CALL(*m_tab, handleNumericDataAdded()).Times(Exactly(0));
+    EXPECT_CALL(*m_tab, handleDataChanged()).Times(Exactly(0));
+
+    m_presenter->handleAddNumericData(dialog.get());
+  }
+
+  void test_setNumericQAxis_does_nothing_when_given_an_empty_workspace_name() {
+    TS_ASSERT_THROWS_NOTHING(m_presenter->setNumericQAxis(""));
+  }
+
   void test_setNumericQAxis_converts_non_numeric_axis_to_numeric_with_momentum_transfer_unit() {
     auto ws = createWorkspace(5);
     TS_ASSERT(!ws->getAxis(1)->isNumeric());
@@ -258,6 +287,7 @@ private:
     m_presenter.reset();
     m_model.reset();
     m_view.reset();
+    m_tab.reset();
 
     m_table.reset();
   }
