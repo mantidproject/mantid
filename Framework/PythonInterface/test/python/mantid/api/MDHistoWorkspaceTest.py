@@ -213,6 +213,7 @@ class MDHistoWorkspaceTest(unittest.TestCase):
         testWS.setNumEventsArray(num_events)
         new_num_events = testWS.getNumEventsArray()
         self._verify_numpy_data(new_num_events, num_events)
+        mtd.remove("demo")
 
     def test_set_num_events_array_clears_original_workspaces(self):
         # "A" is produced by BinMD from "mdw", so it is linked to an original workspace

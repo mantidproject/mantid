@@ -17,6 +17,8 @@
 #define NO_IMPORT_ARRAY
 #include <numpy/arrayobject.h>
 
+#include <vector>
+
 using namespace Mantid::API;
 using Mantid::PythonInterface::NDArray;
 using Mantid::PythonInterface::Registry::RegisterWorkspacePtrToPython;
@@ -185,9 +187,15 @@ void setNumEventsArray(IMDHistoWorkspace &self, const NDArray &numEvents) {
   object rav = numEvents.attr("ravel")("F");
   object flattened = rav.attr("flat");
   auto length = len(flattened);
-  auto *dest = self.mutableNumEventsArray();
+  // Buffer conversions first so a failed Python-to-double extraction cannot partially modify the workspace.
+  std::vector<double> values;
+  values.reserve(static_cast<size_t>(length));
   for (auto i = 0; i < length; ++i) {
-    dest[i] = extract<double>(flattened[i])();
+    values.emplace_back(extract<double>(flattened[i])());
+  }
+  auto *dest = self.mutableNumEventsArray();
+  for (size_t i = 0; i < values.size(); ++i) {
+    dest[i] = values[i];
   }
   self.clearOriginalWorkspaces();
 }
