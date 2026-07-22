@@ -110,7 +110,6 @@ mv $CONDA_ENV_PATH/ucrt*.* $COPY_DIR/bin/
 echo "Copy all DLLs from env/Library/bin to package/bin"
 mv $CONDA_ENV_PATH/Library/bin/*.dll $COPY_DIR/bin/
 
-
 echo "Copy Mantid specific files from env/Library/bin to package/bin"
 mv $CONDA_ENV_PATH/Library/bin/Mantid.properties $COPY_DIR/bin/
 mv $CONDA_ENV_PATH/Library/bin/mantid-scripts.pth $COPY_DIR/bin/
@@ -121,19 +120,18 @@ cp $THIS_SCRIPT_DIR/../../../images/mantid_workbench$LOWER_CASE_SUFFIX.ico $COPY
 echo "Copy Instrument details to the package"
 mv $CONDA_ENV_PATH/Library/instrument $COPY_DIR/
 
-echo "Constructing package/lib/qt5"
-mkdir -p $COPY_DIR/lib/qt5/bin
-cp $THIS_SCRIPT_DIR/../common/qt.conf $COPY_DIR/lib/qt5/bin
+echo "Constructing package/lib/qt6"
+mkdir -p $COPY_DIR/lib/qt6/bin
+cp $THIS_SCRIPT_DIR/../common/qt.conf $COPY_DIR/lib/qt6/bin
 
 echo "Copy plugins to the package"
 mkdir $COPY_DIR/plugins
-mkdir $COPY_DIR/plugins/qt5
-mv $CONDA_ENV_PATH/Library/plugins/platforms $COPY_DIR/plugins/qt5/
-mv $CONDA_ENV_PATH/Library/plugins/imageformats $COPY_DIR/plugins/qt5/
-mv $CONDA_ENV_PATH/Library/plugins/printsupport $COPY_DIR/plugins/qt5/
-mv $CONDA_ENV_PATH/Library/plugins/sqldrivers $COPY_DIR/plugins/qt5/
-mv $CONDA_ENV_PATH/Library/plugins/styles $COPY_DIR/plugins/qt5/
-mv $CONDA_ENV_PATH/Library/plugins/qt5/*.dll $COPY_DIR/plugins/qt5/
+mkdir $COPY_DIR/plugins/qt6
+mv $CONDA_ENV_PATH/Library/lib/qt6/plugins/platforms $COPY_DIR/plugins/qt6/
+mv $CONDA_ENV_PATH/Library/lib/qt6/plugins/imageformats $COPY_DIR/plugins/qt6/
+mv $CONDA_ENV_PATH/Library/lib/qt6/plugins/sqldrivers $COPY_DIR/plugins/qt6/
+mv $CONDA_ENV_PATH/Library/lib/qt6/plugins/styles $COPY_DIR/plugins/qt6/
+mv $CONDA_ENV_PATH/Library/plugins/qt6/*.dll $COPY_DIR/plugins/qt6/
 mv $CONDA_ENV_PATH/Library/plugins/*.dll $COPY_DIR/plugins/
 mv $CONDA_ENV_PATH/Library/plugins/python $COPY_DIR/plugins/
 
