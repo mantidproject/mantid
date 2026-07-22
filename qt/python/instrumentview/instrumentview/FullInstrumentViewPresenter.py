@@ -7,7 +7,7 @@
 import numpy as np
 import pyvista as pv
 from queue import Queue
-from typing import Literal, Optional
+from typing import Literal, Optional, cast
 from instrumentview.Globals import CurrentTab
 from threading import Thread
 
@@ -232,6 +232,18 @@ class FullInstrumentViewPresenter:
         self._view.set_render_mode_combo_enabled(True)
         self._on_render_mode_changed(self._view.get_render_mode_option())
 
+        if self._view.current_selected_projection() == ProjectionType.THREE_D:
+            self._view.set_rubberband_zoom_checked(False)
+            self._view.set_overlaid_shape_controls_checked(False)
+            self._view.set_hover_pick_checked(False)
+
+        enabled = self._view.current_selected_projection() != ProjectionType.THREE_D
+        self._view.set_rubberband_zoom_enabled(enabled)
+        self._view.set_overlaid_shape_controls_enabled(enabled)
+        self._view.set_hover_pick_enabled(enabled)
+        self._view.set_aspect_ratio_box_enabled(enabled)
+        self._view.set_flip_beam_box_enabled(enabled)
+
     def on_projection_option_changed(self) -> None:
         self._callback_queue.put((self._on_projection_option_changed, ()))
 
@@ -242,11 +254,6 @@ class FullInstrumentViewPresenter:
         self._model.flip_beam = self._view.is_flip_beam_checkbox_checked()
         with SuppressRendering(self._view.main_plotter):
             self._update_view_main_plotter(refresh_limits=refresh_limits)
-            self._view.enable_or_disable_mask_widgets()
-            self._view.enable_or_disable_aspect_ratio_box()
-            self._view.enable_or_disable_flip_beam_box()
-            self._view.enable_or_disable_hover_pick()
-            self._view.enable_or_disable_rubberband_zoom()
             self.refresh_plotter_peaks()
 
     def count_scale_combo_options(self) -> list[str]:
@@ -380,12 +387,12 @@ class FullInstrumentViewPresenter:
         # Return list of xmin, xmax, ymin, ymax, zmin, zmax
         return [x for pair in zip(min_point, max_point) for x in pair]
 
-    def on_rubberband_zoom_toggled(self, checked) -> None:
+    def on_rubberband_zoom_toggled(self, checked: bool) -> None:
         if checked:
             self._view.set_start_adding_peaks_checked(False)
             self._view.set_hover_pick_checked(False)
             self._view.delete_current_overlaid_shape()
-        self._view.reset_overlay_shapes(disable=checked)
+        self._view.set_overlaid_shape_controls_enabled(not checked)
         self._update_interactor_style()
 
     def on_hover_pick_toggled(self, checked: bool) -> None:
@@ -403,7 +410,7 @@ class FullInstrumentViewPresenter:
         self._view.set_sum_spectra_checkbox_disabled(checked)
         self._view.set_select_bank_tube_disabled(checked)
         self._view.set_export_workspace_button_disabled(checked)
-        self._view.reset_overlay_shapes(disable=checked)
+        self._view.set_overlaid_shape_controls_enabled(not checked)
 
         self._last_hovered_point_index = None
         self._update_interactor_style()
@@ -442,9 +449,11 @@ class FullInstrumentViewPresenter:
 
     def on_overlaid_shape_added(self) -> None:
         self._update_interactor_style()
+        self._view.set_add_selection_and_mask_buttons_enabled(True)
 
     def on_overlaid_shape_removed(self) -> None:
         self._update_interactor_style()
+        self._view.set_add_selection_and_mask_buttons_enabled(False)
 
     def _on_add_item_clicked(self) -> None:
         centres = self._transform_vectors_with_matrix(np.array(self._model.detector_positions), self._transform)
@@ -456,6 +465,7 @@ class FullInstrumentViewPresenter:
             mask = self._model.expand_pickable_mask_to_parent_subtrees(mask)
         new_key = self._model.add_new_detector_key(mask.tolist(), self._view.get_current_selected_tab())
         self._view.set_new_item_key(self._view.get_current_selected_tab(), new_key)
+        self._view.set_overlaid_shape_controls_checked(False)
 
     def on_select_bank_tube_toggled(self, checked: bool) -> None:
         self._select_bank_tube = checked
@@ -474,8 +484,6 @@ class FullInstrumentViewPresenter:
             self._update_line_plot_ws_and_draw(self._view.current_selected_lineplot_unit())
         else:
             self.update_picked_detectors_on_view()
-            # NOTE: This is required explicitly
-            self._view.enable_or_disable_mask_widgets()
 
     def on_list_item_selected(self, kind: CurrentTab) -> None:
         self._callback_queue.put((self._on_list_item_selected, (kind,)))
@@ -565,7 +573,7 @@ class FullInstrumentViewPresenter:
         return self._model.cached_keys(kind)
 
     def _update_line_plot_ws_and_draw(self, unit: str) -> None:
-        if self._view.is_hover_pick_mode_toggled():
+        if self._view.is_hover_pick_mode_checked():
             if self._last_hovered_point_index is not None:
                 self._update_hover_pick_plot(self._last_hovered_point_index)
             return
@@ -667,7 +675,8 @@ class FullInstrumentViewPresenter:
             del self._ads_observer
         if hasattr(self, "_callback_queue"):
             self._callback_queue.put(self._callback_stop_sentinel)
-        self._model = None
+        # Drop presenter->model reference on close while keeping _model non-optional for static typing.
+        self._model = cast(FullInstrumentViewModel, None)
 
     def on_sliders_unit_selected(self, value) -> None:
         self._model.set_integration_units(self._UNIT_OPTIONS[value])
@@ -702,17 +711,16 @@ class FullInstrumentViewPresenter:
             self._view.set_rubberband_zoom_checked(False)
             self._view.set_hover_pick_checked(False)
             self._view.add_peak_cursor_to_lineplot()
-            self._view.set_delete_all_selected_peaks_button_enabled(False)
             self._view.disable_and_uncheck_selection_list()
-            self._on_list_item_selected(CurrentTab.Grouping)
         else:
             self._model.turn_off_single_point_picking()
             self._view.remove_peak_cursor_from_lineplot()
-            self._view.set_delete_all_selected_peaks_button_enabled(True)
             self._view.enable_and_restore_selection_list()
-            self._on_list_item_selected(CurrentTab.Grouping)
 
-        self._view.reset_overlay_shapes(disable=checked)
+        self._on_list_item_selected(CurrentTab.Grouping)
+        self._view.set_list_enabled(CurrentTab.Masking, not checked)
+        self._view.set_delete_all_selected_peaks_button_enabled(not checked)
+        self._view.set_overlaid_shape_controls_enabled(not checked)
 
     def on_peak_selected_in_lineplot(self, x: float, mouse_click: Literal["right", "left"]) -> None:
         if len(self._model.picked_detector_ids) == 0:
@@ -771,7 +779,7 @@ class FullInstrumentViewPresenter:
             self._view.main_plotter.iren.style = self._interactor_styles.SCROLL_ZOOM_NO_PICKING
             return
 
-        if self._view.is_hover_pick_mode_toggled():
+        if self._view.is_hover_pick_mode_checked():
             self._view.main_plotter.iren.style = self._interactor_styles.SCROLL_ZOOM_WITH_HOVER
         elif self._view.is_rubberband_zoom_toggled():
             self._view.main_plotter.iren.style = self._interactor_styles.RUBBERBAND_ZOOM

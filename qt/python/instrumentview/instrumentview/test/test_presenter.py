@@ -28,6 +28,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view = MagicMock()
         self._mock_view.current_selected_projection.return_value = ProjectionType.CYLINDRICAL_Y
         self._mock_view.get_render_mode_option.return_value = "Points"
+        self._mock_view.is_hover_pick_mode_checked.return_value = False
         self._mock_view._RENDER_MODE_POINTS = "Points (Fastest)"
         self._mock_view._RENDER_MODE_SHAPES_FAST = "Approximated Shapes (Fast)"
         self._mock_view._RENDER_MODE_RAW_SHAPES = "Raw Shapes (Slowest)"
@@ -162,7 +163,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.set_start_adding_peaks_checked.assert_called_once_with(False)
         self._mock_view.set_hover_pick_checked.assert_called_once_with(False)
         self._mock_view.delete_current_overlaid_shape.assert_called_once()
-        self._mock_view.reset_overlay_shapes.assert_called_once_with(disable=True)
+        self._mock_view.set_overlaid_shape_controls_enabled.assert_called_once_with(False)
         self._presenter._update_interactor_style.assert_called_once()
 
     def test_on_rubberband_zoom_toggled_off_restores_regular_plotting(self):
@@ -170,7 +171,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
 
         self._presenter.on_rubberband_zoom_toggled(False)
 
-        self._mock_view.reset_overlay_shapes.assert_called_once_with(disable=False)
+        self._mock_view.set_overlaid_shape_controls_enabled.assert_called_once_with(True)
         self._presenter._update_interactor_style.assert_called_once()
 
     def test_on_hover_pick_toggled_enables_hover_mode(self):
@@ -192,7 +193,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.set_sum_spectra_checkbox_disabled.assert_called_once_with(True)
         self._mock_view.set_select_bank_tube_disabled.assert_called_once_with(True)
         self._mock_view.set_export_workspace_button_disabled.assert_called_once_with(True)
-        self._mock_view.reset_overlay_shapes.assert_called_once_with(disable=True)
+        self._mock_view.set_overlaid_shape_controls_enabled.assert_called_once_with(False)
         self._presenter._update_interactor_style.assert_called_once()
 
     def test_on_hover_pick_toggled_off_restores_regular_plotting(self):
@@ -206,7 +207,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.set_sum_spectra_checkbox_disabled.assert_called_once_with(False)
         self._mock_view.set_select_bank_tube_disabled.assert_called_once_with(False)
         self._mock_view.set_export_workspace_button_disabled.assert_called_once_with(False)
-        self._mock_view.reset_overlay_shapes.assert_called_once_with(disable=False)
+        self._mock_view.set_overlaid_shape_controls_enabled.assert_called_once_with(True)
         self._presenter._update_interactor_style.assert_called_once()
         self._presenter.update_picked_detectors_on_view.assert_called_once()
 
@@ -215,7 +216,6 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.extract_spectra_for_line_plot")
     def test_unit_option_selected(self, mock_extract_spectra, mock_set_integration_units, mock_reset_integration):
         self._mock_view.sum_spectra_selected.return_value = True
-        self._mock_view.is_hover_pick_mode_toggled.return_value = False
         self._presenter.on_sliders_unit_selected(1)
         mock_set_integration_units.assert_called_once_with(self._presenter._UNIT_OPTIONS[1])
         self._mock_view.show_plot_for_detectors.assert_called_once()
@@ -283,7 +283,6 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._presenter._renderer.set_pickable_scalars.side_effect = lambda m, visibility, label: m.point_data.update({label: visibility})
         self._mock_view.current_selected_lineplot_unit.return_value = "TOF"
         self._mock_view.sum_spectra_selected.return_value = True
-        self._mock_view.is_hover_pick_mode_toggled.return_value = False
         self._presenter.update_picked_detectors_on_view()
         np.testing.assert_allclose(
             self._presenter._pickable_mesh.point_data[self._presenter._visible_label], self._model._detector_is_picked
@@ -301,6 +300,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._presenter._on_add_item_clicked()
         np.testing.assert_array_equal(self._model.add_new_detector_key.call_args.args[0], mock_mask.tolist())
         self._mock_view.set_new_item_key.assert_called_once_with(CurrentTab.Grouping, "mock_key")
+        self._mock_view.set_overlaid_shape_controls_checked.assert_called_once_with(False)
 
     def test_on_add_selection_clicked_select_bank_tube_expands_mask(self):
         mask = np.array([False, True, False], dtype=bool)
@@ -415,23 +415,17 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.current_selected_projection.return_value = ProjectionType.THREE_D
         self._presenter.update_plotter()
         self.assertEqual(ProjectionType.THREE_D, self._model.projection_type)
-        self._mock_view.enable_or_disable_aspect_ratio_box.assert_called_once()
-        self._mock_view.enable_or_disable_aspect_ratio_box.reset_mock()
         self._mock_view.current_selected_projection.return_value = ProjectionType.SPHERICAL_X
         self._presenter.update_plotter()
         self.assertEqual(ProjectionType.SPHERICAL_X, self._model.projection_type)
-        self._mock_view.enable_or_disable_aspect_ratio_box.assert_called_once()
 
     def test_flip_beam_box_enabled_disabled(self):
         self._mock_view.current_selected_projection.return_value = ProjectionType.THREE_D
         self._presenter.update_plotter()
         self.assertEqual(ProjectionType.THREE_D, self._model.projection_type)
-        self._mock_view.enable_or_disable_flip_beam_box.assert_called_once()
-        self._mock_view.enable_or_disable_flip_beam_box.reset_mock()
         self._mock_view.current_selected_projection.return_value = ProjectionType.SPHERICAL_X
         self._presenter.update_plotter()
         self.assertEqual(ProjectionType.SPHERICAL_X, self._model.projection_type)
-        self._mock_view.enable_or_disable_flip_beam_box.assert_called_once()
 
     def test_on_flip_beam_calls_update_plotter(self):
         self._mock_view.is_flip_beam_checkbox_checked.return_value = True
