@@ -429,7 +429,9 @@ CSGObject &CSGObject::operator=(const CSGObject &A) {
     AABBzMin = A.AABBzMin;
     boolBounded = A.boolBounded;
     m_objNum = A.m_objNum;
-    m_handler = A.m_handler->clone();
+    // rebind the cloned handler to this object: it renders the object it points at, and A may be
+    // destroyed while this copy is still alive (e.g. cloneWithMaterial replacing a sample shape)
+    m_handler = A.m_handler->clone(this);
     bGeometryCaching = A.bGeometryCaching;
     vtkCacheReader = A.vtkCacheReader;
     vtkCacheWriter = A.vtkCacheWriter;
