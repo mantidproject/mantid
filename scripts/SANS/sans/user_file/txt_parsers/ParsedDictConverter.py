@@ -184,10 +184,10 @@ class ParsedDictConverter(IStateParser):
                 no_fit_selected = last_item.fit_type is FitType.NO_FIT
                 match last_item.data_type:
                     case DataType.SAMPLE:
-                        sample.fit_type = FitType.NO_FIT if no_fit_selected else cur_fit_sample
+                        sample.fit_type = FitType.NO_FIT if no_fit_selected else last_item.fit_type
                         can.fit_type = cur_fit_can if no_fit_selected else FitType.NO_FIT
                     case DataType.CAN:
-                        can.fit_type = FitType.NO_FIT if no_fit_selected else cur_fit_can
+                        can.fit_type = FitType.NO_FIT if no_fit_selected else last_item.fit_type
                         sample.fit_type = cur_fit_sample if no_fit_selected else FitType.NO_FIT
                     case _:
                         pass
