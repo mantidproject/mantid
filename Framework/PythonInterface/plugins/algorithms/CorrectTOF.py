@@ -87,8 +87,6 @@ class CorrectTOF(PythonAlgorithm):
         tof1 = float(run.getLogData("TOF1").value)
         wavelength = float(run.getLogData("wavelength").value)
         velocity = sp.constants.h / (sp.constants.m_n * wavelength * 1e-10)  # m/s
-        instrument = inputws.getInstrument()
-        sample = instrument.getSample()
         t_fit = np.array(epptable.column("PeakCentre")) - tof1
         outws = CloneWorkspace(inputws, OutputWorkspace=outws_name)
         # mask detectors with EPP=0
@@ -97,11 +95,12 @@ class CorrectTOF(PythonAlgorithm):
             self.log().warning("Detectors " + str(bad_data) + " have EPP=0 and will be masked.")
             MaskDetectors(outws, DetectorList=bad_data)
 
+        detector_info = inputws.detectorInfo()
         for idx in range(outws.getNumberHistograms()):
             # correct TOF only if fit of EPP was succesful
             if t_fit[idx] > 0:
-                det = instrument.getDetector(outws.getSpectrum(idx).getDetectorIDs()[0])
-                sdd = det.getDistance(sample)
+                det_id = outws.getSpectrum(idx).getDetectorIDs()[0]
+                sdd = detector_info.l2(detector_info.indexOf(det_id))
                 t2_el = sdd * 1.0e6 / velocity  # microseconds
                 newX = inputws.x(idx) + t2_el - t_fit[idx]
                 outws.setSharedX(idx, newX)

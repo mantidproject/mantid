@@ -722,7 +722,6 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         :param distance: Distance to move the instrument in the x-z plane
         """
         # Adjust detector height and distance with new offsets
-        instrument = ws.getInstrument()
         for bank in range(1, 4):
             # Set height offset (y) first on bank
             panel_name = "bank{}/panel".format(bank)
@@ -731,8 +730,10 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
 
             # Set distance offset to detector (x,z) on bank/panel
             if distance != 0.0:
-                component = instrument.getComponentByName(panel_name)
-                panel_pos = component.getPos()
+                component_info = ws.componentInfo()
+                bank_index = component_info.indexOfAny("bank{}".format(bank))
+                panel_index = next(int(c) for c in component_info.children(bank_index) if component_info.name(int(c)) == "panel")
+                panel_pos = component_info.position(panel_index)
                 # need to move detector in direction in x-z plane
                 panel_pos[1] = 0
                 panel_offset = panel_pos * (distance / panel_pos.norm())

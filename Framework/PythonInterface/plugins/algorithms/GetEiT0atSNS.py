@@ -67,9 +67,10 @@ class GetEiT0atSNS(mantid.api.PythonAlgorithm):
                 if sp2 == -1:
                     raise RuntimeError("Could not find spectrum for the second monitor")
                 # change frame for monitors. ARCS monitors would be in the first frame for Ei>10meV
-                so = i.getSource().getPos()
-                m1 = wm.getDetector(sp1).getPos()
-                m2 = wm.getDetector(sp2).getPos()
+                so = wm.componentInfo().sourcePosition()
+                det_info = wm.detectorInfo()
+                m1 = det_info.position(det_info.indexOf(wm.getSpectrum(sp1).getDetectorIDs()[0]))
+                m2 = det_info.position(det_info.indexOf(wm.getSpectrum(sp2).getDetectorIDs()[0]))
                 run_starttime = wm.getRun().startTime()
                 from mantid.kernel import DateAndTime
 

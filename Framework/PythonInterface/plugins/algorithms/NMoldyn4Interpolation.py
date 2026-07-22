@@ -95,14 +95,11 @@ class NMoldyn4Interpolation(PythonAlgorithm):
         else:
             return
 
-    def get_Q_for_workspace_index(self, workspace_name, workspace_index, e_fixed):
+    def get_Q_for_workspace_index(self, spectrum_info, workspace_index, e_fixed):
         # Calculates Q-values from detectors metadata
-        # Inputs are name of workspace, index of detector and fixed energy value
+        # Inputs are the workspace's SpectrumInfo, index of detector and fixed energy value
         # Outputs a float Q-value for given ws and detector
-        ws = mtd[workspace_name]
-
-        det = ws.getDetector(workspace_index)
-        two_theta = ws.detectorTwoTheta(det) / 2
+        two_theta = spectrum_info.twoTheta(workspace_index) / 2
         sin_theta = math.sin(two_theta)
         numer = 1 / sc.constants.angstrom * sc.constants.Planck
         denom = math.sqrt(2 * sc.constants.neutron_mass * sc.constants.eV * 1e-3)
@@ -119,6 +116,7 @@ class NMoldyn4Interpolation(PythonAlgorithm):
         # Outputs a tuple of (array of X-values, array of Q-values,
         # list of Y-values, list of X-bins)
         osiris = mtd[ws_name]
+        spectrum_info = osiris.spectrumInfo()
         Q_values = []
         for i in range(osiris.getNumberHistograms()):
             Q_values.append(self.get_Q_for_workspace_index(osiris.name(), i, e_fixed))

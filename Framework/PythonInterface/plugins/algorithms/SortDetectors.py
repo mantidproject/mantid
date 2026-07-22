@@ -47,8 +47,9 @@ class SortDetectors(PythonAlgorithm):
     def PyExec(self):
         """Main execution body"""
         workspace = self.getProperty("Workspace").value
-        samplePos = workspace.getInstrument().getSample().getPos()
-        moderatorPos = workspace.getInstrument().getSource().getPos()
+        spectrum_info = workspace.spectrumInfo()
+        samplePos = spectrum_info.samplePosition()
+        moderatorPos = spectrum_info.sourcePosition()
         incident = samplePos - moderatorPos
 
         upstream = []
@@ -58,7 +59,7 @@ class SortDetectors(PythonAlgorithm):
         downinds = []
         downdist = []
         for i in range(workspace.getNumberHistograms()):
-            detPos = workspace.getDetector(i).getPos()
+            detPos = spectrum_info.position(i)
             scattered = detPos - samplePos
             if abs(scattered.angle(incident)) > 0.999 * math.pi:
                 upstream.append((i, scattered.norm()))

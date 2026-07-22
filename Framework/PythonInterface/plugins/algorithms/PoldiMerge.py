@@ -106,15 +106,17 @@ class PoldiMerge(PythonAlgorithm):
         return np.floor((chopperSpeed + 250.0) / 500.0) * 500.0
 
     def instrumentsMatch(self, leftWorkspace, rightWorkspace):
+        leftDetectorInfo = leftWorkspace.detectorInfo()
+        rightDetectorInfo = rightWorkspace.detectorInfo()
+        if not leftDetectorInfo.position(leftDetectorInfo.indexOf(0)) == rightDetectorInfo.position(rightDetectorInfo.indexOf(0)):
+            raise RuntimeError("Detector positions are not equal")
+
         leftInstrument = leftWorkspace.getInstrument()
         rightInstrument = rightWorkspace.getInstrument()
 
         return self.instrumentParametersMatch(leftInstrument, rightInstrument)
 
     def instrumentParametersMatch(self, leftInstrument, rightInstrument):
-        if not leftInstrument.getDetector(0).getPos() == rightInstrument.getDetector(0).getPos():
-            raise RuntimeError("Detector positions are not equal")
-
         for parameterTuple in self.comparedInstrumentParameters:
             leftValue = self.getParameterValue(leftInstrument, parameterTuple)
             rightValue = self.getParameterValue(rightInstrument, parameterTuple)
