@@ -7,17 +7,17 @@ recipe:
   name: mantid
   version: ${{ version }}
 
-cache:
-  source:
-    path: ../../../
-  build:
-    script:
+outputs:
+  - staging:
+      name: mantid-build
+    build:
+      script:
       - if: win
         then: build.bat
       - if: not win
         then: build.sh
-  requirements:
-    build:
+    requirements:
+      build:
       - ${{ compiler("c") }}
       - ${{ compiler("cxx") }}
       - ninja ${{ ninja }}
@@ -25,14 +25,14 @@ cache:
       - git
       - if: linux
         then:
-          - ${{ stdlib("c") }}
-          - libgomp
-          - mpi
-          - mpich
+        - ${{ stdlib("c") }}
+        - libgomp
+        - mpi
+        - mpich
       - if: osx
         then:
-          - llvm-openmp ${{ llvm_openmp }}
-    host:
+        - llvm-openmp ${{ llvm_openmp }}
+      host:
       - eigen ${{ eigen }}
       - gsl ${{ gsl }}
       - gtest ${{ gtest }}
@@ -55,23 +55,23 @@ cache:
       - zlib
       - if: linux
         then:
-          - libglu ${{ libglu }}
-          - libgl-devel
-          - xorg-libxxf86vm
-          - xorg-libx11
-          - xorg-xorgproto
-          - libopenblas ${{ libopenblas }}
-          - libboost-mpi ${{ libboost }}
-          - mpi
-          - mpi4py
-          - mpich
+        - libglu ${{ libglu }}
+        - libgl-devel
+        - xorg-libxxf86vm
+        - xorg-libx11
+        - xorg-xorgproto
+        - libopenblas ${{ libopenblas }}
+        - libboost-mpi ${{ libboost }}
+        - mpi
+        - mpi4py
+        - mpich
       - if: win
         then:
-          - lib3mf
+        - lib3mf
       - if: osx
         then:
-          - libopenblas ${{ libopenblas }}
-    run:
+        - libopenblas ${{ libopenblas }}
+      run:
       - ${{ pin_compatible("gsl", upper_bound="x.x") }}
       - ${{ pin_compatible("hdf4", upper_bound="x.x") }}
       - h5py
@@ -94,15 +94,17 @@ cache:
       - ${{ pin_compatible('libboost-python', upper_bound='x.x') }}
       - if: linux
         then:
-          - libglu ${{ libglu }}
+        - libglu ${{ libglu }}
       - if: win
         then:
-          - lib3mf
+        - lib3mf
+    source:
+      path: ../../../
 
-outputs:
   - package:
       name: mantid
       version: ${{ version }}
+    inherit: mantid-build
 
     build:
       script: echo "Mantid Build Using Cache"
@@ -142,6 +144,7 @@ outputs:
   - package:
       name: mantidmpi
       version: ${{ version }}
+    inherit: mantid-build
 
     build:
       script: echo "Using Cache"
