@@ -2761,15 +2761,25 @@ void FitPropertyBrowser::findPeaks(const std::unique_ptr<FindPeakStrategyGeneric
   try {
     findPeakStrategy->execute();
     clear();
+    this->blockSignals(true);
+    PropertyHandler *lastAdded = nullptr;
     for (size_t i = 0; i < findPeakStrategy->peakNumber(); ++i) {
       if (findPeakStrategy->getPeakCentre(i) < startX() || findPeakStrategy->getPeakCentre(i) > endX()) {
         continue;
       }
-      if (!createAndAddFunction(inputWS, i, findPeakStrategy)) {
+      if (!createAndAddFunction(inputWS, i, findPeakStrategy, lastAdded)) {
         break;
       }
     }
+
+    this->blockSignals(false);
+    compositeFunction()->checkFunction();
+    if (lastAdded) {
+      setCurrentFunction(lastAdded);
+    }
+    emit functionChanged();
   } catch (...) {
+    this->blockSignals(false);
     QApplication::restoreOverrideCursor();
     throw;
   }
@@ -3301,7 +3311,8 @@ QString FitPropertyBrowser::addFunction(const QString &fnName) {
 }
 
 bool FitPropertyBrowser::createAndAddFunction(const Mantid::API::MatrixWorkspace_sptr inputWS, const size_t peakIndex,
-                                              const std::unique_ptr<FindPeakStrategyGeneric> &findPeakStrategy) {
+                                              const std::unique_ptr<FindPeakStrategyGeneric> &findPeakStrategy,
+                                              PropertyHandler *&lastAdded) {
   bool validFn = false;
   auto f = std::dynamic_pointer_cast<Mantid::API::IPeakFunction>(
       Mantid::API::FunctionFactory::Instance().createFunction(defaultPeakType()));
@@ -3311,7 +3322,7 @@ bool FitPropertyBrowser::createAndAddFunction(const Mantid::API::MatrixWorkspace
     f->setCentre(findPeakStrategy->getPeakCentre(peakIndex));
     f->setFwhm(findPeakStrategy->getPeakWidth(peakIndex));
     f->setHeight(findPeakStrategy->getPeakHeight(peakIndex));
-    addFunction(f->asString());
+    lastAdded = addFunction(f->asString());
   }
   return validFn;
 }

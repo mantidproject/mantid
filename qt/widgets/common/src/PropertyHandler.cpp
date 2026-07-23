@@ -348,7 +348,7 @@ void PropertyHandler::initWorkspace() {
  * @param fnName :: A function name or full initialization string
  *   in the form name=FunctionName,param1=Value,param2=Value,...
  */
-PropertyHandler *PropertyHandler::addFunction(const std::string &fnName) {
+PropertyHandler *PropertyHandler::addFunction(const std::string &fnName, bool notify) {
   if (!m_cf)
     return nullptr;
   m_browser->disableUndo();
@@ -415,7 +415,10 @@ PropertyHandler *PropertyHandler::addFunction(const std::string &fnName) {
 
   size_t nFunctions = m_cf->nFunctions() + 1;
   m_cf->addFunction(f);
-  m_browser->compositeFunction()->checkFunction();
+
+  if (notify) {
+    m_browser->compositeFunction()->checkFunction();
+  }
 
   if (m_cf->nFunctions() != nFunctions) { // this may happen
     m_browser->reset();
@@ -435,9 +438,12 @@ PropertyHandler *PropertyHandler::addFunction(const std::string &fnName) {
   } else {
     m_browser->setDefaultBackgroundType(f->name());
   }
-  m_browser->setFocus();
+
   auto return_ptr = static_cast<PropertyHandler *>(f->getHandler());
-  m_browser->setCurrentFunction(return_ptr);
+  if (notify) {
+    m_browser->setFocus();
+    m_browser->setCurrentFunction(return_ptr);
+  }
 
   return return_ptr;
 }

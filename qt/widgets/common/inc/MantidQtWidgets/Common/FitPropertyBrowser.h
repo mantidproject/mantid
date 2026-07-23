@@ -313,7 +313,8 @@ public:
   QStringList getPeakPrefixes() const;
   void findPeaks(const std::unique_ptr<FindPeakStrategyGeneric> findPeakStrategy);
   bool createAndAddFunction(const Mantid::API::MatrixWorkspace_sptr inputWS, const size_t peakIndex,
-                            const std::unique_ptr<FindPeakStrategyGeneric> &findPeakStrategy);
+                            const std::unique_ptr<FindPeakStrategyGeneric> &findPeakStrategy,
+                            PropertyHandler *&lastAdded);
 
   // Emits a signal for when the sequential fit has finished
 

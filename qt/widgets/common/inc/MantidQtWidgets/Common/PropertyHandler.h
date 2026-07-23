@@ -49,7 +49,7 @@ public:
   /// overrides virtual init() which is called from IFunction::setHandler(...)
   void init() override;
 
-  PropertyHandler *addFunction(const std::string &fnName);
+  PropertyHandler *addFunction(const std::string &fnName, bool notify = true);
   // Removes handled function from its parent function and
   // properties from the browser
   void removeFunction();
