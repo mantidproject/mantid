@@ -203,7 +203,7 @@ class SaveYDA(PythonAlgorithm):
         elif ax.length() == nHist:
             # if y axis contains bin centers
             for i in range(ax.length()):
-                xval = round(ax.getValue(), 14)
+                xval = round(ax.getValue(i), 14)
                 bin.append(xval)
         else:
             # get the bin centers not the bin edges
