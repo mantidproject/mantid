@@ -220,6 +220,11 @@ class EnggCalibrateFull(PythonAlgorithm):
 
         prog = Progress(self, start=0, end=1, nreports=len(indices))
 
+        # Build the spectrum/component metadata proxies once; they are valid for the whole loop and
+        # are shared with _get_calibrated_det_pos rather than reconstructed per detector.
+        spectrum_info = ws.spectrumInfo()
+        component_info = ws.componentInfo()
+
         for i in indices:
             try:
                 fitted_peaks_table = self._fit_peaks(ws, i, expected_peaks_d)
@@ -232,13 +237,13 @@ class EnggCalibrateFull(PythonAlgorithm):
                     "FindPeaks: %s" % (i, str(re))
                 )
 
-            new_pos, new_L2 = self._get_calibrated_det_pos(difc, i, ws)
-
             # get old (pre-calibration) detector coordinates
             # det.getPhi() has no *Info equivalent: it is the ambiguous, lab-frame atan2(y, x),
             # not the sample-centred, reference-frame-relative DetectorInfo/SpectrumInfo.azimuthal()
             det = ws.getDetector(i)
-            spectrum_info = ws.spectrumInfo()
+
+            new_pos, new_L2 = self._get_calibrated_det_pos(difc, i, spectrum_info, component_info, det)
+
             det_id = next(iter(ws.getSpectrum(i).getDetectorIDs()))
             old_pos = spectrum_info.position(i)
             if spectrum_info.isMonitor(i):
@@ -246,7 +251,6 @@ class EnggCalibrateFull(PythonAlgorithm):
                 # replicate the legacy IDetector.getDistance()/getTwoTheta(), which computed the raw
                 # geometric value unconditionally, since calibration indices are not guaranteed to
                 # exclude monitors.
-                component_info = ws.componentInfo()
                 sample_pos = component_info.samplePosition()
                 beam_dir = sample_pos - component_info.sourcePosition()
                 old_L2 = old_pos.distance(sample_pos)
@@ -386,18 +390,20 @@ class EnggCalibrateFull(PythonAlgorithm):
         if filename.strip():
             SaveAscii(InputWorkspace=tbl, Filename=filename, WriteXError=True, WriteSpectrumID=False, Separator="Tab")
 
-    def _get_calibrated_det_pos(self, new_difc, index, ws):
+    def _get_calibrated_det_pos(self, new_difc, index, spectrum_info, component_info, det):
         """
         Returns a detector position which corresponds to the newDifc value.
 
         The two_theta and phi of the detector are preserved, L2 is changed.
+
+        @param spectrum_info :: SpectrumInfo of the workspace, shared with the caller
+        @param component_info :: ComponentInfo of the workspace, shared with the caller
+        @param det :: detector for this index, shared with the caller
         """
-        spectrum_info = ws.spectrumInfo()
         if spectrum_info.isMonitor(index):
             # spectrum_info.twoTheta() throws for monitors (see SpectrumInfo.cpp); replicate the
             # legacy IDetector.getTwoTheta(), which computed the raw geometric angle
             # unconditionally, since calibration indices are not guaranteed to exclude monitors.
-            component_info = ws.componentInfo()
             sample_pos = component_info.samplePosition()
             beam_dir = sample_pos - component_info.sourcePosition()
             # This is how det_L2 would be calculated
@@ -409,7 +415,7 @@ class EnggCalibrateFull(PythonAlgorithm):
             det_two_theta = spectrum_info.twoTheta(index)
         # det.getPhi() has no *Info equivalent: see the comment at the call site in
         # _calculate_calib_positions_tbl for why the legacy, lab-frame angle must be kept here.
-        det_phi = ws.getDetector(index).getPhi()
+        det_phi = det.getPhi()
 
         new_L2 = (new_difc / (252.816 * 2 * math.sin(det_two_theta / 2.0))) - 50
 
