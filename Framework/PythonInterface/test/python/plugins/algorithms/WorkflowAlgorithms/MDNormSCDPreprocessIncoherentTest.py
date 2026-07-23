@@ -33,8 +33,7 @@ class MDNormSCDPreprocessIncoherentTest(unittest.TestCase):
         # Baseline the value the masking branch is expected to derive, and preserve the original
         # regression assertion that it matches the loaded vanadium workspace's instrument name.
         van = Load(Filename="CNCS_7860", OutputWorkspace="__van_probe")
-        component_info = van.componentInfo()
-        expected_instrument = component_info.name(component_info.root())
+        expected_instrument = van.getInstrumentName()
         self.assertEqual(expected_instrument, van.getInstrument().getName())
 
         captured = {}
