@@ -88,10 +88,10 @@ outputs:
 
     requirements:
       run:
-        - ${{ pin_compatible("gsl", upper_bound="x.x") }}
-        - ${{ pin_compatible("hdf4", upper_bound="x.x") }}
+        - gsl ${{ gsl }}
+        - hdf4 ${{ hdf4 }}
         - h5py
-        - ${{ pin_compatible("hdf5", upper_bound="x.x") }}
+        - hdf5 ${{ hdf5 }}
         - muparser ${{ muparser }}
         - occt ${{ occt }}
         - pycifrw
@@ -105,9 +105,9 @@ outputs:
         - orsopy ${{ orsopy }}
         - quickbayes ${{ quickbayes }}
         - zlib
-        - ${{ pin_compatible('numpy', lower_bound='2.0', upper_bound='x.x') }}
-        - ${{ pin_compatible('libboost', upper_bound='x.x') }}
-        - ${{ pin_compatible('libboost-python', upper_bound='x.x') }}
+        - numpy ${{ numpy }}
+        - libboost ${{ libboost }}
+        - libboost-python ${{ libboost }}
         - if: linux
           then:
             - libglu ${{ libglu }}
