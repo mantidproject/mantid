@@ -100,7 +100,7 @@ class SaveP2D(PythonAlgorithm):
             print("Exporting: " + OutFile + "\n")
             # Create File header with additional information
             of.write("#Title: " + Data.getTitle() + "\n")
-            of.write("#Inst: " + Data.getInstrument().getName() + ".prm\n")
+            of.write("#Inst: " + Data.getInstrumentName() + ".prm\n")
             binning = form.format(Data.getDimension(0).getBinWidth()) + " " + form.format(Data.getDimension(1).getBinWidth()) + "\n"
             of.write("#Binning: ddperp" + binning)
             of.write("#Bank: 1\n")

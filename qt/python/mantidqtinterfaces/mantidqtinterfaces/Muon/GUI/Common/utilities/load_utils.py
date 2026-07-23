@@ -38,7 +38,7 @@ class LoadUtils(object):
         self.options = mantid.AnalysisDataService.getObjectNames()
         self.options = [item.replace(" ", "") for item in self.options]
         self.N_points = len(tmpWS.readX(0))
-        self.instrument = tmpWS.getInstrument().getName()
+        self.instrument = tmpWS.getInstrumentName()
 
         self.runName = self.instrument + str(tmpWS.getRunNumber()).zfill(8)
 
@@ -62,7 +62,7 @@ class LoadUtils(object):
     def hasDataChanged(self):
         exists, ws = self.MuonAnalysisExists()
         if exists:
-            current = ws.getInstrument().getName() + str(ws.getRunNumber()).zfill(8)
+            current = ws.getInstrumentName() + str(ws.getRunNumber()).zfill(8)
             if self.runName != current:
                 mantid.logger.error("Active workspace has changed. Reloading the data")
                 self.setUp(ws)

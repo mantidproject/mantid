@@ -758,6 +758,23 @@ public:
     TS_ASSERT(fp.getFunction() == "Bk2BkExpConvPV" || fp.getFunction() == "IkedaCarpenterPV");
   }
 
+  void test_getInstrumentName_NoInstrument() {
+    ExperimentInfo expInfo;
+    auto inst = expInfo.getInstrument();
+    TS_ASSERT(inst->isEmptyInstrument());
+    TS_ASSERT(inst->getName().empty())
+    TS_ASSERT(expInfo.getInstrumentName().empty());
+  }
+
+  void test_getInstrumentName_WithInstrument() {
+    std::string instrName = "MyTestInst";
+    ExperimentInfo expInfo;
+    std::shared_ptr<Instrument> inst1 = std::make_shared<Instrument>();
+    inst1->setName(instrName);
+    expInfo.setInstrument(inst1);
+    TS_ASSERT_EQUALS(expInfo.getInstrumentName(), instrName);
+  }
+
 private:
   void addInstrumentWithParameter(ExperimentInfo &expt, const std::string &name, const std::string &value) {
     Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(1);

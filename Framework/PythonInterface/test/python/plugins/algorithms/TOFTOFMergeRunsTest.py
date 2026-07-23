@@ -64,7 +64,7 @@ class TOFTOFMergeRunsTest(unittest.TestCase):
         self.assertEqual(wsoutput.getNumberHistograms(), self._input_ws_base.getNumberHistograms())
         self.assertEqual(wsoutput.blocksize(), self._input_ws_base.blocksize())
         # check instrument
-        self.assertEqual(wsoutput.getInstrument().getName(), "TOFTOF")
+        self.assertEqual(wsoutput.getInstrumentName(), "TOFTOF")
 
         AnalysisDataService.remove("output_ws")
 

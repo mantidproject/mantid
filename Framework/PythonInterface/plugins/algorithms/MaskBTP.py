@@ -157,7 +157,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
             IDF = mantid.api.ExperimentInfo.getInstrumentFilename(self.instname)
             ws = mantid.simpleapi.LoadEmptyInstrument(Filename=IDF, OutputWorkspace=self.instname + "MaskBTP")
             deleteWS = True  # if there is going to be an issue with the instrument provided
-        self.instname = ws.getInstrument().getName()  # update the instrument name
+        self.instname = ws.getInstrumentName()  # update the instrument name
 
         # only check against valid instrument if components isn't set
         checkInstrument = self.getProperty("Components").isDefault

@@ -71,7 +71,7 @@ class SingleCrystalPeaksAbsorptionTest(systemtesting.MantidSystemTest):
             self.assertAlmostEqual(peak_lean.getSigmaIntensity(), peak_corr.getSigmaIntensity(), 3)
             self.assertAlmostEqual(peak_lean.getAbsorptionWeightedPathLength(), peak_corr.getAbsorptionWeightedPathLength(), 3)
 
-        self.assertEqual(peaks_lean.getInstrument().getName(), "TOPAZ")
+        self.assertEqual(peaks_lean.getInstrumentName(), "TOPAZ")
 
         # create lean peaks workspace without instrument
         AddAbsorptionWeightedPathLengths(InputWorkspace=peaks_lean_no_inst, ApplyCorrection=True)
@@ -81,4 +81,4 @@ class SingleCrystalPeaksAbsorptionTest(systemtesting.MantidSystemTest):
             self.assertAlmostEqual(peak_lean.getSigmaIntensity(), peak_lean_no_inst.getSigmaIntensity(), 3)
             self.assertAlmostEqual(peak_lean.getAbsorptionWeightedPathLength(), peak_lean_no_inst.getAbsorptionWeightedPathLength(), 3)
 
-        self.assertEqual(peaks_lean_no_inst.getInstrument().getName(), "")
+        self.assertEqual(peaks_lean_no_inst.getInstrumentName(), "")

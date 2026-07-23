@@ -784,7 +784,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         """
         self._indirect_elastic = True
         self._q_values = workspace.getAxis(1).extractValues()
-        instrument_name = workspace.getInstrument().getName()
+        instrument_name = workspace.getInstrumentName()
         self._isis_instrument = instrument_name == "IRIS" or instrument_name == "OSIRIS"
 
         # ---------- Load Elastic Instrument Definition File ----------

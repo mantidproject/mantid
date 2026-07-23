@@ -101,7 +101,7 @@ class SANSILLReduction(DataProcessorAlgorithm):
 
     @staticmethod
     def _make_solid_angle_name(ws):
-        return mtd[ws].getInstrument().getName() + "_" + str(round(mtd[ws].getRun().getLogData("L2").value)) + "m_SolidAngle"
+        return mtd[ws].getInstrumentName() + "_" + str(round(mtd[ws].getRun().getLogData("L2").value)) + "m_SolidAngle"
 
     @staticmethod
     def _check_distances_match(ws1, ws2):
@@ -370,7 +370,7 @@ class SANSILLReduction(DataProcessorAlgorithm):
         Provides vertical grouping pattern and crops to the main detector panel where counts from the beam are measured.
         :param ws: Empty beam workspace.
         """
-        inst_name = mtd[ws].getInstrument().getName()
+        inst_name = mtd[ws].getInstrumentName()
         min_id = 0
         if "D11" in inst_name:
             if "lr" in inst_name:
@@ -872,7 +872,7 @@ class SANSILLReduction(DataProcessorAlgorithm):
         if mtd[ws].blocksize() > 1:
             if mtd[ws].getAxis(0).getUnit().unitID() == "Wavelength":
                 self._mode = "TOF"
-            elif mtd[ws].getInstrument().getName() != "D16":
+            elif mtd[ws].getInstrumentName() != "D16":
                 self._mode = "Kinetic"
 
     def PyExec(self):
@@ -911,7 +911,7 @@ class SANSILLReduction(DataProcessorAlgorithm):
             else:
                 raise RuntimeError("Only the sample can be in kinetic mode, the calibration measurements cannot be.")
 
-        self._instrument = mtd[ws].getInstrument().getName()
+        self._instrument = mtd[ws].getInstrumentName()
         self._normalise(ws)
         if process in ["Beam", "Transmission", "Container", "Sample"]:
             absorber_ws = self.getProperty("AbsorberInputWorkspace").value

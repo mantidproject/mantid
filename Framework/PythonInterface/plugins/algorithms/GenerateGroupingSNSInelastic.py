@@ -85,10 +85,10 @@ class GenerateGroupingSNSInelastic(mantid.api.PythonAlgorithm):
             else:
                 __w = mantid.simpleapi.LoadEmptyInstrument(Filename=IDF)
                 # checks the instrument from the loaded IDF belongs to the DGS/SNS suite.
-                if __w.getInstrument().getName() not in ["ARCS", "CNCS", "HYSPEC", "SEQUOIA"]:
+                if __w.getInstrumentName() not in ["ARCS", "CNCS", "HYSPEC", "SEQUOIA"]:
                     raise ValueError("Select the instrument definition file from only one of ARCS, SEQUOIA, CNCS, HYSPEC")
                 # set instrument to instrument name from the loaded IDF instead of drop down menu
-                instrument = __w.getInstrument().getName()
+                instrument = __w.getInstrumentName()
 
         i = 0
         spectrumInfo = __w.spectrumInfo()

@@ -97,7 +97,7 @@ class LoadPreNexusLive(DataProcessorAlgorithm):
 
         # let people know what was just loaded
         wksp = mtd[wkspName]
-        instrument = str(wksp.getInstrument().getName())
+        instrument = str(wksp.getInstrumentName())
         runNumber = int(wksp.run()["run_number"].value)
         startTime = str(wksp.run().startTime())
         self.log().information("Loaded %s live run %d - starttime=%s" % (instrument, runNumber, startTime))
