@@ -151,6 +151,9 @@ bool LevenbergMarquardtMDMinimizer::iterate(size_t /*iteration*/) {
   } catch (std::runtime_error &error) {
     m_errorString = error.what();
     return false;
+  } catch (std::invalid_argument &error) {
+    m_errorString = error.what();
+    return false;
   }
 
   if (verbose) {

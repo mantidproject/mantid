@@ -706,12 +706,14 @@ FitPropertyBrowser::~FitPropertyBrowser() {
 
 /// Get handler to the root composite function
 PropertyHandler *FitPropertyBrowser::getHandler() const {
-  return static_cast<PropertyHandler *>(m_compositeFunction->getHandler());
+  return dynamic_cast<PropertyHandler *>(m_compositeFunction->getHandler());
 }
 
-PropertyHandler *FitPropertyBrowser::addFunction(const std::string &fnName) {
+PropertyHandler *FitPropertyBrowser::addFunction(const std::string &fnName, bool notify /*= false*/) {
   PropertyHandler *h = getHandler()->addFunction(fnName);
-  emit functionChanged();
+  if (notify) {
+    emit functionChanged();
+  }
   return h;
 }
 
@@ -784,7 +786,7 @@ void FitPropertyBrowser::createCompositeFunction(const Mantid::API::IFunction_sp
 
   auto h = std::make_unique<PropertyHandler>(m_compositeFunction, Mantid::API::CompositeFunction_sptr(), this);
   m_compositeFunction->setHandler(std::move(h));
-  setCurrentFunction(static_cast<PropertyHandler *>(m_compositeFunction->getHandler()));
+  setCurrentFunction(dynamic_cast<PropertyHandler *>(m_compositeFunction->getHandler()));
 
   if (m_auto_back) {
     addAutoBackground();
@@ -2763,6 +2765,7 @@ void FitPropertyBrowser::findPeaks(const std::unique_ptr<FindPeakStrategyGeneric
   try {
     findPeakStrategy->execute();
     clear();
+    m_browser->setUpdatesEnabled(false);
     for (size_t i = 0; i < findPeakStrategy->peakNumber(); ++i) {
       if (findPeakStrategy->getPeakCentre(i) < startX() || findPeakStrategy->getPeakCentre(i) > endX()) {
         continue;
@@ -2771,7 +2774,10 @@ void FitPropertyBrowser::findPeaks(const std::unique_ptr<FindPeakStrategyGeneric
         break;
       }
     }
+    m_browser->setUpdatesEnabled(true);
+    emit functionChanged();
   } catch (...) {
+    m_browser->setUpdatesEnabled(true);
     QApplication::restoreOverrideCursor();
     throw;
   }
