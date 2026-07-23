@@ -14,7 +14,7 @@
 #include <QMessageBox>
 #include <QtXml>
 #include <boost/algorithm/string.hpp>
-//this is a test line
+// this is a test line
 namespace {
 Mantid::Kernel::Logger g_log("InterfaceUtils");
 
