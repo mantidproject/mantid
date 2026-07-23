@@ -186,7 +186,7 @@ class SaveYDA(PythonAlgorithm):
         bin = []
 
         # if y axis is SpectrumAxis
-        if ax.isSpectra:
+        if ax.isSpectra():
             # computed from the (possibly grouped) detector position rather than via
             # spectrum_info.twoTheta(i): the latter averages each detector's individual
             # two-theta, while this averages positions first then takes one angle,

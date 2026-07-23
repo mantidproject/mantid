@@ -77,6 +77,7 @@ class SaveNexusPDTest(unittest.TestCase):
             return
 
         wkspname = "SaveNexusPDTest_offsetsample"
+        filename = self.saveFilePath(wkspname)
         self._createMultiSpectra(wkspname)
 
         # move the sample away from the origin so a wrong L1 formula would show up numerically
@@ -95,6 +96,14 @@ class SaveNexusPDTest(unittest.TestCase):
         # the pre-fix formula computed this (wrong) value instead
         buggy_l1 = np.linalg.norm(np.array(list(component_info.sourcePosition())))
         self.assertGreater(abs(expected_l1 - buggy_l1), 1e-6, "Sample offset displacement not considered in calculation of L1")
+        try:
+            SaveNexusPD(InputWorkspace=wkspname, OutputFilename=filename)
+            with h5py.File(filename, "r") as handle:
+                nxentry = handle[sorted(handle.keys())[0]]
+                saved_l1 = abs(nxentry["instrument"]["moderator"]["distance"][0])
+            self.assertAlmostEqual(saved_l1, expected_l1, places=5)
+        finally:
+            self.cleanup(filename, wkspname)
 
     def testSaveWithMonitors(self):
         """
