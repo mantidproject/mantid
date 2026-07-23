@@ -1,0 +1,1 @@
+- Parallelisation added to :ref:`algm-ConvertToMD` and improved in :ref:`algm-MDNormDirectSC`.
