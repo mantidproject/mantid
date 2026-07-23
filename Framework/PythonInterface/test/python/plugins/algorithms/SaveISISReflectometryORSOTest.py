@@ -370,21 +370,6 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
             [f"{self._get_affiliation_entry()}\n{self._REDUCTION_CALL_HEADING} CreateSampleWorkspace(OutputWorkspace='ws'"]
         )
 
-    def test_file_excludes_reduction_call_for_ws_groups(self):
-        ws = self._create_sample_workspace_group(["ws_1", "ws_2"], instrument_name="INTER")
-
-        self._run_save_alg(ws)
-
-        self._check_file_header(excluded_header_values=[f"{self._get_affiliation_entry()}\n{self._REDUCTION_CALL_HEADING}"])
-
-    def test_file_excludes_reduction_call_for_ws_group_member(self):
-        ws_name = "ws_1"
-        self._create_sample_workspace_group([ws_name, "ws_2"], instrument_name="INTER")
-
-        self._run_save_alg(ws_name)
-
-        self._check_file_header(excluded_header_values=[f"{self._get_affiliation_entry()}\n{self._REDUCTION_CALL_HEADING}"])
-
     @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
     def test_flood_correction_ws_included_in_additional_files(self, mock_alg_histories):
         test_cases = [
@@ -619,14 +604,19 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         alg_kwargs = {"MetadataSource": "Manual"}
         self._run_save_alg(ws, **alg_kwargs)
 
-        blank_entries = [f"{self._REDUCTION_CALL_HEADING} ''", f"{self._REDUCTION_TIMESTAMP_HEADING} ''", f"{self._DATA_FILES_HEADING} []"]
+        blank_entries = [f"{self._REDUCTION_TIMESTAMP_HEADING} ''", f"{self._DATA_FILES_HEADING} []"]
+        absent_entries = [f"{self._REDUCTION_CALL_HEADING} ''"]
 
-        self._check_file_header(included_header_values=blank_entries)
+        self._check_file_header(included_header_values=blank_entries, excluded_header_values=absent_entries)
 
     def test_manual_source_allows_manual_setting_of_metadata(self):
         ws = self._create_sample_workspace()
         timestamp = datetime.combine(date(2024, 2, 13), time(12, 14, 36)).replace(tzinfo=timezone.utc).astimezone(tz=None)
-        alg_kwargs = {"MetadataSource": "Manual", "ReductionTimestamp": str(timestamp.isoformat()), "ReductionScript": "example():"}
+        alg_kwargs = {
+            "MetadataSource": "Manual",
+            "ReductionTimestamp": str(timestamp.isoformat()),
+            "DatasetSpecificMetadata": f'{{ "{ws.name()}" : {{ "reduction-call" : "example():" }} }}',
+        }
         self._run_save_alg(ws, **alg_kwargs)
 
         expected_manual_entries = [
@@ -640,7 +630,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
     def test_hybrid_source_requests_missing_metadata(self):
         ws = self._create_sample_workspace()
         alg_kwargs = {"MetadataSource": "HistoryWherePossible"}
-        with self.assertRaisesRegex(RuntimeError, "AngleFileList: Metadata could not be found"):
+        with self.assertRaisesRegex(RuntimeError, "CalibrationFile: Metadata could not be found"):
             self._run_save_alg(ws, **alg_kwargs)
 
     def _create_sample_workspace(self, rb_num_log_name=_LOG_RB_NUMBER, instrument_name="", ws_name="ws"):

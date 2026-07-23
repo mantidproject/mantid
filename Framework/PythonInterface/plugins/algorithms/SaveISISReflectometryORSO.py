@@ -111,7 +111,7 @@ class ReflectometryDatasetBase:
         self._q_conversion_method: str = ""
         self._spin_state: str = ""
         self._reduction_script: Optional[str] = None
-        self._angle_files: List[Tuple[str, str]] = None
+        self._angle_files: List[Tuple[str, str]] = []
         self._transmission_files: Tuple[List[str], List[str]] = None
         self._flood_entry: Optional[Tuple[str, str]] = None
         self._calibration_entry: Optional[str] = None
