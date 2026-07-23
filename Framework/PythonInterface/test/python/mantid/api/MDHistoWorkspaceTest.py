@@ -178,6 +178,24 @@ class MDHistoWorkspaceTest(unittest.TestCase):
         new_errors = testWS.getErrorSquaredArray()
         self._verify_numpy_data(new_errors, errors)
 
+    def test_set_signal_array_clears_original_workspaces(self):
+        # "A" is produced by BinMD from "mdw", so it is linked to an original workspace
+        A = mtd["A"]
+        self.assertGreater(A.numOriginalWorkspaces(), 0)
+        signal = numpy.ones(A.getSignalArray().shape, dtype=numpy.float64)
+        A.setSignalArray(signal)
+        self._verify_numpy_data(A.getSignalArray(), signal)
+        self.assertEqual(A.numOriginalWorkspaces(), 0)
+
+    def test_set_error_array_clears_original_workspaces(self):
+        # "A" is produced by BinMD from "mdw", so it is linked to an original workspace
+        A = mtd["A"]
+        self.assertGreater(A.numOriginalWorkspaces(), 0)
+        errors = numpy.ones(A.getErrorSquaredArray().shape, dtype=numpy.float64)
+        A.setErrorSquaredArray(errors)
+        self._verify_numpy_data(A.getErrorSquaredArray(), errors)
+        self.assertEqual(A.numOriginalWorkspaces(), 0)
+
     def test_set_num_events_array_throws_if_input_array_is_of_incorrect_size(self):
         run_algorithm(
             "CreateMDHistoWorkspace",

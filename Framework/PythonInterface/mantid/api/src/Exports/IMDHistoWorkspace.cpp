@@ -146,7 +146,8 @@ void throwIfSizeIncorrect(const IMDHistoWorkspace &self, const NDArray &signal, 
  * sets each value
  * It does not allow the workspace dimensions to be resized, it will throw if
  * the sizes are not
- * correct
+ * correct. Any link to the original workspace(s) is cleared so downstream
+ * rebinning/slicing cannot bypass the manually-set values.
  */
 void setSignalArray(IMDHistoWorkspace &self, const NDArray &signalValues) {
   throwIfSizeIncorrect(self, signalValues, "setSignalArray");
@@ -156,6 +157,7 @@ void setSignalArray(IMDHistoWorkspace &self, const NDArray &signalValues) {
   for (auto i = 0; i < length; ++i) {
     self.setSignalAt(i, extract<double>(flattened[i])());
   }
+  self.clearOriginalWorkspaces();
 }
 
 /**
@@ -163,7 +165,8 @@ void setSignalArray(IMDHistoWorkspace &self, const NDArray &signalValues) {
  * the array & sets each value
  * It does not allow the workspace dimensions to be resized, it will throw if
  * the sizes are not
- * correct
+ * correct. Any link to the original workspace(s) is cleared so downstream
+ * rebinning/slicing cannot bypass the manually-set values.
  */
 void setErrorSquaredArray(IMDHistoWorkspace &self, const NDArray &errorSquared) {
   throwIfSizeIncorrect(self, errorSquared, "setErrorSquaredArray");
@@ -173,6 +176,7 @@ void setErrorSquaredArray(IMDHistoWorkspace &self, const NDArray &errorSquared) 
   for (auto i = 0; i < length; ++i) {
     self.setErrorSquaredAt(i, extract<double>(flattened[i])());
   }
+  self.clearOriginalWorkspaces();
 }
 
 /**
@@ -241,11 +245,13 @@ void export_IMDHistoWorkspace() {
 
       .def("setSignalArray", &setSignalArray, (arg("self"), arg("signalValues")),
            "Sets the signal from a numpy array. The sizes must match the "
-           "current workspace sizes. A ValueError is thrown if not")
+           "current workspace sizes. A ValueError is thrown if not. Any link "
+           "to the original MDEventWorkspace(s) is cleared.")
 
       .def("setErrorSquaredArray", &setErrorSquaredArray, (arg("self"), arg("errorSquared")),
            "Sets the square of the errors from a numpy array. The sizes must "
-           "match the current workspace sizes. A ValueError is thrown if not")
+           "match the current workspace sizes. A ValueError is thrown if not. Any "
+           "link to the original MDEventWorkspace(s) is cleared.")
 
       .def("setNumEventsArray", &setNumEventsArray, (arg("self"), arg("numEvents")),
            "Sets the number of events from a numpy array. The sizes must match "
