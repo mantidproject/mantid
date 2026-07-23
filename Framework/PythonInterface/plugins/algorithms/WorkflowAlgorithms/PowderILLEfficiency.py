@@ -464,8 +464,15 @@ class PowderILLEfficiency(PythonAlgorithm):
         component_info = mtd[raw_ws].componentInfo()
         det_index = component_info.indexOfAny("detectors")
         tube_index = next(
-            int(c) for c in component_info.componentsInSubtree(det_index) if int(c) != det_index and component_info.name(int(c)) == "tube_1"
+            (
+                int(c)
+                for c in component_info.componentsInSubtree(det_index)
+                if int(c) != det_index and component_info.name(int(c)) == "tube_1"
+            ),
+            None,
         )
+        if tube_index is None:
+            raise RuntimeError("Could not find component 'tube_1' in the detectors subtree.")
         self._n_tubes = len(component_info.children(det_index))
         self._n_pixels_per_tube = len(component_info.children(tube_index))
         # self._n_scans_per_file = mtd[raw_ws].getRun().getLogData('ScanSteps').value
