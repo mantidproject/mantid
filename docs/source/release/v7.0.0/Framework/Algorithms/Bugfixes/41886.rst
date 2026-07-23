@@ -1,0 +1,1 @@
+- Algorithm `SaveYDA` now correctly distinguishes between spectra and bin center axes when saving data.
