@@ -214,13 +214,13 @@ public:
   }
 
   void test_handleAddNumericData_does_nothing_if_the_dialog_is_not_an_add_workspace_dialog() {
-    auto dialog = std::make_unique<MockDialog>();
+    auto dialog = new MockDialog();
 
     EXPECT_CALL(*m_model, addWorkspace(An<const std::string &>(), _)).Times(Exactly(0));
     EXPECT_CALL(*m_tab, handleNumericDataAdded()).Times(Exactly(0));
     EXPECT_CALL(*m_tab, handleDataChanged()).Times(Exactly(0));
 
-    m_presenter->handleAddNumericData(dialog.get());
+    m_presenter->handleAddNumericData(dialog);
   }
 
   void test_setNumericQAxis_does_nothing_when_given_an_empty_workspace_name() {
