@@ -127,7 +127,7 @@ class SaveISISReflectometryORSOTest(systemtesting.MantidSystemTest):
         # Some lines in the file will change each time the test runs and are checked in the unit tests instead.
         # Additionally, the first line in the file may change when the orsopy version changes and is not necessary to
         # check.
-        lines_to_skip = ["#   software: {name: Mantid", self._TIMESTAMP_METADATA, "# # ORSO reflectivity data file"]
+        lines_to_skip = ["#   software: {name: Mantid", self._TIMESTAMP_METADATA, "# # ORSO reflectivity data file", "#     Params="]
         for skip_line in lines_to_skip:
             if ref_line.startswith(skip_line) and saved_line.startswith(skip_line):
                 return False
@@ -162,7 +162,7 @@ class SaveISISReflectometryORSOPeriodDataMultiDatasetFileTest(SaveISISReflectome
 
     def runTest(self):
         self.run_stitched_reduction_and_save_file([("31832", 0.25), ("31833", 0.5)], instrument_name="POLREF")
-        self.check_output_against_ref_file(self._REF_FILE, ref_file_excludes_reduction_call=True)
+        self.check_output_against_ref_file(self._REF_FILE, ref_file_excludes_reduction_call=False)
 
 
 class SaveISISReflectometryORSOStitchedMultiDatasetFileTest(SaveISISReflectometryORSOTest):
