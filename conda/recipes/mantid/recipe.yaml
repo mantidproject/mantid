@@ -52,6 +52,7 @@ outputs:
       - setuptools
       - tbb-devel ${{ tbb }}
       - pip ${{ pip }}
+      - versioningit ${{ versioningit }}
       - zlib
       - if: linux
         then:
@@ -71,33 +72,6 @@ outputs:
       - if: osx
         then:
         - libopenblas ${{ libopenblas }}
-      run:
-      - ${{ pin_compatible("gsl", upper_bound="x.x") }}
-      - ${{ pin_compatible("hdf4", upper_bound="x.x") }}
-      - h5py
-      - ${{ pin_compatible("hdf5", upper_bound="x.x") }}
-      - muparser ${{ muparser }}
-      - occt ${{ occt }}
-      - pycifrw
-      - pydantic ${{ pydantic }}
-      - python
-      - pyyaml ${{ pyyaml }}
-      - scipy ${{ scipy }}
-      - euphonic ${{ euphonic }}
-      - toml ${{ toml }}
-      - joblib
-      - orsopy ${{ orsopy }}
-      - quickbayes ${{ quickbayes }}
-      - zlib
-      - ${{ pin_compatible('numpy', lower_bound='2.0', upper_bound='x.x') }}
-      - ${{ pin_compatible('libboost', upper_bound='x.x') }}
-      - ${{ pin_compatible('libboost-python', upper_bound='x.x') }}
-      - if: linux
-        then:
-        - libglu ${{ libglu }}
-      - if: win
-        then:
-        - lib3mf
     source:
       path: ../../../
 
@@ -113,6 +87,34 @@ outputs:
           - plugins/libMantidMPIAlgorithms.so
 
     requirements:
+      run:
+        - ${{ pin_compatible("gsl", upper_bound="x.x") }}
+        - ${{ pin_compatible("hdf4", upper_bound="x.x") }}
+        - h5py
+        - ${{ pin_compatible("hdf5", upper_bound="x.x") }}
+        - muparser ${{ muparser }}
+        - occt ${{ occt }}
+        - pycifrw
+        - pydantic ${{ pydantic }}
+        - python
+        - pyyaml ${{ pyyaml }}
+        - scipy ${{ scipy }}
+        - euphonic ${{ euphonic }}
+        - toml ${{ toml }}
+        - joblib
+        - orsopy ${{ orsopy }}
+        - quickbayes ${{ quickbayes }}
+        - zlib
+        - ${{ pin_compatible('numpy', lower_bound='2.0', upper_bound='x.x') }}
+        - ${{ pin_compatible('libboost', upper_bound='x.x') }}
+        - ${{ pin_compatible('libboost-python', upper_bound='x.x') }}
+        - if: linux
+          then:
+            - libglu ${{ libglu }}
+        - if: win
+          then:
+            - lib3mf
+
       ignore_run_exports:
         from_package:
           - if: linux
