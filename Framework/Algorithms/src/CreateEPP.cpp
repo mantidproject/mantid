@@ -140,7 +140,7 @@ void CreateEPP::exec() {
 //----------------------------------------------------------------------------------------------
 /** Validate the algorithm's properties.
  *
- * @return A map of porperty names and their issues.
+ * @return A map of property names and their issues.
  */
 std::map<std::string, std::string> CreateEPP::validateInputs(void) {
   std::map<std::string, std::string> issues;

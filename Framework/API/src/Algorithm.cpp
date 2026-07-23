@@ -2048,7 +2048,7 @@ namespace Kernel {
  */
 template <>
 MANTID_API_DLL API::IAlgorithm_sptr IPropertyManager::getValue<API::IAlgorithm_sptr>(const std::string &name) const {
-  auto *prop = dynamic_cast<PropertyWithValue<API::IAlgorithm_sptr> *>(getPointerToProperty(name));
+  const auto *prop = dynamic_cast<PropertyWithValue<API::IAlgorithm_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return *prop;
   } else {
