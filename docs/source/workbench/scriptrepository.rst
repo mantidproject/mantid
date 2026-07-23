@@ -12,6 +12,8 @@ The script repository is a tool for downloading Mantid Scripts and Reduction Alg
 .. note::
    Scripts can only be downloaded from the repository. Uploading scripts to, and
    deleting scripts from, the central repository is not available from Mantid.
+   To add, modify or remove scripts, submit a pull request on the
+   `script repository on GitHub <https://github.com/mantidproject/scriptrepository>`_.
 
 Installation
 ------------
@@ -46,7 +48,7 @@ The columns shown are:
     local machine and the contents match those in the repository.
 
   No icon is shown for items that exist only on your local machine, or that
-  have been modified locally, as there is nothing to download for them.
+  have been modified locally.
 
 - **AutoUpdate**: A checkbox appears next to those items that have been downloaded.
   Checking this box causes the file to be updated with contents from the
