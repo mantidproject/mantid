@@ -41,7 +41,7 @@ FitPlotView::FitPlotView(QWidget *parent)
           &FitPlotView::notifyDelayedPlotSpectrumChanged);
   connect(m_plotForm->cbPlotSpectrum, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
           [=](int index) { this->notifyPlotSpectrumChanged(m_plotForm->cbPlotSpectrum->itemText(index)); });
-  connect(m_plotForm->ckPlotGuess, &QCheckBox::stateChanged, this, &FitPlotView::notifyPlotGuessChanged);
+  connect(m_plotForm->ckPlotGuess, &QCheckBox::checkStateChanged, this, &FitPlotView::notifyPlotGuessChanged);
   connect(m_plotForm->pbPlotPreview, &QPushButton::clicked, this, &FitPlotView::notifyPlotCurrentPreview);
   connect(m_plotForm->pbFitSingle, &QPushButton::clicked, this, &FitPlotView::notifyFitSelectedSpectrum);
 

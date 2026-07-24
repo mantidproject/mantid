@@ -316,7 +316,7 @@ void InstrumentConfig::updateReflectionsList(int index) {
   m_uiForm.cbReflection->clear();
 
   QVariant currentData = m_uiForm.cbAnalyser->itemData(index);
-  bool valid = currentData != QVariant::Invalid;
+  bool valid = currentData.isValid();
   m_uiForm.cbReflection->setEnabled(valid);
 
   if (valid) {

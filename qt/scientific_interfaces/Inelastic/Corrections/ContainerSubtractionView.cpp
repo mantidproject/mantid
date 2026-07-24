@@ -117,8 +117,8 @@ bool ContainerSubtractionView::requestRebinToSample() {
   const char *text = "Binning on sample and container does not match."
                      "Would you like to rebin the container to match the sample?";
 
-  const int result = QMessageBox::question(this, tr("Rebin container?"), tr(text), QMessageBox::Yes, QMessageBox::No,
-                                           QMessageBox::NoButton);
+  const int result = QMessageBox::question(this, tr("Rebin container?"), tr(text), QMessageBox::Yes | QMessageBox::No,
+                                           QMessageBox::Yes);
 
   return result == QMessageBox::Yes;
 }

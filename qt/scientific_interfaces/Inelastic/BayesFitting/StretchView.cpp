@@ -273,8 +273,8 @@ bool StretchView::displaySaveDirectoryMessage() {
                             " If run, the algorithm will default to saving files "
                             "to the current working directory."
                             " Would you still like to run the algorithm?";
-  auto const response = QMessageBox::question(nullptr, tr("Save Directory"), tr(textMessage), QMessageBox::Yes,
-                                              QMessageBox::No, QMessageBox::NoButton);
+  auto const response = QMessageBox::question(nullptr, tr("Save Directory"), tr(textMessage),
+                                              QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
   return response == QMessageBox::No;
 }
 

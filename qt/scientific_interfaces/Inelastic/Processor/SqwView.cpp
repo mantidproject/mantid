@@ -51,7 +51,7 @@ SqwView::SqwView(QWidget *parent) : QWidget(parent), m_presenter() {
           &SqwView::notifyEWidthChanged);
   connect(m_uiForm.spEHigh, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this,
           &SqwView::notifyEHighChanged);
-  connect(m_uiForm.ckRebinInEnergy, &QCheckBox::stateChanged, this, &SqwView::notifyRebinEChanged);
+  connect(m_uiForm.ckRebinInEnergy, &QCheckBox::checkStateChanged, this, &SqwView::notifyRebinEChanged);
   connect(m_uiForm.pbSave, &QPushButton::clicked, this, &SqwView::notifySaveClicked);
   // Allows empty workspace selector when initially selected
   m_uiForm.dsInput->isOptional(true);

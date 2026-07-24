@@ -27,6 +27,7 @@
 #include <QMessageBox>
 #include <QTemporaryFile>
 #include <QTextStream>
+#include <QTimeZone>
 
 #include <cstdio>
 #include <fstream>
@@ -72,7 +73,7 @@ AlgExecSummaryGrpBox::AlgExecSummaryGrpBox(const QString &title, QWidget *w)
   if (m_execDurationlabel)
     m_execDurationlabel->setBuddy(m_execDurationEdit);
 
-  QDateTime datetime(QDate(0, 0, 0), QTime(0, 0, 0), Qt::LocalTime);
+  QDateTime datetime(QDate(0, 0, 0), QTime(0, 0, 0), QTimeZone(QTimeZone::LocalTime));
   m_execDateTimeEdit = new QLineEdit("", this);
   if (m_execDateTimeEdit)
     m_execDateTimeEdit->setReadOnly(true);
@@ -118,7 +119,7 @@ void AlgExecSummaryGrpBox::setData(const double execDuration, const Mantid::Type
   std::tm t = execDate.to_localtime_tm();
   QTime qt(t.tm_hour, t.tm_min, t.tm_sec);
   QDate qd(t.tm_year + 1900, t.tm_mon + 1, t.tm_mday);
-  QDateTime datetime(qd, qt, Qt::LocalTime);
+  QDateTime datetime(qd, qt, QTimeZone(QTimeZone::LocalTime));
 
   QString str("");
   str = datetime.toString("dd/MM/yyyy hh:mm:ss");

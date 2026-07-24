@@ -57,7 +57,7 @@ QVariant Encoder::extractFromEncoding(const QVariant &vMap, const std::vector<st
   QVariantMap map;
   QVariant extract = vMap;
   for (auto &key : jsonKey) {
-    if (extract.type() == 8 && extract.canConvert(8)) { // 8 = map - is there an enum?
+    if (extract.typeId() == QMetaType::QVariantMap && extract.canConvert<QVariantMap>()) {
       map = extract.toMap();
       auto qKey = QString::fromStdString(key);
       if (map.contains(qKey)) {

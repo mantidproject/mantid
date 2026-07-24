@@ -78,8 +78,8 @@ void DiffractionReduction::initLayout() {
   connectRunButtonValidation(m_uiForm.rfCanFiles);
   connectRunButtonValidation(m_uiForm.rfCalFile);
 
-  connect(m_uiForm.ckUseVanadium, &QCheckBox::stateChanged, this, &DiffractionReduction::useVanadiumStateChanged);
-  connect(m_uiForm.ckUseCalib, &QCheckBox::stateChanged, this, &DiffractionReduction::useCalibStateChanged);
+  connect(m_uiForm.ckUseVanadium, &QCheckBox::checkStateChanged, this, &DiffractionReduction::useVanadiumStateChanged);
+  connect(m_uiForm.ckUseCalib, &QCheckBox::checkStateChanged, this, &DiffractionReduction::useCalibStateChanged);
   m_valDbl = new QDoubleValidator(this);
 
   m_uiForm.leRebinStart->setValidator(m_valDbl);

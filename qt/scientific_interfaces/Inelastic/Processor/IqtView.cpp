@@ -148,11 +148,12 @@ void IqtView::setup() {
           &IqtView::notifyIterationsChanged);
   connect(m_uiForm.pbSave, &QPushButton::clicked, this, &IqtView::notifySaveClicked);
   connect(m_uiForm.pbPlotPreview, &QPushButton::clicked, this, &IqtView::notifyPlotCurrentPreview);
-  connect(m_uiForm.cbCalculateErrors, &QCheckBox::stateChanged, this, &IqtView::notifyErrorsClicked);
-  connect(m_uiForm.enEnforceNormalization, &QCheckBox::stateChanged, this, &IqtView::notifyEnableNormalizationClicked);
+  connect(m_uiForm.cbCalculateErrors, &QCheckBox::checkStateChanged, this, &IqtView::notifyErrorsClicked);
+  connect(m_uiForm.enEnforceNormalization, &QCheckBox::checkStateChanged, this,
+          &IqtView::notifyEnableNormalizationClicked);
   connect(m_uiForm.spPreviewSpec, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this,
           &IqtView::notifyPreviewSpectrumChanged);
-  connect(m_uiForm.ckSymmetricEnergy, &QCheckBox::stateChanged, this, &IqtView::notifyUpdateEnergyRange);
+  connect(m_uiForm.ckSymmetricEnergy, &QCheckBox::checkStateChanged, this, &IqtView::notifyUpdateEnergyRange);
   connect(xRangeSelector, &RangeSelector::selectionChanged, this, &IqtView::notifyRangeChanged);
   connect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &IqtView::notifyUpdateRangeSelector);
   connect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &IqtView::notifyValueChanged);

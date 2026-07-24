@@ -174,10 +174,8 @@ if(ENABLE_WORKBENCH OR BUILD_MANTIDQT)
     # Only the legacy sip<=v4 PyQt5 path consumes these flags
     separate_arguments(PYQT5_SIP_FLAGS)
   endif()
-  # Disable use of C++ API deprecated before the given version. Use the same 5.15 baseline for both builds: under Qt6
-  # this keeps APIs deprecated in 6.x (e.g. QMouseEvent::pos(), QVariant::Type) available, so the migration can defer
-  # cleaning those up - only APIs actually *removed* in Qt6 must be fixed.
-  add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
+  # Disable use of C++ API deprecated before Qt 6.11.
+  add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x060B00)
 endif()
 
 # Now add in all the components

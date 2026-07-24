@@ -187,7 +187,7 @@ QList<MatrixWorkspace_const_sptr> MantidTreeWidget::getSelectedMatrixWorkspaces(
   // Get the names of, and pointers to, the MatrixWorkspaces only.
   QList<MatrixWorkspace_const_sptr> selectedMatrixWsList;
   QList<QString> selectedMatrixWsNameList;
-  foreach (const auto &selectedWsName, selectedWsNameList) {
+  for (const auto &selectedWsName : selectedWsNameList) {
     const auto matrixWs =
         std::dynamic_pointer_cast<const MatrixWorkspace>(m_ads.retrieve(selectedWsName.toStdString()));
     if (matrixWs) {

@@ -2570,10 +2570,11 @@ void FitPropertyBrowser::saveFunction(const QString &fnName) {
   QSettings settings;
   settings.beginGroup("Mantid/FitBrowser/SavedFunctions");
   QStringList names = settings.childKeys();
-  if (names.contains(fnName) && QMessageBox::question(this, "Mantid - Question",
-                                                      "Function with this name already exists.\n"
-                                                      "Would you like to replace it?",
-                                                      QMessageBox::Yes) != QMessageBox::Yes) {
+  if (names.contains(fnName) &&
+      QMessageBox::question(this, "Mantid - Question",
+                            "Function with this name already exists.\n"
+                            "Would you like to replace it?",
+                            QMessageBox::Yes | QMessageBox::No, QMessageBox::No) != QMessageBox::Yes) {
     return;
   }
   settings.setValue(fnName, QString::fromStdString(theFunction()->asString()));

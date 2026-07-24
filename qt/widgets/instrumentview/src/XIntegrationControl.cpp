@@ -97,7 +97,7 @@ bool XIntegrationScrollBar::eventFilter(QObject *object, QEvent *e) {
 
   case QEvent::MouseButtonPress: {
     auto *me = static_cast<QMouseEvent *>(e);
-    m_x = me->x();
+    m_x = me->position().toPoint().x();
     m_width = m_slider->width();
     if (m_x < m_resizeMargin) {
       m_resizingLeft = true;
@@ -130,7 +130,7 @@ bool XIntegrationScrollBar::manageEventContinuous(QEvent *e) {
   switch (e->type()) {
   case QEvent::MouseMove: {
     auto *me = static_cast<QMouseEvent *>(e);
-    int x = me->x();
+    int x = me->position().toPoint().x();
     int w = m_slider->width();
     if (x < m_resizeMargin || x > w - m_resizeMargin) {
       if (!QApplication::overrideCursor()) {
@@ -307,7 +307,7 @@ bool XIntegrationScrollBar::manageEventDiscrete(QEvent *e) {
 
   case QEvent::MouseMove: {
     auto *me = static_cast<QMouseEvent *>(e);
-    int x = me->x();
+    int x = me->position().toPoint().x();
     int w = m_slider->width();
     if (x < m_resizeMargin || x > w - m_resizeMargin) {
       if (!QApplication::overrideCursor()) {

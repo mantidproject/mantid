@@ -113,7 +113,7 @@ void ElwinView::setup() {
   connect(m_uiForm.cbPlotSpectrum, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this,
           &ElwinView::notifySelectedSpectrumChanged);
 
-  connect(m_uiForm.ckCollapse, &QCheckBox::stateChanged, this, &ElwinView::notifyRowModeChanged);
+  connect(m_uiForm.ckCollapse, &QCheckBox::checkStateChanged, this, &ElwinView::notifyRowModeChanged);
 
   // Handle plot and save
   connect(m_uiForm.pbSave, &QPushButton::clicked, this, &ElwinView::notifySaveClicked);
