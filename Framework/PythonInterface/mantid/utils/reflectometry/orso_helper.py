@@ -163,6 +163,12 @@ class MantidORSODataset:
                         logger.error(f"The provided model description '{model}' could not be validated because of database unavailability.")
                         self._header = None
                         return
+                    except Exception as exp:
+                        logger.error(
+                            f"A {type(exp).__name__} occurred while validating the model description '{model}' through resolve_to_layers."
+                        )
+                        self._header = None
+                        return
             sample = Sample(name=ws.getTitle(), model=model)
         else:
             sample = Sample(name=ws.getTitle())

@@ -292,6 +292,21 @@ class MantidORSODatasetTest(unittest.TestCase):
             ]
         )
 
+    @mock.patch("mantid.utils.reflectometry.orso_helper.logger.error")
+    @mock.patch("mantid.utils.reflectometry.orso_helper.SampleModel")
+    def test_create_mandatory_header_raises_miscellaneous_error(self, mock_sample_model, error_logger):
+        sample_model = mock_sample_model.return_value
+        for exp in [TypeError, IndexError, ValueError]:
+            sample_model.resolve_to_layers.side_effect = exp()
+            MantidORSODataset(None, None, None, None, None, None, None, model="air", validate=True)
+        error_logger.assert_has_calls(
+            [
+                mock.call("A TypeError occurred while validating the model description 'air' through resolve_to_layers."),
+                mock.call("A IndexError occurred while validating the model description 'air' through resolve_to_layers."),
+                mock.call("A ValueError occurred while validating the model description 'air' through resolve_to_layers."),
+            ]
+        )
+
     def test_set_facility_on_mantid_orso_dataset(self):
         dataset = self._create_test_dataset()
         facility_name = "ISIS"
