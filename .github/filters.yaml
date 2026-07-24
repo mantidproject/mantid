@@ -46,7 +46,7 @@ devsite:
  - '.github/filters.yaml'
  - '.github/actions/devsite-build/**'
  - '.github/workflows/devdocs-publish.yml'
-code_changes:
+code_changes: &files_code_changes
  - *files_cpp
  - *files_py
  - *files_config
@@ -57,6 +57,9 @@ code_changes:
  - 'qt/**'
  - 'scripts/**'
  - 'tools/**'
+user_docs:
+ - *files_code_changes
+ - 'docs/**'
 # files that specifically affect the cppcheck job
 cppcheck: &files_cppcheck_config
  - 'buildconfig/CMake/CppCheckSetup.cmake'

@@ -278,3 +278,93 @@ jobs:
           name: test_logs_${{ matrix.os }}
           if-no-files-found: ignore
           path: ${{ github.workspace }}/build/test_logs/*.log
+
+
+  user-docs-build-and-test:
+    needs: [cppcheck, doxygen]
+    permissions:
+      contents: read
+
+    runs-on:
+      - ${{ (inputs.RUNNER_LABEL == '' && 'self-hosted') || inputs.RUNNER_LABEL }}
+      - self-hosted
+      - Linux
+      - X64
+
+    defaults:
+      run:
+        shell: bash
+
+    env:
+      CMAKE_PRESET: linux-64-ci
+      EXTRA_CMAKE_FLAGS: "-DENABLE_PRECOMMIT=OFF"
+      ENABLE_BUILD_CODE: true
+      ENABLE_UNIT_TESTS: false
+      ENABLE_SYSTEM_TESTS: false
+      ENABLE_DOCS: true
+      ENABLE_DOC_TESTS: true
+      # Developer docs are built and published separately by devdocs-publish.yml
+      ENABLE_DEV_DOCS: false
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          # Needed to fetch the tags for versioningit
+          fetch-depth: 100
+          fetch-tags: true
+
+      - uses: dorny/paths-filter@v4
+        id: changes
+        with:
+          filters: .github/filters.yaml
+
+      - name: Install pixi
+        uses: ./.github/actions/setup-pixi
+        if: ${{ steps.changes.outputs.user_docs == 'true' }}
+
+      - name: Clean build tree
+        if: ${{ steps.changes.outputs.user_docs == 'true' }}
+        # supplying --clean-build or CLEAN_BUILD=true should be added here
+        run: ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/clean-builder ${GITHUB_WORKSPACE}
+
+      - name: Build code and user docs
+        if: ${{ steps.changes.outputs.user_docs == 'true' }}
+        run: |
+          cd ${GITHUB_WORKSPACE}
+          echo "::add-matcher::.github/matchers/gcc.json"
+          pixi run --frozen bash -ex ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/build ${GITHUB_WORKSPACE} $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE_BUILD_CODE $ENABLE_UNIT_TESTS $ENABLE_SYSTEM_TESTS $ENABLE_DOC_TESTS $EXTRA_CMAKE_FLAGS
+          echo "::remove-matcher owner=gcc-problem-matcher::"
+
+      - name: Run doctests
+        if: ${{ steps.changes.outputs.user_docs == 'true' }}
+        id: testdocs
+        run: |
+          cd ${GITHUB_WORKSPACE}
+          # Not physical but logical cores, includes hyper threaded - different for darwin
+          BUILD_THREADS="$(grep -c ^processor /proc/cpuinfo)"
+          # bool flags for this are
+          # SYSTEM_TESTS UNIT_TESTS DOCS DOC_TESTS
+          pixi run --frozen bash -ex ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/run-tests ${GITHUB_WORKSPACE} false false $ENABLE_DOCS $ENABLE_DOC_TESTS ${BUILD_THREADS}
+
+      - name: Upload doctest results
+        uses: actions/upload-artifact@v7
+        if: ${{ failure() && steps.testdocs.conclusion == 'failure' }}
+        with:
+          name: junit-doctest
+          if-no-files-found: ignore
+          path: ${{ github.workspace }}/build/docs/doctest/TEST-doctest.xml
+
+      - name: Upload event payload
+        uses: actions/upload-artifact@v7
+        if: ${{ failure() && github.event_name == 'pull_request' }}
+        with:
+          name: event-file-doctest
+          path: ${{ github.event_path }}
+
+      - name: Upload build and test log artifacts
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: user_docs_test_logs_Linux
+          if-no-files-found: ignore
+          path: ${{ github.workspace }}/build/test_logs/*.log

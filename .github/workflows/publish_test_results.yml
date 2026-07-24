@@ -58,3 +58,15 @@ jobs:
           check_run_annotations: skipped tests
           comment_mode: failures
           files: artifacts/junit-system/**/TEST-systemtests*.xml
+
+      - name: Publish doctest results (Linux)
+        if: hashFiles('artifacts/junit-doctest/TEST-doctest.xml') != ''
+        uses: EnricoMi/publish-unit-test-result-action/linux@v2
+        with:
+          check_name: "Doctest results (Linux)"
+          commit: ${{ github.event.workflow_run.head_sha }}
+          event_file: artifacts/event-file-doctest/event.json
+          event_name: ${{ github.event.workflow_run.event }}
+          check_run_annotations: skipped tests
+          comment_mode: failures
+          files: artifacts/junit-doctest/TEST-doctest.xml
