@@ -147,7 +147,7 @@ void MantidTreeWidget::mouseDoubleClickEvent(QMouseEvent *e) {
 QStringList MantidTreeWidget::getSelectedWorkspaceNames() const {
   QStringList names;
 
-  foreach (const auto selectedItem, this->selectedItems()) {
+  for (const auto selectedItem : this->selectedItems()) {
     if (selectedItem)
       names.append(selectedItem->text(0));
   }
@@ -168,7 +168,7 @@ QList<MatrixWorkspace_const_sptr> MantidTreeWidget::getSelectedMatrixWorkspaces(
   // We preserve the order, but use a set to avoid adding duplicate workspaces.
   std::set<QString> selectedWsNameSet;
   std::vector<QString> selectedWsNameList;
-  foreach (const QString &wsName, this->getSelectedWorkspaceNames()) {
+  for (const QString &wsName : this->getSelectedWorkspaceNames()) {
     const auto groupWs = std::dynamic_pointer_cast<const WorkspaceGroup>(m_ads.retrieve(wsName.toStdString()));
     if (groupWs) {
       const auto childWsNames = groupWs->getNames();
@@ -215,7 +215,7 @@ MantidWSIndexWidget::UserInput MantidTreeWidget::chooseSpectrumFromSelected(bool
                                                                             bool showTiledOpt, bool isAdvanced) const {
   auto selectedMatrixWsList = getSelectedMatrixWorkspaces();
   QList<QString> selectedMatrixWsNameList;
-  foreach (const auto matrixWs, selectedMatrixWsList) {
+  for (const auto &matrixWs : selectedMatrixWsList) {
     selectedMatrixWsNameList.append(QString::fromStdString(matrixWs->getName()));
   }
 
@@ -233,7 +233,7 @@ MantidWSIndexWidget::UserInput MantidTreeWidget::chooseSpectrumFromSelected(bool
   if (plotImmediately) {
     const std::set<int> SINGLE_SPECTRUM = {0};
     QMultiMap<QString, std::set<int>> spectrumToPlot;
-    foreach (const auto selectedMatrixWs, selectedMatrixWsList) {
+    for (const auto &selectedMatrixWs : selectedMatrixWsList) {
       spectrumToPlot.insert(QString::fromStdString(selectedMatrixWs->getName()), SINGLE_SPECTRUM);
     }
     // and get simple 1D plot done

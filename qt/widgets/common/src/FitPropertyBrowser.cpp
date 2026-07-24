@@ -1149,7 +1149,7 @@ std::string FitPropertyBrowser::minimizer(bool withProperties) const {
   QString minimStr = m_minimizers[i];
   // append minimizer properties as name=value pairs
   if (withProperties) {
-    foreach (const QtProperty *const prop, m_minimizerProperties) {
+    for (const QtProperty *const prop : m_minimizerProperties) {
       if (prop->propertyManager() == m_stringManager) {
         QString value = m_stringManager->value(prop);
         if (!value.isEmpty()) {
@@ -2094,7 +2094,7 @@ void FitPropertyBrowser::clear() {
 
 void FitPropertyBrowser::clearBrowser() {
   QList<QtProperty *> props = m_functionsGroup->property()->subProperties();
-  foreach (QtProperty *prop, props) {
+  for (QtProperty *prop : props) {
     m_functionsGroup->property()->removeSubProperty(prop);
   }
 }
@@ -2676,7 +2676,7 @@ void FitPropertyBrowser::addAutoBackground() {
     return;
   if (!m_autoBgAttributes.isEmpty()) { // set attributes
     QStringList attList = m_autoBgAttributes.split(' ');
-    foreach (const QString &att, attList) {
+    for (const QString &att : attList) {
       QStringList name_value = att.split('=');
       if (name_value.size() == 2) {
         QString name = name_value[0].trimmed();
@@ -2793,7 +2793,7 @@ void FitPropertyBrowser::updateDecimals() {
     m_decimals = settings.value("decimals", 6).toInt();
   }
   QSet<QtProperty *> props = m_doubleManager->properties();
-  foreach (QtProperty *prop, props) {
+  for (QtProperty *prop : props) {
     m_doubleManager->setDecimals(prop, m_decimals);
   }
 }
@@ -2905,7 +2905,7 @@ void FitPropertyBrowser::processMultiBGResults() {
   // other colomns - the parameters
   Mantid::API::ITableWorkspace_sptr table = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
   table->addColumn("int", "Index");
-  foreach (const QString &par, parNames) {
+  for (const QString &par : parNames) {
     table->addColumn("double", par.toStdString());
   }
   // Create WorkspaceGroup with the fit results
@@ -3116,7 +3116,7 @@ void FitPropertyBrowser::columnChanged(QtProperty *prop) {
  */
 void FitPropertyBrowser::minimizerChanged() {
   // delete old minimizer properties
-  foreach (QtProperty *prop, m_minimizerProperties) {
+  for (QtProperty *prop : m_minimizerProperties) {
     m_settingsGroup->property()->removeSubProperty(prop);
   }
 

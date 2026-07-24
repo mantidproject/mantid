@@ -851,7 +851,7 @@ void WorkspaceTreeWidget::populateTopLevel(const TopLevelItems &topLevelItems, c
     // collect names of selected workspaces
     QList<QTreeWidgetItem *> selected = m_tree->selectedItems();
     m_selectedNames.clear(); // just in case
-    foreach (QTreeWidgetItem *item, selected) {
+    for (QTreeWidgetItem *item : selected) {
       m_selectedNames << item->text(0);
     }
 
