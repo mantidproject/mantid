@@ -40,6 +40,7 @@ set(TEST_PY_FILES
     CylinderPaalmanPingsCorrection2Test.py
     DakotaChiSquaredTest.py
     DeltaPDF3DTest.py
+    DPDFreductionTest.py
     DNSComputeDetEffCorrCoefsTest.py
     DNSMergeRunsTest.py
     DNSFlippingRatioCorrTest.py
