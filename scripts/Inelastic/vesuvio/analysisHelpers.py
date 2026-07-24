@@ -441,7 +441,7 @@ def convert_to_y_space_and_symmetrise(ws_name, mass):
             if np.isnan(tmp.y(j)[k]):
                 ws.mutableY(j)[k] = 0.0
                 tmp.mutableY(j)[k] = 0.0
-            if tmp.mutableY(j)[k] != 0:
+            if tmp.y(j)[k] != 0:
                 tmp.mutableY(j)[k] = 1.0
     tmp = sapi.SumSpectra("tmp")
     sapi.SumSpectra(InputWorkspace=ws_name + "_JoY", OutputWorkspace=ws_name + "_JoY_sum")

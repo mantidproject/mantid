@@ -144,7 +144,7 @@ public:
       return 0;
     }
     size_t numY = m_vec[0].dataY().size();
-    if (std::any_of(m_vec.cbegin(), m_vec.cend(), [numY](auto it) { return it.mutableY().size() != numY; })) {
+    if (std::any_of(m_vec.cbegin(), m_vec.cend(), [numY](auto it) { return it.y().size() != numY; })) {
       throw std::logic_error("non-constant number of bins");
     }
     return numY;

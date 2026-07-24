@@ -227,8 +227,8 @@ void GenerateGoniometerIndependentBackground::exec() {
 
       std::sort(intensity_input_map.begin(), intensity_input_map.end());
 
-      const auto start = Xvalues[x];
-      const auto end = Xvalues[x + 1];
+      const auto start = Xvalues.at(x);
+      const auto end = Xvalues.at(x + 1);
 
       for (size_t n = minN; n < maxN; n++) {
         const auto inWS = inputWS.at(intensity_input_map.at(n).second);

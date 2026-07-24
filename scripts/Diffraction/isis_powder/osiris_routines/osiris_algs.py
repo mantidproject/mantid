@@ -226,9 +226,9 @@ def merge_dspacing_runs(focussed_runs, drange_sets, run_number):
 
     for i in range(len(merged_spectra)):
         if (
-            merged_spectra[i].mutableX(0).size != max_x_size
-            or merged_spectra[i].mutableY(0).size != max_y_size
-            or merged_spectra[i].mutableE(0).size != max_e_size
+            merged_spectra[i].x(0).size != max_x_size
+            or merged_spectra[i].y(0).size != max_y_size
+            or merged_spectra[i].e(0).size != max_e_size
         ):
             dataX = merged_spectra[i].x(0)
             dataY = merged_spectra[i].y(0)
