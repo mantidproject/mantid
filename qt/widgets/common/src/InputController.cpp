@@ -372,7 +372,7 @@ void InputControllerSelection::drawCursor(QPixmap *cursor) {
   auto size = cursorSize();
 
   auto pen = QPen(Qt::DashLine);
-  QVector<qreal> dashPattern;
+  QList<qreal> dashPattern;
   dashPattern << 4 << 4;
   pen.setDashPattern(dashPattern);
   pen.setColor(QColor(0, 0, 0));
@@ -435,7 +435,7 @@ void InputControllerDrawAndErase::drawCursor(QPixmap *cursor) {
   auto poly = m_rect.translated(-bRect.topLeft());
 
   auto pen = QPen(Qt::DashLine);
-  QVector<qreal> dashPattern;
+  QList<qreal> dashPattern;
   qreal dashLength = cursorSize() < 10 ? 1 : 2;
   dashPattern << dashLength << dashLength;
   pen.setDashPattern(dashPattern);

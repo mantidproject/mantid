@@ -51,8 +51,7 @@ StretchView::StretchView(QWidget *parent)
 
   connect(m_uiForm.dsSample, &DataSelector::dataReady, this, &StretchView::handleSampleInputReady);
 
-  connect(m_uiForm.spPreviewSpectrum, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this,
-          &StretchView::previewSpecChanged);
+  connect(m_uiForm.spPreviewSpectrum, qOverload<int>(&QSpinBox::valueChanged), this, &StretchView::previewSpecChanged);
   m_uiForm.spPreviewSpectrum->setMaximum(0);
 
   connect(m_uiForm.pbSave, &QPushButton::clicked, this, &StretchView::saveWorkspacesClicked);

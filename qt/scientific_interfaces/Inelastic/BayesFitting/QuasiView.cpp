@@ -69,9 +69,9 @@ QuasiView::QuasiView(QWidget *parent)
   connect(m_uiForm.dsResolution, &DataSelector::dataReady, this, &QuasiView::notifyResolutionInputReady);
   connect(m_uiForm.dsResolution, &DataSelector::filesAutoLoaded, this, &QuasiView::notifyFileAutoLoaded);
 
-  connect(m_uiForm.cbProgram, static_cast<void (QComboBox::*)(int const)>(&QComboBox::currentIndexChanged), this,
+  connect(m_uiForm.cbProgram, qOverload<int const>(&QComboBox::currentIndexChanged), this,
           &QuasiView::handleProgramChange);
-  connect(m_uiForm.spPreviewSpectrum, static_cast<void (QSpinBox::*)(int const)>(&QSpinBox::valueChanged), this,
+  connect(m_uiForm.spPreviewSpectrum, qOverload<int const>(&QSpinBox::valueChanged), this,
           &QuasiView::notifyPreviewSpectrumChanged);
 
   connect(m_uiForm.pbPlotPreview, &QPushButton::clicked, this, &QuasiView::notifyPlotCurrentPreview);

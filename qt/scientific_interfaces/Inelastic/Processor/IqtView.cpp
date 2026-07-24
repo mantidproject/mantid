@@ -144,14 +144,13 @@ void IqtView::setup() {
   // signals / slots & validators
   connect(m_uiForm.dsInput, &DataSelector::dataReady, this, &IqtView::notifySampDataReady);
   connect(m_uiForm.dsResolution, &DataSelector::dataReady, this, &IqtView::notifyResDataReady);
-  connect(m_uiForm.spIterations, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this,
-          &IqtView::notifyIterationsChanged);
+  connect(m_uiForm.spIterations, qOverload<int>(&QSpinBox::valueChanged), this, &IqtView::notifyIterationsChanged);
   connect(m_uiForm.pbSave, &QPushButton::clicked, this, &IqtView::notifySaveClicked);
   connect(m_uiForm.pbPlotPreview, &QPushButton::clicked, this, &IqtView::notifyPlotCurrentPreview);
   connect(m_uiForm.cbCalculateErrors, &QCheckBox::checkStateChanged, this, &IqtView::notifyErrorsClicked);
   connect(m_uiForm.enEnforceNormalization, &QCheckBox::checkStateChanged, this,
           &IqtView::notifyEnableNormalizationClicked);
-  connect(m_uiForm.spPreviewSpec, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this,
+  connect(m_uiForm.spPreviewSpec, qOverload<int>(&QSpinBox::valueChanged), this,
           &IqtView::notifyPreviewSpectrumChanged);
   connect(m_uiForm.ckSymmetricEnergy, &QCheckBox::checkStateChanged, this, &IqtView::notifyUpdateEnergyRange);
   connect(xRangeSelector, &RangeSelector::selectionChanged, this, &IqtView::notifyRangeChanged);

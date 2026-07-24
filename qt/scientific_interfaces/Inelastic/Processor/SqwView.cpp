@@ -39,18 +39,12 @@ SqwView::SqwView(QWidget *parent) : QWidget(parent), m_presenter() {
   m_uiForm.rqwPlot2D->setCanvasColour(QColor(240, 240, 240));
 
   connect(m_uiForm.dsInput, &DataSelector::dataReady, this, &SqwView::notifyDataReady);
-  connect(m_uiForm.spQLow, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this,
-          &SqwView::notifyQLowChanged);
-  connect(m_uiForm.spQWidth, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this,
-          &SqwView::notifyQWidthChanged);
-  connect(m_uiForm.spQHigh, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this,
-          &SqwView::notifyQHighChanged);
-  connect(m_uiForm.spELow, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this,
-          &SqwView::notifyELowChanged);
-  connect(m_uiForm.spEWidth, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this,
-          &SqwView::notifyEWidthChanged);
-  connect(m_uiForm.spEHigh, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this,
-          &SqwView::notifyEHighChanged);
+  connect(m_uiForm.spQLow, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &SqwView::notifyQLowChanged);
+  connect(m_uiForm.spQWidth, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &SqwView::notifyQWidthChanged);
+  connect(m_uiForm.spQHigh, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &SqwView::notifyQHighChanged);
+  connect(m_uiForm.spELow, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &SqwView::notifyELowChanged);
+  connect(m_uiForm.spEWidth, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &SqwView::notifyEWidthChanged);
+  connect(m_uiForm.spEHigh, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &SqwView::notifyEHighChanged);
   connect(m_uiForm.ckRebinInEnergy, &QCheckBox::checkStateChanged, this, &SqwView::notifyRebinEChanged);
   connect(m_uiForm.pbSave, &QPushButton::clicked, this, &SqwView::notifySaveClicked);
   // Allows empty workspace selector when initially selected

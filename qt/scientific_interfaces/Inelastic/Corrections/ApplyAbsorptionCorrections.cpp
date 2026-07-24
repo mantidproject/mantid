@@ -40,11 +40,11 @@ ApplyAbsorptionCorrections::ApplyAbsorptionCorrections(QWidget *parent) : Correc
 
   connect(m_uiForm.dsSample, &DataSelector::dataReady, this, &ApplyAbsorptionCorrections::newSample);
   connect(m_uiForm.dsContainer, &DataSelector::dataReady, this, &ApplyAbsorptionCorrections::newContainer);
-  connect(m_uiForm.spPreviewSpec, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this,
+  connect(m_uiForm.spPreviewSpec, qOverload<int>(&QSpinBox::valueChanged), this,
           &ApplyAbsorptionCorrections::plotPreview);
-  connect(m_uiForm.spCanScale, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this,
+  connect(m_uiForm.spCanScale, qOverload<double>(&QDoubleSpinBox::valueChanged), this,
           &ApplyAbsorptionCorrections::updateContainer);
-  connect(m_uiForm.spCanShift, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this,
+  connect(m_uiForm.spCanShift, qOverload<double>(&QDoubleSpinBox::valueChanged), this,
           &ApplyAbsorptionCorrections::updateContainer);
   connect(m_uiForm.ckShiftCan, &QCheckBox::toggled, this, &ApplyAbsorptionCorrections::updateContainer);
   connect(m_uiForm.ckScaleCan, &QCheckBox::toggled, this, &ApplyAbsorptionCorrections::updateContainer);

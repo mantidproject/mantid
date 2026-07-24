@@ -35,9 +35,9 @@ InstrumentConfig::InstrumentConfig(QWidget *parent)
           &InstrumentConfig::filterDisabledInstruments);
   connect(m_instrumentSelector, &InstrumentSelector::instrumentSelectionChanged, this,
           &InstrumentConfig::updateInstrumentConfigurations);
-  connect(m_uiForm.cbAnalyser, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this,
+  connect(m_uiForm.cbAnalyser, qOverload<int>(&QComboBox::currentIndexChanged), this,
           &InstrumentConfig::updateReflectionsList);
-  connect(m_uiForm.cbReflection, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this,
+  connect(m_uiForm.cbReflection, qOverload<int>(&QComboBox::currentIndexChanged), this,
           &InstrumentConfig::newInstrumentConfiguration);
   m_instrumentSelector->fillWithInstrumentsFromFacility();
 }

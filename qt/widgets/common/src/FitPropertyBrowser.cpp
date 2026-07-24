@@ -1946,11 +1946,11 @@ void FitPropertyBrowser::setXRange(double start, double end) {
   connect(m_doubleManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(doubleChanged(QtProperty *)));
 }
 
-QVector<double> FitPropertyBrowser::getXRange() {
+QList<double> FitPropertyBrowser::getXRange() {
   auto ws = getWorkspace();
   auto tbl = std::dynamic_pointer_cast<ITableWorkspace>(ws);
   auto mws = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
-  QVector<double> range;
+  QList<double> range;
   if (tbl) {
     auto xColumnIndex = m_columnManager->value(m_xColumn);
     std::vector<double> xColumnData;

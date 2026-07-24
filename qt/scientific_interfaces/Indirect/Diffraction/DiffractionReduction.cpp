@@ -69,9 +69,9 @@ void DiffractionReduction::initLayout() {
   connect(m_uiForm.iicInstrumentConfiguration, &MantidWidgets::InstrumentConfig::instrumentConfigurationUpdated, this,
           &DiffractionReduction::instrumentSelected);
 
-  connect(m_uiForm.spSpecMin, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this,
+  connect(m_uiForm.spSpecMin, qOverload<int>(&QSpinBox::valueChanged), this,
           &DiffractionReduction::validateSpectrumMin);
-  connect(m_uiForm.spSpecMax, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this,
+  connect(m_uiForm.spSpecMax, qOverload<int>(&QSpinBox::valueChanged), this,
           &DiffractionReduction::validateSpectrumMax);
   // Update run button based on state of raw files field
   connectRunButtonValidation(m_uiForm.rfSampleFiles);
