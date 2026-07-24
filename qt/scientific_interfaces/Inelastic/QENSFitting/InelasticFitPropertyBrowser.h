@@ -19,7 +19,6 @@
 
 #include <QDockWidget>
 #include <QList>
-#include <QPair>
 #include <QString>
 
 #include <optional>

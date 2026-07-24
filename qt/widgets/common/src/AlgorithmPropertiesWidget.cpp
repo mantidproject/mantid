@@ -460,7 +460,7 @@ void AlgorithmPropertiesWidget::saveInput() {
       QString value = (prop->isDefault() || prop->isDynamicDefault() ? "" : widget->getValue());
 
       // save the value
-      m_inputHistory->storeNewValue(m_algoName, QPair<QString, QString>(propName, value));
+      m_inputHistory->storeNewValue(m_algoName, std::pair<QString, QString>(propName, value));
     }
   }
 }

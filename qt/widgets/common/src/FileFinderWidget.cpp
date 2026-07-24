@@ -677,19 +677,19 @@ QString FileFinderWidget::createFileFilter() {
     // The list may contain upper and lower cased versions, ensure these are on
     // the same line
     // I want this ordered
-    QList<QPair<QString, QStringList>> finalIndex;
+    QList<std::pair<QString, QStringList>> finalIndex;
     QStringListIterator sitr(fileExts);
     QString ext = sitr.next();
-    finalIndex.append(qMakePair(ext.toUpper(), QStringList(ext)));
+    finalIndex.append(std::make_pair(ext.toUpper(), QStringList(ext)));
     while (sitr.hasNext()) {
       ext = sitr.next();
       QString key = ext.toUpper();
       const auto it = std::find_if(finalIndex.begin(), finalIndex.end(),
-                                   [&key](const QPair<QString, QStringList> &pair) { return pair.first == key; });
+                                   [&key](const std::pair<QString, QStringList> &pair) { return pair.first == key; });
       if (it != finalIndex.end()) {
         it->second.append(ext);
       } else {
-        finalIndex.append(qMakePair(key, QStringList(ext)));
+        finalIndex.append(std::make_pair(key, QStringList(ext)));
       }
     }
 
@@ -700,7 +700,7 @@ QString FileFinderWidget::createFileFilter() {
     QString individualFiles("");
 
     if (extsAsSingleOption()) {
-      QListIterator<QPair<QString, QStringList>> itr(finalIndex);
+      QListIterator<std::pair<QString, QStringList>> itr(finalIndex);
       while (itr.hasNext()) {
         const QStringList values = itr.next().second;
 
@@ -712,7 +712,7 @@ QString FileFinderWidget::createFileFilter() {
       dataFiles.chop(1); // Remove last space
       dataFiles += ");;";
     } else {
-      QListIterator<QPair<QString, QStringList>> itr(finalIndex);
+      QListIterator<std::pair<QString, QStringList>> itr(finalIndex);
       while (itr.hasNext()) {
         const QStringList values = itr.next().second;
         dataFiles += "*" + values.join(" *") + ";;";

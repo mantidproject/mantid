@@ -1111,7 +1111,7 @@ QtVariantPropertyManager::~QtVariantPropertyManager() {
     \sa createProperty()
 */
 QtVariantProperty *QtVariantPropertyManager::variantProperty(const QtProperty *property) const {
-  const QMap<const QtProperty *, QPair<QtVariantProperty *, int>>::const_iterator it =
+  const QMap<const QtProperty *, std::pair<QtVariantProperty *, int>>::const_iterator it =
       d_ptr->m_propertyToType.constFind(property);
   if (it == d_ptr->m_propertyToType.constEnd())
     return nullptr;
@@ -1252,7 +1252,7 @@ int QtVariantPropertyManager::valueType(int propertyType) const {
     \sa valueType()
 */
 int QtVariantPropertyManager::propertyType(const QtProperty *property) const {
-  const QMap<const QtProperty *, QPair<QtVariantProperty *, int>>::const_iterator it =
+  const QMap<const QtProperty *, std::pair<QtVariantProperty *, int>>::const_iterator it =
       d_ptr->m_propertyToType.constFind(property);
   if (it == d_ptr->m_propertyToType.constEnd())
     return 0;
@@ -1649,7 +1649,7 @@ void QtVariantPropertyManager::initializeProperty(QtProperty *property) {
     \reimp
 */
 void QtVariantPropertyManager::uninitializeProperty(QtProperty *property) {
-  const QMap<const QtProperty *, QPair<QtVariantProperty *, int>>::iterator type_it =
+  const QMap<const QtProperty *, std::pair<QtVariantProperty *, int>>::iterator type_it =
       d_ptr->m_propertyToType.find(property);
   if (type_it == d_ptr->m_propertyToType.end())
     return;
@@ -1676,7 +1676,7 @@ QtProperty *QtVariantPropertyManager::createProperty() {
     return nullptr;
 
   auto *property = new QtVariantProperty(this);
-  d_ptr->m_propertyToType.insert(property, qMakePair(property, d_ptr->m_propertyType));
+  d_ptr->m_propertyToType.insert(property, std::make_pair(property, d_ptr->m_propertyType));
 
   return property;
 }
