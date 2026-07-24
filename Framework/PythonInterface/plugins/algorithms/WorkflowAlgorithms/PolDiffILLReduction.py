@@ -616,7 +616,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         masked_detectors = self.getProperty("MaskDetectors").value
         if len(masked_detectors) > 0:
             MaskDetectors(Workspace=ws, SpectraList=masked_detectors)
-        self._instrument = mtd[ws][0].getInstrument().getName()
+        self._instrument = mtd[ws][0].getInstrumentName()
         self._figure_out_measurement_method(ws)
         if measurement_technique == "SingleCrystal":
             progress.report(7, "Merging omega scan")

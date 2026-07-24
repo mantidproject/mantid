@@ -16,7 +16,7 @@ class TestGetInstrumentFromWsList(unittest.TestCase):
     @patch(f"{texture_utils_path}.ADS")
     def test_single_ws_in_ads_returns_instrument_name(self, mock_ads):
         mock_ws = MagicMock()
-        mock_ws.getInstrument().getName.return_value = "ENGINX"
+        mock_ws.getInstrumentName.return_value = "ENGINX"
         mock_ads.doesExist.return_value = True
         mock_ads.retrieve.return_value = mock_ws
 
@@ -29,7 +29,7 @@ class TestGetInstrumentFromWsList(unittest.TestCase):
     @patch(f"{texture_utils_path}.ADS")
     def test_multiple_ws_same_instrument_in_ads_returns_instrument_name(self, mock_ads):
         mock_ws = MagicMock()
-        mock_ws.getInstrument().getName.return_value = "ENGINX"
+        mock_ws.getInstrumentName.return_value = "ENGINX"
         mock_ads.doesExist.return_value = True
         mock_ads.retrieve.return_value = mock_ws
 
@@ -42,7 +42,7 @@ class TestGetInstrumentFromWsList(unittest.TestCase):
     @patch(f"{texture_utils_path}.ADS")
     def test_ws_not_in_ads_loads_from_file(self, mock_ads, mock_load):
         mock_ws = MagicMock()
-        mock_ws.getInstrument().getName.return_value = "IMAT"
+        mock_ws.getInstrumentName.return_value = "IMAT"
         mock_ads.doesExist.return_value = False
         mock_load.return_value = mock_ws
 
@@ -68,9 +68,9 @@ class TestGetInstrumentFromWsList(unittest.TestCase):
     @patch(f"{texture_utils_path}.ADS")
     def test_multiple_instruments_logs_error_and_returns_none(self, mock_ads, mock_logger):
         mock_ws1 = MagicMock()
-        mock_ws1.getInstrument().getName.return_value = "ENGINX"
+        mock_ws1.getInstrumentName.return_value = "ENGINX"
         mock_ws2 = MagicMock()
-        mock_ws2.getInstrument().getName.return_value = "IMAT"
+        mock_ws2.getInstrumentName.return_value = "IMAT"
         mock_ads.doesExist.return_value = True
         mock_ads.retrieve.side_effect = [mock_ws1, mock_ws2]
 
@@ -93,7 +93,7 @@ class TestGetInstrumentFromWsList(unittest.TestCase):
     def test_load_failure_stops_processing_remaining_ws(self, mock_ads, mock_load, mock_logger):
         # If the second ws fails to load, processing stops early and returns None.
         mock_ws1 = MagicMock()
-        mock_ws1.getInstrument().getName.return_value = "ENGINX"
+        mock_ws1.getInstrumentName.return_value = "ENGINX"
         mock_ads.doesExist.side_effect = [True, False]
         mock_ads.retrieve.return_value = mock_ws1
         mock_load.side_effect = RuntimeError("Cannot load")

@@ -83,7 +83,7 @@ def saveMFT(idx, fname, logs):
     sep = "\t"
     f = open(fname, "w")
     f.write("MFT\n")
-    f.write("Instrument: " + a1.getInstrument().getName() + "\n")
+    f.write("Instrument: " + a1.getInstrumentName() + "\n")
     f.write("User-local contact: \n")
     f.write("Title: \n")
     samp = a1.getRun()

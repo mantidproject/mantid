@@ -872,7 +872,7 @@ def create_detector_grouping_string(number_of_groups: int, spectra_min: int, spe
 
 
 def create_grouping_workspace(workspace: MatrixWorkspace, cal_file: str) -> GroupingWorkspace:
-    group_ws, _, _ = CreateGroupingWorkspace(InstrumentName=workspace.getInstrument().getName(), OldCalFilename=cal_file, StoreInADS=False)
+    group_ws, _, _ = CreateGroupingWorkspace(InstrumentName=workspace.getInstrumentName(), OldCalFilename=cal_file, StoreInADS=False)
     return group_ws
 
 

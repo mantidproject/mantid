@@ -63,7 +63,7 @@ def __get_instrument_name(wksp):
         ws = mtd[wksp]
     else:
         raise ValueError(f"{wksp} cannot be found")
-    return mantid.kernel.ConfigService.getInstrument(ws.getInstrument().getName()).shortName()
+    return mantid.kernel.ConfigService.getInstrument(ws.getInstrumentName()).shortName()
 
 
 def __get_cache_name(

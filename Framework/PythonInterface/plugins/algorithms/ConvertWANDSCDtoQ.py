@@ -183,7 +183,7 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
         if run.getNumGoniometers() != number_of_runs:
             issues["InputWorkspace"] = "goniometers not set correctly, did you run SetGoniometer with Average=False"
 
-        instrument = experiment_info.getInstrument().getName()
+        instrument = experiment_info.getInstrumentName()
         if instrument in ("HB3A", "DEMAND"):
             for prop in ["monitor", "time"]:
                 if run.hasProperty(prop):
@@ -307,7 +307,7 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
 
         normaliseBy = self.getProperty("NormaliseBy").value
 
-        instrument_name = inWS.getExperimentInfo(0).getInstrument().getName()
+        instrument_name = inWS.getExperimentInfo(0).getInstrumentName()
         assert instrument_name in ["HB3A", "DEMAND", "HB2C", "WAND"], "Supported instruments are HB3A and HB2C"
 
         if normaliseBy == "Monitor":
@@ -404,7 +404,7 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
             # so that the first two dimensions of inWS correspond to the extent of the individual detector pixels
             di = inWS.getExperimentInfo(0).detectorInfo()
             polar = np.array([di.twoTheta(i) for i in range(di.size()) if not di.isMonitor(i)])
-            if inWS.getExperimentInfo(0).getInstrument().getName() == "HB3A":
+            if inWS.getExperimentInfo(0).getInstrumentName() == "HB3A":
                 polar = polar.reshape(512 * 3, 512).T.flatten()
 
         if inWS.getExperimentInfo(0).run().hasProperty("azimuthal"):
@@ -412,7 +412,7 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
         else:
             di = inWS.getExperimentInfo(0).detectorInfo()
             azim = np.array([di.azimuthal(i) for i in range(di.size()) if not di.isMonitor(i)])
-            if inWS.getExperimentInfo(0).getInstrument().getName() == "HB3A":
+            if inWS.getExperimentInfo(0).getInstrumentName() == "HB3A":
                 azim = azim.reshape(512 * 3, 512).T.flatten()
 
         # check convention to determine the sign

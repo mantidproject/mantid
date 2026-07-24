@@ -392,7 +392,7 @@ class DPDFreduction(api.PythonAlgorithm):
                 sapi.Plus(LHSWorkspace=data_name, RHSWorkspace=data_name + "_tmp", OutputWorkspace=data_name)
                 sapi.Plus(LHSWorkspace=monitor_name, RHSWorkspace=data_name + "_tmp_monitors", OutputWorkspace=monitor_name)
             sapi.DeleteWorkspace(data_name + "_tmp")
-        if sapi.mtd[data_name].getInstrument().getName() not in ("ARCS"):
+        if sapi.mtd[data_name].getInstrumentName() != "ARCS":
             raise NotImplementedError("This algorithm works only for ARCS instrument")
 
     def _findGaps(self, workspace_name, min_i, max_i):

@@ -2181,7 +2181,7 @@ class IDFOverrideTests(unittest.TestCase):
     def test_wand_uses_custom_idf(self):
         algo = _create_algo(Instrument="WAND^2", IDFFilename=self._idf)
         algo._load_WAND_Data("HB2C_7000.nxs.h5", "test_wand_custom_idf")
-        instrument_name = mtd["test_wand_custom_idf"].getInstrument().getName()
+        instrument_name = mtd["test_wand_custom_idf"].getInstrumentName()
         self.assertEqual(instrument_name, os.path.basename(self._idf))
 
     def test_midas_uses_custom_idf(self):
@@ -2193,7 +2193,7 @@ class IDFOverrideTests(unittest.TestCase):
 
         algo = _create_algo(Instrument="MIDAS", Wavelength=2.5, IDFFilename=self._idf)
         algo._loadMIDASData(midas_file, "test_midas_custom_idf")
-        instrument_name = mtd["test_midas_custom_idf"].getInstrument().getName()
+        instrument_name = mtd["test_midas_custom_idf"].getInstrumentName()
         self.assertEqual(instrument_name, os.path.basename(self._idf))
 
 

@@ -178,7 +178,7 @@ class MantidORSODataset:
         run = ws.getRun()
         experiment = Experiment(
             title=None,
-            instrument=ws.getInstrument().getName(),
+            instrument=ws.getInstrumentName(),
             start_date=self._get_exp_start_time(run),
             probe=self.PROBE_NEUTRON,
         )

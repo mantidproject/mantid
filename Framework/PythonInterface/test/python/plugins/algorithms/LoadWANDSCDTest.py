@@ -37,7 +37,7 @@ class LoadWANDTest(unittest.TestCase):
         self.assertEqual(d2.getMaximum(), 2.5)
 
         self.assertEqual(LoadWANDTest_ws.getNumExperimentInfo(), 1)
-        self.assertEqual(LoadWANDTest_ws.getExperimentInfo(0).getInstrument().getName(), "WAND")
+        self.assertEqual(LoadWANDTest_ws.getExperimentInfo(0).getInstrumentName(), "WAND")
 
         run = LoadWANDTest_ws.getExperimentInfo(0).run()
         s1 = run.getProperty("HB2C:Mot:s1").value

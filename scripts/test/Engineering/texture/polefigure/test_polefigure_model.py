@@ -47,6 +47,7 @@ class TextureProjectionTest(unittest.TestCase):
         self.mock_ws.sample().hasCrystalStructure.return_value = True
         self.mock_ws.getRun.return_value = mock_run
         self.mock_ws.getInstrument.return_value = mock_inst
+        self.mock_ws.getInstrumentName.return_value = "instrument"
 
     @patch(correction_model_path + ".ADS")
     @patch(correction_model_path + ".TextureProjection._has_no_valid_shape")

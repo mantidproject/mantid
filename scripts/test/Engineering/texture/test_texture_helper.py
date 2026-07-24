@@ -523,7 +523,7 @@ class TestGenerousRebin(unittest.TestCase):
         mock_ws = MagicMock()
         mock_ws.getNumberHistograms.return_value = len(x_arrays)
         mock_ws.readX.side_effect = lambda i: np.array(x_arrays[i])
-        mock_ws.getInstrument.return_value.getName.return_value = instrument_name
+        mock_ws.getInstrumentName.return_value = instrument_name
         return mock_ws
 
     @patch(texture_utils_path + ".Rebin")

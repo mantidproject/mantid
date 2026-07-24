@@ -237,7 +237,7 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
         input_group = GroupWorkspaces(InputWorkspaces=input_workspace)
 
         instrument = input_group[0].getInstrument()
-        instrument_name = instrument.getName()
+        instrument_name = input_group[0].getInstrumentName()
         self._validate_instrument(instrument_name)
 
         self._progress.report("Normalising to monitor")

@@ -356,7 +356,7 @@ class SANSILLReduction(DataProcessorAlgorithm):
     def setup(self, ws):
         """Performs a full setup, which can be done only after having loaded the sample data"""
         self.process = self.getPropertyValue("ProcessAs")
-        self.instrument = ws.getInstrument().getName()
+        self.instrument = ws.getInstrumentName()
         self.log().notice(f"Set the instrument name to {self.instrument}")
         unit = ws.getAxis(0).getUnit().unitID()
         self.n_frames = ws.blocksize()
@@ -1089,7 +1089,7 @@ class SANSILLReduction(DataProcessorAlgorithm):
         """
         instr = mtd[ws].getInstrument()
         run = mtd[ws].getRun()
-        if instr.getName() == "D22B":
+        if mtd[ws].getInstrumentName() == "D22B":
             back_pos = instr.getComponentByName("detector_back").getPos()
             distance = run["Detector 1.det1_calc"].value
             MoveInstrumentComponent(
@@ -1119,7 +1119,7 @@ class SANSILLReduction(DataProcessorAlgorithm):
                 Z=0,
             )
             AddSampleLog(Workspace=ws, LogName="L2", LogText=str(distance), LogType="Number")
-        if instr.getName() == "D11B":
+        if mtd[ws].getInstrumentName() == "D11B":
             back_pos = instr.getComponentByName("detector_center").getPos()
             det_pos = instr.getComponentByName("detector").getPos()
             distance = run["Detector 1.det_calc"].value - back_pos[2]

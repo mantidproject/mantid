@@ -741,7 +741,7 @@ class PowderILLEfficiency(PythonAlgorithm):
             LoadILLDiffraction(Filename=numor, OutputWorkspace=ws_name)
             self._validate_scan(ws_name)
             if index == 0:
-                if mtd[ws_name].getInstrument().getName() != "D2B":
+                if mtd[ws_name].getInstrumentName() != "D2B":
                     raise RuntimeError("Global reference method is not supported for the instrument given")
                 self._configure_global(ws_name)
             if self._normalise_to == "Monitor":
@@ -910,7 +910,7 @@ class PowderILLEfficiency(PythonAlgorithm):
         if self._derivation_method == "SequentialSummedReference1D":  # D20
             self._input_files = self._input_files.replace(",", "+")
             LoadAndMerge(Filename=self._input_files, OutputWorkspace=raw_ws, LoaderName="LoadILLDiffraction")
-            if not mtd[raw_ws].getInstrument().getName().startswith("D20"):
+            if not mtd[raw_ws].getInstrumentName().startswith("D20"):
                 DeleteWorkspace(raw_ws)
                 raise RuntimeError("Sequential reference method is not supported for the instrument given")
             self._validate_scan(raw_ws)
