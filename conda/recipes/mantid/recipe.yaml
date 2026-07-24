@@ -98,9 +98,6 @@ cache:
       - if: win
         then:
           - lib3mf
-      - if: osx or linux
-        then:
-          - quasielasticbayes ${{ quasielasticbayes }}
 
 outputs:
   - package:
