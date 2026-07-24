@@ -166,11 +166,7 @@ class GuiTestBase(object):
         action = self.get_child(QAction, name)
         if not get_menu:
             return action
-        if hasattr(action, "associatedObjects"):
-            # Qt6: associatedWidgets() was replaced by associatedObjects(), which can also contain non-widgets
-            menus = [obj for obj in action.associatedObjects() if isinstance(obj, QWidget)]
-        else:
-            menus = action.associatedWidgets()
+        menus = [obj for obj in action.associatedObjects() if isinstance(obj, QWidget)]
         if len(menus) == 0:
             raise RuntimeError("QAction {} isn't associated with any menu".format(name))
         return action, menus[0]
