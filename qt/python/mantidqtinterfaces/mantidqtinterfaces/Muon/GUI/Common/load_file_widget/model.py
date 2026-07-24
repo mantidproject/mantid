@@ -48,7 +48,7 @@ class BrowseFileWidgetModel(object):
                 failed_files += [(filename, error)]
                 continue
             if not psi_data:
-                instrument_from_workspace = ws["OutputWorkspace"][0].workspace.getInstrument().getName()
+                instrument_from_workspace = ws["OutputWorkspace"][0].workspace.getInstrumentName()
             else:
                 # Load another instrument first
                 instrument_from_workspace = "PSI"
@@ -85,7 +85,7 @@ class BrowseFileWidgetModel(object):
         return self._loaded_data_store.get_data(**kwargs)
 
     def get_instrument_from_latest_run(self):
-        instrument = self._loaded_data_store.get_latest_data()["workspace"]["OutputWorkspace"][0].workspace.getInstrument().getName()
+        instrument = self._loaded_data_store.get_latest_data()["workspace"]["OutputWorkspace"][0].workspace.getInstrumentName()
         if instrument:
             return instrument
         else:

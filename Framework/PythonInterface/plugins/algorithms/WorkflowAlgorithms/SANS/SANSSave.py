@@ -253,7 +253,7 @@ class SANSSave(DataProcessorAlgorithm):
         additional_properties["SampleWidth"] = sample.getWidth()
         additional_properties["SampleThickness"] = sample.getThickness()
 
-        instrument = SANSInstrument_string_as_key_NoInstrument[workspace.getInstrument().getName()]
+        instrument = SANSInstrument_string_as_key_NoInstrument[workspace.getInstrumentName()]
         additional_properties["DetectorNames"] = ",".join(get_detector_names_from_instrument(instrument))
 
         maybe_geometry = convert_to_shape(sample.getGeometryFlag())

@@ -599,7 +599,7 @@ def _plot_focused_workspaces(ws_names: Sequence[str]) -> None:
 
     for ws_name in ws_names:
         ws_foc = ADS.retrieve(ws_name)
-        ws_label = "_".join([ws_foc.getInstrument().getName(), ws_foc.run().get("run_number").value])
+        ws_label = "_".join([ws_foc.getInstrumentName(), ws_foc.run().get("run_number").value])
         fig, ax = subplots(subplot_kw={"projection": "mantid"})
         for ispec in range(ws_foc.getNumberHistograms()):
             ax.plot(ws_foc, label=f"{ws_label} focused: spec {ispec + 1}", marker=".", wkspIndex=ispec)

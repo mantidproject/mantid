@@ -27,6 +27,7 @@ class TextureCorrectionModelTest(unittest.TestCase):
         # Mock instrument
         mock_inst = MagicMock()
         mock_inst.getName.return_value = "instrument"
+        instrument_name = "instrument"
 
         # Mock run_number log property
         mock_run_number = MagicMock()
@@ -51,6 +52,7 @@ class TextureCorrectionModelTest(unittest.TestCase):
         # Mock workspace
         self.mock_ws = MagicMock()
         self.mock_ws.getInstrument.return_value = mock_inst
+        self.mock_ws.getInstrumentName.return_value = instrument_name
         self.mock_ws.getRun.return_value = mock_run
         self.mock_ws.run.return_value = mock_run
         self.mock_ws.sample.return_value = mock_sample

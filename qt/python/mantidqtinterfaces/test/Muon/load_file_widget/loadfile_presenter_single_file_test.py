@@ -84,6 +84,7 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         instrument_mock = mock.MagicMock()
         instrument_mock.getName.return_value = "EMU"
         workspace_mock.workspace.getInstrument.return_value = instrument_mock
+        workspace_mock.workspace.getInstrumentName.return_value = "EMU"
 
         return {"OutputWorkspace": [workspace_mock]}
 

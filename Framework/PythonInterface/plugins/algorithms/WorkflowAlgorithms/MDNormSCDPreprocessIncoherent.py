@@ -174,7 +174,9 @@ class MDNormSCDPreprocessIncoherent(DataProcessorAlgorithm):
 
         if _masking:
             LoadMask(
-                Instrument=mtd["__van"].getInstrument().getName(), InputFile=self.getProperty("MaskFile").value, OutputWorkspace="__mask"
+                Instrument=mtd["__van"].getInstrumentName(),
+                InputFile=self.getProperty("MaskFile").value,
+                OutputWorkspace="__mask",
             )
             MaskDetectors(Workspace="__van", MaskedWorkspace="__mask")
             DeleteWorkspace("__mask")

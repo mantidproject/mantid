@@ -29,7 +29,7 @@ class InstrumentView:
 
         if (
             not ws.getInstrument()
-            or not ws.getInstrument().getName()
+            or not ws.getInstrumentName()
             or not ws.getAxis(1).isSpectra()
             or (ws.detectorInfo().detectorIDs().size == 0)
         ):

@@ -74,7 +74,7 @@ Usage
                                       BinWidth=0.01)
     # Efixed is generally defined as part of the IDF for real data.
     # Fake it here
-    inst_name = sample_ws.getInstrument().getName()
+    inst_name = sample_ws.getInstrumentName()
     SetInstrumentParameter(sample_ws, ComponentName=inst_name,
         ParameterName='Efixed', ParameterType='Number', Value='4.1')
 
@@ -127,7 +127,7 @@ Usage
                                       BinWidth=0.01)
     # Efixed is generally defined as part of the IDF for real data.
     # Fake it here
-    inst_name = sample_ws.getInstrument().getName()
+    inst_name = sample_ws.getInstrumentName()
     SetInstrumentParameter(sample_ws, ComponentName=inst_name,
         ParameterName='Efixed', ParameterType='Number', Value='4.1')
 
@@ -178,7 +178,7 @@ Usage
                                       BinWidth=0.01)
     # Efixed is generally defined as part of the IDF for real data.
     # Fake it here
-    inst_name = sample_ws.getInstrument().getName()
+    inst_name = sample_ws.getInstrumentName()
     SetInstrumentParameter(sample_ws, ComponentName=inst_name,
         ParameterName='Efixed', ParameterType='Number', Value='4.1')
 
@@ -231,7 +231,7 @@ Usage
                                       BinWidth=0.01)
     # Efixed is generally defined as part of the IDF for real data.
     # Fake it here
-    inst_name = sample_ws.getInstrument().getName()
+    inst_name = sample_ws.getInstrumentName()
     SetInstrumentParameter(sample_ws, ComponentName=inst_name,
         ParameterName='Efixed', ParameterType='Number', Value='4.1')
 

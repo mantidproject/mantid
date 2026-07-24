@@ -319,7 +319,7 @@ def pdcalibration_groups(
     # put the input data back into time-of-flight
     ConvertUnits(data_ws, Target="dSpacing", OutputWorkspace=data_ws)
 
-    instrument = data_ws.getInstrument().getName()
+    instrument = data_ws.getInstrumentName()
 
     if instrument == "POWGEN":
         pdcalib_for_powgen(

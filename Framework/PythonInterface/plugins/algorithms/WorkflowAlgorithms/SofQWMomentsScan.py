@@ -485,7 +485,7 @@ class SofQWMomentsScan(DataProcessorAlgorithm):
             else:
                 raise RuntimeError("Could not find run number associated with workspace.")
 
-        instrument = mtd[ws_name].getInstrument().getName()
+        instrument = mtd[ws_name].getInstrumentName()
         if instrument != "":
             for facility in config.getFacilities():
                 try:

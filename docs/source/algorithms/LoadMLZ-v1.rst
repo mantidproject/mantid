@@ -29,7 +29,7 @@ Usage
 
    ws = LoadMLZ(Filename='TOFTOFTestdata.nxs')
 
-   print("Name of the instrument:  {}".format(ws.getInstrument().getName()))
+   print("Name of the instrument:  {}".format(ws.getInstrumentName()))
    print("Number of spectra:  {}".format(ws.getNumberHistograms()))
 
 

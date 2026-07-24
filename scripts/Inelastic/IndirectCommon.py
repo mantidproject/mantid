@@ -53,7 +53,7 @@ def get_instrument_and_run(ws_name: str) -> Tuple[str, str]:
     """
     run_number = get_run_number(ws_name)
 
-    instrument = AnalysisDataService.retrieve(ws_name).getInstrument().getName()
+    instrument = AnalysisDataService.retrieve(ws_name).getInstrumentName()
     if instrument == "":
         return instrument, run_number
 

@@ -307,7 +307,7 @@ class TextureCorrectionModel:
     def get_atten_table_name(ws_str: str, eval_val: float, unit: str) -> str:
         ws = ADS.retrieve(ws_str)
         run_num = str(ws.getRun().getProperty("run_number").value)
-        instr = ws.getInstrument().getName()
+        instr = ws.getInstrumentName()
         return f"{instr}_{run_num}_attenuation_coefficient_{eval_val}_{unit}"
 
     def write_atten_val_table(

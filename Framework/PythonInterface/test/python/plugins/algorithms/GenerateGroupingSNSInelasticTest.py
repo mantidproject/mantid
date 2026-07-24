@@ -103,7 +103,7 @@ class GenerateGroupingSNSInelasticTest(unittest.TestCase):
         IDF_name = alg_test.getProperty("InstrumentDefinitionFile").value
 
         __w = mantid.simpleapi.LoadEmptyInstrument(Filename=IDF_name)
-        instrument_name = __w.getInstrument().getName()
+        instrument_name = __w.getInstrumentName()
 
         self.assertTrue(alg_test.isExecuted())
         self.assertTrue(os.path.exists(outfilename))

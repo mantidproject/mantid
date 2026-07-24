@@ -118,6 +118,8 @@ void export_ExperimentInfo() {
            "Return a const reference to the "
            ":class:`~mantid.geometry.ComponentInfo` "
            "object.")
+      .def("getInstrumentName", &ExperimentInfo::getInstrumentName, args("self"),
+           "Return the name of the instrument for this experiment.")
       .def("setSample", setSample, args("self", "sample"))
       .def("setRun", setRun, args("self", "run"))
       .def("populateInstrumentParameters", &ExperimentInfo::populateInstrumentParameters, (arg("self")),

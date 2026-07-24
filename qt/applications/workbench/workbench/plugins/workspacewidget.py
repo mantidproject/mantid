@@ -285,7 +285,7 @@ class WorkspaceWidget(PluginWidget):
         """
         parent, flags = get_window_config()
         for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
-            if ws.getInstrument().getName():
+            if ws.getInstrumentName():
                 try:
                     presenter = InstrumentViewPresenter(ws, parent=parent, window_flags=flags)
                     presenter.show_view()
@@ -302,7 +302,7 @@ class WorkspaceWidget(PluginWidget):
         """
         parent, _ = get_window_config()
         for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
-            if ws.getInstrument().getName():
+            if ws.getInstrumentName():
                 try:
                     view = FullInstrumentViewWindow(parent=parent, off_screen=off_screen)
                     view.show()

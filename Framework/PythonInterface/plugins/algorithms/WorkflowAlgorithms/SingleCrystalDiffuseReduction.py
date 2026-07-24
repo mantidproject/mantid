@@ -263,7 +263,9 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
 
         if _masking:
             LoadMask(
-                Instrument=mtd["__sa"].getInstrument().getName(), InputFile=self.getProperty("MaskFile").value, OutputWorkspace="__mask"
+                Instrument=mtd["__sa"].getInstrumentName(),
+                InputFile=self.getProperty("MaskFile").value,
+                OutputWorkspace="__mask",
             )
             MaskDetectors(Workspace="__sa", MaskedWorkspace="__mask")
             DeleteWorkspace("__mask")
