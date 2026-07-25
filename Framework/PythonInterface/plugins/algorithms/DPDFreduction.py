@@ -12,6 +12,7 @@ import mantid.simpleapi as sapi
 import mantid.api as api
 import mantid.kernel as kapi
 from mantid import config
+from mantid.utils.deprecator import deprecated_algorithm
 from tempfile import mkstemp
 
 # conversion factor from energy (in meV) to vawevector (in inverse Angstroms)
@@ -20,6 +21,7 @@ ENERGY_TO_WAVEVECTOR = 2.072
 # pylint: disable=too-many-instance-attributes
 
 
+@deprecated_algorithm(None, "2026-07-24")
 class DPDFreduction(api.PythonAlgorithm):
     channelgroup = None
 

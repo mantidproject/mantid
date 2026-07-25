@@ -81,6 +81,10 @@ class DeprecatorTest(unittest.TestCase):
         log_file = self._exec_alg("log")
         self.assertTrue(' Algorithm "MyOldAlg" is deprecated' in log_file)
 
+    def test_deprecated_algorithm_adds_deprecated_category(self):
+        alg = MyOldAlg()
+        self.assertEqual("Inelastic\\Reduction;Deprecated", alg.category())
+
 
 if __name__ == "__main__":
     unittest.main()
