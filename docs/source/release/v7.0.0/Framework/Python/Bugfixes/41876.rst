@@ -1,0 +1,1 @@
+- Fixed a crash where a ``Peak`` retrieved from a ``PeaksWorkspace`` in Python could reference deleted memory after the owning workspace is deleted. Peaks now share ownership of their workspace, keeping it alive for as long as the peak is in use.

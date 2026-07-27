@@ -11,11 +11,14 @@
 #include "MantidPythonInterface/api/RegisterWorkspacePtrToPython.h"
 #include "MantidPythonInterface/core/Converters/PyObjectToV3D.h"
 #include "MantidPythonInterface/core/Converters/PySequenceToVector.h"
+#include "MantidPythonInterface/core/ExtractSharedPtr.h"
 #include "MantidPythonInterface/core/GetPointer.h"
 #include <boost/none.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/iterator.hpp>
 #include <boost/python/manage_new_object.hpp>
+#include <boost/python/object.hpp>
+#include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/return_internal_reference.hpp>
 #include <optional>
 #include <utility>
@@ -232,34 +235,53 @@ void setCell(IPeaksWorkspace &self, const object &col_or_row, const int row_or_c
   tableMap.setProperty(columnName, rowIndex, value);
 }
 
+/// Extract the calling workspace as a shared_ptr so peaks handed out to Python
+/// can share ownership of it.
+IPeaksWorkspace_sptr extractWorkspace(const object &self) {
+  return std::dynamic_pointer_cast<IPeaksWorkspace>(Mantid::PythonInterface::ExtractSharedPtr<Workspace>(self)());
+}
+
+/**
+ * Return the peak at the given index as a shared_ptr that shares ownership with
+ * the owning workspace.
+ */
+std::shared_ptr<IPeak> makePeakHandle(const IPeaksWorkspace_sptr &workspace, const int index) {
+  return std::shared_ptr<IPeak>(workspace, workspace->getPeakPtr(index));
+}
+
+/// getPeak binding: return a peak that keeps its workspace alive
+std::shared_ptr<IPeak> getPeak(const object &self, const int index) {
+  return makePeakHandle(extractWorkspace(self), index);
+}
+
 /// Internal helper to support iteration on PeaksWorkspace in Python
 struct IPeaksWorkspaceIterator {
-  explicit IPeaksWorkspaceIterator(IPeaksWorkspace *const workspace)
+  explicit IPeaksWorkspaceIterator(const IPeaksWorkspace_sptr &workspace)
       : m_workspace{workspace}, m_numPeaks{workspace->getNumberPeaks()}, m_rowIndex{-1} {
     assert(workspace);
   }
-  IPeak *next() {
+  std::shared_ptr<IPeak> next() {
     ++m_rowIndex;
     if (m_rowIndex >= m_numPeaks) {
       objects::stop_iteration_error();
     }
-    return m_workspace->getPeakPtr(m_rowIndex);
+    return makePeakHandle(m_workspace, m_rowIndex);
   }
 
 private:
-  IPeaksWorkspace *const m_workspace;
+  IPeaksWorkspace_sptr m_workspace;
   const int m_numPeaks;
   int m_rowIndex;
 };
 
 // Create an iterator from the given workspace
-IPeaksWorkspaceIterator makePyIterator(IPeaksWorkspace &self) { return IPeaksWorkspaceIterator(&self); }
+IPeaksWorkspaceIterator makePyIterator(const object &self) { return IPeaksWorkspaceIterator(extractWorkspace(self)); }
 
 } // namespace
 
 void export_IPeaksWorkspaceIterator() {
   class_<IPeaksWorkspaceIterator>("IPeaksWorkspaceIterator", no_init)
-      .def("__next__", &IPeaksWorkspaceIterator::next, return_value_policy<reference_existing_object>())
+      .def("__next__", &IPeaksWorkspaceIterator::next)
       .def("__iter__", objects::identity_function());
 }
 
@@ -272,8 +294,7 @@ void export_IPeaksWorkspace() {
       .def("addPeak", addPeak2, (arg("self"), arg("data"), arg("coord_system")), "Add a peak to the workspace")
       .def("removePeak", removePeak, (arg("self"), arg("peak_num")), "Remove a peak from the workspace")
       .def("removePeaks", removePeaks, (arg("self"), arg("peak_num")), "Remove specified peaks from the workspace")
-      .def("getPeak", &IPeaksWorkspace::getPeakPtr, (arg("self"), arg("peak_num")), return_internal_reference<>(),
-           "Returns a peak at the given index")
+      .def("getPeak", &getPeak, (arg("self"), arg("peak_num")), "Returns a peak at the given index")
       .def("createPeak", createPeakQLab, (arg("self"), arg("data")), return_value_policy<manage_new_object>(),
            "Create a Peak and return it from its coordinates in the QLab frame")
       .def("createPeak", createPeakQLabWithDistance, (arg("self"), arg("data"), arg("detector_distance")),
