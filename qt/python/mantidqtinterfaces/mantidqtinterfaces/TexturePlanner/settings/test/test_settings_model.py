@@ -23,6 +23,7 @@ class TestTexturePlannerSettingsModel_GetSetting(unittest.TestCase):
     @patch(file_path + ".QSettings")
     def test_non_bool_returns_qsettings_value_typed(self, mock_qsettings):
         qs = MagicMock()
+        qs.contains.return_value = True
         qs.value.return_value = 1.5
         mock_qsettings.return_value = qs
 
@@ -36,6 +37,7 @@ class TestTexturePlannerSettingsModel_GetSetting(unittest.TestCase):
     @patch(file_path + ".QSettings")
     def test_bool_true_string_returns_true(self, mock_qsettings):
         qs = MagicMock()
+        qs.contains.return_value = True
         qs.value.return_value = "true"
         mock_qsettings.return_value = qs
 
@@ -47,6 +49,7 @@ class TestTexturePlannerSettingsModel_GetSetting(unittest.TestCase):
     @patch(file_path + ".QSettings")
     def test_bool_false_string_returns_false(self, mock_qsettings):
         qs = MagicMock()
+        qs.contains.return_value = True
         qs.value.return_value = "false"
         mock_qsettings.return_value = qs
 
@@ -55,14 +58,27 @@ class TestTexturePlannerSettingsModel_GetSetting(unittest.TestCase):
         self.assertIs(result, False)
 
     @patch(file_path + ".QSettings")
-    def test_bool_missing_returns_empty_string_sentinel(self, mock_qsettings):
+    def test_missing_key_returns_default_without_lookup(self, mock_qsettings):
         qs = MagicMock()
-        qs.value.return_value = ""
+        qs.contains.return_value = False
         mock_qsettings.return_value = qs
 
-        result = TexturePlannerSettingsModel._get_setting("directions", bool)
+        result = TexturePlannerSettingsModel._get_setting("att_point", float, 1.5)
 
-        self.assertEqual(result, "")
+        qs.contains.assert_called_once_with(TEXTURE_PLANNER_PREFIX + "att_point")
+        qs.value.assert_not_called()
+        self.assertEqual(result, 1.5)
+
+    @patch(file_path + ".QSettings")
+    def test_bool_unparseable_value_returns_default(self, mock_qsettings):
+        qs = MagicMock()
+        qs.contains.return_value = True
+        qs.value.return_value = "garbage"
+        mock_qsettings.return_value = qs
+
+        result = TexturePlannerSettingsModel._get_setting("directions", bool, True)
+
+        self.assertIs(result, True)
 
 
 class TestTexturePlannerSettingsModel_SetSetting(unittest.TestCase):
@@ -83,26 +99,22 @@ class TestTexturePlannerSettingsModel_GetSettingsDict(unittest.TestCase):
         model = TexturePlannerSettingsModel()
         canned = {name: (True if t is bool else t(1) if t in (int, float) else "x") for name, t in SETTINGS_DICT.items()}
 
-        with patch.object(TexturePlannerSettingsModel, "_get_setting", side_effect=lambda name, t: canned[name]):
+        with patch.object(TexturePlannerSettingsModel, "_get_setting", side_effect=lambda name, t, default: canned[name]):
             result = model.get_settings_dict()
 
         self.assertEqual(result, canned)
 
-    def test_falls_back_to_default_when_value_is_empty_string(self):
+    def test_passes_type_and_default_for_each_key_to_get_setting(self):
+        # get_settings_dict delegates the missing-value fallback to _get_setting by handing it the
+        # per-key default; the fallback behaviour itself is covered in TestTexturePlannerSettingsModel_GetSetting.
         model = TexturePlannerSettingsModel()
 
-        with patch.object(TexturePlannerSettingsModel, "_get_setting", return_value=""):
-            result = model.get_settings_dict()
+        with patch.object(TexturePlannerSettingsModel, "_get_setting", return_value="x") as mock_get:
+            model.get_settings_dict()
 
-        self.assertEqual(result, DEFAULT_SETTINGS)
-
-    def test_falls_back_to_default_when_value_is_none(self):
-        model = TexturePlannerSettingsModel()
-
-        with patch.object(TexturePlannerSettingsModel, "_get_setting", return_value=None):
-            result = model.get_settings_dict()
-
-        self.assertEqual(result, DEFAULT_SETTINGS)
+        self.assertEqual(mock_get.call_count, len(SETTINGS_DICT))
+        for name, return_type in SETTINGS_DICT.items():
+            mock_get.assert_any_call(name, return_type, DEFAULT_SETTINGS[name])
 
 
 class TestTexturePlannerSettingsModel_SetSettingsDict(unittest.TestCase):
