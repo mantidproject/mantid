@@ -114,6 +114,7 @@ public:
     alg.setPropertyValue("OutputWorkspace", "test_md3");
     TS_ASSERT_THROWS_NOTHING(alg.execute();)
     TS_ASSERT(alg.isExecuted())
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist("PreprocDetectorsWS"))
 
     MDEventWorkspace3::sptr ws;
     TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3>("test_md3"));
@@ -138,6 +139,7 @@ public:
       alg.setPropertyValue("OutputWorkspace", "test_md3");
       TS_ASSERT_THROWS_NOTHING(alg.execute();)
       TS_ASSERT(alg.isExecuted())
+      TS_ASSERT(!AnalysisDataService::Instance().doesExist("PreprocDetectorsWS"))
 
       TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3>("test_md3"));
       TS_ASSERT(ws);
@@ -189,6 +191,7 @@ public:
     alg.setPropertyValue("OutputWorkspace", "test_md3");
     TS_ASSERT_THROWS_NOTHING(alg.execute();)
     TS_ASSERT(alg.isExecuted())
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist("PreprocDetectorsWS"))
 
     MDEventWorkspace3::sptr ws;
     TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3>("test_md3"));
