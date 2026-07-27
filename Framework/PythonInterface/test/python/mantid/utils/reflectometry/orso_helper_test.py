@@ -257,16 +257,22 @@ class MantidORSODatasetTest(unittest.TestCase):
         mock_logger.assert_has_calls(
             [
                 mock.call(
-                    "The provided model description 'air | Ni 100 | SiO2 0.5 | 02' contains an error. "
-                    "Please check that the string follows the correct ORSO format."
+                    "The provided model description 'air | Ni 100 | SiO2 0.5 | 02' contains an error because the "
+                    "density information of atleast one of the materials in the stack couldn't "
+                    "be located. Please check that the string follows the correct ORSO format "
+                    "and the materials in the stack are defined correctly"
                 ),
                 mock.call(
-                    "The provided model description 'air | 25 [ Si 7 | Fe 7 ] | Si' contains an error. "
-                    "Please check that the string follows the correct ORSO format."
+                    "The provided model description 'air | 25 [ Si 7 | Fe 7 ] | Si' contains an error because the "
+                    "density information of atleast one of the materials in the stack couldn't "
+                    "be located. Please check that the string follows the correct ORSO format "
+                    "and the materials in the stack are defined correctly"
                 ),
                 mock.call(
-                    "The provided model description 'Si | SiO2 0.5 | wat:er' contains an error. "
-                    "Please check that the string follows the correct ORSO format."
+                    "The provided model description 'Si | SiO2 0.5 | wat:er' contains an error because the "
+                    "density information of atleast one of the materials in the stack couldn't "
+                    "be located. Please check that the string follows the correct ORSO format "
+                    "and the materials in the stack are defined correctly"
                 ),
             ]
         )
@@ -283,6 +289,21 @@ class MantidORSODatasetTest(unittest.TestCase):
         error_logger.assert_has_calls(
             [
                 mock.call("The provided model description 'air' could not be validated because of database unavailability."),
+            ]
+        )
+
+    @mock.patch("mantid.utils.reflectometry.orso_helper.logger.error")
+    @mock.patch("mantid.utils.reflectometry.orso_helper.SampleModel")
+    def test_create_mandatory_header_raises_miscellaneous_error(self, mock_sample_model, error_logger):
+        sample_model = mock_sample_model.return_value
+        for exp in [TypeError, IndexError, ValueError]:
+            sample_model.resolve_to_layers.side_effect = exp()
+            MantidORSODataset(None, None, None, None, None, None, None, model="air", validate=True)
+        error_logger.assert_has_calls(
+            [
+                mock.call("A TypeError occurred while validating the model description 'air' through resolve_to_layers."),
+                mock.call("A IndexError occurred while validating the model description 'air' through resolve_to_layers."),
+                mock.call("A ValueError occurred while validating the model description 'air' through resolve_to_layers."),
             ]
         )
 

@@ -130,7 +130,7 @@ class MantidORSODataset:
 
     @staticmethod
     def _create_file(filename: str, timestamp: Optional[datetime] = None, comment: Optional[str] = None) -> File:
-        return File(filename, timestamp, comment)
+        return File(file=filename, timestamp=timestamp, comment=comment)
 
     def _create_mandatory_header(
         self,
@@ -149,15 +149,23 @@ class MantidORSODataset:
                 with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
                     future = executor.submit(SampleModel(stack=model).resolve_to_layers)
                     try:
-                        future.result(timeout=5.0)
+                        layers = future.result(timeout=5.0)
+                        if "could not locate density information for material" in str(layers):
+                            logger.error(
+                                f"The provided model description '{model}' contains an error because the "
+                                "density information of atleast one of the materials in the stack couldn't "
+                                "be located. Please check that the string follows the correct ORSO format "
+                                "and the materials in the stack are defined correctly"
+                            )
+                            self._header = None
+                            return
                     except concurrent.futures.TimeoutError:
                         logger.error(f"The provided model description '{model}' could not be validated because of database unavailability.")
                         self._header = None
                         return
-                    except:
+                    except Exception as exp:
                         logger.error(
-                            f"The provided model description '{model}' contains an error. "
-                            "Please check that the string follows the correct ORSO format."
+                            f"A {type(exp).__name__} occurred while validating the model description '{model}' through resolve_to_layers."
                         )
                         self._header = None
                         return
