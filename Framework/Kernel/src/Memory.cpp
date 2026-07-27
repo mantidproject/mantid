@@ -566,17 +566,27 @@ size_t MemoryStats::getCurrentRSS() const {
 
 /** @brief Check if there is enough space in memory to hold the requested amount of memory.
  * @param requestedMemoryBytes :: The amount of memory that is being requested, in bytes.
- * @return error string if the requested memory would exceed the available memory; else empty string
+ * @param compareToTotalMemory :: If false (default) the request is compared against the currently
+ *   available system memory. If true it is compared against the machine's total physical memory
+ *   instead. Comparing to total memory makes the check independent of transient system load (e.g.
+ *   other processes running in parallel), which otherwise causes the same request to pass or fail
+ *   non-deterministically.
+ * @param fraction :: Fraction of the chosen memory basis to treat as the usable limit (default 1.0,
+ *   i.e. the whole basis). Use a value below 1.0 to leave some headroom.
+ * @return error string if the requested memory would exceed the usable limit; else empty string
  */
-std::string MemoryStats::checkAvailableMemory(std::size_t const requestedMemoryBytes) const {
+std::string MemoryStats::checkAvailableMemory(std::size_t const requestedMemoryBytes, bool const compareToTotalMemory,
+                                              double const fraction) const {
   std::string errorString;
-  const auto availableMemory = this->availMem() * 1024; // Convert from KiB to bytes
-  if (requestedMemoryBytes > availableMemory) {
+  const std::size_t memoryBasisKiB = compareToTotalMemory ? this->totalMem() : this->availMem();
+  // Fraction of the chosen basis, converted from KiB to bytes
+  const auto usableMemory = static_cast<std::size_t>(fraction * static_cast<double>(memoryBasisKiB) * 1024.0);
+  if (requestedMemoryBytes > usableMemory) {
     double constexpr bytesToGB = 1e9;
     double requestedGB = static_cast<double>(requestedMemoryBytes) / bytesToGB;
-    double availableGB = static_cast<double>(availableMemory) / bytesToGB;
-    errorString = "Requested " + std::to_string(requestedGB) + " GB of memory, but only " +
-                  std::to_string(availableGB) + " GB is available.";
+    double usableGB = static_cast<double>(usableMemory) / bytesToGB;
+    errorString = "Requested " + std::to_string(requestedGB) + " GB of memory, but only " + std::to_string(usableGB) +
+                  " GB is available.";
   }
   return errorString;
 }

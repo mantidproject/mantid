@@ -199,7 +199,13 @@ std::map<std::string, std::string> Rebin::validateInputs() {
     } else if (!(eventInputWS && preserveEvents)) {
       size_t numSpec = inputWS->getNumberHistograms();
       std::size_t binSpaceInBytes = 2 * numSpec * numBins * sizeof(double); // memory required in bytes
-      std::string memMsg = MemoryStats().checkAvailableMemory(binSpaceInBytes);
+      // Compare against a fraction of total physical memory rather than currently-available memory:
+      // available memory fluctuates with unrelated system load (e.g. tests running in parallel), which
+      // made this check reject legitimate rebins non-deterministically. Total memory depends only on the
+      // machine, keeping the check deterministic while still catching genuinely oversized binnings.
+      constexpr double memorySafetyFraction = 0.8;
+      std::string memMsg =
+          MemoryStats().checkAvailableMemory(binSpaceInBytes, /*compareToTotalMemory=*/true, memorySafetyFraction);
       if (!memMsg.empty()) {
         memMsg = "This binning is expected to create " + std::to_string(numBins * numSpec) + " bins. " + memMsg +
                  " Consider grouping spectra before rebinning, or using a coarser binning.";

@@ -68,8 +68,12 @@ std::size_t Mantid::Kernel::MemoryStats::availMem() const {
   }
 }
 
-std::string Mantid::Kernel::MemoryStats::checkAvailableMemory(std::size_t const requestedMemory) const {
+std::string Mantid::Kernel::MemoryStats::checkAvailableMemory(std::size_t const requestedMemory,
+                                                              bool const compareToTotalMemory,
+                                                              double const fraction) const {
   if (g_override_availMem.load()) {
+    // In override mode the mocked value is the effective memory ceiling directly, so tests can target
+    // the boundary without accounting for compareToTotalMemory or the fraction.
     std::size_t avail = g_value.load() * 1024;
     if (requestedMemory > avail) {
       return "Mock Memory Failure";
@@ -77,18 +81,25 @@ std::string Mantid::Kernel::MemoryStats::checkAvailableMemory(std::size_t const 
       return "";
     }
   } else {
-    init_real_availMem();
-    if (g_real_availMem.load()) {
-      // requestedMemory is in bytes, availMem is in KiB, so multiply
-      std::size_t avail = g_real_availMem.load()(this) * 1024;
-      if (requestedMemory > avail) {
-        return "Requested Memory Failure " + std::to_string(requestedMemory) + " > " + std::to_string(avail);
-      } else {
-        return "";
-      }
+    // Mirror the real implementation: pick the memory basis and scale it by the fraction. totalMem() is not
+    // patched, so it resolves to the real value; availMem() is patched, so reach the real one via lookup.
+    std::size_t basisKiB;
+    if (compareToTotalMemory) {
+      basisKiB = this->totalMem();
     } else {
-      // if it cannot be thrown, this can cause opaque testing errors; throw an error here instead
-      throw std::runtime_error("Failed to reset the MemoryStats patch by name lookup");
+      init_real_availMem();
+      if (!g_real_availMem.load()) {
+        // Throw an error here if it doesn't work, otherwise this can cause opaque testing errors
+        throw std::runtime_error("Failed to reset the MemoryStats patch by name lookup");
+      }
+      basisKiB = g_real_availMem.load()(this);
+    }
+    // basisKiB is in KiB, requestedMemory is in bytes, so multiply
+    std::size_t avail = static_cast<std::size_t>(fraction * static_cast<double>(basisKiB) * 1024.0);
+    if (requestedMemory > avail) {
+      return "Requested Memory Failure " + std::to_string(requestedMemory) + " > " + std::to_string(avail);
+    } else {
+      return "";
     }
   }
 }

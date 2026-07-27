@@ -42,7 +42,8 @@ public:
   std::size_t getCurrentRSS() const;
   std::size_t getPeakRSS() const;
   double getFreeRatio() const;
-  std::string checkAvailableMemory(std::size_t const requestedMemoryBytes) const;
+  std::string checkAvailableMemory(std::size_t const requestedMemoryBytes, bool const compareToTotalMemory = false,
+                                   double const fraction = 1.0) const;
 
 private:
   void process_mem_system(size_t &sys_avail, size_t &sys_total);
