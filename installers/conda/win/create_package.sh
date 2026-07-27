@@ -90,21 +90,13 @@ if [ -z "$MANTID_VERSION" ]; then
   exit 1
 fi
 
-echo "Creating conda env from mantidworkbench==${MANTID_VERSION} and jq"
+echo "Creating conda env from mantidworkbench==${MANTID_VERSION} and mslice"
 "$CONDA_EXE" create --prefix $CONDA_ENV_PATH \
   --copy --channel $CONDA_CHANNEL --channel conda-forge --channel $MANTID_CHANNEL -y \
   "mantidworkbench==${MANTID_VERSION}" \
   "mantiddocs==${MANTID_VERSION}" \
-  mslice \
-  m2w64-jq
+  mslice
 echo "Conda env created"
-
-# Determine version information
-VERSION=$("$CONDA_EXE" list --prefix "$CONDA_ENV_PATH" '^mantid$' --json | $CONDA_ENV_PATH/Library/mingw-w64/bin/jq.exe --raw-output '.[0].version')
-echo "Version number: $VERSION"
-echo "Removing jq from conda env"
-"$CONDA_EXE" remove --prefix $CONDA_ENV_PATH --yes m2w64-jq
-echo "jq removed from conda env"
 
 echo "Copying root packages of env files (Python, DLLs, Lib, Scripts, ucrt, and msvc files) to package/bin"
 mkdir $COPY_DIR/bin
@@ -118,7 +110,6 @@ mv $CONDA_ENV_PATH/ucrt*.* $COPY_DIR/bin/
 echo "Copy all DLLs from env/Library/bin to package/bin"
 mv $CONDA_ENV_PATH/Library/bin/*.dll $COPY_DIR/bin/
 
-
 echo "Copy Mantid specific files from env/Library/bin to package/bin"
 mv $CONDA_ENV_PATH/Library/bin/Mantid.properties $COPY_DIR/bin/
 mv $CONDA_ENV_PATH/Library/bin/mantid-scripts.pth $COPY_DIR/bin/
@@ -129,19 +120,18 @@ cp $THIS_SCRIPT_DIR/../../../images/mantid_workbench$LOWER_CASE_SUFFIX.ico $COPY
 echo "Copy Instrument details to the package"
 mv $CONDA_ENV_PATH/Library/instrument $COPY_DIR/
 
-echo "Constructing package/lib/qt5"
-mkdir -p $COPY_DIR/lib/qt5/bin
-cp $THIS_SCRIPT_DIR/../common/qt.conf $COPY_DIR/lib/qt5/bin
+echo "Constructing package/lib/qt6"
+mkdir -p $COPY_DIR/lib/qt6/bin
+cp $THIS_SCRIPT_DIR/../common/qt.conf $COPY_DIR/lib/qt6/bin
 
 echo "Copy plugins to the package"
 mkdir $COPY_DIR/plugins
-mkdir $COPY_DIR/plugins/qt5
-mv $CONDA_ENV_PATH/Library/plugins/platforms $COPY_DIR/plugins/qt5/
-mv $CONDA_ENV_PATH/Library/plugins/imageformats $COPY_DIR/plugins/qt5/
-mv $CONDA_ENV_PATH/Library/plugins/printsupport $COPY_DIR/plugins/qt5/
-mv $CONDA_ENV_PATH/Library/plugins/sqldrivers $COPY_DIR/plugins/qt5/
-mv $CONDA_ENV_PATH/Library/plugins/styles $COPY_DIR/plugins/qt5/
-mv $CONDA_ENV_PATH/Library/plugins/qt5/*.dll $COPY_DIR/plugins/qt5/
+mkdir $COPY_DIR/plugins/qt6
+mv $CONDA_ENV_PATH/Library/lib/qt6/plugins/platforms $COPY_DIR/plugins/qt6/
+mv $CONDA_ENV_PATH/Library/lib/qt6/plugins/imageformats $COPY_DIR/plugins/qt6/
+mv $CONDA_ENV_PATH/Library/lib/qt6/plugins/sqldrivers $COPY_DIR/plugins/qt6/
+mv $CONDA_ENV_PATH/Library/lib/qt6/plugins/styles $COPY_DIR/plugins/qt6/
+mv $CONDA_ENV_PATH/Library/plugins/qt6/*.dll $COPY_DIR/plugins/qt6/
 mv $CONDA_ENV_PATH/Library/plugins/*.dll $COPY_DIR/plugins/
 mv $CONDA_ENV_PATH/Library/plugins/python $COPY_DIR/plugins/
 
@@ -227,15 +217,15 @@ echo Generating uninstaller helper files
 python $THIS_SCRIPT_DIR/create_uninstall_lists.py --package_dir=$COPY_DIR --output_dir=$THIS_SCRIPT_DIR
 
 # Add version info to the package name
-VERSION_NAME="$PACKAGE_NAME"-"$VERSION".exe
+VERSION_NAME="$PACKAGE_NAME"-"$MANTID_VERSION".exe
 # Give NSIS full path to the output package name so that it drops it in the current working directory.
 OUTFILE_NAME=$PWD/$VERSION_NAME
 OUTFILE_NAME=${OUTFILE_NAME////\\}
 OUTFILE_NAME="$SCRIPT_DRIVE_LETTER:${OUTFILE_NAME:2}"
 
 # Run the makensis command from our nsis conda environment
-echo makensis /V4 /O\"$NSIS_OUTPUT_LOG\" /DVERSION=$VERSION /DPACKAGE_DIR=\"$COPY_DIR\" /DPACKAGE_SUFFIX=$SUFFIX /DOUTFILE_NAME=$OUTFILE_NAME /DMANTID_ICON=$MANTID_ICON /DMUI_PAGE_LICENSE_PATH=$LICENSE_PATH \"$NSIS_SCRIPT\"
-cmd.exe //C "START /wait "" $MAKENSIS_COMMAND /V4 /DVERSION=$VERSION /O"$NSIS_OUTPUT_LOG" /DPACKAGE_DIR="$COPY_DIR" /DPACKAGE_SUFFIX=$SUFFIX /DOUTFILE_NAME=$OUTFILE_NAME /DMANTID_ICON=$MANTID_ICON /DMUI_PAGE_LICENSE_PATH=$LICENSE_PATH "$NSIS_SCRIPT""
+echo makensis /V4 /O\"$NSIS_OUTPUT_LOG\" /DVERSION=$MANTID_VERSION /DPACKAGE_DIR=\"$COPY_DIR\" /DPACKAGE_SUFFIX=$SUFFIX /DOUTFILE_NAME=$OUTFILE_NAME /DMANTID_ICON=$MANTID_ICON /DMUI_PAGE_LICENSE_PATH=$LICENSE_PATH \"$NSIS_SCRIPT\"
+cmd.exe //C "START /wait "" $MAKENSIS_COMMAND /V4 /DVERSION=$MANTID_VERSION /O"$NSIS_OUTPUT_LOG" /DPACKAGE_DIR="$COPY_DIR" /DPACKAGE_SUFFIX=$SUFFIX /DOUTFILE_NAME=$OUTFILE_NAME /DMANTID_ICON=$MANTID_ICON /DMUI_PAGE_LICENSE_PATH=$LICENSE_PATH "$NSIS_SCRIPT""
 
 if [ ! -f "$OUTFILE_NAME" ]; then
   echo "Error creating package, no file found at $OUTFILE_NAME"

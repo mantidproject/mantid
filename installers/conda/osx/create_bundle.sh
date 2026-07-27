@@ -229,31 +229,21 @@ CONDA_SUBDIR="$platform" "$CONDA_EXE" create --quiet --prefix "$bundle_conda_pre
   --channel "$conda_channel" --channel conda-forge --channel $mantid_channel --yes \
   "mantidworkbench==${mantid_version}" \
   "mantiddocs==${mantid_version}" \
-  mslice \
-  jq  # used for processing the version string
+  mslice
 echo
-
-# Determine version information
-version=$("$CONDA_EXE" list --prefix "$bundle_conda_prefix" '^mantid$' --json | \
-  "$bundle_conda_prefix"/bin/jq --raw-output --args '.[0].version' "$mantid_pkg_info")
-echo "Bundling mantid version $version"
-echo
-
-# Remove jq
-"$CONDA_EXE" remove --quiet --prefix "$bundle_conda_prefix" --yes jq
 
 # Trim and fixup bundle
 trim_conda "$bundle_conda_prefix"
 fixup_qt "$bundle_conda_prefix" "$HERE"/../common/qt.conf
 fixup_reexport_paths "$bundle_conda_prefix"
 add_resources "$bundle_contents" "$bundle_name" "$bundle_icon"
-create_plist "$bundle_contents" "$bundle_name" "$bundle_icon" "$version"
+create_plist "$bundle_contents" "$bundle_name" "$bundle_icon" "$mantid_version"
 
 # Create DMG using `create-dmg` tool:
 # https://github.com/sindresorhus/create-dmg
 # `create-dmg` returns error code by default due to lack of signing - this is suppressed using a command list.
 # Failure of the following `mv` command likely signifies `create-dmg` error.
 export PATH=$PATH:/opt/homebrew/bin/
-version_name="$bundle_name"-"$platform"-"$version"
+version_name="$bundle_name"-"$platform"-"$mantid_version"
 create-dmg "$BUILD_DIR"/"$bundle_dirname" || true
-mv "${bundle_name} ${version}.dmg" "${version_name}.dmg"
+mv "${bundle_name} ${mantid_version}.dmg" "${version_name}.dmg"
