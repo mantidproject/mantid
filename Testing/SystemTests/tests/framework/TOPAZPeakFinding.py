@@ -37,7 +37,7 @@ class TOPAZPeakFinding(systemtesting.MantidSystemTest):
         unitcell_exp = UnitCell(4.714, 6.06, 10.40)  # orthorhombic
 
         # Load then convert to Q in the lab frame
-        LoadEventNexus(Filename=r"TOPAZ_3132_event.nxs", OutputWorkspace="topaz_3132")
+        LoadEventNexus(Filename=r"TOPAZ_3132_event.nxs", OutputWorkspace="topaz_3132", BlockList="frequency")
         ConvertToDiffractionMDWorkspace(
             InputWorkspace="topaz_3132",
             OutputWorkspace="topaz_3132_MD",
