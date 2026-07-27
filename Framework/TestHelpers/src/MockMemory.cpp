@@ -72,10 +72,11 @@ std::string Mantid::Kernel::MemoryStats::checkAvailableMemory(std::size_t const 
                                                               bool const compareToTotalMemory,
                                                               double const fraction) const {
   if (g_override_availMem.load()) {
-    // In override mode the mocked value is the effective memory ceiling directly, so tests can target
-    // the boundary without accounting for compareToTotalMemory or the fraction.
-    std::size_t avail = g_value.load() * 1024;
-    if (requestedMemory > avail) {
+    // g_value is the controllable mocked memory basis in KiB. We need the fraction here because, e.g.
+    // with a 1 GiB mock ceiling, Rebin can accept a 0.9 GiB request even though production’s 80% limit
+    // rejects it, allowing false-positive integration tests.
+    std::size_t ceiling = static_cast<std::size_t>(fraction * static_cast<double>(g_value.load()) * 1024.0);
+    if (requestedMemory > ceiling) {
       return "Mock Memory Failure";
     } else {
       return "";
