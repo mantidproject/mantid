@@ -1954,6 +1954,7 @@ double FitPeaks::fitFunctionSD(const IAlgorithm_sptr &fit, const API::IPeakFunct
   if (constrainByTolerance) {
     // bound the fitted centre to expected_peak_center +/- tolerance during the fit
     std::stringstream peak_center_constraint;
+    peak_center_constraint << std::setprecision(std::numeric_limits<double>::max_digits10);
     peak_center_constraint << (expected_peak_center - peak_pos_tolerance) << " < f0."
                            << peak_function->getCentreParameterName() << " < "
                            << (expected_peak_center + peak_pos_tolerance);
@@ -1964,6 +1965,7 @@ double FitPeaks::fitFunctionSD(const IAlgorithm_sptr &fit, const API::IPeakFunct
     double peak_center = peak_function->centre();
     double peak_width = peak_function->fwhm();
     std::stringstream peak_center_constraint;
+    peak_center_constraint << std::setprecision(std::numeric_limits<double>::max_digits10);
     peak_center_constraint << (peak_center - 0.5 * peak_width) << " < f0." << peak_function->getCentreParameterName()
                            << " < " << (peak_center + 0.5 * peak_width);
     fit->setProperty("Constraints", peak_center_constraint.str());
