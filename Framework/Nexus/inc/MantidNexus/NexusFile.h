@@ -223,6 +223,8 @@ private:
    */
   std::shared_ptr<H5::H5Object> getCurrentObject() const;
 
+  hid_t groupHID() const;
+
   // these are used for updating the NexusDescriptor
   NexusAddress groupAddress(NexusAddress const &) const;
   NexusAddress formAbsoluteAddress(NexusAddress const &) const;
