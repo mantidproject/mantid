@@ -14,15 +14,24 @@ them.
 import systemtesting
 import numpy
 from mantid.api import mtd
-from mantid.simpleapi import BinMD, ConvertToDiffractionMDWorkspace, CopySample, FindPeaksMD, FindUBUsingFFT, IndexPeaks, LoadEventNexus
+from mantid.simpleapi import (
+    BinMD,
+    ConvertToDiffractionMDWorkspace,
+    CopySample,
+    DeleteWorkspace,
+    FindPeaksMD,
+    FindUBUsingFFT,
+    IndexPeaks,
+    LoadEventNexus,
+)
 from mantid.dataobjects import PeaksWorkspace, LeanElasticPeaksWorkspace
 from mantid.geometry import UnitCell
 
 
 class TOPAZPeakFinding(systemtesting.MantidSystemTest):
     def requiredMemoryMB(self):
-        """Require about 2GB free"""
-        return 2000
+        """Require about 3.5GB free"""
+        return 3500
 
     def runTest(self):
         unitcell_exp = UnitCell(4.714, 6.06, 10.40)  # orthorhombic
@@ -41,6 +50,7 @@ class TOPAZPeakFinding(systemtesting.MantidSystemTest):
         # Find peaks and UB matrix
         FindPeaksMD(InputWorkspace="topaz_3132_MD", PeakDistanceThreshold="0.12", MaxPeaks="200", OutputWorkspace="peaks")
         FindUBUsingFFT(PeaksWorkspace="peaks", MinD="2", MaxD="16")
+        DeleteWorkspace("topaz_3132_MD")  # no longer needed
 
         # Index the peaks and check
         results = IndexPeaks(PeaksWorkspace="peaks")
@@ -83,6 +93,7 @@ class TOPAZPeakFinding(systemtesting.MantidSystemTest):
             OutputBins="60,1,1",
             OutputWorkspace="topaz_3132_HKL_line",
         )
+        DeleteWorkspace("topaz_3132_HKL")  # no longer needed
 
         # Now check the integrated bin and the peaks
         w = mtd["topaz_3132_HKL_line"]
@@ -144,6 +155,7 @@ class TOPAZPeakFinding(systemtesting.MantidSystemTest):
             OutputWorkspace="peaks_QSample",
             OutputType="LeanElasticPeak",
         )
+        DeleteWorkspace("topaz_3132_QSample")  # no longer needed
         self.assertTrue(isinstance(mtd["peaks_QSample"], LeanElasticPeaksWorkspace))
         FindUBUsingFFT(PeaksWorkspace="peaks_QSample", MinD="2", MaxD="16")
         CopySample(
@@ -156,10 +168,12 @@ class TOPAZPeakFinding(systemtesting.MantidSystemTest):
         if indexed < 199:
             raise Exception("Expected at least 199 of 200 peaks to be indexed. Only indexed %d!" % indexed)
 
+        # get new UB matrix and OrientedLattice so the EventWorkspace can be deleted
+        newUB = numpy.array(mtd["topaz_3132"].sample().getOrientedLattice().getUB())
+        ol = mtd["topaz_3132"].sample().getOrientedLattice()
+        DeleteWorkspace("topaz_3132")  # no longer needed
+
         # Check the UB matrix
-        w = mtd["topaz_3132"]
-        s = w.sample()
-        ol = s.getOrientedLattice()
         self.assertDelta(ol.a(), unitcell_exp.a(), 0.01, "Correct lattice a value not found.")
         self.assertDelta(ol.b(), unitcell_exp.b(), 0.01, "Correct lattice b value not found.")
         self.assertDelta(ol.c(), unitcell_exp.c(), 0.01, "Correct lattice c value not found.")
