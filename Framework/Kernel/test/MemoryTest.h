@@ -9,6 +9,7 @@
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
 #include <limits>
+#include <stdexcept>
 
 #include "MantidKernel/FunctionTask.h"
 #include "MantidKernel/Memory.h"
@@ -60,6 +61,16 @@ public:
     TS_ASSERT(!mem.checkAvailableMemory(threeQuarters, /*compareToTotalMemory=*/true, 0.5).empty());
     // ... but fits within the full total memory
     TS_ASSERT(mem.checkAvailableMemory(threeQuarters, /*compareToTotalMemory=*/true, 1.0).empty());
+
+    // The boundary values of the fraction are accepted
+    TS_ASSERT_THROWS_NOTHING(mem.checkAvailableMemory(1, /*compareToTotalMemory=*/true, 1.0));
+    TS_ASSERT_THROWS_NOTHING(mem.checkAvailableMemory(1, /*compareToTotalMemory=*/true, 0.001));
+    // A fraction outside (0, 1] is a caller error and must throw before any size_t conversion
+    TS_ASSERT_THROWS(mem.checkAvailableMemory(1, true, 0.0), const std::invalid_argument &);
+    TS_ASSERT_THROWS(mem.checkAvailableMemory(1, true, -0.5), const std::invalid_argument &);
+    TS_ASSERT_THROWS(mem.checkAvailableMemory(1, true, 1.5), const std::invalid_argument &);
+    TS_ASSERT_THROWS(mem.checkAvailableMemory(1, true, std::numeric_limits<double>::quiet_NaN()),
+                     const std::invalid_argument &);
   }
 
   /// Update in parallel to test thread safety

@@ -9,6 +9,7 @@
 
 #include <cstdio>
 #include <sstream>
+#include <stdexcept>
 
 #ifdef __linux__
 #include <fstream>
@@ -572,11 +573,19 @@ size_t MemoryStats::getCurrentRSS() const {
  *   other processes running in parallel), which otherwise causes the same request to pass or fail
  *   non-deterministically.
  * @param fraction :: Fraction of the chosen memory basis to treat as the usable limit (default 1.0,
- *   i.e. the whole basis). Use a value below 1.0 to leave some headroom.
+ *   i.e. the whole basis). Use a value below 1.0 to leave some headroom. Must be in the range
+ *   (0, 1]; any other value (including NaN) is a caller error.
+ * @throw std::invalid_argument if fraction is not in the range (0, 1]
  * @return error string if the requested memory would exceed the usable limit; else empty string
  */
 std::string MemoryStats::checkAvailableMemory(std::size_t const requestedMemoryBytes, bool const compareToTotalMemory,
                                               double const fraction) const {
+  // Reject out-of-range fractions before the size_t conversion below: a negative or NaN value would
+  // otherwise wrap to a huge usable-memory figure, and a value above 1.0 would overstate it.
+  if (!(fraction > 0.0 && fraction <= 1.0)) {
+    throw std::invalid_argument("MemoryStats::checkAvailableMemory: fraction must be in the range (0, 1], but got " +
+                                std::to_string(fraction));
+  }
   std::string errorString;
   const std::size_t memoryBasisKiB = compareToTotalMemory ? this->totalMem() : this->availMem();
   // Fraction of the chosen basis, converted from KiB to bytes
