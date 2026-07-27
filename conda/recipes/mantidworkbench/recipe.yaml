@@ -49,20 +49,14 @@ requirements:
     - superqt
     - ${{ pin_compatible("setuptools", upper_bound="x.x") }}
     # qtconsole-base avoids pulling in PyQt5 on the Qt6 build
+    - qtconsole-base ${{ qtconsole }}
     - if: linux
       then:
-        - qtconsole-base ${{ qtconsole }}
         - pystack
         - lz4
-    - if: win or osx
-      then:
-        - qtconsole ${{ qtconsole }}
     - if: osx
       then:
         - python.app
-    - if: win
-      then:
-        - gdk-pixbuf ${{ gdk_pixbuf }}
   run_constraints:
     - mslice ${{ mslice }}
     - mantiddocs == ${{ version }}

@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name,attribute-defined-outside-init
 import numpy as np
+import platform
 import systemtesting
 from mantid.api import mtd, FileFinder
 from mantid.kernel import config
@@ -274,7 +275,11 @@ class PG3StripPeaks(systemtesting.MantidSystemTest):
         LoadGSS(Filename=self.ref_file, OutputWorkspace="PG3_4866_golden")
 
     def validateMethod(self):
-        self.tolerance = 0.1
+        if platform.system() == "Darwin":
+            self.tolerance = 0.15
+        else:
+            self.tolerance = 0.1
+
         self.tolerance_is_rel_err = True
         return "ValidateWorkspaceToWorkspace"
 

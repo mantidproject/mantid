@@ -36,21 +36,15 @@ requirements:
     - qscintilla2 ${{ qscintilla2 }}
     - setuptools
     - tbb-devel ${{ tbb }}
-    # Linux builds against Qt6, win/osx Qt5 stack
+    - pyqt6 ${{ pyqt6 }}
+    - pyqt6-sip ${{ pyqt6_sip }}
+    - qt6-main ${{ qt6_main }}
     - if: linux
       then:
-        - pyqt6 ${{ pyqt6 }}
-        - pyqt6-sip ${{ pyqt6_sip }}
-        - qt6-main ${{ qt6_main }}
         - libgl-devel
         - xorg-libxxf86vm
         - xorg-libx11
         - xorg-xorgproto
-    - if: win or osx
-      then:
-        - pyqt ${{ pyqt }}
-        - pyqt5-sip ${{ pyqt5_sip }}
-        - qt-main ${{ qt_main }}
     - if: osx or linux
       then:
         - libopenblas ${{ libopenblas }}
@@ -60,13 +54,10 @@ requirements:
     - qscintilla2 ${{ qscintilla2 }}
     - qtpy ${{ qtpy }}
     - python
+    - ${{ pin_compatible("qt6-main", upper_bound="x.x") }}
     - if: linux
       then:
-        - ${{ pin_compatible("qt6-main", upper_bound="x.x") }}
         - qt6-gtk-platformtheme
-    - if: win or osx
-      then:
-        - ${{ pin_compatible("qt-main", upper_bound="x.x") }}
   run_exports:
     - ${{ pin_subpackage('mantidqt', exact=True) }}
 
