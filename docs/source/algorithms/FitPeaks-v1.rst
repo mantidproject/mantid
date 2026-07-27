@@ -236,8 +236,8 @@ By default each ``PositionTolerance`` value is an absolute distance in the fit's
 ``PositionToleranceFractional`` is ``True``, each value is instead interpreted as a *fraction* of
 that peak's fit window width, so the effective tolerance becomes
 ``tolerance * (window_max - window_min)``. Because the fit window can differ per spectrum (for
-example when supplied via ``FitPeakWindowWorkspace``), this yields a per-spectrum tolerance from a
-single fractional value — e.g. ``PositionTolerance=[0.25]`` bounds each spectrum's centre to within
+example when supplied via ``FitPeakWindowWorkspace``), this yields a per-spectrum per-peak tolerance from a
+single fractional value — e.g. ``PositionTolerance=[0.25]`` bounds each peak's centre to within
 a quarter of its own fit window width of the expected position. It applies to both the ``Check`` and
 ``Constrain`` modes and defaults to ``False``.
 

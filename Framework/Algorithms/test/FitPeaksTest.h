@@ -1304,7 +1304,10 @@ public:
     fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS_ptcr");
 
     // validateInputs should flag the missing PositionTolerance and prevent execution
-    TS_ASSERT_THROWS_ANYTHING(fitpeaks.execute());
+    TS_ASSERT_THROWS_EQUALS(
+        fitpeaks.execute(), const std::runtime_error &e, std::string(e.what()),
+        "Some invalid Properties found: \n PositionTolerance: PositionTolerance must be specified when "
+        "PositionToleranceMode is 'Constrain'.");
     TS_ASSERT(!fitpeaks.isExecuted());
 
     AnalysisDataService::Instance().remove(data_ws_name);

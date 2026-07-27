@@ -1239,15 +1239,7 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
   }
 
   // Set up sub algorithm Fit for peak and background
-  IAlgorithm_sptr peak_fitter; // both peak and background (combo)
-  try {
-    peak_fitter = createChildAlgorithm("Fit", -1, -1, false);
-  } catch (Exception::NotFoundError &) {
-    std::stringstream errss;
-    errss << "The FitPeak algorithm requires the CurveFitting library";
-    g_log.error(errss.str());
-    throw std::runtime_error(errss.str());
-  }
+  IAlgorithm_sptr peak_fitter = createChildFit(); // both peak and background (combo)
 
   // Clone background function
   IBackgroundFunction_sptr bkgdfunction = std::dynamic_pointer_cast<API::IBackgroundFunction>(m_bkgdFunction->clone());
@@ -2027,12 +2019,7 @@ void FitPeaks::recalculateErrorsWithoutConstraint(const API::IPeakFunction_sptr 
   comp_func->addFunction(peak_clone);
   comp_func->addFunction(bkgd_clone);
 
-  IAlgorithm_sptr fit;
-  try {
-    fit = createChildAlgorithm("Fit", -1, -1, false);
-  } catch (Exception::NotFoundError &) {
-    throw std::runtime_error("The FitPeaks algorithm requires the CurveFitting library");
-  }
+  IAlgorithm_sptr fit = createChildFit();
 
   fit->setProperty("Function", std::dynamic_pointer_cast<IFunction>(comp_func));
   fit->setProperty("InputWorkspace", dataws);
@@ -2068,14 +2055,7 @@ double FitPeaks::fitFunctionMD(API::IFunction_sptr fit_function, const API::Matr
                                const size_t wsindex, const std::pair<double, double> &vec_xmin,
                                const std::pair<double, double> &vec_xmax) {
   // Note: after testing it is found that multi-domain Fit cannot be reused
-  API::IAlgorithm_sptr fit;
-  try {
-    fit = createChildAlgorithm("Fit", -1, -1, false);
-  } catch (Exception::NotFoundError &) {
-    std::stringstream errss;
-    errss << "The FitPeak algorithm requires the CurveFitting library";
-    throw std::runtime_error(errss.str());
-  }
+  API::IAlgorithm_sptr fit = createChildFit();
   // set up background fit instance
   fit->setProperty("Minimizer", m_minimizer);
   fit->setProperty("CostFunction", m_costFunction);
@@ -2492,6 +2472,22 @@ void FitPeaks::checkPeakWindowEdgeOrder(double const &left, double const &right)
   if (left >= right) {
     std::stringstream errss;
     errss << "Peak window is inappropriate for workspace index: " << left << " >= " << right;
+    throw std::runtime_error(errss.str());
+  }
+}
+
+//---------------------------------------------------------------------------------------------
+/**
+ * Create a Fit child algorithm, with a check that the CurveFitting library is available
+ * @brief FitPeaks::createChildFit
+ */
+API::IAlgorithm_sptr FitPeaks::createChildFit() {
+  try {
+    return createChildAlgorithm("Fit", -1, -1, false);
+  } catch (Exception::NotFoundError &) {
+    std::stringstream errss;
+    errss << "The FitPeaks algorithm requires the CurveFitting library";
+    g_log.error(errss.str());
     throw std::runtime_error(errss.str());
   }
 }

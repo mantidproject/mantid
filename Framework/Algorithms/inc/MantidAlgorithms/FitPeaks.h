@@ -254,6 +254,9 @@ private:
   // log a message disregarding the current logging offset
   void logNoOffset(const size_t &priority, const std::string &msg);
 
+  // create a Fit child alg
+  API::IAlgorithm_sptr createChildFit();
+
   //------- Workspaces-------------------------------------
   /// mandatory input and output workspaces
   API::MatrixWorkspace_sptr m_inputMatrixWS;
