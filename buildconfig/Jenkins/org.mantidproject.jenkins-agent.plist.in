@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  macOS LaunchAgent template for the Mantid Jenkins build agent.
+
+  Loading the agent as a per-user LaunchAgent runs it inside the logged-in
+  user's Aqua (GUI) session. This is REQUIRED on macOS: the Aqua session is the
+  only one connected to the WindowServer and pasteboard, so GUI unit tests that
+  touch QApplication::clipboard() (e.g. FitScriptGeneratorViewTest,
+  test_samplelogs_view) get a working clipboard instead of failing with
+  "com.apple.pasteboard ... [-4960]".
+
+  Do NOT run the agent from cron/a LaunchDaemon: those run in the Background
+  session, which has no WindowServer/pasteboard access.
+
+  Install (per macOS build node), replacing the @PLACEHOLDER@ values:
+    1. Copy this file to ~/Library/LaunchAgents/org.mantidproject.jenkins-agent.plist
+       with @SCRIPT_PATH@, @NODE_NAME@ and @SECRET@ substituted.
+    2. Remove the old crontab entry that launched jenkins-agent.sh.
+    3. Load it into the GUI session (as the logged-in user, NOT via sudo):
+         launchctl bootstrap gui/$(id -u) \
+           ~/Library/LaunchAgents/org.mantidproject.jenkins-agent.plist
+    4. Confirm it is running in the Aqua session:
+         launchctl print gui/$(id -u)/org.mantidproject.jenkins-agent
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>org.mantidproject.jenkins-agent</string>
+
+    <!--
+      LimitLoadToSessionType = Aqua pins this agent to the GUI login session,
+      guaranteeing WindowServer/pasteboard access for the build's GUI tests.
+    -->
+    <key>LimitLoadToSessionType</key>
+    <string>Aqua</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>@SCRIPT_PATH@</string>
+        <string>@NODE_NAME@</string>
+        <string>@SECRET@</string>
+    </array>
+
+    <!-- Start on login and keep the agent connected, mirroring the old cron loop. -->
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string>/tmp/jenkins-agent.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/jenkins-agent.err.log</string>
+</dict>
+</plist>

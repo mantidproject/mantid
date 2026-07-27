@@ -10,6 +10,13 @@
 # Setting up a scheduled task using crontab to ensure agent stays
 # connected
 #####################################################################
+# NOTE (macOS): do NOT use the crontab method below on macOS build nodes.
+# Cron jobs run in launchd's Background session, which has no connection to
+# the WindowServer/pasteboard, so GUI unit tests that use the clipboard fail
+# with "com.apple.pasteboard ... [-4960]". Instead load the agent as a per-user
+# LaunchAgent in the Aqua (GUI) session using the template alongside this
+# script, org.mantidproject.jenkins-agent.plist.in (see that file for steps).
+#####################################################################
 # Download this script to a path under the account that will run the agent
 # Run "crontab -e" under the user that will connect to jenkins and add
 # a line such as
