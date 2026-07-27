@@ -390,6 +390,19 @@ class TestInitialShapeAndPosition(_FunctionalTestBase):
 
         self.assertTrue(np.allclose(self.model.workspaces.offset, (0.0, 0.005, 0.0)))
 
+    def test_initial_orientation_is_applied_before_initial_translation(self):
+        # orient the sample, then shift it: the offset is a lab-frame translation of the *oriented*
+        # sample, so the sample centre ends up at the offset itself (the default cube is centred on
+        # the origin). If the translation were applied before the orientation, the 90 deg rotation
+        # about X would swing the +Y offset round onto the +Z axis and the centre would sit there.
+        self.view.spnInitX.setValue(90.0)
+        self.view.spnInitPY.setValue(0.02)
+        QApplication.processEvents()
+
+        verts = self.model.workspaces.ws.sample().getShape().getMesh().reshape(-1, 3)
+        centre = (verts.max(axis=0) + verts.min(axis=0)) / 2
+        np.testing.assert_allclose(centre, [0.0, 0.02, 0.0], atol=1e-6)
+
 
 class TestTransmission(_FunctionalTestBase):
     def test_toggling_transmission_computes_transmission_for_the_orientation(self):

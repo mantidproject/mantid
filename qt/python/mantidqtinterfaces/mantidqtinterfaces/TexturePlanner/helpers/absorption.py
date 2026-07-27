@@ -78,8 +78,10 @@ class AbsorptionCalculator:
             CopyLattice=False,
         )
 
-        # apply the initial translation
-        wsm.translate_shape(mc_ws, *wsm.offset)
+        # apply the initial translation *after* the initial orientation: the offset is a lab-frame
+        # shift of the oriented sample, so it is expressed in the sample's pre-orientation frame
+        # (see WorkspaceManager.initial_translation_vector) before being baked into the shape.
+        wsm.translate_shape(mc_ws, *wsm.initial_translation_vector())
 
         # apply both the initial and the goniometer rotations
         shapeR = R * wsm.init_R

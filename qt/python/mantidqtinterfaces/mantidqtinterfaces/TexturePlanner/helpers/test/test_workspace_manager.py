@@ -560,6 +560,27 @@ class TestWorkspaceManager_TranslateShape(unittest.TestCase):
         mock_translate.assert_called_once_with(InputWorkspace="ws", TranslationVector="1.0,2.0,3.0")
 
 
+class TestWorkspaceManager_InitialTranslationVector(unittest.TestCase):
+    def test_returns_raw_offset_when_no_rotation(self):
+        wm = _make_manager()
+        wm.offset = (1.0, 2.0, 3.0)
+        wm.init_R = Rotation.identity()
+
+        np.testing.assert_allclose(wm.initial_translation_vector(), (1.0, 2.0, 3.0))
+
+    def test_back_rotates_offset_by_inverse_init_R(self):
+        # the offset is a lab-frame shift applied after the sample is oriented; expressing it in the
+        # sample's pre-rotation frame (init_R^-1 @ offset) makes init_R @ that vector == offset again
+        wm = _make_manager()
+        wm.offset = (0.0, 1.0, 0.0)
+        wm.init_R = Rotation.from_euler("x", 90, degrees=True)
+
+        vec = wm.initial_translation_vector()
+
+        np.testing.assert_allclose(vec, wm.init_R.inv().apply(wm.offset), atol=1e-12)
+        np.testing.assert_allclose(wm.init_R.apply(vec), wm.offset, atol=1e-12)
+
+
 class TestWorkspaceManager_AllRotsZero(unittest.TestCase):
     def test_true_for_zero(self):
         self.assertTrue(WorkspaceManager._all_rots_zero(0, 0, 0))
@@ -630,7 +651,24 @@ class TestWorkspaceManager_UpdateInitialShape(unittest.TestCase):
         wm.update_initial_shape(0.0, 0.0, 0.0, 1.0, 2.0, 3.0)
 
         self.assertEqual(wm.offset, (1.0, 2.0, 3.0))
-        wm.translate_shape.assert_called_once_with("tmp_ws", 1.0, 2.0, 3.0)
+        # with no initial rotation the shape is translated by the raw lab-frame offset
+        wm.translate_shape.assert_called_once()
+        args = wm.translate_shape.call_args.args
+        self.assertEqual(args[0], "tmp_ws")
+        np.testing.assert_allclose(args[1:], (1.0, 2.0, 3.0))
+
+    def test_translates_tmp_ws_in_pre_rotation_frame(self, mock_copy, mock_ads):
+        # the initial orientation is applied before the initial translation, so the offset is
+        # pre-rotated by init_R^-1: once init_R is baked into the shape the net shift is the raw offset
+        wm, _ = self._make_wm_with_ws()
+
+        wm.update_initial_shape(90.0, 0.0, 0.0, 0.0, 1.0, 0.0)
+
+        self.assertEqual(wm.offset, (0.0, 1.0, 0.0))
+        args = wm.translate_shape.call_args.args
+        self.assertEqual(args[0], "tmp_ws")
+        expected = Rotation.from_euler("xyz", (90.0, 0.0, 0.0), degrees=True).inv().apply((0.0, 1.0, 0.0))
+        np.testing.assert_allclose(args[1:], expected, atol=1e-12)
 
     def test_resets_goniometer_to_identity_before_copy(self, mock_copy, mock_ads):
         wm, gonio = self._make_wm_with_ws()

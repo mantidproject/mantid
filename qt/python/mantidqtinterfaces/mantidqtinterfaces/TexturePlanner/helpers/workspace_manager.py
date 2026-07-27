@@ -239,7 +239,18 @@ class WorkspaceManager:
     ) -> None:
         _tmp_ws = self._create_new_ws_with_copied_sample(self.WS_TMP, self.mesh_ws)
         self.offset = (x_pos, y_pos, z_pos)
-        self.translate_shape(_tmp_ws, *self.offset)
+        rots_zero = self._all_rots_zero(x_rot, y_rot, z_rot)
+        # The initial orientation should be applied before the initial translation:
+        # this feels like the more intuative order as
+        # sample position will be determined by the stage etc. where as the initial orientation will be
+        # determined by the mounting of the sample onto this stage.
+        #
+        # init_R must therefore be resolved
+        # before the translation, because initial_translation_vector expresses the offset in the
+        # sample's pre-orientation frame due to how the sample goniometer works
+        # (see initial_translation_vector).
+        self.init_R = Rotation.identity() if rots_zero else Rotation.from_euler("xyz", (x_rot, y_rot, z_rot), degrees=True)
+        self.translate_shape(_tmp_ws, *self.initial_translation_vector())
 
         try:
             # CopySample bakes the destination workspace's current goniometer R into the new
@@ -253,16 +264,23 @@ class WorkspaceManager:
                 InputWorkspace=_tmp_ws, OutputWorkspace=self.updated_mesh_ws, CopyName=False, CopyEnvironment=False, CopyLattice=False
             )
 
-            if self._all_rots_zero(x_rot, y_rot, z_rot):
-                self.init_R = Rotation.identity()
-
-            else:
-                self.init_R = Rotation.from_euler("xyz", (x_rot, y_rot, z_rot), degrees=True)
+            if not rots_zero:
                 self.rotate_samples_by_initial_goniometer()
         finally:
             # guard so a failure before the temp ws was created does not mask the original error
             if ADS.doesExist(self.WS_TMP):
                 ADS.remove(self.WS_TMP)
+
+    def initial_translation_vector(self) -> np.ndarray:
+        """The vector to feed TranslateSampleShape so that the initial translation is applied *after*
+        the initial orientation.
+
+        The offset the user enters is a lab-frame shift of the already-oriented sample. init_R is
+        baked into the shape as an *outermost* rotation - the <goniometer> tag for a CSG shape (always
+        applied last when the shape is realised) or the mesh vertices for a mesh shape - so any
+        translation baked into the shape gets rotated by init_R as well. Pre-rotating the offset by
+        init_R^-1 cancels that, leaving a net lab-frame translation of exactly self.offset"""
+        return self.init_R.inv().apply(self.offset)
 
     @staticmethod
     def _all_rots_zero(x_rot: float | int, y_rot: float | int, z_rot: float | int) -> bool:
