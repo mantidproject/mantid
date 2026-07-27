@@ -213,8 +213,10 @@ class TexturePlannerPresenter(AlgorithmObserver):
         self.revalidate_grouping()
 
     def on_custom_instrument_name_changed(self) -> None:
-        # per-keystroke feedback only: red border + button state
-        self.view.set_custom_instrument_valid(self._custom_instrument_name_valid())
+        # per-keystroke feedback: while being changed assume invalid: red border + button state
+        # reset the cached instrument state to false
+        self.model.instrument.set_is_valid_instrument(False)
+        self.view.set_custom_instrument_valid(False)
         if self.view.is_custom_instrument() and self._group_is_custom():
             self._grouping_applicable = False
             self.view.set_grouping_file_problem("")
@@ -222,6 +224,8 @@ class TexturePlannerPresenter(AlgorithmObserver):
 
     def on_custom_instrument_name_committed(self) -> None:
         # name seems finalised (box focus lost or enter pressed): now run the applicability check
+        valid = self.model.instrument.check_is_valid_instrument(self.view.get_custom_instrument_name())
+        self.view.set_custom_instrument_valid(valid)
         self.revalidate_grouping()
 
     def on_grouping_file_changed(self) -> None:
@@ -249,7 +253,7 @@ class TexturePlannerPresenter(AlgorithmObserver):
         if self._group_is_custom():
             name = self._selected_instrument_name()
             grouping_file = self.view.get_grouping_file()
-            name_ok = not self.view.is_custom_instrument() or self._custom_instrument_name_valid()
+            name_ok = not self.view.is_custom_instrument() or self._cached_instrument_name_valid()
             applicable = bool(grouping_file) and name_ok and self.model.instrument.is_grouping_file_applicable(name, grouping_file)
             unfit = bool(grouping_file) and name_ok and not applicable
             self.view.set_grouping_file_problem("Grouping file is not applicable to this instrument" if unfit else "")
@@ -263,12 +267,12 @@ class TexturePlannerPresenter(AlgorithmObserver):
         """The Update Instrument button is enabled only for a valid, complete selection:
         a known instrument (or valid custom IDF name) paired with an available group (a preset,
         or - for the custom group - a chosen grouping file confirmed applicable to the instrument)."""
-        instrument_ok = not self.view.is_custom_instrument() or self._custom_instrument_name_valid()
+        instrument_ok = not self.view.is_custom_instrument() or self._cached_instrument_name_valid()
         group_ok = not self._group_is_custom() or self._grouping_applicable
         return instrument_ok and group_ok
 
-    def _custom_instrument_name_valid(self) -> bool:
-        return self.model.instrument.is_valid_instrument(self.view.get_custom_instrument_name())
+    def _cached_instrument_name_valid(self) -> bool:
+        return self.model.instrument.get_is_valid_instrument()
 
     def _selected_instrument_name(self) -> str:
         if self.view.is_custom_instrument():
@@ -388,8 +392,7 @@ class TexturePlannerPresenter(AlgorithmObserver):
         # update selected number of goniometers to match
         self.view.set_num_gonios(num_gonios)
         # update the orientation selector
-        self.view.set_current_index(self.model.orientations.get_num_orientations() - 1)
-        self.update_orientation_selector(self.model.orientations.get_num_orientations())
+        self.update_orientation_selector(self.model.orientations.get_num_orientations() - 1)
         # update table and plot
         self.model.update_all_projected_data()
         self.update_table()

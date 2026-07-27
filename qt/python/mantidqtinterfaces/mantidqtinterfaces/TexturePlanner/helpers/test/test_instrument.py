@@ -191,19 +191,37 @@ class TestInstrumentHelper_IsGroupingFileApplicable(unittest.TestCase):
 
 @patch(FILE_PATH + ".InstrumentFileFinder")
 class TestInstrumentHelper_IsValidInstrument(unittest.TestCase):
+    def _helper(self):
+        # construction alone does not touch the config or workspaces, so a mock model is enough
+        return InstrumentHelper(_make_model())
+
     def test_true_when_idf_found(self, mock_finder):
         mock_finder.getInstrumentFilename.return_value = "/instr/WISH_Definition.xml"
 
-        self.assertTrue(InstrumentHelper.is_valid_instrument("WISH"))
+        self.assertTrue(self._helper().check_is_valid_instrument("WISH"))
         mock_finder.getInstrumentFilename.assert_called_once_with("WISH")
 
     def test_false_when_no_idf(self, mock_finder):
         mock_finder.getInstrumentFilename.return_value = ""
 
-        self.assertFalse(InstrumentHelper.is_valid_instrument("NOTREAL"))
+        self.assertFalse(self._helper().check_is_valid_instrument("NOTREAL"))
 
     def test_false_for_empty_name_without_lookup(self, mock_finder):
-        self.assertFalse(InstrumentHelper.is_valid_instrument(""))
+        self.assertFalse(self._helper().check_is_valid_instrument(""))
+        mock_finder.getInstrumentFilename.assert_not_called()
+
+    def test_check_caches_result_for_cheap_reads(self, mock_finder):
+        # check_is_valid_instrument does the (expensive) IDF lookup and caches the result;
+        # get_is_valid_instrument is the cheap cached read used on the per-keystroke path
+        mock_finder.getInstrumentFilename.return_value = "/instr/WISH_Definition.xml"
+        helper = self._helper()
+
+        self.assertTrue(helper.check_is_valid_instrument("WISH"))
+        self.assertTrue(helper.get_is_valid_instrument())
+
+        mock_finder.getInstrumentFilename.reset_mock()
+        # the cached read must not trigger another filesystem lookup
+        self.assertTrue(helper.get_is_valid_instrument())
         mock_finder.getInstrumentFilename.assert_not_called()
 
 

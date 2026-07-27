@@ -8,10 +8,10 @@
 
 These aim to do minimal mocking to test the implementation and replace a manual test
 
-The only genuinely external boundary that is isolated is the modal ``SetSampleMaterial`` dialog
-(``InterfaceManager``), patched where exercised. Everything else - including the transmission
-path's real absorption calculation - runs for real. The settings sub-dialog is also patched out;
-it is a separate interface with its own tests.
+The ``SetSampleMaterial`` dialog (``InterfaceManager``) is patched with some default entries.
+The settings sub-dialog is also patched out.
+
+Everything else should run the actual logic.
 
 File-load tests use small, self-contained temporary fixtures (an ASCII STL, a CSG xml, an
 orientation text file)
@@ -551,25 +551,30 @@ class TestExports(_FunctionalTestBase):
 
 
 class TestMaterialAndSettings(_FunctionalTestBase):
-    def test_set_material_button_opens_preset_dialog(self):
+    def test_set_material_button_opens_preset_dialog_and_sets_material(self):
         self.view.grpSetMaterial.setChecked(True)  # reveal the (collapsed) material controls
         QApplication.processEvents()
 
         with mock.patch(f"{PRESENTER}.InterfaceManager") as mock_mgr:
             dialog = mock_mgr.return_value.createDialogFromName.return_value
+
+            # emulate the modal SetSampleMaterial dialog: opening it runs a real SetSampleMaterial
+            # against the preset raw mesh workspace, then notifies the algorithm observer the dialog
+            # was handed - exactly the path the real dialog drives when the user accepts it.
+            def run_dialog():
+                SetSampleMaterial(InputWorkspace=self.model.workspaces.WS_MESH_RAW, ChemicalFormula="Cu")
+                observer = dialog.addAlgorithmObserver.call_args.args[0]
+                observer.finishHandle()
+
+            dialog.show.side_effect = run_dialog
+
             self._click(self.view.btnSetMaterial)
 
+        # the dialog is opened against the hidden raw mesh ws, with InputWorkspace locked
         mock_mgr.return_value.createDialogFromName.assert_called_once_with(
             "SetSampleMaterial", -1, self.view, False, {"InputWorkspace": self.model.workspaces.WS_MESH_RAW}, "", (), ("InputWorkspace",)
         )
-        dialog.show.assert_called_once_with()
-
-    def test_material_set_signal_propagates_new_material(self):
-        # emulate the dialog: it writes the chosen material onto the raw mesh workspace only
-        SetSampleMaterial(InputWorkspace=self.model.workspaces.mesh_ws, ChemicalFormula="Cu")
-
-        self.view.signal_material_set()  # emitted on the GUI thread when the dialog finishes
-
+        # the real material set on the raw ws is propagated to the other workspaces and shown
         self.assertEqual(self.model.workspaces.get_material_name(), "Cu")
         self.assertEqual(self.view.lblCurrentMaterialValue.text(), "Cu")
 

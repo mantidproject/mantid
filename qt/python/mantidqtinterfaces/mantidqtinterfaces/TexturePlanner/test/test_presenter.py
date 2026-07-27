@@ -350,7 +350,7 @@ class TestTexturePlannerPresenter_InstrumentGroupSelection(unittest.TestCase):
         view.get_custom_instrument_name.return_value = "NOTREAL"
         view.get_group.return_value = "Custom"
         view.get_grouping_file.return_value = "/abs/grouping.xml"
-        model.instrument.is_valid_instrument.return_value = False
+        model.instrument.get_is_valid_instrument.return_value = False
         presenter = TexturePlannerPresenter(model, view)
         view.set_custom_instrument_valid.reset_mock()
         view.set_update_instrument_enabled.reset_mock()
@@ -466,7 +466,7 @@ class TestTexturePlannerPresenter_UpdateInstrumentButton(unittest.TestCase):
         # custom instrument with an invalid name -> disabled regardless of grouping cache
         view.is_custom_instrument.return_value = True
         view.get_custom_instrument_name.return_value = "NOTREAL"
-        model.instrument.is_valid_instrument.return_value = False
+        model.instrument.get_is_valid_instrument.return_value = False
         view.set_update_instrument_enabled.reset_mock()
         presenter.refresh_update_instrument_enabled()
         view.set_update_instrument_enabled.assert_called_with(False)
@@ -478,14 +478,20 @@ class TestTexturePlannerPresenter_UpdateInstrumentButton(unittest.TestCase):
         view.get_custom_instrument_name.return_value = "WISH"
         view.get_group.return_value = "Custom"
         view.get_grouping_file.return_value = "/abs/grouping.xml"
-        model.instrument.is_valid_instrument.return_value = True
+        # committing runs the real IDF check (which caches), so both the check and the cached read
+        # report the name as valid
+        model.instrument.check_is_valid_instrument.return_value = True
+        model.instrument.get_is_valid_instrument.return_value = True
         model.instrument.is_grouping_file_applicable.return_value = True
         presenter = TexturePlannerPresenter(model, view)
+        model.instrument.check_is_valid_instrument.reset_mock()
         model.instrument.is_grouping_file_applicable.reset_mock()
         view.set_update_instrument_enabled.reset_mock()
 
         presenter.on_custom_instrument_name_committed()
 
+        # the commit handler is where the expensive IDF lookup is allowed to run
+        model.instrument.check_is_valid_instrument.assert_called_once_with("WISH")
         model.instrument.is_grouping_file_applicable.assert_called_once_with("WISH", "/abs/grouping.xml")
         view.set_update_instrument_enabled.assert_called_with(True)
 
@@ -496,14 +502,16 @@ class TestTexturePlannerPresenter_UpdateInstrumentButton(unittest.TestCase):
         view.get_custom_instrument_name.return_value = "WIS"
         view.get_group.return_value = "Custom"
         view.get_grouping_file.return_value = "/abs/grouping.xml"
-        model.instrument.is_valid_instrument.return_value = False
+        model.instrument.get_is_valid_instrument.return_value = False
         presenter = TexturePlannerPresenter(model, view)
+        model.instrument.check_is_valid_instrument.reset_mock()
         model.instrument.is_grouping_file_applicable.reset_mock()
         view.set_update_instrument_enabled.reset_mock()
 
         presenter.on_custom_instrument_name_changed()
 
-        # per-keystroke handler must not run the expensive grouping check
+        # per-keystroke handler must not run either expensive check (the IDF lookup or the grouping check)
+        model.instrument.check_is_valid_instrument.assert_not_called()
         model.instrument.is_grouping_file_applicable.assert_not_called()
         view.set_update_instrument_enabled.assert_called_with(False)
 
@@ -682,7 +690,7 @@ class TestTexturePlannerPresenter_LoadFiles(unittest.TestCase):
         view.set_num_gonios.assert_called_with(3)
         view.spnIndex.setMaximum.assert_called_with(5)
         # last set_current_index reflects update_orientation_selector's call with the new count
-        view.set_current_index.assert_called_with(5)
+        view.set_current_index.assert_called_with(4)
         model.update_all_projected_data.assert_called_with()
         presenter.update_table.assert_called_with()
         presenter.update_plots.assert_called_with()

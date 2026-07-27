@@ -61,8 +61,7 @@ class TexturePlannerSettingsModel:
         """Load all settings from QSettings, falling back to defaults for any missing entry."""
         settings = {}
         for name, return_type in SETTINGS_DICT.items():
-            value = self._get_setting(name, return_type)
-            settings[name] = value if (value != "" and value is not None) else DEFAULT_SETTINGS[name]
+            settings[name] = self._get_setting(name, return_type, DEFAULT_SETTINGS[name])
         return settings
 
     def set_settings_dict(self, settings: Dict[str, Any]) -> None:
@@ -72,19 +71,22 @@ class TexturePlannerSettingsModel:
                 self._set_setting(name, value)
 
     @staticmethod
-    def _get_setting(name: str, return_type: Type = str) -> Any:
+    def _get_setting(name: str, return_type: Type = str, default: Any = None) -> Any:
         qs = QSettings()
         qs.beginGroup(INTERFACES_SETTINGS_GROUP)
-        if return_type is bool:
-            raw = qs.value(TEXTURE_PLANNER_PREFIX + name, type=str)
+        key = TEXTURE_PLANNER_PREFIX + name
+        if not qs.contains(key):
+            value = default
+        elif return_type is bool:
+            raw = qs.value(key, type=str)
             if raw == "true":
                 value = True
             elif raw == "false":
                 value = False
             else:
-                value = ""
+                value = default
         else:
-            value = qs.value(TEXTURE_PLANNER_PREFIX + name, type=return_type)
+            value = qs.value(key, type=return_type)
         qs.endGroup()
         return value
 

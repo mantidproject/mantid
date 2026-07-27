@@ -42,10 +42,11 @@ class InstrumentHelper:
         self.supported_groups = self._DEFAULT_SUPPORTED_GROUPS
         # path to a user-supplied grouping XML file, used when self.group is CUSTOM_GROUP
         self.custom_grouping_file = None
+        self.current_instr_name_valid = False
 
     # instrument config -------------------------------------------------
     def update_instrument(self, instrument: str) -> None:
-        if not self.is_valid_instrument(instrument):
+        if not self.check_is_valid_instrument(instrument):
             logger.error(f"Instrument Definition File for: '{instrument}' could not be found")
         self.instr = instrument
         # custom instruments are an arbitrary (validated) IDF name with no registered
@@ -61,10 +62,16 @@ class InstrumentHelper:
     def get_supported_instruments() -> List[str]:
         return SUPPORTED_INSTRUMENTS
 
-    @staticmethod
-    def is_valid_instrument(name: str) -> bool:
+    def check_is_valid_instrument(self, name: str) -> bool:
         """True if name resolves to a known instrument definition file (IDF)."""
-        return bool(InstrumentFileFinder.getInstrumentFilename(name)) if name else False
+        self.set_is_valid_instrument(bool(InstrumentFileFinder.getInstrumentFilename(name)) if name else False)
+        return self.get_is_valid_instrument()
+
+    def get_is_valid_instrument(self) -> bool:
+        return self.current_instr_name_valid
+
+    def set_is_valid_instrument(self, valid: bool) -> None:
+        self.current_instr_name_valid = valid
 
     @staticmethod
     def is_grouping_file_applicable(instrument: str, grouping_path: str) -> bool:

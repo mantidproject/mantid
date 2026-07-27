@@ -401,21 +401,22 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         self.sig_select_state_changed.emit()
 
     # getters
+    @staticmethod
+    def _first_filename(finder, default: str | None = "") -> str | None:
+        fnames = finder.getFilenames()
+        return fnames[0] if fnames else default
+
     def get_stl_string(self) -> str:
-        fnames = self.finder_stl.getFilenames()
-        return fnames[0] if len(fnames) > 0 else ""
+        return self._first_filename(self.finder_stl)
 
     def get_xml_string(self) -> str:
-        fnames = self.finder_xml.getFilenames()
-        return fnames[0] if len(fnames) > 0 else ""
+        return self._first_filename(self.finder_xml)
 
     def get_orientation_file(self) -> str:
-        fnames = self.finder_orient.getFilenames()
-        return fnames[0] if len(fnames) > 0 else ""
+        return self._first_filename(self.finder_orient)
 
     def get_save_dir(self) -> str:
-        fnames = self.finder_save_dir.getFilenames()
-        return fnames[0] if len(fnames) > 0 else ""
+        return self._first_filename(self.finder_save_dir)
 
     def get_save_filename(self) -> str:
         return self.saveFileLine.text()
@@ -472,8 +473,7 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         return self.edt_custom_instr.text().strip()
 
     def get_grouping_file(self) -> str:
-        fnames = self.finder_grouping.getFilenames()
-        return fnames[0] if len(fnames) > 0 else ""
+        return self._first_filename(self.finder_grouping)
 
     def get_current_index(self) -> int:
         return int(self.spnIndex.value()) - 1
@@ -509,8 +509,7 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         return self.combo_shapeMethod.currentText()
 
     def get_custom_shape(self) -> str | None:
-        fnames = self.finder_gauge_vol.getFilenames()
-        return fnames[0] if len(fnames) > 0 else None
+        return self._first_filename(self.finder_gauge_vol, default=None)
 
     # setters
 
@@ -623,13 +622,13 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         self.spnInitPY.setSingleStep(step_size)
         self.spnInitPZ.setSingleStep(step_size)
 
-    def set_translation_limits(self, min: float, max: float) -> None:
-        self.spnInitPX.setMinimum(min)
-        self.spnInitPX.setMaximum(max)
-        self.spnInitPY.setMinimum(min)
-        self.spnInitPY.setMaximum(max)
-        self.spnInitPZ.setMinimum(min)
-        self.spnInitPZ.setMaximum(max)
+    def set_translation_limits(self, min_lim: float, max_lim: float) -> None:
+        self.spnInitPX.setMinimum(min_lim)
+        self.spnInitPX.setMaximum(max_lim)
+        self.spnInitPY.setMinimum(min_lim)
+        self.spnInitPY.setMaximum(max_lim)
+        self.spnInitPZ.setMinimum(min_lim)
+        self.spnInitPZ.setMaximum(max_lim)
 
     def setup_group_options(self, groups: List[str]) -> None:
         self.cmbGroup.blockSignals(True)

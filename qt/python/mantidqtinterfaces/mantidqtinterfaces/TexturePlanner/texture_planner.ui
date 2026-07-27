@@ -191,7 +191,7 @@
                <property name="title">
                 <string>Update Initial Shape Position</string>
                </property>
-               <layout class="QGridLayout" name="layInitAxis">
+               <layout class="QGridLayout" name="layInitPos">
                 <item row="0" column="0">
                  <widget class="QLabel" name="lblInitPX">
                   <property name="text">
@@ -799,7 +799,7 @@
             </widget>
            </item>
               <item row="2" column="0">
-            <widget class="QLabel" name="lblNumAxes">
+            <widget class="QLabel" name="lblGonIndex">
              <property name="text">
               <string>Current Orientation Index:</string>
              </property>
