@@ -307,7 +307,7 @@ jobs:
       ENABLE_DEV_DOCS: false
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           # Needed to fetch the tags for versioningit
           fetch-depth: 100
