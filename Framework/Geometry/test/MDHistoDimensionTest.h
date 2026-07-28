@@ -137,8 +137,22 @@ public:
     TSM_ASSERT_EQUALS("A rejected label must leave the units unchanged", dimension.getUnits(), originalUnits);
   }
 
+  void test_setUnits_hkl_canonical_rlu_label() {
+    HKL frame(new Mantid::Kernel::ReciprocalLatticeUnit);
+    MDHistoDimension dimension("H", "H", frame, 0, 1, 5);
+    dimension.setUnits(Kernel::UnitLabel("r.l.u."));
+    TS_ASSERT_EQUALS(dimension.getUnits(), "r.l.u.");
+    TSM_ASSERT("HKL dimension should still report a Q unit", dimension.getMDUnits().isQUnit());
+  }
+
   void test_setUnits_qsample_throws() {
     Mantid::Geometry::QSample frame;
+    MDHistoDimension dimension("Q", "Q", frame, 0, 1, 5);
+    TS_ASSERT_THROWS(dimension.setUnits(Kernel::UnitLabel("in 2.5 A^-1")), const std::invalid_argument &);
+  }
+
+  void test_setUnits_qlab_throws() {
+    Mantid::Geometry::QLab frame;
     MDHistoDimension dimension("Q", "Q", frame, 0, 1, 5);
     TS_ASSERT_THROWS(dimension.setUnits(Kernel::UnitLabel("in 2.5 A^-1")), const std::invalid_argument &);
   }
