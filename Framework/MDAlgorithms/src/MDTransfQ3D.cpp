@@ -181,6 +181,7 @@ bool MDTransfQ3D::calcYDepCoordinates(std::vector<coord_t> &Coord, size_t i) {
 void MDTransfQ3D::initialize(const MDWSDescription &ConvParams) {
   m_pEfixedArray = nullptr;
   m_pDetMasks = nullptr;
+  m_invertRot = false;
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   //********** Generic part of initialization, common for elastic and inelastic
   // modes:
