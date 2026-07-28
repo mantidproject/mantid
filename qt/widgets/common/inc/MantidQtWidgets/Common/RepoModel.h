@@ -100,8 +100,6 @@ class EXPORT_OPT_MANTIDQT_COMMON RepoModel : public QAbstractItemModel {
     /// access to the parent of this entry
     /// @return : this entry parent's
     RepoItem *parent() const { return parentItem; };
-    /// allow to remove a child, which allows erasing rows from the view.
-    bool removeChild(int row);
 
   private:
     /// track the list of children for this entry

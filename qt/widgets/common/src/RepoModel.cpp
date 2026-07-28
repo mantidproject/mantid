@@ -89,15 +89,6 @@ int RepoModel::RepoItem::row() const {
     return static_cast<int>(parentItem->childItems.indexOf(const_cast<RepoItem *>(this)));
   return 0;
 }
-/** Remove the given child from the childItems. Used to allow removing rows from
- * the view*/
-bool RepoModel::RepoItem::removeChild(int row) {
-  if (row < 0 || row >= childCount())
-    return false;
-
-  childItems.removeAt(row);
-  return true;
-}
 
 //////////////////////////////////////////////////
 // MODEL
