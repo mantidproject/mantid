@@ -36,9 +36,9 @@ The script repository implementation is split into three parts as illustrated be
 1. **Frontend** - the GUI accessed by users through Workbench and described in :ref:`script repository <WorkbenchScriptRepository>`.
 2. **Backend** - the server component that acts as an intermediary to the Git repository
 3. **GitHub repository** - final storage location of the uploaded content.
-   This is currently a `GitHub repository <github-repository_>`_.
-   It can be used with standard git commands and the front/backend will respond as
-   expected.
+   This is currently a `GitHub repository <github-repository_>`_ that is now read-only
+   from the client side. Content is contributed by interacting with the repository
+   directly, by submitting a pull request.
 
 Frontend
 --------
