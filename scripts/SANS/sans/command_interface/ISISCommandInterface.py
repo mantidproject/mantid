@@ -22,11 +22,11 @@ from sans.command_interface.command_interface_state_director import (
     DataCommandId,
     NParameterCommand,
     NParameterCommandId,
-    FitData,
 )
 from sans.common.constants import ALL_PERIODS
 from sans.common.enums import (
     DetectorType,
+    DataType,
     FitType,
     RangeStepType,
     ReductionDimensionality,
@@ -587,14 +587,15 @@ def TransFit(mode, lambdamin=None, lambdamax=None, selector="BOTH"):
 
     # Get the selected detector to which the fit settings apply
     selector = str(selector).strip().upper()
-    if selector == "SAMPLE":
-        fit_data = FitData.Sample
-    elif selector == "CAN":
-        fit_data = FitData.Can
-    elif selector == "BOTH":
-        fit_data = FitData.Both
-    else:
-        raise RuntimeError("TransFit: The selected fit data {0} is not valid. You have to either SAMPLE, CAN or BOTH.".format(selector))
+    match selector:
+        case "SAMPLE":
+            fit_data = DataType.SAMPLE
+        case "CAN":
+            fit_data = DataType.CAN
+        case "BOTH":
+            fit_data = DataType.BOTH
+        case _:
+            raise RuntimeError("TransFit: The selected fit data {0} is not valid. You have to either SAMPLE, CAN or BOTH.".format(selector))
 
     # Output message
     message = mode
