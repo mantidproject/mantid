@@ -1,0 +1,2 @@
+- `ISISCalibration` tab of the :ref:`Data Reduction <interface-indirect-data-reduction>` interface now has a `SumFiles` checkbox to average a comma separate list of input runs.
+- `Transmission` tab of the :ref:`Data Reduction <interface-indirect-data-reduction>` interface now has a `SumFiles` checkbox to average a comma separate list of sample or can runs.
