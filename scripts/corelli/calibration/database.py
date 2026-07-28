@@ -121,7 +121,7 @@ def save_manifest_file(
     # verify day_stamps are correct
     [verify_date_format("save_manifest_file", date) for date in day_stamps]
     if manifest_day_stamp is None:
-        manifest_day_stamp = str(sorted(day_stamps)[-1])
+        manifest_day_stamp = str(max(day_stamps))
     verify_date_format("save_manifest_file", manifest_day_stamp)
 
     filename = database_path + "/manifest_corelli_" + str(manifest_day_stamp) + ".csv"
@@ -447,7 +447,7 @@ def new_corelli_calibration(database_path: str, date: Optional[str] = None) -> T
         table = combine_spatial_banks(bank_tables, table_type=table_type)
 
         bank_numbers, day_stamps = zip(*bank_stamps)
-        last_day_stamp = sorted(day_stamps)[-1]
+        last_day_stamp = max(day_stamps)
         filename = str(pathlib.Path(database_path) / f"{table_type}_corelli_{last_day_stamp}.nxs.h5")
         logger.notice(f"** Saving instrument {table_type} to the database")
         SaveNexusProcessed(InputWorkspace=table, Filename=filename)
