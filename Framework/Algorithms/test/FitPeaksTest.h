@@ -1338,8 +1338,15 @@ public:
     fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS_ptcc");
     fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS_ptcc");
 
+    const std::string repeat_msg = "PositionToleranceMode='Constrain' and ConstrainPeakPositions both "
+                                   "constrain the peak centre during fitting and are mutually exclusive. "
+                                   "Set ConstrainPeakPositions to false to use 'Constrain' mode.";
+
+    const std::string err_msg = "Some invalid Properties found: \n ConstrainPeakPositions: " + repeat_msg +
+                                "\n PositionToleranceMode: " + repeat_msg;
+
     // validateInputs should reject the mutually-exclusive combination and prevent execution
-    TS_ASSERT_THROWS_ANYTHING(fitpeaks.execute());
+    TS_ASSERT_THROWS_EQUALS(fitpeaks.execute(), const std::runtime_error &e, std::string(e.what()), err_msg);
     TS_ASSERT(!fitpeaks.isExecuted());
 
     AnalysisDataService::Instance().remove(data_ws_name);
