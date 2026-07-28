@@ -6,11 +6,15 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidGeometry/MDGeometry/HKL.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidGeometry/MDGeometry/QLab.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
+#include "MantidKernel/MDUnit.h"
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
+#include <stdexcept>
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
@@ -98,5 +102,44 @@ public:
     dimension.setMDFrame(frameQLab);
     // Assert
     TSM_ASSERT_EQUALS("Should now be a QLab frame", dimension.getMDFrame().name(), Mantid::Geometry::QLab::QLabName);
+  }
+
+  void test_setName() {
+    Mantid::Geometry::GeneralFrame frame("My General Frame", "Furlongs");
+    MDHistoDimension dimension("name", "id", frame, -10, 20.0, 15);
+    dimension.setName("renamed");
+    TS_ASSERT_EQUALS(dimension.getName(), "renamed");
+    // The id is independent of the name and must be untouched.
+    TS_ASSERT_EQUALS(dimension.getDimensionId(), "id");
+  }
+
+  void test_setUnits_general_frame() {
+    Mantid::Geometry::GeneralFrame frame("Length", "Meters");
+    MDHistoDimension dimension("Distance", "Dist", frame, 0, 10, 1);
+    dimension.setUnits(Kernel::UnitLabel("Furlongs"));
+    TS_ASSERT_EQUALS(dimension.getUnits(), "Furlongs");
+  }
+
+  void test_setUnits_hkl_conforming_label() {
+    HKL frame(new Mantid::Kernel::ReciprocalLatticeUnit);
+    MDHistoDimension dimension("H", "H", frame, 0, 1, 5);
+    dimension.setUnits(Kernel::UnitLabel("in 2.5 A^-1"));
+    TS_ASSERT_EQUALS(dimension.getUnits(), "in 2.5 A^-1");
+    // The unit must remain a Q unit so the special coordinate system is still detected.
+    TSM_ASSERT("HKL dimension should still report a Q unit", dimension.getMDUnits().isQUnit());
+  }
+
+  void test_setUnits_hkl_nonconforming_label_throws_and_leaves_dimension_unchanged() {
+    HKL frame(new Mantid::Kernel::ReciprocalLatticeUnit);
+    MDHistoDimension dimension("H", "H", frame, 0, 1, 5);
+    const auto originalUnits = dimension.getUnits();
+    TS_ASSERT_THROWS(dimension.setUnits(Kernel::UnitLabel("myaxis")), const std::invalid_argument &);
+    TSM_ASSERT_EQUALS("A rejected label must leave the units unchanged", dimension.getUnits(), originalUnits);
+  }
+
+  void test_setUnits_qsample_throws() {
+    Mantid::Geometry::QSample frame;
+    MDHistoDimension dimension("Q", "Q", frame, 0, 1, 5);
+    TS_ASSERT_THROWS(dimension.setUnits(Kernel::UnitLabel("in 2.5 A^-1")), const std::invalid_argument &);
   }
 };

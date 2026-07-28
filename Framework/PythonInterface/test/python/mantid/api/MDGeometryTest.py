@@ -88,6 +88,19 @@ class MDGeometryTest(unittest.TestCase):
         self.assertEqual(0, self._test_mdws.numOriginalWorkspaces())
         self.assertRaises(RuntimeError, self._test_mdws.getOriginalWorkspace, 0)
 
+    def test_setName_mutates_the_live_dimension(self):
+        # A fresh workspace so the shared fixture's dimension names are left intact.
+        ws = WorkspaceCreationHelper.makeFakeMDHistoWorkspace(3.0, 2)
+        ws.getDimension(0).setName("renamed")
+        # Re-fetch to confirm the edit reached the workspace's actual dimension.
+        self.assertEqual("renamed", ws.getDimension(0).name)
+
+    def test_setUnits_mutates_the_live_dimension(self):
+        # The fake workspace uses a general frame, so an arbitrary unit label is accepted.
+        ws = WorkspaceCreationHelper.makeFakeMDHistoWorkspace(3.0, 2)
+        ws.getDimension(0).setUnits("Angstrom")
+        self.assertEqual("Angstrom", ws.getDimension(0).getUnits())
+
     # ====================== Failure cases ==================================================
 
     def test_getDimension_by_index_raises_RuntimeError_for_invalid_index(self):

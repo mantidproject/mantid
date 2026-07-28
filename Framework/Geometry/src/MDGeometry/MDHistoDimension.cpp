@@ -5,7 +5,11 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidKernel/MDUnit.h"
+#include "MantidKernel/UnitLabel.h"
+#include <memory>
 #include <sstream>
+#include <stdexcept>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
@@ -19,6 +23,38 @@
 #include <Poco/DOM/Text.h>
 
 namespace Mantid::Geometry {
+
+void MDHistoDimension::setUnits(const Kernel::UnitLabel &units) {
+  // Build a replacement unit that preserves the frame's Q-ness. The workspace's
+  // special coordinate system is derived from the unit's isQUnit() (see
+  // MDFramesToSpecialCoordinateSystem), so a Q frame must keep a Q unit.
+  std::unique_ptr<Kernel::MDUnit> newUnit;
+  if (m_frame->getMDUnit().isQUnit()) {
+    newUnit = std::make_unique<Kernel::ReciprocalLatticeUnit>(units);
+  } else {
+    newUnit = std::make_unique<Kernel::LabelUnit>(units);
+  }
+
+  // Snapshot the current unit so we can roll back if the new label is not honoured.
+  std::unique_ptr<Kernel::MDUnit> previousUnit(m_frame->getMDUnit().clone());
+
+  if (!m_frame->setMDUnit(*newUnit)) {
+    throw std::invalid_argument("Cannot set units on dimension '" + m_name + "': its '" + m_frame->name() +
+                                "' frame has a fixed unit and does not support relabelling. Use the SetMDFrame "
+                                "algorithm to change the frame instead.");
+  }
+
+  // Some frames (e.g. HKL) silently revert a label they do not accept; reject rather
+  // than leave the dimension showing an unexpected label.
+  if (m_frame->getUnitLabel().ascii() != units.ascii()) {
+    m_frame->setMDUnit(*previousUnit); // roll back so the dimension is unchanged
+    throw std::invalid_argument(
+        "Cannot set units to '" + units.ascii() + "' on dimension '" + m_name +
+        "': an HKL (reciprocal-lattice) dimension only accepts 'r.l.u.' or an inverse-Angstrom-style label of the "
+        "form 'in <value> A^-1' (e.g. 'in 2.5 A^-1'), used for non-orthogonal projections. Use the SetMDFrame "
+        "algorithm to assign an arbitrary unit label.");
+  }
+}
 
 std::string MDHistoDimension::toXMLString() const {
   using namespace Poco::XML;
