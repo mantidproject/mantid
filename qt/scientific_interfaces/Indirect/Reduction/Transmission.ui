@@ -25,72 +25,43 @@
      <property name="title">
       <string>Input</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout_2">
-      <item row="0" column="1">
-       <widget class="MantidQt::MantidWidgets::DataSelector" name="dsSampleInput" native="true">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="autoLoad" stdset="0">
-         <bool>true</bool>
-        </property>
-        <property name="loadLabelText" stdset="0">
-         <string/>
-        </property>
-        <property name="workspaceSuffixes" stdset="0">
-         <stringlist/>
-        </property>
-        <property name="fileBrowserSuffixes" stdset="0">
-         <stringlist>
-          <string>.raw</string>
-         </stringlist>
-        </property>
-        <property name="showLoad" stdset="0">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="lbSample">
-        <property name="text">
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="MantidQt::API::FileFinderWidget" name="dsSampleInput" native="true">
+        <property name="label" stdset="0">
          <string>Sample:</string>
         </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="MantidQt::MantidWidgets::DataSelector" name="dsCanInput" native="true">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
+        <property name="fileExtensions" stdset="0">
+         <string>.RAW</string>
         </property>
-        <property name="autoLoad" stdset="0">
+        <property name="multipleFiles" stdset="0">
          <bool>true</bool>
         </property>
-        <property name="loadLabelText" stdset="0">
-         <string/>
-        </property>
-        <property name="workspaceSuffixes" stdset="0">
-         <stringlist/>
-        </property>
-        <property name="fileBrowserSuffixes" stdset="0">
-         <stringlist>
-          <string>.raw</string>
-         </stringlist>
-        </property>
-        <property name="showLoad" stdset="0">
-         <bool>false</bool>
+        <property name="findRunFiles" stdset="0">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="lbBackground">
+      <item>
+       <widget class="MantidQt::API::FileFinderWidget" name="dsCanInput" native="true">
+        <property name="label" stdset="0">
+         <string>Can:</string>
+        </property>
+        <property name="findRunFiles" stdset="0">
+         <bool>true</bool>
+        </property>
+        <property name="multipleFiles" stdset="0">
+         <bool>true</bool>
+        </property>
+        <property name="fileExtensions" stdset="0">
+         <string>.RAW</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="ckSumFiles">
         <property name="text">
-         <string>Background:</string>
+         <string>SumFiles</string>
         </property>
        </widget>
       </item>
@@ -174,11 +145,6 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::MantidWidgets::DataSelector</class>
-   <extends>QWidget</extends>
-   <header>MantidQtWidgets/Common/DataSelector.h</header>
-  </customwidget>
-  <customwidget>
    <class>MantidQt::CustomInterfaces::OutputPlotOptionsView</class>
    <extends>QWidget</extends>
    <header>MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsView.h</header>
@@ -188,6 +154,12 @@
    <class>MantidQt::MantidWidgets::PreviewPlot</class>
    <extends>QWidget</extends>
    <header>MantidQtWidgets/Plotting/PreviewPlot.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::API::FileFinderWidget</class>
+   <extends>QWidget</extends>
+   <header>MantidQtWidgets/Common/FileFinderWidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

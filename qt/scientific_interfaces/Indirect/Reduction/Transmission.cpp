@@ -5,8 +5,11 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Transmission.h"
-#include "MantidAPI/WorkspaceGroup.h"
 
+#include "MantidAPI/WorkspaceGroup.h"
+#include "ReductionAlgorithmUtils.h"
+
+#include <MantidQtWidgets/Common/ParseKeyValueString.h>
 #include <QFileInfo>
 
 using namespace Mantid::API;
@@ -37,31 +40,53 @@ Transmission::Transmission(IDataReduction *idrUI, QWidget *parent) : DataReducti
   connect(m_batchAlgoRunner, &API::BatchAlgorithmRunner::batchComplete, this, &Transmission::transAlgDone);
 
   connect(m_uiForm.pbSave, &QPushButton::clicked, this, &Transmission::saveClicked);
+  connect(m_uiForm.dsSampleInput, &FileFinderWidget::filesFoundChanged, this, &Transmission::handleNewInputData);
+  connect(m_uiForm.dsCanInput, &FileFinderWidget::filesFoundChanged, this, &Transmission::handleNewInputData);
 
   m_uiForm.ppPlot->setCanvasColour(QColor(240, 240, 240));
-
-  m_uiForm.dsSampleInput->setTypeSelectorVisible(false);
-  m_uiForm.dsCanInput->setTypeSelectorVisible(false);
 }
 
 Transmission::~Transmission() = default;
 
-void Transmission::handleRun() {
-  QString sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
-  QString canWsName = m_uiForm.dsCanInput->getCurrentDataName();
-  QString outWsName = sampleWsName.toLower() + "_transmission_group";
+void Transmission::handleNewInputData() {
+  const auto *finder = qobject_cast<MantidQt::API::FileFinderWidget *>(sender());
+  const auto fileNames = finder->getFilenames();
 
-  IAlgorithm_sptr transAlg = AlgorithmManager::Instance().create("IndirectTransmissionMonitor", -1);
+  QString wsname;
+  if (!m_uiForm.ckSumFiles->isChecked() || fileNames.size() == 1) {
+    QFileInfo fi(finder->getFirstFilename());
+    wsname = fi.baseName();
+    if (!loadFile(finder->getFirstFilename().toStdString(), wsname.toStdString())) {
+      emit showMessageBox("Unable to load file.\nCheck whether your file exists "
+                          "and matches the selected instrument in the "
+                          "EnergyTransfer tab.");
+      return;
+    }
+  } else {
+    wsname =
+        QString::fromStdString(loadFilesWithSum(MantidWidgets::qStringListToStdVector(fileNames), getIpfFilename()));
+  }
+
+  if (finder != m_uiForm.dsCanInput) {
+    m_sampleName = wsname;
+  } else {
+    m_canName = wsname;
+  }
+}
+
+void Transmission::handleRun() {
+  const auto outWsName = m_sampleName.toLower().toStdString() + "_transmission_group";
+  const auto transAlg = AlgorithmManager::Instance().create("IndirectTransmissionMonitor", -1);
   transAlg->initialize();
 
-  transAlg->setProperty("SampleWorkspace", sampleWsName.toStdString());
-  transAlg->setProperty("CanWorkspace", canWsName.toStdString());
-  transAlg->setProperty("OutputWorkspace", outWsName.toStdString());
+  transAlg->setProperty("SampleWorkspace", m_sampleName.toStdString());
+  transAlg->setProperty("CanWorkspace", m_canName.toStdString());
+  transAlg->setProperty("OutputWorkspace", outWsName);
 
   m_batchAlgoRunner->addAlgorithm(transAlg);
   m_batchAlgoRunner->executeBatchAsync();
 
-  m_pythonExportWsName = outWsName.toStdString();
+  m_pythonExportWsName = outWsName;
 }
 
 void Transmission::handleValidation(IUserInputValidator *validator) const {
@@ -70,13 +95,8 @@ void Transmission::handleValidation(IUserInputValidator *validator) const {
   if (currentInst != "IRIS" && currentInst != "OSIRIS")
     validator->addErrorMessage("The selected instrument must be IRIS or OSIRIS");
 
-  // Check for an invalid sample input
-  if (!m_uiForm.dsSampleInput->isValid())
-    validator->addErrorMessage("Sample: " + m_uiForm.dsSampleInput->getProblem().toStdString());
-
-  // Check for an invalid can input
-  if (!m_uiForm.dsCanInput->isValid())
-    validator->addErrorMessage("Resolution: " + m_uiForm.dsCanInput->getProblem().toStdString());
+  validator->checkFileFinderWidgetIsValid("Sample", m_uiForm.dsSampleInput);
+  validator->checkFileFinderWidgetIsValid("Can", m_uiForm.dsCanInput);
 }
 
 void Transmission::transAlgDone(bool error) {
@@ -85,7 +105,7 @@ void Transmission::transAlgDone(bool error) {
   if (error)
     return;
 
-  auto const sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
+  auto const sampleWsName = m_sampleName;
   auto const transmissionName = sampleWsName.toLower().toStdString() + "_transmission";
   conjoinSpectra(sampleWsName.toStdString() + "_Can," + sampleWsName.toStdString() + "_Sam," +
                      sampleWsName.toStdString() + "_Trans",
@@ -124,10 +144,5 @@ void Transmission::saveClicked() {
 }
 
 void Transmission::setSaveEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
-
-void Transmission::setLoadHistory(bool doLoadHistory) {
-  m_uiForm.dsSampleInput->setLoadProperty("LoadHistory", doLoadHistory);
-  m_uiForm.dsCanInput->setLoadProperty("LoadHistory", doLoadHistory);
-};
 
 } // namespace MantidQt::CustomInterfaces

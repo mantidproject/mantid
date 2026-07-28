@@ -29,17 +29,19 @@ public:
 
 private slots:
   void transAlgDone(bool error);
+  void handleNewInputData();
 
   void saveClicked();
 
   void setSaveEnabled(bool enabled);
 
 private:
-  void setLoadHistory(bool doLoadHistory) override;
   void setInstrument(QString const &instrumentName);
   void updateInstrumentConfiguration() override;
 
   Ui::Transmission m_uiForm;
+  QString m_sampleName;
+  QString m_canName;
 };
 
 } // namespace CustomInterfaces
