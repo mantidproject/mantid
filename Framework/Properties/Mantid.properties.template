@@ -227,7 +227,7 @@ ScriptLocalRepository =
 # Base Url for the remote script repository. Not necessarily accessible, it is used to construct longer URLs
 ScriptRepository = https://download.mantidproject.org/scriptrepository/
 # Pattern given to ScriptRepository that is used to hide entries from repository to the users. It is a csv string separated with ';'
-ScriptRepositoryIgnore = *pyc;
+ScriptRepositoryIgnore = *pyc;.DS_Store;
 
 # The ability to send a job to a cluster form the reduction UIs is turned off. Set it to 'On' to enable it.
 cluster.submission=Off
