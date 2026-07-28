@@ -69,6 +69,8 @@ QString DataReductionTab::getInstrumentDetail(QMap<QString, QString> const &inst
   return instrumentDetails[key];
 }
 
+std::string DataReductionTab::getIpfFilename() const { return m_idrUI->ipfFileName(); }
+
 void DataReductionTab::validateInstrumentDetail(QString const &key) const {
   auto const instrumentName = getInstrumentName().toStdString();
 
