@@ -83,6 +83,8 @@ private:
   void setBackgroundRange(double minimum, double maximum);
 
   Ui::ISISDiagnostics m_uiForm;
+  QString m_sampleName;
+  bool m_isSumFiles;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

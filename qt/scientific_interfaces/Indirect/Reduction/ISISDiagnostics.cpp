@@ -5,14 +5,17 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ISISDiagnostics.h"
+
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
 #include "MantidQtWidgets/Spectroscopy/InterfaceUtils.h"
+#include "ReductionAlgorithmUtils.h"
 
 #include <MantidAPI/FileFinder.h>
+#include <MantidQtWidgets/Common/ParseKeyValueString.h>
 #include <MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsHelper.h>
 #include <QFileInfo>
 
@@ -132,7 +135,6 @@ ISISDiagnostics::~ISISDiagnostics() {
 
 void ISISDiagnostics::handleRun() {
   QString suffix = "_" + getAnalyserName() + getReflectionName() + "_slice";
-  QString filenames = m_uiForm.dsInputFiles->getFilenames().join(",");
 
   std::vector<int> spectraRange;
   spectraRange.emplace_back(static_cast<int>(m_dblManager->value(m_properties["SpecMin"])));
@@ -145,7 +147,12 @@ void ISISDiagnostics::handleRun() {
   IAlgorithm_sptr sliceAlg = AlgorithmManager::Instance().create("TimeSlice");
   sliceAlg->initialize();
 
-  sliceAlg->setProperty("InputFiles", filenames.toStdString());
+  if (m_isSumFiles) {
+    sliceAlg->setProperty("SampleWorkspace", m_sampleName.toStdString());
+  } else {
+    sliceAlg->setProperty("InputFiles", m_sampleName.toStdString());
+  }
+
   sliceAlg->setProperty("SpectraRange", spectraRange);
   sliceAlg->setProperty("PeakRange", peakRange);
   sliceAlg->setProperty("OutputNameSuffix", suffix.toStdString());
@@ -254,20 +261,26 @@ void ISISDiagnostics::handleNewFile() {
   if (!m_uiForm.dsInputFiles->isValid())
     return;
 
-  QString filename = m_uiForm.dsInputFiles->getFirstFilename();
-
-  QFileInfo fi(filename);
-  QString wsname = fi.baseName();
+  QString wsname;
+  if (!m_uiForm.ckSumFiles->isChecked()) {
+    QFileInfo fi(m_uiForm.dsInputFiles->getFirstFilename());
+    wsname = fi.baseName();
+    if (!loadFile(m_uiForm.dsInputFiles->getFirstFilename().toStdString(), wsname.toStdString())) {
+      emit showMessageBox("Unable to load file.\nCheck whether your file exists "
+                          "and matches the selected instrument in the "
+                          "EnergyTransfer tab.");
+      return;
+    }
+    m_sampleName = m_uiForm.dsInputFiles->getFilenames().join(",");
+    m_isSumFiles = false;
+  } else {
+    wsname = QString::fromStdString(loadFilesWithSum(
+        MantidWidgets::qStringListToStdVector(m_uiForm.dsInputFiles->getFilenames()), getIpfFilename()));
+    m_sampleName = wsname;
+    m_isSumFiles = true;
+  }
 
   int specMin = static_cast<int>(m_dblManager->value(m_properties["SpecMin"]));
-  int specMax = static_cast<int>(m_dblManager->value(m_properties["SpecMax"]));
-
-  if (!loadFile(filename.toStdString(), wsname.toStdString(), specMin, specMax, SettingsHelper::loadHistory())) {
-    emit showMessageBox("Unable to load file.\nCheck whether your file exists "
-                        "and matches the selected instrument in the "
-                        "EnergyTransfer tab.");
-    return;
-  }
 
   auto const inputWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsname.toStdString());
 
