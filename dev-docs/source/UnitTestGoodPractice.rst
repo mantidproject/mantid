@@ -162,16 +162,15 @@ I want a workspace with a valid instrument definition and Spectra-detector map
     Loading instrument XML files in debug **really** hurts performance;
     avoid this like the plague.
 What if it **really** needs a file
-    First justify your reasoning with the PM or Lead developer
+    First justify your reasoning with the PM or Lead developer.
     Ensure the file is as small as possible. Perhaps edit the file to
-    only contain 2 spectra
+    only contain 2 spectra.
     Note: this is not the same as just loading 2 spectra from a large
-    file.
-    Do not use a relative path to a file
-    Used the `Scoped
-    File <https://github.com/mantidproject/mantid/blob/main/Framework/TestHelpers/inc/MantidTestHelpers/ScopedFileHelper.h>`__
-    helper, to ensure that resources are cleaned-up in an exception safe
-    manner.
+    file. Information on introducing a new data file can be found from the `Data Files for Testing <https://developer.mantidproject.org/DataFilesForTesting.html>`__ section.
+    Do not use a relative path to a file.
+    Use the `Scoped
+    File <https://github.com/mantidproject/mantid/blob/main/Framework/TestHelpers/inc/MantidFrameworkTestHelpers/ScopedFileHelper.h>`__
+    helper, to ensure that resources are cleaned-up in an exception safe manner.
 
 Mocking
 #######

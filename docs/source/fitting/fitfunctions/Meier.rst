@@ -9,7 +9,7 @@ Meier
 Description
 -----------
 
-Time dependence of the polarization function for a static muon interacting with nuclear spin [1].
+Time dependence of the polarization function for a static muon interacting with nuclear spin [1]_.
 
 .. math:: A(t)=\frac{A_0*G(t)*L(t)}{3}(2P_x+P_z)
 
@@ -59,7 +59,7 @@ and :math:`m` is the z-component of the total orbital quantum number.
 References
 ----------
 
-[1]  `P.H. Meier, HFI 17-19 427-434 (1984) <https://link.springer.com/content/pdf/10.1007%2FBF02064848.pdf>`_.
+.. [1]  `P.H. Meier, HFI 17-19 427-434 (1984) <https://link.springer.com/content/pdf/10.1007%2FBF02064848.pdf>`_.
 
 .. properties::
 

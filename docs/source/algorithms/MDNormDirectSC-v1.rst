@@ -24,6 +24,10 @@ MDBox. A brief introduction to the multi-dimensional data normalization can be f
 
     As of :ref:`Release 4.0.0 <v4.0.0>`, the algorithm can handle merged MD workspaces. Make sure all original MDEvent workspaces have the same dimensions
 
+.. Note::
+    As of :ref:`Release 7.0.0 <v7.0.0>`, the algorithm can handle MDEvent workspaces created with the ``UseLogTimes=True`` option
+    (e.g. for continuous rotation scans). It does this by calculating trajectories at 0.25 degree intervals within the full logged angular range.
+
 Usage
 -----
 

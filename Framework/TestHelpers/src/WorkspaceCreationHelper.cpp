@@ -790,6 +790,7 @@ EventWorkspace_sptr createEventWorkspaceWithStartTime(int numPixels, int numBins
   auto retVal = std::make_shared<EventWorkspace>();
   retVal->initialize(numPixels, 1, 1);
 
+  MersenneTwister randomGen(DateAndTime::getCurrentTime().nanoseconds(), 0, std::numeric_limits<int>::max());
   // Make fake events
   if (eventPattern) // 0 == no events
   {
@@ -814,6 +815,9 @@ EventWorkspace_sptr createEventWorkspaceWithStartTime(int numPixels, int numBins
         {
           for (int q = 0; q < pix; q++)
             el += TofEvent((i + 0.5) * binDelta, run_start + double(i));
+        } else if (eventPattern == 5) // Randomized pattern
+        {
+          el += TofEvent(static_cast<double>(randomGen.nextValue()), run_start + double(i));
         }
       }
       workspaceIndex++;

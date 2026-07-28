@@ -53,10 +53,11 @@ protected:
 private:
   IInstrumentView *m_view;
   Instrument m_model;
-  IBatchPresenter *m_mainPresenter;
+  IBatchPresenter *m_mainPresenter{nullptr};
   IFileHandler *m_fileHandler;
   IReflMessageHandler *m_messageHandler;
 
+  IBatchPresenter &mainPresenter() const;
   std::optional<RangeInLambda> wavelengthRangeFromView();
   std::optional<RangeInLambda> monitorBackgroundRangeFromView();
   std::optional<RangeInLambda> monitorIntegralRangeFromView();

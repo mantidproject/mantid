@@ -141,6 +141,8 @@ private:
 
   void notifyTableChanged();
 
+  IRunsPresenter &mainPresenter() const;
+
   bool isProcessing() const;
   bool isAutoreducing() const;
   bool isAnyBatchProcessing() const;
@@ -152,7 +154,7 @@ private:
   RunsTable m_model;
   Clipboard m_clipboard;
   JobsViewUpdater m_jobViewUpdater;
-  IRunsPresenter *m_mainPresenter;
+  IRunsPresenter *m_mainPresenter{nullptr};
   const IPlotter &m_plotter;
 
   friend class Encoder;

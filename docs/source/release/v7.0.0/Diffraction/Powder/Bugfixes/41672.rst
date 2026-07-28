@@ -1,0 +1,1 @@
+- :ref:`ISIS Powder SampleDetails <isis-powder-diffraction-sampleDetails-ref>` now accepts a ``number_density_units`` argument which can be set appropriately to fix issues where total scattering ``S(Q)-1`` does not tend to 0 at high Q when number density has been provided as: formula units per volume (see :ref:`number_density_unit_sampleDetails_isis-powder-diffraction-ref`).

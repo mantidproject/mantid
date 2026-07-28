@@ -1,0 +1,1 @@
+- :ref:`algm-SaveDaveGrp` algorithm now optionally converts the spectrum numbers into ``Q`` values using :ref:`algm-GetQsInQENSData` when creating the ``.grp`` file.

@@ -249,6 +249,28 @@ public:
     checkOutputWorkspaceGroupSize(2);
   }
 
+  void test_polarization_analysis_pnr_with_pa_input_spinstates_gives_specific_error() {
+    auto alg = createAlgorithm(FREDRIKZE_METHOD, FREDRIKZE_METHOD, "PNR");
+    alg->setProperty("InputWorkspaceGroup", createWorkspaceGroup(2));
+    alg->setProperty("SpinStatesInFredrikze", "pa,ap,pp,aa");
+
+    TS_ASSERT_THROWS_EQUALS(
+        alg->execute(), const std::invalid_argument &e, std::string(e.what()),
+        "The Fredrikze input spin state order \"pa,ap,pp,aa\" contains 4 spin states, but PNR polarization correction "
+        "expects 2 single spin states such as \"p,a\".");
+  }
+
+  void test_polarization_analysis_pa_with_pnr_input_spinstates_gives_specific_error() {
+    auto alg = createAlgorithm(FREDRIKZE_METHOD, FREDRIKZE_METHOD, "PA");
+    alg->setProperty("InputWorkspaceGroup", createWorkspaceGroup(4));
+    alg->setProperty("SpinStatesInFredrikze", "p,a");
+
+    TS_ASSERT_THROWS_EQUALS(
+        alg->execute(), const std::invalid_argument &e, std::string(e.what()),
+        "The Fredrikze input spin state order \"p,a\" contains 2 spin states, but PA polarization correction expects 4 "
+        "paired spin states such as \"pp,pa,ap,aa\".");
+  }
+
   void test_that_fredrikze_input_spinstates_cannot_be_used_with_wildes() {
     auto alg = createAlgorithm(WILDES_METHOD, WILDES_METHOD);
     alg->setProperty("InputWorkspaces", createWorkspacesInADS(4));

@@ -39,7 +39,7 @@ Alternatively, units of :math:`\Gamma` are :math:`\mu eV` if units of
 References
 ----------
 
-.. [1] J. Teixeira, M.-C. Bellissent-Funel, S. H. Chen, and A. J. Dianoux. `Phys. Rev. A, 31:1913–1917 <http://dx.doi.org/10.1103/PhysRevA.31.1913>`__
+.. [1] \J. Teixeira, M.-C. Bellissent-Funel, S. H. Chen, and A. J. Dianoux. `Phys. Rev. A, 31:1913–1917 <http://dx.doi.org/10.1103/PhysRevA.31.1913>`__
 
 .. categories::
 

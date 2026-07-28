@@ -83,8 +83,7 @@ const std::vector<std::string> EXCLUDEUSAGE = {"CompositeFunction"};
 /**
  * Constructor
  */
-IFunction ::IFunction()
-    : m_isParallel(false), m_handler(nullptr), m_chiSquared(0.0), m_stepSizeFunction(defaultStepSize) {}
+IFunction ::IFunction() : m_isParallel(false), m_handler(nullptr), m_chiSquared(0.0) {}
 
 /**
  * Destructor
@@ -124,6 +123,12 @@ void IFunction::setProgressReporter(std::shared_ptr<Kernel::ProgressBase> report
   m_progReporter = std::move(reporter);
   m_progReporter->setNotifyStep(0.01);
 }
+
+/**
+ * Saves the CustomStepSizes
+ * @param stepSizes :: A reference to the stepSizes vector
+ */
+void IFunction::setCustomStepSizes(const std::vector<double> &stepSizes) { m_stepSizes = stepSizes; }
 
 /**
  * If a reporter object is set, reports progress with an optional message
@@ -1128,7 +1133,7 @@ void IFunction::calNumericalDeriv(const FunctionDomain &domain, Jacobian &jacobi
   for (size_t iP = 0; iP < nParam; iP++) {
     if (isActive(iP)) {
       const double val = activeParameter(iP);
-      step = calculateStepSize(val);
+      step = calculateStepSize(iP, val);
 
       const double paramPstep = val + step;
       setActiveParameter(iP, paramPstep);
@@ -1146,25 +1151,26 @@ void IFunction::calNumericalDeriv(const FunctionDomain &domain, Jacobian &jacobi
 }
 
 /** Calculates the step size to use when calculating the numerical derivative.
+ * @param parameterIndex :: The parameter index.
  * @param parameterValue :: The value of the active parameter.
  * @returns The step size to use when calculating the numerical derivative.
  */
-double IFunction::calculateStepSize(const double parameterValue) const { return m_stepSizeFunction(parameterValue); }
+double IFunction::calculateStepSize(const size_t parameterIndex, const double parameterValue) const {
+  switch (m_stepSizeMethod) {
+  case StepSizeMethod::DEFAULT:
+    return defaultStepSize(parameterValue);
+  case StepSizeMethod::SQRT_EPSILON:
+    return sqrtEpsilonStepSize(parameterValue);
+  case StepSizeMethod::CUSTOM:
+    return m_stepSizes.at(parameterIndex);
+  }
+  throw std::invalid_argument("An invalid method for calculating the step size was provided.");
+}
 
 /** Sets the function to use when calculating the step size.
  * @param method :: An enum indicating which method to use when calculating the step size.
  */
-void IFunction::setStepSizeMethod(const StepSizeMethod method) {
-  switch (method) {
-  case StepSizeMethod::DEFAULT:
-    m_stepSizeFunction = defaultStepSize;
-    return;
-  case StepSizeMethod::SQRT_EPSILON:
-    m_stepSizeFunction = sqrtEpsilonStepSize;
-    return;
-  }
-  throw std::invalid_argument("An invalid method for calculating the step size was provided.");
-}
+void IFunction::setStepSizeMethod(const StepSizeMethod method) { m_stepSizeMethod = method; }
 
 /** Initialize the function providing it the workspace
  * @param workspace :: The workspace to set
@@ -1231,7 +1237,15 @@ void IFunction::setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> w
 
     for (size_t i = 0; i < nParams(); i++) {
       if (!isExplicitlySet(i)) {
-        Geometry::Parameter_sptr param = paramMap.getRecursive(detectorPtr, parameterName(i), "fitting");
+        // Use the fitting-function-aware lookup: two functions on the same component can declare a
+        // parameter with the same short name (e.g. Bk2BkExpConvPV:Gamma and IkedaCarpenterPV:Gamma).
+        // The plain getRecursive() short-circuits on the first match and would pick the wrong one.
+        Geometry::Parameter_sptr param =
+            paramMap.getRecursiveFittingParameter(detectorPtr, parameterName(i), this->name());
+        if (!param) {
+          // Fall back for IDFs that omit the function prefix (no embedded function name to match).
+          param = paramMap.getRecursive(detectorPtr, parameterName(i), "fitting");
+        }
         if (param != Geometry::Parameter_sptr()) {
           // get FitParameter
           const auto &fitParam = param->value<Geometry::FitParameter>();

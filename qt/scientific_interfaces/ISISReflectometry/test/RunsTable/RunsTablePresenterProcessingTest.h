@@ -38,6 +38,12 @@ public:
 
   static void destroySuite(RunsTablePresenterProcessingTest *suite) { delete suite; }
 
+  void testThrowsWhenMainPresenterHasNotBeenAccepted() {
+    auto presenter = makePresenterWithoutMainPresenter(m_view);
+    TS_ASSERT_THROWS_EQUALS(presenter.notifyResumeReductionRequested(), std::runtime_error const &e,
+                            std::string(e.what()), "RunsTablePresenter does not have a main presenter.");
+  }
+
   void testResumeReductionNotifiesParent() {
     auto presenter = makePresenter(m_view, ReductionJobs());
     EXPECT_CALL(m_mainPresenter, notifyResumeReductionRequested()).Times(1);

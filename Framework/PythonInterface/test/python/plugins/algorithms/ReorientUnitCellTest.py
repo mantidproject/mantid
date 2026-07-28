@@ -111,6 +111,17 @@ class ReorientUnitCellTest(unittest.TestCase):
         # now Z axis points along `+a*`, X-axis along `b*`
         self.assert_preferred_orientation()
 
+    def test_triclinic_crystal_system(self):
+        """Test reorientation with a triclinic crystal system, relying on CrystalSystem defaulting to Triclinic."""
+        # Fully triclinic lattice (a, b, c and alpha, beta, gamma all distinct from each other and from 90/120).
+        # Point group "-1" has no symmetry operation other than the identity with a positive determinant, so
+        # ReorientUnitCell cannot reorient the cell: Z axis already along `a*`, X-axis already along `b*`
+        SetUB(self.peaks_ws_name, a=1.0, b=2.0, c=3.0, alpha=80, beta=95, gamma=100, u=[1, 0, 0], v=[0, 1, 0])
+        # CrystalSystem is omitted here to verify that the algorithm defaults to Triclinic
+        ReorientUnitCell(PeaksWorkspace=self.peaks_ws_name, Tolerance=0.12)
+        # Z axis and X-axis are unchanged
+        self.assert_preferred_orientation()
+
 
 if __name__ == "__main__":
     unittest.main()

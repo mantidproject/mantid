@@ -32,8 +32,8 @@ public:
   /// Default constructor
   ConvToMDHistoWS();
 
-  size_t initialize(const MDWSDescription &WSD, std::shared_ptr<MDEventWSWrapper> inWSWrapper,
-                    bool ignoreZeros) override;
+  size_t initialize(const MDWSDescription &WSD, std::shared_ptr<MDEventWSWrapper> inWSWrapper, bool ignoreZeros,
+                    bool useLogTimes) override;
 
   void runConversion(API::Progress *pProgress) override;
 

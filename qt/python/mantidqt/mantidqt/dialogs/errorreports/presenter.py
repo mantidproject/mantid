@@ -49,42 +49,42 @@ class ErrorReporterPresenter(object):
             except OSError:
                 pass
 
-    def forget_contact_info(self):
-        settings = QSettings()
-        settings.beginGroup(self._view.CONTACT_INFO)
-        settings.setValue(self._view.NAME, "")
-        settings.setValue(self._view.EMAIL, "")
-        settings.endGroup()
-
-    def do_not_share(self, continue_working=True):
+    def do_not_share(self, continue_working=True, remember_contact_info=False, name="", email=""):
         self.error_log.notice("No information shared")
+        self._manage_remember_me_setting(remember_contact_info, name, email)
         self._handle_exit(continue_working)
-        if not self._view.rememberContactInfoCheckbox.isChecked():
-            self.forget_contact_info()
         return -1
 
-    def share_all_information(self, continue_working, new_name, new_email, text_box):
+    def _manage_remember_me_setting(self, remember_contact_info=False, name: str = "", email: str = "") -> None:
+        """
+        Stores locally the name and email set by the user on the error reporter form if they choose to do so
+        when clicking on the `Remember Me` checkbox. This information is never shared if the button
+        `Don't share any information` is clicked.
+        """
+        if not remember_contact_info:
+            name = email = ""
+        settings = QSettings()
+        settings.beginGroup(self._view.CONTACT_INFO)
+        settings.setValue(self._view.NAME, name)
+        settings.setValue(self._view.EMAIL, email)
+        settings.endGroup()
+
+    def share_all_information(self, continue_working, remember_contact_info, new_name, new_email, text_box):
         uptime = UsageService.getUpTime()
         status = self._send_report_to_server(share_identifiable=True, uptime=uptime, name=new_name, email=new_email, text_box=text_box)
         self.error_log.notice("Sent full information")
+        # Remember name and email in QSettings
+        self._manage_remember_me_setting(remember_contact_info, new_name, new_email)
+
         self._handle_exit(continue_working)
 
-        # Remember name and email in QSettings
-        if self._view.rememberContactInfoCheckbox.isChecked():
-            settings = QSettings()
-            settings.beginGroup(self._view.CONTACT_INFO)
-            settings.setValue(self._view.NAME, new_name)
-            settings.setValue(self._view.EMAIL, new_email)
-            settings.endGroup()
-        else:
-            self.forget_contact_info()
         return status
 
-    def error_handler(self, continue_working, share, name, email, text_box):
+    def error_handler(self, continue_working, remember_contact_info, share, name, email, text_box):
         if share:
-            status = self.share_all_information(continue_working, name, email, text_box)
+            status = self.share_all_information(continue_working, remember_contact_info, name, email, text_box)
         else:
-            status = self.do_not_share(continue_working)
+            status = self.do_not_share(continue_working, remember_contact_info, name, email)
 
         self._view.close_reporter(status)
 

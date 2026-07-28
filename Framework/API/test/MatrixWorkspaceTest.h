@@ -116,6 +116,13 @@ MatrixWorkspace_sptr makeWorkspaceWithMixedValidAndInvalidDetectors(size_t inval
 
   return ws;
 }
+
+void makeActualXValuesUncommonWithoutInvalidating(MatrixWorkspace &ws) {
+  TS_ASSERT(ws.isCommonBins());
+  // This intentionally bypasses the mutating MatrixWorkspace API so the test can
+  // detect whether the next metadata-only operation invalidates the cached flag.
+  const_cast<HistogramData::HistogramX &>(ws.x(0))[0] = 2.;
+}
 } // namespace
 
 class MatrixWorkspaceTest : public CxxTest::TestSuite {
@@ -481,6 +488,64 @@ public:
     // Once we change the value, however, isCommonsBins should return false
     ws.mutableX(0)[0] = 2.;
     TS_ASSERT_EQUALS(ws.isCommonBins(), false);
+  }
+
+  void test_setDistribution_does_not_invalidate_common_bins_flag() {
+    WorkspaceTester ws;
+    ws.initialize(3, 1, 1);
+    makeActualXValuesUncommonWithoutInvalidating(ws);
+
+    ws.setDistribution(true);
+
+    TS_ASSERT(ws.isDistribution());
+    TS_ASSERT(ws.isCommonBins());
+  }
+
+  void test_updateSpectraUsing_does_not_invalidate_common_bins_flag() {
+    WorkspaceTester ws;
+    ws.initialize(3, 1, 1);
+    makeActualXValuesUncommonWithoutInvalidating(ws);
+
+    specnum_t specs[] = {1, 2, 2, 3};
+    detid_t detids[] = {10, 99, 20, 30};
+    ws.updateSpectraUsing(SpectrumDetectorMapping(specs, detids, 4));
+
+    TS_ASSERT(ws.isCommonBins());
+    TS_ASSERT(ws.getSpectrum(0).hasDetectorID(10));
+    TS_ASSERT(ws.getSpectrum(1).hasDetectorID(20));
+    TS_ASSERT(ws.getSpectrum(1).hasDetectorID(99));
+    TS_ASSERT(ws.getSpectrum(2).hasDetectorID(30));
+  }
+
+  void test_rebuildSpectraMapping_does_not_invalidate_common_bins_flag() {
+    auto ws = makeWorkspaceWithDetectors(3, 1);
+    makeActualXValuesUncommonWithoutInvalidating(*ws);
+
+    ws->rebuildSpectraMapping();
+
+    TS_ASSERT(ws->isCommonBins());
+  }
+
+  void test_setIndexInfo_does_not_invalidate_common_bins_flag() {
+    WorkspaceTester ws;
+    ws.initialize(3, 1, 1);
+    ws.setInstrument(ComponentCreationHelper::createTestInstrumentRectangular(1, 2));
+    makeActualXValuesUncommonWithoutInvalidating(ws);
+    IndexInfo indices(3);
+    indices.setSpectrumNumbers({2, 4, 6});
+    std::vector<SpectrumDefinition> specDefs(3);
+    specDefs[0].add(0);
+    specDefs[1].add(1);
+    specDefs[2].add(2);
+    specDefs[2].add(3);
+    indices.setSpectrumDefinitions(specDefs);
+
+    ws.setIndexInfo(std::move(indices));
+
+    TS_ASSERT(ws.isCommonBins());
+    TS_ASSERT_EQUALS(ws.getSpectrum(0).getSpectrumNo(), 2);
+    TS_ASSERT_EQUALS(ws.getSpectrum(1).getSpectrumNo(), 4);
+    TS_ASSERT_EQUALS(ws.getSpectrum(2).getSpectrumNo(), 6);
   }
 
   void testIsCommonLogAxis() {

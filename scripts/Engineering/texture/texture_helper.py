@@ -548,6 +548,24 @@ def save_texture_ws_ascii(ws: str, save_dir: str, StoreInADS: bool = False) -> N
         SaveAscii(InputWorkspace=ascii_ws, Filename=path.join(save_dir, ws + ".txt"), Separator="Tab")
 
 
+def convert_to_sscanss_frame(rot_mat: np.ndarray) -> np.ndarray:
+    # Define M: matrix to convert vectors from XYZ to ZXY
+    M = np.array(
+        [
+            [0, 0, 1],  # X in ZXY = Z in XYZ
+            [1, 0, 0],  # Y in ZXY = X in XYZ
+            [0, 1, 0],  # Z in ZXY = Y in XYZ
+        ]
+    )
+
+    # Apply the similarity transform to express R in XYZ frame
+    r_xyz = Rotation.from_matrix(M @ rot_mat @ M.T)
+
+    # Now extract Euler angles in XYZ axes (extrinsic or intrinsic as needed)
+    # minus is because the sense of rotation is the other way in sscanss
+    return -r_xyz.as_euler("xyz", degrees=True)
+
+
 # --------------------------------------------------------------#
 ##### TexturePlanner shared math/workspace helpers ############
 # --------------------------------------------------------------#

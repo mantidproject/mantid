@@ -30,7 +30,7 @@ in :math:`\theta` implements a powder average
 References
 ----------
 
-.. [1] A. J. Dianoux et al. `Mol. Phys. 46:1129-37, 1982 <https://doi.org/10.1080/00268978200101121>`__.
+.. [1] \A. J. Dianoux et al. `Mol. Phys. 46:1129-37, 1982 <https://doi.org/10.1080/00268978200101121>`__.
 
 Usage
 -----

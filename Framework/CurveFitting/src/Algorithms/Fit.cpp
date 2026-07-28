@@ -9,6 +9,7 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
+#include "MantidCurveFitting/StepSizeConstants.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/Expression.h"
@@ -20,6 +21,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/StartsWithValidator.h"
 #include "MantidKernel/UsageService.h"
@@ -91,6 +93,10 @@ void Fit::initConcrete() {
                   "workspace(s) with the calculated values\n"
                   "(default is false, ignored if CreateOutput is false and "
                   "Output is an empty string).");
+  declareProperty("CustomStepSizes", std::vector<double>{}, "Custom step sizes for numerical derivatives.");
+  setPropertySettings("CustomStepSizes",
+                      std::make_unique<Kernel::EnabledWhenProperty>(
+                          "StepSizeMethod", Kernel::ePropertyCriterion::IS_EQUAL_TO, CUSTOM_STEP_SIZE));
 }
 
 std::map<std::string, std::string> Fit::validateInputs() {
@@ -112,6 +118,15 @@ std::map<std::string, std::string> Fit::validateInputs() {
     }
   }
 
+  const std::string stepSizeMethod = getPropertyValue("StepSizeMethod");
+  const std::vector<double> customStepSizes = getProperty("CustomStepSizes");
+  if (stepSizeMethod == CUSTOM_STEP_SIZE && customStepSizes.empty()) {
+    issues["CustomStepSizes"] = "CustomStepSizes must be provided when StepSizeMethod is set to Custom.";
+  }
+  if (stepSizeMethod != CUSTOM_STEP_SIZE && !customStepSizes.empty()) {
+    issues["CustomStepSizes"] = "CustomStepSizes can only be provided when StepSizeMethod is set to Custom.";
+  }
+
   return issues;
 }
 
@@ -130,6 +145,22 @@ void Fit::readProperties() {
   // Try to retrieve optional properties
   int intMaxIterations = getProperty("MaxIterations");
   m_maxIterations = static_cast<size_t>(intMaxIterations);
+
+  const std::string stepSizeMethod = getPropertyValue("StepSizeMethod");
+  if (stepSizeMethod == CUSTOM_STEP_SIZE) {
+    const std::vector<double> customStepSizes = getProperty("CustomStepSizes");
+    const size_t nParams = m_function->nParams();
+    if (customStepSizes.size() != nParams) {
+      throw std::invalid_argument(
+          "The 'CustomStepSizes' list must be the same length as the number of parameters. The list should contain " +
+          std::to_string(nParams) + " values.\n");
+    }
+    m_function->setCustomStepSizes(customStepSizes);
+    for (size_t i = 0; i < nParams; i++) {
+      g_log.debug() << "The step size of " << m_function->parameterName(i) << " has been set to " << customStepSizes[i]
+                    << "\n";
+    }
+  }
 }
 
 /// Initialize the minimizer for this fit.
@@ -295,15 +326,15 @@ void Fit::createOutput() {
       }
     }
 
-    size_t np = m_function->nParams();
+    size_t nParams = m_function->nParams();
     size_t ia = 0;
-    for (size_t i = 0; i < np; i++) {
+    for (size_t i = 0; i < nParams; i++) {
       if (!m_function->isActive(i))
         continue;
       Mantid::API::TableRow row = covariance->appendRow();
       row << m_function->parameterName(i);
       size_t ja = 0;
-      for (size_t j = 0; j < np; j++) {
+      for (size_t j = 0; j < nParams; j++) {
         if (!m_function->isActive(j))
           continue;
         if (j == i)

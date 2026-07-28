@@ -332,10 +332,10 @@ Output:
 References
 ------------
 
-.. [1] D. F. R. Mildner, B. C. Boland, R. N. Sinclair, C. G. Windsor, L. J. Bunce, and J. H. Clarke (1977) *A Cooled Polyethylene Moderator on a Pulsed Neutron Source*, Nuclear Instruments and Methods 152 437-446 `doi: 10.1016/0029-554X(78)90043-5 <https://doi.org/10.1016/0029-554X(78)90043-5>`__
-.. [2] J. P. Hodges, J. D. Jorgensen, S. Short, D. N. Argyiou, and J. W. Richardson, Jr.  *Incident Spectrum Determination for Time-of-Flight Neutron Powder Diffraction Data Analysis* ICANS 14th Meeting of the International Collaboration on Advanced Neutron Sources 813-822 `link to paper <http://www.neutronresearch.com/parch/1998/01/199801008130.pdf>`__
-.. [3] F. Issa, A. Khaplanov, R. Hall-Wilton, I. Llamas, M. Dalseth Ricktor, S. R. Brattheim, and H. Perrey (2017) *Characterization of Thermal Neutron Beam Monitors* Physical Review Accelerators and Beams 20 092801 `doi: 10.1103/PhysRevAccelBeams.20.092801 <https://doi.org/10.1103/PhysRevAccelBeams.20.092801>`__
-.. [4] W. S. Howells (1983) *On the Choice of Moderator for Liquids Diffractometer on a Pulsed Neutron Source*, Nuclear Instruments and Methods in Physics Research 223 141-146 `doi: 10.1016/0167-5087(84)90256-4 <https://doi.org/10.1016/0167-5087(84)90256-4>`__
+.. [1] \D. F. R. Mildner, B. C. Boland, R. N. Sinclair, C. G. Windsor, L. J. Bunce, and J. H. Clarke (1977) *A Cooled Polyethylene Moderator on a Pulsed Neutron Source*, Nuclear Instruments and Methods 152 437-446 `doi: 10.1016/0029-554X(78)90043-5 <https://doi.org/10.1016/0029-554X(78)90043-5>`__
+.. [2] \J. P. Hodges, J. D. Jorgensen, S. Short, D. N. Argyiou, and J. W. Richardson, Jr.  *Incident Spectrum Determination for Time-of-Flight Neutron Powder Diffraction Data Analysis* ICANS 14th Meeting of the International Collaboration on Advanced Neutron Sources 813-822 `link to paper <http://www.neutronresearch.com/parch/1998/01/199801008130.pdf>`__
+.. [3] \F. Issa, A. Khaplanov, R. Hall-Wilton, I. Llamas, M. Dalseth Ricktor, S. R. Brattheim, and H. Perrey (2017) *Characterization of Thermal Neutron Beam Monitors* Physical Review Accelerators and Beams 20 092801 `doi: 10.1103/PhysRevAccelBeams.20.092801 <https://doi.org/10.1103/PhysRevAccelBeams.20.092801>`__
+.. [4] \W. S. Howells (1983) *On the Choice of Moderator for Liquids Diffractometer on a Pulsed Neutron Source*, Nuclear Instruments and Methods in Physics Research 223 141-146 `doi: 10.1016/0167-5087(84)90256-4 <https://doi.org/10.1016/0167-5087(84)90256-4>`__
 
 
 .. categories::

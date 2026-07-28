@@ -72,6 +72,10 @@ public:
     return presenter;
   }
 
+  RunsTablePresenter makePresenterWithoutMainPresenter(IRunsTableView &view) {
+    return RunsTablePresenter(&view, {}, 0.01, ReductionJobs(), m_plotter);
+  }
+
   Group &getGroup(RunsTablePresenter &presenter, int groupIndex) {
     auto &reductionJobs = presenter.mutableRunsTable().mutableReductionJobs();
     auto &group = reductionJobs.mutableGroups()[groupIndex];

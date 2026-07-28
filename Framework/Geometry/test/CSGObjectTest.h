@@ -121,6 +121,23 @@ public:
     TSM_ASSERT_DELTA("Expected a number density of 45", 45.0, cloned_obj->material().numberDensity(), 1e-12);
   }
 
+  void testCloneOutlivesOriginal() {
+    using Mantid::Kernel::Material;
+    // Re-setting a sample material clones the shape and then drops the original (see
+    // SetSampleMaterial and CopySample), so the clone's handler and triangulator must render the
+    // clone. If they are left pointing at the original this reads freed memory.
+    auto original = createUnitCube();
+    std::shared_ptr<CSGObject> clone(dynamic_cast<CSGObject *>(
+        original->cloneWithMaterial(Material("arm", PhysicalConstants::getNeutronAtom(13), 45.0))));
+    TS_ASSERT(clone);
+    original.reset();
+
+    auto handler = clone->getGeometryHandler();
+    TS_ASSERT_THROWS_NOTHING(handler->numberOfTriangles());
+    TS_ASSERT_EQUALS(3 * handler->numberOfPoints(), clone->getTriangleVertices().size());
+    TS_ASSERT_EQUALS(3 * handler->numberOfTriangles(), clone->getTriangleFaces().size());
+  }
+
   void testIsOnSideCappedCylinder() {
     auto geom_obj = createCappedCylinder();
     // inside

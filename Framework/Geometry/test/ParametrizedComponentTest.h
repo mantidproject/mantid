@@ -109,9 +109,9 @@ public:
     TS_ASSERT_EQUALS(grandchild->getRotationParameter(m_quatName, false).size(), 0);
 
     std::vector<std::string> params = grandchild->getStringParameter(m_strName + "_child2", false);
-    const size_t nparams = params.size();
-    TS_ASSERT_EQUALS(nparams, 1);
-    if (nparams > 0) {
+    const size_t nParams = params.size();
+    TS_ASSERT_EQUALS(nParams, 1);
+    if (nParams > 0) {
       TS_ASSERT_EQUALS(params[0], m_strValue + "_child2");
     }
 

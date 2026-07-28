@@ -9,8 +9,8 @@ import mantid.simpleapi as mantid
 from mantid.kernel import logger
 from mantid.dataobjects import Workspace2D
 
-import isis_powder.routines.common as common
-from isis_powder.routines.common_enums import INPUT_BATCHING
+import Diffraction.isis_powder.routines.common as common
+from Diffraction.isis_powder.routines.common_enums import INPUT_BATCHING
 import math
 import numpy
 import os

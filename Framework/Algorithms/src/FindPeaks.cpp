@@ -1312,18 +1312,18 @@ void FindPeaks::addInfoRow(const size_t spectrum, const API::IPeakFunction_const
   // peak and background function parameters
   if (isoutputraw) {
     // Output of raw peak parameters
-    size_t nparams = peakfunction->nParams();
-    size_t nparamsb = bkgdfunction->nParams();
+    size_t nParams = peakfunction->nParams();
+    size_t nParamsb = bkgdfunction->nParams();
 
     size_t numcols = m_outPeakTableWS->columnCount();
-    if (nparams + nparamsb + 2 != numcols) {
+    if (nParams + nParamsb + 2 != numcols) {
       throw std::runtime_error("Error 1307 number of columns do not matches");
     }
 
-    for (size_t i = 0; i < nparams; ++i) {
+    for (size_t i = 0; i < nParams; ++i) {
       t << peakfunction->getParameter(i);
     }
-    for (size_t i = 0; i < nparamsb; ++i) {
+    for (size_t i = 0; i < nParamsb; ++i) {
       t << bkgdfunction->getParameter(i);
     }
   } else {

@@ -126,11 +126,12 @@ class ReductionData(Enum):
 
 class DataType(Enum):
     """
-    Defines the type of reduction data. This can either the sample or only the can.
+    Defines the type of reduction data. This can either be only one of sample or can, or both.
     """
 
     CAN = "Can"
     SAMPLE = "Sample"
+    BOTH = "Both"
 
 
 class OutputParts(Enum):

@@ -53,6 +53,12 @@ public:
     auto presenter = makePresenter();
   }
 
+  void testThrowsWhenMainPresenterHasNotBeenAccepted() {
+    auto presenter = makePresenter(false);
+    TS_ASSERT_THROWS_EQUALS(presenter.notifySettingsChanged(), std::runtime_error const &e, std::string(e.what()),
+                            "SavePresenter does not have a main presenter.");
+  }
+
   void testSetWorkspaceListOnConstruction() {
     auto workspaceNames = createWorkspaces();
     expectSetWorkspaceListFromADS(workspaceNames);
@@ -525,11 +531,13 @@ public:
   }
 
 private:
-  SavePresenter makePresenter() {
+  SavePresenter makePresenter(bool const acceptMainPresenter = true) {
     auto FileSaver = std::make_unique<NiceMock<MockFileSaver>>();
     m_fileSaver = FileSaver.get();
     auto presenter = SavePresenter(&m_view, std::move(FileSaver));
-    presenter.acceptMainPresenter(&m_mainPresenter);
+    if (acceptMainPresenter) {
+      presenter.acceptMainPresenter(&m_mainPresenter);
+    }
     return presenter;
   }
 

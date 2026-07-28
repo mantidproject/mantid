@@ -15,7 +15,7 @@
 namespace MantidQt::API {
 class EXPORT_OPT_MANTIDQT_COMMON IConfiguredAlgorithm {
 public:
-  virtual ~IConfiguredAlgorithm() = default;
+  virtual ~IConfiguredAlgorithm();
   virtual Mantid::API::IAlgorithm_sptr algorithm() const = 0;
   virtual const Mantid::API::IAlgorithmRuntimeProps &getAlgorithmRuntimeProps() const noexcept = 0;
   virtual bool validatePropsPreExec() const noexcept = 0;

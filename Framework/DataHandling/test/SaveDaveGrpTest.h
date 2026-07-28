@@ -44,7 +44,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(saver->initialize());
     TS_ASSERT(saver->isInitialized());
 
-    TS_ASSERT_EQUALS(static_cast<int>(saver->getProperties().size()), 3);
+    TS_ASSERT_EQUALS(static_cast<int>(saver->getProperties().size()), 4);
   }
 
   void test_exec() {
@@ -256,6 +256,70 @@ public:
     AnalysisDataService::Instance().remove(outws);
     if (std::filesystem::exists(outputFile))
       std::filesystem::remove(outputFile);
+  }
+
+  void test_exec_event_q() {
+    LoadEventNexus ld;
+    ld.initialize();
+    std::string outws("CNCS");
+    ld.setPropertyValue("Filename", "CNCS_7860_event.nxs");
+    ld.setPropertyValue("OutputWorkspace", outws);
+    ld.setPropertyValue("Precount", "0");
+    ld.setProperty("NumberOfBins", 1);
+    ld.execute();
+    TS_ASSERT(ld.isExecuted());
+    AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
+    TS_ASSERT_EQUALS(dataStore.doesExist(outws), true);
+
+    TS_ASSERT_THROWS_NOTHING(saver->setPropertyValue("InputWorkspace", outws));
+    TS_ASSERT_THROWS_NOTHING(saver->setProperty("ToMicroEV", false));
+    TS_ASSERT_THROWS_NOTHING(saver->setProperty("ToQsInQENSData", true));
+    std::string outputFile("testSaveDaveGrp4.grp");
+    TS_ASSERT_THROWS_NOTHING(saver->setPropertyValue("Filename", outputFile));
+    outputFile = saver->getPropertyValue("Filename"); // get absolute path
+
+    TS_ASSERT_THROWS_NOTHING(saver->execute());
+    TS_ASSERT(saver->isExecuted());
+
+    TS_ASSERT(std::filesystem::exists(outputFile));
+    // check the content of the file
+    std::ifstream testfile;
+    testfile.open(outputFile.c_str());
+    TS_ASSERT(testfile.is_open());
+    if (testfile.is_open()) {
+      std::string line;
+      getline(testfile, line);
+      TS_ASSERT_EQUALS(line, "# Number of Time-of-flight values");
+      getline(testfile, line);
+      TS_ASSERT_EQUALS(line, "1"); // only one bin
+      getline(testfile, line);
+      TS_ASSERT_EQUALS(line, "# Number of Q values");
+      getline(testfile, line);
+      TS_ASSERT_EQUALS(line, "51200");
+      getline(testfile, line);
+      TS_ASSERT_EQUALS(line, "# Time-of-flight (microsecond) values");
+      double d;
+      testfile >> d;
+      TS_ASSERT_DELTA(d, 52496.4, 1);
+      getline(testfile, line);
+      getline(testfile, line);
+      TS_ASSERT_EQUALS(line, "# Q () values");
+      testfile.close();
+    }
+    AnalysisDataService::Instance().remove(outws);
+    if (std::filesystem::exists(outputFile))
+      std::filesystem::remove(outputFile);
+  }
+
+  void test_validate_inputs() {
+    saver->setProperty("ToMicroEV", true);
+    saver->setProperty("ToQsInQENSData", true);
+    auto errors = saver->validateInputs();
+
+    TS_ASSERT_EQUALS(errors.size(), 1);
+    TS_ASSERT_EQUALS(
+        errors["ToQsInQENSData"],
+        "\'ToMicroEV\' and \'ToQsInQENSData\' can\'t be set to True at the same time.Set \'ToQsInQENSData\' to False");
   }
 
 private:

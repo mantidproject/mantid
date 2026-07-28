@@ -80,9 +80,6 @@ private:
   std::map<std::string, std::string> m_stitchParameters;
   LookupTable m_lookupTable;
   bool m_diagnostics;
-
-  friend bool operator==(Experiment const &lhs, Experiment const &rhs);
-  friend bool operator!=(Experiment const &lhs, Experiment const &rhs);
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

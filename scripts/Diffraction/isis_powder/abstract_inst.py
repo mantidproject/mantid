@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
-from isis_powder.routines import calibrate, focus, common, common_enums, common_output
+from Diffraction.isis_powder.routines import calibrate, focus, common, common_enums, common_output
 from mantid.kernel import config, logger
 import mantid.simpleapi as mantid
 

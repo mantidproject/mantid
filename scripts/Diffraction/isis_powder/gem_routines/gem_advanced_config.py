@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import copy
 
-from isis_powder.routines.common import ADVANCED_CONFIG as COMMON_ADVANCED_CONFIG
+from Diffraction.isis_powder.routines.common import ADVANCED_CONFIG as COMMON_ADVANCED_CONFIG
 
 
 absorption_correction_params = {

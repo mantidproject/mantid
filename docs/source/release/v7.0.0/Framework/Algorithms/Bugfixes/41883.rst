@@ -1,0 +1,1 @@
+- :ref:`algm-CopySample` no longer causes a crash when called with ``CopyShape = False``, ``CopyMaterial = True`` and an input workspace that is subsequently overwritten.

@@ -39,7 +39,7 @@ where the radial part is
     A_l^m = \frac{1}{4\pi\epsilon_0} \left\{ (-1)^m \frac{4\pi}{2l+1} \sum_j \frac{q_j}{r_j^{l+1}} Y_{l,-m}(\mathbf{r}_j) \right\}.
   :label: alm
 
-The above equations define the *point charge model* `[Hutchings64]`_.
+The above equations define the *point charge model* [#Hutchings64]_.
 In many solids, though, the point charge approximation breaks down,
 because the ligand electrons may be involved in bonding or charge transfer processes,
 and thus have a spatial extent and may no longer be treated as point charges situated at the atomic sites.
@@ -113,7 +113,7 @@ which transform in the same way as the *tesseral harmonic functions* (also calle
 Expressing the Hamiltonian in terms of the hermitian operators means that the coefficients in the sum can be purely real
 (using spherical tensor operators means the coefficients are in general complex) [#]_.
 
-The first attempt to construct such a crystal field Hamiltonian was by Stevens `[Stevens52]`_ who took the expressions
+The first attempt to construct such a crystal field Hamiltonian was by Stevens [#Stevens52]_ who took the expressions
 for the tesseral harmonic functions  in `Cartesian coordinates <http://www.mcphase.de/manual/node123.html>`_,
 removed the constant prefactors and replaced the :math:`x`, :math:`y` and :math:`z` coordinates
 with the angular momentum operators :math:`\hat{J}_x`, :math:`\hat{J}_y`, :math:`\hat{J}_z` respectively,
@@ -122,14 +122,14 @@ These `Stevens operators <http://www.mcphase.de/manual/node124.html>`_ are used 
 from the :math:`\hat{J}_x`, :math:`\hat{J}_y`, :math:`\hat{J}_z` operators expressed as a matrix
 using the :math:`J_z` basis states.
 
-In Stevens' original work `[Stevens52]`_, attention was paid to how the crystal field parameters determined for one magnetic
+In Stevens' original work [#Stevens52]_, attention was paid to how the crystal field parameters determined for one magnetic
 ion might be transfered to another ion in the same crystalline environment.
 In order to account for the different electronic configurations of the ions,
 the crystal field parameters are additionally weighted by the *Stevens factor*
 :math:`\theta_k = \langle \nu,L,S | |O^{(k)}|| \nu,L,S \rangle` which may be thought of as an additional reduced matrix
 element which depends on quantum numbers :math:`\nu` other than the angular momentum quantum numbers.
 The values of :math:`\theta_k` are tabulated in `Table 1`_,
-or may be calculated using the techniques in `[Judd63]`_.
+or may be calculated using the techniques in [#Judd63]_.
 Thus Stevens' Hamiltonian is
 
 .. math::
@@ -150,7 +150,7 @@ Instead, in the neutron spectroscopy literature, the full product
 is often used as the crystal field parameter to be fitted, and this convention is used by Mantid
 (e.g. the fittable coefficients in Mantid are the :math:`B_q^k` rather than the :math:`A_q^k`).
 
-An alternative formulation of the crystal field Hamiltonian developed by Wybourne `[Wybourne65]`_, Judd `[Judd63]`_ and others used
+An alternative formulation of the crystal field Hamiltonian developed by Wybourne [#Wybourne65]_, Judd [#Judd63]_ and others used
 the spherical tensor operators :math:`T_q^{(k)}` instead of the Stevens operators.
 The matrix elements of the :math:`T_q^{(k)}` are then calculated directly using the Wigner-Eckart theorem.
 This is a faster calculation but results in different Hamiltonian matrix elements for a given set of crystal field parameter values.
@@ -245,7 +245,7 @@ along the axis of highest symmetry), rather than necessarily relating to any cry
 necessary to rotate the coordinate systems (or equivalently, the crystal field parameters) for actual calculations for
 magnetic fields applied parallel to particular crystallographic directions.
 The `FOCUS manual <https://epubs.stfc.ac.uk/manifestation/5723/RAL-TR-95-023.pdf>`_ [#]_
-has some details of how these calculations may be accomplished, and further details may be found in reference `[Buckmaster72]`_.
+has some details of how these calculations may be accomplished, and further details may be found in reference [#Buckmaster72]_.
 
 The :math:`\hat{J}_x`, :math:`\hat{J}_y`, :math:`\hat{J}_z` operators may be identified with the :math:`\hat{C}_q^{(k)}` operators for :math:`k=1`
 with :math:`x`, :math:`y` and :math:`z` corresponding to :math:`q=1,-1` and 0 respectively [#]_.
@@ -330,7 +330,7 @@ Appendix A: Wybourne Normalisation
 
 It turns out that the spherical harmonic functions :math:`Y_{lm}` are not the most convenient form in which to express the
 expansion of the crystal field potential when we want to transform it into a Hamiltonian operator matrix.
-Instead, an alternative *normalisation* convention, called the *Wybourne* normalisation after `[Wybourne65]`_,
+Instead, an alternative *normalisation* convention, called the *Wybourne* normalisation after [#Wybourne65]_,
 is used, where the crystal field potential is expressed in terms of the functions
 
 .. math::
@@ -362,7 +362,7 @@ where we have expressed the Clebsch-Gordan coefficient (in the round brackets) a
 and the reduced matrix element :math:`\langle L ||t^{(k)}|| L \rangle`
 depends only on the operator rank :math:`k` and the total angular momentum :math:`L`.
 Within a single :math:`L`-manifold (that is ignoring other states with different :math:`L`, and just considering the splitting
-of the :math:`2L+1` formerly degenerate :math:`L_z` levels), it can be set to `[SmithThornley66]`_
+of the :math:`2L+1` formerly degenerate :math:`L_z` levels), it can be set to [#SmithThornley66]_
 
 .. math::
     \langle L ||t^{(k)}|| L \rangle = \frac{1}{2^k} \sqrt{\frac{(2L+k+1)!}{(2L-k)!}}.
@@ -478,7 +478,7 @@ Appendix B: Tables
 
 Table 1: *Total angular momentum quantum numbers* :math:`L`, :math:`S` and :math:`J`, *Landé* :math:`g_J` *factors,
 and Stevens factors* :math:`\theta_k` *for the ground states of the trivalent rare-earth ions*.
-After `[JensenMackintosh91]`_.
+After [#JensenMackintosh91]_.
 The ground state of :math:`\mathrm{Gd}^{3+}` is a pure spin state, on which the crystal field does not operate.
 Eu compound often do not adopt the trivalent state, and Pm is radioactive so not much studied.
 
@@ -574,43 +574,21 @@ Note, that for cubic symmetry additionally :math:`\mathrm{B}_4^4=5 \mathrm{B}_4^
 +-----+----------------------+-------+-------+-------+-------+-------+-------+
 
 Table 3: *Ratios* :math:`\lambda_{lm}` *of the Stevens to the real valued Wybourne normalised parameters.*
-After `[NewmanNg00]`_.
+After [#NewmanNg00]_.
 
 
 References
 ----------
 
-.. _[Buckmaster72]:
 
-[Buckmaster72] `H. A. Buckmaster, R. Chatterjee, and Y. H. Shing, phys. stat. sol.  (a) 13, 9 (1972). <https://doi.org/10.1002/pssa.2210130102>`_
-
-.. _[Hutchings64]:
-
-[Hutchings64] `M. T. Hutchings, in Solid State Physics, edited by F. Seitz and D. Turnbull (Academic Press, New York, 1964), vol. 16, pp.  227–273. <https://doi.org/10.1016/S0081-1947(08)60517-2>`_
-
-.. _[JensenMackintosh91]:
-
-[JensenMackintosh91] `J. Jensen and A. R. Mackintosh, Rare Earth Magnetism (Clarendon Press, 1991). <https://www.fys.ku.dk/~jjensen/REM.htm>`_
-
-.. _[Judd63]:
-
-[Judd63] B. R. Judd, Operator Techniques in Atomic Spectroscopy (McGraw-Hill, 1963), reprinted (1998) by Princeton University Press.
-
-.. _[NewmanNg00]:
-
-[NewmanNg00] D. J. Newman and B. K. C. Ng, Crystal Field Handbook (Cambridge University Press, 2000).
-
-.. _[SmithThornley66]:
-
-[SmithThornley66] `D. Smith and J. H. M. Thornley, Proc. Phys. Soc. 89, 779 (1966) <https://doi.org/10.1088/0370-1328/89/4/301>`_
-
-.. _[Stevens52]:
-
-[Stevens52] `K. W. H. Stevens, Proc. Phys. Soc. A 65, 209 (1952). <https://doi.org/10.1088/0370-1298/65/3/308>`_
-
-.. _[Wybourne65]:
-
-[Wybourne65] B. G. Wybourne, Spectroscopic Properties of Rare Earths (Interscience, New York, 1965).
+.. [#Buckmaster72] \H. A. Buckmaster, R. Chatterjee, and Y. H. Shing, phys. stat. sol.  (a) 13, 9 (1972). `<https://doi.org/10.1002/pssa.2210130102>`_
+.. [#Hutchings64] \M. T. Hutchings, in Solid State Physics, edited by F. Seitz and D. Turnbull (Academic Press, New York, 1964), vol. 16, pp.  227–273. `<https://doi.org/10.1016/S0081-1947(08)60517-2>`_
+.. [#JensenMackintosh91] \J. Jensen and A. R. Mackintosh, Rare Earth Magnetism (Clarendon Press, 1991). `<https://www.fys.ku.dk/~jjensen/REM.htm>`_
+.. [#Judd63] \B. R. Judd, Operator Techniques in Atomic Spectroscopy (McGraw-Hill, 1963), reprinted (1998) by Princeton University Press.
+.. [#NewmanNg00] \D. J. Newman and B. K. C. Ng, Crystal Field Handbook (Cambridge University Press, 2000).
+.. [#SmithThornley66] \D. Smith and J. H. M. Thornley, Proc. Phys. Soc. 89, 779 (1966) `<https://doi.org/10.1088/0370-1328/89/4/301>`_
+.. [#Stevens52] \K. W. H. Stevens, Proc. Phys. Soc. A 65, 209 (1952). `<https://doi.org/10.1088/0370-1298/65/3/308>`_
+.. [#Wybourne65] \B. G. Wybourne, Spectroscopic Properties of Rare Earths (Interscience, New York, 1965).
 
 
 .. categories:: Concepts

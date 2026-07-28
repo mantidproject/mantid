@@ -17,6 +17,7 @@
 #include "MantidQtWidgets/Common/IMessageHandler.h"
 #include "Reduction/RowExceptions.h"
 #include <memory>
+#include <stdexcept>
 
 namespace {
 Mantid::Kernel::Logger g_log("Reflectometry Batch Presenter");
@@ -44,7 +45,7 @@ BatchPresenter::BatchPresenter(
     std::unique_ptr<IExperimentPresenter> experimentPresenter,
     std::unique_ptr<IInstrumentPresenter> instrumentPresenter, std::unique_ptr<ISavePresenter> savePresenter,
     std::unique_ptr<IPreviewPresenter> previewPresenter, MantidQt::MantidWidgets::IMessageHandler *messageHandler)
-    : m_view(view), m_model(std::move(model)), m_mainPresenter(), m_runsPresenter(std::move(runsPresenter)),
+    : m_view(view), m_model(std::move(model)), m_runsPresenter(std::move(runsPresenter)),
       m_eventPresenter(std::move(eventPresenter)), m_experimentPresenter(std::move(experimentPresenter)),
       m_instrumentPresenter(std::move(instrumentPresenter)), m_savePresenter(std::move(savePresenter)),
       m_previewPresenter(std::move(previewPresenter)), m_unsavedBatchFlag(false), m_jobRunner(std::move(jobRunner)),
@@ -72,6 +73,13 @@ BatchPresenter::BatchPresenter(
  */
 void BatchPresenter::acceptMainPresenter(IMainWindowPresenter *mainPresenter) { m_mainPresenter = mainPresenter; }
 
+IMainWindowPresenter &BatchPresenter::mainPresenter() const {
+  if (!m_mainPresenter) {
+    throw std::runtime_error("BatchPresenter does not have a main presenter.");
+  }
+  return *m_mainPresenter;
+}
+
 std::string BatchPresenter::initInstrumentList(const std::string &selectedInstrument) {
   return m_runsPresenter->initInstrumentList(selectedInstrument);
 }
@@ -79,7 +87,7 @@ std::string BatchPresenter::initInstrumentList(const std::string &selectedInstru
 bool BatchPresenter::requestClose() const { return true; }
 
 void BatchPresenter::notifyChangeInstrumentRequested(const std::string &instrumentName) {
-  m_mainPresenter->notifyChangeInstrumentRequested(instrumentName);
+  mainPresenter().notifyChangeInstrumentRequested(instrumentName);
 }
 
 void BatchPresenter::notifyInstrumentChanged(const std::string &instrumentName) {
@@ -88,7 +96,7 @@ void BatchPresenter::notifyInstrumentChanged(const std::string &instrumentName) 
   m_instrumentPresenter->notifyInstrumentChanged(instrumentName);
 }
 
-void BatchPresenter::notifyUpdateInstrumentRequested() { m_mainPresenter->notifyUpdateInstrumentRequested(); }
+void BatchPresenter::notifyUpdateInstrumentRequested() { mainPresenter().notifyUpdateInstrumentRequested(); }
 
 void BatchPresenter::notifySettingsChanged() { settingsChanged(); }
 
@@ -188,8 +196,8 @@ void BatchPresenter::resumeReduction() {
   m_jobManager->notifyReductionResumed();
   // Get the algorithms to process
   auto algorithms = m_jobManager->getAlgorithms();
-  if (algorithms.size() < 1 || (m_jobManager->getProcessAll() && m_mainPresenter->isProcessAllPrevented()) ||
-      (m_jobManager->getProcessPartial() && m_mainPresenter->isProcessPartialGroupPrevented())) {
+  if (algorithms.size() < 1 || (m_jobManager->getProcessAll() && mainPresenter().isProcessAllPrevented()) ||
+      (m_jobManager->getProcessPartial() && mainPresenter().isProcessPartialGroupPrevented())) {
     notifyReductionPaused();
     return;
   }
@@ -206,7 +214,7 @@ void BatchPresenter::notifyReductionResumed() {
   m_experimentPresenter->notifyReductionResumed();
   m_instrumentPresenter->notifyReductionResumed();
   m_runsPresenter->notifyReductionResumed();
-  m_mainPresenter->notifyAnyBatchReductionResumed();
+  mainPresenter().notifyAnyBatchReductionResumed();
 }
 
 void BatchPresenter::pauseReduction() { m_jobRunner->cancelAlgorithmQueue(); }
@@ -221,7 +229,7 @@ void BatchPresenter::notifyReductionPaused() {
   m_experimentPresenter->notifyReductionPaused();
   m_instrumentPresenter->notifyReductionPaused();
   m_runsPresenter->notifyReductionPaused();
-  m_mainPresenter->notifyAnyBatchReductionPaused();
+  mainPresenter().notifyAnyBatchReductionPaused();
   // If autoreducing, notify
   if (isAutoreducing())
     notifyAutoreductionCompleted();
@@ -255,7 +263,7 @@ void BatchPresenter::notifyAutoreductionResumed() {
   m_runsPresenter->notifyAutoreductionResumed();
 
   m_runsPresenter->notifyRowStateChanged();
-  m_mainPresenter->notifyAnyBatchAutoreductionResumed();
+  mainPresenter().notifyAnyBatchAutoreductionResumed();
 }
 
 void BatchPresenter::pauseAutoreduction() {
@@ -276,7 +284,7 @@ void BatchPresenter::notifyAutoreductionPaused() {
   m_instrumentPresenter->notifyAutoreductionPaused();
   m_runsPresenter->notifyAutoreductionPaused();
 
-  m_mainPresenter->notifyAnyBatchAutoreductionPaused();
+  mainPresenter().notifyAnyBatchAutoreductionPaused();
 }
 
 void BatchPresenter::autoreductionCompleted() {
@@ -303,9 +311,9 @@ void BatchPresenter::notifyRunsTransferred() {
   m_runsPresenter->notifyRowModelChanged();
 }
 
-Mantid::Geometry::Instrument_const_sptr BatchPresenter::instrument() const { return m_mainPresenter->instrument(); }
+Mantid::Geometry::Instrument_const_sptr BatchPresenter::instrument() const { return mainPresenter().instrument(); }
 
-std::string BatchPresenter::instrumentName() const { return m_mainPresenter->instrumentName(); }
+std::string BatchPresenter::instrumentName() const { return mainPresenter().instrumentName(); }
 
 void BatchPresenter::settingsChanged() {
   setBatchUnsaved();
@@ -331,19 +339,19 @@ bool BatchPresenter::isAutoreducing() const { return m_jobManager->isAutoreducin
    * i.e. whether we are polling for new runs
    * @return : Bool on whether data is being processed
    */
-bool BatchPresenter::isAnyBatchProcessing() const { return m_mainPresenter->isAnyBatchProcessing(); }
+bool BatchPresenter::isAnyBatchProcessing() const { return mainPresenter().isAnyBatchProcessing(); }
 
 /**
    Checks whether or not autoprocessing is currently running in any batch
    * i.e. whether we are polling for new runs
    * @return : Bool on whether data is being autoprocessed
    */
-bool BatchPresenter::isAnyBatchAutoreducing() const { return m_mainPresenter->isAnyBatchAutoreducing(); }
+bool BatchPresenter::isAnyBatchAutoreducing() const { return mainPresenter().isAnyBatchAutoreducing(); }
 
-bool BatchPresenter::isOverwriteBatchPrevented() const { return m_mainPresenter->isOverwriteBatchPrevented(this); }
+bool BatchPresenter::isOverwriteBatchPrevented() const { return mainPresenter().isOverwriteBatchPrevented(this); }
 
 bool BatchPresenter::discardChanges(std::string const &message) const {
-  return m_mainPresenter->discardChanges(message);
+  return mainPresenter().discardChanges(message);
 }
 
 /** Returns whether there are any unsaved changes in the current batch */
@@ -429,7 +437,7 @@ std::optional<ProcessingInstructions> BatchPresenter::getMatchingROIDetectorIDsF
 }
 
 std::string BatchPresenter::getBatchState(const std::vector<std::string> &jsonKey) const {
-  return m_mainPresenter->encodeBatchToStr(jsonKey);
+  return mainPresenter().encodeBatchToStr(jsonKey);
 }
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

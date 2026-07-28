@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
 import yaml
-from isis_powder.routines import common as common
-from isis_powder.routines import yaml_sanity
+from Diffraction.isis_powder.routines import common as common
+from Diffraction.isis_powder.routines import yaml_sanity
 
 
 def get_run_dictionary(run_number_string, file_path):

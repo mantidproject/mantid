@@ -12,6 +12,7 @@
 #include "Reduction/ParseReflectometryStrings.h"
 #include "Reduction/PreviewRow.h"
 #include "Reduction/RowExceptions.h"
+#include <stdexcept>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 // unnamed namespace
@@ -29,17 +30,24 @@ ExperimentPresenter::ExperimentPresenter(IExperimentView *view, Experiment exper
 
 void ExperimentPresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) { m_mainPresenter = mainPresenter; }
 
+IBatchPresenter &ExperimentPresenter::mainPresenter() const {
+  if (!m_mainPresenter) {
+    throw std::runtime_error("ExperimentPresenter does not have a main presenter.");
+  }
+  return *m_mainPresenter;
+}
+
 Experiment const &ExperimentPresenter::experiment() const { return m_model; }
 
 void ExperimentPresenter::notifySettingsChanged() {
   updateModelFromView();
   showValidationResult();
-  m_mainPresenter->notifySettingsChanged();
+  mainPresenter().notifySettingsChanged();
 }
 
 void ExperimentPresenter::notifyRestoreDefaultsRequested() {
   // Trigger a reload of the instrument to get up-to-date settings.
-  m_mainPresenter->notifyUpdateInstrumentRequested();
+  mainPresenter().notifyUpdateInstrumentRequested();
   restoreDefaults();
 }
 
@@ -68,12 +76,12 @@ void ExperimentPresenter::notifyRemoveLookupRowRequested(int index) {
 void ExperimentPresenter::notifyLookupRowChanged(int /*row*/, int /*column*/) {
   updateModelFromView();
   showValidationResult();
-  m_mainPresenter->notifySettingsChanged();
+  mainPresenter().notifySettingsChanged();
 }
 
-bool ExperimentPresenter::isProcessing() const { return m_mainPresenter->isProcessing(); }
+bool ExperimentPresenter::isProcessing() const { return mainPresenter().isProcessing(); }
 
-bool ExperimentPresenter::isAutoreducing() const { return m_mainPresenter->isAutoreducing(); }
+bool ExperimentPresenter::isAutoreducing() const { return mainPresenter().isAutoreducing(); }
 
 /** Tells the view to update the enabled/disabled state of all relevant
  * widgets based on whether processing is in progress or not.
@@ -133,7 +141,7 @@ void ExperimentPresenter::notifyPreviewApplyRequested(PreviewRow const &previewR
 
     m_model.updateLookupRow(std::move(lookupRowCopy), m_thetaTolerance);
     updateViewFromModel();
-    m_mainPresenter->notifySettingsChanged();
+    mainPresenter().notifySettingsChanged();
     g_log.information("Updated experiment settings applied from preview.");
   } else {
     throw RowNotFoundException("There is no row with angle matching '" + std::to_string(previewRow.theta()) +
@@ -148,7 +156,7 @@ void ExperimentPresenter::updateLookupRowProcessingInstructions(PreviewRow const
 }
 
 void ExperimentPresenter::restoreDefaults() {
-  auto const instrument = m_mainPresenter->instrument();
+  auto const instrument = mainPresenter().instrument();
   try {
     m_model = m_experimentDefaults->get(instrument);
   } catch (std::invalid_argument &ex) {
@@ -173,16 +181,19 @@ PolarizationCorrections ExperimentPresenter::polarizationCorrectionsFromView() {
   auto const &polCorrOptionString = m_view->getPolarizationCorrectionOption();
   auto const &polCorrType = polarizationCorrectionTypeFromString(polCorrOptionString);
 
-  if (polCorrType == PolarizationCorrectionType::None || polCorrType == PolarizationCorrectionType::ParameterFile) {
+  if (polCorrType == PolarizationCorrectionType::None) {
     return PolarizationCorrections(polCorrType);
   }
-  auto const &fredrikzeSpinStateOrder = m_view->getFredrikzeSpinStateOrder();
+  if (polCorrType == PolarizationCorrectionType::ParameterFile) {
+    return PolarizationCorrections(polCorrType, std::nullopt, m_view->getInputSpinStateOrder());
+  }
+  auto const &inputSpinStateOrder = m_view->getInputSpinStateOrder();
   if (polCorrOptionString == "FilePath") {
     auto const &polCorrFilePath = m_view->getPolarizationEfficienciesFilePath();
     showPolCorrFilePathValidity(polCorrFilePath);
-    return PolarizationCorrections(polCorrType, polCorrFilePath, fredrikzeSpinStateOrder);
+    return PolarizationCorrections(polCorrType, polCorrFilePath, inputSpinStateOrder);
   }
-  return PolarizationCorrections(polCorrType, m_view->getPolarizationEfficienciesWorkspace(), fredrikzeSpinStateOrder);
+  return PolarizationCorrections(polCorrType, m_view->getPolarizationEfficienciesWorkspace(), inputSpinStateOrder);
 }
 
 void ExperimentPresenter::showPolCorrFilePathValidity(std::string const &filePath) {
@@ -239,7 +250,7 @@ void ExperimentPresenter::updatePolarizationCorrectionEnabledState() {
   // We could generalise which instruments polarization corrections are
   // applicable for but for now it's not worth it, so just hard code the
   // instrument names.
-  auto const &instrumentName = m_mainPresenter->instrumentName();
+  auto const &instrumentName = mainPresenter().instrumentName();
   if (instrumentName == "INTER" || instrumentName == "SURF") {
     m_view->setPolarizationCorrectionOption("None");
     m_view->disablePolarizationCorrections();
@@ -248,19 +259,25 @@ void ExperimentPresenter::updatePolarizationCorrectionEnabledState() {
   }
   auto const &polCorrOption = m_view->getPolarizationCorrectionOption();
   m_view->enablePolarizationCorrections();
-  if (polCorrOption == "ParameterFile" || polCorrOption == "None") {
+  if (polCorrOption == "None") {
     disablePolarizationEfficiencies();
+    return;
+  }
+  if (polCorrOption == "ParameterFile") {
+    m_view->setPolarizationEfficienciesWorkspaceMode();
+    m_view->disablePolarizationEfficiencies();
+    m_view->enableInputSpinStateOrder();
     return;
   }
   if (polCorrOption == "Workspace") {
     m_view->enablePolarizationEfficiencies();
-    m_view->enableFredrikzeSpinStateOrder();
+    m_view->enableInputSpinStateOrder();
     m_view->setPolarizationEfficienciesWorkspaceMode();
     return;
   }
   if (polCorrOption == "FilePath") {
     m_view->enablePolarizationEfficiencies();
-    m_view->enableFredrikzeSpinStateOrder();
+    m_view->enableInputSpinStateOrder();
     m_view->setPolarizationEfficienciesFilePathMode();
     return;
   }
@@ -269,7 +286,7 @@ void ExperimentPresenter::updatePolarizationCorrectionEnabledState() {
 void ExperimentPresenter::disablePolarizationEfficiencies() {
   m_view->setPolarizationEfficienciesWorkspaceMode();
   m_view->disablePolarizationEfficiencies();
-  m_view->disableFredrikzeSpinStateOrder();
+  m_view->disableInputSpinStateOrder();
 }
 
 void ExperimentPresenter::updateFloodCorrectionEnabledState() {
@@ -448,7 +465,7 @@ void ExperimentPresenter::updateViewFromModel() {
   m_view->setPolarizationEfficienciesFilePath("");
   if (m_model.polarizationCorrections().workspace())
     m_view->setPolarizationEfficienciesWorkspace(m_model.polarizationCorrections().workspace().value());
-  m_view->setFredrikzeSpinStateOrder(m_model.polarizationCorrections().fredrikzeSpinStateOrder());
+  m_view->setInputSpinStateOrder(m_model.polarizationCorrections().inputSpinStateOrder());
   m_view->setFloodCorrectionType(floodCorrectionTypeToString(m_model.floodCorrections().correctionType()));
   if (m_model.floodCorrections().workspace())
     m_view->setFloodWorkspace(m_model.floodCorrections().workspace().value());

@@ -1,0 +1,1 @@
+- The :ref:`algm-Fit` algorithm now allows setting step sizes to customize the perturbation applied to each parameter value while fitting. Setting the ``StepSizeMethod`` to ``Custom`` will allow the step sizes list to be passed using the ``CustomStepSizes`` parameter.

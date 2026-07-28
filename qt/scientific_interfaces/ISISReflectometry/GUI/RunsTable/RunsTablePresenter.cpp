@@ -14,6 +14,7 @@
 #include <boost/range/algorithm/fill.hpp>
 #include <boost/range/iterator_range_core.hpp>
 #include <boost/regex.hpp>
+#include <stdexcept>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
@@ -138,6 +139,13 @@ void RunsTablePresenter::appendRowAndGroup() {
 
 void RunsTablePresenter::acceptMainPresenter(IRunsPresenter *mainPresenter) { m_mainPresenter = mainPresenter; }
 
+IRunsPresenter &RunsTablePresenter::mainPresenter() const {
+  if (!m_mainPresenter) {
+    throw std::runtime_error("RunsTablePresenter does not have a main presenter.");
+  }
+  return *m_mainPresenter;
+}
+
 RunsTable const &RunsTablePresenter::runsTable() const { return m_model; }
 
 RunsTable &RunsTablePresenter::mutableRunsTable() { return m_model; }
@@ -205,9 +213,9 @@ void RunsTablePresenter::removeGroupsFromModel(std::vector<int> const &groupIndi
     removeGroup(m_model.mutableReductionJobs(), *it);
 }
 
-void RunsTablePresenter::notifyResumeReductionRequested() { m_mainPresenter->notifyResumeReductionRequested(); }
+void RunsTablePresenter::notifyResumeReductionRequested() { mainPresenter().notifyResumeReductionRequested(); }
 
-void RunsTablePresenter::notifyPauseReductionRequested() { m_mainPresenter->notifyPauseReductionRequested(); }
+void RunsTablePresenter::notifyPauseReductionRequested() { mainPresenter().notifyPauseReductionRequested(); }
 
 void RunsTablePresenter::notifyInsertRowRequested() {
   if (isProcessing() || isAutoreducing())
@@ -236,8 +244,8 @@ void RunsTablePresenter::notifyFilterChanged(std::string const &filterString) {
 void RunsTablePresenter::notifyChangeInstrumentRequested() {
   auto const instrumentName = m_view->getInstrumentName();
   // If the instrument cannot be changed, revert to the original
-  if (!m_mainPresenter->notifyChangeInstrumentRequested(instrumentName))
-    m_view->setInstrumentName(m_mainPresenter->instrumentName());
+  if (!mainPresenter().notifyChangeInstrumentRequested(instrumentName))
+    m_view->setInstrumentName(mainPresenter().instrumentName());
 }
 
 void RunsTablePresenter::notifyFilterReset() { m_view->resetFilterBox(); }
@@ -460,7 +468,7 @@ void RunsTablePresenter::updateGroupName(MantidWidgets::Batch::RowLocation const
     cell.setContentText(oldValue);
     m_view->jobs().setCellAt(itemIndex, column, cell);
   }
-  m_mainPresenter->notifyGroupNameChanged(m_model.mutableReductionJobs().mutableGroups()[groupIndex]);
+  mainPresenter().notifyGroupNameChanged(m_model.mutableReductionJobs().mutableGroups()[groupIndex]);
   notifyRowModelChanged();
 }
 
@@ -478,7 +486,7 @@ void RunsTablePresenter::updateRowField(MantidWidgets::Batch::RowLocation const 
   updateRow(m_model.mutableReductionJobs(), groupIndex, rowIndex, rowValidationResult.validElseNone());
   if (rowValidationResult.isValid()) {
     showAllCellsOnRowAsValid(itemIndex);
-    m_mainPresenter->notifyRowContentChanged(
+    mainPresenter().notifyRowContentChanged(
         m_model.mutableReductionJobs().mutableGroups()[groupIndex].mutableRows()[rowIndex].value());
     Item const &row = m_model.reductionJobs().groups()[groupIndex].rows()[rowIndex].value();
     notifyRowModelChanged(row);
@@ -747,9 +755,9 @@ void RunsTablePresenter::setRowStylingForItem(MantidWidgets::Batch::RowLocation 
   };
 }
 
-void RunsTablePresenter::updateProgressBar() { m_view->setProgress(m_mainPresenter->percentComplete()); }
+void RunsTablePresenter::updateProgressBar() { m_view->setProgress(mainPresenter().percentComplete()); }
 
-void RunsTablePresenter::notifyTableChanged() { m_mainPresenter->notifyTableChanged(); }
+void RunsTablePresenter::notifyTableChanged() { mainPresenter().notifyTableChanged(); }
 
 void RunsTablePresenter::notifyRowStateChanged() {
   updateProgressBar();
@@ -813,13 +821,13 @@ void RunsTablePresenter::notifyRowModelChanged(std::optional<std::reference_wrap
   m_jobViewUpdater.rowModified(groupOf(location), rowOf(location), row);
 }
 
-bool RunsTablePresenter::isProcessing() const { return m_mainPresenter->isProcessing(); }
+bool RunsTablePresenter::isProcessing() const { return mainPresenter().isProcessing(); }
 
-bool RunsTablePresenter::isAutoreducing() const { return m_mainPresenter->isAutoreducing(); }
+bool RunsTablePresenter::isAutoreducing() const { return mainPresenter().isAutoreducing(); }
 
-bool RunsTablePresenter::isAnyBatchProcessing() const { return m_mainPresenter->isAnyBatchProcessing(); }
+bool RunsTablePresenter::isAnyBatchProcessing() const { return mainPresenter().isAnyBatchProcessing(); }
 
-bool RunsTablePresenter::isAnyBatchAutoreducing() const { return m_mainPresenter->isAnyBatchAutoreducing(); }
+bool RunsTablePresenter::isAnyBatchAutoreducing() const { return mainPresenter().isAnyBatchAutoreducing(); }
 
 void RunsTablePresenter::notifyPlotSelectedPressed() {
   std::vector<std::string> workspaces;

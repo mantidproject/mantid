@@ -7,6 +7,7 @@
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Crystal/CrystalStructure.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/Container.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/MeshObject.h"
@@ -18,11 +19,54 @@
 
 namespace Mantid::API {
 using namespace Mantid::Kernel;
+using Geometry::Container;
 using Geometry::IObject;
+using Geometry::IObject_const_sptr;
 using Geometry::IObject_sptr;
 using Geometry::OrientedLattice;
 using Geometry::SampleEnvironment;
 using Geometry::ShapeFactory;
+
+namespace {
+void saveShapeToFile(Nexus::File *file, const IObject_const_sptr &shape, const std::string &tag = "") {
+  std::string shapeXML;
+  if (auto csgObject = std::dynamic_pointer_cast<const Mantid::Geometry::CSGObject>(shape)) {
+    shapeXML = csgObject->getShapeXML();
+  }
+  file->putAttr(tag + "shape_xml", shapeXML);
+  if (auto meshObject = std::dynamic_pointer_cast<const Mantid::Geometry::MeshObject>(shape)) {
+    meshObject->saveNexus(file, tag + "shape_mesh");
+  }
+  file->putAttr(tag + "shape_id", shape->id());
+}
+
+IObject_sptr loadShapeFromFile(Nexus::File *file, const std::string &tag = "") {
+  Kernel::Material material;
+  IObject_sptr shape;
+  material.loadNexus(file, tag + "material");
+  // Shape (from XML)
+  std::string shape_xml;
+  file->getAttr(tag + "shape_xml", shape_xml);
+  shape_xml = Strings::strip(shape_xml);
+  if (!shape_xml.empty()) {
+    ShapeFactory shapeMaker;
+    shape = shapeMaker.createShape(std::move(shape_xml), false /*Don't wrap with <type> tag*/);
+  } else if (file->hasGroup(tag + "shape_mesh", "NXoff_geometry")) {
+    shape = Mantid::Geometry::MeshObject::loadNexus(file, tag + "shape_mesh", material);
+  } else {
+    // if neither shape xml or shape mesh can be found this should return nullptr to be checked
+    return nullptr;
+  }
+  shape->setMaterial(material);
+  // Restore the shape id if it was saved (absent in older files)
+  if (file->hasAttr(tag + "shape_id")) {
+    std::string id;
+    file->getAttr(tag + "shape_id", id);
+    shape->setID(id);
+  }
+  return shape;
+}
+} // namespace
 
 /**
  * Default constructor. Required for cow_ptr.
@@ -290,22 +334,29 @@ void Sample::saveNexus(Nexus::File *file, const std::string &group) const {
     file->putAttr("name_empty", 1);
   }
   file->putAttr("version", 1);
-  std::string shapeXML("");
-  if (auto csgObject = std::dynamic_pointer_cast<Mantid::Geometry::CSGObject>(m_shape)) {
-    shapeXML = csgObject->getShapeXML();
-  }
-  file->putAttr("shape_xml", shapeXML);
-
-  if (auto meshObject = std::dynamic_pointer_cast<Mantid::Geometry::MeshObject>(m_shape)) {
-    meshObject->saveNexus(file, "shape_mesh");
-  }
-
+  saveShapeToFile(file, m_shape);
   m_shape->material().saveNexus(file, "material");
+
   // Write out the other (indexes 1+) samples
   file->writeData("num_other_samples", int(m_samples.size()));
   for (size_t i = 0; i < m_samples.size(); i++)
     m_samples[i]->saveNexus(file, "sample" + Strings::toString(i + 1));
-  // TODO: SampleEnvironment
+
+  if (m_environment) {
+    file->putAttr("env_name", m_environment->name());
+    auto const nElem = m_environment->nelements();
+    file->writeData("num_env_comp", int(nElem));
+    for (size_t i = 0; i < nElem; ++i) {
+      const std::string tag = "env_" + Strings::toString(i) + "_";
+      // Component 0 is the Container wrapper; save its inner shape so it can be
+      // re-wrapped on load. Other components are stored as plain shapes.
+      IObject_const_sptr comp =
+          (i == 0) ? m_environment->getContainer().getShapePtr() : m_environment->getComponentPtr(i);
+      saveShapeToFile(file, comp, tag);
+      comp->material().saveNexus(file, tag + "material");
+    }
+  }
+
   // OrientedLattice
   if (hasOrientedLattice()) {
     file->writeData("num_oriented_lattice", 1);
@@ -358,22 +409,29 @@ int Sample::loadNexus(Nexus::File *file, const std::string &group) {
         m_name.clear();
       }
     }
-    // exctract the material if there is one
-    Kernel::Material material;
-    material.loadNexus(file, "material");
-    // Shape (from XML)
-    std::string shape_xml;
-    file->getAttr("shape_xml", shape_xml);
-    shape_xml = Strings::strip(shape_xml);
-    if (!shape_xml.empty()) {
-      ShapeFactory shapeMaker;
-      m_shape = shapeMaker.createShape(std::move(shape_xml), false /*Don't wrap with <type> tag*/);
-    } else if (file->hasGroup("shape_mesh", "NXoff_geometry")) {
-      m_shape = Mantid::Geometry::MeshObject::loadNexus(file, "shape_mesh", material);
-    }
-    // CSGObject expected, if so, set its material
-    if (auto csgObj = std::dynamic_pointer_cast<Geometry::CSGObject>(m_shape)) {
-      csgObj->setMaterial(material);
+
+    // Only replace the default shape if the file actually defines one; otherwise
+    // keep the valid (empty) shape so callers never observe a null m_shape.
+    if (IObject_sptr loadedShape = loadShapeFromFile(file))
+      m_shape = std::move(loadedShape);
+
+    // sample environment
+    if (file->hasAttr("env_name")) {
+      std::string env_name;
+      file->getAttr("env_name", env_name);
+
+      int nElem;
+      file->readData("num_env_comp", nElem);
+      // component 0 is the container; without a valid shape there is no environment to build
+      if (IObject_sptr container_shape = (nElem > 0) ? loadShapeFromFile(file, "env_0_") : nullptr) {
+        auto env = std::make_shared<SampleEnvironment>(env_name, std::make_shared<Container>(container_shape));
+        for (int i = 1; i < nElem; ++i) {
+          const std::string tag = "env_" + Strings::toString(i) + "_";
+          if (IObject_sptr comp = loadShapeFromFile(file, tag))
+            env->add(comp);
+        }
+        m_environment = std::move(env);
+      }
     }
 
     // Load other samples
@@ -439,6 +497,5 @@ bool Sample::operator==(const Sample &other) const {
          compare(m_shape, other.m_shape, [](const auto &x) { return x->shape(); }) &&
          compare(m_crystalStructure, other.m_crystalStructure, [](const auto &x) { return *(x->spaceGroup()); });
 }
-
 bool Sample::operator!=(const Sample &other) const { return !this->operator==(other); }
 } // namespace Mantid::API

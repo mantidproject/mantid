@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import mantid.simpleapi as mantid
 
-from isis_powder.routines import common, common_enums, sample_details
+from Diffraction.isis_powder.routines import common, common_enums, sample_details
 
 
 def create_vanadium_sample_details_obj(config_dict):

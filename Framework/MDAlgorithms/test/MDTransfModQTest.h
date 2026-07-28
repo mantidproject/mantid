@@ -135,25 +135,64 @@ public:
     return result;
   }
 
+  void testMatrixLinSys() {
+    MDTransfModQ ModQTransf;
+    MDWSDescription WSDescr(2);
+    auto ws2D = prepareWsForMDTransfModQ(ModQTransf, WSDescr, false);
+
+    const double deltaE{1};
+    double signal{1.0}, error{1.0};
+
+    std::vector<coord_t> Q{0.0, 1.0};
+    Mantid::Kernel::DblMatrix mat = std::vector<double>({1, 0, 0.5, 0, 1, 0, 1, 0, 1});
+    ModQTransf.updateRotMat(mat.getVector());
+    ModQTransf.calcYDepCoordinates(Q, 0);
+    ModQTransf.calcMatrixCoord(deltaE, Q, signal, error);
+
+    mat.Invert();
+    ModQTransf.updateRotMat(mat.getVector());
+    ModQTransf.setInvertRot(true);
+    std::vector<coord_t> Q2{0.0, 1.0};
+    ModQTransf.calcMatrixCoord(deltaE, Q2, signal, error);
+
+    TS_ASSERT_DELTA(Q[0], Q2[0], 1e-5);
+    TS_ASSERT_DELTA(Q[1], Q2[1], 1e-5);
+  }
+
   void testExtremums() {
     MDTransfModQ ModQTransf;
+    MDWSDescription WSDescr(4);
+    auto ws2Dbig = prepareWsForMDTransfModQ(ModQTransf, WSDescr, true);
 
-    size_t nDims = 4;
+    auto convResult = checkMinMaxRangesCorrect(WSDescr, ws2Dbig, ModQTransf);
+    TSM_ASSERT_EQUALS(convResult, 0, convResult.size());
+    // Check if the correct display normalization is set
+    auto mdEventWorkspace = Mantid::DataObjects::MDEventsTestHelper::makeMDEW<3>(4, 0.0, 4.0, 1);
+    ModQTransf.setDisplayNormalization(mdEventWorkspace, ws2Dbig);
+    TSM_ASSERT_EQUALS("Should be set to number events normalization", mdEventWorkspace->displayNormalization(),
+                      Mantid::API::VolumeNormalization);
+    TSM_ASSERT_EQUALS("Should be set to number events normalization", mdEventWorkspace->displayNormalizationHisto(),
+                      Mantid::API::NumEventsNormalization);
+  }
+
+  API::MatrixWorkspace_sptr prepareWsForMDTransfModQ(MDTransfModQ &ModQTransf, MDWSDescription &WSDescr,
+                                                     bool addExtraDims) {
+    auto nDims = WSDescr.nDimensions();
     std::vector<double> L2, polar, azimuthal;
     WorkspaceCreationHelper::create2DAngles(L2, polar, azimuthal);
-
-    MDWSDescription WSDescr(static_cast<unsigned int>(nDims));
     std::string QMode = ModQTransf.transfID();
     std::string dEMode = Kernel::DeltaEMode::asString(Kernel::DeltaEMode::Direct);
-    std::vector<std::string> dimPropNames(2, "T");
-    dimPropNames[1] = "Ei";
+    std::vector<std::string> dimPropNames;
 
     auto ws2Dbig = WorkspaceCreationHelper::createProcessedInelasticWS(L2, polar, azimuthal, 100, -11, 9.9, 10);
 
     ws2Dbig->mutableRun().mutableGoniometer().setRotationAngle(0, 20);
-    // add workspace energy
-    ws2Dbig->mutableRun().addProperty("Ei", 13., "meV", true);
-    ws2Dbig->mutableRun().addProperty("T", 70., "K", true);
+    if (addExtraDims) {
+      dimPropNames = {"T", "Ei"};
+      // add workspace energy
+      ws2Dbig->mutableRun().addProperty("Ei", 13., "meV", true);
+      ws2Dbig->mutableRun().addProperty("T", 70., "K", true);
+    }
 
     WSDescr.buildFromMatrixWS(ws2Dbig, QMode, dEMode, dimPropNames);
 
@@ -172,25 +211,19 @@ public:
     ppDets_alg->execute();
     WSDescr.m_PreprDetTable = ppDets_alg->getProperty("OutputWorkspace");
     TSM_ASSERT_THROWS_NOTHING("should initialize properly: ", ModQTransf.initialize(WSDescr));
-    std::vector<coord_t> coord(4);
-    TSM_ASSERT("Generic coordinates should be in range, so should be true ", ModQTransf.calcGenericVariables(coord, 4));
-    TSM_ASSERT_DELTA("3th Generic coordinates should be temperature ", 70, coord[2], 2.e-8);
-    TSM_ASSERT_DELTA("4th Generic coordinates should be Ei ", 13, coord[3], 2.e-8);
 
-    TSM_ASSERT(" Y-dependent coordinates should be in range so it should be true: ",
-               ModQTransf.calcYDepCoordinates(coord, 0));
+    if (addExtraDims) {
+      std::vector<coord_t> coord(4);
+      TSM_ASSERT("Generic coordinates should be in range, so should be true ",
+                 ModQTransf.calcGenericVariables(coord, 4));
+      TSM_ASSERT_DELTA("3th Generic coordinates should be temperature ", 70, coord[2], 2.e-8);
+      TSM_ASSERT_DELTA("4th Generic coordinates should be Ei ", 13, coord[3], 2.e-8);
 
-    auto convResult = checkMinMaxRangesCorrect(WSDescr, ws2Dbig, ModQTransf);
+      TSM_ASSERT(" Y-dependent coordinates should be in range so it should be true: ",
+                 ModQTransf.calcYDepCoordinates(coord, 0));
+    }
 
-    TSM_ASSERT_EQUALS(convResult, 0, convResult.size());
-
-    // Check if the correct display normalization is set
-    auto mdEventWorkspace = Mantid::DataObjects::MDEventsTestHelper::makeMDEW<3>(4, 0.0, 4.0, 1);
-    ModQTransf.setDisplayNormalization(mdEventWorkspace, ws2Dbig);
-    TSM_ASSERT_EQUALS("Should be set to number events normalization", mdEventWorkspace->displayNormalization(),
-                      Mantid::API::VolumeNormalization);
-    TSM_ASSERT_EQUALS("Should be set to number events normalization", mdEventWorkspace->displayNormalizationHisto(),
-                      Mantid::API::NumEventsNormalization);
+    return ws2Dbig;
   }
 
   MDTransfModQTest() {

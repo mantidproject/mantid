@@ -5,13 +5,16 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import copy
+import os
 
 from mantidqtinterfaces.Muon.GUI.Common import thread_model
 import mantidqtinterfaces.Muon.GUI.Common.utilities.run_string_utils as run_utils
 import mantidqtinterfaces.Muon.GUI.Common.utilities.muon_file_utils as file_utils
 import mantidqtinterfaces.Muon.GUI.Common.utilities.load_utils as load_utils
 from mantidqtinterfaces.Muon.GUI.Common.utilities.run_string_utils import flatten_run_list
+from mantidqtinterfaces.Muon.GUI.Common.utilities.muon_file_utils import show_file_browser_and_return_selection
 from mantidqt.utils.observer_pattern import Observable
+from mantid.kernel.environment import is_windows
 
 
 class LoadRunWidgetPresenter(object):
@@ -26,6 +29,10 @@ class LoadRunWidgetPresenter(object):
 
         self._instrument = self._model.instrument
         self._view.set_current_instrument(self._instrument)
+        if is_windows():
+            self.set_autosave_file_path(file_utils.get_autosave_file_path(self._instrument))
+        else:
+            self.set_autosave_file_path("")
 
         self.run_list = []
 
@@ -34,6 +41,7 @@ class LoadRunWidgetPresenter(object):
         self.disable_notifier = self.DisableEditingNotifier(self)
 
     def _set_connections(self):
+        self._view.on_browse_clicked(self.handle_browse_clicked)
         self._view.on_load_current_run_clicked(self.handle_load_current_run)
         self._view.on_increment_run_clicked(self.handle_increment_run)
         self._view.on_decrement_run_clicked(self.handle_decrement_run)
@@ -60,6 +68,8 @@ class LoadRunWidgetPresenter(object):
         else:
             self._view.enable_load_buttons()
         self._instrument = instrument
+        if is_windows():
+            self.set_autosave_file_path(file_utils.get_autosave_file_path(self._instrument))
         self._view.set_current_instrument(instrument)
 
     def disable_loading(self):
@@ -73,6 +83,13 @@ class LoadRunWidgetPresenter(object):
     def clear_loaded_data(self):
         self._view.clear()
         self._model.clear_loaded_data()
+
+    def set_autosave_file_path(self, file_path):
+        self._view.set_autosave_file_path(file_path)
+        if not file_path and not is_windows():
+            self._view.load_current_run_button.setEnabled(False)
+        else:
+            self._view.load_current_run_button.setEnabled(True)
 
     @property
     def workspaces(self):
@@ -129,12 +146,24 @@ class LoadRunWidgetPresenter(object):
             self.on_loading_finished()
 
     # ------------------------------------------------------------------------------------------------------------------
+    # Browse for autosave.run file
+    # ------------------------------------------------------------------------------------------------------------------
+
+    def handle_browse_clicked(self):
+        file_filter = "Autosave Run File (*.run)"
+        filename = show_file_browser_and_return_selection(self._view, file_filter, [""], multiple_files=False)
+        if filename:
+            self.set_autosave_file_path(filename[0])
+
+    # ------------------------------------------------------------------------------------------------------------------
     # Loading from current run button
     # ------------------------------------------------------------------------------------------------------------------
 
     def handle_load_current_run(self):
         try:
-            current_run_file = file_utils.get_current_run_filename(self.get_current_instrument())
+            current_run_file = str(
+                file_utils.get_current_run_filename(self.get_current_instrument(), os.path.abspath(self._view.get_autosave_file_path()))
+            )
         except ValueError as error:
             self._view.warning_popup(error.args[0])
             return

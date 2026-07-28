@@ -11,7 +11,7 @@ import tempfile
 import shutil
 import warnings
 
-from isis_powder.gem_routines import gem_output
+from Diffraction.isis_powder.gem_routines import gem_output
 
 
 class ISISPowderGemOutputTest(unittest.TestCase):

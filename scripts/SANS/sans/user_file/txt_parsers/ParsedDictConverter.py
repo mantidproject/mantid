@@ -93,6 +93,14 @@ class ParsedDictConverter(IStateParser):
         return state
 
     def get_state_calculate_transmission(self):
+        def update_transmission_state(cur_states, new_state):
+            cur_states = cur_states if isinstance(cur_states, list) else [cur_states]
+            for container in cur_states:
+                container.fit_type = new_state.fit_type
+                container.polynomial_order = new_state.polynomial_order
+                container.wavelength_low = new_state.start
+                container.wavelength_high = new_state.stop
+
         state = (
             self._all_states.adjustment.calculate_transmission
             if self._all_states
@@ -151,56 +159,38 @@ class ParsedDictConverter(IStateParser):
             fit_general = self._input_dict[FitId.GENERAL]
             # We can have settings for both the sample or the can or individually
             # There can be three types of settings:
-            # 1. Clearing the fit setting
-            # 2. General settings where the entry data_type is not specified. Settings apply to both sample and can
+            # 1. Clearing the fit setting: data_type no specified but fit set to NO FIT.
+            # 2. General settings where the entry data_type is not specified. Settings apply to both sample and can.
             # 3. Sample settings
             # 4. Can settings
-            # We first apply the general settings. Specialized settings for can or sample override the general settings
-            # As usual if there are multiple settings for a specific case, then the last in the list is used.
+            # Either we apply general or clearing settings, or we specify the settings for either the sample or the can.
+            # Only the last instance of these settings in the list is used.
             can = state.fit[DataType.CAN.value]
             sample = state.fit[DataType.SAMPLE.value]
+            last_item = fit_general[-1]
 
-            # 1 Fit type settings
-            clear_settings = [item for item in fit_general if item.data_type is None and item.fit_type is FitType.NO_FIT]
+            if last_item.data_type is None:
+                if last_item.fit_type is FitType.NO_FIT:
+                    can.fit_type = sample.fit_type = FitType.NO_FIT
+                else:
+                    # No data type specified, assumed is BOTH, so settings are applied generally.
+                    update_transmission_state([sample, can], last_item)
 
-            if clear_settings:
-                clear_settings = clear_settings[-1]
-                # Will set the fitting to NoFit
-                sample.fit_type = clear_settings.fit_type
-                can.fit_type = clear_settings.fit_type
+            else:
+                # We keep the current state in case the new command is to clear either the sample or the can settings.
+                cur_fit_sample, cur_fit_can = sample.fit_type, can.fit_type
+                update_transmission_state([sample, can], last_item)
 
-            # 2. General settings
-            general_settings = [item for item in fit_general if item.data_type is None and item.fit_type is not FitType.NO_FIT]
-            if general_settings:
-                general_settings = general_settings[-1]
-
-                sample.fit_type = general_settings.fit_type
-                sample.polynomial_order = general_settings.polynomial_order
-                sample.wavelength_low = general_settings.start
-                sample.wavelength_high = general_settings.stop
-
-                can.fit_type = general_settings.fit_type
-                can.polynomial_order = general_settings.polynomial_order
-                can.wavelength_low = general_settings.start
-                can.wavelength_high = general_settings.stop
-
-            # 3. Sample settings
-            sample_settings = [item for item in fit_general if item.data_type is DataType.SAMPLE]
-            if sample_settings:
-                sample_settings = sample_settings[-1]
-                sample.fit_type = sample_settings.fit_type
-                sample.polynomial_order = sample_settings.polynomial_order
-                sample.wavelength_low = sample_settings.start
-                sample.wavelength_high = sample_settings.stop
-
-            # 4. Can settings
-            can_settings = [item for item in fit_general if item.data_type is DataType.CAN]
-            if can_settings:
-                can_settings = can_settings[-1]
-                can.fit_type = can_settings.fit_type
-                can.polynomial_order = can_settings.polynomial_order
-                can.wavelength_low = can_settings.start
-                can.wavelength_high = can_settings.stop
+                no_fit_selected = last_item.fit_type is FitType.NO_FIT
+                match last_item.data_type:
+                    case DataType.SAMPLE:
+                        sample.fit_type = FitType.NO_FIT if no_fit_selected else last_item.fit_type
+                        can.fit_type = cur_fit_can if no_fit_selected else FitType.NO_FIT
+                    case DataType.CAN:
+                        can.fit_type = FitType.NO_FIT if no_fit_selected else last_item.fit_type
+                        sample.fit_type = cur_fit_sample if no_fit_selected else FitType.NO_FIT
+                    case _:
+                        pass
 
         # Set the wavelength default configuration
         _set_wavelength_limits(state, self._input_dict)

@@ -29,7 +29,7 @@ Related functions:
 References
 ----------
 
-.. [1] F. Volino and A. J. Dianoux, `Molecular Physics 41(2):271-279 <https://doi.org/10.1080/00268978000102761>`__.
+.. [1] \F. Volino and A. J. Dianoux, `Molecular Physics 41(2):271-279 <https://doi.org/10.1080/00268978000102761>`__.
 
 Usage
 -----

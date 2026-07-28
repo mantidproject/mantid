@@ -80,7 +80,8 @@ of Ref[3].
 For a detailed derivation of the analytical Jacobian used by the implementation, see
 :ref:`func-IkedaCarpenterPV-derivative`.
 
-References:
+References
+----------
 
 #. S. Ikeda and J. M. Carpenter, `Nuclear Inst. and Meth. in Phys. Res.
    A239, 536 (1985) <http://dx.doi.org/10.1016/0168-9002(85)90033-6>`_

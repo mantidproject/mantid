@@ -4,7 +4,7 @@
 Formatting Plots with a script
 ==============================
 
-**Sometimes the easiest way to find out how to control part of a plot with Matplotlib is to search online for their** `documentation <https://matplotlib.org/3.2.1/index.html>`_ **! Below are some useful commands and a handful of links**
+**Sometimes the easiest way to find out how to control part of a plot with Matplotlib is to search online for their** `documentation <https://matplotlib.org/3.10.9/index.html>`_ **! Below are some useful commands and a handful of links**
 
 
 General
@@ -12,24 +12,28 @@ General
 
 Required imports:
 
-.. code-block:: python
+.. testcode:: MantidPlottingExample
 
-    from mantid.simpleapi import *
+    from mantid.simpleapi import Load
     import matplotlib.pyplot as plt
 
 Access a workspace,loaded in the Workspace Toolbox, inside a script:
 
-.. code-block:: python
+.. testcode:: MantidPlottingExample
 
-    ws = mtd['ws']
+    # For example
+    # ws = mtd['ws']
 
-    #or you could use:
-    from mantid.api import AnalysisDataService as ADS
-    ws = ADS.retrieve('ws')
+    # or you could use:
+    # from mantid.api import AnalysisDataService as ADS
+    # ws = ADS.retrieve('ws')
+
+    # or import it directly
+    ws = Load('MAR11060')
 
 Create a Figure and access its Axes for plotting:
 
-.. code-block:: python
+.. testcode:: MantidPlottingExample
 
     fig, axes = plt.subplots(subplot_kw={'projection': 'mantid'})
 
@@ -37,33 +41,33 @@ Create a Figure and access its Axes for plotting:
 
 **Actually plot** the 1st spectrum of the workspace "ws" and control `many options <https://matplotlib.org/3.2.1/api/_as_gen/matplotlib.axes.Axes.plot.html>`_:
 
-.. code-block:: python
+.. testcode:: MantidPlottingExample
 
     axes.plot(ws, specNum=1, color='red', label='spec 1 - ws', linewidth=1.0, linestyle='--', drawstyle='steps', marker = 'x')
 
 Add a `legend <https://matplotlib.org/3.2.1/api/_as_gen/matplotlib.pyplot.legend.html>`_ containing the plotted data labels:
 
-.. code-block:: python
+.. testcode:: MantidPlottingExample
 
-    plt.legend()
+    axes.legend()
 
 Adjust the `scale to logarithmic <https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.yscale.html>`_, or the `axis limits <https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.set_xlim.html>`_:
 
-.. code-block:: python
+.. testcode:: MantidPlottingExample
 
     axes.set_yscale('log')
-    axes.set_xlim(0.0, 80.)
+    axes.set_xlim(0.0, 800.)
     # x and y can be swapped to alter the other axis
 
 Add a title:
 
-.. code-block:: python
+.. testcode:: MantidPlottingExample
 
     axes.set_title("My Wonderful Plot", fontsize=20, verticalalignment='bottom')
 
 Add axis labels:
 
-.. code-block:: python
+.. testcode:: MantidPlottingExample
 
     axes.set_xlabel(r'Time-of-flight ($\mu s$)'), axes.set_ylabel(r'Counts ($\mu s$)$^{-1}$')
 
@@ -73,9 +77,9 @@ Plotting with Errorbars
 
 Simply use "`errorbar <https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.errorbar.html>`_" instead of "plot":
 
-.. code-block:: python
+.. testcode:: MantidPlottingExample
 
-    axes.errorbar(ws, specNum=3, capsize=2.0, label='spec 3', linewidth=1.0)
+    axes.errorbar(ws, specNum=1, capsize=2.0, label='spec 3', linewidth=1.0)
 
 
 Tick Marks and Grid lines
@@ -83,7 +87,7 @@ Tick Marks and Grid lines
 
 Add `minor tick marks <https://matplotlib.org/3.2.1/gallery/ticks_and_spines/major_minor_demo.html>`_, here to the x-axis:
 
-.. code-block:: python
+.. testcode:: MantidPlottingExample
 
     from matplotlib.ticker import (MultipleLocator, AutoMinorLocator)
     axes.xaxis.set_minor_locator(MultipleLocator(5)) # minor ticks every 5 units
@@ -91,19 +95,19 @@ Add `minor tick marks <https://matplotlib.org/3.2.1/gallery/ticks_and_spines/maj
 
 Edit `tick options <https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.tick_params.html>`_ such as direction in/out:
 
-.. code-block:: python
+.. testcode:: MantidPlottingExample
 
    axes.tick_params(which='minor', width = 0.5, length=4, color='b', direction='in', top='on')
 
 Even add `gridlines <https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.grid.html>`_ :
 
-.. code-block:: python
+.. testcode:: MantidPlottingExample
 
    axes.grid(True, which = 'both', axis = 'both') # major/minor, x/y
 
 Notice how `gridlines are linked to the axis ticks <https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.tick_params.html>`_:
 
-.. code-block:: python
+.. testcode:: MantidPlottingExample
 
     axes.tick_params(which='minor', grid_color='r', grid_alpha=0.5)
     axes.tick_params(which='major', grid_color='b')
@@ -122,18 +126,36 @@ Alter the `font <https://matplotlib.org/3.10.8/users/explain/text/usetex.html>`_
 
 Note that the fonts available is system dependent - and you can `find available fonts here <http://jonathansoma.com/lede/data-studio/matplotlib/list-all-fonts-available-in-matplotlib-plus-samples/>`_ .
 
-Alternatively, you can set a title or label to have certain `font properties <https://matplotlib.org/3.1.1/api/text_api.html#matplotlib.text.Text>`_:
+Alternatively, you can set a title or label to have certain `font properties <https://matplotlib.org/3.10.9/api/text_api.html#matplotlib.text.Text>`_:
 
-.. code-block:: python
+.. testcode:: MantidPlottingExample
 
    axes.set_xlabel(r'Time-of-flight ($\mu s$)', fontsize = 12, fontstyle = 'italic', fontweight = 'bold', fontfamily='serif')
+
+   print("Plotting example ran successfully")
+
+Output:
+
+.. testoutput:: MantidPlottingExample
+
+    Plotting example ran successfully
+
+.. testcleanup:: MantidPlottingExample
+
+    DeleteWorkspace(ws)
+
 
 Subplots and Inset plots
 ========================
 
 Create a `tiled plot <https://matplotlib.org/devdocs/gallery/subplots_axes_and_figures/subplots_demo.html>`_ (subplot)
 
-.. code-block:: python
+.. testcode:: MantidSubplotExample
+
+    from mantid.simpleapi import Load
+    import matplotlib.pyplot as plt
+
+    ws = Load('MAR11060')
 
     fig, axes = plt.subplots(ncols=2, nrows=2, subplot_kw={'projection': 'mantid'})
     # You've created 2x2 arrangement of plots, now plot in them:
@@ -144,12 +166,24 @@ Create a `tiled plot <https://matplotlib.org/devdocs/gallery/subplots_axes_and_f
     #for subplots it is useful to include the following line
     plt.tight_layout()
 
-Add an `inset plot using the mantid projection <https://matplotlib.org/3.2.1/api/_as_gen/matplotlib.figure.Figure.html?highlight=add_axes#matplotlib.figure.Figure.add_axes>`_ (`without it <https://matplotlib.org/3.1.1/api/_as_gen/mpl_toolkits.axes_grid1.inset_locator.inset_axes.html>`_ ):
+Add an `inset plot using the mantid projection <https://matplotlib.org/3.10.9/api/_as_gen/matplotlib.figure.Figure.add_axes.html>`_ (`without it <https://matplotlib.org/3.10.9/api/_as_gen/mpl_toolkits.axes_grid1.inset_locator.inset_axes.html>`_ ):
 
-.. code-block:: python
+.. testcode:: MantidSubplotExample
 
     ax_sub = fig.add_axes([0.50, 0.50, 0.3, 0.25],projection='mantid') #[left, bottom, width, height]
-    ax_sub.plot(ws, specNum=5)
+    ax_sub.plot(ws, specNum=6)
+
+    print("Subplots and Inset example ran successfully")
+
+Output:
+
+.. testoutput:: MantidSubplotExample
+
+    Subplots and Inset example ran successfully
+
+.. testcleanup:: MantidSubplotExample
+
+    DeleteWorkspace(ws)
 
 
 Generate a Script
@@ -167,7 +201,7 @@ Useful links
 For further info, including code for producing 2D colorfill plots see:
 
 * `Mantid Plotting Examples <https://docs.mantidproject.org/nightly/plotting/index.html>`_
-* `Matplotlib Gallery <https://matplotlib.org/3.1.1/gallery/index.html>`_
+* `Matplotlib Gallery <https://matplotlib.org/3.10.9/gallery/index.html>`_
 * `Mantid Script Plotting <https://docs.mantidproject.org/nightly/api/python/mantid/plots/index.html>`_
 
 
@@ -222,7 +256,7 @@ Example Script
 
 * :ref:`plotting`
 * :ref:`06_formatting_plots`
-* `Matplotlib Keyboard Shortcuts <https://matplotlib.org/3.1.1/users/navigation_toolbar.html#navigation-keyboard-shortcuts>`_
+* `Matplotlib Keyboard Shortcuts <https://matplotlib.org/stable/users/explain/figure/interactive.html#navigation-keyboard-shortcuts>`_
 
 .. |GenerateAScript.png| image:: /images/GenerateAScript.png
    :width: 30px

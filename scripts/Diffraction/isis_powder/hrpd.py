@@ -7,9 +7,9 @@
 import os
 import numpy as np
 
-from isis_powder.abstract_inst import AbstractInst
-from isis_powder.routines import absorb_corrections, common, instrument_settings
-from isis_powder.hrpd_routines import hrpd_advanced_config, hrpd_algs, hrpd_param_mapping
+from Diffraction.isis_powder.abstract_inst import AbstractInst
+from Diffraction.isis_powder.routines import absorb_corrections, common, instrument_settings
+from Diffraction.isis_powder.hrpd_routines import hrpd_advanced_config, hrpd_algs, hrpd_param_mapping
 
 import mantid.simpleapi as mantid
 from mantid.api import MultiDomainFunction, FunctionFactory

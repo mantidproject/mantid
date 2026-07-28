@@ -16,12 +16,20 @@ namespace Mantid::Kernel {
 SpinStateValidator::SpinStateValidator(std::unordered_set<int> allowedNumbersOfSpins, const bool acceptSingleStates,
                                        const std::string &paraIndicator, const std::string &antiIndicator,
                                        const bool optional, const std::string &extraIndicator)
+    : SpinStateValidator(std::move(allowedNumbersOfSpins), acceptSingleStates, paraIndicator, antiIndicator, optional,
+                         extraIndicator, true) {}
+
+SpinStateValidator::SpinStateValidator(std::unordered_set<int> allowedNumbersOfSpins, const bool acceptSingleStates,
+                                       const std::string &paraIndicator, const std::string &antiIndicator,
+                                       const bool optional, const std::string &extraIndicator,
+                                       const bool rejectRepeatedSpinStates)
     : TypedValidator<std::string>(), m_allowedNumbersOfSpins(std::move(allowedNumbersOfSpins)),
       m_acceptSingleStates(acceptSingleStates), m_para(paraIndicator), m_anti(antiIndicator), m_optional(optional),
-      m_extra(extraIndicator) {}
+      m_extra(extraIndicator), m_rejectRepeatedSpinStates(rejectRepeatedSpinStates) {}
 
 Kernel::IValidator_sptr SpinStateValidator::clone() const {
-  return std::make_shared<SpinStateValidator>(m_allowedNumbersOfSpins, m_acceptSingleStates);
+  return std::make_shared<SpinStateValidator>(m_allowedNumbersOfSpins, m_acceptSingleStates, m_para, m_anti, m_optional,
+                                              m_extra, m_rejectRepeatedSpinStates);
 }
 
 std::string SpinStateValidator::checkValidity(const std::string &input) const {
@@ -69,11 +77,13 @@ std::string SpinStateValidator::checkValidity(const std::string &input) const {
   }
 
   // Check that each spin state only appears once
-  std::sort(spinStates.begin(), spinStates.end());
-  auto it = std::unique(spinStates.begin(), spinStates.end());
-  auto numberOfUniqueStates = static_cast<int>(std::distance(spinStates.begin(), it));
-  if (numberOfUniqueStates < numberSpinStates)
-    return "Each spin state must only appear once";
+  if (m_rejectRepeatedSpinStates) {
+    std::sort(spinStates.begin(), spinStates.end());
+    auto it = std::unique(spinStates.begin(), spinStates.end());
+    auto numberOfUniqueStates = static_cast<int>(std::distance(spinStates.begin(), it));
+    if (numberOfUniqueStates < numberSpinStates)
+      return "Each spin state must only appear once";
+  }
 
   return "";
 }

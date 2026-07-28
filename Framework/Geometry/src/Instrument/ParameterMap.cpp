@@ -9,6 +9,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidKernel/Cache.h"
@@ -388,6 +389,62 @@ void ParameterMap::add(const IComponent *comp, const std::shared_ptr<Parameter> 
     m_map.insert(std::make_pair(comp->getComponentID(), par));
 #endif
   }
+}
+
+/** Add a fitting parameter, deduplicating by (name, fittingFunction) instead of name alone.
+ *
+ * Two different fitting functions attached to the same component can declare a parameter with
+ * the same short name (e.g. Bk2BkExpConvPV:Gamma and IkedaCarpenterPV:Gamma). The regular add()
+ * path uses positionOf() which only matches by name and would let one entry silently overwrite
+ * the other.
+ *
+ * @param comp :: Component the parameter is attached to
+ * @param name :: Parameter short name (e.g. "Gamma")
+ * @param fittingFunction :: Name of the fitting function this parameter applies to (may be empty)
+ * @param value :: Serialised FitParameter value string (as built by ExperimentInfo)
+ * @param pDescription :: Optional description
+ * @param pVisible :: Visibility flag
+ */
+void ParameterMap::addFittingParameter(const IComponent *comp, const std::string &name,
+                                       const std::string &fittingFunction, const std::string &value,
+                                       const std::string *const pDescription, const std::string &pVisible) {
+  checkIsNotMaskingParameter(name);
+  auto param = ParameterFactory::create("fitting", name, pVisible);
+  param->fromString(value);
+  if (pDescription)
+    param->setDescription(*pDescription);
+
+  // Look for an existing fitting parameter on this component with the same name AND the same
+  // embedded function; only that one should be replaced.
+  if (!m_map.empty()) {
+    const ComponentID id = comp->getComponentID();
+    auto it_found = m_map.find(id);
+    if (it_found != m_map.end()) {
+      auto itrs = m_map.equal_range(id);
+      for (auto itr = itrs.first; itr != itrs.second; ++itr) {
+        const auto &existing = itr->second;
+        if (existing->type() == "fitting" && strcasecmp(existing->nameAsCString(), name.c_str()) == 0) {
+          try {
+            if (existing->value<FitParameter>().getFunction() == fittingFunction) {
+              g_log.debug() << "addFittingParameter: [replace] matched existing (name='" << name << "', function='"
+                            << fittingFunction << "') on component '" << comp->getName() << "'; overwriting in place\n";
+              std::atomic_store(&(itr->second), param);
+              return;
+            }
+          } catch (...) {
+            // Not a FitParameter value despite the type tag
+            g_log.debug() << "addFittingParameter: [skip-match] existing 'fitting' entry (name='" << name
+                          << "') on component '" << comp->getName()
+                          << "' did not hold a FitParameter value; ignoring it and continuing search\n";
+          }
+        }
+      }
+    }
+  }
+
+  g_log.debug() << "addFittingParameter: [insert] no existing match for (name='" << name << "', function='"
+                << fittingFunction << "') on component '" << comp->getName() << "'; adding new entry\n";
+  m_map.insert({comp->getComponentID(), param});
 }
 
 /** Create or adjust "pos" parameter for a component
@@ -880,6 +937,54 @@ Parameter_sptr ParameterMap::getRecursive(const IComponent *comp, const char *na
     parent = parent->getParent();
   }
   return result;
+}
+
+/** Find a fitting parameter recursively, picking the one whose embedded FitParameter function name
+ * matches the requested fittingFunction.
+ *
+ * When two functions attached to the same component share a parameter short name
+ * (e.g. Bk2BkExpConvPV:Gamma and IkedaCarpenterPV:Gamma), getRecursive() short-circuits on the first
+ * match and may return the wrong function's parameter. This method walks every entry on each level
+ * of the component tree so it can disambiguate by function name.
+ *
+ * @param comp :: The component to start the search with
+ * @param name :: Parameter short name (e.g. "Gamma")
+ * @param fittingFunction :: The fitting function name this parameter must belong to
+ * @returns the matching parameter, or a null shared pointer if none is found
+ */
+Parameter_sptr ParameterMap::getRecursiveFittingParameter(const IComponent *comp, const std::string &name,
+                                                          const std::string &fittingFunction) const {
+  checkIsNotMaskingParameter(name);
+  if (!comp || m_map.empty())
+    return Parameter_sptr();
+
+  // Walk up the component tree using a raw pointer. Wrapping the externally-owned
+  // component in a shared_ptr (even with NoDeleting) makes Coverity flag it as being
+  // managed by two smart pointers; the parent shared_ptr keeps each level alive.
+  const IComponent *current = comp;
+  std::shared_ptr<const IComponent> parent;
+  while (current != nullptr) {
+    const ComponentID id = current->getComponentID();
+    auto it_found = m_map.find(id);
+    if (it_found != m_map.end()) {
+      auto itrs = m_map.equal_range(id);
+      for (auto itr = itrs.first; itr != itrs.second; ++itr) {
+        const auto &param = itr->second;
+        if (param->type() == "fitting" && strcasecmp(param->nameAsCString(), name.c_str()) == 0) {
+          try {
+            if (param->value<FitParameter>().getFunction() == fittingFunction) {
+              return std::atomic_load(&itr->second);
+            }
+          } catch (...) {
+            // Not a FitParameter value despite the type tag, keep looking.
+          }
+        }
+      }
+    }
+    parent = current->getParent();
+    current = parent.get();
+  }
+  return Parameter_sptr();
 }
 
 /**

@@ -11,8 +11,8 @@
 namespace Mantid::MDAlgorithms {
 
 size_t ConvToMDEventsWSIndexing::initialize(const MDWSDescription &WSD, std::shared_ptr<MDEventWSWrapper> inWSWrapper,
-                                            bool ignoreZeros) {
-  size_t numSpec = ConvToMDEventsWS::initialize(WSD, inWSWrapper, ignoreZeros);
+                                            bool ignoreZeros, bool useLogTimes) {
+  size_t numSpec = ConvToMDEventsWS::initialize(WSD, std::move(inWSWrapper), ignoreZeros, useLogTimes);
 
   // check if split parameters are valid
   const auto &split_into = m_OutWSWrapper->pWorkspace()->getBoxController()->getSplitIntoAll();

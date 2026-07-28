@@ -37,11 +37,11 @@ public:
     BSpline bsp;
     int order = bsp.getAttribute("Order").asInt();
     int nbreak = bsp.getAttribute("NBreak").asInt();
-    size_t nparams = bsp.nParams();
+    size_t nParams = bsp.nParams();
 
     TS_ASSERT_EQUALS(order, 3);
     TS_ASSERT_EQUALS(nbreak, 10);
-    TS_ASSERT_EQUALS(nparams, 11);
+    TS_ASSERT_EQUALS(nParams, 11);
     TS_ASSERT_EQUALS(bsp.getAttribute("StartX").asDouble(), 0.0);
     TS_ASSERT_EQUALS(bsp.getAttribute("EndX").asDouble(), 1.0);
     TS_ASSERT_EQUALS(bsp.getAttribute("Uniform").asBool(), true);

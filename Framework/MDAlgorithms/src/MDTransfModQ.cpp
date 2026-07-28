@@ -5,8 +5,11 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/MDTransfModQ.h"
+#include "Eigen/Core"
+#include "Eigen/Dense"
 #include "MantidKernel/RegistrationHelper.h"
 #include "MantidMDAlgorithms/DisplayNormalizationSetter.h"
+
 namespace Mantid::MDAlgorithms {
 // register the class, whith conversion factory under ModQ name
 // clang-format off
@@ -149,7 +152,7 @@ bool MDTransfModQ::calcYDepCoordinates(std::vector<coord_t> &Coord, size_t i) {
 * transfer and put them into initial positions (0 and 1) in the Coord vector
 *
 *@param   deltaE input energy transfer
-*@param   &Coord  vector of MD coordinates with filled in momentum and energy
+*@param   Coord  vector of MD coordinates with filled in momentum and energy
 transfer
 
 *@return   true if all momentum and energy are within the limits requested by
@@ -158,7 +161,7 @@ the algorithm and false otherwise.
 * it also uses preprocessed detectors positions, which are calculated by
 PreprocessDetectors algorithm and set up by
 * calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i) method.    */
-bool MDTransfModQ::calcMatrixCoordInelastic(const double &deltaE, std::vector<coord_t> &Coord) const {
+bool MDTransfModQ::calcMatrixCoordInelastic(const double deltaE, std::vector<coord_t> &Coord) const {
   if (deltaE < m_DimMin[1] || deltaE >= m_DimMax[1])
     return false;
   Coord[1] = static_cast<coord_t>(deltaE);
@@ -176,26 +179,14 @@ bool MDTransfModQ::calcMatrixCoordInelastic(const double &deltaE, std::vector<co
     qy = -m_ey * m_kFixed;
     qz = kInitial - m_ez * m_kFixed;
   }
-
-  // transformation matrix has to be here for "Crystal AS Powder conversion
-  // mode, further specialization possible if "powder" mode defined"
-  double Qx = (m_RotMat[0] * qx + m_RotMat[1] * qy + m_RotMat[2] * qz);
-  double Qy = (m_RotMat[3] * qx + m_RotMat[4] * qy + m_RotMat[5] * qz);
-  double Qz = (m_RotMat[6] * qx + m_RotMat[7] * qy + m_RotMat[8] * qz);
-
-  double Qsq = Qx * Qx + Qy * Qy + Qz * Qz;
-  if (Qsq < m_DimMin[0] || Qsq >= m_DimMax[0])
-    return false;
-  Coord[0] = static_cast<coord_t>(sqrt(Qsq));
-
-  return true;
+  return applyCoordTransf(qx, qy, qz, Coord);
 }
 /** function calculates workspace-dependent coordinates in elastic case.
 * Namely, it calculates module of Momentum transfer
 * put it into specified (0) position in the Coord vector
 *
 *@param    k0   module of input momentum
-*@param   &Coord  vector of MD coordinates with filled in momentum and energy
+*@param   Coord  vector of MD coordinates with filled in momentum and energy
 transfer
 
 *@return   true if momentum is within the limits requested by the algorithm and
@@ -204,23 +195,13 @@ false otherwise.
 * it uses preprocessed detectors positions, which are calculated by
 PreprocessDetectors algorithm and set up by
 * calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i) method. */
-bool MDTransfModQ::calcMatrixCoordElastic(const double &k0, std::vector<coord_t> &Coord) const {
-
+bool MDTransfModQ::calcMatrixCoordElastic(const double k0, std::vector<coord_t> &Coord) const {
   double qx = -m_ex * k0;
   double qy = -m_ey * k0;
   double qz = (1 - m_ez) * k0;
-  // transformation matrix has to be here for "Crystal AS Powder mode, further
-  // specialization possible if powder mode is defined "
-  double Qx = (m_RotMat[0] * qx + m_RotMat[1] * qy + m_RotMat[2] * qz);
-  double Qy = (m_RotMat[3] * qx + m_RotMat[4] * qy + m_RotMat[5] * qz);
-  double Qz = (m_RotMat[6] * qx + m_RotMat[7] * qy + m_RotMat[8] * qz);
-
-  double Qsq = Qx * Qx + Qy * Qy + Qz * Qz;
-  if (Qsq < m_DimMin[0] || Qsq >= m_DimMax[0])
-    return false;
-  Coord[0] = static_cast<coord_t>(sqrt(Qsq));
-  return true;
+  return applyCoordTransf(qx, qy, qz, Coord);
 }
+
 /** method returns the vector of input coordinates values where the transformed
  *coordinates reach its extremum values in Q or dE
  * direction.
@@ -386,7 +367,15 @@ MDTransfModQ::MDTransfModQ()
     : m_ex(0), m_ey(0), m_ez(1), m_DetDirecton(nullptr), //,m_NMatrixDim(-1)
       m_NMatrixDim(0),                                   // uninitialized
       m_Emode(Kernel::DeltaEMode::Undefined),            // uninitialized
-      m_kFixed(1.), m_eFixed(1.), m_pEfixedArray(nullptr), m_pDetMasks(nullptr) {}
+      m_kFixed(1.), m_eFixed(1.), m_pEfixedArray(nullptr), m_pDetMasks(nullptr), m_invertRot(false) {}
+
+/**
+ * @param dim dimension index for which to check bounds.
+ * @return coord_t pair with min and max bounds of selected dimension.
+ */
+std::pair<coord_t, coord_t> MDTransfModQ::getDimBounds(size_t dim) const {
+  return std::make_pair(m_DimMin[dim], m_DimMax[dim]);
+}
 
 std::vector<std::string> MDTransfModQ::getEmodes() const { return Kernel::DeltaEMode::availableTypes(); }
 
@@ -400,6 +389,41 @@ void MDTransfModQ::setDisplayNormalization(Mantid::API::IMDWorkspace_sptr mdWork
   DisplayNormalizationSetter setter;
   auto isQ = true;
   setter(mdWorkspace, underlyingWorkspace, isQ, m_Emode);
+}
+
+bool MDTransfModQ::applyCoordTransf(double qx, double qy, double qz, std::vector<coord_t> &Coord) const {
+  std::array<coord_t, 3> Q{};
+  if (m_invertRot) {
+    calcMatrixCoordLinSys(qx, qy, qz, Q);
+  } else {
+    // transformation matrix has to be here for "Crystal AS Powder conversion
+    // mode, further specialization possible if "powder" mode defined"
+    Q[0] = static_cast<coord_t>(m_RotMat[0] * qx + m_RotMat[1] * qy + m_RotMat[2] * qz);
+    Q[1] = static_cast<coord_t>(m_RotMat[3] * qx + m_RotMat[4] * qy + m_RotMat[5] * qz);
+    Q[2] = static_cast<coord_t>(m_RotMat[6] * qx + m_RotMat[7] * qy + m_RotMat[8] * qz);
+  }
+
+  const auto Qsq = Q[0] * Q[0] + Q[1] * Q[1] + Q[2] * Q[2];
+  if (Qsq < static_cast<coord_t>(m_DimMin[0]) || Qsq >= static_cast<coord_t>(m_DimMax[0])) {
+    return false;
+  }
+  Coord[0] = static_cast<coord_t>(std::sqrt(Qsq));
+
+  return true;
+}
+
+void MDTransfModQ::calcMatrixCoordLinSys(double qx, double qy, double qz, std::array<coord_t, 3> &Coord) const {
+  // For some computations, e.g. continuous rotation in ConvToMDEventsWS, the rotation matrix
+  // has to be recomputed multiple times, so it is not inverted prior to calculating the coordinates.
+  // Deferring to a linear system solution here makes it slightly more efficient and stable.
+  Eigen::Map<const Eigen::Matrix<double, 3, 3, Eigen::RowMajor>> map_rm(m_RotMat.data());
+  const Eigen::Vector3d qs(qx, qy, qz);
+  const Eigen::PartialPivLU<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>> lu(map_rm);
+  Eigen::Vector3d coords = lu.solve(qs);
+
+  Coord[0] = static_cast<coord_t>(coords[0]);
+  Coord[1] = static_cast<coord_t>(coords[1]);
+  Coord[2] = static_cast<coord_t>(coords[2]);
 }
 
 } // namespace Mantid::MDAlgorithms

@@ -1,0 +1,1 @@
+- Fixed an issue of :ref:`SliceViewer <sliceviewer>` not showing data in non-orthogonal view when L is selected as one of the project axes by setting proper limits for the axes.

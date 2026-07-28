@@ -62,7 +62,7 @@ correction expressed as:
 References
 ----------
 
-.. [1] G. Romanelli, `On the quantum contributions to phase transitions in Water probed by inelastic neutron scattering <https://epubs.stfc.ac.uk/work/12422430>`__
+.. [1] \G. Romanelli, `On the quantum contributions to phase transitions in Water probed by inelastic neutron scattering <https://epubs.stfc.ac.uk/work/12422430>`__
 
 .. categories::
 

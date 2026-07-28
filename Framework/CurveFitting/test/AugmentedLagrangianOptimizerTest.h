@@ -28,16 +28,16 @@ public:
     using Mantid::CurveFitting::AugmentedLagrangianOptimizer;
     using Mantid::Kernel::DblMatrix;
 
-    const size_t nparams(2);
-    DblMatrix equality(1, nparams + 1); // cols > number parameters
+    const size_t nParams(2);
+    DblMatrix equality(1, nParams + 1); // cols > number parameters
     DblMatrix inequality;               // Empty indicates no constraint
 
     AugmentedLagrangianOptimizer::ObjFunction userFunc;
-    TS_ASSERT_THROWS(AugmentedLagrangianOptimizer(nparams, userFunc, equality, inequality),
+    TS_ASSERT_THROWS(AugmentedLagrangianOptimizer(nParams, userFunc, equality, inequality),
                      const std::invalid_argument &);
 
-    equality = DblMatrix(1, nparams - 1); // cols < number parameters
-    TS_ASSERT_THROWS(AugmentedLagrangianOptimizer(nparams, userFunc, equality, inequality),
+    equality = DblMatrix(1, nParams - 1); // cols < number parameters
+    TS_ASSERT_THROWS(AugmentedLagrangianOptimizer(nParams, userFunc, equality, inequality),
                      const std::invalid_argument &);
   }
 
@@ -45,16 +45,16 @@ public:
     using Mantid::CurveFitting::AugmentedLagrangianOptimizer;
     using Mantid::Kernel::DblMatrix;
 
-    const size_t nparams(2);
+    const size_t nParams(2);
     DblMatrix equality; // Empty indicates no constraint
-    DblMatrix inequality(1, nparams + 1);
+    DblMatrix inequality(1, nParams + 1);
 
     AugmentedLagrangianOptimizer::ObjFunction userFunc;
-    TS_ASSERT_THROWS(AugmentedLagrangianOptimizer(nparams, userFunc, equality, inequality),
+    TS_ASSERT_THROWS(AugmentedLagrangianOptimizer(nParams, userFunc, equality, inequality),
                      const std::invalid_argument &);
 
-    inequality = DblMatrix(1, nparams - 1); // cols < number parameters
-    TS_ASSERT_THROWS(AugmentedLagrangianOptimizer(nparams, userFunc, equality, inequality),
+    inequality = DblMatrix(1, nParams - 1); // cols < number parameters
+    TS_ASSERT_THROWS(AugmentedLagrangianOptimizer(nParams, userFunc, equality, inequality),
                      const std::invalid_argument &);
   }
 
@@ -128,40 +128,40 @@ private:
     using Mantid::CurveFitting::AugmentedLagrangianOptimizer;
     using Mantid::Kernel::DblMatrix;
 
-    const size_t nparams = m_nparams;
+    const size_t nParams = m_nparams;
     AugmentedLagrangianOptimizer::ObjFunction userFunc = &TestObjFunction::eval;
 
-    std::vector<double> xv(nparams, -1);
+    std::vector<double> xv(nParams, -1);
     xv[1] = 1.0;
 
     // x-y==0 ==> [1 -1][x   == 0
     //                  y]
-    DblMatrix equality(1, nparams);
+    DblMatrix equality(1, nParams);
     equality[0][0] = 1.0;
     equality[0][1] = -1.0;
 
     // x-5y>=0 ==> [-1 5][x   <= 0
     //                  y]
-    DblMatrix inequality(1, nparams);
+    DblMatrix inequality(1, nParams);
     inequality[0][0] = -1.0;
     inequality[0][1] = 5.0;
 
     std::shared_ptr<AugmentedLagrangianOptimizer> lsqmin;
     switch (type) {
     case NOCONSTRAINTS:
-      lsqmin = std::make_shared<AugmentedLagrangianOptimizer>(nparams, userFunc);
+      lsqmin = std::make_shared<AugmentedLagrangianOptimizer>(nParams, userFunc);
       break;
     case EMPTYCONSTRAINTS:
-      lsqmin = std::make_shared<AugmentedLagrangianOptimizer>(nparams, userFunc, DblMatrix(), DblMatrix());
+      lsqmin = std::make_shared<AugmentedLagrangianOptimizer>(nParams, userFunc, DblMatrix(), DblMatrix());
       break;
     case EQUALITYCONSTRAINT:
-      lsqmin = std::make_shared<AugmentedLagrangianOptimizer>(nparams, userFunc, equality, DblMatrix());
+      lsqmin = std::make_shared<AugmentedLagrangianOptimizer>(nParams, userFunc, equality, DblMatrix());
       break;
     case INEQUALITYCONSTRAINT:
-      lsqmin = std::make_shared<AugmentedLagrangianOptimizer>(nparams, userFunc, DblMatrix(), inequality);
+      lsqmin = std::make_shared<AugmentedLagrangianOptimizer>(nParams, userFunc, DblMatrix(), inequality);
       break;
     case BOTHCONSTRAINTS:
-      lsqmin = std::make_shared<AugmentedLagrangianOptimizer>(nparams, userFunc, equality, inequality);
+      lsqmin = std::make_shared<AugmentedLagrangianOptimizer>(nParams, userFunc, equality, inequality);
       break;
     };
 

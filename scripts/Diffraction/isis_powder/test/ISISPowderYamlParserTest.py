@@ -8,7 +8,7 @@ import tempfile
 import os
 import unittest
 import warnings
-from isis_powder.routines import yaml_parser
+from Diffraction.isis_powder.routines import yaml_parser
 
 
 class ISISPowderYamlParserTest(unittest.TestCase):

@@ -140,7 +140,7 @@ private:
   /// The progress view
   ProgressableView *m_progressView;
   /// The main presenter
-  IBatchPresenter *m_mainPresenter;
+  IBatchPresenter *m_mainPresenter{nullptr};
   /// The message reporting implementation
   IReflMessageHandler *m_messageHandler;
   /// The file handler
@@ -179,6 +179,8 @@ private:
   std::string liveDataReductionOptions(const std::string &inputWorkspace, const std::string &instrument);
 
   Mantid::API::IAlgorithm_sptr setupLiveDataMonitorAlgorithm();
+
+  IBatchPresenter &mainPresenter() const;
 
   void handleError(const std::string &message, const std::exception &e);
   void handleError(const std::string &message);

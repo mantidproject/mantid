@@ -40,59 +40,59 @@ public:
       m_function = fun;
   }
   bool hasFunction() const override { return bool(m_function); }
-  void setParameter(const QString &paramName, double value) override {
-    m_function->setParameter(paramName.toStdString(), value);
-  }
-  void setParameterError(const QString &paramName, double error) override {
-    auto const i = m_function->parameterIndex(paramName.toStdString());
+  void setParameter(const std::string &paramName, double value) override { m_function->setParameter(paramName, value); }
+  void setParameterError(const std::string &paramName, double error) override {
+    auto const i = m_function->parameterIndex(paramName);
     m_function->setError(i, error);
   }
-  double getParameter(const QString &paramName) const override {
-    return m_function->getParameter(paramName.toStdString());
-  }
+  double getParameter(const std::string &paramName) const override { return m_function->getParameter(paramName); }
   void setErrorsEnabled(bool enabled) override { m_areErrorsEnabled = enabled; }
   void clearErrors() override {
     for (size_t i = 0; i < m_function->nParams(); ++i) {
       m_function->setError(i, 0.0);
     }
   }
-  std::optional<QString> currentFunctionIndex() const override { return m_currentFunctionIndex; }
+  std::optional<std::string> currentFunctionIndex() const override { return m_currentFunctionIndex; }
 
-  void setParameterTie(const QString &paramName, const QString &tie) override {
-    if (!tie.isEmpty()) {
-      m_function->tie(paramName.toStdString(), tie.toStdString());
+  void setParameterTie(const std::string &paramName, const std::string &tie) override {
+    if (!tie.empty()) {
+      try {
+        m_function->tie(paramName, tie);
+      } catch (const std::exception &) {
+        // ignore invalid tie (e.g. self-tie)
+      }
     } else {
-      m_function->removeTie(paramName.toStdString());
+      m_function->removeTie(paramName);
     }
   }
 
-  void setParameterConstraint(const QString & /*paramName*/, const QString & /*constraint*/) override {}
+  void setParameterConstraint(const std::string & /*paramName*/, const std::string & /*constraint*/) override {}
 
-  void setGlobalParameters(const QStringList &globals) override { m_globals = globals; }
+  void setGlobalParameters(const std::vector<std::string> &globals) override { m_globals = globals; }
   void functionHelpRequested() { emit functionHelpRequest(); }
   MOCK_METHOD0(getSelectedFunction, IFunction_sptr());
-  MOCK_CONST_METHOD1(showFunctionHelp, void(const QString &));
+  MOCK_CONST_METHOD1(showFunctionHelp, void(const std::string &));
 
   // Mock user action
-  void addFunction(const QString &prefix, const QString &funStr) {
+  void addFunction(const std::string &prefix, const std::string &funStr) {
     m_currentFunctionIndex = prefix;
-    if (prefix.isEmpty()) {
+    if (prefix.empty()) {
       auto fun = m_function ? m_function->asString() + ";" : "";
-      m_function = FunctionFactory::Instance().createInitialized(fun + funStr.toStdString());
+      m_function = FunctionFactory::Instance().createInitialized(fun + funStr);
     } else {
       auto parentFun = std::dynamic_pointer_cast<CompositeFunction>(getFunctionWithPrefix(prefix, m_function));
-      parentFun->addFunction(FunctionFactory::Instance().createInitialized(funStr.toStdString()));
+      parentFun->addFunction(FunctionFactory::Instance().createInitialized(funStr));
     }
     emit functionAdded(funStr);
   }
 
-  void userSetsParameterTie(const QString &paramName, const QString &tie) {
+  void userSetsParameterTie(const std::string &paramName, const std::string &tie) {
     setParameterTie(paramName, tie);
     emit parameterTieChanged(paramName, tie);
   }
 
-  void removeFunction(const QString &prefix) {
-    QString parentPrefix;
+  void removeFunction(const std::string &prefix) {
+    std::string parentPrefix;
     int i;
     std::tie(parentPrefix, i) = splitFunctionPrefix(prefix);
     auto fun = std::dynamic_pointer_cast<CompositeFunction>(getFunctionWithPrefix(parentPrefix, m_function));
@@ -105,22 +105,22 @@ public:
 
   IFunction_sptr getFunction() const { return m_function; }
 
-  MOCK_CONST_METHOD1(getAttribute, IFunction::Attribute(const QString &));
+  MOCK_CONST_METHOD1(getAttribute, IFunction::Attribute(const std::string &));
 
-  void attributeChanged() { emit attributePropertyChanged(QString("f0.Q")); }
+  void attributeChanged() { emit attributePropertyChanged(std::string("f0.Q")); }
 
   friend class FunctionMultiDomainPresenterTest;
 
 private:
   IFunction_sptr m_function;
-  std::optional<QString> m_currentFunctionIndex;
+  std::string m_currentFunctionIndex;
   bool m_areErrorsEnabled{true};
-  QStringList m_globals;
-  MOCK_METHOD2(setDoubleAttribute, void(const QString &, double));
-  MOCK_METHOD2(setIntAttribute, void(const QString &, int));
-  MOCK_METHOD2(setStringAttribute, void(const QString &, std::string &));
-  MOCK_METHOD2(setBooleanAttribute, void(const QString &, bool));
-  MOCK_METHOD2(setVectorAttribute, void(const QString &, std::vector<double> &));
+  std::vector<std::string> m_globals;
+  MOCK_METHOD2(setDoubleAttribute, void(const std::string &, double));
+  MOCK_METHOD2(setIntAttribute, void(const std::string &, int));
+  MOCK_METHOD2(setStringAttribute, void(const std::string &, std::string &));
+  MOCK_METHOD2(setBooleanAttribute, void(const std::string &, bool));
+  MOCK_METHOD2(setVectorAttribute, void(const std::string &, std::vector<double> &));
 };
 
 class FunctionMultiDomainPresenterTest : public CxxTest::TestSuite {
@@ -135,7 +135,7 @@ public:
   }
 
   void test_utils_splitFunctionPrefix() {
-    QString prefix;
+    std::string prefix;
     int i;
     std::tie(prefix, i) = splitFunctionPrefix("");
     TS_ASSERT_EQUALS(prefix, "");
@@ -314,8 +314,9 @@ public:
     TS_ASSERT_EQUALS(presenter.getParameterTie("f1.A0"), "f0.A0");
     auto fun = presenter.getFitFunction();
     TS_ASSERT_EQUALS(fun->getParameterStatus(1), IFunction::Tied);
+    // Self-tie is silently rejected; previous tie is preserved
     view->userSetsParameterTie("f1.A0", "f1.A0=f1.A0");
-    TS_ASSERT_EQUALS(presenter.getParameterTie("f1.A0"), "f1.A0");
+    TS_ASSERT_EQUALS(presenter.getParameterTie("f1.A0"), "f0.A0");
   }
 
   void test_view_set_tie_multi() {
@@ -495,7 +496,7 @@ public:
     FunctionMultiDomainPresenter presenter(view.get());
     presenter.setFunctionString("name=LinearBackground");
     presenter.setNumberOfDatasets(3);
-    QStringList globals("A1");
+    std::vector<std::string> globals{"A1"};
     presenter.setGlobalParameters(globals);
     auto fun = presenter.getFitFunction();
     TS_ASSERT(!fun->getTie(1));
@@ -504,7 +505,7 @@ public:
     auto locals = presenter.getLocalParameters();
     TS_ASSERT_EQUALS(locals[0], "A0");
     globals.clear();
-    globals << "A0";
+    globals.push_back("A0");
     presenter.setGlobalParameters(globals);
     fun = presenter.getFitFunction();
     TS_ASSERT(!fun->getTie(0));
@@ -518,7 +519,7 @@ public:
   }
   void test_open_function_help_window() {
     auto func = FunctionFactory::Instance().createInitialized("name=LinearBackground");
-    QString functionName = QString::fromStdString(func->name());
+    std::string functionName = func->name();
     auto view = std::make_unique<NiceMock<MockFunctionView>>();
     FunctionMultiDomainPresenter presenter(view.get());
 
@@ -556,9 +557,9 @@ public:
     // this function has three attributes: NumDeriv (boolean attribute), f0.Q (a
     // double attribute) and f0.WorkspaceIndex (integer attribute) so we should
     // expect those calls
-    EXPECT_CALL(*view, setBooleanAttribute(QString("NumDeriv"), false)).Times(Exactly(1));
-    EXPECT_CALL(*view, setDoubleAttribute(QString("f0.Q"), 41.3)).Times(Exactly(1));
-    EXPECT_CALL(*view, setIntAttribute(QString("f0.WorkspaceIndex"), Mantid::EMPTY_INT())).Times(Exactly(1));
+    EXPECT_CALL(*view, setBooleanAttribute(std::string("NumDeriv"), false)).Times(Exactly(1));
+    EXPECT_CALL(*view, setDoubleAttribute(std::string("f0.Q"), 41.3)).Times(Exactly(1));
+    EXPECT_CALL(*view, setIntAttribute(std::string("f0.WorkspaceIndex"), Mantid::EMPTY_INT())).Times(Exactly(1));
 
     presenter.updateMultiDatasetAttributes(func);
   }
@@ -570,7 +571,7 @@ public:
                                 "DiffCoeff=2.3, Tau=1.25, Centre=0, "
                                 "constraints=(Height>0, DiffCoeff>0, "
                                 "Tau>0);name=FlatBackground;name=LinearBackground");
-    EXPECT_CALL(*view, getAttribute(QString("f0.Q"))).Times(Exactly(1)).WillOnce(Return(IFunction::Attribute()));
+    EXPECT_CALL(*view, getAttribute(std::string("f0.Q"))).Times(Exactly(1)).WillOnce(Return(IFunction::Attribute()));
 
     view->attributeChanged();
   }

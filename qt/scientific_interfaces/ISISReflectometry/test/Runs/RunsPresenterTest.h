@@ -61,6 +61,11 @@ public:
   static RunsPresenterTest *createSuite() { return new RunsPresenterTest(); }
   static void destroySuite(RunsPresenterTest *suite) { delete suite; }
 
+  void testPercentCompleteWhenMainPresenterHasNotBeenAccepted() {
+    auto presenter = makePresenter(false);
+    TS_ASSERT_EQUALS(presenter->percentComplete(), 0);
+  }
+
   RunsPresenterTest()
       : m_thetaTolerance(0.01), m_instruments{"INTER", "SURF", "CRISP", "POLREF", "OFFSPEC"},
         m_runsTable(m_instruments, m_thetaTolerance, ReductionJobs()), m_searchString("test search string"),
@@ -833,7 +838,7 @@ private:
                         fileHandler) {}
   };
 
-  std::shared_ptr<RunsPresenterFriend> makePresenter() {
+  std::shared_ptr<RunsPresenterFriend> makePresenter(bool const acceptMainPresenter = true) {
     Plotter plotter;
 
     auto makeRunsTablePresenter = RunsTablePresenterFactory(m_instruments, m_thetaTolerance, std::move(plotter));
@@ -841,7 +846,9 @@ private:
         std::make_shared<RunsPresenterFriend>(&m_view, &m_progressView, makeRunsTablePresenter, m_thetaTolerance,
                                               m_instruments, &m_messageHandler, &m_fileHandler);
 
-    presenter->acceptMainPresenter(&m_mainPresenter);
+    if (acceptMainPresenter) {
+      presenter->acceptMainPresenter(&m_mainPresenter);
+    }
     presenter->m_tablePresenter.reset(new NiceMock<MockRunsTablePresenter>());
     m_runsTablePresenter = dynamic_cast<NiceMock<MockRunsTablePresenter> *>(presenter->m_tablePresenter.get());
     presenter->m_runNotifier.reset(new NiceMock<MockRunNotifier>());

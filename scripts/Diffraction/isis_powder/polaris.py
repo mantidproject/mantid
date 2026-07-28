@@ -6,9 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
 
-from isis_powder.routines import absorb_corrections, common, instrument_settings
-from isis_powder.abstract_inst import AbstractInst
-from isis_powder.polaris_routines import polaris_advanced_config, polaris_algs, polaris_param_mapping
+from Diffraction.isis_powder.routines import absorb_corrections, common, instrument_settings
+from Diffraction.isis_powder.abstract_inst import AbstractInst
+from Diffraction.isis_powder.polaris_routines import polaris_advanced_config, polaris_algs, polaris_param_mapping
 from mantid.kernel import logger
 from mantid.api import MatrixWorkspace, WorkspaceGroup
 

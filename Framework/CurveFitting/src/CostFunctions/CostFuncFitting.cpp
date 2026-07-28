@@ -145,10 +145,10 @@ void CostFuncFitting::calCovarianceMatrix(EigenMatrix &covar, double epsrel) {
   EigenMatrix c;
   calActiveCovarianceMatrix(c, epsrel);
 
-  size_t np = m_function->nParams();
+  const size_t numParams = m_function->nParams();
 
   bool isTransformationIdentity = true;
-  for (size_t i = 0; i < np; ++i) {
+  for (size_t i = 0; i < numParams; ++i) {
     if (!m_function->isActive(i))
       continue;
     isTransformationIdentity =
@@ -174,16 +174,16 @@ void CostFuncFitting::calCovarianceMatrix(EigenMatrix &covar, double epsrel) {
  */
 void CostFuncFitting::calFittingErrors(const EigenMatrix &covar, double chi2) {
   checkValidity();
-  size_t np = m_function->nParams();
-  auto covarMatrix = std::shared_ptr<Kernel::Matrix<double>>(new Kernel::Matrix<double>(np, np));
+  const size_t numParams = m_function->nParams();
+  auto covarMatrix = std::shared_ptr<Kernel::Matrix<double>>(new Kernel::Matrix<double>(numParams, numParams));
   m_function->setCovarianceMatrix(covarMatrix);
   size_t ia = 0;
-  for (size_t i = 0; i < np; ++i) {
+  for (size_t i = 0; i < numParams; ++i) {
     if (!m_function->isActive(i)) {
       m_function->setError(i, 0);
     } else {
       size_t ja = 0;
-      for (size_t j = 0; j < np; ++j) {
+      for (size_t j = 0; j < numParams; ++j) {
         if (m_function->isActive(j)) {
           (*covarMatrix)[i][j] = covar.get(ia, ja);
           ++ja;
@@ -201,7 +201,7 @@ void CostFuncFitting::calFittingErrors(const EigenMatrix &covar, double chi2) {
     }
   }
   m_function->setCovarianceMatrix(covarMatrix);
-  m_function->setReducedChiSquared(chi2 / static_cast<double>((m_values->size() - np)));
+  m_function->setReducedChiSquared(chi2 / static_cast<double>((m_values->size() - numParams)));
 }
 
 /**
@@ -210,11 +210,11 @@ void CostFuncFitting::calFittingErrors(const EigenMatrix &covar, double chi2) {
  */
 void CostFuncFitting::calTransformationMatrixNumerically(EigenMatrix &tm) {
   const double epsilon = std::numeric_limits<double>::epsilon() * 100;
-  size_t np = m_function->nParams();
-  size_t na = nParams();
+  const size_t numParams = m_function->nParams();
+  size_t na = CostFuncFitting::nParams();
   tm.resize(na, na);
   size_t ia = 0;
-  for (size_t i = 0; i < np; ++i) {
+  for (size_t i = 0; i < numParams; ++i) {
     if (!m_function->isActive(i))
       continue;
     double p0 = m_function->getParameter(i);
@@ -365,7 +365,7 @@ double CostFuncFitting::valDerivHessian(bool evalDeriv, bool evalHessian) const 
     return m_value;
   }
 
-  const size_t numParams = nParams();
+  const size_t numParams = CostFuncFitting::nParams();
 
   checkValidity();
 
@@ -390,9 +390,9 @@ double CostFuncFitting::valDerivHessian(bool evalDeriv, bool evalHessian) const 
   }
 
   // Add constraints penalty
-  size_t np = m_function->nParams();
+  const size_t parameterCount = m_function->nParams();
   if (m_includePenalty) {
-    for (size_t i = 0; i < np; ++i) {
+    for (size_t i = 0; i < parameterCount; ++i) {
       API::IConstraint *c = m_function->getConstraint(i);
       if (c) {
         m_value += c->check();
@@ -404,7 +404,7 @@ double CostFuncFitting::valDerivHessian(bool evalDeriv, bool evalHessian) const 
   if (evalDeriv) {
     if (m_includePenalty) {
       size_t i = 0;
-      for (size_t ip = 0; ip < np; ++ip) {
+      for (size_t ip = 0; ip < parameterCount; ++ip) {
         if (!m_function->isActive(ip))
           continue;
         API::IConstraint *c = m_function->getConstraint(ip);
@@ -419,7 +419,7 @@ double CostFuncFitting::valDerivHessian(bool evalDeriv, bool evalHessian) const 
 
     if (m_includePenalty) {
       size_t i = 0;
-      for (size_t ip = 0; ip < np; ++ip) {
+      for (size_t ip = 0; ip < parameterCount; ++ip) {
         if (!m_function->isActive(ip))
           continue;
         API::IConstraint *c = m_function->getConstraint(ip);

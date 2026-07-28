@@ -17,6 +17,7 @@
 #include "Poco/File.h"
 
 #include <boost/regex.hpp>
+#include <stdexcept>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
@@ -27,8 +28,7 @@ using namespace Mantid::API;
  * @param view :: The view we are handling
  */
 SavePresenter::SavePresenter(ISaveView *view, std::unique_ptr<IFileSaver> saver)
-    : m_mainPresenter(nullptr), m_view(view), m_saver(std::move(saver)), m_shouldAutosave(false),
-      m_shouldSaveIndividualRows(false) {
+    : m_view(view), m_saver(std::move(saver)), m_shouldAutosave(false), m_shouldSaveIndividualRows(false) {
 
   m_view->subscribe(this);
   populateWorkspaceList();
@@ -40,8 +40,15 @@ SavePresenter::SavePresenter(ISaveView *view, std::unique_ptr<IFileSaver> saver)
 
 void SavePresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) { m_mainPresenter = mainPresenter; }
 
+IBatchPresenter &SavePresenter::mainPresenter() const {
+  if (!m_mainPresenter) {
+    throw std::runtime_error("SavePresenter does not have a main presenter.");
+  }
+  return *m_mainPresenter;
+}
+
 void SavePresenter::notifySettingsChanged() {
-  m_mainPresenter->setBatchUnsaved();
+  mainPresenter().setBatchUnsaved();
   updateWidgetEnabledState();
 }
 
@@ -59,9 +66,9 @@ void SavePresenter::notifyAutosaveEnabled() { enableAutosave(); }
 
 void SavePresenter::notifySavePathChanged() { onSavePathChanged(); }
 
-bool SavePresenter::isProcessing() const { return m_mainPresenter->isProcessing(); }
+bool SavePresenter::isProcessing() const { return mainPresenter().isProcessing(); }
 
-bool SavePresenter::isAutoreducing() const { return m_mainPresenter->isAutoreducing(); }
+bool SavePresenter::isAutoreducing() const { return mainPresenter().isAutoreducing(); }
 
 namespace {
 bool isORSOFormat(const NamedFormat &fileFormat) {

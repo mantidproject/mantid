@@ -20,9 +20,11 @@ class LoadRunWidgetView(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super(LoadRunWidgetView, self).__init__(parent)
         self.load_current_run_button = None
+        self.browse_button = None
+        self.autosave_file_path_edit = None
         self.increment_run_button = None
         self.decrement_run_button = None
-        self.horizontal_layout = None
+        self.vertical_layout = None
         self.instrument_label = None
         self.run_edit = None
         self.spacer_item = None
@@ -37,10 +39,22 @@ class LoadRunWidgetView(QtWidgets.QWidget):
         self.setObjectName("LoadRunWidget")
         self.resize(468, 45)
 
+        self.browse_button = QtWidgets.QPushButton(self)
+        self.browse_button.setObjectName("browseButton")
+        self.browse_button.setToolTip("Browse for an autosave.run file")
+        self.browse_button.setText("Browse")
+
         self.load_current_run_button = QtWidgets.QPushButton(self)
         self.load_current_run_button.setText("Load Current Run")
         self.load_current_run_button.setToolTip("Load the current run for the current instrument")
         self.load_current_run_button.setObjectName("loadCurrentRunButton")
+
+        self.autosave_file_path_edit = QtWidgets.QLineEdit(self)
+        self.autosave_file_path_edit.setToolTip("Set location of autosave.run")
+        self.autosave_file_path_edit.setObjectName("autosaveFilePathEdit")
+        self.autosave_file_path_edit.setPlaceholderText("autosave.run file path not set")
+        self.autosave_file_path_edit.setStyleSheet("background: #d7d6d5;")
+        self.autosave_file_path_edit.setReadOnly(True)
 
         self.increment_run_button = QtWidgets.QToolButton(self)
         self.increment_run_button.setText(">")
@@ -67,18 +81,28 @@ class LoadRunWidgetView(QtWidgets.QWidget):
         )
         self.run_edit.setObjectName("runEdit")
 
-        self.horizontal_layout = QtWidgets.QHBoxLayout(self)
-        self.horizontal_layout.setObjectName("horizontalLayout")
-        self.horizontal_layout.addWidget(self.load_current_run_button)
-        self.horizontal_layout.addWidget(self.decrement_run_button)
-        self.horizontal_layout.addWidget(self.instrument_label)
-        self.horizontal_layout.addWidget(self.run_edit)
-        self.horizontal_layout.addWidget(self.increment_run_button)
+        horizontal_layout_1 = QtWidgets.QHBoxLayout()
+        horizontal_layout_1.setObjectName("horizontalLayout_1")
+        horizontal_layout_1.addWidget(self.decrement_run_button)
+        horizontal_layout_1.addWidget(self.instrument_label)
+        horizontal_layout_1.addWidget(self.run_edit)
+        horizontal_layout_1.addWidget(self.increment_run_button)
 
-        self.horizontal_layout.setContentsMargins(0, 0, 0, 0)
+        horizontal_layout_2 = QtWidgets.QHBoxLayout()
+        horizontal_layout_2.setObjectName("horizontalLayout_2")
+        horizontal_layout_2.addWidget(self.browse_button)
+        horizontal_layout_2.addWidget(self.autosave_file_path_edit)
+        horizontal_layout_2.addWidget(self.load_current_run_button)
+
+        self.vertical_layout = QtWidgets.QVBoxLayout(self)
+        self.vertical_layout.setObjectName("verticalLayout")
+        self.vertical_layout.addItem(horizontal_layout_1)
+        self.vertical_layout.addItem(horizontal_layout_2)
+
+        self.vertical_layout.setContentsMargins(0, 0, 0, 0)
 
     def getLayout(self):
-        return self.horizontalLayout
+        return self.vertical_layout
 
     # ------------------------------------------------------------------------------------------------------------------
     # Enabling / disabling the interface
@@ -103,12 +127,14 @@ class LoadRunWidgetView(QtWidgets.QWidget):
     def disable_load_buttons(self):
         self.load_current_run_button.setEnabled(False)
         self.run_edit.setEnabled(False)
+        self.autosave_file_path_edit.setEnabled(False)
         self.increment_run_button.setEnabled(False)
         self.decrement_run_button.setEnabled(False)
 
     def enable_load_buttons(self):
         self.load_current_run_button.setEnabled(True)
         self.run_edit.setEnabled(True)
+        self.autosave_file_path_edit.setEnabled(True)
         self.increment_run_button.setEnabled(True)
         self.decrement_run_button.setEnabled(True)
 
@@ -127,6 +153,9 @@ class LoadRunWidgetView(QtWidgets.QWidget):
 
     def set_current_instrument(self, instrument):
         self.instrument_label.setText(instrument)
+
+    def set_autosave_file_path(self, file_path):
+        self.autosave_file_path_edit.setText(file_path)
 
     def set_run_edit_regex(self):
         # The regular expression string here is "^[0-9]*([0-9]+[,-]{0,1})*[0-9]+$"
@@ -147,6 +176,9 @@ class LoadRunWidgetView(QtWidgets.QWidget):
         tmp = self._cached_text
         self.set_run_edit_text(tmp)
         self._cached_text = tmp
+
+    def get_autosave_file_path(self):
+        return str(self.autosave_file_path_edit.text())
 
     def get_run_edit_text(self):
         return str(self.run_edit.text())
@@ -169,6 +201,9 @@ class LoadRunWidgetView(QtWidgets.QWidget):
 
     def on_increment_run_clicked(self, slot):
         self.increment_run_button.clicked.connect(slot)
+
+    def on_browse_clicked(self, slot):
+        self.browse_button.clicked.connect(slot)
 
     def on_load_current_run_clicked(self, slot):
         self.load_current_run_button.clicked.connect(slot)

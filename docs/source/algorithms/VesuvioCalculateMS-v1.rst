@@ -56,7 +56,7 @@ Usage
 References
 ----------
 
-.. [1] J. Mayers, A.L. Fielding and R. Senesi, `Nucl. Inst Methods A 481, 454(2002) <http://dx.doi.org/10.1016/S0168-9002(01)01335-3>`__
+.. [1] \J. Mayers, A.L. Fielding and R. Senesi, `Nucl. Inst Methods A 481, 454(2002) <http://dx.doi.org/10.1016/S0168-9002(01)01335-3>`__
 
 
 

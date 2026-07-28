@@ -159,6 +159,8 @@ class SampleLogsView(QSplitter, ObservingView):
         plotAction.triggered.connect(self.presenter.new_plot_logs)
         plotAction = menu.addAction("Print selected")
         plotAction.triggered.connect(self.presenter.print_selected_logs)
+        plotAction = menu.addAction("Copy selected log name")
+        plotAction.triggered.connect(self.presenter.copy_selected_log_name)
         menu.exec(event.globalPos())
 
     def set_model(self, model):

@@ -75,8 +75,9 @@ protected:
   std::unique_ptr<IExperimentOptionDefaults> m_experimentDefaults;
 
 private:
-  IBatchPresenter *m_mainPresenter;
+  IBatchPresenter *m_mainPresenter{nullptr};
 
+  IBatchPresenter &mainPresenter() const;
   ExperimentValidationResult validateExperimentFromView();
   BackgroundSubtraction backgroundSubtractionFromView();
   PolarizationCorrections polarizationCorrectionsFromView();
