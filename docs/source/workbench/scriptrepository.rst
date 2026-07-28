@@ -47,8 +47,11 @@ The columns shown are:
   - ✓ indicates the file/directory has been downloaded to the
     local machine and the contents match those in the repository.
 
-  No icon is shown for items that exist only on your local machine, or that
-  have been modified locally.
+  - ✎ (a pencil) indicates the file has been downloaded and then modified
+    locally, so its contents no longer match the repository. This icon is
+    informational only; there is no action to take from Mantid.
+
+  No icon is shown for items that exist only on your local machine.
 
 - **AutoUpdate**: A checkbox appears next to those items that have been downloaded.
   Checking this box causes the file to be updated with contents from the

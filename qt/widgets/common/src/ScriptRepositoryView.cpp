@@ -343,18 +343,26 @@ void ScriptRepositoryView::RepoDelegate::paint(QPainter *painter, const QStyleOp
     return;
 
   // define the region to draw the icon
-  QRect buttonRect(option.rect);
-  int min_val = buttonRect.width() < buttonRect.height() ? buttonRect.width() : buttonRect.height();
+  QRect iconRect(option.rect);
+  int min_val = iconRect.width() < iconRect.height() ? iconRect.width() : iconRect.height();
   // make it square
-  buttonRect.setWidth(min_val);
-  buttonRect.setHeight(min_val);
-  buttonRect.moveCenter(option.rect.center());
+  iconRect.setWidth(min_val);
+  iconRect.setHeight(min_val);
+  iconRect.moveCenter(option.rect.center());
+
+  int icon_size = (int)(min_val * .8);
+
+  // the locally-modified state is informational only, so draw the icon flat
+  // (no push-button chrome) to make clear there is nothing to click
+  if (state == RepoModel::localChangedSt()) {
+    icon.paint(painter, iconRect, Qt::AlignCenter);
+    return;
+  }
 
   // define the options to draw a push button with the icon displayed
   QStyleOptionButton button;
-  button.rect = buttonRect;
+  button.rect = iconRect;
   button.icon = icon;
-  int icon_size = (int)(min_val * .8);
   button.iconSize = QSize(icon_size, icon_size);
   button.state = QStyle::State_Enabled;
   // draw a push button
@@ -371,8 +379,10 @@ QIcon ScriptRepositoryView::RepoDelegate::getIcon(const QString &state) const {
     icon = Icons::getIcon("mdi.check-bold");
   else if (state == RepoModel::downloadSt())
     icon = Icons::getIcon("mdi.progress-download");
-  // local-only and locally-changed entries have no remote action, so they
-  // deliberately get a null icon
+  else if (state == RepoModel::localChangedSt())
+    icon = Icons::getIcon("mdi.pencil");
+  // local-only entries have no remote action, so they deliberately get a null
+  // icon
   return icon;
 }
 
