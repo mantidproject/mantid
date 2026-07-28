@@ -795,9 +795,10 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             components = instrument.getStringParameter("detector_panels")
             if components:
                 components = components[0].split(",")
+                component_info = mtd[ws].componentInfo()
                 for c in components:
                     if c in ws:
-                        distance = instrument.getComponentByName(c).getPos()[2]
+                        distance = component_info.position(component_info.indexOfAny(c))[2]
                         break
             if not distance:
                 distance = float(logs[DISTANCE_LOG])

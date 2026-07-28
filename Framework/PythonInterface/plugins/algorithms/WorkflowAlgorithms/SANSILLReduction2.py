@@ -485,8 +485,9 @@ class SANSILLReduction(DataProcessorAlgorithm):
         l2_main = mtd[ws].getRun()["L2"].value
         if instrument.hasParameter("detector_panels"):
             panel_names = instrument.getStringParameter("detector_panels")[0].split(",")
+            component_info = mtd[ws].componentInfo()
             for panel in panel_names:
-                l2_panel = instrument.getComponentByName(panel).getPos()[2]
+                l2_panel = component_info.position(component_info.indexOfAny(panel))[2]
                 MoveInstrumentComponent(Workspace=ws, X=-beam_x * l2_panel / l2_main, Y=-beam_y * l2_panel / l2_main, ComponentName=panel)
         else:
             MoveInstrumentComponent(Workspace=ws, X=-beam_x, Y=-beam_y, ComponentName="detector")
@@ -1087,10 +1088,11 @@ class SANSILLReduction(DataProcessorAlgorithm):
         TODO: It is not good to repeat the logic of the LoadILLSANS, the only way to avoid this would be to create a small separate C++
         algorithm that does the placement, and it can be called both from within the loader, and here if needed; that is, for events.
         """
-        instr = mtd[ws].getInstrument()
         run = mtd[ws].getRun()
-        if mtd[ws].getInstrumentName() == "D22B":
-            back_pos = instr.getComponentByName("detector_back").getPos()
+        component_info = mtd[ws].componentInfo()
+        instrument_name = mtd[ws].getInstrumentName()
+        if instrument_name == "D22B":
+            back_pos = component_info.position(component_info.indexOfAny("detector_back"))
             distance = run["Detector 1.det1_calc"].value
             MoveInstrumentComponent(
                 Workspace=ws,
@@ -1100,7 +1102,7 @@ class SANSILLReduction(DataProcessorAlgorithm):
                 Y=back_pos[1],
                 Z=distance,
             )
-            front_pos = instr.getComponentByName("detector_front").getPos()
+            front_pos = component_info.position(component_info.indexOfAny("detector_front"))
             MoveInstrumentComponent(
                 Workspace=ws,
                 ComponentName="detector_front",
@@ -1119,9 +1121,9 @@ class SANSILLReduction(DataProcessorAlgorithm):
                 Z=0,
             )
             AddSampleLog(Workspace=ws, LogName="L2", LogText=str(distance), LogType="Number")
-        if mtd[ws].getInstrumentName() == "D11B":
-            back_pos = instr.getComponentByName("detector_center").getPos()
-            det_pos = instr.getComponentByName("detector").getPos()
+        if instrument_name == "D11B":
+            back_pos = component_info.position(component_info.indexOfAny("detector_center"))
+            det_pos = component_info.position(component_info.indexOfAny("detector"))
             distance = run["Detector 1.det_calc"].value - back_pos[2]
             MoveInstrumentComponent(Workspace=ws, ComponentName="detector", RelativePosition=False, X=det_pos[0], Y=det_pos[1], Z=distance)
             AddSampleLog(Workspace=ws, LogName="L2", LogText=str(distance), LogType="Number")
