@@ -10,9 +10,9 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "QPair"
 #include <optional>
 #include <string>
+#include <utility>
 
 namespace MantidQt {
 namespace MantidWidgets {

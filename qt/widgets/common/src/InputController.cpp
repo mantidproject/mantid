@@ -36,13 +36,13 @@ InputController3DMove::InputController3DMove(QObject *parent)
  */
 void InputController3DMove::mousePressEvent(QMouseEvent *event) {
   if (event->buttons() & Qt::MiddleButton) {
-    emit initZoom(event->x(), event->y());
+    emit initZoom(event->position().toPoint().x(), event->position().toPoint().y());
     m_isButtonPressed = true;
   } else if ((event->buttons() & Qt::LeftButton) && !m_isRotationFrozen) {
-    emit initRotation(event->x(), event->y());
+    emit initRotation(event->position().toPoint().x(), event->position().toPoint().y());
     m_isButtonPressed = true;
   } else if ((event->buttons() & Qt::RightButton) || ((event->buttons() & Qt::LeftButton) && m_isRotationFrozen)) {
-    emit initTranslation(event->x(), event->y());
+    emit initTranslation(event->position().toPoint().x(), event->position().toPoint().y());
     m_isButtonPressed = true;
   }
 }
@@ -53,11 +53,11 @@ void InputController3DMove::mousePressEvent(QMouseEvent *event) {
  */
 void InputController3DMove::mouseMoveEvent(QMouseEvent *event) {
   if ((event->buttons() & Qt::LeftButton) && !m_isRotationFrozen) {
-    emit rotate(event->x(), event->y());
+    emit rotate(event->position().toPoint().x(), event->position().toPoint().y());
   } else if ((event->buttons() & Qt::RightButton) || ((event->buttons() & Qt::LeftButton) && m_isRotationFrozen)) {
-    emit translate(event->x(), event->y());
+    emit translate(event->position().toPoint().x(), event->position().toPoint().y());
   } else if (event->buttons() & Qt::MiddleButton) {
-    emit zoom(event->x(), event->y());
+    emit zoom(event->position().toPoint().x(), event->position().toPoint().y());
   }
   InputController::mouseMoveEvent(event);
 }
@@ -96,8 +96,8 @@ InputControllerPick::InputControllerPick(QObject *parent) : InputController(pare
 void InputControllerPick::mousePressEvent(QMouseEvent *event) {
   if (event->button() == Qt::LeftButton) {
     m_isButtonPressed = true;
-    m_rect.setRect(event->x(), event->y(), 1, 1);
-    emit pickPointAt(event->x(), event->y());
+    m_rect.setRect(event->position().toPoint().x(), event->position().toPoint().y(), 1, 1);
+    emit pickPointAt(event->position().toPoint().x(), event->position().toPoint().y());
   }
 }
 
@@ -106,10 +106,10 @@ void InputControllerPick::mousePressEvent(QMouseEvent *event) {
  */
 void InputControllerPick::mouseMoveEvent(QMouseEvent *event) {
   if (m_isButtonPressed) {
-    m_rect.setBottomRight(QPoint(event->x(), event->y()));
+    m_rect.setBottomRight(QPoint(event->position().toPoint().x(), event->position().toPoint().y()));
     emit setSelection(m_rect);
   } else {
-    emit touchPointAt(event->x(), event->y());
+    emit touchPointAt(event->position().toPoint().x(), event->position().toPoint().y());
   }
 }
 
@@ -136,15 +136,16 @@ void InputControllerDrawShape::mousePressEvent(QMouseEvent *event) {
   if (event->button() == Qt::LeftButton) {
     m_isButtonPressed = true;
     if (m_creating && !m_shapeType.isEmpty()) {
-      emit addShape(m_shapeType, event->x(), event->y(), m_borderColor, m_fillColor);
+      emit addShape(m_shapeType, event->position().toPoint().x(), event->position().toPoint().y(), m_borderColor,
+                    m_fillColor);
     } else if (event->modifiers() & Qt::ControlModifier) {
-      emit selectCtrlAt(event->x(), event->y());
+      emit selectCtrlAt(event->position().toPoint().x(), event->position().toPoint().y());
     } else {
-      emit selectAt(event->x(), event->y());
+      emit selectAt(event->position().toPoint().x(), event->position().toPoint().y());
     }
-    m_x = event->x();
-    m_y = event->y();
-    m_rect.setRect(event->x(), event->y(), 1, 1);
+    m_x = event->position().toPoint().x();
+    m_y = event->position().toPoint().y();
+    m_rect.setRect(event->position().toPoint().x(), event->position().toPoint().y(), 1, 1);
   }
 }
 
@@ -155,16 +156,16 @@ void InputControllerDrawShape::mousePressEvent(QMouseEvent *event) {
 void InputControllerDrawShape::mouseMoveEvent(QMouseEvent *event) {
   if (m_isButtonPressed) {
     if (m_creating) {
-      emit moveRightBottomTo(event->x(), event->y());
+      emit moveRightBottomTo(event->position().toPoint().x(), event->position().toPoint().y());
     } else {
-      emit moveBy(event->x() - m_x, event->y() - m_y);
-      m_rect.setBottomRight(QPoint(event->x(), event->y()));
-      m_x = event->x();
-      m_y = event->y();
+      emit moveBy(event->position().toPoint().x() - m_x, event->position().toPoint().y() - m_y);
+      m_rect.setBottomRight(QPoint(event->position().toPoint().x(), event->position().toPoint().y()));
+      m_x = event->position().toPoint().x();
+      m_y = event->position().toPoint().y();
       emit setSelection(m_rect);
     }
   } else {
-    emit touchPointAt(event->x(), event->y());
+    emit touchPointAt(event->position().toPoint().x(), event->position().toPoint().y());
   }
 }
 
@@ -237,7 +238,7 @@ InputControllerMoveUnwrapped::InputControllerMoveUnwrapped(QObject *parent)
 void InputControllerMoveUnwrapped::mousePressEvent(QMouseEvent *event) {
   if (event->button() == Qt::LeftButton || event->button() == Qt::RightButton) {
     m_isButtonPressed = true;
-    m_rect.setTopLeft(QPoint(event->x(), event->y()));
+    m_rect.setTopLeft(QPoint(event->position().toPoint().x(), event->position().toPoint().y()));
   }
 }
 
@@ -246,7 +247,7 @@ void InputControllerMoveUnwrapped::mousePressEvent(QMouseEvent *event) {
  */
 void InputControllerMoveUnwrapped::mouseMoveEvent(QMouseEvent *event) {
   if (m_isButtonPressed) {
-    m_rect.setBottomRight(QPoint(event->x(), event->y()));
+    m_rect.setBottomRight(QPoint(event->position().toPoint().x(), event->position().toPoint().y()));
     emit setSelectionRect(m_rect);
   }
   InputController::mouseMoveEvent(event);
@@ -285,7 +286,7 @@ InputControllerDraw::~InputControllerDraw() { delete m_cursor; }
  */
 void InputControllerDraw::mousePressEvent(QMouseEvent *event) {
   m_isActive = true;
-  setPosition(QPoint(event->x(), event->y()));
+  setPosition(QPoint(event->position().toPoint().x(), event->position().toPoint().y()));
   if (event->button() == Qt::LeftButton) {
     m_isLeftButtonPressed = true;
     signalLeftClick();
@@ -300,7 +301,7 @@ void InputControllerDraw::mousePressEvent(QMouseEvent *event) {
  */
 void InputControllerDraw::mouseMoveEvent(QMouseEvent *event) {
   m_isActive = true;
-  setPosition(QPoint(event->x(), event->y()));
+  setPosition(QPoint(event->position().toPoint().x(), event->position().toPoint().y()));
   if (m_isLeftButtonPressed) {
     signalLeftClick();
   } else if (m_isRightButtonPressed) {
@@ -371,7 +372,7 @@ void InputControllerSelection::drawCursor(QPixmap *cursor) {
   auto size = cursorSize();
 
   auto pen = QPen(Qt::DashLine);
-  QVector<qreal> dashPattern;
+  QList<qreal> dashPattern;
   dashPattern << 4 << 4;
   pen.setDashPattern(dashPattern);
   pen.setColor(QColor(0, 0, 0));
@@ -434,7 +435,7 @@ void InputControllerDrawAndErase::drawCursor(QPixmap *cursor) {
   auto poly = m_rect.translated(-bRect.topLeft());
 
   auto pen = QPen(Qt::DashLine);
-  QVector<qreal> dashPattern;
+  QList<qreal> dashPattern;
   qreal dashLength = cursorSize() < 10 ? 1 : 2;
   dashPattern << dashLength << dashLength;
   pen.setDashPattern(dashPattern);

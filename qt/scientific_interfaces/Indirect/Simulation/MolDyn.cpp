@@ -24,7 +24,7 @@ MolDyn::MolDyn(QWidget *parent) : SimulationTab(parent) {
 
   connect(m_uiForm.ckCropEnergy, &QCheckBox::toggled, m_uiForm.dspMaxEnergy, &QDoubleSpinBox::setEnabled);
   connect(m_uiForm.ckResolution, &QCheckBox::toggled, m_uiForm.dsResolution, &DataSelector::setEnabled);
-  connect(m_uiForm.cbVersion, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+  connect(m_uiForm.cbVersion, qOverload<int>(&QComboBox::currentIndexChanged),
           [=](int index) { this->versionSelected(m_uiForm.cbVersion->itemText(index)); });
 
   connect(m_uiForm.pbSave, &QPushButton::clicked, this, &MolDyn::saveClicked);

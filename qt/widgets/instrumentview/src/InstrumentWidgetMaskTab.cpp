@@ -788,7 +788,7 @@ void InstrumentWidgetMaskTab::saveInvertedMaskToCalFile() { saveMaskingToCalFile
 void InstrumentWidgetMaskTab::saveMaskToTable() { saveMaskingToTableWorkspace(false); }
 
 void InstrumentWidgetMaskTab::showMessageBox(const QString &message) {
-  QMessageBox::information(this, "GroupDetectors Error", message, "OK");
+  QMessageBox::information(this, "GroupDetectors Error", message);
 }
 
 /**

@@ -9,7 +9,6 @@
 #include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
-#include <QPair>
 #include <QStringList>
 
 #include <memory>

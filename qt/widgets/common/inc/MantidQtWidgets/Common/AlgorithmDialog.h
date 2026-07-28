@@ -312,10 +312,10 @@ protected:
   QStringList m_noValidation;
 
   /// Store a list of the names of input workspace boxes
-  QVector<QWidget *> m_inputws_opts;
+  QList<QWidget *> m_inputws_opts;
 
   /// Store a list of output workspace text edits
-  QVector<QLineEdit *> m_outputws_fields;
+  QList<QLineEdit *> m_outputws_fields;
 
   /// A map to keep track of replace workspace button presses
   QHash<QPushButton *, int> m_wsbtn_tracker;

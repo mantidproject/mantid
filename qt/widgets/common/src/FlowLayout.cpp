@@ -104,7 +104,7 @@ QSize FlowLayout::sizeHint() const { return minimumSize(); }
 
 QSize FlowLayout::minimumSize() const {
   QSize size;
-  foreach (QLayoutItem *item, itemList)
+  for (QLayoutItem *item : itemList)
     size = size.expandedTo(item->minimumSize());
 
   const QMargins margins = contentsMargins();

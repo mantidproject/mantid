@@ -30,7 +30,7 @@ public:
 
   /// Update the old values that are stored here. Only valid
   /// values are stored here
-  void storeNewValue(const QString &algName, const QPair<QString, QString> &property);
+  void storeNewValue(const QString &algName, const std::pair<QString, QString> &property);
 
   /// Clear values for a particular algorithm
   void clearAlgorithmInput(const QString &algName);

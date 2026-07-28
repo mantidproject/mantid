@@ -81,10 +81,9 @@ void OutputPlotOptionsView::setupView() {
           &OutputPlotOptionsView::notifySelectedUnitChanged);
 
   connect(m_plotOptions->leIndices, &QLineEdit::editingFinished, this,
-          static_cast<void (OutputPlotOptionsView::*)()>(&OutputPlotOptionsView::notifySelectedIndicesChanged));
+          qOverload<>(&OutputPlotOptionsView::notifySelectedIndicesChanged));
   connect(m_plotOptions->leIndices, &QLineEdit::textEdited, this,
-          static_cast<void (OutputPlotOptionsView::*)(QString const &)>(
-              &OutputPlotOptionsView::notifySelectedIndicesChanged));
+          qOverload<QString const &>(&OutputPlotOptionsView::notifySelectedIndicesChanged));
 
   connect(m_plotOptions->pbPlotSpectra, &QPushButton::clicked, this, &OutputPlotOptionsView::notifyPlotSpectraClicked);
   setIndicesErrorLabelVisibleImpl(false);

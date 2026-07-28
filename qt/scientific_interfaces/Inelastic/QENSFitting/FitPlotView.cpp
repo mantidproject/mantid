@@ -35,13 +35,13 @@ FitPlotView::FitPlotView(QWidget *parent)
     : API::MantidWidget(parent), m_plotForm(new Ui::FitPreviewPlot), m_presenter() {
   m_plotForm->setupUi(this);
 
-  connect(m_plotForm->cbDataSelection, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this,
+  connect(m_plotForm->cbDataSelection, qOverload<int>(&QComboBox::currentIndexChanged), this,
           &FitPlotView::notifySelectedFitDataChanged);
-  connect(m_plotForm->spPlotSpectrum, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this,
+  connect(m_plotForm->spPlotSpectrum, qOverload<int>(&QSpinBox::valueChanged), this,
           &FitPlotView::notifyDelayedPlotSpectrumChanged);
-  connect(m_plotForm->cbPlotSpectrum, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+  connect(m_plotForm->cbPlotSpectrum, qOverload<int>(&QComboBox::currentIndexChanged),
           [=](int index) { this->notifyPlotSpectrumChanged(m_plotForm->cbPlotSpectrum->itemText(index)); });
-  connect(m_plotForm->ckPlotGuess, &QCheckBox::stateChanged, this, &FitPlotView::notifyPlotGuessChanged);
+  connect(m_plotForm->ckPlotGuess, &QCheckBox::checkStateChanged, this, &FitPlotView::notifyPlotGuessChanged);
   connect(m_plotForm->pbPlotPreview, &QPushButton::clicked, this, &FitPlotView::notifyPlotCurrentPreview);
   connect(m_plotForm->pbFitSingle, &QPushButton::clicked, this, &FitPlotView::notifyFitSelectedSpectrum);
 

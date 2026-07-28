@@ -8,21 +8,10 @@
 
 #include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
-#include <QtGlobal>
 
 /*
  * Defines constants relating to the matplotlib backend
  */
-
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-
-/// Define PyQt version that matches the matplotlib backend
-constexpr static const char *PYQT_MODULE = "PyQt5";
-
-/// Define matplotlib backend that will be used to draw the canvas
-constexpr static const char *MPL_QT_BACKEND = "matplotlib.backends.backend_qt5agg";
-
-#elif QT_VERSION < QT_VERSION_CHECK(7, 0, 0)
 
 /// Define PyQt version that matches the matplotlib backend
 constexpr static const char *PYQT_MODULE = "PyQt6";
@@ -30,10 +19,6 @@ constexpr static const char *PYQT_MODULE = "PyQt6";
 /// Define matplotlib backend that will be used to draw the canvas. backend_qtagg
 /// is the binding-agnostic Qt backend (matplotlib >= 3.5) and uses QT_API=pyqt6.
 constexpr static const char *MPL_QT_BACKEND = "matplotlib.backends.backend_qtagg";
-
-#else
-#error "Unknown Qt version. Cannot determine matplotlib backend."
-#endif
 
 namespace MantidQt {
 namespace Widgets {

@@ -62,7 +62,7 @@ void ResNormView::setup() {
   connect(m_uiForm.dsResolution, &DataSelector::dataReady, this, &ResNormView::notifyResolutionInputReady);
 
   // Connect the preview spectrum selector
-  connect(m_uiForm.spPreviewSpectrum, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this,
+  connect(m_uiForm.spPreviewSpectrum, qOverload<int>(&QSpinBox::valueChanged), this,
           &ResNormView::notifyPreviewSpecChanged);
   // Post Plot and Save
   connect(m_uiForm.pbSave, &QPushButton::clicked, this, &ResNormView::notifySaveClicked);

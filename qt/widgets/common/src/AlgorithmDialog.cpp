@@ -165,7 +165,7 @@ void AlgorithmDialog::saveInput() {
       QString pName = *pitr;
       // normalize default (or default-derived) values to empty string.
       QString value = p->isDefault() || p->isDynamicDefault() ? "" : m_propertyValueMap.value(pName);
-      AlgorithmInputHistory::Instance().storeNewValue(m_algName, QPair<QString, QString>(pName, value));
+      AlgorithmInputHistory::Instance().storeNewValue(m_algName, std::pair<QString, QString>(pName, value));
     }
   }
 }

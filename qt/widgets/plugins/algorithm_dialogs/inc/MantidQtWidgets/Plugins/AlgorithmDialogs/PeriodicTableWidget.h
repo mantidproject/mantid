@@ -8,7 +8,7 @@
 
 #include "MantidQtWidgets/Common/DllOption.h"
 #include "ui_PeriodicTableWidget.h"
-#include <QVector>
+#include <QList>
 #include <QWidget>
 
 /**
@@ -25,31 +25,31 @@ public:
   /// Destructor
   ~PeriodicTableWidget() override {};
   /// Vectors to Hold the QPushButtons of Elements in corresponding Groups
-  QVector<QPushButton *> OtherNonMetals;
-  QVector<QPushButton *> AlkaliMetals;
-  QVector<QPushButton *> AlkalineEarthMetals;
-  QVector<QPushButton *> TransitionMetals;
-  QVector<QPushButton *> Actinides;
-  QVector<QPushButton *> Lanthanides;
-  QVector<QPushButton *> UnknownProperties;
-  QVector<QPushButton *> PostTransitionMetals;
-  QVector<QPushButton *> Metalloids;
-  QVector<QPushButton *> Halogens;
-  QVector<QPushButton *> NobleGases;
+  QList<QPushButton *> OtherNonMetals;
+  QList<QPushButton *> AlkaliMetals;
+  QList<QPushButton *> AlkalineEarthMetals;
+  QList<QPushButton *> TransitionMetals;
+  QList<QPushButton *> Actinides;
+  QList<QPushButton *> Lanthanides;
+  QList<QPushButton *> UnknownProperties;
+  QList<QPushButton *> PostTransitionMetals;
+  QList<QPushButton *> Metalloids;
+  QList<QPushButton *> Halogens;
+  QList<QPushButton *> NobleGases;
 
   /// Vector to hold all group vectors for access to All Buttons at once
-  QVector<QVector<QPushButton *>> AllElementButtons;
+  QList<QList<QPushButton *>> AllElementButtons;
 
   /// @return Comma-separated string of all the element buttons for one group
   /// that are currently checked
-  QString elementsSelectedToString(const QVector<QPushButton *> &elementsSelected);
+  QString elementsSelectedToString(const QList<QPushButton *> &elementsSelected);
 
   /// @return Comma-separated string of all element buttons that are checked in
   /// the whole PeriodicTableWidget
   QString getAllCheckedElementsStr();
 
   /// Disables all buttons associated with a group.
-  void disableButtons(QVector<QPushButton *> buttons);
+  void disableButtons(QList<QPushButton *> buttons);
 
   /// Disables All buttons in periodicTableWidget.
   void disableAllElementButtons();
@@ -70,17 +70,17 @@ private:
   /// The Form containing the PeriodicTableWidget
   Ui::PeriodicTable ui;
   /// Methods to colour element buttons by periodic group
-  void ColourNonMetals(const QVector<QPushButton *> &nonMetals);
-  void ColourAlkaliMetals(const QVector<QPushButton *> &alkaliMetals);
-  void ColourAlkalineEarthMetals(const QVector<QPushButton *> &alkalineEarthMetals);
-  void ColourTransitionMetals(const QVector<QPushButton *> &transMetals);
-  void ColourActinides(const QVector<QPushButton *> &actinides);
-  void ColourLanthanides(const QVector<QPushButton *> &lanthanides);
-  void ColourPostTransitionMetals(const QVector<QPushButton *> &postTransMetals);
-  void ColourUnknownProperties(const QVector<QPushButton *> &unknownProperties);
-  void ColourMetalloids(const QVector<QPushButton *> &metalloids);
-  void ColourHalogens(const QVector<QPushButton *> &halogens);
-  void ColourNobleGases(const QVector<QPushButton *> &nobleGases);
+  void ColourNonMetals(const QList<QPushButton *> &nonMetals);
+  void ColourAlkaliMetals(const QList<QPushButton *> &alkaliMetals);
+  void ColourAlkalineEarthMetals(const QList<QPushButton *> &alkalineEarthMetals);
+  void ColourTransitionMetals(const QList<QPushButton *> &transMetals);
+  void ColourActinides(const QList<QPushButton *> &actinides);
+  void ColourLanthanides(const QList<QPushButton *> &lanthanides);
+  void ColourPostTransitionMetals(const QList<QPushButton *> &postTransMetals);
+  void ColourUnknownProperties(const QList<QPushButton *> &unknownProperties);
+  void ColourMetalloids(const QList<QPushButton *> &metalloids);
+  void ColourHalogens(const QList<QPushButton *> &halogens);
+  void ColourNobleGases(const QList<QPushButton *> &nobleGases);
 
   /// Methods to colour single element button by setting styleSheet
   void ColourButton(QPushButton *elementButton, const QString &colour);

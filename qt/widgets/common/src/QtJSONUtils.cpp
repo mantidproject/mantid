@@ -80,7 +80,7 @@ QMap<QString, QVariant> loadJSONFromString(const QString &jsonString) {
 
 std::string outputJsonToString(QVariant &v) {
   QJsonDocument doc;
-  if (v.type() == 8 && v.canConvert(8)) { // 8 = map - is there an enum?
+  if (v.typeId() == QMetaType::QVariantMap) {
     QVariantMap map = v.toMap();
     doc = QJsonDocument{QJsonObject::fromVariantMap(map)};
   } else if (v.canConvert<QString>()) {

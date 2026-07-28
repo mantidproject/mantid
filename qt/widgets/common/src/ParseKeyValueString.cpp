@@ -303,8 +303,8 @@ std::vector<std::string> qListToStdVector(QList<std::string> const &qList) {
  * @param stringVec The standard vector of standard strings to convert.
  * @return          A QVector of QStrings.
  */
-QVector<QString> convertStdStringVector(const std::vector<std::string> &stringVec) {
-  QVector<QString> resultVec;
+QList<QString> convertStdStringVector(const std::vector<std::string> &stringVec) {
+  QList<QString> resultVec;
   resultVec.reserve(boost::numeric_cast<int>(stringVec.size()));
   std::transform(stringVec.cbegin(), stringVec.cend(), std::back_inserter(resultVec),
                  [](const auto &str) { return QString::fromStdString(str); });
