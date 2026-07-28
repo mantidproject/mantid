@@ -78,7 +78,7 @@ def _get_instrument_from_ws_list(wss: Sequence[str]) -> str | None:
             except:
                 logger.error(f"Could not find or load '{ws_str}'")
                 return None
-        instruments.add(ws.getInstrument().getName())
+        instruments.add(ws.getInstrumentName())
     instruments = list(instruments)
     if len(instruments) == 1:
         return instruments[0]

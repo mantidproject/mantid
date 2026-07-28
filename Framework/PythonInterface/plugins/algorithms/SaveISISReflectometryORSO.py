@@ -72,7 +72,7 @@ class ReflectometryDataset:
 
     @property
     def instrument_name(self) -> str:
-        return self._ws.getInstrument().getName()
+        return self._ws.getInstrumentName()
 
     @property
     def spin_state(self) -> str:

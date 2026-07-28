@@ -42,7 +42,6 @@ template <class T> size_t ConvToMDEventsWS::convertEventList(size_t workspaceInd
   UnitsConversionHelper localUnitConv(m_UnitConversion);
 
   uint32_t detID = m_detID[workspaceIndex];
-  uint16_t expInfoIndexLoc = m_ExpInfoIndex;
 
   std::vector<coord_t> locCoord(m_Coord);
   // set up unit conversion and calculate up all coordinates, which depend on
@@ -54,45 +53,58 @@ template <class T> size_t ConvToMDEventsWS::convertEventList(size_t workspaceInd
   // allocate temporary buffers for MD Events data
   // MD events coordinates buffer
   std::vector<coord_t> allCoord;
-  std::vector<float> sig_err;             // array for signal and error.
-  std::vector<uint16_t> expInfoIndex;     // Buffer for associated experiment-info index for each event
-  std::vector<uint16_t> goniometer_index; // Buffer for goniometer index for each event
-  std::vector<uint32_t> det_ids;          // Buffer of det Id-s for each event
+  std::vector<float> sig_err; // array for signal and error.
 
   allCoord.reserve(this->m_NDims * numEvents);
   sig_err.reserve(2 * numEvents);
-  expInfoIndex.reserve(numEvents);
-  goniometer_index.reserve(numEvents);
-  det_ids.reserve(numEvents);
 
   // This little dance makes the getting vector of events more general (since
   // you can't overload by return type).
   typename std::vector<T> const *events_ptr;
   getEventsFrom(el, events_ptr);
   const typename std::vector<T> &events = *events_ptr;
+
+  // Parallelise loops by workers, each worker needs a clone of QConverter and Goniometer
+  int numthreads = m_NumThreads < 0 ? PARALLEL_GET_MAX_THREADS : std::max(1, m_NumThreads);
+  std::vector<MDTransf_sptr> qConverters;
+  std::vector<Geometry::Goniometer> gonios;
+  std::vector<std::vector<coord_t>> allCoords;
+  std::vector<std::vector<float>> sig_errs;
+  for (int i = 0; i < numthreads; i++) {
+    qConverters.emplace_back(m_QConverter->clone());
+    allCoords.push_back(allCoord);
+    sig_errs.push_back(sig_err);
+    gonios.emplace_back(m_Goniometer);
+  }
   // Iterators to start/end
-  for (auto it = events.cbegin(); it != events.cend(); it++) {
-    double val = localUnitConv.convertUnits(it->tof());
-    double signal = it->weight();
-    double errorSq = it->errorSquared();
-    if (!setGoniometersFromLogs(it))
+  PRAGMA_OMP(parallel for)
+  for (int i = 0; i < static_cast<int>(events.size()); i++) {
+    MDTransf_sptr p_QConverter = qConverters[PARALLEL_THREAD_NUMBER];
+    double val = localUnitConv.convertUnits(events[i].tof());
+    double signal = events[i].weight();
+    double errorSq = events[i].errorSquared();
+    if (!setGoniometersFromLogs(&events[i], gonios[PARALLEL_THREAD_NUMBER], p_QConverter))
       continue; // skip if log value is NaN
-    if (!setGenericVariableFromLogs(it->pulseTime(), locCoord))
+    std::vector<coord_t> locCoord_(m_Coord);
+    if (!setGenericVariableFromLogs(events[i].pulseTime(), locCoord_))
       continue; // skip if log value is NaN or out of bounds
-    if (!m_QConverter->calcMatrixCoord(val, locCoord, signal, errorSq))
+    if (!p_QConverter->calcMatrixCoord(val, locCoord_, signal, errorSq))
       continue; // skip ND outside the range
 
-    sig_err.emplace_back(static_cast<float>(signal));
-    sig_err.emplace_back(static_cast<float>(errorSq));
-    expInfoIndex.emplace_back(expInfoIndexLoc);
-    goniometer_index.emplace_back(0); // default value
-    det_ids.emplace_back(detID);
-    allCoord.insert(allCoord.end(), locCoord.begin(), locCoord.end());
+    sig_errs[PARALLEL_THREAD_NUMBER].emplace_back(static_cast<float>(signal));
+    sig_errs[PARALLEL_THREAD_NUMBER].emplace_back(static_cast<float>(errorSq));
+    allCoords[PARALLEL_THREAD_NUMBER].insert(allCoords[PARALLEL_THREAD_NUMBER].end(), locCoord_.begin(),
+                                             locCoord_.end());
   }
+  for (int i = 0; i < numthreads; i++) {
+    sig_err.insert(sig_err.end(), sig_errs[i].begin(), sig_errs[i].end());
+    allCoord.insert(allCoord.end(), allCoords[i].begin(), allCoords[i].end());
+  }
+  size_t n_added_events = sig_err.size() / 2;
+  std::vector<uint32_t> det_ids(n_added_events, detID);
 
   // Add them to the MDEW
-  size_t n_added_events = expInfoIndex.size();
-  m_OutWSWrapper->addMDData(sig_err, expInfoIndex, goniometer_index, det_ids, allCoord, n_added_events);
+  m_OutWSWrapper->addMDData(sig_err, m_ExpInfoIndex, 0, det_ids, allCoord, n_added_events);
   return n_added_events;
 }
 

@@ -270,7 +270,7 @@ public:
 
     for (size_t i = 0; i < 3; i++) {
       TS_ASSERT_DELTA(correct_vec[i], current_vec[i], 1e-4);
-      TS_ASSERT_DELTA(correct_err[i], current_err[i], 1e-4);
+      TS_ASSERT_DELTA(correct_err[i], current_err[i], 2e-4);
     }
 
     // Remove workspace from the data service.

@@ -95,7 +95,7 @@ void ElwinView::setup() {
   backgroundRangeSelector->setBounds(-DBL_MAX, DBL_MAX);
 
   connect(integrationRangeSelector, &RangeSelector::selectionChanged, backgroundRangeSelector,
-          static_cast<void (RangeSelector::*)(double, double)>(&RangeSelector::setRange));
+          qOverload<double, double>(&RangeSelector::setRange));
   connect(backgroundRangeSelector, &RangeSelector::minValueChanged, this, &ElwinView::notifyMinChanged);
   connect(backgroundRangeSelector, &RangeSelector::maxValueChanged, this, &ElwinView::notifyMaxChanged);
   connect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &ElwinView::notifyDoubleValueChanged);
@@ -106,14 +106,14 @@ void ElwinView::setup() {
   connect(m_uiForm.wkspRemove, &QPushButton::clicked, this, &ElwinView::notifyRemoveDataClicked);
   connect(m_uiForm.pbSelAll, &QPushButton::clicked, this, &ElwinView::notifySelectAllClicked);
 
-  connect(m_uiForm.cbPreviewFile, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this,
+  connect(m_uiForm.cbPreviewFile, qOverload<int>(&QComboBox::currentIndexChanged), this,
           &ElwinView::notifyPreviewIndexChanged);
-  connect(m_uiForm.spPlotSpectrum, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this,
+  connect(m_uiForm.spPlotSpectrum, qOverload<int>(&QSpinBox::valueChanged), this,
           &ElwinView::notifySelectedSpectrumChanged);
-  connect(m_uiForm.cbPlotSpectrum, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this,
+  connect(m_uiForm.cbPlotSpectrum, qOverload<int>(&QComboBox::currentIndexChanged), this,
           &ElwinView::notifySelectedSpectrumChanged);
 
-  connect(m_uiForm.ckCollapse, &QCheckBox::stateChanged, this, &ElwinView::notifyRowModeChanged);
+  connect(m_uiForm.ckCollapse, &QCheckBox::checkStateChanged, this, &ElwinView::notifyRowModeChanged);
 
   // Handle plot and save
   connect(m_uiForm.pbSave, &QPushButton::clicked, this, &ElwinView::notifySaveClicked);
@@ -272,11 +272,11 @@ void ElwinView::notifyCheckboxValueChanged(QtProperty *prop, bool enabled) {
     m_properties["BackgroundEnd"]->setEnabled(enabled);
 
     disconnect(integrationRangeSelector, &RangeSelector::selectionChanged, backgroundRangeSelector,
-               static_cast<void (RangeSelector::*)(double, double)>(&RangeSelector::setRange));
+               qOverload<double, double>(&RangeSelector::setRange));
     if (!enabled) {
       backgroundRangeSelector->setRange(integrationRangeSelector->getRange());
       connect(integrationRangeSelector, &RangeSelector::selectionChanged, backgroundRangeSelector,
-              static_cast<void (RangeSelector::*)(double, double)>(&RangeSelector::setRange));
+              qOverload<double, double>(&RangeSelector::setRange));
     }
   }
 }
@@ -427,7 +427,7 @@ void ElwinView::setAvailableSpectra(WorkspaceIndex minimum, WorkspaceIndex maxim
 
 void ElwinView::setAvailableSpectra(const std::vector<WorkspaceIndex>::const_iterator &from,
                                     const std::vector<WorkspaceIndex>::const_iterator &to) {
-  disconnect(m_uiForm.cbPlotSpectrum, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this,
+  disconnect(m_uiForm.cbPlotSpectrum, qOverload<int>(&QComboBox::currentIndexChanged), this,
              &ElwinView::notifySelectedSpectrumChanged);
   m_uiForm.elwinPreviewSpec->setCurrentIndex(1);
   m_uiForm.cbPlotSpectrum->clear();
@@ -437,7 +437,7 @@ void ElwinView::setAvailableSpectra(const std::vector<WorkspaceIndex>::const_ite
 
   m_uiForm.cbPlotSpectrum->setCurrentIndex(0);
 
-  connect(m_uiForm.cbPlotSpectrum, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this,
+  connect(m_uiForm.cbPlotSpectrum, qOverload<int>(&QComboBox::currentIndexChanged), this,
           &ElwinView::notifySelectedSpectrumChanged);
 }
 

@@ -135,6 +135,7 @@ void MDNormDirectSC::exec() {
   setProperty("OutputNormalizationWorkspace", m_normWS);
 
   m_numExptInfos = outputWS->getNumExperimentInfo();
+  m_signalArray = std::vector<std::atomic<signal_t>>(m_normWS->getNPoints());
   // loop over all experiment infos
   m_progress->resetNumSteps(m_numExptInfos, 0.3, 1.0);
   for (uint16_t expInfoIndex = 0; expInfoIndex < m_numExptInfos; expInfoIndex++) {
@@ -160,10 +161,9 @@ void MDNormDirectSC::exec() {
       g_log.warning("Binning limits are outside the limits of the MDWorkspace. "
                     "Not applying normalization.");
     }
-    // if more than one experiment info, keep accumulating
-    m_accumulate = true;
     m_progress->report();
   }
+  std::copy(m_signalArray.cbegin(), m_signalArray.cend(), m_normWS->mutableSignalArray());
 
   // Set the display normalization based on the input workspace
   outputWS->setDisplayNormalization(m_inputWS->displayNormalizationHisto());
@@ -288,8 +288,6 @@ void MDNormDirectSC::createNormalizationWS(const MDHistoWorkspace &dataWS) {
   if (!m_normWS) {
     m_normWS = dataWS.clone();
     m_normWS->setTo(0., 0., 0.);
-  } else {
-    m_accumulate = true;
   }
 }
 
@@ -516,7 +514,6 @@ void MDNormDirectSC::calculateNormContinuous(const std::vector<coord_t> &otherVa
       auto idx = static_cast<size_t>(floor((logval - *min) / GONIOBINSTEP));
       gonioCharge[idx] += protonCharge[n];
     }
-    m_accumulate = true;
     m_progress->resetNumSteps(static_cast<int64_t>(gonioCharge.size()), progressStart, progressEnd);
     for (size_t n = 0; n < gonioCharge.size(); n++) {
       if (gonioCharge[n] < MINPROTONCHARGE) {
@@ -580,11 +577,8 @@ void MDNormDirectSC::calculateNormInner(const API::SpectrumInfo &spectrumInfo, c
   }
 
   const size_t vmdDims = 4;
-  std::vector<std::atomic<signal_t>> signalArray(m_normWS->getNPoints());
-  std::vector<std::array<double, 4>> intersections;
-  std::vector<coord_t> pos, posNew;
 
-  PRAGMA_OMP(parallel for private(intersections, pos, posNew))
+  PRAGMA_OMP(parallel for)
   for (int64_t i = 0; i < ndets; i++) {
     PARALLEL_START_INTERRUPT_REGION
 
@@ -598,6 +592,8 @@ void MDNormDirectSC::calculateNormInner(const API::SpectrumInfo &spectrumInfo, c
     const auto detID = detector.getID();
 
     // Intersections
+    std::vector<std::array<double, 4>> intersections;
+    std::vector<coord_t> pos, posNew;
     this->calculateIntersections(intersections, theta, phi);
     if (intersections.empty())
       continue;
@@ -612,8 +608,7 @@ void MDNormDirectSC::calculateNormInner(const API::SpectrumInfo &spectrumInfo, c
     pos.resize(vmdDims + otherValues.size() + 1);
     std::copy(otherValues.begin(), otherValues.end(), pos.begin() + vmdDims);
     pos.emplace_back(1.f);
-    auto intersectionsBegin = intersections.begin();
-    for (auto it = intersectionsBegin + 1; it != intersections.end(); ++it) {
+    for (auto it = intersections.begin() + 1; it != intersections.end(); ++it) {
       const auto &curIntSec = *it;
       const auto &prevIntSec = *(it - 1);
       // the full vector isn't used so compute only what is necessary
@@ -635,17 +630,11 @@ void MDNormDirectSC::calculateNormInner(const API::SpectrumInfo &spectrumInfo, c
       // signal = integral between two consecutive intersections *solid angle
       // *PC
       double signal = solid * delta;
-      Mantid::Kernel::AtomicOp(signalArray[linIndex], signal, std::plus<signal_t>());
+      Mantid::Kernel::AtomicOp(m_signalArray[linIndex], signal, std::plus<signal_t>());
     }
     PARALLEL_END_INTERRUPT_REGION
   }
   PARALLEL_CHECK_INTERRUPT_REGION
-  if (m_accumulate) {
-    std::transform(signalArray.cbegin(), signalArray.cend(), m_normWS->getSignalArray(), m_normWS->mutableSignalArray(),
-                   [](const std::atomic<signal_t> &a, const signal_t &b) { return a + b; });
-  } else {
-    std::copy(signalArray.cbegin(), signalArray.cend(), m_normWS->mutableSignalArray());
-  }
 }
 
 /**

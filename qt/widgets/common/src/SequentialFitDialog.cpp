@@ -92,7 +92,7 @@ bool SequentialFitDialog::addWorkspaces(const QStringList &wsNames) {
   ui.tWorkspaces->model()->insertRows(row, static_cast<int>(wsNames.size()));
   int wi = m_fitBrowser->workspaceIndex();
   QAbstractItemModel *model = ui.tWorkspaces->model();
-  foreach (QString wsName, wsNames) {
+  for (const QString &wsName : wsNames) {
     model->setData(model->index(row, 0, QModelIndex()), wsName);
 
     if (row == 0) {
@@ -157,7 +157,7 @@ void SequentialFitDialog::addFile() {
     ui.tWorkspaces->model()->insertRows(row, static_cast<int>(fileNames.size()));
     // int wi = m_fitBrowser->workspaceIndex();
     QAbstractItemModel *model = ui.tWorkspaces->model();
-    foreach (QString fileName, fileNames) {
+    for (const QString &fileName : fileNames) {
       model->setData(model->index(row, 0, QModelIndex()), fileName); // file name
       model->setData(model->index(row, 1, QModelIndex()),
                      ui.sbPeriod->value()); // period
@@ -216,7 +216,7 @@ bool SequentialFitDialog::validateLogs(const QString &wsName) {
           namesToRemove << logName;
         }
       }
-      foreach (QString logName, namesToRemove) {
+      for (const QString &logName : namesToRemove) {
         int i = ui.cbLogValue->findText(logName);
         if (i >= 0) {
           ui.cbLogValue->removeItem(i);

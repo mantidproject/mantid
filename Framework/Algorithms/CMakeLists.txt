@@ -123,6 +123,7 @@ set(SRC_FILES
     src/EditInstrumentGeometry.cpp
     src/ElasticWindow.cpp
     src/EstimateDivergence.cpp
+    src/EstimatePeakIntensities.cpp
     src/EstimateResolutionDiffraction.cpp
     src/EstimateScatteringVolumeCentreOfMass.cpp
     src/EventWorkspaceAccess.cpp
@@ -477,6 +478,7 @@ set(INC_FILES
     inc/MantidAlgorithms/EditInstrumentGeometry.h
     inc/MantidAlgorithms/ElasticWindow.h
     inc/MantidAlgorithms/EstimateDivergence.h
+    inc/MantidAlgorithms/EstimatePeakIntensities.h
     inc/MantidAlgorithms/EstimateResolutionDiffraction.h
     inc/MantidAlgorithms/EstimateScatteringVolumeCentreOfMass.h
     inc/MantidAlgorithms/EventWorkspaceAccess.h
@@ -835,6 +837,7 @@ set(TEST_FILES
     EditInstrumentGeometryTest.h
     ElasticWindowTest.h
     EstimateDivergenceTest.h
+    EstimatePeakIntensitiesTest.h
     EstimateResolutionDiffractionTest.h
     EstimateScatteringVolumeCentreOfMassTest.h
     ExponentialCorrectionTest.h

@@ -35,8 +35,8 @@ MomentsView::MomentsView(QWidget *parent) : QWidget(parent), m_presenter() {
   MantidWidgets::RangeSelector *xRangeSelector = m_uiForm.ppRawPlot->addRangeSelector("XRange");
 
   connect(m_uiForm.dsInput, &DataSelector::dataReady, this, &MomentsView::notifyDataReady);
-  connect(m_uiForm.ckScale, &QCheckBox::stateChanged, this, &MomentsView::notifyScaleChanged);
-  connect(m_uiForm.spScale, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this,
+  connect(m_uiForm.ckScale, &QCheckBox::checkStateChanged, this, &MomentsView::notifyScaleChanged);
+  connect(m_uiForm.spScale, qOverload<double>(&QDoubleSpinBox::valueChanged), this,
           &MomentsView::notifyScaleValueChanged);
   connect(m_uiForm.pbSave, &QPushButton::clicked, this, &MomentsView::notifySaveClicked);
 

@@ -27,7 +27,6 @@
 
 #include <QDoubleValidator>
 #include <QMap>
-#include <QPair>
 
 #include <algorithm>
 #include <map>

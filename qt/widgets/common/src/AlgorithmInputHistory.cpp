@@ -45,7 +45,7 @@ AbstractAlgorithmInputHistory::~AbstractAlgorithmInputHistory() {
  * @param algName :: The name of the algorithm
  * @param property :: A pair containing <name,value> of a property
  */
-void AbstractAlgorithmInputHistory::storeNewValue(const QString &algName, const QPair<QString, QString> &property) {
+void AbstractAlgorithmInputHistory::storeNewValue(const QString &algName, const std::pair<QString, QString> &property) {
   m_lastInput[algName][property.first] = property.second;
 }
 

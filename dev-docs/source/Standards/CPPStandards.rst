@@ -388,6 +388,9 @@ Suppressions File
 When Cppcheck is updated, a suppressions file will be created using the
 suppressions file generator script, ``generate_cppcheck_suppressions_list.py``.
 
+This script consumes the ``cppcheck.sarif`` report produced by the
+``cppcheck-sarif`` CMake target.
+
 This file, ``CppCheck_Suppressions.txt.in``, contains a list of all the problems
 that Cppcheck found in the codebase. It has two functions:
 

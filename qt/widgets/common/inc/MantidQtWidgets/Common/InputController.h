@@ -41,7 +41,9 @@ public:
   ~InputController() override = default;
 
   virtual void mousePressEvent(QMouseEvent * /*unused*/) {}
-  virtual void mouseMoveEvent(QMouseEvent *event) { emit touchPointAt(event->x(), event->y()); }
+  virtual void mouseMoveEvent(QMouseEvent *event) {
+    emit touchPointAt(event->position().toPoint().x(), event->position().toPoint().y());
+  }
   virtual void mouseReleaseEvent(QMouseEvent * /*unused*/) {}
   virtual void wheelEvent(QWheelEvent * /*unused*/) {}
   virtual void keyPressEvent(QKeyEvent * /*unused*/) {}

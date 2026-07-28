@@ -56,8 +56,8 @@ class LoadAndCheckBase(systemtesting.MantidSystemTest, metaclass=ABCMeta):
 
     def do_check_instrument_applied(self, ws1, ws2):
         instrument_name = self.get_expected_instrument_name()
-        self.assertEqual(ws1.getInstrument().getName(), instrument_name)
-        self.assertEqual(ws2.getInstrument().getName(), instrument_name)
+        self.assertEqual(ws1.getInstrumentName(), instrument_name)
+        self.assertEqual(ws2.getInstrumentName(), instrument_name)
 
     def runTest(self):
         Load(Filename=self.get_nexus_workspace_filename(), OutputWorkspace="nexus")

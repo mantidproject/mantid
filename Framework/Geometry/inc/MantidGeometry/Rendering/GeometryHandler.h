@@ -74,6 +74,10 @@ public:
   GeometryHandler(const GeometryHandler &handler);
   GeometryHandler &operator=(GeometryHandler handler);
   std::shared_ptr<GeometryHandler> clone() const;
+  /// Clone the handler, rebinding it to render newOwner. The handler and its triangulator hold a
+  /// non-owning pointer to the CSGObject they render, so a copy taken for a new object must be
+  /// pointed at that object: the original may be destroyed while the copy is still in use.
+  std::shared_ptr<GeometryHandler> clone(CSGObject *newOwner) const;
   ~GeometryHandler();
   void render() const;     ///< Render Object or ObjComponent
   void initialize() const; ///< Prepare/Initialize Object/ObjComponent to be rendered

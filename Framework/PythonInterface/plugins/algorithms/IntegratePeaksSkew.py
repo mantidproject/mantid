@@ -683,7 +683,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         ws = self.getProperty("InputWorkspace").value
         inst = ws.getInstrument()
         pk_ws = self.getProperty("PeaksWorkspace").value
-        if inst.getName() != pk_ws.getInstrument().getName():
+        if inst.getName() != pk_ws.getInstrumentName():
             issues["PeaksWorkspace"] = "PeaksWorkspace must have same instrument as the InputWorkspace."
         if pk_ws.getNumberPeaks() < 1:
             issues["PeaksWorkspace"] = "PeaksWorkspace must have at least 1 peak."

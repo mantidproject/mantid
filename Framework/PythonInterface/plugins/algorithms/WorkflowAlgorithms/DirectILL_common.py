@@ -165,7 +165,7 @@ def get_grouping_pattern(ws, vertical_step, horizontal_step=1):
     vertical_step -- grouping step inside a tube
     horizontal_step -- grouping step between tubes
     """
-    instrument = ws.getInstrument().getName()
+    instrument = ws.getInstrumentName()
     n_pixels = ws.getNumberHistograms()
     if horizontal_step == 1:
         group_by = vertical_step

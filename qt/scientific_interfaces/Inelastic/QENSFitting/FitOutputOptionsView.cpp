@@ -17,7 +17,7 @@ FitOutputOptionsView::FitOutputOptionsView(QWidget *parent)
       m_presenter() {
   m_outputOptions->setupUi(this);
 
-  connect(m_outputOptions->cbGroupWorkspace, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+  connect(m_outputOptions->cbGroupWorkspace, qOverload<int>(&QComboBox::currentIndexChanged),
           [=](int index) { this->notifyGroupWorkspaceChanged(m_outputOptions->cbGroupWorkspace->itemText(index)); });
   connect(m_outputOptions->pbPlot, &QPushButton::clicked, this, &FitOutputOptionsView::notifyPlotClicked);
   connect(m_outputOptions->pbSave, &QPushButton::clicked, this, &FitOutputOptionsView::notifySaveClicked);

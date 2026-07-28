@@ -527,7 +527,7 @@ def _retrieve_ws_object(ws: str | Workspace2D | TableWorkspace) -> Workspace2D |
 
 def generous_rebin(ws: str | Workspace2D, out_ws: str, StoreInADS: bool = True) -> Workspace2D:
     ws = _retrieve_ws_object(ws)
-    if ws.getInstrument().getName() not in ("ENGIN-X", "IMAT"):
+    if ws.getInstrumentName() not in ("ENGIN-X", "IMAT"):
         # the size and detector ranges for enginx and imat should not cause issues with this
         logger.warning("Rebinning generously - this may cause memory issues for workspaces with very different x binning")
     minX, maxX, diffX = np.inf, 0, np.inf

@@ -15,6 +15,7 @@ class AxisChangerView(QtWidgets.QWidget):
 
     def __init__(self, label, parent):
         super(AxisChangerView, self).__init__(parent)
+        self._previous_limits = None
         layout = QtWidgets.QHBoxLayout()
         self._label = QtWidgets.QLabel(label)
 
@@ -46,9 +47,17 @@ class AxisChangerView(QtWidgets.QWidget):
     def set_limits(self, limits):
         self.lower_bound.setText(str(limits[0]))
         self.upper_bound.setText(str(limits[1]))
+        self._previous_limits = list(limits)
 
     def _bound_changed(self):
-        self.sig_bound_changed.emit(self.get_limits())
+        limits = self.get_limits()
+        if limits[0] >= limits[1]:
+            # Reject an invalid min >= max range and restore the last valid values instead.
+            if self._previous_limits is not None:
+                self.set_limits(self._previous_limits)
+            return
+        self._previous_limits = limits
+        self.sig_bound_changed.emit(limits)
 
     def on_range_changed(self, slot):
         self.sig_bound_changed.connect(slot)

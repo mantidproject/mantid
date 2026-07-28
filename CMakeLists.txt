@@ -29,14 +29,8 @@ option(ENABLE_WORKBENCH "Enable Qt-based gui" ON)
 
 # Major version of Qt to build the GUI layer against (5 or 6). A single version is selected per build tree; the
 # Qt-versioned target machinery in buildconfig/CMake/QtTargetFunctions.cmake produces the matching -Qt${V} targets.
-# Linux defaults to Qt6; Windows and macOS still default to Qt5.
-if(UNIX AND NOT APPLE)
-  set(_default_qt_version 6)
-else()
-  set(_default_qt_version 5)
-endif()
 set(MANTID_QT_VERSION
-    ${_default_qt_version}
+    6
     CACHE STRING "Major version of Qt to build against (5 or 6)"
 )
 set_property(CACHE MANTID_QT_VERSION PROPERTY STRINGS 5 6)
@@ -180,10 +174,8 @@ if(ENABLE_WORKBENCH OR BUILD_MANTIDQT)
     # Only the legacy sip<=v4 PyQt5 path consumes these flags
     separate_arguments(PYQT5_SIP_FLAGS)
   endif()
-  # Disable use of C++ API deprecated before the given version. Use the same 5.15 baseline for both builds: under Qt6
-  # this keeps APIs deprecated in 6.x (e.g. QMouseEvent::pos(), QVariant::Type) available, so the migration can defer
-  # cleaning those up - only APIs actually *removed* in Qt6 must be fixed.
-  add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
+  # Disable use of C++ API deprecated before Qt 6.11.
+  add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x060B00)
 endif()
 
 # Now add in all the components

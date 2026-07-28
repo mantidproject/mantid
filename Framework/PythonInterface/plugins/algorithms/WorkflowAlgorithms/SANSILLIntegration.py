@@ -251,7 +251,7 @@ class SANSILLIntegration(PythonAlgorithm):
         self._integrate(self._input_ws, self._output_ws)
         self.setProperty("OutputWorkspace", self._output_ws)
         panels_out_ws = self.getPropertyValue("PanelOutputWorkspaces")
-        if mtd[self._output_ws].getInstrument().getName() in ["D33", "D11B", "D22B"] and panels_out_ws:
+        if mtd[self._output_ws].getInstrumentName() in ["D33", "D11B", "D22B"] and panels_out_ws:
             panel_names = mtd[self._output_ws].getInstrument().getStringParameter("detector_panels")[0].split(",")
             panel_outputs = []
             for panel in panel_names:

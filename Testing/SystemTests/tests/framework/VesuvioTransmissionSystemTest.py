@@ -6,8 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,attribute-defined-outside-init
 import systemtesting
-import numpy as np
-from mantid.simpleapi import VesuvioTransmission, LoadNexus, CompareWorkspaces
+from mantid.simpleapi import VesuvioTransmission
 from mantid.api import mtd
 
 
@@ -41,29 +40,6 @@ class VesuvioTransmissionSystemTest(systemtesting.MantidSystemTest):
             InvertMonitors=False,
             SmoothIncidentSpectrum=False,
         )
-
-        # Load the nexus files
-        LoadNexus(Filename="VesuvioTransmissionTimeScanExpectedOutput.nxs", OutputWorkspace="expected_output_time_scan")
-        LoadNexus(Filename="VesuvioTransmissionTimeScanExpectedOutputXS.nxs", OutputWorkspace="expected_output_time_scan_XS")
-
-        # Preprocess the workspaces to replace the inf and NaNs to enable comparison
-        for ws in [
-            mtd["expected_output_time_scan"],
-            mtd["vesuvio_transmission_time_scan"],
-            mtd["expected_output_time_scan_XS"],
-            mtd["vesuvio_transmission_time_scan_XS"],
-        ]:
-            for i in range(ws.getNumberHistograms()):
-                y = ws.dataY(i)
-                e = ws.dataE(i)
-                y[:] = np.nan_to_num(y, nan=0.0, posinf=0.0, neginf=0.0)
-                e[:] = np.nan_to_num(e, nan=0.0, posinf=0.0, neginf=0.0)
-
-        # Compare the workspaces
-        result, _ = CompareWorkspaces("vesuvio_transmission_time_scan", "expected_output_time_scan", CheckInstrument=False)
-        self.assertTrue(result)
-        result, _ = CompareWorkspaces("vesuvio_transmission_time_scan_XS", "expected_output_time_scan_XS", CheckInstrument=False)
-        self.assertTrue(result)
 
     def validateMethod(self):
         return "ValidateWorkspaceToNexus"
@@ -113,11 +89,16 @@ class VesuvioTransmissionSystemTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.checkInstrument = False
+        self.nanEqual = True
         return (
             "vesuvio_transmission_sum_of_all_runs",
             "VesuvioTransmissionSumOfAllRunsExpectedOutput.nxs",
             "vesuvio_transmission_sum_of_all_runs_XS",
             "VesuvioTransmissionSumOfAllRunsExpectedOutputXS.nxs",
+            "vesuvio_transmission_time_scan",
+            "VesuvioTransmissionTimeScanExpectedOutput.nxs",
+            "vesuvio_transmission_time_scan_XS",
+            "VesuvioTransmissionTimeScanExpectedOutputXS.nxs",
         )
 
     def cleanup(self):

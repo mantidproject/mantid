@@ -62,6 +62,14 @@ GeometryHandler::~GeometryHandler() = default;
 
 std::shared_ptr<GeometryHandler> GeometryHandler::clone() const { return std::make_shared<GeometryHandler>(*this); }
 
+std::shared_ptr<GeometryHandler> GeometryHandler::clone(CSGObject *newOwner) const {
+  auto cloned = std::make_shared<GeometryHandler>(*this);
+  cloned->m_csgObj = newOwner;
+  if (cloned->m_triangulator)
+    cloned->m_triangulator = std::make_unique<detail::GeometryTriangulator>(newOwner);
+  return cloned;
+}
+
 void GeometryHandler::render() const {
   if (m_shapeInfo)
     RenderingHelpers::renderShape(*m_shapeInfo);

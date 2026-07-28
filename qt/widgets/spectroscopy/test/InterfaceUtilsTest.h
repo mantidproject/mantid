@@ -11,7 +11,6 @@
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 #include "MantidQtWidgets/Spectroscopy/InterfaceUtils.h"
 
-#include <QPair>
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;

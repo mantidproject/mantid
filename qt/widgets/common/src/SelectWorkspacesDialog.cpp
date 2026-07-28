@@ -102,7 +102,7 @@ SelectWorkspacesDialog::SelectWorkspacesDialog(QWidget *parent, const std::strin
 QStringList SelectWorkspacesDialog::getSelectedNames() const {
   QList<QListWidgetItem *> items = m_wsList->selectedItems();
   QStringList res;
-  foreach (QListWidgetItem *item, items) {
+  for (QListWidgetItem *item : items) {
     res << item->text();
   }
   return res;

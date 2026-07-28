@@ -1,0 +1,1 @@
+- :ref:`algm-EstimatePeakIntensities` allows parallel, fit-free estimation of peak intensities within specified windows, using a skew-seeded background estimation.

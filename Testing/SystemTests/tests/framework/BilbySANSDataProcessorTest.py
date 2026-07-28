@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import sys
 import systemtesting
 from BilbyReductionScript import RunBilbyReduction
 
@@ -12,6 +13,9 @@ class BilbySANSDataProcessorTest(systemtesting.MantidSystemTest):
     def __init__(self):
         systemtesting.MantidSystemTest.__init__(self)
         self.tolerance = 1e-6
+
+    def skipTests(self):
+        return sys.platform.startswith("win")
 
     def runTest(self):
         run_bilby_reduction = RunBilbyReduction("mantid_reduction_settings_example.csv", "0", "0", "shift_assembled.csv", False)

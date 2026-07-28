@@ -12,7 +12,6 @@ from sans.command_interface.command_interface_state_director import (
     CommandInterfaceStateDirector,
     DataCommand,
     DataCommandId,
-    FitData,
 )
 from sans.common.enums import (
     SANSFacility,
@@ -82,7 +81,7 @@ class CommandInterfaceStateDirectorTest(unittest.TestCase):
         self._assert_raises_nothing(command_interface.add_command, command)
 
         # # Trans fit
-        command = NParameterCommand(command_id=NParameterCommandId.TRANS_FIT, values=[FitData.Can, 10.4, 12.54, FitType.LOGARITHMIC, 0])
+        command = NParameterCommand(command_id=NParameterCommandId.TRANS_FIT, values=[DataType.CAN, 10.4, 12.54, FitType.LOGARITHMIC, 0])
         self._assert_raises_nothing(command_interface.add_command, command)
 
         # Front detector rescale
