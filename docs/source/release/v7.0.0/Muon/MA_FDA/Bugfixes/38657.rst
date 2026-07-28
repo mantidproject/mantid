@@ -1,0 +1,1 @@
+- Fixed a bug in the :ref:`Muon Analysis <Muon_Analysis-ref>` and :ref:`Frequency Domain Analysis <Frequency_Domain_Analysis-ref>` interfaces where entering an X (or Y) minimum value greater than or equal to the maximum in the plot range boxes flipped the axis. The invalid value is now rejected and the range reverted to its previous value.
