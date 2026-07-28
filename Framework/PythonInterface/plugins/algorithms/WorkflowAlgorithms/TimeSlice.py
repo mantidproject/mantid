@@ -74,6 +74,7 @@ class TimeSlice(PythonAlgorithm):
     _background_range = None
     _calib_ws = None
     _out_ws_group = None
+    _do_load = True
 
     def category(self):
         return "Inelastic\\Utility"
@@ -85,7 +86,12 @@ class TimeSlice(PythonAlgorithm):
         return ["Integration"]
 
     def PyInit(self):
-        self.declareProperty(StringArrayProperty(name="InputFiles"), doc="Comma separated list of input files")
+        self.declareProperty(StringArrayProperty(name="InputFiles", values=[]), doc="Comma separated list of input files")
+
+        self.declareProperty(
+            WorkspaceProperty(name="SampleWorkspace", defaultValue="", direction=Direction.Input, optional=PropertyMode.Optional),
+            doc="Optional sample workspace that can be provided instead of Input Files, only uses the workspace if Input Files is empty",
+        )
 
         self.declareProperty(
             WorkspaceProperty(name="CalibrationWorkspace", defaultValue="", direction=Direction.Input, optional=PropertyMode.Optional),
@@ -127,6 +133,11 @@ class TimeSlice(PythonAlgorithm):
     def validateInputs(self):
         issues = dict()
 
+        if self.getProperty("InputFiles").isDefault and self.getProperty("SampleWorkspace").value is None:
+            msg = "Must supply either 'InputFiles' or 'SampleWorkspace'."
+            issues["InputFiles"] = msg
+            issues["SampleWorkspace"] = msg
+
         issues["SpectraRange"] = self._validate_range("SpectraRange")
         issues["PeakRange"] = self._validate_range("PeakRange")
 
@@ -143,7 +154,8 @@ class TimeSlice(PythonAlgorithm):
         workflow_prog = Progress(self, start=0.0, end=0.96, nreports=len(self._raw_files) * 3)
         for index, filename in enumerate(self._raw_files):
             workflow_prog.report("Reading file: " + str(i))
-            raw_file = self._read_raw_file(filename)
+
+            raw_file = self._read_raw_file(filename) if self._do_load else filename
 
             # Only need to process the calib file once
             if index == 0 and self._calib_ws is not None:
@@ -157,7 +169,8 @@ class TimeSlice(PythonAlgorithm):
 
             workflow_prog.report("Deleting Workspace")
             out_ws_list.append(slice_file)
-            DeleteWorkspace(raw_file)
+            if self._do_load:
+                DeleteWorkspace(raw_file)
 
         all_workspaces = ",".join(out_ws_list)
         final_prog = Progress(self, start=0.96, end=1.0, nreports=2)
@@ -170,8 +183,9 @@ class TimeSlice(PythonAlgorithm):
         """
         Gets properties.
         """
+        self._do_load = not self.getProperty("InputFiles").isDefault
+        self._raw_files = self.getProperty("InputFiles").value if self._do_load else [self.getPropertyValue("SampleWorkspace")]
 
-        self._raw_files = self.getProperty("InputFiles").value
         self._spectra_range = self.getProperty("SpectraRange").value
         self._peak_range = self.getProperty("PeakRange").value
         self._output_ws_name_suffix = self.getPropertyValue("OutputNameSuffix")
@@ -254,9 +268,12 @@ class TimeSlice(PythonAlgorithm):
             Divide(LHSWorkspace=raw_file, RHSWorkspace=self._calib_ws, OutputWorkspace=raw_file)
 
         # Construct output workspace name
-        run = mtd[raw_file].getRun().getLogData("run_number").value
-        inst = mtd[raw_file].getInstrumentName()
-        slice_file = inst.lower() + run + self._output_ws_name_suffix
+        slice_file = raw_file + self._output_ws_name_suffix  # we just use workspace name if we haven't loaded a raw file
+        if self._do_load:
+            run = mtd[raw_file].getRun().getLogData("run_number").value
+            inst = mtd[raw_file].getInstrumentName()
+            slice_file = inst.lower() + run + self._output_ws_name_suffix
+
 
         if self._background_range is None:
             Integration(
