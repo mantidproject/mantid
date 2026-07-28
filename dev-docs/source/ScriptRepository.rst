@@ -62,7 +62,7 @@ It provides capabilities to:
 - upload/delete requested content from the repository. Mantid no longer calls these
   endpoints, though the backend still implements them.
 
-The backend requires a clone of the repository in order to push/pull content.
+The backend requires a clone of the repository in order to pull content.
 The cloned repository connected to the backend must be configured with an
 appropriate SSH key to allow it to publish to GitHub. For the production
 setup please see the `Ansible configuration <ansible-linode_>`_
