@@ -7,6 +7,7 @@
 import unittest
 import os
 import shutil
+import tempfile
 import numpy as np
 from unittest.mock import patch, MagicMock
 from pathlib import Path
@@ -716,15 +717,20 @@ class TestGSAS2Model(unittest.TestCase):
         self.model.default_cif_dict = {"FE": "f.cif", "AL": "a.cif", "CU": "c.cif"}
         self.assertEqual(self.model.get_cif_combo_options(), ["AL", "CU", "FE", "Custom"])
 
-    @patch(model_path + ".os.listdir")
-    def test_populate_default_cif_dict_only_includes_cif_files(self, mock_listdir):
-        mock_listdir.return_value = ["FE_GAMMA.cif", "AL.cif", "notes.txt", "README"]
-        self.model.default_cif_dict = {}
-        self.model.populate_default_cif_dict()
-        # Non-cif files are ignored and the .cif extension is stripped from the key
-        self.assertEqual(set(self.model.default_cif_dict.keys()), {"FE_GAMMA", "AL"})
-        for name, path in self.model.default_cif_dict.items():
-            self.assertTrue(path.endswith(name + ".cif"))
+    def test_populate_default_cif_dict_only_includes_cif_files(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            phase_info_dir = Path(tmp_dir) / "ENGINX" / "phase_info"
+            phase_info_dir.mkdir(parents=True)
+            for filename in ("FE_GAMMA.cif", "AL.cif", "notes.txt", "README"):
+                (phase_info_dir / filename).touch()
+            self.model.default_cif_dict = {}
+            with patch(model_path + ".Engineering") as mock_engineering:
+                mock_engineering.__file__ = str(Path(tmp_dir) / "__init__.py")
+                self.model.populate_default_cif_dict()
+            # Non-cif files are ignored and the .cif extension is stripped from the key
+            self.assertEqual(set(self.model.default_cif_dict.keys()), {"FE_GAMMA", "AL"})
+            for name, path in self.model.default_cif_dict.items():
+                self.assertTrue(path.endswith(name + ".cif"))
 
     def test_populate_default_cif_dict_finds_real_bundled_cif_files(self):
         # The model populates this from the bundled ENGINX/phase_info directory on construction

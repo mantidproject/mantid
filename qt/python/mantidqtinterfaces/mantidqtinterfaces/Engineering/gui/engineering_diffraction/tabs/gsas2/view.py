@@ -79,6 +79,12 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
         self.focused_data_file_finder.add_filter("Region", _region_filter_values.keys())
         self.focused_data_file_finder.set_filter_generator(_file_filter_generator)
 
+        # The finder wrapper and its filter row each add their own default padding on top of the
+        # Focused Data group box margins, so drop them and let the group box control the spacing.
+        self.focused_data_file_finder.layout().setContentsMargins(0, 0, 0, 0)
+        self.focused_data_file_finder.layout().setSpacing(4)
+        self.focused_data_file_finder.filter_row.layout().setContentsMargins(0, 0, 0, 0)
+
         self.mark_project_name_invalid_when_empty()
         self.project_name_line_edit.textChanged.connect(self.mark_project_name_invalid_when_empty)
         self.mark_checkboxes_invalid_when_empty()

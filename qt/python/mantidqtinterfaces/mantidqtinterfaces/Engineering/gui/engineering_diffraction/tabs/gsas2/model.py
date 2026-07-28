@@ -146,8 +146,6 @@ class GSAS2Model:
 
     _CUSTOM_PHASE = "Custom"
 
-    ReflectionType: TypeAlias = Tuple[List[int], float, int]
-
     def __init__(self) -> None:
         # Configuration and State
         self.config = GSAS2ModelConfig()
@@ -1146,10 +1144,9 @@ class GSAS2Model:
 
     def populate_default_cif_dict(self) -> None:
         # get the path to Engineering root, to anchor file search
-        phase_info_dir = os.path.join(os.path.dirname(Engineering.__file__), "ENGINX", "phase_info")
-        for filename in os.listdir(phase_info_dir):
-            if filename.endswith(".cif"):
-                self.default_cif_dict[filename[:-4]] = os.path.join(phase_info_dir, filename)
+        phase_info_dir = Path(Engineering.__file__).parent / "ENGINX" / "phase_info"
+        for cif_path in phase_info_dir.glob("*.cif"):
+            self.default_cif_dict[cif_path.stem] = str(cif_path)
 
     def get_cif_combo_options(self) -> List[str]:
         defaults = list(self.default_cif_dict.keys())
