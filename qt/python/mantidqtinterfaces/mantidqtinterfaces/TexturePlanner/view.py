@@ -567,6 +567,20 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         for i in range(6):
             self.gonio_angles[i].setValue(angles[i])
 
+    def set_goniometer_state(self, vecs: List[str], senses: List[str], angles: List[float]) -> None:
+        """Set every goniometer field without emitting its change signal. Used when displaying a
+        stored orientation, which must not be treated as a user edit of that orientation."""
+        widgets = self.gonio_vecs + self.gonio_senses + self.gonio_angles
+        for widget in widgets:
+            widget.blockSignals(True)
+        try:
+            self.set_vecs(vecs)
+            self.set_senses(senses)
+            self.set_angles(angles)
+        finally:
+            for widget in widgets:
+                widget.blockSignals(False)
+
     def set_show_transmission(self, check: bool) -> None:
         self.chkTransmission.setChecked(check)
 

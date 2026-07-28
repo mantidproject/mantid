@@ -589,9 +589,9 @@ class TestTexturePlannerPresenter_OnIndexChanged(unittest.TestCase):
 
         model.orientations.set_orientation_index.assert_called_with(2)
         model.orientations.get_goniometer_values.assert_called_with(2)
-        view.set_vecs.assert_called_with("v")
-        view.set_senses.assert_called_with("s")
-        view.set_angles.assert_called_with("a")
+        # the fields are set without firing their change signals: displaying an orientation
+        # must not rewrite it from widget precision
+        view.set_goniometer_state.assert_called_with("v", "s", "a")
 
 
 @patch(file_path + ".TexturePlannerSettingsPresenter")

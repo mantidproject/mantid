@@ -25,24 +25,40 @@ import unittest
 from unittest import mock
 
 import numpy as np
+from scipy.spatial.transform import Rotation
+
+from matplotlib.collections import PathCollection
+from matplotlib.colors import to_rgba
+from mpl_toolkits.mplot3d.art3d import Line3DCollection, Path3DCollection, Poly3DCollection, Text3D
 
 from qtpy.QtCore import Qt, QPoint
 from qtpy.QtTest import QTest
 from qtpy.QtWidgets import QApplication, QStyle
 
 from mantid.api import AnalysisDataService as ADS
-from mantid.simpleapi import SetSampleMaterial
+from mantid.simpleapi import (
+    CreateGroupingWorkspace,
+    CreateSimulationWorkspace,
+    LoadNexus,
+    SaveDetectorsGrouping,
+    SetSampleMaterial,
+)
 from Engineering.common.instrument_config import SUPPORTED_INSTRUMENTS
 from Engineering.common.xml_shapes import get_cube_xml
+from Engineering.texture.texture_helper import convert_to_sscanss_frame
 
 from mantidqtinterfaces.TexturePlanner.model import TexturePlannerModel
+from mantidqtinterfaces.TexturePlanner.settings.settings_model import DEFAULT_SETTINGS
+from mantidqtinterfaces.TexturePlanner.settings.settings_presenter import TexturePlannerSettingsPresenter as RealSettingsPresenter
 from mantidqtinterfaces.TexturePlanner.view import (
     TexturePlannerView,
     CUSTOM_INSTRUMENT,
     EXPORT_SSCANSS,
+    EXPORT_EULER,
     EXPORT_MATRIX,
     EXPORT_REFERENCE_WS,
     EXPORT_TRANSMISSION_WEIGHTING,
+    GAUGE_VOL_CUSTOM_SHAPE,
 )
 from mantidqtinterfaces.TexturePlanner.presenter import TexturePlannerPresenter
 
@@ -148,6 +164,153 @@ class _FunctionalTestBase(unittest.TestCase):
         # "is the initial rotation still applied to this workspace's shape".
         verts = ws.sample().getShape().getMesh().reshape(-1, 3)
         return verts.max(axis=0) - verts.min(axis=0)
+
+    @staticmethod
+    def _aabb_centre(ws):
+        verts = ws.sample().getShape().getMesh().reshape(-1, 3)
+        return (verts.max(axis=0) + verts.min(axis=0)) / 2
+
+    # heavier workflow helpers ------------------------------------------
+    def _load_stl(self, content=None, name="sample.stl"):
+        path = self._write(name, content if content is not None else _TETRAHEDRON_STL)
+        self.view.get_stl_string = lambda: path
+        self.view.set_load_stl_enabled(True)
+        self._click(self.view.btnSTL)
+        QApplication.processEvents()
+
+    def _load_csg_cube(self, side):
+        path = self._write("shape.xml", get_cube_xml("test_cube", side))
+        self.view.get_xml_string = lambda: path
+        self.view.set_load_xml_enabled(True)
+        self._click(self.view.btnXML)
+        QApplication.processEvents()
+
+    def _set_material_via_dialog(self, **material_kwargs):
+        # emulate accepting the modal SetSampleMaterial dialog: opening it runs a real
+        # SetSampleMaterial against the preset raw mesh workspace, then notifies the algorithm
+        # observer - exactly the path the real dialog drives when the user accepts it.
+        self.view.grpSetMaterial.setChecked(True)
+        QApplication.processEvents()
+        with mock.patch(f"{PRESENTER}.InterfaceManager") as mock_mgr:
+            dialog = mock_mgr.return_value.createDialogFromName.return_value
+
+            def run_dialog():
+                SetSampleMaterial(InputWorkspace=self.model.workspaces.WS_MESH_RAW, **material_kwargs)
+                dialog.addAlgorithmObserver.call_args.args[0].finishHandle()
+
+            dialog.show.side_effect = run_dialog
+            self._click(self.view.btnSetMaterial)
+        QApplication.processEvents()
+
+    # which getter of the (mocked) settings dialog supplies which settings-dict entry
+    _SETTINGS_GETTER_KEYS = {
+        "get_show_directions": "directions",
+        "get_show_goniometers": "goniometers",
+        "get_show_incident_beam": "incident",
+        "get_show_ks": "ks",
+        "get_show_scattered_beam": "scattered",
+        "get_stl_scale": "stl_scale",
+        "get_stl_x_deg": "stl_x_degrees",
+        "get_stl_y_deg": "stl_y_degrees",
+        "get_stl_z_deg": "stl_z_degrees",
+        "get_stl_translation": "stl_translation_vector",
+        "get_orient_axes": "orientation_axes",
+        "get_orient_senses": "orientation_senses",
+        "get_mc_events": "mc_events_per_point",
+        "get_mc_max_scatter": "mc_max_scatter_attempts",
+        "get_mc_simulate_in": "mc_simulate_in",
+        "get_mc_resimulate": "mc_resimulate",
+        "get_att_point": "att_point",
+        "get_att_unit": "att_unit",
+        "get_att_use_data_range": "att_use_data_range",
+    }
+
+    def _apply_settings_via_real_presenter(self, **overrides):
+        """Drive the REAL settings presenter with a mock settings dialog returning the default
+        settings plus ``overrides``, then Apply. The QSettings-backed settings model is stubbed so
+        the user's real stored settings are never written."""
+        settings = dict(DEFAULT_SETTINGS)
+        settings.update(overrides)
+        settings_view = mock.MagicMock()
+        for getter, key in self._SETTINGS_GETTER_KEYS.items():
+            getattr(settings_view, getter).return_value = settings[key]
+        settings_presenter = RealSettingsPresenter(self.model, settings_view)
+        settings_presenter.settings_model = mock.MagicMock()
+        settings_presenter.set_on_settings_applied(self.presenter.on_settings_applied)
+        settings_presenter.save_settings()
+        QApplication.processEvents()
+
+    def _apply_instrument_group(self, group, instrument=None):
+        self._show_experiment_tab()
+        if instrument is not None:
+            self.view.cmbInstr.setCurrentText(instrument)
+            QApplication.processEvents()
+        self.view.cmbGroup.setCurrentText(group)
+        QApplication.processEvents()
+        self._click(self.view.btnUpdateInstr)
+        QApplication.processEvents()
+
+    def _set_gauge_volume(self, method="4mmCube", custom_file=None):
+        self._show_experiment_tab()
+        self.view.grpGaugeVol.setChecked(True)
+        if custom_file is not None:
+            self.view.get_custom_shape = lambda: custom_file
+        self.view.combo_shapeMethod.setCurrentText(method)
+        QApplication.processEvents()
+        self._click(self.view.setGV)
+        QApplication.processEvents()
+
+    # matplotlib artist introspection -----------------------------------
+    def _pf_point_scatters(self):
+        # scatter PathCollections on the pole-figure axis (goniometer poles have 1 point,
+        # orientation coverage has one point per detector group); quivers are PolyCollections
+        # and are naturally excluded
+        return [c for c in self.view.get_pf_ax().collections if isinstance(c, PathCollection)]
+
+    def _pf_scatters_matching(self, pf_points):
+        # the plotter draws (pf_xy[:, 1], pf_xy[:, 0]), i.e. columns swapped
+        swapped = np.asarray(pf_points)[:, ::-1]
+        return [
+            c
+            for c in self._pf_point_scatters()
+            if len(c.get_offsets()) == len(swapped) and np.allclose(np.asarray(c.get_offsets()), swapped, atol=1e-12)
+        ]
+
+    def _drawn_sample_vertices(self):
+        # the sample is drawn grey; a gauge volume (if any) adds a second, cyan Poly3DCollection
+        polys = [
+            c
+            for c in self.view.get_lab_ax().collections
+            if isinstance(c, Poly3DCollection) and np.allclose(c.get_facecolor()[0][:3], to_rgba("grey")[:3])
+        ]
+        self.assertEqual(len(polys), 1)
+        return np.asarray(polys[0]._vec)[:3].T
+
+    def _lab_q_tip_positions(self):
+        # scatter tips of the diffraction-vector (Q) quiver bundle; the only Path3DCollection with
+        # the default vis settings (ks on, scattered off)
+        tips = [c for c in self.view.get_lab_ax().collections if isinstance(c, Path3DCollection)]
+        self.assertEqual(len(tips), 1)
+        return np.asarray(tips[0]._offsets3d).T
+
+    def _expected_q_tip_positions(self):
+        # replicate the plotter's maths: tips sit at scattering_centre + Q * 1.25 * extent
+        wsm = self.model.workspaces
+        mesh = wsm.updated_mesh_ws.sample().getShape().getMesh()
+        extent = (np.linalg.norm(mesh, axis=(1, 2)).max() / 2) * 1.2
+        return wsm.scattering_centre + self.model.geometry.detQs_lab * (1.25 * extent)
+
+    def _lab_axis_quiver_direction(self, label):
+        quivers = [c for c in self.view.get_lab_ax().collections if isinstance(c, Line3DCollection) and c.get_label() == label]
+        self.assertEqual(len(quivers), 1)
+        # the quiver is rooted at the origin, so its tip - the segment point farthest from the
+        # origin (segment ordering within the artist is an implementation detail) - gives the axis
+        points = np.asarray(quivers[0]._segments3d).reshape(-1, 3)
+        tip = points[np.argmax(np.linalg.norm(points, axis=1))]
+        return tip / np.linalg.norm(tip)
+
+    def _lab_direction_labels(self):
+        return {t.get_text(): np.asarray(t.get_position_3d(), dtype=float) for t in self.view.get_lab_ax().texts if isinstance(t, Text3D)}
 
 
 class TestInitialState(_FunctionalTestBase):
@@ -353,6 +516,8 @@ class TestLoadShapeAndFiles(_FunctionalTestBase):
         # default planner shape is a CSG cube; loading an STL swaps it for a mesh object
         shape = self.model.workspaces.ws.sample().getShape()
         self.assertEqual(type(shape).__name__, "MeshObject")
+        # the fixture tetrahedron spans 1 unit per axis and loads at the default "cm" scale
+        np.testing.assert_allclose(self._aabb_extent(self.model.workspaces.ws), (0.01, 0.01, 0.01), atol=1e-9)
 
     def test_loading_a_csg_xml_sets_a_valid_shape(self):
         xml_path = self._write("shape.xml", get_cube_xml("test_cube", 0.02))
@@ -364,6 +529,7 @@ class TestLoadShapeAndFiles(_FunctionalTestBase):
         # the loaded cube has side 0.02 m; volume() is signed, so compare on magnitude
         volume = self.model.workspaces.ws.sample().getShape().volume()
         self.assertAlmostEqual(abs(volume), 0.02**3, places=9)
+        np.testing.assert_allclose(self._aabb_extent(self.model.workspaces.ws), (0.02, 0.02, 0.02), atol=1e-9)
 
     def test_loading_an_orientation_file_adds_orientations_and_sets_gonios(self):
         orient_path = self._write("orient.txt", "10,20,30\n40,50,60\n70,80,90\n")
@@ -402,6 +568,17 @@ class TestInitialShapeAndPosition(_FunctionalTestBase):
         verts = self.model.workspaces.ws.sample().getShape().getMesh().reshape(-1, 3)
         centre = (verts.max(axis=0) + verts.min(axis=0)) / 2
         np.testing.assert_allclose(centre, [0.0, 0.02, 0.0], atol=1e-6)
+
+    def test_combined_rotation_and_translation_give_expected_bounds(self):
+        # 45 deg about X stretches the default cube's AABB to sqrt(2) in y and z (rotation is
+        # resolved first), and the offset then shifts that box wholesale in the lab frame
+        self.view.spnInitX.setValue(45.0)
+        self.view.spnInitPY.setValue(0.02)
+        QApplication.processEvents()
+
+        ws = self.model.workspaces.ws
+        np.testing.assert_allclose(self._aabb_extent(ws), (0.01, 0.01 * np.sqrt(2), 0.01 * np.sqrt(2)), atol=1e-6)
+        np.testing.assert_allclose(self._aabb_centre(ws), (0.0, 0.02, 0.0), atol=1e-6)
 
 
 class TestTransmission(_FunctionalTestBase):
@@ -617,6 +794,621 @@ class TestWindowClose(_FunctionalTestBase):
         self.assertNotEqual(self.model.workspaces.wsname, other_model.workspaces.wsname)
         self.assertTrue(ADS.doesExist(self.model.workspaces.wsname))
         self.assertTrue(ADS.doesExist(other_model.workspaces.wsname))
+
+
+class TestStlLoadSettings(_FunctionalTestBase):
+    """Changing the STL-loading settings (scale / initial rotation / translation) through the real
+    settings presenter must change how a subsequently loaded mesh is realised."""
+
+    def test_mm_scale_applied_through_settings_shrinks_loaded_mesh(self):
+        self._apply_settings_via_real_presenter(stl_scale="mm")
+        self.assertEqual(self.model.workspaces.stl_kwargs["Scale"], "mm")
+
+        self._load_stl()
+
+        np.testing.assert_allclose(self._aabb_extent(self.model.workspaces.ws), (0.001, 0.001, 0.001), atol=1e-9)
+
+    def test_rotation_and_translation_settings_transform_loaded_mesh(self):
+        # LoadSampleShape rotates X,Y,Z first and then translates, with the TranslationVector
+        # expressed in the same units as the mesh (the Scale setting). Rotating the unit
+        # tetrahedron 90 deg about Z swings its +x vertex onto +y and its +y vertex onto -x
+        # (AABB x-range becomes [-1, 0] cm), and the 1 cm x-translation shifts that back to [0, 1].
+        self._apply_settings_via_real_presenter(stl_z_degrees=90.0, stl_translation_vector="1,0,0")
+
+        self._load_stl()
+
+        verts = self.model.workspaces.ws.sample().getShape().getMesh().reshape(-1, 3)
+        np.testing.assert_allclose(verts.min(axis=0), (0.0, 0.0, 0.0), atol=1e-9)
+        np.testing.assert_allclose(verts.max(axis=0), (0.01, 0.01, 0.01), atol=1e-9)
+
+
+class TestMaterialOnShapes(_FunctionalTestBase):
+    """Set and update the sample material on both shape types."""
+
+    def _assert_material_shown(self, name):
+        self.assertEqual(self.model.workspaces.get_material_name(), name)
+        self.assertEqual(self.view.lblCurrentMaterialValue.text(), name)
+
+    def test_set_then_update_material_on_stl_mesh(self):
+        self._load_stl()
+
+        self._set_material_via_dialog(ChemicalFormula="Cu")
+        self._assert_material_shown("Cu")
+        # the mesh shape must survive the material round-trip
+        self.assertEqual(type(self.model.workspaces.ws.sample().getShape()).__name__, "MeshObject")
+
+        self._set_material_via_dialog(ChemicalFormula="Al")
+        self._assert_material_shown("Al")
+
+    def test_set_then_update_material_on_csg_shape(self):
+        self._load_csg_cube(0.02)
+
+        self._set_material_via_dialog(ChemicalFormula="Cu")
+        self._assert_material_shown("Cu")
+        self.assertAlmostEqual(abs(self.model.workspaces.ws.sample().getShape().volume()), 0.02**3, places=9)
+
+        self._set_material_via_dialog(ChemicalFormula="Al")
+        self._assert_material_shown("Al")
+
+    def test_material_update_recomputes_active_transmission_estimates(self):
+        # 2 detector groups keep the (real) MonteCarloAbsorption runs quick
+        self._apply_instrument_group("banks")
+        self._click_checkbox(self.view.chkTransmission)
+        t_fe = np.array(self.model.orientations[0].transmission)
+        self.assertEqual(len(t_fe), 2)
+
+        self._set_material_via_dialog(ChemicalFormula="V", SampleNumberDensity=0.0722)
+
+        # the estimate is redone for the new material: still cached, valid, and (V attenuating
+        # very differently from Fe) with clearly different factors
+        t_v = np.array(self.model.orientations[0].transmission)
+        self.assertEqual(len(t_v), 2)
+        self.assertTrue(np.all((t_v > 0) & (t_v <= 1)))
+        self.assertFalse(np.allclose(t_fe, t_v, rtol=1e-3))
+
+
+class TestInitialShapeOnLoadedShapes(_FunctionalTestBase):
+    """Initial orientation / translation applied to both shape types."""
+
+    def test_initial_orientation_rotates_csg_bounds(self):
+        self.view.spnInitX.setValue(45.0)
+        QApplication.processEvents()
+
+        expected = (0.01, 0.01 * np.sqrt(2), 0.01 * np.sqrt(2))
+        np.testing.assert_allclose(self._aabb_extent(self.model.workspaces.ws), expected, atol=1e-6)
+        np.testing.assert_allclose(self._aabb_extent(self.model.workspaces.updated_mesh_ws), expected, atol=1e-6)
+
+    def test_initial_orientation_rotates_stl_bounds(self):
+        self._load_stl()
+
+        self.view.spnInitZ.setValue(45.0)
+        QApplication.processEvents()
+
+        # unit tetrahedron rotated 45 deg about Z (about the origin): x extent grows to sqrt(2) cm,
+        # y extent shrinks to sqrt(2)/2 cm, z extent is unchanged
+        expected = (0.01 * np.sqrt(2), 0.01 * np.sqrt(2) / 2, 0.01)
+        np.testing.assert_allclose(self._aabb_extent(self.model.workspaces.ws), expected, atol=1e-6)
+
+    def test_translation_moves_bounds_and_scattering_elements(self):
+        detqs_at_origin = self.model.geometry.detQs_lab.copy()
+
+        self.view.spnInitPX.setValue(0.002)
+        self.view.spnInitPY.setValue(0.003)
+        QApplication.processEvents()
+
+        # shape: same cube, shifted wholesale
+        ws = self.model.workspaces.ws
+        np.testing.assert_allclose(self._aabb_extent(ws), (0.01, 0.01, 0.01), atol=1e-9)
+        np.testing.assert_allclose(self._aabb_centre(ws), (0.002, 0.003, 0.0), atol=1e-6)
+        # the scattering centre follows the (whole-shape) centre of mass
+        np.testing.assert_allclose(self.model.workspaces.scattering_centre, (0.002, 0.003, 0.0), atol=1e-4)
+        # and the Q vectors are recomputed against it (unit length, measurably different from the
+        # origin-centred set for a mm-scale shift against m-scale detector distances)
+        detqs = self.model.geometry.detQs_lab
+        np.testing.assert_allclose(np.linalg.norm(detqs, axis=1), 1.0, atol=1e-12)
+        self.assertFalse(np.allclose(detqs_at_origin, detqs))
+        # the lab-view Q-vector bundle is rooted on the new scattering centre
+        np.testing.assert_allclose(self._lab_q_tip_positions(), self._expected_q_tip_positions(), atol=1e-9)
+
+    def test_translation_after_gauge_volume_scatters_from_illuminated_volume(self):
+        self._set_gauge_volume("4mmCube")
+        gauge_str = self.model.workspaces.gauge_volume_str
+
+        # small enough that the 4 mm gauge cube still intersects the 1 cm sample
+        self.view.spnInitPX.setValue(0.004)
+        QApplication.processEvents()
+
+        # shape moved...
+        ws = self.model.workspaces.ws
+        np.testing.assert_allclose(self._aabb_extent(ws), (0.01, 0.01, 0.01), atol=1e-9)
+        np.testing.assert_allclose(self._aabb_centre(ws), (0.004, 0.0, 0.0), atol=1e-6)
+        # ...but the gauge volume stays put at the origin (the log normalises whitespace)
+        self.assertEqual(ws.run().getProperty("GaugeVolume").value.strip(), gauge_str.strip())
+        self.assertIn("x='0.0' y='0.0' z='0.0'", gauge_str)
+        # the scattering centre is the c.o.m. of the illuminated (gauge AND sample) region: well
+        # short of the sample centre (0.004), just above the gauge centre (0)
+        centre = self.model.workspaces.scattering_centre
+        self.assertGreaterEqual(centre[0], 0.0)
+        self.assertLess(centre[0], 0.002)
+        np.testing.assert_allclose(centre[1:], (0.0, 0.0), atol=5e-4)
+        # and the displayed scattering elements are rooted there
+        np.testing.assert_allclose(self._lab_q_tip_positions(), self._expected_q_tip_positions(), atol=1e-9)
+
+
+class TestSampleDirectionsDisplay(_FunctionalTestBase):
+    """Sample-direction arrows and labels in the lab view and pole figure."""
+
+    def test_direction_labels_scale_with_shape_and_appear_in_both_views(self):
+        self._load_csg_cube(0.02)
+
+        self.view.grpDirectionWidgets.setChecked(True)
+        QApplication.processEvents()
+        self.view.set_rd_name("AD")
+        self.view.set_nd_name("BD")
+        self.view.set_td_name("CD")
+        self._click(self.view.updateDirs)
+        QApplication.processEvents()
+
+        # lab view: one label per direction, placed at the arrow tip 1.2 x the half-extent of the
+        # shape from its centre (the 0.02 cube => 0.012 along each axis)
+        labels = self._lab_direction_labels()
+        self.assertEqual(set(labels), {"AD", "BD", "CD"})
+        np.testing.assert_allclose(labels["AD"], (0.012, 0.0, 0.0), atol=1e-6)
+        np.testing.assert_allclose(labels["BD"], (0.0, 0.012, 0.0), atol=1e-6)
+        np.testing.assert_allclose(labels["CD"], (0.0, 0.0, 0.012), atol=1e-6)
+
+        # pole figure: rim circle, the in-plane direction labels, and the coverage points
+        pf_ax = self.view.get_pf_ax()
+        self.assertEqual([type(p).__name__ for p in pf_ax.patches], ["Circle"])
+        self.assertEqual([t.get_text() for t in pf_ax.texts], ["AD", "CD"])
+        pf_points = self.model.orientations[0].pf_points
+        self.assertEqual(len(pf_points), 20)  # ENGINX Texture20 default
+        self.assertEqual(len(self._pf_scatters_matching(pf_points)), 1)
+
+
+class TestInstrumentGeometryCounts(_FunctionalTestBase):
+    """Detector / Q / pole-figure point counts per instrument grouping."""
+
+    def _assert_group_count(self, n):
+        self.assertEqual(self.model.geometry.det_k.shape, (n, 3))
+        self.assertEqual(self.model.geometry.detQs_lab.shape, (n, 3))
+        self.assertEqual(self.model.orientations[0].pf_points.shape, (n, 2))
+        self.assertEqual(len(self._pf_scatters_matching(self.model.orientations[0].pf_points)), 1)
+
+    def test_enginx_group_counts(self):
+        self._assert_group_count(20)  # Texture20 is the startup default
+
+        self._apply_instrument_group("Texture30")
+        self._assert_group_count(30)
+
+        self._apply_instrument_group("banks")
+        self._assert_group_count(2)
+
+    def test_imat_group_counts(self):
+        self._apply_instrument_group("banks", instrument="IMAT")
+        self.assertEqual(self.model.instrument.get_instrument(), "IMAT")
+        self._assert_group_count(2)
+
+        self._apply_instrument_group("Module1")
+        self._assert_group_count(14)
+
+    def test_custom_instrument_with_generated_grouping_file(self):
+        # build a two-group grouping file for POLDI at runtime (group IDs must start at 1: the
+        # planner treats group 0 as the null group)
+        sim = CreateSimulationWorkspace(Instrument="POLDI", BinParams="0,1,2", OutputWorkspace="__texplan_test_poldi_sim")
+        grouping_ws = CreateGroupingWorkspace(InputWorkspace=sim, FixedGroupCount=2, OutputWorkspace="__texplan_test_poldi_grp")[0]
+        n_hist = grouping_ws.getNumberHistograms()
+        for i in range(n_hist):
+            grouping_ws.dataY(i)[0] = 1.0 if i < n_hist // 2 else 2.0
+        grouping_path = os.path.join(self._tmpdir, "poldi_grouping.xml")
+        SaveDetectorsGrouping(InputWorkspace=grouping_ws, OutputFile=grouping_path)
+
+        # drive the real custom-instrument UI path
+        self._show_experiment_tab()
+        self.view.cmbInstr.setCurrentText(CUSTOM_INSTRUMENT)
+        QApplication.processEvents()
+        QTest.keyClicks(self.view.edt_custom_instr, "POLDI")
+        self.view.edt_custom_instr.editingFinished.emit()
+        QApplication.processEvents()
+        self.assertNotIn("red", self.view.edt_custom_instr.styleSheet())
+        # a valid name alone is not enough: the grouping file must be supplied and applicable
+        self.assertFalse(self.view.btnUpdateInstr.isEnabled())
+
+        self.view.get_grouping_file = lambda: grouping_path
+        self.view.finder_grouping.fileFindingFinished.emit()
+        QApplication.processEvents()
+        self.assertTrue(self.view.btnUpdateInstr.isEnabled())
+
+        self._click(self.view.btnUpdateInstr)
+        QApplication.processEvents()
+
+        self.assertEqual(self.model.instrument.get_instrument(), "POLDI")
+        self._assert_group_count(2)
+
+
+class TestGaugeVolumeScattering(_FunctionalTestBase):
+    """Gauge volumes move the scattering centre; custom gauge shapes load from file."""
+
+    def test_setting_gauge_volume_writes_log_and_moves_scattering_centre(self):
+        # shift the sample so the whole-shape c.o.m. is clearly away from the gauge centre
+        self.view.spnInitPX.setValue(0.004)
+        QApplication.processEvents()
+        np.testing.assert_allclose(self.model.workspaces.scattering_centre, (0.004, 0.0, 0.0), atol=1e-4)
+        detqs_without_gauge = self.model.geometry.detQs_lab.copy()
+
+        self._set_gauge_volume("4mmCube")
+
+        self.assertTrue(self.model.workspaces.ws.run().hasProperty("GaugeVolume"))
+        # the centre snaps from the sample centre towards the (origin-centred) gauge region
+        centre = self.model.workspaces.scattering_centre
+        self.assertLess(centre[0], 0.002)
+        self.assertGreaterEqual(centre[0], 0.0)
+        # and the detector Q vectors follow the new centre
+        self.assertFalse(np.allclose(detqs_without_gauge, self.model.geometry.detQs_lab))
+
+    def test_custom_gauge_volume_loaded_from_xml_file(self):
+        gauge_xml = get_cube_xml("custom_gv", 0.002)
+        gauge_path = self._write("gauge.xml", gauge_xml)
+
+        self._set_gauge_volume(GAUGE_VOL_CUSTOM_SHAPE, custom_file=gauge_path)
+
+        self.assertEqual(self.model.workspaces.gauge_volume_str, gauge_xml)
+        # the log normalises whitespace, so compare stripped
+        self.assertEqual(self.model.workspaces.ws.run().getProperty("GaugeVolume").value.strip(), gauge_xml.strip())
+
+
+class TestOrientationFileContents(_FunctionalTestBase):
+    """Orientation-file loading: euler, matrix, and custom euler conventions."""
+
+    def _load_orientation_file(self, content):
+        path = self._write("orient.txt", content)
+        self.view.get_orientation_file = lambda: path
+        self.view.set_load_orientation_enabled(True)
+        self._click(self.view.btnOrient)
+        QApplication.processEvents()
+
+    def test_euler_file_populates_table_and_rotations(self):
+        self._load_orientation_file("30,45,60\n")
+
+        # one row appended after the initial orientation; YXY -> three goniometer axes
+        self.assertEqual(self.model.orientations.get_num_orientations(), 2)
+        self.assertEqual(self.view.get_num_gonios(), 3)
+        # default convention: YXY axes, all senses -1
+        expected_R = (
+            Rotation.from_euler("y", -30, degrees=True)
+            * Rotation.from_euler("x", -45, degrees=True)
+            * Rotation.from_euler("y", -60, degrees=True)
+        )
+        self.assertLess((self.model.orientations[1].R * expected_R.inv()).magnitude(), 1e-10)
+        # table strings carry the file angles on the convention's axes, exactly as loaded
+        self.assertEqual(self.view.tableWidget.item(1, 0).text(), "30.0,0,1,0,-1")
+        self.assertEqual(self.view.tableWidget.item(1, 1).text(), "45.0,1,0,0,-1")
+        self.assertEqual(self.view.tableWidget.item(1, 2).text(), "60.0,0,1,0,-1")
+        # the shape is untouched and the sample directions are still displayed in both views
+        np.testing.assert_allclose(self._aabb_extent(self.model.workspaces.ws), (0.01, 0.01, 0.01), atol=1e-9)
+        self.assertEqual(set(self._lab_direction_labels()), {"RD", "ND", "TD"})
+        self.assertEqual([t.get_text() for t in self.view.get_pf_ax().texts], ["RD", "TD"])
+
+    def test_matrix_file_preserves_exact_rotation(self):
+        exact_Rs = [Rotation.from_euler("XYZ", angles, degrees=True) for angles in ((10, 20, 30), (25, 15, 5))]
+        rows = "".join(",".join(str(x) for x in R.as_matrix().reshape(-1)) + "\n" for R in exact_Rs)
+        self._load_orientation_file(rows)
+
+        self.assertEqual(self.model.orientations.get_num_orientations(), 3)
+        self.assertEqual(self.view.get_num_gonios(), 3)
+        # every matrix row must keep the exact R (the YXY euler decomposition is display-only),
+        # including the last row, which becomes the displayed orientation on load
+        np.testing.assert_allclose(self.model.orientations[1].R.as_matrix(), exact_Rs[0].as_matrix(), atol=1e-10)
+        np.testing.assert_allclose(self.model.orientations[2].R.as_matrix(), exact_Rs[1].as_matrix(), atol=1e-10)
+
+    def test_euler_file_with_custom_axes_and_senses_from_settings(self):
+        self._apply_settings_via_real_presenter(orientation_axes="XYZ", orientation_senses="1,1,1")
+        self.assertEqual(self.model.orientations.orientation_kwargs, {"Axes": "XYZ", "Senses": "1,1,1"})
+
+        self._load_orientation_file("90,0,0\n")
+
+        self.assertEqual(self.model.orientations.get_num_orientations(), 2)
+        expected_R = Rotation.from_euler("x", 90, degrees=True)
+        self.assertLess((self.model.orientations[1].R * expected_R.inv()).magnitude(), 1e-10)
+
+
+class TestGoniometerDisplay(_FunctionalTestBase):
+    """Goniometer rings, axis amendments, and pole-figure axis rendering."""
+
+    def _pf_lines_of_color(self, color):
+        return [ln for ln in self.view.get_pf_ax().lines if ln.get_color() == color]
+
+    def test_ring_count_tracks_number_of_goniometers(self):
+        # each goniometer ring is two Line3D artists (swept arc + remainder), and rings are the
+        # only Line3D artists on the lab axis
+        self.assertEqual(len(self.view.get_lab_ax().lines), 4)
+
+        self.view.spnNumAxes.setValue(4)
+        QApplication.processEvents()
+        self.assertEqual(len(self.view.get_lab_ax().lines), 8)
+
+        self.view.spnNumAxes.setValue(2)
+        QApplication.processEvents()
+        self.assertEqual(len(self.view.get_lab_ax().lines), 4)
+
+    def test_amending_axis_updates_rotation_table_and_both_views(self):
+        self.view.edtVec0.setText("0,0,1")
+        self.view.spnAngle0.setValue(90.0)
+        QApplication.processEvents()
+
+        # model: 90 deg clockwise (sense -1) about z
+        expected_R = Rotation.from_euler("z", -90, degrees=True)
+        self.assertLess((self.model.orientations[0].R * expected_R.inv()).magnitude(), 1e-10)
+        # table row shows the amended axis
+        self.assertEqual(self.view.tableWidget.item(0, 0).text(), "90.0,0.0,0.0,1.0,-1")
+        # lab view: the axis-0 quiver now points along +z
+        np.testing.assert_allclose(self._lab_axis_quiver_direction("Axis 0"), (0.0, 0.0, 1.0), atol=1e-8)
+        # pole figure: the (equatorial) axis pole is the line through the centre at the new azimuth
+        (line,) = self._pf_lines_of_color("hotpink")
+        np.testing.assert_allclose(line.get_xdata(), (1.0, -1.0), atol=1e-10)
+        np.testing.assert_allclose(line.get_ydata(), (0.0, 0.0), atol=1e-10)
+
+    def test_equatorial_axis_is_line_and_polar_axis_is_point(self):
+        # the default axis 0 (1,0,0) lies on the pole-figure equator -> drawn as a diameter line
+        (line,) = self._pf_lines_of_color("hotpink")
+        np.testing.assert_allclose(line.get_xdata(), (0.0, 0.0), atol=1e-10)
+        np.testing.assert_allclose(line.get_ydata(), (1.0, -1.0), atol=1e-10)
+
+        # an axis along the pole-figure pole (0,1,0) collapses to a point at the centre
+        self.view.edtVec0.setText("0,1,0")
+        self.view.edtVec0.editingFinished.emit()
+        QApplication.processEvents()
+
+        self.assertEqual(self._pf_lines_of_color("hotpink"), [])
+        hotpink = to_rgba("hotpink")
+        centre_points = [
+            c
+            for c in self._pf_point_scatters()
+            if len(c.get_offsets()) == 1
+            and np.allclose(np.asarray(c.get_offsets())[0], (0.0, 0.0), atol=1e-10)
+            and np.allclose(c.get_edgecolor()[0], hotpink)
+        ]
+        self.assertEqual(len(centre_points), 1)
+        # axis 0 is the selected goniometer, so its pole is drawn filled
+        np.testing.assert_allclose(centre_points[0].get_facecolor()[0], hotpink)
+
+
+class TestOrientationCycling(_FunctionalTestBase):
+    """Cycling / clamping the current orientation and its pole-figure highlighting."""
+
+    def _add_rotated_orientation(self, angle):
+        self._click(self.view.addOrientation)
+        self.view.spnAngle0.setValue(angle)
+        QApplication.processEvents()
+
+    def _filled_state(self, pf_points):
+        (scatter,) = self._pf_scatters_matching(pf_points)
+        return len(scatter.get_facecolor()) > 0
+
+    def test_cycling_index_applies_orientation_rotation_to_display(self):
+        self._add_rotated_orientation(45.0)  # orientation 1: 45 deg CW about x
+        neutral_verts = self.model.workspaces.updated_mesh_ws.sample().getShape().getMesh().reshape(-1, 3)
+
+        for spn_value, orientation_index in ((1, 0), (2, 1)):
+            self.view.spnIndex.setValue(spn_value)
+            QApplication.processEvents()
+
+            expected_R = self.model.orientations[orientation_index].R
+            # the run goniometer of the data ws carries the displayed orientation's R
+            np.testing.assert_allclose(self.model.workspaces.ws.run().getGoniometer().getR(), expected_R.as_matrix(), atol=1e-10)
+            # and the drawn sample mesh is the neutral mesh rotated by that R
+            expected_verts = expected_R.apply(neutral_verts)
+            drawn = self._drawn_sample_vertices()
+            np.testing.assert_allclose(drawn.min(axis=0), expected_verts.min(axis=0), atol=1e-9)
+            np.testing.assert_allclose(drawn.max(axis=0), expected_verts.max(axis=0), atol=1e-9)
+
+    def test_index_spinbox_clamps_to_orientation_count(self):
+        self._add_rotated_orientation(45.0)
+        self.assertEqual(self.view.spnIndex.maximum(), 2)
+
+        self.view.spnIndex.setValue(0)
+        self.assertEqual(self.view.spnIndex.value(), 1)
+
+        self.view.spnIndex.setValue(99)
+        self.assertEqual(self.view.spnIndex.value(), 2)
+
+    def test_changing_index_swaps_which_scatter_is_filled(self):
+        self._add_rotated_orientation(45.0)
+        pf0 = self.model.orientations[0].pf_points
+        pf1 = self.model.orientations[1].pf_points
+        self.assertFalse(np.allclose(pf0, pf1))
+
+        # orientation 1 is current: drawn filled, orientation 0 as edges only
+        self.assertTrue(self._filled_state(pf1))
+        self.assertFalse(self._filled_state(pf0))
+
+        self.view.spnIndex.setValue(1)
+        QApplication.processEvents()
+
+        self.assertTrue(self._filled_state(pf0))
+        self.assertFalse(self._filled_state(pf1))
+
+    def test_include_toggles_update_pole_figure(self):
+        self._add_rotated_orientation(45.0)
+        pf0 = self.model.orientations[0].pf_points
+        pf1 = self.model.orientations[1].pf_points
+
+        # exclude the non-current row 0: its points disappear entirely
+        self._click_checkbox(self._checkbox(0, 6))
+        QApplication.processEvents()
+        self.assertEqual(self._pf_scatters_matching(pf0), [])
+        self.assertTrue(self._filled_state(pf1))
+
+        # exclude the current row 1 as well: it is kept visible but greyed out
+        self._click_checkbox(self._checkbox(1, 6))
+        QApplication.processEvents()
+        (scatter,) = self._pf_scatters_matching(pf1)
+        self.assertEqual(len(scatter.get_facecolor()), 0)
+        np.testing.assert_allclose(scatter.get_edgecolor()[0][:3], to_rgba("grey")[:3])
+        self.assertEqual(scatter.get_alpha(), 0.5)
+
+
+class TestTransmissionValues(_FunctionalTestBase):
+    """Transmission estimates are physical and drive the pole-figure colour scale."""
+
+    def setUp(self):
+        super().setUp()
+        # 2 detector groups keep the (real) MonteCarloAbsorption runs quick
+        self._apply_instrument_group("banks")
+
+    def _transmission_scatter(self):
+        scatters = [c for c in self._pf_point_scatters() if c.get_array() is not None]
+        self.assertEqual(len(scatters), 1)
+        return scatters[0]
+
+    def test_transmission_estimates_are_sensible(self):
+        self._click_checkbox(self.view.chkTransmission)
+
+        transmission = np.array(self.model.orientations[0].transmission)
+        self.assertEqual(len(transmission), len(self.model.geometry.spec_inds))
+        self.assertTrue(np.all((transmission > 0) & (transmission <= 1)))
+        # the default cube is centred on the beam, so the two (mirrored) ENGINX banks should see
+        # roughly the same attenuation (loose bound: MonteCarlo with 50 events per point)
+        self.assertLess(abs(transmission[0] - transmission[1]), 0.15 * transmission.mean())
+
+    def test_colourbar_limit_setting_switches_scale_to_data_range(self):
+        self._click_checkbox(self.view.chkTransmission)
+
+        scatter = self._transmission_scatter()
+        self.assertEqual(scatter.get_cmap().name, "jet")
+        self.assertEqual(scatter.get_clim(), (0.0, 1.0))
+
+        self._apply_settings_via_real_presenter(att_use_data_range=True)
+
+        transmission = np.array(self.model.orientations[0].transmission)
+        scatter = self._transmission_scatter()
+        self.assertNotEqual(scatter.get_clim(), (0.0, 1.0))
+        np.testing.assert_allclose(scatter.get_clim(), (transmission.min(), transmission.max()), atol=1e-12)
+
+
+class TestExportContents(_FunctionalTestBase):
+    """Exports write only the included rows, with faithful values."""
+
+    def setUp(self):
+        super().setUp()
+        # three orientations: row 0 identity, row 1 Rx(-30), row 2 Rx(-60); row 1 excluded
+        self._click(self.view.addOrientation)
+        self.view.spnAngle0.setValue(30.0)
+        self._click(self.view.addOrientation)
+        self.view.spnAngle0.setValue(60.0)
+        QApplication.processEvents()
+        self._click_checkbox(self._checkbox(1, 6))
+        QApplication.processEvents()
+        self.included_Rs = [self.model.orientations[0].R, self.model.orientations[2].R]
+
+        self.view.get_save_dir = lambda: self._tmpdir
+        QTest.keyClicks(self.view.saveFileLine, "run")
+
+    def _export_and_read(self, fmt, filename):
+        self.view.cmbExportFormat.setCurrentText(fmt)
+        self._click(self.view.btnExport)
+        with open(os.path.join(self._tmpdir, filename)) as f:
+            return f.read().splitlines()
+
+    def test_sscanss_export_contains_only_included_rows(self):
+        lines = self._export_and_read(EXPORT_SSCANSS, "run.angles")
+
+        self.assertEqual(lines[0], "xyz")
+        self.assertEqual(len(lines), 3)  # header + the two included rows
+        for line, expected_R in zip(lines[1:], self.included_Rs):
+            angles = [float(x) for x in line.split("\t")]
+            np.testing.assert_allclose(angles, convert_to_sscanss_frame(expected_R.as_matrix()), atol=0.011)
+
+    def test_euler_export_round_trips_included_rotations(self):
+        lines = self._export_and_read(EXPORT_EULER, "run.txt")
+
+        self.assertEqual(len(lines), 2)
+        senses = [float(s) for s in self.model.orientations.orientation_kwargs["Senses"].split(",")]
+        for line, expected_R in zip(lines, self.included_Rs):
+            file_angles = [float(x) for x in line.split("\t")]
+            # undo the sense factors and rebuild the rotation on the convention's axes
+            raw = [sense * angle for sense, angle in zip(senses, file_angles)]
+            rebuilt_R = Rotation.from_euler(self.model.orientations.orientation_kwargs["Axes"], raw, degrees=True)
+            self.assertLess((rebuilt_R * expected_R.inv()).magnitude(), 1e-3)
+
+    def test_matrix_export_contains_exact_flattened_matrices(self):
+        lines = self._export_and_read(EXPORT_MATRIX, "run.txt")
+
+        self.assertEqual(len(lines), 2)
+        for line, expected_R in zip(lines, self.included_Rs):
+            values = [float(x) for x in line.split("\t")]
+            np.testing.assert_allclose(values, expected_R.as_matrix().reshape(-1), atol=1e-12)
+
+    def test_reference_workspace_round_trips_shape_and_material(self):
+        # bake in an initial rotation so the round-trip proves the oriented shape survives
+        self.view.spnInitX.setValue(30.0)
+        QApplication.processEvents()
+        expected_extent = self._aabb_extent(self.model.workspaces.updated_mesh_ws)
+
+        self.view.cmbExportFormat.setCurrentText(EXPORT_REFERENCE_WS)
+        self._click(self.view.btnExport)
+
+        loaded = LoadNexus(Filename=os.path.join(self._tmpdir, "run.nxs"), OutputWorkspace="__texplan_test_ref_roundtrip")
+        self.assertAlmostEqual(abs(loaded.sample().getShape().volume()), 0.01**3, places=9)
+        self.assertEqual(loaded.sample().getMaterial().name(), "Fe")
+        np.testing.assert_allclose(self._aabb_extent(loaded), expected_extent, atol=1e-9)
+
+
+class TestPoleFigureReference(_FunctionalTestBase):
+    """Hard-coded pole-figure regression references.
+
+    The reference arrays below were captured from the implementation on 28/7/2026 (ENGINX,
+    "banks" grouping). They are primarily to function as REGRESSION CHECKS,
+    and failures should be considered in the context of their changes: a legitimate change
+    to the projection / geometry algorithms may move them, in which case they should be
+    re-captured and updated deliberately.
+    """
+
+    # ENGINX + banks, identity orientation, default directions, azimuthal projection
+    _REF_BANKS_IDENTITY = np.array(
+        [
+            [-0.7074793697410617, 0.7067339962042226],
+            [0.7074793697410614, 0.7067339962042228],
+        ]
+    )
+    # as above with the single edit of goniometer axis 0 (1,0,0) set to 30 deg, sense Clockwise
+    _REF_BANKS_X30_CLOCKWISE = np.array(
+        [
+            [0.5823836510064151, -0.5038276628930591],
+            [-0.5823836510064151, -0.5038276628930591],
+        ]
+    )
+
+    def setUp(self):
+        super().setUp()
+        self._apply_instrument_group("banks")
+
+    def test_identity_orientation_matches_captured_reference(self):
+        pf = self.model.orientations[0].pf_points
+
+        # analytic anchor (loose): the beam is +z and the ENGINX banks sit near +/-90 deg 2theta,
+        # so the identity-orientation azimuthal points are on the rim at ~(+/-0.707, +/-0.707),
+        # mirrored in x
+        np.testing.assert_allclose(np.linalg.norm(pf, axis=1), 1.0, atol=1e-3)
+        np.testing.assert_allclose(np.abs(pf), [[0.7075, 0.7067]] * 2, atol=0.01)
+        self.assertAlmostEqual(pf[0, 0], -pf[1, 0], places=6)
+
+        # captured regression reference (see class docstring)
+        np.testing.assert_allclose(pf, self._REF_BANKS_IDENTITY, atol=1e-10)
+
+    def test_rotated_orientation_matches_captured_reference(self):
+        self.view.spnAngle0.setValue(30.0)
+        QApplication.processEvents()
+
+        pf = self.model.orientations[0].pf_points
+        # analytic anchor (loose): rotating about x keeps the two banks mirrored in x with a
+        # common y, and pulls the points off the rim
+        self.assertAlmostEqual(pf[0, 1], pf[1, 1], places=6)
+        self.assertAlmostEqual(pf[0, 0], -pf[1, 0], places=6)
+        self.assertTrue(np.all(np.linalg.norm(pf, axis=1) < 1.0))
+
+        # captured regression reference (see class docstring)
+        np.testing.assert_allclose(pf, self._REF_BANKS_X30_CLOCKWISE, atol=1e-10)
 
 
 if __name__ == "__main__":

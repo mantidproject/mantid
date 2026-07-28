@@ -159,16 +159,21 @@ class TexturePlannerPresenter(AlgorithmObserver):
         self.model.set_gonio_index(goniometer_index)
         orientation_index = self.view.get_current_index()
         self.model.orientations.update_gRs(self.get_vecs(), self.get_senses(), self.get_angles(), orientation_index)
-        # Apply this orientation's R to the workspace so the scattering centre (which depends on
-        # how the sample sits in the gauge volume) is recomputed for it, then refresh the
-        # lab-frame detector Qs against that fresh centre.
-        R = self.model.orientations[orientation_index].R
-        self.model.workspaces.ws.run().getGoniometer().setR(R.as_matrix())
-        self.model.geometry.recompute_scattering_geometry()
+        self.refresh_scattering_geometry()
         self.model.update_projected_data(orientation_index)
         self.model.orientations.update_gonio_string(self.get_vecs(), self.get_senses(), self.get_angles(), orientation_index)
         self.update_plots()
         self.update_table()
+
+    def refresh_scattering_geometry(self) -> None:
+        """Recompute the lab-frame detector directions and Qs against the current scattering centre.
+
+        The centre depends on how the displayed orientation of the sample sits in the gauge
+        volume, so that orientation's R is applied to the workspace first. Must be called whenever
+        the sample is moved, the gauge volume changes, or the displayed orientation changes."""
+        R = self.model.orientations[self.view.get_current_index()].R
+        self.model.workspaces.ws.run().getGoniometer().setR(R.as_matrix())
+        self.model.geometry.recompute_scattering_geometry()
 
     def on_num_gonio_updated(self) -> None:
         num_gonios = self.view.get_num_gonios()
@@ -326,16 +331,24 @@ class TexturePlannerPresenter(AlgorithmObserver):
 
     def update_goniometer_values_from_index(self, index: int) -> None:
         vecs, senses, angles = self.model.orientations.get_goniometer_values(index)
-        self.view.set_vecs(vecs)
-        self.view.set_senses(senses)
-        self.view.set_angles(angles)
+        self.view.set_goniometer_state(vecs, senses, angles)
 
     def on_index_changed(self) -> None:
         updated_index = self.view.get_current_index()
         self.model.orientations.set_orientation_index(updated_index)
 
-        # we now update the goniometer fields with the saved values
+        # Reflect the saved values into the goniometer fields without firing their change signals:
+        # displaying an orientation must not rewrite it at widget precision (the fields hold
+        # rounded display values, whereas e.g. an orientation loaded from a matrix file is exact).
         self.update_goniometer_values_from_index(updated_index)
+
+        # refresh the displays for the newly selected orientation, reusing any cached results
+        # (they were computed for this orientation's R, which has not changed)
+        self.refresh_scattering_geometry()
+        orientation = self.model.orientations[updated_index]
+        if orientation.pf_points is None or (self.model.plot_transmission and orientation.transmission is None):
+            self.model.update_projected_data(updated_index)
+        self.update_plots()
 
     def enable_load_stl(self) -> None:
         self.view.set_load_stl_enabled(self.view.get_stl_string() != "")
@@ -454,16 +467,21 @@ class TexturePlannerPresenter(AlgorithmObserver):
             self.view.get_init_py(),
             self.view.get_init_pz(),
         )
+        # moving the shape moves the scattering centre, so the detector geometry must follow
+        self.refresh_scattering_geometry()
         self.model.update_all_projected_data()
         self.update_plots()
 
     def set_gauge_volume(self) -> None:
         self.model.workspaces.set_gauge_volume_str(self.view.get_shape_method(), self.view.get_custom_shape())
+        # the gauge volume changes which part of the sample scatters, moving the scattering centre
+        self.refresh_scattering_geometry()
         self.model.update_all_projected_data()
         self.update_plots()
 
     def clear_gauge_volume(self) -> None:
         self.model.workspaces.set_gauge_volume_str(GAUGE_VOL_NONE, None)
+        self.refresh_scattering_geometry()
         self.model.update_all_projected_data()
         self.update_plots()
 
