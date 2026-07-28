@@ -16,8 +16,8 @@
 
 #include <QDoubleValidator>
 #include <QLineEdit>
+#include <QList>
 #include <QSettings>
-#include <QVector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -171,7 +171,7 @@ private:
   const char *changedSignal(QWidget *widget);
 
   /// A list of all the registered widgets
-  QVector<QWidget *> m_registeredWidgets;
+  QList<QWidget *> m_registeredWidgets;
 
   /// Names of registered widgets
   QMap<QWidget *, QString> m_widgetNames;

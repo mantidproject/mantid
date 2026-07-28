@@ -123,8 +123,8 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
   // Change of input
 
   connect(m_uiForm.dsSampleInput, &DataSelector::dataReady, this,
-          static_cast<void (AbsorptionCorrections::*)(const QString &)>(&AbsorptionCorrections::getParameterDefaults));
-  connect(m_uiForm.cbShape, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this,
+          qOverload<const QString &>(&AbsorptionCorrections::getParameterDefaults));
+  connect(m_uiForm.cbShape, qOverload<int>(&QComboBox::currentIndexChanged), this,
           &AbsorptionCorrections::handlePresetShapeChanges);
   // Handle algorithm completion
   connect(m_batchAlgoRunner, &API::BatchAlgorithmRunner::batchComplete, this,
@@ -133,21 +133,21 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
   connect(m_uiForm.pbSave, &QPushButton::clicked, this, &AbsorptionCorrections::saveClicked);
   // Handle density units
 
-  connect(m_uiForm.cbSampleDensity, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+  connect(m_uiForm.cbSampleDensity, qOverload<int>(&QComboBox::currentIndexChanged),
           [=](int index) { this->setSampleDensityUnit(m_uiForm.cbSampleDensity->itemText(index)); });
-  connect(m_uiForm.cbCanDensity, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+  connect(m_uiForm.cbCanDensity, qOverload<int>(&QComboBox::currentIndexChanged),
           [=](int index) { this->setCanDensityUnit(m_uiForm.cbCanDensity->itemText(index)); });
-  connect(m_uiForm.cbSampleDensity, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+  connect(m_uiForm.cbSampleDensity, qOverload<int>(&QComboBox::currentIndexChanged),
           [=](int index) { this->setSampleDensityValue(m_uiForm.cbSampleDensity->itemText(index)); });
-  connect(m_uiForm.cbCanDensity, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+  connect(m_uiForm.cbCanDensity, qOverload<int>(&QComboBox::currentIndexChanged),
           [=](int index) { this->setCanDensityValue(m_uiForm.cbCanDensity->itemText(index)); });
-  connect(m_uiForm.cbSampleMaterialMethod, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this,
+  connect(m_uiForm.cbSampleMaterialMethod, qOverload<int>(&QComboBox::currentIndexChanged), this,
           &AbsorptionCorrections::changeSampleMaterialOptions);
-  connect(m_uiForm.cbCanMaterialMethod, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this,
+  connect(m_uiForm.cbCanMaterialMethod, qOverload<int>(&QComboBox::currentIndexChanged), this,
           &AbsorptionCorrections::changeCanMaterialOptions);
-  connect(m_uiForm.spSampleDensity, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this,
+  connect(m_uiForm.spSampleDensity, qOverload<double>(&QDoubleSpinBox::valueChanged), this,
           &AbsorptionCorrections::setSampleDensity);
-  connect(m_uiForm.spCanDensity, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this,
+  connect(m_uiForm.spCanDensity, qOverload<double>(&QDoubleSpinBox::valueChanged), this,
           &AbsorptionCorrections::setCanDensity);
 
   // Allows empty workspace selector when initially selected

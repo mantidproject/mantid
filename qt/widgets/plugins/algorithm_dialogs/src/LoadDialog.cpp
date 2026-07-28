@@ -188,7 +188,7 @@ void LoadDialog::saveInput() {
   m_form.fileWidget->saveSettings("Mantid/Algorithms/Load");
   AlgorithmDialog::saveInput();
   // Ensure the filename is store as the full file
-  API::AlgorithmInputHistory::Instance().storeNewValue("Load", QPair<QString, QString>("Filename", m_currentFiles));
+  API::AlgorithmInputHistory::Instance().storeNewValue("Load", std::pair<QString, QString>("Filename", m_currentFiles));
 }
 
 /**

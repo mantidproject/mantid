@@ -334,7 +334,7 @@ void FitDialog::parseInput() {
     // Cannot set any other properties until Function is set
     return;
   }
-  foreach (QWidget *t, m_tabs) {
+  for (QWidget *t : m_tabs) {
     auto iww = dynamic_cast<InputWorkspaceWidget *>(t);
     if (iww) {
       iww->setProperties();
@@ -408,7 +408,7 @@ void FitDialog::domainTypeChanged() {
 void FitDialog::createInputWorkspaceWidgets() {
   m_form.tabWidget->clear();
   QStringList wsNames;
-  foreach (QWidget *t, m_tabs) {
+  for (QWidget *t : m_tabs) {
     const auto *tab = dynamic_cast<InputWorkspaceWidget *>(t);
     if (tab) {
       wsNames << tab->getWorkspaceName();

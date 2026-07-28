@@ -224,14 +224,14 @@ void SymmetriseView::resetEDefaults(bool isPositive, std::pair<double, double> r
   auto rangeESelector = m_uiForm.ppRawPlot->getRangeSelector("rangeE");
 
   // Set Selector range boundaries
-  auto rangeReflect = isPositive ? qMakePair(0.0, range.second) : qMakePair(range.first, 0.0);
+  auto rangeReflect = isPositive ? std::make_pair(0.0, range.second) : std::make_pair(range.first, 0.0);
   rangeESelector->setBounds(rangeReflect.first, rangeReflect.second);
   m_dblManager->setRange(m_properties["Ehigh"], rangeReflect.first, rangeReflect.second);
   m_dblManager->setRange(m_properties["Elow"], rangeReflect.first, rangeReflect.second);
 
   // Set Initial selector range values
-  auto rangeInitial =
-      isPositive ? qMakePair(0.1 * range.second, 0.9 * range.second) : qMakePair(0.9 * range.first, 0.1 * range.first);
+  auto rangeInitial = isPositive ? std::make_pair(0.1 * range.second, 0.9 * range.second)
+                                 : std::make_pair(0.9 * range.first, 0.1 * range.first);
   rangeESelector->setRange(rangeInitial.first, rangeInitial.second);
   m_dblManager->setValue(m_properties["Ehigh"], rangeInitial.second);
   m_dblManager->setValue(m_properties["Elow"], rangeInitial.first);
@@ -247,7 +247,7 @@ void SymmetriseView::resetEDefaults(bool isPositive, std::pair<double, double> r
 bool SymmetriseView::verifyERange(std::string const &workspaceName) {
   MatrixWorkspace_sptr sampleWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
   auto axisRange = getXRangeFromWorkspace(sampleWS);
-  auto Erange = qMakePair(getElow(), getEhigh());
+  auto Erange = std::make_pair(getElow(), getEhigh());
 
   bool const reflectType = m_enumManager->value(m_properties["ReflectType"]);
   if ((reflectType == 0) && (Erange.first > abs(axisRange.first))) {

@@ -156,7 +156,7 @@ protected:
   QPushButton *m_replaceWSButton;
 
   /// All contained widgets
-  QVector<QWidget *> m_widgets;
+  QList<QWidget *> m_widgets;
 
   /// Last modified value
   QString m_lastValue;

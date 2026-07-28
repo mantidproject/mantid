@@ -184,7 +184,7 @@ public:
   /// Get the excluded range for the fit
   std::string getExcludeRange() const;
   /// Get the X limits of the workspace
-  QVector<double> getXRange();
+  QList<double> getXRange();
 
   /// Get the function as a string
   std::string getFunctionString() const;

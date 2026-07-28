@@ -394,7 +394,7 @@ void QtTreePropertyBrowserPrivate::init(QWidget *parent, const QStringList &opti
   labels.append(translateUtf8Encoded("QtTreePropertyBrowser", "Property", nullptr));
   labels.append(QApplication::translate("QtTreePropertyBrowser", "Value", nullptr));
   // add optional columns
-  foreach (const auto &opt, m_options) {
+  for (const auto &opt : m_options) {
     labels.append(QApplication::translate("QtTreePropertyBrowser", opt.toStdString().c_str(), nullptr));
   }
   m_treeWidget->setHeaderLabels(labels);

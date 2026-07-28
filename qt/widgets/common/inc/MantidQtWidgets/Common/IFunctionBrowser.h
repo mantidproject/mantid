@@ -16,7 +16,6 @@
 #include <vector>
 
 #include <QList>
-#include <QPair>
 #include <QString>
 
 namespace MantidQt {

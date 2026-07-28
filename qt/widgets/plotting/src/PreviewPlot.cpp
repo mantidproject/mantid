@@ -505,7 +505,7 @@ void PreviewPlot::showContextMenu(QMouseEvent *evt) {
   contextMenu.addSeparator();
   contextMenu.addAction(m_contextLegend);
 
-  contextMenu.exec(evt->globalPos());
+  contextMenu.exec(evt->globalPosition().toPoint());
 }
 
 /**
