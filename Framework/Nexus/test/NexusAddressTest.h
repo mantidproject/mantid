@@ -9,8 +9,6 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidNexus/NexusAddress.h"
 
-#include <filesystem>
-
 #include <cstddef> // std::size_t
 
 #include <cxxtest/TestSuite.h>
@@ -32,27 +30,28 @@ public:
   }
 
   void test_construct_from_filepath() {
-    std::filesystem::path p("/path/good");
+    std::string p("/path/good");
     NexusAddress np(p);
-    TS_ASSERT_EQUALS(np.string(), p.string());
+    TS_ASSERT_EQUALS(np.string(), p);
   }
 
-  void test_construct_from_filepath_lexically_normal() {
-    std::filesystem::path p("/path/good/../other/");
+  void test_construct_lexically_normal_dots() {
+    std::string p("/path/good/../other/");
     NexusAddress np(p);
     TS_ASSERT_EQUALS(np.string(), "/path/other");
+  }
+
+  void test_construct_lexically_normal_trail() {
+    // trailing slashes are stripped on construction
+    std::string p("/path/good/other/");
+    NexusAddress np(p);
+    TS_ASSERT_EQUALS(np.string(), "/path/good/other");
   }
 
   void test_construct_from_string() {
     std::string p("/path/good");
     NexusAddress np(p);
     TS_ASSERT_EQUALS(np.string(), p);
-  }
-
-  void test_construct_from_string_lexically_normal() {
-    std::string p("/path/good/../other/");
-    NexusAddress np(p);
-    TS_ASSERT_EQUALS(np.string(), "/path/other");
   }
 
   void test_assignment_operator_path() {
@@ -148,33 +147,22 @@ public:
     NexusAddress root;
     TS_ASSERT_EQUALS(root.parent_path(), root);
 
-    std::filesystem::path path("/entry1/data_points/logs/log_values");
-    NexusAddress long_path(path);
-    TS_ASSERT_EQUALS(long_path, path.string());
+    NexusAddress long_path("/entry1/data_points/logs/log_values");
+    TS_ASSERT_EQUALS(long_path, "/entry1/data_points/logs/log_values");
 
     long_path = long_path.parent_path();
-    path = path.parent_path();
-    TS_ASSERT_EQUALS(long_path, path.string());
     TS_ASSERT_EQUALS(long_path, "/entry1/data_points/logs");
 
     long_path = long_path.parent_path();
-    path = path.parent_path();
-    TS_ASSERT_EQUALS(long_path, path.string());
     TS_ASSERT_EQUALS(long_path, "/entry1/data_points");
 
     long_path = long_path.parent_path();
-    path = path.parent_path();
-    TS_ASSERT_EQUALS(long_path, path.string());
     TS_ASSERT_EQUALS(long_path, "/entry1");
 
     long_path = long_path.parent_path();
-    path = path.parent_path();
-    TS_ASSERT_EQUALS(long_path, path.string());
     TS_ASSERT_EQUALS(long_path, "/");
 
     long_path = long_path.parent_path();
-    path = path.parent_path();
-    TS_ASSERT_EQUALS(long_path, path.string());
     TS_ASSERT_EQUALS(long_path, "/");
   }
 
@@ -261,8 +249,7 @@ public:
     TS_ASSERT_EQUALS(np, NexusAddress("/raw_data_1"));
     TS_ASSERT_EQUALS(np.string(), "/raw_data_1");
 
-    std::filesystem::path p("//raw_data_1");
-    NexusAddress np2(p);
+    NexusAddress np2("//raw_data_1");
     TS_ASSERT_EQUALS(np2.string(), "/raw_data_1");
   }
 
