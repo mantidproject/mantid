@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from mantid.api import mtd
-from mantid.simpleapi import TimeSlice
+from mantid.simpleapi import TimeSlice, Load
 
 
 class TimeSliceTest(unittest.TestCase):
@@ -41,6 +41,37 @@ class TimeSliceTest(unittest.TestCase):
         )
 
         self.assertTrue(mtd.doesExist("iris26173_graphite002_slice"))
+
+    def test_sample_workspace_property(self):
+        """
+        Test to check optional SampleWorkspace input property
+        """
+        Load("IRS26173.raw", OutputWorkspace="TestWs")
+        TimeSlice(
+            SampleWorkspace="TestWs",
+            SpectraRange=[3, 53],
+            PeakRange=[62500, 65000],
+            BackgroundRange=[59000, 61500],
+            OutputNameSuffix="_graphite002_slice",
+            OutputWorkspace="SliceTestOut",
+        )
+        self.assertTrue(mtd.doesExist("TestWs_graphite002_slice"))
+
+    def test_validation_input_files_empty(self):
+        """
+        Tests to ensure that a valid input is selected
+        """
+
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Must supply either 'InputFiles' or 'SampleWorkspace'",
+            TimeSlice,
+            SpectraRange=[3, 53],
+            PeakRange=[62500, 65000],
+            BackgroundRange=[59000, 61500],
+            OutputNameSuffix="_graphite002_slice",
+            OutputWorkspace="SliceTestOut",
+        )
 
     def test_validation_peak_range_order(self):
         """
