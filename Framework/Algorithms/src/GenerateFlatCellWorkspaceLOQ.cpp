@@ -159,7 +159,7 @@ std::vector<double> GenerateFlatCellWorkspaceLOQ::extractIntegratedValues(const 
   std::vector<double> values;
   values.reserve(nHist);
   for (size_t i = 0; i < nHist; ++i) {
-    const auto &Y = ws->readY(i);
+    const auto &Y = ws->y(i);
     values.insert(values.end(), Y.cbegin(), Y.cend());
   }
   return values;

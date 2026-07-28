@@ -230,7 +230,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(deadDets = alg.getProperty("FoundDead"))
     TS_ASSERT_EQUALS(deadDets.size(), 0)
     for (int i = 0; i < nBins; i++) {
-      const double val = work_out1->readY(i)[0];
+      const double val = work_out1->y(i)[0];
       double valExpected = 1;
       if (i % 2 == 0) {
         valExpected = 2;

@@ -92,7 +92,7 @@ class CalculateSampleTransmission(PythonAlgorithm):
         ConvertToPointData(InputWorkspace=self._output_ws, OutputWorkspace=self._output_ws)
 
         ws = mtd[self._output_ws]
-        wavelengths = ws.readX(0)
+        wavelengths = ws.x(0)
         transmission_data = np.zeros(len(wavelengths))
         scattering_data = np.zeros(len(wavelengths))
 
@@ -102,8 +102,8 @@ class CalculateSampleTransmission(PythonAlgorithm):
             transmission_data[idx] = transmission
             scattering_data[idx] = scattering
 
-        ws.setY(0, transmission_data)
-        ws.setY(1, scattering_data)
+        ws.setSharedY(0, transmission_data)
+        ws.setSharedY(1, scattering_data)
 
         self.setProperty("OutputWorkspace", self._output_ws)
 

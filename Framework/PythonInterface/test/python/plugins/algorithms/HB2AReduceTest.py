@@ -134,14 +134,14 @@ class HB2AReduceTest(unittest.TestCase):
         self.assertTrue(HB2AReduce_ws)
         self.assertEqual(HB2AReduce_ws.getNumberHistograms(), 44)
         self.assertEqual(HB2AReduce_ws.blocksize(), 56)
-        self.assertEqual(np.argmax(HB2AReduce_ws.readY(7)), 2)
-        self.assertAlmostEqual(np.max(HB2AReduce_ws.readY(7)), 2.13258433)
+        self.assertEqual(np.argmax(HB2AReduce_ws.y(7)), 2)
+        self.assertAlmostEqual(np.max(HB2AReduce_ws.y(7)), 2.13258433)
         norm_time_wsk = mtd[HB2AReduce_ws.name() + "_norm_time"]
         self.assertTrue(norm_time_wsk)
         self.assertEqual(norm_time_wsk.getNumberHistograms(), 44)
         self.assertEqual(norm_time_wsk.blocksize(), 56)
-        self.assertEqual(np.argmax(norm_time_wsk.readY(7)), 2)
-        self.assertAlmostEqual(np.max(norm_time_wsk.readY(7)), 1195.31351784)
+        self.assertEqual(np.argmax(norm_time_wsk.y(7)), 2)
+        self.assertAlmostEqual(np.max(norm_time_wsk.y(7)), 1195.31351784)
         HB2AReduce_ws.delete()
         norm_time_wsk.delete()
 

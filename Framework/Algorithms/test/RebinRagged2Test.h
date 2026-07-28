@@ -67,7 +67,7 @@ public:
     const std::vector<double> expected_len = {478, 981, 1880, 1816, 1795, 449};
 
     for (size_t i = 0; i < 6; i++) {
-      TS_ASSERT_EQUALS(result->readX(i).size(), expected_len[i]);
+      TS_ASSERT_EQUALS(result->x(i).size(), expected_len[i]);
     }
   }
 
@@ -99,7 +99,7 @@ public:
     const std::vector<double> expected_len = {256, 521, 1001, 1001, 1001, 235};
 
     for (size_t i = 0; i < 6; i++) {
-      TS_ASSERT_EQUALS(result->readX(i).size(), expected_len[i]);
+      TS_ASSERT_EQUALS(result->x(i).size(), expected_len[i]);
     }
   }
 
@@ -136,7 +136,7 @@ public:
     TS_ASSERT_EQUALS(result->getNumberHistograms(), 200);
 
     for (size_t i = 0; i < result->getNumberHistograms(); i++) {
-      const auto X = result->readX(i);
+      const auto X = result->x(i);
       if (i == 11)
         TS_ASSERT_EQUALS(X.size(), 9)
       else if (i == 12 || i == 13)
@@ -144,7 +144,7 @@ public:
       else
         TS_ASSERT_EQUALS(X.size(), 10)
 
-      const auto Y = result->readY(i);
+      const auto Y = result->y(i);
       if (i == 13)
         for (const auto y : Y)
           TS_ASSERT_DELTA(y, 0.9, 1e-9)
@@ -187,7 +187,7 @@ public:
     TS_ASSERT_EQUALS(result->getNumberHistograms(), 200);
 
     for (size_t i = 0; i < result->getNumberHistograms(); i++) {
-      const auto X = result->readX(i);
+      const auto X = result->x(i);
       if (i == 11)
         TS_ASSERT_EQUALS(X.size(), 9)
       else if (i == 12 || i == 13)
@@ -195,7 +195,7 @@ public:
       else
         TS_ASSERT_EQUALS(X.size(), 10)
 
-      const auto Y = result->readY(i);
+      const auto Y = result->y(i);
       if (i == 13)
         for (const auto y : Y)
           TS_ASSERT_EQUALS(y, 21)
@@ -239,7 +239,7 @@ public:
     TS_ASSERT_EQUALS(result->getNumberHistograms(), 200);
 
     for (size_t i = 0; i < result->getNumberHistograms(); i++) {
-      const auto X = result->readX(i);
+      const auto X = result->x(i);
       if (i == 11)
         TS_ASSERT_EQUALS(X.size(), 9)
       else if (i == 12 || i == 13)
@@ -247,7 +247,7 @@ public:
       else
         TS_ASSERT_EQUALS(X.size(), 10)
 
-      const auto Y = result->readY(i);
+      const auto Y = result->y(i);
       if (i == 13)
         for (const auto y : Y)
           TS_ASSERT_EQUALS(y, 21)
@@ -283,8 +283,8 @@ public:
 
     // check bin mask before RebinRagged
 
-    TS_ASSERT_EQUALS(ws->readX(0).size(), 11);
-    TS_ASSERT_EQUALS(ws->readX(1).size(), 11);
+    TS_ASSERT_EQUALS(ws->x(0).size(), 11);
+    TS_ASSERT_EQUALS(ws->x(1).size(), 11);
 
     auto hist0BinMasked = ws->maskedBinsIndices(0);
     auto hist1BinMasked = ws->maskedBinsIndices(1);
@@ -315,8 +315,8 @@ public:
 
     TS_ASSERT_EQUALS(result->getNumberHistograms(), 2);
 
-    TS_ASSERT_EQUALS(result->readX(0).size(), 13);
-    TS_ASSERT_EQUALS(result->readX(1).size(), 9);
+    TS_ASSERT_EQUALS(result->x(0).size(), 13);
+    TS_ASSERT_EQUALS(result->x(1).size(), 9);
 
     hist0BinMasked = result->maskedBinsIndices(0);
     hist1BinMasked = result->maskedBinsIndices(1);
@@ -374,7 +374,7 @@ public:
     TS_ASSERT_EQUALS(result->getNumberHistograms(), 200);
 
     for (size_t i = 0; i < result->getNumberHistograms(); i++) {
-      const auto X = result->readX(i);
+      const auto X = result->x(i);
       if (i == 11)
         TS_ASSERT_EQUALS(X.size(), 8)
       else if (i == 12 || i == 13)
@@ -382,7 +382,7 @@ public:
       else
         TS_ASSERT_EQUALS(X.size(), 9)
 
-      const auto Y = result->readY(i);
+      const auto Y = result->y(i);
       if (i == 13)
         for (const auto y : Y)
           TS_ASSERT_DELTA(y, 0.9, 1e-9)

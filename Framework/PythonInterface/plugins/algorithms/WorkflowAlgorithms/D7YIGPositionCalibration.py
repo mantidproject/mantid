@@ -280,7 +280,7 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         name_list = []
         for entry_no, entry in enumerate(mtd[scan_data_name]):
             # normalize to monitor1 as monitor2 is sometimes empty:
-            monitor1_counts = entry.readY(self._D7NumberPixels)[0]
+            monitor1_counts = entry.y(self._D7NumberPixels)[0]
             if monitor1_counts != 0:
                 monitor_name = "__monitor_" + entry.name()
                 CreateSingleValuedWorkspace(DataValue=monitor1_counts, ErrorValue=np.sqrt(monitor1_counts), OutputWorkspace=monitor_name)
@@ -354,8 +354,8 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         peak_list = []
 
         for pixel_no in range(mtd[ws].getNumberHistograms()):
-            detector_2theta = mtd[ws].readX(pixel_no)
-            intensity = mtd[ws].readY(pixel_no)
+            detector_2theta = mtd[ws].x(pixel_no)
+            intensity = mtd[ws].y(pixel_no)
             min2Theta = detector_2theta[0] + self._peakWidth
             max2Theta = detector_2theta[-1] - self._peakWidth
             single_spectrum_peaks = []

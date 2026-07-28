@@ -246,7 +246,7 @@ class D7YIGPositionCalibrationTest(systemtesting.MantidSystemTest):
             mtd["output"].getItem(0).getRun().getLogData("2theta.actual_bank{}".format(bank_no + 2)).value for bank_no in range(3)
         ]
 
-        xAxisValues = mtd["output"].getItem(0).readX(0)
+        xAxisValues = mtd["output"].getItem(0).x(0)
         self.assertAlmostEqual(xAxisValues[0], bank_gradients[0] * nexus_bank_offsets[0] - positionCalibration[0], delta=1e-2)
         self.assertAlmostEqual(xAxisValues[43], bank_gradients[0] * nexus_bank_offsets[0] - positionCalibration[43], delta=1e-2)
         self.assertAlmostEqual(xAxisValues[44], bank_gradients[1] * nexus_bank_offsets[1] - positionCalibration[44], delta=1e-2)
@@ -286,7 +286,7 @@ class D7YIGPositionCalibrationTest(systemtesting.MantidSystemTest):
                 ConvertToScatteringAngle=True,
                 TransposeMonochromatic=True,
             )
-        xAxisValues = mtd["calibration_test"].getItem(0).readX(0)
+        xAxisValues = mtd["calibration_test"].getItem(0).x(0)
         self.assertAlmostEqual(xAxisValues[0], 14.3, delta=2e0)
         self.assertAlmostEqual(xAxisValues[43], 56.8, delta=6e0)
         self.assertAlmostEqual(xAxisValues[44], 60.3, delta=5e0)

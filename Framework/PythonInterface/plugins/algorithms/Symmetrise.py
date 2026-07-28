@@ -77,12 +77,12 @@ class Symmetrise(PythonAlgorithm):
             InputWorkspace=input_ws, OutputWorkspace="__symm", StartWorkspaceIndex=min_spectrum_index, EndWorkspaceIndex=max_spectrum_index
         )
         # Find the smallest data array in the first spectra
-        len_x = len(cropped_input.readX(0))
-        len_y = len(cropped_input.readY(0))
-        len_e = len(cropped_input.readE(0))
+        len_x = len(cropped_input.x(0))
+        len_y = len(cropped_input.y(0))
+        len_e = len(cropped_input.e(0))
         sample_array_len = min(len_x, len_y, len_e)
 
-        sample_x = cropped_input.readX(0)
+        sample_x = cropped_input.x(0)
 
         # Get slice bounds of array
         try:
@@ -119,9 +119,9 @@ class Symmetrise(PythonAlgorithm):
         for idx in range(out_ws.getNumberHistograms()):
             pop_prog.report("Populating data in workspace %i" % idx)
             # Strip any additional array cells
-            x_in = cropped_input.readX(idx)[:sample_array_len]
-            y_in = cropped_input.readY(idx)[:sample_array_len]
-            e_in = cropped_input.readE(idx)[:sample_array_len]
+            x_in = cropped_input.x(idx)[:sample_array_len]
+            y_in = cropped_input.y(idx)[:sample_array_len]
+            e_in = cropped_input.e(idx)[:sample_array_len]
 
             # Get some zeroed data to overwrite with copies from sample
             x_out = np.zeros(new_array_len)
@@ -139,9 +139,9 @@ class Symmetrise(PythonAlgorithm):
             e_out[output_cut_index:] = e_in[self._negative_min_index : self._positive_max_index]
 
             # Set output spectrum data
-            out_ws.setX(idx, x_out)
-            out_ws.setY(idx, y_out)
-            out_ws.setE(idx, e_out)
+            out_ws.setSharedX(idx, x_out)
+            out_ws.setSharedY(idx, y_out)
+            out_ws.setSharedE(idx, e_out)
 
             logger.information("Symmetrise spectrum %d" % idx)
 
@@ -209,7 +209,7 @@ class Symmetrise(PythonAlgorithm):
             issues["XMax"] = "XMax must be greater than XMin"
 
         # Valudate X range against workspace X range
-        sample_x = input_workspace.readX(0)
+        sample_x = input_workspace.x(0)
         sample_x_min = sample_x.min()
         sample_x_max = sample_x.max()
 

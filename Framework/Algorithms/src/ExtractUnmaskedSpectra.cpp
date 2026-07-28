@@ -78,7 +78,7 @@ void ExtractUnmaskedSpectra::exec() {
 
   // Find the unmasked spectra
   for (size_t index = 0; index < nSpectra; ++index) {
-    if (mask->readY(index)[0] < 1.0) {
+    if (mask->y(index)[0] < 1.0) {
       indicesToExtract.emplace_back(index);
     }
   }

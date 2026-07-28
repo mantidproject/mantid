@@ -53,8 +53,8 @@ class FitGaussian(PythonAlgorithm):
         if index >= nhist:
             self._error("Index " + str(index) + " is out of range for the workspace " + workspace.name())
 
-        x_values = np.array(workspace.readX(index))
-        y_values = np.array(workspace.readY(index))
+        x_values = np.array(workspace.x(index))
+        y_values = np.array(workspace.y(index))
 
         # get peak centre position, assuming that it is the point with the highest value
         imax = np.argmax(y_values)

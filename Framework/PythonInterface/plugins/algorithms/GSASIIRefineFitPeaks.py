@@ -79,7 +79,7 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
 
         input_ws = self.getProperty(self.PROP_INPUT_WORKSPACE).value
         input_ws_d = mantid.ConvertUnits(InputWorkspace=input_ws, Target="dSpacing", StoreInADS=False)
-        max_d = max(input_ws_d.readX(0))
+        max_d = max(input_ws_d.x(0))
         pawley_dmin = self.getProperty(self.PROP_PAWLEY_DMIN).value
         if pawley_dmin > max_d:
             errors[self.PROP_PAWLEY_DMIN] = "{}={} is greater than the max dSpacing value in the input workspace ({})".format(
@@ -233,8 +233,8 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         input_ws = self.getProperty(self.PROP_INPUT_WORKSPACE).value
         x_max = self.getProperty(self.PROP_XMAX).value
         if not x_max:
-            x_max = max(input_ws.readX(0))
-        x_min = max(pawley_tmin, min(input_ws.readX(0)), self.getProperty(self.PROP_XMIN).value)
+            x_max = max(input_ws.x(0))
+        x_min = max(pawley_tmin, min(input_ws.x(0)), self.getProperty(self.PROP_XMIN).value)
         self.setProperty(self.PROP_XMIN, x_min)
         self.setProperty(self.PROP_XMAX, x_max)
         basic_refinement["set"].update({"Limits": [x_min, x_max]})
@@ -280,7 +280,7 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         hist = gsas_proj.histogram(0)
         fitted_peaks_y = hist.getdata(datatype="yCalc")
         fitted_peaks_y_unmasked = self._replace_masked_elements_with_default(masked_array=fitted_peaks_y, default=0)
-        fitted_peaks_ws.setY(0, fitted_peaks_y_unmasked)
+        fitted_peaks_ws.setSharedY(0, fitted_peaks_y_unmasked)
         return fitted_peaks_ws
 
     def _generate_pawley_reflections(self, phase):

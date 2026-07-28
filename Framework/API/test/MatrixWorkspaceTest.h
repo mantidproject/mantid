@@ -676,8 +676,8 @@ public:
     // Initially un masked
     const auto &spectrumInfo = workspace->spectrumInfo();
     for (int i = 0; i < numHist; ++i) {
-      TS_ASSERT_EQUALS(workspace->readY(i)[0], 1.0);
-      TS_ASSERT_EQUALS(workspace->readE(i)[0], 1.0);
+      TS_ASSERT_EQUALS(workspace->y(i)[0], 1.0);
+      TS_ASSERT_EQUALS(workspace->e(i)[0], 1.0);
       TS_ASSERT(spectrumInfo.hasDetectors(i));
       TS_ASSERT_EQUALS(spectrumInfo.isMasked(i), false);
     }
@@ -698,8 +698,8 @@ public:
       } else {
         expectedMasked = true;
       }
-      TS_ASSERT_EQUALS(workspace->readY(i)[0], expectedValue);
-      TS_ASSERT_EQUALS(workspace->readE(i)[0], expectedValue);
+      TS_ASSERT_EQUALS(workspace->y(i)[0], expectedValue);
+      TS_ASSERT_EQUALS(workspace->e(i)[0], expectedValue);
       TS_ASSERT(spectrumInfo2.hasDetectors(i));
       TS_ASSERT_EQUALS(spectrumInfo2.isMasked(i), expectedMasked);
     }
@@ -1146,10 +1146,10 @@ public:
     for (int i = 0; i < nVertical; ++i) {
       for (int j = 0; j < nBins; ++j) {
         if (j < nYValues) {
-          ws.dataY(i)[j] = 1.0; // All y values are 1.
-          ws.dataE(i)[j] = j;
+          ws.mutableY(i)[j] = 1.0; // All y values are 1.
+          ws.mutableE(i)[j] = j;
         }
-        ws.dataX(i)[j] = j; // x increments by 1
+        ws.mutableX(i)[j] = j; // x increments by 1
       }
       verticalAxis->setValue(i, double(i)); // Vertical axis increments by 1.
     }
@@ -1158,13 +1158,13 @@ public:
     // signal values by volume should always be 1.
 
     // Test at the top right.
-    coord_t coord_top_right[2] = {static_cast<float>(ws.readX(0).back()), float(0)};
+    coord_t coord_top_right[2] = {static_cast<float>(ws.x(0).back()), float(0)};
     signal_t value = 0;
     TS_ASSERT_THROWS_NOTHING(value = ws.getSignalAtCoord(coord_top_right, VolumeNormalization));
     TS_ASSERT_EQUALS(1.0, value);
 
     // Test at another location just to be sure.
-    coord_t coord_bottom_left[2] = {static_cast<float>(ws.readX(nVertical - 1)[1]), float(nVertical - 1)};
+    coord_t coord_bottom_left[2] = {static_cast<float>(ws.x(nVertical - 1)[1]), float(nVertical - 1)};
     TS_ASSERT_THROWS_NOTHING(value = ws.getSignalAtCoord(coord_bottom_left, VolumeNormalization));
     TS_ASSERT_EQUALS(1.0, value);
   }
@@ -1499,7 +1499,7 @@ public:
     X[0] = 1.0;
     X[1] = 2.0;
     for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
-      ws.dataY(i)[0] = static_cast<double>(i + 1);
+      ws.mutableY(i)[0] = static_cast<double>(i + 1);
     }
     const size_t start = 0;
     const size_t stop = 8;
@@ -1532,7 +1532,7 @@ public:
     auto &X = ws.dataX(0);
     X[0] = 1.0;
     for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
-      ws.dataY(i)[0] = static_cast<double>(i + 1);
+      ws.mutableY(i)[0] = static_cast<double>(i + 1);
     }
     const size_t start = 0;
     const size_t stop = 8;
@@ -1568,9 +1568,9 @@ public:
     X[2] = 3.0;
     X[3] = 4.0;
     for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
-      ws.dataY(i)[0] = static_cast<double>(i + 1);
-      ws.dataY(i)[1] = static_cast<double>(i + 2);
-      ws.dataY(i)[2] = static_cast<double>(i + 3);
+      ws.mutableY(i)[0] = static_cast<double>(i + 1);
+      ws.mutableY(i)[1] = static_cast<double>(i + 2);
+      ws.mutableY(i)[2] = static_cast<double>(i + 3);
     }
     const size_t start = 0;
     const size_t stop = 8;
@@ -1603,9 +1603,9 @@ public:
     X[1] = 2.0;
     X[2] = 3.0;
     for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
-      ws.dataY(i)[0] = static_cast<double>(i + 1);
-      ws.dataY(i)[1] = static_cast<double>(i + 2);
-      ws.dataY(i)[2] = static_cast<double>(i + 3);
+      ws.mutableY(i)[0] = static_cast<double>(i + 1);
+      ws.mutableY(i)[1] = static_cast<double>(i + 2);
+      ws.mutableY(i)[2] = static_cast<double>(i + 3);
     }
     const size_t start = 0;
     const size_t stop = 8;
@@ -1649,12 +1649,12 @@ public:
     WorkspaceTester ws;
     ws.initialize(6, 2, 1);
     TS_ASSERT_THROWS_NOTHING(ws.setImageY(*image));
-    TS_ASSERT_EQUALS(ws.readY(0)[0], 1);
-    TS_ASSERT_EQUALS(ws.readY(1)[0], 2);
-    TS_ASSERT_EQUALS(ws.readY(2)[0], 3);
-    TS_ASSERT_EQUALS(ws.readY(3)[0], 4);
-    TS_ASSERT_EQUALS(ws.readY(4)[0], 5);
-    TS_ASSERT_EQUALS(ws.readY(5)[0], 6);
+    TS_ASSERT_EQUALS(ws.y(0)[0], 1);
+    TS_ASSERT_EQUALS(ws.y(1)[0], 2);
+    TS_ASSERT_EQUALS(ws.y(2)[0], 3);
+    TS_ASSERT_EQUALS(ws.y(3)[0], 4);
+    TS_ASSERT_EQUALS(ws.y(4)[0], 5);
+    TS_ASSERT_EQUALS(ws.y(5)[0], 6);
   }
 
   void test_setImageE() {
@@ -1662,12 +1662,12 @@ public:
     WorkspaceTester ws;
     ws.initialize(6, 2, 1);
     TS_ASSERT_THROWS_NOTHING(ws.setImageE(*image));
-    TS_ASSERT_EQUALS(ws.readE(0)[0], 1);
-    TS_ASSERT_EQUALS(ws.readE(1)[0], 2);
-    TS_ASSERT_EQUALS(ws.readE(2)[0], 3);
-    TS_ASSERT_EQUALS(ws.readE(3)[0], 4);
-    TS_ASSERT_EQUALS(ws.readE(4)[0], 5);
-    TS_ASSERT_EQUALS(ws.readE(5)[0], 6);
+    TS_ASSERT_EQUALS(ws.e(0)[0], 1);
+    TS_ASSERT_EQUALS(ws.e(1)[0], 2);
+    TS_ASSERT_EQUALS(ws.e(2)[0], 3);
+    TS_ASSERT_EQUALS(ws.e(3)[0], 4);
+    TS_ASSERT_EQUALS(ws.e(4)[0], 5);
+    TS_ASSERT_EQUALS(ws.e(5)[0], 6);
   }
 
   void test_setImageY_start() {
@@ -1675,12 +1675,12 @@ public:
     WorkspaceTester ws;
     ws.initialize(9, 2, 1);
     TS_ASSERT_THROWS_NOTHING(ws.setImageY(*image, 3));
-    TS_ASSERT_EQUALS(ws.readY(3)[0], 1);
-    TS_ASSERT_EQUALS(ws.readY(4)[0], 2);
-    TS_ASSERT_EQUALS(ws.readY(5)[0], 3);
-    TS_ASSERT_EQUALS(ws.readY(6)[0], 4);
-    TS_ASSERT_EQUALS(ws.readY(7)[0], 5);
-    TS_ASSERT_EQUALS(ws.readY(8)[0], 6);
+    TS_ASSERT_EQUALS(ws.y(3)[0], 1);
+    TS_ASSERT_EQUALS(ws.y(4)[0], 2);
+    TS_ASSERT_EQUALS(ws.y(5)[0], 3);
+    TS_ASSERT_EQUALS(ws.y(6)[0], 4);
+    TS_ASSERT_EQUALS(ws.y(7)[0], 5);
+    TS_ASSERT_EQUALS(ws.y(8)[0], 6);
   }
 
   void test_setImageE_start() {
@@ -1688,12 +1688,12 @@ public:
     WorkspaceTester ws;
     ws.initialize(9, 2, 1);
     TS_ASSERT_THROWS_NOTHING(ws.setImageE(*image, 2));
-    TS_ASSERT_EQUALS(ws.readE(2)[0], 1);
-    TS_ASSERT_EQUALS(ws.readE(3)[0], 2);
-    TS_ASSERT_EQUALS(ws.readE(4)[0], 3);
-    TS_ASSERT_EQUALS(ws.readE(5)[0], 4);
-    TS_ASSERT_EQUALS(ws.readE(6)[0], 5);
-    TS_ASSERT_EQUALS(ws.readE(7)[0], 6);
+    TS_ASSERT_EQUALS(ws.e(2)[0], 1);
+    TS_ASSERT_EQUALS(ws.e(3)[0], 2);
+    TS_ASSERT_EQUALS(ws.e(4)[0], 3);
+    TS_ASSERT_EQUALS(ws.e(5)[0], 4);
+    TS_ASSERT_EQUALS(ws.e(6)[0], 5);
+    TS_ASSERT_EQUALS(ws.e(7)[0], 6);
   }
 
   /**
@@ -1759,7 +1759,7 @@ public:
       TSM_ASSERT("dataDx should allow access to the spectrum",
                  std::all_of(std::begin(dataDx), std::end(dataDx), compareValueForSpecificWorkspaceIndex));
 
-      auto &readDx = ws.readDx(index);
+      auto &readDx = ws.dx(index);
       TSM_ASSERT("readDx should allow access to the spectrum",
                  std::all_of(std::begin(readDx), std::end(readDx), compareValueForSpecificWorkspaceIndex));
 

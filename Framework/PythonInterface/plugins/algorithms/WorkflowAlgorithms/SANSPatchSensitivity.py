@@ -113,8 +113,8 @@ class SANSPatchSensitivity(PythonAlgorithm):
                 id_to_fit.append(detector_id)
             elif not inputDetInfo.isMasked(detector_idx):
                 id_to_calculate_fit.append(detector_id)
-                y_to_calculate_fit.append(in_ws.readY(detector_idx).sum())
-                e_to_calculate_fit.append(in_ws.readE(detector_idx).sum())
+                y_to_calculate_fit.append(in_ws.y(detector_idx).sum())
+                e_to_calculate_fit.append(in_ws.e(detector_idx).sum())
 
         degree = self.getProperty("DegreeOfThePolynomial").value
         # Returns coeffcients for the polynomial fit
@@ -132,8 +132,8 @@ class SANSPatchSensitivity(PythonAlgorithm):
             spec_idx = id_ - 1
             vy = np.polyval(py, [id_])
             ve = np.polyval(pe, [id_])
-            in_ws.setY(spec_idx, vy)
-            in_ws.setE(spec_idx, ve)
+            in_ws.setSharedY(spec_idx, vy)
+            in_ws.setSharedE(spec_idx, ve)
 
 
 AlgorithmFactory.subscribe(SANSPatchSensitivity())

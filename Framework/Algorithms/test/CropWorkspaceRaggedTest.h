@@ -39,10 +39,10 @@ public:
       for (int k = 0; k < m_numberOfYPoints; ++k) {
         ydata.push_back(double(k + 1));
         errors.push_back(sqrt(double(k + 1)));
-        m_ws->dataX(j)[k] = k;
+        m_ws->mutableX(j)[k] = k;
       }
-      m_ws->dataY(j) = ydata;
-      m_ws->dataE(j) = errors;
+      m_ws->mutableY(j) = ydata;
+      m_ws->mutableE(j) = errors;
     }
   }
 
@@ -145,13 +145,13 @@ public:
 
     MatrixWorkspace_sptr out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("nothing");
     for (int spec = 0; spec < m_numberOfSpectra; spec++) {
-      TS_ASSERT_DELTA(out->readX(spec)[0], 2.0, 1e-6);
-      TS_ASSERT_DELTA(out->readY(spec)[0], 3.0, 1e-6);
-      TS_ASSERT_DELTA(out->readE(spec)[0], 1.732051, 1e-6); // sqrt(3)
+      TS_ASSERT_DELTA(out->x(spec)[0], 2.0, 1e-6);
+      TS_ASSERT_DELTA(out->y(spec)[0], 3.0, 1e-6);
+      TS_ASSERT_DELTA(out->e(spec)[0], 1.732051, 1e-6); // sqrt(3)
 
-      TS_ASSERT_DELTA(out->readX(spec).back(), 11.0, 1e-6);
-      TS_ASSERT_DELTA(out->readY(spec).back(), 11.0, 1e-6);
-      TS_ASSERT_DELTA(out->readE(spec).back(), 3.316625, 1e-6); // sqrt(11)
+      TS_ASSERT_DELTA(out->x(spec).back(), 11.0, 1e-6);
+      TS_ASSERT_DELTA(out->y(spec).back(), 11.0, 1e-6);
+      TS_ASSERT_DELTA(out->e(spec).back(), 3.316625, 1e-6); // sqrt(11)
     }
   }
 
@@ -166,13 +166,13 @@ public:
 
     MatrixWorkspace_sptr out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("nothing");
     for (int spec = 0; spec < m_numberOfSpectra; spec++) {
-      TS_ASSERT_DELTA(out->readX(spec)[0], xMin[spec], 1e-6);
-      TS_ASSERT_DELTA(out->readY(spec)[0], xMin[spec] + 1., 1e-6);
-      TS_ASSERT_DELTA(out->readE(spec)[0], sqrt(xMin[spec] + 1.), 1e-6);
+      TS_ASSERT_DELTA(out->x(spec)[0], xMin[spec], 1e-6);
+      TS_ASSERT_DELTA(out->y(spec)[0], xMin[spec] + 1., 1e-6);
+      TS_ASSERT_DELTA(out->e(spec)[0], sqrt(xMin[spec] + 1.), 1e-6);
 
-      TS_ASSERT_DELTA(out->readX(spec).back(), 11.0, 1e-6);
-      TS_ASSERT_DELTA(out->readY(spec).back(), 11.0, 1e-6);
-      TS_ASSERT_DELTA(out->readE(spec).back(), 3.316625, 1e-6); // sqrt(11)
+      TS_ASSERT_DELTA(out->x(spec).back(), 11.0, 1e-6);
+      TS_ASSERT_DELTA(out->y(spec).back(), 11.0, 1e-6);
+      TS_ASSERT_DELTA(out->e(spec).back(), 3.316625, 1e-6); // sqrt(11)
     }
   }
   void test_MaxListCrop() {
@@ -186,13 +186,13 @@ public:
 
     MatrixWorkspace_sptr out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("nothing");
     for (int spec = 0; spec < m_numberOfSpectra; spec++) {
-      TS_ASSERT_DELTA(out->readX(spec)[0], 2.0, 1e-6);
-      TS_ASSERT_DELTA(out->readY(spec)[0], 3.0, 1e-6);
-      TS_ASSERT_DELTA(out->readE(spec)[0], sqrt(3.), 1e-6);
+      TS_ASSERT_DELTA(out->x(spec)[0], 2.0, 1e-6);
+      TS_ASSERT_DELTA(out->y(spec)[0], 3.0, 1e-6);
+      TS_ASSERT_DELTA(out->e(spec)[0], sqrt(3.), 1e-6);
 
-      TS_ASSERT_DELTA(out->readX(spec).back(), xMax[spec], 1e-6);
-      TS_ASSERT_DELTA(out->readY(spec).back(), xMax[spec], 1e-6);
-      TS_ASSERT_DELTA(out->readE(spec).back(), sqrt(xMax[spec]), 1e-6);
+      TS_ASSERT_DELTA(out->x(spec).back(), xMax[spec], 1e-6);
+      TS_ASSERT_DELTA(out->y(spec).back(), xMax[spec], 1e-6);
+      TS_ASSERT_DELTA(out->e(spec).back(), sqrt(xMax[spec]), 1e-6);
     }
   }
 
@@ -238,13 +238,13 @@ public:
     MatrixWorkspace_sptr out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("nothing");
 
     for (int spec = 0; spec < m_numberOfSpectra; spec++) {
-      TS_ASSERT_DELTA(out->readX(spec)[0], 2.0, 1e-6);
-      TS_ASSERT_DELTA(out->readY(spec)[0], 3.0, 1e-6);
-      TS_ASSERT_DELTA(out->readE(spec)[0], 1.732051, 1e-6); // sqrt(3)
+      TS_ASSERT_DELTA(out->x(spec)[0], 2.0, 1e-6);
+      TS_ASSERT_DELTA(out->y(spec)[0], 3.0, 1e-6);
+      TS_ASSERT_DELTA(out->e(spec)[0], 1.732051, 1e-6); // sqrt(3)
 
-      TS_ASSERT_DELTA(out->readX(spec).back(), m_ws->readX(spec).back(), 1e-6);
-      TS_ASSERT_DELTA(out->readY(spec).back(), m_ws->readY(spec).back(), 1e-6);
-      TS_ASSERT_DELTA(out->readE(spec).back(), m_ws->readE(spec).back(), 1e-6);
+      TS_ASSERT_DELTA(out->x(spec).back(), m_ws->x(spec).back(), 1e-6);
+      TS_ASSERT_DELTA(out->y(spec).back(), m_ws->y(spec).back(), 1e-6);
+      TS_ASSERT_DELTA(out->e(spec).back(), m_ws->e(spec).back(), 1e-6);
     }
   }
 
@@ -257,13 +257,13 @@ public:
 
     MatrixWorkspace_sptr out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("nothing");
     for (int spec = 0; spec < m_numberOfSpectra; spec++) {
-      TS_ASSERT_DELTA(out->readX(spec)[0], m_ws->readX(spec)[0], 1e-6);
-      TS_ASSERT_DELTA(out->readY(spec)[0], m_ws->readY(spec)[0], 1e-6);
-      TS_ASSERT_DELTA(out->readE(spec)[0], m_ws->readE(spec)[0], 1e-6);
+      TS_ASSERT_DELTA(out->x(spec)[0], m_ws->x(spec)[0], 1e-6);
+      TS_ASSERT_DELTA(out->y(spec)[0], m_ws->y(spec)[0], 1e-6);
+      TS_ASSERT_DELTA(out->e(spec)[0], m_ws->e(spec)[0], 1e-6);
 
-      TS_ASSERT_DELTA(out->readX(spec).back(), 11.0, 1e-6);
-      TS_ASSERT_DELTA(out->readY(spec).back(), 11.0, 1e-6);
-      TS_ASSERT_DELTA(out->readE(spec).back(), 3.316625, 1e-6); // sqrt(11)
+      TS_ASSERT_DELTA(out->x(spec).back(), 11.0, 1e-6);
+      TS_ASSERT_DELTA(out->y(spec).back(), 11.0, 1e-6);
+      TS_ASSERT_DELTA(out->e(spec).back(), 3.316625, 1e-6); // sqrt(11)
     }
   }
 

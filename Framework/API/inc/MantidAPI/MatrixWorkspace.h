@@ -334,19 +334,19 @@ public:
 
   /// Deprecated, use sharedX() instead. Returns a pointer to the x data
   virtual Kernel::cow_ptr<HistogramData::HistogramX> refX(const std::size_t index) const {
-    return getSpectrum(index).ptrX();
+    return getSpectrum(index).sharedX();
   }
 
   /// Deprecated, use setSharedX() instead. Set the specified X array to point
   /// to the given existing array
   virtual void setX(const std::size_t index, const Kernel::cow_ptr<HistogramData::HistogramX> &X) {
-    getSpectrum(index).setX(X);
+    getSpectrum(index).setSharedX(X);
   }
 
   /// Deprecated, use setSharedX() instead. Set the specified X array to point
   /// to the given existing array
   virtual void setX(const std::size_t index, const std::shared_ptr<HistogramData::HistogramX> &X) {
-    getSpectrum(index).setX(X);
+    getSpectrum(index).setSharedX(X);
   }
 
   /**

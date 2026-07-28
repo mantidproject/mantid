@@ -339,8 +339,8 @@ API::MatrixWorkspace_sptr CalculateEfficiency2::mergeGroup(API::WorkspaceGroup &
         MatrixWorkspace_sptr entry = std::static_pointer_cast<API::MatrixWorkspace>(input.getItem(entryNo));
         auto spectrumInfoEntry = entry->spectrumInfo();
         if (!spectrumInfoEntry.isMasked(spectrumNo)) {
-          dataY += entry->readY(spectrumNo)[0];
-          dataE += pow(entry->readE(spectrumNo)[0], 2); // propagate errors
+          dataY += entry->y(spectrumNo)[0];
+          dataE += pow(entry->e(spectrumNo)[0], 2); // propagate errors
           nonMaskedEntries++;
         }
       }

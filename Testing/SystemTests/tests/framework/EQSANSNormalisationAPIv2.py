@@ -176,7 +176,7 @@ class EQSANSNormalisationBeamFlux(systemtesting.MantidSystemTest):
             1.41834793e-08,
         ]
 
-        output_y = mtd[self.data_ws].readY(0)
+        output_y = mtd[self.data_ws].y(0)
         if output_y[0] - ref_values[0] > 0.000006:
             return False
         if output_y[5] - ref_values[5] > 0.000006:

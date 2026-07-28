@@ -1250,8 +1250,8 @@ def get_shift_and_scale_factors_from_algorithm(alg, event_slice_optimisation):
         if factors_workspace is None:
             return [], []
         else:
-            scales = factors_workspace.readX(0)
-            shifts = factors_workspace.readY(0)
+            scales = factors_workspace.x(0)
+            shifts = factors_workspace.y(0)
             delete_alg = create_unmanaged_algorithm("DeleteWorkspace", **{"Workspace": "ShiftAndScaleFactors"})
             delete_alg.execute()
             return scales, shifts

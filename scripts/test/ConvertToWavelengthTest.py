@@ -66,7 +66,7 @@ class ConvertToWavelengthTest(unittest.TestCase):
         ws2 = CloneWorkspace(ws1)
         ws3 = CloneWorkspace(ws1)
         sum = ConvertToWavelength.sum_workspaces([ws1, ws2, ws3])
-        self.assertEqual(set([3, 6, 9]), set(sum.readY(0)), "Fail to sum workspaces correctly")
+        self.assertEqual(set([3, 6, 9]), set(sum.y(0)), "Fail to sum workspaces correctly")
         DeleteWorkspace(ws1)
         DeleteWorkspace(ws2)
         DeleteWorkspace(ws3)
@@ -120,8 +120,8 @@ class ConvertToWavelengthTest(unittest.TestCase):
 
     @classmethod
     def cropped_x_range(cls, ws, index):
-        det_ws_x = ws.readX(index)
-        mask = ws.readY(index) != 0  # CropWorkspace will only zero out y values! so we need to translate those to an x range
+        det_ws_x = ws.x(index)
+        mask = ws.y(index) != 0  # CropWorkspace will only zero out y values! so we need to translate those to an x range
         cropped_x = det_ws_x[:-1][mask]
         return cropped_x[0], cropped_x[-1]
 

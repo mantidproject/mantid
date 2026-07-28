@@ -332,8 +332,8 @@ const API::MatrixWorkspace_sptr LoadRKH::read1D() {
     for (int index = 0; index < pointsToRead; ++index) {
       localworkspace->getSpectrum(index).setSpectrumNo(static_cast<int>(columnOne[index]));
       localworkspace->getSpectrum(index).setDetectorID(static_cast<detid_t>(index + 1));
-      localworkspace->dataY(index)[0] = ydata[index];
-      localworkspace->dataE(index)[0] = errdata[index];
+      localworkspace->mutableY(index)[0] = ydata[index];
+      localworkspace->mutableE(index)[0] = errdata[index];
     }
 
     if (hasXError) {
@@ -363,7 +363,7 @@ const MatrixWorkspace_sptr LoadRKH::read2D(const std::string &firstLine) {
   // set the X-values to the common bin values we read above
   auto toPass = Kernel::make_cow<HistogramData::HistogramX>(axis0Data);
   for (size_t i = 0; i < nAxis1Values; ++i) {
-    outWrksp->setX(i, toPass);
+    outWrksp->setSharedX(i, toPass);
 
     // now read in the Y values
     MantidVec &YOut = outWrksp->dataY(i);

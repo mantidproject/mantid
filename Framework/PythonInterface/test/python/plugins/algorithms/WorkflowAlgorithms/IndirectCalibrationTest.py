@@ -32,7 +32,7 @@ class IndirectCalibrationTest(unittest.TestCase):
             ScaleByFactor=True,
         )
 
-        self.assertNotEqual(cal_ws_scaled.dataY(0) / cal_ws.dataY(0), 1.0)
+        self.assertNotEqual(cal_ws_scaled.y(0) / cal_ws.y(0), 1.0)
 
     def test_scale_by_factor_uses_factor(self):
         cal_ws_1_0 = IndirectCalibration(
@@ -54,7 +54,7 @@ class IndirectCalibrationTest(unittest.TestCase):
             ScaleFactor=0.9,
         )
 
-        self.assertEqual(cal_ws_0_9.dataY(0) / cal_ws_1_0.dataY(0), 0.9)
+        self.assertEqual(cal_ws_0_9.y(0) / cal_ws_1_0.y(0), 0.9)
 
 
 if __name__ == "__main__":

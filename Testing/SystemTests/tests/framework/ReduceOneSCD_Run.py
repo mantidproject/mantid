@@ -142,7 +142,7 @@ class ReduceOneSCD_Run(systemtesting.MantidSystemTest):
             EndWorkspaceIndex=monitor_index,
         )
 
-        monitor_count = integrated_monitor_ws.dataY(0)[0]
+        monitor_count = integrated_monitor_ws.y(0)[0]
         print("\n", run, " has calculated monitor count", monitor_count, "\n")
 
         #

@@ -80,9 +80,9 @@ public:
     auto outWS = doExecute(m_testWS, "0:2"); // Crop off the last spectra
     TS_ASSERT_EQUALS(3, outWS->getNumberHistograms());
 
-    TS_ASSERT_EQUALS(1.0, outWS->readY(0)[0])
-    TS_ASSERT_EQUALS(1.1, outWS->readY(1)[0])
-    TS_ASSERT_EQUALS(1.2, outWS->readY(2)[0])
+    TS_ASSERT_EQUALS(1.0, outWS->y(0)[0])
+    TS_ASSERT_EQUALS(1.1, outWS->y(1)[0])
+    TS_ASSERT_EQUALS(1.2, outWS->y(2)[0])
   }
 
   void test_split_crop() // Crop out workspace index 2
@@ -90,47 +90,47 @@ public:
     auto outWS = doExecute(m_testWS, "0:1,3:4"); // Crop off the middle spectra only
     TS_ASSERT_EQUALS(4, outWS->getNumberHistograms());
 
-    TS_ASSERT_EQUALS(1.0, outWS->readY(0)[0])
-    TS_ASSERT_EQUALS(1.1, outWS->readY(1)[0])
-    TS_ASSERT_EQUALS(1.3, outWS->readY(2)[0])
-    TS_ASSERT_EQUALS(1.4, outWS->readY(3)[0])
+    TS_ASSERT_EQUALS(1.0, outWS->y(0)[0])
+    TS_ASSERT_EQUALS(1.1, outWS->y(1)[0])
+    TS_ASSERT_EQUALS(1.3, outWS->y(2)[0])
+    TS_ASSERT_EQUALS(1.4, outWS->y(3)[0])
   }
 
   void test_add_spectra() {
     auto outWS = doExecute(m_testWS, "0+1");
     TS_ASSERT_EQUALS(1, outWS->getNumberHistograms());
-    TS_ASSERT_EQUALS(1.0 + 1.1, outWS->readY(0)[0])
+    TS_ASSERT_EQUALS(1.0 + 1.1, outWS->y(0)[0])
   }
 
   void test_add_spectra_that_are_not_neighbours() {
     auto outWS = doExecute(m_testWS, "0+4");
     TS_ASSERT_EQUALS(1, outWS->getNumberHistograms());
-    TS_ASSERT_EQUALS(1.0 + 1.4, outWS->readY(0)[0])
+    TS_ASSERT_EQUALS(1.0 + 1.4, outWS->y(0)[0])
   }
 
   void test_add_spectra_range() {
     auto outWS = doExecute(m_testWS, "0-2"); // Sum first and second spectra. Remove the rest.
     TS_ASSERT_EQUALS(1, outWS->getNumberHistograms());
 
-    TS_ASSERT_EQUALS(1.0 + 1.1 + 1.2, outWS->readY(0)[0])
+    TS_ASSERT_EQUALS(1.0 + 1.1 + 1.2, outWS->y(0)[0])
   }
 
   void test_combine_and_crop_ranges() {
     auto outWS = doExecute(m_testWS, "0-1,2,3,4"); //
     TS_ASSERT_EQUALS(4, outWS->getNumberHistograms());
 
-    TS_ASSERT_EQUALS(1.0 + 1.1, outWS->readY(0)[0])
-    TS_ASSERT_EQUALS(1.2, outWS->readY(1)[0])
-    TS_ASSERT_EQUALS(1.3, outWS->readY(2)[0])
-    TS_ASSERT_EQUALS(1.4, outWS->readY(3)[0])
+    TS_ASSERT_EQUALS(1.0 + 1.1, outWS->y(0)[0])
+    TS_ASSERT_EQUALS(1.2, outWS->y(1)[0])
+    TS_ASSERT_EQUALS(1.3, outWS->y(2)[0])
+    TS_ASSERT_EQUALS(1.4, outWS->y(3)[0])
   }
 
   void test_complex_schenario() {
     auto outWS = doExecute(m_testWS, "0:1,2-3"); //
     TS_ASSERT_EQUALS(3, outWS->getNumberHistograms());
 
-    TS_ASSERT_EQUALS(1.0, outWS->readY(0)[0])
-    TS_ASSERT_EQUALS(1.1, outWS->readY(1)[0])
-    TS_ASSERT_EQUALS(1.2 + 1.3, outWS->readY(2)[0])
+    TS_ASSERT_EQUALS(1.0, outWS->y(0)[0])
+    TS_ASSERT_EQUALS(1.1, outWS->y(1)[0])
+    TS_ASSERT_EQUALS(1.2 + 1.3, outWS->y(2)[0])
   }
 };

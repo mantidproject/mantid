@@ -67,7 +67,7 @@ def _applyIncidentEnergyCalibration(ws, eiWS, wsNames, report, algorithmLogging)
     """Update incident energy and wavelength in the sample logs."""
     originalEnergy = ws.getRun().getLogData("Ei").value
     originalWavelength = ws.getRun().getLogData("wavelength").value
-    energy = eiWS.readY(0)[0]
+    energy = eiWS.y(0)[0]
     wavelength = UnitConversion.run("Energy", "Wavelength", energy, 0, 0, 0, Direct, 5)
     AddSampleLog(
         Workspace=ws,
@@ -160,8 +160,8 @@ def _createFlatBkg(ws, wsType, windowWidth, wsNames, algorithmLogging):
         AveragingWindowWidth=windowWidth,
         EnableLogging=algorithmLogging,
     )
-    firstBinStart = bkgWS.dataX(0)[0]
-    firstBinEnd = bkgWS.dataX(0)[1]
+    firstBinStart = bkgWS.x(0)[0]
+    firstBinEnd = bkgWS.x(0)[1]
     bkgWS = CropWorkspace(InputWorkspace=bkgWS, OutputWorkspace=bkgWS, XMin=firstBinStart, XMax=firstBinEnd, EnableLogging=algorithmLogging)
     return bkgWS
 
@@ -275,7 +275,7 @@ def _sumDetectorsAtDistance(ws, distance, tolerance):
         if abs(distance - sampleToDetector) < tolerance:
             if detectorInfo.isMonitor(i) or detectorInfo.isMasked(i):
                 continue
-            ySums += ws.readY(i)
+            ySums += ws.y(i)
     return ySums
 
 
@@ -645,7 +645,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             return mainWS
         if not self.getProperty(common.PROP_ELASTIC_CHANNEL_WS).isDefault:
             indexWS = self.getProperty(common.PROP_ELASTIC_CHANNEL_WS).value
-            index = indexWS.readY(0)[0]
+            index = indexWS.y(0)[0]
         else:
             mode = self._chooseElasticChannelMode(mainWS)
             if mode == common.ELASTIC_CHANNEL_SAMPLE_LOG:
@@ -686,7 +686,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         else:
             sigma = self.getProperty(common.PROP_EPP_SIGMA).value
             if sigma == Property.EMPTY_DBL:
-                sigma = 10.0 * (mainWS.readX(0)[1] - mainWS.readX(0)[0])
+                sigma = 10.0 * (mainWS.x(0)[1] - mainWS.x(0)[0])
             detEPPWS = _calculateEPP(mainWS, sigma, self._names, self._subalgLogging)
         self._cleanup.cleanupLater(detEPPWS)
         return detEPPWS
@@ -796,7 +796,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         """Assigns Y-axis values of grouped detectors back to the original (ungrouped) detectors."""
         output_ws = f"{input_ws}ungrouped"
         CreateWorkspace(
-            DataX=ws_to_match.readX(0)[0] * ws_to_match.getNumberHistograms(),
+            DataX=ws_to_match.x(0)[0] * ws_to_match.getNumberHistograms(),
             DataY=np.full(shape=(ws_to_match.getNumberHistograms()), fill_value=0.0, dtype="float64"),
             Nspec=ws_to_match.getNumberHistograms(),
             ParentWorkspace=ws_to_match,
@@ -805,9 +805,9 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         )
         for group_no, grouped_detectors in enumerate(grouping_pattern.split(",")):
             det_list = list(map(int, grouped_detectors.split("+")))
-            det_grouped_val = input_ws.readY(group_no)
+            det_grouped_val = input_ws.y(group_no)
             for det_no in det_list:
-                mtd[output_ws].setY(det_no, det_grouped_val)
+                mtd[output_ws].setSharedY(det_no, det_grouped_val)
 
         return mtd[output_ws]
 
@@ -860,8 +860,8 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                     self.log().warning(
                         "Fitting to monitor data failed. Integrating the intensity over " + "the entire TOF range for normalisation."
                     )
-                    begin = monWS.dataX(monIndex)[0]
-                    end = monWS.dataX(monIndex)[-1]
+                    begin = monWS.x(monIndex)[0]
+                    end = monWS.x(monIndex)[-1]
                 else:
                     sigma = eppRow["Sigma"]
                     centre = eppRow["PeakCentre"]

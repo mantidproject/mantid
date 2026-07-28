@@ -62,8 +62,8 @@ class NormaliseSpectraTest(unittest.TestCase):
 
     def _check_workspace_is_within_boundaries(self, matrixWs, max, min):
         for i in range(matrixWs.getNumberHistograms()):
-            self._check_spectrum_less_than(matrixWs.readY(i), max)
-            self._check_spectrum_more_than(matrixWs.readY(i), min)
+            self._check_spectrum_less_than(matrixWs.y(i), max)
+            self._check_spectrum_more_than(matrixWs.y(i), min)
 
     def _check_spectrum_less_than(self, y_data, upper_boundary):
         for i in range(len(y_data)):

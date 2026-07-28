@@ -34,9 +34,9 @@ Plus(LHSWorkspace=input, RHSWorkspace=input, OutputWorkspace=output)
         RunPythonScript(InputWorkspace="ws", Code=code, OutputWorkspace="ws_out")
         ws_out = mtd["ws_out"]
 
-        self.assertAlmostEqual(ws_out.dataY(0)[0], 2.0, 3)
-        self.assertAlmostEqual(ws_out.dataY(0)[1], 4.0, 3)
-        self.assertAlmostEqual(ws_out.dataY(0)[2], 6.0, 3)
+        self.assertAlmostEqual(ws_out.y(0)[0], 2.0, 3)
+        self.assertAlmostEqual(ws_out.y(0)[1], 4.0, 3)
+        self.assertAlmostEqual(ws_out.y(0)[2], 6.0, 3)
 
     # Use an operation that sets 'output' to a workspace proxy
     def test_usingOperators(self):
@@ -44,9 +44,9 @@ Plus(LHSWorkspace=input, RHSWorkspace=input, OutputWorkspace=output)
         RunPythonScript(InputWorkspace="ws", Code=code, OutputWorkspace="ws_out")
         ws_out = mtd["ws_out"]
 
-        self.assertAlmostEqual(ws_out.dataY(0)[0], 5.0, 3)
-        self.assertAlmostEqual(ws_out.dataY(0)[1], 10.0, 3)
-        self.assertAlmostEqual(ws_out.dataY(0)[2], 15.0, 3)
+        self.assertAlmostEqual(ws_out.y(0)[0], 5.0, 3)
+        self.assertAlmostEqual(ws_out.y(0)[1], 10.0, 3)
+        self.assertAlmostEqual(ws_out.y(0)[2], 15.0, 3)
 
     def test_input_MatrixWorkspace_has_correct_python_type_when_executed(self):
         code = """from mantid.api import MatrixWorkspace
@@ -84,7 +84,7 @@ output = CreateSingleValuedWorkspace(DataValue='1')
 """
         c = RunPythonScript(Code=code)
         self.assertEqual(c.name(), "c")
-        self.assertEqual(c.readY(0)[0], 1)
+        self.assertEqual(c.y(0)[0], 1)
 
     def test_algorithm_executes_once_for_whole_input_group_and_not_once_per_group_member(self):
         DeleteWorkspace("ws")
@@ -101,7 +101,7 @@ Scale(input,OutputWorkspace=output,Factor=5)
         self.assertEqual(3, mtd.size())
         group = mtd["ws"]
         self.assertTrue(isinstance(group, WorkspaceGroup))
-        self.assertAlmostEqual(5.0, mtd["ws_1"].readY(0)[0], 8)
+        self.assertAlmostEqual(5.0, mtd["ws_1"].y(0)[0], 8)
 
     def test_code_with_a_mixture_of_line_endings_succeeds(self):
         code = """from mantid.simpleapi import Scale
@@ -112,7 +112,7 @@ Scale(input,OutputWorkspace=output,Factor=5)\n
 
         RunPythonScript(InputWorkspace="ws", Code=code, OutputWorkspace="ws")
         ws = mtd["ws"]
-        self.assertAlmostEqual(300.0, ws.readY(0)[0], 8)
+        self.assertAlmostEqual(300.0, ws.y(0)[0], 8)
 
     # ======================== Failure cases =====================================================
     def test_syntax_error_in_code_raises_Runtime_Error(self):

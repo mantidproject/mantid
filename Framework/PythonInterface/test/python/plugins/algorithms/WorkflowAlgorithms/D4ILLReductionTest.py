@@ -55,8 +55,8 @@ class D4ILLReductionTest(unittest.TestCase):
     def test_rotation(self):
         output_ws = "single_run_rotation"
         D4ILLReduction(Run="387230", OutputWorkspace=output_ws, ZeroPositionAngle=10, ExportAscii=True)
-        min_angular_range = mtd[output_ws][0].readX(0)[0]
-        max_angular_range = mtd[output_ws][0].readX(0)[256]
+        min_angular_range = mtd[output_ws][0].x(0)[0]
+        max_angular_range = mtd[output_ws][0].x(0)[256]
         self.assertAlmostEqual(min_angular_range, 19.70, delta=1e-2)
         self.assertAlmostEqual(max_angular_range, 147.70, delta=1e-2)
 
@@ -66,8 +66,8 @@ class D4ILLReductionTest(unittest.TestCase):
         self._check_output(mtd[output_ws], 256, 1, 2, ["Scattering Angle", "q"], ["Label", "MomentumTransfer"], "Height", "Label")
         integrated_ws = "integration_ws"
         Integration(InputWorkspace=output_ws, OutputWorkspace=integrated_ws)
-        self.assertEqual(mtd[integrated_ws][0].readY(0)[0], mtd[integrated_ws][1].readY(0)[0])
-        self.assertAlmostEqual(mtd[integrated_ws][0].readY(0)[0], 2769365.5, delta=1e-1)
+        self.assertEqual(mtd[integrated_ws][0].y(0)[0], mtd[integrated_ws][1].y(0)[0])
+        self.assertAlmostEqual(mtd[integrated_ws][0].y(0)[0], 2769365.5, delta=1e-1)
 
     def test_normalise_to_time(self):
         output_ws = "norm_to_time"
@@ -75,8 +75,8 @@ class D4ILLReductionTest(unittest.TestCase):
         self._check_output(mtd[output_ws], 256, 1, 2, ["Scattering Angle", "q"], ["Label", "MomentumTransfer"], "Height", "Label")
         integrated_ws = "integration_ws"
         Integration(InputWorkspace=output_ws, OutputWorkspace=integrated_ws)
-        self.assertEqual(mtd[integrated_ws][0].readY(0)[0], mtd[integrated_ws][1].readY(0)[0])
-        self.assertAlmostEqual(mtd[integrated_ws][0].readY(0)[0], 2762649.6, delta=1e-1)
+        self.assertEqual(mtd[integrated_ws][0].y(0)[0], mtd[integrated_ws][1].y(0)[0])
+        self.assertAlmostEqual(mtd[integrated_ws][0].y(0)[0], 2762649.6, delta=1e-1)
 
     def test_calibrate_bank_positions(self):
         bank_positions = np.linspace(0, 9, 9)
@@ -86,8 +86,8 @@ class D4ILLReductionTest(unittest.TestCase):
         output_ws = "calibrate_positions"
         D4ILLReduction(Run="387230", OutputWorkspace=output_ws, BankPositionOffsetsFile=calibration_file, ExportAscii=True)
         remove(calibration_file)  # clean up the temporary file
-        min_angular_range = mtd[output_ws][0].readX(0)[0]
-        max_angular_range = mtd[output_ws][0].readX(0)[256]
+        min_angular_range = mtd[output_ws][0].x(0)[0]
+        max_angular_range = mtd[output_ws][0].x(0)[256]
         self.assertAlmostEqual(min_angular_range, 9.68, delta=1e-2)
         self.assertAlmostEqual(max_angular_range, 137.68, delta=1e-2)
 

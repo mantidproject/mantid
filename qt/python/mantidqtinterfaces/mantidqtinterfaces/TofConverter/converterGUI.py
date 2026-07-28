@@ -108,7 +108,7 @@ class MainWindow(QMainWindow):
         ws_list = AnalysisDataService.retrieveWorkspaces(ws_names)
         for ws in ws_list:
             if isinstance(ws, WorkspaceSingleValue):
-                single_value_workspaces[ws.name()] = ws.readY(0)[0]
+                single_value_workspaces[ws.name()] = ws.y(0)[0]
         return single_value_workspaces
 
     def helpClicked(self):

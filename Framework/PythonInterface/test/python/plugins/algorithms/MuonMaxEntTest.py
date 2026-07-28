@@ -28,15 +28,15 @@ def create_workspace():
 
 def create_workspace_with_dead_detectors():
     inputData = CreateSimulationWorkspace("MUSR", "0,1,32")
-    xData = (inputData.dataX(0)[1:] + inputData.dataX(0)[:-1]) / 2.0
+    xData = (inputData.x(0)[1:] + inputData.x(0)[:-1]) / 2.0
     for j in range(inputData.getNumberHistograms()):
         if j == 42 or j == 24:
-            inputData.dataY(j)[:] = np.zeros(len(xData))
-            inputData.dataE(j)[:] = np.cos(0.3 * xData)
+            inputData.mutableY(j)[:] = np.zeros(len(xData))
+            inputData.mutableE(j)[:] = np.cos(0.3 * xData)
         else:
             phi = 2.0 * math.pi * (j + 1) / (inputData.getNumberHistograms() + 1)
-            inputData.dataY(j)[:] = np.sin(2.3 * xData + phi)
-            inputData.dataE(j)[:] = np.cos(0.3 * xData)
+            inputData.mutableY(j)[:] = np.sin(2.3 * xData + phi)
+            inputData.mutableE(j)[:] = np.cos(0.3 * xData)
     return inputData
 
 
@@ -73,9 +73,9 @@ class MuonMaxEntTest(unittest.TestCase):
         # check input data has 2 dead detectors
         for k in range(self._workspace_with_dead_detectors.getNumberHistograms()):
             if k == 24 or k == 42:
-                self.assertEqual(np.count_nonzero(self._workspace_with_dead_detectors.readY(k)), 0)
+                self.assertEqual(np.count_nonzero(self._workspace_with_dead_detectors.y(k)), 0)
             else:
-                self.assertNotEqual(np.count_nonzero(self._workspace_with_dead_detectors.readY(k)), 0)
+                self.assertNotEqual(np.count_nonzero(self._workspace_with_dead_detectors.y(k)), 0)
         MuonMaxent(
             InputWorkspace=self._workspace_with_dead_detectors,
             Npts=32768,
@@ -95,13 +95,13 @@ class MuonMaxEntTest(unittest.TestCase):
         self.assertEqual(freq.getNumberHistograms(), 1)
         for j in range(time.getNumberHistograms()):
             if j == 42 or j == 24:
-                self.assertEqual(np.count_nonzero(time.readY(j)), 0)
-                self.assertEqual(np.count_nonzero(con.readY(j)), 0)
+                self.assertEqual(np.count_nonzero(time.y(j)), 0)
+                self.assertEqual(np.count_nonzero(con.y(j)), 0)
                 self.assertEqual(phase.cell(j, 2), 0.0)
                 self.assertEqual(phase.cell(j, 1), 999.0)
             else:
-                self.assertNotEqual(np.count_nonzero(time.readY(j)), 0)
-                self.assertNotEqual(np.count_nonzero(con.readY(j)), 0)
+                self.assertNotEqual(np.count_nonzero(time.y(j)), 0)
+                self.assertNotEqual(np.count_nonzero(con.y(j)), 0)
                 self.assertNotEqual(phase.cell(j, 1), 999.0)
 
         self.assertEqual(phase.rowCount(), 64)

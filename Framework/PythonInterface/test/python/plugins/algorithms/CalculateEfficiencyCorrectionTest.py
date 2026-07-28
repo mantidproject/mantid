@@ -60,14 +60,14 @@ class CalculateEfficiencyCorrectionTest(unittest.TestCase):
         output_wksp = AnalysisDataService.retrieve(self._output_wksp)
 
         self.assertEqual(output_wksp.getAxis(0).getUnit().unitID(), "Wavelength")
-        self.assertAlmostEqual(output_wksp.readX(0)[79], 0.995)
+        self.assertAlmostEqual(output_wksp.x(0)[79], 0.995)
         if eventCheck:
-            self.assertAlmostEqual(output_wksp.readY(0)[79], 66.23970242900438)
+            self.assertAlmostEqual(output_wksp.y(0)[79], 66.23970242900438)
         else:
             if xsection == "AttenuationXSection":
-                self.assertAlmostEqual(output_wksp.readY(0)[79], 3250.28183501)
+                self.assertAlmostEqual(output_wksp.y(0)[79], 3250.28183501)
             if xsection == "TotalXSection":
-                self.assertAlmostEqual(output_wksp.readY(0)[79], 3245.70148939)
+                self.assertAlmostEqual(output_wksp.y(0)[79], 3245.70148939)
 
     # Result tests
     def testCalculateEfficiencyCorrectionAlphaForEventWksp(self):

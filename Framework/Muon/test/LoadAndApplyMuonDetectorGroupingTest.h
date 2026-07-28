@@ -158,38 +158,38 @@ public:
         std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("EMU00012345; Group; group2; Counts; #1_Raw"));
 
     // Check values against calculation by hand.
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.400, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.900, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[0], 0.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[4], 0.400, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[9], 0.900, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], 85.43223343, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], 0.87394, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], 25.57248768, 0.0001);
+    TS_ASSERT_DELTA(wsOut->y(0)[0], 85.43223343, 0.0001);
+    TS_ASSERT_DELTA(wsOut->y(0)[4], 0.87394, 0.0001);
+    TS_ASSERT_DELTA(wsOut->y(0)[9], 25.57248768, 0.0001);
     // Sqrt(2) * 0.005.
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.007071, 0.00001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.007071, 0.00001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.007071, 0.00001);
+    TS_ASSERT_DELTA(wsOut->e(0)[0], 0.007071, 0.00001);
+    TS_ASSERT_DELTA(wsOut->e(0)[4], 0.007071, 0.00001);
+    TS_ASSERT_DELTA(wsOut->e(0)[9], 0.007071, 0.00001);
 
     wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("EMU00012345; Group; group1; Counts; #1_Raw"));
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], 37.2468, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], 2.2974, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], 8.9759, 0.0001);
+    TS_ASSERT_DELTA(wsOut->y(0)[0], 37.2468, 0.0001);
+    TS_ASSERT_DELTA(wsOut->y(0)[4], 2.2974, 0.0001);
+    TS_ASSERT_DELTA(wsOut->y(0)[9], 8.9759, 0.0001);
 
     wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1_Raw"));
 
     // Asymmetry converts bin width to point data
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.050, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.450, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.950, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[0], 0.050, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[4], 0.450, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[9], 0.950, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.3928, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], 0.44885, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.4804, 0.0001);
+    TS_ASSERT_DELTA(wsOut->y(0)[0], -0.3928, 0.0001);
+    TS_ASSERT_DELTA(wsOut->y(0)[4], 0.44885, 0.0001);
+    TS_ASSERT_DELTA(wsOut->y(0)[9], -0.4804, 0.0001);
 
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.09699944, 0.00001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.6155, 0.00001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.18874449, 0.00001);
+    TS_ASSERT_DELTA(wsOut->e(0)[0], 0.09699944, 0.00001);
+    TS_ASSERT_DELTA(wsOut->e(0)[4], 0.6155, 0.00001);
+    TS_ASSERT_DELTA(wsOut->e(0)[9], 0.18874449, 0.00001);
   }
 
   void test_workspace_overwritten_if_name_is_duplicated() {
@@ -220,7 +220,7 @@ public:
     auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
         setup.wsGroup->getItem("EMU00012345; Group; group1; Counts; #1_Raw"));
 
-    TS_ASSERT_EQUALS(wsOut->readX(0).size(), 10 + 1);
+    TS_ASSERT_EQUALS(wsOut->x(0).size(), 10 + 1);
 
     ads.clear();
   }
@@ -324,27 +324,27 @@ public:
     auto wsOut =
         std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("EMU00012345; Group; group1; Counts; #1_Raw"));
 
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.100, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.400, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[0], 0.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[1], 0.100, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[4], 0.400, 0.001);
 
     wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("EMU00012345; Group; group1; Counts; #1"));
 
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.200, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.800, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[0], 0.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[1], 0.200, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[4], 0.800, 0.001);
 
     wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1_Raw"));
     // Asymmetry converted to point data
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.050, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.150, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.450, 0.0001);
+    TS_ASSERT_DELTA(wsOut->x(0)[0], 0.050, 0.0001);
+    TS_ASSERT_DELTA(wsOut->x(0)[1], 0.150, 0.0001);
+    TS_ASSERT_DELTA(wsOut->x(0)[4], 0.450, 0.0001);
 
     wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1"));
     // Rebinning happens before conversion to point data
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.100, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.300, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.900, 0.0001);
+    TS_ASSERT_DELTA(wsOut->x(0)[0], 0.100, 0.0001);
+    TS_ASSERT_DELTA(wsOut->x(0)[1], 0.300, 0.0001);
+    TS_ASSERT_DELTA(wsOut->x(0)[4], 0.900, 0.0001);
   }
 
   void test_TimeOffset_applied_correctly() {
@@ -364,27 +364,27 @@ public:
     auto wsOut =
         std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("EMU00012345; Group; group1; Counts; #1_Raw"));
 
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.500, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.600, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.900, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[0], 0.500, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[1], 0.600, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[4], 0.900, 0.001);
 
     wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("EMU00012345; Group; group1; Counts; #1"));
 
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.500, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.600, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.900, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[0], 0.500, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[1], 0.600, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[4], 0.900, 0.001);
 
     wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1_Raw"));
 
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.550, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.650, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.950, 0.0001);
+    TS_ASSERT_DELTA(wsOut->x(0)[0], 0.550, 0.0001);
+    TS_ASSERT_DELTA(wsOut->x(0)[1], 0.650, 0.0001);
+    TS_ASSERT_DELTA(wsOut->x(0)[4], 0.950, 0.0001);
 
     wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1"));
 
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.550, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.650, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.950, 0.0001);
+    TS_ASSERT_DELTA(wsOut->x(0)[0], 0.550, 0.0001);
+    TS_ASSERT_DELTA(wsOut->x(0)[1], 0.650, 0.0001);
+    TS_ASSERT_DELTA(wsOut->x(0)[4], 0.950, 0.0001);
   }
 
   void test_multiple_period_data_summing_periods_gives_correct_result() {
@@ -403,21 +403,21 @@ public:
     auto wsOut =
         std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("EMU00012345; Group; group1; Counts; #1_Raw"));
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], 26, 0.1);
-    TS_ASSERT_DELTA(wsOut->readY(0)[1], 30, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], 42, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[0], 26, 0.1);
+    TS_ASSERT_DELTA(wsOut->y(0)[1], 30, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[4], 42, 0.001);
 
     wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("EMU00012345; Group; group2; Counts; #1_Raw"));
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], 106, 0.1);
-    TS_ASSERT_DELTA(wsOut->readY(0)[1], 110, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], 122, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[0], 106, 0.1);
+    TS_ASSERT_DELTA(wsOut->y(0)[1], 110, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[4], 122, 0.001);
 
     wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1_Raw"));
     // Asymmetry on group 1 and 2
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.6061, 0.1);
-    TS_ASSERT_DELTA(wsOut->readY(0)[1], -0.5714, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], -0.4878, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[0], -0.6061, 0.1);
+    TS_ASSERT_DELTA(wsOut->y(0)[1], -0.5714, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[4], -0.4878, 0.001);
   }
 
   void test_multiple_period_data_subtracting_periods_gives_correct_result() {
@@ -437,21 +437,21 @@ public:
     auto wsOut =
         std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("EMU00012345; Group; group1; Counts; #1_Raw"));
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], -2, 0.1);
-    TS_ASSERT_DELTA(wsOut->readY(0)[1], -2, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], -2, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[0], -2, 0.1);
+    TS_ASSERT_DELTA(wsOut->y(0)[1], -2, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[4], -2, 0.001);
 
     wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("EMU00012345; Group; group2; Counts; #1_Raw"));
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], -2, 0.1);
-    TS_ASSERT_DELTA(wsOut->readY(0)[1], -2, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], -2, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[0], -2, 0.1);
+    TS_ASSERT_DELTA(wsOut->y(0)[1], -2, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[4], -2, 0.001);
 
     wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1_Raw"));
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.03676, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[1], -0.03268, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], -0.02382, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[0], -0.03676, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[1], -0.03268, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[4], -0.02382, 0.001);
   }
 
   void test_dead_time_correction_is_applied_correctly() {
@@ -475,21 +475,21 @@ public:
     auto wsOut =
         std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("EMU00012345; Group; group1; Counts; #1_Raw"));
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], 39.2846, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[1], 32.9165, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], 2.30412, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[0], 39.2846, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[1], 32.9165, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[4], 2.30412, 0.001);
 
     wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("EMU00012345; Group; group2; Counts; #1_Raw"));
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], 95.8873, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[1], 75.7566, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], 0.87585, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[0], 95.8873, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[1], 75.7566, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[4], 0.87585, 0.001);
 
     wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1_Raw"));
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.41874, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[1], -0.39421, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], 0.4491, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[0], -0.41874, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[1], -0.39421, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[4], 0.4491, 0.001);
   }
 
   void test_workspace_cropped_only_on_lower_limit() {
@@ -512,15 +512,15 @@ public:
     auto wsOut =
         std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("EMU00012345; Group; group1; Counts; #1_Raw"));
 
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.2, delta);
-    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.3, delta);
-    TS_ASSERT_DELTA(wsOut->readX(0)[8], 1.0, delta);
+    TS_ASSERT_DELTA(wsOut->x(0)[0], 0.2, delta);
+    TS_ASSERT_DELTA(wsOut->x(0)[1], 0.3, delta);
+    TS_ASSERT_DELTA(wsOut->x(0)[8], 1.0, delta);
 
     wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1_Raw"));
 
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.25, delta);
-    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.35, delta);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.65, delta);
+    TS_ASSERT_DELTA(wsOut->x(0)[0], 0.25, delta);
+    TS_ASSERT_DELTA(wsOut->x(0)[1], 0.35, delta);
+    TS_ASSERT_DELTA(wsOut->x(0)[4], 0.65, delta);
   }
 
   void test_group_asymmetry_range_applied_correctly() {}

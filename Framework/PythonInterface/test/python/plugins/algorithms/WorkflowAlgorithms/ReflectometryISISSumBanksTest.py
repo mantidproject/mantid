@@ -128,7 +128,7 @@ class ReflectometryISISSumBanksTest(unittest.TestCase):
 
         self.assertIsInstance(summed_ws, MatrixWorkspace)
         self.assertNotEqual(test_ws, summed_ws)
-        self.assertTrue(numpy.allclose(num_banks * test_ws.readY(0), summed_ws.readY(0)))
+        self.assertTrue(numpy.allclose(num_banks * test_ws.y(0), summed_ws.y(0)))
 
     def test_mask_and_sum_banks(self):
         num_banks = 3
@@ -142,7 +142,7 @@ class ReflectometryISISSumBanksTest(unittest.TestCase):
 
         self.assertIsInstance(summed_ws, MatrixWorkspace)
         self.assertNotEqual(test_ws, summed_ws)
-        self.assertTrue(numpy.allclose(num_banks_included * test_ws.readY(0), summed_ws.readY(0)))
+        self.assertTrue(numpy.allclose(num_banks_included * test_ws.y(0), summed_ws.y(0)))
 
     def test_monitors_are_prepended(self):
         num_banks = 3

@@ -54,7 +54,7 @@ def load_poldi(
     bin_width = cycle_time / dat.shape[-1]
     ws = exec_alg("Rebin", InputWorkspace=ws, Params=f"0,{bin_width},{cycle_time}")
     for ispec in range(ws.getNumberHistograms()):
-        ws.setY(ispec, dat[ispec, :])
+        ws.setSharedY(ispec, dat[ispec, :])
     ws = exec_alg("ConvertToPointData", InputWorkspace=ws)
     # add some logs (will eventually be set in file)
     exec_alg("AddSampleLog", Workspace=ws, LogName="chopperspeed", LogText=str(chopper_speed), LogType="Number")
@@ -111,7 +111,7 @@ def load_poldi_h5f(
     ws = exec_alg("LoadEmptyInstrument", Filename=fpath_idf)
     ws = exec_alg("Rebin", InputWorkspace=ws, Params=f"0,{bin_width},{cycle_time}")
     for ispec in range(ws.getNumberHistograms()):
-        ws.setY(ispec, dat[ispec, :])
+        ws.setSharedY(ispec, dat[ispec, :])
     ws = exec_alg("ConvertToPointData", InputWorkspace=ws)
     # add some logs (will eventually be set in file)
     exec_alg("AddSampleLog", Workspace=ws, LogName="chopperspeed", LogText=str(chopper_speed), LogType="Number")
@@ -215,7 +215,7 @@ def get_dspac_array_from_ws(ws: Workspace2D, lambda_min: float = 1.1, lambda_max
     # determine npulses to include in calc
     time_max = get_max_tof_from_chopper(l1, l1_chop, l2s, tths, lambda_max) + slit_offsets[0]
     dspac_min, dspac_max = get_dspac_limits(tths.min(), tths.max(), lambda_min, lambda_max)
-    bin_width = ws.readX(0)[1] - ws.readX(0)[0]
+    bin_width = ws.x(0)[1] - ws.x(0)[0]
     return get_final_dspac_array(bin_width, dspac_min, dspac_max, time_max)
 
 
@@ -275,14 +275,14 @@ def simulate_2d_data(
     # simulate detected spectra
     ipulses = np.arange(npulses)[:, None]
     offsets = (ipulses * cycle_time - slit_offsets - t0_const).flatten()  # note different sign to auto-corr!
-    tofs = ws_sim.readX(0)[:, None] + offsets  # same for all spectra
+    tofs = ws_sim.x(0)[:, None] + offsets  # same for all spectra
     path_length_ratio = (l2s + l1 - l1_chop) / (l2s + l1)
     tof_d1Ang = np.asarray([si.diffractometerConstants(ispec)[UnitParams.difc] * path_length_ratio[ispec] for ispec in range(nspec)])
     out = Parallel(n_jobs=min(4, cpu_count()), prefer="threads", return_as="generator")(
-        delayed(_do_interp)(tofs / tof_d1Ang[ispec], ws_1d.readX(0), ws_1d.readY(0)) for ispec in range(nspec)
+        delayed(_do_interp)(tofs / tof_d1Ang[ispec], ws_1d.x(0), ws_1d.y(0)) for ispec in range(nspec)
     )
     # set y values
-    [ws_sim.setY(ispec, yvec) for ispec, yvec in enumerate(out)]
+    [ws_sim.setSharedY(ispec, yvec) for ispec, yvec in enumerate(out)]
     ADS.addOrReplace(output_workspace, ws_sim)
     return ws_sim
 

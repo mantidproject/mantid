@@ -128,9 +128,9 @@ class DirectToolsTest(unittest.TestCase):
             StoreInADS=False,
         )
         wsOut = directtools.dynamicsusceptibility(ws, 100.0, zeroEnergyEpsilon=0.13)
-        numpy.testing.assert_equal(wsOut.readX(0), xs)
-        outYs = wsOut.readY(0)
-        outEs = wsOut.readE(0)
+        numpy.testing.assert_equal(wsOut.x(0), xs)
+        outYs = wsOut.y(0)
+        outEs = wsOut.e(0)
         self.assertEqual(outYs[2], 0.0)
         self.assertEqual(outEs[2], 0.0)
 

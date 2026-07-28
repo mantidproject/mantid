@@ -22,12 +22,12 @@ def saveCustom(idx, fname, sep=" ", logs=[], title=False, error=False):
     print("FILENAME: ", fname)
     a1 = mtd[str(idx.text())]
     titl = "#" + a1.getTitle() + "\n"
-    x1 = a1.readX(0)
+    x1 = a1.x(0)
     X1 = n.zeros((len(x1) - 1))
     for i in range(0, len(x1) - 1):
         X1[i] = (x1[i] + x1[i + 1]) / 2.0
-    y1 = a1.readY(0)
-    e1 = a1.readE(0)
+    y1 = a1.y(0)
+    e1 = a1.e(0)
     f = open(fname, "w")
     if title:
         f.write(titl)
@@ -53,12 +53,12 @@ def saveANSTO(idx, fname):
     fname += ".txt"
     print("FILENAME: ", fname)
     a1 = mtd[str(idx.text())]
-    x1 = a1.readX(0)
+    x1 = a1.x(0)
     X1 = n.zeros((len(x1) - 1))
     for i in range(0, len(x1) - 1):
         X1[i] = (x1[i] + x1[i + 1]) / 2.0
-    y1 = a1.readY(0)
-    e1 = a1.readE(0)
+    y1 = a1.y(0)
+    e1 = a1.e(0)
     sep = "\t"
     f = open(fname, "w")
     qres = (X1[1] - X1[0]) / X1[1]
@@ -74,12 +74,12 @@ def saveMFT(idx, fname, logs):
     fname += ".mft"
     print("FILENAME: ", fname)
     a1 = mtd[str(idx.text())]
-    x1 = a1.readX(0)
+    x1 = a1.x(0)
     X1 = n.zeros((len(x1) - 1))
     for i in range(0, len(x1) - 1):
         X1[i] = (x1[i] + x1[i + 1]) / 2.0
-    y1 = a1.readY(0)
-    e1 = a1.readE(0)
+    y1 = a1.y(0)
+    e1 = a1.e(0)
     sep = "\t"
     f = open(fname, "w")
     f.write("MFT\n")

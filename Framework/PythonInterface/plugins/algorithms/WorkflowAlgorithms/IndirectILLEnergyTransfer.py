@@ -302,7 +302,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         @param   xstart       :: MaskBins between x[0] and x[xstart]
         @param   xend         :: MaskBins between x[xend] and x[-1]
         """
-        x_values = mtd[ws].readX(0)
+        x_values = mtd[ws].x(0)
 
         if xstart > 0:
             logger.debug("Mask bins smaller than {0}".format(xstart))
@@ -348,7 +348,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         return    :: [xmin,xmax]
         """
 
-        y = mtd[ws].readY(0)
+        y = mtd[ws].y(0)
         size = len(y)
         mid = int(size / 2)
         imin = np.nanargmax(y[0:mid])
@@ -363,7 +363,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         return    :: [start,end]
         """
 
-        y = mtd[ws].readY(0)
+        y = mtd[ws].y(0)
         nonzero = np.argwhere(y > max(y) / 100)
         start = nonzero[0][0] if nonzero.any() else 0
         end = nonzero[-1][0] if nonzero.any() else len(y)
@@ -565,7 +565,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         elastic_channel = elastic_channel_equator
 
         x_new = elastic_tof + (x[0] - elastic_channel) * channel_width
-        ws.setX(0, x_new)
+        ws.setSharedX(0, x_new)
 
         expected_row_count = (N_TUBES * N_PIXELS_PER_TUBE) // self._group_by + self._get_single_detectors_number(ws.name()) + 1
 
@@ -586,7 +586,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
                 elastic_tof = elastic_tof_equator
                 elastic_channel = elastic_channel_equator
             x_new = elastic_tof + (x[pixel] - elastic_channel) * channel_width
-            ws.setX(pixel, x_new)
+            ws.setSharedX(pixel, x_new)
 
         for single_detector in range(N_PIXELS_PER_TUBE * N_TUBES + N_MONITOR, ws.getNumberHistograms()):
             group = rows - 1 - (ws.getNumberHistograms() - single_detector)
@@ -603,7 +603,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
                 )
 
             x_new = elastic_tof + (x[single_detector] - elastic_channel) * channel_width
-            ws.setX(single_detector, x_new)
+            ws.setSharedX(single_detector, x_new)
         ws.getAxis(0).setUnit("TOF")
 
         if output_epp:
@@ -627,16 +627,16 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         delay_offset = run.getLogData("monitor.time_of_flight_2").value - run.getLogData("PSD.time_of_flight_2").value
         ScaleX(InputWorkspace=mon_ws, OutputWorkspace=mon_ws, Factor=delay_offset, Operation="Add")
         frame_width = 1e6 * 2 * 4.0 / v_fixed
-        mon_data = mtd[mon_ws].readY(0)
+        mon_data = mtd[mon_ws].y(0)
         mon_elastic = np.argmax(mon_data)
-        mon_elastic_tof = mtd[mon_ws].readX(0)[mon_elastic]
+        mon_elastic_tof = mtd[mon_ws].x(0)[mon_elastic]
         n_frames_diff = math.floor((mon_elastic_tof - elastic_tof_equator) / frame_width) + 1
         ScaleX(InputWorkspace=mon_ws, OutputWorkspace=mon_ws, Factor=-n_frames_diff * frame_width, Operation="Add")
         # Energy is elastic energy and currently doesn't take the energy transfer into account, so do this in lambda
         ConvertUnits(InputWorkspace=mon_ws, OutputWorkspace=mon_ws, Target="Wavelength", EMode="Elastic")
         ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws, Target="Wavelength", EMode="Indirect")
-        monitor = mtd[mon_ws].readY(0)
-        x_axis = mtd[mon_ws].readX(0)
+        monitor = mtd[mon_ws].y(0)
+        x_axis = mtd[mon_ws].x(0)
         cutoff = np.max(monitor) * self._monitor_cutoff
         mon_range = x_axis[:-1][monitor > cutoff]
         self.log().information("Cutoff from {0} to {1} in Energy [mev]".format(mon_range[0], mon_range[-1]))
@@ -864,7 +864,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         @param ws :: input workspace name
         @param mon :: ws's monitor
         """
-        x = mtd[ws].readX(0)
+        x = mtd[ws].x(0)
 
         if self._reduction_type == "QENS":
             # Normalise bin-to-bin, do not use NormaliseToMonitor, it uses scaling that we don't want
@@ -876,13 +876,11 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
             int_ws = "__integral1_" + ws
             Integration(InputWorkspace=mon, OutputWorkspace=int_ws, RangeLower=x[0], RangeUpper=x[-1])
 
-            if mtd[int_ws].readY(0)[0] != 0:  # this needs to be checked
-                Scale(InputWorkspace=ws, OutputWorkspace=ws, Factor=1.0 / mtd[int_ws].readY(0)[0])
+            if mtd[int_ws].y(0)[0] != 0:  # this needs to be checked
+                Scale(InputWorkspace=ws, OutputWorkspace=ws, Factor=1.0 / mtd[int_ws].y(0)[0])
 
             # remember the integral of the monitor
-            AddSampleLog(
-                Workspace=ws, LogName="MonitorIntegral", LogType="Number", LogText=str(mtd[int_ws].readY(0)[0]), EnableLogging=False
-            )
+            AddSampleLog(Workspace=ws, LogName="MonitorIntegral", LogType="Number", LogText=str(mtd[int_ws].y(0)[0]), EnableLogging=False)
 
             DeleteWorkspace(int_ws)
 
@@ -901,13 +899,11 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
 
             Plus(LHSWorkspace=i1, RHSWorkspace=i2, OutputWorkspace=int_ws)
 
-            if mtd[int_ws].readY(0)[0] != 0:  # this needs to be checked
-                Scale(InputWorkspace=ws, OutputWorkspace=ws, Factor=1.0 / mtd[int_ws].readY(0)[0])
+            if mtd[int_ws].y(0)[0] != 0:  # this needs to be checked
+                Scale(InputWorkspace=ws, OutputWorkspace=ws, Factor=1.0 / mtd[int_ws].y(0)[0])
 
             # remember the integral of the monitor
-            AddSampleLog(
-                Workspace=ws, LogName="MonitorIntegral", LogType="Number", LogText=str(mtd[int_ws].readY(0)[0]), EnableLogging=False
-            )
+            AddSampleLog(Workspace=ws, LogName="MonitorIntegral", LogType="Number", LogText=str(mtd[int_ws].y(0)[0]), EnableLogging=False)
 
             # store the x_start and x_end derived from monitor, needed later for integration
             AddSampleLogMultiple(Workspace=ws, LogNames=["MonitorLeftPeak", "MonitorRightPeak"], LogValues=[x_start, x_end])

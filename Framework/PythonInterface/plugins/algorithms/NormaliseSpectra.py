@@ -37,7 +37,7 @@ class NormaliseSpectra(DataProcessorAlgorithm):
 
         for idx in range(num_hists):
             single_spectrum = ExtractSpectra(InputWorkspace=self._input_ws, WorkspaceIndexList=idx)
-            y_data = single_spectrum.readY(0)
+            y_data = single_spectrum.y(0)
             ymax = np.nanmax(y_data)
             # raises a RuntimeError if the ymax is <= 0
             if ymax <= 0:
@@ -49,8 +49,8 @@ class NormaliseSpectra(DataProcessorAlgorithm):
                     + "All spectra must have a maximum y value more than 0"
                 )
             Scale(InputWorkspace=single_spectrum, Operation="Multiply", Factor=(1 / ymax), OutputWorkspace=single_spectrum)
-            output_ws.setY(idx, single_spectrum.readY(0))
-            output_ws.setE(idx, single_spectrum.readE(0))
+            output_ws.setSharedY(idx, single_spectrum.y(0))
+            output_ws.setSharedE(idx, single_spectrum.e(0))
 
         # Delete extracted spectra workspace
         DeleteWorkspace("single_spectrum")

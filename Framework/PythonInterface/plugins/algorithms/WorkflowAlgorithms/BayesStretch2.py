@@ -76,9 +76,9 @@ class BayesStretch2(QuickBayesTemplate):
         return parallel(items=items, function=function, N=N)
 
     def do_one_spec(self, spec, data):
-        sx = data["sample"].readX(spec)
-        sy = data["sample"].readY(spec)
-        se = data["sample"].readE(spec)
+        sx = data["sample"].x(spec)
+        sy = data["sample"].y(spec)
+        se = data["sample"].e(spec)
 
         sample = {"x": sx, "y": sy, "e": se}
 
@@ -140,10 +140,10 @@ class BayesStretch2(QuickBayesTemplate):
         data["N_FWHM"] = self.getProperty("NumberFWHM").value
 
         # work around for bug
-        if data["start x"] < sample_ws.readX(0)[0]:
-            data["start x"] = sample_ws.readX(0)[0]
-        if data["end x"] > sample_ws.readX(0)[-1]:
-            data["end x"] = sample_ws.readX(0)[-1]
+        if data["start x"] < sample_ws.x(0)[0]:
+            data["start x"] = sample_ws.x(0)[0]
+        if data["end x"] > sample_ws.x(0)[-1]:
+            data["end x"] = sample_ws.x(0)[-1]
 
         logger.information(" Number of spectra = {0} ".format(N))
         logger.information(" Erange : {0}  to {1} ".format(data["start x"], data["end x"]))

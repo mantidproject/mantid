@@ -159,7 +159,7 @@ class IndirectCalibration(DataProcessorAlgorithm):
 
         workflow_prog.report("Summing Spectra")
         temp_sum = SumSpectra(InputWorkspace=calib_ws_name, OutputWorkspace="__temp_sum")
-        total = temp_sum.readY(0)[0]
+        total = temp_sum.y(0)[0]
         DeleteWorkspace(temp_sum)
 
         if self._intensity_scale is None:

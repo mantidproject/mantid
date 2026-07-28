@@ -183,12 +183,12 @@ double DiffractionEventCalibrateDetectors::intensity(double x, double y, double 
   g_log.debug() << tim << " to Rebin\n";
 
   // Find point of peak centre
-  const MantidVec &yValues = outputW->readY(0);
+  Mantid::HistogramData::HistogramY const &yValues = outputW->y(0);
   auto it = std::max_element(yValues.begin(), yValues.end());
   double peakHeight = *it;
   if (peakHeight == 0)
     return -0.000;
-  double peakLoc = outputW->readX(0)[it - yValues.begin()];
+  double peakLoc = outputW->x(0)[it - yValues.begin()];
 
   IAlgorithm_sptr fit_alg;
   try {
@@ -203,8 +203,8 @@ double DiffractionEventCalibrateDetectors::intensity(double x, double y, double 
   fit_alg->setProperty("Function", fun_str.str());
   fit_alg->setProperty("InputWorkspace", outputW);
   fit_alg->setProperty("WorkspaceIndex", 0);
-  fit_alg->setProperty("StartX", outputW->readX(0)[0]);
-  fit_alg->setProperty("EndX", outputW->readX(0)[outputW->blocksize()]);
+  fit_alg->setProperty("StartX", outputW->x(0)[0]);
+  fit_alg->setProperty("EndX", outputW->x(0)[outputW->blocksize()]);
   fit_alg->setProperty("MaxIterations", 200);
   fit_alg->setProperty("Output", "fit");
   fit_alg->executeAsChildAlg();

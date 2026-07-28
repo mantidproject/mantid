@@ -101,32 +101,32 @@ class IqtFitSequentialTest(unittest.TestCase):
 
     def _validate_matrix_values(self, matrixWS):
         # Check f0.A0
-        a0 = matrixWS.readY(0)
+        a0 = matrixWS.y(0)
         self.assertEqual(round(a0[0], 7), 0.0336564)
         self.assertEqual(round(a0[-1], 7), 0.0182411)
 
         # Check f1.Height
-        height = matrixWS.readY(2)
+        height = matrixWS.y(2)
         self.assertEqual(round(height[0], 6), 0.966344)
         self.assertEqual(round(height[-1], 6), 0.981759)
 
         # Check f1.Lifetime
-        lifetime = matrixWS.readY(3)
+        lifetime = matrixWS.y(3)
         self.assertEqual(round(lifetime[0], 7), 0.0287491)
         self.assertEqual(round(lifetime[-1], 7), 0.0034427)
 
     def _validate_group_values(self, groupWS):
         sub_ws = groupWS.getItem(0)
         # Check Data
-        data = sub_ws.readY(0)
+        data = sub_ws.y(0)
         self.assertEqual(round(data[0], 6), 1.0)
         self.assertEqual(round(data[-1], 6), 0.039044)
         # Check Calc
-        calc = sub_ws.readY(1)
+        calc = sub_ws.y(1)
         self.assertEqual(round(calc[0], 6), 1.0)
         self.assertEqual(round(calc[-1], 6), 0.033886)
         # Check Diff
-        diff = sub_ws.readY(2)
+        diff = sub_ws.y(2)
         self.assertEqual(round(diff[0], 6), 0.0)
         self.assertEqual(round(diff[-1], 6), 0.005157)
 

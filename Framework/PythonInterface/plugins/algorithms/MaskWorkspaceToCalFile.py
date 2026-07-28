@@ -65,7 +65,7 @@ class MaskWorkspaceToCalFile(PythonAlgorithm):
             mask_query = QueryValue()
 
         # check for consistency
-        if len(inputWorkspace.readX(0)) < 1:
+        if len(inputWorkspace.x(0)) < 1:
             raise RuntimeError("The input workspace is empty.")
 
         # define flags for masking and not-masking
@@ -85,7 +85,7 @@ class MaskWorkspaceToCalFile(PythonAlgorithm):
         for i in range(inputWorkspace.getNumberHistograms()):
             try:
                 det = inputWorkspace.getDetector(i)
-                y_value = inputWorkspace.readY(i)[0]
+                y_value = inputWorkspace.y(i)[0]
                 if mask_query.isMasked(specInfo, i, y_value):  # check if masked
                     group = masking_flag
                 else:

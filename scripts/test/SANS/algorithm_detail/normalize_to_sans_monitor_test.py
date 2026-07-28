@@ -27,7 +27,7 @@ def get_expected_for_spectrum_1_case(monitor_workspace, selected_detector):
     distance_source_detector = detector.getDistance(source)
     h = 6.62606896e-34
     mass = 1.674927211e-27
-    times = monitor_workspace.dataX(0)
+    times = monitor_workspace.x(0)
     lambda_after_unit_conversion = [(time * 1e-6) * h / distance_source_detector / mass * 1e10 for time in times]
     expected_lambda = [2.0, 4.0, 6.0, 8.0]
     expected_signal = [
@@ -112,7 +112,7 @@ class SANSNormalizeToMonitorTest(unittest.TestCase):
         # Now set specified monitors to specified values
         if data is not None:
             for key, value in list(data.items()):
-                data_y = rebinned.dataY(key)
+                data_y = rebinned.mutableY(key)
                 for index in range(len(data_y)):
                     data_y[index] = value[index]
 
@@ -137,7 +137,7 @@ class SANSNormalizeToMonitorTest(unittest.TestCase):
         self.assertEqual(unit.unitID(), "Wavelength")
 
         # Check the spectrum
-        self.assertEqual(len(workspace.dataY(0)), 3)
+        self.assertEqual(len(workspace.y(0)), 3)
         self.assertEqual(workspace.getNumberHistograms(), 1)
         single_spectrum = workspace.getSpectrum(0)
         self.assertEqual(single_spectrum.getSpectrumNo(), expected_monitor_spectrum)
@@ -147,12 +147,12 @@ class SANSNormalizeToMonitorTest(unittest.TestCase):
         for (
             e1,
             e2,
-        ) in zip(workspace.dataX(0), expected_lambda):
+        ) in zip(workspace.x(0), expected_lambda):
             self.assertTrue(abs(e1 - e2) < tolerance)
         for (
             e1,
             e2,
-        ) in zip(workspace.dataY(0), expected_signal):
+        ) in zip(workspace.y(0), expected_signal):
             self.assertLess(abs(e1 - e2), tolerance)
 
     def test_that_gets_normalization_for_general_background_and_no_prompt_peak(self):

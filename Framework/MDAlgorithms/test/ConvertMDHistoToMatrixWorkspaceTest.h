@@ -112,8 +112,8 @@ public:
         auto xDim = slice->getDimension(nonIntegr[0]);
         TS_ASSERT_EQUALS(xDim->getNBins(), matrix->blocksize());
         for (size_t i = 0; i < matrix->getNumberHistograms(); ++i) {
-          TS_ASSERT_EQUALS(matrix->readX(i).front(), xDim->getMinimum());
-          TS_ASSERT_EQUALS(matrix->readX(i).back(), xDim->getMaximum());
+          TS_ASSERT_EQUALS(matrix->x(i).front(), xDim->getMinimum());
+          TS_ASSERT_EQUALS(matrix->x(i).back(), xDim->getMaximum());
         }
       } else if (nonIntegr.size() == 2) {
         auto yDim = slice->getDimension(nonIntegr[1]);
@@ -149,7 +149,7 @@ public:
 
     MatrixWorkspace_sptr out_ws = do_execute_on_1D_directly(n_dims, signal, error_sq, nbins, min, max);
     TS_ASSERT_EQUALS(out_ws->getNumberHistograms(), 1);
-    auto first_x_spectra = out_ws->readX(0);
+    auto first_x_spectra = out_ws->x(0);
     TS_ASSERT_EQUALS(first_x_spectra.front(), -1);
     TS_ASSERT_EQUALS(first_x_spectra.back(), 1);
   }
@@ -199,7 +199,7 @@ public:
     MatrixWorkspace_sptr out_ws = convert_alg.getProperty("OutputWorkspace");
 
     TS_ASSERT_EQUALS(out_ws->getNumberHistograms(), 1);
-    auto first_x_spectra = out_ws->readX(0);
+    auto first_x_spectra = out_ws->x(0);
 
     TSM_ASSERT_DELTA("First coordinate in the incorrect position. Incorrect transformation.", first_x_spectra.front(),
                      -10, 1e-3);
@@ -274,7 +274,7 @@ public:
     TSM_ASSERT_EQUALS("Wrong dimension auto selected for output x-axis", in_ws->getDimension(0)->getName(),
                       out_ws->getDimension(0)->getName());
     TS_ASSERT_EQUALS(out_ws->getNumberHistograms(), 1);
-    auto first_x_spectra = out_ws->readX(0);
+    auto first_x_spectra = out_ws->x(0);
 
     TSM_ASSERT_DELTA("First coordinate in the incorrect position. Incorrect transformation.", first_x_spectra.front(),
                      -10, 1e-3);
@@ -348,7 +348,7 @@ public:
     TSM_ASSERT_EQUALS("Wrong dimension auto selected for output x-axis", in_ws->getDimension(1)->getName(),
                       out_ws->getDimension(0)->getName());
     TS_ASSERT_EQUALS(out_ws->getNumberHistograms(), 1);
-    auto first_x_spectra = out_ws->readX(0);
+    auto first_x_spectra = out_ws->x(0);
     TSM_ASSERT_DELTA("First coordinate in the incorrect position. Incorrect transformation.", first_x_spectra.front(),
                      -8, 1e-3);
     TSM_ASSERT_DELTA("Last coordinate in the incorrect position. Incorrect transformation.", first_x_spectra.back(), 8,
@@ -360,7 +360,7 @@ public:
     out_ws = convert_alg.getProperty("OutputWorkspace");
     TSM_ASSERT_EQUALS("FindXAxis if off", "X", out_ws->getDimension(0)->getName());
     TS_ASSERT_EQUALS(out_ws->getNumberHistograms(), 1);
-    first_x_spectra = out_ws->readX(0);
+    first_x_spectra = out_ws->x(0);
     TSM_ASSERT_DELTA("First coordinate in the incorrect position. Incorrect transformation.", first_x_spectra.front(),
                      -5, 1e-3);
     TSM_ASSERT_DELTA("Last coordinate in the incorrect position. Incorrect transformation.", first_x_spectra.back(), 5,

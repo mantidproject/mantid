@@ -29,7 +29,7 @@ def mask_ws(ws_to_mask, xstart, xend):
         xend:     MaskBins between x[xend] and x[-1]
 
     """
-    x_values = ws_to_mask.readX(0)
+    x_values = ws_to_mask.x(0)
 
     if xstart > 0:
         logger.debug("Mask bins smaller than {0}".format(xstart))
@@ -197,8 +197,8 @@ class MatchPeaks(PythonAlgorithm):
         # perform actual shift
         for i in range(output_ws.getNumberHistograms()):
             # Shift Y and E values of spectrum i
-            output_ws.setY(i, np.roll(output_ws.readY(i), int(-to_shift[i])))
-            output_ws.setE(i, np.roll(output_ws.readE(i), int(-to_shift[i])))
+            output_ws.setSharedY(i, np.roll(output_ws.y(i), int(-to_shift[i])))
+            output_ws.setSharedE(i, np.roll(output_ws.e(i), int(-to_shift[i])))
 
         self.log().debug("Shift array: {0}".format(-to_shift))
 
@@ -253,12 +253,12 @@ class MatchPeaks(PythonAlgorithm):
         peak_bin = np.ones(input_ws.getNumberHistograms()) * mid_bin
         # Bin range: difference between mid bin and peak bin should be in this range
         tolerance = int(mid_bin / 2)
-        x_values = input_ws.readX(0)
+        x_values = input_ws.x(0)
 
         for i in range(input_ws.getNumberHistograms()):
             fit = fit_table.row(i)
             # Bin number, where Y has its maximum
-            y_values = input_ws.readY(i)
+            y_values = input_ws.y(i)
             max_pos = np.argmax(y_values)
             peak_plus_error = abs(fit["PeakCentreError"]) + abs(fit["PeakCentre"])
 

@@ -65,9 +65,9 @@ class EQSANSSolid(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance = 0.2
-        mtd["EQSANS_1466_event_Iq"].dataY(0)[0] = 269.688
-        mtd["EQSANS_1466_event_Iq"].dataE(0)[0] = 13.8013
-        mtd["EQSANS_1466_event_Iq"].dataY(0)[2] = 11.3167
+        mtd["EQSANS_1466_event_Iq"].mutableY(0)[0] = 269.688
+        mtd["EQSANS_1466_event_Iq"].mutableE(0)[0] = 13.8013
+        mtd["EQSANS_1466_event_Iq"].mutableY(0)[2] = 11.3167
 
         self.disableChecking.append("Instrument")
         self.disableChecking.append("Sample")

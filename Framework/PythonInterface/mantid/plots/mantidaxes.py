@@ -336,11 +336,11 @@ class MantidAxes(Axes):
             raise ValueError("Artist '{}' is not tracked and so does not have an associated workspace.".format(artist))
         workspace, spec_num = self.get_artists_workspace_and_spec_num(artist)
         if artist.axes.creation_args[0].get("axis", None) == MantidAxType.BIN:
-            if any([workspace.readE(i)[spec_num] != 0 for i in range(0, workspace.getNumberHistograms())]):
+            if any([workspace.e(i)[spec_num] != 0 for i in range(0, workspace.getNumberHistograms())]):
                 return True
         elif spec_num is not None:
             workspace_index = workspace.getIndexFromSpectrumNumber(spec_num)
-            if any(workspace.readE(workspace_index) != 0):
+            if any(workspace.e(workspace_index) != 0):
                 return True
         return False
 

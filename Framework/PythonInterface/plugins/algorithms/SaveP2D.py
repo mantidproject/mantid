@@ -125,12 +125,12 @@ class SaveP2D(PythonAlgorithm):
                 print("{:4.0f}%".format(cdp * 100.0 / ndp))
                 # iterate over all dSpacing values for the selected dPerpendicular value
                 for cd in range(Data.getDimension(0).getNBins()):
-                    d = Data.dataX(cdp)[cd]
+                    d = Data.x(cdp)[cd]
                     # skip if d is the same as before
                     if d == last_d:
                         break
                     last_d = d
-                    Y = Data.dataY(cdp)[cd]
+                    Y = Data.y(cdp)[cd]
                     # skip NaN values for intensity if option is activated
                     if self.getPropertyValue("RemoveNaN") == "1":
                         if math.isnan(Y):

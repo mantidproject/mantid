@@ -33,7 +33,7 @@ class HomeRunInfoWidgetModel(object):
         workspace = self._data.current_workspace
         total = 0
         for i in range(workspace.getNumberHistograms()):
-            total += sum(workspace.dataY(i))
+            total += sum(workspace.y(i))
 
         return total
 

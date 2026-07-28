@@ -145,8 +145,8 @@ def uniqueDescription(name, wksp):
         materialname = sample.getMaterial().name()
         shapeXML = sample.getShape().getShapeXML()
         density = str(sample.getMaterial().numberDensityEffective)
-        wavelength = mtd[wksp].readX(0)
-        wavelength = "{} to {} with {} bins".format(wavelength[0], wavelength[-1], mtd[wksp].readY(0).size)
+        wavelength = mtd[wksp].x(0)
+        wavelength = "{} to {} with {} bins".format(wavelength[0], wavelength[-1], mtd[wksp].y(0).size)
         value = ";".join((materialname, density, shapeXML, wavelength))
     elif name == CAL_WKSP:
         value = str(np.sum(mtd[wksp].column("difc")))  # less false collisions than the workspace name

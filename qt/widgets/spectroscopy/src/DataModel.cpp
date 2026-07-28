@@ -149,7 +149,7 @@ bool DataModel::setResolution(const std::string &resName, WorkspaceID workspaceI
     const auto resSpectra = resolution->getNumberHistograms() == 1 ? FunctionModelSpectra(0, 0) : spectra;
     for (const auto &spIndex : resSpectra) {
       try {
-        const auto &y = resolution->readY(spIndex.value);
+        const auto &y = resolution->y(spIndex.value);
         hasValidValues = hasValidValues && std::ranges::all_of(y, [](double value) { return value == value; });
       } catch (std::range_error const &) {
         // Either resolution has one histogram, or there should be 1-1 correspondence

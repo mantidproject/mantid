@@ -181,12 +181,12 @@ class ClipPeaks(PythonAlgorithm):
         e = input_ws.extractE()
 
         for histogram in range(n_histo):
-            peak_clip_ws.setX(histogram, x[histogram])
-            peak_clip_ws.setY(
+            peak_clip_ws.setSharedX(histogram, x[histogram])
+            peak_clip_ws.setSharedY(
                 histogram,
                 self.peak_clip(y[histogram], clip_window_size=window, decrease=decreasing, use_lls=lls_set, smooth_factor=smooth_range),
             )
-            peak_clip_ws.setE(histogram, e[histogram])
+            peak_clip_ws.setSharedE(histogram, e[histogram])
 
         self.setProperty("OutputWorkspace", peak_clip_ws)
 

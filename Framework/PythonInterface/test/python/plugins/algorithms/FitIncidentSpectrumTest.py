@@ -41,9 +41,9 @@ class FitIncidentSpectrumTest(unittest.TestCase):
         self.incident_wksp = ConvertToPointData(InputWorkspace=self.incident_wksp, OutputWorkspace="foobar")
         # Add the incident spectrum to the workspace
         corrected_spectrum = self.generate_incident_spectrum(
-            self.incident_wksp.readX(0), self.phiMax, self.phiEpi, self.alpha, self.lambda1, self.lambda2, self.lambdaT
+            self.incident_wksp.x(0), self.phiMax, self.phiEpi, self.alpha, self.lambda1, self.lambda2, self.lambdaT
         )
-        self.incident_wksp.setY(0, corrected_spectrum)
+        self.incident_wksp.setSharedY(0, corrected_spectrum)
         self.agl_instance = FitIncidentSpectrum
 
     def generate_incident_spectrum(self, wavelengths, phi_max, phi_epi, alpha, lambda_1, lambda_2, lambda_T):
@@ -65,7 +65,7 @@ class FitIncidentSpectrumTest(unittest.TestCase):
         )
         self.assertTrue(alg_test.isExecuted())
         fit_wksp = AnalysisDataService.retrieve("fit_wksp")
-        self.assertEqual(fit_wksp.readX(0).all(), np.arange(0.2, 3, 0.01).all())
+        self.assertEqual(fit_wksp.x(0).all(), np.arange(0.2, 3, 0.01).all())
 
     def test_fit_cubic_spline_produces_fit_with_same_range_as_binning_for_calc(self):
         binning_for_calc = "0.2,0.1,3.0"
@@ -80,7 +80,7 @@ class FitIncidentSpectrumTest(unittest.TestCase):
         )
         self.assertTrue(alg_test.isExecuted())
         fit_wksp = AnalysisDataService.retrieve("fit_wksp")
-        self.assertEqual(fit_wksp.readX(0).all(), np.arange(0.2, 3, 0.1).all())
+        self.assertEqual(fit_wksp.x(0).all(), np.arange(0.2, 3, 0.1).all())
 
     def test_fit_cubic_spline_via_mantid_produces_fit_with_same_range_as_binning_for_calc(self):
         binning_for_calc = "0.2,0.1,3.0"
@@ -95,7 +95,7 @@ class FitIncidentSpectrumTest(unittest.TestCase):
         )
         self.assertTrue(alg_test.isExecuted())
         fit_wksp = AnalysisDataService.retrieve("fit_wksp")
-        self.assertEqual(fit_wksp.readX(0).all(), np.arange(0.2, 3, 0.1).all())
+        self.assertEqual(fit_wksp.x(0).all(), np.arange(0.2, 3, 0.1).all())
 
     def test_fit_cubic_spline_both_derivatives(self):
         binning_for_calc = "0.2,0.1,3.0"
@@ -112,9 +112,9 @@ class FitIncidentSpectrumTest(unittest.TestCase):
         self.assertTrue(alg_test.isExecuted())
         fit_wksp = AnalysisDataService.retrieve("fit_wksp")
         # check values at peak at wavelength~1.0 A
-        self.assertAlmostEqual(fit_wksp.readY(0)[8], 43064.09, 2)
-        self.assertAlmostEqual(fit_wksp.readY(1)[8], -9772.89, 2)
-        self.assertAlmostEqual(fit_wksp.readY(2)[8], -494934.77, 2)
+        self.assertAlmostEqual(fit_wksp.y(0)[8], 43064.09, 2)
+        self.assertAlmostEqual(fit_wksp.y(1)[8], -9772.89, 2)
+        self.assertAlmostEqual(fit_wksp.y(2)[8], -494934.77, 2)
 
 
 if __name__ == "__main__":

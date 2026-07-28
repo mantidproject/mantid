@@ -212,7 +212,7 @@ def cc_calibrate_groups(
             if group in SkipCrossCorrelation:
                 # set the detector offsets to zero
                 for item in ws_indices:
-                    mtd["_tmp_group_cc_main"].dataY(int(item))[0] = 0.0
+                    mtd["_tmp_group_cc_main"].mutableY(int(item))[0] = 0.0
                 logger.notice(f"Cross correlation skipped for group-{group}.")
                 converged = True
             else:
@@ -399,7 +399,7 @@ def pdcalibration_groups(
             difc_calib = mtd[f"{output_basename}_pd_diffcal_skip"].row(i)["difc"]
         else:
             difc_calib = mtd[f"{output_basename}_cc_pd_diffcal_tmp"].row(i)["difc"]
-        if mtd[f"{output_basename}_pd_diffcal_mask"].readY(i)[0] == 0.0:
+        if mtd[f"{output_basename}_pd_diffcal_mask"].y(i)[0] == 0.0:
             diff_difc = abs(difc_bak - difc_calib) / difc_calib * 100.0
         else:
             diff_difc = np.inf

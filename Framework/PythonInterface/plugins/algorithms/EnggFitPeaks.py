@@ -130,7 +130,7 @@ class EnggFitPeaks(PythonAlgorithm):
         self.setProperty("FittedPeaks", fitted_peaks)
 
     def _any_expected_peaks_in_ws_range(self, input_ws, expected_peaks):
-        x_axis = input_ws.readX(0)
+        x_axis = input_ws.x(0)
         x_min = min(x_axis)
         x_max = max(x_axis)
 
@@ -370,7 +370,7 @@ class EnggFitPeaks(PythonAlgorithm):
         y_values = [1] * (len(expected_peaks) - 1)
         ws_tof = CreateWorkspace(UnitX="TOF", DataX=expected_peaks, DataY=y_values, ParentWorkspace=input_ws)
         ws_d = ConvertUnits(InputWorkspace=ws_tof, Target="dSpacing")
-        return ws_d.readX(0)
+        return ws_d.x(0)
 
     def _expected_peaks_in_tof(self, expected_peaks, in_wks, wks_index):
         """
@@ -386,7 +386,7 @@ class EnggFitPeaks(PythonAlgorithm):
                                       ParentWorkspace=in_wks)
         target_units = 'TOF'
         wsTo = sapi.ConvertUnits(InputWorkspace=ws_from, Target=target_units)
-        peaks_ToF = wsTo.dataX(0)
+        peaks_ToF = wsTo.x(0)
         values = [peaks_ToF[i] for i in range(0,len(peaks_ToF))]
 
         @param expected_peaks :: vector of expected peaks, in dSpacing units
@@ -443,7 +443,7 @@ class EnggFitPeaks(PythonAlgorithm):
                 )
             )
 
-        peaks_tof = output_ws.readX(0)
+        peaks_tof = output_ws.x(0)
         if len(peaks_tof) != len(expected_peaks):
             raise RuntimeError(
                 "Conversion of units went wrong. Converted {0} peaks from the "
@@ -525,7 +525,7 @@ class EnggFitPeaks(PythonAlgorithm):
             True if the peak function parameters and error estimates look acceptable
             so the peak should be used.
         """
-        spec_x_axis = wks.readX(wks_index)
+        spec_x_axis = wks.x(wks_index)
         center = self._find_peak_center_in_params(fitted_params)
         intensity = self._find_peak_intensity_in_params(fitted_params)
         return (

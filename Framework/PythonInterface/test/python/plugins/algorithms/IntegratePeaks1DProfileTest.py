@@ -52,9 +52,9 @@ class IntegratePeaks1DProfileTest(unittest.TestCase):
                 if ipix > 0:
                     # add small shift to simulated peak in second pixel so can check d-spacing tolerance
                     pk_func["X0"] = cls.pk_tof + 5
-                y = cls.ws.dataY(int(ispec))
-                y += pk_func(cls.ws.readX(int(ispec))[:-1])  # note shifts peak centre by half a bin
-                cls.ws.setE(int(ispec), np.sqrt(y))
+                y = cls.ws.mutableY(int(ispec))
+                y += pk_func(cls.ws.x(int(ispec))[:-1])  # note shifts peak centre by half a bin
+                cls.ws.setSharedE(int(ispec), np.sqrt(y))
 
         # clone workspace and delete edge peak so only 1 peak (quicker for most tests)
         cls.peaks = CloneWorkspace(cls.peaks_edge, OutputWorkspace="peaks")

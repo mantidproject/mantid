@@ -468,7 +468,7 @@ class LoadWANDSCD(PythonAlgorithm):
         wi = np.arange(nHist)
         group_ids = (wi // 512 // grouping) * (512 // grouping) + (wi % 512 // grouping) + 1.0
         for i in range(nHist):
-            grouping_ws.dataY(i)[0] = group_ids[i]
+            grouping_ws.mutableY(i)[0] = group_ids[i]
             grouping_ws.getSpectrum(i).setDetectorID(i)
 
         return grouping_ws

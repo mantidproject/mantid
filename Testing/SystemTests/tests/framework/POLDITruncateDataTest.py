@@ -35,13 +35,13 @@ class POLDITruncateDataTest(systemtesting.MantidSystemTest):
         currentWs = mtd[self.dataFileName]
 
         # Input data has 10 extra bins
-        self.assertEqual(len(currentWs.readX(0)), 510)
+        self.assertEqual(len(currentWs.x(0)), 510)
 
         # First without keeping the additional data
         truncated = PoldiTruncateData(currentWs)
 
         self.assertEqual(truncated.getNumberHistograms(), currentWs.getNumberHistograms())
-        self.assertEqual(len(truncated.readX(0)), 500)
+        self.assertEqual(len(truncated.x(0)), 500)
 
         # now keeping the additional data
         truncated = PoldiTruncateData(currentWs, ExtraCountsWorkspaceName="extra")
@@ -51,7 +51,7 @@ class POLDITruncateDataTest(systemtesting.MantidSystemTest):
         extraWs = mtd["extra"]
 
         self.assertEqual(extraWs.getNumberHistograms(), 1)
-        extraCounts = extraWs.readY(0)
+        extraCounts = extraWs.y(0)
         self.assertEqual(len(extraCounts), 10)
 
         # there are 13 counts in the first bin
@@ -67,10 +67,10 @@ class POLDITruncateDataTest(systemtesting.MantidSystemTest):
         currentWs = mtd[self.dataFileName]
 
         cropped = CropWorkspace(currentWs, XMax=1497.0)
-        self.assertEqual(len(cropped.readX(0)), 500)
+        self.assertEqual(len(cropped.x(0)), 500)
 
         truncated = PoldiTruncateData(cropped)
-        self.assertEqual(len(truncated.readX(0)), len(cropped.readX(0)))
+        self.assertEqual(len(truncated.x(0)), len(cropped.x(0)))
 
         # Now there are no extra bins.
         truncated = PoldiTruncateData(cropped, ExtraCountsWorkspaceName="moreCounts")
@@ -85,7 +85,7 @@ class POLDITruncateDataTest(systemtesting.MantidSystemTest):
         currentWs = mtd[self.dataFileName]
 
         cropped = CropWorkspace(currentWs, XMax=1197.0)
-        self.assertEqual(len(cropped.readX(0)), 400)
+        self.assertEqual(len(cropped.x(0)), 400)
 
         truncated = PoldiTruncateData(cropped)
         self.assertEqual(truncated, None)

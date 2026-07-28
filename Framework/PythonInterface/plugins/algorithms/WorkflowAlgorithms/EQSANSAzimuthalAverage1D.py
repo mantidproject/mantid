@@ -261,10 +261,10 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         @param ws_frame1: frame 1 workspace object
         @param ws_frame2: frame 2 workspace object
         """
-        iq_f1 = ws_frame1.readY(0)
-        iq_f2 = ws_frame2.readY(0)
-        q_f1 = ws_frame1.readX(0)
-        q_f2 = ws_frame2.readX(0)
+        iq_f1 = ws_frame1.y(0)
+        iq_f2 = ws_frame2.y(0)
+        q_f1 = ws_frame1.x(0)
+        q_f2 = ws_frame2.x(0)
         scale_f1 = 0.0
         scale_f2 = 0.0
         scale_factor = 1.0
@@ -310,7 +310,7 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
 
         # Dq is not propagated by scale, so do it by hand
         # First, store Dq
-        dq = ws_frame1.readDx(0)
+        dq = ws_frame1.dx(0)
 
         alg = AlgorithmManager.create("Scale")
         alg.initialize()
@@ -323,7 +323,7 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         output_ws = alg.getProperty("OutputWorkspace").value
 
         # ... then put Dq back
-        dq_output = output_ws.dataDx(0)
+        dq_output = output_ws.mutableDx(0)
         for i in range(len(dq_output)):
             dq_output[i] = dq[i]
 

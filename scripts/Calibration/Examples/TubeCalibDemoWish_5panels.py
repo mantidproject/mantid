@@ -75,7 +75,7 @@ def CalibrateWish(run_per_panel_list):
         # copy data from the current panel to the whole_instrument
         for i in range(tube_set.getNumTubes()):
             for spec_num in tube_set.getTube(i):
-                whole_instrument.setY(spec_num, ws.dataY(spec_num))
+                whole_instrument.setSharedY(spec_num, ws.y(spec_num))
 
     # calibrate the whole_instrument with the last calibrated panel which has the calibration accumulation
     # of all the others

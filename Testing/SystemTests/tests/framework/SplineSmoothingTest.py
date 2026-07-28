@@ -77,10 +77,10 @@ class LoadTests(unittest.TestCase):
         self.assertEqual(3, ws_smooth.getNumberHistograms())
         self.assertEqual(14168, ws_smooth.blocksize())
 
-        self.assertAlmostEqual(0.24360103, ws_smooth.readX(2)[0], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.86546920, ws_smooth.readX(2)[1738], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.24360103, ws_smooth.x(2)[0], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.86546920, ws_smooth.x(2)[1738], places=DIFF_PLACES)
 
-        self.assertAlmostEqual(57.1213842, ws_smooth.readY(2)[0], places=DIFF_PLACES)
+        self.assertAlmostEqual(57.1213842, ws_smooth.y(2)[0], places=DIFF_PLACES)
 
     def test_stheta_curve_spline_smoothed(self):
         ws_smooth = mtd["SthetaOutSpline"]
@@ -89,8 +89,8 @@ class LoadTests(unittest.TestCase):
         self.assertEqual(1, ws_smooth.getNumberHistograms())
         self.assertEqual(463, ws_smooth.blocksize())
 
-        self.assertAlmostEqual(2.3405, ws_smooth.readX(0)[0], places=DIFF_PLACES)
-        self.assertAlmostEqual(56.9972, ws_smooth.readX(0)[231], places=DIFF_PLACES)
+        self.assertAlmostEqual(2.3405, ws_smooth.x(0)[0], places=DIFF_PLACES)
+        self.assertAlmostEqual(56.9972, ws_smooth.x(0)[231], places=DIFF_PLACES)
 
     def test_enginx_curve_further_checks(self):
         ws_smooth_enginx = mtd["enginxOutSpline"]
@@ -100,6 +100,6 @@ class LoadTests(unittest.TestCase):
         ws_stetha = mtd["wsStheta"]
 
         for i in range(0, 462):
-            self.assertTrue(ws_enginx.readX(0)[i], ws_smooth_enginx.readX(0)[i])
-            self.assertTrue(ws_stetha.readX(0)[i], ws_smooth_stetha.readX(0)[i])
-            self.assertTrue(ws_stetha.readY(0)[i], ws_smooth_stetha.readY(0)[i])
+            self.assertTrue(ws_enginx.x(0)[i], ws_smooth_enginx.x(0)[i])
+            self.assertTrue(ws_stetha.x(0)[i], ws_smooth_stetha.x(0)[i])
+            self.assertTrue(ws_stetha.y(0)[i], ws_smooth_stetha.y(0)[i])

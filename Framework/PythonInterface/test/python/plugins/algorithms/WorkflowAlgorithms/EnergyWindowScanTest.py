@@ -22,8 +22,8 @@ class EnergyWindowScanTest(unittest.TestCase):
             TotalRange="-0.5,0.5",
         )
         scan_ws = mtd["Scan_eisf"]
-        self.assertEqual(round(scan_ws.readY(0)[0], 7), 0.5091999)
-        self.assertEqual(round(scan_ws.readY(1)[0], 7), 0.5047055)
+        self.assertEqual(round(scan_ws.y(0)[0], 7), 0.5091999)
+        self.assertEqual(round(scan_ws.y(1)[0], 7), 0.5047055)
 
     def test_OSIRIS(self):
         EnergyWindowScan(
@@ -37,8 +37,8 @@ class EnergyWindowScanTest(unittest.TestCase):
             TotalRange="-1.0,1.5",
         )
 
-        self.assertEqual(round(mtd["Scan_el_eq1"].readY(0)[0], 7), 0)
-        self.assertEqual(round(mtd["Scan_inel_eq2"].readY(0)[0], 7), -9.2376546)
+        self.assertEqual(round(mtd["Scan_el_eq1"].y(0)[0], 7), 0)
+        self.assertEqual(round(mtd["Scan_inel_eq2"].y(0)[0], 7), -9.2376546)
 
     def test_MSDFit(self):
         EnergyWindowScan(
@@ -53,8 +53,8 @@ class EnergyWindowScanTest(unittest.TestCase):
             MSDFit=True,
         )
         scan_ws = mtd["Scan_msd_fit"]
-        self.assertEqual(round(scan_ws[0].readY(0)[0], 7), 0.0844171)
-        self.assertEqual(round(scan_ws[0].readY(0)[1], 7), 0.0963181)
+        self.assertEqual(round(scan_ws[0].y(0)[0], 7), 0.0844171)
+        self.assertEqual(round(scan_ws[0].y(0)[1], 7), 0.0963181)
 
 
 if __name__ == "__main__":

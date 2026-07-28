@@ -762,7 +762,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         logger.information("Waves for the dummy workspace: " + str(waves))
         nhist = workspace.getNumberHistograms()
         for idx in range(nhist):
-            workspace.setX(idx, waves)
+            workspace.setSharedX(idx, waves)
 
         if self._isis_instrument:
             workspace.replaceAxis(1, SpectraAxis.create(workspace))
@@ -809,7 +809,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         :param workspace:   The workspace to crop.
         :return:            The cropped workspace.
         """
-        x = workspace.dataX(0)
+        x = workspace.x(0)
         xmin = x[0]
         xmax = x[1]
         crop_alg = self.createChildAlgorithm("CropWorkspace", enableLogging=False)

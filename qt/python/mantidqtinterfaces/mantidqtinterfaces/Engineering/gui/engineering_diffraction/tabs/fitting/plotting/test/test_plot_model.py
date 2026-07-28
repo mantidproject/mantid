@@ -489,8 +489,8 @@ class FittingPlotModelTest(unittest.TestCase):
         # check the first call to setY and setE for one of the parameters
         for im, m in enumerate(self.model._fit_workspaces[:-2]):
             for iws, ws in enumerate(loaded_ws_list):
-                _, argsY, _ = m.setY.mock_calls[iws]
-                _, argsE, _ = m.setE.mock_calls[iws]
+                _, argsY, _ = m.setSharedY.mock_calls[iws]
+                _, argsE, _ = m.setSharedE.mock_calls[iws]
                 self.assertEqual([argsY[0], argsE[0]], [iws, iws])
                 if ws in self.model._fit_results:
                     self.assertTrue(all(argsY[1] == [x[0] for x in self.model._fit_results["name1"]["results"][ws_names[im]]]))

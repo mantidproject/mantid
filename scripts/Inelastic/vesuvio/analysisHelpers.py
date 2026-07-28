@@ -192,9 +192,9 @@ def load_workspace(ws_name, spectrum):
             # mantid.ConvertToPointData(InputWorkspace=ws.name(), OutputWorkspace=ws.name())
             for i in range(ws_len):
                 # converting the histogram into points
-                ws_y[i] = ws.readY(spec)[i] / (ws.readX(spec)[i + 1] - ws.readX(spec)[i])
-                ws_e[i] = ws.readE(spec)[i] / (ws.readX(spec)[i + 1] - ws.readX(spec)[i])
-                ws_x[i] = 0.5 * (ws.readX(spec)[i + 1] + ws.readX(spec)[i])
+                ws_y[i] = ws.y(spec)[i] / (ws.x(spec)[i + 1] - ws.x(spec)[i])
+                ws_e[i] = ws.e(spec)[i] / (ws.x(spec)[i + 1] - ws.x(spec)[i])
+                ws_x[i] = 0.5 * (ws.x(spec)[i + 1] + ws.x(spec)[i])
     ws_x, ws_y, ws_e = np.array(ws_x), np.array(ws_y), np.array(ws_e)
     return ws_x, ws_y, ws_e
 
@@ -217,8 +217,8 @@ def block_fit_ncp(par, first_spectrum, last_spectrum, masses, ws_name, fit_argum
         data_x, data_y, data_e = load_workspace(ws_name, spectrum)
         ncp, fitted_par, result = fit_ncp(par, spectrum, masses, data_x, data_y, data_e, fit_arguments, IPFile, g_log)
         for bin in range(len(data_x) - 1):
-            tof_fit_ws.dataY(j)[bin] = ncp[bin] * (data_x[bin + 1] - data_x[bin])
-            tof_fit_ws.dataE(j)[bin] = 0.0
+            tof_fit_ws.mutableY(j)[bin] = ncp[bin] * (data_x[bin + 1] - data_x[bin])
+            tof_fit_ws.mutableE(j)[bin] = 0.0
         # Calculate the reduced chi2 from the fitting Cost function:
         reduced_chi2 = result.fun / (len(data_x) - len(par))
         if reduced_chi2 > 1.0e-3:
@@ -386,8 +386,8 @@ def correct_for_gamma_background(ws_name, first_spectrum, last_spectrum, sample_
             InputWorkspace=ws_name, ComptonFunction=sample_properties, WorkspaceIndexList=ws_index
         )
         for bin in range(gamma_background_correction.blocksize()):
-            gamma_background_correction.dataY(ws_index)[bin] = tmp_bkg.dataY(0)[bin]
-            gamma_background_correction.dataE(ws_index)[bin] = 0.0
+            gamma_background_correction.mutableY(ws_index)[bin] = tmp_bkg.y(0)[bin]
+            gamma_background_correction.mutableE(ws_index)[bin] = 0.0
     sapi.RenameWorkspace(InputWorkspace="gamma_background_correction", OutputWorkspace=str(ws_name) + "_gamma_background")
     safe_delete_ws("tmp_cor")
     safe_delete_ws("tmp_bkg")
@@ -423,7 +423,7 @@ def subtract_other_masses(ws_name, widths, intensities, centres, spectra, masses
             )  # define the input parameters to get the NCPs
             ncp = calculate_ncp(other_par, spectra[index], [masses[m + 1]], data_x, IPFile, g_log)
             for bin in range(len(data_x) - 1):
-                hydrogen_ws.dataY(index)[bin] -= ncp[bin] * (data_x[bin + 1] - data_x[bin])
+                hydrogen_ws.mutableY(index)[bin] -= ncp[bin] * (data_x[bin + 1] - data_x[bin])
     return hydrogen_ws
 
 
@@ -437,12 +437,12 @@ def convert_to_y_space_and_symmetrise(ws_name, mass):
     tmp = sapi.CloneWorkspace(InputWorkspace=ws_name + "_JoY")
     for j in range(tmp.getNumberHistograms()):
         for k in range(tmp.blocksize()):
-            tmp.dataE(j)[k] = 0.0
-            if np.isnan(tmp.dataY(j)[k]):
-                ws.dataY(j)[k] = 0.0
-                tmp.dataY(j)[k] = 0.0
-            if tmp.dataY(j)[k] != 0:
-                tmp.dataY(j)[k] = 1.0
+            tmp.mutableE(j)[k] = 0.0
+            if np.isnan(tmp.y(j)[k]):
+                ws.mutableY(j)[k] = 0.0
+                tmp.mutableY(j)[k] = 0.0
+            if tmp.y(j)[k] != 0:
+                tmp.mutableY(j)[k] = 1.0
     tmp = sapi.SumSpectra("tmp")
     sapi.SumSpectra(InputWorkspace=ws_name + "_JoY", OutputWorkspace=ws_name + "_JoY_sum")
     sapi.Divide(LHSWorkspace=ws_name + "_JoY_sum", RHSWorkspace="tmp", OutputWorkspace=ws_name + "_JoY_sum")
@@ -450,8 +450,8 @@ def convert_to_y_space_and_symmetrise(ws_name, mass):
     ws = sapi.mtd[ws_name + "_JoY_sum"]
     tmp = sapi.CloneWorkspace(InputWorkspace=ws_name + "_JoY_sum")
     for k in range(tmp.blocksize()):
-        tmp.dataE(0)[k] = (ws.dataE(0)[k] + ws.dataE(0)[ws.blocksize() - 1 - k]) / 2.0
-        tmp.dataY(0)[k] = (ws.dataY(0)[k] + ws.dataY(0)[ws.blocksize() - 1 - k]) / 2.0
+        tmp.mutableE(0)[k] = (ws.e(0)[k] + ws.e(0)[ws.blocksize() - 1 - k]) / 2.0
+        tmp.mutableY(0)[k] = (ws.y(0)[k] + ws.y(0)[ws.blocksize() - 1 - k]) / 2.0
     sapi.RenameWorkspace(InputWorkspace="tmp", OutputWorkspace=ws_name + "_JoY_sym")
     normalise_workspace(ws_name + "_JoY_sym")
     return max_Y
@@ -488,7 +488,7 @@ def correct_for_multiple_scattering(
         ws = sapi.mtd[workspace]
         for j in range(ws.getNumberHistograms()):
             for k in range(ws.blocksize()):
-                ws.dataE(j)[k] = 0.0  # set the errors from the MonteCarlo simulation to zero - no propagation of such uncertainties
+                ws.mutableE(j)[k] = 0.0  # set the errors from the MonteCarlo simulation to zero - no propagation of such uncertainties
                 # - Use high number of events for final corrections!!!
         sapi.Divide(LHSWorkspace=workspace, RHSWorkspace=simulation_normalisation, OutputWorkspace=workspace)
         sapi.Multiply(LHSWorkspace=workspace, RHSWorkspace=data_normalisation, OutputWorkspace=workspace)

@@ -27,7 +27,7 @@ class IndirectDiffScanTest(unittest.TestCase):
         self.assertEqual(red_ws.getNumberHistograms(), 1)
 
         scan_ws = mtd["Output_scan"]
-        self.assertEqual(round(scan_ws.readY(0)[0], 7), 6.6324986)
+        self.assertEqual(round(scan_ws.y(0)[0], 7), 6.6324986)
 
     def test_multi_files(self):
         """
@@ -47,7 +47,7 @@ class IndirectDiffScanTest(unittest.TestCase):
         self.assertEqual(red_ws.getNumberHistograms(), 1)
 
         scan_ws = mtd["Output_scan"]
-        self.assertEqual(round(scan_ws.readY(0)[0], 7), 6.6324986)
+        self.assertEqual(round(scan_ws.y(0)[0], 7), 6.6324986)
 
     def test_osiris(self):
         """

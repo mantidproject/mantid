@@ -111,12 +111,12 @@ public:
     // This test cut and paste from FlatPlateAbsorption. Since we have a larger
     // sample now, but the
     // same integration volume, the numbers have to be smaller.
-    TS_ASSERT_LESS_THAN(result->readY(0).front(), 0.7235);
-    TS_ASSERT_LESS_THAN(result->readY(0)[1], 0.6888);
-    TS_ASSERT_LESS_THAN(result->readY(0).back(), 0.4603);
-    TS_ASSERT_LESS_THAN(result->readY(1).front(), 0.7235);
-    TS_ASSERT_LESS_THAN(result->readY(1)[5], 0.5616);
-    TS_ASSERT_LESS_THAN(result->readY(1).back(), 0.4603);
+    TS_ASSERT_LESS_THAN(result->y(0).front(), 0.7235);
+    TS_ASSERT_LESS_THAN(result->y(0)[1], 0.6888);
+    TS_ASSERT_LESS_THAN(result->y(0).back(), 0.4603);
+    TS_ASSERT_LESS_THAN(result->y(1).front(), 0.7235);
+    TS_ASSERT_LESS_THAN(result->y(1)[5], 0.5616);
+    TS_ASSERT_LESS_THAN(result->y(1).back(), 0.4603);
 
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
   }

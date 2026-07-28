@@ -119,9 +119,9 @@ class MatchSpectra(PythonAlgorithm):
         doScale = self.getProperty("CalculateScale").value
         doOffset = self.getProperty("CalculateOffset").value
 
-        referenceX = outputWS.readX(referenceWkspIndex)
-        referenceY = outputWS.readY(referenceWkspIndex)
-        referenceE = outputWS.readE(referenceWkspIndex)
+        referenceX = outputWS.x(referenceWkspIndex)
+        referenceY = outputWS.y(referenceWkspIndex)
+        referenceE = outputWS.e(referenceWkspIndex)
 
         if not np.any(referenceE > 0.0):
             raise RuntimeError("None of the uncertainties in the reference spectrum is greater than zero. No data would be used.")
@@ -140,9 +140,9 @@ class MatchSpectra(PythonAlgorithm):
                 self.log().information("spectrum {} is the reference".format(spectrumNum))
                 continue
 
-            X = outputWS.readX(wkspIndex)
-            Y = outputWS.readY(wkspIndex)
-            E = outputWS.readE(wkspIndex)
+            X = outputWS.x(wkspIndex)
+            Y = outputWS.y(wkspIndex)
+            E = outputWS.e(wkspIndex)
 
             if not np.any(E > 0.0):
                 self.log().warning("None of the uncertainties in the reference spectrum {} is greater than zero".format(spectrumNum))
@@ -213,8 +213,8 @@ class MatchSpectra(PythonAlgorithm):
             # update the values in the output workspace
             Ynew = np.copy(Y)
             Ynew[E > 0.0] = Ynew[E > 0.0] * scale + offset
-            outputWS.setY(wkspIndex, Ynew)
-            outputWS.setE(wkspIndex, E * scale)  # background doesn't matter because there isn't uncertainty
+            outputWS.setSharedY(wkspIndex, Ynew)
+            outputWS.setSharedE(wkspIndex, E * scale)  # background doesn't matter because there isn't uncertainty
 
             resultOffset.append(offset)
             resultScale.append(scale)

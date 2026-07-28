@@ -298,11 +298,12 @@ void EventList::createFromHistogram(const ISpectrum *inSpec, bool GenerateZeros,
   this->clear(true);
 
   // Get the input histogram
-  const MantidVec &X = inSpec->readX();
-  const MantidVec &Y = inSpec->readY();
-  const MantidVec &E = inSpec->readE();
-  if (Y.size() + 1 != X.size())
+  Mantid::HistogramData::HistogramX const &X = inSpec->x();
+  Mantid::HistogramData::HistogramY const &Y = inSpec->y();
+  Mantid::HistogramData::HistogramE const &E = inSpec->e();
+  if (Y.size() + 1 != X.size()) {
     throw std::runtime_error("Expected a histogram (X vector should be 1 longer than the Y vector)");
+  }
 
   // Copy detector IDs and spectra
   this->copyInfoFrom(*inSpec);
@@ -357,7 +358,7 @@ void EventList::createFromHistogram(const ISpectrum *inSpec, bool GenerateZeros,
   } // (each bin)
 
   // Set the X binning parameters
-  this->setX(inSpec->ptrX());
+  this->setSharedX(inSpec->sharedX());
 
   // Manually set that this is sorted by TOF, since it is. This will make it
   // "threadSafe" in other algos.
@@ -1357,7 +1358,7 @@ size_t EventList::getMemorySize() const {
 /** Return the size of the histogram data.
  * @return the size of the histogram representation of the data (size of Y) **/
 size_t EventList::histogram_size() const {
-  size_t x_size = readX().size();
+  size_t x_size = x().size();
   if (x_size > 1)
     return x_size - 1;
   else
@@ -1374,7 +1375,7 @@ size_t EventList::histogram_size() const {
  * @param X :: The vector of doubles to set as the histogram limits.
  */
 void EventList::setX(const Kernel::cow_ptr<HistogramData::HistogramX> &X) {
-  m_histogram.setX(X);
+  m_histogram.setSharedX(X);
   if (mru)
     mru->deleteIndex(this);
 }
@@ -1393,10 +1394,10 @@ MantidVec &EventList::dataX() {
 const MantidVec &EventList::dataX() const { return m_histogram.dataX(); }
 
 /// Deprecated, use x() instead. Returns the x data const
-const MantidVec &EventList::readX() const { return m_histogram.readX(); }
+const MantidVec &EventList::readX() const { return m_histogram.x().rawData(); }
 
 /// Deprecated, use sharedX() instead. Returns a pointer to the x data
-Kernel::cow_ptr<HistogramData::HistogramX> EventList::ptrX() const { return m_histogram.ptrX(); }
+Kernel::cow_ptr<HistogramData::HistogramX> EventList::ptrX() const { return m_histogram.sharedX(); }
 
 /// Deprecated, use mutableDx() instead.
 MantidVec &EventList::dataDx() { return m_histogram.dataDx(); }

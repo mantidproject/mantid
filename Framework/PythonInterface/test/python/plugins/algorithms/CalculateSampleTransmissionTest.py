@@ -50,8 +50,8 @@ class CalculateSampleTransmissionTest(unittest.TestCase):
             0.43017862,
             0.43017862,
         ]
-        trans = ws.readY(0)
-        scatt = ws.readY(1)
+        trans = ws.y(0)
+        scatt = ws.y(1)
 
         np.testing.assert_array_almost_equal(trans, expected_trans, decimal=4)
         np.testing.assert_array_almost_equal(scatt, expected_scatt, decimal=4)
@@ -95,8 +95,8 @@ class CalculateSampleTransmissionTest(unittest.TestCase):
             0.43021665,
         ]
 
-        trans = ws.readY(0)
-        scatt = ws.readY(1)
+        trans = ws.y(0)
+        scatt = ws.y(1)
         np.testing.assert_array_almost_equal(trans, expected_trans, decimal=4)
         np.testing.assert_array_almost_equal(scatt, expected_scatt, decimal=4)
 

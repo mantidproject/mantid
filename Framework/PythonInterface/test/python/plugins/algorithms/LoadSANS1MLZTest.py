@@ -35,8 +35,8 @@ class LoadSANSMLZTest(unittest.TestCase):
         self.assertEqual(16386, ws.getNumberHistograms())
         self.assertEqual(2, ws.getNumDims())
         # data array
-        self.assertEqual(1109, ws.readY(8502))
-        self.assertEqual(1160, ws.readY(8629))
+        self.assertEqual(1109, ws.y(8502))
+        self.assertEqual(1160, ws.y(8629))
         # sample logs
         run = ws.getRun()
 
@@ -95,8 +95,8 @@ class LoadSANSMLZTest(unittest.TestCase):
         # dimensions
         self.assertEqual(16384, ws.getNumberHistograms())
         # data array
-        self.assertEqual(1109, ws.readY(8502))
-        self.assertEqual(1160, ws.readY(8629))
+        self.assertEqual(1109, ws.y(8502))
+        self.assertEqual(1160, ws.y(8629))
 
         run_algorithm("DeleteWorkspace", Workspace=output_ws_name)
 

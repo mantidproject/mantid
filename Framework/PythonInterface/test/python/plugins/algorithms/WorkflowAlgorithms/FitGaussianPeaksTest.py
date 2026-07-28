@@ -256,15 +256,15 @@ class FitGaussianPeaksTest(unittest.TestCase):
 
         cost = self.alg_instance.evaluate_cost(
             self.x_values,
-            self.data_ws.readY(0),
-            self.data_ws.readY(1),
-            self.data_ws.readE(0),
+            self.data_ws.y(0),
+            self.data_ws.y(1),
+            self.data_ws.e(0),
             peak_param=data_table,
             refit_peak_param=refit_data_table,
             use_poisson=False,
         )
         model = self.alg_instance.multi_peak(params, self.x_values, np.zeros(len(self.x_values)))
-        expected = self.alg_instance.function_difference(self.data_ws.readY(0), model, self.data_ws.readE(0))
+        expected = self.alg_instance.function_difference(self.data_ws.y(0), model, self.data_ws.e(0))
 
         self.assertAlmostEqual(cost, expected, 5)
 
@@ -280,15 +280,15 @@ class FitGaussianPeaksTest(unittest.TestCase):
 
         cost = self.alg_instance.evaluate_cost(
             self.x_values,
-            self.data_ws.readY(0),
-            self.data_ws.readY(1),
-            self.data_ws.readE(0),
+            self.data_ws.y(0),
+            self.data_ws.y(1),
+            self.data_ws.e(0),
             peak_param=data_table,
             refit_peak_param=refit_data_table,
             use_poisson=True,
         )
         model = self.alg_instance.multi_peak(params, self.x_values, np.zeros(len(self.x_values)))
-        expected = self.alg_instance.poisson_cost(self.data_ws.readY(0) + self.data_ws.readY(1), model + self.data_ws.readY(1))
+        expected = self.alg_instance.poisson_cost(self.data_ws.y(0) + self.data_ws.y(1), model + self.data_ws.y(1))
 
         self.assertAlmostEqual(cost, expected, 3)
 
@@ -354,13 +354,13 @@ class FitGaussianPeaksTest(unittest.TestCase):
     @mock.patch("plugins.algorithms.WorkflowAlgorithms.FitGaussianPeaks.FitGaussianPeaks.getProperty")
     def test_refit_peaks_uses_xvalue_from_input_workspace(self, mock_get_property):
         self.alg_instance.refit_peaks([])
-        calls = [mock.call("InputWorkspace"), mock.call().value.readX(0), mock.call().value.readX().copy()]
+        calls = [mock.call("InputWorkspace"), mock.call().value.x(0), mock.call().value.x().copy()]
         mock_get_property.assert_has_calls(calls, any_order=True)
 
     @mock.patch("plugins.algorithms.WorkflowAlgorithms.FitGaussianPeaks.FitGaussianPeaks.getProperty")
     def test_refit_peaks_returns_if_given_no_parameters(self, mock_get_property):
         self.alg_instance.refit_peaks([])
-        mock_get_property().value.readX().copy.return_value = [1, 2, 3, 4]
+        mock_get_property().value.x().copy.return_value = [1, 2, 3, 4]
         yvals, params = self.alg_instance.refit_peaks([])
 
         self.assertEqual(params, None)
@@ -369,7 +369,7 @@ class FitGaussianPeaksTest(unittest.TestCase):
     @mock.patch("plugins.algorithms.WorkflowAlgorithms.FitGaussianPeaks.Fit")
     @mock.patch("plugins.algorithms.WorkflowAlgorithms.FitGaussianPeaks.FitGaussianPeaks.getProperty")
     def test_refit_peaks_is_called_correctly_when_given_one_peak(self, mock_get_property, mock_fit):
-        mock_get_property().value.readX().copy.return_value = self.x_values
+        mock_get_property().value.x().copy.return_value = self.x_values
         self.alg_instance.getPropertyValue = mock.Mock(return_value="ws")
         ret_ws = CreateWorkspace(DataX=[1, 2, 3, 4], DataY=[5, 6, 7, 8], NSpec=2)
         mock_fit.return_value = (None, None, None, "parameters", ret_ws, None, None)
@@ -394,7 +394,7 @@ class FitGaussianPeaksTest(unittest.TestCase):
     @mock.patch("plugins.algorithms.WorkflowAlgorithms.FitGaussianPeaks.Fit")
     @mock.patch("plugins.algorithms.WorkflowAlgorithms.FitGaussianPeaks.FitGaussianPeaks.getProperty")
     def test_refit_peaks_is_called_correctly_when_given_multiple_peaks(self, mock_get_property, mock_fit):
-        mock_get_property().value.readX().copy.return_value = self.x_values
+        mock_get_property().value.x().copy.return_value = self.x_values
         self.alg_instance.getPropertyValue = mock.Mock(return_value="ws")
         ret_ws = CreateWorkspace(DataX=[1, 2, 3, 4], DataY=[5, 6, 7, 8], NSpec=2)
         mock_fit.return_value = (None, None, None, "parameters", ret_ws, None, None)

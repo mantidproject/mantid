@@ -88,8 +88,8 @@ class StitchByBackgroundTest(unittest.TestCase):
 
         self.assertEqual(out_ws.getNumberHistograms(), 1)
         self.assertEqual(out_ws.blocksize(), 475)  # Cropping upper bound to 95000 drops the number of bins from 500 to 475.
-        self.assertEqual(out_ws.dataY(0)[10], 0.3)
-        self.assertEqual(out_ws.dataY(0)[25], 10.3)
+        self.assertEqual(out_ws.y(0)[10], 0.3)
+        self.assertEqual(out_ws.y(0)[25], 10.3)
 
 
 if __name__ == "__main__":

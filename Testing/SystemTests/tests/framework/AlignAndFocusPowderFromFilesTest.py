@@ -551,7 +551,7 @@ class AbsorptionCompare(systemtesting.MantidSystemTest):
         )
         xaxis = np.arange(0.0, float(num_wl_bins + 1)) * (wl_max - wl_min) / (num_wl_bins) + wl_min
         for i in range(absorptionWS.getNumberHistograms()):
-            absorptionWS.setX(i, xaxis)
+            absorptionWS.setSharedX(i, xaxis)
         absorptionWS.getAxis(0).setUnit("Wavelength")
         AnalysisDataService.addOrReplace("V_abs", absorptionWS)
         SetSample(
@@ -624,8 +624,8 @@ def checkRaggedWorkspaces(obs_name, exp_name):
     # first check that the data arrays are the same length
     assert wksp_obs.getNumberHistograms() == wksp_exp.getNumberHistograms(), "number of histograms doesn't match"
     for i in range(wksp_exp.getNumberHistograms()):
-        np.testing.assert_allclose(wksp_obs.readX(i), wksp_exp.readX(i), err_msg="x-values index={i}")
-        np.testing.assert_allclose(wksp_obs.readY(i), wksp_exp.readY(i), err_msg="y-values index={i}")
+        np.testing.assert_allclose(wksp_obs.x(i), wksp_exp.x(i), err_msg="x-values index={i}")
+        np.testing.assert_allclose(wksp_obs.y(i), wksp_exp.y(i), err_msg="y-values index={i}")
 
 
 class VulcanRaggedInD(systemtesting.MantidSystemTest):

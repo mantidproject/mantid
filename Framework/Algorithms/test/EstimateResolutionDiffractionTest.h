@@ -166,7 +166,7 @@ public:
       const double res = resolution(SNAP_deltaTOFOverTOF, SNAP_deltaL, l1 + l2, SNAP_deltaTheta, 0.5 * twoTheta);
 
       // compare values with relative tolerance
-      const double abs_tol = abs(wsOut->readY(i)[0] - res);
+      const double abs_tol = abs(wsOut->y(i)[0] - res);
       const double rel_tol = 100. * abs_tol / res;
       TS_ASSERT_LESS_THAN(rel_tol, tolerances[i]);
     }

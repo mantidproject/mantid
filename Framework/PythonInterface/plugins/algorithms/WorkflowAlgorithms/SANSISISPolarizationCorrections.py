@@ -763,8 +763,8 @@ class SANSISISPolarizationCorrections(DataProcessorAlgorithm):
         if not self.has_2nd_flipper:
             flip_a_name = f"{TMP_NAME}_flipper_a_eff"
             fp = ADS.retrieve(flip_p_name)
-            x = fp.readX(0).tolist()
-            ones = np.ones_like(fp.readY(0)).tolist()
+            x = fp.x(0).tolist()
+            ones = np.ones_like(fp.y(0)).tolist()
             self._load_child_algorithm(
                 ALGS.create, OutputWorkspace=flip_a_name, DataX=x, DataY=ones, DataE=ones, UnitX=self.instrument.units
             )

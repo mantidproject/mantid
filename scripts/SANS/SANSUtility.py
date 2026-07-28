@@ -310,7 +310,7 @@ def isEventWorkspace(ws_reference):
 
 def getBinsBoundariesFromWorkspace(ws_reference):
     ws_reference = getWorkspaceReference(ws_reference)
-    Xvalues = ws_reference.dataX(0)
+    Xvalues = ws_reference.x(0)
     binning = str(Xvalues[0])
     binGap = Xvalues[1] - Xvalues[0]
     binning = binning + "," + str(binGap)
@@ -602,10 +602,10 @@ def _merge_to_ranges(ints):
 def _yield_masked_det_ids(masking_ws):
     """
     For some reason Detector.isMasked() does not work for MaskingWorkspaces.
-    We use masking_ws.readY(ws_index)[0] == 1 instead.
+    We use masking_ws.y(ws_index)[0] == 1 instead.
     """
     for ws_index in range(masking_ws.getNumberHistograms()):
-        if masking_ws.readY(ws_index)[0] == 1:
+        if masking_ws.y(ws_index)[0] == 1:
             yield masking_ws.getDetector(ws_index).getID()
 
 
@@ -1716,7 +1716,7 @@ def get_start_q_and_end_q_values(rear_data_name, front_data_name, rescale_shift)
     min_q = None
     max_q = None
     front_data = mtd[front_data_name]
-    front_dataX = front_data.readX(0)
+    front_dataX = front_data.x(0)
 
     front_size = len(front_dataX)
     front_q_min = None
@@ -1728,7 +1728,7 @@ def get_start_q_and_end_q_values(rear_data_name, front_data_name, rescale_shift)
         raise RuntimeError("The FRONT detector does not seem to contain q values")
 
     rear_data = mtd[rear_data_name]
-    rear_dataX = rear_data.readX(0)
+    rear_dataX = rear_data.x(0)
 
     rear_size = len(rear_dataX)
     rear_q_min = None
@@ -1768,8 +1768,8 @@ def get_error_corrected_front_and_rear_data_sets(front_data, rear_data, q_min, q
 
     # Now transfer the error from front data to the rear data workspace
     # This works only if we have a single QMod spectrum in the workspaces
-    front_error = front_data_cropped.dataE(0)
-    rear_error = rear_data_cropped.dataE(0)
+    front_error = front_data_cropped.e(0)
+    rear_error = rear_data_cropped.mutableE(0)
 
     rear_error_squared = rear_error * rear_error
     front_error_squared = front_error * front_error
@@ -1822,7 +1822,7 @@ def correct_q_resolution_for_can(original_workspace, can_workspace, subtracted_w
     @param subtracted_workspace: the subtracted workspace
     """
     if original_workspace.getNumberHistograms() == 1 and original_workspace.hasDx(0):
-        subtracted_workspace.setDx(0, original_workspace.dataDx(0))
+        subtracted_workspace.setSharedDx(0, original_workspace.dx(0))
 
 
 def correct_q_resolution_for_merged(count_ws_front, count_ws_rear, output_ws, scale):
@@ -1860,10 +1860,10 @@ def correct_q_resolution_for_merged(count_ws_front, count_ws_rear, output_ws, sc
     if not count_ws_rear.hasDx(0) or not count_ws_front.hasDx(0):
         return
 
-    q_resolution_front = count_ws_front.readDx(0)
-    q_resolution_rear = count_ws_rear.readDx(0)
-    counts_front = count_ws_front.readY(0)
-    counts_rear = count_ws_rear.readY(0)
+    q_resolution_front = count_ws_front.dx(0)
+    q_resolution_rear = count_ws_rear.dx(0)
+    counts_front = count_ws_front.y(0)
+    counts_rear = count_ws_rear.y(0)
 
     # We need to make sure that the workspaces match in length
     if (len(q_resolution_front) != len(q_resolution_rear)) or (len(counts_front) != len(counts_rear)):
@@ -2416,7 +2416,7 @@ def ScaleByVolume(inputWS, scalefactor, geomid, width, height, thickness):
 @deprecated
 def StripEndZeroes(workspace, flag_value=0.0):
     result_ws = mtd[workspace]
-    y_vals = result_ws.readY(0)
+    y_vals = result_ws.y(0)
     length = len(y_vals)
     # Find the first non-zero value
     start = 0
@@ -2432,7 +2432,7 @@ def StripEndZeroes(workspace, flag_value=0.0):
             stop = j
             break
         # Find the appropriate X values and call CropWorkspace
-    x_vals = result_ws.readX(0)
+    x_vals = result_ws.x(0)
     startX = x_vals[start]
     # Make sure we're inside the bin that we want to crop
     endX = 1.001 * x_vals[stop + 1]

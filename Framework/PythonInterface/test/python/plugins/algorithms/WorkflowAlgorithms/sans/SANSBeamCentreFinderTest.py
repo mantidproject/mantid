@@ -17,8 +17,8 @@ class SANSBeamCentreFinderTest(unittest.TestCase):
     def gen_mock_data(q_vals, y_vals):
         assert len(q_vals) == len(y_vals)
         mocked_quartile = mock.Mock()
-        mocked_quartile.readX.return_value = q_vals
-        mocked_quartile.readY.return_value = y_vals
+        mocked_quartile.x.return_value = q_vals
+        mocked_quartile.y.return_value = y_vals
         return mocked_quartile
 
     def setUp(self):

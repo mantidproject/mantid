@@ -353,8 +353,8 @@ class VesuvioAnalysis(PythonAlgorithm):
                             )
                             fit_ws = mtd[ws_name + "_cor_residuals_Workspace"]
                             for bin in range(ws.blocksize()):
-                                ws.dataY(index)[bin] = fit_ws.readY(1)[bin]
-                                ws.dataE(index)[bin] = 0.0
+                                ws.mutableY(index)[bin] = fit_ws.y(1)[bin]
+                                ws.mutableE(index)[bin] = 0.0
                         RenameWorkspace(InputWorkspace="ws", OutputWorkspace=ws_name + "_fitted_resonances")
                         Minus(LHSWorkspace=ws_name + "_cor", RHSWorkspace=ws_name + "_fitted_resonances", OutputWorkspace=ws_name + "_cor")
                         Minus(

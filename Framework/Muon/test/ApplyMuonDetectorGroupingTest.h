@@ -167,17 +167,17 @@ public:
     auto wsOut =
         std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("inputGroup; Group; test; Counts; #1_Raw"));
 
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.400, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.900, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[0], 0.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[4], 0.400, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[9], 0.900, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], 30.000, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], 42.000, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], 57.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[0], 30.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[4], 42.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[9], 57.000, 0.001);
     // Quadrature errors : Sqrt(0.005)
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.00866, 0.00001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.00866, 0.00001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.00866, 0.00001);
+    TS_ASSERT_DELTA(wsOut->e(0)[0], 0.00866, 0.00001);
+    TS_ASSERT_DELTA(wsOut->e(0)[4], 0.00866, 0.00001);
+    TS_ASSERT_DELTA(wsOut->e(0)[9], 0.00866, 0.00001);
   }
 
   void test_grouping_with_single_detector_and_asymmetry_analysis_gives_correct_values() {
@@ -195,17 +195,17 @@ public:
     auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("inputGroup; Group; test; Asym; #1_Raw"));
 
     // Check values against calculation by hand.
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.400, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.900, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[0], 0.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[4], 0.400, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[9], 0.900, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], 1.404, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], -0.766, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.1978, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[0], 1.404, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[4], -0.766, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[9], -0.1978, 0.001);
     // Errors are simply normalized by a constant.
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.00096, 0.00001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.00116, 0.00001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.00145, 0.00001);
+    TS_ASSERT_DELTA(wsOut->e(0)[0], 0.00096, 0.00001);
+    TS_ASSERT_DELTA(wsOut->e(0)[4], 0.00116, 0.00001);
+    TS_ASSERT_DELTA(wsOut->e(0)[9], 0.00145, 0.00001);
   }
 
   void test_grouping_with_multiple_detectors_and_asymmetry_analysis_gives_correct_values() {
@@ -223,17 +223,17 @@ public:
     auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("inputGroup; Group; test; Asym; #1_Raw"));
 
     // Check values against calculation by hand.
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.400, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.900, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[0], 0.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[4], 0.400, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[9], 0.900, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], 1.465, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], -0.873, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.0307, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[0], 1.465, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[4], -0.873, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[9], -0.0307, 0.001);
     // Errors : quadrature addition + normalized by a constant.
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.000288, 0.000001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.000346, 0.000001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.000434, 0.000001);
+    TS_ASSERT_DELTA(wsOut->e(0)[0], 0.000288, 0.000001);
+    TS_ASSERT_DELTA(wsOut->e(0)[4], 0.000346, 0.000001);
+    TS_ASSERT_DELTA(wsOut->e(0)[9], 0.000434, 0.000001);
   }
 
   void test_grouping_with_summed_multiple_periods_and_counts_analysis_gives_correct_values() {
@@ -254,17 +254,17 @@ public:
         std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("inputGroup; Group; test; Counts; #1_Raw"));
 
     // Check values against calculation by hand.
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.400, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.900, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[0], 0.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[4], 0.400, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[9], 0.900, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], 3, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], 11, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], 21, 0.0001);
+    TS_ASSERT_DELTA(wsOut->y(0)[0], 3, 0.0001);
+    TS_ASSERT_DELTA(wsOut->y(0)[4], 11, 0.0001);
+    TS_ASSERT_DELTA(wsOut->y(0)[9], 21, 0.0001);
     // Errors : quadrature addition from periods (1 + 2).
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.00707, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.00707, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.00707, 0.0001);
+    TS_ASSERT_DELTA(wsOut->e(0)[0], 0.00707, 0.0001);
+    TS_ASSERT_DELTA(wsOut->e(0)[4], 0.00707, 0.0001);
+    TS_ASSERT_DELTA(wsOut->e(0)[9], 0.00707, 0.0001);
   }
 
   void test_grouping_with_subtracted_multiple_periods_and_counts_analysis_gives_correct_values() {
@@ -287,17 +287,17 @@ public:
         std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("inputGroup; Group; test; Counts; #1_Raw"));
 
     // Check values against calculation by hand.
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.400, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.900, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[0], 0.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[4], 0.400, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[9], 0.900, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], 4, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], 8, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], 13, 0.0001);
+    TS_ASSERT_DELTA(wsOut->y(0)[0], 4, 0.0001);
+    TS_ASSERT_DELTA(wsOut->y(0)[4], 8, 0.0001);
+    TS_ASSERT_DELTA(wsOut->y(0)[9], 13, 0.0001);
     // Errors : quadrature addition from periods (1 + 2 - 3)
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.00866, 0.00001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.00866, 0.00001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.00866, 0.00001);
+    TS_ASSERT_DELTA(wsOut->e(0)[0], 0.00866, 0.00001);
+    TS_ASSERT_DELTA(wsOut->e(0)[4], 0.00866, 0.00001);
+    TS_ASSERT_DELTA(wsOut->e(0)[9], 0.00866, 0.00001);
   }
 
   void test_dead_time_correction_is_applied_correctly() {
@@ -320,17 +320,17 @@ public:
         std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("inputGroup; Group; test; Counts; #1_Raw"));
 
     // Check values against calculation by hand.
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.400, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.900, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[0], 0.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[4], 0.400, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[9], 0.900, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], 12.86, 0.1);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], 1.01, 0.1);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], 2.78, 0.1);
+    TS_ASSERT_DELTA(wsOut->y(0)[0], 12.86, 0.1);
+    TS_ASSERT_DELTA(wsOut->y(0)[4], 1.01, 0.1);
+    TS_ASSERT_DELTA(wsOut->y(0)[9], 2.78, 0.1);
 
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.0050, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.0050, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.0050, 0.0001);
+    TS_ASSERT_DELTA(wsOut->e(0)[0], 0.0050, 0.0001);
+    TS_ASSERT_DELTA(wsOut->e(0)[4], 0.0050, 0.0001);
+    TS_ASSERT_DELTA(wsOut->e(0)[9], 0.0050, 0.0001);
   }
 
   void test_rebinning_is_applied_correctly() {
@@ -348,24 +348,24 @@ public:
         std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("inputGroup; Group; test; Counts; #1_Raw"));
 
     // Check values against calculation by hand.
-    TS_ASSERT_DELTA(wsOutNoRebin->readX(0)[0], 0.000, 0.001);
-    TS_ASSERT_DELTA(wsOutNoRebin->readX(0)[4], 0.400, 0.001);
-    TS_ASSERT_DELTA(wsOutNoRebin->readX(0)[9], 0.900, 0.001);
+    TS_ASSERT_DELTA(wsOutNoRebin->x(0)[0], 0.000, 0.001);
+    TS_ASSERT_DELTA(wsOutNoRebin->x(0)[4], 0.400, 0.001);
+    TS_ASSERT_DELTA(wsOutNoRebin->x(0)[9], 0.900, 0.001);
 
     auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem("inputGroup; Group; test; Counts; #1"));
 
     // Check values against calculation by hand.
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.200, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.800, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[0], 0.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[1], 0.200, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[4], 0.800, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], 63, 0.1);
-    TS_ASSERT_DELTA(wsOut->readY(0)[1], 75, 0.1);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], 111, 0.1);
+    TS_ASSERT_DELTA(wsOut->y(0)[0], 63, 0.1);
+    TS_ASSERT_DELTA(wsOut->y(0)[1], 75, 0.1);
+    TS_ASSERT_DELTA(wsOut->y(0)[4], 111, 0.1);
 
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.0122, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[1], 0.0122, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.0122, 0.0001);
+    TS_ASSERT_DELTA(wsOut->e(0)[0], 0.0122, 0.0001);
+    TS_ASSERT_DELTA(wsOut->e(0)[1], 0.0122, 0.0001);
+    TS_ASSERT_DELTA(wsOut->e(0)[4], 0.0122, 0.0001);
   }
 
   /// 26/06/18 : unNorm workspaces required in ADS

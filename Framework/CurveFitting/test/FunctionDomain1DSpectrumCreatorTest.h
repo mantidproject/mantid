@@ -55,9 +55,9 @@ public:
     creator.setMatrixWorkspace(matrixWs);
 
     TS_ASSERT_EQUALS(creator.m_matrixWorkspace->getNumberHistograms(), 10);
-    TS_ASSERT_EQUALS(creator.m_matrixWorkspace->readX(0).size(), 15);
-    TS_ASSERT_EQUALS(creator.m_matrixWorkspace->readX(0)[0], 1.0);
-    TS_ASSERT_EQUALS(creator.m_matrixWorkspace->readX(4)[0], 1.0);
+    TS_ASSERT_EQUALS(creator.m_matrixWorkspace->x(0).size(), 15);
+    TS_ASSERT_EQUALS(creator.m_matrixWorkspace->x(0)[0], 1.0);
+    TS_ASSERT_EQUALS(creator.m_matrixWorkspace->x(4)[0], 1.0);
   }
 
   void testThrowIfWorkspaceInvalid() {

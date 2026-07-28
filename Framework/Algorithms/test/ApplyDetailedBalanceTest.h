@@ -55,10 +55,9 @@ public:
       return;
 
     for (std::size_t i = 0; i < 5; ++i) {
-      TS_ASSERT_DELTA(outws->readY(0)[i],
-                      M_PI * (1 - std::exp(-11.604519 * (inws->readX(0)[i] + inws->readX(0)[i + 1]) / 2. / 300.)) *
-                          inws->readY(0)[i],
-                      1e-8);
+      TS_ASSERT_DELTA(
+          outws->y(0)[i],
+          M_PI * (1 - std::exp(-11.604519 * (inws->x(0)[i] + inws->x(0)[i + 1]) / 2. / 300.)) * inws->y(0)[i], 1e-8);
     }
     AnalysisDataService::Instance().remove(outputWSname);
     AnalysisDataService::Instance().remove(inputWSname);
@@ -155,9 +154,9 @@ private:
 
     auto cow_xv = make_cow<HistogramX>(std::move(xv));
     for (int i = 0; i < nspecs; i++) {
-      ws2D->setX(i, cow_xv);
-      ws2D->dataY(i) = {1, 2, 3, 4, 5};
-      ws2D->dataE(i) = {sqrt(1), sqrt(2), sqrt(3), sqrt(4), sqrt(5)};
+      ws2D->setSharedX(i, cow_xv);
+      ws2D->mutableY(i) = {1, 2, 3, 4, 5};
+      ws2D->mutableE(i) = {sqrt(1), sqrt(2), sqrt(3), sqrt(4), sqrt(5)};
     }
 
     AnalysisDataService::Instance().add(inputWSname, ws2D);

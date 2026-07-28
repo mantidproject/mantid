@@ -45,9 +45,9 @@ class SANSWideAngleCorrection(PythonAlgorithm):
         trans = self.getProperty("TransmissionData").value
 
         # check transmission input workspace
-        if len(trans.dataX(0)) != len(wd.dataX(0)):
+        if len(trans.x(0)) != len(wd.x(0)):
             raise RuntimeError("Uncompatible sizes. Transmission must have the same bins of sample values")
-        if min(trans.dataY(0)) < 0:
+        if min(trans.y(0)) < 0:
             raise RuntimeError("Invalid workspace for transmission, it does not accept negative values.")
 
         # check input sample has associated instrument
@@ -64,9 +64,9 @@ class SANSWideAngleCorrection(PythonAlgorithm):
         trans_wc = WorkspaceFactory.create(wd)
 
         # get the values of transmission (data, error, binning)
-        to = np.array(trans.dataY(0))
-        to_e = np.array(trans.dataE(0))
-        x_bins = np.array(wd.dataX(0))
+        to = np.array(trans.y(0))
+        to_e = np.array(trans.e(0))
+        x_bins = np.array(wd.x(0))
 
         # get the position of the sample and the instrument
         sample_pos = wd.getInstrument().getSample().getPos()
@@ -83,9 +83,9 @@ class SANSWideAngleCorrection(PythonAlgorithm):
                 to_l = (np.power(to, A) - 1) / (np.log(to) * A)
                 to_err_l = (np.power(to_e, A) - 1) / (np.log(to_e) * A)
                 # applying the data to the workspace
-                trans_wc.setY(i, to_l)
-                trans_wc.setE(i, to_err_l)
-                trans_wc.setX(i, x_bins)
+                trans_wc.setSharedY(i, to_l)
+                trans_wc.setSharedE(i, to_err_l)
+                trans_wc.setSharedX(i, x_bins)
             except:
                 self.getLogger().warning("WideAngleCorrection error: " + str(sys.exc_info()[2]))
 

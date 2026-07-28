@@ -455,7 +455,9 @@ class SNAPReduce(DataProcessorAlgorithm):
             n_histo = peak_clip_WS.getNumberHistograms()
 
             for h in range(n_histo):
-                peak_clip_WS.setY(h, self.peak_clip(peak_clip_WS.readY(h), win=window, decrese=True, LLS=True, smooth_window=smooth_range))
+                peak_clip_WS.setSharedY(
+                    h, self.peak_clip(peak_clip_WS.y(h), win=window, decrese=True, LLS=True, smooth_window=smooth_range)
+                )
             return str(peak_clip_WS)
         else:  # other values are already held in normWS
             return normWS
