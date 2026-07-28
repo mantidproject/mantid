@@ -149,7 +149,7 @@ static QList<QLocale::Country> sortCountries(const QList<QLocale::Country> &coun
   QListIterator<QLocale::Country> itCountry(countries);
   while (itCountry.hasNext()) {
     QLocale::Country country = itCountry.next();
-    nameToCountry.insert(QLocale::countryToString(country), country);
+    nameToCountry.insert(QLocale::territoryToString(country), country);
   }
   return nameToCountry.values();
 }
@@ -171,9 +171,13 @@ void QtMetaEnumProvider::initLocale() {
   QListIterator<QLocale::Language> itLang(languages);
   for (const auto language : languages) {
     QList<QLocale::Country> countries;
-    countries = QLocale::countriesForLanguage(language);
+    const auto localesForLanguage = QLocale::matchingLocales(language, QLocale::AnyScript, QLocale::AnyTerritory);
+    for (const QLocale &locale : localesForLanguage) {
+      if (!countries.contains(locale.territory()))
+        countries << locale.territory();
+    }
     if (countries.isEmpty() && language == system.language())
-      countries << system.country();
+      countries << system.territory();
 
     if (!countries.isEmpty() && !m_languageToIndex.contains(language)) {
       countries = sortCountries(countries);
@@ -185,7 +189,7 @@ void QtMetaEnumProvider::initLocale() {
       int countryIdx = 0;
       while (it.hasNext()) {
         QLocale::Country country = it.next();
-        countryNames << QLocale::countryToString(country);
+        countryNames << QLocale::territoryToString(country);
         m_indexToCountry[langIdx][countryIdx] = country;
         m_countryToIndex[language][country] = countryIdx;
         ++countryIdx;
@@ -1802,14 +1806,14 @@ void QtLocalePropertyManagerPrivate::slotEnumChanged(const QtProperty *property,
   if (QtProperty *prop = m_languageToProperty.value(property, 0)) {
     const QLocale loc = m_values[prop];
     QLocale::Language newLanguage = loc.language();
-    QLocale::Country newCountry = loc.country();
+    QLocale::Country newCountry = loc.territory();
     metaEnumProvider()->indexToLocale(value, 0, &newLanguage, nullptr);
     QLocale newLoc(newLanguage, newCountry);
     q_ptr->setValue(prop, newLoc);
   } else if (QtProperty *prop = m_countryToProperty.value(property, 0)) {
     const QLocale loc = m_values[prop];
     QLocale::Language newLanguage = loc.language();
-    QLocale::Country newCountry = loc.country();
+    QLocale::Country newCountry = loc.territory();
     metaEnumProvider()->indexToLocale(m_enumPropertyManager->value(m_propertyToLanguage.value(prop)), value,
                                       &newLanguage, &newCountry);
     QLocale newLoc(newLanguage, newCountry);
@@ -1919,7 +1923,7 @@ QString QtLocalePropertyManager::valueText(const QtProperty *property) const {
 
   int langIdx = 0;
   int countryIdx = 0;
-  metaEnumProvider()->localeToIndex(loc.language(), loc.country(), &langIdx, &countryIdx);
+  metaEnumProvider()->localeToIndex(loc.language(), loc.territory(), &langIdx, &countryIdx);
   QString str = tr("%1, %2")
                     .arg(metaEnumProvider()->languageEnumNames().at(langIdx))
                     .arg(metaEnumProvider()->countryEnumNames(loc.language()).at(countryIdx));
@@ -1948,7 +1952,7 @@ void QtLocalePropertyManager::setValue(QtProperty *property, const QLocale &val)
 
   int langIdx = 0;
   int countryIdx = 0;
-  metaEnumProvider()->localeToIndex(val.language(), val.country(), &langIdx, &countryIdx);
+  metaEnumProvider()->localeToIndex(val.language(), val.territory(), &langIdx, &countryIdx);
   if (loc.language() != val.language()) {
     d_ptr->m_enumPropertyManager->setValue(d_ptr->m_propertyToLanguage.value(property), langIdx);
     d_ptr->m_enumPropertyManager->setEnumNames(d_ptr->m_propertyToCountry.value(property),
@@ -1969,7 +1973,7 @@ void QtLocalePropertyManager::initializeProperty(QtProperty *property) {
 
   int langIdx = 0;
   int countryIdx = 0;
-  metaEnumProvider()->localeToIndex(val.language(), val.country(), &langIdx, &countryIdx);
+  metaEnumProvider()->localeToIndex(val.language(), val.territory(), &langIdx, &countryIdx);
 
   QtProperty *languageProp = d_ptr->m_enumPropertyManager->addProperty();
   languageProp->setPropertyName(tr("Language"));
@@ -4660,8 +4664,6 @@ void QtSizePolicyPropertyManager::uninitializeProperty(QtProperty *property) {
 // enumeration manager to re-set its strings and index values
 // for each property.
 
-Q_GLOBAL_STATIC(QFontDatabase, fontDatabase)
-
 QtFontPropertyManagerPrivate::QtFontPropertyManagerPrivate()
     : m_settingValue(false), m_fontDatabaseChangeTimer(nullptr) {}
 
@@ -4751,7 +4753,7 @@ void QtFontPropertyManagerPrivate::slotFontDatabaseDelayedChange() {
   using PropertyPropertyMap = QMap<const QtProperty *, QtProperty *>;
   // rescan available font names
   const QStringList oldFamilies = m_familyNames;
-  m_familyNames = fontDatabase()->families();
+  m_familyNames = QFontDatabase::families();
 
   // Adapt all existing properties
   if (!m_propertyToFamily.empty()) {
@@ -4924,11 +4926,7 @@ void QtFontPropertyManager::setValue(QtProperty *property, const QFont &val) {
     return;
 
   const QFont oldVal = it.value();
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
   if (oldVal == val && oldVal.resolveMask() == val.resolveMask())
-#else
-  if (oldVal == val && oldVal.resolve() == val.resolve())
-#endif
     return;
 
   it.value() = val;
@@ -4961,7 +4959,7 @@ void QtFontPropertyManager::initializeProperty(QtProperty *property) {
   QtProperty *familyProp = d_ptr->m_enumPropertyManager->addProperty();
   familyProp->setPropertyName(tr("Family"));
   if (d_ptr->m_familyNames.empty())
-    d_ptr->m_familyNames = fontDatabase()->families();
+    d_ptr->m_familyNames = QFontDatabase::families();
   d_ptr->m_enumPropertyManager->setEnumNames(familyProp, d_ptr->m_familyNames);
   int idx = static_cast<int>(d_ptr->m_familyNames.indexOf(val.family()));
   if (idx == -1)

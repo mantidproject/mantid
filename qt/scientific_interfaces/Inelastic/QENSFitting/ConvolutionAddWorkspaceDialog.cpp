@@ -29,7 +29,7 @@ ConvolutionAddWorkspaceDialog::ConvolutionAddWorkspaceDialog(QWidget *parent) : 
   setAllSpectraSelectionEnabled(false);
 
   connect(m_uiForm.dsWorkspace, &DataSelector::dataReady, this, &ConvolutionAddWorkspaceDialog::workspaceChanged);
-  connect(m_uiForm.ckAllSpectra, &QCheckBox::stateChanged, this, &ConvolutionAddWorkspaceDialog::selectAllSpectra);
+  connect(m_uiForm.ckAllSpectra, &QCheckBox::checkStateChanged, this, &ConvolutionAddWorkspaceDialog::selectAllSpectra);
   connect(m_uiForm.pbAdd, &QPushButton::clicked, this, &ConvolutionAddWorkspaceDialog::emitAddData);
   connect(m_uiForm.pbClose, &QPushButton::clicked, this, &ConvolutionAddWorkspaceDialog::close);
 }

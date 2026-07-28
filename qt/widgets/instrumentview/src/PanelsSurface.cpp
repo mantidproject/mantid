@@ -199,7 +199,7 @@ void PanelsSurface::processStructured(size_t rootIndex) {
   info->endDetectorIndex = lastRow.back();
 
   // set the outline
-  QVector<QPointF> verts;
+  QList<QPointF> verts;
   for (auto &corner : corners) {
     auto pos = corner - ref;
     info->rotation.rotate(pos);
@@ -308,7 +308,7 @@ std::optional<size_t> PanelsSurface::processTubes(size_t rootIndex) {
              m_yaxis.scalar_prod(pos0));
   QPointF p1(m_zaxis.scalar_prod(pos1) > 0 ? -m_xaxis.scalar_prod(pos1) : m_xaxis.scalar_prod(pos1),
              m_yaxis.scalar_prod(pos1));
-  QVector<QPointF> vert;
+  QList<QPointF> vert;
   vert << p0 << p1;
   info->polygon = QPolygonF(vert);
 
@@ -327,7 +327,7 @@ std::optional<size_t> PanelsSurface::processTubes(size_t rootIndex) {
     //      assumption is made here that any two adjacent tubes in an assembly's
     //      children's list
     //      are close to each other
-    QVector<QPointF> vertQuad;
+    QList<QPointF> vertQuad;
     vertQuad << p0 << p1 << p3 << p2;
     info->polygon = info->polygon.united(QPolygonF(vertQuad));
     p0 = p2;
@@ -401,7 +401,7 @@ void PanelsSurface::processUnstructured(size_t rootIndex, std::vector<bool> &vis
     pos1 += pos0;
     QPointF p0(m_xaxis.scalar_prod(pos0), m_yaxis.scalar_prod(pos0));
     QPointF p1(m_xaxis.scalar_prod(pos1), m_yaxis.scalar_prod(pos1));
-    QVector<QPointF> vert;
+    QList<QPointF> vert;
     vert << p1 << p0;
     info->polygon = QPolygonF(vert);
     // initialise bank polygon with sensible bounding box points

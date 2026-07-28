@@ -332,7 +332,7 @@ void FunctionTreeView::removeProperty(QtProperty *prop) {
 
   // remove references to the children
   auto children = prop->subProperties();
-  foreach (QtProperty *child, children) {
+  for (QtProperty *child : children) {
     removeProperty(child);
   }
   m_properties.erase(p);
@@ -428,7 +428,7 @@ FunctionTreeView::AProperty FunctionTreeView::addParameterProperty(QtProperty *p
  */
 void FunctionTreeView::setFunction(QtProperty *prop, const Mantid::API::IFunction_sptr &fun) {
   auto children = prop->subProperties();
-  foreach (QtProperty *child, children) {
+  for (QtProperty *child : children) {
     removeProperty(child);
   }
   // m_localParameterValues.clear();
@@ -808,7 +808,7 @@ void FunctionTreeView::updateFunctionIndices(QtProperty *prop, std::string const
   }
   auto children = prop->subProperties();
   size_t i = 0;
-  foreach (QtProperty *child, children) {
+  for (QtProperty *child : children) {
     if (isFunction(child)) {
       updateFunctionIndices(child, index + "f" + std::to_string(i) + ".");
       ++i;
@@ -1355,7 +1355,7 @@ Mantid::API::IFunction_sptr FunctionTreeView::getFunction(QtProperty *prop, bool
   auto cf = std::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);
   if (cf) {
     auto children = prop->subProperties();
-    foreach (QtProperty *child, children) {
+    for (QtProperty *child : children) {
       if (isFunction(child)) {
         auto f = getFunction(child);
         // if f is null ignore that function
@@ -1369,7 +1369,7 @@ Mantid::API::IFunction_sptr FunctionTreeView::getFunction(QtProperty *prop, bool
   } else {
     // loop over the children properties and set parameters and attributes
     auto children = prop->subProperties();
-    foreach (QtProperty *child, children) {
+    for (QtProperty *child : children) {
       if (isAttribute(child)) {
         setAttributeToFunction(*fun, child);
       } else if (!attributesOnly && isParameter(child)) {
@@ -1399,7 +1399,7 @@ Mantid::API::IFunction_sptr FunctionTreeView::getFunction(QtProperty *prop, bool
       }
     }
     // remove failed ties from the browser
-    foreach (QtProperty *p, failedTies) {
+    for (QtProperty *p : failedTies) {
       removeProperty(p);
     }
   }
@@ -1806,7 +1806,7 @@ void FunctionTreeView::addConstraints50() {
 
 void FunctionTreeView::removeConstraintsQuiet(QtProperty *prop) {
   auto props = prop->subProperties();
-  foreach (QtProperty *p, props) {
+  for (QtProperty *p : props) {
     if (isConstraint(p)) {
       removeProperty(p);
     }

@@ -213,13 +213,13 @@ PropertyWidget::PropertyWidget(Mantid::Kernel::Property *prop, QWidget *parent, 
   // `addLayout` sets parent of `infoWidget` correctly
   m_gridLayout->addWidget(infoWidget, m_row, 4);
 
-  QMap<Info, QPair<QString, QString>> pathsAndToolTips;
+  QMap<Info, std::pair<QString, QString>> pathsAndToolTips;
   pathsAndToolTips[RESTORE] =
-      QPair<QString, QString>(":/history.png", "This property had a previously-entered value.  Click "
-                                               "to toggle it off and on.");
-  pathsAndToolTips[REPLACE] =
-      QPair<QString, QString>(":/replace.png", "A workspace with this name already exists and so will be overwritten.");
-  pathsAndToolTips[INVALID] = QPair<QString, QString>(":/invalid.png", "");
+      std::pair<QString, QString>(":/history.png", "This property had a previously-entered value.  Click "
+                                                   "to toggle it off and on.");
+  pathsAndToolTips[REPLACE] = std::pair<QString, QString>(
+      ":/replace.png", "A workspace with this name already exists and so will be overwritten.");
+  pathsAndToolTips[INVALID] = std::pair<QString, QString>(":/invalid.png", "");
 
   std::vector<Info> labelOrder = {RESTORE, REPLACE, INVALID};
 

@@ -108,7 +108,7 @@ void UserFunctionDialog::updateCategories() {
   QString currentCategory = getCurrentCategory();
   m_uiForm.lstCategory->clear();
   QSet<QString> cats = categoryNames();
-  foreach (QString cat, cats) {
+  for (const QString &cat : cats) {
     m_uiForm.lstCategory->addItem(cat);
   }
   // try to restore current item selection
@@ -125,7 +125,7 @@ void UserFunctionDialog::updateCategories() {
 void UserFunctionDialog::selectCategory(const QString &cat) {
   QSet<QString> funs = functionNames(cat);
   m_uiForm.lstFunction->clear();
-  foreach (QString fun, funs) {
+  for (const QString &fun : funs) {
     QString value = getFunction(cat, fun);
     if (!value.isEmpty()) {
       m_uiForm.lstFunction->addItem(fun);

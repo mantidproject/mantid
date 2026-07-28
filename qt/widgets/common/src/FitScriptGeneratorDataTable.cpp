@@ -159,7 +159,7 @@ QPersistentModelIndex FitScriptGeneratorDataTable::hoveredRowIndex(QEvent *event
   auto index = m_lastHoveredIndex;
   auto const eventType = event->type();
   if (eventType == QEvent::HoverMove)
-    index = QPersistentModelIndex(this->indexAt(static_cast<QHoverEvent *>(event)->pos()));
+    index = QPersistentModelIndex(this->indexAt(static_cast<QHoverEvent *>(event)->position().toPoint()));
   else if (eventType == QEvent::Leave)
     index = QPersistentModelIndex(QModelIndex());
 

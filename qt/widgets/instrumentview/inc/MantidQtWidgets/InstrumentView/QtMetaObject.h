@@ -12,19 +12,13 @@
 
 namespace MantidQt::MantidWidgets {
 
-// Q_ARG / Q_RETURN_ARG produce QGenericArgument/QGenericReturnArgument in Qt5 but
-// QMetaMethodArgument/QMetaMethodReturnArgument in Qt6. Alias to the right type so
-// the wrapper (and its mock) match what the macros generate.
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+// Q_ARG / Q_RETURN_ARG produce QMetaMethodArgument/QMetaMethodReturnArgument. Alias to
+// the right type so the wrapper (and its mock) match what the macros generate.
 using QtInvokeArgument = QMetaMethodArgument;
 using QtInvokeReturnArgument = QMetaMethodReturnArgument;
 
 namespace detail {
-// In Qt5 QMetaObject::invokeMethod accepted a fixed list of arguments terminated
-// by the first default-constructed (null) QGenericArgument, so the wrapper below
-// could always forward all ten slots and let Qt ignore the trailing padding.
-//
-// In Qt6 invokeMethod is variadic and counts its arguments at compile time; it has
+// QMetaObject::invokeMethod is variadic and counts its arguments at compile time; it has
 // no notion of a null terminator. Forwarding the padding would make Qt believe the
 // slot takes ten parameters, the method lookup fails, and Qt crashes while trying to
 // report the missing method (printMethodNotFoundWarning). So only forward the leading,
@@ -64,10 +58,6 @@ inline bool forwardInvoke(QObject *obj, const char *member, Qt::ConnectionType t
   }
 }
 } // namespace detail
-#else
-using QtInvokeArgument = QGenericArgument;
-using QtInvokeReturnArgument = QGenericReturnArgument;
-#endif
 
 struct QtMetaObject {
   virtual ~QtMetaObject() = default;
@@ -79,17 +69,12 @@ struct QtMetaObject {
                             QtInvokeArgument val6 = QtInvokeArgument(), QtInvokeArgument val7 = QtInvokeArgument(),
                             QtInvokeArgument val8 = QtInvokeArgument(),
                             QtInvokeArgument val9 = QtInvokeArgument()) const {
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-    // Qt6's variadic invokeMethod only accepts a typed QTemplatedMetaMethodReturnArgument,
+    // The variadic invokeMethod only accepts a typed QTemplatedMetaMethodReturnArgument,
     // which cannot be reconstructed from the type-erased base passed here. Nothing in the
-    // instrument view captures a return value, so the return argument is unused under Qt6.
+    // instrument view captures a return value, so the return argument is unused.
     (void)ret;
     const QtInvokeArgument args[10] = {val0, val1, val2, val3, val4, val5, val6, val7, val8, val9};
     return detail::forwardInvoke(obj, member, type, args);
-#else
-    return QMetaObject::invokeMethod(obj, member, type, ret, val0, val1, val2, val3, val4, val5, val6, val7, val8,
-                                     val9);
-#endif
   }
 
   virtual bool invokeMethod(QObject *obj, const char *member, QtInvokeReturnArgument ret,
@@ -99,14 +84,10 @@ struct QtMetaObject {
                             QtInvokeArgument val6 = QtInvokeArgument(), QtInvokeArgument val7 = QtInvokeArgument(),
                             QtInvokeArgument val8 = QtInvokeArgument(),
                             QtInvokeArgument val9 = QtInvokeArgument()) const {
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-    // See the note above: the type-erased return argument is unused under Qt6.
+    // See the note above: the type-erased return argument is unused.
     (void)ret;
     const QtInvokeArgument args[10] = {val0, val1, val2, val3, val4, val5, val6, val7, val8, val9};
     return detail::forwardInvoke(obj, member, Qt::AutoConnection, args);
-#else
-    return QMetaObject::invokeMethod(obj, member, ret, val0, val1, val2, val3, val4, val5, val6, val7, val8, val9);
-#endif
   }
 
   virtual bool invokeMethod(QObject *obj, const char *member, Qt::ConnectionType type,
@@ -116,12 +97,8 @@ struct QtMetaObject {
                             QtInvokeArgument val6 = QtInvokeArgument(), QtInvokeArgument val7 = QtInvokeArgument(),
                             QtInvokeArgument val8 = QtInvokeArgument(),
                             QtInvokeArgument val9 = QtInvokeArgument()) const {
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     const QtInvokeArgument args[10] = {val0, val1, val2, val3, val4, val5, val6, val7, val8, val9};
     return detail::forwardInvoke(obj, member, type, args);
-#else
-    return QMetaObject::invokeMethod(obj, member, type, val0, val1, val2, val3, val4, val5, val6, val7, val8, val9);
-#endif
   }
 
   virtual bool invokeMethod(QObject *obj, const char *member, QtInvokeArgument val0 = QtInvokeArgument(),
@@ -130,12 +107,8 @@ struct QtMetaObject {
                             QtInvokeArgument val5 = QtInvokeArgument(), QtInvokeArgument val6 = QtInvokeArgument(),
                             QtInvokeArgument val7 = QtInvokeArgument(), QtInvokeArgument val8 = QtInvokeArgument(),
                             QtInvokeArgument val9 = QtInvokeArgument()) const {
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     const QtInvokeArgument args[10] = {val0, val1, val2, val3, val4, val5, val6, val7, val8, val9};
     return detail::forwardInvoke(obj, member, Qt::AutoConnection, args);
-#else
-    return QMetaObject::invokeMethod(obj, member, val0, val1, val2, val3, val4, val5, val6, val7, val8, val9);
-#endif
   }
 };
 } // namespace MantidQt::MantidWidgets

@@ -18,11 +18,7 @@ const sipAPIDef *sipAPI() {
     return sip_API;
 
   // Some configs have a private sip module inside PyQt. Try this first
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-  sip_API = static_cast<const sipAPIDef *>(PyCapsule_Import("PyQt5.sip._C_API", 0));
-#else
   sip_API = static_cast<const sipAPIDef *>(PyCapsule_Import("PyQt6.sip._C_API", 0));
-#endif
   // Try plain sip module
   if (!sip_API) {
     PyErr_Clear();

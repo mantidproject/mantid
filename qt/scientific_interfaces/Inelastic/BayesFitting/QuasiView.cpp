@@ -69,9 +69,9 @@ QuasiView::QuasiView(QWidget *parent)
   connect(m_uiForm.dsResolution, &DataSelector::dataReady, this, &QuasiView::notifyResolutionInputReady);
   connect(m_uiForm.dsResolution, &DataSelector::filesAutoLoaded, this, &QuasiView::notifyFileAutoLoaded);
 
-  connect(m_uiForm.cbProgram, static_cast<void (QComboBox::*)(int const)>(&QComboBox::currentIndexChanged), this,
+  connect(m_uiForm.cbProgram, qOverload<int const>(&QComboBox::currentIndexChanged), this,
           &QuasiView::handleProgramChange);
-  connect(m_uiForm.spPreviewSpectrum, static_cast<void (QSpinBox::*)(int const)>(&QSpinBox::valueChanged), this,
+  connect(m_uiForm.spPreviewSpectrum, qOverload<int const>(&QSpinBox::valueChanged), this,
           &QuasiView::notifyPreviewSpectrumChanged);
 
   connect(m_uiForm.pbPlotPreview, &QPushButton::clicked, this, &QuasiView::notifyPlotCurrentPreview);
@@ -257,8 +257,8 @@ bool QuasiView::displaySaveDirectoryMessage() const {
                             " If run, the algorithm will default to saving files "
                             "to the current working directory."
                             " Would you still like to run the algorithm?";
-  return QMessageBox::question(nullptr, "Save Directory", textMessage, QMessageBox::Yes, QMessageBox::No,
-                               QMessageBox::NoButton) == QMessageBox::No;
+  return QMessageBox::question(nullptr, "Save Directory", textMessage, QMessageBox::Yes | QMessageBox::No,
+                               QMessageBox::Yes) == QMessageBox::No;
 }
 
 void QuasiView::setFileExtensionsByName(bool const filter) {

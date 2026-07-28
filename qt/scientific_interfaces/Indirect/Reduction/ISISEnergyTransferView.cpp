@@ -123,8 +123,8 @@ bool IETView::showRebinWidthPrompt() const {
   const char *text = "The Binning width is currently negative, this suggests "
                      "you wish to use logarithmic binning.\n"
                      " Do you want to use Logarithmic Binning?";
-  int result = QMessageBox::question(nullptr, tr("Logarithmic Binning"), tr(text), QMessageBox::Yes, QMessageBox::No,
-                                     QMessageBox::NoButton);
+  int result = QMessageBox::question(nullptr, tr("Logarithmic Binning"), tr(text), QMessageBox::Yes | QMessageBox::No,
+                                     QMessageBox::Yes);
 
   return result == QMessageBox::Yes;
 }

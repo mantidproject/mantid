@@ -13,7 +13,6 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 
 #include <QList>
-#include <QPair>
 #include <QString>
 #include <QStringList>
 
