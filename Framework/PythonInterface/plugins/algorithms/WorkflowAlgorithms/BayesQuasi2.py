@@ -151,10 +151,10 @@ class BayesQuasi2(QuickBayesTemplate):
         start_x = self.getProperty("EMin").value
         end_x = self.getProperty("EMax").value
         # work around for bug
-        if start_x < sample_ws.readX(0)[0]:
-            start_x = sample_ws.readX(0)[0]
-        if end_x > sample_ws.readX(0)[-1]:
-            end_x = sample_ws.readX(0)[-1]
+        if start_x < sample_ws.x(0)[0]:
+            start_x = sample_ws.x(0)[0]
+        if end_x > sample_ws.x(0)[-1]:
+            end_x = sample_ws.x(0)[-1]
 
         logger.information(" Number of spectra = {0} ".format(N))
         logger.information(" Erange : {0}  to {1} ".format(start_x, end_x))
@@ -169,9 +169,9 @@ class BayesQuasi2(QuickBayesTemplate):
         for spec in range(N):
             report_progress.report(f"spectrum {spec}")
             self.log().notice(f"Fitting spectrum {spec + 1} of {N}")
-            sx = sample_ws.readX(spec)
-            sy = sample_ws.readY(spec)
-            se = sample_ws.readE(spec)
+            sx = sample_ws.x(spec)
+            sy = sample_ws.y(spec)
+            se = sample_ws.e(spec)
 
             sample = {"x": sx, "y": sy, "e": se}
 

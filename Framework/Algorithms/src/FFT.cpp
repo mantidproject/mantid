@@ -200,7 +200,7 @@ void FFT::transformForward(std::vector<double> &data, const int xSize, const int
     m_outWS->mutableY(m_iIm)[i] = im;                       // imaginary part
     m_outWS->mutableY(m_iAbs)[i] = sqrt(re * re + im * im); // modulus
     if (addPositiveOnly) {
-      m_outWS->dataX(0)[i] = df * i;
+      m_outWS->mutableX(0)[i] = df * i;
       if (j < ySize / 2) {
         m_outWS->mutableY(0)[j] = re;                      // real part
         m_outWS->mutableY(1)[j] = im;                      // imaginary part

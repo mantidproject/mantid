@@ -205,7 +205,7 @@ void GenerateGoniometerIndependentBackground::exec() {
   // all spectra for all input workspaces have same binning
   const size_t numGroups = grouped_inputs.front()->getNumberHistograms();
   const auto blocksize = grouped_inputs.front()->blocksize();
-  const auto Xvalues = grouped_inputs.front()->readX(0);
+  const auto Xvalues = grouped_inputs.front()->x(0);
 
   for (size_t group = 0; group < numGroups; group++) {
     const auto msg = "Processing group " + std::to_string(group) + " out of " + std::to_string(numGroups);
@@ -222,7 +222,7 @@ void GenerateGoniometerIndependentBackground::exec() {
       // create pair of intensity and input index to sort for every bin in this group
       std::vector<std::pair<double, size_t>> intensity_input_map;
       for (size_t f = 0; f < numInputs; f++) {
-        intensity_input_map.push_back(std::make_pair(grouped_inputs.at(f)->readY(group).at(x), f));
+        intensity_input_map.push_back(std::make_pair(grouped_inputs.at(f)->y(group).at(x), f));
       }
 
       std::sort(intensity_input_map.begin(), intensity_input_map.end());

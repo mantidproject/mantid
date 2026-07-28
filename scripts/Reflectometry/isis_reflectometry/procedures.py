@@ -280,13 +280,13 @@ def removeoutlayer(wksp):
     # calculation
     a1 = mtd[wksp]
     nspec = a1.getNumberHistograms()
-    x = a1.readX(0)
+    x = a1.x(0)
     for i in range(nspec):
         for j in range(len(x) - 1):
-            y = a1.readY(i)[j]
+            y = a1.y(i)[j]
             if y < 2:
-                a1.dataY(i)[j] = 0.0
-                a1.dataE(i)[j] = 0.0
+                a1.mutableY(i)[j] = 0.0
+                a1.mutableE(i)[j] = 0.0
 
 
 def nrSESANSFn(
@@ -430,22 +430,22 @@ def _process_2dsesans_workspace(SEConstList, convertToSEL, k, lnPOverLam, nlist)
         a1 = mtd[i + "2dSESANS"]
         nspec = a1.getNumberHistograms()
         for l in range(nspec):
-            x = a1.readX(l)
+            x = a1.x(l)
             for j in range(len(x) - 1):
-                lam = ((a1.readX(l)[j] + a1.readX(l)[j + 1]) / 2.0) / 10.0
-                p = a1.readY(l)[j]
-                _e = a1.readE(l)[j]
+                lam = ((a1.x(l)[j] + a1.x(l)[j + 1]) / 2.0) / 10.0
+                p = a1.y(l)[j]
+                _e = a1.e(l)[j]
                 if lnPOverLam == "2":
                     if p > 0.0:
-                        a1.dataY(l)[j] = log(p) / ((lam * 1.0e-9) ** 2)
-                        a1.dataE(l)[j] = (_e / p) / ((lam * 1.0e-9) ** 2)
+                        a1.mutableY(l)[j] = log(p) / ((lam * 1.0e-9) ** 2)
+                        a1.mutableE(l)[j] = (_e / p) / ((lam * 1.0e-9) ** 2)
                     else:
-                        a1.dataY(l)[j] = 0.0
-                        a1.dataE(l)[j] = 0.0
+                        a1.mutableY(l)[j] = 0.0
+                        a1.mutableE(l)[j] = 0.0
             for j in range(len(x)):
                 if convertToSEL == "2":
-                    lam = a1.readX(l)[j]
-                    a1.dataX(l)[j] = 1.0e-2 * float(SEConstList[k]) * lam * lam
+                    lam = a1.x(l)[j]
+                    a1.mutableX(l)[j] = 1.0e-2 * float(SEConstList[k]) * lam * lam
         k = k + 1
 
 
@@ -454,22 +454,22 @@ def _process_sesans_workspace(SEConstList, convertToSEL, k, lnPOverLam, nlist):
         if lnPOverLam == "2":
             CloneWorkspace(InputWorkspace=i + "SESANS", OutputWorkspace=i + "SESANS_P")
         a1 = mtd[i + "SESANS"]
-        x = a1.readX(0)
+        x = a1.x(0)
         for j in range(len(x) - 1):
-            lam = ((a1.readX(0)[j] + a1.readX(0)[j + 1]) / 2.0) / 10.0
-            p = a1.readY(0)[j]
-            _e = a1.readE(0)[j]
+            lam = ((a1.x(0)[j] + a1.x(0)[j + 1]) / 2.0) / 10.0
+            p = a1.y(0)[j]
+            _e = a1.e(0)[j]
             if lnPOverLam == "2":
                 if p > 0.0:
-                    a1.dataY(0)[j] = log(p) / ((lam) ** 2)
-                    a1.dataE(0)[j] = (_e / p) / ((lam) ** 2)
+                    a1.mutableY(0)[j] = log(p) / ((lam) ** 2)
+                    a1.mutableE(0)[j] = (_e / p) / ((lam) ** 2)
                 else:
-                    a1.dataY(0)[j] = 0.0
-                    a1.dataE(0)[j] = 0.0
+                    a1.mutableY(0)[j] = 0.0
+                    a1.mutableE(0)[j] = 0.0
         for j in range(len(x)):
             if convertToSEL == "2":
-                lam = a1.readX(0)[j]
-                a1.dataX(0)[j] = 1.0e-2 * float(SEConstList[k]) * lam * lam
+                lam = a1.x(0)[j]
+                a1.mutableX(0)[j] = 1.0e-2 * float(SEConstList[k]) * lam * lam
         k = k + 1
 
 
@@ -675,14 +675,14 @@ def nrSERGISFn(
     k = 0
     for i in nlist:
         a1 = mtd[i + "SESANS"]
-        x = a1.readX(0)
+        x = a1.x(0)
         for j in range(len(x) - 1):
-            lam = ((a1.readX(0)[j] + a1.readX(0)[j + 1]) / 2.0) / 10.0
-            p = a1.readY(0)[j]
-            a1.dataY(0)[j] = log(p) / ((lam * 1.0e-8) ** 2)
+            lam = ((a1.x(0)[j] + a1.x(0)[j + 1]) / 2.0) / 10.0
+            p = a1.y(0)[j]
+            a1.mutableY(0)[j] = log(p) / ((lam * 1.0e-8) ** 2)
         for j in range(len(x)):
-            lam = a1.readX(0)[j]
-            a1.dataX(0)[j] = 1.0e-2 * float(SEConstList[k]) * lam * lam
+            lam = a1.x(0)[j]
+            a1.mutableX(0)[j] = 1.0e-2 * float(SEConstList[k]) * lam * lam
             # print str(lam)+" "+str(1.0e-2*float(SEConstList[k])*lam*lam)
         k = k + 1
 
@@ -789,7 +789,7 @@ def nrNRFn(runList, nameList, incidentAngles, DBList, specChan, minSpec, maxSpec
 
 def findbin(wksp, val):
     a1 = mtd[wksp]
-    x1 = a1.readX(0)
+    x1 = a1.x(0)
 
     i = None
     for i in range(len(x1) - 1):
@@ -919,19 +919,19 @@ def nrDBFn(
 
 def numberofbins(wksp):
     a1 = mtd[wksp]
-    y1 = a1.readY(0)
+    y1 = a1.y(0)
     return len(y1) - 1
 
 
 def maskbin(wksp, val):
     a1 = mtd[wksp]
-    x1 = a1.readX(0)
+    x1 = a1.x(0)
     i = None
     for i in range(len(x1) - 1):
         if x1[i] > val:
             break
-    a1.dataY(0)[i - 1] = 0.0
-    a1.dataE(0)[i - 1] = 0.0
+    a1.mutableY(0)[i - 1] = 0.0
+    a1.mutableE(0)[i - 1] = 0.0
 
 
 def arr2list(iarray):
@@ -959,10 +959,10 @@ def NRCombineDatafn(RunsNameList, CombNameList, applySFs, SFList, SFError, scale
     eol = []  # end of overlaps
     for i in range(len(rlist) - 1):
         a1 = mtd[rlist[i + 1]]
-        x = a1.readX(0)
+        x = a1.x(0)
         bol.append(x[0])
         a1 = mtd[rlist[i]]
-        x = a1.readX(0)
+        x = a1.x(0)
         eol.append(x[len(x) - 1])
     # set the edges of the rebinned data to 0.0 to avoid partial bin problems
     maskbin(rlist[0] + "reb", eol[0])
@@ -978,14 +978,14 @@ def NRCombineDatafn(RunsNameList, CombNameList, applySFs, SFList, SFError, scale
         if scaleOption != "2":
             Divide("i" + str(i) + "1temp", "i" + str(i) + "2temp", "sf" + str(i))
             a1 = mtd["sf" + str(i)]
-            print("sf" + str(i) + "=" + str(a1.readY(0)) + " +/- " + str(a1.readE(0)))
-            sfs.append(str(a1.readY(0)[0]))
-            sferrs.append(str(a1.readE(0)[0]))
+            print("sf" + str(i) + "=" + str(a1.y(0)) + " +/- " + str(a1.e(0)))
+            sfs.append(str(a1.y(0)[0]))
+            sferrs.append(str(a1.e(0)[0]))
         else:
             Divide("i" + str(i) + "2temp", "i" + str(i) + "1temp", "sf" + str(i))
-            print("sf" + str(i) + "=" + str(a1.readY(0)) + " +/- " + str(a1.readE(0)))
-            sfs.append(str(a1.readY(0)[0]))
-            sferrs.append(str(a1.readE(0)[0]))
+            print("sf" + str(i) + "=" + str(a1.y(0)) + " +/- " + str(a1.e(0)))
+            sfs.append(str(a1.y(0)[0]))
+            sferrs.append(str(a1.e(0)[0]))
         mtd.deleteWorkspace("i" + str(i) + "1temp")
         mtd.deleteWorkspace("i" + str(i) + "2temp")
     # if applying pre-defined scale factors substitute the given values now
@@ -993,8 +993,8 @@ def NRCombineDatafn(RunsNameList, CombNameList, applySFs, SFList, SFError, scale
     if applySFs == "2":
         for i in range(len(rlist) - 1):
             a1 = mtd["sf" + str(i)]
-            a1.dataY(0)[0] = float(listsfs[i])
-            a1.dataE(0)[0] = float(listsfserr[i])
+            a1.mutableY(0)[0] = float(listsfs[i])
+            a1.mutableE(0)[0] = float(listsfserr[i])
     # Now scale the various data sets in the correct order
     if scaleOption != "2":
         for i in range(len(rlist) - 1):
@@ -1026,12 +1026,12 @@ def NRCombineDatafn(RunsNameList, CombNameList, applySFs, SFList, SFError, scale
 
 def nrWriteXYE(wksp, fname):
     a1 = mtd[wksp]
-    x1 = a1.readX(0)
+    x1 = a1.x(0)
     X1 = n.zeros((len(x1) - 1))
     for i in range(0, len(x1) - 1):
         X1[i] = (x1[i] + x1[i + 1]) / 2.0
-    y1 = a1.readY(0)
-    e1 = a1.readE(0)
+    y1 = a1.y(0)
+    e1 = a1.e(0)
     f = open(fname, "w")
     for i in range(len(X1)):
         s = ""
@@ -1057,22 +1057,22 @@ def nrPNRCorrection(UpWksp, DownWksp):
     Ia = mtd[DownWksp]
     CloneWorkspace(Ip, "PCalpha")
     CropWorkspace(InputWorkspace="PCalpha", OutputWorkspace="PCalpha", StartWorkspaceIndex="0", EndWorkspaceIndex="0")
-    # a1=alpha.readY(0)
+    # a1=alpha.y(0)
     # for i in range(0,len(a1)):
-    # alpha.dataY(0)[i]=0.0
-    # alpha.dataE(0)[i]=0.0
+    # alpha.mutableY(0)[i]=0.0
+    # alpha.mutableE(0)[i]=0.0
     CloneWorkspace("PCalpha", "PCrho")
     CloneWorkspace("PCalpha", "PCAp")
     CloneWorkspace("PCalpha", "PCPp")
     rho = mtd["PCrho"]
     Pp = mtd["PCPp"]
     # for i in range(0,len(a1)):
-    # x=(alpha.dataX(0)[i]+alpha.dataX(0)[i])/2.0
+    # x=(alpha.x(0)[i]+alpha.x(0)[i])/2.0
     # for j in range(0,4):
-    # alpha.dataY(0)[i]=alpha.dataY(0)[i]+calpha[j]*x**j
-    # rho.dataY(0)[i]=rho.dataY(0)[i]+crho[j]*x**j
-    # Ap.dataY(0)[i]=Ap.dataY(0)[i]+cAp[j]*x**j
-    # Pp.dataY(0)[i]=Pp.dataY(0)[i]+cPp[j]*x**j
+    # alpha.mutableY(0)[i]=alpha.y(0)[i]+calpha[j]*x**j
+    # rho.mutableY(0)[i]=rho.y(0)[i]+crho[j]*x**j
+    # Ap.mutableY(0)[i]=Ap.y(0)[i]+cAp[j]*x**j
+    # Pp.mutableY(0)[i]=Pp.y(0)[i]+cPp[j]*x**j
     PolynomialCorrection(InputWorkspace="PCalpha", OutputWorkspace="PCalpha", Coefficients=calpha, Operation="Multiply")
     PolynomialCorrection(InputWorkspace="PCrho", OutputWorkspace="PCrho", Coefficients=crho, Operation="Multiply")
     PolynomialCorrection(InputWorkspace="PCAp", OutputWorkspace="PCAp", Coefficients=cAp, Operation="Multiply")
@@ -1114,10 +1114,10 @@ def nrPACorrection(UpUpWksp, UpDownWksp, DownUpWksp, DownDownWksp):
     CloneWorkspace(Ipp, "PCalpha")
     CropWorkspace(InputWorkspace="PCalpha", OutputWorkspace="PCalpha", StartWorkspaceIndex="0", EndWorkspaceIndex="0")
     alpha = mtd["PCalpha"]
-    # a1=alpha.readY(0)
+    # a1=alpha.y(0)
     # for i in range(0,len(a1)):
-    # alpha.dataY(0)[i]=0.0
-    # alpha.dataE(0)[i]=0.0
+    # alpha.mutableY(0)[i]=0.0
+    # alpha.mutableE(0)[i]=0.0
     CloneWorkspace("PCalpha", "PCrho")
     CloneWorkspace("PCalpha", "PCAp")
     CloneWorkspace("PCalpha", "PCPp")
@@ -1125,12 +1125,12 @@ def nrPACorrection(UpUpWksp, UpDownWksp, DownUpWksp, DownDownWksp):
     Ap = mtd["PCAp"]
     Pp = mtd["PCPp"]
     # for i in range(0,len(a1)):
-    # x=(alpha.dataX(0)[i]+alpha.dataX(0)[i])/2.0
+    # x=(alpha.x(0)[i]+alpha.x(0)[i])/2.0
     # for j in range(0,4):
-    # alpha.dataY(0)[i]=alpha.dataY(0)[i]+calpha[j]*x**j
-    # rho.dataY(0)[i]=rho.dataY(0)[i]+crho[j]*x**j
-    # Ap.dataY(0)[i]=Ap.dataY(0)[i]+cAp[j]*x**j
-    # Pp.dataY(0)[i]=Pp.dataY(0)[i]+cPp[j]*x**j
+    # alpha.mutableY(0)[i]=alpha.y(0)[i]+calpha[j]*x**j
+    # rho.mutableY(0)[i]=rho.y(0)[i]+crho[j]*x**j
+    # Ap.mutableY(0)[i]=Ap.y(0)[i]+cAp[j]*x**j
+    # Pp.mutableY(0)[i]=Pp.y(0)[i]+cPp[j]*x**j
     # Use the polynomial corretion fn instead
     PolynomialCorrection(InputWorkspace="PCalpha", OutputWorkspace="PCalpha", Coefficients=calpha, Operation="Multiply")
     PolynomialCorrection(InputWorkspace="PCrho", OutputWorkspace="PCrho", Coefficients=crho, Operation="Multiply")
@@ -1385,7 +1385,7 @@ def tl(wksp, th0, schan):
     dist = 3630
     ThetaInc = th0 * pi / 180.0
     a1 = mtd[wksp]
-    y = a1.readY(0)
+    y = a1.y(0)
     ntc = len(y)
     nspec = a1.getNumberHistograms()
     x1 = n.zeros((nspec + 1, ntc + 1))
@@ -1393,9 +1393,9 @@ def tl(wksp, th0, schan):
     y1 = n.zeros((nspec, ntc))
     e1 = n.zeros((nspec, ntc))
     for i in range(0, nspec):
-        x = a1.readX(i)
-        y = a1.readY(i)
-        _e = a1.readE(i)
+        x = a1.x(i)
+        y = a1.y(i)
+        _e = a1.e(i)
         x1[i, 0 : ntc + 1] = x[0 : ntc + 1]
         theta[i, :] = atan2((i - schan - 0.5) * pixel + dist * tan(ThetaInc), dist) * 180 / pi
         y1[i, 0:ntc] = y[0:ntc]
@@ -1432,12 +1432,12 @@ def writemap_tab(dat, th0, spchan, fname):
 
 def xye(wksp):
     a1 = mtd[wksp]
-    x1 = a1.readX(0)
+    x1 = a1.x(0)
     X1 = n.zeros((len(x1) - 1))
     for i in range(0, len(x1) - 1):
         X1[i] = (x1[i] + x1[i + 1]) / 2.0
-    y1 = a1.readY(0)
-    e1 = a1.readE(0)
+    y1 = a1.y(0)
+    e1 = a1.e(0)
     d1 = [X1, y1, e1]
     return d1
 

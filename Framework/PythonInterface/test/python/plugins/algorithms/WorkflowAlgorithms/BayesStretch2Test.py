@@ -81,8 +81,8 @@ class BayesStretch2Test(unittest.TestCase):
 
         self.assertEqual(ws.getNumberHistograms(), 3)
         for j in range(ws.getNumberHistograms()):
-            np.testing.assert_almost_equal(ws.readX(j), x, 3)
-            np.testing.assert_almost_equal(ws.readY(j), expect[j], 3)
+            np.testing.assert_almost_equal(ws.x(j), x, 3)
+            np.testing.assert_almost_equal(ws.y(j), expect[j], 3)
 
         label = ["beta", "FWHM"]
         axis_values = [x, y]
@@ -107,8 +107,8 @@ class BayesStretch2Test(unittest.TestCase):
 
         self.assertEqual(ws.getNumberHistograms(), 2)
         for j in range(ws.getNumberHistograms()):
-            np.testing.assert_almost_equal(ws.readX(j), x, 3)
-            np.testing.assert_almost_equal(ws.readY(j), expect[j], 3)
+            np.testing.assert_almost_equal(ws.x(j), x, 3)
+            np.testing.assert_almost_equal(ws.y(j), expect[j], 3)
 
         label = ["q", ""]
         axis_values = [x, [str(val) for val in Q]]
@@ -199,9 +199,9 @@ class BayesStretch2Test(unittest.TestCase):
             method_mock.preprocess_data,
             N_calls=1,
             call_number=1,
-            x_data=self._sample_ws.readX(0),
-            y_data=self._sample_ws.readY(0),
-            e_data=self._sample_ws.readE(0),
+            x_data=self._sample_ws.x(0),
+            y_data=self._sample_ws.y(0),
+            e_data=self._sample_ws.e(0),
             start_x=-0.3,
             end_x=0.3,
             res=self._res_ws,

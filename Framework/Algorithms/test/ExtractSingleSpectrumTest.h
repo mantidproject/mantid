@@ -32,23 +32,23 @@ public:
     MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(5, nbins);
     const int wsIndex = 2;
     for (int i = 0; i < nbins + 1; ++i) {
-      inputWS->dataX(wsIndex)[i] = i;
+      inputWS->mutableX(wsIndex)[i] = i;
       if (i < nbins) {
-        inputWS->dataY(wsIndex)[i] = 20 - i;
-        inputWS->dataE(wsIndex)[i] = 7;
+        inputWS->mutableY(wsIndex)[i] = 20 - i;
+        inputWS->mutableE(wsIndex)[i] = 7;
       }
     }
     MatrixWorkspace_sptr outputWS = runAlgorithm(inputWS, wsIndex);
 
     TS_ASSERT(outputWS);
     TS_ASSERT_EQUALS(outputWS->blocksize(), 5);
-    TS_ASSERT_EQUALS(outputWS->readX(0).size(), nbins + 1);
+    TS_ASSERT_EQUALS(outputWS->x(0).size(), nbins + 1);
     TS_ASSERT_EQUALS(outputWS->getAxis(1)->spectraNo(0), wsIndex + 1);
     for (int j = 0; j < nbins + 1; ++j) {
-      TS_ASSERT_EQUALS(outputWS->readX(0)[j], j);
+      TS_ASSERT_EQUALS(outputWS->x(0)[j], j);
       if (j < nbins) {
-        TS_ASSERT_EQUALS(outputWS->readY(0)[j], 20 - j);
-        TS_ASSERT_EQUALS(outputWS->readE(0)[j], 7);
+        TS_ASSERT_EQUALS(outputWS->y(0)[j], 20 - j);
+        TS_ASSERT_EQUALS(outputWS->e(0)[j], 7);
       }
     }
     do_Spectrum_Tests(outputWS, 3, 3);

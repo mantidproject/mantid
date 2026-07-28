@@ -37,7 +37,7 @@ class LoadUtils(object):
         # get everything from the ADS
         self.options = mantid.AnalysisDataService.getObjectNames()
         self.options = [item.replace(" ", "") for item in self.options]
-        self.N_points = len(tmpWS.readX(0))
+        self.N_points = len(tmpWS.x(0))
         self.instrument = tmpWS.getInstrumentName()
 
         self.runName = self.instrument + str(tmpWS.getRunNumber()).zfill(8)

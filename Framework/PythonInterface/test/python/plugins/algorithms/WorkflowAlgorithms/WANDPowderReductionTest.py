@@ -78,10 +78,10 @@ class WANDPowderReductionTest(unittest.TestCase):
             return get_bkg_counts(n) + 10 * np.exp(-((twoTheta - tt1) ** 2) / 1) + 20 * np.exp(-((twoTheta - tt2) ** 2) / 0.2)
 
         for i in range(cal.getNumberHistograms()):
-            cal.setY(i, [get_cal_counts(i) * 2.0])
-            bkg.setY(i, [get_bkg_counts(i) / 2.0])
+            cal.setSharedY(i, [get_cal_counts(i) * 2.0])
+            bkg.setSharedY(i, [get_bkg_counts(i) / 2.0])
             twoTheta = data.getInstrument().getDetector(i + 10000).getTwoTheta(V3D(0, 0, 0), V3D(0, 0, 1)) * 180 / np.pi
-            data.setY(i, [get_data_counts(i, twoTheta)])
+            data.setSharedY(i, [get_data_counts(i, twoTheta)])
 
         return data, cal, bkg
 
@@ -488,9 +488,7 @@ class WANDPowderReductionTest(unittest.TestCase):
         LoadInstrument("tmp_ws", InstrumentName="WAND", RewriteSpectraMap=False)
 
         out = WANDPowderReduction("tmp_ws", Target="Theta", XMin=29, XMax=31, NumberBins=10, NormaliseBy="None")
-        np.testing.assert_allclose(
-            out.readY(0), [0, 0, 0, 0, 269.068237, 486.311606, 618.125152, 720.37274, 811.141863, 821.032586], rtol=5e-4
-        )
+        np.testing.assert_allclose(out.y(0), [0, 0, 0, 0, 269.068237, 486.311606, 618.125152, 720.37274, 811.141863, 821.032586], rtol=5e-4)
 
         tmp_ws.delete()
         out.delete()

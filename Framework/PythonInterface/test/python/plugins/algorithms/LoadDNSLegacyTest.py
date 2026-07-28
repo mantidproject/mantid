@@ -34,8 +34,8 @@ class LoadDNSLegacyTest(unittest.TestCase):
         self.assertEqual(24, ws.getNumberHistograms())
         self.assertEqual(2, ws.getNumDims())
         # data array
-        self.assertEqual(31461, ws.readY(1))
-        self.assertEqual(13340, ws.readY(23))
+        self.assertEqual(31461, ws.y(1))
+        self.assertEqual(13340, ws.y(23))
         # sample logs
         run = ws.getRun()
         self.assertEqual(-8.54, run.getProperty("deterota").value)
@@ -105,8 +105,8 @@ class LoadDNSLegacyTest(unittest.TestCase):
         self.assertEqual(24, ws.getNumberHistograms())
         self.assertEqual(2, ws.getNumDims())
         # data array
-        self.assertAlmostEqual(31461.0 / 600.0, ws.readY(1))
-        self.assertAlmostEqual(13340.0 / 600.0, ws.readY(23))
+        self.assertAlmostEqual(31461.0 / 600.0, ws.y(1))
+        self.assertAlmostEqual(13340.0 / 600.0, ws.y(23))
         # sample logs
         run = ws.getRun()
         self.assertEqual(-8.54, run.getProperty("deterota").value)
@@ -136,8 +136,8 @@ class LoadDNSLegacyTest(unittest.TestCase):
         self.assertEqual(24, ws.getNumberHistograms())
         self.assertEqual(2, ws.getNumDims())
         # data array
-        self.assertAlmostEqual(31461.0 / 8332872.0, ws.readY(1))
-        self.assertAlmostEqual(13340.0 / 8332872.0, ws.readY(23))
+        self.assertAlmostEqual(31461.0 / 8332872.0, ws.y(1))
+        self.assertAlmostEqual(13340.0 / 8332872.0, ws.y(23))
         # sample logs
         run = ws.getRun()
         self.assertEqual(-8.54, run.getProperty("deterota").value)
@@ -161,8 +161,8 @@ class LoadDNSLegacyTest(unittest.TestCase):
         self.assertEqual(24, ws.getNumberHistograms())
         self.assertEqual(2, ws.getNumDims())
         # data array
-        self.assertEqual(31461, ws.readY(1))
-        self.assertEqual(13340, ws.readY(23))
+        self.assertEqual(31461, ws.y(1))
+        self.assertEqual(13340, ws.y(23))
         # sample logs
         run = ws.getRun()
         self.assertEqual(-8.54, run.getProperty("deterota").value)
@@ -191,9 +191,9 @@ class LoadDNSLegacyTest(unittest.TestCase):
         self.assertEqual(24, ws.getNumberHistograms())
         self.assertEqual(100, ws.blocksize())
         # data array
-        self.assertEqual(8, ws.readY(19)[23])
-        self.assertAlmostEqual(tof1, ws.readX(0)[0], 3)
-        self.assertAlmostEqual(tof1 + 40.1 * 100, ws.readX(0)[100], 3)
+        self.assertEqual(8, ws.y(19)[23])
+        self.assertAlmostEqual(tof1, ws.x(0)[0], 3)
+        self.assertAlmostEqual(tof1 + 40.1 * 100, ws.x(0)[100], 3)
         # sample logs
         run = ws.getRun()
         self.assertEqual(-7.5, run.getProperty("deterota").value)
@@ -229,10 +229,10 @@ class LoadDNSLegacyTest(unittest.TestCase):
         self.assertEqual(24, ws.getNumberHistograms())
         self.assertEqual(2, ws.getNumDims())
         # data array
-        self.assertEqual(31461, ws.readY(1))
-        self.assertEqual(13340, ws.readY(23))
-        self.assertAlmostEqual(5.7, ws.readX(1)[0], 3)
-        self.assertAlmostEqual(5.7, ws.readX(23)[0], 3)
+        self.assertEqual(31461, ws.y(1))
+        self.assertEqual(13340, ws.y(23))
+        self.assertAlmostEqual(5.7, ws.x(1)[0], 3)
+        self.assertAlmostEqual(5.7, ws.x(23)[0], 3)
         # sample logs
         run = ws.getRun()
         self.assertEqual(5.7, run.getProperty("wavelength").value)

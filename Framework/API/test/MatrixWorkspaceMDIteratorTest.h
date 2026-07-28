@@ -30,10 +30,10 @@ public:
     for (size_t wi = 0; wi < 4; wi++) {
       ax1->setValue(wi, static_cast<double>(wi) * 2.0);
       for (size_t x = 0; x < 6; x++) {
-        ws->dataX(wi)[x] = static_cast<double>(x) * 2.0;
+        ws->mutableX(wi)[x] = static_cast<double>(x) * 2.0;
         if (x < 5) {
-          ws->dataY(wi)[x] = static_cast<double>(wi * 10 + x);
-          ws->dataE(wi)[x] = static_cast<double>((wi * 10 + x) * 2);
+          ws->mutableY(wi)[x] = static_cast<double>(wi * 10 + x);
+          ws->mutableE(wi)[x] = static_cast<double>((wi * 10 + x) * 2);
         }
       }
     }

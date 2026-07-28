@@ -385,9 +385,9 @@ def rebin_workspace(workspace, new_bin_width, start_x=None, end_x=None):
 
     # Find the starting and ending bin boundaries if they were not set
     if start_x is None:
-        start_x = workspace.readX(0)[0]
+        start_x = workspace.x(0)[0]
     if end_x is None:
-        end_x = workspace.readX(0)[-1]
+        end_x = workspace.x(0)[-1]
 
     rebin_string = str(start_x) + "," + str(new_bin_width) + "," + str(end_x)
     workspace = mantid.Rebin(InputWorkspace=workspace, OutputWorkspace=workspace, Params=rebin_string)
@@ -619,7 +619,7 @@ def _crop_single_ws_in_tof(ws_to_rebin, x_max, x_min):
     if x_min > x_max:
         raise ValueError("XMin is larger than XMax. (" + str(x_min) + " > " + str(x_max) + ")")
     if x_max <= 1 and x_min <= 1:  # If <= 1, cropping by fractions, not absolutes
-        x_axis = ws_to_rebin.dataX(0)
+        x_axis = ws_to_rebin.x(0)
         x_min = x_axis[0] * (1 + x_min)
         x_max = x_axis[-1] * x_max
     cropped_ws = mantid.CropWorkspace(InputWorkspace=ws_to_rebin, OutputWorkspace=ws_to_rebin, XMin=x_min, XMax=x_max)
@@ -759,7 +759,7 @@ def _remove_masked_and_monitor_spectra(data_workspace: Workspace2D, correction_w
 
     detectors_to_mask = []
     for wsIndex in range(0, cal_workspace.getNumberHistograms()):
-        if cal_workspace.dataY(wsIndex) == 0:
+        if cal_workspace.y(wsIndex) == 0:
             detectors_to_mask.append(cal_workspace.getDetectorIDs(wsIndex)[0])
 
     results_ws = []

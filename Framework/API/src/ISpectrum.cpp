@@ -34,7 +34,7 @@ void ISpectrum::copyInfoFrom(const ISpectrum &other) {
  *          and the second the maximum
  */
 std::pair<double, double> ISpectrum::getXDataRange() const {
-  const auto &xdata = readX();
+  const auto &xdata = x();
   return std::pair<double, double>(xdata.front(), xdata.back());
 }
 

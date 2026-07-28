@@ -74,7 +74,7 @@ def find_minimum_non_zero_y_in_spectrum(y_minimum, spectrum):
 def find_minimum_non_zero_y_in_workspace(workspace):
     y_minimum = None
     for idx in range(0, workspace.getNumberHistograms()):
-        y_minimum = find_minimum_non_zero_y_in_spectrum(y_minimum, workspace.readY(idx))
+        y_minimum = find_minimum_non_zero_y_in_spectrum(y_minimum, workspace.y(idx))
     return y_minimum
 
 

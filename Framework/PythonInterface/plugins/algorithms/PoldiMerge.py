@@ -71,7 +71,7 @@ class PoldiMerge(PythonAlgorithm):
         self.setProperty("OutputWorkspace", MergeRuns(workspaceNames))
 
     def canMerge(self, leftWorkspace, rightWorkspace):
-        if not self.timingsMatch(leftWorkspace.dataX(0), rightWorkspace.dataX(0)):
+        if not self.timingsMatch(leftWorkspace.x(0), rightWorkspace.x(0)):
             raise RuntimeError("Timings don't match")
 
         # If this option is enabled, don't do any checks

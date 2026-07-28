@@ -75,8 +75,8 @@ class VesuvioPreFit(VesuvioBase):
         for ws_index, pt_index in zip(indices[0], indices[1]):
             ws_index = int(ws_index)
             pt_index = int(pt_index)
-            data.dataY(ws_index)[pt_index] = 0.0
-            data.dataE(ws_index)[pt_index] = 0.0
+            data.mutableY(ws_index)[pt_index] = 0.0
+            data.mutableE(ws_index)[pt_index] = 0.0
 
         return data
 

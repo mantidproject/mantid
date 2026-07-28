@@ -107,9 +107,9 @@ def __get_cache_name(
         property_string = [
             f"{key}={val}"
             for key, val in {
-                "wavelength_min": ws.readX(0).min(),
-                "wavelength_max": ws.readX(0).max(),
-                "num_wl_bins": len(ws.readX(0)) - 1,
+                "wavelength_min": ws.x(0).min(),
+                "wavelength_max": ws.x(0).max(),
+                "num_wl_bins": len(ws.x(0)) - 1,
                 "sample_formula": ws.run()["SampleFormula"].lastValue().strip(),
                 "mass_density": ws.run()["SampleDensity"].lastValue(),
                 "height_unit": height_unit_tmp,
@@ -685,7 +685,7 @@ def create_absorption_input(
     )
     xaxis = np.arange(0.0, float(num_wl_bins + 1)) * (wl_max - wl_min) / (num_wl_bins) + wl_min
     for i in range(absorptionWS.getNumberHistograms()):
-        absorptionWS.setX(i, xaxis)
+        absorptionWS.setSharedX(i, xaxis)
     absorptionWS.getAxis(0).setUnit("Wavelength")
 
     # this effectively deletes the metadata only workspace

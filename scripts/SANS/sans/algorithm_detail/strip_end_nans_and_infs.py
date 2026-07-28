@@ -20,7 +20,7 @@ def strip_end_nans(workspace, parent_alg=None):
     # If the workspace is larger than 1D, then there is nothing we can do
     if workspace is None or workspace.getNumberHistograms() != 1:
         return workspace
-    data = workspace.readY(0)
+    data = workspace.y(0)
     # Find the index at which the first legal value appears
 
     start_index = next((index for index in range(len(data)) if is_valid_data(data[index])), None)
@@ -33,14 +33,14 @@ def strip_end_nans(workspace, parent_alg=None):
         return workspace
 
     # Get the corresponding Q values
-    q_values = workspace.readX(0)
+    q_values = workspace.x(0)
 
     start_q = q_values[start_index]
 
     # Make sure we're inside the bin that we want to crop. This is part of the old framework. It looks like a bug fix,
     # hence we leave it in here for now. In general this is risky, and it should be a fraction of a bin width by which
     # we increase the end value
-    is_point_data = len(workspace.dataX(0)) == len(workspace.dataY(0))
+    is_point_data = len(workspace.x(0)) == len(workspace.y(0))
     if is_point_data:
         end_q = 1.001 * q_values[end_index]
     else:

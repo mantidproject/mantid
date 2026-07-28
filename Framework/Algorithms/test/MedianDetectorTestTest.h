@@ -83,7 +83,7 @@ public:
     const int lastGoodSpec = 95;
     for (int lHist = 0; lHist < Nhist; lHist++) {
       //      std::cout << "    " << lHist << " " <<
-      //      outputMat->readY(lHist).front() << '\n';
+      //      outputMat->y(lHist).front() << '\n';
       double expected = BAD_VAL;
       if (lHist >= firstGoodSpec && lHist <= lastGoodSpec)
         expected = GOOD_VAL;
@@ -91,7 +91,7 @@ public:
         expected = BAD_VAL;
       else if (lHist == SAVEDBYERRORBAR)
         expected = GOOD_VAL;
-      TS_ASSERT_EQUALS(outputMat->readY(lHist).front(), expected);
+      TS_ASSERT_EQUALS(outputMat->y(lHist).front(), expected);
     }
   }
 
@@ -102,7 +102,7 @@ public:
     const auto &spectrumInfo = ws->spectrumInfo();
 
     for (size_t i = 0; i < ws->getNumberHistograms(); i++) {
-      ws->dataY(i)[0] = 1e9 * spectrumInfo.detector(i).solidAngle(V3D(0, 0, 0));
+      ws->mutableY(i)[0] = 1e9 * spectrumInfo.detector(i).solidAngle(V3D(0, 0, 0));
     }
     AnalysisDataService::Instance().addOrReplace("MDTSolidAngle", ws);
 
@@ -136,7 +136,7 @@ public:
     const auto &spectrumInfo = ws->spectrumInfo();
 
     for (size_t i = 0; i < ws->getNumberHistograms(); i++) {
-      ws->dataY(i)[0] = std::floor(1e9 * spectrumInfo.detector(i).solidAngle(V3D(0, 0, 0)));
+      ws->mutableY(i)[0] = std::floor(1e9 * spectrumInfo.detector(i).solidAngle(V3D(0, 0, 0)));
     }
     AnalysisDataService::Instance().addOrReplace("MDTLevelsUp", ws);
 

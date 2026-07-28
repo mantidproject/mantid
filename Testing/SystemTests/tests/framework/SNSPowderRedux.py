@@ -209,7 +209,7 @@ class PG3AbsorptionCorrection(systemtesting.MantidSystemTest):
         Integration(InputWorkspace="top", OutputWorkspace="top")
 
         Divide(LHSWorkspace="top", RHSWorkspace="bottom", OutputWorkspace="Rval")
-        Rval = mtd["Rval"].dataY(0)
+        Rval = mtd["Rval"].y(0)
 
         self.assertLessThan(Rval, self.tolerance)
 

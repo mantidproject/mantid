@@ -532,7 +532,7 @@ def generous_rebin(ws: str | Workspace2D, out_ws: str, StoreInADS: bool = True) 
         logger.warning("Rebinning generously - this may cause memory issues for workspaces with very different x binning")
     minX, maxX, diffX = np.inf, 0, np.inf
     for i in range(ws.getNumberHistograms()):
-        xdat = ws.readX(i)
+        xdat = ws.x(i)
         minX = min(xdat.min(), minX)
         maxX = max(xdat.max(), maxX)
         diffX = min(np.diff(xdat).min(), diffX)

@@ -190,12 +190,12 @@ void ConvertAxisByFormula::exec() {
 
       // copy xVals to every spectra
       auto numberOfSpectra_i = static_cast<int64_t>(outputWs->getNumberHistograms()); // cast to make openmp happy
-      auto xVals = outputWs->refX(0);
+      auto xVals = outputWs->sharedX(0);
       Progress prog(this, 0.6, 1.0, numberOfSpectra_i);
       PARALLEL_FOR_IF(Kernel::threadSafe(*outputWs))
       for (int64_t j = 1; j < numberOfSpectra_i; ++j) {
         PARALLEL_START_INTERRUPT_REGION
-        outputWs->setX(j, xVals);
+        outputWs->setSharedX(j, xVals);
         prog.report();
         PARALLEL_END_INTERRUPT_REGION
       }

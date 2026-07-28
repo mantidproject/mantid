@@ -145,8 +145,8 @@ private:
 
     fun.function(x, y);
     ws->setPoints(0, x.toVector());
-    ws->dataY(0) = y.toVector();
-    ws->dataE(0) = e;
+    ws->mutableY(0) = y.toVector();
+    ws->mutableE(0) = e;
 
     return ws;
   }

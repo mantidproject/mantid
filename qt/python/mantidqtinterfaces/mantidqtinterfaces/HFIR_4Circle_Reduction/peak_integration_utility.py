@@ -237,7 +237,7 @@ def fit_gaussian_linear_background_mtd(matrix_ws_name):
     fit_param_table_name = "{}_params_table".format(matrix_ws_name)
 
     # estimated peak center
-    vec_x = peak_ws.readX(0)
+    vec_x = peak_ws.x(0)
     estimated_peak_center = numpy.mean(vec_x)
 
     mantidsimple.FitPeaks(

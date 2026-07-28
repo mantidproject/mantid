@@ -85,13 +85,13 @@ public:
     TS_ASSERT(!outputWS->isDistribution())
     TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->unitID(), "Degrees")
     // check the data values are correct
-    const auto xAxis = outputWS->readX(0);
+    const auto xAxis = outputWS->x(0);
     TS_ASSERT_DELTA(xAxis[0], -2.78698, 1E-5)
     TS_ASSERT_DELTA(xAxis[3071], 150.76298, 1E-5)
-    const auto yAxis = outputWS->readY(0);
+    const auto yAxis = outputWS->y(0);
     TS_ASSERT_DELTA(yAxis[0], 2304.0, 1E-5)
     TS_ASSERT_DELTA(yAxis[3071], 4393.0, 1E-5)
-    const auto eAxis = outputWS->readE(0);
+    const auto eAxis = outputWS->e(0);
     TS_ASSERT_DELTA(eAxis[0], 48.0, 1E-5)
     TS_ASSERT_DELTA(eAxis[3071], 66.27971, 1E-5)
     checkTimeFormat(outputWS);
@@ -480,25 +480,25 @@ public:
     TS_ASSERT(outputWS->run().hasProperty("Multi.TotalCount"))
     // check the data is loaded in as expected
     // first, monitors should be the same regardless of data type
-    TS_ASSERT_DELTA(outputWS->readY(0)[0], 200000.0, 1E-5)
-    TS_ASSERT_DELTA(outputWS->readE(0)[0], 447.21359, 1E-5)
-    TS_ASSERT_DELTA(outputWS->readY(detInfo.scanCount() - 1)[0], 200000.0, 1E-5)
-    TS_ASSERT_DELTA(outputWS->readE(detInfo.scanCount() - 1)[0], 447.21359, 1E-5)
+    TS_ASSERT_DELTA(outputWS->y(0)[0], 200000.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->e(0)[0], 447.21359, 1E-5)
+    TS_ASSERT_DELTA(outputWS->y(detInfo.scanCount() - 1)[0], 200000.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->e(detInfo.scanCount() - 1)[0], 447.21359, 1E-5)
     // second, data, tube 1, isolated counts or high counts
-    TS_ASSERT_DELTA(outputWS->readY(234)[0], 1.0, 1E-5)
-    TS_ASSERT_DELTA(outputWS->readE(234)[0], 1.0, 1E-5)
-    TS_ASSERT_DELTA(outputWS->readY(457)[0], 2.0, 1E-5)
-    TS_ASSERT_DELTA(outputWS->readE(457)[0], 1.41421, 1E-5)
+    TS_ASSERT_DELTA(outputWS->y(234)[0], 1.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->e(234)[0], 1.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->y(457)[0], 2.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->e(457)[0], 1.41421, 1E-5)
     // tube 2, to ensure proper order of tube filling
-    TS_ASSERT_DELTA(outputWS->readY(3201)[0], 3.0, 1E-5)
-    TS_ASSERT_DELTA(outputWS->readE(3201)[0], 1.73205, 1E-5)
-    TS_ASSERT_DELTA(outputWS->readY(3583)[0], 1.0, 1E-5)
-    TS_ASSERT_DELTA(outputWS->readE(3583)[0], 1.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->y(3201)[0], 3.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->e(3201)[0], 1.73205, 1E-5)
+    TS_ASSERT_DELTA(outputWS->y(3583)[0], 1.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->e(3583)[0], 1.0, 1E-5)
     // next tubes, isolated counts or high counts
-    TS_ASSERT_DELTA(outputWS->readY(314228)[0], 3.0, 1E-5)
-    TS_ASSERT_DELTA(outputWS->readE(314228)[0], 1.73205, 1E-5)
-    TS_ASSERT_DELTA(outputWS->readY(409620)[0], 3.0, 1E-5)
-    TS_ASSERT_DELTA(outputWS->readE(409620)[0], 1.73205, 1E-5)
+    TS_ASSERT_DELTA(outputWS->y(314228)[0], 3.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->e(314228)[0], 1.73205, 1E-5)
+    TS_ASSERT_DELTA(outputWS->y(409620)[0], 3.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->e(409620)[0], 1.73205, 1E-5)
     TS_ASSERT_EQUALS(outputWS->run().getProperty("Detector.calibration_file")->value(), "d2bcal_23Nov16_c.2d")
   }
 
@@ -528,17 +528,17 @@ public:
     const auto scanVar = run.getLogData("ScanVar");
     TS_ASSERT_EQUALS(scanVar->value(), "2theta.position");
     // check the data values are correct
-    const auto xAxis = outputWS->readX(0);
+    const auto xAxis = outputWS->x(0);
     TS_ASSERT_EQUALS(xAxis.size(), 1) // point data
     TS_ASSERT_DELTA(xAxis[0], 0.0, 1E-5)
     // first, the monitor
-    TS_ASSERT_DELTA(outputWS->readY(0)[0], 3958253.0, 1E-5)
-    TS_ASSERT_DELTA(outputWS->readE(0)[0], 1989.53587, 1E-5)
+    TS_ASSERT_DELTA(outputWS->y(0)[0], 3958253.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->e(0)[0], 1989.53587, 1E-5)
     // then, the data
-    TS_ASSERT_DELTA(outputWS->readY(1)[0], 4.0, 1E-5)
-    TS_ASSERT_DELTA(outputWS->readE(1)[0], 2.0, 1E-5)
-    TS_ASSERT_DELTA(outputWS->readY(16384)[0], 25.0, 1E-5)
-    TS_ASSERT_DELTA(outputWS->readE(16384)[0], 5.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->y(1)[0], 4.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->e(1)[0], 2.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->y(16384)[0], 25.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->e(16384)[0], 5.0, 1E-5)
     checkTimeFormat(outputWS);
   }
 
@@ -576,13 +576,13 @@ public:
     TS_ASSERT_DELTA(firstTube.angle(V3D(0, 0, 1)) * RAD_2_DEG, 0.85, 1e-6)
 
     // check the data values are correct
-    TS_ASSERT_EQUALS(outputWS->readX(0)[0], 0.0)
-    TS_ASSERT_DELTA(outputWS->readY(0)[0], 898939.0, 1E-5)
-    TS_ASSERT_DELTA(outputWS->readE(0)[0], 948.12393, 1E-5)
+    TS_ASSERT_EQUALS(outputWS->x(0)[0], 0.0)
+    TS_ASSERT_DELTA(outputWS->y(0)[0], 898939.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->e(0)[0], 948.12393, 1E-5)
 
-    TS_ASSERT_EQUALS(outputWS->readX(13)[0], 0.0)
-    TS_ASSERT_DELTA(outputWS->readY(13)[0], 1394.0, 1E-5)
-    TS_ASSERT_DELTA(outputWS->readE(13)[0], 37.33630, 1E-5)
+    TS_ASSERT_EQUALS(outputWS->x(13)[0], 0.0)
+    TS_ASSERT_DELTA(outputWS->y(13)[0], 1394.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->e(13)[0], 37.33630, 1E-5)
 
     checkTimeFormat(outputWS);
   }

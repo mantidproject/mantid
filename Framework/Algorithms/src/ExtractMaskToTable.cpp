@@ -228,7 +228,7 @@ std::vector<detid_t> ExtractMaskToTable::extractMaskFromMaskWorkspace() {
   size_t numhist = maskws->getNumberHistograms();
   for (size_t i = 0; i < numhist; ++i) {
     // Rule out the spectrum without mask
-    if (maskws->readY(i)[0] < 1.0E-9)
+    if (maskws->y(i)[0] < 1.0E-9)
       continue;
 
     const auto &detidset = maskws->getSpectrum(i).getDetectorIDs();

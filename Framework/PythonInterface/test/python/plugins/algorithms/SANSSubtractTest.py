@@ -26,7 +26,7 @@ class SANSSubtractTest(unittest.TestCase):
         run_algorithm("SANSSubtract", DataDistribution=self.test_ws, Background=self.test_ws, OutputWorkspace="test", rethrow=True)
         self.assertTrue(AnalysisDataService.doesExist("test"))
 
-        y = AnalysisDataService.retrieve("test").readY(0)
+        y = AnalysisDataService.retrieve("test").y(0)
         for value in y:
             self.assertAlmostEqual(value, 0, 2)
 

@@ -492,8 +492,8 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         # update values based on all workspaces
         for name in workspaces:
             _ws_tmp = mtd[name]
-            _xMin = min(_xMin, _ws_tmp.readX(0).min())
-            _xMax = max(_xMax, _ws_tmp.readX(0).max())
+            _xMin = min(_xMin, _ws_tmp.x(0).min())
+            _xMax = max(_xMax, _ws_tmp.x(0).max())
 
         return _xMin, _xMax
 

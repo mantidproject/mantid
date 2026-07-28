@@ -219,7 +219,7 @@ public:
     m_alg->setProperty("OutputWorkspace", "test_ws");
     m_alg->execute();
     Mantid::API::MatrixWorkspace_sptr outputWS = m_alg->getProperty("OutputWorkspace");
-    compareVectors(outputWS->readY(0), {-1.25, 0.4167, 2.0833, 3.75, 5.4167});
+    compareVectors(outputWS->y(0).rawData(), {-1.25, 0.4167, 2.0833, 3.75, 5.4167});
   }
 
   void testTaskBasedAlgorithmACBD() {
@@ -231,7 +231,7 @@ public:
     m_alg->setProperty("OutputWorkspace", "test_ws");
     m_alg->execute();
     Mantid::API::MatrixWorkspace_sptr outputWS = m_alg->getProperty("OutputWorkspace");
-    compareVectors(outputWS->readY(0), {-0.8333, 0.8333, 2.5, 4.1667, 5.8333});
+    compareVectors(outputWS->y(0).rawData(), {-0.8333, 0.8333, 2.5, 4.1667, 5.8333});
   }
 
   void testTaskBasedAlgorithmABD() {
@@ -243,7 +243,7 @@ public:
     m_alg->setProperty("OutputWorkspace", "test_ws");
     m_alg->execute();
     Mantid::API::MatrixWorkspace_sptr outputWS = m_alg->getProperty("OutputWorkspace");
-    compareVectors(outputWS->readY(0), {2.50, 7.50, 12.50, 17.50, 22.50});
+    compareVectors(outputWS->y(0).rawData(), {2.50, 7.50, 12.50, 17.50, 22.50});
   }
 
   void testTaskENoOutputSpecified() {
@@ -255,7 +255,7 @@ public:
     m_alg->setProperty("OutputWorkspace", "test_ws");
     m_alg->execute();
     Mantid::API::MatrixWorkspace_sptr outputWS = m_alg->getProperty("OutputWorkspace");
-    compareVectors(outputWS->readY(0), {-0.25, 1.4167, 3.0833, 4.75, 6.4167});
+    compareVectors(outputWS->y(0).rawData(), {-0.25, 1.4167, 3.0833, 4.75, 6.4167});
   }
 
   void testTaskBasedAlgorithmThrowsWhenNoTaskSetCanBeFulfilled() {
@@ -306,7 +306,7 @@ public:
     m_alg->setProperty("OutputWorkspace", "test_ws");
     m_alg->execute();
     Mantid::API::MatrixWorkspace_sptr outputWS = m_alg->getProperty("OutputWorkspace");
-    compareVectors(outputWS->readY(0), {0.0, 1.667, 3.333, 5.0, 6.667});
+    compareVectors(outputWS->y(0).rawData(), {0.0, 1.667, 3.333, 5.0, 6.667});
   }
 
   // Simulate being called through algorithm dialog
@@ -321,7 +321,7 @@ public:
     m_alg->setProperty("TaskExecutionOrder", "TaskA, TaskB, TaskD");
     m_alg->execute();
     Mantid::API::MatrixWorkspace_sptr outputWS = m_alg->getProperty("OutputWorkspace");
-    compareVectors(outputWS->readY(0), {2.50, 7.50, 12.50, 17.50, 22.50});
+    compareVectors(outputWS->y(0).rawData(), {2.50, 7.50, 12.50, 17.50, 22.50});
   }
 
   void testTaskBasedAlgorithmDoesNotMutateInput() {
@@ -332,7 +332,7 @@ public:
     m_alg->setProperty("InputWorkspace", inputWS);
     m_alg->setProperty("OutputWorkspace", "test_ws");
     m_alg->execute();
-    compareVectors(inputWS->readY(0), {1.0, 2.0, 3.0, 4.0, 5.0});
+    compareVectors(inputWS->y(0).rawData(), {1.0, 2.0, 3.0, 4.0, 5.0});
   }
 
   void testTaskBasedAlgorithmDoesMutateInputIfSet() {
@@ -347,7 +347,7 @@ public:
     alg->enableMutableInput();
 
     m_alg->execute();
-    compareVectors(inputWS->readY(0), {5.0, 10.0, 15.0, 20.0, 25.0});
+    compareVectors(inputWS->y(0).rawData(), {5.0, 10.0, 15.0, 20.0, 25.0});
   }
 
   void testTaskOutputDebugWorkspace() {

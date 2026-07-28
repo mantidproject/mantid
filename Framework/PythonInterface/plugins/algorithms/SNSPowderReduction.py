@@ -515,7 +515,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             self._beamHeight,  # Height of the neutron beam cross section in cm
             self._numberDensity,  # Optional number density of sample to be added
             self._containerShape,  # Shape definition of container
-            self._num_wl_bins,  # Number of bins: len(ws.readX(0))-1
+            self._num_wl_bins,  # Number of bins: len(ws.x(0))-1
             self._elementSize,  # Size of one side of the integration element cube in mm
             metaws,  # Optional workspace containing metadata
             self._cache_dirs,  # Cache dir for absorption correction workspace
@@ -1228,8 +1228,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         # get the filter wall time according to type of splitting workspace
         if isinstance(split_ws, MatrixWorkspace):
             # matrix workspace: nano seconds of epoch time
-            filter_start_time = split_ws.readX(0)[0] * 1.0e-9
-            filter_stop_time = split_ws.readX(0)[-1] * 1.0e-9
+            filter_start_time = split_ws.x(0)[0] * 1.0e-9
+            filter_stop_time = split_ws.x(0)[-1] * 1.0e-9
 
         elif isinstance(split_ws, SplittersWorkspace):
             # splitters workspace: filter start and stop time are in "nano-seconds" and epoch time
@@ -1321,7 +1321,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         elif isinstance(split_ws, MatrixWorkspace):
             # case as MatrixWorkspace splitter
-            vec_y = split_ws.readY(0)
+            vec_y = split_ws.y(0)
             set_y = set()
             for y in vec_y:
                 int_y = int(y + 0.1)
@@ -1697,7 +1697,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         else:
             if isinstance(split_ws, MatrixWorkspace):
                 # matrix workspace case
-                time0 = split_ws.readX(0)[0]
+                time0 = split_ws.x(0)[0]
             else:
                 #  table workspace case
                 time0 = split_ws.cell(0, 0)

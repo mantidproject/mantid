@@ -84,7 +84,7 @@ class MolDyn(PythonAlgorithm):
             for ws_name in mtd[output_ws_name].getNames():
                 if mtd[ws_name].getAxis(0).getUnit().unitID() == "Energy":
                     # Get an XMax value, default to max energy if not cropping
-                    max_energy = mtd[ws_name].dataX(0).max()
+                    max_energy = mtd[ws_name].x(0).max()
                     logger.debug("Max energy in workspace %s: %f" % (ws_name, max_energy))
 
                     if max_energy_param != Property.EMPTY_DBL:

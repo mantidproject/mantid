@@ -850,7 +850,7 @@ EventWorkspace_sptr createGroupedEventWorkspace(std::vector<std::vector<int>> co
     for (size_t g = 0; g < groups.size(); g++) {
       // Create the x-axis for histogramming.
       const double x0 = xOffset * static_cast<double>(g);
-      retVal->setX(g, make_cow<HistogramX>(numBins, LinearGenerator(x0, binDelta)));
+      retVal->setSharedX(g, make_cow<HistogramX>(numBins, LinearGenerator(x0, binDelta)));
     }
   }
 

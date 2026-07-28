@@ -56,7 +56,7 @@ public:
     const double tau = 0.001;
     MatrixWorkspace_sptr in = createWorkspace();
     // we have 2 TOF bins, and will be grouping 9 pixels
-    const double countrate = 9 * (in->readY(0)[0] + in->readY(0)[1]);
+    const double countrate = 9 * (in->y(0)[0] + in->y(0)[1]);
     const double expectation = 1. / (1. - tau * countrate);
     DeadTimeCorrection alg;
     alg.setChild(true);
@@ -73,10 +73,10 @@ public:
     TS_ASSERT(out)
     TS_ASSERT_EQUALS(out->getNumberHistograms(), in->getNumberHistograms())
     for (size_t index = 0; index < in->getNumberHistograms(); ++index) {
-      const auto &yIn = in->readY(index);
-      const auto &eIn = in->readE(index);
-      const auto &yOut = out->readY(index);
-      const auto &eOut = out->readE(index);
+      const auto &yIn = in->y(index);
+      const auto &eIn = in->e(index);
+      const auto &yOut = out->y(index);
+      const auto &eOut = out->e(index);
       TS_ASSERT_EQUALS(yIn.size(), yOut.size())
       TS_ASSERT_EQUALS(eIn.size(), eOut.size())
       for (size_t bin = 0; bin < yIn.size(); ++bin) {
@@ -93,8 +93,8 @@ public:
     const double tau = 0.001;
     MatrixWorkspace_sptr in = createWorkspace(3, 2, 2, "Empty"); // default parameters except for 'Empty' X-axis unit
     // we have 2 TOF bins, and will be grouping 9 pixels
-    const double countrateBin1 = 9 * in->readY(0)[0];
-    const double countrateBin2 = 9 * in->readY(0)[1];
+    const double countrateBin1 = 9 * in->y(0)[0];
+    const double countrateBin2 = 9 * in->y(0)[1];
     const double expectationBin1 = 1. / (1. - tau * countrateBin1);
     const double expectationBin2 = 1. / (1. - tau * countrateBin2);
     DeadTimeCorrection alg;
@@ -112,10 +112,10 @@ public:
     TS_ASSERT(out)
     TS_ASSERT_EQUALS(out->getNumberHistograms(), in->getNumberHistograms())
     for (size_t index = 0; index < in->getNumberHistograms(); ++index) {
-      const auto &yIn = in->readY(index);
-      const auto &eIn = in->readE(index);
-      const auto &yOut = out->readY(index);
-      const auto &eOut = out->readE(index);
+      const auto &yIn = in->y(index);
+      const auto &eIn = in->e(index);
+      const auto &yOut = out->y(index);
+      const auto &eOut = out->e(index);
       TS_ASSERT_EQUALS(yIn.size(), yOut.size())
       TS_ASSERT_EQUALS(eIn.size(), eOut.size())
       for (size_t bin = 0; bin < yIn.size(); ++bin) {

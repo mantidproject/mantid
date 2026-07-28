@@ -41,16 +41,16 @@ public:
     Workspace2D_sptr inWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(50, 10, true);
     AnalysisDataService::Instance().addOrReplace(inWSName, inWS);
 
-    inWS->dataY(0)[0] = 1.0;
-    inWS->dataE(0)[0] = 1.0;
-    inWS->dataY(0)[1] = 3.0;
-    inWS->dataE(0)[1] = sqrt(3.0);
-    inWS->dataY(0)[2] = 0.0;
-    inWS->dataE(0)[2] = 0.0;
-    inWS->dataY(0)[3] = 2.0;
-    inWS->dataE(0)[3] = M_SQRT2;
-    inWS->dataY(0)[4] = 10000.0;
-    inWS->dataE(0)[4] = 100.0;
+    inWS->mutableY(0)[0] = 1.0;
+    inWS->mutableE(0)[0] = 1.0;
+    inWS->mutableY(0)[1] = 3.0;
+    inWS->mutableE(0)[1] = sqrt(3.0);
+    inWS->mutableY(0)[2] = 0.0;
+    inWS->mutableE(0)[2] = 0.0;
+    inWS->mutableY(0)[3] = 2.0;
+    inWS->mutableE(0)[3] = M_SQRT2;
+    inWS->mutableY(0)[4] = 10000.0;
+    inWS->mutableE(0)[4] = 100.0;
 
     if (ConvertToPointData) {
       FrameworkManager::Instance().exec("ConvertToPointData", 4, "InputWorkspace", inWSName.c_str(), "OutputWorkspace",
@@ -157,20 +157,20 @@ public:
     double inf = std::numeric_limits<double>::infinity();
     double ninf = -inf;
 
-    inWS->dataY(0)[0] = 1.0;
-    inWS->dataE(0)[0] = 1.0;
+    inWS->mutableY(0)[0] = 1.0;
+    inWS->mutableE(0)[0] = 1.0;
 
     // But nan or inf in either Y or error
-    inWS->dataY(0)[1] = nan;
-    inWS->dataE(0)[2] = nan;
-    inWS->dataY(0)[3] = inf;
-    inWS->dataE(0)[4] = inf;
-    inWS->dataY(0)[5] = ninf;
-    inWS->dataE(0)[6] = ninf;
+    inWS->mutableY(0)[1] = nan;
+    inWS->mutableE(0)[2] = nan;
+    inWS->mutableY(0)[3] = inf;
+    inWS->mutableE(0)[4] = inf;
+    inWS->mutableY(0)[5] = ninf;
+    inWS->mutableE(0)[6] = ninf;
 
     for (size_t i = 7; i < 10; i++) {
-      inWS->dataY(0)[i] = 0;
-      inWS->dataE(0)[i] = 0;
+      inWS->mutableY(0)[i] = 0;
+      inWS->mutableE(0)[i] = 0;
     }
 
     // Name of the output workspace.

@@ -196,8 +196,8 @@ def check_axis_match(ws1: MatrixWorkspace, ws2: MatrixWorkspace) -> bool:
     Return:
         Whether the workspace axes are close enough to each other
     """
-    ax1 = ws1.readX(0)
-    ax2 = ws2.readX(0)
+    ax1 = ws1.x(0)
+    ax2 = ws2.x(0)
     tolerance = 0.01  # no unit
     diff = abs(ax2 - ax1)
     if any(diff > tolerance):

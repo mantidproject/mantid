@@ -49,10 +49,10 @@ PyArrayObject *cloneArray(const MatrixWorkspace &workspace, DataField field, con
    * the data
    */
   if (field == XValues) {
-    stride = workspace.readX(0).size();
+    stride = workspace.x(0).size();
     dataAccesor = &MatrixWorkspace::readX;
   } else if (field == DxValues) {
-    stride = workspace.readDx(0).size();
+    stride = workspace.dx(0).size();
     dataAccesor = &MatrixWorkspace::readDx;
   } else {
     stride = workspace.blocksize();

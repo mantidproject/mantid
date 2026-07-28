@@ -73,8 +73,8 @@ public:
       }
       // Populate the workspace.
       ws2D->setPoints(i, timeChannelsVec);
-      ws2D->dataY(i) = v;
-      ws2D->dataE(i) = e;
+      ws2D->mutableY(i) = v;
+      ws2D->mutableE(i) = e;
     }
 
     // We want to test if the spectra mapping changes
@@ -147,8 +147,8 @@ public:
       }
       // Populate the workspace.
       ws2D->setPoints(i, timeChannelsVec);
-      ws2D->dataY(i) = v;
-      ws2D->dataE(i) = e;
+      ws2D->mutableY(i) = v;
+      ws2D->mutableE(i) = e;
     }
 
     // We want to test id the spectra mapping changes

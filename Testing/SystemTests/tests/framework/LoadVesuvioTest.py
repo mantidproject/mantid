@@ -76,10 +76,10 @@ class VesuvioTests(unittest.TestCase):
 
         # Check some data
         evs_raw = mtd[self.ws_name]
-        self.assertAlmostEqual(0.13015715643321046, evs_raw.readY(0)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.12122048601642356, evs_raw.readE(0)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.017172642169849039, evs_raw.readY(131)[1188], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.063124106780391834, evs_raw.readE(131)[1188], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.13015715643321046, evs_raw.y(0)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.12122048601642356, evs_raw.e(0)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.017172642169849039, evs_raw.y(131)[1188], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.063124106780391834, evs_raw.e(131)[1188], places=DIFF_PLACES)
 
         self._verify_correct_parameters_loaded(evs_raw, forward_scatter=False, diff_mode=diff_mode)
 
@@ -89,8 +89,8 @@ class VesuvioTests(unittest.TestCase):
         self.assertTrue(mtd.doesExist("evs_raw_monitors"))
         monitor_ws = mtd["evs_raw_monitors"]
         self.assertTrue(isinstance(monitor_ws, MatrixWorkspace))
-        self.assertEqual(monitor_ws.readX(0)[0], 5)
-        self.assertEqual(monitor_ws.readX(0)[-1], 19990)
+        self.assertEqual(monitor_ws.x(0)[0], 5)
+        self.assertEqual(monitor_ws.x(0)[-1], 19990)
 
     def test_monitors_loaded_into_ADS_when_monitor_load_is_true_for_forward_scattering(self):
         diff_mode = "SingleDifference"
@@ -139,10 +139,10 @@ class VesuvioTests(unittest.TestCase):
 
         # Check some data
         evs_raw = mtd[self.ws_name]
-        self.assertAlmostEqual(0.16805529043135614, evs_raw.readY(0)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.13602628474190004, evs_raw.readE(0)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.056426592449087654, evs_raw.readY(131)[1188], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.070774572171486652, evs_raw.readE(131)[1188], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.16805529043135614, evs_raw.y(0)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.13602628474190004, evs_raw.e(0)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.056426592449087654, evs_raw.y(131)[1188], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.070774572171486652, evs_raw.e(131)[1188], places=DIFF_PLACES)
 
         self._verify_correct_parameters_loaded(evs_raw, forward_scatter=False, diff_mode=diff_mode)
 
@@ -152,10 +152,10 @@ class VesuvioTests(unittest.TestCase):
 
         # Check some data
         evs_raw = mtd[self.ws_name]
-        self.assertAlmostEqual(-0.4421157823659172, evs_raw.readY(0)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.23849110331150025, evs_raw.readE(0)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(-0.030129475930755989, evs_raw.readY(63)[1188], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.23849110331150025, evs_raw.readE(0)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(-0.4421157823659172, evs_raw.y(0)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.23849110331150025, evs_raw.e(0)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(-0.030129475930755989, evs_raw.y(63)[1188], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.23849110331150025, evs_raw.e(0)[1], places=DIFF_PLACES)
 
         self._verify_correct_parameters_loaded(evs_raw, forward_scatter=True, diff_mode=diff_mode)
 
@@ -164,40 +164,40 @@ class VesuvioTests(unittest.TestCase):
 
         # Check some data
         evs_raw = mtd[self.ws_name]
-        self.assertAlmostEqual(0.14595792251532602, evs_raw.readY(0)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.069974931114835631, evs_raw.readE(0)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.034269132557441905, evs_raw.readY(131)[1188], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.036773635912201605, evs_raw.readE(131)[1188], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.14595792251532602, evs_raw.y(0)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.069974931114835631, evs_raw.e(0)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.034269132557441905, evs_raw.y(131)[1188], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.036773635912201605, evs_raw.e(131)[1188], places=DIFF_PLACES)
 
     def test_non_consecutive_runs_with_back_scattering_spectra_gives_expected_numbers(self):
         self._run_load("14188,14190", "3-134", "DoubleDifference")
 
         # Check some data
         evs_raw = mtd[self.ws_name]
-        self.assertAlmostEqual(0.17587447223331631, evs_raw.readY(0)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.085647015119071523, evs_raw.readE(0)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(-0.031951030862195084, evs_raw.readY(131)[1188], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.044999174645580703, evs_raw.readE(131)[1188], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.17587447223331631, evs_raw.y(0)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.085647015119071523, evs_raw.e(0)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(-0.031951030862195084, evs_raw.y(131)[1188], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.044999174645580703, evs_raw.e(131)[1188], places=DIFF_PLACES)
 
     def test_consecutive_runs_with_forward_scattering_spectra_gives_expected_numbers(self):
         self._run_load("14188-14190", "135-198", "SingleDifference")
 
         # Check some data
         evs_raw = mtd[self.ws_name]
-        self.assertAlmostEqual(-0.33023675686822429, evs_raw.readY(0)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.13839181298987582, evs_raw.readE(0)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(-0.0005762703884557574, evs_raw.readY(63)[1188], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.022314627606989094, evs_raw.readE(63)[1188], places=DIFF_PLACES)
+        self.assertAlmostEqual(-0.33023675686822429, evs_raw.y(0)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.13839181298987582, evs_raw.e(0)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(-0.0005762703884557574, evs_raw.y(63)[1188], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.022314627606989094, evs_raw.e(63)[1188], places=DIFF_PLACES)
 
     def test_non_consecutive_runs_with_forward_scattering_spectra_gives_expected_numbers(self):
         self._run_load("14188,14190", "135-198", "SingleDifference")
 
         # Check some data
         evs_raw = mtd[self.ws_name]
-        self.assertAlmostEqual(-0.31382658620745474, evs_raw.readY(0)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.16935354944452052, evs_raw.readE(0)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.0013599866184859088, evs_raw.readY(63)[1188], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.16935354944452052, evs_raw.readE(0)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(-0.31382658620745474, evs_raw.y(0)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.16935354944452052, evs_raw.e(0)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.0013599866184859088, evs_raw.y(63)[1188], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.16935354944452052, evs_raw.e(0)[1], places=DIFF_PLACES)
 
     def test_consecutive_and_non_consecutive_runs_with_forward_scattering_spectra_gives_expected_numbers(self):
         # Skips runs 14190, 91
@@ -206,24 +206,24 @@ class VesuvioTests(unittest.TestCase):
         # Check some data
         evs_raw = mtd[self.ws_name]
 
-        self.assertAlmostEqual(-0.3302367568682385, evs_raw.readY(0)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.1383918129898758, evs_raw.readE(0)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(-0.0005762703884557574, evs_raw.readY(63)[1188], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.1383918129898758, evs_raw.readE(0)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(-0.3302367568682385, evs_raw.y(0)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.1383918129898758, evs_raw.e(0)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(-0.0005762703884557574, evs_raw.y(63)[1188], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.1383918129898758, evs_raw.e(0)[1], places=DIFF_PLACES)
 
     def test_foilout_mode_gives_expected_numbers(self):
         self._run_load("14188", "3", "FoilOut")
 
         evs_raw = mtd[self.ws_name]
-        self.assertAlmostEqual(18753.00, evs_raw.readY(0)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(136.94159338929865, evs_raw.readE(0)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(18753.00, evs_raw.y(0)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(136.94159338929865, evs_raw.e(0)[1], places=DIFF_PLACES)
 
     def test_foilin_mode_gives_expected_numbers(self):
         self._run_load("14188", "3", "FoilIn")
 
         evs_raw = mtd[self.ws_name]
-        self.assertAlmostEqual(37594.0, evs_raw.readY(0)[1], places=DIFF_PLACES)
-        self.assertAlmostEqual(193.89172236070317, evs_raw.readE(0)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(37594.0, evs_raw.y(0)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(193.89172236070317, evs_raw.e(0)[1], places=DIFF_PLACES)
 
     def test_using_ip_file_adjusts_instrument_and_attaches_parameters_foil_mode(self):
         self._run_load("14188", "3", "FoilOut", "IP0005.dat")
@@ -241,12 +241,12 @@ class VesuvioTests(unittest.TestCase):
 
         # Verify
         self.assertEqual(1, evs_raw.getNumberHistograms())
-        self.assertAlmostEqual(5.0, evs_raw.readX(0)[0], places=DIFF_PLACES)
-        self.assertAlmostEqual(599.5, evs_raw.readX(0)[-1], places=DIFF_PLACES)
-        self.assertAlmostEqual(-1.5288171762918328, evs_raw.readY(0)[0], places=DIFF_PLACES)
-        self.assertAlmostEqual(-0.079412793053402098, evs_raw.readY(0)[-1], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.52109203357613976, evs_raw.readE(0)[0], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.10617318614513051, evs_raw.readE(0)[-1], places=DIFF_PLACES)
+        self.assertAlmostEqual(5.0, evs_raw.x(0)[0], places=DIFF_PLACES)
+        self.assertAlmostEqual(599.5, evs_raw.x(0)[-1], places=DIFF_PLACES)
+        self.assertAlmostEqual(-1.5288171762918328, evs_raw.y(0)[0], places=DIFF_PLACES)
+        self.assertAlmostEqual(-0.079412793053402098, evs_raw.y(0)[-1], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.52109203357613976, evs_raw.e(0)[0], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.10617318614513051, evs_raw.e(0)[-1], places=DIFF_PLACES)
 
     def test_sumspectra_with_multiple_groups_gives_number_output_spectra_as_input_groups(self):
         self._run_load("14188", "135-148;152-165", "SingleDifference", "IP0005.dat", sum_runs=True)
@@ -254,14 +254,14 @@ class VesuvioTests(unittest.TestCase):
 
         # Verify
         self.assertEqual(2, evs_raw.getNumberHistograms())
-        self.assertAlmostEqual(5.0, evs_raw.readX(0)[0], places=DIFF_PLACES)
-        self.assertAlmostEqual(5.0, evs_raw.readX(1)[0], places=DIFF_PLACES)
-        self.assertAlmostEqual(599.5, evs_raw.readX(0)[-1], places=DIFF_PLACES)
-        self.assertAlmostEqual(599.5, evs_raw.readX(1)[-1], places=DIFF_PLACES)
-        self.assertAlmostEqual(-0.713877795283, evs_raw.readY(0)[0], places=DIFF_PLACES)
-        self.assertAlmostEqual(-3.00125465604, evs_raw.readY(1)[0], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.6219299465, evs_raw.readE(0)[0], places=DIFF_PLACES)
-        self.assertAlmostEqual(0.676913729914, evs_raw.readE(1)[0], places=DIFF_PLACES)
+        self.assertAlmostEqual(5.0, evs_raw.x(0)[0], places=DIFF_PLACES)
+        self.assertAlmostEqual(5.0, evs_raw.x(1)[0], places=DIFF_PLACES)
+        self.assertAlmostEqual(599.5, evs_raw.x(0)[-1], places=DIFF_PLACES)
+        self.assertAlmostEqual(599.5, evs_raw.x(1)[-1], places=DIFF_PLACES)
+        self.assertAlmostEqual(-0.713877795283, evs_raw.y(0)[0], places=DIFF_PLACES)
+        self.assertAlmostEqual(-3.00125465604, evs_raw.y(1)[0], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.6219299465, evs_raw.e(0)[0], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.676913729914, evs_raw.e(1)[0], places=DIFF_PLACES)
 
         # Spectrum numbers
         self._verify_spectra_numbering(evs_raw.getSpectrum(0), 135, range(3101, 3115))
@@ -273,12 +273,12 @@ class VesuvioTests(unittest.TestCase):
 
         # Verify
         self.assertEqual(1, evs_raw.getNumberHistograms())
-        self.assertAlmostEqual(5.0, evs_raw.readX(0)[0], places=DIFF_PLACES)
-        self.assertAlmostEqual(19990.0, evs_raw.readX(0)[-1], places=DIFF_PLACES)
-        self.assertAlmostEqual(497722.0, evs_raw.readY(0)[0], places=DIFF_PLACES)
-        self.assertAlmostEqual(2072.0, evs_raw.readY(0)[-1], places=DIFF_PLACES)
-        self.assertAlmostEqual(705.49415305869115, evs_raw.readE(0)[0], places=DIFF_PLACES)
-        self.assertAlmostEqual(45.519226706964169, evs_raw.readE(0)[-1], places=DIFF_PLACES)
+        self.assertAlmostEqual(5.0, evs_raw.x(0)[0], places=DIFF_PLACES)
+        self.assertAlmostEqual(19990.0, evs_raw.x(0)[-1], places=DIFF_PLACES)
+        self.assertAlmostEqual(497722.0, evs_raw.y(0)[0], places=DIFF_PLACES)
+        self.assertAlmostEqual(2072.0, evs_raw.y(0)[-1], places=DIFF_PLACES)
+        self.assertAlmostEqual(705.49415305869115, evs_raw.e(0)[0], places=DIFF_PLACES)
+        self.assertAlmostEqual(45.519226706964169, evs_raw.e(0)[-1], places=DIFF_PLACES)
 
         self._verify_spectra_numbering(evs_raw.getSpectrum(0), 3, range(2101, 2114))
 
@@ -288,14 +288,14 @@ class VesuvioTests(unittest.TestCase):
 
         # Verify
         self.assertEqual(2, evs_raw.getNumberHistograms())
-        self.assertAlmostEqual(5.0, evs_raw.readX(0)[0], places=DIFF_PLACES)
-        self.assertAlmostEqual(5.0, evs_raw.readX(1)[0], places=DIFF_PLACES)
-        self.assertAlmostEqual(19990.0, evs_raw.readX(0)[-1], places=DIFF_PLACES)
-        self.assertAlmostEqual(19990.0, evs_raw.readX(1)[-1], places=DIFF_PLACES)
-        self.assertAlmostEqual(497722.0, evs_raw.readY(0)[0], places=DIFF_PLACES)
-        self.assertAlmostEqual(1332812.0, evs_raw.readY(1)[0], places=DIFF_PLACES)
-        self.assertAlmostEqual(705.49415305869115, evs_raw.readE(0)[0], places=DIFF_PLACES)
-        self.assertAlmostEqual(1154.4747723532116, evs_raw.readE(1)[0], places=DIFF_PLACES)
+        self.assertAlmostEqual(5.0, evs_raw.x(0)[0], places=DIFF_PLACES)
+        self.assertAlmostEqual(5.0, evs_raw.x(1)[0], places=DIFF_PLACES)
+        self.assertAlmostEqual(19990.0, evs_raw.x(0)[-1], places=DIFF_PLACES)
+        self.assertAlmostEqual(19990.0, evs_raw.x(1)[-1], places=DIFF_PLACES)
+        self.assertAlmostEqual(497722.0, evs_raw.y(0)[0], places=DIFF_PLACES)
+        self.assertAlmostEqual(1332812.0, evs_raw.y(1)[0], places=DIFF_PLACES)
+        self.assertAlmostEqual(705.49415305869115, evs_raw.e(0)[0], places=DIFF_PLACES)
+        self.assertAlmostEqual(1154.4747723532116, evs_raw.e(1)[0], places=DIFF_PLACES)
 
         self._verify_spectra_numbering(evs_raw.getSpectrum(0), 3, range(2101, 2114))
         self._verify_spectra_numbering(evs_raw.getSpectrum(1), 30, list(range(2128, 2145)) + list(range(2201, 2205)))

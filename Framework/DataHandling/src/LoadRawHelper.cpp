@@ -430,21 +430,21 @@ void LoadRawHelper::setWorkspaceData(const DataObjects::Workspace2D_sptr &newWor
   newWorkspace->getSpectrum(wsIndex).setSpectrumNo(nspecNum);
   // for loadrawbin0
   if (binStart == 0) {
-    newWorkspace->setX(wsIndex, timeChannelsVec[0]);
+    newWorkspace->setSharedX(wsIndex, timeChannelsVec[0]);
     return;
   }
   // for loadrawspectrum 0
   if (nspecNum == 0) {
-    newWorkspace->setX(wsIndex, timeChannelsVec[0]);
+    newWorkspace->setSharedX(wsIndex, timeChannelsVec[0]);
     return;
   }
   // Set the X vector pointer and spectrum number
   if (noTimeRegimes < 2)
-    newWorkspace->setX(wsIndex, timeChannelsVec[0]);
+    newWorkspace->setSharedX(wsIndex, timeChannelsVec[0]);
   else {
 
     // Use std::vector::at just incase spectrum missing from spec array
-    newWorkspace->setX(wsIndex, timeChannelsVec.at(m_specTimeRegimes[nspecNum] - 1));
+    newWorkspace->setSharedX(wsIndex, timeChannelsVec.at(m_specTimeRegimes[nspecNum] - 1));
   }
 }
 

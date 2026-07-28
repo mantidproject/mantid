@@ -39,4 +39,4 @@ class ILLPowderEfficiencyClosureTest(systemtesting.MantidSystemTest):
         PowderILLEfficiency(CalibrationRun="967076.nxs", CalibrationFile=self._m_tmp_file, OutputWorkspace="calib-2nd")
 
         for i in range(mtd["calib-2nd"].getNumberHistograms()):
-            self.assertDelta(mtd["calib-2nd"].readY(i), 1.0, 1e-3)
+            self.assertDelta(mtd["calib-2nd"].y(i), 1.0, 1e-3)

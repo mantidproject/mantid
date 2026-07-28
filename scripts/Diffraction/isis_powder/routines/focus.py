@@ -259,7 +259,7 @@ def divide_by_number_of_detectors_in_bank(focussed_data, cal_filepath):
     )
     n_pixel = numpy.zeros(focussed_data.getNumberHistograms())
     for ws_index in range(cal_workspace.getNumberHistograms()):
-        grouping = cal_workspace.dataY(ws_index)
+        grouping = cal_workspace.y(ws_index)
         if grouping[0] > 0:
             n_pixel[int(grouping[0] - 1)] += 1
     number_detectors_in_bank_ws = mantid.CreateWorkspace(DataY=n_pixel, DataX=[0, 1], NSpec=focussed_data.getNumberHistograms())
@@ -426,11 +426,11 @@ def _individual_run_focusing(
 
 
 def _crop_vanadium_to_percent_of_max(vanadium_ws, input_ws, output_workspace, min_value, max_value):
-    vanadium_spectrum = vanadium_ws.readY(0)
+    vanadium_spectrum = vanadium_ws.y(0)
     if not vanadium_spectrum.any():
         return mantid.CloneWorkspace(inputWorkspace=input_ws, OutputWorkspace=output_workspace)
 
-    x_list = input_ws.readX(0)
+    x_list = input_ws.x(0)
     min_index = x_list.searchsorted(min_value)
     max_index = x_list.searchsorted(max_value)
     sliced_vanadium_spectrum = vanadium_spectrum[min_index:max_index:1]

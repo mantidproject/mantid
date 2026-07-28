@@ -290,7 +290,7 @@ public:
     IFunction_sptr fun = fit.getProperty("Function");
 
     // normalise expected height by bin_width
-    auto dx = ws->readX(0)[1] - ws->readX(0)[0];
+    auto dx = ws->x(0)[1] - ws->x(0)[0];
     TS_ASSERT_DELTA(fun->getParameter("Height"), dx / (0.2 * sqrt(2.0 * M_PI)), 1e-5); // ~1.995
     TS_ASSERT_DELTA(fun->getParameter("PeakCentre"), 0.0, 1e-5);
     TS_ASSERT_DELTA(fun->getParameter("Sigma"), 0.2, 1e-5);
@@ -378,7 +378,7 @@ public:
     TS_ASSERT_DELTA(fun->getParameter("f0.A0"), 3.1, 1e-5);
     TS_ASSERT_DELTA(fun->getParameter("f0.A1"), 0.3, 1e-5);
     // normalise expected height by bin_width
-    auto dx = ws->readX(0)[1] - ws->readX(0)[0];
+    auto dx = ws->x(0)[1] - ws->x(0)[0];
     TS_ASSERT_DELTA(fun->getParameter("f1.Height"), dx / 0.2 / sqrt(2.0 * M_PI), 1e-4);
     TS_ASSERT_DELTA(fun->getParameter("f1.PeakCentre"), 0.0, 1e-5);
     TS_ASSERT_DELTA(fun->getParameter("f1.Sigma"), 0.2, 1e-5);

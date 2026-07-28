@@ -979,8 +979,8 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::create2DWorkspace123(2, 2);
     ws2->maskBin(0, 0);
-    ws2->dataY(0)[0] = 2;
-    ws2->dataE(0)[0] = 3;
+    ws2->mutableY(0)[0] = 2;
+    ws2->mutableE(0)[0] = 3;
 
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws2));
@@ -993,8 +993,8 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr ws3 = WorkspaceCreationHelper::create2DWorkspace123(2, 2);
     ws3->maskBin(0, 1);
-    ws3->dataY(0)[1] = 2;
-    ws3->dataE(0)[1] = 3;
+    ws3->mutableY(0)[1] = 2;
+    ws3->mutableE(0)[1] = 3;
 
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws3));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws2));

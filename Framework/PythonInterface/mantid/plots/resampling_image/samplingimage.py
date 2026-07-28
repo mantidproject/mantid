@@ -198,7 +198,7 @@ def imshow_sampling(
             si = workspace.spectrumInfo()
             for i in range(workspace.getNumberHistograms()):
                 if si.hasDetectors(i) and not si.isMonitor(i):
-                    x_axis = workspace.readX(i)
+                    x_axis = workspace.x(i)
                     x_i_first = x_axis[0]
                     x_i_last = x_axis[-1]
                     x_i_min = min([x_i_first, x_i_last])

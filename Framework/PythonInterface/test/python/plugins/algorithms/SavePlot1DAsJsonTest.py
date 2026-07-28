@@ -152,13 +152,13 @@ class SavePlot1DAsJsonTest(unittest.TestCase):
         # workspace
         ws = WorkspaceFactory.create("Workspace2D", NVectors=2, XLength=E.size, YLength=intensity_1.size)
         # curve1
-        ws.dataX(0)[:] = E
-        ws.dataY(0)[:] = intensity_1
-        ws.dataE(0)[:] = err
+        ws.mutableX(0)[:] = E
+        ws.mutableY(0)[:] = intensity_1
+        ws.mutableE(0)[:] = err
         # curve2
-        ws.dataX(1)[:] = E
-        ws.dataY(1)[:] = intensity_2
-        ws.dataE(1)[:] = err2
+        ws.mutableX(1)[:] = E
+        ws.mutableY(1)[:] = intensity_2
+        ws.mutableE(1)[:] = err2
         # Add to data service
         AnalysisDataService.addOrReplace(datawsname, ws)
         return E, intensity_1, err, intensity_2, err2

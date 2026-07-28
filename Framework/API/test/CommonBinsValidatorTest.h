@@ -39,7 +39,7 @@ public:
     for (size_t k = 0; k < 3; ++k)
       for (size_t i = 0; i < 11; ++i) {
         auto di = double(i);
-        ws->dataX(k)[i] = di * (1.0 + 0.001 * di);
+        ws->mutableX(k)[i] = di * (1.0 + 0.001 * di);
       }
     CommonBinsValidator validator;
     TS_ASSERT_EQUALS(validator.isValid(ws), "");
@@ -51,7 +51,7 @@ public:
     for (size_t k = 0; k < 3; ++k)
       for (size_t i = 0; i < 11; ++i) {
         auto di = double(i + k);
-        ws->dataX(k)[i] = di * (1.0 + 0.001 * di);
+        ws->mutableX(k)[i] = di * (1.0 + 0.001 * di);
       }
     CommonBinsValidator validator;
     TS_ASSERT_EQUALS(validator.isValid(ws), "The workspace must have common bin boundaries for all histograms");

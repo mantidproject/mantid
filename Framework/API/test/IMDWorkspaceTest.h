@@ -37,15 +37,15 @@ public:
     workspace.setTitle("workspace");
     workspace.initialize(2, 4, 3);
     for (int i = 0; i < 4; ++i) {
-      workspace.dataX(0)[i] = i;
-      workspace.dataX(1)[i] = i + 4;
+      workspace.mutableX(0)[i] = i;
+      workspace.mutableX(1)[i] = i + 4;
     }
 
     for (int i = 0; i < 3; ++i) {
-      workspace.dataY(0)[i] = i * 10;
-      workspace.dataE(0)[i] = sqrt(workspace.dataY(0)[i]);
-      workspace.dataY(1)[i] = i * 100;
-      workspace.dataE(1)[i] = sqrt(workspace.dataY(1)[i]);
+      workspace.mutableY(0)[i] = i * 10;
+      workspace.mutableE(0)[i] = sqrt(workspace.dataY(0)[i]);
+      workspace.mutableY(1)[i] = i * 100;
+      workspace.mutableE(1)[i] = sqrt(workspace.dataY(1)[i]);
     }
   }
 

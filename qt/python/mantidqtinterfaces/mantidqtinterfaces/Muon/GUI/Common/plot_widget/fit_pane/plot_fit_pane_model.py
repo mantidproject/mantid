@@ -52,7 +52,7 @@ class PlotFitPaneModel(BasePaneModel):
     @staticmethod
     def get_shade_lines(ws, index):
         # need to copy the x data because if switch from points to hist data it causes errors
-        x_data = copy(ws.readX(index))
-        y_data = ws.readY(index)
-        e_data = ws.readE(index)
+        x_data = copy(ws.x(index))
+        y_data = ws.y(index)
+        e_data = ws.e(index)
         return x_data, y_data + e_data, y_data - e_data

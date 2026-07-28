@@ -325,7 +325,7 @@ class IncidentEnergy(PropDescriptor):
         if ei_mon_spec is None:
             ei_mon_spec = instance.ei_mon_spectra
         guess_ei_ws = GetAllEi(Workspace=monitor_ws, Monitor1SpecID=ei_mon_spec[0], Monitor2SpecID=ei_mon_spec[1])
-        guessEi = guess_ei_ws.readX(0)
+        guessEi = guess_ei_ws.x(0)
         fin_ei = []
         for ei in guessEi:
             try:

@@ -122,7 +122,7 @@ class NMoldyn4Interpolation(PythonAlgorithm):
         Q_values = []
         for i in range(osiris.getNumberHistograms()):
             Q_values.append(self.get_Q_for_workspace_index(osiris.name(), i, e_fixed))
-        X_values = osiris.readX(0)
+        X_values = osiris.x(0)
         X_diff = np.diff(X_values) / 2
         X_bins = [X_values[i] + X_diff[i] for i in range(len(X_diff))]
         return X_values, Q_values, X_bins
@@ -134,8 +134,8 @@ class NMoldyn4Interpolation(PythonAlgorithm):
         # list of Y-values)
         ws_handle = mtd[ws_name]
         Q_values = ws_handle.getAxis(1).extractValues()
-        E_values = ws_handle.readX(0)
-        Y_values = [ws_handle.readY(i) for i in range(ws_handle.getNumberHistograms())]
+        E_values = ws_handle.x(0)
+        Y_values = [ws_handle.y(i) for i in range(ws_handle.getNumberHistograms())]
         return E_values, Q_values, Y_values
 
 

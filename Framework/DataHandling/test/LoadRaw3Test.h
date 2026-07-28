@@ -523,8 +523,8 @@ public:
     TS_ASSERT(output =
                   std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("twoRegimes")))
     // Shift should be 3300 - check a couple of values
-    TS_ASSERT_EQUALS(output->readX(0).front() + 3300, output->readX(1).front())
-    TS_ASSERT_EQUALS(output->readX(0).back() + 3300, output->readX(1).back())
+    TS_ASSERT_EQUALS(output->x(0).front() + 3300, output->x(1).front())
+    TS_ASSERT_EQUALS(output->x(0).back() + 3300, output->x(1).back())
 
     AnalysisDataService::Instance().remove("twoRegimes");
   }
@@ -1164,18 +1164,18 @@ private:
       return "Workspaces have different numbers of bins.";
     }
     for (size_t i = 0; i < ws1->getNumberHistograms(); ++i) {
-      auto &x1 = ws1->readX(i);
-      auto &x2 = ws2->readX(i);
+      auto &x1 = ws1->x(i);
+      auto &x2 = ws2->x(i);
       if (!std::equal(x1.begin(), x1.end(), x2.begin())) {
         return "Mismatch in x-values.";
       }
-      auto &y1 = ws1->readY(i);
-      auto &y2 = ws2->readY(i);
+      auto &y1 = ws1->y(i);
+      auto &y2 = ws2->y(i);
       if (!std::equal(y1.begin(), y1.end(), y2.begin())) {
         return "Mismatch in y-values.";
       }
-      auto &e1 = ws1->readE(i);
-      auto &e2 = ws2->readE(i);
+      auto &e1 = ws1->e(i);
+      auto &e2 = ws2->e(i);
       if (!std::equal(e1.begin(), e1.end(), e2.begin())) {
         return "Mismatch in error values.";
       }

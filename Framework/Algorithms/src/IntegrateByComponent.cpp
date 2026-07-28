@@ -128,8 +128,8 @@ void IntegrateByComponent::exec() {
 
         // Now we have a good value
         PARALLEL_CRITICAL(IntegrateByComponent_setaverage) {
-          integratedWS->dataY(hists[i])[0] = averageY;
-          integratedWS->dataE(hists[i])[0] = averageE;
+          integratedWS->mutableY(hists[i])[0] = averageY;
+          integratedWS->mutableE(hists[i])[0] = averageE;
         }
 
         PARALLEL_END_INTERRUPT_REGION

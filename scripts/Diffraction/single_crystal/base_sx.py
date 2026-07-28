@@ -451,11 +451,11 @@ class BaseSX(ABC):
         for ispec in range(ws.getNumberHistograms()):
             if si.hasDetectors(ispec) and not si.isMonitor(ispec):
                 # divide y and e by bin-width
-                xedges = ws.readX(ispec)
+                xedges = ws.x(ispec)
                 dx = np.diff(xedges)
                 scale = dx if not undo else 1 / dx
-                ws.setY(ispec, ws.readY(ispec) / scale)
-                ws.setE(ispec, ws.readE(ispec) / scale)
+                ws.setSharedY(ispec, ws.y(ispec) / scale)
+                ws.setSharedE(ispec, ws.e(ispec) / scale)
 
     @staticmethod
     def _minus_workspaces(ws_lhs, ws_rhs):

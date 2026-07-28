@@ -1272,7 +1272,7 @@ class CrystalField(object):
         out = alg.getProperty("OutputWorkspace").value
         # Create copies of the x and y because `out` goes out of scope when this method returns
         # and x and y get deallocated
-        return np.array(out.readX(0)), np.array(out.readY(1))
+        return np.array(out.x(0)), np.array(out.y(1))
 
     def isMultiSpectrum(self):
         return self._isMultiSpectrum
@@ -1435,7 +1435,7 @@ class CrystalFieldFit(object):
         all_parameters = b_parameters + shape_parameters
 
         # Read the x, y and error data from the input workspace.
-        x, y, e = self._input_workspace.readX(0), self._input_workspace.readY(0), self._input_workspace.readE(0)
+        x, y, e = self._input_workspace.x(0), self._input_workspace.y(0), self._input_workspace.e(0)
 
         # Find the number of data points, and parameters.
         m = self._input_workspace.getNumberBins(0)

@@ -143,7 +143,7 @@ void CompressEvents::exec() {
                           // And on the output side
                           EventList &output_el = outputWS->getSpectrum(index);
                           // Copy other settings into output
-                          output_el.setX(input_el.ptrX());
+                          output_el.setSharedX(input_el.sharedX());
                           // The EventList method does the work.
                           if (compressFat)
                             input_el.compressFatEvents(toleranceTof, startTime, toleranceWallClock, &output_el);

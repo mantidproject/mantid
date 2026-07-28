@@ -79,9 +79,9 @@ class PearlMCAbsorption(PythonAlgorithm):
         num_hist = input_ws.getNumberHistograms()
         num_vals = input_ws.blocksize()
         for i in range(num_hist):
-            mu_values = input_ws.readY(i)
+            mu_values = input_ws.y(i)
             for j in range(num_vals):
-                input_ws.dataY(i)[j] = math.exp(-1.0 * mu_values[j] * thickness)
+                input_ws.mutableY(i)[j] = math.exp(-1.0 * mu_values[j] * thickness)
 
         return input_ws
 

@@ -232,7 +232,7 @@ def _adjust_xmin_xmax_for_event_workspace(workspace, xmin, xmax, ws_index_min):
         return xmin, xmax
 
     if xmin == xmax and xmin is not None:
-        x_data = workspace.readX(ws_index_min)
+        x_data = workspace.x(ws_index_min)
         bin_index_to_xmin = workspace.yIndexOfX(xmin, ws_index_min)
         return x_data[bin_index_to_xmin], x_data[bin_index_to_xmin + 1]
     else:

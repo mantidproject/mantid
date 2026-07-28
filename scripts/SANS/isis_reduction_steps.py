@@ -2673,7 +2673,7 @@ class CalculateNormISIS(object):
         @return True for point data, false for histogram
         """
         handle = mtd[wksp]
-        if len(handle.readX(0)) == len(handle.readY(0)):
+        if len(handle.x(0)) == len(handle.y(0)):
             return True
         else:
             return False
@@ -3203,8 +3203,8 @@ class UnitsConvert(ReductionStep):
         high_wav = self.wav_high
 
         if low_wav is None and high_wav is None:
-            low_wav = min(mtd[workspace].readX(0))
-            high_wav = max(mtd[workspace].readX(0))
+            low_wav = min(mtd[workspace].x(0))
+            high_wav = max(mtd[workspace].x(0))
 
         if not bin_alg:
             bin_alg = self.rebin_alg
@@ -4250,7 +4250,7 @@ class StripEndNans(ReductionStep):
             # Strip zeros is only possible on 1D workspaces
             return
 
-        y_vals = result_ws.readY(0)
+        y_vals = result_ws.y(0)
         length = len(y_vals)
         # Find the first non-zero value
         start = 0
@@ -4266,7 +4266,7 @@ class StripEndNans(ReductionStep):
                 stop = j
                 break
         # Find the appropriate X values and call CropWorkspace
-        x_vals = result_ws.readX(0)
+        x_vals = result_ws.x(0)
         startX = x_vals[start]
         # Make sure we're inside the bin that we want to crop
         endX = 1.001 * x_vals[stop + 1]

@@ -30,12 +30,12 @@ class NMoldyn4InterpolationTest(unittest.TestCase):
         x_data = np.tile(x_data, len(q_data))
         sim = CreateWorkspace(DataX=x_data, DataY=y_data, NSpec=len(q_data), VerticalAxisUnit="MomentumTransfer", VerticalAxisValues=q_data)
 
-        osiris_X = self.osiris.readX(0)
+        osiris_X = self.osiris.x(0)
         osiris_Q_length = self.osiris.getAxis(1).length()
         inter = NMoldyn4Interpolation(sim, self.osiris)
-        inter_X = inter.readX(0)
+        inter_X = inter.x(0)
         inter_Q_length = inter.getAxis(1).length()
-        sample_Y_data = inter.readY(5)
+        sample_Y_data = inter.y(5)
 
         self.assertTrue(np.all(inter_X == osiris_X))
         self.assertNotEqual(len(inter_X), sim.getAxis(0).length())

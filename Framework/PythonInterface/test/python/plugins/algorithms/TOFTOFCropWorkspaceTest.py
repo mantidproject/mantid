@@ -36,7 +36,7 @@ class TOFTOFCropWorkspaceTest(unittest.TestCase):
         # check unit horizontal axis
         self.assertEqual(self._cropped_ws.getAxis(0).getUnit().unitID(), "TOF")
         # check length of cropped ws
-        self.assertEqual(len(self._cropped_ws.readX(0)), int(full_channels))
+        self.assertEqual(len(self._cropped_ws.x(0)), int(full_channels))
 
     def test_inputgroup(self):
         group = GroupWorkspaces([self._input_ws])

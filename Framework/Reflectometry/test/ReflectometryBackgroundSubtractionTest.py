@@ -54,10 +54,10 @@ class ReflectometryBackgroundSubtractionTest(unittest.TestCase):
         for i in range(0, output.getNumberHistograms()):
             if i == 3 or i == 4:
                 for itr in range(0, output.blocksize()):
-                    self.assertEqual(3.0, output.dataY(i)[itr])
+                    self.assertEqual(3.0, output.y(i)[itr])
             else:
                 for itr in range(0, output.blocksize()):
-                    self.assertEqual(0.0, output.dataY(i)[itr])
+                    self.assertEqual(0.0, output.y(i)[itr])
 
     def test_output_Polynomial(self):
         """
@@ -75,10 +75,10 @@ class ReflectometryBackgroundSubtractionTest(unittest.TestCase):
         for i in range(0, output.getNumberHistograms()):
             if i == 3 or i == 4:
                 for itr in range(0, output.blocksize()):
-                    self.assertEqual(4.9, output.dataY(i)[itr])
+                    self.assertEqual(4.9, output.y(i)[itr])
             else:
                 for itr in range(0, output.blocksize()):
-                    self.assertEqual(1.9, output.dataY(i)[itr])
+                    self.assertEqual(1.9, output.y(i)[itr])
 
     def test_output_AveragePixelFit(self):
         """
@@ -96,10 +96,10 @@ class ReflectometryBackgroundSubtractionTest(unittest.TestCase):
         for i in range(0, output.getNumberHistograms()):
             if i == 3 or i == 4:
                 for itr in range(0, output.blocksize()):
-                    self.assertEqual(3.0, output.dataY(i)[itr])
+                    self.assertEqual(3.0, output.y(i)[itr])
             else:
                 for itr in range(0, output.blocksize()):
-                    self.assertEqual(0.0, output.dataY(i)[itr])
+                    self.assertEqual(0.0, output.y(i)[itr])
 
     def test_peak_range_changes_with_index_type(self):
         """
@@ -120,10 +120,10 @@ class ReflectometryBackgroundSubtractionTest(unittest.TestCase):
         for i in range(0, output.getNumberHistograms()):
             if i == 3 or i == 4:
                 for itr in range(0, output.blocksize()):
-                    self.assertEqual(3.0, output.dataY(i)[itr])
+                    self.assertEqual(3.0, output.y(i)[itr])
             else:
                 for itr in range(0, output.blocksize()):
-                    self.assertEqual(0.0, output.dataY(i)[itr])
+                    self.assertEqual(0.0, output.y(i)[itr])
 
     def test_Polynomial_error_for_single_spectra(self):
         args = {"InputWorkspace": "workspace_with_peak", "ProcessingInstructions": "3", "BackgroundCalculationMethod": "Polynomial"}

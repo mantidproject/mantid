@@ -208,7 +208,7 @@ integrated_monitor_ws = Integration(
     EndWorkspaceIndex=monitor_index,
 )
 
-monitor_count = integrated_monitor_ws.dataY(0)[0]
+monitor_count = integrated_monitor_ws.y(0)[0]
 print("\n", run, " has integrated monitor count", monitor_count, "\n")
 
 minVals = "-" + max_Q + ",-" + max_Q + ",-" + max_Q

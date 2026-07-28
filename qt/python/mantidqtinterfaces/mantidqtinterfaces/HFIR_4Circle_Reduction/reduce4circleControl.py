@@ -516,8 +516,8 @@ class CWSCDReductionControl(object):
         matrix_ws = AnalysisDataService.retrieve(integration_manager.get_model_workspace())
         ws_index = integration_manager.get_spectrum_number(scan_number, from_zero=True)
 
-        vec_x = matrix_ws.readX(ws_index)
-        vec_model = matrix_ws.readY(ws_index)
+        vec_x = matrix_ws.x(ws_index)
+        vec_model = matrix_ws.y(ws_index)
 
         return vec_x, vec_model
 
@@ -1266,7 +1266,7 @@ class CWSCDReductionControl(object):
         array2d = numpy.ndarray(shape=det_shape, dtype="float")
         for i in range(det_shape[0]):
             for j in range(det_shape[1]):
-                array2d[i][j] = raw_ws.readY(j * det_shape[0] + i)[0]
+                array2d[i][j] = raw_ws.y(j * det_shape[0] + i)[0]
 
         # Flip the 2D array to look detector from sample
         array2d = numpy.flipud(array2d)

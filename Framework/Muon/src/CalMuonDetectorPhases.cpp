@@ -436,7 +436,7 @@ double CalMuonDetectorPhases::getEndTime() const {
   double endTime = getProperty("LastGoodData");
   if (endTime == EMPTY_DBL()) {
     // Last available time
-    endTime = m_inputWS->readX(0).back();
+    endTime = m_inputWS->x(0).back();
   }
   return endTime;
 }

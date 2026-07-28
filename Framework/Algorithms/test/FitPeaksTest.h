@@ -1706,7 +1706,7 @@ public:
 
     for (std::size_t i = 0; i < center_ws->getNumberHistograms(); ++i) {
       for (std::size_t j = 0; j < peak_index_vec.size(); ++j) {
-        center_ws->dataX(i)[j] = (peak_index_vec[j] == 0 ? 5.0 : 10.0);
+        center_ws->mutableX(i)[j] = (peak_index_vec[j] == 0 ? 5.0 : 10.0);
       }
     }
 
@@ -1735,8 +1735,8 @@ public:
     for (std::size_t i = 0; i < window_ws->getNumberHistograms(); ++i) {
       for (std::size_t j = 0; j < num_peaks; ++j) {
         const double peak_center = (peak_index_vec[j] == 0 ? 5.0 : 10.0);
-        window_ws->dataX(i)[j * 2] = peak_center - halfwidth;
-        window_ws->dataX(i)[j * 2 + 1] = peak_center + halfwidth;
+        window_ws->mutableX(i)[j * 2] = peak_center - halfwidth;
+        window_ws->mutableX(i)[j * 2 + 1] = peak_center + halfwidth;
       }
       TS_ASSERT(window_ws->dataX(i).size() == num_peaks * 2);
     }

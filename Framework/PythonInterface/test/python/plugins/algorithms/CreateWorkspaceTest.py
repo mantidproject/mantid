@@ -21,16 +21,16 @@ class CreateWorkspaceTest(unittest.TestCase):
         self.assertTrue(isinstance(wksp, MatrixWorkspace))
         self.assertEqual(wksp.getNumberHistograms(), 1)
 
-        self.assertEqual(len(wksp.readY(0)), len(y))
-        self.assertEqual(len(wksp.readX(0)), len(x))
-        self.assertEqual(len(wksp.readE(0)), len(e))
+        self.assertEqual(len(wksp.y(0)), len(y))
+        self.assertEqual(len(wksp.x(0)), len(x))
+        self.assertEqual(len(wksp.e(0)), len(e))
 
         for index in range(len(y)):
-            self.assertEqual(wksp.readY(0)[index], y[index])
-            self.assertEqual(wksp.readE(0)[index], e[index])
-            self.assertEqual(wksp.readX(0)[index], x[index])
+            self.assertEqual(wksp.y(0)[index], y[index])
+            self.assertEqual(wksp.e(0)[index], e[index])
+            self.assertEqual(wksp.x(0)[index], x[index])
         # Last X value
-        self.assertEqual(wksp.readX(0)[len(x) - 1], x[len(x) - 1])
+        self.assertEqual(wksp.x(0)[len(x) - 1], x[len(x) - 1])
         AnalysisDataService.remove("wksp")
 
     def test_create_with_2D_numpy_array(self):
@@ -44,11 +44,11 @@ class CreateWorkspaceTest(unittest.TestCase):
 
         for i in [0, 1]:
             for j in range(len(y[0])):
-                self.assertEqual(wksp.readY(i)[j], y[i][j])
-                self.assertEqual(wksp.readE(i)[j], e[i][j])
-                self.assertEqual(wksp.readX(i)[j], x[j])
+                self.assertEqual(wksp.y(i)[j], y[i][j])
+                self.assertEqual(wksp.e(i)[j], e[i][j])
+                self.assertEqual(wksp.x(i)[j], x[j])
             # Last X value
-            self.assertEqual(wksp.readX(i)[len(x) - 1], x[len(x) - 1])
+            self.assertEqual(wksp.x(i)[len(x) - 1], x[len(x) - 1])
 
         AnalysisDataService.remove("wksp")
 
@@ -68,11 +68,11 @@ class CreateWorkspaceTest(unittest.TestCase):
 
         for i in [0, 1]:
             for j in range(len(y2[0])):
-                self.assertEqual(wksp.readY(i)[j], loq.readY(i)[j])
-                self.assertEqual(wksp.readE(i)[j], loq.readE(i)[j])
-                self.assertEqual(wksp.readX(i)[j], loq.readX(i)[j])
+                self.assertEqual(wksp.y(i)[j], loq.y(i)[j])
+                self.assertEqual(wksp.e(i)[j], loq.e(i)[j])
+                self.assertEqual(wksp.x(i)[j], loq.x(i)[j])
             # Last X value
-            self.assertEqual(wksp.readX(i)[len(x2) - 1], loq.readX(i)[len(x2) - 1])
+            self.assertEqual(wksp.x(i)[len(x2) - 1], loq.x(i)[len(x2) - 1])
 
         AnalysisDataService.remove("wksp")
 

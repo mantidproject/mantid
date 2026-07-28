@@ -73,12 +73,12 @@ private:
 
     if (!runAlg) {
       ws = WorkspaceFactory::Instance().create("Workspace2D", 2, nbins + 1, nbins);
-      ws->dataX(0) = xData1;
-      ws->dataX(1) = xData2;
-      ws->dataY(0) = yData1;
-      ws->dataY(1) = yData2;
-      ws->dataE(0) = eData1;
-      ws->dataE(1) = eData2;
+      ws->mutableX(0) = xData1;
+      ws->mutableX(1) = xData2;
+      ws->mutableY(0) = yData1;
+      ws->mutableY(1) = yData2;
+      ws->mutableE(0) = eData1;
+      ws->mutableE(1) = eData2;
       ws->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
     } else {
       // Concatenate data vectors into one vector
@@ -378,7 +378,7 @@ public:
     createUniformWorkspace(0.1, 0.1, 1., 2., "ws1");
     createUniformWorkspace(0.8, 0.1, 1., 2., "ws2");
     auto ws1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("ws1");
-    ws1->dataY(0)[8] = std::numeric_limits<double>::quiet_NaN();
+    ws1->mutableY(0)[8] = std::numeric_limits<double>::quiet_NaN();
 
     Stitch1DMany alg;
     alg.setChild(true);
@@ -404,7 +404,7 @@ public:
     createUniformWorkspace(0.1, 0.1, 1., 2., "ws1");
     createUniformWorkspace(0.8, 0.1, 1., 2., "ws2");
     auto ws1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("ws1");
-    ws1->dataY(0)[8] = std::numeric_limits<double>::quiet_NaN();
+    ws1->mutableY(0)[8] = std::numeric_limits<double>::quiet_NaN();
 
     Stitch1DMany alg;
     alg.setChild(true);

@@ -88,9 +88,9 @@ def _denormalizeline(line):
     """Multiplies line workspace by the line width."""
     axis = line.getAxis(1)
     height = axis.getMax() - axis.getMin()
-    Ys = line.dataY(0)
+    Ys = line.mutableY(0)
     Ys *= height
-    Es = line.dataE(0)
+    Es = line.mutableE(0)
     Es *= height
 
 
@@ -281,9 +281,9 @@ def _profiletitle(workspaces, cuts, isSingleCutInfo, scan, units, axes):
 def _removesingularity(ws, epsilon):
     """Find the bin nearest to X = 0, and if -epsilon <= bin centre < epsilon, set Y and E to zero."""
     for i in range(ws.getNumberHistograms()):
-        xs = ws.readX(i)
-        ys = ws.dataY(i)
-        es = ws.dataE(i)
+        xs = ws.x(i)
+        ys = ws.mutableY(i)
+        es = ws.mutableE(i)
         if len(xs) != len(ys):
             xs = _bincentres(xs)
         binIndex = numpy.argmin(numpy.abs(xs))
@@ -832,9 +832,9 @@ def validQ(workspace, E=0.0):
         if len(vertPoints) > workspace.getNumberHistograms():
             vertPoints = _bincentres(vertPoints)
         elasticIndex = int(numpy.argmin(numpy.abs(vertPoints - E)))
-        ys = workspace.readY(elasticIndex)
+        ys = workspace.y(elasticIndex)
         validIndices = numpy.argwhere(numpy.logical_not(numpy.isnan(ys)))
-        xs = workspace.readX(elasticIndex)
+        xs = workspace.x(elasticIndex)
         lower = xs[numpy.amin(validIndices)]
         upperIndex = numpy.amax(validIndices)
         if len(xs) > len(ys):
@@ -842,8 +842,8 @@ def validQ(workspace, E=0.0):
         upper = xs[upperIndex]
         return lower, upper
     else:
-        horPoints = workspace.readX(0)
-        nPoints = len(workspace.readY(0))
+        horPoints = workspace.x(0)
+        nPoints = len(workspace.y(0))
         if len(horPoints) > nPoints:
             horPoints = _bincentres(horPoints)
         elasticIndex = int(numpy.argmin(numpy.abs(horPoints - E)))
@@ -853,7 +853,7 @@ def validQ(workspace, E=0.0):
         lower = numpy.inf
         upper = -numpy.inf
         for i in range(workspace.getNumberHistograms()):
-            y = workspace.readY(i)[elasticIndex]
+            y = workspace.y(i)[elasticIndex]
             if not numpy.isnan(y):
                 q = vertPoints[i]
                 if q < lower:

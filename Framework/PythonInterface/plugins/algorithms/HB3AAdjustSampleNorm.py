@@ -589,7 +589,7 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
                 for i, det_ids in enumerate(detector_ids_per_group):
                     group_id = float(i + 1)
                     for det_id in det_ids:
-                        grouping_workspace.dataY(int(det_id) - 1)[0] = group_id
+                        grouping_workspace.mutableY(int(det_id) - 1)[0] = group_id
                         grouping_workspace.getSpectrum(int(det_id) - 1).setDetectorID(int(det_id))
 
             # Group spectra

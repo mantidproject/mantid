@@ -27,7 +27,7 @@ class LoadNMoldyn4Ascii1DTest(unittest.TestCase):
         self.assertEqual(str(workspace.getAxis(0).getUnit().unitID()), "Energy_inWavenumber")
 
     def _validate_dos_total_convolution(self, workspace):
-        data_y = workspace.readY(0)
+        data_y = workspace.y(0)
         self.assertTrue(math.isnan(data_y[0]))
         self.assertAlmostEqual(data_y[-1], 8.64166846648649e-06)
         self.assertAlmostEqual(data_y[500], 0.000294421598059313)

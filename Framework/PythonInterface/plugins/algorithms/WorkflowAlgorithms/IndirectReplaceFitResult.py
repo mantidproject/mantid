@@ -143,7 +143,7 @@ class IndirectReplaceFitResult(PythonAlgorithm):
             input_y_axis = input_workspace.getAxis(1)
             if not input_x_axis.isNumeric():
                 issues["InputWorkspace"] = "The input workspace must have a numeric x axis."
-            if len(input_workspace.readY(0)) < 2:
+            if len(input_workspace.y(0)) < 2:
                 issues["InputWorkspace"] = "The input workspace must contain result data from a fit involving 2 or more spectra."
             if not input_y_axis.isText():
                 issues["InputWorkspace"] = "The input workspace must have a text y axis."
@@ -155,7 +155,7 @@ class IndirectReplaceFitResult(PythonAlgorithm):
             single_fit_y_axis = single_fit_workspace.getAxis(1)
             if not single_fit_x_axis.isNumeric():
                 issues["SingleFitWorkspace"] = "The single fit workspace must have a numeric x axis."
-            if len(single_fit_workspace.readY(0)) > 1:
+            if len(single_fit_workspace.y(0)) > 1:
                 issues["SingleFitWorkspace"] = "The single fit workspace must contain data from a single fit."
             if not single_fit_y_axis.isText():
                 issues["SingleFitWorkspace"] = "The single fit workspace must have a text y axis."
@@ -174,7 +174,7 @@ class IndirectReplaceFitResult(PythonAlgorithm):
         input_workspace = get_ads_workspace(self._input_workspace)
         single_fit_workspace = get_ads_workspace(self._single_fit_workspace)
 
-        self._bin_value = single_fit_workspace.readX(0)[0]
+        self._bin_value = single_fit_workspace.x(0)[0]
         self._insertion_x_index = get_x_insertion_index(input_workspace, single_fit_workspace)
         self._row_indices = get_indices_of_equivalent_labels(input_workspace, single_fit_workspace)
         self._insertion_y_indices = get_indices_of_equivalent_labels(single_fit_workspace, input_workspace)

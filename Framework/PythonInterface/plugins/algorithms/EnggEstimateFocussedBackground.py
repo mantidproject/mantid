@@ -98,7 +98,7 @@ class EnggEstimateFocussedBackground(PythonAlgorithm):
         alg.execute()
         outws = alg.getProperty("OutputWorkspace").value
         # replace intensity in output spectrum with background
-        [outws.setY(ispec, yvec) for ispec, yvec in enumerate(out)]
+        [outws.setSharedY(ispec, yvec) for ispec, yvec in enumerate(out)]
 
         # set output
         self.setProperty("OutputWorkspace", outws)
@@ -126,9 +126,9 @@ def _get_end_normalisation(nwindow):
 def find_bg_of_spectrum(wsname, ispec, xwindow, niter, do_sg_filter, prog):
     ws = AnalysisDataService.retrieve(wsname)
     # find kernel size
-    nwindow = _get_nbins_in_xwindow(ws.readX(ispec), xwindow)
+    nwindow = _get_nbins_in_xwindow(ws.x(ispec), xwindow)
     # do initial filter to remove very high intensity points
-    ybg = ws.readY(ispec).copy()  # copy
+    ybg = ws.y(ispec).copy()  # copy
     if do_sg_filter:
         ybg = savgol_filter(ybg, nwindow, polyorder=1)
     yavg = ybg.mean()

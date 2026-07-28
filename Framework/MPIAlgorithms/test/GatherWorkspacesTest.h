@@ -56,9 +56,9 @@ public:
     API::MatrixWorkspace_const_sptr outWS = gatherer.getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(inWS->size(), outWS->size());
     for (int i = 0; i < 5; ++i) {
-      TS_ASSERT_EQUALS(inWS->readX(0)[i], outWS->readX(0)[i]);
-      TS_ASSERT_EQUALS(inWS->readY(0)[i], outWS->readY(0)[i]);
-      TS_ASSERT_EQUALS(inWS->readE(0)[i], outWS->readE(0)[i]);
+      TS_ASSERT_EQUALS(inWS->x(0)[i], outWS->x(0)[i]);
+      TS_ASSERT_EQUALS(inWS->y(0)[i], outWS->y(0)[i]);
+      TS_ASSERT_EQUALS(inWS->e(0)[i], outWS->e(0)[i]);
     }
 
     TS_ASSERT_EQUALS(inWS->getInstrument()->baseInstrument(), outWS->getInstrument()->baseInstrument());
@@ -78,9 +78,9 @@ public:
     TS_ASSERT_EQUALS(inWS->size(), outWS->size());
     for (int i = 0; i < 5; ++i) {
       printf("i: %d\n", i);
-      TS_ASSERT_EQUALS(inWS->readX(0)[i], outWS->readX(0)[i]);
-      TS_ASSERT_EQUALS(inWS->readY(0)[i], outWS->readY(0)[i]);
-      TS_ASSERT_EQUALS(inWS->readE(0)[i], outWS->readE(0)[i]);
+      TS_ASSERT_EQUALS(inWS->x(0)[i], outWS->x(0)[i]);
+      TS_ASSERT_EQUALS(inWS->y(0)[i], outWS->y(0)[i]);
+      TS_ASSERT_EQUALS(inWS->e(0)[i], outWS->e(0)[i]);
     }
 
     TS_ASSERT_EQUALS(inWS->getInstrument()->baseInstrument(), outWS->getInstrument()->baseInstrument());

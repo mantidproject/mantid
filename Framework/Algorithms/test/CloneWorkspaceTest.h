@@ -53,7 +53,7 @@ public:
 
     MatrixWorkspace_sptr in = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("in");
     // Input file does not contain Dx, we just add it for testing.
-    HistogramData::PointStandardDeviations dx(in->readX(0).size() - 1);
+    HistogramData::PointStandardDeviations dx(in->x(0).size() - 1);
     for (size_t i = 0; i < in->getNumberHistograms(); ++i)
       in->setPointStandardDeviations(i, dx);
 

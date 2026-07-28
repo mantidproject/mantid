@@ -11,7 +11,7 @@ import mantid.simpleapi as mantid
 def removeDeadDetectors(ws):
     deadDetectors = []
     for j in range(0, ws.getNumberHistograms()):
-        if np.count_nonzero(ws.readY(j)) == 0:
+        if np.count_nonzero(ws.y(j)) == 0:
             deadDetectors.append(j + 1)
     if len(deadDetectors) == 0:
         return ws, deadDetectors

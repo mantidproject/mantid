@@ -96,9 +96,9 @@ class LoadEXED(PythonAlgorithm):
         nr, nc = ydata.shape
         ws = WorkspaceFactory.create("Workspace2D", NVectors=nr, XLength=nc + 1, YLength=nc)
         for i in range(nrows):
-            ws.setX(i, xdata)
-            ws.setY(i, ydata[i])
-            ws.setE(i, edata[i])
+            ws.setSharedX(i, xdata)
+            ws.setSharedY(i, ydata[i])
+            ws.setSharedE(i, edata[i])
         ws.getAxis(0).setUnit("tof")
         AnalysisDataService.addOrReplace(wsn, ws)
 
@@ -108,7 +108,7 @@ class LoadEXED(PythonAlgorithm):
 
         # fix the x values for the monitor
         for i in range(nrows - 2, nrows):
-            ws.setX(i, xdata_mon)
+            ws.setSharedX(i, xdata_mon)
         self.log().information("set detector IDs")
         # set detetector IDs
         for i in range(nrows):

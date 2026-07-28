@@ -550,7 +550,7 @@ const MantidVec &EventWorkspace::dataE(const std::size_t index) const { return g
  * @return a pointer to the X data vector at a given workspace index
  * @param index :: workspace index   */
 Kernel::cow_ptr<HistogramData::HistogramX> EventWorkspace::refX(const std::size_t index) const {
-  return getSpectrum(index).ptrX();
+  return getSpectrum(index).sharedX();
 }
 
 /** Using the event data in the event list, generate a histogram of it w.r.t

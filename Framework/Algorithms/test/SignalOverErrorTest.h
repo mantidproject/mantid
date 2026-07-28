@@ -47,8 +47,8 @@ public:
       return;
 
     // Check the results
-    TS_ASSERT_DELTA(ws->readY(0)[0], M_SQRT2, 1e-5);
-    TS_ASSERT_DELTA(ws->readE(0)[0], 0.0, 1e-5);
+    TS_ASSERT_DELTA(ws->y(0)[0], M_SQRT2, 1e-5);
+    TS_ASSERT_DELTA(ws->e(0)[0], 0.0, 1e-5);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);

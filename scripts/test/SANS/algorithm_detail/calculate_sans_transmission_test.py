@@ -38,7 +38,7 @@ def get_expected_for_spectrum_n(data_workspace, selected_workspace_index, value_
     distance_source_detector = detector.getDistance(source)
     h = 6.62606896e-34
     mass = 1.674927211e-27
-    times = data_workspace.dataX(0)
+    times = data_workspace.x(0)
     lambda_after_unit_conversion = [(time * 1e-6) * h / distance_source_detector / mass * 1e10 for time in times]
     expected_lambda = [2.0, 4.0, 6.0, 8.0]
     if selected_workspace_index == 0:
@@ -194,7 +194,7 @@ class CalculateSansTransmissionTest(unittest.TestCase):
         # Now set specified monitors to specified values
         if data is not None:
             for key, value in list(data.items()):
-                data_y = workspace.dataY(key)
+                data_y = workspace.mutableY(key)
                 for index in range(len(data_y)):
                     data_y[index] = value[index]
         return workspace
@@ -253,10 +253,10 @@ class CalculateSansTransmissionTest(unittest.TestCase):
         self.assertTrue(unfitted_workspace.isDistribution())
         self.assertTrue(fitted_workspace.isDistribution())
 
-        for e1, e2 in zip(fitted_workspace.dataX(0), trans_lambda):
+        for e1, e2 in zip(fitted_workspace.x(0), trans_lambda):
             self.assertTrue(abs(e1 - e2) < tolerance)
 
-        for e1, e2 in zip(unfitted_workspace.dataY(0), ratio):
+        for e1, e2 in zip(unfitted_workspace.y(0), ratio):
             self.assertTrue(abs(e1 - e2) < tolerance)
             self.assertLessEqual(e1, 1.0)  # The transmission has to be smaller or equal to 1
 

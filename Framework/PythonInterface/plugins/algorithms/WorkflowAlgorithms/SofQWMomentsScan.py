@@ -306,9 +306,9 @@ class SofQWMomentsScan(DataProcessorAlgorithm):
         ydat = list()
         edat = list()
         for idx in range(len(temperatures)):
-            x = mtd[width_workspace].readX(idx)
-            y = mtd[width_workspace].readY(idx)
-            e = mtd[width_workspace].readE(idx)
+            x = mtd[width_workspace].x(idx)
+            y = mtd[width_workspace].y(idx)
+            e = mtd[width_workspace].e(idx)
             if x_axis_is_temp:
                 xdat.append(float(temperatures[idx]))
             else:

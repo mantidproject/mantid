@@ -194,7 +194,7 @@ def getQuickTOFWS(
         iccFitDict=iccFitDict,
         fitPenalty=fitPenalty,
     )
-    h = [tofWS.readY(0), tofWS.readX(0)]
+    h = [tofWS.y(0), tofWS.x(0)]
     chiSq = fitResults.OutputChi2overDoF
 
     r = mtd["fit_Workspace"]
@@ -205,14 +205,14 @@ def getQuickTOFWS(
     fitBG = [param.row(int(iii + i + 1))["Value"] for i in range(1 + 1)]
 
     # Set the intensity before moving on to the next peak
-    icProfile = r.readY(1)
+    icProfile = r.y(1)
     bgCoefficients = fitBG[::-1]
 
     intensity, sigma, xStart, xStop = integratePeak(
-        r.readX(0),
+        r.x(0),
         icProfile,
-        r.readY(0),
-        np.polyval(bgCoefficients, r.readX(1)),
+        r.y(0),
+        np.polyval(bgCoefficients, r.x(1)),
         pp_lambda=pp_lambda,
         fracStop=0.01,
         totEvents=np.sum(n_events[goodIDX * qMask]),
@@ -840,8 +840,8 @@ def getInitialGuess(tofWS, paramNames, energy, flightPath, padeCoefficients):
      flightPath is L = L1 + L2 (units: m)
     """
     x0 = np.zeros(len(paramNames))
-    x = tofWS.readX(0)
-    y = tofWS.readY(0)
+    x = tofWS.x(0)
+    y = tofWS.y(0)
     x0[0] = pade(padeCoefficients["A"], energy)
     x0[1] = pade(padeCoefficients["B"], energy)
     x0[2] = pade(padeCoefficients["R"], energy)
@@ -909,14 +909,14 @@ def plotFit(filenameFormat, r, tofWS, fICC, runNumber, peakNumber, energy, chiSq
     """
     plt.figure(1)
     plt.clf()
-    plt.plot(r.readX(0), r.readY(0), "o", label="Data")
+    plt.plot(r.x(0), r.y(0), "o", label="Data")
     if bgx0 is not None:
-        plt.plot(tofWS.readX(0), fICC.function1D(tofWS.readX(0)) + np.polyval(bgx0, tofWS.readX(0)), "b", label="Initial Guess")
+        plt.plot(tofWS.x(0), fICC.function1D(tofWS.x(0)) + np.polyval(bgx0, tofWS.x(0)), "b", label="Initial Guess")
     else:
-        plt.plot(tofWS.readX(0), fICC.function1D(tofWS.readX(0)), "b", label="Initial Guess")
+        plt.plot(tofWS.x(0), fICC.function1D(tofWS.x(0)), "b", label="Initial Guess")
 
-    plt.plot(r.readX(1), r.readY(1), ".-", label="Fit")
-    plt.plot(r.readX(1), np.polyval(bgFinal, r.readX(1)), "r", label="Background")
+    plt.plot(r.x(1), r.y(1), ".-", label="Fit")
+    plt.plot(r.x(1), np.polyval(bgFinal, r.x(1)), "r", label="Background")
     yLims = plt.ylim()
     plt.plot([xStart, xStart], yLims, "k")
     plt.plot([xStop, xStop], yLims, "k")
@@ -999,8 +999,8 @@ def doICCFit(
     paramNames = [fICC.getParamName(x) for x in range(fICC.numParams())]
     x0 = getInitialGuess(tofWS, paramNames, energy, flightPath, padeCoefficients)
     [fICC.setParameter(iii, v) for iii, v in enumerate(x0[: fICC.numParams()])]
-    x = tofWS.readX(0)
-    y = tofWS.readY(0)
+    x = tofWS.x(0)
+    y = tofWS.y(0)
     bgx0 = np.polyfit(x[np.r_[0:15, -15:0]], y[np.r_[0:15, -15:0]], fitOrder)
 
     nPts = x.size
@@ -1187,7 +1187,7 @@ def integrateSample(
                 fitBG = [param.row(int(iii + bgIDX + 1))["Value"] for bgIDX in range(bgPolyOrder + 1)]
 
                 # Set the intensity before moving on to the next peak
-                icProfile = r.readY(1)
+                icProfile = r.y(1)
                 bgCoefficients = fitBG[::-1]
                 # peak.setSigmaIntensity(np.sqrt(np.sum(icProfile)))i
 
@@ -1198,10 +1198,10 @@ def integrateSample(
                 bgIDX = reduce(np.logical_and, [~goodIDX, qMask, conv_n_events > 0])
                 bgEvents = np.mean(n_events[bgIDX]) * np.sum(goodIDX * qMask)
                 intensity, sigma, xStart, xStop = integratePeak(
-                    r.readX(0),
+                    r.x(0),
                     icProfile,
-                    r.readY(0),
-                    np.polyval(bgCoefficients, r.readX(1)),
+                    r.y(0),
+                    np.polyval(bgCoefficients, r.x(1)),
                     pp_lambda=pp_lambda,
                     fracStop=fracStop,
                     totEvents=totEvents,
@@ -1209,13 +1209,13 @@ def integrateSample(
                     varFit=chiSq,
                 )
                 # subtract background
-                icProfile = icProfile - np.polyval(bgCoefficients, r.readX(1))
+                icProfile = icProfile - np.polyval(bgCoefficients, r.x(1))
                 peak.setIntensity(intensity)
                 peak.setSigmaIntensity(sigma)
                 if figsFormat is not None:
                     plotFit(figsFormat, r, tofWS, fICC, peak.getRunNumber(), i, energy, chiSq, fitBG, xStart, xStop, bgx0=None)
                 if keepFitDict:
-                    fitDict[i] = np.array([r.readX(0), r.readY(0), r.readY(1), r.readY(2)])
+                    fitDict[i] = np.array([r.x(0), r.y(0), r.y(1), r.y(2)])
                 paramList.append(
                     [i, energy, np.sum(icProfile), 0.0, chiSq] + [param.row(i)["Value"] for i in range(param.rowCount())] + [pp_lambda]
                 )

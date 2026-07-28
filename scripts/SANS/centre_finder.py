@@ -207,10 +207,10 @@ class CentreFinder(object):
         """
         residueX = 0
         if self.find_direction == FindDirectionEnum.ALL or self.find_direction == FindDirectionEnum.LEFT_RIGHT:
-            yvalsAX = mtd["Left"].readY(0)
-            yvalsBX = mtd["Right"].readY(0)
-            qvalsAX = mtd["Left"].readX(0)
-            qvalsBX = mtd["Right"].readX(0)
+            yvalsAX = mtd["Left"].y(0)
+            yvalsBX = mtd["Right"].y(0)
+            qvalsAX = mtd["Left"].x(0)
+            qvalsBX = mtd["Right"].x(0)
             qrangeX = [len(yvalsAX), len(yvalsBX)]
             nvalsX = min(qrangeX)
             id1X = "LR1"
@@ -221,10 +221,10 @@ class CentreFinder(object):
 
         residueY = 0
         if self.find_direction == FindDirectionEnum.ALL or self.find_direction == FindDirectionEnum.UP_DOWN:
-            yvalsAY = mtd["Up"].readY(0)
-            yvalsBY = mtd["Down"].readY(0)
-            qvalsAY = mtd["Up"].readX(0)
-            qvalsBY = mtd["Down"].readX(0)
+            yvalsAY = mtd["Up"].y(0)
+            yvalsBY = mtd["Down"].y(0)
+            qvalsAY = mtd["Up"].x(0)
+            qvalsBY = mtd["Down"].x(0)
             qrangeY = [len(yvalsAY), len(yvalsBY)]
             nvalsY = min(qrangeY)
             id1Y = "UD1"

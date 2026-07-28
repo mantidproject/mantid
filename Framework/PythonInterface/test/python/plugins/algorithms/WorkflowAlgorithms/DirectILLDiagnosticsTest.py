@@ -58,7 +58,7 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
         self.assertEqual(outWS.blocksize(), 1)
         spectrumInfo = outWS.spectrumInfo()
         for i in range(outWS.getNumberHistograms()):
-            self.assertEqual(outWS.readY(i)[0], 0)
+            self.assertEqual(outWS.y(i)[0], 0)
             self.assertFalse(spectrumInfo.isMasked(i))
 
     def testBackgroundDiagnostics(self):
@@ -66,11 +66,11 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
         spectraCount = rawWS.getNumberHistograms()
         highBkgIndices = [0, int(spectraCount / 3), spectraCount - 1]
         for i in highBkgIndices:
-            ys = rawWS.dataY(i)
+            ys = rawWS.mutableY(i)
             ys += 10.0 * self._BKG_LEVEL
         lowBkgIndices = [int(spectraCount / 4), int(2 * spectraCount / 3)]
         for i in lowBkgIndices:
-            ys = rawWS.dataY(i)
+            ys = rawWS.mutableY(i)
             ys -= self._BKG_LEVEL
         outWSName = "diagnosticsWS"
         kwargs = {
@@ -93,7 +93,7 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
         spectrumInfo = outWS.spectrumInfo()
         for i in range(spectraCount):
             self.assertFalse(spectrumInfo.isMasked(i))
-            ys = outWS.readY(i)
+            ys = outWS.y(i)
             if i in highBkgIndices + lowBkgIndices:
                 self.assertEqual(ys[0], 1)
             else:
@@ -115,12 +115,12 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
         # From now on, we work on workspace indices.
         # First range is fully covered by the beam stop.
         for i in range(42, 57):
-            ys = beamWS.dataY(i)
+            ys = beamWS.mutableY(i)
             ys *= 0.0
         # Second range is partially covered by the beam stop.
         # Actually, only this range will be recongnized as beam stop's shadow.
         for i in range(92, 105):
-            ys = beamWS.dataY(i)
+            ys = beamWS.mutableY(i)
             ys *= 0.0
         # The third range is not covered by the beam stop at all.
         outWSName = "diagnosticsWS"
@@ -138,7 +138,7 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
         self.assertEqual(outWS.getNumberHistograms(), beamWS.getNumberHistograms())
         self.assertEqual(outWS.blocksize(), 1)
         for i in range(outWS.getNumberHistograms()):
-            ys = outWS.readY(i)
+            ys = outWS.y(i)
             if i >= 92 and i < 105:
                 self.assertEqual(ys[0], 1)
             else:
@@ -149,11 +149,11 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
         spectraCount = inWS.getNumberHistograms()
         highPeakIndices = [0, int(spectraCount / 3), spectraCount - 1]
         for i in highPeakIndices:
-            ys = inWS.dataY(i)
+            ys = inWS.mutableY(i)
             ys *= 10.0
         lowPeakIndices = [int(spectraCount / 4), int(2 * spectraCount / 3)]
         for i in lowPeakIndices:
-            ys = inWS.dataY(i)
+            ys = inWS.mutableY(i)
             ys *= 0.1
         outWSName = "diagnosticsWS"
         kwargs = {
@@ -176,7 +176,7 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
         spectrumInfo = outWS.spectrumInfo()
         for i in range(spectraCount):
             self.assertFalse(spectrumInfo.isMasked(i))
-            ys = outWS.readY(i)
+            ys = outWS.y(i)
             if i in highPeakIndices + lowPeakIndices:
                 self.assertEqual(ys[0], 1)
             else:
@@ -202,7 +202,7 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
         self.assertEqual(outWS.getNumberHistograms(), spectraCount)
         self.assertEqual(outWS.blocksize(), 1)
         for i in range(spectraCount):
-            Ys = outWS.readY(i)
+            Ys = outWS.y(i)
             detector = outWS.getDetector(i)
             componentName = detector.getFullName()
             if "tube_1" in componentName:
@@ -215,7 +215,7 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
         spectraCount = inWS.getNumberHistograms()
         maskedIndices = [0, int(spectraCount / 3), spectraCount - 1]
         for i in maskedIndices:
-            ys = inWS.dataY(i)
+            ys = inWS.mutableY(i)
             ys *= 10.0
         outWSName = "diagnosticsWS"
         kwargs = {

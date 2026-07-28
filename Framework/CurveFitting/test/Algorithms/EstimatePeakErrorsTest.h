@@ -276,12 +276,12 @@ private:
 
     fun.function(x, y);
     ws->setPoints(0, x.toVector());
-    ws->dataY(0) = y.toVector();
-    ws->dataE(0) = e;
+    ws->mutableY(0) = y.toVector();
+    ws->mutableE(0) = e;
     assert(n == noise.size());
     for (size_t i = 0; i < n; ++i) {
-      ws->dataY(0)[i] += noiseLevel * noise[i];
-      ws->dataE(0)[i] += noiseLevel;
+      ws->mutableY(0)[i] += noiseLevel * noise[i];
+      ws->mutableE(0)[i] += noiseLevel;
     }
     return ws;
   }

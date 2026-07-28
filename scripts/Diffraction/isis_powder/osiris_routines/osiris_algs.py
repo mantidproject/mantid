@@ -56,7 +56,7 @@ class WORKSPACE_SUFFIX(object):
 
 
 def get_osiris_d_range(run_ws):
-    x_data = run_ws.dataX(0)
+    x_data = run_ws.x(0)
     x_range = [x_data[0], x_data[-1]]
     return list(d_range_with_time.keys())[list(d_range_with_time.values()).index(x_range)]
 
@@ -184,7 +184,7 @@ def get_empty_can_run_for_drange(all_run_numbers, drange):
 def _correct_drange_overlap(merged_ws, drange_sets):
     for i in range(0, merged_ws.getNumberHistograms()):
         # Create scalar data to cope with where merge has combined overlapping data.
-        data_x = (merged_ws.dataX(i)[1:] + merged_ws.dataX(i)[:-1]) / 2.0
+        data_x = (merged_ws.x(i)[1:] + merged_ws.x(i)[:-1]) / 2.0
         data_y = np.zeros(data_x.size)
         for drange in drange_sets:
             if drange_sets[drange].has_sample():
@@ -197,8 +197,8 @@ def _correct_drange_overlap(merged_ws, drange_sets):
                 data_y[z] = 1
 
         # apply scalar data to result workspace
-        merged_ws.setY(i, merged_ws.dataY(i) / data_y)
-        merged_ws.setE(i, merged_ws.dataE(i) / data_y)
+        merged_ws.setSharedY(i, merged_ws.y(i) / data_y)
+        merged_ws.setSharedE(i, merged_ws.e(i) / data_y)
 
     return merged_ws
 
@@ -223,19 +223,19 @@ def merge_dspacing_runs(focussed_runs, drange_sets, run_number):
     # Merge workspaces located at the same index
     merged_spectra = [MergeRuns(InputWorkspaces=spectra, OutputWorkspace=f"merged_{idx}") for idx, spectra in enumerate(matched_spectra)]
 
-    max_x_size = max([spectra.dataX(0).size for spectra in merged_spectra])
-    max_y_size = max([spectra.dataY(0).size for spectra in merged_spectra])
-    max_e_size = max([spectra.dataE(0).size for spectra in merged_spectra])
+    max_x_size = max([spectra.x(0).size for spectra in merged_spectra])
+    max_y_size = max([spectra.y(0).size for spectra in merged_spectra])
+    max_e_size = max([spectra.e(0).size for spectra in merged_spectra])
 
     for i in range(len(merged_spectra)):
         if (
-            merged_spectra[i].dataX(0).size != max_x_size
-            or merged_spectra[i].dataY(0).size != max_y_size
-            or merged_spectra[i].dataE(0).size != max_e_size
+            merged_spectra[i].x(0).size != max_x_size
+            or merged_spectra[i].y(0).size != max_y_size
+            or merged_spectra[i].e(0).size != max_e_size
         ):
-            dataX = merged_spectra[i].dataX(0)
-            dataY = merged_spectra[i].dataY(0)
-            dataE = merged_spectra[i].dataE(0)
+            dataX = merged_spectra[i].x(0)
+            dataY = merged_spectra[i].y(0)
+            dataE = merged_spectra[i].e(0)
 
             dataX = np.append(dataX, [dataX[-1]] * (max_x_size - dataX.size))
             dataY = np.append(dataY, [0] * (max_y_size - dataY.size))

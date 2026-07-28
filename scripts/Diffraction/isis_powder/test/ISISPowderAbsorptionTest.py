@@ -20,9 +20,9 @@ class ISISPowderAbsorptionTest(unittest.TestCase):
             ws_to_correct=ws, multiple_scattering=False, sample_details_obj=sample_details, is_vanadium=True
         )
 
-        self.assertAlmostEqual(ws.dataY(0)[2], 1.16864808, delta=1e-8)
-        self.assertAlmostEqual(ws.dataY(0)[5], 1.16872761, delta=1e-8)
-        self.assertAlmostEqual(ws.dataY(0)[9], 1.16883365, delta=1e-8)
+        self.assertAlmostEqual(ws.mutableY(0)[2], 1.16864808, delta=1e-8)
+        self.assertAlmostEqual(ws.mutableY(0)[5], 1.16872761, delta=1e-8)
+        self.assertAlmostEqual(ws.mutableY(0)[9], 1.16883365, delta=1e-8)
 
     def test_missing_property_is_detected(self):
         sample_properties = {

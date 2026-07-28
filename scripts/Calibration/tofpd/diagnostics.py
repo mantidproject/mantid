@@ -254,13 +254,13 @@ def difc_plot2d(calib_new, calib_old=None, instr_ws=None, mask=None, vrange=(0, 
         pos = info.position(det_id)
         phi = np.arctan2(pos[0], pos[1])
         theta = np.arccos(pos[2] / pos.norm())
-        if use_mask and mtd[str(mask)].dataY(det_id):
+        if use_mask and mtd[str(mask)].y(det_id):
             masked_theta_array.append(theta)
             masked_phi_array.append(phi)
         else:
             theta_array.append(theta)
             phi_array.append(phi)
-            percent = 100.0 * np.sum(np.abs(delta.dataY(det_id))) / np.sum(ws_old.dataY(det_id))
+            percent = 100.0 * np.sum(np.abs(delta.y(det_id))) / np.sum(ws_old.y(det_id))
             value_array.append(percent)
 
     # Use the largest solid angle for circle radius
@@ -270,7 +270,7 @@ def difc_plot2d(calib_new, calib_old=None, instr_ws=None, mask=None, vrange=(0, 
         instr_ws = f"{instr_name}_instr"
     det_tmp = SolidAngle(InputWorkspace=instr_ws, OutputWorkspace="detector_tmp")
     for wksp_index in range(info.size()):
-        maximum_solid_angle = max(maximum_solid_angle, det_tmp.readY(wksp_index)[0])
+        maximum_solid_angle = max(maximum_solid_angle, det_tmp.y(wksp_index)[0])
 
     # Convert to degrees for plotting
     theta_array = np.rad2deg(theta_array)
@@ -376,13 +376,13 @@ def collect_peaks(wksp: Union[str, TableWorkspace], outputname: str, donor: Unio
     # convert the d-space table to a Workspace2d
     output = __create_outputws(donor, numSpec, numPeaks)
     for i in range(numSpec):  # TODO get the detID correct
-        output.setX(i, peaks)
+        output.setSharedX(i, peaks)
         if infotype == "strain":
-            output.setY(i, __calculate_strain(wksp.row(i), peaks))
+            output.setSharedY(i, __calculate_strain(wksp.row(i), peaks))
         elif infotype == "difference":
-            output.setY(i, __calculate_difference(wksp.row(i), peaks))
+            output.setSharedY(i, __calculate_difference(wksp.row(i), peaks))
         elif infotype == "dspacing":
-            output.setY(i, __calculate_dspacing(wksp.row(i)))
+            output.setSharedY(i, __calculate_dspacing(wksp.row(i)))
         else:
             raise ValueError(f"Do not know how to calculate {infotype}")
 
@@ -436,8 +436,8 @@ def collect_fit_result(
     for i in range(len(wsindex_unique)):
         start = int(np.searchsorted(wsindex, wsindex_unique[i]))
         i = int(i)  # to be compliant with mantid API
-        output.setX(i, peaks)
-        output.setY(i, observable[start : start + numPeaks])
+        output.setSharedX(i, peaks)
+        output.setSharedY(i, observable[start : start + numPeaks])
     mtd.addOrReplace(outputname, output)
     return mtd[outputname]
 
@@ -455,28 +455,28 @@ def extract_peak_info(wksp: Union[str, Workspace2D], outputname: str, peak_posit
     numSpec = wksp.getNumberHistograms()
 
     # get the index into the x/y arrays of the peak position
-    peak_index = wksp.readX(0).searchsorted(peak_position)
+    peak_index = wksp.x(0).searchsorted(peak_position)
 
     # create a workspace to put the result into
     single = WorkspaceFactory.create("Workspace2D", NVectors=1, XLength=wksp.getNumberHistograms(), YLength=wksp.getNumberHistograms())
-    single.setTitle("d-spacing={}\\A".format(wksp.readX(0)[peak_index]))
+    single.setTitle("d-spacing={}\\A".format(wksp.x(0)[peak_index]))
 
     # get a handle to map the detector positions
     detids = wksp.detectorInfo().detectorIDs()
     have_detids = bool(len(detids) > 0)
 
     # fill in the data values
-    x = single.dataX(0)
-    y = single.dataY(0)
-    e = single.dataE(0)
+    x = single.mutableX(0)
+    y = single.mutableY(0)
+    e = single.mutableE(0)
     start_detid = np.searchsorted(detids, 0)
     for wksp_index in range(numSpec):
         if have_detids:
             x[wksp_index] = detids[start_detid + wksp_index]
         else:
             x[wksp_index] = wksp_index
-        y[wksp_index] = wksp.readY(wksp_index)[peak_index]
-        e[wksp_index] = wksp.readE(wksp_index)[peak_index]
+        y[wksp_index] = wksp.y(wksp_index)[peak_index]
+        e[wksp_index] = wksp.e(wksp_index)[peak_index]
 
     # add the workspace to the AnalysisDataService
     mtd.addOrReplace(outputname, single)
@@ -537,8 +537,8 @@ def plot_peakd(
         single = extract_peak_info(wksp, "single", peak)
 
         # get x and y arrays from single peak ws
-        x = single.dataX(0)
-        y = single.dataY(0)
+        x = single.x(0)
+        y = single.y(0)
 
         # filter out any nans
         y_val = y[~np.isnan(y)]
@@ -594,7 +594,7 @@ def plot_peakd(
         region_cnts = [0] * len(regions)
         for peak in plotted_peaks:
             single = extract_peak_info(wksp, "single", peak)
-            y = single.dataY(0)
+            y = single.y(0)
             for i in range(len(regions)):
                 det_start = single.yIndexOfX(regions[i][0])
                 det_end = single.yIndexOfX(regions[i][1])
@@ -652,8 +652,8 @@ def plot_corr(tof_ws):
 
     for workspaceIndex in range(numHist):
         # Get Pearson correlation coefficient for each detector
-        x = tof_ws.dataY(workspaceIndex)
-        y = tof_ws.dataX(workspaceIndex)
+        x = tof_ws.y(workspaceIndex)
+        y = tof_ws.x(workspaceIndex)
 
         mask = np.logical_not(np.isnan(x))
         if np.sum(mask) > 1:
@@ -715,8 +715,8 @@ def plot_peak_info(wksp: Union[str, TableWorkspace], peak_positions: Union[float
     markers = ["x", ".", "^", "s", "d", "h", "p", "v"]
     for i in range(nbanks):
         for j in range(len(workspaces)):
-            x = workspaces[j].dataX(i)
-            data = workspaces[j].dataY(i)
+            x = workspaces[j].x(i)
+            data = workspaces[j].y(i)
             # Cycle through marker list if there are too many banks
             marker = i % len(markers)
             ax[j].plot(x, data, marker=markers[marker], ls="None", label="bank{}".format(i))

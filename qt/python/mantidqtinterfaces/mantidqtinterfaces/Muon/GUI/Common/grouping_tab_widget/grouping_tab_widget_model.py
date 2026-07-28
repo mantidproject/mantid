@@ -260,7 +260,7 @@ class GroupingTabModel(object):
 
     def get_last_data_from_file(self):
         if self._data.current_runs:
-            return round(max(self._data.get_loaded_data_for_run(self._data.current_runs[-1])["OutputWorkspace"][0].workspace.dataX(0)), 3)
+            return round(max(self._data.get_loaded_data_for_run(self._data.current_runs[-1])["OutputWorkspace"][0].workspace.x(0)), 3)
         else:
             return 1.0
 

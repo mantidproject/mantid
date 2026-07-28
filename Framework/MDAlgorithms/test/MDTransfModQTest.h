@@ -95,7 +95,7 @@ public:
 
     for (size_t i = 0; i < nDetectors; i++) {
       size_t iSpctr = detIDMap[i];
-      const MantidVec &X = ws2D->readX(iSpctr);
+      Mantid::MantidVec const &X = ws2D->x(iSpctr).rawData();
 
       auto range = MDTransf.getExtremumPoints(X[0], X[specSize], i);
 

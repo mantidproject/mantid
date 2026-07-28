@@ -68,9 +68,9 @@ class SANSScaleTest(unittest.TestCase):
 
         # We have a LOQ data set, hence we need to divide by pi
         expected_value = 0.3 / (height * math.pi * math.pow(width, 2) / 4.0) * (rear_scale / math.pi) * 100.0
-        data_y = rear_output_ws.dataY(0)
+        data_y = rear_output_ws.y(0)
         self.assertAlmostEqual(data_y[0], expected_value, delta=1e-7)
-        self.assertListEqual(list(rear_output_ws.dataY(0)), list(front_output_ws.dataY(0)))
+        self.assertListEqual(list(rear_output_ws.y(0)), list(front_output_ws.y(0)))
 
     def test_that_divide_uses_settings_from_workspace(self):
         # Arrange
@@ -102,7 +102,7 @@ class SANSScaleTest(unittest.TestCase):
         # Assert
         expected_volume = thickness * math.pi * math.pow(width, 2) / 4.0
         expected_value = 0.3 / expected_volume
-        data_y = output_workspace.dataY(0)
+        data_y = output_workspace.y(0)
         self.assertEqual(data_y[0], expected_value)
 
     def test_that_divide_uses_settings_from_state_if_they_are_set(self):
@@ -133,7 +133,7 @@ class SANSScaleTest(unittest.TestCase):
 
         expected_volume = thickness * math.pi * math.pow(width, 2) / 4.0
         expected_value = 0.3 / expected_volume
-        data_y = output_workspace.dataY(0)
+        data_y = output_workspace.y(0)
         self.assertEqual(data_y[0], expected_value)
 
     def test_that_correct_scale_strategy_is_selected_for_loq_2(self):
@@ -161,7 +161,7 @@ class SANSScaleTest(unittest.TestCase):
 
             # Assert
             expected_value = 0.3 * scale_factor / math.pi * 100.0
-            data_y = output_workspace.dataY(0)
+            data_y = output_workspace.y(0)
             self.assertEqual(data_y[0], expected_value)
 
         run_and_test_output(DetectorType.LAB, 2.4)

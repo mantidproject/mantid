@@ -62,7 +62,7 @@ class ClipPeaksTest(unittest.TestCase):
         basews = AnalysisDataService.retrieve("Baseline")
         y = basews.extractY()
         y = np.add(y, noise_gen.normal(mean, scale, self.resolution))
-        basews.setY(y)
+        basews.setSharedY(y)
 
     def __createRandPeaksWS(self, amplitude=1.0):
         """

@@ -186,9 +186,9 @@ public:
     // check x-axis and total counts match - this is easier to debug than CompareWorkspaces
     const size_t NUM_HISTO = wsFalse->getNumberHistograms();
     for (size_t ws_index = 0; ws_index < NUM_HISTO; ++ws_index) {
-      TS_ASSERT_EQUALS(wsFalse->readX(ws_index), wsTrue->readX(ws_index));
-      const auto totalFalse = std::accumulate(wsFalse->readY(ws_index).cbegin(), wsFalse->readY(ws_index).cend(), 0.);
-      const auto totalTrue = std::accumulate(wsTrue->readY(ws_index).cbegin(), wsTrue->readY(ws_index).cend(), 0.);
+      TS_ASSERT_EQUALS(wsFalse->x(ws_index), wsTrue->x(ws_index));
+      const auto totalFalse = std::accumulate(wsFalse->y(ws_index).cbegin(), wsFalse->y(ws_index).cend(), 0.);
+      const auto totalTrue = std::accumulate(wsTrue->y(ws_index).cbegin(), wsTrue->y(ws_index).cend(), 0.);
       TS_ASSERT_DELTA(totalFalse, totalTrue, .1);
     }
 
@@ -662,7 +662,7 @@ public:
       double events_after_binning = 0;
       for (size_t workspace_index = 0; workspace_index < outputEvent->getNumberHistograms(); workspace_index++) {
         // should be 16 bins
-        TS_ASSERT_EQUALS(outputEvent->refX(workspace_index)->size(), 16);
+        TS_ASSERT_EQUALS(outputEvent->sharedX(workspace_index)->size(), 16);
         // There should be some data in the bins
         for (int i = 0; i < 15; i++)
           events_after_binning += outputEvent->dataY(workspace_index)[i];

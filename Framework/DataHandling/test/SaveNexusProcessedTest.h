@@ -111,9 +111,9 @@ public:
     localWorkspace2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
     double d = 0.0;
     for (int i = 0; i < 10; ++i, d += 0.1) {
-      localWorkspace2D->dataX(0)[i] = d;
-      localWorkspace2D->dataY(0)[i] = d;
-      localWorkspace2D->dataE(0)[i] = d;
+      localWorkspace2D->mutableX(0)[i] = d;
+      localWorkspace2D->mutableY(0)[i] = d;
+      localWorkspace2D->mutableE(0)[i] = d;
     }
     AnalysisDataService::Instance().addOrReplace("testSpace", localWorkspace2D);
 
@@ -332,9 +332,9 @@ public:
 
     double d = 0.0;
     for (int i = 0; i < 10; ++i, d += 0.1) {
-      localWorkspace2D->dataX(0)[i] = d;
-      localWorkspace2D->dataY(0)[i] = d;
-      localWorkspace2D->dataE(0)[i] = d;
+      localWorkspace2D->mutableX(0)[i] = d;
+      localWorkspace2D->mutableY(0)[i] = d;
+      localWorkspace2D->mutableE(0)[i] = d;
     }
 
     AnalysisDataService::Instance().addOrReplace("testSpace", localWorkspace2D);
@@ -792,7 +792,7 @@ public:
     // stop regression related to bug in github issue #33152
     auto ws = WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(1, 2, 2);
     // alter binning of 1st spectrum
-    ws->setX(0, make_cow<Mantid::HistogramData::HistogramX>(std::vector<double>{0.0, 2.0, 4.0}));
+    ws->setSharedX(0, make_cow<Mantid::HistogramData::HistogramX>(std::vector<double>{0.0, 2.0, 4.0}));
     AnalysisDataService::Instance().add("testSpace", ws);
 
     SaveNexusProcessed saveAlg;
@@ -813,7 +813,7 @@ public:
     auto wsReloaded =
         std::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve("testSpaceReloaded"));
     // check has saved x values from 2nd spectrum not 1st
-    TS_ASSERT_EQUALS(wsReloaded->readX(0), ws->readX(1));
+    TS_ASSERT_EQUALS(wsReloaded->x(0), ws->x(1));
 
     AnalysisDataService::Instance().remove("testSpace");
   }
@@ -827,10 +827,10 @@ public:
     EventWorkspace_sptr ws = WorkspaceCreationHelper::createGroupedEventWorkspace(groups, 50, 1.0, 1.0);
 
     // Different bin edges per spectrum forces the ragged (non-shared-bins) path in LoadNexusProcessed
-    ws->setX(0, make_cow<Mantid::HistogramData::HistogramX>(std::vector<double>{0.0, 1.0, 2.0}));
-    ws->setX(1, make_cow<Mantid::HistogramData::HistogramX>(std::vector<double>{0.0, 2.0, 4.0}));
-    ws->setX(2, make_cow<Mantid::HistogramData::HistogramX>(std::vector<double>{0.0, 3.0, 6.0}));
-    ws->setX(3, make_cow<Mantid::HistogramData::HistogramX>(std::vector<double>{0.0, 4.0, 8.0}));
+    ws->setSharedX(0, make_cow<Mantid::HistogramData::HistogramX>(std::vector<double>{0.0, 1.0, 2.0}));
+    ws->setSharedX(1, make_cow<Mantid::HistogramData::HistogramX>(std::vector<double>{0.0, 2.0, 4.0}));
+    ws->setSharedX(2, make_cow<Mantid::HistogramData::HistogramX>(std::vector<double>{0.0, 3.0, 6.0}));
+    ws->setSharedX(3, make_cow<Mantid::HistogramData::HistogramX>(std::vector<double>{0.0, 4.0, 8.0}));
 
     AnalysisDataService::Instance().add("testEventRagged", ws);
 
@@ -857,8 +857,8 @@ public:
     if (wsReloaded) {
       TS_ASSERT_EQUALS(wsReloaded->getNumberHistograms(), 2);
       // Verify bin edges from spectra 1 and 3 were saved, not 0 or 2
-      TS_ASSERT_EQUALS(wsReloaded->readX(0), ws->readX(1));
-      TS_ASSERT_EQUALS(wsReloaded->readX(1), ws->readX(3));
+      TS_ASSERT_EQUALS(wsReloaded->x(0).rawData(), ws->x(1).rawData());
+      TS_ASSERT_EQUALS(wsReloaded->x(1).rawData(), ws->x(3).rawData());
       // Verify events from spectra 1 and 3 were saved, not 0 or 2
       TS_ASSERT_EQUALS(wsReloaded->getSpectrum(0).getNumberEvents(), ws->getSpectrum(1).getNumberEvents());
       TS_ASSERT_EQUALS(wsReloaded->getSpectrum(1).getNumberEvents(), ws->getSpectrum(3).getNumberEvents());
@@ -999,8 +999,8 @@ public:
 
     // check the X and Y values
     for (std::size_t i = 0; i < ws->getNumberHistograms(); ++i) {
-      TS_ASSERT_EQUALS(wsReloaded->readX(i), ws->readX(i));
-      TS_ASSERT_EQUALS(wsReloaded->readY(i), ws->readY(i));
+      TS_ASSERT_EQUALS(wsReloaded->x(i), ws->x(i));
+      TS_ASSERT_EQUALS(wsReloaded->x(i), ws->x(i));
     }
 
     AnalysisDataService::Instance().remove("testSpace");
@@ -1161,9 +1161,9 @@ private:
       localWorkspace2D->setPointStandardDeviations(0, 10);
     }
     for (int i = 0; i < 10; ++i, d += 0.1) {
-      localWorkspace2D->dataX(0)[i] = d;
-      localWorkspace2D->dataY(0)[i] = d;
-      localWorkspace2D->dataE(0)[i] = d;
+      localWorkspace2D->mutableX(0)[i] = d;
+      localWorkspace2D->mutableY(0)[i] = d;
+      localWorkspace2D->mutableE(0)[i] = d;
       if (useXErrors) {
         localWorkspace2D->mutableDx(0)[i] = d;
       }

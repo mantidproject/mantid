@@ -265,7 +265,7 @@ class PowderILLParameterScan(PythonAlgorithm):
         self._zero_cells = []
         size = mtd[ws].blocksize()
         for spectrum in range(mtd[ws].getNumberHistograms()):
-            counts = mtd[ws].readY(spectrum)
+            counts = mtd[ws].y(spectrum)
             if np.count_nonzero(counts) < size / 5:
                 self._zero_cells.append(spectrum)
         self._zero_cells.sort()
@@ -316,15 +316,15 @@ class PowderILLParameterScan(PythonAlgorithm):
                 theta_prev = theta_axis[prev_cell]
                 theta = theta_axis[cell]
                 theta_next = theta_axis[next_cell]
-                counts_prev = mtd[ws].readY(prev_cell)
-                errors_prev = mtd[ws].readE(prev_cell)
-                counts_next = mtd[ws].readY(next_cell)
-                errors_next = mtd[ws].readE(next_cell)
+                counts_prev = mtd[ws].y(prev_cell)
+                errors_prev = mtd[ws].e(prev_cell)
+                counts_next = mtd[ws].y(next_cell)
+                errors_next = mtd[ws].e(next_cell)
                 coefficient = (theta - theta_prev) / (theta_next - theta_prev)
                 counts = counts_prev + coefficient * (counts_next - counts_prev)
                 errors = errors_prev + coefficient * (errors_next - errors_prev)
-                mtd[ws].setY(cell, counts)
-                mtd[ws].setE(cell, errors)
+                mtd[ws].setSharedY(cell, counts)
+                mtd[ws].setSharedE(cell, errors)
 
         self._crop_zero_cells(ws, unable_to_interpolate)
 

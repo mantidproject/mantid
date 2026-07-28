@@ -33,7 +33,7 @@ public:
     TSM_ASSERT("Different size workspaces should always fail", !WorkspaceHelpers::matchingBins(ws, ws2));
     TSM_ASSERT("Different size workspaces should always fail", !WorkspaceHelpers::matchingBins(ws, ws3));
 
-    ws2->dataX(1)[0] = 99.0;
+    ws2->mutableX(1)[0] = 99.0;
     TSM_ASSERT("First-spectrum-only check should pass even when things differ "
                "in later spectra",
                WorkspaceHelpers::matchingBins(ws, ws2, true));
@@ -42,21 +42,21 @@ public:
     // & later spectra.
     auto ws4 = std::make_shared<WorkspaceTester>();
     ws4->initialize(2, 3, 2);
-    ws4->dataX(0)[0] = -1;
-    ws4->dataX(0)[1] = 0;
+    ws4->mutableX(0)[0] = -1;
+    ws4->mutableX(0)[1] = 0;
     auto ws5 = std::make_shared<WorkspaceTester>();
     ws5->initialize(2, 3, 2);
-    ws5->dataX(0)[0] = -1;
-    ws5->dataX(0)[2] = 0;
+    ws5->mutableX(0)[0] = -1;
+    ws5->mutableX(0)[2] = 0;
     TS_ASSERT(!WorkspaceHelpers::matchingBins(ws4, ws5, true))
     auto ws6 = std::make_shared<WorkspaceTester>();
     ws6->initialize(2, 3, 2);
-    ws6->dataX(1)[0] = -1;
-    ws6->dataX(1)[1] = 0;
+    ws6->mutableX(1)[0] = -1;
+    ws6->mutableX(1)[1] = 0;
     auto ws7 = std::make_shared<WorkspaceTester>();
     ws7->initialize(2, 3, 2);
-    ws7->dataX(1)[0] = -1;
-    ws7->dataX(1)[2] = 0;
+    ws7->mutableX(1)[0] = -1;
+    ws7->mutableX(1)[2] = 0;
     TS_ASSERT(!WorkspaceHelpers::matchingBins(ws6, ws7))
 
     // N.B. There are known ways to fool this method, but they are considered
@@ -73,21 +73,21 @@ public:
   {
     auto ws1 = std::make_shared<WorkspaceTester>();
     ws1->initialize(2, 2, 1);
-    ws1->getSpectrum(1).dataX()[0] = -2.5;
-    ws1->getSpectrum(1).dataX()[1] = -1.5;
+    ws1->getSpectrum(1).mutableX()[0] = -2.5;
+    ws1->getSpectrum(1).mutableX()[1] = -1.5;
 
     auto ws2 = std::make_shared<WorkspaceTester>();
     ws2->initialize(2, 2, 1);
-    ws2->getSpectrum(1).dataX()[0] = -2.7;
-    ws2->getSpectrum(1).dataX()[1] = -1.7;
+    ws2->getSpectrum(1).mutableX()[0] = -2.7;
+    ws2->getSpectrum(1).mutableX()[1] = -1.7;
 
     TS_ASSERT(WorkspaceHelpers::matchingBins(ws1, ws2, true));
     TS_ASSERT(!WorkspaceHelpers::matchingBins(ws1, ws2));
 
-    ws1->getSpectrum(0).dataX()[0] = -2.0;
-    ws1->getSpectrum(0).dataX()[1] = -1.0;
-    ws2->getSpectrum(0).dataX()[0] = -3.0;
-    ws2->getSpectrum(0).dataX()[1] = -4.0;
+    ws1->getSpectrum(0).mutableX()[0] = -2.0;
+    ws1->getSpectrum(0).mutableX()[1] = -1.0;
+    ws2->getSpectrum(0).mutableX()[0] = -3.0;
+    ws2->getSpectrum(0).mutableX()[1] = -4.0;
 
     TS_ASSERT(!WorkspaceHelpers::matchingBins(ws1, ws2, true));
   }
@@ -98,7 +98,7 @@ public:
     // By default the X vectors are different ones
     TS_ASSERT(!WorkspaceHelpers::sharedXData(ws));
     // Force both X spectra to point to the same underlying vector
-    ws->getSpectrum(1).setX(ws->getSpectrum(0).ptrX());
+    ws->getSpectrum(1).setSharedX(ws->getSpectrum(0).sharedX());
     TS_ASSERT(WorkspaceHelpers::sharedXData(ws));
   }
 
@@ -108,56 +108,56 @@ public:
     // Test only on tiny data here.
     auto ws = std::make_shared<WorkspaceTester>();
     ws->initialize(2, 2, 1);
-    ws->dataX(0)[1] = 3.0;
-    ws->dataX(1)[1] = 1.5;
+    ws->mutableX(0)[1] = 3.0;
+    ws->mutableX(1)[1] = 1.5;
     TS_ASSERT(!ws->isDistribution());
 
     TS_ASSERT_THROWS_NOTHING(WorkspaceHelpers::makeDistribution(ws));
     TS_ASSERT(ws->isDistribution());
-    TS_ASSERT_EQUALS(ws->readX(0)[0], 1.0)
-    TS_ASSERT_EQUALS(ws->readX(0)[1], 3.0)
-    TS_ASSERT_EQUALS(ws->readX(1)[0], 1.0)
-    TS_ASSERT_EQUALS(ws->readX(1)[1], 1.5)
-    TS_ASSERT_EQUALS(ws->readY(0)[0], 0.5)
-    TS_ASSERT_EQUALS(ws->readY(1)[0], 2.0)
-    TS_ASSERT_EQUALS(ws->readE(0)[0], 0.5)
-    TS_ASSERT_EQUALS(ws->readE(1)[0], 2.0)
+    TS_ASSERT_EQUALS(ws->x(0)[0], 1.0)
+    TS_ASSERT_EQUALS(ws->x(0)[1], 3.0)
+    TS_ASSERT_EQUALS(ws->x(1)[0], 1.0)
+    TS_ASSERT_EQUALS(ws->x(1)[1], 1.5)
+    TS_ASSERT_EQUALS(ws->y(0)[0], 0.5)
+    TS_ASSERT_EQUALS(ws->y(1)[0], 2.0)
+    TS_ASSERT_EQUALS(ws->e(0)[0], 0.5)
+    TS_ASSERT_EQUALS(ws->e(1)[0], 2.0)
 
     // Try and do it again - will do nothing
     TS_ASSERT_THROWS_NOTHING(WorkspaceHelpers::makeDistribution(ws));
     TS_ASSERT(ws->isDistribution());
-    TS_ASSERT_EQUALS(ws->readX(0)[0], 1.0)
-    TS_ASSERT_EQUALS(ws->readX(0)[1], 3.0)
-    TS_ASSERT_EQUALS(ws->readX(1)[0], 1.0)
-    TS_ASSERT_EQUALS(ws->readX(1)[1], 1.5)
-    TS_ASSERT_EQUALS(ws->readY(0)[0], 0.5)
-    TS_ASSERT_EQUALS(ws->readY(1)[0], 2.0)
-    TS_ASSERT_EQUALS(ws->readE(0)[0], 0.5)
-    TS_ASSERT_EQUALS(ws->readE(1)[0], 2.0)
+    TS_ASSERT_EQUALS(ws->x(0)[0], 1.0)
+    TS_ASSERT_EQUALS(ws->x(0)[1], 3.0)
+    TS_ASSERT_EQUALS(ws->x(1)[0], 1.0)
+    TS_ASSERT_EQUALS(ws->x(1)[1], 1.5)
+    TS_ASSERT_EQUALS(ws->y(0)[0], 0.5)
+    TS_ASSERT_EQUALS(ws->y(1)[0], 2.0)
+    TS_ASSERT_EQUALS(ws->e(0)[0], 0.5)
+    TS_ASSERT_EQUALS(ws->e(1)[0], 2.0)
 
     // Now reverse the operation
     TS_ASSERT_THROWS_NOTHING(WorkspaceHelpers::makeDistribution(ws, false));
     TS_ASSERT(!ws->isDistribution());
-    TS_ASSERT_EQUALS(ws->readX(0)[0], 1.0)
-    TS_ASSERT_EQUALS(ws->readX(0)[1], 3.0)
-    TS_ASSERT_EQUALS(ws->readX(1)[0], 1.0)
-    TS_ASSERT_EQUALS(ws->readX(1)[1], 1.5)
-    TS_ASSERT_EQUALS(ws->readY(0)[0], 1.0)
-    TS_ASSERT_EQUALS(ws->readY(1)[0], 1.0)
-    TS_ASSERT_EQUALS(ws->readE(0)[0], 1.0)
-    TS_ASSERT_EQUALS(ws->readE(1)[0], 1.0)
+    TS_ASSERT_EQUALS(ws->x(0)[0], 1.0)
+    TS_ASSERT_EQUALS(ws->x(0)[1], 3.0)
+    TS_ASSERT_EQUALS(ws->x(1)[0], 1.0)
+    TS_ASSERT_EQUALS(ws->x(1)[1], 1.5)
+    TS_ASSERT_EQUALS(ws->y(0)[0], 1.0)
+    TS_ASSERT_EQUALS(ws->y(1)[0], 1.0)
+    TS_ASSERT_EQUALS(ws->e(0)[0], 1.0)
+    TS_ASSERT_EQUALS(ws->e(1)[0], 1.0)
 
     // Try and do it again - will do nothing
     TS_ASSERT_THROWS_NOTHING(WorkspaceHelpers::makeDistribution(ws, false));
     TS_ASSERT(!ws->isDistribution());
-    TS_ASSERT_EQUALS(ws->readX(0)[0], 1.0)
-    TS_ASSERT_EQUALS(ws->readX(0)[1], 3.0)
-    TS_ASSERT_EQUALS(ws->readX(1)[0], 1.0)
-    TS_ASSERT_EQUALS(ws->readX(1)[1], 1.5)
-    TS_ASSERT_EQUALS(ws->readY(0)[0], 1.0)
-    TS_ASSERT_EQUALS(ws->readY(1)[0], 1.0)
-    TS_ASSERT_EQUALS(ws->readE(0)[0], 1.0)
-    TS_ASSERT_EQUALS(ws->readE(1)[0], 1.0)
+    TS_ASSERT_EQUALS(ws->x(0)[0], 1.0)
+    TS_ASSERT_EQUALS(ws->x(0)[1], 3.0)
+    TS_ASSERT_EQUALS(ws->x(1)[0], 1.0)
+    TS_ASSERT_EQUALS(ws->x(1)[1], 1.5)
+    TS_ASSERT_EQUALS(ws->y(0)[0], 1.0)
+    TS_ASSERT_EQUALS(ws->y(1)[0], 1.0)
+    TS_ASSERT_EQUALS(ws->e(0)[0], 1.0)
+    TS_ASSERT_EQUALS(ws->e(1)[0], 1.0)
   }
 
   void test_makeDistribution_fails_for_point_data() {

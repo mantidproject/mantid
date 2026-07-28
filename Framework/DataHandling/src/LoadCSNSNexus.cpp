@@ -289,7 +289,7 @@ void LoadCSNSNexus::loadHistData(MatrixWorkspace_sptr &workspace, const std::vec
     it_err_start += (timeNums - 1);
     it_err_end += (timeNums - 1);
     auto toPass = Kernel::make_cow<HistogramData::HistogramX>(xRef);
-    workspace->setX(hist, toPass);
+    workspace->setSharedX(hist, toPass);
     ++hist;
   }
 }

@@ -466,10 +466,10 @@ class PawleyPattern1D(PawleyPatternBase):
     def eval_profile(self, params: np.ndarray[float]) -> np.ndarray[float]:
         self.set_free_params(params)
         self.update_profile_function()
-        return self.comp_func(self.ws.readX(self.ispec))
+        return self.comp_func(self.ws.x(self.ispec))
 
     def eval_resids(self, params: np.ndarray[float]) -> np.ndarray[float]:
-        return self.ws.readY(self.ispec) - self.eval_profile(params)
+        return self.ws.y(self.ispec) - self.eval_profile(params)
 
     def get_eval_workspace(self, **kwargs) -> Workspace2D:
         if "OutputWorkspace" not in kwargs:
@@ -495,7 +495,7 @@ class PawleyPattern1D(PawleyPatternBase):
 
     def estimate_initial_params(self) -> None:
         ws_eval = self.get_eval_workspace(StoreInADS=False)
-        ppval = np.polyfit(ws_eval.readY(1), ws_eval.readY(0), 1)
+        ppval = np.polyfit(ws_eval.y(1), ws_eval.y(0), 1)
         scale, bg = ppval
         for iphase in range(len(self.phases)):
             self.intens[iphase] = self.intens[iphase] * scale
@@ -522,7 +522,7 @@ class PawleyPattern1D(PawleyPatternBase):
         bg_func = self.comp_func[len(self.comp_func) - 1]
         self._set_func_params(bg_func, p)
         ws = EvaluateFunction(Function=bg_func, InputWorkspace=self.ws, WorkspaceIndex=self.ispec, StoreInADS=False, EnableLogging=False)
-        return ws.readY(1).copy()
+        return ws.y(1).copy()
 
     @staticmethod
     def _set_func_params(func: FunctionWrapper, p: np.ndarray[float]):
@@ -532,7 +532,7 @@ class PawleyPattern1D(PawleyPatternBase):
         # quadratic for negative residuals, scaled cauchy loss for positive (turnover to logarithmic at ~ 2 sigma)
         # note at x=0 cauchy loss has second-deriv == 2 (i.e. is quadratic)
         bg_calc = self._eval_bg_func(p)
-        resids = (self.ws.readY(self.ispec) - bg_calc) / self.ws.readE(self.ispec)
+        resids = (self.ws.y(self.ispec) - bg_calc) / self.ws.e(self.ispec)
         ipos = resids > 0
         resids[ipos] = np.sign(resids[ipos]) * 2 * np.sqrt(np.log(1 + (resids[ipos] / 2) ** 2))
         resids[~np.isfinite(resids)] = 0  # ignore empty bins
@@ -546,17 +546,17 @@ class Poldi2DEvalMixin:
     """
 
     def eval_2d(self, params: np.ndarray[float]) -> Workspace2D:
-        self.ws_1d.setY(0, self.eval_profile(params))
+        self.ws_1d.setSharedY(0, self.eval_profile(params))
         ws_sim = simulate_2d_data(self.ws, self.ws_1d, output_workspace=f"{self.ws.name()}_sim", lambda_max=self.lambda_max)
         if not self.global_scale:
             self.scales = np.zeros(self.ws.getNumberHistograms())
             self.bgs = np.zeros_like(self.scales)
             for ispec in range(self.ws.getNumberHistograms()):
-                yobs = self.ws.readY(ispec)
-                ycalc = ws_sim.readY(ispec)
+                yobs = self.ws.y(ispec)
+                ycalc = ws_sim.y(ispec)
                 ppval = np.polyfit(ycalc, yobs, 1)
                 self.scales[ispec], self.bgs[ispec] = ppval
-                ws_sim.setY(ispec, np.polyval(ppval, ycalc))
+                ws_sim.setSharedY(ispec, np.polyval(ppval, ycalc))
         return ws_sim
 
     def eval_resids(self, params: np.ndarray[float]) -> np.ndarray[float]:
@@ -565,7 +565,7 @@ class Poldi2DEvalMixin:
 
     def eval_profile(self, params: np.ndarray[float]) -> np.ndarray[float]:
         self.set_free_params(params)
-        return self.comp_func(self.ws_1d.readX(0))
+        return self.comp_func(self.ws_1d.x(0))
 
 
 class PawleyPattern2D(Poldi2DEvalMixin, PawleyPatternBase):
@@ -623,7 +623,7 @@ class PawleyPattern2D(Poldi2DEvalMixin, PawleyPatternBase):
     def eval_profile(self, params: np.ndarray[float]) -> np.ndarray[float]:
         self.set_free_params(params)
         self.update_profile_function()
-        return self.comp_func(self.ws_1d.readX(0))
+        return self.comp_func(self.ws_1d.x(0))
 
     def _estimate_intensities(self) -> None:
         # scale intensities

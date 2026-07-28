@@ -136,19 +136,19 @@ public:
   void testSetX() {
     double aNumber = 5.3;
     auto v = std::make_shared<HistogramData::HistogramX>(nbins + 1, LinearGenerator(aNumber, 1.0));
-    TS_ASSERT_THROWS_NOTHING(ws->setX(0, v));
+    TS_ASSERT_THROWS_NOTHING(ws->setSharedX(0, v));
     TS_ASSERT_EQUALS(ws->dataX(0)[0], aNumber);
-    TS_ASSERT_THROWS(ws->setX(-1, v), const std::range_error &);
-    TS_ASSERT_THROWS(ws->setX(nhist + 5, v), const std::range_error &);
+    TS_ASSERT_THROWS(ws->setSharedX(-1, v), const std::range_error &);
+    TS_ASSERT_THROWS(ws->setSharedX(nhist + 5, v), const std::range_error &);
   }
 
   void testSetX_cowptr() {
     double aNumber = 5.4;
     auto v = Kernel::make_cow<HistogramData::HistogramX>(nbins + 1, LinearGenerator(aNumber, 1.0));
-    TS_ASSERT_THROWS_NOTHING(ws->setX(0, v));
+    TS_ASSERT_THROWS_NOTHING(ws->setSharedX(0, v));
     TS_ASSERT_EQUALS(ws->dataX(0)[0], aNumber);
-    TS_ASSERT_THROWS(ws->setX(-1, v), const std::range_error &);
-    TS_ASSERT_THROWS(ws->setX(nhist + 5, v), const std::range_error &);
+    TS_ASSERT_THROWS(ws->setSharedX(-1, v), const std::range_error &);
+    TS_ASSERT_THROWS(ws->setSharedX(nhist + 5, v), const std::range_error &);
   }
 
   void testSetCounts_cowptr() {
@@ -229,11 +229,11 @@ public:
   }
 
   void testDataDx() {
-    TS_ASSERT_EQUALS(ws->readDx(0).size(), 5);
-    TS_ASSERT_EQUALS(ws->readDx(6)[3], 0.0);
+    TS_ASSERT_EQUALS(ws->dx(0).size(), 5);
+    TS_ASSERT_EQUALS(ws->dx(6)[3], 0.0);
 
     TS_ASSERT_THROWS_NOTHING(ws->dataDx(6)[3] = 9.9);
-    TS_ASSERT_EQUALS(ws->readDx(6)[3], 9.9);
+    TS_ASSERT_EQUALS(ws->dx(6)[3], 9.9);
   }
 
   void test_getMemorySizeForXAxes() {
@@ -241,7 +241,7 @@ public:
     // Here they are shared, so only 1 X axis
     TS_ASSERT_EQUALS(ws->getMemorySizeForXAxes(), 1 * (nbins + 1) * sizeof(double));
     for (int i = 0; i < nhist; i++) {
-      ws->dataX(i)[0] += 1; // This modifies the X axis in-place, creatign a copy of it.
+      ws->mutableX(i)[0] += 1; // This modifies the X axis in-place, creatign a copy of it.
     }
     // Now there is a different one for each
     TS_ASSERT_EQUALS(ws->getMemorySizeForXAxes(), nhist * (nbins + 1) * sizeof(double));

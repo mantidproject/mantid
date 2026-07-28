@@ -260,9 +260,9 @@ class RunBilbyReduction:
             if not external_mode:
                 print("Internal frame source. Binning range is taken from the sample scattering data.")
                 binning_wavelength_ini = (
-                    ws_sam.readX(0)[0],
-                    ws_sam.readX(0)[ws_sam.blocksize()] - ws_sam.readX(0)[0],
-                    ws_sam.readX(0)[ws_sam.blocksize()],
+                    ws_sam.x(0)[0],
+                    ws_sam.x(0)[ws_sam.blocksize()] - ws_sam.x(0)[0],
+                    ws_sam.x(0)[ws_sam.blocksize()],
                 )
                 binning_wavelength_transmission = binning_wavelength_ini
                 if wavelength_intervals:

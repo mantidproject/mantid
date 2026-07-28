@@ -96,9 +96,9 @@ class GlobalFitTest(MantidSystemTest):
             residuals = np.empty(0)
             for i in range(curves.size()):
                 curveset = curves[i]  # contains data, model, and residuals
-                dataY = curveset.dataY(0)
-                dataE = curveset.dataE(0)
-                modelY = curveset.dataY(1)
+                dataY = curveset.y(0)
+                dataE = curveset.e(0)
+                modelY = curveset.y(1)
                 residuals = np.append(residuals, ((dataY - modelY) / dataE) ** 2)  # don't trust residuals of curveset
             otherChi2 = residuals.sum() / len(residuals)
             self.assertLess(abs(otherChi2 - chi2) / chi2, 0.1)

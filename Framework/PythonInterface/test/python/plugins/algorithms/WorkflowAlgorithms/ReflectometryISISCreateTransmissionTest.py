@@ -139,7 +139,7 @@ class ReflectometryISISCreateTransmissionTest(unittest.TestCase):
 
     def _check_output_data(self, ws, expected_num_bins, expected_first_y, expected_last_y):
         self.assertEqual(ws.getNumberHistograms(), 1)
-        data_y = ws.readY(0)
+        data_y = ws.y(0)
         self.assertEqual(data_y.size, expected_num_bins)
         self.assertAlmostEqual(data_y[0], expected_first_y, places=12)
         self.assertAlmostEqual(data_y[-1], expected_last_y, places=12)
