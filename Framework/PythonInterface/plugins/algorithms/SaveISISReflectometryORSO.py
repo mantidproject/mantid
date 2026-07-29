@@ -25,7 +25,7 @@ from functools import wraps
 from pathlib import Path
 from typing import Optional, Tuple, Union, List
 import re
-from collections import OrderedDict
+from collections import defaultdict, OrderedDict
 from datetime import datetime
 import numpy as np
 import json
@@ -728,15 +728,18 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             )
 
         if self.getPropertyValue(Prop.META_SOURCE) == MetadataSourceOptions.HYBRID and not ws_issue:
-            check_dataset = self._create_and_sort_refl_datasets()[0]
-            missing_meta = check_dataset.get_missing_metadata_list()
             optional_metadata = self.getProperty(Prop.IGNORED_OPTIONAL_PROPS).value
-            for prop in missing_meta:
-                if self.getProperty(prop).isDefault and prop not in optional_metadata:
-                    issues[prop] = (
-                        f"Metadata could not be found in the workspace history. "
-                        f"Please provide some or add the property name to the '{Prop.IGNORED_OPTIONAL_PROPS}' list."
-                    )
+            missing_metadata_by_prop = defaultdict(list)
+            for check_dataset in self._create_and_sort_refl_datasets():
+                missing_meta = check_dataset.get_missing_metadata_list()
+                for prop in missing_meta:
+                    if self.getProperty(prop).isDefault and prop not in optional_metadata:
+                        missing_metadata_by_prop[prop].append(check_dataset.name)
+            for prop, dataset_names in missing_metadata_by_prop.items():
+                issues[prop] = (
+                    f"Metadata could not be found in the workspace history for dataset(s): {', '.join(dataset_names)}. "
+                    f"Please provide some or add the property name to the '{Prop.IGNORED_OPTIONAL_PROPS}' list."
+                )
         return issues
 
     def _validate_ws(self, ws_name: str) -> str:

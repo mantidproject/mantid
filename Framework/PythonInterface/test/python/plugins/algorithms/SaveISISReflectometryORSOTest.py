@@ -638,6 +638,21 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "CalibrationFile: Metadata could not be found"):
             self._run_save_alg(ws, **alg_kwargs)
 
+    @patch("plugins.algorithms.SaveISISReflectometryORSO.ReflectometryDatasetHistory._get_reduction_script")
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_hybrid_source_checks_each_top_level_workspace_for_missing_metadata(self, mock_alg_histories, mock_reduction_script):
+        mock_reduction_script.return_value = None
+        self._create_sample_workspace(instrument_name="INTER", ws_name="ws_1")
+        self._create_sample_workspace(instrument_name="INTER", ws_name="ws_2")
+
+        complete_history = self._create_hybrid_validation_history(calibration_file="calib.nxs")
+        incomplete_history = self._create_hybrid_validation_history(calibration_file="")
+        mock_alg_histories.side_effect = [complete_history, complete_history, incomplete_history, incomplete_history]
+
+        alg_kwargs = {"MetadataSource": "HistoryWherePossible"}
+        with self.assertRaisesRegex(RuntimeError, "CalibrationFile: Metadata could not be found.*ws_2"):
+            self._run_save_alg(["ws_1", "ws_2"], **alg_kwargs)
+
     def _create_sample_workspace(self, rb_num_log_name=_LOG_RB_NUMBER, instrument_name="", ws_name="ws"):
         # Create a single spectrum workspace in units of momentum transfer
         ws = CreateSampleWorkspace(
@@ -720,6 +735,20 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         else:
             red_history = self._create_mock_alg_history(self._REDUCTION_ALG, {}, [rro_history])
         mock_alg_histories.return_value = [red_history]
+
+    def _create_hybrid_validation_history(self, calibration_file):
+        red_history = self._create_mock_alg_history(self._REDUCTION_ALG, {}, [])
+        workflow_history = self._create_mock_alg_history(
+            self._REDUCTION_WORKFLOW_ALG,
+            {
+                "FirstTransmissionRunList": "13463",
+                "SecondTransmissionRunList": "13464",
+                "FloodWorkspace": "flood_ws",
+                "CalibrationFile": calibration_file,
+            },
+            [red_history],
+        )
+        return [workflow_history]
 
     def _check_file_contents(self, header_values_to_check, ws, resolution, excluded_header_values=None):
         self._check_file_header(header_values_to_check, excluded_header_values)
