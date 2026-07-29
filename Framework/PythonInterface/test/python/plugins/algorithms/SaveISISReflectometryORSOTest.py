@@ -604,7 +604,11 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         alg_kwargs = {"MetadataSource": "Manual"}
         self._run_save_alg(ws, **alg_kwargs)
 
-        blank_entries = [f"{self._REDUCTION_TIMESTAMP_HEADING} ''", f"{self._DATA_FILES_HEADING} []"]
+        blank_entries = [
+            self._get_dataset_name_entry(ws.name()),
+            f"{self._REDUCTION_TIMESTAMP_HEADING} ''",
+            f"{self._DATA_FILES_HEADING} []",
+        ]
         absent_entries = [f"{self._REDUCTION_CALL_HEADING} ''"]
 
         self._check_file_header(included_header_values=blank_entries, excluded_header_values=absent_entries)
@@ -615,11 +619,12 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         alg_kwargs = {
             "MetadataSource": "Manual",
             "ReductionTimestamp": str(timestamp.isoformat()),
-            "DatasetSpecificMetadata": f'{{ "{ws.name()}" : {{ "reduction-call" : "example():" }} }}',
+            "DatasetSpecificMetadata": f'{{ "{ws.name()}" : {{ "dataset-name" : "manual-name", "reduction-call" : "example():" }} }}',
         }
         self._run_save_alg(ws, **alg_kwargs)
 
         expected_manual_entries = [
+            self._get_dataset_name_entry("manual-name"),
             f"{self._REDUCTION_CALL_HEADING} 'example():'",
             f"{self._REDUCTION_TIMESTAMP_HEADING} {str(timestamp.isoformat())}",
             f"{self._DATA_FILES_HEADING} []",

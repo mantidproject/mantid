@@ -255,6 +255,10 @@ class ReflectometryDatasetBase:
 
 
 class ReflectometryDatasetManual(ReflectometryDatasetBase):
+    def __init__(self, ws, is_ws_grp_member: bool):
+        super(ReflectometryDatasetManual, self).__init__(ws, is_ws_grp_member)
+        self._name = ws.name()
+
     def _read_only(self) -> bool:
         return False
 
