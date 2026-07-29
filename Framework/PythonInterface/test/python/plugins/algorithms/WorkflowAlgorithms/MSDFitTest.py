@@ -45,8 +45,8 @@ class MSDFitTest(unittest.TestCase):
         self.assertEqual(fit_ws.getNumberOfEntries(), 5)
 
         # Validate MSD property workspaces
-        self.assertEqual(len(msd_ws.readX(0)), 5)
-        self.assertEqual(len(msd_ws.readX(1)), 5)
+        self.assertEqual(len(msd_ws.x(0)), 5)
+        self.assertEqual(len(msd_ws.x(1)), 5)
 
     def test_basic_run(self):
         """

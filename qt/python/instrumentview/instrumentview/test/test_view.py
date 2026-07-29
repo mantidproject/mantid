@@ -3,7 +3,7 @@
 # Copyright &copy; 2025 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
-# SPDX - License - Identifier: GPL - 3.0 +
+# SPDX - License - Identifier: GPL-3.0+
 import unittest
 from unittest import mock
 from unittest.mock import MagicMock
@@ -12,7 +12,7 @@ import numpy as np
 from qtpy.QtCore import Qt
 from mantidqt.utils.qt.testing import start_qapplication
 from mantid.simpleapi import CreateSampleWorkspace
-from instrumentview.FullInstrumentViewWindow import FullInstrumentViewWindow
+from instrumentview.FullInstrumentViewWindow import FullInstrumentViewView, _LIGHT_GREY
 from instrumentview.ShapeWidgets import (
     AnnulusSelectionShape,
     CircleSelectionShape,
@@ -23,7 +23,7 @@ from instrumentview.ShapeWidgets import (
 
 
 @start_qapplication
-class TestFullInstrumentViewWindow(unittest.TestCase):
+class TestFullInstrumentViewView(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls._workspace = CreateSampleWorkspace(StoreInADS=False)
@@ -35,7 +35,7 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
     @mock.patch("instrumentview.FullInstrumentViewWindow.BackgroundPlotter")
     def setUp(self, mock_plotter, mock_splitter_add_widget, mock_v_add_widget, mock_h_add_widget, mock_figure_canvas) -> None:
         with mock.patch("mantidqt.utils.qt.qappthreadcall.force_method_calls_to_qapp_thread"):
-            self._view = FullInstrumentViewWindow()
+            self._view = FullInstrumentViewView()
         self._mock_plotter = mock_plotter
         self._mock_splitter_add_widget = mock_splitter_add_widget
         self._mock_v_add_widget = mock_v_add_widget
@@ -58,21 +58,20 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
     def test_figure_canvas_created(self):
         self._mock_figure_canvas.assert_called_once()
 
+    def test_hover_pick_button_is_checkable(self):
+        self.assertTrue(self._view._hover_pick.isCheckable())
+
+    def test_shape_selector_initialised(self):
+        self.assertEqual(
+            [self._view._shape_selector_combo_box.itemText(i) for i in range(self._view._shape_selector_combo_box.count())],
+            ["Circle", "Rectangle", "Ellipse", "Annulus", "Hollow Rectangle"],
+        )
+        self.assertTrue(self._view._add_shape_button.isCheckable())
+        self.assertEqual(self._view._add_shape_button.text(), "Add Shape")
+
     def test_update_scalar_range(self):
         self._view.set_plotter_scalar_bar_range((0, 100), "label")
         self._view.main_plotter.update_scalar_bar_range.assert_has_calls([mock.call((0, 100), "label")])
-
-    @mock.patch("qtpy.QtWidgets.QMainWindow.closeEvent")
-    def test_close_event(self, mock_close_event):
-        self._view.closeEvent(MagicMock())
-        self.assertEqual(1, mock_close_event.call_count)
-        self._view.main_plotter.close.assert_called_once()
-
-    @mock.patch("qtpy.QtWidgets.QMainWindow.closeEvent")
-    def test_close_no_presenter(self, mock_close_event):
-        self._view._presenter = None
-        self._view.closeEvent(MagicMock())
-        self._view.main_plotter.close.assert_called_once()
 
     def test_add_simple_shape(self):
         self._view.main_plotter.reset_mock()
@@ -90,18 +89,14 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
             mock_mesh, scalars=mock_scalars, rgba=True, pickable=False, render_points_as_spheres=True, point_size=10
         )
 
-    @mock.patch("instrumentview.FullInstrumentViewWindow.QListWidgetItem")
-    def test_refresh_peaks_ws_list(self, mock_qlist_widget_item):
+    def test_refresh_peaks_ws_list(self):
         mock_list = MagicMock()
-        mock_item = MagicMock()
-        mock_item.text.return_value = "existing_ws"
-        mock_list.item.return_value = mock_item
-        mock_list.count.return_value = 1
         self._view._peak_ws_list = mock_list
         self._view._presenter.peaks_workspaces_in_ads.return_value = ["existing_ws", "new_ws"]
+
         self._view.refresh_peaks_ws_list()
-        # Only the new workspace should trigger QListWidgetItem creation
-        mock_qlist_widget_item.assert_called_once()
+
+        mock_list.refresh_items.assert_called_once_with(["existing_ws", "new_ws"], colours=self._view._COLOURS)
 
     def test_clear_overlay_meshes(self):
         mock_meshes = (MagicMock(), MagicMock())
@@ -155,46 +150,56 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
 
     def test_add_rectangular_widget(self) -> None:
         self._view.add_rectangular_widget()
-        self.assertIsInstance(self._view._current_widget, RectangleSelectionShape)
         self.assertIsNotNone(self._view._shape_overlay_manager)
-        self.assertIs(self._view._shape_overlay_manager.current_shape, self._view._current_widget)
+        self.assertIsInstance(self._view._shape_overlay_manager.current_shape, RectangleSelectionShape)
 
     def test_add_circle_widget(self) -> None:
         self._view.add_circle_widget()
-        self.assertIsInstance(self._view._current_widget, CircleSelectionShape)
         self.assertIsNotNone(self._view._shape_overlay_manager)
-        self.assertIs(self._view._shape_overlay_manager.current_shape, self._view._current_widget)
+        self.assertIsInstance(self._view._shape_overlay_manager.current_shape, CircleSelectionShape)
 
     def test_add_ellipse_widget(self) -> None:
         self._view.add_ellipse_widget()
-        self.assertIsInstance(self._view._current_widget, EllipseSelectionShape)
         self.assertIsNotNone(self._view._shape_overlay_manager)
-        self.assertIs(self._view._shape_overlay_manager.current_shape, self._view._current_widget)
+        self.assertIsInstance(self._view._shape_overlay_manager.current_shape, EllipseSelectionShape)
 
     def test_add_annulus_widget(self) -> None:
         self._view.add_annulus_widget()
-        self.assertIsInstance(self._view._current_widget, AnnulusSelectionShape)
         self.assertIsNotNone(self._view._shape_overlay_manager)
-        self.assertIs(self._view._shape_overlay_manager.current_shape, self._view._current_widget)
+        self.assertIsInstance(self._view._shape_overlay_manager.current_shape, AnnulusSelectionShape)
 
     def test_add_hollow_rectangle_widget(self) -> None:
         self._view.add_hollow_rectangle_widget()
-        self.assertIsInstance(self._view._current_widget, HollowRectangleSelectionShape)
         self.assertIsNotNone(self._view._shape_overlay_manager)
-        self.assertIs(self._view._shape_overlay_manager.current_shape, self._view._current_widget)
+        self.assertIsInstance(self._view._shape_overlay_manager.current_shape, HollowRectangleSelectionShape)
+
+    def test_add_selected_shape_uses_dropdown_choice(self) -> None:
+        self._view._shape_selector_combo_box.setCurrentText("Ellipse")
+        self._view.add_selected_shape(True)
+        self.assertIsNotNone(self._view._shape_overlay_manager)
+        self.assertIsInstance(self._view._shape_overlay_manager.current_shape, EllipseSelectionShape)
+
+    def test_unchecking_add_shape_button_clears_current_widget(self) -> None:
+        self._view._add_shape_button.setChecked(True)
+        self._view.add_circle_widget()
+        self.assertIsNotNone(self._view._shape_overlay_manager)
+        self.assertIsNotNone(self._view._shape_overlay_manager.current_shape)
+        self._view.add_selected_shape(False)
+        self.assertIsNone(self._view._shape_overlay_manager)
 
     def test_delete_current_widget(self) -> None:
         self._view.add_circle_widget()
-        self.assertIsNotNone(self._view._current_widget)
-        self._view.delete_current_widget()
-        self.assertIsNone(self._view._current_widget)
+        self.assertIsNotNone(self._view._shape_overlay_manager)
+        self._view.delete_current_overlaid_shape()
         self.assertIsNone(self._view._shape_overlay_manager)
 
     @mock.patch("instrumentview.FullInstrumentViewWindow.ConfigService")
-    def test_store_draw_shapes_option_stores_yes_when_checked(self, mock_config):
-        self._view._show_shapes_check_box.setChecked(True)
-        self._view.store_draw_shapes_option()
-        mock_config.Instance.return_value.__setitem__.assert_called_once_with(self._view._DRAW_SHAPES_SETTING_STRING, "Yes")
+    def test_store_render_mode_option_stores_current_text(self, mock_config):
+        self._view._render_mode_combo_box.setCurrentText(self._view._RENDER_MODE_RAW_SHAPES)
+        self._view.store_render_mode_option()
+        mock_config.Instance.return_value.__setitem__.assert_called_once_with(
+            self._view._RENDER_MODE_SETTING_STRING, self._view._RENDER_MODE_RAW_SHAPES
+        )
 
     def test_on_axes_click_left_calls_presenter_with_left(self):
         event = MagicMock()
@@ -205,10 +210,9 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
         self._view._presenter.on_peak_selected_in_lineplot.assert_called_once_with(5.0, "left")
 
     @mock.patch("instrumentview.FullInstrumentViewWindow.ConfigService")
-    def test_store_draw_shapes_option_stores_no_when_unchecked(self, mock_config):
-        self._view._show_shapes_check_box.setChecked(False)
-        self._view.store_draw_shapes_option()
-        mock_config.Instance.return_value.__setitem__.assert_called_once_with(self._view._DRAW_SHAPES_SETTING_STRING, "No")
+    def test_get_render_mode_option_returns_current_text(self, mock_config):
+        self._view._render_mode_combo_box.setCurrentText(self._view._RENDER_MODE_POINTS)
+        self.assertEqual(self._view.get_render_mode_option(), self._view._RENDER_MODE_POINTS)
 
     @mock.patch("instrumentview.FullInstrumentViewWindow.FigureCanvas")
     @mock.patch("qtpy.QtWidgets.QHBoxLayout.addWidget")
@@ -216,13 +220,13 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
     @mock.patch("qtpy.QtWidgets.QSplitter.addWidget")
     @mock.patch("instrumentview.FullInstrumentViewWindow.BackgroundPlotter")
     @mock.patch("instrumentview.FullInstrumentViewWindow.ConfigService")
-    def test_draw_shapes_checkbox_initialised_checked_when_config_is_yes(
+    def test_render_mode_combo_initialised_to_points_when_config_not_recognised(
         self, mock_config, mock_plotter, mock_splitter, mock_v_layout, mock_h_layout, mock_canvas
     ):
-        mock_config.Instance.return_value.__getitem__.return_value = "Yes"
+        mock_config.Instance.return_value.__getitem__.return_value = "UnknownValue"
         with mock.patch("mantidqt.utils.qt.qappthreadcall.force_method_calls_to_qapp_thread"):
-            view = FullInstrumentViewWindow()
-        self.assertTrue(view.is_show_shapes_checkbox_checked())
+            view = FullInstrumentViewView()
+        self.assertEqual(view.get_render_mode_option(), view._RENDER_MODE_POINTS)
 
     @mock.patch("instrumentview.FullInstrumentViewWindow.FigureCanvas")
     @mock.patch("qtpy.QtWidgets.QHBoxLayout.addWidget")
@@ -230,13 +234,27 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
     @mock.patch("qtpy.QtWidgets.QSplitter.addWidget")
     @mock.patch("instrumentview.FullInstrumentViewWindow.BackgroundPlotter")
     @mock.patch("instrumentview.FullInstrumentViewWindow.ConfigService")
-    def test_draw_shapes_checkbox_initialised_unchecked_when_config_is_no(
+    def test_render_mode_combo_initialised_to_full_shapes_when_config_is_full_shapes(
         self, mock_config, mock_plotter, mock_splitter, mock_v_layout, mock_h_layout, mock_canvas
     ):
-        mock_config.Instance.return_value.__getitem__.return_value = "No"
+        mock_config.Instance.return_value.__getitem__.return_value = self._view._RENDER_MODE_RAW_SHAPES
         with mock.patch("mantidqt.utils.qt.qappthreadcall.force_method_calls_to_qapp_thread"):
-            view = FullInstrumentViewWindow()
-        self.assertFalse(view.is_show_shapes_checkbox_checked())
+            view = FullInstrumentViewView()
+        self.assertEqual(view.get_render_mode_option(), self._view._RENDER_MODE_RAW_SHAPES)
+
+    @mock.patch("instrumentview.FullInstrumentViewWindow.FigureCanvas")
+    @mock.patch("qtpy.QtWidgets.QHBoxLayout.addWidget")
+    @mock.patch("qtpy.QtWidgets.QVBoxLayout.addWidget")
+    @mock.patch("qtpy.QtWidgets.QSplitter.addWidget")
+    @mock.patch("instrumentview.FullInstrumentViewWindow.BackgroundPlotter")
+    @mock.patch("instrumentview.FullInstrumentViewWindow.ConfigService")
+    def test_render_mode_combo_initialised_to_shapes_fast_when_config_is_shapes_fast(
+        self, mock_config, mock_plotter, mock_splitter, mock_v_layout, mock_h_layout, mock_canvas
+    ):
+        mock_config.Instance.return_value.__getitem__.return_value = self._view._RENDER_MODE_SHAPES_FAST
+        with mock.patch("mantidqt.utils.qt.qappthreadcall.force_method_calls_to_qapp_thread"):
+            view = FullInstrumentViewView()
+        self.assertEqual(view.get_render_mode_option(), self._view._RENDER_MODE_SHAPES_FAST)
 
     def test_on_axes_click_right_calls_presenter_with_right(self):
         event = MagicMock()
@@ -300,6 +318,30 @@ class TestFullInstrumentViewWindow(unittest.TestCase):
         det.detector_id = 42
         self._view._set_detector_edit_text(mock_edit, [det], lambda d: str(d.detector_id))
         mock_edit.setPlainText.assert_called_once_with("42")
+
+    def test_on_show_monitors_toggled_sets_presenter_color_when_checked(self):
+        self._view._presenter.monitor_colour = (230, 55, 55)
+        with mock.patch.object(self._view._show_monitors_check_box, "set_colour") as mock_set_colour:
+            self._view._on_show_monitors_toggled(True)
+        mock_set_colour.assert_called_once_with((230, 55, 55))
+
+    def test_on_show_monitors_toggled_uses_grey_when_unchecked(self):
+        self._view._presenter.monitor_colour = (230, 55, 55)
+        with mock.patch.object(self._view._show_monitors_check_box, "set_colour") as mock_set_colour:
+            self._view._on_show_monitors_toggled(False)
+        mock_set_colour.assert_called_once_with(_LIGHT_GREY)
+
+    def test_on_show_sample_position_toggled_sets_presenter_color_when_checked(self):
+        self._view._presenter.sample_position_colour = (70, 160, 70)
+        with mock.patch.object(self._view._show_sample_position_check_box, "set_colour") as mock_set_colour:
+            self._view._on_show_sample_position_toggled(True)
+        mock_set_colour.assert_called_once_with((70, 160, 70))
+
+    def test_on_show_sample_position_toggled_uses_grey_when_unchecked(self):
+        self._view._presenter.sample_position_colour = (70, 160, 70)
+        with mock.patch.object(self._view._show_sample_position_check_box, "set_colour") as mock_set_colour:
+            self._view._on_show_sample_position_toggled(False)
+        mock_set_colour.assert_called_once_with(_LIGHT_GREY)
 
 
 if __name__ == "__main__":

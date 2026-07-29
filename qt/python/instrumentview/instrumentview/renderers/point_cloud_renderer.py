@@ -24,6 +24,11 @@ class PointCloudRenderer(InstrumentRenderer):
     _DETECTOR_POINT_SIZE = 15
     _PICKABLE_POINT_SIZE = 30
     _MASKED_COLOUR = (0.25, 0.25, 0.25)
+    _DEFAULT_PICKING_TOLERANCE = 0.01
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._picking_tolerance = self._DEFAULT_PICKING_TOLERANCE
 
     # ------------------------------------------------------------------ build
     def build_detector_mesh(self, positions: np.ndarray, flip_beam: bool, model=None) -> pv.PolyData:
@@ -82,32 +87,26 @@ class PointCloudRenderer(InstrumentRenderer):
         )
 
     # --------------------------------------------------------------- picking
-    def enable_picking(self, plotter: BackgroundPlotter, callback: Callable[[int], None]) -> None:
+    def get_callback_tied_to_detector_index(
+        self, plotter: BackgroundPlotter, callback: Callable[[int], None], hover: bool = False
+    ) -> Callable:
         """Set up left-click point picking.  *callback* receives ``(detector_index: int)``."""
-        plotter.disable_picking()
 
         if plotter.off_screen:
-            return
+            return lambda _obj, _event: None
 
-        picking_tolerance = 0.01
         picker = vtkPointPicker()
-        picker.SetTolerance(picking_tolerance)
-        interactor = plotter.iren
+        picker.SetTolerance(self._effective_picking_tolerance(hover))
 
-        def _on_left_button_press(obj, event):
-            """Handle left mouse button press for picking."""
-            # Get the current mouse position from the interactor
-            x, y = interactor.get_event_position()
-            # Perform the pick operation
+        def _on_pick(_obj, _event):
+            x, y = plotter.iren.get_event_position()
             pick_result = picker.Pick(x, y, 0, plotter.renderer)
             if pick_result > 0:
-                # Get the picked point ID
                 point_id = picker.GetPointId()
                 if point_id >= 0:
                     callback(point_id)
 
-        # Register callback for left button press
-        plotter.iren.style.AddObserver("LeftButtonPressEvent", _on_left_button_press)
+        return _on_pick
 
     # -------------------------------------------------------------- scalars
     def set_detector_scalars(self, mesh: pv.PolyData, counts: np.ndarray, label: str) -> None:

@@ -36,8 +36,8 @@ class POLDIAutoCorrelationTest(systemtesting.MantidSystemTest):
         for dataFile in filenames:
             workspaceNameTemplate = "Comparison_%s" % (dataFile)
 
-            referenceData = mtd["%s_reference" % (dataFile)].dataY(0)
-            calculatedData = mtd["%sCorr" % (dataFile)].dataY(0)
+            referenceData = mtd["%s_reference" % (dataFile)].y(0)
+            calculatedData = mtd["%sCorr" % (dataFile)].y(0)
 
             self.assertEqual(
                 calculatedData.shape[0],
@@ -77,7 +77,7 @@ class POLDIAutoCorrelationTest(systemtesting.MantidSystemTest):
                 "Relative error of intercept is too large for %s (is: %d)" % (dataFile, relativeInterceptError),
             )
 
-            residuals = mtd[fitNameTemplate + "_Workspace"].dataY(2)
+            residuals = mtd[fitNameTemplate + "_Workspace"].y(2)
             maxAbsoluteResidual = np.max(np.abs(residuals))
             self.assertLessThan(
                 maxAbsoluteResidual, 1.0, "Maximum absolute residual is too large for %s (is: %d)" % (dataFile, maxAbsoluteResidual)

@@ -449,8 +449,8 @@ class FilterSetupWidget(BaseWidget):
 
     def logvalue_vs_time_distribution(self, workspace, callback):
         """Plot"""
-        xmin = workspace.dataX(0)[0]
-        xmax = workspace.dataX(0)[-1]
+        xmin = workspace.x(0)[0]
+        xmax = workspace.x(0)[-1]
         if callback is not None:
             from LargeScaleStructures import data_stitching  # TODO make this qt4/5 compatible
 

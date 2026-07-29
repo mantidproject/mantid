@@ -85,7 +85,7 @@ class EQSANSFlatTest(systemtesting.MantidSystemTest):
         Reduce1D()
         # This reference is old, ignore the first non-zero point and
         # give the comparison a reasonable tolerance (less than 0.5%).
-        mtd["EQSANS_5729_event_frame1_Iq"].dataY(0)[1] = 856.30028119108
+        mtd["EQSANS_5729_event_frame1_Iq"].mutableY(0)[1] = 856.30028119108
 
     def validate(self):
         self.tolerance = 5.0

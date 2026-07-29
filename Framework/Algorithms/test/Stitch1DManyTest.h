@@ -24,6 +24,7 @@
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/Points.h"
 #include "MantidKernel/UnitFactory.h"
+#include <limits>
 #include <math.h>
 
 using namespace Mantid::API;
@@ -72,12 +73,12 @@ private:
 
     if (!runAlg) {
       ws = WorkspaceFactory::Instance().create("Workspace2D", 2, nbins + 1, nbins);
-      ws->dataX(0) = xData1;
-      ws->dataX(1) = xData2;
-      ws->dataY(0) = yData1;
-      ws->dataY(1) = yData2;
-      ws->dataE(0) = eData1;
-      ws->dataE(1) = eData2;
+      ws->mutableX(0) = xData1;
+      ws->mutableX(1) = xData2;
+      ws->mutableY(0) = yData1;
+      ws->mutableY(1) = yData2;
+      ws->mutableE(0) = eData1;
+      ws->mutableE(1) = eData2;
       ws->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
     } else {
       // Concatenate data vectors into one vector
@@ -370,6 +371,60 @@ public:
     // In ADS: ws1, ws2
     TS_ASSERT_EQUALS(wsInADS.size(), 2)
     // Remove workspaces from ADS
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_default_stitching_reinserts_invalid_y_values() {
+    createUniformWorkspace(0.1, 0.1, 1., 2., "ws1");
+    createUniformWorkspace(0.8, 0.1, 1., 2., "ws2");
+    auto ws1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("ws1");
+    ws1->mutableY(0)[8] = std::numeric_limits<double>::quiet_NaN();
+
+    Stitch1DMany alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspaces", "ws1, ws2");
+    alg.setProperty("Params", "0.1, 0.1, 1.8");
+    alg.setProperty("StartOverlaps", "0.8");
+    alg.setProperty("EndOverlaps", "1.1");
+    alg.setProperty("UseManualScaleFactors", true);
+    alg.setProperty("ManualScaleFactors", "1.0");
+    alg.setProperty("OutputWorkspace", "outws");
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
+
+    Workspace_sptr outws = alg.getProperty("OutputWorkspace");
+    auto stitched = std::dynamic_pointer_cast<MatrixWorkspace>(outws);
+    TS_ASSERT(std::isnan(stitched->y(0)[8]));
+
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_use_valid_data_only_uses_valid_overlap_y_values() {
+    createUniformWorkspace(0.1, 0.1, 1., 2., "ws1");
+    createUniformWorkspace(0.8, 0.1, 1., 2., "ws2");
+    auto ws1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("ws1");
+    ws1->mutableY(0)[8] = std::numeric_limits<double>::quiet_NaN();
+
+    Stitch1DMany alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspaces", "ws1, ws2");
+    alg.setProperty("Params", "0.1, 0.1, 1.8");
+    alg.setProperty("StartOverlaps", "0.8");
+    alg.setProperty("EndOverlaps", "1.1");
+    alg.setProperty("UseManualScaleFactors", true);
+    alg.setProperty("ManualScaleFactors", "1.0");
+    alg.setProperty("UseValidDataOnly", true);
+    alg.setProperty("OutputWorkspace", "outws");
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
+
+    Workspace_sptr outws = alg.getProperty("OutputWorkspace");
+    auto stitched = std::dynamic_pointer_cast<MatrixWorkspace>(outws);
+    TS_ASSERT(!std::isnan(stitched->y(0)[8]));
+    TS_ASSERT_DELTA(stitched->y(0)[8], 1., 0.00001);
+
     AnalysisDataService::Instance().clear();
   }
 

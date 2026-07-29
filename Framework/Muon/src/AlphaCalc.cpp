@@ -103,7 +103,7 @@ void AlphaCalc::exec() {
   integr->execute();
   API::MatrixWorkspace_sptr out = integr->getProperty("OutputWorkspace");
 
-  double sumForward = out->readY(0)[0];
+  double sumForward = out->y(0)[0];
 
   if (sumForward < 0) {
     g_log.error() << "Sum of forward detector counts is negative."
@@ -124,7 +124,7 @@ void AlphaCalc::exec() {
   integrB->execute();
   out = integrB->getProperty("OutputWorkspace");
 
-  double sumBackward = out->readY(0)[0];
+  double sumBackward = out->y(0)[0];
 
   if (sumBackward <= 0) {
     g_log.error() << "Sum of backward detector counts is negative or zero."

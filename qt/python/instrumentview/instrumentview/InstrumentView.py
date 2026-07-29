@@ -38,7 +38,7 @@ class InstrumentView:
 
         model = FullInstrumentViewModel(ws)
         window = FullInstrumentViewWindow()
-        FullInstrumentViewPresenter(window, model)
+        FullInstrumentViewPresenter(window.get_instrument_view_widget(), model)
         current_dir = os.path.dirname(__file__)
         app.setWindowIcon(QIcon(f"{current_dir}/mantidplot.png"))
         window.show()

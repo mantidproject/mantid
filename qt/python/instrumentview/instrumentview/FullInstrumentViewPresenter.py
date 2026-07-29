@@ -3,11 +3,11 @@
 # Copyright &copy; 2025 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
-# SPDX - License - Identifier: GPL - 3.0 +
+# SPDX - License - Identifier: GPL-3.0+
 import numpy as np
 import pyvista as pv
 from queue import Queue
-from typing import Literal, Optional
+from typing import Literal, Optional, cast
 from instrumentview.Globals import CurrentTab
 from threading import Thread
 
@@ -17,7 +17,7 @@ from mantid.simpleapi import AnalysisDataService
 from mantid.dataobjects import MaskWorkspace, GroupingWorkspace, PeaksWorkspace
 
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
-from instrumentview.FullInstrumentViewWindow import FullInstrumentViewWindow
+from instrumentview.FullInstrumentViewWindow import FullInstrumentViewView
 from instrumentview.InstrumentViewADSObserver import InstrumentViewADSObserver
 from instrumentview.ComponentTreeModel import ComponentTreeModel
 from instrumentview.ComponentTreePresenter import ComponentTreePresenter
@@ -25,6 +25,8 @@ from instrumentview.Projections.ProjectionType import ProjectionType
 from instrumentview.renderers.point_cloud_renderer import PointCloudRenderer
 from instrumentview.renderers.shape_renderer import ShapeRenderer
 from instrumentview.renderers.side_by_side_shape_renderer import SideBySideShapeRenderer
+
+from instrumentview.InteractorStyles import InteractorStyles
 
 from vtkmodules.vtkRenderingCore import vtkCoordinate
 
@@ -57,7 +59,7 @@ class FullInstrumentViewPresenter:
     _XML_FILE_FILTER = "XML files (*xml)"
     _CAL_FILE_FILTER = "CAL files (*cal)"
 
-    def __init__(self, view: FullInstrumentViewWindow, model: FullInstrumentViewModel):
+    def __init__(self, view: FullInstrumentViewView, model: FullInstrumentViewModel):
         """For the given workspace, use the data from the model to plot the detectors. Also include points at the origin and
         any monitors."""
         self._view = view
@@ -67,17 +69,26 @@ class FullInstrumentViewPresenter:
         self._counts_label = "Integrated Counts"
         self._visible_label = "Visible Picked"
         self._count_scale_mode = self._LINEAR
+        self._detector_mesh: Optional[pv.PolyData] = None
+        self._pickable_mesh: Optional[pv.PolyData] = None
+        self._masked_mesh: Optional[pv.PolyData] = None
         self._model.setup()
         self._point_cloud_renderer = PointCloudRenderer()
         self._shape_renderer = ShapeRenderer(self._model.workspace)
+        self._shape_renderer_full = ShapeRenderer(self._model.workspace, use_optimised_shapes=False)
         self._sbs_shape_renderer = SideBySideShapeRenderer(self._model.workspace)
-        self._renderer = self._shape_renderer if view.is_show_shapes_checkbox_checked() else self._point_cloud_renderer
+        self._sbs_shape_renderer_full = SideBySideShapeRenderer(self._model.workspace, use_optimised_shapes=False)
+        self._renderer = self._get_renderer_for_mode(view.get_render_mode_option())
+        self._interactor_styles = InteractorStyles(self._view.main_plotter, picking_callback=lambda: None, hover_callback=lambda: None)
+        self._last_hovered_point_index: Optional[int] = None
         self._select_bank_tube = False
-        self.setup()
         self._callback_queue = Queue()
         self._callback_stop_sentinel = object()
         self._callback_thread = Thread(None, self._callback_worker, daemon=True)
         self._callback_thread.start()
+        self.monitor_colour = (230, 55, 55)
+        self.sample_position_colour = (70, 160, 70)
+        self.setup()
 
     def _callback_worker(self):
         while True:
@@ -96,7 +107,8 @@ class FullInstrumentViewPresenter:
 
     def setup(self):
         self._view.subscribe_presenter(self)
-        self._view.set_projection_combo_options(*self._model.get_default_projection_index_and_options())
+        self._view.set_projection_combo_options(self._model.get_projection_options())
+        self._view.set_default_projection(self._model.get_default_projection())
         self._view.setup_connections_to_presenter()
         self._view.set_contour_range_limits(self._model.counts_limits)
         self._view.set_integration_range_limits(self._model.integration_limits)
@@ -112,7 +124,7 @@ class FullInstrumentViewPresenter:
         )
         self._view.hide_status_box()
         self._select_bank_tube = self._view.is_select_bank_tube_checked()
-        self.update_plotter()
+        self.update_plotter(False)
 
         if self._model.workspace_base_unit in self._UNIT_OPTIONS:
             self._view.set_unit_combo_box_index(self._UNIT_OPTIONS.index(self._model.workspace_base_unit))
@@ -127,10 +139,26 @@ class FullInstrumentViewPresenter:
     def _create_and_add_monitor_mesh(self) -> Optional[pv.PolyData]:
         if len(self._model.monitor_positions) == 0 or not self._view.is_show_monitors_checkbox_checked():
             return None
-        monitor_point_cloud = self.create_poly_data_mesh(self._model.monitor_positions)
-        monitor_point_cloud["colours"] = self.generate_single_colour(len(self._model.monitor_positions), 1, 0, 0, 1)
-        self._view.add_rgba_mesh(monitor_point_cloud, scalars="colours")
-        return monitor_point_cloud
+        return self._create_and_add_component_point_mesh(np.array(self._model.monitor_positions), self.monitor_colour)
+
+    def _create_and_add_sample_mesh(self) -> Optional[pv.PolyData]:
+        if self._model.sample_position is None or not self._view.is_show_sample_position_checkbox_checked():
+            return None
+        if self._model.sample_shape is not None:
+            n = len(self._model.sample_shape)
+            vertices = self._model.sample_shape.reshape(-1, 3)
+            faces = np.c_[np.full(n, 3, dtype=int), np.arange(n * 3).reshape(n, 3)]
+            sample_shape_mesh = pv.PolyData(vertices, faces)
+            sample_shape_mesh["colours"] = self.generate_single_colour(n, self.sample_position_colour, 0.5)
+            self._view.add_rgba_mesh(sample_shape_mesh, scalars="colours")
+            return sample_shape_mesh
+        return self._create_and_add_component_point_mesh(np.array([self._model.sample_position]), self.sample_position_colour)
+
+    def _create_and_add_component_point_mesh(self, points: np.ndarray, colour: tuple[int, int, int]) -> pv.PolyData:
+        point_cloud = self.create_poly_data_mesh(points)
+        point_cloud["colours"] = self.generate_single_colour(len(points), colour, 1)
+        self._view.add_rgba_mesh(point_cloud, scalars="colours")
+        return point_cloud
 
     def on_export_workspace_clicked(self) -> None:
         self._model.save_line_plot_workspace_to_ads()
@@ -199,10 +227,22 @@ class FullInstrumentViewPresenter:
         self._view.set_contour_min_max_boxes(clim)
 
     def _on_projection_option_changed(self) -> None:
-        """Update the projection, enable/disable shapes checkbox, and select appropriate renderer."""
+        """Update the projection, enable/disable render mode combo, and select appropriate renderer."""
         self._model.projection_type = self._view.current_selected_projection()
-        self._view.set_show_shapes_checkbox_enabled(True)
-        self._on_show_shapes_toggled(self._view.is_show_shapes_checkbox_checked())
+        self._view.set_render_mode_combo_enabled(True)
+        self._on_render_mode_changed(self._view.get_render_mode_option())
+
+        if self._view.current_selected_projection() == ProjectionType.THREE_D:
+            self._view.set_rubberband_zoom_checked(False)
+            self._view.set_overlaid_shape_controls_checked(False)
+            self._view.set_hover_pick_checked(False)
+
+        enabled = self._view.current_selected_projection() != ProjectionType.THREE_D
+        self._view.set_rubberband_zoom_enabled(enabled)
+        self._view.set_overlaid_shape_controls_enabled(enabled)
+        self._view.set_hover_pick_enabled(enabled)
+        self._view.set_aspect_ratio_box_enabled(enabled)
+        self._view.set_flip_beam_box_enabled(enabled)
 
     def on_projection_option_changed(self) -> None:
         self._callback_queue.put((self._on_projection_option_changed, ()))
@@ -214,7 +254,6 @@ class FullInstrumentViewPresenter:
         self._model.flip_beam = self._view.is_flip_beam_checkbox_checked()
         with SuppressRendering(self._view.main_plotter):
             self._update_view_main_plotter(refresh_limits=refresh_limits)
-            self.update_detector_picker()
             self.refresh_plotter_peaks()
 
     def count_scale_combo_options(self) -> list[str]:
@@ -255,21 +294,17 @@ class FullInstrumentViewPresenter:
         renderer.add_masked_mesh_to_plotter(self._view.main_plotter, self._masked_mesh)
 
         monitor_mesh = self._create_and_add_monitor_mesh()
+        sample_position_mesh = self._create_and_add_sample_mesh()
 
-        renderer.set_parallel_view(self._view.main_plotter)
+        self._view.enable_parallel_projection()
 
         # Update transform needs to happen after adding to plotter
         # Uses display coordinates
         self._update_transform()
-        self._detector_mesh.transform(self._transform, inplace=True)
-        self._pickable_mesh.transform(self._transform, inplace=True)
-        self._masked_mesh.transform(self._transform, inplace=True)
-        if monitor_mesh is not None:
-            monitor_mesh.transform(self._transform, inplace=True)
+        for mesh in [self._detector_mesh, self._pickable_mesh, self._masked_mesh, monitor_mesh, sample_position_mesh]:
+            if mesh is not None:
+                mesh.transform(self._transform, inplace=True)
 
-        self._view.enable_or_disable_mask_widgets()
-        self._view.enable_or_disable_aspect_ratio_box()
-        self._view.enable_or_disable_flip_beam_box()
         # If refreshing the limits we reset both the contour and integration sliders.
         # If not, we need to manually update the contour limits to what they were set to before we added the
         # meshes above, because adding the meshes resets the contour limits in the plotter.
@@ -278,11 +313,10 @@ class FullInstrumentViewPresenter:
         else:
             self.on_contour_limits_updated()
 
-        self._view.cache_default_camera_position()
         self._view.reset_camera()
 
-        # Set style after camera reset for correct camera defaults
-        renderer.set_interactive_style(self._view.main_plotter, self._model.is_2d_projection)
+        # Reload styles after camera reset for correct camera defaults
+        self.reload_interactor_styles()
 
         self._view.set_camera_to_cached_state()
         self._view.cache_current_selected_projection()
@@ -353,12 +387,53 @@ class FullInstrumentViewPresenter:
         # Return list of xmin, xmax, ymin, ymax, zmin, zmax
         return [x for pair in zip(min_point, max_point) for x in pair]
 
-    def update_detector_picker(self) -> None:
-        def detector_picked(detector_index: int) -> None:
-            self._model.update_point_picked_detectors(detector_index, self._select_bank_tube)
-            self.update_picked_detectors_on_view()
+    def on_rubberband_zoom_toggled(self, checked: bool) -> None:
+        if checked:
+            self._view.set_start_adding_peaks_checked(False)
+            self._view.set_hover_pick_checked(False)
+            self._view.delete_current_overlaid_shape()
+        self._view.set_overlaid_shape_controls_enabled(not checked)
+        self._update_interactor_style()
 
-        self._renderer.enable_picking(self._view.main_plotter, callback=detector_picked)
+    def on_hover_pick_toggled(self, checked: bool) -> None:
+        if checked:
+            self._view.set_start_adding_peaks_checked(False)
+            self._view.set_rubberband_zoom_checked(False)
+            self._view.delete_current_overlaid_shape()
+            self._view.clear_lineplot_overlays()
+            self._view.show_plot_for_detectors(self._model.line_plot_workspace, self._model.lineplot_limits)
+            self._view.set_selected_detector_info([])
+            self._view.set_relative_detector_angle(None)
+            self._view.remove_peak_cursor_from_lineplot()
+
+        self._view.set_clear_point_picked_detectors_disabled(checked)
+        self._view.set_sum_spectra_checkbox_disabled(checked)
+        self._view.set_select_bank_tube_disabled(checked)
+        self._view.set_export_workspace_button_disabled(checked)
+        self._view.set_overlaid_shape_controls_enabled(not checked)
+
+        self._last_hovered_point_index = None
+        self._update_interactor_style()
+
+        if checked:
+            return
+
+        self.update_picked_detectors_on_view()
+
+    def _update_hover_pick_plot(self, point_index: int | None) -> None:
+        if point_index is None:
+            return
+        n_pickable = int(np.count_nonzero(self._model.is_pickable))
+        if point_index < 0 or point_index >= n_pickable:
+            self._last_hovered_point_index = None
+            return
+        self._model.extract_spectra_for_line_plot(self._view.current_selected_lineplot_unit(), False, np.array([point_index]))
+        detector_info = self._model.detector_info_text_for_workspace_index(point_index)
+        if len(detector_info) == 0:
+            return
+        self._view.show_plot_for_detectors(self._model.line_plot_workspace, self._model.lineplot_limits)
+        self._view.set_selected_detector_info(detector_info)
+        self._view.set_relative_detector_angle(None)
 
     def update_picked_detectors_on_view(self) -> None:
         # Update to visibility shows up in real time
@@ -372,6 +447,14 @@ class FullInstrumentViewPresenter:
     def on_clear_point_picked_detectors_clicked(self) -> None:
         self._callback_queue.put((self._on_clear_point_picked_detectors_clicked, ()))
 
+    def on_overlaid_shape_added(self) -> None:
+        self._update_interactor_style()
+        self._view.set_add_selection_and_mask_buttons_enabled(True)
+
+    def on_overlaid_shape_removed(self) -> None:
+        self._update_interactor_style()
+        self._view.set_add_selection_and_mask_buttons_enabled(False)
+
     def _on_add_item_clicked(self) -> None:
         centres = self._transform_vectors_with_matrix(np.array(self._model.detector_positions), self._transform)
         mask = self._view.get_shape_mask(centres)
@@ -382,6 +465,7 @@ class FullInstrumentViewPresenter:
             mask = self._model.expand_pickable_mask_to_parent_subtrees(mask)
         new_key = self._model.add_new_detector_key(mask.tolist(), self._view.get_current_selected_tab())
         self._view.set_new_item_key(self._view.get_current_selected_tab(), new_key)
+        self._view.set_overlaid_shape_controls_checked(False)
 
     def on_select_bank_tube_toggled(self, checked: bool) -> None:
         self._select_bank_tube = checked
@@ -400,8 +484,6 @@ class FullInstrumentViewPresenter:
             self._update_line_plot_ws_and_draw(self._view.current_selected_lineplot_unit())
         else:
             self.update_picked_detectors_on_view()
-            # NOTE: This is required explicitly
-            self._view.enable_or_disable_mask_widgets()
 
     def on_list_item_selected(self, kind: CurrentTab) -> None:
         self._callback_queue.put((self._on_list_item_selected, (kind,)))
@@ -491,6 +573,11 @@ class FullInstrumentViewPresenter:
         return self._model.cached_keys(kind)
 
     def _update_line_plot_ws_and_draw(self, unit: str) -> None:
+        if self._view.is_hover_pick_mode_checked():
+            if self._last_hovered_point_index is not None:
+                self._update_hover_pick_plot(self._last_hovered_point_index)
+            return
+
         self._model.extract_spectra_for_line_plot(unit, self._view.sum_spectra_selected())
         self._view.show_plot_for_detectors(self._model.line_plot_workspace, self._model.lineplot_limits)
         self._view.set_selected_detector_info(self._model.picked_detectors_info_text())
@@ -510,12 +597,12 @@ class FullInstrumentViewPresenter:
         mesh = pv.PolyData(points, faces)
         return mesh
 
-    def generate_single_colour(self, number_of_points: int, red: float, green: float, blue: float, alpha: float) -> np.ndarray:
+    def generate_single_colour(self, number_of_points: int, colour: tuple[int, int, int], alpha: float) -> np.ndarray:
         """Returns an RGBA colours array for the given set of points, with all points the same colour"""
         rgba = np.zeros((number_of_points, 4))
-        rgba[:, 0] = red
-        rgba[:, 1] = green
-        rgba[:, 2] = blue
+        rgba[:, 0] = float(colour[0]) / 255.0  # red
+        rgba[:, 1] = float(colour[1]) / 255.0  # green
+        rgba[:, 2] = float(colour[2]) / 255.0  # blue
         rgba[:, 3] = alpha
         return rgba
 
@@ -525,7 +612,7 @@ class FullInstrumentViewPresenter:
 
     def _delete_workspace_callback(self, ws_name):
         if self._model.workspace.name() == ws_name:
-            self._view.close()
+            self._view.close_window()
             logger.warning(f"Workspace {ws_name} deleted, closed Experimental Instrument View.")
         else:
             self._reload_everything()
@@ -546,7 +633,7 @@ class FullInstrumentViewPresenter:
         self._callback_queue.put((self._rename_workspace_callback, (ws_old_name, ws_new_name)))
 
     def clear_workspace_callback(self):
-        self._view.close()
+        self._view.close_window()
 
     def _replace_workspace_callback(self, ws_name, ws):
         if isinstance(ws, PeaksWorkspace):
@@ -556,11 +643,14 @@ class FullInstrumentViewPresenter:
         elif isinstance(ws, GroupingWorkspace):
             self._reload_grouping_workspaces()
         elif ws_name == self._model.workspace.name():
-            self._model._workspace = AnalysisDataService.retrieve(ws_name)
-            self._model.setup()
-            self._setup_component_tree()
-            self._reload_renderers()  # Clear cached renderers before rendering
-            self.update_plotter()
+            self._reset_model_workspace(ws_name)
+
+    def _reset_model_workspace(self, ws_name):
+        self._model._workspace = AnalysisDataService.retrieve(ws_name)
+        self._model.setup()
+        self._setup_component_tree()
+        self._reload_renderers()  # Clear cached renderers before rendering
+        self.update_plotter()
 
     def replace_workspace_callback(self, ws_name, ws):
         self._callback_queue.put((self._replace_workspace_callback, (ws_name, ws)))
@@ -585,6 +675,8 @@ class FullInstrumentViewPresenter:
             del self._ads_observer
         if hasattr(self, "_callback_queue"):
             self._callback_queue.put(self._callback_stop_sentinel)
+        # Drop presenter->model reference on close while keeping _model non-optional for static typing.
+        self._model = cast(FullInstrumentViewModel, None)
 
     def on_sliders_unit_selected(self, value) -> None:
         self._model.set_integration_units(self._UNIT_OPTIONS[value])
@@ -616,16 +708,19 @@ class FullInstrumentViewPresenter:
     def on_start_adding_peaks_toggled(self, checked) -> None:
         if checked:
             self._model.turn_on_single_point_picking()
+            self._view.set_rubberband_zoom_checked(False)
+            self._view.set_hover_pick_checked(False)
             self._view.add_peak_cursor_to_lineplot()
-            self._view.set_delete_all_selected_peaks_button_enabled(False)
             self._view.disable_and_uncheck_selection_list()
-            self._on_list_item_selected(CurrentTab.Grouping)
         else:
             self._model.turn_off_single_point_picking()
             self._view.remove_peak_cursor_from_lineplot()
-            self._view.set_delete_all_selected_peaks_button_enabled(True)
             self._view.enable_and_restore_selection_list()
-            self._on_list_item_selected(CurrentTab.Grouping)
+
+        self._on_list_item_selected(CurrentTab.Grouping)
+        self._view.set_list_enabled(CurrentTab.Masking, not checked)
+        self._view.set_delete_all_selected_peaks_button_enabled(not checked)
+        self._view.set_overlaid_shape_controls_enabled(not checked)
 
     def on_peak_selected_in_lineplot(self, x: float, mouse_click: Literal["right", "left"]) -> None:
         if len(self._model.picked_detector_ids) == 0:
@@ -643,24 +738,72 @@ class FullInstrumentViewPresenter:
     def on_show_monitors_check_box_clicked(self) -> None:
         self.update_plotter()
 
+    def on_show_sample_position_check_box_clicked(self) -> None:
+        self.update_plotter()
+
     def on_component_tree_item_selected(self, component_indices: np.ndarray) -> None:
         self._model.component_tree_indices_selected(component_indices)
         self.update_plotter()
 
-    def _on_show_shapes_toggled(self, checked: bool) -> None:
-        if checked:
-            if self._model.projection_type == ProjectionType.SIDE_BY_SIDE:
-                self._renderer = self._sbs_shape_renderer
-            else:
-                self._renderer = self._shape_renderer
-        else:
-            self._renderer = self._point_cloud_renderer
+    def reload_interactor_styles(self):
+        def point_hovered(point_index: int | None) -> None:
+            if point_index is None or point_index == self._last_hovered_point_index:
+                return
+            self._last_hovered_point_index = point_index
+            self._update_hover_pick_plot(point_index)
+            return
 
+        def detector_picked(detector_index: int) -> None:
+            self._model.update_point_picked_detectors(detector_index, self._select_bank_tube)
+            self.update_picked_detectors_on_view()
+            return
+
+        wrapped_picking_callback = self._renderer.get_callback_tied_to_detector_index(
+            self._view.main_plotter, callback=detector_picked, hover=False
+        )
+        wrapped_hover_callback = self._renderer.get_callback_tied_to_detector_index(
+            self._view.main_plotter, callback=point_hovered, hover=True
+        )
+
+        self._interactor_styles = InteractorStyles(
+            self._view.main_plotter, picking_callback=wrapped_picking_callback, hover_callback=wrapped_hover_callback
+        )
+        self._update_interactor_style()
+
+    def _update_interactor_style(self):
+        if not self._model.is_2d_projection:
+            self._view.main_plotter.iren.style = self._interactor_styles.TRACKBALL
+            return
+
+        if self._view.is_active_current_overlaid_shape():
+            self._view.main_plotter.iren.style = self._interactor_styles.SCROLL_ZOOM_NO_PICKING
+            return
+
+        if self._view.is_hover_pick_mode_checked():
+            self._view.main_plotter.iren.style = self._interactor_styles.SCROLL_ZOOM_WITH_HOVER
+        elif self._view.is_rubberband_zoom_toggled():
+            self._view.main_plotter.iren.style = self._interactor_styles.RUBBERBAND_ZOOM
+        else:
+            self._view.main_plotter.iren.style = self._interactor_styles.SCROLL_ZOOM_WITH_PICKING
+
+    def _get_renderer_for_mode(self, mode: str):
+        if mode == self._view._RENDER_MODE_POINTS:
+            return self._point_cloud_renderer
+
+        is_sbs = self._model.projection_type == ProjectionType.SIDE_BY_SIDE
+        if mode == self._view._RENDER_MODE_RAW_SHAPES:
+            return self._sbs_shape_renderer_full if is_sbs else self._shape_renderer_full
+
+        return self._sbs_shape_renderer if is_sbs else self._shape_renderer
+
+    def _on_render_mode_changed(self, mode: str) -> None:
+        self._renderer = self._get_renderer_for_mode(mode)
         self.update_plotter()
 
-    def on_show_shapes_toggled(self, checked: bool) -> None:
-        self._view.store_draw_shapes_option()
-        self._callback_queue.put((self._on_show_shapes_toggled, (checked,)))
+    def on_render_mode_changed(self, index: int) -> None:
+        self._view.store_render_mode_option()
+        mode = self._view.get_render_mode_option()
+        self._callback_queue.put((self._on_render_mode_changed, (mode,)))
 
     def _reload_renderers(self) -> None:
         """
@@ -669,8 +812,10 @@ class FullInstrumentViewPresenter:
         """
         self._point_cloud_renderer = PointCloudRenderer()
         self._shape_renderer = ShapeRenderer(self._model.workspace)
+        self._shape_renderer_full = ShapeRenderer(self._model.workspace, use_optimised_shapes=False)
         self._sbs_shape_renderer = SideBySideShapeRenderer(self._model.workspace)
-        self._on_show_shapes_toggled(self._view.is_show_shapes_checkbox_checked())
+        self._sbs_shape_renderer_full = SideBySideShapeRenderer(self._model.workspace, use_optimised_shapes=False)
+        self._on_render_mode_changed(self._view.get_render_mode_option())
 
     def _reload_everything(self) -> None:
         """Reload all workspace-dependent data (peaks, masks, groupings) and clear renderer cache.

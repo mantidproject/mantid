@@ -732,7 +732,7 @@ AlignAndFocusPowderSlim::initializeSpectraProcessingData(const API::MatrixWorksp
   const size_t numSpectra = outputWS->getNumberHistograms();
   for (size_t i = 0; i < numSpectra; ++i) {
     const auto &spectrum = outputWS->getSpectrum(i);
-    processingData.binedges.emplace_back(&spectrum.readX());
+    processingData.binedges.emplace_back(&spectrum.x().rawData());
     processingData.counts.emplace_back(spectrum.dataY().size());
   }
   return processingData;

@@ -34,8 +34,8 @@ class SideBySideShapeRenderer(ShapeRenderer):
     no shape extends past half the inter-detector spacing.
     """
 
-    def __init__(self, workspace: Workspace2D) -> None:
-        super().__init__(workspace)
+    def __init__(self, workspace: Workspace2D, use_optimised_shapes: bool = True) -> None:
+        super().__init__(workspace, use_optimised_shapes=use_optimised_shapes)
 
     def precompute(self):
         super().precompute()
@@ -199,7 +199,7 @@ class SideBySideShapeRenderer(ShapeRenderer):
         The returned value is ``max(|v · direction_2d|)`` over all vertices.
         """
         shape_key = self._det_shape_keys[det_index]
-        template_verts, _ = self._shape_cache[shape_key]
+        template_verts, _, _ = self._shape_cache[shape_key]
         if len(template_verts) == 0:
             return 0.0
 
@@ -215,7 +215,7 @@ class SideBySideShapeRenderer(ShapeRenderer):
         Used as a fallback for single-detector banks.
         """
         shape_key = self._det_shape_keys[det_index]
-        template_verts, _ = self._shape_cache[shape_key]
+        template_verts, _, _ = self._shape_cache[shape_key]
         if len(template_verts) == 0:
             return 0.0
 

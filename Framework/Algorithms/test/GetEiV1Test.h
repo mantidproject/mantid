@@ -163,8 +163,8 @@ private:
     const double peakOneHeight(3000.), peakTwoHeight(1000.);
     for (int i = 0; i < numBins; ++i) {
       if (includePeaks) {
-        testWS->dataY(0)[i] = peakOneHeight * exp(-0.5 * pow(xdata[i] - peakOneCentre, 2.) / sigmaSqOne);
-        testWS->dataY(1)[i] = peakTwoHeight * exp(-0.5 * pow(xdata[i] - peakTwoCentre, 2.) / sigmaSqTwo);
+        testWS->mutableY(0)[i] = peakOneHeight * exp(-0.5 * pow(xdata[i] - peakOneCentre, 2.) / sigmaSqOne);
+        testWS->mutableY(1)[i] = peakTwoHeight * exp(-0.5 * pow(xdata[i] - peakTwoCentre, 2.) / sigmaSqTwo);
       }
     }
     testWS->setBinEdges(0, xdata);

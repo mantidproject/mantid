@@ -144,7 +144,7 @@ class RebinRagged(PythonAlgorithm):
             accumulationWS = None
             for i, (name, xmin, xmax, delta) in enumerate(zip(names, xmins, xmaxs, deltas)):
                 # don't  go beyond the range of the data
-                x = inputWS.readX(i)
+                x = inputWS.x(i)
                 if xmin == Property.EMPTY_DBL:
                     xmin = x[0]
                 if xmax == Property.EMPTY_DBL:

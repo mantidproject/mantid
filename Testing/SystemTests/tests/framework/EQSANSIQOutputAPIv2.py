@@ -69,11 +69,11 @@ class EQSANSIQOutput(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance = 0.2
-        mtd["EQSANS_1466_event_Iq"].dataY(0)[0] = 269.687
-        mtd["EQSANS_1466_event_Iq"].dataE(0)[0] = 16.4977
-        mtd["EQSANS_1466_event_Iq"].dataE(0)[1] = 6.78
-        mtd["EQSANS_1466_event_Iq"].dataY(0)[2] = 11.3157
-        mtd["EQSANS_1466_event_Iq"].dataE(0)[2] = 1.23419
+        mtd["EQSANS_1466_event_Iq"].mutableY(0)[0] = 269.687
+        mtd["EQSANS_1466_event_Iq"].mutableE(0)[0] = 16.4977
+        mtd["EQSANS_1466_event_Iq"].mutableE(0)[1] = 6.78
+        mtd["EQSANS_1466_event_Iq"].mutableY(0)[2] = 11.3157
+        mtd["EQSANS_1466_event_Iq"].mutableE(0)[2] = 1.23419
         self.disableChecking.append("Instrument")
         self.disableChecking.append("Sample")
         self.disableChecking.append("SpectraMap")
@@ -143,7 +143,7 @@ class EQSANSDQPositiveOutput(systemtesting.MantidSystemTest):
         Reduce1D()
 
     def validate(self):
-        dq = mtd["EQSANS_1466_event_Iq"].dataDx(0)
+        dq = mtd["EQSANS_1466_event_Iq"].dx(0)
         for x in dq:
             if x < 0:
                 return False
@@ -293,7 +293,7 @@ class EQSANSDQOutput(systemtesting.MantidSystemTest):
             0,
         ]
 
-        dq = mtd["EQSANS_1466_event_Iq"].readDx(0)
+        dq = mtd["EQSANS_1466_event_Iq"].dx(0)
         diff = [math.fabs(dq_ref[i] - dq[i]) < 0.0001 for i in range(7, 100)]
         output = reduce(lambda x, y: x and y, diff)
         if not output:
@@ -444,7 +444,7 @@ class EQSANSDQOutput_FS(systemtesting.MantidSystemTest):
             0,
         ]
 
-        dq = mtd["EQSANS_4061_event_frame1_Iq"].readDx(0)
+        dq = mtd["EQSANS_4061_event_frame1_Iq"].dx(0)
         diff = [math.fabs(dq_ref[i] - dq[i]) < 0.0001 for i in range(7, 100)]
         output = reduce(lambda x, y: x and y, diff)
 

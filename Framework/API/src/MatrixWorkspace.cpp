@@ -811,7 +811,7 @@ void MatrixWorkspace::getIntegratedSpectra(std::vector<double> &out, const doubl
   PARALLEL_FOR_IF(this->threadSafe())
   for (int wksp_index = 0; wksp_index < static_cast<int>(this->getNumberHistograms()); wksp_index++) {
     // Get Handle to data
-    const Mantid::MantidVec &xData = this->readX(wksp_index);
+    const Mantid::HistogramData::HistogramX &xData = this->x(wksp_index);
     const auto &yData = this->y(wksp_index);
     // If it is a 1D workspace, no need to integrate
     if ((xData.size() <= 1 + histogramOffset) && (!yData.empty())) {
@@ -1358,9 +1358,9 @@ size_t MatrixWorkspace::getMemorySize() const {
  */
 size_t MatrixWorkspace::getMemorySizeForXAxes() const {
   size_t total = 0;
-  auto lastX = this->refX(0);
+  auto lastX = this->sharedX(0);
   for (size_t wi = 0; wi < getNumberHistograms(); wi++) {
-    auto X = this->refX(wi);
+    auto X = this->sharedX(wi);
     // If the pointers are the same
     if (!(X == lastX) || wi == 0)
       total += (*X).size() * sizeof(double);
@@ -1576,7 +1576,7 @@ private:
 class MWXDimension : public Mantid::Geometry::IMDDimension {
 public:
   MWXDimension(const MatrixWorkspace *ws, std::string dimensionId)
-      : m_ws(ws), m_X(ws->readX(0)), m_dimensionId(std::move(dimensionId)),
+      : m_ws(ws), m_X(ws->x(0).rawData()), m_dimensionId(std::move(dimensionId)),
         m_frame(std::make_unique<Geometry::GeneralFrame>(m_ws->getAxis(0)->unit()->label(),
                                                          m_ws->getAxis(0)->unit()->label())) {}
 

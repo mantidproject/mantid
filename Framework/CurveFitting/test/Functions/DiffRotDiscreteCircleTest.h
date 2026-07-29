@@ -405,12 +405,12 @@ private:
     // create temporaray workspace.
     auto temp_ws = WorkspaceCreationHelper::create2DWorkspace(1, static_cast<int>(M));
     for (size_t i = 0; i < M; i++) {
-      temp_ws->dataX(0)[i] = xView[i];
-      temp_ws->dataY(0)[i] = dataYvalues.getCalculated(i);
-      temp_ws->dataE(0)[i] = 0.1 * dataYvalues.getCalculated(i); // assume the error is 10% of the actual value
+      temp_ws->mutableX(0)[i] = xView[i];
+      temp_ws->mutableY(0)[i] = dataYvalues.getCalculated(i);
+      temp_ws->mutableE(0)[i] = 0.1 * dataYvalues.getCalculated(i); // assume the error is 10% of the actual value
     }
     const double dw = xView[1] - xView[0]; // bin width
-    temp_ws->dataX(0)[M] = temp_ws->dataX(0)[M - 1] + dw;
+    temp_ws->mutableX(0)[M] = temp_ws->dataX(0)[M - 1] + dw;
     //  save workspace to file.
     auto save = Mantid::API::AlgorithmFactory::Instance().create("SaveNexus", 1);
     if (!save)
@@ -453,11 +453,11 @@ private:
       double bin_boundary = dataX[i] - dw / 2.0; // bin boundaries are shifted by half the bind width
       double y =
           I * (2.0 / M_PI) * A1 * (3.0 * rate / (9.0 * rate * rate + dataX[i] * dataX[i])); // verbose for clarity
-      ws->dataX(0)[i] = bin_boundary;
-      ws->dataY(0)[i] = y;
-      ws->dataE(0)[i] = fractional_error * y; // assume the error is a small percent of the actual value
+      ws->mutableX(0)[i] = bin_boundary;
+      ws->mutableY(0)[i] = y;
+      ws->mutableE(0)[i] = fractional_error * y; // assume the error is a small percent of the actual value
     }
-    ws->dataX(0)[M] = dataX[M - 1] + dw / 2; // recall number of bin boundaries is 1 + #bins
+    ws->mutableX(0)[M] = dataX[M - 1] + dw / 2; // recall number of bin boundaries is 1 + #bins
 
     // return now the workspace
     return ws;
@@ -532,12 +532,12 @@ private:
 
     double fractional_error = 0.01; // error taken as a percent of the signal
     for (size_t i = 0; i < M; i++) {
-      ws->dataX(0)[i] = dataX[i] - dw / 2; // bin boundaries are shifted by half the bind width
-      ws->dataY(0)[i] = dataYvalues.getCalculated(i);
+      ws->mutableX(0)[i] = dataX[i] - dw / 2; // bin boundaries are shifted by half the bind width
+      ws->mutableY(0)[i] = dataYvalues.getCalculated(i);
       ws->dataE(0)[i] =
           fractional_error * dataYvalues.getCalculated(i); // assume the error is a small percent of the actual value
     }
-    ws->dataX(0)[M] = dataX[M - 1] + dw / 2; // recall number of bin boundaries is 1 + #bins
+    ws->mutableX(0)[M] = dataX[M - 1] + dw / 2; // recall number of bin boundaries is 1 + #bins
 
     // return now the workspace
     return ws;

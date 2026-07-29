@@ -91,8 +91,8 @@ Mantid::API::MatrixWorkspace_sptr provideWorkspace2D(LogType logType, const std:
   int jj = 0;
   for (int i = 0; i < 2; ++i) {
     for (jj = 0; jj < 4; ++jj)
-      ws->dataX(jj)[i] = 1.0 * i;
-    ws->dataY(jj)[i] = 2.0 * i;
+      ws->mutableX(jj)[i] = 1.0 * i;
+    ws->mutableY(jj)[i] = 2.0 * i;
   }
   // Add the logs
   provideLogs(logType, ws, startTime, length);

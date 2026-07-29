@@ -27,7 +27,7 @@ def crop_and_rebin(ws: Workspace2D | str, out_ws: str, lower: float, upper: floa
 
 
 def _get_max_bin(ws: Workspace2D) -> np.ndarray:
-    return max(np.diff(ws.readX(i)).max() for i in range(ws.getNumberHistograms()))
+    return max(np.diff(ws.x(i)).max() for i in range(ws.getNumberHistograms()))
 
 
 def crop_wss_and_combine(
@@ -77,7 +77,7 @@ def fit_initial_summed_spectra(
         peak_func = FunctionFactory.Instance().createPeakFunction(peak_func_name)
 
         # estimate starting params
-        intens, sigma, bg, centre = _estimate_intensity_background_and_centre(window_ws, 0, 0, len(window_ws.readX(0)) - 1, peak)
+        intens, sigma, bg, centre = _estimate_intensity_background_and_centre(window_ws, 0, 0, len(window_ws.x(0)) - 1, peak)
         bg_func.setParameter("A0", bg)
         intens_par_name = "I"
         peak_func.setMatrixWorkspace(window_ws, 0, low_bound, hi_bound)
@@ -341,7 +341,7 @@ def calc_intens_and_sigma_arrays(fit_result: Fit) -> Tuple[np.ndarray, np.ndarra
     for idom, comp_func in enumerate(function):
         intens[idom] = comp_func.getParameterValue("f0.I")
         ws_fit = get_eval_ws(fit_result["OutputWorkspace"], idom, ndoms)
-        sigma[idom], peak_limits[idom] = calc_sigma_from_summation(ws_fit.readX(0), ws_fit.readE(0) ** 2, ws_fit.readY(3))
+        sigma[idom], peak_limits[idom] = calc_sigma_from_summation(ws_fit.x(0), ws_fit.e(0) ** 2, ws_fit.y(3))
     ivalid = ~np.isclose(sigma, 0)
     intens_over_sig[ivalid] = intens[ivalid] / sigma[ivalid]
     return intens, sigma, intens_over_sig, peak_limits
@@ -567,13 +567,13 @@ def _tie_bkg(function: MultiDomainFunction, approx_bkgs: np.ndarray, ties: List[
 def _estimate_intensity_background_and_centre(
     ws: Workspace2D, ispec: int, istart: int, iend: int, peak: float
 ) -> Tuple[float, float, float, float]:
-    xdat = ws.readX(ispec)[istart:iend]
+    xdat = ws.x(ispec)[istart:iend]
     bin_width = np.diff(xdat)
     bin_width = np.hstack((bin_width, bin_width[-1]))  # easier than checking iend and istart not out of bounds
-    y = ws.readY(ispec)[istart:iend]
+    y = ws.y(ispec)[istart:iend]
     if not np.any(y > 0):
         return 0.0, 0.0, 0.0, peak
-    e = ws.readE(ispec)[istart:iend]
+    e = ws.e(ispec)[istart:iend]
     ibg, _ = PeakData.find_bg_pts_seed_skew(y)
     bg = np.mean(y[ibg])
     intensity = np.trapezoid((y - bg), xdat)

@@ -7,14 +7,21 @@
 """Unit tests for the PointCloudRenderer and ShapeRenderer classes."""
 
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pyvista as pv
+from scipy.spatial.transform import Rotation
 
 from instrumentview.renderers.base_renderer import InstrumentRenderer
 from instrumentview.renderers.point_cloud_renderer import PointCloudRenderer
-from instrumentview.renderers.shape_renderer import ShapeRenderer, _triangles_to_verts_faces, _make_fallback_shape
+from instrumentview.renderers.shape_renderer import (
+    ShapeRenderer,
+    _triangles_to_verts_faces,
+    _make_fallback_shape,
+    _extract_quad_from_cylinder_shapeinfo,
+    _extract_quad_from_cuboid_shapeinfo,
+)
 from instrumentview.Projections.ProjectionType import ProjectionType
 
 
@@ -86,6 +93,82 @@ class TestPointCloudRenderer(unittest.TestCase):
         self.renderer.add_masked_mesh_to_plotter(plotter, mesh)
         plotter.add_mesh.assert_called_once()
 
+    # --------------------------------------------------------------- picking
+
+    def _make_mock_plotter(self, off_screen=False):
+        plotter = MagicMock()
+        plotter.off_screen = off_screen
+        plotter.iren.get_event_position.return_value = (100, 200)
+        return plotter
+
+    @patch("instrumentview.renderers.point_cloud_renderer.vtkPointPicker")
+    def test_get_callback_tied_to_detector_index_off_screen_returns_noop(self, mock_picker_cls):
+        plotter = self._make_mock_plotter(off_screen=True)
+        callback = MagicMock()
+
+        observer_fn = self.renderer.get_callback_tied_to_detector_index(plotter, callback)
+
+        self.assertTrue(callable(observer_fn))
+        observer_fn(None, None)
+        callback.assert_not_called()
+        mock_picker_cls.assert_not_called()
+
+    @patch("instrumentview.renderers.point_cloud_renderer.vtkPointPicker")
+    def test_get_callback_tied_to_detector_index_click_returns_callback(self, mock_picker_cls):
+        plotter = self._make_mock_plotter()
+
+        observer_fn = self.renderer.get_callback_tied_to_detector_index(plotter, MagicMock())
+
+        self.assertTrue(callable(observer_fn))
+        mock_picker_cls.return_value.SetTolerance.assert_called_once_with(self.renderer._effective_picking_tolerance(False))
+
+    @patch("instrumentview.renderers.point_cloud_renderer.vtkPointPicker")
+    def test_get_callback_tied_to_detector_index_click_fires_callback_on_hit(self, mock_picker_cls):
+        mock_picker = MagicMock()
+        mock_picker_cls.return_value = mock_picker
+        mock_picker.Pick.return_value = 1
+        mock_picker.GetPointId.return_value = 5
+        plotter = self._make_mock_plotter()
+        callback = MagicMock()
+        observer_fn = self.renderer.get_callback_tied_to_detector_index(plotter, callback)
+        observer_fn(None, None)
+        callback.assert_called_once_with(5)
+
+    @patch("instrumentview.renderers.point_cloud_renderer.vtkPointPicker")
+    def test_get_callback_tied_to_detector_index_click_does_not_fire_on_miss(self, mock_picker_cls):
+        mock_picker = MagicMock()
+        mock_picker_cls.return_value = mock_picker
+        mock_picker.Pick.return_value = 0
+        plotter = self._make_mock_plotter()
+        callback = MagicMock()
+        observer_fn = self.renderer.get_callback_tied_to_detector_index(plotter, callback)
+        observer_fn(None, None)
+        callback.assert_not_called()
+
+    @patch("instrumentview.renderers.point_cloud_renderer.vtkPointPicker")
+    def test_get_callback_tied_to_detector_index_hover_fires_callback_when_point_found(self, mock_picker_cls):
+        mock_picker = MagicMock()
+        mock_picker_cls.return_value = mock_picker
+        mock_picker.GetPointId.return_value = 3
+        mock_picker.Pick.return_value = 3
+        plotter = self._make_mock_plotter()
+        callback = MagicMock()
+        observer_fn = self.renderer.get_callback_tied_to_detector_index(plotter, callback, hover=True)
+        observer_fn(None, None)
+        callback.assert_called_once_with(3)
+
+    @patch("instrumentview.renderers.point_cloud_renderer.vtkPointPicker")
+    def test_get_callback_tied_to_detector_index_hover_does_not_fire_when_no_point(self, mock_picker_cls):
+        mock_picker = MagicMock()
+        mock_picker_cls.return_value = mock_picker
+        mock_picker.GetPointId.return_value = -1
+        mock_picker.Pick.return_value = -1
+        plotter = self._make_mock_plotter()
+        callback = MagicMock()
+        observer_fn = self.renderer.get_callback_tied_to_detector_index(plotter, callback, hover=True)
+        observer_fn(None, None)
+        callback.assert_not_called()
+
 
 class TestTrianglesToVertsFaces(unittest.TestCase):
     """Tests for the _triangles_to_verts_faces helper."""
@@ -130,9 +213,168 @@ class TestTrianglesToVertsFaces(unittest.TestCase):
 
 class TestFallbackShape(unittest.TestCase):
     def test_returns_tetrahedron(self):
-        verts, faces = _make_fallback_shape()
+        verts, faces, face_size = _make_fallback_shape()
         self.assertEqual(verts.shape, (4, 3))
         self.assertEqual(faces.shape, (4, 3))
+        self.assertEqual(face_size, 3)
+
+
+class TestExtractQuadFromCuboidShapeinfo(unittest.TestCase):
+    """Tests for _extract_quad_from_cuboid_shapeinfo."""
+
+    def _make_v3d(self, x, y, z):
+        v = MagicMock()
+        v.X.return_value = float(x)
+        v.Y.return_value = float(y)
+        v.Z.return_value = float(z)
+        return v
+
+    def _make_cuboid_si(self, x_min=-0.005, x_max=0.005, y_min=-0.005, y_max=0.005, z_front=-0.0005, z_back=0.0005):
+        si = MagicMock()
+        si.cuboidGeometry.return_value = {
+            "leftFrontBottom": self._make_v3d(x_min, y_min, z_front),
+            "leftFrontTop": self._make_v3d(x_min, y_max, z_front),
+            "leftBackBottom": self._make_v3d(x_min, y_min, z_back),
+            "rightFrontBottom": self._make_v3d(x_max, y_min, z_front),
+        }
+        return si
+
+    def test_rectangular_cuboid_returns_quad(self):
+        si = self._make_cuboid_si()
+        result = _extract_quad_from_cuboid_shapeinfo(si)
+        self.assertIsNotNone(result)
+        quad_verts, quad_faces = result
+        self.assertEqual(quad_verts.shape, (4, 3))
+        self.assertEqual(quad_faces.shape, (1, 4))
+
+    def test_quad_corners_derived_from_shapeinfo(self):
+        """Quad X/Y extents should come directly from the ShapeInfo corner points."""
+        si = self._make_cuboid_si(x_min=-0.01, x_max=0.01, y_min=-0.005, y_max=0.005)
+        result = _extract_quad_from_cuboid_shapeinfo(si)
+        self.assertIsNotNone(result)
+        quad_verts, _ = result
+        np.testing.assert_allclose(np.sort(np.unique(quad_verts[:, 0])), [-0.01, 0.01], atol=1e-10)
+        np.testing.assert_allclose(np.sort(np.unique(quad_verts[:, 1])), [-0.005, 0.005], atol=1e-10)
+
+    def test_quad_z_at_mid_depth(self):
+        """Quad Z should be the midpoint of z_front and z_back."""
+        si = self._make_cuboid_si(z_front=-0.002, z_back=0.006)
+        result = _extract_quad_from_cuboid_shapeinfo(si)
+        self.assertIsNotNone(result)
+        quad_verts, _ = result
+        np.testing.assert_allclose(quad_verts[:, 2], 0.002, atol=1e-10)
+
+    def test_cube_shaped_detector_uses_xy_face(self):
+        """Equal extents on all axes: quad must span X/Y at mid-Z."""
+        s = 0.0127
+        si = self._make_cuboid_si(x_min=-s, x_max=s, y_min=-s, y_max=s, z_front=-s, z_back=s)
+        result = _extract_quad_from_cuboid_shapeinfo(si)
+        self.assertIsNotNone(result)
+        quad_verts, _ = result
+        np.testing.assert_allclose(quad_verts[:, 2], 0.0, atol=1e-10)
+        np.testing.assert_allclose(np.sort(np.unique(quad_verts[:, 0])), [-s, s], atol=1e-10)
+        np.testing.assert_allclose(np.sort(np.unique(quad_verts[:, 1])), [-s, s], atol=1e-10)
+
+    def test_zero_xy_extent_returns_none(self):
+        """A degenerate cuboid with no XY extent should return None."""
+        si = self._make_cuboid_si(x_min=0.0, x_max=0.0, y_min=0.0, y_max=0.0, z_front=-0.01, z_back=0.01)
+        result = _extract_quad_from_cuboid_shapeinfo(si)
+        self.assertIsNone(result)
+
+    def test_exception_in_cuboid_geometry_returns_none(self):
+        si = MagicMock()
+        si.cuboidGeometry.side_effect = RuntimeError("bad shape")
+        self.assertIsNone(_extract_quad_from_cuboid_shapeinfo(si))
+
+
+class TestExtractQuadFromCylinderShapeinfo(unittest.TestCase):
+    """Tests for _extract_quad_from_cylinder_shapeinfo."""
+
+    def _make_v3d(self, x, y, z):
+        v = MagicMock()
+        v.X.return_value = float(x)
+        v.Y.return_value = float(y)
+        v.Z.return_value = float(z)
+        return v
+
+    def _make_cylinder_si(self, bottom_base=(0.0, 0.0, 0.0), axis=(0.0, 1.0, 0.0), radius=0.004, height=0.00203320):
+        """Return a mock ShapeInfo whose cylinderGeometry() describes a cylinder."""
+        si = MagicMock()
+        si.cylinderGeometry.return_value = {
+            "centreOfBottomBase": self._make_v3d(*bottom_base),
+            "axis": self._make_v3d(*axis),
+            "radius": radius,
+            "height": height,
+        }
+        return si
+
+    # --- WISH-like Y-axis cylinder (axis along local Y, bottom base at origin) ---
+
+    def test_wish_cylinder_returns_quad(self):
+        si = self._make_cylinder_si()
+        result = _extract_quad_from_cylinder_shapeinfo(si)
+        self.assertIsNotNone(result)
+        quad_verts, quad_faces = result
+        self.assertEqual(quad_verts.shape, (4, 3))
+        self.assertEqual(quad_faces.shape, (1, 4))
+
+    def test_wish_cylinder_quad_spans_correct_height(self):
+        """Quad height (along Y axis) should equal cylinder height."""
+        height = 0.00203320
+        si = self._make_cylinder_si(axis=(0.0, 1.0, 0.0), height=height)
+        quad_verts, _ = _extract_quad_from_cylinder_shapeinfo(si)
+        y_min, y_max = quad_verts[:, 1].min(), quad_verts[:, 1].max()
+        self.assertAlmostEqual(y_max - y_min, height, places=8)
+
+    def test_wish_cylinder_quad_spans_correct_width(self):
+        """Quad width (along the s_hat direction) should equal 2*radius."""
+        radius = 0.004
+        si = self._make_cylinder_si(axis=(0.0, 1.0, 0.0), radius=radius)
+        quad_verts, _ = _extract_quad_from_cylinder_shapeinfo(si)
+        x_min, x_max = quad_verts[:, 0].min(), quad_verts[:, 0].max()
+        self.assertAlmostEqual(x_max - x_min, 2 * radius, places=8)
+
+    def test_wish_cylinder_quad_lies_in_xy_plane(self):
+        """For Y-axis cylinder, quad should lie in the local XY plane (z=0)."""
+        si = self._make_cylinder_si(axis=(0.0, 1.0, 0.0))
+        quad_verts, _ = _extract_quad_from_cylinder_shapeinfo(si)
+        np.testing.assert_allclose(quad_verts[:, 2], 0.0, atol=1e-12)
+
+    def test_wish_cylinder_normal_faces_negative_z(self):
+        """Normal = e1 x e2 should point in the (0, 0, ±1) direction for Y-axis cylinder."""
+        si = self._make_cylinder_si(axis=(0.0, 1.0, 0.0))
+        quad_verts, _ = _extract_quad_from_cylinder_shapeinfo(si)
+        e1 = quad_verts[1] - quad_verts[0]
+        e2 = quad_verts[3] - quad_verts[0]
+        normal = np.cross(e1, e2)
+        normal /= np.linalg.norm(normal)
+        self.assertAlmostEqual(abs(normal[2]), 1.0, places=6)
+
+    # --- Z-axis cylinder (axis parallel to sample direction) ---
+
+    def test_z_axis_cylinder_falls_back_gracefully(self):
+        """Cylinder with axis parallel to sample dir (0,0,1) should still return a quad."""
+        si = self._make_cylinder_si(axis=(0.0, 0.0, 1.0), bottom_base=(0.0, 0.0, -0.05), height=0.1)
+        result = _extract_quad_from_cylinder_shapeinfo(si)
+        self.assertIsNotNone(result)
+        quad_verts, _ = result
+        self.assertEqual(quad_verts.shape, (4, 3))
+
+    # --- Error / degenerate cases ---
+
+    def test_zero_axis_returns_none(self):
+        si = self._make_cylinder_si(axis=(0.0, 0.0, 0.0))
+        self.assertIsNone(_extract_quad_from_cylinder_shapeinfo(si))
+
+    def test_exception_in_cylinder_geometry_returns_none(self):
+        si = MagicMock()
+        si.cylinderGeometry.side_effect = RuntimeError("bad shape")
+        self.assertIsNone(_extract_quad_from_cylinder_shapeinfo(si))
+
+    def test_quad_faces_correct_vertex_indices(self):
+        si = self._make_cylinder_si()
+        _, quad_faces = _extract_quad_from_cylinder_shapeinfo(si)
+        np.testing.assert_array_equal(quad_faces[0], [0, 1, 2, 3])
 
 
 class TestShapeRenderer(unittest.TestCase):
@@ -443,6 +685,181 @@ class TestShapeRenderer(unittest.TestCase):
         self.assertTrue(np.all(z_flip < 0), f"Expected negative z with flip, got {z_flip}")
         np.testing.assert_allclose(z_flip, -z_no_flip)
 
+    def _make_shape_mock_plotter(self, off_screen=False):
+        plotter = MagicMock()
+        plotter.off_screen = off_screen
+        plotter.iren.get_event_position.return_value = (100, 200)
+        return plotter
+
+    @patch("instrumentview.renderers.shape_renderer.vtkCellPicker")
+    def test_get_callback_tied_to_detector_index_off_screen_returns_noop(self, mock_picker_cls):
+        plotter = self._make_shape_mock_plotter(off_screen=True)
+        callback = MagicMock()
+
+        observer_fn = self.renderer.get_callback_tied_to_detector_index(plotter, callback)
+
+        self.assertTrue(callable(observer_fn))
+        observer_fn(None, None)
+        callback.assert_not_called()
+        mock_picker_cls.assert_not_called()
+
+    @patch("instrumentview.renderers.shape_renderer.vtkCellPicker")
+    def test_get_callback_tied_to_detector_index_click_returns_callback(self, mock_picker_cls):
+        plotter = self._make_shape_mock_plotter()
+
+        observer_fn = self.renderer.get_callback_tied_to_detector_index(plotter, MagicMock())
+
+        self.assertTrue(callable(observer_fn))
+        mock_picker_cls.return_value.SetTolerance.assert_called_once_with(self.renderer._effective_picking_tolerance(False))
+
+    @patch("instrumentview.renderers.shape_renderer.vtkCellPicker")
+    def test_get_callback_tied_to_detector_index_hover_returns_callback(self, mock_picker_cls):
+        plotter = self._make_shape_mock_plotter()
+
+        observer_fn = self.renderer.get_callback_tied_to_detector_index(plotter, MagicMock(), hover=True)
+
+        self.assertTrue(callable(observer_fn))
+        mock_picker_cls.return_value.SetTolerance.assert_called_once_with(self.renderer._effective_picking_tolerance(True))
+
+    @patch("instrumentview.renderers.shape_renderer.vtkCellPicker")
+    def test_get_callback_tied_to_detector_index_click_fires_callback_via_cell_to_detector(self, mock_picker_cls):
+        mock_picker = MagicMock()
+        mock_picker_cls.return_value = mock_picker
+        mock_picker.Pick.return_value = 1
+        mock_picker.GetCellId.return_value = 1
+        self.renderer._cell_to_detector = np.array([0, 7, 2])
+        plotter = self._make_shape_mock_plotter()
+        callback = MagicMock()
+        observer_fn = self.renderer.get_callback_tied_to_detector_index(plotter, callback)
+        observer_fn(None, None)
+        callback.assert_called_once_with(7)
+
+    @patch("instrumentview.renderers.shape_renderer.vtkCellPicker")
+    def test_get_callback_tied_to_detector_index_click_does_not_fire_on_miss(self, mock_picker_cls):
+        mock_picker = MagicMock()
+        mock_picker_cls.return_value = mock_picker
+        mock_picker.Pick.return_value = 0
+        self.renderer._cell_to_detector = np.array([0, 1, 2])
+        plotter = self._make_shape_mock_plotter()
+        callback = MagicMock()
+        observer_fn = self.renderer.get_callback_tied_to_detector_index(plotter, callback)
+        observer_fn(None, None)
+        callback.assert_not_called()
+
+    @patch("instrumentview.renderers.shape_renderer.vtkCellPicker")
+    def test_get_callback_tied_to_detector_index_does_not_fire_when_c2d_is_none(self, mock_picker_cls):
+        mock_picker = MagicMock()
+        mock_picker_cls.return_value = mock_picker
+        mock_picker.Pick.return_value = 1
+        mock_picker.GetCellId.return_value = 0
+        self.renderer._cell_to_detector = None
+        plotter = self._make_shape_mock_plotter()
+        callback = MagicMock()
+        observer_fn = self.renderer.get_callback_tied_to_detector_index(plotter, callback)
+        observer_fn(None, None)
+        callback.assert_not_called()
+
+    @patch("instrumentview.renderers.shape_renderer.vtkCellPicker")
+    def test_get_callback_tied_to_detector_index_hover_fires_callback_when_cell_found(self, mock_picker_cls):
+        mock_picker = MagicMock()
+        mock_picker_cls.return_value = mock_picker
+        mock_picker.Pick.return_value = 1
+        mock_picker.GetCellId.return_value = 2
+        self.renderer._cell_to_detector = np.array([4, 5, 9])
+        plotter = self._make_shape_mock_plotter()
+        callback = MagicMock()
+        observer_fn = self.renderer.get_callback_tied_to_detector_index(plotter, callback, hover=True)
+        observer_fn(None, None)
+        callback.assert_called_once_with(9)
+
+    @patch("instrumentview.renderers.shape_renderer.vtkCellPicker")
+    def test_get_callback_tied_to_detector_index_hover_does_not_fire_when_no_cell(self, mock_picker_cls):
+        mock_picker = MagicMock()
+        mock_picker_cls.return_value = mock_picker
+        mock_picker.Pick.return_value = 0
+        self.renderer._cell_to_detector = np.array([0, 1, 2])
+        plotter = self._make_shape_mock_plotter()
+        callback = MagicMock()
+        observer_fn = self.renderer.get_callback_tied_to_detector_index(plotter, callback, hover=True)
+        observer_fn(None, None)
+        callback.assert_not_called()
+
+    def test_assemble_mesh_rotation_applied_correctly_via_matmul(self):
+        """_assemble_mesh applies per-detector rotation via batched matmul (@ operator).
+
+        A 90° rotation about Z maps (1, 0, 0) -> (0, 1, 0).  Verify the
+        assembled mesh vertices reflect this exactly.
+        """
+        self._refresh_render_with_mock_workspace(n_detectors=1)
+
+        template_verts = np.array([[0.1, 0.0, 0.0], [-0.1, 0.0, 0.0], [0.0, 0.1, 0.0]], dtype=np.float64)
+        template_faces = np.array([[0, 1, 2]], dtype=np.int64)
+        shape_key = 777
+        self.renderer._shape_cache = {shape_key: (template_verts, template_faces, 3)}
+        self.renderer._det_shape_keys = np.array([shape_key], dtype=np.int64)
+
+        rot_90z = Rotation.from_euler("z", 90, degrees=True).as_matrix()
+        self.renderer._det_rotations = rot_90z[np.newaxis]  # (1, 3, 3)
+        self.renderer._det_scales = np.ones((1, 3))
+        self.renderer._all_positions_3d = np.array([[0.0, 0.0, 0.0]])
+
+        mesh, _, _ = self.renderer._assemble_mesh(
+            detector_indices=np.array([0]),
+            detector_positions=np.array([[0.0, 0.0, 0.0]]),
+            projection=None,
+        )
+
+        expected = (rot_90z @ template_verts.T).T  # (3, 3): rotate each row-vertex
+        np.testing.assert_allclose(mesh.points, expected, atol=1e-10)
+
+    def test_assemble_mesh_all_detectors_in_group_rotated_without_boolean_mask(self):
+        """In the non-SIDE_BY_SIDE path every detector is rotated via a single
+        batched matmul — no per-detector boolean mask is applied.
+
+        Two detectors share the same template shape but carry different
+        rotations (identity and 90° about Z).  Both must produce independently
+        correct vertices, confirming the vectorised path applies each detector's
+        own rotation matrix without skipping any entry.
+        """
+        self._refresh_render_with_mock_workspace(n_detectors=2)
+
+        template_verts = np.array([[0.1, 0.0, 0.0], [-0.1, 0.0, 0.0], [0.0, 0.1, 0.0]], dtype=np.float64)
+        template_faces = np.array([[0, 1, 2]], dtype=np.int64)
+        shape_key = 888
+        self.renderer._shape_cache = {shape_key: (template_verts, template_faces, 3)}
+        self.renderer._det_shape_keys = np.array([shape_key, shape_key], dtype=np.int64)
+
+        rot_90z = Rotation.from_euler("z", 90, degrees=True).as_matrix()
+        self.renderer._det_rotations = np.stack([np.eye(3), rot_90z])  # (2, 3, 3)
+        self.renderer._det_scales = np.ones((2, 3))
+        self.renderer._all_positions_3d = np.array([[0.0, 0.0, 0.0], [2.0, 0.0, 0.0]])
+
+        mesh, _, _ = self.renderer._assemble_mesh(
+            detector_indices=np.array([0, 1]),
+            detector_positions=np.array([[0.0, 0.0, 0.0], [2.0, 0.0, 0.0]]),
+            projection=None,
+        )
+
+        # Both detectors share shape_key=888, so they are processed in a single
+        # group.  Vertex layout: detector 0 occupies rows 0-2, detector 1 rows 3-5.
+
+        # Detector 0: identity rotation, no translation offset
+        np.testing.assert_allclose(
+            mesh.points[:3],
+            template_verts,
+            atol=1e-10,
+            err_msg="Identity-rotation detector must preserve template vertices",
+        )
+
+        # Detector 1: 90° Z rotation then translated to [2, 0, 0]
+        expected_det1 = (template_verts @ rot_90z.T) + np.array([2.0, 0.0, 0.0])
+        np.testing.assert_allclose(
+            mesh.points[3:],
+            expected_det1,
+            atol=1e-10,
+            err_msg="90°-Z-rotation detector must have rotated and translated vertices",
+        )
+
     # ------------------------------------------------------------------
     # Helper methods to create mock objects
     # ------------------------------------------------------------------
@@ -459,7 +876,6 @@ class TestShapeRenderer(unittest.TestCase):
 
         det_info = MagicMock()
         det_info.size.return_value = n_detectors
-        # Each detector has a unique position
 
         def position(i):
             pos = MagicMock()
@@ -477,10 +893,15 @@ class TestShapeRenderer(unittest.TestCase):
             det_info.indexOf.side_effect = lambda did: int(did)
         det_info.detectorIDs.return_value = list(range(n_detectors))
 
+        # Bulk methods required by precompute() — identity quaternions (scipy [x,y,z,w]) and unit scales
+        det_info.allRotations.return_value = np.tile([0.0, 0.0, 0.0, 1.0], (n_detectors, 1))
+        det_info.allScaleFactors.return_value = np.ones((n_detectors, 3))
+        det_info.allPositions.return_value = np.column_stack([np.arange(n_detectors, dtype=float), np.zeros((n_detectors, 2))])
+
         comp_info = MagicMock()
         comp_info.hasValidShape.return_value = True
 
-        # Create a simple triangle mesh for each shape
+        # Create a simple triangle mesh for each shape (non-cuboid/cylinder so getMesh path is used)
         triangle_mesh = np.array(
             [
                 [[0.0, 0.0, 0.0], [0.01, 0.0, 0.0], [0.0, 0.01, 0.0]],
@@ -492,28 +913,15 @@ class TestShapeRenderer(unittest.TestCase):
         for i in range(n_detectors):
             shape = MagicMock()
             if same_shape:
-                shape.getShapeXML.return_value = "<cuboid>same_shape</cuboid>"
+                shape.getShapeXML.return_value = "<sphere>same_shape</sphere>"
             else:
-                shape.getShapeXML.return_value = f"<cuboid>shape_{i % 2}</cuboid>"
+                shape.getShapeXML.return_value = f"<sphere>shape_{i % 2}</sphere>"
             shape.getMesh.return_value = triangle_mesh.copy()
+            # shapeInfo().shape() returns a MagicMock — does not match GeometryShape.CYLINDER/CUBOID,
+            # so precompute() falls through to the getMesh() path for these mock shapes.
             shape_objs.append(shape)
 
         comp_info.shape.side_effect = lambda idx: shape_objs[idx]
-
-        # Rotation: identity quaternion
-        identity_quat = MagicMock()
-        identity_quat.real.return_value = 1.0
-        identity_quat.imagI.return_value = 0.0
-        identity_quat.imagJ.return_value = 0.0
-        identity_quat.imagK.return_value = 0.0
-        comp_info.rotation.return_value = identity_quat
-
-        # Scale: unit scale
-        unit_scale = MagicMock()
-        unit_scale.X.return_value = 1.0
-        unit_scale.Y.return_value = 1.0
-        unit_scale.Z.return_value = 1.0
-        comp_info.scaleFactor.return_value = unit_scale
 
         workspace.componentInfo.return_value = comp_info
         workspace.detectorInfo.return_value = det_info

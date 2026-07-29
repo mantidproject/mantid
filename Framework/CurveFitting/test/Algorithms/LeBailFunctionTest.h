@@ -187,8 +187,8 @@ public:
 
     // Calculate peak
     MatrixWorkspace_sptr testws = createDataWorkspace(1);
-    const vector<double> vecX = testws->readX(0);
-    const vector<double> vecY = testws->readY(0);
+    const vector<double> vecX = testws->x(0).rawData();
+    const vector<double> vecY = testws->y(0).rawData();
 
     // Calculate peak intensities
     vector<double> summedpeaksvalue(vecY.size(), 0.);
@@ -288,12 +288,12 @@ public:
 
     // Prepare data
     MatrixWorkspace_sptr dataws = createDataWorkspace(2);
-    const MantidVec &vecX = dataws->readX(0);
-    const MantidVec &vecY = dataws->readY(0);
+    Mantid::HistogramData::HistogramX const &vecX = dataws->x(0);
+    Mantid::HistogramData::HistogramY const &vecY = dataws->y(0);
     vector<double> vecoutput(vecY.size(), 0.);
 
     // Calculate peaks' intensities
-    lebailfunction.calculatePeaksIntensities(vecX, vecY, vecoutput);
+    lebailfunction.calculatePeaksIntensities(vecX.rawData(), vecY.rawData(), vecoutput);
 
     // Check
     size_t ipeak1 = 6;
@@ -408,10 +408,10 @@ public:
     MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", 1, vecX.size(), vecY.size());
 
     for (size_t i = 0; i < vecX.size(); ++i)
-      ws->dataX(0)[i] = vecX[i];
+      ws->mutableX(0)[i] = vecX[i];
     for (size_t i = 0; i < vecY.size(); ++i) {
-      ws->dataY(0)[i] = vecY[i];
-      ws->dataE(0)[i] = vecE[i];
+      ws->mutableY(0)[i] = vecY[i];
+      ws->mutableE(0)[i] = vecE[i];
     }
 
     return ws;

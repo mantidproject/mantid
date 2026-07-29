@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
@@ -14,6 +15,7 @@
 
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
+#include <boost/python/dict.hpp>
 #include <boost/python/reference_existing_object.hpp>
 #include <boost/python/return_value_policy.hpp>
 
@@ -29,6 +31,19 @@ namespace {
 ComponentInfoPythonIterator make_pyiterator(ComponentInfo &componentInfo) {
   return ComponentInfoPythonIterator(componentInfo);
 }
+
+dict shapeToComponentIndices(const ComponentInfo &componentInfo) {
+  dict result;
+  const auto shapeMap = componentInfo.shapeToComponentIndices();
+  for (const auto &shape : shapeMap) {
+    const auto csgObject = std::dynamic_pointer_cast<const Mantid::Geometry::CSGObject>(shape.first);
+    if (csgObject != nullptr) {
+      result[csgObject->getShapeXML()] = shape.second;
+    }
+  }
+  return result;
+}
+
 } // namespace
 
 // Function pointers to help resolve ambiguity
@@ -146,5 +161,7 @@ void export_ComponentInfo() {
 
       .def("root", &ComponentInfo::root, arg("self"), "Returns the index of the root component")
       .def("getMemorySize", &ComponentInfo::getMemorySize, arg("self"),
-           "Return the memory footprint of the component info in bytes.");
+           "Return the memory footprint of the component info in bytes.")
+      .def("shapeToComponentIndices", &shapeToComponentIndices, arg("self"),
+           "Returns a mapping of shapes to the indices of components with that shape.");
 }

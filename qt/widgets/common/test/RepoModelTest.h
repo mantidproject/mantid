@@ -44,7 +44,7 @@ public:
     auto *model = new RepoModel();
     // contains TofConv and reflectometry folders
     TS_ASSERT_EQUALS(1, model->rowCount());
-    TS_ASSERT_EQUALS(4, model->columnCount());
+    TS_ASSERT_EQUALS(3, model->columnCount());
     auto index = model->index(0, 0);
     // in TofConv folder should be README.txt and TofConverter.py and
     // reflectometry
@@ -91,20 +91,6 @@ public:
     std::string expectedEntries[6] = {"", "false", "", "false", "true", "true"};
     for (auto i = 0; i < 6; ++i) {
       auto index = getIndex(model, i, 2);
-      auto rowEntry = model->data(index, role).toString().toStdString();
-      TS_ASSERT_EQUALS(expectedEntries[i], rowEntry);
-    }
-  }
-
-  // test the data in the fourth column is displayed correctly. This column
-  // contains whether the file can be deleted.
-  void test_data_fourth_column_entries() {
-    auto *model = new RepoModel();
-    int role = Qt::DisplayRole;
-    auto filenames = scriptRepoMock.listFiles();
-    std::string expectedEntries[6] = {"protected", "deletable", "protected", "protected", "protected", "deletable"};
-    for (auto i = 0; i < 6; ++i) {
-      auto index = getIndex(model, i, 3);
       auto rowEntry = model->data(index, role).toString().toStdString();
       TS_ASSERT_EQUALS(expectedEntries[i], rowEntry);
     }

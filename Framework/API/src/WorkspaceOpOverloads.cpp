@@ -160,7 +160,7 @@ bool equals(const MatrixWorkspace_sptr &lhs, const MatrixWorkspace_sptr &rhs, do
  */
 static MatrixWorkspace_sptr createWorkspaceSingleValue(const double &rhsValue) {
   MatrixWorkspace_sptr retVal = WorkspaceFactory::Instance().create("WorkspaceSingleValue", 1, 1, 1);
-  retVal->dataY(0)[0] = rhsValue;
+  retVal->mutableY(0)[0] = rhsValue;
 
   return retVal;
 }

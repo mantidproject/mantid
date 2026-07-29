@@ -104,11 +104,11 @@ private:
     const size_t xsize = outputWS->blocksize();
     for (size_t i = 0; i < outputWS->getNumberHistograms(); ++i) {
       for (size_t j = 0; j < xsize; ++j) {
-        TS_ASSERT_DELTA(outputWS->readX(i)[j], inputWS->readX(i)[j], 1e-12);
-        double resultY = (multiply) ? factor * inputWS->readY(i)[j] : factor + inputWS->readY(i)[j];
-        TS_ASSERT_DELTA(outputWS->readY(i)[j], resultY, 1e-12);
-        double resultE = (multiply) ? factor * inputWS->readE(i)[j] : inputWS->readE(i)[j];
-        TS_ASSERT_DELTA(outputWS->readE(i)[j], resultE, 1e-12);
+        TS_ASSERT_DELTA(outputWS->x(i)[j], inputWS->x(i)[j], 1e-12);
+        double resultY = (multiply) ? factor * inputWS->y(i)[j] : factor + inputWS->y(i)[j];
+        TS_ASSERT_DELTA(outputWS->y(i)[j], resultY, 1e-12);
+        double resultE = (multiply) ? factor * inputWS->e(i)[j] : inputWS->e(i)[j];
+        TS_ASSERT_DELTA(outputWS->e(i)[j], resultE, 1e-12);
       }
     }
   }

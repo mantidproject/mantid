@@ -334,17 +334,17 @@ public:
     alg->execute();
     auto wsOut = getOutputWorkspace(alg);
 
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.050, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.450, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.950, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[0], 0.050, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[4], 0.450, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[9], 0.950, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.3889, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], 0.000, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.8211, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[0], -0.3889, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[4], 0.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[9], -0.8211, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.04641, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[4], 1.00000, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.19818, 0.0001);
+    TS_ASSERT_DELTA(wsOut->e(0)[0], 0.04641, 0.0001);
+    TS_ASSERT_DELTA(wsOut->e(0)[4], 1.00000, 0.0001);
+    TS_ASSERT_DELTA(wsOut->e(0)[9], 0.19818, 0.0001);
   }
 
   void test_that_single_period_data_combines_detectors_correctly_for_two_group_workspaces() {
@@ -359,17 +359,17 @@ public:
 
     auto wsOut = getOutputWorkspace(alg);
 
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.05, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.45, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.95, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[0], 0.05, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[4], 0.45, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[9], 0.95, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.3889, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], 0.000, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.8211, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[0], -0.3889, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[4], 0.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[9], -0.8211, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.04641, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[4], 1.00000, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.19818, 0.0001);
+    TS_ASSERT_DELTA(wsOut->e(0)[0], 0.04641, 0.0001);
+    TS_ASSERT_DELTA(wsOut->e(0)[4], 1.00000, 0.0001);
+    TS_ASSERT_DELTA(wsOut->e(0)[9], 0.19818, 0.0001);
   }
 
   // //
@@ -389,17 +389,17 @@ public:
 
     auto wsOut = getOutputWorkspace(alg);
 
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.050, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.450, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.950, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[0], 0.050, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[4], 0.450, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[9], 0.950, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.38484955, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], 0.000, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.74269249, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[0], -0.38484955, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[4], 0.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[9], -0.74269249, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.02743, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[4], 1.0000, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.098512, 0.0001);
+    TS_ASSERT_DELTA(wsOut->e(0)[0], 0.02743, 0.0001);
+    TS_ASSERT_DELTA(wsOut->e(0)[4], 1.0000, 0.0001);
+    TS_ASSERT_DELTA(wsOut->e(0)[9], 0.098512, 0.0001);
   }
 
   void
@@ -417,16 +417,16 @@ public:
 
     auto wsOut = getOutputWorkspace(alg);
 
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.050, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.450, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.950, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[0], 0.050, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[4], 0.450, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[9], 0.950, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.00630986, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], 0.000, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.10690094, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[0], -0.00630986, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[4], 0.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[9], -0.10690094, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.05754263, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.2283730, 0.0001);
+    TS_ASSERT_DELTA(wsOut->e(0)[0], 0.05754263, 0.0001);
+    TS_ASSERT_DELTA(wsOut->e(0)[9], 0.2283730, 0.0001);
   }
 
   void
@@ -444,16 +444,16 @@ public:
 
     auto wsOut = getOutputWorkspace(alg);
 
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.050, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.450, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.950, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[0], 0.050, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[4], 0.450, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[9], 0.950, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.00879057, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], 0.0, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.130944, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[0], -0.00879057, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[4], 0.0, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[9], -0.130944, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.0395697, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.122684, 0.0001);
+    TS_ASSERT_DELTA(wsOut->e(0)[0], 0.0395697, 0.0001);
+    TS_ASSERT_DELTA(wsOut->e(0)[9], 0.122684, 0.0001);
   }
 
   void test_that_multi_period_data_combines_detectors_correctly_for_group_workspaces_summed_and_subtracted_periods() {
@@ -472,15 +472,15 @@ public:
 
     auto wsOut = getOutputWorkspace(alg);
 
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.050, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.450, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.950, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[0], 0.050, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[4], 0.450, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[9], 0.950, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.00879057, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], 0.0, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.130944, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[0], -0.00879057, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[4], 0.0, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[9], -0.130944, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.0395697, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.122684, 0.0001);
+    TS_ASSERT_DELTA(wsOut->e(0)[0], 0.0395697, 0.0001);
+    TS_ASSERT_DELTA(wsOut->e(0)[9], 0.122684, 0.0001);
   }
 };

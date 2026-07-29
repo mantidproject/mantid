@@ -25,7 +25,6 @@ from instrumentview.ShapeWidgets import (
 # Keys for the _state interaction dictionary.
 _STATE_MODE = "mode"
 _STATE_ACTIVE_SHAPE = "active_shape"
-_STATE_SAVED_STYLE = "_saved_style"
 _STATE_ROTATE_START_CURSOR = "rotate_start_cursor"
 _STATE_ROTATE_START_ANGLE = "rotate_start_angle"
 _STATE_RESIZE_START = "resize_start"
@@ -256,7 +255,6 @@ class ShapeOverlayManager:
         # inside PyVista's _MultiCompChart.  Clear their borders too.
         self._set_all_chart_borders_zero()
         if was_empty:
-            self._detach_style()
             self._install_observers()
         self._plotter.render()
         self._read_plot_transform()
@@ -267,7 +265,6 @@ class ShapeOverlayManager:
             shape.cleanup()
         self._shapes = []
         self._uninstall_observers()
-        self._restore_style()
         if self._chart is not None:
             try:
                 self._plotter.remove_chart(self._chart)
@@ -301,21 +298,6 @@ class ShapeOverlayManager:
         except Exception as ex:
             logger.debug(f"Failed to remove VTK observers: {ex}")
         self._observer_ids = []
-
-    def _detach_style(self):
-        try:
-            self._state[_STATE_SAVED_STYLE] = self._plotter.iren.style
-            self._plotter.iren.style = None
-        except Exception as ex:
-            logger.debug(f"Failed to detach interactor style: {ex}")
-
-    def _restore_style(self):
-        saved = self._state.pop(_STATE_SAVED_STYLE, None)
-        if saved is not None:
-            try:
-                self._plotter.iren.style = saved
-            except Exception as ex:
-                logger.debug(f"Failed to restore interactor style: {ex}")
 
     def _on_left_press(self, obj, event):
         try:

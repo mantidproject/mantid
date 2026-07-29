@@ -248,7 +248,7 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         @param   xstart       :: MaskBins between x[0] and x[xstart]
         @param   xend         :: MaskBins between x[xend] and x[-1]
         """
-        x_values = mtd[ws].readX(0)
+        x_values = mtd[ws].x(0)
 
         if xstart > 0:
             self.log().debug("Mask bins smaller than {0}".format(xstart))
@@ -308,7 +308,7 @@ class IndirectILLReductionQENS(PythonAlgorithm):
 
         for item in mtd[tmp_int]:
             for index in range(item.getNumberHistograms()):
-                if item.readY(index)[0] <= 0:
+                if item.y(index)[0] <= 0:
                     self.log().warning("Negative or 0 integral in spectrum #{0} {1}".format(index, message))
 
         DeleteWorkspace(tmp_int)

@@ -63,7 +63,7 @@ public:
     auto out1 = std::make_shared<WorkspaceTester>();
     out1->initialize(10, 10, 10);
     out1->setTitle(outName);
-    out1->dataY(0)[0] = getProperty("Number");
+    out1->mutableY(0)[0] = getProperty("Number");
     setProperty("OutputWorkspace1", out1);
     if (!getPropertyValue("OutputWorkspace2").empty()) {
       auto out2 = std::make_shared<WorkspaceTester>();
@@ -707,7 +707,7 @@ public:
 
     TS_ASSERT_EQUALS(ws1->getName(), "D_1");
     TS_ASSERT_EQUALS(ws1->getTitle(), "A_1+B_1+C_1");
-    TS_ASSERT_EQUALS(ws1->readY(0)[0], 234);
+    TS_ASSERT_EQUALS(ws1->y(0)[0], 234);
     TS_ASSERT_EQUALS(ws2->getName(), "D_2");
     TS_ASSERT_EQUALS(ws2->getTitle(), "A_2+B_2+C_2");
     TS_ASSERT_EQUALS(ws3->getName(), "D_3");
@@ -720,7 +720,7 @@ public:
 
     TS_ASSERT_EQUALS(ws1->getName(), "A_1_B_1_alice_D");
     TS_ASSERT_EQUALS(ws1->getTitle(), "A_1+B_1+alice");
-    TS_ASSERT_EQUALS(ws1->readY(0)[0], 234);
+    TS_ASSERT_EQUALS(ws1->y(0)[0], 234);
     TS_ASSERT_EQUALS(ws2->getName(), "A_2_B_2_bob_D");
     TS_ASSERT_EQUALS(ws2->getTitle(), "A_2+B_2+bob");
     TS_ASSERT_EQUALS(ws3->getName(), "A_3_B_3_charlie_D");
@@ -733,7 +733,7 @@ public:
 
     TS_ASSERT_EQUALS(ws1->getName(), "D_1");
     TS_ASSERT_EQUALS(ws1->getTitle(), "A_1+B+C");
-    TS_ASSERT_EQUALS(ws1->readY(0)[0], 234);
+    TS_ASSERT_EQUALS(ws1->y(0)[0], 234);
     TS_ASSERT_EQUALS(ws2->getName(), "D_2");
     TS_ASSERT_EQUALS(ws2->getTitle(), "A_2+B+C");
     TS_ASSERT_EQUALS(ws3->getName(), "D_3");
@@ -746,7 +746,7 @@ public:
 
     TS_ASSERT_EQUALS(ws1->getName(), "D_1");
     TS_ASSERT_EQUALS(ws1->getTitle(), "A_1+B+");
-    TS_ASSERT_EQUALS(ws1->readY(0)[0], 234);
+    TS_ASSERT_EQUALS(ws1->y(0)[0], 234);
     TS_ASSERT_EQUALS(ws2->getName(), "D_2");
     TS_ASSERT_EQUALS(ws2->getTitle(), "A_2+B+");
     TS_ASSERT_EQUALS(ws3->getName(), "D_3");
@@ -759,7 +759,7 @@ public:
 
     TS_ASSERT_EQUALS(ws1->getName(), "D_1");
     TS_ASSERT_EQUALS(ws1->getTitle(), "A_1++C_1");
-    TS_ASSERT_EQUALS(ws1->readY(0)[0], 234);
+    TS_ASSERT_EQUALS(ws1->y(0)[0], 234);
     TS_ASSERT_EQUALS(ws2->getName(), "D_2");
     TS_ASSERT_EQUALS(ws2->getTitle(), "A_2++C_2");
     TS_ASSERT_EQUALS(ws3->getName(), "D_3");
@@ -772,7 +772,7 @@ public:
 
     TS_ASSERT_EQUALS(ws1->getName(), "D_1");
     TS_ASSERT_EQUALS(ws1->getTitle(), "A_1+B+C");
-    TS_ASSERT_EQUALS(ws1->readY(0)[0], 234);
+    TS_ASSERT_EQUALS(ws1->y(0)[0], 234);
   }
 
   /// Two inputs are groups with one member (each)
@@ -781,7 +781,7 @@ public:
 
     TS_ASSERT_EQUALS(ws1->getName(), "D_1");
     TS_ASSERT_EQUALS(ws1->getTitle(), "A_1+B_1+C");
-    TS_ASSERT_EQUALS(ws1->readY(0)[0], 234);
+    TS_ASSERT_EQUALS(ws1->y(0)[0], 234);
   }
 
   void test_processGroups_failOnGroupMemberErrorMessage() {
@@ -811,7 +811,7 @@ public:
 
     TS_ASSERT_EQUALS(ws1->getName(), "D1");
     TS_ASSERT_EQUALS(ws1->getTitle(), "D1+B1+C1");
-    TS_ASSERT_EQUALS(ws1->readY(0)[0], 234);
+    TS_ASSERT_EQUALS(ws1->y(0)[0], 234);
     TS_ASSERT_EQUALS(ws2->getName(), "D2");
     TS_ASSERT_EQUALS(ws2->getTitle(), "D2+B2+C2");
     TS_ASSERT_EQUALS(ws3->getName(), "D3");
@@ -824,7 +824,7 @@ public:
 
     TS_ASSERT_EQUALS(ws1->getName(), "D1");
     TS_ASSERT_EQUALS(ws1->getTitle(), "A1+D1+C1");
-    TS_ASSERT_EQUALS(ws1->readY(0)[0], 234);
+    TS_ASSERT_EQUALS(ws1->y(0)[0], 234);
     TS_ASSERT_EQUALS(ws2->getName(), "D2");
     TS_ASSERT_EQUALS(ws2->getTitle(), "A2+D2+C2");
     TS_ASSERT_EQUALS(ws3->getName(), "D3");
@@ -837,7 +837,7 @@ public:
 
     TS_ASSERT_EQUALS(ws1->getName(), "D1");
     TS_ASSERT_EQUALS(ws1->getTitle(), "A1+D1+D1");
-    TS_ASSERT_EQUALS(ws1->readY(0)[0], 234);
+    TS_ASSERT_EQUALS(ws1->y(0)[0], 234);
     TS_ASSERT_EQUALS(ws2->getName(), "D2");
     TS_ASSERT_EQUALS(ws2->getTitle(), "A2+D2+D2");
     TS_ASSERT_EQUALS(ws3->getName(), "D3");

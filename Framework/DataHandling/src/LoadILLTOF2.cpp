@@ -611,7 +611,7 @@ void LoadILLTOF2::addPulseInterval() {
  */
 std::vector<double> LoadILLTOF2::prepareAxis(const LegacyNexus::NXEntry &entry, bool convertToTOF) {
 
-  std::vector<double> xAxis(m_localWorkspace->readX(0).size());
+  std::vector<double> xAxis(m_localWorkspace->x(0).size());
   if (m_isScan) {
     // read which variable is going to be the axis
     LegacyNexus::NXInt scannedAxis = entry.openNXInt("data_scan/scanned_variables/variables_names/axis");

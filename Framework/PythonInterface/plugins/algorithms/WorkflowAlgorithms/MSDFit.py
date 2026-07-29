@@ -75,7 +75,7 @@ class MSDFit(DataProcessorAlgorithm):
         spec_max = self.getProperty("SpecMax").value
 
         if isinstance(workspace, MatrixWorkspace):
-            x_data = workspace.readX(0)
+            x_data = workspace.x(0)
             if x_min < x_data[0]:
                 issues["XStart"] = "Must be greater than minimum X value in workspace"
 

@@ -301,7 +301,7 @@ def check_hist_zero(workspace_name: str) -> Tuple[int, int]:
     num_hist = AnalysisDataService.retrieve(workspace_name).getNumberHistograms()  # no. of hist/groups in WS
     if num_hist == 0:
         raise ValueError(f"The '{workspace_name}' workspace has zero histograms")
-    x_in = AnalysisDataService.retrieve(workspace_name).readX(0)
+    x_in = AnalysisDataService.retrieve(workspace_name).x(0)
     ntc = len(x_in) - 1  # no. points from length of x array
     if ntc == 0:
         raise ValueError(f"The '{workspace_name}' workspace has zero bins")
@@ -326,10 +326,10 @@ def check_dimensions_equal(workspace_name1: str, descriptor1: str, workspace_nam
       Valuerror: number of bin boundaries in the histograms is different
     """
     num_hist_1 = AnalysisDataService.retrieve(workspace_name1).getNumberHistograms()  # no. of hist/groups in WS1
-    x_1 = AnalysisDataService.retrieve(workspace_name1).readX(0)
+    x_1 = AnalysisDataService.retrieve(workspace_name1).x(0)
     x_len_1 = len(x_1)
     num_hist_2 = AnalysisDataService.retrieve(workspace_name2).getNumberHistograms()  # no. of hist/groups in WS2
-    x_2 = AnalysisDataService.retrieve(workspace_name2).readX(0)
+    x_2 = AnalysisDataService.retrieve(workspace_name2).x(0)
     x_len_2 = len(x_2)
     if num_hist_1 != num_hist_2:  # Check that no. groups are the same
         error_1 = f"{descriptor1} ({workspace_name1}) histograms ({num_hist_1})"
@@ -446,11 +446,11 @@ def identify_non_zero_bin_range(workspace: MatrixWorkspace, workspace_index: int
     @return a tuple of the first and last non-zero values in a spectrum
     """
     # Identify bin index of first and last non-zero y value
-    y_data = workspace.readY(workspace_index)
+    y_data = workspace.y(workspace_index)
     start_data_idx = _first_non_zero(y_data)
     end_data_idx = _first_non_zero(list(reversed(y_data)))
     # Assumes common bin boundaries for each spectra
-    x_data = workspace.readX(0)
+    x_data = workspace.x(0)
     return x_data[start_data_idx], x_data[len(x_data) - end_data_idx - 1]
 
 

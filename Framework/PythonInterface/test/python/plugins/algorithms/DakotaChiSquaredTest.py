@@ -92,7 +92,7 @@ class DakotaChiSquaredTest(unittest.TestCase):
             self.assertEqual(alg[1].name(), "alg")
             self.assertEqual(alg[1].blocksize(), 5)
             self.assertEqual(alg[1].getNumberHistograms(), 1)
-            self.assertEqual(alg[1].dataY(0)[3], 1.5)
+            self.assertEqual(alg[1].y(0)[3], 1.5)
             ads = AnalysisDataServiceImpl.Instance()
             ads.remove("alg")
             alg1 = simpleapi.DakotaChiSquared(self.datafile, self.simfile, self.chifile, ResidualsWorkspace="res")

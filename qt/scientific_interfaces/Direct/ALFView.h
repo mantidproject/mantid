@@ -25,7 +25,6 @@ class MANTIDQT_DIRECT_DLL ALFView : public API::UserSubWindow {
 
 public:
   ALFView(QWidget *parent = nullptr);
-  ~ALFView();
 
   static std::string name() { return "ALFView"; }
   static QString categoryInfo() { return "Direct"; }
@@ -35,6 +34,7 @@ public:
 
 protected:
   void initLayout() override;
+  void closeEvent(QCloseEvent *event) override;
 
 private slots:
   void openHelp();

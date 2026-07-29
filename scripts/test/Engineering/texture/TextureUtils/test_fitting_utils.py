@@ -170,8 +170,8 @@ class TextureUtilsFittingStepsTests(unittest.TestCase):
         mock_fit.return_value = MagicMock()
 
         peak1_window_ws, peak2_window_ws = MagicMock(), MagicMock()
-        peak1_window_ws.readX.return_value = x_vals
-        peak2_window_ws.readX.return_value = x_vals
+        peak1_window_ws.x.return_value = x_vals
+        peak2_window_ws.x.return_value = x_vals
         peak1_window_ws.name.return_value = "peak_window_0"
         peak2_window_ws.name.return_value = "peak_window_1"
 
@@ -255,7 +255,7 @@ class TextureUtilsFittingStepsTests(unittest.TestCase):
 
         x_vals = [1, 1.5, 2]
         window_ws = MagicMock()
-        window_ws.readX.return_value = x_vals
+        window_ws.x.return_value = x_vals
         window_ws.name.return_value = "peak_window_0"
 
         mock_crop_and_combine.return_value = (window_ws, ["ws1_1.0"])
@@ -919,12 +919,12 @@ class TextureUtilsNewFunctionsTests(unittest.TestCase):
 
         # mock workspace data
         ws0, ws1 = MagicMock(), MagicMock()
-        ws0.readX.return_value = np.array([1, 2, 3])
-        ws0.readE.return_value = np.array([0.1, 0.2, 0.3])
-        ws0.readY.return_value = np.array([5, 6, 7])  # readY(3) for calc function
-        ws1.readX.return_value = np.array([4, 5, 6])
-        ws1.readE.return_value = np.array([0.4, 0.5, 0.6])
-        ws1.readY.return_value = np.array([8, 9, 10])
+        ws0.x.return_value = np.array([1, 2, 3])
+        ws0.e.return_value = np.array([0.1, 0.2, 0.3])
+        ws0.y.return_value = np.array([5, 6, 7])  # readY(3) for calc function
+        ws1.x.return_value = np.array([4, 5, 6])
+        ws1.e.return_value = np.array([0.4, 0.5, 0.6])
+        ws1.y.return_value = np.array([8, 9, 10])
         mock_get_eval_ws.side_effect = [ws0, ws1]
 
         mock_calc_sigma.side_effect = [(2.0, 1.5), (5.0, 4.0)]
@@ -947,9 +947,9 @@ class TextureUtilsNewFunctionsTests(unittest.TestCase):
         func.nDomains.return_value = 1
 
         ws0 = MagicMock()
-        ws0.readX.return_value = np.array([1, 2, 3])
-        ws0.readE.return_value = np.array([0.1, 0.2, 0.3])
-        ws0.readY.return_value = np.array([5, 6, 7])
+        ws0.x.return_value = np.array([1, 2, 3])
+        ws0.e.return_value = np.array([0.1, 0.2, 0.3])
+        ws0.y.return_value = np.array([5, 6, 7])
         mock_get_eval_ws.return_value = ws0
         mock_calc_sigma.return_value = (0.0, None)
 

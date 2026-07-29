@@ -1077,10 +1077,10 @@ def create_test_ws():
         ]
     )
 
-    tof_ws.setY(0, arr_y_0)
-    tof_ws.setY(1, arr_y_1)
-    tof_ws.setE(0, arr_e_0)
-    tof_ws.setE(1, arr_e_1)
+    tof_ws.setSharedY(0, arr_y_0)
+    tof_ws.setSharedY(1, arr_y_1)
+    tof_ws.setSharedE(0, arr_e_0)
+    tof_ws.setSharedE(1, arr_e_1)
     return tof_ws
 
 
@@ -2152,8 +2152,8 @@ def create_test_container_ws():
             0.0146234,
         ]
     )
-    can_ws.setY(0, arr_y_0)
-    can_ws.setY(1, arr_y_1)
-    can_ws.setE(0, arr_e_0)
-    can_ws.setE(1, arr_e_1)
+    can_ws.setSharedY(0, arr_y_0)
+    can_ws.setSharedY(1, arr_y_1)
+    can_ws.setSharedE(0, arr_e_0)
+    can_ws.setSharedE(1, arr_e_1)
     return can_ws

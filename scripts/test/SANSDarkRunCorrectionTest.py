@@ -247,10 +247,10 @@ class DarkRunNormalizationExtractorTest(unittest.TestCase):
 
         # Assert
         if log_name == "good_frames":
-            time_frame_scatter = ws_scatter.dataX(0)[-1] - ws_scatter.dataX(0)[0]
+            time_frame_scatter = ws_scatter.x(0)[-1] - ws_scatter.x(0)[0]
             number_of_frames_scatter = ws_scatter.getRun().getProperty("good_frames").value[-1]
 
-            time_frame_dark = ws_dark.dataX(0)[-1] - ws_dark.dataX(0)[0]
+            time_frame_dark = ws_dark.x(0)[-1] - ws_dark.x(0)[0]
             number_of_frames_dark = ws_dark.getRun().getProperty("good_frames").value[-1]
 
             expected_ratio = float(time_frame_scatter * number_of_frames_scatter) / float(time_frame_dark * number_of_frames_dark)

@@ -8,6 +8,7 @@ from instrumentview.Projections.ProjectionType import ProjectionType
 from instrumentview.Projections.Projection import SideBySide
 from instrumentview.Projections.SideBySide import FlatBankInfo
 
+from scipy.spatial.transform import Rotation
 import numpy as np
 from unittest.mock import MagicMock, patch
 import unittest
@@ -71,7 +72,11 @@ class TestSideBySideProjection(unittest.TestCase):
     def _create_side_by_side(self, detector_ids: list[int], has_other_detectors: bool) -> SideBySide:
         mock_workspace = MagicMock()
         mock_detector_info = MagicMock()
-        mock_detector_info.detectorIDs.return_value = detector_ids + [100] if has_other_detectors else detector_ids
+        all_ids = detector_ids + [100] if has_other_detectors else detector_ids
+        mock_detector_info.detectorIDs.return_value = all_ids
+        mock_detector_info.allPositions.return_value = np.array([[float(det_id), 0.0, 0.0] for det_id in all_ids])
+        mock_detector_info.allRotations.return_value = np.array([Rotation.identity().as_quat() for _ in all_ids])
+        mock_detector_info.allScaleFactors.return_value = np.array([[1.0, 1.0, 1.0] for _ in all_ids])
         mock_workspace.detectorInfo.return_value = mock_detector_info
         side_by_side = SideBySide(
             type=ProjectionType.SIDE_BY_SIDE,
@@ -156,12 +161,13 @@ class TestSideBySideProjection(unittest.TestCase):
     def test_construct_tube_banks(self, mock_panels_surface_calculator, mock_calculate_detector_coords):
         detector_IDs = [5, 10, 15, 20, 25]
         side_by_side = self._create_side_by_side(detector_IDs, True)
-        side_by_side._component_index_detector_id_map = {id: id for id in detector_IDs}
+        component_indices = list(range(len(detector_IDs)))
+        side_by_side._component_index_detector_id_map = dict(zip(component_indices, detector_IDs))
         mock_component_info = side_by_side._workspace.componentInfo()
         side_by_side._calculator.getAllTubeDetectorFlatGroupParents.return_value = [[3]]
         side_by_side._calculator.calculateBankNormal.return_value = [0, 0, -1]
         side_by_side._calculator.calcBankRotation.return_value = Quat(1, 0, 1, 0)
-        mock_component_info.children.return_value = detector_IDs
+        mock_component_info.children.return_value = component_indices
         mock_component_info.position.return_value = [0, 1, 0]
         tube_banks = side_by_side._construct_tube_banks(mock_component_info)
         self.assertEqual(1, len(tube_banks))

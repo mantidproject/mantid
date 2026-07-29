@@ -350,7 +350,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         AddSampleLog(Workspace=workspace, LogName="two_theta", LogText=str(two_theta_degrees), LogType="Number", LogUnit="degree")
 
         # Get an array with the center wavelength value for each bin
-        wl_values = workspace.readX(0)
+        wl_values = workspace.x(0)
 
         AddSampleLog(Workspace=workspace, LogName="lambda_min", LogText=str(wl_values[0]), LogType="Number", LogUnit="Angstrom")
         AddSampleLog(Workspace=workspace, LogName="lambda_max", LogText=str(wl_values[-1]), LogType="Number", LogUnit="Angstrom")
@@ -489,7 +489,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         AddSampleLog(Workspace=q_workspace, LogName="lambda_min", LogText=str(lambda_min), LogType="Number", LogUnit="Angstrom")
         AddSampleLog(Workspace=q_workspace, LogName="lambda_max", LogText=str(lambda_max), LogType="Number", LogUnit="Angstrom")
 
-        data_x = q_workspace.dataX(0)
+        data_x = q_workspace.mutableX(0)
         for i in range(len(data_x)):
             data_x[i] = constant / data_x[i]
         q_workspace = SortXAxis(InputWorkspace=q_workspace, OutputWorkspace=str(q_workspace))
@@ -520,7 +520,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         # Replace NaNs by zeros
         q_rebin = ReplaceSpecialValues(InputWorkspace=q_rebin, OutputWorkspace=str(q_rebin), NaNValue=0.0, NaNError=0.0)
         # Crop to non-zero values
-        data_y = q_rebin.readY(0)
+        data_y = q_rebin.y(0)
         low_q = None
         high_q = None
         for i in range(len(data_y)):
@@ -538,13 +538,13 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
             if crop:
                 low_q += 1
                 high_q -= 1
-            data_x = q_rebin.readX(0)
+            data_x = q_rebin.x(0)
             q_rebin = CropWorkspace(InputWorkspace=q_rebin, OutputWorkspace=str(q_rebin), XMin=data_x[low_q], XMax=data_x[high_q])
         elif cleanup:
             logger.error("Data is all zeros. Check your TOF ranges.")
 
         # Clean up the workspace for backward compatibility
-        data_y = q_rebin.dataY(0)
+        data_y = q_rebin.y(0)
 
         if self.getProperty("AcceptNullReflectivity").value is False and sum(data_y) == 0:
             raise RuntimeError("The reflectivity is all zeros: check your peak selection")
@@ -595,8 +595,8 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         lambda_max = ws.getRun().getProperty("lambda_max").value
         dq_over_q = np.min(res) / np.tan(theta)
 
-        data_x = ws.dataX(0)
-        data_dx = ws.dataDx(0)
+        data_x = ws.x(0)
+        data_dx = ws.mutableDx(0)
         dwl = (lambda_max - lambda_min) / len(data_x) / np.sqrt(12.0)
         for i in range(len(data_x)):
             dq_theta = data_x[i] * dq_over_q

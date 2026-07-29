@@ -39,7 +39,7 @@ private:
     // Fake a TOF unit in the data.
     test_in->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
     for (size_t i = 0; i < test_in->dataX(0).size(); ++i) {
-      test_in->dataX(0)[i] += shift;
+      test_in->mutableX(0)[i] += shift;
     }
     test_in->setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(NUMPIXELS / 9));
     // Make sure the detector IDs are ok

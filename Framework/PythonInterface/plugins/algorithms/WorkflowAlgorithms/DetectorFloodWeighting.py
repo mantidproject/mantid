@@ -159,8 +159,8 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
         progress.report()
         # Fix-up ranges
         for i in range(normalized.getNumberHistograms()):
-            normalized.dataX(i)[0] = bands[0]
-            normalized.dataX(i)[1] = bands[-1]
+            normalized.mutableX(i)[0] = bands[0]
+            normalized.mutableX(i)[1] = bands[-1]
 
         self.setProperty("OutputWorkspace", normalized)
 

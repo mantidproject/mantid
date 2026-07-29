@@ -288,12 +288,12 @@ class RectanglePlotTest(unittest.TestCase):
         self.assertTrue(mtd.doesExist("y_cut_0"))
 
         x_cut = mtd["x_cut_0"]
-        data = x_cut.dataY(0)
+        data = x_cut.y(0)
         self.assertEqual(data.shape[0], 10)
         self.assertAlmostEqual(data[5], 3.955, 3)
 
         y_cut = mtd["y_cut_0"]
-        data = y_cut.dataY(0)
+        data = y_cut.y(0)
         self.assertEqual(data.shape[0], 10)
         self.assertAlmostEqual(data[5], 3.955, 3)
 

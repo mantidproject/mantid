@@ -209,8 +209,8 @@ class MDNormSCDPreprocessIncoherent(DataProcessorAlgorithm):
         flux = mtd["__van"]
         for i in range(flux.getNumberHistograms()):
             el = flux.getSpectrum(i)
-            if flux.readY(i)[0] > 0:
-                el.divide(flux.readY(i)[0], flux.readE(i)[0])
+            if flux.y(i)[0] > 0:
+                el.divide(flux.y(i)[0], flux.e(i)[0])
         SortEvents(InputWorkspace="__van", SortBy="X Value")
         IntegrateFlux(InputWorkspace="__van", OutputWorkspace=_Flux_name, NPoints=10000)
         DeleteWorkspace("__van")

@@ -201,7 +201,7 @@ class SANSStitch(DataProcessorAlgorithm):
             # Strip zeros is only possible on 1D workspaces
             return ws
 
-        y_vals = ws.readY(0)
+        y_vals = ws.y(0)
         length = len(y_vals)
         # Find the first non-zero value
         start = 0
@@ -217,7 +217,7 @@ class SANSStitch(DataProcessorAlgorithm):
                 stop = j
                 break
         # Find the appropriate X values and call CropWorkspace
-        x_vals = ws.readX(0)
+        x_vals = ws.x(0)
         start_x = x_vals[start]
         # Make sure we're inside the bin that we want to crop
         if len(y_vals) == len(x_vals):
@@ -242,22 +242,22 @@ class SANSStitch(DataProcessorAlgorithm):
 
     def _check_bins(self, merge_min, merge_max, cF, cR):
         if cF.yIndexOfX(merge_min) == cR.yIndexOfX(merge_max):
-            return cF.readX(0)[cR.yIndexOfX(merge_max) + 1]
+            return cF.x(0)[cR.yIndexOfX(merge_max) + 1]
         else:
             return merge_max
 
     def _check_merge_range(self, merge_min, merge_max, q_LAB, q_HAB, logger):
-        if merge_min < min(q_HAB.dataX(0)):
-            merge_min = min(q_HAB.dataX(0))
+        if merge_min < min(q_HAB.x(0)):
+            merge_min = min(q_HAB.x(0))
             logger.warning("Minimum merge region less than data overlap setting to HAB minimum q")
-        elif merge_min > max(q_LAB.dataX(0)):
-            merge_min = max(q_LAB.dataX(0))
+        elif merge_min > max(q_LAB.x(0)):
+            merge_min = max(q_LAB.x(0))
             logger.warning("Minimum merge region greater than data overlap setting to LAB maximum q")
-        if merge_max > max(q_LAB.dataX(0)):
-            merge_max = max(q_LAB.dataX(0))
+        if merge_max > max(q_LAB.x(0)):
+            merge_max = max(q_LAB.x(0))
             logger.warning("Maximum merge region greater than data overlap setting to LAB maximum q")
-        elif merge_max < min(q_HAB.dataX(0)):
-            merge_max = min(q_HAB.dataX(0))
+        elif merge_max < min(q_HAB.x(0)):
+            merge_max = min(q_HAB.x(0))
             logger.warning("Maximum merge region less than data overlap setting to HAB minimum q")
 
         return merge_min, merge_max
@@ -271,14 +271,14 @@ class SANSStitch(DataProcessorAlgorithm):
 
         mask_alg.setProperty("InputWorkspace", cF)
         mask_alg.setProperty("OutputWorkspace", EMPTY_NAME)
-        mask_alg.setProperty("XMin", min(cF.dataX(0)))
+        mask_alg.setProperty("XMin", min(cF.x(0)))
         mask_alg.setProperty("XMax", merge_min)
         mask_alg.execute()
         cF = mask_alg.getProperty("OutputWorkspace").value
 
         mask_alg.setProperty("InputWorkspace", nF)
         mask_alg.setProperty("OutputWorkspace", EMPTY_NAME)
-        mask_alg.setProperty("XMin", min(nF.dataX(0)))
+        mask_alg.setProperty("XMin", min(nF.x(0)))
         mask_alg.setProperty("XMax", merge_min)
         mask_alg.execute()
         nF = mask_alg.getProperty("OutputWorkspace").value
@@ -286,14 +286,14 @@ class SANSStitch(DataProcessorAlgorithm):
         mask_alg.setProperty("InputWorkspace", cR)
         mask_alg.setProperty("OutputWorkspace", EMPTY_NAME)
         mask_alg.setProperty("XMin", merge_max)
-        mask_alg.setProperty("XMax", max(cR.dataX(0)))
+        mask_alg.setProperty("XMax", max(cR.x(0)))
         mask_alg.execute()
         cR = mask_alg.getProperty("OutputWorkspace").value
 
         mask_alg.setProperty("InputWorkspace", nR)
         mask_alg.setProperty("OutputWorkspace", EMPTY_NAME)
         mask_alg.setProperty("XMin", merge_max)
-        mask_alg.setProperty("XMax", max(nR.dataX(0)))
+        mask_alg.setProperty("XMax", max(nR.x(0)))
         mask_alg.execute()
         nR = mask_alg.getProperty("OutputWorkspace").value
         return cR, cF, nR, nF
@@ -341,8 +341,8 @@ class SANSStitch(DataProcessorAlgorithm):
         if not mode == Mode.NoneFit:
             scale_factor, shift_factor = self._run_fit(q_high_angle, q_low_angle, scale_factor, shift_factor, fit_min, fit_max)
 
-        min_q = min(min(q_high_angle.dataX(0)), min(q_low_angle.dataX(0)))
-        max_q = max(max(q_high_angle.dataX(0)), max(q_low_angle.dataX(0)))
+        min_q = min(min(q_high_angle.x(0)), min(q_low_angle.x(0)))
+        max_q = max(max(q_high_angle.x(0)), max(q_low_angle.x(0)))
 
         # Crop our input workspaces
         cF = self._crop_to_x_range(cF, min_q, max_q)
@@ -492,10 +492,10 @@ class QErrorCorrectionForMergedWorkspaces(object):
         if not count_ws_rear.hasDx(0) or not count_ws_front.hasDx(0):
             return
 
-        q_resolution_front = count_ws_front.readDx(0)
-        q_resolution_rear = count_ws_rear.readDx(0)
-        counts_front = count_ws_front.readY(0)
-        counts_rear = count_ws_rear.readY(0)
+        q_resolution_front = count_ws_front.dx(0)
+        q_resolution_rear = count_ws_rear.dx(0)
+        counts_front = count_ws_front.y(0)
+        counts_rear = count_ws_rear.y(0)
 
         # We need to make sure that the workspaces match in length
         if (len(q_resolution_front) != len(q_resolution_rear)) or (len(counts_front) != len(counts_rear)):

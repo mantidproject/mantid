@@ -195,8 +195,8 @@ class TOFTOFMergeRuns(PythonAlgorithm):
         for i in range(len(wsNames)):
             leftWorkspace = wsNames[i]
             rightWorkspace = wsNames[i + 1]
-            leftXData = api.mtd[leftWorkspace].dataX(0)
-            rightXData = api.mtd[rightWorkspace].dataX(0)
+            leftXData = api.mtd[leftWorkspace].x(0)
+            rightXData = api.mtd[rightWorkspace].x(0)
             leftDeltaX = leftXData[0] - leftXData[1]
             rightDeltaX = rightXData[0] - rightXData[1]
             if abs(leftDeltaX - rightDeltaX) >= 1e-4 or abs(rightXData[0] - leftXData[0]) >= 1e-4:

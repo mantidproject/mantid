@@ -478,7 +478,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                     ReferenceWorkspace=outputSamples[self.stitch_reference_index],
                     OutputScaleFactorsWorkspace=stitch_params_ws,
                 )
-                mtd[stitched].getRun().addProperty("stitch_scale_factors", list(mtd[stitch_params_ws].readY(0)), True)
+                mtd[stitched].getRun().addProperty("stitch_scale_factors", list(mtd[stitch_params_ws].y(0)), True)
                 DeleteWorkspace(stitch_params_ws)
                 outputSamples.append(stitched)
             except RuntimeError as re:
@@ -528,8 +528,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                     RenameWorkspace(InputWorkspace=old_name, OutputWorkspace=new_name)
                     ConvertToPointData(InputWorkspace=new_name, OutputWorkspace=new_name)
                     ReplaceSpecialValues(InputWorkspace=new_name, OutputWorkspace=new_name, NaNValue=0)
-                    y = mtd[new_name].readY(0)
-                    x = mtd[new_name].readX(0)
+                    y = mtd[new_name].y(0)
+                    x = mtd[new_name].x(0)
                     nonzero = np.nonzero(y)
                     CropWorkspace(InputWorkspace=new_name, XMin=x[nonzero][0] - 1, XMax=x[nonzero][-1], OutputWorkspace=new_name)
                     suffix = self.createCustomSuffix(new_name)
@@ -795,9 +795,10 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             components = instrument.getStringParameter("detector_panels")
             if components:
                 components = components[0].split(",")
+                component_info = mtd[ws].componentInfo()
                 for c in components:
                     if c in ws:
-                        distance = instrument.getComponentByName(c).getPos()[2]
+                        distance = component_info.position(component_info.indexOfAny(c))[2]
                         break
             if not distance:
                 distance = float(logs[DISTANCE_LOG])

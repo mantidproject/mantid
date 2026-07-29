@@ -64,9 +64,9 @@ class ISISMuonAnalysis(systemtesting.MantidSystemTest, metaclass=ABCMeta):
         # Rebin then...
         if self.rebin:
             ws = mtd[outputWS]
-            binSize = ws.dataX(0)[1] - ws.dataX(0)[0]
-            firstX = ws.dataX(0)[0]
-            lastX = ws.dataX(0)[ws.blocksize()]
+            binSize = ws.x(0)[1] - ws.x(0)[0]
+            firstX = ws.x(0)[0]
+            lastX = ws.x(0)[ws.blocksize()]
 
             if self.rebin_fixed:
                 Rebin(InputWorkspace=outputWS, OutputWorkspace=outputWS, Params=str(binSize * float(self.rebin_params)))

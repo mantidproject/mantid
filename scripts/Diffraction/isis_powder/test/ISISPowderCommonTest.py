@@ -332,7 +332,7 @@ class ISISPowderCommonTest(unittest.TestCase):
         # Get the only workspace in the list, ask for the 0th spectrum and the value at the 200th bin
         self.assertTrue(isinstance(single_workspace, list))
         self.assertEqual(len(single_workspace), 1)
-        self.assertAlmostEqual(single_workspace[0].readY(0)[bin_index], first_run_bin_value)
+        self.assertAlmostEqual(single_workspace[0].y(0)[bin_index], first_run_bin_value)
         mantid.DeleteWorkspace(single_workspace[0])
 
         # Does it return multiple workspaces when instructed
@@ -344,8 +344,8 @@ class ISISPowderCommonTest(unittest.TestCase):
         self.assertEqual(len(multiple_ws), 2)
 
         # Check the bins haven't been summed
-        self.assertAlmostEqual(multiple_ws[0].readY(0)[bin_index], first_run_bin_value)
-        self.assertAlmostEqual(multiple_ws[1].readY(0)[bin_index], second_run_bin_value)
+        self.assertAlmostEqual(multiple_ws[0].y(0)[bin_index], first_run_bin_value)
+        self.assertAlmostEqual(multiple_ws[1].y(0)[bin_index], second_run_bin_value)
         for ws in multiple_ws:
             mantid.DeleteWorkspace(ws)
 
@@ -358,7 +358,7 @@ class ISISPowderCommonTest(unittest.TestCase):
         self.assertEqual(len(summed_ws), 1)
 
         # Check bins have been summed
-        self.assertAlmostEqual(summed_ws[0].readY(0)[bin_index], (first_run_bin_value + second_run_bin_value))
+        self.assertAlmostEqual(summed_ws[0].y(0)[bin_index], (first_run_bin_value + second_run_bin_value))
         mantid.DeleteWorkspace(summed_ws[0])
 
     def test_load_raw_files_respects_keep_raw_workspace_setting(self):
@@ -390,13 +390,13 @@ class ISISPowderCommonTest(unittest.TestCase):
             instrument=ISISPowderMockInst(file_ext=file_ext_one), run_number_string=run_number
         )
         # Have to store result and delete the ws as they share the same name so will overwrite
-        result_ws_one = returned_ws_one[0].readY(0)[bin_index]
+        result_ws_one = returned_ws_one[0].y(0)[bin_index]
         mantid.DeleteWorkspace(returned_ws_one[0])
 
         returned_ws_two = common.load_current_normalised_ws_list(
             instrument=ISISPowderMockInst(file_ext=file_ext_two), run_number_string=run_number
         )
-        result_ws_two = returned_ws_two[0].readY(0)[bin_index]
+        result_ws_two = returned_ws_two[0].y(0)[bin_index]
         mantid.DeleteWorkspace(returned_ws_two[0])
 
         # Ensure it loaded two different workspaces
@@ -418,8 +418,8 @@ class ISISPowderCommonTest(unittest.TestCase):
         new_bin_width = 0.5
         # Originally had bins at 1 unit each. So binning of 0.5 should give us 2n bins back
         original_number_bins = ws.blocksize()
-        original_first_x_val = ws.readX(0)[0]
-        original_last_x_val = ws.readX(0)[-1]
+        original_first_x_val = ws.x(0)[0]
+        original_last_x_val = ws.x(0)[-1]
 
         expected_bins = original_number_bins * 2
 
@@ -427,8 +427,8 @@ class ISISPowderCommonTest(unittest.TestCase):
         self.assertEqual(ws.blocksize(), expected_bins)
 
         # Check bin boundaries were preserved
-        self.assertEqual(ws.readX(0)[0], original_first_x_val)
-        self.assertEqual(ws.readX(0)[-1], original_last_x_val)
+        self.assertEqual(ws.x(0)[0], original_first_x_val)
+        self.assertEqual(ws.x(0)[-1], original_last_x_val)
 
         mantid.DeleteWorkspace(ws)
 
@@ -455,8 +455,8 @@ class ISISPowderCommonTest(unittest.TestCase):
         self.assertEqual(ws.blocksize(), original_number_bins)
 
         # Check bin boundaries were changed
-        self.assertEqual(ws.readX(0)[0], expected_start_x)
-        self.assertEqual(ws.readX(0)[-1], expected_end_x)
+        self.assertEqual(ws.x(0)[0], expected_start_x)
+        self.assertEqual(ws.x(0)[-1], expected_end_x)
 
         mantid.DeleteWorkspace(ws)
 
@@ -528,8 +528,8 @@ class ISISPowderCommonTest(unittest.TestCase):
         )
         self.assertEqual(len(output_list), number_of_ws)
         for ws in output_list:
-            self.assertEqual(ws.readX(0)[0], new_start_x)
-            self.assertEqual(ws.readX(0)[-1], new_end_x)
+            self.assertEqual(ws.x(0)[0], new_start_x)
+            self.assertEqual(ws.x(0)[-1], new_end_x)
             mantid.DeleteWorkspace(ws)
 
     def test_remove_intermediate_workspace(self):
@@ -569,9 +569,9 @@ class ISISPowderCommonTest(unittest.TestCase):
         # Add Good Proton Charge Log
         mantid.AddSampleLog(Workspace=ws, LogName="gd_prtn_chrg", LogText=prtn_charge, LogType="Number")
 
-        self.assertEqual(initial_value, ws.dataY(0)[0])
+        self.assertEqual(initial_value, ws.y(0)[0])
         common.run_normalise_by_current(ws)
-        self.assertAlmostEqual(expected_value, ws.dataY(0)[0], delta=1e-8)
+        self.assertAlmostEqual(expected_value, ws.mutableY(0)[0], delta=1e-8)
 
     def test_spline_workspaces(self):
         ws_list = []
@@ -581,9 +581,9 @@ class ISISPowderCommonTest(unittest.TestCase):
 
         splined_list = common.spline_workspaces(focused_vanadium_spectra=ws_list, num_splines=10)
         for ws in splined_list:
-            self.assertAlmostEqual(ws.dataY(0)[25], 0.28576649, delta=1e-8)
-            self.assertAlmostEqual(ws.dataY(0)[50], 0.37745918, delta=1e-8)
-            self.assertAlmostEqual(ws.dataY(0)[75], 0.28133096, delta=1e-8)
+            self.assertAlmostEqual(ws.mutableY(0)[25], 0.28576649, delta=1e-8)
+            self.assertAlmostEqual(ws.mutableY(0)[50], 0.37745918, delta=1e-8)
+            self.assertAlmostEqual(ws.mutableY(0)[75], 0.28133096, delta=1e-8)
 
         for input_ws, splined_ws in zip(ws_list, splined_list):
             mantid.DeleteWorkspace(input_ws)
@@ -593,13 +593,13 @@ class ISISPowderCommonTest(unittest.TestCase):
         sample_empty_number = "100"
         ws_file_name = "POL" + sample_empty_number
         original_ws = mantid.Load(ws_file_name)
-        original_y = original_ws.readY(0)
+        original_y = original_ws.y(0)
         scale_factor = 0.75
 
         scaled_ws = common.generate_summed_runs(
             empty_ws_string=sample_empty_number, instrument=ISISPowderMockInst(), scale_factor=scale_factor
         )
-        scaled_y_values = scaled_ws.readY(0)
+        scaled_y_values = scaled_ws.y(0)
         self.assertAlmostEqual(scaled_y_values[2], original_y[2] * scale_factor)
         self.assertAlmostEqual(scaled_y_values[4], original_y[4] * scale_factor)
         self.assertAlmostEqual(scaled_y_values[7], original_y[7] * scale_factor)
@@ -619,8 +619,8 @@ class ISISPowderCommonTest(unittest.TestCase):
         empty_ws = empty_ws * 0.3
 
         returned_ws = common.subtract_summed_runs(ws_to_correct=no_scale_ws, empty_ws=empty_ws)
-        y_values = returned_ws.readY(0)
-        original_y_values = original_ws.readY(0)
+        y_values = returned_ws.y(0)
+        original_y_values = original_ws.y(0)
         for i in range(returned_ws.blocksize()):
             self.assertAlmostEqual(y_values[i], original_y_values[i] * 0.7)
 
@@ -639,8 +639,8 @@ class ISISPowderCommonTest(unittest.TestCase):
         empty_ws = empty_ws * 0.3
 
         returned_ws = common.subtract_summed_runs(ws_to_correct=ws_to_correct, empty_ws=empty_ws)
-        y_values = returned_ws.readY(0)
-        original_y_values = original_ws.readY(0)
+        y_values = returned_ws.y(0)
+        original_y_values = original_ws.y(0)
         # subtraction should be skipped leaving original values
         for i in range(returned_ws.blocksize()):
             self.assertAlmostEqual(y_values[i], original_y_values[i])

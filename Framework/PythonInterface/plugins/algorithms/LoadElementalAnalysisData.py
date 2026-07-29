@@ -88,7 +88,7 @@ class LoadElementalAnalysisData(PythonAlgorithm):
         """inputs is a dict mapping filepaths to output names"""
         for path, output in inputs.items():
             workspace = LoadAscii(path, OutputWorkspace=output)
-            workspace.setE(0, np.sqrt(workspace.dataY(0)))
+            workspace.setSharedE(0, np.sqrt(workspace.y(0)))
             workspace.getAxis(0).setUnit("Label").setLabel("Energy", "keV")
 
     def merge_and_crop_workspaces(self, workspaces):
@@ -120,7 +120,7 @@ class LoadElementalAnalysisData(PythonAlgorithm):
                 minX, maxX = [], []
                 ws = AnalysisDataService.retrieve(detector)
                 for i in range(ws.getNumberHistograms()):
-                    xdata = ws.readX(i)
+                    xdata = ws.x(i)
                     minX.append(xdata[0])
                     if i == 2:
                         maxX.append(xdata[-1])
@@ -154,22 +154,22 @@ class LoadElementalAnalysisData(PythonAlgorithm):
                     if ws.isHistogramData():
                         ws = ConvertToPointData(InputWorkspace=ws.name(), OutputWorkspace=ws.name())
                     # find max x val
-                    max_x = np.max(ws.readX(0))
+                    max_x = np.max(ws.x(0))
                     # get current number of bins
                     num_bins = ws.blocksize()
                     # pad bins
                     X_padded = np.empty(max_num_bins)
                     X_padded.fill(max_x)
-                    X_padded[:num_bins] = ws.readX(0)
+                    X_padded[:num_bins] = ws.x(0)
                     Y_padded = np.zeros(max_num_bins)
-                    Y_padded[:num_bins] = ws.readY(0)
+                    Y_padded[:num_bins] = ws.y(0)
                     E_padded = np.zeros(max_num_bins)
-                    E_padded[:num_bins] = ws.readE(0)
+                    E_padded[:num_bins] = ws.e(0)
 
                     # set row of merged workspace
-                    merged_ws.setX(i, X_padded)
-                    merged_ws.setY(i, Y_padded)
-                    merged_ws.setE(i, E_padded)
+                    merged_ws.setSharedX(i, X_padded)
+                    merged_ws.setSharedY(i, Y_padded)
+                    merged_ws.setSharedE(i, E_padded)
 
                     # set y axis labels
                     self.set_y_axis_labels(merged_ws, SPECTRUM_INDEX)

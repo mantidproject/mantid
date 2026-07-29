@@ -8,6 +8,8 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include <set>
+
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/ExtractSpectra.h"
@@ -145,6 +147,20 @@ public:
     params.testWorkspaceIndexList(*ws);
   }
 
+  void test_duplicate_workspace_indices_are_deduplicated() {
+    Parameters params;
+    params.WorkspaceIndexList = {0, 2, 2, 4};
+
+    auto ws = runAlgorithm(params);
+
+    TS_ASSERT(ws);
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), 3);
+
+    const std::set<double> actualYValues{ws->y(0)[0], ws->y(1)[0], ws->y(2)[0]};
+    const std::set<double> expectedYValues{0.0, 2.0, 4.0};
+    TS_ASSERT_EQUALS(actualYValues, expectedYValues);
+  }
+
   void test_index_and_spectrum_list() {
     Parameters params;
     params.setWorkspaceIndexList().setIndexRange();
@@ -194,6 +210,20 @@ public:
 
     TS_ASSERT_EQUALS(ws->blocksize(), nBins);
     params.testDetectorList(*ws);
+  }
+
+  void test_duplicate_detector_ids_are_deduplicated() {
+    Parameters params("histo-detector");
+    params.DetectorList = {1, 3, 3, 5};
+
+    auto ws = runAlgorithm(params);
+
+    TS_ASSERT(ws);
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), 3);
+
+    const std::set<double> actualYValues{ws->y(0)[0], ws->y(1)[0], ws->y(2)[0]};
+    const std::set<double> expectedYValues{0.0, 2.0, 4.0};
+    TS_ASSERT_EQUALS(actualYValues, expectedYValues);
   }
 
   void test_index_and_detector_list() {

@@ -34,9 +34,9 @@ std::pair<double, double> getRangeFromWorkspace(MatrixWorkspace const &inputWork
 
   auto midGoodIndex = int(floor(((double(lastGoodIndex) - double(firstGoodIndex)) / 2.)));
 
-  double midGood = inputWorkspace.readX(index)[midGoodIndex];
+  double midGood = inputWorkspace.x(index)[midGoodIndex];
 
-  double lastGood = inputWorkspace.readX(index)[lastGoodIndex];
+  double lastGood = inputWorkspace.x(index)[lastGoodIndex];
 
   return std::make_pair(midGood, lastGood);
 }
@@ -106,7 +106,7 @@ std::map<std::string, std::string> PSIBackgroundSubtraction::validateInputs() {
     if (firstGood < 0) {
       errors["InputWorkspace"] += "\n Input Workspace should have first good data > 0. ";
     }
-    if (lastGood >= int(inputWS->readX(index).size())) {
+    if (lastGood >= int(inputWS->x(index).size())) {
       errors["InputWorkspace"] += "\n Input Workspace should have last good data < number of bins. ";
     }
   }

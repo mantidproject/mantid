@@ -44,7 +44,7 @@ class CalculateTransmissionHelperTest(unittest.TestCase):
         workspace = Rebin(workspace, "1,20,80")
         # For each spectrum we set the first two entries to 2 and the other two entries to 4.
         for index in range(workspace.getNumberHistograms()):
-            data_y = workspace.dataY(index)
+            data_y = workspace.mutableY(index)
             data_y[0] = 2.0
             data_y[1] = 2.0
             data_y[2] = 4.0
@@ -174,11 +174,11 @@ class CalculateTransmissionHelperTest(unittest.TestCase):
         # The first monitor  should have [0, 0, 2, 2], it has 2.1 in the last value, not clear why
         # The second monitor  should have [0, 0, 0, 0], it has 0.1 in the last value, not clear why. Note that
         # the flat background correction never goes negative.
-        self._assert_collection_elements_are_equal(output_workspace.dataY(0), [0, 0, 2, 2.1])
-        self._assert_collection_elements_are_equal(output_workspace.dataY(1), [0, 0, 0, 0.1])
+        self._assert_collection_elements_are_equal(output_workspace.y(0), [0, 0, 2, 2.1])
+        self._assert_collection_elements_are_equal(output_workspace.y(1), [0, 0, 0, 0.1])
         # The detectors should be unchanged
         for index in range(2, output_workspace.getNumberHistograms()):
-            self._assert_collection_elements_are_equal(output_workspace.dataY(index), [2, 2, 4, 4])
+            self._assert_collection_elements_are_equal(output_workspace.y(index), [2, 2, 4, 4])
 
         # Clean up
         DeleteWorkspace(workspace)
@@ -196,11 +196,11 @@ class CalculateTransmissionHelperTest(unittest.TestCase):
 
         # Assert
         # The monitors should not have changed
-        self._assert_collection_elements_are_equal(output_workspace.dataY(0), [2.0, 2.0, 4.0, 4.0])
-        self._assert_collection_elements_are_equal(output_workspace.dataY(1), [2.0, 2.0, 4.0, 4.0])
+        self._assert_collection_elements_are_equal(output_workspace.y(0), [2.0, 2.0, 4.0, 4.0])
+        self._assert_collection_elements_are_equal(output_workspace.y(1), [2.0, 2.0, 4.0, 4.0])
         # The detectors should be subtracted by 2. The last value seems to be slightly off
         for index in range(2, output_workspace.getNumberHistograms()):
-            self._assert_collection_elements_are_equal(output_workspace.dataY(index), [0.0, 0.0, 2.0, 2.1])
+            self._assert_collection_elements_are_equal(output_workspace.y(index), [0.0, 0.0, 2.0, 2.1])
 
         # Clean up
         DeleteWorkspace(workspace)

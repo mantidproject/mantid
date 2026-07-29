@@ -377,8 +377,8 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(const MatrixWorkspace &i
 
     for (size_t j = 0; j < packedLambdas.size(); j++) {
       auto idx = simulationWS.yIndexOfX(packedLambdas[j], i);
-      simulationWS.getSpectrum(i).dataY()[idx] = packedAttFactors[j];
-      simulationWS.getSpectrum(i).dataE()[idx] = packedAttFactorErrors[j];
+      simulationWS.getSpectrum(i).mutableY()[idx] = packedAttFactors[j];
+      simulationWS.getSpectrum(i).mutableE()[idx] = packedAttFactorErrors[j];
     }
 
     // Interpolate through points not simulated. Simulation WS only has

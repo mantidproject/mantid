@@ -78,7 +78,7 @@ class IndirectILLReductionFWS(unittest.TestCase):
 
         self._check_workspace_group(mtd["out_red"], 1, 18, 1)
 
-        self.assertEqual(mtd["out_red"].getItem(0).readX(0)[0], 90)
+        self.assertEqual(mtd["out_red"].getItem(0).x(0)[0], 90)
 
     def test_ifws_monitor_peaks(self):
         args = {"Run": "170304", "OutputWorkspace": "out"}

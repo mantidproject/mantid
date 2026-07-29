@@ -163,8 +163,8 @@ class TestBank(unittest.TestCase):
         workspace = mtd["summary"]
         axis = workspace.getAxis(1)
         assert [axis.label(workspace_index) for workspace_index in (0, 1, 2)] == ["success", "deviation", "Z-score"]
-        self.assertEqual(min(workspace.readY(0)), 1.0)  # check success of first tube
-        self.assertAlmostEqual(max(workspace.readY(2)), 2.73, delta=0.01)  # check maximum Z-score
+        self.assertEqual(min(workspace.y(0)), 1.0)  # check success of first tube
+        self.assertAlmostEqual(max(workspace.y(2)), 2.73, delta=0.01)  # check maximum Z-score
         DeleteWorkspaces(["CalibTable", "ParametersTable", "PeakTable", "PeakYTable", "summary"])  # a bit of clean-up
 
     def test_criterion_peak_pixel_position(self):
@@ -205,8 +205,8 @@ class TestBank(unittest.TestCase):
         workspace = mtd["summary"]
         axis = workspace.getAxis(1)
         assert [axis.label(workspace_index) for workspace_index in (0, 1, 2)] == ["success", "deviation", "Z-score"]
-        self.assertEqual(min(workspace.readY(0)), 1.0)
-        self.assertAlmostEqual(max(workspace.readY(2)), 1.728, delta=0.001)
+        self.assertEqual(min(workspace.y(0)), 1.0)
+        self.assertAlmostEqual(max(workspace.y(2)), 1.728, delta=0.001)
         DeleteWorkspaces(["CalibTable", "PeakTable", "PeakYTable", "ParametersTable", "summary"])  # a bit of clean-up
 
     def test_purge_table(self):
@@ -272,7 +272,7 @@ class TestBank(unittest.TestCase):
         # collect only the acceptance criteria results
         collect_bank_fit_results("fit_results", acceptance_summary="summary", parameters_table_group=None)
         assert spectra_labels("fit_results") == ["success", "deviation", "Z-score"]
-        assert_allclose(mtd["fit_results"].readY(0), mtd["summary"].readY(0))
+        assert_allclose(mtd["fit_results"].y(0), mtd["summary"].y(0))
         DeleteWorkspaces(["fit_results"])
 
         # collect only the polynomial coefficients
@@ -281,12 +281,12 @@ class TestBank(unittest.TestCase):
         for coefficient_idx in range(3):  # we have three polynomial coefficients
             for tube_idx in range(TUBES_IN_BANK):
                 self.assertAlmostEqual(
-                    mtd["fit_results"].readY(coefficient_idx)[tube_idx],
+                    mtd["fit_results"].y(coefficient_idx)[tube_idx],
                     mtd[f"parameters_tables_{tube_idx}"].row(coefficient_idx)["Value"],
                     delta=1e-6,
                 )
                 self.assertAlmostEqual(
-                    mtd["fit_results"].readE(coefficient_idx)[tube_idx],
+                    mtd["fit_results"].e(coefficient_idx)[tube_idx],
                     mtd[f"parameters_tables_{tube_idx}"].row(coefficient_idx)["Error"],
                     delta=1e-6,
                 )
@@ -296,17 +296,17 @@ class TestBank(unittest.TestCase):
         collect_bank_fit_results("fit_results", acceptance_summary="summary", parameters_table_group="parameters_tables")
         assert spectra_labels("fit_results") == ["success", "deviation", "Z-score", "A0", "A1", "A2"]
         for spectrum_idx in [0, 1, 2]:
-            assert_allclose(mtd["fit_results"].readY(spectrum_idx), mtd["summary"].readY(spectrum_idx))
-            assert_allclose(mtd["fit_results"].readE(spectrum_idx), mtd["summary"].readE(spectrum_idx))
+            assert_allclose(mtd["fit_results"].y(spectrum_idx), mtd["summary"].y(spectrum_idx))
+            assert_allclose(mtd["fit_results"].e(spectrum_idx), mtd["summary"].e(spectrum_idx))
         for coefficient_idx, spectrum_idx in [(0, 3), (1, 4), (2, 5)]:  # we have three polynomial coefficients
             for tube_idx in range(TUBES_IN_BANK):
                 self.assertAlmostEqual(
-                    mtd["fit_results"].readY(spectrum_idx)[tube_idx],
+                    mtd["fit_results"].y(spectrum_idx)[tube_idx],
                     mtd[f"parameters_tables_{tube_idx}"].row(coefficient_idx)["Value"],
                     delta=1e-6,
                 )
                 self.assertAlmostEqual(
-                    mtd["fit_results"].readE(spectrum_idx)[tube_idx],
+                    mtd["fit_results"].e(spectrum_idx)[tube_idx],
                     mtd[f"parameters_tables_{tube_idx}"].row(coefficient_idx)["Error"],
                     delta=1e-6,
                 )
@@ -339,10 +339,10 @@ class TestBank(unittest.TestCase):
         axis = workspace.getAxis(1)
         labels = [axis.label(i) for i in range(workspace.getNumberHistograms())]
         assert labels == ["success", "deviation", "Z-score", "A0", "A1", "A2"]
-        assert_allclose(workspace.readY(0), [1.0] * TUBES_IN_BANK)  # success status for first tube
-        self.assertAlmostEqual(max(workspace.readY(2)), 2.73, delta=0.01)  # maximum Z-score
-        self.assertAlmostEqual(max(workspace.readY(3)), -0.445, delta=0.001)  # maximum A0 value
-        self.assertAlmostEqual(max(workspace.readE(3)), 1.251, delta=0.001)  # maximum A0 error
+        assert_allclose(workspace.y(0), [1.0] * TUBES_IN_BANK)  # success status for first tube
+        self.assertAlmostEqual(max(workspace.y(2)), 2.73, delta=0.01)  # maximum Z-score
+        self.assertAlmostEqual(max(workspace.y(3)), -0.445, delta=0.001)  # maximum A0 value
+        self.assertAlmostEqual(max(workspace.e(3)), 1.251, delta=0.001)  # maximum A0 error
         DeleteWorkspaces(["calibration_table", "fits"])  # a bit of clean-up
 
     def test_calibrate_banks(self):
@@ -353,14 +353,14 @@ class TestBank(unittest.TestCase):
         assert mtd["calib15"].rowCount() == 256 * (16 - 1)  # one uncalibrated tubes
         assert mtd["mask15"].rowCount() == 256
         # Check for success status
-        self.assertEqual(mtd["fit10"].readY(0).tolist(), [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
-        self.assertEqual(mtd["fit15"].readY(0).tolist(), [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1])
+        self.assertEqual(mtd["fit10"].y(0).tolist(), [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+        self.assertEqual(mtd["fit15"].y(0).tolist(), [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1])
         # Check for A1 coefficient values
-        self.assertAlmostEqual(max(mtd["fit10"].readY(4)), 0.0038, delta=0.0001)
-        self.assertAlmostEqual(max(mtd["fit15"].readY(4)), 0.0037, delta=0.0001)
+        self.assertAlmostEqual(max(mtd["fit10"].y(4)), 0.0038, delta=0.0001)
+        self.assertAlmostEqual(max(mtd["fit15"].y(4)), 0.0037, delta=0.0001)
         # Check for A2 coefficient errors
-        self.assertAlmostEqual(max(mtd["fit10"].readE(4)), 0.0219, delta=0.0001)
-        self.assertAlmostEqual(max(mtd["fit15"].readE(4)), 0.0221, delta=0.0001)
+        self.assertAlmostEqual(max(mtd["fit10"].e(4)), 0.0219, delta=0.0001)
+        self.assertAlmostEqual(max(mtd["fit15"].e(4)), 0.0221, delta=0.0001)
         DeleteWorkspaces(["calibrations", "masks", "fits"])
 
 

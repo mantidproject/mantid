@@ -45,6 +45,11 @@ The reference workspace will not be scaled, and the other workspaces will be sca
 to match the reference. Note that this property should be used instead of
 :literal:`ScaleRHSWorkspace`, which no longer has any effect and will eventually be removed.
 
+If :literal:`UseValidDataOnly` is true, invalid signal values do not contribute
+to stitched overlap bins when another workspace has a valid signal value in the
+same bin. This can be used when input workspaces collectively provide full data
+coverage but individual workspaces contain NaN or infinite signal values.
+
 Workflow
 --------
 

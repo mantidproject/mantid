@@ -62,9 +62,9 @@ public:
     double factor = 1.;
     if (offsetsWS)
       factor = 1. / (1. + OFFSET);
-    TS_ASSERT_DELTA(ws->readY(0)[0], factor * 0., 1.);
-    TS_ASSERT_DELTA(ws->readY(1)[0], factor * 126., 1.);
-    TS_ASSERT_DELTA(ws->readY(2)[0], factor * 252., 1.);
+    TS_ASSERT_DELTA(ws->y(0)[0], factor * 0., 1.);
+    TS_ASSERT_DELTA(ws->y(1)[0], factor * 126., 1.);
+    TS_ASSERT_DELTA(ws->y(2)[0], factor * 252., 1.);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
@@ -122,7 +122,7 @@ public:
 
     // should only be NUM_SPEC
     for (size_t i = 0; i < NUM_SPEC; ++i) {
-      TS_ASSERT_DELTA(ws->readY(i)[0], 12345., 1.);
+      TS_ASSERT_DELTA(ws->y(i)[0], 12345., 1.);
     }
 
     // Remove workspace from the data service.
@@ -159,9 +159,9 @@ public:
     if (!ws)
       return;
 
-    TS_ASSERT_DELTA(ws->readY(0)[0], 0, 1.0e-5);
-    TS_ASSERT_DELTA(ws->readY(1)[0], 63.1876542664, 1.0e-6);
-    TS_ASSERT_DELTA(ws->readY(2)[0], 126.3336544142, 1.0e-6);
+    TS_ASSERT_DELTA(ws->y(0)[0], 0, 1.0e-5);
+    TS_ASSERT_DELTA(ws->y(1)[0], 63.1876542664, 1.0e-6);
+    TS_ASSERT_DELTA(ws->y(2)[0], 126.3336544142, 1.0e-6);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);

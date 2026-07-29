@@ -61,24 +61,34 @@ class TestWorkspaceDetectorPeaks(unittest.TestCase):
         peak1 = Peak(10, 0, (1, 0, 0), 100, 10, 5, 2)
         peak2 = Peak(20, 1, (0, 1, 0), 200, 20, 15, 4)
         wdp = self._create_workspace_detector_peaks([DetectorPeaks([peak1]), DetectorPeaks([peak2])])
-        x_values, labels = wdp.get_x_values_and_labels("TOF", [10, 20])
-        self.assertEqual([100, 200], x_values)
-        self.assertEqual(["(1, 0, 0)", "(0, 1, 0)"], labels)
+        peaks = wdp.get_x_values_and_labels([10, 20])
+        self.assertEqual([100, 200], [peak.tof for peak in peaks])
+        self.assertEqual(["(1, 0, 0)", "(0, 1, 0)"], [peak.label for peak in peaks])
 
     def test_get_x_values_and_labels_filters_by_picked_detector_ids(self):
         peak1 = Peak(10, 0, (1, 0, 0), 100, 10, 5, 2)
         peak2 = Peak(20, 1, (0, 1, 0), 200, 20, 15, 4)
         wdp = self._create_workspace_detector_peaks([DetectorPeaks([peak1]), DetectorPeaks([peak2])])
-        x_values, labels = wdp.get_x_values_and_labels("TOF", [10])
-        self.assertEqual([100], x_values)
-        self.assertEqual(["(1, 0, 0)"], labels)
+        peaks = wdp.get_x_values_and_labels([10])
+        self.assertEqual([100], [peak.tof for peak in peaks])
+        self.assertEqual(["(1, 0, 0)"], [peak.label for peak in peaks])
 
     def test_get_x_values_and_labels_empty_when_no_matching_spectrum_numbers(self):
         peak1 = Peak(10, 0, (1, 0, 0), 100, 10, 5, 2)
         wdp = self._create_workspace_detector_peaks([DetectorPeaks([peak1])])
-        x_values, labels = wdp.get_x_values_and_labels("TOF", [99])
-        self.assertEqual([], x_values)
-        self.assertEqual([], labels)
+        peaks = wdp.get_x_values_and_labels([99])
+        self.assertEqual([], peaks)
+
+    def test_get_positions_and_labels_peak_id_larger_than_all_detector_ids(self):
+        # Peak detector ID (999) is larger than every entry in detector_ids.
+        # np.searchsorted would return an out-of-bounds index; the valid mask must
+        # filter it out so the result is empty rather than raising an IndexError.
+        peak = Peak(999, 0, (1, 0, 0), 100, 10, 10, 10)
+        wdp = self._create_workspace_detector_peaks([DetectorPeaks([peak])])
+        detector_positions = np.array([[1, 1, 1], [2, 2, 2]])
+        detector_ids = np.array([1, 2])
+        positions, labels = wdp.get_positions_and_labels(detector_positions, detector_ids)
+        self.assertEqual(0, len(positions))
 
     @mock.patch("instrumentview.Peaks.WorkspaceDetectorPeaks.AnalysisDataService")
     def test_peaks_read_from_ads_workspace(self, peaks_mock_ads):

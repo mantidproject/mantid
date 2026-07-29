@@ -36,8 +36,8 @@ class VesuvioPreFitTest(unittest.TestCase):
         output_ws = alg.getProperty("OutputWorkspace").value
 
         self.assertEqual(2, output_ws.getNumberHistograms())
-        self.assertAlmostEqual(50.0, output_ws.readX(0)[0])
-        self.assertAlmostEqual(562.0, output_ws.readX(0)[-1])
+        self.assertAlmostEqual(50.0, output_ws.x(0)[0])
+        self.assertAlmostEqual(562.0, output_ws.x(0)[-1])
 
         # Expected values
         expected_peak_height_spec1 = 0.4555026
@@ -46,8 +46,8 @@ class VesuvioPreFitTest(unittest.TestCase):
         expected_bin_index_spec2 = 139
 
         # Peak height and bin index
-        peak_height_spec1, bin_index_spec1 = self._get_peak_height_and_bin_index(output_ws.readY(0))
-        peak_height_spec2, bin_index_spec2 = self._get_peak_height_and_bin_index(output_ws.readY(1))
+        peak_height_spec1, bin_index_spec1 = self._get_peak_height_and_bin_index(output_ws.y(0))
+        peak_height_spec2, bin_index_spec2 = self._get_peak_height_and_bin_index(output_ws.y(1))
 
         # Check first spectra matches expected
         self.assertTrue(self._equal_within_tolerance(expected_peak_height_spec1, peak_height_spec1))
@@ -58,17 +58,17 @@ class VesuvioPreFitTest(unittest.TestCase):
         self.assertTrue(self._equal_within_tolerance(expected_bin_index_spec2, bin_index_spec2))
 
     def test_mask_only_masks_over_threshold(self):
-        err_start = self._test_ws.readE(1)[-1]
-        self._test_ws.dataE(1)[-1] = 1.5e6
+        err_start = self._test_ws.e(1)[-1]
+        self._test_ws.mutableE(1)[-1] = 1.5e6
 
         alg = self._create_algorithm(InputWorkspace=self._test_ws, Smoothing="None", BadDataError=1.0e6)
         alg.execute()
-        self._test_ws.dataE(1)[-1] = err_start
+        self._test_ws.mutableE(1)[-1] = err_start
         output_ws = alg.getProperty("OutputWorkspace").value
 
         self.assertEqual(2, output_ws.getNumberHistograms())
-        self.assertAlmostEqual(50.0, output_ws.readX(0)[0])
-        self.assertAlmostEqual(562.0, output_ws.readX(0)[-1])
+        self.assertAlmostEqual(50.0, output_ws.x(0)[0])
+        self.assertAlmostEqual(562.0, output_ws.x(0)[-1])
 
         # Expected values
         expected_peak_height_spec1 = 0.4663805
@@ -77,8 +77,8 @@ class VesuvioPreFitTest(unittest.TestCase):
         expected_bin_index_spec2 = 139
 
         # Peak height and bin index
-        peak_height_spec1, bin_index_spec1 = self._get_peak_height_and_bin_index(output_ws.readY(0))
-        peak_height_spec2, bin_index_spec2 = self._get_peak_height_and_bin_index(output_ws.readY(1))
+        peak_height_spec1, bin_index_spec1 = self._get_peak_height_and_bin_index(output_ws.y(0))
+        peak_height_spec2, bin_index_spec2 = self._get_peak_height_and_bin_index(output_ws.y(1))
 
         # Check first spectra matches expected
         self.assertTrue(self._equal_within_tolerance(expected_peak_height_spec1, peak_height_spec1))
@@ -89,7 +89,7 @@ class VesuvioPreFitTest(unittest.TestCase):
         self.assertTrue(self._equal_within_tolerance(expected_bin_index_spec2, bin_index_spec2))
 
         # Check masked data
-        self.assertAlmostEqual(0.0, output_ws.readY(1)[-1])
+        self.assertAlmostEqual(0.0, output_ws.y(1)[-1])
 
     # -------------- Failure cases ------------------
 

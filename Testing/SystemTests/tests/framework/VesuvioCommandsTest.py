@@ -94,7 +94,7 @@ def _get_peak_height_and_index(workspace, ws_index):
     returns the maximum height in y of a given spectrum of a workspace
     workspace is assumed to be a matrix workspace
     """
-    y_data = workspace.readY(ws_index)
+    y_data = workspace.y(ws_index)
     peak_height = np.amax(y_data)
     peak_bin = np.argmax(y_data)
 
@@ -182,18 +182,18 @@ class FitSingleSpectrumNoBackgroundTest(systemtesting.MantidSystemTest):
         self.assertTrue(isinstance(fitted_ws, MatrixWorkspace))
         self.assertEqual(7, fitted_ws.getNumberHistograms())
 
-        self.assertAlmostEqual(50.0, fitted_ws.readX(0)[0])
-        self.assertAlmostEqual(562.0, fitted_ws.readX(0)[-1])
+        self.assertAlmostEqual(50.0, fitted_ws.x(0)[0])
+        self.assertAlmostEqual(562.0, fitted_ws.x(0)[-1])
 
         index_one_first = 0.000794
         index_one_last = 0.007207
         index_two_first = 1.127134e-05
         index_two_last = 6.902223e-05
 
-        _equal_within_tolerance(self, index_one_first, fitted_ws.readY(0)[0])
-        _equal_within_tolerance(self, index_one_last, fitted_ws.readY(0)[-1])
-        _equal_within_tolerance(self, index_two_first, fitted_ws.readY(1)[0])
-        _equal_within_tolerance(self, index_two_last, fitted_ws.readY(1)[-1])
+        _equal_within_tolerance(self, index_one_first, fitted_ws.y(0)[0])
+        _equal_within_tolerance(self, index_one_last, fitted_ws.y(0)[-1])
+        _equal_within_tolerance(self, index_two_first, fitted_ws.y(1)[0])
+        _equal_within_tolerance(self, index_two_last, fitted_ws.y(1)[-1])
 
         fitted_params = self._fit_results[1]
         self.assertTrue(isinstance(fitted_params, MatrixWorkspace))
@@ -230,8 +230,8 @@ class FitSingleSpectrumBivariateGaussianTiesTest(systemtesting.MantidSystemTest)
     def validate(self):
         # Get fit workspace
         fit_params = mtd["15039-15045_params_iteration_1"]
-        f0_sigma_x = fit_params.readY(2)[0]
-        f0_sigma_y = fit_params.readY(3)[0]
+        f0_sigma_x = fit_params.y(2)[0]
+        f0_sigma_y = fit_params.y(3)[0]
         self.assertAlmostEqual(f0_sigma_x, f0_sigma_y)
 
 
@@ -261,16 +261,16 @@ class SingleSpectrumBackground(systemtesting.MantidSystemTest):
         self.assertTrue(isinstance(fitted_ws, MatrixWorkspace))
         self.assertEqual(8, fitted_ws.getNumberHistograms())
 
-        self.assertAlmostEqual(50.0, fitted_ws.readX(0)[0])
-        self.assertAlmostEqual(562.0, fitted_ws.readX(0)[-1])
+        self.assertAlmostEqual(50.0, fitted_ws.x(0)[0])
+        self.assertAlmostEqual(562.0, fitted_ws.x(0)[-1])
 
         index_one_first = 0.000819
         index_one_last = 0.007221
         calc_data_height_expected = 0.133021
         calc_data_bin_expected = 635
 
-        _equal_within_tolerance(self, index_one_first, fitted_ws.readY(0)[0])
-        _equal_within_tolerance(self, index_one_last, fitted_ws.readY(0)[-1])
+        _equal_within_tolerance(self, index_one_first, fitted_ws.y(0)[0])
+        _equal_within_tolerance(self, index_one_last, fitted_ws.y(0)[-1])
 
         calc_data_height_actual, calc_data_bin_actual = _get_peak_height_and_index(fitted_ws, 1)
         _equal_within_tolerance(self, calc_data_height_expected, calc_data_height_actual)
@@ -314,20 +314,20 @@ class BankByBankForwardSpectraNoBackground(systemtesting.MantidSystemTest):
         bank1 = fitted_banks[0]
         self.assertTrue(isinstance(bank1, MatrixWorkspace))
 
-        self.assertAlmostEqual(50.0, bank1.readX(0)[0])
-        self.assertAlmostEqual(562.0, bank1.readX(0)[-1])
+        self.assertAlmostEqual(50.0, bank1.x(0)[0])
+        self.assertAlmostEqual(562.0, bank1.x(0)[-1])
 
-        _equal_within_tolerance(self, 8.23840378769e-05, bank1.readY(1)[0])
-        _equal_within_tolerance(self, 0.000556695665501, bank1.readY(1)[-1])
+        _equal_within_tolerance(self, 8.23840378769e-05, bank1.y(1)[0])
+        _equal_within_tolerance(self, 0.000556695665501, bank1.y(1)[-1])
 
         bank8 = fitted_banks[7]
         self.assertTrue(isinstance(bank8, MatrixWorkspace))
 
-        self.assertAlmostEqual(50.0, bank8.readX(0)[0])
-        self.assertAlmostEqual(562.0, bank8.readX(0)[-1])
+        self.assertAlmostEqual(50.0, bank8.x(0)[0])
+        self.assertAlmostEqual(562.0, bank8.x(0)[-1])
 
-        _equal_within_tolerance(self, 0.00025454613205, bank8.readY(1)[0])
-        _equal_within_tolerance(self, 0.00050412575393, bank8.readY(1)[-1])
+        _equal_within_tolerance(self, 0.00025454613205, bank8.y(1)[0])
+        _equal_within_tolerance(self, 0.00050412575393, bank8.y(1)[-1])
 
         chisq_values = self._fit_results[2]
         self.assertTrue(isinstance(chisq_values, np.ndarray), msg="Chi-sq values is not a numpy array. Found {}".format(type(chisq_values)))
@@ -363,20 +363,20 @@ class SpectraBySpectraForwardSpectraNoBackground(systemtesting.MantidSystemTest)
         spec143 = fitted_spec[0]
         self.assertTrue(isinstance(spec143, MatrixWorkspace))
 
-        self.assertAlmostEqual(50.0, spec143.readX(0)[0])
-        self.assertAlmostEqual(562.0, spec143.readX(0)[-1])
+        self.assertAlmostEqual(50.0, spec143.x(0)[0])
+        self.assertAlmostEqual(562.0, spec143.x(0)[-1])
 
-        _equal_within_tolerance(self, 2.27289862507e-06, spec143.readY(1)[0])
-        _equal_within_tolerance(self, 3.49287467421e-05, spec143.readY(1)[-1])
+        _equal_within_tolerance(self, 2.27289862507e-06, spec143.y(1)[0])
+        _equal_within_tolerance(self, 3.49287467421e-05, spec143.y(1)[-1])
 
         spec144 = fitted_spec[1]
         self.assertTrue(isinstance(spec144, MatrixWorkspace))
 
-        self.assertAlmostEqual(50.0, spec144.readX(0)[0])
-        self.assertAlmostEqual(562.0, spec144.readX(0)[-1])
+        self.assertAlmostEqual(50.0, spec144.x(0)[0])
+        self.assertAlmostEqual(562.0, spec144.x(0)[-1])
 
-        _equal_within_tolerance(self, 5.9811662524e-06, spec144.readY(1)[0])
-        _equal_within_tolerance(self, 4.7479831769e-05, spec144.readY(1)[-1])
+        _equal_within_tolerance(self, 5.9811662524e-06, spec144.y(1)[0])
+        _equal_within_tolerance(self, 4.7479831769e-05, spec144.y(1)[-1])
 
         chisq_values = self._fit_results[2]
         self.assertTrue(isinstance(chisq_values, np.ndarray), msg="Chi-sq values is not a numpy array. Found {}".format(type(chisq_values)))
@@ -410,20 +410,20 @@ class PassPreLoadedWorkspaceToFitTOF(systemtesting.MantidSystemTest):
         spec143 = fitted_spec[0]
         self.assertTrue(isinstance(spec143, MatrixWorkspace))
 
-        self.assertAlmostEqual(50.0, spec143.readX(0)[0])
-        self.assertAlmostEqual(562.0, spec143.readX(0)[-1])
+        self.assertAlmostEqual(50.0, spec143.x(0)[0])
+        self.assertAlmostEqual(562.0, spec143.x(0)[-1])
 
-        _equal_within_tolerance(self, 2.27289862507e-06, spec143.readY(1)[0])
-        _equal_within_tolerance(self, 3.49287467421e-05, spec143.readY(1)[-1])
+        _equal_within_tolerance(self, 2.27289862507e-06, spec143.y(1)[0])
+        _equal_within_tolerance(self, 3.49287467421e-05, spec143.y(1)[-1])
 
         spec144 = fitted_spec[1]
         self.assertTrue(isinstance(spec144, MatrixWorkspace))
 
-        self.assertAlmostEqual(50.0, spec144.readX(0)[0])
-        self.assertAlmostEqual(562.0, spec144.readX(0)[-1])
+        self.assertAlmostEqual(50.0, spec144.x(0)[0])
+        self.assertAlmostEqual(562.0, spec144.x(0)[-1])
 
-        _equal_within_tolerance(self, 5.9811662524e-06, spec144.readY(1)[0])
-        _equal_within_tolerance(self, 4.7479831769e-05, spec144.readY(1)[-1])
+        _equal_within_tolerance(self, 5.9811662524e-06, spec144.y(1)[0])
+        _equal_within_tolerance(self, 4.7479831769e-05, spec144.y(1)[-1])
 
         chisq_values = self._fit_results[2]
         self.assertTrue(isinstance(chisq_values, np.ndarray), msg="Chi-sq values is not a numpy array. Found {}".format(type(chisq_values)))
@@ -461,20 +461,20 @@ class CalculateCumulativeAngleAveragedData(systemtesting.MantidSystemTest):
         bank1 = fitted_banks[0]
         self.assertTrue(isinstance(bank1, MatrixWorkspace))
 
-        self.assertAlmostEqual(50.0, bank1.readX(0)[0])
-        self.assertAlmostEqual(562.0, bank1.readX(0)[-1])
+        self.assertAlmostEqual(50.0, bank1.x(0)[0])
+        self.assertAlmostEqual(562.0, bank1.x(0)[-1])
 
-        _equal_within_tolerance(self, 8.23840378769e-05, bank1.readY(1)[0])
-        _equal_within_tolerance(self, 0.000556695665501, bank1.readY(1)[-1])
+        _equal_within_tolerance(self, 8.23840378769e-05, bank1.y(1)[0])
+        _equal_within_tolerance(self, 0.000556695665501, bank1.y(1)[-1])
 
         bank8 = fitted_banks[7]
         self.assertTrue(isinstance(bank8, MatrixWorkspace))
 
-        self.assertAlmostEqual(50.0, bank8.readX(0)[0])
-        self.assertAlmostEqual(562.0, bank8.readX(0)[-1])
+        self.assertAlmostEqual(50.0, bank8.x(0)[0])
+        self.assertAlmostEqual(562.0, bank8.x(0)[-1])
 
-        _equal_within_tolerance(self, 0.00025454613205, bank8.readY(1)[0])
-        _equal_within_tolerance(self, 0.00050412575393, bank8.readY(1)[-1])
+        _equal_within_tolerance(self, 0.00025454613205, bank8.y(1)[0])
+        _equal_within_tolerance(self, 0.00050412575393, bank8.y(1)[-1])
 
         chisq_values = self._fit_results[2]
         self.assertTrue(isinstance(chisq_values, np.ndarray), msg="Chi-sq values is not a numpy array. Found {}".format(type(chisq_values)))

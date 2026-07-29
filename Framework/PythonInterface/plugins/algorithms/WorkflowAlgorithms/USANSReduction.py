@@ -173,8 +173,8 @@ class USANSReduction(PythonAlgorithm):
                 # Store the reduced data
                 try:
                     self.q_output[i_wl][point + index_offset] = q
-                    self.iq_output[i_wl][point + index_offset] = i_q.dataY(0)[0]
-                    self.iq_err_output[i_wl][point + index_offset] = i_q.dataE(0)[0]
+                    self.iq_output[i_wl][point + index_offset] = i_q.y(0)[0]
+                    self.iq_err_output[i_wl][point + index_offset] = i_q.e(0)[0]
                 except:
                     Logger("USANSReduction").error(
                         "Exception caught for " + "%s on peak %s, point %s. Offset=%s" % (file_info.workspace, i_wl, point, index_offset)

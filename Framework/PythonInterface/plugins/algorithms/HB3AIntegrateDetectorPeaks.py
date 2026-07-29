@@ -152,7 +152,7 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
             scan_log = "omega" if np.isclose(run.getTimeAveragedStd("phi"), 0.0) else "phi"
             scan_axis = run[scan_log].value
             scan_step = (scan_axis[-1] - scan_axis[0]) / (scan_axis.size - 1)
-            data.setX(0, scan_axis)
+            data.setSharedX(0, scan_axis)
 
             y = data.extractY().flatten()
             x = data.extractX().flatten()

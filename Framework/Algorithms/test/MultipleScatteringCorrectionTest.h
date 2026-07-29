@@ -71,10 +71,10 @@ public:
     // of multiple scattering correction.
     // This is mostly to make sure other changes that impacting multiple scattering correction can be caught early,
     // and the reference values here are by no means physically correct
-    TS_ASSERT_DELTA(rst_ms->readY(0)[0], 0.184945, 1e-3);
-    TS_ASSERT_DELTA(rst_ms->readY(0)[1], 0.182756, 1e-3);
-    TS_ASSERT_DELTA(rst_ms->readY(1)[0], 0.184469, 1e-3);
-    TS_ASSERT_DELTA(rst_ms->readY(1)[1], 0.182175, 1e-3);
+    TS_ASSERT_DELTA(rst_ms->y(0)[0], 0.184945, 1e-3);
+    TS_ASSERT_DELTA(rst_ms->y(0)[1], 0.182756, 1e-3);
+    TS_ASSERT_DELTA(rst_ms->y(1)[0], 0.184469, 1e-3);
+    TS_ASSERT_DELTA(rst_ms->y(1)[1], 0.182175, 1e-3);
   }
 
   void test_sampleAndContainer() {
@@ -119,9 +119,9 @@ public:
     Mantid::API::MatrixWorkspace_sptr rst_ms_sampleAndContainer =
         AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>("rst_ms_sampleAndContainer");
 
-    TS_ASSERT_DELTA(rst_ms_sampleOnly->readY(0)[0], 0.0923619, 1e-3);
-    TS_ASSERT_DELTA(rst_ms_containerOnly->readY(0)[0], 0.223564, 1e-3);
-    TS_ASSERT_DELTA(rst_ms_sampleAndContainer->readY(0)[0], 0.109557, 1e-3);
+    TS_ASSERT_DELTA(rst_ms_sampleOnly->y(0)[0], 0.0923619, 1e-3);
+    TS_ASSERT_DELTA(rst_ms_containerOnly->y(0)[0], 0.223564, 1e-3);
+    TS_ASSERT_DELTA(rst_ms_sampleAndContainer->y(0)[0], 0.109557, 1e-3);
   }
 
 private:

@@ -12,6 +12,7 @@
 
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include <qwidget.h>
 
 namespace MantidQt::CustomInterfaces {
 
@@ -27,7 +28,7 @@ QWidget *ALFInstrumentPresenter::getSampleLoadWidget() { return m_view->generate
 
 QWidget *ALFInstrumentPresenter::getVanadiumLoadWidget() { return m_view->generateVanadiumLoadWidget(); }
 
-ALFInstrumentWidget *ALFInstrumentPresenter::getInstrumentView() { return m_view->getInstrumentView(); }
+QWidget *ALFInstrumentPresenter::getInstrumentView() { return m_view->getInstrumentView(); }
 
 void ALFInstrumentPresenter::subscribeAnalysisPresenter(IALFAnalysisPresenter *presenter) {
   m_analysisPresenter = presenter;

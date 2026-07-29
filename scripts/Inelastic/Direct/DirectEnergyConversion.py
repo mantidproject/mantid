@@ -1083,7 +1083,7 @@ class DirectEnergyConversion(object):
             **kwargs,
         )
         norm_mon1ws = mtd["Monitor1_norm_ws"]
-        norm_factor = norm_mon1ws.dataY(0)
+        norm_factor = norm_mon1ws.y(0)
         if len(norm_factor) > 1:
             raise RuntimeError("Can not normalize by monitor spectra. Normalization range necessary")
         AddSampleLog(old_name, LogName="NormalizationFactor", LogText=str(norm_factor[0]), LogType="Number")
@@ -1163,7 +1163,7 @@ class DirectEnergyConversion(object):
 
         norm_ws_name = kwargs["NormFactorWS"]
         norm_mon2ws = mtd[norm_ws_name]
-        norm_factor = norm_mon2ws.dataY(0)
+        norm_factor = norm_mon2ws.y(0)
         if len(norm_factor) > 1:
             raise RuntimeError("Can not normalize by monitor spectra. Normalization range necessary")
 
@@ -1317,7 +1317,7 @@ class DirectEnergyConversion(object):
                     OutputWorkspace=range_ws_name, NSpec=1, DataX=energy_list, DataY=y, UnitX="Energy", ParentWorkspace=template_ws_name
                 )
                 range_ws = ConvertUnits(InputWorkspace=range_ws_name, OutputWorkspace=range_ws_name, Target="TOF", EMode="Elastic")
-            x = range_ws.dataX(0) + mon1_peak
+            x = range_ws.x(0) + mon1_peak
             TOF_range.append(x.tolist())
 
         if not debug_mode:
@@ -1552,8 +1552,8 @@ class DirectEnergyConversion(object):
                 continue
             if data_specInfo.isMasked(i):
                 continue
-            sig = data_ws.readY(i)[0]
-            err = data_ws.readE(i)[0]
+            sig = data_ws.y(i)[0]
+            err = data_ws.e(i)[0]
             if sig != sig:  # ignore NaN (hopefully it will mean mask some day)
                 continue
             if (err <= 0) or (sig <= 0):  # count Inf and negative||zero readings.

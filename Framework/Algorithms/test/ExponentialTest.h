@@ -76,7 +76,7 @@ public:
     TS_ASSERT(histo_out); // this should be a 2d workspace
 
     for (size_t i = 0; i < 5; ++i) {
-      TS_ASSERT_DELTA(histo_out->readY(i)[0], exp(static_cast<double>(i)), 1e-10);
+      TS_ASSERT_DELTA(histo_out->y(i)[0], exp(static_cast<double>(i)), 1e-10);
     }
     AnalysisDataService::Instance().remove("test_ev_exp");
     AnalysisDataService::Instance().remove("test_ev_exp_out");
@@ -103,7 +103,7 @@ private:
 
     for (size_t i = 0; i < work_in1->size(); i++) {
       double sig1 = work_in1->dataY(i / work_in1->blocksize())[i % work_in1->blocksize()];
-      work_in1->dataE(i / work_in1->blocksize())[i % work_in1->blocksize()] = sqrt(sig1);
+      work_in1->mutableE(i / work_in1->blocksize())[i % work_in1->blocksize()] = sqrt(sig1);
     }
   }
 };

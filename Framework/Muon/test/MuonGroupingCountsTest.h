@@ -223,17 +223,17 @@ public:
 
     auto wsOut = getOutputWorkspace(alg);
 
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.400, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.900, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[0], 0.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[4], 0.400, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[9], 0.900, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], 33.000, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], 45.000, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], 60.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[0], 33.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[4], 45.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[9], 60.000, 0.001);
     // Quadrature errors : Sqrt(3 * 0.005^2 )
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.00866, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.00866, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.00866, 0.0001);
+    TS_ASSERT_DELTA(wsOut->e(0)[0], 0.00866, 0.0001);
+    TS_ASSERT_DELTA(wsOut->e(0)[4], 0.00866, 0.0001);
+    TS_ASSERT_DELTA(wsOut->e(0)[9], 0.00866, 0.0001);
   }
 
   void test_that_summing_periods_combines_detectors_correctly() {
@@ -252,17 +252,17 @@ public:
 
     auto wsOut = getOutputWorkspace(alg);
 
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.400, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.900, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[0], 0.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[4], 0.400, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[9], 0.900, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], 26.000, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], 42.000, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], 62.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[0], 26.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[4], 42.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[9], 62.000, 0.001);
     // Quadrature errors : Sqrt(4 * 0.005^2 )
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.0100, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.0100, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.0100, 0.0001);
+    TS_ASSERT_DELTA(wsOut->e(0)[0], 0.0100, 0.0001);
+    TS_ASSERT_DELTA(wsOut->e(0)[4], 0.0100, 0.0001);
+    TS_ASSERT_DELTA(wsOut->e(0)[9], 0.0100, 0.0001);
   }
 
   void test_that_subtracting_periods_combines_detectors_correctly() {
@@ -283,16 +283,16 @@ public:
 
     auto wsOut = getOutputWorkspace(alg);
 
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.400, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.900, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[0], 0.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[4], 0.400, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[9], 0.900, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], 2.000, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], 2.000, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], 2.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[0], 2.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[4], 2.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[9], 2.000, 0.001);
     // Quadrature errors : Sqrt(4 * 0.005^2 )
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.0100, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.0100, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.0100, 0.0001);
+    TS_ASSERT_DELTA(wsOut->e(0)[0], 0.0100, 0.0001);
+    TS_ASSERT_DELTA(wsOut->e(0)[4], 0.0100, 0.0001);
+    TS_ASSERT_DELTA(wsOut->e(0)[9], 0.0100, 0.0001);
   }
 };

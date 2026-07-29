@@ -64,7 +64,7 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
         workflow_prog.report("Dividing Sample by Container")
         Divide(LHSWorkspace=sam_ws, RHSWorkspace=can_ws, OutputWorkspace=trans_ws)
 
-        trans = numpy.average(mtd[trans_ws].readY(0))
+        trans = numpy.average(mtd[trans_ws].y(0))
         logger.information("Average Transmission: " + str(trans))
 
         workflow_prog.report("Adding Sample logs")
@@ -178,8 +178,8 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
         )
 
         # Check for single or multiple time regimes
-        mon_tcb_start = mtd["__m1"].readX(0)[0]
-        spec_tcb_start = mtd["__det"].readX(0)[0]
+        mon_tcb_start = mtd["__m1"].x(0)[0]
+        spec_tcb_start = mtd["__det"].x(0)[0]
 
         DeleteWorkspace("__det")
         mon_ws = "__Mon"
@@ -196,13 +196,13 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
             ConvertUnits(InputWorkspace="__m2", OutputWorkspace="__Mon2", Target="Wavelength")
             DeleteWorkspace("__m2")
 
-            x_in = mtd["__Mon1"].readX(0)
-            xmin1 = mtd["__Mon1"].readX(0)[0]
-            xmax1 = mtd["__Mon1"].readX(0)[len(x_in) - 1]
+            x_in = mtd["__Mon1"].x(0)
+            xmin1 = mtd["__Mon1"].x(0)[0]
+            xmax1 = mtd["__Mon1"].x(0)[len(x_in) - 1]
 
-            x_in = mtd["__Mon2"].readX(0)
-            xmin2 = mtd["__Mon2"].readX(0)[0]
-            xmax2 = mtd["__Mon2"].readX(0)[len(x_in) - 1]
+            x_in = mtd["__Mon2"].x(0)
+            xmin2 = mtd["__Mon2"].x(0)[0]
+            xmax2 = mtd["__Mon2"].x(0)[len(x_in) - 1]
 
             wmin = max(xmin1, xmin2)
             wmax = min(xmax1, xmax2)

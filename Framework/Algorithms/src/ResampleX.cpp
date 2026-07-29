@@ -427,9 +427,9 @@ void ResampleX::exec() {
       PARALLEL_START_INTERRUPT_REGION
       // get const references to input Workspace arrays (no copying)
       // TODO: replace with HistogramX/Y/E when VectorHelper::rebin is updated
-      const MantidVec &XValues = inputWS->readX(wkspIndex);
-      const MantidVec &YValues = inputWS->readY(wkspIndex);
-      const MantidVec &YErrors = inputWS->readE(wkspIndex);
+      Mantid::HistogramData::HistogramX const &XValues = inputWS->x(wkspIndex);
+      Mantid::HistogramData::HistogramY const &YValues = inputWS->y(wkspIndex);
+      Mantid::HistogramData::HistogramE const &YErrors = inputWS->e(wkspIndex);
 
       // get references to output workspace data (no copying)
       // TODO: replace with HistogramX/Y/E when VectorHelper::rebin is updated
@@ -443,7 +443,8 @@ void ResampleX::exec() {
 
       // output data arrays are implicitly filled by function
       try {
-        VectorHelper::rebin(XValues, YValues, YErrors, XValues_new, YValues_new, YErrors_new, m_isDistribution);
+        VectorHelper::rebin(XValues.rawData(), YValues.rawData(), YErrors.rawData(), XValues_new, YValues_new,
+                            YErrors_new, m_isDistribution);
       } catch (std::exception &ex) {
         g_log.error() << "Error in rebin function: " << ex.what() << '\n';
         throw;

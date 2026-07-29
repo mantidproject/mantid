@@ -454,7 +454,7 @@ class SliceViewerTestPlotMatrixXlimitsIgnoresMonitors(systemtesting.MantidSystem
         xmin = 5000
         xmax = 10000
         ws = CreateSampleWorkspace(NumBanks=1, NumMonitors=1, BankPixelWidth=1, XMin=xmin, XMax=xmax)
-        ws.setX(0, 2 * ws.readX(0))  # change x limits of monitor spectrum
+        ws.setSharedX(0, 2 * ws.x(0))  # change x limits of monitor spectrum
         pres = SliceViewer(ws)
 
         pres.view.data_view.plot_matrix(ws)
@@ -470,7 +470,7 @@ class SliceViewerTestPlotMatrixXlimitsIgnoresNans(systemtesting.MantidSystemTest
         xmin = 5000
         xmax = 10000
         ws = CreateSampleWorkspace(NumBanks=2, BankPixelWidth=2, XMin=xmin, XMax=xmax)  # two non-monitor spectra
-        ws.setX(0, hstack([2 * ws.readX(0)[0:-1], inf]))  # change x limits of spectrum and put inf in last element
+        ws.setSharedX(0, hstack([2 * ws.x(0)[0:-1], inf]))  # change x limits of spectrum and put inf in last element
         pres = SliceViewer(ws)
 
         pres.view.data_view.plot_matrix(ws)

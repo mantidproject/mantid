@@ -53,7 +53,7 @@ class DistributeProtonChargeTest(systemtesting.MantidSystemTest):
         first_laser_time = fsp.times[np.where(fsp.value == 0)[0][0]]
         first_proton_charge_time = w.run()["proton_charge"].times[0]
         diff_lp = float(first_laser_time - first_proton_charge_time) * 1e-3  # in microseconds
-        tofmin = w.readX(0)[0]  # in microseconds
+        tofmin = w.x(0)[0]  # in microseconds
         offset = 1e-6 * (tofmin - diff_lp)  # offset in seconds
         w = ChangeLogTime(w, LogName="fsp", TimeOffset=offset)
 

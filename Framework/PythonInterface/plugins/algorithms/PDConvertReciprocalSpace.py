@@ -115,16 +115,16 @@ class PDConvertReciprocalSpace(PythonAlgorithm):
             sample_kwargs = dict()
 
         for sp_num in range(input_ws.getNumberHistograms()):
-            x = input_ws.readX(sp_num)
-            output_ws.setX(sp_num, x)
-            y = input_ws.readY(sp_num)
-            e = input_ws.readE(sp_num)
+            x = input_ws.x(sp_num)
+            output_ws.setSharedX(sp_num, x)
+            y = input_ws.y(sp_num)
+            e = input_ws.e(sp_num)
             if len(x) == len(y) + 1:
                 x = 0.5 * (x[:-1] + x[1:])
 
             new_y, new_e = transformation[from_quantity][to_quantity](x, y, e, **sample_kwargs)
-            output_ws.setY(sp_num, new_y)
-            output_ws.setE(sp_num, new_e)
+            output_ws.setSharedY(sp_num, new_y)
+            output_ws.setSharedE(sp_num, new_e)
 
 
 try:

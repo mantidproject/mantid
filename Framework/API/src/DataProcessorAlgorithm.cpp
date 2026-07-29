@@ -419,7 +419,7 @@ MatrixWorkspace_sptr GenericDataProcessorAlgorithm<Base>::minus(const MatrixWork
 template <class Base>
 MatrixWorkspace_sptr GenericDataProcessorAlgorithm<Base>::createWorkspaceSingleValue(const double &rhsValue) {
   MatrixWorkspace_sptr retVal = WorkspaceFactory::Instance().create("WorkspaceSingleValue", 1, 1, 1);
-  retVal->dataY(0)[0] = rhsValue;
+  retVal->mutableY(0)[0] = rhsValue;
 
   return retVal;
 }

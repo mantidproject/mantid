@@ -55,6 +55,12 @@ The algorithm workflow for histograms is as follows:
    workspace and the right-hand-side workspace happen to have a different special value in the same bin, this
    bin will be set to infinite in the output workspace.
 
+If :literal:`UseValidDataOnly` is true, invalid signal values in the overlap
+region are not reinserted when the other workspace has a valid signal value in
+the same bin. In this case, the valid signal and error values from the other
+workspace are used. Bins without any valid signal contribution retain their
+invalid signal value.
+
 Below is a flowchart illustrating the steps in the algorithm (it assumes :literal:`ScaleRHSWorkspace`
 is true). Figure on the left corresponds
 to the workflow when no scale factor is provided, while figure on the right corresponds to

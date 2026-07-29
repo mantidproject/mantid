@@ -132,7 +132,7 @@ class ILLIndirectReductionFWSTest(systemtesting.MantidSystemTest):
         # this tests the EFWS in mirror mode: data in 140680 is indeed split to two wings,
         # while the others have right wing empty (though mirror sense is ON!)
         IndirectILLReductionFWS(Run="140678:140682", OutputWorkspace="efws_mirror")
-        yData = mtd["efws_mirror_red"].getItem(0).readY(17)
+        yData = mtd["efws_mirror_red"].getItem(0).y(17)
         avg = numpy.average(yData)
         for y in numpy.nditer(yData):
             self.assertDelta(y, avg, 0.001)
@@ -149,4 +149,4 @@ class ILLIndirectReductionFWSTest(systemtesting.MantidSystemTest):
 
         self.assertEqual(mtd["efws_calib_bg_red"].getItem(0).getNumberHistograms(), 18)
 
-        self.assertDelta(mtd["efws_calib_bg_red"].getItem(0).readY(0)[0], 0.218, 0.001)
+        self.assertDelta(mtd["efws_calib_bg_red"].getItem(0).y(0)[0], 0.218, 0.001)

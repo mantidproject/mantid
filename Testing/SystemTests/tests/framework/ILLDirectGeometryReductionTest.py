@@ -205,7 +205,7 @@ class IN5_Mask_Non_Overlapping_Bins(systemtesting.MantidSystemTest):
         y = ws.extractY()
         y_prime = np.full_like(y, 0.1)
         for i in range(ws.getNumberHistograms()):
-            ws.setY(i, y_prime[i])
+            ws.setSharedY(i, y_prime[i])
 
     def runTest(self):
         run = "ILL/IN5/176053.nxs"

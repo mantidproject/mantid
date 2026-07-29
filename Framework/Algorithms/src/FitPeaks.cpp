@@ -1590,7 +1590,7 @@ void FitPeaks::calculateFittedPeaks(const std::vector<std::shared_ptr<FitPeaksAl
       std::size_t istart = static_cast<size_t>(start_x_iter - vec_x.begin());
       std::size_t istop = static_cast<size_t>(stop_x_iter - vec_x.begin());
       for (std::size_t yindex = istart; yindex < istop; ++yindex) {
-        m_fittedPeakWS->dataY(iws)[yindex] = values.getCalculated(yindex - istart);
+        m_fittedPeakWS->mutableY(iws)[yindex] = values.getCalculated(yindex - istart);
       }
     } // END-FOR (ipeak)
     PARALLEL_END_INTERRUPT_REGION
@@ -1612,7 +1612,7 @@ double FitPeaks::calculateSignalToSigmaRatio(const size_t &iws, const std::pair<
   peakFunction->function(domain, values);
   auto peakValues = values.toVector();
 
-  const auto &errors = m_inputMatrixWS->readE(iws);
+  const auto &errors = m_inputMatrixWS->e(iws);
   auto startE = errors.begin() + (startX - vecX.begin());
   auto stopE = errors.begin() + (stopX - vecX.begin());
   std::vector<double> peakErrors(startE, stopE);
@@ -2004,7 +2004,7 @@ void FitPeaks::generateOutputPeakPositionWS() {
     std::size_t inp_wi = wi + m_startWorkspaceIndex;
     std::vector<double> expected_position = m_getExpectedPeakPositions(inp_wi);
     for (std::size_t ipeak = 0; ipeak < expected_position.size(); ++ipeak) {
-      m_outputPeakPositionWorkspace->dataX(wi)[ipeak] = expected_position[ipeak];
+      m_outputPeakPositionWorkspace->mutableX(wi)[ipeak] = expected_position[ipeak];
     }
   }
 

@@ -500,7 +500,7 @@ class PelicanReduction(PythonAlgorithm):
             CloneWorkspace(InputWorkspace=input_ws, OutputWorkspace=output_ws)
         ows = mtd[output_ws]
         for i in range(len(yav)):
-            ows.dataY(i)[0] = yav[i] if yav[i] > 0 else 1.0
+            ows.mutableY(i)[0] = yav[i] if yav[i] > 0 else 1.0
 
     def _get_minimum_tof(self) -> float:
         """

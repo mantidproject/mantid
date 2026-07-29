@@ -61,7 +61,7 @@ class BinWidthAtX(PythonAlgorithm):
         n = inputWs.getNumberHistograms()
         widths = numpy.empty(n)
         for wsIndex in range(n):
-            xs = inputWs.readX(wsIndex)
+            xs = inputWs.x(wsIndex)
             lowerBound = xs[0]
             upperBound = xs[-1]
             if lowerBound > upperBound:

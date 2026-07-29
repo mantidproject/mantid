@@ -307,7 +307,7 @@ class IndirectILLReductionFWS(PythonAlgorithm):
             ws = item.name()
             size = item.blocksize()
             imin, imax = self._ifws_peak_bins(ws)
-            x_values = item.readX(0)
+            x_values = item.x(0)
             int1 = "__int1_" + ws
             int2 = "__int2_" + ws
             Integration(InputWorkspace=ws, OutputWorkspace=int1, RangeLower=x_values[0], RangeUpper=x_values[2 * imin])
@@ -488,7 +488,7 @@ class IndirectILLReductionFWS(PythonAlgorithm):
                 ws = self._insert_energy_value(self._red_ws + "_" + label, energy, label)
                 if mtd[ws].blocksize() > 1:
                     SortXAxis(InputWorkspace=ws, OutputWorkspace=ws)
-                    axis = mtd[ws].readX(0)
+                    axis = mtd[ws].x(0)
                     start = axis[0]
                     end = axis[-1]
                     integration_range = end - start
@@ -570,8 +570,8 @@ class IndirectILLReductionFWS(PythonAlgorithm):
             for column in range(mtd[sample].blocksize()):
                 scale = np.max(mtd[calib].extractY()[:, column])
                 for spectrum in range(mtd[sample].getNumberHistograms()):
-                    mtd[sample].dataY(spectrum)[column] *= scale
-                    mtd[sample].dataE(spectrum)[column] *= scale
+                    mtd[sample].mutableY(spectrum)[column] *= scale
+                    mtd[sample].mutableE(spectrum)[column] *= scale
 
     def _get_observable_values(self, ws_list):
         """
@@ -651,7 +651,7 @@ class IndirectILLReductionFWS(PythonAlgorithm):
             AddSampleLog(Workspace=wsname, LogName="ReducedRunsList", LogText=run_list.rstrip(","))
 
             for spectrum in range(nspectra):
-                mtd[wsname].setX(spectrum, np.array(observable_array))
+                mtd[wsname].setSharedX(spectrum, np.array(observable_array))
 
             if self._sortX:
                 SortXAxis(InputWorkspace=wsname, OutputWorkspace=wsname)

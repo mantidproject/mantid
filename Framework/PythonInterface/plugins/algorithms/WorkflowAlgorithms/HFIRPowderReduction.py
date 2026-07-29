@@ -1647,8 +1647,8 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         # update values based on all workspaces
         for name in workspaces:
             _ws_tmp = mtd[name]
-            _xMin = max(_xMin, _ws_tmp.readX(0).min())
-            _xMax = min(_xMax, _ws_tmp.readX(0).max())
+            _xMin = max(_xMin, _ws_tmp.x(0).min())
+            _xMax = min(_xMax, _ws_tmp.x(0).max())
 
         return _xMin, _xMax
 

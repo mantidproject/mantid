@@ -172,8 +172,8 @@ class EnggFocusTest(unittest.TestCase):
         xvals = [10861.958645540433, 12192.372902418168, 13522.787159295902, 14853.201416173637, 24166.101214317776, 34809.415269339654]
         p_charge = wks.getRun().getProtonCharge()
         for i, bin_idx in enumerate([0, 5, 10, 15, 50, 90]):
-            self.assertAlmostEqual(wks.readX(0)[bin_idx], xvals[i])
-            self.assertAlmostEqual(wks.readY(0)[bin_idx], yvalues[i] / p_charge)
+            self.assertAlmostEqual(wks.x(0)[bin_idx], xvals[i])
+            self.assertAlmostEqual(wks.y(0)[bin_idx], yvalues[i] / p_charge)
 
     def test_runs_ok(self):
         """

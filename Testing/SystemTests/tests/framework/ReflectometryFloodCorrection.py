@@ -143,12 +143,12 @@ class ReflectometryCreateFloodWorkspaceCentralPixel(systemtesting.MantidSystemTe
             SaveNexus(ws, input_file)
             CreateFloodWorkspace(input_file, CentralPixelSpectrum=3, OutputWorkspace=self.flood_ws_name)
             out = mtd[self.flood_ws_name]
-            self.assertAlmostEqual(out.readY(0)[0], 1.0 / 8)
-            self.assertAlmostEqual(out.readY(1)[0], 9.0 / 8)
-            self.assertAlmostEqual(out.readY(2)[0], 1.0)
-            self.assertAlmostEqual(out.readY(3)[0], 3.0 / 8)
-            self.assertAlmostEqual(out.readY(4)[0], 14.0 / 8)
-            self.assertAlmostEqual(out.readY(5)[0], 15.0 / 8)
+            self.assertAlmostEqual(out.y(0)[0], 1.0 / 8)
+            self.assertAlmostEqual(out.y(1)[0], 9.0 / 8)
+            self.assertAlmostEqual(out.y(2)[0], 1.0)
+            self.assertAlmostEqual(out.y(3)[0], 3.0 / 8)
+            self.assertAlmostEqual(out.y(4)[0], 14.0 / 8)
+            self.assertAlmostEqual(out.y(5)[0], 15.0 / 8)
         finally:
             os.unlink(input_file)
 
@@ -165,12 +165,12 @@ class ReflectometryCreateFloodWorkspaceIntegrationRange(systemtesting.MantidSyst
             SaveNexus(ws, input_file)
             CreateFloodWorkspace(input_file, CentralPixelSpectrum=3, RangeLower=3, RangeUpper=7, OutputWorkspace=self.flood_ws_name)
             out = mtd[self.flood_ws_name]
-            self.assertAlmostEqual(out.readY(0)[0], 2.0 / 4)
-            self.assertAlmostEqual(out.readY(1)[0], 3.0 / 4)
-            self.assertAlmostEqual(out.readY(2)[0], 1.0)
-            self.assertAlmostEqual(out.readY(3)[0], 5.0 / 4)
-            self.assertAlmostEqual(out.readY(4)[0], 6.0 / 4)
-            self.assertAlmostEqual(out.readY(5)[0], 7.0 / 4)
+            self.assertAlmostEqual(out.y(0)[0], 2.0 / 4)
+            self.assertAlmostEqual(out.y(1)[0], 3.0 / 4)
+            self.assertAlmostEqual(out.y(2)[0], 1.0)
+            self.assertAlmostEqual(out.y(3)[0], 5.0 / 4)
+            self.assertAlmostEqual(out.y(4)[0], 6.0 / 4)
+            self.assertAlmostEqual(out.y(5)[0], 7.0 / 4)
         finally:
             os.unlink(input_file)
 
@@ -210,12 +210,12 @@ class ReflectometryCreateFloodWorkspaceCentralPixelExclude(systemtesting.MantidS
             SaveNexus(ws, input_file)
             CreateFloodWorkspace(input_file, CentralPixelSpectrum=3, ExcludeSpectra=[1, 5], OutputWorkspace=self.flood_ws_name)
             out = mtd[self.flood_ws_name]
-            self.assertGreaterThan(out.readY(0)[0], 1.0e100)
-            self.assertAlmostEqual(out.readY(1)[0], 9.0 / 8)
-            self.assertAlmostEqual(out.readY(2)[0], 1.0)
-            self.assertAlmostEqual(out.readY(3)[0], 3.0 / 8)
-            self.assertGreaterThan(out.readY(4)[0], 1.0e100)
-            self.assertAlmostEqual(out.readY(5)[0], 15.0 / 8)
+            self.assertGreaterThan(out.y(0)[0], 1.0e100)
+            self.assertAlmostEqual(out.y(1)[0], 9.0 / 8)
+            self.assertAlmostEqual(out.y(2)[0], 1.0)
+            self.assertAlmostEqual(out.y(3)[0], 3.0 / 8)
+            self.assertGreaterThan(out.y(4)[0], 1.0e100)
+            self.assertAlmostEqual(out.y(5)[0], 15.0 / 8)
         finally:
             os.unlink(input_file)
 
@@ -232,11 +232,11 @@ class ReflectometryCreateFloodWorkspaceCentralPixelRange(systemtesting.MantidSys
             SaveNexus(ws, input_file)
             CreateFloodWorkspace(input_file, CentralPixelSpectrum=3, StartSpectrum=2, EndSpectrum=4, OutputWorkspace=self.flood_ws_name)
             out = mtd[self.flood_ws_name]
-            self.assertAlmostEqual(out.readY(0)[0], 1.0)
-            self.assertAlmostEqual(out.readY(1)[0], 9.0 / 8)
-            self.assertAlmostEqual(out.readY(2)[0], 1.0)
-            self.assertAlmostEqual(out.readY(3)[0], 3.0 / 8)
-            self.assertAlmostEqual(out.readY(4)[0], 1.0)
-            self.assertAlmostEqual(out.readY(5)[0], 1.0)
+            self.assertAlmostEqual(out.y(0)[0], 1.0)
+            self.assertAlmostEqual(out.y(1)[0], 9.0 / 8)
+            self.assertAlmostEqual(out.y(2)[0], 1.0)
+            self.assertAlmostEqual(out.y(3)[0], 3.0 / 8)
+            self.assertAlmostEqual(out.y(4)[0], 1.0)
+            self.assertAlmostEqual(out.y(5)[0], 1.0)
         finally:
             os.unlink(input_file)

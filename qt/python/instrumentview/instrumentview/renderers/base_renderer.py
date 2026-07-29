@@ -11,8 +11,6 @@ import numpy as np
 import pyvista as pv
 from pyvistaqt import BackgroundPlotter
 
-from instrumentview.InteractorStyles import CursorZoomInteractorStyle, SwappedButtonTrackballCamera
-
 
 class InstrumentRenderer(ABC):
     """Abstract base class defining the interface for rendering detectors in the instrument view.
@@ -20,6 +18,21 @@ class InstrumentRenderer(ABC):
     Concrete implementations handle either point-cloud rendering (fast, approximate)
     or shape-based rendering (slower, geometrically accurate).
     """
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._mouse_move_observer_id = None
+        self._left_button_observer_id = None
+        self._picking_tolerance: float = 0.01
+
+    def _clear_observers(self, plotter):
+        style = plotter.iren.style
+        if self._mouse_move_observer_id is not None:
+            style.RemoveObserver(self._mouse_move_observer_id)
+        if self._left_button_observer_id is not None:
+            style.RemoveObserver(self._left_button_observer_id)
+        self._mouse_move_observer_id = None
+        self._left_button_observer_id = None
 
     @abstractmethod
     def build_detector_mesh(self, positions: np.ndarray, flip_beam: bool, model) -> pv.PolyData:
@@ -91,7 +104,9 @@ class InstrumentRenderer(ABC):
         """Add the masked detector mesh to the plotter."""
 
     @abstractmethod
-    def enable_picking(self, plotter: BackgroundPlotter, callback: Callable[[int], None]) -> None:
+    def get_callback_tied_to_detector_index(
+        self, plotter: BackgroundPlotter, callback: Callable[[int], None], hover: bool = False
+    ) -> Callable:
         """Set up picking interaction on the plotter.
 
         Parameters
@@ -130,12 +145,11 @@ class InstrumentRenderer(ABC):
             Scalar array name.
         """
 
-    def set_parallel_view(self, plotter):
-        plotter.view_xy()
-        plotter.enable_parallel_projection()
+    def _effective_picking_tolerance(self, hover: bool) -> float:
+        """Return the tolerance to pass to the VTK picker.
 
-    def set_interactive_style(self, plotter, is_projection):
-        if not is_projection:
-            plotter.iren.style = SwappedButtonTrackballCamera()
-            return
-        plotter.iren.style = CursorZoomInteractorStyle(plotter)
+        Hover picking uses a 25 % larger tolerance so that moving the mouse
+        over nearby detectors feels responsive without sacrificing click
+        precision.
+        """
+        return self._picking_tolerance * 1.25 if hover else self._picking_tolerance

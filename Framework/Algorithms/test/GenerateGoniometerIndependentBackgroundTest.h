@@ -205,6 +205,6 @@ private:
     Mantid::DataObjects::EventWorkspace_sptr result =
         Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::DataObjects::EventWorkspace>("result");
     TS_ASSERT(result)
-    TS_ASSERT_DELTA(result->readY(0).at(0), expectedResult, 1e-4)
+    TS_ASSERT_DELTA(result->y(0).at(0), expectedResult, 1e-4)
   }
 };

@@ -495,7 +495,7 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
         output = model.headerData(mock_section, Qt.Horizontal, Qt.DisplayRole)
 
         ws.isHistogramData.assert_called_once_with()
-        ws.readX.assert_called_once_with(0)
+        ws.x.assert_called_once_with(0)
         ws.getAxis.assert_called_once_with(AXIS_INDEX_FOR_HORIZONTAL)
         ws.mock_axis.getUnit.assert_called_once_with()
         ws.mock_axis.mock_unit.symbol.assert_called_once_with()
@@ -527,7 +527,7 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
         output = model.headerData(mock_section, Qt.Horizontal, Qt.ToolTipRole)
 
         ws.isHistogramData.assert_called_once_with()
-        ws.readX.assert_called_once_with(0)
+        ws.x.assert_called_once_with(0)
         ws.getAxis.assert_called_once_with(AXIS_INDEX_FOR_HORIZONTAL)
         ws.mock_axis.getUnit.assert_called_once_with()
         ws.mock_axis.mock_unit.symbol.assert_called_once_with()

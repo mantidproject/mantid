@@ -105,14 +105,12 @@ class SaveVulcanGSS(PythonAlgorithm):
 
                 api.Rebin(InputWorkspace=temp_out_name, OutputWorkspace=temp_out_name, Params=bin_params, PreserveEvents=True)
                 rebinned_ws = AnalysisDataService.retrieve(temp_out_name)
-                self.log().warning(
-                    "Rebinnd workspace Size(x) = {0}, Size(y) = {1}".format(len(rebinned_ws.readX(0)), len(rebinned_ws.readY(0)))
-                )
+                self.log().warning("Rebinnd workspace Size(x) = {0}, Size(y) = {1}".format(len(rebinned_ws.x(0)), len(rebinned_ws.y(0))))
 
                 # Upon this point, the workspace is still HistogramData.
                 # Check whether it is necessary to reset the X-values to reference TOF from VDRIVE
                 temp_out_ws = AnalysisDataService.retrieve(temp_out_name)
-                if len(bin_params) == 2 * len(temp_out_ws.readX(0)) - 1:
+                if len(bin_params) == 2 * len(temp_out_ws.x(0)) - 1:
                     reset_bins = True
                 else:
                     reset_bins = False
@@ -124,8 +122,8 @@ class SaveVulcanGSS(PythonAlgorithm):
 
                 if reset_bins:
                     # good to align:
-                    for tof_i in range(len(temp_out_ws.readX(0))):
-                        temp_out_ws.dataX(0)[tof_i] = int(bin_params[2 * tof_i] * 10) / 10.0
+                    for tof_i in range(len(temp_out_ws.x(0))):
+                        temp_out_ws.mutableX(0)[tof_i] = int(bin_params[2 * tof_i] * 10) / 10.0
                     # END-FOR (tof-i)
                 # END-IF (align)
             # END-FOR
@@ -290,7 +288,7 @@ class SaveVulcanGSS(PythonAlgorithm):
             if ws_index < 0 or ws_index >= ref_tof_ws.getNumberHistograms():
                 raise RuntimeError("Workspace index {0} must be in range [0, {1})".format(ws_index, ref_tof_ws.getNumberHistograms()))
 
-            ref_tof_vec = ref_tof_ws.readX(ws_index)
+            ref_tof_vec = ref_tof_ws.x(ws_index)
             delta_tof_vec = ref_tof_vec[1:] - ref_tof_vec[:-1]
 
             bin_param = numpy.empty((ref_tof_vec.size + delta_tof_vec.size), dtype=ref_tof_vec.dtype)
@@ -323,7 +321,7 @@ class SaveVulcanGSS(PythonAlgorithm):
         vulcan_bank_headers = list()
         for ws_index in range(output_workspace.getNumberHistograms()):
             bank_id = output_workspace.getSpectrum(ws_index).getSpectrumNo()
-            bank_header = self.create_bank_header(bank_id, output_workspace.readX(ws_index))
+            bank_header = self.create_bank_header(bank_id, output_workspace.x(ws_index))
             vulcan_bank_headers.append(bank_header)
         # END-F
 

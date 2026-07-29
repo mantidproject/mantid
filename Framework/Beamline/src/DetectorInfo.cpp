@@ -218,6 +218,15 @@ const Eigen::Vector3d &DetectorInfo::samplePosition() const {
   return m_componentInfo->samplePosition();
 }
 
+Eigen::Vector3d DetectorInfo::scaleFactor(const size_t index) const {
+  // TODO Not scan safe yet for scanning ComponentInfo
+  if (!hasComponentInfo()) {
+    throw std::runtime_error("DetectorInfo has no valid ComponentInfo thus "
+                             "cannot determine scale factor");
+  }
+  return m_componentInfo->scaleFactor(index);
+}
+
 void DetectorInfo::checkSizes(const DetectorInfo &other) const {
   if (size() != other.size())
     failMerge("size mismatch");

@@ -856,7 +856,7 @@ the first two hours"""
             Name of the workspace to rescale
         """
         workspace = sapi.mtd[wsName]
-        maximumYvalue = workspace.dataY(0).max()
+        maximumYvalue = workspace.y(0).max()
         sapi.Scale(InputWorkspace=wsName, OutputWorkspace=wsName, Factor=1.0 / maximumYvalue, Operation="Multiply")
 
     def generateSplitterWorkspace(self, fragment):

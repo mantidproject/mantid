@@ -110,9 +110,9 @@ void CalculatePlaczekSelfScattering::exec() {
   const double packingFraction = getPackingFraction(inWS);
 
   // get incident spectrum and 1st derivative
-  const MantidVec xLambda = incidentWS->readX(0);
-  const MantidVec incident = incidentWS->readY(0);
-  const MantidVec incidentPrime = incidentWS->readY(1);
+  Mantid::HistogramData::HistogramX const &xLambda = incidentWS->x(0);
+  Mantid::HistogramData::HistogramY const &incident = incidentWS->y(0);
+  Mantid::HistogramData::HistogramY const &incidentPrime = incidentWS->y(1);
   const double dx = (xLambda[1] - xLambda[0]) / 2.0; // assume constant bin width
   std::vector<double> phi1;
   for (size_t i = 0; i < xLambda.size() - 1; i++) {

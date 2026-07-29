@@ -664,7 +664,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         def _check_num_histograms_and_first_y_value(ws_name, expected_num_histograms, expected_y_value):
             ws = AnalysisDataService.retrieve(ws_name)
             self.assertTrue(ws.getNumberHistograms(), expected_num_histograms)
-            self._assert_delta(ws.readY(2)[0], expected_y_value)
+            self._assert_delta(ws.y(2)[0], expected_y_value)
 
         _check_num_histograms_and_first_y_value("TOF_38415", 6, 0.3)
         args = self._default_options

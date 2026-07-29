@@ -34,8 +34,8 @@ from mantid.simpleapi import (
 from mantid.api import MatrixWorkspace
 from pathlib import Path
 import numpy as np
-
 from enum import Enum
+from typing import Optional
 
 
 class PeakPickingStatus(Enum):
@@ -52,7 +52,10 @@ class FullInstrumentViewModel:
     _source_position = np.array([0, 0, 0])
     _beam_axis = np.array([0, 0, 1])
     line_plot_workspace = None
-    _lineplot_ws_in_base_units = None
+    _lineplot_ws_in_base_units_not_summed = None
+    _lineplot_ws_in_selected_units_not_summed = None
+    _line_plot_workspace = None
+    _lineplot_limits = None
     _workspace_x_unit: str
     _workspace_x_unit_display: str
     _peak_picking_status: PeakPickingStatus = PeakPickingStatus.Off
@@ -93,10 +96,9 @@ class FullInstrumentViewModel:
         self._spherical_positions = np.transpose(np.vstack([r, theta, phi]))
         self._detector_positions_3d = detector_info_table.columnArray("Position")
         self._workspace_indices = detector_info_table.columnArray("Index")
-        self._spectrum_nos = detector_info_table.columnArray("Spectrum No")
         # Array of strings 'yes', 'no' and 'n/a'
         self._is_monitor = detector_info_table.columnArray("Monitor")
-        self._is_valid = self._is_monitor == "no"
+        self._is_valid = (self._is_monitor != "yes") & (self._workspace_indices != -1)
         self._component_idxs = np.arange(len(self._detector_ids))
         # TODO: Add masked column to detector table
         self._is_masked_in_ws = np.array([self._workspace.detectorInfo().isMasked(i) for i, _ in enumerate(self._detector_ids)])
@@ -119,6 +121,8 @@ class FullInstrumentViewModel:
         self.update_integration_range(True)
         self.full_counts_limits = self._counts_limits
 
+        self._sample_shape = self._get_sample_shape_from_workspace(self._workspace)
+
     @property
     def workspace(self) -> Workspace2D:
         return self._workspace
@@ -139,6 +143,14 @@ class FullInstrumentViewModel:
     def sample_position(self) -> np.ndarray:
         return self._sample_position
 
+    def _get_sample_shape_from_workspace(self, ws: Workspace2D) -> Optional[np.ndarray]:
+        shape = ws.sample().getShape()
+        return shape.getMesh() if shape.hasValidShape() else None
+
+    @property
+    def sample_shape(self) -> Optional[np.ndarray]:
+        return self._sample_shape
+
     @property
     def all_detector_ids(self) -> np.ndarray:
         """All detector IDs (unfiltered), in the same order as CreateDetectorTable."""
@@ -153,10 +165,6 @@ class FullInstrumentViewModel:
     def masked_detector_ids(self) -> np.ndarray:
         """Detector IDs for masked (but valid, non-monitor) detectors."""
         return self._detector_ids[self._is_masked & self._is_valid]
-
-    @property
-    def spectrum_nos(self) -> np.ndarray:
-        return self._spectrum_nos[self.is_pickable]
 
     @property
     def monitor_positions(self) -> np.ndarray:
@@ -175,12 +183,20 @@ class FullInstrumentViewModel:
         return self._detector_ids[self.is_pickable & self._detector_is_picked]
 
     @property
-    def picked_spectrum_nos(self) -> np.ndarray:
-        return self._spectrum_nos[self.is_pickable & self._detector_is_picked]
-
-    @property
     def picked_workspace_indices(self) -> np.ndarray:
         return self._workspace_indices[self.is_pickable & self._detector_is_picked]
+
+    @property
+    def picked_detector_positions_3d(self) -> np.ndarray:
+        return self._detector_positions_3d[self.is_pickable & self._detector_is_picked]
+
+    @property
+    def picked_spherical_positions(self) -> np.ndarray:
+        return self._spherical_positions[self.is_pickable & self._detector_is_picked]
+
+    @property
+    def picked_counts(self) -> np.ndarray:
+        return self._counts[self.is_pickable & self._detector_is_picked]
 
     @property
     def detector_counts(self) -> np.ndarray:
@@ -242,6 +258,12 @@ class FullInstrumentViewModel:
 
     def update_integration_range(self, entire_range: bool = False) -> None:
         workspace_indices = self._workspace_indices[self.is_pickable]
+        if len(workspace_indices) == 0:
+            self._counts[self.is_pickable] = 0
+            self._counts_limits = (0, 0)
+            self.full_counts_limits = self._counts_limits
+            return
+
         new_detector_counts = np.array(
             self._integration_workspace.getIntegratedCountsForWorkspaceIndices(
                 workspace_indices,
@@ -257,18 +279,8 @@ class FullInstrumentViewModel:
         self._counts[self.is_pickable] = new_detector_counts
 
     @property
-    def lineplot_limits(self) -> None | list[float]:
-        if self._lineplot_ws_in_base_units is None or self.line_plot_workspace is None:
-            return None
-
-        limits_in_base_units = [
-            self._match_workspace_unit(self._integration_workspace, self.picked_workspace_indices[0], x, self._workspace)
-            for x in self.integration_limits
-        ]
-        limits_in_lineplot_units = [
-            self._match_workspace_unit(self._lineplot_ws_in_base_units, 0, x, self.line_plot_workspace) for x in limits_in_base_units
-        ]
-        return [min(limits_in_lineplot_units), max(limits_in_lineplot_units)]
+    def lineplot_limits(self) -> tuple | None:
+        return self._lineplot_limits
 
     def calculate_and_set_full_integration_range(self) -> None:
         self._calculate_and_set_full_integration_range(self.is_pickable)
@@ -276,17 +288,26 @@ class FullInstrumentViewModel:
 
     def _calculate_and_set_full_integration_range(self, valid_indices: np.ndarray) -> None:
         workspace_indices = self._workspace_indices[valid_indices]
-        if self._integration_workspace.isRaggedWorkspace():
-            first_last = np.array([self._integration_workspace.readX(i)[[0, -1]] for i in workspace_indices])
-            self._integration_limits = (np.min(first_last[:, 0]), np.max(first_last[:, 1]))
+        self._integration_limits = self._extract_limits_from_workspace(self._integration_workspace, workspace_indices)
+        self.full_integration_limits = self._integration_limits
 
-        elif self._integration_workspace.isCommonBins():
-            self._integration_limits = tuple(self._integration_workspace.dataX(int(workspace_indices[0]))[[0, -1]])
+    def _extract_limits_from_workspace(self, workspace, workspace_indices=None) -> tuple:
+        if workspace_indices is None:
+            workspace_indices = np.arange(0, workspace.getNumberHistograms())
+
+        if len(workspace_indices) == 0:
+            return (0, 0)
+
+        if workspace.isRaggedWorkspace():
+            first_last = np.array([workspace.x(int(i))[[0, -1]] for i in workspace_indices])
+            return (np.min(first_last[:, 0]), np.max(first_last[:, 1]))
+
+        elif workspace.isCommonBins():
+            return tuple(workspace.x(int(workspace_indices[0]))[[0, -1]])
 
         else:
-            data_x = self._integration_workspace.extractX()[workspace_indices]
-            self._integration_limits = (np.min(data_x[:, 0]), np.max(data_x[:, -1]))
-        self.full_integration_limits = self._integration_limits
+            data_x = workspace.extractX()[workspace_indices]
+            return (np.min(data_x[:, 0]), np.max(data_x[:, -1]))
 
     def set_integration_units(self, unit):
         if self.has_unit and unit != self.workspace_base_unit:
@@ -305,8 +326,6 @@ class FullInstrumentViewModel:
         return detector_table_indices_for_parent_subtrees(
             selected_indices=selected_indices,
             component_idxs=self._component_idxs,
-            detector_ids=self._detector_ids[selected_indices],
-            detector_info=self._workspace.detectorInfo(),
             component_info=self._workspace.componentInfo(),
             pickable_mask=pickable_mask,
         )
@@ -361,6 +380,33 @@ class FullInstrumentViewModel:
             self._point_picked_detectors[:] = False
             self._point_picked_detectors[global_index] = True
 
+    def _build_detector_info_list(
+        self,
+        ws_indices: np.ndarray,
+        det_ids: np.ndarray,
+        xyz_positions: np.ndarray,
+        spherical_positions: np.ndarray,
+        counts: np.ndarray,
+    ) -> list[DetectorInfo]:
+        return [
+            DetectorInfo(det.getName(), det_id, ws_index, xyz, spherical, det.getFullName(), int(count))
+            for ws_index, det_id, xyz, spherical, count in zip(ws_indices, det_ids, xyz_positions, spherical_positions, counts, strict=True)
+            for det in (self._workspace.getDetector(int(ws_index)),)
+        ]
+
+    def detector_info_text_for_workspace_index(self, picked_index: int) -> list[DetectorInfo]:
+
+        pickable_indices = np.argwhere(self.is_pickable).flatten()
+        index = [pickable_indices[picked_index]]
+
+        return self._build_detector_info_list(
+            self._workspace_indices[index],
+            self._detector_ids[index],
+            self._detector_positions_3d[index],
+            self._spherical_positions[index],
+            self._counts[index],
+        )
+
     def clear_point_picked_detectors(self) -> None:
         self._detector_is_picked[self._point_picked_detectors] = False
         self._point_picked_detectors.fill(False)
@@ -368,24 +414,21 @@ class FullInstrumentViewModel:
     def picked_detectors_info_text(self) -> list[DetectorInfo]:
         """For the specified detector, extract info that can be displayed in the View, and wrap it all up in a DetectorInfo class"""
 
-        picked_ws_indices = self._workspace_indices[self._detector_is_picked]
-        picked_ids = self._detector_ids[self._detector_is_picked]
-        picked_xyz_positions = self._detector_positions_3d[self._detector_is_picked]
-        picked_spherical_positions = self._spherical_positions[self._detector_is_picked]
-        picked_counts = self._counts[self._detector_is_picked]
-
-        if len(picked_ws_indices) > self.MAX_DET_INFO_SHOWN:
+        if len(self.picked_detector_ids) > self.MAX_DET_INFO_SHOWN:
             return []
 
-        return [
-            DetectorInfo(det.getName(), det_id, ws_index, xyz, spherical, det.getFullName(), int(count))
-            for ws_index, det_id, xyz, spherical, count in zip(
-                picked_ws_indices, picked_ids, picked_xyz_positions, picked_spherical_positions, picked_counts
-            )
-            for det in (self._workspace.getDetector(int(ws_index)),)
-        ]
+        return self._build_detector_info_list(
+            self.picked_workspace_indices,
+            self.picked_detector_ids,
+            self.picked_detector_positions_3d,
+            self.picked_spherical_positions,
+            self.picked_counts,
+        )
 
-    def get_default_projection_index_and_options(self) -> tuple[int, list[str]]:
+    def get_projection_options(self) -> list[str]:
+        return [p.value for p in ProjectionType]
+
+    def get_default_projection(self) -> ProjectionType:
         possible_returns_map = {
             "3D": ProjectionType.THREE_D,
             "SPHERICAL_X": ProjectionType.SPHERICAL_X,
@@ -395,9 +438,7 @@ class FullInstrumentViewModel:
             "CYLINDRICAL_Y": ProjectionType.CYLINDRICAL_Y,
             "CYLINDRICAL_Z": ProjectionType.CYLINDRICAL_Z,
         }
-        default_projection_type = possible_returns_map[self._workspace.getInstrument().getDefaultView()]
-        projection_options = [p.value for p in ProjectionType]
-        return projection_options.index(default_projection_type.value), projection_options
+        return possible_returns_map[self._workspace.getInstrument().getDefaultView()]
 
     @property
     def projection_type(self):
@@ -474,40 +515,61 @@ class FullInstrumentViewModel:
             projection = self._cached_projection_objects.get(cache_key)
         return projection
 
-    def extract_spectra_for_line_plot(self, unit: str, sum_spectra: bool) -> None:
+    def extract_spectra_for_line_plot(self, unit: str, sum_spectra: bool, picked_indices: Optional[np.ndarray] = None) -> None:
         self._current_linplot_unit = unit
-        workspace_indices = np.unique(self.picked_workspace_indices)
-        if len(workspace_indices) == 0:
+
+        if picked_indices is None:
+            det_ids = np.unique(self.picked_detector_ids)
+        else:
+            pickable_indices = np.argwhere(self.is_pickable).flatten()
+            det_ids = self._detector_ids[pickable_indices[picked_indices]]
+
+        self.line_plot_det_ids = det_ids
+
+        if len(det_ids) == 0:
             self.line_plot_workspace = None
-            self._lineplot_ws_in_base_units = None
+            self._lineplot_ws_in_base_units_not_summed = None
+            self._lineplot_ws_in_selected_units_not_summed = None
+            self._lineplot_limits = None
             return
 
-        self._lineplot_ws_in_base_units = ExtractSpectra(
-            InputWorkspace=self._workspace, WorkspaceIndexList=workspace_indices.tolist(), EnableLogging=False, StoreInADS=False
+        self._lineplot_ws_in_base_units_not_summed = ExtractSpectra(
+            InputWorkspace=self._workspace, DetectorList=det_ids, EnableLogging=False, StoreInADS=False
         )
-        ws = self._lineplot_ws_in_base_units
         if self.has_unit and unit != self.workspace_base_unit:
-            ws = ConvertUnits(InputWorkspace=ws, target=unit, EMode="Elastic", EnableLogging=False, StoreInADS=False)
+            self._lineplot_ws_in_selected_units_not_summed = ConvertUnits(
+                InputWorkspace=self._lineplot_ws_in_base_units_not_summed,
+                target=unit,
+                EMode="Elastic",
+                EnableLogging=False,
+                StoreInADS=False,
+            )
+        else:
+            self._lineplot_ws_in_selected_units_not_summed = self._lineplot_ws_in_base_units_not_summed
 
-        if sum_spectra and len(workspace_indices) > 1:
+        tmp_ws = self._lineplot_ws_in_selected_units_not_summed
+        if sum_spectra and len(det_ids) > 1:
             # Find the spectrum with the widest range, and the one with the smallest bin width and use that
             # combo to rebin the selected spectra. We have to loop over the spectra because otherwise ragged
             # workspaces will have their bin edge vector truncated
-            if not ws.isCommonBins():
+            if not tmp_ws.isCommonBins():
                 min_bin_edge = np.inf
                 max_bin_edge = 0
                 min_bin_width = np.inf
-                for ws_index_i in range(len(workspace_indices)):
-                    bin_edges = ws.readX(ws_index_i)
+                for ws_index_i in range(tmp_ws.getNumberHistograms()):
+                    bin_edges = tmp_ws.x(ws_index_i)
                     min_bin_edge = min(min_bin_edge, bin_edges[0])
                     max_bin_edge = max(max_bin_edge, bin_edges[-1])
                     min_bin_width = min(min_bin_width, np.min(np.diff(bin_edges)))
 
-                ws = Rebin(InputWorkspace=ws, Params=[min_bin_edge, min_bin_width, max_bin_edge], EnableLogging=False, StoreInADS=False)
+                tmp_ws = Rebin(
+                    InputWorkspace=tmp_ws, Params=[min_bin_edge, min_bin_width, max_bin_edge], EnableLogging=False, StoreInADS=False
+                )
 
-            ws = SumSpectra(InputWorkspace=ws, EnableLogging=False, StoreInADS=False)
+            tmp_ws = SumSpectra(InputWorkspace=tmp_ws, EnableLogging=False, StoreInADS=False)
 
-        self.line_plot_workspace = ws
+        self.line_plot_workspace = tmp_ws
+        self._lineplot_limits = self._extract_limits_from_workspace(self.line_plot_workspace)
 
     def save_line_plot_workspace_to_ads(self) -> None:
         if self.line_plot_workspace is None or len(self.picked_workspace_indices) == 0:
@@ -527,35 +589,53 @@ class FullInstrumentViewModel:
         labels_by_pws = [pair[1] for pair in positions_and_labels_by_pws]
         return positions_by_pws, labels_by_pws, selected_peaks_workspaces
 
-    def get_peak_lineplot_overlay_arguments(self, selected_peaks_workspaces: list[str]):
+    def get_peak_lineplot_overlay_arguments(
+        self, selected_peaks_workspaces: list[str]
+    ) -> tuple[list[list[float]], list[list[str]], list[str]]:
+        if not self._lineplot_ws_in_base_units_not_summed:
+            return [], [], []
+
         selected_peaks_workspaces = [ws for ws in selected_peaks_workspaces if AnalysisDataService.doesExist(ws)]
         wrapped_workspaces = [
             WorkspaceDetectorPeaks(ws_name, self.get_integration_units(), self._integration_limits) for ws_name in selected_peaks_workspaces
         ]
-        # NOTE: Need to get x coords in workspace unit for better acuracy
-        x_and_labels_by_pws = [wws.get_x_values_and_labels(self._workspace_x_unit, self.picked_detector_ids) for wws in wrapped_workspaces]
-        x_by_pws = [pair[0] for pair in x_and_labels_by_pws]
-        labels_by_pws = [pair[1] for pair in x_and_labels_by_pws]
+        peaks_by_pws = [wws.get_x_values_and_labels(self.picked_detector_ids) for wws in wrapped_workspaces]
+        labels_by_pws = [[p.label for p in peaks] for peaks in peaks_by_pws]
         # Convert peak units to currently plotted units
+        # NOTE: Need to get x coords in workspace unit for better acuracy
+        # Cannot trust units in peak workspaces
         converted_x = [
-            [self._match_workspace_unit(self._lineplot_ws_in_base_units, 0, x, self.line_plot_workspace) for x in x_values]
-            for x_values in x_by_pws
+            [
+                self._match_workspace_unit(
+                    self._lineplot_ws_in_base_units_not_summed,
+                    self._lineplot_ws_in_base_units_not_summed.getIndicesFromDetectorIDs([p.detector_id])[0],
+                    p.location_in_unit(self._workspace_x_unit),
+                    self._lineplot_ws_in_selected_units_not_summed,
+                )
+                for p in peaks
+            ]
+            for peaks in peaks_by_pws
         ]
         return converted_x, labels_by_pws, selected_peaks_workspaces
 
-    def add_peak(self, x_in_integration_unit: float, selected_peaks_workspaces: list[str]) -> str:
+    def add_peak(self, x_in_lineplot_unit: float, selected_peaks_workspaces: list[str]) -> str:
         peaks_ws = self._get_peaks_workspace_for_adding_new_peak(selected_peaks_workspaces)
         detector_id = self.picked_detector_ids[0]
         x_in_workspace_unit = self._match_workspace_unit(
-            self.line_plot_workspace, 0, x_in_integration_unit, self._lineplot_ws_in_base_units
+            # self.line_plot_workspace, 0, x_in_integration_unit, self._lineplot_ws_in_base_units_not_summed
+            self._lineplot_ws_in_selected_units_not_summed,
+            0,
+            x_in_lineplot_unit,
+            self._lineplot_ws_in_base_units_not_summed,
         )
         AddPeak(peaks_ws, self._workspace, x_in_workspace_unit, int(detector_id))
         return peaks_ws
 
     def _match_workspace_unit(self, ws_from, idx, x_from: float, ws_to):
+
         # Find closest dataX cell in integration workspace and get the value of that cell in self._workspace
-        data_x_from = ws_from.dataX(int(idx))[:]
-        data_x_to = ws_to.dataX(int(idx))[:]
+        data_x_from = ws_from.x(int(idx))[:]
+        data_x_to = ws_to.x(int(idx))[:]
 
         # ConvertUnits does not output one-to-one dataX for momentum transfer
         # Need to use inverse of dataX to get correct one-to-one match of dataX
@@ -585,11 +665,11 @@ class FullInstrumentViewModel:
             return
 
         x_in_workspace_unit = self._match_workspace_unit(
-            self.line_plot_workspace, 0, x_in_integration_unit, self._lineplot_ws_in_base_units
+            self.line_plot_workspace, 0, x_in_integration_unit, self._lineplot_ws_in_base_units_not_summed
         )
         closest_peak_by_ws = []
         for ws_name in selected_peaks_workspaces:
-            peaks_by_detector = WorkspaceDetectorPeaks(ws_name).detector_peaks
+            peaks_by_detector = WorkspaceDetectorPeaks(ws_name, self.get_integration_units(), self.integration_limits).detector_peaks
             picked_detector_peaks = [p for p in peaks_by_detector if p.detector_id in self.picked_detector_ids]
             if len(picked_detector_peaks) == 0:
                 continue
@@ -609,7 +689,7 @@ class FullInstrumentViewModel:
 
     def delete_peaks_on_all_selected_detectors(self, selected_peaks_workspaces) -> None:
         for ws_name in selected_peaks_workspaces:
-            peaks_by_detector = WorkspaceDetectorPeaks(ws_name).detector_peaks
+            peaks_by_detector = WorkspaceDetectorPeaks(ws_name, self.get_integration_units(), self.integration_limits).detector_peaks
             picked_detector_peaks = [p for p in peaks_by_detector if p.detector_id in self.picked_detector_ids]
             if len(picked_detector_peaks) == 0:
                 continue
@@ -788,7 +868,7 @@ class FullInstrumentViewModel:
         return
 
     def _create_current_grouping_workspace(self, grouping_name):
-        # TODO: Ideally algorithm should use workspace when ADS hanging is fixed
+        # TODO: Ideally algorithm should use workspace as ADS hanging already fixed
         individual_groups_strings = []
         for i in range(1, self._current_detector_groupings.max() + 1):
             individual_groups_strings.append("+".join([str(id) for id in self._detector_ids[self._current_detector_groupings == i]]))

@@ -37,7 +37,7 @@ class WorkspaceDetectorPeaks:
 
     def get_positions_and_labels(self, detector_positions, detector_ids) -> tuple[np.ndarray, list]:
         peaks_ids = np.array([p.detector_id for p in self.detector_peaks])
-        if len(peaks_ids) == 0:
+        if len(peaks_ids) == 0 or len(detector_ids) == 0:
             return np.array([]), []
 
         # Use argsort + searchsorted for fast lookup. Using np.where(np.isin) does not
@@ -46,18 +46,16 @@ class WorkspaceDetectorPeaks:
         sorter = np.argsort(detector_ids)
         sorted_detector_ids = detector_ids[sorter]
         positions = np.searchsorted(sorted_detector_ids, peaks_ids)
+        positions = np.clip(positions, 0, len(sorted_detector_ids) - 1)
         ordered_indices = sorter[positions]
         valid = sorted_detector_ids[positions] == peaks_ids
         ordered_indices = ordered_indices[valid]
         labels = [p.label for p in np.array(self.detector_peaks)[valid]]
         return detector_positions[ordered_indices], labels
 
-    def get_x_values_and_labels(self, unit, picked_detector_ids) -> tuple[list, list]:
-        # x values for vertical markers in lineplot
+    def get_x_values_and_labels(self, picked_detector_ids) -> list[Peak]:
         picked_peaks = [p for peak in self.detector_peaks for p in peak.peaks if peak.detector_id in picked_detector_ids]
-        x_values = [p.location_in_unit(unit) for p in picked_peaks]
-        labels = [p.label for p in picked_peaks]
-        return x_values, labels
+        return picked_peaks
 
     def _is_within_limits(self, x, limits):
         return x >= min(limits) and x <= max(limits)

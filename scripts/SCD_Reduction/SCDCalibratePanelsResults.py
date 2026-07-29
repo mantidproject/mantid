@@ -37,8 +37,8 @@ WSROW = Load("RowCalcvsTheor.nxs")
 WSCOL = Load("ColCalcvsTheor.nxs")
 
 for i in range(WSROW.getNumberHistograms()):
-    x = WSROW.readX(i)
-    y = WSROW.readY(i)
+    x = WSROW.x(i)
+    y = WSROW.y(i)
     y = np.trim_zeros(y, "b")
     ylen = len(y)
     x = x[0:ylen]
@@ -78,8 +78,8 @@ for i in range(WSROW.getNumberHistograms()):
 
     # ---------- plot column number comparison
 
-    x = WSCOL.readX(i)
-    y = WSCOL.readY(i)
+    x = WSCOL.x(i)
+    y = WSCOL.y(i)
     y = np.trim_zeros(y, "b")
     ylen = len(y)
     x = x[0:ylen]

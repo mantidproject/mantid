@@ -1,0 +1,20 @@
+digraph ScriptRepositoryArchitecture {
+  label="Script Repository Architecture"
+  $global_style
+
+  subgraph algorithms {
+    $algorithm_style
+    workbenchGUI	[label="Workbench GUI"]
+    scriptRepositoryBackend [label="ScriptRepository Backend"]
+    githubRepository [label="GitHub Repository"]
+    gitClient [label="Git Client"]
+  }
+
+  scriptRepositoryBackend -> workbenchGUI	      [label="Download"]
+  githubRepository -> scriptRepositoryBackend	  [label="Pull"]
+  githubRepository	      -> gitClient
+  gitClient -> githubRepository
+}
+
+// This file was used to generate scriptrepository-architecture.png, but dev-docs
+// does not currently support generating diagrams, so I used http://www.webgraphviz.com/

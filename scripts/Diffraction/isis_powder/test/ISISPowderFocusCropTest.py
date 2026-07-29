@@ -17,7 +17,7 @@ class ISISPowderFocusCropTest(unittest.TestCase):
         # search entire range (0 to 100) for max
         test_ws = focus._crop_vanadium_to_percent_of_max(test_ws, test_ws, test_ws, 0, 100)
         y_compare = [30, 2000, 80, 50, 40, 30, 25, 30]
-        result = test_ws.readY(0)
+        result = test_ws.y(0)
         for compare, val in zip(y_compare, result):
             self.assertEqual(compare, val)
 
@@ -28,7 +28,7 @@ class ISISPowderFocusCropTest(unittest.TestCase):
         # search entire range (0 to 100) for max
         test_ws = focus._crop_vanadium_to_percent_of_max(test_ws, test_ws, test_ws, 0, 100)
         y_compare = [50, 100, 300, 500, 2000, 80, 50]
-        result = test_ws.readY(0)
+        result = test_ws.y(0)
         for compare, val in zip(y_compare, result):
             self.assertEqual(compare, val)
 
@@ -39,7 +39,7 @@ class ISISPowderFocusCropTest(unittest.TestCase):
         # search entire range (0 to 100) for max
         test_ws = focus._crop_vanadium_to_percent_of_max(test_ws, test_ws, test_ws, 0, 100)
         y_compare = [30, 2000, 80, 50]
-        result = test_ws.readY(0)
+        result = test_ws.y(0)
         for compare, val in zip(y_compare, result):
             self.assertEqual(compare, val)
 
@@ -50,7 +50,7 @@ class ISISPowderFocusCropTest(unittest.TestCase):
         # search entire range (0 to 100) for max
         test_ws = focus._crop_vanadium_to_percent_of_max(test_ws, test_ws, test_ws, 0, 100)
         y_compare = [1, 5, 10, 30, 20, 80, 50, 40, 20, 10, 1]
-        result = test_ws.readY(0)
+        result = test_ws.y(0)
         for compare, val in zip(y_compare, result):
             self.assertEqual(compare, val)
 
@@ -61,7 +61,7 @@ class ISISPowderFocusCropTest(unittest.TestCase):
         # search from 0 to 20 x for max
         test_ws = focus._crop_vanadium_to_percent_of_max(test_ws, test_ws, test_ws, 0, 20)
         y_compare = [1, 5, 10, 30, 20, 80, 50, 40, 20, 10, 10000]
-        result = test_ws.readY(0)
+        result = test_ws.y(0)
         for compare, val in zip(y_compare, result):
             self.assertEqual(compare, val)
 
@@ -72,7 +72,7 @@ class ISISPowderFocusCropTest(unittest.TestCase):
         # search from 0 to 30 x for max
         test_ws = focus._crop_vanadium_to_percent_of_max(test_ws, test_ws, test_ws, 0, 30)
         y_compare = [50, 2000, 30, 20, 80, 50, 40]
-        result = test_ws.readY(0)
+        result = test_ws.y(0)
         for compare, val in zip(y_compare, result):
             self.assertEqual(compare, val)
 

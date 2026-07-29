@@ -17,9 +17,9 @@ class PDConvertReciprocalSpaceTest(unittest.TestCase):
         Gr = CreateWorkspace(DataX=input_x, DataY=input_y, DataE=input_e)
         SetSampleMaterial(InputWorkspace=Gr, ChemicalFormula="Ar")
         GKr = PDConvertRealSpace(InputWorkspace=Gr, To="GK(r)", From="G(r)")
-        x = GKr.readX(0)
-        y = GKr.readY(0)
-        e = GKr.readE(0)
+        x = GKr.x(0)
+        y = GKr.y(0)
+        e = GKr.e(0)
 
         bsq = Gr.sample().getMaterial().cohScatterLengthSqrd()
         rho = Gr.sample().getMaterial().numberDensity

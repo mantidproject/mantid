@@ -39,7 +39,7 @@ class StitchingTest(unittest.TestCase):
             [100],
             output_workspace="scaled_ws",
         )
-        x_out = mtd["scaled_ws"].dataY(0)
+        x_out = mtd["scaled_ws"].y(0)
         # Stitching will scale ws2 to ws1, so the output workspace should line up
         # with ws1, which should have an average value of about 10.
         # Since both workspaces have very different ranges of values, we use a wide
