@@ -52,7 +52,7 @@ std::string workspaceNameFromFilename(const std::string &filename) {
 }
 
 void loadFile(const std::string &filename, const std::string &ipfFilename, bool loadLogFiles, SumFilesData &sumData) {
-  const auto workspaceName = workspaceNameFromFilename(filename);
+  const auto workspaceName = "__" + workspaceNameFromFilename(filename);
 
   const auto loader = createAlgorithm("Load");
   loader->setPropertyValue("Filename", filename);
@@ -184,19 +184,25 @@ MantidQt::API::IConfiguredAlgorithm_sptr groupDetectorsConfiguredAlg(std::string
 
 std::string loadFilesWithSum(const std::vector<std::string> &filenames, const std::string &ipfFilename,
                              bool loadLogFiles, bool deleteMonitors) {
+  std::string outName;
+  try {
+    auto sumData = SumFilesData(filenames.size());
+    for (const auto &filename : filenames) {
+      loadFile(filename, ipfFilename, loadLogFiles, sumData);
+    }
 
-  auto sumData = SumFilesData(filenames.size());
-  for (const auto &filename : filenames) {
-    loadFile(filename, ipfFilename, loadLogFiles, sumData);
+    if (filenames.size() == 1) {
+      outName = filenames.at(0);
+    } else {
+      sumRegularRuns(sumData.wsNames, false);
+      outName = renameOutputWorkspace(sumData);
+      removeWorkspacesFromADS(sumData.wsNames, deleteMonitors);
+    }
+
+  } catch (const std::exception &e) {
+    // We are rethrowing all algorithm calls
+    outName.clear();
   }
-
-  if (filenames.size() == 1) {
-    return filenames.at(0);
-  }
-  sumRegularRuns(sumData.wsNames, false);
-  const auto outName = renameOutputWorkspace(sumData);
-  removeWorkspacesFromADS(sumData.wsNames, deleteMonitors);
-
   return outName;
 }
 
