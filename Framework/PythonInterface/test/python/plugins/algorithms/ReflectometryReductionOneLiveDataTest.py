@@ -222,7 +222,7 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
 
     def test_instrument_was_set_on_output_workspace(self):
         workspace = self._run_algorithm_with_defaults()
-        self.assertEqual(workspace.getInstrument().getName(), self._instrument_name)
+        self.assertEqual(workspace.getInstrumentName(), self._instrument_name)
 
         load_inst_history = self._get_child_alg_history(workspace, "LoadInstrument")
         self.assertIsNotNone(load_inst_history)

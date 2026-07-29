@@ -524,7 +524,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             kwargs[common.PROP_CLEANUP_MODE] = "Cleanup OFF"
 
         DirectILLCollectData(Run=sample, OutputWorkspace=ws, IncidentEnergyWorkspace=self.incident_energy_ws, **kwargs)
-        instrument = mtd[ws].getInstrument().getName()
+        instrument = mtd[ws].getInstrumentName()
         if self.instrument and instrument != self.instrument:
             self.log().error(
                 "Sample data: {} comes from different instruments that the rest of the data: {} and {}".format(

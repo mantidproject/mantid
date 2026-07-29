@@ -456,7 +456,7 @@ class MantidORSODatasetTest(unittest.TestCase):
             "    affiliation: null\n"
             "  experiment:\n"
             "    title: null\n"
-            f"    instrument: {ws.getInstrument().getName()}\n"
+            f"    instrument: {ws.getInstrumentName()}\n"
             "    start_date: 2010-01-01T00:00:00\n"
             "    probe: neutron\n"
             "  sample:\n"

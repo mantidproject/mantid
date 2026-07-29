@@ -41,7 +41,7 @@ Output:
 
     ws = LoadEmptyInstrument(Filename="LOKI_Definition.hdf5")
     print("The workspace contains {} spectra".format(ws.getNumberHistograms()))
-    print("Instrument is {}".format(ws.getInstrument().getName()))
+    print("Instrument is {}".format(ws.getInstrumentName()))
 
 Output:
 

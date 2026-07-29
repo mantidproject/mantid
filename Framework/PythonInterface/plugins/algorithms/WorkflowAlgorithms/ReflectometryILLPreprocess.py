@@ -416,7 +416,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
 
         ws = self._input_ws()
 
-        self._instrument_name = ws.getInstrument().getName()
+        self._instrument_name = ws.getInstrumentName()
 
         ws, mon_ws = self._extract_monitors(ws)
 

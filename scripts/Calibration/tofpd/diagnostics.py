@@ -234,7 +234,7 @@ def difc_plot2d(calib_new, calib_old=None, instr_ws=None, mask=None, vrange=(0, 
     ws_old = _get_difc_ws(calib_old, instr_ws)
     if ws_old is None:
         # If no second workspace is given, then load default instrument to compare against
-        instr_name = ws_new.getInstrument().getName()
+        instr_name = ws_new.getInstrumentName()
         ws_old = CalculateDIFC(InputWorkspace=ws_new, OutputWorkspace="__difc_{}".format(instr_name))
 
     delta = ws_new - ws_old

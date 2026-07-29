@@ -92,7 +92,7 @@ class SANSTubeMerge(DataProcessorAlgorithm):
     def _create_empty_calibrated_workspace(self, merged_calib_ws, calibrated_ws_name: str) -> None:
         """Copy the instrument parameters of a merged calibration workspace into a new workspace with no counts"""
 
-        inst_file_name = merged_calib_ws.getInstrumentFilename(merged_calib_ws.getInstrument().getName())
+        inst_file_name = merged_calib_ws.getInstrumentFilename(merged_calib_ws.getInstrumentName())
         load_inst_alg = self._create_child_alg("LoadEmptyInstrument", Filename=inst_file_name, OutputWorkspace=calibrated_ws_name)
         load_inst_alg.execute()
         calibrated_ws = load_inst_alg.getProperty("OutputWorkspace").value

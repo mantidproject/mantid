@@ -255,7 +255,7 @@ class TimeSlice(PythonAlgorithm):
 
         # Construct output workspace name
         run = mtd[raw_file].getRun().getLogData("run_number").value
-        inst = mtd[raw_file].getInstrument().getName()
+        inst = mtd[raw_file].getInstrumentName()
         slice_file = inst.lower() + run + self._output_ws_name_suffix
 
         if self._background_range is None:

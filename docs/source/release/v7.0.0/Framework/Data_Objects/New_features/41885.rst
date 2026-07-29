@@ -1,0 +1,1 @@
+- `getInstrumentName()` can be used on workspaces or `ExperimentInfo` objects to get the name of the underlying instrument.  Use this instead of `getInstrument().getName()`.

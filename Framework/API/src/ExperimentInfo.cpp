@@ -856,6 +856,13 @@ void ExperimentInfo::setSpectrumDefinitions(Kernel::cow_ptr<std::vector<Spectrum
   m_spectrumInfoWrapper = nullptr;
 }
 
+/** Return the name of the instrument from the ComponentInfo object */
+std::string ExperimentInfo::getInstrumentName() const {
+  populateIfNotLoaded();
+  Geometry::ComponentInfo const &compInfo = componentInfo();
+  return compInfo.name(compInfo.root());
+}
+
 /** Notifies the ExperimentInfo that a spectrum definition has changed.
  *
  * ExperimentInfo will rebuild its spectrum definitions before the next use. In

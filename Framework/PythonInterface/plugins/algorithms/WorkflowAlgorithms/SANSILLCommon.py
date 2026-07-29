@@ -318,7 +318,7 @@ def get_vertical_grouping_pattern(ws):
     TODO: These are static and can be turned to grouping files in instrument/Grouping folder
     :param ws: Empty beam workspace.
     """
-    inst_name = mtd[ws].getInstrument().getName()
+    inst_name = mtd[ws].getInstrumentName()
     min_id = 0
     if "D11" in inst_name:
         if "lr" in inst_name:

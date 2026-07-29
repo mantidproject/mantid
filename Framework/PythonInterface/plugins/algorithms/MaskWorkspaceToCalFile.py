@@ -77,7 +77,7 @@ class MaskWorkspaceToCalFile(PythonAlgorithm):
 
         calFile = open(outputFileName, "w")
         # write a header
-        instrumentName = inputWorkspace.getInstrument().getName()
+        instrumentName = inputWorkspace.getInstrumentName()
         calFile.write("# " + instrumentName + " detector file\n")
         calFile.write("# Format: number      UDET       offset       select    group\n")
         # save the grouping

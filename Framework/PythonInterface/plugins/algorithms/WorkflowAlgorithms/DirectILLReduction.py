@@ -557,7 +557,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
         # out of range from the original ragged workspace in delta E.
         # The mask is later respected by the detector grouping
         # to get the normalisation right also in the non-overlapping regions.
-        if mainWS.getInstrument().getName() in ["IN5", "PANTHER", "SHARP"]:
+        if mainWS.getInstrumentName() in ["IN5", "PANTHER", "SHARP"]:
             rebinnedWS = MaskNonOverlappingBins(
                 InputWorkspace=rebinnedWS,
                 ComparisonWorkspace=mainWS,
