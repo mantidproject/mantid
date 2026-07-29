@@ -28,10 +28,11 @@ ConvolutionAddWorkspaceDialog::ConvolutionAddWorkspaceDialog(QWidget *parent) : 
   m_uiForm.leWorkspaceIndices->setValidator(new QRegularExpressionValidator(QRegularExpression(validatorString), this));
   setAllSpectraSelectionEnabled(false);
 
-  connect(m_uiForm.dsWorkspace, SIGNAL(dataReady(const QString &)), this, SLOT(workspaceChanged(const QString &)));
-  connect(m_uiForm.ckAllSpectra, SIGNAL(checkStateChanged(int)), this, SLOT(selectAllSpectra(int)));
-  connect(m_uiForm.pbAdd, SIGNAL(clicked()), this, SLOT(emitAddData()));
-  connect(m_uiForm.pbClose, SIGNAL(clicked()), this, SLOT(close()));
+  connect(m_uiForm.dsWorkspace, &MantidWidgets::DataSelector::dataReady, this,
+          &ConvolutionAddWorkspaceDialog::workspaceChanged);
+  connect(m_uiForm.ckAllSpectra, &QCheckBox::checkStateChanged, this, &ConvolutionAddWorkspaceDialog::selectAllSpectra);
+  connect(m_uiForm.pbAdd, &QPushButton::clicked, this, &ConvolutionAddWorkspaceDialog::emitAddData);
+  connect(m_uiForm.pbClose, &QPushButton::clicked, this, &ConvolutionAddWorkspaceDialog::close);
 }
 
 std::string ConvolutionAddWorkspaceDialog::workspaceName() const {
@@ -72,7 +73,7 @@ void ConvolutionAddWorkspaceDialog::updateSelectedSpectra() {
   selectAllSpectra(state);
 }
 
-void ConvolutionAddWorkspaceDialog::selectAllSpectra(int state) {
+void ConvolutionAddWorkspaceDialog::selectAllSpectra(Qt::CheckState state) {
   auto const name = workspaceName();
   if (doesExistInADS(name) && state == Qt::Checked) {
     m_uiForm.leWorkspaceIndices->setText(QString::fromStdString(getIndexString(name)));
