@@ -36,12 +36,10 @@ public:
 signals:
   void addData(MantidWidgets::IAddWorkspaceDialog *dialog);
 
-private slots:
-  void selectAllSpectra(int state);
+private:
   void workspaceChanged(const QString &workspaceName);
   void emitAddData();
-
-private:
+  void selectAllSpectra(Qt::CheckState state);
   void setWorkspace(const std::string &workspace);
   void setAllSpectraSelectionEnabled(bool doEnable);
 

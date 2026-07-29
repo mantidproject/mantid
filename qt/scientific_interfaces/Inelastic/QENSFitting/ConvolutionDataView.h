@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "FitDataView.h"
-
+#include "ConvolutionAddWorkspaceDialog.h"
 #include "DllConfig.h"
+#include "FitDataView.h"
 
 #include <QTabWidget>
 
@@ -30,6 +30,13 @@ protected:
 
 protected slots:
   void showAddWorkspaceDialog() override;
+  void showAddNumericWorkspaceDialog() override;
+
+private:
+  ConvolutionAddWorkspaceDialog *createAddWorkspaceDialog(const QStringList &sampleWorkspaceSuffixes,
+                                                          const QStringList &sampleFileSuffixes,
+                                                          const QStringList &resolutionWorkspaceSuffixes,
+                                                          const QStringList &resolutionFileSuffixes) const;
 };
 
 } // namespace Inelastic

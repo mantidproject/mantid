@@ -1,0 +1,1 @@
+- The QENS Fitting interface can now load workspaces from text files, e.g. from simulations, and perform fits as with Nexus files.
