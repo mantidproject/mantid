@@ -57,6 +57,23 @@ class TimeSliceTest(unittest.TestCase):
         )
         self.assertTrue(mtd.doesExist("TestWs_graphite002_slice"))
 
+    def test_sample_workspace_property_does_not_alter_input_ws(self):
+        """
+        Test to check optional SampleWorkspace input property
+        """
+        ws = Load("IRS26173.raw", OutputWorkspace="TestWs")
+        no_hist = ws.getNumberHistograms()
+        TimeSlice(
+            SampleWorkspace="TestWs",
+            SpectraRange=[3, 53],
+            PeakRange=[62500, 65000],
+            BackgroundRange=[59000, 61500],
+            OutputNameSuffix="_graphite002_slice",
+            OutputWorkspace="SliceTestOut",
+        )
+        self.assertEqual(no_hist, mtd["TestWs"].getNumberHistograms())
+        self.assertTrue(mtd.doesExist("TestWs_graphite002_slice"))
+
     def test_validation_input_files_empty(self):
         """
         Tests to ensure that a valid input is selected

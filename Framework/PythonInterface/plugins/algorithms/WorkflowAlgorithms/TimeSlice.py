@@ -22,6 +22,7 @@ from mantid.simpleapi import (
     Integration,
     Load,
     Transpose,
+    CloneWorkspace,
 )
 
 from IndirectCommon import check_hist_zero
@@ -154,23 +155,30 @@ class TimeSlice(PythonAlgorithm):
         workflow_prog = Progress(self, start=0.0, end=0.96, nreports=len(self._raw_files) * 3)
         for index, filename in enumerate(self._raw_files):
             workflow_prog.report("Reading file: " + str(i))
-
-            raw_file = self._read_raw_file(filename) if self._do_load else filename
+            if self._do_load:
+                raw_file = self._read_raw_file(filename)
+                run = mtd[raw_file].getRun().getLogData("run_number").value
+                inst = mtd[raw_file].getInstrumentName()
+                sliced_ws_name = inst.lower() + run + self._output_ws_name_suffix
+            else:
+                raw_file = "__" + filename
+                CloneWorkspace(InputWorkspace=filename, OutputWorkspace=raw_file)
+                # we just use workspace name if we haven't loaded a raw file
+                sliced_ws_name = raw_file.lstrip("__") + self._output_ws_name_suffix
 
             # Only need to process the calib file once
             if index == 0 and self._calib_ws is not None:
                 self._process_calib(raw_file)
 
             workflow_prog.report("Transposing Workspace: " + str(i))
-            slice_file = self._process_raw_file(raw_file)
-            Transpose(InputWorkspace=slice_file, OutputWorkspace=slice_file)
-            unit = mtd[slice_file].getAxis(0).setUnit("Label")
+            self._process_raw_file(raw_file, sliced_ws_name)
+            Transpose(InputWorkspace=sliced_ws_name, OutputWorkspace=sliced_ws_name)
+            unit = mtd[sliced_ws_name].getAxis(0).setUnit("Label")
             unit.setLabel("Spectrum Number", "")
 
             workflow_prog.report("Deleting Workspace")
-            out_ws_list.append(slice_file)
-            if self._do_load:
-                DeleteWorkspace(raw_file)
+            out_ws_list.append(sliced_ws_name)
+            DeleteWorkspace(raw_file)
 
         all_workspaces = ",".join(out_ws_list)
         final_prog = Progress(self, start=0.96, end=1.0, nreports=2)
@@ -246,39 +254,31 @@ class TimeSlice(PythonAlgorithm):
             EndWorkspaceIndex=calib_spec_max,
         )
 
-    def _process_raw_file(self, raw_file):
+    def _process_raw_file(self, curr_name, sliced_ws_name):
         """
         Process a raw sample file.
 
-        @param raw_file Name of file to process
+        @param curr_name Name of loaded raw file/ws to process
         """
         # Crop the raw file to use the desired number of spectra
         # less one because CropWorkspace is zero based
         CropWorkspace(
-            InputWorkspace=raw_file,
-            OutputWorkspace=raw_file,
+            InputWorkspace=curr_name,
+            OutputWorkspace=curr_name,
             StartWorkspaceIndex=int(self._spectra_range[0]) - 1,
             EndWorkspaceIndex=int(self._spectra_range[1]) - 1,
         )
 
-        num_hist = check_hist_zero(raw_file)[0]
+        num_hist = check_hist_zero(curr_name)[0]
 
         # Use calibration file if desired
         if self._calib_ws is not None:
-            Divide(LHSWorkspace=raw_file, RHSWorkspace=self._calib_ws, OutputWorkspace=raw_file)
-
-        # Construct output workspace name
-        slice_file = raw_file + self._output_ws_name_suffix  # we just use workspace name if we haven't loaded a raw file
-        if self._do_load:
-            run = mtd[raw_file].getRun().getLogData("run_number").value
-            inst = mtd[raw_file].getInstrumentName()
-            slice_file = inst.lower() + run + self._output_ws_name_suffix
-
+            Divide(LHSWorkspace=curr_name, RHSWorkspace=self._calib_ws, OutputWorkspace=curr_name)
 
         if self._background_range is None:
             Integration(
-                InputWorkspace=raw_file,
-                OutputWorkspace=slice_file,
+                InputWorkspace=curr_name,
+                OutputWorkspace=sliced_ws_name,
                 RangeLower=self._peak_range[0],
                 RangeUpper=self._peak_range[1],
                 StartWorkspaceIndex=0,
@@ -286,22 +286,20 @@ class TimeSlice(PythonAlgorithm):
             )
         else:
             CalculateFlatBackground(
-                InputWorkspace=raw_file,
-                OutputWorkspace=slice_file,
+                InputWorkspace=curr_name,
+                OutputWorkspace=sliced_ws_name,
                 StartX=self._background_range[0],
                 EndX=self._background_range[1],
                 Mode="Mean",
             )
             Integration(
-                InputWorkspace=slice_file,
-                OutputWorkspace=slice_file,
+                InputWorkspace=sliced_ws_name,
+                OutputWorkspace=sliced_ws_name,
                 RangeLower=self._peak_range[0],
                 RangeUpper=self._peak_range[1],
                 StartWorkspaceIndex=0,
                 EndWorkspaceIndex=num_hist - 1,
             )
-
-        return slice_file
 
 
 AlgorithmFactory.subscribe(TimeSlice)
