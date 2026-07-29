@@ -856,8 +856,12 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         )
         set_simple_dataset_value_from_property("calibration_entry", self.getPropertyValue(Prop.CALIB_FILE), Prop.CALIB_FILE)
 
-        if use_default or (not self.getProperty(Prop.TRANS_FILES_1).isDefault and not self.getProperty(Prop.TRANS_FILES_2).isDefault):
-            dataset.transmission_files = (self.getProperty(Prop.TRANS_FILES_1).value, self.getProperty(Prop.TRANS_FILES_2).value)
+        first_trans_files, second_trans_files = dataset.transmission_files or ([], [])
+        if use_default or not self.getProperty(Prop.TRANS_FILES_1).isDefault:
+            first_trans_files = [file for file in self.getProperty(Prop.TRANS_FILES_1).value if file]
+        if use_default or not self.getProperty(Prop.TRANS_FILES_2).isDefault:
+            second_trans_files = [file for file in self.getProperty(Prop.TRANS_FILES_2).value if file]
+        dataset.transmission_files = (first_trans_files, second_trans_files)
 
         if use_default or not self.getProperty(Prop.FLOOD_ENTRY).isDefault:
             dataset.flood_entry = tuple(self.getProperty(Prop.FLOOD_ENTRY).value)

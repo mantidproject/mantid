@@ -653,6 +653,71 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "CalibrationFile: Metadata could not be found.*ws_2"):
             self._run_save_alg(["ws_1", "ws_2"], **alg_kwargs)
 
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_hybrid_source_allows_manual_first_transmission_with_no_second_transmission(self, mock_alg_histories):
+        ws = self._create_sample_workspace(instrument_name="INTER")
+        self._configure_mock_alg_history(
+            mock_alg_histories,
+            [
+                (
+                    self._REDUCTION_WORKFLOW_ALG,
+                    {
+                        "FloodWorkspace": "flood_ws",
+                        "CalibrationFile": "calib.nxs",
+                    },
+                )
+            ],
+        )
+
+        alg_kwargs = {
+            "MetadataSource": "HistoryWherePossible",
+            "IgnoredProperties": ["ReductionTimestamp", "SecondTransmissionFileList"],
+            "FirstTransmissionFileList": ["manual_first.nxs"],
+        }
+        self._run_save_alg(ws, **alg_kwargs)
+
+        expected_additional_file_entries = {
+            "manual_first.nxs": self._FIRST_TRANS_COMMENT,
+            "flood_ws": self._FLOOD_WS_COMMENT,
+            "calib.nxs": self._CALIB_FILE_COMMENT,
+        }
+        self._check_file_header([self._get_expected_additional_file_metadata(expected_additional_file_entries, self._REDUCTION_HEADING)])
+
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_hybrid_source_allows_manual_transmission_metadata_to_clear_history(self, mock_alg_histories):
+        ws = self._create_sample_workspace(instrument_name="INTER")
+        self._configure_mock_alg_history(
+            mock_alg_histories,
+            [
+                (
+                    self._REDUCTION_WORKFLOW_ALG,
+                    {
+                        "FirstTransmissionRunList": "13463",
+                        "SecondTransmissionRunList": "13464",
+                        "FloodWorkspace": "flood_ws",
+                        "CalibrationFile": "calib.nxs",
+                    },
+                )
+            ],
+        )
+
+        alg_kwargs = {
+            "MetadataSource": "HistoryWherePossible",
+            "IgnoredProperties": ["ReductionTimestamp"],
+            "FirstTransmissionFileList": [""],
+        }
+        self._run_save_alg(ws, **alg_kwargs)
+
+        expected_additional_file_entries = {
+            "INTER00013464": self._SECOND_TRANS_COMMENT,
+            "flood_ws": self._FLOOD_WS_COMMENT,
+            "calib.nxs": self._CALIB_FILE_COMMENT,
+        }
+        self._check_file_header(
+            included_header_values=[self._get_expected_additional_file_metadata(expected_additional_file_entries, self._REDUCTION_HEADING)],
+            excluded_header_values=["#     - file: INTER00013463\n#       comment: First transmission run"],
+        )
+
     def _create_sample_workspace(self, rb_num_log_name=_LOG_RB_NUMBER, instrument_name="", ws_name="ws"):
         # Create a single spectrum workspace in units of momentum transfer
         ws = CreateSampleWorkspace(
