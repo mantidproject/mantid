@@ -111,7 +111,7 @@ ISISDiagnostics::ISISDiagnostics(IDataReduction *idrUI, QWidget *parent) : DataR
   connect(m_uiForm.ckUseCalibration, &QCheckBox::toggled, this, &ISISDiagnostics::sliceCalib);
   // Plot slice miniplot when file has finished loading
   connect(m_uiForm.dsInputFiles, &FileFinderWidget::filesFoundChanged, this, &ISISDiagnostics::handleNewFile);
-  connect(m_uiForm.ckSumFiles, &QCheckBox::stateChanged, this, &ISISDiagnostics::handleNewFile);
+  connect(m_uiForm.ckSumFiles, &QCheckBox::checkStateChanged, this, &ISISDiagnostics::handleNewFile);
   // Shows message on run button when Mantid is finding the file for a given run
   // number
   connect(m_uiForm.dsInputFiles, &FileFinderWidget::findingFiles, this, &ISISDiagnostics::pbRunFinding);

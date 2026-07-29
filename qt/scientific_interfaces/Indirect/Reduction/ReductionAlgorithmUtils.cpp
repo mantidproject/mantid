@@ -120,11 +120,13 @@ std::string renameOutputWorkspace(const SumFilesData &sumData) {
   }
 
   std::string runstr = std::to_string(sumData.runNo.at(0));
+  std::string summedSuffix;
   if (sumData.runNo.size() > 1) {
     const auto &[minRun, maxRun] = std::minmax_element(sumData.runNo.cbegin(), sumData.runNo.cend());
     runstr = std::to_string(*minRun) + "-" + std::to_string(*maxRun);
+    summedSuffix = "_summed";
   }
-  const auto wsName = inst + runstr + "_summed";
+  const auto wsName = inst + runstr + summedSuffix;
   const auto rename = createAlgorithm("RenameWorkspace");
   rename->setPropertyValue("InputWorkspace", currName);
   rename->setPropertyValue("OutputWorkspace", wsName);
@@ -192,14 +194,14 @@ std::string loadFilesWithSum(const std::vector<std::string> &filenames, const st
     }
 
     if (filenames.size() == 1) {
-      outName = filenames.at(0);
+      outName = renameOutputWorkspace(sumData);
     } else {
       sumRegularRuns(sumData.wsNames, false);
       outName = renameOutputWorkspace(sumData);
       removeWorkspacesFromADS(sumData.wsNames, deleteMonitors);
     }
 
-  } catch (const std::exception &e) {
+  } catch (const std::exception &) {
     // We are rethrowing all algorithm calls
     outName.clear();
   }

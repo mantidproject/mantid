@@ -44,7 +44,7 @@ Transmission::Transmission(IDataReduction *idrUI, QWidget *parent) : DataReducti
           [this]() { Transmission::handleNewInputData(SenderType::sampleInput); });
   connect(m_uiForm.dsCanInput, &FileFinderWidget::filesFoundChanged, this,
           [this]() { Transmission::handleNewInputData(SenderType::canInput); });
-  connect(m_uiForm.ckSumFiles, &QCheckBox::stateChanged, this,
+  connect(m_uiForm.ckSumFiles, &QCheckBox::checkStateChanged, this,
           [this]() { Transmission::handleNewInputData(SenderType::sumCheckbox); });
 
   m_uiForm.ppPlot->setCanvasColour(QColor(240, 240, 240));
