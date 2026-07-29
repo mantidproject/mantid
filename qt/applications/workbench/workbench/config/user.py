@@ -173,8 +173,11 @@ def _get_settings_dir() -> Path:
     raise RuntimeError("Failed to find QStandardPaths.ConfigLocation in home area")
 
 
-def remove_lock_files(filenames: list[str] = ["mantidproject/mantidworkbench.ini", "QtProject.conf"]) -> None:
+def remove_lock_files(filenames: list[str] | None = None) -> None:
     GLOB_LOCK = ".lock*"
+
+    if filenames is None or not filenames:
+        filenames = ["mantidproject/mantidworkbench.ini", "QtProject.conf"]
 
     settings_dir = _get_settings_dir()
     for filename in filenames:

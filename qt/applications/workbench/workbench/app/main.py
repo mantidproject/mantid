@@ -23,7 +23,7 @@ def main(args=None):
         parser.add_argument(
             "--qt-rm-lockfiles",
             action="store_true",
-            help="Remove lockfiles for qt configuration. This should not be necessary under normal operation.",
+            help="Forceably remove lockfiles for qt configuration. This should not be necessary under normal operation.",
         )
     parser.add_argument("--profile", action="store", help="Run workbench with execution profiling. Specify a path for the output file.")
     parser.add_argument("--yappi", action="store_true", help="Profile using Yappi instead of cProfile to capture multi-threaded execution.")
@@ -61,7 +61,7 @@ def main(args=None):
         warnings.simplefilter("error")  # Change the filter in this process
         os.environ["PYTHONWARNINGS"] = "error"  # Also affect subprocesses
 
-    if options.qt_rm_lockfiles:
+    if getattr(options, "qt_rm_lockfiles", False):
         _remove_lock_files()
 
     if options.profile:
