@@ -130,10 +130,10 @@ class GSAS2Presenter(object):
             self.model.replace_workspace(name, workspace)
 
     def _get_load_parameters(self) -> List[List[str]]:
-        phase = self.model.get_phase_file(self.view.get_phase_combo_text(), self.view.get_phase_finder_file())
+        phases = self.model.get_phase_files(self.view.get_phase_combo_text(), self.view.get_phase_finder_file())
         return [
             self.view.get_instrument_group(),
-            phase,
+            phases,
             self.view.get_focused_data(),
         ]
 

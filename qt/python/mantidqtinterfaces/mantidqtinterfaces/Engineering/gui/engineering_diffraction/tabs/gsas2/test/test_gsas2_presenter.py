@@ -110,7 +110,7 @@ class TestGSAS2Presenter(unittest.TestCase):
 
     def _patch_parameters_from_view(self, instr=None, phase=None, data=None):
         self.view.get_instrument_group.return_value = instr
-        self.model.get_phase_file.return_value = phase
+        self.model.get_phase_files.return_value = phase
         self.view.get_focused_data.return_value = data
 
     # ================
@@ -122,13 +122,13 @@ class TestGSAS2Presenter(unittest.TestCase):
         self.view.get_phase_finder_file.return_value = ["custom.cif"]
         self.view.get_instrument_group.return_value = ["inst.prm"]
         self.view.get_focused_data.return_value = ["data.gss"]
-        self.model.get_phase_file.return_value = "resolved_phase.cif"
+        self.model.get_phase_files.return_value = ["resolved_phase.cif"]
 
         result = self.presenter._get_load_parameters()
 
-        # The phase is resolved by the model from the combo selection and the finder path
-        self.model.get_phase_file.assert_called_once_with("FE_GAMMA", ["custom.cif"])
-        self.assertEqual(result, [["inst.prm"], "resolved_phase.cif", ["data.gss"]])
+        # The phases are resolved by the model from the combo selection and the finder paths
+        self.model.get_phase_files.assert_called_once_with("FE_GAMMA", ["custom.cif"])
+        self.assertEqual(result, [["inst.prm"], ["resolved_phase.cif"], ["data.gss"]])
 
     def test_populate_phase_combo_box_sets_options_and_refreshes_visibility(self):
         self.view.reset_mock()

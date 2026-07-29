@@ -1136,11 +1136,12 @@ class GSAS2Model:
     def phase_is_custom(self, combo_text: str) -> bool:
         return combo_text == self._CUSTOM_PHASE
 
-    def get_phase_file(self, combo_text: str, finder_file_path: str | None) -> str:
+    def get_phase_files(self, combo_text: str, finder_file_paths: List[str] | None) -> List[str]:
+        # always return a list of filepaths, so that callers iterate over phases rather than characters
         if combo_text == self._CUSTOM_PHASE:
-            return finder_file_path
+            return finder_file_paths or []
         else:
-            return self.default_cif_dict[combo_text]
+            return [self.default_cif_dict[combo_text]]
 
     def populate_default_cif_dict(self) -> None:
         # get the path to Engineering root, to anchor file search

@@ -704,14 +704,20 @@ class TestGSAS2Model(unittest.TestCase):
         self.assertFalse(self.model.phase_is_custom("FE_GAMMA"))
         self.assertFalse(self.model.phase_is_custom(""))
 
-    def test_get_phase_file_returns_finder_path_when_custom(self):
-        # When "Custom" is selected the phase comes from the file finder, not the defaults
-        self.assertEqual(self.model.get_phase_file("Custom", "/some/custom_phase.cif"), "/some/custom_phase.cif")
+    def test_get_phase_files_returns_finder_paths_when_custom(self):
+        # When "Custom" is selected the phases come from the file finder, not the defaults
+        self.assertEqual(
+            self.model.get_phase_files("Custom", ["/some/custom_phase.cif", "/some/other_phase.cif"]),
+            ["/some/custom_phase.cif", "/some/other_phase.cif"],
+        )
 
-    def test_get_phase_file_returns_default_path_for_known_phase(self):
+    def test_get_phase_files_returns_empty_list_when_custom_and_no_files_selected(self):
+        self.assertEqual(self.model.get_phase_files("Custom", None), [])
+
+    def test_get_phase_files_returns_default_path_in_a_list_for_known_phase(self):
         self.model.default_cif_dict = {"FE_GAMMA": "/defaults/FE_GAMMA.cif"}
-        # The finder path is ignored when a default phase is selected
-        self.assertEqual(self.model.get_phase_file("FE_GAMMA", "/ignored.cif"), "/defaults/FE_GAMMA.cif")
+        # The finder paths are ignored when a default phase is selected
+        self.assertEqual(self.model.get_phase_files("FE_GAMMA", ["/ignored.cif"]), ["/defaults/FE_GAMMA.cif"])
 
     def test_get_cif_combo_options_returns_sorted_defaults_with_custom_last(self):
         self.model.default_cif_dict = {"FE": "f.cif", "AL": "a.cif", "CU": "c.cif"}
