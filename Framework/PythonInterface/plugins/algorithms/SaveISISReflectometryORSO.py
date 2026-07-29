@@ -665,7 +665,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         flood_entry_validator = StringArrayLengthValidator()
         flood_entry_validator.setLengthMax(2)
         self.declareProperty(
-            StringArrayProperty(Prop.FLOOD_ENTRY, values=["", ""], validator=flood_entry_validator),
+            StringArrayProperty(Prop.FLOOD_ENTRY, values=[], validator=flood_entry_validator),
             doc="Entry for the flood correction. Must be in the form 'filename, comment'.",
         )
         self.setPropertySettings(Prop.FLOOD_ENTRY, manual_metadata_condition)
@@ -863,8 +863,15 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             second_trans_files = [file for file in self.getProperty(Prop.TRANS_FILES_2).value if file]
         dataset.transmission_files = (first_trans_files, second_trans_files)
 
+        def get_flood_entry_from_property() -> Optional[Tuple[str, str]]:
+            flood_entry = self.getProperty(Prop.FLOOD_ENTRY).value
+            if not flood_entry or not flood_entry[0]:
+                return None
+            comment = flood_entry[1] if len(flood_entry) > 1 and flood_entry[1] else "Flood correction workspace or file"
+            return flood_entry[0], comment
+
         if use_default or not self.getProperty(Prop.FLOOD_ENTRY).isDefault:
-            dataset.flood_entry = tuple(self.getProperty(Prop.FLOOD_ENTRY).value)
+            dataset.flood_entry = get_flood_entry_from_property()
 
         if metadata_dict is None:
             return dataset

@@ -432,6 +432,40 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         self._check_file_header(None, [filename])
 
     @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_hybrid_source_uses_flood_correction_from_history_when_manual_property_is_default(self, mock_alg_histories):
+        ws = self._create_sample_workspace(instrument_name="INTER")
+        mock_alg_histories.return_value = self._create_hybrid_validation_history("calib.nxs")
+
+        self._run_save_alg(ws, MetadataSource="HistoryWherePossible")
+
+        self._check_file_header(["#     - file: flood_ws\n#       comment: Flood correction workspace or file"])
+
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_hybrid_source_uses_manual_flood_correction_when_property_is_set(self, mock_alg_histories):
+        ws = self._create_sample_workspace(instrument_name="INTER")
+        mock_alg_histories.return_value = self._create_hybrid_validation_history("calib.nxs")
+
+        self._run_save_alg(
+            ws,
+            MetadataSource="HistoryWherePossible",
+            FloodCorrectionSource=["manual_flood.nxs", "Manual flood correction"],
+        )
+
+        self._check_file_header(
+            included_header_values=["#     - file: manual_flood.nxs\n#       comment: Manual flood correction"],
+            excluded_header_values=["#     - file: flood_ws\n#       comment: Flood correction workspace or file"],
+        )
+
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_hybrid_source_allows_manual_flood_correction_to_clear_history(self, mock_alg_histories):
+        ws = self._create_sample_workspace(instrument_name="INTER")
+        mock_alg_histories.return_value = self._create_hybrid_validation_history("calib.nxs")
+
+        self._run_save_alg(ws, MetadataSource="HistoryWherePossible", FloodCorrectionSource=[""])
+
+        self._check_file_header(excluded_header_values=["#     - file: flood_ws\n#       comment: Flood correction workspace or file"])
+
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
     def test_calibration_file_included_in_additional_files(self, mock_alg_histories):
         filename = "calib_file.nxs"
         test_path = Path(f"path/to/{filename}")
