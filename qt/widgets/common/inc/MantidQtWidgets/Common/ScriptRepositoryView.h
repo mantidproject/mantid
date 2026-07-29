@@ -26,7 +26,7 @@ class RepoModel;
 class EXPORT_OPT_MANTIDQT_COMMON ScriptRepositoryView : public MantidDialog {
   Q_OBJECT
 
-  /// Delegate to show the icons Download and Upload
+  /// Delegate to show the Download icons
   class RepoDelegate : public QStyledItemDelegate {
   public:
     RepoDelegate(QObject *parent = nullptr);
@@ -41,15 +41,6 @@ class EXPORT_OPT_MANTIDQT_COMMON ScriptRepositoryView : public MantidDialog {
   class CheckBoxDelegate : public QStyledItemDelegate {
   public:
     CheckBoxDelegate(QObject *parent = nullptr);
-    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
-    bool editorEvent(QEvent *event, QAbstractItemModel *model, const QStyleOptionViewItem &option,
-                     const QModelIndex &index) override;
-  };
-  /// Delegate to show the icon to remove the entry from the local and central
-  /// repository
-  class RemoveEntryDelegate : public QStyledItemDelegate {
-  public:
-    RemoveEntryDelegate(QObject *parent = nullptr);
     void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
     bool editorEvent(QEvent *event, QAbstractItemModel *model, const QStyleOptionViewItem &option,
                      const QModelIndex &index) override;
