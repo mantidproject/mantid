@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
+#include <cmath>
 #include <cxxtest/TestSuite.h>
 #include <random>
 
@@ -12,10 +13,12 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAlgorithms/FitPeaks.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/Logger.h"
@@ -414,6 +417,74 @@ public:
     AnalysisDataService::Instance().remove("PeakPositionsWS_ePP");
     AnalysisDataService::Instance().remove("FittedPeaksWS_ePP");
     AnalysisDataService::Instance().remove("PeakParametersWS_ePP");
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Test that per-spectrum starting values supplied through PeakParameterValueTable are consumed.
+   * The table has one column per peak parameter and one row per spectrum (row index -> workspace
+   * index); a non-finite cell means "no starting value for that spectrum/parameter".  This exercises
+   * the table branch of convertParametersNameToIndex and the per-row read in decideToEstimatePeakParams
+   * (previously the per-row values were never applied).
+   */
+  void test_peakParameterValueTable() {
+    const std::string data_ws_name("FitPeaksTest_ws_pPVT");
+    generateTestDataGaussian(data_ws_name);
+
+    // per-spectrum starting values; spectrum 1's Sigma is NaN to exercise the "no seed for this
+    // cell" path (the value is left as calculated rather than overwritten)
+    ITableWorkspace_sptr value_table = std::make_shared<DataObjects::TableWorkspace>();
+    value_table->addColumn("double", "Height");
+    value_table->addColumn("double", "Sigma");
+    value_table->addColumn("double", "PeakCentre");
+    const std::vector<double> heights{2.0, 4.0, 3.0};
+    const std::vector<double> sigmas{0.15, std::nan(""), 0.19};
+    const std::vector<double> centres{5.0, 5.01, 5.03};
+    for (size_t i = 0; i < 3; ++i) {
+      API::TableRow row = value_table->appendRow();
+      row << heights[i] << sigmas[i] << centres[i];
+    }
+    AnalysisDataService::Instance().addOrReplace("FitPeaksTest_valueTable", value_table);
+
+    FitPeaks fitpeaks;
+    fitpeaks.initialize();
+    fitpeaks.setRethrows(true);
+    TS_ASSERT(fitpeaks.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("InputWorkspace", data_ws_name));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", 0));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 2));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCenters", "5.0"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitWindowBoundaryList", "2.5, 6.5"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakParameterValueTable", "FitPeaksTest_valueTable"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("HighBackground", false));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("ConstrainPeakPositions", false));
+
+    fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS_pPVT");
+    fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS_pPVT");
+    fitpeaks.setProperty("FittedPeaksWorkspace", "FittedPeaksWS_pPVT");
+
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.execute());
+    TS_ASSERT(fitpeaks.isExecuted());
+    if (!fitpeaks.isExecuted())
+      return;
+
+    API::MatrixWorkspace_sptr main_out_ws = std::dynamic_pointer_cast<API::MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve("PeakPositionsWS_pPVT"));
+    TS_ASSERT(main_out_ws);
+    TS_ASSERT_EQUALS(main_out_ws->getNumberHistograms(), 3);
+
+    // each spectrum's single peak fits near its d ~ 5 position (from generateTestDataGaussian), so the
+    // per-row read path executed cleanly across all three spectra (incl. the NaN Sigma cell)
+    TS_ASSERT_DELTA(main_out_ws->histogram(0).y()[0], 5.0, 1.E-2);
+    TS_ASSERT_DELTA(main_out_ws->histogram(1).y()[0], 5.01, 1.E-2);
+    TS_ASSERT_DELTA(main_out_ws->histogram(2).y()[0], 5.03, 1.E-2);
+
+    // clean up
+    AnalysisDataService::Instance().remove(data_ws_name);
+    AnalysisDataService::Instance().remove("FitPeaksTest_valueTable");
+    AnalysisDataService::Instance().remove("PeakPositionsWS_pPVT");
+    AnalysisDataService::Instance().remove("FittedPeaksWS_pPVT");
+    AnalysisDataService::Instance().remove("PeakParametersWS_pPVT");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -1017,6 +1088,345 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
+  /** Test PositionToleranceMode="Constrain": the tolerance bounds the peak centre during the fit,
+   * the fitted centres stay within tolerance of the expected positions, and the reported centre
+   * error is a genuine (finite, positive) covariance error rather than the spuriously small value
+   * produced when a boundary-constraint penalty contaminates the Hessian.
+   * @brief test_positionToleranceConstrainMode
+   */
+  void test_positionToleranceConstrainMode() {
+    g_log.notice() << "TEST POSITION TOLERANCE CONSTRAIN MODE";
+
+    const std::string data_ws_name("FitPeaksTest_ws_ptc");
+
+    std::vector<string> peakparnames;
+    std::vector<double> peakparvalues;
+    createGaussParameters(peakparnames, peakparvalues);
+
+    generateTestDataGaussian(data_ws_name);
+
+    FitPeaks fitpeaks;
+    fitpeaks.initialize();
+    fitpeaks.setRethrows(true);
+    TS_ASSERT(fitpeaks.isInitialized());
+
+    const double tolerance = 0.5;
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("InputWorkspace", data_ws_name));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", 0));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 2));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCenters", "5.0, 10.0"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitWindowBoundaryList", "2.5, 6.5, 8.0, 12.0"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitFromRight", true));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakParameterNames", peakparnames));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakParameterValues", peakparvalues));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("HighBackground", false));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PositionTolerance", std::vector<double>{tolerance}));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PositionToleranceMode", "Constrain"));
+    // Constrain mode is mutually exclusive with the width-based ConstrainPeakPositions bound
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("ConstrainPeakPositions", false));
+    // recompute the reported errors free of the position constraint
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("CalculateUnconstrainedErrors", true));
+
+    fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS_ptc");
+    fitpeaks.setProperty("RawPeakParameters", true);
+    fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS_ptc");
+    fitpeaks.setPropertyValue("OutputParameterFitErrorsWorkspace", "FitErrorsWS_ptc");
+    fitpeaks.setProperty("FittedPeaksWorkspace", "FittedPeaksWS_ptc");
+
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.execute());
+    TS_ASSERT(fitpeaks.isExecuted());
+    if (!fitpeaks.isExecuted())
+      return;
+
+    API::MatrixWorkspace_sptr main_out_ws = std::dynamic_pointer_cast<API::MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve("PeakPositionsWS_ptc"));
+    TS_ASSERT(main_out_ws);
+    if (!main_out_ws)
+      return;
+
+    // fitted centres remain within tolerance of the expected positions
+    const std::vector<double> expected{5.0, 10.0};
+    for (size_t iws = 0; iws < main_out_ws->getNumberHistograms(); ++iws) {
+      const auto fitted = main_out_ws->histogram(iws).y();
+      TS_ASSERT_EQUALS(fitted.size(), 2);
+      for (size_t ipeak = 0; ipeak < fitted.size(); ++ipeak) {
+        // a failed fit is flagged with a negative position; only check successful fits
+        if (fitted[ipeak] > 0.)
+          TS_ASSERT_LESS_THAN_EQUALS(std::fabs(fitted[ipeak] - expected[ipeak]), tolerance + 1.E-6);
+      }
+    }
+
+    // the position error is recomputed without the constraint penalty: it must be a real, finite,
+    // strictly positive covariance error (the ConstrainPeakPositions path can report ~0 here)
+    API::ITableWorkspace_sptr error_table =
+        std::dynamic_pointer_cast<API::ITableWorkspace>(AnalysisDataService::Instance().retrieve("FitErrorsWS_ptc"));
+    TS_ASSERT(error_table);
+    if (!error_table)
+      return;
+    const std::vector<std::string> colNames = error_table->getColumnNames();
+    size_t centreCol = colNames.size();
+    for (size_t i = 0; i < colNames.size(); ++i)
+      if (colNames[i] == "PeakCentre")
+        centreCol = i;
+    TS_ASSERT(centreCol < colNames.size());
+    if (centreCol >= colNames.size())
+      return;
+    bool any_positive_error = false;
+    for (size_t irow = 0; irow < error_table->rowCount(); ++irow) {
+      const double centre_err = error_table->cell<double>(irow, centreCol);
+      TS_ASSERT(std::isfinite(centre_err));
+      TS_ASSERT_LESS_THAN_EQUALS(0.0, centre_err);
+      if (centre_err > 0.0)
+        any_positive_error = true;
+    }
+    // at least one successful fit reports a genuine (non-zero) covariance error on the centre
+    TS_ASSERT(any_positive_error);
+
+    AnalysisDataService::Instance().remove(data_ws_name);
+    AnalysisDataService::Instance().remove("PeakPositionsWS_ptc");
+    AnalysisDataService::Instance().remove("PeakParametersWS_ptc");
+    AnalysisDataService::Instance().remove("FitErrorsWS_ptc");
+    AnalysisDataService::Instance().remove("FittedPeaksWS_ptc");
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Test PositionToleranceFractional: each PositionTolerance value is interpreted as a fraction of
+   * that peak's fit window width, so peaks with different window widths get proportionally different
+   * absolute tolerances.  Two peaks (at 5.0 and 10.0) are given fit windows of different widths (1.4
+   * and 4.0) and expected positions offset by the same absolute amount, so their freely-fitted
+   * centres end up equidistant from expectation.  A single fractional tolerance is chosen so its
+   * window-scaled bound clears the wide-window peak but not the narrow-window one; the same tolerance
+   * applied as an absolute value (fractional off) rejects both, proving the tolerance is scaled by
+   * window width rather than used verbatim.
+   * @brief test_positionToleranceFractional
+   */
+  void test_positionToleranceFractional() {
+    g_log.notice() << "TEST POSITION TOLERANCE FRACTIONAL";
+
+    const std::string data_ws_name("FitPeaksTest_ws_ptf");
+
+    std::vector<string> peakparnames;
+    std::vector<double> peakparvalues;
+    createGaussParameters(peakparnames, peakparvalues);
+
+    generateTestDataGaussian(data_ws_name);
+
+    // true data peaks (spectrum 0) are at 5.0 and 10.0; the expected positions below (5.4, 10.4) are
+    // offset by the same absolute amount (0.4) so each freely-fitted centre ends up 0.4 from expected.
+    // peak0 has a narrow fit window (5.7-4.3 = 1.4) and peak1 a wide one (12.0-8.0 = 4.0).
+    const double fraction = 0.2;
+    // fractional bounds: peak0 -> 0.2*1.4 = 0.28 (< 0.4 offset -> rejected),
+    //                    peak1 -> 0.2*4.0 = 0.80 (> 0.4 offset -> accepted)
+
+    auto runFit = [&](bool fractional, const std::string &suffix) -> std::vector<double> {
+      FitPeaks fitpeaks;
+      fitpeaks.initialize();
+      fitpeaks.setRethrows(true);
+      TS_ASSERT(fitpeaks.isInitialized());
+
+      TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("InputWorkspace", data_ws_name));
+      TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", 0));
+      TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 0));
+      // expected positions offset from the true peaks (5.0, 10.0) by 0.4, with unequal fit windows
+      TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCenters", "5.4, 10.4"));
+      TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitWindowBoundaryList", "4.3, 5.7, 8.0, 12.0"));
+      TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakParameterNames", peakparnames));
+      TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakParameterValues", peakparvalues));
+      TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("HighBackground", false));
+      // free fit (converges to the true data peak) with a post-fit Check against the tolerance
+      TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("ConstrainPeakPositions", false));
+      TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PositionTolerance", std::vector<double>{fraction}));
+      TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PositionToleranceMode", "Check"));
+      TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PositionToleranceFractional", fractional));
+
+      fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS_" + suffix);
+      fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS_" + suffix);
+      fitpeaks.setProperty("FittedPeaksWorkspace", "FittedPeaksWS_" + suffix);
+
+      TS_ASSERT_THROWS_NOTHING(fitpeaks.execute());
+      TS_ASSERT(fitpeaks.isExecuted());
+
+      API::MatrixWorkspace_sptr out_ws = std::dynamic_pointer_cast<API::MatrixWorkspace>(
+          AnalysisDataService::Instance().retrieve("PeakPositionsWS_" + suffix));
+      TS_ASSERT(out_ws);
+      std::vector<double> positions = out_ws ? out_ws->histogram(0).y().rawData() : std::vector<double>{};
+
+      AnalysisDataService::Instance().remove("PeakPositionsWS_" + suffix);
+      AnalysisDataService::Instance().remove("PeakParametersWS_" + suffix);
+      AnalysisDataService::Instance().remove("FittedPeaksWS_" + suffix);
+      return positions;
+    };
+
+    // fractional tolerance: the narrow-window peak is rejected (negative position flag) because its
+    // window-scaled bound (0.28) is smaller than the 0.4 offset, while the wide-window peak passes (0.80)
+    const std::vector<double> frac_positions = runFit(true, "ptf_frac");
+    TS_ASSERT_EQUALS(frac_positions.size(), 2);
+    if (frac_positions.size() == 2) {
+      TS_ASSERT_LESS_THAN(frac_positions[0], 0.0);
+      TS_ASSERT_LESS_THAN(0.0, frac_positions[1]);
+      TS_ASSERT_DELTA(frac_positions[1], 10.0, 0.05);
+    }
+
+    // same tolerance applied as an absolute value (0.2) rejects the wide-window peak too, since
+    // 0.4 > 0.2 - confirming the fractional flag, not some unrelated effect, is what let it pass
+    const std::vector<double> abs_positions = runFit(false, "ptf_abs");
+    TS_ASSERT_EQUALS(abs_positions.size(), 2);
+    if (abs_positions.size() == 2) {
+      TS_ASSERT_LESS_THAN(abs_positions[0], 0.0);
+      TS_ASSERT_LESS_THAN(abs_positions[1], 0.0);
+    }
+
+    AnalysisDataService::Instance().remove(data_ws_name);
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Test that PositionToleranceMode="Constrain" is rejected when no PositionTolerance is given,
+   * since there is nothing to constrain the centre against.
+   * @brief test_positionToleranceConstrainRequiresTolerance
+   */
+  void test_positionToleranceConstrainRequiresTolerance() {
+    g_log.notice() << "TEST POSITION TOLERANCE CONSTRAIN REQUIRES TOLERANCE";
+
+    const std::string data_ws_name("FitPeaksTest_ws_ptcr");
+    generateTestDataGaussian(data_ws_name);
+
+    FitPeaks fitpeaks;
+    fitpeaks.initialize();
+    fitpeaks.setRethrows(true);
+    TS_ASSERT(fitpeaks.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("InputWorkspace", data_ws_name));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCenters", "5.0, 10.0"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitWindowBoundaryList", "2.5, 6.5, 8.0, 12.0"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("ConstrainPeakPositions", false));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PositionToleranceMode", "Constrain"));
+    fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS_ptcr");
+    fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS_ptcr");
+
+    // validateInputs should flag the missing PositionTolerance and prevent execution
+    TS_ASSERT_THROWS_EQUALS(
+        fitpeaks.execute(), const std::runtime_error &e, std::string(e.what()),
+        "Some invalid Properties found: \n PositionTolerance: PositionTolerance must be specified when "
+        "PositionToleranceMode is 'Constrain'.");
+    TS_ASSERT(!fitpeaks.isExecuted());
+
+    AnalysisDataService::Instance().remove(data_ws_name);
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Test that PositionToleranceMode="Constrain" and ConstrainPeakPositions=true are rejected as
+   * mutually exclusive, since both bound the peak centre during the fit.
+   * @brief test_positionToleranceConstrainConflictsWithConstrainPeakPositions
+   */
+  void test_positionToleranceConstrainConflictsWithConstrainPeakPositions() {
+    g_log.notice() << "TEST POSITION TOLERANCE CONSTRAIN CONFLICTS WITH CONSTRAIN PEAK POSITIONS";
+
+    const std::string data_ws_name("FitPeaksTest_ws_ptcc");
+    generateTestDataGaussian(data_ws_name);
+
+    FitPeaks fitpeaks;
+    fitpeaks.initialize();
+    fitpeaks.setRethrows(true);
+    TS_ASSERT(fitpeaks.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("InputWorkspace", data_ws_name));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCenters", "5.0, 10.0"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitWindowBoundaryList", "2.5, 6.5, 8.0, 12.0"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PositionTolerance", std::vector<double>{0.5}));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PositionToleranceMode", "Constrain"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("ConstrainPeakPositions", true));
+    fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS_ptcc");
+    fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS_ptcc");
+
+    const std::string repeat_msg = "PositionToleranceMode='Constrain' and ConstrainPeakPositions both "
+                                   "constrain the peak centre during fitting and are mutually exclusive. "
+                                   "Set ConstrainPeakPositions to false to use 'Constrain' mode.";
+
+    const std::string err_msg = "Some invalid Properties found: \n ConstrainPeakPositions: " + repeat_msg +
+                                "\n PositionToleranceMode: " + repeat_msg;
+
+    // validateInputs should reject the mutually-exclusive combination and prevent execution
+    TS_ASSERT_THROWS_EQUALS(fitpeaks.execute(), const std::runtime_error &e, std::string(e.what()), err_msg);
+    TS_ASSERT(!fitpeaks.isExecuted());
+
+    AnalysisDataService::Instance().remove(data_ws_name);
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Test that CalculateUnconstrainedErrors also applies to the ConstrainPeakPositions path: with
+   * that constraint active the fit still succeeds and reports finite, positive centre errors
+   * recomputed from the unconstrained cost function.
+   * @brief test_calculateUnconstrainedErrorsWithConstrainPeakPositions
+   */
+  void test_calculateUnconstrainedErrorsWithConstrainPeakPositions() {
+    g_log.notice() << "TEST CALCULATE UNCONSTRAINED ERRORS WITH CONSTRAIN PEAK POSITIONS";
+
+    const std::string data_ws_name("FitPeaksTest_ws_cue");
+
+    std::vector<string> peakparnames;
+    std::vector<double> peakparvalues;
+    createGaussParameters(peakparnames, peakparvalues);
+
+    generateTestDataGaussian(data_ws_name);
+
+    FitPeaks fitpeaks;
+    fitpeaks.initialize();
+    fitpeaks.setRethrows(true);
+    TS_ASSERT(fitpeaks.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("InputWorkspace", data_ws_name));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", 0));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 2));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCenters", "5.0, 10.0"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitWindowBoundaryList", "2.5, 6.5, 8.0, 12.0"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitFromRight", true));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakParameterNames", peakparnames));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakParameterValues", peakparvalues));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("HighBackground", false));
+    // width-based position constraint, with unconstrained error recalculation enabled
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("ConstrainPeakPositions", true));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("CalculateUnconstrainedErrors", true));
+
+    fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS_cue");
+    fitpeaks.setProperty("RawPeakParameters", true);
+    fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS_cue");
+    fitpeaks.setPropertyValue("OutputParameterFitErrorsWorkspace", "FitErrorsWS_cue");
+
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.execute());
+    TS_ASSERT(fitpeaks.isExecuted());
+    if (!fitpeaks.isExecuted())
+      return;
+
+    API::ITableWorkspace_sptr error_table =
+        std::dynamic_pointer_cast<API::ITableWorkspace>(AnalysisDataService::Instance().retrieve("FitErrorsWS_cue"));
+    TS_ASSERT(error_table);
+    if (!error_table)
+      return;
+    const std::vector<std::string> colNames = error_table->getColumnNames();
+    size_t centreCol = colNames.size();
+    for (size_t i = 0; i < colNames.size(); ++i)
+      if (colNames[i] == "PeakCentre")
+        centreCol = i;
+    TS_ASSERT(centreCol < colNames.size());
+    if (centreCol >= colNames.size())
+      return;
+    bool any_positive_error = false;
+    for (size_t irow = 0; irow < error_table->rowCount(); ++irow) {
+      const double centre_err = error_table->cell<double>(irow, centreCol);
+      TS_ASSERT(std::isfinite(centre_err));
+      TS_ASSERT_LESS_THAN_EQUALS(0.0, centre_err);
+      if (centre_err > 0.0)
+        any_positive_error = true;
+    }
+    TS_ASSERT(any_positive_error);
+
+    AnalysisDataService::Instance().remove(data_ws_name);
+    AnalysisDataService::Instance().remove("PeakPositionsWS_cue");
+    AnalysisDataService::Instance().remove("PeakParametersWS_cue");
+    AnalysisDataService::Instance().remove("FitErrorsWS_cue");
+  }
+
+  //----------------------------------------------------------------------------------------------
   /** Test that FitPeaks does not throw an exception when
    * not enough data points are available for peak fitting
    * @brief test_notEnoughPeakDataPoints
@@ -1595,6 +2005,48 @@ public:
 
     bool defaultVal = fitpeaks.getProperty("CopyLastGoodPeakParameters");
     TS_ASSERT_EQUALS(defaultVal, true);
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Test that StrictConvergence defaults to true, preserving the historical behaviour
+   * of only accepting a fit whose minimizer reports the exact status "success".
+   */
+  void test_StrictConvergenceDefaultIsTrue() {
+    FitPeaks fitpeaks;
+    fitpeaks.initialize();
+    TS_ASSERT(fitpeaks.isInitialized());
+
+    bool defaultVal = fitpeaks.getProperty("StrictConvergence");
+    TS_ASSERT_EQUALS(defaultVal, true);
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Unit test the convergence-status decision used to gate a fit result. This isolates the
+   * only behaviour StrictConvergence changes (which minimizer OutputStatus strings are treated
+   * as converged), without depending on the numeric behaviour of the child Fit algorithm.
+   */
+  void test_fitStatusIsConverged() {
+    // Use the canonical status strings the minimizer actually emits, so this test tracks
+    // the real wording rather than an independent copy that could silently drift.
+    const std::string &success = API::MinimizerStatus::SUCCESS;
+    const std::string &toleranceInF = API::MinimizerStatus::CHANGES_IN_FUNCTION_TOO_SMALL;
+    const std::string &toleranceInX = API::MinimizerStatus::CHANGES_IN_PARAMETER_TOO_SMALL;
+    const std::string failure("Failed to converge after 500 iterations.");
+
+    // "success" is always accepted, regardless of strictness
+    TS_ASSERT(FitPeaks::fitStatusIsConverged(success, true));
+    TS_ASSERT(FitPeaks::fitStatusIsConverged(success, false));
+
+    // In strict mode nothing else is accepted
+    TS_ASSERT(!FitPeaks::fitStatusIsConverged(toleranceInF, true));
+    TS_ASSERT(!FitPeaks::fitStatusIsConverged(toleranceInX, true));
+    TS_ASSERT(!FitPeaks::fitStatusIsConverged(failure, true));
+
+    // In non-strict mode the tolerance-limited stopping conditions are accepted...
+    TS_ASSERT(FitPeaks::fitStatusIsConverged(toleranceInF, false));
+    TS_ASSERT(FitPeaks::fitStatusIsConverged(toleranceInX, false));
+    // ...but a genuine non-convergence is still rejected
+    TS_ASSERT(!FitPeaks::fitStatusIsConverged(failure, false));
   }
 
   //----------------------------------------------------------------------------------------------
