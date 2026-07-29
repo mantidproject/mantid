@@ -111,6 +111,7 @@ ISISDiagnostics::ISISDiagnostics(IDataReduction *idrUI, QWidget *parent) : DataR
   connect(m_uiForm.ckUseCalibration, &QCheckBox::toggled, this, &ISISDiagnostics::sliceCalib);
   // Plot slice miniplot when file has finished loading
   connect(m_uiForm.dsInputFiles, &FileFinderWidget::filesFoundChanged, this, &ISISDiagnostics::handleNewFile);
+  connect(m_uiForm.ckSumFiles, &QCheckBox::stateChanged, this, &ISISDiagnostics::handleNewFile);
   // Shows message on run button when Mantid is finding the file for a given run
   // number
   connect(m_uiForm.dsInputFiles, &FileFinderWidget::findingFiles, this, &ISISDiagnostics::pbRunFinding);
@@ -257,28 +258,40 @@ void ISISDiagnostics::setDefaultInstDetails(QMap<QString, QString> const &instru
   m_dblManager->setValue(m_properties["PreviewSpec"], spectraMin);
 }
 
+QString ISISDiagnostics::loadFiles(const QStringList &fileNames) {
+  if (fileNames.empty()) {
+    return "";
+  }
+
+  QString wsname;
+  bool loadError = false;
+  if (!m_uiForm.ckSumFiles->isChecked()) {
+    const QString fileName = fileNames.at(0);
+    const QFileInfo fi(fileName);
+    wsname = fi.baseName();
+    loadError = !loadFile(fileName.toStdString(), wsname.toStdString());
+  } else {
+    wsname =
+        QString::fromStdString(loadFilesWithSum(MantidWidgets::qStringListToStdVector(fileNames), getIpfFilename()));
+    loadError = wsname.isEmpty();
+  }
+
+  if (loadError) {
+    emit showMessageBox("Unable to load file.\nCheck whether your file exists "
+                        "and matches the selected instrument in the "
+                        "EnergyTransfer tab.");
+    wsname.clear();
+  }
+  return wsname;
+}
+
 void ISISDiagnostics::handleNewFile() {
   if (!m_uiForm.dsInputFiles->isValid())
     return;
 
-  QString wsname;
-  if (!m_uiForm.ckSumFiles->isChecked()) {
-    QFileInfo fi(m_uiForm.dsInputFiles->getFirstFilename());
-    wsname = fi.baseName();
-    if (!loadFile(m_uiForm.dsInputFiles->getFirstFilename().toStdString(), wsname.toStdString())) {
-      emit showMessageBox("Unable to load file.\nCheck whether your file exists "
-                          "and matches the selected instrument in the "
-                          "EnergyTransfer tab.");
-      return;
-    }
-    m_sampleName = m_uiForm.dsInputFiles->getFilenames().join(",");
-    m_isSumFiles = false;
-  } else {
-    wsname = QString::fromStdString(loadFilesWithSum(
-        MantidWidgets::qStringListToStdVector(m_uiForm.dsInputFiles->getFilenames()), getIpfFilename()));
-    m_sampleName = wsname;
-    m_isSumFiles = true;
-  }
+  const auto wsname = loadFiles(m_uiForm.dsInputFiles->getFilenames());
+  m_sampleName = wsname;
+  m_isSumFiles = m_uiForm.ckSumFiles->isChecked();
 
   int specMin = static_cast<int>(m_dblManager->value(m_properties["SpecMin"]));
 
