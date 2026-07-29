@@ -1,0 +1,1 @@
+- Ensure that :ref:`algm-ConvertToMD` and :ref:`algm-MDNormDirectSC` with the ``UseLogTimes`` property supports SNS data.
