@@ -11,6 +11,7 @@
 #include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
 
 #include "MantidAPI/FuncMinimizerFactory.h"
+#include "MantidAPI/IFuncMinimizer.h"
 
 #include "MantidKernel/Logger.h"
 
@@ -91,7 +92,7 @@ bool SimplexMinimizer::iterate(size_t /*iteration*/) {
   double size = gsl_multimin_fminimizer_size(m_gslSolver);
   status = gsl_multimin_test_size(size, m_epsabs);
   if (status != GSL_CONTINUE) {
-    m_errorString = gsl_strerror(status);
+    m_errorString = (status == GSL_SUCCESS) ? API::MinimizerStatus::SUCCESS : gsl_strerror(status);
     return false;
   }
   return true;

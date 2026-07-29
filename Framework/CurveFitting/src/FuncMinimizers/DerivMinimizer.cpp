@@ -10,6 +10,8 @@
 #include "MantidCurveFitting/FuncMinimizers/DerivMinimizer.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
 
+#include "MantidAPI/IFuncMinimizer.h"
+
 namespace Mantid::CurveFitting::FuncMinimisers {
 
 /** Used by the GSL to calculate the cost function.
@@ -152,7 +154,7 @@ bool DerivMinimizer::iterate(size_t /*iteration*/) {
   }
   status = gsl_multimin_test_gradient(m_gslSolver->gradient, m_stopGradient);
   if (status != GSL_CONTINUE) {
-    m_errorString = gsl_strerror(status);
+    m_errorString = (status == GSL_SUCCESS) ? API::MinimizerStatus::SUCCESS : gsl_strerror(status);
     return false;
   }
   return true;
