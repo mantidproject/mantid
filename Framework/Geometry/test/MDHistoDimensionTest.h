@@ -137,6 +137,15 @@ public:
     TSM_ASSERT_EQUALS("A rejected label must leave the units unchanged", dimension.getUnits(), originalUnits);
   }
 
+  void test_setUnits_general_frame_with_q_like_units() {
+    // A general frame is not a Q frame even if its current label looks Q-like ("A^-1"),
+    // so it must still accept an arbitrary relabelling.
+    Mantid::Geometry::GeneralFrame frame("General", "A^-1");
+    MDHistoDimension dimension("x", "x", frame, 0, 1, 5);
+    dimension.setUnits(Kernel::UnitLabel("Furlongs"));
+    TS_ASSERT_EQUALS(dimension.getUnits(), "Furlongs");
+  }
+
   void test_setUnits_hkl_canonical_rlu_label() {
     HKL frame(new Mantid::Kernel::ReciprocalLatticeUnit);
     MDHistoDimension dimension("H", "H", frame, 0, 1, 5);

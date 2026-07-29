@@ -27,9 +27,11 @@ namespace Mantid::Geometry {
 void MDHistoDimension::setUnits(const Kernel::UnitLabel &units) {
   // Build a replacement unit that preserves the frame's Q-ness. The workspace's
   // special coordinate system is derived from the unit's isQUnit() (see
-  // MDFramesToSpecialCoordinateSystem), so a Q frame must keep a Q unit.
+  // MDFramesToSpecialCoordinateSystem), so a Q frame must keep a Q unit. Discriminate
+  // on the frame itself, not the current unit's isQUnit(): a general frame may already
+  // carry a Q-like label (e.g. "A^-1") yet must still accept arbitrary relabelling.
   std::unique_ptr<Kernel::MDUnit> newUnit;
-  if (m_frame->getMDUnit().isQUnit()) {
+  if (m_frame->isQ()) {
     newUnit = std::make_unique<Kernel::ReciprocalLatticeUnit>(units);
   } else {
     newUnit = std::make_unique<Kernel::LabelUnit>(units);
