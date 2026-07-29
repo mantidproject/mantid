@@ -12,6 +12,8 @@
 #include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
 #include "ui_Transmission.h"
 
+enum class SenderType { sumCheckbox, sampleInput, canInput };
+
 namespace MantidQt {
 namespace CustomInterfaces {
 class IDataReduction;
@@ -29,15 +31,14 @@ public:
 
 private slots:
   void transAlgDone(bool error);
-  void handleNewInputData();
-
   void saveClicked();
-
   void setSaveEnabled(bool enabled);
 
 private:
+  void handleNewInputData(const SenderType &senderType);
   void setInstrument(QString const &instrumentName);
   void updateInstrumentConfiguration() override;
+  QString loadFiles(const QStringList &fileNames);
 
   Ui::Transmission m_uiForm;
   QString m_sampleName;

@@ -40,37 +40,64 @@ Transmission::Transmission(IDataReduction *idrUI, QWidget *parent) : DataReducti
   connect(m_batchAlgoRunner, &API::BatchAlgorithmRunner::batchComplete, this, &Transmission::transAlgDone);
 
   connect(m_uiForm.pbSave, &QPushButton::clicked, this, &Transmission::saveClicked);
-  connect(m_uiForm.dsSampleInput, &FileFinderWidget::filesFoundChanged, this, &Transmission::handleNewInputData);
-  connect(m_uiForm.dsCanInput, &FileFinderWidget::filesFoundChanged, this, &Transmission::handleNewInputData);
+  connect(m_uiForm.dsSampleInput, &FileFinderWidget::filesFoundChanged, this,
+          [this]() { Transmission::handleNewInputData(SenderType::sampleInput); });
+  connect(m_uiForm.dsCanInput, &FileFinderWidget::filesFoundChanged, this,
+          [this]() { Transmission::handleNewInputData(SenderType::canInput); });
+  connect(m_uiForm.ckSumFiles, &QCheckBox::stateChanged, this,
+          [this]() { Transmission::handleNewInputData(SenderType::sumCheckbox); });
 
   m_uiForm.ppPlot->setCanvasColour(QColor(240, 240, 240));
 }
 
 Transmission::~Transmission() = default;
 
-void Transmission::handleNewInputData() {
-  const auto *finder = qobject_cast<MantidQt::API::FileFinderWidget *>(sender());
-  const auto fileNames = finder->getFilenames();
+QString Transmission::loadFiles(const QStringList &fileNames) {
+  if (fileNames.empty()) {
+    return "";
+  }
 
   QString wsname;
+  bool loadError = false;
   if (!m_uiForm.ckSumFiles->isChecked() || fileNames.size() == 1) {
-    QFileInfo fi(finder->getFirstFilename());
+    const QString fileName = fileNames.at(0);
+    const QFileInfo fi(fileName);
     wsname = fi.baseName();
-    if (!loadFile(finder->getFirstFilename().toStdString(), wsname.toStdString())) {
-      emit showMessageBox("Unable to load file.\nCheck whether your file exists "
-                          "and matches the selected instrument in the "
-                          "EnergyTransfer tab.");
-      return;
-    }
+    loadError = !loadFile(fileName.toStdString(), wsname.toStdString());
   } else {
     wsname =
         QString::fromStdString(loadFilesWithSum(MantidWidgets::qStringListToStdVector(fileNames), getIpfFilename()));
+    loadError = wsname.isEmpty();
   }
 
-  if (finder != m_uiForm.dsCanInput) {
-    m_sampleName = wsname;
-  } else {
-    m_canName = wsname;
+  if (loadError) {
+    emit showMessageBox("Unable to load file.\nCheck whether your file exists "
+                        "and matches the selected instrument in the "
+                        "EnergyTransfer tab.");
+    wsname = "";
+  }
+  return wsname;
+}
+
+void Transmission::handleNewInputData(const SenderType &senderType) {
+  switch (senderType) {
+  case SenderType::sampleInput: {
+    const auto sampleName = loadFiles(m_uiForm.dsSampleInput->getFilenames());
+    m_sampleName = sampleName;
+    break;
+  }
+  case SenderType::canInput: {
+    const auto canName = loadFiles(m_uiForm.dsCanInput->getFilenames());
+    m_canName = canName;
+    break;
+  }
+  case SenderType::sumCheckbox: {
+    const auto canName = loadFiles(m_uiForm.dsCanInput->getFilenames());
+    const auto sampleName = loadFiles(m_uiForm.dsSampleInput->getFilenames());
+    m_sampleName = sampleName;
+    m_canName = canName;
+    break;
+  }
   }
 }
 
