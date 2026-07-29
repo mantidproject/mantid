@@ -86,8 +86,8 @@ The resolution (:math:`dQ/Q`) is looked up as follows:
 
 If a resolution value cannot be found from the workspace history or from the property then the file is saved without this column included.
 
-If parameter ``IncludeAdditionalColumns`` is set to ``True`` then the value of parameter ``WriteResolution`` is ignored and the algorithm will output the four columns described above for stitched datasets.
-For non-stitched datasets there will be the four columns described above plus an additional four columns as follows:
+If parameter ``IncludeAdditionalColumns`` is set to ``True`` then, for non-stitched datasets, the algorithm will attempt to output the additional columns as follows.
+This setting is independent of ``WriteResolution``: the ``Qz`` resolution column is only written when ``WriteResolution`` is set to ``True``.
 
 - *lambda* - the wavelength values.
 
@@ -101,6 +101,7 @@ For non-stitched datasets there will be the four columns described above plus an
 - *error of incident theta* - calculated as :math:`resolution * \theta`.
 
 If it is not possible to calculate the values for the additional columns then a warning is logged and they are excluded from the file.
+For stitched datasets, additional columns are not included and a warning is logged if ``IncludeAdditionalColumns`` is set to ``True``.
 
 Header Metadata
 ---------------

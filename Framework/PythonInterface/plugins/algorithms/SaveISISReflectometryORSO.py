@@ -684,9 +684,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             name=Prop.INCLUDE_EXTRA_COLS,
             defaultValue=False,
             direction=Direction.Input,
-            doc="Whether to include the four additional columns lambda, dlambda, theta and dtheta for unstitched datasets. "
-            "If set to True then a resolution column will be included for all datasets, regardless of the value of "
-            f"the {Prop.WRITE_RESOLUTION} parameter.",
+            doc="Whether to include the four additional columns lambda, dlambda, theta and dtheta for unstitched datasets.",
         )
 
         self.declareProperty(
@@ -910,17 +908,22 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         """
         Set up the column headers and data values
         """
-        resolution = self._get_resolution(refl_dataset)
+        resolution = refl_dataset.resolution
+        write_resolution = self.getProperty(Prop.WRITE_RESOLUTION).value
         point_data = self._convert_to_point_data(refl_dataset.ws, "pointData")
 
         q_data = point_data.extractX()[0]
         reflectivity = point_data.extractY()[0]
         reflectivity_error = point_data.extractE()[0]
-        q_resolution = resolution if resolution is None else q_data * resolution
+        q_resolution = q_data * resolution if write_resolution and resolution is not None else None
 
         data_columns = MantidORSODataColumns(q_data, reflectivity, reflectivity_error, q_resolution, q_error_value_is=None)
 
-        if self.getProperty(Prop.INCLUDE_EXTRA_COLS).value and not refl_dataset.is_stitched:
+        if self.getProperty(Prop.INCLUDE_EXTRA_COLS).value and refl_dataset.is_stitched:
+            self.log().warning("Additional data columns cannot be calculated for stitched datasets and will be excluded.")
+            return data_columns
+
+        if self.getProperty(Prop.INCLUDE_EXTRA_COLS).value:
             # Add additional data columns
             try:
                 l_data = self._convert_from_q_to_wavelength(refl_dataset, q_data)
@@ -930,15 +933,29 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
 
             size = q_data.size
 
-            data_columns.add_column("lambda", MantidORSODataColumns.Unit.Angstrom, "wavelength", l_data)
-            data_columns.add_error_column("lambda", MantidORSODataColumns.ErrorType.Resolution, None, np.full(size, 0))
+            data_columns.add_column("lambda", MantidORSODataColumns.Unit.Angstrom, "wavelength", l_data, ensure_recommended_columns=False)
+            data_columns.add_error_column(
+                "lambda", MantidORSODataColumns.ErrorType.Resolution, None, np.full(size, 0), ensure_recommended_columns=False
+            )
             data_columns.add_column(
-                "incident theta", MantidORSODataColumns.Unit.Degrees, "incident theta", np.full(size, refl_dataset.q_conversion_theta)
+                "incident theta",
+                MantidORSODataColumns.Unit.Degrees,
+                "incident theta",
+                np.full(size, refl_dataset.q_conversion_theta),
+                ensure_recommended_columns=False,
             )
             if resolution is not None:
                 # d incident theta = dQ/Q * incident theta
                 d_theta = resolution * refl_dataset.q_conversion_theta
-                data_columns.add_error_column("incident theta", MantidORSODataColumns.ErrorType.Uncertainty, None, np.full(size, d_theta))
+                data_columns.add_error_column(
+                    "incident theta",
+                    MantidORSODataColumns.ErrorType.Uncertainty,
+                    None,
+                    np.full(size, d_theta),
+                    ensure_recommended_columns=False,
+                )
+            else:
+                self.log().warning("Unable to calculate incident theta error as resolution metadata was not found.")
 
         return data_columns
 
@@ -1042,11 +1059,6 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
                 rb_num = str(run.getProperty(log_name).value)
                 return rb_num, f"{self._ISIS_DOI_PREFIX}{rb_num}"
         return None, None
-
-    def _get_resolution(self, refl_dataset: ReflectometryDatasetBase) -> Optional[float]:
-        if not self.getProperty(Prop.WRITE_RESOLUTION).value and not self.getProperty(Prop.INCLUDE_EXTRA_COLS).value:
-            return None
-        return refl_dataset.resolution
 
 
 # Register algorithm with Mantid

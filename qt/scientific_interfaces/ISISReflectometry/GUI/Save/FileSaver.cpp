@@ -89,7 +89,8 @@ void FileSaver::runSaveAsciiAlgorithm(std::string const &savePath, std::string c
 
 void FileSaver::runSaveORSOAlgorithm(std::string const &savePath, std::vector<std::string> const &workspaceNames,
                                      FileFormatOptions const &fileFormat) const {
-  m_saveAlgRunner->runSaveORSOAlgorithm(workspaceNames, savePath, fileFormat.shouldIncludeQResolution(),
+  auto const includeQResolution = fileFormat.shouldIncludeQResolution() || fileFormat.shouldIncludeAdditionalColumns();
+  m_saveAlgRunner->runSaveORSOAlgorithm(workspaceNames, savePath, includeQResolution,
                                         fileFormat.shouldIncludeAdditionalColumns(), fileFormat.model(),
                                         fileFormat.validate());
 }
