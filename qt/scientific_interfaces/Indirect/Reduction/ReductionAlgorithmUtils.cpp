@@ -189,6 +189,10 @@ std::string loadFilesWithSum(const std::vector<std::string> &filenames, const st
   for (const auto &filename : filenames) {
     loadFile(filename, ipfFilename, loadLogFiles, sumData);
   }
+
+  if (filenames.size() == 1) {
+    return filenames.at(0);
+  }
   sumRegularRuns(sumData.wsNames, false);
   const auto outName = renameOutputWorkspace(sumData);
   removeWorkspacesFromADS(sumData.wsNames, deleteMonitors);
