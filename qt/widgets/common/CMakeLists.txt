@@ -668,22 +668,18 @@ mtd_add_qt_library(
   MOC ${QT5_MOC_FILES}
   NOMOC ${QT5_INC_FILES} ${_sip_include_dir}/sip.h
   UI ${QT5_UI_FILES}
-  DEFS IN_MANTIDQT_COMMON QSCINTILLA_DLL QT5_DEFS PRECOMPILED ${PRECOMP_HEADERS}
+  DEFS IN_MANTIDQT_COMMON QSCINTILLA_DLL PRECOMPILED ${PRECOMP_HEADERS}
   INCLUDE_DIRS inc
   SYSTEM_INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${_sip_include_dir}
-  LINK_LIBS ${TARGET_LIBRARIES} PUBLIC Mantid::PythonInterfaceCore
-  QT5_LINK_LIBS
-    Qt5::Concurrent
-    Qt5::Help
-    Qt5::Network
-    Qt5::PrintSupport
-    Qt5::Qscintilla
-    QT6_LINK_LIBS
-    Qt6::Concurrent
-    Qt6::Help
-    Qt6::Network
-    Qt6::PrintSupport
-    Qt6::Qscintilla
+  LINK_LIBS ${TARGET_LIBRARIES}
+            PUBLIC
+            Mantid::PythonInterfaceCore
+            QT6_LINK_LIBS
+            Qt6::Concurrent
+            Qt6::Help
+            Qt6::Network
+            Qt6::PrintSupport
+            Qt6::Qscintilla
   MTD_QT_LINK_LIBS MantidQtIcons
   INSTALL_DIR ${WORKBENCH_LIB_DIR}
   OSX_INSTALL_RPATH @loader_path/../MacOS @loader_path/../Frameworks

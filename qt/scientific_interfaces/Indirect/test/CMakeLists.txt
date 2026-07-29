@@ -12,9 +12,15 @@ mtd_add_qt_tests(
   SRC ${ALL_TEST_FILES}
   INCLUDE_DIRS ../../../../Framework/DataObjects/inc ../
   TEST_HELPER_SRCS ${ALL_TEST_HELPERS}
-  LINK_LIBS ${CORE_MANTIDLIBS} Mantid::DataObjects ${POCO_LIBRARIES} ${Boost_LIBRARIES} Mantid::PythonInterfaceCore
+  LINK_LIBS ${CORE_MANTIDLIBS}
+            Mantid::DataObjects
+            ${POCO_LIBRARIES}
+            ${Boost_LIBRARIES}
+            Mantid::PythonInterfaceCore
             ${PYTHON_LIBRARIES}
-  QT5_LINK_LIBS Qt5::OpenGL QT6_LINK_LIBS Qt6::OpenGL Qt6::OpenGLWidgets
+            QT6_LINK_LIBS
+            Qt6::OpenGL
+            Qt6::OpenGLWidgets
   MTD_QT_LINK_LIBS MantidScientificInterfacesIndirect MantidQtWidgetsCommon MantidQtWidgetsPlotting
                    MantidQtWidgetsMplCpp
   PARENT_DEPENDENCIES GUITests
