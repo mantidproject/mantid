@@ -61,7 +61,8 @@ protected:
 
   std::unique_ptr<Ui::FitDataView> m_uiForm;
   void setCell(std::unique_ptr<QTableWidgetItem> cell, size_t row, size_t column);
-  MantidWidgets::AddWorkspaceDialog *createAddWorkspaceDialog(const QStringList &fileSuffixes) const;
+  MantidWidgets::AddWorkspaceDialog *createAddWorkspaceDialog(const QStringList &workspaceSuffixes,
+                                                              const QStringList &fileSuffixes) const;
 
   IFitDataPresenter *m_presenter;
 

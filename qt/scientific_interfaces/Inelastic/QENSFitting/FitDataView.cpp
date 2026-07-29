@@ -169,22 +169,25 @@ QModelIndexList FitDataView::getSelectedIndexes() const {
 }
 
 void FitDataView::showAddWorkspaceDialog() {
-  auto dialog = createAddWorkspaceDialog(InterfaceUtils::getSampleFBSuffixes(m_presenter->tabName()));
+  auto tabName = m_presenter->tabName();
+  auto dialog = createAddWorkspaceDialog(InterfaceUtils::getSampleWSSuffixes(tabName),
+                                         InterfaceUtils::getSampleFBSuffixes(tabName));
   connect(dialog, &AddWorkspaceDialog::addData, this, &FitDataView::notifyAddData);
 }
 
 void FitDataView::notifyAddData(MantidWidgets::IAddWorkspaceDialog *dialog) { m_presenter->handleAddData(dialog); }
 
 void FitDataView::showAddNumericWorkspaceDialog() {
-  auto dialog = createAddWorkspaceDialog({".*"});
+  // Simulated data has no naming convention, so the workspace selector is left unfiltered
+  auto dialog = createAddWorkspaceDialog({}, {".*"});
   connect(dialog, &AddWorkspaceDialog::addData, this, &FitDataView::notifyAddNumericData);
 }
 
-MantidWidgets::AddWorkspaceDialog *FitDataView::createAddWorkspaceDialog(const QStringList &fileSuffixes) const {
+MantidWidgets::AddWorkspaceDialog *FitDataView::createAddWorkspaceDialog(const QStringList &workspaceSuffixes,
+                                                                         const QStringList &fileSuffixes) const {
   auto dialog = new MantidWidgets::AddWorkspaceDialog(parentWidget());
-  auto tabName = m_presenter->tabName();
   dialog->setAttribute(Qt::WA_DeleteOnClose);
-  dialog->setWSSuffices(InterfaceUtils::getSampleWSSuffixes(tabName));
+  dialog->setWSSuffices(workspaceSuffixes);
   dialog->setFBSuffices(fileSuffixes);
   dialog->setLoadProperty("LoadHistory", SettingsHelper::loadHistory());
   dialog->updateSelectedSpectra();
