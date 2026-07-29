@@ -773,6 +773,35 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
             excluded_header_values=["#     - file: INTER00013463\n#       comment: First transmission run"],
         )
 
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_hybrid_source_allows_manual_reduction_timestamp_to_clear_history(self, mock_alg_histories):
+        ws = self._create_sample_workspace(instrument_name="INTER")
+        mock_alg_histories.return_value = self._create_hybrid_validation_history("calib.nxs")
+
+        self._run_save_alg(ws, MetadataSource="HistoryWherePossible", ReductionTimestamp="")
+
+        self._check_file_header(
+            included_header_values=[f"{self._REDUCTION_TIMESTAMP_HEADING} ''"],
+            excluded_header_values=[f"{self._REDUCTION_TIMESTAMP_HEADING} 2024"],
+        )
+
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_hybrid_source_allows_manual_calibration_file_to_clear_history(self, mock_alg_histories):
+        ws = self._create_sample_workspace(instrument_name="INTER")
+        mock_alg_histories.return_value = self._create_hybrid_validation_history("calib.nxs")
+
+        self._run_save_alg(ws, MetadataSource="HistoryWherePossible", CalibrationFile="")
+
+        expected_additional_file_entries = {
+            "INTER00013463": self._FIRST_TRANS_COMMENT,
+            "INTER00013464": self._SECOND_TRANS_COMMENT,
+            "flood_ws": self._FLOOD_WS_COMMENT,
+        }
+        self._check_file_header(
+            included_header_values=[self._get_expected_additional_file_metadata(expected_additional_file_entries, self._REDUCTION_HEADING)],
+            excluded_header_values=["#     - file: calib.nxs\n#       comment: Calibration file"],
+        )
+
     def _create_sample_workspace(self, rb_num_log_name=_LOG_RB_NUMBER, instrument_name="", ws_name="ws"):
         # Create a single spectrum workspace in units of momentum transfer
         ws = CreateSampleWorkspace(

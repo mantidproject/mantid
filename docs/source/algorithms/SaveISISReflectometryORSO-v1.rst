@@ -131,6 +131,41 @@ the file is saved without this metadata included.
 |                     | :ref:`algm-ReflectometryISISLoadAndProcess` in the workspace history.                         |                                 |
 +---------------------+-----------------------------------------------------------------------------------------------+---------------------------------+
 
+Manual Metadata Blank Values
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In ``HistoryWherePossible`` mode, manual metadata properties only override values found in the workspace history if the
+property is explicitly set. Leaving a property at its default value means that the history value is used where possible.
+An explicitly set blank value can be used to clear a value found in the history.
+
+.. list-table::
+   :header-rows: 1
+
+   * - Property
+     - Default behaviour
+     - Explicit blank override
+   * - ``DatasetSpecificMetadata``
+     - No dataset-specific values are overridden.
+     - ``{}`` or an omitted dataset leaves history values unchanged. Present JSON keys override history values; omitted JSON keys do not clear history values.
+   * - ``QConversionMethod``
+     - ``RefRoi`` is used if no method is found in the history.
+     - No blank override is available. The value must be either ``RefRoi`` or ``ConvertUnits``.
+   * - ``ReductionTimestamp``
+     - The history timestamp is used where possible.
+     - ``""`` clears the history timestamp.
+   * - ``FirstTransmissionFileList``
+     - The first transmission files from history are used where possible.
+     - ``[""]`` clears the first transmission file list.
+   * - ``SecondTransmissionFileList``
+     - The second transmission files from history are used where possible.
+     - ``[""]`` clears the second transmission file list.
+   * - ``FloodCorrectionSource``
+     - The flood correction from history is used where possible.
+     - ``[""]`` clears the flood correction.
+   * - ``CalibrationFile``
+     - The calibration file from history is used where possible.
+     - ``""`` clears the calibration file.
+
 Dataset-Specific Metadata
 -------------------------
 

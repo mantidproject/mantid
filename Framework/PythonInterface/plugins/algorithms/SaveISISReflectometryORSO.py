@@ -585,6 +585,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
     See https://www.reflectometry.org/ for more information about the ORSO .ort format
     """
 
+    _MANUAL_METADATA_NOT_SET = "__manual_metadata_not_set__"
     _FACILITY = "ISIS"
     _ISIS_DOI_PREFIX = "10.5286/ISIS.E.RB"
     _RB_NUM_LOGS = ("rb_proposal", "experiment_identifier")
@@ -653,7 +654,11 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         )
         self.setPropertySettings(Prop.Q_CONVERT_METHOD, manual_metadata_condition)
 
-        self.declareProperty(name=Prop.REDUCTION_TIMESTAMP, defaultValue="", doc="When the reduction took place (ISO8601 Standard).")
+        self.declareProperty(
+            name=Prop.REDUCTION_TIMESTAMP,
+            defaultValue=self._MANUAL_METADATA_NOT_SET,
+            doc="When the reduction took place (ISO8601 Standard).",
+        )
         self.setPropertySettings(Prop.REDUCTION_TIMESTAMP, manual_metadata_condition)
 
         self.declareProperty(StringArrayProperty(Prop.TRANS_FILES_1, values=[]), doc="List of files used in the first transmission run.")
@@ -670,7 +675,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         )
         self.setPropertySettings(Prop.FLOOD_ENTRY, manual_metadata_condition)
 
-        self.declareProperty(Prop.CALIB_FILE, defaultValue="", doc="Calibration file used.")
+        self.declareProperty(Prop.CALIB_FILE, defaultValue=self._MANUAL_METADATA_NOT_SET, doc="Calibration file used.")
         self.setPropertySettings(Prop.CALIB_FILE, manual_metadata_condition)
 
         self.declareProperty(
@@ -839,6 +844,9 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             if use_default or not self.getProperty(alg_prop).isDefault:
                 setattr(dataset, dataset_attr, value)
 
+        def get_manual_property_value(alg_prop: str) -> str:
+            return "" if self.getProperty(alg_prop).isDefault else self.getPropertyValue(alg_prop)
+
         def set_dataset_value_from_meta_dict(dataset_attr: str, key: str, meta_dict: dict) -> None:
             if meta_dict is None:
                 return
@@ -850,9 +858,9 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         if not dataset.q_conversion_method:
             setattr(dataset, "q_conversion_method", self.getPropertyValue(Prop.Q_CONVERT_METHOD))
         set_simple_dataset_value_from_property(
-            "reduction_timestamp", self.getPropertyValue(Prop.REDUCTION_TIMESTAMP), Prop.REDUCTION_TIMESTAMP
+            "reduction_timestamp", get_manual_property_value(Prop.REDUCTION_TIMESTAMP), Prop.REDUCTION_TIMESTAMP
         )
-        set_simple_dataset_value_from_property("calibration_entry", self.getPropertyValue(Prop.CALIB_FILE), Prop.CALIB_FILE)
+        set_simple_dataset_value_from_property("calibration_entry", get_manual_property_value(Prop.CALIB_FILE), Prop.CALIB_FILE)
 
         first_trans_files, second_trans_files = dataset.transmission_files or ([], [])
         if use_default or not self.getProperty(Prop.TRANS_FILES_1).isDefault:
