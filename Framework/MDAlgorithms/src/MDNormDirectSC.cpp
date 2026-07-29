@@ -500,7 +500,7 @@ void MDNormDirectSC::calculateNormContinuous(const std::vector<coord_t> &otherVa
 
   // Convert from picoCoulomb to uA.hr for SNS data
   if (protonlog->units().find("picoCoulomb") != std::string::npos) {
-    const double pCTouA = 1.e-6 / 3600.;
+    constexpr double pCTouA = 1.e-6 / 3600.;
     std::transform(protonCharge.cbegin(), protonCharge.cend(), protonCharge.begin(),
                    [pCTouA](double v) { return v * pCTouA; });
   }
