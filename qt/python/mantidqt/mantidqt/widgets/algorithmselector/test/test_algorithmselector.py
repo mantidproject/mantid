@@ -10,7 +10,6 @@
 from collections import Counter, namedtuple
 import unittest
 
-import qtpy
 from qtpy.QtCore import Qt
 from qtpy.QtTest import QTest
 
@@ -113,12 +112,9 @@ class WidgetTest(unittest.TestCase):
         self.assertEqual(selected_algorithm.name, "DoStuff")
         self.assertEqual(selected_algorithm.version, -1)
 
-    def test_search_box_selection_filter_mode_on_qt5(self):
-        if not qtpy.PYQT5:
-            self.skipTest("Versions below Qt5 do not support the following functionality, and the default Qt behaviour is used")
-        else:
-            widget = AlgorithmSelectorWidget()
-            self.assertEqual(widget.search_box.completer().filterMode(), Qt.MatchContains)
+    def test_search_box_selection_filter_mode(self):
+        widget = AlgorithmSelectorWidget()
+        self.assertEqual(widget.search_box.completer().filterMode(), Qt.MatchContains)
 
     def test_search_box_selection_ignores_tree_selection(self):
         widget = AlgorithmSelectorWidget()

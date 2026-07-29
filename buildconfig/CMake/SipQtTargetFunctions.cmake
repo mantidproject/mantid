@@ -146,8 +146,6 @@ function(
   # Directory holding the original (source) .sip files, so relative %Include directives resolve even though the module
   # spec lives in the build dir.
   set(SIP_INCLUDE_DIR ${sip_include_dir})
-  # The Qt6Bindings sip feature is enabled by default and is the only supported binding set.
-  set(SIP_DISABLED_FEATURES "[]")
 
   # generate project files for sip-build
   configure_file(${SIP_PROJECT_PY_TEMPLATE} ${_project_dir}/project.py)

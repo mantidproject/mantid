@@ -24,12 +24,10 @@
 #endif
 %End
 
-// Always import core, gui and widgets in Qt5
+// Always import core, gui and widgets
 %Import QtCore/QtCoremod.sip
 %Import QtGui/QtGuimod.sip
-%If(Qt_5_0_0 -)
 %Import QtWidgets/QtWidgetsmod.sip
-%End
 
 // Module contents
 @SIP_INCLUDES@

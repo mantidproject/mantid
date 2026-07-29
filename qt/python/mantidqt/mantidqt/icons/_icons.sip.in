@@ -7,7 +7,6 @@
 // This file defines the Python bindings for the
 // _icons library.
 %Module(name=@SIP_MODULE_NAME@)
-%Feature Qt6Bindings
 
 %ModuleCode
 #include "MantidQtIcons/Icon.h"
@@ -26,7 +25,7 @@ GNU_DIAG_OFF("missing-field-initializers")
 using namespace MantidQt::Icons;
 %End
 
-// PyQt5 Gui module
+// Qt Gui module
 %Import QtGui/QtGuimod.sip
 
 QIcon getIcon(const QString &iconName, const QString &color = QString("black"), const double scaleFactor = 1.0);

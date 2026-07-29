@@ -15,7 +15,7 @@ from mantid.simpleapi import CreateWorkspace, CreateEmptyTableWorkspace
 from mantidqt.utils.qt.testing import start_qapplication
 from workbench.plotting.figurewindow import FigureWindow, _validate_workspaces
 
-matplotlib.use("Qt5Agg")
+matplotlib.use("QtAgg")
 import matplotlib.pyplot as plt
 
 

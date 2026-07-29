@@ -7,7 +7,6 @@
 // This file defines the Python bindings for the
 // _common library.
 %Module(name=@SIP_MODULE_NAME@)
-%Feature Qt6Bindings
 
 %ModuleCode
 #include "MantidKernel/WarningSuppressions.h"
@@ -39,7 +38,7 @@ using namespace MantidQt::MantidWidgets::Batch;
 %HideNamespace(name=MantidQt::MantidWidgets)
 %HideNamespace(name=MantidQt::MantidWidgets::Batch)
 
-// PyQt5 widgets
+// Qt widgets
 %Import QtGui/QtGuimod.sip
 %Import QtWidgets/QtWidgetsmod.sip
 
@@ -893,16 +892,15 @@ signals:
   void cutRowsRequested();
 };
 
-// Qt6 (>= 6.7) only: PyQt6 provides a generic std::optional<TYPE> (and an
-// optional<QList<TYPE>> that mis-matches std::vector), so we override the cases it
-// can't handle with concrete specializations here. On Qt5 / Qt6 < 6.7 the templates
-// in sip/vector.sip handle these instead.
-%If (Qt6Bindings)
+// PyQt6 provides a generic std::optional<TYPE> (and an optional<QList<TYPE>> that
+// mis-matches std::vector), so we override the cases it can't handle with concrete
+// specializations here.
+//
 // Explicit mapped type for the doubly-nested optional<vector<vector<Row>>> returned
 // by JobTreeView::selectedSubtrees(). PyQt6 provides a generic std::optional<TYPE>
 // that composes with single-level std::vector<X>, but not with this double nesting,
-// so we provide a concrete specialization (which coexists with PyQt6's generic, and
-// also works under PyQt5). Defined after the Batch::Row class so the type is known.
+// so we provide a concrete specialization (which coexists with PyQt6's generic).
+// Defined after the Batch::Row class so the type is known.
 %MappedType std::optional<std::vector<std::vector<Row>>>
 {
 %TypeHeaderCode
@@ -995,7 +993,6 @@ signals:
   return transferToSip(cppValue, sipCppPtr, sipIsErr, sipGetState(sipTransferObj));
 %End
 };
-%End
 
 
 // ---------------------------------
