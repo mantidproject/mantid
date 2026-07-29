@@ -115,8 +115,6 @@ public:
     auto const outName1 = std::filesystem::path(run1).stem().string();
     auto const outName2 = std::filesystem::path(run2).stem().string();
 
-    TS_ASSERT_EQUALS(outputName, outputName);
-
     auto &ads = Mantid::API::AnalysisDataService::Instance();
     Mantid::API::MatrixWorkspace_sptr outputWorkspace;
 
