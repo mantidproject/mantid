@@ -20,13 +20,13 @@ target_include_directories(
   MantidQtIconsQt${MANTID_QT_VERSION} PUBLIC $<TARGET_PROPERTY:Mantid::Kernel,INTERFACE_INCLUDE_DIRECTORIES>
 )
 
-set(QT5_TEST_FILES test/IconTest.h)
+set(QT_TEST_FILES test/IconTest.h)
 
 set(CXXTEST_EXTRA_HEADER_INCLUDE "${CMAKE_CURRENT_LIST_DIR}/test/IconsTestInitialization.h")
 
 mtd_add_qt_tests(
   TARGET_NAME MantidQtIconsTest
-  SRC ${QT5_TEST_FILES}
+  SRC ${QT_TEST_FILES}
   INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/inc ${CMAKE_CURRENT_SOURCE_DIR}/../widgets/common/inc
   LINK_LIBS ${TARGET_LIBRARIES} ${Boost_LIBRARIES}
   MTD_QT_LINK_LIBS MantidQtIcons

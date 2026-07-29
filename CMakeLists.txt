@@ -142,18 +142,12 @@ if(ENABLE_WORKBENCH OR BUILD_MANTIDQT)
   set(_qt_min_version ${QT6_MIN_VERSION})
   find_package(
     QT ${QT6_MIN_VERSION} NAMES Qt6
-    COMPONENTS Core Gui Widgets OpenGL Test
+    COMPONENTS Core Gui Widgets OpenGL OpenGLWidgets Test
     REQUIRED
   )
   find_package(
     Qt${QT_VERSION_MAJOR} ${_qt_min_version}
-    COMPONENTS Core Gui Widgets OpenGL Test
-    REQUIRED
-  )
-  # QOpenGLWidget moved out of the OpenGL module into its own module in Qt6
-  find_package(
-    Qt6
-    COMPONENTS OpenGLWidgets
+    COMPONENTS Core Gui Widgets OpenGL OpenGLWidgets Test
     REQUIRED
   )
   message(STATUS "Found Qt ${Qt${QT_VERSION_MAJOR}_VERSION}: ${Qt${QT_VERSION_MAJOR}_DIR}")

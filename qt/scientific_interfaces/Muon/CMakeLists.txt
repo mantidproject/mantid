@@ -1,4 +1,4 @@
-# Qt 5 implementation
+# Qt implementation
 set(SRC_FILES
     ALCBaselineModellingModel.cpp
     ALCBaselineModellingPresenter.cpp

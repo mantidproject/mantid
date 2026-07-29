@@ -160,7 +160,7 @@ set(SRC_FILES
     src/PythonHelpWindow.cpp
 )
 
-set(QT5_MOC_FILES
+set(QT_MOC_FILES
     inc/MantidQtWidgets/Common/AddWorkspaceDialog.h
     inc/MantidQtWidgets/Common/AddWorkspaceMultiDialog.h
     inc/MantidQtWidgets/Common/AlgorithmDialog.h
@@ -264,8 +264,8 @@ set(QT5_MOC_FILES
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
-set(QT5_INC_FILES
-    ${QT5_MOC_FILES}
+set(QT_INC_FILES
+    ${QT_MOC_FILES}
     inc/MantidQtWidgets/Common/BaseEncoder.h
     inc/MantidQtWidgets/Common/BaseDecoder.h
     inc/MantidQtWidgets/Common/AlgorithmInputHistory.h
@@ -350,7 +350,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/Python/QHashToDict.h
 )
 
-set(QT5_UI_FILES
+set(QT_UI_FILES
     inc/MantidQtWidgets/Common/AddWorkspaceDialog.ui
     inc/MantidQtWidgets/Common/AddWorkspaceMultiDialog.ui
     inc/MantidQtWidgets/Common/DataSelector.ui
@@ -665,9 +665,9 @@ mtd_add_qt_library(
   TARGET_NAME MantidQtWidgetsCommon
   QT_VERSION ${MANTID_QT_VERSION}
   SRC ${SRC_FILES}
-  MOC ${QT5_MOC_FILES}
-  NOMOC ${QT5_INC_FILES} ${_sip_include_dir}/sip.h
-  UI ${QT5_UI_FILES}
+  MOC ${QT_MOC_FILES}
+  NOMOC ${QT_INC_FILES} ${_sip_include_dir}/sip.h
+  UI ${QT_UI_FILES}
   DEFS IN_MANTIDQT_COMMON QSCINTILLA_DLL PRECOMPILED ${PRECOMP_HEADERS}
   INCLUDE_DIRS inc
   SYSTEM_INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${_sip_include_dir}
@@ -691,7 +691,7 @@ mtd_add_qt_library(
 
 set(CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/test/WidgetsCommonTestInitialization.h)
 
-set(QT5_TEST_FILES
+set(QT_TEST_FILES
     test/AlgorithmRunnerTest.h
     test/AlgorithmHintStrategyTest.h
     test/AlgorithmPropertiesWidgetTest.h
@@ -741,7 +741,7 @@ if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
   mtd_add_qt_tests(
     TARGET_NAME MantidQtWidgetsCommonTest
     QT_VERSION ${MANTID_QT_VERSION}
-    SRC ${QT5_TEST_FILES}
+    SRC ${QT_TEST_FILES}
     INCLUDE_DIRS ../../../Framework/DataObjects/inc ../../../Framework/Crystal/inc
     LINK_LIBS ${TARGET_LIBRARIES} ${Boost_LIBRARIES} Mantid::PythonInterfaceCore Mantid::DataObjects
               Qt${MANTID_QT_VERSION}::Test Python::Python
