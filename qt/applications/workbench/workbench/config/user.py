@@ -7,8 +7,10 @@
 #  This file is part of the mantid workbench.
 #
 #
+from pathlib import Path
 from posixpath import join as joinsettings
-from qtpy.QtCore import QSettings
+from qtpy.QtCore import QSettings, QStandardPaths
+from time import sleep
 
 
 class UserConfig(object):
@@ -155,3 +157,41 @@ class UserConfig(object):
             # If a setting does not exist, we want to raise a KeyError
             raise KeyError(f"Unknown config item requested: '{option}'")
         return self.qsettings.value(full_option, type=type)
+
+
+def _get_settings_dir() -> Path:
+    # get directories to look in
+    options = QStandardPaths.standardLocations(QStandardPaths.ConfigLocation)
+    if len(options) < 1:
+        raise RuntimeError("Failed to find QStandardPaths.ConfigLocation")
+    # we only care about those in the home area
+    home_dir = Path.home().expanduser()
+    for candidate in options:
+        # return first one in home directory, likely ~/.config
+        if home_dir in Path(candidate).parents:
+            return Path(candidate)
+    raise RuntimeError("Failed to find QStandardPaths.ConfigLocation in home area")
+
+
+def remove_lock_files(filenames: list[str] = ["mantidproject/mantidworkbench.ini", "QtProject.conf"]) -> None:
+    GLOB_LOCK = ".lock*"
+
+    settings_dir = _get_settings_dir()
+    for filename in filenames:
+        filepath = settings_dir / filename
+        if not filepath.exists():
+            continue  # no need to remove lockfile
+
+        # longest pathname first e.g. .lock.rmlock.rmlock
+        lockfiles = sorted(filepath.parent.glob(filepath.name + GLOB_LOCK), reverse=True)
+        if not lockfiles:
+            continue  # no lockfiles exist
+
+        for lockfile in lockfiles:
+            # wait for the file to get removed properly
+            sleep(0.1)  # seconds
+
+            # remove if it still exists
+            if lockfile.exists():
+                print("Removing lockfile", lockfile)
+                lockfile.unlink(missing_ok=True)

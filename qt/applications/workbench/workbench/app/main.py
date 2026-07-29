@@ -19,6 +19,12 @@ def main(args=None):
     parser.add_argument("--version", action="version", version=mtd_version)
     parser.add_argument("-x", "--execute", action="store_true", help="execute the script file given as argument")
     parser.add_argument("-q", "--quit", action="store_true", help="execute the script file with '-x' given as argument and then exit")
+    if os.name == "posix":  # don't add argument to windows
+        parser.add_argument(
+            "--qt-rm-lockfiles",
+            action="store_true",
+            help="Remove lockfiles for qt configuration. This should not be necessary under normal operation.",
+        )
     parser.add_argument("--profile", action="store", help="Run workbench with execution profiling. Specify a path for the output file.")
     parser.add_argument("--yappi", action="store_true", help="Profile using Yappi instead of cProfile to capture multi-threaded execution.")
     parser.add_argument("--error-on-warning", action="store_true", help="Convert python warnings to exceptions")
@@ -55,6 +61,9 @@ def main(args=None):
         warnings.simplefilter("error")  # Change the filter in this process
         os.environ["PYTHONWARNINGS"] = "error"  # Also affect subprocesses
 
+    if options.qt_rm_lockfiles:
+        _remove_lock_files()
+
     if options.profile:
         output_path = os.path.abspath(os.path.expanduser(options.profile))
         if not os.path.exists(os.path.dirname(output_path)):
@@ -87,6 +96,12 @@ def _enable_cprofile_profiling(output_path, options):
     import cProfile
 
     cProfile.runctx("start(options)", globals(), locals(), filename=output_path)
+
+
+def _remove_lock_files():
+    from workbench.config.user import remove_lock_files
+
+    remove_lock_files()
 
 
 def start(options):
