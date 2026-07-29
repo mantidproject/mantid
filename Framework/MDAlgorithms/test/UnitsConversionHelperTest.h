@@ -72,7 +72,7 @@ public:
     // initialize peculiar conversion from ws units to DeltaE_inWavenumber
     TS_ASSERT_THROWS_NOTHING(Conv.initialize(WSD, "DeltaE_inWavenumber"));
 
-    const auto &X = ws2D->readX(0);
+    const auto &X = ws2D->x(0);
     size_t n_bins = X.size() - 1;
     for (size_t i = 0; i < n_bins; i++) {
       TS_ASSERT_DELTA(X[i] * 8.06554465, Conv.convertUnits(X[i]), 1.e-4);
@@ -108,7 +108,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(Conv.initialize(WSD, "DeltaE_inFrequency"));
 
-    const auto &X = ws2D->readX(0);
+    const auto &X = ws2D->x(0);
     size_t n_bins = X.size() - 1;
     for (size_t i = 0; i < n_bins; i++) {
       TS_ASSERT_DELTA(X[i] * Mantid::PhysicalConstants::meVtoFrequency, Conv.convertUnits(X[i]), 1.e-4);
@@ -150,7 +150,7 @@ public:
     double t_4 = Conv.convertUnits(-100);
     double t_lim = Conv.convertUnits(-DBL_MAX);
 
-    const auto &X = ws2D->readX(0);
+    const auto &X = ws2D->x(0);
     Mantid::MantidVec E_storage(X.size());
     TS_ASSERT_THROWS_NOTHING(Conv.updateConversion(0));
 
@@ -208,7 +208,7 @@ public:
   void testConvertViaTOFElastic() {
 
     // Modify input workspace to be elastic workspace
-    const auto &X = ws2D->readX(0);
+    const auto &X = ws2D->x(0);
     Mantid::MantidVec E_storage(X.size());
     size_t n_bins = X.size();
     for (size_t i = 0; i < n_bins; i++) {

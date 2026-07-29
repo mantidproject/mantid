@@ -51,8 +51,8 @@ class EnggEstimateFocussedBackground_Test(unittest.TestCase):
         ws_diff = self.ws - ws_bg
 
         # test residuals to ensure background is well approximated
-        self.assertAlmostEqual(np.mean(ws_diff.readY(0)[self.mask]), 0, delta=0.01)
-        self.assertAlmostEqual(np.median(ws_diff.readY(0)[self.mask]), 0, delta=0.01)
+        self.assertAlmostEqual(np.mean(ws_diff.y(0)[self.mask]), 0, delta=0.01)
+        self.assertAlmostEqual(np.median(ws_diff.y(0)[self.mask]), 0, delta=0.01)
 
     def test_window_validation(self):
         # test too small a window

@@ -257,7 +257,7 @@ public:
     TS_ASSERT_EQUALS(ws1->getNumberHistograms(), 2);
     double total;
     total = 0;
-    for (double yValue : ws1->readY(0))
+    for (double yValue : ws1->y(0))
       total += yValue;
     TS_ASSERT_DELTA(total, 100.0, 1e-4);
 
@@ -267,7 +267,7 @@ public:
 
     // The new total signal is 200.0
     total = 0;
-    for (double yValue : ws1->readY(0))
+    for (double yValue : ws1->y(0))
       total += yValue;
     TS_ASSERT_DELTA(total, 200.0, 1e-4);
 
@@ -392,9 +392,9 @@ public:
     TS_ASSERT(mws);
     TS_ASSERT_EQUALS(mws->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(mws->blocksize(), 10);
-    TS_ASSERT_EQUALS(mws->readX(1)[10], 10.0);
-    TS_ASSERT_EQUALS(mws->readY(1)[5], 2.0);
-    TS_ASSERT_EQUALS(std::accumulate(mws->readY(1).begin(), mws->readY(1).end(), 0.0, std::plus<double>()), 20.0);
+    TS_ASSERT_EQUALS(mws->x(1)[10], 10.0);
+    TS_ASSERT_EQUALS(mws->y(1)[5], 2.0);
+    TS_ASSERT_EQUALS(std::accumulate(mws->y(1).begin(), mws->y(1).end(), 0.0, std::plus<double>()), 20.0);
     AnalysisDataService::Instance().clear();
   }
   //--------------------------------------------------------------------------------------------
@@ -408,9 +408,9 @@ public:
     TS_ASSERT(mws);
     TS_ASSERT_EQUALS(mws->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(mws->blocksize(), 4);
-    TS_ASSERT_EQUALS(mws->readX(1)[4], 8.0);
-    TS_ASSERT_EQUALS(mws->readY(1)[3], 4.0);
-    TS_ASSERT_EQUALS(std::accumulate(mws->readY(1).begin(), mws->readY(1).end(), 0.0, std::plus<double>()), 16.0);
+    TS_ASSERT_EQUALS(mws->x(1)[4], 8.0);
+    TS_ASSERT_EQUALS(mws->y(1)[3], 4.0);
+    TS_ASSERT_EQUALS(std::accumulate(mws->y(1).begin(), mws->y(1).end(), 0.0, std::plus<double>()), 16.0);
     AnalysisDataService::Instance().clear();
   }
   //--------------------------------------------------------------------------------------------
@@ -424,9 +424,9 @@ public:
     TS_ASSERT(mws);
     TS_ASSERT_EQUALS(mws->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(mws->blocksize(), 4);
-    TS_ASSERT_EQUALS(mws->readX(1)[4], 8.0);
-    TS_ASSERT_EQUALS(mws->readY(1)[3], 4.0);
-    TS_ASSERT_EQUALS(std::accumulate(mws->readY(1).begin(), mws->readY(1).end(), 0.0, std::plus<double>()), 16.0);
+    TS_ASSERT_EQUALS(mws->x(1)[4], 8.0);
+    TS_ASSERT_EQUALS(mws->y(1)[3], 4.0);
+    TS_ASSERT_EQUALS(std::accumulate(mws->y(1).begin(), mws->y(1).end(), 0.0, std::plus<double>()), 16.0);
     AnalysisDataService::Instance().clear();
   }
   //--------------------------------------------------------------------------------------------
@@ -442,9 +442,9 @@ public:
     TS_ASSERT(mws);
     TS_ASSERT_EQUALS(mws->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(mws->blocksize(), 10);
-    TS_ASSERT_EQUALS(mws->readX(1)[10], 10.0);
-    TS_ASSERT_EQUALS(mws->readY(1)[5], 4.0);
-    TS_ASSERT_EQUALS(std::accumulate(mws->readY(1).begin(), mws->readY(1).end(), 0.0, std::plus<double>()), 40.0);
+    TS_ASSERT_EQUALS(mws->x(1)[10], 10.0);
+    TS_ASSERT_EQUALS(mws->y(1)[5], 4.0);
+    TS_ASSERT_EQUALS(std::accumulate(mws->y(1).begin(), mws->y(1).end(), 0.0, std::plus<double>()), 40.0);
     AnalysisDataService::Instance().clear();
   }
   //--------------------------------------------------------------------------------------------
@@ -460,9 +460,9 @@ public:
     TS_ASSERT(mws);
     TS_ASSERT_EQUALS(mws->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(mws->blocksize(), 4);
-    TS_ASSERT_EQUALS(mws->readX(1)[4], 8.0);
-    TS_ASSERT_EQUALS(mws->readY(1)[3], 8.0);
-    TS_ASSERT_EQUALS(std::accumulate(mws->readY(1).begin(), mws->readY(1).end(), 0.0, std::plus<double>()), 32.0);
+    TS_ASSERT_EQUALS(mws->x(1)[4], 8.0);
+    TS_ASSERT_EQUALS(mws->y(1)[3], 8.0);
+    TS_ASSERT_EQUALS(std::accumulate(mws->y(1).begin(), mws->y(1).end(), 0.0, std::plus<double>()), 32.0);
     AnalysisDataService::Instance().clear();
   }
   //--------------------------------------------------------------------------------------------
@@ -478,9 +478,9 @@ public:
     TS_ASSERT(mws);
     TS_ASSERT_EQUALS(mws->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(mws->blocksize(), 4);
-    TS_ASSERT_EQUALS(mws->readX(1)[4], 8.0);
-    TS_ASSERT_EQUALS(mws->readY(1)[3], 8.0);
-    TS_ASSERT_EQUALS(std::accumulate(mws->readY(1).begin(), mws->readY(1).end(), 0.0, std::plus<double>()), 32.0);
+    TS_ASSERT_EQUALS(mws->x(1)[4], 8.0);
+    TS_ASSERT_EQUALS(mws->y(1)[3], 8.0);
+    TS_ASSERT_EQUALS(std::accumulate(mws->y(1).begin(), mws->y(1).end(), 0.0, std::plus<double>()), 32.0);
     AnalysisDataService::Instance().clear();
   }
   //--------------------------------------------------------------------------------------------
@@ -496,9 +496,9 @@ public:
     TS_ASSERT(mws);
     TS_ASSERT_EQUALS(mws->getNumberHistograms(), 4);
     TS_ASSERT_EQUALS(mws->blocksize(), 10);
-    TS_ASSERT_EQUALS(mws->readX(1)[10], 10.0);
-    TS_ASSERT_EQUALS(mws->readY(1)[5], 2.0);
-    TS_ASSERT_EQUALS(std::accumulate(mws->readY(1).begin(), mws->readY(1).end(), 0.0, std::plus<double>()), 20.0);
+    TS_ASSERT_EQUALS(mws->x(1)[10], 10.0);
+    TS_ASSERT_EQUALS(mws->y(1)[5], 2.0);
+    TS_ASSERT_EQUALS(std::accumulate(mws->y(1).begin(), mws->y(1).end(), 0.0, std::plus<double>()), 20.0);
     AnalysisDataService::Instance().clear();
   }
   //--------------------------------------------------------------------------------------------
@@ -514,9 +514,9 @@ public:
     TS_ASSERT(mws);
     TS_ASSERT_EQUALS(mws->getNumberHistograms(), 4);
     TS_ASSERT_EQUALS(mws->blocksize(), 4);
-    TS_ASSERT_EQUALS(mws->readX(1)[4], 8.0);
-    TS_ASSERT_EQUALS(mws->readY(1)[3], 4.0);
-    TS_ASSERT_EQUALS(std::accumulate(mws->readY(1).begin(), mws->readY(1).end(), 0.0, std::plus<double>()), 16.0);
+    TS_ASSERT_EQUALS(mws->x(1)[4], 8.0);
+    TS_ASSERT_EQUALS(mws->y(1)[3], 4.0);
+    TS_ASSERT_EQUALS(std::accumulate(mws->y(1).begin(), mws->y(1).end(), 0.0, std::plus<double>()), 16.0);
     AnalysisDataService::Instance().clear();
   }
   //--------------------------------------------------------------------------------------------
@@ -532,9 +532,9 @@ public:
     TS_ASSERT(mws);
     TS_ASSERT_EQUALS(mws->getNumberHistograms(), 4);
     TS_ASSERT_EQUALS(mws->blocksize(), 4);
-    TS_ASSERT_EQUALS(mws->readX(1)[4], 8.0);
-    TS_ASSERT_EQUALS(mws->readY(1)[3], 4.0);
-    TS_ASSERT_EQUALS(std::accumulate(mws->readY(1).begin(), mws->readY(1).end(), 0.0, std::plus<double>()), 16.0);
+    TS_ASSERT_EQUALS(mws->x(1)[4], 8.0);
+    TS_ASSERT_EQUALS(mws->y(1)[3], 4.0);
+    TS_ASSERT_EQUALS(std::accumulate(mws->y(1).begin(), mws->y(1).end(), 0.0, std::plus<double>()), 16.0);
     AnalysisDataService::Instance().clear();
   }
 

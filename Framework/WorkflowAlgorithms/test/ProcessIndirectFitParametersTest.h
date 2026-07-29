@@ -168,11 +168,11 @@ public:
     TS_ASSERT_EQUALS(outWs->blocksize(), 5);
 
     // Test output values
-    auto heightY = outWs->readY(0);
+    auto heightY = outWs->y(0);
     auto heightTest = tableWs->getColumn("f1.f1.f0.Height")->numeric_fill<>();
     TS_ASSERT_EQUALS(heightY, heightTest);
 
-    auto ampY = outWs->readY(1);
+    auto ampY = outWs->y(1);
     auto ampTest = tableWs->getColumn("f1.f1.f0.Amplitude")->numeric_fill<>();
     TS_ASSERT_EQUALS(ampY, ampTest);
 
@@ -213,19 +213,19 @@ public:
     TS_ASSERT_EQUALS(outWs->blocksize(), 5);
 
     // Test output values
-    auto heightY = outWs->readY(0);
+    auto heightY = outWs->y(0);
     auto heightTest = tableWs->getColumn("f1.f1.f0.Height")->numeric_fill<>();
     TS_ASSERT_EQUALS(heightY, heightTest);
 
-    auto ampY = outWs->readY(1);
+    auto ampY = outWs->y(1);
     auto ampTest = tableWs->getColumn("f1.f1.f0.Amplitude")->numeric_fill<>();
     TS_ASSERT_EQUALS(ampY, ampTest);
 
-    auto height1Y = outWs->readY(2);
+    auto height1Y = outWs->y(2);
     auto height1Test = tableWs->getColumn("f1.f1.f1.Height")->numeric_fill<>();
     TS_ASSERT_EQUALS(height1Y, height1Test);
 
-    auto height2Y = outWs->readY(3);
+    auto height2Y = outWs->y(3);
     auto height2Test = tableWs->getColumn("f1.f1.f2.Height")->numeric_fill<>();
     TS_ASSERT_EQUALS(height2Y, height2Test);
 

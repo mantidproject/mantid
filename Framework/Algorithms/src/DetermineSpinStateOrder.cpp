@@ -133,7 +133,7 @@ void DetermineSpinStateOrder::exec() {
     const auto sfLogValues = sfLog->filteredValuesAsVector();
     const double rfState =
         std::accumulate(sfLogValues.cbegin(), sfLogValues.cend(), 0.0) / static_cast<double>(sfLogValues.size());
-    const double heState = *std::max_element(groupItem->readY(0).cbegin(), groupItem->readY(0).cend()) - averageTrans;
+    const double heState = *std::max_element(groupItem->y(0).cbegin(), groupItem->y(0).cend()) - averageTrans;
 
     if (rfState > m_rfStateCondition) {
       if (heState < 0) {
@@ -163,7 +163,7 @@ double DetermineSpinStateOrder::averageTransmission(API::WorkspaceGroup_const_sp
   double total =
       std::accumulate(workspaces.cbegin(), workspaces.cend(), 0.0, [](double total, const API::Workspace_sptr ws) {
         const auto groupItem = std::dynamic_pointer_cast<API::MatrixWorkspace>(ws);
-        return total + *std::max_element(groupItem->readY(0).cbegin(), groupItem->readY(0).cend());
+        return total + *std::max_element(groupItem->y(0).cbegin(), groupItem->y(0).cend());
       });
 
   return total / static_cast<double>(workspaces.size());

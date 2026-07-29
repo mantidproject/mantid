@@ -28,12 +28,12 @@ class ConjoinSpectraTest(unittest.TestCase):
         conjoinedWS = mtd.retrieve("conjoined")
 
         wsIndex = 0
-        inDataY = mtd[self._aWS].readY(wsIndex)
-        inDataE = mtd[self._aWS].readE(wsIndex)
-        outDataY1 = conjoinedWS.readY(0)
-        outDataY2 = conjoinedWS.readY(1)
-        outDataE1 = conjoinedWS.readE(0)
-        outDataE2 = conjoinedWS.readE(1)
+        inDataY = mtd[self._aWS].y(wsIndex)
+        inDataE = mtd[self._aWS].e(wsIndex)
+        outDataY1 = conjoinedWS.y(0)
+        outDataY2 = conjoinedWS.y(1)
+        outDataE1 = conjoinedWS.e(0)
+        outDataE2 = conjoinedWS.e(1)
 
         # Check output shape
         self.assertEqual(len(inDataY), len(outDataY1))

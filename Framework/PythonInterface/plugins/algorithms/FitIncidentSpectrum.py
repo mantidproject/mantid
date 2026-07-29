@@ -91,17 +91,17 @@ class FitIncidentSpectrum(PythonAlgorithm):
     def PyExec(self):
         self._setup()
         if self._binning_for_calc.size == 0:
-            x = np.array(self._input_ws.readX(self._incident_index))
+            x = np.array(self._input_ws.x(self._incident_index))
             self._binning_for_calc = [i for i in [min(x), x[1] - x[0], max(x) + x[1] - x[0]]]
         else:
             x = np.arange(self._binning_for_calc[0], self._binning_for_calc[2], self._binning_for_calc[1])
         if self._binning_for_fit.size == 0:
-            x_fit = np.array(self._input_ws.readX(self._incident_index))
-            y_fit = np.array(self._input_ws.readY(self._incident_index))
+            x_fit = np.array(self._input_ws.x(self._incident_index))
+            y_fit = np.array(self._input_ws.y(self._incident_index))
         else:
             rebinned = Rebin(InputWorkspace=self._input_ws, Params=self._binning_for_fit, PreserveEvents=True, StoreInADS=False)
-            x_fit = np.array(rebinned.readX(self._incident_index))
-            y_fit = np.array(rebinned.readY(self._incident_index))
+            x_fit = np.array(rebinned.x(self._incident_index))
+            y_fit = np.array(rebinned.y(self._incident_index))
 
         rebin_norm = x.size / x_fit.size
         x_bin_centers = 0.5 * (x[:-1] + x[1:])
@@ -175,10 +175,10 @@ class FitIncidentSpectrum(PythonAlgorithm):
         )
         fit = Rebin(InputWorkspace=fit_tuple.OutputWorkspace, Params=params_output, PreserveEvents=True, StoreInADS=False)
         fit_primes = Rebin(InputWorkspace=fit_tuple.OutputWorkspaceDeriv[0], Params=params_output, PreserveEvents=True, StoreInADS=False)
-        fit_array = copy(fit.readY(0))
+        fit_array = copy(fit.y(0))
         fit_primes_array = [None, None]
         for i in range(self._deriv_order):
-            fit_primes_array[i] = copy(fit_primes.readY(i))
+            fit_primes_array[i] = copy(fit_primes.y(i))
         return fit_array, fit_primes_array[0], fit_primes_array[1]
 
 

@@ -394,8 +394,8 @@ class D4ILLReduction(PythonAlgorithm):
             value = mtd[det].getRun().getLogData("duration").value
             error = 0.01  # s
         elif method == "Monitor":
-            value = mtd[mon].readY(0)[0]
-            error = mtd[mon].readE(0)[0]
+            value = mtd[mon].y(0)[0]
+            error = mtd[mon].e(0)[0]
         else:  # method == None
             value = 1.0
             error = 0.0

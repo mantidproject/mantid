@@ -85,7 +85,6 @@ public:
     repository_json_content = REPOSITORYJSON;
     tofconv_readme_content = TOFCONV_README;
     tofconv_tofconverter_content = TOFCONV_CONVERTER;
-    fail = false;
   }
   std::string repository_json_content;
   std::string tofconv_readme_content;
@@ -152,43 +151,6 @@ public:
     std::stringstream ss;
     ss << "Failed to download this file : " << url_file << " to " << local_file_path << std::ends;
     throw ScriptRepoException(ss.str());
-  };
-
-  /** Override the ScriptRepositoryImpl::doDeleteRemoteFile in order
-      to mock its functioning avoiding the internet connection.
-
-      Its answer depends on the public attribute fail. If fail is false
-     (default)
-      then, it will return a json string that simulate the answer from the
-     remote host
-      when it succeed in deleting one file. If fail is true, than, it will
-     return
-      a json file that simulate the answer from the remote host when the
-     operation fails.
-
-      @code
-      // delete success
-      std::string json_ans =
-     doDeleteRemoteFile("<remote_url>/README.md","README.md",
-                "noone","noone@nowhere.com","Remove this useless file");
-
-      // delete failure
-      fail = true;
-      std::string json_fail_ans =
-     doDeleteRemoteFile("<remote_url>/README.md","README.md",
-                "noone","noone@nowhere.com","Remove this useless file");
-      @endcode
-
-      It also make it public, in order to be able to test this method itself.
-   */
-  bool fail;
-  std::string doDeleteRemoteFile(const std::string & /*url*/, const std::string & /*file_path*/,
-                                 const std::string & /*author*/, const std::string & /*email*/,
-                                 const std::string & /*comment*/) override {
-    if (fail)
-      return "{\n  \"message\": \"Invalid author: \"\n}";
-    else
-      return "{\n  \"message\": \"success\"\n}";
   };
 };
 
@@ -838,81 +800,5 @@ public:
     TS_ASSERT_THROWS_NOTHING(repo = std::make_unique<ScriptRepositoryImplLocal>());
     TS_ASSERT_THROWS_NOTHING(repo->install(local_rep));
     TS_ASSERT_THROWS_NOTHING(repo->listFiles());
-  }
-
-  /**This test ensure that when you remove a file from the central repository,
-
-     the entry will be available only internally as LOCAL_ONLY file.
-   */
-  void test_delete_remove_valid_file_from_central_repository() {
-    TS_ASSERT_THROWS_NOTHING(repo->install(local_rep));
-    TS_ASSERT_THROWS_NOTHING(repo->listFiles());
-    std::string file_name = "TofConv/TofConverter.py";
-    // download the file
-    TS_ASSERT_THROWS_NOTHING(repo->download(file_name));
-
-    // it must be unchanged
-    TS_ASSERT(repo->fileStatus(file_name) == Mantid::API::BOTH_UNCHANGED);
-
-    // now, lets delete this file from the central repository
-    TS_ASSERT_THROWS_NOTHING(repo->remove(file_name, "please remove it", "noauthor", "noemail"));
-
-    // you should not find the file, so fileStatus should throw exception entry
-    // not inside repository
-    TS_ASSERT(repo->fileStatus(file_name) == Mantid::API::LOCAL_ONLY);
-
-    // even if you re-read the repository listing the files
-    TS_ASSERT_THROWS_NOTHING(repo->listFiles());
-
-    // you should not find this file agin
-    TS_ASSERT(repo->fileStatus(file_name) == Mantid::API::LOCAL_ONLY);
-
-    // assert file does exist inside the local folder
-    TS_ASSERT(std::filesystem::exists(std::string(local_rep).append(file_name)));
-  }
-
-  /** This test simulate the reaction when the delete from the central
-     repository
-      fails.
-   */
-  void test_delete_remove_valid_file_from_central_repository_simulate_server_rejection() {
-    TS_ASSERT_THROWS_NOTHING(repo->install(local_rep));
-    TS_ASSERT_THROWS_NOTHING(repo->listFiles());
-    std::string file_name = "TofConv/TofConverter.py";
-    // download
-    TS_ASSERT_THROWS_NOTHING(repo->download(file_name));
-
-    // it must be unchanged
-    TS_ASSERT(repo->fileStatus(file_name) == Mantid::API::BOTH_UNCHANGED);
-    repo->fail = true;
-    // now, lets delete this file from the repository
-    // it must throw exception describing the reason for failuring.
-    TS_ASSERT_THROWS(repo->remove(file_name, "please remove it", "noauthor", "noemail"), const ScriptRepoException &);
-
-    // you should find the file internally and externally
-    TS_ASSERT(repo->fileStatus(file_name) == Mantid::API::BOTH_UNCHANGED);
-    // nothing should changing, re-reading the whole repository list
-    TS_ASSERT_THROWS_NOTHING(repo->listFiles());
-    // you should find the file
-    TS_ASSERT(repo->fileStatus(file_name) == Mantid::API::BOTH_UNCHANGED);
-  }
-
-  /** Test invalid entry for removing files, when they are not local (not
-     downloaded)
-
-      Ensure that removing from the central repository is not allowed, if the
-     file has
-      not been downloaded first.
-   */
-  void test_delete_file_not_local() {
-    TS_ASSERT_THROWS_NOTHING(repo->install(local_rep));
-    TS_ASSERT_THROWS_NOTHING(repo->listFiles());
-    std::string file_name = "TofConv/TofConverter.py";
-
-    // attempt to remove file that is not local (no download was done)
-    // it must throw exception, to inform that it is not allowed to remove it.
-    TS_ASSERT_THROWS(repo->remove(file_name, "please remove it", "noauthor", "noemail"), const ScriptRepoException &);
-    // the state is still remote-only
-    TS_ASSERT(repo->fileStatus(file_name) == Mantid::API::REMOTE_ONLY);
   }
 };

@@ -143,7 +143,7 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
 
         # for the Y and E values, create a label with the units
         axis_index = 0
-        x_vec = self.ws.readX(0)
+        x_vec = self.ws.x(0)
         if self.ws.isHistogramData():
             bin_centre_value = (x_vec[section] + x_vec[section + 1]) / 2.0
         else:

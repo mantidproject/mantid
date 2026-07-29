@@ -50,17 +50,17 @@ class IntegratePeaksShoeboxTOFTest(unittest.TestCase):
         axis.setUnit("TOF")
         # fake peak centred on ispec=30 (detid=79) and TOF=5 - near middle of bank
         peak_1D = array([0, 0, 4, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0])
-        cls.ws.setY(30, cls.ws.readY(30) + peak_1D)
+        cls.ws.setSharedY(30, cls.ws.y(30) + peak_1D)
         for ispec in [23, 29, 30, 31, 37]:
-            cls.ws.setY(ispec, cls.ws.readY(ispec) + peak_1D)
+            cls.ws.setSharedY(ispec, cls.ws.y(ispec) + peak_1D)
         # fake peak centred on ispec=12 (detid=61) and TOF=7 - near detector edge
-        cls.ws.setY(12, cls.ws.readY(12) + peak_1D[::-1])
+        cls.ws.setSharedY(12, cls.ws.y(12) + peak_1D[::-1])
         for ispec in [5, 11, 12, 13, 19]:
-            cls.ws.setY(ispec, cls.ws.readY(ispec) + peak_1D[::-1])
+            cls.ws.setSharedY(ispec, cls.ws.y(ispec) + peak_1D[::-1])
         # add background and set errors
         for ispec in range(cls.ws.getNumberHistograms()):
-            cls.ws.setY(ispec, cls.ws.readY(ispec) + 0.5)
-            cls.ws.setE(ispec, sqrt(cls.ws.readY(ispec)))
+            cls.ws.setSharedY(ispec, cls.ws.y(ispec) + 0.5)
+            cls.ws.setSharedE(ispec, sqrt(cls.ws.y(ispec)))
         # add peaks
         cls.peaks = CreatePeaksWorkspace(InstrumentWorkspace=cls.ws, NumberOfPeaks=0, OutputWorkspace="peaks")
         AddPeak(PeaksWorkspace=cls.peaks, RunWorkspace=cls.ws, TOF=5, DetectorID=85)

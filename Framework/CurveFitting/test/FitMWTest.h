@@ -384,7 +384,7 @@ public:
       fitmw.setNormalise(false);
       fitmw.createDomain(domain, values);
 
-      auto &y = ws->readY(1);
+      auto &y = ws->y(1);
 
       for (size_t i = 0; i < values->size(); ++i) {
         TS_ASSERT_DELTA((*values).getFitData(i), y[i], 1e-8);
@@ -545,18 +545,18 @@ public:
     for (size_t i = 0; i < nExpectedHist; ++i) {
       TS_ASSERT_DELTA(outputWS->y(i)[1], yValues[i], 1e-8);
       TS_ASSERT_DELTA(outputWS->e(i)[1], eValues[i], 1e-8);
-      TS_ASSERT_DELTA(outputWS->x(i)[1], ws2->readX(0)[1], 1e-8);
+      TS_ASSERT_DELTA(outputWS->x(i)[1], ws2->x(0)[1], 1e-8);
     }
   }
 
   void test_ignore_invalid_data() {
     auto ws = createTestWorkspace(false);
     const double one = 1.0;
-    ws->dataY(0)[3] = std::numeric_limits<double>::infinity();
-    ws->dataY(0)[5] = log(-one);
-    ws->dataE(0)[7] = 0;
-    ws->dataE(0)[9] = std::numeric_limits<double>::infinity();
-    ws->dataE(0)[11] = log(-one);
+    ws->mutableY(0)[3] = std::numeric_limits<double>::infinity();
+    ws->mutableY(0)[5] = log(-one);
+    ws->mutableE(0)[7] = 0;
+    ws->mutableE(0)[9] = std::numeric_limits<double>::infinity();
+    ws->mutableE(0)[11] = log(-one);
 
     FunctionDomain_sptr domain;
     FunctionValues_sptr values;
@@ -1264,9 +1264,9 @@ public:
     fit.setProperty("Normalise", true);
     fit.execute();
     auto out_ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out_Workspace");
-    auto const &y1 = out_ws->readY(1);
-    auto const &y3 = out_ws->readY(3);
-    auto const &y4 = out_ws->readY(4);
+    auto const &y1 = out_ws->y(1);
+    auto const &y3 = out_ws->y(3);
+    auto const &y4 = out_ws->y(4);
     for (size_t i = 0; i < y1.size(); ++i) {
       TS_ASSERT_DELTA(y1[i], y3[i] + y4[i], 1e-10);
     }

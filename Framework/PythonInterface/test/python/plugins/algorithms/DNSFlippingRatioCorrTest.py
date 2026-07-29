@@ -211,13 +211,13 @@ class DNSFlippingRatioCorrTest(unittest.TestCase):
         self.assertEqual(2, ws_nsf.getNumDims())
         # data array: spin-flip must be zero
         for i in range(24):
-            self.assertAlmostEqual(0.0, ws_sf.readY(i)[0])
+            self.assertAlmostEqual(0.0, ws_sf.y(i)[0])
         # data array: non spin-flip must be nsf - sf^2/nsf
         nsf = np.array(dataws_nsf.extractY())
         sf = np.array(dataws_sf.extractY())
         refdata = nsf + sf
         for i in range(24):
-            self.assertAlmostEqual(refdata[i][0], ws_nsf.readY(i)[0])
+            self.assertAlmostEqual(refdata[i][0], ws_nsf.y(i)[0])
 
         run_algorithm("DeleteWorkspace", Workspace=outputWorkspaceName + "SF")
         run_algorithm("DeleteWorkspace", Workspace=outputWorkspaceName + "NSF")
@@ -366,7 +366,7 @@ class DNSFlippingRatioCorrTest(unittest.TestCase):
         # data array: for vanadium ratio sf/nsf must be around 2
         ws = ws_sf / ws_nsf
         for i in range(24):
-            self.assertAlmostEqual(2.0, np.around(ws.readY(i)))
+            self.assertAlmostEqual(2.0, np.around(ws.y(i)))
 
         run_algorithm("DeleteWorkspace", Workspace=outputWorkspaceName + "SF")
         run_algorithm("DeleteWorkspace", Workspace=outputWorkspaceName + "NSF")

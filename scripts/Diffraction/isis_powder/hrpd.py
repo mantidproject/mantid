@@ -187,7 +187,7 @@ class HRPD(AbstractInst):
         """
         # The number of pulse can vary depending on the data range
         # Compute number of pulses that occur at each 20ms interval.
-        x_data = ws.readX(0)
+        x_data = ws.x(0)
         pulse_min = int(round(x_data[0]) / PROMPT_PULSE_INTERVAL) + 1
         pulse_max = int(round(x_data[-1]) / PROMPT_PULSE_INTERVAL) + 1
 
@@ -267,9 +267,9 @@ class HRPD(AbstractInst):
                     if success_final:
                         func = fit_output.Function.function
                     y_pulses = self._eval_fitted_prompt_pulse_peaks_only(ws, func)
-                    y_nopulse = ws.readY(ispec) - y_pulses
+                    y_nopulse = ws.y(ispec) - y_pulses
                     y_nopulse[y_nopulse < 0] = 0  # can't have negative counts
-                    ws.setY(ispec, y_nopulse)
+                    ws.setSharedY(ispec, y_nopulse)
                 else:
                     ispec_failed.append(ispec)
             else:
@@ -285,7 +285,7 @@ class HRPD(AbstractInst):
         for ifunc in range(1, func.nDomains()):
             pk_func = pk_func + FunctionWrapper(func[ifunc][0])
         ws_eval = mantid.EvaluateFunction(InputWorkspace=ws, Function=pk_func, EnableLogging=False, StoreInADS=False)
-        return ws_eval.readY(1)
+        return ws_eval.y(1)
 
     @staticmethod
     def _free_ties_of_multidomain_prompt_pulse_func(func, fit_kwargs):
@@ -327,10 +327,10 @@ class HRPD(AbstractInst):
             "constraints=(0.2<Sigma,1.5<Exponent);name=FlatBackground, A0=0,constraints=(0<A0)"
         )
         comp_func[0].setAttributeValue("CentreShift", cen)
-        comp_func[0].setHeight(ws.readY(ispec)[ws.yIndexOfX(cen)])
+        comp_func[0].setHeight(ws.y(ispec)[ws.yIndexOfX(cen)])
         comp_func[0].addConstraints(f"{-15}<Centre<{15}")
         comp_func[0].addConstraints(f"{0}<Intensity")
-        comp_func[1]["A0"] = min(ws.readY(ispec)[ws.yIndexOfX(xlo)], ws.readY(ispec)[ws.yIndexOfX(xhi)])
+        comp_func[1]["A0"] = min(ws.y(ispec)[ws.yIndexOfX(xlo)], ws.y(ispec)[ws.yIndexOfX(xhi)])
         return comp_func
 
     @staticmethod

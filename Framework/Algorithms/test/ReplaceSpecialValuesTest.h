@@ -176,8 +176,8 @@ public:
   void testExecCheckSmall() {
     MatrixWorkspace_sptr inputWS = createWorkspace();
     // Put in some small values
-    inputWS->dataY(0)[0] = 2.0E-7;
-    inputWS->dataY(0)[1] = 1.99E-7;
+    inputWS->mutableY(0)[0] = 2.0E-7;
+    inputWS->mutableY(0)[1] = 1.99E-7;
     AnalysisDataService::Instance().add("InputWS", inputWS);
 
     Mantid::Algorithms::ReplaceSpecialValues alg3;
@@ -235,8 +235,8 @@ public:
   void testExecCheckSmallNonAbsolute() {
     MatrixWorkspace_sptr inputWS = createWorkspace();
     // Put in some small values
-    inputWS->dataY(0)[0] = -3.0E-7;
-    inputWS->dataY(0)[1] = 1.99E-7;
+    inputWS->mutableY(0)[0] = -3.0E-7;
+    inputWS->mutableY(0)[1] = 1.99E-7;
     AnalysisDataService::Instance().add("InputWS", inputWS);
 
     Mantid::Algorithms::ReplaceSpecialValues alg3;
@@ -279,9 +279,9 @@ public:
   void testExecCheckLargeNonAbsolute() {
     MatrixWorkspace_sptr inputWS = createWorkspace();
     // Put in some small values
-    inputWS->dataY(0)[0] = 1600;
-    inputWS->dataY(0)[1] = -2000;
-    inputWS->dataE(0)[1] = -1000;
+    inputWS->mutableY(0)[0] = 1600;
+    inputWS->mutableY(0)[1] = -2000;
+    inputWS->mutableE(0)[1] = -1000;
     AnalysisDataService::Instance().add("InputWS", inputWS);
 
     Mantid::Algorithms::ReplaceSpecialValues alg3;
@@ -360,19 +360,19 @@ public:
     MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(8, 4, 0.5);
     // put some infinities and NaNs in there
     double inf = std::numeric_limits<double>::infinity();
-    inputWS->dataY(0)[2] = inf;
-    inputWS->dataY(1)[0] = -inf;
-    inputWS->dataY(2)[0] = -999;
-    inputWS->dataE(2)[0] = 999;
-    inputWS->dataY(3)[1] = 999;
-    inputWS->dataE(3)[1] = -inf;
+    inputWS->mutableY(0)[2] = inf;
+    inputWS->mutableY(1)[0] = -inf;
+    inputWS->mutableY(2)[0] = -999;
+    inputWS->mutableE(2)[0] = 999;
+    inputWS->mutableY(3)[1] = 999;
+    inputWS->mutableE(3)[1] = -inf;
     double nan = std::numeric_limits<double>::quiet_NaN();
-    inputWS->dataY(4)[3] = nan;
-    inputWS->dataY(5)[1] = nan;
-    inputWS->dataY(6)[3] = 999;
-    inputWS->dataE(6)[3] = nan;
-    inputWS->dataY(7)[1] = -999;
-    inputWS->dataE(7)[1] = nan;
+    inputWS->mutableY(4)[3] = nan;
+    inputWS->mutableY(5)[1] = nan;
+    inputWS->mutableY(6)[3] = 999;
+    inputWS->mutableE(6)[3] = nan;
+    inputWS->mutableY(7)[1] = -999;
+    inputWS->mutableE(7)[1] = nan;
 
     return inputWS;
   }

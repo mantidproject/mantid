@@ -37,8 +37,8 @@ public:
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1)
     // number of events should be the same as /entry/bank_error_events/total_counts
     TS_ASSERT_EQUALS(outputWS->getNumberEvents(), 82980)
-    TS_ASSERT_DELTA(outputWS->readX(0)[0], 8494.900394, 1e-5)
-    TS_ASSERT_DELTA(outputWS->readX(0)[1], 24927.699219, 1e-5)
+    TS_ASSERT_DELTA(outputWS->x(0)[0], 8494.900394, 1e-5)
+    TS_ASSERT_DELTA(outputWS->x(0)[1], 24927.699219, 1e-5)
 
     // check first event has expected tof and pulsetime
     const auto ev = outputWS->getSpectrum(0);
@@ -64,8 +64,8 @@ public:
     TS_ASSERT_EQUALS(outputWS->blocksize(), 1)
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1)
     TS_ASSERT_EQUALS(outputWS->getNumberEvents(), 6052)
-    TS_ASSERT_DELTA(outputWS->readX(0)[0], 0.5, 1e-5)
-    TS_ASSERT_DELTA(outputWS->readX(0)[1], 16663.0996, 1e-5)
+    TS_ASSERT_DELTA(outputWS->x(0)[0], 0.5, 1e-5)
+    TS_ASSERT_DELTA(outputWS->x(0)[1], 16663.0996, 1e-5)
 
     // check first event has expected tof and pulsetime
     const auto ev = outputWS->getSpectrum(0);
@@ -90,8 +90,8 @@ public:
     TS_ASSERT_EQUALS(outputWS->blocksize(), 1)
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1)
     TS_ASSERT_EQUALS(outputWS->getNumberEvents(), 0)
-    TS_ASSERT_EQUALS(outputWS->readX(0)[0], 0)
-    TS_ASSERT_DELTA(outputWS->readX(0)[1], 16666.7, 1e-9)
+    TS_ASSERT_EQUALS(outputWS->x(0)[0], 0)
+    TS_ASSERT_DELTA(outputWS->x(0)[1], 16666.7, 1e-9)
   }
 
   void test_HYSA() {

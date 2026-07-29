@@ -634,8 +634,8 @@ class GSAS2Model:
                 return False
 
             for workspace_index in range(file_bank_count):
-                self.x_limits.data_x_min.append(loop_focused_workspace.readX(workspace_index)[0])
-                self.x_limits.data_x_max.append(loop_focused_workspace.readX(workspace_index)[-1])
+                self.x_limits.data_x_min.append(loop_focused_workspace.x(workspace_index)[0])
+                self.x_limits.data_x_max.append(loop_focused_workspace.x(workspace_index)[-1])
                 number_of_regions += 1
             DeleteWorkspace(loop_focused_workspace)
 

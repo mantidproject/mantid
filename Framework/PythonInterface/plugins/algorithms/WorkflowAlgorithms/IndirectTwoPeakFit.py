@@ -245,7 +245,7 @@ class IndirectTwoPeakFit(PythonAlgorithm):
         # Make any negative y values positive
         self._force_positive_y_values(temporary_name, 0)
 
-        amplitude0, fwhm0 = mtd[self._result_name].readY(0)[0], mtd[self._result_name].readY(1)[0]
+        amplitude0, fwhm0 = mtd[self._result_name].y(0)[0], mtd[self._result_name].y(1)[0]
         amplitude1, fwhm1 = self._get_amplitude_and_fwhm_from_fit(temporary_name)
         function = "name=Lorentzian,Amplitude={0},PeakCentre=0.0,FWHM={1}".format(amplitude0, fwhm0)
         function += ",constraint=(Amplitude>0.0,FWHM>0.0)"
@@ -256,8 +256,8 @@ class IndirectTwoPeakFit(PythonAlgorithm):
     def _force_positive_y_values(self, temporary_name, index):
         from numpy import array
 
-        new_y_array = [-y_value if y_value < 0.0 else y_value for y_value in mtd[temporary_name].readY(index)]
-        mtd[temporary_name].setY(0, array(new_y_array))
+        new_y_array = [-y_value if y_value < 0.0 else y_value for y_value in mtd[temporary_name].y(index)]
+        mtd[temporary_name].setSharedY(0, array(new_y_array))
 
     def _get_amplitude_and_fwhm_from_fit(self, workspace):
         from IndirectCommon import get_efixed

@@ -150,7 +150,7 @@ class CreatePoleFigureTableTest(unittest.TestCase):
         )
         self.assertEqual(spec_ws.getNumberHistograms(), 4)
         for ispec in range(spec_ws.getNumberHistograms()):
-            self.assertEqual(spec_ws.readY(ispec), ispec + 1.0)  # each spectrum has one Y val: 1.0,2.0,3.0,4.0
+            self.assertEqual(spec_ws.y(ispec), ispec + 1.0)  # each spectrum has one Y val: 1.0,2.0,3.0,4.0
 
     def test_spectra_workspace_when_some_omissions_outputs_correct_spectra(self):
         _, spec_ws = CreatePoleFigureTableWorkspace(
@@ -162,7 +162,7 @@ class CreatePoleFigureTableTest(unittest.TestCase):
         )
         self.assertEqual(spec_ws.getNumberHistograms(), 2)
         for ispec in range(spec_ws.getNumberHistograms()):
-            self.assertEqual(spec_ws.readY(ispec), ispec + 1.0)  # allowed spectra have one Y val each: 1.0,2.0
+            self.assertEqual(spec_ws.y(ispec), ispec + 1.0)  # allowed spectra have one Y val each: 1.0,2.0
 
     def test_flipping_td_negates_alphas(self):
         # alpha is taken from rd, if td is inverted the q vectors are now at -alpha rather than alpha

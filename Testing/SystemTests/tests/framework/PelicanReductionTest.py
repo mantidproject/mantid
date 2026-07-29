@@ -88,7 +88,7 @@ class PelicanReductionAutoQTest(systemtesting.MantidSystemTest):
         wg = mtd["test_qw3"]
         index = dict([(tag, i) for i, tag in enumerate(wg.getNames())])
         ws = wg.getItem(index["test_qw3_2D"])
-        xv = ws.dataX(0)
+        xv = ws.x(0)
         self.assertDelta(xv[0], 0.0, 0.01, "Unexpected minimum Q value")
         self.assertDelta(xv[-1], 2.7, 0.01, "Unexpected maximum Q value")
 

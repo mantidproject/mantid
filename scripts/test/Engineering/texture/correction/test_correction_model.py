@@ -181,8 +181,8 @@ class TextureCorrectionModelTest(unittest.TestCase):
     def test_read_attenuation_coefficient_at_value_interpolates(self, mock_ads, mock_convert):
         mock_ads.retrieve.return_value = self.mock_ws
         mock_ws = self.mock_ws
-        mock_ws.readX.return_value = np.array([1, 2, 3])
-        mock_ws.readY.return_value = np.array([2, 4])
+        mock_ws.x.return_value = np.array([1, 2, 3])
+        mock_ws.y.return_value = np.array([2, 4])
         mock_ws.getNumberHistograms.return_value = 1
 
         mock_convert.return_value = mock_ws
@@ -270,7 +270,7 @@ class TextureCorrectionModelTest(unittest.TestCase):
     @patch(correction_model_path + ".ADS")
     def test_calc_divergence(self, mock_ads, mock_get_thetas):
         self.mock_ws.getNumberHistograms.return_value = 2
-        self.mock_ws.readY.return_value = np.array([1.0, 2.0])
+        self.mock_ws.y.return_value = np.array([1.0, 2.0])
         mock_get_thetas.return_value = np.array([0, 0.5])  # radians
         mock_ads.retrieve.return_value = self.mock_ws
 

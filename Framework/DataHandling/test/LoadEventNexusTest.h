@@ -136,7 +136,7 @@ private:
 
     for (size_t wi = 0; wi < NUM_HIST; wi++) {
       // total counts in uncompressed and compressed should be equal
-      TS_ASSERT_EQUALS(ws_compressed->readY(wi), ws_uncompressed->readY(wi));
+      TS_ASSERT_EQUALS(ws_compressed->y(wi), ws_uncompressed->y(wi));
 
       // all uncompressed spectra should be raw events
       TS_ASSERT_EQUALS(ws_uncompressed->getSpectrum(wi).getEventType(), uncompressed_type);
@@ -502,8 +502,8 @@ public:
     TS_ASSERT_EQUALS(WS->getNumberEvents(), 112266);
     // TOF limits found. There is a pad of +-1 given around the actual TOF
     // founds.
-    TS_ASSERT_DELTA((*WS->refX(0))[0], 44163.6, 0.05);
-    TS_ASSERT_DELTA((*WS->refX(0))[1], 60830.2, 0.05);
+    TS_ASSERT_DELTA((*WS->sharedX(0))[0], 44163.6, 0.05);
+    TS_ASSERT_DELTA((*WS->sharedX(0))[1], 60830.2, 0.05);
     // Valid spectrum info
     TS_ASSERT_EQUALS(WS->getSpectrum(0).getSpectrumNo(), 1);
     TS_ASSERT_EQUALS(WS->getSpectrum(0).getDetectorIDs().size(), 1);
@@ -866,8 +866,8 @@ public:
     TS_ASSERT_EQUALS(WS->getNumberHistograms(), 3);
     // Check some histogram data
     // TOF
-    TS_ASSERT_EQUALS((*WS->refX(0)).size(), 200002);
-    TS_ASSERT_DELTA((*WS->refX(0))[1], 1.0, 1e-6);
+    TS_ASSERT_EQUALS((*WS->sharedX(0)).size(), 200002);
+    TS_ASSERT_DELTA((*WS->sharedX(0))[1], 1.0, 1e-6);
     // Data
     TS_ASSERT_EQUALS(WS->dataY(0).size(), 200001);
     TS_ASSERT_DELTA(WS->dataY(0)[12], 0.0, 1e-6);
@@ -1693,8 +1693,8 @@ public:
     TS_ASSERT_EQUALS(eventWS->getNumberEvents(), expectedNumberEvents);
     double sum = 0.0;
     for (size_t i = 0; i < eventWS->getNumberHistograms(); ++i) {
-      TS_ASSERT_EQUALS(eventWS->readX(i).size(), 2)
-      sum += eventWS->readY(i)[0];
+      TS_ASSERT_EQUALS(eventWS->x(i).size(), 2)
+      sum += eventWS->y(i)[0];
     }
     TS_ASSERT_DELTA(sum, expectedNumberEvents, 1e-6)
     AnalysisDataService::Instance().remove(wsName);

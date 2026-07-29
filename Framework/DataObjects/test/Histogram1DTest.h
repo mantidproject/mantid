@@ -116,7 +116,7 @@ public:
   }
   void testcopyX() {
     h2.setPoints(x1);
-    h.dataX() = h2.dataX();
+    h.mutableX() = h2.dataX();
     TS_ASSERT_EQUALS(h.dataX(), x1);
   }
   void testsetgetDataYVector() {
@@ -179,81 +179,81 @@ public:
   void test_copy_constructor() {
     const Histogram1D source(Histogram::XMode::Points, Histogram::YMode::Counts);
     Histogram1D clone(source);
-    TS_ASSERT_EQUALS(&clone.readX(), &source.readX());
-    TS_ASSERT_EQUALS(&clone.readY(), &source.readY());
-    TS_ASSERT_EQUALS(&clone.readE(), &source.readE());
+    TS_ASSERT_EQUALS(&clone.x(), &source.x());
+    TS_ASSERT_EQUALS(&clone.y(), &source.y());
+    TS_ASSERT_EQUALS(&clone.e(), &source.e());
   }
 
   void test_move_constructor() {
     Histogram1D source(Histogram::XMode::Points, Histogram::YMode::Counts);
-    auto oldX = &source.readX();
-    auto oldY = &source.readY();
-    auto oldE = &source.readE();
+    auto oldX = &source.x();
+    auto oldY = &source.y();
+    auto oldE = &source.e();
     Histogram1D clone(std::move(source));
-    TS_ASSERT(!source.ptrX());
-    TS_ASSERT_EQUALS(&clone.readX(), oldX);
-    TS_ASSERT_EQUALS(&clone.readY(), oldY);
-    TS_ASSERT_EQUALS(&clone.readE(), oldE);
+    TS_ASSERT(!source.sharedX());
+    TS_ASSERT_EQUALS(&clone.x(), oldX);
+    TS_ASSERT_EQUALS(&clone.y(), oldY);
+    TS_ASSERT_EQUALS(&clone.e(), oldE);
   }
 
   void test_constructor_from_ISpectrum() {
     Histogram1D resource(Histogram::XMode::Points, Histogram::YMode::Counts);
-    resource.dataX() = {0.1};
-    resource.dataY() = {0.2};
-    resource.dataE() = {0.3};
+    resource.mutableX() = {0.1};
+    resource.mutableY() = {0.2};
+    resource.mutableE() = {0.3};
     const Mantid::API::ISpectrum &source = resource;
     Histogram1D clone(source);
     // X is shared...
-    TS_ASSERT_EQUALS(&clone.readX(), &source.readX());
+    TS_ASSERT_EQUALS(&clone.x(), &source.x());
     // Y and E are in general not shared, since they are not part of ISpectrum,
     // but in this special case ISpectrum references Histogram1D, so they
     // should.
-    TS_ASSERT_EQUALS(&clone.readY(), &source.readY());
-    TS_ASSERT_EQUALS(&clone.readE(), &source.readE());
-    TS_ASSERT_EQUALS(clone.readX()[0], 0.1);
-    TS_ASSERT_EQUALS(clone.readY()[0], 0.2);
-    TS_ASSERT_EQUALS(clone.readE()[0], 0.3);
+    TS_ASSERT_EQUALS(&clone.y(), &source.y());
+    TS_ASSERT_EQUALS(&clone.e(), &source.e());
+    TS_ASSERT_EQUALS(clone.x()[0], 0.1);
+    TS_ASSERT_EQUALS(clone.y()[0], 0.2);
+    TS_ASSERT_EQUALS(clone.e()[0], 0.3);
   }
 
   void test_copy_assignment() {
     const Histogram1D source(Histogram::XMode::Points, Histogram::YMode::Counts);
     Histogram1D clone(Histogram::XMode::Points, Histogram::YMode::Counts);
     clone = source;
-    TS_ASSERT_EQUALS(&clone.readX(), &source.readX());
-    TS_ASSERT_EQUALS(&clone.readY(), &source.readY());
-    TS_ASSERT_EQUALS(&clone.readE(), &source.readE());
+    TS_ASSERT_EQUALS(&clone.x(), &source.x());
+    TS_ASSERT_EQUALS(&clone.y(), &source.y());
+    TS_ASSERT_EQUALS(&clone.e(), &source.e());
   }
 
   void test_move_assignment() {
     Histogram1D source(Histogram::XMode::Points, Histogram::YMode::Counts);
-    auto oldX = &source.readX();
-    auto oldY = &source.readY();
-    auto oldE = &source.readE();
+    auto oldX = &source.x();
+    auto oldY = &source.y();
+    auto oldE = &source.e();
     Histogram1D clone(Histogram::XMode::Points, Histogram::YMode::Counts);
     clone = std::move(source);
-    TS_ASSERT(!source.ptrX());
-    TS_ASSERT_EQUALS(&clone.readX(), oldX);
-    TS_ASSERT_EQUALS(&clone.readY(), oldY);
-    TS_ASSERT_EQUALS(&clone.readE(), oldE);
+    TS_ASSERT(!source.sharedX());
+    TS_ASSERT_EQUALS(&clone.x(), oldX);
+    TS_ASSERT_EQUALS(&clone.y(), oldY);
+    TS_ASSERT_EQUALS(&clone.e(), oldE);
   }
 
   void test_assign_ISpectrum() {
     Histogram1D resource(Histogram::XMode::Points, Histogram::YMode::Counts);
-    resource.dataX() = {0.1};
-    resource.dataY() = {0.2};
-    resource.dataE() = {0.3};
+    resource.mutableX() = {0.1};
+    resource.mutableY() = {0.2};
+    resource.mutableE() = {0.3};
     const Mantid::API::ISpectrum &source = resource;
     Histogram1D clone(Histogram::XMode::Points, Histogram::YMode::Counts);
     clone = source;
     // X is shared...
-    TS_ASSERT_EQUALS(&clone.readX(), &source.readX());
+    TS_ASSERT_EQUALS(&clone.x(), &source.x());
     // Y and E are in general not shared, since they are not part of ISpectrum,
     // but in this special case ISpectrum references Histogram1D, so they
     // should.
-    TS_ASSERT_EQUALS(&clone.readY(), &source.readY());
-    TS_ASSERT_EQUALS(&clone.readE(), &source.readE());
-    TS_ASSERT_EQUALS(clone.readX()[0], 0.1);
-    TS_ASSERT_EQUALS(clone.readY()[0], 0.2);
-    TS_ASSERT_EQUALS(clone.readE()[0], 0.3);
+    TS_ASSERT_EQUALS(&clone.y(), &source.y());
+    TS_ASSERT_EQUALS(&clone.e(), &source.e());
+    TS_ASSERT_EQUALS(clone.x()[0], 0.1);
+    TS_ASSERT_EQUALS(clone.y()[0], 0.2);
+    TS_ASSERT_EQUALS(clone.e()[0], 0.3);
   }
 };

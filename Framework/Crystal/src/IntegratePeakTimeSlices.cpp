@@ -24,6 +24,9 @@
 #include "MantidDataObjects/Workspace2D.h"
 
 #include "MantidHistogramData/BinEdges.h"
+#include "MantidHistogramData/CountStandardDeviations.h"
+#include "MantidHistogramData/Counts.h"
+#include "MantidHistogramData/Points.h"
 
 #include <boost/math/special_functions/round.hpp>
 #include <utility>
@@ -1517,14 +1520,13 @@ void IntegratePeakTimeSlices::SetUpData1(API::MatrixWorkspace_sptr &Data,
     m_AttributeValues->EdgeX = 0;
 
   auto pX = Kernel::make_cow<HistogramData::HistogramX>(std::move(xRef));
-  Data->setX(0, pX);
-  Data->setX(1, pX);
-  Data->setX(2, pX);
-
-  ws->setCounts(0, yvalB);
-  ws->setCountStandardDeviations(0, errB);
-  ws->setCounts(1, xvalB);
-  ws->setCounts(2, YvalB);
+  // Set the shared X and the counts together so the Histogram size invariant holds. The
+  // workspace was allocated with an upper-bound number of points and is resized here to the
+  // number of valid neighbour pixels actually collected. Calling setSharedX on its own would
+  // be rejected, because the not-yet-resized Y still has the original (larger) length.
+  ws->setHistogram(0, Points(pX), Counts(yvalB), CountStandardDeviations(errB));
+  ws->setHistogram(1, Points(pX), Counts(xvalB));
+  ws->setHistogram(2, Points(pX), Counts(YvalB));
   m_AttributeValues->setHeightHalfWidthInfo(xvalB, YvalB, yvalB);
 
   StatBase[IStartRow] = minRow;

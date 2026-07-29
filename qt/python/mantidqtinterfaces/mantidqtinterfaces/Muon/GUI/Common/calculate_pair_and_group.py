@@ -97,7 +97,7 @@ def _setup_rebin_options(context, pre_process_params, run):
         if context.gui_context["RebinType"] == "Fixed" and context.gui_context["RebinFixed"]:
             x_data = context.data_context._loaded_data.get_data(run=run, instrument=context.data_context.instrument)["workspace"][
                 "OutputWorkspace"
-            ][0].workspace.dataX(0)
+            ][0].workspace.x(0)
             original_step = x_data[1] - x_data[0]
             pre_process_params["RebinArgs"] = float(context.gui_context["RebinFixed"]) * original_step
     except KeyError:
@@ -126,7 +126,7 @@ def _get_EstimateMuonAsymmetryFromCounts_parameters(context, group, run, periods
     if "GroupRangeMax" in context.gui_context:
         params["EndX"] = context.gui_context["GroupRangeMax"]
     else:
-        params["EndX"] = max(context.data_context.get_loaded_data_for_run(run)["OutputWorkspace"][0].workspace.dataX(0))
+        params["EndX"] = max(context.data_context.get_loaded_data_for_run(run)["OutputWorkspace"][0].workspace.x(0))
 
     params["OutputUnNormData"] = True
 

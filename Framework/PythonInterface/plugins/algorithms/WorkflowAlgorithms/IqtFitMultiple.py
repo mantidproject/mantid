@@ -99,7 +99,7 @@ class IqtFitMultiple(PythonAlgorithm):
         issues = dict()
 
         maximum_possible_spectra = self._input_ws.getNumberHistograms()
-        maximum_possible_x = self._input_ws.readX(0)[self._input_ws.blocksize() - 1]
+        maximum_possible_x = self._input_ws.x(0)[self._input_ws.blocksize() - 1]
         # Validate SpecMin/Max
 
         if self._spec_max > maximum_possible_spectra:

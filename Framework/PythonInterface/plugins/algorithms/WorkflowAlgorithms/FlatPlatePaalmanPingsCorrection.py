@@ -558,9 +558,9 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         else:
             wave_range = "__WaveRange"
             ExtractSingleSpectrum(InputWorkspace=self._sample_ws_name, OutputWorkspace=wave_range, WorkspaceIndex=0)
-            Xin = mtd[wave_range].readX(0)
-            wave_min = mtd[wave_range].readX(0)[0]
-            wave_max = mtd[wave_range].readX(0)[len(Xin) - 1]
+            Xin = mtd[wave_range].x(0)
+            wave_min = mtd[wave_range].x(0)[0]
+            wave_max = mtd[wave_range].x(0)[len(Xin) - 1]
             number_waves = self._number_wavelengths
             wave_bin = (wave_max - wave_min) / (number_waves - 1)
 

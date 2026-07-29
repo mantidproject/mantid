@@ -94,6 +94,21 @@ public:
   const double &operator[](size_t pos) const { return m_data[pos]; }
   double &operator[](size_t pos) { return m_data[pos]; }
 
+  double const &at(size_t pos) const {
+    if (pos >= m_data.size()) {
+      throw std::out_of_range("invalid access for full length vector type");
+    } else {
+      return m_data[pos];
+    }
+  }
+  double &at(size_t pos) {
+    if (pos >= m_data.size()) {
+      throw std::out_of_range("invalid access for full length vector type");
+    } else {
+      return m_data[pos];
+    }
+  }
+
   /// Returns a const reference to the underlying vector.
   const std::vector<double> &rawData() const { return m_data; }
 

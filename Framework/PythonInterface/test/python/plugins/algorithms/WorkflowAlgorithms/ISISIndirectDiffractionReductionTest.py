@@ -56,7 +56,7 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         self.assertEqual(red_ws.getNumberHistograms(), 1)
 
         self.assertEqual(red_ws.blocksize(), 10)
-        data_x = red_ws.dataX(0)
+        data_x = red_ws.x(0)
         self.assertAlmostEqual(data_x[0], 3.0)
         self.assertAlmostEqual(data_x[-1], 4.0)
 
@@ -171,8 +171,8 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         red_ws = wks[0]
         self.assertEqual(red_ws.getAxis(0).getUnit().unitID(), "dSpacing")
         self.assertEqual(red_ws.getNumberHistograms(), 1)
-        self.assertEqual(round(red_ws.readY(0)[1], 7), 0.0215684)
-        self.assertEqual(round(red_ws.readY(0)[-1], 7), 0.0022809)
+        self.assertEqual(round(red_ws.y(0)[1], 7), 0.0215684)
+        self.assertEqual(round(red_ws.y(0)[-1], 7), 0.0022809)
 
     def test_that_a_reduction_with_a_vanadium_file_containing_zeros_for_osiris_diffspec_produces_a_workspace_with_the_correct_name(self):
         output_group = ISISIndirectDiffractionReduction(

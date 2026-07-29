@@ -391,7 +391,7 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
         Return:
             Name of the workspace, either original one, if unchanged, or new workspace with bins merged
         """
-        xAxis = mtd[ws].readX(0)
+        xAxis = mtd[ws].x(0)
         maskedX = np.ma.array(xAxis, mask=False)
         yAxis = mtd[ws].extractY()
         maskedY = np.ma.array(yAxis, mask=False)
@@ -476,7 +476,7 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
         # we need to get the data and interpolate it with numpy because Mantid only have spline interpolation and the
         # water correction has a shape that cause the spline to go completely off
         # so we are using numpy instead
-        energy = mtd[ws_to_correct].readX(0)
+        energy = mtd[ws_to_correct].x(0)
 
         interpolated_corr = np.interp(energy, self.water_correction[:, 0], self.water_correction[:, 1])
 

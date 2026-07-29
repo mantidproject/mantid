@@ -1338,7 +1338,7 @@ class RunDescriptor(PropDescriptor):
                 )
 
         #
-        x_param = mon_ws.readX(0)
+        x_param = mon_ws.x(0)
         homo_binning, dx_min = RunDescriptor._is_binning_homogeneous(x_param)
         bins = [x_param[0], dx_min, x_param[-1]]
         ExtractSingleSpectrum(InputWorkspace=data_ws, OutputWorkspace="tmp_mon", WorkspaceIndex=ws_index)
@@ -1685,7 +1685,7 @@ class RunDescriptor(PropDescriptor):
             pointer to the workspace, containing extra spectra
         """
 
-        source_spec = expand_ws.readX(0)
+        source_spec = expand_ws.x(0)
         zero_signal = [0] * n_spectra
         fake_spectra = CreateWorkspace(
             DataX=[source_spec[0], source_spec[-1]], DataY=zero_signal, Nspec=n_spectra, UnitX="TOF", ParentWorkspace=expand_ws

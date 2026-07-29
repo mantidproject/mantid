@@ -784,7 +784,7 @@ public:
     auto originalUnit = ws->getAxis(0)->unit();
     auto originalEMode = ws->getEMode();
     TS_ASSERT_THROWS_ANYTHING(ws->getEFixed());
-    auto originalYdata = ws->readY(0);
+    auto originalYdata = ws->y(0);
 
     ConvertUnits conv;
     conv.initialize();
@@ -803,7 +803,7 @@ public:
     TS_ASSERT_EQUALS(originalUnit, ws->getAxis(0)->unit());
     TS_ASSERT_EQUALS(originalEMode, ws->getEMode());
     TS_ASSERT_THROWS_ANYTHING(ws->getEFixed());
-    TS_ASSERT_EQUALS(originalYdata, ws->readY(0));
+    TS_ASSERT_EQUALS(originalYdata, ws->y(0));
 
     AnalysisDataService::Instance().remove(wsName);
   }
@@ -859,24 +859,24 @@ public:
             TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->unitID(), targetUnits);
             if (distribution) {
               // counts are scaled by bin width in new units
-              TS_ASSERT_EQUALS(raggedWS->readY(0).size(), outputWS->readY(0).size());
-              TS_ASSERT_EQUALS(raggedWS->readY(1).size(), outputWS->readY(1).size());
+              TS_ASSERT_EQUALS(raggedWS->y(0).size(), outputWS->y(0).size());
+              TS_ASSERT_EQUALS(raggedWS->y(1).size(), outputWS->y(1).size());
             } else {
               // counts are the same
               if (targetUnits.compare(TestUnits::TOF) == 0) {
-                TS_ASSERT_EQUALS(raggedWS->readY(0), outputWS->readY(0));
-                TS_ASSERT_EQUALS(raggedWS->readY(1), outputWS->readY(1));
+                TS_ASSERT_EQUALS(raggedWS->y(0), outputWS->y(0));
+                TS_ASSERT_EQUALS(raggedWS->y(1), outputWS->y(1));
               } else { // reversed for MomentumTransfer
                 for (size_t i = 0; i < numHist; ++i) {
-                  auto Yorig = outputWS->readY(i); // make a copy
+                  auto Yorig = outputWS->y(i); // make a copy
                   std::reverse(Yorig.begin(), Yorig.end());
-                  TS_ASSERT_EQUALS(Yorig, raggedWS->readY(i));
+                  TS_ASSERT_EQUALS(Yorig, raggedWS->y(i));
                 }
               }
             }
             // size of bins hasn't changed
-            TS_ASSERT_EQUALS(raggedWS->readX(0).size(), outputWS->readX(0).size());
-            TS_ASSERT_EQUALS(raggedWS->readX(1).size(), outputWS->readX(1).size());
+            TS_ASSERT_EQUALS(raggedWS->x(0).size(), outputWS->x(0).size());
+            TS_ASSERT_EQUALS(raggedWS->x(1).size(), outputWS->x(1).size());
 
             // remove output workspace
             AnalysisDataService::Instance().remove(outname);

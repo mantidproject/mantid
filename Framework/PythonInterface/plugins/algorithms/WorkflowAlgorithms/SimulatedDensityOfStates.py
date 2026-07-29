@@ -538,13 +538,13 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         # If there is more than one partial workspace need to sum first spectrum of all
         if len(partial_workspaces) > 1:
             initial_partial_ws = partial_workspaces[0]
-            data_x = initial_partial_ws.dataX(0)
-            dos_specs = np.zeros_like(initial_partial_ws.dataY(0))
-            stick_specs = np.zeros_like(initial_partial_ws.dataY(0))
+            data_x = initial_partial_ws.x(0)
+            dos_specs = np.zeros_like(initial_partial_ws.y(0))
+            stick_specs = np.zeros_like(initial_partial_ws.y(0))
 
             for partial_ws in partial_workspaces:
-                dos_specs += partial_ws.dataY(0)
-                stick_specs += partial_ws.dataY(1)
+                dos_specs += partial_ws.y(0)
+                stick_specs += partial_ws.y(1)
 
             stick_specs[stick_specs > 0.0] = self.getProperty("StickHeight").value
 
@@ -685,8 +685,8 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
         bin_width = self.getProperty("BinWidth").value
         if bin_width != 1:
-            x_min = out_ws.readX(0)[0] - (bin_width / 2.0)
-            x_max = out_ws.readX(0)[-1] + (bin_width / 2.0)
+            x_min = out_ws.x(0)[0] - (bin_width / 2.0)
+            x_max = out_ws.x(0)[-1] + (bin_width / 2.0)
             rebin_param = "%f, %f, %f" % (x_min, bin_width, x_max)
             out_ws = s_api.Rebin(Inputworkspace=out_ws, Params=rebin_param, OutputWorkspace=out_ws)
 

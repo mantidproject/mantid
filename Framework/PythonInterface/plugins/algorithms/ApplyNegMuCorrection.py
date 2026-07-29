@@ -32,15 +32,15 @@ class ApplyNegMuCorrection(PythonAlgorithm):
             raise RuntimeError("could not find file: " + rooth20_filename)
 
         # Correcting for Gain and offset of the detectors
-        ws2000_corr = CreateWorkspace(A2000 * ws2000.readX(0)[:] + B2000, ws2000.readY(0)[:])
-        ws3000_corr = CreateWorkspace(A3000 * ws3000.readX(0)[:] + B3000, ws3000.readY(0)[:])
+        ws2000_corr = CreateWorkspace(A2000 * ws2000.x(0)[:] + B2000, ws2000.y(0)[:])
+        ws3000_corr = CreateWorkspace(A3000 * ws3000.x(0)[:] + B3000, ws3000.y(0)[:])
 
         # Summing total counts for normalisation
         ws2000_total = 0
         ws3000_total = 0
         for count in range(0, 8000):
-            ws2000_total = ws2000_corr.readY(0)[count] + ws2000_total
-            ws3000_total = ws3000_corr.readY(0)[count] + ws3000_total
+            ws2000_total = ws2000_corr.y(0)[count] + ws2000_total
+            ws3000_total = ws3000_corr.y(0)[count] + ws3000_total
         print(ws2000_total)
         print(ws3000_total)
         # normalising
@@ -48,7 +48,7 @@ class ApplyNegMuCorrection(PythonAlgorithm):
         ws3000_corr = ws3000_corr / ws3000_total
 
         # rebinning to adataDir detectors together
-        data = [100, ws2000.readX(0)[2] - ws2000.readX(0)[1], 8000]
+        data = [100, ws2000.x(0)[2] - ws2000.x(0)[1], 8000]
 
         ws2000_corr_rebin = Rebin(ws2000_corr, data)
         ws3000_corr_rebin = Rebin(ws3000_corr, data)

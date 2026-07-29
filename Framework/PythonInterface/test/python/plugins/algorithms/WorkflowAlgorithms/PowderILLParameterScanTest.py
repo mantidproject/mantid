@@ -38,14 +38,14 @@ class PowderILLParameterScanTest(unittest.TestCase):
         spectrumaxis = red.getAxis(1).extractValues()
         self.assertAlmostEqual(spectrumaxis[0], 253.924, 5)
         self.assertAlmostEqual(spectrumaxis[1], 242.82001, 5)
-        self.assertEqual(red.readY(0)[0], 644)
-        self.assertAlmostEqual(red.readE(0)[0], 25.3772, 4)
-        self.assertEqual(red.readY(0)[3007], 8468)
-        self.assertAlmostEqual(red.readE(0)[3007], 92.0217, 4)
-        self.assertEqual(red.readY(1)[1], 1105)
-        self.assertAlmostEqual(red.readE(1)[1], 33.2415, 4)
-        self.assertEqual(red.readY(0)[1400], 9532)
-        self.assertEqual(red.readY(1)[2100], 9789)
+        self.assertEqual(red.y(0)[0], 644)
+        self.assertAlmostEqual(red.e(0)[0], 25.3772, 4)
+        self.assertEqual(red.y(0)[3007], 8468)
+        self.assertAlmostEqual(red.e(0)[3007], 92.0217, 4)
+        self.assertEqual(red.y(1)[1], 1105)
+        self.assertAlmostEqual(red.e(1)[1], 33.2415, 4)
+        self.assertEqual(red.y(0)[1400], 9532)
+        self.assertEqual(red.y(1)[2100], 9789)
 
     def test_sort_temperature_axis(self):
         red = PowderILLParameterScan(Run=self._runs, SortObservableAxis=True)
@@ -69,20 +69,20 @@ class PowderILLParameterScanTest(unittest.TestCase):
     def test_normalise_monitor(self):
         red = PowderILLParameterScan(Run=self._runs, NormaliseTo="Monitor")
         self.assertTrue(red)
-        self.assertAlmostEqual(red.readY(0)[1400], 0.00348, 5)
-        self.assertAlmostEqual(red.readY(1)[2100], 0.00335, 5)
+        self.assertAlmostEqual(red.y(0)[1400], 0.00348, 5)
+        self.assertAlmostEqual(red.y(1)[2100], 0.00335, 5)
 
     def test_normalise_time(self):
         red = PowderILLParameterScan(Run=self._runs, NormaliseTo="Time")
         self.assertTrue(red)
-        self.assertAlmostEqual(red.readY(0)[1400], 9532 / 300.0, 4)
-        self.assertAlmostEqual(red.readY(1)[2100], 9789 / 300.0, 2)
+        self.assertAlmostEqual(red.y(0)[1400], 9532 / 300.0, 4)
+        self.assertAlmostEqual(red.y(1)[2100], 9789 / 300.0, 2)
 
     def test_normalise_roi(self):
         red = PowderILLParameterScan(Run=self._runs, NormaliseTo="ROI", ROI="0,100")
         self.assertTrue(red)
-        self.assertAlmostEqual(red.readY(0)[1400], 0.00055, 5)
-        self.assertAlmostEqual(red.readY(1)[2100], 0.00053, 5)
+        self.assertAlmostEqual(red.y(0)[1400], 0.00055, 5)
+        self.assertAlmostEqual(red.y(1)[2100], 0.00053, 5)
 
     def test_crop_zero_counting_cells(self):
         red = PowderILLParameterScan(Run=self._runs, ZeroCountingCells="Crop")
@@ -97,7 +97,7 @@ class PowderILLParameterScanTest(unittest.TestCase):
     def test_normalise_time_single(self):
         red = PowderILLParameterScan(Run="967087", NormaliseTo="Time")
         self.assertTrue(red)
-        self.assertAlmostEqual(red.readY(0)[1400], 9532 / 300.0, 4)
+        self.assertAlmostEqual(red.y(0)[1400], 9532 / 300.0, 4)
 
 
 if __name__ == "__main__":

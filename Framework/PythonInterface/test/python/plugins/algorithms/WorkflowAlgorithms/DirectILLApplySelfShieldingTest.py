@@ -72,9 +72,9 @@ class DirectILLApplySelfShieldingTest(unittest.TestCase):
         corrFactor = 0.789
         corrWS = self._cloneTestWorkspace("correctionWS")
         for i in range(corrWS.getNumberHistograms()):
-            ys = corrWS.dataY(i)
+            ys = corrWS.mutableY(i)
             ys.fill(corrFactor)
-            es = corrWS.dataE(i)
+            es = corrWS.mutableE(i)
             es.fill(0)
         outWSName = "outWS"
         algProperties = {
@@ -105,9 +105,9 @@ class DirectILLApplySelfShieldingTest(unittest.TestCase):
         corrFactor = 0.43
         corrWS = self._cloneTestWorkspace("correctionWS")
         for i in range(corrWS.getNumberHistograms()):
-            ys = corrWS.dataY(i)
+            ys = corrWS.mutableY(i)
             ys.fill(corrFactor)
-            es = corrWS.dataE(i)
+            es = corrWS.mutableE(i)
             es.fill(0)
         algProperties = {
             "InputWorkspace": self._TEST_WS_NAME,

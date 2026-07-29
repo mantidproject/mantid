@@ -333,7 +333,7 @@ void LoadILLTOF3::addPulseInterval() {
  */
 std::vector<double> LoadILLTOF3::prepareAxis(const Nexus::NXEntry &entry, bool convertToTOF) {
 
-  std::vector<double> xAxis(m_localWorkspace->readX(0).size());
+  std::vector<double> xAxis(m_localWorkspace->x(0).size());
   if (m_isScan) {
     // read which variable is going to be the axis
     NXInt scannedAxis = entry.openNXInt("data_scan/scanned_variables/variables_names/axis");

@@ -35,8 +35,8 @@ class SANSWideAngleCorrectionTest(unittest.TestCase):
         Trans = CropWorkspace(Sample, StartWorkspaceIndex=10, EndWorkspaceIndex=10)
         y_v = numpy.linspace(0.743139, 0.6, nb)
         e_v = y_v / 58.0
-        Trans.setY(0, y_v)
-        Trans.setE(0, e_v)
+        Trans.setSharedY(0, y_v)
+        Trans.setSharedE(0, e_v)
         self._sample = Sample
         self._trans = Trans
         self.n_det = xd * yd
@@ -44,14 +44,14 @@ class SANSWideAngleCorrectionTest(unittest.TestCase):
     def test_calculate_correction(self):
         correction = SANSWideAngleCorrection(self._sample, self._trans)
         self.assertEqual(correction.getNumberHistograms(), self._sample.getNumberHistograms())
-        self.assertEqual(len(correction.readX(0)), len(self._sample.readX(0)))
-        self.assertEqual(len(correction.readY(0)), len(self._sample.readY(0)))
+        self.assertEqual(len(correction.x(0)), len(self._sample.x(0)))
+        self.assertEqual(len(correction.y(0)), len(self._sample.y(0)))
         lRange = Min(correction)
         hRange = Max(correction)
         lRange = Transpose(lRange)
         hRange = Transpose(hRange)
-        self.assertGreater(97, hRange.dataY(0).all())
-        self.assertGreaterEqual(1, hRange.dataY(0).all())
+        self.assertGreater(97, hRange.y(0).all())
+        self.assertGreaterEqual(1, hRange.y(0).all())
 
     def test_negative_trans_data(self):
         trans_invalid = self._trans * -1

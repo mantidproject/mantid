@@ -21,6 +21,25 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
    <item>
+    <widget class="QLabel" name="warningLabel">
+     <property name="styleSheet">
+      <string notr="true">QLabel { background-color: #fff3cd; color: #664d03; border: 1px solid #ffe69c; border-radius: 4px; padding: 6px; }</string>
+     </property>
+     <property name="text">
+      <string>&lt;b&gt;Note:&lt;/b&gt; The Script Repository is read-only from Mantid Workbench. Scripts can be downloaded and kept up to date, but changes cannot be uploaded here. To add, modify or remove scripts, submit a pull request on &lt;a href="https://github.com/mantidproject/scriptrepository"&gt;https://github.com/mantidproject/scriptrepository&lt;/a&gt;.</string>
+     </property>
+     <property name="textFormat">
+      <enum>Qt::RichText</enum>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+     <property name="openExternalLinks">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QSplitter" name="splitter">
      <property name="orientation">
       <enum>Qt::Vertical</enum>

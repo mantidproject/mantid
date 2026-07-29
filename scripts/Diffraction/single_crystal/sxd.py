@@ -102,8 +102,8 @@ class SXD(BaseSX):
             EnableLogging=False,
         )
         for igrp in range(ngroups):
-            ybank = banks_foc.readY(igrp)
-            ebank = banks_foc.readE(igrp)
+            ybank = banks_foc.y(igrp)
+            ebank = banks_foc.e(igrp)
             ybank_sum = ybank.sum()
             # get detector IDs in raw ws that contribute to focused spectrum
             foc_spec = banks_foc.getSpectrum(igrp)
@@ -111,9 +111,9 @@ class SXD(BaseSX):
             for ispec in ispecs:
                 # assume lambda dep. efficiency differs only by const scale factor between detectors on same bank
                 # also assume that bg counts are subject to same efficiency
-                scale = ws.readY(int(ispec)).sum() / ybank_sum
-                ws.setY(int(ispec), scale * ybank)
-                ws.setE(int(ispec), scale * ebank)
+                scale = ws.y(int(ispec)).sum() / ybank_sum
+                ws.setSharedY(int(ispec), scale * ybank)
+                ws.setSharedE(int(ispec), scale * ebank)
         mantid.DeleteWorkspace("grouped")
 
     def process_vanadium(self):

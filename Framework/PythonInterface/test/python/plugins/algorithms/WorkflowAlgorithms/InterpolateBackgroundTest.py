@@ -29,7 +29,7 @@ class InterpolateBackgroundTest(unittest.TestCase):
         outputWS = InterpolateBackground(self.wsGroup, self.interpo)
         expected = [8.33333333, 16.66666667, 25.0, 33.33333333, 41.66666667, 50.0, 58.33333333, 66.66666667, 75.0, 83.33333333]
         tolerance = 1.0e-8
-        np.testing.assert_allclose(list(outputWS.readY(0)), expected, rtol=tolerance)
+        np.testing.assert_allclose(list(outputWS.y(0)), expected, rtol=tolerance)
 
     def test_bad_input(self):
         # Test raises Runtime error if a workspace is missing SampleTemp property

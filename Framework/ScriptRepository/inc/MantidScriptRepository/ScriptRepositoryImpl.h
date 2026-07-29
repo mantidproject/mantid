@@ -91,12 +91,6 @@ public:
 
   SCRIPTSTATUS fileStatus(const std::string &input_path) override;
 
-  void upload(const std::string &file_path, const std::string &comment, const std::string &author,
-              const std::string &email) override;
-  // remove file from the central repository and from local folder
-  void remove(const std::string &file_path, const std::string &comment, const std::string &author,
-              const std::string &email) override;
-
   /* Return true if there is a local repository installed*/
   bool isValid() override;
 
@@ -114,10 +108,6 @@ public:
   const std::string &localRepository() const { return local_repository; }
 
   virtual void doDownloadFile(const std::string &url_file, const std::string &local_file_path = "");
-  // convenient method to allow to perform the unit tests on remove files.
-  virtual std::string doDeleteRemoteFile(const std::string &url, const std::string &file_path,
-                                         const std::string &author, const std::string &email,
-                                         const std::string &comment);
 
 protected:
   void parseCentralRepository(Repository &repo);
@@ -134,8 +124,6 @@ protected:
   std::string local_repository;
   /// URL for the remote repository, usually:
   std::string remote_url;
-  /// URL for the upload
-  std::string remote_upload;
 
 private:
   void recursiveParsingDirectories(const std::string &path, Repository &repo);
@@ -160,7 +148,6 @@ private:
   void download_directory(const std::string &);
   void download_file(const std::string &, RepositoryEntry &);
   void updateLocalJson(const std::string &, const RepositoryEntry &);
-  void updateRepositoryJson(const std::string &, const RepositoryEntry &);
 
   /// flag that indicate a valid repository
   bool m_valid;

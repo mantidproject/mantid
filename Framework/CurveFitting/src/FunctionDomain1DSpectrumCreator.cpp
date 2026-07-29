@@ -91,7 +91,7 @@ void FunctionDomain1DSpectrumCreator::createDomain(std::shared_ptr<FunctionDomai
 size_t FunctionDomain1DSpectrumCreator::getDomainSize() const {
   throwIfWorkspaceInvalid();
 
-  size_t numberOfXValues = m_matrixWorkspace->readX(m_workspaceIndex).size();
+  size_t numberOfXValues = m_matrixWorkspace->x(m_workspaceIndex).size();
 
   if (m_matrixWorkspace->isHistogramData()) {
     return numberOfXValues - 1;

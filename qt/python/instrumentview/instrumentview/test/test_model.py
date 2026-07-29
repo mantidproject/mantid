@@ -95,10 +95,10 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_detector_info.isMasked.return_value = False
         mock_workspace.detectorInfo.return_value = mock_detector_info
         mock_workspace.componentInfo.return_value = MagicMock()
-        mock_workspace.dataY.return_value = MagicMock()
+        mock_workspace.y.return_value = MagicMock()
         mock_workspace.getNumberHistograms.return_value = len(detector_ids)
         mock_workspace.extractX.return_value = np.tile(np.arange(len(detector_ids)), (len(detector_ids), 1))
-        mock_workspace.readX.return_value = np.arange(len(detector_ids))
+        mock_workspace.x.return_value = np.arange(len(detector_ids))
         mock_workspace.getIntegratedCountsForWorkspaceIndices.return_value = [100 * i for i in detector_ids]
         mock_workspace.clone.return_value = mock_workspace
         mock_workspace.getInstrument().getReferenceFrame().vecPointingAlongBeam.return_value = [0, 0, 1]
@@ -392,7 +392,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
     def test_integration_limits_ws_with_common_bins(self):
         model, mock_workspace = self._setup_model([1, 2, 3])
         mock_workspace.isCommonBins.return_value = True
-        mock_workspace.dataX.return_value = np.array([1, 2, 3])
+        mock_workspace.x.return_value = np.array([1, 2, 3])
         model.setup()
         model._integration_workspace = mock_workspace
         self.assertEqual(model.integration_limits, (1, 3))
@@ -401,7 +401,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model, mock_workspace = self._setup_model([1, 2, 3])
         mock_workspace.isRaggedWorkspace.return_value = True
         data_x = {0: np.array([1, 2, 3]), 1: np.array([10, 20, 30, 40]), 2: np.array([10, 20, 30, 40, 50])}
-        mock_workspace.readX.side_effect = lambda i: data_x[i]
+        mock_workspace.x.side_effect = lambda i: data_x[i]
         model.setup()
         model._integration_workspace = mock_workspace
         self.assertEqual(model.integration_limits, (1, 50))
@@ -415,7 +415,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
                 raise TypeError(f"No to-python (by-value) converter found for C++ type: {type(i)}")
             return np.array([0.0, 1.0, 2.0])
 
-        mock_workspace.readX.side_effect = read_x_rejecting_numpy_int
+        mock_workspace.x.side_effect = read_x_rejecting_numpy_int
         model._integration_workspace = mock_workspace
         model._calculate_and_set_full_integration_range(model._is_valid)
 
@@ -930,7 +930,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model._detector_is_picked = [True, False, False]
         # No workspace exists to assert removePeak calls; just ensure method didn’t crash.
         model._integration_workspace = MagicMock()
-        model._integration_workspace.dataX = MagicMock(return_value=np.array([1, 2, 3]))
+        model._integration_workspace.x = MagicMock(return_value=np.array([1, 2, 3]))
         self.assertEqual(None, model.delete_peak(5.0, []))
 
     @mock.patch("instrumentview.FullInstrumentViewModel.AnalysisDataService")
@@ -1039,8 +1039,8 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         ws_to = MagicMock()
         integration_x = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
         workspace_x = np.array([100.0, 200.0, 300.0, 400.0, 500.0])
-        ws_from.dataX.return_value = integration_x
-        ws_to.dataX.return_value = workspace_x
+        ws_from.x.return_value = integration_x
+        ws_to.x.return_value = workspace_x
 
         # 1.1 is closest to integration_x[0]=1.0 -> workspace_x[0]=100.0
         self.assertEqual(model._match_workspace_unit(ws_from, 0, 1.1, ws_to), 100.0)
@@ -1055,8 +1055,8 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         ws_from = MagicMock()
         ws_to = MagicMock()
         # Q values decrease (high to low); ws_to values increase
-        ws_from.dataX.return_value = np.array([5.0, 4.0, 3.0, 2.0, 1.0])
-        ws_to.dataX.return_value = np.array([100.0, 200.0, 300.0, 400.0, 500.0])
+        ws_from.x.return_value = np.array([5.0, 4.0, 3.0, 2.0, 1.0])
+        ws_to.x.return_value = np.array([100.0, 200.0, 300.0, 400.0, 500.0])
         ws_from.getAxis.return_value.getUnit.return_value.name.return_value = "MomentumTransfer"
         ws_to.getAxis.return_value.getUnit.return_value.name.return_value = "TOF"
 
@@ -1128,21 +1128,21 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model, mock_workspace = self._setup_model([1, 2, 3])
         mock_workspace.isRaggedWorkspace.return_value = False
         mock_workspace.isCommonBins.return_value = True
-        mock_workspace.dataX.return_value = np.array([10.0, 20.0, 30.0])
+        mock_workspace.x.return_value = np.array([10.0, 20.0, 30.0])
         # Only include detectors 1 and 2 (indices 0, 1)
         valid_mask = np.array([True, True, False])
         model._calculate_and_set_full_integration_range(valid_mask)
         self.assertEqual(model.integration_limits, (10.0, 30.0))
         self.assertEqual(model.full_integration_limits, (10.0, 30.0))
         # Should call dataX with the first workspace index from valid_mask
-        mock_workspace.dataX.assert_called_with(0)
+        mock_workspace.x.assert_called_with(0)
 
     def test_calculate_and_set_full_integration_range_ragged(self):
         """Test that _calculate_and_set_full_integration_range returns min/max across valid spectra for ragged workspaces."""
         model, mock_workspace = self._setup_model([1, 2, 3])
         mock_workspace.isRaggedWorkspace.return_value = True
         data_x = {0: np.array([5.0, 10.0, 15.0]), 1: np.array([1.0, 20.0, 50.0]), 2: np.array([100.0, 200.0])}
-        mock_workspace.readX.side_effect = lambda i: data_x[i]
+        mock_workspace.x.side_effect = lambda i: data_x[i]
         # Only include detectors 0 and 2 (skip detector 1 which has range 1-50)
         valid_mask = np.array([True, False, True])
         model._calculate_and_set_full_integration_range(valid_mask)
@@ -1166,7 +1166,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_workspace.isRaggedWorkspace.return_value = True
         # Detector 1 has range 1-500, detectors 0 and 2 have range 10-100
         data_x = {0: np.array([10.0, 50.0, 100.0]), 1: np.array([1.0, 250.0, 500.0]), 2: np.array([20.0, 60.0, 90.0])}
-        mock_workspace.readX.side_effect = lambda i: data_x[i]
+        mock_workspace.x.side_effect = lambda i: data_x[i]
         all_valid = np.array([True, True, True])
         model._calculate_and_set_full_integration_range(all_valid)
         self.assertEqual(model.integration_limits, (1.0, 500.0))
@@ -1198,7 +1198,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_workspace.isRaggedWorkspace.return_value = True
         # Detector 0: 1-500, Detector 1: 10-100, Detector 2: 20-90
         data_x = {0: np.array([1.0, 250.0, 500.0]), 1: np.array([10.0, 50.0, 100.0]), 2: np.array([20.0, 60.0, 90.0])}
-        mock_workspace.readX.side_effect = lambda i: data_x[i]
+        mock_workspace.x.side_effect = lambda i: data_x[i]
         mock_workspace.getIntegratedCountsForWorkspaceIndices.return_value = [100, 200]
         # Mask detector 0 so only detectors 1 and 2 are pickable
         model._is_masked = np.array([True, False, False])
@@ -1214,7 +1214,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model, mock_workspace = self._setup_model([1, 2, 3])
         mock_workspace.isRaggedWorkspace.return_value = False
         mock_workspace.isCommonBins.return_value = True
-        mock_workspace.dataX.return_value = np.array([10.0, 20.0, 30.0])
+        mock_workspace.x.return_value = np.array([10.0, 20.0, 30.0])
         mock_workspace.getIntegratedCountsForWorkspaceIndices.return_value = [50, 150, 250]
         model.calculate_and_set_full_integration_range()
         # The setter calls update_integration_range which calls getIntegratedCountsForWorkspaceIndices

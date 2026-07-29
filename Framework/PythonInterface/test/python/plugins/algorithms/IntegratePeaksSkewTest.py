@@ -33,10 +33,10 @@ class IntegratePeaksSkewTest(unittest.TestCase):
         axis.setUnit("TOF")
         # fake peak in spectra in middle bank 1 (centered on detID=37/spec=12 and TOF=5)
         cls.peak_1D = 2 * array([0, 0, 0, 1, 4, 6, 4, 1, 0, 0, 0])
-        cls.ws.setY(12, cls.ws.readY(12) + cls.peak_1D)
+        cls.ws.setSharedY(12, cls.ws.y(12) + cls.peak_1D)
         for ispec in [7, 11, 12, 13, 17, 22]:
-            cls.ws.setY(ispec, cls.ws.readY(ispec) + cls.peak_1D)
-            cls.ws.setE(ispec, sqrt(cls.ws.readY(ispec)))
+            cls.ws.setSharedY(ispec, cls.ws.y(ispec) + cls.peak_1D)
+            cls.ws.setSharedE(ispec, sqrt(cls.ws.y(ispec)))
         # Add back-to-back exponential params
         for param in ["A", "B", "S"]:
             SetInstrumentParameter(cls.ws, ParameterName=param, Value="1")
@@ -312,11 +312,11 @@ class IntegratePeaksSkewTest(unittest.TestCase):
         # make dataset with a vacancy of 1 pixel
         ws_clone = CloneWorkspace(InputWorkspace=self.ws)
         for ispec in [6, 8, 16, 18]:
-            ws_clone.setY(ispec, ws_clone.readY(ispec) + 0.5 * self.peak_1D)
-            ws_clone.setE(ispec, sqrt(ws_clone.readY(ispec)))
+            ws_clone.setSharedY(ispec, ws_clone.y(ispec) + 0.5 * self.peak_1D)
+            ws_clone.setSharedE(ispec, sqrt(ws_clone.y(ispec)))
         for ispec in [12, 22]:
-            ws_clone.setY(ispec, ws_clone.readY(0))
-            ws_clone.setE(ispec, ws_clone.readE(0))
+            ws_clone.setSharedY(ispec, ws_clone.y(0))
+            ws_clone.setSharedE(ispec, ws_clone.e(0))
 
         # check vacancy with 1 pixel detected (and first peak therefore not integrated)
         out = IntegratePeaksSkew(

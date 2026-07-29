@@ -175,9 +175,9 @@ class LRReflectivityOutput(PythonAlgorithm):
             header_info += "# %-9s %-9s %-14.6g %-14.6g %-12.6g %-12.6s %-12.6s %-12.6s %-12.6s %-12.6s\n" % value_list
 
         # Take the first rebinned histo as our output
-        data_x = mtd[scaled_ws_list[0] + "_histo"].dataX(0)
-        data_y = mtd[scaled_ws_list[0] + "_histo"].dataY(0)
-        data_e = mtd[scaled_ws_list[0] + "_histo"].dataE(0)
+        data_x = mtd[scaled_ws_list[0] + "_histo"].x(0)
+        data_y = mtd[scaled_ws_list[0] + "_histo"].mutableY(0)
+        data_e = mtd[scaled_ws_list[0] + "_histo"].mutableE(0)
 
         # Skip first point and last one
         points_to_skip = 1
@@ -185,8 +185,8 @@ class LRReflectivityOutput(PythonAlgorithm):
             skipped_points = 0
             distribution_started = False
 
-            data_y_i = mtd[scaled_ws_list[i] + "_histo"].dataY(0)
-            data_e_i = mtd[scaled_ws_list[i] + "_histo"].dataE(0)
+            data_y_i = mtd[scaled_ws_list[i] + "_histo"].y(0)
+            data_e_i = mtd[scaled_ws_list[i] + "_histo"].e(0)
             for j in range(len(data_y_i) - 1):
                 # Check whether we need to skip this point
                 if data_y_i[j] > 0:
@@ -264,9 +264,9 @@ class LRReflectivityOutput(PythonAlgorithm):
 
         meta_data = self.getProperty("MetaData").value
 
-        data_x = mtd[scaled_ws_list[0] + "_scaled"].dataX(0)
-        data_y = mtd[scaled_ws_list[0] + "_scaled"].dataY(0)
-        data_e = mtd[scaled_ws_list[0] + "_scaled"].dataE(0)
+        data_x = mtd[scaled_ws_list[0] + "_scaled"].x(0)
+        data_y = mtd[scaled_ws_list[0] + "_scaled"].y(0)
+        data_e = mtd[scaled_ws_list[0] + "_scaled"].e(0)
 
         start_time = mtd[scaled_ws_list[0] + "_scaled"].getRun().getProperty("start_time").value
         experiment = mtd[scaled_ws_list[0] + "_scaled"].getRun().getProperty("experiment_identifier").value

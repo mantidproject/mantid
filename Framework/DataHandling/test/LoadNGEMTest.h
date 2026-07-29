@@ -68,9 +68,9 @@ public:
     auto &ads = AnalysisDataService::Instance();
     auto outputWS = ads.retrieveWS<DataObjects::Workspace2D>("ws");
     // check some random values
-    const auto &ydata{outputWS->readY(10304)};
-    const auto &xdata{outputWS->readX(10304)};
-    const auto &edata{outputWS->readE(10304)};
+    const auto &ydata{outputWS->y(10304)};
+    const auto &xdata{outputWS->x(10304)};
+    const auto &edata{outputWS->e(10304)};
     TS_ASSERT_DELTA(3.0, ydata[344], 1e-8);
     TS_ASSERT_DELTA(17900.92, xdata[344], 1e-8);
     TS_ASSERT_DELTA(1.732051, edata[344], 1e-6);

@@ -165,8 +165,8 @@ class FittingPlotModel(object):
                     data = vstack((fitvals, full((nfuncs - fitvals.shape[0], 2), nan)))
                 else:
                     data = full((nfuncs, 2), nan)
-                ws.setY(iws, data[:, 0])
-                ws.setE(iws, data[:, 1])
+                ws.setSharedY(iws, data[:, 0])
+                ws.setSharedE(iws, data[:, 1])
                 # label row
                 axis.setLabel(iws, wsname)
             ws.replaceAxis(1, axis)

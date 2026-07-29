@@ -93,9 +93,9 @@ bool IMDWorkspaceTesterIterator::next() {
   return true;
 }
 
-signal_t IMDWorkspaceTesterIterator::getNormalizedSignal() const { return signal_t(m_ws->readY(iy)[ix]); }
+signal_t IMDWorkspaceTesterIterator::getNormalizedSignal() const { return signal_t(m_ws->y(iy)[ix]); }
 
-signal_t IMDWorkspaceTesterIterator::getNormalizedError() const { return signal_t(m_ws->readE(iy)[ix]); }
+signal_t IMDWorkspaceTesterIterator::getNormalizedError() const { return signal_t(m_ws->e(iy)[ix]); }
 
 void IMDWorkspaceTesterIterator::jumpTo(size_t index) {
   iy = index % m_ws->blocksize();
@@ -106,9 +106,9 @@ Mantid::Kernel::VMD IMDWorkspaceTesterIterator::getCenter() const {
   double y = double(iy);
   double x;
   if (m_ws->isHistogramData()) {
-    x = (m_ws->readX(iy)[ix] + m_ws->readX(iy)[ix + 1]) / 2;
+    x = (m_ws->x(iy)[ix] + m_ws->x(iy)[ix + 1]) / 2;
   } else {
-    x = m_ws->readX(iy)[ix];
+    x = m_ws->x(iy)[ix];
   }
   return Mantid::Kernel::VMD(x, y);
 }

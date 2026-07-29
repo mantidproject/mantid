@@ -384,11 +384,11 @@ class SANSILLReduction(DataProcessorAlgorithm):
         Throws an error, if the sum of monitor spectra is not strictly positive.
         Logs an error, if there is a bin in monitor spectra that is not strictly positive.
         """
-        if np.sum(mtd[mon_ws].readY(0)) <= 0:
+        if np.sum(mtd[mon_ws].y(0)) <= 0:
             raise RuntimeError(
                 "Normalise by monitor requested, but the monitor spectrum has no positive counts, please switch to time normalization."
             )
-        if np.any(mtd[mon_ws].readY(0) <= 0):
+        if np.any(mtd[mon_ws].y(0) <= 0):
             self.log().error(
                 "Some bins in the monitor spectra have no positive counts, please check the monitor data, or switch to time normalization."
             )
@@ -485,8 +485,9 @@ class SANSILLReduction(DataProcessorAlgorithm):
         l2_main = mtd[ws].getRun()["L2"].value
         if instrument.hasParameter("detector_panels"):
             panel_names = instrument.getStringParameter("detector_panels")[0].split(",")
+            component_info = mtd[ws].componentInfo()
             for panel in panel_names:
-                l2_panel = instrument.getComponentByName(panel).getPos()[2]
+                l2_panel = component_info.position(component_info.indexOfAny(panel))[2]
                 MoveInstrumentComponent(Workspace=ws, X=-beam_x * l2_panel / l2_main, Y=-beam_y * l2_panel / l2_main, ComponentName=panel)
         else:
             MoveInstrumentComponent(Workspace=ws, X=-beam_x, Y=-beam_y, ComponentName="detector")
@@ -520,7 +521,7 @@ class SANSILLReduction(DataProcessorAlgorithm):
                 ApplyTransmissionCorrection(
                     InputWorkspace=ws, TransmissionWorkspace=tr_ws_rebin, ThetaDependent=theta_dependent, OutputWorkspace=ws
                 )
-                mtd[ws].getRun().addProperty("sample.transmission", list(mtd[tr_ws_rebin].readY(0)), True)
+                mtd[ws].getRun().addProperty("sample.transmission", list(mtd[tr_ws_rebin].y(0)), True)
                 DeleteWorkspace(tr_ws_rebin)
             else:
                 check_wavelengths_match(mtd[tr_ws], mtd[ws])
@@ -534,7 +535,7 @@ class SANSILLReduction(DataProcessorAlgorithm):
                 ApplyTransmissionCorrection(
                     InputWorkspace=ws, TransmissionWorkspace=tr_to_apply, ThetaDependent=theta_dependent, OutputWorkspace=ws
                 )
-                mtd[ws].getRun().addProperty("sample.transmission", list(mtd[tr_to_apply].readY(0)), True)
+                mtd[ws].getRun().addProperty("sample.transmission", list(mtd[tr_to_apply].y(0)), True)
                 if needs_broadcasting:
                     DeleteWorkspace(tr_to_apply)
                 if theta_dependent and self.instrument == "D16" and 75 < mtd[ws].getRun()["Gamma.value"].value < 105:
@@ -747,9 +748,9 @@ class SANSILLReduction(DataProcessorAlgorithm):
         Repeats the values by the number of frames in order to allow vectorized application of the correction
         Here we are matching in terms of the x-axis size
         """
-        x = mtd[ws].readX(0)
-        y = mtd[ws].readY(0)
-        e = mtd[ws].readE(0)
+        x = mtd[ws].x(0)
+        y = mtd[ws].y(0)
+        e = mtd[ws].e(0)
         out = ws + "_broadcast"
         CreateWorkspace(
             ParentWorkspace=ws,
@@ -771,9 +772,9 @@ class SANSILLReduction(DataProcessorAlgorithm):
         Here we are matching in terms of vertical axis size (i.e. number of spectra)
         """
         nspec = mtd[ws].getNumberHistograms()
-        x = mtd[flux].readX(0)
-        y = mtd[flux].readY(0)
-        e = mtd[flux].readE(0)
+        x = mtd[flux].x(0)
+        y = mtd[flux].y(0)
+        e = mtd[flux].e(0)
         CreateWorkspace(
             DataX=x,
             DataY=np.tile(y, nspec),
@@ -876,7 +877,7 @@ class SANSILLReduction(DataProcessorAlgorithm):
         """Linearizes x-axis for a single rebinned event workspace to transform it to kinetic"""
         x = np.arange(mtd[ws].blocksize())
         for s in range(mtd[ws].getNumberHistograms()):
-            mtd[ws].setX(s, x)
+            mtd[ws].setSharedX(s, x)
 
     # ===============================METHODS TO TREAT PROCESS TYPES===============================#
 
@@ -1052,12 +1053,12 @@ class SANSILLReduction(DataProcessorAlgorithm):
             run = mtd[ws].getRun()
             time = run["duration"].value
             if self.mode == AcqMode.MONO:
-                mtd[ws].setY(blank_mon, np.array([time]))
-                mtd[ws].setE(blank_mon, np.array([0.0]))
+                mtd[ws].setSharedY(blank_mon, np.array([time]))
+                mtd[ws].setSharedE(blank_mon, np.array([0.0]))
         if self.mode == AcqMode.REVENT:
             # if a workspace is a rebinned event, it is loaded by LoadNexusProcess and not by LoadILLSANS,
             # hence we have to prepare it similarly, including the placement of the detector
-            durations = np.diff(mtd[ws].readX(0)) * 1e-6
+            durations = np.diff(mtd[ws].x(0)) * 1e-6
             ConvertToPointData(InputWorkspace=ws, OutputWorkspace=ws)
             # note that, currently for event workspaces monitors are loaded to a separate workspace,
             # so monitor normalisation is not possible
@@ -1066,14 +1067,14 @@ class SANSILLReduction(DataProcessorAlgorithm):
             run = mtd[ws].getRun()
             CreateWorkspace(
                 NSpec=2,
-                DataX=np.tile(mtd[ws].readX(0), 2),
+                DataX=np.tile(mtd[ws].x(0), 2),
                 DataY=np.ones(2 * bsize),
                 DataE=np.zeros(2 * bsize),
                 OutputWorkspace=tmp_mon_spectra,
             )
             AppendSpectra(InputWorkspace1=ws, InputWorkspace2=tmp_mon_spectra, OutputWorkspace=ws, ValidateInputs=False)
             blank_mon = mtd[ws].getNumberHistograms() + blank_monitor_ws_neg_index(self.instrument)
-            mtd[ws].setY(blank_mon, durations)
+            mtd[ws].setSharedY(blank_mon, durations)
             DeleteWorkspace(tmp_mon_spectra)
             l2 = main_detector_distance(run, self.instrument)
             AddSampleLog(Workspace=ws, LogName="L2", LogType="Number", LogText=str(l2), LogUnit="meters")
@@ -1087,10 +1088,11 @@ class SANSILLReduction(DataProcessorAlgorithm):
         TODO: It is not good to repeat the logic of the LoadILLSANS, the only way to avoid this would be to create a small separate C++
         algorithm that does the placement, and it can be called both from within the loader, and here if needed; that is, for events.
         """
-        instr = mtd[ws].getInstrument()
         run = mtd[ws].getRun()
-        if mtd[ws].getInstrumentName() == "D22B":
-            back_pos = instr.getComponentByName("detector_back").getPos()
+        component_info = mtd[ws].componentInfo()
+        instrument_name = mtd[ws].getInstrumentName()
+        if instrument_name == "D22B":
+            back_pos = component_info.position(component_info.indexOfAny("detector_back"))
             distance = run["Detector 1.det1_calc"].value
             MoveInstrumentComponent(
                 Workspace=ws,
@@ -1100,7 +1102,7 @@ class SANSILLReduction(DataProcessorAlgorithm):
                 Y=back_pos[1],
                 Z=distance,
             )
-            front_pos = instr.getComponentByName("detector_front").getPos()
+            front_pos = component_info.position(component_info.indexOfAny("detector_front"))
             MoveInstrumentComponent(
                 Workspace=ws,
                 ComponentName="detector_front",
@@ -1119,9 +1121,9 @@ class SANSILLReduction(DataProcessorAlgorithm):
                 Z=0,
             )
             AddSampleLog(Workspace=ws, LogName="L2", LogText=str(distance), LogType="Number")
-        if mtd[ws].getInstrumentName() == "D11B":
-            back_pos = instr.getComponentByName("detector_center").getPos()
-            det_pos = instr.getComponentByName("detector").getPos()
+        if instrument_name == "D11B":
+            back_pos = component_info.position(component_info.indexOfAny("detector_center"))
+            det_pos = component_info.position(component_info.indexOfAny("detector"))
             distance = run["Detector 1.det_calc"].value - back_pos[2]
             MoveInstrumentComponent(Workspace=ws, ComponentName="detector", RelativePosition=False, X=det_pos[0], Y=det_pos[1], Z=distance)
             AddSampleLog(Workspace=ws, LogName="L2", LogText=str(distance), LogType="Number")

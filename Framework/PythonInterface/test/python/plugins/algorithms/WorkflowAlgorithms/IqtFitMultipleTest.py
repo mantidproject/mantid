@@ -103,37 +103,37 @@ class IqtFitMultipleTest(unittest.TestCase):
 
     def _validate_matrix_values(self, matrixWS):
         # Check f0.A0
-        a0 = matrixWS.readY(0)
+        a0 = matrixWS.y(0)
         self.assertEqual(round(a0[0], 7), 0.0204827)
         self.assertEqual(round(a0[-1], 7), 0.0229125)
 
         # Check f1.height
-        height = matrixWS.readY(1)
+        height = matrixWS.y(1)
         self.assertEqual(round(height[0], 6), 0.979517)
         self.assertEqual(round(height[-1], 6), 0.977088)
 
         # Check f1.lifetime
-        lifetime = matrixWS.readY(2)
+        lifetime = matrixWS.y(2)
         self.assertEqual(round(lifetime[0], 6), 0.024672)
         self.assertEqual(round(lifetime[-1], 8), 0.00253487)
 
         # Check f1.stretching
-        stretching = matrixWS.readY(3)
+        stretching = matrixWS.y(3)
         self.assertEqual(round(stretching[0], 6), 0.781177)
         self.assertEqual(round(stretching[-1], 6), 0.781177)
 
     def _validate_group_values(self, groupWS):
         sub_ws = groupWS.getItem(0)
         # Check Data
-        data = sub_ws.readY(0)
+        data = sub_ws.y(0)
         self.assertEqual(round(data[0], 5), 1)
         self.assertEqual(round(data[-1], 7), 0.0450769)
         # Check Calc
-        calc = sub_ws.readY(1)
+        calc = sub_ws.y(1)
         self.assertEqual(round(calc[0], 5), 1)
         self.assertEqual(round(calc[-1], 6), 0.026465)
         # Check Diff
-        diff = sub_ws.readY(2)
+        diff = sub_ws.y(2)
         self.assertEqual(round(diff[0], 19), -5.31797e-14)
         self.assertEqual(round(diff[-1], 6), 0.018612)
 

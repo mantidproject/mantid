@@ -3,7 +3,7 @@
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
-// SPDX - License - Identifier: GPL - 3.0 +
+// SPDX-License-Identifier: GPL-3.0+
 #pragma once
 
 #include <string>
@@ -11,7 +11,6 @@
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DateAndTime.h"
-#include <vector>
 
 namespace Mantid {
 namespace API {
@@ -20,32 +19,31 @@ namespace API {
 struct ScriptInfo {
   /// Identification of the author of the script.
   std::string author;
-  /// Time of the last update of this file (remotelly)
+  /// Time of the last (remote) update of this file.
   Types::Core::DateAndTime pub_date;
-  /// Marked for auto update
+  /// Whether the file is marked for auto-update.
   bool auto_update;
-  /// Directory Flag to indicate if the entry is a directory.
+  /// Flag to indicate whether the entry is a directory.
   bool directory;
 };
 
 /** Represent the possible states for a given file:
-      - REMOTE_ONLY: it exists only at the remote repository.
-      - LOCAL_ONLY: it exists only at the local folder.
-      - REMOTE_CHANGED: it has been changed remotely, may be updated.
-      - LOCAL_CHANGED: it has been modified locally, may be published.
-      - BOTH_CHANGED: modified locally and remotelly.
-      - BOTH_UNCHANGED: the local file is a copy of the remotely one.
+      - REMOTE_ONLY: it exists only in the remote repository.
+      - LOCAL_ONLY: it exists only in the local folder.
+      - REMOTE_CHANGED: it has been changed remotely and may be updated.
+      - LOCAL_CHANGED: it has been modified locally.
+      - BOTH_CHANGED: modified both locally and remotely.
+      - BOTH_UNCHANGED: the local file is a copy of the remote one.
 
-    For folders, the reason are slightly different:
+    For folders, the meanings are slightly different:
       - REMOTE_ONLY: the folder exists only remotely.
       - LOCAL_ONLY: the folder exists only locally.
-      - BOTH_UNCHANGED: if no file inside the folder has the XXX_CHANGED status.
-      - BOTH_CHANGED: if inside the folder it has one file with BOTH_CHANGED
- status
-      or one REMOTE_CHANGED with another LOCAL_CHANGED.
-      - REMOTE_CHANGED: at least one marked with REMOTE_CHANGED and others as
-      REMOTE_CHANGED or BOTH_UNCHANGED.
-      - LOCAL_CHANGED: analogous to REMOTE_CHANGED, but locally.
+      - BOTH_UNCHANGED: no file inside the folder has a XXX_CHANGED status.
+      - BOTH_CHANGED: the folder contains a file marked BOTH_CHANGED, or one
+        file marked REMOTE_CHANGED together with another marked LOCAL_CHANGED.
+      - REMOTE_CHANGED: at least one file is marked REMOTE_CHANGED and the rest
+        are REMOTE_CHANGED or BOTH_UNCHANGED.
+      - LOCAL_CHANGED: analogous to REMOTE_CHANGED, but for local changes.
  **/
 enum SCRIPTSTATUS {
   BOTH_UNCHANGED = 0,
@@ -57,40 +55,39 @@ enum SCRIPTSTATUS {
 };
 
 /**
-The ScriptRepository class is intended to be used mainly by the users, who
-will be willing to share and download scripts for their analysis. As so,
-the exceptions that may occurr while operating must provide information that
-are usefull for them to understand what is happening, but, the Mantid Team
-must still be informed what happened in more techinical detail in order
-to be able to deal with eventually bugs.
+The ScriptRepository class is intended to be used mainly by users, who
+will want to share and download scripts for their analysis. As such,
+the exceptions raised while operating must provide information that is
+useful for them to understand what is happening, while the Mantid Team
+must still be informed of what happened in more technical detail in order
+to be able to deal with any resulting bugs.
 
-To provide this functionality, the ScriptRepoException will be used.
-As a normal std::exception (the default base one used through all the
-Mantid Project), it allows Mantid to work as normally.
+To provide this functionality, ScriptRepoException is used. As a normal
+std::exception (the default base used throughout the Mantid Project),
+it allows Mantid to work as usual.
 
-But, it extends the usage of the exception, by allowing more information
-to be added. Below, some examples on how to trigger exceptions.
+It also extends the usage of the exception by allowing more information
+to be added. Below are some examples of how to throw exceptions.
 
 \code
 
-// throw "Unknown Exception"
+// Throw "Unknown Exception"
 throw ScriptRepoException();
 
-// After system changing errno number, for example, EACCES
-// You could give the user the reason way he can not download the file.
-throw ScriptRepoException(EACCES, "You can allowed to download scripts. Please,
-contact the administrator");
+// After the system sets an errno value, for example EACCES,
+// you could tell the user why they cannot download the file.
+throw ScriptRepoException(EACCES, "You are not allowed to download scripts. "
+"Please contact the administrator");
 
-// For more serious exception, you could provide the location where it
-// were triggered.
+// For a more serious exception, you could provide the location where it
+// was triggered.
 throw ScriptRepoException(errno, "Critical Failure", __FILE__, __LINE__)
 \endcode
 
-The default ScriptRepoException::what method will be used to show the user
-message, while it is up to whom is using the ScriptRepository to decide on
-using or not the techinical information through
-ScriptRepoException::systemError,
-ScriptRepoException::filePath.
+The default ScriptRepoException::what method is used to show the user
+message, while it is up to whoever is using the ScriptRepository to decide
+whether to use the technical information available through
+ScriptRepoException::systemError and ScriptRepoException::filePath.
 
 
 */
@@ -114,86 +111,71 @@ public:
   const std::string &filePath() const { return m_filepath; };
 
 private:
-  /// The message returned by what()
+  /// Technical description of the error, returned by systemError().
   std::string m_systemError;
+  /// User-facing message, returned by what().
   std::string m_userInfo;
+  /// Path to the file where the error originated, returned by filePath().
   std::string m_filepath;
 };
 
 //----------------------------------------------------------------------
 /**
-Abstract Class to manage the interaction between the users and the Script folder
-(mantid subproject).
+Abstract class to manage the interaction between users and the scripts folder
+(a mantid subproject).
 
-Inside the mantid repository (https://github.com/mantidproject) there is also a
-subproject called
-scripts (https://github.com/mantidproject/scripts), created to allow users to
-share their scripts,
-as well as to allow Mantid Team to distribute to the Mantid community scripts
-for analysis and
-also to enhance the quality of the scripts used for the sake of data analysis.
+Inside the mantid organisation (https://github.com/mantidproject) there is also
+a subproject called scripts (https://github.com/mantidproject/scripts), created
+to allow users to share their scripts, to allow the Mantid Team to distribute
+analysis scripts to the Mantid community, and to help improve the quality of
+the scripts used for data analysis.
 
 The ScriptRepository interface aims to provide a simple way to interact with
-that repository in order to
-promote its usage. In order to enhance the usage, it is necessary:
+that repository in order to promote its usage. To do so, it needs to:
 
-  - List all scripts available at the repository
-  - Download selected scripts.
+  - List all scripts available in the repository
+  - Download selected scripts
   - Check for updates
-  - Allow to publish users scripts/folders.
 
-ScriptRepository may show all the files inside the script repository through
-ScriptRepository::listFiles.
-Only the names of the files may not be sufficient, to help deciding if the file
-would be usefull or
-not, so, the author, the description and when the file was last changed can be
-accessed through
-ScriptRepository::ScriptInfo.
+@note The repository is read-only from Mantid: scripts may be downloaded and
+kept up to date, but they can not be published or deleted through this
+interface.
 
-The list of the files could become confusing if a large amount of automatically
-created files is installed.
-In order to avoid this, it is possible to edit the file patterns that should be
-ignored when listing files,
-this is done through ScriptRepository::setIgnorePatterns, and you can check this
-settings through the
-ScriptRepository::ignorePatterns.
+ScriptRepository can list all the files inside the script repository through
+ScriptRepository::listFiles. The file names alone may not be enough to decide
+whether a file is useful, so the author, the description and the time the file
+was last changed can be accessed through ScriptRepository::ScriptInfo.
 
-After looking at a file, you may be interested in downloading it through
+The file list could become confusing if a large number of automatically
+generated files were shown. To avoid this, you can edit the file patterns that
+should be ignored when listing files; this is done through
+ScriptRepository::setIgnorePatterns, and the current patterns can be checked
+through ScriptRepository::ignorePatterns.
+
+After looking at a file, you may want to download it through
 ScriptRepository::download.
 
-When working with the repository, the files may be local only, if the user
-created a file inside
-his folder, it may not be downloaded, it can be locally modified, or changed
-remotely and
-not up-to-date, or even, being modified locally and remotely. Use
-ScriptRepository::fileStatus in
-order to get these informations of any file.
+When working with the repository, a file may be local only (if the user created
+it inside their folder and it has not been uploaded), locally modified, changed
+remotely and out of date, or even modified both locally and remotely. Use
+ScriptRepository::fileStatus to get this information for any file.
 
-The user may decide to upload one of his file or folder, to share it. This is
-possible through
-the ScriptRepository::upload. The same command may be used to publish also some
-updates made to an
-already shared file.
-
-Finally, the ScriptRepository have to check periodically the remote repository
-(https://github.com/mantidproject/scripts), but it will be done indirectly
-through a mantid web service,
-it is the responsibility of external tools to ensure
-it is done periodically, through ScriptRepository::check4Update. For the sake of
-simplicity, this method
-is used also to create the local repository in case it does not exists.
+Finally, the ScriptRepository has to check the remote repository
+(https://github.com/mantidproject/scripts) periodically, but it does so
+indirectly through a mantid web service. It is the responsibility of external
+tools to ensure this is done periodically, through
+ScriptRepository::check4Update. For simplicity, this method is also used to
+create the local repository if it does not exist.
 
 Before using the ScriptRepository, it must be installed inside a local folder
-(ScriptRepository::install).
-If ScriptRepository is not created pointing to a valid local repository, the
-methog ScriptRepository::isValid
-will return false, and no method will be available, except, install.
-As a good practice, it is good to ensure that the connection between the local
-object and the
-mantid web service is available, through the ScriptRepository::connect.
+(ScriptRepository::install). If ScriptRepository is not pointing at a valid
+local repository, the method ScriptRepository::isValid will return false and no
+method will be available except install. As good practice, it is worth ensuring
+that the connection between the local object and the mantid web service is
+available, through ScriptRepository::connect.
 
-@note Exceptions will be triggered through ScriptRepoException in order user
-      understandable information as well as techinical details.
+@note Exceptions are raised through ScriptRepoException to provide
+      user-understandable information as well as technical details.
 
 
 @note Mantid::API::ScriptRepositoryImpl implements this class.
@@ -208,8 +190,8 @@ Files
 
 @section script-description-sec Scripts, Folders and Files Description
 
-The description of the files and scripts will obey an agreement for the
-following type of files:
+The description of the files and scripts follows a convention for the
+following types of file:
 
  - @ref pyscript-sec
  - @ref folders-sec
@@ -218,12 +200,9 @@ following type of files:
 
 @subsection pyscript-sec Python Scripts
 
-If the script is as python file, then the description will be the module __doc__
-attribute.
-If this information is not availabe, them, it will try to get the first group of
-comments, at the
-header of the file. For
-example, the following code:
+If the script is a python file, then the description is the module __doc__
+attribute. If this is not available, it will try to get the first group of
+comments at the header of the file. For example, the following code:
 
 @code{.py}
 import mantid
@@ -261,12 +240,10 @@ This module is responsible to display a
 
 @subsection folders-sec Folders
 
-If the script is a folder, it will try to find a file __init__.py, so to check
-if this folder is
-a python module. If it does, it will parse the __init__.py as in section @ref
-pyscript-sec. Otherwise,
-it will look for a file starting with name README, and will show it.
-For example, if the mantid repository path would be passed,
+If the entry is a folder, it will look for an __init__.py file to check whether
+the folder is a python module. If it is, it will parse the __init__.py as in
+section @ref pyscript-sec. Otherwise, it will look for a file whose name starts
+with README and show it. For example, if the mantid repository path were passed,
 it would show the content of its README.md file:
 
 @verbatim
@@ -277,14 +254,13 @@ The Mantid project provides (...)
 
 @endverbatim
 
-In this case, author should be any name found inside the README file that starts
-with
-the following line: 'Author:'.
+In this case, the author is taken from any line inside the README file that
+starts with 'Author:'.
 
 
 @subsection readme-sec README files
 
-They will work as was expected for folders @ref folders-sec.
+These work as described for folders in @ref folders-sec.
 
 */
 
@@ -293,13 +269,14 @@ public:
   /// Virtual destructor (always needed for abstract classes)
   virtual ~ScriptRepository() = default;
   /**
-     Return the information about the script through the Mantid::API::ScriptInfo
+     Return information about the script through the Mantid::API::ScriptInfo
      struct.
 
-     It may throw exception if the file is not presented locally, or even
-     remotelly.
+     It may throw an exception if the file is present neither locally nor
+     remotely.
 
-     @param path : Script path related to the repository, or to operate system.
+     @param path : script path relative to the repository, or to the operating
+     system.
      @return Mantid::API::ScriptInfo : Information about the script.
 
      @exception ScriptRepoException Mainly for scripts not found.
@@ -312,24 +289,23 @@ public:
    */
   virtual ScriptInfo info(const std::string &path) = 0;
 
-  /** Provide the description of the file given the path
+  /** Provide the description of the file at the given path.
    *
-   *  @param path: Script path related to the reposititory, or the operative
+   *  @param path: script path relative to the repository, or to the operating
    *system.
    *  @return the description of the file or folder.
    */
   virtual const std::string &description(const std::string &path) = 0;
 
-  /// @deprecated Previous version, to be removed.
+  /// @deprecated Old name for info(); kept for compatibility and to be removed.
   ScriptInfo fileInfo(const std::string &path) { return info(path); }
 
   /**
      Return the list of files inside the repository. It provides a file-system
-     like path for all the files, folders that are inside the local repository
-     as
-     well as remotely.
+     like path for all the files and folders that are inside the local
+     repository as well as remotely.
 
-     @note The path used a normal slash to separate folders.
+     @note The path uses a normal slash to separate folders.
 
      Consider the following repository:
 
@@ -356,34 +332,31 @@ public:
      NewFile
      @endverbatim
 
-     @return List of all the files available inside the repository as a file
-     system
-     path relative to the local repository.
+     @return List of all the files available inside the repository, as a
+     file-system path relative to the local repository.
 
      @exception May throw Invalid Repository if the local repository was not
-     generated. In this case, it is necessary to execute the
-     ScriptRepository::install (at least once).
+     generated. In this case, ScriptRepository::install must be run (at least
+     once).
    */
   virtual std::vector<std::string> listFiles() = 0;
 
   /**
      Create a copy of the remote file/folder inside the local repository.
-     For folder, it will copy all the files inside the folder as well.
+     For a folder, it copies all the files inside the folder as well.
 
-     If one file is reported to have local changes (@see
-     ScriptRepository::fileStatus)
-     the download will make a copy of the remote file, but will preserve a
-     backup
-     of the local file. This incident will be reported through throwing an
-     exception.
+     If a file is reported to have local changes (@see
+     ScriptRepository::fileStatus), the download will overwrite it with a copy
+     of the remote file, but will keep a backup of the local file. This is
+     reported by throwing an exception.
 
-     For folders, the exception will also list all the files that a backup was
-     created.
+     For folders, the exception will also list all the files for which a backup
+     was created.
 
      @param file_path of a file or folder to be downloaded.
 
-     @throws ScriptRepoException to indicate file is not available at
-                remotely or to indicate that a conflict was found.
+     @throws ScriptRepoException to indicate that the file is not available
+                remotely, or that a conflict was found.
 
    */
   virtual void download(const std::string &file_path) = 0;
@@ -398,193 +371,106 @@ public:
    */
   virtual SCRIPTSTATUS fileStatus(const std::string &file_path) = 0;
 
-  /** Check if the local repository exists. If there is no local repository,
-    the repository was never installed, the isValid will return false, and the
-    only method valid is ScriptRepository::install.
+  /** Check whether the local repository exists. If there is no local
+    repository (it was never installed), isValid returns false and the only
+    valid method is ScriptRepository::install.
   */
   virtual bool isValid() = 0;
 
-  /** Install the necessary resources at the local_path given that allows the
-    ScriptRepository to operate
-    locally.
-    It is allowed to create hidden files that would be necessary for the
-    operation of this class.
+  /** Install, at the given local_path, the resources that allow the
+    ScriptRepository to operate locally. It may create any hidden files needed
+    for the operation of this class.
 
-    At the end, a new folder is created (if it does not exists already), with
-    the given local_path given.
+    At the end, a new folder is created at local_path (if it does not already
+    exist).
 
-    @param local_path: path where the folder (having the same name given) will
-    be created.
+    @param local_path: path at which the folder will be created.
 
-    @exception ScriptRepoException: If the local_path may not be created
-    (Permission issues).
+    @exception ScriptRepoException: if local_path cannot be created (for
+    example, because of permission issues).
 
     */
   virtual void install(const std::string &local_path) = 0;
 
-  /** Allow the ScriptRepository to double check the connection with the web
-  server.
-  An optional argument is allowed webserverurl, but, it may be taken from the
-  settings defined for the ScriptRepository.
+  /** Allow the ScriptRepository to double-check the connection with the web
+  server. The webserverurl argument is optional; if omitted, it is taken from
+  the settings defined for the ScriptRepository.
 
-  This method ensures that the network and the link is available.
+  This method ensures that the network and the link are available.
 
   @param webserverurl : url of the mantid web server.
-  @exception ScriptRepoException: Failure to connect to the web server and the
+  @exception ScriptRepoException: failure to connect to the web server, and the
   reason why.
   */
   virtual void connect(const std::string &webserverurl = "") = 0;
 
   /**
-     Connects to the remote repository checking for updates.
+     Connect to the remote repository and check for updates.
 
-     This method, needs to know the remote URL wich must be available to the
-     object before
-     calling the check4update.
+     This method needs to know the remote URL, which must be available to the
+     object before check4Update is called.
 
-     It must check the state of the central repository and download all the
-     files marked as
-     AutoUpdate.
+     It checks the state of the central repository and downloads all the files
+     marked as AutoUpdate.
 
-     @attention The responsibility of executing this method periodically, is not
-     of
-                the ScriptRepository it self. The others methods may not respond
-                propperly, if this method is not executed.
+     @attention Executing this method periodically is not the responsibility of
+                the ScriptRepository itself. The other methods may not respond
+                properly if this method is not executed.
 
-     @note This operation requires internet connection.
+     @note This operation requires an internet connection.
 
-     @exception ScriptRepoException notifies mainly connection failure, but,
-                may eventually, notify that the local repository may not be
-     created.
+     @exception ScriptRepoException mainly reports a connection failure, but may
+                also report that the local repository could not be created.
 
-     @return List with all the files automatically downloaded.
+     @return List of all the files that were automatically downloaded.
   */
   virtual std::vector<std::string> check4Update() = 0;
 
-  /**
-     Upload the local file/folder to be available at the remote repository.
-     After this, this file/folder will be available for every, being published
-     as with the same license as the mantid framework itself.
+  /** Define the file patterns that will not be listed by listFiles.
+      This lets the ScriptRepository avoid listing hidden files, automatically
+      generated files and so on, giving the user a cleaner view of the
+      repository.
 
-     The user is not allowed to upload files that are marked as BOTH_CHANGED. It
-     must first download the file (wich will make a copy of the local one), than
-     update the downloaded file with the user own changes. At this point, he may
-     published his file.
-
-     @note This operation requires internet connection.
-
-     @param file_path for the file/folder to be published. For folders, it will
-            publish all the files inside the folder.
-            (Empty folders will not be accepted).
-
-     @param comment Allows to give information of the last changes, updates on
-            a given file/folder. It differs from description, in the sense, that
-            it may inform just what changed from the last version, while, the
-            description must provide information about the scope of the file.
-
-     @param author An string that may identify who is the responsible for
-    changing
-            that file. It may be a nick name, or an e-mail, or even a code, but,
-            it it necessary that it identifies who was responsible for changing
-            the file.
-
-     @param email An string that identifies the email of the author.
-
-
-    @exception ScriptRepoException may be triggered for an attempt to publish an
-               empty folder, a file not present locally, because the file, or
-    one
-               of the files inside the folder are marked as BOTH_CHANGED, or
-    even
-               failure to connect to the remote repository.
-
-
-   */
-  virtual void upload(const std::string &file_path, const std::string &comment, const std::string &author,
-                      const std::string &email) = 0;
-
-  /**
-     Delete the file from the remote repository (it does not touch the local
-    copy).
-     After this, the file will not be available for anyone among the users. As
-    so,
-     it is required a justification of why to remove (the comment), and the
-    current
-     rule accept that only the owner of the file (which is considered the last
-    one
-     to use the file) is allowed to remove it.
-
-     The file will be removed from the central repository (git)
-
-     @note This operation requires internet connection.
-
-     @param file_path for the file to be deleted. It will not accept deleting
-    folders for
-            security reason.
-
-     @param comment The reson of why deleting this entry.
-
-     @param author An string that may identify who is requesting to delete the
-    file.
-            It accept only the last author to remove it.
-
-     @param email An string that identifies the email of the author.
-
-    @exception ScriptRepoException may be triggered for an attempt to delete
-    folders,
-               or a non existent file, or not allowed operation, or any network
-    erros.
-   */
-  virtual void remove(const std::string &file_path, const std::string &comment, const std::string &author,
-                      const std::string &email) = 0;
-
-  /** Define the file patterns that will not be listed in listFiles.
-      This is important to force the ScriptRepository to not list hidden files,
-      automatic generated files and so on. This helps to present to the user a
-      clean presentation of the Repository
-
-      For example, there are the pyc files that are automatically generated, and
-      should be discarded. We could set also to ignore files that end with ~,
-      temporary files in linux. The patterns will be evaluated as a csv regex
-     patterns.
+      For example, pyc files are automatically generated and should be
+      discarded. You could also ignore files ending with ~, which are temporary
+      files on linux. The patterns are evaluated as csv regex patterns.
 
       To discard all pyc files, set: "*pyc".
 
-      To discard all pyc files and hidden files and folders: "*pyc;\b\.*"
+      To discard all pyc files as well as hidden files and folders: "*pyc;\b\.*"
 
       @param patterns : csv regex patterns to be ignored when listing files.
 
-      This settings must be preserved, and be available after trough the
-     configure system.
+      These settings must be preserved and remain available afterwards through
+      the configuration system.
   */
   virtual void setIgnorePatterns(const std::string &patterns) = 0;
 
-  /** Return the ignore patters that was defined through
-   * ScriptRepository::setIgnorePatterns*/
+  /** Return the ignore patterns that were defined through
+   * ScriptRepository::setIgnorePatterns.*/
   virtual std::string ignorePatterns() = 0;
 
-  /** Define the AutoUpdate option, which define if a file will be updated as
-     soon as
-      new versions are available at the central repository.
+  /** Define the AutoUpdate option, which determines whether a file is updated
+      as soon as new versions are available in the central repository.
 
-      This information will be kept in a property system, in order to be
-     available afterwards.
+      This information is kept in a property system so that it is available
+      afterwards.
 
-      @param path : file or folder inside the local repository
+      @param path : file or folder inside the local repository.
 
-      @param option: flag to set for auto-update, or not. If true, new versions
-     of the path will replace the local file as soon as they are available at
-     the central repository.
+      @param option: auto-update flag. If true, new versions of the path will
+     replace the local file as soon as they are available in the central
+     repository.
 
-      @return int: number of files changed (because of the cascading of folders)
+      @return int: number of files changed (folders cascade to their contents).
 
-      @exception ScriptRepoException : Invalid entry.
+      @exception ScriptRepoException : invalid entry.
 
   */
   virtual int setAutoUpdate(const std::string &path, bool option = true) = 0;
 };
 
-/// shared pointer to the function base class
+/// shared pointer to the ScriptRepository base class
 using ScriptRepository_sptr = std::shared_ptr<ScriptRepository>;
 } // namespace API
 } // namespace Mantid

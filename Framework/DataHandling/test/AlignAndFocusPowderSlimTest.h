@@ -217,15 +217,15 @@ public:
     TS_ASSERT_EQUALS(outputWS->blocksize(), NUM_Y);
     TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->unitID(), "TOF");
     // default values in algorithm
-    TS_ASSERT_DELTA(outputWS->readX(0).front(), 1646., 1);
-    TS_ASSERT_DELTA(outputWS->readX(0).back(), 32925., 1);
+    TS_ASSERT_DELTA(outputWS->x(0).front(), 1646., 1);
+    TS_ASSERT_DELTA(outputWS->x(0).back(), 32925., 1);
     // observed values from running
-    const auto y_values = outputWS->readY(0);
+    const auto y_values = outputWS->y(0);
     TS_ASSERT_EQUALS(y_values.size(), NUM_Y);
     TS_ASSERT_EQUALS(y_values[0], 0.);
     TS_ASSERT_EQUALS(y_values[NUM_Y / 2], 0.);
     TS_ASSERT_EQUALS(y_values[NUM_Y - 1], 4744.);
-    const auto e_values = outputWS->readE(0);
+    const auto e_values = outputWS->e(0);
     TS_ASSERT_DELTA(e_values[0], 0., 1e-10);
     TS_ASSERT_DELTA(e_values[NUM_Y / 2], 0., 1e-10);
     TS_ASSERT_DELTA(e_values[NUM_Y - 1], std::sqrt(4744.), 1e-10);
@@ -275,15 +275,15 @@ public:
     TS_ASSERT_EQUALS(outputWS->blocksize(), NUM_Y);
     TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->unitID(), "TOF");
     // default values in algorithm
-    TS_ASSERT_DELTA(outputWS->readX(0).front(), 1646., 1);
-    TS_ASSERT_DELTA(outputWS->readX(0).back(), 32925., 1);
+    TS_ASSERT_DELTA(outputWS->x(0).front(), 1646., 1);
+    TS_ASSERT_DELTA(outputWS->x(0).back(), 32925., 1);
     // observed values from running
-    const auto y_values = outputWS->readY(0);
+    const auto y_values = outputWS->y(0);
     TS_ASSERT_EQUALS(y_values.size(), NUM_Y);
     TS_ASSERT_EQUALS(y_values[0], 0.);
     TS_ASSERT_EQUALS(y_values[NUM_Y / 2], 0.);
     TS_ASSERT_EQUALS(y_values[NUM_Y - 1], 34622.); // expect larger value then before since all counts go to 1 spectrum
-    const auto e_values = outputWS->readE(0);
+    const auto e_values = outputWS->e(0);
     TS_ASSERT_DELTA(e_values[0], 0., 1e-10);
     TS_ASSERT_DELTA(e_values[NUM_Y / 2], 0., 1e-10);
     TS_ASSERT_DELTA(e_values[NUM_Y - 1], std::sqrt(34622.), 1e-10);
@@ -302,15 +302,15 @@ public:
     TS_ASSERT(outputWS->isCommonBins());
     TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->unitID(), "TOF");
     // default values in algorithm
-    TS_ASSERT_EQUALS(outputWS->readX(0).front(), configuration.xmin[0]);
-    TS_ASSERT_EQUALS(outputWS->readX(0).back(), configuration.xmax[0]);
+    TS_ASSERT_EQUALS(outputWS->x(0).front(), configuration.xmin[0]);
+    TS_ASSERT_EQUALS(outputWS->x(0).back(), configuration.xmax[0]);
     // observed values from running
-    const auto y_values = outputWS->readY(0);
+    const auto y_values = outputWS->y(0);
     TS_ASSERT_EQUALS(y_values.size(), NUM_Y);
     TS_ASSERT_EQUALS(y_values[0], 0.);
     TS_ASSERT_EQUALS(y_values[NUM_Y / 2], 55374.); // observed
     TS_ASSERT_EQUALS(y_values[NUM_Y - 1], 0.);
-    const auto e_values = outputWS->readE(0);
+    const auto e_values = outputWS->e(0);
     TS_ASSERT_DELTA(e_values[0], 0., 1e-10);
     TS_ASSERT_DELTA(e_values[NUM_Y / 2], std::sqrt(55374.), 1e-10);
     TS_ASSERT_DELTA(e_values[NUM_Y - 1], 0., 1e-10);
@@ -329,7 +329,7 @@ public:
 
     // check the x-values
     for (size_t i = 0; i < outputWS->getNumberHistograms(); ++i) {
-      const auto &x_values = outputWS->readX(i);
+      const auto &x_values = outputWS->x(i);
       TS_ASSERT_EQUALS(x_values.front(), configuration.xmin[i]);
       TS_ASSERT_EQUALS(x_values.back(), configuration.xmax[i]);
     }
@@ -347,7 +347,7 @@ public:
 
     // check the x-values
     for (size_t i = 0; i < outputWS->getNumberHistograms(); ++i) {
-      const auto &x_values = outputWS->readX(i);
+      const auto &x_values = outputWS->x(i);
       TS_ASSERT_EQUALS(x_values.front(), configuration.xmin[0]);
       TS_ASSERT_EQUALS(x_values.back(), configuration.xmax[0]);
       TS_ASSERT_EQUALS(x_values.size(),
@@ -408,8 +408,8 @@ public:
     TS_ASSERT_EQUALS(outputWS->blocksize(), 20);
     TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->unitID(), "TOF");
     for (size_t i = 0; i < outputWS->getNumberHistograms(); ++i) {
-      TS_ASSERT_DELTA(outputWS->readX(i).front(), 13000., 1e-5);
-      TS_ASSERT_DELTA(outputWS->readX(i).back(), 36000., 1e-5);
+      TS_ASSERT_DELTA(outputWS->x(i).front(), 13000., 1e-5);
+      TS_ASSERT_DELTA(outputWS->x(i).back(), 36000., 1e-5);
     }
   }
 
@@ -427,8 +427,8 @@ public:
     TS_ASSERT_EQUALS(outputWS->blocksize(), 1);
     TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->unitID(), "TOF");
     for (size_t i = 0; i < outputWS->getNumberHistograms(); ++i) {
-      TS_ASSERT_DELTA(outputWS->readX(i).front(), configuration.xmin[0], 1e-5);
-      TS_ASSERT_DELTA(outputWS->readX(i).back(), configuration.xmax[0], 1e-5);
+      TS_ASSERT_DELTA(outputWS->x(i).front(), configuration.xmin[0], 1e-5);
+      TS_ASSERT_DELTA(outputWS->x(i).back(), configuration.xmax[0], 1e-5);
     }
     // check some logs
     TS_ASSERT(outputWS->run().hasProperty("run_number"));
@@ -451,12 +451,12 @@ public:
     print(ws.extractY())
     */
 
-    TS_ASSERT_EQUALS(outputWS->readY(0).front(), 3742475);
-    TS_ASSERT_EQUALS(outputWS->readY(1).front(), 3735653);
-    TS_ASSERT_EQUALS(outputWS->readY(2).front(), 4295302);
-    TS_ASSERT_EQUALS(outputWS->readY(3).front(), 4244796);
-    TS_ASSERT_EQUALS(outputWS->readY(4).front(), 1435593);
-    TS_ASSERT_EQUALS(outputWS->readY(5).front(), 2734113);
+    TS_ASSERT_EQUALS(outputWS->y(0).front(), 3742475);
+    TS_ASSERT_EQUALS(outputWS->y(1).front(), 3735653);
+    TS_ASSERT_EQUALS(outputWS->y(2).front(), 4295302);
+    TS_ASSERT_EQUALS(outputWS->y(3).front(), 4244796);
+    TS_ASSERT_EQUALS(outputWS->y(4).front(), 1435593);
+    TS_ASSERT_EQUALS(outputWS->y(5).front(), 2734113);
 
     // check the time ROI
     const auto &run_timeroi = outputWS->run().getTimeROI();
@@ -485,12 +485,12 @@ public:
     print(ws.extractY())
     */
 
-    TS_ASSERT_EQUALS(outputWS->readY(0).front(), 16370014);
-    TS_ASSERT_EQUALS(outputWS->readY(1).front(), 16353116);
-    TS_ASSERT_EQUALS(outputWS->readY(2).front(), 18782610);
-    TS_ASSERT_EQUALS(outputWS->readY(3).front(), 18572804);
-    TS_ASSERT_EQUALS(outputWS->readY(4).front(), 6275399);
-    TS_ASSERT_EQUALS(outputWS->readY(5).front(), 11972050);
+    TS_ASSERT_EQUALS(outputWS->y(0).front(), 16370014);
+    TS_ASSERT_EQUALS(outputWS->y(1).front(), 16353116);
+    TS_ASSERT_EQUALS(outputWS->y(2).front(), 18782610);
+    TS_ASSERT_EQUALS(outputWS->y(3).front(), 18572804);
+    TS_ASSERT_EQUALS(outputWS->y(4).front(), 6275399);
+    TS_ASSERT_EQUALS(outputWS->y(5).front(), 11972050);
   }
 
   void test_stop_time_filtering() {
@@ -507,12 +507,12 @@ public:
     print(ws.extractY())
     */
 
-    TS_ASSERT_EQUALS(outputWS->readY(0).front(), 10348627);
-    TS_ASSERT_EQUALS(outputWS->readY(1).front(), 10328566);
-    TS_ASSERT_EQUALS(outputWS->readY(2).front(), 11877182);
-    TS_ASSERT_EQUALS(outputWS->readY(3).front(), 11734382);
-    TS_ASSERT_EQUALS(outputWS->readY(4).front(), 3969153);
-    TS_ASSERT_EQUALS(outputWS->readY(5).front(), 7567195);
+    TS_ASSERT_EQUALS(outputWS->y(0).front(), 10348627);
+    TS_ASSERT_EQUALS(outputWS->y(1).front(), 10328566);
+    TS_ASSERT_EQUALS(outputWS->y(2).front(), 11877182);
+    TS_ASSERT_EQUALS(outputWS->y(3).front(), 11734382);
+    TS_ASSERT_EQUALS(outputWS->y(4).front(), 3969153);
+    TS_ASSERT_EQUALS(outputWS->y(5).front(), 7567195);
   }
 
   void test_all_time_filtering() {
@@ -530,12 +530,12 @@ public:
     print(ws.extractY())
     */
 
-    TS_ASSERT_EQUALS(outputWS->readY(0).front(), 22976166);
-    TS_ASSERT_EQUALS(outputWS->readY(1).front(), 22946029);
-    TS_ASSERT_EQUALS(outputWS->readY(2).front(), 26364490);
-    TS_ASSERT_EQUALS(outputWS->readY(3).front(), 26062390);
-    TS_ASSERT_EQUALS(outputWS->readY(4).front(), 8808959);
-    TS_ASSERT_EQUALS(outputWS->readY(5).front(), 16805132);
+    TS_ASSERT_EQUALS(outputWS->y(0).front(), 22976166);
+    TS_ASSERT_EQUALS(outputWS->y(1).front(), 22946029);
+    TS_ASSERT_EQUALS(outputWS->y(2).front(), 26364490);
+    TS_ASSERT_EQUALS(outputWS->y(3).front(), 26062390);
+    TS_ASSERT_EQUALS(outputWS->y(4).front(), 8808959);
+    TS_ASSERT_EQUALS(outputWS->y(5).front(), 16805132);
   }
 
   void test_invalid_time_filtering() {
@@ -581,18 +581,18 @@ public:
       */
 
       auto outputWS0 = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(0));
-      TS_ASSERT_EQUALS(outputWS0->readY(0).front(), 807206);
-      TS_ASSERT_EQUALS(outputWS0->readY(1).front(), 805367);
-      TS_ASSERT_EQUALS(outputWS0->readY(2).front(), 920983);
-      TS_ASSERT_EQUALS(outputWS0->readY(3).front(), 909955);
-      TS_ASSERT_EQUALS(outputWS0->readY(4).front(), 310676);
-      TS_ASSERT_EQUALS(outputWS0->readY(5).front(), 590230);
-      TS_ASSERT_DELTA(outputWS0->readE(0).front(), std::sqrt(807206), 1e-10);
-      TS_ASSERT_DELTA(outputWS0->readE(1).front(), std::sqrt(805367), 1e-10);
-      TS_ASSERT_DELTA(outputWS0->readE(2).front(), std::sqrt(920983), 1e-10);
-      TS_ASSERT_DELTA(outputWS0->readE(3).front(), std::sqrt(909955), 1e-10);
-      TS_ASSERT_DELTA(outputWS0->readE(4).front(), std::sqrt(310676), 1e-10);
-      TS_ASSERT_DELTA(outputWS0->readE(5).front(), std::sqrt(590230), 1e-10);
+      TS_ASSERT_EQUALS(outputWS0->y(0).front(), 807206);
+      TS_ASSERT_EQUALS(outputWS0->y(1).front(), 805367);
+      TS_ASSERT_EQUALS(outputWS0->y(2).front(), 920983);
+      TS_ASSERT_EQUALS(outputWS0->y(3).front(), 909955);
+      TS_ASSERT_EQUALS(outputWS0->y(4).front(), 310676);
+      TS_ASSERT_EQUALS(outputWS0->y(5).front(), 590230);
+      TS_ASSERT_DELTA(outputWS0->e(0).front(), std::sqrt(807206), 1e-10);
+      TS_ASSERT_DELTA(outputWS0->e(1).front(), std::sqrt(805367), 1e-10);
+      TS_ASSERT_DELTA(outputWS0->e(2).front(), std::sqrt(920983), 1e-10);
+      TS_ASSERT_DELTA(outputWS0->e(3).front(), std::sqrt(909955), 1e-10);
+      TS_ASSERT_DELTA(outputWS0->e(4).front(), std::sqrt(310676), 1e-10);
+      TS_ASSERT_DELTA(outputWS0->e(5).front(), std::sqrt(590230), 1e-10);
     }
   }
 
@@ -608,12 +608,12 @@ public:
       /* expected results should be the same as test_splitter_table but produced with absolute time */
 
       auto outputWS0 = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(0));
-      TS_ASSERT_EQUALS(outputWS0->readY(0).front(), 807206);
-      TS_ASSERT_EQUALS(outputWS0->readY(1).front(), 805367);
-      TS_ASSERT_EQUALS(outputWS0->readY(2).front(), 920983);
-      TS_ASSERT_EQUALS(outputWS0->readY(3).front(), 909955);
-      TS_ASSERT_EQUALS(outputWS0->readY(4).front(), 310676);
-      TS_ASSERT_EQUALS(outputWS0->readY(5).front(), 590230);
+      TS_ASSERT_EQUALS(outputWS0->y(0).front(), 807206);
+      TS_ASSERT_EQUALS(outputWS0->y(1).front(), 805367);
+      TS_ASSERT_EQUALS(outputWS0->y(2).front(), 920983);
+      TS_ASSERT_EQUALS(outputWS0->y(3).front(), 909955);
+      TS_ASSERT_EQUALS(outputWS0->y(4).front(), 310676);
+      TS_ASSERT_EQUALS(outputWS0->y(5).front(), 590230);
     }
   }
 
@@ -636,18 +636,18 @@ public:
 
       auto outputWS0 = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(0));
 
-      TS_ASSERT_EQUALS(outputWS0->readY(0).front(), 59561);
-      TS_ASSERT_EQUALS(outputWS0->readY(1).front(), 59358);
-      TS_ASSERT_EQUALS(outputWS0->readY(2).front(), 63952);
-      TS_ASSERT_EQUALS(outputWS0->readY(3).front(), 63299);
-      TS_ASSERT_EQUALS(outputWS0->readY(4).front(), 22917);
-      TS_ASSERT_EQUALS(outputWS0->readY(5).front(), 43843);
-      TS_ASSERT_DELTA(outputWS0->readE(0).front(), std::sqrt(59561), 1e-10);
-      TS_ASSERT_DELTA(outputWS0->readE(1).front(), std::sqrt(59358), 1e-10);
-      TS_ASSERT_DELTA(outputWS0->readE(2).front(), std::sqrt(63952), 1e-10);
-      TS_ASSERT_DELTA(outputWS0->readE(3).front(), std::sqrt(63299), 1e-10);
-      TS_ASSERT_DELTA(outputWS0->readE(4).front(), std::sqrt(22917), 1e-10);
-      TS_ASSERT_DELTA(outputWS0->readE(5).front(), std::sqrt(43843), 1e-10);
+      TS_ASSERT_EQUALS(outputWS0->y(0).front(), 59561);
+      TS_ASSERT_EQUALS(outputWS0->y(1).front(), 59358);
+      TS_ASSERT_EQUALS(outputWS0->y(2).front(), 63952);
+      TS_ASSERT_EQUALS(outputWS0->y(3).front(), 63299);
+      TS_ASSERT_EQUALS(outputWS0->y(4).front(), 22917);
+      TS_ASSERT_EQUALS(outputWS0->y(5).front(), 43843);
+      TS_ASSERT_DELTA(outputWS0->e(0).front(), std::sqrt(59561), 1e-10);
+      TS_ASSERT_DELTA(outputWS0->e(1).front(), std::sqrt(59358), 1e-10);
+      TS_ASSERT_DELTA(outputWS0->e(2).front(), std::sqrt(63952), 1e-10);
+      TS_ASSERT_DELTA(outputWS0->e(3).front(), std::sqrt(63299), 1e-10);
+      TS_ASSERT_DELTA(outputWS0->e(4).front(), std::sqrt(22917), 1e-10);
+      TS_ASSERT_DELTA(outputWS0->e(5).front(), std::sqrt(43843), 1e-10);
 
       /* expected results came from running
 
@@ -659,12 +659,12 @@ public:
 
       auto outputWS1 = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(1));
 
-      TS_ASSERT_EQUALS(outputWS1->readY(0).front(), 373262);
-      TS_ASSERT_EQUALS(outputWS1->readY(1).front(), 372186);
-      TS_ASSERT_EQUALS(outputWS1->readY(2).front(), 428220);
-      TS_ASSERT_EQUALS(outputWS1->readY(3).front(), 423472);
-      TS_ASSERT_EQUALS(outputWS1->readY(4).front(), 143703);
-      TS_ASSERT_EQUALS(outputWS1->readY(5).front(), 273072);
+      TS_ASSERT_EQUALS(outputWS1->y(0).front(), 373262);
+      TS_ASSERT_EQUALS(outputWS1->y(1).front(), 372186);
+      TS_ASSERT_EQUALS(outputWS1->y(2).front(), 428220);
+      TS_ASSERT_EQUALS(outputWS1->y(3).front(), 423472);
+      TS_ASSERT_EQUALS(outputWS1->y(4).front(), 143703);
+      TS_ASSERT_EQUALS(outputWS1->y(5).front(), 273072);
 
       /* expected results came from running
 
@@ -675,12 +675,12 @@ public:
       */
 
       auto outputWS2 = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(2));
-      TS_ASSERT_EQUALS(outputWS2->readY(0).front(), 374383);
-      TS_ASSERT_EQUALS(outputWS2->readY(1).front(), 373823);
-      TS_ASSERT_EQUALS(outputWS2->readY(2).front(), 428811);
-      TS_ASSERT_EQUALS(outputWS2->readY(3).front(), 423184);
-      TS_ASSERT_EQUALS(outputWS2->readY(4).front(), 144056);
-      TS_ASSERT_EQUALS(outputWS2->readY(5).front(), 273315);
+      TS_ASSERT_EQUALS(outputWS2->y(0).front(), 374383);
+      TS_ASSERT_EQUALS(outputWS2->y(1).front(), 373823);
+      TS_ASSERT_EQUALS(outputWS2->y(2).front(), 428811);
+      TS_ASSERT_EQUALS(outputWS2->y(3).front(), 423184);
+      TS_ASSERT_EQUALS(outputWS2->y(4).front(), 144056);
+      TS_ASSERT_EQUALS(outputWS2->y(5).front(), 273315);
     }
   }
 
@@ -715,12 +715,12 @@ public:
       */
 
       auto outputWS0 = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(0));
-      TS_ASSERT_EQUALS(outputWS0->readY(0).front(), 415525);
-      TS_ASSERT_EQUALS(outputWS0->readY(1).front(), 414435);
-      TS_ASSERT_EQUALS(outputWS0->readY(2).front(), 476903);
-      TS_ASSERT_EQUALS(outputWS0->readY(3).front(), 471846);
-      TS_ASSERT_EQUALS(outputWS0->readY(4).front(), 160000);
-      TS_ASSERT_EQUALS(outputWS0->readY(5).front(), 304167);
+      TS_ASSERT_EQUALS(outputWS0->y(0).front(), 415525);
+      TS_ASSERT_EQUALS(outputWS0->y(1).front(), 414435);
+      TS_ASSERT_EQUALS(outputWS0->y(2).front(), 476903);
+      TS_ASSERT_EQUALS(outputWS0->y(3).front(), 471846);
+      TS_ASSERT_EQUALS(outputWS0->y(4).front(), 160000);
+      TS_ASSERT_EQUALS(outputWS0->y(5).front(), 304167);
     }
   }
 
@@ -808,28 +808,28 @@ public:
       */
 
       auto outputWS0 = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(0));
-      TS_ASSERT_EQUALS(outputWS0->readY(0).front(), 2729042);
-      TS_ASSERT_EQUALS(outputWS0->readY(1).front(), 2726901);
-      TS_ASSERT_EQUALS(outputWS0->readY(2).front(), 3133867);
-      TS_ASSERT_EQUALS(outputWS0->readY(3).front(), 3098887);
-      TS_ASSERT_EQUALS(outputWS0->readY(4).front(), 1045181);
-      TS_ASSERT_EQUALS(outputWS0->readY(5).front(), 1997189);
+      TS_ASSERT_EQUALS(outputWS0->y(0).front(), 2729042);
+      TS_ASSERT_EQUALS(outputWS0->y(1).front(), 2726901);
+      TS_ASSERT_EQUALS(outputWS0->y(2).front(), 3133867);
+      TS_ASSERT_EQUALS(outputWS0->y(3).front(), 3098887);
+      TS_ASSERT_EQUALS(outputWS0->y(4).front(), 1045181);
+      TS_ASSERT_EQUALS(outputWS0->y(5).front(), 1997189);
 
       auto outputWS1 = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(1));
-      TS_ASSERT_EQUALS(outputWS1->readY(0).front(), 2567255);
-      TS_ASSERT_EQUALS(outputWS1->readY(1).front(), 2566070);
-      TS_ASSERT_EQUALS(outputWS1->readY(2).front(), 2947152);
-      TS_ASSERT_EQUALS(outputWS1->readY(3).front(), 2913240);
-      TS_ASSERT_EQUALS(outputWS1->readY(4).front(), 983897);
-      TS_ASSERT_EQUALS(outputWS1->readY(5).front(), 1877851);
+      TS_ASSERT_EQUALS(outputWS1->y(0).front(), 2567255);
+      TS_ASSERT_EQUALS(outputWS1->y(1).front(), 2566070);
+      TS_ASSERT_EQUALS(outputWS1->y(2).front(), 2947152);
+      TS_ASSERT_EQUALS(outputWS1->y(3).front(), 2913240);
+      TS_ASSERT_EQUALS(outputWS1->y(4).front(), 983897);
+      TS_ASSERT_EQUALS(outputWS1->y(5).front(), 1877851);
 
       auto outputWS2 = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(2));
-      TS_ASSERT_EQUALS(outputWS2->readY(0).front(), 1346290);
-      TS_ASSERT_EQUALS(outputWS2->readY(1).front(), 1343588);
-      TS_ASSERT_EQUALS(outputWS2->readY(2).front(), 1541892);
-      TS_ASSERT_EQUALS(outputWS2->readY(3).front(), 1526538);
-      TS_ASSERT_EQUALS(outputWS2->readY(4).front(), 516351);
-      TS_ASSERT_EQUALS(outputWS2->readY(5).front(), 984359);
+      TS_ASSERT_EQUALS(outputWS2->y(0).front(), 1346290);
+      TS_ASSERT_EQUALS(outputWS2->y(1).front(), 1343588);
+      TS_ASSERT_EQUALS(outputWS2->y(2).front(), 1541892);
+      TS_ASSERT_EQUALS(outputWS2->y(3).front(), 1526538);
+      TS_ASSERT_EQUALS(outputWS2->y(4).front(), 516351);
+      TS_ASSERT_EQUALS(outputWS2->y(5).front(), 984359);
     }
   }
 
@@ -871,50 +871,50 @@ public:
     */
     {
       auto outputWS0 = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(0));
-      TS_ASSERT_EQUALS(outputWS0->readY(0).front(), 214);
-      TS_ASSERT_EQUALS(outputWS0->readY(1).front(), 219);
-      TS_ASSERT_EQUALS(outputWS0->readY(2).front(), 269);
-      TS_ASSERT_EQUALS(outputWS0->readY(3).front(), 228);
-      TS_ASSERT_EQUALS(outputWS0->readY(4).front(), 71);
-      TS_ASSERT_EQUALS(outputWS0->readY(5).front(), 144);
-      TS_ASSERT_DELTA(outputWS0->readE(0).front(), std::sqrt(214), 1e-10);
-      TS_ASSERT_DELTA(outputWS0->readE(1).front(), std::sqrt(219), 1e-10);
-      TS_ASSERT_DELTA(outputWS0->readE(2).front(), std::sqrt(269), 1e-10);
-      TS_ASSERT_DELTA(outputWS0->readE(3).front(), std::sqrt(228), 1e-10);
-      TS_ASSERT_DELTA(outputWS0->readE(4).front(), std::sqrt(71), 1e-10);
-      TS_ASSERT_DELTA(outputWS0->readE(5).front(), std::sqrt(144), 1e-10);
+      TS_ASSERT_EQUALS(outputWS0->y(0).front(), 214);
+      TS_ASSERT_EQUALS(outputWS0->y(1).front(), 219);
+      TS_ASSERT_EQUALS(outputWS0->y(2).front(), 269);
+      TS_ASSERT_EQUALS(outputWS0->y(3).front(), 228);
+      TS_ASSERT_EQUALS(outputWS0->y(4).front(), 71);
+      TS_ASSERT_EQUALS(outputWS0->y(5).front(), 144);
+      TS_ASSERT_DELTA(outputWS0->e(0).front(), std::sqrt(214), 1e-10);
+      TS_ASSERT_DELTA(outputWS0->e(1).front(), std::sqrt(219), 1e-10);
+      TS_ASSERT_DELTA(outputWS0->e(2).front(), std::sqrt(269), 1e-10);
+      TS_ASSERT_DELTA(outputWS0->e(3).front(), std::sqrt(228), 1e-10);
+      TS_ASSERT_DELTA(outputWS0->e(4).front(), std::sqrt(71), 1e-10);
+      TS_ASSERT_DELTA(outputWS0->e(5).front(), std::sqrt(144), 1e-10);
 
       auto outputWS1 = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(1));
-      TS_ASSERT_EQUALS(outputWS1->readY(0).front(), 171);
-      TS_ASSERT_EQUALS(outputWS1->readY(1).front(), 163);
-      TS_ASSERT_EQUALS(outputWS1->readY(2).front(), 188);
-      TS_ASSERT_EQUALS(outputWS1->readY(3).front(), 182);
-      TS_ASSERT_EQUALS(outputWS1->readY(4).front(), 68);
-      TS_ASSERT_EQUALS(outputWS1->readY(5).front(), 135);
+      TS_ASSERT_EQUALS(outputWS1->y(0).front(), 171);
+      TS_ASSERT_EQUALS(outputWS1->y(1).front(), 163);
+      TS_ASSERT_EQUALS(outputWS1->y(2).front(), 188);
+      TS_ASSERT_EQUALS(outputWS1->y(3).front(), 182);
+      TS_ASSERT_EQUALS(outputWS1->y(4).front(), 68);
+      TS_ASSERT_EQUALS(outputWS1->y(5).front(), 135);
 
       auto outputWS2 = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(2));
-      TS_ASSERT_EQUALS(outputWS2->readY(0).front(), 132);
-      TS_ASSERT_EQUALS(outputWS2->readY(1).front(), 131);
-      TS_ASSERT_EQUALS(outputWS2->readY(2).front(), 159);
-      TS_ASSERT_EQUALS(outputWS2->readY(3).front(), 139);
-      TS_ASSERT_EQUALS(outputWS2->readY(4).front(), 54);
-      TS_ASSERT_EQUALS(outputWS2->readY(5).front(), 77);
+      TS_ASSERT_EQUALS(outputWS2->y(0).front(), 132);
+      TS_ASSERT_EQUALS(outputWS2->y(1).front(), 131);
+      TS_ASSERT_EQUALS(outputWS2->y(2).front(), 159);
+      TS_ASSERT_EQUALS(outputWS2->y(3).front(), 139);
+      TS_ASSERT_EQUALS(outputWS2->y(4).front(), 54);
+      TS_ASSERT_EQUALS(outputWS2->y(5).front(), 77);
 
       auto outputWS3 = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(3));
-      TS_ASSERT_EQUALS(outputWS3->readY(0).front(), 12705);
-      TS_ASSERT_EQUALS(outputWS3->readY(1).front(), 12668);
-      TS_ASSERT_EQUALS(outputWS3->readY(2).front(), 14334);
-      TS_ASSERT_EQUALS(outputWS3->readY(3).front(), 14313);
-      TS_ASSERT_EQUALS(outputWS3->readY(4).front(), 4807);
-      TS_ASSERT_EQUALS(outputWS3->readY(5).front(), 9179);
+      TS_ASSERT_EQUALS(outputWS3->y(0).front(), 12705);
+      TS_ASSERT_EQUALS(outputWS3->y(1).front(), 12668);
+      TS_ASSERT_EQUALS(outputWS3->y(2).front(), 14334);
+      TS_ASSERT_EQUALS(outputWS3->y(3).front(), 14313);
+      TS_ASSERT_EQUALS(outputWS3->y(4).front(), 4807);
+      TS_ASSERT_EQUALS(outputWS3->y(5).front(), 9179);
 
       auto outputWS4 = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(4));
-      TS_ASSERT_EQUALS(outputWS4->readY(0).front(), 54);
-      TS_ASSERT_EQUALS(outputWS4->readY(1).front(), 71);
-      TS_ASSERT_EQUALS(outputWS4->readY(2).front(), 76);
-      TS_ASSERT_EQUALS(outputWS4->readY(3).front(), 86);
-      TS_ASSERT_EQUALS(outputWS4->readY(4).front(), 30);
-      TS_ASSERT_EQUALS(outputWS4->readY(5).front(), 29);
+      TS_ASSERT_EQUALS(outputWS4->y(0).front(), 54);
+      TS_ASSERT_EQUALS(outputWS4->y(1).front(), 71);
+      TS_ASSERT_EQUALS(outputWS4->y(2).front(), 76);
+      TS_ASSERT_EQUALS(outputWS4->y(3).front(), 86);
+      TS_ASSERT_EQUALS(outputWS4->y(4).front(), 30);
+      TS_ASSERT_EQUALS(outputWS4->y(5).front(), 29);
     }
 
     // now repeat but with correction to sample
@@ -930,44 +930,44 @@ public:
 
     {
       auto outputWS0 = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(0));
-      TS_ASSERT_EQUALS(outputWS0->readY(0).front(), 207);
-      TS_ASSERT_EQUALS(outputWS0->readY(1).front(), 196);
-      TS_ASSERT_EQUALS(outputWS0->readY(2).front(), 241);
-      TS_ASSERT_EQUALS(outputWS0->readY(3).front(), 206);
-      TS_ASSERT_EQUALS(outputWS0->readY(4).front(), 69);
-      TS_ASSERT_EQUALS(outputWS0->readY(5).front(), 151);
+      TS_ASSERT_EQUALS(outputWS0->y(0).front(), 207);
+      TS_ASSERT_EQUALS(outputWS0->y(1).front(), 196);
+      TS_ASSERT_EQUALS(outputWS0->y(2).front(), 241);
+      TS_ASSERT_EQUALS(outputWS0->y(3).front(), 206);
+      TS_ASSERT_EQUALS(outputWS0->y(4).front(), 69);
+      TS_ASSERT_EQUALS(outputWS0->y(5).front(), 151);
 
       auto outputWS1 = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(1));
-      TS_ASSERT_EQUALS(outputWS1->readY(0).front(), 150);
-      TS_ASSERT_EQUALS(outputWS1->readY(1).front(), 149);
-      TS_ASSERT_EQUALS(outputWS1->readY(2).front(), 180);
-      TS_ASSERT_EQUALS(outputWS1->readY(3).front(), 173);
-      TS_ASSERT_EQUALS(outputWS1->readY(4).front(), 63);
-      TS_ASSERT_EQUALS(outputWS1->readY(5).front(), 104);
+      TS_ASSERT_EQUALS(outputWS1->y(0).front(), 150);
+      TS_ASSERT_EQUALS(outputWS1->y(1).front(), 149);
+      TS_ASSERT_EQUALS(outputWS1->y(2).front(), 180);
+      TS_ASSERT_EQUALS(outputWS1->y(3).front(), 173);
+      TS_ASSERT_EQUALS(outputWS1->y(4).front(), 63);
+      TS_ASSERT_EQUALS(outputWS1->y(5).front(), 104);
 
       auto outputWS2 = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(2));
-      TS_ASSERT_EQUALS(outputWS2->readY(0).front(), 119);
-      TS_ASSERT_EQUALS(outputWS2->readY(1).front(), 123);
-      TS_ASSERT_EQUALS(outputWS2->readY(2).front(), 147);
-      TS_ASSERT_EQUALS(outputWS2->readY(3).front(), 133);
-      TS_ASSERT_EQUALS(outputWS2->readY(4).front(), 50);
-      TS_ASSERT_EQUALS(outputWS2->readY(5).front(), 78);
+      TS_ASSERT_EQUALS(outputWS2->y(0).front(), 119);
+      TS_ASSERT_EQUALS(outputWS2->y(1).front(), 123);
+      TS_ASSERT_EQUALS(outputWS2->y(2).front(), 147);
+      TS_ASSERT_EQUALS(outputWS2->y(3).front(), 133);
+      TS_ASSERT_EQUALS(outputWS2->y(4).front(), 50);
+      TS_ASSERT_EQUALS(outputWS2->y(5).front(), 78);
 
       auto outputWS3 = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(3));
-      TS_ASSERT_EQUALS(outputWS3->readY(0).front(), 12742);
-      TS_ASSERT_EQUALS(outputWS3->readY(1).front(), 12705);
-      TS_ASSERT_EQUALS(outputWS3->readY(2).front(), 14375);
-      TS_ASSERT_EQUALS(outputWS3->readY(3).front(), 14348);
-      TS_ASSERT_EQUALS(outputWS3->readY(4).front(), 4813);
-      TS_ASSERT_EQUALS(outputWS3->readY(5).front(), 9213);
+      TS_ASSERT_EQUALS(outputWS3->y(0).front(), 12742);
+      TS_ASSERT_EQUALS(outputWS3->y(1).front(), 12705);
+      TS_ASSERT_EQUALS(outputWS3->y(2).front(), 14375);
+      TS_ASSERT_EQUALS(outputWS3->y(3).front(), 14348);
+      TS_ASSERT_EQUALS(outputWS3->y(4).front(), 4813);
+      TS_ASSERT_EQUALS(outputWS3->y(5).front(), 9213);
 
       auto outputWS4 = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(4));
-      TS_ASSERT_EQUALS(outputWS4->readY(0).front(), 66);
-      TS_ASSERT_EQUALS(outputWS4->readY(1).front(), 67);
-      TS_ASSERT_EQUALS(outputWS4->readY(2).front(), 90);
-      TS_ASSERT_EQUALS(outputWS4->readY(3).front(), 67);
-      TS_ASSERT_EQUALS(outputWS4->readY(4).front(), 18);
-      TS_ASSERT_EQUALS(outputWS4->readY(5).front(), 57);
+      TS_ASSERT_EQUALS(outputWS4->y(0).front(), 66);
+      TS_ASSERT_EQUALS(outputWS4->y(1).front(), 67);
+      TS_ASSERT_EQUALS(outputWS4->y(2).front(), 90);
+      TS_ASSERT_EQUALS(outputWS4->y(3).front(), 67);
+      TS_ASSERT_EQUALS(outputWS4->y(4).front(), 18);
+      TS_ASSERT_EQUALS(outputWS4->y(5).front(), 57);
     }
   }
 
@@ -986,12 +986,12 @@ public:
     print(ws.extractY())
     */
 
-    TS_ASSERT_EQUALS(outputWS->readY(0).front(), 22668454);
-    TS_ASSERT_EQUALS(outputWS->readY(1).front(), 22639565);
-    TS_ASSERT_EQUALS(outputWS->readY(2).front(), 26014789);
-    TS_ASSERT_EQUALS(outputWS->readY(3).front(), 25716703);
-    TS_ASSERT_EQUALS(outputWS->readY(4).front(), 8690549);
-    TS_ASSERT_EQUALS(outputWS->readY(5).front(), 16577786);
+    TS_ASSERT_EQUALS(outputWS->y(0).front(), 22668454);
+    TS_ASSERT_EQUALS(outputWS->y(1).front(), 22639565);
+    TS_ASSERT_EQUALS(outputWS->y(2).front(), 26014789);
+    TS_ASSERT_EQUALS(outputWS->y(3).front(), 25716703);
+    TS_ASSERT_EQUALS(outputWS->y(4).front(), 8690549);
+    TS_ASSERT_EQUALS(outputWS->y(5).front(), 16577786);
   }
 
   void test_filter_bad_pulses_and_time_start_stop() {
@@ -1012,12 +1012,12 @@ public:
     */
 
     // values should be slightly smaller than in test_start_stop_time_filtering
-    TS_ASSERT_EQUALS(outputWS->readY(0).front(), 3736146);
-    TS_ASSERT_EQUALS(outputWS->readY(1).front(), 3729398);
-    TS_ASSERT_EQUALS(outputWS->readY(2).front(), 4288311);
-    TS_ASSERT_EQUALS(outputWS->readY(3).front(), 4237608);
-    TS_ASSERT_EQUALS(outputWS->readY(4).front(), 1433200);
-    TS_ASSERT_EQUALS(outputWS->readY(5).front(), 2729481);
+    TS_ASSERT_EQUALS(outputWS->y(0).front(), 3736146);
+    TS_ASSERT_EQUALS(outputWS->y(1).front(), 3729398);
+    TS_ASSERT_EQUALS(outputWS->y(2).front(), 4288311);
+    TS_ASSERT_EQUALS(outputWS->y(3).front(), 4237608);
+    TS_ASSERT_EQUALS(outputWS->y(4).front(), 1433200);
+    TS_ASSERT_EQUALS(outputWS->y(5).front(), 2729481);
   }
 
   void test_bank_number_validation() {
@@ -1046,8 +1046,8 @@ public:
       TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), NUM_HIST);
       for (int j = 0; j < NUM_HIST; j++) {
         // check all spectra have bins
-        TS_ASSERT_EQUALS(outputWS->readX(j).front(), 0.);
-        TS_ASSERT_EQUALS(outputWS->readX(j).back(), 50000.);
+        TS_ASSERT_EQUALS(outputWS->x(j).front(), 0.);
+        TS_ASSERT_EQUALS(outputWS->x(j).back(), 50000.);
         if (j == i - 1) {
           // the indicated spectra has values
           const auto y_values = outputWS->y(j);
@@ -1096,18 +1096,18 @@ public:
     */
 
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 12);
-    TS_ASSERT_EQUALS(outputWS->readY(0).front(), 52699);
-    TS_ASSERT_EQUALS(outputWS->readY(1).front(), 15037626);
-    TS_ASSERT_EQUALS(outputWS->readY(2).front(), 3776091);
-    TS_ASSERT_EQUALS(outputWS->readY(3).front(), 20332502);
-    TS_ASSERT_EQUALS(outputWS->readY(4).front(), 21215268);
-    TS_ASSERT_EQUALS(outputWS->readY(5).front(), 3819719);
-    TS_ASSERT_EQUALS(outputWS->readY(6).front(), 11720729);
-    TS_ASSERT_EQUALS(outputWS->readY(7).front(), 12322917);
-    TS_ASSERT_EQUALS(outputWS->readY(8).front(), 2784939);
-    TS_ASSERT_EQUALS(outputWS->readY(9).front(), 11921456);
-    TS_ASSERT_EQUALS(outputWS->readY(10).front(), 19044631);
-    TS_ASSERT_EQUALS(outputWS->readY(11).front(), 1934589);
+    TS_ASSERT_EQUALS(outputWS->y(0).front(), 52699);
+    TS_ASSERT_EQUALS(outputWS->y(1).front(), 15037626);
+    TS_ASSERT_EQUALS(outputWS->y(2).front(), 3776091);
+    TS_ASSERT_EQUALS(outputWS->y(3).front(), 20332502);
+    TS_ASSERT_EQUALS(outputWS->y(4).front(), 21215268);
+    TS_ASSERT_EQUALS(outputWS->y(5).front(), 3819719);
+    TS_ASSERT_EQUALS(outputWS->y(6).front(), 11720729);
+    TS_ASSERT_EQUALS(outputWS->y(7).front(), 12322917);
+    TS_ASSERT_EQUALS(outputWS->y(8).front(), 2784939);
+    TS_ASSERT_EQUALS(outputWS->y(9).front(), 11921456);
+    TS_ASSERT_EQUALS(outputWS->y(10).front(), 19044631);
+    TS_ASSERT_EQUALS(outputWS->y(11).front(), 1934589);
   }
 
   void test_grouping_workspace_3_groups() {
@@ -1143,9 +1143,9 @@ public:
     */
 
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 3);
-    TS_ASSERT_EQUALS(outputWS->readY(0).front(), 39198918);
-    TS_ASSERT_EQUALS(outputWS->readY(1).front(), 49892899);
-    TS_ASSERT_EQUALS(outputWS->readY(2).front(), 34871349);
+    TS_ASSERT_EQUALS(outputWS->y(0).front(), 39198918);
+    TS_ASSERT_EQUALS(outputWS->y(1).front(), 49892899);
+    TS_ASSERT_EQUALS(outputWS->y(2).front(), 34871349);
   }
 
   void test_grouping_workspace_sparse() {
@@ -1173,13 +1173,13 @@ public:
 
     /* expected results came from running
     ws = LoadEventNexus("VULCAN_218062.nxs.h5", NumberOfBins=1)
-    print(ws.readY(30) + ws.readY(50))
-    print(ws.readY(40))
+    print(ws.y(30) + ws.y(50))
+    print(ws.y(40))
     */
 
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 2);
-    TS_ASSERT_EQUALS(outputWS->readY(0).front(), 543);
-    TS_ASSERT_EQUALS(outputWS->readY(1).front(), 260);
+    TS_ASSERT_EQUALS(outputWS->y(0).front(), 543);
+    TS_ASSERT_EQUALS(outputWS->y(1).front(), 260);
   }
 
   void test_PG3() {
@@ -1193,10 +1193,10 @@ public:
     TS_ASSERT_EQUALS(outputWS->getInstrument()->getName(), "POWGEN");
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);
     TS_ASSERT_EQUALS(outputWS->blocksize(), 1874);
-    TS_ASSERT_DELTA(outputWS->readX(0).front(), 2258.57547, 1e-5);
-    TS_ASSERT_DELTA(outputWS->readX(0).back(), 45171.50931, 1e-5);
-    TS_ASSERT_EQUALS(outputWS->readY(0).front(), 0);
-    TS_ASSERT_EQUALS(outputWS->readY(0).back(), 60723);
+    TS_ASSERT_DELTA(outputWS->x(0).front(), 2258.57547, 1e-5);
+    TS_ASSERT_DELTA(outputWS->x(0).back(), 45171.50931, 1e-5);
+    TS_ASSERT_EQUALS(outputWS->y(0).front(), 0);
+    TS_ASSERT_EQUALS(outputWS->y(0).back(), 60723);
   }
 
   void test_grouping_filename_xml() {

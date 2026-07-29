@@ -266,8 +266,8 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
         """
         calibration_ws = _generate_calibration_workspace("IRIS")
         half_index = int(calibration_ws.getNumberHistograms() / 2 - 1)
-        calibration_ws.setY(half_index, [0])
-        calibration_ws.setY(half_index + 1, [0])
+        calibration_ws.setSharedY(half_index, [0])
+        calibration_ws.setSharedY(half_index + 1, [0])
 
         wks = ISISIndirectEnergyTransfer(
             InputFiles=["IRS26176.raw"],

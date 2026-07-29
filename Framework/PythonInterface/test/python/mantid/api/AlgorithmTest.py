@@ -290,7 +290,7 @@ class AlgorithmTest(unittest.TestCase):
         child_alg.execute()
         ws = child_alg.getProperty("OutputWorkspace").value
 
-        self.assertEqual(2.0, ws.readX(0)[0])
+        self.assertEqual(2.0, ws.x(0)[0])
 
     def test_createChildAlgorithm_with_list(self):
         parent_alg = AlgorithmManager.createUnmanaged("Load")

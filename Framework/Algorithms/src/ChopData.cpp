@@ -52,7 +52,7 @@ void ChopData::exec() {
   const int monitorWi = getProperty("MonitorWorkspaceIndex");
   const auto nHist = static_cast<int>(inputWS->getNumberHistograms());
   const size_t nBins = inputWS->blocksize();
-  const double maxX = inputWS->readX(0)[nBins];
+  const double maxX = inputWS->x(0)[nBins];
   std::map<int, double> intMap;
   int prelow = -1;
   std::vector<MatrixWorkspace_sptr> workspaces;

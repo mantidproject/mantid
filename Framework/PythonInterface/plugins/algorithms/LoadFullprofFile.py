@@ -218,9 +218,9 @@ class LoadFullprofFile(PythonAlgorithm):
         dataws = WorkspaceFactory.create("Workspace2D", 4, datasize, datasize)
         for i in range(datasize):
             for j in range(4):
-                dataws.dataX(j)[i] = data[i][0]
-                dataws.dataY(j)[i] = data[i][j + 1]
-                dataws.dataE(j)[i] = 1.0
+                dataws.mutableX(j)[i] = data[i][0]
+                dataws.mutableY(j)[i] = data[i][j + 1]
+                dataws.mutableE(j)[i] = 1.0
 
         return (tablews, dataws)
 
@@ -419,9 +419,9 @@ class LoadFullprofFile(PythonAlgorithm):
         datasize = len(vecx)
         dataws = WorkspaceFactory.create("Workspace2D", 1, datasize, datasize)
         for i in range(datasize):
-            dataws.dataX(0)[i] = vecx[i]
-            dataws.dataY(0)[i] = vecy[i]
-            dataws.dataE(0)[i] = vece[i]
+            dataws.mutableX(0)[i] = vecx[i]
+            dataws.mutableY(0)[i] = vecy[i]
+            dataws.mutableE(0)[i] = vece[i]
 
         return (tablews, dataws)
 

@@ -80,7 +80,7 @@ public:
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 61440);
     double sum = 0.0;
     for (size_t i = 0; i < output->getNumberHistograms(); i++)
-      sum += output->readY(i)[0];
+      sum += output->y(i)[0];
     sum *= 1.0e22;
     TS_ASSERT_DELTA(sum / 1.0E27, 2.0, 0.0001);
 

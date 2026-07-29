@@ -286,7 +286,7 @@ class DataSet(object):
         Scale(InputWorkspace=self._ws_name, OutputWorkspace=self._ws_scaled, Operation="Multiply", Factor=self._scale)
 
         # Put back dQ
-        dq_scaled = mtd[self._ws_scaled].dataDx(0)
+        dq_scaled = mtd[self._ws_scaled].mutableDx(0)
         for i in range(len(dq_scaled)):
             dq_scaled[i] = dq[i]
 
@@ -316,12 +316,12 @@ class DataSet(object):
                 ParentWorkspace=self._ws_name,
             )
 
-            dq_scaled = mtd[self._ws_scaled].dataDx(0)
+            dq_scaled = mtd[self._ws_scaled].mutableDx(0)
             for i in range(len(dq_scaled)):
                 dq_scaled[i] = dx_trim[i]
         else:
-            y_scaled = mtd[self._ws_scaled].dataY(0)
-            e_scaled = mtd[self._ws_scaled].dataE(0)
+            y_scaled = mtd[self._ws_scaled].mutableY(0)
+            e_scaled = mtd[self._ws_scaled].mutableE(0)
             for i in range(self._skip_first):
                 y_scaled[i] = 0
                 e_scaled[i] = 0
@@ -363,7 +363,7 @@ class DataSet(object):
                 ConvertToPointData(InputWorkspace=self._ws_name, OutputWorkspace=point_data_ws)
                 # Copy over the resolution
                 dq_original = mtd[self._ws_name].dx(0)
-                dq_points = mtd[point_data_ws].dataDx(0)
+                dq_points = mtd[point_data_ws].mutableDx(0)
                 for i in range(len(dq_points)):
                     dq_points[i] = dq_original[i]
 
@@ -598,10 +598,10 @@ class Stitcher(object):
         for d in self._data_sets:
             ws = d.get_scaled_ws()
             if ws is not None:
-                _x = mtd[ws].dataX(0)
-                _y = mtd[ws].dataY(0)
-                _e = mtd[ws].dataE(0)
-                _dx = mtd[ws].dataDx(0)
+                _x = mtd[ws].x(0)
+                _y = mtd[ws].y(0)
+                _e = mtd[ws].e(0)
+                _dx = mtd[ws].dx(0)
                 if len(_x) == len(_y) + 1:
                     xtmp = [(_x[i] + _x[i + 1]) / 2.0 for i in range(len(_y))]
                     _x = xtmp
@@ -624,7 +624,7 @@ class Stitcher(object):
 
         CreateWorkspace(DataX=x, DataY=y, DataE=e, OutputWorkspace=ws_combined, UnitX="MomentumTransfer", ParentWorkspace=first_ws)
 
-        dxtmp = mtd[ws_combined].dataDx(0)
+        dxtmp = mtd[ws_combined].mutableDx(0)
 
         # Fill out dQ
         npts = len(dxtmp)

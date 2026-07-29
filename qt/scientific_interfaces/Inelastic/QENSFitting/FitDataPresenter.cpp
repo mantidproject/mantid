@@ -196,10 +196,10 @@ FitDataPresenter::getDataForParameterEstimation(const EstimationDataSelector &se
   for (auto i = WorkspaceID{0}; i < m_model->getNumberOfWorkspaces(); ++i) {
     auto const ws = m_model->getWorkspace(i);
     for (const auto &spectrum : m_model->getSpectra(i)) {
-      auto const &x = ws->readX(spectrum.value);
-      auto const &y = ws->readY(spectrum.value);
+      auto const &x = ws->x(spectrum.value);
+      auto const &y = ws->y(spectrum.value);
       auto range = m_model->getFittingRange(i, spectrum);
-      dataCollection.emplace_back(selector(x, y, range));
+      dataCollection.emplace_back(selector(x.rawData(), y.rawData(), range));
     }
   }
   return dataCollection;

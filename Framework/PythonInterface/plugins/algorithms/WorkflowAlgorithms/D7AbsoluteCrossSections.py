@@ -120,7 +120,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         neutron_mass = physical_constants["neutron mass"][0]  # in0 kg
         wavelength = ws.getRun().getLogData("monochromator.wavelength").value * 1e-10  # in m
         Ei = math.pow(h / wavelength, 2) / (2 * neutron_mass)  # in Joules
-        minW = ws.readX(0)[0] * 1e-3 * physical_constants["elementary charge"][0]  # in Joules
+        minW = ws.x(0)[0] * 1e-3 * physical_constants["elementary charge"][0]  # in Joules
         maxEf = Ei - minW
         # In Ångströms
         maxQ = 1e-10 * np.sqrt((2.0 * neutron_mass / (hbar**2)) * (Ei + maxEf - 2 * np.sqrt(Ei * maxEf) * -1.0))
@@ -419,7 +419,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         c0_value = cos_alpha_value**2
         c4_value = (cos_alpha_value - np.pi / 4.0) ** 2
 
-        x_axis = mtd[parent_ws].readX(0)
+        x_axis = mtd[parent_ws].x(0)
         c0_t2_m4 = CreateWorkspace(DataX=x_axis, DataY=2 * c0_value - 4, NSPec=n_detectors, ParentWorkspace=parent_ws)
         to_clean.add("c0_t2_m4")
         c0_t2_p2 = CreateWorkspace(DataX=x_axis, DataY=2 * c0_value + 2, NSPec=n_detectors, ParentWorkspace=parent_ws)
@@ -650,7 +650,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                             CreateSingleValuedWorkspace(DataValue=normalisationFactors, ErrorValue=dataE, OutputWorkspace=norm_ws)
                         else:
                             CreateWorkspace(
-                                dataX=mtd[cross_section_ws][1].readX(0),
+                                dataX=mtd[cross_section_ws][1].x(0),
                                 dataY=normalisationFactors,
                                 dataE=dataE,
                                 NSpec=mtd[cross_section_ws][1].getNumberHistograms(),

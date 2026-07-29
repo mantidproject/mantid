@@ -321,7 +321,7 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
         """
         workspaces = AnalysisDataService.Instance().retrieveWorkspaces(workspaces, unrollGroups=True)
         for ws in workspaces:
-            if np.isnan(ws.readY(0)).any():
+            if np.isnan(ws.y(0)).any():
                 # All data can be NaN if bounds are too close together
                 # this makes the data unplottable
                 raise ValueError("Workspace contains NaN values.")
@@ -384,10 +384,10 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
         return state
 
     def _calculate_residuals(self, quartile1, quartile2):
-        yvalsAX = quartile1.readY(0)
-        yvalsBX = quartile2.readY(0)
-        qvalsAX = quartile1.readX(0)
-        qvalsBX = quartile2.readX(0)
+        yvalsAX = quartile1.y(0)
+        yvalsBX = quartile2.y(0)
+        qvalsAX = quartile1.x(0)
+        qvalsBX = quartile2.x(0)
         A_vals_dict = dict(zip(qvalsAX, yvalsAX))
         B_vals_dict = dict(zip(qvalsBX, yvalsBX))
 

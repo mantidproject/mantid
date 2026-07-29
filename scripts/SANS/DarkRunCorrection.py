@@ -180,7 +180,7 @@ class DarkRunNormalizationExtractor(object):
         Get the time of a frame. Look into the first histogram only.
         @param workspace: the workspace from which extract the frame time
         """
-        return workspace.dataX(0)[-1] - workspace.dataX(0)[0]
+        return workspace.x(0)[-1] - workspace.x(0)[0]
 
     def _get_number_of_good_frames(self, prop):
         """

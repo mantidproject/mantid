@@ -577,7 +577,7 @@ std::vector<double> DetectorDiagnostic::calculateMedian(const API::MatrixWorkspa
           continue;
       }
 
-      const double yValue = input.readY(hists[i])[0];
+      const double yValue = input.y(hists[i])[0];
       if (yValue < 0.0) {
         throw std::out_of_range("Negative number of counts found, could be "
                                 "corrupted raw counts or solid angle data");

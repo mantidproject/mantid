@@ -510,12 +510,12 @@ class MainWindow(QMainWindow):
         except RuntimeError as e:
             return str(e)
 
-        vecx = sumws.readX(0)
-        vecy = sumws.readY(0)
+        vecx = sumws.x(0)
+        vecy = sumws.y(0)
 
         # if there is only one xbin in the summed workspace, that means we have an event file without pulse,
         # and in this case we use the original workspace time limits
-        xlim = [min(wksp.readX(0) / 1000000), max(wksp.readX(0) / 1000000)] if len(vecx) == 1 else [min(vecx), max(vecx)]
+        xlim = [min(wksp.x(0) / 1000000), max(wksp.x(0) / 1000000)] if len(vecx) == 1 else [min(vecx), max(vecx)]
         self.update_plot(vecx, vecy, "Time(s)", "Counts", xlim)
 
     def filterByTime(self):

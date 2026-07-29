@@ -35,7 +35,7 @@ class GenerateGroupingSNSInelasticTest(unittest.TestCase):
         self.assertTrue(os.path.exists(outfilename))
         self.assertEqual(instrument_name, "CNCS")
         # __y = mantid.simpleapi.LoadDetectorsGroupingFile(outfilename)
-        # groupnum=__y.readY(51199)
+        # groupnum=__y.y(51199)
         # self.assertEqual(groupnum, 51200)
 
         os.remove(outfilename)
@@ -109,7 +109,7 @@ class GenerateGroupingSNSInelasticTest(unittest.TestCase):
         self.assertTrue(os.path.exists(outfilename))
         self.assertEqual(instrument_name, "SEQUOIA")
         __y = mantid.simpleapi.LoadDetectorsGroupingFile(outfilename)
-        groupnum = __y.readY(119807)
+        groupnum = __y.y(119807)
         self.assertEqual(groupnum, 115712)
 
         os.remove(outfilename)

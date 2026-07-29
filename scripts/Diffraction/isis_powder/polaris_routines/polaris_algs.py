@@ -127,10 +127,10 @@ def generate_ts_pdf(
 
     if enforce_high_q_to_1:
         constant_background = mantid.CreateSingleValuedWorkspace(
-            DataValue=focused_ws[-1].readY(0)[-1], OutputWorkspace=f"{run_number}_correction_offset_s_q_1"
+            DataValue=focused_ws[-1].y(0)[-1], OutputWorkspace=f"{run_number}_correction_offset_s_q_1"
         )
         print(
-            f"Forcing values of S(Q)-1 to zero by subtraction of a constant: {constant_background.dataY(0)}. "
+            f"Forcing values of S(Q)-1 to zero by subtraction of a constant: {constant_background.y(0)}. "
             "This is a workaround for normalisation issue #40566, check that it is appropriate for your data."
         )
         focused_ws = mantid.Minus(LHSWorkspace=focused_ws, RHSWorkspace=constant_background)
@@ -353,7 +353,7 @@ def fast_fourier_filter(ws, rho0, freq_params=None):
     # To be improved - input workspace doesn't have regular bins but output from this filter process does (and typically
     # has a lot more bins since the width is taken from the narrowest bin in the input)
     if freq_params:
-        q_data = ws.dataX(0)
+        q_data = ws.x(0)
         q_max = q_data[-1]
         q_delta = q_data[1] - q_data[0]
         r_min = freq_params[0]
@@ -376,8 +376,8 @@ def fast_fourier_filter(ws, rho0, freq_params=None):
         )
         # apply filter so that g(r)=0 for r < rmin => RDF(r)=0, G(r)~-r
         ws = mantid.mtd[ws_name]
-        r_data = ws.dataX(0)
-        y_data = ws.dataY(0)
+        r_data = ws.x(0)
+        y_data = ws.mutableY(0)
         for i in range(len(r_data)):
             if r_data[i] < r_min and i < len(y_data):  # ws will be points but cope if it's bin edges
                 y_data[i] = 0.0

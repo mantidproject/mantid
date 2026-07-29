@@ -45,12 +45,12 @@ public:
       }
       for (int j = 0; j < 5; ++j) {
         for (int k = 0; k < 6; ++k) {
-          space2D->dataX(j)[k] = k;
+          space2D->mutableX(j)[k] = k;
         }
         auto beginY = std::next(a.begin(), j * 5);
-        space2D->dataY(j) = std::vector<double>(beginY, std::next(beginY, 5));
+        space2D->mutableY(j) = std::vector<double>(beginY, std::next(beginY, 5));
         auto beginE = std::next(e.begin(), j * 5);
-        space2D->dataE(j) = std::vector<double>(beginE, std::next(beginE, 5));
+        space2D->mutableE(j) = std::vector<double>(beginE, std::next(beginE, 5));
       }
       InstrumentCreationHelper::addFullInstrumentToWorkspace(*space2D, false, false, "");
       // Register the workspace in the data service
@@ -172,11 +172,11 @@ public:
     MatrixWorkspace_const_sptr input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("toCrop");
     for (int i = 0; i < 3; ++i) {
       for (int j = 0; j < 3; ++j) {
-        TS_ASSERT_EQUALS(output->readX(i)[j], input->readX(i + 2)[j + 1]);
-        TS_ASSERT_EQUALS(output->readY(i)[j], input->readY(i + 2)[j + 1]);
-        TS_ASSERT_EQUALS(output->readE(i)[j], input->readE(i + 2)[j + 1]);
+        TS_ASSERT_EQUALS(output->x(i)[j], input->x(i + 2)[j + 1]);
+        TS_ASSERT_EQUALS(output->y(i)[j], input->y(i + 2)[j + 1]);
+        TS_ASSERT_EQUALS(output->e(i)[j], input->e(i + 2)[j + 1]);
       }
-      TS_ASSERT_EQUALS(output->readX(i)[3], input->readX(i + 2)[4]);
+      TS_ASSERT_EQUALS(output->x(i)[3], input->x(i + 2)[4]);
       TS_ASSERT_EQUALS(output->getAxis(1)->spectraNo(i), input->getAxis(1)->spectraNo(i + 2));
       TS_ASSERT_EQUALS(output->getSpectrum(i).getDetectorIDs(), input->getSpectrum(i + 2).getDetectorIDs());
     }
@@ -199,12 +199,12 @@ public:
 
     const size_t xsize = output->blocksize();
     for (size_t i = 0; i < output->getNumberHistograms(); ++i) {
-      const auto &outX = output->readX(i);
-      const auto &outY = output->readY(i);
-      const auto &outE = output->readE(i);
-      const auto &inX = input->readX(i);
-      const auto &inY = input->readY(i);
-      const auto &inE = input->readE(i);
+      const auto &outX = output->x(i);
+      const auto &outY = output->y(i);
+      const auto &outE = output->e(i);
+      const auto &inX = input->x(i);
+      const auto &inY = input->y(i);
+      const auto &inE = input->e(i);
 
       for (size_t j = 0; j < xsize; ++j) {
         TS_ASSERT_EQUALS(outX[j], inX[j]);
@@ -237,12 +237,12 @@ public:
 
     const size_t xsize = output->blocksize();
     for (size_t i = 0; i < output->getNumberHistograms(); ++i) {
-      const auto &outX = output->readX(i);
-      const auto &outY = output->readY(i);
-      const auto &outE = output->readE(i);
-      const auto &inX = input->readX(i);
-      const auto &inY = input->readY(i);
-      const auto &inE = input->readE(i);
+      const auto &outX = output->x(i);
+      const auto &outY = output->y(i);
+      const auto &outE = output->e(i);
+      const auto &inX = input->x(i);
+      const auto &inY = input->y(i);
+      const auto &inE = input->e(i);
 
       for (size_t j = 0; j < xsize; ++j) {
         TS_ASSERT_EQUALS(outX[j], inX[j]);
@@ -259,7 +259,7 @@ public:
     MatrixWorkspace_sptr input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("toCrop");
     // Change the first X vector
     for (int k = 0; k < 6; ++k) {
-      input->dataX(0)[k] = k + 3;
+      input->mutableX(0)[k] = k + 3;
     }
 
     CropWorkspace crop4;
@@ -281,9 +281,9 @@ public:
     for (int i = 0; i < 5; ++i) {
       for (int j = 0; j < 5; ++j) {
         if ((i == 0 && j == 0) || (i != 0 && j == 3)) {
-          TS_ASSERT_EQUALS(output->readY(i)[j], input->readY(i)[j]);
+          TS_ASSERT_EQUALS(output->y(i)[j], input->y(i)[j]);
         } else {
-          TS_ASSERT_EQUALS(output->readY(i)[j], 0.0);
+          TS_ASSERT_EQUALS(output->y(i)[j], 0.0);
         }
       }
     }
@@ -294,7 +294,7 @@ public:
     EventWorkspace_sptr input = WorkspaceCreationHelper::createEventWorkspace(5, 10, 10, 0.0, 1.0);
     // Change the first X vector to 3, 4, 5 ..
     for (int k = 0; k <= 10; ++k) {
-      input->dataX(0)[k] = k + 3;
+      input->mutableX(0)[k] = k + 3;
     }
     CropWorkspace crop4;
     TS_ASSERT_THROWS_NOTHING(crop4.initialize());
@@ -314,8 +314,8 @@ public:
     TS_ASSERT_EQUALS(output->blocksize(), input->blocksize());
 
     for (size_t i = 0; i < 5; ++i) {
-      const MantidVec &iX = input->readX(i);
-      const MantidVec &oX = output->readX(i);
+      Mantid::HistogramData::HistogramX const &iX = input->x(i);
+      Mantid::HistogramData::HistogramX const &oX = output->x(i);
       for (size_t j = 0; j < iX.size(); j++) {
         TS_ASSERT_EQUALS(iX[j], oX[j]);
       }
@@ -337,8 +337,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName));
 
     TSM_ASSERT_EQUALS("The number of bins", 3, output->blocksize());
-    TSM_ASSERT_EQUALS("First bin boundary", -5, output->readX(0).front());
-    TSM_ASSERT_EQUALS("Last bin boundary", -2, output->readX(0).back());
+    TSM_ASSERT_EQUALS("First bin boundary", -5, output->x(0).front());
+    TSM_ASSERT_EQUALS("Last bin boundary", -2, output->x(0).back());
 
     AnalysisDataService::Instance().remove(wsName);
   }
@@ -359,7 +359,7 @@ public:
     const double flagged(100.0);
     const size_t numBins = inputWS->blocksize();
     for (size_t i = 0; i < numBins; ++i) {
-      inputWS->dataY(croppedIndex)[i] = flagged;
+      inputWS->mutableY(croppedIndex)[i] = flagged;
     }
     const char *labels[3] = {"Entry1", "Entry2", "Entry3"};
     auto inputTextAxis = std::make_unique<TextAxis>(3);

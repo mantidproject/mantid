@@ -379,10 +379,10 @@ public:
 
   void test_setPoints_legacy_self_assignment() {
     Histogram h(Points(0));
-    auto &x = h.readX();
+    auto &x = h.x();
     auto old_address = &x;
     h.setPoints(x);
-    TS_ASSERT_EQUALS(&h.readX(), old_address);
+    TS_ASSERT_EQUALS(&h.x(), old_address);
   }
 
   void test_setPoints_self_assignment_with_size_mismatch() {
@@ -525,10 +525,10 @@ public:
 
   void test_setBinEdges_legacy_self_assignment() {
     Histogram h(BinEdges(0));
-    auto &x = h.readX();
+    auto &x = h.x();
     auto old_address = &x;
     h.setBinEdges(x);
-    TS_ASSERT_EQUALS(&h.readX(), old_address);
+    TS_ASSERT_EQUALS(&h.x(), old_address);
   }
 
   void test_setBinEdges_self_assignment_with_size_mismatch() {
@@ -583,10 +583,10 @@ public:
   void test_setCounts_legacy_self_assignment() {
     Histogram h(Points(0));
     h.setCounts(0);
-    auto &y = h.readY();
+    auto &y = h.y();
     auto old_address = &y;
-    h.setPoints(y);
-    TS_ASSERT_EQUALS(&h.readY(), old_address);
+    h.setCounts(y);
+    TS_ASSERT_EQUALS(&h.y(), old_address);
   }
 
   void test_setFrequencies_size_mismatch() {
@@ -623,10 +623,10 @@ public:
   void test_setFrequencies_legacy_self_assignment() {
     Histogram h(Points(0));
     h.setFrequencies(0);
-    auto &y = h.readY();
+    auto &y = h.y();
     auto old_address = &y;
     h.setFrequencies(y);
-    TS_ASSERT_EQUALS(&h.readY(), old_address);
+    TS_ASSERT_EQUALS(&h.y(), old_address);
   }
 
   void test_setCountVariances() {

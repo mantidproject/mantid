@@ -930,8 +930,8 @@ public:
     }
 
 	// Sanity check, the inputs were set to have 2.0 in each bin (2 events)
-    TS_ASSERT_DELTA(  rhs->readY(0)[0], 2.00, 1e-5);
-    TS_ASSERT_DELTA(  rhs->readE(0)[0], sqrt(2.00), 1e-5);
+    TS_ASSERT_DELTA(  rhs->y(0)[0], 2.00, 1e-5);
+    TS_ASSERT_DELTA(  rhs->e(0)[0], sqrt(2.00), 1e-5);
 
     //Do the minus
     IAlgorithm * alg;
@@ -984,20 +984,20 @@ public:
         }
 
         //Incoming event workspace should still have 2.0 for values
-        TS_ASSERT_DELTA(  lhs->readY(pix)[i], 2.00, 1e-5);
-        TS_ASSERT_DELTA(  lhs->readE(pix)[i], sqrt(2.0), 1e-5);
+        TS_ASSERT_DELTA(  lhs->y(pix)[i], 2.00, 1e-5);
+        TS_ASSERT_DELTA(  lhs->e(pix)[i], sqrt(2.0), 1e-5);
 
         if (!rhsShouldBeCleared)
         {
           //Incoming event workspace should still have 2.0 for values
-          TS_ASSERT_DELTA(  rhs->readY(pix)[i], 2.00, 1e-5);
-          TS_ASSERT_DELTA(  rhs->readE(pix)[i], sqrt(2.0), 1e-5);
+          TS_ASSERT_DELTA(  rhs->y(pix)[i], 2.00, 1e-5);
+          TS_ASSERT_DELTA(  rhs->e(pix)[i], sqrt(2.0), 1e-5);
         }
         else
         {
           // If you cleared it, should be 0
-          TS_ASSERT_DELTA(  rhs->readY(pix)[i], 0.00, 1e-5);
-          TS_ASSERT_DELTA(  rhs->readE(pix)[i], 0.00, 1e-5);
+          TS_ASSERT_DELTA(  rhs->y(pix)[i], 0.00, 1e-5);
+          TS_ASSERT_DELTA(  rhs->e(pix)[i], 0.00, 1e-5);
         }
       }
 

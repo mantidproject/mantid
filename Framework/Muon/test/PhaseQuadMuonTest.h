@@ -177,9 +177,9 @@ public:
     MatrixWorkspace_sptr outputWs = phaseQuad->getProperty("OutputWorkspace");
 
     TS_ASSERT_EQUALS(outputWs->getNumberHistograms(), 2);
-    TS_ASSERT_EQUALS(outputWs->getSpectrum(0).readX(),
-                     m_loadedData->getSpectrum(0).readX()); // Check outputWs X values
-    TS_ASSERT_EQUALS(outputWs->getSpectrum(1).readX(), m_loadedData->getSpectrum(1).readX());
+    TS_ASSERT_EQUALS(outputWs->getSpectrum(0).x(),
+                     m_loadedData->getSpectrum(0).x()); // Check outputWs X values
+    TS_ASSERT_EQUALS(outputWs->getSpectrum(1).x(), m_loadedData->getSpectrum(1).x());
     // Check output log is not empty
     TS_ASSERT(outputWs->mutableRun().getLogData().size() > 0);
 
@@ -213,9 +213,9 @@ public:
     MatrixWorkspace_sptr outputWs = phaseQuad->getProperty("OutputWorkspace");
 
     TS_ASSERT_EQUALS(outputWs->getNumberHistograms(), 2);
-    TS_ASSERT_EQUALS(outputWs->getSpectrum(0).readX(),
-                     m_loadedData->getSpectrum(0).readX()); // Check outputWs X values
-    TS_ASSERT_EQUALS(outputWs->getSpectrum(1).readX(), m_loadedData->getSpectrum(1).readX());
+    TS_ASSERT_EQUALS(outputWs->getSpectrum(0).x(),
+                     m_loadedData->getSpectrum(0).x()); // Check outputWs X values
+    TS_ASSERT_EQUALS(outputWs->getSpectrum(1).x(), m_loadedData->getSpectrum(1).x());
     // Check output log is not empty
     TS_ASSERT(outputWs->mutableRun().getLogData().size() > 0);
 
@@ -271,9 +271,9 @@ public:
     MatrixWorkspace_sptr outputWs = phaseQuad->getProperty("OutputWorkspace");
 
     TS_ASSERT_EQUALS(outputWs->getNumberHistograms(), 2);
-    TS_ASSERT_EQUALS(outputWs->getSpectrum(0).readX(),
-                     m_loadedData->getSpectrum(0).readX()); // Check outputWs X values
-    TS_ASSERT_EQUALS(outputWs->getSpectrum(1).readX(), m_loadedData->getSpectrum(1).readX());
+    TS_ASSERT_EQUALS(outputWs->getSpectrum(0).x(),
+                     m_loadedData->getSpectrum(0).x()); // Check outputWs X values
+    TS_ASSERT_EQUALS(outputWs->getSpectrum(1).x(), m_loadedData->getSpectrum(1).x());
 
     const auto specReY = outputWs->getSpectrum(0).y();
     const auto specReE = outputWs->getSpectrum(0).e();

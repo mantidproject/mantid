@@ -247,8 +247,8 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
         wrk = WorkspaceFactory.create("Workspace2D", NVectors=dim, XLength=length + 1, YLength=length)
         for i in range(dim):
             wrk.getSpectrum(i).setDetectorID(i + 1)
-        wrk.setX(0, self._bins)
-        wrk.setY(0, s_points)
+        wrk.setSharedX(0, self._bins)
+        wrk.setSharedY(0, s_points)
         AnalysisDataService.addOrReplace(workspace, wrk)
 
         # Set correct units on workspace

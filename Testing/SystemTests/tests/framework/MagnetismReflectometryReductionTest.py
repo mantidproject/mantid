@@ -87,7 +87,7 @@ class MagnetismReflectometryReductionConstQTest(systemtesting.MantidSystemTest):
         )
 
     def validate(self):
-        refl = mtd["r_24949"].dataY(0)
+        refl = mtd["r_24949"].y(0)
         return math.fabs(refl[1] - 0.648596877775159) < 0.002
 
 
@@ -121,7 +121,7 @@ class MagnetismReflectometryReductionSkipRebinTest(systemtesting.MantidSystemTes
         )
 
     def validate(self):
-        q_values = mtd["r_24949"].dataX(0)
+        q_values = mtd["r_24949"].x(0)
         return math.fabs(q_values[0] - 0.005) > 0.001
 
 
@@ -154,7 +154,7 @@ class MagnetismReflectometryReductionConstQWLCutTest(systemtesting.MantidSystemT
         )
 
     def validate(self):
-        refl = mtd["r_24949"].dataY(0)
+        refl = mtd["r_24949"].y(0)
         return math.fabs(refl[1] - 0.648596877775159) < 0.002
 
 
@@ -202,7 +202,7 @@ class MagnetismReflectometryReductionEmptyCurve(systemtesting.MantidSystemTest):
 
     def validate(self):
         empty_component = mtd["r42100_reduced"][1]  # the second workspace in the GroupWorkspace is the empty one
-        return np.all(empty_component.readY(0) < 1e-9)  # reflectivity curve has only zeroes
+        return np.all(empty_component.y(0) < 1e-9)  # reflectivity curve has only zeroes
 
 
 class MRFilterCrossSectionsTest(systemtesting.MantidSystemTest):

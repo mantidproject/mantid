@@ -188,7 +188,7 @@ void LoadILLLagrange::loadMetaData() {
   // Add scanned variable: energy to the sample logs so it can be used for merging workspaces as X axis
   TimeSeriesProperty<double> *prop = new TimeSeriesProperty<double>("Ei");
   int index = 0;
-  for (auto energy : m_outputWorkspace->readX(0)) {
+  for (auto energy : m_outputWorkspace->x(0)) {
     prop->addValue(index++, energy);
   }
   m_outputWorkspace->mutableRun().addProperty(prop);

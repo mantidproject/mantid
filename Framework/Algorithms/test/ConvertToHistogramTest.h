@@ -72,7 +72,7 @@ public:
 
     const double expectedX[11] = {-0.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5};
     for (int j = 0; j < numBoundaries; ++j) {
-      TS_ASSERT_EQUALS(outputWS->readX(0)[j], expectedX[j]);
+      TS_ASSERT_EQUALS(outputWS->x(0)[j], expectedX[j]);
     }
   }
 
@@ -123,10 +123,10 @@ public:
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 2);
 
     // check the data
-    const Mantid::MantidVec &Y0 = outputWS->readY(0);
-    const Mantid::MantidVec &X0 = outputWS->readX(0);
-    const Mantid::MantidVec &Y1 = outputWS->readY(1);
-    const Mantid::MantidVec &X1 = outputWS->readX(1);
+    auto const &Y0 = outputWS->y(0);
+    auto const &X0 = outputWS->x(0);
+    auto const &Y1 = outputWS->y(1);
+    auto const &X1 = outputWS->x(1);
     TS_ASSERT_EQUALS(Y0.size(), 3);
     TS_ASSERT_EQUALS(X0.size(), 4);
     TS_ASSERT_EQUALS(Y1.size(), 2);

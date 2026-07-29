@@ -592,8 +592,8 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
                     y.append(0.0)
                     e.append(1.0)
                 else:
-                    y.append(_t_w.readY(i)[0])
-                    e.append(_t_w.readE(i)[0])
+                    y.append(_t_w.y(i)[0])
+                    e.append(_t_w.e(i)[0])
         x = np.asarray(x)
         y = np.asarray(y)
         e = np.asarray(e)

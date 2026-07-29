@@ -398,9 +398,9 @@ private:
   void doTestOutputSpectrum(const MatrixWorkspace_sptr &ws, size_t index, size_t nHistograms = 3) {
     TS_ASSERT(ws);
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), nHistograms);
-    auto &data = ws->readY(0);
-    auto &calc = ws->readY(1);
-    auto &diff = ws->readY(2);
+    auto &data = ws->y(0);
+    auto &calc = ws->y(1);
+    auto &diff = ws->y(2);
 
     for (size_t i = 0; i < data.size(); ++i) {
       TS_ASSERT_EQUALS(data[i], static_cast<double>(index + 1));

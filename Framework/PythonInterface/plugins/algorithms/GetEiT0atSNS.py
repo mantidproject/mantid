@@ -84,7 +84,7 @@ class GetEiT0atSNS(mantid.api.PythonAlgorithm):
                     wtemp = mantid.simpleapi.ChangeBinOffset(wtemp, t2f * 16667, sp2, sp2)
                 else:
                     wtemp = wm
-                maxtof = wtemp.readX(0)[-1]
+                maxtof = wtemp.x(0)[-1]
                 period = 1.0e6 / 60
                 Nmax = int(maxtof / period) + 1
                 for i in range(1, Nmax + 1):

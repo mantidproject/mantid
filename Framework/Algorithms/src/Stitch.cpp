@@ -40,7 +40,7 @@ static const std::string OUTPUT_SCALE_FACTORS_PROPERTY = "OutputScaleFactorsWork
  * @return a pair of min-x and max-x
  */
 std::pair<double, double> getInterval(const MatrixWorkspace &ws) {
-  return std::make_pair(ws.readX(0).front(), ws.readX(0).back());
+  return std::make_pair(ws.x(0).front(), ws.x(0).back());
 }
 
 /**
@@ -110,7 +110,7 @@ MatrixWorkspace_sptr medianWorkspaceLocal(const MatrixWorkspace_sptr &ws) {
   for (int i = 0; i < static_cast<int>(nSpectra); ++i) {
     const size_t wsIndex = static_cast<size_t>(i);
     auto &y = out->mutableY(wsIndex);
-    y = std::vector<double>(1, median(ws->readY(wsIndex)));
+    y = std::vector<double>(1, median(ws->y(wsIndex).rawData()));
   }
   return out;
 }
@@ -403,7 +403,7 @@ void Stitch::scale(const MatrixWorkspace_sptr &wsToMatch, const MatrixWorkspace_
     interpolator->execute();
     rebinnedToScale = interpolator->getProperty("OutputWorkspace");
   } else {
-    if (croppedToMatch->readX(0) != croppedToScale->readX(0)) {
+    if (croppedToMatch->x(0) != croppedToScale->x(0)) {
       throw std::runtime_error(
           "Unable to make the ratio; only one overlapping point is found and it is at different x");
     } else {
@@ -445,7 +445,7 @@ void Stitch::recordScaleFactor(const Mantid::API::MatrixWorkspace_sptr &scaleFac
   const size_t index = std::distance(inputs.cbegin(), it);
   PARALLEL_FOR_IF(threadSafe(*scaleFactorWorkspace))
   for (int i = 0; i < static_cast<int>(scaleFactorWorkspace->getNumberHistograms()); ++i) {
-    scaleFactorWorkspace->mutableY(i)[index] = 1. / medianWorkspace->readY(i)[0];
+    scaleFactorWorkspace->mutableY(i)[index] = 1. / medianWorkspace->y(i)[0];
   }
 }
 

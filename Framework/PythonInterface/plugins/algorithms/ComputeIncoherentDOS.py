@@ -305,8 +305,8 @@ class ComputeIncoherentDOS(PythonAlgorithm):
         if spectrum_axis_index == 1:
             dos2d = Transpose(dos2d, StoreInADS=False)
         for i in range(len(y)):
-            dos2d.setY(i, y[i, :])
-            dos2d.setE(i, e[i, :])
+            dos2d.setSharedY(i, y[i, :])
+            dos2d.setSharedE(i, e[i, :])
         dos2d.setYUnitLabel(ylabel)
 
         dos1d = cut1D(dos2d, qqgrid, spectrum_binning, dosebin)

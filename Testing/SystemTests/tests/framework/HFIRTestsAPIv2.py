@@ -95,9 +95,9 @@ def _check_result(ws, test_file, tolerance=1e-6):
     passed = True
 
     # Read mantid data
-    x = ws.dataX(0)[: len(ws.dataX(0))]
-    y = ws.dataY(0)
-    e = ws.dataE(0)
+    x = ws.x(0)[: len(ws.x(0))]
+    y = ws.y(0)
+    e = ws.e(0)
     data_mantid = list(zip(x, y, e))
 
     # Read the test data to compare with
@@ -259,7 +259,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
         Reduce1D()
 
         ws = AnalysisDataService.retrieve("BioSANS_test_data")
-        v_x = ws.dataX(0)
+        v_x = ws.x(0)
         self.assertEqual(v_x[0], 4.4)
         self.assertEqual(v_x[1], 5.6)
 
@@ -336,7 +336,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
         Reduce1D()
 
         ws = AnalysisDataService.retrieve("BioSANS_test_data_Iq")
-        data = ws.dataY(0)
+        data = ws.y(0)
         check = [
             0.19472,
             0.204269,
@@ -459,7 +459,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
         Reduce()
 
         ws = AnalysisDataService.retrieve("BioSANS_test_data_Iqxy")
-        data = ws.dataX(0)
+        data = ws.x(0)
         check = [
             -0.11,
             -0.10489929,
@@ -680,7 +680,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
         Reduce1D()
 
         ws = AnalysisDataService.retrieve("BioSANS_test_data_Iq")
-        data = ws.dataY(0)
+        data = ws.y(0)
         self.assertAlmostEqual(data[0], 0.1948464330517794, delta=0.00001)
         self.assertAlmostEqual(data[10], 0.25088976280978281, delta=0.00001)
         self.assertAlmostEqual(data[20], 0.252098592791137, delta=0.00001)
@@ -696,7 +696,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
         Reduce1D()
 
         ws = AnalysisDataService.retrieve("BioSANS_test_data_Iq")
-        data = ws.dataY(0)
+        data = ws.y(0)
         check = [
             0.268942,
             0.272052,
@@ -814,7 +814,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
         Reduce1D()
 
         ws = AnalysisDataService.retrieve("BioSANS_test_data_Iq")
-        data = ws.dataY(0)
+        data = ws.y(0)
         check = [
             0.269037,
             0.272176,
@@ -934,7 +934,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
         Reduce1D()
 
         ws = AnalysisDataService.retrieve("BioSANS_test_data_Iq")
-        data = ws.dataY(0)
+        data = ws.y(0)
         check = [
             0.514758,
             0.520759,
@@ -1060,7 +1060,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
         AppendDataFile("BioSANS_test_data.xml")
         Reduce1D()
 
-        data = mtd["BioSANS_test_data_Iq"].dataY(0)
+        data = mtd["BioSANS_test_data_Iq"].y(0)
         self.assertAlmostEqual(data[0], 0.00418831, delta=0.00001)
         self.assertAlmostEqual(data[10], 0.0042193, delta=0.00001)
 
@@ -1107,7 +1107,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
         Reduce1D()
 
         ws = AnalysisDataService.retrieve("BioSANS_test_data_Iq")
-        data = ws.dataY(0)
+        data = ws.y(0)
         self.assertAlmostEqual(data[0], 0.0, 10)
         self.assertAlmostEqual(data[10], 0.0, 10)
         self.assertAlmostEqual(data[20], 0.0, 10)
@@ -1130,7 +1130,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
         Reduce1D()
 
         ws = AnalysisDataService.retrieve("BioSANS_test_data_Iq")
-        data = ws.dataY(0)
+        data = ws.y(0)
         self.assertAlmostEqual(data[0], 0.0, 10)
         self.assertAlmostEqual(data[10], 0.0, 10)
         self.assertAlmostEqual(data[20], 0.0, 10)
@@ -1150,7 +1150,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
         Reduce1D()
 
         ws = AnalysisDataService.retrieve("test_data_Iq")
-        data = ws.dataY(0)
+        data = ws.y(0)
         self.assertAlmostEqual(data[0], 0.0, 10)
         self.assertAlmostEqual(data[10], 0.0, 10)
         self.assertAlmostEqual(data[20], 0.0, 10)
@@ -1167,7 +1167,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
         Reduce1D()
 
         ws = AnalysisDataService.retrieve("BioSANS_test_data_Iq")
-        data = ws.dataY(0)
+        data = ws.y(0)
         check = [
             0.374914,
             0.393394,
@@ -1401,7 +1401,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
         Reduce1D()
 
         ws = AnalysisDataService.retrieve("BioSANS_exp61_scan0004_0001_Iq")
-        res = ws.dataY(0)
+        res = ws.y(0)
         for i in range(len(res)):
             self._assertAlmostEqual(res[i], ref[i], delta=0.01, rel_delta=0.001, msg="result point %d: %g, found %g" % (i, ref[i], res[i]))
 
@@ -1531,7 +1531,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
         Reduce1D()
 
         ws = AnalysisDataService.retrieve("BioSANS_exp61_scan0004_0001_Iq")
-        res = ws.dataY(0)
+        res = ws.y(0)
         for i in range(len(res)):
             self._assertAlmostEqual(res[i], ref[i], delta=0.01, rel_delta=0.001, msg="result point %d: %g, found %g" % (i, ref[i], res[i]))
 
@@ -1659,7 +1659,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
         Reduce1D()
 
         ws = AnalysisDataService.retrieve("BioSANS_exp61_scan0004_0001_Iq")
-        res = ws.dataY(0)
+        res = ws.y(0)
         for i in range(len(res)):
             self._assertAlmostEqual(res[i], ref[i], delta=0.01, rel_delta=0.001, msg="result point %d: %g, found %g" % (i, ref[i], res[i]))
 
@@ -1677,7 +1677,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
         Reduce1D()
 
         ws = AnalysisDataService.retrieve("test_data_Iq")
-        data = ws.dataY(0)
+        data = ws.y(0)
         self.assertAlmostEqual(data[0], 0.195821, delta=0.00001)
         self.assertAlmostEqual(data[10], 0.256210, delta=0.00001)
         self.assertAlmostEqual(data[20], 0.257666, delta=0.00001)
@@ -1696,7 +1696,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
         Reduce1D()
 
         ws = AnalysisDataService.retrieve("test_data_Iq")
-        data = ws.dataY(0)
+        data = ws.y(0)
         self.assertAlmostEqual(data[0], -0.0682723, delta=0.00001)
         self.assertAlmostEqual(data[10], -0.068800, delta=0.00001)
         self.assertAlmostEqual(data[20], -0.066403, delta=0.00001)
@@ -1715,7 +1715,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
         AzimuthalAverage(binning="0.01,0.001,0.11", error_weighting=True)
         Reduce1D()
 
-        data = mtd["test_data_Iq"].dataY(0)
+        data = mtd["test_data_Iq"].y(0)
         self.assertAlmostEqual(data[0], 0.1787709, delta=0.00001)
         self.assertAlmostEqual(data[10], 0.1801518, delta=0.00001)
         self.assertAlmostEqual(data[20], 0.1738586, delta=0.00001)
@@ -1735,7 +1735,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
         AzimuthalAverage(binning="0.01,0.001,0.11", error_weighting=True)
         Reduce1D()
 
-        data = mtd["test_data_Iq"].dataY(0)
+        data = mtd["test_data_Iq"].y(0)
         self.assertAlmostEqual(data[0], -0.046791, delta=0.00001)
         self.assertAlmostEqual(data[10], -0.047874, delta=0.00001)
         self.assertAlmostEqual(data[20], -0.047785, delta=0.00001)

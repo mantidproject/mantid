@@ -266,7 +266,7 @@ class AbstractInst(object):
             )
             det_ids_on_bank_to_mask = {}
             for ws_index in range(cal_workspace.getNumberHistograms()):
-                grouping = cal_workspace.dataY(ws_index)[0]
+                grouping = cal_workspace.y(ws_index)[0]
                 if grouping > 0:
                     det_id = cal_workspace.getDetectorIDs(ws_index)[0]
                     if grouping in det_ids_on_bank_to_mask:

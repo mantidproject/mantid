@@ -86,7 +86,7 @@ public:
 
     // Create a workspace to mask out one of the spectra
     MatrixWorkspace_sptr mask = WorkspaceFactory::Instance().create("MaskWorkspace", 3, 1, 1);
-    mask->dataY(1)[0] = 1;
+    mask->mutableY(1)[0] = 1;
 
     TS_ASSERT_THROWS_NOTHING(stepScan->setProperty("MaskWorkspace", mask));
     TS_ASSERT_THROWS_NOTHING(stepScan->setProperty("XMin", 40.0));

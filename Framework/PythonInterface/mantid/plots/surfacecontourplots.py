@@ -75,8 +75,8 @@ def _create_workspace_for_group_plot(
             else:
                 matrix_ws.applyPointsFromAnotherWorkspace(ws, plot_index, i)
 
-            matrix_ws.setY(i, ws.readY(plot_index))
-            matrix_ws.setE(i, ws.readE(plot_index))
+            matrix_ws.setSharedY(i, ws.y(plot_index))
+            matrix_ws.setSharedE(i, ws.e(plot_index))
 
             if log_name == "Custom":
                 log_values.append(get_single_workspace_log_value(i, log_values=custom_log_values))
@@ -102,7 +102,7 @@ def _group_contents_have_same_x(workspaces: List[Workspace], index: int) -> bool
             if ws.getNumberHistograms() < spectrum:
                 raise RuntimeError("Spectrum index too large for some workspaces.")
             else:
-                return ws.readX(spectrum)
+                return ws.x(spectrum)
         else:
             raise RuntimeError("Group contains something other than MatrixWorkspaces.")
 

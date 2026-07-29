@@ -111,7 +111,7 @@ class PoldiAutoCorrelation(PythonAlgorithm):
         # in actuality not all d-spacings will be measured within the wavelength range in every pixel
         # but this is a small effect as detector doesn't cover much two-theta range
         dspac_min, dspac_max = get_dspac_limits(tths.min(), tths.max(), lambda_min, lambda_max)
-        bin_width = ws.readX(0)[1] - ws.readX(0)[0]
+        bin_width = ws.x(0)[1] - ws.x(0)[0]
         dspacs = get_final_dspac_array(bin_width, dspac_min, dspac_max, time_max)[:, None]
         # perform auto-correlation (Eq. 7 in POLDI concept paper)
         ipulses = np.arange(npulses)[:, None]
@@ -126,7 +126,7 @@ class PoldiAutoCorrelation(PythonAlgorithm):
         else:
             do_autocorr = _autocorr_spec_nearest
         generator = Parallel(n_jobs=min(4, cpu_count()), prefer="threads", return_as="generator")(
-            delayed(do_autocorr)(ws.readY(ispec), tof_d1Ang[ispec], dspacs, offsets, bin_width, progress) for ispec in range(nspec)
+            delayed(do_autocorr)(ws.y(ispec), tof_d1Ang[ispec], dspacs, offsets, bin_width, progress) for ispec in range(nspec)
         )
         # sum over spectra in each group
         corr = np.zeros((ngroups, len(dspacs)))

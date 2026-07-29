@@ -14,7 +14,7 @@ class LoadWANDTest(unittest.TestCase):
         self.assertTrue(ws)
         self.assertEqual(ws.blocksize(), 1)
         self.assertEqual(ws.getNumberHistograms(), 1966080 // 4)
-        self.assertEqual(ws.readY(257775), 4)
+        self.assertEqual(ws.y(257775), 4)
         self.assertEqual(ws.run().getProtonCharge(), 907880)
         self.assertAlmostEqual(ws.run().getGoniometer().getEulerAngles()[0], -142.6)
         self.assertAlmostEqual(ws.run().getLogData("duration").value, 40.05)

@@ -91,7 +91,7 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
 
         if len(binning) == 0 or (binning[0] == 0 and binning[1] == 0 and binning[2] == 0):
             # Wavelength. Read in the wavelength bins. Skip the first one which is not set up properly for EQ-SANS
-            x = workspace.dataX(1)
+            x = workspace.x(1)
             x_length = len(x)
             if x_length < 2:
                 raise RuntimeError("Azimuthal averaging expects at least one wavelength bin")

@@ -55,8 +55,8 @@ class CorrectTOFTest(unittest.TestCase):
         velocity = h / (m_n * 6.0e-10)
         t_el = 4.0e6 / velocity
         t_corr = np.arange(self.xmin, self.xmax + 1.0, 10.5) + t_el - (8189.5 - 2123.33867005)
-        self.assertTrue(np.allclose(t_corr, wsoutput.readX(0)))  # sdd = 4
-        self.assertTrue(np.allclose(t_corr + t_el, wsoutput.readX(1)))  # sdd = 8
+        self.assertTrue(np.allclose(t_corr, wsoutput.x(0)))  # sdd = 4
+        self.assertTrue(np.allclose(t_corr + t_el, wsoutput.x(1)))  # sdd = 8
 
         run_algorithm("DeleteWorkspace", Workspace=wsoutput)
 
@@ -90,19 +90,19 @@ class CorrectTOFTest(unittest.TestCase):
 
         # create reference data for X axis
         tof1 = 2123.33867005
-        dataX = self._input_ws.readX(0) - tof1
+        dataX = self._input_ws.x(0) - tof1
         tel = 8189.5 - tof1
         factor = m_n * 1e15 / eV
         newX = 0.5 * factor * 16.0 * (1 / tel**2 - 1 / dataX**2)
         # compare
-        # self.assertEqual(newX[0], ws_dE.readX(0)[0])
-        self.assertTrue(np.allclose(newX, ws_dE.readX(0), atol=0.01))
+        # self.assertEqual(newX[0], ws_dE.x(0)[0])
+        self.assertTrue(np.allclose(newX, ws_dE.x(0), atol=0.01))
 
         # create reference data for Y axis and compare to the output
         tof = dataX[:-1] + 5.25
-        newY = self._input_ws.readY(0) * tof**3 / (factor * 10.5 * 16.0)
+        newY = self._input_ws.y(0) * tof**3 / (factor * 10.5 * 16.0)
         # compare
-        self.assertTrue(np.allclose(newY, ws_dE.readY(0), rtol=0.01))
+        self.assertTrue(np.allclose(newY, ws_dE.y(0), rtol=0.01))
 
         run_algorithm("DeleteWorkspace", Workspace=ws_dE)
         run_algorithm("DeleteWorkspace", Workspace=wscorr)

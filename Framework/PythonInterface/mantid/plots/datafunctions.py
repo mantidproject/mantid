@@ -374,15 +374,15 @@ def get_spectrum(workspace, wkspIndex, normalization: PlotNormalizationType, wit
     the bin centers for x.
     To be used in 1D plots (plot, scatter, errorbar)
     """
-    x = workspace.readX(wkspIndex)
-    y = workspace.readY(wkspIndex)
+    x = workspace.x(wkspIndex)
+    y = workspace.y(wkspIndex)
     dy = None
     dx = None
 
     if withDy:
-        dy = workspace.readE(wkspIndex)
+        dy = workspace.e(wkspIndex)
     if withDx and workspace.getSpectrum(wkspIndex).hasDx():
-        dx = workspace.readDx(wkspIndex)
+        dx = workspace.dx(wkspIndex)
 
     if workspace.isHistogramData():
         boundary_points = points_from_boundaries(x)
@@ -466,14 +466,14 @@ def get_bins(workspace, bin_index, withDy=False, withDx=False):
     dy = [] if withDy else None
     dx = [] if withDx else None
     for row_index in indices:
-        y_data = workspace.readY(int(row_index))
+        y_data = workspace.y(int(row_index))
         if bin_index < len(y_data):
             x_values.append(row_index)
             y_values.append(y_data[bin_index])
             if withDy:
-                dy.append(workspace.readE(int(row_index))[bin_index])
+                dy.append(workspace.e(int(row_index))[bin_index])
             if withDx:
-                dx.append(workspace.readDx(int(row_index))[bin_index])
+                dx.append(workspace.dx(int(row_index))[bin_index])
 
     return x_values, y_values, dy, dx
 
@@ -561,7 +561,7 @@ def get_matrix_2d_ragged(
 
         for spectrum_index in range(workspace.getNumberHistograms()):
             if not (spec_info and spec_info.hasDetectors(spectrum_index) and spec_info.isMonitor(spectrum_index)):
-                xtmp = workspace.readX(spectrum_index)
+                xtmp = workspace.x(spectrum_index)
                 if workspace.isHistogramData():
                     # input x is edges
                     xtmp = mantid.plots.datafunctions.points_from_boundaries(xtmp)
@@ -574,7 +574,7 @@ def get_matrix_2d_ragged(
                 delta = min(delta, diff.min())
                 if common_bins:
                     break
-                xtmp = workspace.readX(0)
+                xtmp = workspace.x(0)
         if delta == np.finfo(np.float64).max:
             delta = np.diff(xtmp).min()
         if min_value == np.finfo(np.float64).max:
@@ -679,7 +679,7 @@ def interpolate_y_data(workspace, x, y, normalize_by_bin_width, spectrum_info=No
             centers, ztmp, _, _ = get_spectrum(workspace, workspace_index, normalization=normalization, withDy=False, withDx=False)
             interpolation_function = interp1d(centers, ztmp, kind="nearest", bounds_error=False, fill_value="extrapolate")
             # only set values in the range of workspace
-            x_range = np.where((x >= workspace.readX(workspace_index)[0]) & (x <= workspace.readX(workspace_index)[-1]))
+            x_range = np.where((x >= workspace.x(workspace_index)[0]) & (x <= workspace.x(workspace_index)[-1]))
             # set values outside x data to nan
             counts[index, x_range] = interpolation_function(x[x_range])
     counts = np.ma.masked_invalid(counts, copy=False)
@@ -779,8 +779,8 @@ def get_uneven_data(workspace, distribution):
     except:
         specInfo = None
     for index in range(nhist):
-        xvals = workspace.readX(index)
-        zvals = workspace.readY(index)
+        xvals = workspace.x(index)
+        zvals = workspace.y(index)
         if workspace.isHistogramData():
             if not distribution:
                 zvals = zvals / (xvals[1:] - xvals[0:-1])
@@ -821,7 +821,7 @@ def check_resample_to_regular_grid(ws, **kwargs):
         if aligned or not ws.isCommonBins():
             return True, kwargs
 
-        x = ws.readX(0)
+        x = ws.x(0)
         difference = np.diff(x)
         if x.size > 1 and not np.allclose(difference[:-1], difference[0]):
             return True, kwargs

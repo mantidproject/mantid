@@ -632,7 +632,7 @@ public:
     TS_ASSERT_EQUALS(data->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(image->getNumberHistograms(), 2);
     // Check that all X bins have been populated
-    TS_ASSERT_EQUALS(data->readX(0).size(), data->readY(0).size());
+    TS_ASSERT_EQUALS(data->x(0).size(), data->y(0).size());
 
     // Test some values
     TS_ASSERT_DELTA(image->y(0)[70], 6.829, 0.001);
@@ -1066,11 +1066,11 @@ public:
     // of points minus one.
     for (size_t i = 0; i < size; i++) {
       double value = static_cast<double>(i);
-      ws->dataX(0)[i] = value;
-      ws->dataY(0)[i] = value;
-      ws->dataE(0)[i] = value + 1.0;
+      ws->mutableX(0)[i] = value;
+      ws->mutableY(0)[i] = value;
+      ws->mutableE(0)[i] = value + 1.0;
     }
-    ws->dataX(0)[size] = static_cast<double>(size);
+    ws->mutableX(0)[size] = static_cast<double>(size);
 
     auto alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
@@ -1088,9 +1088,9 @@ public:
     MatrixWorkspace_sptr image = alg->getProperty("ReconstructedImage");
     MatrixWorkspace_sptr data = alg->getProperty("ReconstructedData");
 
-    TS_ASSERT_EQUALS(image->readX(0).size(), ws->readX(0).size() - 1);
-    TS_ASSERT_EQUALS(data->readX(0).size(), ws->readX(0).size());
-    TS_ASSERT_EQUALS(data->readX(0), ws->readX(0));
+    TS_ASSERT_EQUALS(image->x(0).size(), ws->x(0).size() - 1);
+    TS_ASSERT_EQUALS(data->x(0).size(), ws->x(0).size());
+    TS_ASSERT_EQUALS(data->x(0), ws->x(0));
   }
 
   void test_pointdata_workspace() {
@@ -1105,9 +1105,9 @@ public:
     // of points.
     for (size_t i = 0; i < size; i++) {
       double value = static_cast<double>(i);
-      ws->dataX(0)[i] = value;
-      ws->dataY(0)[i] = value;
-      ws->dataE(0)[i] = value + 1.0;
+      ws->mutableX(0)[i] = value;
+      ws->mutableY(0)[i] = value;
+      ws->mutableE(0)[i] = value + 1.0;
     }
 
     auto alg = AlgorithmManager::Instance().create("MaxEnt");
@@ -1126,9 +1126,9 @@ public:
     MatrixWorkspace_sptr image = alg->getProperty("ReconstructedImage");
     MatrixWorkspace_sptr data = alg->getProperty("ReconstructedData");
 
-    TS_ASSERT_EQUALS(image->readX(0).size(), ws->readX(0).size());
-    TS_ASSERT_EQUALS(data->readX(0).size(), ws->readX(0).size());
-    TS_ASSERT_EQUALS(data->readX(0), ws->readX(0));
+    TS_ASSERT_EQUALS(image->x(0).size(), ws->x(0).size());
+    TS_ASSERT_EQUALS(data->x(0).size(), ws->x(0).size());
+    TS_ASSERT_EQUALS(data->x(0), ws->x(0));
   }
 
   MatrixWorkspace_sptr createWorkspaceWithYValues(size_t nHist, size_t length, std::vector<double> const &YVal) {

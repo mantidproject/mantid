@@ -158,7 +158,7 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
         # The workspace needs to be scaled to match the SANS data. This is done by the normalization_factor
         # In addition we need to spread the integrated signal evenly over all bins of the SANS data set.
         # Note that we assume here a workspace with common bins.
-        num_bins = len(workspace.dataY(0))
+        num_bins = len(workspace.y(0))
         scale_factor = normalization_ratio / float(num_bins)
 
         return self._scale_dark_run(dark_run_integrated, scale_factor)
@@ -215,15 +215,15 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
 
         # Get the single value out of the summed workspace and divide it
         # by the number of pixels
-        summed_value = dark_run_summed.dataY(0)[0]
+        summed_value = dark_run_summed.y(0)[0]
         num_pixels = dark_run_integrated.getNumberHistograms()
         averaged_value = summed_value / float(num_pixels)
 
         # Apply the averaged value to all pixels. Set values to unity. Don't
         # divide workspaces as this will alter the y unit.
         for index in range(0, dark_run_integrated.getNumberHistograms()):
-            dark_run_integrated.dataY(index)[0] = 1.0
-            dark_run_integrated.dataE(index)[0] = 1.0
+            dark_run_integrated.mutableY(index)[0] = 1.0
+            dark_run_integrated.mutableE(index)[0] = 1.0
 
         # Now that we have a unity workspace multiply with the unit value
         return self._scale_dark_run(dark_run_integrated, averaged_value)
@@ -274,12 +274,12 @@ class DarkRunMonitorAndDetectorRemover(object):
         # Since we only have around 10 or so monitors
         # we set them manually to 0
         for ws_index, dummy_det_id in monitor_list:
-            data = dark_run.dataY(ws_index)
-            error = dark_run.dataE(ws_index)
+            data = dark_run.y(ws_index)
+            error = dark_run.e(ws_index)
             data = data * 0
             error = error * 0
-            dark_run.setY(ws_index, data)
-            dark_run.setE(ws_index, error)
+            dark_run.setSharedY(ws_index, data)
+            dark_run.setSharedE(ws_index, error)
 
         return dark_run
 
@@ -400,8 +400,8 @@ class DarkRunMonitorAndDetectorRemover(object):
         list_dataY = []
         list_dataE = []
         for ws_index, dummy_det_id in monitor_list:
-            list_dataY.append(np.copy(dark_run.dataY(ws_index)))
-            list_dataE.append(np.copy(dark_run.dataE(ws_index)))
+            list_dataY.append(np.copy(dark_run.y(ws_index)))
+            list_dataE.append(np.copy(dark_run.e(ws_index)))
         return list_dataY, list_dataE
 
     def _set_all_monitors(self, dark_run, list_dataY, list_dataE, monitor_list):
@@ -415,8 +415,8 @@ class DarkRunMonitorAndDetectorRemover(object):
         """
         counter = 0
         for ws_index, dummy_det_id in monitor_list:
-            dark_run.setY(ws_index, list_dataY[counter])
-            dark_run.setE(ws_index, list_dataE[counter])
+            dark_run.setSharedY(ws_index, list_dataY[counter])
+            dark_run.setSharedE(ws_index, list_dataE[counter])
             counter += 1
         return dark_run
 
@@ -438,8 +438,8 @@ class DarkRunMonitorAndDetectorRemover(object):
         for ws_index, det_id in monitor_list:
             # Only add the data back for the specified monitors
             if det_id in selected_monitors:
-                dark_run.setY(ws_index, list_dataY[counter])
-                dark_run.setE(ws_index, list_dataE[counter])
+                dark_run.setSharedY(ws_index, list_dataY[counter])
+                dark_run.setSharedE(ws_index, list_dataE[counter])
             counter += 1
         return dark_run
 

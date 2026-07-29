@@ -36,7 +36,7 @@ class RebinRaggedTest(unittest.TestCase):
         # Verify ....
         outputws = AnalysisDataService.retrieve("NOM_91796_banks")
         for i, Xlen in enumerate([478, 981, 1880, 1816, 1795, 449]):
-            self.assertEqual(len(outputws.readX(i)), Xlen)
+            self.assertEqual(len(outputws.x(i)), Xlen)
 
         AnalysisDataService.remove("NOM_91796_banks")
 
@@ -56,7 +56,7 @@ class RebinRaggedTest(unittest.TestCase):
         # Verify ....
         outputws = AnalysisDataService.retrieve("NOM_91796_banks")
         for i, Xlen in enumerate([256, 521, 1001, 1001, 1001, 235]):  # larger than in test_nomad_inplace
-            self.assertEqual(len(outputws.readX(i)), Xlen)
+            self.assertEqual(len(outputws.x(i)), Xlen)
 
         AnalysisDataService.remove("NOM_91796_banks")
 
@@ -77,16 +77,16 @@ class RebinRaggedTest(unittest.TestCase):
         for i in range(rebinned.getNumberHistograms()):
             label = "index={}".format(i)
             if i == 11:
-                self.assertEqual(rebinned.readX(i).size, 9, label)
+                self.assertEqual(rebinned.x(i).size, 9, label)
             elif i == 12 or i == 13:
-                self.assertEqual(rebinned.readX(i).size, 7, label)
+                self.assertEqual(rebinned.x(i).size, 7, label)
             else:
                 self.assertEqual(
-                    rebinned.readX(i).size,
+                    rebinned.x(i).size,
                     10,
                 )
 
-            y = rebinned.readY(i)
+            y = rebinned.y(i)
             if i == 13:
                 np.testing.assert_almost_equal(0.9, y, err_msg=label)
             else:
@@ -110,16 +110,16 @@ class RebinRaggedTest(unittest.TestCase):
         for i in range(rebinned.getNumberHistograms()):
             label = "index={}".format(i)
             if i == 11:
-                self.assertEqual(rebinned.readX(i).size, 9, label)
+                self.assertEqual(rebinned.x(i).size, 9, label)
             elif i == 12 or i == 13:
-                self.assertEqual(rebinned.readX(i).size, 7, label)
+                self.assertEqual(rebinned.x(i).size, 7, label)
             else:
                 self.assertEqual(
-                    rebinned.readX(i).size,
+                    rebinned.x(i).size,
                     10,
                 )
 
-            y = rebinned.readY(i)
+            y = rebinned.y(i)
             if i == 13:
                 np.testing.assert_almost_equal(21, y, err_msg=label)
             else:
@@ -149,10 +149,10 @@ class RebinRaggedTest(unittest.TestCase):
             InputWorkspace=inputWs, OutputWorkspace="FullBinsOnly", Delta=2.0, PreserveEvents=True, FullBinsOnly=True
         )
 
-        fullBinsXValues = AnalysisDataService.retrieve("FullBinsOnly").readX(0)
-        fullBinsYValues = AnalysisDataService.retrieve("FullBinsOnly").readY(0)
+        fullBinsXValues = AnalysisDataService.retrieve("FullBinsOnly").x(0)
+        fullBinsYValues = AnalysisDataService.retrieve("FullBinsOnly").y(0)
 
-        notFullBinsXValues = AnalysisDataService.retrieve("NotFullBinsOnly").readX(0)
+        notFullBinsXValues = AnalysisDataService.retrieve("NotFullBinsOnly").x(0)
 
         assert not fullBinsOnlyWs.isRaggedWorkspace()
 
@@ -197,7 +197,7 @@ class RebinRaggedTest(unittest.TestCase):
             InputWorkspace=inputWs, OutputWorkspace="FullBinsOnly", XMin=xmins, XMax=xmaxs, Delta=deltas, FullBinsOnly=True
         )
 
-        assert len(fullBinsOnlyWs.readX(0)) != len(notFullBinsOnlyWs.readX(0))
+        assert len(fullBinsOnlyWs.x(0)) != len(notFullBinsOnlyWs.x(0))
         assert fullBinsOnlyWs.isRaggedWorkspace()
         api.DeleteWorkspace("NotFullBinsOnly")
         api.DeleteWorkspace("FullBinsOnly")

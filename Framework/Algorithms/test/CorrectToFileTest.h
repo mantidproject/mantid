@@ -42,7 +42,7 @@ public:
     MatrixWorkspace_sptr testInput = WorkspaceCreationHelper::create2DWorkspaceBinned(10, 102, 1.5);
     testInput->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
 
-    TS_ASSERT_DELTA(testInput->readY(0)[0], 2.0, 0.0001);
+    TS_ASSERT_DELTA(testInput->y(0)[0], 2.0, 0.0001);
 
     MatrixWorkspace_sptr data = executeAlgorithm(testInput, "Wavelength", "Divide");
 

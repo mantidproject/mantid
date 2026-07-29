@@ -61,12 +61,12 @@ public:
     TS_ASSERT_EQUALS(ax->unit()->label(), "MyUnit");
     const size_t xsize = result->blocksize();
     for (size_t i = 0; i < result->getNumberHistograms(); ++i) {
-      const auto &outX = result->readX(i);
-      const auto &outY = result->readY(i);
-      const auto &outE = result->readE(i);
-      const auto &inX = in->readX(i);
-      const auto &inY = in->readY(i);
-      const auto &inE = in->readE(i);
+      const auto &outX = result->x(i);
+      const auto &outY = result->y(i);
+      const auto &outE = result->e(i);
+      const auto &inX = in->x(i);
+      const auto &inY = in->y(i);
+      const auto &inE = in->e(i);
 
       for (size_t j = 0; j < xsize; ++j) {
         TS_ASSERT_EQUALS(outX[j], inX[j] + 3);
@@ -258,12 +258,12 @@ public:
     const auto &spectrumInfo = in->spectrumInfo();
     const size_t xsize = result->blocksize();
     for (size_t i = 0; i < result->getNumberHistograms(); ++i) {
-      const auto &outX = result->readX(i);
-      const auto &outY = result->readY(i);
-      const auto &outE = result->readE(i);
-      const auto &inX = in->readX(i);
-      const auto &inY = in->readY(i);
-      const auto &inE = in->readE(i);
+      const auto &outX = result->x(i);
+      const auto &outY = result->y(i);
+      const auto &outE = result->e(i);
+      const auto &inX = in->x(i);
+      const auto &inY = in->y(i);
+      const auto &inE = in->e(i);
 
       double l2 = spectrumInfo.l2(i);
       for (size_t j = 0; j < xsize; ++j) {
@@ -296,12 +296,12 @@ public:
     const auto &spectrumInfo = in->spectrumInfo();
     const size_t xsize = result->blocksize();
     for (size_t i = 0; i < result->getNumberHistograms(); ++i) {
-      const auto &outX = result->readX(i);
-      const auto &outY = result->readY(i);
-      const auto &outE = result->readE(i);
-      const auto &inX = in->readX(i);
-      const auto &inY = in->readY(i);
-      const auto &inE = in->readE(i);
+      const auto &outX = result->x(i);
+      const auto &outY = result->y(i);
+      const auto &outE = result->e(i);
+      const auto &inX = in->x(i);
+      const auto &inY = in->y(i);
+      const auto &inE = in->e(i);
 
       double twoTheta = spectrumInfo.twoTheta(i);
       for (size_t j = 0; j < xsize; ++j) {
@@ -335,12 +335,12 @@ public:
     const auto &spectrumInfo = in->spectrumInfo();
     const size_t xsize = result->blocksize();
     for (size_t i = 0; i < result->getNumberHistograms(); ++i) {
-      const auto &outX = result->readX(i);
-      const auto &outY = result->readY(i);
-      const auto &outE = result->readE(i);
-      const auto &inX = in->readX(i);
-      const auto &inY = in->readY(i);
-      const auto &inE = in->readE(i);
+      const auto &outX = result->x(i);
+      const auto &outY = result->y(i);
+      const auto &outE = result->e(i);
+      const auto &inX = in->x(i);
+      const auto &inY = in->y(i);
+      const auto &inE = in->e(i);
 
       double signedTwoTheta = spectrumInfo.signedTwoTheta(i);
       for (size_t j = 0; j < xsize; ++j) {
@@ -372,12 +372,12 @@ public:
 
     const size_t xsize = result->blocksize();
     for (size_t i = 0; i < result->getNumberHistograms(); ++i) {
-      const auto &outX = result->readX(i);
-      const auto &outY = result->readY(i);
-      const auto &outE = result->readE(i);
-      const auto &inX = in->readX(i);
-      const auto &inY = in->readY(i);
-      const auto &inE = in->readE(i);
+      const auto &outX = result->x(i);
+      const auto &outY = result->y(i);
+      const auto &outE = result->e(i);
+      const auto &inX = in->x(i);
+      const auto &inY = in->y(i);
+      const auto &inE = in->e(i);
 
       for (size_t j = 0; j < xsize; ++j) {
         TS_ASSERT_DELTA(outX[j], -inX[xsize - j], 0.0001);
@@ -408,11 +408,11 @@ public:
 
     const size_t xsize = result->blocksize();
     for (size_t i = 0; i < result->getNumberHistograms(); ++i) {
-      const auto &outX = result->readX(i);
-      const auto &outY = result->readY(i);
-      const auto &outE = result->readE(i);
-      const auto &inY = in->readY(i);
-      const auto &inE = in->readE(i);
+      const auto &outX = result->x(i);
+      const auto &outY = result->y(i);
+      const auto &outE = result->e(i);
+      const auto &inY = in->y(i);
+      const auto &inE = in->e(i);
 
       for (size_t j = 0; j < xsize; ++j) {
         TS_ASSERT_DELTA(outX[j], M_PI, 0.0001);

@@ -582,7 +582,7 @@ class ElasticEMUauReduction(PythonAlgorithm):
             CloneWorkspace(InputWorkspace=input_ws, OutputWorkspace=output_ws)
         ows = mtd[output_ws]
         for i in range(len(yv)):
-            ows.dataY(i)[:] = yft[:, i]
+            ows.mutableY(i)[:] = yft[:, i]
 
     def scan_time_to_refn(self, parameter: str, input_ws: str, output_ws: str, tsmap, bin_params) -> None:
         iws = mtd[input_ws]

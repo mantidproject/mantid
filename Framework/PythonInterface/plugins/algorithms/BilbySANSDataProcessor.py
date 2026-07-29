@@ -530,8 +530,8 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
             raise ValueError
         if ws_tran.getNumberHistograms() != 1:
             raise ValueError
-        ws_emp_bins = ws_emp.readX(0)
-        ws_tran_bins = ws_tran.readX(0)
+        ws_emp_bins = ws_emp.x(0)
+        ws_tran_bins = ws_tran.x(0)
         if np.array_equal(ws_emp_bins, ws_tran_bins):  # check that bins match
             return ws_emp  # if they match keep them as they are
         self.sanslog.warning("EmptyBeamSpectrumShapeWorkspace did not have expected wavelength binning and has to be rebinned")

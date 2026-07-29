@@ -116,6 +116,11 @@ public:
 
   std::map<std::string, std::string> validateInputs() override;
 
+  /// Decide whether a Fit "OutputStatus" string should be treated as a converged fit.
+  /// In strict mode only the exact status "success" is accepted. In non-strict mode the
+  /// GSL tolerance-limited stopping conditions are also treated as converged.
+  static bool fitStatusIsConverged(const std::string &fitStatus, const bool strict);
+
 private:
   /// Init
   void init() override;
@@ -160,22 +165,33 @@ private:
 
   // Peak fitting suite
   double fitIndividualPeak(size_t wi, const API::IAlgorithm_sptr &fitter, const double expected_peak_center,
-                           const std::pair<double, double> &fitwindow, const bool estimate_peak_width,
-                           const API::IPeakFunction_sptr &peakfunction, const API::IBackgroundFunction_sptr &bkgdfunc,
+                           const double peak_pos_tolerance, const std::pair<double, double> &fitwindow,
+                           const bool estimate_peak_width, const API::IPeakFunction_sptr &peakfunction,
+                           const API::IBackgroundFunction_sptr &bkgdfunc,
                            const std::shared_ptr<FitPeaksAlgorithm::PeakFitPreCheckResult> &pre_check_result);
 
   /// Methods to fit functions (general)
   double fitFunctionSD(const API::IAlgorithm_sptr &fit, const API::IPeakFunction_sptr &peak_function,
                        const API::IBackgroundFunction_sptr &bkgd_function, const API::MatrixWorkspace_sptr &dataws,
                        size_t wsindex, const std::pair<double, double> &peak_range, const double &expected_peak_center,
-                       bool estimate_peak_width, bool estimate_background);
+                       const double peak_pos_tolerance, bool estimate_peak_width, bool estimate_background);
+
+  /// Re-evaluate parameter fitting errors free of any peak-position boundary
+  /// constraint penalty, so a constrained centre still reports a genuine
+  /// covariance error rather than the spuriously small one produced when the
+  /// penalty curvature is folded into the Hessian that CalcErrors inverts.
+  void recalculateErrorsWithoutConstraint(const API::IPeakFunction_sptr &peak_function,
+                                          const API::IBackgroundFunction_sptr &bkgd_function,
+                                          const API::MatrixWorkspace_sptr &dataws, size_t wsindex,
+                                          const std::pair<double, double> &peak_range);
 
   double fitFunctionMD(API::IFunction_sptr fit_function, const API::MatrixWorkspace_sptr &dataws, const size_t wsindex,
                        const std::pair<double, double> &vec_xmin, const std::pair<double, double> &vec_xmax);
 
   /// fit a single peak with high background
   double fitFunctionHighBackground(const API::IAlgorithm_sptr &fit, const std::pair<double, double> &fit_window,
-                                   const size_t &ws_index, const double &expected_peak_center, bool observe_peak_shape,
+                                   const size_t &ws_index, const double &expected_peak_center,
+                                   const double peak_pos_tolerance, bool observe_peak_shape,
                                    const API::IPeakFunction_sptr &peakfunction,
                                    const API::IBackgroundFunction_sptr &bkgdfunc);
 
@@ -206,7 +222,8 @@ private:
   API::MatrixWorkspace_sptr createMatrixWorkspace(const std::vector<double> &vec_x, const std::vector<double> &vec_y,
                                                   const std::vector<double> &vec_e);
 
-  bool decideToEstimatePeakParams(const bool firstPeakInSpectrum, const API::IPeakFunction_sptr &peak_function);
+  bool decideToEstimatePeakParams(const bool firstPeakInSpectrum, const size_t wsindex,
+                                  const API::IPeakFunction_sptr &peak_function);
 
   /// Process the result from fitting a single peak
   bool processSinglePeakFitResult(size_t wsindex, size_t peakindex, const double cost,
@@ -236,6 +253,9 @@ private:
 
   // log a message disregarding the current logging offset
   void logNoOffset(const size_t &priority, const std::string &msg);
+
+  // create a Fit child alg
+  API::IAlgorithm_sptr createChildFit();
 
   //------- Workspaces-------------------------------------
   /// mandatory input and output workspaces
@@ -270,6 +290,9 @@ private:
   std::string m_minimizer;
   /// Cost function
   std::string m_costFunction;
+  /// Require an exact 'success' status to accept a fit, rather than also
+  /// accepting the "changes too small" convergence statuses
+  bool m_strictConvergence{true};
   /// Fit from right or left
   bool m_fitPeaksFromRight;
   /// Fit iterations
@@ -315,6 +338,20 @@ private:
   /// from 'observation' (3) calculated from instrument resolution
   Algorithms::PeakParameterHelper::EstimatePeakWidth m_peakWidthEstimateApproach;
   bool m_constrainPeaksPosition;
+  /// when true, PositionTolerance is applied as an active constraint on the peak
+  /// centre during fitting (bounded by expected_centre +/- tolerance) instead of
+  /// only being checked after the fit
+  bool m_constrainByPositionTolerance{false};
+  /// when true, each PositionTolerance value is interpreted as a fraction of this
+  /// peak's (per-spectrum) fit window width rather than an absolute value, so the
+  /// effective tolerance is tolerance*(window_max - window_min).  Orthogonal to the
+  /// Check/Constrain mode - it rescales the tolerance used by either.
+  bool m_fractionalPositionTolerance{false};
+  /// when true, and a peak-position constraint was applied (ConstrainPeakPositions
+  /// or PositionToleranceMode=Constrain), the reported parameter errors are
+  /// recomputed from the unconstrained cost function so the constraint penalty does
+  /// not distort them
+  bool m_calculateUnconstrainedErrors{false};
 
   /// peak windows
   std::vector<std::vector<double>> m_peakWindowVector;
