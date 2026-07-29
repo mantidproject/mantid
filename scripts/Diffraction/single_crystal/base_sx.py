@@ -192,7 +192,6 @@ class BaseSX(ABC):
         )
         BaseSX._normalise_by_bin_width_in_k(ws, undo=True)  # normalise by bin-width in K = 2pi/lambda
         mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws, Target=xunit, EnableLogging=False)
-        mantid.DeleteWorkspace("PreprocessedDetectorsWS")
         return wsMD
 
     @default_apply_to_all_runs

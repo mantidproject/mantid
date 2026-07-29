@@ -168,10 +168,9 @@ class TOPAZPeakFinding(systemtesting.MantidSystemTest):
         if indexed < 199:
             raise Exception("Expected at least 199 of 200 peaks to be indexed. Only indexed %d!" % indexed)
 
-        # get new UB matrix and OrientedLattice so the EventWorkspace can be deleted
+        # get new UB matrix and OrientedLattice
         newUB = numpy.array(mtd["topaz_3132"].sample().getOrientedLattice().getUB())
         ol = mtd["topaz_3132"].sample().getOrientedLattice()
-        DeleteWorkspace("topaz_3132")  # no longer needed
 
         # Check the UB matrix
         self.assertDelta(ol.a(), unitcell_exp.a(), 0.01, "Correct lattice a value not found.")
@@ -182,7 +181,6 @@ class TOPAZPeakFinding(systemtesting.MantidSystemTest):
         self.assertDelta(ol.gamma(), unitcell_exp.gamma(), 0.4, "Correct lattice angle gamma value not found.")
 
         # Compare new and old UBs
-        newUB = numpy.array(mtd["topaz_3132"].sample().getOrientedLattice().getUB())
         # UB Matrices are not necessarily the same, some of the H,K and/or L sign can be reversed
         diff = abs(newUB) - abs(originalUB) < 0.001
         for c in range(3):
@@ -191,6 +189,7 @@ class TOPAZPeakFinding(systemtesting.MantidSystemTest):
                 raise Exception(
                     "More than 0.001 difference between UB matrices: Q (lab frame):\n%s\nQ (sample frame):\n%s" % (originalUB, newUB)
                 )
+        DeleteWorkspace("topaz_3132")  # no longer needed
 
     def doValidation(self):
         # If we reach here, no validation failed
