@@ -300,8 +300,6 @@ ScriptRepository Properties
 | ``ScriptRepositoryIgnore`` |CSV patterns for paths that should not be      | ``*pyc;``                                                            |
 |                            |listed at ScriptRepository.                    |                                                                      |
 +----------------------------+-----------------------------------------------+----------------------------------------------------------------------+
-| ``UploaderWebServer``      |URL for uploading scripts.                     | ``https://upload.mantidproject.org/scriptrepository/payload/publish``|
-+----------------------------+-----------------------------------------------+----------------------------------------------------------------------+
 
 
 Project Recovery
