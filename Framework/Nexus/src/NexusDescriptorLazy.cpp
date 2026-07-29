@@ -18,8 +18,10 @@
 #include <cstdlib> // malloc, calloc
 #include <cstring> // strcpy
 #include <filesystem>
-#include <map>
+#include <optional>
+#include <set>
 #include <stdexcept> // std::invalid_argument
+#include <unordered_map>
 #include <unordered_set>
 #include <utility>
 
@@ -54,6 +56,54 @@ template <herr_t (*H5Xclose)(hid_t)> std::string readNXClass(Mantid::Nexus::Uniq
   }
   return nxClass;
 }
+
+// H5Lvisit2 callback for the one-time full scan: records every visited link's absolute address and its
+// class (NX_class for groups, "SDS" for datasets) into the EntryMap supplied via op_data.
+herr_t fullScanCallback(hid_t loc_id, char const *name, H5L_info2_t const *, void *op_data) {
+  auto *entries = static_cast<Mantid::Nexus::EntryMap *>(op_data);
+  H5O_info2_t oinfo;
+  if (H5Oget_info_by_name3(loc_id, name, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT) < 0) {
+    return 0;
+  }
+  // H5Lvisit2 supplies the path relative to the visit root (no leading '/')
+  std::string const address = "/" + std::string(name);
+  if (oinfo.type == H5O_TYPE_GROUP) {
+    Mantid::Nexus::UniqueID<&H5Oclose> oid(H5Oopen(loc_id, name, H5P_DEFAULT));
+    if (oid.isValid()) {
+      (*entries)[address] = readNXClass(oid);
+    }
+  } else if (oinfo.type == H5O_TYPE_DATASET) {
+    (*entries)[address] = Mantid::Nexus::SCIENTIFIC_DATA_SET;
+  }
+  return 0;
+}
+
+// Data for the early-exit class probe: search for the first entry of a target class.
+struct ClassProbe {
+  std::string const &target;
+  bool found;
+};
+
+// H5Literate2/H5Lvisit2 callback that stops (returns 1) at the first entry matching the target class,
+// so an existence query need not scan the whole tree. Used by classTypeExists / classTypeExistsChild.
+herr_t classProbeCallback(hid_t loc_id, char const *name, H5L_info2_t const *, void *op_data) {
+  auto *probe = static_cast<ClassProbe *>(op_data);
+  H5O_info2_t oinfo;
+  if (H5Oget_info_by_name3(loc_id, name, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT) < 0) {
+    return 0;
+  }
+  if (oinfo.type == H5O_TYPE_GROUP) {
+    Mantid::Nexus::UniqueID<&H5Oclose> oid(H5Oopen(loc_id, name, H5P_DEFAULT));
+    if (oid.isValid() && readNXClass(oid) == probe->target) {
+      probe->found = true;
+      return 1; // non-zero stops iteration
+    }
+  } else if (oinfo.type == H5O_TYPE_DATASET && probe->target == Mantid::Nexus::SCIENTIFIC_DATA_SET) {
+    probe->found = true;
+    return 1;
+  }
+  return 0;
+}
 } // namespace
 
 namespace Mantid::Nexus {
@@ -63,6 +113,12 @@ namespace Mantid::Nexus {
 NexusDescriptorLazy::NexusDescriptorLazy(std::string const &filename)
     : m_filename(filename), m_extension(std::filesystem::path(m_filename).extension().string()), m_firstEntryNameType(),
       m_allEntries(initAllEntries()), m_allMisses() {}
+
+NexusDescriptorLazy::NexusDescriptorLazy(SharedFileID fileID, std::string const &filename)
+    : m_filename(filename), m_extension(std::filesystem::path(m_filename).extension().string()), m_fileID(fileID),
+      m_firstEntryNameType(), m_allMisses() {
+  m_allEntries = initAllEntries();
+}
 
 // open the object to determine its type
 bool NexusDescriptorLazy::isEntry(std::string const &entryName) const {
@@ -110,10 +166,21 @@ bool NexusDescriptorLazy::isEntry(std::string const &entryName) const {
 /// @param classType the NX_class type to check for
 /// @return true if the class type exists anywhere in the file
 bool NexusDescriptorLazy::classTypeExists(std::string const &classType) const {
-  // wait for writes to end
-  std::shared_lock<std::shared_mutex> lock(m_readNexusMutex);
-  return std::any_of(m_allEntries.begin(), m_allEntries.end(),
-                     [&classType](auto const &entry) { return entry.second == classType; });
+  {
+    std::shared_lock<std::shared_mutex> lock(m_readNexusMutex);
+    // a cache hit is always definitive; absence is definitive only once the whole file was scanned
+    if (std::any_of(m_allEntries.begin(), m_allEntries.end(),
+                    [&classType](auto const &entry) { return entry.second == classType; })) {
+      return true;
+    }
+    if (m_fullyScanned) {
+      return false;
+    }
+  }
+  // not cached and not fully scanned: walk with early-exit rather than forcing a full scan
+  ClassProbe probe{classType, false};
+  H5Lvisit2(m_fileID, H5_INDEX_NAME, H5_ITER_NATIVE, &classProbeCallback, &probe);
+  return probe.found;
 }
 
 bool NexusDescriptorLazy::classTypeExistsChild(const std::string &parentPath, const std::string &classType) const {
@@ -121,18 +188,28 @@ bool NexusDescriptorLazy::classTypeExistsChild(const std::string &parentPath, co
   if (!this->isEntry(parentPath))
     return false;
 
-  // wait for writes to end
-  std::shared_lock<std::shared_mutex> lock(m_readNexusMutex);
-
-  // linear search through all entries - stop at first match
-  const auto delimitedEntryName = parentPath + '/';
-  for (auto const &[name, cls] : m_allEntries) {
-    // match the class first since that limits the list more
-    if (cls == classType && name.starts_with(delimitedEntryName)) {
-      return true;
+  {
+    std::shared_lock<std::shared_mutex> lock(m_readNexusMutex);
+    // a cached descendant of the right class is definitive; absence is definitive only once fully scanned
+    const auto delimitedEntryName = parentPath + '/';
+    for (auto const &[name, cls] : m_allEntries) {
+      // match the class first since that limits the list more
+      if (cls == classType && name.starts_with(delimitedEntryName)) {
+        return true;
+      }
+    }
+    if (m_fullyScanned) {
+      return false;
     }
   }
-  return false;
+  // not cached and not fully scanned: probe the parent subtree with early-exit
+  UniqueID<&H5Gclose> parentID(H5Gopen(m_fileID, parentPath.c_str(), H5P_DEFAULT));
+  if (!parentID.isValid()) {
+    return false;
+  }
+  ClassProbe probe{classType, false};
+  H5Lvisit2(parentID, H5_INDEX_NAME, H5_ITER_NATIVE, &classProbeCallback, &probe);
+  return probe.found;
 }
 
 bool NexusDescriptorLazy::hasRootAttr(std::string const &name) const {
@@ -156,6 +233,51 @@ bool NexusDescriptorLazy::hasRootAttr(std::string const &name) const {
   }
 }
 
+void NexusDescriptorLazy::registerEntry(std::string const &entryName, std::string const &groupClass) {
+  std::lock_guard<std::shared_mutex> lock(m_readNexusMutex);
+  m_allMisses.erase(entryName);
+  m_allEntries[entryName] = groupClass;
+}
+
+std::string NexusDescriptorLazy::operator[](std::string const &entryName) const {
+  bool known_miss = true;
+  {
+    std::shared_lock<std::shared_mutex> lock(m_readNexusMutex);
+    known_miss = m_allMisses.contains(entryName);
+  }
+  if (known_miss) {
+    return UNKNOWN_CLASS;
+  } else {
+    EntryMap::iterator it, iend;
+    {
+      std::shared_lock<std::shared_mutex> lock(m_readNexusMutex);
+      it = m_allEntries.find(entryName);
+      iend = m_allEntries.end();
+    }
+    if (it != iend) {
+      // if it is found in the cache, use it
+      return it->second;
+    } else {
+      // otherwise check if it exists in the file
+      if (H5Oexists_by_name(m_fileID, entryName.c_str(), H5P_DEFAULT) > 0) {
+        // if it exists in file, read and save the correct class type for it
+        UniqueID<H5Gclose> entryID(H5Oopen(m_fileID, entryName.c_str(), H5P_DEFAULT));
+        std::string nxclass = readNXClass(entryID);
+        {
+          std::lock_guard<std::shared_mutex> lock(m_readNexusMutex);
+          m_allEntries[entryName] = nxclass;
+        }
+        return nxclass;
+      } else {
+        // if it does not exist in the file, cache the miss
+        std::lock_guard<std::shared_mutex> lock(m_readNexusMutex);
+        m_allMisses.insert(entryName);
+        return UNKNOWN_CLASS;
+      }
+    }
+  }
+}
+
 /// Get string data from a dataset at address
 std::string NexusDescriptorLazy::getStrData(std::string const &address) {
   std::string strData;
@@ -172,10 +294,44 @@ std::string NexusDescriptorLazy::getStrData(std::string const &address) {
   return strData;
 }
 
+std::set<std::string> NexusDescriptorLazy::allAddressesOfType(std::string const &classType) const {
+  // ensure the whole file has been cached (one-time full scan), then filter by class from memory
+  ensureAllEntries();
+  std::set<std::string> result;
+  std::shared_lock<std::shared_mutex> lock(m_readNexusMutex);
+  for (auto const &[address, cls] : m_allEntries) {
+    if (cls == classType) {
+      result.insert(address);
+    }
+  }
+  return result;
+}
+
 // PRIVATE
 
-void NexusDescriptorLazy::loadGroups(std::map<std::string, std::string> &allEntries, std::string const &address,
-                                     unsigned int depth, const unsigned int maxDepth) {
+void NexusDescriptorLazy::ensureAllEntries() const {
+  { // fast path: already fully scanned
+    std::shared_lock<std::shared_mutex> lock(m_readNexusMutex);
+    if (m_fullyScanned) {
+      return;
+    }
+  }
+  // Walk the whole file once. H5Lvisit2 is cycle-safe, so hard-linked groups cannot cause infinite
+  // recursion. Build into a local map with no lock held, then merge — readers are not blocked during I/O.
+  EntryMap scanned;
+  H5Lvisit2(m_fileID, H5_INDEX_NAME, H5_ITER_NATIVE, &fullScanCallback, &scanned);
+
+  std::lock_guard<std::shared_mutex> lock(m_readNexusMutex);
+  if (!m_fullyScanned) {
+    for (auto &entry : scanned) {
+      m_allEntries.insert_or_assign(entry.first, std::move(entry.second));
+    }
+    m_fullyScanned = true;
+  }
+}
+
+void NexusDescriptorLazy::loadGroups(EntryMap &allEntries, std::string const &address, unsigned int depth,
+                                     const unsigned int maxDepth) {
   UniqueID<&H5Gclose> groupID(H5Gopen(m_fileID, address.c_str(), H5P_DEFAULT));
   if (!groupID.isValid()) {
     return;
@@ -210,34 +366,37 @@ void NexusDescriptorLazy::loadGroups(std::map<std::string, std::string> &allEntr
   }
 }
 
-std::map<std::string, std::string> NexusDescriptorLazy::initAllEntries() {
+EntryMap NexusDescriptorLazy::initAllEntries() {
 
   H5Eset_auto(H5E_DEFAULT, nullptr, nullptr);
 
-  std::map<std::string, std::string> allEntries;
+  EntryMap allEntries;
 
-  // if the file exists read it
-  if (std::filesystem::exists(m_filename)) {
-    // if the file exists but cannot be opened, throw invalid
-    // NOTE must be std::invalid_argument for expected errors to be raised in python API
+  // open the file if not already open (may have been provided via the hid_t constructor)
+  if (!m_fileID.isValid()) {
+    if (!std::filesystem::exists(m_filename))
+      return allEntries;
     if (!H5::H5File::isAccessible(m_filename, Mantid::Nexus::H5Util::defaultFileAcc())) {
       throw std::invalid_argument("ERROR: NexusDescriptorLazy couldn't open hdf5 file " + m_filename + "\n");
-    } else {
-      m_fileID = H5Fopen(m_filename.c_str(), H5F_ACC_RDONLY, Mantid::Nexus::H5Util::defaultFileAcc().getId());
     }
+    m_fileID = H5Fopen(m_filename.c_str(), H5F_ACC_RDONLY, Mantid::Nexus::H5Util::defaultFileAcc().getId());
     if (!m_fileID.isValid()) {
       throw std::invalid_argument("ERROR: NexusDescriptorLazy couldn't open hdf5 file " + m_filename + "\n");
     }
+  }
 
-    // get all top-level entries
+  // get all top-level entries
+  {
     unsigned int depth = 0;
     loadGroups(allEntries, "/", depth, INIT_DEPTH);
-    // set the first entry name/type
-    if (allEntries.size() > 1) {
-      m_firstEntryNameType = *(++allEntries.begin());
-      m_firstEntryNameType.first = m_firstEntryNameType.first.substr(1); // remove leading /
-    } else {
-      m_firstEntryNameType = std::make_pair("", UNKNOWN_CLASS);
+    // set the first entry name/type — find the first direct child of root
+    // (unordered_map has no ordering, so we can't rely on iterator arithmetic)
+    m_firstEntryNameType = std::make_pair("", UNKNOWN_CLASS);
+    for (auto const &[path, cls] : allEntries) {
+      if (path.size() > 1 && path.find('/', 1) == std::string::npos) {
+        m_firstEntryNameType = {path.substr(1), cls};
+        break;
+      }
     }
 
     // for levels beyond 2, only load special entries
@@ -257,8 +416,6 @@ std::map<std::string, std::string> NexusDescriptorLazy::initAllEntries() {
         }
       }
     }
-  } else {
-    // if the file does not exist, then leave allEntries empty
   }
   // rely on move semantics for single return
   return allEntries;

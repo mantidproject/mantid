@@ -965,7 +965,6 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
   }
 
   // set more properties on the workspace
-  Nexus::NexusDescriptor const &descriptor = m_file->getFileDescriptor();
   try {
     // this is a static method that is why it is passing the
     // file object and the file path
@@ -993,7 +992,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
     // This may not be needed in the future if both LoadEventNexus and
     // LoadInstrument are made to use the same Nexus/HDF5 library
     m_file->close();
-    m_instrument_loaded_correctly = loadInstrument(m_filename, m_ws, m_top_entry_name, this, &descriptor);
+    m_instrument_loaded_correctly = loadInstrument(m_filename, m_ws, m_top_entry_name, this);
 
     if (!m_instrument_loaded_correctly)
       throw std::runtime_error("Instrument was not initialized correctly! Loading cannot continue.");

@@ -1,5 +1,6 @@
 #include "MantidNexus/NexusFile.h"
 #include "MantidNexus/H5Util.h"
+#include "MantidNexus/NexusDescriptorLazy.h"
 #include "MantidNexus/NexusException.h"
 #include "MantidNexus/hdf5_type_helper.h"
 #include "MantidNexus/inverted_napi.h"
@@ -135,7 +136,7 @@ namespace Mantid::Nexus {
 
 File::File(const char *filename, const NXaccess access)
     : m_filename(filename), m_access(access), m_address(), m_current_group_id(0), m_current_data_id(0),
-      m_current_type_id(0), m_current_space_id(0), m_gid_stack{0}, m_descriptor(m_filename, m_access) {
+      m_current_type_id(0), m_current_space_id(0), m_gid_stack{0} {
   this->initOpenFile(m_filename, m_access);
 }
 
@@ -204,6 +205,7 @@ void File::initOpenFile(std::string const &filename, NXaccess const am) {
   } else {
     m_fileID = temp_fid.release();
   }
+  m_descriptor = std::make_shared<NexusDescriptorLazy>(m_fileID.get(), filename);
 }
 
 // copy constructors
@@ -248,7 +250,8 @@ File::~File() {
 }
 
 void File::close() {
-  // decrease reference counts to this file
+  // release the descriptor first so its handle is dropped before the file handle
+  m_descriptor.reset();
   m_fileID.reset();
 }
 
@@ -365,21 +368,38 @@ NexusAddress File::groupAddress(NexusAddress const &addr) const {
 }
 
 bool File::hasAddress(std::string const &name) const {
-  if (name == "/") { // NexusDescriptor does not keep the root, but it does exist
+  if (name == "/") {
     return true;
   } else {
-    return m_descriptor.isEntry(formAbsoluteAddress(name));
+    std::string const addr = formAbsoluteAddress(name);
+    // return m_descriptor->isEntry(addr);
+    return H5Oexists_by_name(m_fileID, addr.c_str(), H5P_DEFAULT) > 0;
   }
 }
 
 bool File::hasGroup(std::string const &name, std::string const &class_type) const {
-  std::string const address = formAbsoluteAddress(name);
-  return m_descriptor.isEntry(address, class_type);
+  std::string const addr = formAbsoluteAddress(name);
+  return m_descriptor->isEntry(addr, class_type);
+  // {
+  //   GroupID tempid = H5Gopen(m_fileID, addr.c_str(), H5P_DEFAULT);
+  //   if(tempid.isValid()) {
+  //     AttributeID tempattr = H5Aopen(tempid, GROUP_CLASS_SPEC.c_str(), H5P_DEFAULT);
+  //     if(tempattr.isValid()) {
+  //       H5::Attribute attr(tempattr);
+  //       std::string value;
+  //       attr.read(attr.getDataType(), value);
+  //       return value == class_type;
+  //     }
+  //   }
+  //   return false;
+  // }
 }
 
 bool File::hasData(std::string const &name) const {
-  std::string const address = formAbsoluteAddress(name);
-  return m_descriptor.isEntry(address, SCIENTIFIC_DATA_SET);
+  std::string const addr = formAbsoluteAddress(name);
+  // return m_descriptor->isEntry(addr, SCIENTIFIC_DATA_SET);
+  DataSetID tempid = H5Dopen(m_fileID, addr.c_str(), H5P_DEFAULT);
+  return tempid.isValid();
 }
 
 bool File::isDataSetOpen() const {
@@ -436,17 +456,6 @@ std::shared_ptr<H5::H5Object> File::getCurrentObject() const {
   }
 }
 
-void File::registerEntry(std::string const &address, std::string const &name) {
-  if (m_descriptor.isEntry(address, name)) {
-    // do nothing
-  } else if (address.front() != '/') {
-    throw NXEXCEPTION("Address must be absolute: " + address);
-  } else {
-    // NOTE the caller is responsible for only registering valid address
-    m_descriptor.addEntry(address, name);
-  }
-}
-
 //------------------------------------------------------------------------------------------------------------------
 // GROUP MAKE / OPEN / CLOSE
 //------------------------------------------------------------------------------------------------------------------
@@ -465,8 +474,10 @@ void File::makeGroup(const std::string &name, const std::string &nxclass, bool o
   H5::H5File h5file(m_fileID);
   H5::Group grp = H5Util::createGroupNXS(h5file, absaddr, nxclass);
 
+  // keep the descriptor in sync with the newly-created group
+  m_descriptor->registerEntry(absaddr.string(), nxclass);
+
   // cleanup
-  registerEntry(absaddr, nxclass);
   if (open_group) {
     // grp will close when it goes out of scope -- open new copy
     m_current_group_id = H5Gopen(grp.getId(), ".", H5P_DEFAULT);
@@ -486,22 +497,17 @@ void File::openGroup(std::string const &name, std::string const &nxclass) {
   if (nxclass.empty()) {
     throw NXEXCEPTION("Supplied empty class name");
   }
-
-  // validate existence and class via the descriptor
-  NexusAddress const absaddr(formAbsoluteAddress(name));
-  if (!m_descriptor.isEntry(absaddr, nxclass)) {
-    throw NXEXCEPTION("The supplied group " + absaddr + " does not exist");
-  }
-
-  // open relative to the current group handle rather than from root
+  // check for existence
   GroupID iVID = H5Gopen(groupHID(), name.c_str(), H5P_DEFAULT);
   if (iVID.get() < 0) {
-    std::stringstream msg;
-    msg << "Group " << absaddr.string() << " does not exist";
-    throw NXEXCEPTION(msg.str());
+    throw NXEXCEPTION("Group " + (m_address / name).string() + " does not exist");
   }
-
-  /* maintain stack */
+  // validate NX_class
+  NexusAddress const absstr = m_address / name;
+  std::string const cached = (*m_descriptor)[absstr];
+  if (cached != nxclass) {
+    throw NXEXCEPTION("Group " + name + " at " + m_address + " does not have class " + nxclass);
+  }
   m_current_group_id = iVID.release();
   m_gid_stack.push_back(m_current_group_id);
   m_address.appendComponent(name);
@@ -804,8 +810,6 @@ template <typename NumT> void File::getData(NumT *data) {
   }
 
   herr_t ret = -1;
-  hsize_t dims[H5S_MAX_RANK];
-  H5Sget_simple_extent_dims(m_current_space_id, dims, nullptr);
   hsize_t ndims = H5Sget_simple_extent_ndims(m_current_space_id);
 
   if (ndims == 0) {
@@ -829,17 +833,20 @@ template <typename NumT> void File::getData(NumT *data) {
 }
 
 template <typename NumT> void File::getData(vector<NumT> &data) {
-  Info info = this->getInfo();
-
-  if (info.type != getType<NumT>()) {
+  // validate type on disk against queried type
+  NXnumtype const file_type = hdf5ToNXType(H5Tget_class(m_current_type_id), m_current_type_id);
+  if (file_type != getType<NumT>()) {
     std::stringstream msg;
-    msg << "inconsistent NXnumtype file datatype=" << info.type << " supplied datatype=" << getType<NumT>();
+    msg << "inconsistent NXnumtype file datatype=" << file_type << " supplied datatype=" << getType<NumT>();
     throw NXEXCEPTION(msg.str());
   }
   // determine the number of elements
-  size_t length =
-      std::accumulate(info.dims.cbegin(), info.dims.cend(), static_cast<size_t>(1),
-                      [](auto const subtotal, auto const &value) { return subtotal * static_cast<size_t>(value); });
+  std::array<hsize_t, H5S_MAX_RANK> dims{0};
+  int const rank = H5Sget_simple_extent_dims(m_current_space_id, dims.data(), nullptr);
+  size_t length = 1;
+  for (int i = 0; i < rank; i++) {
+    length *= dims[i];
+  }
 
   // allocate memory to put the data into
   // need to use resize() rather than reserve() so vector length gets set
@@ -976,8 +983,7 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
       throw NXEXCEPTION(msg.str());
     }
   }
-  // cleanup
-  registerEntry(absaddr, SCIENTIFIC_DATA_SET);
+  m_descriptor->registerEntry(absaddr.string(), SCIENTIFIC_DATA_SET);
   if (open_data) {
     m_current_type_id = datatype.release();
     m_current_space_id = dataspace.release();
@@ -1437,22 +1443,43 @@ void File::getEntries(Entries &result) const {
 }
 
 std::string File::getTopLevelEntryName() const {
-  std::string top("");
-  // check all of the NXentry's for one at top-level
-  auto allEntryAddresses = m_descriptor.allAddressesOfType("NXentry");
-  auto iTopAddress = std::find_if(allEntryAddresses.cbegin(), allEntryAddresses.cend(),
-                                  [](auto x) { return x.find_first_of('/', 1) == std::string::npos; });
-  if (iTopAddress != allEntryAddresses.cend()) {
-    top = *iTopAddress;
+  // Iterate only the root-level links to find the first NXentry group.
+  H5::H5File h5file(m_fileID);
+  H5::Group root = h5file.openGroup("/");
+  hsize_t const n = root.getNumObjs();
+  for (hsize_t i = 0; i < n; ++i) {
+    if (root.getObjTypeByIdx(i) != H5G_GROUP)
+      continue;
+    std::string const childName = root.getObjnameByIdx(i);
+    try {
+      H5::Group child = root.openGroup(childName);
+      if (H5Util::keyHasValue(child, GROUP_CLASS_SPEC, "NXentry"))
+        return "/" + childName;
+    } catch (H5::Exception const &) {
+      continue;
+    }
   }
-  if (top.empty()) {
-    throw NXEXCEPTION("unable to find top-level entry, no valid groups");
-  }
-  return top;
+  throw NXEXCEPTION("unable to find top-level entry, no valid groups");
 }
 
 std::set<std::string> File::getEntriesByClass(std::string const &class_type) const {
-  return m_descriptor.allAddressesOfType(class_type);
+  // served from the descriptor's cache; the first enumeration triggers one full-file scan (memoized)
+  return m_descriptor->allAddressesOfType(class_type);
+}
+
+bool File::classTypeExists(std::string const &class_type) const { return m_descriptor->classTypeExists(class_type); }
+
+std::string File::classForEntry(std::string const &entry) const {
+  H5::H5File h5file(m_fileID);
+  try {
+    H5::Group grp = h5file.openGroup(entry);
+    std::string cls;
+    H5Util::readStringAttribute(grp, GROUP_CLASS_SPEC, cls);
+    return cls;
+  } catch (H5::Exception const &) {
+    // Not a group — treat as a dataset.
+    return SCIENTIFIC_DATA_SET;
+  }
 }
 
 //------------------------------------------------------------------------------------------------------------------
@@ -1655,9 +1682,6 @@ void File::makeLink(NXlink const &link) {
   // build addressname to link from our current group and the name of the thing to link
   std::string linkTarget(groupAddress(m_address) / itemName);
   H5Lcreate_hard(m_fileID, link.targetAddress.c_str(), H5L_SAME_LOC, linkTarget.c_str(), H5P_DEFAULT, H5P_DEFAULT);
-
-  // register the entry
-  registerEntry(linkTarget, m_descriptor.classTypeForName(link.targetAddress));
 
   // set the target attribute
   NexusAddress here(m_address);
