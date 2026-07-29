@@ -899,10 +899,19 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
                 (angle_dict[MetaDictKeys.ANGLE_FILES_FILENAME], angle_dict[MetaDictKeys.ANGLE_FILES_ANGLE])
                 for angle_dict in metadata_dict[MetaDictKeys.ANGLE_FILES]
             ]
-        except KeyError:
+            self._set_ref_roi_q_conversion_theta_from_angle_files(dataset)
+        except (KeyError, TypeError):
             # One of angle-files, or the two sub-keys wasn't found. Just move on.
             pass
         return dataset
+
+    def _set_ref_roi_q_conversion_theta_from_angle_files(self, dataset: ReflectometryDatasetBase) -> None:
+        if not dataset.angle_files or self.getPropertyValue(Prop.Q_CONVERT_METHOD) != ReflectometryDatasetHistory.REF_ROI_ALG:
+            return
+        try:
+            dataset.q_conversion_theta = float(dataset.angle_files[0][1])
+        except (TypeError, ValueError):
+            pass
 
     def _create_orso_dataset(self, refl_dataset: ReflectometryDatasetBase) -> MantidORSODataset:
         data_columns = self._create_data_columns(refl_dataset)
@@ -973,6 +982,8 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         # The method to convert back to wavelength depends on which method was used to perform the conversion to Q
         match conversion_method:
             case ReflectometryDatasetHistory.REF_ROI_ALG:
+                if refl_dataset.q_conversion_theta is None:
+                    raise RuntimeError("Unable to calculate lambda values. An angle was not provided.")
                 return 4 * np.pi * np.sin(np.radians(refl_dataset.q_conversion_theta)) / q_data
             case ReflectometryDatasetHistory.CONVERT_ALG:
                 alg = self.createChildAlgorithm(

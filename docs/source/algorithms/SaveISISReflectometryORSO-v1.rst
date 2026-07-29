@@ -92,6 +92,8 @@ This setting is independent of ``WriteResolution``: the ``Qz`` resolution column
 - *lambda* - the wavelength values.
 
   - If the original conversion to Q was performed using :ref:`algm-RefRoi` then the ``Qz`` column values are converted back to wavelength using: :math:`\lambda=\frac{4\pi}{Q}sin(\theta)`.
+    In ``Manual`` mode, or the manual step of ``HistoryWherePossible`` mode, this angle is taken from the ``angle`` values in ``DatasetSpecificMetadata``.
+    If no angle can be found then the additional columns are excluded and a warning is logged.
   - If the original conversion was performed using :ref:`algm-ConvertUnits` then this algorithm is used to convert back to wavelength.
   - Note: The method used is either determined from the workspace history (in ``History`` or ``HistoryWherePossible`` modes) or from the ``QConversionMethod`` property (in ``Manual`` or
     ``HistoryWherePossible`` mode. When using the ``HistoryWherePossible`` mode, the value in the workspace history will override the setting chosen in the property.)
@@ -199,7 +201,8 @@ Metadata Fields
 +----------------------+------------------------------------------------------------------------------------------------+-------------------------+-------------------------+
 | ``"file-name"``      | The name of the data file.                                                                     | ``"INTER00013460"``     | ``file``                |
 +----------------------+------------------------------------------------------------------------------------------------+-------------------------+-------------------------+
-| ``"angle"``          | The angle of the data file.                                                                    | ``0.5``                 | ``comment``             |
+| ``"angle"``          | The angle of the data file. This is also used to calculate lambda when using ``RefRoi``        | ``0.5``                 | ``comment``             |
+|                      | with ``IncludeAdditionalColumns``.                                                             |                         |                         |
 +----------------------+------------------------------------------------------------------------------------------------+-------------------------+-------------------------+
 | ``"reduction-call"`` | The script used to perform the reduction.                                                      | ``"ReflectometryI...""``| ``call``                |
 +----------------------+------------------------------------------------------------------------------------------------+-------------------------+-------------------------+

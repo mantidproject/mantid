@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
+import json
 import unittest
 import tempfile
 import numpy as np
@@ -573,6 +574,101 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         self._configure_q_conversion_alg_mock_history(mock_alg_histories, self._REF_ROI, {"ScatteringAngle": angle}, True)
         self._run_save_alg(ws, write_resolution=True, include_extra_cols=True)
         self._check_num_columns_in_file(self._NUM_COLS_EXTENDED_WITH_RES)
+
+    def test_manual_source_uses_json_data_file_angle_to_calculate_ref_roi_lambda_columns(self):
+        angle = 2.3
+        ws = self._create_sample_workspace()
+        metadata = json.dumps({ws.name(): {"data-files": [{"file-name": "INTER00013460", "angle": angle}]}})
+
+        self._run_save_alg(
+            ws,
+            write_resolution=False,
+            include_extra_cols=True,
+            MetadataSource="Manual",
+            QConversionMethod=self._REF_ROI,
+            DatasetSpecificMetadata=metadata,
+        )
+
+        orso_data = self._check_num_columns_in_file(self._NUM_COLS_EXTENDED)
+        q_data = orso_data[:, 0]
+        lambda_data = orso_data[:, 3]
+        theta_data = orso_data[:, 5]
+        self.assertTrue(np.allclose(lambda_data, 4 * np.pi * np.sin(np.radians(angle)) / q_data, atol=1e-10, equal_nan=True))
+        self.assertTrue(np.allclose(theta_data, np.full(q_data.size, angle), atol=1e-10, equal_nan=True))
+
+    @patch.object(Logger, "warning")
+    def test_manual_source_excludes_ref_roi_additional_columns_if_json_angle_is_missing(self, mock_warning):
+        ws = self._create_sample_workspace()
+        metadata = json.dumps({ws.name(): {"data-files": [{"file-name": "INTER00013460"}]}})
+
+        self._run_save_alg(
+            ws,
+            write_resolution=False,
+            include_extra_cols=True,
+            MetadataSource="Manual",
+            QConversionMethod=self._REF_ROI,
+            DatasetSpecificMetadata=metadata,
+        )
+
+        self._check_num_columns_in_file(self._NUM_COLS_BASIC)
+        mock_warning.assert_any_call(
+            "Unable to calculate lambda values. An angle was not provided. Additional data columns will be excluded."
+        )
+
+    @patch.object(Logger, "warning")
+    def test_manual_source_excludes_ref_roi_additional_columns_if_json_angle_is_invalid(self, mock_warning):
+        ws = self._create_sample_workspace()
+        metadata = json.dumps({ws.name(): {"data-files": [{"file-name": "INTER00013460", "angle": "invalid"}]}})
+
+        self._run_save_alg(
+            ws,
+            write_resolution=False,
+            include_extra_cols=True,
+            MetadataSource="Manual",
+            QConversionMethod=self._REF_ROI,
+            DatasetSpecificMetadata=metadata,
+        )
+
+        self._check_num_columns_in_file(self._NUM_COLS_BASIC)
+        mock_warning.assert_any_call(
+            "Unable to calculate lambda values. An angle was not provided. Additional data columns will be excluded."
+        )
+
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_hybrid_source_uses_history_angle_for_ref_roi_additional_columns_if_json_angle_is_missing(self, mock_alg_histories):
+        angle = 2.3
+        ws = self._create_sample_workspace()
+        self._configure_q_conversion_alg_mock_history(mock_alg_histories, self._REF_ROI, {"ScatteringAngle": angle})
+
+        self._run_save_alg(
+            ws,
+            write_resolution=False,
+            include_extra_cols=True,
+            MetadataSource="HistoryWherePossible",
+            IgnoredProperties=["FirstTransmissionFileList", "SecondTransmissionFileList", "FloodCorrectionSource", "CalibrationFile"],
+        )
+
+        orso_data = self._check_num_columns_in_file(self._NUM_COLS_EXTENDED)
+        q_data = orso_data[:, 0]
+        lambda_data = orso_data[:, 3]
+        theta_data = orso_data[:, 5]
+        self.assertTrue(np.allclose(lambda_data, 4 * np.pi * np.sin(np.radians(angle)) / q_data, atol=1e-10, equal_nan=True))
+        self.assertTrue(np.allclose(theta_data, np.full(q_data.size, angle), atol=1e-10, equal_nan=True))
+
+    def test_json_data_file_angles_are_not_required_when_ref_roi_additional_columns_are_not_requested(self):
+        ws = self._create_sample_workspace()
+        metadata = json.dumps({ws.name(): {"data-files": [{"file-name": "INTER00013460"}]}})
+
+        self._run_save_alg(
+            ws,
+            write_resolution=False,
+            include_extra_cols=False,
+            MetadataSource="Manual",
+            QConversionMethod=self._REF_ROI,
+            DatasetSpecificMetadata=metadata,
+        )
+
+        self._check_num_columns_in_file(self._NUM_COLS_BASIC)
 
     @patch.object(Logger, "warning")
     @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
