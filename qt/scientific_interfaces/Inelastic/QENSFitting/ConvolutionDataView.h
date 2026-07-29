@@ -33,7 +33,9 @@ protected slots:
   void showAddNumericWorkspaceDialog() override;
 
 private:
-  ConvolutionAddWorkspaceDialog *createAddWorkspaceDialog(const QStringList &sampleFileSuffixes,
+  ConvolutionAddWorkspaceDialog *createAddWorkspaceDialog(const QStringList &sampleWorkspaceSuffixes,
+                                                          const QStringList &sampleFileSuffixes,
+                                                          const QStringList &resolutionWorkspaceSuffixes,
                                                           const QStringList &resolutionFileSuffixes) const;
 };
 
