@@ -14,7 +14,9 @@ if((ENABLE_WORKBENCH OR BUILD_MANTIDQT) AND MANTID_QT_VERSION EQUAL 6)
       HINTS ${Qt6_DIR}/../../qt6 ${Qt6_DIR}/../../../libexec ${Qt6_DIR}/../../../bin
     )
     if(NOT QT_RCC_CMD)
-      message(WARNING "Qt6 rcc not found: workbench resources will not be compiled")
+      message(
+        FATAL_ERROR "Qt6 rcc not found while GUI components are enabled. Resource .rcc files are required at runtime."
+      )
     endif()
   endif()
 endif()

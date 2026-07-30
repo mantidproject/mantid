@@ -15,10 +15,9 @@ import os
 #  On Windows the package can be installed anywhere so the locations must
 #  be determined at runtime. The two options are:
 #    1. using a qt.conf file: requires it to be next to the application
-#       executable but this would be python.exe and then would not allow
-#       switching between Qt Major versions
+#       executable but this would be python.exe
 #    2. add extra paths to the LibraryPath list here
-# As we can dynamically determine the Qt version here we choose option 2.
+# We choose option 2 and add the build-time Qt6 plugin paths below.
 
 
 def setup_library_paths_win():
