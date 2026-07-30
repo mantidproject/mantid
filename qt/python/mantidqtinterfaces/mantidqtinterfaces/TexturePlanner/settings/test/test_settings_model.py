@@ -4,9 +4,12 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import tempfile
 import unittest
 
 from unittest.mock import patch, MagicMock, call
+
+from qtpy.QtCore import QCoreApplication, QSettings
 
 from mantidqtinterfaces.TexturePlanner.settings.settings_model import (
     DEFAULT_SETTINGS,
@@ -20,65 +23,86 @@ file_path = "mantidqtinterfaces.TexturePlanner.settings.settings_model"
 
 
 class TestTexturePlannerSettingsModel_GetSetting(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        QCoreApplication.setApplicationName("test_texture_planner")
+        QCoreApplication.setOrganizationName("test_texture_planner_org")
+        cls.settings_dir = tempfile.TemporaryDirectory()
+
+    @classmethod
+    def tearDownClass(cls):
+        QSettings().clear()
+        cls.settings_dir.cleanup()
+
+    def setUp(self):
+        QSettings().clear()
+
+    @staticmethod
+    def _write(name, value):
+        qs = QSettings()
+        qs.beginGroup(INTERFACES_SETTINGS_GROUP)
+        qs.setValue(TEXTURE_PLANNER_PREFIX + name, value)
+        qs.endGroup()
+
+    def test_stored_value_round_trips_with_its_type(self):
+        for name, value in (("att_point", 2.75), ("mc_events_per_point", 7), ("att_unit", "Wavelength"), ("directions", True)):
+            with self.subTest(name=name):
+                self._write(name, value)
+
+                result = TexturePlannerSettingsModel._get_setting(name, SETTINGS_DICT[name], DEFAULT_SETTINGS[name])
+
+                self.assertEqual(result, value)
+                self.assertIsInstance(result, type(value))
+
+    def test_numeric_value_that_cannot_be_converted_returns_default(self):
+        for name in ("att_point", "mc_events_per_point"):
+            for raw in ("garbage", ""):
+                with self.subTest(name=name, raw=raw):
+                    self._write(name, raw)
+
+                    result = TexturePlannerSettingsModel._get_setting(name, SETTINGS_DICT[name], DEFAULT_SETTINGS[name])
+
+                    self.assertEqual(result, DEFAULT_SETTINGS[name])
+
+    def test_corrupted_bool_uses_default(self):
+        default_value = True
+        for raw, expected in (("tru", default_value), ("0", default_value), ("", default_value)):
+            with self.subTest(raw=raw):
+                self._write("directions", raw)
+
+                self.assertIs(TexturePlannerSettingsModel._get_setting("directions", bool, default_value), expected)
+
+    def test_missing_key_returns_default(self):
+        for name in SETTINGS_DICT:
+            with self.subTest(name=name):
+                result = TexturePlannerSettingsModel._get_setting(name, SETTINGS_DICT[name], DEFAULT_SETTINGS[name])
+
+                self.assertEqual(result, DEFAULT_SETTINGS[name])
+                self.assertIsInstance(result, type(DEFAULT_SETTINGS[name]))
+
+    def test_value_is_read_from_the_texture_planner_group_only(self):
+        # Same setting name, written outside the interface's own group and prefix.
+        qs = QSettings()
+        qs.setValue("att_unit", "Wavelength")
+        qs.beginGroup(INTERFACES_SETTINGS_GROUP)
+        qs.setValue("att_unit", "TOF")
+        qs.endGroup()
+
+        self.assertEqual(TexturePlannerSettingsModel._get_setting("att_unit", str, "dSpacing"), "dSpacing")
+
     @patch(file_path + ".QSettings")
-    def test_non_bool_returns_qsettings_value_typed(self, mock_qsettings):
-        qs = MagicMock()
-        qs.contains.return_value = True
-        qs.value.return_value = 1.5
-        mock_qsettings.return_value = qs
-
-        result = TexturePlannerSettingsModel._get_setting("att_point", float)
-
-        qs.beginGroup.assert_called_once_with(INTERFACES_SETTINGS_GROUP)
-        qs.value.assert_called_once_with(TEXTURE_PLANNER_PREFIX + "att_point", type=float)
-        qs.endGroup.assert_called_once_with()
-        self.assertEqual(result, 1.5)
-
-    @patch(file_path + ".QSettings")
-    def test_bool_true_string_returns_true(self, mock_qsettings):
-        qs = MagicMock()
-        qs.contains.return_value = True
-        qs.value.return_value = "true"
-        mock_qsettings.return_value = qs
-
-        result = TexturePlannerSettingsModel._get_setting("directions", bool)
-
-        qs.value.assert_called_once_with(TEXTURE_PLANNER_PREFIX + "directions", type=str)
-        self.assertIs(result, True)
-
-    @patch(file_path + ".QSettings")
-    def test_bool_false_string_returns_false(self, mock_qsettings):
-        qs = MagicMock()
-        qs.contains.return_value = True
-        qs.value.return_value = "false"
-        mock_qsettings.return_value = qs
-
-        result = TexturePlannerSettingsModel._get_setting("directions", bool)
-
-        self.assertIs(result, False)
-
-    @patch(file_path + ".QSettings")
-    def test_missing_key_returns_default_without_lookup(self, mock_qsettings):
+    def test_missing_key_is_not_looked_up(self, mock_qsettings):
         qs = MagicMock()
         qs.contains.return_value = False
         mock_qsettings.return_value = qs
 
         result = TexturePlannerSettingsModel._get_setting("att_point", float, 1.5)
 
+        qs.beginGroup.assert_called_once_with(INTERFACES_SETTINGS_GROUP)
         qs.contains.assert_called_once_with(TEXTURE_PLANNER_PREFIX + "att_point")
         qs.value.assert_not_called()
+        qs.endGroup.assert_called_once_with()
         self.assertEqual(result, 1.5)
-
-    @patch(file_path + ".QSettings")
-    def test_bool_unparseable_value_returns_default(self, mock_qsettings):
-        qs = MagicMock()
-        qs.contains.return_value = True
-        qs.value.return_value = "garbage"
-        mock_qsettings.return_value = qs
-
-        result = TexturePlannerSettingsModel._get_setting("directions", bool, True)
-
-        self.assertIs(result, True)
 
 
 class TestTexturePlannerSettingsModel_SetSetting(unittest.TestCase):
@@ -144,6 +168,64 @@ class TestTexturePlannerSettingsModel_SetSettingsDict(unittest.TestCase):
             model.set_settings_dict(payload)
 
         mock_set.assert_called_once_with("directions", True)
+
+
+class TestTexturePlannerSettingsModel_RoundTrip(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        QCoreApplication.setApplicationName("test_texture_planner")
+        QCoreApplication.setOrganizationName("test_texture_planner_org")
+        cls.settings_dir = tempfile.TemporaryDirectory()
+
+    @classmethod
+    def tearDownClass(cls):
+        QSettings().clear()
+        cls.settings_dir.cleanup()
+
+    def setUp(self):
+        QSettings().clear()
+        self.model = TexturePlannerSettingsModel()
+
+    def _assert_round_trips(self, settings):
+        self.model.set_settings_dict(settings)
+
+        result = self.model.get_settings_dict()
+
+        self.assertEqual(result, settings)
+        for name, value in settings.items():
+            self.assertIsInstance(result[name], type(value), msg=name)
+
+    def test_defaults_round_trip_unchanged(self):
+        self._assert_round_trips(dict(DEFAULT_SETTINGS))
+
+    def test_non_default_values_round_trip_unchanged(self):
+        # flip bools from default
+        settings = {name: (not value if isinstance(value, bool) else value) for name, value in DEFAULT_SETTINGS.items()}
+        # change the rest of the values manually
+        settings.update(
+            {
+                "stl_scale": "mm",
+                "stl_x_degrees": 90.0,
+                "stl_translation_vector": "1,2,3",
+                "orientation_axes": "ZXZ",
+                "mc_events_per_point": 500,
+                "mc_simulate_in": "SampleAndEnvironment",
+                "att_point": 2.75,
+                "att_unit": "Wavelength",
+            }
+        )
+
+        self._assert_round_trips(settings)
+
+    def test_partial_write_leaves_other_settings_at_their_defaults(self):
+        self.model.set_settings_dict({"att_unit": "Wavelength", "scattered": True})
+
+        result = self.model.get_settings_dict()
+
+        self.assertEqual(result["att_unit"], "Wavelength")
+        self.assertIs(result["scattered"], True)
+        for name in ("directions", "att_point", "mc_events_per_point", "stl_scale"):
+            self.assertEqual(result[name], DEFAULT_SETTINGS[name], msg=name)
 
 
 class TestTexturePlannerSettingsModel_DefaultsAlignment(unittest.TestCase):

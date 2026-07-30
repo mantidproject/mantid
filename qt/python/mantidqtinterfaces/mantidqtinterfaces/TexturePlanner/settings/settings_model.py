@@ -75,19 +75,27 @@ class TexturePlannerSettingsModel:
         qs = QSettings()
         qs.beginGroup(INTERFACES_SETTINGS_GROUP)
         key = TEXTURE_PLANNER_PREFIX + name
-        if not qs.contains(key):
-            value = default
-        elif return_type is bool:
-            raw = qs.value(key, type=str)
-            if raw == "true":
-                value = True
-            elif raw == "false":
-                value = False
-            else:
+        try:
+            # set missing values to default
+            if not qs.contains(key):
                 value = default
-        else:
-            value = qs.value(key, type=return_type)
-        qs.endGroup()
+            elif return_type is bool:
+                # if bool contains a corrupted value QSettings will auto-convert to False
+                # this block makes it auto-convert to default
+                raw = qs.value(key, type=str)
+                match raw:
+                    case "true":
+                        value = True
+                    case "false":
+                        value = False
+                    case _:
+                        value = default
+            else:
+                value = qs.value(key, default, type=return_type)
+        except TypeError:
+            value = default  # any other corrupted values fallback to default
+        finally:
+            qs.endGroup()
         return value
 
     @staticmethod
