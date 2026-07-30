@@ -889,10 +889,9 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
         blank_entries = [
             self._get_dataset_name_entry(ws.name()),
-            f"{self._REDUCTION_TIMESTAMP_HEADING} ''",
             f"{self._DATA_FILES_HEADING} []",
         ]
-        absent_entries = [f"{self._REDUCTION_CALL_HEADING} ''"]
+        absent_entries = [f"{self._REDUCTION_TIMESTAMP_HEADING}", f"{self._REDUCTION_CALL_HEADING} ''"]
 
         self._check_file_header(included_header_values=blank_entries, excluded_header_values=absent_entries)
 
