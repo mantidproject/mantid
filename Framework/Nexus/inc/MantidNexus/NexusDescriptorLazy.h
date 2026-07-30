@@ -128,7 +128,7 @@ public:
    * @param entryName absolute path of the new entry
    * @param groupClass NXclass for a group, or SDS for a dataset
    */
-  void registerEntry(std::string const &entryName, std::string const &groupClass);
+  void registerEntry(std::string const &entryName, std::string const &groupClass) const;
 
   /**
    * Return the group NX_class for a given entry name, if it exists.  Else, UNKNOWN_CLASS.
