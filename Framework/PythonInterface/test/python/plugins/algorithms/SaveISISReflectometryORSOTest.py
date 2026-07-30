@@ -761,8 +761,9 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
         self._check_num_columns_in_file(self._NUM_COLS_BASIC)
 
+    @patch.object(Logger, "debug")
     @patch.object(Logger, "warning")
-    def test_json_data_file_angles_are_not_required_for_stitched_data(self, mock_warning):
+    def test_json_data_file_angles_are_not_required_for_stitched_data(self, mock_warning, mock_debug):
         ws = self._create_sample_workspace()
         metadata = json.dumps(
             {
@@ -787,7 +788,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         )
 
         self._check_num_columns_in_file(self._NUM_COLS_BASIC)
-        mock_warning.assert_any_call(
+        mock_debug.assert_any_call(
             f"Dataset '{ws.name()}': Additional data columns cannot be calculated for stitched datasets and will be excluded."
         )
         warning_messages = [args[0] for args, _ in mock_warning.call_args_list]
@@ -797,14 +798,14 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
             warning_messages,
         )
 
-    @patch.object(Logger, "warning")
+    @patch.object(Logger, "debug")
     @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
-    def test_additional_columns_excluded_if_requested_but_is_stitched_data(self, mock_alg_histories, mock_warning):
+    def test_additional_columns_excluded_if_requested_but_is_stitched_data(self, mock_alg_histories, mock_debug):
         ws = self._create_sample_workspace()
         self._configure_mock_alg_history(mock_alg_histories, [(self._STITCH_ALG, {"Params": 0.02})])
         self._run_save_alg(ws, write_resolution=False, include_extra_cols=True)
         self._check_num_columns_in_file(self._NUM_COLS_BASIC)
-        mock_warning.assert_any_call(
+        mock_debug.assert_any_call(
             "Dataset 'Stitched': Additional data columns cannot be calculated for stitched datasets and will be excluded."
         )
 

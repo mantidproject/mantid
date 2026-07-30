@@ -903,7 +903,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
                 logger.debug(f"An entry for '{key}' was not found in {Prop.META_JSON}. It will not be included in the output file.")
 
         if not dataset.q_conversion_method:
-            if self.getPropertyValue(Prop.META_SOURCE) == MetadataSourceOptions.HYBRID:
+            if self.getPropertyValue(Prop.META_SOURCE) == MetadataSourceOptions.HYBRID and not dataset.is_stitched:
                 self.log().warning(
                     f"Dataset '{dataset.name}': Unable to find a supported Q conversion method in the workspace history. "
                     f"Falling back to the '{Prop.Q_CONVERT_METHOD}' property value: {self.getPropertyValue(Prop.Q_CONVERT_METHOD)}."
@@ -996,7 +996,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         data_columns = MantidORSODataColumns(q_data, reflectivity, reflectivity_error, q_resolution, q_error_value_is=None)
 
         if self.getProperty(Prop.INCLUDE_EXTRA_COLS).value and refl_dataset.is_stitched:
-            self.log().warning(
+            self.log().debug(
                 f"Dataset '{refl_dataset.name}': Additional data columns cannot be calculated for stitched datasets and will be excluded."
             )
             return data_columns
