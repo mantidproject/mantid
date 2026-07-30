@@ -1,1 +1,1 @@
-- new command line argument ``--qt-rm-lockfiles`` forceably removes lockfiles created by QSettings. This is not available on windows.
+- new command line argument ``--qt-rm-lockfiles`` forcibly removes lockfiles created by QSettings. This is not available on Windows.

@@ -23,7 +23,8 @@ def main(args=None):
         parser.add_argument(
             "--qt-rm-lockfiles",
             action="store_true",
-            help="Forceably remove lockfiles for qt configuration. This should not be necessary under normal operation.",
+            help="Forceably remove lockfiles for Qt configuration. This should not be necessary under normal operation. "
+            "Close all instances of mantidworkbench before restarting with this option.",
         )
     parser.add_argument("--profile", action="store", help="Run workbench with execution profiling. Specify a path for the output file.")
     parser.add_argument("--yappi", action="store_true", help="Profile using Yappi instead of cProfile to capture multi-threaded execution.")
