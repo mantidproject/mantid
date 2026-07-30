@@ -107,6 +107,13 @@ public:
    */
   bool isEntry(std::string const &entryName) const;
 
+  /**
+   * Checks if a full-address entry exists and is a dataset
+   * @param entryName full address for an entry name /entry/NXlogs
+   * @return true: entryName exists and is a dataset, otherwise false
+   */
+  bool isDataSet(std::string const &entryName) const;
+
   /// Query if a given type exists somewhere in the file
   bool classTypeExists(std::string const &classType) const;
 
@@ -129,6 +136,8 @@ public:
    * @param groupClass NXclass for a group, or SDS for a dataset
    */
   void registerEntry(std::string const &entryName, std::string const &groupClass) const;
+
+  void registerDataSet(std::string const &entryName) const;
 
   /**
    * Return the group NX_class for a given entry name, if it exists.  Else, UNKNOWN_CLASS.

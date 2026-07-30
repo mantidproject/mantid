@@ -162,6 +162,10 @@ bool NexusDescriptorLazy::isEntry(std::string const &entryName) const {
   }
 }
 
+bool NexusDescriptorLazy::isDataSet(std::string const &entryName) const {
+  return (*this)[entryName] == SCIENTIFIC_DATA_SET;
+}
+
 /// @brief Check if a class type exists in the file
 /// @param classType the NX_class type to check for
 /// @return true if the class type exists anywhere in the file
@@ -233,10 +237,14 @@ bool NexusDescriptorLazy::hasRootAttr(std::string const &name) const {
   }
 }
 
-void NexusDescriptorLazy::registerEntry(std::string const &entryName, std::string const &groupClass) {
+void NexusDescriptorLazy::registerEntry(std::string const &entryName, std::string const &groupClass) const {
   std::lock_guard<std::shared_mutex> lock(m_readNexusMutex);
   m_allMisses.erase(entryName);
   m_allEntries[entryName] = groupClass;
+}
+
+void NexusDescriptorLazy::registerDataSet(std::string const &entryName) const {
+  registerEntry(entryName, SCIENTIFIC_DATA_SET);
 }
 
 std::string NexusDescriptorLazy::operator[](std::string const &entryName) const {
@@ -280,8 +288,8 @@ std::string NexusDescriptorLazy::operator[](std::string const &entryName) const 
 
 /// Get string data from a dataset at address
 std::string NexusDescriptorLazy::getStrData(std::string const &address) {
-  std::string strData;
-  if (isEntry(address, SCIENTIFIC_DATA_SET)) {
+  std::string strData{};
+  if (isDataSet(address)) {
     // open the data set and get its string data
     // using H5Cpp interface because trying to read string data is an absolute nightmare with the C API
     UniqueID<&H5Dclose> did(H5Dopen(m_fileID, address.c_str(), H5P_DEFAULT));

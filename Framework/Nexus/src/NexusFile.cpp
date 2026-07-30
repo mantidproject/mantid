@@ -394,9 +394,7 @@ bool File::hasGroup(std::string const &name, std::string const &class_type) cons
   // }
 }
 
-bool File::hasData(std::string const &name) const {
-  return m_descriptor->isEntry(formAbsoluteAddress(name), SCIENTIFIC_DATA_SET);
-}
+bool File::hasData(std::string const &name) const { return m_descriptor->isDataSet(formAbsoluteAddress(name)); }
 
 bool File::isDataSetOpen() const {
   if (!H5_id_is_valid(m_current_data_id)) {
@@ -978,7 +976,7 @@ void File::makeCompData(std::string const &name, NXnumtype const type, DimVector
       throw NXEXCEPTION(msg.str());
     }
   }
-  m_descriptor->registerEntry(absaddr.string(), SCIENTIFIC_DATA_SET);
+  m_descriptor->registerDataSet(absaddr.string());
   if (open_data) {
     m_current_type_id = datatype.release();
     m_current_space_id = dataspace.release();
