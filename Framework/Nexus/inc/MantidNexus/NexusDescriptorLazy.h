@@ -92,14 +92,7 @@ public:
    * @param groupClass e.g. NxLog , Nexus entry attribute
    * @return true: entryName exists for a groupClass, otherwise false
    */
-  bool isEntry(std::string const &entryName, std::string const &groupClass) const {
-    if (isEntry(entryName)) {
-      return m_allEntries.at(entryName) == groupClass;
-    } else {
-      return false;
-    }
-  }
-
+  bool isEntry(std::string const &entryName, std::string const &groupClass) const;
   /**
    * Checks if a full-address entry exists in a Nexus dataset
    * @param entryName full address for an entry name /entry/NXlogs
@@ -196,7 +189,7 @@ private:
 
   /// true once the whole file has been scanned into m_allEntries, so enumeration queries are complete.
   /// mutable because it is set from const enumeration methods via ensureAllEntries().
-  mutable bool m_fullyScanned = false;
+  mutable std::atomic<bool> m_fullyScanned{false};
 };
 
 } // namespace Nexus
