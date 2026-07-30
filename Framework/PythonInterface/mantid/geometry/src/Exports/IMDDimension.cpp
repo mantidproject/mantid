@@ -6,10 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDFrame.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/UnitLabel.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/core/GetPointer.h"
 #include <memory>
+#include <stdexcept>
 
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
@@ -37,6 +39,35 @@ std::string getUnitsAsStr(const IMDDimension &self) { return self.getUnits().asc
  */
 std::shared_ptr<MDFrame> getMDFrame(const IMDDimension &self) {
   return std::shared_ptr<MDFrame>(self.getMDFrame().clone());
+}
+
+/**
+ * Downcast to the editable concrete dimension. Editing name/units is only
+ * meaningful for an MDHistoWorkspace's MDHistoDimension; other IMDDimension
+ * implementations (e.g. a MatrixWorkspace viewed as MD) wrap read-only data.
+ * @param self A reference to the calling object
+ * @throw std::runtime_error if the dimension is not an MDHistoDimension
+ */
+MDHistoDimension &asEditableDimension(IMDDimension &self) {
+  auto *histoDimension = dynamic_cast<MDHistoDimension *>(&self);
+  if (!histoDimension) {
+    throw std::runtime_error("Editing the name or units is only supported for MDHistoWorkspace dimensions.");
+  }
+  return *histoDimension;
+}
+
+/**
+ * @param self A reference to the calling object
+ * @param name The new name of the dimension
+ */
+void setName(IMDDimension &self, const std::string &name) { asEditableDimension(self).setName(name); }
+
+/**
+ * @param self A reference to the calling object
+ * @param units The new unit label of the dimension
+ */
+void setUnits(IMDDimension &self, const std::string &units) {
+  asEditableDimension(self).setUnits(Mantid::Kernel::UnitLabel(units));
 }
 } // namespace
 
@@ -79,5 +110,14 @@ void export_IMDDimension() {
            "dimension."
            "A dimension can be usually find by its ID and various  ")
       .def("getUnits", &getUnitsAsStr, arg("self"), "Return the units associated with this dimension.")
-      .def("getMDFrame", &getMDFrame, arg("self"), "Return the multidimensional frame for this dimension.");
+      .def("getMDFrame", &getMDFrame, arg("self"), "Return the multidimensional frame for this dimension.")
+      .def("setName", &setName, (arg("self"), arg("name")),
+           "Set the name of the dimension as displayed along the axis. Only "
+           "supported for MDHistoWorkspace dimensions.")
+      .def("setUnits", &setUnits, (arg("self"), arg("units")),
+           "Set the units of the dimension. Only supported for MDHistoWorkspace "
+           "dimensions whose frame permits it (HKL and general frames); an HKL "
+           "dimension accepts 'r.l.u.' or an inverse-Angstrom-style label such as "
+           "'in 2.5 A^-1'. Raises for a frame with a fixed unit (e.g. QSample/QLab) "
+           "or a label the frame does not accept.");
 }
