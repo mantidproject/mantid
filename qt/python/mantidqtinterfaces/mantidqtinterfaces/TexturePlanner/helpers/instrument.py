@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import annotations
 
 import os
 
@@ -12,28 +13,14 @@ from mantid.simpleapi import CreateSimulationWorkspace, GroupDetectors
 from mantid.kernel import logger
 from Engineering.EnggUtils import CALIB_DIR
 from Engineering.common.instrument_config import get_instr_config, SUPPORTED_INSTRUMENTS
-from typing import List, Sequence, Protocol
-from abc import abstractmethod
+from typing import TYPE_CHECKING, List, Sequence
+
+if TYPE_CHECKING:
+    from mantidqtinterfaces.TexturePlanner.model import TexturePlannerModel
 
 # Group used when the user supplies their own grouping XML file rather than
 # selecting one of an instrument's grouping presets. Also the label shown in the group combo.
 CUSTOM_GROUP = "Custom"
-
-
-class _WorkspaceManagerType(Protocol):
-    """For the purpose of type hinting while this module is orphaned
-    Will be removed and replaced with actual model before final PR"""
-
-    @abstractmethod
-    def update_ws(self) -> None:
-        pass
-
-
-class _BaseModelType(Protocol):
-    """For the purpose of type hinting while this module is orphaned
-    Will be removed and replaced with actual model before final PR"""
-
-    workspaces: _WorkspaceManagerType
 
 
 class InstrumentHelper:
@@ -46,7 +33,7 @@ class InstrumentHelper:
     }
     _DEFAULT_SUPPORTED_GROUPS = ("banks",)
 
-    def __init__(self, model: _BaseModelType, instrument: str = "ENGINX"):
+    def __init__(self, model: TexturePlannerModel, instrument: str = "ENGINX"):
         self._model = model
         # instrument config
         self.instr = instrument
@@ -55,10 +42,11 @@ class InstrumentHelper:
         self.supported_groups = self._DEFAULT_SUPPORTED_GROUPS
         # path to a user-supplied grouping XML file, used when self.group is CUSTOM_GROUP
         self.custom_grouping_file = None
+        self.current_instr_name_valid = False
 
     # instrument config -------------------------------------------------
     def update_instrument(self, instrument: str) -> None:
-        if not self.is_valid_instrument(instrument):
+        if not self.check_is_valid_instrument(instrument):
             logger.error(f"Instrument Definition File for: '{instrument}' could not be found")
         self.instr = instrument
         # custom instruments are an arbitrary (validated) IDF name with no registered
@@ -74,10 +62,16 @@ class InstrumentHelper:
     def get_supported_instruments() -> List[str]:
         return SUPPORTED_INSTRUMENTS
 
-    @staticmethod
-    def is_valid_instrument(name: str) -> bool:
+    def check_is_valid_instrument(self, name: str) -> bool:
         """True if name resolves to a known instrument definition file (IDF)."""
-        return bool(InstrumentFileFinder.getInstrumentFilename(name)) if name else False
+        self.set_is_valid_instrument(bool(InstrumentFileFinder.getInstrumentFilename(name)) if name else False)
+        return self.get_is_valid_instrument()
+
+    def get_is_valid_instrument(self) -> bool:
+        return self.current_instr_name_valid
+
+    def set_is_valid_instrument(self, valid: bool) -> None:
+        self.current_instr_name_valid = valid
 
     @staticmethod
     def is_grouping_file_applicable(instrument: str, grouping_path: str) -> bool:
@@ -127,7 +121,7 @@ class InstrumentHelper:
         return (CUSTOM_GROUP,)
 
     def get_grouping_file(self) -> str:
-        return self.config.grouping_files[self.group]
+        return self.config.group_info[self.group].grouping_file
 
     def get_grouping_path(self) -> str:
         if self.group == CUSTOM_GROUP:
