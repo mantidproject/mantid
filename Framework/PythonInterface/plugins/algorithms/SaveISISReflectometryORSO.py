@@ -279,12 +279,17 @@ class ReflectometryDatasetHistory(ReflectometryDatasetBase):
     def _is_supported_q_conversion_method(cls, alg_name: str) -> bool:
         return alg_name in [cls.REF_ROI_ALG, cls.CONVERT_ALG]
 
+    @classmethod
+    def _supported_q_conversion_methods(cls) -> List[str]:
+        return [cls.REF_ROI_ALG, cls.CONVERT_ALG]
+
     def _read_only(self) -> bool:
         return True
 
-    def __init__(self, ws, is_ws_grp_member: bool):
+    def __init__(self, ws, is_ws_grp_member: bool, preferred_q_conversion_method: str = REF_ROI_ALG):
         super(ReflectometryDatasetHistory, self).__init__(ws, is_ws_grp_member)
         self._q_conversion_history = None
+        self._preferred_q_conversion_method = preferred_q_conversion_method
         self._stitch_history = None
         self._reduction_history = None
         self._reduction_workflow_histories = []
@@ -367,10 +372,7 @@ class ReflectometryDatasetHistory(ReflectometryDatasetBase):
 
         for child in reversed(self._reduction_history.getChildHistories()):
             if child.name() == self._RRO_ALG:
-                for rro_child in reversed(child.getChildHistories()):
-                    if self._is_supported_q_conversion_method(rro_child.name()):
-                        self._q_conversion_history = rro_child
-                        break
+                self._q_conversion_history = self._get_q_conversion_history_from_rro_history(child)
                 break
 
         if self._q_conversion_history is None:
@@ -386,6 +388,22 @@ class ReflectometryDatasetHistory(ReflectometryDatasetBase):
             self._q_conversion_theta = float(np.rad2deg(self._ws.spectrumInfo().signedTwoTheta(0))) / 2.0
 
         self._q_conversion_method = q_conversion_method
+
+    def _get_q_conversion_history_from_rro_history(self, rro_history):
+        for q_conversion_method in self._q_conversion_method_search_order():
+            for rro_child in reversed(rro_history.getChildHistories()):
+                if rro_child.name() == q_conversion_method:
+                    return rro_child
+        return None
+
+    def _q_conversion_method_search_order(self) -> List[str]:
+        supported_methods = self._supported_q_conversion_methods()
+        if self._preferred_q_conversion_method not in supported_methods:
+            return supported_methods
+        return [
+            self._preferred_q_conversion_method,
+            *[method for method in supported_methods if method != self._preferred_q_conversion_method],
+        ]
 
     def _set_name(self):
         if self.stitch_history is not None:
@@ -557,8 +575,8 @@ class ReflectometryDatasetHybrid(ReflectometryDatasetHistory, ReflectometryDatas
     a chance to manually enter any remaining properties.
     """
 
-    def __init__(self, ws, is_ws_grp_member: bool):
-        super(ReflectometryDatasetHybrid, self).__init__(ws, is_ws_grp_member)
+    def __init__(self, ws, is_ws_grp_member: bool, preferred_q_conversion_method: str = ReflectometryDatasetHistory.REF_ROI_ALG):
+        super(ReflectometryDatasetHybrid, self).__init__(ws, is_ws_grp_member, preferred_q_conversion_method)
 
     def _read_only(self):
         return False
@@ -859,9 +877,9 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
     def _create_single_refl_dataset(self, ws, is_child, metadata_dict=None) -> ReflectometryDatasetBase:
         match self.getPropertyValue(Prop.META_SOURCE):
             case MetadataSourceOptions.FROM_HISTORY:
-                return ReflectometryDatasetHistory(ws, is_child)
+                return ReflectometryDatasetHistory(ws, is_child, self.getPropertyValue(Prop.Q_CONVERT_METHOD))
             case MetadataSourceOptions.HYBRID:
-                dataset = ReflectometryDatasetHybrid(ws, is_child)
+                dataset = ReflectometryDatasetHybrid(ws, is_child, self.getPropertyValue(Prop.Q_CONVERT_METHOD))
                 use_default = False
             case MetadataSourceOptions.MANUAL:
                 dataset = ReflectometryDatasetManual(ws, is_child)

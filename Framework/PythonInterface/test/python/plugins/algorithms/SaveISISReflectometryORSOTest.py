@@ -681,6 +681,25 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         self.assertTrue(np.allclose(theta_data, np.full(q_data.size, angle), atol=1e-10, equal_nan=True))
 
     @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_history_source_prefers_requested_q_conversion_method_when_multiple_supported_methods_are_in_history(self, mock_alg_histories):
+        angle = 0.4
+        ws = self._create_sample_workspace()
+        ref_roi_history = self._create_mock_alg_history(self._REF_ROI, {"ScatteringAngle": angle})
+        convert_units_history = self._create_mock_alg_history(self._CONVERT_UNITS, {})
+        rro_history = self._create_mock_alg_history(self._RRO_ALG, {}, [ref_roi_history, convert_units_history])
+        red_history = self._create_mock_alg_history(self._REDUCTION_ALG, {}, [rro_history])
+        mock_alg_histories.return_value = [red_history]
+
+        self._run_save_alg(ws, write_resolution=False, include_extra_cols=True, QConversionMethod=self._REF_ROI)
+
+        orso_data = self._check_num_columns_in_file(self._NUM_COLS_EXTENDED)
+        q_data = orso_data[:, 0]
+        lambda_data = orso_data[:, 3]
+        theta_data = orso_data[:, 5]
+        self.assertTrue(np.allclose(lambda_data, 4 * np.pi * np.sin(np.radians(angle)) / q_data, atol=1e-10, equal_nan=True))
+        self.assertTrue(np.allclose(theta_data, np.full(q_data.size, angle), atol=1e-10, equal_nan=True))
+
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
     def test_history_source_uses_supported_q_conversion_algorithm_from_final_rro_call(self, mock_alg_histories):
         angle = 2.3
         ws = self._create_sample_workspace()
