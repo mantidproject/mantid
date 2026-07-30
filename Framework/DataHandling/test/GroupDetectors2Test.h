@@ -694,7 +694,7 @@ public:
 
     // Create an axis for each pixel.
     for (size_t pix = 0; pix < inputW->getNumberHistograms(); pix++) {
-      inputW->setX(pix, make_cow<HistogramX>(std::vector<double>{1.0, 2.0, 3.0, 4.0, 1e6}));
+      inputW->setSharedX(pix, make_cow<HistogramX>(std::vector<double>{1.0, 2.0, 3.0, 4.0, 1e6}));
       inputW->getSpectrum(pix).addEventQuickly(TofEvent(1000.0));
     }
 
@@ -785,7 +785,7 @@ public:
 
     // Create an axis for each pixel.
     for (size_t pix = 0; pix < inputW->getNumberHistograms(); pix++) {
-      inputW->setX(pix, make_cow<HistogramX>(std::vector<double>{1.0, 2.0, 3.0, 4.0, 1e6}));
+      inputW->setSharedX(pix, make_cow<HistogramX>(std::vector<double>{1.0, 2.0, 3.0, 4.0, 1e6}));
       inputW->getSpectrum(pix).addEventQuickly(TofEvent(1000.0));
     }
 

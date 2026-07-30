@@ -85,6 +85,7 @@ def _ensure_overlay_manager(method):
             self._shape_overlay_manager = ShapeOverlayManager(self.main_plotter)
         shape = method(self, *args, **kwargs)
         self._shape_overlay_manager.set_shape(shape)
+        self._presenter.on_overlaid_shape_added()
 
     return wrapper
 
@@ -109,6 +110,35 @@ class WorkspaceListWidget(QListWidget):
             if item.text() == drop_text:
                 item.setCheckState(Qt.Checked)
         event.acceptProposedAction()
+
+    def refresh_items(
+        self, keys_from_ads: list[str], keys_cached_in_model: list[str] | None = None, colours: list[str] | None = None
+    ) -> None:
+        keys_in_current_list = [self.item(i).text() for i in range(self.count())]
+
+        # Keys from ADS but not yet in list
+        for key in keys_from_ads:
+            if key not in keys_in_current_list:
+                item = QListWidgetItem(key, self)
+                item.setCheckState(Qt.Unchecked)
+
+        # Remove keys that are neither in cache (if provided) nor in ADS
+        for i in range(self.count() - 1, -1, -1):
+            item = self.item(i)
+            if item.text() in keys_from_ads:
+                continue
+            if keys_cached_in_model is not None and item.text() in keys_cached_in_model:
+                continue
+            removed = self.takeItem(i)
+            del removed
+
+        if colours is None or len(colours) == 0:
+            return
+
+        for list_i in range(self.count()):
+            list_item = self.item(list_i)
+            colour = colours[list_i % len(colours)]
+            list_item.setForeground(QColor(colour))
 
 
 class NoWheelComboBox(QComboBox):
@@ -208,6 +238,7 @@ class FullInstrumentViewView(QWidget):
     def _create_main_widgets(self):
         self._left_column_tabs = QTabWidget()
         self._left_column_home = QWidget()
+        self._left_column_settings = QWidget()
         self._left_column_component_tree = QWidget()
         self._left_column_scroll = QScrollArea()
 
@@ -276,6 +307,8 @@ class FullInstrumentViewView(QWidget):
         self._reset_projection.setToolTip("Resets the projection to default.")
         self._reset_projection.clicked.connect(self.reset_camera)
         self._clear_point_picked_detectors = QPushButton("Clear Mouse Picking")
+
+        self._picking_group_box = QGroupBox("Picking/Interaction")
         self._hover_pick = QPushButton("Hover Pick")
         self._hover_pick.setCheckable(True)
         self._hover_pick.setToolTip("Use mouse hover to preview a single detector spectrum (2D projections only).")
@@ -326,18 +359,19 @@ class FullInstrumentViewView(QWidget):
 
         self._grouping_masking_group_box = QGroupBox("Grouping and Masking")
         self._shapes_widget = QWidget()
-        self._add_circle = QPushButton("Add Circle")
-        self._add_circle.setCheckable(True)
-        self._add_rectangle = QPushButton("Add Rectangle")
-        self._add_rectangle.setCheckable(True)
-        self._add_ellipse = QPushButton("Add Ellipse")
-        self._add_ellipse.setCheckable(True)
-        self._add_annulus = QPushButton("Add Annulus")
-        self._add_annulus.setCheckable(True)
-        self._add_hollow_rectangle = QPushButton("Add Hollow Rectangle")
-        self._add_hollow_rectangle.setCheckable(True)
-
-        self._shape_buttons = [self._add_circle, self._add_rectangle, self._add_ellipse, self._add_annulus, self._add_hollow_rectangle]
+        self._shape_options = [
+            ("Circle", self.add_circle_widget),
+            ("Rectangle", self.add_rectangular_widget),
+            ("Ellipse", self.add_ellipse_widget),
+            ("Annulus", self.add_annulus_widget),
+            ("Hollow Rectangle", self.add_hollow_rectangle_widget),
+        ]
+        self._shape_selector_combo_box = NoWheelComboBox()
+        self._shape_selector_combo_box.addItems([label for label, _ in self._shape_options])
+        self._shape_selector_combo_box.setToolTip("Select a shape to add to the projection.")
+        self._add_shape_button = QPushButton("Add Shape")
+        self._add_shape_button.setToolTip("Add or replace the selected shape.")
+        self._add_shape_button.setCheckable(True)
 
         # TODO: for the ROI and Mask tabs, should separate buttons from layout
         self._selection_tab = QWidget()
@@ -355,7 +389,7 @@ class FullInstrumentViewView(QWidget):
         self._save_grouping_to_xml.setText("Save Grouping to XML")
         self._save_grouping_to_cal.setText("Save Grouping to CAL")
 
-        mask_tab = QWidget()
+        self._mask_tab = QWidget()
         (
             self._add_mask,
             self._clear_masks,
@@ -364,7 +398,7 @@ class FullInstrumentViewView(QWidget):
             self._save_mask_to_xml,
             self._save_mask_to_cal,
             self._overwrite_mask,
-        ) = self._add_tab(mask_tab, "Mask")
+        ) = self._add_tab(self._mask_tab, "Mask")
         self._save_mask_to_ws.setText("Save Mask to ADS")
         self._save_mask_to_xml.setText("Save Mask to XML")
         self._save_mask_to_cal.setText("Save Mask to CAL")
@@ -372,7 +406,7 @@ class FullInstrumentViewView(QWidget):
 
         self._picking_masking_tab = QTabWidget()
         self._picking_masking_tab.addTab(self._selection_tab, CurrentTab.Grouping.value)
-        self._picking_masking_tab.addTab(mask_tab, CurrentTab.Masking.value)
+        self._picking_masking_tab.addTab(self._mask_tab, CurrentTab.Masking.value)
 
         self.status_group_box = QGroupBox("Status")
 
@@ -398,45 +432,48 @@ class FullInstrumentViewView(QWidget):
 
         self._parent_hsplitter.addWidget(self._left_column_scroll)
         self._parent_hsplitter.addWidget(self._right_column_graphics)
-        self._parent_hsplitter.setSizes([150, 200])
+        self._parent_hsplitter.setSizes([100, 200])
 
         self._left_column_scroll.setWidgetResizable(True)
         self._left_column_scroll.setWidget(self._left_column_tabs)
         self._left_column_scroll.setFrameShape(QFrame.NoFrame)
 
         self._left_column_tabs.addTab(self._left_column_home, "Home")
+        self._left_column_tabs.addTab(self._left_column_settings, "Settings")
         self._left_column_tabs.addTab(self._left_column_component_tree, "Component Tree")
 
         left_column_component_layout = QVBoxLayout(self._left_column_component_tree)
         left_column_component_layout.addWidget(self.component_tree)
 
         left_column_home_layout = QVBoxLayout(self._left_column_home)
+        left_column_home_layout.addWidget(self._projection_group_box)
         left_column_home_layout.addWidget(self._integration_limit_group_box)
         left_column_home_layout.addWidget(self._contour_range_group_box)
-        left_column_home_layout.addWidget(self._projection_group_box)
+        left_column_home_layout.addWidget(self._picking_group_box)
         left_column_home_layout.addWidget(self._lineplot_options_group_box)
         left_column_home_layout.addWidget(self._lists_vsplitter)
 
         projection_layout = QVBoxLayout(self._projection_group_box)
         projection_first_row = QHBoxLayout()
-        projection_second_row = QHBoxLayout()
-        projection_third_row = QHBoxLayout()
 
         projection_first_row.addWidget(self._projection_combo_box)
         projection_first_row.addWidget(self._reset_projection)
-        projection_first_row.addWidget(self._rubberband_zoom)
-        projection_second_row.addWidget(self._hover_pick)
-        projection_second_row.addWidget(self._select_bank_tube)
-        projection_second_row.addWidget(self._clear_point_picked_detectors)
-        projection_third_row.addWidget(self._aspect_ratio_check_box)
-        projection_third_row.addWidget(self._flip_beam_check_box)
-        projection_third_row.addWidget(self._show_monitors_check_box)
-        projection_third_row.addWidget(self._show_sample_position_check_box)
-        projection_second_row.addWidget(self._render_mode_combo_box)
-        projection_third_row.addWidget(self._count_scale_combo_box)
         projection_layout.addLayout(projection_first_row)
-        projection_layout.addLayout(projection_second_row)
-        projection_layout.addLayout(projection_third_row)
+
+        picking_layout = QHBoxLayout(self._picking_group_box)
+        picking_layout.addWidget(self._rubberband_zoom)
+        picking_layout.addWidget(self._hover_pick)
+        picking_layout.addWidget(self._select_bank_tube)
+        picking_layout.addWidget(self._clear_point_picked_detectors)
+
+        settings_layout = QVBoxLayout(self._left_column_settings)
+        settings_layout.addWidget(self._aspect_ratio_check_box)
+        settings_layout.addWidget(self._flip_beam_check_box)
+        settings_layout.addWidget(self._show_monitors_check_box)
+        settings_layout.addWidget(self._show_sample_position_check_box)
+        settings_layout.addWidget(self._render_mode_combo_box)
+        settings_layout.addWidget(self._count_scale_combo_box)
+        settings_layout.addStretch(1)
 
         lineplot_options_layout = QHBoxLayout(self._lineplot_options_group_box)
         lineplot_options_layout.addWidget((self._units_combo_box_lineplot))
@@ -468,11 +505,8 @@ class FullInstrumentViewView(QWidget):
         grouping_masking_group_layout.addWidget(self._picking_masking_tab)
 
         shapes_layout = QHBoxLayout(self._shapes_widget)
-        shapes_layout.addWidget(self._add_circle)
-        shapes_layout.addWidget(self._add_rectangle)
-        shapes_layout.addWidget(self._add_ellipse)
-        shapes_layout.addWidget(self._add_annulus)
-        shapes_layout.addWidget(self._add_hollow_rectangle)
+        shapes_layout.addWidget(self._shape_selector_combo_box)
+        shapes_layout.addWidget(self._add_shape_button)
 
         right_column_graphics_layout = QVBoxLayout(self._right_column_graphics)
         right_column_graphics_layout.addWidget(self._graphics_vsplitter)
@@ -530,14 +564,18 @@ class FullInstrumentViewView(QWidget):
         option = "Yes" if checkbox.isChecked() else "No"
         ConfigService.Instance()[config_key] = option
 
-    def enable_or_disable_aspect_ratio_box(self) -> None:
-        self._aspect_ratio_check_box.setDisabled(self.current_selected_projection() == ProjectionType.THREE_D)
+    def set_add_selection_and_mask_buttons_enabled(self, enabled: bool):
+        self._add_mask.setEnabled(enabled)
+        self._add_selection.setEnabled(enabled)
+
+    def set_aspect_ratio_box_enabled(self, enabled):
+        self._aspect_ratio_check_box.setEnabled(enabled)
+
+    def set_flip_beam_box_enabled(self, enabled):
+        self._flip_beam_check_box.setEnabled(enabled)
 
     def is_flip_beam_checkbox_checked(self) -> bool:
         return self._flip_beam_check_box.isChecked()
-
-    def enable_or_disable_flip_beam_box(self) -> None:
-        self._flip_beam_check_box.setDisabled(self.current_selected_projection() in [ProjectionType.THREE_D, ProjectionType.SIDE_BY_SIDE])
 
     def is_show_monitors_checkbox_checked(self) -> bool:
         return self._show_monitors_check_box.isChecked()
@@ -751,88 +789,51 @@ class FullInstrumentViewView(QWidget):
             self._presenter.on_integration_limits_updated,
         )
 
-        self._add_circle.toggled.connect(self.on_toggle_add_circle)
-        self._add_rectangle.toggled.connect(self.on_toggle_add_rectangle)
-        self._add_ellipse.toggled.connect(self.on_toggle_add_ellipse)
-        self._add_annulus.toggled.connect(self.on_toggle_add_annulus)
-        self._add_hollow_rectangle.toggled.connect(self.on_toggle_add_hollow_rectangle)
+        self._add_shape_button.toggled.connect(self.add_selected_shape)
 
         self._add_mask.clicked.connect(self._presenter.on_add_item_clicked)
         self._add_mask.setDisabled(True)
         self._add_selection.clicked.connect(self._presenter.on_add_item_clicked)
         self._add_selection.setDisabled(True)
 
-    def on_toggle_add_circle(self, checked):
-        self._on_toggle_add_shape(checked, self.add_circle_widget)
-
-    def on_toggle_add_rectangle(self, checked):
-        self._on_toggle_add_shape(checked, self.add_rectangular_widget)
-
-    def on_toggle_add_ellipse(self, checked):
-        self._on_toggle_add_shape(checked, self.add_ellipse_widget)
-
     def is_select_bank_tube_checked(self) -> bool:
         return self._select_bank_tube.isChecked()
 
-    def on_toggle_add_annulus(self, checked):
-        self._on_toggle_add_shape(checked, self.add_annulus_widget)
-
-    def on_toggle_add_hollow_rectangle(self, checked):
-        self._on_toggle_add_shape(checked, self.add_hollow_rectangle_widget)
-
-    def set_start_adding_peaks_checked(self, checked):
-        self._start_adding_peaks_button.setChecked(checked)
-
-    def reset_overlay_shapes(self, disable=False) -> None:
-        disable = disable or (self.current_selected_projection() == ProjectionType.THREE_D)
-        self._add_mask.setDisabled(disable)
-        self._add_selection.setDisabled(disable)
-        for btn in self._shape_buttons:
-            if btn.isChecked():
-                btn.toggle()
-            btn.setDisabled(disable)
-
-    def _on_toggle_add_shape(self, checked, add_widget_function: Callable):
-        if checked:
-            add_widget_function()
-            self._presenter.on_overlaid_shape_added()
-        else:
+    def add_selected_shape(self, checked: bool = False) -> None:
+        if not checked:
             self.delete_current_overlaid_shape()
-
-        # Enable button for applying mask/group if widget is present, disable otherwise
-        self._add_mask.setEnabled(checked)
-        self._add_selection.setEnabled(checked)
-
-        # Disable buttons for adding more widgets if widget is already present, enable otherwise
-        for btn in self._shape_buttons:
-            if btn != self.sender():
-                btn.setDisabled(checked)
-
-    def enable_or_disable_mask_widgets(self):
-        if self.is_hover_pick_mode_toggled():
-            self.reset_overlay_shapes(disable=True)
             return
 
-        self.reset_overlay_shapes()
+        selected_shape = self._shape_selector_combo_box.currentText()
+        for label, add_widget_function in self._shape_options:
+            if label == selected_shape:
+                add_widget_function()
+                return
+
+    def set_overlaid_shape_controls_enabled(self, enabled: bool) -> None:
+        self._shape_selector_combo_box.setEnabled(enabled)
+        self._add_shape_button.setEnabled(enabled)
+
+    def set_overlaid_shape_controls_checked(self, checked: bool) -> None:
+        self._add_shape_button.setChecked(checked)
 
     def is_rubberband_zoom_toggled(self) -> bool:
         return self._rubberband_zoom.isChecked()
 
-    def enable_or_disable_rubberband_zoom(self) -> None:
-        if self.current_selected_projection() == ProjectionType.THREE_D:
-            self._rubberband_zoom.setChecked(False)
-            self._rubberband_zoom.setEnabled(False)
-        if self.current_selected_projection() != ProjectionType.THREE_D:
-            self._rubberband_zoom.setEnabled(True)
-
-    def is_hover_pick_mode_toggled(self) -> bool:
-        return self._hover_pick.isChecked()
-
-    def set_hover_pick_checked(self, checked):
+    def set_hover_pick_checked(self, checked: bool) -> None:
         self._hover_pick.setChecked(checked)
+
+    def set_hover_pick_enabled(self, enabled: bool) -> None:
+        self._hover_pick.setEnabled(enabled)
+
+    def is_hover_pick_mode_checked(self) -> bool:
+        return self._hover_pick.isChecked()
 
     def set_rubberband_zoom_checked(self, checked):
         self._rubberband_zoom.setChecked(checked)
+
+    def set_rubberband_zoom_enabled(self, enabled):
+        self._rubberband_zoom.setEnabled(enabled)
 
     def set_clear_point_picked_detectors_disabled(self, disabled):
         self._clear_point_picked_detectors.setDisabled(disabled)
@@ -843,15 +844,11 @@ class FullInstrumentViewView(QWidget):
     def set_select_bank_tube_disabled(self, disabled):
         self._select_bank_tube.setDisabled(disabled)
 
+    def set_start_adding_peaks_checked(self, checked):
+        self._start_adding_peaks_button.setChecked(checked)
+
     def set_export_workspace_button_disabled(self, disabled):
         self._export_workspace_button.setDisabled(disabled)
-
-    def enable_or_disable_hover_pick(self) -> None:
-        if self.current_selected_projection() == ProjectionType.THREE_D:
-            self._hover_pick.setChecked(False)
-            self._hover_pick.setEnabled(False)
-        if self.current_selected_projection() != ProjectionType.THREE_D:
-            self._hover_pick.setEnabled(True)
 
     def delete_current_overlaid_shape(self):
         if self._shape_overlay_manager is not None:
@@ -863,49 +860,13 @@ class FullInstrumentViewView(QWidget):
         return self._shape_overlay_manager is not None
 
     def refresh_peaks_ws_list(self) -> None:
-        # TODO: Very similar to other refresh list function, combine in one function
-        list_to_refresh = self._peak_ws_list
-        keys_from_workspaces_in_ads = self._presenter.peaks_workspaces_in_ads()
-        keys_in_current_list = [list_to_refresh.item(i).text() for i in range(list_to_refresh.count())]
-
-        # Keys from ads but not yet in list
-        for key in keys_from_workspaces_in_ads:
-            if key not in keys_in_current_list:
-                item = QListWidgetItem(key, list_to_refresh)
-                item.setCheckState(Qt.Unchecked)
-
-        # Remove keys that are not in ads
-        for i in range(list_to_refresh.count() - 1, -1, -1):
-            item = list_to_refresh.item(i)
-            if item.text() not in keys_from_workspaces_in_ads:
-                removed = list_to_refresh.takeItem(i)
-                del removed
-
-        # Update peaks list colours
-        for list_i in range(self._peak_ws_list.count()):
-            list_item = self._peak_ws_list.item(list_i)
-            colour = self._COLOURS[list_i % len(self._COLOURS)]
-            list_item.setForeground(QColor(colour))
+        self._peak_ws_list.refresh_items(self._presenter.peaks_workspaces_in_ads(), colours=self._COLOURS)
 
     def refresh_workspaces_in_list(self, kind: CurrentTab) -> None:
         list_to_refresh = self._mask_list if kind is CurrentTab.Masking else self._selection_list
-
-        keys_from_workspaces_in_ads = self._presenter.get_list_keys_from_workspaces_in_ads(kind)
-        keys_in_current_list = [list_to_refresh.item(i).text() for i in range(list_to_refresh.count())]
-        keys_cached_in_model = self._presenter.cached_keys(kind)
-
-        # Keys from ads but not yet in list
-        for key in keys_from_workspaces_in_ads:
-            if key not in keys_in_current_list:
-                item = QListWidgetItem(key, list_to_refresh)
-                item.setCheckState(Qt.Unchecked)
-
-        # Remove keys that are not cached in model and not in ads
-        for i in range(list_to_refresh.count() - 1, -1, -1):
-            item = list_to_refresh.item(i)
-            if item.text() not in keys_cached_in_model and item.text() not in keys_from_workspaces_in_ads:
-                removed = list_to_refresh.takeItem(i)
-                del removed
+        list_to_refresh.refresh_items(
+            self._presenter.get_list_keys_from_workspaces_in_ads(kind), keys_cached_in_model=self._presenter.cached_keys(kind)
+        )
 
     def _cache_and_uncheck_list(self, list_widget: WorkspaceListWidget) -> dict:
         cache = {}
@@ -928,6 +889,12 @@ class FullInstrumentViewView(QWidget):
     def enable_and_restore_selection_list(self) -> None:
         self._restore_list(self._selection_list, self._selection_list_cache)
         self._selection_tab.setEnabled(True)
+
+    def set_list_enabled(self, kind: CurrentTab, enabled: bool):
+        if kind is CurrentTab.Grouping:
+            self._selection_tab.setEnabled(enabled)
+        elif kind is CurrentTab.Masking:
+            self._mask_tab.setEnabled(enabled)
 
     def select_peaks_workspace(self, peaks_ws: str) -> None:
         for list_i in range(self._peak_ws_list.count()):

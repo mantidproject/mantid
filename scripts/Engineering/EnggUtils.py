@@ -599,7 +599,7 @@ def _plot_focused_workspaces(ws_names: Sequence[str]) -> None:
 
     for ws_name in ws_names:
         ws_foc = ADS.retrieve(ws_name)
-        ws_label = "_".join([ws_foc.getInstrument().getName(), ws_foc.run().get("run_number").value])
+        ws_label = "_".join([ws_foc.getInstrumentName(), ws_foc.run().get("run_number").value])
         fig, ax = subplots(subplot_kw={"projection": "mantid"})
         for ispec in range(ws_foc.getNumberHistograms()):
             ax.plot(ws_foc, label=f"{ws_label} focused: spec {ispec + 1}", marker=".", wkspIndex=ispec)
@@ -682,7 +682,7 @@ def _apply_vanadium_norm_event(sample_ws_foc, van_ws_foc, xmin=0.45):
     # alter the bins attached to the event workspace (used for histogram conversion) to remove any bins before the crop
     nspec = sample_ws_foc.getNumberHistograms()
     if nspec > 1:
-        deltas = [diff(sample_ws_foc.readX(ispec)).mean() for ispec in range(nspec)]
+        deltas = [diff(sample_ws_foc.x(ispec)).mean() for ispec in range(nspec)]
         mantid.RebinRagged(
             InputWorkspace=sample_ws_foc,
             XMin=[xmin] * nspec,
@@ -946,7 +946,7 @@ def get_detector_ids_for_bank(bank):
         bank_int = [bank_int]
 
     for i in range(grouping.getNumberHistograms()):
-        if grouping.readY(i)[0] in bank_int:
+        if grouping.y(i)[0] in bank_int:
             detector_ids.add(grouping.getDetector(i).getID())
 
     mantid.DeleteWorkspace(grouping)

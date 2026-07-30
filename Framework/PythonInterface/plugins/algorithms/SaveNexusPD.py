@@ -110,18 +110,18 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
         return nxinstrument
 
     def _writeY(self, nxdata, wksp, index):
-        temp = nxdata.create_dataset(name="data", data=wksp.readY(index), dtype=self._dtype, **self._compressArgs)
+        temp = nxdata.create_dataset(name="data", data=wksp.y(index), dtype=self._dtype, **self._compressArgs)
         temp.attrs["uncertainties"] = "errors"
         temp.attrs["axes"] = "dspacing"
         temp.attrs["signal"] = 1
         temp.attrs["units"] = str(wksp.YUnit())
-        nxdata.create_dataset(name="errors", data=wksp.readE(index), dtype=self._dtype, **self._compressArgs)
+        nxdata.create_dataset(name="errors", data=wksp.e(index), dtype=self._dtype, **self._compressArgs)
 
     # pylint: disable=too-many-arguments
     def _writeX(self, nxdata, name, wksp, index, writeDx):
         units = wksp.getAxis(0).getUnit().symbol().ascii()
         reverse = name == "Q"  # reverse the array
-        arr = wksp.readX(index)
+        arr = wksp.x(index)
         if reverse:
             arr = arr[::-1]  # reverse the array
         temp = nxdata.create_dataset(name=name, data=arr, dtype=self._dtype, **self._compressArgs)
@@ -129,7 +129,7 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
         temp.attrs["longname"] = self.AXES_DICT[name]
 
         if writeDx:  # optional
-            arr = wksp.readDx(index)
+            arr = wksp.dx(index)
             if reverse:  # reverse the array
                 arr = arr[::-1]
 
@@ -258,7 +258,7 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
             nxinstrument = self._createInstrument(nxentry)
 
             for i in range(wksp.getNumberHistograms()):
-                writeDx = not np.all(wksp.readDx(i) == 0)
+                writeDx = not np.all(wksp.dx(i) == 0)
 
                 dataname = "spectrum_%d" % wksp.getSpectrum(i).getSpectrumNo()
 

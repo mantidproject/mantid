@@ -35,9 +35,9 @@ InstrumentConfig::InstrumentConfig(QWidget *parent)
           &InstrumentConfig::filterDisabledInstruments);
   connect(m_instrumentSelector, &InstrumentSelector::instrumentSelectionChanged, this,
           &InstrumentConfig::updateInstrumentConfigurations);
-  connect(m_uiForm.cbAnalyser, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this,
+  connect(m_uiForm.cbAnalyser, qOverload<int>(&QComboBox::currentIndexChanged), this,
           &InstrumentConfig::updateReflectionsList);
-  connect(m_uiForm.cbReflection, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this,
+  connect(m_uiForm.cbReflection, qOverload<int>(&QComboBox::currentIndexChanged), this,
           &InstrumentConfig::newInstrumentConfiguration);
   m_instrumentSelector->fillWithInstrumentsFromFacility();
 }
@@ -316,7 +316,7 @@ void InstrumentConfig::updateReflectionsList(int index) {
   m_uiForm.cbReflection->clear();
 
   QVariant currentData = m_uiForm.cbAnalyser->itemData(index);
-  bool valid = currentData != QVariant::Invalid;
+  bool valid = currentData.isValid();
   m_uiForm.cbReflection->setEnabled(valid);
 
   if (valid) {

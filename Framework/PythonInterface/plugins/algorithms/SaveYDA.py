@@ -218,14 +218,14 @@ class SaveYDA(PythonAlgorithm):
             slicethis["z"] = FlowList()
             slicethis["z"].append(val)
 
-            xax = ws.readX(i)
+            xax = ws.x(i)
             # get the bin centers not the bin edges
             xcenters = self._get_bin_centers(xax)
             # x axis is NumericAxis in energy transfer units
             xx = [float(j) for j in xcenters]
             slicethis["x"] = FlowList(xx)
 
-            ys = ws.dataY(i)
+            ys = ws.y(i)
             # y is dataY of the workspace
             yy = [float(round(j, 14)) for j in ys]
             slicethis["y"] = FlowList(yy)

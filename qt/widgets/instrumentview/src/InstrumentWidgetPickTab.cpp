@@ -964,7 +964,7 @@ void InstrumentWidgetPickTab::onRunRebin() {
                          m_instrWidget->getWorkspaceNameStdString());
     }
   } catch (const std::exception &ex) {
-    QMessageBox::information(this, "Rebin Error", ex.what(), "OK");
+    QMessageBox::information(this, "Rebin Error", ex.what());
   }
 }
 

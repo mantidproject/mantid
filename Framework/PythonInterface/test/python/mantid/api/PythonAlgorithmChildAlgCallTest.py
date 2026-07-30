@@ -49,7 +49,7 @@ class PythonAlgorithmChildAlgCallTest(unittest.TestCase):
             self.fail("Algorithm call failed: %s" % str(exc))
 
         self.assertTrue(self._ws_name in mtd)
-        self.assertAlmostEqual(mtd[self._ws_name].readY(0)[0], 2.0, places=10)
+        self.assertAlmostEqual(mtd[self._ws_name].y(0)[0], 2.0, places=10)
 
     def test_ChildAlg_call_with_output_and_input_ws_different_succeeds(self):
         data = [1.0]
@@ -61,7 +61,7 @@ class PythonAlgorithmChildAlgCallTest(unittest.TestCase):
             self.fail("Algorithm call failed: %s" % str(exc))
 
         self.assertTrue(self._ws_name2 in mtd)
-        self.assertAlmostEqual(mtd[self._ws_name2].readY(0)[0], 2.0, places=10)
+        self.assertAlmostEqual(mtd[self._ws_name2].y(0)[0], 2.0, places=10)
 
 
 if __name__ == "__main__":

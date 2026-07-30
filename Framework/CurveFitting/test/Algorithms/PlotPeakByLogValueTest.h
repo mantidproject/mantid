@@ -887,7 +887,7 @@ private:
       alg->setProperty("OutputWorkspace", "out");
       alg->execute();
       auto calc = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
-      ws->dataY(i) = calc->readY(1);
+      ws->mutableY(i) = calc->y(1);
     }
     AnalysisDataService::Instance().addOrReplace(name, ws);
   }
@@ -905,8 +905,8 @@ private:
     const double peakOneCentre(6493.0), sigmaSqOne(250 * 250.), peakTwoCentre(10625.), sigmaSqTwo(50 * 50);
     const double peakOneHeight(3000.), peakTwoHeight(1000.);
     for (int i = 0; i < numBins; ++i) {
-      testWS->dataY(0)[i] = peakOneHeight * exp(-0.5 * pow(xdata[i] - peakOneCentre, 2.) / sigmaSqOne);
-      testWS->dataY(1)[i] = peakTwoHeight * exp(-0.5 * pow(xdata[i] - peakTwoCentre, 2.) / sigmaSqTwo);
+      testWS->mutableY(0)[i] = peakOneHeight * exp(-0.5 * pow(xdata[i] - peakOneCentre, 2.) / sigmaSqOne);
+      testWS->mutableY(1)[i] = peakTwoHeight * exp(-0.5 * pow(xdata[i] - peakTwoCentre, 2.) / sigmaSqTwo);
     }
     testWS->setBinEdges(0, xdata);
     testWS->setBinEdges(1, xdata);

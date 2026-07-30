@@ -168,7 +168,7 @@ class PDToGUDRUN(DataProcessorAlgorithm):
 
         groupingFile = self.getProperty("GroupingFile").value
         if len(groupingFile) > 0:
-            instrumentName = wksp.getInstrument().getName()
+            instrumentName = wksp.getInstrumentName()
             instrumentName = ConfigService.getInstrument(instrumentName).shortName()
             LoadDetectorsGroupingFile(InputFile=groupingFile, OutputWorkspace=instrumentName + "_group")
 

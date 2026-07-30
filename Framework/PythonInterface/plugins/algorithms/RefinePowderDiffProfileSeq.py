@@ -311,9 +311,9 @@ class SeqRefineProfile(object):
         # Data and data range
         self._datawsname = str(dataws)
         if startx <= 0.0:
-            startx = dataws.readX(wsindex)[0]
+            startx = dataws.x(wsindex)[0]
         if endx <= 0.0:
-            endx = dataws.readX(wsindex)[-1]
+            endx = dataws.x(wsindex)[-1]
 
         # Profile
         self._peakType = peaktype
@@ -403,9 +403,9 @@ class SeqRefineProfile(object):
         """Refine parameters"""
         # Range of fit
         if startx <= 0.0:
-            startx = dataws.readX(wsindex)[0]
+            startx = dataws.x(wsindex)[0]
         if endx <= 0.0:
-            endx = dataws.readX(wsindex)[-1]
+            endx = dataws.x(wsindex)[-1]
 
         # Set up RefineProfileParameters object
         runner = RefineProfileParameters(self.glog)

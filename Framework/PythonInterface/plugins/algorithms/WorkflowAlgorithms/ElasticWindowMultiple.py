@@ -22,8 +22,8 @@ import numpy as np
 
 
 def workspaces_have_same_size(workspaces):
-    first_size = len(workspaces[0].readY(0))
-    differently_sized_workspaces = [workspace for workspace in workspaces[1:] if len(workspace.readY(0)) != first_size]
+    first_size = len(workspaces[0].y(0))
+    differently_sized_workspaces = [workspace for workspace in workspaces[1:] if len(workspace.y(0)) != first_size]
     return len(differently_sized_workspaces) == 0
 
 
@@ -38,8 +38,8 @@ def _normalize_by_index(workspace, index):
     number_of_histograms = workspace.getNumberHistograms()
 
     for idx in range(0, number_of_histograms):
-        y_values = workspace.readY(idx)
-        y_errors = workspace.readE(idx)
+        y_values = workspace.y(idx)
+        y_errors = workspace.e(idx)
 
         # Avoid divide by zero
         if y_values[index] == 0.0:
@@ -55,8 +55,8 @@ def _normalize_by_index(workspace, index):
         b = y_values * y_errors[index] * (scale**2)
         y_errors_propagated = np.sqrt(a**2 + b**2)
 
-        workspace.setY(idx, y_values_normalised)
-        workspace.setE(idx, y_errors_propagated)
+        workspace.setSharedY(idx, y_values_normalised)
+        workspace.setSharedE(idx, y_errors_propagated)
 
 
 class ElasticWindowMultiple(DataProcessorAlgorithm):

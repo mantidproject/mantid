@@ -338,7 +338,7 @@ class SimpleAPITest(unittest.TestCase):
 
             def PyExec(self):
                 ws = WorkspaceFactory.create("Workspace2D", NVectors=1, YLength=1, XLength=1)
-                ws.dataY(0)[0] = 5
+                ws.mutableY(0)[0] = 5
                 self.setProperty("RequiredWorkspace", ws)
                 self.getLogger().notice("done!")
 
@@ -353,13 +353,13 @@ class SimpleAPITest(unittest.TestCase):
         # Call with no optional output specified
         result = simpleapi.OptionalWorkspace(RequiredWorkspace="required")
         self.assertTrue(isinstance(result, MatrixWorkspace))
-        self.assertAlmostEqual(5, result.readY(0)[0], places=12)
+        self.assertAlmostEqual(5, result.y(0)[0], places=12)
         mtd.remove("required")
 
         # Call with both outputs specified
         result = simpleapi.OptionalWorkspace(RequiredWorkspace="required", OptionalWorkspace="optional")
         self.assertTrue(isinstance(result, MatrixWorkspace))
-        self.assertAlmostEqual(5, result.readY(0)[0], places=12)
+        self.assertAlmostEqual(5, result.y(0)[0], places=12)
         mtd.remove("required")
 
         # Tidy up simple api function

@@ -36,8 +36,8 @@ class ComputeIncoherentDOSTest(unittest.TestCase):
         ws = SofQW3(ws, [0, 0.05, 8], "Direct", 25)
         qq = np.arange(0, 8, 0.05) + 0.025
         for i in range(ws.getNumberHistograms()):
-            ws.setY(i, ws.readY(i) * qq[i] ** 2)
-            ws.setE(i, ws.readE(i) * qq[i] ** 2)
+            ws.setSharedY(i, ws.y(i) * qq[i] ** 2)
+            ws.setSharedE(i, ws.e(i) * qq[i] ** 2)
         return ws
 
     def compute(self, qs, energyBins, msd=0.0, temperature=300.0):
@@ -125,8 +125,8 @@ class ComputeIncoherentDOSTest(unittest.TestCase):
         self.assertEqual(ws_DOS.getAxis(0).getUnit().unitID(), "DeltaE_inWavenumber")
         self.assertEqual(ws_DOS.blocksize(), 200)
         # Checks that the Bose factor correction is ok.
-        dos_eplus = np.max(ws_DOS.readY(0)[100:200])
-        dos_eminus = np.max(ws_DOS.readY(0)[:100])
+        dos_eplus = np.max(ws_DOS.y(0)[100:200])
+        dos_eminus = np.max(ws_DOS.y(0)[:100])
         self.assertAlmostEqual(dos_eplus / dos_eminus, 1.0, places=1)
         # Check that unit conversion from cm^-1 to meV works and also that conversion to states/meV is done
         ws = self.convertToWavenumber(ws)
@@ -136,7 +136,7 @@ class ComputeIncoherentDOSTest(unittest.TestCase):
         self.assertEqual(ws_DOSn.getAxis(0).getUnit().unitID(), "DeltaE")
         material = ws.sample().getMaterial()
         factor = material.relativeMolecularMass() / (material.totalScatterXSection() * 1000) * 4 * np.pi
-        self.assertAlmostEqual(np.max(ws_DOSn.readY(0)) / (np.max(ws_DOS.readY(0)) * factor), 1.0, places=1)
+        self.assertAlmostEqual(np.max(ws_DOSn.y(0)) / (np.max(ws_DOS.y(0)) * factor), 1.0, places=1)
 
     def test_computation_nontransposed_QW(self):
         energyBins = np.arange(-7.0, 7.0, 0.13)
@@ -145,10 +145,10 @@ class ComputeIncoherentDOSTest(unittest.TestCase):
         dos = ComputeIncoherentDOS(ws, EnergyBinning="Emin, Emax", StoreInADS=False)
         self.assertEqual(dos.getNumberHistograms(), 1)
         self.assertEqual(dos.getAxis(0).getUnit().unitID(), "DeltaE")
-        dos_Xs = dos.readX(0)
+        dos_Xs = dos.x(0)
         self.assertEqual(len(dos_Xs), len(energyBins))
-        dos_Ys = dos.readY(0)
-        dos_Es = dos.readE(0)
+        dos_Ys = dos.y(0)
+        dos_Es = dos.e(0)
         g = self.compute(qs, energyBins)
         np.testing.assert_equal(dos_Xs, energyBins)
         for i in range(len(dos_Ys)):
@@ -162,10 +162,10 @@ class ComputeIncoherentDOSTest(unittest.TestCase):
         dos = ComputeIncoherentDOS(ws, EnergyBinning="Emin, Emax", StoreInADS=False)
         self.assertEqual(dos.getNumberHistograms(), 1)
         self.assertEqual(dos.getAxis(0).getUnit().unitID(), "DeltaE")
-        dos_Xs = dos.readX(0)
+        dos_Xs = dos.x(0)
         self.assertEqual(len(dos_Xs), len(energyBins))
-        dos_Ys = dos.readY(0)
-        dos_Es = dos.readE(0)
+        dos_Ys = dos.y(0)
+        dos_Es = dos.e(0)
         g = self.computeFromTwoTheta(twoThetas, energyBins)
         np.testing.assert_equal(dos_Xs, energyBins)
         for i in range(len(dos_Ys)):
@@ -180,10 +180,10 @@ class ComputeIncoherentDOSTest(unittest.TestCase):
         dos = ComputeIncoherentDOS(ws, EnergyBinning="Emin, Emax", StoreInADS=False)
         self.assertEqual(dos.getNumberHistograms(), 1)
         self.assertEqual(dos.getAxis(0).getUnit().unitID(), "DeltaE")
-        dos_Xs = dos.readX(0)
+        dos_Xs = dos.x(0)
         self.assertEqual(len(dos_Xs), len(energyBins))
-        dos_Ys = dos.readY(0)
-        dos_Es = dos.readE(0)
+        dos_Ys = dos.y(0)
+        dos_Es = dos.e(0)
         g = self.computeFromTwoTheta(twoThetas, energyBins)
         np.testing.assert_equal(dos_Xs, energyBins)
         for i in range(len(dos_Ys)):
@@ -198,10 +198,10 @@ class ComputeIncoherentDOSTest(unittest.TestCase):
         dos = ComputeIncoherentDOS(ws, EnergyBinning="Emin, Emax", StoreInADS=False)
         self.assertEqual(dos.getNumberHistograms(), 1)
         self.assertEqual(dos.getAxis(0).getUnit().unitID(), "DeltaE")
-        dos_Xs = dos.readX(0)
+        dos_Xs = dos.x(0)
         self.assertEqual(len(dos_Xs), len(energyBins))
-        dos_Ys = dos.readY(0)
-        dos_Es = dos.readE(0)
+        dos_Ys = dos.y(0)
+        dos_Es = dos.e(0)
         g = self.compute(qs, energyBins)
         np.testing.assert_equal(dos_Xs, energyBins)
         for i in range(len(dos_Ys)):
@@ -216,10 +216,10 @@ class ComputeIncoherentDOSTest(unittest.TestCase):
         dos = ComputeIncoherentDOS(ws, MeanSquareDisplacement=msd, EnergyBinning="Emin, Emax", StoreInADS=False)
         self.assertEqual(dos.getNumberHistograms(), 1)
         self.assertEqual(dos.getAxis(0).getUnit().unitID(), "DeltaE")
-        dos_Xs = dos.readX(0)
+        dos_Xs = dos.x(0)
         self.assertEqual(len(dos_Xs), len(energyBins))
-        dos_Ys = dos.readY(0)
-        dos_Es = dos.readE(0)
+        dos_Ys = dos.y(0)
+        dos_Es = dos.e(0)
         g = self.compute(qs, energyBins, msd=msd)
         np.testing.assert_equal(dos_Xs, energyBins)
         for i in range(len(dos_Ys)):
@@ -234,10 +234,10 @@ class ComputeIncoherentDOSTest(unittest.TestCase):
         dos = ComputeIncoherentDOS(ws, Temperature=temperature, EnergyBinning="Emin, Emax", StoreInADS=False)
         self.assertEqual(dos.getNumberHistograms(), 1)
         self.assertEqual(dos.getAxis(0).getUnit().unitID(), "DeltaE")
-        dos_Xs = dos.readX(0)
+        dos_Xs = dos.x(0)
         self.assertEqual(len(dos_Xs), len(energyBins))
-        dos_Ys = dos.readY(0)
-        dos_Es = dos.readE(0)
+        dos_Ys = dos.y(0)
+        dos_Es = dos.e(0)
         g = self.compute(qs, energyBins, temperature=temperature)
         np.testing.assert_equal(dos_Xs, energyBins)
         for i in range(len(dos_Ys)):
@@ -266,10 +266,10 @@ class ComputeIncoherentDOSTest(unittest.TestCase):
         dos = ComputeIncoherentDOS(ws, EnergyBinning="Emin, Emax", StoreInADS=False)
         self.assertEqual(dos.getNumberHistograms(), 1)
         self.assertEqual(dos.getAxis(0).getUnit().unitID(), "DeltaE")
-        dos_Xs = dos.readX(0)
+        dos_Xs = dos.x(0)
         self.assertEqual(len(dos_Xs), len(energyBins))
-        dos_Ys = dos.readY(0)
-        dos_Es = dos.readE(0)
+        dos_Ys = dos.y(0)
+        dos_Es = dos.e(0)
         g1 = self.compute(qs[0:2], energyBins)
         g2 = self.compute(qs[1:3], energyBins)
         g3 = self.compute(qs[2:4], energyBins)

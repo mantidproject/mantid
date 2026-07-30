@@ -292,7 +292,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         AddSampleLog(Workspace=q_workspace, LogName="lambda_min", LogText=str(lambda_min), LogType="Number")
         AddSampleLog(Workspace=q_workspace, LogName="lambda_max", LogText=str(lambda_max), LogType="Number")
 
-        data_x = q_workspace.dataX(0)
+        data_x = q_workspace.mutableX(0)
         for i in range(len(data_x)):
             data_x[i] = constant / data_x[i]
         q_workspace = SortXAxis(InputWorkspace=q_workspace, OutputWorkspace=str(q_workspace))
@@ -314,7 +314,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         # Replace NaNs by zeros
         q_rebin = ReplaceSpecialValues(InputWorkspace=q_rebin, OutputWorkspace=name_output_ws, NaNValue=0.0, NaNError=0.0)
         # Crop to non-zero values
-        data_y = q_rebin.readY(0)
+        data_y = q_rebin.y(0)
         low_q = None
         high_q = None
         for i in range(len(data_y)):
@@ -331,14 +331,14 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             if crop:
                 low_q += 1
                 high_q -= 1
-            data_x = q_rebin.readX(0)
+            data_x = q_rebin.x(0)
             q_rebin = CropWorkspace(InputWorkspace=q_rebin, OutputWorkspace=str(q_rebin), XMin=data_x[low_q], XMax=data_x[high_q])
         else:
             logger.error("Data is all zeros. Check your TOF ranges.")
 
         # Clean up the workspace for backward compatibility
-        data_y = q_rebin.dataY(0)
-        data_e = q_rebin.dataE(0)
+        data_y = q_rebin.mutableY(0)
+        data_e = q_rebin.mutableE(0)
         # Again for backward compatibility, the first and last points of the
         # raw output when not cropping was simply set to 0 += 1.
         if crop is False:
@@ -619,9 +619,9 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             # Extract a single spectrum, just so we have the TOF axis
             # to create a normalization workspace
             normalization = ExtractSingleSpectrum(InputWorkspace=workspace, OutputWorkspace="normalization", WorkspaceIndex=0)
-            norm_tof = normalization.dataX(0)
-            norm_value = normalization.dataY(0)
-            norm_error = normalization.dataE(0)
+            norm_tof = normalization.x(0)
+            norm_value = normalization.mutableY(0)
+            norm_error = normalization.mutableE(0)
             for i in range(len(norm_value)):
                 norm_value[i] = norm_tof[i] * b + a
                 norm_error[i] = math.sqrt(a_error * a_error + norm_tof[i] * norm_tof[i] * b_error * b_error)

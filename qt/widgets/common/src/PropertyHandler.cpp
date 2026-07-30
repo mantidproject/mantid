@@ -890,7 +890,10 @@ void PropertyHandler::setAttribute(QString const &attName, AttributeType const &
     try {
       m_fun->setAttribute(attName.toStdString(), Mantid::API::IFunction::Attribute(attValue));
       m_browser->compositeFunction()->checkFunction();
-      foreach (const QtProperty *prop, m_attributes) {
+      // Iterate over a copy: initAttributes()/initParameters() rebuild m_attributes,
+      // which would invalidate iteration over the member list directly.
+      const auto attributes = m_attributes;
+      for (const QtProperty *prop : attributes) {
         if (prop->propertyName() == attName) {
           // re-insert the attribute and parameter properties as they may
           // depend on the value of the attribute being set
@@ -921,7 +924,7 @@ void PropertyHandler::setAttribute(const QString &attName, const QString &attVal
     att.fromString(attValue.toStdString());
     m_fun->setAttribute(name, att);
     m_browser->compositeFunction()->checkFunction();
-    foreach (QtProperty *prop, m_attributes) {
+    for (QtProperty *prop : m_attributes) {
       if (prop->propertyName() == attName) {
         SetAttributeProperty tmp(m_browser, prop);
         att.apply(tmp);
@@ -939,7 +942,7 @@ void PropertyHandler::setAttribute(const QString &attName, const QString &attVal
  * @param prop :: A property for a member of a vector attribute.
  */
 void PropertyHandler::setVectorAttribute(QtProperty *prop) {
-  foreach (QtProperty *att, m_attributes) {
+  for (QtProperty *att : m_attributes) {
     QList<QtProperty *> subProps = att->subProperties();
     if (subProps.contains(prop)) {
       bool resetProperties = m_vectorSizes.contains(prop);
@@ -1070,7 +1073,7 @@ Mantid::API::IFunction_sptr PropertyHandler::changeType(QtProperty *prop) {
     }
 
     QList<QtProperty *> subs = m_item->property()->subProperties();
-    foreach (QtProperty *sub, subs) {
+    for (QtProperty *sub : subs) {
       m_item->property()->removeSubProperty(sub);
     }
 
@@ -1615,7 +1618,7 @@ void PropertyHandler::updateWorkspaces(const QStringList &oldWorkspaces) {
       wsName = oldWorkspaces[index];
     }
     QStringList names("All");
-    foreach (const QString &name, m_browser->m_workspaceNames) {
+    for (const QString &name : m_browser->m_workspaceNames) {
       names.append(name);
     }
     m_browser->m_enumManager->setEnumNames(m_workspace, names);

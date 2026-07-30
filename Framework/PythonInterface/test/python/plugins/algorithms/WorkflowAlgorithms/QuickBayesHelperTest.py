@@ -41,9 +41,9 @@ class QuickBayesHelperTest(unittest.TestCase):
     # ----------------------------------Algorithm tests----------------------------------------
 
     def test_point_data(self):
-        self.assertEqual(len(self._sample_ws.readY(0)) + 1, len(self._sample_ws.readX(0)))
+        self.assertEqual(len(self._sample_ws.y(0)) + 1, len(self._sample_ws.x(0)))
         ws, _ = self._alg.point_data(self._sample_ws.name())
-        self.assertEqual(len(ws.readY(0)), len(ws.readX(0)))
+        self.assertEqual(len(ws.y(0)), len(ws.x(0)))
 
     def test_group_ws(self):
         ws_list = [self._sample_ws, self._res_ws]
@@ -68,10 +68,10 @@ class QuickBayesHelperTest(unittest.TestCase):
         ws = AnalysisDataService.retrieve(name)
         self.assertEqual(ws.name(), "test")
         self.assertEqual(ws.getNumberHistograms(), 2)
-        self.assertListEqual(list(ws.readX(0)), [1, 2])
-        self.assertListEqual(list(ws.readX(1)), [3, 4])
-        self.assertListEqual(list(ws.readY(0)), [4, 5])
-        self.assertListEqual(list(ws.readY(1)), [6, 7])
+        self.assertListEqual(list(ws.x(0)), [1, 2])
+        self.assertListEqual(list(ws.x(1)), [3, 4])
+        self.assertListEqual(list(ws.y(0)), [4, 5])
+        self.assertListEqual(list(ws.y(1)), [6, 7])
 
         ax = ws.getAxis(0)
         self.assertEqual(ax.getUnit().caption(), "Energy")
@@ -87,8 +87,8 @@ class QuickBayesHelperTest(unittest.TestCase):
             "test", [1, 2, 3, 4], [4, 5, 6, 7], 2, "energy", "TOF", "Text", ["unit", "python"], DataE=[0.1, 0.2, 0.3, 0.4]
         )
         ws = AnalysisDataService.retrieve(name)
-        self.assertListEqual(list(ws.readE(0)), [0.1, 0.2])
-        self.assertListEqual(list(ws.readE(1)), [0.3, 0.4])
+        self.assertListEqual(list(ws.e(0)), [0.1, 0.2])
+        self.assertListEqual(list(ws.e(1)), [0.3, 0.4])
 
     def test_duplicate_res(self):
         N = 3
@@ -97,8 +97,8 @@ class QuickBayesHelperTest(unittest.TestCase):
         self.assertEqual(len(ws_list), N)
         for j in range(N):
             data = ws_list[j]
-            self.assertListEqual(list(ws.readX(0)), list(data["x"]))
-            self.assertListEqual(list(ws.readY(0)), list(data["y"]))
+            self.assertListEqual(list(ws.x(0)), list(data["x"]))
+            self.assertListEqual(list(ws.y(0)), list(data["y"]))
 
     def test_unique_res(self):
         N = 2
@@ -107,8 +107,8 @@ class QuickBayesHelperTest(unittest.TestCase):
         self.assertEqual(len(ws_list), N)
         for j in range(N):
             data = ws_list[j]
-            self.assertListEqual(list(ws.readX(j)), list(data["x"]))
-            self.assertListEqual(list(ws.readY(j)), list(data["y"]))
+            self.assertListEqual(list(ws.x(j)), list(data["x"]))
+            self.assertListEqual(list(ws.y(j)), list(data["y"]))
 
     # -------------------------------- Failure cases ------------------------------------------
     def test_start_greater_end(self):

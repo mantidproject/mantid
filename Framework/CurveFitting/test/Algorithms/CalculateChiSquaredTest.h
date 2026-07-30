@@ -307,9 +307,9 @@ private:
       for (size_t spec = 0; spec < nSpec; ++spec) {
         space->dataX(spec).assign(xBins.begin(), xBins.end());
         for (size_t i = 0; i < nData; ++i) {
-          const double x = space->readX(0)[i];
-          space->dataY(spec)[i] = (1.1 + 0.1 * double(spec)) * (1.0 + x + x * x);
-          space->dataE(spec)[i] = 10.0;
+          const double x = space->x(0)[i];
+          space->mutableY(spec)[i] = (1.1 + 0.1 * double(spec)) * (1.0 + x + x * x);
+          space->mutableE(spec)[i] = 10.0;
         }
       }
       workspace = space;
@@ -345,8 +345,8 @@ private:
       setDefaultXRange();
       double sum2 = 0.0;
       double sum2w = 0.0;
-      auto &yValues = dynamic_cast<MatrixWorkspace &>(*workspace).readY(workspaceIndex);
-      auto &eValues = dynamic_cast<MatrixWorkspace &>(*workspace).readE(workspaceIndex);
+      auto &yValues = dynamic_cast<MatrixWorkspace &>(*workspace).y(workspaceIndex);
+      auto &eValues = dynamic_cast<MatrixWorkspace &>(*workspace).e(workspaceIndex);
       double dof = -double(nParams);
       for (size_t i = 0; i < xValues.size(); ++i) {
         const double xValue = xValues[i];

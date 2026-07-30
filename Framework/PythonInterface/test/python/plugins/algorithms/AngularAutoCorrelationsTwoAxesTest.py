@@ -20,9 +20,9 @@ class AngularAutoCorrelationsTwoAxesTest(unittest.TestCase):
             OutputWorkspaceFT="output_ws_ft",
         )
 
-        data_y = output_ws.readY(0)
+        data_y = output_ws.y(0)
         self.assertAlmostEqual(data_y[1], 0.998192889883855)
-        data_y = output_ws.readY(1)
+        data_y = output_ws.y(1)
         self.assertAlmostEqual(data_y[1], 0.993160180815704)
         self.assertAlmostEqual(output_ws.blocksize(), 501)
 

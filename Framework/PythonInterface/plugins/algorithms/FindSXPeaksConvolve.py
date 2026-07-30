@@ -157,7 +157,7 @@ class FindSXPeaksConvolve(DataProcessorAlgorithm):
             irow_to_del = peaks.getNumberPeaks()
             detid = bank[bank.xpixels() // 2][bank.ypixels() // 2].getID()
             ispec = ws.getIndicesFromDetectorIDs([detid])[0]
-            xspec = ws.readX(ispec)
+            xspec = ws.x(ispec)
             icen = len(xspec) // 2
             self.exec_child_alg("AddPeak", PeaksWorkspace=peaks, RunWorkspace=ws, TOF=xspec[icen], DetectorID=detid)
             dummy_pk = peaks.getPeak(irow_to_del)

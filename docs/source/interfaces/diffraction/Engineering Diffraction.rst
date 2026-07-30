@@ -477,8 +477,10 @@ Instrument Group
     each data file)
 
 Phase
-    Path to the ``.cif`` file defining the initial crystal structure (more than one path can be supplied, the lattice
-    parameters will be overridden for the first phase only).
+    A list of default ``.cif`` files are provided for defining the initial crystal structure. The content of these files
+    can be inspected within ``MANTID_INSTALL_DIRECTORY/scripts/Engineering/ENGINX/phase_info``. The final option in the
+    list, ``Custom`` will allow you to provide a path to a ``.cif`` file of your choosing (more than one path can be
+    supplied, the lattice parameters will be overridden for the first phase only).
 
 Focused Data
     Path to focused ``.gss`` files (note it should have the same number of spectra as in ``.prm`` file and contains multiple

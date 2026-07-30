@@ -229,7 +229,7 @@ def add_runs(  # noqa: C901
 def handle_saving_event_workspace_when_saving_as_histogram(binning, runs, def_type, inst):
     ws_in_monitor = mtd[ADD_FILES_SUM_TEMPORARY_MONITORS]
     if binning == "Monitors":
-        mon_x = ws_in_monitor.dataX(0)
+        mon_x = ws_in_monitor.x(0)
         binning = str(mon_x[0])
         bin_gap = mon_x[1] - mon_x[0]
         binning = binning + "," + str(bin_gap)
@@ -271,8 +271,8 @@ def handle_saving_event_workspace_when_saving_as_histogram(binning, runs, def_ty
 
     mon_n = ws_in_monitor.getNumberHistograms()
     for i in range(mon_n):
-        wsOut.setY(i, ws_in_monitor.dataY(i))
-        wsOut.setE(i, ws_in_monitor.dataE(i))
+        wsOut.setSharedY(i, ws_in_monitor.y(i))
+        wsOut.setSharedE(i, ws_in_monitor.e(i))
     ConjoinWorkspaces(wsOut, ws_in_detector, CheckOverlapping=True, CheckMatchingBins=False)
 
     if "AddFilesSumTemporary_Rebin" in mtd:

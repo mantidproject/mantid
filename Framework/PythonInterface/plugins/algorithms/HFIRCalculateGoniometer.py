@@ -67,9 +67,9 @@ class HFIRCalculateGoniometer(PythonAlgorithm):
             flip_x = self.getProperty("FlipX").value
             inner = self.getProperty("InnerGoniometer").value
         else:
-            flip_x = peaks.getInstrument().getName() == "HB3A"
+            flip_x = peaks.getInstrumentName() == "HB3A"
 
-            if peaks.getInstrument().getName() == "HB3A":
+            if peaks.getInstrumentName() == "HB3A":
                 inner = math.isclose(peaks.run().getTimeAveragedStd("omega"), 0.0)
             else:
                 inner = False

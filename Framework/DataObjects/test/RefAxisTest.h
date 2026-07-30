@@ -76,7 +76,7 @@ public:
     TS_ASSERT_EQUALS(newRefAxis->title(), "test axis");
     TS_ASSERT_EQUALS(newRefAxis->unit()->unitID(), "TOF");
     TS_ASSERT_EQUALS(newRefAxis->length(), 5);
-    m_space2->dataX(0)[1] = 9.9;
+    m_space2->mutableX(0)[1] = 9.9;
     TS_ASSERT_EQUALS((*newRefAxis)(1), 9.9);
   }
 

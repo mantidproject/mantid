@@ -351,9 +351,9 @@ std::vector<Types::Core::DateAndTime> AddSampleLog::getTimes(const API::MatrixWo
 
   // set up the time vector
   std::vector<Types::Core::DateAndTime> timevec;
-  size_t vecsize = dataws->readX(workspace_index).size();
+  size_t vecsize = dataws->x(workspace_index).size();
   for (size_t i = 0; i < vecsize; ++i) {
-    double timedbl = dataws->readX(workspace_index)[i];
+    double timedbl = dataws->x(workspace_index)[i];
     if (is_second)
       timedbl *= 1.E9;
     auto entry_i64 = static_cast<int64_t>(timedbl);
@@ -391,9 +391,9 @@ Types::Core::DateAndTime AddSampleLog::getRunStart(const API::Run &run_obj) {
  */
 std::vector<double> AddSampleLog::getDblValues(const API::MatrixWorkspace_const_sptr &dataws, int workspace_index) {
   std::vector<double> valuevec;
-  size_t vecsize = dataws->readY(workspace_index).size();
+  size_t vecsize = dataws->y(workspace_index).size();
   for (size_t i = 0; i < vecsize; ++i)
-    valuevec.emplace_back(dataws->readY(workspace_index)[i]);
+    valuevec.emplace_back(dataws->y(workspace_index)[i]);
 
   return valuevec;
 }
@@ -407,9 +407,9 @@ std::vector<double> AddSampleLog::getDblValues(const API::MatrixWorkspace_const_
  */
 std::vector<int> AddSampleLog::getIntValues(const API::MatrixWorkspace_const_sptr &dataws, int workspace_index) {
   std::vector<int> valuevec;
-  size_t vecsize = dataws->readY(workspace_index).size();
+  size_t vecsize = dataws->y(workspace_index).size();
   for (size_t i = 0; i < vecsize; ++i)
-    valuevec.emplace_back(static_cast<int>(dataws->readY(workspace_index)[i]));
+    valuevec.emplace_back(static_cast<int>(dataws->y(workspace_index)[i]));
 
   return valuevec;
 }

@@ -224,8 +224,8 @@ class Abins2D(AbinsAlgorithm, PythonAlgorithm):
 
     def _create_dummy_workspace(self, name):
         wrk = WorkspaceFactory.create("Workspace2D", NVectors=1, XLength=2, YLength=1)
-        wrk.setX(0, [0, 1])
-        wrk.setY(0, [0])
+        wrk.setSharedX(0, [0, 1])
+        wrk.setSharedY(0, [0])
         AnalysisDataService.addOrReplace(name, wrk)
         return wrk
 
@@ -251,8 +251,8 @@ class Abins2D(AbinsAlgorithm, PythonAlgorithm):
         freq_axis = NumericAxis.create(n_freq_bins)
         freq_offset = (energy_bins[1] - energy_bins[0]) / 2
         for i, freq in enumerate(energy_bins[1:]):
-            wrk.setX(i, self._q_bins)
-            wrk.setY(i, s_points[:, i].T)
+            wrk.setSharedX(i, self._q_bins)
+            wrk.setSharedY(i, s_points[:, i].T)
             freq_axis.setValue(i, freq + freq_offset)
         wrk.replaceAxis(1, freq_axis)
 

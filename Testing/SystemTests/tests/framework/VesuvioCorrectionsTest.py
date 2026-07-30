@@ -639,7 +639,7 @@ def _validate_matrix_peak_height(self, matrix_ws, expected_height, expected_bin,
     ws_index        :: The Index to read from the workspace
     tolerance       :: Percentage of allowed value offset
     """
-    y_data = matrix_ws.readY(ws_index)
+    y_data = matrix_ws.y(ws_index)
     peak_height = np.amax(y_data)
     peak_bin = np.argmax(y_data)
     tolerance_value = expected_height * tolerance

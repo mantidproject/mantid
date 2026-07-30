@@ -106,6 +106,13 @@ void FitTab::handleDataAdded(IAddWorkspaceDialog const *dialog) {
   updateParameterEstimationData();
 }
 
+void FitTab::handleNumericDataAdded() {
+  m_fittingPresenter->addDefaultParameters();
+  updateDataReferences();
+  m_plotPresenter->appendLastDataToSelection(m_dataPresenter->createDisplayNames());
+  updateParameterEstimationData();
+}
+
 void FitTab::handleDataRemoved() {
   m_fittingPresenter->removeDefaultParameters();
   updateDataReferences();

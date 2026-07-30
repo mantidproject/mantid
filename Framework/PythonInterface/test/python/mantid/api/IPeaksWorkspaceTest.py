@@ -8,6 +8,7 @@ import unittest
 from testhelpers import WorkspaceCreationHelper
 from mantid.kernel import SpecialCoordinateSystem, V3D
 from mantid.api import IPeaksWorkspace, IPeak
+from mantid.simpleapi import CreatePeaksWorkspace, DeleteWorkspace
 
 import math
 
@@ -168,6 +169,35 @@ class IPeaksWorkspaceTest(unittest.TestCase):
         pws = WorkspaceCreationHelper.createPeaksWorkspace(5)
         pws.removePeaks([2, 3, 4])
         self.assertEqual(pws.getNumberPeaks(), 2)
+
+    def test_getPeak_modifications_are_reflected_in_workspace(self):
+        """A peak returned by getPeak references the peak stored in the workspace,
+        so modifications must be visible when the peak is fetched again."""
+        pws = CreatePeaksWorkspace(NumberOfPeaks=2, OutputType="LeanElasticPeak")
+        pws.getPeak(1).setIntensity(123.0)
+        self.assertEqual(pws.getPeak(1).getIntensity(), 123.0)
+
+    def test_peak_keeps_workspace_alive_after_deletion(self):
+        """A peak handed out by getPeak co-owns its workspace, so accessing it
+        after the workspace is deleted must remain safe rather than segfault."""
+        pws = CreatePeaksWorkspace(NumberOfPeaks=1, OutputType="LeanElasticPeak")
+        peak = pws.getPeak(0)
+        self.assertTrue(isinstance(peak, IPeak))
+
+        DeleteWorkspace(pws)
+        # The peak still owns the workspace data, so this must not crash.
+        self.assertEqual(peak.getScattering(), 0)
+
+    def test_iterator_peak_keeps_workspace_alive_after_deletion(self):
+        """Peaks obtained by iterating a workspace must also keep the workspace
+        alive once it is deleted."""
+        pws = CreatePeaksWorkspace(NumberOfPeaks=2, OutputType="LeanElasticPeak")
+        peaks = list(pws)
+        self.assertEqual(len(peaks), 2)
+
+        DeleteWorkspace(pws)
+        for peak in peaks:
+            self.assertEqual(peak.getScattering(), 0)
 
 
 if __name__ == "__main__":

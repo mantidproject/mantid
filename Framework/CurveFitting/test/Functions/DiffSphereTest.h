@@ -467,12 +467,12 @@ private:
 
     double fractional_error = 0.01; // error taken as a percent of the signal
     for (size_t i = 0; i < M; i++) {
-      ws->dataX(0)[i] = dataX[i] - dw / 2; // bin boundaries are shifted by half the bind width
-      ws->dataY(0)[i] = dataYvalues.getCalculated(i);
+      ws->mutableX(0)[i] = dataX[i] - dw / 2; // bin boundaries are shifted by half the bind width
+      ws->mutableY(0)[i] = dataYvalues.getCalculated(i);
       ws->dataE(0)[i] =
           fractional_error * dataYvalues.getCalculated(i); // assume the error is a small percent of the actual value
     }
-    ws->dataX(0)[M] = dataX[M - 1] + dw / 2; // recall number of bin boundaries is 1 + #bins
+    ws->mutableX(0)[M] = dataX[M - 1] + dw / 2; // recall number of bin boundaries is 1 + #bins
 
     // return now the workspace
     return ws;

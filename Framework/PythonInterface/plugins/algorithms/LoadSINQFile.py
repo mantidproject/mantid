@@ -79,10 +79,10 @@ class LoadSINQFile(PythonAlgorithm):
             histogramCount = ws.getNumberHistograms()
             oldYData = []
             for i in range(histogramCount):
-                oldYData.append([x for x in ws.readY(i)])
+                oldYData.append([x for x in ws.y(i)])
 
             for i in range(histogramCount):
-                ws.setY(i, np.array(oldYData[histogramCount - 1 - i]))
+                ws.setSharedY(i, np.array(oldYData[histogramCount - 1 - i]))
 
         elif inst == "TRICS":
             ws = mantid.simpleapi.LoadFlexiNexus(fname, dicname, OutputWorkspace=wname)

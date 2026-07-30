@@ -146,15 +146,15 @@ class WorkspaceCalculatorModelTest(unittest.TestCase):
             self.assertTrue(mtd[output_ws])
             self.check_validity(lhs_validation=valid_lhs, rhs_validation=valid_rhs, err_msg=err_msg, passed=True)
             if operation == "+":
-                self.assertEqual(mtd[output_ws].readY(0)[0], 3)
+                self.assertEqual(mtd[output_ws].y(0)[0], 3)
             elif operation == "-":
-                self.assertEqual(mtd[output_ws].readY(0)[0], -1)
+                self.assertEqual(mtd[output_ws].y(0)[0], -1)
             elif operation == "*":
-                self.assertEqual(mtd[output_ws].readY(0)[0], 2)
+                self.assertEqual(mtd[output_ws].y(0)[0], 2)
             elif operation == "/":
-                self.assertAlmostEqual(mtd[output_ws].readY(0)[0], 0.500, delta=0.001)
+                self.assertAlmostEqual(mtd[output_ws].y(0)[0], 0.500, delta=0.001)
             elif operation == "WM":
-                self.assertAlmostEqual(mtd[output_ws].readY(0)[0], 1.200, delta=0.001)
+                self.assertAlmostEqual(mtd[output_ws].y(0)[0], 1.200, delta=0.001)
 
     def test_model_single_scaling(self):
         """Tests SingleValuedWorkspace scaling by arbitrary float parameters."""
@@ -172,7 +172,7 @@ class WorkspaceCalculatorModelTest(unittest.TestCase):
         valid_lhs, valid_rhs, err_msg = model.performOperation()
         self.assertTrue(mtd[output_ws])
         self.check_validity(lhs_validation=valid_lhs, rhs_validation=valid_rhs, err_msg=err_msg, passed=True)
-        value = mtd[output_ws].readY(0)[0]
+        value = mtd[output_ws].y(0)[0]
         self.assertAlmostEqual(value, -1.24518, delta=1e-5)
 
     def test_model_matrix(self):
@@ -195,7 +195,7 @@ class WorkspaceCalculatorModelTest(unittest.TestCase):
         valid_lhs, valid_rhs, err_msg = model.performOperation()
         self.assertTrue(mtd[output_ws])
         self.check_validity(lhs_validation=valid_lhs, rhs_validation=valid_rhs, err_msg=err_msg, passed=True)
-        value = mtd[output_ws].readY(0)[0]
+        value = mtd[output_ws].y(0)[0]
         self.assertAlmostEqual(value, -26.9626, delta=1e-4)
 
     def test_model_matrix_same(self):
@@ -209,7 +209,7 @@ class WorkspaceCalculatorModelTest(unittest.TestCase):
         valid_lhs, valid_rhs, err_msg = model.performOperation()
         self.assertTrue(mtd[output_ws])
         self.check_validity(lhs_validation=valid_lhs, rhs_validation=valid_rhs, err_msg=err_msg, passed=True)
-        value = mtd[output_ws].readY(0)[0]
+        value = mtd[output_ws].y(0)[0]
         self.assertEqual(value, 1.5)
 
     def test_model_matrix_groups(self):

@@ -76,11 +76,11 @@ class AbsorbtionShapesTest(unittest.TestCase):
         test_ws = ConvertUnits(test_ws, "DeltaE", Emode="Direct", EFixed=2000)
         cor_ws, corrections = ash.correct_absorption(test_ws, is_fast=True)
         n_bins = corrections.blocksize()
-        corr_ranges = [n_bins, corrections.readY(0)[0], corrections.readY(0)[n_bins - 1]]
+        corr_ranges = [n_bins, corrections.y(0)[0], corrections.y(0)[n_bins - 1]]
         np.testing.assert_almost_equal(corr_ranges, [97, 0.0, 0.0], 4)
         mccor_ws, mc_corr = ash.correct_absorption(test_ws, EventsPerPoint=300)
         n_bins = mc_corr.blocksize()
-        mccorr_ranges = [n_bins, mc_corr.readY(0)[0], mc_corr.readY(0)[n_bins - 1]]
+        mccorr_ranges = [n_bins, mc_corr.y(0)[0], mc_corr.y(0)[n_bins - 1]]
         np.testing.assert_almost_equal(mccorr_ranges, [97, 0.266, 0.033], 3)
 
     def test_MARI_axis_cylinder(self):
@@ -129,12 +129,12 @@ class AbsorbtionShapesTest(unittest.TestCase):
 
         cor_ws, corrections = ash.correct_absorption(test_ws, is_fast=True, ElementSize=5)
         n_bins = corrections.blocksize()
-        corr_ranges = [n_bins, corrections.readY(0)[0], corrections.readY(0)[n_bins - 1]]
+        corr_ranges = [n_bins, corrections.y(0)[0], corrections.y(0)[n_bins - 1]]
         np.testing.assert_almost_equal(corr_ranges, [97, 0.0, 0.0], 4)
 
         mccor_ws, mc_corr = ash.correct_absorption(test_ws, is_mc=True, EventsPerPoint=300)
         n_bins = mc_corr.blocksize()
-        mccorr_ranges = [n_bins, mc_corr.readY(0)[0], mc_corr.readY(0)[n_bins - 1]]
+        mccorr_ranges = [n_bins, mc_corr.y(0)[0], mc_corr.y(0)[n_bins - 1]]
         np.testing.assert_almost_equal(mccorr_ranges, [97, 0.52, 0.13], 2)
 
     def test_adsrp_hollow_cylinder(self):
@@ -164,12 +164,12 @@ class AbsorbtionShapesTest(unittest.TestCase):
         test_ws = ConvertUnits(test_ws, "DeltaE", Emode="Direct", EFixed=2000)
         cor_ws, corrections = ash.correct_absorption(test_ws, is_fast=True, ElementSize=5)
         n_bins = corrections.blocksize()
-        corr_ranges = [n_bins, corrections.readY(0)[0], corrections.readY(0)[n_bins - 1]]
+        corr_ranges = [n_bins, corrections.y(0)[0], corrections.y(0)[n_bins - 1]]
         np.testing.assert_almost_equal(corr_ranges, [97, 0.0, 0.000], 4)
 
         mccor_ws, mc_corr = ash.correct_absorption(test_ws, is_mc=True, EventsPerPoint=300)
         n_bins = mc_corr.blocksize()
-        mccorr_ranges = [n_bins, mc_corr.readY(0)[0], mc_corr.readY(0)[n_bins - 1]]
+        mccorr_ranges = [n_bins, mc_corr.y(0)[0], mc_corr.y(0)[n_bins - 1]]
         np.testing.assert_almost_equal(mccorr_ranges, [97, 0.27, 0.03], 2)
 
     #
@@ -215,17 +215,17 @@ class AbsorbtionShapesTest(unittest.TestCase):
         test_ws = ConvertUnits(test_ws, "DeltaE", Emode="Direct", EFixed=2000)
         cor_ws, corrections = ash.correct_absorption(test_ws, is_fast=True, ElementSize=6)
         n_bins = corrections.blocksize()
-        corr_ranges = [n_bins, corrections.readY(0)[0], corrections.readY(0)[n_bins - 1]]
+        corr_ranges = [n_bins, corrections.y(0)[0], corrections.y(0)[n_bins - 1]]
         np.testing.assert_almost_equal(corr_ranges, [97, 0.0, 0.0], 4)
 
         cor_ws, corrections = ash.correct_absorption(test_ws, is_fast=True)
         n_bins = corrections.blocksize()
-        corr_ranges = [n_bins, corrections.readY(0)[0], corrections.readY(0)[n_bins - 1]]
+        corr_ranges = [n_bins, corrections.y(0)[0], corrections.y(0)[n_bins - 1]]
         np.testing.assert_almost_equal(corr_ranges, [97, 0.0, 0.0], 4)
 
         mccor_ws, mc_corr = ash.correct_absorption(test_ws, is_mc=True, EventsPerPoint=300)
         n_bins = mc_corr.blocksize()
-        mccorr_ranges = [n_bins, mc_corr.readY(0)[0], mc_corr.readY(0)[n_bins - 1]]
+        mccorr_ranges = [n_bins, mc_corr.y(0)[0], mc_corr.y(0)[n_bins - 1]]
         np.testing.assert_almost_equal(mccorr_ranges, [97, 0.66, 0.51], 2)
 
 

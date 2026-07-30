@@ -219,8 +219,8 @@ def AutoReduce(transRun=[], runRange=[], oldList=[]):
         if len(wq_list):
             w1 = getWorkspace(wq_list[0])
             w2 = getWorkspace(wq_list[-1])
-            Qmin = min(w1.readX(0))
-            Qmax = max(w2.readX(0))
+            Qmin = min(w1.x(0))
+            Qmax = max(w2.x(0))
             Qmax = 0.3
 
             # print(Qmin, Qmax, dqq)

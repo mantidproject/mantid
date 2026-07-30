@@ -100,7 +100,7 @@ class SaveP2D(PythonAlgorithm):
             print("Exporting: " + OutFile + "\n")
             # Create File header with additional information
             of.write("#Title: " + Data.getTitle() + "\n")
-            of.write("#Inst: " + Data.getInstrument().getName() + ".prm\n")
+            of.write("#Inst: " + Data.getInstrumentName() + ".prm\n")
             binning = form.format(Data.getDimension(0).getBinWidth()) + " " + form.format(Data.getDimension(1).getBinWidth()) + "\n"
             of.write("#Binning: ddperp" + binning)
             of.write("#Bank: 1\n")
@@ -125,12 +125,12 @@ class SaveP2D(PythonAlgorithm):
                 print("{:4.0f}%".format(cdp * 100.0 / ndp))
                 # iterate over all dSpacing values for the selected dPerpendicular value
                 for cd in range(Data.getDimension(0).getNBins()):
-                    d = Data.dataX(cdp)[cd]
+                    d = Data.x(cdp)[cd]
                     # skip if d is the same as before
                     if d == last_d:
                         break
                     last_d = d
-                    Y = Data.dataY(cdp)[cd]
+                    Y = Data.y(cdp)[cd]
                     # skip NaN values for intensity if option is activated
                     if self.getPropertyValue("RemoveNaN") == "1":
                         if math.isnan(Y):

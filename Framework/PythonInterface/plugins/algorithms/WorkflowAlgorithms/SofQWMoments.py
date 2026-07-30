@@ -67,7 +67,7 @@ class SofQWMoments(DataProcessorAlgorithm):
         convert_point_alg.setProperty("OutputWorkspace", "__NOT_IN_ADS")
         convert_point_alg.execute()
         modified_ws = convert_point_alg.getProperty("OutputWorkspace").value
-        x_data = np.asarray(modified_ws.readX(0))
+        x_data = np.asarray(modified_ws.x(0))
         workflow_prog.report("Creating temporary data workspace")
         x_workspace = "__temp_sqw_moments_x"
         create_alg = self.createChildAlgorithm("CreateWorkspace", enableLogging=False)
@@ -245,7 +245,7 @@ class SofQWMoments(DataProcessorAlgorithm):
         num_hist = mtd[ws].getNumberHistograms()  # no. of hist/groups in WS
         if num_hist == 0:
             raise ValueError("Workspace %s has NO histograms" % ws)
-        x_in = mtd[ws].readX(0)
+        x_in = mtd[ws].x(0)
         ntc = len(x_in) - 1  # no. points from length of x array
         if ntc == 0:
             raise ValueError("Workspace %s has NO points" % ws)
@@ -254,7 +254,7 @@ class SofQWMoments(DataProcessorAlgorithm):
     def _CheckElimits(self, erange, ws):
         import math
 
-        x_data = np.asarray(mtd[ws].readX(0))
+        x_data = np.asarray(mtd[ws].x(0))
         len_x = len(x_data) - 1
 
         if math.fabs(erange[0]) < 1e-5:

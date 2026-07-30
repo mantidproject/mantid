@@ -128,8 +128,8 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         outWS = alg.getProperty("OutputWorkspace").value
         self.assertEqual(outWS.getAxis(0).getUnit().caption(), "Wavelength")
         self.assertEqual(mtd.getObjectNames(), [])
-        self.assertAlmostEqual(outWS.readY(69)[307], 5.240, 3)
-        self.assertAlmostEqual(outWS.readE(69)[307], 6.550, 3)
+        self.assertAlmostEqual(outWS.y(69)[307], 5.240, 3)
+        self.assertAlmostEqual(outWS.e(69)[307], 6.550, 3)
 
     def test_time_normalisation(self):
         outWSName = "outWS"
@@ -146,8 +146,8 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         self.assertEqual(outWS.getAxis(0).getUnit().caption(), "Wavelength")
         self.assertEqual(mtd.getObjectNames(), [])
         duration = outWS.getRun().getLogData("duration").value
-        self.assertAlmostEqual(outWS.readY(69)[307], 5.240 / duration, 3)
-        self.assertAlmostEqual(outWS.readE(69)[307], 6.550 / duration, 3)
+        self.assertAlmostEqual(outWS.y(69)[307], 5.240 / duration, 3)
+        self.assertAlmostEqual(outWS.e(69)[307], 6.550 / duration, 3)
 
     def test_monitor_normalisation(self):
         outWSName = "outWS"
@@ -163,8 +163,8 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         outWS = alg.getProperty("OutputWorkspace").value
         self.assertEqual(outWS.getAxis(0).getUnit().caption(), "Wavelength")
         self.assertEqual(mtd.getObjectNames(), [])
-        self.assertAlmostEqual(outWS.readY(69)[307], 9.080e-07, 3)
-        self.assertAlmostEqual(outWS.readE(69)[307], 1.135e-06, 3)
+        self.assertAlmostEqual(outWS.y(69)[307], 9.080e-07, 3)
+        self.assertAlmostEqual(outWS.e(69)[307], 1.135e-06, 3)
 
     def testReplaceSampleLogs(self):
         outWSName = "outWS"

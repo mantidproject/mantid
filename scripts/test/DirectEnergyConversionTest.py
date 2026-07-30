@@ -190,7 +190,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
             NumBanks=1, BankPixelWidth=4, NumEvents=10000, XUnit="DeltaE", XMin=-5, XMax=15, BinWidth=0.1, function="Flat background"
         )
         LoadInstrument(mono_ws, InstrumentName="MARI", RewriteSpectraMap=True)
-        sig = mono_ws.dataY(0)
+        sig = mono_ws.mutableY(0)
         sig[:] = 0
 
         tReducer.wb_run = mono_ws
@@ -262,7 +262,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
             CreateWorkspace(OutputWorkspace="TOF_WS", NSpec=1, DataX=tof, DataY=y, UnitX="TOF", ParentWorkspace="_ws_template")
             EnWs = ConvertUnits(InputWorkspace="TOF_WS", Target="Energy", EMode="Elastic")
 
-            eni = EnWs.dataX(0)
+            eni = EnWs.x(0)
             for samp, rez in zip(eni, en_range):
                 self.assertAlmostEqual(samp, rez)
 
@@ -290,7 +290,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
             CreateWorkspace(OutputWorkspace="TOF_WS", NSpec=1, DataX=tof, DataY=y, UnitX="TOF", ParentWorkspace="_ws_template")
             EnWs = ConvertUnits(InputWorkspace="TOF_WS", Target="Energy", EMode="Elastic")
 
-            eni = EnWs.dataX(0)
+            eni = EnWs.x(0)
             for samp, rez in zip(eni, en_range):
                 self.assertAlmostEqual(samp, rez)
 
@@ -301,7 +301,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         LoadInstrument(run_monitors, InstrumentName="MARI", RewriteSpectraMap=True)
         ConvertUnits(InputWorkspace="run_monitors", OutputWorkspace="run_monitors", Target="TOF")
         run_monitors = mtd["run_monitors"]
-        tof = run_monitors.dataX(3)
+        tof = run_monitors.x(3)
         tMin = tof[0]
         tMax = tof[-1]
         run = CreateSampleWorkspace(
@@ -359,9 +359,9 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
         self.assertEqual(len(tof_range), 3)
 
-        x = run_tof.readX(3)
+        x = run_tof.x(3)
         xMin = min(x)
-        x = run_tof.readX(5)
+        x = run_tof.x(5)
         xMax = max(x)
 
         self.assertGreater(tof_range[0], xMin)
@@ -390,7 +390,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         LoadInstrument(run_monitors, InstrumentName="MARI", RewriteSpectraMap=True)
         ConvertUnits(InputWorkspace="run_monitors", OutputWorkspace="run_monitors", Target="TOF")
         run_monitors = mtd["run_monitors"]
-        tof = run_monitors.dataX(3)
+        tof = run_monitors.x(3)
         tMin = tof[0]
         tMax = tof[-1]
         run = CreateSampleWorkspace(
@@ -428,13 +428,13 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
         ws1 = result[0]
         self.assertEqual(ws1.getAxis(0).getUnit().unitID(), "DeltaE")
-        x = ws1.readX(0)
+        x = ws1.x(0)
         self.assertAlmostEqual(x[0], -2 * 67.0)
         self.assertAlmostEqual(x[-1], 0.8 * 67.0)
 
         ws2 = result[1]
         self.assertEqual(ws2.getAxis(0).getUnit().unitID(), "DeltaE")
-        x = ws2.readX(0)
+        x = ws2.x(0)
         self.assertAlmostEqual(x[0], -2 * 122.0)
         self.assertAlmostEqual(x[-1], 0.8 * 122.0)
 
@@ -458,7 +458,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         LoadInstrument(run_monitors, InstrumentName="MARI", RewriteSpectraMap=True)
         ConvertUnits(InputWorkspace="run_monitors", OutputWorkspace="run_monitors", Target="TOF")
         run_monitors = mtd["run_monitors"]
-        tof = run_monitors.dataX(3)
+        tof = run_monitors.x(3)
         tMin = tof[0]
         tMax = tof[-1]
         run = CreateSampleWorkspace(
@@ -501,13 +501,13 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
         ws1 = result[0]
         self.assertEqual(ws1.getAxis(0).getUnit().unitID(), "DeltaE")
-        x = ws1.readX(0)
+        x = ws1.x(0)
         self.assertAlmostEqual(x[0], -2 * 67.0)
         self.assertAlmostEqual(x[-1], 0.8 * 67.0)
 
         ws2 = result[1]
         self.assertEqual(ws2.getAxis(0).getUnit().unitID(), "DeltaE")
-        x = ws2.readX(0)
+        x = ws2.x(0)
         self.assertAlmostEqual(x[0], -2 * 122.0)
         self.assertAlmostEqual(x[-1], 0.8 * 122.0)
 
@@ -531,7 +531,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         LoadInstrument(run_monitors, InstrumentName="MARI", RewriteSpectraMap=True)
         ConvertUnits(InputWorkspace="run_monitors", OutputWorkspace="run_monitors", Target="TOF")
         run_monitors = mtd["run_monitors"]
-        tof = run_monitors.dataX(3)
+        tof = run_monitors.x(3)
         tMin = tof[0]
         tMax = tof[-1]
         run = CreateSampleWorkspace(
@@ -582,13 +582,13 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
         ws1 = result[0]
         self.assertEqual(ws1.getAxis(0).getUnit().unitID(), "DeltaE")
-        x = ws1.readX(0)
+        x = ws1.x(0)
         self.assertAlmostEqual(x[0], -2 * 67.0)
         self.assertAlmostEqual(x[-1], 0.8 * 67.0)
 
         ws2 = result[1]
         self.assertEqual(ws2.getAxis(0).getUnit().unitID(), "DeltaE")
-        x = ws2.readX(0)
+        x = ws2.x(0)
         self.assertAlmostEqual(x[0], -2 * 122.0)
         self.assertAlmostEqual(x[-1], 0.8 * 122.0)
 
@@ -614,7 +614,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
         # Rebin to "formally" make common bin boundaries as it is not considered as such
         # any more after converting units (Is this a bug?)
-        xx = monitor_ws.readX(0)
+        xx = monitor_ws.x(0)
         x_min = min(xx[0], xx[-1])
         x_max = max(xx[0], xx[-1])
         x_step = (x_max - x_min) / (len(xx) - 1)

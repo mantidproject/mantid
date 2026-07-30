@@ -307,7 +307,7 @@ class TextureCorrectionModel:
     def get_atten_table_name(ws_str: str, eval_val: float, unit: str) -> str:
         ws = ADS.retrieve(ws_str)
         run_num = str(ws.getRun().getProperty("run_number").value)
-        instr = ws.getInstrument().getName()
+        instr = ws.getInstrumentName()
         return f"{instr}_{run_num}_attenuation_coefficient_{eval_val}_{unit}"
 
     def write_atten_val_table(
@@ -371,10 +371,10 @@ class TextureCorrectionModel:
 def read_attenuation_coefficient_at_value(ws: str, val: float, unit: str) -> Sequence[float]:
     conv_ws = ConvertUnits(ADS.retrieve(ws), Target=unit, StoreInADS=False)
     coefs = []
-    xbins = conv_ws.readX(0)
+    xbins = conv_ws.x(0)
     xdat = np.convolve(xbins, np.ones(2), "valid") / 2  # this gets the bin centres
     for r in range(conv_ws.getNumberHistograms()):
-        ydat = conv_ws.readY(r)
+        ydat = conv_ws.y(r)
         f = interpolate.interp1d(xdat, ydat)
         interp_val = f([val])[0]
         coefs.append(interp_val)

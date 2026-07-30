@@ -191,7 +191,7 @@ class FunctionWrapper(object):
         ws = self._execute_algorithm("CreateWorkspace", DataX=x_list, DataY=y)
         out = self._execute_algorithm("EvaluateFunction", Function=self.fun, InputWorkspace=ws)
         # Create a copy of the calculated spectrum
-        output_array = np.array(out.readY(1))
+        output_array = np.array(out.y(1))
         if numpy_input:
             return output_array.reshape(x_shape, order="C")
 
@@ -261,7 +261,7 @@ class FunctionWrapper(object):
         if haveXValues:
             spectrumWs = self._execute_algorithm("CreateWorkspace", DataX=xvals, DataY=xvals)
         elif isWorkspace:
-            xvals = ws.readX(workspaceIndex)
+            xvals = ws.x(workspaceIndex)
             if haveStartX and haveEndX:
                 xvals = filter(inRange, xvals)
             if extractSpectrum or (haveStartX and haveEndX):
@@ -280,7 +280,7 @@ class FunctionWrapper(object):
                 raise RuntimeError("insufficient plotting arguments")  # Should not occur.
 
         outWs = self(spectrumWs)
-        vals = outWs.readY(1)
+        vals = outWs.y(1)
         CreateWorkspace(DataX=xvals, DataY=vals, OutputWorkspace=plotName)
         plot(plotName, 0)
 

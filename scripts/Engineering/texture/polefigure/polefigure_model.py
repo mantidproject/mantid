@@ -65,7 +65,7 @@ class TextureProjection:
         readout_column = readout_column.replace("/", "_over_")
         try:
             run_range = f"{fws.getRun().getLogData('run_number').value}-{lws.getRun().getLogData('run_number').value}"
-            instr = fws.getInstrument().getName()
+            instr = fws.getInstrumentName()
         except RuntimeError:
             instr = "UNKNOWN"
             run_range = "XXXXXX-XXXXXX"

@@ -27,10 +27,10 @@ class peakdata_utilsTest(unittest.TestCase):
         axis.setUnit("TOF")
         # fake peak in spectra in middle bank 1 (centered on detID=37/spec=12 and TOF=5)
         cls.peak_1D = 2 * array([0, 0, 0, 1, 4, 6, 4, 1, 0, 0, 0])
-        cls.ws.setY(12, cls.ws.readY(12) + cls.peak_1D)
+        cls.ws.setSharedY(12, cls.ws.y(12) + cls.peak_1D)
         for ispec in [7, 11, 12, 13, 17, 22]:
-            cls.ws.setY(ispec, cls.ws.readY(ispec) + cls.peak_1D)
-            cls.ws.setE(ispec, sqrt(cls.ws.readY(ispec)))
+            cls.ws.setSharedY(ispec, cls.ws.y(ispec) + cls.peak_1D)
+            cls.ws.setSharedE(ispec, sqrt(cls.ws.y(ispec)))
         # Add back-to-back exponential params
         for param in ["A", "B", "S"]:
             SetInstrumentParameter(cls.ws, ParameterName=param, Value="1")

@@ -53,8 +53,8 @@ class POLDIDataAnalysisTestSiIndividual(POLDIDataAnalysisTestSi):
         # get residuals
         residuals = AnalysisDataService.retrieve("poldi_data_6904_residuals")
 
-        sumData = totalSpectrum.dataY(0)
-        residualData = residuals.dataY(0)
+        sumData = totalSpectrum.y(0)
+        residualData = residuals.y(0)
 
         maxSum = np.max(sumData)
         maxResidual = np.max(residualData)

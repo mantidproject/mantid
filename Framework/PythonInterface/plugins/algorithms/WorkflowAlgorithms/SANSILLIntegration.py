@@ -251,7 +251,7 @@ class SANSILLIntegration(PythonAlgorithm):
         self._integrate(self._input_ws, self._output_ws)
         self.setProperty("OutputWorkspace", self._output_ws)
         panels_out_ws = self.getPropertyValue("PanelOutputWorkspaces")
-        if mtd[self._output_ws].getInstrument().getName() in ["D33", "D11B", "D22B"] and panels_out_ws:
+        if mtd[self._output_ws].getInstrumentName() in ["D33", "D11B", "D22B"] and panels_out_ws:
             panel_names = mtd[self._output_ws].getInstrument().getStringParameter("detector_panels")[0].split(",")
             panel_outputs = []
             for panel in panel_names:
@@ -567,7 +567,7 @@ class SANSILLIntegration(PythonAlgorithm):
         """Calculates, sets as dX and returns the resolution"""
         if self._resolution != "None":
             if res is None:
-                x = mtd[ws].readX(0)
+                x = mtd[ws].x(0)
                 mid_x = (x[1:] + x[:-1]) / 2
                 res = self._deltaQ(mid_x)
             for i in range(mtd[ws].getNumberHistograms()):

@@ -40,6 +40,7 @@ set(TEST_PY_FILES
     CylinderPaalmanPingsCorrection2Test.py
     DakotaChiSquaredTest.py
     DeltaPDF3DTest.py
+    DPDFreductionTest.py
     DNSComputeDetEffCorrCoefsTest.py
     DNSMergeRunsTest.py
     DNSFlippingRatioCorrTest.py
@@ -130,6 +131,7 @@ set(TEST_PY_FILES
     SaveGEMMAUDParamFileTest.py
     SaveNexusPDTest.py
     SaveMDHistoToVTKTest.py
+    SaveMDToAsciiTest.py
     SaveGSSCWTest.py
     SaveHKLCWTest.py
     SaveINSTest.py
@@ -163,6 +165,7 @@ set(TEST_PY_FILES
     VesuvioPreFitTest.py
     VesuvioResolutionTest.py
     VesuvioThicknessTest.py
+    VesuvioTransmissionTest.py
     VesuvioTOFFitTest.py
     PEARLTransfitTest.py
     PEARLTransfitV2Test.py

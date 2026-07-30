@@ -29,9 +29,9 @@ class LoadLiveDataTest(unittest.TestCase):
 
         ws = mtd["fake"]
         # The rebin call in the code made 20 bins
-        self.assertEqual(len(ws.readY(0)), 20)
+        self.assertEqual(len(ws.y(0)), 20)
         # First bin is correct
-        self.assertAlmostEqual(ws.readX(0)[0], 40e3, 3)
+        self.assertAlmostEqual(ws.x(0)[0], 40e3, 3)
 
     # --------------------------------------------------------------------------
     def test_chunkProcessing(self):
@@ -76,9 +76,9 @@ Rebin(InputWorkspace=input,Params='40e3,1e3,60e3',OutputWorkspace=output)
 
         ws = mtd["fake"]
         # The rebin call in the code made 20 bins
-        self.assertEqual(len(ws.readY(0)), 20)
+        self.assertEqual(len(ws.y(0)), 20)
         # First bin is correct
-        self.assertAlmostEqual(ws.readX(0)[0], 40e3, 3)
+        self.assertAlmostEqual(ws.x(0)[0], 40e3, 3)
 
 
 if __name__ == "__main__":

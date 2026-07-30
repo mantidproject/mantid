@@ -471,10 +471,10 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
     def _check_y(self, workspace_group, child, spec, expected_bins, expected_values):
         """Check Y values for bins 0, 51 and 99 match the list of expected values"""
         ws = workspace_group[child]
-        self.assertEqual(ws.dataX(spec).size, expected_bins)
-        self._assert_delta(ws.dataY(spec)[0], expected_values[0])
-        self._assert_delta(ws.dataY(spec)[51], expected_values[1])
-        self._assert_delta(ws.dataY(spec)[99], expected_values[2])
+        self.assertEqual(ws.x(spec).size, expected_bins)
+        self._assert_delta(ws.y(spec)[0], expected_values[0])
+        self._assert_delta(ws.y(spec)[51], expected_values[1])
+        self._assert_delta(ws.y(spec)[99], expected_values[2])
 
     def _assert_delta(self, value1, value2):
         self.assertEqual(round(value1, 6), round(value2, 6))

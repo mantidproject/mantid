@@ -52,7 +52,7 @@ public:
     // centre must be inside the limits of the workspace
     std::vector<double> twoInputs(2, 0);
     // set the centre outside the matrix workspace
-    twoInputs[0] = goodWS->readX(0)[0] - 3.5;
+    twoInputs[0] = goodWS->x(0)[0] - 3.5;
     twoInputs[1] = goodWS->getAxis(1)->getMin() - 4.5;
     // it is a valid input because it has just two inputs
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Centre", twoInputs));
@@ -74,7 +74,7 @@ public:
     // centre must be inside the limits of the workspace
     std::vector<double> twoInputs(3, 0);
     // set the centre outside the matrix workspace
-    twoInputs[0] = goodWS->readX(0)[0] - 3.5;
+    twoInputs[0] = goodWS->x(0)[0] - 3.5;
     twoInputs[1] = goodWS->getAxis(1)->getMin() - 4.5;
     // it is a valid input because it has just two inputs
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Centre", twoInputs));
@@ -123,20 +123,20 @@ public:
     goodWS->replaceAxis(0, std::move(xAxis));
 
     // 0 values
-    goodWS->dataY(0)[0] = goodWS->dataY(0)[2] = goodWS->dataY(0)[4] = 0;
-    goodWS->dataY(1)[1] = goodWS->dataY(1)[3] = 0;
-    goodWS->dataY(2)[0] = goodWS->dataY(2)[2] = goodWS->dataY(2)[4] = 0;
-    goodWS->dataY(3)[1] = goodWS->dataY(3)[3] = 0;
-    goodWS->dataY(4)[0] = goodWS->dataY(4)[2] = goodWS->dataY(4)[4] = 0;
+    goodWS->mutableY(0)[0] = goodWS->dataY(0)[2] = goodWS->mutableY(0)[4] = 0;
+    goodWS->mutableY(1)[1] = goodWS->dataY(1)[3] = 0;
+    goodWS->mutableY(2)[0] = goodWS->dataY(2)[2] = goodWS->mutableY(2)[4] = 0;
+    goodWS->mutableY(3)[1] = goodWS->dataY(3)[3] = 0;
+    goodWS->mutableY(4)[0] = goodWS->dataY(4)[2] = goodWS->mutableY(4)[4] = 0;
 
     // 2 values
-    goodWS->dataY(0)[1] = goodWS->dataY(1)[0] = goodWS->dataY(1)[2] = 2;
+    goodWS->mutableY(0)[1] = goodWS->dataY(1)[0] = goodWS->mutableY(1)[2] = 2;
     // 1 values
-    goodWS->dataY(0)[3] = goodWS->dataY(1)[4] = goodWS->dataY(2)[3] = 1;
+    goodWS->mutableY(0)[3] = goodWS->dataY(1)[4] = goodWS->mutableY(2)[3] = 1;
     // 3 values
-    goodWS->dataY(2)[1] = goodWS->dataY(3)[0] = goodWS->dataY(4)[1] = 3;
+    goodWS->mutableY(2)[1] = goodWS->dataY(3)[0] = goodWS->mutableY(4)[1] = 3;
     // 4 values
-    goodWS->dataY(3)[2] = goodWS->dataY(3)[4] = goodWS->dataY(4)[3] = 4;
+    goodWS->mutableY(3)[2] = goodWS->dataY(3)[4] = goodWS->mutableY(4)[3] = 4;
 
     return goodWS;
   }
@@ -173,8 +173,8 @@ public:
     MatrixWorkspace_sptr outws =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(alg.getPropertyValue("OutputWorkspace"));
     TS_ASSERT_EQUALS(outws->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(outws->readY(0).size(), num_bins);
-    TS_ASSERT_EQUALS(outws->readX(0).size(), num_bins + 1);
+    TS_ASSERT_EQUALS(outws->y(0).size(), num_bins);
+    TS_ASSERT_EQUALS(outws->x(0).size(), num_bins + 1);
     return outws;
   }
 
@@ -199,13 +199,13 @@ public:
 
     // check angles:
     for (int i = 0; i < 5; i++)
-      TS_ASSERT_DELTA(outputWS->readX(0)[i], 90 * i, 0.1);
+      TS_ASSERT_DELTA(outputWS->x(0)[i], 90 * i, 0.1);
 
     // check that Y = [1, 4, 3, 2]
-    TS_ASSERT_DELTA(outputWS->readY(0)[0], 1, 0.1);
-    TS_ASSERT_DELTA(outputWS->readY(0)[1], 4, 0.1);
-    TS_ASSERT_DELTA(outputWS->readY(0)[2], 3, 0.1);
-    TS_ASSERT_DELTA(outputWS->readY(0)[3], 2, 0.1);
+    TS_ASSERT_DELTA(outputWS->y(0)[0], 1, 0.1);
+    TS_ASSERT_DELTA(outputWS->y(0)[1], 4, 0.1);
+    TS_ASSERT_DELTA(outputWS->y(0)[2], 3, 0.1);
+    TS_ASSERT_DELTA(outputWS->y(0)[3], 2, 0.1);
   }
 
   void test__profile_of_2d_workspace_startangle_45_anticlock() {
@@ -229,11 +229,11 @@ public:
 
     // check angles:
     for (int i = 0; i < 5; i++)
-      TS_ASSERT_DELTA(outputWS->readX(0)[i], 90 * i, 0.1);
+      TS_ASSERT_DELTA(outputWS->x(0)[i], 90 * i, 0.1);
 
     // check that Y = [4, 3, 2, 1]
     for (int i = 0; i < 4; i++)
-      TS_ASSERT_DELTA(outputWS->readY(0)[i], 4 - i, 0.1);
+      TS_ASSERT_DELTA(outputWS->y(0)[i], 4 - i, 0.1);
   }
 
   void test__profile_of_2d_workspace_startangle_45_clock() {
@@ -251,7 +251,7 @@ public:
 
     // now, the result expected is [1, 2, 3, 4]
     for (int i = 0; i < 4; i++)
-      TS_ASSERT_DELTA(outputWS->readY(0)[i], i + 1, 0.1);
+      TS_ASSERT_DELTA(outputWS->y(0)[i], i + 1, 0.1);
   }
 
   void test__profile_of_2d_workspace_bigger_ring_and_more_bins() {
@@ -274,9 +274,9 @@ public:
     const double exp_results[] = {0, 4, 0, 4};
 
     for (int i = 0; i < num_bins; i++)
-      TS_ASSERT_DELTA(outputWS->readY(0)[i], exp_results[i], 0.1);
+      TS_ASSERT_DELTA(outputWS->y(0)[i], exp_results[i], 0.1);
     for (int i = 0; i < num_bins + 1; i++)
-      TS_ASSERT_DELTA(outputWS->readX(0)[i], exp_angles[i], 0.1);
+      TS_ASSERT_DELTA(outputWS->x(0)[i], exp_angles[i], 0.1);
   }
 
   void test__profile_of_2d_workspace_bigger_different_centre() {
@@ -322,20 +322,20 @@ public:
     MatrixWorkspace_sptr goodWS = WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(1, 5, 1);
 
     // 0 values
-    goodWS->dataY(0)[0] = goodWS->dataY(2)[0] = goodWS->dataY(4)[0] = 0;
-    goodWS->dataY(6)[0] = goodWS->dataY(8)[0] = 0;
-    goodWS->dataY(10)[0] = goodWS->dataY(12)[0] = goodWS->dataY(14)[0] = 0;
-    goodWS->dataY(16)[0] = goodWS->dataY(18)[0] = 0;
-    goodWS->dataY(20)[0] = goodWS->dataY(22)[0] = goodWS->dataY(24)[0] = 0;
+    goodWS->mutableY(0)[0] = goodWS->dataY(2)[0] = goodWS->mutableY(4)[0] = 0;
+    goodWS->mutableY(6)[0] = goodWS->dataY(8)[0] = 0;
+    goodWS->mutableY(10)[0] = goodWS->dataY(12)[0] = goodWS->mutableY(14)[0] = 0;
+    goodWS->mutableY(16)[0] = goodWS->dataY(18)[0] = 0;
+    goodWS->mutableY(20)[0] = goodWS->dataY(22)[0] = goodWS->mutableY(24)[0] = 0;
 
     // 2 values
-    goodWS->dataY(1)[0] = goodWS->dataY(5)[0] = goodWS->dataY(7)[0] = 2;
+    goodWS->mutableY(1)[0] = goodWS->dataY(5)[0] = goodWS->mutableY(7)[0] = 2;
     // 1 values
-    goodWS->dataY(3)[0] = goodWS->dataY(9)[0] = goodWS->dataY(13)[0] = 1;
+    goodWS->mutableY(3)[0] = goodWS->dataY(9)[0] = goodWS->mutableY(13)[0] = 1;
     // 3 values
-    goodWS->dataY(11)[0] = goodWS->dataY(15)[0] = goodWS->dataY(21)[0] = 3;
+    goodWS->mutableY(11)[0] = goodWS->dataY(15)[0] = goodWS->mutableY(21)[0] = 3;
     // 4 values
-    goodWS->dataY(17)[0] = goodWS->dataY(19)[0] = goodWS->dataY(23)[0] = 4;
+    goodWS->mutableY(17)[0] = goodWS->dataY(19)[0] = goodWS->mutableY(23)[0] = 4;
 
     return goodWS;
   }
@@ -358,10 +358,10 @@ public:
     MatrixWorkspace_sptr outputWS = basic_checkup_on_output_workspace(alg, 4);
     // specific checks:
     // check that Y = [4, 1, 2, 3]
-    TS_ASSERT_DELTA(outputWS->readY(0)[0], 4, 0.1);
-    TS_ASSERT_DELTA(outputWS->readY(0)[1], 1, 0.1);
-    TS_ASSERT_DELTA(outputWS->readY(0)[2], 2, 0.1);
-    TS_ASSERT_DELTA(outputWS->readY(0)[3], 3, 0.1);
+    TS_ASSERT_DELTA(outputWS->y(0)[0], 4, 0.1);
+    TS_ASSERT_DELTA(outputWS->y(0)[1], 1, 0.1);
+    TS_ASSERT_DELTA(outputWS->y(0)[2], 2, 0.1);
+    TS_ASSERT_DELTA(outputWS->y(0)[3], 3, 0.1);
   }
 
   void test__profile_of_rectangular_startangle_45_anticlock() {
@@ -382,7 +382,7 @@ public:
     MatrixWorkspace_sptr outputWS = basic_checkup_on_output_workspace(alg, 4);
 
     for (int i = 0; i < 4; i++)
-      TS_ASSERT_DELTA(outputWS->readY(0)[i], i + 1, 0.1);
+      TS_ASSERT_DELTA(outputWS->y(0)[i], i + 1, 0.1);
   }
 
   void test__profile_of_rectangular_startangle_45_clock() {
@@ -403,7 +403,7 @@ public:
     MatrixWorkspace_sptr outputWS = basic_checkup_on_output_workspace(alg, 4);
     // 4, 3, 2, 1
     for (int i = 0; i < 4; i++)
-      TS_ASSERT_DELTA(outputWS->readY(0)[i], 4 - i, 0.1);
+      TS_ASSERT_DELTA(outputWS->y(0)[i], 4 - i, 0.1);
   }
 
   void test__profile_of_rectangular_bigger_ring_and_more_bins() {
@@ -423,6 +423,6 @@ public:
     const double exp_results[] = {8, 4, 1, 1, 1, 4, 2, 3, 3, 3};
     // angles: 0, 36, 72, 108, 144, 180, 216, 252, 288, 324, 360
     for (int i = 0; i < 10; i++)
-      TS_ASSERT_DELTA(outputWS->readY(0)[i], exp_results[i], 0.1);
+      TS_ASSERT_DELTA(outputWS->y(0)[i], exp_results[i], 0.1);
   }
 };

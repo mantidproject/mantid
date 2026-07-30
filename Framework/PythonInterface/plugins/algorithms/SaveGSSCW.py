@@ -151,16 +151,16 @@ class SaveGSSCW(mantid.api.PythonAlgorithm):
 
         """
         # data points
-        num_data_points = len(workspace.readY(0))
+        num_data_points = len(workspace.y(0))
         # number of lines
         num_lines = num_data_points // 5
         if num_data_points % 5 > 0:
             num_lines += 1
         # min 2theta and 2theta step as centi-degree
-        min_2theta = workspace.readX(0)[0] * 100
-        delta_2theta = np.mean(workspace.readX(0)[1:] - workspace.readX(0)[:-1]) * 100
+        min_2theta = workspace.x(0)[0] * 100
+        delta_2theta = np.mean(workspace.x(0)[1:] - workspace.x(0)[:-1]) * 100
         # check whether the workspace's 2theta has constant step
-        delta_2theta_std = np.std(workspace.readX(0)[1:] - workspace.readX(0)[:-1])
+        delta_2theta_std = np.std(workspace.x(0)[1:] - workspace.x(0)[:-1])
         if delta_2theta_std > 1e-5:
             raise RuntimeError("2theta steps are not constant")
 
@@ -183,8 +183,8 @@ class SaveGSSCW(mantid.api.PythonAlgorithm):
             data body
         """
         # Get Y and E
-        vec_y = workspace.readY(0)
-        vec_e = workspace.readE(0)
+        vec_y = workspace.y(0)
+        vec_e = workspace.e(0)
         num_data_points = len(vec_y)
 
         # Write

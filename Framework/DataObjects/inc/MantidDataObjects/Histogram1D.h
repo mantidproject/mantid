@@ -56,15 +56,13 @@ public:
   /// Deprecated, use mutableE() instead. Returns the error data
   MantidVec &dataE() override { return m_histogram.dataE(); }
 
-  virtual std::size_t size() const { return m_histogram.readY().size(); } ///< get pseudo size
+  virtual std::size_t size() const { return m_histogram.y().size(); } ///< get pseudo size
 
   /// Checks for errors
   bool isError() const { return readE().empty(); }
 
   /// Gets the memory size of the histogram
-  size_t getMemorySize() const override {
-    return ((readX().size() + readY().size() + readE().size()) * sizeof(double));
-  }
+  size_t getMemorySize() const override { return ((x().size() + y().size() + e().size()) * sizeof(double)); }
 
 private:
   using ISpectrum::copyDataInto;

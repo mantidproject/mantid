@@ -144,22 +144,22 @@ def create_merged_workspace(workspace_list):
                 if ws.isHistogramData():
                     ws = mantid.ConvertToPointData(InputWorkspace=ws.name(), OutputWorkspace=ws.name())
                 # find max x val
-                max_x = np.max(ws.readX(0))
+                max_x = np.max(ws.x(0))
                 # get current number of bins
                 num_bins = ws.blocksize()
                 # pad bins
                 X_padded = np.empty(max_num_bins)
                 X_padded.fill(max_x)
-                X_padded[:num_bins] = ws.readX(0)
+                X_padded[:num_bins] = ws.x(0)
                 Y_padded = np.zeros(max_num_bins)
-                Y_padded[:num_bins] = ws.readY(0)
+                Y_padded[:num_bins] = ws.y(0)
                 E_padded = np.zeros(max_num_bins)
-                E_padded[:num_bins] = ws.readE(0)
+                E_padded[:num_bins] = ws.e(0)
 
                 # set row of merged workspace
-                merged_ws.setX(i, X_padded)
-                merged_ws.setY(i, Y_padded)
-                merged_ws.setE(i, E_padded)
+                merged_ws.setSharedX(i, X_padded)
+                merged_ws.setSharedY(i, Y_padded)
+                merged_ws.setSharedE(i, E_padded)
 
                 # remove workspace from ADS
                 mantid.AnalysisDataService.remove(ws.getName())

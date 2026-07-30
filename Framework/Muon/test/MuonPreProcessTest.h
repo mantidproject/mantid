@@ -255,13 +255,13 @@ public:
 
     MatrixWorkspace_sptr wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(0));
 
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.200, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.800, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[0], 0.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[1], 0.200, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[4], 0.800, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], 1.000, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[1], 5.00, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], 17.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[0], 1.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[1], 5.00, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[4], 17.000, 0.001);
   }
 
   void test_rebinning_with_logarithmic_binning_produces_correct_x_and_y_values() {
@@ -284,16 +284,16 @@ public:
     // Using "FullBinsOnly" as false in Rebin preserves
     // the counts at the expense of an uneven bin
     // at the end of the range, as seen below.
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 1.000, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[1], 1.200, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[2], 1.440, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[3], 1.728, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 2.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[0], 1.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[1], 1.200, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[2], 1.440, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[3], 1.728, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[4], 2.000, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], 1.000, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[1], 6.600, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[2], 15.360, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[3], 22.040, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[0], 1.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[1], 6.600, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[2], 15.360, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[3], 22.040, 0.001);
   }
 
   // --------------------------------------------------------------------------
@@ -310,12 +310,12 @@ public:
 
     auto wsOut = getOutputWorkspace(alg, 0);
     // x-values
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000 + 0.500, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.100 + 0.500, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[10], 1.000 + 0.500, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[0], 0.000 + 0.500, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[1], 0.100 + 0.500, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[10], 1.000 + 0.500, 0.001);
     // y-values
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], 0.0, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], 9.0, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[0], 0.0, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[9], 9.0, 0.001);
   }
 
   void test_that_negative_time_offset_applied_correctly() {
@@ -328,12 +328,12 @@ public:
     alg->execute();
     auto wsOut = getOutputWorkspace(alg, 0);
     // x-values
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000 - 0.500, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.100 - 0.500, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[10], 1.000 - 0.500, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[0], 0.000 - 0.500, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[1], 0.100 - 0.500, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[10], 1.000 - 0.500, 0.001);
     // y-values
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], 0.0, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], 9.0, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[0], 0.0, 0.001);
+    TS_ASSERT_DELTA(wsOut->y(0)[9], 9.0, 0.001);
   }
 
   // --------------------------------------------------------------------------
@@ -349,12 +349,12 @@ public:
     alg->execute();
 
     auto wsOut = getOutputWorkspace(alg, 0);
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.0, 0.01);
-    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.5, 0.01);
-    TS_ASSERT_DELTA(wsOut->readX(0)[2], 1.0, 0.01);
-    TS_ASSERT_DELTA(wsOut->readX(1)[0], 0.0, 0.01);
-    TS_ASSERT_DELTA(wsOut->readX(1)[1], 0.5, 0.01);
-    TS_ASSERT_DELTA(wsOut->readX(1)[2], 1.0, 0.01);
+    TS_ASSERT_DELTA(wsOut->x(0)[0], 0.0, 0.01);
+    TS_ASSERT_DELTA(wsOut->x(0)[1], 0.5, 0.01);
+    TS_ASSERT_DELTA(wsOut->x(0)[2], 1.0, 0.01);
+    TS_ASSERT_DELTA(wsOut->x(1)[0], 0.0, 0.01);
+    TS_ASSERT_DELTA(wsOut->x(1)[1], 0.5, 0.01);
+    TS_ASSERT_DELTA(wsOut->x(1)[2], 1.0, 0.01);
   }
 
   void test_not_empty_time_zero_table_applied_correctly() {
@@ -366,12 +366,12 @@ public:
     alg->execute();
 
     auto wsOut = getOutputWorkspace(alg, 0);
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.0 - 0.25, 0.01);
-    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.5 - 0.25, 0.01);
-    TS_ASSERT_DELTA(wsOut->readX(0)[2], 1.0 - 0.25, 0.01);
-    TS_ASSERT_DELTA(wsOut->readX(1)[0], 0.0 + 0.25, 0.01);
-    TS_ASSERT_DELTA(wsOut->readX(1)[1], 0.5 + 0.25, 0.01);
-    TS_ASSERT_DELTA(wsOut->readX(1)[2], 1.0 + 0.25, 0.01);
+    TS_ASSERT_DELTA(wsOut->x(0)[0], 0.0 - 0.25, 0.01);
+    TS_ASSERT_DELTA(wsOut->x(0)[1], 0.5 - 0.25, 0.01);
+    TS_ASSERT_DELTA(wsOut->x(0)[2], 1.0 - 0.25, 0.01);
+    TS_ASSERT_DELTA(wsOut->x(1)[0], 0.0 + 0.25, 0.01);
+    TS_ASSERT_DELTA(wsOut->x(1)[1], 0.5 + 0.25, 0.01);
+    TS_ASSERT_DELTA(wsOut->x(1)[2], 1.0 + 0.25, 0.01);
   }
 
   // --------------------------------------------------------------------------
@@ -386,9 +386,9 @@ public:
     alg->execute();
 
     auto wsOut = getOutputWorkspace(alg, 0);
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.500, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.600, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[5], 1.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[0], 0.500, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[1], 0.600, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[5], 1.000, 0.001);
   }
 
   void test_that_cropping_with_TimeMax_crops_correctly() {
@@ -399,9 +399,9 @@ public:
     alg->execute();
 
     auto wsOut = getOutputWorkspace(alg, 0);
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.100, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[5], 0.500, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[0], 0.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[1], 0.100, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[5], 0.500, 0.001);
   }
 
   void test_that_if_TimeMin_below_lowest_time_then_crop_has_no_effect_on_lower_range() {
@@ -412,9 +412,9 @@ public:
     alg->execute();
 
     auto wsOut = getOutputWorkspace(alg, 0);
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[5], 0.500, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[10], 1.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[0], 0.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[5], 0.500, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[10], 1.000, 0.001);
   }
 
   void test_that_if_TimeMax_above_highest_time_then_crop_has_no_effect_on_upper_range() {
@@ -425,9 +425,9 @@ public:
     alg->execute();
 
     auto wsOut = getOutputWorkspace(alg, 0);
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[5], 0.500, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[10], 1.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[0], 0.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[5], 0.500, 0.001);
+    TS_ASSERT_DELTA(wsOut->x(0)[10], 1.000, 0.001);
   }
 
   // --------------------------------------------------------------------------
@@ -444,9 +444,9 @@ public:
     alg->execute();
 
     auto wsOut = getOutputWorkspace(alg, 0);
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], 0.0, 0.01);
-    TS_ASSERT_DELTA(wsOut->readY(0)[3], 3.53, 0.01);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], 16.36, 0.01);
+    TS_ASSERT_DELTA(wsOut->y(0)[0], 0.0, 0.01);
+    TS_ASSERT_DELTA(wsOut->y(0)[3], 3.53, 0.01);
+    TS_ASSERT_DELTA(wsOut->y(0)[9], 16.36, 0.01);
   }
 
   // --------------------------------------------------------------------------

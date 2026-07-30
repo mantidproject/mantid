@@ -52,9 +52,9 @@ class ExampleSaveAscii(PythonAlgorithm):
             # Loop through each spectrum histogram
             for histogram_n in range(input_workspace.getNumberHistograms()):
                 # Read the histogram data from the workspace
-                xdata = input_workspace.readX(histogram_n)
-                ydata = input_workspace.readY(histogram_n)
-                edata = input_workspace.readE(histogram_n)
+                xdata = input_workspace.x(histogram_n)
+                ydata = input_workspace.y(histogram_n)
+                edata = input_workspace.e(histogram_n)
 
                 # Write the spectrum histogram index to file
                 file_handle.write(str(histogram_n + 1) + "\n")  # +1 to convert to 1 indexed

@@ -137,10 +137,10 @@ class DarkRunSubtractionTest(unittest.TestCase):
         self.assertFalse(np.greater(y, 1e-14).any(), "Detector entries should all be 0")
 
         for i in [0, 2, 3]:
-            self.assertTrue(monitor_workspace.dataY(i).any(), "Monitor entries should not all be 0")
+            self.assertTrue(monitor_workspace.y(i).any(), "Monitor entries should not all be 0")
 
         for i in ws_index2:
-            y = monitor_workspace.dataY(i)
+            y = monitor_workspace.y(i)
             self.assertFalse(np.greater(y, 1e-14).any(), "Entries should all be 0")
 
     def test_that_subtracts_correct_added_file_type(self):
@@ -179,7 +179,7 @@ class DarkRunSubtractionTest(unittest.TestCase):
         self.assertFalse(np.greater(y, 1e-14).any(), "Detector entries should all be 0")
         # The monitors should not be affected, but we only have data in ws_index 0-3
         for i in [0, 3]:
-            self.assertTrue(monitor_workspace.dataY(i).any(), "Monitor entries should not all be 0")
+            self.assertTrue(monitor_workspace.y(i).any(), "Monitor entries should not all be 0")
 
         os.remove(os.path.join(config["defaultsave.directory"], run_number))
 
@@ -223,11 +223,11 @@ class DarkRunSubtractionTest(unittest.TestCase):
 
         # The monitors should not be affected, but we only have data in ws_index 0-3
         for i in [0, 2, 3]:
-            self.assertTrue(monitor_workspace.dataY(i).any(), "Monitor1, Monitor3, Monitor4 entries should not all be 0")
+            self.assertTrue(monitor_workspace.y(i).any(), "Monitor1, Monitor3, Monitor4 entries should not all be 0")
 
         # Monitor 2 (workspace index 1 should be 0
         for i in ws_index:
-            y = monitor_workspace.dataY(i)
+            y = monitor_workspace.y(i)
             self.assertFalse(np.greater(y, 1e-14).any(), "Monitor2 entries should  all be 0")
 
         os.remove(os.path.join(config["defaultsave.directory"], run_number))
@@ -260,11 +260,11 @@ class DarkRunSubtractionTest(unittest.TestCase):
 
         # The monitors should not be affected, but we only have data in ws_index 0-3
         for i in [0, 2, 3]:
-            self.assertTrue(monitor_workspace.dataY(i).any(), "Monitor1, Monitor3, Monitor4 entries should not all be 0")
+            self.assertTrue(monitor_workspace.y(i).any(), "Monitor1, Monitor3, Monitor4 entries should not all be 0")
 
         # Monitor 1 should be 0
         for i in ws_index:
-            y = monitor_workspace.dataY(i)
+            y = monitor_workspace.y(i)
             self.assertFalse(np.greater(y, 1e-14).any(), "Monitor2 entries should  all be 0")
 
     def test_that_subtracts_correct_for_transmission_workspace_with_only_monitors(self):
@@ -293,11 +293,11 @@ class DarkRunSubtractionTest(unittest.TestCase):
 
         # We only have monitors in our transmission file, monitor 2 should be 0
         for i in [0, 2, 3]:
-            self.assertTrue(transmission_workspace.dataY(i).any(), "Monitor1, Monitor3, Monitor4 entries should not all be 0")
+            self.assertTrue(transmission_workspace.y(i).any(), "Monitor1, Monitor3, Monitor4 entries should not all be 0")
 
         # Monitor2 should be 0
         for i in ws_index:
-            y = transmission_workspace.dataY(i)
+            y = transmission_workspace.y(i)
             self.assertFalse(np.greater(y, 1e-14).any(), "Monitor2 entries should  all be 0")
 
     def test_that_subtracts_nothing_when_selecting_detector_subtraction_for_transmission_workspace_with_only_monitors(self):
@@ -325,9 +325,7 @@ class DarkRunSubtractionTest(unittest.TestCase):
 
         # We only have monitors in our transmission file
         for i in [0, 1, 2, 3]:
-            self.assertTrue(
-                transmission_workspace.dataY(i).any(), ("Monitor1, Monitor2, Monitor3 and Monitor4 entries should not all be 0")
-            )
+            self.assertTrue(transmission_workspace.y(i).any(), ("Monitor1, Monitor2, Monitor3 and Monitor4 entries should not all be 0"))
 
     def test_that_subtracts_monitors_and_detectors_for_transmission_workspace_with_monitors_and_detectors(self):
         # Arrange
@@ -367,17 +365,17 @@ class DarkRunSubtractionTest(unittest.TestCase):
 
         # We only have monitors in our transmission file, monitor 1 should be 0
         for i in [0, 2, 3]:
-            self.assertTrue(transmission_workspace.dataY(i).any(), "Monitor0, Monitor2, Monitor3 entries should not all be 0")
+            self.assertTrue(transmission_workspace.y(i).any(), "Monitor0, Monitor2, Monitor3 entries should not all be 0")
 
         # Monitor 2 should be set to 0
         for i in ws_index2:
-            y = transmission_workspace.dataY(i)
+            y = transmission_workspace.y(i)
             self.assertFalse(np.greater(y, 1e-14).any(), "Monitor2 entries should be 0")
 
         # Detectors should be set to 0
         detector_indices = list(range(4, 14))
         for i in detector_indices:
-            y = transmission_workspace.dataY(i)
+            y = transmission_workspace.y(i)
             self.assertFalse(np.greater(y, 1e-14).any(), "All detectors entries should be 0")
 
     def test_that_subtracts_monitors_only_for_transmission_workspace_with_monitors_and_detectors(self):
@@ -409,11 +407,11 @@ class DarkRunSubtractionTest(unittest.TestCase):
 
         # We only have monitors in our transmission file, monitor 1 should be 0
         for i in [0, 2, 3]:
-            self.assertTrue(transmission_workspace.dataY(i).any(), "Monitor0, Monitor2, Monitor3 entries should not all be 0")
+            self.assertTrue(transmission_workspace.y(i).any(), "Monitor0, Monitor2, Monitor3 entries should not all be 0")
 
         # Monitor 2 should be set to 0
         for i in ws_index:
-            y = transmission_workspace.dataY(i)
+            y = transmission_workspace.y(i)
             self.assertFalse(np.greater(y, 1e-14).any(), "Monitor2 entries should be 0")
 
         # Detectors should NOT all be set to 0

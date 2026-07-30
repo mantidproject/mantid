@@ -278,7 +278,7 @@ void MuonSequentialFitDialog::updateInputEnabled(DialogState newState) {
   m_ui.runs->setEnabled(enabled);
   m_ui.labelInput->setEnabled(enabled);
 
-  foreach (QAbstractButton *button, m_ui.paramTypeGroup->buttons())
+  for (QAbstractButton *button : m_ui.paramTypeGroup->buttons())
     button->setEnabled(enabled);
 }
 

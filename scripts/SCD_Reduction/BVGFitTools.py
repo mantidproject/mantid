@@ -413,24 +413,24 @@ def fitTOFCoordinate(
     bgCoeffs = []
     for bgRow in bgParamsRows[::-1]:  # reverse for numpy order
         bgCoeffs.append(mtd["fit_Parameters"].row(bgRow)["Value"])
-    x = tofWS.readX(0)
-    yFit = mtd["fit_Workspace"].readY(1)
+    x = tofWS.x(0)
+    yFit = mtd["fit_Workspace"].y(1)
 
     interpF = interp1d(x, yFit, kind="cubic")
-    tofxx = np.linspace(tofWS.readX(0).min(), tofWS.readX(0).max(), 1000)
+    tofxx = np.linspace(tofWS.x(0).min(), tofWS.x(0).max(), 1000)
     tofyy = interpF(tofxx)
     if plotResults:
         plt.figure(1)
         plt.clf()
         plt.plot(tofxx, tofyy, label="Interpolated")
-        plt.plot(tofWS.readX(0), tofWS.readY(0), "o", label="Data")
-        plt.plot(mtd["fit_Workspace"].readX(1), mtd["fit_Workspace"].readY(1), label="Fit")
+        plt.plot(tofWS.x(0), tofWS.y(0), "o", label="Data")
+        plt.plot(mtd["fit_Workspace"].x(1), mtd["fit_Workspace"].y(1), label="Fit")
         plt.title(fitResults.OutputChi2overDoF)
         plt.legend(loc="best")
     ftof = interp1d(tofxx, tofyy, bounds_error=False, fill_value=0.0)
     XTOF = boxToTOFThetaPhi(box, peak)[:, :, :, 0]
     YTOF = ftof(XTOF)
-    return YTOF, fICC, [tofWS.readX(0).min(), tofWS.readX(0).max()]
+    return YTOF, fICC, [tofWS.x(0).min(), tofWS.x(0).max()]
 
 
 def getYTOF(fICC, XTOF, xlims):

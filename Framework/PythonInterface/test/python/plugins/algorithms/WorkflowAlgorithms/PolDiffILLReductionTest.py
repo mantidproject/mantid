@@ -36,19 +36,19 @@ class PolDiffILLReductionTest(unittest.TestCase):
         PolDiffILLReduction(Run="396991", ProcessAs="BeamWithCadmium", OutputWorkspace="cadmium_ws")
         self._check_output(mtd["cadmium_ws"], 1, 1, 1, "Wavelength", "Wavelength", "Spectrum", "Label")
         self._check_process_flag(mtd["cadmium_ws"], "BeamWithCadmium")
-        self.assertAlmostEqual(mtd["cadmium_ws_1"].readY(0)[0], 0.06, delta=1e-3)
+        self.assertAlmostEqual(mtd["cadmium_ws_1"].y(0)[0], 0.06, delta=1e-3)
 
     def test_absorber_transmission_norm_by_time(self):
         PolDiffILLReduction(Run="396991", ProcessAs="BeamWithCadmium", OutputWorkspace="cadmium_ws", NormaliseBy="Time")
         self._check_output(mtd["cadmium_ws"], 1, 1, 1, "Wavelength", "Wavelength", "Spectrum", "Label")
         self._check_process_flag(mtd["cadmium_ws"], "BeamWithCadmium")
-        self.assertAlmostEqual(mtd["cadmium_ws_1"].readY(0)[0], 0.00773, delta=1e-3)
+        self.assertAlmostEqual(mtd["cadmium_ws_1"].y(0)[0], 0.00773, delta=1e-3)
 
     def test_beam(self):
         PolDiffILLReduction(Run="396983", ProcessAs="EmptyBeam", OutputWorkspace="beam_ws")
         self._check_output(mtd["beam_ws"], 1, 1, 1, "Wavelength", "Wavelength", "Spectrum", "Label")
         self._check_process_flag(mtd["beam_ws"], "EmptyBeam")
-        self.assertAlmostEqual(mtd["beam_ws_1"].readY(0)[0], 5.566, delta=1e-3)
+        self.assertAlmostEqual(mtd["beam_ws_1"].y(0)[0], 5.566, delta=1e-3)
 
     def test_transmission(self):
         PolDiffILLReduction(Run="396983", ProcessAs="EmptyBeam", OutputWorkspace="beam_ws")
@@ -61,7 +61,7 @@ class PolDiffILLReductionTest(unittest.TestCase):
             EmptyBeamWorkspace="beam_ws",
         )
         self._check_output(mtd["quartz_transmission"], 1, 1, 1, "Wavelength", "Wavelength", "Spectrum", "Label")
-        self.assertAlmostEqual(mtd["quartz_transmission_1"].readY(0)[0], 0.692, delta=1e-3)
+        self.assertAlmostEqual(mtd["quartz_transmission_1"].y(0)[0], 0.692, delta=1e-3)
         self._check_process_flag(mtd["quartz_transmission"], "Transmission")
 
     def test_absorber(self):
@@ -95,7 +95,7 @@ class PolDiffILLReductionTest(unittest.TestCase):
             EmptyContainerWorkspace="container_ws",
         )
         self.assertTrue("quartz_transmission" in mtd)
-        self.assertTrue(mtd["quartz_transmission"].readY(0)[0] == float(quartz_transmission))
+        self.assertTrue(mtd["quartz_transmission"].y(0)[0] == float(quartz_transmission))
         self._check_output(mtd["quartz"], 1, 132, 3, "Wavelength", "Wavelength", "Spectrum", "Label")
         self._check_process_flag(mtd["quartz"], "Quartz")
 

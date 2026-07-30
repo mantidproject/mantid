@@ -152,13 +152,13 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
 
     def test_basic_reduction_works(self):
         workspace = self._run_algorithm_with_defaults()
-        self.assertEqual(workspace.dataX(0).size, 55)
-        self._assert_delta(workspace.dataX(0)[0], 0.000523)
-        self._assert_delta(workspace.dataX(0)[33], 0.002217)
-        self._assert_delta(workspace.dataX(0)[54], 0.005379)
-        self._assert_delta(workspace.dataY(0)[4], 0.039447)
-        self._assert_delta(workspace.dataY(0)[33], 0.00003)
-        self._assert_delta(workspace.dataY(0)[53], 0.0)
+        self.assertEqual(workspace.x(0).size, 55)
+        self._assert_delta(workspace.x(0)[0], 0.000523)
+        self._assert_delta(workspace.x(0)[33], 0.002217)
+        self._assert_delta(workspace.x(0)[54], 0.005379)
+        self._assert_delta(workspace.y(0)[4], 0.039447)
+        self._assert_delta(workspace.y(0)[33], 0.00003)
+        self._assert_delta(workspace.y(0)[53], 0.0)
 
     def test_basic_reduction_history(self):
         workspace = self._run_algorithm_with_defaults()
@@ -222,7 +222,7 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
 
     def test_instrument_was_set_on_output_workspace(self):
         workspace = self._run_algorithm_with_defaults()
-        self.assertEqual(workspace.getInstrument().getName(), self._instrument_name)
+        self.assertEqual(workspace.getInstrumentName(), self._instrument_name)
 
         load_inst_history = self._get_child_alg_history(workspace, "LoadInstrument")
         self.assertIsNotNone(load_inst_history)
@@ -290,13 +290,13 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         self.assertTrue(AnalysisDataService.doesExist("IvsLam"))
 
     def _assert_exp_setting_outout_ws_correct(self, workspace):
-        self.assertEqual(workspace.dataX(0).size, 36)
-        self._assert_delta(workspace.dataX(0)[2], 0.0022)
-        self._assert_delta(workspace.dataX(0)[15], 0.0035)
-        self._assert_delta(workspace.dataX(0)[31], 0.0051)
-        self._assert_delta(workspace.dataY(0)[2], 3.24424e-5)
-        self._assert_delta(workspace.dataY(0)[15], 2.35158e-6)
-        self._assert_delta(workspace.dataY(0)[31], 2.01589e-7)
+        self.assertEqual(workspace.x(0).size, 36)
+        self._assert_delta(workspace.x(0)[2], 0.0022)
+        self._assert_delta(workspace.x(0)[15], 0.0035)
+        self._assert_delta(workspace.x(0)[31], 0.0051)
+        self._assert_delta(workspace.y(0)[2], 3.24424e-5)
+        self._assert_delta(workspace.y(0)[15], 2.35158e-6)
+        self._assert_delta(workspace.y(0)[31], 2.01589e-7)
 
     def test_experiment_setting_state_is_parsed_one_entry(self):
         state = '[["0.5","test_title","","","","0.002","0.0055","-0.0001","","","",""]]'

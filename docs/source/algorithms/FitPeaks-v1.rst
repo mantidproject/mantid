@@ -208,14 +208,49 @@ the peak widths, instead.
 Tolerance on Fitting Peaks Positions
 ####################################
 
-Tolerance will be always checked!
-
 * Uniform tolerance
 
 * Non-uniform tolerance
 
 * Case 2, 3 and 4
 
+PositionToleranceMode
+=====================
+
+``PositionTolerance`` can be applied in two ways, selected by ``PositionToleranceMode``:
+
+* ``Check`` (default) — the tolerance is only a post-fit acceptance criterion. The peak
+  centre is fit freely (within its fit window) and a fitted centre that ends up further than
+  the tolerance from its expected position is rejected. This is the historical behaviour.
+
+* ``Constrain`` — the tolerance additionally bounds the peak centre *during* the fit, to
+  ``expected position +/- tolerance``. This is useful when a well-determined expected position
+  (e.g. carried forward from a higher-SNR fit) should keep a weak peak's centre from wandering.
+  ``PositionTolerance`` must be specified when using this mode, and ``ConstrainPeakPositions``
+  must be set to ``false``: both bound the centre during the fit, so they are mutually exclusive.
+
+PositionToleranceFractional
+===========================
+
+By default each ``PositionTolerance`` value is an absolute distance in the fit's x-unit. If
+``PositionToleranceFractional`` is ``True``, each value is instead interpreted as a *fraction* of
+that peak's fit window width, so the effective tolerance becomes
+``tolerance * (window_max - window_min)``. Because the fit window can differ per spectrum (for
+example when supplied via ``FitPeakWindowWorkspace``), this yields a per-spectrum per-peak tolerance from a
+single fractional value — e.g. ``PositionTolerance=[0.25]`` bounds each peak's centre to within
+a quarter of its own fit window width of the expected position. It applies to both the ``Check`` and
+``Constrain`` modes and defaults to ``False``.
+
+CalculateUnconstrainedErrors
+============================
+
+When a peak-position constraint is applied during fitting — either ``ConstrainPeakPositions`` or
+``PositionToleranceMode='Constrain'`` — the constraint contributes curvature to the Hessian that
+the error calculation inverts, so the reported position error reflects the constraint as well as
+the data. If ``CalculateUnconstrainedErrors`` is ``True``, the parameter errors are recomputed
+from the unconstrained cost function at the fitted parameter values, i.e. the covariance error
+from the data alone. This costs one extra (zero-iteration) fit per constrained peak. It defaults
+to ``False`` and has no effect when no position constraint is applied.
 
 Algorithm Configurations
 ########################

@@ -99,7 +99,7 @@ Development Process
    Details the interaction of pull requests with the Jenkins CI builds.
 
 :doc:`JenkinsConfiguration`
-   Describes the setup of Jenkins system and how to add a new slave.
+   Describes the setup of Jenkins system and how to add a new node.
 
 :doc:`ReleaseChecklist`
    How to perform a full release of Mantid.

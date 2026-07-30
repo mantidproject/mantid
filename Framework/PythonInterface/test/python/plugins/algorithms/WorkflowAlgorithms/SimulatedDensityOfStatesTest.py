@@ -101,8 +101,8 @@ class SimulatedDensityOfStatesTest(unittest.TestCase):
 
         wks = SimulatedDensityOfStates(PHONONFile=self._phonon_file, ZeroThreshold=20)
 
-        x_data = wks.readX(0)
-        y_data = wks.readY(0)
+        x_data = wks.x(0)
+        y_data = wks.y(0)
 
         mask = np.where(x_data < 20)
         self.assertEqual(sum(y_data[mask]), 0)
@@ -200,8 +200,8 @@ class SimulatedDensityOfStatesTest(unittest.TestCase):
         expected_x_min = -0.051481
         for idx in range(wks_grp.getNumberOfEntries()):
             ws = wks_grp.getItem(idx)
-            self.assertAlmostEqual(expected_x_min, ws.readX(0)[0])
-            self.assertAlmostEqual(bin_width, (ws.readX(0)[1] - ws.readX(0)[0]))
+            self.assertAlmostEqual(expected_x_min, ws.x(0)[0])
+            self.assertAlmostEqual(bin_width, (ws.x(0)[1] - ws.x(0)[0]))
 
     def test_isotopes_are_parsed_correctly(self):
         """

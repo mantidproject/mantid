@@ -190,7 +190,7 @@ public:
     TS_ASSERT(histo_out); // this should be a 2d workspace
 
     for (size_t i = 0; i < 5; ++i) {
-      TS_ASSERT_DELTA(histo_out->readY(i)[0], static_cast<double>(i * i), 1e-10);
+      TS_ASSERT_DELTA(histo_out->y(i)[0], static_cast<double>(i * i), 1e-10);
     }
     AnalysisDataService::Instance().remove("test_pow_log");
     AnalysisDataService::Instance().remove("test_ev_pow_out");

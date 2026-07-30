@@ -29,6 +29,21 @@ void SaveDaveGrp::init() {
                         "A DAVE grouped data format file that will be created");
   this->declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>("ToMicroEV", false, Kernel::Direction::Input),
                         "Transform all energy units from milli eV to micro eV");
+  this->declareProperty(
+      std::make_unique<Kernel::PropertyWithValue<bool>>("ToQsInQENSData", false, Kernel::Direction::Input),
+      "Transform the spectrum numbers to Q values");
+}
+
+std::map<std::string, std::string> SaveDaveGrp::validateInputs() {
+  std::map<std::string, std::string> result;
+
+  const bool toMicroEV = getProperty("ToMicroEV");
+  const bool toQsInQENSData = getProperty("ToQsInQENSData");
+  if (toMicroEV && toQsInQENSData) {
+    result["ToQsInQENSData"] = "'ToMicroEV' and 'ToQsInQENSData' can't be set to True at the same time."
+                               "Set 'ToQsInQENSData' to False";
+  }
+  return result;
 }
 
 /** Execute the algorithm.
@@ -42,10 +57,12 @@ void SaveDaveGrp::exec() {
     throw std::invalid_argument("Either the number of bins or the number of histograms is 0");
   std::string xcaption = ws->getAxis(0)->unit()->caption();
   std::string ycaption = ws->getAxis(1)->unit()->caption();
+  const bool toQsInQENSData = getProperty("ToQsInQENSData");
+
   if (xcaption.length() == 0)
     xcaption = "X";
   if (ycaption.length() == 0 || ycaption == "Spectrum")
-    ycaption = "Y";
+    ycaption = toQsInQENSData ? "Q" : "Y";
 
   std::string filename = getProperty("Filename");
   std::ofstream file(filename.c_str());
@@ -86,7 +103,16 @@ void SaveDaveGrp::exec() {
     yunit = "micro eV";
   file << "# " << ycaption << " (" << yunit << ") values\n";
   double yvalue;
-  if ((*ws->getAxis(1)).length() == (nSpectra + 1)) {
+  if (toQsInQENSData) {
+    auto qsInQENSData = createChildAlgorithm("GetQsInQENSData");
+    qsInQENSData->initialize();
+    qsInQENSData->setProperty("InputWorkspace", ws->getName());
+    qsInQENSData->execute();
+    std::vector<double> qvalues = qsInQENSData->getProperty("Qvalues");
+    for (const auto &qvalue : qvalues) {
+      file << qvalue << '\n';
+    }
+  } else if ((*ws->getAxis(1)).length() == (nSpectra + 1)) {
     for (std::size_t i = 0; i < nSpectra; i++) {
       yvalue = 0.5 * (((*ws->getAxis(1))(i)) + ((*ws->getAxis(1))(i + 1)));
       if (yToMicroeV)

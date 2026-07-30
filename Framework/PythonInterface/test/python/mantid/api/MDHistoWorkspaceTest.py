@@ -178,6 +178,70 @@ class MDHistoWorkspaceTest(unittest.TestCase):
         new_errors = testWS.getErrorSquaredArray()
         self._verify_numpy_data(new_errors, errors)
 
+    def test_set_signal_array_clears_original_workspaces(self):
+        # "A" is produced by BinMD from "mdw", so it is linked to an original workspace
+        A = mtd["A"]
+        self.assertGreater(A.numOriginalWorkspaces(), 0)
+        signal = numpy.ones(A.getSignalArray().shape, dtype=numpy.float64)
+        A.setSignalArray(signal)
+        self._verify_numpy_data(A.getSignalArray(), signal)
+        self.assertEqual(A.numOriginalWorkspaces(), 0)
+
+    def test_set_error_array_clears_original_workspaces(self):
+        # "A" is produced by BinMD from "mdw", so it is linked to an original workspace
+        A = mtd["A"]
+        self.assertGreater(A.numOriginalWorkspaces(), 0)
+        errors = numpy.ones(A.getErrorSquaredArray().shape, dtype=numpy.float64)
+        A.setErrorSquaredArray(errors)
+        self._verify_numpy_data(A.getErrorSquaredArray(), errors)
+        self.assertEqual(A.numOriginalWorkspaces(), 0)
+
+    def test_set_num_events_array_throws_if_input_array_is_of_incorrect_size(self):
+        run_algorithm(
+            "CreateMDHistoWorkspace",
+            SignalInput="1,2,3,4,5,6,7,8,9",
+            ErrorInput="1,1,1,1,1,1,1,1,1",
+            Dimensionality="2",
+            Extents="-1,1,-1,1",
+            NumberOfBins="3,3",
+            Names="A,B",
+            Units="U,T",
+            OutputWorkspace="demo",
+        )
+        testWS = mtd["demo"]
+        num_events = numpy.array([1, 2, 3])
+        self.assertRaises(ValueError, testWS.setNumEventsArray, num_events)
+        mtd.remove("demo")
+
+    def test_set_num_events_array_passes_numpy_values_to_workspace(self):
+        run_algorithm(
+            "CreateMDHistoWorkspace",
+            SignalInput="1,2,3,4,5,6,7,8,9",
+            ErrorInput="1,1,1,1,1,1,1,1,1",
+            Dimensionality="2",
+            Extents="-1,1,-1,1",
+            NumberOfBins="3,3",
+            Names="A,B",
+            Units="U,T",
+            OutputWorkspace="demo",
+        )
+        testWS = mtd["demo"]
+        num_events = numpy.arange(30, 39, dtype=numpy.float64)
+        num_events = numpy.reshape(num_events, (3, 3))
+        testWS.setNumEventsArray(num_events)
+        new_num_events = testWS.getNumEventsArray()
+        self._verify_numpy_data(new_num_events, num_events)
+        mtd.remove("demo")
+
+    def test_set_num_events_array_clears_original_workspaces(self):
+        # "A" is produced by BinMD from "mdw", so it is linked to an original workspace
+        A = mtd["A"]
+        self.assertGreater(A.numOriginalWorkspaces(), 0)
+        num_events = numpy.ones(A.getNumEventsArray().shape, dtype=numpy.float64)
+        A.setNumEventsArray(num_events)
+        self._verify_numpy_data(A.getNumEventsArray(), num_events)
+        self.assertEqual(A.numOriginalWorkspaces(), 0)
+
     def _verify_numpy_data(self, test_array, expected):
         """Check the correct numpy array has been constructed"""
 

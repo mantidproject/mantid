@@ -67,11 +67,11 @@ public:
     createMDEs();
     MDNormDirectSC alg;
     alg.initialize();
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim0", "Q1,-10,10,100"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim1", "Q2,-10,10,100"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim2", "Q3,-10,10,100"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim0", "Q1,-10,10,20"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim1", "Q2,-10,10,20"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim2", "Q3,-10,10,20"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim3", "DeltaE," + std::to_string(-m_Ei) + "," +
-                                                                     std::to_string(0.9 * m_Ei) + ",100"));
+                                                                     std::to_string(0.9 * m_Ei) + ",20"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "MDNorm"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputNormalizationWorkspace", "MDNorm_single"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "MDE_single"));

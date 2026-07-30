@@ -65,9 +65,31 @@ class MantidORSODataset:
         creator_name: str,
         creator_affiliation: str,
         enable_instrument_settings: bool,
-        model: str,
-        validate: bool,
+        model: Optional[str] = "",
+        validate: Optional[bool] = False,
     ) -> None:
+        """
+        A helper class in Mantid used to define and manage an ORSO dataset.
+
+        :param dataset_name: The name of the dataset.
+        :type dataset_name: str
+        :param data_columns: The data columns containing the data and header information.
+        :type data_columns: MantidORSODataColumns
+        :param ws: The workspace containing the metadata used to create sample and experiment entries for the DataSource.
+        :type ws: MatrixWorkspace
+        :param reduction_timestamp: The reduction timestamp.
+        :type reduction_timestamp: datetime
+        :param creator_name: The creator name.
+        :type creator_name: str
+        :param creator_affiliation: The creator affiliation.
+        :type creator_affiliation: str
+        :param enable_instrument_settings: If ``True``, Instrument settings are passed to the DataSource.
+        :type enable_instrument_settings: bool
+        :param model: The model description, for example ``air | Ni 100 | SiO2 0.5 | Si``.
+        :type model: str
+        :param validate: If ``True``, validates the syntax of the model description using the orsopy library.
+        :type validate: bool
+        """
         self._data_columns = data_columns
         self._header = None
 
@@ -108,7 +130,7 @@ class MantidORSODataset:
 
     @staticmethod
     def _create_file(filename: str, timestamp: Optional[datetime] = None, comment: Optional[str] = None) -> File:
-        return File(filename, timestamp, comment)
+        return File(file=filename, timestamp=timestamp, comment=comment)
 
     def _create_mandatory_header(
         self,
@@ -117,7 +139,7 @@ class MantidORSODataset:
         reduction_timestamp: datetime,
         creator_name: str,
         creator_affiliation: str,
-        model: str,
+        model: Optional[str] = "",
         validate: Optional[bool] = False,
         enable_instrument_settings: Optional[bool] = None,
     ) -> None:
@@ -127,15 +149,23 @@ class MantidORSODataset:
                 with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
                     future = executor.submit(SampleModel(stack=model).resolve_to_layers)
                     try:
-                        future.result(timeout=5.0)
+                        layers = future.result(timeout=5.0)
+                        if "could not locate density information for material" in str(layers):
+                            logger.error(
+                                f"The provided model description '{model}' contains an error because the "
+                                "density information of atleast one of the materials in the stack couldn't "
+                                "be located. Please check that the string follows the correct ORSO format "
+                                "and the materials in the stack are defined correctly"
+                            )
+                            self._header = None
+                            return
                     except concurrent.futures.TimeoutError:
                         logger.error(f"The provided model description '{model}' could not be validated because of database unavailability.")
                         self._header = None
                         return
-                    except:
+                    except Exception as exp:
                         logger.error(
-                            f"The provided model description '{model}' contains an error. "
-                            "Please check that the string follows the correct ORSO format."
+                            f"A {type(exp).__name__} occurred while validating the model description '{model}' through resolve_to_layers."
                         )
                         self._header = None
                         return
@@ -148,7 +178,7 @@ class MantidORSODataset:
         run = ws.getRun()
         experiment = Experiment(
             title=None,
-            instrument=ws.getInstrument().getName(),
+            instrument=ws.getInstrumentName(),
             start_date=self._get_exp_start_time(run),
             probe=self.PROBE_NEUTRON,
         )

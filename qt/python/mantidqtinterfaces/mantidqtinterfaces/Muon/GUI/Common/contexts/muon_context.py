@@ -321,7 +321,7 @@ class MuonContext(object):
 
     def _get_x_data(self, name):
         tmp = retrieve_ws(name)
-        return tmp.readX(0)
+        return tmp.x(0)
 
     def _average_by_bin_widths(self, ws_name, dt):
         # convert to Histogram to get bin widths and divide by how much bin widths have changed
@@ -371,7 +371,7 @@ class MuonContext(object):
 
             if self.gui_context["RebinType"] == "Fixed" and self.gui_context["RebinFixed"]:
                 ws = retrieve_ws(name)
-                x_data = ws.dataX(0)
+                x_data = ws.x(0)
                 original_step = x_data[1] - x_data[0]
                 params = float(self.gui_context["RebinFixed"]) * original_step
             return rebin_ws(name, params)
@@ -486,13 +486,13 @@ class MuonContext(object):
             return 0.0
 
         if self.gui_context["LastGoodDataFromFile"]:
-            return round(max(self.data_context.get_loaded_data_for_run(run)["OutputWorkspace"][0].workspace.dataX(0)), 2)
+            return round(max(self.data_context.get_loaded_data_for_run(run)["OutputWorkspace"][0].workspace.x(0)), 2)
         else:
             if "LastGoodData" in self.gui_context:
                 return self.gui_context["LastGoodData"]
             else:
                 self.gui_context["LastGoodData"] = round(
-                    max(self.data_context.get_loaded_data_for_run(run)["OutputWorkspace"][0].workspace.dataX(0)), 2
+                    max(self.data_context.get_loaded_data_for_run(run)["OutputWorkspace"][0].workspace.x(0)), 2
                 )
                 return self.gui_context["LastGoodData"]
 

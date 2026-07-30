@@ -9,12 +9,10 @@
 #include "IGLDisplay.h"
 #include "MantidGeometry/IComponent.h"
 
+#include <QEnterEvent>
 #include <QString>
 
 #include <memory>
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-#include <QEnterEvent>
-#endif
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -54,11 +52,7 @@ protected:
   void wheelEvent(QWheelEvent * /*unused*/) override;
   void keyPressEvent(QKeyEvent * /*unused*/) override;
   void keyReleaseEvent(QKeyEvent * /*unused*/) override;
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
   void enterEvent(QEnterEvent * /*unused*/) override;
-#else
-  void enterEvent(QEvent * /*unused*/) override;
-#endif
   void leaveEvent(QEvent * /*unused*/) override;
   void draw();
 

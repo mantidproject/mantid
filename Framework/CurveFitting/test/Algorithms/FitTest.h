@@ -140,7 +140,7 @@ public:
     API::MatrixWorkspace_sptr outWS =
         API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("MinimizerOutput");
     TS_ASSERT(outWS);
-    auto &y = outWS->readY(0);
+    auto &y = outWS->y(0);
     TS_ASSERT_EQUALS(y.size(), 99);
     for (size_t iter = 0; iter < 99; ++iter) {
       TS_ASSERT_EQUALS(y[iter], static_cast<double>(iter));
@@ -662,7 +662,7 @@ public:
   }
 
   void setUp() override {
-    std::string resFileName = "ResolutionTestResolution.res";
+    std::string resFileName = "ResolutionTestResolution_fit.res";
     std::ofstream fil(resFileName.c_str());
 
     double N = 117;
@@ -685,7 +685,7 @@ public:
   }
 
   void tearDown() override {
-    std::string resFileName = "ResolutionTestResolution.res";
+    std::string resFileName = "ResolutionTestResolution_fit.res";
     std::filesystem::path phandle(resFileName);
     if (std::filesystem::exists(phandle)) {
       std::filesystem::remove(phandle);
@@ -734,7 +734,7 @@ public:
 
     fit.setPropertyValue("Function", "composite=Convolution,"
                                      "FixResolution=true,NumDeriv=true;name=Resolution,FileName="
-                                     "\"ResolutionTestResolution.res\","
+                                     "\"ResolutionTestResolution_fit.res\","
                                      "WorkspaceIndex=0;name=ResolutionTest_Gauss,c=5,h=2,s=1");
     fit.setPropertyValue("InputWorkspace", "ResolutionTest_WS");
     fit.setPropertyValue("WorkspaceIndex", "0");
@@ -1538,7 +1538,7 @@ public:
     auto ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, ndata, false, false, false);
     ws->getAxis(0)->setUnit("DeltaE");
     for (int i = 0; i < ndata; i++) {
-      ws->dataX(0)[i] = i * 5;
+      ws->mutableX(0)[i] = i * 5;
     }
     Mantid::MantidVec &x = ws->dataX(0);
     Mantid::MantidVec &y = ws->dataY(0);
@@ -1815,9 +1815,9 @@ public:
         WorkspaceFactory::Instance().create("Workspace2D", histogramNumber, timechannels, timechannels);
 
     for (int i = 0; i < timechannels; i++) {
-      ws2D->dataX(0)[i] = i + 1;
-      ws2D->dataY(0)[i] = i + 1;
-      ws2D->dataE(0)[i] = 1.0;
+      ws2D->mutableX(0)[i] = i + 1;
+      ws2D->mutableY(0)[i] = i + 1;
+      ws2D->mutableE(0)[i] = 1.0;
     }
 
     Algorithms::Fit alg2;
@@ -1851,9 +1851,9 @@ public:
         WorkspaceFactory::Instance().create("Workspace2D", histogramNumber, timechannels, timechannels);
 
     for (int i = 0; i < timechannels; i++) {
-      ws2D->dataX(0)[i] = i + 1;
-      ws2D->dataY(0)[i] = (i + 1) * (i + 1) + 2 * (i + 1) + 3.0;
-      ws2D->dataE(0)[i] = 1.0;
+      ws2D->mutableX(0)[i] = i + 1;
+      ws2D->mutableY(0)[i] = (i + 1) * (i + 1) + 2 * (i + 1) + 3.0;
+      ws2D->mutableE(0)[i] = 1.0;
     }
 
     CurveFitting::Algorithms::Fit alg2;
@@ -1889,9 +1889,9 @@ public:
         WorkspaceFactory::Instance().create("Workspace2D", histogramNumber, timechannels, timechannels);
 
     for (int i = 0; i < timechannels; i++) {
-      ws2D->dataX(0)[i] = i + 1;
-      ws2D->dataY(0)[i] = (i + 1) * (i + 1);
-      ws2D->dataE(0)[i] = 1.0;
+      ws2D->mutableX(0)[i] = i + 1;
+      ws2D->mutableY(0)[i] = (i + 1) * (i + 1);
+      ws2D->mutableE(0)[i] = 1.0;
     }
 
     Fit fitalg;

@@ -89,16 +89,16 @@ public:
     TS_ASSERT_EQUALS((*(ws_q->getAxis(1)))(0), 0.0);
     TS_ASSERT_DELTA((*(ws_q->getAxis(1)))(400), 5.0, delta);
     TS_ASSERT_EQUALS((*(ws_q->getAxis(1)))(800), 10.);
-    TS_ASSERT_DELTA(ws_q->readY(64)[0], 1.5577979780, delta);
-    TS_ASSERT_DELTA(ws_q->readE(64)[0], 0.0956304498, delta);
-    TS_ASSERT_DELTA(ws_q->readY(345)[0], 6.6485381486, delta);
-    TS_ASSERT_DELTA(ws_q->readE(345)[0], 0.2742620639, delta);
-    TS_ASSERT_DELTA(ws_q->readY(595)[0], 1.5959507353, delta);
-    TS_ASSERT_DELTA(ws_q->readE(595)[0], 0.1205590343, delta);
-    TS_ASSERT_DELTA(ws_q->readY(683)[0], 1.7956989694, delta);
-    TS_ASSERT_DELTA(ws_q->readE(683)[0], 0.1921823844, delta);
-    TS_ASSERT_DELTA(ws_q->readY(745)[0], 22.9332050574, delta);
-    TS_ASSERT_DELTA(ws_q->readE(745)[0], 0.5068253372, delta);
+    TS_ASSERT_DELTA(ws_q->y(64)[0], 1.5577979780, delta);
+    TS_ASSERT_DELTA(ws_q->e(64)[0], 0.0956304498, delta);
+    TS_ASSERT_DELTA(ws_q->y(345)[0], 6.6485381486, delta);
+    TS_ASSERT_DELTA(ws_q->e(345)[0], 0.2742620639, delta);
+    TS_ASSERT_DELTA(ws_q->y(595)[0], 1.5959507353, delta);
+    TS_ASSERT_DELTA(ws_q->e(595)[0], 0.1205590343, delta);
+    TS_ASSERT_DELTA(ws_q->y(683)[0], 1.7956989694, delta);
+    TS_ASSERT_DELTA(ws_q->e(683)[0], 0.1921823844, delta);
+    TS_ASSERT_DELTA(ws_q->y(745)[0], 22.9332050574, delta);
+    TS_ASSERT_DELTA(ws_q->e(745)[0], 0.5068253372, delta);
 
     auto ws_e = std::dynamic_pointer_cast<MatrixWorkspace>(result->getItem(1));
     TS_ASSERT_EQUALS(ws_e->getAxis(0)->length(), 121);
@@ -110,16 +110,16 @@ public:
     TS_ASSERT_EQUALS(ws_e->getAxis(1)->unit()->unitID(), "MomentumTransfer");
     TS_ASSERT_EQUALS((*(ws_e->getAxis(1)))(0), 5.);
     TS_ASSERT_EQUALS((*(ws_e->getAxis(1)))(1), 10.);
-    TS_ASSERT_DELTA(ws_e->readY(0)[3], 3.3384754287, delta);
-    TS_ASSERT_DELTA(ws_e->readE(0)[3], 0.0228727752, delta);
-    TS_ASSERT_DELTA(ws_e->readY(0)[20], 0.2282186682, delta);
-    TS_ASSERT_DELTA(ws_e->readE(0)[20], 0.0062779325, delta);
-    TS_ASSERT_DELTA(ws_e->readY(0)[27], 0.2638646427, delta);
-    TS_ASSERT_DELTA(ws_e->readE(0)[27], 0.0068527377, delta);
-    TS_ASSERT_DELTA(ws_e->readY(0)[78], 0.3287522505, delta);
-    TS_ASSERT_DELTA(ws_e->readE(0)[78], 0.0090771986, delta);
-    TS_ASSERT_DELTA(ws_e->readY(0)[119], 0.0453667614, delta);
-    TS_ASSERT_DELTA(ws_e->readE(0)[119], 0.0054619518, delta);
+    TS_ASSERT_DELTA(ws_e->y(0)[3], 3.3384754287, delta);
+    TS_ASSERT_DELTA(ws_e->e(0)[3], 0.0228727752, delta);
+    TS_ASSERT_DELTA(ws_e->y(0)[20], 0.2282186682, delta);
+    TS_ASSERT_DELTA(ws_e->e(0)[20], 0.0062779325, delta);
+    TS_ASSERT_DELTA(ws_e->y(0)[27], 0.2638646427, delta);
+    TS_ASSERT_DELTA(ws_e->e(0)[27], 0.0068527377, delta);
+    TS_ASSERT_DELTA(ws_e->y(0)[78], 0.3287522505, delta);
+    TS_ASSERT_DELTA(ws_e->e(0)[78], 0.0090771986, delta);
+    TS_ASSERT_DELTA(ws_e->y(0)[119], 0.0453667614, delta);
+    TS_ASSERT_DELTA(ws_e->e(0)[119], 0.0054619518, delta);
   }
 
   void test_sofqw3_zerobinwidth() {
@@ -158,6 +158,6 @@ public:
     TS_ASSERT_EQUALS((*(ws->getAxis(0)))(1), 1.5);
     TS_ASSERT_EQUALS(ws->getAxis(1)->length(), 2);
     TS_ASSERT_EQUALS(ws->getAxis(1)->unit()->unitID(), "MomentumTransfer");
-    TS_ASSERT_DELTA(ws->readY(0)[0], 0.998910675, delta);
+    TS_ASSERT_DELTA(ws->y(0)[0], 0.998910675, delta);
   }
 };

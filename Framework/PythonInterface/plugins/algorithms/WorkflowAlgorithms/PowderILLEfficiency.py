@@ -91,7 +91,7 @@ def _divide_friendly(ws1, ws2, out):
     """
     Divides ws1/ws2 ignoring the difference in x-axis
     """
-    mtd[ws2].setX(0, mtd[ws1].readX(0))
+    mtd[ws2].setSharedX(0, mtd[ws1].x(0))
     Divide(LHSWorkspace=ws1, RHSWorkspace=ws2, OutputWorkspace=out)
 
 
@@ -99,7 +99,7 @@ def _plus_friendly(ws1, ws2, out):
     """
     Sums ws1+ws2 ignoring the difference in x-axis
     """
-    mtd[ws2].setX(0, mtd[ws1].readX(0))
+    mtd[ws2].setSharedX(0, mtd[ws1].x(0))
     Plus(LHSWorkspace=ws1, RHSWorkspace=ws2, OutputWorkspace=out)
 
 
@@ -286,7 +286,7 @@ class PowderILLEfficiency(PythonAlgorithm):
         @param ref_ws: current reference workspace
         @param factor: relative efficiency factor for the current pixel
         """
-        x = mtd[ws].readX(0)[-self._bin_offset]
+        x = mtd[ws].x(0)[-self._bin_offset]
         last_bins = ws + "_last_bins"
         CropWorkspace(InputWorkspace=ws, XMin=x, OutputWorkspace=last_bins)
 
@@ -298,7 +298,7 @@ class PowderILLEfficiency(PythonAlgorithm):
             WeightedMean(InputWorkspace1=ref_ws, InputWorkspace2=cropped_ws, OutputWorkspace=ref_ws)
         ConjoinXRuns(InputWorkspaces=[ref_ws, last_bins], OutputWorkspace=ref_ws)
         SortXAxis(InputWorkspace=ref_ws, OutputWorkspace=ref_ws)
-        x = mtd[ref_ws].readX(0)[self._bin_offset]
+        x = mtd[ref_ws].x(0)[self._bin_offset]
         CropWorkspace(InputWorkspace=ref_ws, XMin=x, OutputWorkspace=ref_ws)
         DeleteWorkspace(last_bins)
 
@@ -309,7 +309,7 @@ class PowderILLEfficiency(PythonAlgorithm):
         """
         ConvertToHistogram(InputWorkspace=ratio_ws, OutputWorkspace=ratio_ws)
         equator = int(mtd[ratio_ws].getNumberHistograms() / 2)
-        x = mtd[ratio_ws].readX(equator)
+        x = mtd[ratio_ws].x(equator)
         xmin = x[0]
         xmax = x[-1]
         for excluded_range in self._excluded_ranges:
@@ -461,9 +461,20 @@ class PowderILLEfficiency(PythonAlgorithm):
         Configures the calibration with GlobalSummedReference2D method (D2B)
         @param : first raw ws name in the list
         """
-        inst = mtd[raw_ws].getInstrument()
-        self._n_tubes = inst.getComponentByName("detectors").nelements()
-        self._n_pixels_per_tube = inst.getComponentByName("detectors/tube_1").nelements()
+        component_info = mtd[raw_ws].componentInfo()
+        det_index = component_info.indexOfAny("detectors")
+        tube_index = next(
+            (
+                int(c)
+                for c in component_info.componentsInSubtree(det_index)
+                if int(c) != det_index and component_info.name(int(c)) == "tube_1"
+            ),
+            None,
+        )
+        if tube_index is None:
+            raise RuntimeError("Could not find component 'tube_1' in the detectors subtree.")
+        self._n_tubes = len(component_info.children(det_index))
+        self._n_pixels_per_tube = len(component_info.children(tube_index))
         # self._n_scans_per_file = mtd[raw_ws].getRun().getLogData('ScanSteps').value
         self._n_scans_per_file = 25  # TODO: In v2 this should be freely variable
         self._scan_points = self._n_scans_per_file * self._n_scan_files
@@ -486,8 +497,8 @@ class PowderILLEfficiency(PythonAlgorithm):
         """
         roi_min = np.min(self._regions_of_interest)
         roi_max = np.max(self._regions_of_interest)
-        first_cell_last_time_theta = mtd[ws_2d].readX(1)[-1]
-        last_cell_first_time_theta = mtd[ws_2d].readX(self._n_det)[0]
+        first_cell_last_time_theta = mtd[ws_2d].x(1)[-1]
+        last_cell_first_time_theta = mtd[ws_2d].x(self._n_det)[0]
         if roi_min < first_cell_last_time_theta or roi_max > last_cell_first_time_theta:
             raise ValueError(
                 "Invalid ROI. The region must be fully contained within the detector at any time index. "
@@ -525,8 +536,8 @@ class PowderILLEfficiency(PythonAlgorithm):
             roi_counts_arr[time_index] = roi_counts
         roi_ws = self._hide("roi")
         ExtractSingleSpectrum(InputWorkspace=ws_2d, WorkspaceIndex=0, OutputWorkspace=roi_ws)
-        mtd[roi_ws].setY(0, roi_counts_arr)
-        mtd[roi_ws].setE(0, np.sqrt(roi_counts_arr))
+        mtd[roi_ws].setSharedY(0, roi_counts_arr)
+        mtd[roi_ws].setSharedE(0, np.sqrt(roi_counts_arr))
         Divide(LHSWorkspace=ws_2d, RHSWorkspace=roi_ws, OutputWorkspace=ws_2d)
         DeleteWorkspace(roi_ws)
 
@@ -561,8 +572,8 @@ class PowderILLEfficiency(PythonAlgorithm):
         Scale(InputWorkspace=constants_ws, Factor=1.0 / absolute_norm, OutputWorkspace=constants_ws)
         for pixel in range(mtd[constants_ws].getNumberHistograms()):
             if not self._live_pixels[pixel]:
-                mtd[constants_ws].dataY(pixel)[0] = 1.0
-                mtd[constants_ws].dataE(pixel)[0] = 0.0
+                mtd[constants_ws].mutableY(pixel)[0] = 1.0
+                mtd[constants_ws].mutableE(pixel)[0] = 0.0
 
     def _derive_calibration_sequential(self, ws_2d, constants_ws, response_ws):
         """
@@ -589,8 +600,8 @@ class PowderILLEfficiency(PythonAlgorithm):
             ws = "__det_" + str(det)
             ExtractSingleSpectrum(InputWorkspace=ws_2d, WorkspaceIndex=det, OutputWorkspace=ws)
             SortXAxis(InputWorkspace=ws, OutputWorkspace=ws)
-            y = mtd[ws].readY(0)
-            x = mtd[ws].readX(0)
+            y = mtd[ws].y(0)
+            x = mtd[ws].x(0)
             # keep track of dead pixels
             if np.count_nonzero(y) > self._scan_points / 5:
                 self._live_pixels[det] = True
@@ -620,14 +631,14 @@ class PowderILLEfficiency(PythonAlgorithm):
                         OutputWorkspaceDeriv="",
                         EnableLogging=False,
                     )
-                    mtd[interp_ws].setE(0, mtd[cropped_ws].readE(0))
+                    mtd[interp_ws].setSharedE(0, mtd[cropped_ws].e(0))
                     RenameWorkspace(InputWorkspace=interp_ws, OutputWorkspace=cropped_ws)
                 else:
                     # here we need to effectively clone the x-axis
                     cloned_ref_ws = ws + "_cloned"
                     CloneWorkspace(InputWorkspace=ref_ws, OutputWorkspace=cloned_ref_ws)
-                    mtd[cloned_ref_ws].setY(0, mtd[cropped_ws].readY(0))
-                    mtd[cloned_ref_ws].setE(0, mtd[cropped_ws].readE(0))
+                    mtd[cloned_ref_ws].setSharedY(0, mtd[cropped_ws].y(0))
+                    mtd[cloned_ref_ws].setSharedE(0, mtd[cropped_ws].e(0))
                     RenameWorkspace(InputWorkspace=cloned_ref_ws, OutputWorkspace=cropped_ws)
 
                 Divide(LHSWorkspace=ref_ws, RHSWorkspace=cropped_ws, OutputWorkspace=ratio_ws, EnableLogging=False)
@@ -639,7 +650,7 @@ class PowderILLEfficiency(PythonAlgorithm):
                     self.log().warning("Factor is " + str(factor) + " for pixel #" + str(det + 1))
                 else:
                     self.log().debug("Factor derived for detector pixel #" + str(det + 1) + " is " + str(factor))
-                    mtd[constants_ws].dataY(det)[0] = factor
+                    mtd[constants_ws].mutableY(det)[0] = factor
 
                 self._update_reference(ws, cropped_ws, ref_ws, factor)
                 DeleteWorkspace(cropped_ws)
@@ -653,13 +664,13 @@ class PowderILLEfficiency(PythonAlgorithm):
                     end = self._scan_points - self._bin_offset
                     for scan_point in range(0, self._bin_offset):
                         index = responseBlockSize - self._bin_offset + scan_point
-                        response.dataY(0)[index] = mtd[ws].readY(0)[end + scan_point]
-                        response.dataE(0)[index] = mtd[ws].readE(0)[end + scan_point]
+                        response.mutableY(0)[index] = mtd[ws].y(0)[end + scan_point]
+                        response.mutableE(0)[index] = mtd[ws].e(0)[end + scan_point]
 
                 for scan_point in range(0, end):
                     index = det * self._bin_offset + scan_point
-                    response.dataY(0)[index] = mtd[ref_ws].readY(0)[scan_point]
-                    response.dataE(0)[index] = mtd[ref_ws].readE(0)[scan_point]
+                    response.mutableY(0)[index] = mtd[ref_ws].y(0)[scan_point]
+                    response.mutableE(0)[index] = mtd[ref_ws].e(0)[scan_point]
 
             DeleteWorkspace(ws)
         # end of loop over pixels
@@ -741,7 +752,7 @@ class PowderILLEfficiency(PythonAlgorithm):
             LoadILLDiffraction(Filename=numor, OutputWorkspace=ws_name)
             self._validate_scan(ws_name)
             if index == 0:
-                if mtd[ws_name].getInstrument().getName() != "D2B":
+                if mtd[ws_name].getInstrumentName() != "D2B":
                     raise RuntimeError("Global reference method is not supported for the instrument given")
                 self._configure_global(ws_name)
             if self._normalise_to == "Monitor":
@@ -883,7 +894,7 @@ class PowderILLEfficiency(PythonAlgorithm):
         Transpose(InputWorkspace=calib_current, OutputWorkspace=calib_current)
         for tube in range(self._n_tubes):
             coeff = self._compute_relative_factor_2D("__ratio" + str(tube), tube)
-            mtd[calib_current].setY(tube, coeff)
+            mtd[calib_current].setSharedY(tube, coeff)
         Transpose(InputWorkspace=calib_current, OutputWorkspace=calib_current)
         DeleteWorkspace(ratios_group)
 
@@ -910,7 +921,7 @@ class PowderILLEfficiency(PythonAlgorithm):
         if self._derivation_method == "SequentialSummedReference1D":  # D20
             self._input_files = self._input_files.replace(",", "+")
             LoadAndMerge(Filename=self._input_files, OutputWorkspace=raw_ws, LoaderName="LoadILLDiffraction")
-            if not mtd[raw_ws].getInstrument().getName().startswith("D20"):
+            if not mtd[raw_ws].getInstrumentName().startswith("D20"):
                 DeleteWorkspace(raw_ws)
                 raise RuntimeError("Sequential reference method is not supported for the instrument given")
             self._validate_scan(raw_ws)

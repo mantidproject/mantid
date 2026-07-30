@@ -12,6 +12,7 @@ import mantid.simpleapi as sapi
 import mantid.api as api
 import mantid.kernel as kapi
 from mantid import config
+from mantid.utils.deprecator import deprecated_algorithm
 from tempfile import mkstemp
 
 # conversion factor from energy (in meV) to vawevector (in inverse Angstroms)
@@ -20,6 +21,7 @@ ENERGY_TO_WAVEVECTOR = 2.072
 # pylint: disable=too-many-instance-attributes
 
 
+@deprecated_algorithm(None, "2026-07-24")
 class DPDFreduction(api.PythonAlgorithm):
     channelgroup = None
 
@@ -301,12 +303,12 @@ class DPDFreduction(api.PythonAlgorithm):
         ws_sten = sapi.mtd[wn_sten]
 
         for i_theta in range(ws_sten.getNumberHistograms()):
-            if ws_sten.dataY(i_theta).any():
+            if ws_sten.y(i_theta).any():
                 min_i_theta = i_theta
                 break
         # second, find maximum theta with a non-zero histogram
         for i_theta in range(ws_sten.getNumberHistograms() - 1, -1, -1):
-            if ws_sten.dataY(i_theta).any():
+            if ws_sten.y(i_theta).any():
                 max_i_theta = i_theta
                 break
 
@@ -392,7 +394,7 @@ class DPDFreduction(api.PythonAlgorithm):
                 sapi.Plus(LHSWorkspace=data_name, RHSWorkspace=data_name + "_tmp", OutputWorkspace=data_name)
                 sapi.Plus(LHSWorkspace=monitor_name, RHSWorkspace=data_name + "_tmp_monitors", OutputWorkspace=monitor_name)
             sapi.DeleteWorkspace(data_name + "_tmp")
-        if sapi.mtd[data_name].getInstrument().getName() not in ("ARCS"):
+        if sapi.mtd[data_name].getInstrumentName() != "ARCS":
             raise NotImplementedError("This algorithm works only for ARCS instrument")
 
     def _findGaps(self, workspace_name, min_i, max_i):
@@ -408,7 +410,7 @@ class DPDFreduction(api.PythonAlgorithm):
         zero_fraction = list()  # for each histogram, count the number of zeros
         workspace = sapi.mtd[workspace_name]
         for index in range(min_i, max_i):
-            y = workspace.dataY(index)
+            y = workspace.y(index)
             zero_fraction.append(1.0 - (1.0 * numpy.count_nonzero(y)) / len(y))
         # Find workspace indexes zero fraction above a reasonable threshold
         threshold = numpy.mean(zero_fraction) + 2 * numpy.std(zero_fraction)  # above twice the standard deviation
@@ -441,12 +443,12 @@ class DPDFreduction(api.PythonAlgorithm):
         nonnull_i_theta_start = gap[0] - 1  # index of adjacent histogram with intensity not low
         nonnull_i_theta_end = gap[-1] + 1  # index of adjacent histogram with intensity not low
         workspace = sapi.mtd[workspace_name]
-        y_start = workspace.dataY(nonnull_i_theta_start)
-        y_end = workspace.dataY(nonnull_i_theta_end)
+        y_start = workspace.y(nonnull_i_theta_start)
+        y_end = workspace.y(nonnull_i_theta_end)
         intercept = y_start
         slope = (y_end - y_start) / (nonnull_i_theta_end - nonnull_i_theta_start)
         for null_i_theta in range(1 + nonnull_i_theta_start, nonnull_i_theta_end):
-            workspace.dataY(null_i_theta)[:] = intercept + slope * (null_i_theta - nonnull_i_theta_start)  # linear interpolation
+            workspace.mutableY(null_i_theta)[:] = intercept + slope * (null_i_theta - nonnull_i_theta_start)  # linear interpolation
 
 
 # Register algorithm with Mantid.

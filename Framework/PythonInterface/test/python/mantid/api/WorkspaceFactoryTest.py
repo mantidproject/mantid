@@ -19,7 +19,7 @@ class WorkspaceFactoryTest(unittest.TestCase):
         self.assertTrue(isinstance(wksp, MatrixWorkspace))
         self.assertEqual(wksp.id(), wsId)
         self.assertEqual(wksp.getNumberHistograms(), nhist)
-        self.assertEqual(len(wksp.readX(0)), xlength)
+        self.assertEqual(len(wksp.x(0)), xlength)
         self.assertEqual(wksp.blocksize(), ylength)
 
     def test_creating_a_clean_workspace_is_correct_size_and_type(self):

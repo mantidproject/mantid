@@ -522,8 +522,8 @@ class TestGenerousRebin(unittest.TestCase):
     def _make_mock_ws(self, x_arrays, instrument_name="ENGIN-X"):
         mock_ws = MagicMock()
         mock_ws.getNumberHistograms.return_value = len(x_arrays)
-        mock_ws.readX.side_effect = lambda i: np.array(x_arrays[i])
-        mock_ws.getInstrument.return_value.getName.return_value = instrument_name
+        mock_ws.x.side_effect = lambda i: np.array(x_arrays[i])
+        mock_ws.getInstrumentName.return_value = instrument_name
         return mock_ws
 
     @patch(texture_utils_path + ".Rebin")
@@ -615,8 +615,8 @@ class TestGenerousRebinSystem(unittest.TestCase):
         result = generous_rebin(ws_in, "rebinned_ws", StoreInADS=True)
 
         self.assertEqual(result.getNumberHistograms(), 2)
-        x0 = result.readX(0)
-        x1 = result.readX(1)
+        x0 = result.x(0)
+        x1 = result.x(1)
         np.testing.assert_array_equal(x0, x1)
         self.assertAlmostEqual(x0[0], 1.0)
         self.assertAlmostEqual(x0[-1], 3.0)

@@ -494,7 +494,7 @@ class CalculateNorm(object):
         @return True for point data, false for histogram
         """
         handle = mtd[wksp]
-        if len(handle.readX(0)) == len(handle.readY(0)):
+        if len(handle.x(0)) == len(handle.y(0)):
             return True
         else:
             return False
@@ -917,7 +917,7 @@ class StripEndZeros(ReductionStep):
             # Strip zeros is only possible on 1D workspaces
             return
 
-        y_vals = result_ws.readY(0)
+        y_vals = result_ws.y(0)
         length = len(y_vals)
         # Find the first non-zero value
         start = 0
@@ -933,7 +933,7 @@ class StripEndZeros(ReductionStep):
                 stop = j
                 break
         # Find the appropriate X values and call CropWorkspace
-        x_vals = result_ws.readX(0)
+        x_vals = result_ws.x(0)
         startX = x_vals[start]
         # Make sure we're inside the bin that we want to crop
         endX = 1.001 * x_vals[stop + 1]
@@ -956,7 +956,7 @@ class StripEndNans(ReductionStep):
             # Strip zeros is only possible on 1D workspaces
             return
 
-        y_vals = result_ws.readY(0)
+        y_vals = result_ws.y(0)
         length = len(y_vals)
         # Find the first non-zero value
         start = 0
@@ -972,7 +972,7 @@ class StripEndNans(ReductionStep):
                 stop = j
                 break
         # Find the appropriate X values and call CropWorkspace
-        x_vals = result_ws.readX(0)
+        x_vals = result_ws.x(0)
         startX = x_vals[start]
         # Make sure we're inside the bin that we want to crop
         endX = 1.001 * x_vals[stop + 1]

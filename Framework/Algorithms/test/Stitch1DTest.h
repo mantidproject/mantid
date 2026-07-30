@@ -470,7 +470,7 @@ public:
     std::vector<double> params = {-1.0, 0.2, 1.0};
     auto ret = do_stitch1D(ws1, ws2, params);
 
-    const auto &stitched_y = ret.get<0>()->readY(0);
+    const auto &stitched_y = ret.get<0>()->y(0);
     const auto &stitched_x = ret.get<0>()->x(0);
 
     std::vector<size_t> overlap_indexes = std::vector<size_t>();
@@ -497,7 +497,7 @@ public:
     std::vector<double> params = {(-1.0), (0.2), (1.0)};
     auto ret = do_stitch1D(ws1, ws2, -0.5, params, true);
 
-    const auto &stitched_y = ret.get<0>()->readY(0);
+    const auto &stitched_y = ret.get<0>()->y(0);
     const auto &stitched_x = ret.get<0>()->x(0);
 
     std::vector<size_t> overlap_indexes = std::vector<size_t>();
@@ -524,7 +524,7 @@ public:
     std::vector<double> params = {-1.0, 0.2, 1.0};
     auto ret = do_stitch1D(ws1, ws2, 0.5, params, false);
 
-    const auto &stitched_y = ret.get<0>()->readY(0);
+    const auto &stitched_y = ret.get<0>()->y(0);
     const auto &stitched_x = ret.get<0>()->x(0);
 
     std::vector<size_t> overlap_indexes = std::vector<size_t>();
@@ -666,8 +666,8 @@ public:
     const double scaleFactor = ret.get<1>();
 
     TSM_ASSERT_EQUALS("Two cosine waves in phase scale factor should be unity", 1.0, scaleFactor);
-    const double stitchedWSFirstYValue = outWS->readY(0)[0]; // Should be 1.0 at cos(0)
-    const double lhsWSFirstYValue = lhs->readY(0)[0];        // Should be 1.0 at cos(0)
+    const double stitchedWSFirstYValue = outWS->y(0)[0]; // Should be 1.0 at cos(0)
+    const double lhsWSFirstYValue = lhs->y(0)[0];        // Should be 1.0 at cos(0)
 
     TSM_ASSERT_EQUALS("No scaling of the output workspace should have occurred", stitchedWSFirstYValue,
                       lhsWSFirstYValue);
@@ -783,7 +783,7 @@ public:
 
     TSM_ASSERT("ScaleFactor should not be NaN", !std::isnan(scaleFactor));
 
-    auto outY = outWs->readY(0);
+    auto outY = outWs->y(0);
     TSM_ASSERT("Nans should be put back into Y Values", std::isnan(outY[0]));
   }
 
@@ -808,10 +808,10 @@ public:
 
     MatrixWorkspace_sptr outWs = ret.get<0>();
 
-    auto outY = outWs->readY(0);
+    auto outY = outWs->y(0);
     TSM_ASSERT("Valid values should be used in overlap", !std::isnan(outY[5]));
 
-    auto outE = outWs->readE(0);
+    auto outE = outWs->e(0);
     TSM_ASSERT("Error should be taken from valid datapoint", !std::isnan(outE[5]));
   }
 
@@ -831,10 +831,10 @@ public:
 
     MatrixWorkspace_sptr outWs = ret.get<0>();
 
-    auto outY = outWs->readY(0);
+    auto outY = outWs->y(0);
     TSM_ASSERT("Invalid values should be preserved in overlap", std::isnan(outY[5]));
 
-    auto outE = outWs->readE(0);
+    auto outE = outWs->e(0);
     TSM_ASSERT("Error should be set invalid if both overlap regions contain invalid values", std::isnan(outE[5]));
   }
 };

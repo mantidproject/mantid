@@ -17,6 +17,8 @@
 #define NO_IMPORT_ARRAY
 #include <numpy/arrayobject.h>
 
+#include <vector>
+
 using namespace Mantid::API;
 using Mantid::PythonInterface::NDArray;
 using Mantid::PythonInterface::Registry::RegisterWorkspacePtrToPython;
@@ -144,7 +146,8 @@ void throwIfSizeIncorrect(const IMDHistoWorkspace &self, const NDArray &signal, 
  * sets each value
  * It does not allow the workspace dimensions to be resized, it will throw if
  * the sizes are not
- * correct
+ * correct. Any link to the original workspace(s) is cleared so downstream
+ * rebinning/slicing cannot bypass the manually-set values.
  */
 void setSignalArray(IMDHistoWorkspace &self, const NDArray &signalValues) {
   throwIfSizeIncorrect(self, signalValues, "setSignalArray");
@@ -154,6 +157,7 @@ void setSignalArray(IMDHistoWorkspace &self, const NDArray &signalValues) {
   for (auto i = 0; i < length; ++i) {
     self.setSignalAt(i, extract<double>(flattened[i])());
   }
+  self.clearOriginalWorkspaces();
 }
 
 /**
@@ -161,7 +165,8 @@ void setSignalArray(IMDHistoWorkspace &self, const NDArray &signalValues) {
  * the array & sets each value
  * It does not allow the workspace dimensions to be resized, it will throw if
  * the sizes are not
- * correct
+ * correct. Any link to the original workspace(s) is cleared so downstream
+ * rebinning/slicing cannot bypass the manually-set values.
  */
 void setErrorSquaredArray(IMDHistoWorkspace &self, const NDArray &errorSquared) {
   throwIfSizeIncorrect(self, errorSquared, "setErrorSquaredArray");
@@ -171,6 +176,32 @@ void setErrorSquaredArray(IMDHistoWorkspace &self, const NDArray &errorSquared) 
   for (auto i = 0; i < length; ++i) {
     self.setErrorSquaredAt(i, extract<double>(flattened[i])());
   }
+  self.clearOriginalWorkspaces();
+}
+
+/**
+ * Set the number of events array from a numpy array. This simply loops over the
+ * array & sets each value. It does not allow the workspace dimensions to be
+ * resized, it will throw if the sizes are not correct. Any link to the original
+ * workspace(s) is cleared so downstream rebinning/slicing cannot bypass the
+ * manually-set values.
+ */
+void setNumEventsArray(IMDHistoWorkspace &self, const NDArray &numEvents) {
+  throwIfSizeIncorrect(self, numEvents, "setNumEventsArray");
+  object rav = numEvents.attr("ravel")("F");
+  object flattened = rav.attr("flat");
+  const auto length = static_cast<size_t>(len(flattened));
+  // Buffer conversions first so a failed Python-to-double extraction cannot partially modify the workspace.
+  std::vector<double> values;
+  values.reserve(length);
+  for (size_t i = 0; i < length; ++i) {
+    values.emplace_back(extract<double>(flattened[i])());
+  }
+  auto *dest = self.mutableNumEventsArray();
+  for (size_t i = 0; i < values.size(); ++i) {
+    dest[i] = values[i];
+  }
+  self.clearOriginalWorkspaces();
 }
 
 /**
@@ -214,11 +245,18 @@ void export_IMDHistoWorkspace() {
 
       .def("setSignalArray", &setSignalArray, (arg("self"), arg("signalValues")),
            "Sets the signal from a numpy array. The sizes must match the "
-           "current workspace sizes. A ValueError is thrown if not")
+           "current workspace sizes. A ValueError is thrown if not. Any link "
+           "to the original MDEventWorkspace(s) is cleared.")
 
       .def("setErrorSquaredArray", &setErrorSquaredArray, (arg("self"), arg("errorSquared")),
            "Sets the square of the errors from a numpy array. The sizes must "
-           "match the current workspace sizes. A ValueError is thrown if not")
+           "match the current workspace sizes. A ValueError is thrown if not. Any "
+           "link to the original MDEventWorkspace(s) is cleared.")
+
+      .def("setNumEventsArray", &setNumEventsArray, (arg("self"), arg("numEvents")),
+           "Sets the number of events from a numpy array. The sizes must match "
+           "the current workspace sizes, otherwise a ValueError is thrown. Any link "
+           "to the original MDEventWorkspace(s) is cleared.")
 
       .def("setTo", &IMDHistoWorkspace::setTo, (arg("self"), arg("signal"), arg("error_squared"), arg("num_events")),
            "Sets all signals/errors in the workspace to the given values")

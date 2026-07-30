@@ -409,9 +409,9 @@ class PolDiffILLReduction(PythonAlgorithm):
     def _calculate_transmission(ws, beam_ws):
         """Calculates transmission based on the measurement of the current sample and empty beam."""
         # extract Monitor2 values
-        if 0 in mtd[ws][0].readY(0):
+        if 0 in mtd[ws][0].y(0):
             raise RuntimeError("Cannot calculate transmission; monitor has 0 counts.")
-        if 0 in mtd[beam_ws][0].readY(0):
+        if 0 in mtd[beam_ws][0].y(0):
             raise RuntimeError("Cannot calculate transmission; beam monitor has 0 counts.")
         Divide(LHSWorkspace=ws, RHSWorkspace=beam_ws, OutputWorkspace=ws)
         return ws
@@ -584,9 +584,9 @@ class PolDiffILLReduction(PythonAlgorithm):
     def _correct_bin_widths(ws, max_energy):
         """Corrects zero bin widths in masked spectra caused by integrating elastic peak."""
         for spec_no in range(mtd[ws].getNumberHistograms()):
-            dataX = mtd[ws].readX(spec_no)
+            dataX = mtd[ws].x(spec_no)
             if any(dataX[:-1] - dataX[1:] == 0):  # any zero bin width
-                mtd[ws].setX(spec_no, np.linspace(-max_energy, max_energy, len(dataX)))
+                mtd[ws].setSharedX(spec_no, np.linspace(-max_energy, max_energy, len(dataX)))
 
     def _load_and_prepare_data(self, measurement_technique, process, progress):
         """Loads the data, sets the instrument, and runs function to check the measurement method. In the case
@@ -616,7 +616,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         masked_detectors = self.getProperty("MaskDetectors").value
         if len(masked_detectors) > 0:
             MaskDetectors(Workspace=ws, SpectraList=masked_detectors)
-        self._instrument = mtd[ws][0].getInstrument().getName()
+        self._instrument = mtd[ws][0].getInstrumentName()
         self._figure_out_measurement_method(ws)
         if measurement_technique == "SingleCrystal":
             progress.report(7, "Merging omega scan")
@@ -626,7 +626,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         elif measurement_technique == "TOF":
             if not self.getProperty("MaxTOFChannel").isDefault:
                 max_TOF_channel = self.getProperty("MaxTOFChannel").value
-                dataX = mtd[ws][0].readX(0)
+                dataX = mtd[ws][0].x(0)
                 if len(dataX) > max_TOF_channel:
                     lowerLimit = dataX[max_TOF_channel]
                     upperLimit = dataX[-1]
@@ -654,7 +654,7 @@ class PolDiffILLReduction(PythonAlgorithm):
             detectors = entry.name()
             ExtractMonitors(InputWorkspace=entry, DetectorWorkspace=detectors, MonitorWorkspace=mon)
             if normaliseBy == "Monitor":
-                if 0 in mtd[mon].readY(0):
+                if 0 in mtd[mon].y(0):
                     raise RuntimeError("Cannot normalise to monitor; monitor has 0 counts.")
                 else:
                     norm_value = float(mtd[mon].getRun().getLogData("monitor1.monsum").value) / lampCompatibilityFactor
@@ -790,15 +790,15 @@ class PolDiffILLReduction(PythonAlgorithm):
         bckg_list = []
         to_clean = []
         elastic_peaks, peak_widths, n_sigmas = self._set_up_tof_background_parameters(empty_ws)
-        transmission = mtd[transmission_ws].readY(0)[0]
+        transmission = mtd[transmission_ws].y(0)[0]
         for empty in mtd[empty_ws]:
             background = "{}_bckg".format(empty.name())
             bckg_list.append(background)
             CloneWorkspace(InputWorkspace=empty, OutputWorkspace=background)
             for pixel_no in range(mtd[background].getNumberHistograms()):
-                time_channels = mtd[background].readX(pixel_no)
-                counts = mtd[background].dataY(pixel_no)
-                errors = mtd[background].dataE(pixel_no)
+                time_channels = mtd[background].x(pixel_no)
+                counts = mtd[background].mutableY(pixel_no)
+                errors = mtd[background].mutableE(pixel_no)
                 ep_index = np.abs(time_channels - elastic_peaks[pixel_no]).argmin()
                 # at this point bins should still be equidistant
                 bin_width = (time_channels[-1] - time_channels[0]) / np.size(time_channels)
@@ -936,16 +936,16 @@ class PolDiffILLReduction(PythonAlgorithm):
         """Subtracts from the data time-dependent and independent background using a gaussian approximation
         of the shape of container counts in the elastic peak region."""
         elastic_peaks, peak_widths, n_sigmas = self._set_up_tof_background_parameters(empty_ws)
-        transmission = mtd[transmission_ws].readY(0)[0]
+        transmission = mtd[transmission_ws].y(0)[0]
         max_empty = mtd[empty_ws].getNumberOfEntries()
         for entry_no, entry in enumerate(mtd[ws]):
             empty_no = entry_no if entry_no < max_empty else entry_no % max_empty
             background = mtd[empty_ws][empty_no].name()
             for pixel_no in range(entry.getNumberHistograms()):
-                counts = entry.dataY(pixel_no)
-                errors = entry.dataE(pixel_no)
-                time_channels = mtd[background].readX(pixel_no)
-                empty_counts = mtd[background].readY(pixel_no)
+                counts = entry.mutableY(pixel_no)
+                errors = entry.mutableE(pixel_no)
+                time_channels = mtd[background].x(pixel_no)
+                empty_counts = mtd[background].y(pixel_no)
                 ep_index = np.abs(time_channels - elastic_peaks[pixel_no]).argmin()
                 bin_width = (time_channels[-1] - time_channels[0]) / np.size(time_channels)
                 lower_peak_edge = int(ep_index - n_sigmas * peak_widths[pixel_no] / bin_width)
@@ -1032,7 +1032,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         tmp_ws = "{}_tmp".format(ws_to_match)
         # helper conversion to match the correction function with wavelength values of the workspace to be corrected
         ConvertUnits(InputWorkspace=ws_to_match, Target="Wavelength", Emode="Direct", OutputWorkspace=tmp_ws)
-        data_x = mtd[tmp_ws].readX(0)
+        data_x = mtd[tmp_ws].x(0)
         # analyser transmission values for the final energies (wavelengths) in the workspace to be corrected
         bin_centres = data_x[:-1] + (data_x[1:] - data_x[:-1]) / 2  # the calculation is going to be done for bin centres
         data_y = self._get_transmission_function(bin_centres)
@@ -1042,7 +1042,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         data_y /= analyser_tr_ei
         correction_ws = "analyser_correction_ws"
         CreateWorkspace(
-            DataX=mtd[ws_to_match].readX(0),
+            DataX=mtd[ws_to_match].x(0),
             DataY=data_y,
             OutputWorkspace=correction_ws,
             NSpec=1,
@@ -1224,7 +1224,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         individual scan step."""
         attenuation_method = self.getPropertyValue("SelfAttenuationMethod")
         attenuation_ws = attenuation_method + "_attenuation_ws"
-        xAxis_range = mtd[sample_ws][0].readX(0)
+        xAxis_range = mtd[sample_ws][0].x(0)
         if "MockInstrumentMinRange" in self._sampleAndEnvironmentProperties:
             min_range = self._sampleAndEnvironmentProperties["MockInstrumentMinRange"].value
         else:
@@ -1411,7 +1411,7 @@ class PolDiffILLReduction(PythonAlgorithm):
             for pixel_no in range(entry.getNumberHistograms()):
                 tof_deltaE_0 = tof_deltaE_0_odd if pixel_no % 2 == 0 else tof_deltaE_0_even
                 tof_correction = peak_positions[pixel_no] - tof_deltaE_0
-                time_axis = entry.dataX(pixel_no)
+                time_axis = entry.mutableX(pixel_no)
                 time_axis -= tof_correction
         if self._debug:
             clone_name = "{}_epp_calibrated".format(ws)

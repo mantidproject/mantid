@@ -171,14 +171,14 @@ class POLDILoadRunsTest(systemtesting.MantidSystemTest):
 
         ws2015 = AnalysisDataService.retrieve("ws_data_977")
         self.assertEqual(ws2015.getNumberHistograms(), 400)
-        self.assertEqual(len(ws2015.readX(0)), 125)
+        self.assertEqual(len(ws2015.x(0)), 125)
         self.assertTrue(ws2015.run().hasProperty("chopperspeed"))
 
         self.clearAnalysisDataService()
 
     def compareWorkspaces(self, left, right):
         for i in range(left.getNumberHistograms()):
-            self.assertTrue(np.array_equal(left.dataY(i), right.dataY(i)))
+            self.assertTrue(np.array_equal(left.y(i), right.y(i)))
 
     def clearAnalysisDataService(self):
         AnalysisDataService.clear()

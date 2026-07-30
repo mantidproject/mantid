@@ -17,7 +17,6 @@
 #include "MantidQtWidgets/Plotting/SingleSelector.h"
 
 #include <QHash>
-#include <QPair>
 #include <QVariant>
 #include <QWidget>
 #include <list>

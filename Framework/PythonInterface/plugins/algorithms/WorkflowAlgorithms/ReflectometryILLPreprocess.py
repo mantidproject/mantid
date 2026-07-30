@@ -144,8 +144,8 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         bkg_region = bkg_region.reshape((n_spec, int(bkg_region.size / n_spec)))
         bkg = np.mean(bkg_region, axis=1)
         for channel in range(n_spec):
-            transposed_bkg_ws.setE(channel, np.zeros(block_size))
-            transposed_bkg_ws.setY(channel, bkg[channel] * np.ones(block_size))
+            transposed_bkg_ws.setSharedE(channel, np.zeros(block_size))
+            transposed_bkg_ws.setSharedY(channel, bkg[channel] * np.ones(block_size))
         return transposed_bkg_ws
 
     @staticmethod
@@ -416,7 +416,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
 
         ws = self._input_ws()
 
-        self._instrument_name = ws.getInstrument().getName()
+        self._instrument_name = ws.getInstrumentName()
 
         ws, mon_ws = self._extract_monitors(ws)
 
@@ -602,7 +602,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         m_n = physical_constants["neutron mass"][0]  # in kg
         planck_per_kg = h / m_n  # in m^2 / s
 
-        t_size = len(ws.readX(0))
+        t_size = len(ws.x(0))
         x_axis = np.linspace(0.5, t_size - 1, t_size, endpoint=False)
 
         run = ws.getRun()
@@ -667,7 +667,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             correction = 0.5 * (correction[1:] + correction[:-1])
             CreateWorkspace(DataX=new_lambda, DataY=correction, OutputWorkspace=new_twoTheta_ws, UnitX="Wavelength", ParentWorkspace=ws)
         for spec_no in range(ws.getNumberHistograms()):
-            ws.setX(spec_no, new_lambda)
+            ws.setSharedX(spec_no, new_lambda)
         return ws
 
     def _input_ws(self) -> MatrixWorkspace:
@@ -734,7 +734,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                 raise RuntimeError("Cannot normalise to monitor data: no monitors in input data.")
             normalised_ws_name = self._names.withSuffix("normalised_to_monitor")
             mon_index = normalisation_monitor_workspace_index(mon_ws)
-            mon_xs = mon_ws.readX(0)
+            mon_xs = mon_ws.x(0)
             min_x = mon_xs[0]
             max_x = mon_xs[-1]
             normalised_ws = NormaliseToMonitor(
@@ -805,7 +805,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         Transpose(InputWorkspace=int_ws, OutputWorkspace=int_ws)  # the integration output is a bin plot, cannot be fitted
         original_peak_centre = ws.getRun().getLogData("reduction.line_position").value
         # determine the initial fitting parameters
-        y_axis = mtd[int_ws].readY(0)
+        y_axis = mtd[int_ws].y(0)
         max_height = np.max(y_axis)
         max_index = start_index + (np.where(y_axis == max_height))[0][0]
         sigma = max_index - (np.where(y_axis > 0.667 * max_height))[0][0]

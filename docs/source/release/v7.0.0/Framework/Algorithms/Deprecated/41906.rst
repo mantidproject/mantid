@@ -1,0 +1,1 @@
+- The ``DPDFreduction`` algorithm has been deprecated and has no direct replacement.

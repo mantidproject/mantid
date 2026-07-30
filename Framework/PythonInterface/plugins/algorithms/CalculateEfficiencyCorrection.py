@@ -214,10 +214,10 @@ class CalculateEfficiencyCorrection(PythonAlgorithm):
             if self._xsection_type == "TotalXSection":
                 self._calculate_alpha_scatXS_term()
 
-        wavelengths = self._output_ws.readX(0)
+        wavelengths = self._output_ws.x(0)
         efficiency = self._calculate_efficiency(wavelengths)
         for histo in range(self._output_ws.getNumberHistograms()):
-            self._output_ws.setY(histo, efficiency)
+            self._output_ws.setSharedY(histo, efficiency)
 
         self.setProperty("OutputWorkspace", self._output_ws)
 

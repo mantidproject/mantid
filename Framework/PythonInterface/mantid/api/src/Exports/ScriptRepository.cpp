@@ -103,7 +103,6 @@ order to promote its usage. In order to enhance the usage, it is necessary:\n\
  - List all scripts available at the repository\n\
  - Download selected scripts. \n\
  - Check for updates\n\
- - Allow to publish users scripts/folders. \n\
 \n\
 Basically, you will need to install the repository through ::install(local_path). \n\
 After, you will be able to ::listFiles inside your repository to check the files that are \n\
@@ -112,7 +111,8 @@ available, eventually, you may want to check the information of a single entry \
 or if the file has been modified since last downloaded (::fileStatus(path)). You may want \n\
 to download scripts through ::download(path), or check for updates through ::update(). \n\
 \n\
-'''NOTE:''' Upload is not implemented yet.\n";
+'''NOTE:''' The repository is read-only. Scripts can not be published or deleted \n\
+from Mantid.\n";
 
   const char *list_files_desc = "Return an array with all the entries inside the repository. \n\
 \n\

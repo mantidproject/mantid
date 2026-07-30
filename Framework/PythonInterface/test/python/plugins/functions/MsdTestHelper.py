@@ -72,9 +72,9 @@ def create_test_workspace(model, num_bins):
     for i in range(1, num_bins):
         noise = random.uniform(0.8, 1.2)
         x_value = i * 1.2
-        workspace.dataX(0)[i] = x_value
-        workspace.dataY(0)[i] = noise * model(x_value)
-        workspace.dataE(0)[i] = 1
+        workspace.mutableX(0)[i] = x_value
+        workspace.mutableY(0)[i] = noise * model(x_value)
+        workspace.mutableE(0)[i] = 1
     return workspace
 
 

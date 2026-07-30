@@ -102,7 +102,7 @@ class ReflectometryQuickAuxiliaryTest(unittest.TestCase):
 
         corrected = correction.apply(test_ws)
 
-        self.assertTrue(all(test_ws.readY(0) == corrected.readY(0)), msg="Input and outputs should be identical")
+        self.assertTrue(all(test_ws.y(0) == corrected.y(0)), msg="Input and outputs should be identical")
 
         DeleteWorkspace(test_ws)
         DeleteWorkspace(corrected)
@@ -115,7 +115,7 @@ class ReflectometryQuickAuxiliaryTest(unittest.TestCase):
 
         corrected = correction.apply(test_ws)
 
-        self.assertTrue(all(test_ws.readY(0) == corrected.readY(0)), msg="Input and outputs should be identical")
+        self.assertTrue(all(test_ws.y(0) == corrected.y(0)), msg="Input and outputs should be identical")
 
         DeleteWorkspace(test_ws)
         DeleteWorkspace(corrected)
@@ -128,7 +128,7 @@ class ReflectometryQuickAuxiliaryTest(unittest.TestCase):
 
         corrected = correction.apply(test_ws)
 
-        self.assertTrue(all(test_ws.readY(0) == corrected.readY(0)), msg="Input and outputs should be identical")
+        self.assertTrue(all(test_ws.y(0) == corrected.y(0)), msg="Input and outputs should be identical")
 
         DeleteWorkspace(test_ws)
         DeleteWorkspace(corrected)

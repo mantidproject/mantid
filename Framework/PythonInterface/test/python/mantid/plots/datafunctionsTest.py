@@ -502,7 +502,7 @@ class DataFunctionsTest(unittest.TestCase):
         )
 
         # 12th spectra is high counting and will be the first entry in the data when we are using maxpooling
-        np.testing.assert_allclose(z[0], self.ws2d_high_counting_detector.readY(12))
+        np.testing.assert_allclose(z[0], self.ws2d_high_counting_detector.y(12))
 
     def test_get_matrix2d_ragged_without_maxpooling(self):
         x, y, z = funcs.get_matrix_2d_ragged(
@@ -510,7 +510,7 @@ class DataFunctionsTest(unittest.TestCase):
         )
 
         # 12th spectra is high counting but will skipped if we don't use maxpooling
-        np.testing.assert_allclose(z[0], self.ws2d_high_counting_detector.readY(0))
+        np.testing.assert_allclose(z[0], self.ws2d_high_counting_detector.y(0))
 
     def test_get_uneven_data(self):
         # even points

@@ -224,10 +224,10 @@ void RebinRagged::exec() {
       for (int hist = 0; hist < histnumber; ++hist) {
         HistogramBuilder builder;
         builder.setX(inputWS->histogram(hist).binEdges().rawData());
-        builder.setY(inputWS->readY(hist));
-        builder.setE(inputWS->readE(hist));
+        builder.setY(inputWS->y(hist));
+        builder.setE(inputWS->e(hist));
         if (inputWS->hasDx(dist))
-          builder.setDx(inputWS->readDx(hist));
+          builder.setDx(inputWS->dx(hist));
         builder.setDistribution(dist);
         inputWS->setHistogram(hist, builder.build());
       }
@@ -272,10 +272,10 @@ void RebinRagged::exec() {
       for (int hist = 0; hist < histnumber; ++hist) {
         HistogramBuilder builder;
         builder.setX(outputWS->histogram(hist).points().rawData());
-        builder.setY(outputWS->readY(hist));
-        builder.setE(outputWS->readE(hist));
+        builder.setY(outputWS->y(hist).rawData());
+        builder.setE(outputWS->e(hist).rawData());
         if (outputWS->hasDx(hist))
-          builder.setDx(outputWS->readDx(hist));
+          builder.setDx(outputWS->dx(hist));
         builder.setDistribution(dist);
         outputWS->setHistogram(hist, builder.build());
       }

@@ -1250,8 +1250,8 @@ def get_shift_and_scale_factors_from_algorithm(alg, event_slice_optimisation):
         if factors_workspace is None:
             return [], []
         else:
-            scales = factors_workspace.readX(0)
-            shifts = factors_workspace.readY(0)
+            scales = factors_workspace.x(0)
+            shifts = factors_workspace.y(0)
             delete_alg = create_unmanaged_algorithm("DeleteWorkspace", **{"Workspace": "ShiftAndScaleFactors"})
             delete_alg.execute()
             return scales, shifts
@@ -1581,7 +1581,7 @@ def _apply_polarization_component_adjustments(polarization_state, ws):
         component = ws.getInstrument().getComponentByName(idf_name)
         if component is None:
             raise AttributeError(
-                f'The name "{idf_name}" is not present in the Instrument Definition File for {ws.getInstrument().getName()}. '
+                f'The name "{idf_name}" is not present in the Instrument Definition File for {ws.getInstrumentName()}. '
                 f'Please ensure any "idf_component_name" fields in the User File match an existing entry in the IDF for the '
                 f"component you wish to override."
             )

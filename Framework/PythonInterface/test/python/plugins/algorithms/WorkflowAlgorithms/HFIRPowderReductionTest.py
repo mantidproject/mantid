@@ -291,7 +291,7 @@ class LoadInputErrorMessages(unittest.TestCase):
     #     self.assertTrue(ws)
     #     self.assertEqual(ws.blocksize(), 1)
     #     self.assertEqual(ws.getNumberHistograms(), 1966080 // 4)
-    #     self.assertEqual(ws.readY(257775), 4)
+    #     self.assertEqual(ws.y(257775), 4)
     #     self.assertEqual(ws.run().getProtonCharge(), 907880)
     #     self.assertAlmostEqual(ws.run().getLogData("duration").value, 40.05)
 
@@ -1152,10 +1152,10 @@ class ReductionExecutionTests(unittest.TestCase):
             return get_bkg_counts(n) + 10 * np.exp(-((twoTheta - tt1) ** 2) / 1) + 20 * np.exp(-((twoTheta - tt2) ** 2) / 0.2)
 
         for i in range(cal.getNumberHistograms()):
-            cal.setY(i, [get_cal_counts(i) * 2.0])
-            bkg.setY(i, [get_bkg_counts(i) / 2.0])
+            cal.setSharedY(i, [get_cal_counts(i) * 2.0])
+            bkg.setSharedY(i, [get_bkg_counts(i) / 2.0])
             twoTheta = data.getInstrument().getDetector(i + 10000).getTwoTheta(V3D(0, 0, 0), V3D(0, 0, 1)) * 180 / np.pi
-            data.setY(i, [get_data_counts(i, twoTheta)])
+            data.setSharedY(i, [get_data_counts(i, twoTheta)])
 
         data_file_name = os.path.join(self._test_dir, "sample_workspace.nxs")
         SaveNexusESS(data, Filename=data_file_name)
@@ -1661,8 +1661,8 @@ class VanadiumAbsorptionCorrectionTests(unittest.TestCase):
             InstrumentName="TestInstrument",
         )
         for i in range(ws.getNumberHistograms()):
-            ws.setY(i, [counts])
-            ws.setE(i, [np.sqrt(counts)])
+            ws.setSharedY(i, [counts])
+            ws.setSharedE(i, [np.sqrt(counts)])
         AddSampleLog(ws, LogName="gd_prtn_chrg", LogType="Number", NumberType="Double", LogText=str(monitor))
         AddSampleLog(ws, LogName="duration", LogType="Number", NumberType="Double", LogText=str(duration))
         return ws
@@ -1700,7 +1700,7 @@ class VanadiumAbsorptionCorrectionTests(unittest.TestCase):
         # Vcorr = 100 - 40 = 60
         ws = mtd["van_ws"]
         for i in range(ws.getNumberHistograms()):
-            self.assertAlmostEqual(ws.readY(i)[0], 60.0, places=5)
+            self.assertAlmostEqual(ws.y(i)[0], 60.0, places=5)
 
         # Background should be marked as processed
         self.assertIsNone(algo.vanadium_background_ws)
@@ -1717,7 +1717,7 @@ class VanadiumAbsorptionCorrectionTests(unittest.TestCase):
 
         ws = mtd["van_ws"]
         for i in range(ws.getNumberHistograms()):
-            self.assertAlmostEqual(ws.readY(i)[0], 100.0, places=5)
+            self.assertAlmostEqual(ws.y(i)[0], 100.0, places=5)
 
     def test_absorption_correction_applied_with_nonzero_diameter(self):
         """When VanadiumDiameter > 0, absorption correction should modify data."""
@@ -1733,9 +1733,9 @@ class VanadiumAbsorptionCorrectionTests(unittest.TestCase):
         # After correction, values should be V * (1 - Δ) / A
         # Since A < 1 for absorption, corrected values should be > original values
         for i in range(ws.getNumberHistograms()):
-            self.assertGreater(ws.readY(i)[0], 100.0)
+            self.assertGreater(ws.y(i)[0], 100.0)
             # Errors should also be scaled
-            self.assertGreater(ws.readE(i)[0], np.sqrt(100.0))
+            self.assertGreater(ws.e(i)[0], np.sqrt(100.0))
 
     def test_absorption_correction_with_background(self):
         """Verify Vcorr = (V - VB) * (1 - Δ) / A when both are given."""
@@ -1752,7 +1752,7 @@ class VanadiumAbsorptionCorrectionTests(unittest.TestCase):
         # Then (80) * (1-Δ)/A should give values > 80 since A < 1
         ws = mtd["van_ws"]
         for i in range(ws.getNumberHistograms()):
-            self.assertGreater(ws.readY(i)[0], 80.0)
+            self.assertGreater(ws.y(i)[0], 80.0)
 
         self.assertIsNone(algo.vanadium_background_ws)
 
@@ -1768,9 +1768,9 @@ class VanadiumAbsorptionCorrectionTests(unittest.TestCase):
 
         ws = mtd["van_ws"]
         # Spectra at 45° and 135° should have different correction than 90°
-        val_45 = ws.readY(0)[0]
-        val_90 = ws.readY(1)[0]
-        val_90_2 = ws.readY(3)[0]
+        val_45 = ws.y(0)[0]
+        val_90 = ws.y(1)[0]
+        val_90_2 = ws.y(3)[0]
 
         # 90° spectra should give the same result
         self.assertAlmostEqual(val_90, val_90_2, places=5)
@@ -1804,7 +1804,7 @@ class VanadiumAbsorptionCorrectionTests(unittest.TestCase):
         # Vcorr = 100 - 100 = 0
         ws = mtd["van_ws"]
         for i in range(ws.getNumberHistograms()):
-            self.assertAlmostEqual(ws.readY(i)[0], 0.0, places=5)
+            self.assertAlmostEqual(ws.y(i)[0], 0.0, places=5)
 
     def test_normalise_by_none_no_scaling(self):
         """When NormaliseBy=None, background scale factor is 1 (no scaling)."""
@@ -1821,7 +1821,7 @@ class VanadiumAbsorptionCorrectionTests(unittest.TestCase):
         # Vcorr = 100 - 30 = 70
         ws = mtd["van_ws"]
         for i in range(ws.getNumberHistograms()):
-            self.assertAlmostEqual(ws.readY(i)[0], 70.0, places=5)
+            self.assertAlmostEqual(ws.y(i)[0], 70.0, places=5)
 
 
 class SampleAbsorptionCorrectionTests(unittest.TestCase):
@@ -1841,8 +1841,8 @@ class SampleAbsorptionCorrectionTests(unittest.TestCase):
             InstrumentName="TestInstrument",
         )
         for i in range(ws.getNumberHistograms()):
-            ws.setY(i, [counts])
-            ws.setE(i, [np.sqrt(counts)])
+            ws.setSharedY(i, [counts])
+            ws.setSharedE(i, [np.sqrt(counts)])
         AddSampleLog(ws, LogName="gd_prtn_chrg", LogType="Number", NumberType="Double", LogText=str(monitor))
         AddSampleLog(ws, LogName="duration", LogType="Number", NumberType="Double", LogText=str(duration))
         return ws
@@ -1937,7 +1937,7 @@ class SampleAbsorptionCorrectionTests(unittest.TestCase):
         ws = mtd["sample_ws"]
         # After absorption correction (dividing by A < 1), values should increase
         for i in range(ws.getNumberHistograms()):
-            self.assertGreater(ws.readY(i)[0], 100.0)
+            self.assertGreater(ws.y(i)[0], 100.0)
 
     def test_sample_correction_with_background_subtraction(self):
         """Background is subtracted (with fB and normalization) before absorption."""
@@ -1970,7 +1970,7 @@ class SampleAbsorptionCorrectionTests(unittest.TestCase):
         # Then divided by A (< 1) and multiplied by (1-Δ), so result > 60
         ws = mtd["sample_ws"]
         for i in range(ws.getNumberHistograms()):
-            self.assertGreater(ws.readY(i)[0], 60.0)
+            self.assertGreater(ws.y(i)[0], 60.0)
 
         # Sample background should be marked as processed
         self.assertIsNone(algo.sample_background_ws)
@@ -2006,7 +2006,7 @@ class SampleAbsorptionCorrectionTests(unittest.TestCase):
         # Then corrected (> 90 because A < 1)
         ws = mtd["sample_ws"]
         for i in range(ws.getNumberHistograms()):
-            self.assertGreater(ws.readY(i)[0], 90.0)
+            self.assertGreater(ws.y(i)[0], 90.0)
 
     def test_no_multiple_scattering_when_disabled(self):
         """When DoMultipleScatteringCorrection=False, ΔS=0."""
@@ -2031,7 +2031,7 @@ class SampleAbsorptionCorrectionTests(unittest.TestCase):
         algo.sample_background_ws = None
 
         algo._apply_sample_corrections_pre_conversion(["sample_ws"])
-        val_no_ms = mtd["sample_ws"].readY(0)[0]
+        val_no_ms = mtd["sample_ws"].y(0)[0]
 
         # Now with MS
         self._create_workspace("sample_ws2", counts=100.0, monitor=200.0)
@@ -2054,7 +2054,7 @@ class SampleAbsorptionCorrectionTests(unittest.TestCase):
         algo2.sample_background_ws = None
 
         algo2._apply_sample_corrections_pre_conversion(["sample_ws2"])
-        val_with_ms = mtd["sample_ws2"].readY(0)[0]
+        val_with_ms = mtd["sample_ws2"].y(0)[0]
 
         # With MS correction (Δ > 0), (1-Δ) < 1, so result should be smaller
         self.assertGreater(val_no_ms, val_with_ms)
@@ -2083,9 +2083,9 @@ class SampleAbsorptionCorrectionTests(unittest.TestCase):
         algo._apply_sample_corrections_pre_conversion(["sample_ws"])
 
         ws = mtd["sample_ws"]
-        val_45 = ws.readY(0)[0]
-        val_90 = ws.readY(1)[0]
-        val_90_2 = ws.readY(3)[0]
+        val_45 = ws.y(0)[0]
+        val_90 = ws.y(1)[0]
+        val_90_2 = ws.y(3)[0]
 
         # Same angle should give same correction
         self.assertAlmostEqual(val_90, val_90_2, places=5)
@@ -2181,7 +2181,7 @@ class IDFOverrideTests(unittest.TestCase):
     def test_wand_uses_custom_idf(self):
         algo = _create_algo(Instrument="WAND^2", IDFFilename=self._idf)
         algo._load_WAND_Data("HB2C_7000.nxs.h5", "test_wand_custom_idf")
-        instrument_name = mtd["test_wand_custom_idf"].getInstrument().getName()
+        instrument_name = mtd["test_wand_custom_idf"].getInstrumentName()
         self.assertEqual(instrument_name, os.path.basename(self._idf))
 
     def test_midas_uses_custom_idf(self):
@@ -2193,7 +2193,7 @@ class IDFOverrideTests(unittest.TestCase):
 
         algo = _create_algo(Instrument="MIDAS", Wavelength=2.5, IDFFilename=self._idf)
         algo._loadMIDASData(midas_file, "test_midas_custom_idf")
-        instrument_name = mtd["test_midas_custom_idf"].getInstrument().getName()
+        instrument_name = mtd["test_midas_custom_idf"].getInstrumentName()
         self.assertEqual(instrument_name, os.path.basename(self._idf))
 
 

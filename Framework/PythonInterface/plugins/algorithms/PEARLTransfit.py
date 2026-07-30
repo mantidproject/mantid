@@ -223,9 +223,9 @@ class PEARLTransfit(PythonAlgorithm):
             func["Position"] = energy * self.eV_TO_meV  # take peak position starting guess from tabulated value
             bg_pars = np.zeros(3)
             if estimate_background:
-                bg_pars[:2] = self.estimate_linear_background(ws.readX(0), ws.readY(0))
+                bg_pars[:2] = self.estimate_linear_background(ws.x(0), ws.y(0))
             else:
-                bg_pars[0] = self.getProperty("Bg0guessFraction").value * ws.readY(0)[0]
+                bg_pars[0] = self.getProperty("Bg0guessFraction").value * ws.y(0)[0]
                 bg_pars[1] = self.getProperty("Bg1guess").value
                 bg_pars[2] = self.getProperty("Bg2guess").value
             for ipar, par in enumerate(bg_pars):
@@ -286,7 +286,7 @@ class PEARLTransfit(PythonAlgorithm):
                 self.log().information("-----------------------------")
                 self.log().information(f"The Debye temperature is {temp_debye:.2f} K")
                 self.log().information(f"The effective temperature is: {temp_eff:.2f} +/- {temp_eff_err:.2f} K")
-                self.log().information(f"Fitted in range {ws.readX(0)[0]:.2f} < Energy (meV) < {ws.readX(0)[-1]:.2f}")
+                self.log().information(f"Fitted in range {ws.x(0)[0]:.2f} < Energy (meV) < {ws.x(0)[-1]:.2f}")
                 self.log().information(f"Gaussian width at this reference temperature is: {gauss_fwhm_ref_temp:.2f} meV")
                 self.log().information(f"Lorentzian FWHM is fixed: {final_func['LorentzianFWHM']:.2f} meV")
                 self.log().information(f"Gaussian FWHM is fitted as: {final_func['GaussianFWHM']:.2f} meV")

@@ -12,6 +12,7 @@
 
 #include "MantidAPI/CostFunctionFactory.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
+#include "MantidAPI/IFuncMinimizer.h"
 
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
@@ -113,9 +114,9 @@ bool LevenbergMarquardtMinimizer::iterate(size_t /*iteration*/) {
   if (retVal && retVal != GSL_CONTINUE) {
     m_errorString = gsl_strerror(retVal);
     if (cannotReachSpecifiedToleranceInF(retVal)) {
-      m_errorString = "Changes in function value are too small";
+      m_errorString = API::MinimizerStatus::CHANGES_IN_FUNCTION_TOO_SMALL;
     } else if (cannotReachSpecifiedToleranceInX(retVal)) {
-      m_errorString = "Changes in parameter value are too small";
+      m_errorString = API::MinimizerStatus::CHANGES_IN_PARAMETER_TOO_SMALL;
     }
     return false;
   }

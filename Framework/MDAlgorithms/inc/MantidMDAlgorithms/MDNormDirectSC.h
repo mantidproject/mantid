@@ -76,8 +76,8 @@ private:
   Kernel::V3D m_beamDir;
   /// ki-kf for Inelastic convention; kf-ki for Crystallography convention
   std::string convention;
-  /// internal flag to accumulate to an existing workspace
-  bool m_accumulate{false};
+  /// internal array to accumulate signals to avoid copying (serial) each loop
+  std::vector<std::atomic<signal_t>> m_signalArray;
   /// number of experiment infos
   uint16_t m_numExptInfos;
   /// Progress bar

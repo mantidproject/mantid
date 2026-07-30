@@ -70,7 +70,7 @@ public:
     ws_child->initialize(3, 1, 1);
     ws_child->getSpectrum(0).setSpectrumNo(123);
     ws_child->getSpectrum(1).setDetectorID(456);
-    ws_child->getSpectrum(2).dataY()[0] = 789;
+    ws_child->getSpectrum(2).mutableY()[0] = 789;
 
     ws_child->mutableRun().addProperty("Ei", 12.0);
     ws_child->mutableSample().setName("MySample");

@@ -48,13 +48,13 @@ public:
     TS_ASSERT(ws);
     TS_ASSERT_EQUALS(ws->blocksize(), 501);
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 77824);
-    TS_ASSERT_EQUALS(ws->readX(0)[0], 0.);
-    TS_ASSERT_EQUALS(ws->readX(0)[1], 200.);
-    TS_ASSERT_EQUALS(ws->readX(0)[2], 400.);
+    TS_ASSERT_EQUALS(ws->x(0)[0], 0.);
+    TS_ASSERT_EQUALS(ws->x(0)[1], 200.);
+    TS_ASSERT_EQUALS(ws->x(0)[2], 400.);
 
-    TS_ASSERT_EQUALS(ws->readY(41799)[62], 191.);
-    TS_ASSERT_EQUALS(ws->readY(51223)[66], 8.);
-    TS_ASSERT_EQUALS(ws->readY(13873)[227], 1.);
+    TS_ASSERT_EQUALS(ws->y(41799)[62], 191.);
+    TS_ASSERT_EQUALS(ws->y(51223)[66], 8.);
+    TS_ASSERT_EQUALS(ws->y(13873)[227], 1.);
 
     const std::vector<Property *> &logs = ws->run().getLogData();
     TS_ASSERT_EQUALS(logs.size(), 1);

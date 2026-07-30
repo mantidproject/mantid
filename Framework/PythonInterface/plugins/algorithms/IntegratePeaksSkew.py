@@ -683,7 +683,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         ws = self.getProperty("InputWorkspace").value
         inst = ws.getInstrument()
         pk_ws = self.getProperty("PeaksWorkspace").value
-        if inst.getName() != pk_ws.getInstrument().getName():
+        if inst.getName() != pk_ws.getInstrumentName():
             issues["PeaksWorkspace"] = "PeaksWorkspace must have same instrument as the InputWorkspace."
         if pk_ws.getNumberPeaks() < 1:
             issues["PeaksWorkspace"] = "PeaksWorkspace must have at least 1 peak."
@@ -910,8 +910,8 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         det_bin_list = []
         for det in peak_data.detids[peak_data.peak_mask]:
             ispec = ws.getIndicesFromDetectorIDs([int(det)])[0]
-            x_start = ws.readX(ispec)[peak_data.ixmin_opt]
-            x_end = ws.readX(ispec)[peak_data.ixmax_opt]
+            x_start = ws.x(ispec)[peak_data.ixmin_opt]
+            x_end = ws.x(ispec)[peak_data.ixmax_opt]
             det_bin_list.append((int(det), x_start, x_end))
         if len(det_bin_list) > 0:
             peak_shape = PeakShapeDetectorBin(det_bin_list, SpecialCoordinateSystem.NONE, self.name(), self.version())

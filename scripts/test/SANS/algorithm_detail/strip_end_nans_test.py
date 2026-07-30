@@ -30,7 +30,7 @@ class StripEndNansTest(unittest.TestCase):
         # Act
         cropped_workspace = strip_end_nans(workspace)
         # Assert
-        data_y = cropped_workspace.dataY(0)
+        data_y = cropped_workspace.y(0)
         self.assertEqual(len(data_y), 5)
         self.assertEqual(data_y[0], 36.0)
         self.assertEqual(data_y[1], 44.0)

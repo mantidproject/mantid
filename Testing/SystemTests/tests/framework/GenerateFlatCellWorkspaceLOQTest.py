@@ -24,8 +24,7 @@ class GenerateFlatCellWorkspaceLOQTest(systemtesting.MantidSystemTest):
         self.filename = "flatcell_rkf_output.txt"
         GenerateFlatCellWorkspaceLOQ(InputWorkspace="input", OutputWorkspace="output", OutputRKHFilePath=self.filename)
 
-        # Load the output data and save into a workspace
-        LoadNexus(Filename="GenerateFlatCellWorkspaceLOQExpectedOutput.nxs", OutputWorkspace="expected_output")
+        # Load the expected mask and save into a workspace
         LoadNexus(Filename="GenerateFlatCellWorkspaceLOQExpectedMask.nxs", OutputWorkspace="expected_mask")
 
         # Compare the mask workspaces
@@ -51,7 +50,7 @@ class GenerateFlatCellWorkspaceLOQTest(systemtesting.MantidSystemTest):
         return True
 
     def validateMethod(self):
-        return "ValidateWorkspaceToWorkspace"
+        return "ValidateWorkspaceToNexus"
 
     def requiredFiles(self):
         return [
@@ -63,7 +62,7 @@ class GenerateFlatCellWorkspaceLOQTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance = 1e-2
-        return ("output", "expected_output")
+        return ("output", "GenerateFlatCellWorkspaceLOQExpectedOutput.nxs")
 
     def cleanup(self):
         if os.path.exists(self.filename):

@@ -226,7 +226,7 @@ class PEARLTransfit(PythonAlgorithm):
             func["Position"] = eV_TO_meV * self.res_params.En  # take peak position starting guess from tabulated value
             bg_pars = np.zeros(3)
             if estimate_background:
-                bg_pars[:2] = self.estimate_linear_background(ws.readX(0), ws.readY(0))
+                bg_pars[:2] = self.estimate_linear_background(ws.x(0), ws.y(0))
             else:
                 param_names = fit_table.column(0)
                 bg_pars[0] = fit_table.row(param_names.index("Bg0"))["Value"]
@@ -375,8 +375,8 @@ class PEARLTransfit(PythonAlgorithm):
             debug_params = {
                 "Debye Temp. (K)": temp_debye,
                 "Eff. Temp. (K)": (temp_eff, temp_eff_err),
-                "Fit. Min. (meV)": ws.readX(0)[0],
-                "Fit. Max. (meV)": ws.readX(0)[-1],
+                "Fit. Min. (meV)": ws.x(0)[0],
+                "Fit. Max. (meV)": ws.x(0)[-1],
                 "Gaussian Width at Reference Temp (meV)": self.gauss_fwhm_ref_temp,
                 "Instrumental contribution (meV)": gauss_fwhm_inst,
                 "Temperature Contribution (meV)": fwhm,

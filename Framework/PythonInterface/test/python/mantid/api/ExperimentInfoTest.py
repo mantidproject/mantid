@@ -13,6 +13,7 @@ import unittest
 from testhelpers import run_algorithm
 from mantid.geometry import Instrument
 from mantid.api import Sample, Run
+from mantid.simpleapi import LoadEmptyInstrument
 
 
 class ExperimentInfoTest(unittest.TestCase):
@@ -66,6 +67,15 @@ class ExperimentInfoTest(unittest.TestCase):
 
         self.assertNotEqual(id(held_run), id(run))
         self.assertTrue(held_run.hasProperty("run_property"))
+
+    def test_get_instrument_name_none(self):
+        inst_name = self._expt_ws.getInstrumentName()
+        self.assertEqual(inst_name, "")
+
+    def test_get_instrument_name_with_instrument(self):
+        ws = LoadEmptyInstrument(InstrumentName="SNAP")
+        inst_name = ws.getInstrumentName()
+        self.assertEqual(inst_name, "SNAP")
 
 
 if __name__ == "__main__":

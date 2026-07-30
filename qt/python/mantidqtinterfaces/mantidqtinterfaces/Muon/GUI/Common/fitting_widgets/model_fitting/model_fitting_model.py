@@ -206,9 +206,9 @@ class ModelFittingModel(BasicFittingModel):
         if check_if_workspace_exist(workspace_name):
             workspace = retrieve_ws(workspace_name)
             return (
-                self._lists_are_equal(workspace.dataX(0), x_values)
-                and self._lists_are_equal(workspace.dataY(0), y_values)
-                and self._lists_are_equal(workspace.dataE(0), y_errors)
+                self._lists_are_equal(workspace.x(0), x_values)
+                and self._lists_are_equal(workspace.y(0), y_values)
+                and self._lists_are_equal(workspace.e(0), y_errors)
             )
         return False
 

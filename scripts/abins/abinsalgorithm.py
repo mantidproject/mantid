@@ -639,7 +639,7 @@ class AbinsAlgorithm:
 
             # initialize S
             if self._instrument.get_name() in ONE_DIMENSIONAL_INSTRUMENTS:
-                s_atoms = np.zeros_like(ws.dataY(0))
+                s_atoms = np.zeros_like(ws.y(0))
 
             if self._instrument.get_name() in TWO_DIMENSIONAL_INSTRUMENTS:
                 n_q = abins.parameters.instruments[self._instrument.get_name()]["q_size"]
@@ -649,11 +649,11 @@ class AbinsAlgorithm:
             # collect all S
             for partial_ws in local_partial_workspaces:
                 if self._instrument.get_name() in ONE_DIMENSIONAL_INSTRUMENTS:
-                    s_atoms += mtd[partial_ws].dataY(0)
+                    s_atoms += mtd[partial_ws].y(0)
 
                 elif self._instrument.get_name() in TWO_DIMENSIONAL_INSTRUMENTS:
                     for i in range(n_energy_bins):
-                        s_atoms[:, i] += mtd[partial_ws].dataY(i)
+                        s_atoms[:, i] += mtd[partial_ws].y(i)
 
             # create workspace with S
             self._fill_s_workspace(s_points=s_atoms, workspace=total_workspace)

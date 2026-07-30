@@ -152,7 +152,7 @@ def instrument_name(ws: MatrixWorkspace) -> str:
     Keyword arguments:
     ws -- workspace object with defined instrument
     """
-    name = ws.getInstrument().getName()
+    name = ws.getInstrumentName()
     if name != "D17" and name != "FIGARO":
         raise RuntimeError("Unrecognized instrument {}. Only D17 and FIGARO are supported.".format(name))
     return name

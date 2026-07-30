@@ -64,7 +64,7 @@ def create_tube_calibration_ws_by_ws_index_list(integrated_workspace, output_wor
     for i in workspace_index_list:
         pixel_numbers.append(pixel)
         pixel = pixel + 1
-        integrated_pixel_counts.append(integrated_workspace.dataY(i)[0])
+        integrated_pixel_counts.append(integrated_workspace.y(i)[0])
 
     CreateWorkspace(dataX=pixel_numbers, dataY=integrated_pixel_counts, OutputWorkspace=output_workspace)
     # For some reason plotSpectrum is not recognised, but instead we can plot this workspace afterwards.
@@ -112,7 +112,7 @@ def fit_edges(fit_par, index, ws, output_ws):
     outer_edge, inner_edge, end_grad = fit_par.getEdgeParameters()
     margin = fit_par.getMargin()
     # get values around the expected center
-    all_values = ws.dataY(0)
+    all_values = ws.y(0)
     right_limit = len(all_values)
     values = all_values[max(int(centre - margin), 0) : min(int(centre + margin), len(all_values))]
 
@@ -136,7 +136,7 @@ def fit_gaussian(fit_par, index, ws, output_ws):
     margin = fit_par.getMargin()
 
     # get values around the expected center
-    all_values = ws.dataY(0)
+    all_values = ws.y(0)
 
     right_limit = len(all_values)
 
@@ -221,7 +221,7 @@ def getPoints(integrated_ws, func_forms, fit_params, which_tube, show_plot=False
 
     # Create input workspace for fitting
     # get all the counts for the integrated workspace inside the tube
-    counts_y = numpy.array([integrated_ws.dataY(i)[0] for i in which_tube])
+    counts_y = numpy.array([integrated_ws.y(i)[0] for i in which_tube])
     if len(counts_y) == 0:
         return
     get_points_ws = CreateWorkspace(range(len(counts_y)), counts_y, OutputWorkspace="TubePlot")
@@ -242,8 +242,8 @@ def getPoints(integrated_ws, func_forms, fit_params, which_tube, show_plot=False
 
         if show_plot:
             ws = ADS.retrieve(calib_points_ws + "_Workspace")
-            fitt_y_values.append(copy.copy(ws.dataY(1)))
-            fitt_x_values.append(copy.copy(ws.dataX(1)))
+            fitt_y_values.append(copy.copy(ws.y(1)))
+            fitt_x_values.append(copy.copy(ws.x(1)))
 
     if show_plot:
         CreateWorkspace(OutputWorkspace="FittedData", DataX=numpy.hstack(fitt_x_values), DataY=numpy.hstack(fitt_y_values))

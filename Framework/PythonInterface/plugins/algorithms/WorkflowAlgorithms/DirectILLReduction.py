@@ -226,7 +226,7 @@ def _medianDeltaTheta(ws):
 def _minMaxQ(ws):
     """Estimate the start and end q bins for a S(theta, w) workspace."""
     Ei = ws.run().getProperty("Ei").value * 1e-3 * constants.e  # in Joules
-    xs = ws.readX(0)
+    xs = ws.x(0)
     minW = xs[0] * 1e-3 * constants.e  # in Joules
     maxEf = Ei - minW
     # In Ånströms
@@ -557,7 +557,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
         # out of range from the original ragged workspace in delta E.
         # The mask is later respected by the detector grouping
         # to get the normalisation right also in the non-overlapping regions.
-        if mainWS.getInstrument().getName() in ["IN5", "PANTHER", "SHARP"]:
+        if mainWS.getInstrumentName() in ["IN5", "PANTHER", "SHARP"]:
             rebinnedWS = MaskNonOverlappingBins(
                 InputWorkspace=rebinnedWS,
                 ComparisonWorkspace=mainWS,

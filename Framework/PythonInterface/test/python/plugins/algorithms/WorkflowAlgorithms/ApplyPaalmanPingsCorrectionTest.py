@@ -156,7 +156,7 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
         corrected = ApplyPaalmanPingsCorrection(SampleWorkspace=sample_1, CanWorkspace=container_1)
         numHisto = container_1.getNumberHistograms()
         for i in range(numHisto):
-            container_xs = container_1.readX(i)
+            container_xs = container_1.x(i)
             for j in range(len(container_xs)):
                 self.assertEqual(container_xs[j], xs[i * numHisto + j])
         DeleteWorkspace(sample_1)

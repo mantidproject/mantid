@@ -13,8 +13,8 @@ class TestROIDefs(unittest.TestCase):
         ws_index_min = np.random.randint(event_ws.getNumberHistograms())
         xmin = xmax = np.random.uniform(event_ws.getTofMin(), event_ws.getTofMax())
         new_xmin, new_xmax = _adjust_xmin_xmax_for_event_workspace(event_ws, xmin, xmax, ws_index_min)
-        self.assertEqual(new_xmin, event_ws.readX(ws_index_min)[event_ws.yIndexOfX(xmin)])
-        self.assertEqual(new_xmax, event_ws.readX(ws_index_min)[event_ws.yIndexOfX(xmin) + 1])
+        self.assertEqual(new_xmin, event_ws.x(ws_index_min)[event_ws.yIndexOfX(xmin)])
+        self.assertEqual(new_xmax, event_ws.x(ws_index_min)[event_ws.yIndexOfX(xmin) + 1])
 
     def test_adjust_xmin_xmax_for_event_workspace_for_unequal_xvalues(self):
         event_ws = CreateSampleWorkspace(WorkspaceType="Event")
@@ -28,8 +28,8 @@ class TestROIDefs(unittest.TestCase):
     def test_no_adjust_to_xmin_xmax_for_non_event_workspace(self):
         ws = CreateSampleWorkspace()
         ws_index_min = np.random.randint(ws.getNumberHistograms())
-        xmin = np.random.uniform(ws.readX(ws_index_min)[0], ws.readX(ws_index_min)[-1] - 1)
-        xmax = np.random.uniform(xmin + 1, ws.readX(ws_index_min)[-1])
+        xmin = np.random.uniform(ws.x(ws_index_min)[0], ws.x(ws_index_min)[-1] - 1)
+        xmax = np.random.uniform(xmin + 1, ws.x(ws_index_min)[-1])
         new_xmin, new_xmax = _adjust_xmin_xmax_for_event_workspace(ws, xmin, xmax, ws_index_min)
         self.assertEqual(new_xmin, xmin)
         self.assertEqual(new_xmax, xmax)
@@ -37,7 +37,7 @@ class TestROIDefs(unittest.TestCase):
     def test_no_adjust_to_xmin_xmax_for_non_event_workspace_equal_xvalues(self):
         ws = CreateSampleWorkspace()
         ws_index_min = np.random.randint(ws.getNumberHistograms())
-        xmin = xmax = np.random.uniform(ws.readX(ws_index_min)[0], ws.readX(ws_index_min)[-1])
+        xmin = xmax = np.random.uniform(ws.x(ws_index_min)[0], ws.x(ws_index_min)[-1])
         new_xmin, new_xmax = _adjust_xmin_xmax_for_event_workspace(ws, xmin, xmax, ws_index_min)
         self.assertEqual(new_xmin, xmin)
         self.assertEqual(new_xmax, xmax)

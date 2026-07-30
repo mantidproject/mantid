@@ -146,7 +146,7 @@ private:
             SLOT(showMessageBox(const std::string &)));
 
     // Add to the cache
-    m_tabs[name] = qMakePair(tabWidget, tabIDRContent);
+    m_tabs[name] = std::make_pair(tabWidget, tabIDRContent);
 
     // Add all tabs to UI initially
     m_uiForm.twIDRTabs->addTab(tabWidget, QString::fromStdString(name));
@@ -186,7 +186,7 @@ private:
             SLOT(showMessageBox(const std::string &)));
 
     // Add to the cache
-    m_tabs[name] = qMakePair(tabWidget, presenter.get());
+    m_tabs[name] = std::make_pair(tabWidget, presenter.get());
     m_presenters[name] = std::move(presenter);
 
     // Add all tabs to UI initially
@@ -200,7 +200,7 @@ private:
   QString m_settingsGroup;
 
   // All indirect tabs - this should be removed when the interface is in MVP
-  QMap<std::string, QPair<QWidget *, DataReductionTab *>> m_tabs;
+  QMap<std::string, std::pair<QWidget *, DataReductionTab *>> m_tabs;
   /// A map to hold the presenter corresponding to each tab
   std::unordered_map<std::string, std::unique_ptr<DataReductionTab>> m_presenters;
 

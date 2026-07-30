@@ -352,9 +352,9 @@ class LiquidsReflectometryReductionSimpleErrorTest(systemtesting.MantidSystemTes
             same or not
 
         """
-        test_vec_x = test_output.readX(0)
-        test_vec_y = test_output.readY(0)
-        test_vec_e = test_output.readE(0)
+        test_vec_x = test_output.x(0)
+        test_vec_y = test_output.y(0)
+        test_vec_e = test_output.e(0)
 
         gold_data = np.array(
             [

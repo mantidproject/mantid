@@ -539,8 +539,8 @@ class BASISCrystalDiffraction(DataProcessorAlgorithm):
         ClearMaskFlag(ws)
         MaskDetectors(ws, MaskedWorkspace=self._t_mask)
         for i in range(ws.getNumberHistograms()):
-            ws.dataY(i)[0] = 0.0 if ws.getDetector(i).isMasked() else 1.0
-            ws.setX(i, self._momentum_range)
+            ws.mutableY(i)[0] = 0.0 if ws.getDetector(i).isMasked() else 1.0
+            ws.setSharedX(i, self._momentum_range)
         return ws
 
     def nominal_integrated_flux(self, name):

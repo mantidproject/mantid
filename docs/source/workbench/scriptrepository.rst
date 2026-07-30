@@ -4,10 +4,16 @@
 Script Repository
 =================
 
-The script repository is a sharing tool for downloading and uploading of Mantid Scripts and Reduction Algorithms.
+The script repository is a tool for downloading Mantid Scripts and Reduction Algorithms.
 
 - Its a user and scientific community repository for their scripts.
-- It allows downloading and uploading scripts.
+- It allows downloading scripts and keeping them up to date.
+
+.. note::
+   Scripts can only be downloaded from the repository. Uploading scripts to, and
+   deleting scripts from, the central repository is not available from Mantid.
+   To add, modify or remove scripts, submit a pull request on the
+   `script repository on GitHub <https://github.com/mantidproject/scriptrepository>`_.
 
 Installation
 ------------
@@ -41,16 +47,15 @@ The columns shown are:
   - ✓ indicates the file/directory has been downloaded to the
     local machine and the contents match those in the repository.
 
-  - ⤒ indicates changes have been made locally that can be uploaded to the
-    repository. Click the icon to upload.
+  - ✎ (a pencil) indicates the file has been downloaded and then modified
+    locally, so its contents no longer match the repository. This icon is
+    informational only; there is no action to take from Mantid.
+
+  No icon is shown for items that exist only on your local machine.
 
 - **AutoUpdate**: A checkbox appears next to those items that have been downloaded.
   Checking this box causes the file to be updated with contents from the
   repository when Workbench is restarted.
-
-- **Delete**: An icon appears next to those items that have been downloaded.
-  Clicking this removes the item *locally and from the repository* (a confirmation dialog
-  appears first).
 
 If a file item is highlighted in the table, the contents of the file will be
 displayed in the box marked **Description**.

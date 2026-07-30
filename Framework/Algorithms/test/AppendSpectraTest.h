@@ -59,12 +59,12 @@ public:
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(top));
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 25);
     // Check a few values
-    TS_ASSERT_EQUALS(output->readX(0)[0], in1->readX(0)[0]);
-    TS_ASSERT_EQUALS(output->readX(15)[444], in2->readX(5)[444]);
-    TS_ASSERT_EQUALS(output->readY(3)[99], in1->readY(3)[99]);
-    TS_ASSERT_EQUALS(output->readE(7)[700], in1->readE(7)[700]);
-    TS_ASSERT_EQUALS(output->readY(19)[55], in2->readY(9)[55]);
-    TS_ASSERT_EQUALS(output->readE(10)[321], in2->readE(0)[321]);
+    TS_ASSERT_EQUALS(output->x(0)[0], in1->x(0)[0]);
+    TS_ASSERT_EQUALS(output->x(15)[444], in2->x(5)[444]);
+    TS_ASSERT_EQUALS(output->y(3)[99], in1->y(3)[99]);
+    TS_ASSERT_EQUALS(output->e(7)[700], in1->e(7)[700]);
+    TS_ASSERT_EQUALS(output->y(19)[55], in2->y(9)[55]);
+    TS_ASSERT_EQUALS(output->e(10)[321], in2->e(0)[321]);
     TS_ASSERT_EQUALS(output->getAxis(1)->spectraNo(5), in1->getAxis(1)->spectraNo(5));
     TS_ASSERT_EQUALS(output->getAxis(1)->spectraNo(12), in2->getAxis(1)->spectraNo(2));
 
@@ -90,15 +90,15 @@ public:
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(top));
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 40);
     // Check a few values
-    TS_ASSERT_EQUALS(output->readX(0)[0], in1->readX(0)[0]);
-    TS_ASSERT_EQUALS(output->readX(15)[444], in2->readX(5)[444]);
-    TS_ASSERT_EQUALS(output->readX(30)[444], in2->readX(5)[444]);
-    TS_ASSERT_EQUALS(output->readY(3)[99], in1->readY(3)[99]);
-    TS_ASSERT_EQUALS(output->readE(7)[700], in1->readE(7)[700]);
-    TS_ASSERT_EQUALS(output->readY(19)[55], in2->readY(9)[55]);
-    TS_ASSERT_EQUALS(output->readE(10)[321], in2->readE(0)[321]);
-    TS_ASSERT_EQUALS(output->readY(34)[55], in2->readY(9)[55]);
-    TS_ASSERT_EQUALS(output->readE(25)[321], in2->readE(0)[321]);
+    TS_ASSERT_EQUALS(output->x(0)[0], in1->x(0)[0]);
+    TS_ASSERT_EQUALS(output->x(15)[444], in2->x(5)[444]);
+    TS_ASSERT_EQUALS(output->x(30)[444], in2->x(5)[444]);
+    TS_ASSERT_EQUALS(output->y(3)[99], in1->y(3)[99]);
+    TS_ASSERT_EQUALS(output->e(7)[700], in1->e(7)[700]);
+    TS_ASSERT_EQUALS(output->y(19)[55], in2->y(9)[55]);
+    TS_ASSERT_EQUALS(output->e(10)[321], in2->e(0)[321]);
+    TS_ASSERT_EQUALS(output->y(34)[55], in2->y(9)[55]);
+    TS_ASSERT_EQUALS(output->e(25)[321], in2->e(0)[321]);
     // There will be a spectra number clash here so all spectra numbers
     // should be reset
     TS_ASSERT_EQUALS(output->getAxis(1)->spectraNo(5), 5);

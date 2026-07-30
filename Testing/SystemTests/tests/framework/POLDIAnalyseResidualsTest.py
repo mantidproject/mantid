@@ -42,8 +42,8 @@ class POLDIAnalyseResidualsTest(systemtesting.MantidSystemTest):
         for dataFile in filenames:
             workspaceNameTemplate = "Comparison_%s" % (dataFile)
 
-            referenceData = mtd["%s_fortran_residuals" % (dataFile)].dataY(0)
-            calculatedData = mtd["%sResiduals" % (dataFile)].dataY(0)
+            referenceData = mtd["%s_fortran_residuals" % (dataFile)].y(0)
+            calculatedData = mtd["%sResiduals" % (dataFile)].y(0)
 
             self.assertEqual(
                 calculatedData.shape[0],
@@ -77,7 +77,7 @@ class POLDIAnalyseResidualsTest(systemtesting.MantidSystemTest):
             intercept = fitResult.cell(0, 1)
             self.assertDelta(intercept, 0.0, 1e-3, "Intercept deviates too far from 0 %s (is: %d)" % (dataFile, intercept))
 
-            residuals = mtd[fitNameTemplate + "_Workspace"].dataY(2)
+            residuals = mtd[fitNameTemplate + "_Workspace"].y(2)
             maxAbsoluteResidual = np.max(np.abs(residuals))
             self.assertLessThan(
                 maxAbsoluteResidual, 1.0, "Maximum absolute residual is too large for %s (is: %d)" % (dataFile, maxAbsoluteResidual)

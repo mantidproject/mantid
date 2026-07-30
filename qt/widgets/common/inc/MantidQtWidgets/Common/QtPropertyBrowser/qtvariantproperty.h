@@ -282,7 +282,7 @@ public:
   QMap<int, QtAbstractPropertyManager *> m_typeToPropertyManager;
   QMap<int, QMap<QString, int>> m_typeToAttributeToAttributeType;
 
-  QMap<const QtProperty *, QPair<QtVariantProperty *, int>> m_propertyToType;
+  QMap<const QtProperty *, std::pair<QtVariantProperty *, int>> m_propertyToType;
 
   QMap<int, int> m_typeToValueType;
 

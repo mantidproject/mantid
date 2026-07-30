@@ -92,8 +92,8 @@ public:
     int jj = 0;
     for (int i = 0; i < 2; ++i) {
       for (jj = 0; jj < 4; ++jj)
-        testWorkspace->dataX(jj)[i] = 1.0 * i;
-      testWorkspace->dataY(jj)[i] = 2.0 * i;
+        testWorkspace->mutableX(jj)[i] = 1.0 * i;
+      testWorkspace->mutableY(jj)[i] = 2.0 * i;
     }
 
     return testWorkspace;

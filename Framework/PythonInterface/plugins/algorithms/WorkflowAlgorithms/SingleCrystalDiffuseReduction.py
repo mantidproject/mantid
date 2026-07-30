@@ -263,7 +263,9 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
 
         if _masking:
             LoadMask(
-                Instrument=mtd["__sa"].getInstrument().getName(), InputFile=self.getProperty("MaskFile").value, OutputWorkspace="__mask"
+                Instrument=mtd["__sa"].getInstrumentName(),
+                InputFile=self.getProperty("MaskFile").value,
+                OutputWorkspace="__mask",
             )
             MaskDetectors(Workspace="__sa", MaskedWorkspace="__mask")
             DeleteWorkspace("__mask")
@@ -281,8 +283,8 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
             logger.notice("Using momentum range {} to {} A^-1".format(self.XMin, self.XMax))
             CropWorkspace(InputWorkspace="__flux", OutputWorkspace="__flux", XMin=self.XMin, XMax=self.XMax)
             for spectrumNumber in range(mtd["__flux"].getNumberHistograms()):
-                Y = mtd["__flux"].readY(spectrumNumber)
-                mtd["__flux"].setY(spectrumNumber, (Y - Y.min()) / (Y.max() - Y.min()))
+                Y = mtd["__flux"].y(spectrumNumber)
+                mtd["__flux"].setSharedY(spectrumNumber, (Y - Y.min()) / (Y.max() - Y.min()))
 
         MinValues = [-self.XMax * 2] * 3
         MaxValues = [self.XMax * 2] * 3

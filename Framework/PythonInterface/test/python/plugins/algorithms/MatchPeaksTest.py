@@ -203,7 +203,7 @@ class MatchPeaksTest(unittest.TestCase):
         shifted = AnalysisDataService.retrieve("output")
         fit_table = FindEPP(shifted)
         self.assertEqual(35, shifted.yIndexOfX(fit_table.row(0)["PeakCentre"]))
-        self.assertEqual(35, np.argmax(shifted.readY(2)))
+        self.assertEqual(35, np.argmax(shifted.y(2)))
         self._workspace_properties(shifted)
         DeleteWorkspace(shifted)
         DeleteWorkspace(fit_table)
@@ -234,9 +234,9 @@ class MatchPeaksTest(unittest.TestCase):
         masked = AnalysisDataService.retrieve("output")
         for i in range(4):
             for k in range(3):
-                self.assertEqual(0.0, masked.readY(i)[k], "Mask spectrum {0} bin {1} failed".format(i, k))
+                self.assertEqual(0.0, masked.y(i)[k], "Mask spectrum {0} bin {1} failed".format(i, k))
             for k in range(65, 70):
-                self.assertEqual(0.0, masked.readY(i)[k], "Mask spectrum {0} bin {1} failed".format(i, k))
+                self.assertEqual(0.0, masked.y(i)[k], "Mask spectrum {0} bin {1} failed".format(i, k))
         DeleteWorkspace(masked)
 
     def testNoMasking(self):
@@ -246,7 +246,7 @@ class MatchPeaksTest(unittest.TestCase):
         alg_test = run_algorithm("MatchPeaks", **self._args)
         self.assertTrue(alg_test.isExecuted())
         not_masked = AnalysisDataService.retrieve("output")
-        self.assertNotEqual(0, not_masked.readY(0)[0])
+        self.assertNotEqual(0, not_masked.y(0)[0])
         DeleteWorkspace(not_masked)
 
     def testMatchInput2(self):
@@ -267,7 +267,7 @@ class MatchPeaksTest(unittest.TestCase):
         bin_range_table = AnalysisDataService.retrieve("bin_range")
         fit_table = FindEPP(shifted)
         self.assertEqual(42, shifted.yIndexOfX(fit_table.row(0)["PeakCentre"]))
-        self.assertEqual(42, np.argmax(shifted.readY(2)))
+        self.assertEqual(42, np.argmax(shifted.y(2)))
         # Bin range
         self.assertEqual(10, bin_range_table.row(0)["MinBin"])
         self.assertEqual(70, bin_range_table.row(0)["MaxBin"])
@@ -293,7 +293,7 @@ class MatchPeaksTest(unittest.TestCase):
         bin_range_table = AnalysisDataService.retrieve("bin_range")
         fit_table = FindEPP(shifted)
         self.assertEqual(32 - 7, shifted.yIndexOfX(fit_table.row(0)["PeakCentre"]))
-        self.assertEqual(40 - 7, np.argmax(shifted.readY(2)))
+        self.assertEqual(40 - 7, np.argmax(shifted.y(2)))
         # Bin range
         self.assertEqual(0, bin_range_table.row(0)["MinBin"])
         self.assertEqual(62, bin_range_table.row(0)["MaxBin"])
@@ -317,7 +317,7 @@ class MatchPeaksTest(unittest.TestCase):
         bin_range_table = AnalysisDataService.retrieve("bin_range")
         fit_table = FindEPP(shifted)
         self.assertEqual(32 + 17, shifted.yIndexOfX(fit_table.row(0)["PeakCentre"]))
-        self.assertEqual(40 + 17, np.argmax(shifted.readY(2)))
+        self.assertEqual(40 + 17, np.argmax(shifted.y(2)))
         # Bin range
         self.assertEqual(17, bin_range_table.row(0)["MinBin"])
         self.assertEqual(70, bin_range_table.row(0)["MaxBin"])

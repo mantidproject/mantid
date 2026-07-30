@@ -217,7 +217,7 @@ private:
       for (auto &tof : xdata) {
         evlist.addEventQuickly(TofEvent(tof));
       }
-      evlist.setX(xdata.cowData()); // set the bins for the associated histogram
+      evlist.setSharedX(xdata.cowData()); // set the bins for the associated histogram
     }
     return testWS;
   }

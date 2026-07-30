@@ -784,7 +784,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         """
         self._indirect_elastic = True
         self._q_values = workspace.getAxis(1).extractValues()
-        instrument_name = workspace.getInstrument().getName()
+        instrument_name = workspace.getInstrumentName()
         self._isis_instrument = instrument_name == "IRIS" or instrument_name == "OSIRIS"
 
         # ---------- Load Elastic Instrument Definition File ----------
@@ -833,7 +833,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         logger.information("Waves for the dummy workspace: " + str(waves))
         nhist = workspace.getNumberHistograms()
         for idx in range(nhist):
-            workspace.setX(idx, waves)
+            workspace.setSharedX(idx, waves)
 
         if self._isis_instrument:
             workspace.replaceAxis(1, SpectraAxis.create(workspace))
@@ -880,7 +880,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         :param workspace:   The workspace to crop.
         :return:            The cropped workspace.
         """
-        x = workspace.dataX(0)
+        x = workspace.x(0)
         xmin = x[0]
         xmax = x[1]
         crop_alg = self.createChildAlgorithm("CropWorkspace", enableLogging=False)

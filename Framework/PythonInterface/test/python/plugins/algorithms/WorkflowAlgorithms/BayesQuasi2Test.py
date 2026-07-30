@@ -208,7 +208,7 @@ class BayesQuasi2Test(unittest.TestCase):
         self.assertEqual(mock_method.call_count, 2)
 
         def get_ws(spec):
-            return {"x": self._sample_ws.readX(spec), "y": self._sample_ws.readY(spec), "e": self._sample_ws.readE(spec)}
+            return {"x": self._sample_ws.x(spec), "y": self._sample_ws.y(spec), "e": self._sample_ws.e(spec)}
 
         sample = get_ws(0)
         self.assert_mock_called_with(

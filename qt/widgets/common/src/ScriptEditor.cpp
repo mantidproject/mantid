@@ -327,7 +327,7 @@ void ScriptEditor::wheelEvent(QWheelEvent *e) {
  *  @param keyCombination :: QString of the key combination e.g. "Ctrl+/".
  */
 void ScriptEditor::clearKeyBinding(const QString &keyCombination) {
-  int keyIdentifier = QKeySequence(keyCombination)[0];
+  int keyIdentifier = QKeySequence(keyCombination)[0].toCombined();
   if (QsciCommand::validKey(keyIdentifier)) {
     QsciCommand *cmd = standardCommands()->boundTo(keyIdentifier);
     if (cmd) { /// if key identifier bound to a command

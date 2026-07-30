@@ -255,7 +255,7 @@ class ISISLoadFilesMER(systemtesting.MantidSystemTest):
         ei_ws = GetAllEi(mon_ws, 69634, 69638, IgnoreSecondMonitor=False)
         self.assertTrue(isinstance(ei_ws, Workspace))
 
-        en_peaks = ei_ws.readX(0)
+        en_peaks = ei_ws.x(0)
         self.assertAlmostEqual(len(en_peaks), 1)
         self.assertAlmostEqual(en_peaks[0], 108.94, 2)
 

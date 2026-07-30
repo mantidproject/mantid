@@ -25,7 +25,7 @@ static std::unordered_map<std::string, GroupingMethod> GROUPING_METHODS = {{"Ind
 DetectorGroupingOptions::DetectorGroupingOptions(QWidget *parent) : QWidget(parent) {
   m_uiForm.setupUi(parent);
 
-  connect(m_uiForm.cbGroupingOptions, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+  connect(m_uiForm.cbGroupingOptions, qOverload<int>(&QComboBox::currentIndexChanged),
           [=](int index) { this->handleGroupingMethodChanged(m_uiForm.cbGroupingOptions->itemText(index)); });
   connect(m_uiForm.pbSaveCustomGrouping, &QPushButton::clicked, this, &DetectorGroupingOptions::emitSaveCustomGrouping);
   QRegularExpression re("([0-9]+[-:+]?[0-9]*([+]?[0-9]*)*,[ ]?)*[0-9]+[-:+]?[0-9]*([+]?[0-9]*)*");

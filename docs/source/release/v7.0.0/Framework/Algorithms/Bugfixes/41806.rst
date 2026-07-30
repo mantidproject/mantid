@@ -1,0 +1,1 @@
+- In :ref:`algm-FitPeaks`, the ``PeakParameterValueTable`` input option now reads and applies row-per-spectra parameter starting values. Previously this functionality was declared but was not applied.

@@ -192,8 +192,8 @@ void EQSANSDarkCurrentSubtraction2::exec() {
     g_log.error() << "Incompatible number of pixels between sample run and "
                      "dark current\n";
   }
-  const auto nBins = static_cast<int>(inputWS->readY(0).size());
-  const auto xLength = static_cast<int>(inputWS->readX(0).size());
+  const auto nBins = static_cast<int>(inputWS->y(0).size());
+  const auto xLength = static_cast<int>(inputWS->x(0).size());
   if (xLength != nBins + 1) {
     g_log.error() << "The input workspaces are expected to be histograms\n";
   }
@@ -206,9 +206,9 @@ void EQSANSDarkCurrentSubtraction2::exec() {
     if (spectrumInfo.isMasked(i))
       continue;
 
-    const MantidVec &YDarkValues = scaledDarkWS->readY(i);
-    const MantidVec &YDarkErrors = scaledDarkWS->readE(i);
-    const MantidVec &XValues = inputWS->readX(i);
+    Mantid::HistogramData::HistogramY const &YDarkValues = scaledDarkWS->y(i);
+    Mantid::HistogramData::HistogramE const &YDarkErrors = scaledDarkWS->e(i);
+    Mantid::HistogramData::HistogramX const &XValues = inputWS->x(i);
     MantidVec &YValues = inputWS->dataY(i);
     MantidVec &YErrors = inputWS->dataE(i);
     for (int j = 0; j < nBins; j++) {

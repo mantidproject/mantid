@@ -74,13 +74,13 @@ class DgsReductionScripter(BaseReductionScripter):
 
         filenames = self.filenameParser(data_list)
         if len(filenames) == 1:
-            script += "OutputFilename=os.path.join(OutputDirectory,DGS_output_data[0].getInstrument().getName()"
+            script += "OutputFilename=os.path.join(OutputDirectory,DGS_output_data[0].getInstrumentName()"
             script += "+str(DGS_output_data[0].getRunNumber())+'.nxs')\n"
             script += "SaveNexus(DGS_output_data[0],OutputFilename)\n"
         else:
             script += "for i in range(" + str(len(filenames)) + "):\n"
             script += DgsReductionScripter.WIDTH
-            script += "OutputFilename=os.path.join(OutputDirectory,DGS_output_data[0][i].getInstrument().getName()"
+            script += "OutputFilename=os.path.join(OutputDirectory,DGS_output_data[0][i].getInstrumentName()"
             script += "+str(DGS_output_data[0][i].getRunNumber())+'.nxs')\n"
             script += DgsReductionScripter.WIDTH + "SaveNexus(DGS_output_data[0][i],OutputFilename)\n"
 
@@ -169,7 +169,7 @@ class DgsReductionScripter(BaseReductionScripter):
                 out_dir_line = 'OutputDirectory="%s"\n' % output_dir
             script += out_dir_line
 
-            script += "OutputFilename=os.path.join(OutputDirectory,DGS_output_data[0].getInstrument().getName()"
+            script += "OutputFilename=os.path.join(OutputDirectory,DGS_output_data[0].getInstrumentName()"
             script += "+str(DGS_output_data[0].getRunNumber())+'.nxs')\n"
             script += "SaveNexus(DGS_output_data[0],OutputFilename)\n"
 

@@ -13,7 +13,7 @@ cxx_compiler_version:        # [unix]
   - '18.*'                   # [osx]
   - '13.*'                   # [linux]
 llvm_openmp:                 # [osx]
-  - '18.*'                   # [osx]
+  - '>=19.1.7'               # [osx]
 c_stdlib:                    # [linux]
   - sysroot                  # [linux]
 c_stdlib_version:            # [linux]
@@ -24,8 +24,7 @@ python:
 
 # Aim to follow conda-forge
 libboost:
-  - '1.88.*'  # [win or linux]
-  - '1.86.*'  # [osx]
+  - '1.88.*'
 
 cmake:
   - '>=4.2,<5'
@@ -35,8 +34,7 @@ doxygen:
   - '1.9.*'
 
 eigen:
-  - '5.*'      # [linux]
-  - '3.4.*'    # [win or osx]
+  - '5.*'
 
 # Not a primary dependency, but we pin it to avoid 2.18, which breaks button icons on Linux.
 fontconfig:
@@ -48,8 +46,6 @@ hdf4:
 hdf5: # this is to move to libcurl>=8.4
   - '>1.14.0,<1.15'
 
-gdk_pixbuf:
-  - '==2.42.12 hed59a49_0' # [win]
 
 graphviz:
   - '>=2.47.0'
@@ -96,7 +92,7 @@ occt:
 
 # Fix the version to avoid updates being pulled in automatically, which might change the Reflectometry ORSO file content or layout and cause tests to fail.
 orsopy:
-  - '==1.2.1'
+  - '==1.2.3'
 
 poco:
   - '>=1.14'
@@ -118,16 +114,10 @@ scipy:
   - '>=1.16.0,<1.17'
 
 pip:
-  - '>=21.0.1,!=26.1.*'
+  - '>=21.0.1'
 
 pystog:
   - '>=0.6.3'
-
-pyqt:
-  - '>=5.15,<6'
-
-pyqt5_sip:
-  - '<12.13'
 
 pyqt6:
   - '>=6.11,<7'
@@ -139,13 +129,13 @@ pyqt6_sip:
 pyvista:
   - '>=0.46'
 
+pyvistaqt:
+  - ">=0.11.3"
+
 pyyaml:
   - '>=5.4.1'
 
 # Pins qt to a specific version to avoid gui rendering problems in certain versions
-qt_main:
-  - '5.15.*'
-
 qt6_main:
   - '6.11.*'
 
@@ -153,11 +143,8 @@ qt6_main:
 qtconsole:
   - '>5.5.0'
 
-# On Qt5 (win/osx) this is the last version built for Qt5 and compatible with the rest of our pins.
-# Linux builds against Qt6 and uses the newer qscintilla2.
 qscintilla2:
-  - '>=2.14.1'        # [linux]
-  - '==2.14.1 *_0'    # [win or osx]
+  - '>=2.14.1'
 
 # 2.4.2 fails workbench.test_mainwindow.test_mainwindow which uses isinstance()
 qtpy:
@@ -169,8 +156,7 @@ quickbayes:
   - '==1.0.2'
 
 tbb:
-  - '>=2022.3'   # [linux]
-  - '2021.*'     # [win or osx]
+  - '>=2022.3'
 
 toml:
   - '>=0.10.2'

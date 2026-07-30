@@ -65,10 +65,10 @@ class QuickBayesTemplate(PythonAlgorithm):
 
         # Validate fitting range within data range
         ws = self.getProperty("SampleWorkspace").value
-        data_min = ws.readX(0)[0]
+        data_min = ws.x(0)[0]
         if start_x < data_min:
             issues["EMin"] = "EMin must be more than the minimum x range of the data."
-        data_max = ws.readX(0)[-1]
+        data_max = ws.x(0)[-1]
         if end_x > data_max:
             issues["EMax"] = "EMax must be less than the maximum x range of the data"
 
@@ -160,7 +160,7 @@ class QuickBayesTemplate(PythonAlgorithm):
         """
         res_list = []
         for j in range(N):
-            res_list.append({"x": res_ws.readX(0), "y": res_ws.readY(0)})
+            res_list.append({"x": res_ws.x(0), "y": res_ws.y(0)})
         return res_list
 
     def unique_res(self, res_ws, N):
@@ -172,7 +172,7 @@ class QuickBayesTemplate(PythonAlgorithm):
         """
         res_list = []
         for j in range(N):
-            res_list.append({"x": res_ws.readX(j), "y": res_ws.readY(j)})
+            res_list.append({"x": res_ws.x(j), "y": res_ws.y(j)})
         return res_list
 
     def PyExec(self):

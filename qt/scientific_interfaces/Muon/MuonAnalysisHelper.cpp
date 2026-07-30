@@ -278,7 +278,7 @@ const char *WidgetAutoSaver::changedSignal(QWidget *widget) {
  * @param enabled :: Whether auto-saving should be enabled or disabled
  */
 void WidgetAutoSaver::setAutoSaveEnabled(bool enabled) {
-  foreach (QWidget *w, m_registeredWidgets) {
+  for (QWidget *w : m_registeredWidgets) {
     setAutoSaveEnabled(w, enabled);
   }
 }
@@ -353,7 +353,7 @@ void WidgetAutoSaver::loadWidgetValue(QWidget *widget) {
  * Load the auto-saved (or default) value of all the registered widgets.
  */
 void WidgetAutoSaver::loadWidgetValues() {
-  foreach (QWidget *w, m_registeredWidgets) {
+  for (QWidget *w : m_registeredWidgets) {
     loadWidgetValue(w);
   }
 }

@@ -21,7 +21,7 @@ class LoadSANSMLZTest(unittest.TestCase):
 
         self.assertTrue(alg_test.isExecuted())
         ws = AnalysisDataService.retrieve(output_ws_name)
-        self.assertEqual("SANS-1_MLZ", ws.getInstrument().getName())
+        self.assertEqual("SANS-1_MLZ", ws.getInstrumentName())
         run_algorithm("DeleteWorkspace", Workspace=output_ws_name)
 
     def test_VerifyValues001(self):
@@ -35,8 +35,8 @@ class LoadSANSMLZTest(unittest.TestCase):
         self.assertEqual(16386, ws.getNumberHistograms())
         self.assertEqual(2, ws.getNumDims())
         # data array
-        self.assertEqual(1109, ws.readY(8502))
-        self.assertEqual(1160, ws.readY(8629))
+        self.assertEqual(1109, ws.y(8502))
+        self.assertEqual(1160, ws.y(8629))
         # sample logs
         run = ws.getRun()
 
@@ -91,12 +91,12 @@ class LoadSANSMLZTest(unittest.TestCase):
 
         # Verify some values
         ws = AnalysisDataService.retrieve(output_ws_name)
-        self.assertEqual("SANS-1_MLZ", ws.getInstrument().getName())
+        self.assertEqual("SANS-1_MLZ", ws.getInstrumentName())
         # dimensions
         self.assertEqual(16384, ws.getNumberHistograms())
         # data array
-        self.assertEqual(1109, ws.readY(8502))
-        self.assertEqual(1160, ws.readY(8629))
+        self.assertEqual(1109, ws.y(8502))
+        self.assertEqual(1160, ws.y(8629))
 
         run_algorithm("DeleteWorkspace", Workspace=output_ws_name)
 
@@ -110,7 +110,7 @@ class LoadSANSMLZTest(unittest.TestCase):
         alg_test = run_algorithm("LoadSANS1MLZ", Filename=self.filename_incomplete, Wavelength=4.6, OutputWorkspace=output_ws_name)
 
         ws = AnalysisDataService.retrieve(output_ws_name)
-        self.assertEqual("SANS-1_MLZ", ws.getInstrument().getName())
+        self.assertEqual("SANS-1_MLZ", ws.getInstrumentName())
 
         self.assertTrue(alg_test.isExecuted())
 

@@ -37,9 +37,9 @@ class SofQWMomentsTest(unittest.TestCase):
         output_workspace = SofQWMoments(InputWorkspace=input_workspace)
 
         expected_workspace = Load("iris26176_graphite002_sqw_moments")
-        self.assertListEqual(output_workspace.dataX(0).tolist(), expected_workspace.dataX(0).tolist())
-        self.assertListEqual(output_workspace.dataY(0).tolist(), expected_workspace.dataY(0).tolist())
-        self.assertListEqual(output_workspace.dataE(0).tolist(), expected_workspace.dataE(0).tolist())
+        self.assertListEqual(output_workspace.x(0).tolist(), expected_workspace.x(0).tolist())
+        self.assertListEqual(output_workspace.y(0).tolist(), expected_workspace.y(0).tolist())
+        self.assertListEqual(output_workspace.e(0).tolist(), expected_workspace.e(0).tolist())
         self.assertTrue(CompareWorkspaces(expected_workspace, output_workspace, 1e-8)[0])
 
 

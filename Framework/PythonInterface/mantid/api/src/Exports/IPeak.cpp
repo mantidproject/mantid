@@ -59,7 +59,7 @@ void export_IPeak() {
   // return_value_policy for read-only numpy array
   using return_copy_to_numpy = return_value_policy<Policies::MatrixToNumpy>;
 
-  register_ptr_to_python<IPeak *>();
+  register_ptr_to_python<std::shared_ptr<IPeak>>();
 
   class_<IPeak, boost::noncopyable>("IPeak", no_init)
       .def("getRunNumber", &IPeak::getRunNumber, arg("self"), "Return the run number this peak was measured at")

@@ -130,19 +130,19 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
 
         self.declareProperty(name="AlignTubes", defaultValue=False, doc="Align the tubes vertically and horizontally according to IPF.")
 
-    def _generate_mask(self, n_pix, instrument):
+    def _generate_mask(self, n_pix, component_info):
         """
         Generates the DetectorList input for MaskDetectors
         Masks the bottom and top n_pix pixels in each tube, for D2B only
         @param n_pix : Number of pixels to mask from top and bottom of each tube
-        @param instrument : Instrument
+        @param component_info : ComponentInfo of the workspace whose detectors are to be masked
         @return the DetectorList string
         """
         mask = ""
-        det = instrument.getComponentByName("detectors")
-        tube = instrument.getComponentByName("tube_1")
-        n_tubes = det.nelements()
-        n_pixels = tube.nelements()
+        det_index = component_info.indexOfAny("detectors")
+        tube_index = component_info.indexOfAny("tube_1")
+        n_tubes = len(component_info.children(det_index))
+        n_pixels = len(component_info.children(tube_index))
         for tube in range(n_tubes):
             start_bottom = tube * n_pixels + 1
             end_bottom = start_bottom + n_pix - 1
@@ -237,7 +237,7 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
         input_group = GroupWorkspaces(InputWorkspaces=input_workspace)
 
         instrument = input_group[0].getInstrument()
-        instrument_name = instrument.getName()
+        instrument_name = input_group[0].getInstrumentName()
         self._validate_instrument(instrument_name)
 
         self._progress.report("Normalising to monitor")

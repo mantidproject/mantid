@@ -379,10 +379,10 @@ public:
 
   void test_setPoints_legacy_self_assignment() {
     Histogram h(Points(0));
-    auto &x = h.readX();
+    auto &x = h.x();
     auto old_address = &x;
     h.setPoints(x);
-    TS_ASSERT_EQUALS(&h.readX(), old_address);
+    TS_ASSERT_EQUALS(&h.x(), old_address);
   }
 
   void test_setPoints_self_assignment_with_size_mismatch() {
@@ -525,10 +525,10 @@ public:
 
   void test_setBinEdges_legacy_self_assignment() {
     Histogram h(BinEdges(0));
-    auto &x = h.readX();
+    auto &x = h.x();
     auto old_address = &x;
     h.setBinEdges(x);
-    TS_ASSERT_EQUALS(&h.readX(), old_address);
+    TS_ASSERT_EQUALS(&h.x(), old_address);
   }
 
   void test_setBinEdges_self_assignment_with_size_mismatch() {
@@ -583,10 +583,10 @@ public:
   void test_setCounts_legacy_self_assignment() {
     Histogram h(Points(0));
     h.setCounts(0);
-    auto &y = h.readY();
+    auto &y = h.y();
     auto old_address = &y;
-    h.setPoints(y);
-    TS_ASSERT_EQUALS(&h.readY(), old_address);
+    h.setCounts(y);
+    TS_ASSERT_EQUALS(&h.y(), old_address);
   }
 
   void test_setFrequencies_size_mismatch() {
@@ -623,10 +623,10 @@ public:
   void test_setFrequencies_legacy_self_assignment() {
     Histogram h(Points(0));
     h.setFrequencies(0);
-    auto &y = h.readY();
+    auto &y = h.y();
     auto old_address = &y;
     h.setFrequencies(y);
-    TS_ASSERT_EQUALS(&h.readY(), old_address);
+    TS_ASSERT_EQUALS(&h.y(), old_address);
   }
 
   void test_setCountVariances() {
@@ -765,16 +765,46 @@ public:
   }
 
   void test_setSharedX_size_mismatch() {
-    auto data1 = Mantid::Kernel::make_cow<HistogramX>(0);
+    Histogram hist{BinEdges{1.0, 2.0, 3.0}, Counts{4.0, 5.0}};
     auto tmp = {1.0, 2.0};
     auto data2 = Mantid::Kernel::make_cow<HistogramX>(tmp);
-    Histogram hist{BinEdges(data1)};
     TS_ASSERT_THROWS(hist.setSharedX(data2), const std::logic_error &);
+  }
+
+  void test_setSharedX_size_mismatch_with_dx() {
+    Histogram hist{BinEdges{1.0, 2.0, 3.0}};
+    hist.setPointStandardDeviations(PointStandardDeviations{0.1, 0.2});
+    auto tmp = {1.0, 2.0};
+    auto data2 = Mantid::Kernel::make_cow<HistogramX>(tmp);
+    TS_ASSERT_THROWS(hist.setSharedX(data2), const std::logic_error &);
+  }
+
+  void test_setSharedX_size_change_without_y_data() {
+    // With no Y or Dx data there is no invariant to break, so the X data may
+    // change size, e.g., when initializing a workspace or rebinning events.
+    Histogram hist(Histogram::XMode::BinEdges, Histogram::YMode::Counts);
+    auto tmp = {1.0, 2.0, 3.0};
+    auto data = Mantid::Kernel::make_cow<HistogramX>(tmp);
+    TS_ASSERT_THROWS_NOTHING(hist.setSharedX(data));
+    TS_ASSERT_EQUALS(hist.sharedX(), data);
+    TS_ASSERT_THROWS_NOTHING(hist.setCounts(Counts{4.0, 5.0}));
+  }
+
+  void test_setSharedX_size_change_with_empty_y_data() {
+    // A histogram holding zero data points is not yet constrained either;
+    // this is the state of the spectra during Workspace2D::init().
+    Histogram hist(Histogram::XMode::BinEdges, Histogram::YMode::Counts);
+    hist.setCounts(0);
+    auto tmp = {1.0, 2.0, 3.0};
+    auto data = Mantid::Kernel::make_cow<HistogramX>(tmp);
+    TS_ASSERT_THROWS_NOTHING(hist.setSharedX(data));
+    TS_ASSERT_EQUALS(hist.sharedX(), data);
+    TS_ASSERT_THROWS_NOTHING(hist.setCounts(Counts{4.0, 5.0}));
   }
 
   void test_setSharedX_catches_misuse() {
     BinEdges edges{1.0, 2.0};
-    Histogram hist(edges);
+    Histogram hist(edges, Counts{4.0});
     auto points = hist.points();
     TS_ASSERT_THROWS(hist.setSharedX(points.cowData()), const std::logic_error &);
   }

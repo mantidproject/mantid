@@ -134,9 +134,9 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
             col_y = num_col * i + 1
             col_e = num_col * i + 2
 
-            data_y = ws.readY(row)
-            data_x = ws.readX(row)
-            data_e = ws.readE(row)
+            data_y = ws.y(row)
+            data_x = ws.x(row)
+            data_e = ws.e(row)
 
             for j in range(row_size):
                 table_ws.setCell(j, col_x, data_x[j])
@@ -147,7 +147,7 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
             if self.hasDx:
                 table_ws.addColumn("double", "DXS" + str(row))
                 col_dx = num_col * i + 3
-                data_dx = ws.readDx(row)
+                data_dx = ws.dx(row)
                 for j in range(row_size):
                     table_ws.setCell(j, col_dx, data_dx[j])
 
@@ -169,8 +169,8 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
             col_e = num_cols * i + 2
 
             for j in range(num_rows):
-                data_y = ws.readY(j)
-                data_e = ws.readE(j)
+                data_y = ws.y(j)
+                data_e = ws.e(j)
 
                 if i == 0:
                     if ws.axes() > 1:
@@ -184,7 +184,7 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
                 table_ws.addColumn("double", "XE" + str(col))
                 col_dx = num_cols * i + 3
                 for j in range(num_rows):
-                    data_dx = ws.readDx(j)
+                    data_dx = ws.dx(j)
                     _set_cell_if_exists(table_ws, j, col_dx, data_dx, col)
 
     def action_copy_cells(self, table):

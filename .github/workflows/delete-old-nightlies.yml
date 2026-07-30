@@ -31,7 +31,7 @@ env:
   ANACONDA_TOKEN_MANTIDORNL: ${{ secrets.ANACONDA_TOKEN_MANTIDORNL || 'unset_token' }}
 
 jobs:
-  releases:
+  github-releases:
     if: ${{ github.repository_owner == 'mantidproject' && (github.event_name != 'workflow_dispatch' || github.event.inputs.target == 'all' || github.event.inputs.target == 'github-releases') }}
     runs-on: ubuntu-latest
     steps:

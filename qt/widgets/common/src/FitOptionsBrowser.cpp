@@ -352,7 +352,7 @@ void FitOptionsBrowser::updateMinimizer() {
 
   // Remove properties of the old minimizer
   auto subProperties = m_minimizerGroup->subProperties();
-  foreach (QtProperty *prop, subProperties) {
+  for (QtProperty *prop : subProperties) {
     if (prop != m_minimizer) {
       m_minimizerGroup->removeSubProperty(prop);
       removeProperty(prop->propertyName());
@@ -388,10 +388,10 @@ void FitOptionsBrowser::switchFitType() {
  * Show normal Fit properties and hide the others.
  */
 void FitOptionsBrowser::displayNormalFitProperties() {
-  foreach (QtProperty *prop, m_simultaneousProperties) {
+  for (QtProperty *prop : m_simultaneousProperties) {
     m_browser->addProperty(prop);
   }
-  foreach (QtProperty *prop, m_sequentialProperties) {
+  for (QtProperty *prop : m_sequentialProperties) {
     m_browser->removeProperty(prop);
   }
   emit changedToSimultaneousFitting();
@@ -502,7 +502,7 @@ QString FitOptionsBrowser::getMinimizer(QtProperty * /*unused*/) const {
 
   auto subProperties = m_minimizerGroup->subProperties();
   if (subProperties.size() > 1) {
-    foreach (const QtProperty *prop, subProperties) {
+    for (const QtProperty *prop : subProperties) {
       if (prop == m_minimizer)
         continue;
       if (prop->propertyManager() == m_stringManager) {
@@ -524,7 +524,7 @@ QString FitOptionsBrowser::getMinimizer(QtProperty * /*unused*/) const {
                                    prop->propertyName().toStdString());
         }
       }
-    } // foreach
+    } // for
   }
   return minimStr;
 }
@@ -802,10 +802,10 @@ bool FitOptionsBrowser::addPropertyToBlacklist(const QString &name) {
  * Show sequential fit (PlotPeakByLogValue) properties and hide the others.
  */
 void FitOptionsBrowser::displaySequentialFitProperties() {
-  foreach (QtProperty *prop, m_sequentialProperties) {
+  for (QtProperty *prop : m_sequentialProperties) {
     m_browser->addProperty(prop);
   }
-  foreach (QtProperty *prop, m_simultaneousProperties) {
+  for (QtProperty *prop : m_simultaneousProperties) {
     m_browser->removeProperty(prop);
   }
   emit changedToSequentialFitting();

@@ -151,10 +151,10 @@ class FitGaussianPeaks(DataProcessorAlgorithm):
         return win_size
 
     def _load_data(self):
-        xvals = self.getProperty("InputWorkspace").value.readX(0).copy()
-        flat_yvals = self.getProperty("InputWorkspace").value.readY(0).copy()
-        baseline = self.getProperty("InputWorkspace").value.readY(1).copy()
-        errors = self.getProperty("InputWorkspace").value.readE(0).copy()
+        xvals = self.getProperty("InputWorkspace").value.x(0).copy()
+        flat_yvals = self.getProperty("InputWorkspace").value.y(0).copy()
+        baseline = self.getProperty("InputWorkspace").value.y(1).copy()
+        errors = self.getProperty("InputWorkspace").value.e(0).copy()
         xvals = xvals[np.isfinite(flat_yvals)]
         flat_yvals = flat_yvals[np.isfinite(flat_yvals)]
 
@@ -358,10 +358,10 @@ class FitGaussianPeaks(DataProcessorAlgorithm):
             StoreInADS=False,
         )
 
-        return fit_result.readY(1).copy(), param
+        return fit_result.y(1).copy(), param
 
     def refit_peaks(self, bad_params):
-        xvals = self.getProperty("InputWorkspace").value.readX(0).copy()
+        xvals = self.getProperty("InputWorkspace").value.x(0).copy()
 
         if not bad_params:
             return np.zeros(len(xvals)), None
@@ -397,7 +397,7 @@ class FitGaussianPeaks(DataProcessorAlgorithm):
             StoreInADS=False,
         )
 
-        return fit_result.readY(1).copy(), param
+        return fit_result.y(1).copy(), param
 
 
 AlgorithmFactory.subscribe(FitGaussianPeaks)

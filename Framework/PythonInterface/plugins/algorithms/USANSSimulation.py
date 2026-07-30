@@ -48,17 +48,17 @@ class USANSSimulation(PythonAlgorithm):
         out_ws = CreateSimulationWorkspace(Instrument="USANS", BinParams="0,50,32000", UnitX="TOF", OutputWorkspace=workspace)
         out_ws.setYUnitLabel("1/cm")
 
-        data_x = out_ws.dataX(0)
+        data_x = out_ws.x(0)
         mon_ws_name = self.getPropertyValue("MonitorWorkspace")
         mon_ws = CreateWorkspace(dataX=data_x, dataY=numpy.zeros(len(data_x) - 1), UnitX="TOF", OutputWorkspace=mon_ws_name)
-        mon_y = mon_ws.dataY(0)
-        mon_e = mon_ws.dataE(0)
+        mon_y = mon_ws.mutableY(0)
+        mon_e = mon_ws.mutableE(0)
 
         # Number of pixels for the main detector
         n_pixels = int(out_ws.getNumberHistograms() / 2)
         # Clean up the workspace
         for j in range(n_pixels):
-            data_y = out_ws.dataY(j)
+            data_y = out_ws.mutableY(j)
             for i in range(len(data_y)):
                 data_y[i] = 0.0
 
@@ -110,9 +110,9 @@ class USANSSimulation(PythonAlgorithm):
                     r = math.sqrt(det_pos.Y() * det_pos.Y() + det_pos.X() * det_pos.X())
                     sigma = 0.01
                     scale = math.exp(-r * r / (2.0 * sigma * sigma))
-                    data_y = out_ws.dataY(j)
+                    data_y = out_ws.mutableY(j)
                     data_y[i] += int(scale * flux)
-                    data_e = out_ws.dataE(j)
+                    data_e = out_ws.mutableE(j)
                     data_e[i] = math.sqrt(data_e[i] * data_e[i] + scale * scale * flux * flux)
 
                 # If we have an empty run, there's no need to fill the main detector
@@ -129,9 +129,9 @@ class USANSSimulation(PythonAlgorithm):
                     sigma = 0.01
                     scale = math.exp(-r * r / (2.0 * sigma * sigma))
 
-                    data_y = out_ws.dataY(j)
+                    data_y = out_ws.mutableY(j)
                     data_y[i] += int(i_q * scale)
-                    data_e = out_ws.dataE(j)
+                    data_e = out_ws.mutableE(j)
                     data_e[i] = math.sqrt(data_e[i] * data_e[i] + i_q * i_q * scale * scale)
 
         self.setProperty("OutputWorkspace", out_ws)

@@ -21,13 +21,13 @@ ContainerSubtractionView::ContainerSubtractionView(QWidget *parent) : QWidget(pa
 
   connect(m_uiForm.dsSample, &DataSelector::dataReady, this, &ContainerSubtractionView::notifySampleDataReady);
   connect(m_uiForm.dsContainer, &DataSelector::dataReady, this, &ContainerSubtractionView::notifyCanDataReady);
-  connect(m_uiForm.spPreviewSpec, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this,
+  connect(m_uiForm.spPreviewSpec, qOverload<int>(&QSpinBox::valueChanged), this,
           &ContainerSubtractionView::notifySpectraIncreaseClicked);
   connect(m_uiForm.ckShiftCan, &QCheckBox::toggled, m_uiForm.spShift, &QDoubleSpinBox::setEnabled);
   connect(m_uiForm.ckScaleCan, &QCheckBox::toggled, m_uiForm.spCanScale, &QDoubleSpinBox::setEnabled);
-  connect(m_uiForm.spCanScale, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this,
+  connect(m_uiForm.spCanScale, qOverload<double>(&QDoubleSpinBox::valueChanged), this,
           &ContainerSubtractionView::notifyUpdateCan);
-  connect(m_uiForm.spShift, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this,
+  connect(m_uiForm.spShift, qOverload<double>(&QDoubleSpinBox::valueChanged), this,
           &ContainerSubtractionView::notifyUpdateCan);
   connect(m_uiForm.pbSave, &QPushButton::clicked, this, &ContainerSubtractionView::notifySaveClicked);
   connect(m_uiForm.pbPlotPreview, &QPushButton::clicked, this, &ContainerSubtractionView::notifyPreviewClicked);
@@ -117,8 +117,8 @@ bool ContainerSubtractionView::requestRebinToSample() {
   const char *text = "Binning on sample and container does not match."
                      "Would you like to rebin the container to match the sample?";
 
-  const int result = QMessageBox::question(this, tr("Rebin container?"), tr(text), QMessageBox::Yes, QMessageBox::No,
-                                           QMessageBox::NoButton);
+  const int result = QMessageBox::question(this, tr("Rebin container?"), tr(text), QMessageBox::Yes | QMessageBox::No,
+                                           QMessageBox::Yes);
 
   return result == QMessageBox::Yes;
 }

@@ -101,7 +101,7 @@ class SANSILLReduction(DataProcessorAlgorithm):
 
     @staticmethod
     def _make_solid_angle_name(ws):
-        return mtd[ws].getInstrument().getName() + "_" + str(round(mtd[ws].getRun().getLogData("L2").value)) + "m_SolidAngle"
+        return mtd[ws].getInstrumentName() + "_" + str(round(mtd[ws].getRun().getLogData("L2").value)) + "m_SolidAngle"
 
     @staticmethod
     def _check_distances_match(ws1, ws2):
@@ -346,7 +346,7 @@ class SANSILLReduction(DataProcessorAlgorithm):
         if normalise_by == "Monitor":
             mon = ws + "_mon"
             ExtractSpectra(InputWorkspace=ws, DetectorList=monID, OutputWorkspace=mon)
-            if mtd[mon].readY(0)[0] == 0:
+            if mtd[mon].y(0)[0] == 0:
                 raise RuntimeError("Normalise to monitor requested, but monitor has 0 counts.")
             else:
                 Divide(LHSWorkspace=ws, RHSWorkspace=mon, OutputWorkspace=ws)
@@ -370,7 +370,7 @@ class SANSILLReduction(DataProcessorAlgorithm):
         Provides vertical grouping pattern and crops to the main detector panel where counts from the beam are measured.
         :param ws: Empty beam workspace.
         """
-        inst_name = mtd[ws].getInstrument().getName()
+        inst_name = mtd[ws].getInstrumentName()
         min_id = 0
         if "D11" in inst_name:
             if "lr" in inst_name:
@@ -490,9 +490,9 @@ class SANSILLReduction(DataProcessorAlgorithm):
             CalculateFlux(InputWorkspace=ws, OutputWorkspace=flux, BeamRadius=radius)
             Scale(InputWorkspace=flux, Factor=att_coeff, OutputWorkspace=flux)
             nspec = mtd[ws].getNumberHistograms()
-            x = mtd[flux].readX(0)
-            y = mtd[flux].readY(0)
-            e = mtd[flux].readE(0)
+            x = mtd[flux].x(0)
+            y = mtd[flux].y(0)
+            e = mtd[flux].e(0)
             CreateWorkspace(
                 DataX=x,
                 DataY=np.tile(y, nspec),
@@ -697,8 +697,8 @@ class SANSILLReduction(DataProcessorAlgorithm):
             self.log().warning("Transmission input workspace is not processed as transmission.")
         if transmission_ws.blocksize() == 1:
             # monochromatic mode, scalar transmission
-            transmission = transmission_ws.readY(0)[0]
-            transmission_err = transmission_ws.readE(0)[0]
+            transmission = transmission_ws.y(0)[0]
+            transmission_err = transmission_ws.e(0)[0]
             ApplyTransmissionCorrection(
                 InputWorkspace=ws,
                 TransmissionValue=transmission,
@@ -714,7 +714,7 @@ class SANSILLReduction(DataProcessorAlgorithm):
             ApplyTransmissionCorrection(
                 InputWorkspace=ws, TransmissionWorkspace=transmission_rebinned, ThetaDependent=theta_dependent, OutputWorkspace=ws
             )
-            mtd[ws].getRun().addProperty("sample.transmission", list(mtd[transmission_rebinned].readY(0)), True)
+            mtd[ws].getRun().addProperty("sample.transmission", list(mtd[transmission_rebinned].y(0)), True)
             DeleteWorkspace(transmission_rebinned)
 
     def _apply_container(self, ws, container_ws):
@@ -872,7 +872,7 @@ class SANSILLReduction(DataProcessorAlgorithm):
         if mtd[ws].blocksize() > 1:
             if mtd[ws].getAxis(0).getUnit().unitID() == "Wavelength":
                 self._mode = "TOF"
-            elif mtd[ws].getInstrument().getName() != "D16":
+            elif mtd[ws].getInstrumentName() != "D16":
                 self._mode = "Kinetic"
 
     def PyExec(self):
@@ -911,7 +911,7 @@ class SANSILLReduction(DataProcessorAlgorithm):
             else:
                 raise RuntimeError("Only the sample can be in kinetic mode, the calibration measurements cannot be.")
 
-        self._instrument = mtd[ws].getInstrument().getName()
+        self._instrument = mtd[ws].getInstrumentName()
         self._normalise(ws)
         if process in ["Beam", "Transmission", "Container", "Sample"]:
             absorber_ws = self.getProperty("AbsorberInputWorkspace").value
@@ -984,7 +984,7 @@ class SANSILLReduction(DataProcessorAlgorithm):
             ConvertToHistogram(InputWorkspace=frame_name, OutputWorkspace=frame_name)
             mtd[frame_name].getAxis(0).setUnit("Wavelength")
             for s in range(n_hist):
-                mtd[frame_name].setX(s, wave_bins)
+                mtd[frame_name].setSharedX(s, wave_bins)
         RenameWorkspace(InputWorkspace=ws, OutputWorkspace=ws[2:])
         return frames
 

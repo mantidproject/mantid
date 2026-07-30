@@ -60,10 +60,10 @@ public:
     Mantid::API::MatrixWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
                                  AnalysisDataService::Instance().retrieve(workspaceName)));
-    TS_ASSERT_DELTA(ws->readY(0)[0], expectedValues[0], 1e-7);
-    TS_ASSERT_DELTA(ws->readY(1)[0], expectedValues[1], 1e-7);
-    TS_ASSERT_DELTA(ws->readY(2)[0], expectedValues[2], 1e-7);
-    TS_ASSERT_DELTA(ws->readY(3)[0], expectedValues[3], 1e-7);
+    TS_ASSERT_DELTA(ws->y(0)[0], expectedValues[0], 1e-7);
+    TS_ASSERT_DELTA(ws->y(1)[0], expectedValues[1], 1e-7);
+    TS_ASSERT_DELTA(ws->y(2)[0], expectedValues[2], 1e-7);
+    TS_ASSERT_DELTA(ws->y(3)[0], expectedValues[3], 1e-7);
   }
 
   void checkAbsorptionCorrectionSample(const std::string inputWS, const std::string outputWS) {
@@ -86,10 +86,10 @@ public:
     TS_ASSERT_THROWS_NOTHING(ass = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
                                  AnalysisDataService::Instance().retrieve(outputWS + "_ass")));
 
-    TS_ASSERT_DELTA(ass->readY(0)[0], absorptionCorrection_ass->readY(0)[0], 1e-7);
-    TS_ASSERT_DELTA(ass->readY(1)[0], absorptionCorrection_ass->readY(1)[0], 1e-7);
-    TS_ASSERT_DELTA(ass->readY(2)[0], absorptionCorrection_ass->readY(2)[0], 1e-7);
-    TS_ASSERT_DELTA(ass->readY(3)[0], absorptionCorrection_ass->readY(3)[0], 1e-7);
+    TS_ASSERT_DELTA(ass->y(0)[0], absorptionCorrection_ass->y(0)[0], 1e-7);
+    TS_ASSERT_DELTA(ass->y(1)[0], absorptionCorrection_ass->y(1)[0], 1e-7);
+    TS_ASSERT_DELTA(ass->y(2)[0], absorptionCorrection_ass->y(2)[0], 1e-7);
+    TS_ASSERT_DELTA(ass->y(3)[0], absorptionCorrection_ass->y(3)[0], 1e-7);
   }
 
   void checkAbsorptionCorrectionContainer(const std::string inputWS, const std::string outputWS) {
@@ -110,10 +110,10 @@ public:
     Mantid::API::MatrixWorkspace_sptr acc;
     TS_ASSERT_THROWS_NOTHING(acc = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
                                  AnalysisDataService::Instance().retrieve(outputWS + "_acc")));
-    TS_ASSERT_DELTA(acc->readY(0)[0], absorptionCorrection_acc->readY(0)[0], 1e-7);
-    TS_ASSERT_DELTA(acc->readY(1)[0], absorptionCorrection_acc->readY(1)[0], 1e-7);
-    TS_ASSERT_DELTA(acc->readY(2)[0], absorptionCorrection_acc->readY(2)[0], 1e-7);
-    TS_ASSERT_DELTA(acc->readY(3)[0], absorptionCorrection_acc->readY(3)[0], 1e-7);
+    TS_ASSERT_DELTA(acc->y(0)[0], absorptionCorrection_acc->y(0)[0], 1e-7);
+    TS_ASSERT_DELTA(acc->y(1)[0], absorptionCorrection_acc->y(1)[0], 1e-7);
+    TS_ASSERT_DELTA(acc->y(2)[0], absorptionCorrection_acc->y(2)[0], 1e-7);
+    TS_ASSERT_DELTA(acc->y(3)[0], absorptionCorrection_acc->y(3)[0], 1e-7);
   }
 
   void test_missing_container() {

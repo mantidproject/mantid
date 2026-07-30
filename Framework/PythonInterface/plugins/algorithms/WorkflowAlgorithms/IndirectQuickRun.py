@@ -291,12 +291,12 @@ class IndirectQuickRun(DataProcessorAlgorithm):
         if exists_in_ads(elf_workspace_name):
             elf_workspace = mtd[elf_workspace_name]
             if isinstance(elf_workspace, MatrixWorkspace):
-                return elf_workspace.dataX(0)
+                return elf_workspace.x(0)
         return None
 
     def _perform_width_fit(self):
         input_workspace_names = mtd[self._output_ws].getNames()
-        x = mtd[input_workspace_names[0]].readX(0)
+        x = mtd[input_workspace_names[0]].x(0)
 
         # Perform the two peak fits on the input workspaces
         result_workspaces, chi_workspaces, run_numbers = self._perform_two_peak_fits(input_workspace_names, x[0], x[len(x) - 1])
@@ -364,9 +364,9 @@ class IndirectQuickRun(DataProcessorAlgorithm):
         y_data = []
         e_data = []
         for index in range(width_workspace.getNumberHistograms()):
-            x = width_workspace.readX(index)
-            y = width_workspace.readY(index)
-            e = width_workspace.readE(index)
+            x = width_workspace.x(index)
+            y = width_workspace.y(index)
+            e = width_workspace.e(index)
             # The slice here is to make the plot versus number less cluttered/messy when using 5 or more digits.
             x_data.append(float(temperatures[index])) if x_axis_is_temperature else x_data.append(float(run_numbers[index][-3:]))
             # The 5th spectrum is taken here as only a single data point is needed for the fit and the first is often

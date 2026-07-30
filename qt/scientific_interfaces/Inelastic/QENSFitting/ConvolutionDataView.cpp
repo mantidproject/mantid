@@ -37,18 +37,31 @@ ConvolutionDataView::ConvolutionDataView(const QStringList &headers, QWidget *pa
 }
 
 void ConvolutionDataView::showAddWorkspaceDialog() {
-  auto dialog = new ConvolutionAddWorkspaceDialog(parentWidget());
-  connect(dialog, &ConvolutionAddWorkspaceDialog::addData, this, &ConvolutionDataView::notifyAddData);
-
   auto tabName = m_presenter->tabName();
+  auto dialog = createAddWorkspaceDialog(
+      InterfaceUtils::getSampleWSSuffixes(tabName), InterfaceUtils::getSampleFBSuffixes(tabName),
+      InterfaceUtils::getResolutionWSSuffixes(tabName), InterfaceUtils::getResolutionFBSuffixes(tabName));
+  connect(dialog, &ConvolutionAddWorkspaceDialog::addData, this, &ConvolutionDataView::notifyAddData);
+}
+
+void ConvolutionDataView::showAddNumericWorkspaceDialog() {
+  auto dialog = createAddWorkspaceDialog({}, {".*"}, {}, {".*"});
+  connect(dialog, &ConvolutionAddWorkspaceDialog::addData, this, &ConvolutionDataView::notifyAddNumericData);
+}
+
+ConvolutionAddWorkspaceDialog *ConvolutionDataView::createAddWorkspaceDialog(
+    const QStringList &sampleWorkspaceSuffixes, const QStringList &sampleFileSuffixes,
+    const QStringList &resolutionWorkspaceSuffixes, const QStringList &resolutionFileSuffixes) const {
+  auto dialog = new ConvolutionAddWorkspaceDialog(parentWidget());
   dialog->setAttribute(Qt::WA_DeleteOnClose);
-  dialog->setWSSuffices(InterfaceUtils::getSampleWSSuffixes(tabName));
-  dialog->setFBSuffices(InterfaceUtils::getSampleFBSuffixes(tabName));
-  dialog->setResolutionWSSuffices(InterfaceUtils::getResolutionWSSuffixes(tabName));
-  dialog->setResolutionFBSuffices(InterfaceUtils::getResolutionFBSuffixes(tabName));
+  dialog->setWSSuffices(sampleWorkspaceSuffixes);
+  dialog->setFBSuffices(sampleFileSuffixes);
+  dialog->setResolutionWSSuffices(resolutionWorkspaceSuffixes);
+  dialog->setResolutionFBSuffices(resolutionFileSuffixes);
   dialog->setLoadProperty("LoadHistory", SettingsHelper::loadHistory());
   dialog->updateSelectedSpectra();
   dialog->show();
+  return dialog;
 }
 
 void ConvolutionDataView::addTableEntry(size_t row, FitDataRow const &newRow) {

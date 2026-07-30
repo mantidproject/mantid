@@ -56,7 +56,7 @@ void GroupingWorkspace::makeDetectorIDToGroupMap(std::map<detid_t, int> &detIDTo
   ngroups = 0;
   for (size_t wi = 0; wi < getNumberHistograms(); ++wi) {
     // Convert the Y value to a group number
-    auto group = this->translateToGroupID(static_cast<int>(this->readY(wi)[0]));
+    auto group = this->translateToGroupID(static_cast<int>(this->y(wi)[0]));
     auto detIDs = this->getDetectorIDs(wi);
     for (auto detID : detIDs) {
       detIDToGroup[detID] = group;

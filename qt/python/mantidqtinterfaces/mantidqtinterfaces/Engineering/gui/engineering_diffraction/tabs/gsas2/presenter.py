@@ -9,7 +9,7 @@ import numpy as np
 
 from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.fitting_ads_observer import FittingADSObserver
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 if TYPE_CHECKING:
     from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2.model import GSAS2Model
@@ -29,16 +29,18 @@ class GSAS2Presenter(object):
         self.focus_run_observer_gsas2 = GenericObserverWithArgPassing(self.view.set_default_gss_files)
         self.prm_filepath_observer_gsas2 = GenericObserverWithArgPassing(self.view.set_default_prm_files)
         self.ads_observer = FittingADSObserver(self.remove_workspace, self.clear_workspaces, self.replace_workspace, self.rename_workspace)
+        self.populate_phase_combo_box()
         if not test:
             self.connect_view_signals()
 
     def connect_view_signals(self) -> None:
         self.view.set_refine_clicked(self.on_refine_clicked)
         self.view.number_output_histograms_combobox.currentTextChanged.connect(self.on_plot_index_changed)
+        self.view.on_phase_combo_update(self.phase_combo_changed)
 
     def on_refine_clicked(self) -> None:
         self.clear_plot()
-        load_params = self.view.get_load_parameters()
+        load_params = self._get_load_parameters()
         project_name = self.view.get_project_name()
         refine_params = self.view.get_refinement_parameters()
         number_output_histograms = self.model.run_model(
@@ -56,7 +58,7 @@ class GSAS2Presenter(object):
                 self.plot_result(new_plot_index)
 
     def get_limits_if_same_load_parameters(self) -> np.ndarray | None:
-        new_load_params = self.view.get_load_parameters()
+        new_load_params = self._get_load_parameters()
         if not new_load_params:
             return None
         if new_load_params != self.latest_load_parameters:
@@ -76,7 +78,7 @@ class GSAS2Presenter(object):
         self.rb_num = rb_num
 
     def save_latest_load_parameters(self) -> None:
-        self.latest_load_parameters = self.view.get_load_parameters()
+        self.latest_load_parameters = self._get_load_parameters()
 
     # ========
     # Plotting
@@ -126,3 +128,18 @@ class GSAS2Presenter(object):
     def replace_workspace(self, name: str, workspace: MatrixWorkspace) -> None:
         if name in self.model.get_all_workspace_names():
             self.model.replace_workspace(name, workspace)
+
+    def _get_load_parameters(self) -> List[List[str]]:
+        phases = self.model.get_phase_files(self.view.get_phase_combo_text(), self.view.get_phase_finder_file())
+        return [
+            self.view.get_instrument_group(),
+            phases,
+            self.view.get_focused_data(),
+        ]
+
+    def populate_phase_combo_box(self) -> None:
+        self.view.set_cif_combo_options(self.model.get_cif_combo_options())
+        self.phase_combo_changed()
+
+    def phase_combo_changed(self) -> None:
+        self.view.set_phase_finder_visible(self.model.phase_is_custom(self.view.get_phase_combo_text()))

@@ -202,7 +202,7 @@ MWPropertiesWidget::MWPropertiesWidget(InputWorkspaceWidget *parent) : DynamicPr
         Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString()).get());
     if (ws) {
       m_workspaceIndex->setRange(0, static_cast<int>(ws->getNumberHistograms()));
-      const Mantid::MantidVec &x = ws->readX(0);
+      auto const &x = ws->x(0);
       if (!x.empty()) {
         m_startX->setText(QString::number(x.front()));
         m_endX->setText(QString::number(x.back()));
@@ -334,7 +334,7 @@ void FitDialog::parseInput() {
     // Cannot set any other properties until Function is set
     return;
   }
-  foreach (QWidget *t, m_tabs) {
+  for (QWidget *t : m_tabs) {
     auto iww = dynamic_cast<InputWorkspaceWidget *>(t);
     if (iww) {
       iww->setProperties();
@@ -408,7 +408,7 @@ void FitDialog::domainTypeChanged() {
 void FitDialog::createInputWorkspaceWidgets() {
   m_form.tabWidget->clear();
   QStringList wsNames;
-  foreach (QWidget *t, m_tabs) {
+  for (QWidget *t : m_tabs) {
     const auto *tab = dynamic_cast<InputWorkspaceWidget *>(t);
     if (tab) {
       wsNames << tab->getWorkspaceName();

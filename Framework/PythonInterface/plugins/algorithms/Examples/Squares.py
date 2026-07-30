@@ -40,9 +40,9 @@ class Squares(PythonAlgorithm):
         prog_reporter = Progress(self, start=0.0, end=1.0, nreports=endrange + 1)  # extra call below when summing
 
         for i in range(1, endrange + 1):
-            wspace.dataX(0)[i - 1] = 1
-            wspace.dataY(0)[i - 1] = i * i
-            wspace.dataE(0)[i - 1] = i
+            wspace.mutableX(0)[i - 1] = 1
+            wspace.mutableY(0)[i - 1] = i * i
+            wspace.mutableE(0)[i - 1] = i
             prog_reporter.report("Setting %dth bin in workspace" % (i - 1))
 
         self.setProperty("OutputWorkspace", wspace)  # Stores the workspace as the given name

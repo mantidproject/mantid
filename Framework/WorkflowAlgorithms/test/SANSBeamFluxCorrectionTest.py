@@ -32,7 +32,7 @@ class SANSBeamFluxCorrectionTest(unittest.TestCase):
         )
 
         ref_value = 0.1 / (49152 * 0.1) / (49152 * 0.1)
-        output_y = output[0].readY(0)
+        output_y = output[0].y(0)
         self.assertAlmostEqual(ref_value, output_y[0], 6)
 
     def test_in_place(self):
@@ -44,7 +44,7 @@ class SANSBeamFluxCorrectionTest(unittest.TestCase):
         )
 
         ref_value = 0.1 / (49152 * 0.1) / (49152 * 0.1)
-        output_y = output[0].readY(0)
+        output_y = output[0].y(0)
         self.assertAlmostEqual(ref_value, output_y[0], 6)
 
 

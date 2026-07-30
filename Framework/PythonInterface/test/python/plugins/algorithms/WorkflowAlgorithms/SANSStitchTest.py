@@ -200,7 +200,7 @@ class SANSStitchTest(unittest.TestCase):
 
         self.assertEqual(out_scale_factor, in_scale_factor)
         self.assertEqual(out_shift_factor, in_shift_factor)
-        y_array = out_ws.readY(0)
+        y_array = out_ws.y(0)
 
         expected_y_array = [1.5] * 9
         np.testing.assert_equal(y_array, expected_y_array)
@@ -269,7 +269,7 @@ class SANSStitchTest(unittest.TestCase):
 
         self.assertTrue(isinstance(out_ws, MatrixWorkspace))
 
-        y_array = out_ws.readY(0)
+        y_array = out_ws.y(0)
 
         expected_y_array = [0.5] * 9
 
@@ -316,9 +316,9 @@ class SANSStitchTest(unittest.TestCase):
         self.assertEqual(out_scale_factor, 1.0)
         self.assertEqual(out_shift_factor, -5.0)
 
-        y_array = out_ws.readY(0)
+        y_array = out_ws.y(0)
 
-        expected_y_array = lab_workspace.readY(0)  # We scale and shift to the back (lab) detectors
+        expected_y_array = lab_workspace.y(0)  # We scale and shift to the back (lab) detectors
 
         np.testing.assert_equal(y_array, expected_y_array)
 
@@ -369,7 +369,7 @@ class SANSStitchTest(unittest.TestCase):
 
         out_ws = alg.getProperty("OutputWorkspace").value
 
-        y_array = out_ws.readY(0)
+        y_array = out_ws.y(0)
 
         expected_y_array = [7497.5, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 7502, 10.0]  # We scale and shift to the back (lab) detectors
 
@@ -413,9 +413,9 @@ class SANSStitchTest(unittest.TestCase):
         alg.execute()
         out_ws = alg.getProperty("OutputWorkspace").value
 
-        y_array = out_ws.readY(0)
+        y_array = out_ws.y(0)
 
-        expected_y_array = lab_workspace.readY(0)  # We scale and shift to the back (lab) detectors
+        expected_y_array = lab_workspace.y(0)  # We scale and shift to the back (lab) detectors
         np.testing.assert_equal(y_array, expected_y_array)
 
     def test_scale_only_without_can(self):
@@ -456,9 +456,9 @@ class SANSStitchTest(unittest.TestCase):
         alg.execute()
         out_ws = alg.getProperty("OutputWorkspace").value
 
-        y_array = out_ws.readY(0)
+        y_array = out_ws.y(0)
 
-        expected_y_array = lab_workspace.readY(0)  # We scale and shift to the back (lab) detectors
+        expected_y_array = lab_workspace.y(0)  # We scale and shift to the back (lab) detectors
 
         np.testing.assert_equal(y_array, expected_y_array)
 
@@ -504,7 +504,7 @@ class SANSStitchTest(unittest.TestCase):
 
         self.assertTrue(isinstance(out_ws, MatrixWorkspace))
 
-        y_array = out_ws.readY(0)
+        y_array = out_ws.y(0)
 
         expected_y_array = [0.5] * 5 + [1.5] * 4
 
@@ -552,7 +552,7 @@ class SANSStitchTest(unittest.TestCase):
 
         self.assertTrue(isinstance(out_ws, MatrixWorkspace))
 
-        y_array = out_ws.readY(0)
+        y_array = out_ws.y(0)
 
         expected_y_array = [0.5] * 2 + [1.0] * 5 + [1.5] * 2
 
@@ -602,7 +602,7 @@ class SANSStitchTest(unittest.TestCase):
 
         self.assertTrue(isinstance(out_ws, MatrixWorkspace))
 
-        y_array = out_ws.readY(0)
+        y_array = out_ws.y(0)
 
         expected_y_array = [0.5] * 9
         np.testing.assert_equal(y_array, expected_y_array)
@@ -651,7 +651,7 @@ class SANSStitchTest(unittest.TestCase):
 
         self.assertTrue(isinstance(out_ws, MatrixWorkspace))
 
-        y_array = out_ws.readY(0)
+        y_array = out_ws.y(0)
 
         expected_y_array = [1.0] + [1.5] * 8
 
@@ -701,7 +701,7 @@ class SANSStitchTest(unittest.TestCase):
 
         self.assertTrue(isinstance(out_ws, MatrixWorkspace))
 
-        y_array = out_ws.readY(0)
+        y_array = out_ws.y(0)
 
         expected_y_array = [0.5] * 5 + [1.5] * 4
 
@@ -766,7 +766,7 @@ class SANSStitchTest(unittest.TestCase):
         expected_entries = (1.0 + 3.0) / (2.0 + 4.0)
         delta = 1e-5
         for index in range(0, 2):
-            for element in out_ws.dataY(index):
+            for element in out_ws.y(index):
                 self.assertTrue(abs(expected_entries - element) < delta)
 
 
@@ -883,7 +883,7 @@ class TestQErrorCorrectionForMergedWorkspaces(unittest.TestCase):
 
         dx_expected_0 = (dx_front[0] * y_front[0] * scale + dx_rear[0] * y_rear[0]) / (y_front[0] * scale + y_rear[0])
         dx_expected_1 = (dx_front[1] * y_front[1] * scale + dx_rear[1] * y_rear[1]) / (y_front[1] * scale + y_rear[1])
-        dx_result = result.readDx(0)
+        dx_result = result.dx(0)
         self.assertEqual(len(dx_result), 2)
         self.assertEqual(dx_result[0], dx_expected_0)
         self.assertEqual(dx_result[1], dx_expected_1)

@@ -182,11 +182,11 @@ class SANSBeamSpreaderTransmission(PythonAlgorithm):
 
         self._apply_transmission(workspace, trans_ws_name)
 
-        trans = trans_ws.dataY(0)[0]
-        error = trans_ws.dataE(0)[0]
+        trans = trans_ws.y(0)[0]
+        error = trans_ws.e(0)[0]
 
         output_str = ""
-        if len(trans_ws.dataY(0)) == 1:
+        if len(trans_ws.y(0)) == 1:
             self.setProperty("MeasuredTransmission", trans)
             self.setProperty("MeasuredError", error)
             output_str = "\n%s   T = %6.2g += %6.2g\n" % (output_str, trans, error)

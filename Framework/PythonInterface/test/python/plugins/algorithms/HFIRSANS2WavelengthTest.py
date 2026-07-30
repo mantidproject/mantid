@@ -21,10 +21,10 @@ class HFIRSANS2WavelengthTest(unittest.TestCase):
         out = HFIRSANS2Wavelength(InputWorkspace="ws")
         self.assertTrue(out)
         self.assertEqual(out.blocksize(), 1)
-        self.assertEqual(out.readX(0)[0], 6.175)
-        self.assertEqual(out.readX(1)[1], 6.825)
-        self.assertEqual(out.readY(0)[0], 24)
-        self.assertAlmostEqual(out.readE(1)[0], 7.071067, 5)
+        self.assertEqual(out.x(0)[0], 6.175)
+        self.assertEqual(out.x(1)[1], 6.825)
+        self.assertEqual(out.y(0)[0], 24)
+        self.assertAlmostEqual(out.e(1)[0], 7.071067, 5)
         self.assertEqual(out.getAxis(0).getUnit().caption(), "Wavelength")
 
 

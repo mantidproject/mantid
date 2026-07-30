@@ -104,9 +104,9 @@ class LoadUtilsTest(unittest.TestCase):
             mantid.mtd.add(name, ws)
             Y_data = Yfunc(X_data, i)
             E_data = Efunc(X_data, i)
-            ws.setY(0, Y_data)
-            ws.setX(0, X_data)
-            ws.setE(0, E_data)
+            ws.setSharedY(0, Y_data)
+            ws.setSharedX(0, X_data)
+            ws.setSharedE(0, E_data)
             workspace_list.append(ws.name())
 
         merged_ws = lutils.create_merged_workspace(workspace_list)
@@ -115,9 +115,9 @@ class LoadUtilsTest(unittest.TestCase):
         self.assertEqual(merged_ws.blocksize(), num_bins)
         # check that data has been copied over correctly into the new merged workspace
         for i in range(0, num_workspaces):
-            self.assertTrue(np.array_equal(merged_ws.readX(i), X_data))
-            self.assertTrue(np.array_equal(merged_ws.readY(i), Yfunc(X_data, i)))
-            self.assertTrue(np.array_equal(merged_ws.readE(i), Efunc(X_data, i)))
+            self.assertTrue(np.array_equal(merged_ws.x(i), X_data))
+            self.assertTrue(np.array_equal(merged_ws.y(i), Yfunc(X_data, i)))
+            self.assertTrue(np.array_equal(merged_ws.e(i), Efunc(X_data, i)))
 
     def test_merge_workspaces_returns_correctly_if_delayed_data_missing(self):
         num_files_per_detector = lutils.num_files_per_detector
@@ -139,9 +139,9 @@ class LoadUtilsTest(unittest.TestCase):
             mantid.mtd.add(name, ws)
             Y_data = Yfunc(X_data, i)
             E_data = Efunc(X_data, i)
-            ws.setY(0, Y_data)
-            ws.setX(0, X_data)
-            ws.setE(0, E_data)
+            ws.setSharedY(0, Y_data)
+            ws.setSharedX(0, X_data)
+            ws.setSharedE(0, E_data)
             input_index = lutils.spectrum_index[name] - 1
             workspace_list[input_index] = name
 
@@ -151,11 +151,11 @@ class LoadUtilsTest(unittest.TestCase):
         for i in range(0, 2):
             name = names[i]
             input_index = lutils.spectrum_index[name] - 1
-            self.assertTrue(np.array_equal(merged_ws.readX(input_index), X_data))
-            self.assertTrue(np.array_equal(merged_ws.readY(input_index), Yfunc(X_data, i)))
-            self.assertTrue(np.array_equal(merged_ws.readE(input_index), Efunc(X_data, i)))
+            self.assertTrue(np.array_equal(merged_ws.x(input_index), X_data))
+            self.assertTrue(np.array_equal(merged_ws.y(input_index), Yfunc(X_data, i)))
+            self.assertTrue(np.array_equal(merged_ws.e(input_index), Efunc(X_data, i)))
         # check that the y data for delayed response is all zeros
-        self.assertTrue(not np.any(merged_ws.readY(lutils.spectrum_index["Delayed"] - 1)))
+        self.assertTrue(not np.any(merged_ws.y(lutils.spectrum_index["Delayed"] - 1)))
 
     def test_flatten_run_data(self):
         test_1 = ["1_det_1", "1_det_2"]
