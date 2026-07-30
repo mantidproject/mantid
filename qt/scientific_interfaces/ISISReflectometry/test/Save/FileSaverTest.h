@@ -57,7 +57,7 @@ public:
     runTestSaveORSOAlgorithmCalledForFileFormat(NamedFormat::ORSONexus);
   }
 
-  void test_save_orso_algorithm_includes_q_resolution_when_additional_columns_are_requested() {
+  void test_save_orso_algorithm_does_not_include_q_resolution_when_only_additional_columns_are_requested() {
     auto mockSaveAlgorithmRunner = std::make_unique<MockSaveAlgorithmRunner>();
     auto mockFileHandler = MockFileHandler();
     auto wsNames = createWorkspaces();
@@ -67,7 +67,7 @@ public:
 
     expectIsValidSaveDirectory(mockFileHandler);
     EXPECT_CALL(*mockSaveAlgorithmRunner, runSaveORSOAlgorithm(_, expectedSavePath("ws_1", NamedFormat::ORSOAscii),
-                                                               true, true, m_model, m_validation))
+                                                               false, true, m_model, m_validation))
         .Times(1);
 
     auto saver = createSaver(std::move(mockSaveAlgorithmRunner), mockFileHandler);
@@ -248,8 +248,7 @@ private:
                                      const NamedFormat format) {
     auto extension = expectedExtension(format);
     auto savePath = expectedSavePath(wsName, format);
-    auto const includeQResolution = m_includeQResolution || m_includeAdditionalColumns;
-    EXPECT_CALL(mockSaveAlgorithmRunner, runSaveORSOAlgorithm(_, savePath, includeQResolution,
+    EXPECT_CALL(mockSaveAlgorithmRunner, runSaveORSOAlgorithm(_, savePath, m_includeQResolution,
                                                               m_includeAdditionalColumns, m_model, m_validation))
         .Times(1);
   }
