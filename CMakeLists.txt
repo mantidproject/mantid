@@ -17,8 +17,6 @@ if(POLICY CMP0177)
   cmake_policy(SET CMP0177 NEW)
 endif()
 
-set(CMAKE_CXX_SCAN_FOR_MODULES 0)
-
 # Add the path to our custom 'find' modules
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/buildconfig/CMake")
 # Send libraries to common place, reference in several places so must be at top level

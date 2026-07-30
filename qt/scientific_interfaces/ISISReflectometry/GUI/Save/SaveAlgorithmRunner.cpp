@@ -8,8 +8,6 @@
 #include "SaveAlgorithmRunner.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidQtWidgets/Common/AlgorithmDialog.h"
-#include "MantidQtWidgets/Common/InterfaceManager.h"
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
