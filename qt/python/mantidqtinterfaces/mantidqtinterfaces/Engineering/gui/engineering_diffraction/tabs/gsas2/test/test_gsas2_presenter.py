@@ -27,7 +27,7 @@ class TestGSAS2Presenter(unittest.TestCase):
 
     @patch(presenter_path + ".view.GSAS2View.get_refinement_parameters")
     @patch(presenter_path + ".view.GSAS2View.get_project_name")
-    @patch(presenter_path + ".view.GSAS2View.get_load_parameters")
+    @patch(presenter_path + ".presenter.GSAS2Presenter._get_load_parameters")
     @patch(presenter_path + ".presenter.GSAS2Presenter.save_latest_load_parameters")
     @patch(presenter_path + ".presenter.GSAS2Presenter.get_limits_if_same_load_parameters")
     @patch(presenter_path + ".presenter.GSAS2Presenter.clear_plot")
@@ -90,23 +90,73 @@ class TestGSAS2Presenter(unittest.TestCase):
         self.view.initial_x_limits = [17000, 51000]
 
         # no new load params
-        self.view.get_load_parameters.return_value = []
+        self._patch_parameters_from_view()
         self.assertEqual(self.presenter.get_limits_if_same_load_parameters(), None)
         # load params different
-        self.view.get_load_parameters.return_value = ["inst_DIFFERENT", "phase", "data"]
+        self._patch_parameters_from_view("inst_DIFFERENT", "phase", "data")
         self.assertEqual(self.presenter.get_limits_if_same_load_parameters(), None)
         # no current limits
         self.view.get_x_limits_from_line_edits.return_value = None
-        self.view.get_load_parameters.return_value = ["inst", "phase", "data"]
+        self._patch_parameters_from_view("inst", "phase", "data")
         self.assertEqual(self.presenter.get_limits_if_same_load_parameters(), None)
         # Success
         self.view.get_x_limits_from_line_edits.return_value = [["18000"], ["50000"]]
-        self.view.get_load_parameters.return_value = ["inst", "phase", "data"]
+        self._patch_parameters_from_view("inst", "phase", "data")
         self.assertEqual(self.presenter.get_limits_if_same_load_parameters(), [[18000.0], [50000.0]])
         # Success with limits reversed
         self.view.get_x_limits_from_line_edits.return_value = [["50000"], ["8000"]]
-        self.view.get_load_parameters.return_value = ["inst", "phase", "data"]
+        self._patch_parameters_from_view("inst", "phase", "data")
         self.assertEqual(self.presenter.get_limits_if_same_load_parameters(), [[8000.0], [50000.0]])
+
+    def _patch_parameters_from_view(self, instr=None, phase=None, data=None):
+        self.view.get_instrument_group.return_value = instr
+        self.model.get_phase_files.return_value = phase
+        self.view.get_focused_data.return_value = data
+
+    # ================
+    # Phase Selection
+    # ================
+
+    def test_get_load_parameters_combines_view_inputs_with_resolved_phase(self):
+        self.view.get_phase_combo_text.return_value = "FE_GAMMA"
+        self.view.get_phase_finder_file.return_value = ["custom.cif"]
+        self.view.get_instrument_group.return_value = ["inst.prm"]
+        self.view.get_focused_data.return_value = ["data.gss"]
+        self.model.get_phase_files.return_value = ["resolved_phase.cif"]
+
+        result = self.presenter._get_load_parameters()
+
+        # The phases are resolved by the model from the combo selection and the finder paths
+        self.model.get_phase_files.assert_called_once_with("FE_GAMMA", ["custom.cif"])
+        self.assertEqual(result, [["inst.prm"], ["resolved_phase.cif"], ["data.gss"]])
+
+    def test_populate_phase_combo_box_sets_options_and_refreshes_visibility(self):
+        self.view.reset_mock()
+        self.model.get_cif_combo_options.return_value = ["AL", "FE_GAMMA", "Custom"]
+
+        with patch.object(self.presenter, "phase_combo_changed") as mock_changed:
+            self.presenter.populate_phase_combo_box()
+
+        self.view.set_cif_combo_options.assert_called_once_with(["AL", "FE_GAMMA", "Custom"])
+        mock_changed.assert_called_once()
+
+    def test_phase_combo_changed_shows_finder_when_custom_selected(self):
+        self.view.get_phase_combo_text.return_value = "Custom"
+        self.model.phase_is_custom.return_value = True
+
+        self.presenter.phase_combo_changed()
+
+        self.model.phase_is_custom.assert_called_with("Custom")
+        self.view.set_phase_finder_visible.assert_called_with(True)
+
+    def test_phase_combo_changed_hides_finder_for_default_phase(self):
+        self.view.get_phase_combo_text.return_value = "FE_GAMMA"
+        self.model.phase_is_custom.return_value = False
+
+        self.presenter.phase_combo_changed()
+
+        self.model.phase_is_custom.assert_called_with("FE_GAMMA")
+        self.view.set_phase_finder_visible.assert_called_with(False)
 
 
 if __name__ == "__main__":

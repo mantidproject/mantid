@@ -423,14 +423,14 @@ Please test this on IDAaaS: an ENGINX instance should have MantidWorkbenchNightl
 
 4. In the ``Focus`` group, enter ``Sample Run #`` ``305761`` and click the ``Focus`` button.
 
-.. image:: figure:: /../../../../../docs/source/images/6_5_release/Diffraction/GSASII_tab.png
+.. image:: figure:: /../../../../../docs/source/images/EngDiff_GSASII.png
     :align: center
     :width: 600px
 
 5. Change to the ``GSASII`` tab. The ``Instrument Group`` path should be pre-filled to a `.prm` file output by the calibration
    and the ``Focused Data`` path should be pre-filled to the `.gss` file output from the ``Focus`` group.
 
-6. For the ``Phase`` filepath, browse to ``MANTID_INSTALL_DIRECTORY/scripts/Engineering/ENGINX/phase_info/FE_GAMMA.cif``. For the ``Project Name`` at the top, enter a string of your choice.
+6. For the ``Phase`` filepath, select ``FE_GAMMA`` from the list. For the ``Project Name`` at the top, enter a string of your choice.
 
 7. Now, click ``Refine in GSAS II``. After a few seconds, the output fit should be plotted. In the top right of the plot widget, the refined spectrum can be changed using the combo-box.
 
@@ -465,7 +465,7 @@ Change to the ``GSAS II`` tab. Clear any pre-filled paths.
 
 6. For the ``Focused Data`` filepath, browse and select multiple `.gss` files that each contain multiple banks. Ensure all selected files have the same number of banks (e.g., select the all_banks files: E`NGINX_305738_305793_all_banks_dSpacing.gss`, `ENGINX_305738_305794_all_banks_dSpacing.gss`, `ENGINX_305738_305795_all_banks_dSpacing.gss`).
 
-7. For the ``Phase`` filepath, browse to `MANTID_INSTALL_DIRECTORY/scripts/Engineering/ENGINX/phase_info/FE_GAMMA.cif`. For the ``Project Name`` at the top, enter a string of your choice.
+7. For the ``Phase`` filepath, select ``FE_GAMMA`` from the list. For the ``Project Name`` at the top, enter a string of your choice.
 
 8. Click Refine in ``GSAS II``. After a few seconds, the output fit should be plotted. In the top right of the plot widget, verify that the refined spectrum combobox shows entries for the banks of the last refined data file.
 

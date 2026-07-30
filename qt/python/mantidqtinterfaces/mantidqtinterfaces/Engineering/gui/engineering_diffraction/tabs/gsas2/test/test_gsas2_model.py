@@ -7,6 +7,7 @@
 import unittest
 import os
 import shutil
+import tempfile
 import numpy as np
 from unittest.mock import patch, MagicMock
 from pathlib import Path
@@ -693,6 +694,56 @@ class TestGSAS2Model(unittest.TestCase):
                 self.assertEqual(env["PYTHONHOME"], "/opt/gsas2")
                 self.assertTrue(env["PATH"].startswith("/some/bin;/other/bin;"))
                 self.assertEqual(env["PYTHONPATH"], expected_pythonpath)
+
+    # ================
+    # Phase Selection
+    # ================
+
+    def test_phase_is_custom(self):
+        self.assertTrue(self.model.phase_is_custom("Custom"))
+        self.assertFalse(self.model.phase_is_custom("FE_GAMMA"))
+        self.assertFalse(self.model.phase_is_custom(""))
+
+    def test_get_phase_files_returns_finder_paths_when_custom(self):
+        # When "Custom" is selected the phases come from the file finder, not the defaults
+        self.assertEqual(
+            self.model.get_phase_files("Custom", ["/some/custom_phase.cif", "/some/other_phase.cif"]),
+            ["/some/custom_phase.cif", "/some/other_phase.cif"],
+        )
+
+    def test_get_phase_files_returns_empty_list_when_custom_and_no_files_selected(self):
+        self.assertEqual(self.model.get_phase_files("Custom", None), [])
+
+    def test_get_phase_files_returns_default_path_in_a_list_for_known_phase(self):
+        self.model.default_cif_dict = {"FE_GAMMA": "/defaults/FE_GAMMA.cif"}
+        # The finder paths are ignored when a default phase is selected
+        self.assertEqual(self.model.get_phase_files("FE_GAMMA", ["/ignored.cif"]), ["/defaults/FE_GAMMA.cif"])
+
+    def test_get_cif_combo_options_returns_sorted_defaults_with_custom_last(self):
+        self.model.default_cif_dict = {"FE": "f.cif", "AL": "a.cif", "CU": "c.cif"}
+        self.assertEqual(self.model.get_cif_combo_options(), ["AL", "CU", "FE", "Custom"])
+
+    def test_populate_default_cif_dict_only_includes_cif_files(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            phase_info_dir = Path(tmp_dir) / "ENGINX" / "phase_info"
+            phase_info_dir.mkdir(parents=True)
+            for filename in ("FE_GAMMA.cif", "AL.cif", "notes.txt", "README"):
+                (phase_info_dir / filename).touch()
+            self.model.default_cif_dict = {}
+            with patch(model_path + ".Engineering") as mock_engineering:
+                mock_engineering.__file__ = str(Path(tmp_dir) / "__init__.py")
+                self.model.populate_default_cif_dict()
+            # Non-cif files are ignored and the .cif extension is stripped from the key
+            self.assertEqual(set(self.model.default_cif_dict.keys()), {"FE_GAMMA", "AL"})
+            for name, path in self.model.default_cif_dict.items():
+                self.assertTrue(path.endswith(name + ".cif"))
+
+    def test_populate_default_cif_dict_finds_real_bundled_cif_files(self):
+        # The model populates this from the bundled ENGINX/phase_info directory on construction
+        self.assertTrue(self.model.default_cif_dict, "Expected bundled default cif files to be discovered")
+        for name, path in self.model.default_cif_dict.items():
+            self.assertNotIn(".cif", name)
+            self.assertTrue(os.path.isfile(path))
 
 
 if __name__ == "__main__":

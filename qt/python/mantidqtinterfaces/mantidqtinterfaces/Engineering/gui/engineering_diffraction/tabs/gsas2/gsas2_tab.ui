@@ -153,57 +153,168 @@ QGroupBox:title {
           </spacer>
          </item>
          <item>
-          <widget class="QGroupBox" name="loadingGroup_5">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="layoutDirection">
-            <enum>Qt::LeftToRight</enum>
-           </property>
-           <property name="autoFillBackground">
-            <bool>false</bool>
-           </property>
-           <property name="styleSheet">
-            <string notr="true"/>
-           </property>
+          <widget class="QGroupBox" name="data_selection_group_box">
            <property name="title">
-            <string>Load Focused Data</string>
+            <string>Data Selection</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignBottom|Qt::AlignHCenter</set>
            </property>
-           <property name="flat">
-            <bool>false</bool>
+           <layout class="QVBoxLayout" name="data_selection_layout">
+            <property name="spacing">
+             <number>6</number>
+            </property>
+            <item>
+          <widget class="QGroupBox" name="instrument_group_box">
+           <property name="title">
+            <string>Instrument Group</string>
            </property>
-           <property name="checkable">
-            <bool>false</bool>
+           <property name="styleSheet">
+            <string notr="true">QGroupBox {
+border: 1px solid #ccc;
+border-radius: 4px;
+margin-top: 10px;
+}
+QGroupBox::title {
+subcontrol-origin: margin;
+subcontrol-position: top left;
+padding: 0 5px;
+font-weight: normal;
+color: #555;
+}</string>
            </property>
-           <layout class="QGridLayout" name="gridLayout_11">
-            <item row="1" column="0">
-             <layout class="QGridLayout" name="gridLayout_12" rowstretch="0" columnstretch="0">
-              <property name="sizeConstraint">
-               <enum>QLayout::SetDefaultConstraint</enum>
-              </property>
-              <property name="verticalSpacing">
-               <number>6</number>
-              </property>
-              <item row="0" column="0">
-               <layout class="QGridLayout" name="gridLayout">
-                <item row="1" column="0">
-                 <widget class="FileFinderWidget" name="phase_file_finder" native="true"/>
-                </item>
-                <item row="2" column="0">
-                 <widget class="FilteredFileFinderWidget" name="focused_data_file_finder" native="true"/>
-                </item>
-                <item row="0" column="0">
-                 <widget class="FileFinderWidget" name="instrument_group_file_finder" native="true"/>
-                </item>
-               </layout>
+           <layout class="QVBoxLayout" name="instrument_group_layout">
+            <property name="topMargin">
+             <number>12</number>
+            </property>
+            <property name="bottomMargin">
+             <number>12</number>
+            </property>
+            <item>
+             <widget class="FileFinderWidget" name="instrument_group_file_finder" native="true"/>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <spacer name="verticalSpacer_6">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Fixed</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>2</width>
+             <height>4</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="phase_group_box">
+           <property name="title">
+            <string>Phase</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QGroupBox {
+border: 1px solid #ccc;
+border-radius: 4px;
+margin-top: 10px;
+}
+QGroupBox::title {
+subcontrol-origin: margin;
+subcontrol-position: top left;
+padding: 0 5px;
+font-weight: normal;
+color: #555;
+}</string>
+           </property>
+           <layout class="QVBoxLayout" name="phase_group_layout">
+            <property name="spacing">
+             <number>8</number>
+            </property>
+            <property name="topMargin">
+             <number>12</number>
+            </property>
+            <property name="bottomMargin">
+             <number>12</number>
+            </property>
+            <item>
+             <layout class="QHBoxLayout" name="phase_combo_layout">
+              <item>
+               <widget class="QLabel" name="label">
+                <property name="minimumSize">
+                 <size>
+                  <width>115</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Select Phase</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="cifComboBox">
+                <property name="toolTip">
+                 <string>Select from default cif files</string>
+                </property>
+               </widget>
               </item>
              </layout>
+            </item>
+            <item>
+             <widget class="FileFinderWidget" name="phase_file_finder" native="true"/>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <spacer name="verticalSpacer_7">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Fixed</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>2</width>
+             <height>4</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="focused_data_group_box">
+           <property name="title">
+            <string>Focused Data</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QGroupBox {
+border: 1px solid #ccc;
+border-radius: 4px;
+margin-top: 10px;
+}
+QGroupBox::title {
+subcontrol-origin: margin;
+subcontrol-position: top left;
+padding: 0 5px;
+font-weight: normal;
+color: #555;
+}</string>
+           </property>
+           <layout class="QVBoxLayout" name="focused_data_layout">
+            <item>
+             <widget class="FilteredFileFinderWidget" name="focused_data_file_finder" native="true"/>
+            </item>
+           </layout>
+          </widget>
             </item>
            </layout>
           </widget>
