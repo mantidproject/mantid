@@ -87,12 +87,15 @@ class TexturePlannerPresenter(AlgorithmObserver):
         self.view.set_on_save_dir_changed(self.enable_outputs)
         self.view.set_on_save_file_changed(self.enable_outputs)
         self.view.set_on_show_transmission_toggled(self.set_show_transmission)
+        self.view.set_on_transform_dirs_toggled(self.set_transform_dirs)
+        self.view.set_on_lab_dirs_toggled(self.set_lab_dirs)
         self.view.set_on_gauge_vol_state_changed(self.update_gauge_volume_state)
         self.view.set_on_gauge_vol_file_changed(self.update_set_gauge_vol_enabled)
         self.view.set_on_set_gauge_volume_clicked(self.set_gauge_volume)
         self.view.set_on_clear_gauge_volume_clicked(self.clear_gauge_volume)
         self.view.set_on_gauge_vol_group_toggled(self.update_custom_shape_finder_enabled)
         self.update_custom_shape_finder_enabled()
+        self.view.set_texture_directions_enabled(not self.view.get_lab_dirs())
         self.view.set_on_instrument_changed(self.on_instrument_changed)
         self.view.set_on_group_changed(self.on_group_selection_changed)
         self.view.set_on_custom_instrument_name_changed(self.on_custom_instrument_name_changed)
@@ -110,7 +113,7 @@ class TexturePlannerPresenter(AlgorithmObserver):
     def open_settings(self) -> None:
         self.settings_presenter.show()
 
-    def set_view_texture_directions(self, names: Tuple[str, str, str], vecs: FlatArrayTuple) -> None:
+    def set_view_texture_directions(self, names: Tuple[str, str, str], vecs: FlatArrayTuple | ndarray) -> None:
         self.view.set_rd_name(names[0])
         self.view.set_nd_name(names[1])
         self.view.set_td_name(names[2])
@@ -119,8 +122,10 @@ class TexturePlannerPresenter(AlgorithmObserver):
         self.view.set_td_dir(vecs[2])
 
     def set_model_texture_directions(self) -> None:
-        self.model.set_ax_transform(self.view.get_rd_dir(), self.view.get_nd_dir(), self.view.get_td_dir())
         self.model.set_dir_names(self.view.get_rd_name(), self.view.get_nd_name(), self.view.get_td_name())
+        # if the view is showing the lab directions - only allow updating the sample names
+        if not self.view.get_lab_dirs():
+            self.model.set_ax_transform(self.view.get_rd_dir(), self.view.get_nd_dir(), self.view.get_td_dir())
 
     def set_model_group(self) -> None:
         self.model.instrument.set_group(self.view.get_group())
@@ -131,6 +136,10 @@ class TexturePlannerPresenter(AlgorithmObserver):
 
     def set_view_with_default_texture_directions(self) -> None:
         names, vecs = self.model.get_default_texture_directions()
+        self.set_view_texture_directions(names, vecs)
+
+    def set_view_with_texture_directions(self) -> None:
+        names, vecs = self.model.get_texture_directions(self.view.get_lab_dirs())
         self.set_view_texture_directions(names, vecs)
 
     def update_enabled_gonios(self, num_gonios: int) -> None:
@@ -457,6 +466,18 @@ class TexturePlannerPresenter(AlgorithmObserver):
         self.view.set_transmission_weighting_available(show_transmission)
         self.model.update_all_projected_data()
         self.update_plots()
+
+    def set_transform_dirs(self) -> None:
+        self.model.set_transform_dirs(self.view.get_transform_dirs())
+        if self.view.get_lab_dirs():
+            self.set_view_with_texture_directions()
+        self.model.update_all_projected_data()
+        self.update_plots()
+
+    def set_lab_dirs(self) -> None:
+        self.set_view_with_texture_directions()
+        # the lab-frame values are derived, so they are shown read-only
+        self.view.set_texture_directions_enabled(not self.view.get_lab_dirs())
 
     def set_initial_shape(self) -> None:
         self.model.workspaces.update_initial_shape(
