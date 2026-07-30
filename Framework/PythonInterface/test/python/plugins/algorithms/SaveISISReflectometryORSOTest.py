@@ -671,6 +671,39 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         self._check_num_columns_in_file(self._NUM_COLS_BASIC)
 
     @patch.object(Logger, "warning")
+    def test_json_data_file_angles_are_not_required_for_stitched_data(self, mock_warning):
+        ws = self._create_sample_workspace()
+        metadata = json.dumps(
+            {
+                ws.name(): {
+                    "is-stitched": True,
+                    "data-files": [
+                        {"file-name": "INTER00013460", "angle": 0.7},
+                        {"file-name": "INTER00013461"},
+                        {"file-name": "INTER00013462"},
+                    ],
+                }
+            }
+        )
+
+        self._run_save_alg(
+            ws,
+            write_resolution=False,
+            include_extra_cols=True,
+            MetadataSource="Manual",
+            QConversionMethod=self._REF_ROI,
+            DatasetSpecificMetadata=metadata,
+        )
+
+        self._check_num_columns_in_file(self._NUM_COLS_BASIC)
+        mock_warning.assert_any_call("Additional data columns cannot be calculated for stitched datasets and will be excluded.")
+        warning_messages = [args[0] for args, _ in mock_warning.call_args_list]
+        self.assertNotIn(
+            "Unable to calculate lambda values. An angle was not provided. Additional data columns will be excluded.",
+            warning_messages,
+        )
+
+    @patch.object(Logger, "warning")
     @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
     def test_additional_columns_excluded_if_requested_but_is_stitched_data(self, mock_alg_histories, mock_warning):
         ws = self._create_sample_workspace()
@@ -782,6 +815,31 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         ]
 
         self._check_file_header(included_header_values=expected_manual_entries)
+
+    def test_manual_source_invalid_dataset_specific_metadata_json_fails_validation(self):
+        ws = self._create_sample_workspace()
+
+        with self.assertRaisesRegex(RuntimeError, "DatasetSpecificMetadata: DatasetSpecificMetadata must be valid JSON"):
+            self._run_save_alg(ws, MetadataSource="Manual", DatasetSpecificMetadata="{invalid")
+
+    def test_hybrid_source_invalid_dataset_specific_metadata_json_fails_validation(self):
+        ws = self._create_sample_workspace()
+
+        with self.assertRaisesRegex(RuntimeError, "DatasetSpecificMetadata: DatasetSpecificMetadata must be valid JSON"):
+            self._run_save_alg(ws, MetadataSource="HistoryWherePossible", DatasetSpecificMetadata="{invalid")
+
+    def test_dataset_specific_metadata_json_must_be_an_object(self):
+        ws = self._create_sample_workspace()
+
+        with self.assertRaisesRegex(RuntimeError, "DatasetSpecificMetadata: DatasetSpecificMetadata must be a JSON object"):
+            self._run_save_alg(ws, MetadataSource="Manual", DatasetSpecificMetadata="[]")
+
+    def test_history_source_ignores_invalid_dataset_specific_metadata_json(self):
+        ws = self._create_sample_workspace()
+
+        self._run_save_alg(ws, MetadataSource="History", DatasetSpecificMetadata="{invalid")
+
+        self._check_file_header([self._get_dataset_name_entry(ws.name())])
 
     def test_hybrid_source_requests_missing_metadata(self):
         ws = self._create_sample_workspace()

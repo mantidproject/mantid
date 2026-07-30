@@ -730,7 +730,11 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
                 f"to save as ORSO ASCII or {MantidORSOSaver.NEXUS_FILE_EXT} to save as ORSO Nexus."
             )
 
-        if self.getPropertyValue(Prop.META_SOURCE) == MetadataSourceOptions.HYBRID and not ws_issue:
+        metadata_json_issue = self._validate_manual_metadata_json()
+        if metadata_json_issue:
+            issues[Prop.META_JSON] = metadata_json_issue
+
+        if self.getPropertyValue(Prop.META_SOURCE) == MetadataSourceOptions.HYBRID and not ws_issue and not metadata_json_issue:
             optional_metadata = self.getProperty(Prop.IGNORED_OPTIONAL_PROPS).value
             missing_metadata_by_prop = defaultdict(list)
             for check_dataset in self._create_and_sort_refl_datasets():
@@ -744,6 +748,17 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
                     f"Please provide some or add the property name to the '{Prop.IGNORED_OPTIONAL_PROPS}' list."
                 )
         return issues
+
+    def _validate_manual_metadata_json(self) -> str:
+        if self.getPropertyValue(Prop.META_SOURCE) == MetadataSourceOptions.FROM_HISTORY:
+            return ""
+        try:
+            self._get_manual_metadata_json()
+        except json.JSONDecodeError as ex:
+            return f"{Prop.META_JSON} must be valid JSON: {ex.msg}."
+        except TypeError:
+            return f"{Prop.META_JSON} must be a JSON object."
+        return ""
 
     def _validate_ws(self, ws_name: str) -> str:
         if not AnalysisDataService.doesExist(ws_name):
@@ -794,6 +809,17 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
                 ws_groups.append(ws)
         return ws_groups
 
+    def _get_manual_metadata_json(self) -> dict:
+        if self.getPropertyValue(Prop.META_SOURCE) == MetadataSourceOptions.FROM_HISTORY:
+            return {}
+        manual_metadata = self.getPropertyValue(Prop.META_JSON)
+        if not manual_metadata:
+            return {}
+        manual_metadata = json.loads(manual_metadata)
+        if not isinstance(manual_metadata, dict):
+            raise TypeError
+        return manual_metadata
+
     def _create_and_sort_refl_datasets(self) -> List[ReflectometryDatasetBase]:
         """Retrieve the workspaces from the input list, transform them into ReflectometryDataset objects and sort them
         into the order that the datasets should appear in the ORSO file"""
@@ -806,15 +832,12 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             return False
 
         dataset_list = []
-        try:
-            manual_metadata = json.loads(self.getPropertyValue(Prop.META_JSON))
-        except json.JSONDecodeError:
-            manual_metadata = None
+        manual_metadata = self._get_manual_metadata_json()
 
         for ws_name in self.getProperty(Prop.WORKSPACE_LIST).value:
             ws = AnalysisDataService.retrieve(ws_name)
             try:
-                ws_meta = manual_metadata[ws_name] if manual_metadata else None
+                ws_meta = manual_metadata[ws_name]
             except KeyError:
                 # There wasn't a manual metadata entry for this workspace.
                 ws_meta = None
@@ -906,12 +929,19 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         return dataset
 
     def _set_ref_roi_q_conversion_theta_from_angle_files(self, dataset: ReflectometryDatasetBase) -> None:
-        if not dataset.angle_files or self.getPropertyValue(Prop.Q_CONVERT_METHOD) != ReflectometryDatasetHistory.REF_ROI_ALG:
+        if not dataset.angle_files or not self._requires_ref_roi_angle_for_additional_columns(dataset):
             return
         try:
             dataset.q_conversion_theta = float(dataset.angle_files[0][1])
         except (TypeError, ValueError):
             pass
+
+    def _requires_ref_roi_angle_for_additional_columns(self, dataset: ReflectometryDatasetBase) -> bool:
+        return (
+            self.getProperty(Prop.INCLUDE_EXTRA_COLS).value
+            and not dataset.is_stitched
+            and dataset.q_conversion_method == ReflectometryDatasetHistory.REF_ROI_ALG
+        )
 
     def _create_orso_dataset(self, refl_dataset: ReflectometryDatasetBase) -> MantidORSODataset:
         data_columns = self._create_data_columns(refl_dataset)
