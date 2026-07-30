@@ -223,6 +223,7 @@ class _FunctionalTestBase(unittest.TestCase):
         "get_att_point": "att_point",
         "get_att_unit": "att_unit",
         "get_att_use_data_range": "att_use_data_range",
+        "get_att_show_current": "att_show_current",
     }
 
     def _apply_settings_via_real_presenter(self, **overrides):
@@ -275,6 +276,29 @@ class _FunctionalTestBase(unittest.TestCase):
             for c in self._pf_point_scatters()
             if len(c.get_offsets()) == len(swapped) and np.allclose(np.asarray(c.get_offsets()), swapped, atol=1e-12)
         ]
+
+    def _transmission_scatter(self):
+        # the colour-mapped transmission points are the only pole-figure scatter carrying a value array
+        scatters = [c for c in self._pf_point_scatters() if c.get_array() is not None]
+        self.assertEqual(len(scatters), 1)
+        return scatters[0]
+
+    def _current_highlight_scatter(self):
+        """The ring drawn around the current orientation in transmission mode, or None if it is not
+        drawn. It is the only grey open-circle scatter: the transmission points carry a colour array
+        and the goniometer poles are colour-coded per axis."""
+        rings = [
+            c
+            for c in self._pf_point_scatters()
+            if c.get_array() is None and len(c.get_facecolor()) == 0 and np.allclose(c.get_edgecolor()[0][:3], to_rgba("grey")[:3])
+        ]
+        self.assertLessEqual(len(rings), 1)
+        return rings[0] if rings else None
+
+    def _add_rotated_orientation(self, angle):
+        self._click(self.view.addOrientation)
+        self.view.spnAngle0.setValue(angle)
+        QApplication.processEvents()
 
     def _drawn_sample_vertices(self):
         # the sample is drawn grey; a gauge volume (if any) adds a second, cyan Poly3DCollection
@@ -1176,11 +1200,6 @@ class TestGoniometerDisplay(_FunctionalTestBase):
 class TestOrientationCycling(_FunctionalTestBase):
     """Cycling / clamping the current orientation and its pole-figure highlighting."""
 
-    def _add_rotated_orientation(self, angle):
-        self._click(self.view.addOrientation)
-        self.view.spnAngle0.setValue(angle)
-        QApplication.processEvents()
-
     def _filled_state(self, pf_points):
         (scatter,) = self._pf_scatters_matching(pf_points)
         return len(scatter.get_facecolor()) > 0
@@ -1255,11 +1274,6 @@ class TestTransmissionValues(_FunctionalTestBase):
         super().setUp()
         # 2 detector groups keep the (real) MonteCarloAbsorption runs quick
         self._apply_instrument_group("banks")
-
-    def _transmission_scatter(self):
-        scatters = [c for c in self._pf_point_scatters() if c.get_array() is not None]
-        self.assertEqual(len(scatters), 1)
-        return scatters[0]
 
     def test_transmission_estimates_are_sensible(self):
         self._click_checkbox(self.view.chkTransmission)
@@ -1339,6 +1353,77 @@ class TestTransmissionValues(_FunctionalTestBase):
         scatter = self._transmission_scatter()
         self.assertNotEqual(scatter.get_clim(), (0.0, 1.0))
         np.testing.assert_allclose(scatter.get_clim(), (transmission.min(), transmission.max()), atol=1e-12)
+
+
+class TestTransmissionCurrentOrientation(_FunctionalTestBase):
+    """In transmission mode every point is coloured by its value, so the current orientation cannot be
+    picked out by fill colour as it is in the coverage plot. It is ringed instead."""
+
+    def setUp(self):
+        super().setUp()
+        # 2 detector groups keep the (real) MonteCarloAbsorption runs quick
+        self._apply_instrument_group("banks")
+        # two orientations, so a highlight of *only* the current one is distinguishable
+        self._add_rotated_orientation(45.0)
+        self._click_checkbox(self.view.chkTransmission)
+
+    def _swapped(self, index):
+        # the plotter draws (pf_xy[:, 1], pf_xy[:, 0]), i.e. columns swapped
+        return np.asarray(self.model.orientations[index].pf_points)[:, ::-1]
+
+    def test_current_orientation_is_ringed_over_the_colour_mapped_points(self):
+        # both orientations are colour-mapped together...
+        transmission_points = np.asarray(self._transmission_scatter().get_offsets())
+        np.testing.assert_allclose(transmission_points, np.concatenate([self._swapped(0), self._swapped(1)]), atol=1e-12)
+
+        # ...and the current one (orientation 1) additionally gets an open grey ring
+        ring = self._current_highlight_scatter()
+        self.assertIsNotNone(ring)
+        np.testing.assert_allclose(np.asarray(ring.get_offsets()), self._swapped(1), atol=1e-12)
+        # oversized relative to the coloured points, so the colour stays visible inside the ring
+        np.testing.assert_allclose(ring.get_sizes(), self._transmission_scatter().get_sizes() * 2)
+
+    def test_ring_follows_the_current_index(self):
+        self.view.spnIndex.setValue(1)  # the spinbox is 1-based: select orientation 0
+        QApplication.processEvents()
+
+        np.testing.assert_allclose(np.asarray(self._current_highlight_scatter().get_offsets()), self._swapped(0), atol=1e-12)
+
+        self.view.spnIndex.setValue(2)
+        QApplication.processEvents()
+
+        np.testing.assert_allclose(np.asarray(self._current_highlight_scatter().get_offsets()), self._swapped(1), atol=1e-12)
+
+    def test_excluded_current_orientation_is_still_ringed_though_it_has_no_coloured_points(self):
+        self._click_checkbox(self._checkbox(1, 6))  # exclude the current row
+        QApplication.processEvents()
+
+        # only orientation 0 is colour-mapped now
+        np.testing.assert_allclose(np.asarray(self._transmission_scatter().get_offsets()), self._swapped(0), atol=1e-12)
+        # but the ring keeps the current orientation's coverage visible
+        np.testing.assert_allclose(np.asarray(self._current_highlight_scatter().get_offsets()), self._swapped(1), atol=1e-12)
+
+    def test_highlight_setting_switches_the_ring_off_and_back_on(self):
+        self._apply_settings_via_real_presenter(att_show_current=False)
+
+        self.assertIsNone(self._current_highlight_scatter())
+        # the colour-mapped points and their scale are untouched
+        np.testing.assert_allclose(
+            np.asarray(self._transmission_scatter().get_offsets()), np.concatenate([self._swapped(0), self._swapped(1)]), atol=1e-12
+        )
+        self.assertEqual(self._transmission_scatter().get_clim(), (0.0, 1.0))
+
+        self._apply_settings_via_real_presenter(att_show_current=True)
+
+        np.testing.assert_allclose(np.asarray(self._current_highlight_scatter().get_offsets()), self._swapped(1), atol=1e-12)
+
+    def test_no_ring_outside_transmission_mode(self):
+        # in the coverage plot the current orientation is already drawn filled, so it needs no ring
+        self._click_checkbox(self.view.chkTransmission)  # transmission off
+        QApplication.processEvents()
+
+        self.assertIsNone(self._current_highlight_scatter())
+        self.assertTrue(self._pf_scatters_matching(self.model.orientations[1].pf_points))
 
 
 class TestExportContents(_FunctionalTestBase):

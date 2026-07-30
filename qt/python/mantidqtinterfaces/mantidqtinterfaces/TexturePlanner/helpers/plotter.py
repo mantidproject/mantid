@@ -29,6 +29,10 @@ if TYPE_CHECKING:
 
 @dataclass
 class PlotProperties:
+    point_size: float = 20
+    gonio_point_size: float = 30
+    # size multiplier for the ring drawn around the current orientation in the transmission plot
+    current_point_scale: float = 2
     sample_vec_scaler: float = 1.2
     num_points_in_ring: int = 360
     sample_opacity: float = 0.5
@@ -62,6 +66,7 @@ class TexturePlotter:
         self.vis_settings = {"directions": True, "goniometers": True, "incident": True, "ks": True, "scattered": False}
         # when True the transmission plot colour scale spans the data range; otherwise it is fixed to [0, 1]
         self.transmission_use_data_range = False
+        self.att_show_current = True
         self._transmission_cax = None
         self._plot_properties = PlotProperties()
 
@@ -242,7 +247,7 @@ class TexturePlotter:
             if np.isclose(np.linalg.norm(gP), 1):
                 proj_ax.plot((gP[1], -gP[1]), (gP[0], -gP[0]), color=pc, ls=("-", "--")[int(i != self._model.gonio_index)])
             else:
-                proj_ax.scatter(gP[1], gP[0], s=30, edgecolor=pc, facecolor=fc)
+                proj_ax.scatter(gP[1], gP[0], s=self._plot_properties.gonio_point_size, edgecolor=pc, facecolor=fc)
 
         # if there aren't transmission values
         if not self._model.plot_transmission:
@@ -254,14 +259,18 @@ class TexturePlotter:
                     pf_xy = orientation.pf_points
                     # plot current selected orientation with full circles
                     if i == current_index:
-                        proj_ax.scatter(pf_xy[:, 1], pf_xy[:, 0], s=20, c="dodgerblue")
+                        proj_ax.scatter(pf_xy[:, 1], pf_xy[:, 0], s=self._plot_properties.point_size, c="dodgerblue")
                     # plot all other orientations as just edges
                     else:
-                        proj_ax.scatter(pf_xy[:, 1], pf_xy[:, 0], s=20, facecolor="None", edgecolor="dodgerblue")
+                        proj_ax.scatter(
+                            pf_xy[:, 1], pf_xy[:, 0], s=self._plot_properties.point_size, facecolor="None", edgecolor="dodgerblue"
+                        )
                 # if the current selected orientation is not set to be included plot it as a grey edge
                 elif i == current_index:
                     pf_xy = orientation.pf_points
-                    proj_ax.scatter(pf_xy[:, 1], pf_xy[:, 0], s=20, facecolor="None", edgecolor="grey", alpha=0.5)
+                    proj_ax.scatter(
+                        pf_xy[:, 1], pf_xy[:, 0], s=self._plot_properties.point_size, facecolor="None", edgecolor="grey", alpha=0.5
+                    )
         # if there are transmission values to be plotted
         else:
             # get the included runs
@@ -277,9 +286,27 @@ class TexturePlotter:
             # constrain the cmap range if desired
             clim_kwargs = {} if self.transmission_use_data_range else {"vmin": 0, "vmax": 1}
             # plot the points
-            scatt = proj_ax.scatter(all_pf_xy[:, 1], all_pf_xy[:, 0], s=20, c=all_transmissions, cmap="jet", **clim_kwargs)
+            scatt = proj_ax.scatter(
+                all_pf_xy[:, 1], all_pf_xy[:, 0], s=self._plot_properties.point_size, c=all_transmissions, cmap="jet", **clim_kwargs
+            )
+            # the colour-coded points carry no per-orientation identity, so optionally ring the current one
+            if self.att_show_current:
+                self._show_current_index(proj_ax, current_index)
             self._transmission_cax = proj_ax.inset_axes(self._plot_properties.cbar_inset_location)
             proj_ax.figure.colorbar(scatt, cax=self._transmission_cax)
+
+    def _show_current_index(self, proj_ax: Axes, current_index: int) -> None:
+        pf_xy = self._model.orientations[current_index].pf_points
+        if pf_xy is None:
+            return
+        # ring the current selected orientation with oversized open circles so the colours stay readable
+        proj_ax.scatter(
+            pf_xy[:, 1],
+            pf_xy[:, 0],
+            s=self._plot_properties.point_size * self._plot_properties.current_point_scale,
+            facecolor="None",
+            edgecolor="grey",
+        )
 
     def _decorate_pole_figure(self, proj_ax: Axes) -> None:
         proj_ax.set(xlim=self._plot_properties.pf_ax_lims, ylim=self._plot_properties.pf_ax_lims, aspect="equal")
