@@ -369,11 +369,10 @@ NexusAddress File::groupAddress(NexusAddress const &addr) const {
 
 bool File::hasAddress(std::string const &name) const {
   if (name == "/") {
+    // the descriptor does not track the root, which always exists
     return true;
   } else {
-    std::string const addr = formAbsoluteAddress(name);
-    // return m_descriptor->isEntry(addr);
-    return H5Oexists_by_name(m_fileID, addr.c_str(), H5P_DEFAULT) > 0;
+    return m_descriptor->isEntry(formAbsoluteAddress(name));
   }
 }
 
@@ -396,10 +395,7 @@ bool File::hasGroup(std::string const &name, std::string const &class_type) cons
 }
 
 bool File::hasData(std::string const &name) const {
-  std::string const addr = formAbsoluteAddress(name);
-  // return m_descriptor->isEntry(addr, SCIENTIFIC_DATA_SET);
-  DataSetID tempid = H5Dopen(m_fileID, addr.c_str(), H5P_DEFAULT);
-  return tempid.isValid();
+  return m_descriptor->isEntry(formAbsoluteAddress(name), SCIENTIFIC_DATA_SET);
 }
 
 bool File::isDataSetOpen() const {
@@ -504,8 +500,7 @@ void File::openGroup(std::string const &name, std::string const &nxclass) {
   }
   // validate NX_class
   NexusAddress const absstr = m_address / name;
-  std::string const cached = (*m_descriptor)[absstr];
-  if (cached != nxclass) {
+  if (!m_descriptor->isEntry(absstr, nxclass)) {
     throw NXEXCEPTION("Group " + name + " at " + m_address + " does not have class " + nxclass);
   }
   m_current_group_id = iVID.release();
@@ -1469,18 +1464,7 @@ std::set<std::string> File::getEntriesByClass(std::string const &class_type) con
 
 bool File::classTypeExists(std::string const &class_type) const { return m_descriptor->classTypeExists(class_type); }
 
-std::string File::classForEntry(std::string const &entry) const {
-  H5::H5File h5file(m_fileID);
-  try {
-    H5::Group grp = h5file.openGroup(entry);
-    std::string cls;
-    H5Util::readStringAttribute(grp, GROUP_CLASS_SPEC, cls);
-    return cls;
-  } catch (H5::Exception const &) {
-    // Not a group — treat as a dataset.
-    return SCIENTIFIC_DATA_SET;
-  }
-}
+std::string File::classForEntry(std::string const &entry) const { return (*m_descriptor)[entry]; }
 
 //------------------------------------------------------------------------------------------------------------------
 // ATTRIBUTE METHODS
