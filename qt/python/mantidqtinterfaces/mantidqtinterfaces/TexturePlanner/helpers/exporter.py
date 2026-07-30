@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import annotations
 
 import os
 import numpy as np
@@ -15,61 +16,11 @@ from mantid.simpleapi import (
 from mantid.api import AnalysisDataService as ADS
 from mantid.kernel import logger
 from Engineering.texture.texture_helper import convert_to_sscanss_frame
-from typing import Protocol, ValuesView, Generator
-from abc import abstractmethod
-from mantid.api import MatrixWorkspace
-from scipy.spatial.transform import Rotation
+from typing import TYPE_CHECKING, Generator
 
-
-class _WorkspaceManagerType(Protocol):
-    """For the purpose of type hinting while this module is orphaned
-    Will be removed and replaced with actual model before final PR"""
-
-    updated_mesh_ws: MatrixWorkspace
-    WS_REFERENCE: str
-
-    @abstractmethod
-    def copy_sample_preserving_initial_rotation(self, source_ws: MatrixWorkspace, dest_ws: MatrixWorkspace) -> None:
-        pass
-
-
-class _InstrumentType(Protocol):
-    """For the purpose of type hinting while this module is orphaned
-    Will be removed and replaced with actual model before final PR"""
-
-    @abstractmethod
-    def get_instrument(self) -> str:
-        pass
-
-
-class _OrientationType(Protocol):
-    """For the purpose of type hinting while this module is orphaned
-    Will be removed and replaced with actual model before final PR"""
-
-    include: bool
-    select: bool
-    R: Rotation
-    transmission: np.ndarray | None
-
-
-class _OrientationTableType(Protocol):
-    """For the purpose of type hinting while this module is orphaned
-    Will be removed and replaced with actual model before final PR"""
-
-    orientation_kwargs: dict
-
-    @abstractmethod
-    def values(self) -> ValuesView[_OrientationType]:
-        pass
-
-
-class _BaseModelType(Protocol):
-    """For the purpose of type hinting while this module is orphaned
-    Will be removed and replaced with actual model before final PR"""
-
-    workspaces: _WorkspaceManagerType
-    instrument: _InstrumentType
-    orientations: _OrientationTableType
+if TYPE_CHECKING:
+    from mantidqtinterfaces.TexturePlanner.model import TexturePlannerModel
+    from mantidqtinterfaces.TexturePlanner.helpers.orientation_table import Orientation
 
 
 class OrientationExporter:
@@ -80,10 +31,10 @@ class OrientationExporter:
     at write time.
     """
 
-    def __init__(self, model: _BaseModelType):
+    def __init__(self, model: TexturePlannerModel):
         self._model = model
 
-    def _included(self) -> Generator[_OrientationType, None, None]:
+    def _included(self) -> Generator[Orientation, None, None]:
         return (o for o in self._model.orientations.values() if o.include)
 
     def output_as_sscanss(self, save_dir: str, filename: str) -> None:

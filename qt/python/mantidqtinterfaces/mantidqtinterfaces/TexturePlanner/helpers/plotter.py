@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import annotations
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -18,86 +19,12 @@ from Engineering.texture.texture_helper import (
     ring,
     ster_proj_xy,
 )
-from typing import Protocol, ValuesView, List, ItemsView, Tuple
-from abc import abstractmethod
-from mantid.api import MatrixWorkspace
+from typing import TYPE_CHECKING, List, Tuple
 from scipy.spatial.transform import Rotation
 from dataclasses import dataclass
 
-
-class _WorkspaceManagerType(Protocol):
-    """For the purpose of type hinting while this module is orphaned
-    Will be removed and replaced with actual model before final PR"""
-
-    ws: MatrixWorkspace
-    ungrouped_ws: MatrixWorkspace
-    updated_mesh_ws: MatrixWorkspace
-    wsname: str
-    gauge_volume_str: str
-    scattering_centre: np.ndarray
-
-    @abstractmethod
-    def copy_sample_preserving_initial_rotation(self, source_ws: MatrixWorkspace, dest_ws: MatrixWorkspace) -> None:
-        pass
-
-
-class _InstrumentType(Protocol):
-    """For the purpose of type hinting while this module is orphaned
-    Will be removed and replaced with actual model before final PR"""
-
-    @abstractmethod
-    def get_grouping_path(self) -> str:
-        pass
-
-
-class _OrientationType(Protocol):
-    """For the purpose of type hinting while this module is orphaned
-    Will be removed and replaced with actual model before final PR"""
-
-    include: bool
-    select: bool
-    R: Rotation
-    transmission: np.ndarray | None
-    gRs: List[Rotation]
-    pf_points: np.ndarray | None
-
-
-class _OrientationTableType(Protocol):
-    """For the purpose of type hinting while this module is orphaned
-    Will be removed and replaced with actual model before final PR"""
-
-    @abstractmethod
-    def values(self) -> ValuesView[_OrientationType]:
-        pass
-
-    @abstractmethod
-    def items(self) -> ItemsView[int, _OrientationType]:
-        pass
-
-    @abstractmethod
-    def __getitem__(self, index: int) -> _OrientationType:
-        pass
-
-
-class _GeometryType(Protocol):
-    detQs_lab: np.ndarray
-    det_k: np.ndarray
-
-
-class _BaseModelType(Protocol):
-    """For the purpose of type hinting while this module is orphaned
-    Will be removed and replaced with actual model before final PR"""
-
-    workspaces: _WorkspaceManagerType
-    instrument: _InstrumentType
-    orientations: _OrientationTableType
-    geometry: _GeometryType
-
-    gonio_index: int
-    ax_transform: np.ndarray
-    dir_names: List[str]
-    projection: str
-    plot_transmission: bool
+if TYPE_CHECKING:
+    from mantidqtinterfaces.TexturePlanner.model import TexturePlannerModel
 
 
 @dataclass
@@ -126,7 +53,7 @@ class TexturePlotter:
     orientation table, visualisation settings) via back-reference.
     """
 
-    def __init__(self, model: _BaseModelType):
+    def __init__(self, model: TexturePlannerModel):
         self._model = model
         # visual / rendering config owned by the plotter (the colour/label constants plus the
         # visualisation toggles the settings dialog writes to)

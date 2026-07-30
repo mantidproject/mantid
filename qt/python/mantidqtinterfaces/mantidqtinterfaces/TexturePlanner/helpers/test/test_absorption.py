@@ -27,6 +27,9 @@ def _make_wsm(offset=(0.0, 0.0, 0.0), init_R=None, gauge_volume_str="<gv/>"):
     wsm.mesh_ws = "mesh_ws"
     wsm.offset = offset
     wsm.init_R = init_R if init_R is not None else Rotation.identity()
+    # mirror the real manager: the initial translation is expressed in the sample's pre-orientation
+    # frame (init_R^-1 @ offset) so it is applied after the initial orientation
+    wsm.initial_translation_vector.side_effect = lambda: wsm.init_R.inv().apply(wsm.offset)
     wsm.gauge_volume_str = gauge_volume_str
     wsm.attenuation_kwargs = {"point": 1.5, "unit": "dSpacing"}
     return wsm
@@ -88,13 +91,30 @@ class TestAbsorptionCalculator_SetMcSampleState(unittest.TestCase):
             CopyLattice=False,
         )
 
-    def test_applies_translate_with_offset(self, mock_copy, mock_rotate, mock_define_gv):
+    def test_applies_translate_with_offset_when_no_initial_rotation(self, mock_copy, mock_rotate, mock_define_gv):
         wsm = _make_wsm(offset=(1.0, 2.0, 3.0))
         mc_ws = MagicMock()
 
         AbsorptionCalculator._set_mc_sample_state(wsm, mc_ws, Rotation.identity())
 
-        wsm.translate_shape.assert_called_once_with(mc_ws, 1.0, 2.0, 3.0)
+        wsm.translate_shape.assert_called_once()
+        args = wsm.translate_shape.call_args.args
+        self.assertIs(args[0], mc_ws)
+        np.testing.assert_allclose(args[1:], (1.0, 2.0, 3.0))
+
+    def test_translates_in_pre_orientation_frame_when_initially_rotated(self, mock_copy, mock_rotate, mock_define_gv):
+        # the initial orientation is applied before the initial translation, so the offset is
+        # pre-rotated by init_R^-1 before being baked into the shape (see initial_translation_vector)
+        init_R = Rotation.from_euler("z", 90, degrees=True)
+        wsm = _make_wsm(offset=(1.0, 2.0, 3.0), init_R=init_R)
+        mc_ws = MagicMock()
+
+        AbsorptionCalculator._set_mc_sample_state(wsm, mc_ws, Rotation.identity())
+
+        wsm.translate_shape.assert_called_once()
+        args = wsm.translate_shape.call_args.args
+        self.assertIs(args[0], mc_ws)
+        np.testing.assert_allclose(args[1:], init_R.inv().apply((1.0, 2.0, 3.0)), atol=1e-12)
 
     def test_skips_rotate_when_combined_rotation_is_identity(self, mock_copy, mock_rotate, mock_define_gv):
         wsm = _make_wsm(init_R=Rotation.identity())
