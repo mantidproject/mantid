@@ -557,7 +557,10 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         self._configure_q_conversion_alg_mock_history(mock_alg_histories, self._REF_ROI, {"ScatteringAngle": angle})
         self._run_save_alg(ws, write_resolution=False, include_extra_cols=True)
         self._check_num_columns_in_file(self._NUM_COLS_EXTENDED)
-        mock_warning.assert_any_call("Unable to calculate incident theta error as resolution metadata was not found.")
+        mock_warning.assert_any_call(
+            "Dataset '2.300': Unable to calculate incident theta error as resolution metadata was not found. "
+            "The incident theta error column will be excluded."
+        )
 
     @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
     def test_additional_columns_included_if_requested_and_is_unstitched_data_with_resolution(self, mock_alg_histories):
@@ -612,7 +615,8 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
         self._check_num_columns_in_file(self._NUM_COLS_BASIC)
         mock_warning.assert_any_call(
-            "Unable to calculate lambda values. An angle was not provided. Additional data columns will be excluded."
+            f"Dataset '{ws.name()}': Unable to calculate lambda values. An angle was not provided. "
+            "Additional data columns will be excluded."
         )
 
     @patch.object(Logger, "warning")
@@ -631,7 +635,8 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
         self._check_num_columns_in_file(self._NUM_COLS_BASIC)
         mock_warning.assert_any_call(
-            "Unable to calculate lambda values. An angle was not provided. Additional data columns will be excluded."
+            f"Dataset '{ws.name()}': Unable to calculate lambda values. An angle was not provided. "
+            "Additional data columns will be excluded."
         )
 
     @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
@@ -696,10 +701,13 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         )
 
         self._check_num_columns_in_file(self._NUM_COLS_BASIC)
-        mock_warning.assert_any_call("Additional data columns cannot be calculated for stitched datasets and will be excluded.")
+        mock_warning.assert_any_call(
+            f"Dataset '{ws.name()}': Additional data columns cannot be calculated for stitched datasets and will be excluded."
+        )
         warning_messages = [args[0] for args, _ in mock_warning.call_args_list]
         self.assertNotIn(
-            "Unable to calculate lambda values. An angle was not provided. Additional data columns will be excluded.",
+            f"Dataset '{ws.name()}': Unable to calculate lambda values. An angle was not provided. "
+            "Additional data columns will be excluded.",
             warning_messages,
         )
 
@@ -710,7 +718,9 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         self._configure_mock_alg_history(mock_alg_histories, [(self._STITCH_ALG, {"Params": 0.02})])
         self._run_save_alg(ws, write_resolution=False, include_extra_cols=True)
         self._check_num_columns_in_file(self._NUM_COLS_BASIC)
-        mock_warning.assert_any_call("Additional data columns cannot be calculated for stitched datasets and will be excluded.")
+        mock_warning.assert_any_call(
+            "Dataset 'Stitched': Additional data columns cannot be calculated for stitched datasets and will be excluded."
+        )
 
     @patch.object(Logger, "warning")
     def test_additional_columns_excluded_if_no_conversion_history(self, mock_warning):
@@ -718,7 +728,8 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         self._run_save_alg(ws, write_resolution=True, include_extra_cols=True)
         self._check_num_columns_in_file(self._NUM_COLS_BASIC)
         mock_warning.assert_any_call(
-            "Unable to calculate lambda values. A supported conversion method was not given. Additional data columns will be excluded."
+            f"Dataset '{ws.name()}': Unable to calculate lambda values. A supported conversion method was not given. "
+            "Additional data columns will be excluded."
         )
 
     @patch.object(Logger, "warning")
@@ -731,7 +742,8 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
         self._check_num_columns_in_file(self._NUM_COLS_BASIC)
         mock_warning.assert_any_call(
-            "Unable to calculate lambda values. A supported conversion method was not given. Additional data columns will be excluded."
+            f"Dataset '{ws.name()}': Unable to calculate lambda values. A supported conversion method was not given. "
+            "Additional data columns will be excluded."
         )
 
     def test_filename_must_have_supported_extension(self):

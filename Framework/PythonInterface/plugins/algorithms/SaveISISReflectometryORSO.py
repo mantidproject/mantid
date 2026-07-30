@@ -967,7 +967,9 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         data_columns = MantidORSODataColumns(q_data, reflectivity, reflectivity_error, q_resolution, q_error_value_is=None)
 
         if self.getProperty(Prop.INCLUDE_EXTRA_COLS).value and refl_dataset.is_stitched:
-            self.log().warning("Additional data columns cannot be calculated for stitched datasets and will be excluded.")
+            self.log().warning(
+                f"Dataset '{refl_dataset.name}': Additional data columns cannot be calculated for stitched datasets and will be excluded."
+            )
             return data_columns
 
         if self.getProperty(Prop.INCLUDE_EXTRA_COLS).value:
@@ -975,7 +977,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             try:
                 l_data = self._convert_from_q_to_wavelength(refl_dataset, q_data)
             except RuntimeError as ex:
-                self.log().warning(f"{ex} Additional data columns will be excluded.")
+                self.log().warning(f"Dataset '{refl_dataset.name}': {ex} Additional data columns will be excluded.")
                 return data_columns
 
             size = q_data.size
@@ -1002,7 +1004,10 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
                     ensure_recommended_columns=False,
                 )
             else:
-                self.log().warning("Unable to calculate incident theta error as resolution metadata was not found.")
+                self.log().warning(
+                    f"Dataset '{refl_dataset.name}': Unable to calculate incident theta error as resolution metadata was not found. "
+                    "The incident theta error column will be excluded."
+                )
 
         return data_columns
 
