@@ -54,23 +54,36 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
         self.setupUi(self)
         self.instrument = instrument
 
-        self.instrument_group_file_finder.setLabelText("Instrument Group")
+        # Shared label-column width so the labels (and the "Selected Phase" combo
+        # in the Phase box) line up consistently across the group boxes.
+        label_min_width = 115
+
+        self.instrument_group_file_finder.setLabelText("Instrument Group File")
+        self.instrument_group_file_finder.setLabelMinWidth(label_min_width)
         self.instrument_group_file_finder.isForRunFiles(False)
         self.instrument_group_file_finder.setFileExtensions([".prm"])
         self.instrument_group_file_finder.allowMultipleFiles(True)
 
-        self.phase_file_finder.setLabelText("Phase")
+        self.phase_file_finder.setLabelText("Custom Phase File")
+        self.phase_file_finder.setLabelMinWidth(label_min_width)
         self.phase_file_finder.isForRunFiles(False)
         self.phase_file_finder.setFileExtensions([".cif"])
         self.phase_file_finder.allowMultipleFiles(True)
 
-        self.focused_data_file_finder.setLabelText("Focused Data")
+        self.focused_data_file_finder.setLabelText("Focused Data Path(s)")
+        self.focused_data_file_finder.setLabelMinWidth(label_min_width)
         self.focused_data_file_finder.isForRunFiles(False)
         self.focused_data_file_finder.setFileExtensions([".gss", ".gsa"])
         self.focused_data_file_finder.allowMultipleFiles(True)
 
         self.focused_data_file_finder.add_filter("Region", _region_filter_values.keys())
         self.focused_data_file_finder.set_filter_generator(_file_filter_generator)
+
+        # The finder wrapper and its filter row each add their own default padding on top of the
+        # Focused Data group box margins, so drop them and let the group box control the spacing.
+        self.focused_data_file_finder.layout().setContentsMargins(0, 0, 0, 0)
+        self.focused_data_file_finder.layout().setSpacing(4)
+        self.focused_data_file_finder.filter_row.layout().setContentsMargins(0, 0, 0, 0)
 
         self.mark_project_name_invalid_when_empty()
         self.project_name_line_edit.textChanged.connect(self.mark_project_name_invalid_when_empty)
@@ -189,12 +202,17 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
             self.refine_gamma_y_checkbox.isChecked(),
         ]
 
-    def get_load_parameters(self) -> List[List[str]]:
-        return [
-            self.instrument_group_file_finder.getFilenames(),
-            self.phase_file_finder.getFilenames(),
-            self.focused_data_file_finder.getFilenames(),
-        ]
+    def get_instrument_group(self) -> List[str]:
+        return self.instrument_group_file_finder.getFilenames()
+
+    def get_phase(self) -> List[str]:
+        return self.phase_file_finder.getFilenames()
+
+    def get_focused_data(self) -> List[str]:
+        return self.focused_data_file_finder.getFilenames()
+
+    def get_phase_finder_file(self) -> List[str]:
+        return self.phase_file_finder.getFilenames()
 
     def get_project_name(self) -> str:
         return self.project_name_line_edit.text()
@@ -444,3 +462,20 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
             two_decimal_string = str("{:.2f}".format(self.initial_x_limits[1]))
             self.x_max_line_edit.setText(two_decimal_string)
             self.x_max_line_edit.validator().last_valid_value = two_decimal_string
+
+    # ========================
+    # CIF Selector options
+    # ========================
+
+    def set_cif_combo_options(self, options: List[str]) -> None:
+        """should only be called on init"""
+        self.cifComboBox.addItems(options)
+
+    def get_phase_combo_text(self) -> str:
+        return self.cifComboBox.currentText()
+
+    def set_phase_finder_visible(self, vis: bool) -> None:
+        self.phase_file_finder.setVisible(vis)
+
+    def on_phase_combo_update(self, slot: Callable) -> None:
+        self.cifComboBox.currentIndexChanged.connect(slot)

@@ -133,6 +133,13 @@ public:
   void add(const IComponent *comp, const std::shared_ptr<Parameter> &par,
            const std::string *const pDescription = nullptr);
 
+  /// Add a fitting parameter. Dedupes by (name, fittingFunction) rather than just name so that two
+  /// functions attached to the same component sharing a parameter name (e.g. IkedaCarpenterPV:Alpha0
+  /// and IkedaCarpenterMD:Alpha0) can coexist in the map.
+  void addFittingParameter(const IComponent *comp, const std::string &name, const std::string &fittingFunction,
+                           const std::string &value, const std::string *const pDescription = nullptr,
+                           const std::string &pVisible = "true");
+
   /** @name Helper methods for adding and updating parameter types  */
   /// Create or adjust "pos" parameter for a component
   void addPositionCoordinate(const IComponent *comp, const std::string &name, const double value,
@@ -196,6 +203,12 @@ public:
   /// Looks recursively upwards in the component tree for the first instance of
   /// a parameter with a specified type.
   std::shared_ptr<Parameter> getRecursiveByType(const IComponent *comp, const std::string &type) const;
+
+  /// Look for a fitting parameter recursively, picking the one whose embedded FitParameter function name
+  /// matches fittingFunction. Multiple fitting parameters can share a short name on the same component
+  /// (one per function) — getRecursive() would short-circuit on the first match, this walks them all.
+  std::shared_ptr<Parameter> getRecursiveFittingParameter(const IComponent *comp, const std::string &name,
+                                                          const std::string &fittingFunction) const;
 
   /** Get the values of a given parameter of all the components that have the
    * name: compName

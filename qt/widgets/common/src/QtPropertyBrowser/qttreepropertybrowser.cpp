@@ -493,12 +493,8 @@ void QtTreePropertyBrowserPrivate::propertyInserted(QtBrowserItem *index, const 
   QTreeWidgetItem *afterItem = m_indexToItem.value(afterIndex);
   QTreeWidgetItem *parentItem = m_indexToItem.value(index->parent());
 
-  QTreeWidgetItem *newItem = nullptr;
-  if (parentItem) {
-    newItem = new QTreeWidgetItem(parentItem, afterItem);
-  } else {
-    newItem = new QTreeWidgetItem(m_treeWidget, afterItem);
-  }
+  QTreeWidgetItem *newItem =
+      (parentItem) ? new QTreeWidgetItem(parentItem, afterItem) : new QTreeWidgetItem(m_treeWidget, afterItem);
   m_itemToIndex[newItem] = index;
   m_indexToItem[index] = newItem;
 

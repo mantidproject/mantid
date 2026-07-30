@@ -68,7 +68,7 @@ void Decoder::decodeBatch(const IMainWindowView *mwv, int batchIndex, const QMap
   auto runsPresenter = dynamic_cast<RunsPresenter *>(batchPresenter->m_runsPresenter.get());
   auto runsTablePresenter = dynamic_cast<RunsTablePresenter *>(runsPresenter->m_tablePresenter.get());
   auto reductionJobs = &runsTablePresenter->m_model.m_reductionJobs;
-  auto destinationPrecision = batchPresenter->m_mainPresenter->roundPrecision();
+  auto destinationPrecision = batchPresenter->mainPresenter().roundPrecision();
   auto searcher = dynamic_cast<QtCatalogSearcher *>(runsPresenter->m_searcher.get());
   // We must do the Runs tab first because this sets the instrument, which
   // other settings may need to be correct. There is also a notification to set
@@ -104,7 +104,7 @@ void Decoder::decodeExperiment(QtExperimentView *gui, const QMap<QString, QVaria
   decodePolarizationCorrectionsComboBox(gui->m_ui.polCorrComboBox, map);
   gui->m_polCorrEfficienciesWsSelector->setCurrentText(map[QString("polCorrEfficienciesWsSelector")].toString());
   gui->m_polCorrEfficienciesLineEdit->setText(map[QString("polCorrEfficienciesLineEdit")].toString());
-  gui->m_ui.polCorrFredrikzeSpinStateEdit->setText(map[QString("polCorrFredrikzeSpinStateEdit")].toString());
+  gui->m_ui.polCorrSpinStateEdit->setText(map[QString("polCorrSpinStateEdit")].toString());
   gui->m_ui.floodCorComboBox->setCurrentIndex(map[QString("floodCorComboBox")].toInt());
   gui->m_floodCorrWsSelector->setCurrentText(map[QString("floodWorkspaceWsSelector")].toString());
   gui->m_floodCorrLineEdit->setText(map[QString("floodWorkspaceLineEdit")].toString());

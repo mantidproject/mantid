@@ -7,8 +7,8 @@
 import mantid.simpleapi as mantid
 from mantid.kernel import logger
 
-from isis_powder.routines.common_enums import WORKSPACE_UNITS
-from isis_powder.pearl_routines import pearl_algs
+from Diffraction.isis_powder.routines.common_enums import WORKSPACE_UNITS
+from Diffraction.isis_powder.pearl_routines import pearl_algs
 
 # This file generates the various outputs for the PEARL instruments and saves them to their respective files
 

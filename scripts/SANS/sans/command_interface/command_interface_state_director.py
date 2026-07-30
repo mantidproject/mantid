@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from enum import Enum
-from sans.common.enums import DataType
 from sans.common.file_information import SANSFileInformationFactory
 from sans.state.AllStates import AllStates
 from sans.state.StateObjects.StateData import get_data_builder
@@ -108,22 +107,6 @@ class NParameterCommand(Command):
     def __init__(self, command_id, values):
         super(NParameterCommand, self).__init__(command_id)
         self.values = values
-
-
-class FitData(object):
-    """
-    Describes the fit mode. This is not part of the SANSType module since we only need it here. It is slightly
-    inconsistent but it is very localized.
-    """
-
-    class Sample(object):
-        pass
-
-    class Can(object):
-        pass
-
-    class Both(object):
-        pass
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -472,33 +455,20 @@ class CommandInterfaceStateDirector(object):
         self.add_to_processed_state_settings(new_state_entries)
 
     def _process_trans_fit(self, command):
-        def fit_type_to_data_type(fit_type_to_convert):
-            return DataType.CAN if fit_type_to_convert is FitData.Can else DataType.SAMPLE
-
         fit_data = command.values[0]
         wavelength_low = command.values[1]
         wavelength_high = command.values[2]
         fit_type = command.values[3]
         polynomial_order = command.values[4]
-        if fit_data is FitData.Both:
-            data_to_fit = [FitData.Sample, FitData.Can]
-        else:
-            data_to_fit = [fit_data]
-
-        new_state_entries = {}
-        for element in data_to_fit:
-            data_type = fit_type_to_data_type(element)
-            new_state_entries.update(
-                {
-                    FitId.GENERAL: fit_general(
-                        start=wavelength_low,
-                        stop=wavelength_high,
-                        fit_type=fit_type,
-                        data_type=data_type,
-                        polynomial_order=polynomial_order,
-                    )
-                }
+        new_state_entries = {
+            FitId.GENERAL: fit_general(
+                start=wavelength_low,
+                stop=wavelength_high,
+                fit_type=fit_type,
+                data_type=fit_data,
+                polynomial_order=polynomial_order,
             )
+        }
         self.add_to_processed_state_settings(new_state_entries)
 
     def _process_front_detector_rescale(self, command):

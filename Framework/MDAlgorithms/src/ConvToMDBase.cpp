@@ -25,11 +25,15 @@ Kernel::Logger ConvToMDBase::g_Log("MD-Algorithms");
  * converted events to.
  * @param ignoreZeros -- if true, 0 values on input histograms do not copied as
  * events into resulting MD workspace. By false(default), they do.
+ * @param useLogTimes -- if true and input is an EventWorkspace will use the
+ * value of the logs at the pulse time of each event instead of the average
+ * for computation of the rotation matrix or additional dimensions.
  */
 size_t ConvToMDBase::initialize(const MDAlgorithms::MDWSDescription &WSD,
-                                std::shared_ptr<MDAlgorithms::MDEventWSWrapper> inWSWrapper, bool ignoreZeros) {
-
+                                std::shared_ptr<MDAlgorithms::MDEventWSWrapper> inWSWrapper, bool ignoreZeros,
+                                bool useLogTimes) {
   m_ignoreZeros = ignoreZeros;
+  m_useLogTimes = useLogTimes;
   m_InWS2D = WSD.getInWS();
   // preprocessed detectors information:
   // check if detector information has been precalculated:
@@ -105,7 +109,7 @@ ConvToMDBase::ConvToMDBase()
       m_NSpectra(0),        // no valid spectra by default.
       m_NumThreads(-1),     // run with all cores availible
       m_ignoreZeros(false), // 0-s added to workspace
-      m_coordinateSystem(Mantid::Kernel::None) {}
+      m_coordinateSystem(Mantid::Kernel::None), m_useLogTimes(false) {}
 
 /**
  * Set the normalization options

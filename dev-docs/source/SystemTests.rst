@@ -186,6 +186,9 @@ data files but will time-out after 2 minutes. The time out limit can be set in t
 variables ``ExternalData_TIMEOUT_INACTIVITY`` and ``ExternalData_TIMEOUT_ABSOLUTE``.
 If using CMake these will need to be added as new string entries (value is in seconds).
 
+This guide assumes that all test data has already been retrieved from the remote store.
+For the instructions on how to do this, refer to `CMake targets for downloading test data <https://developer.mantidproject.org/DataFilesForTesting.html#cmake-targets-for-downloading-test-data>`__.
+
 Visual Studio/Xcode
 -------------------
 

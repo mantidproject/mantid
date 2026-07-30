@@ -1,0 +1,1 @@
+- The ISIS SANS Command Interface selects the correct range for transmission fitting when using the `TransFit` command for every container selector.

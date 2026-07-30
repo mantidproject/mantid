@@ -7,7 +7,7 @@
 import unittest
 import warnings
 
-from isis_powder.routines import instrument_settings, param_map_entry
+from Diffraction.isis_powder.routines import instrument_settings, param_map_entry
 
 
 class ISISPowderInstrumentSettingsTest(unittest.TestCase):

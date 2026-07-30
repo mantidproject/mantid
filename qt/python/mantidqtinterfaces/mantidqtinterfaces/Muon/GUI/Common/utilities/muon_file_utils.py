@@ -8,6 +8,7 @@ import os
 from mantid.api import FileFinder
 from mantidqtinterfaces.Muon.GUI.Common.message_box import warning
 from qtpy import QtWidgets
+from pathlib import Path
 
 allowed_instruments = ["EMU", "MUSR", "CHRONUS", "HIFI", "ARGUS", "PSI"]
 allowed_extensions = ["nxs", "nxs_v2", "bin", "nxs_v1"]
@@ -36,31 +37,38 @@ def check_file_exists(filename):
     return os.path.isfile(filename)
 
 
-def get_current_run_filename(instrument):
-    """
-    If instrument is supported, attempts to find the file on the ISIS network which
-    contains the data from its current (most up-to-date) run.
-    """
-
+def get_autosave_file_path(instrument):
     instrument_directory = get_instrument_directory(instrument)
     if instrument_directory is None:
         return ""
 
     file_path = _instrument_data_directory(instrument_directory) + FILE_SEP
     autosave_file_name = file_path + "autosave.run"
+    return os.path.abspath(autosave_file_name)
+
+
+def get_current_run_filename(instrument, autosave=None):
+    """
+    If instrument is supported, attempts to find the file on the ISIS network which
+    contains the data from its current (most up-to-date) run.
+    """
+    autosave_file_name = autosave or get_autosave_file_path(instrument)
+
+    autosave_file_path = Path(autosave_file_name)
+    autosave_directory = autosave_file_path.parent
     current_run_filename = ""
     if not check_file_exists(autosave_file_name):
         raise ValueError("Cannot find file : " + autosave_file_name)
     with open(autosave_file_name, "r") as autosave_file:
         for line in autosave_file:
             line.replace(" ", "")
-            file_name = file_path + line
-            if check_file_exists(FileFinder.getFullPath(file_name)):
+            file_name = autosave_directory / line
+            if check_file_exists(FileFinder.getFullPath(str(file_name))):
                 current_run_filename = file_name
     if current_run_filename == "":
         # Default to auto_A (replicates MuonAnalysis 1.0 behaviour)
-        current_run_filename = file_path + instrument_directory + "auto_A.tmp"
-        warning("Failed to find latest run, defaulting to " + current_run_filename)
+        current_run_filename = autosave_directory / (instrument + "auto_A.tmp")
+        warning("Failed to find latest run, defaulting to " + str(current_run_filename))
 
     return current_run_filename
 

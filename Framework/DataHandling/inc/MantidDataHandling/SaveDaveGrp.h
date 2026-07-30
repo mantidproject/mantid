@@ -43,6 +43,7 @@ public:
   const std::string category() const override { return "DataHandling\\Text;Inelastic\\DataHandling"; }
   /// Algorithm's aliases
   const std::string alias() const override { return "SaveDASC"; }
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   /// Initialise the properties

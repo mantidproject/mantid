@@ -1,0 +1,1 @@
+- The :ref:`Moments<inelastic-moments>` tab now correctly sets the ``EMin`` and ``EMax`` value for the *MomentsModel* when plotting new data so that it is correctly propagated through to the :ref:`SofQWMoments <algm-SofQWMoments>` algorithm initialization.

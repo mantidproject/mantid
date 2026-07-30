@@ -20,6 +20,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <unordered_set>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -77,26 +78,71 @@ Instrument_const_sptr fetchInstrument(WorkspaceGroup const *const groupWS) {
   return matrixWS->getInstrument();
 }
 
-// Helper function to check valid spin states
 bool isValidSpinState(const std::vector<std::string> &spinStates, const std::string &analysisMode) {
+  if (spinStates.empty()) {
+    return true;
+  }
+
   if (analysisMode == PNR_LABEL) {
-    // for PR, spinStates must be "p,a", "a,p", or empty vector
-    return (spinStates.size() == 2 &&
-            ((spinStates[0] == Mantid::Algorithms::SpinStateConfigurationsFredrikze::PARA &&
-              spinStates[1] == Mantid::Algorithms::SpinStateConfigurationsFredrikze::ANTI) ||
-             (spinStates[0] == Mantid::Algorithms::SpinStateConfigurationsFredrikze::ANTI &&
-              spinStates[1] == Mantid::Algorithms::SpinStateConfigurationsFredrikze::PARA))) ||
-           spinStates.empty();
-  } else if (analysisMode == PA_LABEL) {
-    // For PA, spinStates size must be 4 or empty
-    return (spinStates.size() == 4 || spinStates.empty());
+    return spinStates.size() == 2 && ((spinStates[0] == Mantid::Algorithms::SpinStateConfigurationsFredrikze::PARA &&
+                                       spinStates[1] == Mantid::Algorithms::SpinStateConfigurationsFredrikze::ANTI) ||
+                                      (spinStates[0] == Mantid::Algorithms::SpinStateConfigurationsFredrikze::ANTI &&
+                                       spinStates[1] == Mantid::Algorithms::SpinStateConfigurationsFredrikze::PARA));
+  }
+  if (analysisMode == PA_LABEL) {
+    const std::unordered_set<std::string> validStates = {
+        Mantid::Algorithms::SpinStateConfigurationsFredrikze::PARA_PARA,
+        Mantid::Algorithms::SpinStateConfigurationsFredrikze::PARA_ANTI,
+        Mantid::Algorithms::SpinStateConfigurationsFredrikze::ANTI_PARA,
+        Mantid::Algorithms::SpinStateConfigurationsFredrikze::ANTI_ANTI};
+    const std::unordered_set<std::string> uniqueStates(spinStates.cbegin(), spinStates.cend());
+    return uniqueStates == validStates;
   }
 
   return false;
 }
 
+bool isValidFredrikzeSpinStateOrder(const std::string &spinStatesStr) {
+  static const SpinStateValidator validator(std::unordered_set<int>{2, 4}, true, "p", "a", true);
+  return validator.isValid(spinStatesStr).empty();
+}
+
+std::string invalidSpinStateMessage(const std::string &propertyDescription, const std::string &spinStatesStr,
+                                    const std::string &analysisMode) {
+  return "Invalid " + propertyDescription + " spin state: " + spinStatesStr + " for " + analysisMode +
+         " The possible values are 'pp,pa,ap,aa' for PA, or 'p,a' for PNR, in any order";
+}
+
+std::string spinStateCountMessage(const std::string &propertyDescription, const std::string &spinStatesStr,
+                                  const std::string &analysisMode) {
+  auto const numberOfSpinStates = std::to_string(SpinStateHelpers::splitSpinStateString(spinStatesStr).size());
+  if (analysisMode == PNR_LABEL) {
+    return "The Fredrikze " + propertyDescription + " spin state order \"" + spinStatesStr + "\" contains " +
+           numberOfSpinStates +
+           " spin states, but PNR polarization correction expects 2 single spin states such as "
+           "\"p,a\".";
+  }
+  return "The Fredrikze " + propertyDescription + " spin state order \"" + spinStatesStr + "\" contains " +
+         numberOfSpinStates +
+         " spin states, but PA polarization correction expects 4 paired spin states such as \"pp,pa,ap,aa\".";
+}
+
+void validateSpinStateOrder(const std::string &propertyDescription, const std::string &spinStatesStr,
+                            const std::string &analysisMode) {
+  const auto spinStates = SpinStateHelpers::splitSpinStateString(spinStatesStr);
+  if (!isValidFredrikzeSpinStateOrder(spinStatesStr)) {
+    throw std::invalid_argument(invalidSpinStateMessage(propertyDescription, spinStatesStr, analysisMode));
+  }
+  if (!isValidSpinState(spinStates, analysisMode)) {
+    throw std::invalid_argument(spinStateCountMessage(propertyDescription, spinStatesStr, analysisMode));
+  }
+}
+
 void validateInputWorkspace(WorkspaceGroup_sptr &ws, const std::string &inputStatesStr,
                             const std::string &outputStatesStr, const std::string &analysisMode) {
+  validateSpinStateOrder("input", inputStatesStr, analysisMode);
+  validateSpinStateOrder("output", outputStatesStr, analysisMode);
+
   MatrixWorkspace_sptr lastWS;
   for (size_t i = 0; i < ws->size(); ++i) {
 
@@ -131,19 +177,6 @@ void validateInputWorkspace(WorkspaceGroup_sptr &ws, const std::string &inputSta
           throw std::invalid_argument("X-arrays do not match between all "
                                       "workspaces in the InputWorkspace "
                                       "WorkspaceGroup.");
-        }
-
-        const auto inputStates = SpinStateHelpers::splitSpinStateString(inputStatesStr);
-        const auto outputStates = SpinStateHelpers::splitSpinStateString(outputStatesStr);
-
-        if (!isValidSpinState(inputStates, analysisMode)) {
-          throw std::invalid_argument("Invalid input spin state: " + inputStatesStr + " for " + analysisMode +
-                                      " The possible values are 'pp,pa,ap,aa' for PA, or 'p,a' for PNR, in any order");
-        }
-
-        if (!isValidSpinState(outputStates, analysisMode)) {
-          throw std::invalid_argument("Invalid output spin state: " + outputStatesStr + " for " + analysisMode +
-                                      " The possible values are 'pp,pa,ap,aa' for PA, or 'p,a' for PNR, in any order");
         }
       }
 

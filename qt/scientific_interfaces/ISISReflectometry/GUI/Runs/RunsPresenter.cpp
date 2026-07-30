@@ -18,6 +18,7 @@
 #include "QtCatalogSearcher.h"
 
 #include <algorithm>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
@@ -49,8 +50,8 @@ RunsPresenter::RunsPresenter(IRunsView *mainView, ProgressableView *progressable
                              IFileHandler *fileHandler)
     : m_runNotifier(std::make_unique<CatalogRunNotifier>(mainView)),
       m_searcher(std::make_unique<QtCatalogSearcher>(mainView)), m_view(mainView), m_progressView(progressableView),
-      m_mainPresenter(nullptr), m_messageHandler(messageHandler), m_fileHandler(fileHandler),
-      m_instruments(std::move(instruments)), m_thetaTolerance(thetaTolerance), m_tableUnsaved{false} {
+      m_messageHandler(messageHandler), m_fileHandler(fileHandler), m_instruments(std::move(instruments)),
+      m_thetaTolerance(thetaTolerance), m_tableUnsaved{false} {
 
   assert(m_view != nullptr);
   m_view->subscribe(this);
@@ -71,6 +72,13 @@ RunsPresenter::~RunsPresenter() {
  * @param mainPresenter :: [input] A main presenter
  */
 void RunsPresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) { m_mainPresenter = mainPresenter; }
+
+IBatchPresenter &RunsPresenter::mainPresenter() const {
+  if (!m_mainPresenter) {
+    throw std::runtime_error("RunsPresenter does not have a main presenter.");
+  }
+  return *m_mainPresenter;
+}
 
 /** Initialise the list of available instruments.
  * @param selectedInstrument : Optional name of an instrument to try and select from the list.
@@ -136,7 +144,7 @@ void RunsPresenter::notifyChangeInstrumentRequested() {
   if (changeInstrumentPrevented(newName))
     m_view->setSearchInstrument(instrumentName());
   else
-    m_mainPresenter->notifyChangeInstrumentRequested(newName);
+    mainPresenter().notifyChangeInstrumentRequested(newName);
 }
 
 void RunsPresenter::notifyExportSearchResults() const {
@@ -172,17 +180,17 @@ bool RunsPresenter::notifyChangeInstrumentRequested(std::string const &instrumen
   if (changeInstrumentPrevented(instrumentName))
     return false;
 
-  m_mainPresenter->notifyChangeInstrumentRequested(instrumentName);
+  mainPresenter().notifyChangeInstrumentRequested(instrumentName);
   return true;
 }
 
-void RunsPresenter::notifyResumeReductionRequested() { m_mainPresenter->notifyResumeReductionRequested(); }
+void RunsPresenter::notifyResumeReductionRequested() { mainPresenter().notifyResumeReductionRequested(); }
 
-void RunsPresenter::notifyPauseReductionRequested() { m_mainPresenter->notifyPauseReductionRequested(); }
+void RunsPresenter::notifyPauseReductionRequested() { mainPresenter().notifyPauseReductionRequested(); }
 
-void RunsPresenter::notifyResumeAutoreductionRequested() { m_mainPresenter->notifyResumeAutoreductionRequested(); }
+void RunsPresenter::notifyResumeAutoreductionRequested() { mainPresenter().notifyResumeAutoreductionRequested(); }
 
-void RunsPresenter::notifyPauseAutoreductionRequested() { m_mainPresenter->notifyPauseAutoreductionRequested(); }
+void RunsPresenter::notifyPauseAutoreductionRequested() { mainPresenter().notifyPauseAutoreductionRequested(); }
 
 void RunsPresenter::notifyStartMonitor() { startMonitor(); }
 
@@ -315,14 +323,14 @@ void RunsPresenter::notifyInstrumentChanged(std::string const &instrumentName) {
   tablePresenter()->notifyInstrumentChanged(instrumentName);
 }
 
-std::string RunsPresenter::instrumentName() const { return m_mainPresenter->instrumentName(); }
+std::string RunsPresenter::instrumentName() const { return mainPresenter().instrumentName(); }
 
 void RunsPresenter::notifyTableChanged() { m_tableUnsaved = true; }
 
-void RunsPresenter::notifyRowContentChanged(Row &changedRow) { m_mainPresenter->notifyRowContentChanged(changedRow); }
+void RunsPresenter::notifyRowContentChanged(Row &changedRow) { mainPresenter().notifyRowContentChanged(changedRow); }
 
 void RunsPresenter::notifyGroupNameChanged(Group &changedGroup) {
-  m_mainPresenter->notifyGroupNameChanged(changedGroup);
+  mainPresenter().notifyGroupNameChanged(changedGroup);
 }
 
 void RunsPresenter::settingsChanged() { tablePresenter()->settingsChanged(); }
@@ -382,16 +390,16 @@ void RunsPresenter::autoreduceNewRuns() {
   if (rowsToTransfer.size() > 0)
     transfer(rowsToTransfer, TransferMatch::Strict);
 
-  m_mainPresenter->notifyResumeReductionRequested();
+  mainPresenter().notifyResumeReductionRequested();
 }
 
-bool RunsPresenter::isProcessing() const { return m_mainPresenter->isProcessing(); }
+bool RunsPresenter::isProcessing() const { return mainPresenter().isProcessing(); }
 
-bool RunsPresenter::isAutoreducing() const { return m_mainPresenter->isAutoreducing(); }
+bool RunsPresenter::isAutoreducing() const { return mainPresenter().isAutoreducing(); }
 
-bool RunsPresenter::isAnyBatchProcessing() const { return m_mainPresenter->isAnyBatchProcessing(); }
+bool RunsPresenter::isAnyBatchProcessing() const { return mainPresenter().isAnyBatchProcessing(); }
 
-bool RunsPresenter::isAnyBatchAutoreducing() const { return m_mainPresenter->isAnyBatchAutoreducing(); }
+bool RunsPresenter::isAnyBatchAutoreducing() const { return mainPresenter().isAnyBatchAutoreducing(); }
 
 bool RunsPresenter::changeInstrumentPrevented(std::string const &newName) const {
   return newName != instrumentName() && overwriteSearchResultsPrevented();
@@ -400,20 +408,19 @@ bool RunsPresenter::changeInstrumentPrevented(std::string const &newName) const 
 bool RunsPresenter::hasUnsavedChanges() const { return m_tableUnsaved || m_searcher->hasUnsavedChanges(); }
 
 bool RunsPresenter::overwriteSearchResultsAndTablePrevented() const {
-  return hasUnsavedChanges() &&
-         !m_mainPresenter->discardChanges("This will cause unsaved changes in the search results "
-                                          "and main table to be lost. Continue?");
+  return hasUnsavedChanges() && !mainPresenter().discardChanges("This will cause unsaved changes in the search results "
+                                                                "and main table to be lost. Continue?");
 }
 
 bool RunsPresenter::overwriteTablePrevented() const {
-  return m_tableUnsaved && !m_mainPresenter->discardChanges("This will cause unsaved changes in "
-                                                            "the table to be lost. Continue?");
+  return m_tableUnsaved && !mainPresenter().discardChanges("This will cause unsaved changes in "
+                                                           "the table to be lost. Continue?");
 }
 
 bool RunsPresenter::overwriteSearchResultsPrevented() const {
   return m_searcher->hasUnsavedChanges() &&
-         !m_mainPresenter->discardChanges("This will cause unsaved changes in the search results to be "
-                                          "lost. Continue?");
+         !mainPresenter().discardChanges("This will cause unsaved changes in the search results to be "
+                                         "lost. Continue?");
 }
 
 bool RunsPresenter::searchInProgress() const { return m_searcher->searchInProgress(); }
@@ -487,7 +494,7 @@ void RunsPresenter::transfer(const std::set<int> &rowsToTransfer, const Transfer
     }
 
     tablePresenter()->mergeAdditionalJobs(jobs);
-    m_mainPresenter->notifyRunsTransferred();
+    mainPresenter().notifyRunsTransferred();
   }
 }
 
@@ -518,8 +525,8 @@ std::string RunsPresenter::liveDataReductionAlgorithm() { return "ReflectometryR
 
 std::string RunsPresenter::liveDataReductionOptions(const std::string &inputWorkspace, const std::string &instrument) {
   // Get the properties for the reduction algorithm from the settings tabs
-  auto options = m_mainPresenter->rowProcessingPropertiesDefault();
-  auto experimentState = m_mainPresenter->getBatchState({"experimentView", "perAngleDefaults", "rows"});
+  auto options = mainPresenter().rowProcessingPropertiesDefault();
+  auto experimentState = mainPresenter().getBatchState({"experimentView", "perAngleDefaults", "rows"});
 
   // Add other required input properties to the live data reduction algorithnm
   options->setPropertyValue("InputWorkspace", inputWorkspace);

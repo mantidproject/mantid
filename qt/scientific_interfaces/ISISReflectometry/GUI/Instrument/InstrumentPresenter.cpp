@@ -9,6 +9,7 @@
 #include "InstrumentOptionDefaults.h"
 #include "MantidGeometry/Instrument_fwd.h"
 #include <ostream>
+#include <stdexcept>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
@@ -33,14 +34,21 @@ InstrumentPresenter::InstrumentPresenter(IInstrumentView *view, Instrument instr
 
 void InstrumentPresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) { m_mainPresenter = mainPresenter; }
 
+IBatchPresenter &InstrumentPresenter::mainPresenter() const {
+  if (!m_mainPresenter) {
+    throw std::runtime_error("InstrumentPresenter does not have a main presenter.");
+  }
+  return *m_mainPresenter;
+}
+
 void InstrumentPresenter::notifySettingsChanged() {
   updateModelFromView();
-  m_mainPresenter->notifySettingsChanged();
+  mainPresenter().notifySettingsChanged();
 }
 
 void InstrumentPresenter::notifyRestoreDefaultsRequested() {
   // Trigger a reload of the instrument to get up-to-date settings.
-  m_mainPresenter->notifyUpdateInstrumentRequested();
+  mainPresenter().notifyUpdateInstrumentRequested();
   restoreDefaults();
 }
 
@@ -53,9 +61,9 @@ void InstrumentPresenter::notifyBrowseToCalibrationFileRequested() {
 
 Instrument const &InstrumentPresenter::instrument() const { return m_model; }
 
-bool InstrumentPresenter::isProcessing() const { return m_mainPresenter->isProcessing(); }
+bool InstrumentPresenter::isProcessing() const { return mainPresenter().isProcessing(); }
 
-bool InstrumentPresenter::isAutoreducing() const { return m_mainPresenter->isAutoreducing(); }
+bool InstrumentPresenter::isAutoreducing() const { return mainPresenter().isAutoreducing(); }
 
 /** Tells the view to update the enabled/disabled state of all widgets
  * depending on whether they are currently applicable or not
@@ -119,7 +127,7 @@ void InstrumentPresenter::notifyInstrumentChanged(std::string const &instrumentN
 }
 
 void InstrumentPresenter::restoreDefaults() {
-  auto const instr = m_mainPresenter->instrument();
+  auto const instr = mainPresenter().instrument();
   try {
     m_model = m_instrumentDefaults->get(instr);
   } catch (std::invalid_argument &ex) {

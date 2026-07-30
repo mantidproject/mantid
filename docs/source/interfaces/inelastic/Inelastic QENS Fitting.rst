@@ -188,8 +188,8 @@ single fit can be performed using the Fit Single Spectrum button underneath the
 preview plot. A simultaneous fit may be performed in a very similar fashion by changeing the Fit Type to Simultaneous
 and the clicking run.
 
-The :ref:`Peters model <func-MsdPeters>` [1] reduces to a :ref:`Gaussian <func-MsdGauss>` at large
-(towards infinity) beta. The :ref:`Yi Model <func-MsdYi>` [2] reduces to a :ref:`Gaussian <func-MsdGauss>` at sigma
+The :ref:`Peters model <func-MsdPeters>` [1]_ reduces to a :ref:`Gaussian <func-MsdGauss>` at large
+(towards infinity) beta. The :ref:`Yi Model <func-MsdYi>` [2]_ reduces to a :ref:`Gaussian <func-MsdGauss>` at sigma
 equal to zero.
 
 .. interface:: QENS Fitting
@@ -520,9 +520,10 @@ Acceptance Rate
 The FABADA minimizer can output a PDF group workspace when the PDF option is ticked. If this happens,
 then it is possible to plot this PDF data using the output options at the bottom of the tabs.
 
-**References**
+References
+----------
 
-1. Peters & Kneller, Journal of Chemical Physics, 139, 165102 (2013)
-2. Yi et al, J Phys Chem B 116, 5028 (2012)
+.. [1] Peters & Kneller, Journal of Chemical Physics, 139, 165102 (2013)
+.. [2] Yi et al, J Phys Chem B 116, 5028 (2012)
 
 .. categories:: Interfaces Inelastic

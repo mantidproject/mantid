@@ -8,9 +8,11 @@ Running the Unit Tests
 Overview
 ########
 
-We use `CTest <https://cmake.org/cmake/help/latest/manual/ctest.1.html>`__
-for building and running our unit tests. This wraps the underlying
-`cxxtest <cxxtest>`__ or other (e.g. pyunit) test code.
+We use `CTest <https://cmake.org/cmake/help/latest/manual/ctest.1.html>`__ for building and running our unit tests.
+This wraps the underlying `cxxtest <cxxtest>`__ or other (e.g. pyunit) test code.
+
+This guide assumes that all test data has already been retrieved from the remote store.
+For the instructions on how to do this, refer to `CMake targets for downloading test data <https://developer.mantidproject.org/DataFilesForTesting.html#cmake-targets-for-downloading-test-data>`__.
 
 CMake/CTest: Command Line
 #########################

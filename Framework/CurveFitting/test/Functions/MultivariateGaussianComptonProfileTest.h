@@ -28,13 +28,13 @@ public:
 
   void test_Initialized_Function_Has_Expected_Parameters_In_Right_Order() {
     Mantid::API::IFunction_sptr profile = createFunction();
-    static const size_t nparams(5);
+    static const size_t nParams(5);
     auto currentNames = profile->getParameterNames();
-    const size_t nnames = currentNames.size();
-    TS_ASSERT_EQUALS(nparams, nnames);
-    if (nnames == nparams) {
-      const char *expectedParams[nparams] = {"Mass", "Intensity", "SigmaX", "SigmaY", "SigmaZ"};
-      for (size_t i = 0; i < nnames; ++i) {
+    const size_t nNames = currentNames.size();
+    TS_ASSERT_EQUALS(nParams, nNames);
+    if (nNames == nParams) {
+      const char *expectedParams[nParams] = {"Mass", "Intensity", "SigmaX", "SigmaY", "SigmaZ"};
+      for (size_t i = 0; i < nNames; ++i) {
         TS_ASSERT_EQUALS(expectedParams[i], currentNames[i]);
       }
     }

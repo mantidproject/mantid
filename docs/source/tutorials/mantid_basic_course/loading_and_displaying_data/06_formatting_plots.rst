@@ -139,7 +139,7 @@ Please note especially the shortcuts `k` and `l`, which are useful for quickly s
 
 * :ref:`02_scripting_plots`
 * :ref:`plotting`
-* `Matplotlib Keyboard Shortcuts <https://matplotlib.org/3.1.1/users/navigation_toolbar.html#navigation-keyboard-shortcuts>`_
+* `Matplotlib Keyboard Shortcuts <https://matplotlib.org/stable/users/explain/figure/interactive.html#navigation-keyboard-shortcuts>`_
 
 .. |FigureOptionsGear.png| image:: /images/FigureOptionsGear.png
    :width: 150px

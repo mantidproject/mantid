@@ -6,10 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import mantid
 
-from isis_powder.abstract_inst import AbstractInst
-from isis_powder.routines.instrument_settings import InstrumentSettings
-from isis_powder.routines.param_map_entry import ParamMapEntry
-from isis_powder.routines import common, run_details, yaml_parser
+from Diffraction.isis_powder.abstract_inst import AbstractInst
+from Diffraction.isis_powder.routines.instrument_settings import InstrumentSettings
+from Diffraction.isis_powder.routines.param_map_entry import ParamMapEntry
+from Diffraction.isis_powder.routines import common, run_details, yaml_parser
 
 import os
 import random
@@ -238,11 +238,11 @@ class ISISPowderAbstractInstrumentTest(unittest.TestCase):
         self.assertRaises(ValueError, mock_inst.set_beam_parameters, height="height", width=-2)
         self.assertRaises(ValueError, mock_inst.set_beam_parameters, height=-1.234, width=True)
 
-    @patch("isis_powder.routines.common.remove_intermediate_workspace")
-    @patch("isis_powder.routines.common.keep_single_ws_unit")
-    @patch("isis_powder.abstract_inst.AbstractInst._output_focused_ws")
-    @patch("isis_powder.abstract_inst.AbstractInst._get_input_batching_mode")
-    @patch("isis_powder.abstract_inst.AbstractInst._get_run_details")
+    @patch("Diffraction.isis_powder.routines.common.remove_intermediate_workspace")
+    @patch("Diffraction.isis_powder.routines.common.keep_single_ws_unit")
+    @patch("Diffraction.isis_powder.abstract_inst.AbstractInst._output_focused_ws")
+    @patch("Diffraction.isis_powder.abstract_inst.AbstractInst._get_input_batching_mode")
+    @patch("Diffraction.isis_powder.abstract_inst.AbstractInst._get_run_details")
     def test_output_focused_runs_individual_batch_mode(
         self, mock_get_run_details, mock_get_mode, mock_output_ws, mock_keep_unit, mock_remove_ws
     ):
@@ -256,11 +256,11 @@ class ISISPowderAbstractInstrumentTest(unittest.TestCase):
         expected_calls = [call(d_spacing_group=run, tof_group=run, unit_to_keep=None) for run in runs]
         mock_keep_unit.assert_has_calls(expected_calls)
 
-    @patch("isis_powder.routines.common.remove_intermediate_workspace")
-    @patch("isis_powder.routines.common.keep_single_ws_unit")
-    @patch("isis_powder.abstract_inst.AbstractInst._output_focused_ws")
-    @patch("isis_powder.abstract_inst.AbstractInst._get_input_batching_mode")
-    @patch("isis_powder.abstract_inst.AbstractInst._get_run_details")
+    @patch("Diffraction.isis_powder.routines.common.remove_intermediate_workspace")
+    @patch("Diffraction.isis_powder.routines.common.keep_single_ws_unit")
+    @patch("Diffraction.isis_powder.abstract_inst.AbstractInst._output_focused_ws")
+    @patch("Diffraction.isis_powder.abstract_inst.AbstractInst._get_input_batching_mode")
+    @patch("Diffraction.isis_powder.abstract_inst.AbstractInst._get_run_details")
     def test_output_focused_runs_summed_batch_mode(
         self, mock_get_run_details, mock_get_mode, mock_output_ws, mock_keep_unit, mock_remove_ws
     ):

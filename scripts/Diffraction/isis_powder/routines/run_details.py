@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from isis_powder.routines import common, yaml_parser
+from Diffraction.isis_powder.routines import common, yaml_parser
 import os
 
 

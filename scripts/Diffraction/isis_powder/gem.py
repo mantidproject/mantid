@@ -6,9 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
 
-from isis_powder.abstract_inst import AbstractInst
-from isis_powder.gem_routines import gem_advanced_config, gem_algs, gem_param_mapping, gem_output, gem_calibration_algs
-from isis_powder.routines import absorb_corrections, common, instrument_settings, common_output
+from Diffraction.isis_powder.abstract_inst import AbstractInst
+from Diffraction.isis_powder.gem_routines import gem_advanced_config, gem_algs, gem_param_mapping, gem_output, gem_calibration_algs
+from Diffraction.isis_powder.routines import absorb_corrections, common, instrument_settings, common_output
 
 
 class Gem(AbstractInst):

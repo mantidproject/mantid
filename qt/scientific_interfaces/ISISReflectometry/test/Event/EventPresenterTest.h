@@ -44,6 +44,12 @@ public:
     TS_ASSERT(isNoSlicing(presenter.slicing()));
   }
 
+  void testThrowsWhenMainPresenterHasNotBeenAccepted() {
+    auto presenter = makePresenter(false);
+    TS_ASSERT_THROWS_EQUALS(presenter.notifyReductionResumed(), std::runtime_error const &e, std::string(e.what()),
+                            "EventPresenter does not have a main presenter.");
+  }
+
   void testInitializesWithStateFromViewWhenChangingToUniformSlicingByTime() {
     auto presenter = makePresenter();
     auto const secondsPerSlice = 10.0;
@@ -208,9 +214,11 @@ private:
   NiceMock<MockEventView> m_view;
   NiceMock<MockBatchPresenter> m_mainPresenter;
 
-  EventPresenter makePresenter() {
+  EventPresenter makePresenter(bool const acceptMainPresenter = true) {
     auto presenter = EventPresenter(&m_view);
-    presenter.acceptMainPresenter(&m_mainPresenter);
+    if (acceptMainPresenter) {
+      presenter.acceptMainPresenter(&m_mainPresenter);
+    }
     return presenter;
   }
 

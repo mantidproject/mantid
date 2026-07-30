@@ -74,6 +74,13 @@ class LoadRunWidgetViewTest(unittest.TestCase):
 
         self.assertEqual(result, "")
 
+    def test_set_autosave_file_path(self):
+        test_path = "/path/to/autosave.run"
+        self.view.set_autosave_file_path(test_path)
+        result = self.view.get_autosave_file_path()
+
+        self.assertEqual(result, test_path)
+
 
 if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

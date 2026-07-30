@@ -73,7 +73,12 @@ public:
   void setDisplayNormalization(Mantid::API::IMDWorkspace_sptr mdWorkspace,
                                Mantid::API::MatrixWorkspace_sptr underlyingWorkspace) const override;
 
+  void updateRotMat(const std::vector<double> &newMat) override { m_RotMat = newMat; }
+  std::pair<coord_t, coord_t> getDimBounds(size_t dim) const override;
+  void setInvertRot(bool isInvert) override { m_invertRot = isInvert; }
+
 protected:
+  void calcMatrixCoordLinSys(double qx, double qy, double qz, std::array<coord_t, 3> &Coord) const;
   //  directions to the detectors
   double m_ex, m_ey, m_ez;
   // the matrix which transforms the neutron momentums from laboratory to
@@ -108,12 +113,15 @@ protected:
   // untill Mantid masks spectra by 0 instead of NaNs, when switched to NaN-s --
   // remove
   int *m_pDetMasks;
+  bool m_invertRot; // whether rot matrix requires inverting prior to solving q
 
 private:
   /// how to transform workspace data in elastic case
-  inline bool calcMatrixCoordElastic(const double &k0, std::vector<coord_t> &Coord) const;
+  inline bool calcMatrixCoordElastic(const double k0, std::vector<coord_t> &Coord) const;
   /// how to transform workspace data in inelastic case
-  inline bool calcMatrixCoordInelastic(const double &deltaE, std::vector<coord_t> &Coord) const;
+  inline bool calcMatrixCoordInelastic(const double deltaE, std::vector<coord_t> &Coord) const;
+  //// matrix coordinate transformation of q
+  inline bool applyCoordTransf(double qx, double qy, double qz, std::vector<coord_t> &Coord) const;
 };
 
 } // namespace MDAlgorithms

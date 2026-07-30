@@ -1,6 +1,7 @@
 set(BATCH_SRC_FILES
     BatchPresenter.cpp
     QtBatchView.cpp
+    IBatchJobAlgorithm.cpp
     BatchJobAlgorithm.cpp
     BatchJobManager.cpp
     GroupProcessingAlgorithm.cpp

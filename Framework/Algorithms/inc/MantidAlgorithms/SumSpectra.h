@@ -9,7 +9,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
-#include <set>
+#include <vector>
 
 namespace Mantid {
 
@@ -98,8 +98,8 @@ private:
   size_t m_numberOfSpectra{0};
   /// Blocksize of the input workspace
   size_t m_yLength{0};
-  /// Set of indices to sum
-  std::set<size_t> m_indices;
+  /// Sorted list of indices to sum
+  std::vector<size_t> m_indices;
 
   // if calculating additional workspace with specially weighted averages is
   // necessary

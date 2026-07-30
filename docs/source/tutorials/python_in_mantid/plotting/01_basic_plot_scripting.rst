@@ -19,26 +19,71 @@ Right-clicking a workspace from the Workspaces Toolbox and selecting **Show Data
 
 Right clicking on a row or a column allows a plot of that spectrum or time bin, which can also be achieved in Python using the `plotSpectrum()` or `plotBin()` functions, e.g.
 
-.. code-block:: python
+.. testcode:: PlottingWithoutErrorBars
+
+    from matplotlib.container import ErrorbarContainer
 
     RawData = Load("MAR11015")
 
     graph_spec = plotSpectrum(RawData, 0)
     graph_time = plotBin(RawData, 0)
 
+    # Verify no errorbars added to plots
+    graph_spec_has_errorbars = any(isinstance(c, ErrorbarContainer) for c in graph_spec.axes[0].containers)
+    graph_time_has_errorbars = any(isinstance(c, ErrorbarContainer) for c in graph_time.axes[0].containers)
+
+    print(f"The spectrum graph contains errorbars - {graph_spec_has_errorbars}")
+    print(f"The time-of-flight graph contains errorbars - {graph_time_has_errorbars}")
+
+Output:
+
+.. testoutput:: PlottingWithoutErrorBars
+
+    The spectrum graph contains errorbars - False
+    The time-of-flight graph contains errorbars - False
+
+.. testcleanup:: PlottingWithoutErrorBars
+
+    DeleteWorkspace("RawData")
+
+
 To include error bars on a plot, there is an extra argument that can be set to 'True' to enable them, e.g.
 
-.. code-block:: python
+.. testcode:: PlottingWithErrorBars
+
+    from matplotlib.container import ErrorbarContainer
+
+    RawData = Load("MAR11015")
 
     graph_spec = plotSpectrum(RawData, 0, error_bars=True)
     graph_time = plotBin(RawData, 0, error_bars=True)
 
+    # Verify errorbars added to plots
+    graph_spec_has_errorbars = any(isinstance(c, ErrorbarContainer) for c in graph_spec.axes[0].containers)
+    graph_time_has_errorbars = any(isinstance(c, ErrorbarContainer) for c in graph_time.axes[0].containers)
+
+    print(f"The spectrum graph contains errorbars - {graph_spec_has_errorbars}")
+    print(f"The time-of-flight graph contains errorbars - {graph_time_has_errorbars}")
+
+Output:
+
+.. testoutput:: PlottingWithErrorBars
+
+    The spectrum graph contains errorbars - True
+    The time-of-flight graph contains errorbars - True
+
+.. testcleanup:: PlottingWithErrorBars
+
+    DeleteWorkspace("RawData")
+
 For setting scales, axis titles, plot titles etc. you can use:
 
-.. code-block:: python
+.. testcode:: AddingScalesAndTitlesToPlots
+
+    import matplotlib.pyplot as plt
 
     RawData = Load("MAR11015")
-    plotSpectrum(RawData,1, error_bars=True)
+    plotSpectrum(RawData, 1, error_bars=True)
 
     # Get current axes of the graph
     fig, axes = plt.gcf(), plt.gca()
@@ -49,7 +94,8 @@ For setting scales, axis titles, plot titles etc. you can use:
     axes.set_xlim(0,5000)
     axes.set_ylim(0.001,1500)
 
-    #C hange the y-axis label
+    # Change the labels
+    axes.set_xlabel(r'Time-of-flight ($\mu s$)')
     axes.set_ylabel(r'Counts ($\mu s$)$^{-1}$')
 
     # Add legend entries
@@ -58,33 +104,89 @@ For setting scales, axis titles, plot titles etc. you can use:
     # Give the graph a modest title
     plt.title("My Wonderful Plot", fontsize=20)
 
+    # Verify the scale, legend, axis limits and labels
+    print(f"The yscale is - {axes.get_yscale()}")
+    print(f"The x-limits are - [{float(axes.get_xlim()[0])}, {float(axes.get_xlim()[1])}]")
+    print(f"The y-limits are - [{float(axes.get_ylim()[0])}, {float(axes.get_ylim()[1])}]")
+    print(f"The x-axis label is - {axes.get_xlabel()}")
+    print(f"The y-axis label is - {axes.get_ylabel()}")
+    print(f"The plot title is - {axes.get_title()}")
+    print(f"The plot legend is - {axes.get_legend().get_texts()[0].get_text()}")
+
+Output:
+
+.. testoutput:: AddingScalesAndTitlesToPlots
+
+    The yscale is - log
+    The x-limits are - [0.0, 5000.0]
+    The y-limits are - [0.001, 1500.0]
+    The x-axis label is - Time-of-flight ($\mu s$)
+    The y-axis label is - Counts ($\mu s$)$^{-1}$
+    The plot title is - My Wonderful Plot
+    The plot legend is - Good Line
+
+.. testcleanup:: AddingScalesAndTitlesToPlots
+
+    DeleteWorkspace("RawData")
+
 Multiple workspaces/spectra can be plotted by providing lists within the `plotSpectrum()` or `plotBin()` functions, e.g.
 
-.. code-block:: python
+.. testcode:: PlotMultipleSpectra
+
+    RawData1 = Load("MAR11015")
+    RawData2 = Load("MAR11060")
 
     # Plot multiple spectra from a single workspace
-    plotSpectrum(RawData, [0,1,3])
-
-    # Here you need to load files into RawData1 and RawData2 before the next two commands
+    graph_spec1 = plotSpectrum(RawData1, [0,1,3])
 
     # Plot a spectrum from different workspaces
-    plotSpectrum([RawData1,RawData2], 0)
+    graph_spec2 = plotSpectrum([RawData1,RawData2], 0)
 
     # Plot multiple spectra across multiple workspaces
-    plotSpectrum([RawData1,RawData2], [0,1,3])
+    graph_spec3 = plotSpectrum([RawData1,RawData2], [0,1,3])
+
+    # Verify the number of spectra in plots
+    print(f"The graph_spec1 plot contains {len(graph_spec1.axes[0].lines)} spectra")
+    print(f"The graph_spec2 plot contains {len(graph_spec2.axes[0].lines)} spectra")
+    print(f"The graph_spec3 plot contains {len(graph_spec3.axes[0].lines)} spectra")
+
+Output:
+
+.. testoutput:: PlotMultipleSpectra
+
+    The graph_spec1 plot contains 3 spectra
+    The graph_spec2 plot contains 2 spectra
+    The graph_spec3 plot contains 6 spectra
+
+.. testcleanup:: PlotMultipleSpectra
+
+    DeleteWorkspace(RawData1)
+    DeleteWorkspace(RawData2)
 
 To overplot on the same window:
 
-.. code-block:: python
+.. testcode:: OverPlottingWithTwoSpectra
 
     RawData = Load("MAR11015")
 
-    # Assign original plot to a window called graph_spce
+    # Assign original plot to a window called graph_spec
     graph_spec = plotSpectrum(RawData, 0)
 
     # Overplot on that window, without clearing it
     plotSpectrum(RawData, 1, window=graph_spec, clearWindow=False)
 
+    # Verify the number of spectra in plot
+    print(f"The plot contains {len(graph_spec.axes[0].lines)} spectra")
+
+Output:
+
+.. testoutput:: OverPlottingWithTwoSpectra
+
+    The plot contains 2 spectra
+
+.. testcleanup:: OverPlottingWithTwoSpectra
+
+    DeleteWorkspace("RawData")
 
 2D Colourfill and Contour Plots
 ===============================
@@ -186,9 +288,8 @@ To overplot on the same window:
     from mantid.simpleapi import *
     import matplotlib.pyplot as plt
 
-    # This file can be found in the Usage Examples folder, available
-    # here https://www.mantidproject.org/installation/index#sample-data
-    data = Load('PG3_733.nxs')
+    data = Load('164198.nxs')
+    data=ExtractSpectra(data, XMin=470, XMax=490, StartWorkspaceIndex=260, EndWorkspaceIndex=270)
 
     fig, ax = plt.subplots(subplot_kw={'projection':'mantid3d'})
     ax.plot_wireframe(data, color='green')

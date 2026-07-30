@@ -39,7 +39,7 @@ Alternatively, units of :math:`HWHM` are :math:`\mu eV` if units of
 References
 ----------
 
-.. [1] P. L. Hall and D. K. Ross, Mol. Phys. 42, 673 (1981) <http://dx.doi.org/10.1080/00268978100100521>
+.. [1] \P. L. Hall and D. K. Ross, Mol. Phys. 42, 673 (1981) <http://dx.doi.org/10.1080/00268978100100521>
 
 .. categories::
 

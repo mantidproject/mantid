@@ -13,7 +13,34 @@ using Mantid::Geometry::Component;
 using Mantid::Geometry::IComponent;
 using namespace boost::python;
 
+// forward declare
+namespace Mantid::Kernel {
+class Quat;
+class V3D;
+} // namespace Mantid::Kernel
+
 namespace {
+// Deprecation wrappers. Absolute/relative placement is available from the
+// index-based ComponentInfo access layer. See the 'Instrument Access via
+// SpectrumInfo, DetectorInfo, ComponentInfo' concept page. (The parameter and
+// description accessors are intentionally not deprecated yet; they have no
+// ComponentInfo equivalent and await the parameter-map redesign.)
+Mantid::Kernel::Quat getRotationDeprecated(const Component &self) {
+  PyErr_Warn(PyExc_DeprecationWarning, "'Component.getRotation()' is deprecated in Mantid 7.0, "
+                                       "use 'ComponentInfo.rotation' instead. "
+                                       "For more information, see the instrument access layers concept page: "
+                                       "https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html");
+  return self.getRotation();
+}
+
+Mantid::Kernel::V3D getRelativePosDeprecated(const Component &self) {
+  PyErr_Warn(PyExc_DeprecationWarning, "'Component.getRelativePos' is deprecated in Mantid 7.0, "
+                                       "use 'ComponentInfo.relativePosition' instead. "
+                                       "For more information, see the instrument access layers concept page: "
+                                       "https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html");
+  return self.getRelativePos();
+}
+
 GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
@@ -30,8 +57,6 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getRotationParameter, Component
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getStringParameter, Component::getStringParameter, 1, 2)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getIntParameter, Component::getIntParameter, 1, 2)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getParameterType, Component::getParameterType, 1, 2)
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getRotation, Component::getRotation, 0, 0)
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getRelativePos, Component::getRelativePos, 0, 0)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getParamShortDescription, Component::getParamShortDescription, 1, 2)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getParamDescription, Component::getParamDescription, 1, 2)
 
@@ -57,8 +82,10 @@ void export_Component() {
       .def("getIntParameter", &Component::getIntParameter,
            Component_getIntParameter((arg("self"), arg("pname"), arg("recursive") = true)))
       //
-      .def("getRotation", &Component::getRotation, Component_getRotation(arg("self")))
-      .def("getRelativePos", &Component::getRelativePos, Component_getRelativePos(arg("self")))
+      .def("getRotation", &getRotationDeprecated, arg("self"),
+           "Returns the absolute rotation as a Quat (deprecated, use ComponentInfo.rotation)")
+      .def("getRelativePos", &getRelativePosDeprecated, arg("self"),
+           "Returns the relative position as a V3D (deprecated, use ComponentInfo.relativePosition)")
       //
       .def("getParamShortDescription", &Component::getParamShortDescription,
            Component_getParamShortDescription((arg("self"), arg("pname"), arg("recursive") = true)))

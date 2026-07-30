@@ -282,13 +282,18 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             Direction.Input,
         )
         self.declareProperty(
+            "PolarizationCorrectionInputSpinStateOrder",
+            "",
+            "The order of spin states in the input workspace group. For Wildes corrections this is the flipper "
+            "configuration, e.g. '00,01,10,11' or '0,1'. For Fredrikze corrections this is the input spin state "
+            "order, e.g. 'pa,ap,pp,aa' or 'p,a'. If left empty, the correction default from the parameter file or "
+            "child algorithm is used.",
+            Direction.Input,
+        )
+        self.declareProperty(
             "FredrikzePolarizationSpinStateOrder",
             "",
-            "The spin state order of the workspaces in the workspace group to be passed to "
-            'PolarizationCorrectionsFredrikze. See the "Spin State Configurations" -> '
-            '"InputSpinStates" section of the PolarizationCorrectionsFredrikze v1 documentation for '
-            "more details. This is only applied to Fredrikze corrections. Wildes flipper "
-            "configurations are taken from the instrument's parameter file.",
+            "Deprecated. Use PolarizationCorrectionInputSpinStateOrder instead.",
             Direction.Input,
         )
 
@@ -647,9 +652,18 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         efficiencies_ws = self._loadPolarizationCorrectionWorkspace()
         if efficiencies_ws:
             alg.setProperty("PolarizationEfficiencies", efficiencies_ws)
-        alg.setProperty("FredrikzePolarizationSpinStateOrder", self.getPropertyValue("FredrikzePolarizationSpinStateOrder"))
+        alg.setProperty("PolarizationCorrectionInputSpinStateOrder", self._polarizationCorrectionInputSpinStateOrder())
         alg.execute()
         return alg
+
+    def _polarizationCorrectionInputSpinStateOrder(self):
+        input_spin_state_order = self.getPropertyValue("PolarizationCorrectionInputSpinStateOrder")
+        deprecated_input_spin_state_order = self.getPropertyValue("FredrikzePolarizationSpinStateOrder")
+        if input_spin_state_order and deprecated_input_spin_state_order and input_spin_state_order != deprecated_input_spin_state_order:
+            raise RuntimeError(
+                "PolarizationCorrectionInputSpinStateOrder and FredrikzePolarizationSpinStateOrder cannot both be set to different values."
+            )
+        return input_spin_state_order or deprecated_input_spin_state_order
 
     def _removePrefix(self, workspace, isTrans):
         """Remove the TOF prefix from the given workspace name"""

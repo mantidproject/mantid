@@ -4,9 +4,10 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from isis_powder.routines import common
+from Diffraction.isis_powder.routines import common
 import math
 from mantid import logger
+from mantid.kernel import MaterialBuilder, NumberDensityUnit
 
 property_err_string = "The following sample property was not passed as an argument: {}"
 
@@ -49,6 +50,7 @@ class SampleDetails(object):
         number_density = common.dictionary_key_helper(dictionary=kwargs, key="number_density", throws=False)
         number_density_effective = common.dictionary_key_helper(dictionary=kwargs, key="number_density_effective", throws=False)
         packing_fraction = common.dictionary_key_helper(dictionary=kwargs, key="packing_fraction", throws=False)
+        number_density_unit = common.dictionary_key_helper(dictionary=kwargs, key="number_density_unit", throws=False)
 
         if self.material_object is not None:
             self.print_sample_details()
@@ -63,6 +65,7 @@ class SampleDetails(object):
             number_density=number_density,
             number_density_effective=number_density_effective,
             packing_fraction=packing_fraction,
+            number_density_unit=number_density_unit,
         )
 
     def set_container(self, **kwargs):
@@ -74,6 +77,7 @@ class SampleDetails(object):
         number_density = common.dictionary_key_helper(dictionary=kwargs, key="number_density", throws=False)
         number_density_effective = common.dictionary_key_helper(dictionary=kwargs, key="number_density_effective", throws=False)
         packing_fraction = common.dictionary_key_helper(dictionary=kwargs, key="packing_fraction", throws=False)
+        number_density_unit = common.dictionary_key_helper(dictionary=kwargs, key="number_density_unit", throws=False)
         if self.container_material_object is not None:
             self.print_container_details()
             raise RuntimeError(
@@ -85,6 +89,7 @@ class SampleDetails(object):
             number_density=number_density,
             number_density_effective=number_density_effective,
             packing_fraction=packing_fraction,
+            number_density_unit=number_density_unit,
         )
         if self._shape_type.capitalize() == "Cylinder":
             self._container_shape = _HollowCylinder(
@@ -240,6 +245,8 @@ class SampleDetails(object):
             material_json["NumberDensity"] = self.material_object.number_density
         if self.material_object.number_density_effective:
             material_json["EffectiveNumberDensity"] = self.material_object.number_density_effective
+        if self.material_object.number_density_unit:
+            material_json["NumberDensityUnit"] = self.material_object.number_density_unit
         if self.material_object.packing_fraction:
             material_json["PackingFraction"] = self.material_object.packing_fraction
         if self.material_object.absorption_cross_section:
@@ -261,6 +268,8 @@ class SampleDetails(object):
                 container_material_json["NumberDensity"] = self.container_material_object.number_density
             if self.container_material_object.number_density_effective:
                 container_material_json["EffectiveNumberDensity"] = self.container_material_object.number_density_effective
+            if self.container_material_object.number_density_unit:
+                container_material_json["NumberDensityUnit"] = self.container_material_object.number_density_unit
             if self.container_material_object.packing_fraction:
                 container_material_json["PackingFraction"] = self.container_material_object.packing_fraction
             if self.container_material_object.absorption_cross_section:
@@ -273,7 +282,9 @@ class SampleDetails(object):
 
 
 class _Material(object):
-    def __init__(self, chemical_formula, number_density=None, number_density_effective=None, packing_fraction=None):
+    def __init__(
+        self, chemical_formula, number_density=None, number_density_effective=None, packing_fraction=None, number_density_unit=None
+    ):
         self.chemical_formula = chemical_formula
         # If it is not an element Mantid requires us to provide the number density
         # which is required for absorption corrections.
@@ -294,6 +305,7 @@ class _Material(object):
         self.number_density_effective = number_density_effective
 
         self.packing_fraction = packing_fraction
+        self.number_density_unit = _validate_number_density_unit(number_density_unit)
 
         # Advanced material properties
         self.absorption_cross_section = None
@@ -302,13 +314,38 @@ class _Material(object):
         # Internal flags so we are only allowed to set the material properties once
         self._is_material_props_set = False
 
+    def get_number_density_in_atoms(self):
+        """
+        Return the number density in atoms / Angstrom^3, converting from formula units if necessary.
+        This is the convention expected by quantities such as rho0 in PDFFourierTransform.
+        Returns None if no (non-effective) number density was supplied.
+        """
+        if self.number_density is None:
+            return None
+        if self.number_density_unit == "Formula Units":
+            return self.number_density * self._atoms_per_formula_unit()
+        return self.number_density
+
+    def _atoms_per_formula_unit(self):
+        # Build the material with a number density of 1 formula unit / Angstrom^3; Mantid then stores the
+        # number density in atoms, so the resulting value is the number of atoms per formula unit.
+        builder = (
+            MaterialBuilder().setFormula(self.chemical_formula).setNumberDensity(1.0).setNumberDensityUnit(NumberDensityUnit.FormulaUnits)
+        )
+        try:
+            material = builder.build()
+            return material.numberDensity
+        except RuntimeError:
+            logger.error(f"Unable to work out the number of atoms per formula unit for {self.chemical_formula}")
+            return
+
     def print_material(self):
         print("Material properties:")
         print("------------------------")
         print("Chemical formula: {}".format(self.chemical_formula))
 
-        if self.number_density:
-            print("Number Density: {}".format(self.number_density))
+        if self.number_density and self.number_density_unit:
+            print(f"Number Density (units: {self.number_density_unit}/Volume): {self.number_density}")
         if self.number_density_effective:
             print("Effective Number Density: {}".format(self.number_density_effective))
         if not self.number_density and not self.number_density_effective:
@@ -464,6 +501,17 @@ class _FlatPlateHolder(object):
             "FrontThick": self.front_thick,
             "BackThick": self.back_thick,
         }
+
+
+def _validate_number_density_unit(number_density_unit):
+    """
+    Confirm that the provided string for number density unit is a permitted string
+    """
+    if number_density_unit is None:
+        return "Atoms"
+    if number_density_unit not in ("Atoms", "Formula Units"):
+        raise ValueError(f"Invalid number_density_unit '{number_density_unit}'. Allowed values are 'Atoms' or 'Formula Units'.")
+    return number_density_unit
 
 
 def _check_value_is_physical(property_name, value):

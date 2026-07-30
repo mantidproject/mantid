@@ -61,10 +61,12 @@ public:
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_view.get()));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_model.get()));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_tab.get()));
 
     m_presenter.reset();
     m_model.reset();
     m_view.reset();
+    m_tab.reset();
     m_dataTable.reset();
   }
 
@@ -128,6 +130,32 @@ public:
     }
 
     m_presenter->updateTableFromModel();
+  }
+
+  void test_handleAddNumericData_adds_the_workspace_and_resolution_then_refreshes_the_plot() {
+    auto dialog = std::make_unique<ConvolutionAddWorkspaceDialog>(nullptr);
+
+    InSequence seq;
+    EXPECT_CALL(*m_model, addWorkspace(An<const std::string &>(), _)).Times(Exactly(1));
+    EXPECT_CALL(*m_model, setResolution(_, An<const std::string &>(), _)).Times(Exactly(1)).WillOnce(Return(true));
+    EXPECT_CALL(*m_view, clearTable()).Times(Exactly(1));
+    EXPECT_CALL(*m_tab, handleNumericDataAdded()).Times(Exactly(1));
+    // handleDataChanged is what makes the plot pick up the new data. Without it
+    // the row appears in the table but no spectra are plotted.
+    EXPECT_CALL(*m_tab, handleDataChanged()).Times(Exactly(1));
+
+    m_presenter->handleAddNumericData(dialog.get());
+  }
+
+  void test_handleAddNumericData_does_nothing_if_the_dialog_is_not_Convolution() {
+    auto dialog = std::make_unique<MantidQt::MantidWidgets::AddWorkspaceDialog>(nullptr);
+
+    EXPECT_CALL(*m_model, addWorkspace(An<const std::string &>(), _)).Times(Exactly(0));
+    EXPECT_CALL(*m_model, setResolution(_, An<const std::string &>(), _)).Times(Exactly(0));
+    EXPECT_CALL(*m_tab, handleNumericDataAdded()).Times(Exactly(0));
+    EXPECT_CALL(*m_tab, handleDataChanged()).Times(Exactly(0));
+
+    m_presenter->handleAddNumericData(dialog.get());
   }
 
   ///----------------------------------------------------------------------

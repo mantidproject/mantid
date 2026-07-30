@@ -32,7 +32,7 @@ ErrorReportUIBase, ErrorReportUI = load_ui(__file__, "errorreport.ui")
 
 
 class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
-    action = Signal(bool, int, str, str, str)
+    action = Signal(bool, bool, int, str, str, str)
     quit_signal = Signal()
     free_text_edited = False
     interface_manager = InterfaceManager()
@@ -127,10 +127,10 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
         self.quit_signal.emit()
 
     def fullShare(self):
-        self.action.emit(self.continue_working, True, self.input_name, self.input_email, self.input_text)
+        self.action.emit(self.continue_working, self.remember_contact_info, True, self.input_name, self.input_email, self.input_text)
 
     def noShare(self):
-        self.action.emit(self.continue_working, False, self.input_name, self.input_email, self.input_text)
+        self.action.emit(self.continue_working, self.remember_contact_info, False, self.input_name, self.input_email, self.input_text)
 
     def close_reporter(self, status):
         if status == 201 or status == -1:
@@ -217,3 +217,7 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
     @property
     def continue_working(self):
         return self.radioButtonContinue.isChecked()
+
+    @property
+    def remember_contact_info(self):
+        return self.rememberContactInfoCheckbox.isChecked()

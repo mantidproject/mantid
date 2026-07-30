@@ -35,6 +35,58 @@ public:
     TS_ASSERT(!sample.getName().compare("test"))
   }
 
+  IObject_sptr getSimpleMesh(const float x = 0.0, const float y = 0.0, const float z = 0.0) {
+    // create tetrahedral mesh and offset by x,y,z if distinct meshes are required
+    const std::vector<V3D> vertices{V3D(0.0 + x, 0.0 + y, 0.0 + z), V3D(1.0 + x, 0.0 + y, 0.0 + z),
+                                    V3D(0.0 + x, 1.0 + y, 0.0 + z), V3D(0.0 + x, 0.0 + y, 1.0 + z)};
+    // winding order should be CCW from outside the face
+    const std::vector<uint32_t> faces{0, 2, 1, 0, 1, 3, 1, 2, 3, 0, 3, 2};
+
+    const Material material;
+    return std::make_shared<MeshObject>(faces, vertices, material);
+  }
+
+  std::shared_ptr<SampleEnvironment> createTestEnvironment(const bool asCSG, const int nComponents = 2) {
+    using namespace Mantid::Geometry;
+    using namespace Mantid::Kernel;
+
+    // at centre
+    ShapeFactory factory;
+    std::shared_ptr<Container> can;
+    if (asCSG) {
+      can = std::make_shared<Container>(
+          factory.createShape(ComponentCreationHelper::sphereXML(0.01, V3D(0, 0, 0), "sp-1")));
+    } else {
+      can = std::make_shared<Container>(getSimpleMesh());
+    }
+    can->setID("8mm");
+    auto kit = std::make_shared<SampleEnvironment>("TestKit", can);
+    // before sample
+    for (auto i = 0; i < nComponents; i++) {
+      IObject_sptr comp;
+      // give any component a unique x translation of i +1 units so the shape validation is discrimantory
+      if (asCSG) {
+        comp = factory.createShape(ComponentCreationHelper::sphereXML(0.01, V3D(i + 1, 0, 0), "sp-1"));
+      } else {
+        comp = getSimpleMesh(static_cast<float>(i + 1));
+      }
+      kit->add(comp);
+    }
+    return kit;
+  }
+
+  void validateMeshShape(const MeshObject &loadedMesh, const MeshObject &originalMesh) {
+    TS_ASSERT_EQUALS(loadedMesh.getVertices(), originalMesh.getVertices());
+    TS_ASSERT_EQUALS(loadedMesh.getTriangles(), originalMesh.getTriangles());
+  }
+
+  void validateCSGShape(const CSGObject &loadedShape, const CSGObject &originalShape) {
+    TS_ASSERT_EQUALS(loadedShape.getBoundingBox().xMax(), originalShape.getBoundingBox().xMax());
+    TS_ASSERT_EQUALS(loadedShape.getBoundingBox().yMax(), originalShape.getBoundingBox().yMax());
+    TS_ASSERT_EQUALS(loadedShape.getBoundingBox().zMax(), originalShape.getBoundingBox().zMax());
+    TS_ASSERT_EQUALS(loadedShape.getShapeXML(), originalShape.getShapeXML());
+  }
+
   //--------------------------------------------------------------------------------------------
 
   void testShape() {
@@ -320,9 +372,9 @@ public:
     TS_ASSERT_DELTA(loaded.getOrientedLattice().a(), 4.0, 1e-6);
     TS_ASSERT_DELTA(loaded.getOrientedLattice().b(), 5.0, 1e-6);
     TS_ASSERT_DELTA(loaded.getOrientedLattice().c(), 6.0, 1e-6);
-    TS_ASSERT_EQUALS(loaded.getShape().getBoundingBox().xMax(), sample.getShape().getBoundingBox().xMax());
-    TS_ASSERT_EQUALS(dynamic_cast<const CSGObject &>(loaded.getShape()).getShapeXML(),
-                     dynamic_cast<const CSGObject &>(sample.getShape()).getShapeXML());
+
+    validateCSGShape(dynamic_cast<const CSGObject &>(loaded.getShape()),
+                     dynamic_cast<const CSGObject &>(sample.getShape()));
     // Geometry values
     TS_ASSERT_DELTA(loaded.getWidth(), sample.getWidth(), 1e-6);
   }
@@ -331,13 +383,7 @@ public:
     NexusTestHelper th(true);
     th.createFile("SampleTestMesh.nxs");
 
-    // create tetrahedral mesh
-    const std::vector<V3D> vertices{V3D(0.0, 0.0, 0.0), V3D(1.0, 0.0, 0.0), V3D(0.0, 1.0, 0.0), V3D(0.0, 0.0, 1.0)};
-    // winding order should be CCW from outside the face
-    const std::vector<uint32_t> faces{0, 2, 1, 0, 1, 3, 1, 2, 3, 0, 3, 2};
-
-    const Material material;
-    IObject_sptr meshShape = std::make_shared<MeshObject>(faces, vertices, material);
+    IObject_sptr meshShape = getSimpleMesh();
 
     Sample sample;
     sample.setName("MeshSample");
@@ -351,11 +397,8 @@ public:
 
     TS_ASSERT_EQUALS(loaded.getName(), sample.getName());
 
-    const auto &loadedMesh = dynamic_cast<const MeshObject &>(loaded.getShape());
-    const auto &originalMesh = dynamic_cast<const MeshObject &>(sample.getShape());
-
-    TS_ASSERT_EQUALS(loadedMesh.getVertices(), originalMesh.getVertices());
-    TS_ASSERT_EQUALS(loadedMesh.getTriangles(), originalMesh.getTriangles());
+    validateMeshShape(dynamic_cast<const MeshObject &>(loaded.getShape()),
+                      dynamic_cast<const MeshObject &>(sample.getShape()));
   }
 
   void test_load_nexus_with_square_faces() {
@@ -407,10 +450,7 @@ public:
 
     TS_ASSERT_EQUALS(loaded.getName(), "MeshSample");
 
-    const auto &loadedMesh = dynamic_cast<const MeshObject &>(loaded.getShape());
-
-    TS_ASSERT_EQUALS(loadedMesh.getVertices(), validationMesh.getVertices());
-    TS_ASSERT_EQUALS(loadedMesh.getTriangles(), validationMesh.getTriangles());
+    validateMeshShape(dynamic_cast<const MeshObject &>(loaded.getShape()), validationMesh);
   }
 
   void test_nexus_empty_name() {
@@ -426,6 +466,109 @@ public:
     loaded.loadNexus(th.file.get(), "sample");
 
     TS_ASSERT(loaded.getName().empty());
+  }
+
+  // A sample with no defined shape must round-trip to a valid (empty) shape,
+  // never a null m_shape, otherwise downstream callers segfault.
+  void test_nexus_sample_without_shape() {
+    NexusTestHelper th(true);
+    th.createFile("SampleTestNoShape.nxs");
+
+    Sample sample;
+    sample.setName("NoShape");
+    sample.saveNexus(th.file.get(), "sample");
+    th.reopenFile();
+
+    Sample loaded;
+    loaded.loadNexus(th.file.get(), "sample");
+
+    TS_ASSERT(loaded.hasShape());
+    TS_ASSERT_THROWS_NOTHING(loaded.getShape().material());
+  }
+
+  // CSG environment paired with a mesh sample shape
+  void test_nexus_with_csg_env() {
+    NexusTestHelper th(true);
+    th.createFile("SampleTestEnvCSG.nxs");
+
+    IObject_sptr meshShape = getSimpleMesh();
+    std::shared_ptr<SampleEnvironment> env = createTestEnvironment(true);
+    Sample sample;
+    sample.setName("MeshSample");
+    sample.setShape(meshShape);
+    sample.setEnvironment(env);
+
+    sample.saveNexus(th.file.get(), "sample");
+    th.reopenFile();
+
+    Sample loaded;
+    loaded.loadNexus(th.file.get(), "sample");
+
+    // validate the sample still
+
+    TS_ASSERT_EQUALS(loaded.getName(), sample.getName());
+
+    const auto &loadedSampleMesh = dynamic_cast<const MeshObject &>(loaded.getShape());
+    const auto &originalSampleMesh = dynamic_cast<const MeshObject &>(sample.getShape());
+
+    validateMeshShape(loadedSampleMesh, originalSampleMesh);
+
+    std::shared_ptr<SampleEnvironment> loadedEnv = std::make_shared<SampleEnvironment>(loaded.getEnvironment());
+
+    TS_ASSERT_EQUALS(env->nelements(), loadedEnv->nelements())
+    TS_ASSERT_EQUALS(env->name(), loadedEnv->name())
+    TS_ASSERT_EQUALS(env->getContainer().id(), loadedEnv->getContainer().id())
+
+    // component 0 is the Container wrapper; compare its inner shape
+    validateCSGShape(dynamic_cast<const CSGObject &>(env->getContainer().getShape()),
+                     dynamic_cast<const CSGObject &>(loadedEnv->getContainer().getShape()));
+    for (size_t i = 1; i < env->nelements(); i++) {
+      validateCSGShape(dynamic_cast<const CSGObject &>(env->getComponent(i)),
+                       dynamic_cast<const CSGObject &>(loadedEnv->getComponent(i)));
+    }
+  }
+
+  // Mesh environment paired with a CSG sample shape
+  void test_nexus_with_mesh_env() {
+    NexusTestHelper th(true);
+    th.createFile("SampleTestEnvMesh.nxs");
+
+    IObject_sptr csgShape =
+        ComponentCreationHelper::createCappedCylinder(0.0127, 1.0, V3D(), V3D(0.0, 1.0, 0.0), "cyl");
+    std::shared_ptr<SampleEnvironment> env = createTestEnvironment(false);
+    Sample sample;
+    sample.setName("CSGSample");
+    sample.setShape(csgShape);
+    sample.setEnvironment(env);
+
+    sample.saveNexus(th.file.get(), "sample");
+    th.reopenFile();
+
+    Sample loaded;
+    loaded.loadNexus(th.file.get(), "sample");
+
+    // validate the sample still
+
+    TS_ASSERT_EQUALS(loaded.getName(), sample.getName());
+
+    const auto &loadedSampleCSG = dynamic_cast<const CSGObject &>(loaded.getShape());
+    const auto &originalSampleCSG = dynamic_cast<const CSGObject &>(sample.getShape());
+
+    validateCSGShape(loadedSampleCSG, originalSampleCSG);
+
+    std::shared_ptr<SampleEnvironment> loadedEnv = std::make_shared<SampleEnvironment>(loaded.getEnvironment());
+
+    TS_ASSERT_EQUALS(env->nelements(), loadedEnv->nelements())
+    TS_ASSERT_EQUALS(env->name(), loadedEnv->name())
+    TS_ASSERT_EQUALS(env->getContainer().id(), loadedEnv->getContainer().id())
+
+    // component 0 is the Container wrapper; compare its inner shape
+    validateMeshShape(dynamic_cast<const MeshObject &>(env->getContainer().getShape()),
+                      dynamic_cast<const MeshObject &>(loadedEnv->getContainer().getShape()));
+    for (size_t i = 1; i < env->nelements(); i++) {
+      validateMeshShape(dynamic_cast<const MeshObject &>(env->getComponent(i)),
+                        dynamic_cast<const MeshObject &>(loadedEnv->getComponent(i)));
+    }
   }
 
   void test_equal_when_sample_identical() {

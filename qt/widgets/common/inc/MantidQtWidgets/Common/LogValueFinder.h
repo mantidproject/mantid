@@ -8,7 +8,9 @@
 
 #include "DllOption.h"
 #include "MantidKernel/Statistics.h"
-#include <QStringList>
+
+#include <string>
+#include <vector>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -19,18 +21,18 @@ namespace MantidWidgets {
 class EXPORT_OPT_MANTIDQT_COMMON LogValueFinder {
 public:
   /// Constructor
-  explicit LogValueFinder(QStringList wsNames);
+  explicit LogValueFinder(std::vector<std::string> wsNames);
   /// Get log names from workspaces
   std::vector<std::string> getLogNames() const;
   /// Get log value from workspace position in list
-  double getLogValue(const QString &logName, const Mantid::Kernel::Math::StatisticType &function, int index) const;
+  double getLogValue(const std::string &logName, const Mantid::Kernel::Math::StatisticType &function, int index) const;
   /// Get log value from workspace name
-  double getLogValue(const QString &logName, const Mantid::Kernel::Math::StatisticType &function,
-                     const QString &wsName) const;
+  double getLogValue(const std::string &logName, const Mantid::Kernel::Math::StatisticType &function,
+                     const std::string &wsName) const;
 
 private:
   /// Workspace names
-  const QStringList m_wsNames;
+  const std::vector<std::string> m_wsNames;
 };
 
 } // namespace MantidWidgets

@@ -7,7 +7,6 @@
 #pragma once
 
 #include "Common/DllConfig.h"
-#include "IBatchJobAlgorithm.h"
 #include "MantidAPI/Workspace_fwd.h"
 
 #include <map>
@@ -22,7 +21,7 @@ class Item;
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL IBatchJobAlgorithm {
 public:
-  virtual ~IBatchJobAlgorithm() = default;
+  virtual ~IBatchJobAlgorithm();
 
   virtual Item *item() = 0;
   virtual void updateItem() = 0;

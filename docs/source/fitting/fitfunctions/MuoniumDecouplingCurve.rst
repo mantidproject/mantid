@@ -24,7 +24,7 @@ The function models the repolarisation of isotropic muonium. The x axis should b
 Examples
 --------
 
-This has been used in examining the influence of strong magnetic field on the depolarizations of Muons[1] and in investigating the Paschen-Back Effect as a means of detecting Muonium[2].
+This has been used in examining the influence of strong magnetic field on the depolarizations of Muons [1]_ and in investigating the Paschen-Back Effect as a means of detecting Muonium [2]_.
 
 
 .. attributes::
@@ -33,8 +33,8 @@ This has been used in examining the influence of strong magnetic field on the de
 
 References
 ----------
-[1] Orearm J. and Harris, G. and Bierman, E. (1957) Influence of Strong Magnetic Field on Depolarization of Muons, Phys. Rev., Vol 107 Issue 1, 322-323 `doi: 10.1103/PhysRev.107.322 <https://doi.org/10.1103/PhysRev.107.322>`
-[2] Ferrell, R. A. and Chaos, F. (1957) Paschen-Back Effect as a Means of Detecting Muonium, Phys. Rev., Vol 107 Issue 5, 1322-1323 `doi: 10.1103/PhysRev.107.1322 <https://doi.org/10.1103/PhysRev.107.1322>`
+.. [1] Orearm J. and Harris, G. and Bierman, E. (1957) Influence of Strong Magnetic Field on Depolarization of Muons, Phys. Rev., Vol 107 Issue 1, 322-323 `doi: 10.1103/PhysRev.107.322 <https://doi.org/10.1103/PhysRev.107.322>`
+.. [2] Ferrell, R. A. and Chaos, F. (1957) Paschen-Back Effect as a Means of Detecting Muonium, Phys. Rev., Vol 107 Issue 5, 1322-1323 `doi: 10.1103/PhysRev.107.1322 <https://doi.org/10.1103/PhysRev.107.1322>`
 
 .. categories::
 

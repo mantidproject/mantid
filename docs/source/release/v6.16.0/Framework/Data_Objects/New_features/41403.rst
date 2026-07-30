@@ -1,1 +1,0 @@
-- Added ``getMemorySize()`` to :py:class:`~mantid.geometry.Instrument`, :py:class:`~mantid.geometry.DetectorInfo`, and :py:class:`~mantid.geometry.ComponentInfo` to report the memory footprint of instrument geometry objects in bytes.

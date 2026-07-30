@@ -55,6 +55,7 @@ public:
 
   MOCK_CONST_METHOD0(tabName, std::string());
   MOCK_METHOD1(handleDataAdded, void(MantidQt::MantidWidgets::IAddWorkspaceDialog const *dialog));
+  MOCK_METHOD0(handleNumericDataAdded, void());
   MOCK_METHOD0(handleDataChanged, void());
   MOCK_METHOD0(handleDataRemoved, void());
   MOCK_METHOD3(handleTableStartXChanged, void(double startX, WorkspaceID workspaceID, WorkspaceIndex workspaceIndex));

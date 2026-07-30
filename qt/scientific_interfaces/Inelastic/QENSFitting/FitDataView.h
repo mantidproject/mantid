@@ -11,10 +11,12 @@
 #include "IFitDataView.h"
 
 #include "DllConfig.h"
+#include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <MantidAPI/AnalysisDataServiceObserver.h>
+#include <QStringList>
 #include <QTabWidget>
 
 namespace MantidQt {
@@ -59,11 +61,15 @@ protected:
 
   std::unique_ptr<Ui::FitDataView> m_uiForm;
   void setCell(std::unique_ptr<QTableWidgetItem> cell, size_t row, size_t column);
+  MantidWidgets::AddWorkspaceDialog *createAddWorkspaceDialog(const QStringList &workspaceSuffixes,
+                                                              const QStringList &fileSuffixes) const;
 
   IFitDataPresenter *m_presenter;
 
 protected slots:
   virtual void showAddWorkspaceDialog();
+  virtual void showAddNumericWorkspaceDialog();
+  void notifyAddNumericData(MantidWidgets::IAddWorkspaceDialog *dialog);
 
 private slots:
   void notifyRemoveClicked();

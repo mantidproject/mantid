@@ -25,6 +25,9 @@ public:
   SpinStateValidator(std::unordered_set<int> allowedNumbersOfSpins, const bool acceptSingleStates = false,
                      const std::string &paraIndicator = "0", const std::string &antiIndicator = "1",
                      const bool optional = false, const std::string &extraIndicator = "");
+  SpinStateValidator(std::unordered_set<int> allowedNumbersOfSpins, const bool acceptSingleStates,
+                     const std::string &paraIndicator, const std::string &antiIndicator, const bool optional,
+                     const std::string &extraIndicator, const bool rejectRepeatedSpinStates);
   Kernel::IValidator_sptr clone() const override;
 
   static bool anyOfIsInSet(const std::vector<std::string> &anyOf, const std::unordered_set<std::string> &set);
@@ -43,5 +46,6 @@ private:
   bool m_optional = false;
   // Extra value to indicate a third spin state (for example 0)
   const std::string m_extra;
+  const bool m_rejectRepeatedSpinStates;
 };
 } // namespace Mantid::Kernel

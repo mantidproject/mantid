@@ -147,10 +147,10 @@ void ComptonScatteringCountRate::iterationStarting() {
    *   Cx >= 0, where C is the same matrix of J(y) values above
    *   Ax = 0, where A is the intensity constraints supplied by the user
    */
-  const size_t nparams(m_cmatrix.numCols());
+  const size_t nParams(m_cmatrix.numCols());
 
   // Compute minimization with of Cx where the amplitudes are set to 1.0
-  std::vector<double> x0(nparams, 1);
+  std::vector<double> x0(nParams, 1);
   setFixedParameterValues(x0);
   // Compute the constraint matrix
   this->updateCMatrixValues();
@@ -159,13 +159,13 @@ void ComptonScatteringCountRate::iterationStarting() {
     BkgdNorm2 objf(m_cmatrix, m_dataErrorRatio);
     using namespace std::placeholders;
     AugmentedLagrangianOptimizer::ObjFunction objfunc = std::bind(&BkgdNorm2::eval, objf, _1, _2);
-    AugmentedLagrangianOptimizer lsqmin(nparams, objfunc, m_eqMatrix, m_cmatrix);
+    AugmentedLagrangianOptimizer lsqmin(nParams, objfunc, m_eqMatrix, m_cmatrix);
     lsqmin.minimize(x0);
     // Set the parameters for the 'real' function calls
     setFixedParameterValues(x0);
   } else {
     NoBkgdNorm2 objfunc(m_cmatrix, m_dataErrorRatio);
-    Kernel::Math::SLSQPMinimizer lsqmin(nparams, objfunc, m_eqMatrix, m_cmatrix);
+    Kernel::Math::SLSQPMinimizer lsqmin(nParams, objfunc, m_eqMatrix, m_cmatrix);
     auto res = lsqmin.minimize(x0);
     // Set the parameters for the 'real' function calls
     setFixedParameterValues(res);
@@ -179,14 +179,14 @@ void ComptonScatteringCountRate::iterationStarting() {
 void ComptonScatteringCountRate::setFixedParameterValues(const std::vector<double> &values) {
   assert(values.size() == m_fixedParamIndices.size());
 
-  const size_t nparams = values.size();
-  for (size_t i = 0; i < nparams; ++i) {
+  const size_t nParams = values.size();
+  for (size_t i = 0; i < nParams; ++i) {
     this->setParameter(m_fixedParamIndices[i], values[i], true);
   }
 
   if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
     g_log.debug() << "--- New Intensity Parameters ---\n";
-    for (size_t i = 0; i < nparams; ++i) {
+    for (size_t i = 0; i < nParams; ++i) {
       g_log.debug() << "x_" << i << "=" << values[i] << "\n";
     }
   }

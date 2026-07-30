@@ -13,6 +13,7 @@ set(SRC_FILES
     src/ReflectometryReductionOne3.cpp
     src/ReflectometryReductionOneAuto2.cpp
     src/ReflectometryReductionOneAuto3.cpp
+    src/ReflectometryPolarizationCorrectionISIS.cpp
     src/ReflectometryTransformKiKf.cpp
     src/ReflectometryTransformP.cpp
     src/ReflectometryTransformQxQz.cpp
@@ -41,6 +42,7 @@ set(INC_FILES
     inc/MantidReflectometry/ReflectometryReductionOne3.h
     inc/MantidReflectometry/ReflectometryReductionOneAuto2.h
     inc/MantidReflectometry/ReflectometryReductionOneAuto3.h
+    inc/MantidReflectometry/ReflectometryPolarizationCorrectionISIS.h
     inc/MantidReflectometry/ReflectometryTransformKiKf.h
     inc/MantidReflectometry/ReflectometryTransformP.h
     inc/MantidReflectometry/ReflectometryTransformQxQz.h

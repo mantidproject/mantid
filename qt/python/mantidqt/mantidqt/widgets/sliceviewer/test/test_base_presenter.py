@@ -123,6 +123,24 @@ class SliceViewerBasePresenterTest(unittest.TestCase):
 
         new_plot_mock.assert_not_called()
 
+    def test_set_axes_limits_transforms_all_four_corners_for_nonorthogonal_view(self):
+        data_view_mock = mock.Mock()
+        data_view_mock.nonorthogonal_mode = True
+
+        class Transform:
+            def tr(self, x, y):
+                return x + 2 * y, 3 * y
+
+        data_view_mock.nonortho_transform = Transform()
+        data_view_mock.set_axes_limits = mock.Mock()
+        presenter = SliceViewerBasePresenterShim(None, model=mock.Mock(), data_view=data_view_mock)
+        presenter.new_plot = mock.Mock()
+
+        presenter.set_axes_limits((-1, 1), (-2, 2))
+
+        data_view_mock.set_axes_limits.assert_called_once_with((-5.0, 5.0), (-6.0, 6.0))
+        presenter.new_plot.assert_called_once()
+
     def test_request_to_show_all_data_sets_correct_limits_on_view_MD(self):
         model_mock = mock.Mock()
         data_view_mock = mock.Mock()

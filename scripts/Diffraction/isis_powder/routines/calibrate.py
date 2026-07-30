@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import mantid.simpleapi as mantid
 
-import isis_powder.routines.common as common
-from isis_powder.routines.common_enums import INPUT_BATCHING
+import Diffraction.isis_powder.routines.common as common
+from Diffraction.isis_powder.routines.common_enums import INPUT_BATCHING
 
 
 def create_van(instrument, run_details, absorb, spline=True):

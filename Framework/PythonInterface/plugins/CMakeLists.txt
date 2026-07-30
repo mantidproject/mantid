@@ -217,6 +217,7 @@ set(PYTHON_PLUGINS
     algorithms/VesuvioResolution.py
     algorithms/VesuvioTOFFit.py
     algorithms/VesuvioThickness.py
+    algorithms/VesuvioTransmission.py
     algorithms/ViewBOA.py
     algorithms/VisionReduction.py
     algorithms/dnsdata.py

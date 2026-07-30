@@ -76,6 +76,13 @@ public:
     checkAllInputs(validator, duplicates, false);
   }
 
+  void testCanAllowDuplicateEntries() {
+    auto validator =
+        std::make_shared<SpinStateValidator>(std::unordered_set<int>{2, 3}, true, "0", "1", false, "", false);
+    auto duplicates = std::vector<std::string>{"01, 01", "11,10,11", "00,00", "1,1,0", "0,1,0", "1,1"};
+    checkAllInputs(validator, duplicates, true);
+  }
+
   void testMultipleStatesCorrectInputs() {
     auto validator = std::make_shared<SpinStateValidator>(std::unordered_set<int>{2, 3, 4});
     auto correctInputs = std::vector<std::string>{"01, 11", "00,10,11", "11,10, 00,01", "00, 10 "};

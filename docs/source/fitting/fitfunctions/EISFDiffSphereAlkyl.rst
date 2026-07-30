@@ -42,7 +42,7 @@ Related functions:
 References
 ----------
 
-.. [1] V. K. Sharma, et al., `J. Phys. Chem. B 120(1):154-163 <http://pubs.acs.org/doi/abs/10.1021/acs.jpcb.5b10417>`__.
+.. [1] \V. K. Sharma, et al., `J. Phys. Chem. B 120(1):154-163 <http://pubs.acs.org/doi/abs/10.1021/acs.jpcb.5b10417>`__.
 
 Usage
 -----

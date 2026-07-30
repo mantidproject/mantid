@@ -52,7 +52,8 @@ public:
   void notifySavePathChanged() override;
 
 private:
-  IBatchPresenter *m_mainPresenter;
+  IBatchPresenter *m_mainPresenter{nullptr};
+  IBatchPresenter &mainPresenter() const;
   bool isValidSaveDirectory(std::string const &directory);
   void onSavePathChanged();
   void warnInvalidSaveDirectory();

@@ -117,6 +117,15 @@ input workspace group has a size of 2 and PA if the size is 4. For Wildes, a wor
 size 2 will use flipper configuration :literal:`'0, 1'`, while a group of size 4 will use configuration
 :literal:`'00, 01, 10, 11'`.
 
+The :literal:`PolarizationCorrectionInputSpinStateOrder` property can be used to specify the order of the
+input workspace group. For Fredrikze corrections this is the input spin state order, such as
+:literal:`'pa, ap, pp, aa'`. For Wildes corrections this is the flipper configuration, such as
+:literal:`'00, 01, 10, 11'` or :literal:`'0, 1'`. If it is left empty, the default from the parameter
+file or correction algorithm is used. Fredrikze defaults are read from the
+:literal:`FredrikzeInputSpinStateOrderPA` or :literal:`FredrikzeInputSpinStateOrderPNR` instrument parameter,
+depending on the Fredrikze analysis mode. Wildes defaults are read from the :literal:`WildesFlipperConfig`
+instrument parameter when an efficiencies workspace is supplied.
+
 If a workspace is not provided for the :literal:`PolarizationEfficiencies` parameter then the
 method and values specified in the parameters file are used instead.
 

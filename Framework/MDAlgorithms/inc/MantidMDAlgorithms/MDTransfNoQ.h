@@ -62,6 +62,8 @@ public:
   void setDisplayNormalization(Mantid::API::IMDWorkspace_sptr mdWorkspace,
                                Mantid::API::MatrixWorkspace_sptr underlyingWorkspace) const override;
 
+  std::pair<coord_t, coord_t> getDimBounds(size_t dim) const override;
+
 private:
   unsigned int m_NMatrixDim;
   // the variables used for exchange data between different specific parts of

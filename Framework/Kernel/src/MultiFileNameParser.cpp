@@ -355,6 +355,11 @@ void Parser::split() {
     base = base.substr(m_underscoreString.size(), base.size());
   }
 
+  // LIST requires at least one run number ([0-9]+) so a base with no digits
+  // can never match. Skip the expensive regex and fail fast.
+  if (base.find_first_of("0123456789") == std::string::npos)
+    throw std::runtime_error("There do not appear to be any runs present.");
+
   m_runString = getMatchingString("^" + Regexs::LIST, base);
 
   if (m_runString.size() != base.size()) {

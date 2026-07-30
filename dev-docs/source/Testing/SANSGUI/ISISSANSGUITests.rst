@@ -181,7 +181,7 @@ Processing
 #. Click over to the ``Runs`` tab.
 #. Set the ``Save Options`` to ``Memory``.
 #. Select one of the rows and click ``Process Selected``
-#. Take note of the name of the reduced workspace with ``merged`` in the title.
+#. Verify that a reduced 2D workspace with ``merged`` in the title is created. e.g. first_time_merged_1D_2.2_10.0.
 #. Make a copy of the row you just processed using the ``Copy`` and ``Paste`` buttons above the runs table.
 #. Change the ``Output Name`` of the new row to something like ``bgsub_test``.
 #. Check the ``Scaled Background Subtraction`` checkbox.

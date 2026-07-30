@@ -80,10 +80,11 @@ protected:
 
 private:
   /// how to transform workspace data in elastic case
-  inline bool calcMatrixCoord3DElastic(const double &k0, std::vector<coord_t> &Coord, double &signal,
+  inline bool calcMatrixCoord3DElastic(const double k0, std::vector<coord_t> &Coord, double &signal,
                                        double &errSq) const;
   /// how to transform workspace data in inelastic case
-  inline bool calcMatrixCoord3DInelastic(const double &deltaE, std::vector<coord_t> &Coord) const;
+  inline bool calcMatrixCoord3DInelastic(const double deltaE, std::vector<coord_t> &Coord) const;
+  inline bool calcMatrixCoord3D(double qx, double qy, double qz, std::vector<coord_t> &Coord) const;
 };
 
 } // namespace MDAlgorithms

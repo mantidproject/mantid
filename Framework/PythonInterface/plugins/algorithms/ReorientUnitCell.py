@@ -8,7 +8,13 @@ import numpy as np
 
 from mantid.api import PythonAlgorithm, AlgorithmFactory, IPeaksWorkspaceProperty
 from mantid.geometry import PointGroupFactory
-from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator, PropertyCriterion, StringListValidator
+from mantid.kernel import (
+    Direction,
+    EnabledWhenProperty,
+    FloatBoundedValidator,
+    PropertyCriterion,
+    StringListValidator,
+)
 from mantid.simpleapi import mtd, TransformHKL
 
 
@@ -34,6 +40,7 @@ class ReorientUnitCell(PythonAlgorithm):
             "Tetragonal": "4/mmm",
             "Orthorhombic": "mmm",
             "Monoclinic": "2/m",
+            "Triclinic": "-1",
         }
 
         # Special case for Trigonal
@@ -74,10 +81,18 @@ class ReorientUnitCell(PythonAlgorithm):
         )
 
         # Crystal system
-        crystal_systems = ["Cubic", "Hexagonal", "Tetragonal", "Trigonal", "Orthorhombic", "Monoclinic"]
+        crystal_systems = [
+            "Cubic",
+            "Hexagonal",
+            "Tetragonal",
+            "Trigonal",
+            "Orthorhombic",
+            "Monoclinic",
+            "Triclinic",
+        ]
         self.declareProperty(
             name="CrystalSystem",
-            defaultValue="Monoclinic",
+            defaultValue="Triclinic",
             direction=Direction.Input,
             validator=StringListValidator(crystal_systems),
             doc="Crystal system.",
@@ -93,7 +108,10 @@ class ReorientUnitCell(PythonAlgorithm):
             doc="Lattice system (for Trigonal: Rhombohedral or Hexagonal). Defaults to CrystalSystem value.",
         )
         # Set up conditional visibility
-        self.setPropertySettings("LatticeSystem", EnabledWhenProperty("CrystalSystem", PropertyCriterion.IsEqualTo, "Trigonal"))
+        self.setPropertySettings(
+            "LatticeSystem",
+            EnabledWhenProperty("CrystalSystem", PropertyCriterion.IsEqualTo, "Trigonal"),
+        )
 
     def validateInputs(self):
         issues = dict()
@@ -211,16 +229,26 @@ class ReorientUnitCell(PythonAlgorithm):
         # Step 6: Apply the optimal transformation
         if optimal_transform is not None:
             self.log().notice(f"Aligning symmetry operation: {transform_name}")
-            # Determine whether to use FindError based on number of peaks
-            find_error = mtd[wsname].getNumberPeaks() > 3
-            (
+            try:
+                # Try to recalculate error, but if it fails (e.g. due to too few peaks) we will still have the reoriented cell
                 TransformHKL(
                     PeaksWorkspace=wsname,
                     Tolerance=self.getProperty("Tolerance").value,
                     HKLTransform=optimal_transform,
-                    FindError=find_error,
-                ),
-            )
+                    FindError=True,
+                )
+                self.log().notice("Successfully recalculated error after reorienting unit cell.")
+            except (RuntimeError, ValueError) as e:
+                # Log before retrying without error recalculation, so the reason is recorded
+                # even if this retry also fails and the algorithm aborts.
+                self.log().warning(f"Reoriented unit cell but failed to recalculate error: {e}")
+                # Don't recalculate error since we're only reorienting the cell
+                TransformHKL(
+                    PeaksWorkspace=wsname,
+                    Tolerance=self.getProperty("Tolerance").value,
+                    HKLTransform=optimal_transform,
+                    FindError=False,
+                )
 
         self.setProperty("PeaksWorkspace", mtd[wsname])
 

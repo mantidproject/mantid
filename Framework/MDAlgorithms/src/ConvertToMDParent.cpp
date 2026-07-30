@@ -151,6 +151,11 @@ void ConvertToMDParent::init() {
                   "calculations in situations when the normalization is not important "
                   "(e.g. peak finding).");
 
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("UseLogTimes", false, Direction::Input),
+                  "If true, and the input workspace is an EventWorkspace, this flag will "
+                  "use the value of logs at the pulse times of the events rather than their "
+                  "average values to define the sample rotation (Goniometer) and OtherDimensions.");
+
   declareProperty(std::make_unique<ArrayProperty<double>>("Uproj"),
                   //"The functionality of this parameter set to non-default
                   // value is still not fully verified (see ticket #5982). "

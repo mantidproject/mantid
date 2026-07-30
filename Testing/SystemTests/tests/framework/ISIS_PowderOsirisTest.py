@@ -11,8 +11,8 @@ import shutil
 import mantid.simpleapi as mantid
 from mantid import config
 
-from isis_powder.osiris import Osiris
-from isis_powder.routines.sample_details import SampleDetails
+from Diffraction.isis_powder.osiris import Osiris
+from Diffraction.isis_powder.routines.sample_details import SampleDetails
 
 DIRS = config["datasearch.directories"].split(";")
 

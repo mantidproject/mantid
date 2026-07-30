@@ -8,7 +8,7 @@ import io
 import sys
 import unittest
 
-from isis_powder.routines import sample_details
+from Diffraction.isis_powder.routines import sample_details
 from mantid.simpleapi import SetSample, CreateSampleWorkspace
 
 
@@ -276,7 +276,7 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
             sample_details_obj.print_sample_details()
             captured_std_out_material_set = std_out_buffer.getvalue()
             self.assertRegex(captured_std_out_material_set, "Chemical formula: " + chemical_formula_two)
-            self.assertRegex(captured_std_out_material_set, "Number Density: " + str(expected_number_density))
+            self.assertRegex(captured_std_out_material_set, r"Number Density \(units: Atoms/Volume\): " + str(expected_number_density))
 
             # Test with no material properties set - we can reuse buffer from previous test
             self.assertRegex(captured_std_out_material_default, "Absorption cross section: Calculated by Mantid")
@@ -380,7 +380,13 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         # Run test
         result = sample_details_obj.generate_sample_material()
         # Validate
-        expected = {"ChemicalFormula": "Si", "NumberDensity": 1.5, "AttenuationXSection": 123.0, "ScatteringXSection": 456.0}
+        expected = {
+            "ChemicalFormula": "Si",
+            "NumberDensity": 1.5,
+            "AttenuationXSection": 123.0,
+            "ScatteringXSection": 456.0,
+            "NumberDensityUnit": "Atoms",
+        }
         self.assertEqual(result, expected)
 
     def test_generate_geometry_cylinder(self):
@@ -577,6 +583,49 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
                 ContainerGeometry=sample_details_object.generate_container_geometry(),
                 ContainerMaterial=sample_details_object.generate_container_material(),
             )
+
+    def test_validate_number_density_unit(self):
+        # Defaults to Atoms when not supplied (historic / Mantid default behaviour)
+        self.assertEqual(sample_details._validate_number_density_unit(None), "Atoms")
+
+        bad_inputs = ("atoms", "formula_units", "those cheeky little guys", "FormulaUnits")
+        good_inputs = ("Atoms", "Formula Units")
+        for bad_input in bad_inputs:
+            with self.subTest(bad_input=bad_input):
+                with self.assertRaisesRegex(ValueError, "Invalid number_density_unit"):
+                    sample_details._validate_number_density_unit(bad_input)
+        for good_input in good_inputs:
+            with self.subTest(good_input=good_input):
+                self.assertEqual(sample_details._validate_number_density_unit(good_input), good_input)
+
+    def test_material_constructor_number_density_unit(self):
+        # Defaults to Atoms
+        material_default = sample_details._Material(chemical_formula="Si", number_density=1.0)
+        self.assertEqual(material_default.number_density_unit, "Atoms")
+        # Stores the normalised value when supplied
+        material_formula_units = sample_details._Material(chemical_formula="Si O2", number_density=1.0, number_density_unit="Formula Units")
+        self.assertEqual(material_formula_units.number_density_unit, "Formula Units")
+        # An invalid unit raises on construction
+        with self.assertRaisesRegex(ValueError, "Invalid number_density_unit"):
+            sample_details._Material(chemical_formula="Si", number_density=1.0, number_density_unit="bad")
+
+    def test_get_number_density_in_atoms(self):
+        # Atoms: returned unchanged
+        material_atoms = sample_details._Material(chemical_formula="Si O2", number_density=2.0)
+        self.assertEqual(material_atoms.get_number_density_in_atoms(), 2.0)
+        # Formula Units: converted using atoms-per-formula-unit (Si O2 -> 3 atoms per formula unit)
+        material_formula_units = sample_details._Material(chemical_formula="Si O2", number_density=2.0, number_density_unit="Formula Units")
+        self.assertAlmostEqual(material_formula_units.get_number_density_in_atoms(), 6.0)
+        # No (non-effective) number density set -> None
+        material_none = sample_details._Material(chemical_formula="Si")
+        self.assertIsNone(material_none.get_number_density_in_atoms())
+
+    def test_generate_sample_material_formula_units(self):
+        sample_details_obj = sample_details.SampleDetails(height=1.0, radius=1.0, center=[0.0, 0.0, 0.0])
+        sample_details_obj.set_material(chemical_formula="Si O2", number_density=1.5, number_density_unit="Formula Units")
+        result = sample_details_obj.generate_sample_material()
+        expected = {"ChemicalFormula": "Si O2", "NumberDensity": 1.5, "NumberDensityUnit": "Formula Units"}
+        self.assertEqual(result, expected)
 
 
 def get_std_out_buffer_obj():

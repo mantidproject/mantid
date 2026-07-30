@@ -35,8 +35,9 @@ public:
   void test_getLogNames() {
     ScopedWorkspace ws1(createTestWS(1));
     ScopedWorkspace ws2(createTestWS(2));
-    QStringList wsNames;
-    wsNames << QString::fromStdString(ws1.name()) << QString::fromStdString(ws2.name());
+    std::vector<std::string> wsNames;
+    wsNames.push_back(std::string(ws1.name()));
+    wsNames.push_back(std::string(ws2.name()));
     LogValueFinder finder(wsNames);
     std::vector<std::string> logNames;
     const std::vector<std::string> expectedNames = {"stringProp", "dblProp", "intProp", "boolProp", "timeSeries"};
@@ -48,8 +49,9 @@ public:
   void test_getLogValue_byString_byIndex() {
     ScopedWorkspace ws0(createTestWS(0));
     ScopedWorkspace ws1(createTestWS(1));
-    QStringList wsNames;
-    wsNames << QString::fromStdString(ws0.name()) << QString::fromStdString(ws1.name());
+    std::vector<std::string> wsNames;
+    wsNames.push_back(std::string(ws0.name()));
+    wsNames.push_back(std::string(ws1.name()));
     LogValueFinder finder(wsNames);
     double valIndex0 = 0.;
     TS_ASSERT_THROWS_NOTHING(valIndex0 = finder.getLogValue("dblProp", StatisticType::Mean, 0));
@@ -68,8 +70,9 @@ public:
   void test_getLogValue_integer() {
     ScopedWorkspace ws0(createTestWS(0));
     ScopedWorkspace ws1(createTestWS(1));
-    QStringList wsNames;
-    wsNames << QString::fromStdString(ws0.name()) << QString::fromStdString(ws1.name());
+    std::vector<std::string> wsNames;
+    wsNames.push_back(std::string(ws0.name()));
+    wsNames.push_back(std::string(ws1.name()));
     LogValueFinder finder(wsNames);
     double val0, val1;
     TS_ASSERT_THROWS_NOTHING(val0 = finder.getLogValue("intProp", StatisticType::Mean, 0));
@@ -81,8 +84,9 @@ public:
   void test_getLogValue_timeSeries() {
     ScopedWorkspace ws0(createTestWS(0));
     ScopedWorkspace ws1(createTestWS(1));
-    QStringList wsNames;
-    wsNames << QString::fromStdString(ws0.name()) << QString::fromStdString(ws1.name());
+    std::vector<std::string> wsNames;
+    wsNames.push_back(std::string(ws0.name()));
+    wsNames.push_back(std::string(ws1.name()));
     LogValueFinder finder(wsNames);
     double val0, val1;
     TS_ASSERT_THROWS_NOTHING(val0 = finder.getLogValue("timeSeries", StatisticType::Mean, 0));
@@ -94,8 +98,9 @@ public:
   void test_getLogValue_bool_throws() {
     ScopedWorkspace ws0(createTestWS(0));
     ScopedWorkspace ws1(createTestWS(1));
-    QStringList wsNames;
-    wsNames << QString::fromStdString(ws0.name()) << QString::fromStdString(ws1.name());
+    std::vector<std::string> wsNames;
+    wsNames.push_back(std::string(ws0.name()));
+    wsNames.push_back(std::string(ws1.name()));
     LogValueFinder finder(wsNames);
     TS_ASSERT_THROWS(finder.getLogValue("boolProp", StatisticType::Mean, 0), const std::invalid_argument &);
     TS_ASSERT_THROWS(finder.getLogValue("boolProp", StatisticType::Mean, 1), const std::invalid_argument &);
@@ -104,8 +109,9 @@ public:
   void test_getLogValue_nonExistentWorkspace_throws() {
     ScopedWorkspace ws0(createTestWS(0));
     ScopedWorkspace ws1(createTestWS(1));
-    QStringList wsNames;
-    wsNames << QString::fromStdString(ws0.name()) << QString::fromStdString(ws1.name());
+    std::vector<std::string> wsNames;
+    wsNames.push_back(std::string(ws0.name()));
+    wsNames.push_back(std::string(ws1.name()));
     LogValueFinder finder(wsNames);
     TS_ASSERT_THROWS(finder.getLogValue("dblProp", StatisticType::Mean, "no_workspace"), const std::invalid_argument &);
   }
@@ -113,8 +119,9 @@ public:
   void test_getLogValue_indexOutOfRange_throws() {
     ScopedWorkspace ws0(createTestWS(0));
     ScopedWorkspace ws1(createTestWS(1));
-    QStringList wsNames;
-    wsNames << QString::fromStdString(ws0.name()) << QString::fromStdString(ws1.name());
+    std::vector<std::string> wsNames;
+    wsNames.push_back(std::string(ws0.name()));
+    wsNames.push_back(std::string(ws1.name()));
     LogValueFinder finder(wsNames);
     TS_ASSERT_THROWS(finder.getLogValue("dblProp", StatisticType::Mean, 2), const std::invalid_argument &);
   }

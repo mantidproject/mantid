@@ -180,6 +180,26 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
 
         self.assertEqual(self.signal_handler.call_count, 1)
 
+    @patch("mantidqtinterfaces.Muon.GUI.Common.load_run_widget.load_run_presenter.show_file_browser_and_return_selection")
+    def test_handle_browse_clicked_sets_autosave_path(self, mock_file_browser):
+        test_file_path = "/path/to/autosave.run"
+        mock_file_browser.return_value = [test_file_path]
+
+        self.presenter.handle_browse_clicked()
+
+        self.assertEqual(self.view.get_autosave_file_path(), test_file_path)
+
+    @patch("mantidqtinterfaces.Muon.GUI.Common.load_run_widget.load_run_presenter.show_file_browser_and_return_selection")
+    def test_handle_browse_clicked_with_no_selection(self, mock_file_browser):
+        original_path = "/original/path/autosave.run"
+        self.view.set_autosave_file_path(original_path)
+        mock_file_browser.return_value = []
+
+        self.presenter.handle_browse_clicked()
+
+        # Path should remain unchanged if nothing was selected
+        self.assertEqual(self.view.get_autosave_file_path(), original_path)
+
 
 if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

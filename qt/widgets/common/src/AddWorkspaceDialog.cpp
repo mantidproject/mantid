@@ -23,11 +23,11 @@ AddWorkspaceDialog::AddWorkspaceDialog(QWidget *parent) : QDialog(parent) {
   const auto validatorString = QString::fromStdString(getRegexValidatorString(RegexValidatorStrings::SpectraValidator));
   m_uiForm.leWorkspaceIndices->setValidator(new QRegularExpressionValidator(QRegularExpression(validatorString), this));
   setAllSpectraSelectionEnabled(false);
-  connect(m_uiForm.dsWorkspace, SIGNAL(filesAutoLoaded()), this, SLOT(handleAutoLoaded()));
-  connect(m_uiForm.dsWorkspace, SIGNAL(dataReady(const QString &)), this, SLOT(workspaceChanged(const QString &)));
-  connect(m_uiForm.ckAllSpectra, SIGNAL(stateChanged(int)), this, SLOT(selectAllSpectra(int)));
-  connect(m_uiForm.pbAdd, SIGNAL(clicked()), this, SLOT(emitAddData()));
-  connect(m_uiForm.pbClose, SIGNAL(clicked()), this, SLOT(close()));
+  connect(m_uiForm.dsWorkspace, &DataSelector::filesAutoLoaded, this, &AddWorkspaceDialog::handleAutoLoaded);
+  connect(m_uiForm.dsWorkspace, &DataSelector::dataReady, this, &AddWorkspaceDialog::workspaceChanged);
+  connect(m_uiForm.ckAllSpectra, &QCheckBox::checkStateChanged, this, &AddWorkspaceDialog::selectAllSpectra);
+  connect(m_uiForm.pbAdd, &QPushButton::clicked, this, &AddWorkspaceDialog::emitAddData);
+  connect(m_uiForm.pbClose, &QPushButton::clicked, this, &AddWorkspaceDialog::close);
 }
 
 std::string AddWorkspaceDialog::workspaceName() const {
@@ -51,7 +51,7 @@ void AddWorkspaceDialog::updateSelectedSpectra() {
   selectAllSpectra(state);
 }
 
-void AddWorkspaceDialog::selectAllSpectra(int state) {
+void AddWorkspaceDialog::selectAllSpectra(Qt::CheckState state) {
   auto const name = workspaceName();
   if (WorkspaceUtils::doesExistInADS(name) && state == Qt::Checked) {
     m_uiForm.leWorkspaceIndices->setText(QString::fromStdString(WorkspaceUtils::getIndexString(name)));

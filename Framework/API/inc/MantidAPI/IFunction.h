@@ -625,7 +625,7 @@ public:
   /// Calculate numerical derivatives
   void calNumericalDeriv(const FunctionDomain &domain, Jacobian &jacobian);
   /// Calculate step size for the given parameter value
-  [[nodiscard]] double calculateStepSize(const double parameterValue) const;
+  [[nodiscard]] double calculateStepSize(size_t parameterIndex, double parameterValue) const;
   /// Set the covariance matrix
   void setCovarianceMatrix(const std::shared_ptr<Kernel::Matrix<double>> &covar);
   /// Get the covariance matrix
@@ -660,9 +660,12 @@ public:
   /// Describes the method in which the step size will be calculated:
   /// DEFAULT: Uses the traditional Mantid method of calculating the step size.
   /// SQRT_EPSILON: Uses the square root of epsilon to calculate the step size.
-  enum class StepSizeMethod { DEFAULT, SQRT_EPSILON };
+  /// CUSTOM: Uses the custom step sizes provided by the user.
+  enum class StepSizeMethod { DEFAULT, SQRT_EPSILON, CUSTOM };
   /// Sets the StepSizeMethod to use when calculation the step size
   virtual void setStepSizeMethod(const StepSizeMethod method);
+  /// Sets the custom step sizes
+  void setCustomStepSizes(const std::vector<double> &stepSizes);
 
 protected:
   /// Function initialization. Declare function parameters in this method.
@@ -729,8 +732,10 @@ private:
   std::vector<ParameterTie *> m_orderedTies;
   /// whether the function usage has been registered
   bool m_isRegistered{false};
-  /// The function used to calculate the step size
-  std::function<double(const double)> m_stepSizeFunction;
+  /// The method used to calculate the step size
+  StepSizeMethod m_stepSizeMethod{StepSizeMethod::DEFAULT};
+  /// The custom step sizes for the derivative
+  std::vector<double> m_stepSizes;
 
   // Creates and processes a single tie, handling constant expressions and validation
   std::unique_ptr<ParameterTie> createAndProcessTie(const std::string &parName, const std::string &expr,

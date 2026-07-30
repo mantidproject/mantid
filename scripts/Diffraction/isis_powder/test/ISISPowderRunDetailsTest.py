@@ -12,8 +12,8 @@ import tempfile
 import unittest
 import warnings
 
-from isis_powder.routines import run_details
-from isis_powder.routines import common, yaml_parser
+from Diffraction.isis_powder.routines import run_details
+from Diffraction.isis_powder.routines import common, yaml_parser
 
 
 class ISISPowderInstrumentRunDetailsTest(unittest.TestCase):

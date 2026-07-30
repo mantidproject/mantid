@@ -48,6 +48,12 @@ public:
     auto presenter = makePresenter();
   }
 
+  void testThrowsWhenMainPresenterHasNotBeenAccepted() {
+    auto presenter = makePresenter(std::make_unique<MockInstrumentOptionDefaults>(), false);
+    TS_ASSERT_THROWS_EQUALS(presenter.notifySettingsChanged(), std::runtime_error const &e, std::string(e.what()),
+                            "InstrumentPresenter does not have a main presenter.");
+  }
+
   void testSetValidWavelengthRange() {
     auto const range = RangeInLambda(1.5, 14);
     runTestForValidWavelengthRange(range, range);
@@ -369,10 +375,13 @@ private:
   }
 
   InstrumentPresenter makePresenter(
-      std::unique_ptr<IInstrumentOptionDefaults> defaultOptions = std::make_unique<MockInstrumentOptionDefaults>()) {
+      std::unique_ptr<IInstrumentOptionDefaults> defaultOptions = std::make_unique<MockInstrumentOptionDefaults>(),
+      bool const acceptMainPresenter = true) {
     auto presenter = InstrumentPresenter(&m_view, ModelCreationHelper::makeEmptyInstrument(), &m_fileHandler,
                                          &m_messageHandler, std::move(defaultOptions));
-    presenter.acceptMainPresenter(&m_mainPresenter);
+    if (acceptMainPresenter) {
+      presenter.acceptMainPresenter(&m_mainPresenter);
+    }
     return presenter;
   }
 

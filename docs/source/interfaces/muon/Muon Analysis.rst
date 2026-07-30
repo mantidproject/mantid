@@ -22,8 +22,8 @@ Loading
 
 The loading section is used to load data as well as to specify what the current runs of interest are.
 
-**Load Current Run** This will load the latest run for the selected instrument. You must be connected to the
- data archive. It also currently only works on windows.
+**Load Current Run** This will load the latest run for the selected instrument specified in the ``autosave.run`` file
+(shown in the accompanying line edit). This is automatically set when on Windows (you must be connected to the data archive).
 
 **Run selection box** This takes a comma seperated list of run numbers for the GUI to load. A range
 be specified with a dash. For example ``62260, 62270-3`` will load ``62260, 62270, 62271, 62273``. This specifies

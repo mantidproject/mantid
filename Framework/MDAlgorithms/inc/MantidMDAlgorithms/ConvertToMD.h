@@ -12,8 +12,6 @@
 
 #include "MantidKernel/DeltaEMode.h"
 
-#include <boost/scoped_ptr.hpp>
-
 namespace Mantid {
 namespace MDAlgorithms {
 
@@ -53,7 +51,7 @@ private:
   void exec() override;
   void init() override;
   /// progress reporter
-  boost::scoped_ptr<API::Progress> m_Progress;
+  std::unique_ptr<API::Progress> m_Progress;
 
   void setupFileBackend(const std::string &filebackPath, const API::IMDEventWorkspace_sptr &outputWS);
 

@@ -752,18 +752,18 @@ References
 .. [1] NIST Center for Neutron Research tabulated neutron scattering lengths and cross sections. - https://www.ncnr.nist.gov/resources/n-lengths/list.html
 .. [2] A.K. Soper (2012). GudrunN and GudrunX manual. - https://www.isis.stfc.ac.uk/OtherFiles/Disordered%20Materials/Gudrun-Manual-2017-10.pdf
 .. [3] Mantid source code for `NeutronAtom.cpp to define ReferenceLambda variable. <https://github.com/mantidproject/mantid/blob/master/Framework/Kernel/src/NeutronAtom.cpp#L23>`__
-.. [4] H. H. Paalman, and C. J. Pings. (1962) *Numerical Evaluation of X‐Ray Absorption Factors for Cylindrical Samples and Annular Sample Cells*, Journal of Applied Physics 33:8 2635–2639 `doi: 10.1063/1.1729034 <http://dx.doi.org/10.1063/1.1729034>`__
-.. [5] H. L. Ritter, R. L. Harris, & R. E. Wood (1951) *On the X-Ray Absorption Correction for Encased Diffracters in the Debye-Sherrer Technique*, Journal of Applied Physics 22:2 169-176 `doi: 10.1063/1.699919 <https://doi.org/10.1063/1.1699919>`__
-.. [6] E. J. Lindley & J. Mayers (Ed.). (1988). *Chapter 10: Experimental method and corrections to data*. United Kingdom: Adam Hilger. - https://inis.iaea.org/search/search.aspx?orig_q=RN:20000574
+.. [4] \H. H. Paalman, and C. J. Pings. (1962) *Numerical Evaluation of X‐Ray Absorption Factors for Cylindrical Samples and Annular Sample Cells*, Journal of Applied Physics 33:8 2635–2639 `doi: 10.1063/1.1729034 <http://dx.doi.org/10.1063/1.1729034>`__
+.. [5] \H. L. Ritter, R. L. Harris, & R. E. Wood (1951) *On the X-Ray Absorption Correction for Encased Diffracters in the Debye-Sherrer Technique*, Journal of Applied Physics 22:2 169-176 `doi: 10.1063/1.699919 <https://doi.org/10.1063/1.1699919>`__
+.. [6] \E. J. Lindley & J. Mayers (Ed.). (1988). *Chapter 10: Experimental method and corrections to data*. United Kingdom: Adam Hilger. - https://inis.iaea.org/search/search.aspx?orig_q=RN:20000574
 .. [7] V.F. Sears (1975): *Slow-neutron multiple scattering*, `Advances in Physics <http://dx.doi.org/10.1080/00018737500101361>`__, 24:1, 1-45
 .. [8] A.K.Soper, W.S.Howells and A.C.Hannon *ATLAS - Analysis of Time-of-Flight Diffraction Data from Liquid and Amorphous Samples* Rutherford Appleton Laboratory Report (1989): `RAL-89-046 <http://wwwisis2.isis.rl.ac.uk/disordered/Manuals/ATLAS/ATLAS%20manual%20v1.0.pdf>`__
-.. [9] I. A. Blech,& B. L. Averbach (Ed.). (1965). *Multiple Scattering of Neutrons in Vanadium and Copper*. Physical Review 137:4A A1113–A1116 `doi: 10.1103/PhysRev.137.A1113 <https://doi.org/10.1103/PhysRev.137.A1113>`__
-.. [10] A. K. Soper & P. A. Egelstaff (1980). *Multiple Scattering and Attenuation of Neutrons in Concentric Cylinders: I. Isotropic First Scattering*. Nuclear Instruments and Methods 178 415–425 `doi: 10.1016/0029-554X(80)90820-4 <https://doi.org/10.1016/0029-554X(80)90820-4>`__
-.. [11] S. J. Cocking & C. R. T. Heard (1965). *Multiple Scattering in Plane Samples: Application to Scattering of Thermal Neutrons*. Report AERE - R5016, Harwell, Berkshire.
-.. [12] J. Mayers & R. Cywinski (1985). *A Monte Carlo Evaluation of Analytical Multiple Scattering Corrections for Unpolarised Neutron Scatting and Polarization Analysis Data*. Nuclear Instruments and Methods in Physics Research Section A: Accelerators, Spectrometers, Detectors, and Associated Equipment 241, 519-531 `doi: 10.1016/0168-9002(85)90607-2 <https://doi.org/10.1016/0168-9002(85)90607-2>`__
+.. [9] \I. A. Blech,& B. L. Averbach (Ed.). (1965). *Multiple Scattering of Neutrons in Vanadium and Copper*. Physical Review 137:4A A1113–A1116 `doi: 10.1103/PhysRev.137.A1113 <https://doi.org/10.1103/PhysRev.137.A1113>`__
+.. [10] \A. K. Soper & P. A. Egelstaff (1980). *Multiple Scattering and Attenuation of Neutrons in Concentric Cylinders: I. Isotropic First Scattering*. Nuclear Instruments and Methods 178 415–425 `doi: 10.1016/0029-554X(80)90820-4 <https://doi.org/10.1016/0029-554X(80)90820-4>`__
+.. [11] \S. J. Cocking & C. R. T. Heard (1965). *Multiple Scattering in Plane Samples: Application to Scattering of Thermal Neutrons*. Report AERE - R5016, Harwell, Berkshire.
+.. [12] \J. Mayers & R. Cywinski (1985). *A Monte Carlo Evaluation of Analytical Multiple Scattering Corrections for Unpolarised Neutron Scatting and Polarization Analysis Data*. Nuclear Instruments and Methods in Physics Research Section A: Accelerators, Spectrometers, Detectors, and Associated Equipment 241, 519-531 `doi: 10.1016/0168-9002(85)90607-2 <https://doi.org/10.1016/0168-9002(85)90607-2>`__
 .. [13] J.Schelten & W.Schmatz, J.Appl.Cryst. 13(1980)385-390
 .. [14] J.R.D.Copley J.Appl.Cryst 21(1988)639-644
 .. [15] McStas: A neutron ray-trace simulation package `website <http://mcstas.org/>`__
-.. [16] M. W. Johnson, (1974). *Discus: A computer program for calculation of multiple scattering effects in inelastic neutron scattering experiments*. Report AERE-R7682 UKAEA AERE Harwell, Oxfordshire. `Report <https://www.isis.stfc.ac.uk/Pages/discus-manual6827.pdf>`__
+.. [16] \M. W. Johnson, (1974). *Discus: A computer program for calculation of multiple scattering effects in inelastic neutron scattering experiments*. Report AERE-R7682 UKAEA AERE Harwell, Oxfordshire. `Report <https://www.isis.stfc.ac.uk/Pages/discus-manual6827.pdf>`__
 
 .. categories:: Concepts

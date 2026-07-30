@@ -7,6 +7,9 @@
 #include "FitDataPresenter.h"
 #include "FitTab.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/NumericAxis.h"
 
 #include <algorithm>
 #include <map>
@@ -123,6 +126,45 @@ void FitDataPresenter::handleAddData(MantidWidgets::IAddWorkspaceDialog const *d
     displayWarning(ex.what());
   } catch (const std::invalid_argument &ex) {
     displayWarning(ex.what());
+  }
+}
+
+void FitDataPresenter::setNumericQAxis(const std::string &wsName) {
+  if (wsName.empty()) {
+    return;
+  }
+  auto ws = AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(wsName);
+  if (!ws) {
+    return;
+  }
+  const auto &axis = ws->getAxis(1);
+  if (!axis->isNumeric()) {
+    auto numericAxis = std::make_unique<NumericAxis>(ws->getNumberHistograms());
+    for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
+      numericAxis->setValue(i, axis->getValue(i));
+    }
+    ws->replaceAxis(1, std::move(numericAxis));
+  }
+
+  if (ws->getAxis(1)->unit()->unitID() != "MomentumTransfer") {
+    ws->getAxis(1)->setUnit("MomentumTransfer");
+  }
+}
+
+void FitDataPresenter::handleAddNumericData(MantidWidgets::IAddWorkspaceDialog const *dialog) {
+  if (const auto wsDialog = dynamic_cast<MantidWidgets::AddWorkspaceDialog const *>(dialog)) {
+    try {
+      auto const wsName = wsDialog->workspaceName();
+      setNumericQAxis(wsName);
+      addWorkspace(wsName, wsDialog->workspaceIndices());
+      updateTableFromModel();
+      m_tab->handleNumericDataAdded();
+      m_tab->handleDataChanged();
+    } catch (const std::runtime_error &ex) {
+      displayWarning(ex.what());
+    } catch (const std::invalid_argument &ex) {
+      displayWarning(ex.what());
+    }
   }
 }
 

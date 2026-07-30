@@ -121,6 +121,9 @@ public:
       }
     }
 
+    if constexpr (DependentVars < 2)
+      return covariance;
+
     // Preserve supplied dependent variances on the diagonal. Only dependent-dependent off-diagonal terms are inferred.
     for (size_t depA = 0; depA < DependentVars; ++depA) {
       const size_t depAIndex = IndependentVars + depA;

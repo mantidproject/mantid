@@ -11,7 +11,7 @@ from collections import defaultdict
 
 from mantid.api import mtd, AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, WorkspaceGroupProperty
 from mantid.kernel import logger, Direction, IntArrayProperty
-import isis_powder.gem_routines
+import Diffraction.isis_powder.gem_routines as gem_routines
 
 _MAUD_TEMPLATE_PATH = None
 
@@ -19,7 +19,7 @@ _MAUD_TEMPLATE_PATH = None
 def _maud_template_path():
     global _MAUD_TEMPLATE_PATH
     if _MAUD_TEMPLATE_PATH is None:
-        _MAUD_TEMPLATE_PATH = os.path.join(os.path.dirname(isis_powder.gem_routines.__file__), "maud_param_template.maud")
+        _MAUD_TEMPLATE_PATH = os.path.join(os.path.dirname(gem_routines.__file__), "maud_param_template.maud")
     return _MAUD_TEMPLATE_PATH
 
 

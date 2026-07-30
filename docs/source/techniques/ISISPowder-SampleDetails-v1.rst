@@ -247,8 +247,10 @@ Example Input:
 number_density
 ^^^^^^^^^^^^^^
 This parameter defines the number density of the property.
+By default it should be given in units of atoms per cubic angstrom. Optionally this unit can be changed using
+:ref:`number_density_unit_sampleDetails_isis-powder-diffraction-ref`.
 When :ref:`chemical_formula_sampleDetails_isis-powder-diffraction-ref`
-defines an element this can automatically be calculated by Mantid.
+defines a sole element this can automatically be calculated by Mantid.
 
 This value is used to convert between different PDF types in `Polaris.create_total_scattering_pdf`.
 
@@ -290,6 +292,21 @@ Example Input:
 ..  code-block:: python
 
     sample_obj.set_material(number_density=0.231, packing_fraction=0.5, ...)
+
+
+.. _number_density_unit_sampleDetails_isis-powder-diffraction-ref:
+
+number_density_unit
+^^^^^^^^^^^^^^^^^^^
+This defines the units of the provided :ref:`number_density_sampleDetails_isis-powder-diffraction-ref`. By default it is
+``"Atoms"`` (i.e. atoms per cubic angstrom) but :ref:`SetSampleMaterial<algm-SetSampleMaterial>`
+also accepts ``"Formula Units"`` (i.e. formula units per cubic angstrom) so this can be used as well.
+
+Example Input:
+
+..  code-block:: python
+
+    sample_obj.set_material(..., number_density_unit="Formula Units", ...)
 
 
 .. _set_material_properties_sampleDetails_isis-powder-diffraction-ref:

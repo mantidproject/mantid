@@ -110,6 +110,7 @@ private:
   bool m_plotExistingROIs = false;
 
   void updateWidgetEnabledState();
+  IBatchPresenter &mainPresenter() const;
   void updateSelectedRegionInModelFromView();
   void updateRegionSelectorWorkspace();
 

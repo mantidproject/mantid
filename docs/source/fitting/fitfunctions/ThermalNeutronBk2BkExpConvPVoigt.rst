@@ -84,6 +84,7 @@ exponentially modelled neutron pulse goes from being exponentially
 rising to exponentially decaying.
 
 References
+^^^^^^^^^^
 
 1. Fullprof manual
 

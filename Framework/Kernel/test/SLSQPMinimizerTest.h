@@ -28,30 +28,30 @@ public:
     using Mantid::Kernel::DblMatrix;
     using Mantid::Kernel::Math::SLSQPMinimizer;
 
-    const size_t nparams(2);
-    DblMatrix equality(1, nparams + 1); // cols > number parameters
+    const size_t nParams(2);
+    DblMatrix equality(1, nParams + 1); // cols > number parameters
     DblMatrix inequality;               // Empty indicates no constraint
 
     ObjFunction userFunc;
-    TS_ASSERT_THROWS(SLSQPMinimizer(nparams, userFunc, equality, inequality), const std::invalid_argument &);
+    TS_ASSERT_THROWS(SLSQPMinimizer(nParams, userFunc, equality, inequality), const std::invalid_argument &);
 
-    equality = DblMatrix(1, nparams - 1); // cols < number parameters
-    TS_ASSERT_THROWS(SLSQPMinimizer(nparams, userFunc, equality, inequality), const std::invalid_argument &);
+    equality = DblMatrix(1, nParams - 1); // cols < number parameters
+    TS_ASSERT_THROWS(SLSQPMinimizer(nParams, userFunc, equality, inequality), const std::invalid_argument &);
   }
 
   void test_constuctor_with_inequality_matrix_whose_num_columns_dont_match_nparams_throws() {
     using Mantid::Kernel::DblMatrix;
     using Mantid::Kernel::Math::SLSQPMinimizer;
 
-    const size_t nparams(2);
+    const size_t nParams(2);
     DblMatrix equality; // Empty indicates no constraint
-    DblMatrix inequality(1, nparams + 1);
+    DblMatrix inequality(1, nParams + 1);
 
     ObjFunction userFunc;
-    TS_ASSERT_THROWS(SLSQPMinimizer(nparams, userFunc, equality, inequality), const std::invalid_argument &);
+    TS_ASSERT_THROWS(SLSQPMinimizer(nParams, userFunc, equality, inequality), const std::invalid_argument &);
 
-    inequality = DblMatrix(1, nparams - 1); // cols < number parameters
-    TS_ASSERT_THROWS(SLSQPMinimizer(nparams, userFunc, equality, inequality), const std::invalid_argument &);
+    inequality = DblMatrix(1, nParams - 1); // cols < number parameters
+    TS_ASSERT_THROWS(SLSQPMinimizer(nParams, userFunc, equality, inequality), const std::invalid_argument &);
   }
 
   void test_minimizer_calls_user_function() {
@@ -122,38 +122,38 @@ private:
     using Mantid::Kernel::Math::SLSQPMinimizer;
 
     auto lsqmin = std::shared_ptr<SLSQPMinimizer>();
-    const size_t nparams = m_nparams;
+    const size_t nParams = m_nparams;
     ObjFunction userFunc;
-    std::vector<double> start(nparams, -1);
+    std::vector<double> start(nParams, -1);
     start[1] = 1.0;
 
     // x-y>=0 ==> [1 -1][x   >= 0
     //                  y]
-    DblMatrix equality(1, nparams);
+    DblMatrix equality(1, nParams);
     equality[0][0] = 1.0;
     equality[0][1] = -1.0;
 
     // x-5y>=0 ==> [1 -5][x   >= 0
     //                  y]
-    DblMatrix inequality(1, nparams);
+    DblMatrix inequality(1, nParams);
     inequality[0][0] = 1.0;
     inequality[0][1] = -5.0;
 
     switch (type) {
     case NOCONSTRAINTS:
-      lsqmin = std::shared_ptr<SLSQPMinimizer>(new SLSQPMinimizer(nparams, userFunc));
+      lsqmin = std::shared_ptr<SLSQPMinimizer>(new SLSQPMinimizer(nParams, userFunc));
       break;
     case EMPTYCONSTRAINTS:
-      lsqmin = std::shared_ptr<SLSQPMinimizer>(new SLSQPMinimizer(nparams, userFunc, DblMatrix(), DblMatrix()));
+      lsqmin = std::shared_ptr<SLSQPMinimizer>(new SLSQPMinimizer(nParams, userFunc, DblMatrix(), DblMatrix()));
       break;
     case EQUALITYCONSTRAINT:
-      lsqmin = std::shared_ptr<SLSQPMinimizer>(new SLSQPMinimizer(nparams, userFunc, equality, DblMatrix()));
+      lsqmin = std::shared_ptr<SLSQPMinimizer>(new SLSQPMinimizer(nParams, userFunc, equality, DblMatrix()));
       break;
     case INEQUALITYCONSTRAINT:
-      lsqmin = std::shared_ptr<SLSQPMinimizer>(new SLSQPMinimizer(nparams, userFunc, DblMatrix(), inequality));
+      lsqmin = std::shared_ptr<SLSQPMinimizer>(new SLSQPMinimizer(nParams, userFunc, DblMatrix(), inequality));
       break;
     case BOTHCONSTRAINTS:
-      lsqmin = std::shared_ptr<SLSQPMinimizer>(new SLSQPMinimizer(nparams, userFunc, equality, inequality));
+      lsqmin = std::shared_ptr<SLSQPMinimizer>(new SLSQPMinimizer(nParams, userFunc, equality, inequality));
       break;
     };
 

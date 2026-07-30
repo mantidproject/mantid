@@ -7,12 +7,12 @@
 import unittest
 from unittest.mock import patch, Mock
 import mantid.simpleapi as mantid  # noqa: F401 # runs .pth file to add scripts subdirectories
-from isis_powder.pearl import Pearl
-from isis_powder.pearl_routines import pearl_advanced_config
+from Diffraction.isis_powder.pearl import Pearl
+from Diffraction.isis_powder.pearl_routines import pearl_advanced_config
 
 
 class ISISPowderPearlTest(unittest.TestCase):
-    @patch("isis_powder.routines.focus.focus")
+    @patch("Diffraction.isis_powder.routines.focus.focus")
     def test_long_mode_on(self, mock_focus):
         def generate_long_mode_checker(expected_value):
             if expected_value:

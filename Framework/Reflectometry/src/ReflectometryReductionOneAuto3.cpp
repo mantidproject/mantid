@@ -17,6 +17,7 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/RegexStrings.h"
 #include "MantidKernel/Strings.h"
+#include "MantidReflectometry/ReflectometryPolarizationCorrectionISIS.h"
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/join.hpp>
@@ -31,36 +32,6 @@ using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
 namespace { // anonymous
-// Property names
-namespace Prop {
-static const std::string FLIPPERS{"Flippers"};
-static const std::string POLARIZATION_ANALYSIS{"PolarizationAnalysis"};
-} // namespace Prop
-
-namespace CorrectionMethod {
-static const std::string WILDES{"Wildes"};
-static const std::string FREDRIKZE{"Fredrikze"};
-
-static const std::vector<std::string> WILDES_AXES = {"P1", "P2", "F1", "F2"};
-static const std::vector<std::string> FREDRIKZE_AXES = {"Pp", "Ap", "Rho", "Alpha"};
-
-// Map correction methods to which correction-option property name they use
-static const std::map<std::string, std::string> OPTION_NAME{{CorrectionMethod::WILDES, Prop::FLIPPERS},
-                                                            {CorrectionMethod::FREDRIKZE, Prop::POLARIZATION_ANALYSIS}};
-
-void validate(const std::string &method) {
-  if (!CorrectionMethod::OPTION_NAME.count(method))
-    throw std::invalid_argument("Unsupported polarization correction method: " + method);
-}
-} // namespace CorrectionMethod
-
-namespace CorrectionOption {
-static const std::string PNR{"PNR"};
-static const std::string PA{"PA"};
-static const std::string DEFAULT_FLIPPERS_NO_ANALYSER{"0, 1"};
-static const std::string DEFAULT_FLIPPERS_FULL{"00, 01, 10, 11"};
-} // namespace CorrectionOption
-
 Algorithm::WorkspaceVector getGroupMembers(const std::string &groupName) {
   auto group = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName);
   return group->getAllItems();
@@ -328,12 +299,16 @@ void ReflectometryReductionOneAuto3::init() {
                   "histograms: P1, P2, F1 and F2 in the Wildes method and Pp, Ap, Rho and Alpha for Fredrikze.");
 
   declareProperty(
+      std::make_unique<PropertyWithValue<std::string>>("PolarizationCorrectionInputSpinStateOrder", "",
+                                                       Direction::Input),
+      "The order of spin states in the input workspace group. For Wildes corrections this is the flipper "
+      "configuration, e.g. '00,01,10,11' or '0,1'. For Fredrikze corrections this is the input spin state "
+      "order, e.g. 'pa,ap,pp,aa' or 'p,a'. If left empty, the correction default from the parameter file or "
+      "child algorithm is used.");
+
+  declareProperty(
       std::make_unique<PropertyWithValue<std::string>>("FredrikzePolarizationSpinStateOrder", "", Direction::Input),
-      "The spin state order of the workspaces in the workspace group to be passed to "
-      "PolarizationCorrectionsFredrikze. See the 'Spin State Configurations' -> "
-      "'InputSpinStates' section of the PolarizationCorrectionsFredrikze v1 documentation for "
-      "more details. This is only applied to Fredrikze corrections. Wildes flipper "
-      "configurations are taken from the instrument's parameter file.");
+      "Deprecated. Use PolarizationCorrectionInputSpinStateOrder instead.");
 
   // Sum banks
   declareProperty(std::make_unique<PropertyWithValue<std::string>>("ROIDetectorIDs", "", Direction::Input),
@@ -498,7 +473,7 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto3::postReductionProcessing(con
   } else {
     g_log.error("NRCalculateSlitResolution failed. Workspace in Q will not be "
                 "rebinned. Please provide dQ/Q.");
-    binnedWS = IvsQC;
+    binnedWS = std::move(IvsQC);
   }
   return binnedWS;
 }
@@ -671,7 +646,7 @@ void ReflectometryReductionOneAuto3::determineCorrectionAlgorithm(const Instrume
   } else {
     corrProps.type = "None";
   }
-  m_correctionProperties = corrProps;
+  m_correctionProperties = std::move(corrProps);
 }
 
 /** Set algorithmic correction properties
@@ -900,21 +875,17 @@ void ReflectometryReductionOneAuto3::setOutputPropertiesFromChild(const Algorith
  * @param runNumber : the run number of the group (our own value is passed in
  * because this is not a property a workspace group has)
  * @param taskOrder : task execution order to pass to ReflectometryReductionOne
- * @param workspaceNames : output workspace names to use for the group members
  * @param reduced : if true, recalculate IvsQ based on previous IvsLam outputs;
  * IvsLam outputs must be passed as the members
  * @returns : the grouped output workspace names
  */
-ReflectometryReductionOneAuto3::processGroupMembersOutput ReflectometryReductionOneAuto3::processGroupMembers(
-    const Algorithm::WorkspaceVector &members, std::string const &runNumber, std::vector<std::string> const &taskOrder,
-    const std::vector<WorkspaceNames> &workspaceNames, const bool reduced) {
+ReflectometryReductionOneAuto3::processGroupMembersOutput
+ReflectometryReductionOneAuto3::processGroupMembers(const Algorithm::WorkspaceVector &members,
+                                                    std::string const &runNumber,
+                                                    std::vector<std::string> const &taskOrder, const bool reduced) {
   // Compile a list of output workspace names for each group member
   // No need to compile list if the output names are already provided, e.g. from a previous run of RRO
-  bool populateOutputNames = workspaceNames.empty();
-
   std::vector<WorkspaceNames> allOutputNames;
-  if (!populateOutputNames)
-    allOutputNames = workspaceNames;
   // Process each group member
   std::vector<RROOutputs> allRROOutputs;
   for (size_t i = 0; i < members.size(); i++) {
@@ -923,21 +894,19 @@ ReflectometryReductionOneAuto3::processGroupMembersOutput ReflectometryReduction
     if (!matrixWs) {
       throw std::runtime_error("Group Member is not a MatrixWorkspace");
     }
-    if (populateOutputNames)
-      allOutputNames.emplace_back(getOutputNamesForGroupMember(matrixWs->getName(), runNumber, i));
-
+    allOutputNames.emplace_back(getOutputNamesForGroupMember(matrixWs->getName(), runNumber, i));
     // If data has already been reduced, as workspace is summed we need to change processing instructions.
     // Also, do not perform flood corrections as these will have been performed upon initial reduction
     if (reduced) {
       const auto &origProcessingInstructions = getPropertyValue("ProcessingInstructions");
       setPropertyValue("ProcessingInstructions", convertToSpectrumNumber("0", matrixWs));
-      allRROOutputs.push_back(performCoreReduction(matrixWs, taskOrder, false));
+      allRROOutputs.push_back(performCoreReduction(std::move(matrixWs), taskOrder, false));
       setPropertyValue("ProcessingInstructions", origProcessingInstructions);
     } else {
-      allRROOutputs.push_back(performCoreReduction(matrixWs, taskOrder));
+      allRROOutputs.push_back(performCoreReduction(std::move(matrixWs), taskOrder));
     }
   }
-  return {.rroOutputs = allRROOutputs, .outputNames = allOutputNames};
+  return {.rroOutputs = std::move(allRROOutputs), .outputNames = std::move(allOutputNames)};
 }
 
 std::vector<std::string> ReflectometryReductionOneAuto3::getTaskExecutionOrder(const bool reduced,
@@ -989,8 +958,7 @@ bool ReflectometryReductionOneAuto3::processGroups() {
     const auto corrected = applyPolarizationCorrection(groupIvsLam, groupedOutputNames.iVsLam);
     taskOrder = getTaskExecutionOrder(true, summingInQ);
     // finish the processing using RRO
-    processGroupsOutput =
-        processGroupMembers(corrected->getAllItems(), runNumber, taskOrder, processGroupsOutput.outputNames, true);
+    processGroupsOutput = processGroupMembers(corrected->getAllItems(), runNumber, taskOrder, true);
   }
   postReductionProcessingGroups(processGroupsOutput.rroOutputs, processGroupsOutput.outputNames, groupedOutputNames,
                                 !polarizationAnalysisOn);
@@ -1007,12 +975,21 @@ auto ReflectometryReductionOneAuto3::getOutputNamesForGroupMember(const std::str
                                                                   const size_t wsGroupNumber) -> WorkspaceNames {
   const auto output = getOutputWorkspaceNames();
   std::string informativeName = "TOF" + runNumber + "_";
+  std::string outputIvsLamName = output.iVsLam + "_";
 
   WorkspaceNames outputNames;
   const auto inputNameSize = inputName.size();
   const auto informativeNameSize = informativeName.size();
-  if (inputNameSize >= informativeNameSize && equal(informativeName.begin(), informativeName.end(), inputName.begin(),
-                                                    inputName.begin() + informativeNameSize)) {
+  const auto outputIvsLamNameSize = outputIvsLamName.size();
+  if (inputNameSize > outputIvsLamNameSize && equal(outputIvsLamName.begin(), outputIvsLamName.end(), inputName.begin(),
+                                                    inputName.begin() + outputIvsLamNameSize)) {
+    auto spinState = inputName.substr(outputIvsLamName.length());
+    outputNames.iVsQ = output.iVsQ + "_" + spinState;
+    outputNames.iVsQBinned = output.iVsQBinned + "_" + spinState;
+    outputNames.iVsLam = inputName;
+  } else if (inputNameSize >= informativeNameSize &&
+             equal(informativeName.begin(), informativeName.end(), inputName.begin(),
+                   inputName.begin() + informativeNameSize)) {
     auto informativeTest = inputName.substr(informativeName.length());
     outputNames.iVsQ = output.iVsQ + "_" + informativeTest;
     outputNames.iVsQBinned = output.iVsQBinned + "_" + informativeTest;
@@ -1028,106 +1005,6 @@ auto ReflectometryReductionOneAuto3::getOutputNamesForGroupMember(const std::str
   return outputNames;
 }
 
-/** Find the polarization correction method to use for the given efficiencies workspace.
- * Checks the workspace axes labels to determine the appropriate correction method.
- * We don't check all the workspace labels here, we just look for the first label that matches
- * one of the efficiency factors for a supported correction method.
- */
-std::string
-ReflectometryReductionOneAuto3::findPolarizationCorrectionMethod(const API::MatrixWorkspace_sptr &efficiencies) {
-  try {
-    auto const &axis = dynamic_cast<TextAxis &>(*efficiencies->getAxis(1));
-
-    for (size_t i = 0; i < axis.length(); ++i) {
-      if (std::find(CorrectionMethod::WILDES_AXES.begin(), CorrectionMethod::WILDES_AXES.end(), axis.label(i)) !=
-          CorrectionMethod::WILDES_AXES.end()) {
-        return CorrectionMethod::WILDES;
-      }
-      if (std::find(CorrectionMethod::FREDRIKZE_AXES.begin(), CorrectionMethod::FREDRIKZE_AXES.end(), axis.label(i)) !=
-          CorrectionMethod::FREDRIKZE_AXES.end()) {
-        return CorrectionMethod::FREDRIKZE;
-      }
-    }
-  } catch (std::bad_cast &) {
-    throw std::runtime_error("Efficiencies workspace is not in a supported format");
-  }
-  throw std::runtime_error(
-      "Axes labels for efficiencies workspace do not match any supported polarization correction method");
-}
-
-/** Find the polarization correction option to use for the given correction method, based on the number of workspaces
- * in the input workspace group.
- * For the Fredrikze algorithm the correction option represents the polarization analysis mode.
- * For Wildes the correction option is the flipper configuration. There are more than two possible flipper
- * configurations, but this is mainly intended for use by POLREF initially so we only need to support two for now.
- */
-std::string ReflectometryReductionOneAuto3::findPolarizationCorrectionOption(const std::string &correctionMethod,
-                                                                             const WorkspaceGroup_sptr &groupIvsLam) {
-  auto numWorkspacesInGrp = groupIvsLam->size();
-  if (numWorkspacesInGrp != 4 && numWorkspacesInGrp != 2) {
-    throw std::runtime_error("Only input workspace groups with two or four periods are supported");
-  }
-
-  // If using Wildes, check and use a flipper configuration from the parameter file.
-  if (correctionMethod == CorrectionMethod::WILDES) {
-    auto const &correctionOption = std::dynamic_pointer_cast<MatrixWorkspace>(groupIvsLam->getItem(0))
-                                       ->getInstrument()
-                                       ->getParameterAsString("WildesFlipperConfig");
-
-    if (!correctionOption.empty()) {
-      return correctionOption;
-    }
-  }
-  // Otherwise, use the defaults defined in this file.
-  if (numWorkspacesInGrp == 2) {
-    return (correctionMethod == CorrectionMethod::FREDRIKZE) ? CorrectionOption::PNR
-                                                             : CorrectionOption::DEFAULT_FLIPPERS_NO_ANALYSER;
-  }
-  return (correctionMethod == CorrectionMethod::FREDRIKZE) ? CorrectionOption::PA
-                                                           : CorrectionOption::DEFAULT_FLIPPERS_FULL;
-}
-
-std::string ReflectometryReductionOneAuto3::getFredrikzeInputSpinStateOrder(const std::string &correctionMethod) {
-  auto const &spinStatesProp = getPropertyValue("FredrikzePolarizationSpinStateOrder");
-  if (!spinStatesProp.empty() && correctionMethod == CorrectionMethod::WILDES) {
-    throw std::runtime_error(
-        "A custom spin state order cannot be entered using the FredrikzePolarizationSpinStateOrder property when "
-        "performing a Wildes polarization correction. Check you don't have one assigned in the Experiment Settings. "
-        "Modify the parameter file for your instrument to change the spin state order.");
-  }
-  return spinStatesProp;
-}
-
-/** Construct a polarization efficiencies workspace based on values of input
- * properties.
- */
-std::tuple<API::MatrixWorkspace_sptr, std::string, std::string, std::string>
-ReflectometryReductionOneAuto3::getPolarizationEfficiencies(const WorkspaceGroup_sptr &groupIvsLam) {
-  MatrixWorkspace_sptr efficiencies;
-  std::string correctionMethod;
-  std::string correctionOption;
-  std::string fredrikzeInputOrder;
-
-  if (!isDefault("PolarizationEfficiencies")) {
-    // Get the efficiencies from the provided workspace
-    efficiencies = getProperty("PolarizationEfficiencies");
-    correctionMethod = findPolarizationCorrectionMethod(efficiencies);
-    correctionOption = findPolarizationCorrectionOption(correctionMethod, groupIvsLam);
-    fredrikzeInputOrder = getFredrikzeInputSpinStateOrder(correctionMethod);
-  } else {
-    // Get the efficiencies from the parameter file
-    Workspace_sptr workspace = groupIvsLam->getItem(0);
-    auto effAlg = createChildAlgorithm("ExtractPolarizationEfficiencies");
-    effAlg->setProperty("InputWorkspace", workspace);
-    effAlg->execute();
-    efficiencies = effAlg->getProperty("OutputWorkspace");
-    correctionMethod = effAlg->getPropertyValue("CorrectionMethod");
-    correctionOption = effAlg->getPropertyValue("CorrectionOption");
-  }
-
-  return std::make_tuple(efficiencies, correctionMethod, correctionOption, fredrikzeInputOrder);
-}
-
 /**
  * Apply a polarization correction to workspaces in lambda.
  * @param outputIvsLam :: Workspace group to apply the correction to.
@@ -1135,26 +1012,12 @@ ReflectometryReductionOneAuto3::getPolarizationEfficiencies(const WorkspaceGroup
  */
 WorkspaceGroup_sptr ReflectometryReductionOneAuto3::applyPolarizationCorrection(const WorkspaceGroup_sptr &outputIvsLam,
                                                                                 const std::string &outputGroupName) {
-  MatrixWorkspace_sptr efficiencies;
-  std::string correctionMethod;
-  std::string correctionOption;
-  std::string fredrikzeInputOrder;
-  std::tie(efficiencies, correctionMethod, correctionOption, fredrikzeInputOrder) =
-      getPolarizationEfficiencies(outputIvsLam);
-  CorrectionMethod::validate(correctionMethod);
-
-  Algorithm_sptr polAlg = createChildAlgorithm("PolarizationEfficiencyCor");
-  polAlg->setAlwaysStoreInADS(true);
-  polAlg->setRethrows(true);
-  polAlg->setProperty("OutputWorkspace", outputGroupName);
-  polAlg->setProperty("Efficiencies", efficiencies);
-  polAlg->setProperty("CorrectionMethod", correctionMethod);
-  polAlg->setProperty("SpinStatesInFredrikze", fredrikzeInputOrder);
-  polAlg->setProperty(CorrectionMethod::OPTION_NAME.at(correctionMethod), correctionOption);
-  polAlg->setProperty("AddSpinStateToLog", true);
-  polAlg->setProperty("InputWorkspaceGroup", outputIvsLam);
-  polAlg->execute();
-  return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputGroupName);
+  ReflectometryPolarizationCorrectionISIS polarization(
+      outputIvsLam, [this](const auto &name) { return createChildAlgorithm(name); },
+      [this](const auto &propertyName) { return isDefault(propertyName); },
+      [this](const auto &propertyName) { return getPropertyValue(propertyName); },
+      [this](const auto &propertyName) -> MatrixWorkspace_sptr { return getProperty(propertyName); });
+  return polarization.apply(outputGroupName);
 }
 
 /**

@@ -11,7 +11,7 @@ Description
 
 The GramCharlierComptonProfile function calculates the Compton profile of a nucleus using a
 Gram-Charlier approximation convoluted with an instrument resolution function.
-The Gram-Charlier expansion of the Neutron Compton profile, :math:`J(y)` is given by [1] as an
+The Gram-Charlier expansion of the Neutron Compton profile, :math:`J(y)` is given by [1]_ as an
 expansion of Hermite polynomials,
 
 .. math::
@@ -36,9 +36,8 @@ The instrument resolution, :math:`R_M`, is approximated by a :ref:`Voigt <func-V
 
 References
 ----------
-[1] Pantalei C, Pietropaolo A, Senesi R, Imberti S, Andreani C, Mayers J, et al.
-Proton Momentum Distribution of Liquid Water from Room Temperature to the Supercritical Phase.
-Phys Rev Lett 2008;100. https://doi.org/10.1103/physrevlett.100.177801.
+
+.. [1] Pantalei C, Pietropaolo A, Senesi R, Imberti S, Andreani C, Mayers J, et al. Proton Momentum Distribution of Liquid Water from Room Temperature to the Supercritical Phase. Phys Rev Lett 2008;100. https://doi.org/10.1103/physrevlett.100.177801.
 
 .. categories::
 

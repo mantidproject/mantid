@@ -11,6 +11,7 @@
 #include "IEventView.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include <boost/algorithm/string.hpp>
+#include <stdexcept>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
@@ -23,40 +24,47 @@ EventPresenter::EventPresenter(IEventView *view) : m_view(view), m_sliceType(Sli
 
 void EventPresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) { m_mainPresenter = mainPresenter; }
 
+IBatchPresenter &EventPresenter::mainPresenter() const {
+  if (!m_mainPresenter) {
+    throw std::runtime_error("EventPresenter does not have a main presenter.");
+  }
+  return *m_mainPresenter;
+}
+
 Slicing const &EventPresenter::slicing() const { return m_slicing; }
 
 void EventPresenter::notifyUniformSliceCountChanged(int) {
   if (m_sliceType == SliceType::UniformEven) {
     setUniformSlicingByNumberOfSlicesFromView();
-    m_mainPresenter->notifySettingsChanged();
+    mainPresenter().notifySettingsChanged();
   }
 }
 
 void EventPresenter::notifyUniformSecondsChanged(double) {
   if (m_sliceType == SliceType::Uniform) {
     setUniformSlicingByTimeFromView();
-    m_mainPresenter->notifySettingsChanged();
+    mainPresenter().notifySettingsChanged();
   }
 }
 
 void EventPresenter::notifyCustomSliceValuesChanged(std::string) {
   if (m_sliceType == SliceType::Custom) {
     setCustomSlicingFromView();
-    m_mainPresenter->notifySettingsChanged();
+    mainPresenter().notifySettingsChanged();
   }
 }
 
 void EventPresenter::notifyLogSliceBreakpointsChanged(std::string) {
   if (m_sliceType == SliceType::LogValue) {
     setLogValueSlicingFromView();
-    m_mainPresenter->notifySettingsChanged();
+    mainPresenter().notifySettingsChanged();
   }
 }
 
 void EventPresenter::notifyLogBlockNameChanged(std::string) {
   if (m_sliceType == SliceType::LogValue) {
     setLogValueSlicingFromView();
-    m_mainPresenter->notifySettingsChanged();
+    mainPresenter().notifySettingsChanged();
   }
 }
 
@@ -65,7 +73,7 @@ void EventPresenter::notifySliceTypeChanged(SliceType newSliceType) {
   m_view->enableSliceType(newSliceType);
   m_sliceType = newSliceType;
   setSlicingFromView();
-  m_mainPresenter->notifySettingsChanged();
+  mainPresenter().notifySettingsChanged();
 }
 
 /** Tells the view to update the enabled/disabled state of all relevant
@@ -150,7 +158,7 @@ void EventPresenter::setSlicingFromView() {
 
 GNU_DIAG_ON("maybe-uninitialized")
 
-bool EventPresenter::isProcessing() const { return m_mainPresenter->isProcessing(); }
+bool EventPresenter::isProcessing() const { return mainPresenter().isProcessing(); }
 
-bool EventPresenter::isAutoreducing() const { return m_mainPresenter->isAutoreducing(); }
+bool EventPresenter::isAutoreducing() const { return mainPresenter().isAutoreducing(); }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

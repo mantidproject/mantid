@@ -302,6 +302,9 @@ The ``Sqrt epsilon`` method calculates the step size as follows:
 
 where :math:`x_0` is the value of the active parameter and :math:`\epsilon \approx 2.22e-16`.
 
+The ``Custom`` method allows the user to specify the step sizes for the derivatives.
+They can be specified using the ``CustomStepSizes`` argument.
+
 Output
 ######
 
