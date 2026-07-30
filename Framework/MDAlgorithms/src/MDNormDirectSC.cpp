@@ -498,6 +498,11 @@ void MDNormDirectSC::calculateNormContinuous(const std::vector<coord_t> &otherVa
     }
   }
 
+  // Convert from picoCoulomb to uA.hr for SNS data
+  if (protonlog->units().find("picoCoulomb") != std::string::npos) {
+    normfac *= 3600.e6;
+  }
+
   if (movingGonioIndex.size() == 1) {
     // If we only have a single moving gonio, bin all its values to GONIOBINSTEP degree bins and
     // run inner loop on each binned angle

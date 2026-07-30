@@ -254,6 +254,7 @@ void MDTransfModQ::initialize(const MDWSDescription &ConvParams) {
   // get transformation matrix (needed for CrystalAsPoder mode)
   m_RotMat = ConvParams.getTransfMatrix();
   m_pEfixedArray = nullptr;
+  m_invertRot = false;
   if (!ConvParams.m_PreprDetTable)
     throw(std::runtime_error("The detectors have not been preprocessed but "
                              "they have to before running initialize"));
