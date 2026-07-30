@@ -148,7 +148,13 @@ class TexturePlannerSettingsView(QDialog):
         form.addRow("Max Scatter Point Attempts:", self.mc_max_scatter)
 
         self.mc_simulate_in = QComboBox()
-        self.mc_simulate_in.addItems(["SampleOnly", "EnvironmentOnly", "SampleAndEnvironment"])
+        self.mc_simulate_in.addItems(
+            [
+                "SampleOnly",
+            ]
+        )
+        # NOTE: EnvironmentOnly and SampleAndEnvironment are valid inputs here, but the interface
+        # does not currently support the environment, so it seems neater to initially not supply the options
         form.addRow("Simulate Scattering Point In:", self.mc_simulate_in)
 
         self.mc_resimulate = QCheckBox()
