@@ -118,6 +118,25 @@ public:
    */
   void setMDFrame(const MDFrame &frame) { m_frame.reset(frame.clone()); }
 
+  /** Set the name of the dimension.
+   * @param name :: the new name to display along the axis
+   */
+  void setName(std::string name) { m_name = std::move(name); }
+
+  /** Set the units of the dimension by relabelling its frame's unit.
+   *
+   * The unit is owned by the dimension's MDFrame, so this only works for frames
+   * whose unit can be changed (HKL and general frames). Frames with a fixed unit
+   * (QSample, QLab, unknown) throw. For an HKL frame the label must be either
+   * "r.l.u." or an inverse-Angstrom-style label of the form "in <value> A^-1";
+   * any other label is rejected rather than silently reverted. A reciprocal
+   * lattice unit is used for Q frames so the workspace's special coordinate
+   * system continues to be detected.
+   * @param units :: the new unit label
+   * @throw std::invalid_argument if the frame or the label does not support the change
+   */
+  void setUnits(const Kernel::UnitLabel &units);
+
 private:
   /// Name
   std::string m_name;
