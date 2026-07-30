@@ -13,6 +13,7 @@ import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Tuple, TypeAlias
+import Engineering
 
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
@@ -143,6 +144,8 @@ class GSAS2Model:
     Diffraction interface.
     """
 
+    _CUSTOM_PHASE = "Custom"
+
     def __init__(self) -> None:
         # Configuration and State
         self.config = GSAS2ModelConfig()
@@ -171,6 +174,9 @@ class GSAS2Model:
         self.output_state.phase_names_list = []
         self.refinement_state.crystal_structures = []
         self.user_save_directory: str | None = None
+        self.default_cif_dict: dict = {}
+
+        self.populate_default_cif_dict()
 
     def clear_input_components(self) -> None:
         """
@@ -1122,3 +1128,28 @@ class GSAS2Model:
         if len(reflection_labels) != len(reflection_positions):
             return [f"reflections_phase_{i}" for i in range(1, len(reflection_positions) + 1)]
         return reflection_labels
+
+    # ================
+    # Phase Selection
+    # ================
+
+    def phase_is_custom(self, combo_text: str) -> bool:
+        return combo_text == self._CUSTOM_PHASE
+
+    def get_phase_files(self, combo_text: str, finder_file_paths: List[str] | None) -> List[str]:
+        # always return a list of filepaths, so that callers iterate over phases rather than characters
+        if combo_text == self._CUSTOM_PHASE:
+            return finder_file_paths or []
+        else:
+            return [self.default_cif_dict[combo_text]]
+
+    def populate_default_cif_dict(self) -> None:
+        # get the path to Engineering root, to anchor file search
+        phase_info_dir = Path(Engineering.__file__).parent / "ENGINX" / "phase_info"
+        for cif_path in phase_info_dir.glob("*.cif"):
+            self.default_cif_dict[cif_path.stem] = str(cif_path)
+
+    def get_cif_combo_options(self) -> List[str]:
+        defaults = list(self.default_cif_dict.keys())
+        defaults.sort()
+        return defaults + [self._CUSTOM_PHASE]
