@@ -8,9 +8,12 @@
 #
 #
 import os
-from unittest import TestCase, main
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from unittest import TestCase, main, skipUnless
+from unittest.mock import patch
 
-from workbench.config.user import UserConfig
+from workbench.config.user import UserConfig, remove_lock_files
 
 
 class ConfigUserManager(object):
@@ -145,6 +148,48 @@ class ConfigUserTest(TestCase):
 
     def test_set_raises_when_key_is_not_str_and_second_is_none(self):
         self.assertRaises(TypeError, self.cfg.set, 123, None)
+
+
+class RemoveLockFilesTest(TestCase):
+    @patch("workbench.config.user.sleep")
+    def test_remove_default_lockfiles_including_nested_rmlock_variants_and_preserve_settings(self, _):
+        with TemporaryDirectory() as temp_dir:
+            settings_dir = Path(temp_dir)
+            settings_files = [
+                settings_dir / "mantidproject" / "mantidworkbench.ini",
+                settings_dir / "QtProject.conf",
+            ]
+            lock_suffixes = [".lock", ".lock.rmlock", ".lock.rmlock.rmlock"]
+
+            for settings_file in settings_files:
+                settings_file.parent.mkdir(parents=True, exist_ok=True)
+                settings_file.touch()
+                for suffix in lock_suffixes:
+                    settings_file.with_name(settings_file.name + suffix).touch()
+
+            with patch("workbench.config.user._get_settings_dir", return_value=settings_dir):
+                remove_lock_files()
+
+            for settings_file in settings_files:
+                self.assertTrue(settings_file.exists())
+                for suffix in lock_suffixes:
+                    self.assertFalse(settings_file.with_name(settings_file.name + suffix).exists())
+
+    def test_missing_target_is_ignored(self):
+        with TemporaryDirectory() as temp_dir:
+            with patch("workbench.config.user._get_settings_dir", return_value=Path(temp_dir)):
+                remove_lock_files(["missing.conf"])
+
+    @skipUnless(os.name == "posix", "--qt-rm-lockfiles is only available on POSIX")
+    @patch("workbench.app.main.start")
+    @patch("workbench.app.main._remove_lock_files")
+    def test_qt_rm_lockfiles_cli_option_removes_lockfiles(self, remove_lock_files_mock, start_mock):
+        from workbench.app.main import main as workbench_main
+
+        workbench_main(["--qt-rm-lockfiles"])
+
+        remove_lock_files_mock.assert_called_once_with()
+        start_mock.assert_called_once()
 
 
 if __name__ == "__main__":
