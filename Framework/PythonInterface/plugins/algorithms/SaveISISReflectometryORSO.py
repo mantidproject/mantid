@@ -275,6 +275,10 @@ class ReflectometryDatasetHistory(ReflectometryDatasetBase):
     _CREATE_FLOOD_ALG = "CreateFloodWorkspace"
     _REBIN_ALG = "Rebin"
 
+    @classmethod
+    def _is_supported_q_conversion_method(cls, alg_name: str) -> bool:
+        return alg_name in [cls.REF_ROI_ALG, cls.CONVERT_ALG]
+
     def _read_only(self) -> bool:
         return True
 
@@ -361,12 +365,13 @@ class ReflectometryDatasetHistory(ReflectometryDatasetBase):
             # Q conversion information isn't relevant for a stitched dataset
             return
 
-        for child in self._reduction_history.getChildHistories():
+        for child in reversed(self._reduction_history.getChildHistories()):
             if child.name() == self._RRO_ALG:
-                rro_child_algs = child.getChildHistories()
-                if rro_child_algs:
-                    self._q_conversion_history = rro_child_algs[-1]
-                    break
+                for rro_child in reversed(child.getChildHistories()):
+                    if self._is_supported_q_conversion_method(rro_child.name()):
+                        self._q_conversion_history = rro_child
+                        break
+                break
 
         if self._q_conversion_history is None:
             logger.warning(
@@ -374,12 +379,13 @@ class ReflectometryDatasetHistory(ReflectometryDatasetBase):
             )
             return
 
-        if self._q_conversion_history.name() == self.REF_ROI_ALG:
+        q_conversion_method = self._q_conversion_history.name()
+        if q_conversion_method == self.REF_ROI_ALG:
             self._q_conversion_theta = float(self._q_conversion_history.getPropertyValue("ScatteringAngle"))
-        elif self._q_conversion_history.name() == self.CONVERT_ALG:
+        elif q_conversion_method == self.CONVERT_ALG:
             self._q_conversion_theta = float(np.rad2deg(self._ws.spectrumInfo().signedTwoTheta(0))) / 2.0
 
-        self._q_conversion_method = self.q_conversion_history.name()
+        self._q_conversion_method = q_conversion_method
 
     def _set_name(self):
         if self.stitch_history is not None:
@@ -879,6 +885,11 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
                 logger.debug(f"An entry for '{key}' was not found in {Prop.META_JSON}. It will not be included in the output file.")
 
         if not dataset.q_conversion_method:
+            if self.getPropertyValue(Prop.META_SOURCE) == MetadataSourceOptions.HYBRID:
+                self.log().warning(
+                    f"Dataset '{dataset.name}': Unable to find a supported Q conversion method in the workspace history. "
+                    f"Falling back to the '{Prop.Q_CONVERT_METHOD}' property value: {self.getPropertyValue(Prop.Q_CONVERT_METHOD)}."
+                )
             setattr(dataset, "q_conversion_method", self.getPropertyValue(Prop.Q_CONVERT_METHOD))
         set_simple_dataset_value_from_property(
             "reduction_timestamp", get_manual_property_value(Prop.REDUCTION_TIMESTAMP), Prop.REDUCTION_TIMESTAMP

@@ -660,6 +660,73 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         self.assertTrue(np.allclose(lambda_data, 4 * np.pi * np.sin(np.radians(angle)) / q_data, atol=1e-10, equal_nan=True))
         self.assertTrue(np.allclose(theta_data, np.full(q_data.size, angle), atol=1e-10, equal_nan=True))
 
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_history_source_uses_supported_q_conversion_algorithm_if_it_is_not_the_last_reduction_child(self, mock_alg_histories):
+        angle = 2.3
+        ws = self._create_sample_workspace()
+        self._configure_q_conversion_alg_mock_history(
+            mock_alg_histories,
+            self._REF_ROI,
+            {"ScatteringAngle": angle},
+            later_rro_child_histories=[self._create_mock_alg_history("UnsupportedAlgorithm", {})],
+        )
+
+        self._run_save_alg(ws, write_resolution=False, include_extra_cols=True)
+
+        orso_data = self._check_num_columns_in_file(self._NUM_COLS_EXTENDED)
+        q_data = orso_data[:, 0]
+        lambda_data = orso_data[:, 3]
+        theta_data = orso_data[:, 5]
+        self.assertTrue(np.allclose(lambda_data, 4 * np.pi * np.sin(np.radians(angle)) / q_data, atol=1e-10, equal_nan=True))
+        self.assertTrue(np.allclose(theta_data, np.full(q_data.size, angle), atol=1e-10, equal_nan=True))
+
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_history_source_uses_supported_q_conversion_algorithm_from_final_rro_call(self, mock_alg_histories):
+        angle = 2.3
+        ws = self._create_sample_workspace()
+        unsupported_rro_history = self._create_mock_alg_history(
+            self._RRO_ALG,
+            {},
+            [self._create_mock_alg_history("UnsupportedAlgorithm", {})],
+        )
+        ref_roi_history = self._create_mock_alg_history(self._REF_ROI, {"ScatteringAngle": angle})
+        supported_rro_history = self._create_mock_alg_history(self._RRO_ALG, {}, [ref_roi_history])
+        red_history = self._create_mock_alg_history(self._REDUCTION_ALG, {}, [unsupported_rro_history, supported_rro_history])
+        mock_alg_histories.return_value = [red_history]
+
+        self._run_save_alg(ws, write_resolution=False, include_extra_cols=True)
+
+        orso_data = self._check_num_columns_in_file(self._NUM_COLS_EXTENDED)
+        q_data = orso_data[:, 0]
+        lambda_data = orso_data[:, 3]
+        theta_data = orso_data[:, 5]
+        self.assertTrue(np.allclose(lambda_data, 4 * np.pi * np.sin(np.radians(angle)) / q_data, atol=1e-10, equal_nan=True))
+        self.assertTrue(np.allclose(theta_data, np.full(q_data.size, angle), atol=1e-10, equal_nan=True))
+
+    @patch.object(Logger, "warning")
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_hybrid_source_warns_when_falling_back_to_q_conversion_method_property(self, mock_alg_histories, mock_warning):
+        ws = self._create_sample_workspace()
+        self._configure_q_conversion_alg_mock_history(mock_alg_histories, "UnsupportedAlgorithm", {})
+
+        self._run_save_alg(
+            ws,
+            write_resolution=False,
+            include_extra_cols=True,
+            MetadataSource="HistoryWherePossible",
+            IgnoredProperties=["FirstTransmissionFileList", "SecondTransmissionFileList", "FloodCorrectionSource", "CalibrationFile"],
+        )
+
+        self._check_num_columns_in_file(self._NUM_COLS_BASIC)
+        mock_warning.assert_any_call(
+            f"Dataset '{ws.name()}': Unable to find a supported Q conversion method in the workspace history. "
+            f"Falling back to the 'QConversionMethod' property value: {self._REF_ROI}."
+        )
+        mock_warning.assert_any_call(
+            f"Dataset '{ws.name()}': Unable to calculate lambda values. An angle was not provided. "
+            "Additional data columns will be excluded."
+        )
+
     def test_json_data_file_angles_are_not_required_when_ref_roi_additional_columns_are_not_requested(self):
         ws = self._create_sample_workspace()
         metadata = json.dumps({ws.name(): {"data-files": [{"file-name": "INTER00013460"}]}})
@@ -1041,9 +1108,12 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         history.getPropertyValue = Mock(side_effect=mock_get_property_value)
         return history
 
-    def _configure_q_conversion_alg_mock_history(self, mock_alg_histories, q_convert_alg_name, property_values, has_resolution=False):
+    def _configure_q_conversion_alg_mock_history(
+        self, mock_alg_histories, q_convert_alg_name, property_values, has_resolution=False, later_rro_child_histories=None
+    ):
         convert_history = self._create_mock_alg_history(q_convert_alg_name, property_values)
-        rro_history = self._create_mock_alg_history(self._RRO_ALG, {}, [convert_history])
+        later_rro_child_histories = later_rro_child_histories or []
+        rro_history = self._create_mock_alg_history(self._RRO_ALG, {}, [convert_history, *later_rro_child_histories])
         if has_resolution:
             rebin_history = self._create_mock_alg_history(self._REBIN_ALG, {"Params": "0.1,0.02,0.3"})
             red_history = self._create_mock_alg_history(self._REDUCTION_ALG, {}, [rro_history, rebin_history])
