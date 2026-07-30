@@ -1271,6 +1271,61 @@ class TestTransmissionValues(_FunctionalTestBase):
         # roughly the same attenuation (loose bound: MonteCarlo with 50 events per point)
         self.assertLess(abs(transmission[0] - transmission[1]), 0.15 * transmission.mean())
 
+    def _transmission_for(self, **att_settings):
+        self._apply_settings_via_real_presenter(**att_settings)
+        self._click_checkbox(self.view.chkTransmission)
+        return np.array(self.model.orientations[0].transmission)
+
+    def test_evaluation_point_far_outside_the_default_range_still_computes(self):
+        # regression: the absorption workspace used to be binned on a fixed 0-5 dSpacing grid, so an
+        # evaluation point beyond it fell outside the interpolation range and raised a ValueError -
+        # which calc_for_index does not catch, so it escaped to the user. The grid is now built
+        # around the point itself, so any point is in range.
+        transmission = self._transmission_for(att_point=7.5, att_unit="dSpacing")
+
+        self.assertEqual(len(transmission), len(self.model.geometry.spec_inds))
+        self.assertTrue(np.all((transmission > 0) & (transmission <= 1)))
+
+    def test_evaluation_point_far_below_the_default_range_still_computes(self):
+        transmission = self._transmission_for(att_point=0.2, att_unit="dSpacing")
+
+        self.assertTrue(np.all((transmission > 0) & (transmission <= 1)))
+
+    def test_wavelength_evaluation_point_computes(self):
+        # a wavelength point needs no per-spectrum conversion, but must still bracket correctly
+        transmission = self._transmission_for(att_point=4.0, att_unit="Wavelength")
+
+        self.assertTrue(np.all((transmission > 0) & (transmission <= 1)))
+
+    def test_longer_wavelength_attenuates_more(self):
+        # absorption cross-sections rise with wavelength, so a longer wavelength must transmit less.
+        # This is what pins the evaluation point to the *right* wavelength: binning the whole bank
+        # around one shared wavelength would wash the difference out.
+        short = self._transmission_for(att_point=0.5, att_unit="Wavelength")
+        self._click_checkbox(self.view.chkTransmission)  # off, so the next toggle recomputes
+        long = self._transmission_for(att_point=4.0, att_unit="Wavelength")
+
+        self.assertTrue(np.all(long < short))
+
+    def test_dspacing_point_is_converted_per_detector(self):
+        # lambda = 2 d sin(theta), so a dSpacing point maps to a different wavelength in each detector.
+        # Asking for d and asking for that detector's equivalent wavelength must therefore agree.
+        # Binning the whole bank around a single shared wavelength would break this for every
+        # detector except the one the shared wavelength was derived from.
+        by_d = self._transmission_for(att_point=1.5, att_unit="dSpacing")
+
+        spec_info = self.model.workspaces.ws.spectrumInfo()
+        two_thetas = np.array([spec_info.twoTheta(i) for i in self.model.geometry.spec_inds])
+        equivalent_lambda = 2 * 1.5 * np.sin(two_thetas / 2)
+        # the two ENGINX banks are at mirrored 2theta, so they share one equivalent wavelength
+        np.testing.assert_allclose(equivalent_lambda, equivalent_lambda[0], rtol=1e-6)
+
+        self._click_checkbox(self.view.chkTransmission)  # off, so the next toggle recomputes
+        by_lambda = self._transmission_for(att_point=float(equivalent_lambda[0]), att_unit="Wavelength")
+
+        # loose bound: MonteCarloAbsorption with 50 events per point is noisy
+        np.testing.assert_allclose(by_lambda, by_d, rtol=0.1)
+
     def test_colourbar_limit_setting_switches_scale_to_data_range(self):
         self._click_checkbox(self.view.chkTransmission)
 
