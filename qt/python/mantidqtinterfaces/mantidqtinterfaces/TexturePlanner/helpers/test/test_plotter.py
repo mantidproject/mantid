@@ -57,7 +57,7 @@ def _make_model(
     return model
 
 
-def _make_plotter(model, *, vis_settings=None, gon_colors=None, dir_cols=None, transmission_use_data_range=None):
+def _make_plotter(model, *, vis_settings=None, gon_colors=None, dir_cols=None, transmission_use_data_range=None, att_show_current=None):
     # the plotter owns its visual config; by default we leave the constructor defaults in place so
     # __init__ wiring is actually exercised. Tests that intentionally drive a specific config pass
     # the relevant override(s), which are applied on top of the real defaults.
@@ -70,7 +70,22 @@ def _make_plotter(model, *, vis_settings=None, gon_colors=None, dir_cols=None, t
         plotter.dir_cols = dir_cols
     if transmission_use_data_range is not None:
         plotter.transmission_use_data_range = transmission_use_data_range
+    if att_show_current is not None:
+        plotter.att_show_current = att_show_current
     return plotter
+
+
+def _transmission_scatter_call(proj_ax):
+    # the colour-mapped scatter is the only one passed a cmap; the current-orientation highlight
+    # (when enabled) is a separate, later scatter call
+    calls = [c for c in proj_ax.scatter.call_args_list if "cmap" in c.kwargs]
+    assert len(calls) == 1, f"expected exactly one colour-mapped scatter, got {len(calls)}"
+    return calls[0]
+
+
+def _highlight_scatter_calls(proj_ax):
+    # the current-orientation highlight is the grey open-circle scatter drawn in transmission mode
+    return [c for c in proj_ax.scatter.call_args_list if c.kwargs.get("edgecolor") == "grey" and "cmap" not in c.kwargs]
 
 
 class TestTexturePlotter_UpdatePlot(unittest.TestCase):
@@ -527,7 +542,7 @@ class TestTexturePlotter_DrawPoleFigure(unittest.TestCase):
 
         plotter._draw_pole_figure(proj_ax, [], current_index=0)
 
-        scatter_call = proj_ax.scatter.call_args
+        scatter_call = _transmission_scatter_call(proj_ax)
         np.testing.assert_array_equal(scatter_call.args[0], np.array([0.2, 0.4]))
         np.testing.assert_array_equal(scatter_call.args[1], np.array([0.1, 0.3]))
         np.testing.assert_array_equal(scatter_call.kwargs["c"], np.array([0.3, 0.7]))
@@ -548,10 +563,119 @@ class TestTexturePlotter_DrawPoleFigure(unittest.TestCase):
 
         plotter._draw_pole_figure(proj_ax, [], current_index=0)
 
-        scatter_call = proj_ax.scatter.call_args
+        scatter_call = _transmission_scatter_call(proj_ax)
         self.assertNotIn("vmin", scatter_call.kwargs)
         self.assertNotIn("vmax", scatter_call.kwargs)
         self.assertEqual(scatter_call.kwargs["cmap"], "jet")
+
+
+class TestTexturePlotter_TransmissionCurrentIndexHighlight(unittest.TestCase):
+    """In transmission mode the points are coloured by value, so the current orientation is
+    optionally ringed with oversized grey open circles instead of being drawn filled."""
+
+    @staticmethod
+    def _model_with_two_orientations(**model_kwargs):
+        cur = MagicMock()
+        cur.include = True
+        cur.pf_points = np.array([[0.1, 0.2], [0.3, 0.4]])
+        cur.transmission = np.array([0.3, 0.5])
+        other = MagicMock()
+        other.include = True
+        other.pf_points = np.array([[0.5, 0.6]])
+        other.transmission = np.array([0.7])
+        return _make_model(orientations={0: cur, 1: other}, plot_transmission=True, **model_kwargs)
+
+    def test_enabled_by_default(self):
+        self.assertTrue(TexturePlotter(_make_model()).att_show_current)
+
+    def test_highlights_current_orientation_points_when_enabled(self):
+        model = self._model_with_two_orientations()
+        plotter = _make_plotter(model, att_show_current=True)
+        proj_ax = MagicMock()
+
+        plotter._draw_pole_figure(proj_ax, [], current_index=0)
+
+        (highlight,) = _highlight_scatter_calls(proj_ax)
+        # only the current orientation's points are ringed, with the columns swapped as elsewhere
+        np.testing.assert_array_equal(highlight.args[0], np.array([0.2, 0.4]))
+        np.testing.assert_array_equal(highlight.args[1], np.array([0.1, 0.3]))
+        # open circles, drawn at twice the normal point size so the colour stays visible inside
+        self.assertEqual(highlight.kwargs["facecolor"], "None")
+        self.assertEqual(highlight.kwargs["s"], 40)
+
+    def test_highlight_follows_the_current_index(self):
+        model = self._model_with_two_orientations()
+        plotter = _make_plotter(model, att_show_current=True)
+        proj_ax = MagicMock()
+
+        plotter._draw_pole_figure(proj_ax, [], current_index=1)
+
+        (highlight,) = _highlight_scatter_calls(proj_ax)
+        np.testing.assert_array_equal(highlight.args[0], np.array([0.6]))
+        np.testing.assert_array_equal(highlight.args[1], np.array([0.5]))
+
+    def test_no_highlight_when_disabled(self):
+        model = self._model_with_two_orientations()
+        plotter = _make_plotter(model, att_show_current=False)
+        proj_ax = MagicMock()
+
+        plotter._draw_pole_figure(proj_ax, [], current_index=0)
+
+        self.assertEqual(_highlight_scatter_calls(proj_ax), [])
+        # the colour-mapped scatter and its colour bar are unaffected
+        self.assertEqual(_transmission_scatter_call(proj_ax).kwargs["cmap"], "jet")
+        proj_ax.figure.colorbar.assert_called_once()
+
+    def test_highlights_excluded_current_orientation_whose_points_are_not_in_the_colour_map(self):
+        # an excluded current orientation contributes no coloured points, but the user still needs
+        # to see where it sits - as in the non-transmission plot, it stays visible
+        model = self._model_with_two_orientations()
+        model.orientations[0].include = False
+        plotter = _make_plotter(model, att_show_current=True)
+        proj_ax = MagicMock()
+
+        plotter._draw_pole_figure(proj_ax, [], current_index=0)
+
+        (highlight,) = _highlight_scatter_calls(proj_ax)
+        np.testing.assert_array_equal(highlight.args[0], np.array([0.2, 0.4]))
+        # only the *other* orientation's value is colour-mapped
+        np.testing.assert_array_equal(_transmission_scatter_call(proj_ax).kwargs["c"], np.array([0.7]))
+
+    def test_no_highlight_when_current_orientation_has_no_pole_figure_points(self):
+        # regression: an orientation whose pf_points have not been calculated must not be indexed
+        model = self._model_with_two_orientations()
+        model.orientations[0].pf_points = None
+        plotter = _make_plotter(model, att_show_current=True)
+        proj_ax = MagicMock()
+
+        plotter._draw_pole_figure(proj_ax, [], current_index=0)
+
+        self.assertEqual(_highlight_scatter_calls(proj_ax), [])
+        proj_ax.figure.colorbar.assert_called_once()
+
+    def test_no_highlight_when_there_is_nothing_to_colour_map(self):
+        # with no included orientations the transmission branch returns before drawing anything
+        model = self._model_with_two_orientations()
+        model.orientations[0].include = False
+        model.orientations[1].include = False
+        plotter = _make_plotter(model, att_show_current=True)
+        proj_ax = MagicMock()
+
+        plotter._draw_pole_figure(proj_ax, [], current_index=0)
+
+        self.assertEqual(_highlight_scatter_calls(proj_ax), [])
+        proj_ax.figure.colorbar.assert_not_called()
+
+    def test_not_drawn_outside_transmission_mode(self):
+        # without transmission values the current orientation is already drawn filled, so no ring
+        model = self._model_with_two_orientations()
+        model.plot_transmission = False
+        plotter = _make_plotter(model, att_show_current=True)
+        proj_ax = MagicMock()
+
+        plotter._draw_pole_figure(proj_ax, [], current_index=0)
+
+        self.assertEqual(_highlight_scatter_calls(proj_ax), [])
 
 
 @patch(file_path + ".plt")

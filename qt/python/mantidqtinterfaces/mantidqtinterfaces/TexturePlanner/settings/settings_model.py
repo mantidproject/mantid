@@ -33,6 +33,7 @@ SETTINGS_DICT = {
     "att_point": float,
     "att_unit": str,
     "att_use_data_range": bool,
+    "att_show_current": bool,
 }
 
 DEFAULT_SETTINGS = {
@@ -55,6 +56,7 @@ DEFAULT_SETTINGS = {
     "att_point": 1.5,
     "att_unit": "dSpacing",
     "att_use_data_range": False,
+    "att_show_current": True,
 }
 
 
