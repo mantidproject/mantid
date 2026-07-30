@@ -336,6 +336,36 @@ class _FunctionalTestBase(unittest.TestCase):
     def _lab_direction_labels(self):
         return {t.get_text(): np.asarray(t.get_position_3d(), dtype=float) for t in self.view.get_lab_ax().texts if isinstance(t, Text3D)}
 
+    def _lab_direction_unit_vectors(self):
+        """Unit direction of each labelled sample-direction arrow in the lab view.
+
+        Each label sits at scat_centre + direction * arrow_length, and the arrow length is read off
+        the mesh extent along that direction, so only the direction itself is a stable assertion."""
+        scat_centre = self.model.workspaces.scattering_centre
+        vectors = {}
+        for name, position in self._lab_direction_labels().items():
+            arrow = position - scat_centre
+            vectors[name] = arrow / np.linalg.norm(arrow)
+        return vectors
+
+    def _displayed_directions(self):
+        # the three direction fields as a (3, 3) array, one direction per row (RD, ND, TD)
+        fields = (self.view.get_rd_dir(), self.view.get_nd_dir(), self.view.get_td_dir())
+        return np.array([[float(x) for x in vec.split(",")] for vec in fields])
+
+    def _reveal_direction_controls(self):
+        # both groups start collapsed, hiding the two frame checkboxes and the direction fields
+        self.view.grpDirectionWidgets.setChecked(True)
+        self.view.initOrientation.setChecked(True)
+        QApplication.processEvents()
+
+    def _set_entered_directions(self, rd, nd, td):
+        self.view.set_rd_dir(rd)
+        self.view.set_nd_dir(nd)
+        self.view.set_td_dir(td)
+        self._click(self.view.updateDirs)
+        QApplication.processEvents()
+
 
 class TestInitialState(_FunctionalTestBase):
     def test_instrument_combo_lists_supported_instruments_plus_custom(self):
@@ -988,6 +1018,196 @@ class TestSampleDirectionsDisplay(_FunctionalTestBase):
         pf_points = self.model.orientations[0].pf_points
         self.assertEqual(len(pf_points), 20)  # ENGINX Texture20 default
         self.assertEqual(len(self._pf_scatters_matching(pf_points)), 1)
+
+
+class TestTextureDirectionFrames(_FunctionalTestBase):
+    """The two direction-frame controls in the sample setup tab.
+
+    "Apply Transformation to Sample Directions" (chkTransformDirs) decides whether the initial shape
+    orientation also carries the texture directions - i.e. whether the initial rotation models a
+    misoriented shape *definition* (unticked, the original behaviour) or a sample misaligned on the
+    beamline (ticked). "Show Directions in Lab Frame" (chkLabDirs) only changes what the direction
+    fields display; the directions are always entered in the sample frame.
+
+    A 90 deg initial rotation about x is used throughout because it maps the default directions onto
+    each other exactly: RD (1,0,0) -> (1,0,0), ND (0,1,0) -> (0,0,1), TD (0,0,1) -> (0,-1,0).
+    """
+
+    _ROT_X90_RD = (1.0, 0.0, 0.0)
+    _ROT_X90_ND = (0.0, 0.0, 1.0)
+    _ROT_X90_TD = (0.0, -1.0, 0.0)
+
+    def setUp(self):
+        super().setUp()
+        self._reveal_direction_controls()
+
+    def _rotate_initial_shape_x90(self):
+        self.view.spnInitX.setValue(90.0)
+        QApplication.processEvents()
+        # sanity: the rotation really is on the workspace manager, so the directions have something
+        # non-trivial to (not) follow
+        np.testing.assert_allclose(self.model.workspaces.init_R.as_euler("xyz", degrees=True), (90.0, 0.0, 0.0), atol=1e-9)
+
+    def _assert_lab_arrows(self, rd, nd, td):
+        arrows = self._lab_direction_unit_vectors()
+        self.assertEqual(set(arrows), {"RD", "ND", "TD"})
+        np.testing.assert_allclose(arrows["RD"], rd, atol=1e-9)
+        np.testing.assert_allclose(arrows["ND"], nd, atol=1e-9)
+        np.testing.assert_allclose(arrows["TD"], td, atol=1e-9)
+
+    # the transform toggle -------------------------------------------------
+    def test_initial_rotation_leaves_directions_alone_by_default(self):
+        # the pre-existing behaviour: the initial rotation misorients the shape definition only, so
+        # the directions stay pinned to the lab axes
+        self.assertFalse(self.view.chkTransformDirs.isChecked())
+        self.assertFalse(self.model.transform_dirs)
+
+        self._rotate_initial_shape_x90()
+
+        np.testing.assert_allclose(self.model.effective_ax_transform, np.eye(3), atol=1e-9)
+        self._assert_lab_arrows((1, 0, 0), (0, 1, 0), (0, 0, 1))
+
+    def test_ticking_transform_rotates_the_directions_with_the_shape(self):
+        self._rotate_initial_shape_x90()
+
+        self._click_checkbox(self.view.chkTransformDirs)
+        QApplication.processEvents()
+
+        self.assertTrue(self.model.transform_dirs)
+        # columns of the effective transform are the directions, now carried round by the rotation
+        effective = self.model.effective_ax_transform
+        np.testing.assert_allclose(effective[:, 0], self._ROT_X90_RD, atol=1e-9)
+        np.testing.assert_allclose(effective[:, 1], self._ROT_X90_ND, atol=1e-9)
+        np.testing.assert_allclose(effective[:, 2], self._ROT_X90_TD, atol=1e-9)
+        # and the lab view draws the arrows in their new places
+        self._assert_lab_arrows(self._ROT_X90_RD, self._ROT_X90_ND, self._ROT_X90_TD)
+
+    def test_transform_is_a_no_op_without_an_initial_rotation(self):
+        self._click_checkbox(self.view.chkTransformDirs)
+        QApplication.processEvents()
+
+        self.assertTrue(self.model.transform_dirs)
+        np.testing.assert_allclose(self.model.effective_ax_transform, np.eye(3), atol=1e-9)
+        self._assert_lab_arrows((1, 0, 0), (0, 1, 0), (0, 0, 1))
+
+    def test_directions_follow_a_later_change_of_initial_rotation(self):
+        self._click_checkbox(self.view.chkTransformDirs)
+        QApplication.processEvents()
+
+        # the toggle is applied first, so the rotation that arrives afterwards must still be picked up
+        self._rotate_initial_shape_x90()
+
+        self._assert_lab_arrows(self._ROT_X90_RD, self._ROT_X90_ND, self._ROT_X90_TD)
+
+    def test_untransformed_directions_are_restored_when_the_toggle_is_cleared(self):
+        self._rotate_initial_shape_x90()
+        self._click_checkbox(self.view.chkTransformDirs)
+        QApplication.processEvents()
+        self._assert_lab_arrows(self._ROT_X90_RD, self._ROT_X90_ND, self._ROT_X90_TD)
+
+        self._click_checkbox(self.view.chkTransformDirs)
+        QApplication.processEvents()
+
+        self.assertFalse(self.model.transform_dirs)
+        self._assert_lab_arrows((1, 0, 0), (0, 1, 0), (0, 0, 1))
+
+    def test_transform_toggle_leaves_the_entered_directions_untouched(self):
+        # the transform changes only the derived (lab) directions; the values the user typed - and
+        # the model's record of them - must survive a toggle unrounded and unrotated
+        self._set_entered_directions((0, 2, 0), (0, 0, 1), (1, 0, 0))
+        self._rotate_initial_shape_x90()
+        entered = self._displayed_directions()
+        ax_transform = self.model.ax_transform.copy()
+
+        self._click_checkbox(self.view.chkTransformDirs)
+        QApplication.processEvents()
+
+        np.testing.assert_array_equal(self._displayed_directions(), entered)
+        np.testing.assert_array_equal(self.model.ax_transform, ax_transform)
+
+    def test_transform_toggle_reprojects_the_pole_figure(self):
+        self._rotate_initial_shape_x90()
+        before = self.model.orientations[0].pf_points.copy()
+
+        self._click_checkbox(self.view.chkTransformDirs)
+        QApplication.processEvents()
+
+        after = self.model.orientations[0].pf_points
+        # rotating the directions reframes the projection, so the coverage points must move...
+        self.assertFalse(np.allclose(before, after))
+        # ...and the redrawn scatter must be the new points, not a stale artist
+        self.assertEqual(len(self._pf_scatters_matching(after)), 1)
+        self.assertEqual(len(self._pf_scatters_matching(before)), 0)
+
+    # the lab-frame display toggle ----------------------------------------
+    def test_lab_frame_display_shows_the_rotated_directions_read_only(self):
+        self._rotate_initial_shape_x90()
+        self._click_checkbox(self.view.chkTransformDirs)
+        QApplication.processEvents()
+        self.assertTrue(self.view.lineedit_RD0.isEnabled())
+
+        self._click_checkbox(self.view.chkLabDirs)
+        QApplication.processEvents()
+
+        np.testing.assert_allclose(self._displayed_directions(), (self._ROT_X90_RD, self._ROT_X90_ND, self._ROT_X90_TD), atol=1e-9)
+        # the lab values are derived, so they cannot be edited
+        for field in (self.view.lineedit_RD0, self.view.lineedit_ND1, self.view.lineedit_TD2):
+            self.assertFalse(field.isEnabled())
+
+    def test_clearing_lab_frame_display_restores_the_entered_directions(self):
+        self._rotate_initial_shape_x90()
+        self._click_checkbox(self.view.chkTransformDirs)
+        self._click_checkbox(self.view.chkLabDirs)
+        QApplication.processEvents()
+
+        self._click_checkbox(self.view.chkLabDirs)
+        QApplication.processEvents()
+
+        np.testing.assert_allclose(self._displayed_directions(), np.eye(3), atol=1e-9)
+        self.assertTrue(self.view.lineedit_RD0.isEnabled())
+
+    def test_lab_frame_display_matches_the_sample_frame_when_not_transforming(self):
+        # with the transform off the two frames coincide, so the display must not move
+        self._rotate_initial_shape_x90()
+
+        self._click_checkbox(self.view.chkLabDirs)
+        QApplication.processEvents()
+
+        np.testing.assert_allclose(self._displayed_directions(), np.eye(3), atol=1e-9)
+
+    def test_lab_frame_display_keeps_each_direction_on_its_own_row(self):
+        # guards the row/column convention: ax_transform stores the directions as columns, but the
+        # fields take one direction per row, so a missing transpose would silently permute them
+        self._set_entered_directions((0, 1, 0), (0, 0, 1), (1, 0, 0))
+        entered = self._displayed_directions()
+
+        self._click_checkbox(self.view.chkLabDirs)
+        QApplication.processEvents()
+        np.testing.assert_allclose(self._displayed_directions(), entered, atol=1e-9)
+
+        # and with a rotation applied, each row is exactly its own direction, rotated
+        self._rotate_initial_shape_x90()
+        self._click_checkbox(self.view.chkTransformDirs)
+        QApplication.processEvents()
+
+        rotated = Rotation.from_euler("x", 90, degrees=True).apply(entered)
+        np.testing.assert_allclose(self._displayed_directions(), rotated, atol=1e-9)
+
+    def test_update_directions_in_lab_frame_renames_without_rewriting_the_vectors(self):
+        # the fields are showing derived values, so Update must not feed them back into the model
+        self._set_entered_directions((0, 1, 0), (0, 0, 1), (1, 0, 0))
+        self._rotate_initial_shape_x90()
+        self._click_checkbox(self.view.chkTransformDirs)
+        self._click_checkbox(self.view.chkLabDirs)
+        QApplication.processEvents()
+        ax_transform = self.model.ax_transform.copy()
+
+        self.view.set_rd_name("AD")
+        self._click(self.view.updateDirs)
+        QApplication.processEvents()
+
+        self.assertEqual(self.model.dir_names, ["AD", "ND", "TD"])
+        np.testing.assert_array_equal(self.model.ax_transform, ax_transform)
 
 
 class TestInstrumentGeometryCounts(_FunctionalTestBase):

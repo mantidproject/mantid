@@ -32,7 +32,10 @@ def _make_model(
     # configured on the plotter itself via _make_plotter(...), not on the model.
     model = MagicMock()
     model.dir_names = dir_names or ["RD", "ND", "TD"]
-    model.ax_transform = np.eye(3) if ax_transform is None else ax_transform
+    # the plotter reads effective_ax_transform (the entered directions, carried round by the initial
+    # shape rotation when that option is on) - never the raw ax_transform, which is left unset so a
+    # regression back to it fails loudly rather than silently drawing a MagicMock
+    model.effective_ax_transform = np.eye(3) if ax_transform is None else ax_transform
     model.projection = projection
     model.gonio_index = gonio_index
     model.plot_transmission = plot_transmission

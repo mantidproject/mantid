@@ -181,7 +181,7 @@ class TexturePlotter:
 
         # if the setting want the sample directions plotted, plot them
         if self.vis_settings["directions"]:
-            sample_model.plot_sample_directions(self._model.ax_transform, self._model.dir_names, scat_centre=scat_centre)
+            sample_model.plot_sample_directions(self._model.effective_ax_transform, self._model.dir_names, scat_centre=scat_centre)
 
         # scale the lab frame
         lim = [-(abs_lim := extent * n_gon / 1.5), abs_lim]
@@ -229,7 +229,7 @@ class TexturePlotter:
         lab_ax.scatter(tips[:, 0], tips[:, 1], tips[:, 2], color=tip_color, s=2)
 
     def _project_goniometer_poles(self, R: Rotation, g_vecs: List[np.ndarray | int]) -> np.ndarray:
-        g_pole = R.inv().apply(np.array(g_vecs)) @ self._model.ax_transform
+        g_pole = R.inv().apply(np.array(g_vecs)) @ self._model.effective_ax_transform
         cart_g_pole = get_alpha_beta_from_cart(g_pole.T)
         return ster_proj_xy(*cart_g_pole.T) if self._model.projection == "ster" else azim_proj_xy(*cart_g_pole.T)
 
