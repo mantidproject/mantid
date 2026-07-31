@@ -96,6 +96,7 @@ void ConvertToDiffractionMDWorkspace3::calculateExtentsFromData(std::vector<doub
   convertFramePropertyNames(getPropertyValue("OutputDimensions"), TargetFrame, Scaling);
   alg->setProperty("Q3DFrames", TargetFrame);
   alg->setProperty("QConversionScales", Scaling);
+  alg->setProperty("PreprocDetectorsWS", "PreprocDetectorsWS");
 
   alg->execute();
 
