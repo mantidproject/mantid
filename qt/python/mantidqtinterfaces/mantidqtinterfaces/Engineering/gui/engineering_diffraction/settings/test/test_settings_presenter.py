@@ -111,7 +111,7 @@ class SettingsPresenterTest(unittest.TestCase):
 
         self.assertEqual(self.view.close.call_count, 0)
         self.assertEqual(self.presenter.settings, self.settings)
-        self.model.set_settings_dict.assert_called_with(self.settings)
+        self.model.set_settings_dict.assert_called_with(self.settings, None)
         self.assertEqual(self.presenter.savedir_notifier.notify_subscribers.call_count, 1)
 
     @patch(dir_path + ".path.isfile")
@@ -140,7 +140,7 @@ class SettingsPresenterTest(unittest.TestCase):
         self.presenter.save_and_close_dialog()
 
         self.assertEqual(self.presenter.settings, self.settings)
-        self.model.set_settings_dict.assert_called_with(self.settings)
+        self.model.set_settings_dict.assert_called_with(self.settings, None)
         self.assertEqual(self.view.close.call_count, 1)
         self.assertEqual(self.presenter.savedir_notifier.notify_subscribers.call_count, 1)
 
