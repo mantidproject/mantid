@@ -143,9 +143,6 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         )
 
     def PyExec(self):
-        # Set the expected order of the columns in the calibration file
-        self._det_id_col_idx = 0
-        self._angle_col_idx = 1
         self._workflow_options = self._selected_workflow_options()
 
         try:
@@ -162,13 +159,37 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         """Return a dictionary containing issues found in properties."""
         issues = dict()
 
+        workflow_options = self._selected_workflow_options()
         self._calibration_filepath = self.getPropertyValue(self._CALIBRATION_FILE)
         if not self._calibration_filepath:
             issues[self._CALIBRATION_FILE] = "Calibration file path must be provided"
-        workflow_options = self._selected_workflow_options()
+        else:
+            calibration_file_issue = self._validate_calibration_file_header(self._calibration_filepath, workflow_options)
+            if calibration_file_issue:
+                issues[self._CALIBRATION_FILE] = calibration_file_issue
         if workflow_options.enable_property(self._EXPERIMENT_ANGLE) and self.getProperty(self._EXPERIMENT_ANGLE).isDefault:
             issues[self._EXPERIMENT_ANGLE] = "ExperimentAngle must be provided for the POLREF workflow"
         return issues
+
+    def _validate_calibration_file_header(self, filepath, workflow_options):
+        """Return an issue found in the first non-comment row of a calibration file."""
+        try:
+            with open(filepath, "r") as file:
+                header_entries = next(self._file_entries(file), None)
+        except FileNotFoundError:
+            return "Calibration file path cannot be found"
+
+        if header_entries is None:
+            return "Calibration file provided contains no data"
+
+        identifier_label, angle_label = self._calibration_file_column_labels(workflow_options)
+        try:
+            self._det_id_col_idx, self._angle_col_idx = self._validate_calibration_file_header_and_get_column_indices(
+                header_entries, identifier_label, angle_label
+            )
+        except (RuntimeError, ValueError) as error:
+            return str(error)
+        return None
 
     def _parse_calibration_file(self, filepath):
         """Parse calibration data from the calibration file."""
@@ -181,20 +202,10 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         """Create a dictionary of detector IDs and theta offsets from the calibration file."""
         scanned_theta_offsets = {}
         with open(filepath, "r") as file:
-            labels_checked = False
-
-            for entries in self._file_entries(file):
-                if len(entries) != self._NUM_COLUMNS_REQUIRED:
-                    raise RuntimeError(
-                        "Calibration file should contain two space de-limited columns, "
-                        f"labelled as {self._DET_ID_LABEL} and {self._THETA_LABEL}"
-                    )
-
-                if not labels_checked:
-                    # The labels should be the first row in the file that doesn't begin with a #
-                    self._check_file_column_labels(entries)
-                    labels_checked = True
-                    continue
+            file_entries = self._file_entries(file)
+            next(file_entries, None)
+            for entries in file_entries:
+                self._check_calibration_file_column_count(entries, self._DET_ID_LABEL, self._THETA_LABEL)
 
                 try:
                     scanned_theta_offsets[int(entries[self._det_id_col_idx])] = float(entries[self._angle_col_idx])
@@ -212,19 +223,10 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         """Create a dictionary of spectrum numbers and absolute angles from the calibration file."""
         calibration_angles = {}
         with open(filepath, "r") as file:
-            labels_checked = False
-
-            for entries in self._file_entries(file):
-                if len(entries) != self._NUM_COLUMNS_REQUIRED:
-                    raise RuntimeError(
-                        "Calibration file should contain two space de-limited columns, "
-                        f"labelled as {self._SPECTRUM_NUMBER_LABEL} and {self._ANGLE_LABEL}"
-                    )
-
-                if not labels_checked:
-                    self._check_absolute_file_column_labels(entries)
-                    labels_checked = True
-                    continue
+            file_entries = self._file_entries(file)
+            next(file_entries, None)
+            for entries in file_entries:
+                self._check_calibration_file_column_count(entries, self._SPECTRUM_NUMBER_LABEL, self._ANGLE_LABEL)
 
                 try:
                     spectrum_number = float(entries[self._det_id_col_idx])
@@ -258,37 +260,25 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
 
             yield entries
 
-    def _check_file_column_labels(self, row_entries):
-        """Check that the file contains the required column labels"""
-        valid_labels = collections.Counter([self._DET_ID_LABEL, self._THETA_LABEL])
+    def _calibration_file_column_labels(self, workflow_options):
+        if workflow_options.calibration_angle_type == self._ABSOLUTE:
+            return self._SPECTRUM_NUMBER_LABEL, self._ANGLE_LABEL
+        return self._DET_ID_LABEL, self._THETA_LABEL
 
-        first_label = row_entries[self._det_id_col_idx].lower()
-        second_label = row_entries[self._angle_col_idx].lower()
-
-        if collections.Counter([first_label, second_label]) == valid_labels:
-            if first_label == self._THETA_LABEL:
-                # Allow the columns to be specified in any order
-                self._angle_col_idx = 0
-                self._det_id_col_idx = 1
-        else:
-            raise ValueError(f"Incorrect column labels in calibration file - should be {self._DET_ID_LABEL} and {self._THETA_LABEL}")
-
-    def _check_absolute_file_column_labels(self, row_entries):
-        """Check that an absolute-angle file contains the required column labels."""
-        valid_labels = collections.Counter([self._SPECTRUM_NUMBER_LABEL, self._ANGLE_LABEL])
-
-        first_label = row_entries[self._det_id_col_idx].lower()
-        second_label = row_entries[self._angle_col_idx].lower()
-
-        if collections.Counter([first_label, second_label]) == valid_labels:
-            if first_label == self._ANGLE_LABEL:
-                # Allow the columns to be specified in any order
-                self._angle_col_idx = 0
-                self._det_id_col_idx = 1
-        else:
-            raise ValueError(
-                f"Incorrect column labels in calibration file - should be {self._SPECTRUM_NUMBER_LABEL} and {self._ANGLE_LABEL}"
+    def _check_calibration_file_column_count(self, row_entries, identifier_label, angle_label):
+        if len(row_entries) != self._NUM_COLUMNS_REQUIRED:
+            raise RuntimeError(
+                f"Calibration file should contain two space de-limited columns, labelled as {identifier_label} and {angle_label}"
             )
+
+    def _validate_calibration_file_header_and_get_column_indices(self, row_entries, identifier_label, angle_label):
+        """Validate calibration file labels and return their column indices."""
+        self._check_calibration_file_column_count(row_entries, identifier_label, angle_label)
+        labels = [entry.lower() for entry in row_entries]
+        valid_labels = collections.Counter([identifier_label, angle_label])
+        if collections.Counter(labels) != valid_labels:
+            raise ValueError(f"Incorrect column labels in calibration file - should be {identifier_label} and {angle_label}")
+        return labels.index(identifier_label), labels.index(angle_label)
 
     def _clone_workspace(self, ws):
         clone_alg = self.createChildAlgorithm("CloneWorkspace", InputWorkspace=ws)

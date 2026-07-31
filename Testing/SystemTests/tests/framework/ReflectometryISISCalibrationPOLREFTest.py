@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 
+from mantid.api import AlgorithmManager
 from mantid.simpleapi import Load, ReflectometryISISCalibration
 import systemtesting
 
@@ -19,6 +20,7 @@ class ReflectometryISISCalibrationPOLREFTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         group_ws = Load(Filename=self._POLREF_DATA_FILE, OutputWorkspace=self._POLREF_DATA_FILE)
+        self._validate_calibration_inputs(group_ws)
         output_ws = ReflectometryISISCalibration(
             InputWorkspace=self._POLREF_DATA_FILE,
             CalibrationFile=self._POLREF_CALIBRATION_MAP,
@@ -37,6 +39,15 @@ class ReflectometryISISCalibrationPOLREFTest(systemtesting.MantidSystemTest):
 
     def requiredFiles(self):
         return [self._POLREF_DATA_FILE + ".nxs", self._POLREF_CALIBRATION_MAP]
+
+    def _validate_calibration_inputs(self, group_ws):
+        algorithm = AlgorithmManager.create("ReflectometryISISCalibration")
+        algorithm.setProperty("InputWorkspace", group_ws)
+        algorithm.setProperty("CalibrationFile", self._POLREF_CALIBRATION_MAP)
+        algorithm.setProperty("InstrumentWorkflow", "POLREF")
+        algorithm.setProperty("SpecularPixelSpectrumNo", self._SPECULAR_PIXEL)
+        algorithm.setProperty("ExperimentAngle", 0.95)
+        self.assertEqual({}, algorithm.validateInputs())
 
     def _check_geometry_changed_in_polref_scattering_plane(self, spec_index, input, output):
         det_info_in = input.detectorInfo()

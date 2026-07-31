@@ -19,6 +19,7 @@ from testhelpers.tempfile_wrapper import TemporaryFileHelper
 
 class ReflectometryISISCalibrationTest(unittest.TestCase):
     _CALIBRATION_TEST_DATA = FileFinder.getFullPath("ISISReflectometry/calibration_test_data.dat")
+    _CALIBRATION_FILE = "CalibrationFile"
     _RAD_TO_DEG = 180.0 / math.pi
     _DEG_TO_RAD = math.pi / 180.0
 
@@ -124,6 +125,43 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         ws = self._create_sample_workspace(input_ws_name)
         args = {"InputWorkspace": ws, "CalibrationFile": "invalid/file_path.dat", "OutputWorkspace": "test_calibrated"}
         self._assert_run_algorithm_raises_exception(args, "Calibration file path cannot be found")
+
+    def test_validate_inputs_reports_invalid_header_column_count(self):
+        for header in [self._DET_ID_LABEL, f"{self._DET_ID_LABEL} {self._THETA_LABEL} extra_column"]:
+            with self.subTest(header=header):
+                issues = self._validate_calibration_file_header(f"{header}\n")
+                self.assertIn(self._CALIBRATION_FILE, issues)
+                self.assertIn(self._COLUMN_NUM_ERROR, issues[self._CALIBRATION_FILE])
+
+    def test_validate_inputs_reports_calibration_file_without_header_data(self):
+        for file_content in ["", "\n# calibration metadata\n"]:
+            with self.subTest(file_content=file_content):
+                issues = self._validate_calibration_file_header(file_content)
+                self.assertEqual("Calibration file provided contains no data", issues[self._CALIBRATION_FILE])
+
+    def test_validate_inputs_reports_invalid_labels_for_selected_workflow(self):
+        test_cases = [
+            ("Default", f"{self._DET_ID_LABEL} invalid_label\n", f"{self._DET_ID_LABEL} and {self._THETA_LABEL}"),
+            ("POLREF", f"{self._SPECTRUM_NUMBER_LABEL} invalid_label\n", f"{self._SPECTRUM_NUMBER_LABEL} and {self._ANGLE_LABEL}"),
+        ]
+        for workflow, header, expected_labels in test_cases:
+            with self.subTest(workflow=workflow):
+                issues = self._validate_calibration_file_header(header, workflow)
+                self.assertIn(self._CALIBRATION_FILE, issues)
+                self.assertIn(self._COLUMN_LABELS_ERROR, issues[self._CALIBRATION_FILE])
+                self.assertIn(expected_labels, issues[self._CALIBRATION_FILE])
+
+    def test_validate_inputs_accepts_valid_headers_in_either_order_after_comments_and_blank_lines(self):
+        test_cases = [
+            ("Default", f"{self._DET_ID_LABEL} {self._THETA_LABEL}"),
+            ("Default", f"{self._THETA_LABEL.upper()} {self._DET_ID_LABEL.upper()}"),
+            ("POLREF", f"{self._SPECTRUM_NUMBER_LABEL} {self._ANGLE_LABEL}"),
+            ("POLREF", f"{self._ANGLE_LABEL.upper()} {self._SPECTRUM_NUMBER_LABEL.upper()}"),
+        ]
+        for workflow, header in test_cases:
+            with self.subTest(workflow=workflow, header=header):
+                issues = self._validate_calibration_file_header(f"\n# calibration metadata\n{header}\n", workflow)
+                self.assertNotIn(self._CALIBRATION_FILE, issues)
 
     def test_exception_raised_if_too_many_columns_in_file(self):
         self.temp_calibration_file = TemporaryFileHelper(
@@ -448,6 +486,19 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         """Run the algorithm with the given args and check it raises the expected exception"""
         alg = self._setup_algorithm(args)
         self.assertRaisesRegex(RuntimeError, error_msg_regex, alg.execute)
+
+    def _validate_calibration_file_header(self, file_content, workflow="Default"):
+        self.temp_calibration_file = TemporaryFileHelper(fileContent=file_content, extension=".dat")
+        ws = self._create_sample_workspace("test_1234")
+        args = {
+            "InputWorkspace": ws,
+            "CalibrationFile": self.temp_calibration_file.getName(),
+            "InstrumentWorkflow": workflow,
+            "OutputWorkspace": "test_calibrated",
+        }
+        if workflow == "POLREF":
+            args["ExperimentAngle"] = 0.5
+        return self._setup_algorithm(args).validateInputs()
 
     def _setup_algorithm(self, args):
         alg = create_algorithm("ReflectometryISISCalibration", **args)
