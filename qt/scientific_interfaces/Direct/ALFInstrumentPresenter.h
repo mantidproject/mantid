@@ -35,7 +35,9 @@ public:
 
   virtual void subscribeAnalysisPresenter(IALFAnalysisPresenter *presenter) = 0;
 
+  /// Delegate the legacy combined settings read-and-restore operation to the view.
   virtual void loadSettings() = 0;
+  /// Delegate persistence of current settings to the view.
   virtual void saveSettings() = 0;
 
   virtual void loadSample() = 0;

@@ -69,6 +69,7 @@ public:
   virtual void setFileExtensionsByName(bool const filter) = 0;
   virtual void setLoadHistory(bool const loadHistory) = 0;
 
+  /// Restore widget state by querying const storage; this legacy operation does not write.
   virtual void loadSettings(const QSettings &settings) = 0;
 };
 

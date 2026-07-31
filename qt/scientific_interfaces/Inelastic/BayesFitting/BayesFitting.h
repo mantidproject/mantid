@@ -60,7 +60,7 @@ private:
   void closeEvent(QCloseEvent * /*unused*/) override;
   /// handle POCO event
   void handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
-  /// Load default interface settings for each tab
+  /// Legacy operation that writes the default directory, then restores each tab; see @ref settings_lifecycle.
   void loadSettings();
 
   /// Map of tabs indexed by position on the window

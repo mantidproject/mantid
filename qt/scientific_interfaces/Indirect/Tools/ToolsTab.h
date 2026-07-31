@@ -31,7 +31,11 @@ public:
   ToolsTab(QWidget *parent = nullptr);
   ~ToolsTab() override;
 
-  /// Base methods implemented in derived classes
+  /**
+   * Legacy restore operation. It may query the supplied const settings and
+   * update tab widgets, but must not write or synchronize persistent storage.
+   * See @ref settings_lifecycle.
+   */
   virtual void loadSettings(const QSettings &settings) = 0;
 };
 } // namespace CustomInterfaces

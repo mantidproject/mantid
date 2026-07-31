@@ -27,6 +27,7 @@ public:
 
   virtual void setSuffixes(bool filter) = 0;
   virtual void setLoadHistory(bool doLoadHistory) = 0;
+  /// Restore widget state by querying const storage; this legacy operation does not write.
   virtual void loadSettings(QSettings const &settings) = 0;
 
   virtual std::string getCurrentDataName(std::string const &selectorName) const = 0;

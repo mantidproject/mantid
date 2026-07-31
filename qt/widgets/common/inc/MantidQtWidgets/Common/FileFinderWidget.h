@@ -128,9 +128,13 @@ public:
   void setFileProblem(const QString &message);
   /// Get file problem, empty string means no error.
   const QString &getFileProblem() const;
-  /// Read settings from the given group
+  /**
+   * Query `last_directory` from the given group and immediately restore it to
+   * this widget. This legacy combined operation does not write settings; see
+   * @ref settings_lifecycle for the planned split API.
+   */
   void readSettings(const QString &group);
-  /// Save settings in the given group
+  /// Persist the current `last_directory` in the given group.
   void saveSettings(const QString &group);
   /// Alters the text label that contains the number of entries, normally run
   /// when the file is loaded

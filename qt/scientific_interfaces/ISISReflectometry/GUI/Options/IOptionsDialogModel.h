@@ -19,7 +19,9 @@ public:
   virtual ~IOptionsDialogModel() = default;
   virtual void applyDefaultOptions(std::map<std::string, bool> &boolOptions,
                                    std::map<std::string, int> &intOptions) = 0;
+  /// Query persistent settings into the supplied maps without writing.
   virtual void loadSettings(std::map<std::string, bool> &boolOptions, std::map<std::string, int> &intOptions) = 0;
+  /// Persist the supplied option values.
   virtual void saveSettings(const std::map<std::string, bool> &boolOptions,
                             const std::map<std::string, int> &intOptions) = 0;
 };

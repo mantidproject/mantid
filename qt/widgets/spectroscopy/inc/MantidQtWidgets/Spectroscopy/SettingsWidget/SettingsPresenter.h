@@ -24,6 +24,7 @@ public:
   QWidget *getView();
   void subscribeParent(ISettings *parent);
 
+  /// Query the model and immediately restore view state; legacy combined operation.
   void loadSettings();
 
   void notifyOkClicked();
@@ -31,6 +32,7 @@ public:
   void notifyCancelClicked();
 
 private:
+  /// Persist the option values currently represented by the view.
   void saveSettings();
 
   void setApplyingChanges(bool applyingChanges);

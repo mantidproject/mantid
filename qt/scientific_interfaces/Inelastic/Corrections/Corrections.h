@@ -58,7 +58,7 @@ private:
   void initLayout() override;
   /// Initialize Python-dependent sections
   void initLocalPython() override;
-  /// Load the settings of the interface (and child tabs).
+  /// Legacy operation that writes the default directory, then restores each tab; see @ref settings_lifecycle.
   void loadSettings();
 
   /// Called upon a close event.

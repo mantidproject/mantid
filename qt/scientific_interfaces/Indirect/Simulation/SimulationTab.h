@@ -39,6 +39,11 @@ public:
   void clearOutputPlotOptionsWorkspaces();
 
   void enableLoadHistoryProperty(bool doLoadHistory);
+  /**
+   * Legacy restore operation. It queries the supplied const settings and
+   * updates tab widgets, but must not write or synchronize persistent storage.
+   * See @ref settings_lifecycle.
+   */
   virtual void loadSettings(const QSettings &settings) = 0;
 
 private:
