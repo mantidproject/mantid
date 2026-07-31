@@ -13,7 +13,8 @@
       "binaryDir": "${sourceDir}/build",
       "generator": "Ninja",
       "cacheVariables": {
-        "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}"
+        "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
+        "CMAKE_CXX_SCAN_FOR_MODULES": "OFF"
       }
     },
     {
@@ -23,8 +24,7 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
         "ENABLE_PRECOMMIT": "OFF",
-        "COLORED_COMPILER_OUTPUT": "OFF",
-        "CMAKE_CXX_SCAN_FOR_MODULES": "OFF"
+        "COLORED_COMPILER_OUTPUT": "OFF"
       }
     },
     {
