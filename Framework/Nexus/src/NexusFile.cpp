@@ -833,13 +833,12 @@ template <typename NumT> void File::getData(vector<NumT> &data) {
     msg << "inconsistent NXnumtype file datatype=" << file_type << " supplied datatype=" << getType<NumT>();
     throw NXEXCEPTION(msg.str());
   }
-  // determine the number of elements
+  // determine the number of elements (product of the per-dimension extents).
+  // A scalar/null dataspace has rank 0, giving an empty range whose product is the accumulate seed of 1.
   std::array<hsize_t, H5S_MAX_RANK> dims{0};
   int const rank = H5Sget_simple_extent_dims(m_current_space_id, dims.data(), nullptr);
-  size_t length = 1;
-  for (int i = 0; i < rank; i++) {
-    length *= dims[i];
-  }
+  size_t const length = std::accumulate(dims.cbegin(), dims.cbegin() + rank, size_t{1},
+                                        [](size_t acc, hsize_t dim) { return acc * static_cast<size_t>(dim); });
 
   // allocate memory to put the data into
   // need to use resize() rather than reserve() so vector length gets set
