@@ -104,7 +104,9 @@ void MolDyn::algorithmComplete(bool error) {
  *
  * @param settings :: The settings to loading into the interface
  */
-void MolDyn::loadSettings(const QSettings &settings) { m_uiForm.mwRun->readSettings(settings.group()); }
+void MolDyn::loadSettings(const QSettings &settings) {
+  m_uiForm.mwRun->restoreSettings(MantidWidgets::DataSelector::readSettings(settings));
+}
 
 /**
  * Selects wheter to load the history of a workspace for the resolution data selector loader

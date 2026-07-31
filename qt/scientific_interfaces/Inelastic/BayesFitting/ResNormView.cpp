@@ -99,8 +99,8 @@ void ResNormView::setLoadHistory(bool doLoadHistory) {
  * @param settings :: The current settings
  */
 void ResNormView::loadSettings(const QSettings &settings) {
-  m_uiForm.dsVanadium->readSettings(settings.group());
-  m_uiForm.dsResolution->readSettings(settings.group());
+  m_uiForm.dsVanadium->restoreSettings(MantidWidgets::DataSelector::readSettings(settings));
+  m_uiForm.dsResolution->restoreSettings(MantidWidgets::DataSelector::readSettings(settings));
 }
 
 void ResNormView::notifyVanadiumInputReady(const QString &filename) {

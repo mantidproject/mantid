@@ -455,9 +455,9 @@ void ApplyAbsorptionCorrections::postProcessComplete(bool error) {
 }
 
 void ApplyAbsorptionCorrections::loadSettings(const QSettings &settings) {
-  m_uiForm.dsCorrections->readSettings(settings.group());
-  m_uiForm.dsContainer->readSettings(settings.group());
-  m_uiForm.dsSample->readSettings(settings.group());
+  m_uiForm.dsCorrections->restoreSettings(MantidWidgets::DataSelector::readSettings(settings));
+  m_uiForm.dsContainer->restoreSettings(MantidWidgets::DataSelector::readSettings(settings));
+  m_uiForm.dsSample->restoreSettings(MantidWidgets::DataSelector::readSettings(settings));
 }
 
 void ApplyAbsorptionCorrections::setFileExtensionsByName(bool filter) {

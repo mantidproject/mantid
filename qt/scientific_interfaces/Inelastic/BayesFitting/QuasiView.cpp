@@ -275,8 +275,8 @@ void QuasiView::setLoadHistory(bool const loadHistory) {
 }
 
 void QuasiView::loadSettings(const QSettings &settings) {
-  m_uiForm.dsSample->readSettings(settings.group());
-  m_uiForm.dsResolution->readSettings(settings.group());
+  m_uiForm.dsSample->restoreSettings(MantidWidgets::DataSelector::readSettings(settings));
+  m_uiForm.dsResolution->restoreSettings(MantidWidgets::DataSelector::readSettings(settings));
 }
 
 } // namespace MantidQt::CustomInterfaces
