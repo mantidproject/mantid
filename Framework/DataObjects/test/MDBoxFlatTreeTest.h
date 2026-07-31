@@ -11,6 +11,7 @@
 #include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
 
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 #include <memory>
 
 using Mantid::DataObjects::MDBoxFlatTree;
