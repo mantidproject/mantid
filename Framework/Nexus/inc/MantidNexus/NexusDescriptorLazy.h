@@ -110,6 +110,13 @@ public:
   /// Query if a given type exists somewhere in the file
   bool classTypeExists(std::string const &classType) const;
 
+  /// Query if a given type exists among the already-cached entries only. Unlike classTypeExists, this never
+  /// walks the file: it consults the bounded init-scan cache and returns false on a miss. Correct only for
+  /// classes the init scan is tuned to reach (root-level NXentry; NXevent_data directly under a
+  /// SPECIAL_ADDRESS entry). Intended for confidence() checks, where escalating to a full-file walk just to
+  /// prove a class is absent is the wrong tradeoff.
+  bool classTypeExistsInCache(std::string const &classType) const;
+
   /// Query if a given type exists as a decendant of the supplied parentPath. It is expected to be used only to check
   /// for direct children.
   bool classTypeExistsChild(const std::string &parentPath, const std::string &classType) const;

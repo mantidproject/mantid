@@ -116,8 +116,8 @@ LoadEventNexus::LoadEventNexus()
  */
 int LoadEventNexus::confidence(Nexus::NexusDescriptorLazy &descriptor) const {
   int confidence = 0;
-  if (descriptor.classTypeExists("NXevent_data")) {
-    if (descriptor.isEntry("/entry", "NXentry") || descriptor.isEntry("/raw_data_1", "NXentry")) {
+  if (descriptor.isEntry("/entry", "NXentry") || descriptor.isEntry("/raw_data_1", "NXentry")) {
+    if (descriptor.classTypeExistsInCache("NXevent_data")) {
       confidence = 80;
     }
   }

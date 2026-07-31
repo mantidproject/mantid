@@ -154,6 +154,14 @@ bool NexusDescriptorLazy::classTypeExists(std::string const &classType) const {
   }
 }
 
+bool NexusDescriptorLazy::classTypeExistsInCache(std::string const &classType) const {
+  // cache-only: never walk the file. Absence here means "not in the bounded init scan", which is the
+  // intended answer for confidence() checks — the discriminating classes are shallow by construction.
+  std::shared_lock<std::shared_mutex> lock(m_readNexusMutex);
+  return std::any_of(m_allEntries.begin(), m_allEntries.end(),
+                     [&classType](auto const &entry) { return entry.second == classType; });
+}
+
 bool NexusDescriptorLazy::classTypeExistsChild(const std::string &parentPath, const std::string &classType) const {
   // if the parent doesn't exist, the child doesn't either
   if (!this->isEntry(parentPath)) {
@@ -248,9 +256,9 @@ std::string NexusDescriptorLazy::operator[](std::string const &entryName) const 
           // read NX_class attribute
           nxclass = readNXClass(entryID);
         }
-        // modifying m_allEntries, need write lock
+        // modifying m_allEntries, need write lock. Do NOT move nxclass here — it is returned below.
         std::lock_guard<std::shared_mutex> lock(m_readNexusMutex);
-        m_allEntries[entryName] = std::move(nxclass);
+        m_allEntries[entryName] = nxclass;
         return nxclass;
       } else {
         // if it does not exist in the file, cache the miss
