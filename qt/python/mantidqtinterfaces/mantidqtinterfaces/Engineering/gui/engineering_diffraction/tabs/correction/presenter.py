@@ -16,6 +16,7 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common impo
     CalibrationObserver,
 )
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.rb_scope import RbScope, RbScopeConsumer
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.show_sample.show_sample_presenter import ShowSamplePresenter
@@ -36,7 +37,7 @@ def redraws_table(func: Callable):
     return wrapper
 
 
-class TextureCorrectionPresenter(AlgorithmObserver):
+class TextureCorrectionPresenter(RbScopeConsumer, AlgorithmObserver):
     def __init__(self, model: CorrectionModel, view: TextureCorrectionView):
         super(TextureCorrectionPresenter, self).__init__()
         self.model = model
@@ -51,7 +52,8 @@ class TextureCorrectionPresenter(AlgorithmObserver):
 
         self.calibration_observer = CalibrationObserver(self)
         self.current_calibration = CalibrationInfo(instrument=self.instrument)
-        self.rb_num = None
+        # replaced by the main window's shared scope in EngineeringDiffractionPresenter
+        self._rb_scope = RbScope()
 
         self.correction_notifier = GenericObservable()
 
@@ -152,7 +154,6 @@ class TextureCorrectionPresenter(AlgorithmObserver):
         self.model.set_include_abs(self.view.include_absorption())
         self.model.set_include_atten(self.view.include_atten_tab())
         self.model.set_include_div(self.view.include_divergence())
-        self.model.set_rb_num(self.rb_num)
         self.model.set_calibration(self.current_calibration)
         self.model.set_remove_after_processing(self._get_setting("clear_absorption_ws_after_processing", bool))
 
@@ -231,8 +232,16 @@ class TextureCorrectionPresenter(AlgorithmObserver):
         self.redraw_table()
         self.update_reference_info()
 
+    def set_rb_scope(self, rb_scope: RbScope) -> None:
+        super().set_rb_scope(rb_scope)
+        # built in __init__, before the window hands over the shared scope, so pass it on
+        self.show_sample_presenter.set_rb_scope(rb_scope)
+
     def set_rb_num(self, rb_num: str | None) -> None:
-        self.rb_num = rb_num
+        super().set_rb_num(rb_num)
+        # the model builds the reference-workspace save path from its own copy, and previously
+        # only got one at apply time
+        self.model.set_rb_num(self.rb_num)
 
     def update_calibration(self, calibration: CalibrationInfo) -> None:
         """
@@ -257,9 +266,10 @@ class TextureCorrectionPresenter(AlgorithmObserver):
     def update_reference_info(self) -> None:
         self.view.update_reference_info_section(*self.model.get_reference_info())
 
-    @staticmethod
-    def _get_setting(setting_name: str, return_type: Type = str) -> Any:
-        return get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, setting_name, return_type)
+    def _get_setting(self, setting_name: str, return_type: Type = str) -> Any:
+        return get_setting(
+            output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, setting_name, return_type, rb=self.rb_num
+        )
 
     def add_correction_subscriber(self, obs: GenericObserverWithArgPassing) -> None:
         self.correction_notifier.add_subscriber(obs)

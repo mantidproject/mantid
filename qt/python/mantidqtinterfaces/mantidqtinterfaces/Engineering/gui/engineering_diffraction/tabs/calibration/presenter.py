@@ -13,6 +13,7 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting, set_setting
 from Engineering.common.calibration_info import CalibrationInfo
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.rb_scope import RbScope, RbScopeConsumer
 from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing
 
 from mantidqt.utils.asynchronous import AsyncTask
@@ -21,7 +22,7 @@ from mantidqt.utils.observer_pattern import Observable, GenericObservable
 from Engineering.common.instrument_config import get_instr_config
 
 
-class CalibrationPresenter(object):
+class CalibrationPresenter(RbScopeConsumer):
     def __init__(self, model: CalibrationModel, view: CalibrationView):
         self.model = model
         self.view = view
@@ -34,7 +35,8 @@ class CalibrationPresenter(object):
 
         # Main Window State Variables
         self.instrument = "ENGINX"
-        self.rb_num = None
+        # replaced by the main window's shared scope in EngineeringDiffractionPresenter
+        self._rb_scope = RbScope()
 
         self.set_last_van_path()
 
@@ -150,9 +152,6 @@ class CalibrationPresenter(object):
         self.set_last_van_path()
         self.load_last_calibration()
         self._notify_calibration_subscribers_of_instrument_change()
-
-    def set_rb_num(self, rb_num: str | None) -> None:
-        self.rb_num = rb_num
 
     def _validate(self) -> bool:
         # Do nothing if run numbers are invalid or view is searching.

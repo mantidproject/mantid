@@ -10,6 +10,7 @@ from mantidqt.utils.observer_pattern import Observable
 from Engineering.EnggUtils import CALIB_DIR
 from Engineering.common.instrument_config import get_instr_config
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.rb_scope import RbScope, RbScopeConsumer
 
 GSAS2_PATH_ON_IDAAAS = "/opt/gsas2"
 SETTINGS_DICT = {
@@ -146,13 +147,17 @@ ALL_LOGS = ",".join(
 ALL_PEAKS = ",".join(["BackToBackExponential", "Gaussian", "Lorentzian", "Voigt", "IkedaCarpenterPV"])
 
 
-class SettingsPresenter(object):
+class SettingsPresenter(RbScopeConsumer):
     def __init__(self, model, view):
         self.model = model
         self.view = view
         self.settings = {}
         self.savedir_notifier = self.SavedirNotifier(self)
         self.instrument = "ENGINX"
+        # replaced by the main window's shared scope in EngineeringDiffractionPresenter
+        self._rb_scope = RbScope()
+        # the RB the cached settings were read under, so show() knows when to re-read
+        self._loaded_for_rb = None
 
         # populate lists in view
         self.view.add_log_checkboxs(ALL_LOGS)
@@ -174,6 +179,10 @@ class SettingsPresenter(object):
         self.set_contour_option_enabled()
 
     def show(self):
+        # the RB may have changed since the cache was filled; the dialog is modal, so resolving
+        # it here is enough - it cannot change again while the dialog is up
+        if self.rb_num != self._loaded_for_rb:
+            self.load_settings_from_file_or_default()
         self._show_settings_in_view()
         self.view.show()
 
@@ -270,15 +279,16 @@ class SettingsPresenter(object):
 
     def _save_settings_to_file(self, set_nullables_to_default=True):
         self._validate_settings(set_nullables_to_default)
-        self.model.set_settings_dict(self.settings)
+        self.model.set_settings_dict(self.settings, self.rb_num)
         self.savedir_notifier.notify_subscribers(self.settings["save_location"])
 
     def load_settings_from_file_or_default(self):
-        self.settings = self.model.get_settings_dict(SETTINGS_DICT)
+        self._loaded_for_rb = self.rb_num
+        self.settings = self.model.get_settings_dict(SETTINGS_DICT, self.rb_num)
 
         self._validate_settings()
 
-        if self.settings != self.model.get_settings_dict(SETTINGS_DICT):
+        if self.settings != self.model.get_settings_dict(SETTINGS_DICT, self.rb_num):
             self._save_settings_to_file()
         self._find_files()
 
@@ -312,6 +322,15 @@ class SettingsPresenter(object):
         self._validate_settings()
         self.update_full_calib_with_instrument()
         self.update_peak_with_instrument()
+
+    def set_rb_num(self, rb_num: str | None) -> None:
+        # the shared scope is updated by whichever presenter the signal reached first, so this
+        # only has to react. Re-reading is deferred to show(): the dialog is modal, so nothing
+        # can observe the cache until it is next opened.
+        super().set_rb_num(rb_num)
+        if self.view.isVisible() and self.rb_num != self._loaded_for_rb:
+            self.load_settings_from_file_or_default()
+            self._show_settings_in_view()
 
     # -----------------------
     # Observers / Observables

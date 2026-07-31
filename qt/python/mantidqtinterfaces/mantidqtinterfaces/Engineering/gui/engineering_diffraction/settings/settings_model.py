@@ -8,40 +8,45 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.setting
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from os import path
 from mantid.kernel import logger
-from numpy import all, array, concatenate, abs, eye
+from numpy import all, array, concatenate, abs, eye, ndarray
 from numpy.linalg import det, norm
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_presenter import SETTINGS_DICT
+from typing import Any, Type, Sequence, TypeAlias
+
+SettingDict: TypeAlias = dict[str, Any]
 
 
 class SettingsModel(object):
-    def get_settings_dict(self, names_and_types):
+    def get_settings_dict(self, names_and_types: dict[str, Type], rb: str | None = None) -> SettingDict:
         settings = {}
         for setting_name in names_and_types.keys():
-            settings[setting_name] = self.get_setting(setting_name, return_type=names_and_types[setting_name])
+            settings[setting_name] = self.get_setting(setting_name, return_type=names_and_types[setting_name], rb=rb)
         return settings
 
-    def set_settings_dict(self, settings):
+    def set_settings_dict(self, settings: SettingDict, rb: str | None = None) -> None:
         for key in settings:
-            self.set_setting(key, settings[key])
+            self.set_setting(key, settings[key], rb=rb)
 
     @staticmethod
-    def get_setting(name, return_type=str):
-        return get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, name, return_type=return_type)
+    def get_setting(name: str, return_type: Type = str, rb: str | None = None) -> Any:
+        return get_setting(
+            output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, name, return_type=return_type, rb=rb
+        )
 
     @staticmethod
-    def set_setting(name, value):
-        set_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, name, value)
+    def set_setting(name: str, value: Any, rb: str | None = None) -> None:
+        set_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, name, value, rb=rb)
 
     # validation methods
 
-    def validate_gsas2_path(self, gsas2_path):
+    def validate_gsas2_path(self, gsas2_path: str) -> tuple[bool, str]:
         # FileFinderWidget doesn't validate that the directory exists if isForDirectory=true (probably to support save
         # locations where directory gets created on save). So check the GSAS2 path is valid here
         msg = "Path does not exists" if not self.validate_path_empty_or_valid(gsas2_path) else ""
         return msg == "", msg
 
     @staticmethod
-    def validate_reference_frame(settings):
+    def validate_reference_frame(settings: SettingDict) -> None:
         try:
             rd = array([float(x) for x in settings["rd_dir"].split(",")])[:, None]
             nd = array([float(x) for x in settings["nd_dir"].split(",")])[:, None]
@@ -53,7 +58,7 @@ class SettingsModel(object):
         except Exception as e:
             logger.error("Invalid Reference Axes, values must all be able to be converted to floats. " + str(e))
 
-    def validate_euler_settings(self, settings, use_euler_angles):
+    def validate_euler_settings(self, settings: SettingDict, use_euler_angles: bool) -> None:
         if use_euler_angles:
             error_msg = ""
             euler_scheme = settings["euler_angles_scheme"]
@@ -77,7 +82,7 @@ class SettingsModel(object):
                 logger.error(error_msg)
 
     @staticmethod
-    def _validate_euler_sense_string(euler_sense):
+    def _validate_euler_sense_string(euler_sense: str) -> tuple[bool, Sequence[int], str]:
         try:
             sense_vals = [int(x) for x in euler_sense.split(",")]
             valid = all([v in (1, -1) for v in sense_vals])
@@ -89,7 +94,7 @@ class SettingsModel(object):
         return valid, sense_vals, error_msg
 
     @staticmethod
-    def _validate_convert_to_float(settings, setting_name):
+    def _validate_convert_to_float(settings: SettingDict, setting_name: str) -> None:
         val = ""
         try:
             val = settings[setting_name]
@@ -98,19 +103,26 @@ class SettingsModel(object):
             logger.error(f"Could not convert {setting_name} value of {val} to a float")
 
     @staticmethod
-    def validate_path_empty_or_valid(path_to_check):
+    def validate_path_empty_or_valid(path_to_check: str) -> bool:
         if path_to_check:
             if not path.exists(path_to_check):
                 return False
         return True
 
     @staticmethod
-    def _check_and_populate_with_default(name, settings, default_settings):
+    def _check_and_populate_with_default(name: str, settings: SettingDict, default_settings: SettingDict) -> SettingDict:
         if name not in settings or settings[name] == "":
             settings[name] = default_settings[name]
         return settings
 
-    def validate_settings(self, settings, default_settings, all_peaks, set_nullables_to_default=True, instrument="ENGINX"):
+    def validate_settings(
+        self,
+        settings: SettingDict,
+        default_settings: SettingDict,
+        all_peaks: Sequence[str],
+        set_nullables_to_default: bool = True,
+        instrument: str = "ENGINX",
+    ) -> SettingDict:
         # set to class attributes to save duplicating arguments and passing settings dict around too much
 
         for key in list(settings):
@@ -138,7 +150,7 @@ class SettingsModel(object):
         return settings
 
 
-def is_approx_orthonormal(mat, tol=1e-5):
+def is_approx_orthonormal(mat: ndarray, tol=1e-5) -> bool:
     n = mat.shape[1]
     identity = eye(n)
     error = norm(mat.T @ mat - identity, ord="fro")

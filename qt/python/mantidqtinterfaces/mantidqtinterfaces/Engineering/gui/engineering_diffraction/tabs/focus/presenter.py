@@ -12,6 +12,7 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common impo
     CalibrationObserver,
 )
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.rb_scope import RbScope, RbScopeConsumer
 from Engineering.common.calibration_info import CalibrationInfo
 from mantidqt.utils.asynchronous import AsyncTask, AsyncTaskFailure
 from mantidqt.utils.observer_pattern import GenericObservable, GenericObserverWithArgPassing
@@ -24,7 +25,7 @@ if TYPE_CHECKING:
     from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration.view import CalibrationView
 
 
-class FocusPresenter(object):
+class FocusPresenter(RbScopeConsumer):
     def __init__(self, model: FocusModel, view: CalibrationView):
         self.model = model
         self.view = view
@@ -44,7 +45,8 @@ class FocusPresenter(object):
         # Variables from other GUI tabs.
         self.current_calibration = CalibrationInfo()
         self.instrument = "ENGINX"
-        self.rb_num = None
+        # replaced by the main window's shared scope in EngineeringDiffractionPresenter
+        self._rb_scope = RbScope()
 
         self.set_default_directories()
         self.view.set_focus_button_enabled(False)
@@ -103,9 +105,6 @@ class FocusPresenter(object):
 
     def set_default_directories(self) -> None:
         self.view.set_finder_last_directory(output_settings.get_output_path())
-
-    def set_rb_num(self, rb_num: str) -> None:
-        self.rb_num = rb_num
 
     def _validate(self) -> bool:
         """
