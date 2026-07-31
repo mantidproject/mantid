@@ -63,7 +63,11 @@ public:
   BayesFittingTab(QWidget *parent = nullptr, std::unique_ptr<API::IAlgorithmRunner> algorithmRunner = nullptr);
   ~BayesFittingTab() override;
 
-  /// Base methods implemented in derived classes
+  /**
+   * Legacy restore operation implemented by derived classes. It queries the
+   * supplied const settings and updates tab widgets, but must not write or
+   * synchronize persistent storage. See @ref settings_lifecycle.
+   */
   virtual void loadSettings(const QSettings &settings) = 0;
 
   /// Prevent loading of data with incorrect naming

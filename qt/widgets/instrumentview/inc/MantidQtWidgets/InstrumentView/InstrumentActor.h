@@ -254,6 +254,7 @@ public:
   void setGridLayer(bool isUsingLayer, int layer) const;
   const InstrumentRenderer &getInstrumentRenderer() const override;
 
+  /// Persist the current actor rendering settings.
   void saveSettings() const;
 
   // cppcheck-suppress unknownMacro
@@ -267,6 +268,7 @@ private:
   void setUpWorkspace(const std::shared_ptr<const Mantid::API::MatrixWorkspace> &sharedWorkspace, double scaleMin,
                       double scaleMax);
   void setupPhysicalInstrumentIfExists();
+  /// Query persistent settings and immediately restore actor state; legacy combined operation.
   void loadSettings();
   void resetColors();
   void setDataMinMaxRange(double vmin, double vmax);

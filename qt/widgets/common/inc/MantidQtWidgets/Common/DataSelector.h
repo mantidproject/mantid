@@ -87,9 +87,13 @@ public:
   virtual bool isValid(bool const autoLoad = true);
   /// Get file problem, empty string means no error.
   QString getProblem() const;
-  /// Read settings from the given group
+  /**
+   * Query file-finder settings from the given group and immediately restore
+   * them to the child widget. This legacy combined operation does not write
+   * settings; see @ref settings_lifecycle for the planned split API.
+   */
   void readSettings(const QString & /*group*/);
-  /// Save settings in the given group
+  /// Persist the current child file finder settings in the given group.
   void saveSettings(const QString & /*group*/);
   /// Gets if optional
   bool isOptional() const;

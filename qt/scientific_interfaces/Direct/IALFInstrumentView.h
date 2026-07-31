@@ -36,7 +36,9 @@ public:
 
   virtual void subscribePresenter(IALFInstrumentPresenter *presenter) = 0;
 
+  /// Query persistent settings and immediately restore view state; legacy combined operation.
   virtual void loadSettings() = 0;
+  /// Persist the current view state.
   virtual void saveSettings() = 0;
 
   virtual void disable(std::string const &reason) = 0;

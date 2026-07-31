@@ -61,7 +61,9 @@ private:
   void initLayout() override;
   void initLocalPython() override;
 
+  /// Legacy combined read-and-restore operation; currently also writes the default directory.
   void loadSettings();
+  /// Persist the current calibration and vanadium file values.
   void saveSettings();
 
   Mantid::API::IAlgorithm_sptr saveGSSAlgorithm(const std::string &filename);

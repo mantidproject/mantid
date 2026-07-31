@@ -48,7 +48,9 @@ public:
   QString getProperty(const QString &name) const;
   void setProperty(const QString &name, const QString &value);
   void copyPropertiesToAlgorithm(Mantid::API::IAlgorithm &fit) const;
+  /// Persist the current browser state to mutable storage.
   void saveSettings(QSettings &settings) const;
+  /// Query const storage and immediately restore browser state; legacy combined operation.
   void loadSettings(const QSettings &settings);
   FittingMode getCurrentFittingType() const;
   void setCurrentFittingType(FittingMode fitType);

@@ -114,7 +114,9 @@ private:
 
   QString getInstrumentParameterFrom(const Mantid::Geometry::IComponent_const_sptr &comp, const std::string &param);
 
+  /// Query persistent settings and immediately restore interface state; legacy combined operation.
   void readSettings();
+  /// Persist the current instrument configuration.
   void saveSettings();
 
   /// Set and show an instrument-specific widget

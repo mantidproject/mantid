@@ -33,6 +33,7 @@ public:
   virtual ~IStretchView() = default;
 
   virtual void subscribePresenter(IStretchViewSubscriber *presenter) = 0;
+  /// Restore widget state by querying const storage; this legacy operation does not write.
   virtual void loadSettings(const QSettings &settings) = 0;
   virtual void applySettings(std::map<std::string, QVariant> const &settings) = 0;
   virtual void validateUserInput(IUserInputValidator *validator) const = 0;

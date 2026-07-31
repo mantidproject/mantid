@@ -29,6 +29,7 @@ public:
   virtual void setCanWSSuffixes(const QStringList &suffixes) = 0;
   virtual void setCanFBSuffixes(const QStringList &suffixes) = 0;
 
+  /// Restore widget state by querying const storage; this legacy operation does not write.
   virtual void loadSettings(const QSettings &settings) = 0;
   virtual void setLoadHistory(bool doLoadHistory) = 0;
   virtual void enableSaveButton(bool enable) = 0;
