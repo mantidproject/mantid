@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/BaseConvertToDiffractionMDWorkspace.h"
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 
 #include "MantidDataObjects/EventWorkspace.h"
@@ -130,6 +131,16 @@ void BaseConvertToDiffractionMDWorkspace::convertFramePropertyNames(const std::s
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.   */
 void BaseConvertToDiffractionMDWorkspace::exec() {
+  const std::string preprocDetectorsWSName{"PreprocDetectorsWS"};
+  struct PreprocDetectorsWSCleanup final {
+    std::string workspaceName;
+    ~PreprocDetectorsWSCleanup() {
+      auto &ads = AnalysisDataService::Instance();
+      if (ads.doesExist(workspaceName)) {
+        ads.remove(workspaceName);
+      }
+    }
+  } cleanup{preprocDetectorsWSName};
 
   Mantid::API::Algorithm_sptr Convert = createChildAlgorithm("ConvertToMD", 0., 1.);
   Convert->initialize();
@@ -157,7 +168,7 @@ void BaseConvertToDiffractionMDWorkspace::exec() {
   Convert->setProperty("QConversionScales", Scaling);
 
   Convert->setProperty("OtherDimensions", "");
-  Convert->setProperty("PreprocDetectorsWS", "-");
+  Convert->setProperty("PreprocDetectorsWS", preprocDetectorsWSName);
 
   bool lorCorr = this->getProperty("LorentzCorrection");
   Convert->setProperty("LorentzCorrection", lorCorr);
@@ -182,6 +193,7 @@ void BaseConvertToDiffractionMDWorkspace::exec() {
 
   Convert->executeAsChildAlg();
 
+  // write out the output
   IMDEventWorkspace_sptr iOut = Convert->getProperty("OutputWorkspace");
   this->setProperty("OutputWorkspace", iOut);
 }

@@ -24,11 +24,12 @@ import platform
 import systemtesting
 
 import os
-from mantid.api import mtd, AnalysisDataService
+from mantid.api import mtd
 from mantid.simpleapi import (
     ConvertToDiffractionMDWorkspace,
     ConvertToMD,
     CreateSingleValuedWorkspace,
+    DeleteWorkspace,
     FindPeaksMD,
     FindUBUsingFFT,
     IndexPeaks,
@@ -64,8 +65,8 @@ class ReduceOneSCD_Run(systemtesting.MantidSystemTest):
         config["Q.convention"] = "Crystallography"
 
     def requiredMemoryMB(self):
-        """Require about 12GB free"""
-        return 6000
+        """Require about 3GB free"""
+        return 3000
 
     def runTest(self):
         start_time = time.time()
@@ -167,7 +168,8 @@ class ReduceOneSCD_Run(systemtesting.MantidSystemTest):
         distance_threshold = 0.9 * 6.28 / float(max_d)
         peaks_ws = FindPeaksMD(MDEW, MaxPeaks=num_peaks_to_find, PeakDistanceThreshold=distance_threshold)
 
-        AnalysisDataService.remove(MDEW.name())
+        DeleteWorkspace(MDEW)
+        del MDEW
         #      SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=False,
         #               Filename='A'+run_niggli_integrate_file )
         #
@@ -233,6 +235,8 @@ class ReduceOneSCD_Run(systemtesting.MantidSystemTest):
                 PeaksWorkspace=peaks_ws,
                 IntegrateIfOnEdge=integrate_if_edge_peak,
             )
+            DeleteWorkspace(MDEW)
+            del MDEW
 
         elif use_fit_peaks_integration:
             event_ws = Rebin(InputWorkspace=event_ws, Params=rebin_params, PreserveEvents=preserve_events)

@@ -21,6 +21,7 @@ from mantid.simpleapi import (
     CentroidPeaksMD,
     CopySample,
     ConvertToDiffractionMDWorkspace,
+    DeleteWorkspace,
     FindPeaksMD,
     FindUBUsingFFT,
     FindUBUsingLatticeParameters,
@@ -47,8 +48,8 @@ class Diffraction_Workflow_Test(systemtesting.MantidSystemTest):
         return True
 
     def requiredMemoryMB(self):
-        """Require about 4GB free"""
-        return 4000
+        """Require about 4.5GB free"""
+        return 4500
 
     def runTest(self):
         # raise tolerance to 1e-4
@@ -147,6 +148,7 @@ class Diffraction_Workflow_Test(systemtesting.MantidSystemTest):
             PeaksWorkspace=ws + "_peaksFFT",
             OutputWorkspace=ws + "_peaksFFT",
         )
+        DeleteWorkspace(ws + "_MD2")
         # Save for SHELX
         SaveHKL(InputWorkspace=ws + "_peaksFFT", Filename=savedir + "/" + ws + "FFT.hkl")
 
@@ -178,6 +180,7 @@ class Diffraction_Workflow_Test(systemtesting.MantidSystemTest):
             AlignedDim2="[0,0,L], -10, 10,  800",
             OutputWorkspace=ws + "_binned",
         )
+        DeleteWorkspace(ws + "_HKL")
 
         originalUB = numpy.array(mtd["TOPAZ_3132"].sample().getOrientedLattice().getUB())
         w = mtd["TOPAZ_3132"]
@@ -212,6 +215,7 @@ class Diffraction_Workflow_Test(systemtesting.MantidSystemTest):
             OutputBins="60,1,1",
             OutputWorkspace="TOPAZ_3132_HKL_line",
         )
+        DeleteWorkspace("TOPAZ_3132_HKL")
 
         # Now check the integrated bin and the peaks
         w = mtd["TOPAZ_3132_HKL_line"]
@@ -231,6 +235,7 @@ class Diffraction_Workflow_Test(systemtesting.MantidSystemTest):
             SplitThreshold="150",
         )
         FindPeaksMD(InputWorkspace="TOPAZ_3132_QSample", PeakDistanceThreshold="0.12", MaxPeaks="200", OutputWorkspace="peaks_QSample")
+        DeleteWorkspace("TOPAZ_3132_QSample")
         FindUBUsingFFT(PeaksWorkspace="peaks_QSample", MinD="2", MaxD="16")
         CopySample(
             InputWorkspace="peaks_QSample", OutputWorkspace="TOPAZ_3132", CopyName="0", CopyMaterial="0", CopyEnvironment="0", CopyShape="0"
