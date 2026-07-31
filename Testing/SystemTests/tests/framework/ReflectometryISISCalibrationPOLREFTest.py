@@ -52,8 +52,11 @@ class ReflectometryISISCalibrationPOLREFTest(systemtesting.MantidSystemTest):
     def _check_geometry_changed_in_polref_scattering_plane(self, spec_index, input, output):
         det_info_in = input.detectorInfo()
         det_info_out = output.detectorInfo()
-        position_in = det_info_in.position(spec_index)
-        position_out = det_info_out.position(spec_index)
+        detector_ids = input.getSpectrum(spec_index).getDetectorIDs()
+        self.assertEqual(1, len(detector_ids))
+        detector_id = next(iter(detector_ids))
+        position_in = det_info_in.position(det_info_in.indexOf(detector_id))
+        position_out = det_info_out.position(det_info_out.indexOf(detector_id))
 
         self.assertDelta(position_in.Y(), position_out.Y(), 1e-12)
         self.assertTrue(abs(position_in.X() - position_out.X()) > 1e-8)
