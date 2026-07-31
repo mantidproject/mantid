@@ -1486,88 +1486,88 @@ def testThreadsLoopImpl(
         test_sub_directory = None
         # Empty test list
         local_test_list = None
+        # Data files locked for the selected test module
+        locked_files = ()
         # Get the lock to inspect the global list of tests
-        lock.acquire()
-        # Run through the list of test modules, starting from the ith
-        # element where i is the process number.
-        for i in range(process_number, len(tests_lock)):
-            # If the lock for this particular module is 0, it means
-            # this module has not yet been run and it will be chosen
-            # for this particular loop
-            if tests_lock[i] == 0:
-                # Check for the lock status of the required files for this test module
-                modname = tests_dict[str(i)][1][0]._modname
-                no_files_are_locked = True
-                for f in required_files_dict[modname]:
-                    if locked_files_dict[f]:
-                        no_files_are_locked = False
+        with lock:
+            # Run through the list of test modules, starting from the ith
+            # element where i is the process number.
+            for i in range(process_number, len(tests_lock)):
+                # If the lock for this particular module is 0, it means
+                # this module has not yet been run and it will be chosen
+                # for this particular loop
+                if tests_lock[i] == 0:
+                    # Check for the lock status of the required files for this test module
+                    modname = tests_dict[str(i)][1][0]._modname
+                    required_files = tuple(required_files_dict[modname])
+                    no_files_are_locked = True
+                    for f in required_files:
+                        if locked_files_dict[f]:
+                            no_files_are_locked = False
+                            break
+                    # If all files are available, we can proceed with this module
+                    if no_files_are_locked:
+                        # Lock the data files for this test module
+                        for f in required_files:
+                            locked_files_dict[f] = True
+                        locked_files = required_files
+                        # Set the current test list to the chosen module
+                        test_sub_directory, local_test_list = tests_dict[str(i)]
+                        tests_lock[i] = 1
+                        imodule = i
+                        tests_left.value -= 1
                         break
-                # If all files are available, we can proceed with this module
-                if no_files_are_locked:
-                    # Lock the data files for this test module
-                    for f in required_files_dict[modname]:
-                        locked_files_dict[f] = True
-                    # Set the current test list to the chosen module
-                    test_sub_directory, local_test_list = tests_dict[str(i)]
-                    tests_lock[i] = 1
-                    imodule = i
-                    tests_left.value -= 1
-                    break
-        # Release the lock
-        lock.release()
 
         # Check if local_test_list exists: if all data was locked,
         # then there is no test list
         if local_test_list and test_sub_directory:
-            if not options.quiet:
-                print(
-                    "##### Thread %2i will execute module: [%3i] %s (%i tests)" % (process_number, imodule, modname, len(local_test_list))
-                )
-                sys.stdout.flush()
-
-            test_directory = os.path.abspath(os.path.join(mtdconf.testDir, test_sub_directory))
-            if os.path.isdir(test_directory):
-                sys.path.insert(0, test_directory)
-            else:
-                raise RuntimeError("Expected a tests directory at {0}.".format(test_directory))
-
-            runner.setTestDir(test_directory)
-
-            # Create a TestManager, giving it a pre-compiled list_of_tests
-            mgr = TestManager(
-                mantid_config=mtdconf,
-                runner=runner,
-                output=[reporter],
-                quiet=options.quiet,
-                testsInclude=options.testsInclude,
-                testsExclude=options.testsExclude,
-                exclude_in_pr_builds=options.exclude_in_pr_builds,
-                showSkipped=options.showskipped,
-                output_on_failure=options.output_on_failure,
-                clean=options.clean,
-                list_of_tests=local_test_list,
-            )
-
             try:
-                mgr.executeTests(tests_done)
-            except KeyboardInterrupt:
-                mgr.markSkipped("KeyboardInterrupt", tests_done.value)
+                if not options.quiet:
+                    print(
+                        "##### Thread %2i will execute module: [%3i] %s (%i tests)"
+                        % (process_number, imodule, modname, len(local_test_list))
+                    )
+                    sys.stdout.flush()
 
-            # Update the test results in the array shared across cores
-            res_array[process_number] += mgr._skippedTests
-            res_array[process_number + options.ncores] += mgr._failedTests
-            res_array[process_number + 2 * options.ncores] = min(
-                int(reporter.reportStatus()), res_array[process_number + 2 * options.ncores]
-            )
+                test_directory = os.path.abspath(os.path.join(mtdconf.testDir, test_sub_directory))
+                if os.path.isdir(test_directory):
+                    sys.path.insert(0, test_directory)
+                else:
+                    raise RuntimeError("Expected a tests directory at {0}.".format(test_directory))
 
-            # Delete the TestManager
-            del mgr
+                runner.setTestDir(test_directory)
 
-            # Unlock the data files
-            lock.acquire()
-            for f in required_files_dict[modname]:
-                locked_files_dict[f] = False
-            lock.release()
+                # Create a TestManager, giving it a pre-compiled list_of_tests
+                mgr = TestManager(
+                    mantid_config=mtdconf,
+                    runner=runner,
+                    output=[reporter],
+                    quiet=options.quiet,
+                    testsInclude=options.testsInclude,
+                    testsExclude=options.testsExclude,
+                    exclude_in_pr_builds=options.exclude_in_pr_builds,
+                    showSkipped=options.showskipped,
+                    output_on_failure=options.output_on_failure,
+                    clean=options.clean,
+                    list_of_tests=local_test_list,
+                )
+
+                try:
+                    mgr.executeTests(tests_done)
+                except KeyboardInterrupt:
+                    mgr.markSkipped("KeyboardInterrupt", tests_done.value)
+
+                # Update the test results in the array shared across cores
+                res_array[process_number] += mgr._skippedTests
+                res_array[process_number + options.ncores] += mgr._failedTests
+                res_array[process_number + 2 * options.ncores] = min(
+                    int(reporter.reportStatus()), res_array[process_number + 2 * options.ncores]
+                )
+            finally:
+                # Unlock the data files even if the test module raises
+                with lock:
+                    for f in locked_files:
+                        locked_files_dict[f] = False
 
     # Report the errors
     local_dict = dict()
