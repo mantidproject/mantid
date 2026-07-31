@@ -15,6 +15,8 @@
 
 #include <QWidget>
 
+class QSettings;
+
 namespace MantidQt {
 namespace MantidWidgets {
 
@@ -87,14 +89,14 @@ public:
   virtual bool isValid(bool const autoLoad = true);
   /// Get file problem, empty string means no error.
   QString getProblem() const;
-  /**
-   * Query file-finder settings from the given group and immediately restore
-   * them to the child widget. This legacy combined operation does not write
-   * settings; see @ref settings_lifecycle for the planned split API.
-   */
-  void readSettings(const QString & /*group*/);
-  /// Persist the current child file finder settings in the given group.
-  void saveSettings(const QString & /*group*/);
+  /// Query file-finder settings from const storage without changing this widget or writing settings.
+  [[nodiscard]] static API::FileFinderSettings readSettings(const QSettings &settings);
+  /// Restore the child file finder from an in-memory snapshot without persistent I/O.
+  void restoreSettings(const API::FileFinderSettings &settings);
+  /// Capture the current state of the child file finder without persistent I/O.
+  [[nodiscard]] API::FileFinderSettings captureSettings() const;
+  /// Persist the supplied snapshot to mutable storage positioned at the target group.
+  void saveSettings(QSettings &settings, const API::FileFinderSettings &values) const;
   /// Gets if optional
   bool isOptional() const;
   /// Sets if optional

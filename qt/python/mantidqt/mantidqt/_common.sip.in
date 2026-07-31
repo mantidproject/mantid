@@ -1077,6 +1077,19 @@ public:
 };
 
 // ---------------------------------
+// FileFinderSettings
+// ---------------------------------
+class FileFinderSettings
+{
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/FileFinderWidget.h"
+%End
+public:
+    FileFinderSettings(const QString &lastDirectory = QString());
+    QString lastDirectory() const;
+};
+
+// ---------------------------------
 // FileFinderWidget
 // ---------------------------------
 class FileFinderWidget : QWidget
@@ -1111,8 +1124,10 @@ public:
     void setLastDirectory(const QString &lastDir);
     void setUseNativeWidget(bool native);
     void setProxyModel(QAbstractProxyModel* /Transfer/);
-    void readSettings(const QString &group);
-    void saveSettings(const QString &group);
+    static FileFinderSettings readSettings(const QSettings &settings);
+    void restoreSettings(const FileFinderSettings &settings);
+    FileFinderSettings captureSettings() const;
+    void saveSettings(QSettings &settings, const FileFinderSettings &values) const;
 
 signals:
     void fileTextChanged(const QString & /*_t1*/);

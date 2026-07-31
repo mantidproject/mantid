@@ -584,7 +584,7 @@ void DiffractionReduction::loadSettings() {
 
   settings.beginGroup(m_settingsGroup);
   settings.setValue("last_directory", dataDir);
-  m_uiForm.rfSampleFiles->readSettings(settings.group());
+  m_uiForm.rfSampleFiles->restoreSettings(API::FileFinderWidget::readSettings(settings));
   m_uiForm.rfCalFile->setUserInput(settings.value("last_cal_file").toString());
   m_uiForm.rfVanFile->setUserInput(settings.value("last_van_files").toString());
   settings.endGroup();

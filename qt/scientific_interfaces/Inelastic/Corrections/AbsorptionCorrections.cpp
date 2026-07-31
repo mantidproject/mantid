@@ -469,7 +469,7 @@ void AbsorptionCorrections::validateContainerGeometryInputs(IUserInputValidator 
 }
 
 void AbsorptionCorrections::loadSettings(const QSettings &settings) {
-  m_uiForm.dsSampleInput->readSettings(settings.group());
+  m_uiForm.dsSampleInput->restoreSettings(MantidWidgets::DataSelector::readSettings(settings));
 }
 
 void AbsorptionCorrections::setFileExtensionsByName(bool filter) {
