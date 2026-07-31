@@ -116,9 +116,10 @@ class NMoldyn4Interpolation(PythonAlgorithm):
         # Outputs a tuple of (array of X-values, array of Q-values,
         # list of Y-values, list of X-bins)
         osiris = mtd[ws_name]
+        spectrum_info = osiris.spectrumInfo()
         Q_values = []
         for i in range(osiris.getNumberHistograms()):
-            Q_values.append(self.get_Q_for_workspace_index(osiris.name(), i, e_fixed))
+            Q_values.append(self.get_Q_for_workspace_index(spectrum_info, i, e_fixed))
         X_values = osiris.x(0)
         X_diff = np.diff(X_values) / 2
         X_bins = [X_values[i] + X_diff[i] for i in range(len(X_diff))]
