@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT, create_error_message
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import create_error_message
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.cropping.cropping_presenter import CroppingPresenter
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration.model import CalibrationModel
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration.view import CalibrationView
@@ -14,6 +14,7 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.setting
 from Engineering.common.calibration_info import CalibrationInfo
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.rb_scope import RbScope, RbScopeConsumer
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.instrument_scope import InstrumentScope, InstrumentScopeConsumer
 from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing
 
 from mantidqt.utils.asynchronous import AsyncTask
@@ -22,7 +23,7 @@ from mantidqt.utils.observer_pattern import Observable, GenericObservable
 from Engineering.common.instrument_config import get_instr_config
 
 
-class CalibrationPresenter(RbScopeConsumer):
+class CalibrationPresenter(RbScopeConsumer, InstrumentScopeConsumer):
     def __init__(self, model: CalibrationModel, view: CalibrationView):
         self.model = model
         self.view = view
@@ -34,9 +35,9 @@ class CalibrationPresenter(RbScopeConsumer):
         self.connect_view_signals()
 
         # Main Window State Variables
-        self.instrument = "ENGINX"
-        # replaced by the main window's shared scope in EngineeringDiffractionPresenter
+        # both replaced by the main window's shared scopes in EngineeringDiffractionPresenter
         self._rb_scope = RbScope()
+        self._instrument_scope = InstrumentScope()
 
         self.set_last_van_path()
 
@@ -145,10 +146,13 @@ class CalibrationPresenter(RbScopeConsumer):
             self.view.set_load_checked(False)
             self.view.set_file_text_with_search("")
 
-    def set_instrument_override(self, instrument_index: int) -> None:
-        instrument = INSTRUMENT_DICT[instrument_index]
-        self.view.set_instrument_override(instrument)
-        self.instrument = instrument
+    def set_instrument_scope(self, instrument_scope: InstrumentScope) -> None:
+        super().set_instrument_scope(instrument_scope)
+        # built in __init__, before the window hands over the shared scope, so pass it on
+        self.cropping_widget.set_instrument_scope(instrument_scope)
+
+    def _on_instrument_changed(self) -> None:
+        self.view.set_instrument_override(self.instrument)
         self.set_last_van_path()
         self.load_last_calibration()
         self._notify_calibration_subscribers_of_instrument_change()

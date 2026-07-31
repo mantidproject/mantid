@@ -12,10 +12,8 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.setting
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.rb_scope import RbScope, RbScopeConsumer
 from Engineering.common.calibration_info import CalibrationInfo
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import (
-    INSTRUMENT_DICT,
-    CalibrationObserver,
-)
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import CalibrationObserver
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.instrument_scope import InstrumentScope, InstrumentScopeConsumer
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.show_sample.show_sample_presenter import ShowSamplePresenter
 from typing import Callable, TYPE_CHECKING, List, Sequence, Tuple, Any, Type
 
@@ -34,7 +32,7 @@ def redraws_table(func: Callable):
     return wrapper
 
 
-class TexturePresenter(RbScopeConsumer):
+class TexturePresenter(RbScopeConsumer, InstrumentScopeConsumer):
     def __init__(self, model: ProjectionModel, view: TextureView):
         # set up mvp components
         self.model = model
@@ -58,9 +56,9 @@ class TexturePresenter(RbScopeConsumer):
 
         # set some metadata
         self.current_calibration = CalibrationInfo()
-        self.instrument = "ENGINX"
-        # replaced by the main window's shared scope in EngineeringDiffractionPresenter
+        # both replaced by the main window's shared scopes in EngineeringDiffractionPresenter
         self._rb_scope = RbScope()
+        self._instrument_scope = InstrumentScope()
 
         # connect view slots
         # loader slots
@@ -290,10 +288,8 @@ class TexturePresenter(RbScopeConsumer):
         """
         self.current_calibration = calibration
 
-    def set_instrument_override(self, instrument_index: int) -> None:
-        instrument = INSTRUMENT_DICT[instrument_index]
-        self.view.set_instrument_override(instrument)
-        self.instrument = instrument
+    def _on_instrument_changed(self) -> None:
+        self.view.set_instrument_override(self.instrument)
 
     def set_default_directories(self) -> None:
         save_dir = output_settings.get_output_path()

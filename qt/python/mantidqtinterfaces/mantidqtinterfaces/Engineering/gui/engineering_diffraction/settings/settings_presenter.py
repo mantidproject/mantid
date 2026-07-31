@@ -11,6 +11,7 @@ from Engineering.EnggUtils import CALIB_DIR
 from Engineering.common.instrument_config import get_instr_config
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.rb_scope import RbScope, RbScopeConsumer
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.instrument_scope import InstrumentScope, InstrumentScopeConsumer
 
 GSAS2_PATH_ON_IDAAAS = "/opt/gsas2"
 SETTINGS_DICT = {
@@ -147,15 +148,15 @@ ALL_LOGS = ",".join(
 ALL_PEAKS = ",".join(["BackToBackExponential", "Gaussian", "Lorentzian", "Voigt", "IkedaCarpenterPV"])
 
 
-class SettingsPresenter(RbScopeConsumer):
+class SettingsPresenter(RbScopeConsumer, InstrumentScopeConsumer):
     def __init__(self, model, view):
         self.model = model
         self.view = view
         self.settings = {}
         self.savedir_notifier = self.SavedirNotifier(self)
-        self.instrument = "ENGINX"
-        # replaced by the main window's shared scope in EngineeringDiffractionPresenter
+        # both replaced by the main window's shared scopes in EngineeringDiffractionPresenter
         self._rb_scope = RbScope()
+        self._instrument_scope = InstrumentScope()
         # the RB the cached settings were read under, so show() knows when to re-read
         self._loaded_for_rb = None
 
@@ -316,9 +317,7 @@ class SettingsPresenter(RbScopeConsumer):
     def set_contour_option_enabled(self):
         self.view.contourKernel_lineedit.setEnabled(not self.view.get_plot_exp_pf())
 
-    def set_instrument_override(self, instrument):
-        instrument = INSTRUMENT_DICT[instrument]
-        self.instrument = instrument
+    def _on_instrument_changed(self):
         self._validate_settings()
         self.update_full_calib_with_instrument()
         self.update_peak_with_instrument()

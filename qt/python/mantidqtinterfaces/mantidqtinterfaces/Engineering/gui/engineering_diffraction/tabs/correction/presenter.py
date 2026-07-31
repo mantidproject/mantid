@@ -11,12 +11,10 @@ from mantidqt.utils.observer_pattern import GenericObservable, GenericObserverWi
 from mantid.kernel import logger
 from mantidqt.interfacemanager import InterfaceManager
 from Engineering.common.calibration_info import CalibrationInfo
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import (
-    INSTRUMENT_DICT,
-    CalibrationObserver,
-)
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import CalibrationObserver
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.rb_scope import RbScope, RbScopeConsumer
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.instrument_scope import InstrumentScope, InstrumentScopeConsumer
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.show_sample.show_sample_presenter import ShowSamplePresenter
@@ -37,7 +35,7 @@ def redraws_table(func: Callable):
     return wrapper
 
 
-class TextureCorrectionPresenter(RbScopeConsumer, AlgorithmObserver):
+class TextureCorrectionPresenter(RbScopeConsumer, InstrumentScopeConsumer, AlgorithmObserver):
     def __init__(self, model: CorrectionModel, view: TextureCorrectionView):
         super(TextureCorrectionPresenter, self).__init__()
         self.model = model
@@ -48,12 +46,12 @@ class TextureCorrectionPresenter(RbScopeConsumer, AlgorithmObserver):
 
         self.ws_names = []
         self.ws_info = {}
-        self.instrument = "ENGINX"
+        # both replaced by the main window's shared scopes in EngineeringDiffractionPresenter
+        self._rb_scope = RbScope()
+        self._instrument_scope = InstrumentScope()
 
         self.calibration_observer = CalibrationObserver(self)
         self.current_calibration = CalibrationInfo(instrument=self.instrument)
-        # replaced by the main window's shared scope in EngineeringDiffractionPresenter
-        self._rb_scope = RbScope()
 
         self.correction_notifier = GenericObservable()
 
@@ -250,10 +248,8 @@ class TextureCorrectionPresenter(RbScopeConsumer, AlgorithmObserver):
         """
         self.current_calibration = calibration
 
-    def set_instrument_override(self, instrument_index: int) -> None:
-        instrument = INSTRUMENT_DICT[instrument_index]
-        self.view.set_instrument_override(instrument)
-        self.instrument = instrument
+    def _on_instrument_changed(self) -> None:
+        self.view.set_instrument_override(self.instrument)
         self.current_calibration = CalibrationInfo(instrument=self.instrument)
 
     def update_custom_shape_finder_vis(self) -> None:
