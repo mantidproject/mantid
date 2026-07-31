@@ -252,6 +252,9 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
                 continue
 
             entries = row[0].split()
+            if not entries:
+                # Ignore whitespace-only lines
+                continue
 
             if entries[0][0] == self._COMMENT_PREFIX:
                 # Ignore any lines that begin with a #
