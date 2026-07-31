@@ -16,6 +16,7 @@ from mantid.kernel import (
     Direction,
     EnabledWhenProperty,
     FloatBoundedValidator,
+    Property,
     PropertyCriterion,
     StringListValidator,
 )
@@ -126,13 +127,13 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         non_negative_double.setLower(0.0)
         self.declareProperty(
             self._SPECULAR_PIXEL_SPECTRUM_NO,
-            0.0,
+            Property.EMPTY_DBL,
             non_negative_double,
-            "The spectrum number of the specular pixel in the subject run.",
+            "The spectrum number of the specular pixel in the subject run. Required for the POLREF workflow.",
         )
         self.declareProperty(
             self._EXPERIMENT_ANGLE,
-            0.0,
+            Property.EMPTY_DBL,
             "The experiment theta angle in degrees. Required for the POLREF workflow.",
         )
         self._enable_property_when_workflow_option_enables(self._SPECULAR_PIXEL_SPECTRUM_NO)
@@ -167,8 +168,9 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
             calibration_file_issue = self._validate_calibration_file_header(self._calibration_filepath, workflow_options)
             if calibration_file_issue:
                 issues[self._CALIBRATION_FILE] = calibration_file_issue
-        if workflow_options.enable_property(self._EXPERIMENT_ANGLE) and self.getProperty(self._EXPERIMENT_ANGLE).isDefault:
-            issues[self._EXPERIMENT_ANGLE] = "ExperimentAngle must be provided for the POLREF workflow"
+        for property_name in [self._SPECULAR_PIXEL_SPECTRUM_NO, self._EXPERIMENT_ANGLE]:
+            if workflow_options.enable_property(property_name) and self.getProperty(property_name).isDefault:
+                issues[property_name] = f"{property_name} must be provided for the POLREF workflow"
         return issues
 
     def _validate_calibration_file_header(self, filepath, workflow_options):

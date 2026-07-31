@@ -345,6 +345,21 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         }
         self._assert_run_algorithm_raises_exception(args, "ExperimentAngle must be provided for the POLREF workflow")
 
+    def test_polref_workflow_requires_specular_pixel_spectrum_number(self):
+        input_ws_name = "test_1234"
+        ws = self._create_sample_workspace(input_ws_name)
+        angles = [0.05 * index for index in range(ws.getNumberHistograms())]
+        self.temp_calibration_file = TemporaryFileHelper(fileContent=self._absolute_calibration_file_content(angles), extension=".dat")
+
+        args = {
+            "InputWorkspace": ws,
+            "CalibrationFile": self.temp_calibration_file.getName(),
+            "InstrumentWorkflow": "POLREF",
+            "ExperimentAngle": 0.5,
+            "OutputWorkspace": "test_calibrated",
+        }
+        self._assert_run_algorithm_raises_exception(args, "SpecularPixelSpectrumNo must be provided for the POLREF workflow")
+
     def test_workflow_options_enable_property_only_for_configured_properties(self):
         workflow_options = ReflectometryISISCalibration.WorkflowOptions(
             calibration_angle_type="Absolute",
