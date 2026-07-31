@@ -15,7 +15,7 @@ from mantid.simpleapi import (
 )
 from mantid.api import AnalysisDataService as ADS
 from mantid.kernel import logger
-from Engineering.texture.texture_helper import convert_to_sscanss_frame
+from Engineering.texture.texture_helper import convert_to_sscanss_frame, write_texture_direction_info_to_log
 from typing import TYPE_CHECKING, Generator
 
 if TYPE_CHECKING:
@@ -109,6 +109,7 @@ class OrientationExporter:
         ref_wsname = self._model.workspaces.WS_REFERENCE
         try:
             self._build_reference_ws(ref_wsname)
+            write_texture_direction_info_to_log(ref_wsname, self._model.effective_ax_transform, self._model.dir_names)
             save_file = os.path.join(save_dir, filename + ".nxs")
             SaveNexus(InputWorkspace=ref_wsname, Filename=save_file)
             logger.notice(f"Reference workspace saved to '{save_file}'")
