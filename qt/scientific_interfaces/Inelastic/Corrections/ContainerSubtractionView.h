@@ -8,6 +8,7 @@
 
 #include "DllConfig.h"
 #include "ui_ContainerSubtraction.h"
+#include <MantidQtWidgets/Common/FileFinderWidget.h>
 #include <MantidQtWidgets/Common/UserInputValidator.h>
 #include <MantidQtWidgets/Spectroscopy/OutputWidget/OutputNameView.h>
 #include <QObject>
@@ -29,8 +30,8 @@ public:
   virtual void setCanWSSuffixes(const QStringList &suffixes) = 0;
   virtual void setCanFBSuffixes(const QStringList &suffixes) = 0;
 
-  /// Restore widget state by querying const storage; this legacy operation does not write.
-  virtual void loadSettings(const QSettings &settings) = 0;
+  /// Restore widget state from an immutable settings snapshot.
+  virtual void restoreSettings(const API::FileFinderSettings &settings) = 0;
   virtual void setLoadHistory(bool doLoadHistory) = 0;
   virtual void enableSaveButton(bool enable) = 0;
   virtual double getShift() const = 0;
@@ -62,7 +63,7 @@ public:
   void setCanWSSuffixes(const QStringList &suffixes) override;
   void setCanFBSuffixes(const QStringList &suffixes) override;
 
-  void loadSettings(const QSettings &settings) override;
+  void restoreSettings(const API::FileFinderSettings &settings) override;
   void setLoadHistory(bool doLoadHistory) override;
   void enableSaveButton(bool enable) override;
   double getScale() const override;

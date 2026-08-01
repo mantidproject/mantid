@@ -9,7 +9,7 @@
 #include "DllConfig.h"
 #include "MantidQtWidgets/Spectroscopy/InelasticTab.h"
 
-#include <QSettings>
+#include <MantidQtWidgets/Common/FileFinderWidget.h>
 
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
@@ -68,7 +68,7 @@ public:
    * supplied const settings and updates tab widgets, but must not write or
    * synchronize persistent storage. See @ref settings_lifecycle.
    */
-  virtual void loadSettings(const QSettings &settings) = 0;
+  virtual void restoreSettings(const API::FileFinderSettings &settings) = 0;
 
   /// Prevent loading of data with incorrect naming
   void filterInputData(bool filter);

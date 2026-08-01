@@ -274,9 +274,9 @@ void QuasiView::setLoadHistory(bool const loadHistory) {
   m_uiForm.dsResolution->setLoadProperty("LoadHistory", loadHistory);
 }
 
-void QuasiView::loadSettings(const QSettings &settings) {
-  m_uiForm.dsSample->restoreSettings(MantidWidgets::DataSelector::readSettings(settings));
-  m_uiForm.dsResolution->restoreSettings(MantidWidgets::DataSelector::readSettings(settings));
+void QuasiView::restoreSettings(const API::FileFinderSettings &settings) {
+  m_uiForm.dsSample->restoreSettings(settings);
+  m_uiForm.dsResolution->restoreSettings(settings);
 }
 
 } // namespace MantidQt::CustomInterfaces

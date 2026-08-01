@@ -36,7 +36,7 @@ public:
   void handleRun() override;
   const std::string getSubscriberName() const override { return "Stretch"; }
 
-  void loadSettings(const QSettings &settings) override;
+  void restoreSettings(const API::FileFinderSettings &settings) override;
   void applySettings(std::map<std::string, QVariant> const &settings) override;
 
   void notifySaveClicked() override;

@@ -10,6 +10,7 @@
 
 #include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include <MantidQtWidgets/Common/FileFinderWidget.h>
 
 #include <string>
 #include <utility>
@@ -69,8 +70,8 @@ public:
   virtual void setFileExtensionsByName(bool const filter) = 0;
   virtual void setLoadHistory(bool const loadHistory) = 0;
 
-  /// Restore widget state by querying const storage; this legacy operation does not write.
-  virtual void loadSettings(const QSettings &settings) = 0;
+  /// Restore widget state from an immutable settings snapshot.
+  virtual void restoreSettings(const API::FileFinderSettings &settings) = 0;
 };
 
 class QuasiView final : public QWidget, public IQuasiView {
@@ -118,7 +119,7 @@ public:
   void setFileExtensionsByName(bool const filter) override;
   void setLoadHistory(bool const loadHistory) override;
 
-  void loadSettings(const QSettings &settings) override;
+  void restoreSettings(const API::FileFinderSettings &settings) override;
 
 private slots:
   void minEValueChanged(double const min);
