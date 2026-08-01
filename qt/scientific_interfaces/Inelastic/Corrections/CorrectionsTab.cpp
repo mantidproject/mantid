@@ -10,7 +10,6 @@
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
 
 #include <MantidAPI/Run.h>
-#include <QSettings>
 
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets::WorkspaceUtils;
@@ -45,15 +44,6 @@ void CorrectionsTab::setOutputPlotOptionsWorkspaces(std::vector<std::string> con
 }
 
 void CorrectionsTab::clearOutputPlotOptionsWorkspaces() { m_plotOptionsPresenter->clearWorkspaces(); }
-
-/**
- * Loads the tab's settings.
- *
- * Calls overridden version of loadSettings() in child class.
- *
- * @param settings :: the QSettings object from which to load
- */
-void CorrectionsTab::loadTabSettings(const QSettings &settings) { loadSettings(settings); }
 
 /**
  * Prevents the loading of data with incorrect naming if passed true

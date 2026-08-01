@@ -215,8 +215,8 @@ void DensityOfStates::ionLoadComplete(bool error) {
  *
  * @param settings :: The settings to loading into the interface
  */
-void DensityOfStates::loadSettings(const QSettings &settings) {
-  m_uiForm.mwInputFile->restoreSettings(MantidWidgets::DataSelector::readSettings(settings));
+void DensityOfStates::restoreSettings(const API::FileFinderSettings &settings) {
+  m_uiForm.mwInputFile->restoreSettings(settings);
 }
 
 /**

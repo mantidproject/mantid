@@ -52,7 +52,7 @@ private:
   std::string documentationPage() const override;
 
   /// Legacy operation that writes the default directory, then restores each tab; see @ref settings_lifecycle.
-  void loadSettings();
+  void restoreSettings();
   /// Called upon a close event.
   void closeEvent(QCloseEvent * /*unused*/) override;
   /// Handle POCO event

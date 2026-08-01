@@ -9,6 +9,7 @@
 #include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "ui_ResNorm.h"
+#include <MantidQtWidgets/Common/FileFinderWidget.h>
 
 #include <MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h>
 #include <MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser>
@@ -27,8 +28,8 @@ public:
 
   virtual void setSuffixes(bool filter) = 0;
   virtual void setLoadHistory(bool doLoadHistory) = 0;
-  /// Restore widget state by querying const storage; this legacy operation does not write.
-  virtual void loadSettings(QSettings const &settings) = 0;
+  /// Restore widget state from an immutable settings snapshot.
+  virtual void restoreSettings(API::FileFinderSettings const &settings) = 0;
 
   virtual std::string getCurrentDataName(std::string const &selectorName) const = 0;
   virtual MantidWidgets::DataSelector *getDataSelector(std::string const &selectorName) const = 0;
@@ -60,7 +61,7 @@ public:
 
   void setSuffixes(bool filter) override;
   void setLoadHistory(bool doLoadHistory) override;
-  void loadSettings(QSettings const &settings) override;
+  void restoreSettings(API::FileFinderSettings const &settings) override;
 
   std::string getCurrentDataName(std::string const &selectorName) const override;
   MantidWidgets::DataSelector *getDataSelector(std::string const &selectorName) const override;

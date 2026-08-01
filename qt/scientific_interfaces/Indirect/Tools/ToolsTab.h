@@ -9,7 +9,7 @@
 #include "../DllConfig.h"
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Spectroscopy/InelasticTab.h"
-#include <QSettings>
+#include <MantidQtWidgets/Common/FileFinderWidget.h>
 #include <QWidget>
 
 namespace MantidQt {
@@ -36,7 +36,7 @@ public:
    * update tab widgets, but must not write or synchronize persistent storage.
    * See @ref settings_lifecycle.
    */
-  virtual void loadSettings(const QSettings &settings) = 0;
+  virtual void restoreSettings(const API::FileFinderSettings &settings) = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

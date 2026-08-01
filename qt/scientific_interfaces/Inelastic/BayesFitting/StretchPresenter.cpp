@@ -159,7 +159,7 @@ void StretchPresenter::notifyPlotCurrentPreviewClicked() {
   }
 }
 
-void StretchPresenter::loadSettings(const QSettings &settings) { m_view->loadSettings(settings); }
+void StretchPresenter::restoreSettings(const API::FileFinderSettings &settings) { m_view->restoreSettings(settings); }
 
 void StretchPresenter::applySettings(std::map<std::string, QVariant> const &settings) {
   m_view->applySettings(settings);

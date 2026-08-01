@@ -114,7 +114,7 @@ void ResNormPresenter::setSampleLogs() const {
  *
  * @param settings :: The current settings
  */
-void ResNormPresenter::loadSettings(const QSettings &settings) { m_view->loadSettings(settings); }
+void ResNormPresenter::restoreSettings(const API::FileFinderSettings &settings) { m_view->restoreSettings(settings); }
 
 /**
  * Plots the loaded file to the miniplot and sets the guides
