@@ -388,42 +388,12 @@ public:
   }
 
   // -------------------------------------------------------------------------
-  // Sub-spec 07: legacy runStatus() shim
-  // -------------------------------------------------------------------------
-
-  /** The deprecated runStatus() shim must return the edge when lastTransition()
-   *  is set, then fall back to runState() once the edge is cleared.
-   */
-  void test_legacy_runStatus_returns_edge_then_state() {
-    TestableSNSListener listener;
-    listener.m_stubHooks = true;
-
-    // Inject a BeginRun transition and commit it.
-    listener.injectPendingTransition(ILiveListener::BeginRun);
-    listener.callOnBeforeExtract();
-
-    // runStatus() should report the edge.
-    TS_ASSERT_EQUALS(ILiveListener::BeginRun, listener.runStatus());
-
-    // Simulate success: the post-extract hook marks the edge as delivered.
-    listener.callOnAfterExtract();
-
-    // Under the new design, BeginRun persists until the *next* onBeforeExtract()
-    // observes m_previousExtractCompleted == true and performs the deferred clear.
-    listener.callOnBeforeExtract();
-
-    // Now runStatus() must fall back to runState().
-    // onBeginRun() was stubbed, so m_adaraRunStatus is still NoRun.
-    TS_ASSERT_EQUALS(ILiveListener::NoRun, listener.runStatus());
-  }
-
-  // -------------------------------------------------------------------------
   // Sub-spec 07: background exception propagation
   // -------------------------------------------------------------------------
 
-  /** When the background thread has thrown, runState(), lastTransition(), and
-   *  runStatus() must all rethrow the stored exception.  listenerState() must
-   *  return Error without throwing.
+  /** When the background thread has thrown, runState() and lastTransition()
+   *  must both rethrow the stored exception.  listenerState() must return
+   *  Error without throwing.
    */
   void test_background_exception_propagates_from_all_getters() {
     TestableSNSListener listener;
@@ -431,7 +401,6 @@ public:
 
     TS_ASSERT_THROWS(listener.runState(), const std::runtime_error &);
     TS_ASSERT_THROWS(listener.lastTransition(), const std::runtime_error &);
-    TS_ASSERT_THROWS(listener.runStatus(), const std::runtime_error &);
 
     // listenerState() must NOT throw — it returns Error to allow callers to
     // distinguish "listener broken" from "listener not yet connected".

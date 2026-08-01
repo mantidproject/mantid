@@ -59,10 +59,11 @@ The v3 refactor has three objectives, in priority order:
 3. Move as much of the state machine as possible into ``extractData()``,
    the only method every consumer of ``ILiveListener`` must call.
 
-The result is four pure-getter queries on ``ILiveListener``, a
+The result is four pure-getter queries on ``ILiveListener`` and a
 template-method ``extractData()`` on ``LiveListener`` that dispatches to
-named protected hooks, and a deprecated-but-functional ``runStatus()``
-shim for backward compatibility.
+named protected hooks.  The old ``runStatus()`` getter was kept for a
+transitional period as a ``[[deprecated]]`` shim and has since been
+removed; see `Removed API`_ below.
 
 
 New API (use these)
@@ -114,7 +115,7 @@ The base-class declarations are:
 
    class MANTID_API_DLL ILiveListener : public Kernel::PropertyManager {
    public:
-       enum RunStatus { NoRun = 0, BeginRun = 1, Running = 2, EndRun = 4 };
+       enum RunStatus { NoRun = 0, JoiningRun = 1, BeginRun = 2, Running = 3, EndRun = 4 };
 
        virtual RunStatus runState() const                  { return NoRun;       }
        virtual bool      isPaused() const                  { return false;       }
@@ -122,10 +123,6 @@ The base-class declarations are:
        virtual std::optional<RunStatus> lastTransition() const { return std::nullopt; }
 
        virtual std::shared_ptr<Workspace> extractData() = 0;
-
-       [[deprecated("Use runState() / lastTransition() and call extractData() "
-                    "to commit pending transitions.")]]
-       virtual RunStatus runStatus();
        // ... other existing methods unchanged ...
    };
 
@@ -142,8 +139,8 @@ regardless of run phase.  Neither query reads or mutates the other's
 backing field.
 
 
-Deprecated API (migrate away from)
------------------------------------
+Removed API
+-----------
 
 ``runStatus()``
 ~~~~~~~~~~~~~~~
@@ -156,9 +153,9 @@ The old ``runStatus()`` method carried large hidden side effects:
 * Cleared the ``m_pauseNetRead`` gate (causing deadlock in stand-alone
   ``LoadLiveData``).
 
-It is replaced by the combination of ``lastTransition()`` and
-``runState()``.  ``runStatus()`` is no longer pure virtual; the
-default base-class implementation in ``ILiveListener.cpp`` is:
+It has been **removed** in favour of the combination of
+``lastTransition()`` and ``runState()``.  For a transitional period it
+was kept as a ``[[deprecated]]`` base-class shim equivalent to:
 
 .. code-block:: cpp
 
@@ -167,27 +164,30 @@ default base-class implementation in ``ILiveListener.cpp`` is:
        return runState();
    }
 
-This shim preserves backward-compatible behaviour for
-``MonitorLiveData`` without requiring callers to change immediately.
-The method is marked ``[[deprecated]]`` and **will be removed in a
-future release**.  Note that the default cannot throw on its own: both
-``lastTransition()`` and ``runState()`` have safe defaults
-(``nullopt`` / ``NoRun``).  A listener that wishes to forbid the
-deprecated API outright is free to override ``runStatus()`` as
-``[[noreturn]] throw std::logic_error(...)``; nothing in the design
-relies on the default never throwing.
+Any remaining call site should be updated to call the two replacement
+getters directly:
 
-How the shim preserves ``MonitorLiveData`` semantics
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. code-block:: cpp
+
+   const auto status = listener->lastTransition().value_or(listener->runState());
+
+Call ``extractData()`` first to commit any pending transition, then
+read ``lastTransition()`` / ``runState()`` — this reproduces the
+historical ``runStatus()`` contract exactly (see below).
+
+How the former shim preserved ``MonitorLiveData`` semantics
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ``MonitorLiveData`` calls ``extractData()`` first (via
-``loadAlg->executeAsChildAlg()``) and ``runStatus()`` second within the
-same loop iteration.  By the time ``runStatus()`` is called,
-``extractData()`` has already committed any pending transition and
-``lastTransition()`` is populated.  The shim returns the edge once
-across the boundary, then falls through to ``runState()`` on
-subsequent calls (``Running`` or ``NoRun``) — matching the historical
-return-once-then-settle behaviour exactly.
+``loadAlg->executeAsChildAlg()``) and then reads the run status second
+within the same loop iteration.  By that point, ``extractData()`` has
+already committed any pending transition and ``lastTransition()`` is
+populated.  Reading ``lastTransition().value_or(runState())`` returns
+the edge once across the boundary, then falls through to
+``runState()`` on subsequent calls (``Running`` or ``NoRun``) —
+matching the historical return-once-then-settle behaviour of the old
+``runStatus()`` exactly.  See
+``Framework/LiveData/src/MonitorLiveData.cpp`` for the call site.
 
 
 ``extractData()`` as a template method
@@ -332,9 +332,9 @@ follows.
 Step 1 — Remove your ``runStatus()`` override
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The base-class shim is correct for almost every listener.  Drop the
-override entirely; the deprecation warning at the call sites will
-prompt eventual migration to ``lastTransition()`` / ``runState()``.
+``runStatus()`` has been removed from ``ILiveListener``.  Drop the
+override entirely; call sites should read ``lastTransition()`` /
+``runState()`` directly instead.
 
 Step 2 — Add a ``listenerState() const override``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -456,9 +456,9 @@ inside a run right now?".
 
 ``lastTransition()`` is not overridden (returns ``nullopt``); Kafka
 does not have the ``BeginRun`` / ``EndRun`` edge-detection contract
-that ADARA does, so the deprecated ``runStatus()`` shim falls through
-to ``runState()`` and returns the same value the legacy override
-would have.
+that ADARA does, so ``lastTransition().value_or(runState())`` falls
+through to ``runState()`` and returns the same value the legacy
+``runStatus()`` override would have.
 
 Pattern C — FSM-tick anti-pattern fix
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -639,7 +639,7 @@ fix.
    * - ``MonitorLiveData`` workspace renaming triggers on
        ``BeginRun`` / ``EndRun``
      - yes
-     - yes (via the legacy ``runStatus()`` shim)
+     - yes (via ``lastTransition().value_or(runState())``)
    * - Listener can be queried for its state without mutating it
      - **no**
      - yes (``runState()``, ``isPaused()``, ``listenerState()``,
@@ -779,5 +779,3 @@ Further reading
   interface declaration.
 * ``Framework/API/inc/MantidAPI/LiveListener.h`` — ``extractData()``
   template method and default hook implementations.
-* ``Framework/API/src/ILiveListener.cpp`` — default ``runStatus()``
-  shim.

@@ -157,16 +157,6 @@ public:
    */
   virtual std::optional<RunStatus> lastTransition() const { return std::nullopt; }
 
-  /** Gets the current run status of the listened-to data stream.
-   *  @return A value of the RunStatus enumeration indicating the present status
-   *  @deprecated Use runState() / lastTransition() and call extractData() to
-   *    commit pending transitions.  This method will be removed in a future
-   *    release.
-   */
-  [[deprecated("Use runState() / lastTransition() and call extractData() "
-               "to commit pending transitions.")]]
-  virtual RunStatus runStatus();
-
   /// Returns the run number of the current run
   virtual int runNumber() const = 0;
 
