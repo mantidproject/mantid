@@ -86,7 +86,7 @@ class PoldiAutoCorrelation(PythonAlgorithm):
                 "please use PoldiAutoCorrelation with keyword argument Version=5."
             )
         has_log = ws.run().hasProperty("chopperspeed")
-        has_chopper = ws.getInstrument().getComponentByName("chopper") is not None
+        has_chopper = ws.componentInfo().uniqueName("chopper")
         if not has_log or not has_chopper:
             issues["InputWorkspace"] = "InputWorkspace must have chopper component and chopperspeed log."
         return issues

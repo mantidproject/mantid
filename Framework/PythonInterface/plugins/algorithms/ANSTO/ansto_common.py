@@ -19,7 +19,6 @@ from configparser import ConfigParser, NoOptionError, NoSectionError
 from mantid import mtd
 from mantid.api import NumericAxis, Algorithm, Progress
 from mantid.kernel import DateAndTime
-from mantid.geometry import Instrument
 from mantid.simpleapi import (
     Workspace,
     FileFinder,
@@ -493,7 +492,6 @@ class FilterPixelsTubes:
     _pixels_per_tube: int
     _pixel_offset: int
     _nhist: int
-    _instrument: Instrument
     _include: np.ndarray
 
     def __init__(self, valid_tubes: StrOption, valid_pixels: RangeOption, pixels_per_tube: int, pixel_offset: int):
@@ -520,7 +518,6 @@ class FilterPixelsTubes:
 
     def _setup(self, ws_tag: str):
         event_ws = mtd[ws_tag]
-        self._instrument = event_ws.getInstrument()
         self._nhist = event_ws.getNumberHistograms()
         self._include = np.full(self._nhist, False)
 

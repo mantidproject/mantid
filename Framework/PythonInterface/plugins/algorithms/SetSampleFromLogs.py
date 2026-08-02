@@ -157,7 +157,7 @@ class SetSampleFromLogs(DataProcessorAlgorithm):
         runObject = wksp.run()
 
         # this is used for determining some of the log names
-        instrEnum = ConfigService.getInstrument(wksp.getInstrument().getFullName())
+        instrEnum = ConfigService.getInstrument(wksp.getInstrumentName())
 
         # get information from the logs
         material = self._createMaterial(runObject)

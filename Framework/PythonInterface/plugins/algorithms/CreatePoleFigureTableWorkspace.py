@@ -189,7 +189,7 @@ class CreatePoleFigureTableWorkspace(PythonAlgorithm):
         det_pos = np.asarray(det_table.column("Position")) - sample_pos
 
         # get the normalised source pos for qi
-        source_pos = ws.getInstrument().getSource().getPos()
+        source_pos = ws.componentInfo().sourcePosition()
         source_pos = np.asarray(source_pos) / source_pos.norm()
         qi = sample_pos - source_pos
 
