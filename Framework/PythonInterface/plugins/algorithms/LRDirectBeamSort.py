@@ -233,11 +233,9 @@ class LRDirectBeamSort(PythonAlgorithm):
                 )
 
             # Determine TOF range from first file
-            sample = g[0].getInstrument().getSample()
-            source = g[0].getInstrument().getSource()
-            source_sample_distance = sample.getDistance(source)
-            detector = g[0].getDetector(0)
-            sample_detector_distance = detector.getPos().getZ()
+            spectrum_info = g[0].spectrumInfo()
+            source_sample_distance = spectrum_info.l1()
+            sample_detector_distance = spectrum_info.position(0).getZ()
             source_detector_distance = source_sample_distance + sample_detector_distance
             h = 6.626e-34  # m^2 kg s^-1
             m = 1.675e-27  # kg

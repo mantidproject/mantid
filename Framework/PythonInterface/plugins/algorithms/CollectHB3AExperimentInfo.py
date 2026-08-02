@@ -324,13 +324,14 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
 
                     # write each detector's position and ID to table workspace
                     maxdetid = -1
+                    det_info = dataws.detectorInfo()
                     for iws in range(dataws.getNumberHistograms()):
-                        detector = dataws.getDetector(iws)
-                        detpos = detector.getPos()
-                        newdetid = self._currStartDetID + detector.getID()
-                        if detector.getID() > maxdetid:
-                            maxdetid = detector.getID()
-                        self._myPixelInfoTableWS.addRow([newdetid, detpos.X(), detpos.Y(), detpos.Z(), detector.getID()])
+                        detid = next(iter(dataws.getSpectrum(iws).getDetectorIDs()))
+                        detpos = det_info.position(det_info.indexOf(detid))
+                        newdetid = self._currStartDetID + detid
+                        if detid > maxdetid:
+                            maxdetid = detid
+                        self._myPixelInfoTableWS.addRow([newdetid, detpos.X(), detpos.Y(), detpos.Z(), detid])
                     # ENDFOR (iws)
 
                 else:
