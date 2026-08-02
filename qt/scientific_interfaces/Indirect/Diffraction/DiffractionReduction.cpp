@@ -19,6 +19,7 @@
 
 #include <MantidAPI/FileFinder.h>
 #include <QSignalBlocker>
+#include <utility>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -42,7 +43,14 @@ DiffractionReduction::DiffractionReduction(QWidget *parent)
       m_batchAlgoRunner(new BatchAlgorithmRunner(parent)), m_plotWorkspaces(), m_runPresenter(),
       m_plotOptionsPresenter(), m_groupingWidget() {}
 
-DiffractionReduction::~DiffractionReduction() { saveSettings(); }
+DiffractionReduction::~DiffractionReduction() { persistSettings(); }
+
+DiffractionSettings::DiffractionSettings(QString calibrationFile, QString vanadiumFiles)
+    : m_calibrationFile(std::move(calibrationFile)), m_vanadiumFiles(std::move(vanadiumFiles)) {}
+
+const QString &DiffractionSettings::calibrationFile() const { return m_calibrationFile; }
+
+const QString &DiffractionSettings::vanadiumFiles() const { return m_vanadiumFiles; }
 
 /**
  * Sets up UI components and Qt signal/slot connections.
@@ -89,7 +97,7 @@ void DiffractionReduction::initLayout() {
   // Handle saving
   connect(m_uiForm.pbSave, &QPushButton::clicked, this, &DiffractionReduction::saveReductions);
 
-  loadSettings();
+  initializeSettings();
 
   // Update invalid rebinning markers
   validateRebin();
@@ -576,26 +584,42 @@ std::string DiffractionReduction::documentationPage() const { return "Indirect D
 
 void DiffractionReduction::initLocalPython() {}
 
-void DiffractionReduction::loadSettings() {
+void DiffractionReduction::initializeSettings() {
   QSettings settings;
-  QString dataDir =
-      QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories"))
-          .split(";")[0];
-
   settings.beginGroup(m_settingsGroup);
-  settings.setValue("last_directory", dataDir);
-  m_uiForm.rfSampleFiles->restoreSettings(API::FileFinderWidget::readSettings(settings));
-  m_uiForm.rfCalFile->setUserInput(settings.value("last_cal_file").toString());
-  m_uiForm.rfVanFile->setUserInput(settings.value("last_van_files").toString());
+  auto const values = DiffractionSettings::readSettings(settings);
   settings.endGroup();
+  restoreSettings(values);
+
+  auto const dataDir =
+      QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories"))
+          .split(";", Qt::SkipEmptyParts)
+          .value(0);
+  m_uiForm.rfSampleFiles->restoreSettings(API::FileFinderSettings(dataDir));
 }
 
-void DiffractionReduction::saveSettings() {
-  QSettings settings;
+DiffractionSettings DiffractionSettings::readSettings(const QSettings &settings) {
+  return DiffractionSettings(settings.value("last_cal_file").toString(), settings.value("last_van_files").toString());
+}
 
+void DiffractionReduction::restoreSettings(const DiffractionSettings &settings) {
+  m_uiForm.rfCalFile->setUserInput(settings.calibrationFile());
+  m_uiForm.rfVanFile->setUserInput(settings.vanadiumFiles());
+}
+
+DiffractionSettings DiffractionReduction::captureSettings() const {
+  return DiffractionSettings(m_uiForm.rfCalFile->getText(), m_uiForm.rfVanFile->getText());
+}
+
+void DiffractionSettings::saveSettings(QSettings &settings, const DiffractionSettings &values) {
+  settings.setValue("last_cal_file", values.calibrationFile());
+  settings.setValue("last_van_files", values.vanadiumFiles());
+}
+
+void DiffractionReduction::persistSettings() {
+  QSettings settings;
   settings.beginGroup(m_settingsGroup);
-  settings.setValue("last_cal_file", m_uiForm.rfCalFile->getText());
-  settings.setValue("last_van_files", m_uiForm.rfVanFile->getText());
+  DiffractionSettings::saveSettings(settings, captureSettings());
   settings.endGroup();
 }
 
