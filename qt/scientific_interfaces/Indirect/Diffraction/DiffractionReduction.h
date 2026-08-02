@@ -17,12 +17,32 @@
 
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 
+#include <QString>
 #include <optional>
+
+class QSettings;
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
 class DetectorGroupingOptions;
+
+class MANTIDQT_INDIRECT_DLL DiffractionSettings {
+public:
+  explicit DiffractionSettings(QString calibrationFile = {}, QString vanadiumFiles = {});
+
+  [[nodiscard]] const QString &calibrationFile() const;
+  [[nodiscard]] const QString &vanadiumFiles() const;
+
+  /// Query persistent storage without changing widgets or writing settings.
+  [[nodiscard]] static DiffractionSettings readSettings(const QSettings &settings);
+  /// Persist only the calibration and vanadium values from a snapshot.
+  static void saveSettings(QSettings &settings, const DiffractionSettings &values);
+
+private:
+  QString m_calibrationFile;
+  QString m_vanadiumFiles;
+};
 
 class DiffractionReduction : public InelasticInterface, public IRunSubscriber {
   Q_OBJECT
@@ -40,6 +60,11 @@ public:
   void handleValidation(IUserInputValidator *validator) const override;
   void handleRun() override;
   const std::string getSubscriberName() const override { return "DiffractionReduction"; }
+
+  /// Restore widgets from an immutable snapshot without persistent access.
+  void restoreSettings(const DiffractionSettings &settings);
+  /// Capture current widget state without persistent access.
+  [[nodiscard]] DiffractionSettings captureSettings() const;
 
 public slots:
   void instrumentSelected(const QString &instrumentName, const QString &analyserName, const QString &reflectionName);
@@ -61,10 +86,8 @@ private:
   void initLayout() override;
   void initLocalPython() override;
 
-  /// Legacy combined read-and-restore operation; currently also writes the default directory.
-  void loadSettings();
-  /// Persist the current calibration and vanadium file values.
-  void saveSettings();
+  void initializeSettings();
+  void persistSettings();
 
   Mantid::API::IAlgorithm_sptr saveGSSAlgorithm(const std::string &filename);
   Mantid::API::IAlgorithm_sptr saveASCIIAlgorithm(const std::string &filename, const std::string &inputWsName);
