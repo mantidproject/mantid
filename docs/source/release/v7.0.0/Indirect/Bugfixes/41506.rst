@@ -1,0 +1,1 @@
+- The output workspace name for summed runs in the  ``ISISCalibration`` tab of the :ref:`Indirect Data Reduction<interface-indirect-data-reduction>` is formatted correctly.
