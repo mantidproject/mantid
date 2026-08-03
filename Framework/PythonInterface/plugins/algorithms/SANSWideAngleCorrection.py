@@ -51,7 +51,7 @@ class SANSWideAngleCorrection(PythonAlgorithm):
             raise RuntimeError("Invalid workspace for transmission, it does not accept negative values.")
 
         # check input sample has associated instrument
-        if not wd.getInstrument().getSample():
+        if not wd.componentInfo().hasSample():
             raise RuntimeError("You can not apply this correction for workspace not associated to instrument")
 
         # initialization of progress bar:
@@ -69,15 +69,21 @@ class SANSWideAngleCorrection(PythonAlgorithm):
         x_bins = np.array(wd.x(0))
 
         # get the position of the sample and the instrument
-        sample_pos = wd.getInstrument().getSample().getPos()
-        inst_pos = sample_pos - wd.getInstrument().getSource().getPos()
+        # computed from the (possibly grouped) detector position rather than via
+        # spectrum_info.twoTheta(i): the latter averages each detector's individual
+        # two-theta, while this averages positions first then takes one angle, matching
+        # the legacy behaviour of a DetectorGroup's getPos()/getTwoTheta().
+        spectrum_info = wd.spectrumInfo()
+        component_info = wd.componentInfo()
+        sample_pos = component_info.samplePosition()
+        beam_dir = sample_pos - component_info.sourcePosition()
 
         # for each spectrum (i,j) calculate the correction factor for the transmission.
         for i in range(wd.getNumberHistograms()):
             try:
                 prog_reporter.report("Correcting Wide Angle")
                 # calculation of A
-                twoTheta = wd.getDetector(i).getTwoTheta(sample_pos, inst_pos)
+                twoTheta = (spectrum_info.position(i) - sample_pos).angle(beam_dir)
                 A = 1 / np.cos(twoTheta) - 1
                 # calculation of factor for transmission
                 to_l = (np.power(to, A) - 1) / (np.log(to) * A)

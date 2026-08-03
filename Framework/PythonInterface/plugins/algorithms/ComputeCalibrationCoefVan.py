@@ -164,9 +164,19 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
         run = self.vanaws.getRun()
         nhist = self.vanaws.getNumberHistograms()
         thetasort = np.empty(nhist)  # half of the scattering angle, in radians
+        spectrum_info = self.vanaws.spectrumInfo()
+        component_info = self.vanaws.componentInfo()
+        sample_pos = component_info.samplePosition()
+        beam_dir = sample_pos - component_info.sourcePosition()
         for i in range(nhist):
-            det = self.vanaws.getDetector(i)
-            thetasort[i] = 0.5 * self.vanaws.detectorTwoTheta(det)
+            if spectrum_info.isMonitor(i):
+                # spectrum_info.twoTheta() throws for monitors (see SpectrumInfo.cpp); replicate
+                # the legacy IDetector.getTwoTheta(), which computed the raw geometric angle
+                # unconditionally, since this workspace's spectra are not guaranteed to exclude monitors.
+                two_theta = (spectrum_info.position(i) - sample_pos).angle(beam_dir)
+            else:
+                two_theta = spectrum_info.twoTheta(i)
+            thetasort[i] = 0.5 * two_theta
 
         # T in K
         temperature = self.get_temperature()

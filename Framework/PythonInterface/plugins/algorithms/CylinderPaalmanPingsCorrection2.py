@@ -561,16 +561,21 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
     # ------------------------------------------------------------------------------
 
     def _get_angles(self):
-        num_hist = mtd[self._sample_ws_name].getNumberHistograms()
+        ws = mtd[self._sample_ws_name]
+        num_hist = ws.getNumberHistograms()
         angle_prog = Progress(self, start=0.03, end=0.07, nreports=num_hist)
-        source_pos = mtd[self._sample_ws_name].getInstrument().getSource().getPos()
-        sample_pos = mtd[self._sample_ws_name].getInstrument().getSample().getPos()
-        beam_pos = sample_pos - source_pos
+        # computed from the (possibly grouped) detector position rather than via
+        # spectrum_info.twoTheta(index): the latter averages each detector's individual
+        # two-theta, while this averages positions first then takes one angle, matching
+        # the legacy behaviour of a DetectorGroup's getPos()/getTwoTheta().
+        spectrum_info = ws.spectrumInfo()
+        component_info = ws.componentInfo()
+        sample_pos = component_info.samplePosition()
+        beam_dir = sample_pos - component_info.sourcePosition()
         self._angles = list()
         for index in range(0, num_hist):
             angle_prog.report("Obtaining data for detector angle %i" % index)
-            detector = mtd[self._sample_ws_name].getDetector(index)
-            two_theta = detector.getTwoTheta(sample_pos, beam_pos) * 180.0 / math.pi
+            two_theta = (spectrum_info.position(index) - sample_pos).angle(beam_dir) * 180.0 / math.pi
             self._angles.append(two_theta)
         logger.information("Detector angles : %i from %f to %f " % (len(self._angles), self._angles[0], self._angles[-1]))
 
