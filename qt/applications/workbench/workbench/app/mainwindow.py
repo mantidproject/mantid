@@ -547,6 +547,8 @@ class MainWindow(QMainWindow):
             # write out any changes to the mantid config file
             ConfigService.saveConfig(ConfigService.getUserFilename())
             # write current window information to global settings object
+            # QSettings treats setValue as a mutation even when the stored value is identical. These save calls
+            # therefore replace the settings file on every successful shutdown.
             self.saveSettings(CONF, self.captureSettings())
             self.saveChildSettings(CONF)
             # Close all open plots
