@@ -58,6 +58,11 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
         self.lineedit_TD0.setToolTip("X component of the third intrinsic sample direction")
         self.lineedit_TD1.setToolTip("Y component of the third intrinsic sample direction")
         self.lineedit_TD2.setToolTip("Z component of the third intrinsic sample direction")
+        self.readDirsFromRef_checkBox.setToolTip(
+            "If checked, loading a reference workspace on the Absorption Correction tab replaces the "
+            "sample directions above with the ones saved on it (only for the active RB number, and "
+            "only if the reference workspace carries them)"
+        )
 
         self.monte_carlo_lineedit.setToolTip(
             "Python dictionary-style string for input parameters to the MonteCarloAbsorption algorithm, "
@@ -207,6 +212,9 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
     def get_auto_populate_texture(self):
         return self.textureAutoPopulate.isChecked()
 
+    def get_read_texture_dirs_from_ref(self):
+        return self.readDirsFromRef_checkBox.isChecked()
+
     # =================
     # Component Setters
     # =================
@@ -321,6 +329,9 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
 
     def set_auto_populate_texture(self, val):
         self.textureAutoPopulate.setChecked(val)
+
+    def set_read_texture_dirs_from_ref(self, val):
+        self.readDirsFromRef_checkBox.setChecked(val)
 
     # =================
     # Force Actions
