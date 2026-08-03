@@ -13,6 +13,9 @@
 #include <string>
 #include <vector>
 
+#include <QString>
+
+class QSettings;
 class QWidget;
 
 namespace MantidQt {
@@ -25,6 +28,21 @@ namespace CustomInterfaces {
 
 class IALFInstrumentPresenter;
 
+class MANTIDQT_DIRECT_DLL ALFInstrumentSettings {
+public:
+  explicit ALFInstrumentSettings(QString vanadiumRun = {});
+
+  [[nodiscard]] const QString &vanadiumRun() const;
+
+  /// Query persistent storage without changing widgets or writing settings.
+  [[nodiscard]] static ALFInstrumentSettings readSettings(const QSettings &settings);
+  /// Persist only the vanadium run from a snapshot.
+  static void saveSettings(QSettings &settings, const ALFInstrumentSettings &values);
+
+private:
+  QString m_vanadiumRun;
+};
+
 class MANTIDQT_DIRECT_DLL IALFInstrumentView {
 
 public:
@@ -36,10 +54,10 @@ public:
 
   virtual void subscribePresenter(IALFInstrumentPresenter *presenter) = 0;
 
-  /// Query persistent settings and immediately restore view state; legacy combined operation.
-  virtual void loadSettings() = 0;
-  /// Persist the current view state.
-  virtual void saveSettings() = 0;
+  /// Apply an immutable settings snapshot without accessing persistent storage.
+  virtual void restoreSettings(const ALFInstrumentSettings &settings) = 0;
+  /// Capture current view state without accessing persistent storage.
+  [[nodiscard]] virtual ALFInstrumentSettings captureSettings() const = 0;
 
   virtual void disable(std::string const &reason) = 0;
   virtual void enable() = 0;
