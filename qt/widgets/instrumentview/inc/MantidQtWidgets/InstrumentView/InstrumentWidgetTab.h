@@ -30,10 +30,6 @@ public:
   /// Called by InstrumentWidget after the projection surface crated
   /// Use it for surface-specific initialization
   virtual void initSurface() {}
-  /// Persist tab state to the supplied mutable storage.
-  virtual void saveSettings(QSettings & /*unused*/) const {}
-  /// Query supplied const storage and immediately restore tab state; legacy combined operation.
-  virtual void loadSettings(const QSettings & /*unused*/) {}
   /// Add tab-specific items to the context menu
   /// Return true if at least 1 item was added or false otherwise.
   virtual bool addToDisplayContextMenu(QMenu & /*unused*/) const { return false; }

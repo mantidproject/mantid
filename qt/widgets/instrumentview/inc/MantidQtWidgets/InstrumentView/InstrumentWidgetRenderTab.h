@@ -28,6 +28,21 @@ class QHBoxLayout;
 namespace MantidQt {
 namespace MantidWidgets {
 class InstrumentWidget;
+
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidgetRenderTabSettings {
+public:
+  explicit InstrumentWidgetRenderTabSettings(bool axesShown = true);
+
+  [[nodiscard]] bool axesShown() const;
+
+  /// Read values without modifying or synchronizing the backing settings file.
+  [[nodiscard]] static InstrumentWidgetRenderTabSettings readSettings(const QSettings &settings);
+  /// Persist an explicit snapshot.
+  static void saveSettings(QSettings &settings, const InstrumentWidgetRenderTabSettings &values);
+
+private:
+  bool m_axesShown;
+};
 class BinDialog;
 
 /**
@@ -40,8 +55,10 @@ public:
   explicit InstrumentWidgetRenderTab(InstrumentWidget *instrWindow);
   ~InstrumentWidgetRenderTab();
   void initSurface() override;
-  void saveSettings(QSettings & /*unused*/) const override;
-  void loadSettings(const QSettings & /*unused*/) override;
+  /// Apply an already-read snapshot to the tab without performing file I/O.
+  void restoreSettings(const InstrumentWidgetRenderTabSettings &settings);
+  /// Capture the current UI state without performing file I/O.
+  [[nodiscard]] InstrumentWidgetRenderTabSettings captureSettings() const;
   // legacy interface for MantidPlot python api
   ColorMap::ScaleType getScaleType() const;
   void setScaleType(ColorMap::ScaleType type);

@@ -36,6 +36,19 @@
 
 namespace MantidQt::MantidWidgets {
 
+InstrumentWidgetRenderTabSettings::InstrumentWidgetRenderTabSettings(bool axesShown) : m_axesShown(axesShown) {}
+
+bool InstrumentWidgetRenderTabSettings::axesShown() const { return m_axesShown; }
+
+InstrumentWidgetRenderTabSettings InstrumentWidgetRenderTabSettings::readSettings(const QSettings &settings) {
+  return InstrumentWidgetRenderTabSettings(settings.value("3DAxesShown", 1).toInt() != 0);
+}
+
+void InstrumentWidgetRenderTabSettings::saveSettings(QSettings &settings,
+                                                     const InstrumentWidgetRenderTabSettings &values) {
+  settings.setValue("3DAxesShown", QVariant(values.axesShown() ? 1 : 0));
+}
+
 Mantid::Kernel::Logger g_log("InstrumentWidgetRenderTab");
 
 // QSettings entry names
@@ -450,19 +463,15 @@ void InstrumentWidgetRenderTab::changeColorMap(const QString &filename, const bo
   m_instrWidget->changeColormap(filename, highlightZeroDets);
 }
 
-void InstrumentWidgetRenderTab::loadSettings(const QSettings &settings) {
-  int show3daxes = settings.value("3DAxesShown", 1).toInt();
-  m_instrWidget->set3DAxesState(show3daxes != 0);
+void InstrumentWidgetRenderTab::restoreSettings(const InstrumentWidgetRenderTabSettings &settings) {
+  m_instrWidget->set3DAxesState(settings.axesShown());
   m_displayAxes->blockSignals(true);
-  m_displayAxes->setChecked(show3daxes != 0);
+  m_displayAxes->setChecked(settings.axesShown());
   m_displayAxes->blockSignals(false);
 }
 
-void InstrumentWidgetRenderTab::saveSettings(QSettings &settings) const {
-  int val = 0;
-  if (m_displayAxes->isChecked())
-    val = 1;
-  settings.setValue("3DAxesShown", QVariant(val));
+InstrumentWidgetRenderTabSettings InstrumentWidgetRenderTab::captureSettings() const {
+  return InstrumentWidgetRenderTabSettings(m_displayAxes->isChecked());
 }
 
 /**

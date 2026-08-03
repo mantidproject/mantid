@@ -57,6 +57,27 @@ using Mantid::API::AlgorithmManager;
 
 namespace MantidQt::MantidWidgets {
 
+InstrumentWidgetPickTabSettings::InstrumentWidgetPickTabSettings(int tubeXUnits, int plotType, bool rebinKeepOriginal)
+    : m_tubeXUnits(tubeXUnits), m_plotType(plotType), m_rebinKeepOriginal(rebinKeepOriginal) {}
+
+int InstrumentWidgetPickTabSettings::tubeXUnits() const { return m_tubeXUnits; }
+
+int InstrumentWidgetPickTabSettings::plotType() const { return m_plotType; }
+
+bool InstrumentWidgetPickTabSettings::rebinKeepOriginal() const { return m_rebinKeepOriginal; }
+
+InstrumentWidgetPickTabSettings InstrumentWidgetPickTabSettings::readSettings(const QSettings &settings) {
+  return InstrumentWidgetPickTabSettings(settings.value("TubeXUnits", 0).toInt(),
+                                         settings.value("PlotType", IWPickPlotType::SINGLE).toInt(),
+                                         settings.value("RebinKeeporiginal", true).toBool());
+}
+
+void InstrumentWidgetPickTabSettings::saveSettings(QSettings &settings, const InstrumentWidgetPickTabSettings &values) {
+  settings.setValue("TubeXUnits", values.tubeXUnits());
+  settings.setValue("PlotType", values.plotType());
+  settings.setValue("RebinKeeporiginal", values.rebinKeepOriginal());
+}
+
 using namespace boost::math;
 
 namespace {
@@ -767,26 +788,16 @@ std::shared_ptr<ProjectionSurface> InstrumentWidgetPickTab::getSurface() const {
 
 const InstrumentWidget *InstrumentWidgetPickTab::getInstrumentWidget() const { return m_instrWidget; }
 
-/**
- * Save tab's persistent settings to the provided QSettings instance
- */
-void InstrumentWidgetPickTab::saveSettings(QSettings &settings) const {
-  settings.setValue("TubeXUnits", m_plotController->getTubeXUnits());
-  settings.setValue("PlotType", m_plotController->getPlotType());
-  settings.setValue("RebinKeeporiginal", m_rebinKeepOriginal->isChecked());
+void InstrumentWidgetPickTab::restoreSettings(const InstrumentWidgetPickTabSettings &settings) {
+  // These values are applied after the plot controller is created.
+  m_tubeXUnitsCache = settings.tubeXUnits();
+  m_plotTypeCache = settings.plotType();
+  m_rebinKeepOriginal->setChecked(settings.rebinKeepOriginal());
 }
 
-/**
- * Restore (read and apply) tab's persistent settings from the provided
- * QSettings instance
- */
-void InstrumentWidgetPickTab::loadSettings(const QSettings &settings) {
-  // loadSettings is called when m_plotController is not created yet.
-  // Cache the settings and apply them later
-  m_tubeXUnitsCache = settings.value("TubeXUnits", 0).toInt();
-  m_plotTypeCache = settings.value("PlotType", IWPickPlotType::SINGLE).toInt();
-
-  m_rebinKeepOriginal->setChecked(settings.value("RebinKeeporiginal", true).toBool());
+InstrumentWidgetPickTabSettings InstrumentWidgetPickTab::captureSettings() const {
+  return InstrumentWidgetPickTabSettings(m_plotController->getTubeXUnits(), m_plotController->getPlotType(),
+                                         m_rebinKeepOriginal->isChecked());
 }
 void InstrumentWidgetPickTab::addToContextMenu(QAction *action,
                                                std::function<bool(std::map<std::string, bool>)> &actionCondition) {
