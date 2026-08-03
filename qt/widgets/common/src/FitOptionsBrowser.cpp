@@ -44,23 +44,24 @@
 
 namespace MantidQt::MantidWidgets {
 
-FitOptionsBrowserSettings::FitOptionsBrowserSettings(QMap<QString, QString> values) : m_values(std::move(values)) {}
+FitOptionsBrowserSettings::FitOptionsBrowserSettings(QMap<QString, QString> propertyValues)
+    : m_values(std::move(propertyValues)) {}
 
 const QMap<QString, QString> &FitOptionsBrowserSettings::values() const { return m_values; }
 
 FitOptionsBrowserSettings FitOptionsBrowserSettings::readSettings(const QSettings &settings,
                                                                   const QStringList &propertyNames) {
-  QMap<QString, QString> values;
+  QMap<QString, QString> propertyValues;
   for (const auto &name : propertyNames) {
     auto const value = settings.value(name).toString();
     if (!value.isEmpty())
-      values.insert(name, value);
+      propertyValues.insert(name, value);
   }
-  return FitOptionsBrowserSettings(std::move(values));
+  return FitOptionsBrowserSettings(std::move(propertyValues));
 }
 
-void FitOptionsBrowserSettings::saveSettings(QSettings &settings, const FitOptionsBrowserSettings &values) {
-  for (auto property = values.values().constBegin(); property != values.values().constEnd(); ++property)
+void FitOptionsBrowserSettings::saveSettings(QSettings &settings, const FitOptionsBrowserSettings &snapshot) {
+  for (auto property = snapshot.values().constBegin(); property != snapshot.values().constEnd(); ++property)
     settings.setValue(property.key(), property.value());
 }
 
@@ -654,13 +655,13 @@ void FitOptionsBrowser::setStringProperty(QtProperty *prop, const QString &value
 // ------------------------------------------------------------------------------------//
 
 FitOptionsBrowserSettings FitOptionsBrowser::captureSettings() const {
-  QMap<QString, QString> values;
+  QMap<QString, QString> propertyValues;
   for (auto p = m_propertyNameMap.constBegin(); p != m_propertyNameMap.constEnd(); ++p) {
     auto prop = p.value();
     auto f = m_getters[prop];
-    values.insert(p.key(), (this->*f)(prop));
+    propertyValues.insert(p.key(), (this->*f)(prop));
   }
-  return FitOptionsBrowserSettings(std::move(values));
+  return FitOptionsBrowserSettings(std::move(propertyValues));
 }
 
 FitOptionsBrowserSettings FitOptionsBrowser::readSettings(const QSettings &settings) const {

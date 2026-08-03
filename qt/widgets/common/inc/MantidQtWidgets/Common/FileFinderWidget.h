@@ -33,9 +33,9 @@ namespace API {
 /** Immutable snapshot of the persistent state used by FileFinderWidget. */
 class EXPORT_OPT_MANTIDQT_COMMON FileFinderSettings {
 public:
-  explicit FileFinderSettings(QString lastDirectory = {}) : m_lastDirectory(lastDirectory) {}
+  explicit FileFinderSettings(const QString &lastDirectory = {}) : m_lastDirectory(lastDirectory) {}
 
-  QString lastDirectory() const { return m_lastDirectory; }
+  const QString &lastDirectory() const { return m_lastDirectory; }
 
 private:
   QString m_lastDirectory;

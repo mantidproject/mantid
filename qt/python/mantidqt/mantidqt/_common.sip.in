@@ -1101,7 +1101,7 @@ class FileFinderSettings
 %End
 public:
     FileFinderSettings(const QString &lastDirectory = QString());
-    QString lastDirectory() const;
+    const QString &lastDirectory() const;
 };
 
 // ---------------------------------

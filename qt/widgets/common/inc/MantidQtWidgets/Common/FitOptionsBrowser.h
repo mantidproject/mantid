@@ -38,7 +38,7 @@ namespace MantidWidgets {
 
 class EXPORT_OPT_MANTIDQT_COMMON FitOptionsBrowserSettings {
 public:
-  explicit FitOptionsBrowserSettings(QMap<QString, QString> values = {});
+  explicit FitOptionsBrowserSettings(QMap<QString, QString> propertyValues = {});
 
   [[nodiscard]] const QMap<QString, QString> &values() const;
 
@@ -46,7 +46,7 @@ public:
   [[nodiscard]] static FitOptionsBrowserSettings readSettings(const QSettings &settings,
                                                               const QStringList &propertyNames);
   /// Persist only the property values contained in a snapshot.
-  static void saveSettings(QSettings &settings, const FitOptionsBrowserSettings &values);
+  static void saveSettings(QSettings &settings, const FitOptionsBrowserSettings &snapshot);
 
 private:
   QMap<QString, QString> m_values;
