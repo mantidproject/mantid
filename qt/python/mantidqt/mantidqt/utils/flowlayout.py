@@ -38,7 +38,7 @@
 ##
 #############################################################################
 
-
+import mantid.kernel.environment as mtd_env
 from qtpy.QtCore import QPoint, QRect, QSize, Qt
 from qtpy.QtWidgets import QLayout, QSizePolicy
 
@@ -118,17 +118,20 @@ class FlowLayout(QLayout):
             wid = item.widget()
             spaceX = self.spacing() + wid.style().layoutSpacing(QSizePolicy.PushButton, QSizePolicy.PushButton, Qt.Horizontal)
             spaceY = self.spacing() + wid.style().layoutSpacing(QSizePolicy.PushButton, QSizePolicy.PushButton, Qt.Vertical)
-            nextX = x + item.sizeHint().width() + spaceX
-            if nextX - spaceX > rect.right() and lineHeight > 0:
+            size = item.sizeHint()
+            if mtd_env.is_mac() and size.height() <= 28:
+                size.setHeight(28)
+            lineHeight = size.height() // 2
+
+            nextX = x + size.width() + spaceX
+            if nextX - spaceX > rect.right():
                 x = rect.x()
                 y = y + lineHeight + spaceY
-                nextX = x + item.sizeHint().width() + spaceX
-                lineHeight = 0
+                nextX = x + size.width() + spaceX
 
             if not testOnly:
-                item.setGeometry(QRect(QPoint(x, y), item.sizeHint()))
+                item.setGeometry(QRect(QPoint(x, y), size))
 
             x = nextX
-            lineHeight = max(lineHeight, item.sizeHint().height())
 
         return y + lineHeight - rect.y()
