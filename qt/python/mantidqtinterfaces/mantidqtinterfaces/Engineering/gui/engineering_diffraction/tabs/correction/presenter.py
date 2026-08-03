@@ -15,13 +15,14 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common impo
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.rb_scope import RbScope, RbScopeConsumer
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.instrument_scope import InstrumentScope, InstrumentScopeConsumer
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting, set_setting
 
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.show_sample.show_sample_presenter import ShowSamplePresenter
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.correction.model import CorrectionModel
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.correction.view import TextureCorrectionView
 
 from functools import wraps
+from numpy import ndarray
 from typing import Callable, Type, List, Dict, Tuple, Sequence, Any
 
 
@@ -54,6 +55,9 @@ class TextureCorrectionPresenter(RbScopeConsumer, InstrumentScopeConsumer, Algor
         self.current_calibration = CalibrationInfo(instrument=self.instrument)
 
         self.correction_notifier = GenericObservable()
+        # fired when a loaded reference workspace rewrites the sample directions, so the settings
+        # dialog can drop its cached copy rather than saving the pre-load values back over them
+        self.reference_frame_notifier = GenericObservable()
 
         self.view.set_on_load_clicked(self.load_files_into_table)
         self.view.set_on_load_orientation_clicked(self.load_all_orientations)
@@ -138,6 +142,51 @@ class TextureCorrectionPresenter(RbScopeConsumer, InstrumentScopeConsumer, Algor
     def _on_load_ref_clicked(self) -> None:
         self.model.load_ref(self.view.get_reference_file())
         self.update_reference_info()
+        if self._get_setting("read_texture_dirs_from_ref", bool):
+            self._adopt_reference_texture_directions()
+
+    def _adopt_reference_texture_directions(self) -> None:
+        """Replace the sample directions with the ones saved on the just-loaded reference workspace.
+
+        The directions are written under the active RB number, so this only re-frames the current
+        experiment and leaves the user's global defaults intact. A reference carrying no direction
+        logs says nothing about the sample frame, so the configured directions are left alone."""
+        directions = self.model.get_reference_texture_directions()
+        if directions is None:
+            logger.notice(
+                f"Reference workspace '{self.model.get_reference_ws()}' carries no texture direction "
+                "information; the configured sample directions are unchanged."
+            )
+            return
+        ax_transform, dir_names = directions
+        changes = self._write_texture_direction_settings(ax_transform, dir_names)
+        if not changes:
+            # the reference agrees with what is already set, so there is nothing worth reporting
+            return
+        scope = f"RB {self.rb_num}" if self.rb_num else "the default settings"
+        logger.notice(
+            f"Sample directions for {scope} were overwritten from reference workspace "
+            f"'{self.model.get_reference_ws()}': " + "; ".join(changes)
+        )
+        self.reference_frame_notifier.notify_subscribers()
+
+    def _write_texture_direction_settings(self, ax_transform: ndarray, dir_names: Sequence[str]) -> List[str]:
+        """Write the six direction settings under the active RB, returning a description of each
+        value that actually changed (so an unchanged reload stays silent)."""
+        # ax_transform holds one direction per COLUMN (see TexturePlannerModel.set_ax_transform)
+        new_values = {}
+        for i, key in enumerate(("rd_dir", "nd_dir", "td_dir")):
+            new_values[key] = ",".join(str(round(float(x), 6)) for x in ax_transform[:, i])
+        for i, key in enumerate(("rd_name", "nd_name", "td_name")):
+            new_values[key] = dir_names[i]
+
+        changes = []
+        for key, new_value in new_values.items():
+            old_value = self._get_setting(key)
+            if old_value != new_value:
+                changes.append(f"{key} {old_value} -> {new_value}")
+            set_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, key, new_value, rb=self.rb_num)
+        return changes
 
     def on_apply_clicked(self) -> None:
         wss = self.view.get_selected_workspaces()

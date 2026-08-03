@@ -8,7 +8,10 @@
 import os
 from typing import Sequence, Tuple, Dict, List, Any
 
+import numpy as np
+
 from Engineering.texture.correction.correction_model import TextureCorrectionModel
+from Engineering.texture.texture_helper import has_texture_direction_info, read_texture_direction_info_from_log
 from mantid.kernel import logger
 from mantid.api import AnalysisDataService as ADS
 from mantid.simpleapi import Load
@@ -43,6 +46,18 @@ class CorrectionModel(TextureCorrectionModel):
             self.set_reference_ws(ws_name)
         except Exception as e:
             logger.warning(f"Failed to load {path}: {e}")
+
+    def get_reference_texture_directions(self) -> Tuple[np.ndarray, Tuple[str, str, str]] | None:
+        """The sample directions saved on the current reference workspace, or None when it carries
+        none (one built here by Create Reference Workspace, or predating these logs).
+
+        None means "this reference says nothing about the sample frame", which is deliberately
+        distinct from "it defines the identity frame" - the caller leaves the configured directions
+        alone in the first case."""
+        ref_ws = self.get_reference_ws()
+        if not ref_ws or not has_texture_direction_info(ref_ws):
+            return None
+        return read_texture_direction_info_from_log(ref_ws)
 
     @staticmethod
     def get_out_ws_names(wss: Sequence[str]) -> List[str]:
