@@ -1,0 +1,1 @@
+- :ref:`ReflectometryISISCalibration <algm-ReflectometryISISCalibration>` now has an ``InstrumentWorkflow`` option. The ``POLREF`` workflow supports spectrum-number-indexed absolute theta calibration files, using the supplied experiment theta and ``SpecularPixelSpectrumNo`` to align the detector geometry, including the inverted POLREF calibration-map angle convention.

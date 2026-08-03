@@ -12,17 +12,21 @@ from mantid import FileFinder
 from mantid.api import AnalysisDataService, WorkspaceGroup
 from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces
 from mantid.kernel import V3D
+from ReflectometryISISCalibration import ReflectometryISISCalibration
 from testhelpers import assertRaisesNothing, create_algorithm, WorkspaceCreationHelper
 from testhelpers.tempfile_wrapper import TemporaryFileHelper
 
 
 class ReflectometryISISCalibrationTest(unittest.TestCase):
     _CALIBRATION_TEST_DATA = FileFinder.getFullPath("ISISReflectometry/calibration_test_data.dat")
+    _CALIBRATION_FILE = "CalibrationFile"
     _RAD_TO_DEG = 180.0 / math.pi
     _DEG_TO_RAD = math.pi / 180.0
 
     _DET_ID_LABEL = "detectorid"
+    _SPECTRUM_NUMBER_LABEL = "spectrumnumber"
     _THETA_LABEL = "theta_offset"
+    _ANGLE_LABEL = "angle"
     _COLUMN_NUM_ERROR = "Calibration file should contain two space de-limited columns"
     _COLUMN_LABELS_ERROR = "Incorrect column labels in calibration file"
 
@@ -122,6 +126,43 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         args = {"InputWorkspace": ws, "CalibrationFile": "invalid/file_path.dat", "OutputWorkspace": "test_calibrated"}
         self._assert_run_algorithm_raises_exception(args, "Calibration file path cannot be found")
 
+    def test_validate_inputs_reports_invalid_header_column_count(self):
+        for header in [self._DET_ID_LABEL, f"{self._DET_ID_LABEL} {self._THETA_LABEL} extra_column"]:
+            with self.subTest(header=header):
+                issues = self._validate_calibration_file_header(f"{header}\n")
+                self.assertIn(self._CALIBRATION_FILE, issues)
+                self.assertIn(self._COLUMN_NUM_ERROR, issues[self._CALIBRATION_FILE])
+
+    def test_validate_inputs_reports_calibration_file_without_header_data(self):
+        for file_content in ["", "\n# calibration metadata\n"]:
+            with self.subTest(file_content=file_content):
+                issues = self._validate_calibration_file_header(file_content)
+                self.assertEqual("Calibration file provided contains no data", issues[self._CALIBRATION_FILE])
+
+    def test_validate_inputs_reports_invalid_labels_for_selected_workflow(self):
+        test_cases = [
+            ("Default", f"{self._DET_ID_LABEL} invalid_label\n", f"{self._DET_ID_LABEL} and {self._THETA_LABEL}"),
+            ("POLREF", f"{self._SPECTRUM_NUMBER_LABEL} invalid_label\n", f"{self._SPECTRUM_NUMBER_LABEL} and {self._ANGLE_LABEL}"),
+        ]
+        for workflow, header, expected_labels in test_cases:
+            with self.subTest(workflow=workflow):
+                issues = self._validate_calibration_file_header(header, workflow)
+                self.assertIn(self._CALIBRATION_FILE, issues)
+                self.assertIn(self._COLUMN_LABELS_ERROR, issues[self._CALIBRATION_FILE])
+                self.assertIn(expected_labels, issues[self._CALIBRATION_FILE])
+
+    def test_validate_inputs_accepts_valid_headers_in_either_order_after_comments_and_blank_lines(self):
+        test_cases = [
+            ("Default", f"{self._DET_ID_LABEL} {self._THETA_LABEL}"),
+            ("Default", f"{self._THETA_LABEL.upper()} {self._DET_ID_LABEL.upper()}"),
+            ("POLREF", f"{self._SPECTRUM_NUMBER_LABEL} {self._ANGLE_LABEL}"),
+            ("POLREF", f"{self._ANGLE_LABEL.upper()} {self._SPECTRUM_NUMBER_LABEL.upper()}"),
+        ]
+        for workflow, header in test_cases:
+            with self.subTest(workflow=workflow, header=header):
+                issues = self._validate_calibration_file_header(f"\n# calibration metadata\n{header}\n", workflow)
+                self.assertNotIn(self._CALIBRATION_FILE, issues)
+
     def test_exception_raised_if_too_many_columns_in_file(self):
         self.temp_calibration_file = TemporaryFileHelper(
             fileContent=f"{self._DET_ID_LABEL} {self._THETA_LABEL} extra_column\n1 0.05 0.03\n", extension=".dat"
@@ -168,22 +209,203 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         args = {"InputWorkspace": ws, "CalibrationFile": self.temp_calibration_file.getName(), "OutputWorkspace": "test_calibrated"}
         self._assert_run_algorithm_raises_exception(args, "Invalid data in calibration file entry")
 
-    def test_calibration_successful_with_columns_reversed_in_file(self):
-        det_id = 11
-        theta_offset = 0.05
-        self.temp_calibration_file = TemporaryFileHelper(
-            fileContent=f"{self._THETA_LABEL} {self._DET_ID_LABEL}\n{theta_offset} {det_id}\n", extension=".dat"
-        )
+    def test_calibration_successful_with_non_contiguous_default_detector_ids(self):
+        theta_offsets = {11: 0.05, 13: -0.03}
+        calibration_lines = [f"{self._DET_ID_LABEL} {self._THETA_LABEL}\n"]
+        calibration_lines.extend(f"{det_id} {theta_offset}\n" for det_id, theta_offset in theta_offsets.items())
+        self.temp_calibration_file = TemporaryFileHelper(fileContent="".join(calibration_lines), extension=".dat")
         input_ws_name = "test_1234"
         ws = self._create_sample_workspace(input_ws_name)
 
         output_ws_name = "test_calibrated"
         args = {"InputWorkspace": ws, "CalibrationFile": self.temp_calibration_file.getName(), "OutputWorkspace": output_ws_name}
-        outputs = [input_ws_name, output_ws_name]
-        self._assert_run_algorithm_succeeds(args, outputs)
+        self._assert_run_algorithm_succeeds(args, [input_ws_name, output_ws_name])
 
         output_ws = AnalysisDataService.retrieve(output_ws_name)
-        self._check_final_theta_values(ws, output_ws, calibration_data={det_id: theta_offset})
+        self._check_final_theta_values(ws, output_ws, calibration_data=theta_offsets)
+
+    def test_polref_workflow_interpolates_fractional_specular_spectrum_numbers(self):
+        input_ws_name = "test_1234"
+        ws = self._create_sample_workspace(input_ws_name)
+        angles = [0.05 * index for index in range(ws.getNumberHistograms())]
+        self.temp_calibration_file = TemporaryFileHelper(fileContent=self._absolute_calibration_file_content(angles), extension=".dat")
+
+        output_ws_name = "test_calibrated"
+        specular_spectrum_number = 4.5
+        experiment_angle = 0.5
+        args = {
+            "InputWorkspace": ws,
+            "CalibrationFile": self.temp_calibration_file.getName(),
+            "InstrumentWorkflow": "POLREF",
+            "SpecularPixelSpectrumNo": specular_spectrum_number,
+            "ExperimentAngle": experiment_angle,
+            "OutputWorkspace": output_ws_name,
+        }
+        self._assert_run_algorithm_succeeds(args, [input_ws_name, output_ws_name])
+
+        output_ws = AnalysisDataService.retrieve(output_ws_name)
+        self._check_polref_final_theta_values(
+            output_ws,
+            {
+                1: 1.35,
+                2: 1.25,
+                3: 1.15,
+                4: 1.05,
+                5: 0.95,
+                6: 0.85,
+                7: 0.75,
+                8: 0.65,
+                9: 0.55,
+            },
+        )
+
+    def test_polref_workflow_inverts_descending_calibration_map_angles(self):
+        input_ws_name = "test_1234"
+        ws = self._create_sample_workspace(input_ws_name)
+        angles = [0.50 - 0.05 * index for index in range(ws.getNumberHistograms())]
+        self.temp_calibration_file = TemporaryFileHelper(fileContent=self._absolute_calibration_file_content(angles), extension=".dat")
+
+        output_ws_name = "test_calibrated"
+        specular_spectrum_number = 4
+        experiment_angle = 0.5
+        args = {
+            "InputWorkspace": ws,
+            "CalibrationFile": self.temp_calibration_file.getName(),
+            "InstrumentWorkflow": "POLREF",
+            "SpecularPixelSpectrumNo": specular_spectrum_number,
+            "ExperimentAngle": experiment_angle,
+            "OutputWorkspace": output_ws_name,
+        }
+        self._assert_run_algorithm_succeeds(args, [input_ws_name, output_ws_name])
+
+        output_ws = AnalysisDataService.retrieve(output_ws_name)
+        self._check_polref_final_theta_values(
+            output_ws,
+            {
+                1: 0.70,
+                2: 0.80,
+                3: 0.90,
+                4: 1.00,
+                5: 1.10,
+                6: 1.20,
+                7: 1.30,
+                8: 1.40,
+                9: 1.50,
+            },
+        )
+        self.assertGreater(
+            output_ws.spectrumInfo().signedTwoTheta(ws.getIndexFromSpectrumNumber(specular_spectrum_number + 1)),
+            output_ws.spectrumInfo().signedTwoTheta(ws.getIndexFromSpectrumNumber(specular_spectrum_number)),
+        )
+
+    def test_polref_workflow_raises_if_specular_spectrum_number_out_of_calibration_range(self):
+        input_ws_name = "test_1234"
+        ws = self._create_sample_workspace(input_ws_name)
+        angles = [0.05 * index for index in range(ws.getNumberHistograms())]
+        self.temp_calibration_file = TemporaryFileHelper(fileContent=self._absolute_calibration_file_content(angles), extension=".dat")
+
+        args = {
+            "InputWorkspace": ws,
+            "CalibrationFile": self.temp_calibration_file.getName(),
+            "InstrumentWorkflow": "POLREF",
+            "SpecularPixelSpectrumNo": len(angles) + 1,
+            "ExperimentAngle": 0.5,
+            "OutputWorkspace": "test_calibrated",
+        }
+        self._assert_run_algorithm_raises_exception(args, "SpecularPixelSpectrumNo must be in the range")
+
+    def test_polref_workflow_raises_if_specular_spectrum_number_is_outside_workspace_range(self):
+        input_ws_name = "test_1234"
+        ws = self._create_sample_workspace(input_ws_name)
+        angles = [0.05 * index for index in range(ws.getNumberHistograms() + 2)]
+        self.temp_calibration_file = TemporaryFileHelper(fileContent=self._absolute_calibration_file_content(angles), extension=".dat")
+
+        args = {
+            "InputWorkspace": ws,
+            "CalibrationFile": self.temp_calibration_file.getName(),
+            "InstrumentWorkflow": "POLREF",
+            "SpecularPixelSpectrumNo": ws.getNumberHistograms() + 1,
+            "ExperimentAngle": 0.5,
+            "OutputWorkspace": "test_calibrated",
+        }
+        self._assert_run_algorithm_raises_exception(args, "SpecularPixelSpectrumNo must be in the range")
+
+    def test_polref_workflow_requires_experiment_angle(self):
+        input_ws_name = "test_1234"
+        ws = self._create_sample_workspace(input_ws_name)
+        angles = [0.05 * index for index in range(ws.getNumberHistograms())]
+        self.temp_calibration_file = TemporaryFileHelper(fileContent=self._absolute_calibration_file_content(angles), extension=".dat")
+
+        args = {
+            "InputWorkspace": ws,
+            "CalibrationFile": self.temp_calibration_file.getName(),
+            "InstrumentWorkflow": "POLREF",
+            "SpecularPixelSpectrumNo": 4,
+            "OutputWorkspace": "test_calibrated",
+        }
+        self._assert_run_algorithm_raises_exception(args, "ExperimentAngle must be provided for the POLREF workflow")
+
+    def test_polref_workflow_requires_specular_pixel_spectrum_number(self):
+        input_ws_name = "test_1234"
+        ws = self._create_sample_workspace(input_ws_name)
+        angles = [0.05 * index for index in range(ws.getNumberHistograms())]
+        self.temp_calibration_file = TemporaryFileHelper(fileContent=self._absolute_calibration_file_content(angles), extension=".dat")
+
+        args = {
+            "InputWorkspace": ws,
+            "CalibrationFile": self.temp_calibration_file.getName(),
+            "InstrumentWorkflow": "POLREF",
+            "ExperimentAngle": 0.5,
+            "OutputWorkspace": "test_calibrated",
+        }
+        self._assert_run_algorithm_raises_exception(args, "SpecularPixelSpectrumNo must be provided for the POLREF workflow")
+
+    def test_workflow_options_enable_property_only_for_configured_properties(self):
+        workflow_options = ReflectometryISISCalibration.WorkflowOptions(
+            calibration_angle_type="Absolute",
+            detector_correction_type="RotateAroundSample",
+            enabled_properties={"SpecularPixelSpectrumNo"},
+        )
+
+        self.assertTrue(workflow_options.enable_property("SpecularPixelSpectrumNo"))
+        self.assertFalse(workflow_options.enable_property("ExperimentAngle"))
+
+    def test_polref_workflow_raises_if_spectrum_number_is_fractional(self):
+        input_ws_name = "test_1234"
+        ws = self._create_sample_workspace(input_ws_name)
+        self.temp_calibration_file = TemporaryFileHelper(
+            fileContent=f"{self._SPECTRUM_NUMBER_LABEL} {self._ANGLE_LABEL}\n2.5 0.10\n3 0.15\n", extension=".dat"
+        )
+
+        args = {
+            "InputWorkspace": ws,
+            "CalibrationFile": self.temp_calibration_file.getName(),
+            "InstrumentWorkflow": "POLREF",
+            "SpecularPixelSpectrumNo": 3,
+            "ExperimentAngle": 0.5,
+            "OutputWorkspace": "test_calibrated",
+        }
+        self._assert_run_algorithm_raises_exception(args, "spectrum numbers should be integers")
+
+    def test_polref_workflow_interpolates_missing_spectrum_numbers(self):
+        input_ws_name = "test_1234"
+        ws = self._create_sample_workspace(input_ws_name)
+        angles = {2: 0.10, 3: 0.15, 5: 0.25}
+        self.temp_calibration_file = TemporaryFileHelper(fileContent=self._absolute_calibration_file_content(angles), extension=".dat")
+
+        output_ws_name = "test_calibrated"
+        args = {
+            "InputWorkspace": ws,
+            "CalibrationFile": self.temp_calibration_file.getName(),
+            "InstrumentWorkflow": "POLREF",
+            "SpecularPixelSpectrumNo": 4,
+            "ExperimentAngle": 0.5,
+            "OutputWorkspace": output_ws_name,
+        }
+        self._assert_run_algorithm_succeeds(args, [input_ws_name, output_ws_name])
+
+        output_ws = AnalysisDataService.retrieve(output_ws_name)
+        self._check_polref_final_theta_values(output_ws, {2: 1.20, 3: 1.10, 4: 1.00, 5: 0.90})
 
     def _check_final_theta_values(self, input_ws, output_ws, calibration_data=None):
         if not calibration_data:
@@ -202,6 +424,28 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
             expected_two_theta = ((two_theta_in * self._RAD_TO_DEG) + theta_offset) * self._DEG_TO_RAD if theta_offset else two_theta_in
 
             self.assertAlmostEqual(two_theta_out, expected_two_theta, msg=f"Unexpected theta value for detector {det_id}")
+
+    def _check_polref_final_theta_values(self, output_ws, expected_two_theta_degrees_by_spectrum_number):
+        info_out = output_ws.spectrumInfo()
+
+        for index in range(output_ws.getNumberHistograms()):
+            spectrum_number = output_ws.getSpectrum(index).getSpectrumNo()
+            if spectrum_number not in expected_two_theta_degrees_by_spectrum_number:
+                continue
+            expected_two_theta = expected_two_theta_degrees_by_spectrum_number[spectrum_number] * self._DEG_TO_RAD
+            self.assertAlmostEqual(
+                info_out.signedTwoTheta(index), expected_two_theta, msg=f"Unexpected theta value for spectrum {spectrum_number}"
+            )
+
+    def _absolute_calibration_file_content(self, angles, reverse=False):
+        angle_items = angles.items() if isinstance(angles, dict) else enumerate(angles, start=1)
+        if reverse:
+            lines = [f"{self._ANGLE_LABEL} {self._SPECTRUM_NUMBER_LABEL}\n"]
+            lines.extend(f"{angle} {index}\n" for index, angle in angle_items)
+        else:
+            lines = [f"{self._SPECTRUM_NUMBER_LABEL} {self._ANGLE_LABEL}\n"]
+            lines.extend(f"{index} {angle}\n" for index, angle in angle_items)
+        return "".join(lines)
 
     def _create_sample_workspace(self, name):
         """Creates a workspace with 9 detectors. Only detector IDs 11 to 14 will have calibration data"""
@@ -250,6 +494,19 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         """Run the algorithm with the given args and check it raises the expected exception"""
         alg = self._setup_algorithm(args)
         self.assertRaisesRegex(RuntimeError, error_msg_regex, alg.execute)
+
+    def _validate_calibration_file_header(self, file_content, workflow="Default"):
+        self.temp_calibration_file = TemporaryFileHelper(fileContent=file_content, extension=".dat")
+        ws = self._create_sample_workspace("test_1234")
+        args = {
+            "InputWorkspace": ws,
+            "CalibrationFile": self.temp_calibration_file.getName(),
+            "InstrumentWorkflow": workflow,
+            "OutputWorkspace": "test_calibrated",
+        }
+        if workflow == "POLREF":
+            args["ExperimentAngle"] = 0.5
+        return self._setup_algorithm(args).validateInputs()
 
     def _setup_algorithm(self, args):
         alg = create_algorithm("ReflectometryISISCalibration", **args)
