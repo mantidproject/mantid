@@ -53,10 +53,12 @@ class LogMessageDisplay(PluginWidget):
         self.display.file_name_modified(old_file_name, new_file_name)
 
     def readSettings(self, settings):
-        self.display.readSettings(toQSettings(settings))
+        qsettings = toQSettings(settings)
+        self.display.restoreSettings(self.display.readSettings(qsettings))
 
     def writeSettings(self, settings):
-        self.display.writeSettings(toQSettings(settings))
+        qsettings = toQSettings(settings)
+        self.display.saveSettings(qsettings, self.display.captureSettings())
 
     def register_plugin(self, menu=None):
         self.display.attachLoggingChannel(DEFAULT_LOG_PRIORITY)

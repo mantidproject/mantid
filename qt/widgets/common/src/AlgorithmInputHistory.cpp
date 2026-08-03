@@ -11,7 +11,6 @@
 #include "MantidAPI/IAlgorithm.h"
 
 #include <QSettings>
-#include <QStringList>
 #include <utility>
 
 using namespace MantidQt::API;
@@ -20,13 +19,22 @@ using namespace MantidQt::API;
 // Public member functions
 //----------------------------------
 
+AlgorithmInputHistorySettings::AlgorithmInputHistorySettings(InputHistory lastInput, QString previousDirectory)
+    : m_lastInput(std::move(lastInput)), m_previousDirectory(std::move(previousDirectory)) {}
+
+AlgorithmInputHistorySettings::InputHistory const &AlgorithmInputHistorySettings::lastInput() const {
+  return m_lastInput;
+}
+
+QString const &AlgorithmInputHistorySettings::previousDirectory() const { return m_previousDirectory; }
+
 /**
  * Constructor
  */
 AbstractAlgorithmInputHistory::AbstractAlgorithmInputHistory(const QString &settingsGroup)
     : m_lastInput(), m_previousDirectory(""), m_algorithmsGroup(settingsGroup), m_dirKey("LastDirectory") {
   // Fill the stored map from the QSettings information
-  load();
+  initializeSettings();
 }
 
 /**
@@ -89,58 +97,58 @@ const QString &AbstractAlgorithmInputHistory::getPreviousDirectory() const { ret
  */
 void AbstractAlgorithmInputHistory::save() const {
   QSettings settings;
-  this->writeSettings(settings);
+  saveSettings(settings, captureSettings());
 }
 
-void AbstractAlgorithmInputHistory::readSettings(const QSettings &storage) {
-  // unfortunately QSettings does not allow const when using beginGroup and
-  // endGroup
-  m_lastInput.clear();
-  const_cast<QSettings &>(storage).beginGroup(m_algorithmsGroup);
-  //  QStringList algorithms = settings.childGroups();
-  QListIterator<QString> algNames(storage.childGroups());
+AlgorithmInputHistorySettings AbstractAlgorithmInputHistory::readSettings(const QSettings &storage) const {
+  auto prefix = m_algorithmsGroup;
+  if (!prefix.isEmpty() && !prefix.endsWith('/'))
+    prefix.append('/');
 
-  // Each property is a key of the algorithm group
-  while (algNames.hasNext()) {
-    QHash<QString, QString> algorithmProperties;
-    QString group = algNames.next();
-    const_cast<QSettings &>(storage).beginGroup(group);
-    QListIterator<QString> properties(storage.childKeys());
-    while (properties.hasNext()) {
-      QString propName = properties.next();
-      QString value = storage.value(propName).toString();
-      if (!value.isEmpty())
-        algorithmProperties.insert(propName, value);
+  AlgorithmInputHistorySettings::InputHistory inputHistory;
+  QString previousDirectory;
+  for (auto const &qualifiedName : storage.allKeys()) {
+    if (!qualifiedName.startsWith(prefix))
+      continue;
+    auto const relativeName = qualifiedName.mid(prefix.size());
+    if (relativeName == m_dirKey) {
+      previousDirectory = storage.value(qualifiedName).toString();
+      continue;
     }
-    m_lastInput.insert(group, algorithmProperties);
-    const_cast<QSettings &>(storage).endGroup();
+    auto const separator = relativeName.indexOf('/');
+    if (separator <= 0 || relativeName.indexOf('/', separator + 1) >= 0)
+      continue;
+    auto const value = storage.value(qualifiedName).toString();
+    if (!value.isEmpty())
+      inputHistory[relativeName.left(separator)].insert(relativeName.mid(separator + 1), value);
   }
-
-  // The previous dir
-  m_previousDirectory = storage.value(m_dirKey).toString();
-
-  const_cast<QSettings &>(storage).endGroup();
+  return AlgorithmInputHistorySettings(std::move(inputHistory), std::move(previousDirectory));
 }
 
-void AbstractAlgorithmInputHistory::writeSettings(QSettings &storage) const {
-  storage.beginGroup(m_algorithmsGroup);
-  QHashIterator<QString, QHash<QString, QString>> inputHistory(m_lastInput);
+void AbstractAlgorithmInputHistory::restoreSettings(const AlgorithmInputHistorySettings &settings) {
+  m_lastInput = settings.lastInput();
+  m_previousDirectory = settings.previousDirectory();
+}
+
+AlgorithmInputHistorySettings AbstractAlgorithmInputHistory::captureSettings() const {
+  return AlgorithmInputHistorySettings(m_lastInput, m_previousDirectory);
+}
+
+void AbstractAlgorithmInputHistory::saveSettings(QSettings &storage,
+                                                 const AlgorithmInputHistorySettings &settings) const {
+  auto prefix = m_algorithmsGroup;
+  if (!prefix.isEmpty() && !prefix.endsWith('/'))
+    prefix.append('/');
+  QHashIterator<QString, QHash<QString, QString>> inputHistory(settings.lastInput());
   while (inputHistory.hasNext()) {
     inputHistory.next();
-    storage.beginGroup(inputHistory.key());
-    // Remove all keys for this group that exist at the moment
-    storage.remove("");
-    QHash<QString, QString>::const_iterator iend = inputHistory.value().end();
-    for (QHash<QString, QString>::const_iterator itr = inputHistory.value().begin(); itr != iend; ++itr) {
-      storage.setValue(itr.key(), itr.value());
-    }
-    storage.endGroup();
+    auto const algorithmName = prefix + inputHistory.key();
+    storage.remove(algorithmName);
+    auto const algorithmPrefix = algorithmName + '/';
+    for (auto itr = inputHistory.value().cbegin(); itr != inputHistory.value().cend(); ++itr)
+      storage.setValue(algorithmPrefix + itr.key(), itr.value());
   }
-
-  // Store the previous directory
-  storage.setValue(m_dirKey, m_previousDirectory);
-
-  storage.endGroup();
+  storage.setValue(prefix + m_dirKey, settings.previousDirectory());
 }
 
 //----------------------------------
@@ -151,7 +159,7 @@ void AbstractAlgorithmInputHistory::writeSettings(QSettings &storage) const {
  * Load any values that are available from persistent storage. Note: this
  * clears all currently values stored
  */
-void AbstractAlgorithmInputHistory::load() {
+void AbstractAlgorithmInputHistory::initializeSettings() {
   QSettings settings;
-  this->readSettings(settings);
+  restoreSettings(readSettings(settings));
 }
