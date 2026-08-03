@@ -11,7 +11,9 @@ from instrumentview.alfview.ALFInstrumentViewView import ALFInstrumentViewView
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
 from instrumentview.FullInstrumentViewPresenter import FullInstrumentViewPresenter
 from instrumentview.ComponentSelectionUtils import detector_component_indices_in_subtrees
+from instrumentview.Globals import CurrentTab
 
+import numpy as np
 from mantid.simpleapi import CreateSampleWorkspace, Rebin
 from qtpy.QtCore import QObject, QMetaObject, Q_ARG
 
@@ -22,6 +24,8 @@ class ALFInstrumentViewPresenter(FullInstrumentViewPresenter):
     This keeps the import and construction path lightweight so the C++ side can
     always acquire a Qt widget from the `view` attribute.
     """
+
+    _ROI_SELECTION_KEY = "Rectangle ROI"
 
     def __init__(self, view=None):
         _placeholder_ws = CreateSampleWorkspace(InstrumentName="ALF", StoreInADS=False, OutputWorkspace="test_alfview")
@@ -51,6 +55,27 @@ class ALFInstrumentViewPresenter(FullInstrumentViewPresenter):
     def update_picked_detectors_on_view(self) -> None:
         super().update_picked_detectors_on_view()
         self.notify_cpp_callback("notify_whole_tube_selected")
+
+    def on_roi_shape_changed(self) -> None:
+        """Re-derive the selection from the rectangle overlaid on the projection.
+
+        Called on the Qt thread when the rectangle is added, and again by the shape overlay
+        manager each time it is dragged, resized or rotated, so that the ALF tube selection
+        always follows the rectangle.
+        """
+        centres = self._transform_vectors_with_matrix(np.array(self._model.detector_positions), self._transform)
+        # Projection uses VTK, so must be done on the Qt thread before queueing the rest
+        self._view.project_and_cache_detector_points(centres)
+        self._callback_queue.put((self._on_roi_shape_changed, (centres,)))
+
+    def _on_roi_shape_changed(self, centres: np.ndarray) -> None:
+        mask = self._view.get_shape_mask(centres)
+        if self._select_bank_tube:
+            mask = self._model.expand_pickable_mask_to_parent_subtrees(mask)
+        # A single stored key so that moving the rectangle replaces the selection rather than adding to it
+        self._model.set_detector_key(self._ROI_SELECTION_KEY, mask.tolist(), CurrentTab.Grouping)
+        self._model.apply_detector_items([self._ROI_SELECTION_KEY], CurrentTab.Grouping)
+        self.update_picked_detectors_on_view()
 
     def rebin_button_clicked(self, params: str) -> None:
         # Rewrites the active workspace in the model
