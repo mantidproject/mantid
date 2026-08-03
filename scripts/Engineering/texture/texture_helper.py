@@ -114,6 +114,26 @@ def show_texture_sample_shape(
 ##### Utility Texture Log IO Functions ################
 # ------------------------------------------------------------#
 
+# Log names carrying the texture sample directions. Named here rather than inline so the writer
+# (the Texture Planner's reference-workspace export) and the readers cannot drift apart.
+TEXTURE_DIRECTION_MATRIX_LOG = "TextureDirectionMatrix"
+TEXTURE_DIRECTION_LABELS_LOG = "TextureDirectionLabels"
+
+
+def has_texture_direction_info(ws: str | Workspace2D) -> bool:
+    """Whether ws carries a texture direction matrix at all.
+
+    Lets callers tell "this workspace defines no sample frame" (a reference workspace made by
+    LoadEmptyInstrument, or one predating these logs) apart from "it defines the identity frame",
+    which read_texture_direction_info_from_log cannot express - it always falls back to a default.
+    The labels are not required: they default harmlessly, whereas the matrix is the meaningful part.
+    """
+    if isinstance(ws, str):
+        if not ADS.doesExist(ws):
+            return False
+        ws = ADS.retrieve(ws)
+    return ws.getRun().hasProperty(TEXTURE_DIRECTION_MATRIX_LOG)
+
 
 def write_texture_direction_info_to_log(ws: str | Workspace2D, ax_transform: np.ndarray, dir_names: tuple[str, str, str]) -> None:
     """
@@ -139,11 +159,11 @@ def read_texture_direction_info_from_log(
 
 def _write_ax_transform_to_log(ws: str | Workspace2D, ax_transform: np.ndarray) -> None:
     direction_matrix_str = ",".join([str(x) for x in ax_transform.reshape(-1)])
-    AddSampleLog(Workspace=ws, LogName="TextureDirectionMatrix", LogText=direction_matrix_str)
+    AddSampleLog(Workspace=ws, LogName=TEXTURE_DIRECTION_MATRIX_LOG, LogText=direction_matrix_str)
 
 
 def _write_texture_dir_names_to_log(ws: str | Workspace2D, dir_names: tuple[str, str, str]) -> None:
-    AddSampleLog(Workspace=ws, LogName="TextureDirectionLabels", LogText=",".join(dir_names))
+    AddSampleLog(Workspace=ws, LogName=TEXTURE_DIRECTION_LABELS_LOG, LogText=",".join(dir_names))
 
 
 # --------------- reading helpers ----------------------------------
@@ -167,14 +187,14 @@ def _read_texture_log(ws: str | Workspace2D, log_name: str, default: str) -> str
 
 def _read_texture_dir_names_from_log(ws: str | Workspace2D, default: tuple[str, str, str] = ("D1", "D2", "D3")) -> tuple[str, str, str]:
     default_str = ",".join(default)
-    dir_name_str = _read_texture_log(ws, "TextureDirectionLabels", default_str)
+    dir_name_str = _read_texture_log(ws, TEXTURE_DIRECTION_LABELS_LOG, default_str)
     return _ensure_dir_names_are_three_comma_separated_labels([x for x in dir_name_str.split(",")])
 
 
 def _read_ax_transform_from_log(ws: str | Workspace2D, default: np.ndarray | None = None) -> np.ndarray:
     default = np.eye(3) if default is None else default
     default_str = ",".join([str(x) for x in default.reshape(-1)])
-    dir_name_str = _read_texture_log(ws, "TextureDirectionMatrix", default_str)
+    dir_name_str = _read_texture_log(ws, TEXTURE_DIRECTION_MATRIX_LOG, default_str)
     return _ensure_ax_transform_is_nine_comma_separated_values([x for x in dir_name_str.split(",")])
 
 
