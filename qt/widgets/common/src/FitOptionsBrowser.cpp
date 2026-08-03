@@ -40,8 +40,29 @@
 #include <QSettings>
 #include <QVBoxLayout>
 #include <limits>
+#include <utility>
 
 namespace MantidQt::MantidWidgets {
+
+FitOptionsBrowserSettings::FitOptionsBrowserSettings(QMap<QString, QString> values) : m_values(std::move(values)) {}
+
+const QMap<QString, QString> &FitOptionsBrowserSettings::values() const { return m_values; }
+
+FitOptionsBrowserSettings FitOptionsBrowserSettings::readSettings(const QSettings &settings,
+                                                                  const QStringList &propertyNames) {
+  QMap<QString, QString> values;
+  for (const auto &name : propertyNames) {
+    auto const value = settings.value(name).toString();
+    if (!value.isEmpty())
+      values.insert(name, value);
+  }
+  return FitOptionsBrowserSettings(std::move(values));
+}
+
+void FitOptionsBrowserSettings::saveSettings(QSettings &settings, const FitOptionsBrowserSettings &values) {
+  for (auto property = values.values().constBegin(); property != values.values().constEnd(); ++property)
+    settings.setValue(property.key(), property.value());
+}
 
 /**
  * Constructor
@@ -632,29 +653,26 @@ void FitOptionsBrowser::setStringProperty(QtProperty *prop, const QString &value
 
 // ------------------------------------------------------------------------------------//
 
-/**
- * Save the last property values in settings.
- * @param settings :: A QSettings instance provided by the user of this class.
- */
-void FitOptionsBrowser::saveSettings(QSettings &settings) const {
+FitOptionsBrowserSettings FitOptionsBrowser::captureSettings() const {
+  QMap<QString, QString> values;
   for (auto p = m_propertyNameMap.constBegin(); p != m_propertyNameMap.constEnd(); ++p) {
     auto prop = p.value();
     auto f = m_getters[prop];
-    settings.setValue(p.key(), (this->*f)(prop));
+    values.insert(p.key(), (this->*f)(prop));
   }
+  return FitOptionsBrowserSettings(std::move(values));
 }
 
-/**
- * Load property values from settings.
- * @param settings :: A QSettings instance provided by the user of this class.
- */
-void FitOptionsBrowser::loadSettings(const QSettings &settings) {
-  for (auto p = m_propertyNameMap.constBegin(); p != m_propertyNameMap.constEnd(); ++p) {
-    QString value = settings.value(p.key()).toString();
-    if (!value.isEmpty()) {
-      auto prop = p.value();
+FitOptionsBrowserSettings FitOptionsBrowser::readSettings(const QSettings &settings) const {
+  return FitOptionsBrowserSettings::readSettings(settings, m_propertyNameMap.keys());
+}
+
+void FitOptionsBrowser::restoreSettings(const FitOptionsBrowserSettings &settings) {
+  for (auto value = settings.values().constBegin(); value != settings.values().constEnd(); ++value) {
+    if (auto property = m_propertyNameMap.find(value.key()); property != m_propertyNameMap.end()) {
+      auto prop = property.value();
       auto f = m_setters[prop];
-      (this->*f)(prop, value);
+      (this->*f)(prop, value.value());
     }
   }
 }
