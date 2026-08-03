@@ -134,9 +134,10 @@ class DNSMergeRuns(PythonAlgorithm):
         # merge workspaces, existance has been checked by _can_merge function
         for ws_name in self.workspace_names:
             wks = api.AnalysisDataService.retrieve(ws_name)
-            samplePos = wks.getInstrument().getSample().getPos()
+            spectrum_info = wks.spectrumInfo()
+            samplePos = spectrum_info.samplePosition()
             n_hists = wks.getNumberHistograms()
-            two_theta = np.array([wks.getDetector(i).getTwoTheta(samplePos, beamDirection) for i in range(0, n_hists)])
+            two_theta = np.array([(spectrum_info.position(i) - samplePos).angle(beamDirection) for i in range(0, n_hists)])
             # round to approximate hardware accuracy 0.05 degree ~ 1 mrad
             two_theta = np.round(two_theta, 4)
             dataY = np.rot90(wks.extractY())[0]

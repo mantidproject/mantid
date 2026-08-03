@@ -585,7 +585,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         sp = _t_w.spectrumInfo()
         x, y, e = [list(), list(), list()]
         for i in range(_t_w.getNumberHistograms()):
-            id_i = _t_w.getDetector(i).getID()
+            id_i = next(iter(_t_w.getSpectrum(i).getDetectorIDs()))
             if id_s <= id_i <= id_e:
                 x.append(np.degrees(sp.twoTheta(i)))
                 if sp.isMasked(i) is True:

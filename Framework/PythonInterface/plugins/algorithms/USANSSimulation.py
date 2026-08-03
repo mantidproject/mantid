@@ -54,6 +54,8 @@ class USANSSimulation(PythonAlgorithm):
         mon_y = mon_ws.mutableY(0)
         mon_e = mon_ws.mutableE(0)
 
+        detector_info = out_ws.detectorInfo()
+
         # Number of pixels for the main detector
         n_pixels = int(out_ws.getNumberHistograms() / 2)
         # Clean up the workspace
@@ -106,7 +108,7 @@ class USANSSimulation(PythonAlgorithm):
 
                 # Transmission detector
                 for j in range(n_pixels, 2 * n_pixels):
-                    det_pos = out_ws.getInstrument().getDetector(j).getPos()
+                    det_pos = detector_info.position(detector_info.indexOf(j))
                     r = math.sqrt(det_pos.Y() * det_pos.Y() + det_pos.X() * det_pos.X())
                     sigma = 0.01
                     scale = math.exp(-r * r / (2.0 * sigma * sigma))
@@ -124,7 +126,7 @@ class USANSSimulation(PythonAlgorithm):
                 i_q = self._sphere_model(q_i, scale=flux)
 
                 for j in range(n_pixels):
-                    det_pos = out_ws.getInstrument().getDetector(j).getPos()
+                    det_pos = detector_info.position(detector_info.indexOf(j))
                     r = math.sqrt(det_pos.Y() * det_pos.Y() + det_pos.X() * det_pos.X())
                     sigma = 0.01
                     scale = math.exp(-r * r / (2.0 * sigma * sigma))

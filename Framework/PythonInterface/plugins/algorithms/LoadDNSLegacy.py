@@ -154,6 +154,8 @@ class LoadDNSLegacy(PythonAlgorithm):
 
         tmp = api.LoadEmptyInstrument(InstrumentName="DNS")
         self.instrument = tmp.getInstrument()
+        component_info = tmp.componentInfo()
+        l1 = (component_info.samplePosition() - component_info.sourcePosition()).norm()
         api.DeleteWorkspace(tmp)
 
         # load polarisation table and determine polarisation
@@ -173,7 +175,6 @@ class LoadDNSLegacy(PythonAlgorithm):
             unitX = "TOF"
 
             # get instrument parameters
-            l1 = np.linalg.norm(self.instrument.getSample().getPos() - self.instrument.getSource().getPos())
             l2 = float(self.instrument.getStringParameter("l2")[0])
             self.log().notice("L1 = {} m".format(l1))
             self.log().notice("L2 = {} m".format(l2))
