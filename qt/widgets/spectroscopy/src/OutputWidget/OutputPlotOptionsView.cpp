@@ -17,6 +17,7 @@
 #include <QSignalBlocker>
 
 #include <stdexcept>
+#include <utility>
 
 namespace {
 
@@ -30,22 +31,6 @@ const std::map<std::string, std::string> displayStrToUnitId = {
     {"D-Spacing", "dSpacing"},
     {"Q-Squared", "QSquared"},
 };
-
-void saveIndicesSuggestions(QStringList const &suggestions) {
-  QSettings settings;
-  settings.beginGroup(SETTINGS_GROUP);
-  settings.setValue(SETTING_NAME, suggestions);
-  settings.endGroup();
-}
-
-QStringList indicesSuggestions() {
-  QSettings settings;
-  settings.beginGroup(SETTINGS_GROUP);
-  auto const suggestions = settings.value(SETTING_NAME).toStringList();
-  settings.endGroup();
-
-  return suggestions;
-}
 
 QString getAction(std::map<std::string, std::string> const &actions, std::string const &key) {
   auto const iter = actions.find(key);
@@ -66,11 +51,28 @@ QIcon plot3DIcon() { return MantidQt::Icons::getIcon("mdi.panorama"); }
 
 namespace MantidQt::CustomInterfaces {
 
+IndicesSuggestionsSettings::IndicesSuggestionsSettings(QStringList suggestions)
+    : m_suggestions(std::move(suggestions)) {}
+
+const QStringList &IndicesSuggestionsSettings::suggestions() const { return m_suggestions; }
+
+IndicesSuggestionsSettings IndicesSuggestionsSettings::readSettings(const QSettings &settings) {
+  return IndicesSuggestionsSettings(settings.value(SETTING_NAME).toStringList());
+}
+
+void IndicesSuggestionsSettings::saveSettings(QSettings &settings, const IndicesSuggestionsSettings &values) {
+  settings.setValue(SETTING_NAME, values.suggestions());
+}
+
 OutputPlotOptionsView::OutputPlotOptionsView(QWidget *parent)
-    : API::MantidWidget(parent), m_suggestionsModel(std::make_unique<QStringListModel>(indicesSuggestions())),
+    : API::MantidWidget(parent), m_suggestionsModel(std::make_unique<QStringListModel>()),
       m_completer(std::make_unique<QCompleter>(m_suggestionsModel.get(), this)),
       m_plotOptions(new Ui::OutputPlotOptions), m_presenter() {
   m_plotOptions->setupUi(this);
+  QSettings settings;
+  settings.beginGroup(SETTINGS_GROUP);
+  restoreSettings(IndicesSuggestionsSettings::readSettings(settings));
+  settings.endGroup();
   setupView();
 }
 
@@ -284,8 +286,19 @@ void OutputPlotOptionsView::addIndicesSuggestion(QString const &indices) {
     suggestions.insert(suggestions.begin(), indices);
     m_suggestionsModel->setStringList(suggestions);
 
-    saveIndicesSuggestions(suggestions);
+    QSettings settings;
+    settings.beginGroup(SETTINGS_GROUP);
+    IndicesSuggestionsSettings::saveSettings(settings, captureSettings());
+    settings.endGroup();
   }
+}
+
+void OutputPlotOptionsView::restoreSettings(const IndicesSuggestionsSettings &settings) {
+  m_suggestionsModel->setStringList(settings.suggestions());
+}
+
+IndicesSuggestionsSettings OutputPlotOptionsView::captureSettings() const {
+  return IndicesSuggestionsSettings(m_suggestionsModel->stringList());
 }
 
 void OutputPlotOptionsView::displayWarning(QString const &message) {

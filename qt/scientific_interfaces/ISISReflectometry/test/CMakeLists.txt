@@ -52,6 +52,7 @@ set(TEST_FILES
     Preview/PreviewJobManagerTest.h
     Preview/PreviewModelTest.h
     Preview/PreviewPresenterTest.h
+    Preview/PreviewSettingsTest.h
 )
 
 set(CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/InterfacesReflectometryTestInitialization.h)
