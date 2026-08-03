@@ -203,6 +203,37 @@ class SettingsPresenterTest(unittest.TestCase):
         self.presenter.close_dialog()
         self.model.set_settings_dict.assert_not_called()
 
+    @patch(dir_path + ".path.isfile")
+    def test_reload_settings_from_file_refreshes_the_cache(self, mock_isfile):
+        # something outside the dialog (a reference workspace load) has rewritten a setting; the
+        # cached copy must be dropped or the next Apply would write the stale values back
+        mock_isfile.return_value = True
+        self.presenter.settings = {"stale": True}
+        reloaded = self.settings.copy()
+        reloaded["rd_dir"] = "0,1,0"
+        self.model.get_settings_dict.return_value = reloaded
+        self.model.validate_settings.return_value = reloaded
+        self.view.isVisible.return_value = False
+
+        self.presenter.reload_settings_from_file()
+
+        self.assertEqual(self.presenter.settings["rd_dir"], "0,1,0")
+        # the dialog is closed, so there is nothing to repopulate
+        self.view.set_rd_dir.assert_not_called()
+
+    @patch(dir_path + ".path.isfile")
+    def test_reload_settings_from_file_repopulates_an_open_dialog(self, mock_isfile):
+        mock_isfile.return_value = True
+        reloaded = self.settings.copy()
+        reloaded["rd_dir"] = "0,1,0"
+        self.model.get_settings_dict.return_value = reloaded
+        self.model.validate_settings.return_value = reloaded
+        self.view.isVisible.return_value = True
+
+        self.presenter.reload_settings_from_file()
+
+        self.view.set_rd_dir.assert_called_with("0,1,0")
+
     def test_default_calib_file_correct_location(self):
         self.assertTrue(path.exists(settings_presenter.DEFAULT_SETTINGS[f"full_calibration_{self.presenter.instrument}"]))
 

@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #
 import unittest
+import numpy as np
 from unittest.mock import patch, MagicMock, call
 
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.correction.model import (
@@ -164,6 +165,41 @@ class TestCorrectionModel(unittest.TestCase):
         # Expect concatenated error messages to include only the failing param text
         args, _ = mock_logger.error.call_args
         self.assertIn("Vertical Divergence must be interpretable as a float.", args[0])
+
+
+class TestReferenceTextureDirections(unittest.TestCase):
+    """Reading the sample directions off the current reference workspace.
+
+    None distinguishes "this reference carries no sample frame" from "it carries the identity
+    frame"; the caller leaves the configured directions alone only in the first case.
+    """
+
+    def setUp(self):
+        self.model = CorrectionModel()
+
+    def test_returns_none_when_no_reference_is_set(self):
+        self.model.set_reference_ws(None)
+
+        self.assertIsNone(self.model.get_reference_texture_directions())
+
+    @patch(model_path + ".has_texture_direction_info", return_value=False)
+    def test_returns_none_when_the_reference_carries_no_direction_logs(self, mock_has_info):
+        self.model.set_reference_ws("ref_ws")
+
+        self.assertIsNone(self.model.get_reference_texture_directions())
+        mock_has_info.assert_called_once_with("ref_ws")
+
+    @patch(model_path + ".read_texture_direction_info_from_log")
+    @patch(model_path + ".has_texture_direction_info", return_value=True)
+    def test_returns_the_logged_directions(self, mock_has_info, mock_read):
+        mock_read.return_value = (np.eye(3), ("RD", "ND", "TD"))
+        self.model.set_reference_ws("ref_ws")
+
+        matrix, names = self.model.get_reference_texture_directions()
+
+        mock_read.assert_called_once_with("ref_ws")
+        np.testing.assert_allclose(matrix, np.eye(3))
+        self.assertEqual(names, ("RD", "ND", "TD"))
 
 
 if __name__ == "__main__":
