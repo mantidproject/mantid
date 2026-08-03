@@ -94,9 +94,11 @@ public:
     listener.m_runState = Mantid::API::ILiveListener::Running;
     listener.m_lastTransition = std::nullopt;
 
+    MSVC_DIAG_OFF(4996)
     GNU_DIAG_OFF("deprecated-declarations")
     const auto status = listener.runStatus();
     GNU_DIAG_ON("deprecated-declarations")
+    MSVC_DIAG_ON(4996)
 
     TS_ASSERT_EQUALS(status, Mantid::API::ILiveListener::Running);
   }
@@ -107,9 +109,11 @@ public:
     listener.m_runState = Mantid::API::ILiveListener::Running;
     listener.m_lastTransition = Mantid::API::ILiveListener::BeginRun;
 
+    MSVC_DIAG_OFF(4996)
     GNU_DIAG_OFF("deprecated-declarations")
     const auto status = listener.runStatus();
     GNU_DIAG_ON("deprecated-declarations")
+    MSVC_DIAG_ON(4996)
 
     TS_ASSERT_EQUALS(status, Mantid::API::ILiveListener::BeginRun);
   }

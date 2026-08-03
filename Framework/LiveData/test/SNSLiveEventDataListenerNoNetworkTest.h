@@ -404,9 +404,11 @@ public:
     listener.callOnBeforeExtract();
 
     // runStatus() should report the edge.
+    MSVC_DIAG_OFF(4996)
     GNU_DIAG_OFF("deprecated-declarations")
     TS_ASSERT_EQUALS(ILiveListener::BeginRun, listener.runStatus());
     GNU_DIAG_ON("deprecated-declarations")
+    MSVC_DIAG_ON(4996)
 
     // Simulate success: the post-extract hook marks the edge as delivered.
     listener.callOnAfterExtract();
@@ -417,9 +419,11 @@ public:
 
     // Now runStatus() must fall back to runState().
     // onBeginRun() was stubbed, so m_adaraRunStatus is still NoRun.
+    MSVC_DIAG_OFF(4996)
     GNU_DIAG_OFF("deprecated-declarations")
     TS_ASSERT_EQUALS(ILiveListener::NoRun, listener.runStatus());
     GNU_DIAG_ON("deprecated-declarations")
+    MSVC_DIAG_ON(4996)
   }
 
   // -------------------------------------------------------------------------
@@ -436,9 +440,11 @@ public:
 
     TS_ASSERT_THROWS(listener.runState(), const std::runtime_error &);
     TS_ASSERT_THROWS(listener.lastTransition(), const std::runtime_error &);
+    MSVC_DIAG_OFF(4996)
     GNU_DIAG_OFF("deprecated-declarations")
     TS_ASSERT_THROWS(listener.runStatus(), const std::runtime_error &);
     GNU_DIAG_ON("deprecated-declarations")
+    MSVC_DIAG_ON(4996)
 
     // listenerState() must NOT throw — it returns Error to allow callers to
     // distinguish "listener broken" from "listener not yet connected".

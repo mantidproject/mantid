@@ -87,7 +87,8 @@ std::vector<MDEventType<ND>> ConvToMDEventsWSIndexing::convertEvents() {
   const auto &pws = m_OutWSWrapper->pWorkspace();
   std::array<std::pair<coord_t, coord_t>, ND> bounds;
   for (size_t ax = 0; ax < ND; ++ax) {
-    bounds[ax] = std::make_pair(pws->getDimension(ax)->getMinimum(), pws->getDimension(ax)->getMaximum());
+    bounds[ax] = std::make_pair(static_cast<coord_t>(pws->getDimension(ax)->getMinimum()),
+                                static_cast<coord_t>(pws->getDimension(ax)->getMaximum()));
   }
 
   std::vector<MDTransf_sptr> qConverters;
