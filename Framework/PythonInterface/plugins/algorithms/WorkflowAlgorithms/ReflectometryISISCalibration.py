@@ -4,14 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import (
-    AlgorithmFactory,
-    DataProcessorAlgorithm,
-    WorkspaceProperty,
-    FileAction,
-    FileProperty,
-    PropertyMode,
-)
+from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, WorkspaceProperty, FileAction, FileProperty, PropertyMode
 from mantid.kernel import (
     Direction,
     EnabledWhenProperty,
@@ -23,6 +16,7 @@ from mantid.kernel import (
 import csv
 import collections
 import math
+import numpy as np
 
 
 class ReflectometryISISCalibration(DataProcessorAlgorithm):
@@ -376,14 +370,12 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
             self._SPECULAR_PIXEL_SPECTRUM_NO,
         )
 
-    @staticmethod
-    def _detector_spectrum_indices(ws):
-        spectrum_info = ws.spectrumInfo()
-        return [
-            index
-            for index in range(ws.getNumberHistograms())
-            if spectrum_info.hasDetectors(index) and spectrum_info.hasUniqueDetector(index) and not spectrum_info.isMonitor(index)
-        ]
+    def _detector_spectrum_indices(self, ws):
+        alg = self.createChildAlgorithm("CreateDetectorTable")
+        alg.setProperty("InputWorkspace", ws)
+        alg.execute()
+        det_tbl = alg.getProperty("DetectorTableWorkspace").value
+        return [int(idx) for idx, mon in zip(det_tbl.columnArray("Index"), det_tbl.columnArray("Monitor")) if mon == "no"]
 
     @staticmethod
     def _single_detector_id(ws, spectrum_index):
@@ -394,7 +386,7 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
 
     @staticmethod
     def _spectrum_numbers(ws, spectrum_indices):
-        return [ws.getSpectrum(spectrum_index).getSpectrumNo() for spectrum_index in spectrum_indices]
+        return np.asarray(ws.getSpectrumNumbers())[spectrum_indices]
 
     @staticmethod
     def _validate_interpolation_index(index, lower_bound, upper_bound, property_name):

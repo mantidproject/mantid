@@ -294,8 +294,8 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
             },
         )
         self.assertGreater(
-            output_ws.spectrumInfo().signedTwoTheta(self._workspace_index_for_spectrum_number(output_ws, specular_spectrum_number + 1)),
-            output_ws.spectrumInfo().signedTwoTheta(self._workspace_index_for_spectrum_number(output_ws, specular_spectrum_number)),
+            output_ws.spectrumInfo().signedTwoTheta(ws.getIndexFromSpectrumNumber(specular_spectrum_number + 1)),
+            output_ws.spectrumInfo().signedTwoTheta(ws.getIndexFromSpectrumNumber(specular_spectrum_number)),
         )
 
     def test_polref_workflow_raises_if_specular_spectrum_number_out_of_calibration_range(self):
@@ -446,13 +446,6 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
             lines = [f"{self._SPECTRUM_NUMBER_LABEL} {self._ANGLE_LABEL}\n"]
             lines.extend(f"{index} {angle}\n" for index, angle in angle_items)
         return "".join(lines)
-
-    @staticmethod
-    def _workspace_index_for_spectrum_number(ws, spectrum_number):
-        for index in range(ws.getNumberHistograms()):
-            if ws.getSpectrum(index).getSpectrumNo() == spectrum_number:
-                return index
-        raise RuntimeError(f"Spectrum number {spectrum_number} not found in workspace")
 
     def _create_sample_workspace(self, name):
         """Creates a workspace with 9 detectors. Only detector IDs 11 to 14 will have calibration data"""
