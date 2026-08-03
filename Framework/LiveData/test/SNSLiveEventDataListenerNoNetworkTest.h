@@ -8,6 +8,7 @@
 
 #include "ADARAPacketBuilders.h"
 #include "MantidAPI/LiveListenerFactory.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidLiveData/SNSLiveEventDataListener.h"
 #include <algorithm>
 #include <cxxtest/TestSuite.h>
@@ -403,7 +404,9 @@ public:
     listener.callOnBeforeExtract();
 
     // runStatus() should report the edge.
+    GNU_DIAG_OFF("deprecated-declarations")
     TS_ASSERT_EQUALS(ILiveListener::BeginRun, listener.runStatus());
+    GNU_DIAG_ON("deprecated-declarations")
 
     // Simulate success: the post-extract hook marks the edge as delivered.
     listener.callOnAfterExtract();
@@ -414,7 +417,9 @@ public:
 
     // Now runStatus() must fall back to runState().
     // onBeginRun() was stubbed, so m_adaraRunStatus is still NoRun.
+    GNU_DIAG_OFF("deprecated-declarations")
     TS_ASSERT_EQUALS(ILiveListener::NoRun, listener.runStatus());
+    GNU_DIAG_ON("deprecated-declarations")
   }
 
   // -------------------------------------------------------------------------
@@ -431,7 +436,9 @@ public:
 
     TS_ASSERT_THROWS(listener.runState(), const std::runtime_error &);
     TS_ASSERT_THROWS(listener.lastTransition(), const std::runtime_error &);
+    GNU_DIAG_OFF("deprecated-declarations")
     TS_ASSERT_THROWS(listener.runStatus(), const std::runtime_error &);
+    GNU_DIAG_ON("deprecated-declarations")
 
     // listenerState() must NOT throw — it returns Error to allow callers to
     // distinguish "listener broken" from "listener not yet connected".
