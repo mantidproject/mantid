@@ -19,6 +19,7 @@ configuration: &files_config
  - 'buildconfig/CMake/**'
  - pyproject.toml
  - setup.py
+ - 'conda/recipes/**'
 # files that affect CI
 workflows: &files_workflow
  - 'buildconfig/Jenkins/**'
