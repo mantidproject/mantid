@@ -298,7 +298,8 @@ protected:
   void setSurface(ProjectionSurface *surface);
   QWidget *createInstrumentTreeTab(QTabWidget *ControlsTab);
   void createTabs(const QSettings &settings, TabCustomizations customizations);
-  void saveSettings();
+  /// Persist the instrument-view state during widget shutdown.
+  void persistSettings();
 
   QString asString(const std::vector<int> &numbers) const;
   QString confirmDetectorOperation(const QString &opName, const QString &inputWS, int ndets);

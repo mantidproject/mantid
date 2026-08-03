@@ -27,6 +27,8 @@
 #include <string>
 #include <vector>
 
+class QSettings;
+
 //------------------------------------------------------------------
 // Forward declarations
 //------------------------------------------------------------------
@@ -46,6 +48,28 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 class InstrumentRenderer;
+
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentActorSettings {
+public:
+  explicit InstrumentActorSettings(QString colorMapFile = ColorMap::defaultColorMap(), bool highlightZeros = false,
+                                   int scaleType = 0, bool showGuides = false);
+
+  [[nodiscard]] const QString &colorMapFile() const;
+  [[nodiscard]] bool highlightZeros() const;
+  [[nodiscard]] int scaleType() const;
+  [[nodiscard]] bool showGuides() const;
+
+  /// Query persistent storage without changing actor state or writing settings.
+  [[nodiscard]] static InstrumentActorSettings readSettings(const QSettings &settings);
+  /// Persist only actor rendering values from a snapshot.
+  static void saveSettings(QSettings &settings, const InstrumentActorSettings &values);
+
+private:
+  QString m_colorMapFile;
+  bool m_highlightZeros;
+  int m_scaleType;
+  bool m_showGuides;
+};
 
 class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW IInstrumentActor : public QObject {
   Q_OBJECT
@@ -254,8 +278,12 @@ public:
   void setGridLayer(bool isUsingLayer, int layer) const;
   const InstrumentRenderer &getInstrumentRenderer() const override;
 
-  /// Persist the current actor rendering settings.
-  void saveSettings() const;
+  /// Apply an immutable actor settings snapshot without persistent access.
+  void restoreSettings(const InstrumentActorSettings &settings);
+  /// Capture current actor state without persistent access.
+  [[nodiscard]] InstrumentActorSettings captureSettings() const;
+  /// Persist captured actor state to its configured settings group.
+  void persistSettings() const;
 
   // cppcheck-suppress unknownMacro
 public slots:
@@ -268,8 +296,6 @@ private:
   void setUpWorkspace(const std::shared_ptr<const Mantid::API::MatrixWorkspace> &sharedWorkspace, double scaleMin,
                       double scaleMax);
   void setupPhysicalInstrumentIfExists();
-  /// Query persistent settings and immediately restore actor state; legacy combined operation.
-  void loadSettings();
   void resetColors();
   void setDataMinMaxRange(double vmin, double vmax);
   void setDataIntegrationRange(const double &xmin, const double &xmax);
