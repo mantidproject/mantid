@@ -61,7 +61,7 @@
       <item>
        <widget class="QCheckBox" name="ckSumFiles">
         <property name="text">
-         <string>SumFiles</string>
+         <string>Sum Files</string>
         </property>
        </widget>
       </item>
