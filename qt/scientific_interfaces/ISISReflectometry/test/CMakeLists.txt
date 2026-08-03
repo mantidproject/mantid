@@ -31,6 +31,7 @@ set(TEST_FILES
     Runs/QtSearchModelTest.h
     Runs/SearchResultTest.h
     Options/OptionsDialogPresenterTest.h
+    Options/OptionsDialogSettingsTest.h
     Common/ClipboardTest.h
     Common/DecoderTest.h
     Common/DetectorTest.h

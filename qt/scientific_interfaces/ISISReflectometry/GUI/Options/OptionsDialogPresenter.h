@@ -45,6 +45,9 @@ protected:
   std::map<std::string, int> m_intOptions;
 
 private:
+  void restoreSettings(OptionsDialogSettings const &settings);
+  [[nodiscard]] OptionsDialogSettings captureSettings() const;
+
   IOptionsDialogView *m_view;
   std::unique_ptr<IOptionsDialogModel> m_model;
   // subscribe updates from presenter
