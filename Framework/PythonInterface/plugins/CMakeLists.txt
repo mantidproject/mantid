@@ -27,6 +27,7 @@ set(PYTHON_PLUGINS
     algorithms/ClipPeaks.py
     algorithms/CollectHB3AExperimentInfo.py
     algorithms/CompareSampleLogs.py
+    algorithms/component_info_utils.py
     algorithms/ComputeCalibrationCoefVan.py
     algorithms/ComputeIncoherentDOS.py
     algorithms/ConjoinFiles.py

@@ -23,7 +23,7 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
     _dtype = None
     _compressArgs = {}
     _tempNames = []
-    _sample = None
+    _samplePos = None
     _sourcePos = None
 
     def category(self):
@@ -102,7 +102,7 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
         nxmoderator.attrs[self.NX_CLASS] = "NXmoderator"
 
         if self._sourcePos is not None:
-            L1 = self._sourcePos.distance(self._sample.getPos())
+            L1 = self._sourcePos.distance(self._samplePos)
             L1 = -1.0 * abs(L1)  # nexus likes the distance negative
             temp = nxmoderator.create_dataset("distance", data=[L1], dtype=self._dtype)
             temp.attrs["units"] = "metre"
@@ -157,16 +157,24 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
         field = nxentry.create_dataset("proton_charge", data=[value], dtype=self._dtype)
         field.attrs["units"] = units
 
-    def _writeDetectorPos(self, nxinstrument, name, detector):
+    def _writeDetectorPos(self, nxinstrument, name, wksp, spectrum_info, index):
         nxdetector = nxinstrument.create_group(name)
         nxdetector.attrs[self.NX_CLASS] = "NXdetector"
 
-        if self._sample is None or detector is None:
+        # only continue if there is position information
+        if self._sourcePos is None:
             return nxdetector
 
-        # only continue if there is position information
-        L2 = detector.getDistance(self._sample)
-        polar = detector.getTwoTheta(self._sample.getPos(), self._sourcePos)  # radians
+        try:
+            # kept only for getPhi(), which has no *Info equivalent: it is the ambiguous,
+            # lab-frame atan2(y, x), not the sample-centred, reference-frame-relative
+            # DetectorInfo/SpectrumInfo.azimuthal()
+            detector = wksp.getDetector(index)
+        except RuntimeError:
+            return nxdetector
+
+        L2 = spectrum_info.l2(index)
+        polar = spectrum_info.twoTheta(index)  # radians
         azi = detector.getPhi()  # radians
 
         temp = nxdetector.create_dataset("distance", data=[abs(L2)], dtype=self._dtype)
@@ -205,13 +213,13 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
         return result
 
     def _determineSourceSample(self, wksp):
-        self._sample = wksp.getInstrument().getSample()
-        source = wksp.getInstrument().getSource()
+        component_info = wksp.componentInfo()
+        self._samplePos = component_info.samplePosition() if component_info.hasSample() else None
 
         # set all of the information to None if the
         # instrument doesn't supply it
-        if (source is not None) and (self._sample is not None):
-            self._sourcePos = self._sample.getPos() - source.getPos()
+        if component_info.hasSource() and component_info.hasSample():
+            self._sourcePos = component_info.sourcePosition()
 
     # pylint: disable=too-many-branches
     def PyExec(self):
@@ -257,22 +265,18 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
 
             nxinstrument = self._createInstrument(nxentry)
 
+            spectrum_info = wksp.spectrumInfo()
             for i in range(wksp.getNumberHistograms()):
-                writeDx = not np.all(wksp.dx(i) == 0)
+                if spectrum_info.hasDetectors(i) and spectrum_info.isMonitor(i):
+                    continue  # skip monitor spectra
+                writeDx = not np.all(wksp.readDx(i) == 0)
 
                 dataname = "spectrum_%d" % wksp.getSpectrum(i).getSpectrumNo()
 
                 nxdata = nxentry.create_group(dataname)
                 nxdata.attrs[self.NX_CLASS] = "NXdata"
 
-                if self._sourcePos is None:
-                    detector = None
-                else:
-                    try:
-                        detector = wksp.getDetector(i)
-                    except RuntimeError:
-                        detector = None
-                nxdetector = self._writeDetectorPos(nxinstrument, dataname, detector)
+                nxdetector = self._writeDetectorPos(nxinstrument, dataname, wksp, spectrum_info, i)
 
                 self._writeY(nxdetector, tof, i)
 
