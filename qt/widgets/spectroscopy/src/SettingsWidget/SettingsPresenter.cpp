@@ -14,7 +14,7 @@ using namespace SettingsHelper;
 SettingsPresenter::SettingsPresenter(std::unique_ptr<SettingsModel> model, ISettingsView *view)
     : m_model(std::move(model)), m_view(view) {
   m_view->subscribePresenter(this);
-  loadSettings();
+  restoreSettings(SettingsHelper::readSettings());
 }
 
 QWidget *SettingsPresenter::getView() { return m_view->getView(); }
@@ -34,24 +34,23 @@ void SettingsPresenter::notifyApplyClicked() {
 
 void SettingsPresenter::notifyCancelClicked() { m_parent->notifyCloseSettings(); }
 
-void SettingsPresenter::loadSettings() {
+void SettingsPresenter::restoreSettings(const SettingsHelper::SpectroscopySettings &settings) {
   m_view->setSelectedFacility(QString::fromStdString(m_model->getFacility()));
+  m_view->setRestrictInputByNameChecked(settings.restrictInputByName());
+  m_view->setPlotErrorBarsChecked(settings.externalPlotErrorBars());
+  m_view->setLoadHistoryChecked(settings.loadHistory());
+  m_view->setDeveloperFeatureFlags(settings.developerFeatureFlags());
+}
 
-  m_view->setRestrictInputByNameChecked(restrictInputDataByName());
-  m_view->setPlotErrorBarsChecked(externalPlotErrorBars());
-  m_view->setLoadHistoryChecked(loadHistory());
-
-  m_view->setDeveloperFeatureFlags(developerFeatureFlags());
+SettingsHelper::SpectroscopySettings SettingsPresenter::captureSettings() const {
+  return SettingsHelper::SpectroscopySettings(m_view->isRestrictInputByNameChecked(), m_view->isPlotErrorBarsChecked(),
+                                              m_view->isLoadHistoryChecked(), m_view->developerFeatureFlags());
 }
 
 void SettingsPresenter::saveSettings() {
   m_model->setFacility(m_view->getSelectedFacility().toStdString());
 
-  setRestrictInputDataByName(m_view->isRestrictInputByNameChecked());
-  setExternalPlotErrorBars(m_view->isPlotErrorBarsChecked());
-  setLoadHistory(m_view->isLoadHistoryChecked());
-
-  setDeveloperFeatureFlags(m_view->developerFeatureFlags());
+  SettingsHelper::saveSettings(captureSettings());
 
   m_parent->notifyApplySettings();
 }
