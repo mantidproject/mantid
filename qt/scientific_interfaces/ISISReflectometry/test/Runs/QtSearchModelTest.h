@@ -52,7 +52,7 @@ private:
   static SearchResults getTestSearchResults() {
     auto results = SearchResults();
     results.push_back(SearchResult("111111", "a title with a theta th=0.1", "a title with a theta", "0.1", "", "",
-                                   "this is a good one"));
+                                   "this is a good one", "model one"));
     results.push_back(SearchResult("222222", "a title without a theta"));
     results.push_back(SearchResult("333333", "This one is purposely excluded th=0.2", "This one is purposely excluded",
                                    "0.2", "", "it's bad", "something"));
@@ -61,9 +61,9 @@ private:
   }
 
   static std::string getTestCSV() {
-    return "Run,Description,Exclude,Comment\n"
-           "111111,a title with a theta th=0.1,,this is a good one\n"
-           "222222,a title without a theta,,\n"
-           "333333,This one is purposely excluded th=0.2,it's bad,something\n";
+    return "Run,Description,Exclude,Comment,Model\n"
+           "111111,a title with a theta th=0.1,,this is a good one,model one\n"
+           "222222,a title without a theta,,,\n"
+           "333333,This one is purposely excluded th=0.2,it's bad,something,\n";
   }
 };
