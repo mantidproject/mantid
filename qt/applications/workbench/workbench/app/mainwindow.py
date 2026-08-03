@@ -741,7 +741,8 @@ class MainWindow(QMainWindow):
             self.setWindowState(Qt.WindowMaximized)
 
         # read in settings for children
-        AlgorithmInputHistory().readSettings(settings)
+        algorithm_history = AlgorithmInputHistory()
+        algorithm_history.restoreSettings(algorithm_history.readSettings(settings))
         for widget in self.widgets:
             if hasattr(widget, "readSettingsIfNotDone"):
                 widget.readSettingsIfNotDone(settings)
@@ -752,7 +753,8 @@ class MainWindow(QMainWindow):
         settings.set("MainWindow/state", self.saveState(SAVE_STATE_VERSION))  # QByteArray
 
         # write out settings for children
-        AlgorithmInputHistory().writeSettings(settings)
+        algorithm_history = AlgorithmInputHistory()
+        algorithm_history.saveSettings(settings, algorithm_history.captureSettings())
         for widget in self.widgets:
             if hasattr(widget, "writeSettings"):
                 widget.writeSettings(settings)

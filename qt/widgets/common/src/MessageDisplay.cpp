@@ -46,29 +46,31 @@ namespace MantidQt::MantidWidgets {
 // Public member functions
 //-------------------------------------------
 
-/**
- * Load settings from the persistent store. The client is expected to call
- * this method with the QSettings object opened at the approriate group
- * @param storage A pointer to an existing QSettings instance opened
- * at the group containing the values
- */
-void MessageDisplay::readSettings(const QSettings &storage) {
-  const int logLevel = storage.value(PRIORITY_KEY_NAME, 0).toInt();
-  if (logLevel > 0) {
-    ConfigService::Instance().setLogLevel(logLevel, true);
-  }
-  setMaximumLineCount(storage.value(LINE_COUNT_MAX_KEY_NAME, DEFAULT_LINE_COUNT_MAX).toInt());
+MessageDisplaySettings::MessageDisplaySettings(int logLevel, int maximumLineCount)
+    : m_logLevel(logLevel), m_maximumLineCount(maximumLineCount) {}
+
+int MessageDisplaySettings::logLevel() const { return m_logLevel; }
+
+int MessageDisplaySettings::maximumLineCount() const { return m_maximumLineCount; }
+
+MessageDisplaySettings MessageDisplay::readSettings(const QSettings &storage) const {
+  return MessageDisplaySettings(storage.value(PRIORITY_KEY_NAME, 0).toInt(),
+                                storage.value(LINE_COUNT_MAX_KEY_NAME, DEFAULT_LINE_COUNT_MAX).toInt());
 }
 
-/**
- * Load settings from the persistent store. The client is expected to call
- * this method with the QSettings object opened at the approriate group
- * @param storage A pointer to an existing QSettings instance opened
- * at the group where the values should be stored.
- */
-void MessageDisplay::writeSettings(QSettings &storage) const {
-  storage.setValue(PRIORITY_KEY_NAME, Poco::Logger::root().getLevel());
-  storage.setValue(LINE_COUNT_MAX_KEY_NAME, maximumLineCount());
+void MessageDisplay::restoreSettings(const MessageDisplaySettings &settings) {
+  if (settings.logLevel() > 0)
+    ConfigService::Instance().setLogLevel(settings.logLevel(), true);
+  setMaximumLineCount(settings.maximumLineCount());
+}
+
+MessageDisplaySettings MessageDisplay::captureSettings() const {
+  return MessageDisplaySettings(Poco::Logger::root().getLevel(), maximumLineCount());
+}
+
+void MessageDisplay::saveSettings(QSettings &storage, const MessageDisplaySettings &settings) const {
+  storage.setValue(PRIORITY_KEY_NAME, settings.logLevel());
+  storage.setValue(LINE_COUNT_MAX_KEY_NAME, settings.maximumLineCount());
 }
 
 /**

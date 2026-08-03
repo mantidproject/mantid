@@ -40,22 +40,16 @@ namespace MantidWidgets {
  */
 
 /**
- * Defines the legacy interface for an object to restore and write settings
- * that persist between instances.
- *
- * `readSettings` is a combined read-and-restore operation rather than the
- * query-only operation described by @ref settings_lifecycle. Implementations
- * may query the supplied const storage and update their own in-memory state,
- * but must not mutate or synchronize the storage. `writeSettings` is the
- * persistent write operation.
+ * Defines the in-memory half of the persistent settings lifecycle.
+ * Persistent read and save operations belong to the concrete Settings type.
  */
-class EXPORT_OPT_MANTIDQT_COMMON Configurable {
+template <typename Settings> class Configurable {
 public:
   virtual ~Configurable() = default;
-  /// Query settings and immediately restore the state of this object; does not write.
-  virtual void readSettings(const QSettings &) = 0;
-  /// Persist the current state of this object to the supplied mutable storage.
-  virtual void writeSettings(QSettings &) const = 0;
+  /// Apply an already-read snapshot without persistent I/O.
+  virtual void restoreSettings(const Settings &) = 0;
+  /// Capture current in-memory state without persistent I/O.
+  [[nodiscard]] virtual Settings captureSettings() const = 0;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

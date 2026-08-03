@@ -701,6 +701,7 @@ set(QT5_TEST_FILES
     test/AlgorithmPropertiesWidgetTest.h
     test/BatchAlgorithmRunnerTest.h
     test/ConvolutionFunctionModelTest.h
+    test/ConfigurableSettingsTest.h
     test/FileDialogHandlerTest.h
     test/FileFinderSettingsTest.h
     test/FindFilesThreadPoolManagerTest.h
