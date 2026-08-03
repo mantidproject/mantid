@@ -175,6 +175,7 @@ set(TEST_PY_FILES
     SaveYDATest.py
     SaveP2DTest.py
     peakdata_utilsTest.py
+    component_info_utilsTest.py
 )
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})

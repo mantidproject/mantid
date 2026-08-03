@@ -7,7 +7,7 @@
 # pylint: disable=no-init
 from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty, InstrumentValidator, FileProperty, FileAction
 from mantid.kernel import Direction, StringArrayProperty, StringListValidator
-from plugins.functions.component_info_utils import resolve_component_index
+from plugins.algorithms.component_info_utils import resolve_component_index
 
 SOURCE_XML = """  <!--SOURCE-->
   <component type="moderator">

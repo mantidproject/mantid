@@ -35,7 +35,7 @@ from mantid.kernel import (
     V3D,
 )
 import mantid.simpleapi as api
-from plugins.functions.component_info_utils import resolve_component_index
+from plugins.algorithms.component_info_utils import resolve_component_index
 
 
 class AlignComponents(PythonAlgorithm):

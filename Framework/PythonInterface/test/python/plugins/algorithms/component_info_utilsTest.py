@@ -8,7 +8,7 @@ import numpy as np
 import unittest
 from mantid.simpleapi import LoadEmptyInstrument
 
-from plugins.functions.component_info_utils import resolve_component_index
+from plugins.algorithms.component_info_utils import resolve_component_index
 
 
 class ComponentInfoUtilsTest(unittest.TestCase):

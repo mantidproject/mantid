@@ -27,6 +27,7 @@ set(PYTHON_PLUGINS
     algorithms/ClipPeaks.py
     algorithms/CollectHB3AExperimentInfo.py
     algorithms/CompareSampleLogs.py
+    algorithms/component_info_utils.py
     algorithms/ComputeCalibrationCoefVan.py
     algorithms/ComputeIncoherentDOS.py
     algorithms/ConjoinFiles.py
@@ -365,7 +366,6 @@ set(PYTHON_PLUGINS
     functions/BivariateGaussian.py
     functions/ChudleyElliot.py
     functions/CombGaussLorentzKT.py
-    functions/component_info_utils.py
     functions/CompositePCRmagnet.py
     functions/DampedBessel.py
     functions/EISFDiffCylinder.py
