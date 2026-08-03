@@ -5,6 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench
+from dataclasses import dataclass, replace
+
 from qtpy.QtCore import Qt, QSettings
 
 from mantid.kernel import ConfigService, logger, release_notes_url, release_date, version
@@ -13,6 +15,14 @@ from workbench.widgets.about.view import AboutView
 from workbench.widgets.about.usage_verification_view import UsageReportingVerificationView
 from workbench.widgets.settings.view_utilities.settings_view_utilities import checkbox_state_to_bool
 from mantidqt.widgets import manageuserdirectories
+
+
+@dataclass(frozen=True)
+class AboutSettings:
+    """Immutable first-use state read from persistent settings."""
+
+    do_not_show_until_next_release: int
+    previous_version: str
 
 
 class AboutPresenter(object):
@@ -48,12 +58,39 @@ class AboutPresenter(object):
         about_widget.chk_allow_usage_data.stateChanged.connect(self.action_usage_data_changed)
 
         # set do not show
-        qSettings = QSettings()
-        qSettings.beginGroup(self.DO_NOT_SHOW_GROUP)
-        doNotShowUntilNextRelease = qSettings.value(self.DO_NOT_SHOW, 0, type=int)
-        qSettings.endGroup()
-        about_widget.chk_do_not_show_until_next_release.setChecked(doNotShowUntilNextRelease)
+        self.restoreSettings(self.readSettings())
         about_widget.chk_do_not_show_until_next_release.stateChanged.connect(self.action_do_not_show_until_next_release)
+
+    @classmethod
+    def readSettings(cls, settings=None):
+        """Read and return first-use settings without changing the presenter or store."""
+        settings = settings or QSettings()
+        settings.beginGroup(cls.DO_NOT_SHOW_GROUP)
+        values = AboutSettings(
+            do_not_show_until_next_release=settings.value(cls.DO_NOT_SHOW, 0, type=int),
+            previous_version=settings.value(cls.PREVIOUS_VERSION, "", type=str),
+        )
+        settings.endGroup()
+        return values
+
+    def restoreSettings(self, settings):
+        """Apply a first-use snapshot without persistent writes."""
+        self.view.about_widget.chk_do_not_show_until_next_release.setChecked(settings.do_not_show_until_next_release)
+
+    def captureSettings(self):
+        """Capture the current first-use state for an explicit save."""
+        return AboutSettings(
+            do_not_show_until_next_release=int(self.view.about_widget.chk_do_not_show_until_next_release.isChecked()),
+            previous_version=version().major + "." + version().minor,
+        )
+
+    @classmethod
+    def saveSettings(cls, settings, values):
+        """Persist an explicitly captured first-use snapshot."""
+        settings.beginGroup(cls.DO_NOT_SHOW_GROUP)
+        settings.setValue(cls.DO_NOT_SHOW, values.do_not_show_until_next_release)
+        settings.setValue(cls.PREVIOUS_VERSION, values.previous_version)
+        settings.endGroup()
 
     @staticmethod
     def should_show_on_startup():
@@ -79,18 +116,14 @@ class AboutPresenter(object):
                 )
                 return True
 
-        settings = QSettings()
-        settings.beginGroup(AboutPresenter.DO_NOT_SHOW_GROUP)
-        doNotShowUntilNextRelease = settings.value(AboutPresenter.DO_NOT_SHOW, 0, type=int)
-        lastVersion = settings.value(AboutPresenter.PREVIOUS_VERSION, "", type=str)
+        settings = AboutPresenter.readSettings()
         current_version = version().major + "." + version().minor
-        settings.endGroup()
 
-        if not doNotShowUntilNextRelease:
+        if not settings.do_not_show_until_next_release:
             return True
 
         # Now check if the version has changed since last time
-        return current_version != lastVersion
+        return current_version != settings.previous_version
 
     def setup_facilities_group(self):
         facilities = sorted(ConfigService.getFacilityNames())
@@ -180,19 +213,15 @@ class AboutPresenter(object):
 
     def action_do_not_show_until_next_release(self, checkedState):
         settings = QSettings()
-        settings.beginGroup(self.DO_NOT_SHOW_GROUP)
-        settings.setValue(self.DO_NOT_SHOW, int(checkbox_state_to_bool(checkedState)))
-        settings.endGroup()
+        values = replace(self.readSettings(settings), do_not_show_until_next_release=int(checkbox_state_to_bool(checkedState)))
+        self.saveSettings(settings, values)
 
     def action_close(self):
         self.view.close()
 
     def save_on_closing(self):
         # make sure the Last Version is updated on closing
-        settings = QSettings()
-        settings.beginGroup(self.DO_NOT_SHOW_GROUP)
-        settings.setValue(self.PREVIOUS_VERSION, version().major + "." + version().minor)
-        settings.endGroup()
+        self.saveSettings(QSettings(), self.captureSettings())
         self.store_facility(self.view.about_widget.cb_facility.currentText())
         self.action_instrument_changed(self.view.about_widget.cb_instrument.currentText())
         ConfigService.saveConfig(ConfigService.getUserFilename())

@@ -21,7 +21,9 @@ import matplotlib
 
 from mantidqt.utils.qt.testing import start_qapplication
 from mantid.api import FrameworkManager
+from qtpy.QtCore import QByteArray, QPoint, QSize
 from qtpy.QtWidgets import QMessageBox, QAction, QMenu
+from workbench.config import CONF
 from workbench.utils.recentlyclosedscriptsmenu import RecentlyClosedScriptsMenu
 from io import StringIO
 
@@ -291,16 +293,19 @@ class MainWindowTest(unittest.TestCase):
         mock_project_recovery = Mock()
         mock_project_recovery.stop_recovery_thread, mock_project_recovery.remove_current_pid_folder = Mock(), Mock()
         self.main_window.editor = mock_editor
-        self.main_window.writeSettings = Mock()
+        self.main_window.captureSettings = Mock()
+        self.main_window.saveSettings = Mock()
+        self.main_window.saveChildSettings = Mock()
         self.main_window.project_recovery = mock_project_recovery
         self.main_window.interface_manager = Mock()
-        self.main_window.writeSettings = Mock()
         self.main_window.project = mock_project
 
         self.main_window.closeEvent(mock_event)
 
         mock_ConfigService.saveConfig.assert_called_with(mock_ConfigService.getUserFilename())
-        self.main_window.writeSettings.assert_called()
+        self.main_window.captureSettings.assert_called_once_with()
+        self.main_window.saveSettings.assert_called_once_with(CONF, self.main_window.captureSettings.return_value)
+        self.main_window.saveChildSettings.assert_called_once_with(CONF)
         mock_plt_close.assert_called_with("all")
         mock_QApplication.instance().closeAllWindows.assert_called()
         self.main_window.project_recovery.assert_has_calls(
@@ -309,6 +314,46 @@ class MainWindowTest(unittest.TestCase):
         self.assertTrue(self.main_window.project_recovery.closing_workbench)
         self.main_window.interface_manager.closeHelpWindow.assert_called()
         mock_event.accept.assert_called()
+
+    def test_read_settings_returns_snapshot_without_writing(self):
+        from workbench.app.mainwindow import MainWindowSettings
+
+        settings = Mock()
+        values = {
+            "MainWindow/size": QSize(800, 600),
+            "MainWindow/position": QPoint(10, 20),
+            "MainWindow/state": QByteArray(b"state"),
+            "MainWindow/font": "Family,10,Style",
+        }
+        settings.get.side_effect = lambda key, **_: values[key]
+        settings.has.side_effect = lambda key: key in values
+
+        snapshot = self.main_window.readSettings(settings)
+
+        expected = MainWindowSettings(
+            size=values["MainWindow/size"],
+            position=values["MainWindow/position"],
+            state=values["MainWindow/state"],
+            font=values["MainWindow/font"],
+        )
+        self.assertEqual(expected, snapshot)
+        settings.set.assert_not_called()
+
+    def test_save_settings_writes_an_explicit_snapshot(self):
+        from workbench.app.mainwindow import MainWindowSettings
+
+        settings = Mock()
+        snapshot = MainWindowSettings(QSize(800, 600), QPoint(10, 20), QByteArray(b"state"), None)
+
+        self.main_window.saveSettings(settings, snapshot)
+
+        settings.set.assert_has_calls(
+            [
+                call("MainWindow/size", snapshot.size),
+                call("MainWindow/position", snapshot.position),
+                call("MainWindow/state", snapshot.state),
+            ]
+        )
 
     @patch("workbench.app.mainwindow.input_qinputdialog")
     def test_override_python_input_replaces_input_with_qinputdialog(self, mock_input):
