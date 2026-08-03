@@ -45,7 +45,7 @@ from mantid.simpleapi import (
 )
 from Engineering.common.instrument_config import SUPPORTED_INSTRUMENTS
 from Engineering.common.xml_shapes import get_cube_xml
-from Engineering.texture.texture_helper import convert_to_sscanss_frame
+from Engineering.texture.texture_helper import convert_to_sscanss_frame, read_texture_direction_info_from_log
 
 from mantidqtinterfaces.TexturePlanner.model import TexturePlannerModel
 from mantidqtinterfaces.TexturePlanner.settings.settings_model import DEFAULT_SETTINGS
@@ -1712,6 +1712,57 @@ class TestExportContents(_FunctionalTestBase):
         self.assertAlmostEqual(abs(loaded.sample().getShape().volume()), 0.01**3, places=9)
         self.assertEqual(loaded.sample().getMaterial().name(), "Fe")
         np.testing.assert_allclose(self._aabb_extent(loaded), expected_extent, atol=1e-9)
+
+    def test_reference_workspace_carries_the_texture_directions(self):
+        self.view.grpDirectionWidgets.setChecked(True)
+        QApplication.processEvents()
+        self.view.set_rd_name("AD")
+        self._set_entered_directions((0, 1, 0), (0, 0, 1), (1, 0, 0))
+
+        self.view.cmbExportFormat.setCurrentText(EXPORT_REFERENCE_WS)
+        self._click(self.view.btnExport)
+
+        loaded = LoadNexus(Filename=os.path.join(self._tmpdir, "run.nxs"), OutputWorkspace="__texplan_test_ref_dirs")
+        matrix, names = read_texture_direction_info_from_log(loaded)
+        self.assertEqual(names, ("AD", "ND", "TD"))
+        # columns are the directions, in the same order as the fields
+        np.testing.assert_allclose(matrix, [[0, 0, 1], [1, 0, 0], [0, 1, 0]], atol=1e-9)
+
+    def test_reference_workspace_carries_the_directions_the_shape_was_saved_in(self):
+        # the reference ws holds the shape with the initial rotation already baked in, so with
+        # "apply transformation to sample directions" on it must carry the *rotated* directions -
+        # anything else would describe a frame the saved shape is not actually in
+        self._reveal_direction_controls()
+        self._set_entered_directions((1, 0, 0), (0, 1, 0), (0, 0, 1))
+        self.view.spnInitX.setValue(90.0)
+        QApplication.processEvents()
+        self._click_checkbox(self.view.chkTransformDirs)
+        QApplication.processEvents()
+
+        self.view.cmbExportFormat.setCurrentText(EXPORT_REFERENCE_WS)
+        self._click(self.view.btnExport)
+
+        loaded = LoadNexus(Filename=os.path.join(self._tmpdir, "run.nxs"), OutputWorkspace="__texplan_test_ref_effective")
+        matrix, _ = read_texture_direction_info_from_log(loaded)
+        # 90 deg about x: RD (1,0,0) -> (1,0,0), ND (0,1,0) -> (0,0,1), TD (0,0,1) -> (0,-1,0)
+        np.testing.assert_allclose(matrix[:, 0], (1.0, 0.0, 0.0), atol=1e-9)
+        np.testing.assert_allclose(matrix[:, 1], (0.0, 0.0, 1.0), atol=1e-9)
+        np.testing.assert_allclose(matrix[:, 2], (0.0, -1.0, 0.0), atol=1e-9)
+
+    def test_reference_workspace_carries_the_entered_directions_when_not_transforming(self):
+        # with the transform off the initial rotation is a shape-definition fix only, so the
+        # directions saved alongside it are the ones the user entered
+        self._reveal_direction_controls()
+        self._set_entered_directions((1, 0, 0), (0, 1, 0), (0, 0, 1))
+        self.view.spnInitX.setValue(90.0)
+        QApplication.processEvents()
+
+        self.view.cmbExportFormat.setCurrentText(EXPORT_REFERENCE_WS)
+        self._click(self.view.btnExport)
+
+        loaded = LoadNexus(Filename=os.path.join(self._tmpdir, "run.nxs"), OutputWorkspace="__texplan_test_ref_untransformed")
+        matrix, _ = read_texture_direction_info_from_log(loaded)
+        np.testing.assert_allclose(matrix, np.eye(3), atol=1e-9)
 
 
 class TestPoleFigureReference(_FunctionalTestBase):
