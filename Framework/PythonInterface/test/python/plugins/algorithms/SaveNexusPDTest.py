@@ -99,7 +99,7 @@ class SaveNexusPDTest(unittest.TestCase):
         try:
             SaveNexusPD(InputWorkspace=wkspname, OutputFilename=filename)
             with h5py.File(filename, "r") as handle:
-                nxentry = handle[sorted(handle.keys())[0]]
+                nxentry = handle[min(handle.keys())]
                 saved_l1 = abs(nxentry["instrument"]["moderator"]["distance"][0])
             self.assertAlmostEqual(saved_l1, expected_l1, places=5)
         finally:
