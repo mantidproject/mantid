@@ -1,0 +1,1 @@
+- Opening interfaces or changing default directories no longer unnecessarily rewrites and locks the Mantid Workbench settings file.

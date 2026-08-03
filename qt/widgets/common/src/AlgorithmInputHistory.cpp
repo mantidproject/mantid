@@ -161,5 +161,5 @@ void AbstractAlgorithmInputHistory::saveSettings(QSettings &storage,
  */
 void AbstractAlgorithmInputHistory::initializeSettings() {
   QSettings settings;
-  restoreSettings(readSettings(settings));
+  AbstractAlgorithmInputHistory::restoreSettings(readSettings(settings));
 }

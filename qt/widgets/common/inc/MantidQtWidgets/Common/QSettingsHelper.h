@@ -29,6 +29,7 @@ inline QString qualifiedName(std::string const &settingGroup, QString const &set
 
 /** Loads an individual setting from disk
  *
+ * @param settings The settings store to read from
  * @param settingGroup The name of the setting group
  * @param settingName The name of the setting
  * @return The value stored for the requested setting
@@ -47,6 +48,7 @@ template <typename T> T getSetting(std::string const &settingGroup, std::string 
 /** Loads a map of settings with the same type. This comparison is required
  *  as QVariant types are not properly encoded in ini files
  *
+ * @param settings The settings store to read from
  * @param settingGroup The name of the setting group
  * @return A map of the values stored for all settings matching the given type
  *
@@ -79,6 +81,7 @@ template <typename T> std::map<std::string, T> getSettingsAsMap(std::string cons
 
 /** Sets the value of a specified setting
  *
+ * @param settings The settings store to write to
  * @param settingGroup The name of the setting group
  * @param settingName The name of the setting
  * @param value The value of the named setting
