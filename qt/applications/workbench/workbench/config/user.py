@@ -34,32 +34,17 @@ class UserConfig(object):
         # Loads the saved settings if found
         self.qsettings = QSettings(QSettings.IniFormat, QSettings.UserScope, organization, application)
 
-        # convert the defaults into something that qsettings can handle
-        default_settings = self._flatten_defaults(defaults)
-
-        # put defaults into qsettings if they weren't there already
-        try:
-            self.set_qsettings_values(default_settings)
-        # the editors/sessiontabs are pickled in config so need to remove them
-        except ValueError:
-            self.qsettings.remove("Editors/SessionTabs")
-            self.set_qsettings_values(default_settings)
-
-    def set_qsettings_values(self, default_settings):
-        configFileKeys = self.qsettings.allKeys()
-        for key in default_settings.keys():
-            if key not in configFileKeys:
-                self.qsettings.setValue(key, default_settings[key])
+        # Defaults remain in memory. Querying configuration must not populate
+        # or repair the persistent QSettings store.
+        self._defaults = self._flatten_defaults(defaults)
 
     def all_keys(self, group=None):
-        if group is not None:
-            self.qsettings.beginGroup(group)
-            result = self.qsettings.allKeys()
-            self.qsettings.endGroup()
-        else:
-            result = self.qsettings.allKeys()
+        keys = set(self.qsettings.allKeys()) | set(self._defaults)
+        if group is None:
+            return list(keys)
 
-        return result
+        prefix = group.rstrip("/") + "/"
+        return [key[len(prefix) :] for key in keys if key.startswith(prefix)]
 
     @property
     def filename(self):
@@ -116,6 +101,8 @@ class UserConfig(object):
 
     @staticmethod
     def _flatten_defaults(input_dict):
+        if not input_dict:
+            return {}
         result = {}
         for key in input_dict:
             value = input_dict[key]
@@ -156,7 +143,7 @@ class UserConfig(object):
         if not self.has(option, second):
             # If a setting does not exist, we want to raise a KeyError
             raise KeyError(f"Unknown config item requested: '{option}'")
-        return self.qsettings.value(full_option, type=type)
+        return self.qsettings.value(full_option, self._defaults.get(full_option), type=type)
 
 
 def _get_settings_dir() -> Path:
