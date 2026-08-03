@@ -8,6 +8,7 @@
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
 from instrumentview.isisreflectometry.ReflectometryInstrumentViewView import ReflectometryInstrumentViewView
 from instrumentview.renderers.shape_renderer import ShapeRenderer
+from instrumentview.InteractorStyles import InteractorStyles
 from instrumentview.Projections.ProjectionType import ProjectionType
 from qtpy.QtCore import QObject, QMetaObject, Qt
 import numpy as np
@@ -29,6 +30,7 @@ class ReflectometryInstrumentViewPresenter:
     def __init__(self, view: Optional[ReflectometryInstrumentViewView] = None):
         self.view = view or ReflectometryInstrumentViewView()
         self._model: Optional[FullInstrumentViewModel] = None
+        self._interactor_styles: Optional[InteractorStyles] = None
         self._transform: Optional[np.ndarray] = None
         self._original_mesh_bounds: Optional[tuple] = None
         self._rect_selected_detector_ids: list[int] = []
@@ -53,6 +55,7 @@ class ReflectometryInstrumentViewPresenter:
         self._original_mesh_bounds = None
         self._rect_selected_detector_ids = []
         self._model = None
+        self._interactor_styles = None
 
     def plot(self):
         """Re-render the current instrument."""
@@ -62,9 +65,7 @@ class ReflectometryInstrumentViewPresenter:
     def set_zoom_mode(self):
         """Set the plotter interaction to zoom/pan mode."""
         self.view.remove_shape()
-        plotter = self.view.main_plotter
-        if plotter is not None and self._model is not None:
-            self._renderer.set_interactive_style(plotter, self._model.is_2d_projection)
+        self._apply_interactor_style()
 
     def set_select_rect_mode(self):
         """Set the plotter interaction to rectangle selection mode."""
@@ -117,20 +118,50 @@ class ReflectometryInstrumentViewPresenter:
         self._original_mesh_bounds = self._detector_mesh.bounds
         self._transform = np.eye(4)
 
-        self._renderer.set_parallel_view(plotter)
+        plotter.view_xy()
+        plotter.enable_parallel_projection()
         plotter.reset_camera()
-        self._renderer.set_interactive_style(plotter, self._model.is_2d_projection)
 
-        # Schedule the fill transform via resizeEvent so it runs after Qt/VTK
-        # have applied the correct dock dimensions to the VTK render window.
+        # Recreate the styles after the camera reset so that their cached
+        # "default" camera state (used for right-click reset) is the full view.
+        self._interactor_styles = None
+        self._apply_interactor_style()
+
+        # Keep the mesh filling the viewport on every subsequent resize.
         self.view.set_on_resize_callback(self._apply_fill_transform)
+
+        # Fill now rather than waiting for a resize event: Qt emits none when
+        # plotting into an already-sized widget, so the mesh would otherwise
+        # keep its unfilled aspect ratio until the user resized the window.
+        self._apply_fill_transform()
+
+        # ...and again once Qt has finished laying the plotter out.  On the
+        # very first plot the render window is still at PyVista's default size
+        # (BackgroundPlotter sets it in its constructor) and only shrinks to
+        # the widget when QVTKRenderWindowInteractor handles the resize event
+        # Qt posts after this call returns.  Rendering before that happens
+        # crops the image, which reads as being slightly zoomed in.
+        self.view.schedule_refresh()
+
+    def _apply_interactor_style(self) -> None:
+        """Set the plotter's interactor style to cursor-centred scroll zoom.
+
+        This view is always a 2D projection (see ``update_workspace``), so the
+        trackball/rotation style is never needed.  Picking is disabled because
+        detector selection here is done via the rectangle overlay.
+        """
+        plotter = self.view.main_plotter
+        if plotter is None or self._model is None:
+            return
+        if self._interactor_styles is None:
+            self._interactor_styles = InteractorStyles(plotter, picking_callback=lambda *_: None, hover_callback=lambda *_: None)
+        plotter.iren.style = self._interactor_styles.SCROLL_ZOOM_NO_PICKING
 
     def _apply_fill_transform(self):
         """Stretch the detector mesh to fill the viewport.
 
-        Called from the view's resizeEvent (deferred by one event-loop cycle so
-        QVTKRenderWindowInteractor.resizeEvent has already updated the VTK
-        render window dimensions via vtkRenderWindow.SetSize).
+        Called at the end of ``_render`` and again from the view's resizeEvent
+        (the latter deferred by the view's debounce timer).
         """
         if self._detector_mesh is None or self._original_mesh_bounds is None:
             return
@@ -138,7 +169,7 @@ class ReflectometryInstrumentViewPresenter:
         if plotter is None:
             return
 
-        w, h = plotter.ren_win.GetSize()
+        w, h = self._viewport_size(plotter)
         if w <= 0 or h <= 0:
             return
 
@@ -186,6 +217,22 @@ class ReflectometryInstrumentViewPresenter:
         style = plotter.iren.style
         if hasattr(style, "update_default_camera_state"):
             style.update_default_camera_state()
+
+    def _viewport_size(self, plotter) -> tuple[int, int]:
+        """Return the (width, height) of the render area.
+
+        Taken from the Qt widget rather than ``vtkRenderWindow.GetSize()``:
+        VTK's render window is only resized to the widget when
+        QVTKRenderWindowInteractor first handles a resize event, so on the
+        first plot it still reports PyVista's default size.  Filling against
+        that gives the wrong aspect ratio, which is why the view only looked
+        right once the user had resized the window.  Only the ratio matters
+        here, so Qt's logical pixels serve as well as VTK's physical ones.
+        """
+        w, h = self.view.render_area_size()
+        if w > 0 and h > 0:
+            return w, h
+        return plotter.ren_win.GetSize()
 
     @staticmethod
     def _scale_matrix_relative_to_centre(centre, scale_x=1.0, scale_y=1.0) -> np.ndarray:

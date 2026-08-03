@@ -62,6 +62,50 @@ class ReflectometryInstrumentViewView(QWidget):
         """Set a callable invoked (deferred) on every resize, or None to clear."""
         self._on_resize_callback = callback
 
+    def schedule_refresh(self) -> None:
+        """Run the deferred resize callback without waiting for a resize event.
+
+        Qt emits no resizeEvent when something is drawn into an already-sized
+        widget, so after the first plot the fill transform would not run until
+        the user happened to resize the window.  Starting the same debounce
+        timer applies it once Qt/VTK have settled at the current size.
+        """
+        if self.main_plotter is None:
+            return
+        self._resize_timer.start()
+
+    def render_area_size(self) -> tuple[int, int]:
+        """Size, in logical pixels, of the area the plotter renders into.
+
+        BackgroundPlotter *is* the interactor widget, nested inside its own
+        app_window and frame, so its size is inset from this widget's by those
+        layout margins.  Measuring the interactor rather than this widget is
+        what makes the aspect ratio exact.
+
+        Qt has this right as soon as the widget is laid out, whereas
+        ``vtkRenderWindow.GetSize()`` reports PyVista's default window size
+        until QVTKRenderWindowInteractor has handled its first resize event.
+        """
+        width, height = self.width(), self.height()
+        if self.main_plotter is not None:
+            size = self.main_plotter.size()
+            # The plotter is nested inside this widget, so it can never be
+            # larger than us.  When it is, Qt has not laid it out yet — it is
+            # still at the default window size BackgroundPlotter's constructor
+            # applied — and our own geometry is the trustworthy one.
+            if 0 < size.width() <= width and 0 < size.height() <= height:
+                return size.width(), size.height()
+        return width, height
+
+    def showEvent(self, event):
+        """Re-run the deferred resize callback when the widget becomes visible.
+
+        The VTK render window only takes its true size once the widget is
+        shown, so anything plotted while hidden needs re-filling here.
+        """
+        super().showEvent(event)
+        self.schedule_refresh()
+
     def resizeEvent(self, event):
         """Start (or restart) the debounce timer on every resize event.
 
