@@ -1,0 +1,3 @@
+- In the ISIS Reflectometry interface, fixed a bug where the (new) Instrument View would not fill the available space in the dock when first opened. The view now correctly fills the dock area upon initial display.
+- In the ALF View interface, fixed bug where the "Add ROI" button was not working. The button now correctly adds a new ROI to the view when clicked.
+- In the ALF View interface, fixed an error on opening the interface.
