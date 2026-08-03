@@ -10,6 +10,7 @@
 #include "MantidQtWidgets/Common/FittingMode.h"
 
 #include <QMap>
+#include <QStringList>
 #include <QWidget>
 
 /* Forward declarations */
@@ -35,6 +36,22 @@ class IAlgorithm;
 namespace MantidQt {
 namespace MantidWidgets {
 
+class EXPORT_OPT_MANTIDQT_COMMON FitOptionsBrowserSettings {
+public:
+  explicit FitOptionsBrowserSettings(QMap<QString, QString> values = {});
+
+  [[nodiscard]] const QMap<QString, QString> &values() const;
+
+  /// Query supplied property names without changing widgets or writing settings.
+  [[nodiscard]] static FitOptionsBrowserSettings readSettings(const QSettings &settings,
+                                                              const QStringList &propertyNames);
+  /// Persist only the property values contained in a snapshot.
+  static void saveSettings(QSettings &settings, const FitOptionsBrowserSettings &values);
+
+private:
+  QMap<QString, QString> m_values;
+};
+
 /**
  * Class FitOptionsBrowser implements QtPropertyBrowser to display
  * and set properties of Fit algorithm (excluding Function and Workspace)
@@ -48,10 +65,12 @@ public:
   QString getProperty(const QString &name) const;
   void setProperty(const QString &name, const QString &value);
   void copyPropertiesToAlgorithm(Mantid::API::IAlgorithm &fit) const;
-  /// Persist the current browser state to mutable storage.
-  void saveSettings(QSettings &settings) const;
-  /// Query const storage and immediately restore browser state; legacy combined operation.
-  void loadSettings(const QSettings &settings);
+  /// Query persistent storage without changing browser state.
+  [[nodiscard]] FitOptionsBrowserSettings readSettings(const QSettings &settings) const;
+  /// Apply an immutable settings snapshot without persistent access.
+  void restoreSettings(const FitOptionsBrowserSettings &settings);
+  /// Capture current browser state without persistent access.
+  [[nodiscard]] FitOptionsBrowserSettings captureSettings() const;
   FittingMode getCurrentFittingType() const;
   void setCurrentFittingType(FittingMode fitType);
   void lockCurrentFittingType(FittingMode fitType);

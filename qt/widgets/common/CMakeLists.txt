@@ -728,6 +728,7 @@ set(QT5_TEST_FILES
     test/QtJSONUtilsTest.h
     test/RepoModelTest.h
     test/ParseKeyValueStringTest.h
+    test/ProcessingAlgoWidgetSettingsTest.h
     test/ProgressableViewTest.h
     test/WorkspaceUtilsTest.h
     test/Python/SipTest.h
