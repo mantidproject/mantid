@@ -77,13 +77,13 @@ class EnergyWindowScan(DataProcessorAlgorithm):
         self.declareProperty(
             name="Analyser",
             defaultValue="",
-            validator=StringListValidator(["graphite", "mica", "fmica"]),
+            validator=StringListValidator(["graphite", "mica", "fmica", "silicon"]),
             doc="Analyser bank used during run.",
         )
         self.declareProperty(
             name="Reflection",
             defaultValue="",
-            validator=StringListValidator(["002", "004", "006"]),
+            validator=StringListValidator(["002", "004", "006", "111", "333"]),
             doc="Reflection number for instrument setup during run.",
         )
 
@@ -296,7 +296,7 @@ class EnergyWindowScan(DataProcessorAlgorithm):
         self._data_files = self.getProperty("InputFiles").value
         self._sum_files = self.getProperty("SumFiles").value
         self._load_logs = self.getProperty("LoadLogFiles").value
-        self._calibration_ws = ""
+        self._calibration_ws = self.getPropertyValue("CalibrationWorkspace")
 
         self._instrument_name = self.getPropertyValue("Instrument")
         self._analyser = self.getPropertyValue("Analyser")

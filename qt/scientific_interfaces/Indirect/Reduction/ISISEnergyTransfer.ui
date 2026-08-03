@@ -814,6 +814,22 @@
          </widget>
         </item>
         <item>
+         <widget class="QCheckBox" name="ckSaveNXSPE">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="toolTip">
+           <string>Save file in NXSPE format.</string>
+          </property>
+          <property name="text">
+           <string>NXSPE</string>
+          </property>
+          <property name="checked">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QPushButton" name="pbSave">
           <property name="enabled">
            <bool>false</bool>

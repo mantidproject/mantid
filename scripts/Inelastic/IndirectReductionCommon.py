@@ -4,7 +4,17 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.simpleapi import AppendSpectra, ApplyDiffCal, ConvertUnits, CreateGroupingWorkspace, DeleteWorkspace, Load, Rebin
+from mantid.simpleapi import (
+    AppendSpectra,
+    ApplyDiffCal,
+    ConvertUnits,
+    CreateGroupingWorkspace,
+    DeleteWorkspace,
+    Load,
+    LoadMask,
+    Rebin,
+    RemoveSpectra,
+)
 from mantid.api import AnalysisDataService, MatrixWorkspace, WorkspaceGroup, AlgorithmManager
 from mantid.dataobjects import GroupingWorkspace
 from mantid import mtd, logger, config
@@ -716,6 +726,70 @@ def group_on_string(group_detectors, grouping_string):
     return conjoin_workspaces(*groups)
 
 
+def group_spectra_by_theta(
+    workspace: MatrixWorkspace,
+    number_of_groups: int,
+    spectra_range: List[int] = None,
+) -> MatrixWorkspace:
+    """
+    Groups spectra into theta-based bins. The 2-theta range of the valid analyser
+    detectors is divided into equal-width bins and spectra from all banks within the
+    same bin are averaged together.
+
+    @param workspace The workspace to group
+    @param number_of_groups Number of theta groups to create
+    @param spectra_range [min, max] spectrum numbers defining the analyser spectra to
+                         consider; spectra outside this range are ignored. When None,
+                         all unmasked spectra are used.
+    @return Grouped workspace
+    """
+    import numpy as np
+
+    spectrum_info = workspace.spectrumInfo()
+    num_histograms = workspace.getNumberHistograms()
+
+    # Collect (spectrum_number, 2-theta) for each valid, unmasked analyser spectrum
+    indexed_thetas = []
+    for i in range(num_histograms):
+        if not spectrum_info.hasDetectors(i) or spectrum_info.isMasked(i) or spectrum_info.isMonitor(i):
+            continue
+        spec_no = workspace.getSpectrum(i).getSpectrumNo()
+        if spectra_range is not None:
+            if spec_no < spectra_range[0] or spec_no > spectra_range[1]:
+                continue
+        indexed_thetas.append((spec_no, spectrum_info.twoTheta(i)))
+
+    if not indexed_thetas:
+        raise RuntimeError("No valid detectors found for ThetaGroups grouping.")
+
+    indices, theta_values = zip(*indexed_thetas)
+    theta_min = min(theta_values)
+    theta_max = max(theta_values)
+
+    # Divide the theta range into equal-width bins
+    bin_edges = np.linspace(theta_min, theta_max, number_of_groups + 1)
+    # Nudge the last edge so the maximum theta falls inside the last bin
+    bin_edges[-1] += 1e-10
+
+    theta_groups: List[List[int]] = [[] for _ in range(number_of_groups)]
+    for idx, theta in indexed_thetas:
+        bin_idx = int(np.searchsorted(bin_edges[1:], theta))
+        bin_idx = min(bin_idx, number_of_groups - 1)
+        theta_groups[bin_idx].append(idx)
+
+    non_empty_groups = [g for g in theta_groups if g]
+    if not non_empty_groups:
+        raise RuntimeError("No spectra could be assigned to theta groups.")
+
+    group_detectors = AlgorithmManager.create("GroupDetectors")
+    group_detectors.setChild(True)
+    group_detectors.setProperty("InputWorkspace", workspace)
+    group_detectors.setProperty("Behaviour", "Average")
+
+    groups = [create_group_from_spectra_list(group_detectors, group) for group in non_empty_groups]
+    return conjoin_workspaces(*groups)
+
+
 def group_spectra(
     workspace: str | MatrixWorkspace,
     method: str,
@@ -840,6 +914,21 @@ def group_spectra_of(
     elif grouping_method == "Groups":
         group_string = create_detector_grouping_string(number_of_groups, spectra_range[0], spectra_range[1])
         return group_on_string(group_detectors, group_string)
+    elif grouping_method == "Detectors":
+        try:
+            grouping_file = instrument.getStringParameter("Workflow.DetectorsGroupingFile")[0]
+        except IndexError:
+            raise RuntimeError(
+                "Cannot get detectors grouping file from instrument parameter file. "
+                "Ensure 'Workflow.DetectorsGroupingFile' is defined in the IPF."
+            )
+        if not os.path.isfile(grouping_file):
+            grouping_file = os.path.join(config.getString("groupingFiles.directory"), grouping_file)
+        if not os.path.isfile(grouping_file):
+            raise RuntimeError("Cannot find tube grouping file: %s" % grouping_file)
+        group_detectors.setProperty("MapFile", grouping_file)
+    elif grouping_method == "ThetaGroups":
+        return group_spectra_by_theta(workspace, number_of_groups, spectra_range)
     else:
         raise RuntimeError("Invalid grouping method %s for workspace %s" % (grouping_method, workspace.name()))
 
@@ -1066,7 +1155,12 @@ def save_reduction(workspace_names, formats, x_units="DeltaE"):
             SaveNexusProcessed(InputWorkspace=workspace_name, Filename=workspace_name + ".nxs")
 
         if "nxspe" in formats:
-            SaveNXSPE(InputWorkspace=workspace_name, Filename=workspace_name + ".nxspe")
+            SaveNXSPE(
+                InputWorkspace=workspace_name,
+                Filename=workspace_name + ".nxspe",
+                Psi=0.0,
+                KiOverKfScaling=True,
+            )
 
         if "ascii" in formats:
             _save_ascii(workspace_name, workspace_name + ".dat")
@@ -1253,6 +1347,70 @@ def mask_detectors(workspace, masked_indices):
     mask_detectors_alg.setProperty("Workspace", workspace)
     mask_detectors_alg.setProperty("SpectraList", masked_indices)
     mask_detectors_alg.execute()
+
+
+def remove_edge_pixels(workspace):
+    """
+    Loads the mask file referenced by 'Workflow.EdgePixelMaskFile' from the silicon
+    component of the workspace's instrument and physically removes those spectra.
+    This is a no-op for non-silicon analysers (when the parameter is absent).
+
+    :param workspace:   The name of a workspace in the ADS.
+    """
+    ws = mtd[workspace]
+    component = ws.getInstrument().getComponentByName("silicon")
+    if component is None:
+        return
+    values = component.getStringParameter("Workflow.EdgePixelMaskFile")
+    if not values:
+        return
+    mask_ws_name = "__edge_pixel_mask"
+    LoadMask(Instrument=ws.getInstrument().getName(), InputFile=values[0], OutputWorkspace=mask_ws_name)
+    mask_ws = mtd[mask_ws_name]
+    masked_det_ids = frozenset(
+        detid
+        for i in range(mask_ws.getNumberHistograms())
+        if mask_ws.readY(i)[0] > 0.5
+        for detid in mask_ws.getSpectrum(i).getDetectorIDs()
+    )
+    DeleteWorkspace(mask_ws_name)
+    indices_to_remove = [i for i in range(ws.getNumberHistograms()) if ws.getSpectrum(i).getSpectrumNo() in masked_det_ids]
+    if indices_to_remove:
+        RemoveSpectra(InputWorkspace=workspace, OutputWorkspace=workspace, WorkspaceIndices=indices_to_remove)
+
+
+def get_minimum_calibration_factor(workspace):
+    """
+    Reads the silicon component's 'Workflow.MinimumCalibrationFactor' parameter, or 0.0 if absent.
+
+    :param workspace:   The name of a workspace in the ADS.
+    """
+    component = mtd[workspace].getInstrument().getComponentByName("silicon")
+    if component is None:
+        return 0.0
+    values = component.getNumberParameter("Workflow.MinimumCalibrationFactor")
+    return values[0] if values else 0.0
+
+
+def exclude_low_calibration_spectra(workspace):
+    """
+    Removes spectra with a calibration factor below get_minimum_calibration_factor() times the mean.
+
+    :param workspace:   The name of a calibration workspace in the ADS to remove spectra from.
+    """
+    threshold_factor = get_minimum_calibration_factor(workspace)
+    if threshold_factor <= 0.0:
+        return
+    values = mtd[workspace].extractY().flatten()
+    nonzero = values[values > 0.0]
+    if nonzero.size == 0:
+        return
+    low_indices = np.where(values < threshold_factor * nonzero.mean())[0].tolist()
+    if not low_indices:
+        return
+    spec_nos = [mtd[workspace].getSpectrum(i).getSpectrumNo() for i in low_indices]
+    logger.warning(f"Excluding {len(low_indices)} low-calibration spectra: {spec_nos}")
+    RemoveSpectra(InputWorkspace=workspace, OutputWorkspace=workspace, WorkspaceIndices=low_indices)
 
 
 def _save_ascii(workspace, file_name):

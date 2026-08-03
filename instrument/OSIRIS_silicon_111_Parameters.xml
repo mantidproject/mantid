@@ -7,6 +7,14 @@
       <value val="spectroscopy" />
     </parameter>
 
+    <parameter name="spectra-min">
+      <value val="1009" />
+    </parameter>
+
+    <parameter name="spectra-max">
+      <value val="2562" />
+    </parameter>
+
     <parameter name="analyser" type="string">
       <value val="silicon" />
     </parameter>
@@ -15,12 +23,40 @@
       <value val="111" />
     </parameter>
 
+    <parameter name="peak-start">
+      <value val="55000" />
+    </parameter>
+
+    <parameter name="peak-end">
+      <value val="57000" />
+    </parameter>
+
+    <parameter name="back-start">
+      <value val="61000" />
+    </parameter>
+
+    <parameter name="back-end">
+      <value val="63000" />
+    </parameter>
+
+    <parameter name="Workflow.DetectorsGroupingFile" type="string">
+      <value val="OSIRIS_Si_Detectors_Grouping.xml" />
+    </parameter>
+
+  </component-link>
+
+  <component-link name="silicon">
+
     <parameter name="Efixed">
       <value val="2.082" />
     </parameter>
 
     <parameter name="resolution">
-      <value val="0.00075" />
+      <value val="0.015" />
+    </parameter>
+
+    <parameter name="resolution-rebin-width">
+      <value val="0.001" />
     </parameter>
 
   </component-link>
