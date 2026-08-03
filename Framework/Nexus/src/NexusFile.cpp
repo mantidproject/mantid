@@ -89,6 +89,42 @@ static herr_t getEntriesCallback(hid_t gid, const char *name, const H5L_info2_t 
   return 0;
 }
 
+/** Number of bytes an open string dataset occupies when read back as raw characters.
+ * A string dataset carries its width in the datatype rather than the dataspace, so the
+ * dataspace extents on their own undercount the storage by that width.
+ * @param data_id :: handle of the open dataset
+ * @param type_id :: handle of the dataset's datatype
+ * @param space_id :: handle of the dataset's dataspace
+ * @return the storage size, in bytes, excluding any null terminator
+ */
+static std::size_t stringStorageSize(hid_t const data_id, hid_t const type_id, hid_t const space_id) {
+  std::size_t storage_size(0);
+  if (H5Tis_variable_str(type_id) > 0) {
+    hsize_t vlen_size(0);
+    if (H5Sget_simple_extent_ndims(space_id) == 0) {
+      // H5Dvlen_get_buf_size is unreliable with H5S_SCALAR in some HDF5 versions.
+      // Read the single vlen string and measure it directly.
+      char *vbuf = nullptr;
+      if (H5Dread(data_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &vbuf) < 0 || vbuf == nullptr) {
+        throw Mantid::Nexus::Exception("Failed to read scalar variable-length string length");
+      }
+      vlen_size = strlen(vbuf);
+      H5free_memory(vbuf);
+    } else if (H5Dvlen_get_buf_size(data_id, type_id, space_id, &vlen_size) < 0) {
+      throw Mantid::Nexus::Exception("Failed to read string length for variable-length string");
+    }
+    storage_size = static_cast<std::size_t>(vlen_size);
+  } else {
+    // a scalar dataspace reports a single point, so this covers rank 0 as well
+    hssize_t const npoints = H5Sget_simple_extent_npoints(space_id);
+    if (npoints < 0) {
+      throw Mantid::Nexus::Exception("Failed to get dataspace extent");
+    }
+    storage_size = H5Tget_size(type_id) * static_cast<std::size_t>(npoints);
+  }
+  return storage_size;
+}
+
 } // end of anonymous namespace
 
 namespace Mantid::Nexus {
@@ -163,7 +199,10 @@ void File::initOpenFile(std::string const &filename, NXaccess const am) {
   UniqueFileID temp_fid;
   if (am != NXaccess::CREATE5) {
     if (H5Fis_accessible(filename.c_str(), fapl) <= 0) {
-      throw NXEXCEPTION("File is not HDF5");
+      // The descriptor used to perform this check while being constructed, ahead of the file open.
+      // Keep both its exception type and its message so callers see no change.
+      // NOTE must be std::invalid_argument for expected errors to be raised in python API
+      throw std::invalid_argument("ERROR: Kernel::NexusDescriptor couldn't open hdf5 file " + filename + "\n");
     }
     temp_fid = H5Fopen(filename.c_str(), (unsigned)am, fapl);
   } else {
@@ -768,25 +807,8 @@ string File::getStrData() {
     throw NXEXCEPTION(msg.str());
   }
   // determine storage size: type_size × npoints (mirrors H5Cpp's getInMemDataSize approach)
-  dimsize_t storage_size;
-  if (H5Tis_variable_str(m_current_type_id)) {
-    if (rank == 0) {
-      // H5Dvlen_get_buf_size is unreliable with H5S_SCALAR in some HDF5 versions.
-      char *vbuf = nullptr;
-      if (H5Dread(m_current_data_id, m_current_type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &vbuf) < 0 || !vbuf)
-        throw NXEXCEPTION("Failed to read scalar variable-length string");
-      storage_size = strlen(vbuf);
-      H5free_memory(vbuf);
-    } else if (H5Dvlen_get_buf_size(m_current_data_id, m_current_type_id, m_current_space_id, &storage_size) < 0) {
-      throw NXEXCEPTION("Failed to read string length for variable-length string");
-    }
-  } else {
-    hssize_t npoints = H5Sget_simple_extent_npoints(m_current_space_id);
-    if (npoints < 0)
-      throw NXEXCEPTION("Failed to get dataspace extent");
-    storage_size = H5Tget_size(m_current_type_id) * static_cast<dimsize_t>(npoints);
-  }
-  std::vector<char> value(static_cast<size_t>(storage_size) + 1, '\0');
+  std::size_t const storage_size = stringStorageSize(m_current_data_id, m_current_type_id, m_current_space_id);
+  std::vector<char> value(storage_size + 1, '\0');
   this->getData(value.data());
   return std::string(value.data(), strlen(value.data()));
 }
@@ -826,26 +848,51 @@ template <typename NumT> void File::getData(NumT *data) {
 }
 
 template <typename NumT> void File::getData(vector<NumT> &data) {
+  if (!isDataSetOpen()) {
+    throw NXEXCEPTION("No dataset open");
+  }
+
   // validate type on disk against queried type
-  NXnumtype const file_type = hdf5ToNXType(H5Tget_class(m_current_type_id), m_current_type_id);
+  H5T_class_t const tclass = H5Tget_class(m_current_type_id);
+  NXnumtype const file_type = hdf5ToNXType(tclass, m_current_type_id);
   if (file_type != getType<NumT>()) {
     std::stringstream msg;
     msg << "inconsistent NXnumtype file datatype=" << file_type << " supplied datatype=" << getType<NumT>();
     throw NXEXCEPTION(msg.str());
   }
-  // determine the number of elements (product of the per-dimension extents).
-  // A scalar/null dataspace has rank 0, giving an empty range whose product is the accumulate seed of 1.
-  std::array<hsize_t, H5S_MAX_RANK> dims{0};
-  int const rank = H5Sget_simple_extent_dims(m_current_space_id, dims.data(), nullptr);
-  size_t const length = std::accumulate(dims.cbegin(), dims.cbegin() + rank, size_t{1},
-                                        [](size_t acc, hsize_t dim) { return acc * static_cast<size_t>(dim); });
 
-  // allocate memory to put the data into
-  // need to use resize() rather than reserve() so vector length gets set
-  data.resize(length);
+  if (tclass == H5T_STRING) {
+    // CHAR data does not hold one character per dataspace element.  makeData folds the string
+    // width into the datatype and leaves the trailing dataspace extent at 1, so the extents alone
+    // undercount the bytes by that width.  Ask HDF5 for the storage size instead.
+    size_t const length = stringStorageSize(m_current_data_id, m_current_type_id, m_current_space_id);
+    if (H5Sget_simple_extent_ndims(m_current_space_id) <= 1) {
+      // getData<char>() strips surrounding whitespace from rank<=1 strings and null-terminates the
+      // result, so leave room for the terminator and then shrink to the trimmed length.
+      data.resize(length + 1, NumT());
+      this->getData<NumT>(data.data());
+      auto const terminator = std::find(data.cbegin(), data.cend(), NumT());
+      data.resize(static_cast<size_t>(std::distance(data.cbegin(), terminator)));
+    } else {
+      // rank>=2 blocks are copied verbatim, with no trimming and no terminator
+      data.resize(length);
+      this->getData<NumT>(data.data());
+    }
+  } else {
+    // determine the number of elements (product of the per-dimension extents).
+    // A scalar/null dataspace has rank 0, giving an empty range whose product is the accumulate seed of 1.
+    std::array<hsize_t, H5S_MAX_RANK> dims{0};
+    int const rank = H5Sget_simple_extent_dims(m_current_space_id, dims.data(), nullptr);
+    size_t const length = std::accumulate(dims.cbegin(), dims.cbegin() + rank, size_t{1},
+                                          [](size_t acc, hsize_t dim) { return acc * static_cast<size_t>(dim); });
 
-  // fetch the data
-  this->getData<NumT>(data.data());
+    // allocate memory to put the data into
+    // need to use resize() rather than reserve() so vector length gets set
+    data.resize(length);
+
+    // fetch the data
+    this->getData<NumT>(data.data());
+  }
 }
 
 //------------------------------------------------------------------------------------------------------------------

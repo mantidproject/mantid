@@ -47,10 +47,20 @@ template <herr_t (*H5Xclose)(hid_t)> std::string readNXClass(Mantid::Nexus::Uniq
         // reclaim memory allocated for rdata by HDF5
         H5free_memory(rdata);
       } else {
-        // fixed length string
-        std::size_t size = H5Tget_size(atype);
-        nxClass.resize(size);
-        H5Aread(attrID, atype, nxClass.data());
+        // fixed length string -- the buffer has to cover every point of the attribute's dataspace
+        Mantid::Nexus::UniqueID<&H5Sclose> aspace(H5Aget_space(attrID));
+        hssize_t const npoints = H5Sget_simple_extent_npoints(aspace);
+        std::size_t const size = H5Tget_size(atype) * static_cast<std::size_t>(npoints > 0 ? npoints : 1);
+        std::string buffer(size, '\0');
+        if (H5Aread(attrID, atype, buffer.data()) >= 0) {
+          // a fixed-length string is null-padded out to the width of its type, and the padding
+          // is not part of the class name -- keep only the characters before the first null
+          std::size_t const terminator = buffer.find('\0');
+          if (terminator != std::string::npos) {
+            buffer.resize(terminator);
+          }
+          nxClass = std::move(buffer);
+        }
       }
     }
   }
