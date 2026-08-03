@@ -13,6 +13,7 @@ Defines the QMainWindow of the application and the main() entry point.
 
 import builtins
 import os
+from dataclasses import dataclass
 
 from mantid.api import FrameworkManager, AlgorithmManager
 from mantid.kernel import ConfigService, logger, UsageService, FeatureType
@@ -70,6 +71,17 @@ SPLASH.show()
 SPLASH.showMessage("Starting...", int(Qt.AlignBottom | Qt.AlignLeft | Qt.AlignAbsolute), QColor(Qt.black))
 # The event loop has not started - force event processing
 QApplication.processEvents(QEventLoop.AllEvents)
+
+
+@dataclass(frozen=True)
+class MainWindowSettings:
+    """Immutable main-window state read from persistent settings."""
+
+    size: QSize
+    position: QPoint
+    state: QByteArray | None
+    font: str | None
+
 
 # -----------------------------------------------------------------------------
 # MainWindow
@@ -217,7 +229,8 @@ class MainWindow(QMainWindow):
         # uses default configuration as necessary
         self.setup_default_layouts()
         self.create_actions()
-        self.readSettings(CONF)
+        self.restoreSettings(self.readSettings(CONF))
+        self.restoreChildSettings(CONF)
         self.config_updated()
 
         self.override_python_input()
@@ -534,7 +547,8 @@ class MainWindow(QMainWindow):
             # write out any changes to the mantid config file
             ConfigService.saveConfig(ConfigService.getUserFilename())
             # write current window information to global settings object
-            self.writeSettings(CONF)
+            self.saveSettings(CONF, self.captureSettings())
+            self.saveChildSettings(CONF)
             # Close all open plots
             # We don't want this at module scope here
             import matplotlib.pyplot as plt
@@ -691,13 +705,23 @@ class MainWindow(QMainWindow):
         about.show()
 
     def readSettings(self, settings):
+        """Read and return main-window settings without changing the UI or store."""
+        return MainWindowSettings(
+            size=settings.get("MainWindow/size", type=QSize),
+            position=settings.get("MainWindow/position", type=QPoint),
+            state=settings.get("MainWindow/state", type=QByteArray) if settings.has("MainWindow/state") else None,
+            font=settings.get("MainWindow/font", type=str) if settings.has("MainWindow/font") else None,
+        )
+
+    def restoreSettings(self, settings):
+        """Apply a main-window snapshot without persistent writes."""
         qapp = QApplication.instance()
 
         # get the saved window geometry
-        window_size = settings.get("MainWindow/size", type=QSize)
-        window_pos = settings.get("MainWindow/position", type=QPoint)
-        if settings.has("MainWindow/font"):
-            font_string = settings.get("MainWindow/font", type=str).split(",")
+        window_size = settings.size
+        window_pos = settings.position
+        if settings.font is not None:
+            font_string = settings.font.split(",")
             # QFontDatabase.font is static in Qt6 (the class can no longer be instantiated)
             # but an instance method in Qt5.
             try:
@@ -734,12 +758,14 @@ class MainWindow(QMainWindow):
         self.move(window_pos)
 
         # restore window state
-        if settings.has("MainWindow/state"):
-            if not self.restoreState(settings.get("MainWindow/state", type=QByteArray), SAVE_STATE_VERSION):
+        if settings.state is not None:
+            if not self.restoreState(settings.state, SAVE_STATE_VERSION):
                 logger.warning("The previous layout of workbench is not compatible with this version, reverting to default layout.")
         else:
             self.setWindowState(Qt.WindowMaximized)
 
+    def restoreChildSettings(self, settings):
+        """Read and restore child-widget settings."""
         # read in settings for children
         algorithm_history = AlgorithmInputHistory()
         algorithm_history.restoreSettings(algorithm_history.readSettings(settings))
@@ -747,16 +773,25 @@ class MainWindow(QMainWindow):
             if hasattr(widget, "readSettingsIfNotDone"):
                 widget.readSettingsIfNotDone(settings)
 
-    def writeSettings(self, settings):
-        settings.set("MainWindow/size", self.size())  # QSize
-        settings.set("MainWindow/position", self.pos())  # QPoint
-        settings.set("MainWindow/state", self.saveState(SAVE_STATE_VERSION))  # QByteArray
+    def captureSettings(self):
+        """Capture the current main-window state without persistent writes."""
+        return MainWindowSettings(self.size(), self.pos(), self.saveState(SAVE_STATE_VERSION), None)
 
+    def saveSettings(self, settings, values):
+        """Persist an explicitly captured main-window snapshot."""
+        settings.set("MainWindow/size", values.size)  # QSize
+        settings.set("MainWindow/position", values.position)  # QPoint
+        settings.set("MainWindow/state", values.state)  # QByteArray
+
+    def saveChildSettings(self, settings):
+        """Capture and persist settings owned by child widgets."""
         # write out settings for children
         algorithm_history = AlgorithmInputHistory()
         algorithm_history.saveSettings(settings, algorithm_history.captureSettings())
         for widget in self.widgets:
-            if hasattr(widget, "writeSettings"):
+            if hasattr(widget, "captureSettings") and hasattr(widget, "saveSettings"):
+                widget.saveSettings(settings, widget.captureSettings())
+            elif hasattr(widget, "writeSettings"):
                 widget.writeSettings(settings)
 
     def override_python_input(self):

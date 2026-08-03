@@ -9,6 +9,7 @@
 #
 # system imports
 import os.path as osp
+from dataclasses import dataclass
 
 # third-party library imports
 from qtpy.QtWidgets import QVBoxLayout
@@ -30,6 +31,14 @@ ACCEPTED_FILE_EXTENSIONS = [".py", ".pyw"]
 TAB_SETTINGS_KEY = "Editors/SessionTabs"
 ZOOM_LEVEL_KEY = "Editors/ZoomLevel"
 ENABLE_COMPLETION_KEY = "Editors/completion_enabled"
+
+
+@dataclass(frozen=True)
+class EditorSettings:
+    """Immutable editor state read from persistent settings."""
+
+    session_tabs: tuple[str, ...]
+    zoom_level: int
 
 
 class MultiFileEditor(PluginWidget):
@@ -116,20 +125,29 @@ class MultiFileEditor(PluginWidget):
         return "Editor"
 
     def readSettings(self, settings):
+        """Read and return editor settings without changing the editor or store."""
         try:
             prev_session_tabs = settings.get(TAB_SETTINGS_KEY, type=list)
             zoom_level = settings.get(ZOOM_LEVEL_KEY, type=int)
         except (KeyError, TypeError):
+            return None
+        return EditorSettings(tuple(prev_session_tabs), zoom_level)
+
+    def restoreSettings(self, settings):
+        """Apply a previously read editor snapshot without persistent writes."""
+        if settings is None:
             return
-        self.restore_session_tabs(prev_session_tabs)
-        self.editors.current_editor().editor.zoomTo(zoom_level)
+        self.restore_session_tabs(settings.session_tabs)
+        self.editors.current_editor().editor.zoomTo(settings.zoom_level)
 
-    def writeSettings(self, settings):
-        settings.set(ZOOM_LEVEL_KEY, self.editors_zoom_level)
+    def captureSettings(self):
+        """Capture the editor state prepared during application shutdown."""
+        return EditorSettings(tuple(dict.fromkeys(self.tabs_open_on_closing)), self.editors_zoom_level)
 
-        no_duplicates = []
-        [no_duplicates.append(x) for x in self.tabs_open_on_closing if x not in no_duplicates]
-        settings.set(TAB_SETTINGS_KEY, no_duplicates)
+    def saveSettings(self, settings, values):
+        """Persist an explicitly captured editor snapshot."""
+        settings.set(ZOOM_LEVEL_KEY, values.zoom_level)
+        settings.set(TAB_SETTINGS_KEY, list(values.session_tabs))
 
     def register_plugin(self):
         self.main.add_dockwidget(self)

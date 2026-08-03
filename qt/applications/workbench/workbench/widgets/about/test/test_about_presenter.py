@@ -11,7 +11,7 @@ from unittest.mock import call, Mock, patch
 
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.testing.strict_mock import StrictMock
-from workbench.widgets.about.presenter import AboutPresenter
+from workbench.widgets.about.presenter import AboutPresenter, AboutSettings
 
 
 class MockInstrument(object):
@@ -122,6 +122,24 @@ class AboutPresenterTest(TestCase):
         MockConfigService.getString.assert_has_calls([call(AboutPresenter.FACILITY), call(AboutPresenter.INSTRUMENT)])
         MockConfigService.getFacility.assert_has_calls([call("FACILITY1")])
         MockConfigService.getInstrument.assert_has_calls([call("FACILITY1")])
+
+    def test_read_settings_returns_snapshot_without_writing(self):
+        settings = Mock()
+        settings.value.side_effect = [1, "6.13"]
+
+        snapshot = AboutPresenter.readSettings(settings)
+
+        self.assertEqual(AboutSettings(1, "6.13"), snapshot)
+        settings.setValue.assert_not_called()
+        settings.beginGroup.assert_called_once_with(AboutPresenter.DO_NOT_SHOW_GROUP)
+        settings.endGroup.assert_called_once_with()
+
+    def test_save_settings_writes_an_explicit_snapshot(self):
+        settings = Mock()
+
+        AboutPresenter.saveSettings(settings, AboutSettings(1, "6.13"))
+
+        settings.setValue.assert_has_calls([call(AboutPresenter.DO_NOT_SHOW, 1), call(AboutPresenter.PREVIOUS_VERSION, "6.13")])
 
     def assert_connected_once(self, owner, signal):
         self.assertEqual(1, owner.receivers(signal))

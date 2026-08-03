@@ -53,12 +53,20 @@ class LogMessageDisplay(PluginWidget):
         self.display.file_name_modified(old_file_name, new_file_name)
 
     def readSettings(self, settings):
-        qsettings = toQSettings(settings)
-        self.display.restoreSettings(self.display.readSettings(qsettings))
+        """Read and return message-display settings without changing the widget or store."""
+        return self.display.readSettings(toQSettings(settings))
 
-    def writeSettings(self, settings):
-        qsettings = toQSettings(settings)
-        self.display.saveSettings(qsettings, self.display.captureSettings())
+    def restoreSettings(self, settings):
+        """Apply a previously read message-display snapshot."""
+        self.display.restoreSettings(settings)
+
+    def captureSettings(self):
+        """Capture the current message-display settings."""
+        return self.display.captureSettings()
+
+    def saveSettings(self, settings, values):
+        """Persist an explicitly captured message-display snapshot."""
+        self.display.saveSettings(toQSettings(settings), values)
 
     def register_plugin(self, menu=None):
         self.display.attachLoggingChannel(DEFAULT_LOG_PRIORITY)
