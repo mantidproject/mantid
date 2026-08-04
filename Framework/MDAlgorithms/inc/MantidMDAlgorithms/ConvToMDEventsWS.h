@@ -51,7 +51,10 @@ private:
   /**function converts particular type of events into MD space and add these
    * events to the workspace itself    */
   template <class T> size_t convertEventList(size_t workspaceIndex);
-
+  template <class T>
+  size_t convertEventList(size_t workspaceIndex, MDTransf_sptr pQConverter, Geometry::Goniometer &gonio,
+                          std::vector<coord_t> &eventCoord, std::vector<coord_t> &allCoord, std::vector<float> &sigErr,
+                          std::vector<uint32_t> &detIds);
   virtual void appendEventsFromInputWS(API::Progress *pProgress, const API::BoxController_sptr &bc);
   // Variables for getting log values at times and recomputing sample orientation
   Kernel::DblMatrix m_Wtransf;
