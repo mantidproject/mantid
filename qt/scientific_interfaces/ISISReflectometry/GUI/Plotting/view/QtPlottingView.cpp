@@ -124,7 +124,7 @@ void QtPlottingView::initLayout() {
       m_notifyee->notifyPlotIndividualClicked();
     }
   });
-  connect(m_ui.addToExistingPlot, &QCheckBox::stateChanged, this, [this](int) {
+  connect(m_ui.addToExistingPlot, &QCheckBox::checkStateChanged, this, [this](Qt::CheckState) {
     if (m_notifyee) {
       m_notifyee->notifyAddToExistingPlotChanged();
     }
