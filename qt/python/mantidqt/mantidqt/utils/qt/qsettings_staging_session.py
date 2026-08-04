@@ -1,0 +1,333 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2026 ISIS Rutherford Appleton Laboratory UKRI,
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+# SPDX - License - Identifier: GPL - 3.0 +
+#  This file is part of the mantid workbench.
+
+"""Prepare private local sessions for out-of-place QSettings writes."""
+
+from collections.abc import Callable, Iterable
+from dataclasses import dataclass, field
+import hashlib
+import json
+import os
+from pathlib import Path
+import shutil
+import stat
+from typing import Protocol
+from uuid import uuid4
+
+from mantidqt.utils.qt.qsettings_staging import QSettingsStagingEligibility
+
+
+MANAGER_RELATIVE_PATH = Path("mantidproject/qsettings-stage")
+MANIFEST_FILENAME = ".qsettings-staging-manifest.json"
+COMPLETED_FILENAME = ".qsettings-staging-complete"
+COORDINATOR_FILENAME = "coordinator.lock"
+DEFAULT_SETTINGS_PATHS = (Path("mantidproject/mantidworkbench.ini"),)
+
+_PRIVATE_DIRECTORY_MODE = 0o700
+_PRIVATE_FILE_MODE = 0o600
+
+
+class _Coordinator(Protocol):
+    def tryLock(self, timeout: int = 0) -> bool: ...
+
+    def unlock(self) -> None: ...
+
+
+class StagingPreparationError(RuntimeError):
+    """Raised when a local staging session cannot be prepared safely."""
+
+
+class CoordinatorUnavailable(StagingPreparationError):
+    """Raised when another process owns the local staging coordinator."""
+
+
+@dataclass(frozen=True)
+class StagedSettingsFile:
+    """Startup state required to compare and copy back one settings file."""
+
+    canonical_relative_path: Path
+    staged_relative_path: Path
+    canonical_sha256: str | None
+    canonical_mode: int | None
+
+
+@dataclass
+class PreparedQSettingsSession:
+    """A seeded staging session that retains coordinator ownership."""
+
+    canonical_root: Path
+    staging_root: Path
+    manifest: tuple[StagedSettingsFile, ...]
+    retained_session_roots: tuple[Path, ...]
+    _coordinator: _Coordinator = field(repr=False)
+    _released: bool = field(default=False, init=False, repr=False)
+
+    def abort(self) -> None:
+        """Release ownership while retaining this session for recovery."""
+        if not self._released:
+            self._coordinator.unlock()
+            self._released = True
+
+
+class QSettingsStagingSessionManager:
+    """Create one private, coordinator-owned staging session."""
+
+    def __init__(
+        self,
+        eligibility: QSettingsStagingEligibility,
+        lock_factory: Callable[[Path], _Coordinator] | None = None,
+        expected_settings_paths: Iterable[Path] = DEFAULT_SETTINGS_PATHS,
+        effective_uid: int | None = None,
+    ):
+        if not eligibility.active or eligibility.config_root is None or eligibility.cache_root is None:
+            raise ValueError("an active eligibility result with config and cache roots is required")
+        self._canonical_root = eligibility.config_root
+        self._cache_root = eligibility.cache_root
+        self._lock_factory = _create_qlockfile if lock_factory is None else lock_factory
+        self._expected_settings_paths = tuple(_validated_settings_path(path) for path in expected_settings_paths)
+        self._effective_uid = os.geteuid() if effective_uid is None else effective_uid
+
+    def prepare(self) -> PreparedQSettingsSession:
+        """Acquire ownership, seed a unique session, and record its manifest."""
+        _ensure_directory(self._cache_root, self._effective_uid, private_if_created=True)
+        manager_parent = self._cache_root / MANAGER_RELATIVE_PATH.parent
+        _ensure_directory(manager_parent, self._effective_uid, private_if_created=True)
+        manager_root = manager_parent / MANAGER_RELATIVE_PATH.name
+        _ensure_directory(manager_root, self._effective_uid, private_if_created=True, force_private=True)
+
+        coordinator = self._lock_factory(manager_root / COORDINATOR_FILENAME)
+        if not coordinator.tryLock(0):
+            raise CoordinatorUnavailable(f"QSettings staging coordinator is already held under {manager_root}")
+
+        session_root: Path | None = None
+        try:
+            retained_sessions = _cleanup_completed_sessions(manager_root, self._effective_uid)
+            session_root = manager_root / f"session-{uuid4().hex}"
+            session_root.mkdir(mode=_PRIVATE_DIRECTORY_MODE)
+            manifest = _seed_session(
+                self._canonical_root,
+                session_root,
+                self._expected_settings_paths,
+            )
+            _write_manifest(session_root, manifest)
+            return PreparedQSettingsSession(
+                canonical_root=self._canonical_root,
+                staging_root=session_root,
+                manifest=manifest,
+                retained_session_roots=retained_sessions,
+                _coordinator=coordinator,
+            )
+        except BaseException:
+            try:
+                if session_root is not None:
+                    _remove_owned_session(session_root, manager_root, self._effective_uid)
+            finally:
+                coordinator.unlock()
+            raise
+
+
+def _create_qlockfile(path: Path) -> _Coordinator:
+    # Keep Qt out of discovery and import-only launcher paths. The first actual
+    # preparation is the first point at which QLockFile is needed.
+    from qtpy.QtCore import QLockFile
+
+    return QLockFile(str(path))
+
+
+def _validated_settings_path(path: Path) -> Path:
+    path = Path(path)
+    if path.is_absolute() or ".." in path.parts or not path.parts or path.parts[0] != "mantidproject":
+        raise ValueError(f"settings path must be relative and below mantidproject: {path}")
+    return path
+
+
+def _ensure_directory(path: Path, effective_uid: int, private_if_created: bool, force_private: bool = False) -> None:
+    path = Path(path)
+    created = False
+    try:
+        if not path.exists():
+            path.mkdir(mode=_PRIVATE_DIRECTORY_MODE, parents=True)
+            created = True
+        path_stat = path.lstat()
+    except OSError as error:
+        raise StagingPreparationError(f"cannot prepare staging directory {path}: {error}") from error
+
+    if stat.S_ISLNK(path_stat.st_mode) or not stat.S_ISDIR(path_stat.st_mode):
+        raise StagingPreparationError(f"staging path is not a directory: {path}")
+    if path_stat.st_uid != effective_uid:
+        raise StagingPreparationError(f"staging directory is not owned by the current user: {path}")
+    if (created and private_if_created) or force_private:
+        try:
+            path.chmod(_PRIVATE_DIRECTORY_MODE)
+        except OSError as error:
+            raise StagingPreparationError(f"cannot make staging directory private: {path}") from error
+
+
+def _cleanup_completed_sessions(manager_root: Path, effective_uid: int) -> tuple[Path, ...]:
+    retained = []
+    try:
+        children = tuple(manager_root.iterdir())
+    except OSError as error:
+        raise StagingPreparationError(f"cannot inspect staging manager directory: {manager_root}") from error
+
+    for child in children:
+        if not child.name.startswith("session-"):
+            continue
+        try:
+            child_stat = child.lstat()
+        except OSError:
+            retained.append(child)
+            continue
+        if stat.S_ISLNK(child_stat.st_mode) or not stat.S_ISDIR(child_stat.st_mode) or child_stat.st_uid != effective_uid:
+            retained.append(child)
+            continue
+        completion_marker = child / COMPLETED_FILENAME
+        try:
+            marker_stat = completion_marker.lstat()
+        except OSError:
+            retained.append(child)
+            continue
+        if not stat.S_ISREG(marker_stat.st_mode) or marker_stat.st_uid != effective_uid:
+            retained.append(child)
+            continue
+        _remove_owned_session(child, manager_root, effective_uid)
+    return tuple(retained)
+
+
+def _remove_owned_session(session_root: Path, manager_root: Path, effective_uid: int) -> None:
+    try:
+        root_stat = session_root.lstat()
+    except FileNotFoundError:
+        return
+    if (
+        session_root.parent != manager_root
+        or not session_root.name.startswith("session-")
+        or stat.S_ISLNK(root_stat.st_mode)
+        or not stat.S_ISDIR(root_stat.st_mode)
+        or root_stat.st_uid != effective_uid
+    ):
+        raise StagingPreparationError(f"refusing to remove unvalidated staging path: {session_root}")
+    shutil.rmtree(session_root)
+
+
+def _seed_session(
+    canonical_root: Path,
+    session_root: Path,
+    expected_settings_paths: tuple[Path, ...],
+) -> tuple[StagedSettingsFile, ...]:
+    staged_organization_root = session_root / "mantidproject"
+    staged_organization_root.mkdir(mode=_PRIVATE_DIRECTORY_MODE)
+    source_organization_root = canonical_root / "mantidproject"
+    entries: dict[Path, StagedSettingsFile] = {}
+
+    if source_organization_root.exists() or source_organization_root.is_symlink():
+        source_stat = source_organization_root.lstat()
+        if stat.S_ISLNK(source_stat.st_mode) or not stat.S_ISDIR(source_stat.st_mode):
+            raise StagingPreparationError(f"canonical settings root is not a real directory: {source_organization_root}")
+        _seed_directory(source_organization_root, staged_organization_root, canonical_root, session_root, entries)
+
+    for relative_path in expected_settings_paths:
+        entries.setdefault(relative_path, StagedSettingsFile(relative_path, relative_path, None, None))
+    return tuple(entries[path] for path in sorted(entries))
+
+
+def _seed_directory(
+    source_directory: Path,
+    staged_directory: Path,
+    canonical_root: Path,
+    session_root: Path,
+    entries: dict[Path, StagedSettingsFile],
+) -> None:
+    try:
+        children = tuple(source_directory.iterdir())
+    except OSError as error:
+        raise StagingPreparationError(f"cannot inspect canonical settings directory: {source_directory}") from error
+
+    for source in children:
+        if _is_excluded_artifact(source.name):
+            continue
+        source_stat = source.lstat()
+        if stat.S_ISLNK(source_stat.st_mode):
+            raise StagingPreparationError(f"refusing to follow a canonical settings symlink: {source}")
+        staged = staged_directory / source.name
+        if stat.S_ISDIR(source_stat.st_mode):
+            staged.mkdir(mode=_PRIVATE_DIRECTORY_MODE)
+            _seed_directory(source, staged, canonical_root, session_root, entries)
+        elif stat.S_ISREG(source_stat.st_mode):
+            relative_path = source.relative_to(canonical_root)
+            digest, canonical_mode = _copy_and_hash(source, staged)
+            entries[relative_path] = StagedSettingsFile(
+                canonical_relative_path=relative_path,
+                staged_relative_path=staged.relative_to(session_root),
+                canonical_sha256=digest,
+                canonical_mode=canonical_mode,
+            )
+
+
+def _is_excluded_artifact(name: str) -> bool:
+    lowered = name.lower()
+    return (
+        lowered == MANIFEST_FILENAME
+        or lowered == COMPLETED_FILENAME
+        or lowered == "qsettings-stage"
+        or lowered.startswith(".nfs")
+        or lowered.endswith((".lock", ".rmlock", ".tmp", ".temp", ".swp", "~"))
+        or ".rmlock." in lowered
+    )
+
+
+def _copy_and_hash(source: Path, staged: Path) -> tuple[str, int]:
+    digest = hashlib.sha256()
+    source_flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
+    destination_flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
+    try:
+        source_descriptor = os.open(source, source_flags)
+        try:
+            opened_source_stat = os.fstat(source_descriptor)
+            if not stat.S_ISREG(opened_source_stat.st_mode):
+                raise StagingPreparationError(f"canonical settings path changed type while seeding: {source}")
+            destination_descriptor = os.open(staged, destination_flags, _PRIVATE_FILE_MODE)
+            try:
+                while chunk := os.read(source_descriptor, 1024 * 1024):
+                    digest.update(chunk)
+                    _write_all(destination_descriptor, chunk)
+            finally:
+                os.close(destination_descriptor)
+        finally:
+            os.close(source_descriptor)
+    except OSError as error:
+        raise StagingPreparationError(f"cannot seed canonical settings file {source}: {error}") from error
+    return digest.hexdigest(), stat.S_IMODE(opened_source_stat.st_mode)
+
+
+def _write_all(descriptor: int, contents: bytes) -> None:
+    view = memoryview(contents)
+    while view:
+        written = os.write(descriptor, view)
+        if written == 0:
+            raise OSError("short write while preparing staged settings")
+        view = view[written:]
+
+
+def _write_manifest(session_root: Path, manifest: tuple[StagedSettingsFile, ...]) -> None:
+    records = [
+        {
+            "canonical_relative_path": str(entry.canonical_relative_path),
+            "staged_relative_path": str(entry.staged_relative_path),
+            "canonical_sha256": entry.canonical_sha256,
+            "canonical_mode": entry.canonical_mode,
+        }
+        for entry in manifest
+    ]
+    encoded = (json.dumps({"version": 1, "files": records}, indent=2, sort_keys=True) + "\n").encode("utf-8")
+    descriptor = os.open(session_root / MANIFEST_FILENAME, os.O_WRONLY | os.O_CREAT | os.O_EXCL, _PRIVATE_FILE_MODE)
+    try:
+        _write_all(descriptor, encoded)
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
