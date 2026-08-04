@@ -152,9 +152,9 @@ void setAlignmentXAxisValues(Mantid::API::MatrixWorkspace_sptr const &profileWor
     return;
   }
   auto &x = profileWorkspace->dataX(0);
-  for (auto &value : x) {
-    value = xValueForFractionalWorkspaceIndex(rawWorkspace, value, xAxis);
-  }
+  std::transform(x.begin(), x.end(), x.begin(), [&rawWorkspace, &xAxis](const auto &x) {
+    return xValueForFractionalWorkspaceIndex(rawWorkspace, x, xAxis);
+  });
 }
 
 struct SpecularPeakFit {
