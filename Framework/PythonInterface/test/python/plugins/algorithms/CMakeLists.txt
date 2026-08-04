@@ -61,6 +61,7 @@ set(TEST_PY_FILES
     FindGlobalBMatrixTest.py
     FindMultipleUMatricesTest.py
     FindSXPeaksConvolveTest.py
+    FindUBFromConventionalCellTest.py
     FindUBFromScatteringPlaneTest.py
     FitIncidentSpectrumTest.py
     FractionalIndexingTest.py
