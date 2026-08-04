@@ -64,42 +64,66 @@ template <class T> size_t ConvToMDEventsWS::convertEventList(size_t workspaceInd
   getEventsFrom(el, events_ptr);
   const typename std::vector<T> &events = *events_ptr;
 
-  // Parallelise loops by workers, each worker needs a clone of QConverter and Goniometer
-  int numthreads = m_NumThreads < 0 ? PARALLEL_GET_MAX_THREADS : std::max(1, m_NumThreads);
-  std::vector<MDTransf_sptr> qConverters;
-  std::vector<Geometry::Goniometer> gonios;
-  std::vector<std::vector<coord_t>> allCoords;
-  std::vector<std::vector<float>> sig_errs;
-  for (int i = 0; i < numthreads; i++) {
-    qConverters.emplace_back(m_QConverter->clone());
-    allCoords.push_back(allCoord);
-    sig_errs.push_back(sig_err);
-    gonios.emplace_back(m_Goniometer);
+  int nThreads = m_NumThreads < 0 ? PARALLEL_GET_MAX_THREADS : std::max(1, m_NumThreads);
+  int nEvents = static_cast<int>(events.size());
+  if (nEvents < (nThreads * 1000)) {
+    nThreads = 1;
   }
-  // Iterators to start/end
-  PRAGMA_OMP(parallel for)
-  for (int i = 0; i < static_cast<int>(events.size()); i++) {
-    MDTransf_sptr p_QConverter = qConverters[PARALLEL_THREAD_NUMBER];
-    double val = localUnitConv.convertUnits(events[i].tof());
-    double signal = events[i].weight();
-    double errorSq = events[i].errorSquared();
-    if (!setGoniometersFromLogs(&events[i], gonios[PARALLEL_THREAD_NUMBER], p_QConverter))
-      continue; // skip if log value is NaN
-    std::vector<coord_t> locCoord_(m_Coord);
-    if (!setGenericVariableFromLogs(events[i].pulseTime(), locCoord_))
-      continue; // skip if log value is NaN or out of bounds
-    if (!p_QConverter->calcMatrixCoord(val, locCoord_, signal, errorSq))
-      continue; // skip ND outside the range
 
-    sig_errs[PARALLEL_THREAD_NUMBER].emplace_back(static_cast<float>(signal));
-    sig_errs[PARALLEL_THREAD_NUMBER].emplace_back(static_cast<float>(errorSq));
-    allCoords[PARALLEL_THREAD_NUMBER].insert(allCoords[PARALLEL_THREAD_NUMBER].end(), locCoord_.begin(),
-                                             locCoord_.end());
+  if (nThreads > 1) {
+    // Parallelise loops by workers, each worker needs a clone of QConverter and Goniometer
+    int nBatch = static_cast<int>(ceil(nEvents / nThreads));
+    std::vector<std::vector<float>> sigErrs(nThreads, sig_err);
+    std::vector<std::vector<coord_t>> allCoords(nThreads, allCoord);
+
+    PRAGMA_OMP(parallel for)
+    for (int i = 0; i < nThreads; i++) {
+      MDTransf_sptr t_QConverter(m_QConverter->clone());
+      std::vector<coord_t> locCoord_(m_Coord);
+      Geometry::Goniometer t_gonio(m_Goniometer);
+      auto iStart = events.begin() + (nBatch * i);
+      auto iEnd = (i == (nThreads - 1)) ? events.end() : events.begin() + (nBatch * (i + 1));
+      // Iterators to start/end
+      for (auto it = iStart; it != iEnd; it++) {
+        double val = localUnitConv.convertUnits(it->tof());
+        double signal = it->weight();
+        double errorSq = it->errorSquared();
+        if (!setGoniometersFromLogs(it, t_gonio, t_QConverter))
+          continue; // skip if log value is NaN
+        if (!setGenericVariableFromLogs(it->pulseTime(), locCoord_))
+          continue; // skip if log value is NaN or out of bounds
+        if (!t_QConverter->calcMatrixCoord(val, locCoord_, signal, errorSq))
+          continue; // skip ND outside the range
+
+        sigErrs[i].emplace_back(static_cast<float>(signal));
+        sigErrs[i].emplace_back(static_cast<float>(errorSq));
+        allCoords[i].insert(allCoords[i].end(), locCoord_.begin(), locCoord_.end());
+      }
+    }
+    for (int i = 0; i < nThreads; i++) {
+      // The order of the events is important for some tests
+      sig_err.insert(sig_err.end(), sigErrs[i].begin(), sigErrs[i].end());
+      allCoord.insert(allCoord.end(), allCoords[i].begin(), allCoords[i].end());
+    }
+
+  } else {
+    // Non-parallelised version, avoids OpenMP overhead
+    for (auto it = events.cbegin(); it != events.cend(); it++) {
+      if (!setGoniometersFromLogs(it, m_Goniometer, m_QConverter))
+        continue; // skip if log value is NaN
+      if (!setGenericVariableFromLogs(it->pulseTime(), locCoord))
+        continue; // skip if log value is NaN or out of bounds
+      double val = localUnitConv.convertUnits(it->tof());
+      double signal = it->weight();
+      double errorSq = it->errorSquared();
+      if (!m_QConverter->calcMatrixCoord(val, locCoord, signal, errorSq))
+        continue; // skip ND outside the range
+      sig_err.emplace_back(static_cast<float>(signal));
+      sig_err.emplace_back(static_cast<float>(errorSq));
+      allCoord.insert(allCoord.end(), locCoord.begin(), locCoord.end());
+    }
   }
-  for (int i = 0; i < numthreads; i++) {
-    sig_err.insert(sig_err.end(), sig_errs[i].begin(), sig_errs[i].end());
-    allCoord.insert(allCoord.end(), allCoords[i].begin(), allCoords[i].end());
-  }
+
   size_t n_added_events = sig_err.size() / 2;
   std::vector<uint32_t> det_ids(n_added_events, detID);
 
