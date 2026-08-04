@@ -36,8 +36,15 @@ RELEASE_ROOT = REPO_ROOT / "docs" / "source" / "release"
 
 
 def display_path(path: Path) -> str:
-    """Path relative to the repository root, using forward slashes on every platform."""
-    return path.relative_to(REPO_ROOT).as_posix()
+    """Path relative to the repository root, using forward slashes on every platform.
+
+    Anything outside the repository is reported in full, which keeps the checker usable against the
+    throwaway release trees built by the tests.
+    """
+    try:
+        return path.relative_to(REPO_ROOT).as_posix()
+    except ValueError:
+        return path.as_posix()
 
 
 def find_amalgamate_targets(version_dir: Path) -> dict[Path, list[tuple[Path, int]]]:
