@@ -104,3 +104,10 @@ repos:
           )$
         additional_dependencies:
           - pyyaml
+      - id: unreferenced-release-notes
+        name: unreferenced-release-note-check
+        language: python
+        entry: python tools/ReleaseNotes/unreferenced_release_note_check.py
+        # the whole release tree is checked at once, not just the changed files
+        pass_filenames: false
+        files: ^docs/source/release/v\d+\.\d+\.\d+/.*\.rst$
