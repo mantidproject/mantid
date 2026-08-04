@@ -74,7 +74,7 @@ public:
   }
 
   RunsTablePresenter makePresenterWithoutMainPresenter(IRunsTableView &view) {
-    return RunsTablePresenter(&view, {}, 0.01, ReductionJobs(), m_plotter);
+    return RunsTablePresenter(&view, {}, 0.01, ReductionJobs(), m_plotter, m_plotOptionsProvider);
   }
 
   Group &getGroup(RunsTablePresenter &presenter, int groupIndex) {
