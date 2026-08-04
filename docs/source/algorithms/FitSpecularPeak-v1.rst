@@ -9,7 +9,9 @@
 Description
 -----------
 
-This algorithm locates the specular peak in a reflectometry detector workspace. It integrates the selected spectra over the :math:`X` axis, optionally restricted by *RangeLower* and *RangeUpper*, to produce a detector profile whose :math:`X` values are fractional workspace indices from the input workspace.
+This algorithm locates the specular peak in a reflectometry detector workspace. It integrates the selected spectra over the :math:`X` axis, optionally restricted by *RangeLower* and *RangeUpper*, to produce a detector profile whose :math:`X` values are workspace indices from the input workspace.
+
+*PeakCentre* is the fractional **workspace index** associated with the specular peak. It is not a spectrum number or detector ID. For example, a value of 42.3 places the fitted peak centre between the spectra stored at workspace indices 42 and 43, irrespective of their spectrum numbers or detector IDs.
 
 The algorithm uses the maximum of the profile as the initial peak centre and estimates its width from the half-height points. It then fits a Gaussian together with the background selected by *BackgroundType*. When the fit succeeds, *PeakCentre* contains the optimized Gaussian centre and *PeakCentreError* contains its uncertainty.
 
