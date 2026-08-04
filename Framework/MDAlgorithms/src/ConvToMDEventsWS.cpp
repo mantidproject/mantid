@@ -42,6 +42,7 @@ template <class T> size_t ConvToMDEventsWS::convertEventList(size_t workspaceInd
   UnitsConversionHelper localUnitConv(m_UnitConversion);
 
   uint32_t detID = m_detID[workspaceIndex];
+  uint16_t expInfoIndexLoc = m_ExpInfoIndex;
 
   std::vector<coord_t> locCoord(m_Coord);
   // set up unit conversion and calculate up all coordinates, which depend on
@@ -53,82 +54,45 @@ template <class T> size_t ConvToMDEventsWS::convertEventList(size_t workspaceInd
   // allocate temporary buffers for MD Events data
   // MD events coordinates buffer
   std::vector<coord_t> allCoord;
-  std::vector<float> sig_err; // array for signal and error.
+  std::vector<float> sig_err;             // array for signal and error.
+  std::vector<uint16_t> expInfoIndex;     // Buffer for associated experiment-info index for each event
+  std::vector<uint16_t> goniometer_index; // Buffer for goniometer index for each event
+  std::vector<uint32_t> det_ids;          // Buffer of det Id-s for each event
 
   allCoord.reserve(this->m_NDims * numEvents);
   sig_err.reserve(2 * numEvents);
+  expInfoIndex.reserve(numEvents);
+  goniometer_index.reserve(numEvents);
+  det_ids.reserve(numEvents);
 
   // This little dance makes the getting vector of events more general (since
   // you can't overload by return type).
   typename std::vector<T> const *events_ptr;
   getEventsFrom(el, events_ptr);
   const typename std::vector<T> &events = *events_ptr;
+  // Iterators to start/end
+  for (auto it = events.cbegin(); it != events.cend(); it++) {
+    double val = localUnitConv.convertUnits(it->tof());
+    double signal = it->weight();
+    double errorSq = it->errorSquared();
+    if (!setGoniometersFromLogs(it))
+      continue; // skip if log value is NaN
+    if (!setGenericVariableFromLogs(it->pulseTime(), locCoord))
+      continue; // skip if log value is NaN or out of bounds
+    if (!m_QConverter->calcMatrixCoord(val, locCoord, signal, errorSq))
+      continue; // skip ND outside the range
 
-  int nThreads = m_NumThreads < 0 ? PARALLEL_GET_MAX_THREADS : std::max(1, m_NumThreads);
-  int nEvents = static_cast<int>(events.size());
-  if (nEvents < (nThreads * 1000)) {
-    nThreads = 1;
+    sig_err.emplace_back(static_cast<float>(signal));
+    sig_err.emplace_back(static_cast<float>(errorSq));
+    expInfoIndex.emplace_back(expInfoIndexLoc);
+    goniometer_index.emplace_back(0); // default value
+    det_ids.emplace_back(detID);
+    allCoord.insert(allCoord.end(), locCoord.begin(), locCoord.end());
   }
-
-  if (nThreads > 1) {
-    // Parallelise loops by workers, each worker needs a clone of QConverter and Goniometer
-    int nBatch = static_cast<int>(ceil(nEvents / nThreads));
-    std::vector<std::vector<float>> sigErrs(nThreads, sig_err);
-    std::vector<std::vector<coord_t>> allCoords(nThreads, allCoord);
-
-    PRAGMA_OMP(parallel for)
-    for (int i = 0; i < nThreads; i++) {
-      MDTransf_sptr t_QConverter(m_QConverter->clone());
-      std::vector<coord_t> locCoord_(m_Coord);
-      Geometry::Goniometer t_gonio(m_Goniometer);
-      auto iStart = events.begin() + (nBatch * i);
-      auto iEnd = (i == (nThreads - 1)) ? events.end() : events.begin() + (nBatch * (i + 1));
-      // Iterators to start/end
-      for (auto it = iStart; it != iEnd; it++) {
-        double val = localUnitConv.convertUnits(it->tof());
-        double signal = it->weight();
-        double errorSq = it->errorSquared();
-        if (!setGoniometersFromLogs(it, t_gonio, t_QConverter))
-          continue; // skip if log value is NaN
-        if (!setGenericVariableFromLogs(it->pulseTime(), locCoord_))
-          continue; // skip if log value is NaN or out of bounds
-        if (!t_QConverter->calcMatrixCoord(val, locCoord_, signal, errorSq))
-          continue; // skip ND outside the range
-
-        sigErrs[i].emplace_back(static_cast<float>(signal));
-        sigErrs[i].emplace_back(static_cast<float>(errorSq));
-        allCoords[i].insert(allCoords[i].end(), locCoord_.begin(), locCoord_.end());
-      }
-    }
-    for (int i = 0; i < nThreads; i++) {
-      // The order of the events is important for some tests
-      sig_err.insert(sig_err.end(), sigErrs[i].begin(), sigErrs[i].end());
-      allCoord.insert(allCoord.end(), allCoords[i].begin(), allCoords[i].end());
-    }
-
-  } else {
-    // Non-parallelised version, avoids OpenMP overhead
-    for (auto it = events.cbegin(); it != events.cend(); it++) {
-      if (!setGoniometersFromLogs(it, m_Goniometer, m_QConverter))
-        continue; // skip if log value is NaN
-      if (!setGenericVariableFromLogs(it->pulseTime(), locCoord))
-        continue; // skip if log value is NaN or out of bounds
-      double val = localUnitConv.convertUnits(it->tof());
-      double signal = it->weight();
-      double errorSq = it->errorSquared();
-      if (!m_QConverter->calcMatrixCoord(val, locCoord, signal, errorSq))
-        continue; // skip ND outside the range
-      sig_err.emplace_back(static_cast<float>(signal));
-      sig_err.emplace_back(static_cast<float>(errorSq));
-      allCoord.insert(allCoord.end(), locCoord.begin(), locCoord.end());
-    }
-  }
-
-  size_t n_added_events = sig_err.size() / 2;
-  std::vector<uint32_t> det_ids(n_added_events, detID);
 
   // Add them to the MDEW
-  m_OutWSWrapper->addMDData(sig_err, m_ExpInfoIndex, 0, det_ids, allCoord, n_added_events);
+  size_t n_added_events = expInfoIndex.size();
+  m_OutWSWrapper->addMDData(sig_err, expInfoIndex, goniometer_index, det_ids, allCoord, n_added_events);
   return n_added_events;
 }
 
