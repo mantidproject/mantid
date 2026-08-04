@@ -8,16 +8,18 @@
 
 """Linux storage discovery for staging user-scope QSettings files."""
 
-from collections.abc import Iterable, Mapping
+from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass
 from enum import Enum
 import os
 from pathlib import Path
 import re
+import sys
 
 
 MOUNTINFO_PATH = Path("/proc/self/mountinfo")
 NFS_FILESYSTEM_TYPES = frozenset(("nfs", "nfs4"))
+QSETTINGS_STAGING_ENV = "MANTID_QSETTINGS_STAGING"
 
 _MOUNTINFO_ESCAPE_PATTERN = re.compile(r"\\(011|012|040|134)")
 _MOUNTINFO_ESCAPES = {
@@ -35,6 +37,27 @@ class MountMatchStatus(Enum):
     NOT_FOUND = "not_found"
     AMBIGUOUS = "ambiguous"
     UNAVAILABLE = "unavailable"
+
+
+class QSettingsStagingReason(Enum):
+    """Stable reason codes returned by the staging eligibility decision."""
+
+    ELIGIBLE = "eligible"
+    DISABLED = "disabled"
+    UNSUPPORTED_PLATFORM = "unsupported_platform"
+    CONFIG_MOUNT_UNAVAILABLE = "config_mount_unavailable"
+    CONFIG_MOUNT_NOT_FOUND = "config_mount_not_found"
+    CONFIG_MOUNT_AMBIGUOUS = "config_mount_ambiguous"
+    CONFIG_NOT_NFS = "config_not_nfs"
+    ROOTS_NOT_DISTINCT = "roots_not_distinct"
+    CACHE_MOUNT_UNAVAILABLE = "cache_mount_unavailable"
+    CACHE_MOUNT_NOT_FOUND = "cache_mount_not_found"
+    CACHE_MOUNT_AMBIGUOUS = "cache_mount_ambiguous"
+    CACHE_IS_NFS = "cache_is_nfs"
+    MOUNTS_NOT_DISTINCT = "mounts_not_distinct"
+    CACHE_NOT_DIRECTORY = "cache_not_directory"
+    CACHE_NOT_OWNED = "cache_not_owned"
+    CACHE_NOT_WRITABLE = "cache_not_writable"
 
 
 @dataclass(frozen=True)
@@ -76,13 +99,37 @@ class QSettingsStorageDiscovery:
     mountinfo_error: str | None = None
 
 
+@dataclass(frozen=True)
+class QSettingsStagingEligibility:
+    """Whether staging may proceed, without performing any storage mutation."""
+
+    active: bool
+    reason: QSettingsStagingReason
+    config_root: Path | None = None
+    cache_root: Path | None = None
+    config_filesystem: str | None = None
+    cache_filesystem: str | None = None
+
+
+def resolve_xdg_config_root(environ: Mapping[str, str] | None = None, home: Path | None = None) -> Path:
+    """Resolve the XDG config root without consulting the cache setting."""
+    environ = os.environ if environ is None else environ
+    home = _resolve_home(home)
+    return _resolve_xdg_root(environ.get("XDG_CONFIG_HOME"), home / ".config")
+
+
+def resolve_xdg_cache_root(environ: Mapping[str, str] | None = None, home: Path | None = None) -> Path:
+    """Resolve the XDG cache root independently of the config setting."""
+    environ = os.environ if environ is None else environ
+    home = _resolve_home(home)
+    return _resolve_xdg_root(environ.get("XDG_CACHE_HOME"), home / ".cache")
+
+
 def resolve_xdg_paths(environ: Mapping[str, str] | None = None, home: Path | None = None) -> XdgPaths:
     """Resolve XDG config/cache roots without creating either directory."""
-    environ = os.environ if environ is None else environ
-    home = (Path.home() if home is None else Path(home)).expanduser().resolve(strict=False)
     return XdgPaths(
-        config_root=_resolve_xdg_root(environ.get("XDG_CONFIG_HOME"), home / ".config"),
-        cache_root=_resolve_xdg_root(environ.get("XDG_CACHE_HOME"), home / ".cache"),
+        config_root=resolve_xdg_config_root(environ=environ, home=home),
+        cache_root=resolve_xdg_cache_root(environ=environ, home=home),
     )
 
 
@@ -144,10 +191,8 @@ def discover_qsettings_storage(
 ) -> QSettingsStorageDiscovery:
     """Resolve XDG roots and classify their mounts without changing storage."""
     paths = resolve_xdg_paths(environ=environ, home=home)
-    try:
-        with Path(mountinfo_path).open(encoding="utf-8") as handle:
-            mounts = parse_mountinfo(handle)
-    except OSError:
+    mounts = _read_mountinfo(mountinfo_path)
+    if mounts is None:
         unavailable = MountMatch(MountMatchStatus.UNAVAILABLE)
         return QSettingsStorageDiscovery(
             paths=paths,
@@ -163,6 +208,117 @@ def discover_qsettings_storage(
     )
 
 
+def evaluate_qsettings_staging(
+    environ: Mapping[str, str] | None = None,
+    home: Path | None = None,
+    mountinfo_path: Path = MOUNTINFO_PATH,
+    platform_name: str | None = None,
+    effective_uid: int | None = None,
+    access: Callable[[Path, int], bool] | None = None,
+) -> QSettingsStagingEligibility:
+    """Decide whether local staging is eligible without changing any path.
+
+    Config storage is resolved and classified first. A confirmed non-NFS config
+    returns immediately without resolving or inspecting the cache root.
+    """
+    environ = os.environ if environ is None else environ
+    if environ.get(QSETTINGS_STAGING_ENV) != "1":
+        return QSettingsStagingEligibility(False, QSettingsStagingReason.DISABLED)
+
+    platform_name = sys.platform if platform_name is None else platform_name
+    if not platform_name.startswith("linux"):
+        return QSettingsStagingEligibility(False, QSettingsStagingReason.UNSUPPORTED_PLATFORM)
+
+    config_root = resolve_xdg_config_root(environ=environ, home=home)
+    mounts = _read_mountinfo(mountinfo_path)
+    if mounts is None:
+        return QSettingsStagingEligibility(
+            False,
+            QSettingsStagingReason.CONFIG_MOUNT_UNAVAILABLE,
+            config_root=config_root,
+        )
+
+    config_match = find_mount(config_root, mounts)
+    if config_match.status is not MountMatchStatus.FOUND:
+        return QSettingsStagingEligibility(
+            False,
+            _mount_failure_reason(config_match.status, config=True),
+            config_root=config_root,
+        )
+
+    config_mount = config_match.mount
+    if not config_mount.is_nfs:
+        return QSettingsStagingEligibility(
+            False,
+            QSettingsStagingReason.CONFIG_NOT_NFS,
+            config_root=config_root,
+            config_filesystem=config_mount.filesystem_type,
+        )
+
+    cache_root = resolve_xdg_cache_root(environ=environ, home=home)
+    if cache_root == config_root:
+        return _eligibility_with_mounts(
+            False,
+            QSettingsStagingReason.ROOTS_NOT_DISTINCT,
+            config_root,
+            cache_root,
+            config_mount,
+        )
+
+    cache_match = find_mount(cache_root, mounts)
+    if cache_match.status is not MountMatchStatus.FOUND:
+        return _eligibility_with_mounts(
+            False,
+            _mount_failure_reason(cache_match.status, config=False),
+            config_root,
+            cache_root,
+            config_mount,
+        )
+
+    cache_mount = cache_match.mount
+    if cache_mount.is_nfs:
+        return _eligibility_with_mounts(
+            False,
+            QSettingsStagingReason.CACHE_IS_NFS,
+            config_root,
+            cache_root,
+            config_mount,
+            cache_mount,
+        )
+    if cache_mount.mount_id == config_mount.mount_id:
+        return _eligibility_with_mounts(
+            False,
+            QSettingsStagingReason.MOUNTS_NOT_DISTINCT,
+            config_root,
+            cache_root,
+            config_mount,
+            cache_mount,
+        )
+
+    cache_problem = _assess_cache_root(cache_root, effective_uid=effective_uid, access=access)
+    if cache_problem is not None:
+        return _eligibility_with_mounts(
+            False,
+            cache_problem,
+            config_root,
+            cache_root,
+            config_mount,
+            cache_mount,
+        )
+    return _eligibility_with_mounts(
+        True,
+        QSettingsStagingReason.ELIGIBLE,
+        config_root,
+        cache_root,
+        config_mount,
+        cache_mount,
+    )
+
+
+def _resolve_home(home: Path | None) -> Path:
+    return (Path.home() if home is None else Path(home)).expanduser().resolve(strict=False)
+
+
 def _resolve_xdg_root(value: str | None, fallback: Path) -> Path:
     candidate = Path(value) if value else fallback
     if not candidate.is_absolute():
@@ -172,3 +328,70 @@ def _resolve_xdg_root(value: str | None, fallback: Path) -> Path:
 
 def _decode_mountinfo_path(value: str) -> str:
     return _MOUNTINFO_ESCAPE_PATTERN.sub(lambda match: _MOUNTINFO_ESCAPES[match.group(1)], value)
+
+
+def _read_mountinfo(mountinfo_path: Path) -> tuple[MountInfo, ...] | None:
+    try:
+        with Path(mountinfo_path).open(encoding="utf-8") as handle:
+            return parse_mountinfo(handle)
+    except OSError:
+        return None
+
+
+def _mount_failure_reason(status: MountMatchStatus, config: bool) -> QSettingsStagingReason:
+    config_reasons = {
+        MountMatchStatus.NOT_FOUND: QSettingsStagingReason.CONFIG_MOUNT_NOT_FOUND,
+        MountMatchStatus.AMBIGUOUS: QSettingsStagingReason.CONFIG_MOUNT_AMBIGUOUS,
+        MountMatchStatus.UNAVAILABLE: QSettingsStagingReason.CONFIG_MOUNT_UNAVAILABLE,
+    }
+    cache_reasons = {
+        MountMatchStatus.NOT_FOUND: QSettingsStagingReason.CACHE_MOUNT_NOT_FOUND,
+        MountMatchStatus.AMBIGUOUS: QSettingsStagingReason.CACHE_MOUNT_AMBIGUOUS,
+        MountMatchStatus.UNAVAILABLE: QSettingsStagingReason.CACHE_MOUNT_UNAVAILABLE,
+    }
+    return (config_reasons if config else cache_reasons)[status]
+
+
+def _assess_cache_root(
+    cache_root: Path,
+    effective_uid: int | None,
+    access: Callable[[Path, int], bool] | None,
+) -> QSettingsStagingReason | None:
+    access = os.access if access is None else access
+    try:
+        if cache_root.exists():
+            if not cache_root.is_dir():
+                return QSettingsStagingReason.CACHE_NOT_DIRECTORY
+            effective_uid = os.geteuid() if effective_uid is None else effective_uid
+            if cache_root.stat().st_uid != effective_uid:
+                return QSettingsStagingReason.CACHE_NOT_OWNED
+            if not access(cache_root, os.W_OK | os.X_OK):
+                return QSettingsStagingReason.CACHE_NOT_WRITABLE
+            return None
+
+        existing_parent = cache_root.parent
+        while not existing_parent.exists() and existing_parent != existing_parent.parent:
+            existing_parent = existing_parent.parent
+        if not existing_parent.is_dir() or not access(existing_parent, os.W_OK | os.X_OK):
+            return QSettingsStagingReason.CACHE_NOT_WRITABLE
+    except OSError:
+        return QSettingsStagingReason.CACHE_NOT_WRITABLE
+    return None
+
+
+def _eligibility_with_mounts(
+    active: bool,
+    reason: QSettingsStagingReason,
+    config_root: Path,
+    cache_root: Path,
+    config_mount: MountInfo,
+    cache_mount: MountInfo | None = None,
+) -> QSettingsStagingEligibility:
+    return QSettingsStagingEligibility(
+        active=active,
+        reason=reason,
+        config_root=config_root,
+        cache_root=cache_root,
+        config_filesystem=config_mount.filesystem_type,
+        cache_filesystem=cache_mount.filesystem_type if cache_mount is not None else None,
+    )

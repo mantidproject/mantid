@@ -9,11 +9,14 @@
 import tempfile
 from pathlib import Path
 import unittest
+from unittest.mock import patch
 
 from mantidqt.utils.qt.qsettings_staging import (
     MountInfo,
     MountMatchStatus,
+    QSettingsStagingReason,
     discover_qsettings_storage,
+    evaluate_qsettings_staging,
     find_mount,
     parse_mountinfo,
     resolve_xdg_paths,
@@ -186,6 +189,218 @@ class DiscoverQSettingsStorageTest(unittest.TestCase):
 
             self.assertEqual(MountMatchStatus.AMBIGUOUS, discovery.config_mount.status)
             self.assertEqual(MountMatchStatus.AMBIGUOUS, discovery.cache_mount.status)
+
+
+class EvaluateQSettingsStagingTest(unittest.TestCase):
+    def setUp(self):
+        self.temporary_home = tempfile.TemporaryDirectory()
+        self.home = Path(self.temporary_home.name)
+        self.remote = self.home / "remote"
+        self.local = self.home / "local"
+        self.remote.mkdir()
+        self.local.mkdir()
+        self.config = self.remote / "config"
+        self.cache = self.local / "cache"
+        self.mountinfo = self.home / "mountinfo"
+        self.environ = {
+            "MANTID_QSETTINGS_STAGING": "1",
+            "XDG_CONFIG_HOME": str(self.config),
+            "XDG_CACHE_HOME": str(self.cache),
+        }
+
+    def tearDown(self):
+        self.temporary_home.cleanup()
+
+    def write_mountinfo(self, config_filesystem="nfs4", cache_filesystem="xfs", cache_mount_id=3):
+        self.mountinfo.write_text(
+            f"1 0 0:1 / / rw - ext4 /dev/root rw\n"
+            f"2 1 0:2 / {self.remote} rw - {config_filesystem} server:/remote rw\n"
+            f"{cache_mount_id} 1 0:3 / {self.local} rw - {cache_filesystem} /dev/local rw\n",
+            encoding="utf-8",
+        )
+
+    def evaluate(self, **kwargs):
+        return evaluate_qsettings_staging(
+            environ=self.environ,
+            home=self.home,
+            mountinfo_path=self.mountinfo,
+            platform_name="linux",
+            **kwargs,
+        )
+
+    def test_requires_explicit_opt_in_before_resolving_config(self):
+        with patch(
+            "mantidqt.utils.qt.qsettings_staging.resolve_xdg_config_root",
+            side_effect=AssertionError("config must not be resolved"),
+        ):
+            result = evaluate_qsettings_staging(environ={}, home=self.home, platform_name="linux")
+
+        self.assertFalse(result.active)
+        self.assertEqual(QSettingsStagingReason.DISABLED, result.reason)
+        self.assertIsNone(result.config_root)
+        self.assertIsNone(result.cache_root)
+
+    def test_rejects_non_linux_before_resolving_config(self):
+        with patch(
+            "mantidqt.utils.qt.qsettings_staging.resolve_xdg_config_root",
+            side_effect=AssertionError("config must not be resolved"),
+        ):
+            result = evaluate_qsettings_staging(environ=self.environ, home=self.home, platform_name="darwin")
+
+        self.assertFalse(result.active)
+        self.assertEqual(QSettingsStagingReason.UNSUPPORTED_PLATFORM, result.reason)
+
+    def test_non_nfs_config_returns_without_any_cache_access(self):
+        self.write_mountinfo(config_filesystem="ext4")
+        with (
+            patch(
+                "mantidqt.utils.qt.qsettings_staging.resolve_xdg_cache_root",
+                side_effect=AssertionError("cache must not be resolved"),
+            ),
+            patch(
+                "mantidqt.utils.qt.qsettings_staging._assess_cache_root",
+                side_effect=AssertionError("cache must not be inspected"),
+            ),
+        ):
+            result = self.evaluate()
+
+        self.assertFalse(result.active)
+        self.assertEqual(QSettingsStagingReason.CONFIG_NOT_NFS, result.reason)
+        self.assertEqual("ext4", result.config_filesystem)
+        self.assertIsNone(result.cache_root)
+        self.assertIsNone(result.cache_filesystem)
+
+    def test_unreadable_mountinfo_returns_without_cache_access(self):
+        with patch(
+            "mantidqt.utils.qt.qsettings_staging.resolve_xdg_cache_root",
+            side_effect=AssertionError("cache must not be resolved"),
+        ):
+            result = self.evaluate()
+
+        self.assertFalse(result.active)
+        self.assertEqual(QSettingsStagingReason.CONFIG_MOUNT_UNAVAILABLE, result.reason)
+        self.assertIsNone(result.cache_root)
+
+    def test_missing_config_mount_returns_without_cache_access(self):
+        self.mountinfo.write_text("1 0 0:1 / /unrelated rw - ext4 /dev/root rw\n", encoding="utf-8")
+        with patch(
+            "mantidqt.utils.qt.qsettings_staging.resolve_xdg_cache_root",
+            side_effect=AssertionError("cache must not be resolved"),
+        ):
+            result = self.evaluate()
+
+        self.assertFalse(result.active)
+        self.assertEqual(QSettingsStagingReason.CONFIG_MOUNT_NOT_FOUND, result.reason)
+
+    def test_ambiguous_config_mount_returns_without_cache_access(self):
+        self.mountinfo.write_text(
+            f"1 0 0:1 / {self.remote} rw - nfs4 server:/remote rw\n2 0 0:2 / {self.remote} rw - ext4 /dev/local rw\n",
+            encoding="utf-8",
+        )
+        with patch(
+            "mantidqt.utils.qt.qsettings_staging.resolve_xdg_cache_root",
+            side_effect=AssertionError("cache must not be resolved"),
+        ):
+            result = self.evaluate()
+
+        self.assertFalse(result.active)
+        self.assertEqual(QSettingsStagingReason.CONFIG_MOUNT_AMBIGUOUS, result.reason)
+
+    def test_reports_nfs_cache_with_a_dedicated_reason(self):
+        self.write_mountinfo(cache_filesystem="nfs")
+
+        result = self.evaluate()
+
+        self.assertFalse(result.active)
+        self.assertEqual(QSettingsStagingReason.CACHE_IS_NFS, result.reason)
+        self.assertEqual("nfs4", result.config_filesystem)
+        self.assertEqual("nfs", result.cache_filesystem)
+
+    def test_reports_missing_cache_mount(self):
+        self.mountinfo.write_text(f"2 1 0:2 / {self.remote} rw - nfs4 server:/remote rw\n", encoding="utf-8")
+
+        result = self.evaluate()
+
+        self.assertFalse(result.active)
+        self.assertEqual(QSettingsStagingReason.CACHE_MOUNT_NOT_FOUND, result.reason)
+
+    def test_reports_ambiguous_cache_mount(self):
+        self.mountinfo.write_text(
+            f"2 1 0:2 / {self.remote} rw - nfs4 server:/remote rw\n"
+            f"3 1 0:3 / {self.local} rw - xfs /dev/local rw\n"
+            f"4 1 0:4 / {self.local} rw - ext4 /dev/other rw\n",
+            encoding="utf-8",
+        )
+
+        result = self.evaluate()
+
+        self.assertFalse(result.active)
+        self.assertEqual(QSettingsStagingReason.CACHE_MOUNT_AMBIGUOUS, result.reason)
+
+    def test_reports_identical_roots(self):
+        self.write_mountinfo()
+        self.environ["XDG_CACHE_HOME"] = str(self.config)
+
+        result = self.evaluate()
+
+        self.assertFalse(result.active)
+        self.assertEqual(QSettingsStagingReason.ROOTS_NOT_DISTINCT, result.reason)
+
+    def test_reports_identical_mount_ids(self):
+        self.write_mountinfo(cache_mount_id=2)
+
+        result = self.evaluate()
+
+        self.assertFalse(result.active)
+        self.assertEqual(QSettingsStagingReason.MOUNTS_NOT_DISTINCT, result.reason)
+
+    def test_reports_existing_cache_path_that_is_not_a_directory(self):
+        self.write_mountinfo()
+        self.cache.write_text("not a directory", encoding="utf-8")
+
+        result = self.evaluate()
+
+        self.assertFalse(result.active)
+        self.assertEqual(QSettingsStagingReason.CACHE_NOT_DIRECTORY, result.reason)
+
+    def test_reports_cache_not_owned_by_current_user(self):
+        self.write_mountinfo()
+        self.cache.mkdir()
+
+        result = self.evaluate(effective_uid=self.cache.stat().st_uid + 1)
+
+        self.assertFalse(result.active)
+        self.assertEqual(QSettingsStagingReason.CACHE_NOT_OWNED, result.reason)
+
+    def test_reports_existing_cache_without_write_access(self):
+        self.write_mountinfo()
+        self.cache.mkdir()
+
+        result = self.evaluate(effective_uid=self.cache.stat().st_uid, access=lambda _path, _mode: False)
+
+        self.assertFalse(result.active)
+        self.assertEqual(QSettingsStagingReason.CACHE_NOT_WRITABLE, result.reason)
+
+    def test_reports_missing_cache_with_unwritable_existing_parent(self):
+        self.write_mountinfo()
+
+        result = self.evaluate(access=lambda _path, _mode: False)
+
+        self.assertFalse(result.active)
+        self.assertEqual(QSettingsStagingReason.CACHE_NOT_WRITABLE, result.reason)
+
+    def test_is_eligible_for_nfs_config_and_writable_local_cache_parent(self):
+        self.write_mountinfo()
+
+        result = self.evaluate(access=lambda path, _mode: path == self.local)
+
+        self.assertTrue(result.active)
+        self.assertEqual(QSettingsStagingReason.ELIGIBLE, result.reason)
+        self.assertEqual(self.config, result.config_root)
+        self.assertEqual(self.cache, result.cache_root)
+        self.assertEqual("nfs4", result.config_filesystem)
+        self.assertEqual("xfs", result.cache_filesystem)
+        self.assertFalse(self.cache.exists())
 
 
 if __name__ == "__main__":
