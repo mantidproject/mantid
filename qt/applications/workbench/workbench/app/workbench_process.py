@@ -30,8 +30,7 @@ from qtpy.QtCore import QCoreApplication, Qt  # noqa: E402
 from workbench.app.resource_loader import register_resources, cleanup_resources  # noqa: E402
 
 register_resources()
-from workbench.config import APPNAME, ORG_DOMAIN, ORGANIZATION  # noqa: E402
-from workbench.widgets.about.presenter import AboutPresenter  # noqa: E402
+from workbench.identity import APPNAME, ORG_DOMAIN, ORGANIZATION  # noqa: E402
 
 # Constants
 SYSCHECK_INTERVAL = 50
@@ -117,6 +116,7 @@ def create_and_launch_workbench(app, command_line_options):
         # MainWindow needs to be imported locally to ensure the matplotlib
         # backend is not imported too early.
         from workbench.app.mainwindow import MainWindow
+        from workbench.widgets.about.presenter import AboutPresenter
 
         # The ordering here is very delicate. Test thoroughly when
         # changing anything!

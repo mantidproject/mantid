@@ -26,6 +26,8 @@ import mantid.kernel.environment as mtd_env
 from qtpy.QtCore import Qt, QSettings
 
 # local imports
+from workbench.identity import APPNAME, ORG_DOMAIN as ORG_DOMAIN, ORGANIZATION
+
 from .user import UserConfig
 
 # Type to hold properties for additional QMainWindow instances
@@ -41,13 +43,6 @@ _ADDITIONAL_MAINWINDOWS_PARENT = None
 # -----------------------------------------------------------------------------
 # Public Constants
 # -----------------------------------------------------------------------------
-# The strings APPNAME, ORG_DOMAIN, ORGANIZATION are duplicated
-# in mantidqt/dialogs/errorreports/main.py
-
-ORGANIZATION = "mantidproject"
-ORG_DOMAIN = "mantidproject.org"
-APPNAME = "mantidworkbench"
-
 DEFAULT_SCRIPT_CONTENT = ""
 DEFAULT_SCRIPT_CONTENT += (
     "# import mantid algorithms, numpy and matplotlib"
