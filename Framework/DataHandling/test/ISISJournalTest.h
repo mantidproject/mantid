@@ -22,7 +22,7 @@ using testing::NiceMock;
 using testing::Return;
 
 namespace {
-const std::string URL_PREFIX = "http://journals.isis.cclrc.ac.uk/jv/ndx";
+const std::string URL_PREFIX = "http://data.isis.rl.ac.uk/journals/ndx";
 
 static constexpr const char *emptyFile = "";
 
