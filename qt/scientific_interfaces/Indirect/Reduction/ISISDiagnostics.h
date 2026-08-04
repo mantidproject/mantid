@@ -81,8 +81,11 @@ private:
                       QString const &minPropertyName, QString const &maxPropertyName);
   void setPeakRange(double minimum, double maximum);
   void setBackgroundRange(double minimum, double maximum);
+  QString loadFiles(const QStringList &fileNames);
 
   Ui::ISISDiagnostics m_uiForm;
+  QString m_sampleName;
+  bool m_isSumFiles;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
