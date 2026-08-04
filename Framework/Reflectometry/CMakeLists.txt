@@ -4,6 +4,7 @@ set(SRC_FILES
     src/ConvertToReflectometryQ2.cpp
     src/CreateTransmissionWorkspace2.cpp
     src/CreateTransmissionWorkspaceAuto2.cpp
+    src/FitSpecularPeak.cpp
     src/FindReflectometryLines2.cpp
     src/NRCalculateSlitResolution.cpp
     src/ReflectometryBackgroundSubtraction.cpp
@@ -33,6 +34,7 @@ set(INC_FILES
     inc/MantidReflectometry/ConvertToReflectometryQ2.h
     inc/MantidReflectometry/CreateTransmissionWorkspace2.h
     inc/MantidReflectometry/CreateTransmissionWorkspaceAuto2.h
+    inc/MantidReflectometry/FitSpecularPeak.h
     inc/MantidReflectometry/FindReflectometryLines2.h
     inc/MantidReflectometry/NRCalculateSlitResolution.h
     inc/MantidReflectometry/ReflectometryBackgroundSubtraction.h
