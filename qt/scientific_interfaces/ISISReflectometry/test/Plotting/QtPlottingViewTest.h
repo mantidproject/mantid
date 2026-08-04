@@ -1064,7 +1064,7 @@ private:
 
   void click(QTreeView *tree, QModelIndex const &index, Qt::KeyboardModifiers modifiers = Qt::NoModifier) const {
     auto const position = tree->visualRect(index).center();
-    auto event = QMouseEvent(QEvent::MouseButtonPress, position, Qt::LeftButton, Qt::LeftButton, modifiers);
+    auto event = QMouseEvent(QEvent::MouseButtonPress, position, position, Qt::LeftButton, Qt::LeftButton, modifiers);
     QApplication::sendEvent(tree->viewport(), &event);
   }
 
@@ -1085,16 +1085,19 @@ private:
 
   void doubleClick(QTreeView *tree, QModelIndex const &index, Qt::KeyboardModifiers modifiers = Qt::NoModifier) const {
     auto const position = tree->visualRect(index).center();
-    auto event = QMouseEvent(QEvent::MouseButtonDblClick, position, Qt::LeftButton, Qt::LeftButton, modifiers);
+    auto event =
+        QMouseEvent(QEvent::MouseButtonDblClick, position, position, Qt::LeftButton, Qt::LeftButton, modifiers);
     QApplication::sendEvent(tree->viewport(), &event);
   }
 
   void clickAndDrag(QTreeView *tree, QModelIndex const &from, QModelIndex const &to) const {
     auto const fromPosition = tree->visualRect(from).center();
     auto const toPosition = tree->visualRect(to).center();
-    auto pressEvent = QMouseEvent(QEvent::MouseButtonPress, fromPosition, Qt::LeftButton, Qt::LeftButton, {});
-    auto moveEvent = QMouseEvent(QEvent::MouseMove, toPosition, Qt::NoButton, Qt::LeftButton, {});
-    auto releaseEvent = QMouseEvent(QEvent::MouseButtonRelease, toPosition, Qt::LeftButton, Qt::NoButton, {});
+    auto pressEvent =
+        QMouseEvent(QEvent::MouseButtonPress, fromPosition, fromPosition, Qt::LeftButton, Qt::LeftButton, {});
+    auto moveEvent = QMouseEvent(QEvent::MouseMove, toPosition, toPosition, Qt::NoButton, Qt::LeftButton, {});
+    auto releaseEvent =
+        QMouseEvent(QEvent::MouseButtonRelease, toPosition, toPosition, Qt::LeftButton, Qt::NoButton, {});
 
     QApplication::sendEvent(tree->viewport(), &pressEvent);
     QApplication::sendEvent(tree->viewport(), &moveEvent);
