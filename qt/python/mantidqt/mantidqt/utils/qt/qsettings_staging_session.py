@@ -8,8 +8,10 @@
 
 """Prepare private local sessions for out-of-place QSettings writes."""
 
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Iterable, Iterator
+from contextlib import contextmanager
 from dataclasses import dataclass, field
+from enum import Enum
 import hashlib
 import json
 import os
@@ -51,6 +53,38 @@ class CoordinatorUnavailable(StagingPreparationError):
 
 class StagingActivationError(RuntimeError):
     """Raised when the process-global QSettings path cannot be activated."""
+
+
+class StagingFinalizationError(RuntimeError):
+    """Raised when a staging session cannot enter finalization."""
+
+
+class CopyBackStatus(Enum):
+    """Outcome for one staged settings path."""
+
+    UNCHANGED = "unchanged"
+    ALREADY_SYNCHRONIZED = "already_synchronized"
+    COPIED = "copied"
+    CONFLICT = "conflict"
+    FAILED = "failed"
+
+
+@dataclass(frozen=True)
+class CopyBackFileResult:
+    """Copy-back outcome without exposing settings values."""
+
+    relative_path: Path
+    status: CopyBackStatus
+    error: str | None = None
+
+
+@dataclass(frozen=True)
+class QSettingsStagingFinalization:
+    """Result of finalizing every file in a staging session."""
+
+    successful: bool
+    files: tuple[CopyBackFileResult, ...]
+    error: str | None = None
 
 
 @dataclass(frozen=True)
@@ -104,6 +138,21 @@ class PreparedQSettingsSession:
     def abort(self) -> None:
         """Release ownership while retaining this session for recovery."""
         if not self._released:
+            self._coordinator.unlock()
+            self._released = True
+
+    def finalize(self) -> QSettingsStagingFinalization:
+        """Copy changed staged files directly to canonical storage.
+
+        This operation is deliberately not crash-atomic: it overwrites each
+        destination through its own descriptor without an adjacent temporary
+        file, rename, unlink, or QSettings operation.
+        """
+        if self._released:
+            raise StagingFinalizationError("cannot finalize a released QSettings staging session")
+        try:
+            return _finalize_session(self.canonical_root, self.staging_root, self.manifest)
+        finally:
             self._coordinator.unlock()
             self._released = True
 
@@ -344,7 +393,7 @@ def _write_all(descriptor: int, contents: bytes) -> None:
     while view:
         written = os.write(descriptor, view)
         if written == 0:
-            raise OSError("short write while preparing staged settings")
+            raise OSError("short write while writing settings file")
         view = view[written:]
 
 
@@ -365,3 +414,201 @@ def _write_manifest(session_root: Path, manifest: tuple[StagedSettingsFile, ...]
         os.fsync(descriptor)
     finally:
         os.close(descriptor)
+
+
+def _finalize_session(
+    canonical_root: Path,
+    staging_root: Path,
+    manifest: tuple[StagedSettingsFile, ...],
+) -> QSettingsStagingFinalization:
+    manifest_by_path = {entry.canonical_relative_path: entry for entry in manifest}
+    try:
+        staged_paths = _discover_staged_settings(staging_root)
+    except (OSError, StagingFinalizationError) as error:
+        return QSettingsStagingFinalization(False, (), str(error))
+
+    relative_paths = sorted(set(manifest_by_path) | staged_paths)
+    results = []
+    for relative_path in relative_paths:
+        entry = manifest_by_path.get(relative_path)
+        staged_relative_path = entry.staged_relative_path if entry is not None else relative_path
+        baseline_hash = entry.canonical_sha256 if entry is not None else None
+        results.append(
+            _finalize_file(
+                canonical_root,
+                staging_root,
+                relative_path,
+                staged_relative_path,
+                baseline_hash,
+            )
+        )
+
+    successful = all(result.status not in (CopyBackStatus.CONFLICT, CopyBackStatus.FAILED) for result in results)
+    finalization_error = None
+    if successful:
+        try:
+            _write_completion_marker(staging_root)
+        except OSError as error:
+            successful = False
+            finalization_error = f"cannot mark staging session complete: {error}"
+    return QSettingsStagingFinalization(successful, tuple(results), finalization_error)
+
+
+def _discover_staged_settings(staging_root: Path) -> set[Path]:
+    organization_root = staging_root / "mantidproject"
+    organization_stat = organization_root.lstat()
+    if stat.S_ISLNK(organization_stat.st_mode) or not stat.S_ISDIR(organization_stat.st_mode):
+        raise StagingFinalizationError(f"staged settings root is not a real directory: {organization_root}")
+
+    discovered = set()
+    _discover_staged_directory(organization_root, staging_root, discovered)
+    return discovered
+
+
+def _discover_staged_directory(directory: Path, staging_root: Path, discovered: set[Path]) -> None:
+    for path in directory.iterdir():
+        if _is_excluded_artifact(path.name):
+            continue
+        path_stat = path.lstat()
+        if stat.S_ISLNK(path_stat.st_mode):
+            raise StagingFinalizationError(f"refusing to follow a staged settings symlink: {path}")
+        if stat.S_ISDIR(path_stat.st_mode):
+            _discover_staged_directory(path, staging_root, discovered)
+        elif stat.S_ISREG(path_stat.st_mode):
+            discovered.add(path.relative_to(staging_root))
+        else:
+            raise StagingFinalizationError(f"staged settings path is not a regular file: {path}")
+
+
+def _finalize_file(
+    canonical_root: Path,
+    staging_root: Path,
+    canonical_relative_path: Path,
+    staged_relative_path: Path,
+    baseline_hash: str | None,
+) -> CopyBackFileResult:
+    staged_path = staging_root / staged_relative_path
+    try:
+        staged_hash = _snapshot_file(staged_path)
+    except (OSError, StagingFinalizationError) as error:
+        return _failed_copy(canonical_relative_path, error)
+
+    if staged_hash is None:
+        if baseline_hash is None:
+            return CopyBackFileResult(canonical_relative_path, CopyBackStatus.UNCHANGED)
+        return _failed_copy(canonical_relative_path, "staged file is missing")
+    if staged_hash == baseline_hash:
+        return CopyBackFileResult(canonical_relative_path, CopyBackStatus.UNCHANGED)
+
+    return _copy_changed_file(
+        canonical_root,
+        canonical_root / canonical_relative_path,
+        staged_path,
+        canonical_relative_path,
+        baseline_hash,
+    )
+
+
+def _copy_changed_file(
+    canonical_root: Path,
+    canonical_path: Path,
+    staged_path: Path,
+    relative_path: Path,
+    baseline_hash: str | None,
+) -> CopyBackFileResult:
+    no_follow = getattr(os, "O_NOFOLLOW", 0)
+    try:
+        with _opened_descriptor(staged_path, os.O_RDONLY | no_follow) as staged_descriptor:
+            staged_hash = _hash_descriptor(staged_descriptor, staged_path)
+            canonical_hash = _snapshot_file(canonical_path)
+            if canonical_hash == staged_hash:
+                return CopyBackFileResult(relative_path, CopyBackStatus.ALREADY_SYNCHRONIZED)
+            if canonical_hash != baseline_hash:
+                return CopyBackFileResult(relative_path, CopyBackStatus.CONFLICT)
+
+            _ensure_destination_parent(canonical_path.parent, canonical_root)
+            destination_existed = canonical_hash is not None
+            flags = os.O_RDWR | no_follow
+            if not destination_existed:
+                flags |= os.O_CREAT | os.O_EXCL
+            with _opened_descriptor(canonical_path, flags, _PRIVATE_FILE_MODE) as canonical_descriptor:
+                current_hash = _hash_descriptor(canonical_descriptor, canonical_path) if destination_existed else None
+                if current_hash == staged_hash:
+                    return CopyBackFileResult(relative_path, CopyBackStatus.ALREADY_SYNCHRONIZED)
+                if current_hash != baseline_hash:
+                    return CopyBackFileResult(relative_path, CopyBackStatus.CONFLICT)
+
+                os.ftruncate(canonical_descriptor, 0)
+                os.lseek(staged_descriptor, 0, os.SEEK_SET)
+                while contents := os.read(staged_descriptor, 1024 * 1024):
+                    _write_all(canonical_descriptor, contents)
+                os.fsync(canonical_descriptor)
+        return CopyBackFileResult(relative_path, CopyBackStatus.COPIED)
+    except (OSError, StagingFinalizationError) as error:
+        return _failed_copy(relative_path, error)
+
+
+def _snapshot_file(path: Path) -> str | None:
+    try:
+        with _opened_descriptor(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)) as descriptor:
+            return _hash_descriptor(descriptor, path)
+    except FileNotFoundError:
+        return None
+
+
+def _hash_descriptor(descriptor: int, path: Path) -> str:
+    path_stat = os.fstat(descriptor)
+    if not stat.S_ISREG(path_stat.st_mode):
+        raise StagingFinalizationError(f"settings path is not a regular file: {path}")
+    os.lseek(descriptor, 0, os.SEEK_SET)
+    digest = hashlib.sha256()
+    while contents := os.read(descriptor, 1024 * 1024):
+        digest.update(contents)
+    os.lseek(descriptor, 0, os.SEEK_SET)
+    return digest.hexdigest()
+
+
+def _ensure_destination_parent(destination_parent: Path, canonical_root: Path) -> None:
+    try:
+        relative_parent = destination_parent.relative_to(canonical_root)
+    except ValueError as error:
+        raise StagingFinalizationError(f"canonical destination escapes its root: {destination_parent}") from error
+
+    try:
+        canonical_root.mkdir(mode=_PRIVATE_DIRECTORY_MODE, parents=True)
+    except FileExistsError:
+        pass
+    _validate_real_directory(canonical_root)
+    current = canonical_root
+    for component in relative_parent.parts:
+        current /= component
+        try:
+            current.mkdir(mode=_PRIVATE_DIRECTORY_MODE)
+        except FileExistsError:
+            pass
+        _validate_real_directory(current)
+
+
+def _validate_real_directory(path: Path) -> None:
+    path_stat = path.lstat()
+    if stat.S_ISLNK(path_stat.st_mode) or not stat.S_ISDIR(path_stat.st_mode):
+        raise StagingFinalizationError(f"canonical settings parent is not a real directory: {path}")
+
+
+@contextmanager
+def _opened_descriptor(path: Path, flags: int, mode: int | None = None) -> Iterator[int]:
+    descriptor = os.open(path, flags) if mode is None else os.open(path, flags, mode)
+    try:
+        yield descriptor
+    finally:
+        os.close(descriptor)
+
+
+def _failed_copy(relative_path: Path, error: object) -> CopyBackFileResult:
+    return CopyBackFileResult(relative_path, CopyBackStatus.FAILED, str(error))
+
+
+def _write_completion_marker(staging_root: Path) -> None:
+    marker = staging_root / COMPLETED_FILENAME
+    with _opened_descriptor(marker, os.O_WRONLY | os.O_CREAT | os.O_EXCL, _PRIVATE_FILE_MODE) as descriptor:
+        os.fsync(descriptor)
