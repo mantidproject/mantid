@@ -11,6 +11,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
@@ -120,7 +121,7 @@ public:
 
   void testAlignmentCreatesPlotWorkspaceGroupWithDetectorIndexXAxisForSelectedWorkspace() {
     createConstantWorkspace("IvsQ_12345", -100.0);
-    createAlignmentInputWorkspace("raw_input_name", "12345", alignmentYValues(100, 7.0));
+    createAlignmentInputWorkspace("raw_input_name", "12345", alignmentYValues(100.35, 7.0));
     createTOFGroup({"raw_input_name"});
     auto model = PlottingModel{};
     auto const workspaces = plottingWorkspaces({"IvsQ_12345"});
@@ -132,13 +133,14 @@ public:
     auto group = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>(
         "__isis_refl_align_IvsQ_12345");
     TS_ASSERT_EQUALS(group->size(), 3);
-    assertYValue("__isis_refl_align_IvsQ_12345_raw_sub_bg", 6.0, 96);
-    assertXValue("__isis_refl_align_IvsQ_12345_raw_sub_bg", 96.0, 96);
+    assertYValue("__isis_refl_align_IvsQ_12345_profile", alignmentYValues(100.35, 7.0)[100], 96);
+    assertXValue("__isis_refl_align_IvsQ_12345_profile", 96.0, 96);
+    assertXValue("__isis_refl_align_IvsQ_12345_peak_centre", 96.35, 0, 1e-4);
     TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_align_IvsQ_12345_fitted_peak"));
     TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_align_IvsQ_12345_peak_centre"));
   }
 
-  void testAlignmentCreatesRawProfileWorkspaceWhenGaussianFitFails() {
+  void testAlignmentThrowsWhenInitialPeakCentreCannotBeFound() {
     createConstantWorkspace("IvsQ_12345", -100.0);
     createAlignmentInputWorkspace("raw_input_name", "12345",
                                   std::vector<double>(644, std::numeric_limits<double>::quiet_NaN()));
@@ -146,16 +148,68 @@ public:
     auto model = PlottingModel{};
     auto const workspaces = plottingWorkspaces({"IvsQ_12345"});
 
-    auto const workspacesForPlotting = model.workspacesForPlotting(workspaces, alignmentOutputSelection());
-
-    TS_ASSERT_EQUALS(workspacesForPlotting.size(), 1);
-    TS_ASSERT_EQUALS(workspacesForPlotting[0], "__isis_refl_align_IvsQ_12345");
-    auto group = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>(
-        "__isis_refl_align_IvsQ_12345");
-    TS_ASSERT_EQUALS(group->size(), 1);
-    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_align_IvsQ_12345_raw_sub_bg"));
+    TS_ASSERT_THROWS(model.workspacesForPlotting(workspaces, alignmentOutputSelection()), std::runtime_error const &);
+    TS_ASSERT(!Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_align_IvsQ_12345"));
+    TS_ASSERT(!Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_align_IvsQ_12345_profile"));
     TS_ASSERT(!Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_align_IvsQ_12345_fitted_peak"));
     TS_ASSERT(!Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_align_IvsQ_12345_peak_centre"));
+  }
+
+  void testAlignmentUsesInitialPeakCentreWhenGaussianFitCannotBeAttempted() {
+    createConstantWorkspace("IvsQ_12345", -100.0);
+    createAlignmentInputWorkspace("raw_input_name", "12345", alignmentYValues(4, 7.0));
+    createTOFGroup({"raw_input_name"});
+    auto model = PlottingModel{};
+
+    auto const workspacesForPlotting =
+        model.workspacesForPlotting(workspaceSelections({"IvsQ_12345"}), alignmentOutputSelection());
+
+    TS_ASSERT_EQUALS(workspacesForPlotting, std::vector<std::string>{"__isis_refl_align_IvsQ_12345"});
+    auto group = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>(
+        "__isis_refl_align_IvsQ_12345");
+    TS_ASSERT_EQUALS(group->size(), 2);
+    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_align_IvsQ_12345_profile"));
+    TS_ASSERT(!Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_align_IvsQ_12345_fitted_peak"));
+    assertXValue("__isis_refl_align_IvsQ_12345_peak_centre", 0.0, 0);
+  }
+
+  void testAlignmentMapsProfileFitAndOptimizedPeakCentreToTheta() {
+    createConstantWorkspace("IvsQ_12345", -100.0);
+    createAlignmentInputWorkspace("raw_input_name", "12345", alignmentYValues(100.35, 7.0));
+    createTOFGroup({"raw_input_name"});
+    auto model = PlottingModel{};
+    auto outputSelection = alignmentOutputSelection();
+    outputSelection.alignmentXAxis = AlignmentXAxis::Theta;
+
+    auto const workspacesForPlotting =
+        model.workspacesForPlotting(workspaceSelections({"IvsQ_12345"}), outputSelection);
+
+    TS_ASSERT_EQUALS(workspacesForPlotting, std::vector<std::string>{"__isis_refl_align_IvsQ_12345_theta"});
+    auto const rawWorkspace =
+        Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>("raw_input_name");
+    auto const lowerTheta = rawWorkspace->spectrumInfo().twoTheta(100) * 90.0 / M_PI;
+    auto const upperTheta = rawWorkspace->spectrumInfo().twoTheta(101) * 90.0 / M_PI;
+    auto const expectedCentreTheta = lowerTheta + 0.35 * (upperTheta - lowerTheta);
+    assertXValue("__isis_refl_align_IvsQ_12345_theta_profile", lowerTheta, 96);
+    assertXValue("__isis_refl_align_IvsQ_12345_theta_peak_centre", expectedCentreTheta, 0, 1e-6);
+    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_align_IvsQ_12345_theta_fitted_peak"));
+  }
+
+  void testAlignmentPeakCentreMarkerIgnoresInvalidProfileValues() {
+    createConstantWorkspace("IvsQ_12345", -100.0);
+    auto yValues = alignmentYValues(100.35, 7.0);
+    yValues[4] = std::numeric_limits<double>::quiet_NaN();
+    createAlignmentInputWorkspace("raw_input_name", "12345", yValues);
+    createTOFGroup({"raw_input_name"});
+    auto model = PlottingModel{};
+
+    model.workspacesForPlotting(workspaceSelections({"IvsQ_12345"}), alignmentOutputSelection());
+
+    auto marker = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(
+        "__isis_refl_align_IvsQ_12345_peak_centre");
+    TS_ASSERT(std::isfinite(marker->y(0)[0]));
+    TS_ASSERT(std::isfinite(marker->y(0)[1]));
+    TS_ASSERT_LESS_THAN(marker->y(0)[0], marker->y(0)[1]);
   }
 
   void testAlignmentCreatesOnePlotWorkspaceGroupPerSelectedWorkspace() {
@@ -174,8 +228,8 @@ public:
     TS_ASSERT_EQUALS(workspacesForPlotting, expected);
     TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_align_IvsQ_12345"));
     TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_align_IvsQ_22345"));
-    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_align_IvsQ_12345_raw_sub_bg"));
-    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_align_IvsQ_22345_raw_sub_bg"));
+    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_align_IvsQ_12345_profile"));
+    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_align_IvsQ_22345_profile"));
   }
 
   void testAlignmentDoesNotCreateWorkspaceForAddedRuns() {
@@ -202,7 +256,7 @@ public:
 
     auto const expected = std::vector<std::string>{"__isis_refl_align_IvsQ_12345_2"};
     TS_ASSERT_EQUALS(workspacesForPlotting, expected);
-    assertYValue("__isis_refl_align_IvsQ_12345_2_raw_sub_bg", 9.0, 96);
+    assertYValue("__isis_refl_align_IvsQ_12345_2_profile", 10.0, 96);
   }
 
   void testAlignmentReusesExistingGeneratedWorkspace() {
@@ -379,11 +433,11 @@ private:
     return outputSelection;
   }
 
-  std::vector<double> alignmentYValues(size_t const peakWorkspaceIndex, double const peakHeight) {
+  std::vector<double> alignmentYValues(double const peakWorkspaceIndex, double const peakHeight) {
     auto values = std::vector<double>(644, 1.0);
     auto const sigma = 4.0;
     for (size_t index = 0; index < values.size(); ++index) {
-      auto const offset = static_cast<double>(index) - static_cast<double>(peakWorkspaceIndex);
+      auto const offset = static_cast<double>(index) - peakWorkspaceIndex;
       values[index] += (peakHeight - 1.0) * std::exp(-0.5 * offset * offset / (sigma * sigma));
     }
     return values;
@@ -414,7 +468,8 @@ private:
   void createAlignmentInputWorkspace(std::string const &name, std::string const &runNumber,
                                      std::vector<double> const &yValues,
                                      std::optional<int> const currentPeriod = std::nullopt) {
-    auto workspace = Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", yValues.size(), 2, 1);
+    auto workspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(static_cast<int>(yValues.size()), 1,
+                                                                                  false, false, true, "POLREF");
     workspace->mutableRun().addProperty("run_number", runNumber);
     if (currentPeriod) {
       workspace->mutableRun().addProperty("current_period", *currentPeriod);
@@ -460,9 +515,10 @@ private:
     TS_ASSERT_DELTA(workspace->y(0)[workspaceIndex], expected, 1e-12);
   }
 
-  void assertXValue(std::string const &workspaceName, double expected, size_t const workspaceIndex) {
+  void assertXValue(std::string const &workspaceName, double expected, size_t const workspaceIndex,
+                    double const tolerance = 1e-12) {
     auto workspace =
         Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(workspaceName);
-    TS_ASSERT_DELTA(workspace->x(0)[workspaceIndex], expected, 1e-12);
+    TS_ASSERT_DELTA(workspace->x(0)[workspaceIndex], expected, tolerance);
   }
 };

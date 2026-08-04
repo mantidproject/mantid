@@ -17,6 +17,7 @@
 #include "MantidHistogramData/LinearGenerator.h"
 
 #include <array>
+#include <limits>
 
 using namespace Mantid;
 
@@ -160,6 +161,44 @@ public:
     std::string err_msg("Some invalid Properties found: \n"
                         " EndWorkspaceIndex: The index is smaller than the start.");
     TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error const &e, e.what(), err_msg);
+  }
+
+  void test_flat_profile_returns_absolute_maximum_and_optional_output_workspace() {
+    auto ws = emptyWorkspace(20, 10);
+    for (size_t workspaceIndex = 0; workspaceIndex < ws->getNumberHistograms(); ++workspaceIndex) {
+      std::fill(ws->mutableY(workspaceIndex).begin(), ws->mutableY(workspaceIndex).end(), 2.0);
+    }
+    Reflectometry::FindReflectometryLines2 alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", ws);
+    alg.setProperty("StartWorkspaceIndex", 4);
+    alg.setPropertyValue("OutputWorkspace", "unused_output");
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    double const lineCentre = alg.getProperty("LineCentre");
+    API::MatrixWorkspace_sptr output = alg.getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(lineCentre, 4.0)
+    TS_ASSERT(output)
+    if (output) {
+      TS_ASSERT_EQUALS(output->y(0)[0], 4.0)
+    }
+  }
+
+  void test_profile_without_a_finite_maximum_throws() {
+    auto ws = emptyWorkspace(20, 10);
+    for (size_t workspaceIndex = 0; workspaceIndex < ws->getNumberHistograms(); ++workspaceIndex) {
+      std::fill(ws->mutableY(workspaceIndex).begin(), ws->mutableY(workspaceIndex).end(),
+                std::numeric_limits<double>::quiet_NaN());
+    }
+    Reflectometry::FindReflectometryLines2 alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", ws);
+
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error const &)
   }
 
 private:
