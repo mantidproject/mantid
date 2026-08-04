@@ -257,7 +257,7 @@ transformation (cybaman). The flag which controls this behaviour is ``orient_fil
 If this is ``True``, the orientation file is expect to be a text file with a row for each run and, within each row, a rotation angle for each axis.
 An example snippet is shown below:
 
-.. code::
+.. code:: console
 
     45	0	0
     45	30	180
@@ -275,7 +275,7 @@ If ``orient_file_is_euler`` is ``False``, the orientation file is expected to be
 be a "C-style" (row-major) flattened 3x3 transformation matrix. An example is shown below for the equivalent if the above euler file
 (for ``euler_scheme = YXY`` and ``euler_axes_sense = "-1,-1,-1"``)
 
-.. code::
+.. code:: console
 
     0.7071147,2.05e-05,-0.7070989,1.45e-05,1.0,4.35e-05,0.7070989,-4.1e-05,0.7071147
     -0.707094,0.3535975,0.6123617,-1.39e-05,0.8659876,-0.5000654,-0.7071196,-0.3536017,-0.6123297
