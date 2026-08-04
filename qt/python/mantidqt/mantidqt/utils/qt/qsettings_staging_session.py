@@ -16,6 +16,7 @@ import os
 from pathlib import Path
 import shutil
 import stat
+from threading import Lock
 from typing import Protocol
 from uuid import uuid4
 
@@ -30,6 +31,8 @@ DEFAULT_SETTINGS_PATHS = (Path("mantidproject/mantidworkbench.ini"),)
 
 _PRIVATE_DIRECTORY_MODE = 0o700
 _PRIVATE_FILE_MODE = 0o600
+_ACTIVATION_LOCK = Lock()
+_QSETTINGS_PATH_ACTIVATED = False
 
 
 class _Coordinator(Protocol):
@@ -44,6 +47,10 @@ class StagingPreparationError(RuntimeError):
 
 class CoordinatorUnavailable(StagingPreparationError):
     """Raised when another process owns the local staging coordinator."""
+
+
+class StagingActivationError(RuntimeError):
+    """Raised when the process-global QSettings path cannot be activated."""
 
 
 @dataclass(frozen=True)
@@ -66,6 +73,33 @@ class PreparedQSettingsSession:
     retained_session_roots: tuple[Path, ...]
     _coordinator: _Coordinator = field(repr=False)
     _released: bool = field(default=False, init=False, repr=False)
+    _active: bool = field(default=False, init=False, repr=False)
+
+    @property
+    def active(self) -> bool:
+        """Return whether this session installed the process QSettings path."""
+        return self._active
+
+    def activate(self) -> None:
+        """Redirect user-scope INI settings to this session exactly once.
+
+        The caller must invoke this before constructing any QSettings object.
+        Existing instances cannot be detected reliably, so startup ordering is
+        part of this method's contract.
+        """
+        global _QSETTINGS_PATH_ACTIVATED
+
+        with _ACTIVATION_LOCK:
+            if self._released:
+                raise StagingActivationError("cannot activate a released QSettings staging session")
+            if self._active or _QSETTINGS_PATH_ACTIVATED:
+                raise StagingActivationError("the process QSettings staging path has already been activated")
+
+            from qtpy.QtCore import QSettings
+
+            QSettings.setPath(QSettings.IniFormat, QSettings.UserScope, str(self.staging_root))
+            _QSETTINGS_PATH_ACTIVATED = True
+            self._active = True
 
     def abort(self) -> None:
         """Release ownership while retaining this session for recovery."""

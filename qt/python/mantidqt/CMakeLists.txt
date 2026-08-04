@@ -81,6 +81,7 @@ set(PYTHON_TEST_FILES
     mantidqt/utils/qt/test/test_qappthreadcall.py
     mantidqt/utils/qt/test/test_qsettings_change_aware.py
     mantidqt/utils/qt/test/test_qsettings_staging.py
+    mantidqt/utils/qt/test/test_qsettings_staging_activation.py
     mantidqt/utils/qt/test/test_qsettings_staging_session.py
     mantidqt/widgets/test/test_messagedisplay.py
     mantidqt/widgets/test/test_scriptrepository.py
