@@ -44,7 +44,9 @@ std::string const LINEAR_BACKGROUND{"Linear"};
 std::string const FLAT_BACKGROUND{"Flat"};
 std::string const FALLBACK_STATUS{"Fit failed; using initial peak centre"};
 
-void clearIntegrationLimits(Mantid::API::MatrixWorkspace &workspace) {
+// Give every integrated spectrum common bin edges so that Transpose accepts the workspace. These edges become the
+// unused vertical axis of the detector profile and do not affect the fitted workspace-index coordinates.
+void setCommonBinEdgesForTranspose(Mantid::API::MatrixWorkspace &workspace) {
   for (size_t index = 0; index < workspace.getNumberHistograms(); ++index) {
     auto &x = workspace.mutableX(index);
     x.front() = 0.0;
@@ -85,7 +87,7 @@ PeakParameters estimatePeak(const Mantid::API::MatrixWorkspace &profile, double 
   }
 
   auto const height = y[*maxIndex] - background;
-  if (!std::isfinite(height) || height <= 0.0) {
+  if (height <= 0.0) {
     return {x[*maxIndex], 0.0, std::nullopt};
   }
 
@@ -108,7 +110,7 @@ PeakParameters estimatePeak(const Mantid::API::MatrixWorkspace &profile, double 
   auto fwhm = std::optional<double>{};
   if (left && right) {
     auto const width = x[*right] - x[*left];
-    if (std::isfinite(width) && width > 0.0) {
+    if (width > 0.0) {
       fwhm = width;
     }
   }
@@ -146,9 +148,10 @@ void FitSpecularPeak::init() {
 
   auto nonNegative = std::make_shared<Kernel::BoundedValidator<int>>();
   nonNegative->setLower(0);
-  declareProperty(Prop::START_INDEX, 0, nonNegative, "Index of the first spectrum to include in the detector profile.");
+  declareProperty(Prop::START_INDEX, 0, nonNegative,
+                  "Workspace index of the first spectrum to include in the detector profile.");
   declareProperty(Prop::END_INDEX, EMPTY_INT(), nonNegative,
-                  "Index of the last spectrum to include in the detector profile.");
+                  "Workspace index of the last spectrum to include in the detector profile.");
   declareProperty(Prop::RANGE_LOWER, EMPTY_DBL(), "Lower X limit used when integrating each spectrum.");
   declareProperty(Prop::RANGE_UPPER, EMPTY_DBL(), "Upper X limit used when integrating each spectrum.");
 
@@ -158,7 +161,8 @@ void FitSpecularPeak::init() {
 
   declareProperty(std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
                       Prop::OUTPUT_PROFILE_WS, "", Kernel::Direction::Output, API::PropertyMode::Optional),
-                  "The integrated detector profile used for peak fitting.");
+                  "The integrated detector profile used for peak fitting, with X values corresponding to input "
+                  "workspace indices.");
   declareProperty(std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
                       Prop::OUTPUT_FIT_WS, "", Kernel::Direction::Output, API::PropertyMode::Optional),
                   "The Fit output containing the data, fitted curve, and residuals. Not set when the fit fails.");
@@ -173,6 +177,7 @@ void FitSpecularPeak::init() {
 std::map<std::string, std::string> FitSpecularPeak::validateInputs() {
   std::map<std::string, std::string> issues;
   API::MatrixWorkspace_sptr workspace = getProperty(Prop::INPUT_WS);
+  // Direct validation can receive a WorkspaceGroup before the framework dispatches its members.
   if (!workspace) {
     return issues;
   }
@@ -219,7 +224,7 @@ API::MatrixWorkspace_sptr FitSpecularPeak::createProfile(const API::MatrixWorksp
   }
   integration->execute();
   API::MatrixWorkspace_sptr integratedWorkspace = integration->getProperty("OutputWorkspace");
-  clearIntegrationLimits(*integratedWorkspace);
+  setCommonBinEdgesForTranspose(*integratedWorkspace);
 
   auto transpose = createChildAlgorithm("Transpose");
   transpose->setProperty("InputWorkspace", integratedWorkspace);
