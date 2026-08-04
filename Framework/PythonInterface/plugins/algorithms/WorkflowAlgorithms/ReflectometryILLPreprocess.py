@@ -32,8 +32,7 @@ from mantid.simpleapi import (
     CreateWorkspace,
     Divide,
     ExtractMonitors,
-    Fit,
-    Integration,
+    FitSpecularPeak,
     LoadAndMerge,
     logger,
     Minus,
@@ -788,58 +787,20 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         Keyword arguments:
         ws -- merged workspace that requires foreground refitting
         """
-        # first, we need to  integrate the workspace indices
-        int_ws = "{}_integrated".format(ws)
         kwargs = {}
-        start_index = 0
         if not self.getProperty(Prop.START_WS_INDEX).isDefault:
             kwargs["StartWorkspaceIndex"] = self.getProperty(Prop.START_WS_INDEX).value
-            start_index = self.getProperty(Prop.START_WS_INDEX).value
         if not self.getProperty(Prop.END_WS_INDEX).isDefault:
             kwargs["EndWorkspaceIndex"] = self.getProperty(Prop.END_WS_INDEX).value
         if not self.getProperty(Prop.XMAX).isDefault:
             kwargs["RangeUpper"] = self.getProperty(Prop.XMAX).value
         if not self.getProperty(Prop.XMIN).isDefault:
             kwargs["RangeLower"] = self.getProperty(Prop.XMIN).value
-        Integration(InputWorkspace=ws, OutputWorkspace=int_ws, **kwargs)
-        Transpose(InputWorkspace=int_ws, OutputWorkspace=int_ws)  # the integration output is a bin plot, cannot be fitted
         original_peak_centre = ws.getRun().getLogData("reduction.line_position").value
-        # determine the initial fitting parameters
-        y_axis = mtd[int_ws].y(0)
-        max_height = np.max(y_axis)
-        max_index = start_index + (np.where(y_axis == max_height))[0][0]
-        sigma = max_index - (np.where(y_axis > 0.667 * max_height))[0][0]
-        sigma = sigma if sigma > 0 else 2
-        fit_fun = "name=FlatBackground, A0={};".format(0.3 * max_height) + "name=Gaussian, PeakCentre={0}, Height={1}, Sigma={2}".format(
-            max_index, 0.7 * max_height, sigma
-        )
-        try:
-            fit_name = "fit_output"
-            fit_output = Fit(
-                Function=fit_fun,
-                InputWorkspace=int_ws,
-                StartX=float(max_index - 3 * sigma),
-                EndX=float(max_index + 3 * sigma),
-                CreateOutput=True,
-                IgnoreInvalidData=True,
-                Output="{}_{}".format(int_ws, fit_name),
-            )
-            # this table contains 5 rows, with fitted parameters of the magnitude flat background, then height, peakCentre,
-            # and Sigma of the Gaussian, and finally the cost function
-            param_table = fit_output.OutputParameters
-            # grabbing the fitted peak centre, already as a function of spectrum number
-            peak_centre = param_table.row(2)["Value"]
-            # finally the instrument should be rotated to the correct position
-
-            self._cleanup.cleanup("{}_{}_Parameters".format(int_ws, fit_name))
-            self._cleanup.cleanup("{}_{}_Workspace".format(int_ws, fit_name))
-            self._cleanup.cleanup("{}_{}_NormalisedCovarianceMatrix".format(int_ws, fit_name))
-        except RuntimeError:
-            self.log().error("Refitting of the foreground position of merge data failed. Using the maximum value instead.")
-            peak_centre = max_index
+        fit_output = FitSpecularPeak(InputWorkspace=ws, BackgroundType="Flat", **kwargs)
+        peak_centre = fit_output.PeakCentre
         ws.getRun().addProperty("reduction.line_position", float(peak_centre), True)
         self._rotate_instrument(ws, peak_centre, original_peak_centre)
-        self._cleanup.cleanup(int_ws)
 
     def _rotate_instrument(self, ws: MatrixWorkspace, peak_centre: float, original_centre: float) -> None:
         """Rotates the instrument of the provided workspace by the given angle around the sample, and then rotates
