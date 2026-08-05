@@ -9,11 +9,12 @@ import argparse
 import atexit
 import os
 import sys
+from pathlib import Path
 from sys import setswitchinterval
 from functools import partial
 
 from mantid.api import FrameworkManagerImpl
-from mantid.kernel import ConfigService, UsageService, version_str as mantid_version_str
+from mantid.kernel import ConfigService, Logger, UsageService, version_str as mantid_version_str
 from mantidqt.utils.qt import plugins
 import mantidqt.utils.qt as qtutils
 import mantid.kernel.environment as mtd_env
@@ -35,6 +36,77 @@ from workbench.identity import APPNAME, ORG_DOMAIN, ORGANIZATION  # noqa: E402
 # Constants
 SYSCHECK_INTERVAL = 50
 ORIGINAL_SYS_EXIT = sys.exit
+_QSETTINGS_STAGING_WARNING_EMITTED = False
+
+
+def _evaluate_qsettings_staging():
+    """Evaluate staging lazily so importing this module has no settings side effects."""
+    from mantidqt.utils.qt.qsettings_staging import evaluate_qsettings_staging
+
+    return evaluate_qsettings_staging()
+
+
+def _prepare_and_activate_qsettings_staging(eligibility):
+    """Prepare and activate a staged QSettings session for this process."""
+    from mantidqt.utils.qt.qsettings_staging_session import QSettingsStagingSessionManager, StagingPreparationError
+
+    try:
+        session = QSettingsStagingSessionManager(eligibility).prepare()
+    except StagingPreparationError as error:
+        return None, error
+
+    session.activate()
+    return session, None
+
+
+def _warn_about_qsettings_staging(message):
+    global _QSETTINGS_STAGING_WARNING_EMITTED
+    if _QSETTINGS_STAGING_WARNING_EMITTED:
+        return
+
+    Logger("Mantid Workbench").warning(message)
+    _QSETTINGS_STAGING_WARNING_EMITTED = True
+
+
+def _prepare_qsettings_staging():
+    """Activate eligible QSettings staging, otherwise retain the canonical path."""
+    eligibility = _evaluate_qsettings_staging()
+    if not eligibility.active:
+        reason = eligibility.reason.value
+        if reason == "cache_is_nfs":
+            _warn_about_qsettings_staging(
+                "QSettings staging was requested, but the XDG cache directory is also on NFS. "
+                "Workbench will use the canonical configuration directory. Use a user-owned local "
+                "XDG_CACHE_HOME or unset MANTID_QSETTINGS_STAGING."
+            )
+        elif reason not in {"disabled", "unsupported_platform", "config_not_nfs"}:
+            _warn_about_qsettings_staging(
+                f"QSettings staging was requested but is unavailable ({reason}). Workbench will use the canonical configuration directory."
+            )
+        return None
+
+    session, error = _prepare_and_activate_qsettings_staging(eligibility)
+    if error is not None:
+        _warn_about_qsettings_staging(
+            f"QSettings staging preparation failed ({error}). Workbench will use the canonical configuration directory."
+        )
+    return session
+
+
+def _verify_qsettings_filename(session, filename):
+    expected = (session.staging_root / "mantidproject" / "mantidworkbench.ini").resolve(strict=False)
+    actual = Path(filename).resolve(strict=False)
+    if actual != expected:
+        raise RuntimeError(f"QSettings staging activation selected {actual}, expected {expected}")
+
+
+def _verify_qsettings_staging(session):
+    # Import only after QSettings.setPath has redirected UserScope IniFormat.
+    from workbench.config import CONF
+
+    _verify_qsettings_filename(session, CONF.filename)
+
+
 ORIGINAL_STDERR = sys.stderr
 STACKTRACE_FILE = "workbench_stacktrace.txt"
 
@@ -107,9 +179,12 @@ def initialize():
     return app
 
 
-def create_and_launch_workbench(app, command_line_options):
+def create_and_launch_workbench(app, command_line_options, qsettings_staging_session=None):
     """Given an application instance create the MainWindow,
     show it and start the main event loop
+
+    The optional staging session remains referenced by this stack frame for the
+    lifetime of the event loop. Clean-shutdown finalization is wired separately.
     """
     exit_value = 0
     try:
@@ -202,7 +277,10 @@ def create_and_launch_workbench(app, command_line_options):
 
 
 def initialise_qapp_and_launch_workbench(command_line_options):
-    # Set the global figure manager in matplotlib. Very important this happens first.
+    # QSettings staging must be active before anything can import workbench.config.
+    qsettings_staging_session = _prepare_qsettings_staging()
+
+    # Set the global figure manager before any other matplotlib initialization.
     from workbench.plotting.config import init_mpl_gcf
 
     init_mpl_gcf()
@@ -219,11 +297,14 @@ def initialise_qapp_and_launch_workbench(command_line_options):
             command_line_options.script = None
 
     app = initialize()
+    if qsettings_staging_session is not None:
+        _verify_qsettings_staging(qsettings_staging_session)
+
     # the default sys check interval leads to long lags
     # when request scripts to be aborted
     setswitchinterval(SYSCHECK_INTERVAL)
 
-    create_and_launch_workbench(app, command_line_options)
+    create_and_launch_workbench(app, command_line_options, qsettings_staging_session)
 
 
 if __name__ == "__main__":
