@@ -541,6 +541,8 @@ double LoadILLReflectometry::reflectometryPeak() {
   fitSpecularPeak->setProperty("StartWorkspaceIndex", startIndex);
   fitSpecularPeak->setProperty("EndWorkspaceIndex", endIndex);
   fitSpecularPeak->setProperty("BackgroundType", "Linear");
+  fitSpecularPeak->setProperty("AcceptChangesInFunctionTooSmall", false);
+  fitSpecularPeak->setProperty("AcceptChangesInParameterTooSmall", false);
   if (!isDefault("FitRangeLower")) {
     fitSpecularPeak->setProperty("RangeLower",
                                  wavelengthToTOF(getProperty("FitRangeLower"), m_sourceDistance, m_detectorDistance));
