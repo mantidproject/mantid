@@ -20,6 +20,7 @@
 
 #include <cmath>
 #include <limits>
+#include <stdexcept>
 #include <vector>
 
 using namespace Mantid;
@@ -38,9 +39,11 @@ public:
     bool const useFittedCentreOnFailure = algorithm.getProperty("UseFittedPeakCentreOnFailure");
     bool const acceptChangesInFunction = algorithm.getProperty("AcceptChangesInFunctionTooSmall");
     bool const acceptChangesInParameters = algorithm.getProperty("AcceptChangesInParameterTooSmall");
+    double const fitWindowMultiplier = algorithm.getProperty("FitWindowMultiplier");
     TS_ASSERT(!useFittedCentreOnFailure)
     TS_ASSERT(acceptChangesInFunction)
     TS_ASSERT(acceptChangesInParameters)
+    TS_ASSERT_EQUALS(fitWindowMultiplier, 3.0)
   }
 
   void test_fit_status_acceptance_is_configurable() {
@@ -111,6 +114,32 @@ public:
     TS_ASSERT_EQUALS(peakCentreError, EMPTY_DBL())
     TS_ASSERT_EQUALS(algorithm->getPropertyValue("OutputStatus"), "Fit failed; using initial peak centre")
     TS_ASSERT(!fit)
+  }
+
+  void test_fit_window_multiplier_controls_the_fitted_interval() {
+    auto workspace = gaussianWorkspace(80, 20, 43.25, 3.5, 12.0, 2.0);
+    auto defaultAlgorithm = configuredAlgorithm(workspace);
+    defaultAlgorithm->setPropertyValue("OutputFitWorkspace", "unused_default_fit");
+    auto narrowAlgorithm = configuredAlgorithm(workspace);
+    narrowAlgorithm->setProperty("FitWindowMultiplier", 0.5);
+    narrowAlgorithm->setPropertyValue("OutputFitWorkspace", "unused_narrow_fit");
+
+    TS_ASSERT_THROWS_NOTHING(defaultAlgorithm->execute())
+    TS_ASSERT_THROWS_NOTHING(narrowAlgorithm->execute())
+    API::MatrixWorkspace_sptr defaultFit = defaultAlgorithm->getProperty("OutputFitWorkspace");
+    API::MatrixWorkspace_sptr narrowFit = narrowAlgorithm->getProperty("OutputFitWorkspace");
+    TS_ASSERT(defaultFit)
+    TS_ASSERT(narrowFit)
+    if (defaultFit && narrowFit) {
+      TS_ASSERT_LESS_THAN(narrowFit->blocksize(), defaultFit->blocksize())
+    }
+  }
+
+  void test_fit_window_multiplier_must_be_positive() {
+    auto algorithm = configuredAlgorithm(gaussianWorkspace(20, 10, 10.0, 2.0, 8.0, 1.0));
+
+    TS_ASSERT_THROWS(algorithm->setProperty("FitWindowMultiplier", 0.0), std::invalid_argument const &)
+    TS_ASSERT_THROWS(algorithm->setProperty("FitWindowMultiplier", -1.0), std::invalid_argument const &)
   }
 
   void test_unsuccessful_fit_returns_initial_peak_centre_by_default() {

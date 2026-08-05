@@ -31,6 +31,7 @@ std::string const ACCEPT_CHANGES_IN_FUNCTION{"AcceptChangesInFunctionTooSmall"};
 std::string const ACCEPT_CHANGES_IN_PARAMETERS{"AcceptChangesInParameterTooSmall"};
 std::string const BACKGROUND_TYPE{"BackgroundType"};
 std::string const END_INDEX{"EndWorkspaceIndex"};
+std::string const FIT_WINDOW_MULTIPLIER{"FitWindowMultiplier"};
 std::string const INPUT_WS{"InputWorkspace"};
 std::string const OUTPUT_FIT_WS{"OutputFitWorkspace"};
 std::string const OUTPUT_PROFILE_WS{"OutputProfileWorkspace"};
@@ -164,6 +165,12 @@ void FitSpecularPeak::init() {
                   "Workspace index of the last spectrum to include in the detector profile.");
   declareProperty(Prop::RANGE_LOWER, EMPTY_DBL(), "Lower X limit used when integrating each spectrum.");
   declareProperty(Prop::RANGE_UPPER, EMPTY_DBL(), "Upper X limit used when integrating each spectrum.");
+
+  auto positive = std::make_shared<Kernel::BoundedValidator<double>>();
+  positive->setLower(0.0);
+  positive->setLowerExclusive(true);
+  declareProperty(Prop::FIT_WINDOW_MULTIPLIER, 3.0, positive,
+                  "Number of estimated peak FWHMs included on either side of the initial peak centre.");
 
   auto const backgrounds = std::vector<std::string>{LINEAR_BACKGROUND, FLAT_BACKGROUND};
   declareProperty(Prop::BACKGROUND_TYPE, LINEAR_BACKGROUND, std::make_shared<Kernel::StringListValidator>(backgrounds),
@@ -300,8 +307,9 @@ void FitSpecularPeak::exec() {
   fit->setProperty("Function", std::dynamic_pointer_cast<API::IFunction>(composite));
   fit->setProperty("InputWorkspace", profileWorkspace);
   fit->setProperty("WorkspaceIndex", 0);
-  fit->setProperty("StartX", initialPeak.centre - 3.0 * *initialPeak.fwhm);
-  fit->setProperty("EndX", initialPeak.centre + 3.0 * *initialPeak.fwhm);
+  double const fitWindowMultiplier = getProperty(Prop::FIT_WINDOW_MULTIPLIER);
+  fit->setProperty("StartX", initialPeak.centre - fitWindowMultiplier * *initialPeak.fwhm);
+  fit->setProperty("EndX", initialPeak.centre + fitWindowMultiplier * *initialPeak.fwhm);
   fit->setProperty("IgnoreInvalidData", true);
   fit->setProperty("CalcErrors", true);
   if (!isDefault(Prop::OUTPUT_FIT_WS)) {
