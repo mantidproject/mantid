@@ -146,7 +146,7 @@ class SaveNexusPDTest(unittest.TestCase):
 
     def check(self, filename, withInstrument):
         with h5py.File(filename, "r") as handle:
-            nxentry = handle[sorted(handle.keys())[0]]
+            nxentry = handle[min(handle.keys())]
             nxinstrument = nxentry["instrument"]
 
             nxmoderator = nxinstrument["moderator"]

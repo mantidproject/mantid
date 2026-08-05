@@ -63,17 +63,17 @@ private:
   unsigned int m_NMatrixDimensions{0};
 
   // Private method to update rotation matrix for a single event from log values
-  template <class T> bool setGoniometersFromLogs(const T &ev, Geometry::Goniometer &gonio, MDTransf_sptr QConv) {
+  template <class T> bool setGoniometersFromLogs(const T &ev) {
     if (!m_useLogTimes || m_GonioIndex.empty())
       return true;
     for (size_t axIdx = 0; axIdx < m_GonioIndex.size(); axIdx++) {
       double logval = m_Logs[axIdx]->getSingleValue(ev->pulseTime());
       if (std::isnan(logval))
         return false;
-      gonio.setRotationAngle(m_GonioIndex[axIdx], logval);
+      m_Goniometer.setRotationAngle(m_GonioIndex[axIdx], logval);
     }
-    Kernel::DblMatrix tmpR = gonio.getR() * m_Wtransf;
-    QConv->updateRotMat(tmpR.getVector());
+    m_tmpRot = m_Goniometer.getR() * m_Wtransf;
+    m_QConverter->updateRotMat(m_tmpRot.getVector());
     return true;
   }
 };
