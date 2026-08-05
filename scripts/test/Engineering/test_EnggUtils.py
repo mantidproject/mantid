@@ -255,14 +255,14 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
     @patch(enggutils_path + ".mantid.CloneWorkspace")
     @patch(enggutils_path + ".mantid.MoveInstrumentComponent")
     @patch(enggutils_path + ".mantid.CalculateDIFC")
+    @patch(enggutils_path + ".mantid.ExtractSpectra")
     @patch(enggutils_path + ".mantid.EstimateScatteringVolumeCentreOfMass")
-    def test_correct_full_calib_for_offset_scattering_com_scales_difc_per_detector(self, mock_com, mock_calc_difc, mock_move, mock_clone):
+    def test_correct_full_calib_for_offset_scattering_com_scales_difc_per_detector(
+        self, mock_com, mock_extract, mock_calc_difc, mock_move, mock_clone
+    ):
         ws = MagicMock()
         # nominal sample position and component name
         sample = ws.getInstrument().getSample.return_value
-        orig = MagicMock()
-        orig.X.return_value, orig.Y.return_value, orig.Z.return_value = 0.0, 0.0, 0.0
-        sample.getPos.return_value = orig
         sample.getFullName.return_value = "sample-comp"
         # scattering centre of mass offset from the origin
         mock_com.return_value = (0.001, 0.002, 0.003)
@@ -274,9 +274,15 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
         # cloned calibration table to be corrected in place
         cal = MagicMock()
         cal.column.side_effect = lambda name: {"difc": [100.0, 200.0], "detid": [1, 2]}[name]
+        copy_ws = MagicMock()
+        mock_extract.return_value = copy_ws
         mock_clone.return_value = cal
 
         result = _correct_full_calib_for_offset_scattering_com(ws, "full_calib")
+
+        mock_extract.assert_called_once_with(
+            InputWorkspace=ws, StartWorkspaceIndex=0, EndWorkspaceIndex=0, OutputWorkspace="__tmp_copy", StoreInADS=False
+        )
 
         # returns the cloned (corrected) table, cloned from the supplied full calibration
         self.assertIs(result, cal)
@@ -287,11 +293,10 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
         # sample is moved to the com and then restored to its original position
         mock_move.assert_has_calls(
             [
-                call(Workspace=ws, ComponentName="sample-comp", X=0.001, Y=0.002, Z=0.003, RelativePosition=False),
-                call(Workspace=ws, ComponentName="sample-comp", X=0.0, Y=0.0, Z=0.0, RelativePosition=False),
+                call(Workspace=copy_ws, ComponentName="sample-comp", X=0.001, Y=0.002, Z=0.003, RelativePosition=False),
             ]
         )
-        self.assertEqual(mock_move.call_count, 2)
+        self.assertEqual(mock_move.call_count, 1)
         # only the DIFC column is scaled (by difc1/difc0 = 1.1), DIFA/TZERO are untouched
         cal.setCell.assert_has_calls(
             [

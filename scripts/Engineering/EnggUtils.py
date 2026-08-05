@@ -810,14 +810,15 @@ def _correct_full_calib_for_offset_scattering_com(ws: MatrixWorkspace, full_cali
 
     # extract sample information
     sample = ws.getInstrument().getSample()
-    orig, name = sample.getPos(), sample.getFullName()
+    name = sample.getFullName()
 
     # move the nominal sample location to the scattering COM and calculate the DIFCs from here
-    mantid.MoveInstrumentComponent(Workspace=ws, ComponentName=name, X=com[0], Y=com[1], Z=com[2], RelativePosition=False)
-    difc1 = mantid.CalculateDIFC(InputWorkspace=ws, OutputWorkspace="__difc1", StoreInADS=False)
-
-    # move the sample back to avoid any issues down the line
-    mantid.MoveInstrumentComponent(Workspace=ws, ComponentName=name, X=orig.X(), Y=orig.Y(), Z=orig.Z(), RelativePosition=False)
+    # (do this on a small copy of the ws to make sure data workspace state is never corrupted)
+    tmp_ws = mantid.ExtractSpectra(
+        InputWorkspace=ws, StartWorkspaceIndex=0, EndWorkspaceIndex=0, OutputWorkspace="__tmp_copy", StoreInADS=False
+    )
+    mantid.MoveInstrumentComponent(Workspace=tmp_ws, ComponentName=name, X=com[0], Y=com[1], Z=com[2], RelativePosition=False)
+    difc1 = mantid.CalculateDIFC(InputWorkspace=tmp_ws, OutputWorkspace="__difc1", StoreInADS=False)
 
     # scale DIFC column only, per detector; leave DIFA/TZERO untouched
     cal = mantid.CloneWorkspace(InputWorkspace=full_calib, OutputWorkspace="__full_calib_com")
