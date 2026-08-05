@@ -10,7 +10,6 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/WarningSuppressions.h"
 #include "MantidLiveData/Exception.h"
 #include <Poco/Thread.h>
 #include <cxxtest/TestSuite.h>
@@ -41,14 +40,6 @@ public:
   void testStart() {
     // Nothing much to test just yet
     TS_ASSERT_THROWS_NOTHING(fakel->start(0))
-  }
-
-  void testRunStatus() {
-    MSVC_DIAG_OFF(4996)
-    GNU_DIAG_OFF("deprecated-declarations")
-    TS_ASSERT_EQUALS(fakel->runStatus(), ILiveListener::Running)
-    GNU_DIAG_ON("deprecated-declarations")
-    MSVC_DIAG_ON(4996)
   }
 
   void testExtractData() {

@@ -9,7 +9,6 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/LiveListener.h"
 #include "MantidFrameworkTestHelpers/FakeObjects.h"
-#include "MantidKernel/WarningSuppressions.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -87,36 +86,6 @@ public:
   }
 
   // --- New tests for sub-spec 01 base-interface additions ---
-
-  void test_base_runStatus_default_returns_runState_when_no_edge() {
-    // When lastTransition() is nullopt, runStatus() shim returns runState().
-    TestableListener listener;
-    listener.m_runState = Mantid::API::ILiveListener::Running;
-    listener.m_lastTransition = std::nullopt;
-
-    MSVC_DIAG_OFF(4996)
-    GNU_DIAG_OFF("deprecated-declarations")
-    const auto status = listener.runStatus();
-    GNU_DIAG_ON("deprecated-declarations")
-    MSVC_DIAG_ON(4996)
-
-    TS_ASSERT_EQUALS(status, Mantid::API::ILiveListener::Running);
-  }
-
-  void test_base_runStatus_default_returns_lastTransition_when_present() {
-    // When lastTransition() has a value, runStatus() shim returns that edge.
-    TestableListener listener;
-    listener.m_runState = Mantid::API::ILiveListener::Running;
-    listener.m_lastTransition = Mantid::API::ILiveListener::BeginRun;
-
-    MSVC_DIAG_OFF(4996)
-    GNU_DIAG_OFF("deprecated-declarations")
-    const auto status = listener.runStatus();
-    GNU_DIAG_ON("deprecated-declarations")
-    MSVC_DIAG_ON(4996)
-
-    TS_ASSERT_EQUALS(status, Mantid::API::ILiveListener::BeginRun);
-  }
 
   void test_base_defaults_are_const_correct() {
     // All new pure getters must be callable on a const reference.

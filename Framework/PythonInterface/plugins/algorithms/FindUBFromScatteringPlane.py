@@ -96,10 +96,10 @@ class FindUBFromScatteringPlane(PythonAlgorithm):
         lattice = peak_table.sample().getOrientedLattice()
         ub_arb = lattice.getUB()
 
-        vertical_dir = peak_table.getInstrument().getReferenceFrame().vecPointingUp()
+        peak_ip = peak_table.getPeak(0)
+        vertical_dir = peak_ip.getReferenceFrame().vecPointingUp()
         vertical_dir = vertical_dir * (1 / vertical_dir.norm())
 
-        peak_ip = peak_table.getPeak(0)
         hkl_peak = np.array(peak_ip.getHKL())
         qsample_calc = np.array(np.pi * 2 * (ub_arb @ hkl_peak))
         qsample_calc = V3D(*qsample_calc)

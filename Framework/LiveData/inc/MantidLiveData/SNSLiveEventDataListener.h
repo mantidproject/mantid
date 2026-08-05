@@ -268,10 +268,10 @@ protected:
   /// Stable, committed DAS run state read by runState().  Only ever takes
   /// the values {NoRun, JoiningRun, Running} — never BeginRun or EndRun.
   /// The BeginRun/EndRun *edges* are delivered to consumers via
-  /// m_lastTransition (read by lastTransition()) and the legacy
-  /// runStatus() shim, not via this field.  Written from rxPacket(NEW_RUN)
-  /// on the joining path, and from the onBeginRun() / onEndRun() hooks
-  /// dispatched by onBeforeExtract() / onAfterExtract().
+  /// m_lastTransition (read by lastTransition()), not via this field.
+  /// Written from rxPacket(NEW_RUN) on the joining path, and from the
+  /// onBeginRun() / onEndRun() hooks dispatched by onBeforeExtract() /
+  /// onAfterExtract().
   ILiveListener::RunStatus m_adaraRunStatus{RunStatus::NoRun};
   std::optional<RunStatus> m_pendingTransition;
   /// The run-state edge committed by the most recent successful extractData().

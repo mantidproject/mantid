@@ -432,8 +432,8 @@ legacy implementation are:
   ``onAfterExtract()`` after ``doExtractData()`` has harvested the
   finishing run's events).  Until that commit, ``runState()`` continues
   to report ``Running`` (or ``JoiningRun``); the ``EndRun`` edge is
-  delivered to consumers via ``lastTransition()`` and the legacy
-  ``runStatus()`` shim, satisfying the "exactly once" delivery contract.
+  delivered to consumers via ``lastTransition()``, satisfying the
+  "exactly once" delivery contract.
 
 In ``rxPacket(const ADARA::AnnotationPkt &pkt)``, ``PAUSE`` and
 ``RESUME`` markers call ``onRunPause(true/false)`` directly from the
@@ -844,7 +844,7 @@ Behaviour preservation (SNS-specific)
    * - ``MonitorLiveData`` workspace renaming triggers on
        ``BeginRun`` / ``EndRun``
      - yes
-     - yes (legacy ``runStatus()`` shim returns the edge)
+     - yes (``lastTransition()`` returns the edge)
    * - Stand-alone ``LoadLiveData`` produces a workspace
      - **no** (deadlocks)
      - yes (commit happens inside ``extractData()``)
@@ -1022,7 +1022,6 @@ thread and no network connection.  All live in
 * ``test_lastTransition_survives_NotYet_retry``
 * ``test_lastTransition_cleared_after_successful_extract``
 * ``test_lastTransition_reports_EndRun_then_null_after_success``
-* ``test_legacy_runStatus_returns_edge_then_state``
 * ``test_background_exception_propagates_from_all_getters``
 * ``test_rxRunStatusPkt_newRun_throws_when_slot_occupied``
 * ``test_rxRunStatusPkt_endRun_throws_when_slot_occupied``

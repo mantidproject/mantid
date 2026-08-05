@@ -18,12 +18,12 @@ requirements:
   build:
     - ${{ compiler("c") }}
     - ${{ compiler("cxx") }}
+    - ${{ stdlib("c") }}
     - ninja ${{ ninja }}
     - cmake ${{ cmake }}
     - git
     - if: linux
       then:
-        - ${{ stdlib("c") }}
         - libgomp
   host:
     - libboost-devel ${{ libboost }}

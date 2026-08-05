@@ -33,6 +33,7 @@ public:
   MOCK_METHOD0(getInstrumentDetails, QMap<QString, QString>());
 
   MOCK_METHOD1(showAnalyserAndReflectionOptions, void(bool visible));
+  MOCK_CONST_METHOD0(ipfFileName, const std::string &());
 };
 
 class MockIETModel : public IIETModel {

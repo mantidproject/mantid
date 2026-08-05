@@ -7,6 +7,7 @@
 # pylint: disable=no-init
 from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty, InstrumentValidator, FileProperty, FileAction
 from mantid.kernel import Direction, StringArrayProperty, StringListValidator
+from plugins.algorithms.component_info_utils import resolve_component_index
 
 SOURCE_XML = """  <!--SOURCE-->
   <component type="moderator">
@@ -89,19 +90,28 @@ class ExportGeometry(PythonAlgorithm):
         if len(components) <= 0:
             issues["Components"] = "Must supply components"
         else:
-            components = [component for component in components if wksp.getInstrument().getComponentByName(component) is None]
+            component_info = wksp.componentInfo()
+
+            def component_missing(name):
+                try:
+                    resolve_component_index(name, component_info)
+                    return False
+                except ValueError:
+                    return True
+
+            components = [component for component in components if component_missing(component)]
             if len(components) > 0:
                 issues["Components"] = 'Instrument has no component "' + ",".join(components) + '"'
 
         return issues
 
-    def __updatePos(self, info, component):
-        pos = component.getPos()
+    def __updatePos(self, info, component_info, index):
+        pos = component_info.position(index)
         info["x"] = pos.X()
         info["y"] = pos.Y()
         info["z"] = pos.Z()
 
-        angles = component.getRotation().getEulerAngles(self._eulerCon)
+        angles = component_info.rotation(index).getEulerAngles(self._eulerCon)
         info["alpha"] = angles[0]
         info["beta"] = angles[1]
         info["gamma"] = angles[2]
@@ -109,18 +119,18 @@ class ExportGeometry(PythonAlgorithm):
         info["beta_string"] = self._eulerXML[self._eulerCon[1]] + str(angles[1])
         info["gamma_string"] = self._eulerXML[self._eulerCon[2]] + str(angles[2])
 
-    def __writexmlSource(self, handle, instrument):
+    def __writexmlSource(self, handle, component_info):
         source = {}
-        self.__updatePos(source, instrument.getSource())
+        self.__updatePos(source, component_info, component_info.source())
         handle.write(SOURCE_XML % source)
 
         sample = {}
-        self.__updatePos(sample, instrument.getSample())
+        self.__updatePos(sample, component_info, component_info.sample())
         handle.write(SAMPLE_XML % sample)
 
-    def __writexml(self, handle, component):
-        info = {"name": component.getName()}
-        self.__updatePos(info, component)
+    def __writexml(self, handle, component_info, index):
+        info = {"name": component_info.name(index)}
+        self.__updatePos(info, component_info, index)
 
         if info["alpha"] == 0.0 and info["beta"] == 0.0 and info["gamma"] == 0.0:
             handle.write(COMPONENT_XML_MINIMAL % info)
@@ -133,16 +143,16 @@ class ExportGeometry(PythonAlgorithm):
         filename = self.getProperty("Filename").value
         self._eulerCon = self.getProperty("EulerConvention").value
 
-        instrument = wksp.getInstrument()
+        component_info = wksp.componentInfo()
         with open(filename, "w") as handle:
             # write out the source and sample components
-            self.__writexmlSource(handle, instrument)
+            self.__writexmlSource(handle, component_info)
 
             # write out the requested components
             handle.write("""  <!--COMPONENTS-->\n""")
             for component in components:
-                component = instrument.getComponentByName(component)
-                self.__writexml(handle, component)
+                index = resolve_component_index(component, component_info)
+                self.__writexml(handle, component_info, index)
 
 
 AlgorithmFactory.subscribe(ExportGeometry)

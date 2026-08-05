@@ -5,14 +5,17 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ISISDiagnostics.h"
+
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
 #include "MantidQtWidgets/Spectroscopy/InterfaceUtils.h"
+#include "ReductionAlgorithmUtils.h"
 
 #include <MantidAPI/FileFinder.h>
+#include <MantidQtWidgets/Common/ParseKeyValueString.h>
 #include <MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsHelper.h>
 #include <QFileInfo>
 
@@ -108,6 +111,7 @@ ISISDiagnostics::ISISDiagnostics(IDataReduction *idrUI, QWidget *parent) : DataR
   connect(m_uiForm.ckUseCalibration, &QCheckBox::toggled, this, &ISISDiagnostics::sliceCalib);
   // Plot slice miniplot when file has finished loading
   connect(m_uiForm.dsInputFiles, &FileFinderWidget::filesFoundChanged, this, &ISISDiagnostics::handleNewFile);
+  connect(m_uiForm.ckSumFiles, &QCheckBox::checkStateChanged, this, &ISISDiagnostics::handleNewFile);
   // Shows message on run button when Mantid is finding the file for a given run
   // number
   connect(m_uiForm.dsInputFiles, &FileFinderWidget::findingFiles, this, &ISISDiagnostics::pbRunFinding);
@@ -132,7 +136,6 @@ ISISDiagnostics::~ISISDiagnostics() {
 
 void ISISDiagnostics::handleRun() {
   QString suffix = "_" + getAnalyserName() + getReflectionName() + "_slice";
-  QString filenames = m_uiForm.dsInputFiles->getFilenames().join(",");
 
   std::vector<int> spectraRange;
   spectraRange.emplace_back(static_cast<int>(m_dblManager->value(m_properties["SpecMin"])));
@@ -145,7 +148,12 @@ void ISISDiagnostics::handleRun() {
   IAlgorithm_sptr sliceAlg = AlgorithmManager::Instance().create("TimeSlice");
   sliceAlg->initialize();
 
-  sliceAlg->setProperty("InputFiles", filenames.toStdString());
+  if (m_isSumFiles) {
+    sliceAlg->setProperty("SampleWorkspace", m_sampleName.toStdString());
+  } else {
+    sliceAlg->setProperty("InputFiles", m_sampleName.toStdString());
+  }
+
   sliceAlg->setProperty("SpectraRange", spectraRange);
   sliceAlg->setProperty("PeakRange", peakRange);
   sliceAlg->setProperty("OutputNameSuffix", suffix.toStdString());
@@ -250,24 +258,42 @@ void ISISDiagnostics::setDefaultInstDetails(QMap<QString, QString> const &instru
   m_dblManager->setValue(m_properties["PreviewSpec"], spectraMin);
 }
 
+QString ISISDiagnostics::loadFiles(const QStringList &fileNames) {
+  if (fileNames.empty()) {
+    return "";
+  }
+
+  QString wsname;
+  bool loadError = false;
+  if (!m_uiForm.ckSumFiles->isChecked()) {
+    const QString fileName = fileNames.at(0);
+    const QFileInfo fi(fileName);
+    wsname = fi.baseName();
+    loadError = !loadFile(fileName.toStdString(), wsname.toStdString());
+  } else {
+    wsname =
+        QString::fromStdString(loadFilesWithSum(MantidWidgets::qStringListToStdVector(fileNames), getIpfFilename()));
+    loadError = wsname.isEmpty();
+  }
+
+  if (loadError) {
+    emit showMessageBox("Unable to load file.\nCheck whether your file exists "
+                        "and matches the selected instrument in the "
+                        "EnergyTransfer tab.");
+    wsname.clear();
+  }
+  return wsname;
+}
+
 void ISISDiagnostics::handleNewFile() {
   if (!m_uiForm.dsInputFiles->isValid())
     return;
 
-  QString filename = m_uiForm.dsInputFiles->getFirstFilename();
-
-  QFileInfo fi(filename);
-  QString wsname = fi.baseName();
+  const auto wsname = loadFiles(m_uiForm.dsInputFiles->getFilenames());
+  m_sampleName = wsname;
+  m_isSumFiles = m_uiForm.ckSumFiles->isChecked();
 
   int specMin = static_cast<int>(m_dblManager->value(m_properties["SpecMin"]));
-  int specMax = static_cast<int>(m_dblManager->value(m_properties["SpecMax"]));
-
-  if (!loadFile(filename.toStdString(), wsname.toStdString(), specMin, specMax, SettingsHelper::loadHistory())) {
-    emit showMessageBox("Unable to load file.\nCheck whether your file exists "
-                        "and matches the selected instrument in the "
-                        "EnergyTransfer tab.");
-    return;
-  }
 
   auto const inputWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsname.toStdString());
 

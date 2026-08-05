@@ -40,11 +40,11 @@ public:
     TS_ASSERT(listener->buffersEvents())
     TS_ASSERT(listener->isConnected())
 
-    TS_ASSERT_EQUALS(listener->runState(), ILiveListener::NoRun)
+    TS_ASSERT_EQUALS(listener->lastTransition().value_or(listener->runState()), ILiveListener::NoRun)
 
     TS_ASSERT_THROWS_NOTHING(listener->start(0));
 
-    TS_ASSERT_EQUALS(listener->runState(), ILiveListener::BeginRun)
+    TS_ASSERT_EQUALS(listener->lastTransition().value_or(listener->runState()), ILiveListener::BeginRun)
 
     MatrixWorkspace_const_sptr buffer;
     TS_ASSERT_THROWS_NOTHING(buffer = std::dynamic_pointer_cast<const MatrixWorkspace>(listener->extractData()))
@@ -53,7 +53,7 @@ public:
     TS_ASSERT_EQUALS(buffer.use_count(), 1)
     TS_ASSERT_EQUALS(buffer->getNumberHistograms(), 77824)
 
-    TS_ASSERT_EQUALS(listener->runState(), ILiveListener::Running)
+    TS_ASSERT_EQUALS(listener->lastTransition().value_or(listener->runState()), ILiveListener::Running)
 
     MatrixWorkspace_const_sptr buffer2;
     // Call extractData again
@@ -65,7 +65,7 @@ public:
     TS_ASSERT_DIFFERS(buffer.get(), buffer2.get())
     TS_ASSERT_EQUALS(buffer2->getNumberHistograms(), 77824)
 
-    TS_ASSERT_EQUALS(listener->runState(), ILiveListener::EndRun)
+    TS_ASSERT_EQUALS(listener->lastTransition().value_or(listener->runState()), ILiveListener::EndRun)
 
     // Calling it again will throw as it's the end of the file
     TS_ASSERT_THROWS(listener->extractData(), const std::runtime_error &)
@@ -88,11 +88,11 @@ public:
     TS_ASSERT(listener->buffersEvents())
     TS_ASSERT(listener->isConnected())
 
-    TS_ASSERT_EQUALS(listener->runState(), ILiveListener::NoRun)
+    TS_ASSERT_EQUALS(listener->lastTransition().value_or(listener->runState()), ILiveListener::NoRun)
 
     TS_ASSERT_THROWS_NOTHING(listener->start());
 
-    TS_ASSERT_EQUALS(listener->runState(), ILiveListener::BeginRun)
+    TS_ASSERT_EQUALS(listener->lastTransition().value_or(listener->runState()), ILiveListener::BeginRun)
 
     EventWorkspace_const_sptr buffer;
     TS_ASSERT_THROWS_NOTHING(buffer = std::dynamic_pointer_cast<const EventWorkspace>(listener->extractData()))
@@ -104,7 +104,7 @@ public:
     size_t events = buffer->getNumberEvents();
 
     for (int i = 0; i < nchunks - 1; i++) {
-      TS_ASSERT_EQUALS(listener->runState(), ILiveListener::Running)
+      TS_ASSERT_EQUALS(listener->lastTransition().value_or(listener->runState()), ILiveListener::Running)
       EventWorkspace_const_sptr buffer2;
       // Call extractData again
       TS_ASSERT_THROWS_NOTHING(buffer2 = std::dynamic_pointer_cast<const EventWorkspace>(listener->extractData()))
@@ -119,7 +119,7 @@ public:
 
     TS_ASSERT_EQUALS(events, 14553);
 
-    TS_ASSERT_EQUALS(listener->runState(), ILiveListener::EndRun)
+    TS_ASSERT_EQUALS(listener->lastTransition().value_or(listener->runState()), ILiveListener::EndRun)
 
     // Calling it again will throw as it's the end of the file
     TS_ASSERT_THROWS(listener->extractData(), const std::runtime_error &)
@@ -135,11 +135,11 @@ public:
     TS_ASSERT(!listener->supportsHistory())
     TS_ASSERT(listener->buffersEvents())
     TS_ASSERT(listener->isConnected())
-    TS_ASSERT_EQUALS(listener->runState(), ILiveListener::NoRun)
+    TS_ASSERT_EQUALS(listener->lastTransition().value_or(listener->runState()), ILiveListener::NoRun)
 
     TS_ASSERT_THROWS_NOTHING(listener->start());
 
-    TS_ASSERT_EQUALS(listener->runState(), ILiveListener::BeginRun)
+    TS_ASSERT_EQUALS(listener->lastTransition().value_or(listener->runState()), ILiveListener::BeginRun)
 
     EventWorkspace_const_sptr buffer;
     TS_ASSERT_THROWS_NOTHING(buffer = std::dynamic_pointer_cast<const EventWorkspace>(listener->extractData()))
@@ -162,7 +162,7 @@ public:
     TS_ASSERT(listener->buffersEvents())
     TS_ASSERT(listener->isConnected())
     TS_ASSERT_THROWS_NOTHING(listener->start(0));
-    TS_ASSERT_EQUALS(listener->runState(), ILiveListener::BeginRun)
+    TS_ASSERT_EQUALS(listener->lastTransition().value_or(listener->runState()), ILiveListener::BeginRun)
 
     EventWorkspace_const_sptr buffer2;
     TS_ASSERT_THROWS_NOTHING(buffer2 = std::dynamic_pointer_cast<const EventWorkspace>(listener->extractData()))

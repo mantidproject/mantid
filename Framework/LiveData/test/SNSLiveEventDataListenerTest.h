@@ -225,7 +225,7 @@ public:
     // initial state.
     m_listener = std::make_unique<SNSLiveEventDataListener>();
     TS_ASSERT(!m_listener->isConnected());
-    TS_ASSERT_EQUALS(m_listener->runState(), API::ILiveListener::NoRun);
+    TS_ASSERT_EQUALS(m_listener->lastTransition().value_or(m_listener->runState()), API::ILiveListener::NoRun);
   }
 
   // ----- §6.1 Legacy behavioural contract (remainder) -----
@@ -418,8 +418,7 @@ public:
     m_server->releaseExtractGate(); // release gate 2
     TS_ASSERT_DIFFERS(ws1, nullptr);
     TS_ASSERT_DIFFERS(ws2, nullptr);
-    TS_ASSERT(m_listener->lastTransition().has_value());
-    TS_ASSERT_EQUALS(*m_listener->lastTransition(), API::ILiveListener::EndRun);
+    TS_ASSERT_EQUALS(m_listener->lastTransition().value_or(m_listener->runState()), API::ILiveListener::EndRun);
   }
 
   void test_runNumber_proposalId_title_propagate() {
@@ -749,8 +748,7 @@ public:
     TS_ASSERT_EQUALS(m_listener->listenerState(), API::ListenerState::ReadWait);
     auto ws = extractWithTimeout(*m_listener, std::chrono::seconds{10});
     TS_ASSERT_DIFFERS(ws, nullptr);
-    TS_ASSERT(m_listener->lastTransition().has_value());
-    TS_ASSERT_EQUALS(*m_listener->lastTransition(), API::ILiveListener::EndRun);
+    TS_ASSERT_EQUALS(m_listener->lastTransition().value_or(m_listener->runState()), API::ILiveListener::EndRun);
   }
 
   // ----- §6.7 Pause / resume -----
@@ -1286,8 +1284,7 @@ public:
     // m_adaraRunStatus=NoRun.  m_pauseNetRead is then cleared.
     auto ws1 = extractWithTimeout(*m_listener, std::chrono::seconds{10});
     TS_ASSERT_DIFFERS(ws1, nullptr);
-    TS_ASSERT(m_listener->lastTransition().has_value());
-    TS_ASSERT_EQUALS(*m_listener->lastTransition(), API::ILiveListener::EndRun);
+    TS_ASSERT_EQUALS(m_listener->lastTransition().value_or(m_listener->runState()), API::ILiveListener::EndRun);
 
     // Second extract: m_bgThreadCaughtUp is false (reset by onEndRun()).
     // The bg thread has entered receiveBytes() blocked at gate1 (confirmed

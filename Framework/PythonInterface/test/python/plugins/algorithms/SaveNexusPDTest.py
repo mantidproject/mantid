@@ -7,7 +7,7 @@
 # pylint: disable=invalid-name,too-many-public-methods,too-many-arguments
 import mantid
 from mantid.api import AnalysisDataService
-from mantid.simpleapi import CreateWorkspace, SaveNexusPD
+from mantid.simpleapi import CreateWorkspace, MoveInstrumentComponent, SaveNexusPD
 import numpy as np
 import os
 from testhelpers import WorkspaceCreationHelper as WCH
@@ -63,6 +63,72 @@ class SaveNexusPDTest(unittest.TestCase):
         finally:
             self.cleanup(filename, wkspname)
 
+    def testSaveWithOffsetSample(self):
+        """
+        Regression test for possible bug, if sample is not lcated at origin.
+        - _determineSourceSample stored (samplePos - sourcePos), the beam direction vector,
+          in self._sourcePos instead of the absolute source position. _createInstrument then
+          computed L1 = self._sourcePos.distance(self._samplePos), which algebraically reduces
+          to |sourcePos| (distance from the coordinate origin to the source) rather than the
+          true source-to-sample distance. This was invisible whenever the sample happened to
+          sit at the origin, which is why it went unnoticed for years.
+        """
+        if not runTests:
+            return
+
+        wkspname = "SaveNexusPDTest_offsetsample"
+        filename = self.saveFilePath(wkspname)
+        self._createMultiSpectra(wkspname)
+
+        # move the sample away from the origin so a wrong L1 formula would show up numerically
+        sample_offset = np.array([0.5, 0.3, 1.2])
+        MoveInstrumentComponent(
+            Workspace=wkspname,
+            ComponentName="samplePos",
+            RelativePosition=False,
+            X=sample_offset[0],
+            Y=sample_offset[1],
+            Z=sample_offset[2],
+        )
+
+        component_info = mantid.mtd[wkspname].componentInfo()
+        expected_l1 = component_info.sourcePosition().distance(component_info.samplePosition())
+        # the pre-fix formula computed this (wrong) value instead
+        buggy_l1 = np.linalg.norm(np.array(list(component_info.sourcePosition())))
+        self.assertGreater(abs(expected_l1 - buggy_l1), 1e-6, "Sample offset displacement not considered in calculation of L1")
+        try:
+            SaveNexusPD(InputWorkspace=wkspname, OutputFilename=filename)
+            with h5py.File(filename, "r") as handle:
+                nxentry = handle[min(handle.keys())]
+                saved_l1 = abs(nxentry["instrument"]["moderator"]["distance"][0])
+            self.assertAlmostEqual(saved_l1, expected_l1, places=5)
+        finally:
+            self.cleanup(filename, wkspname)
+
+    def testSaveWithMonitors(self):
+        """
+        Regression test for possible bug if the workspace contains monitors
+        - _writeDetectorPos called spectrum_info.twoTheta()/l2() unconditionally; those throw
+          (twoTheta) or silently use a different formula (l2) for monitor spectra, whereas the
+          legacy IDetector.getTwoTheta()/getDistance() computed the raw geometry unconditionally.
+        """
+        if not runTests:
+            return
+
+        wkspname = "SaveNexusPDTest_monitors"
+        filename = self.saveFilePath(wkspname)
+        # create a workspace with monitors (the True argument)
+        wksp = WCH.create2DWorkspaceWithFullInstrument(5, 5, True, False)
+        AnalysisDataService.add(wkspname, wksp)
+
+        try:
+            # must not raise: a monitor spectrum in the loop previously crashed twoTheta()
+            SaveNexusPD(InputWorkspace=wkspname, OutputFilename=filename)
+        except Exception as e:
+            self.fail(f"SaveNexusPD raised an exception with monitors in the workspace: {e}")
+        finally:
+            self.cleanup(filename, wkspname)
+
     def checkDataFields(self, nxitem, withInstrument):
         keys = nxitem.keys()
         for fieldname in ["data", "errors", "tof"]:
@@ -80,7 +146,7 @@ class SaveNexusPDTest(unittest.TestCase):
 
     def check(self, filename, withInstrument):
         with h5py.File(filename, "r") as handle:
-            nxentry = handle[sorted(handle.keys())[0]]
+            nxentry = handle[min(handle.keys())]
             nxinstrument = nxentry["instrument"]
 
             nxmoderator = nxinstrument["moderator"]

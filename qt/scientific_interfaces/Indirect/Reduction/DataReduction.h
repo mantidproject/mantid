@@ -36,6 +36,7 @@ public:
   virtual QMap<QString, QString> getInstrumentDetails() = 0;
 
   virtual void showAnalyserAndReflectionOptions(bool visible) = 0;
+  virtual const std::string &ipfFileName() const = 0;
 };
 
 /**
@@ -84,6 +85,8 @@ public:
   QMap<QString, QString> getInstrumentDetails() override;
 
   void showAnalyserAndReflectionOptions(bool visible) override;
+
+  const std::string &ipfFileName() const override { return m_ipfFilename; }
 
 signals:
   /// Emitted when the instrument setup is changed
