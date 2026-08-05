@@ -797,7 +797,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         if not self.getProperty(Prop.XMIN).isDefault:
             kwargs["RangeLower"] = self.getProperty(Prop.XMIN).value
         original_peak_centre = ws.getRun().getLogData("reduction.line_position").value
-        fit_output = FitSpecularPeak(InputWorkspace=ws, BackgroundType="Flat", **kwargs)
+        fit_output = FitSpecularPeak(InputWorkspace=ws, BackgroundType="Flat", UseFittedPeakCentreOnFailure=True, **kwargs)
         peak_centre = fit_output.PeakCentre
         ws.getRun().addProperty("reduction.line_position", float(peak_centre), True)
         self._rotate_instrument(ws, peak_centre, original_peak_centre)
