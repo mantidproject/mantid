@@ -38,6 +38,7 @@ std::string const PEAK_CENTRE_ERROR{"PeakCentreError"};
 std::string const RANGE_LOWER{"RangeLower"};
 std::string const RANGE_UPPER{"RangeUpper"};
 std::string const START_INDEX{"StartWorkspaceIndex"};
+std::string const USE_FITTED_CENTRE_ON_FAILURE{"UseFittedPeakCentreOnFailure"};
 } // namespace Prop
 
 std::string const LINEAR_BACKGROUND{"Linear"};
@@ -158,6 +159,9 @@ void FitSpecularPeak::init() {
   auto const backgrounds = std::vector<std::string>{LINEAR_BACKGROUND, FLAT_BACKGROUND};
   declareProperty(Prop::BACKGROUND_TYPE, LINEAR_BACKGROUND, std::make_shared<Kernel::StringListValidator>(backgrounds),
                   "Background function fitted with the Gaussian. Choose Linear or Flat.");
+  declareProperty(Prop::USE_FITTED_CENTRE_ON_FAILURE, false,
+                  "If true, use a finite fitted peak centre when Fit completes with an unsuccessful status. If false, "
+                  "use the initial peak centre.");
 
   declareProperty(std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
                       Prop::OUTPUT_PROFILE_WS, "", Kernel::Direction::Output, API::PropertyMode::Optional),
@@ -165,12 +169,15 @@ void FitSpecularPeak::init() {
                   "workspace indices.");
   declareProperty(std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
                       Prop::OUTPUT_FIT_WS, "", Kernel::Direction::Output, API::PropertyMode::Optional),
-                  "The Fit output containing the data, fitted curve, and residuals. Not set when the fit fails.");
+                  "The Fit output containing the data, fitted curve, and residuals. Not set when the initial peak "
+                  "centre is returned.");
   declareProperty(Prop::PEAK_CENTRE, EMPTY_DBL(), "The fractional workspace index of the specular peak.",
                   Kernel::Direction::Output);
   declareProperty(Prop::PEAK_CENTRE_ERROR, EMPTY_DBL(), "The uncertainty in the optimized peak centre.",
                   Kernel::Direction::Output);
-  declareProperty(Prop::OUTPUT_STATUS, std::string{}, "Whether the optimized or initial peak centre was returned.",
+  declareProperty(Prop::OUTPUT_STATUS, std::string{},
+                  "The Fit status when a fitted peak centre is returned, otherwise reports that the initial peak "
+                  "centre was used.",
                   Kernel::Direction::Output);
 }
 
@@ -300,8 +307,10 @@ void FitSpecularPeak::exec() {
   std::string const fitStatus = fit->getProperty("OutputStatus");
   auto const fittedCentre = gaussian->centre();
   auto const &profileX = profileWorkspace->x(0);
-  if (!fitConverged(fitStatus) || !std::isfinite(fittedCentre) || fittedCentre < profileX.front() ||
-      fittedCentre > profileX.back()) {
+  bool const fitSuccessful = fitConverged(fitStatus);
+  bool const useFittedCentreOnFailure = getProperty(Prop::USE_FITTED_CENTRE_ON_FAILURE);
+  if ((!fitSuccessful && !useFittedCentreOnFailure) || !std::isfinite(fittedCentre) ||
+      fittedCentre < profileX.front() || fittedCentre > profileX.back()) {
     g_log.warning() << "Specular peak fit was not successful. Using the initial peak centre.\n";
     setProperty(Prop::PEAK_CENTRE, initialPeak.centre);
     setProperty(Prop::OUTPUT_STATUS, FALLBACK_STATUS);
@@ -313,7 +322,7 @@ void FitSpecularPeak::exec() {
   if (std::isfinite(centreError)) {
     setProperty(Prop::PEAK_CENTRE_ERROR, centreError);
   }
-  setProperty(Prop::OUTPUT_STATUS, Mantid::API::MinimizerStatus::SUCCESS);
+  setProperty(Prop::OUTPUT_STATUS, fitSuccessful ? Mantid::API::MinimizerStatus::SUCCESS : fitStatus);
   if (!isDefault(Prop::OUTPUT_FIT_WS)) {
     API::MatrixWorkspace_sptr fitWorkspace = fit->getProperty("OutputWorkspace");
     setProperty(Prop::OUTPUT_FIT_WS, fitWorkspace);
