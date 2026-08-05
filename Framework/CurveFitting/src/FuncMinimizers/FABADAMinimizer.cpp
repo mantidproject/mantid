@@ -26,6 +26,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
+#include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/normal_distribution.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
@@ -34,6 +35,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>
+#include <limits>
 #include <random>
 
 namespace Mantid::CurveFitting::FuncMinimisers {
@@ -338,6 +340,7 @@ void FABADAMinimizer::finalize() {
   }
 
   double mostPchi2 = outputPDF(convLength, reducedConvergedChain);
+  outputLogLikelihoodEvidence();
 
   if (!getPropertyValue("ConvergedChain").empty()) {
     outputConvergedChains(convLength, nSteps);
@@ -821,6 +824,90 @@ void FABADAMinimizer::outputPDF(std::vector<double> &xValues, std::vector<double
     groupPDF->addWorkspace(workspace);
     AnalysisDataService::Instance().addOrReplace(pdfName, groupPDF);
   }
+}
+
+void FABADAMinimizer::outputLogLikelihoodEvidence() const {
+  const auto pdfName = getPropertyValue("PDF");
+  if (!AnalysisDataService::Instance().doesExist(pdfName)) {
+    return;
+  }
+  auto groupPDF = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(pdfName);
+
+  API::ITableWorkspace_sptr table;
+  std::string tableName = "LogLikelihoodEvidence";
+  if (AnalysisDataService::Instance().doesExist(tableName)) {
+    table = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(tableName);
+  } else {
+    // Create the workspace for the log likelihood evidence
+    table = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+    table->addColumn("str", "Workspace Name");
+    table->addColumn("double", "Log Likelihood Evidence");
+    AnalysisDataService::Instance().addOrReplace(tableName, table);
+    groupPDF->addWorkspace(table);
+  }
+
+  for (auto &ws : groupPDF->getAllItems()) {
+    auto pdfWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
+    if (!pdfWorkspace) {
+      continue;
+    }
+    API::TableRow row = table->appendRow();
+    row << ws->getName() << calculateLogLikelihoodEvidence(pdfWorkspace);
+  }
+}
+
+double FABADAMinimizer::calculateLogLikelihoodEvidence(const MatrixWorkspace_sptr pdfWorkspace) const {
+  if (!pdfWorkspace || pdfWorkspace->getNumberHistograms() == 0) {
+    return 0.0;
+  }
+
+  // In FABADA PDF output, the last spectrum stores the chi^2 PDF
+  const auto iChi2 = pdfWorkspace->getNumberHistograms() - 1;
+  const MantidVec &chi2 = pdfWorkspace->readX(iChi2);
+  const MantidVec &probChi2 = pdfWorkspace->readY(iChi2);
+
+  if (chi2.size() < 2 || probChi2.empty()) {
+    return 0.0;
+  }
+
+  // log ∫ exp(-chi2/2) P(chi2) dchi2
+  // Use log-sum-exp trick for numerical stability, otherwise the integral can underflow to zero.
+
+  const auto nBins = std::min(probChi2.size(), chi2.size() - 1);
+  double maxLogTerm = -std::numeric_limits<double>::infinity();
+
+  // First pass: find the maximum finite log-term for numerical stability.
+  for (size_t i = 0; i < nBins; ++i) {
+    const double dchi2 = chi2[i + 1] - chi2[i];
+    if (probChi2[i] <= 0.0 || dchi2 <= 0.0) {
+      continue;
+    }
+    const double chi2Value = (chi2[i] + chi2[i + 1]) / 2;
+    const double logTerm = std::log(probChi2[i]) - 0.5 * chi2Value + std::log(dchi2);
+    if (logTerm > maxLogTerm) {
+      maxLogTerm = logTerm;
+    }
+  }
+
+  if (!std::isfinite(maxLogTerm)) {
+    return -std::numeric_limits<double>::infinity();
+  }
+
+  // Second pass: log-sum-exp of all valid terms.
+  double sumExp = 0.0;
+  for (size_t i = 0; i < nBins; ++i) {
+    const double dchi2 = chi2[i + 1] - chi2[i];
+    if (probChi2[i] <= 0.0 || dchi2 <= 0.0) {
+      continue;
+    }
+    const double chi2Value = (chi2[i] + chi2[i + 1]) / 2;
+    const double logTerm = std::log(probChi2[i]) - 0.5 * chi2Value + std::log(dchi2);
+    sumExp += std::exp(logTerm - maxLogTerm);
+  }
+
+  // log(sum_i exp(a_i)) = m + log(sum_i exp(a_i - m)), with m = max_i(a_i).
+  // Here a_i = log(P_i) - chi2_i/2 + log(dchi2_i).
+  return maxLogTerm + std::log(sumExp);
 }
 
 double FABADAMinimizer::getMostProbableChiSquared(std::size_t const &convLength,

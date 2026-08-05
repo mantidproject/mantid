@@ -7,6 +7,8 @@
 #pragma once
 
 #include "MantidAPI/IFuncMinimizer.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
 #include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/EigenMatrix.h"
@@ -79,6 +81,10 @@ private:
   void outputPDF(std::vector<double> &xValues, std::vector<double> &yValues,
                  std::vector<std::vector<double>> const &reducedChain, std::size_t const &convLength,
                  int const &pdfLength);
+  /// Output log-likelihood evidence values for the PDF workspace group.
+  void outputLogLikelihoodEvidence() const;
+  /// Compute log-likelihood evidence term from one chi^2 PDF histogram.
+  double calculateLogLikelihoodEvidence(API::MatrixWorkspace_sptr pdfWorkspace) const;
   /// Finds the most probable Chi Squared value
   double getMostProbableChiSquared(std::size_t const &convLength, std::vector<std::vector<double>> const &reducedChain,
                                    int const &pdfLength, std::vector<double> &xValues, std::vector<double> &yValues,
