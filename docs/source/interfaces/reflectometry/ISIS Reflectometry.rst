@@ -968,10 +968,9 @@ for a description of the supported formats.
 | ORSO Format Options           | You can save into either the ORSO Ascii or ORSO Nexus|
 |                               | format. For either format, you can specify whether to|
 |                               | include a Q Resolution column. You can also use the  |
-|                               | ``Additional columns (includes Q resolution)``       |
-|                               | option to request Q Resolution, Lambda, dLambda,     |
-|                               | Theta and dTheta columns (this is selected by        |
-|                               | default).                                            |
+|                               | ``Additional columns`` option to request             |
+|                               | Lambda, dLambda, Theta and dTheta columns for        |
+|                               | non-stitched datasets.                               |
 +-------------------------------+------------------------------------------------------+
 | Automatic Save                | Automatically save the main output workspace for     |
 |                               | groups in the runs table. Note that the stitched     |

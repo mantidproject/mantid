@@ -285,14 +285,20 @@ class MantidORSODataColumns:
     def data(self) -> np.ndarray:
         return np.array(self._data).T
 
-    def add_column(self, name: str, unit: [Unit, str], physical_quantity: str, data: np.ndarray) -> None:
+    def add_column(
+        self, name: str, unit: [Unit, str], physical_quantity: str, data: np.ndarray, ensure_recommended_columns: bool = True
+    ) -> None:
         # The third and fourth strongly recommended columns are required if further columns are to be added
-        self._ensure_recommended_columns_are_present(data)
+        if ensure_recommended_columns:
+            self._ensure_recommended_columns_are_present(data)
         self._add_column(name, unit, physical_quantity, data)
 
-    def add_error_column(self, error_of: str, error_type: ErrorType, value_is: ErrorValue, data: np.ndarray) -> None:
+    def add_error_column(
+        self, error_of: str, error_type: ErrorType, value_is: ErrorValue, data: np.ndarray, ensure_recommended_columns: bool = True
+    ) -> None:
         # The third and fourth strongly recommended columns are required if further columns are to be added
-        self._ensure_recommended_columns_are_present(data)
+        if ensure_recommended_columns:
+            self._ensure_recommended_columns_are_present(data)
         self._add_error_column(error_of, error_type, value_is, data)
 
     def _add_column(self, name: str, unit: [Unit, str], physical_quantity: str, data: np.ndarray) -> None:

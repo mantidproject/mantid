@@ -220,15 +220,18 @@
           <property name="text">
            <string>Q resolution</string>
           </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
          </widget>
         </item>
         <item>
          <widget class="QCheckBox" name="extraColumnsCheckBox">
           <property name="toolTip">
-           <string>Include columns Q resolution, lambda, dlambda, theta and dtheta for non-stitched datasets.</string>
+           <string>Include lambda, dlambda, theta and dtheta columns for non-stitched datasets.</string>
           </property>
           <property name="text">
-           <string>Additional columns (includes Q resolution)</string>
+           <string>Additional columns</string>
           </property>
           <property name="checked">
            <bool>true</bool>
