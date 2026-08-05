@@ -58,6 +58,44 @@ class ALFInstrumentViewView(FullInstrumentViewView):
         self._presenter.rebin_button_clicked(params)
 
     @override
+    def setup_connections_to_presenter(self):
+        super().setup_connections_to_presenter()
+        # ALF has no shape selector, so "Add ROI" is the rectangle control itself rather than the
+        # base class button that commits an already drawn shape to the (hidden) ROI list.
+        self._add_selection.clicked.disconnect()
+        self._add_selection.setCheckable(True)
+        self._add_selection.setEnabled(True)
+        self._add_selection.setToolTip("Overlay a rectangle on the projection to select a region of detectors.")
+        self._add_selection.toggled.connect(self._on_add_roi_toggled)
+
+    def _on_add_roi_toggled(self, checked: bool):
+        if not checked:
+            self.delete_current_overlaid_shape()
+            return
+        self.add_rectangular_widget()
+        if self._shape_overlay_manager is None:
+            return
+        self._shape_overlay_manager.set_on_shape_changed(self._presenter.on_roi_shape_changed)
+        # Select whatever the rectangle covers where it is first drawn
+        self._presenter.on_roi_shape_changed()
+
+    # NOTE: "Add ROI" creates the rectangle rather than acting on an existing one, so unlike in the
+    # full view it must stay enabled when no shape is overlaid.
+    @override
+    def set_add_selection_and_mask_buttons_enabled(self, enabled: bool):
+        return
+
+    @override
+    def set_overlaid_shape_controls_enabled(self, enabled: bool):
+        if not enabled:
+            self._add_selection.setChecked(False)
+        self._add_selection.setEnabled(enabled)
+
+    @override
+    def set_overlaid_shape_controls_checked(self, checked: bool):
+        self._add_selection.setChecked(checked)
+
+    @override
     def set_selected_detector_info(self, detector_infos):
         return
 
@@ -75,7 +113,6 @@ class ALFInstrumentViewView(FullInstrumentViewView):
         parent_layout = QHBoxLayout(self)
         options_widget = QWidget()
         options_layout = QVBoxLayout(options_widget)
-        options_layout.addWidget(self._add_rectangle)
         options_layout.addWidget(self._add_selection)
         options_layout.addWidget(self._hover_pick)
         options_layout.addWidget(self.rebin_btn)
