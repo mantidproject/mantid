@@ -33,6 +33,24 @@ bool ConvToMDEventsWS::setGenericVariableFromLogs(const Mantid::Types::Core::Dat
  * adds these events to the workspace itself  */
 template <class T> size_t ConvToMDEventsWS::convertEventList(size_t workspaceIndex) {
 
+  MDTransf_sptr pQConverter(m_QConverter->clone());
+  Geometry::Goniometer gonio(m_Goniometer);
+  std::vector<coord_t> eventCoord(m_Coord);
+  std::vector<coord_t> allCoord;
+  std::vector<float> sig_err;
+  std::vector<uint32_t> det_ids;
+
+  const auto nAddedEvents =
+      convertEventList<T>(workspaceIndex, std::move(pQConverter), gonio, eventCoord, allCoord, sig_err, det_ids);
+  m_OutWSWrapper->addMDData(sig_err, m_ExpInfoIndex, 0, det_ids, allCoord, nAddedEvents);
+  return nAddedEvents;
+}
+
+template <class T>
+size_t ConvToMDEventsWS::convertEventList(size_t workspaceIndex, MDTransf_sptr pQConverter, Geometry::Goniometer &gonio,
+                                          std::vector<coord_t> &eventCoord, std::vector<coord_t> &allCoord,
+                                          std::vector<float> &sig_err, std::vector<uint32_t> &det_ids) {
+
   const Mantid::DataObjects::EventList &el = m_EventWS->getSpectrum(workspaceIndex);
   size_t numEvents = el.getNumberEvents();
   if (numEvents == 0)
@@ -43,20 +61,13 @@ template <class T> size_t ConvToMDEventsWS::convertEventList(size_t workspaceInd
 
   uint32_t detID = m_detID[workspaceIndex];
 
-  std::vector<coord_t> locCoord(m_Coord);
+  eventCoord = m_Coord;
   // set up unit conversion and calculate up all coordinates, which depend on
   // spectra index only
-  if (!m_QConverter->calcYDepCoordinates(locCoord, workspaceIndex))
+  if (!pQConverter->calcYDepCoordinates(eventCoord, workspaceIndex))
     return 0; // skip if any y outsize of the range of interest;
+  const std::vector<coord_t> spectrumCoord(eventCoord);
   localUnitConv.updateConversion(workspaceIndex);
-  //
-  // allocate temporary buffers for MD Events data
-  // MD events coordinates buffer
-  std::vector<coord_t> allCoord;
-  std::vector<float> sig_err; // array for signal and error.
-
-  allCoord.reserve(this->m_NDims * numEvents);
-  sig_err.reserve(2 * numEvents);
 
   // This little dance makes the getting vector of events more general (since
   // you can't overload by return type).
@@ -64,48 +75,33 @@ template <class T> size_t ConvToMDEventsWS::convertEventList(size_t workspaceInd
   getEventsFrom(el, events_ptr);
   const typename std::vector<T> &events = *events_ptr;
 
-  // Parallelise loops by workers, each worker needs a clone of QConverter and Goniometer
-  int numthreads = m_NumThreads < 0 ? PARALLEL_GET_MAX_THREADS : std::max(1, m_NumThreads);
-  std::vector<MDTransf_sptr> qConverters;
-  std::vector<Geometry::Goniometer> gonios;
-  std::vector<std::vector<coord_t>> allCoords;
-  std::vector<std::vector<float>> sig_errs;
-  for (int i = 0; i < numthreads; i++) {
-    qConverters.emplace_back(m_QConverter->clone());
-    allCoords.push_back(allCoord);
-    sig_errs.push_back(sig_err);
-    gonios.emplace_back(m_Goniometer);
-  }
-  // Iterators to start/end
-  PRAGMA_OMP(parallel for)
-  for (int i = 0; i < static_cast<int>(events.size()); i++) {
-    MDTransf_sptr p_QConverter = qConverters[PARALLEL_THREAD_NUMBER];
-    double val = localUnitConv.convertUnits(events[i].tof());
-    double signal = events[i].weight();
-    double errorSq = events[i].errorSquared();
-    if (!setGoniometersFromLogs(&events[i], gonios[PARALLEL_THREAD_NUMBER], p_QConverter))
+  const size_t coordStart = allCoord.size();
+  const size_t sigErrStart = sig_err.size();
+  const size_t detIdStart = det_ids.size();
+  allCoord.reserve(coordStart + this->m_NDims * numEvents);
+  sig_err.reserve(sigErrStart + 2 * numEvents);
+  det_ids.reserve(detIdStart + numEvents);
+
+  for (const auto &event : events) {
+    eventCoord = spectrumCoord;
+    double val = localUnitConv.convertUnits(event.tof());
+    double signal = event.weight();
+    double errorSq = event.errorSquared();
+    if (!setGoniometersFromLogs(&event, gonio, pQConverter))
       continue; // skip if log value is NaN
-    std::vector<coord_t> locCoord_(m_Coord);
-    if (!setGenericVariableFromLogs(events[i].pulseTime(), locCoord_))
+
+    if (!setGenericVariableFromLogs(event.pulseTime(), eventCoord))
       continue; // skip if log value is NaN or out of bounds
-    if (!p_QConverter->calcMatrixCoord(val, locCoord_, signal, errorSq))
+    if (!pQConverter->calcMatrixCoord(val, eventCoord, signal, errorSq))
       continue; // skip ND outside the range
 
-    sig_errs[PARALLEL_THREAD_NUMBER].emplace_back(static_cast<float>(signal));
-    sig_errs[PARALLEL_THREAD_NUMBER].emplace_back(static_cast<float>(errorSq));
-    allCoords[PARALLEL_THREAD_NUMBER].insert(allCoords[PARALLEL_THREAD_NUMBER].end(), locCoord_.begin(),
-                                             locCoord_.end());
+    sig_err.emplace_back(static_cast<float>(signal));
+    sig_err.emplace_back(static_cast<float>(errorSq));
+    det_ids.emplace_back(detID);
+    allCoord.insert(allCoord.end(), eventCoord.begin(), eventCoord.end());
   }
-  for (int i = 0; i < numthreads; i++) {
-    sig_err.insert(sig_err.end(), sig_errs[i].begin(), sig_errs[i].end());
-    allCoord.insert(allCoord.end(), allCoords[i].begin(), allCoords[i].end());
-  }
-  size_t n_added_events = sig_err.size() / 2;
-  std::vector<uint32_t> det_ids(n_added_events, detID);
 
-  // Add them to the MDEW
-  m_OutWSWrapper->addMDData(sig_err, m_ExpInfoIndex, 0, det_ids, allCoord, n_added_events);
-  return n_added_events;
+  return det_ids.size() - detIdStart;
 }
 
 /** The method runs conversion for a single event list, corresponding to a
@@ -225,16 +221,66 @@ void ConvToMDEventsWS::appendEventsFromInputWS(API::Progress *pProgress, const A
   // for continuous rotation, algorithm takes much longer. We increase report rate for QOL usage.
   const bool frequentReport = !m_GonioIndex.empty();
   const int div = 500;
-
+  int numthreads = m_NumThreads < 0 ? PARALLEL_GET_MAX_THREADS : std::max(1, m_NumThreads);
+  const size_t workerCount = static_cast<size_t>(numthreads);
   size_t eventsAdded = 0;
-  for (size_t wi = 0; wi < m_NSpectra; wi++) {
+  const size_t numSpectra = static_cast<size_t>(m_NSpectra);
+  const size_t minSpectraPerWorker = 16;
+  const size_t maxSpectraPerWorker = 64;
+  const size_t targetRegions = 32;
+  const size_t targetChunk = (numSpectra + targetRegions - 1) / targetRegions;
+  const size_t spectraChunk =
+      std::clamp(targetChunk, minSpectraPerWorker * workerCount, maxSpectraPerWorker * workerCount);
+  const int guidedChunk = std::max<int>(1, static_cast<int>(spectraChunk / (workerCount * 8)));
+  for (size_t chunkStart = 0; chunkStart < numSpectra; chunkStart += spectraChunk) {
+    const size_t chunkEnd = std::min(numSpectra, chunkStart + spectraChunk);
+    std::vector<std::vector<coord_t>> allCoords(static_cast<size_t>(numthreads));
+    std::vector<std::vector<float>> sigErrs(static_cast<size_t>(numthreads));
+    std::vector<std::vector<uint32_t>> detIds(static_cast<size_t>(numthreads));
+    std::vector<size_t> convertedCounts(static_cast<size_t>(numthreads), 0);
 
-    size_t nConverted = conversionChunk(wi);
-    eventsAdded += nConverted;
-    nEventsInWS += nConverted;
+    PRAGMA_OMP(parallel num_threads(numthreads)) {
+      const auto threadNumber = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
+      MDTransf_sptr pQConverter(m_QConverter->clone());
+      Geometry::Goniometer gonio(m_Goniometer);
+      std::vector<coord_t> eventCoord(m_Coord);
+      auto &threadCoords = allCoords[threadNumber];
+      auto &threadSigErr = sigErrs[threadNumber];
+      auto &threadDetIds = detIds[threadNumber];
 
-    if (frequentReport && wi % div == 0) {
-      pProgress->report(static_cast<int>(wi));
+      PRAGMA_OMP(for schedule(guided, guidedChunk))
+      for (int wi = static_cast<int>(chunkStart); wi < static_cast<int>(chunkEnd); ++wi) {
+        switch (m_EventWS->getSpectrum(static_cast<size_t>(wi)).getEventType()) {
+        case Mantid::API::TOF:
+          convertedCounts[threadNumber] += convertEventList<Mantid::Types::Event::TofEvent>(
+              static_cast<size_t>(wi), pQConverter, gonio, eventCoord, threadCoords, threadSigErr, threadDetIds);
+          break;
+        case Mantid::API::WEIGHTED:
+          convertedCounts[threadNumber] += convertEventList<Mantid::DataObjects::WeightedEvent>(
+              static_cast<size_t>(wi), pQConverter, gonio, eventCoord, threadCoords, threadSigErr, threadDetIds);
+          break;
+        case Mantid::API::WEIGHTED_NOTIME:
+          convertedCounts[threadNumber] += convertEventList<Mantid::DataObjects::WeightedEventNoTime>(
+              static_cast<size_t>(wi), pQConverter, gonio, eventCoord, threadCoords, threadSigErr, threadDetIds);
+          break;
+        default:
+          throw std::runtime_error("EventList had an unexpected data type!");
+        }
+      }
+    }
+
+    size_t chunkConverted = 0;
+    for (int thread = 0; thread < numthreads; ++thread) {
+      const auto threadNumber = static_cast<size_t>(thread);
+      chunkConverted += convertedCounts[threadNumber];
+      m_OutWSWrapper->addMDData(sigErrs[threadNumber], m_ExpInfoIndex, 0, detIds[threadNumber], allCoords[threadNumber],
+                                convertedCounts[threadNumber]);
+    }
+    eventsAdded += chunkConverted;
+    nEventsInWS += chunkConverted;
+
+    if (frequentReport && chunkStart % div == 0) {
+      pProgress->report(static_cast<int>(chunkStart));
     }
 
     // Keep a running total of how many events we've added
@@ -252,7 +298,7 @@ void ConvToMDEventsWS::appendEventsFromInputWS(API::Progress *pProgress, const A
       // Count the new # of boxes.
       lastNumBoxes = m_OutWSWrapper->pWorkspace()->getBoxController()->getTotalNumMDBoxes();
       eventsAdded = 0;
-      pProgress->report(static_cast<int>(wi));
+      pProgress->report(static_cast<int>(chunkEnd));
     }
   }
   // Do a final splitting of everything
