@@ -53,7 +53,7 @@ repos:
     #- id: cmake-lint <- not ready yet
 
   - repo: https://github.com/rstcheck/rstcheck
-    rev: v6.2.5
+    rev: v6.3.0
     hooks:
       - id: rstcheck
         additional_dependencies: [sphinx]
@@ -76,7 +76,7 @@ repos:
         - mdformat-ruff # ruff format code snippets
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.16.0
+    rev: v0.16.1
     # ruff must appear before black in the list of hooks
     hooks:
       - id: ruff-check

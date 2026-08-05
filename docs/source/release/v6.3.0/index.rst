@@ -1,6 +1,6 @@
 .. _v6.3.0:
 
-.. include:: <isonum.txt>
+.. |copy| unicode:: U+00A9
 
 ===========================
 Mantid 6.3.0 Release Notes
