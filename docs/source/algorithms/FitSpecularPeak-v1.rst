@@ -15,7 +15,7 @@ This algorithm locates the specular peak in a reflectometry detector workspace. 
 
 The algorithm uses the maximum of the profile as the initial peak centre and estimates its width from the half-height points. It then fits a Gaussian together with the background selected by *BackgroundType*. When the fit succeeds, *PeakCentre* contains the optimized Gaussian centre and *PeakCentreError* contains its uncertainty.
 
-If a fit cannot be completed, *PeakCentre* contains the initial profile maximum and *OutputStatus* reports that the initial centre was used. The algorithm raises an error if no finite initial peak centre can be found. *OutputProfileWorkspace* and *OutputFitWorkspace* are optional; the fit workspace is only produced for a successful fit.
+By default, if a fit cannot be completed or reports an unsuccessful status, *PeakCentre* contains the initial profile maximum and *OutputStatus* reports that the initial centre was used. If *UseFittedPeakCentreOnFailure* is true and the fit completes with a finite, in-range peak centre, that fitted centre is returned regardless of the fit status and *OutputStatus* contains the status reported by :ref:`Fit <algm-Fit>`. If the fit throws, the initial centre is still returned. The algorithm raises an error if no finite initial peak centre can be found. *OutputProfileWorkspace* and *OutputFitWorkspace* are optional; the fit workspace is only produced when a fitted centre is returned.
 
 Usage
 -----
