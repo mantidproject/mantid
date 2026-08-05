@@ -19,6 +19,7 @@
 
 #include <cmath>
 #include <limits>
+#include <vector>
 
 using namespace Mantid;
 
@@ -33,6 +34,8 @@ public:
     Reflectometry::FitSpecularPeak algorithm;
     TS_ASSERT_THROWS_NOTHING(algorithm.initialize())
     TS_ASSERT(algorithm.isInitialized())
+    bool const useFittedCentreOnFailure = algorithm.getProperty("UseFittedPeakCentreOnFailure");
+    TS_ASSERT(!useFittedCentreOnFailure)
   }
 
   void test_fits_peak_and_returns_absolute_workspace_index() {
@@ -90,6 +93,51 @@ public:
     TS_ASSERT_EQUALS(peakCentreError, EMPTY_DBL())
     TS_ASSERT_EQUALS(algorithm->getPropertyValue("OutputStatus"), "Fit failed; using initial peak centre")
     TS_ASSERT(!fit)
+  }
+
+  void test_unsuccessful_fit_returns_initial_peak_centre_by_default() {
+    auto algorithm = configuredAlgorithm(nonConvergingWorkspace());
+
+    TS_ASSERT_THROWS_NOTHING(algorithm->execute())
+    double const peakCentre = algorithm->getProperty("PeakCentre");
+    TS_ASSERT_EQUALS(peakCentre, 3.0)
+    TS_ASSERT_EQUALS(algorithm->getPropertyValue("OutputStatus"), "Fit failed; using initial peak centre")
+  }
+
+  void test_unsuccessful_fit_returns_fitted_peak_centre_when_requested() {
+    auto algorithm = configuredAlgorithm(nonConvergingWorkspace());
+    algorithm->setProperty("UseFittedPeakCentreOnFailure", true);
+    algorithm->setPropertyValue("OutputFitWorkspace", "unused_fit");
+
+    TS_ASSERT_THROWS_NOTHING(algorithm->execute())
+    double const peakCentre = algorithm->getProperty("PeakCentre");
+    API::MatrixWorkspace_sptr fit = algorithm->getProperty("OutputFitWorkspace");
+    TS_ASSERT_DELTA(peakCentre, 2.687066, 1e-6)
+    TS_ASSERT_EQUALS(algorithm->getPropertyValue("OutputStatus"), "Failed to converge after 500 iterations.")
+    TS_ASSERT(fit)
+  }
+
+  void test_fit_exception_returns_initial_peak_centre_when_fitted_centre_on_failure_is_requested() {
+    auto workspace = gaussianWorkspace(3, 10, 1.0, 0.15, 10.0, 1.0);
+    auto algorithm = configuredAlgorithm(workspace);
+    algorithm->setProperty("UseFittedPeakCentreOnFailure", true);
+
+    TS_ASSERT_THROWS_NOTHING(algorithm->execute())
+    double const peakCentre = algorithm->getProperty("PeakCentre");
+    TS_ASSERT_EQUALS(peakCentre, 1.0)
+    TS_ASSERT_EQUALS(algorithm->getPropertyValue("OutputStatus"), "Fit failed; using initial peak centre")
+  }
+
+  void test_out_of_range_fitted_centre_is_not_used_when_fitted_centre_on_failure_is_requested() {
+    auto workspace = workspaceFromProfile({-4.238311484671598, 18.674709133562637, 16.99615560143591,
+                                           -10.010405371038509, 17.468765109562575, 17.946402536620198});
+    auto algorithm = configuredAlgorithm(workspace);
+    algorithm->setProperty("UseFittedPeakCentreOnFailure", true);
+
+    TS_ASSERT_THROWS_NOTHING(algorithm->execute())
+    double const peakCentre = algorithm->getProperty("PeakCentre");
+    TS_ASSERT_EQUALS(peakCentre, 1.0)
+    TS_ASSERT_EQUALS(algorithm->getPropertyValue("OutputStatus"), "Fit failed; using initial peak centre")
   }
 
   void test_ragged_integration_limits_are_normalized_before_transposing() {
@@ -169,6 +217,23 @@ private:
       }
     }
     return workspace;
+  }
+
+  static API::MatrixWorkspace_sptr workspaceFromProfile(std::vector<double> const &profile) {
+    HistogramData::BinEdges const edges{0.0, 1.0};
+    HistogramData::Counts const counts(1, 0.0);
+    auto workspace =
+        DataObjects::create<DataObjects::Workspace2D>(profile.size(), HistogramData::Histogram(edges, counts));
+    for (size_t index = 0; index < profile.size(); ++index) {
+      workspace->mutableY(index)[0] = profile[index];
+      workspace->mutableE(index)[0] = 1.0;
+    }
+    return workspace;
+  }
+
+  static API::MatrixWorkspace_sptr nonConvergingWorkspace() {
+    return workspaceFromProfile({-8.062627323198912, 0.09656098269096347, -1.1052904296664998, 60.17173237063975,
+                                 0.5011382967410345, 5.544182065326});
   }
 
   static void addPeak(API::MatrixWorkspace &workspace, double const centre, double const sigma, double const height,
