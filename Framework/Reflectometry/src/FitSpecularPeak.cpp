@@ -27,6 +27,8 @@
 
 namespace {
 namespace Prop {
+std::string const ACCEPT_CHANGES_IN_FUNCTION{"AcceptChangesInFunctionTooSmall"};
+std::string const ACCEPT_CHANGES_IN_PARAMETERS{"AcceptChangesInParameterTooSmall"};
 std::string const BACKGROUND_TYPE{"BackgroundType"};
 std::string const END_INDEX{"EndWorkspaceIndex"};
 std::string const INPUT_WS{"InputWorkspace"};
@@ -118,11 +120,6 @@ PeakParameters estimatePeak(const Mantid::API::MatrixWorkspace &profile, double 
   return {x[*maxIndex], height, fwhm};
 }
 
-bool fitConverged(const std::string &status) {
-  return status == Mantid::API::MinimizerStatus::SUCCESS ||
-         status == Mantid::API::MinimizerStatus::CHANGES_IN_FUNCTION_TOO_SMALL ||
-         status == Mantid::API::MinimizerStatus::CHANGES_IN_PARAMETER_TOO_SMALL;
-}
 } // namespace
 
 namespace Mantid::Reflectometry {
@@ -142,6 +139,18 @@ const std::string FitSpecularPeak::summary() const {
 
 const std::vector<std::string> FitSpecularPeak::seeAlso() const { return {"FindReflectometryLines", "FindPeaks"}; }
 
+bool FitSpecularPeak::fitStatusIsAccepted(const std::string &fitStatus, const bool acceptChangesInFunction,
+                                          const bool acceptChangesInParameters) {
+  std::vector<std::string> acceptedStatuses{API::MinimizerStatus::SUCCESS};
+  if (acceptChangesInFunction) {
+    acceptedStatuses.emplace_back(API::MinimizerStatus::CHANGES_IN_FUNCTION_TOO_SMALL);
+  }
+  if (acceptChangesInParameters) {
+    acceptedStatuses.emplace_back(API::MinimizerStatus::CHANGES_IN_PARAMETER_TOO_SMALL);
+  }
+  return std::find(acceptedStatuses.cbegin(), acceptedStatuses.cend(), fitStatus) != acceptedStatuses.cend();
+}
+
 void FitSpecularPeak::init() {
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(Prop::INPUT_WS, "", Kernel::Direction::Input),
@@ -159,6 +168,10 @@ void FitSpecularPeak::init() {
   auto const backgrounds = std::vector<std::string>{LINEAR_BACKGROUND, FLAT_BACKGROUND};
   declareProperty(Prop::BACKGROUND_TYPE, LINEAR_BACKGROUND, std::make_shared<Kernel::StringListValidator>(backgrounds),
                   "Background function fitted with the Gaussian. Choose Linear or Flat.");
+  declareProperty(Prop::ACCEPT_CHANGES_IN_FUNCTION, true,
+                  "If true, accept a fit that stopped because changes in the function value became too small.");
+  declareProperty(Prop::ACCEPT_CHANGES_IN_PARAMETERS, true,
+                  "If true, accept a fit that stopped because changes in the parameter values became too small.");
   declareProperty(Prop::USE_FITTED_CENTRE_ON_FAILURE, false,
                   "If true, use a finite fitted peak centre when Fit completes with an unsuccessful status. If false, "
                   "use the initial peak centre.");
@@ -307,7 +320,8 @@ void FitSpecularPeak::exec() {
   std::string const fitStatus = fit->getProperty("OutputStatus");
   auto const fittedCentre = gaussian->centre();
   auto const &profileX = profileWorkspace->x(0);
-  bool const fitSuccessful = fitConverged(fitStatus);
+  bool const fitSuccessful = fitStatusIsAccepted(fitStatus, getProperty(Prop::ACCEPT_CHANGES_IN_FUNCTION),
+                                                 getProperty(Prop::ACCEPT_CHANGES_IN_PARAMETERS));
   bool const useFittedCentreOnFailure = getProperty(Prop::USE_FITTED_CENTRE_ON_FAILURE);
   if ((!fitSuccessful && !useFittedCentreOnFailure) || !std::isfinite(fittedCentre) ||
       fittedCentre < profileX.front() || fittedCentre > profileX.back()) {

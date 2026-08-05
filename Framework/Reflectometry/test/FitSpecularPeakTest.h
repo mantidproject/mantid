@@ -9,6 +9,7 @@
 #include "MantidReflectometry/FitSpecularPeak.h"
 
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
@@ -35,7 +36,24 @@ public:
     TS_ASSERT_THROWS_NOTHING(algorithm.initialize())
     TS_ASSERT(algorithm.isInitialized())
     bool const useFittedCentreOnFailure = algorithm.getProperty("UseFittedPeakCentreOnFailure");
+    bool const acceptChangesInFunction = algorithm.getProperty("AcceptChangesInFunctionTooSmall");
+    bool const acceptChangesInParameters = algorithm.getProperty("AcceptChangesInParameterTooSmall");
     TS_ASSERT(!useFittedCentreOnFailure)
+    TS_ASSERT(acceptChangesInFunction)
+    TS_ASSERT(acceptChangesInParameters)
+  }
+
+  void test_fit_status_acceptance_is_configurable() {
+    auto const &success = API::MinimizerStatus::SUCCESS;
+    auto const &changesInFunction = API::MinimizerStatus::CHANGES_IN_FUNCTION_TOO_SMALL;
+    auto const &changesInParameters = API::MinimizerStatus::CHANGES_IN_PARAMETER_TOO_SMALL;
+
+    TS_ASSERT(Reflectometry::FitSpecularPeak::fitStatusIsAccepted(success, false, false))
+    TS_ASSERT(Reflectometry::FitSpecularPeak::fitStatusIsAccepted(changesInFunction, true, false))
+    TS_ASSERT(!Reflectometry::FitSpecularPeak::fitStatusIsAccepted(changesInFunction, false, true))
+    TS_ASSERT(Reflectometry::FitSpecularPeak::fitStatusIsAccepted(changesInParameters, false, true))
+    TS_ASSERT(!Reflectometry::FitSpecularPeak::fitStatusIsAccepted(changesInParameters, true, false))
+    TS_ASSERT(!Reflectometry::FitSpecularPeak::fitStatusIsAccepted("Failed to converge", true, true))
   }
 
   void test_fits_peak_and_returns_absolute_workspace_index() {
