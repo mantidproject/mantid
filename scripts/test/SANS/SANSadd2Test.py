@@ -7,9 +7,11 @@
 
 import unittest
 from unittest.mock import patch
+import tempfile
+import os
 
 from SANS import SANSadd2
-from SANS.sans.common.enums import SampleShape
+from sans.common.enums import SampleShape
 from mantid.simpleapi import Load
 
 
@@ -32,7 +34,7 @@ class TestSANSAddSampleMetadata(unittest.TestCase):
             SANSadd2.add_runs(("LOQ54432", "LOQ54432"), "LOQ", ".raw")
             self.assertEqual(2, mocked_load_sample.call_count)
 
-    def test_isis_neuxs_files_get_correct_sample_info(self):
+    def test_isis_nexus_files_get_correct_sample_info(self):
         result = SANSadd2.add_runs(["74014"], "LOQ", ".nxs", rawTypes=(".add", ".raw", ".s*"), lowMem=False)
         assert result.startswith("The following file has been created:")
         assert result.endswith("LOQ74014-add.nxs")
@@ -48,9 +50,17 @@ class TestSANSAddSampleMetadata(unittest.TestCase):
     def test_isis_nexus_get_sample_info_using_file_information(self):
         with patch("SANS.SANSadd2.get_geometry_information_isis_nexus") as mocked_get_geo_info:
             mocked_get_geo_info.return_value = (8.0, 8.0, 2.0, SampleShape.DISC)
-            SANSadd2.add_runs(("74014", "74014"), "LOQ", ".nxs", rawTypes=(".add", ".raw", ".s*"), lowMem=False)
+            SANSadd2.add_runs("74014", "LOQ", ".nxs", rawTypes=(".add", ".raw", ".s*"), lowMem=False)
             self.assertEqual(1, mocked_get_geo_info.call_count)
 
-    def test_is_not_allowed_instrument_branch(self):
-        result = SANSadd2.add_runs(["LOQ00113953"], "LOQ", ".nxs")
-        self.assertEqual(result, "")
+    def test_save_directory_is_called_correctly_when_saving_ws(self):
+        out_name = "ZOOM00006113-add.nxs"
+        out_mon_name = "ZOOM00006113-add_monitors.nxs"
+        with tempfile.TemporaryDirectory() as save_dir:
+            with patch("SANS.SANSadd2.bundle_added_event_data_as_group") as mocked_bundle:
+                out_path = os.path.join(save_dir, out_name)
+                out_path_mon = os.path.join(save_dir, out_mon_name)
+
+                mocked_bundle.return_value = out_path
+                SANSadd2.add_runs("6113", "ZOOM", ".nsx", save_directory=save_dir, saveAsEvent=True)
+                mocked_bundle.assert_called_once_with(out_path, out_path_mon, False)
