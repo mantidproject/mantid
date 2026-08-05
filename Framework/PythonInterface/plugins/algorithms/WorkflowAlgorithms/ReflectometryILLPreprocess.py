@@ -48,10 +48,14 @@ from mantid.simpleapi import (
 import ReflectometryILL_common as common
 import ILL_utilities as utils
 
-from math import fabs, atan
+from math import atan, fabs
 import numpy as np
 from scipy.constants import physical_constants
 from typing import List, Tuple
+
+
+# Express the ILL preprocessing ±3 sigma fit window in FWHM units.
+ILL_PREPROCESS_FIT_WINDOW_MULTIPLIER = 3.0 / np.sqrt(8.0 * np.log(2.0))
 
 
 class Prop:
@@ -797,7 +801,13 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         if not self.getProperty(Prop.XMIN).isDefault:
             kwargs["RangeLower"] = self.getProperty(Prop.XMIN).value
         original_peak_centre = ws.getRun().getLogData("reduction.line_position").value
-        fit_output = FitSpecularPeak(InputWorkspace=ws, BackgroundType="Flat", UseFittedPeakCentreOnFailure=True, **kwargs)
+        fit_output = FitSpecularPeak(
+            InputWorkspace=ws,
+            BackgroundType="Flat",
+            FitWindowMultiplier=ILL_PREPROCESS_FIT_WINDOW_MULTIPLIER,
+            UseFittedPeakCentreOnFailure=True,
+            **kwargs,
+        )
         peak_centre = fit_output.PeakCentre
         ws.getRun().addProperty("reduction.line_position", float(peak_centre), True)
         self._rotate_instrument(ws, peak_centre, original_peak_centre)
