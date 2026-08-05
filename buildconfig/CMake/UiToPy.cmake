@@ -1,5 +1,5 @@
 # ######################################################################################################################
-# Function to convert ui files into PyQt python files
+# Function to convert ui files into PyQt python files for the configured Qt major version
 # ######################################################################################################################
 
 function(UiToPy ui_files target_name)
@@ -15,7 +15,7 @@ function(UiToPy ui_files target_name)
     # Command to run the translation
     add_custom_command(
       OUTPUT ${generated_file}
-      COMMAND ${PYTHON_EXECUTABLE} -m PyQt6.uic.pyuic -x ${source_file} -o ${generated_file}
+      COMMAND ${PYTHON_EXECUTABLE} -m PyQt${MANTID_QT_VERSION}.uic.pyuic -x ${source_file} -o ${generated_file}
       DEPENDS ${source_file}
     )
     # Record all generated files

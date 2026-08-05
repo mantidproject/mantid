@@ -38,7 +38,7 @@ using namespace MantidQt::MantidWidgets::Batch;
 %HideNamespace(name=MantidQt::MantidWidgets)
 %HideNamespace(name=MantidQt::MantidWidgets::Batch)
 
-// Qt widgets
+// Versioned Qt widgets
 %Import QtGui/QtGuimod.sip
 %Import QtWidgets/QtWidgetsmod.sip
 
