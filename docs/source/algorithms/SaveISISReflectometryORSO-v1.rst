@@ -14,8 +14,8 @@ The orsopy library [#orsopy]_ is used to format and write out the file.
 Currently this algorithm is unable to collect all of the mandatory information required by the ORSO standard so it produces a file that is not fully ORSO compliant.
 A comment is included at the top of the file to reflect this. This algorithm is only suitable for use with Reflectometry data collected at the ISIS Neutron and Muon facility.
 
-The ``WorkspaceList`` passed to the algorithm should be a list of one or more reduced Reflectometry workspaces, or workspace groups, in units of momentum transfer (Q).
-For each individual workspace, the algorithm attempts to find metadata for the file header and the resolution (dQ/Q) from the instrument, workspace history and sample logs associated with the workspace.
+The ``WorkspaceList`` passed to the algorithm should be a list of one or more reduced Reflectometry workspaces, or workspace groups, in units of momentum transfer (:math:`Q`).
+For each individual workspace (When in ``History`` mode for the ``MetadataSource`` property), the algorithm attempts to find metadata for the file header and the resolution (:math:`dQ/Q`) from the instrument, workspace history and sample logs associated with the workspace.
 As a result, this algorithm may produce a file that is missing information if it is passed a workspace that wasn't reduced via the :ref:`ISIS Reflectometry Interface <interface-isis-refl>`.
 See below for further information about where the metadata and resolution are searched for in the workspace.
 
@@ -44,67 +44,272 @@ information in the name to make it unique:
 Depending on the combination of workspaces and workspace groups passed in, it is possible that duplicate dataset names will be generated. If this happens then the algorithm will give an error and
 fail to save out a file.
 
+Metadata Sources
+----------------
+
+In its default state, the algorithm will attempt to get as many of the metadata as it can from the workspace history, which requires
+that the workspace has been processed using the same workflow used in the :ref:`ISIS Reflectometry Interface <interface-isis-refl>`.
+This is not compatible with all reduction workflows, however, and so this algorithm also provides methods for fine-tuning where the
+saving process sources any metadata.
+
++--------------------------+-----------------------------------------------------------------------------------------------+
+| MetadataSource           | Collection Process                                                                            |
++==========================+===============================================================================================+
+| ``History``              | The input workspace's history and sample logs will be searched for each of the metadata items.|
+|                          | Any that cannot be found will be omitted from the final saved ORSO file.                      |
++--------------------------+-----------------------------------------------------------------------------------------------+
+| ``HistoryWherePossible`` | As above, but any missing metadata will be marked as an error on the relevant algorithm       |
+|                          | property during validation. If any marked properties are not expected to be found or are not  |
+|                          | required, a list of those properties names should be given as inputs to ``IgnoredProperties``.|
++--------------------------+-----------------------------------------------------------------------------------------------+
+| ``Manual``               | Only the values entered for the relevant properties will be included in the output file. A    |
+|                          | list of the metadata and their relevant properties is included below.                         |
++--------------------------+-----------------------------------------------------------------------------------------------+
+
 Data values
 -----------
 
-The saved ORSO file contains at least three columns of data: the normal wavevector transfer (Qz), the reflectivity (R) and the error of the reflectivity.
+The saved ORSO file contains at least three columns of data: the normal wavevector transfer (:math:`Qz`), the reflectivity (:math:`R`) and the error of the reflectivity.
 The data is converted to point data using algorithm :ref:`algm-ConvertToPointData` before being saved to file.
 
 If parameter ``WriteResolution`` is set to ``True`` then the algorithm will also attempt to include a fourth column that calculates the resolution of the normal wavevector transfer as: :math:`resolution * Qz`.
-The resolution (dQ/Q) is looked up from the workspace history as follows:
+The resolution (:math:`dQ/Q`) is looked up as follows:
 
-- Find the last occurrence of :ref:`algm-Stitch1DMany` in the workspace history. If this can be found, then the absolute value of the stitch ``Params`` parameter is used for the resolution.
-- Otherwise, find the last occurrence of :ref:`algm-ReflectometryReductionOneAuto`. This algorithm makes a call to :ref:`algm-Rebin` and the absolute value of the middle rebin ``Params`` parameter is used as the resolution.
+- In ``History`` or the first step of ``HistoryWherePossible`` mode:
 
-If a resolution value cannot be found from the workspace history then the file is saved without this column included.
+  - Find the last occurrence of :ref:`algm-Stitch1DMany` in the workspace history. If this can be found, then the absolute value of the stitch ``Params`` parameter is used for the resolution.
+  - Otherwise, find the last occurrence of :ref:`algm-ReflectometryReductionOneAuto`. This algorithm makes a call to :ref:`algm-Rebin` and the absolute value of the middle rebin ``Params`` parameter is used as the resolution.
 
-If parameter ``IncludeAdditionalColumns`` is set to ``True`` then the value of parameter ``WriteResolution`` is ignored and the algorithm will output the four columns described above for stitched datasets.
-For non-stitched datasets there will be the four columns described above plus an additional four columns as follows:
+- In ``Manual`` or the manual step of ``HistoryWherePossible`` mode:
 
-- *lambda* - the wavelength values. If the original conversion to Q was performed using :ref:`algm-RefRoi` then the Qz column values are converted back to wavelength using: :math:`\lambda=\frac{4\pi}{Q}sin(\theta)`. If the original conversion was performed using :ref:`algm-ConvertUnits` then this algorithm is used to convert back to wavelength.
+  - The value is taken from the ``Resolution`` property.
+
+If a resolution value cannot be found from the workspace history or from the property then the file is saved without this column included.
+
+If parameter ``IncludeAdditionalColumns`` is set to ``True`` then, for non-stitched datasets, the algorithm will attempt to output the additional columns as follows.
+This setting is independent of ``WriteResolution``: the ``Qz`` resolution column is only written when ``WriteResolution`` is set to ``True``.
+
+- *lambda* - the wavelength values.
+
+  - If the original conversion to Q was performed using :ref:`algm-RefRoi` then the ``Qz`` column values are converted back to wavelength using: :math:`\lambda=\frac{4\pi}{Q}sin(\theta)`.
+    In ``Manual`` mode, or the manual step of ``HistoryWherePossible`` mode, this angle is taken from the ``angle`` values in ``DatasetSpecificMetadata``.
+    If no angle can be found then the additional columns are excluded and a warning is logged.
+  - If the original conversion was performed using :ref:`algm-ConvertUnits` then this algorithm is used to convert back to wavelength.
+  - Note: The method used is either determined from the workspace history (in ``History`` or ``HistoryWherePossible`` modes) or from the ``QConversionMethod`` property (in ``Manual`` or
+    ``HistoryWherePossible`` mode. When using the ``HistoryWherePossible`` mode, the value in the workspace history will override the setting chosen in the property.)
+
 - *error of lambda* - currently assumed to be 0.
-- *incident theta* - the value of theta used for the final conversion to Q.
+- *incident theta* - the value of theta used for the final conversion to :math:`Q`.
 - *error of incident theta* - calculated as :math:`resolution * \theta`.
 
 If it is not possible to calculate the values for the additional columns then a warning is logged and they are excluded from the file.
+For stitched datasets, additional columns are not included and a warning is logged if ``IncludeAdditionalColumns`` is set to ``True``.
 
 Header Metadata
 ---------------
 
 Some of the metadata for the ORSO file header is retrieved directly from the input workspace, as detailed below.
-For values retrieved from the workspace history, if any information cannot be extracted from the history then
+For values retrieved from the workspace history, in ``History`` mode, if any information cannot be extracted from the history then
 the file is saved without this metadata included.
 
-+---------------------+-----------------------------------------------------------------------------------------------+
-| Header value        | Workspace location                                                                            |
-+=====================+===============================================================================================+
-| instrument          | The name of the instrument associated with the workspace.                                     |
-+---------------------+-----------------------------------------------------------------------------------------------+
-| start_date          | The value of the ``run_start`` sample log.                                                    |
-+---------------------+-----------------------------------------------------------------------------------------------+
-| proposalID          | The value of either the ``rb_proposal`` or ``experiment_identifier`` sample log.              |
-+---------------------+-----------------------------------------------------------------------------------------------+
-| sample name         | The workspace title (same as the value of the ``run_title`` sample log).                      |
-+---------------------+-----------------------------------------------------------------------------------------------+
-| reduction timestamp | The execution time of the last occurrence of :ref:`algm-ReflectometryReductionOneAuto` in the |
-|                     | workspace history.                                                                            |
-+---------------------+-----------------------------------------------------------------------------------------------+
-| reduction call      | The sequence of algorithm calls from the workspace history that is generated by               |
-|                     | :ref:`algm-GeneratePythonScript`. This is excluded for workspaces that are members of a       |
-|                     | workspace group.                                                                              |
-+---------------------+-----------------------------------------------------------------------------------------------+
-| measurement         | The individual file names for all of the run numbers passed to the ``InputRunList`` parameter |
-| data_files          | from all calls to :ref:`algm-ReflectometryISISLoadAndProcess` in the workspace history.       |
-+---------------------+-----------------------------------------------------------------------------------------------+
-| measurement         | The individual file names for all of the run numbers passed to parameters                     |
-| additional_files    | ``FirstTransmissionRunList`` and ``SecondTransmissionRunList`` from all calls to              |
-|                     | :ref:`algm-ReflectometryISISLoadAndProcess` in the workspace history. Also the flood          |
-|                     | correction workspace or file name and the calibration file name from                          |
-|                     | :ref:`algm-ReflectometryISISLoadAndProcess` in the workspace history.                         |
-+---------------------+-----------------------------------------------------------------------------------------------+
-|polarization         | For input workspaces containing the ``spin_state_ORSO`` sample log, polarization information  |
-|                     | will be added to the header using the ORSO format [#ORSO]_.                                   |
-+---------------------+-----------------------------------------------------------------------------------------------+
++---------------------+-----------------------------------------------------------------------------------------------+---------------------------------+
+| Header value        | Workspace location                                                                            | Manual Metadata Property        |
++=====================+===============================================================================================+=================================+
+| instrument          | The name of the instrument associated with the workspace.                                     | N/A                             |
++---------------------+-----------------------------------------------------------------------------------------------+---------------------------------+
+| start_date          | The value of the ``run_start`` sample log.                                                    | N/A                             |
++---------------------+-----------------------------------------------------------------------------------------------+---------------------------------+
+| proposalID          | The value of either the ``rb_proposal`` or ``experiment_identifier`` sample log.              | N/A                             |
++---------------------+-----------------------------------------------------------------------------------------------+---------------------------------+
+| sample name         | The workspace title (same as the value of the ``run_title`` sample log).                      | N/A                             |
++---------------------+-----------------------------------------------------------------------------------------------+---------------------------------+
+| reduction timestamp | The execution time of the last occurrence of :ref:`algm-ReflectometryReductionOneAuto` in the | ``ReductionTimestamp``          |
+|                     | workspace history.                                                                            |                                 |
++---------------------+-----------------------------------------------------------------------------------------------+---------------------------------+
+| measurement         | The individual file names for all of the run numbers passed to parameters                     | | ``FirstTransmissionFileList`` |
+| additional_files    | ``FirstTransmissionRunList`` and ``SecondTransmissionRunList`` from all calls to              | | ``SecondTransmissionFileList``|
+|                     | :ref:`algm-ReflectometryISISLoadAndProcess` in the workspace history. Also the flood          | | ``FloodCorrectionSource``     |
+|                     | correction workspace or file name and the calibration file name from                          | | ``CalibrationFile``           |
+|                     | :ref:`algm-ReflectometryISISLoadAndProcess` in the workspace history.                         |                                 |
++---------------------+-----------------------------------------------------------------------------------------------+---------------------------------+
+
+Manual Metadata Blank Values
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In ``HistoryWherePossible`` mode, manual metadata properties only override values found in the workspace history if the
+property is explicitly set. Leaving a property at its default value means that the history value is used where possible.
+An explicitly set blank value can be used to clear a value found in the history.
+
+.. list-table::
+   :header-rows: 1
+
+   * - Property
+     - Default behaviour
+     - Explicit blank override
+   * - ``DatasetSpecificMetadata``
+     - No dataset-specific values are overridden.
+     - ``{}`` or an omitted dataset leaves history values unchanged. Present JSON keys override history values; omitted JSON keys do not clear history values.
+   * - ``QConversionMethod``
+     - ``RefRoi`` is used if no method is found in the history.
+     - No blank override is available. The value must be either ``RefRoi`` or ``ConvertUnits``.
+   * - ``ReductionTimestamp``
+     - The history timestamp is used where possible.
+     - ``""`` clears the history timestamp.
+   * - ``FirstTransmissionFileList``
+     - The first transmission files from history are used where possible.
+     - ``[""]`` clears the first transmission file list.
+   * - ``SecondTransmissionFileList``
+     - The second transmission files from history are used where possible.
+     - ``[""]`` clears the second transmission file list.
+   * - ``FloodCorrectionSource``
+     - The flood correction from history is used where possible.
+     - ``[""]`` clears the flood correction.
+   * - ``CalibrationFile``
+     - The calibration file from history is used where possible.
+     - ``""`` clears the calibration file.
+
+Dataset-Specific Metadata
+-------------------------
+
+Some metadata is specific to each dataset in the output file. There are one of these datasets per workspace given in the ``WorkspaceList``. A ``WorkspaceGroup``
+has a dataset in the output file for each of its child workspaces. In ``History`` mode, these are aquired from the workspace history and the sample logs if
+available. In ``Manual`` mode, these metadata can be provided via a JSON string to the ``DatasetSpecificMetadata`` property.
+
+Metadata Fields
+^^^^^^^^^^^^^^^
+
++----------------------+------------------------------------------------------------------------------------------------+-------------------------+-------------------------+
+| Key                  | Description                                                                                    | Example Value           | ORSO Key                |
++======================+================================================================================================+=========================+=========================+
+| ``<WORKSPACE_NAME>`` | The primary key for the dataset's metadata is the workspace associated with the output dataset.| ``{ <REST OF JSON> }``  | N/A                     |
++----------------------+------------------------------------------------------------------------------------------------+-------------------------+-------------------------+
+| ``"group-members"``  | If the primary key is a workspace group, then this JSON object should be used to define the    | See template.           | N/A                     |
+|                      | ``"dataset-name"`` and ``"polarization"`` for the child workspaces.                            |                         |                         |
++----------------------+------------------------------------------------------------------------------------------------+-------------------------+-------------------------+
+| ``"dataset-name"``   | The name the dataset should have in the output file.                                           | ``"13460 0.5"``         | ``data_set``            |
++----------------------+------------------------------------------------------------------------------------------------+-------------------------+-------------------------+
+| ``"is-stitched"``    | If the dataset is a stitched set. Affects sorting and if additional columns are included.      | ``true``                | N/A                     |
++----------------------+------------------------------------------------------------------------------------------------+-------------------------+-------------------------+
+| ``"polarization"``   | The spin states used in the experiment for this dataset. See the `orsopy documentation`_ for   | | ``unpolarized``       | ``polarization``        |
+|                      | details on the expected formats.                                                               | | ``mp``, etc.          |                         |
++----------------------+------------------------------------------------------------------------------------------------+-------------------------+-------------------------+
+| ``"resolution"``     | The resolution value used to calculate the fourth data column (if ``WriteResolution`` is true).| ``1.82``                | N/A                     |
+|                      | See above for details.                                                                         |                         |                         |
++----------------------+------------------------------------------------------------------------------------------------+-------------------------+-------------------------+
+| ``"data-files"``     | A list of JSON objects defining the data (/angle/run) files associated with the dataset.       | ``[{ "file-name : "x",  | ``data_files``          |
+|                      |                                                                                                | "angle" : 0.0 }]``      |                         |
++----------------------+------------------------------------------------------------------------------------------------+-------------------------+-------------------------+
+| ``"file-name"``      | The name of the data file.                                                                     | ``"INTER00013460"``     | ``file``                |
++----------------------+------------------------------------------------------------------------------------------------+-------------------------+-------------------------+
+| ``"angle"``          | The angle of the data file. This is also used to calculate lambda when using ``RefRoi``        | ``0.5``                 | ``comment``             |
+|                      | with ``IncludeAdditionalColumns``.                                                             |                         |                         |
++----------------------+------------------------------------------------------------------------------------------------+-------------------------+-------------------------+
+| ``"reduction-call"`` | The script used to perform the reduction.                                                      | ``"ReflectometryI...""``| ``call``                |
++----------------------+------------------------------------------------------------------------------------------------+-------------------------+-------------------------+
+
+.. _orsopy documentation: https://www.reflectometry.org/orsopy/api/orsopy.fileio.html#orsopy.fileio.data_source.Polarization
+
+Example
+^^^^^^^
+
+.. code-block:: json
+
+  {
+    "IvsQ_13460" : {
+      "dataset-name" : "IvsQ_13460",
+      "is-stitched" : false,
+      "polarization" : "unpolarized",
+      "resolution" : 0.5,
+      "data-files" : [
+        {
+          "file-name" : "INTER00013460",
+          "angle" : 0.5
+        }
+      ],
+      "reduction-call" : "ReflectometryISISLoadAndProcess(InputRunL..."
+    },
+    "IvsQ_47041_47042" : {
+      "group-members" : {
+        "IvsQ_47041_47042_1 (Workspace 2D)" : {
+          "dataset-name" : "47041_47042 Plus Plus Stitched",
+          "polarization" : "pp"
+        },
+        "IvsQ_47041_47042_2 (Workspace 2D)" : {
+          "dataset-name" : "47041_47042 Plus Minus Stitched",
+          "polarization" : "pm"
+        }
+      },
+      "is-stitched" : true,
+      "data-files" : [
+        {
+          "file-name" : "POLREF00047041",
+          "angle" : 0.4
+        },
+        {
+          "file-name" : "POLREF00047042",
+          "angle" : 1.0
+        }
+      ],
+      "reduction-call" : "ReflectometryISISLoadAndProcess(InputRunL..."
+    }
+  }
+
+
+Templates
+^^^^^^^^^
+
+Matrix Workspace
+++++++++++++++++
+
+.. code-block:: text
+
+  {
+    "<WORKSPACE 1 NAME>" : {
+      "dataset-name" : "<DATASET NAME (string)>",
+      "is-stitched" : <true/false (bool)>,
+      "polarization" : "<POLARIZATION MARKER (string)>",
+      "resolution" : <RESOLUTION (float)>,
+      "data-files" : [
+        {
+          "file-name" : "<RUN FILE NAME (string)>",
+          "angle" : <RUN FILE ANGLE (float)>
+        }
+      ],
+      "reduction-call" : "<REDUCTION SCRIPT (string)>"
+    }
+  }
+
+Workspace Group
++++++++++++++++
+
+.. code-block:: text
+
+  {
+    "<WORKSPACE GROUP NAME>" : {
+      "group-members" : {
+        "<CHILD WORKSPACE 1 NAME>" : {
+          "dataset-name" : "<DATASET_NAME (string)>",
+          "polarization" : "<POLARIZATION (string)>",
+        },
+        "<CHILD WORKSPACE 2 NAME>" : {
+          "dataset-name" : "<DATASET_NAME (string)>",
+          "polarization" : "<POLARIZATION (string)>",
+        }
+      },
+      "is-stitched" : <true/false (bool)>,
+      "data-files" : [
+        {
+          "file-name" : "<RUN FILE NAME (string)>",
+          "angle" : <RUN FILE ANGLE (float)>
+        },
+        {
+          "file-name" : "<RUN FILE NAME (string)>",
+          "angle" : <RUN FILE ANGLE (float)>
+        }
+      ],
+      "reduction-call" : "<REDUCTION SCRIPT (string)>"
+  }
+
 
 Usage
 -----

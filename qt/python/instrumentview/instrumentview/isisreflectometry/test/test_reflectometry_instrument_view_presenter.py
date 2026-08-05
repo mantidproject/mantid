@@ -20,6 +20,12 @@ def _make_presenter():
     mock_view = MagicMock()
     mock_view.main_plotter = MagicMock()
     mock_view.shape_overlay_manager = None
+    # _render() runs the real fill transform, so the plotter needs numeric
+    # geometry rather than mocks — the arithmetic would otherwise produce
+    # MagicMocks that NumPy cannot build a transform matrix from.
+    mock_view.render_area_size.return_value = (400, 300)
+    mock_view.main_plotter.ren_win.GetSize.return_value = (400, 300)
+    mock_view.main_plotter.camera.parallel_scale = 0.75
     return ReflectometryInstrumentViewPresenter(view=mock_view), mock_view
 
 
@@ -48,9 +54,10 @@ class TestReflectometryInstrumentViewPresenter(unittest.TestCase):
             mock_view_cls.assert_called_once()
             self.assertIs(presenter.view, mock_view_cls.return_value)
 
+    @mock.patch("instrumentview.isisreflectometry.ReflectometryInstrumentViewPresenter.InteractorStyles")
     @mock.patch("instrumentview.isisreflectometry.ReflectometryInstrumentViewPresenter.ShapeRenderer")
     @mock.patch("instrumentview.isisreflectometry.ReflectometryInstrumentViewPresenter.FullInstrumentViewModel")
-    def test_update_workspace_calls_view_initialise(self, mock_model_cls, mock_renderer_cls):
+    def test_update_workspace_calls_view_initialise(self, mock_model_cls, mock_renderer_cls, _mock_styles_cls):
         mock_ws = MagicMock()
         mock_model_cls.return_value.detector_positions = np.zeros((10, 3))
         mock_model_cls.return_value.flip_z = False
@@ -60,9 +67,10 @@ class TestReflectometryInstrumentViewPresenter(unittest.TestCase):
         self._presenter.update_workspace(mock_ws)
         self._mock_view.initialise.assert_called_once()
 
+    @mock.patch("instrumentview.isisreflectometry.ReflectometryInstrumentViewPresenter.InteractorStyles")
     @mock.patch("instrumentview.isisreflectometry.ReflectometryInstrumentViewPresenter.ShapeRenderer")
     @mock.patch("instrumentview.isisreflectometry.ReflectometryInstrumentViewPresenter.FullInstrumentViewModel")
-    def test_update_workspace_sets_model(self, mock_model_cls, mock_renderer_cls):
+    def test_update_workspace_sets_model(self, mock_model_cls, mock_renderer_cls, _mock_styles_cls):
         mock_ws = MagicMock()
         mock_model_cls.return_value.detector_positions = np.zeros((10, 3))
         mock_model_cls.return_value.flip_z = False
@@ -73,9 +81,10 @@ class TestReflectometryInstrumentViewPresenter(unittest.TestCase):
         mock_model_cls.assert_called_once_with(mock_ws)
         self.assertIsNotNone(self._presenter._model)
 
+    @mock.patch("instrumentview.isisreflectometry.ReflectometryInstrumentViewPresenter.InteractorStyles")
     @mock.patch("instrumentview.isisreflectometry.ReflectometryInstrumentViewPresenter.ShapeRenderer")
     @mock.patch("instrumentview.isisreflectometry.ReflectometryInstrumentViewPresenter.FullInstrumentViewModel")
-    def test_update_workspace_sets_cylindrical_projection(self, mock_model_cls, mock_renderer_cls):
+    def test_update_workspace_sets_cylindrical_projection(self, mock_model_cls, mock_renderer_cls, _mock_styles_cls):
         mock_ws = MagicMock()
         mock_model_cls.return_value.detector_positions = np.zeros((10, 3))
         mock_model_cls.return_value.flip_z = False
@@ -106,31 +115,36 @@ class TestReflectometryInstrumentViewPresenter(unittest.TestCase):
         self._presenter.plot()
         self._presenter._render.assert_not_called()
 
-    def test_set_zoom_mode_removes_shape(self):
+    @mock.patch("instrumentview.isisreflectometry.ReflectometryInstrumentViewPresenter.InteractorStyles")
+    def test_set_zoom_mode_removes_shape(self, _mock_styles_cls):
         self._presenter._model = MagicMock()
-        self._presenter._model.is_2d_projection = True
         self._presenter._renderer = MagicMock()
         self._presenter.set_zoom_mode()
         self._mock_view.remove_shape.assert_called_once()
 
-    def test_set_zoom_mode_calls_set_interactive_style(self):
+    @mock.patch("instrumentview.isisreflectometry.ReflectometryInstrumentViewPresenter.InteractorStyles")
+    def test_set_zoom_mode_sets_scroll_zoom_style(self, mock_styles_cls):
+        """This view is always a 2D projection, so the scroll-zoom style is always used."""
         self._presenter._model = MagicMock()
-        self._presenter._model.is_2d_projection = True
         self._presenter._renderer = MagicMock()
         self._presenter.set_zoom_mode()
-        self._presenter._renderer.set_interactive_style.assert_called_once_with(self._mock_view.main_plotter, True)
+        mock_styles_cls.assert_called_once()
+        self.assertIs(mock_styles_cls.call_args[0][0], self._mock_view.main_plotter)
+        self.assertIs(self._mock_view.main_plotter.iren.style, mock_styles_cls.return_value.SCROLL_ZOOM_NO_PICKING)
 
-    def test_set_zoom_mode_no_op_when_no_plotter(self):
+    @mock.patch("instrumentview.isisreflectometry.ReflectometryInstrumentViewPresenter.InteractorStyles")
+    def test_set_zoom_mode_no_op_when_no_plotter(self, mock_styles_cls):
         self._mock_view.main_plotter = None
         self._presenter._model = MagicMock()
         self._presenter._renderer = MagicMock()
         self._presenter.set_zoom_mode()
-        self._presenter._renderer.set_interactive_style.assert_not_called()
+        mock_styles_cls.assert_not_called()
 
-    def test_set_zoom_mode_no_op_when_no_model(self):
+    @mock.patch("instrumentview.isisreflectometry.ReflectometryInstrumentViewPresenter.InteractorStyles")
+    def test_set_zoom_mode_no_op_when_no_model(self, mock_styles_cls):
         self._presenter._renderer = MagicMock()
         self._presenter.set_zoom_mode()
-        self._presenter._renderer.set_interactive_style.assert_not_called()
+        mock_styles_cls.assert_not_called()
 
     def test_set_select_rect_mode_calls_overlay_rectangle(self):
         self._presenter.set_select_rect_mode()
@@ -233,13 +247,67 @@ class TestReflectometryInstrumentViewPresenter(unittest.TestCase):
         np.testing.assert_allclose(called_coords[0, :3], [1.0, 2.0, 0.0])
         self.assertEqual(self._presenter._rect_selected_detector_ids, [55])
 
-    def test_render_registers_fill_transform_callback(self):
+    @mock.patch("instrumentview.isisreflectometry.ReflectometryInstrumentViewPresenter.InteractorStyles")
+    def test_render_registers_fill_transform_callback(self, _mock_styles_cls):
         """After _render, the view's resize callback is set to _apply_fill_transform."""
         self._presenter._model = MagicMock()
         self._presenter._renderer = MagicMock()
         self._presenter._renderer.build_detector_mesh.return_value = MagicMock(bounds=(0, 1, 0, 1, 0, 1))
         self._presenter._render()
         self._mock_view.set_on_resize_callback.assert_called_once_with(self._presenter._apply_fill_transform)
+
+    @mock.patch("instrumentview.isisreflectometry.ReflectometryInstrumentViewPresenter.InteractorStyles")
+    def test_render_fills_viewport_without_waiting_for_a_resize_event(self, _mock_styles_cls):
+        """The fill transform must run on first load, not only after a user resize."""
+        self._presenter._model = MagicMock()
+        self._presenter._renderer = MagicMock()
+        self._presenter._renderer.build_detector_mesh.return_value = MagicMock(bounds=(0, 1, 0, 1, 0, 1))
+        self._presenter._apply_fill_transform = MagicMock()
+        self._presenter._render()
+        self._presenter._apply_fill_transform.assert_called_once()
+
+    @mock.patch("instrumentview.isisreflectometry.ReflectometryInstrumentViewPresenter.InteractorStyles")
+    def test_render_also_refreshes_once_the_layout_has_settled(self, _mock_styles_cls):
+        """The first render happens before VTK's window shrinks to the widget, so re-fill after."""
+        self._presenter._model = MagicMock()
+        self._presenter._renderer = MagicMock()
+        self._presenter._renderer.build_detector_mesh.return_value = MagicMock(bounds=(0, 1, 0, 1, 0, 1))
+        self._presenter._render()
+        self._mock_view.schedule_refresh.assert_called_once()
+
+    @mock.patch("instrumentview.isisreflectometry.ReflectometryInstrumentViewPresenter.InteractorStyles")
+    def test_render_fills_after_the_camera_has_been_reset(self, _mock_styles_cls):
+        """The fill reads camera.parallel_scale, so reset_camera must come first."""
+        self._presenter._model = MagicMock()
+        self._presenter._renderer = MagicMock()
+        self._presenter._renderer.build_detector_mesh.return_value = MagicMock(bounds=(0, 1, 0, 1, 0, 1))
+        call_order = []
+        self._mock_view.main_plotter.reset_camera.side_effect = lambda: call_order.append("reset_camera")
+        self._presenter._apply_fill_transform = MagicMock(side_effect=lambda: call_order.append("fill"))
+        self._presenter._render()
+        self.assertEqual(call_order, ["reset_camera", "fill"])
+
+    @mock.patch("instrumentview.isisreflectometry.ReflectometryInstrumentViewPresenter.InteractorStyles")
+    def test_render_enables_parallel_projection_on_plotter(self, _mock_styles_cls):
+        """The parallel (2D) camera must be set up via the plotter itself."""
+        self._presenter._model = MagicMock()
+        self._presenter._renderer = MagicMock()
+        self._presenter._renderer.build_detector_mesh.return_value = MagicMock(bounds=(0, 1, 0, 1, 0, 1))
+        self._presenter._render()
+        self._mock_view.main_plotter.view_xy.assert_called_once()
+        self._mock_view.main_plotter.enable_parallel_projection.assert_called_once()
+        self._mock_view.main_plotter.reset_camera.assert_called_once()
+
+    @mock.patch("instrumentview.isisreflectometry.ReflectometryInstrumentViewPresenter.InteractorStyles")
+    def test_render_recreates_interactor_styles_after_camera_reset(self, mock_styles_cls):
+        """Styles are rebuilt on every render so their cached default camera is the full view."""
+        self._presenter._model = MagicMock()
+        self._presenter._renderer = MagicMock()
+        self._presenter._renderer.build_detector_mesh.return_value = MagicMock(bounds=(0, 1, 0, 1, 0, 1))
+        self._presenter._interactor_styles = MagicMock()
+        self._presenter._render()
+        mock_styles_cls.assert_called_once()
+        self.assertIs(self._presenter._interactor_styles, mock_styles_cls.return_value)
 
     def test_apply_fill_transform_scales_mesh_to_fill_viewport(self):
         """Fill transform should scale mesh so both dimensions fill the viewport."""
@@ -325,6 +393,60 @@ class TestReflectometryInstrumentViewPresenter(unittest.TestCase):
         # Should not raise
         self._presenter._apply_fill_transform()
 
+    def test_apply_fill_transform_uses_widget_size_not_stale_render_window_size(self):
+        """On the first plot VTK still reports its default size — the widget is authoritative.
+
+        Regression test: filling against the stale VTK size gave the wrong
+        aspect ratio until the user happened to resize the window.
+        """
+        mesh = MagicMock()
+        self._presenter._detector_mesh = mesh
+        self._presenter._original_mesh_bounds = (0, 2, 0, 1, 0, 0)
+        self._presenter._transform = np.eye(4)
+        # VTK has not been resized yet; Qt has laid the widget out at 400x300.
+        self._mock_view.main_plotter.ren_win.GetSize.return_value = (1024, 768)
+        self._mock_view.render_area_size.return_value = (400, 300)
+        self._mock_view.main_plotter.camera.parallel_scale = 0.75
+
+        self._presenter._apply_fill_transform()
+
+        transform = mesh.transform.call_args[0][0]
+        # Widget aspect 400/300 → visible_width 2.0, so scale_x = 2.0/2 = 1.0.
+        # The stale 1024/768 would have given visible_width 2.0*... = 1.0 → scale_x 0.5.
+        np.testing.assert_allclose(transform[0, 0], 1.0, atol=1e-6)
+        np.testing.assert_allclose(transform[1, 1], 1.5, atol=1e-6)
+
+    def test_apply_fill_transform_falls_back_to_render_window_size(self):
+        """With no usable widget size, VTK's render window is the only source left."""
+        mesh = MagicMock()
+        self._presenter._detector_mesh = mesh
+        self._presenter._original_mesh_bounds = (0, 2, 0, 1, 0, 0)
+        self._presenter._transform = np.eye(4)
+        self._mock_view.render_area_size.return_value = (0, 0)
+        self._mock_view.main_plotter.ren_win.GetSize.return_value = (400, 300)
+        self._mock_view.main_plotter.camera.parallel_scale = 0.75
+
+        self._presenter._apply_fill_transform()
+
+        transform = mesh.transform.call_args[0][0]
+        np.testing.assert_allclose(transform[0, 0], 1.0, atol=1e-6)
+        np.testing.assert_allclose(transform[1, 1], 1.5, atol=1e-6)
+
+    def test_apply_fill_transform_unaffected_by_dpi_scaling(self):
+        """Only the ratio matters, so logical vs physical pixels make no difference."""
+        mesh = MagicMock()
+        self._presenter._detector_mesh = mesh
+        self._presenter._original_mesh_bounds = (0, 2, 0, 1, 0, 0)
+        self._presenter._transform = np.eye(4)
+        self._mock_view.render_area_size.return_value = (800, 600)  # 2x the 400x300 case
+        self._mock_view.main_plotter.camera.parallel_scale = 0.75
+
+        self._presenter._apply_fill_transform()
+
+        transform = mesh.transform.call_args[0][0]
+        np.testing.assert_allclose(transform[0, 0], 1.0, atol=1e-6)
+        np.testing.assert_allclose(transform[1, 1], 1.5, atol=1e-6)
+
     def test_reset_clears_resize_callback(self):
         self._presenter._model = MagicMock()
         self._presenter.reset()
@@ -351,7 +473,8 @@ class TestReflectometryInstrumentViewPresenter(unittest.TestCase):
         # Origin is 1 unit away from centre; after 2x scale it should be 2 units away
         np.testing.assert_allclose(result[:2], [-1.0, -1.0])
 
-    def test_render_does_not_raise(self):
+    @mock.patch("instrumentview.isisreflectometry.ReflectometryInstrumentViewPresenter.InteractorStyles")
+    def test_render_does_not_raise(self, _mock_styles_cls):
         """_render must complete without raising.
 
         The model mock is spec-restricted to only the attributes that

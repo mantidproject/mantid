@@ -27,6 +27,8 @@ set(PYTHON_TEST_FILES
     instrumentview/renderers/test/test_side_by_side_shape_renderer.py
     instrumentview/isisreflectometry/test/test_reflectometry_instrument_view_presenter.py
     instrumentview/isisreflectometry/test/test_reflectometry_instrument_view_view.py
+    instrumentview/alfview/test/test_alf_instrument_view_presenter.py
+    instrumentview/alfview/test/test_alf_instrument_view_view.py
 )
 
 # Tests
