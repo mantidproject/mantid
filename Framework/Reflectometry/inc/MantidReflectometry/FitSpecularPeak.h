@@ -21,6 +21,9 @@ public:
   const std::string summary() const override;
   const std::vector<std::string> seeAlso() const override;
 
+  static bool fitStatusIsAccepted(const std::string &fitStatus, bool acceptChangesInFunction,
+                                  bool acceptChangesInParameters);
+
 private:
   void init() override;
   std::map<std::string, std::string> validateInputs() override;
