@@ -72,6 +72,21 @@ CUBOID_XML = (
 )
 CUBOID_VOLUME = 1.0e-6  # a 1 cm cube, in m^3
 
+# MonteCarloAbsorption defaults to 1000 events per point, which dominates the runtime of every
+# correction applied below. None of the checks here need converged factors - they ask whether the
+# settings reached the algorithm and whether changing the inputs changed the result - and the
+# algorithm is seeded, so a cheap sampling is still reproducible run to run.
+MC_EVENTS = 50
+
+
+def monte_carlo_params(rows=5, columns=10):
+    """The Monte Carlo settings string the interface takes, with a cheap event count.
+
+    ``rows`` and ``columns`` default to the algorithm's own sparse grid, so only the event count
+    differs from what a user would get.
+    """
+    return f"SparseInstrument:True,EventsPerPoint:{MC_EVENTS},NumberOfDetectorRows:{rows},NumberOfDetectorColumns:{columns}"
+
 
 class _CorrectionTestBase(EngDiffGuiTestBase):
     """Loads the fabricated ENGIN-X runs into the correction table."""
@@ -84,6 +99,9 @@ class _CorrectionTestBase(EngDiffGuiTestBase):
         # keep the corrected and intermediate workspaces so they can be asserted on; the default is
         # to drop them once saved, which is checked explicitly in EngDiffGuiCorrectionApplyTest
         settings["clear_absorption_ws_after_processing"] = False
+        # keep every Monte Carlo calculation cheap; the parameters themselves are checked explicitly
+        # in EngDiffGuiCorrectionApplyTest._check_monte_carlo_parameters
+        settings["monte_carlo_params"] = monte_carlo_params()
         return settings
 
     def pre_gui_setup(self):
@@ -689,7 +707,7 @@ class EngDiffGuiCorrectionApplyTest(_CorrectionTestBase):
 
         # the parameters are only observable through the algorithm history of the workspace
         # MonteCarloAbsorption produced, which is why they are never stubbed
-        self.set_engineering_setting("monte_carlo_params", "SparseInstrument:True,NumberOfDetectorRows:5,NumberOfDetectorColumns:5")
+        self.set_engineering_setting("monte_carlo_params", monte_carlo_params(rows=5, columns=5))
         self.apply_corrections(absorption=True, divergence=False, attenuation=False)
 
         with self.check("Correction / the Monte Carlo settings reach MonteCarloAbsorption"):
@@ -704,7 +722,7 @@ class EngDiffGuiCorrectionApplyTest(_CorrectionTestBase):
             import numpy as np
 
             coarse = ADS.retrieve("_abs_corr").readY(0).copy()
-            self.set_engineering_setting("monte_carlo_params", "SparseInstrument:True,NumberOfDetectorRows:9,NumberOfDetectorColumns:9")
+            self.set_engineering_setting("monte_carlo_params", monte_carlo_params(rows=9, columns=9))
             self.apply_corrections(absorption=True, divergence=False, attenuation=False)
             self.assertFalse(
                 np.allclose(coarse, ADS.retrieve("_abs_corr").readY(0)),
