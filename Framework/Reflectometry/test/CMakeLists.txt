@@ -3,7 +3,7 @@ set(TEST_FILES
     ConvertToReflectometryQTest.h
     CreateTransmissionWorkspace2Test.h
     CreateTransmissionWorkspaceAuto2Test.h
-    FitSpecularPeakTest.h
+    FindReflectometryLines3Test.h
     FindReflectometryLines2Test.h
     NRCalculateSlitResolutionTest.h
     ReflectometryBeamStatisticsTest.h

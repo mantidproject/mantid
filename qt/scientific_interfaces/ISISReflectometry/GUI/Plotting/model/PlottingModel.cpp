@@ -60,8 +60,8 @@ IndexRegion detectorIndexRegion(std::string const &instrumentName) {
   return configuredInstrumentRegion(instrumentDetectorIndexRegions, instrumentName, "detector");
 }
 
-Mantid::API::IAlgorithm_sptr createAlgorithm(std::string const &name) {
-  auto algorithm = Mantid::API::AlgorithmManager::Instance().createUnmanaged(name);
+Mantid::API::IAlgorithm_sptr createAlgorithm(std::string const &name, int const version = -1) {
+  auto algorithm = Mantid::API::AlgorithmManager::Instance().createUnmanaged(name, version);
   algorithm->initialize();
   algorithm->setChild(true);
   algorithm->setLogging(false);
@@ -164,14 +164,14 @@ struct SpecularPeakFit {
 };
 
 SpecularPeakFit fitSpecularPeak(Mantid::API::MatrixWorkspace_sptr const &workspace) {
-  auto algorithm = createAlgorithm("FitSpecularPeak");
+  auto algorithm = createAlgorithm("FindReflectometryLines", 3);
   algorithm->setProperty("InputWorkspace", workspace);
   algorithm->setProperty("BackgroundType", "Linear");
   algorithm->setProperty("OutputProfileWorkspace", "__NotUsed__");
   algorithm->setProperty("OutputFitWorkspace", "__NotUsed__");
   algorithm->execute();
   return {algorithm->getProperty("OutputProfileWorkspace"), algorithm->getProperty("OutputFitWorkspace"),
-          algorithm->getProperty("PeakCentre")};
+          algorithm->getProperty("LineCentre")};
 }
 
 Mantid::API::MatrixWorkspace_sptr createPeakCentreWorkspace(Mantid::API::MatrixWorkspace_sptr const &profileWorkspace,
