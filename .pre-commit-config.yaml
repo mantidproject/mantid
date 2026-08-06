@@ -110,4 +110,5 @@ repos:
         entry: python tools/ReleaseNotes/unreferenced_release_note_check.py
         # the whole release tree is checked at once, not just the changed files
         pass_filenames: false
-        files: ^docs/source/release/v\d+\.\d+\.\d+/.*\.rst$
+        # a note can be orphaned by a change to a page that the filter would not have matched, so always check
+        always_run: true
