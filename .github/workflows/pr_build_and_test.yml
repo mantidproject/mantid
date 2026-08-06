@@ -18,25 +18,37 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  check-filters:
+    runs-on: ubuntu-latest
+    outputs:
+      code_changes: ${{ steps.changes.outputs.code_changes }}
+      doxygen: ${{ steps.changes.outputs.doxygen }}
+      user_docs: ${{ steps.changes.outputs.user_docs }}
+      files_cppcheck: ${{ steps.changes.outputs.files_cppcheck }}
+
+    steps:
+    - uses: actions/checkout@v7
+
+    - uses: dorny/paths-filter@v4
+      id: changes
+      with:
+        filters: .github/filters.yaml
+
   doxygen:
+    needs: [check-filters]
+    if: ${{ needs.check-filters.outputs.doxygen == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
 
-      - uses: dorny/paths-filter@v4
-        id: changes
-        with:
-          filters: .github/filters.yaml
-
       - uses: ./.github/actions/setup-pixi
-        if: ${{ steps.changes.outputs.doxygen == 'true' }}
 
       - uses: ./.github/actions/doxygen-build
         name: Build doxygen
-        if: ${{ steps.changes.outputs.doxygen == 'true' }}
 
   conda-packaging-linux:
-    needs: [cppcheck, doxygen]
+    needs: [cppcheck, doxygen, check-filters]
+    if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
     runs-on:
       - ${{ (inputs.RUNNER_LABEL == '' && 'self-hosted') || inputs.RUNNER_LABEL }}
       - self-hosted
@@ -54,16 +66,9 @@ jobs:
           fetch-tags: true
           path: source
 
-      - uses: dorny/paths-filter@v4
-        id: changes
-        with:
-          filters: .github/filters.yaml
-
       - uses: ./.github/actions/setup-pixi
-        if: ${{ steps.changes.outputs.code_changes == 'true' }}
 
       - name: Build conda packages
-        if: ${{ steps.changes.outputs.code_changes == 'true' }}
         run: |
           rm -rf ${GITHUB_WORKSPACE}/conda-bld
           bash -ex ${GITHUB_WORKSPACE}/source/buildconfig/Jenkins/Conda/package-conda ${GITHUB_WORKSPACE} --build-mantid --build-qt --build-docs --build-workbench
@@ -83,6 +88,8 @@ jobs:
           path: ${{ github.workspace }}/**/env_logs/*/*.txt
 
   cppcheck:
+    needs: [check-filters]
+    if: ${{ needs.check-filters.outputs.files_cppcheck == 'true' }}
     runs-on:
       - ${{ (inputs.RUNNER_LABEL == '' && 'self-hosted') || inputs.RUNNER_LABEL }}
       - self-hosted
@@ -96,34 +103,25 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: dorny/paths-filter@v4
-        id: changes
-        with:
-          filters: .github/filters.yaml
-
       - name: Install pixi
         uses: ./.github/actions/setup-pixi
-        if: ${{ steps.changes.outputs.files_cppcheck == 'true' }}
 
       - name: Clean build tree
-        if: ${{ steps.changes.outputs.files_cppcheck == 'true' }}
         run: ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/clean-builder ${GITHUB_WORKSPACE}
 
       - name: Add cppcheck matcher
-        if: ${{ steps.changes.outputs.files_cppcheck == 'true' }}
         run: echo "::add-matcher::.github/matchers/cppcheck.json"
 
       - uses: ./.github/actions/cppcheck-build
         name: Run cppcheck
-        if: ${{ steps.changes.outputs.files_cppcheck == 'true' }}
 
       - name: Remove cppcheck matcher
-        if: ${{ always() && steps.changes.outputs.files_cppcheck == 'true' }}
+        if: ${{ always() }}
         run: echo "::remove-matcher owner=cppcheck::"
 
       - name: Upload cppcheck SARIF report
         uses: actions/upload-artifact@v7
-        if: ${{ always() && steps.changes.outputs.files_cppcheck == 'true' && hashFiles('build/cppcheck.sarif') != '' }}
+        if: ${{ always() && hashFiles('build/cppcheck.sarif') != '' }}
         with:
           name: cppcheck_sarif_report
           if-no-files-found: warn
