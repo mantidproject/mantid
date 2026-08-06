@@ -248,11 +248,11 @@ class FullInstrumentViewView(QWidget):
         self._right_column_graphics = QWidget()
         self._parent_hsplitter = QSplitter(Qt.Horizontal)
         # TODO: get connections out of setup
-        self._parent_hsplitter.splitterMoved.connect(self._on_splitter_moved)
         self.main_plotter = BackgroundPlotter(show=False, menu_bar=False, toolbar=False, off_screen=self._off_screen)
 
         self._detector_spectrum_fig = Figure()
         self._detector_spectrum_axes = self._detector_spectrum_fig.add_subplot(111, projection="mantid")
+        self._detector_spectrum_fig.subplots_adjust(left=0.05, right=0.98, bottom=0.1, top=0.95)
         self._detector_figure_canvas = FigureCanvas(self._detector_spectrum_fig)
         self._detector_figure_canvas.setMinimumSize(QSize(0, 0))
         self._plot_toolbar = MantidNavigationToolbar(self._detector_figure_canvas, None)
@@ -266,7 +266,6 @@ class FullInstrumentViewView(QWidget):
         self._lineplot_peak_cursor = None
 
         self._graphics_vsplitter = QSplitter(Qt.Vertical)
-        self._graphics_vsplitter.splitterMoved.connect(self._on_splitter_moved)
 
         # Used as a single widget
         self._detector_info_group_box = QGroupBox("Detector Info")
@@ -594,9 +593,6 @@ class FullInstrumentViewView(QWidget):
 
     def set_render_mode_combo_enabled(self, enabled: bool) -> None:
         self._render_mode_combo_box.setEnabled(enabled)
-
-    def _on_splitter_moved(self, pos, index) -> None:
-        self._detector_spectrum_fig.tight_layout()
 
     def hide_status_box(self) -> None:
         self.status_group_box.hide()
@@ -1184,7 +1180,6 @@ class FullInstrumentViewView(QWidget):
 
     @_skip_if_closing
     def redraw_lineplot(self) -> None:
-        self._detector_spectrum_fig.tight_layout()
         self._detector_figure_canvas.draw()
 
     def get_current_selected_tab(self) -> CurrentTab:
