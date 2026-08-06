@@ -206,7 +206,7 @@ class TestFullInstrumentViewView(unittest.TestCase):
         event.inaxes = self._view._detector_spectrum_axes
         event.xdata = 5.0
         event.button = 1
-        self._view._on_axes_click(event)
+        self._view._on_axes_click_during_peak_selection(event)
         self._view._presenter.on_peak_selected_in_lineplot.assert_called_once_with(5.0, "left")
 
     def test_on_axes_click_zoom_enabled_calls_default_callbacks(self):
@@ -217,7 +217,7 @@ class TestFullInstrumentViewView(unittest.TestCase):
         self._view._plot_toolbar.zoom_enabled = MagicMock(return_value=True)
         self._view._plot_toolbar.pan_enabled = MagicMock(return_value=False)
 
-        self._view._on_axes_click(event)
+        self._view._on_axes_click_during_peak_selection(event)
 
         callback_1.assert_called_once_with(event)
         callback_2.assert_called_once_with(event)
@@ -230,7 +230,7 @@ class TestFullInstrumentViewView(unittest.TestCase):
         self._view._plot_toolbar.zoom_enabled = MagicMock(return_value=False)
         self._view._plot_toolbar.pan_enabled = MagicMock(return_value=True)
 
-        self._view._on_axes_click(event)
+        self._view._on_axes_click_during_peak_selection(event)
 
         callback.assert_called_once_with(event)
         self._view._presenter.on_peak_selected_in_lineplot.assert_not_called()
@@ -287,14 +287,14 @@ class TestFullInstrumentViewView(unittest.TestCase):
         event.inaxes = self._view._detector_spectrum_axes
         event.xdata = 7.0
         event.button = 3
-        self._view._on_axes_click(event)
+        self._view._on_axes_click_during_peak_selection(event)
         self._view._presenter.on_peak_selected_in_lineplot.assert_called_once_with(7.0, "right")
 
     def test_on_axes_click_outside_axes_does_nothing(self):
         event = MagicMock()
         event.inaxes = MagicMock()  # different axes
         event.xdata = 5.0
-        self._view._on_axes_click(event)
+        self._view._on_axes_click_during_peak_selection(event)
         self._view._presenter.on_peak_selected_in_lineplot.assert_not_called()
 
     def test_disable_and_uncheck_selection_list(self):
