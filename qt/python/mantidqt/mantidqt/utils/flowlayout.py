@@ -121,8 +121,9 @@ class FlowLayout(QLayout):
             size = item.sizeHint()
             if mtd_env.is_mac() and size.height() <= 28:
                 size.setHeight(28)
-            lineHeight = size.height() // 2
-
+                lineHeight = size.height() // 2
+            else:
+                lineHeight = max(lineHeight, size.height())
             nextX = x + size.width() + spaceX
             if nextX - spaceX > rect.right():
                 x = rect.x()
@@ -133,5 +134,4 @@ class FlowLayout(QLayout):
                 item.setGeometry(QRect(QPoint(x, y), size))
 
             x = nextX
-
         return y + lineHeight - rect.y()

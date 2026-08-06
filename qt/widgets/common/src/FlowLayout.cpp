@@ -132,8 +132,10 @@ int FlowLayout::doLayout(const QRect &rect, bool testOnly) const {
 #ifdef Q_OS_MACOS
     if (size.height() <= 28)
       size.setHeight(28);
-#endif
     lineHeight = size.height() / 2;
+#else
+    lineHeight = qMax(lineHeight, size.height());
+#endif
     int nextX = x + size.width() + spaceX;
     if (nextX - spaceX > effectiveRect.right()) {
       x = effectiveRect.x();
