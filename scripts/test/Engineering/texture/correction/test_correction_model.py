@@ -12,6 +12,7 @@ from unittest.mock import patch, MagicMock, mock_open, call
 from mantid.api import AnalysisDataService as ADS
 from mantid.simpleapi import CreateSampleWorkspace, SetGoniometer, SetSample
 from Engineering.common.xml_shapes import get_cube_xml
+from Engineering.texture.texture_helper import GAUGE_VOLUME_LOG, NO_GAUGE_VOLUME
 
 from Engineering.texture.correction.correction_model import TextureCorrectionModel, read_attenuation_coefficient_at_value
 
@@ -217,6 +218,46 @@ class TextureCorrectionModelTest(unittest.TestCase):
         mock_read_xml.return_value = expected_str
         self.model.define_gauge_volume(self.ws_name, preset=preset, custom="gv.xml")
         mock_def_gauge_vol.assert_called_once_with(self.ws_name, expected_str)
+
+    @patch(correction_model_path + ".DefineGaugeVolume")
+    def test_define_gauge_vol_for_none_clears_any_previous_definition(self, mock_def_gauge_vol):
+        # a real workspace, because the point of this is what is left on the run
+        ws = CreateSampleWorkspace(OutputWorkspace="test_no_gauge_volume")
+        ws.mutableRun().addProperty(GAUGE_VOLUME_LOG, get_cube_xml("some-gv", 0.004), True)
+
+        self.model.define_gauge_volume("test_no_gauge_volume", preset=NO_GAUGE_VOLUME, custom=None)
+
+        # nothing new is defined, and - crucially - the earlier gauge volume does not survive to be
+        # silently reused by the next correction
+        mock_def_gauge_vol.assert_not_called()
+        self.assertFalse(ws.run().hasProperty(GAUGE_VOLUME_LOG))
+        ADS.remove("test_no_gauge_volume")
+
+    @patch(correction_model_path + ".DefineGaugeVolume")
+    def test_define_gauge_vol_for_none_is_harmless_when_none_was_set(self, mock_def_gauge_vol):
+        ws = CreateSampleWorkspace(OutputWorkspace="test_no_gauge_volume_unset")
+
+        self.model.define_gauge_volume("test_no_gauge_volume_unset", preset=NO_GAUGE_VOLUME, custom=None)
+
+        mock_def_gauge_vol.assert_not_called()
+        self.assertFalse(ws.run().hasProperty(GAUGE_VOLUME_LOG))
+        ADS.remove("test_no_gauge_volume_unset")
+
+    @patch(correction_model_path + ".DefineGaugeVolume")
+    @patch(texture_helper_path + "._read_xml")
+    def test_define_gauge_vol_keeps_previous_definition_when_custom_file_is_unreadable(self, mock_read_xml, mock_def_gauge_vol):
+        # an unreadable custom shape also yields no xml, but it means "this went wrong" rather than
+        # "the user wants no gauge volume", so it must not discard a valid definition
+        ws = CreateSampleWorkspace(OutputWorkspace="test_bad_gauge_volume")
+        expected = get_cube_xml("some-gv", 0.004)
+        ws.mutableRun().addProperty(GAUGE_VOLUME_LOG, expected, True)
+        mock_read_xml.side_effect = RuntimeError("no such file")
+
+        self.model.define_gauge_volume("test_bad_gauge_volume", preset="Custom Shape", custom="missing.xml")
+
+        mock_def_gauge_vol.assert_not_called()
+        self.assertEqual(expected, ws.run().getLogData(GAUGE_VOLUME_LOG).value)
+        ADS.remove("test_bad_gauge_volume")
 
     @patch(correction_model_path + ".LoadSampleShape")
     @patch(correction_model_path + ".SetSampleMaterial")

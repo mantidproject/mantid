@@ -8,6 +8,7 @@ import unittest
 
 from unittest import mock
 
+from mantid.api import MinimizerStatus
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.plotting import plot_model, plot_view, plot_presenter
 from mantidqt.utils.asynchronous import BlockingAsyncTaskWithCallback
 
@@ -163,6 +164,17 @@ class FittingPlotPresenterTest(unittest.TestCase):
     def test_final_state_success_status(self):
         self.presenter.set_final_state_progress_bar(output_list=None, status="success")
         self.view.set_progress_bar.assert_has_calls([self.call_success])
+
+    def test_final_state_treats_tolerance_limited_stops_as_success(self):
+        # a minimizer started from an already-optimal set of parameters - the normal case for every
+        # run after the first in a sequential fit - stops this way rather than reporting "success"
+        for status in (MinimizerStatus.CHANGES_IN_FUNCTION_TOO_SMALL, MinimizerStatus.CHANGES_IN_PARAMETER_TOO_SMALL):
+            with self.subTest(status=status):
+                self.view.reset_mock()
+                self.presenter.set_final_state_progress_bar([{"status": status}])
+                self.view.set_progress_bar.assert_has_calls(
+                    [mock.call(status=status, minimum=0, maximum=100, value=100, style_sheet=plot_presenter.SUCCESS_STYLE_SHEET)]
+                )
 
     def test_setup_toolbar(self):
         # Get's called during setup, so let's begin with a blank slate.

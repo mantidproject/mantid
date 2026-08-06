@@ -8,7 +8,7 @@ from numpy import array, degrees, isfinite, reshape, nan, diff, ndarray
 from os import path, makedirs
 from shutil import copy2
 
-from mantid.api import AnalysisDataService as ADS, AlgorithmManager, MatrixWorkspace
+from mantid.api import AnalysisDataService as ADS, AlgorithmManager, FunctionFactory, MatrixWorkspace
 from mantid.kernel import IntArrayProperty, UnitConversion, DeltaEModeType, logger, UnitParams
 import mantid.simpleapi as mantid  # required to call EnggUtils funcs from algorithms to avoid simpleapi error
 from mantid.dataobjects import EventWorkspace, Workspace2D, TableWorkspace
@@ -52,8 +52,13 @@ def plot_tof_vs_d_from_calibration(
     fiterror = ADS.retrieve(diag_ws.name() + "_fiterror").toDict()
     d_table = ADS.retrieve(diag_ws.name() + "_dspacing").toDict()
     dspacing = array(sorted(dspacing))  # PDCal sorts the dspacing list passed
-    x0 = array(fitparam["X0"])
-    x0_er = array(fiterror["X0"])
+    # PDCalibration names the fitted centre column after the peak function's own centre parameter,
+    # so this cannot be hard coded to "X0" - that is BackToBackExponential's name for it, and a
+    # Gaussian (say) calls it "PeakCentre", which used to raise a KeyError here when the Default
+    # Peak Function had been changed and the output was plotted.
+    centre_param = FunctionFactory.createPeakFunction(calibration.get_fit_peak_shape()).getCentreParameterName()
+    x0 = array(fitparam[centre_param])
+    x0_er = array(fiterror[centre_param])
     ws_index = array(fitparam["wsindex"])
     nspec = len(set(ws_index))
     si = ws_foc.spectrumInfo()
