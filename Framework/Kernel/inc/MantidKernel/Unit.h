@@ -12,6 +12,7 @@
 #include "MantidKernel/UnitLabel.h"
 #include <utility>
 
+#include <algorithm>
 #include <unordered_map>
 #include <vector>
 #ifndef Q_MOC_RUN
@@ -93,6 +94,28 @@ public:
   void toTOF(std::vector<double> &xdata, std::vector<double> const &ydata, const double &_l1, const int &_emode,
              const UnitParametersMap &params);
 
+  /** Convert a range of X values in place from the concrete unit to time-of-flight.
+   *  TOF is in microseconds.
+   *  This overload takes an iterator range rather than a `std::vector<double> &`, so that it can be
+   *  used with the size-checked histogram data types, which deliberately do not hand out a
+   *  modifiable `std::vector<double>`.
+   *  @param xbegin ::  Iterator to the first X value to be converted
+   *  @param xend ::    Iterator one past the last X value to be converted
+   *  @param l1 ::      The source-sample distance (in metres)
+   *  @param emode ::   The energy mode (0=elastic, 1=direct geometry, 2=indirect geometry)
+   *  @param params ::  Map containing optional parameters eg
+   *                    The sample-detector distance (in metres)
+   *                    The scattering angle (in radians)
+   *                    Fixed energy: EI (emode=1) or EF (emode=2)(in meV)
+   *                    Delta (not currently used)
+   */
+  template <typename Iterator>
+  void toTOF(Iterator const xbegin, Iterator const xend, double const l1, int const emode,
+             UnitParametersMap const &params) {
+    this->initialize(l1, emode, params);
+    std::transform(xbegin, xend, xbegin, [this](double const x) { return this->singleToTOF(x); });
+  }
+
   /// Convert from the concrete unit to time-of-flight. TOF is in microseconds.
   double convertSingleToTOF(const double xvalue, const double &l1, const int &emode, const UnitParametersMap &params);
 
@@ -114,6 +137,28 @@ public:
 
   void fromTOF(std::vector<double> &xdata, std::vector<double> const &ydata, const double &_l1, const int &_emode,
                const UnitParametersMap &params);
+
+  /** Convert a range of X values in place from time-of-flight to the concrete unit.
+   *  TOF is in microseconds.
+   *  This overload takes an iterator range rather than a `std::vector<double> &`, so that it can be
+   *  used with the size-checked histogram data types, which deliberately do not hand out a
+   *  modifiable `std::vector<double>`.
+   *  @param xbegin ::  Iterator to the first X value to be converted
+   *  @param xend ::    Iterator one past the last X value to be converted
+   *  @param l1 ::      The source-sample distance (in metres)
+   *  @param emode ::   The energy mode (0=elastic, 1=direct geometry, 2=indirect geometry)
+   *  @param params ::  Map containing optional parameters eg
+   *                    The sample-detector distance (in metres)
+   *                    The scattering angle (in radians)
+   *                    Fixed energy: EI (emode=1) or EF (emode=2)(in meV)
+   *                    Delta (not currently used)
+   */
+  template <typename Iterator>
+  void fromTOF(Iterator const xbegin, Iterator const xend, double const l1, int const emode,
+               UnitParametersMap const &params) {
+    this->initialize(l1, emode, params);
+    std::transform(xbegin, xend, xbegin, [this](double const tof) { return this->singleFromTOF(tof); });
+  }
 
   /// Convert from the time-of-flight to the concrete unit. TOF is in microseconds.
   double convertSingleFromTOF(const double xvalue, const double &l1, const int &emode, const UnitParametersMap &params);
