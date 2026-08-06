@@ -50,7 +50,7 @@ Optionally, a :ref:`UB matrix <Lattice>` can be loaded from the CIF-file and app
 the *_diffrn_orient_matrix_UB_xy* fields have to be set.
 
 .. [1] The equivalent isotropic displacement factor, R. X. Fischer & E. Tillmanns, Acta Crystallogr. C, vol. 44, p. 775,
-   DOI: `10.1107/S0108270187012745 <http://dx.doi.org/10.1107/S0108270187012745>`_
+   DOI: `10.1107/S0108270187012745 <https://doi.org/10.1107/S0108270187012745>`_
 
 Required
 --------

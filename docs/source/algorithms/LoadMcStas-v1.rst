@@ -85,7 +85,7 @@ scattering instruments and experiments visit the `McStas homepage <http://www.mc
 For examples of how combined McStas and Mantid analyses can help
 instrument simulation and data treatment/analysis tasks see Nielsen., T.R. et al., McStas
 and Mantid integration, Journal of Neutron Research, vol. 18, no. 2-3, pp. 61-77, 2015
-`DOI: 10.3233/JNR-160026 <http://dx.doi.org/10.3233/JNR-160026>`_
+`DOI: 10.3233/JNR-160026 <https://doi.org/10.3233/JNR-160026>`_
 [`arXiv <http://arxiv.org/abs/1607.02498>`_].
 
 Usage
