@@ -28,11 +28,9 @@ public:
 private:
   void init() override;
   std::map<std::string, std::string> validateInputs() override;
-  bool checkGroups() override;
   void exec() override;
 
   API::MatrixWorkspace_sptr createProfile(const API::MatrixWorkspace_sptr &inputWorkspace);
-  void setLineCentre(double lineCentre);
 };
 
 } // namespace Mantid::Reflectometry
