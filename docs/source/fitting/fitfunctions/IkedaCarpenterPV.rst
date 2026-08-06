@@ -84,7 +84,7 @@ References
 ----------
 
 #. S. Ikeda and J. M. Carpenter, `Nuclear Inst. and Meth. in Phys. Res.
-   A239, 536 (1985) <http://dx.doi.org/10.1016/0168-9002(85)90033-6>`_
+   A239, 536 (1985) <https://doi.org/10.1016/0168-9002(85)90033-6>`_
 #. Fullprof manual, see http://www.ill.eu/sites/fullprof/
 #. J. Rodriguez-Carvajal, `Using FullProf to analyze Time of Flight
    Neutron Powder Diffraction data <http://mill2.chem.ucl.ac.uk/ccp/web-mirrors/plotr/Tutorials&Documents/TOF_FullProf.pdf>`_

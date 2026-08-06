@@ -767,7 +767,7 @@ In Mantid we use the Stevens convention, as common in the neutron scattering lit
 the convention amongst optical spectroscopists is that of Wybourne.
 
 A derivation of the point charge energy can be found in many text books (e.g.
-`Morrison <http://dx.doi.org/10.1007/978-3-642-93376-9_12>`_), but will not be detailed here, where only the final
+`Morrison <https://doi.org/10.1007/978-3-642-93376-9_12>`_), but will not be detailed here, where only the final
 result is given:
 
 .. math::

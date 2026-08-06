@@ -15,7 +15,7 @@ from mantid.simpleapi import PoldiCreatePeaksFromCell
 # K. Momma and F. Izumi, "VESTA 3 for three-dimensional visualization of crystal,
 #           volumetric and morphology data," J. Appl. Crystallogr., 44, 1272-1276 (2011)
 #
-#           http://dx.doi.org/10.1107/S0021889811038970
+#           https://doi.org/10.1107/S0021889811038970
 #
 # All crystal structure data have been acquired from http://www.crystallography.net/. DOIs of the original
 # papers with the published structures are given in the tests.
