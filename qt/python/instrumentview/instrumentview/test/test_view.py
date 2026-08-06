@@ -209,6 +209,32 @@ class TestFullInstrumentViewView(unittest.TestCase):
         self._view._on_axes_click(event)
         self._view._presenter.on_peak_selected_in_lineplot.assert_called_once_with(5.0, "left")
 
+    def test_on_axes_click_zoom_enabled_calls_default_callbacks(self):
+        event = MagicMock()
+        callback_1 = MagicMock()
+        callback_2 = MagicMock()
+        self._view._default_lineplot_callbacks = {1: callback_1, 2: callback_2}
+        self._view._plot_toolbar.zoom_enabled = MagicMock(return_value=True)
+        self._view._plot_toolbar.pan_enabled = MagicMock(return_value=False)
+
+        self._view._on_axes_click(event)
+
+        callback_1.assert_called_once_with(event)
+        callback_2.assert_called_once_with(event)
+        self._view._presenter.on_peak_selected_in_lineplot.assert_not_called()
+
+    def test_on_axes_click_pan_enabled_calls_default_callbacks(self):
+        event = MagicMock()
+        callback = MagicMock()
+        self._view._default_lineplot_callbacks = {1: callback}
+        self._view._plot_toolbar.zoom_enabled = MagicMock(return_value=False)
+        self._view._plot_toolbar.pan_enabled = MagicMock(return_value=True)
+
+        self._view._on_axes_click(event)
+
+        callback.assert_called_once_with(event)
+        self._view._presenter.on_peak_selected_in_lineplot.assert_not_called()
+
     @mock.patch("instrumentview.FullInstrumentViewWindow.ConfigService")
     def test_get_render_mode_option_returns_current_text(self, mock_config):
         self._view._render_mode_combo_box.setCurrentText(self._view._RENDER_MODE_POINTS)

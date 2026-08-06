@@ -1223,7 +1223,11 @@ class FullInstrumentViewView(QWidget):
         return len(self._lineplot_overlays) > 0
 
     def _on_axes_click(self, event) -> None:
-        self._plot_toolbar.setDisabled(False)
+        if self._plot_toolbar.zoom_enabled() or self._plot_toolbar.pan_enabled():
+            # Delegate to matplotlib's default click callbacks when zoom is active.
+            for callback in self._default_lineplot_callbacks.values():
+                callback(event)
+            return
         if event.inaxes is not self._detector_spectrum_axes or event.xdata is None:
             return
         if event.button == 1:  # Left click
@@ -1238,7 +1242,6 @@ class FullInstrumentViewView(QWidget):
         for cid in self._default_lineplot_callbacks:
             self._detector_figure_canvas.mpl_disconnect(cid)
         self._figure_canvas_click_id = self._detector_figure_canvas.mpl_connect("button_press_event", self._on_axes_click)
-        self._plot_toolbar.setDisabled(True)
 
     def remove_peak_cursor_from_lineplot(self) -> None:
         if self._lineplot_peak_cursor is None:
@@ -1252,7 +1255,6 @@ class FullInstrumentViewView(QWidget):
         self._figure_canvas_click_id = None
         del self._lineplot_peak_cursor
         self._lineplot_peak_cursor = None
-        self._plot_toolbar.setDisabled(False)
         self._detector_figure_canvas.draw_idle()
 
     def get_filename_from_dialog(self, file_filter: str):
