@@ -807,6 +807,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             FitWindowMultiplier=ILL_PREPROCESS_FIT_WINDOW_MULTIPLIER,
             UseFittedLineCentreOnFailure=True,
             Version=3,
+            StoreInADS=False,
             **kwargs,
         )
         peak_centre = fit_output.LineCentre
