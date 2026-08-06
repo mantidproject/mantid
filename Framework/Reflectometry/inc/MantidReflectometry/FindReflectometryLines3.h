@@ -12,8 +12,9 @@
 
 namespace Mantid::Reflectometry {
 
-/** Fits a background and Gaussian to a detector profile to locate a specular peak. */
-class MANTID_REFLECTOMETRY_DLL FitSpecularPeak final : public API::Algorithm {
+/** FindReflectometryLines3: Finds a fractional workspace index corresponding to
+ * a reflected or direct line in a line-detector workspace. */
+class MANTID_REFLECTOMETRY_DLL FindReflectometryLines3 final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
@@ -27,9 +28,11 @@ public:
 private:
   void init() override;
   std::map<std::string, std::string> validateInputs() override;
+  bool checkGroups() override;
   void exec() override;
 
   API::MatrixWorkspace_sptr createProfile(const API::MatrixWorkspace_sptr &inputWorkspace);
+  void setLineCentre(double lineCentre);
 };
 
 } // namespace Mantid::Reflectometry
