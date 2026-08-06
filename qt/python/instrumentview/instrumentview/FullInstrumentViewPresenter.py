@@ -404,7 +404,7 @@ class FullInstrumentViewPresenter:
             self._view.show_plot_for_detectors(self._model.line_plot_workspace, self._model.lineplot_limits)
             self._view.set_selected_detector_info([])
             self._view.set_relative_detector_angle(None)
-            self._view.remove_peak_cursor_from_lineplot()
+            self._view.end_peak_selection_in_lineplot()
 
         self._view.set_clear_point_picked_detectors_disabled(checked)
         self._view.set_sum_spectra_checkbox_disabled(checked)

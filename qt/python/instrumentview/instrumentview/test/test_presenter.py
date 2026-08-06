@@ -188,7 +188,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.show_plot_for_detectors.assert_called_once_with(None, None)
         self._mock_view.set_selected_detector_info.assert_called_once_with([])
         self._mock_view.set_relative_detector_angle.assert_called_once_with(None)
-        self._mock_view.remove_peak_cursor_from_lineplot.assert_called_once()
+        self._mock_view.end_peak_selection_in_lineplot.assert_called_once()
         self._mock_view.set_clear_point_picked_detectors_disabled.assert_called_once_with(True)
         self._mock_view.set_sum_spectra_checkbox_disabled.assert_called_once_with(True)
         self._mock_view.set_select_bank_tube_disabled.assert_called_once_with(True)
