@@ -95,7 +95,7 @@ public:
     TS_ASSERT_EQUALS(ws->getNumberEvents(), 200);
     // Check that rebin was called
     TS_ASSERT_EQUALS(ws->blocksize(), 20);
-    TS_ASSERT_DELTA(ws->dataX(0)[0], 40e3, 1e-4);
+    TS_ASSERT_DELTA(ws->x(0)[0], 40e3, 1e-4);
   }
 
   //--------------------------------------------------------------------------------------------

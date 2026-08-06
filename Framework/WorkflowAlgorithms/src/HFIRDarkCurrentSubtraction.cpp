@@ -127,7 +127,7 @@ void HFIRDarkCurrentSubtraction::exec() {
   MatrixWorkspace_sptr scaledDarkWS = scaleAlg->getProperty("OutputWorkspace");
 
   // Zero out timer and monitor so that we don't subtract them out
-  for (size_t i = 0; i < scaledDarkWS->dataY(0).size(); i++) {
+  for (size_t i = 0; i < scaledDarkWS->y(0).size(); i++) {
     scaledDarkWS->mutableY(DEFAULT_TIMER_ID)[i] = 0.0;
     scaledDarkWS->mutableE(DEFAULT_TIMER_ID)[i] = 0.0;
     scaledDarkWS->mutableY(DEFAULT_MONITOR_ID)[i] = 0.0;
@@ -155,7 +155,7 @@ double HFIRDarkCurrentSubtraction::getCountingTime(const MatrixWorkspace_sptr &i
   } else {
     // If we don't have the information in the log, use the default timer
     // spectrum
-    const MantidVec &timer = inputWS->dataY(DEFAULT_TIMER_ID);
+    const auto &timer = inputWS->y(DEFAULT_TIMER_ID);
     return timer[0];
   }
 }

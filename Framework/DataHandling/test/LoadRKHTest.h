@@ -86,32 +86,32 @@ public:
 
     // Test the size of the data vectors (there should be 102 data points so x
     // have 103)
-    TS_ASSERT_EQUALS(static_cast<int>(data->dataX(0).size()), 102);
-    TS_ASSERT_EQUALS(static_cast<int>(data->dataY(0).size()), 102);
-    TS_ASSERT_EQUALS(static_cast<int>(data->dataE(0).size()), 102);
+    TS_ASSERT_EQUALS(static_cast<int>(data->x(0).size()), 102);
+    TS_ASSERT_EQUALS(static_cast<int>(data->y(0).size()), 102);
+    TS_ASSERT_EQUALS(static_cast<int>(data->e(0).size()), 102);
 
     // Test first 3 bin edges for the correct values
     double tolerance(1e-06);
-    TS_ASSERT_DELTA(data->dataX(0)[0], 1.34368, tolerance);
-    TS_ASSERT_DELTA(data->dataX(0)[1], 1.37789, tolerance);
-    TS_ASSERT_DELTA(data->dataX(0)[2], 1.41251, tolerance);
+    TS_ASSERT_DELTA(data->x(0)[0], 1.34368, tolerance);
+    TS_ASSERT_DELTA(data->x(0)[1], 1.37789, tolerance);
+    TS_ASSERT_DELTA(data->x(0)[2], 1.41251, tolerance);
     // Test a couple of random ones
-    TS_ASSERT_DELTA(data->dataX(0)[20], 2.20313, tolerance);
-    TS_ASSERT_DELTA(data->dataX(0)[45], 4.08454, tolerance);
-    TS_ASSERT_DELTA(data->dataX(0)[87], 11.52288, tolerance);
+    TS_ASSERT_DELTA(data->x(0)[20], 2.20313, tolerance);
+    TS_ASSERT_DELTA(data->x(0)[45], 4.08454, tolerance);
+    TS_ASSERT_DELTA(data->x(0)[87], 11.52288, tolerance);
     // Test the last 3
-    TS_ASSERT_DELTA(data->dataX(0)[100], 15.88747, tolerance);
-    TS_ASSERT_DELTA(data->dataX(0)[101], 16.28282, tolerance);
+    TS_ASSERT_DELTA(data->x(0)[100], 15.88747, tolerance);
+    TS_ASSERT_DELTA(data->x(0)[101], 16.28282, tolerance);
 
     // Now Y values
-    TS_ASSERT_DELTA(data->dataY(0)[0], 0.168419, tolerance);
-    TS_ASSERT_DELTA(data->dataY(0)[25], 2.019846, tolerance);
-    TS_ASSERT_DELTA(data->dataY(0)[99], 0.0, tolerance);
+    TS_ASSERT_DELTA(data->y(0)[0], 0.168419, tolerance);
+    TS_ASSERT_DELTA(data->y(0)[25], 2.019846, tolerance);
+    TS_ASSERT_DELTA(data->y(0)[99], 0.0, tolerance);
 
     // Now E values
-    TS_ASSERT_DELTA(data->dataE(0)[0], 0.122346, tolerance);
-    TS_ASSERT_DELTA(data->dataE(0)[25], 0.018345, tolerance);
-    TS_ASSERT_DELTA(data->dataE(0)[99], 0.0, tolerance);
+    TS_ASSERT_DELTA(data->e(0)[0], 0.122346, tolerance);
+    TS_ASSERT_DELTA(data->e(0)[25], 0.018345, tolerance);
+    TS_ASSERT_DELTA(data->e(0)[99], 0.0, tolerance);
   }
 
   void test2D() {
@@ -154,30 +154,30 @@ public:
 
     TS_ASSERT_EQUALS(data->getNumberHistograms(), 2);
 
-    TS_ASSERT_EQUALS(static_cast<int>(data->dataX(0).size()), 3);
-    TS_ASSERT_EQUALS(static_cast<int>(data->dataY(0).size()), 2);
-    TS_ASSERT_EQUALS(static_cast<int>(data->dataY(1).size()), 2);
-    TS_ASSERT_EQUALS(static_cast<int>(data->dataE(0).size()), 2);
+    TS_ASSERT_EQUALS(static_cast<int>(data->x(0).size()), 3);
+    TS_ASSERT_EQUALS(static_cast<int>(data->y(0).size()), 2);
+    TS_ASSERT_EQUALS(static_cast<int>(data->y(1).size()), 2);
+    TS_ASSERT_EQUALS(static_cast<int>(data->e(0).size()), 2);
 
     double tolerance(1e-06);
     // check a sample of values, the workspace is pretty small and so this will
     // check nearly all of them
-    TS_ASSERT_DELTA(data->dataX(0)[0], -3.000000e-01, tolerance);
-    TS_ASSERT_DELTA(data->dataX(0)[1], -2.900000e-01, tolerance);
-    TS_ASSERT_DELTA(data->dataX(0)[2], -2.800000e-01, tolerance);
+    TS_ASSERT_DELTA(data->x(0)[0], -3.000000e-01, tolerance);
+    TS_ASSERT_DELTA(data->x(0)[1], -2.900000e-01, tolerance);
+    TS_ASSERT_DELTA(data->x(0)[2], -2.800000e-01, tolerance);
 
-    TS_ASSERT_DELTA(data->dataX(1)[0], -3.000000e-01, tolerance);
-    TS_ASSERT_DELTA(data->dataX(1)[1], -2.900000e-01, tolerance);
-    TS_ASSERT_DELTA(data->dataX(1)[2], -2.800000e-01, tolerance);
+    TS_ASSERT_DELTA(data->x(1)[0], -3.000000e-01, tolerance);
+    TS_ASSERT_DELTA(data->x(1)[1], -2.900000e-01, tolerance);
+    TS_ASSERT_DELTA(data->x(1)[2], -2.800000e-01, tolerance);
 
-    TS_ASSERT_DELTA(data->dataY(0)[0], 11, tolerance);
-    TS_ASSERT_DELTA(data->dataY(0)[1], 12, tolerance);
-    TS_ASSERT_DELTA(data->dataY(1)[1], 22, tolerance);
+    TS_ASSERT_DELTA(data->y(0)[0], 11, tolerance);
+    TS_ASSERT_DELTA(data->y(0)[1], 12, tolerance);
+    TS_ASSERT_DELTA(data->y(1)[1], 22, tolerance);
 
     // Now E values
-    TS_ASSERT_DELTA(data->dataE(0)[1], 2, tolerance);
-    TS_ASSERT_DELTA(data->dataE(1)[0], 3, tolerance);
-    TS_ASSERT_DELTA(data->dataE(1)[1], 4, tolerance);
+    TS_ASSERT_DELTA(data->e(0)[1], 2, tolerance);
+    TS_ASSERT_DELTA(data->e(1)[0], 3, tolerance);
+    TS_ASSERT_DELTA(data->e(1)[1], 4, tolerance);
 
     Axis *secondAxis = data->getAxis(1);
     TS_ASSERT_EQUALS(secondAxis->length(), 3)
@@ -219,25 +219,25 @@ public:
 
     TS_ASSERT_EQUALS(data->getNumberHistograms(), 1);
 
-    TS_ASSERT_EQUALS(static_cast<int>(data->dataX(0).size()), 10);
+    TS_ASSERT_EQUALS(static_cast<int>(data->x(0).size()), 10);
     TS_ASSERT_EQUALS(static_cast<int>(data->dx(0).size()), 10);
-    TS_ASSERT_EQUALS(static_cast<int>(data->dataY(0).size()), 10);
-    TS_ASSERT_EQUALS(static_cast<int>(data->dataY(0).size()), 10);
-    TS_ASSERT_EQUALS(static_cast<int>(data->dataE(0).size()), 10);
+    TS_ASSERT_EQUALS(static_cast<int>(data->y(0).size()), 10);
+    TS_ASSERT_EQUALS(static_cast<int>(data->y(0).size()), 10);
+    TS_ASSERT_EQUALS(static_cast<int>(data->e(0).size()), 10);
 
     double tolerance(1e-06);
 
-    TS_ASSERT_DELTA(data->dataX(0)[0], 0.5, tolerance);
-    TS_ASSERT_DELTA(data->dataX(0)[1], 1.5, tolerance);
-    TS_ASSERT_DELTA(data->dataX(0)[2], 2.5, tolerance);
+    TS_ASSERT_DELTA(data->x(0)[0], 0.5, tolerance);
+    TS_ASSERT_DELTA(data->x(0)[1], 1.5, tolerance);
+    TS_ASSERT_DELTA(data->x(0)[2], 2.5, tolerance);
 
-    TS_ASSERT_DELTA(data->dataY(0)[0], 1.000000e+00, tolerance);
-    TS_ASSERT_DELTA(data->dataY(0)[1], 1.000000e+00, tolerance);
-    TS_ASSERT_DELTA(data->dataY(0)[1], 1.000000e+00, tolerance);
+    TS_ASSERT_DELTA(data->y(0)[0], 1.000000e+00, tolerance);
+    TS_ASSERT_DELTA(data->y(0)[1], 1.000000e+00, tolerance);
+    TS_ASSERT_DELTA(data->y(0)[1], 1.000000e+00, tolerance);
 
-    TS_ASSERT_DELTA(data->dataE(0)[1], 1.000000e+00, tolerance);
-    TS_ASSERT_DELTA(data->dataE(0)[0], 1.000000e+00, tolerance);
-    TS_ASSERT_DELTA(data->dataE(0)[1], 1.000000e+00, tolerance);
+    TS_ASSERT_DELTA(data->e(0)[1], 1.000000e+00, tolerance);
+    TS_ASSERT_DELTA(data->e(0)[0], 1.000000e+00, tolerance);
+    TS_ASSERT_DELTA(data->e(0)[1], 1.000000e+00, tolerance);
 
     TS_ASSERT_DELTA(data->dx(0)[0], 5.000000e-01, tolerance);
     TS_ASSERT_DELTA(data->dx(0)[1], 1.207107e+00, tolerance);
@@ -276,23 +276,23 @@ public:
 
     TS_ASSERT_EQUALS(data->getNumberHistograms(), 1);
 
-    TS_ASSERT_EQUALS(static_cast<int>(data->dataX(0).size()), 4);
-    TS_ASSERT_EQUALS(static_cast<int>(data->dataY(0).size()), 4);
-    TS_ASSERT_EQUALS(static_cast<int>(data->dataE(0).size()), 4);
+    TS_ASSERT_EQUALS(static_cast<int>(data->x(0).size()), 4);
+    TS_ASSERT_EQUALS(static_cast<int>(data->y(0).size()), 4);
+    TS_ASSERT_EQUALS(static_cast<int>(data->e(0).size()), 4);
 
     double tolerance(1e-06);
 
-    TS_ASSERT_DELTA(data->dataX(0)[0], 0.00520, tolerance);
-    TS_ASSERT_DELTA(data->dataX(0)[1], 0.00562, tolerance);
-    TS_ASSERT_DELTA(data->dataX(0)[2], 0.00607, tolerance);
+    TS_ASSERT_DELTA(data->x(0)[0], 0.00520, tolerance);
+    TS_ASSERT_DELTA(data->x(0)[1], 0.00562, tolerance);
+    TS_ASSERT_DELTA(data->x(0)[2], 0.00607, tolerance);
 
-    TS_ASSERT_DELTA(data->dataY(0)[0], 1.055855e+00, tolerance);
-    TS_ASSERT_DELTA(data->dataY(0)[1], 9.784999e-01, tolerance);
-    TS_ASSERT_DELTA(data->dataY(0)[2], 1.239836e+00, tolerance);
+    TS_ASSERT_DELTA(data->y(0)[0], 1.055855e+00, tolerance);
+    TS_ASSERT_DELTA(data->y(0)[1], 9.784999e-01, tolerance);
+    TS_ASSERT_DELTA(data->y(0)[2], 1.239836e+00, tolerance);
 
-    TS_ASSERT_DELTA(data->dataE(0)[0], 2.570181e-01, tolerance);
-    TS_ASSERT_DELTA(data->dataE(0)[1], 1.365013e-01, tolerance);
-    TS_ASSERT_DELTA(data->dataE(0)[2], 9.582824e-02, tolerance);
+    TS_ASSERT_DELTA(data->e(0)[0], 2.570181e-01, tolerance);
+    TS_ASSERT_DELTA(data->e(0)[1], 1.365013e-01, tolerance);
+    TS_ASSERT_DELTA(data->e(0)[2], 9.582824e-02, tolerance);
 
     remove(tempFile3.c_str());
   }

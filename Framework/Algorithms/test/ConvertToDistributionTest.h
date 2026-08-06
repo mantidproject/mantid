@@ -51,9 +51,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(conv.execute());
     TS_ASSERT(conv.isExecuted());
     auto output = std::dynamic_pointer_cast<MatrixWorkspace>(dist);
-    const Mantid::MantidVec &X = output->dataX(0);
-    const Mantid::MantidVec &Y = output->dataY(0);
-    const Mantid::MantidVec &E = output->dataE(0);
+    const auto &X = output->x(0);
+    const auto &Y = output->y(0);
+    const auto &E = output->e(0);
     for (size_t i = 0; i < Y.size(); ++i) {
       TS_ASSERT_EQUALS(X[i], static_cast<double>(i) / 2.0)
       TS_ASSERT_EQUALS(Y[i], 4)
