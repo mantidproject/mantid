@@ -1025,7 +1025,7 @@ void LoadILLSANS::adjustTOF() {
 
   // Try to set sensible (but not strictly physical) wavelength axes for monitors
   // Normalisation is done by acquisition time, so these axes should not be used
-  auto firstPixel = m_localWorkspace->histogram(0).dataX();
+  auto firstPixel = m_localWorkspace->x(0).rawData();
   const double l2 = specInfo.l2(0);
   const double monitor2 = -specInfo.position(nHist - 1).Z();
   const double l1Monitor2 = m_sourcePos - monitor2;

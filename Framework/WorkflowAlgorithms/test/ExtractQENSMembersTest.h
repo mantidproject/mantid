@@ -52,7 +52,7 @@ public:
 
     auto inputWS = loadWorkspace(fileName + "_red.nxs");
     const auto numSpectra = inputWS->getNumberHistograms();
-    const auto &dataX = inputWS->dataX(0);
+    const auto &dataX = inputWS->x(0).rawData();
     auto resultGroup = createResultGroup(members, dataX, numSpectra);
 
     WorkspaceGroup_sptr membersWorkspace = extractMembers(inputWS, resultGroup, outputName);
@@ -75,7 +75,7 @@ public:
 
     auto inputWS = loadWorkspace(fileName + "_red.nxs");
     const auto numSpectra = inputWS->getNumberHistograms();
-    const auto &dataX = inputWS->dataX(0);
+    const auto &dataX = inputWS->x(0).rawData();
     auto resultGroup = createResultGroup(members, dataX, numSpectra);
 
     WorkspaceGroup_sptr membersWorkspace = extractMembers(inputWS, resultGroup, convolved, outputName);
@@ -94,7 +94,7 @@ private:
       const auto &memberName = memberWorkspace->getName();
       const auto expectedName = outputName + "_" + members[i];
       const auto numMemberSpectra = memberWorkspace->getNumberHistograms();
-      const auto &memberDataX = memberWorkspace->dataX(0);
+      const auto &memberDataX = memberWorkspace->x(0).rawData();
 
       TS_ASSERT_EQUALS(dataX, memberDataX);
       TS_ASSERT_EQUALS(numSpectra, numMemberSpectra);

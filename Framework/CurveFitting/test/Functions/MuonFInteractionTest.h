@@ -24,7 +24,7 @@ using namespace Mantid::DataObjects;
 
 class MuonFInteractionTest : public CxxTest::TestSuite {
 public:
-  void getMockData(Mantid::MantidVec &y, Mantid::MantidVec &e) {
+  void getMockData(Mantid::HistogramData::HistogramY &y, Mantid::HistogramData::HistogramE &e) {
     // Mock data got from an Excel spreadsheet with
     // Lambda = 0.16, Omega = 0.4, Beta = 1.2 &  A = 1.5
 
@@ -67,8 +67,8 @@ public:
     Workspace2D_sptr ws2D = std::dynamic_pointer_cast<Workspace2D>(ws);
     for (int i = 0; i < 21; i++)
       ws2D->mutableX(0)[i] = i;
-    Mantid::MantidVec &y = ws2D->dataY(0); // y-values (counts)
-    Mantid::MantidVec &e = ws2D->dataE(0); // error values of counts
+    auto &y = ws2D->mutableY(0); // y-values (counts)
+    auto &e = ws2D->mutableE(0); // error values of counts
     getMockData(y, e);
 
     // put this workspace in the data service

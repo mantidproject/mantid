@@ -532,6 +532,56 @@ For compatibility reasons an interface to the internal data, equivalent to the o
   };
 
 
+Migrating off the legacy accessors
+##################################
+
+The legacy accessors are deprecated. In C++ their declarations carry a
+``Deprecated, use ... instead`` comment; in Python they emit a ``DeprecationWarning``
+naming the replacement. Use this table when migrating a call site:
+
++---------------------------------+-----------------------------------------+--------------------------------+
+| Deprecated                      | Replacement                             | Notes                          |
++=================================+=========================================+================================+
+| ``readX/readY/readE/readDx``    | ``x()``/``y()``/``e()``/``dx()``        | read-only                      |
++---------------------------------+-----------------------------------------+--------------------------------+
+| ``dataX/dataY/dataE/dataDx``    | ``x()``/``y()``/``e()``/``dx()``        | const overload; read-only      |
++---------------------------------+-----------------------------------------+--------------------------------+
+| ``dataX/dataY/dataE/dataDx``    | ``mutableX()``/``mutableY()``/          | non-const overload; in-place   |
+|                                 | ``mutableE()``/``mutableDx()``          | write                          |
++---------------------------------+-----------------------------------------+--------------------------------+
+| ``refX(i)`` / ``ptrX()``        | ``sharedX(i)``                          | ``cow_ptr``                    |
++---------------------------------+-----------------------------------------+--------------------------------+
+| ``setX(i, cow)``                | ``setSharedX(i, cow)``                  | ``cow_ptr`` setter             |
++---------------------------------+-----------------------------------------+--------------------------------+
+| ``setX/setY/setE/setDx``        | ``setSharedX()``/``setSharedY()``/      | Python only                    |
+| (Python)                        | ``setSharedE()``/``setSharedDx()``      |                                |
++---------------------------------+-----------------------------------------+--------------------------------+
+
+Things to watch for while migrating:
+
+- **Classify each ``data*`` site as a read or a write.**
+  In a non-``const`` context ``dataY(i)`` binds to the *mutable* overload even when the
+  code only reads, which detaches the copy-on-write pointer. Mapping such a site to
+  ``mutableY(i)`` preserves that needless copy; mapping it to ``y(i)`` removes it.
+  When in doubt map to the read-only accessor -- if a write was in fact needed the
+  compiler will reject it, whereas an over-eager ``mutable*`` is a silent performance
+  regression.
+- **``mutable*()`` is lvalue-ref-qualified** (``&``), so it must be called on a named
+  lvalue rather than a temporary.
+- **Individual arrays cannot be resized.** ``dataX().resize(n)`` has no direct
+  equivalent, by design. Use ``MatrixWorkspace::resizeHistogram(i, n)`` (which keeps X,
+  Y and E consistent with the storage mode), or one of the ``setHistogram()`` /
+  ``setBinEdges()`` / ``setPoints()`` / ``setCounts()`` setters.
+- **``EventList``** computes ``y()``/``e()`` from the events via the MRU cache, exactly as
+  the legacy ``dataY()``/``dataE()`` const overloads did. The non-``const`` ``dataY()``
+  throws, so there are no in-place ``EventList`` writes to migrate.
+- **Code that genuinely needs a raw vector** can use ``x(i).rawData()``, which returns
+  ``const std::vector<double> &``. There is deliberately no public route to a
+  *modifiable* ``std::vector<double> &``; callees that require one should be given an
+  iterator-range or ``HistogramX``/``HistogramY``/``HistogramE`` overload instead.
+  ``Kernel::Unit::toTOF()``/``fromTOF()`` provide such an iterator-range overload.
+
+
 Rollout status
 --------------
 

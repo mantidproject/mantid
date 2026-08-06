@@ -301,7 +301,7 @@ std::map<std::string, std::string> DiscusMultipleScatteringCorrection::validateI
 
       if (SQWS->getAxis(0)->unit()->unitID() == "MomentumTransfer") {
         for (size_t iHist = 0; iHist < SQWS->getNumberHistograms(); iHist++) {
-          auto qValues = SQWS->dataX(iHist);
+          const auto &qValues = SQWS->x(iHist).rawData();
           checkEqualQBins(qValues);
         }
       } else if (SQWS->getAxis(1)->unit()->unitID() == "MomentumTransfer") {
@@ -474,7 +474,7 @@ void DiscusMultipleScatteringCorrection::convertWsBothAxesToPoints(MatrixWorkspa
           API::WorkspaceFactory::Instance().create(ws, ws->getNumberHistograms(), ws->blocksize(), ws->blocksize());
       SQWSPoints->setSharedY(0, ws->sharedY(0));
       SQWSPoints->setSharedE(0, ws->sharedE(0));
-      std::vector<double> newX = ws->histogram(0).dataX();
+      std::vector<double> newX = ws->x(0).rawData();
       newX.pop_back();
       SQWSPoints->setSharedX(0, HistogramData::Points(newX).cowData());
       ws = SQWSPoints;

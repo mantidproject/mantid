@@ -143,7 +143,7 @@ void SaveGDA::exec() {
     const auto ws = inputWS->getItem(i);
     const auto matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
 
-    auto x = matrixWS->dataX(0);
+    auto x = matrixWS->x(0).rawData();
     const size_t bankIndex(groupingScheme[i] - 1);
     if (bankIndex >= calibParams.size()) {
       throw Kernel::Exception::IndexError(bankIndex, calibParams.size(), "Bank number out of range");
