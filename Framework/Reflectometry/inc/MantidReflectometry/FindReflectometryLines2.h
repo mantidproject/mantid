@@ -26,6 +26,9 @@ private:
   void init() override;
   std::map<std::string, std::string> validateInputs() override;
   void exec() override;
+  double findPeak(const API::MatrixWorkspace_sptr &ws);
+  API::MatrixWorkspace_sptr integrate(const API::MatrixWorkspace_sptr &ws);
+  API::MatrixWorkspace_sptr transpose(const API::MatrixWorkspace_sptr &ws);
 };
 
 } // namespace Reflectometry

@@ -536,23 +536,23 @@ double LoadILLReflectometry::reflectometryPeak() {
   if (!isDefault("FitEndWorkspaceIndex")) {
     endIndex = getProperty("FitEndWorkspaceIndex");
   }
-  auto fitSpecularPeak = createChildAlgorithm("FitSpecularPeak");
-  fitSpecularPeak->setProperty("InputWorkspace", m_localWorkspace);
-  fitSpecularPeak->setProperty("StartWorkspaceIndex", startIndex);
-  fitSpecularPeak->setProperty("EndWorkspaceIndex", endIndex);
-  fitSpecularPeak->setProperty("BackgroundType", "Linear");
-  fitSpecularPeak->setProperty("AcceptChangesInFunctionTooSmall", false);
-  fitSpecularPeak->setProperty("AcceptChangesInParameterTooSmall", false);
+  auto findLine = createChildAlgorithm("FindReflectometryLines", -1.0, -1.0, true, 3);
+  findLine->setProperty("InputWorkspace", m_localWorkspace);
+  findLine->setProperty("StartWorkspaceIndex", startIndex);
+  findLine->setProperty("EndWorkspaceIndex", endIndex);
+  findLine->setProperty("BackgroundType", "Linear");
+  findLine->setProperty("AcceptChangesInFunctionTooSmall", false);
+  findLine->setProperty("AcceptChangesInParameterTooSmall", false);
   if (!isDefault("FitRangeLower")) {
-    fitSpecularPeak->setProperty("RangeLower",
-                                 wavelengthToTOF(getProperty("FitRangeLower"), m_sourceDistance, m_detectorDistance));
+    findLine->setProperty("RangeLower",
+                          wavelengthToTOF(getProperty("FitRangeLower"), m_sourceDistance, m_detectorDistance));
   }
   if (!isDefault("FitRangeUpper")) {
-    fitSpecularPeak->setProperty("RangeUpper",
-                                 wavelengthToTOF(getProperty("FitRangeUpper"), m_sourceDistance, m_detectorDistance));
+    findLine->setProperty("RangeUpper",
+                          wavelengthToTOF(getProperty("FitRangeUpper"), m_sourceDistance, m_detectorDistance));
   }
-  fitSpecularPeak->execute();
-  return fitSpecularPeak->getProperty("PeakCentre");
+  findLine->execute();
+  return findLine->getProperty("LineCentre");
 }
 
 /** Compute the detector rotation angle around origin

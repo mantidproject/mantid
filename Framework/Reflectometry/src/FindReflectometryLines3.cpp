@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidReflectometry/FitSpecularPeak.h"
+#include "MantidReflectometry/FindReflectometryLines3.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -12,10 +12,12 @@
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/DynamicPointerCastHelper.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Statistics.h"
 
 #include <algorithm>
 #include <cmath>
@@ -36,17 +38,18 @@ std::string const INPUT_WS{"InputWorkspace"};
 std::string const OUTPUT_FIT_WS{"OutputFitWorkspace"};
 std::string const OUTPUT_PROFILE_WS{"OutputProfileWorkspace"};
 std::string const OUTPUT_STATUS{"OutputStatus"};
-std::string const PEAK_CENTRE{"PeakCentre"};
-std::string const PEAK_CENTRE_ERROR{"PeakCentreError"};
+std::string const LINE_CENTRE{"LineCentre"};
+std::string const LINE_CENTRE_ERROR{"LineCentreError"};
+std::string const OUTPUT_WS{"OutputWorkspace"};
 std::string const RANGE_LOWER{"RangeLower"};
 std::string const RANGE_UPPER{"RangeUpper"};
 std::string const START_INDEX{"StartWorkspaceIndex"};
-std::string const USE_FITTED_CENTRE_ON_FAILURE{"UseFittedPeakCentreOnFailure"};
+std::string const USE_FITTED_CENTRE_ON_FAILURE{"UseFittedLineCentreOnFailure"};
 } // namespace Prop
 
 std::string const LINEAR_BACKGROUND{"Linear"};
 std::string const FLAT_BACKGROUND{"Flat"};
-std::string const FALLBACK_STATUS{"Fit failed; using initial peak centre"};
+std::string const FALLBACK_STATUS{"Fit failed; using initial line centre"};
 
 // Give every integrated spectrum common bin edges so that Transpose accepts the workspace. These edges become the
 // unused vertical axis of the detector profile and do not affect the fitted workspace-index coordinates.
@@ -64,11 +67,9 @@ double median(const Mantid::HistogramData::HistogramY &y) {
   std::copy_if(y.cbegin(), y.cend(), std::back_inserter(finiteValues),
                [](double const value) { return std::isfinite(value); });
   if (finiteValues.empty()) {
-    throw std::runtime_error("FitSpecularPeak could not identify an initial peak centre.");
+    throw std::runtime_error("FindReflectometryLines could not identify an initial line centre.");
   }
-  std::sort(finiteValues.begin(), finiteValues.end());
-  auto const middle = finiteValues.size() / 2;
-  return finiteValues.size() % 2 == 0 ? 0.5 * (finiteValues[middle - 1] + finiteValues[middle]) : finiteValues[middle];
+  return Mantid::Kernel::getStatistics(finiteValues, Mantid::Kernel::StatOptions::Median).median;
 }
 
 struct PeakParameters {
@@ -87,7 +88,7 @@ PeakParameters estimatePeak(const Mantid::API::MatrixWorkspace &profile, double 
     }
   }
   if (!maxIndex) {
-    throw std::runtime_error("FitSpecularPeak could not identify an initial peak centre.");
+    throw std::runtime_error("FindReflectometryLines could not identify an initial line centre.");
   }
 
   auto const height = y[*maxIndex] - background;
@@ -125,23 +126,23 @@ PeakParameters estimatePeak(const Mantid::API::MatrixWorkspace &profile, double 
 
 namespace Mantid::Reflectometry {
 
-DECLARE_ALGORITHM(FitSpecularPeak)
+DECLARE_ALGORITHM(FindReflectometryLines3)
 
-const std::string FitSpecularPeak::name() const { return "FitSpecularPeak"; }
+const std::string FindReflectometryLines3::name() const { return "FindReflectometryLines"; }
 
-int FitSpecularPeak::version() const { return 1; }
+int FindReflectometryLines3::version() const { return 3; }
 
-const std::string FitSpecularPeak::category() const { return "Reflectometry"; }
+const std::string FindReflectometryLines3::category() const { return "Reflectometry;ILL\\Reflectometry"; }
 
-const std::string FitSpecularPeak::summary() const {
-  return "Integrates a reflectometry detector workspace and fits a background and Gaussian to locate the specular "
-         "peak.";
+const std::string FindReflectometryLines3::summary() const {
+  return "Finds the fractional workspace index corresponding to a reflected or direct line by fitting a Gaussian "
+         "and background to the integrated detector profile.";
 }
 
-const std::vector<std::string> FitSpecularPeak::seeAlso() const { return {"FindReflectometryLines", "FindPeaks"}; }
+const std::vector<std::string> FindReflectometryLines3::seeAlso() const { return {"FindPeaks"}; }
 
-bool FitSpecularPeak::fitStatusIsAccepted(const std::string &fitStatus, const bool acceptChangesInFunction,
-                                          const bool acceptChangesInParameters) {
+bool FindReflectometryLines3::fitStatusIsAccepted(const std::string &fitStatus, const bool acceptChangesInFunction,
+                                                  const bool acceptChangesInParameters) {
   std::vector<std::string> acceptedStatuses{API::MinimizerStatus::SUCCESS};
   if (acceptChangesInFunction) {
     acceptedStatuses.emplace_back(API::MinimizerStatus::CHANGES_IN_FUNCTION_TOO_SMALL);
@@ -152,7 +153,7 @@ bool FitSpecularPeak::fitStatusIsAccepted(const std::string &fitStatus, const bo
   return std::find(acceptedStatuses.cbegin(), acceptedStatuses.cend(), fitStatus) != acceptedStatuses.cend();
 }
 
-void FitSpecularPeak::init() {
+void FindReflectometryLines3::init() {
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(Prop::INPUT_WS, "", Kernel::Direction::Input),
       "A reflectometry workspace containing detector spectra.");
@@ -170,7 +171,7 @@ void FitSpecularPeak::init() {
   positive->setLower(0.0);
   positive->setLowerExclusive(true);
   declareProperty(Prop::FIT_WINDOW_MULTIPLIER, 3.0, positive,
-                  "Number of estimated peak FWHMs included on either side of the initial peak centre.");
+                  "Number of estimated peak FWHMs included on either side of the initial line centre.");
 
   auto const backgrounds = std::vector<std::string>{LINEAR_BACKGROUND, FLAT_BACKGROUND};
   declareProperty(Prop::BACKGROUND_TYPE, LINEAR_BACKGROUND, std::make_shared<Kernel::StringListValidator>(backgrounds),
@@ -181,8 +182,11 @@ void FitSpecularPeak::init() {
                   "If true, accept a fit that stopped because changes in the parameter values became too small.");
   declareProperty(Prop::USE_FITTED_CENTRE_ON_FAILURE, false,
                   "If true, use a finite fitted peak centre when Fit completes with an unsuccessful status. If false, "
-                  "use the initial peak centre.");
+                  "use the initial line centre.");
 
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+                      Prop::OUTPUT_WS, "", Kernel::Direction::Output, API::PropertyMode::Optional),
+                  "A single-valued workspace containing the fractional workspace index of the line centre.");
   declareProperty(std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
                       Prop::OUTPUT_PROFILE_WS, "", Kernel::Direction::Output, API::PropertyMode::Optional),
                   "The integrated detector profile used for peak fitting, with X values corresponding to input "
@@ -191,17 +195,17 @@ void FitSpecularPeak::init() {
                       Prop::OUTPUT_FIT_WS, "", Kernel::Direction::Output, API::PropertyMode::Optional),
                   "The Fit output containing the data, fitted curve, and residuals. Not set when the initial peak "
                   "centre is returned.");
-  declareProperty(Prop::PEAK_CENTRE, EMPTY_DBL(), "The fractional workspace index of the specular peak.",
+  declareProperty(Prop::LINE_CENTRE, EMPTY_DBL(), "The fractional workspace index of the specular line centre.",
                   Kernel::Direction::Output);
-  declareProperty(Prop::PEAK_CENTRE_ERROR, EMPTY_DBL(), "The uncertainty in the optimized peak centre.",
+  declareProperty(Prop::LINE_CENTRE_ERROR, EMPTY_DBL(), "The uncertainty in the optimized line centre.",
                   Kernel::Direction::Output);
   declareProperty(Prop::OUTPUT_STATUS, std::string{},
-                  "The Fit status when a fitted peak centre is returned, otherwise reports that the initial peak "
+                  "The Fit status when a fitted line centre is returned, otherwise reports that the initial line "
                   "centre was used.",
                   Kernel::Direction::Output);
 }
 
-std::map<std::string, std::string> FitSpecularPeak::validateInputs() {
+std::map<std::string, std::string> FindReflectometryLines3::validateInputs() {
   std::map<std::string, std::string> issues;
   API::MatrixWorkspace_sptr workspace = getProperty(Prop::INPUT_WS);
   // Direct validation can receive a WorkspaceGroup before the framework dispatches its members.
@@ -233,10 +237,25 @@ std::map<std::string, std::string> FitSpecularPeak::validateInputs() {
   return issues;
 }
 
-API::MatrixWorkspace_sptr FitSpecularPeak::createProfile(const API::MatrixWorkspace_sptr &inputWorkspace) {
+bool FindReflectometryLines3::checkGroups() {
+  bool const processGroups = API::Algorithm::checkGroups();
+  if (!processGroups) {
+    return false;
+  }
+  if (!isDefault(Prop::OUTPUT_FIT_WS)) {
+    throw std::invalid_argument("OutputFitWorkspace is not supported when InputWorkspace is a WorkspaceGroup.");
+  }
+  if (isDefault(Prop::OUTPUT_WS) && !isDefault(Prop::OUTPUT_PROFILE_WS)) {
+    throw std::invalid_argument(
+        "OutputWorkspace must also be specified when requesting OutputProfileWorkspace for a WorkspaceGroup.");
+  }
+  return true;
+}
+
+API::MatrixWorkspace_sptr FindReflectometryLines3::createProfile(const API::MatrixWorkspace_sptr &inputWorkspace) {
   auto integration = createChildAlgorithm("Integration");
   integration->setProperty("InputWorkspace", inputWorkspace);
-  integration->setProperty("OutputWorkspace", "__unused_fit_specular_peak");
+  integration->setProperty("OutputWorkspace", "__unused_find_reflectometry_lines");
   int const startIndexProperty = getProperty(Prop::START_INDEX);
   integration->setProperty("StartWorkspaceIndex", startIndexProperty);
   if (!isDefault(Prop::END_INDEX)) {
@@ -255,7 +274,7 @@ API::MatrixWorkspace_sptr FitSpecularPeak::createProfile(const API::MatrixWorksp
 
   auto transpose = createChildAlgorithm("Transpose");
   transpose->setProperty("InputWorkspace", integratedWorkspace);
-  transpose->setProperty("OutputWorkspace", "__unused_fit_specular_peak");
+  transpose->setProperty("OutputWorkspace", "__unused_find_reflectometry_lines");
   transpose->execute();
   API::MatrixWorkspace_sptr profileWorkspace = transpose->getProperty("OutputWorkspace");
 
@@ -267,7 +286,7 @@ API::MatrixWorkspace_sptr FitSpecularPeak::createProfile(const API::MatrixWorksp
   return profileWorkspace;
 }
 
-void FitSpecularPeak::exec() {
+void FindReflectometryLines3::exec() {
   API::MatrixWorkspace_sptr inputWorkspace = getProperty(Prop::INPUT_WS);
   auto profileWorkspace = createProfile(inputWorkspace);
   if (!isDefault(Prop::OUTPUT_PROFILE_WS)) {
@@ -278,8 +297,8 @@ void FitSpecularPeak::exec() {
   auto const backgroundLevel = median(profileWorkspace->y(0));
   auto const initialPeak = estimatePeak(*profileWorkspace, backgroundLevel);
   if (!initialPeak.fwhm) {
-    g_log.warning() << "Could not estimate the specular peak width. Using the initial peak centre.\n";
-    setProperty(Prop::PEAK_CENTRE, initialPeak.centre);
+    g_log.warning() << "Could not estimate the specular peak width. Using the initial line centre.\n";
+    setLineCentre(initialPeak.centre);
     setProperty(Prop::OUTPUT_STATUS, FALLBACK_STATUS);
     return;
   }
@@ -313,14 +332,14 @@ void FitSpecularPeak::exec() {
   fit->setProperty("IgnoreInvalidData", true);
   fit->setProperty("CalcErrors", true);
   if (!isDefault(Prop::OUTPUT_FIT_WS)) {
-    fit->setProperty("Output", "__unused_fit_specular_peak");
+    fit->setProperty("Output", "__unused_find_reflectometry_lines");
   }
 
   try {
     fit->execute();
   } catch (std::exception const &error) {
-    g_log.warning() << "Specular peak fit failed: " << error.what() << ". Using the initial peak centre.\n";
-    setProperty(Prop::PEAK_CENTRE, initialPeak.centre);
+    g_log.warning() << "Specular peak fit failed: " << error.what() << ". Using the initial line centre.\n";
+    setLineCentre(initialPeak.centre);
     setProperty(Prop::OUTPUT_STATUS, FALLBACK_STATUS);
     return;
   }
@@ -333,21 +352,28 @@ void FitSpecularPeak::exec() {
   bool const useFittedCentreOnFailure = getProperty(Prop::USE_FITTED_CENTRE_ON_FAILURE);
   if ((!fitSuccessful && !useFittedCentreOnFailure) || !std::isfinite(fittedCentre) ||
       fittedCentre < profileX.front() || fittedCentre > profileX.back()) {
-    g_log.warning() << "Specular peak fit was not successful. Using the initial peak centre.\n";
-    setProperty(Prop::PEAK_CENTRE, initialPeak.centre);
+    g_log.warning() << "Specular peak fit was not successful. Using the initial line centre.\n";
+    setLineCentre(initialPeak.centre);
     setProperty(Prop::OUTPUT_STATUS, FALLBACK_STATUS);
     return;
   }
 
-  setProperty(Prop::PEAK_CENTRE, fittedCentre);
+  setLineCentre(fittedCentre);
   auto const centreError = gaussian->getError(gaussian->parameterIndex("PeakCentre"));
   if (std::isfinite(centreError)) {
-    setProperty(Prop::PEAK_CENTRE_ERROR, centreError);
+    setProperty(Prop::LINE_CENTRE_ERROR, centreError);
   }
   setProperty(Prop::OUTPUT_STATUS, fitSuccessful ? Mantid::API::MinimizerStatus::SUCCESS : fitStatus);
   if (!isDefault(Prop::OUTPUT_FIT_WS)) {
     API::MatrixWorkspace_sptr fitWorkspace = fit->getProperty("OutputWorkspace");
     setProperty(Prop::OUTPUT_FIT_WS, fitWorkspace);
+  }
+}
+
+void FindReflectometryLines3::setLineCentre(double const lineCentre) {
+  setProperty(Prop::LINE_CENTRE, lineCentre);
+  if (!isDefault(Prop::OUTPUT_WS)) {
+    setProperty(Prop::OUTPUT_WS, std::make_shared<DataObjects::WorkspaceSingleValue>(lineCentre));
   }
 }
 

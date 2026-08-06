@@ -32,7 +32,7 @@ from mantid.simpleapi import (
     CreateWorkspace,
     Divide,
     ExtractMonitors,
-    FitSpecularPeak,
+    FindReflectometryLines,
     LoadAndMerge,
     logger,
     Minus,
@@ -801,14 +801,15 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         if not self.getProperty(Prop.XMIN).isDefault:
             kwargs["RangeLower"] = self.getProperty(Prop.XMIN).value
         original_peak_centre = ws.getRun().getLogData("reduction.line_position").value
-        fit_output = FitSpecularPeak(
+        fit_output = FindReflectometryLines(
             InputWorkspace=ws,
             BackgroundType="Flat",
             FitWindowMultiplier=ILL_PREPROCESS_FIT_WINDOW_MULTIPLIER,
-            UseFittedPeakCentreOnFailure=True,
+            UseFittedLineCentreOnFailure=True,
+            Version=3,
             **kwargs,
         )
-        peak_centre = fit_output.PeakCentre
+        peak_centre = fit_output.LineCentre
         ws.getRun().addProperty("reduction.line_position", float(peak_centre), True)
         self._rotate_instrument(ws, peak_centre, original_peak_centre)
 
