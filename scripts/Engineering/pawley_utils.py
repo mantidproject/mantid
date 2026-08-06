@@ -13,7 +13,7 @@ from mantid.geometry import CrystalStructure, ReflectionGenerator, PointGroupFac
 from mantid.kernel import V3D, logger, UnitConversion, DeltaEModeType
 from typing import TYPE_CHECKING, Sequence, Any, Optional, Tuple
 from scipy.optimize import least_squares
-from plugins.algorithms.poldi_utils import simulate_2d_data, get_dspac_array_from_ws
+from plugins.algorithms.poldi_utils import simulate_2d_data, get_dspac_array_from_ws, get_dspac_limits_from_ws
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
 from enum import Enum
@@ -190,6 +190,7 @@ class Phase:
         if not self.spgr.isAllowedUnitCell(self.unit_cell):
             raise ValueError("Unit cell not compatible with spacegroup")
         # add hkls - check if compatible wth spacegorup
+        self.hkls = []
         if hkls is not None:
             self.set_hkls(hkls)
         # set free parameters based on lattice system
@@ -230,6 +231,18 @@ class Phase:
         alatt_str = " ".join([str(par) for par in alatt])
         xtal = CrystalStructure(alatt_str, spgr, basis)
         return Phase(xtal, name=name, hkl_str_delimiter=hkl_delimiter)
+
+    @classmethod
+    def from_phase(cls, phase: Phase, copy_hkls: bool = True) -> Phase:
+        """Copy constructor - returns a new Phase with the same (current) lattice parameters,
+        space group, name and HKL string delimiter as *phase*.
+        :param phase: Phase to copy
+        :param copy_hkls: if True the reflections of *phase* are copied to the new Phase
+        """
+        new_phase = cls.from_alatt(phase.alatt, phase.spgr.getHMSymbol(), name=phase.name, hkl_delimiter=phase.hkl_str_delimiter)
+        if copy_hkls:
+            new_phase.set_hkls([cls.hkl_as_key(hkl) for hkl in phase.hkls], do_sort=False)
+        return new_phase
 
     def _get_alatt(self) -> np.ndarray[float]:
         return np.array([getattr(self.unit_cell, method)() for method in self.labels.keys()])
@@ -281,21 +294,25 @@ class Phase:
         _, ihkls = np.unique((self.calc_dspacings() * (10**decimal_places)).astype(int), return_index=True)
         self.hkls = [self.hkls[ipk] for ipk in np.sort(ihkls)]
 
+    def filter_hkls_to_dspac_limits(self, dmin: float, dmax: float) -> None:
+        """Discard the HKLs of this Phase whose d-spacing lies outside [dmin, dmax].
+        Unlike set_hkls_from_dspac_limits this only ever removes reflections - the order of the
+        remaining HKLs, and any merging of degenerate d-spacings already applied, are preserved."""
+        self.hkls = [hkl for hkl, dspac in zip(self.hkls, self.calc_dspacings()) if dmin <= dspac <= dmax]
+
+    def set_hkls_from_ws_range(self, ws, lambda_min: float = 1.1, lambda_max: float = 5.0) -> None:
+        """Discard the HKLs of this Phase whose d-spacing is outside the accessible range of *ws*
+        (determined from its angular coverage and the given wavelength limits)."""
+        dmin, dmax = get_dspac_limits_from_ws(ws, lambda_min=lambda_min, lambda_max=lambda_max)
+        self.filter_hkls_to_dspac_limits(dmin, dmax)
+
     def filter_hkls_to_ws_range(self, ws, lambda_min: float = 1.1, lambda_max: float = 5.0) -> Phase:
-        """Return a new Phase containing only HKLs whose d-spacing falls within the
-        accessible range of *ws* (determined from its angular coverage and the given
-        wavelength limits).  The Phase lattice and space-group are preserved."""
-        dspacs_all = get_dspac_array_from_ws(ws, lambda_min=lambda_min, lambda_max=lambda_max)
-        dmin, dmax = float(dspacs_all.min()), float(dspacs_all.max())
-        new_phase = Phase(
-            CrystalStructure(
-                " ".join(str(p) for p in self.alatt),
-                self.spgr.getHMSymbol(),
-                "",
-            ),
-            name=self.name,
-        )
-        new_phase.set_hkls_from_dspac_limits(dmin, dmax)
+        """Return a copy of this Phase containing only HKLs whose d-spacing falls within the
+        accessible range of *ws* (see set_hkls_from_ws_range).  A copy is returned (rather than
+        the HKLs being altered in-place) so that a single Phase covering the whole d-spacing
+        range can be used to produce a Phase per detector group without being modified."""
+        new_phase = Phase.from_phase(self)
+        new_phase.set_hkls_from_ws_range(ws, lambda_min=lambda_min, lambda_max=lambda_max)
         return new_phase
 
     def get_hkl_strings(self) -> Sequence[str]:

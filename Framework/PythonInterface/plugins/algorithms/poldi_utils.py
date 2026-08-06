@@ -186,6 +186,19 @@ def get_dspac_limits(tth_min: float, tth_max: float, lambda_min: float, lambda_m
     return dspac_min, dspac_max
 
 
+def get_dspac_limits_from_ws(ws: Workspace2D, lambda_min: float = 1.1, lambda_max: float = 5.0) -> Tuple[float, float]:
+    """
+    Function to calculate min and max d-spacing accessible in a workspace given its two-theta coverage
+    :param ws: MatrixWorkspace containing POLDI data (raw instrument)
+    :param lambda_min: minimum wavelength (Ang) to consider
+    :param lambda_max: maximum wavelength (Ang) to consider
+    :return (dspac_min, dspac_max): min and max d-spacing
+    """
+    si = ws.spectrumInfo()
+    tths = np.array([si.twoTheta(ispec) for ispec in range(ws.getNumberHistograms())])
+    return get_dspac_limits(tths.min(), tths.max(), lambda_min, lambda_max)
+
+
 def get_final_dspac_array(bin_width: float, dspac_min: float, dspac_max: float, time_max: float) -> np.ndarray[float]:
     """
     Function to calculate d-spacing bins given time bin width and maximum arrival time
