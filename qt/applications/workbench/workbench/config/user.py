@@ -101,8 +101,6 @@ class UserConfig(object):
 
     @staticmethod
     def _flatten_defaults(input_dict):
-        if not input_dict:
-            return {}
         result = {}
         for key in input_dict:
             value = input_dict[key]

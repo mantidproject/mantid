@@ -88,8 +88,9 @@ class ConfigUserTest(TestCase):
 
         try:
             cfg = UserConfig(name, name, {"main": {"default": 42}})
-            self.assertEqual(42, cfg.get("main/default", type=int))
+            self.assertTrue(cfg.has("unrelated"))  # interited from above
             self.assertTrue(cfg.has("main/default"))
+            self.assertEqual(42, cfg.get("main/default", type=int))
             self.assertFalse(cfg.qsettings.contains("main/default"))
             self.assertEqual(contents_before, filename.read_bytes())
             del cfg
