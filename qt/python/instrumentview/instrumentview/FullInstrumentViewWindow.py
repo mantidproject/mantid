@@ -1222,7 +1222,7 @@ class FullInstrumentViewView(QWidget):
     def has_any_peak_overlays(self) -> bool:
         return len(self._lineplot_overlays) > 0
 
-    def _on_axes_click(self, event) -> None:
+    def _on_axes_click_during_peak_selection(self, event) -> None:
         if self._plot_toolbar.zoom_enabled() or self._plot_toolbar.pan_enabled():
             # Delegate to matplotlib's default click callbacks when zoom is active.
             for callback in self._default_lineplot_callbacks.values():
@@ -1235,15 +1235,17 @@ class FullInstrumentViewView(QWidget):
         elif event.button == 3:  # Right click
             self._presenter.on_peak_selected_in_lineplot(event.xdata, "right")
 
-    def add_peak_cursor_to_lineplot(self) -> None:
+    def start_peak_selection_in_lineplot(self) -> None:
         if self._lineplot_peak_cursor is not None:
-            self.remove_peak_cursor_from_lineplot()
+            self.end_peak_selection_in_lineplot()
         self._lineplot_peak_cursor = Cursor(self._detector_spectrum_axes, color="tab:red", linewidth=1, horizOn=False)
         for cid in self._default_lineplot_callbacks:
             self._detector_figure_canvas.mpl_disconnect(cid)
-        self._figure_canvas_click_id = self._detector_figure_canvas.mpl_connect("button_press_event", self._on_axes_click)
+        self._figure_canvas_click_id = self._detector_figure_canvas.mpl_connect(
+            "button_press_event", self._on_axes_click_during_peak_selection
+        )
 
-    def remove_peak_cursor_from_lineplot(self) -> None:
+    def end_peak_selection_in_lineplot(self) -> None:
         if self._lineplot_peak_cursor is None:
             return
         self._detector_figure_canvas.mpl_disconnect(self._figure_canvas_click_id)

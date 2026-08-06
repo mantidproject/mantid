@@ -584,7 +584,7 @@ class FullInstrumentViewPresenter:
         self._update_relative_detector_angle()
         self.refresh_lineplot_peaks()
         if self._model.peak_picking_enabled():
-            self._view.add_peak_cursor_to_lineplot()
+            self._view.start_peak_selection_in_lineplot()
 
     def _update_relative_detector_angle(self) -> None:
         if len(self._model.picked_detector_ids) != 2:
@@ -710,11 +710,11 @@ class FullInstrumentViewPresenter:
             self._model.turn_on_single_point_picking()
             self._view.set_rubberband_zoom_checked(False)
             self._view.set_hover_pick_checked(False)
-            self._view.add_peak_cursor_to_lineplot()
+            self._view.start_peak_selection_in_lineplot()
             self._view.disable_and_uncheck_selection_list()
         else:
             self._model.turn_off_single_point_picking()
-            self._view.remove_peak_cursor_from_lineplot()
+            self._view.end_peak_selection_in_lineplot()
             self._view.enable_and_restore_selection_list()
 
         self._on_list_item_selected(CurrentTab.Grouping)
