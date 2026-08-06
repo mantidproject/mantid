@@ -53,6 +53,28 @@ class PhaseTest(unittest.TestCase):
         self.assertEqual(si.nhkls(), 1)
         mock_log.warning.assert_called_once()
 
+    def test_from_phase_copies_phase(self):
+        si = Phase.from_alatt(3 * [self.SI_LATT_PAR], self.SI_SPGR, "", "Si", ",")
+        si.set_hkls_from_dspac_limits(2, 3.5)  # (1,1,1) peak only
+        si_copy = Phase.from_phase(si)
+        self._assert_si_phase(si_copy)
+        self.assertEqual([Phase.hkl_as_key(hkl) for hkl in si_copy.hkls], [Phase.hkl_as_key(hkl) for hkl in si.hkls])
+
+    def test_from_phase_copy_is_independent_of_original(self):
+        si = Phase.from_alatt(3 * [self.SI_LATT_PAR], self.SI_SPGR, "", "Si", ",")
+        si.set_hkls_from_dspac_limits(2, 3.5)  # (1,1,1) peak only
+        si_copy = Phase.from_phase(si)
+        si_copy.set_params([1.1 * self.SI_LATT_PAR])
+        si_copy.set_hkls([[2, 2, 0]])
+        self.assertAlmostEqual(si.get_params()[0], self.SI_LATT_PAR, delta=1e-5)
+        self.assertTrue(allclose(si.hkls, 1))
+
+    def test_from_phase_without_hkls(self):
+        si = Phase.from_alatt(3 * [self.SI_LATT_PAR], self.SI_SPGR, "", "Si", ",")
+        si.set_hkls_from_dspac_limits(2, 3.5)
+        si_copy = Phase.from_phase(si, copy_hkls=False)
+        self.assertEqual(si_copy.nhkls(), 0)
+
     def test_get_params_noncubic(self):
         tetrag_phase = Phase.from_alatt(3 * [self.SI_LATT_PAR], "P 4")
         assert_array_almost_equal(tetrag_phase.get_params(), array(2 * [self.SI_LATT_PAR]))
@@ -874,12 +896,47 @@ class PhaseFilterHklsTest(unittest.TestCase):
         filtered = phase.filter_hkls_to_ws_range(self.ws, lambda_min=5.1, lambda_max=5.2)
         self.assertEqual(filtered.hkls, [])
 
-    def test_name_propagated(self):
-        phase = Phase.from_alatt(3 * [self.SI_LATT_PAR], self.SI_SPGR)
+    def test_name_and_delimiter_propagated(self):
+        phase = Phase.from_alatt(3 * [self.SI_LATT_PAR], self.SI_SPGR, hkl_delimiter=",")
         phase.set_hkls_from_dspac_limits(0.7, 3.5)
         phase.set_phase_name("Silicon")
         filtered = phase.filter_hkls_to_ws_range(self.ws)
         self.assertEqual(filtered.get_phase_name(), "Silicon")
+        self.assertEqual(filtered.hkl_str_delimiter, ",")
+
+    def test_original_phase_not_modified(self):
+        phase = Phase.from_alatt(3 * [self.SI_LATT_PAR], self.SI_SPGR)
+        phase.set_hkls_from_dspac_limits(0.4, 5.0)
+        hkls_before = [Phase.hkl_as_key(hkl) for hkl in phase.hkls]
+        phase.filter_hkls_to_ws_range(self.ws)
+        self.assertEqual([Phase.hkl_as_key(hkl) for hkl in phase.hkls], hkls_before)
+
+    def test_filtered_hkls_are_subset_of_original(self):
+        phase = Phase.from_alatt(3 * [self.SI_LATT_PAR], self.SI_SPGR)
+        phase.set_hkls_from_dspac_limits(0.4, 5.0)
+        hkls_before = [Phase.hkl_as_key(hkl) for hkl in phase.hkls]
+        filtered = phase.filter_hkls_to_ws_range(self.ws)
+        hkls_after = [Phase.hkl_as_key(hkl) for hkl in filtered.hkls]
+        # only removes reflections - never introduces new ones or reorders those retained
+        self.assertTrue(set(hkls_after).issubset(set(hkls_before)))
+        self.assertEqual(hkls_after, [hkl for hkl in hkls_before if hkl in set(hkls_after)])
+
+    def test_merged_reflections_not_reintroduced_by_filter(self):
+        phase = Phase.from_alatt(3 * [self.SI_LATT_PAR], self.SI_SPGR)
+        phase.set_hkls_from_dspac_limits(0.7, 3.5)
+        phase.merge_reflections()  # drops e.g. (5,1,1), degenerate in d with (3,3,3)
+        merged_hkls = set(Phase.hkl_as_key(hkl) for hkl in phase.hkls)
+        self.assertNotIn((5, 1, 1), merged_hkls)
+        filtered = phase.filter_hkls_to_ws_range(self.ws)
+        self.assertNotIn((5, 1, 1), set(Phase.hkl_as_key(hkl) for hkl in filtered.hkls))
+
+    def test_set_hkls_from_ws_range_modifies_in_place(self):
+        phase = Phase.from_alatt(3 * [self.SI_LATT_PAR], self.SI_SPGR)
+        phase.set_hkls_from_dspac_limits(0.4, 5.0)
+        nhkls_before = phase.nhkls()
+        phase.set_hkls_from_ws_range(self.ws)
+        self.assertGreater(phase.nhkls(), 0)
+        self.assertLess(phase.nhkls(), nhkls_before)
 
 
 class BoundsMixinTest(unittest.TestCase):
