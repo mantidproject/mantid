@@ -8,16 +8,12 @@
 
 #include "MantidReflectometry/FindReflectometryLines3.h"
 
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/LinearGenerator.h"
-#include "MantidKernel/EmptyValues.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -41,6 +37,8 @@ public:
     TS_ASSERT(algorithm.isInitialized())
     TS_ASSERT_EQUALS(algorithm.name(), "FindReflectometryLines")
     TS_ASSERT_EQUALS(algorithm.version(), 3)
+    TS_ASSERT(!algorithm.existsProperty("OutputWorkspace"))
+    TS_ASSERT(!algorithm.existsProperty("LineCentreError"))
     bool const useFittedCentreOnFailure = algorithm.getProperty("UseFittedLineCentreOnFailure");
     bool const acceptChangesInFunction = algorithm.getProperty("AcceptChangesInFunctionTooSmall");
     bool const acceptChangesInParameters = algorithm.getProperty("AcceptChangesInParameterTooSmall");
@@ -69,27 +67,21 @@ public:
     auto algorithm = configuredAlgorithm(workspace);
     algorithm->setProperty("StartWorkspaceIndex", 20);
     algorithm->setProperty("EndWorkspaceIndex", 70);
-    algorithm->setPropertyValue("OutputWorkspace", "unused_line_centre");
     algorithm->setPropertyValue("OutputProfileWorkspace", "unused_profile");
     algorithm->setPropertyValue("OutputFitWorkspace", "unused_fit");
 
     TS_ASSERT_THROWS_NOTHING(algorithm->execute())
     TS_ASSERT(algorithm->isExecuted())
     double const peakCentre = algorithm->getProperty("LineCentre");
-    double const peakCentreError = algorithm->getProperty("LineCentreError");
     TS_ASSERT_DELTA(peakCentre, 43.25, 0.05)
-    TS_ASSERT(std::isfinite(peakCentreError))
     TS_ASSERT_EQUALS(algorithm->getPropertyValue("OutputStatus"), "success")
     API::MatrixWorkspace_sptr profile = algorithm->getProperty("OutputProfileWorkspace");
     API::MatrixWorkspace_sptr fit = algorithm->getProperty("OutputFitWorkspace");
-    API::MatrixWorkspace_sptr lineCentreWorkspace = algorithm->getProperty("OutputWorkspace");
     TS_ASSERT(profile)
     TS_ASSERT(fit)
-    TS_ASSERT(lineCentreWorkspace)
-    if (!profile || !fit || !lineCentreWorkspace) {
+    if (!profile || !fit) {
       return;
     }
-    TS_ASSERT_EQUALS(lineCentreWorkspace->y(0)[0], peakCentre)
     TS_ASSERT_EQUALS(profile->getNumberHistograms(), 1)
     TS_ASSERT_EQUALS(profile->x(0).front(), 20.0)
     TS_ASSERT_EQUALS(profile->x(0).back(), 70.0)
@@ -103,24 +95,19 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(algorithm->execute())
     double const peakCentre = algorithm->getProperty("LineCentre");
-    double const peakCentreError = algorithm->getProperty("LineCentreError");
     TS_ASSERT_DELTA(peakCentre, 28.4, 0.1)
-    TS_ASSERT(std::isfinite(peakCentreError))
-    TS_ASSERT_LESS_THAN(0.0, peakCentreError)
     TS_ASSERT_EQUALS(algorithm->getPropertyValue("OutputStatus"), "success")
   }
 
-  void test_fit_failure_returns_initial_peak_centre_without_fit_output_or_error() {
+  void test_fit_failure_returns_initial_peak_centre_without_fit_output() {
     auto workspace = gaussianWorkspace(3, 10, 1.0, 0.15, 10.0, 1.0);
     auto algorithm = configuredAlgorithm(workspace);
     algorithm->setPropertyValue("OutputFitWorkspace", "unused_fit");
 
     TS_ASSERT_THROWS_NOTHING(algorithm->execute())
     double const peakCentre = algorithm->getProperty("LineCentre");
-    double const peakCentreError = algorithm->getProperty("LineCentreError");
     API::MatrixWorkspace_sptr fit = algorithm->getProperty("OutputFitWorkspace");
     TS_ASSERT_EQUALS(peakCentre, 1.0)
-    TS_ASSERT_EQUALS(peakCentreError, EMPTY_DBL())
     TS_ASSERT_EQUALS(algorithm->getPropertyValue("OutputStatus"), "Fit failed; using initial line centre")
     TS_ASSERT(!fit)
   }
@@ -243,59 +230,6 @@ public:
     TS_ASSERT_THROWS(algorithm->execute(), std::runtime_error const &)
   }
 
-  void test_latest_version_processes_workspace_group_and_returns_grouped_line_centres() {
-    auto &ads = API::AnalysisDataService::Instance();
-    auto inputGroup = addWorkspaceGroupToADS("find_lines_v3_group");
-    auto algorithm = API::AlgorithmManager::Instance().create("FindReflectometryLines");
-    algorithm->initialize();
-    algorithm->setRethrows(true);
-    algorithm->setPropertyValue("InputWorkspace", inputGroup->getName());
-    algorithm->setPropertyValue("OutputWorkspace", "find_lines_v3_output");
-    algorithm->setPropertyValue("OutputProfileWorkspace", "find_lines_v3_profiles");
-
-    TS_ASSERT_EQUALS(algorithm->version(), 3)
-    TS_ASSERT_THROWS_NOTHING(algorithm->execute())
-    auto outputGroup = ads.retrieveWS<API::WorkspaceGroup>("find_lines_v3_output");
-    auto profileGroup = ads.retrieveWS<API::WorkspaceGroup>("find_lines_v3_profiles");
-    TS_ASSERT_EQUALS(outputGroup->size(), 2)
-    TS_ASSERT_EQUALS(profileGroup->size(), 2)
-    if (outputGroup->size() == 2) {
-      auto first = std::dynamic_pointer_cast<API::MatrixWorkspace>(outputGroup->getItem(0));
-      auto second = std::dynamic_pointer_cast<API::MatrixWorkspace>(outputGroup->getItem(1));
-      TS_ASSERT(first)
-      TS_ASSERT(second)
-      if (first && second) {
-        TS_ASSERT_DELTA(first->y(0)[0], 18.25, 0.1)
-        TS_ASSERT_DELTA(second->y(0)[0], 23.75, 0.1)
-      }
-    }
-    removeWorkspaceGroupFromADS("find_lines_v3_group", {"find_lines_v3_output", "find_lines_v3_profiles"});
-  }
-
-  void test_fit_workspace_is_rejected_for_workspace_group_input() {
-    auto inputGroup = addWorkspaceGroupToADS("find_lines_v3_fit_group");
-    auto algorithm = API::AlgorithmManager::Instance().create("FindReflectometryLines", 3);
-    algorithm->initialize();
-    algorithm->setRethrows(true);
-    algorithm->setPropertyValue("InputWorkspace", inputGroup->getName());
-    algorithm->setPropertyValue("OutputFitWorkspace", "find_lines_v3_fit_output");
-
-    TS_ASSERT_THROWS(algorithm->execute(), std::invalid_argument const &)
-    removeWorkspaceGroupFromADS("find_lines_v3_fit_group", {"find_lines_v3_fit_output"});
-  }
-
-  void test_grouped_profile_requires_grouped_line_centre_workspace() {
-    auto inputGroup = addWorkspaceGroupToADS("find_lines_v3_profile_group");
-    auto algorithm = API::AlgorithmManager::Instance().create("FindReflectometryLines", 3);
-    algorithm->initialize();
-    algorithm->setRethrows(true);
-    algorithm->setPropertyValue("InputWorkspace", inputGroup->getName());
-    algorithm->setPropertyValue("OutputProfileWorkspace", "find_lines_v3_profile_output");
-
-    TS_ASSERT_THROWS(algorithm->execute(), std::invalid_argument const &)
-    removeWorkspaceGroupFromADS("find_lines_v3_profile_group", {"find_lines_v3_profile_output"});
-  }
-
 private:
   static std::unique_ptr<Reflectometry::FindReflectometryLines3>
   configuredAlgorithm(const API::MatrixWorkspace_sptr &workspace) {
@@ -343,35 +277,6 @@ private:
   static API::MatrixWorkspace_sptr nonConvergingWorkspace() {
     return workspaceFromProfile({-8.062627323198912, 0.09656098269096347, -1.1052904296664998, 60.17173237063975,
                                  0.5011382967410345, 5.544182065326});
-  }
-
-  static API::WorkspaceGroup_sptr addWorkspaceGroupToADS(std::string const &name) {
-    auto &ads = API::AnalysisDataService::Instance();
-    auto first = gaussianWorkspace(40, 20, 18.25, 2.5, 10.0, 1.0);
-    auto second = gaussianWorkspace(40, 20, 23.75, 2.5, 10.0, 1.0);
-    ads.addOrReplace(name + "_1", first);
-    ads.addOrReplace(name + "_2", second);
-    auto group = std::make_shared<API::WorkspaceGroup>();
-    group->addWorkspace(first);
-    group->addWorkspace(second);
-    ads.addOrReplace(name, group);
-    return group;
-  }
-
-  static void removeWorkspaceGroupFromADS(std::string const &inputName, std::vector<std::string> const &outputNames) {
-    auto &ads = API::AnalysisDataService::Instance();
-    for (auto const &name : {inputName, inputName + "_1", inputName + "_2"}) {
-      if (ads.doesExist(name)) {
-        ads.remove(name);
-      }
-    }
-    for (auto const &outputName : outputNames) {
-      for (auto const &name : {outputName, outputName + "_1", outputName + "_2"}) {
-        if (ads.doesExist(name)) {
-          ads.remove(name);
-        }
-      }
-    }
   }
 
   static void addPeak(API::MatrixWorkspace &workspace, double const centre, double const sigma, double const height,
