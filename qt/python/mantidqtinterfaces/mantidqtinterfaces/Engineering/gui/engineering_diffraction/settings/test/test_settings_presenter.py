@@ -115,6 +115,19 @@ class SettingsPresenterTest(unittest.TestCase):
         self.assertEqual(self.presenter.savedir_notifier.notify_subscribers.call_count, 1)
 
     @patch(dir_path + ".path.isfile")
+    def test_save_new_settings_saved_against_current_rb(self, mock_isfile):
+        mock_isfile.return_value = True
+        self.setup_view_getters()
+        self.model.validate_settings.return_value = self.settings.copy()
+        self.presenter.savedir_notifier = mock.MagicMock()
+        self.view.isVisible.return_value = False
+        self.presenter.set_rb_num("A")
+
+        self.presenter.save_new_settings()
+
+        self.model.set_settings_dict.assert_called_with(self.settings, "A")
+
+    @patch(dir_path + ".path.isfile")
     def test_show(self, mock_isfile):
         mock_isfile.return_value = True
         self.presenter.settings = self.settings.copy()
@@ -143,6 +156,46 @@ class SettingsPresenterTest(unittest.TestCase):
         self.model.set_settings_dict.assert_called_with(self.settings, None)
         self.assertEqual(self.view.close.call_count, 1)
         self.assertEqual(self.presenter.savedir_notifier.notify_subscribers.call_count, 1)
+
+    @patch(dir_path + ".path.isfile")
+    def test_show_reloads_settings_when_rb_changed(self, mock_isfile):
+        mock_isfile.return_value = True
+        settings_a = self.settings.copy()
+        settings_a["save_location"] = "save_a"
+        settings_b = self.settings.copy()
+        settings_b["save_location"] = "save_b"
+        settings_for_rb = {"A": settings_a, "B": settings_b}
+        self.model.get_settings_dict.side_effect = lambda _names_and_types, rb: settings_for_rb[rb].copy()
+        self.model.validate_settings.side_effect = lambda settings, *_args, **_kwargs: settings
+        self.view.isVisible.return_value = False
+
+        self.presenter.set_rb_num("A")
+        self.presenter.show()
+
+        self.assertEqual(self.presenter.settings, settings_a)
+
+        self.presenter.set_rb_num("B")
+        self.presenter.show()
+
+        self.assertEqual(self.presenter.settings, settings_b)
+        self.assertEqual(self.model.get_settings_dict.call_args.kwargs, {})
+        self.assertEqual(self.model.get_settings_dict.call_args.args[1], "B")
+        self.view.set_save_location.assert_called_with("save_b")
+
+    @patch(dir_path + ".path.isfile")
+    def test_show_does_not_reload_settings_when_rb_unchanged(self, mock_isfile):
+        mock_isfile.return_value = True
+        self.model.get_settings_dict.return_value = self.settings.copy()
+        self.model.validate_settings.side_effect = lambda settings, *_args, **_kwargs: settings
+        self.view.isVisible.return_value = False
+        self.presenter.set_rb_num("A")
+
+        self.presenter.show()
+        call_count_after_first_show = self.model.get_settings_dict.call_count
+
+        self.presenter.show()
+
+        self.assertEqual(self.model.get_settings_dict.call_count, call_count_after_first_show)
 
     def test_settings_not_changed_when_cancelled(self):
         self.presenter.close_dialog()

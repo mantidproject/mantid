@@ -53,6 +53,22 @@ class SettingsModelTest(unittest.TestCase):
         get_setting_mock.assert_any_call("CustomInterfaces", "EngineeringDiffraction2/", "name1", return_type=str, rb=None)
         get_setting_mock.assert_any_call("CustomInterfaces", "EngineeringDiffraction2/", "name2", return_type=str, rb=None)
 
+    @patch(dir_path + "settings_model.set_setting")
+    def test_set_settings_dict_passes_rb_through(self, set_setting_mock):
+        self.model.set_settings_dict({"name": "value", "namebool": False, "namenum": 10}, rb="12345")
+        self.assertEqual(set_setting_mock.call_count, 3)
+        set_setting_mock.assert_any_call("CustomInterfaces", "EngineeringDiffraction2/", "name", "value", rb="12345")
+        set_setting_mock.assert_any_call("CustomInterfaces", "EngineeringDiffraction2/", "namebool", False, rb="12345")
+        set_setting_mock.assert_any_call("CustomInterfaces", "EngineeringDiffraction2/", "namenum", 10, rb="12345")
+
+    @patch(dir_path + "settings_model.get_setting")
+    def test_get_settings_dict_passes_rb_through(self, get_setting_mock):
+        get_setting_mock.return_value = "value"
+        self.assertEqual(self.model.get_settings_dict({"name1": str, "name2": str}, rb="12345"), {"name1": "value", "name2": "value"})
+        self.assertEqual(get_setting_mock.call_count, 2)
+        get_setting_mock.assert_any_call("CustomInterfaces", "EngineeringDiffraction2/", "name1", return_type=str, rb="12345")
+        get_setting_mock.assert_any_call("CustomInterfaces", "EngineeringDiffraction2/", "name2", return_type=str, rb="12345")
+
     def test_load_invalid_settings(self):
         bad_settings = {"foo": "dud", "bar": "result"}
         output_settings = self.model.validate_settings(bad_settings, DEFAULT_SETTINGS, ALL_PEAKS)

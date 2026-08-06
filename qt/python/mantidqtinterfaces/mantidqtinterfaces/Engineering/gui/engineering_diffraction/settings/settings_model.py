@@ -8,7 +8,8 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.setting
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from os import path
 from mantid.kernel import logger
-from numpy import all, array, concatenate, abs, eye, ndarray
+import numpy as np
+from numpy import array, concatenate, eye, ndarray
 from numpy.linalg import det, norm
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_presenter import SETTINGS_DICT
 from typing import Any, Type, Sequence, TypeAlias
@@ -52,7 +53,7 @@ class SettingsModel(object):
             nd = array([float(x) for x in settings["nd_dir"].split(",")])[:, None]
             td = array([float(x) for x in settings["td_dir"].split(",")])[:, None]
             trans_mat = concatenate([rd, nd, td], axis=1)
-            _ = abs(det(trans_mat))  # ensure a determinant can be calculated
+            _ = np.abs(det(trans_mat))  # ensure a determinant can be calculated
             if not is_approx_orthonormal(trans_mat):
                 logger.warning("Currently only orthonormal sample axes are properly supported")
         except Exception as e:
@@ -69,7 +70,7 @@ class SettingsModel(object):
                 error_msg += sense_msg
 
             # validate euler_scheme
-            euler_scheme_valid = all([v in ("x", "y", "z") for v in euler_scheme.lower()])
+            euler_scheme_valid = np.all([v in ("x", "y", "z") for v in euler_scheme.lower()])
             if not euler_scheme_valid:
                 error_msg += "Euler Scheme should be defined in terms of X, Y and Z (eg. XYZ or YZY). "
 
@@ -85,7 +86,7 @@ class SettingsModel(object):
     def _validate_euler_sense_string(euler_sense: str) -> tuple[bool, Sequence[int], str]:
         try:
             sense_vals = [int(x) for x in euler_sense.split(",")]
-            valid = all([v in (1, -1) for v in sense_vals])
+            valid = np.all([v in (1, -1) for v in sense_vals])
             error_msg = ""
         except Exception as e:
             error_msg = "Euler Senses should be comma separated +/-1s. " + str(e)
