@@ -8,13 +8,13 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidReflectometry/DllConfig.h"
+#include "MantidAlgorithms/DllConfig.h"
 
-namespace Mantid::Reflectometry {
+namespace Mantid::Algorithms {
 
 /** FindReflectometryLines3: Finds a fractional workspace index corresponding to
  * a reflected or direct line in a line-detector workspace. */
-class MANTID_REFLECTOMETRY_DLL FindReflectometryLines3 final : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL FindReflectometryLines3 final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
@@ -33,4 +33,4 @@ private:
   API::MatrixWorkspace_sptr createProfile(const API::MatrixWorkspace_sptr &inputWorkspace);
 };
 
-} // namespace Mantid::Reflectometry
+} // namespace Mantid::Algorithms

@@ -5,7 +5,6 @@ set(SRC_FILES
     src/CreateTransmissionWorkspace2.cpp
     src/CreateTransmissionWorkspaceAuto2.cpp
     src/FindReflectometryLines2.cpp
-    src/FindReflectometryLines3.cpp
     src/NRCalculateSlitResolution.cpp
     src/ReflectometryBackgroundSubtraction.cpp
     src/ReflectometryBeamStatistics.cpp
@@ -35,7 +34,6 @@ set(INC_FILES
     inc/MantidReflectometry/CreateTransmissionWorkspace2.h
     inc/MantidReflectometry/CreateTransmissionWorkspaceAuto2.h
     inc/MantidReflectometry/FindReflectometryLines2.h
-    inc/MantidReflectometry/FindReflectometryLines3.h
     inc/MantidReflectometry/NRCalculateSlitResolution.h
     inc/MantidReflectometry/ReflectometryBackgroundSubtraction.h
     inc/MantidReflectometry/ReflectometryBeamStatistics.h
