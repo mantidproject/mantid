@@ -426,15 +426,13 @@ void ResampleX::exec() {
     for (int wkspIndex = 0; wkspIndex < numSpectra; ++wkspIndex) {
       PARALLEL_START_INTERRUPT_REGION
       // get const references to input Workspace arrays (no copying)
-      // TODO: replace with HistogramX/Y/E when VectorHelper::rebin is updated
       Mantid::HistogramData::HistogramX const &XValues = inputWS->x(wkspIndex);
       Mantid::HistogramData::HistogramY const &YValues = inputWS->y(wkspIndex);
       Mantid::HistogramData::HistogramE const &YErrors = inputWS->e(wkspIndex);
 
       // get references to output workspace data (no copying)
-      // TODO: replace with HistogramX/Y/E when VectorHelper::rebin is updated
-      MantidVec &YValues_new = outputWS->dataY(wkspIndex);
-      MantidVec &YErrors_new = outputWS->dataE(wkspIndex);
+      auto &YValues_new = outputWS->mutableY(wkspIndex);
+      auto &YErrors_new = outputWS->mutableE(wkspIndex);
 
       // create new output X axis
       MantidVec XValues_new;

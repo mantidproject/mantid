@@ -13,6 +13,7 @@
 #include <cmath>
 #include <functional>
 #include <numeric>
+#include <span>
 #include <stdexcept>
 #include <vector>
 
@@ -35,15 +36,17 @@ std::size_t MANTID_KERNEL_DLL createAxisFromRebinParams(
     const bool full_bins_only = false, const double xMinHint = std::nan(""), const double xMaxHint = std::nan(""),
     const bool useReverseLogarithmic = false, const double power = -1);
 
+/// The output ranges are taken as spans so that the size-checked histogram data types, which do not
+/// hand out a modifiable std::vector<double>, can be rebinned into directly. The outputs must already
+/// be sized; neither function resizes them.
 void MANTID_KERNEL_DLL rebin(const std::vector<double> &xold, const std::vector<double> &yold,
-                             const std::vector<double> &eold, const std::vector<double> &xnew,
-                             std::vector<double> &ynew, std::vector<double> &enew, bool distribution,
-                             bool addition = false);
+                             const std::vector<double> &eold, const std::vector<double> &xnew, std::span<double> ynew,
+                             std::span<double> enew, bool distribution, bool addition = false);
 
 // New method to rebin Histogram data, should be faster than previous one
 void MANTID_KERNEL_DLL rebinHistogram(const std::vector<double> &xold, const std::vector<double> &yold,
                                       const std::vector<double> &eold, const std::vector<double> &xnew,
-                                      std::vector<double> &ynew, std::vector<double> &enew, bool addition);
+                                      std::span<double> ynew, std::span<double> enew, bool addition);
 
 /// Convert an array of bin boundaries to bin center values.
 void MANTID_KERNEL_DLL convertToBinCentre(const std::vector<double> &bin_edges, std::vector<double> &bin_centres);
