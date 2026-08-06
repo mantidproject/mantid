@@ -386,12 +386,15 @@ class EngDiffGuiCorrectionTableTest(_CorrectionTestBase):
             self.assertTrue(np.allclose(from_xyz @ from_xyz.T, np.identity(3), atol=1e-6))
             self.assertAlmostEqual(1.0, float(np.linalg.det(from_xyz)), places=6)
 
+        self.select_only([CERIA_WS])
+        self.set_engineering_setting("euler_angles_scheme", "ZXZ")
+        click(view.btn_loadOrientation)
+        process_events(2)
+        # copied so the next load cannot change it under us, as getR() returns a view of the
+        # goniometer's own matrix
+        from_zxz = ADS.retrieve(CERIA_WS).run().getGoniometer().getR().copy()
+
         with self.check("Correction / changing the Euler scheme changes how the same file is read"):
-            self.select_only([CERIA_WS])
-            self.set_engineering_setting("euler_angles_scheme", "ZXZ")
-            click(view.btn_loadOrientation)
-            process_events(2)
-            from_zxz = ADS.retrieve(CERIA_WS).run().getGoniometer().getR()
             self.assertFalse(np.allclose(from_xyz, from_zxz), "the Euler scheme setting had no effect")
 
         with self.check("Correction / reversing the sense of rotation also changes the result"):
@@ -582,6 +585,11 @@ class EngDiffGuiCorrectionApplyTest(_CorrectionTestBase):
             # the algorithm strips the shape string before storing it as a run log
             return ADS.retrieve(CERIA_WS).run().getLogData("GaugeVolume").value.strip()
 
+        # chosen here rather than left to whatever an earlier check happened to leave selected, so
+        # the log and the factors below are known to belong to the preset
+        select_combo(self.correction_view.combo_shapeMethod, "4mmCube")
+        self.apply_corrections(absorption=True, divergence=False, attenuation=False)
+
         with self.check("Correction / the 4mm cube preset is written to the run as a gauge volume"):
             self.assertEqual(get_cube_xml("some-gv", 0.004).strip(), logged_gauge_volume())
 
@@ -661,7 +669,8 @@ class EngDiffGuiCorrectionApplyTest(_CorrectionTestBase):
             scale = vert * np.sqrt(horz**2 + det_horz**2)
             two_theta = ADS.retrieve(CERIA_WS).spectrumInfo().twoTheta(0)
             expected = scale * np.sin(two_theta) ** 2
-            ratio = uncorrected[uncorrected != 0.0] / corrected[uncorrected != 0.0]
+            usable = (uncorrected != 0.0) & (corrected != 0.0)
+            ratio = uncorrected[usable] / corrected[usable]
             self.assertTrue(np.allclose(expected, ratio, rtol=1e-6), f"expected a divergence factor of {expected}, got {ratio[:3]}")
 
         with self.check("Correction / changing the divergence changes the correction"):

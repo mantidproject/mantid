@@ -217,7 +217,6 @@ class EngDiffGuiFittingDataTest(_FittingTestBase):
             for row in range(self.table().rowCount()):
                 self.assertTrue(self.data_view.get_item_checked(row, COL_BGSUB), f"row {row} has no background subtraction")
 
-        bgsub_name = f"{CERIA}_{INSTRUMENT}_bank_1_TOF_bgsub"
         candidates = [name for name in ADS.getObjectNames() if name.endswith("_bgsub")]
         with self.check("Test 5 / a background subtracted workspace is created for each run"):
             self.assertEqual(2, len(candidates), f"expected two _bgsub workspaces, got {candidates}")
@@ -531,5 +530,10 @@ class EngDiffGuiSequentialFitTest(_FittingTestBase):
         for term in function_string.split(","):
             key, _, value = term.partition("=")
             if key.strip() == name:
-                return float(value)
+                try:
+                    return float(value)
+                except ValueError:
+                    # ties and constraints put the same name on the left of an expression rather
+                    # than a number, e.g. "ties=(Sigma=0.5*Height)"
+                    raise AssertionError(f"{name} is not a fitted value in '{function_string}'")
         raise AssertionError(f"{name} is not in the fitted function '{function_string}'")

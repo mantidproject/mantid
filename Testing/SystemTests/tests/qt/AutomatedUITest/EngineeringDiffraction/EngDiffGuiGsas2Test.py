@@ -386,7 +386,7 @@ class EngDiffGuiGsas2SingleTest(_Gsas2TestBase):
                 self.assertAlmostEqual(narrowed_max, value, places=2)
 
         # choosing different input files must discard the limits rather than apply them to new data
-        other_gss = _write_focused_gss(self.inputs_dir, basename="ENGINX_other_TOF", n_banks=N_BANKS)
+        other_gss = _write_focused_gss(self.inputs_dir, basename="ENGINX_305763_307521_all_banks_TOF", n_banks=N_BANKS)
         self.fill_in_refinement(gss_paths=[other_gss])
         self.refine()
         with self.check("Test 13 / x limits are reset when different input files are chosen"):
@@ -531,7 +531,6 @@ def _stage_stub_gsas2_install(root):
     """
     scriptable_dir = os.path.join(root, "GSASII")
     os.makedirs(scriptable_dir, exist_ok=True)
-    os.makedirs(os.path.join(root, "bin"), exist_ok=True)
     interpreter = "python.exe" if os.name == "nt" else "python"
     for path in (os.path.join(root, interpreter), os.path.join(scriptable_dir, "GSASIIscriptable.py")):
         with open(path, "w") as stub:

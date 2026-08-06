@@ -13,9 +13,11 @@ from Engineering.EnggUtils import (
     process_vanadium,
     focus_run,
     convert_TOFerror_to_derror,
+    plot_tof_vs_d_from_calibration,
 )
 from Engineering.common.instrument_config import ENGINX_GROUP
 from mantid.kernel import UnitConversion, DeltaEModeType, UnitParams, UnitParametersMap
+from mantid.simpleapi import CreateSampleWorkspace
 
 enggutils_path = "Engineering.EnggUtils"
 
@@ -416,6 +418,34 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
 
         expected_dirs = [path.join("/mock", "User", "RB123", "Focus", "Texture20")]
         mock_save.assert_called_with(expected_dirs, ws, calib, "123456", "RB123")
+
+    @patch("matplotlib.pyplot.subplots")
+    @patch(f"{enggutils_path}.ADS")
+    def test_plot_tof_vs_d_reads_centres_using_peak_function_centre_parameter(self, mock_ads, mock_subplots):
+        # Gaussian calls its centre parameter "PeakCentre" rather than BackToBackExponential's "X0"
+        self.calibration.get_fit_peak_shape.return_value = "Gaussian"
+        centre_param = "PeakCentre"
+        ws_foc = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=1, OutputWorkspace="ws_foc_centre_param")
+        detid = ws_foc.getSpectrum(0).getDetectorIDs()[0]
+        centres, errors, dspacing = [1.0e4, 2.0e4], [10.0, 20.0], [1.0, 2.0]
+        tables = {
+            "diag_fitparam": {"wsindex": [0, 0], centre_param: centres},
+            "diag_fiterror": {centre_param: errors},
+            "diag_dspacing": {"detid": [detid], "@1.0": [1.0], "@2.0": [2.0]},
+        }
+        mock_ads.retrieve.side_effect = lambda name: MagicMock(toDict=MagicMock(return_value=tables[name]))
+        diag_ws = MagicMock()
+        diag_ws.name.return_value = "diag"
+        mock_ax = MagicMock()
+        mock_ax.ndim = 2
+        mock_subplots.return_value = (MagicMock(), mock_ax)
+
+        plot_tof_vs_d_from_calibration(diag_ws, ws_foc, dspacing, self.calibration)  # would raise KeyError if hard coded to X0
+
+        # first errorbar call plots the fitted centres and their errors against d-spacing
+        args, kwargs = mock_ax.__getitem__.return_value.errorbar.call_args_list[0]
+        self.assertTrue((args[1] == array(centres)).all())
+        self.assertTrue((kwargs["yerr"] == array(errors)).all())
 
     def test_convert_centres_and_error_from_TOF_to_d(self):
         params = UnitParametersMap()

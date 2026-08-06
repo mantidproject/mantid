@@ -97,6 +97,28 @@ class FittingPlotPresenterTest(unittest.TestCase):
             _, _, kwargs = mock_fit.mock_calls[iws]
             self.assertEqual(kwargs, {"Function": fun_str_list[0], "InputWorkspace": ws, "Output": ws})
 
+    @mock.patch(dir_path + ".AsyncTask", wraps=BlockingAsyncTaskWithCallback)
+    @mock.patch(dir_path + ".Fit")
+    def test_do_sequential_fit_carries_on_tolerance_limited_stop(self, mock_fit, mock_async):
+        # a fit started from an already-optimal set of parameters stops this way rather than
+        # reporting "success", and its result must still seed the next workspace's fit
+        ws_list = ["ws1", "ws2"]
+        fun_str_list = [
+            "name=Gaussian,Height=11,PeakCentre=30000,Sigma=40",  # initial
+            "name=Gaussian,Height=10,PeakCentre=35000,Sigma=50",  # fit result of ws1
+        ]
+        self.view.read_fitprop_from_browser.return_value = {"properties": {"Function": fun_str_list[0]}}  # initial
+        mock_fit_output = mock.MagicMock()
+        mock_fit_output.OutputStatus = MinimizerStatus.CHANGES_IN_FUNCTION_TOO_SMALL
+        mock_fit_output.Function.fun = fun_str_list[1]
+        mock_fit.return_value = mock_fit_output
+
+        self.presenter.do_fit_all(self.view.read_fitprop_from_browser(), ws_list, do_sequential=True)
+
+        self.assertEqual(mock_fit.call_count, len(ws_list))
+        _, _, kwargs = mock_fit.mock_calls[1]
+        self.assertEqual(kwargs, {"Function": fun_str_list[1], "InputWorkspace": "ws2", "Output": "ws2"})
+
     def fit_all_helper(self, mock_fit, do_sequential):
         ws_list = ["ws1", "ws2"]
         fun_str_list = [

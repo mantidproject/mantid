@@ -22,6 +22,7 @@ Because the fabricated peaks are Gaussian, every class here sets ENGIN-X's Defau
 setting, asserted from the captured log.
 """
 
+import math
 import os
 
 from eng_diff_gui_test_base import (
@@ -172,7 +173,7 @@ class EngDiffGuiCalibrateAndFocusTest(_RunProcessingTestBase):
             self.assertEqual(N_BANKS, len(constants), f"expected one row per bank, got {constants}")
             for row in constants:
                 for value in row:
-                    self.assertEqual(value, value, "a diffractometer constant is NaN")
+                    self.assertFalse(math.isnan(value), "a diffractometer constant is NaN")
 
         with self.check("Test 1 / step 12 (the per-bank prm files hold one bank each)"):
             from Engineering.EnggUtils import read_diff_constants_from_prm

@@ -19,6 +19,7 @@ options are right. The one check that asks whether PDCalibration genuinely succe
 so a peak-shape regression reports as one clear line rather than aborting the class.
 """
 
+import math
 import os
 
 from eng_diff_gui_test_base import (
@@ -180,7 +181,7 @@ class EngDiffGuiImatCalibrateAndFocusTest(EngDiffGuiTestBase):
             self.assertEqual(2, len(constants), f"expected one row per bank, got {constants}")
             for row in constants:
                 for value in row:
-                    self.assertEqual(value, value, "a diffractometer constant is NaN")
+                    self.assertFalse(math.isnan(value), "a diffractometer constant is NaN")
 
         # SOFT, for the same reason as the mask check: run_calibration keeps the uncalibrated DIFC
         # when PDCalibration fails rather than raising, so a zero here means the fabricated peak

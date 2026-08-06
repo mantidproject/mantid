@@ -18,9 +18,10 @@ because the naive Qt call does not do what you want in a headless test:
 
 import time
 
-from qtpy.QtCore import QEventLoop, QPoint, Qt
-from qtpy.QtTest import QTest
-from qtpy.QtWidgets import QApplication, QCheckBox, QStyle
+# Qt is imported inside the functions that need it, never at module scope: this module is imported
+# by test modules that the system test collector loads on every build, including framework-only
+# builds with no Qt, and an import error there would break collection before ``skipTests`` could
+# report a clean skip.
 
 # a click that has to travel through the event loop is delivered by processEvents; 20 ms is long
 # enough to drain a burst of queued signals without making the polling loops feel sluggish
@@ -30,12 +31,18 @@ _EVENT_SLICE_MS = 20
 def process_events(rounds=1):
     """Drain the Qt event queue. Several rounds are sometimes needed because handlers post further
     events (a queued signal whose slot emits another queued signal)."""
+    from qtpy.QtCore import QEventLoop
+    from qtpy.QtWidgets import QApplication
+
     for _ in range(rounds):
         QApplication.processEvents(QEventLoop.AllEvents, _EVENT_SLICE_MS)
 
 
 def click(widget):
     """Left-click the centre of a widget."""
+    from qtpy.QtCore import Qt
+    from qtpy.QtTest import QTest
+
     QTest.mouseClick(widget, Qt.LeftButton)
     process_events()
 
@@ -47,6 +54,10 @@ def click_checkbox(checkbox):
     styles but not reliably in the offscreen platform plugin. The indicator at the left edge is the
     dependable hot-spot, and it is also where the checkboxes embedded in table cells live.
     """
+    from qtpy.QtCore import QPoint, Qt
+    from qtpy.QtTest import QTest
+    from qtpy.QtWidgets import QStyle
+
     indicator_w = checkbox.style().pixelMetric(QStyle.PM_IndicatorWidth)
     QTest.mouseClick(checkbox, Qt.LeftButton, pos=QPoint(max(indicator_w // 2, 4), checkbox.height() // 2))
     process_events()
@@ -57,6 +68,8 @@ def set_checkbox(checkbox, checked):
     to know the current state to end up in a known one."""
     if checkbox.isChecked() != checked:
         click_checkbox(checkbox)
+    if checkbox.isChecked() != checked:
+        raise AssertionError(f"checkbox '{checkbox.text()}' is {checkbox.isChecked()} after asking for {checked}")
     return checkbox.isChecked()
 
 
@@ -85,6 +98,8 @@ def table_checkbox(table, row, col):
     Both the correction and texture tables put their select box inside a QWidget/QHBoxLayout so it
     can be centred, so the checkbox is a grandchild of the cell rather than the cell widget itself.
     """
+    from qtpy.QtWidgets import QCheckBox
+
     cell_widget = table.cellWidget(row, col)
     if cell_widget is None:
         raise AssertionError(f"no cell widget at row {row}, column {col}")
@@ -133,6 +148,9 @@ def set_finder_text(finder, text, expect_valid=True):
     logic bug rather than a race.
     """
     finder.setFileTextWithSearch(text)
+    # the search is started from a queued signal, so isSearching() can still be false for the
+    # *previous* text on the next line; wait for the widget to take the new text first
+    wait_until(lambda: finder.getText() == text, msg=f"file finder accepting '{text}'")
     wait_for_file_finder(finder, msg=f"file finder resolving '{text}'")
     if expect_valid and not finder.isValid():
         raise AssertionError(f"file finder could not resolve '{text}'")
@@ -156,4 +174,6 @@ def close_all_figures():
 def top_level_widget_names():
     """Object names of the currently open top-level widgets, for asserting that a button opened a
     new window."""
+    from qtpy.QtWidgets import QApplication
+
     return [w.objectName() for w in QApplication.topLevelWidgets() if w.isVisible()]

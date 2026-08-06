@@ -217,7 +217,7 @@ class GSAS2Model:
 
         # Checked here rather than only in initial_validation because the per-file project name
         # below is never empty, so that check could never fire for a missing project name.
-        if not project_name:
+        if not project_name or not project_name.strip(" \t"):
             logger.error("* There must be a valid Project Name for GSASII refinement")
             return None
 

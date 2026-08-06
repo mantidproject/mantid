@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/IFuncMinimizer.h"
 
+#include <boost/python/args.hpp>
 #include <boost/python/class.hpp>
 
 using namespace boost::python;

@@ -94,6 +94,7 @@ class AutomatedUITestBase(systemtesting.MantidSystemTest, metaclass=ABCMeta):
         super(AutomatedUITestBase, self).__init__()
         self._failures = []
         self._saved_qsettings_state = None
+        self._settings_dir = None
         self._saved_data_dirs = None
         self.tmp_root = None
 
@@ -212,10 +213,16 @@ class AutomatedUITestBase(systemtesting.MantidSystemTest, metaclass=ABCMeta):
         QCoreApplication.setOrganizationName(org)
         QCoreApplication.setApplicationName(app)
         self._saved_qsettings_state = None
+        # point the ini path somewhere that still exists before the temporary directory goes, so a
+        # later bare QSettings() in this process does not write into a deleted directory
+        QSettings.setPath(QSettings.IniFormat, QSettings.UserScope, tempfile.gettempdir())
         shutil.rmtree(self._settings_dir, ignore_errors=True)
+        self._settings_dir = None
 
     def settings_file(self):
         """Path of the isolated ini file, for asserting on what an interface stored."""
+        if self._settings_dir is None:
+            raise RuntimeError("settings are not isolated - settings_file() is only valid between setUp and tearDown")
         return os.path.join(self._settings_dir, self.SETTINGS_ORG, f"{self.SETTINGS_APP}.ini")
 
     # ------------------------------------------------------------------ data search directories
@@ -298,16 +305,19 @@ class AutomatedUITestBase(systemtesting.MantidSystemTest, metaclass=ABCMeta):
         if not hasattr(self, "message_box_messages"):
             self.message_box_messages = []
 
+        patcher = mock.patch(f"{module}.QMessageBox")
+        mocked = patcher.start()
+        # Ok and Cancel must be distinct sentinels: callers decide by comparing the returned value
+        # against QMessageBox.Ok, so a shared value would make a rejection read as an acceptance.
+        mocked.Ok = object()
+        mocked.Cancel = object()
+
         def record(*args, **_kwargs):
             # QMessageBox.warning(parent, title, text, buttons, default_button)
             self.message_box_messages.append(str(args[2]) if len(args) > 2 else "")
-            return answer
+            return mocked.Ok if answer else mocked.Cancel
 
-        patcher = mock.patch(f"{module}.QMessageBox")
-        mocked = patcher.start()
         mocked.warning.side_effect = record
-        mocked.Ok = answer
-        mocked.Cancel = object()
         self.addCleanup(patcher.stop)
         return mocked
 

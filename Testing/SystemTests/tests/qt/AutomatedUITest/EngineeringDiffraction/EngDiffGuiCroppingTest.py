@@ -58,6 +58,10 @@ class _CroppingTestBase(EngDiffGuiTestBase):
     def requiredMemoryMB(self):
         return 4000
 
+    def excludeInPullRequests(self):
+        # a subclass of this base runs a real calibration unless it says otherwise
+        return True
+
     def seeded_settings(self):
         settings = super(_CroppingTestBase, self).seeded_settings()
         # the fixture generates Gaussian peaks, so the fit has to look for the same shape
@@ -219,8 +223,9 @@ class EngDiffGuiRoiOptionsTest(_CroppingTestBase):
                 calibration = CalibrationInfo(group=group, instrument=INSTRUMENT)
                 calibration.set_calibration_paths(INSTRUMENT, CERIA, VANADIUM)
                 calibration.update_group_ws_from_group()
-                grouping = calibration.get_group_ws()
-                self.assertEqual(count, len(set(grouping.extractY().flatten())) - (0 in grouping.extractY()))
+                group_ids = set(calibration.get_group_ws().extractY().flatten())
+                group_ids.discard(0.0)  # 0 marks a detector that is in no group
+                self.assertEqual(count, len(group_ids), f"{group} did not produce {count} group(s), got {sorted(group_ids)}")
 
     def _check_output_file_names(self):
         """The region of interest is what names the calibration output, so check each form."""

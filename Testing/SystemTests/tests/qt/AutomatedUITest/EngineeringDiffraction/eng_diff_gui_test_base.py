@@ -18,6 +18,7 @@ is also what keeps the system test collector from picking it up out of the modul
 """
 
 import os
+import re
 import sys
 from abc import ABCMeta
 
@@ -34,7 +35,7 @@ from qt_interaction_helpers import (  # noqa: E402
     select_combo,
     set_checkbox,
     set_finder_text,
-    wait_until,
+    wait_for_file_finder,
 )
 
 TAB_PREFIX = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs"
@@ -210,10 +211,7 @@ class EngDiffGuiTestBase(AutomatedUITestBase, metaclass=ABCMeta):
         # search settle before OK reads the resolved path back out
         for finder in (view.finder_save, view.finder_fullCalib):
             finder.findFiles(True)
-        wait_until(
-            lambda: not view.finder_save.isSearching() and not view.finder_fullCalib.isSearching(),
-            msg="settings dialog file finders",
-        )
+            wait_for_file_finder(finder, msg="settings dialog file finder")
         click(view.btn_ok)
         process_events(2)
 
@@ -320,7 +318,13 @@ class EngDiffGuiTestBase(AutomatedUITestBase, metaclass=ABCMeta):
         from mantid.api import AnalysisDataService as ADS
         from Engineering.EnggUtils import FOCUSED_OUTPUT_WORKSPACE_NAME
 
-        return sorted(name for name in ADS.getObjectNames() if FOCUSED_OUTPUT_WORKSPACE_NAME in name)
+        # the spectrum/group number is a trailing suffix, so a plain sort puts _10 before _2
+        def spectrum_order(name):
+            match = re.search(r"(\d+)$", name)
+            return (int(match.group(1)) if match else -1, name)
+
+        names = [name for name in ADS.getObjectNames() if FOCUSED_OUTPUT_WORKSPACE_NAME in name]
+        return sorted(names, key=spectrum_order)
 
 
 # ---------------------------------------------------------------------- IMAT data fixture
@@ -466,6 +470,10 @@ def _fill_ceria_peaks(ws, tof, full_calib, expected_d_values):
     """
     # detector id -> difc, so each detector's peaks land where its own calibration puts them
     difc_by_detid = {int(row["detid"]): float(row["difc"]) for row in full_calib}
+    if not difc_by_detid:
+        # otherwise every spectrum would come out as background only and the fixture would produce
+        # peakless data that fails much later, in the calibration, for no obvious reason
+        raise AssertionError("the full calibration table has no difc entries, so no peaks can be generated")
 
     # a smooth, strictly positive background; the peaks sit far above it
     background = 100.0 + 20.0 * np.exp(-(((tof - 40000.0) / 25000.0) ** 2))

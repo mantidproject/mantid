@@ -32,8 +32,8 @@ The automated suite
 ^^^^^^^^^^^^^^^^^^^
 
 The tests live in ``Testing/SystemTests/tests/qt/AutomatedUITest/EngineeringDiffraction`` and are
-registered with CTest under the ``qt.AutomatedUITest.EngineeringDiffraction`` prefix, so the whole
-suite is::
+registered with CTest under the ``qt.AutomatedUITest.EngineeringDiffraction`` prefix (only when the
+build has ``ENABLE_WORKBENCH`` on), so the whole suite is::
 
     ctest -R qt.AutomatedUITest.EngineeringDiffraction
 

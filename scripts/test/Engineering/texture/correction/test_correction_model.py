@@ -160,6 +160,13 @@ class TextureCorrectionModelTest(unittest.TestCase):
         CreateSampleWorkspace(OutputWorkspace=self.ws_name)
         self.assertTrue(self.model._has_no_valid_material(self.ws_name))
 
+    @patch(correction_model_path + ".ADS")
+    def test_has_no_valid_material_returns_true_on_whitespace(self, mock_ads):
+        # a processed nexus round trip returns a blank material name as " " rather than ""
+        self.mock_ws.sample().getMaterial().name.return_value = " "
+        mock_ads.retrieve.return_value = self.mock_ws
+        self.assertTrue(self.model._has_no_valid_material(self.ws_name))
+
     def test_param_str_to_dict_converts_simple_values(self):
         param_str = "NumberOfWavelengthPoints:50,NumberOfDetectorRows:10,SparseInstrument:True"
         result = self.model._param_str_to_dict(param_str)

@@ -131,7 +131,7 @@ class EngDiffGuiTextureLoadingTest(_TextureTestBase):
 
         with self.check("Test 12 / runs load with no parameters, crystal or shape set"):
             for column in (COL_PARAMS, COL_CRYSTAL):
-                self.assertEqual([("Not set")] * len(RUNS), table_column(self.table(), column))
+                self.assertEqual(["Not set"] * len(RUNS), table_column(self.table(), column))
 
         with self.check("Test 12 / every row starts unselected"):
             self.assertEqual([False] * len(RUNS), [table_checkbox(self.table(), row, COL_SELECT).isChecked() for row in range(len(RUNS))])
@@ -152,7 +152,7 @@ class EngDiffGuiTextureLoadingTest(_TextureTestBase):
             params = table_column(self.table(), COL_PARAMS)
             self.assertNotIn("Not set", params, "a run was left without parameters")
             # the pairing is by run number, so each row's parameter table must name the same run
-            for run_name, param_name in zip(table_column(self.table(), COL_RUN), params):
+            for run_name, param_name in zip(table_column(self.table(), COL_RUN), params, strict=True):
                 run_number = run_name.split("_")[1]
                 self.assertIn(run_number, param_name, f"{param_name} was paired with {run_name}")
 
@@ -174,7 +174,7 @@ class EngDiffGuiTextureLoadingTest(_TextureTestBase):
             parameter_table = ADS.retrieve(table_name)
             numeric = [
                 name
-                for name, column_type in zip(parameter_table.getColumnNames(), parameter_table.columnTypes())
+                for name, column_type in zip(parameter_table.getColumnNames(), parameter_table.columnTypes(), strict=True)
                 if column_type in ("double", "float", "int", "long64", "size_t")
             ]
             for offered in combo_items(self.texture_view.combo_param):
@@ -321,7 +321,7 @@ class EngDiffGuiTexturePoleFigureTest(_TextureTestBase):
         with self.check("Test 12 / the crystal structure is recorded against every selected run"):
             self.assertNotIn("Not set", table_column(self.table(), COL_CRYSTAL))
 
-        for line_edit, value in zip((view.h_lineedit, view.k_lineedit, view.l_lineedit), ("1", "1", "0")):
+        for line_edit, value in zip((view.h_lineedit, view.k_lineedit, view.l_lineedit), ("1", "1", "0"), strict=True):
             line_edit.setText(value)
         process_events()
         self.calculate_pole_figure()
