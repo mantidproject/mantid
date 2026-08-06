@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidReflectometry/FindReflectometryLines3.h"
+#include "MantidAlgorithms/FindReflectometryLines3.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IFuncMinimizer.h"
@@ -32,7 +32,7 @@ public:
   FindReflectometryLines3Test() { API::FrameworkManager::Instance(); }
 
   void test_init() {
-    Reflectometry::FindReflectometryLines3 algorithm;
+    Algorithms::FindReflectometryLines3 algorithm;
     TS_ASSERT_THROWS_NOTHING(algorithm.initialize())
     TS_ASSERT(algorithm.isInitialized())
     TS_ASSERT_EQUALS(algorithm.name(), "FindReflectometryLines")
@@ -54,12 +54,12 @@ public:
     auto const &changesInFunction = API::MinimizerStatus::CHANGES_IN_FUNCTION_TOO_SMALL;
     auto const &changesInParameters = API::MinimizerStatus::CHANGES_IN_PARAMETER_TOO_SMALL;
 
-    TS_ASSERT(Reflectometry::FindReflectometryLines3::fitStatusIsAccepted(success, false, false))
-    TS_ASSERT(Reflectometry::FindReflectometryLines3::fitStatusIsAccepted(changesInFunction, true, false))
-    TS_ASSERT(!Reflectometry::FindReflectometryLines3::fitStatusIsAccepted(changesInFunction, false, true))
-    TS_ASSERT(Reflectometry::FindReflectometryLines3::fitStatusIsAccepted(changesInParameters, false, true))
-    TS_ASSERT(!Reflectometry::FindReflectometryLines3::fitStatusIsAccepted(changesInParameters, true, false))
-    TS_ASSERT(!Reflectometry::FindReflectometryLines3::fitStatusIsAccepted("Failed to converge", true, true))
+    TS_ASSERT(Algorithms::FindReflectometryLines3::fitStatusIsAccepted(success, false, false))
+    TS_ASSERT(Algorithms::FindReflectometryLines3::fitStatusIsAccepted(changesInFunction, true, false))
+    TS_ASSERT(!Algorithms::FindReflectometryLines3::fitStatusIsAccepted(changesInFunction, false, true))
+    TS_ASSERT(Algorithms::FindReflectometryLines3::fitStatusIsAccepted(changesInParameters, false, true))
+    TS_ASSERT(!Algorithms::FindReflectometryLines3::fitStatusIsAccepted(changesInParameters, true, false))
+    TS_ASSERT(!Algorithms::FindReflectometryLines3::fitStatusIsAccepted("Failed to converge", true, true))
   }
 
   void test_fits_peak_and_returns_absolute_workspace_index() {
@@ -231,9 +231,9 @@ public:
   }
 
 private:
-  static std::unique_ptr<Reflectometry::FindReflectometryLines3>
+  static std::unique_ptr<Algorithms::FindReflectometryLines3>
   configuredAlgorithm(const API::MatrixWorkspace_sptr &workspace) {
-    auto algorithm = std::make_unique<Reflectometry::FindReflectometryLines3>();
+    auto algorithm = std::make_unique<Algorithms::FindReflectometryLines3>();
     algorithm->initialize();
     algorithm->setChild(true);
     algorithm->setRethrows(true);

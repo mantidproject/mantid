@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidReflectometry/FindReflectometryLines3.h"
+#include "MantidAlgorithms/FindReflectometryLines3.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -121,7 +121,7 @@ PeakParameters estimatePeak(const Mantid::API::MatrixWorkspace &profile, double 
 
 } // namespace
 
-namespace Mantid::Reflectometry {
+namespace Mantid::Algorithms {
 
 DECLARE_ALGORITHM(FindReflectometryLines3)
 
@@ -342,4 +342,4 @@ void FindReflectometryLines3::exec() {
   }
 }
 
-} // namespace Mantid::Reflectometry
+} // namespace Mantid::Algorithms
