@@ -36,19 +36,19 @@ jobs:
 
   doxygen:
     needs: [check-filters]
-    if: ${{ needs.check-filters.outputs.doxygen == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
 
       - uses: ./.github/actions/setup-pixi
+        if: ${{ needs.check-filters.outputs.doxygen == 'true' }}
 
       - uses: ./.github/actions/doxygen-build
         name: Build doxygen
+        if: ${{ needs.check-filters.outputs.doxygen == 'true' }}
 
   conda-packaging-linux:
     needs: [cppcheck, doxygen, check-filters]
-    if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
     runs-on:
       - ${{ (inputs.RUNNER_LABEL == '' && 'self-hosted') || inputs.RUNNER_LABEL }}
       - self-hosted
@@ -67,13 +67,16 @@ jobs:
           path: source
 
       - uses: ./.github/actions/setup-pixi
+        if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
 
       - name: Build conda packages
+        if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
         run: |
           rm -rf ${GITHUB_WORKSPACE}/conda-bld
           bash -ex ${GITHUB_WORKSPACE}/source/buildconfig/Jenkins/Conda/package-conda ${GITHUB_WORKSPACE} --build-mantid --build-qt --build-docs --build-workbench
 
       - name: Upload conda packages
+        if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
         uses: actions/upload-artifact@v7
         with:
           name: conda_packages
@@ -81,6 +84,7 @@ jobs:
           path: ${{ github.workspace }}/conda-bld/**/*.conda
 
       - name: Upload conda environment logs
+        if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
         uses: actions/upload-artifact@v7
         with:
           name: env_logs
@@ -89,7 +93,6 @@ jobs:
 
   cppcheck:
     needs: [check-filters]
-    if: ${{ needs.check-filters.outputs.files_cppcheck == 'true' }}
     runs-on:
       - ${{ (inputs.RUNNER_LABEL == '' && 'self-hosted') || inputs.RUNNER_LABEL }}
       - self-hosted
@@ -105,23 +108,27 @@ jobs:
 
       - name: Install pixi
         uses: ./.github/actions/setup-pixi
+        if: ${{ needs.check-filters.outputs.files_cppcheck == 'true' }}
 
       - name: Clean build tree
+        if: ${{ needs.check-filters.outputs.files_cppcheck == 'true' }}
         run: ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/clean-builder ${GITHUB_WORKSPACE}
 
       - name: Add cppcheck matcher
+        if: ${{ needs.check-filters.outputs.files_cppcheck == 'true' }}
         run: echo "::add-matcher::.github/matchers/cppcheck.json"
 
       - uses: ./.github/actions/cppcheck-build
+        if: ${{ needs.check-filters.outputs.files_cppcheck == 'true' }}
         name: Run cppcheck
 
       - name: Remove cppcheck matcher
-        if: ${{ always() }}
+        if: ${{ always() && needs.check-filters.outputs.files_cppcheck == 'true' }}
         run: echo "::remove-matcher owner=cppcheck::"
 
       - name: Upload cppcheck SARIF report
         uses: actions/upload-artifact@v7
-        if: ${{ always() && hashFiles('build/cppcheck.sarif') != '' }}
+        if: ${{ always() && needs.check-filters.outputs.files_cppcheck == 'true' && hashFiles('build/cppcheck.sarif') != '' }}
         with:
           name: cppcheck_sarif_report
           if-no-files-found: warn
@@ -129,7 +136,7 @@ jobs:
 
 
   build-and-test:
-    needs: [cppcheck, doxygen]
+    needs: [cppcheck, doxygen, check-filters]
     permissions:
       contents: read
 
@@ -180,27 +187,22 @@ jobs:
           fetch-depth: 100
           fetch-tags: true
 
-      - uses: dorny/paths-filter@v4
-        id: changes
-        with:
-          filters: .github/filters.yaml
-
       - name: Install pixi
         uses: ./.github/actions/setup-pixi
-        if: ${{ steps.changes.outputs.code_changes == 'true' }}
+        if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
 
       - name: Clean build tree
-        if: ${{ steps.changes.outputs.code_changes == 'true' }}
+        if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
         # supplying --clean-build or CLEAN_BUILD=true should be added here
         run: ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/clean-builder ${GITHUB_WORKSPACE}
 
       - name: Determine if a PR build
-        if: ${{ github.event_name == 'pull_request' && steps.changes.outputs.code_changes == 'true' }}
+        if: ${{ github.event_name == 'pull_request' && needs.check-filters.outputs.code_changes == 'true' }}
         # telling jenkins scripts this is a PR build
         run: echo "JOB_NAME=pull_requests" >> $GITHUB_ENV
 
       - name: Build code
-        if: ${{ steps.changes.outputs.code_changes == 'true' }}
+        if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
         run: |
           echo "For Jenkins scripts JOB_NAME=${JOB_NAME}"
           cd ${GITHUB_WORKSPACE}
@@ -209,7 +211,7 @@ jobs:
           echo "::remove-matcher owner=gcc-problem-matcher::"
 
       - name: Run unit tests
-        if: ${{ steps.changes.outputs.code_changes == 'true' }}
+        if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
         id: testunit
         run: |
           cd ${GITHUB_WORKSPACE}
@@ -236,7 +238,7 @@ jobs:
           path: ${{ github.workspace }}/build/Testing/*unittest.xml
 
       - name: Run system tests
-        if: ${{ matrix.os == 'Linux' && steps.changes.outputs.code_changes == 'true' }}
+        if: ${{ matrix.os == 'Linux' && needs.check-filters.outputs.code_changes == 'true' }}
         id: testsystem
         run: |
           cd ${GITHUB_WORKSPACE}
@@ -279,7 +281,7 @@ jobs:
 
 
   user-docs-build-and-test:
-    needs: [cppcheck, doxygen]
+    needs: [cppcheck, doxygen, check-filters]
     permissions:
       contents: read
 
@@ -311,22 +313,17 @@ jobs:
           fetch-depth: 100
           fetch-tags: true
 
-      - uses: dorny/paths-filter@v4
-        id: changes
-        with:
-          filters: .github/filters.yaml
-
       - name: Install pixi
         uses: ./.github/actions/setup-pixi
-        if: ${{ steps.changes.outputs.user_docs == 'true' }}
+        if: ${{ needs.check-filters.outputs.user_docs == 'true' }}
 
       - name: Clean build tree
-        if: ${{ steps.changes.outputs.user_docs == 'true' }}
+        if: ${{ needs.check-filters.outputs.user_docs == 'true' }}
         # supplying --clean-build or CLEAN_BUILD=true should be added here
         run: ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/clean-builder ${GITHUB_WORKSPACE}
 
       - name: Build code and user docs
-        if: ${{ steps.changes.outputs.user_docs == 'true' }}
+        if: ${{ needs.check-filters.outputs.user_docs == 'true' }}
         run: |
           cd ${GITHUB_WORKSPACE}
           echo "::add-matcher::.github/matchers/gcc.json"
@@ -334,7 +331,7 @@ jobs:
           echo "::remove-matcher owner=gcc-problem-matcher::"
 
       - name: Run doctests
-        if: ${{ steps.changes.outputs.user_docs == 'true' }}
+        if: ${{ needs.check-filters.outputs.user_docs == 'true' }}
         id: testdocs
         run: |
           cd ${GITHUB_WORKSPACE}
