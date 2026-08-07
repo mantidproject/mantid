@@ -5,7 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from math import atan
 from typing import Dict, Tuple, Sequence, Type
 from enum import Enum
 
@@ -59,6 +60,69 @@ class DetectorGroupInfo:
 
 
 @dataclass(frozen=True)
+class CollimatorConfig:
+    """A radial collimator option, which sets the extent of the gauge volume along the beam.
+
+    ENGIN-X values are from Santisteban et al., J. Appl. Cryst. 39 (2006) 812, section 3. All five
+    collimators share 160 vanes spanning 32 degrees, 350 mm long and 50 um thick; they differ only in
+    how far they sit from the focal point. Where the commissioning paper reports a measured profile
+    (figure 6b) that is used in preference to the nominal width.
+    """
+
+    nominal_gauge_width: float  # m
+    focal_distance: float  # m, l_c in the paper
+    measured_fwhm: float | None = None  # m, from calibration where available
+
+    @property
+    def gauge_width(self) -> float:
+        """The width to model the collimator acceptance with, in m."""
+        return self.measured_fwhm if self.measured_fwhm is not None else self.nominal_gauge_width
+
+
+@dataclass(frozen=True)
+class ExperimentConfig:
+    """The instrument setup defining the shape and position of the instrumental gauge volume.
+
+    The incident slits set the two directions transverse to the beam; the radial collimator sets the
+    extent along it. Together with the sample shape these give the illuminated volume that
+    EstimateScatteringVolumeCentreOfMass integrates over.
+    """
+
+    collimator: CollimatorConfig | None
+    slit_width: float  # m, horizontal
+    slit_height: float  # m, vertical
+    slit_distance: float  # m, from the slits to the sample
+    edge_broadening: float  # m, the measured error-function width of the beam edge
+
+    @property
+    def divergence(self) -> float:
+        """Beam divergence in radians, derived from the measured edge broadening.
+
+        The commissioning paper measures the beam edges directly (0.73 mm on ENGIN-X, figure 6c)
+        rather than quoting a divergence, and that broadening is what the beam profile actually needs.
+        Since the profile is parameterised by a divergence and a slit distance, back one out of the
+        other: broadening = slit_distance * tan(divergence).
+        """
+        return atan(self.edge_broadening / self.slit_distance) if self.slit_distance > 0.0 else 0.0
+
+
+# ENGIN-X radial collimators, keyed by the nominal gauge width in mm.
+ENGINX_COLLIMATORS: Dict[float, CollimatorConfig] = {
+    0.5: CollimatorConfig(nominal_gauge_width=0.0005, focal_distance=0.100),
+    1.0: CollimatorConfig(nominal_gauge_width=0.001, focal_distance=0.160),
+    2.0: CollimatorConfig(nominal_gauge_width=0.002, focal_distance=0.310, measured_fwhm=0.00205),
+    3.0: CollimatorConfig(nominal_gauge_width=0.003, focal_distance=0.400),
+    4.0: CollimatorConfig(nominal_gauge_width=0.004, focal_distance=0.490, measured_fwhm=0.00395),
+}
+
+# Measured broadening of the ENGIN-X beam edges (paper figure 6c).
+ENGINX_EDGE_BROADENING = 0.00073  # m
+# The IGV-defining slits run on a rail 0-120 mm from the sample; this is a mid-range default and
+# should be confirmed against the actual setup before the derived divergence is relied upon.
+ENGINX_SLIT_DISTANCE = 0.05  # m
+
+
+@dataclass(frozen=True)
 class InstrumentConfig:
     name: str
 
@@ -78,6 +142,10 @@ class InstrumentConfig:
 
     # GSAS prm
     prm_header_template: str
+
+    # Named gauge volume setups, keyed by the preset name shown in the interface. Instruments without
+    # a characterised gauge volume simply leave this empty.
+    experiment_configs: Dict[str, ExperimentConfig] = field(default_factory=dict)
 
 
 CONFIGS: Dict[str, InstrumentConfig] = {
@@ -157,6 +225,18 @@ CONFIGS: Dict[str, InstrumentConfig] = {
             (ENGINX_GROUP.TEXTURE20, "Texture20", False, False),
             (ENGINX_GROUP.TEXTURE30, "Texture30", False, False),
         ),
+        # A cubic gauge volume is the usual ENGIN-X setup: the slits are opened to match the
+        # collimator, so the volume is the same size in all three directions.
+        experiment_configs={
+            f"{width:g}mmCube": ExperimentConfig(
+                collimator=collimator,
+                slit_width=collimator.nominal_gauge_width,
+                slit_height=collimator.nominal_gauge_width,
+                slit_distance=ENGINX_SLIT_DISTANCE,
+                edge_broadening=ENGINX_EDGE_BROADENING,
+            )
+            for width, collimator in ENGINX_COLLIMATORS.items()
+        },
     ),
     "IMAT": InstrumentConfig(
         name="IMAT",
@@ -264,3 +344,19 @@ def get_instr_config(instrument: str | None) -> InstrumentConfig | None:
     if key not in CONFIGS:
         raise RuntimeError(f"No instrument config registered for instrument='{instrument}'")
     return CONFIGS[key]
+
+
+def get_experiment_config(instrument: str | None, preset: str | None) -> ExperimentConfig | None:
+    """Look up the gauge volume setup for a named preset.
+
+    Returns None whenever the setup is not known - an unrecognised instrument, a custom gauge volume
+    shape, or no gauge volume at all. Unlike get_instr_config this never raises: describing the optics
+    is optional, and the caller falls back to treating the whole sample as uniformly illuminated.
+    """
+    if instrument is None or preset is None:
+        return None
+    key = str(instrument).upper()
+    key = PSEUDONYMS.get(key, key)
+    if key not in CONFIGS:
+        return None
+    return CONFIGS[key].experiment_configs.get(preset)
