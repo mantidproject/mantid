@@ -155,11 +155,21 @@ public:
   void test_failure_too_much_memory_ws() {
 #if defined(__linux__) || defined(__gnu_linux__)
     std::cout << "Test failure too much memory with a workspace" << std::endl;
-    Mantid::TestMemory::MockMemory memL; // patch the available memory calculator
-    size_t numFloats = memL.numberOfFloats();
-    size_t numSpec = 10;
-    size_t numBins = numFloats / numSpec / 2;
-    // ensure that rebinning will fail if the number of bins requested is expected to exceed available memory
+    constexpr std::size_t mockMemKiB = 1000;
+    Mantid::TestMemory::MockMemory memL(mockMemKiB); // patch the available memory calculator
+
+    // Rebin's histogram memory check compares the output size (the Y and E arrays for every spectrum)
+    // against this fraction of the mocked memory basis - keep in sync with Rebin.cpp's memorySafetyFraction.
+    constexpr double rebinMemoryFraction = 0.8;
+    const auto ceilingBytes = static_cast<std::size_t>(rebinMemoryFraction * static_cast<double>(mockMemKiB) * 1024.0);
+    const std::size_t numSpec = 10;
+    constexpr std::size_t bytesPerBinPerSpec = 2 * sizeof(double); // the Y and E arrays
+    // Choose a bin count that overflows the ceiling for numSpec spectra but still fits for numSpec - 1,
+    // sitting comfortably between the two thresholds so rounding cannot flip the result.
+    const std::size_t failThreshold = ceilingBytes / (numSpec * bytesPerBinPerSpec);
+    const std::size_t passThreshold = ceilingBytes / ((numSpec - 1) * bytesPerBinPerSpec);
+    const std::size_t numBins = (failThreshold + passThreshold) / 2;
+
     Rebin rebin;
     rebin.initialize();
     Workspace2D_sptr ws = createWorkspace<Workspace2D>(numSpec, 2, 1);
