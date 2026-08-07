@@ -10,6 +10,8 @@ from mantid.simpleapi import (
     CopySample,
     SetSampleMaterial,
     DefineGaugeVolume,
+    SetBeam,
+    SetInstrumentParameter,
     ConvertUnits,
     MonteCarloAbsorption,
     CloneWorkspace,
@@ -22,12 +24,14 @@ from mantid.simpleapi import (
 )
 import numpy as np
 from mantid.api import AnalysisDataService as ADS
+from math import degrees
 from os import path, makedirs
 from scipy import interpolate
 from Engineering.common.texture_sample_viewer import has_valid_shape
 from typing import Sequence, Tuple
 from mantid.dataobjects import Workspace2D
 from Engineering.common.calibration_info import CalibrationInfo
+from Engineering.common.instrument_config import get_experiment_config
 from Engineering.texture.texture_helper import get_gauge_vol_str, load_all_orientations
 
 
@@ -92,6 +96,7 @@ class TextureCorrectionModel:
                 logger.notice("Cannot correct monitors for beam divergence, monitor spectra will be ignored")
             if self.include_abs:
                 self.define_gauge_volume(ws, abs_args["gauge_vol_preset"], abs_args["gauge_vol_file"])
+                self.define_beam_and_collimator(ws, abs_args["gauge_vol_preset"])
                 self.calc_absorption(ws, abs_args["mc_param_str"])
                 abs_corr = "_abs_corr"
                 if self.include_atten:
@@ -279,6 +284,44 @@ class TextureCorrectionModel:
         gauge_str = get_gauge_vol_str(preset, custom)
         if gauge_str:
             DefineGaugeVolume(ws, gauge_str)
+
+    def define_beam_and_collimator(self, ws: Workspace2D, preset: str) -> None:
+        """Describe the optics that shaped the gauge volume, for the presets we know the setup for.
+
+        The gauge volume alone says where the illuminated region is but not how the intensity varies
+        across it. The incident slits shape the two directions transverse to the beam and the radial
+        collimator shapes the extent along it, and both are needed to weight the scattering volume
+        properly. A custom gauge volume carries no such information, so it is left undefined and the
+        whole sample is treated as uniformly illuminated.
+        """
+        instrument = self.calibration.get_instrument() if self.calibration else None
+        config = get_experiment_config(instrument, preset)
+        if config is None:
+            logger.notice(
+                f"No known instrument setup for gauge volume preset '{preset}' - the beam and collimator "
+                "will be left undefined and the illumination treated as uniform"
+            )
+            return
+
+        SetBeam(
+            ws,
+            Geometry={
+                "Shape": "Slit",
+                "Width": config.slit_width * 100,  # SetBeam takes cm
+                "Height": config.slit_height * 100,
+                "SlitDistance": config.slit_distance * 100,
+                "HorizontalDivergence": degrees(config.divergence),  # and degrees
+                "VerticalDivergence": degrees(config.divergence),
+            },
+        )
+        if config.collimator:
+            # Read back by EstimateScatteringVolumeCentreOfMass to weight by collimator acceptance.
+            SetInstrumentParameter(
+                ws,
+                ParameterName="col-gauge-width",
+                ParameterType="Number",
+                Value=str(config.collimator.gauge_width),
+            )
 
     # ~~~~~ `Parameter Dictionary as String` Functions ~~~~~~~~~~~~~
 
