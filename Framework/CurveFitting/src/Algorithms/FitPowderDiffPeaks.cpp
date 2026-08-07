@@ -2848,7 +2848,7 @@ Workspace2D_sptr FitPowderDiffPeaks::buildPartialWorkspace(const API::MatrixWork
   // 4. Put data there
   // TODO: Try to use vector copier
   for (size_t iw = 0; iw < partws->getNumberHistograms(); ++iw) {
-    MantidVec &nX = partws->dataX(iw);
+    auto &nX = partws->mutableX(iw);
     for (size_t i = 0; i < wssize; ++i) {
       nX[i] = X[i + ileft];
     }

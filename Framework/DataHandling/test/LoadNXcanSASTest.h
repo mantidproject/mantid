@@ -491,7 +491,7 @@ private:
 
     // If applicable, ensure that both have the same Xdev data
     if (m_parameters.hasDx) {
-      auto readDataDX = [](const MatrixWorkspace_sptr &ws, size_t index) { return ws->dataDx(index); };
+      auto readDataDX = [](const MatrixWorkspace_sptr &ws, size_t index) { return ws->dx(index); };
       do_assert_data(wsIn, wsOut, readDataDX);
     }
 

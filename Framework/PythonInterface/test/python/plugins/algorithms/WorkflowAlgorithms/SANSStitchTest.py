@@ -803,7 +803,7 @@ class TestQErrorCorrectionForMergedWorkspaces(unittest.TestCase):
         if use_xerror:
             for hists in range(0, nspec):
                 x_error_array = np.asarray(x_error)
-                ws.setDx(hists, x_error_array)
+                ws.setSharedDx(hists, x_error_array)
         return ws
 
     def test_error_is_ignored_for_more_than_one_spectrum(self):

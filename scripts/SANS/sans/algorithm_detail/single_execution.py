@@ -274,7 +274,7 @@ def correct_q_resolution_for_can(sample_workspace, can_workspace, subtracted_wor
     """
     _ = can_workspace
     if sample_workspace.getNumberHistograms() == 1 and sample_workspace.hasDx(0):
-        subtracted_workspace.setDx(0, sample_workspace.dx(0))
+        subtracted_workspace.setSharedDx(0, sample_workspace.dx(0))
 
 
 def get_merge_bundle_for_merge_request(completed_slices: CompletedSlices, parent_alg):

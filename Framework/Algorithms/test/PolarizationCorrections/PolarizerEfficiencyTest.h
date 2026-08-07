@@ -107,7 +107,7 @@ public:
         polariserEfficiency->getProperty("OutputWorkspace"));
     // The T_para(00,11) and T_anti(01,10)) curves are 4 and 2 (constant wrt wavelength) respectively, and the analyser
     // efficiency is 1 for all wavelengths, which should give us a polarizer efficiency of 2/3
-    for (const double &y : calculatedPolariserEfficiency->dataY(0)) {
+    for (const double &y : calculatedPolariserEfficiency->y(0)) {
       TS_ASSERT_DELTA(2.0 / 3.0, y, 1e-8);
     }
   }
@@ -122,7 +122,7 @@ public:
 
     // The T_para and T_anti curves are 4 and 2 (constant wrt wavelength) respectively, and the analyser
     // efficiency is 1 for all wavelengths, which should give us a polarizer efficiency of 2/3
-    for (const double &y : calculatedPolariserEfficiency->dataY(0)) {
+    for (const double &y : calculatedPolariserEfficiency->y(0)) {
       TS_ASSERT_DELTA(2.0 / 3.0, y, 1e-8);
     }
   }
@@ -134,7 +134,7 @@ public:
     polarizerEfficiency->execute();
     MatrixWorkspace_sptr eff = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
         polarizerEfficiency->getProperty("OutputWorkspace"));
-    const auto &errors = eff->dataE(0);
+    const auto &errors = eff->e(0);
     const std::vector<double> expectedErrors{0.23570, 0.14142, 0.10101, 0.07856, 0.06428, 0.05439, 0.047140};
     for (size_t i = 0; i < expectedErrors.size(); ++i) {
       TS_ASSERT_DELTA(expectedErrors[i], errors[i], 1e-5);

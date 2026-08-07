@@ -300,9 +300,9 @@ void LoadILLIndirect2::loadDiffractionData(Nexus::NXEntry &entry) {
   // First, Monitor
   // Assign Y
   int *monitor_p = &dataMon(0, 0);
-  m_localWorkspace->dataY(0).assign(monitor_p, monitor_p + m_numberOfChannels);
+  m_localWorkspace->mutableY(0).assign(monitor_p, monitor_p + m_numberOfChannels);
   // Assign Error
-  MantidVec &dataE = m_localWorkspace->dataE(0);
+  auto &dataE = m_localWorkspace->mutableE(0);
   std::transform(monitor_p, monitor_p + m_numberOfChannels, dataE.begin(), [](const double v) { return std::sqrt(v); });
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_localWorkspace))
@@ -322,9 +322,9 @@ void LoadILLIndirect2::loadDiffractionData(Nexus::NXEntry &entry) {
       }
       // Assign Y
       int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
-      m_localWorkspace->dataY(index).assign(data_p, data_p + m_numberOfChannels);
+      m_localWorkspace->mutableY(index).assign(data_p, data_p + m_numberOfChannels);
       // Assign Error
-      MantidVec &E = m_localWorkspace->dataE(index);
+      auto &E = m_localWorkspace->mutableE(index);
       std::transform(data_p, data_p + m_numberOfChannels, E.begin(), [](const double v) { return std::sqrt(v); });
     }
   }

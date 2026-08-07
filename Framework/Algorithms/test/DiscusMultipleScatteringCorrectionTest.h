@@ -518,7 +518,7 @@ public:
     // S(Q) zero everywhere apart from spike at Q=1, w=1
     for (size_t i = 0; i < 3; i++)
       for (size_t j = 0; j < 3; j++) {
-        if ((SofQWorkspace->dataX(i)[j] == deltaE) && (SofQWorkspace->getAxis(1)->getValue(i) == qSpike))
+        if ((SofQWorkspace->x(i)[j] == deltaE) && (SofQWorkspace->getAxis(1)->getValue(i) == qSpike))
           SofQWorkspace->mutableY(i)[j] = 1000.;
         else
           SofQWorkspace->mutableY(i)[j] = 0.;
@@ -839,7 +839,7 @@ public:
       for (size_t i = 0; i < output->size(); i++) {
         TS_ASSERT_THROWS_NOTHING(wsPtr = output->getItem(i));
         auto matrixWsPtr = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr);
-        auto eData = matrixWsPtr->dataE(0);
+        auto eData = matrixWsPtr->e(0);
         TS_ASSERT(std::all_of(eData.cbegin(), eData.cend(), [](double i) { return i > 0; }));
       }
     }

@@ -974,13 +974,13 @@ public:
       {
         if (DO_PLUS)
         {
-          TS_ASSERT_DELTA(  work_out1->dataY(pix)[i], 4.00, 1e-5);
-          TS_ASSERT_DELTA(  work_out1->dataE(pix)[i], sqrt(4.00), 1e-5);
+          TS_ASSERT_DELTA(  work_out1->y(pix)[i], 4.00, 1e-5);
+          TS_ASSERT_DELTA(  work_out1->e(pix)[i], sqrt(4.00), 1e-5);
         }
         else
         {
-          TS_ASSERT_DELTA(  work_out1->dataY(pix)[i], 0.00, 1e-5);
-          TS_ASSERT_DELTA(  work_out1->dataE(pix)[i], sqrt(4.00), 1e-5);
+          TS_ASSERT_DELTA(  work_out1->y(pix)[i], 0.00, 1e-5);
+          TS_ASSERT_DELTA(  work_out1->e(pix)[i], sqrt(4.00), 1e-5);
         }
 
         //Incoming event workspace should still have 2.0 for values

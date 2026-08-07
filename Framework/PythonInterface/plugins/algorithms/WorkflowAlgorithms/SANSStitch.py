@@ -515,7 +515,7 @@ class QErrorCorrectionForMergedWorkspaces(object):
         q_resolution = self._divide_q_resolution_by_counts(new_q_res, new_counts)
 
         # Set the dx error
-        output_ws.setDx(0, q_resolution)
+        output_ws.setSharedDx(0, q_resolution)
 
     def _comment(self, ws, message):
         comment = AlgorithmManager.createUnmanaged("Comment")

@@ -130,8 +130,8 @@ public:
     ws2->initialize(10, 10, 10);
 
     for (size_t is = 0; is < ws2->getNumberHistograms(); ++is) {
-      Mantid::MantidVec &x = ws2->dataX(is);
-      Mantid::MantidVec &y = ws2->dataY(is);
+      auto &x = ws2->mutableX(is);
+      auto &y = ws2->mutableY(is);
       // Mantid::MantidVec& e = ws2->dataE(is);
       for (size_t i = 0; i < y.size(); ++i) {
         x[i] = 0.1 * static_cast<double>(i);

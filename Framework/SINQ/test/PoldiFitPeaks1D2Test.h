@@ -301,8 +301,8 @@ private:
 
     // put it into a workspace
     Workspace2D_sptr ws = WorkspaceCreationHelper::create1DWorkspaceConstant(50, 0.0, 1.0, false);
-    std::vector<double> &x = ws->dataX(0);
-    std::vector<double> &y = ws->dataY(0);
+    auto &x = ws->mutableX(0);
+    auto &y = ws->mutableY(0);
 
     for (size_t i = 0; i < x.size(); ++i) {
       x[i] = domain[i];
