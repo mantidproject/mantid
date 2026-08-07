@@ -246,7 +246,7 @@ class PelicanReduction(PythonAlgorithm):
             self._progress.report("NXSPE processing")
             self._nxspe_processing(red_2D)
         else:
-            self._progress.report("SOFQW-{} processing".format(self._sofqw_mode))
+            self._progress.report("SOFQW-NormalisedPolygon processing")
             self._sofqw_processing(red_2D, output_ws)
 
         # clean up the intermediate workspaces else group them to keep display clean
@@ -283,7 +283,6 @@ class PelicanReduction(PythonAlgorithm):
             QAxisBinning=self._q_range,
             EMode="Direct",
             EFixed=self._efixed,
-            Method=self._sofqw_mode,
             ReplaceNANs=True,
         )
         CorrectKiKf(InputWorkspace=reduced_2D, OutputWorkspace=reduced_2D, EMode="Direct", EFixed=self._efixed)
@@ -382,7 +381,6 @@ class PelicanReduction(PythonAlgorithm):
         # convert to SOFQW or save as NXSPE
         processing = self.getPropertyValue("Processing").split("-")
         self._processing = processing[0]
-        self._sofqw_mode = processing[1] if len(processing) > 1 else ""
         self._process_suffix = {"SOFQW3": "_qw3", "NXSPE": "_spe"}
 
         # from the configuration (ini) file and then

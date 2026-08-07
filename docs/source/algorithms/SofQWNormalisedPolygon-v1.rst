@@ -32,16 +32,6 @@ parameter in the instrument definition file: *detector-neighbour-offset*. The
 integer value of this parameter should be the number of pixels that separates
 two pixels at the same vertical position in adjacent tubes.
 
-See :ref:`algm-SofQWCentre` for centre-point binning or :ref:`algm-SofQWPolygon`
-for simpler and less precise but faster binning strategies. The speed-up
-is from ignoring the azimuthal positions of the detectors (as for the non-PSD
-mode in this algorithm) but in addition, :ref:`algm-SofQWPolygon` treats
-all detectors as being the same, and characterised by a single width in
-scattering angle. Thereafter, it weights the signal and error by the fractional
-overlap, similarly to that shown in the first figure above, but then discards
-the summed weights, producing a **Workspace2D** rather than a
-**RebinnedOutput** workspace.
-
 Usage
 -----
 

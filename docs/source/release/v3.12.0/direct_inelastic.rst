@@ -28,7 +28,7 @@ New features
 
 Similar to the slice viewer, MSlice plots slices and cuts from workspaces. It creates customisable publication quality figures. Cuts can be created interactively by dragging a rectangle across a slice, and information such as recoil lines and bragg peaks can be overplotted.
 
-- The algorithms :ref:`algm-SofQWCentre`, :ref:`algm-SofQWPolygon` and :ref:`algm-SofQWNormalisedPolygon`, which rebin an inelastic workspace (has a `DeltaE` axis) from spectrum numbers (angle) to `MomentumTransfer` may now rebin the energy (`DeltaE`) axis as well as the :math:`|Q|` (`MomentumTransfer`) axes.
+- The algorithms SofQWCentre, SofQWPolygon and :ref:`algm-SofQWNormalisedPolygon`, which rebin an inelastic workspace (has a `DeltaE` axis) from spectrum numbers (angle) to `MomentumTransfer` may now rebin the energy (`DeltaE`) axis as well as the :math:`|Q|` (`MomentumTransfer`) axes.
 - :ref:`algm-SofQWNormalisedPolygon` now has uses a faster method for calculating the polygon intersections.
 - The crystal field computation and fitting engine is now feature complete. It can now handle multi-site computation and simultaneous fitting of inelastic spectra and physical properties dataset. See the :ref:`Crystal Field Python Interface` help page for details, and `<https://archive.mantidproject.org/Crystal_Field_Examples>`_ for examples of use.
 - A new Python module :ref:`directtools <Directtools Python module>` includes utilities for plotting :math:`S(Q,W)` workspaces and cuts (line profiles) in constant :math:`Q` and :math:`E`.
@@ -61,7 +61,7 @@ New features
 ############
 
 - New algorithm :ref:`HyspecScharpfCorrection <algm-HyspecScharpfCorrection-v1>` that can be used to calculate spin incoherent scattering from polarized neutron data
-- The algorithms :ref:`algm-SofQWCentre`, :ref:`algm-SofQWPolygon` and :ref:`algm-SofQWNormalisedPolygon`, which rebin an inelastic workspace (has a `DeltaE` axis) from spectrum numbers (angle) to `MomentumTransfer` may now rebin the energy (`DeltaE`) axis as well as the :math:`|Q|` (`MomentumTransfer`) axes.
+- The algorithms SofQWCentre, SofQWPolygon and :ref:`algm-SofQWNormalisedPolygon`, which rebin an inelastic workspace (has a `DeltaE` axis) from spectrum numbers (angle) to `MomentumTransfer` may now rebin the energy (`DeltaE`) axis as well as the :math:`|Q|` (`MomentumTransfer`) axes.
 - :ref:`algm-SofQWNormalisedPolygon` now has uses a faster method for calculating the polygon intersections.
 
 Bug fixes
