@@ -23,9 +23,15 @@ mtd_add_qt_tests(
   QT_VERSION ${MANTID_QT_VERSION}
   SRC ${TEST_FILES}
   INCLUDE_DIRS ${MOCK_HEADER_DIRS} ../../../../Framework/DataObjects/inc
-  LINK_LIBS Python::Python ${CORE_MANTIDLIBS} Mantid::PythonInterfaceCore Mantid::DataObjects ${POCO_LIBRARIES}
+  LINK_LIBS Python::Python
+            ${CORE_MANTIDLIBS}
+            Mantid::PythonInterfaceCore
+            Mantid::DataObjects
+            ${POCO_LIBRARIES}
             ${Boost_LIBRARIES}
-  QT5_LINK_LIBS Qt5::OpenGL QT6_LINK_LIBS Qt6::OpenGL Qt6::OpenGLWidgets
+            QT6_LINK_LIBS
+            Qt6::OpenGL
+            Qt6::OpenGLWidgets
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon MantidQtWidgetsInstrumentView MantidQtWidgetsMplCpp MantidQtWidgetsPlotting
   PARENT_DEPENDENCIES GUITests
 )

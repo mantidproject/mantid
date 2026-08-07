@@ -15,21 +15,17 @@ import os
 #  On Windows the package can be installed anywhere so the locations must
 #  be determined at runtime. The two options are:
 #    1. using a qt.conf file: requires it to be next to the application
-#       executable but this would be python.exe and then would not allow
-#       switching between Qt Major versions
+#       executable but this would be python.exe
 #    2. add extra paths to the LibraryPath list here
-# As we can dynamically determine the Qt version here we choose option 2.
+# We choose option 2 and add the build-time Qt6 plugin paths below.
 
 
 def setup_library_paths_win():
     """Adds the build-time configured directory to the Qt library path.
     The buildsystem generates the path at build time.
-    A %V marker can be used that will be replaced by the major version of Qt
-    at runtime.
     """
     import os.path as osp
     import sys
-    from qtpy import QT_VERSION
     from qtpy.QtCore import QCoreApplication
 
     conda_prefix = os.environ.get("CONDA_PREFIX", "")
@@ -39,13 +35,13 @@ def setup_library_paths_win():
         return
 
     # package build
-    pkg_qt_plugins = osp.dirname(sys.executable) + f"\\..\\plugins\\qt{QT_VERSION[0]}"
+    pkg_qt_plugins = osp.dirname(sys.executable) + "\\..\\plugins\\qt6"
     if osp.isdir(pkg_qt_plugins):
         QCoreApplication.addLibraryPath(pkg_qt_plugins)
         return
 
     # development build
-    dev_qt_plugins = osp.dirname(sys.executable) + f"\\..\\qt{QT_VERSION[0]}\\plugins"
+    dev_qt_plugins = osp.dirname(sys.executable) + "\\..\\qt6\\plugins"
     if osp.isdir(dev_qt_plugins):
         QCoreApplication.addLibraryPath(dev_qt_plugins)
         return

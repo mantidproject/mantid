@@ -20,8 +20,4 @@ internal = true
 # so we have to strip those manually ourselves. See tools/sip/sipwrapper.py.
 exceptions = true
 protected-is-public = false
-# The Qt6Bindings sip %Feature is enabled by default (PyQt6); disabled for the
-# PyQt5 build so version-specific %MappedTypes select the right implementation.
-# (Qt5/Qt6 sip timelines share no version tag, so a custom feature is used.)
-disabled-features = @SIP_DISABLED_FEATURES@
 sip-file = "@MODULE_SPEC_FILE@"

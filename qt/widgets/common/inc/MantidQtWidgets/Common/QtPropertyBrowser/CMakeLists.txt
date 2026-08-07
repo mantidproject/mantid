@@ -20,19 +20,19 @@ set(QTPROPERTYBROWSER_SRCS
 # moc'd files will end up in build directory, so add to include path
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-# Need to use a string of calls to the qt5_generate_moc macro instead of qt5_wrap_cpp because the latter produces files
+# Need to use a string of calls to the qt6_generate_moc macro instead of qt6_wrap_cpp because the latter produces files
 # with a cxx suffix when QtPropertyBrowser requires cpp
 
-qt5_generate_moc(src/qtpropertybrowser.h ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertybrowser.cpp)
-qt5_generate_moc(src/qtpropertymanager.h ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertymanager.cpp)
-qt5_generate_moc(src/qteditorfactory.h ${CMAKE_CURRENT_BINARY_DIR}/moc_qteditorfactory.cpp)
-qt5_generate_moc(src/qtvariantproperty.h ${CMAKE_CURRENT_BINARY_DIR}/moc_qtvariantproperty.cpp)
-qt5_generate_moc(src/qttreepropertybrowser.h ${CMAKE_CURRENT_BINARY_DIR}/moc_qttreepropertybrowser.cpp)
-qt5_generate_moc(src/qtbuttonpropertybrowser.h ${CMAKE_CURRENT_BINARY_DIR}/moc_qtbuttonpropertybrowser.cpp)
-qt5_generate_moc(src/qtgroupboxpropertybrowser.h ${CMAKE_CURRENT_BINARY_DIR}/moc_qtgroupboxpropertybrowser.cpp)
-qt5_generate_moc(src/qtpropertymanager.cpp ${CMAKE_CURRENT_BINARY_DIR}/qtpropertymanager.moc)
-qt5_generate_moc(src/qteditorfactory.cpp ${CMAKE_CURRENT_BINARY_DIR}/qteditorfactory.moc)
-qt5_generate_moc(src/qttreepropertybrowser.cpp ${CMAKE_CURRENT_BINARY_DIR}/qttreepropertybrowser.moc)
+qt6_generate_moc(src/qtpropertybrowser.h ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertybrowser.cpp)
+qt6_generate_moc(src/qtpropertymanager.h ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertymanager.cpp)
+qt6_generate_moc(src/qteditorfactory.h ${CMAKE_CURRENT_BINARY_DIR}/moc_qteditorfactory.cpp)
+qt6_generate_moc(src/qtvariantproperty.h ${CMAKE_CURRENT_BINARY_DIR}/moc_qtvariantproperty.cpp)
+qt6_generate_moc(src/qttreepropertybrowser.h ${CMAKE_CURRENT_BINARY_DIR}/moc_qttreepropertybrowser.cpp)
+qt6_generate_moc(src/qtbuttonpropertybrowser.h ${CMAKE_CURRENT_BINARY_DIR}/moc_qtbuttonpropertybrowser.cpp)
+qt6_generate_moc(src/qtgroupboxpropertybrowser.h ${CMAKE_CURRENT_BINARY_DIR}/moc_qtgroupboxpropertybrowser.cpp)
+qt6_generate_moc(src/qtpropertymanager.cpp ${CMAKE_CURRENT_BINARY_DIR}/qtpropertymanager.moc)
+qt6_generate_moc(src/qteditorfactory.cpp ${CMAKE_CURRENT_BINARY_DIR}/qteditorfactory.moc)
+qt6_generate_moc(src/qttreepropertybrowser.cpp ${CMAKE_CURRENT_BINARY_DIR}/qttreepropertybrowser.moc)
 
 set(QTPROPERTYBROWSER_HEADERS_ONLY_MOC
     ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertybrowser.cpp
@@ -49,11 +49,11 @@ set(QTPROPERTYBROWSER_HEADERS_ONLY_MOC
 
 set_source_files_properties(${QTPROPERTYBROWSER_HEADERS_ONLY_MOC} PROPERTIES HEADER_FILE_ONLY true)
 
-qt5_generate_moc(src/qtpropertybrowserutils_p.h ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertybrowserutils_p.cpp)
+qt6_generate_moc(src/qtpropertybrowserutils_p.h ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertybrowserutils_p.cpp)
 
 set(QTPROPERTYBROWSER_HEADERS_MOC ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertybrowserutils_p.cpp)
 
-qt5_wrap_cpp(
+qt6_wrap_cpp(
   EXTRA_MOCS
   src/ButtonEditorFactory.h
   src/DoubleEditorFactory.h
@@ -67,7 +67,7 @@ qt5_wrap_cpp(
 
 set(QTPROPERTYBROWSER_MOC ${QTPROPERTYBROWSER_HEADERS_MOC} ${QTPROPERTYBROWSER_HEADERS_ONLY_MOC} ${EXTRA_MOCS})
 
-qt5_add_resources(QTPROPERTYBROWSER_RESOURCES src/qtpropertybrowser.qrc)
+qt6_add_resources(QTPROPERTYBROWSER_RESOURCES src/qtpropertybrowser.qrc)
 
 set(SRCS ${QTPROPERTYBROWSER_MOC} ${QTPROPERTYBROWSER_SRCS} ${QTPROPERTYBROWSER_RESOURCES})
 

@@ -160,7 +160,7 @@ set(SRC_FILES
     src/PythonHelpWindow.cpp
 )
 
-set(QT5_MOC_FILES
+set(QT${MANTID_QT_VERSION}_MOC_FILES
     inc/MantidQtWidgets/Common/AddWorkspaceDialog.h
     inc/MantidQtWidgets/Common/AddWorkspaceMultiDialog.h
     inc/MantidQtWidgets/Common/AlgorithmDialog.h
@@ -264,8 +264,8 @@ set(QT5_MOC_FILES
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
-set(QT5_INC_FILES
-    ${QT5_MOC_FILES}
+set(QT${MANTID_QT_VERSION}_INC_FILES
+    ${QT${MANTID_QT_VERSION}_MOC_FILES}
     inc/MantidQtWidgets/Common/BaseEncoder.h
     inc/MantidQtWidgets/Common/BaseDecoder.h
     inc/MantidQtWidgets/Common/AlgorithmInputHistory.h
@@ -351,7 +351,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/Python/QHashToDict.h
 )
 
-set(QT5_UI_FILES
+set(QT${MANTID_QT_VERSION}_UI_FILES
     inc/MantidQtWidgets/Common/AddWorkspaceDialog.ui
     inc/MantidQtWidgets/Common/AddWorkspaceMultiDialog.ui
     inc/MantidQtWidgets/Common/DataSelector.ui
@@ -667,25 +667,21 @@ mtd_add_qt_library(
   TARGET_NAME MantidQtWidgetsCommon
   QT_VERSION ${MANTID_QT_VERSION}
   SRC ${SRC_FILES}
-  MOC ${QT5_MOC_FILES}
-  NOMOC ${QT5_INC_FILES} ${_sip_include_dir}/sip.h
-  UI ${QT5_UI_FILES}
-  DEFS IN_MANTIDQT_COMMON QSCINTILLA_DLL QT5_DEFS PRECOMPILED ${PRECOMP_HEADERS}
+  MOC ${QT${MANTID_QT_VERSION}_MOC_FILES}
+  NOMOC ${QT${MANTID_QT_VERSION}_INC_FILES} ${_sip_include_dir}/sip.h
+  UI ${QT${MANTID_QT_VERSION}_UI_FILES}
+  DEFS IN_MANTIDQT_COMMON QSCINTILLA_DLL PRECOMPILED ${PRECOMP_HEADERS}
   INCLUDE_DIRS inc
   SYSTEM_INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${_sip_include_dir}
-  LINK_LIBS ${TARGET_LIBRARIES} PUBLIC Mantid::PythonInterfaceCore
-  QT5_LINK_LIBS
-    Qt5::Concurrent
-    Qt5::Help
-    Qt5::Network
-    Qt5::PrintSupport
-    Qt5::Qscintilla
-    QT6_LINK_LIBS
-    Qt6::Concurrent
-    Qt6::Help
-    Qt6::Network
-    Qt6::PrintSupport
-    Qt6::Qscintilla
+  LINK_LIBS ${TARGET_LIBRARIES}
+            PUBLIC
+            Mantid::PythonInterfaceCore
+            QT6_LINK_LIBS
+            Qt6::Concurrent
+            Qt6::Help
+            Qt6::Network
+            Qt6::PrintSupport
+            Qt6::Qscintilla
   MTD_QT_LINK_LIBS MantidQtIcons
   INSTALL_DIR ${WORKBENCH_LIB_DIR}
   OSX_INSTALL_RPATH @loader_path/../MacOS @loader_path/../Frameworks
@@ -697,7 +693,7 @@ mtd_add_qt_library(
 
 set(CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/test/WidgetsCommonTestInitialization.h)
 
-set(QT5_TEST_FILES
+set(QT${MANTID_QT_VERSION}_TEST_FILES
     test/AlgorithmRunnerTest.h
     test/AlgorithmHintStrategyTest.h
     test/AlgorithmPropertiesWidgetTest.h
@@ -751,7 +747,7 @@ if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
   mtd_add_qt_tests(
     TARGET_NAME MantidQtWidgetsCommonTest
     QT_VERSION ${MANTID_QT_VERSION}
-    SRC ${QT5_TEST_FILES}
+    SRC ${QT${MANTID_QT_VERSION}_TEST_FILES}
     INCLUDE_DIRS ../../../Framework/DataObjects/inc ../../../Framework/Crystal/inc
     LINK_LIBS ${TARGET_LIBRARIES} ${Boost_LIBRARIES} Mantid::PythonInterfaceCore Mantid::DataObjects
               Qt${MANTID_QT_VERSION}::Test Python::Python

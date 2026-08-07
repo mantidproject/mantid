@@ -32,7 +32,7 @@ from qtpy.QtCore import Qt, QEvent, QSize
 from qtpy.QtWidgets import QFileDialog
 from superqt import QDoubleRangeSlider
 from pyvistaqt import BackgroundPlotter
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.widgets import Cursor
 
 import numpy as np

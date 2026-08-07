@@ -13,35 +13,22 @@ if(BUILD_MANTIDFRAMEWORK)
   add_dependencies(mantidqt PythonInterface)
 endif()
 
-# Resources (:/...) used by both Python and the C++ widgets. The output files are added to the toplevel gitignore.
+# Resources (:/...) used by both Python and the C++ widgets. The output files are added to the toplevel gitignore. Qt6
+# has no Python resource compiler, so compile resources.qrc to a binary .rcc with Qt's own rcc (QT_RCC_CMD, set in
+# qt/CMakeLists.txt) and register it at runtime via QResource.registerResource - see mantidqt/resource_loader.py.
 set(_qrc_file ${CMAKE_CURRENT_LIST_DIR}/resources.qrc)
-if(PYRCC5_CMD)
-  # Qt5: generate a pyrcc5 resources.py module (its import is rewritten to be binding-agnostic).
-  set(_output_res_py ${CMAKE_CURRENT_LIST_DIR}/mantidqt/resources.py)
-  configure_file(create_resources.cmake.in create_resources.cmake @ONLY)
+set(_output_rcc ${CMAKE_CURRENT_LIST_DIR}/mantidqt/mantidqt.rcc)
+if(QT_RCC_CMD)
   add_custom_command(
-    OUTPUT ${_output_res_py}
-    COMMAND ${CMAKE_COMMAND} -P create_resources.cmake
-    COMMENT "Generating mantidqt resources module"
+    OUTPUT ${_output_rcc}
+    COMMAND ${QT_RCC_CMD} --binary -o ${_output_rcc} ${_qrc_file}
+    COMMENT "Generating mantidqt binary resources (Qt${MANTID_QT_VERSION}): ${_output_rcc}"
     DEPENDS ${_qrc_file}
   )
-  add_custom_target(mantidqt_resources ALL DEPENDS ${_output_res_py})
+  add_custom_target(mantidqt_resources ALL DEPENDS ${_output_rcc})
 else()
-  # Qt6 has no Python resource compiler, so compile resources.qrc to a binary .rcc with Qt's own rcc (QT_RCC_CMD, set in
-  # qt/CMakeLists.txt) and register it at runtime via QResource.registerResource - see mantidqt/resource_loader.py.
-  set(_output_rcc ${CMAKE_CURRENT_LIST_DIR}/mantidqt/mantidqt.rcc)
-  if(QT_RCC_CMD)
-    add_custom_command(
-      OUTPUT ${_output_rcc}
-      COMMAND ${QT_RCC_CMD} --binary -o ${_output_rcc} ${_qrc_file}
-      COMMENT "Generating mantidqt binary resources (Qt${MANTID_QT_VERSION}): ${_output_rcc}"
-      DEPENDS ${_qrc_file}
-    )
-    add_custom_target(mantidqt_resources ALL DEPENDS ${_output_rcc})
-  else()
-    message(STATUS "QT_RCC_CMD not set (Qt${MANTID_QT_VERSION}): skipping mantidqt resource compilation")
-    add_custom_target(mantidqt_resources ALL)
-  endif()
+  message(STATUS "QT_RCC_CMD not set (Qt${MANTID_QT_VERSION}): skipping mantidqt resource compilation")
+  add_custom_target(mantidqt_resources ALL)
 endif()
 
 add_dependencies(
@@ -55,9 +42,9 @@ if(MSVC)
     POST_BUILD
     COMMAND
       if 1==$<CONFIG:Debug> ${CMAKE_COMMAND} -E copy_directory
-      ${MSVC_PYTHON_EXECUTABLE_DIR}/msvc-site-packages/debug/PyQt5
-      ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/PyQt5
-    COMMENT "Copying debug PyQt5 to bin/Debug"
+      ${MSVC_PYTHON_EXECUTABLE_DIR}/msvc-site-packages/debug/PyQt6
+      ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/PyQt6
+    COMMENT "Copying debug PyQt6 to bin/Debug"
   )
 endif()
 
@@ -109,8 +96,8 @@ set(PYTHON_TEST_FILES
     mantidqt/widgets/waterfallplotoffsetdialog/test/test_waterfallplotoffsetdialogpresenter.py
 )
 
-# ctest target for widgets that only get tested in qt5, because they are only used in the workbench
-set(PYTHON_WIDGET_QT5_ONLY_TESTS
+# ctest target for widgets that are only used in the workbench
+set(PYTHON_WIDGET_WORKBENCH_ONLY_TESTS
     mantidqt/widgets/algorithmselector/test/test_algorithm_factory_observer.py
     mantidqt/widgets/algorithmselector/test/test_algorithmselector.py
     mantidqt/widgets/codeeditor/test/test_codecommenter.py
@@ -212,5 +199,6 @@ set(PYTHON_WIDGET_QT5_ONLY_TESTS
 # Tests
 set(PYUNITTEST_QT_API pyqt${MANTID_QT_VERSION})
 pyunittest_add_test(
-  ${CMAKE_CURRENT_SOURCE_DIR} mantidqt_qt${MANTID_QT_VERSION} ${PYTHON_TEST_FILES} ${PYTHON_WIDGET_QT5_ONLY_TESTS}
+  ${CMAKE_CURRENT_SOURCE_DIR} mantidqt_qt${MANTID_QT_VERSION} ${PYTHON_TEST_FILES}
+  ${PYTHON_WIDGET_WORKBENCH_ONLY_TESTS}
 )
