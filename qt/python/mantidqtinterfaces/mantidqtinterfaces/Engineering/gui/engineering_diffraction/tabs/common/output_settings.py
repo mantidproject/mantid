@@ -31,14 +31,16 @@ def get_timeout() -> int:
     return int(timeout) if timeout else 100
 
 
-def get_texture_axes_transform() -> Tuple[ndarray, Tuple[str, str, str]]:
-    rd_str = get_setting(INTERFACES_SETTINGS_GROUP, ENGINEERING_PREFIX, "rd_dir")
-    nd_str = get_setting(INTERFACES_SETTINGS_GROUP, ENGINEERING_PREFIX, "nd_dir")
-    td_str = get_setting(INTERFACES_SETTINGS_GROUP, ENGINEERING_PREFIX, "td_dir")
+def get_texture_axes_transform(rb_num: str | None = None) -> Tuple[ndarray, Tuple[str, str, str]]:
+    # the sample directions are RB-scoped, so every caller has to say which experiment is active,
+    # otherwise directions saved against an RB are written but never read back
+    rd_str = get_setting(INTERFACES_SETTINGS_GROUP, ENGINEERING_PREFIX, "rd_dir", rb=rb_num)
+    nd_str = get_setting(INTERFACES_SETTINGS_GROUP, ENGINEERING_PREFIX, "nd_dir", rb=rb_num)
+    td_str = get_setting(INTERFACES_SETTINGS_GROUP, ENGINEERING_PREFIX, "td_dir", rb=rb_num)
     rd = array([float(x) for x in rd_str.split(",")])[:, None]
     nd = array([float(x) for x in nd_str.split(",")])[:, None]
     td = array([float(x) for x in td_str.split(",")])[:, None]
-    rd_name = get_setting(INTERFACES_SETTINGS_GROUP, ENGINEERING_PREFIX, "rd_name")
-    nd_name = get_setting(INTERFACES_SETTINGS_GROUP, ENGINEERING_PREFIX, "nd_name")
-    td_name = get_setting(INTERFACES_SETTINGS_GROUP, ENGINEERING_PREFIX, "td_name")
+    rd_name = get_setting(INTERFACES_SETTINGS_GROUP, ENGINEERING_PREFIX, "rd_name", rb=rb_num)
+    nd_name = get_setting(INTERFACES_SETTINGS_GROUP, ENGINEERING_PREFIX, "nd_name", rb=rb_num)
+    td_name = get_setting(INTERFACES_SETTINGS_GROUP, ENGINEERING_PREFIX, "td_name", rb=rb_num)
     return concatenate([rd, nd, td], axis=1), (rd_name, nd_name, td_name)
