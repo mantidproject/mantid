@@ -313,6 +313,7 @@ set(QT${MANTID_QT_VERSION}_INC_FILES
     inc/MantidQtWidgets/Common/ProgressableView.h
     inc/MantidQtWidgets/Common/PropertyWidgetFactory.h
     inc/MantidQtWidgets/Common/QSettingsHelper.h
+    inc/MantidQtWidgets/Common/QSettingsChangeAware.h
     inc/MantidQtWidgets/Common/QtAlgorithmRunner.h
     inc/MantidQtWidgets/Common/QtJSONUtils.h
     inc/MantidQtWidgets/Common/SequentialFitDialog.h
@@ -517,6 +518,7 @@ set(INC_FILES
     inc/MantidQtWidgets/Common/QScienceSpinBox.h
     inc/MantidQtWidgets/Common/QtAlgorithmRunner.h
     inc/MantidQtWidgets/Common/QSettingsHelper.h
+    inc/MantidQtWidgets/Common/QSettingsChangeAware.h
     inc/MantidQtWidgets/Common/QStringUtils.h
     inc/MantidQtWidgets/Common/QtJSONUtils.h
     inc/MantidQtWidgets/Common/ScriptRepositoryView.h
@@ -726,6 +728,7 @@ set(QT${MANTID_QT_VERSION}_TEST_FILES
     test/RepoModelTest.h
     test/ParseKeyValueStringTest.h
     test/ProcessingAlgoWidgetSettingsTest.h
+    test/QSettingsChangeAwareTest.h
     test/ProgressableViewTest.h
     test/WorkspaceUtilsTest.h
     test/Python/SipTest.h
