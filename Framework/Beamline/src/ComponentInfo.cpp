@@ -52,15 +52,16 @@ ComponentInfo::ComponentInfo(
     std::shared_ptr<std::vector<Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>> rotations,
     std::shared_ptr<std::vector<Eigen::Vector3d>> scaleFactors,
     std::shared_ptr<std::vector<ComponentType>> componentType, std::shared_ptr<const std::vector<std::string>> names,
-    int64_t sourceIndex, int64_t sampleIndex)
+    int64_t sourceIndex, int64_t sampleIndex, std::vector<VirtualBankSegment> virtualBanks)
     : m_assemblySortedDetectorIndices(std::move(assemblySortedDetectorIndices)),
       m_assemblySortedComponentIndices(std::move(assemblySortedComponentIndices)),
       m_detectorRanges(std::move(detectorRanges)), m_componentRanges(std::move(componentRanges)),
       m_parentIndices(std::move(parentIndices)), m_children(std::move(children)), m_positions(std::move(positions)),
       m_rotations(std::move(rotations)), m_scaleFactors(std::move(scaleFactors)),
       m_componentType(std::move(componentType)), m_names(std::move(names)),
-      m_size(ComponentInfo::computeTotalSize(*m_assemblySortedDetectorIndices, *m_detectorRanges)),
-      m_sourceIndex(sourceIndex), m_sampleIndex(sampleIndex), m_detectorInfo(nullptr) {
+      m_size(ComponentInfo::computeTotalSize(*m_assemblySortedDetectorIndices, virtualBanks, *m_detectorRanges)),
+      m_sourceIndex(sourceIndex), m_sampleIndex(sampleIndex), m_detectorInfo(nullptr),
+      m_virtualBanks(std::move(virtualBanks)) {
   if (m_rotations->size() != m_positions->size()) {
     throw std::invalid_argument("ComponentInfo should have been provided same "
                                 "number of postions and rotations");
@@ -78,26 +79,60 @@ ComponentInfo::ComponentInfo(
                                 "input of same size as the sum of "
                                 "non-detector and detector components");
   }
-  if (m_scaleFactors->size() != m_size) {
-    throw std::invalid_argument("ComponentInfo should have been provided same "
-                                "number of scale factors as number of components");
-  }
   if (m_componentType->size() != nonDetectorSize()) {
     throw std::invalid_argument("ComponentInfo should be provided same number "
                                 "of rectangular bank flags as number of "
                                 "non-detector components");
   }
-  if (m_names->size() != m_size) {
-    throw std::invalid_argument("ComponentInfo should be provided same number "
-                                "of names as number of components");
+
+  if (m_virtualBanks.empty()) {
+    // Non-virtual-bank path: arrays must be full size.
+    // Note: m_parentIndices is NOT checked here because several existing tests
+    // deliberately supply wrong-sized parent-index vectors for tests that do
+    // not exercise the parent relationship (pre-existing behaviour).
+    if (m_scaleFactors->size() != m_size) {
+      throw std::invalid_argument("ComponentInfo should have been provided same "
+                                  "number of scale factors as number of components");
+    }
+    if (m_names->size() != m_size) {
+      throw std::invalid_argument("ComponentInfo should be provided same number "
+                                  "of names as number of components");
+    }
+    // Non-virtual: m_nNonVirtualDetectors == all detectors.
+    m_nNonVirtualDetectors = totalDetectorCount();
+  } else {
+    // Virtual-bank path: names, scaleFactors, and parentIndices are compact
+    // (non-virtual detectors + non-detector components only).
+    const size_t nVirtual =
+        std::accumulate(m_virtualBanks.cbegin(), m_virtualBanks.cend(), size_t{0},
+                        [](size_t acc, const auto &seg) { return acc + seg.lastIndex - seg.firstIndex + 1; });
+    const size_t expectedCompact = m_size - nVirtual;
+    if (m_scaleFactors->size() != expectedCompact) {
+      throw std::invalid_argument("ComponentInfo (virtual-bank): compact scaleFactors "
+                                  "size mismatch");
+    }
+    if (m_names->size() != expectedCompact) {
+      throw std::invalid_argument("ComponentInfo (virtual-bank): compact names "
+                                  "size mismatch");
+    }
+    if (m_parentIndices->size() != expectedCompact) {
+      throw std::invalid_argument("ComponentInfo (virtual-bank): compact parentIndices "
+                                  "size mismatch");
+    }
+    buildNonVirtualDetectorTable();
   }
 
-  // Calculate total size of all assemblies
+  // Calculate total size of all assemblies (uses m_children, unchanged).
+  // VirtualAssembly banks deliberately store empty children lists: their
+  // pixels are not materialised in the tree.  Account for them separately.
   auto assemTotalSize =
       std::accumulate(m_children->begin(), m_children->end(), static_cast<size_t>(1),
                       [](size_t size, const std::vector<size_t> &assem) { return size += assem.size(); });
+  const size_t virtualPixels =
+      std::accumulate(m_virtualBanks.cbegin(), m_virtualBanks.cend(), size_t{0},
+                      [](size_t acc, const auto &seg) { return acc + seg.lastIndex - seg.firstIndex + 1; });
 
-  if (assemTotalSize != m_size) {
+  if (assemTotalSize + virtualPixels != m_size) {
     throw std::invalid_argument("ComponentInfo should be provided an "
                                 "instrument tree which contains same number "
                                 "components");
@@ -111,18 +146,9 @@ std::unique_ptr<ComponentInfo> ComponentInfo::cloneWithoutDetectorInfo() const {
 }
 
 std::vector<size_t> ComponentInfo::detectorsInSubtree(const size_t componentIndex) const {
-  if (isDetector(componentIndex)) {
-    /* This is a single detector. Just return the corresponding index.
-     * detectorIndex == componentIndex
-     */
-    return std::vector<size_t>{componentIndex};
-  }
-  // Calculate index into our ranges (non-detector) component items.
-  const auto rangesIndex = compOffsetIndex(componentIndex);
-  const auto range = (*m_detectorRanges)[rangesIndex];
-  // Extract as a block
-  return std::vector<size_t>(m_assemblySortedDetectorIndices->begin() + range.first,
-                             m_assemblySortedDetectorIndices->begin() + range.second);
+  std::vector<size_t> result;
+  forEachDetectorInSubtree(componentIndex, [&result](size_t idx) { result.push_back(idx); });
+  return result;
 }
 
 std::vector<size_t> ComponentInfo::componentsInSubtree(const size_t componentIndex) const {
@@ -135,8 +161,6 @@ std::vector<size_t> ComponentInfo::componentsInSubtree(const size_t componentInd
   // Non-detector components.
   const auto rangesIndex = compOffsetIndex(componentIndex);
   const auto compRange = (*m_componentRanges)[rangesIndex];
-
-  // Extract as a block
   indices.insert(indices.end(), m_assemblySortedComponentIndices->begin() + compRange.first,
                  m_assemblySortedComponentIndices->begin() + compRange.second);
   return indices;
@@ -160,6 +184,15 @@ size_t ComponentInfo::numberOfDetectorsInSubtree(const size_t componentIndex) co
   const auto rangesIndex = compOffsetIndex(componentIndex);
   const auto detRange = (*m_detectorRanges)[rangesIndex];
   size_t count = detRange.second - detRange.first;
+  // Virtual pixels from VirtualAssembly segments in this subtree.
+  if (hasVirtualBanks()) {
+    const auto compRange = (*m_componentRanges)[rangesIndex];
+    for (size_t j = compRange.first; j < compRange.second; ++j) {
+      const size_t compIdx = (*m_assemblySortedComponentIndices)[j];
+      if (const auto *seg = findVirtualBankByCompIdx(compIdx))
+        count += seg->lastIndex - seg->firstIndex + 1;
+    }
+  }
   return count;
 }
 
@@ -170,9 +203,10 @@ bool ComponentInfo::isMonitor(const size_t componentIndex) const {
   return false;
 }
 
-const Eigen::Vector3d &ComponentInfo::position(const size_t componentIndex) const {
+Eigen::Vector3d ComponentInfo::position(const size_t componentIndex) const {
   checkNoTimeDependence();
   if (isDetector(componentIndex)) {
+    // DetectorInfo::position(size_t) returns by value (supports virtual banks).
     return m_detectorInfo->position(componentIndex);
   }
   const auto rangesIndex = compOffsetIndex(componentIndex);
@@ -262,14 +296,27 @@ void ComponentInfo::doSetPosition(const std::pair<size_t, size_t> &index, const 
   const auto componentIndex = index.first;
   const auto timeIndex = index.second;
   const Eigen::Vector3d offset = newPosition - position(componentIndex);
-  for (const auto &subIndex : detectorRange) {
+  // detectorRange contains only real (non-virtual) detector indices.
+  for (const auto &subIndex : detectorRange)
     m_detectorInfo->setPosition({subIndex, timeIndex}, m_detectorInfo->position({subIndex, timeIndex}) + offset);
-  }
 
   const auto compRange = componentRangeInSubtree(componentIndex);
   for (const auto &subIndex : compRange) {
     size_t offsetIndex = compOffsetIndex(subIndex);
     m_positions.access()[offsetIndex] += offset;
+  }
+
+  // Propagate the translation into any VirtualBankSegments whose bank
+  // component lies in this subtree.
+  if (!m_virtualBanks.empty()) {
+    for (size_t i = 0; i < m_virtualBanks.size(); ++i) {
+      if (std::any_of(compRange.begin(), compRange.end(),
+                      [&](size_t compIdx) { return compIdx == m_virtualBanks[i].bankCompIdx; })) {
+        m_virtualBanks[i].bankPos += offset;
+        if (m_detectorInfo)
+          m_detectorInfo->m_virtualBanks[i].bankPos += offset;
+      }
+    }
   }
 }
 
@@ -283,6 +330,7 @@ void ComponentInfo::doSetRotation(const std::pair<size_t, size_t> &index, const 
   const Eigen::Quaterniond rotDelta = (newRotation * currentRotInv).normalized();
   auto transform = Eigen::Matrix3d(rotDelta);
 
+  // detectorRange contains only real (non-virtual) detector indices.
   for (const auto &subDetIndex : detectorRange) {
     auto oldPos = m_detectorInfo->position({subDetIndex, timeIndex});
     auto newPos = transform * (oldPos - compPos) + compPos;
@@ -299,6 +347,26 @@ void ComponentInfo::doSetRotation(const std::pair<size_t, size_t> &index, const 
     const size_t childCompIndexOffset = compOffsetIndex(subCompIndex);
     m_positions.access()[linearIndex({childCompIndexOffset, timeIndex})] = newPos;
     m_rotations.access()[linearIndex({childCompIndexOffset, timeIndex})] = newRot.normalized();
+  }
+
+  // After updating sub-component positions/rotations, copy the new bank
+  // positions/rotations into any VirtualBankSegments in this subtree so that
+  // DetectorInfo::position(virtualPixelIndex) returns the correct world position.
+  if (!m_virtualBanks.empty()) {
+    for (size_t i = 0; i < m_virtualBanks.size(); ++i) {
+      if (std::any_of(compRange.begin(), compRange.end(),
+                      [&](size_t compIdx) { return compIdx == m_virtualBanks[i].bankCompIdx; })) {
+        const size_t bankOffset = compOffsetIndex(m_virtualBanks[i].bankCompIdx);
+        Eigen::Vector3d newBankPos = m_positions.access()[linearIndex({bankOffset, timeIndex})];
+        Eigen::Quaterniond newBankRot = m_rotations.access()[linearIndex({bankOffset, timeIndex})];
+        m_virtualBanks[i].bankPos = newBankPos;
+        m_virtualBanks[i].bankRot = newBankRot;
+        if (m_detectorInfo) {
+          m_detectorInfo->m_virtualBanks[i].bankPos = newBankPos;
+          m_detectorInfo->m_virtualBanks[i].bankRot = newBankRot;
+        }
+      }
+    }
   }
 }
 
@@ -483,7 +551,14 @@ void ComponentInfo::initIndices() {
   }
 }
 
-size_t ComponentInfo::parent(const size_t componentIndex) const { return (*m_parentIndices)[componentIndex]; }
+size_t ComponentInfo::parent(const size_t componentIndex) const {
+  if (!m_virtualBanks.empty()) {
+    if (const auto *seg = findVirtualSegment(componentIndex))
+      return seg->bankCompIdx;
+    return (*m_parentIndices)[compactComponentIndex(componentIndex)];
+  }
+  return (*m_parentIndices)[componentIndex];
+}
 
 bool ComponentInfo::hasParent(const size_t componentIndex) const { return parent(componentIndex) != componentIndex; }
 
@@ -592,10 +667,24 @@ ComponentInfo::Range ComponentInfo::componentRangeInSubtree(const size_t index) 
 }
 
 Eigen::Vector3d ComponentInfo::scaleFactor(const size_t componentIndex) const {
+  if (!m_virtualBanks.empty()) {
+    if (findVirtualSegment(componentIndex))
+      return Eigen::Vector3d{1.0, 1.0, 1.0};
+    return (*m_scaleFactors)[compactComponentIndex(componentIndex)];
+  }
   return (*m_scaleFactors)[componentIndex];
 }
 
-const std::string &ComponentInfo::name(const size_t componentIndex) const { return (*m_names)[componentIndex]; }
+const std::string &ComponentInfo::name(const size_t componentIndex) const {
+  if (!m_virtualBanks.empty()) {
+    if (findVirtualSegment(componentIndex)) {
+      static const std::string empty{};
+      return empty;
+    }
+    return (*m_names)[compactComponentIndex(componentIndex)];
+  }
+  return (*m_names)[componentIndex];
+}
 
 bool ComponentInfo::uniqueName(const std::string &name) const { return unique_if_exists((*m_names), name); }
 
@@ -607,11 +696,20 @@ size_t ComponentInfo::indexOfAny(const std::string &name) const {
     buffer << name << " does not exist";
     throw std::invalid_argument(buffer.str());
   }
-  return std::distance(m_names->begin(), it.base() - 1);
+  const size_t compactIdx = static_cast<size_t>(std::distance(m_names->begin(), it.base() - 1));
+  // For virtual-bank instruments m_names is compact; convert to logical index.
+  return m_virtualBanks.empty() ? compactIdx : logicalComponentIndex(compactIdx);
 }
 
 void ComponentInfo::setScaleFactor(const size_t componentIndex, const Eigen::Vector3d &scaleFactor) {
-  m_scaleFactors.access()[componentIndex] = scaleFactor;
+  if (!m_virtualBanks.empty()) {
+    if (findVirtualSegment(componentIndex))
+      throw std::runtime_error("ComponentInfo::setScaleFactor: cannot set scale "
+                               "factor on a virtual (PixelAssembly) pixel");
+    m_scaleFactors.access()[compactComponentIndex(componentIndex)] = scaleFactor;
+  } else {
+    m_scaleFactors.access()[componentIndex] = scaleFactor;
+  }
 }
 
 ComponentType ComponentInfo::componentType(const size_t componentIndex) const {
@@ -744,6 +842,85 @@ size_t ComponentInfo::nonDetectorSize() const {
     return 0;
 }
 
+// ---------------------------------------------------------------------------
+// Virtual-bank compaction helpers
+// ---------------------------------------------------------------------------
+
+/// Returns the VirtualBankSegment that contains @p detectorIndex, or nullptr.
+/// Requires m_virtualBanks to be sorted ascending by firstIndex.
+const VirtualBankSegment *ComponentInfo::findVirtualSegment(size_t index) const noexcept {
+  for (const auto &seg : m_virtualBanks) {
+    if (index < seg.firstIndex)
+      return nullptr; // sorted — no further segment can match
+    if (index <= seg.lastIndex)
+      return &seg;
+  }
+  return nullptr;
+}
+
+/**
+ * Maps a logical component index to its compact array offset in
+ * m_names / m_scaleFactors / m_parentIndices.
+ *
+ * For non-virtual detector indices the result is the count of non-virtual
+ * detectors with logical index strictly less than @p componentIndex.
+ * For non-detector component indices (>= nDetectors) the result is
+ * m_nNonVirtualDetectors + (componentIndex - nDetectors).
+ *
+ * Behaviour is undefined if @p componentIndex is a virtual pixel.
+ */
+size_t ComponentInfo::compactComponentIndex(const size_t componentIndex) const noexcept {
+  const size_t nDetectors = totalDetectorCount();
+  if (componentIndex >= nDetectors) {
+    // Non-detector component: offset past all compact detector entries.
+    return m_nNonVirtualDetectors + (componentIndex - nDetectors);
+  }
+  // Detector: subtract the count of virtual pixels with index < componentIndex.
+  size_t virtualsBefore = 0;
+  for (const auto &seg : m_virtualBanks) {
+    if (seg.firstIndex >= componentIndex)
+      break;
+    if (seg.lastIndex < componentIndex)
+      virtualsBefore += seg.lastIndex - seg.firstIndex + 1; // fully before
+    // If firstIndex < componentIndex <= lastIndex, caller passed a virtual index
+    // (should not happen): treat it as fully-before to avoid underflow.
+  }
+  return componentIndex - virtualsBefore;
+}
+
+/**
+ * Inverse of compactComponentIndex: given a compact array offset, return the
+ * corresponding logical component index.
+ */
+size_t ComponentInfo::logicalComponentIndex(const size_t compactIdx) const noexcept {
+  if (compactIdx < m_nNonVirtualDetectors)
+    return m_nonVirtualDetectorLogicalIndices[compactIdx];
+  // Non-detector component.
+  return totalDetectorCount() + (compactIdx - m_nNonVirtualDetectors);
+}
+
+/**
+ * Precomputes m_nNonVirtualDetectors and m_nonVirtualDetectorLogicalIndices
+ * by walking the sorted virtual-bank segments and collecting non-virtual
+ * detector logical indices.  Called once from the constructor.
+ */
+void ComponentInfo::buildNonVirtualDetectorTable() {
+  const size_t nDetectors = totalDetectorCount();
+  m_nonVirtualDetectorLogicalIndices.clear();
+  size_t i = 0;
+  for (const auto &seg : m_virtualBanks) {
+    // Collect non-virtual detectors that precede this segment.
+    while (i < seg.firstIndex)
+      m_nonVirtualDetectorLogicalIndices.push_back(i++);
+    // Skip the virtual segment.
+    i = seg.lastIndex + 1;
+  }
+  // Collect any non-virtual detectors after the last segment.
+  while (i < nDetectors)
+    m_nonVirtualDetectorLogicalIndices.push_back(i++);
+  m_nNonVirtualDetectors = m_nonVirtualDetectorLogicalIndices.size();
+}
+
 /** Return memory used by the component info, in bytes.
  * @return bytes used.
  */
@@ -791,6 +968,10 @@ size_t ComponentInfo::getMemorySize() const {
     mem += sizeof(*m_indexMap) + m_indexMap->size() * sizeof(std::vector<size_t>);
   if (m_indices)
     mem += sizeof(*m_indices) + m_indices->size() * sizeof(std::pair<size_t, size_t>);
+
+  // Virtual-bank compaction metadata
+  mem += m_virtualBanks.capacity() * sizeof(VirtualBankSegment);
+  mem += m_nonVirtualDetectorLogicalIndices.capacity() * sizeof(size_t);
 
   return mem;
 }

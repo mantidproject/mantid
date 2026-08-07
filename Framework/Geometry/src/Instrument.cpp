@@ -17,6 +17,7 @@
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidGeometry/Instrument/PixelAssembly.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/StructuredDetector.h"
@@ -29,6 +30,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <numeric>
 #include <queue>
 #include <utility>
 
@@ -57,6 +59,12 @@ size_t componentObjectSize(const IComponent *comp) {
              sd->getYValues().capacity() * sizeof(double);
   else if (dynamic_cast<const GridDetectorPixel *>(comp))
     result = sizeof(GridDetectorPixel);
+  else if (dynamic_cast<const PixelAssembly *>(comp))
+    // PixelAssembly stores no per-pixel IComponent objects.  The null
+    // DetectorCacheEntry slots it adds to m_detectorCache are already counted
+    // by the global  m_detectorCache.capacity() * sizeof(DetectorCacheEntry)
+    // term in getMemorySize(), so only the object itself is counted here.
+    result = sizeof(PixelAssembly);
   else if (dynamic_cast<const GridDetector *>(comp))
     result = sizeof(GridDetector);
   else if (dynamic_cast<const Detector *>(comp))
@@ -266,13 +274,33 @@ void Instrument::getDetectors(detid2det_map &out_map) const {
 /** Return a vector of detector IDs in this instrument */
 std::vector<detid_t> Instrument::getDetectorIDs(bool skipMonitors) const {
   const auto &in_dets = m_map ? m_instr->m_detectorCache : m_detectorCache;
-  std::vector<detid_t> out;
-  out.reserve(in_dets.size());
+  const auto &vbanks = m_map ? m_instr->m_virtualBankInfos : m_virtualBankInfos;
+
+  // Collect real (non-virtual) detector IDs from the cache (already sorted).
+  std::vector<detid_t> realIDs;
+  realIDs.reserve(in_dets.size());
   for (const auto &in_det : in_dets) {
-    if (!skipMonitors || !in_det.isMonitor()) {
-      out.emplace_back(in_det.id());
-    }
+    if (!skipMonitors || !in_det.isMonitor())
+      realIDs.emplace_back(in_det.id());
   }
+
+  // Virtual pixels are never monitors; include them regardless of skipMonitors.
+  if (vbanks.empty())
+    return realIDs;
+
+  // Generate virtual IDs on demand (O(n_pixels) temporary), sort, then merge.
+  const size_t totalVirtual = std::accumulate(vbanks.cbegin(), vbanks.cend(), size_t{0},
+                                              [](size_t acc, const auto &info) { return acc + info.npixels; });
+  std::vector<detid_t> virtualIDs;
+  virtualIDs.reserve(totalVirtual);
+  for (const auto &info : vbanks)
+    for (size_t k = 0; k < info.npixels; ++k)
+      virtualIDs.push_back(info.idstart + static_cast<detid_t>(static_cast<int64_t>(k) * info.idstep));
+  std::sort(virtualIDs.begin(), virtualIDs.end());
+
+  std::vector<detid_t> out;
+  out.reserve(realIDs.size() + virtualIDs.size());
+  std::merge(realIDs.begin(), realIDs.end(), virtualIDs.begin(), virtualIDs.end(), std::back_inserter(out));
   return out;
 }
 
@@ -294,13 +322,17 @@ std::vector<detid_t> Instrument::getMonitorIDs() const {
 /// @return The total number of detector IDs in the instrument */
 std::size_t Instrument::getNumberDetectors(bool skipMonitors) const {
   const auto &in_dets = m_map ? m_instr->m_detectorCache : m_detectorCache;
+  const auto &vbanks = m_map ? m_instr->m_virtualBankInfos : m_virtualBankInfos;
+  const size_t nVirtual = std::accumulate(vbanks.cbegin(), vbanks.cend(), size_t{0},
+                                          [](size_t acc, const auto &info) { return acc + info.npixels; });
 
   if (skipMonitors) {
+    // Virtual pixels are never monitors; count only non-monitor real entries.
     const std::size_t monitors =
         std::count_if(in_dets.cbegin(), in_dets.cend(), [](const auto &in_det) { return in_det.isMonitor(); });
-    return (in_dets.size() - monitors);
+    return (in_dets.size() - monitors) + nVirtual;
   } else {
-    return in_dets.size();
+    return in_dets.size() + nVirtual;
   }
 }
 
@@ -586,6 +618,17 @@ IDetector_const_sptr Instrument::getDetector(const detid_t &detector_id) const {
   const auto &in_dets = m_map ? m_instr->m_detectorCache : m_detectorCache;
   const auto it = in_dets.find(detector_id);
   if (it == in_dets.end()) {
+    // Virtual pixels are not stored in the cache; return null sptr so callers
+    // can distinguish "virtual pixel" from a genuine "not found" error.
+    const auto &vbanks = m_map ? m_instr->m_virtualBankInfos : m_virtualBankInfos;
+    for (const auto &info : vbanks) {
+      const int64_t delta = static_cast<int64_t>(detector_id) - static_cast<int64_t>(info.idstart);
+      if (info.idstep != 0 && delta % info.idstep == 0) {
+        const int64_t q = delta / info.idstep;
+        if (q >= 0 && q < static_cast<int64_t>(info.npixels))
+          return IDetector_const_sptr{};
+      }
+    }
     std::stringstream readInt;
     readInt << detector_id;
     throw Kernel::Exception::NotFoundError("Instrument: Detector with ID " + readInt.str() + " not found.", "");
@@ -805,6 +848,27 @@ void Instrument::markAsDetectorFinalize() {
   } else {
     m_detectorCache.setFinalized();
   }
+}
+
+/** Register every pixel ID in a virtual bank (IVirtualBank / PixelAssembly)
+ * into the detector cache.
+ *
+ * No per-pixel IDetector object is required: cache entries store a null
+ * IDetector_const_sptr.  This is sufficient for InstrumentVisitor /
+ * DetectorInfo which only needs the IDs to build its index map; the pixel
+ * positions are then filled by registerVirtualBank().
+ *
+ * Legacy callers of Instrument::getDetector(id) for virtual pixels will
+ * receive nullptr — they must migrate to the DetectorInfo API.
+ *
+ * @param bank :: The IVirtualBank whose pixel IDs should be registered.
+ */
+void Instrument::markAsVirtualBankDetectors(const IVirtualBank &bank) {
+  if (m_map)
+    throw std::runtime_error("Instrument::markAsVirtualBankDetectors() called on a parametrized Instrument object.");
+
+  // Store just the bank parameters (O(1) per bank) instead of O(n_pixels) IDs.
+  m_virtualBankInfos.push_back({bank.referentDetectorID(), bank.idstep(), bank.npixels()});
 }
 
 /** Mark a Component which has already been added to the Instrument class
@@ -1537,9 +1601,13 @@ size_t Instrument::getMemorySize() const {
   // Indirect-geometry instruments hold a second full instrument for the physical geometry.
   const size_t physicalInstrumentMem = m_physicalInstrument ? m_physicalInstrument->getMemorySize() : 0;
 
+  // m_virtualBankInfos: one entry per PA bank (O(n_banks), not O(n_pixels)).
+  const size_t virtualIDsMem = m_virtualBankInfos.capacity() * sizeof(VirtualBankInfo);
+
   return sizeof(*this) + componentTreeMem + m_detectorCache.capacity() * sizeof(DetectorCacheEntry) + logfileCacheMem +
          logfileUnitMem + m_defaultView.capacity() + m_defaultViewAxis.capacity() + m_xmlText.capacity() +
-         m_filename.capacity() + detectorInfoMem + componentInfoMem + referenceFrameMem + physicalInstrumentMem;
+         m_filename.capacity() + detectorInfoMem + componentInfoMem + referenceFrameMem + physicalInstrumentMem +
+         virtualIDsMem;
 }
 
 namespace Conversion {

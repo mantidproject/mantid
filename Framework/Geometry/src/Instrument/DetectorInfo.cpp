@@ -36,6 +36,8 @@ DetectorInfo::DetectorInfo(std::unique_ptr<Beamline::DetectorInfo> detectorInfo,
   if (!m_instrument)
     throw std::invalid_argument("DetectorInfo::DetectorInfo Workspace does not contain an instrument!");
 
+  // Both m_detectorIDs and m_detIDToIndex are compact (real detectors only) for
+  // PA instruments as well as for non-PA instruments.
   if (m_detectorIDs->size() != m_detIDToIndex->size()) {
     throw std::invalid_argument("DetectorInfo::DetectorInfo: ID and ID->index map do not match");
   }
@@ -52,6 +54,7 @@ DetectorInfo::DetectorInfo(const DetectorInfo &other)
 
 /// Assigns the contents of the non-wrapping part of `rhs` to this.
 DetectorInfo &DetectorInfo::operator=(const DetectorInfo &rhs) {
+  // Compare the compact (real-detector-only) ID vectors for both PA and non-PA instruments.
   if (*m_detectorIDs != *rhs.m_detectorIDs)
     throw std::runtime_error("DetectorInfo::operator=: Detector IDs in "
                              "assignment do not match. Assignment not "
@@ -79,7 +82,7 @@ bool DetectorInfo::isEquivalent(const DetectorInfo &other) const {
 }
 
 /// Returns the size of the DetectorInfo, i.e., the number of detectors in the
-/// instrument
+/// instrument (real + virtual).
 size_t DetectorInfo::size() const { return m_detectorInfo->size(); }
 
 /// Returns true if the beamline has scanning detectors.
@@ -326,6 +329,11 @@ Kernel::V3D DetectorInfo::position(const size_t index) const { return Kernel::to
 
 /// Returns the position of the detector with given index.
 Kernel::V3D DetectorInfo::position(const std::pair<size_t, size_t> &index) const {
+  // The Beamline pair overload goes straight to the compact array and bypasses
+  // virtual-bank segment lookup.  Virtual-bank instruments are non-scanning so
+  // index.second is always 0; delegate to the scalar overload which is correct.
+  if (m_detectorInfo->hasVirtualBanks())
+    return Kernel::toV3D(m_detectorInfo->position(index.first));
   return Kernel::toV3D(m_detectorInfo->position(index));
 }
 
@@ -346,6 +354,9 @@ Kernel::Quat DetectorInfo::rotation(const size_t index) const {
 
 /// Returns the rotation of the detector with given index.
 Kernel::Quat DetectorInfo::rotation(const std::pair<size_t, size_t> &index) const {
+  // Same virtual-bank bypass issue as position(pair); fix with scalar overload.
+  if (m_detectorInfo->hasVirtualBanks())
+    return Kernel::toQuat(m_detectorInfo->rotation(index.first));
   return Kernel::toQuat(m_detectorInfo->rotation(index));
 }
 
@@ -432,10 +443,25 @@ Kernel::V3D DetectorInfo::samplePosition() const { return Kernel::toV3D(m_detect
 /// Returns L1 (distance from source to sample).
 double DetectorInfo::l1() const { return m_detectorInfo->l1(); }
 
-/// Returns a sorted vector of all detector IDs.
-const std::vector<detid_t> &DetectorInfo::detectorIDs() const { return *m_detectorIDs; }
+/// Returns a sorted vector of all detector IDs (real + virtual).
+/// For non-PA instruments this returns a direct reference to the stored vector.
+/// For PA instruments the full list is built lazily on first call and cached.
+const std::vector<detid_t> &DetectorInfo::detectorIDs() const {
+  if (!m_detectorInfo->hasVirtualBanks())
+    return *m_detectorIDs;
+  std::call_once(m_allDetectorIDsCacheOnce, [this] {
+    m_allDetectorIDsCache = std::make_shared<const std::vector<detid_t>>(m_instrument->getDetectorIDs(false));
+  });
+  return *m_allDetectorIDsCache;
+}
 
 std::size_t DetectorInfo::indexOf(const detid_t id) const {
+  // Fast path for virtual-bank (PixelAssembly) pixels: compute index from the
+  // bank's ID formula rather than looking up in the (now-compact) map.
+  if (m_detectorInfo->hasVirtualBanks()) {
+    if (const auto *seg = m_detectorInfo->findVirtualSegmentByDetId(static_cast<int32_t>(id)))
+      return seg->indexOf(static_cast<int32_t>(id));
+  }
   try {
     return m_detIDToIndex->at(id);
   } catch (const std::out_of_range &) {
@@ -446,8 +472,13 @@ std::size_t DetectorInfo::indexOf(const detid_t id) const {
 }
 
 /// Returns the detector ID for the given logical detector index.
-/// Works without allocating the full ID vector.
+/// Works for both real and virtual (PixelAssembly) pixels without allocating
+/// the full ID vector.
 detid_t DetectorInfo::detid(const size_t index) const {
+  if (!m_detectorInfo->hasVirtualBanks())
+    return (*m_detectorIDs)[index];
+  if (const auto *seg = m_detectorInfo->findVirtualSegment(index))
+    return static_cast<detid_t>(seg->idAtIndex(index));
   return (*m_detectorIDs)[m_detectorInfo->compactDetectorIndex(index)];
 }
 
@@ -501,21 +532,24 @@ DetectorInfoIt DetectorInfo::end() { return DetectorInfoIt(*this, size(), size()
  * @return bytes used.
  */
 size_t DetectorInfo::getMemorySize() const {
-  const size_t n = size();
   // Beamline::DetectorInfo holds the core position/rotation/flag arrays
   const size_t beamlineMem = m_detectorInfo->getMemorySize();
-  // m_detectorIDs: shared_ptr<const vector<detid_t>> — count the heap-allocated vector object + its buffer
-  const size_t detectorIDsMem = sizeof(std::vector<detid_t>) + n * sizeof(detid_t);
+  // m_detectorIDs: compact (real detectors only for PA instruments); count its actual buffer.
+  const size_t detectorIDsMem = sizeof(std::vector<detid_t>) + m_detectorIDs->size() * sizeof(detid_t);
+  // m_allDetectorIDsCache: only populated on first call to detectorIDs() on a PA instrument.
+  const size_t allIDsCacheMem = m_allDetectorIDsCache ? m_allDetectorIDsCache->size() * sizeof(detid_t) : 0;
   // m_detIDToIndex: shared_ptr<const unordered_map<detid_t, size_t>>
-  // Count the heap-allocated map object + each node (key + value + ~2 pointers for bucket/chain overhead)
-  const size_t detIDToIndexMem =
-      sizeof(std::unordered_map<detid_t, size_t>) + n * (sizeof(detid_t) + sizeof(size_t) + 2 * sizeof(void *));
+  // For virtual-bank instruments the map is compact (real detectors only), so use
+  // the actual entry count rather than the logical total n.
+  const size_t nMapEntries = m_detIDToIndex ? m_detIDToIndex->size() : 0;
+  const size_t detIDToIndexMem = sizeof(std::unordered_map<detid_t, size_t>) +
+                                 nMapEntries * (sizeof(detid_t) + sizeof(size_t) + 2 * sizeof(void *));
   // m_lastDetector and m_lastIndex: one slot per OpenMP thread
   const size_t cacheMem = m_lastDetector.capacity() * sizeof(std::shared_ptr<const Geometry::IDetector>) +
                           m_lastIndex.capacity() * sizeof(size_t);
   // m_instrument is a shared_ptr to an Instrument owned by the workspace; its memory is counted in
   // Instrument::getMemorySize() and excluded here to avoid double-counting.
-  return sizeof(*this) + beamlineMem + detectorIDsMem + detIDToIndexMem + cacheMem;
+  return sizeof(*this) + beamlineMem + detectorIDsMem + allIDsCacheMem + detIDToIndexMem + cacheMem;
 }
 
 } // namespace Mantid::Geometry

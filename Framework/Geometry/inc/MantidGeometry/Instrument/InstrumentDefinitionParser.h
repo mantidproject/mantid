@@ -157,6 +157,10 @@ private:
                                 const Poco::XML::Element *pCompElem, const std::string &filename,
                                 const Poco::XML::Element *pType);
 
+  void createPixelAssembly(Geometry::ICompAssembly *parent, const Poco::XML::Element *pLocElem,
+                           const Poco::XML::Element *pCompElem, const std::string &filename,
+                           const Poco::XML::Element *pType);
+
   /// Append \<locations\> in a locations element
   void appendLocations(Geometry::ICompAssembly *parent, const Poco::XML::Element *pLocElems,
                        const Poco::XML::Element *pCompElem, IdList &idList);

@@ -75,6 +75,8 @@ protected:
 
   void processGrid(size_t rootIndex);
 
+  void processVirtualBank(size_t rootIndex);
+
   void processUnstructured(size_t rootIndex, std::vector<bool> &visited);
 
   void rotate(const UnwrappedDetector &udet, Mantid::Kernel::Quat &R) const override;

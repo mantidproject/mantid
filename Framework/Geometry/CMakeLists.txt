@@ -58,6 +58,8 @@ set(SRC_FILES
     src/Instrument/Goniometer.cpp
     src/Instrument/GridDetector.cpp
     src/Instrument/GridDetectorPixel.cpp
+    src/Instrument/IVirtualBank.cpp
+    src/Instrument/PixelAssembly.cpp
     src/Instrument/IDFObject.cpp
     src/Instrument/InstrumentDefinitionParser.cpp
     src/Instrument/InstrumentVisitor.cpp
@@ -205,6 +207,8 @@ set(INC_FILES
     inc/MantidGeometry/Instrument/Goniometer.h
     inc/MantidGeometry/Instrument/GridDetector.h
     inc/MantidGeometry/Instrument/GridDetectorPixel.h
+    inc/MantidGeometry/Instrument/IVirtualBank.h
+    inc/MantidGeometry/Instrument/PixelAssembly.h
     inc/MantidGeometry/Instrument/IDFObject.h
     inc/MantidGeometry/Instrument/InfoIteratorBase.h
     inc/MantidGeometry/Instrument/InstrumentDefinitionParser.h
@@ -326,6 +330,8 @@ set(TEST_FILES
     GoniometerTest.h
     GridDetectorPixelTest.h
     GridDetectorTest.h
+    IVirtualBankTest.h
+    PixelAssemblyTest.h
     GroupTest.h
     GroupTransformationTest.h
     HKLFilterTest.h
