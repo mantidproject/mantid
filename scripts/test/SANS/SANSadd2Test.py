@@ -7,6 +7,8 @@
 
 import unittest
 from unittest.mock import patch
+import tempfile
+import os
 
 from SANS import SANSadd2
 from sans.common.enums import SampleShape
@@ -50,3 +52,15 @@ class TestSANSAddSampleMetadata(unittest.TestCase):
             mocked_get_geo_info.return_value = (8.0, 8.0, 2.0, SampleShape.DISC)
             SANSadd2.add_runs("74014", "LOQ", ".nxs", rawTypes=(".add", ".raw", ".s*"), lowMem=False)
             self.assertEqual(1, mocked_get_geo_info.call_count)
+
+    def test_save_directory_is_called_correctly_when_saving_ws(self):
+        out_name = "ZOOM00006113-add.nxs"
+        out_mon_name = "ZOOM00006113-add_monitors.nxs"
+        with tempfile.TemporaryDirectory() as save_dir:
+            with patch("SANS.SANSadd2.bundle_added_event_data_as_group") as mocked_bundle:
+                out_path = os.path.join(save_dir, out_name)
+                out_path_mon = os.path.join(save_dir, out_mon_name)
+
+                mocked_bundle.return_value = out_path
+                SANSadd2.add_runs("6113", "ZOOM", ".nxs", save_directory=save_dir, saveAsEvent=True)
+                mocked_bundle.assert_called_once_with(out_path, out_path_mon, False)
