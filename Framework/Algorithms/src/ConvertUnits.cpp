@@ -375,10 +375,6 @@ MatrixWorkspace_sptr ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUni
   const std::string emodeStr = getProperty("EMode");
   DeltaEMode::Type emode = DeltaEMode::fromString(emodeStr);
 
-  // Not doing anything with the Y vector in to/fromTOF yet, so just pass
-  // empty
-  // vector
-  std::vector<double> emptyVec;
   double efixedProp = getProperty("Efixed");
   if (efixedProp == EMPTY_DBL() && emode == DeltaEMode::Type::Direct) {
     try {
@@ -405,9 +401,9 @@ MatrixWorkspace_sptr ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUni
   auto checkXValues = inputWS->x(checkIndex).rawData();
   try {
     // Convert the input unit to time-of-flight
-    checkFromUnit->toTOF(checkXValues, emptyVec, l1, emode, upmap);
+    checkFromUnit->toTOF(checkXValues.begin(), checkXValues.end(), l1, emode, upmap);
     // Convert from time-of-flight to the desired unit
-    checkOutputUnit->fromTOF(checkXValues, emptyVec, l1, emode, upmap);
+    checkOutputUnit->fromTOF(checkXValues.begin(), checkXValues.end(), l1, emode, upmap);
   } catch (std::runtime_error &) { // if it's a detector specific problem then ignore
   }
 
