@@ -107,10 +107,12 @@ public:
   void test_Smearing_Grows_With_Slit_Distance() {
     // Further from the slit, the beam has diverged more, so the edge is softer - the intensity just
     // outside the nominal aperture is higher.
-    DivergentSlitBeamProfile near(createTestFrame(), V3D(), WIDTH, HEIGHT, DIVERGENCE, DIVERGENCE, SLIT_DISTANCE);
-    DivergentSlitBeamProfile far(createTestFrame(), V3D(), WIDTH, HEIGHT, DIVERGENCE, DIVERGENCE, 4.0 * SLIT_DISTANCE);
+    DivergentSlitBeamProfile closeToSlit(createTestFrame(), V3D(), WIDTH, HEIGHT, DIVERGENCE, DIVERGENCE,
+                                         SLIT_DISTANCE);
+    DivergentSlitBeamProfile farFromSlit(createTestFrame(), V3D(), WIDTH, HEIGHT, DIVERGENCE, DIVERGENCE,
+                                         4.0 * SLIT_DISTANCE);
     const V3D justOutside(0.0, 0.6 * WIDTH, 0.0);
-    TS_ASSERT_LESS_THAN(near.intensityAt(justOutside), far.intensityAt(justOutside));
+    TS_ASSERT_LESS_THAN(closeToSlit.intensityAt(justOutside), farFromSlit.intensityAt(justOutside));
   }
 
   void test_Upstream_Of_The_Slit_Is_Not_Illuminated() {

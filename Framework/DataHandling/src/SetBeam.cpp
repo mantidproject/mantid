@@ -155,5 +155,5 @@ void SetBeam::exec() {
     double slitD = geometryArgs->getProperty(SLIT_DISTANCE);
     pmap.addDouble(source->getComponentID(), SLIT_DISTANCE_PARAM_NAME, slitD * cm2mFactor); // convert to m
   }
-
+}
 } // namespace Mantid::DataHandling
