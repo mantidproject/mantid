@@ -16,8 +16,11 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Material.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
+#include <algorithm>
+#include <map>
 #include <unordered_map>
 
 namespace Mantid::Algorithms {
@@ -47,6 +50,14 @@ void EstimateScatteringVolumeCentreOfMass::init() {
   declareProperty(std::make_unique<PropertyWithValue<std::vector<double>>>("CentreOfMass", V3D(), Direction::Output),
                   "Estimated centre of mass of illuminated sample volume");
 
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("DetectorScatteringCentres", "", Direction::Output,
+                                                                 PropertyMode::Optional),
+                  "TableWorkspace containing estimated neutron weighted scattering centres per spectra.");
+
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("UseNeutronWeightings", false, Direction::Input),
+                  "Whether the full, per-spectrum neutron weighted centre of mass should be calculated or just the "
+                  "geometric centre of mass");
+
   auto moreThanZero = std::make_shared<BoundedValidator<double>>();
   moreThanZero->setLower(1e-6);
   declareProperty("ElementSize", 1.0, moreThanZero,
@@ -57,20 +68,74 @@ void EstimateScatteringVolumeCentreOfMass::init() {
                   "The units which ElementSize has been provided in");
 }
 
+std::map<std::string, std::string> EstimateScatteringVolumeCentreOfMass::validateInputs() {
+  std::map<std::string, std::string> issues;
+
+  MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
+  if (!inputWS) {
+    // absence is already reported by the property itself
+    return issues;
+  }
+
+  // The element size is needed in metres for the gauge volume check below, so the units have to be
+  // resolvable first
+  const std::string elementUnits = getProperty("ElementUnits");
+  const auto unitIt = unitToMeters.find(elementUnits);
+  if (unitIt == unitToMeters.end()) {
+    issues["ElementUnits"] = "Supported units for ElementUnits are (m, cm, mm), not: " + elementUnits;
+    return issues;
+  }
+  const double elementSizeInUnits = getProperty("ElementSize");
+  const double elementSize = elementSizeInUnits * unitIt->second;
+
+  const auto &sample = inputWS->sample();
+  if (!sample.getShape().hasValidShape()) {
+    issues["InputWorkspace"] = "No shape has been defined for the sample in the input workspace";
+  }
+
+  // A gauge volume must be resolvable into a shape, and has to be big enough to hold at least one
+  // integration element in every dimension or the raster below produces nothing.
+  const auto &run = inputWS->run();
+  if (run.hasProperty("GaugeVolume")) {
+    Geometry::IObject_sptr gauge;
+    try {
+      gauge = Geometry::ShapeFactory().createShape(run.getProperty("GaugeVolume")->value());
+    } catch (const std::exception &e) {
+      issues["InputWorkspace"] = std::string("Could not create a shape from the GaugeVolume sample log: ") + e.what();
+    }
+    if (gauge && gauge->hasValidShape()) {
+      const auto bbox = gauge->getBoundingBox();
+      if ((bbox.xMax() - bbox.xMin()) < elementSize || (bbox.yMax() - bbox.yMin()) < elementSize ||
+          (bbox.zMax() - bbox.zMin()) < elementSize) {
+        issues["ElementSize"] = "The gauge volume is smaller than a single integration element in at least one "
+                                "dimension - reduce the ElementSize";
+      }
+    } else if (!gauge) {
+      issues["InputWorkspace"] = "The GaugeVolume sample log does not describe a valid shape";
+    }
+  }
+
+  const bool useNeutronWeightings = getProperty("UseNeutronWeightings");
+  if (useNeutronWeightings) {
+    // Weighting the scattering points by attenuation is meaningless without something to attenuate in.
+    if (sample.getMaterial().numberDensity() <= 0.0) {
+      issues["UseNeutronWeightings"] = "Neutron weighting requires a sample material - set one with SetSampleMaterial, "
+                                       "or leave UseNeutronWeightings off for a purely geometric centre of mass";
+    }
+  }
+
+  return issues;
+}
+
 void EstimateScatteringVolumeCentreOfMass::exec() {
   // Retrieve the input workspace
   m_inputWS = getProperty("InputWorkspace");
   // Cache the beam direction
   const V3D beamDirection = m_inputWS->getInstrument()->getBeamDirection();
-  // Calculate the element size
+  // Calculate the element size. The units are checked in validateInputs.
   m_cubeSide = getProperty("ElementSize"); // in units
   const std::string elementUnits = getProperty("ElementUnits");
-
-  auto it = unitToMeters.find(elementUnits);
-  if (it == unitToMeters.end()) {
-    throw std::invalid_argument("Supported units for ElementUnits are (m, cm, mm), not: " + elementUnits);
-  }
-  m_cubeSide *= it->second; // now in m
+  m_cubeSide *= unitToMeters.at(elementUnits); // now in m
 
   // The sample shape on the workspace already has any initial rotation baked into its definition,
   // so it is expressed in the sample shape's own frame. The workspace's goniometer R describes
@@ -118,17 +183,11 @@ const V3D EstimateScatteringVolumeCentreOfMass::rasterizeGaugeVolumeAndCalculate
   return meanPos;
 }
 
-/// Create the sample object using the Geometry classes, or use the existing one
+/// Create the sample object using the Geometry classes, or use the existing one.
+/// The shape is validated in validateInputs.
 const Geometry::IObject_sptr EstimateScatteringVolumeCentreOfMass::extractValidSampleObject(const API::Sample &sample) {
-  // Check there is one, and fail if not
-  if (!sample.getShape().hasValidShape()) {
-    const std::string mess("No shape has been defined for the sample in the input workspace");
-    g_log.error(mess);
-    throw std::invalid_argument(mess);
-  } else {
-    g_log.information("Successfully extracted the sample object");
-    return sample.getShapePtr();
-  }
+  g_log.information("Successfully extracted the sample object");
+  return sample.getShapePtr();
 }
 
 const V3D EstimateScatteringVolumeCentreOfMass::rasterizeLabGaugeAndCalculateMeanElementPosition(
@@ -145,15 +204,10 @@ const V3D EstimateScatteringVolumeCentreOfMass::rasterizeLabGaugeAndCalculateMea
   const double xLength = bbox.xMax() - bbox.xMin();
   const double yLength = bbox.yMax() - bbox.yMin();
   const double zLength = bbox.zMax() - bbox.zMin();
+  // validateInputs guarantees the gauge spans at least one element in every dimension
   const auto numXSlices = static_cast<size_t>(xLength / m_cubeSide);
   const auto numYSlices = static_cast<size_t>(yLength / m_cubeSide);
   const auto numZSlices = static_cast<size_t>(zLength / m_cubeSide);
-  if (numXSlices == 0 || numYSlices == 0 || numZSlices == 0) {
-    const std::string mess("Gauge volume is too small for the chosen ElementSize - "
-                           "try reducing the ElementSize");
-    g_log.error(mess);
-    throw std::runtime_error(mess);
-  }
   const double dx = xLength / static_cast<double>(numXSlices);
   const double dy = yLength / static_cast<double>(numYSlices);
   const double dz = zLength / static_cast<double>(numZSlices);
