@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "DiffractionReduction.h"
 #include "Common/DetectorGroupingOptions.h"
+#include "MantidQtWidgets/Common/QSettingsChangeAware.h"
 #include "MantidQtWidgets/Spectroscopy/RunWidget/RunView.h"
 #include "MantidQtWidgets/Spectroscopy/SettingsWidget/Settings.h"
 
@@ -612,8 +613,9 @@ DiffractionSettings DiffractionReduction::captureSettings() const {
 }
 
 void DiffractionSettings::saveSettings(QSettings &settings, const DiffractionSettings &values) {
-  settings.setValue("last_cal_file", values.calibrationFile());
-  settings.setValue("last_van_files", values.vanadiumFiles());
+  MantidQt::MantidWidgets::QSettingsChangeAware writer(settings);
+  writer.setValue("last_cal_file", values.calibrationFile());
+  writer.setValue("last_van_files", values.vanadiumFiles());
 }
 
 void DiffractionReduction::persistSettings() {

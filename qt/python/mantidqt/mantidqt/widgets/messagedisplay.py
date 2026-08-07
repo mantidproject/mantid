@@ -13,6 +13,7 @@ from qtpy.QtWidgets import QAction, QActionGroup
 from qtpy.QtGui import QFont
 
 from mantidqt.utils.qt import import_qt
+from mantidqt.utils.qt.qsettings_change_aware import QSettingsChangeAware
 
 SHOW_FRAMEWORK_OUTPUT_KEY = "MessageDisplay/ShowFrameworkOutput"
 SHOW_ALL_SCRIPT_OUTPUT_KEY = "MessageDisplay/ShowAllScriptOutput"
@@ -87,9 +88,10 @@ class MessageDisplay(MessageDisplay_cpp):
 
     def saveSettings(self, qsettings, settings):
         super(MessageDisplay, self).saveSettings(qsettings, settings.cpp_settings)
-        qsettings.setValue(SHOW_FRAMEWORK_OUTPUT_KEY, settings.show_framework_output)
-        qsettings.setValue(SHOW_ALL_SCRIPT_OUTPUT_KEY, settings.show_all_script_output)
-        qsettings.setValue(SHOW_ACTIVE_SCRIPT_OUTPUT_KEY, settings.show_active_script_output)
+        writer = QSettingsChangeAware(qsettings)
+        writer.setValue(SHOW_FRAMEWORK_OUTPUT_KEY, settings.show_framework_output)
+        writer.setValue(SHOW_ALL_SCRIPT_OUTPUT_KEY, settings.show_all_script_output)
+        writer.setValue(SHOW_ACTIVE_SCRIPT_OUTPUT_KEY, settings.show_active_script_output)
 
     def generateContextMenu(self):
         """

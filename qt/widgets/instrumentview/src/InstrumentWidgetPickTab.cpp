@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h"
+#include "MantidQtWidgets/Common/QSettingsChangeAware.h"
 #include "MantidQtWidgets/InstrumentView/CollapsibleStack.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
@@ -73,9 +74,10 @@ InstrumentWidgetPickTabSettings InstrumentWidgetPickTabSettings::readSettings(co
 }
 
 void InstrumentWidgetPickTabSettings::saveSettings(QSettings &settings, const InstrumentWidgetPickTabSettings &values) {
-  settings.setValue("TubeXUnits", values.tubeXUnits());
-  settings.setValue("PlotType", values.plotType());
-  settings.setValue("RebinKeeporiginal", values.rebinKeepOriginal());
+  MantidQt::MantidWidgets::QSettingsChangeAware writer(settings);
+  writer.setValue("TubeXUnits", values.tubeXUnits());
+  writer.setValue("PlotType", values.plotType());
+  writer.setValue("RebinKeeporiginal", values.rebinKeepOriginal());
 }
 
 using namespace boost::math;

@@ -7,6 +7,8 @@
 from qtpy.QtCore import QSettings
 from typing import Any, Type
 
+from mantidqt.utils.qt.qsettings_change_aware import QSettingsChangeAware
+
 
 def set_setting(group: str, prefix: str, setting_name: str, value: Any) -> None:
     """
@@ -18,7 +20,7 @@ def set_setting(group: str, prefix: str, setting_name: str, value: Any) -> None:
     """
     settings = QSettings()
     settings.beginGroup(group)
-    settings.setValue(prefix + setting_name, value)
+    QSettingsChangeAware(settings).setValue(prefix + setting_name, value)
     settings.endGroup()
 
 

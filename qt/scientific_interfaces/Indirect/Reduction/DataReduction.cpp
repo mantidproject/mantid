@@ -20,6 +20,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidQtWidgets/Common/QSettingsChangeAware.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
 #include "Reduction/ISISEnergyTransferPresenter.h"
 #include "Transmission.h"
@@ -56,9 +57,10 @@ DataReductionSettings DataReductionSettings::readSettings(const QSettings &setti
 }
 
 void DataReductionSettings::saveSettings(QSettings &settings, const DataReductionSettings &values) {
-  settings.setValue("instrument-name", values.instrumentName());
-  settings.setValue("analyser-name", values.analyserName());
-  settings.setValue("reflection-name", values.reflectionName());
+  MantidQt::MantidWidgets::QSettingsChangeAware writer(settings);
+  writer.setValue("instrument-name", values.instrumentName());
+  writer.setValue("analyser-name", values.analyserName());
+  writer.setValue("reflection-name", values.reflectionName());
 }
 DECLARE_SUBWINDOW(DataReduction)
 

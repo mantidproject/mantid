@@ -8,6 +8,8 @@ import os
 from qtpy.QtCore import QSettings
 from qtpy.QtWidgets import QFileDialog
 
+from mantidqt.utils.qt.qsettings_change_aware import QSettingsChangeAware
+
 from sans.common.constant_containers import (
     SANSInstrument_enum_as_key,
     SANSInstrument_string_as_key_NoInstrument,
@@ -254,7 +256,7 @@ def load_property(q_settings_group_key, q_settings_key, type=str):
 def set_setting(q_settings_group_key, q_settings_key, value):
     settings = QSettings()
     settings.beginGroup(q_settings_group_key)
-    settings.setValue(q_settings_key, value)
+    QSettingsChangeAware(settings).setValue(q_settings_key, value)
     settings.endGroup()
 
 
@@ -345,5 +347,5 @@ class SANSGuiPropertiesHandler(object):
     def set_setting(self, q_settings_key, value):
         settings = QSettings()
         settings.beginGroup(self.__generic_settings)
-        settings.setValue(q_settings_key, value)
+        QSettingsChangeAware(settings).setValue(q_settings_key, value)
         settings.endGroup()

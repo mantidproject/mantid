@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsHelper.h"
+#include "MantidQtWidgets/Common/QSettingsChangeAware.h"
 
 #include <QSettings>
 #include <QString>
@@ -66,10 +67,11 @@ SpectroscopySettings readSettings() {
 }
 
 void saveSettings(QSettings &settings, const SpectroscopySettings &values) {
-  settings.setValue(QString::fromStdString(RESTRICT_DATA_PROPERTY), values.restrictInputByName());
-  settings.setValue(QString::fromStdString(ERROR_BARS_PROPERTY), values.externalPlotErrorBars());
-  settings.setValue(QString::fromStdString(LOAD_HISTORY_PROPERTY), values.loadHistory());
-  settings.setValue(QString::fromStdString(FEATURE_FLAGS_PROPERTY), values.developerFeatureFlags());
+  MantidQt::MantidWidgets::QSettingsChangeAware writer(settings);
+  writer.setValue(QString::fromStdString(RESTRICT_DATA_PROPERTY), values.restrictInputByName());
+  writer.setValue(QString::fromStdString(ERROR_BARS_PROPERTY), values.externalPlotErrorBars());
+  writer.setValue(QString::fromStdString(LOAD_HISTORY_PROPERTY), values.loadHistory());
+  writer.setValue(QString::fromStdString(FEATURE_FLAGS_PROPERTY), values.developerFeatureFlags());
 }
 
 void saveSettings(const SpectroscopySettings &values) {
