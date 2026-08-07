@@ -89,8 +89,10 @@ def add_runs(  # noqa: C901
     if not save_directory or save_directory == "" or not os.path.isdir(save_directory):
         save_directory = config["defaultsave.directory"] if config["defaultsave.directory"] != "" else os.getcwd()
 
-    if outFile and outFile.startswith(save_directory):  # it shouldn't
-        outFile.lstrip(save_directory)
+    if outFile:
+        outFile = os.path.basename(outFile)
+    if outFile_monitors:
+        outFile_monitors = os.path.basename(outFile_monitors)
 
     user_entry = runs[0]
     counter_run = 0
@@ -104,25 +106,18 @@ def add_runs(  # noqa: C901
             is_not_allowed_instrument = inst.upper() not in {"SANS2D", "LARMOR", "ZOOM", "LOQ"}
             if is_not_allowed_instrument and is_first_dataset_event:
                 _report_error(f"Adding event data not support for {inst} for now")
-                _delete_workspaces([ADD_FILES_SUM_TEMPORARY, ADD_FILES_SUM_TEMPORARY_MONITORS])
+                _delete_workspaces()
                 return ""
 
             for run_idx in range(1, len(runs)):
                 user_entry = runs[run_idx]
-                last_path, last_file, log_file, dummy, is_data_set_event = _load_ws(
+                last_path, last_file, log_file, _, is_data_set_event = _load_ws(
                     user_entry, defType, inst, ADD_FILES_NEW_TEMPORARY, rawTypes, period
                 )
 
                 if is_data_set_event != is_first_dataset_event:
                     _report_error("Datasets added must be either ALL histogram data or ALL event data")
-                    _delete_workspaces(
-                        [
-                            ADD_FILES_SUM_TEMPORARY,
-                            ADD_FILES_SUM_TEMPORARY_MONITORS,
-                            ADD_FILES_NEW_TEMPORARY,
-                            ADD_FILES_NEW_TEMPORARY_MONITORS,
-                        ]
-                    )
+                    _delete_workspaces()
                     return ""
 
                 adder.add(
@@ -147,13 +142,13 @@ def add_runs(  # noqa: C901
                 # Increment the run number
                 counter_run += 1
         except ValueError as e:
-            _report_error(f"Error opening file {user_entry}:{str(e)}")
-            _delete_workspaces([ADD_FILES_SUM_TEMPORARY])
+            _report_error(f"Error opening file {user_entry}:{e}")
+            _delete_workspaces()
             return ""
         except Exception as e:
             # We need to catch all exceptions to ensure that a dialog box is raised with the error
-            _report_error(f"Error finding files: {str(e)}")
-            _delete_workspaces([ADD_FILES_SUM_TEMPORARY, ADD_FILES_NEW_TEMPORARY])
+            _report_error(f"Error finding files: {e}")
+            _delete_workspaces()
             return ""
 
         # In case of event file force it into a histogram workspace if this is requested
@@ -198,7 +193,7 @@ def add_runs(  # noqa: C901
             period += 1
 
     if is_first_dataset_event and saveAsEvent:
-        filename, ext = _make_filename(runs[0], defType, inst)
+        filename, _ = _make_filename(runs[0], defType, inst)
         workspace_type = get_workspace_type(filename)
         is_multi_period = True if workspace_type is WorkspaceType.MultiperiodEvent else False
         outFile = bundle_added_event_data_as_group(out_path, out_path_monitors, is_multi_period)
@@ -439,7 +434,8 @@ def _report_error(error_msg):
         sanslog.error(error_msg)
 
 
-def _delete_workspaces(names):
+def _delete_workspaces():
+    names = (ADD_FILES_SUM_TEMPORARY, ADD_FILES_SUM_TEMPORARY_MONITORS, ADD_FILES_NEW_TEMPORARY, ADD_FILES_NEW_TEMPORARY_MONITORS)
     for ws_name in names:
         if ws_name in mtd:
             DeleteWorkspace(ws_name)
