@@ -480,7 +480,7 @@ public:
   void test_slices_dx() {
     auto workspace = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 2, 1);
     Mantid::HistogramData::Histogram histogram(BinEdges{1, 2, 3}, Counts{4, 9});
-    workspace->mutableY(0) = histogram.dataY();
+    workspace->mutableY(0) = histogram.y();
     workspace->setPointStandardDeviations(0, 2);
     histogram.setPointStandardDeviations(2);
 
@@ -496,8 +496,8 @@ public:
   void test_slice_single_bin_at_start() {
     auto workspace = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 3, 1);
     const Mantid::HistogramData::Histogram histogram(BinEdges{1, 2, 3, 4}, Counts{4, 9, 16});
-    workspace->mutableY(0) = histogram.dataY();
-    workspace->mutableE(0) = histogram.dataE();
+    workspace->mutableY(0) = histogram.y();
+    workspace->mutableE(0) = histogram.e();
 
     Parameters params;
     params.XMin = 1;
@@ -513,8 +513,8 @@ public:
   void test_slice_single_bin() {
     auto workspace = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 3, 1);
     const Mantid::HistogramData::Histogram histogram(BinEdges{1, 2, 3, 4}, Counts{4, 9, 16});
-    workspace->mutableY(0) = histogram.dataY();
-    workspace->mutableE(0) = histogram.dataE();
+    workspace->mutableY(0) = histogram.y();
+    workspace->mutableE(0) = histogram.e();
 
     Parameters params;
     params.XMin = 2;
@@ -530,8 +530,8 @@ public:
   void test_slice_single_bin_at_end() {
     auto workspace = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 3, 1);
     const Mantid::HistogramData::Histogram histogram(BinEdges{1, 2, 3, 4}, Counts{4, 9, 16});
-    workspace->mutableY(0) = histogram.dataY();
-    workspace->mutableE(0) = histogram.dataE();
+    workspace->mutableY(0) = histogram.y();
+    workspace->mutableE(0) = histogram.e();
 
     Parameters params;
     params.XMin = 3;
@@ -547,8 +547,8 @@ public:
   void test_points_slice_single_bin_at_start() {
     auto workspace = WorkspaceCreationHelper::create2DWorkspacePoints(1, 3, 1);
     const Mantid::HistogramData::Histogram histogram(Points{1, 2, 3}, Counts{4, 9, 16});
-    workspace->mutableY(0) = histogram.dataY();
-    workspace->mutableE(0) = histogram.dataE();
+    workspace->mutableY(0) = histogram.y();
+    workspace->mutableE(0) = histogram.e();
 
     Parameters params;
     params.XMin = 1;
@@ -564,8 +564,8 @@ public:
   void test_points_slice_single_bin() {
     auto workspace = WorkspaceCreationHelper::create2DWorkspacePoints(1, 3, 1);
     const Mantid::HistogramData::Histogram histogram(Points{1, 2, 3}, Counts{4, 9, 16});
-    workspace->mutableY(0) = histogram.dataY();
-    workspace->mutableE(0) = histogram.dataE();
+    workspace->mutableY(0) = histogram.y();
+    workspace->mutableE(0) = histogram.e();
 
     Parameters params;
     params.XMin = 2;
@@ -581,8 +581,8 @@ public:
   void test_points_slice_single_bin_at_end() {
     auto workspace = WorkspaceCreationHelper::create2DWorkspacePoints(1, 3, 1);
     const Mantid::HistogramData::Histogram histogram(Points{1, 2, 3}, Counts{4, 9, 16});
-    workspace->mutableY(0) = histogram.dataY();
-    workspace->mutableE(0) = histogram.dataE();
+    workspace->mutableY(0) = histogram.y();
+    workspace->mutableE(0) = histogram.e();
 
     Parameters params;
     params.XMin = 3;
@@ -598,8 +598,8 @@ public:
   void test_slice_two_bins_at_start() {
     auto workspace = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 4, 1);
     const Mantid::HistogramData::Histogram histogram(BinEdges{1, 2, 3, 4, 5}, Counts{1, 4, 9, 16});
-    workspace->mutableY(0) = histogram.dataY();
-    workspace->mutableE(0) = histogram.dataE();
+    workspace->mutableY(0) = histogram.y();
+    workspace->mutableE(0) = histogram.e();
 
     Parameters params;
     params.XMin = 1;
@@ -615,8 +615,8 @@ public:
   void test_slice_two_bins() {
     auto workspace = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 4, 1);
     const Mantid::HistogramData::Histogram histogram(BinEdges{1, 2, 3, 4, 5}, Counts{1, 4, 9, 16});
-    workspace->mutableY(0) = histogram.dataY();
-    workspace->mutableE(0) = histogram.dataE();
+    workspace->mutableY(0) = histogram.y();
+    workspace->mutableE(0) = histogram.e();
 
     Parameters params;
     params.XMin = 2;
@@ -632,8 +632,8 @@ public:
   void test_slice_two_bins_at_end() {
     auto workspace = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 4, 1);
     const Mantid::HistogramData::Histogram histogram(BinEdges{1, 2, 3, 4, 5}, Counts{1, 4, 9, 16});
-    workspace->mutableY(0) = histogram.dataY();
-    workspace->mutableE(0) = histogram.dataE();
+    workspace->mutableY(0) = histogram.y();
+    workspace->mutableE(0) = histogram.e();
 
     Parameters params;
     params.XMin = 3;
@@ -649,8 +649,8 @@ public:
   void test_points_slice_two_bins_at_start() {
     auto workspace = WorkspaceCreationHelper::create2DWorkspacePoints(1, 4, 1);
     const Mantid::HistogramData::Histogram histogram(Points{1, 2, 3, 4}, Counts{1, 4, 9, 16});
-    workspace->mutableY(0) = histogram.dataY();
-    workspace->mutableE(0) = histogram.dataE();
+    workspace->mutableY(0) = histogram.y();
+    workspace->mutableE(0) = histogram.e();
 
     Parameters params;
     params.XMin = 1;
@@ -666,8 +666,8 @@ public:
   void test_points_slice_two_bins() {
     auto workspace = WorkspaceCreationHelper::create2DWorkspacePoints(1, 4, 1);
     const Mantid::HistogramData::Histogram histogram(Points{1, 2, 3, 4}, Counts{1, 4, 9, 16});
-    workspace->mutableY(0) = histogram.dataY();
-    workspace->mutableE(0) = histogram.dataE();
+    workspace->mutableY(0) = histogram.y();
+    workspace->mutableE(0) = histogram.e();
 
     Parameters params;
     params.XMin = 2;
@@ -683,8 +683,8 @@ public:
   void test_points_slice_two_bins_at_end() {
     auto workspace = WorkspaceCreationHelper::create2DWorkspacePoints(1, 4, 1);
     const Mantid::HistogramData::Histogram histogram(Points{1, 2, 3, 4}, Counts{1, 4, 9, 16});
-    workspace->mutableY(0) = histogram.dataY();
-    workspace->mutableE(0) = histogram.dataE();
+    workspace->mutableY(0) = histogram.y();
+    workspace->mutableE(0) = histogram.e();
 
     Parameters params;
     params.XMin = 3;

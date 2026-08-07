@@ -296,8 +296,8 @@ private:
       const size_t nSpec = 1;
       size_t dn = isHisto ? 1 : 0;
       auto space = WorkspaceFactory::Instance().create("Workspace2D", nSpec, nData + dn, nData);
-      space->dataX(0).assign(xBins.begin(), xBins.end());
-      space->dataE(0).assign(nData, 10.0);
+      space->mutableX(0).assign(xBins.begin(), xBins.end());
+      space->mutableE(0).assign(nData, 10.0);
       workspace = space;
     }
 
@@ -305,7 +305,7 @@ private:
       size_t dn = isHisto ? 1 : 0;
       auto space = WorkspaceFactory::Instance().create("Workspace2D", nSpec, nData + dn, nData);
       for (size_t spec = 0; spec < nSpec; ++spec) {
-        space->dataX(spec).assign(xBins.begin(), xBins.end());
+        space->mutableX(spec).assign(xBins.begin(), xBins.end());
         for (size_t i = 0; i < nData; ++i) {
           const double x = space->x(0)[i];
           space->mutableY(spec)[i] = (1.1 + 0.1 * double(spec)) * (1.0 + x + x * x);
@@ -317,10 +317,10 @@ private:
 
     void set1DSpectrumValuesInvalid() {
       set1DSpectrumValues();
-      auto &yValues = dynamic_cast<MatrixWorkspace &>(*workspace).dataY(workspaceIndex);
+      auto &yValues = dynamic_cast<MatrixWorkspace &>(*workspace).mutableY(workspaceIndex);
       yValues[2] = std::numeric_limits<double>::infinity();
       yValues[4] = std::numeric_limits<double>::quiet_NaN();
-      auto &eValues = dynamic_cast<MatrixWorkspace &>(*workspace).dataE(workspaceIndex);
+      auto &eValues = dynamic_cast<MatrixWorkspace &>(*workspace).mutableE(workspaceIndex);
       eValues[6] = -1;
     }
 
@@ -335,8 +335,8 @@ private:
       xValues = xBins;
       set1DSpectrumEmpty();
       auto space = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(workspace);
-      space->dataY(0).assign(yarray, yarray + ndata);
-      space->dataE(0).assign(ndata, 1.0);
+      space->mutableY(0).assign(yarray, yarray + ndata);
+      space->mutableE(0).assign(ndata, 1.0);
       outputName = "out";
     }
 

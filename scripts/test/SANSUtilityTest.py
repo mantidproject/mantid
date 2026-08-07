@@ -144,7 +144,7 @@ def provide_workspace_with_x_errors(
         ws = mtd[workspace_name]
         for hists in range(0, nspec):
             x_error_array = np.asarray(x_error)
-            ws.setDx(hists, x_error_array)
+            ws.setSharedDx(hists, x_error_array)
 
 
 # This test does not pass and was not used before 1/4/2015. SansUtilitytests was disabled.

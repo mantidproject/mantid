@@ -179,15 +179,15 @@ public:
     // Should be 2584 for file HET15869.RAW
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 2584);
     // Check two X vectors are the same
-    TS_ASSERT((output2D->dataX(99)) == (output2D->dataX(1734)));
+    TS_ASSERT((output2D->x(99)) == (output2D->x(1734)));
     // Check two Y arrays have the same number of elements
-    TS_ASSERT_EQUALS(output2D->dataY(673).size(), output2D->dataY(2111).size());
+    TS_ASSERT_EQUALS(output2D->y(673).size(), output2D->y(2111).size());
     // Check one particular value
-    TS_ASSERT_EQUALS(output2D->dataY(999)[777], 9);
+    TS_ASSERT_EQUALS(output2D->y(999)[777], 9);
     // Check that the error on that value is correct
-    TS_ASSERT_EQUALS(output2D->dataE(999)[777], 3);
+    TS_ASSERT_EQUALS(output2D->e(999)[777], 3);
     // Check that the error on that value is correct
-    TS_ASSERT_EQUALS(output2D->dataX(999)[777], 554.1875);
+    TS_ASSERT_EQUALS(output2D->x(999)[777], 554.1875);
 
     // Check the unit has been set correctly
     TS_ASSERT_EQUALS(output2D->getAxis(0)->unit()->unitID(), "TOF")
@@ -277,17 +277,17 @@ public:
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 9);
 
     // Check two X vectors are the same
-    TS_ASSERT((output2D->dataX(1)) == (output2D->dataX(5)));
+    TS_ASSERT((output2D->x(1)) == (output2D->x(5)));
 
     // Check two Y arrays have the same number of elements
-    TS_ASSERT_EQUALS(output2D->dataY(2).size(), output2D->dataY(7).size());
+    TS_ASSERT_EQUALS(output2D->y(2).size(), output2D->y(7).size());
 
     // Check one particular value
-    TS_ASSERT_EQUALS(output2D->dataY(8)[777], 9);
+    TS_ASSERT_EQUALS(output2D->y(8)[777], 9);
     // Check that the error on that value is correct
-    TS_ASSERT_EQUALS(output2D->dataE(8)[777], 3);
+    TS_ASSERT_EQUALS(output2D->e(8)[777], 3);
     // Check that the error on that value is correct
-    TS_ASSERT_EQUALS(output2D->dataX(8)[777], 554.1875);
+    TS_ASSERT_EQUALS(output2D->x(8)[777], 554.1875);
   }
 
   void testMinlimit() {
@@ -471,10 +471,10 @@ public:
     MatrixWorkspace_sptr outsptr2;
     TS_ASSERT_THROWS_NOTHING(outsptr2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>((*++itr)));
 
-    TS_ASSERT_EQUALS(outsptr1->dataX(0), outsptr2->dataX(0))
+    TS_ASSERT_EQUALS(outsptr1->x(0), outsptr2->x(0))
 
     // But the data should be different
-    TS_ASSERT_DIFFERS(outsptr1->dataY(1)[8], outsptr2->dataY(1)[8])
+    TS_ASSERT_DIFFERS(outsptr1->y(1)[8], outsptr2->y(1)[8])
 
     TS_ASSERT_EQUALS(outsptr1->getInstrument()->baseInstrument(), outsptr2->getInstrument()->baseInstrument())
     TS_ASSERT_EQUALS(&(outsptr1->sample()), &(outsptr2->sample()))
@@ -568,15 +568,15 @@ public:
     TS_ASSERT(monitoroutput2D->getSpectrum(1).hasDetectorID(602));
 
     // Check two X vectors are the same
-    TS_ASSERT((output2D->dataX(95)) == (output2D->dataX(1730)));
+    TS_ASSERT((output2D->x(95)) == (output2D->x(1730)));
     // Check two Y arrays have the same number of elements
-    TS_ASSERT_EQUALS(output2D->dataY(669).size(), output2D->dataY(2107).size());
+    TS_ASSERT_EQUALS(output2D->y(669).size(), output2D->y(2107).size());
     // Check one particular value
-    TS_ASSERT_EQUALS(output2D->dataY(995)[0], 1);
+    TS_ASSERT_EQUALS(output2D->y(995)[0], 1);
     // Check that the error on that value is correct
-    TS_ASSERT_EQUALS(output2D->dataE(995)[777], 3);
+    TS_ASSERT_EQUALS(output2D->e(995)[777], 3);
     // Check that the error on that value is correct
-    TS_ASSERT_EQUALS(output2D->dataX(995)[777], 554.1875);
+    TS_ASSERT_EQUALS(output2D->x(995)[777], 554.1875);
 
     // Check the unit has been set correctly
     TS_ASSERT_EQUALS(output2D->getAxis(0)->unit()->unitID(), "TOF")
@@ -693,10 +693,10 @@ public:
     MatrixWorkspace_sptr monoutsptr2;
     TS_ASSERT_THROWS_NOTHING(monoutsptr2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>((*++monitr)));
 
-    TS_ASSERT_EQUALS(monoutsptr1->dataX(0), monoutsptr2->dataX(0))
+    TS_ASSERT_EQUALS(monoutsptr1->x(0), monoutsptr2->x(0))
 
     // But the data should be different
-    TS_ASSERT_DIFFERS(monoutsptr1->dataY(1)[555], monoutsptr2->dataY(1)[555])
+    TS_ASSERT_DIFFERS(monoutsptr1->y(1)[555], monoutsptr2->y(1)[555])
 
     // Same number of logs
     const auto &monPeriod1Run = monoutsptr1->run();
@@ -732,8 +732,8 @@ public:
     MatrixWorkspace_sptr outsptr2;
     TS_ASSERT_THROWS_NOTHING(outsptr2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>((*++itr)));
 
-    TS_ASSERT_EQUALS(outsptr1->dataX(0), outsptr2->dataX(0))
-    TS_ASSERT_EQUALS(outsptr1->dataY(1)[555], outsptr2->dataY(1)[555])
+    TS_ASSERT_EQUALS(outsptr1->x(0), outsptr2->x(0))
+    TS_ASSERT_EQUALS(outsptr1->y(1)[555], outsptr2->y(1)[555])
 
     // But the data should be different
     TS_ASSERT_DIFFERS(&(outsptr1->run()), &(outsptr2->run()))
@@ -829,17 +829,17 @@ public:
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 9);
 
     // Check two X vectors are the same
-    TS_ASSERT((output2D->dataX(1)) == (output2D->dataX(5)));
+    TS_ASSERT((output2D->x(1)) == (output2D->x(5)));
 
     // Check two Y arrays have the same number of elements
-    TS_ASSERT_EQUALS(output2D->dataY(2).size(), output2D->dataY(7).size());
+    TS_ASSERT_EQUALS(output2D->y(2).size(), output2D->y(7).size());
 
     // Check one particular value
-    TS_ASSERT_EQUALS(output2D->dataY(8)[777], 9);
+    TS_ASSERT_EQUALS(output2D->y(8)[777], 9);
     // Check that the error on that value is correct
-    TS_ASSERT_EQUALS(output2D->dataE(8)[777], 3);
+    TS_ASSERT_EQUALS(output2D->e(8)[777], 3);
     // Check that the error on that value is correct
-    TS_ASSERT_EQUALS(output2D->dataX(8)[777], 554.1875);
+    TS_ASSERT_EQUALS(output2D->x(8)[777], 554.1875);
     AnalysisDataService::Instance().remove("outWS");
   }
 
@@ -874,10 +874,10 @@ public:
     // TS_ASSERT( (output2D->dataX(1)) == (output2D->dataX(5)) );
 
     // Check two Y arrays have the same number of elements
-    TS_ASSERT_EQUALS(output2D->dataY(1).size(), output2D->dataY(2).size());
+    TS_ASSERT_EQUALS(output2D->y(1).size(), output2D->y(2).size());
 
     // Check one particular value
-    TS_ASSERT_EQUALS(output2D->dataY(1)[1], 192);
+    TS_ASSERT_EQUALS(output2D->y(1)[1], 192);
     AnalysisDataService::Instance().remove("outWS");
   }
 
@@ -911,10 +911,10 @@ public:
     TS_ASSERT_EQUALS(monitoroutput2D->getNumberHistograms(), 3);
 
     // Check two X vectors are the same
-    TS_ASSERT((monitoroutput2D->dataX(1)) == (output2D->dataX(1)));
+    TS_ASSERT((monitoroutput2D->x(1)) == (output2D->x(1)));
 
     // Check two Y arrays have the same number of elements
-    TS_ASSERT_EQUALS(output2D->dataY(2).size(), output2D->dataY(3).size());
+    TS_ASSERT_EQUALS(output2D->y(2).size(), output2D->y(3).size());
     AnalysisDataService::Instance().remove("outWS_monitors");
     AnalysisDataService::Instance().remove("outWS");
 
@@ -978,11 +978,11 @@ public:
     // Should be 6 for selected input
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 2580);
     // Check one particular value
-    TS_ASSERT_EQUALS(output2D->dataY(995)[777], 9);
+    TS_ASSERT_EQUALS(output2D->y(995)[777], 9);
     // Check that the error on that value is correct
-    TS_ASSERT_EQUALS(output2D->dataE(995)[777], 3);
+    TS_ASSERT_EQUALS(output2D->e(995)[777], 3);
     // Check that the error on that value is correct
-    TS_ASSERT_EQUALS(output2D->dataX(995)[777], 554.1875);
+    TS_ASSERT_EQUALS(output2D->x(995)[777], 554.1875);
     AnalysisDataService::Instance().remove("outWS");
   }
 

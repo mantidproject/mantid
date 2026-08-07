@@ -43,9 +43,9 @@ public:
 
     for (int i = 0; i < 3; ++i) {
       workspace.mutableY(0)[i] = i * 10;
-      workspace.mutableE(0)[i] = sqrt(workspace.dataY(0)[i]);
+      workspace.mutableE(0)[i] = sqrt(workspace.y(0)[i]);
       workspace.mutableY(1)[i] = i * 100;
-      workspace.mutableE(1)[i] = sqrt(workspace.dataY(1)[i]);
+      workspace.mutableE(1)[i] = sqrt(workspace.y(1)[i]);
     }
   }
 

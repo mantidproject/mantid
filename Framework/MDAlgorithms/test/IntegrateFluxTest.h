@@ -336,14 +336,14 @@ private:
     auto ws = Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", 4, 101, 100);
     auto axis = ws->getAxis(0);
     axis->setUnit("Momentum");
-    auto &x = ws->dataX(0);
+    auto &x = ws->mutableX(0);
     x[0] = 0.0;
     for (auto i = x.begin() + 1; i != x.end(); ++i) {
       *i = *(i - 1) + 0.3;
     }
     for (size_t spec = 0; spec != ws->getNumberHistograms(); ++spec) {
       ws->setBinEdges(spec, x);
-      auto &y = ws->dataY(spec);
+      auto &y = ws->mutableY(spec);
       for (auto j = y.begin(); j != y.end(); ++j) {
         auto i = std::distance(y.begin(), j);
         *j = double(2 * i) + 1.0;
@@ -356,7 +356,7 @@ private:
     auto ws = Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", 4, 101, 100);
     auto axis = ws->getAxis(0);
     axis->setUnit("Momentum");
-    auto &x = ws->dataX(0);
+    auto &x = ws->mutableX(0);
     x[0] = 0.0;
     for (auto i = x.begin() + 1; i != x.end(); ++i) {
       double tmp = *(i - 1);
@@ -364,7 +364,7 @@ private:
     }
     for (size_t spec = 0; spec != ws->getNumberHistograms(); ++spec) {
       ws->setBinEdges(spec, x);
-      auto &y = ws->dataY(spec);
+      auto &y = ws->mutableY(spec);
       for (auto j = y.begin(); j != y.end(); ++j) {
         auto i = std::distance(y.begin(), j);
         *j = double(2 * i) + 1.0;
@@ -377,14 +377,14 @@ private:
     auto ws = Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", 4, 101, 100);
     auto axis = ws->getAxis(0);
     axis->setUnit("Momentum");
-    auto &x = ws->dataX(0);
+    auto &x = ws->mutableX(0);
     x[0] = 0.0;
     for (auto i = x.begin() + 1; i != x.end(); ++i) {
       *i = *(i - 1) + 0.3;
     }
     for (size_t spec = 0; spec != ws->getNumberHistograms(); ++spec) {
       ws->setBinEdges(spec, x);
-      auto &y = ws->dataY(spec);
+      auto &y = ws->mutableY(spec);
       for (auto j = y.begin(); j != y.end(); ++j) {
         auto i = std::distance(y.begin(), j);
         *j = double(2 * i) + 1.0;
@@ -399,14 +399,14 @@ private:
     auto ws = Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", 4, 100, 100);
     auto axis = ws->getAxis(0);
     axis->setUnit("Momentum");
-    auto &x = ws->dataX(0);
+    auto &x = ws->mutableX(0);
     x[0] = 0.0;
     for (auto i = x.begin() + 1; i != x.end(); ++i) {
       *i = *(i - 1) + 0.3;
     }
     for (size_t spec = 0; spec != ws->getNumberHistograms(); ++spec) {
       ws->setPoints(spec, x);
-      auto &y = ws->dataY(spec);
+      auto &y = ws->mutableY(spec);
       for (auto j = y.begin(); j != y.end(); ++j) {
         auto i = std::distance(y.begin(), j);
         *j = 2 * x[i] + 1.0;
@@ -419,7 +419,7 @@ private:
     auto ws = Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", 4, 100, 100);
     auto axis = ws->getAxis(0);
     axis->setUnit("Momentum");
-    auto &x = ws->dataX(0);
+    auto &x = ws->mutableX(0);
     x[0] = 0.0;
     for (auto i = x.begin() + 1; i != x.end(); ++i) {
       double tmp = *(i - 1);
@@ -427,7 +427,7 @@ private:
     }
     for (size_t spec = 0; spec != ws->getNumberHistograms(); ++spec) {
       ws->setPoints(spec, x);
-      auto &y = ws->dataY(spec);
+      auto &y = ws->mutableY(spec);
       for (auto j = y.begin(); j != y.end(); ++j) {
         auto i = std::distance(y.begin(), j);
         *j = 2 * x[i] + 1.0;

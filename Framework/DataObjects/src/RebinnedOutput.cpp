@@ -130,7 +130,7 @@ void RebinnedOutput::finalize(bool hasSqrdErrs) {
   if (m_finalized) {
     PARALLEL_FOR_IF(Kernel::threadSafe(*this))
     for (int i = 0; i < nHist; ++i) {
-      MantidVec &err = this->dataE(i);
+      auto &err = this->mutableE(i);
       MantidVec &frac = this->dataF(i);
       if (hasSqrdErrs) {
         std::transform(err.begin(), err.end(), frac.begin(), err.begin(), std::divides<double>());
@@ -146,8 +146,8 @@ void RebinnedOutput::finalize(bool hasSqrdErrs) {
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*this))
   for (int i = 0; i < nHist; ++i) {
-    MantidVec &data = this->dataY(i);
-    MantidVec &err = this->dataE(i);
+    auto &data = this->mutableY(i);
+    auto &err = this->mutableE(i);
     MantidVec &frac = this->dataF(i);
     std::transform(data.begin(), data.end(), frac.begin(), data.begin(), std::divides<double>());
     std::transform(err.begin(), err.end(), frac.begin(), err.begin(), std::divides<double>());
@@ -173,8 +173,8 @@ void RebinnedOutput::unfinalize() {
   auto nHist = static_cast<int>(this->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*this))
   for (int i = 0; i < nHist; ++i) {
-    MantidVec &data = this->dataY(i);
-    MantidVec &err = this->dataE(i);
+    auto &data = this->mutableY(i);
+    auto &err = this->mutableE(i);
     MantidVec &frac = this->dataF(i);
     std::transform(data.begin(), data.end(), frac.begin(), data.begin(), std::multiplies<double>());
     std::transform(err.begin(), err.end(), frac.begin(), err.begin(), std::multiplies<double>());

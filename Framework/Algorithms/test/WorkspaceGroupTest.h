@@ -66,17 +66,17 @@ private:
 
   void checkDataItem(const MatrixWorkspace_sptr &work_in1, const MatrixWorkspace_sptr &work_in2,
                      const MatrixWorkspace_sptr &work_out1, size_t i, size_t ws2Index) {
-    double sig1 = work_in1->dataY(i / work_in1->blocksize())[i % work_in1->blocksize()];
-    double sig2 = work_in2->dataY(ws2Index / work_in1->blocksize())[ws2Index % work_in2->blocksize()];
-    double sig3 = work_out1->dataY(i / work_in1->blocksize())[i % work_in1->blocksize()];
-    TS_ASSERT_DELTA(work_in1->dataX(i / work_in1->blocksize())[i % work_in1->blocksize()],
-                    work_out1->dataX(i / work_in1->blocksize())[i % work_in1->blocksize()], 0.0001);
+    double sig1 = work_in1->y(i / work_in1->blocksize())[i % work_in1->blocksize()];
+    double sig2 = work_in2->y(ws2Index / work_in1->blocksize())[ws2Index % work_in2->blocksize()];
+    double sig3 = work_out1->y(i / work_in1->blocksize())[i % work_in1->blocksize()];
+    TS_ASSERT_DELTA(work_in1->x(i / work_in1->blocksize())[i % work_in1->blocksize()],
+                    work_out1->x(i / work_in1->blocksize())[i % work_in1->blocksize()], 0.0001);
 
     TS_ASSERT_DELTA(sig1 + sig2, sig3, 0.0001);
-    double err1 = work_in1->dataE(i / work_in1->blocksize())[i % work_in1->blocksize()];
-    double err2 = work_in2->dataE(ws2Index / work_in2->blocksize())[ws2Index % work_in2->blocksize()];
+    double err1 = work_in1->e(i / work_in1->blocksize())[i % work_in1->blocksize()];
+    double err2 = work_in2->e(ws2Index / work_in2->blocksize())[ws2Index % work_in2->blocksize()];
     double err3(sqrt((err1 * err1) + (err2 * err2)));
-    TS_ASSERT_DELTA(err3, work_out1->dataE(i / work_in1->blocksize())[i % work_in1->blocksize()], 0.0001);
+    TS_ASSERT_DELTA(err3, work_out1->e(i / work_in1->blocksize())[i % work_in1->blocksize()], 0.0001);
   }
 
 public:

@@ -67,11 +67,11 @@ public:
     // Check two X vectors are the same
 
     // Check one particular value
-    TS_ASSERT_EQUALS(output2D->dataY(0)[777], 355);
+    TS_ASSERT_EQUALS(output2D->y(0)[777], 355);
     // Check that the error on that value is correct
-    TS_ASSERT_EQUALS(output2D->dataE(0)[777], std::sqrt(output2D->dataY(0)[777]));
+    TS_ASSERT_EQUALS(output2D->e(0)[777], std::sqrt(output2D->y(0)[777]));
     // Check that the error on that value is correct
-    TS_ASSERT_EQUALS(output2D->dataX(0)[777], 554.1875);
+    TS_ASSERT_EQUALS(output2D->x(0)[777], 554.1875);
 
     // Check the unit has been set correctly
     TS_ASSERT_EQUALS(output2D->getAxis(0)->unit()->unitID(), "TOF")
@@ -121,7 +121,7 @@ public:
     MatrixWorkspace_sptr outsptr2;
     TS_ASSERT_THROWS_NOTHING(outsptr2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>((*++itr)));
 
-    TS_ASSERT_EQUALS(outsptr1->dataX(0), outsptr2->dataX(0))
+    TS_ASSERT_EQUALS(outsptr1->x(0), outsptr2->x(0))
 
     TS_ASSERT_EQUALS(&(outsptr1->sample()), &(outsptr2->sample()))
     TS_ASSERT_DIFFERS(&(outsptr1->run()), &(outsptr2->run()))

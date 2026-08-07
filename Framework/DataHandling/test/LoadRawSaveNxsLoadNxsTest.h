@@ -115,15 +115,15 @@ public:
     // set to 4 for CSP78173
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 4);
     // Check two X vectors are the same
-    TS_ASSERT((output2D->dataX(1)) == (output2D->dataX(3)));
+    TS_ASSERT((output2D->x(1)) == (output2D->x(3)));
     // Check two Y arrays have the same number of elements
-    TS_ASSERT_EQUALS(output2D->dataY(1).size(), output2D->dataY(2).size());
+    TS_ASSERT_EQUALS(output2D->y(1).size(), output2D->y(2).size());
     // Check one particular value
-    TS_ASSERT_EQUALS(output2D->dataY(1)[14], 9.0);
+    TS_ASSERT_EQUALS(output2D->y(1)[14], 9.0);
     // Check that the error on that value is correct
-    TS_ASSERT_EQUALS(output2D->dataE(1)[14], 3.0);
+    TS_ASSERT_EQUALS(output2D->e(1)[14], 3.0);
     // Check that the X data is as expected
-    TS_ASSERT_EQUALS(output2D->dataX(2)[777], 15550.0);
+    TS_ASSERT_EQUALS(output2D->x(2)[777], 15550.0);
 
     // Check the unit has been set correctly
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "TOF");
@@ -246,9 +246,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(myOutputSpace));
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 1);
     // Check two X vectors are the same
-    TS_ASSERT((output->dataX(0)) == (singleValuedWs->dataX(0)));
+    TS_ASSERT((output->x(0)) == (singleValuedWs->x(0)));
     // Check two Y arrays have the same number of elements
-    TS_ASSERT_EQUALS(output->dataY(0).size(), singleValuedWs->dataY(0).size());
+    TS_ASSERT_EQUALS(output->y(0).size(), singleValuedWs->y(0).size());
   }
 
 private:

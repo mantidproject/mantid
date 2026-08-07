@@ -209,8 +209,8 @@ void EQSANSDarkCurrentSubtraction2::exec() {
     Mantid::HistogramData::HistogramY const &YDarkValues = scaledDarkWS->y(i);
     Mantid::HistogramData::HistogramE const &YDarkErrors = scaledDarkWS->e(i);
     Mantid::HistogramData::HistogramX const &XValues = inputWS->x(i);
-    MantidVec &YValues = inputWS->dataY(i);
-    MantidVec &YErrors = inputWS->dataE(i);
+    auto &YValues = inputWS->mutableY(i);
+    auto &YErrors = inputWS->mutableE(i);
     for (int j = 0; j < nBins; j++) {
       double bin_scale = (XValues[j + 1] - XValues[j]) / (XValues[nBins] - XValues[0]);
       YValues[j] -= YDarkValues[0] * bin_scale;

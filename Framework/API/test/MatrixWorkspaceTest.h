@@ -769,7 +769,7 @@ public:
     TS_ASSERT_EQUALS(ws->maskedBins(0).begin()->second, 0.75);
     // flagMasked() shouldn't change the y-value maskBins() tested below does
     // that
-    TS_ASSERT_EQUALS(ws->dataY(0)[1], 1.0);
+    TS_ASSERT_EQUALS(ws->y(0)[1], 1.0);
 
     // Now mask a bin earlier than above and check it's sorting properly
     TS_ASSERT_THROWS_NOTHING(ws->flagMasked(1, 1))
@@ -805,17 +805,17 @@ public:
     TS_ASSERT_EQUALS(ws2->maskedBins(0).size(), 1);
     TS_ASSERT_EQUALS(ws2->maskedBins(0).begin()->first, 1);
     TS_ASSERT_EQUALS(ws2->maskedBins(0).begin()->second, 0.5);
-    TS_ASSERT_EQUALS(ws2->dataY(0)[1], 0.5);
+    TS_ASSERT_EQUALS(ws2->y(0)[1], 0.5);
 
     // Now mask a bin earlier than above and check it's sorting properly
     TS_ASSERT_THROWS_NOTHING(ws2->maskBin(0, 0));
     TS_ASSERT_EQUALS(ws2->maskedBins(0).begin()->first, 0);
     TS_ASSERT_EQUALS(ws2->maskedBins(0).begin()->second, 1.0);
-    TS_ASSERT_EQUALS(ws2->dataY(0)[0], 0.0);
+    TS_ASSERT_EQUALS(ws2->y(0)[0], 0.0);
     // Check the previous masking is still OK
     TS_ASSERT_EQUALS(ws2->maskedBins(0).rbegin()->first, 1);
     TS_ASSERT_EQUALS(ws2->maskedBins(0).rbegin()->second, 0.5);
-    TS_ASSERT_EQUALS(ws2->dataY(0)[1], 0.5);
+    TS_ASSERT_EQUALS(ws2->y(0)[1], 0.5);
   }
 
   void testMaskingNaNInf() {
@@ -1266,7 +1266,7 @@ public:
   void test_getXIndex() {
     WorkspaceTester ws;
     ws.initialize(1, 4, 3);
-    auto &X = ws.dataX(0);
+    auto &X = ws.mutableX(0);
     X[0] = 1.0;
     X[1] = 2.0;
     X[2] = 3.0;
@@ -1380,7 +1380,7 @@ public:
   void test_getImage_0_width() {
     WorkspaceTester ws;
     ws.initialize(9, 2, 1);
-    auto &X = ws.dataX(0);
+    auto &X = ws.mutableX(0);
     X[0] = 1.0;
     X[1] = 2.0;
     const size_t start = 0;
@@ -1394,7 +1394,7 @@ public:
   void test_getImage_wrong_start() {
     WorkspaceTester ws;
     ws.initialize(9, 2, 1);
-    auto &X = ws.dataX(0);
+    auto &X = ws.mutableX(0);
     X[0] = 1.0;
     X[1] = 2.0;
     size_t start = 10;
@@ -1410,7 +1410,7 @@ public:
   void test_getImage_wrong_stop() {
     WorkspaceTester ws;
     ws.initialize(9, 2, 1);
-    auto &X = ws.dataX(0);
+    auto &X = ws.mutableX(0);
     X[0] = 1.0;
     X[1] = 2.0;
     size_t start = 0;
@@ -1426,7 +1426,7 @@ public:
   void test_getImage_empty_set() {
     WorkspaceTester ws;
     ws.initialize(9, 2, 1);
-    auto &X = ws.dataX(0);
+    auto &X = ws.mutableX(0);
     X[0] = 1.0;
     X[1] = 2.0;
     size_t start = 1;
@@ -1440,7 +1440,7 @@ public:
   void test_getImage_non_rectangular() {
     WorkspaceTester ws;
     ws.initialize(9, 2, 1);
-    auto &X = ws.dataX(0);
+    auto &X = ws.mutableX(0);
     X[0] = 1.0;
     X[1] = 2.0;
     size_t start = 0;
@@ -1452,7 +1452,7 @@ public:
   void test_getImage_wrong_indexStart() {
     WorkspaceTester ws;
     ws.initialize(9, 2, 1);
-    auto &X = ws.dataX(0);
+    auto &X = ws.mutableX(0);
     X[0] = 1.0;
     X[1] = 2.0;
     const size_t start = 0;
@@ -1472,7 +1472,7 @@ public:
   void test_getImage_wrong_indexEnd() {
     WorkspaceTester ws;
     ws.initialize(9, 2, 1);
-    auto &X = ws.dataX(0);
+    auto &X = ws.mutableX(0);
     X[0] = 1.0;
     X[1] = 2.0;
     const size_t start = 0;
@@ -1484,7 +1484,7 @@ public:
 
     WorkspaceTester wsh;
     wsh.initialize(9, 2, 2);
-    auto &X1 = ws.dataX(0);
+    auto &X1 = ws.mutableX(0);
     X1[0] = 1.0;
     X1[1] = 2.0;
     startX = 1.0;
@@ -1495,7 +1495,7 @@ public:
   void test_getImage_single_bin_histo() {
     WorkspaceTester ws;
     ws.initialize(9, 2, 1);
-    auto &X = ws.dataX(0);
+    auto &X = ws.mutableX(0);
     X[0] = 1.0;
     X[1] = 2.0;
     for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
@@ -1529,7 +1529,7 @@ public:
   void test_getImage_single_bin_points() {
     WorkspaceTester ws;
     ws.initialize(9, 1, 1);
-    auto &X = ws.dataX(0);
+    auto &X = ws.mutableX(0);
     X[0] = 1.0;
     for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
       ws.mutableY(i)[0] = static_cast<double>(i + 1);
@@ -1562,7 +1562,7 @@ public:
   void test_getImage_multi_bin_histo() {
     WorkspaceTester ws;
     ws.initialize(9, 4, 3);
-    auto &X = ws.dataX(0);
+    auto &X = ws.mutableX(0);
     X[0] = 1.0;
     X[1] = 2.0;
     X[2] = 3.0;
@@ -1598,7 +1598,7 @@ public:
   void test_getImage_multi_bin_points() {
     WorkspaceTester ws;
     ws.initialize(9, 3, 3);
-    auto &X = ws.dataX(0);
+    auto &X = ws.mutableX(0);
     X[0] = 1.0;
     X[1] = 2.0;
     X[2] = 3.0;
@@ -2228,7 +2228,7 @@ private:
                                              std::size_t const &yLength, std::vector<double> const &xValues) {
     WorkspaceTester workspace;
     workspace.initialize(nVectors, xLength, yLength);
-    auto &X = workspace.dataX(0);
+    auto &X = workspace.mutableX(0);
 
     std::copy(xValues.begin(), xValues.end(), X.begin());
     return workspace;

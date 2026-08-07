@@ -61,7 +61,7 @@ MatrixWorkspace_sptr WorkspaceFactoryImpl::create(const MatrixWorkspace_const_sp
   if (NVectors == size_t(-1))
     NVectors = parent->getNumberHistograms();
   if (XLength == size_t(-1))
-    XLength = parent->dataX(0).size();
+    XLength = parent->x(0).size();
   if (YLength == size_t(-1)) {
     differentSize = false;
     YLength = parent->blocksize();

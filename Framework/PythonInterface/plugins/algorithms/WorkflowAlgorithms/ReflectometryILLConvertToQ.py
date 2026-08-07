@@ -126,7 +126,7 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
                 Formula="4*pi*{}/x".format(np.sin(theta0)),
                 AxisUnits="MomentumTransfer",
             )
-            theta_ws_in_q.setDx(0, ws.dx(0))
+            theta_ws_in_q.setSharedDx(0, ws.dx(0))
             theta_ws_in_q = self._to_point_data(theta_ws_in_q)
             theta_ws_in_q = self._group_points(theta_ws_in_q, "theta_")
             self._cleanup.cleanupLater(theta_ws_in_q)
@@ -319,7 +319,7 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
         reflectivity_ws.setYUnit("Reflectivity")
         reflectivity_ws.setYUnitLabel("Reflectivity")
         # The X error data is lost in Divide.
-        reflectivity_ws.setDx(0, ws.dx(0))
+        reflectivity_ws.setSharedDx(0, ws.dx(0))
         self._cleanup.cleanup(ws)
         return reflectivity_ws
 

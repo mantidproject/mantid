@@ -23,7 +23,7 @@ public:
     TS_ASSERT_EQUALS(ws->blocksize(), 20);
     TS_ASSERT(ws->getSpectrum(0).hasDetectorID(100));
     TS_ASSERT(ws->getSpectrum(1).hasDetectorID(101));
-    TS_ASSERT_DELTA(ws->dataY(5)[0], 2.0, 1e-5);
+    TS_ASSERT_DELTA(ws->y(5)[0], 2.0, 1e-5);
   }
 
   void test_createEventWorkspaceWithFullInstrument() {

@@ -73,10 +73,10 @@ void EQSANSQ2D::exec() {
   double wavelength_min = 0.0;
   if (inputWS->run().hasProperty("wavelength_min"))
     wavelength_min = getRunProperty(inputWS, "wavelength_min");
-  else if (inputWS->dataX(0).size() > 1)
-    wavelength_min = (inputWS->dataX(1)[0] + inputWS->dataX(1)[1]) / 2.0;
-  else if (inputWS->dataX(0).size() == 1)
-    wavelength_min = inputWS->dataX(1)[0];
+  else if (inputWS->x(0).size() > 1)
+    wavelength_min = (inputWS->x(1)[0] + inputWS->x(1)[1]) / 2.0;
+  else if (inputWS->x(0).size() == 1)
+    wavelength_min = inputWS->x(1)[0];
   else {
     g_log.error("Can't determine the minimum wavelength for the input workspace.");
     throw std::invalid_argument("Can't determine the minimum wavelength for the input workspace.");
