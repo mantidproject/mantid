@@ -20,7 +20,15 @@
 //   * Primary:  runState  (NoRun / JoiningRun / BeginRun / Running / EndRun)
 //   * Separate: isPaused  (self-loop on Running; orthogonal; applied
 //                          immediately in the background thread)
-//   * Separate: listenerState  (Disconnected / Connected / ReadWait / Error)
+//   * Separate: listenerState  (Disconnected / Connected / ReadWait / Error).
+//               Now carries a Connected -> Disconnected edge for a clean
+//               peer close.  That edge is deliberately NOT an error: the
+//               background thread stays neutral (no fatal(), no
+//               m_backgroundException) so a future implementation can
+//               reconnect instead.  The current implementation has no
+//               recovery action, so the FOREGROUND (doExtractData()) is
+//               what escalates Disconnected to Error, shown as a dotted
+//               edge annotated accordingly.
 //
 // Regenerate PNG:
 //   dot -Tpng -o SNSLiveEventDataListener-state-machine-after.png \
@@ -151,8 +159,25 @@ digraph SNSLiveEventDataListener_after {
     // ── listenerState axis — separate small subgraph ──────────────────────
     // ReadWait -> Connected label differs from pre-refactor: the release now
     // happens inside onBeforeExtract() / onAfterExtract(), not the getter.
+    //
+    // Connected -> Disconnected and Disconnected -> Error together encode the
+    // key distinction the v4 poll-loop refactor introduced: a clean peer
+    // close is NOT ascribed to Error by the background thread.  It is
+    // recorded neutrally as Disconnected (no fatal(), no
+    // m_backgroundException) — deliberately reserving the right for a future
+    // implementation to reconnect and rescan the ADARA stream instead of
+    // treating the disconnect as fatal.  Only the FOREGROUND — this
+    // implementation's doExtractData(), which has no recovery action
+    // available — escalates to Error, once there is nothing left to
+    // deliver.  listenerState() itself never returns Error via this path;
+    // the dotted edge below is annotated to make that explicit.
+    //
+    // There is deliberately no ReadWait -> Disconnected edge: while paused,
+    // the background thread is parked in the pause gate (above the poll
+    // block in run()) and never observes a peer close.  See the note on the
+    // ReadWait -> Connected edge below.
     subgraph cluster_listenerstate {
-        label    = "listenerState axis"
+        label    = "listenerState axis\nprecedence: Error > Disconnected > ReadWait > Connected"
         style    = "rounded"
         color    = "gray50"
         fontsize = 10
@@ -161,13 +186,34 @@ digraph SNSLiveEventDataListener_after {
         Connected    [label="Connected"                       fillcolor=lightgreen]
         ReadWait     [label="ReadWait\n(m_pauseNetRead=true)" fillcolor=lightyellow]
         Error        [label="Error"                           fillcolor=lightsalmon]
+
+        _disconnect_note_ [
+            shape     = note
+            style     = filled
+            fillcolor = "#fffbe6"
+            fontsize  = 9
+            label     = "A disconnect is not intrinsically an error:\nan orderly server close is expected.\nThe background thread deliberately does not\ncall fatal(), reserving the right for a future\nimplementation to reconnect and rescan the\nADARA stream instead."
+        ]
     }
 
-    Disconnected -> Connected [label="connect()\nsocket open"]
-    Connected    -> ReadWait  [label="RunStatusPkt\n-> m_pauseNetRead=true"]
-    ReadWait     -> Connected [label="onBeforeExtract() / onAfterExtract():\n-> m_pauseNetRead=false"]
-    Connected    -> Error     [label="background\nexception"]
-    ReadWait     -> Error     [label="background\nexception"]
+    Disconnected -> Connected    [label="connect()\nsocket open"]
+    Connected    -> ReadWait     [label="RunStatusPkt\n-> m_pauseNetRead=true"]
+    ReadWait     -> Connected    [
+        label = "onBeforeExtract() / onAfterExtract():\n-> m_pauseNetRead=false\n\nNB: while paused the bg thread is parked in the\npause gate and does not poll.  A peer close\narriving during ReadWait is not observed until\nthis release fires."
+    ]
+    Connected    -> Error        [label="fatal(): POLL_ERROR / NetException /\nexhausted hello-send retry / rxPacket() throw\n-> m_backgroundException (first-writer-wins)\n   + m_isConnected=false\n(Error pre-empts Disconnected)"]
+    ReadWait     -> Error        [label="fatal() (as above)\n(Error pre-empts ReadWait)"]
+    Connected    -> Disconnected [
+        label = "clean peer close (receiveBytes()==0)\nbackground thread: m_isConnected=false,\nm_bgThreadCaughtUp=true, thread returns.\nNo fatal(), no m_backgroundException."
+        color = "gray30"
+    ]
+    Disconnected -> Error [
+        style     = dotted
+        color     = "crimson"
+        fontcolor = "crimson"
+        label     = "escalated in the FOREGROUND\n(this implementation only):\ndoExtractData() throws once nothing is\nleft to deliver — no recovery action exists.\nlistenerState() itself stays Disconnected."
+    ]
+    Disconnected -> _disconnect_note_ [style=dotted arrowhead=none color="gray60" constraint=false]
 
     // ── Layout anchors ────────────────────────────────────────────────────
     // Invisible constraint=false edges that share rank columns with the main

@@ -4,6 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX-License-Identifier: GPL-3.0+
+#include <cstdlib> // for std::abort
 #include <ctime>
 #include <exception>
 #include <sstream> // for ostringstream
@@ -34,6 +35,7 @@
 #include <Poco/DOM/NodeList.h>
 
 #include <Poco/Net/NetException.h>
+#include <Poco/Net/PollSet.h>
 #include <Poco/Net/SocketStream.h>
 #include <Poco/Net/StreamSocket.h>
 #include <Poco/Timestamp.h>
@@ -47,9 +49,11 @@ using Mantid::Types::Core::DateAndTime;
 using Mantid::Types::Event::TofEvent;
 
 namespace { // anonymous namespace
-// Time we'll wait on a receive call (in seconds)
-// Also used when shutting down the thread so we know how long to wait there
-const int64_t RECV_TIMEOUT = 30;
+// Receive timeout on the socket (seconds).  PollSet drives readiness; this
+// is a backstop against spurious POLL_READ wakeups that would otherwise block
+// receiveBytes() indefinitely.  1 s is orders of magnitude longer than any
+// legitimate poll-to-recv interval, but short enough to keep shutdown prompt.
+const int64_t RECV_TIMEOUT = 1;
 
 // Names for a couple of time series properties
 const std::string PAUSE_PROPERTY("pause");
@@ -103,22 +107,50 @@ SNSLiveEventDataListener::SNSLiveEventDataListener()
 SNSLiveEventDataListener::~SNSLiveEventDataListener() {
   // Stop the background thread
   if (m_thread.isRunning()) {
-    // Ask the thread to exit (and hope that it does - Poco doesn't
-    // seem to have an equivalent to pthread_cancel
+    // Ask the thread to exit.  run()'s loop re-checks m_stopThread every
+    // iteration between bounded waits (100 ms pause-loop sleep, 100 ms
+    // pollSet.poll() timeout, 1 s RECV_TIMEOUT on receiveBytes()), so it
+    // should notice within about a second.
     m_stopThread.store(true, std::memory_order_release);
+
+    // Unblock the thread immediately rather than waiting out those timeouts:
+    // shut down both directions of the socket.  This is safe to call
+    // concurrently with the background thread's in-flight receiveBytes() /
+    // poll() on the same StreamSocket — shutdown() only issues shutdown(fd,
+    // SHUT_RDWR) on the shared descriptor and does not touch Poco's
+    // reference-counted SocketImpl, unlike close() (which would race on that
+    // refcount).  A shut-down socket becomes read-ready with EOF, so poll()
+    // wakes and receiveBytes() returns 0, which run() already treats as a
+    // clean peer-close.  If the socket was never connected or is already
+    // closed, shutdown() throws; there is nothing left to unblock.
     try {
-      m_thread.join(RECV_TIMEOUT * 2 * 1000); // *1000 because join() wants time in milliseconds
-    } catch (Poco::TimeoutException &) {
-      // And just what do we do here?!?
-      // Log a message, sure, but other than that we can either hang the
-      // Mantid process waiting for a thread that will apparently never exit
-      // or segfault because the ADARA::read() is going to try to write to
-      // a buffer that's going to be deleted.
-      // Chose segfault - at least that's obvious.
-      g_log.fatal() << "SNSLiveEventDataListener failed to shut down its "
-                    << "background thread!  This should never happen and "
-                    << "Mantid is pretty much guaranteed to crash shortly.  "
-                    << "Talk to the Mantid developer team.\n";
+      m_socket.shutdown();
+    } catch (...) {
+    }
+
+    // Wait for the thread to actually exit before returning — i.e. before any
+    // member is destroyed.  Never proceed while the thread is still running:
+    // doing so previously let the background thread read freed memory after
+    // a join() timeout ("Chose segfault - at least that's obvious").  Because
+    // the socket shutdown above removes the only wait that could exceed the
+    // per-iteration bound, the first tryJoin() below is expected to succeed;
+    // the retry cap and abort() are a fail-loud backstop for the "should
+    // never happen" case where the thread is still wedged regardless.
+    constexpr int JOIN_TIMEOUT_MS = 5000;
+    constexpr int MAX_JOIN_ATTEMPTS = 6; // ~30 s total, then a controlled crash
+    for (int attempt = 1; !m_thread.tryJoin(JOIN_TIMEOUT_MS); ++attempt) {
+      if (attempt >= MAX_JOIN_ATTEMPTS) {
+        // Log first: g_log.fatal() writes synchronously, so the diagnostic is
+        // emitted before abort() raises SIGABRT.  A controlled crash here is
+        // preferable to both a silent use-after-free and an unbounded hang.
+        g_log.fatal() << "SNSLiveEventDataListener: background thread did not exit within "
+                      << (JOIN_TIMEOUT_MS * MAX_JOIN_ATTEMPTS / 1000)
+                      << " s of socket shutdown; aborting to avoid use-after-free.\n";
+        std::abort();
+      }
+      g_log.warning() << "SNSLiveEventDataListener: still waiting for the background thread "
+                         "to exit after socket shutdown (attempt "
+                      << attempt << " of " << MAX_JOIN_ATTEMPTS << ")...\n";
     }
   }
 }
@@ -172,7 +204,7 @@ bool SNSLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
 
   m_socket.setReceiveTimeout(Poco::Timespan(RECV_TIMEOUT, 0)); // POCO timespan is seconds, microseconds
   g_log.debug() << "Connected to " << m_socket.address().toString() << '\n';
-  m_isConnected = true;
+  m_isConnected.store(true);
 
   return true;
 }
@@ -181,7 +213,7 @@ bool SNSLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
 
 /// Test to see if the object has connected to the SMS daemon
 /// @return Returns true if connected.  False otherwise.
-bool SNSLiveEventDataListener::isConnected() { return m_isConnected; }
+bool SNSLiveEventDataListener::isConnected() { return m_isConnected.load(); }
 
 /// Start the background thread
 
@@ -209,19 +241,51 @@ void SNSLiveEventDataListener::start(const Types::Core::DateAndTime startTime) {
   m_thread.start(*this);
 }
 
+int SNSLiveEventDataListener::sendHelloPacket(const void *buf, int size) {
+  const auto *p = static_cast<const char *>(buf);
+  int remaining = size;
+  while (remaining > 0) {
+    int n = m_socket.sendBytes(p, remaining);
+    if (n <= 0)
+      return size - remaining; // short-write; caller detects
+    p += n;
+    remaining -= n;
+  }
+  return size;
+}
+
 /// The main function for the background thread
 
 /// Loops until the forground thread requests it to stop.  Reads data from the
 /// network, parses it and stores the resulting events (and other metadata) in
 /// a temporary workspace.
 void SNSLiveEventDataListener::run() {
+  // Centralised side-effect helper: sets m_isConnected=false and writes
+  // m_backgroundException (first-writer-wins) under m_mutex.  Called from
+  // fatal() and from every outer catch arm so the locking + first-writer-wins
+  // idiom lives in one place.
+  auto setFatalState = [this](std::shared_ptr<std::runtime_error> ex) {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    m_isConnected.store(false);
+    if (!m_backgroundException)
+      m_backgroundException = std::move(ex);
+  };
+
+  // Fatal-socket-failure helper.  Logs, sets fatal state, then throws
+  // std::runtime_error so the outer catch cascade lands the thread cleanly.
+  auto fatal = [&setFatalState](const std::string &msg) {
+    g_log.fatal() << msg << '\n';
+    setFatalState(std::make_shared<std::runtime_error>(msg));
+    throw std::runtime_error(msg);
+  };
+
   try {
-    if (!m_isConnected) // sanity check
+    if (!m_isConnected.load()) // sanity check
     {
-      throw std::runtime_error(std::string("SNSLiveEventDataListener::run(): No connection to SMS server."));
+      throw std::runtime_error("SNSLiveEventDataListener: No connection to SMS server.");
     }
 
-    // First thing to do is send a hello packet
+    // First thing to do is send a hello packet.
     uint32_t typeVal = ADARA_PKT_TYPE(ADARA::PacketType::Type::CLIENT_HELLO_TYPE, 0);
     uint32_t helloPkt[5] = {4, typeVal, 0, 0, 0};
     // TODO: The packet version should be bumped to 1 and we should add
@@ -236,14 +300,20 @@ void SNSLiveEventDataListener::run() {
     helloPkt[4] = static_cast<uint32_t>(m_startTime.totalNanoseconds() /
                                         1000000000); // divide by a billion to get time in seconds
 
-    if (m_socket.sendBytes(helloPkt, sizeof(helloPkt)) != sizeof(helloPkt))
-    // Yes, I know a send isn't guaranteed to send the whole buffer in one
-    // call.  I'm treating such a case as an error anyway.
-    {
-      g_log.error("SNSLiveEventDataListener::run(): Failed to send client "
-                  "hello packet. Thread exiting.");
-      m_stopThread.store(true, std::memory_order_release);
+    if (sendHelloPacket(helloPkt, static_cast<int>(sizeof(helloPkt))) != static_cast<int>(sizeof(helloPkt))) {
+      fatal("SNSLiveEventDataListener: short write on client hello packet.");
     }
+
+    Poco::Net::PollSet pollSet;
+    pollSet.add(m_socket, Poco::Net::PollSet::POLL_READ);
+
+    // bg-thread-local parse-pending flag (plain bool — only this thread touches
+    // it; no atomic needed).  Set whenever bufferParse() should run on the
+    // next iteration: fresh bytes were appended, the parse buffer is full and
+    // must be drained before more bytes can be read, or a prior parse was
+    // interrupted and bytes remain stranded in the parser's internal buffer
+    // where poll() cannot see them.
+    bool needParse = false;
 
     while (!m_stopThread.load(std::memory_order_acquire)) // loop until the foreground thread tells us to stop
     {
@@ -255,8 +325,7 @@ void SNSLiveEventDataListener::run() {
       while (m_bgThreadCaughtUp.load(std::memory_order_acquire) && m_pauseNetRead.load(std::memory_order_acquire) &&
              !m_stopThread.load(std::memory_order_acquire)) {
         // foreground thread doesn't want us to process any more packets until
-        // it's ready.  See comments in rxPacket( const ADARA::RunStatusPkt
-        // &pkt)
+        // it's ready.  See comments in rxPacket( const ADARA::RunStatusPkt &pkt)
         Poco::Thread::sleep(100); // 100 milliseconds
       }
 
@@ -265,48 +334,132 @@ void SNSLiveEventDataListener::run() {
         break;
       }
 
-      // receiveBytes() does NOT flip m_bgThreadCaughtUp.  A bg thread blocked
-      // in receiveBytes() (e.g. at a test gate) has a stable, fully-parsed
-      // stream state — the foreground may safely snapshot m_pendingTransition
-      // in that situation.
-      unsigned int bufFillLen = bufferFillLength();
-      if (bufFillLen) {
-        uint8_t *bufFillAddr = bufferFillAddress();
-        int bytesRead = 0;
-        try {
-          bytesRead = m_socket.receiveBytes(bufFillAddr, bufFillLen);
-        } catch (Poco::TimeoutException &) {
-          // Don't need to stop processing or anything - just log a warning
-          g_log.warning("Timeout reading from the network.  Is SMS still sending?");
-        } catch (Poco::Net::NetException &e) {
-          std::string msg("Parser::read(): ");
-          msg += e.name();
-          throw std::runtime_error(msg);
-        }
+      // Skip poll() when needParse is already set — the pending bytes are in
+      // the parser's internal buffer, not the kernel's socket buffer, so
+      // poll() cannot see them.  Go straight to parse; the pause condition
+      // is re-checked at the top of the next iteration.
+      if (!needParse) {
+        // Wait up to 100 ms for socket readiness.  Short timeout keeps
+        // shutdown latency low and lets m_stopThread be checked promptly.
+        auto ready = pollSet.poll(Poco::Timespan(0, 100000));
 
-        if (bytesRead > 0) {
-          bufferBytesAppended(bytesRead);
+        // bufferParse() is only useful when bytes have just been appended or
+        // when the parse buffer is full and must be drained to make room.
+        // All other cases — poll timeout, spurious POLL_READ — are no-ops
+        // that would waste CPU and spam the log string.
+        if (!ready.empty()) {
+          auto it = ready.find(m_socket);
+          if (it != ready.end()) {
+            const int mode = it->second;
+
+            // POLL_READ first: on Linux a peer close with pending bytes
+            // delivers EPOLLIN|EPOLLHUP together; drain bytes before treating
+            // the hangup as fatal so the final END_RUN packet is not discarded.
+            // On macOS kqueue, EV_ERROR (kevent changelist failure) can
+            // co-occur with EVFILT_READ (valid pending data) after a
+            // back-pressure pause; successfulRead below suppresses the
+            // POLL_ERROR fatal in that case.
+            bool successfulRead = false;
+            if (mode & Poco::Net::PollSet::POLL_READ) {
+              unsigned int bufFillLen = bufferFillLength();
+              if (bufFillLen) {
+                uint8_t *bufFillAddr = bufferFillAddress();
+                int bytesRead = -1;
+                try {
+                  bytesRead = m_socket.receiveBytes(bufFillAddr, bufFillLen);
+                } catch (Poco::TimeoutException &) {
+                  // Spurious POLL_READ (rare on epoll, not zero) — transient.
+                  // Skip this iteration; next poll() will re-evaluate.
+                  // Do NOT log here: the loop fires every ~100 ms and would flood.
+                  bytesRead = -1;
+                } catch (Poco::Net::NetException &e) {
+                  fatal(std::string("SNSLiveEventDataListener: network read failed: ") + e.name());
+                }
+
+                if (bytesRead == 0) {
+                  // Clean peer-close.  Not an error — set Disconnected state
+                  // and exit the bg thread cleanly.  doExtractData() will
+                  // surface this to consumers via its disconnect checks.
+                  // Set m_bgThreadCaughtUp so onBeforeExtract() can proceed
+                  // past its NotYet gate even if we exit before bufferParse().
+                  m_isConnected.store(false);
+                  m_bgThreadCaughtUp.store(true, std::memory_order_release);
+                  return;
+                }
+                if (bytesRead > 0) {
+                  bufferBytesAppended(bytesRead);
+                  needParse = true; // new bytes may complete one or more packets
+                  successfulRead = true;
+                }
+                // bytesRead < 0 (TimeoutException): no new bytes; needParse unchanged.
+              } else {
+                // Buffer is full; we cannot read more bytes until the parser
+                // drains some complete packets.  Signal parse so the loop
+                // makes forward progress instead of spinning on POLL_READ.
+                needParse = true;
+                successfulRead = true; // event handled; defer POLL_ERROR check
+                                       // to the next iteration after buffer drains
+              }
+            }
+
+            if ((mode & Poco::Net::PollSet::POLL_ERROR) && !successfulRead) {
+              // Only fatal when POLL_READ did not successfully handle the event.
+              // When POLL_READ already read bytes (successfulRead=true), any
+              // concurrent POLL_ERROR is a transient kqueue artefact — the next
+              // poll() iteration will clear it or fire a pure POLL_ERROR if the
+              // socket is genuinely broken.
+              fatal("SNSLiveEventDataListener: socket poll reported error.");
+            }
+          }
         }
+        // If poll() timed out, needParse stays false — go straight back to poll.
+        // CPU already yielded for 100 ms; no additional sleep needed.
       }
 
-      // Close the foreground snapshot window for the duration of bufferParse()
-      // only — rxPacket() calls inside it may mutate m_pendingTransition and
-      // m_pauseNetRead under m_mutex, so the foreground must not snapshot
-      // between rxPacket() calls.
-      m_bgThreadCaughtUp.store(false, std::memory_order_release);
-      std::string bufferParseLog;
-      // bufferParse() wants a string where it can save log messages.
-      // We don't actually use the messages for anything, though.
-      int packetsParsed = bufferParse(bufferParseLog);
-      bufferParseLog.clear(); // keep the string from growing without bound
-      // Reopen the snapshot window — all rxPacket() calls for this iteration
-      // have completed; m_pendingTransition and m_pauseNetRead are stable.
-      m_bgThreadCaughtUp.store(true, std::memory_order_release);
+      if (needParse) {
+        needParse = false; // consume the signal; re-set below if interrupted
+        // Close the foreground snapshot window for the duration of bufferParse()
+        // only — rxPacket() calls inside it may mutate m_pendingTransition and
+        // m_pauseNetRead, so the foreground must not snapshot between calls.
+        m_bgThreadCaughtUp.store(false, std::memory_order_release);
+        int packetsParsed;
+        {
+          // Hold m_mutex for the entire parse iteration so every rxPacket()
+          // override runs under the lock.  This makes "caller holds m_mutex"
+          // an invariant for all rxPacket() bodies and their callees
+          // (initWorkspacePart2(), appendEvent(), etc.), eliminating the
+          // per-packet lock acquisitions that previously existed inside each
+          // override.  Fixes Coverity CIDs 1663860 and 1663859 (accesses to
+          // m_adaraRunStatus / m_pendingTransition without the lock in
+          // initWorkspacePart2()'s tail) and the broader inconsistency where
+          // six of the seven initWorkspacePart2() callers previously ran it
+          // without holding m_mutex at all.
+          //
+          // m_bgThreadCaughtUp is stored outside this scope (atomic, not
+          // mutex-guarded) — the foreground's NotYet gate reads it without
+          // the lock, so it must not be inside the lock scope.
+          //
+          // setFatalState() / fatal() are only called from run()'s catch arms
+          // and pre-parse code paths; they are not reachable from within
+          // bufferParse(), so there is no recursive acquisition.
+          std::lock_guard<std::mutex> lock(m_mutex);
+          std::string bufferParseLog; // required arg: unused
+          packetsParsed = bufferParse(bufferParseLog);
+        }
+        // Reopen the snapshot window — all rxPacket() calls for this iteration
+        // have completed; m_pendingTransition and m_pauseNetRead are stable.
+        m_bgThreadCaughtUp.store(true, std::memory_order_release);
 
-      if (packetsParsed == 0) {
-        // No packets were parsed.  Sleep a little to let some data accumulate
-        // before calling read again.  (Keeps us from spinlocking the cpu...)
-        Poco::Thread::sleep(10); // 10 milliseconds
+        if (packetsParsed < 0) {
+          // bufferParse() was interrupted by a callback returning true
+          // (rxPacket(RunStatusPkt) sets m_pauseNetRead and returns true).
+          // Remaining packets are in the parser's internal buffer; process
+          // them after the pause loop releases — poll() won't wake for them
+          // because they are not in the kernel's socket buffer.
+          needParse = true;
+        }
+        // packetsParsed == 0: fragment only; the next iteration calls poll()
+        // which already yields the CPU up to 100 ms — no sleep needed.
       }
     }
 
@@ -326,47 +479,35 @@ void SNSLiveEventDataListener::run() {
                      "SNSLiveEventDataListener network read thread.\n"
                   << "Exception message is: " << e.what() << ".\n"
                   << "Thread is exiting.\n";
-
-    m_isConnected = false;
-
-    if (!m_backgroundException)
-      m_backgroundException = std::make_shared<ADARA::invalid_packet>(e);
+    setFatalState(std::make_shared<ADARA::invalid_packet>(e));
   } catch (std::runtime_error &e) { // exception handler for generic runtime
                                     // exceptions
     g_log.fatal() << "Caught a runtime exception.\n"
                   << "Exception message: " << e.what() << ".\n"
                   << "Thread will exit.\n";
-    m_isConnected = false;
-
-    if (!m_backgroundException)
-      m_backgroundException = std::make_shared<std::runtime_error>(e);
+    setFatalState(std::make_shared<std::runtime_error>(e));
   } catch (std::invalid_argument &e) { // TimeSeriesProperty (and possibly some
                                        // other things) can throw these errors
     g_log.fatal() << "Caught an invalid argument exception.\n"
                   << "Exception message: " << e.what() << ".\n"
                   << "Thread will exit.\n";
-    m_isConnected = false;
-    m_workspaceInitialized = true; // see the comments in the default exception
-                                   // handler for why we set this value.
+    {
+      std::lock_guard<std::mutex> lock(m_mutex);
+      m_workspaceInitialized = true; // see the comments in the default exception
+                                     // handler for why we set this value.
+    }
     std::string newMsg("Invalid argument exception thrown from the background thread: ");
     newMsg += e.what();
-    if (!m_backgroundException)
-      m_backgroundException = std::make_shared<std::runtime_error>(newMsg);
+    setFatalState(std::make_shared<std::runtime_error>(newMsg));
   } catch (std::exception &e) { // exception handler for generic exceptions
     g_log.fatal() << "Caught an exception.\n"
                   << "Exception message: " << e.what() << ".\n"
                   << "Thread will exit.\n";
-    m_isConnected = false;
-
-    if (!m_backgroundException)
-      m_backgroundException = std::make_shared<std::runtime_error>(e.what());
+    setFatalState(std::make_shared<std::runtime_error>(e.what()));
   } catch (...) { // Default exception handler
     g_log.fatal("Uncaught exception in SNSLiveEventDataListener network read thread."
                 " Thread is exiting.");
-    m_isConnected = false;
-
-    if (!m_backgroundException)
-      m_backgroundException = std::make_shared<std::runtime_error>("Unknown error in backgound thread");
+    setFatalState(std::make_shared<std::runtime_error>("Unknown error in backgound thread"));
   }
 }
 
@@ -418,54 +559,49 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BankedEventPkt &pkt) {
   // First, check to see if the run has been paused.  We don't process
   // the events if we're paused unless the user has specifically overridden
   // this behavior with the livelistener.keeppausedevents property.
-  if (m_isDasPaused && (!m_keepPausedEvents)) {
+  if (m_isDasPaused.load() && (!m_keepPausedEvents)) {
     return false;
   }
 
   // Append the events
   g_log.debug() << "----- Pulse ID: " << pkt.pulseId() << " -----\n";
-  // Scope braces
-  {
-    std::lock_guard<std::mutex> scopedLock(m_mutex);
+  // Timestamp for the events
+  Mantid::Types::Core::DateAndTime eventTime = timeFromPacket(pkt);
 
-    // Timestamp for the events
-    Mantid::Types::Core::DateAndTime eventTime = timeFromPacket(pkt);
+  // Save the pulse charge in the logs (*10 because we want the units to be
+  // picoCulombs, and ADARA sends them out in units of 10pC)
+  m_eventBuffer->mutableRun()
+      .getTimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY)
+      ->addValue(eventTime, pkt.pulseCharge() * 10);
 
-    // Save the pulse charge in the logs (*10 because we want the units to be
-    // picoCulombs, and ADARA sends them out in units of 10pC)
-    m_eventBuffer->mutableRun()
-        .getTimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY)
-        ->addValue(eventTime, pkt.pulseCharge() * 10);
-
-    // Iterate through each event
-    const ADARA::Event *event = pkt.firstEvent();
-    unsigned lastBankID = pkt.curBankId();
-    // A counter that we use for logging purposes
-    unsigned eventsPerBank = 0;
-    while (event != nullptr) {
-      eventsPerBank++;
-      totalEvents++;
-      if (lastBankID < 0xFFFFFFFE) // Bank ID -1 & -2 are special cases and are
-                                   // not valid pixels
-      {
-        // appendEvent needs tof to be in units of microseconds, but it comes
-        // from the ADARA stream in units of 100ns.
-        if (pkt.getSourceCORFlag()) {
-          appendEvent(event->pixel, event->tof / 10.0, eventTime);
-        } else {
-          appendEvent(event->pixel, (event->tof + pkt.getSourceTOFOffset()) / 10.0, eventTime);
-        }
-      }
-
-      event = pkt.nextEvent();
-      if (pkt.curBankId() != lastBankID) {
-        g_log.debug() << "BankID " << lastBankID << " had " << eventsPerBank << " events\n";
-
-        lastBankID = pkt.curBankId();
-        eventsPerBank = 0;
+  // Iterate through each event
+  const ADARA::Event *event = pkt.firstEvent();
+  unsigned lastBankID = pkt.curBankId();
+  // A counter that we use for logging purposes
+  unsigned eventsPerBank = 0;
+  while (event != nullptr) {
+    eventsPerBank++;
+    totalEvents++;
+    if (lastBankID < 0xFFFFFFFE) // Bank ID -1 & -2 are special cases and are
+                                 // not valid pixels
+    {
+      // appendEvent needs tof to be in units of microseconds, but it comes
+      // from the ADARA stream in units of 100ns.
+      if (pkt.getSourceCORFlag()) {
+        appendEvent(event->pixel, event->tof / 10.0, eventTime);
+      } else {
+        appendEvent(event->pixel, (event->tof + pkt.getSourceTOFOffset()) / 10.0, eventTime);
       }
     }
-  } // mutex automatically unlocks here
+
+    event = pkt.nextEvent();
+    if (pkt.curBankId() != lastBankID) {
+      g_log.debug() << "BankID " << lastBankID << " had " << eventsPerBank << " events\n";
+
+      lastBankID = pkt.curBankId();
+      eventsPerBank = 0;
+    }
+  }
 
   g_log.debug() << "Total Events: " << totalEvents << "\n";
   g_log.debug("-------------------------------");
@@ -489,9 +625,6 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BeamMonitorPkt &pkt) {
   if (ignorePacket(pkt)) {
     return false;
   }
-
-  // We'll likely be modifying m_eventBuffer (specifically, m_eventBuffer->m_monitorWorkspace), so lock the mutex
-  std::lock_guard<std::mutex> scopedLock(m_mutex);
 
   if (!m_eventBuffer->monitorWorkspace())
     return false;
@@ -648,8 +781,6 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::RunStatusPkt &pkt) {
   if (ignorePacket(pkt, pkt.status())) {
     return false;
   }
-
-  std::lock_guard<std::mutex> scopedLock(m_mutex);
 
   const bool haveRunNumber = m_eventBuffer->run().hasProperty("run_number");
 
@@ -829,12 +960,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::VariableU32Pkt &pkt) {
                     << " because we haven't received a device descriptor "
                        "packet for it.\n";
     } else {
-      {
-        std::lock_guard<std::mutex> scopedLock(m_mutex);
-        m_eventBuffer->mutableRun()
-            .getTimeSeriesProperty<int>((*it).second)
-            ->addValue(timeFromPacket(pkt), pkt.value());
-      }
+      m_eventBuffer->mutableRun().getTimeSeriesProperty<int>((*it).second)->addValue(timeFromPacket(pkt), pkt.value());
     }
   }
 
@@ -876,12 +1002,9 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::VariableDoublePkt &pkt) {
                     << " because we haven't received a device descriptor "
                        "packet for it.\n";
     } else {
-      {
-        std::lock_guard<std::mutex> scopedLock(m_mutex);
-        m_eventBuffer->mutableRun()
-            .getTimeSeriesProperty<double>((*it).second)
-            ->addValue(timeFromPacket(pkt), pkt.value());
-      }
+      m_eventBuffer->mutableRun()
+          .getTimeSeriesProperty<double>((*it).second)
+          ->addValue(timeFromPacket(pkt), pkt.value());
     }
   }
 
@@ -926,12 +1049,9 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::VariableStringPkt &pkt) {
                     << " because we haven't received a device descriptor "
                        "packet for it.\n";
     } else {
-      {
-        std::lock_guard<std::mutex> scopedLock(m_mutex);
-        m_eventBuffer->mutableRun()
-            .getTimeSeriesProperty<std::string>((*it).second)
-            ->addValue(timeFromPacket(pkt), pkt.value());
-      }
+      m_eventBuffer->mutableRun()
+          .getTimeSeriesProperty<std::string>((*it).second)
+          ->addValue(timeFromPacket(pkt), pkt.value());
     }
   }
 
@@ -1065,22 +1185,16 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::DeviceDescriptorPkt &pkt) {
             if (!pvUnits.empty()) {
               prop->setUnits(pvUnits);
             }
-            {
-              // Note: it's possible for us receive device descriptor packets
-              // in the middle of a run (after the call to initWorkspacePart2),
-              // so we really do need to the lock the mutex here.
-              std::lock_guard<std::mutex> scopedLock(m_mutex);
-              if (m_eventBuffer->run().hasProperty(pvName)) {
-                g_log.error() << "Ignoring duplicate process variable " << pvName << " for devId=" << pkt.devId()
-                              << ", pvId=" << pvIdNum << "; skipping.\n";
-                delete prop;
-              } else {
-                m_eventBuffer->mutableRun().addLogData(prop);
+            if (m_eventBuffer->run().hasProperty(pvName)) {
+              g_log.error() << "Ignoring duplicate process variable " << pvName << " for devId=" << pkt.devId()
+                            << ", pvId=" << pvIdNum << "; skipping.\n";
+              delete prop;
+            } else {
+              m_eventBuffer->mutableRun().addLogData(prop);
 
-                // Add the pv id, device id and pv name to the name map so we can
-                // find the name when we process the variable value packets
-                m_nameMap[std::make_pair(pkt.devId(), pvIdNum)] = pvName;
-              }
+              // Add the pv id, device id and pv name to the name map so we can
+              // find the name when we process the variable value packets
+              m_nameMap[std::make_pair(pkt.devId(), pvIdNum)] = pvName;
             }
           }
         }
@@ -1110,48 +1224,44 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::AnnotationPkt &pkt) {
     return false;
   }
 
-  {
-    std::lock_guard<std::mutex> scopedLock(m_mutex);
-    // We have to lock the mutex prior to calling mutableRun()
-    switch (pkt.marker_type()) {
+  switch (pkt.marker_type()) {
 
-    case ADARA::MarkerType::GENERIC:
-      // Do nothing.  We log the comment field below for all types
-      break;
+  case ADARA::MarkerType::GENERIC:
+    // Do nothing.  We log the comment field below for all types
+    break;
 
-    case ADARA::MarkerType::SCAN_START:
-      m_eventBuffer->mutableRun()
-          .getTimeSeriesProperty<int>(SCAN_PROPERTY)
-          ->addValue(timeFromPacket(pkt), pkt.scanIndex());
-      g_log.information() << "Scan Start: " << pkt.scanIndex() << '\n';
-      break;
+  case ADARA::MarkerType::SCAN_START:
+    m_eventBuffer->mutableRun()
+        .getTimeSeriesProperty<int>(SCAN_PROPERTY)
+        ->addValue(timeFromPacket(pkt), pkt.scanIndex());
+    g_log.information() << "Scan Start: " << pkt.scanIndex() << '\n';
+    break;
 
-    case ADARA::MarkerType::SCAN_STOP:
-      m_eventBuffer->mutableRun().getTimeSeriesProperty<int>(SCAN_PROPERTY)->addValue(timeFromPacket(pkt), 0);
-      g_log.information() << "Scan Stop:  " << pkt.scanIndex() << '\n';
-      break;
+  case ADARA::MarkerType::SCAN_STOP:
+    m_eventBuffer->mutableRun().getTimeSeriesProperty<int>(SCAN_PROPERTY)->addValue(timeFromPacket(pkt), 0);
+    g_log.information() << "Scan Stop:  " << pkt.scanIndex() << '\n';
+    break;
 
-    case ADARA::MarkerType::PAUSE:
-      m_eventBuffer->mutableRun().getTimeSeriesProperty<int>(PAUSE_PROPERTY)->addValue(timeFromPacket(pkt), 1);
-      g_log.information() << "Run paused\n";
-      onRunPause(true);
-      break;
+  case ADARA::MarkerType::PAUSE:
+    m_eventBuffer->mutableRun().getTimeSeriesProperty<int>(PAUSE_PROPERTY)->addValue(timeFromPacket(pkt), 1);
+    g_log.information() << "Run paused\n";
+    onRunPause(true);
+    break;
 
-    case ADARA::MarkerType::RESUME:
-      m_eventBuffer->mutableRun().getTimeSeriesProperty<int>(PAUSE_PROPERTY)->addValue(timeFromPacket(pkt), 0);
-      g_log.information() << "Run resumed\n";
-      onRunPause(false);
-      break;
+  case ADARA::MarkerType::RESUME:
+    m_eventBuffer->mutableRun().getTimeSeriesProperty<int>(PAUSE_PROPERTY)->addValue(timeFromPacket(pkt), 0);
+    g_log.information() << "Run resumed\n";
+    onRunPause(false);
+    break;
 
-    case ADARA::MarkerType::OVERALL_RUN_COMMENT:
-      // Do nothing.  We log the comment field below for all types
-      break;
+  case ADARA::MarkerType::OVERALL_RUN_COMMENT:
+    // Do nothing.  We log the comment field below for all types
+    break;
 
-    case ADARA::MarkerType::SYSTEM:
-      // Do nothing.  We log the comment field below for all types
-      break;
-    }
-  } // mutex auto unlocks here
+  case ADARA::MarkerType::SYSTEM:
+    // Do nothing.  We log the comment field below for all types
+    break;
+  }
 
   // if there's a comment in the packet, log it at the info level
   const std::string &comment = pkt.comment();
@@ -1303,12 +1413,15 @@ void SNSLiveEventDataListener::initWorkspacePart2() {
   try {
     loadInst->execute();
   } catch (std::exception &e) {
+    // Re-throw with context: InstrumentName + XML length make the failure
+    // diagnosable.  Do NOT acquire m_mutex here — the caller always holds it
+    // (guaranteed by the outer lock around bufferParse() in run()), and
+    // std::mutex is non-recursive.
+    // The outer catch arms in run() call setFatalState() with this message.
     std::ostringstream msg;
     msg << "SNSLiveEventDataListener: LoadInstrument failed during workspace "
            "initialization (InstrumentName='"
         << m_instrumentName << "', InstrumentXML length=" << m_instrumentXML.size() << " bytes): " << e.what();
-    if (!m_backgroundException)
-      m_backgroundException = std::make_shared<std::runtime_error>(msg.str());
     throw std::runtime_error(msg.str());
   }
 
@@ -1341,6 +1454,15 @@ void SNSLiveEventDataListener::initWorkspacePart2() {
   }
 
   initMonitorWorkspace();
+
+  // Compose the workspace title from the instrument name and run number, now
+  // that both are known: readyForInitPart2() guarantees m_instrumentName is
+  // non-empty, and m_runNumber is already set on both the joining path
+  // (rxPacket(NEW_RUN) -> setRunDetails()) and the transition path
+  // (onBeginRun() -> setRunDetails(), which runs before initWorkspacePart2()
+  // is reached again for that run).  Applied to the extracted workspace's
+  // title in doExtractData().
+  m_wsName = m_instrumentName + std::to_string(m_runNumber.load());
 
   m_workspaceInitialized = true;
 
@@ -1429,59 +1551,99 @@ std::shared_ptr<Workspace> SNSLiveEventDataListener::doExtractData() {
     startupTimeout = std::max(0.001, *v);
 
   const DateAndTime endTime = DateAndTime::getCurrentTime() + startupTimeout;
-  while ((!m_workspaceInitialized) && (DateAndTime::getCurrentTime() < endTime)) {
-    // Surface any fatal exception from the background thread (e.g. a bad
-    // instrument geometry packet that caused LoadInstrument to throw) so
-    // the caller sees the real cause instead of waiting out the timeout.
-    if (m_backgroundException) {
-      throw std::runtime_error(m_backgroundException->what());
+  while (true) {
+    bool initialized;
+    std::shared_ptr<std::runtime_error> bgEx;
+    {
+      std::lock_guard<std::mutex> lock(m_mutex);
+      initialized = m_workspaceInitialized;
+      bgEx = m_backgroundException;
     }
+    if (initialized)
+      break;
+    // Surface any fatal exception (e.g. LoadInstrument failure) so the
+    // caller sees the real cause instead of waiting out the timeout.
+    if (bgEx)
+      throw std::runtime_error(bgEx->what());
+    // Check 1: clean peer-close before workspace was ever initialised.
+    if (!m_isConnected.load())
+      throw std::runtime_error("SNSLiveEventDataListener: stream ended before workspace initialization.");
+    if (DateAndTime::getCurrentTime() >= endTime)
+      break;
     Poco::Thread::sleep(100); // 100 milliseconds
   }
-  if (m_backgroundException) {
-    throw std::runtime_error(m_backgroundException->what());
-  }
-  if (!m_workspaceInitialized) {
-    throw Exception::NotYet("The workspace has not yet been initialized.");
-  }
-
-  // Throw if the request was for data from the start of a run, but we're not
-  // yet in a run.
-  if (m_ignorePackets) // This variable is (un)set in ignorePacket()
-  {
-    throw Exception::NotYet("Waiting for a run to start.");
-  }
-
   using namespace DataObjects;
 
-  // Make a brand new EventWorkspace
-  EventWorkspace_sptr temp = std::dynamic_pointer_cast<EventWorkspace>(
-      API::WorkspaceFactory::Instance().create("EventWorkspace", m_eventBuffer->getNumberHistograms(), 2, 1));
-
-  // Copy geometry over.
-  API::WorkspaceFactory::Instance().initializeFromParent(*m_eventBuffer, *temp, false);
-
-  // Clear out the old logs, except for the most recent entry
-  temp->mutableRun().clearOutdatedTimeSeriesLogValues();
-
-  // Clear out old monitor logs
-  for (auto &monitorLog : m_monitorLogs) {
-    temp->mutableRun().removeProperty(monitorLog);
-  }
-  m_monitorLogs.clear();
-
-  // Create a fresh monitor workspace and insert into the new 'main' workspace
-  auto monitorBuffer = m_eventBuffer->monitorWorkspace();
-  if (monitorBuffer) {
-    auto newMonitorBuffer =
-        WorkspaceFactory::Instance().create("EventWorkspace", monitorBuffer->getNumberHistograms(), 1, 1);
-    WorkspaceFactory::Instance().initializeFromParent(*monitorBuffer, *newMonitorBuffer, false);
-    temp->setMonitorWorkspace(newMonitorBuffer);
-  }
-
-  // Lock the mutex and swap the workspaces
+  // From here through the workspace swap below, hold m_mutex as a single
+  // critical section.  Everything in this region reads or mutates state that
+  // the background thread also touches under the parse lock inside
+  // bufferParse(): m_backgroundException, m_workspaceInitialized,
+  // m_ignorePackets, m_eventBuffer (including its Run / TimeSeriesProperty
+  // internals via initializeFromParent()), m_monitorLogs, and
+  // m_pendingTransition.  A narrower lock here previously left several of
+  // those reads unguarded.  No deadlock risk: the background thread only ever
+  // acquires m_mutex inside bufferParse() and never blocks on the foreground
+  // while holding it, so this simply serializes extract-vs-parse (the
+  // intended back-pressure).  NOTE: this lock must NOT extend back over the
+  // init-wait sleep loop above — holding it there would starve the background
+  // thread that sets m_workspaceInitialized.
+  EventWorkspace_sptr temp;
   {
-    std::lock_guard<std::mutex> scopedLock(m_mutex);
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (m_backgroundException)
+      throw std::runtime_error(m_backgroundException->what());
+    if (!m_workspaceInitialized)
+      throw Exception::NotYet("The workspace has not yet been initialized.");
+
+    // Throw if the request was for data from the start of a run, but we're
+    // not yet in a run.
+    if (m_ignorePackets.load()) // This variable is (un)set in ignorePacket()
+    {
+      throw Exception::NotYet("Waiting for a run to start.");
+    }
+
+    // Make a brand new EventWorkspace
+    temp = std::dynamic_pointer_cast<EventWorkspace>(
+        API::WorkspaceFactory::Instance().create("EventWorkspace", m_eventBuffer->getNumberHistograms(), 2, 1));
+
+    // Copy geometry over.
+    API::WorkspaceFactory::Instance().initializeFromParent(*m_eventBuffer, *temp, false);
+
+    // Apply the title composed in initWorkspacePart2() (instrument name + run number).
+    temp->setTitle(m_wsName);
+
+    // Clear out the old logs, except for the most recent entry
+    temp->mutableRun().clearOutdatedTimeSeriesLogValues();
+
+    // Clear out old monitor logs
+    for (auto &monitorLog : m_monitorLogs) {
+      temp->mutableRun().removeProperty(monitorLog);
+    }
+    m_monitorLogs.clear();
+
+    // Create a fresh monitor workspace and insert into the new 'main' workspace
+    auto monitorBuffer = m_eventBuffer->monitorWorkspace();
+    if (monitorBuffer) {
+      auto newMonitorBuffer =
+          WorkspaceFactory::Instance().create("EventWorkspace", monitorBuffer->getNumberHistograms(), 1, 1);
+      WorkspaceFactory::Instance().initializeFromParent(*monitorBuffer, *newMonitorBuffer, false);
+      temp->setMonitorWorkspace(newMonitorBuffer);
+    }
+
+    // Check 2: if the bg thread exited cleanly (clean disconnect) and there is
+    // nothing left to deliver — no detector events, no monitor events, and no
+    // pending run-state transition — throw so consumers don't spin on empty
+    // workspaces indefinitely.  Monitor events live in the separate
+    // EventWorkspace returned by m_eventBuffer->monitorWorkspace(), so
+    // m_eventBuffer->getNumberEvents() alone would silently discard a final
+    // batch that contains only monitor data.
+    const auto monitorEventsBuffer = std::dynamic_pointer_cast<EventWorkspace>(monitorBuffer);
+    const std::size_t monitorEvents = monitorEventsBuffer ? monitorEventsBuffer->getNumberEvents() : 0;
+    if (!m_isConnected.load() && !m_pendingTransition && m_eventBuffer->getNumberEvents() == 0 && monitorEvents == 0) {
+      throw std::runtime_error("SNSLiveEventDataListener: stream ended after server disconnect.");
+    }
+
+    // Swap the workspaces
     std::swap(m_eventBuffer, temp);
   } // mutex automatically unlocks here
 
@@ -1493,22 +1655,19 @@ std::shared_ptr<Workspace> SNSLiveEventDataListener::doExtractData() {
 // ---------------------------------------------------------------------------
 
 ILiveListener::RunStatus SNSLiveEventDataListener::runState() const {
+  std::lock_guard<std::mutex> scopedLock(m_mutex);
   if (m_backgroundException)
     throw(*m_backgroundException);
-  std::lock_guard<std::mutex> scopedLock(m_mutex);
   return m_adaraRunStatus;
 }
 
-bool SNSLiveEventDataListener::isPaused() const {
-  std::lock_guard<std::mutex> scopedLock(m_mutex);
-  return m_isDasPaused;
-}
+bool SNSLiveEventDataListener::isPaused() const { return m_isDasPaused.load(); }
 
 API::ListenerState SNSLiveEventDataListener::listenerState() const {
   std::lock_guard<std::mutex> scopedLock(m_mutex);
   if (m_backgroundException)
     return API::ListenerState::Error;
-  if (!m_isConnected)
+  if (!m_isConnected.load())
     return API::ListenerState::Disconnected;
   if (m_pauseNetRead.load(std::memory_order_acquire))
     return API::ListenerState::ReadWait;
@@ -1516,9 +1675,9 @@ API::ListenerState SNSLiveEventDataListener::listenerState() const {
 }
 
 std::optional<ILiveListener::RunStatus> SNSLiveEventDataListener::lastTransition() const {
+  std::lock_guard<std::mutex> scopedLock(m_mutex);
   if (m_backgroundException)
     throw(*m_backgroundException);
-  std::lock_guard<std::mutex> scopedLock(m_mutex);
   return m_lastTransition;
 }
 
@@ -1636,6 +1795,8 @@ void SNSLiveEventDataListener::onBeginRun() {
   m_instrumentName.clear();
   m_nameMap.clear();
   m_requiredLogs.clear(); // stale entries from previous geometry would block readyForInitPart2()
+  m_wsName.clear();       // recomposed by initWorkspacePart2() once the new run's
+                          // instrument name and run number are both known again
 
   initWorkspacePart1();
 
@@ -1662,6 +1823,8 @@ void SNSLiveEventDataListener::onEndRun() {
   m_dataStartTime = Types::Core::DateAndTime(); // cleared on EndRun only
   m_nameMap.clear();
   m_requiredLogs.clear(); // stale entries from previous geometry would block readyForInitPart2()
+  m_wsName.clear();       // recomposed by initWorkspacePart2() once the next run's
+                          // instrument name and run number are both known
 
   initWorkspacePart1();
 
@@ -1679,7 +1842,7 @@ void SNSLiveEventDataListener::onRunPause(bool paused) {
   // while the DAS is paused.  m_isDasPaused is read by isPaused() and by
   // rxPacket(BankedEventPkt) to gate event appending.
   // Called from rxPacket(AnnotationPkt) which already holds m_mutex.
-  m_isDasPaused = paused;
+  m_isDasPaused.store(paused);
 }
 
 // Called by the rxPacket() functions to determine if the packet should be processed
