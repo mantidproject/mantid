@@ -284,7 +284,12 @@ void WorkspaceHistory::loadNestedHistory(Nexus::File *file, const AlgorithmHisto
     std::string entryName = "MantidAlgorithm_" + Kernel::Strings::toString(historyNumber);
     std::string rawData;
     file->openGroup(entryName, "NXnote");
-    file->readData("data", rawData);
+    try {
+      file->readData("data", rawData);
+    } catch (...) {
+      file->closeGroup();
+      throw;
+    }
 
     try {
       AlgorithmHistory_sptr history = parseAlgorithmHistory(rawData);
@@ -299,6 +304,9 @@ void WorkspaceHistory::loadNestedHistory(Nexus::File *file, const AlgorithmHisto
     } catch (std::runtime_error &e) {
       // just log the exception as a warning and continue parsing history
       g_log.warning() << e.what() << "\n";
+    } catch (...) {
+      file->closeGroup();
+      throw;
     }
 
     file->closeGroup();
@@ -348,6 +356,10 @@ AlgorithmHistory_sptr WorkspaceHistory::parseAlgorithmHistory(const std::string 
   // split on lines
   std::vector<std::string> info;
   boost::split(info, rawData, boost::is_any_of("\n"));
+  // Remove any empty lines at the end of the entry
+  while (!info.empty() && info.back().empty()) {
+    info.pop_back();
+  }
 
   const size_t nlines = info.size();
   if (nlines < 4) { // ignore badly formed history entries still at 4 so that
@@ -414,8 +426,18 @@ AlgorithmHistory_sptr WorkspaceHistory::parseAlgorithmHistory(const std::string 
   ++Algorithm::g_execCount;
 
   // Add property information
+  std::vector<std::string> propertyLines;
   for (size_t index = static_cast<size_t>(paramNum) + 1; index < nlines; ++index) {
-    const std::string line = info[index];
+    const std::string &line = info[index];
+    // handle property lines that are split over multiple lines in the file.
+    if (line.starts_with("  Name: ") || propertyLines.empty()) {
+      propertyLines.emplace_back(line);
+    } else {
+      propertyLines.back() += "\n" + line;
+    }
+  }
+
+  for (const auto &line : propertyLines) {
     std::string::size_type colon = line.find(':');
     std::string::size_type comma = line.find(',');
     // Each colon has a space after it
