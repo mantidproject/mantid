@@ -341,7 +341,7 @@ the full log.
    [100%] Built target SystemTestData
    Running tests...
    FrameworkManager-[Notice] Welcome to Mantid 3.13.20180820.2132
-   FrameworkManager-[Notice] Please cite: http://dx.doi.org/10.1016/j.nima.2014.07.029 and this release: http://dx.doi.org/10.5286/Software/Mantid
+   FrameworkManager-[Notice] Please cite: https://doi.org/10.1016/j.nima.2014.07.029 and this release: https://doi.org/10.5286/Software/Mantid
    [  0%]   1/435 : DOSTest.DOSCastepTest ............................................... (success: 0.05s)
    [  0%]   2/435 : ISISIndirectBayesTest.JumpCETest .................................... (success: 0.06s)
    [  0%]   3/435 : ISISIndirectInelastic.IRISCalibration ............................... (success: 0.03s)

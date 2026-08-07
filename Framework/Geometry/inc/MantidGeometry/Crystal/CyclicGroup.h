@@ -59,7 +59,7 @@ namespace Geometry {
     (such as some point groups).
 
     [1] Shmueli, U. Acta Crystallogr. A 40, 559–567 (1984).
-        http://dx.doi.org/10.1107/S0108767384001161
+        https://doi.org/10.1107/S0108767384001161
 
       @author Michael Wedel, Paul Scherrer Institut - SINQ
       @date 03/10/2014

@@ -30,7 +30,7 @@ Alternatively, units of :math:`HWHM` are :math:`\mu eV` if units of
 References
 ----------
 
-.. [1] C T Chudley and R J Elliott `1961 Proc. Phys. Soc. 77 353 <http://dx.doi.org/10.1088/0370-1328/77/2/319>`__
+.. [1] C T Chudley and R J Elliott `1961 Proc. Phys. Soc. 77 353 <https://doi.org/10.1088/0370-1328/77/2/319>`__
 
 .. categories::
 
