@@ -853,9 +853,9 @@ def bundle_added_event_data_as_group(out_file_path, out_file_monitors_path, _is_
 
     # This is a validation and extracting name out of path
     full_data_path_name, filename = get_full_path_for_added_event_data(out_file_path)
-    full_monitor_path_name, filename_monitors = get_full_path_for_added_event_data(out_file_monitors_path)
+    full_monitor_path_name, _ = get_full_path_for_added_event_data(out_file_monitors_path)
     # Extract the file name and the extension
-    file_name, file_extension = os.path.splitext(filename)
+    file_name, _ = os.path.splitext(filename)
 
     event_data_temp = file_name + ADDED_EVENT_DATA_TAG
     Load(Filename=full_data_path_name, OutputWorkspace=event_data_temp)
