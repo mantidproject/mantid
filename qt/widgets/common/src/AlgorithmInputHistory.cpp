@@ -9,6 +9,7 @@
 //----------------------------------
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidQtWidgets/Common/QSettingsChangeAware.h"
 
 #include <QSettings>
 #include <utility>
@@ -136,6 +137,7 @@ AlgorithmInputHistorySettings AbstractAlgorithmInputHistory::captureSettings() c
 
 void AbstractAlgorithmInputHistory::saveSettings(QSettings &storage,
                                                  const AlgorithmInputHistorySettings &settings) const {
+  MantidQt::MantidWidgets::QSettingsChangeAware writer(storage);
   auto prefix = m_algorithmsGroup;
   if (!prefix.isEmpty() && !prefix.endsWith('/'))
     prefix.append('/');
@@ -143,12 +145,18 @@ void AbstractAlgorithmInputHistory::saveSettings(QSettings &storage,
   while (inputHistory.hasNext()) {
     inputHistory.next();
     auto const algorithmName = prefix + inputHistory.key();
-    storage.remove(algorithmName);
     auto const algorithmPrefix = algorithmName + '/';
-    for (auto itr = inputHistory.value().cbegin(); itr != inputHistory.value().cend(); ++itr)
-      storage.setValue(algorithmPrefix + itr.key(), itr.value());
+    auto const &algorithmSettings = inputHistory.value();
+    for (auto const &storedKey : storage.allKeys()) {
+      auto const settingName = storedKey.mid(algorithmPrefix.size());
+      if (storedKey == algorithmName ||
+          (storedKey.startsWith(algorithmPrefix) && !algorithmSettings.contains(settingName)))
+        writer.remove(storedKey);
+    }
+    for (auto itr = algorithmSettings.cbegin(); itr != algorithmSettings.cend(); ++itr)
+      writer.setValue(algorithmPrefix + itr.key(), itr.value());
   }
-  storage.setValue(prefix + m_dirKey, settings.previousDirectory());
+  writer.setValue(prefix + m_dirKey, settings.previousDirectory());
 }
 
 //----------------------------------

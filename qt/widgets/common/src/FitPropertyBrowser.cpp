@@ -9,6 +9,7 @@
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include "MantidQtWidgets/Common/MultifitSetupDialog.h"
 #include "MantidQtWidgets/Common/PropertyHandler.h"
+#include "MantidQtWidgets/Common/QSettingsChangeAware.h"
 #include "MantidQtWidgets/Common/SequentialFitDialog.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -619,7 +620,7 @@ void FitPropertyBrowser::executeCustomSetupRemove(const QString &name) {
   QSettings settings;
   settings.beginGroup("Mantid/FitBrowser/SavedFunctions");
 
-  settings.remove(name);
+  QSettingsChangeAware(settings).remove(name);
   updateSetupMenus();
 }
 
@@ -1279,7 +1280,7 @@ void FitPropertyBrowser::enumChanged(QtProperty *prop) {
     QSettings settings;
     settings.beginGroup("Mantid/FitBrowser");
     auto val = m_enumManager->value(prop);
-    settings.setValue(prop->propertyName(), val);
+    QSettingsChangeAware(settings).setValue(prop->propertyName(), val);
   }
 }
 
@@ -1296,7 +1297,7 @@ void FitPropertyBrowser::boolChanged(QtProperty *prop) {
 
     QSettings settings;
     settings.beginGroup("Mantid/FitBrowser");
-    settings.setValue(prop->propertyName(), val);
+    QSettingsChangeAware(settings).setValue(prop->propertyName(), val);
 
     if (prop == m_showParamErrors) {
       m_parameterManager->setErrorsEnabled(val);
@@ -1346,7 +1347,7 @@ void FitPropertyBrowser::intChanged(QtProperty *prop) {
     QSettings settings;
     settings.beginGroup("Mantid/FitBrowser");
     int val = m_intManager->value(prop);
-    settings.setValue(prop->propertyName(), val);
+    QSettingsChangeAware(settings).setValue(prop->propertyName(), val);
     if (prop == m_peakRadius) {
       sendParameterChanged(m_compositeFunction.get());
     }
@@ -2577,7 +2578,7 @@ void FitPropertyBrowser::saveFunction(const QString &fnName) {
                             QMessageBox::Yes | QMessageBox::No, QMessageBox::No) != QMessageBox::Yes) {
     return;
   }
-  settings.setValue(fnName, QString::fromStdString(theFunction()->asString()));
+  QSettingsChangeAware(settings).setValue(fnName, QString::fromStdString(theFunction()->asString()));
   updateSetupMenus();
 }
 
@@ -2802,7 +2803,7 @@ void FitPropertyBrowser::setDecimals(int d) {
   m_decimals = d;
   QSettings settings;
   settings.beginGroup("Mantid/FitBrowser");
-  settings.setValue("decimals", d);
+  QSettingsChangeAware(settings).setValue("decimals", d);
   updateDecimals();
 }
 

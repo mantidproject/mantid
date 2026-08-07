@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FitOptionsBrowser.h"
+#include "MantidQtWidgets/Common/QSettingsChangeAware.h"
 
 #include "MantidAPI/CostFunctionFactory.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
@@ -61,8 +62,9 @@ FitOptionsBrowserSettings FitOptionsBrowserSettings::readSettings(const QSetting
 }
 
 void FitOptionsBrowserSettings::saveSettings(QSettings &settings, const FitOptionsBrowserSettings &snapshot) {
+  QSettingsChangeAware writer(settings);
   for (auto property = snapshot.values().constBegin(); property != snapshot.values().constEnd(); ++property)
-    settings.setValue(property.key(), property.value());
+    writer.setValue(property.key(), property.value());
 }
 
 /**

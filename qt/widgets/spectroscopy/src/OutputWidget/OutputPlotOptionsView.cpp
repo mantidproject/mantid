@@ -8,6 +8,7 @@
 #include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsPresenter.h"
 
 #include "MantidQtIcons/Icon.h"
+#include "MantidQtWidgets/Common/QSettingsChangeAware.h"
 
 #include <QMenu>
 #include <QMessageBox>
@@ -61,7 +62,7 @@ IndicesSuggestionsSettings IndicesSuggestionsSettings::readSettings(const QSetti
 }
 
 void IndicesSuggestionsSettings::saveSettings(QSettings &settings, const IndicesSuggestionsSettings &values) {
-  settings.setValue(SETTING_NAME, values.suggestions());
+  MantidQt::MantidWidgets::QSettingsChangeAware(settings).setValue(SETTING_NAME, values.suggestions());
 }
 
 OutputPlotOptionsView::OutputPlotOptionsView(QWidget *parent)

@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FileFinderWidget.h"
 #include "MantidQtWidgets/Common/DropEventHelper.h"
+#include "MantidQtWidgets/Common/QSettingsChangeAware.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileProperty.h"
@@ -403,7 +404,7 @@ void FileFinderWidget::setFileProblem(const QString &message) {
 const QString &FileFinderWidget::getFileProblem() const { return m_fileProblem; }
 
 void FileFinderWidget::saveSettings(QSettings &settings, const FileFinderSettings &values) const {
-  settings.setValue("last_directory", values.lastDirectory());
+  MantidQt::MantidWidgets::QSettingsChangeAware(settings).setValue("last_directory", values.lastDirectory());
 }
 
 /** Writes the total number of periods in a file to the NumEntries

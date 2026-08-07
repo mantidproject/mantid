@@ -17,6 +17,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/MessageHandler.h"
+#include "MantidQtWidgets/Common/QSettingsChangeAware.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include "MantidGeometry/Instrument.h"
@@ -66,10 +67,11 @@ InstrumentActorSettings InstrumentActorSettings::readSettings(const QSettings &s
 }
 
 void InstrumentActorSettings::saveSettings(QSettings &settings, const InstrumentActorSettings &values) {
-  settings.setValue("ColormapFile", values.colorMapFile());
-  settings.setValue("ColormapFileHighlightZeros", values.highlightZeros());
-  settings.setValue("ScaleType", values.scaleType());
-  settings.setValue("ShowGuides", values.showGuides());
+  MantidQt::MantidWidgets::QSettingsChangeAware writer(settings);
+  writer.setValue("ColormapFile", values.colorMapFile());
+  writer.setValue("ColormapFileHighlightZeros", values.highlightZeros());
+  writer.setValue("ScaleType", values.scaleType());
+  writer.setValue("ShowGuides", values.showGuides());
 }
 namespace {
 bool isPhysicalView() {

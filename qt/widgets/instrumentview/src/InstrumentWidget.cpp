@@ -10,6 +10,7 @@
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include "MantidQtWidgets/Common/MessageHandler.h"
+#include "MantidQtWidgets/Common/QSettingsChangeAware.h"
 #include "MantidQtWidgets/InstrumentView/DetXMLFile.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetMaskTab.h"
@@ -1008,9 +1009,10 @@ void InstrumentWidget::setInfoText(const QString &text) { mInteractionInfo->setT
 void InstrumentWidget::persistSettings() {
   QSettings settings;
   settings.beginGroup(getSettingsGroupName());
+  MantidQt::MantidWidgets::QSettingsChangeAware writer(settings);
 
   if (m_instrumentDisplay->getGLDisplay())
-    settings.setValue("BackgroundColor", m_instrumentDisplay->getGLDisplay()->currentBackgroundColor());
+    writer.setValue("BackgroundColor", m_instrumentDisplay->getGLDisplay()->currentBackgroundColor());
   if (m_instrumentActor) {
     m_instrumentActor->persistSettings();
   }
@@ -1019,10 +1021,10 @@ void InstrumentWidget::persistSettings() {
   if (surface) {
     // if surface is null istrument view wasn't created and there is nothing to
     // save
-    settings.setValue("PeakLabelPrecision", getSurface()->getPeakLabelPrecision());
-    settings.setValue("ShowPeakRows", getSurface()->getShowPeakRowsFlag());
-    settings.setValue("ShowPeakLabels", getSurface()->getShowPeakLabelsFlag());
-    settings.setValue("ShowPeakRelativeIntensities", getSurface()->getShowPeakRelativeIntensityFlag());
+    writer.setValue("PeakLabelPrecision", getSurface()->getPeakLabelPrecision());
+    writer.setValue("ShowPeakRows", getSurface()->getShowPeakRowsFlag());
+    writer.setValue("ShowPeakLabels", getSurface()->getShowPeakLabelsFlag());
+    writer.setValue("ShowPeakRelativeIntensities", getSurface()->getShowPeakRelativeIntensityFlag());
     // only save tab states if the instrument actor loading finished and this widget was updated
     // through initWidget
     if (m_finished) {

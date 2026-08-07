@@ -14,6 +14,7 @@
 #include "ALFInstrumentWidget.h"
 #include "ALFPythonInstrumentView.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
+#include "MantidQtWidgets/Common/QSettingsChangeAware.h"
 #include "MantidQtWidgets/Common/QtJobRunner.h"
 
 #include <QCloseEvent>
@@ -39,7 +40,7 @@ ALFInstrumentSettings ALFInstrumentSettings::readSettings(const QSettings &setti
 }
 
 void ALFInstrumentSettings::saveSettings(QSettings &settings, const ALFInstrumentSettings &values) {
-  settings.setValue("vanadium-run", values.vanadiumRun());
+  MantidQt::MantidWidgets::QSettingsChangeAware(settings).setValue("vanadium-run", values.vanadiumRun());
 }
 
 DECLARE_SUBWINDOW(ALFView)

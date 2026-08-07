@@ -12,6 +12,8 @@ from posixpath import join as joinsettings
 from qtpy.QtCore import QSettings, QStandardPaths
 from time import sleep
 
+from mantidqt.utils.qt.qsettings_change_aware import QSettingsChangeAware
+
 
 class UserConfig(object):
     """Holds user configuration option. Options are assigned a section
@@ -87,13 +89,12 @@ class UserConfig(object):
         else:
             option = self._check_section_option_is_valid(option, value)
             value = extra
-        self.qsettings.setValue(option, value)
+        QSettingsChangeAware(self.qsettings).setValue(option, value)
 
     def remove(self, option, second=None):
         """Removes a key from the settings. Key not existing returns without effect."""
         option = self._check_section_option_is_valid(option, second)
-        if self.has(option):
-            self.qsettings.remove(option)
+        QSettingsChangeAware(self.qsettings).remove(option)
 
     # -------------------------------------------------------------------------
     # "Private" methods

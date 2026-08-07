@@ -12,6 +12,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/Common/NotificationService.h"
+#include "MantidQtWidgets/Common/QSettingsChangeAware.h"
 
 #include <QAction>
 #include <QActionGroup>
@@ -69,8 +70,9 @@ MessageDisplaySettings MessageDisplay::captureSettings() const {
 }
 
 void MessageDisplay::saveSettings(QSettings &storage, const MessageDisplaySettings &settings) const {
-  storage.setValue(PRIORITY_KEY_NAME, settings.logLevel());
-  storage.setValue(LINE_COUNT_MAX_KEY_NAME, settings.maximumLineCount());
+  QSettingsChangeAware writer(storage);
+  writer.setValue(PRIORITY_KEY_NAME, settings.logLevel());
+  writer.setValue(LINE_COUNT_MAX_KEY_NAME, settings.maximumLineCount());
 }
 
 /**

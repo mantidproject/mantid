@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidQtWidgets/Common/QSettingsChangeAware.h"
+
 #include <QMetaType>
 #include <QSettings>
 #include <QString>
@@ -89,13 +91,16 @@ template <typename T> std::map<std::string, T> getSettingsAsMap(std::string cons
 template <typename T>
 void setSetting(QSettings &settings, std::string const &settingGroup, std::string const &settingName, T const &value) {
   auto const qualifiedName = Detail::qualifiedName(settingGroup, QString::fromStdString(settingName));
-  settings.setValue(qualifiedName + "/value", value);
-  settings.setValue(qualifiedName + "/type", typeid(value).name());
+  QSettingsChangeAware writer(settings);
+  writer.setValue(qualifiedName + "/value", value);
+  writer.setValue(qualifiedName + "/type", typeid(value).name());
 }
 
 template <typename T> void setSetting(std::string const &settingGroup, std::string const &settingName, T const &value) {
-  QSettings settings;
-  setSetting(settings, settingGroup, settingName, value);
+  auto const qualifiedName = Detail::qualifiedName(settingGroup, QString::fromStdString(settingName));
+  QSettingsChangeAware settings;
+  settings.setValue(qualifiedName + "/value", value);
+  settings.setValue(qualifiedName + "/type", typeid(value).name());
 }
 
 } // namespace QSettingsHelper

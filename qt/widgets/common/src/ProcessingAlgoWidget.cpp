@@ -7,6 +7,7 @@
 #include "MantidQtWidgets/Common/ProcessingAlgoWidget.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidQtWidgets/Common/QSettingsChangeAware.h"
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QMessageBox>
@@ -30,7 +31,7 @@ ProcessingAlgoWidgetSettings ProcessingAlgoWidgetSettings::readSettings(const QS
 }
 
 void ProcessingAlgoWidgetSettings::saveSettings(QSettings &settings, const ProcessingAlgoWidgetSettings &values) {
-  settings.setValue("LastFile", values.lastFile());
+  QSettingsChangeAware(settings).setValue("LastFile", values.lastFile());
 }
 
 //----------------------
