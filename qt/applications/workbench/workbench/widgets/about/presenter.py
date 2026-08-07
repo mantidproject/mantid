@@ -58,7 +58,8 @@ class AboutPresenter(object):
         about_widget.chk_allow_usage_data.stateChanged.connect(self.action_usage_data_changed)
 
         # set do not show
-        self.restoreSettings(self.readSettings())
+        self._saved_settings = self.readSettings()
+        self.restoreSettings(self._saved_settings)
         about_widget.chk_do_not_show_until_next_release.stateChanged.connect(self.action_do_not_show_until_next_release)
 
     @classmethod
@@ -91,6 +92,15 @@ class AboutPresenter(object):
         settings.setValue(cls.DO_NOT_SHOW, values.do_not_show_until_next_release)
         settings.setValue(cls.PREVIOUS_VERSION, values.previous_version)
         settings.endGroup()
+
+    def _save_settings_if_changed(self, values):
+        """Persist and remember a snapshot only when either value changed."""
+        if values == self._saved_settings:
+            return False
+
+        self.saveSettings(QSettings(), values)
+        self._saved_settings = values
+        return True
 
     @staticmethod
     def should_show_on_startup():
@@ -212,16 +222,15 @@ class AboutPresenter(object):
         ConfigService.setString(self.USAGE_REPORTING, "1" if is_checked else "0")
 
     def action_do_not_show_until_next_release(self, checkedState):
-        settings = QSettings()
-        values = replace(self.readSettings(settings), do_not_show_until_next_release=int(checkbox_state_to_bool(checkedState)))
-        self.saveSettings(settings, values)
+        values = replace(self._saved_settings, do_not_show_until_next_release=int(checkbox_state_to_bool(checkedState)))
+        self._save_settings_if_changed(values)
 
     def action_close(self):
         self.view.close()
 
     def save_on_closing(self):
         # make sure the Last Version is updated on closing
-        self.saveSettings(QSettings(), self.captureSettings())
+        self._save_settings_if_changed(self.captureSettings())
         self.store_facility(self.view.about_widget.cb_facility.currentText())
         self.action_instrument_changed(self.view.about_widget.cb_instrument.currentText())
         ConfigService.saveConfig(ConfigService.getUserFilename())
