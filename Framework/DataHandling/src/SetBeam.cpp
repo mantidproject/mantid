@@ -24,6 +24,18 @@ constexpr const char *HEIGHT_PARAM_NAME = "beam-height";
 constexpr const char *RADIUS_PARAM_NAME = "beam-radius";
 /// Name of shape parameter in map
 constexpr const char *SHAPE_PARAM_NAME = "beam-shape";
+/// Name of horizontal divergence parameter in map
+constexpr const char *HORIZ_DIV_PARAM_NAME = "beam-divergence-horizontal";
+/// Name of horizontal divergence parameter in input dict
+constexpr const char *HORIZ_DIV = "HorizontalDivergence";
+/// Name of vertical divergence parameter in map
+constexpr const char *VERT_DIV_PARAM_NAME = "beam-divergence-vertical";
+/// Name of vertical divergence parameter in input dict
+constexpr const char *VERT_DIV = "VerticalDivergence";
+/// Name of slit distance parameter in map
+constexpr const char *SLIT_DISTANCE_PARAM_NAME = "slit-distance";
+/// Name of slit distance parameter in input dict
+constexpr const char *SLIT_DISTANCE = "SlitDistance";
 } // namespace
 
 namespace Mantid::DataHandling {
@@ -104,10 +116,12 @@ void SetBeam::exec() {
 
   std::string shape = geometryArgs->getProperty("Shape");
 
+  const double cm2mFactor = 0.01;
+
   if (shape.compare("Circle") == 0) {
     double radius = geometryArgs->getProperty("Radius");
     // convert to metres
-    radius *= 0.01;
+    radius *= cm2mFactor;
 
     // Add the values as parameters on the source object
     pmap.addDouble(source->getComponentID(), RADIUS_PARAM_NAME, radius);
@@ -116,14 +130,30 @@ void SetBeam::exec() {
     double width = geometryArgs->getProperty("Width");
     double height = geometryArgs->getProperty("Height");
     // convert to metres
-    width *= 0.01;
-    height *= 0.01;
+    width *= cm2mFactor;
+    height *= cm2mFactor;
 
     // Add the values as parameters on the source object
     pmap.addDouble(source->getComponentID(), WIDTH_PARAM_NAME, width);
     pmap.addDouble(source->getComponentID(), HEIGHT_PARAM_NAME, height);
     pmap.addString(source->getComponentID(), SHAPE_PARAM_NAME, SHAPE_NAME_SLIT);
   }
-}
+
+  const double deg2radFactor = M_PI / 180.0;
+
+  if (geometryArgs->existsProperty(HORIZ_DIV)) {
+    double horizDiv = geometryArgs->getProperty(HORIZ_DIV);
+    pmap.addDouble(source->getComponentID(), HORIZ_DIV_PARAM_NAME, horizDiv * deg2radFactor); // convert to rad
+  }
+
+  if (geometryArgs->existsProperty(VERT_DIV)) {
+    double vertDiv = geometryArgs->getProperty(VERT_DIV);
+    pmap.addDouble(source->getComponentID(), VERT_DIV_PARAM_NAME, vertDiv * deg2radFactor); // convert to rad
+  }
+
+  if (geometryArgs->existsProperty(SLIT_DISTANCE)) {
+    double slitD = geometryArgs->getProperty(SLIT_DISTANCE);
+    pmap.addDouble(source->getComponentID(), SLIT_DISTANCE_PARAM_NAME, slitD * cm2mFactor); // convert to m
+  }
 
 } // namespace Mantid::DataHandling
