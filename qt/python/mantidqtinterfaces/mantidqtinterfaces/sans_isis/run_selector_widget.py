@@ -8,6 +8,7 @@ from qtpy import QtGui, QtWidgets
 from qtpy.QtCore import Signal, QSettings, QFileInfo
 
 from mantidqt.utils.qt import load_ui
+from mantidqt.utils.qt.qsettings_change_aware import QSettingsChangeAware
 from mantidqt.widgets import manageuserdirectories
 
 Ui_RunSelectorWidget, _ = load_ui(__file__, "run_selector_widget.ui")
@@ -50,7 +51,7 @@ class RunSelectorWidget(QtWidgets.QWidget, Ui_RunSelectorWidget):
 
     def _store_previous_directory(self, settings, path):
         previous_file = QFileInfo(path)
-        settings.setValue("InPath", previous_file.absoluteDir().absolutePath())
+        QSettingsChangeAware(settings).setValue("InPath", previous_file.absoluteDir().absolutePath())
 
     def _filter_for_extensions(self, extensions):
         return "Files ( *" + " *".join(extensions) + ")"

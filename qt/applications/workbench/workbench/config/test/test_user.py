@@ -13,6 +13,8 @@ from tempfile import TemporaryDirectory
 from unittest import TestCase, main, skipUnless
 from unittest.mock import patch
 
+from qtpy.QtCore import QSettings
+
 from workbench.config.user import UserConfig, remove_lock_files
 
 
@@ -74,6 +76,26 @@ class ConfigUserTest(TestCase):
     # ----------------------------------------------
     # Success tests
     # ----------------------------------------------
+
+    def test_construction_and_default_reads_do_not_modify_persistent_storage(self):
+        name = f"{self.__class__.__name__}_{self._testMethodName}"
+        storage = QSettings(QSettings.IniFormat, QSettings.UserScope, name, name)
+        storage.setValue("unrelated", "preserved")
+        storage.sync()
+        filename = Path(storage.fileName())
+        contents_before = filename.read_bytes()
+        del storage
+
+        try:
+            cfg = UserConfig(name, name, {"main": {"default": 42}})
+            self.assertTrue(cfg.has("unrelated"))  # interited from above
+            self.assertTrue(cfg.has("main/default"))
+            self.assertEqual(42, cfg.get("main/default", type=int))
+            self.assertFalse(cfg.qsettings.contains("main/default"))
+            self.assertEqual(contents_before, filename.read_bytes())
+            del cfg
+        finally:
+            filename.unlink(missing_ok=True)
 
     def test_stored_value_not_in_defaults_is_retrieved(self):
         self.cfg.set("main", "key1", 1)

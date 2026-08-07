@@ -15,6 +15,7 @@ import traceback
 
 from mantidqt.gui_helper import get_qapplication
 from mantidqt.utils.qt import load_ui
+from mantidqt.utils.qt.qsettings_change_aware import QSettingsChangeAware
 from mantidqtinterfaces.reduction_gui.instruments.instrument_factory import instrument_factory, INSTRUMENT_DICT
 from mantidqtinterfaces.reduction_gui.settings.application_settings import GeneralSettings
 
@@ -344,8 +345,7 @@ class ReductionGUI(QMainWindow):
             self._clear_and_restart = False
             QSettings().clear()
         else:
-            settings = QSettings()
-
+            settings = QSettingsChangeAware()
             settings.setValue("instrument_name", self._instrument)
             settings.setValue("last_file", self._filename)
             settings.setValue("recent_files", self._recent_files)

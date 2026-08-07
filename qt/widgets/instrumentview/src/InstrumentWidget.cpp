@@ -10,6 +10,7 @@
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include "MantidQtWidgets/Common/MessageHandler.h"
+#include "MantidQtWidgets/Common/QSettingsChangeAware.h"
 #include "MantidQtWidgets/InstrumentView/DetXMLFile.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetMaskTab.h"
@@ -239,7 +240,7 @@ InstrumentWidget::~InstrumentWidget() {
   }
 
   if (m_instrumentActor) {
-    saveSettings();
+    persistSettings();
   }
   m_instrumentActor.reset();
 }
@@ -1005,30 +1006,30 @@ void InstrumentWidget::setInfoText(const QString &text) { mInteractionInfo->setT
 /**
  * Save properties of the window a persistent store
  */
-void InstrumentWidget::saveSettings() {
+void InstrumentWidget::persistSettings() {
   QSettings settings;
   settings.beginGroup(getSettingsGroupName());
+  MantidQt::MantidWidgets::QSettingsChangeAware writer(settings);
 
   if (m_instrumentDisplay->getGLDisplay())
-    settings.setValue("BackgroundColor", m_instrumentDisplay->getGLDisplay()->currentBackgroundColor());
+    writer.setValue("BackgroundColor", m_instrumentDisplay->getGLDisplay()->currentBackgroundColor());
   if (m_instrumentActor) {
-    m_instrumentActor->saveSettings();
+    m_instrumentActor->persistSettings();
   }
 
   auto surface = getSurface();
   if (surface) {
     // if surface is null istrument view wasn't created and there is nothing to
     // save
-    settings.setValue("PeakLabelPrecision", getSurface()->getPeakLabelPrecision());
-    settings.setValue("ShowPeakRows", getSurface()->getShowPeakRowsFlag());
-    settings.setValue("ShowPeakLabels", getSurface()->getShowPeakLabelsFlag());
-    settings.setValue("ShowPeakRelativeIntensities", getSurface()->getShowPeakRelativeIntensityFlag());
+    writer.setValue("PeakLabelPrecision", getSurface()->getPeakLabelPrecision());
+    writer.setValue("ShowPeakRows", getSurface()->getShowPeakRowsFlag());
+    writer.setValue("ShowPeakLabels", getSurface()->getShowPeakLabelsFlag());
+    writer.setValue("ShowPeakRelativeIntensities", getSurface()->getShowPeakRelativeIntensityFlag());
     // only save tab states if the instrument actor loading finished and this widget was updated
     // through initWidget
     if (m_finished) {
-      for (auto tab : std::as_const(m_tabs)) {
-        tab->saveSettings(settings);
-      }
+      InstrumentWidgetRenderTabSettings::saveSettings(settings, m_renderTab->captureSettings());
+      InstrumentWidgetPickTabSettings::saveSettings(settings, m_pickTab->captureSettings());
     }
   }
   settings.endGroup();
@@ -1443,24 +1444,22 @@ void InstrumentWidget::createTabs(const QSettings &settings, TabCustomizations c
   m_renderTab = new InstrumentWidgetRenderTab(this);
   m_qtConnect->connect(m_renderTab, SIGNAL(setAutoscaling(bool)), this, SLOT(setColorMapAutoscaling(bool)));
   m_qtConnect->connect(m_renderTab, SIGNAL(rescaleColorMap()), this, SLOT(setupColorMap()));
-  m_renderTab->loadSettings(settings);
+  m_renderTab->restoreSettings(InstrumentWidgetRenderTabSettings::readSettings(settings));
 
   // Pick controls
   m_pickTab = new InstrumentWidgetPickTab(this, customizations.pickTools);
-  m_pickTab->loadSettings(settings);
+  m_pickTab->restoreSettings(InstrumentWidgetPickTabSettings::readSettings(settings));
 
   // Mask controls
   m_maskTab = new InstrumentWidgetMaskTab(this);
   m_qtConnect->connect(m_maskTab, SIGNAL(executeAlgorithm(const QString &, const QString &)), this,
                        SLOT(executeAlgorithm(const QString &, const QString &)));
-  m_maskTab->loadSettings(settings);
 
   m_qtConnect->connect(m_xIntegration, SIGNAL(changed(double, double)), m_maskTab,
                        SLOT(changedIntegrationRange(double, double)));
 
   // Instrument tree controls
   m_treeTab = new InstrumentWidgetTreeTab(this);
-  m_treeTab->loadSettings(settings);
 
   m_qtConnect->connect(mControlsTab, SIGNAL(currentChanged(int)), this, SLOT(tabChanged(int)));
   m_stateOfTabs.emplace_back(std::string("Render"), true);

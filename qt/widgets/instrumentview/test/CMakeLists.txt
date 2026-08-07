@@ -5,6 +5,7 @@ endif()
 # Testing
 set(TEST_FILES
     InstrumentRendererTest.h
+    InstrumentViewSettingsTest.h
     InstrumentWidgetDecoderTest.h
     InstrumentWidgetEncoderTest.h
     InstrumentWidget/InstrumentDisplayTest.h

@@ -8,54 +8,54 @@
 #include "OptionsDialogModel.h"
 #include "MantidQtWidgets/Common/QSettingsHelper.h"
 
+#include <QSettings>
+
+#include <utility>
+
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 using namespace MantidQt::MantidWidgets::QSettingsHelper;
 
+namespace {
+std::string const SETTINGS_GROUP = "ISISReflectometryUI";
+}
+
+OptionsDialogSettings::OptionsDialogSettings(std::map<std::string, bool> boolOptions,
+                                             std::map<std::string, int> intOptions)
+    : m_boolOptions(std::move(boolOptions)), m_intOptions(std::move(intOptions)) {}
+
+std::map<std::string, bool> const &OptionsDialogSettings::boolOptions() const { return m_boolOptions; }
+
+std::map<std::string, int> const &OptionsDialogSettings::intOptions() const { return m_intOptions; }
+
+OptionsDialogSettings OptionsDialogSettings::readSettings(QSettings const &settings) {
+  return OptionsDialogSettings(getSettingsAsMap<bool>(settings, SETTINGS_GROUP),
+                               getSettingsAsMap<int>(settings, SETTINGS_GROUP));
+}
+
+void OptionsDialogSettings::saveSettings(QSettings &settings, OptionsDialogSettings const &values) {
+  for (auto const &[name, value] : values.boolOptions())
+    setSetting(settings, SETTINGS_GROUP, name, value);
+  for (auto const &[name, value] : values.intOptions())
+    setSetting(settings, SETTINGS_GROUP, name, value);
+}
+
 OptionsDialogModel::OptionsDialogModel() = default;
 
-/** Applies default options to specified settings
- *
- * @param boolOptions A map to store bool options
- * @param intOptions A map to store int options
- * @return void
- *
- */
-void OptionsDialogModel::applyDefaultOptions(std::map<std::string, bool> &boolOptions,
-                                             std::map<std::string, int> &intOptions) {
-  boolOptions["WarnProcessAll"] = true;
-  boolOptions["WarnDiscardChanges"] = true;
-  boolOptions["WarnProcessPartialGroup"] = true;
-  boolOptions["Round"] = false;
-  intOptions["RoundPrecision"] = 3;
+OptionsDialogSettings OptionsDialogModel::defaultSettings() const {
+  return OptionsDialogSettings(
+      {{"WarnProcessAll", true}, {"WarnDiscardChanges", true}, {"WarnProcessPartialGroup", true}, {"Round", false}},
+      {{"RoundPrecision", 3}});
 }
 
-/** Loads the settings saved by the user
- *
- * @param boolOptions A map to store bool options
- * @param intOptions A map to store int options
- * @return void
- *
- */
-void OptionsDialogModel::loadSettings(std::map<std::string, bool> &boolOptions,
-                                      std::map<std::string, int> &intOptions) {
-  boolOptions = getSettingsAsMap<bool>(REFLECTOMETRY_SETTINGS_GROUP);
-  intOptions = getSettingsAsMap<int>(REFLECTOMETRY_SETTINGS_GROUP);
+OptionsDialogSettings OptionsDialogModel::readSettings() const {
+  QSettings settings;
+  return OptionsDialogSettings::readSettings(settings);
 }
 
-/** Saves the settings specified by the user
- *
- * @param boolOptions A map containing values for bool options
- * @param intOptions A map containing values for int options
- * @return void
- *
- */
-void OptionsDialogModel::saveSettings(const std::map<std::string, bool> &boolOptions,
-                                      const std::map<std::string, int> &intOptions) {
-  for (const auto &boolOption : boolOptions)
-    setSetting(REFLECTOMETRY_SETTINGS_GROUP, boolOption.first, boolOption.second);
-  for (const auto &intOption : intOptions)
-    setSetting(REFLECTOMETRY_SETTINGS_GROUP, intOption.first, intOption.second);
+void OptionsDialogModel::saveSettings(OptionsDialogSettings const &values) {
+  QSettings settings;
+  OptionsDialogSettings::saveSettings(settings, values);
 }
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -26,17 +26,14 @@ void OptionsDialogPresenter::notifySubscribeView() { m_view->subscribe(this); }
 
 /** Load options from disk if possible, or set to defaults */
 void OptionsDialogPresenter::initOptions() {
-  m_boolOptions.clear();
-  m_intOptions.clear();
-  // Attempt to load saved values from disk
-  m_model->loadSettings(m_boolOptions, m_intOptions);
-  // If unsuccessful, load defaults
-  if (m_boolOptions.empty() || m_intOptions.empty())
-    m_model->applyDefaultOptions(m_boolOptions, m_intOptions);
+  auto settings = m_model->readSettings();
+  if (settings.boolOptions().empty() || settings.intOptions().empty())
+    settings = m_model->defaultSettings();
+  restoreSettings(settings);
 }
 /** Loads the options used into the view */
 void OptionsDialogPresenter::notifyLoadOptions() {
-  m_model->loadSettings(m_boolOptions, m_intOptions);
+  restoreSettings(m_model->readSettings());
   m_view->setOptions(m_boolOptions, m_intOptions);
   m_notifyee->notifyOptionsChanged();
 }
@@ -44,8 +41,17 @@ void OptionsDialogPresenter::notifyLoadOptions() {
 /** Saves the options selected in the view */
 void OptionsDialogPresenter::notifySaveOptions() {
   m_view->getOptions(m_boolOptions, m_intOptions);
-  m_model->saveSettings(m_boolOptions, m_intOptions);
+  m_model->saveSettings(captureSettings());
   m_notifyee->notifyOptionsChanged();
+}
+
+void OptionsDialogPresenter::restoreSettings(OptionsDialogSettings const &settings) {
+  m_boolOptions = settings.boolOptions();
+  m_intOptions = settings.intOptions();
+}
+
+OptionsDialogSettings OptionsDialogPresenter::captureSettings() const {
+  return OptionsDialogSettings(m_boolOptions, m_intOptions);
 }
 
 /* Get a bool option state */

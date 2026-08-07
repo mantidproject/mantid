@@ -11,14 +11,37 @@
 
 #include <QStringList>
 
+class QSettings;
+
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace SettingsHelper {
 
-MANTID_SPECTROSCOPY_DLL void setRestrictInputDataByName(bool restricted);
-MANTID_SPECTROSCOPY_DLL void setExternalPlotErrorBars(bool errorBars);
-MANTID_SPECTROSCOPY_DLL void setLoadHistory(bool loadHistory);
-MANTID_SPECTROSCOPY_DLL void setDeveloperFeatureFlags(QStringList const &flags);
+class MANTID_SPECTROSCOPY_DLL SpectroscopySettings {
+public:
+  explicit SpectroscopySettings(bool restrictInputByName = true, bool externalPlotErrorBars = false,
+                                bool loadHistory = true, QStringList developerFeatureFlags = {});
+
+  [[nodiscard]] bool restrictInputByName() const;
+  [[nodiscard]] bool externalPlotErrorBars() const;
+  [[nodiscard]] bool loadHistory() const;
+  [[nodiscard]] const QStringList &developerFeatureFlags() const;
+
+private:
+  bool m_restrictInputByName;
+  bool m_externalPlotErrorBars;
+  bool m_loadHistory;
+  QStringList m_developerFeatureFlags;
+};
+
+/// Query an already-positioned store without changing state or writing settings.
+[[nodiscard]] MANTID_SPECTROSCOPY_DLL SpectroscopySettings readSettings(const QSettings &settings);
+/// Query the normal Indirect Settings group without changing application state.
+[[nodiscard]] MANTID_SPECTROSCOPY_DLL SpectroscopySettings readSettings();
+/// Persist only the values from a snapshot to an already-positioned store.
+MANTID_SPECTROSCOPY_DLL void saveSettings(QSettings &settings, const SpectroscopySettings &values);
+/// Persist a snapshot to the normal Indirect Settings group.
+MANTID_SPECTROSCOPY_DLL void saveSettings(const SpectroscopySettings &values);
 
 MANTID_SPECTROSCOPY_DLL bool restrictInputDataByName();
 MANTID_SPECTROSCOPY_DLL bool externalPlotErrorBars();

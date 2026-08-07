@@ -78,6 +78,7 @@ set(PYTHON_TEST_FILES
     mantidqt/utils/test/test_writetosignal.py
     mantidqt/utils/qt/test/test_line_edit_double_validator.py
     mantidqt/utils/qt/test/test_qappthreadcall.py
+    mantidqt/utils/qt/test/test_qsettings_change_aware.py
     mantidqt/widgets/test/test_messagedisplay.py
     mantidqt/widgets/test/test_scriptrepository.py
     mantidqt/widgets/test/test_fittingmode.py

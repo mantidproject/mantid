@@ -61,7 +61,7 @@ public:
   void setFileExtensionsByName(bool const filter) override;
   void setLoadHistory(bool const loadHistory) override;
 
-  void loadSettings(const QSettings &settings) override;
+  void restoreSettings(const API::FileFinderSettings &settings) override;
 
 protected:
   void runComplete(IAlgorithm_sptr const &algorithm, bool const error) override;
