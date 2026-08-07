@@ -72,9 +72,9 @@ private:
     Mantid::DataObjects::Workspace2D_sptr ws = std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
         WorkspaceFactory::Instance().create("Workspace2D", 3, 10, 10));
     for (int i = 0; i < 3; i++) {
-      Mantid::MantidVec &X = ws->dataX(i);
-      Mantid::MantidVec &Y = ws->dataY(i);
-      Mantid::MantidVec &E = ws->dataE(i);
+      auto &X = ws->mutableX(i);
+      auto &Y = ws->mutableY(i);
+      auto &E = ws->mutableE(i);
       for (int j = 0; j < 10; j++) {
         X[j] = 1. * j;
         Y[j] = (i + 1) * (2. + 4. * X[j]);

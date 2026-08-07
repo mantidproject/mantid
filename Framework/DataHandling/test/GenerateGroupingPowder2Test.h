@@ -115,12 +115,12 @@ public:
     DataObjects::GroupingWorkspace_sptr gws2 = std::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(
         API::AnalysisDataService::Instance().retrieve("GroupPowder"));
 
-    TS_ASSERT_DELTA(gws2->dataY(0)[0], 14.0, 1.0E-5);     // 130.6 degrees
-    TS_ASSERT_DELTA(gws2->dataY(10000)[0], 10.0, 1.0E-5); // 97.4 degrees
-    TS_ASSERT_DELTA(gws2->dataY(20000)[0], 7.0, 1.0E-5);  // 62.9 degrees
-    TS_ASSERT_DELTA(gws2->dataY(30000)[0], 3.0, 1.0E-5);  // 27.8 degrees
-    TS_ASSERT_DELTA(gws2->dataY(40000)[0], 2.0, 1.0E-5);  // 14.5 degrees
-    TS_ASSERT_DELTA(gws2->dataY(50000)[0], 5.0, 1.0E-5);  // 49.7 degrees
+    TS_ASSERT_DELTA(gws2->y(0)[0], 14.0, 1.0E-5);     // 130.6 degrees
+    TS_ASSERT_DELTA(gws2->y(10000)[0], 10.0, 1.0E-5); // 97.4 degrees
+    TS_ASSERT_DELTA(gws2->y(20000)[0], 7.0, 1.0E-5);  // 62.9 degrees
+    TS_ASSERT_DELTA(gws2->y(30000)[0], 3.0, 1.0E-5);  // 27.8 degrees
+    TS_ASSERT_DELTA(gws2->y(40000)[0], 2.0, 1.0E-5);  // 14.5 degrees
+    TS_ASSERT_DELTA(gws2->y(50000)[0], 5.0, 1.0E-5);  // 49.7 degrees
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(GROUP_WS);
@@ -346,7 +346,7 @@ public:
     // ensure each pixel angle is inside the range correspondng to its group ID
     for (size_t i = 0; i < nHist; ++i) {
       auto const twoTheta = spectrumInfo.twoTheta(i);
-      auto const groupID = outputWS->dataY(i)[0];
+      auto const groupID = outputWS->y(i)[0];
       TS_ASSERT_LESS_THAN_EQUALS(angleStepRad * (groupID - 1), twoTheta);
       TS_ASSERT_LESS_THAN(twoTheta, angleStepRad * (groupID));
     }

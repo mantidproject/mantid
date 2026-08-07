@@ -597,9 +597,9 @@ public:
     TS_ASSERT_EQUALS(outws->getNumberHistograms(), 11);
 
     /*
-    for (size_t i = 0; i < outws->dataY(0).size(); ++i)
-      std::cout << outws->dataX(0)[i] << "\t\t" << outws->dataY(0)[i] << "\t\t"
-    << outws->dataY(1)[i] << '\n';
+    for (size_t i = 0; i < outws->y(0).size(); ++i)
+      std::cout << outws->x(0)[i] << "\t\t" << outws->y(0)[i] << "\t\t"
+    << outws->y(1)[i] << '\n';
     */
 
     // 4. Calcualte data
@@ -700,9 +700,9 @@ public:
     return;
 
     /*
-    for (size_t i = 0; i < outws->dataY(0).size(); ++i)
-      std::cout << outws->dataX(0)[i] << "\t\t" << outws->dataY(0)[i] << "\t\t"
-    << outws->dataY(1)[i] << '\n';
+    for (size_t i = 0; i < outws->y(0).size(); ++i)
+      std::cout << outws->x(0)[i] << "\t\t" << outws->y(0)[i] << "\t\t"
+    << outws->y(1)[i] << '\n';
     */
 
     // 4. Calcualte data

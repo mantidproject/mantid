@@ -71,9 +71,9 @@ public:
     for (size_t i = 0; i < result->getNumberHistograms(); ++i) {
       for (int j = 1; j < 4; ++j) {
         double factor = 3.0 + j * 2.0 + j * j * 1.0;
-        TS_ASSERT_EQUALS(result->dataX(i)[j - 1], inputWS->dataX(i)[j - 1]);
-        TS_ASSERT_EQUALS(result->dataY(i)[j - 1], factor * inputWS->dataY(i)[j - 1]);
-        TS_ASSERT_EQUALS(result->dataE(i)[j - 1], factor * inputWS->dataE(i)[j - 1]);
+        TS_ASSERT_EQUALS(result->x(i)[j - 1], inputWS->x(i)[j - 1]);
+        TS_ASSERT_EQUALS(result->y(i)[j - 1], factor * inputWS->y(i)[j - 1]);
+        TS_ASSERT_EQUALS(result->e(i)[j - 1], factor * inputWS->e(i)[j - 1]);
       }
     }
 
@@ -104,9 +104,9 @@ public:
     for (size_t i = 0; i < result->getNumberHistograms(); ++i) {
       for (int j = 1; j < 4; ++j) {
         double factor = 3.0 + j * 2.0 + j * j * 1.0;
-        TS_ASSERT_EQUALS(result->dataX(i)[j - 1], inputWS->dataX(i)[j - 1]);
-        TS_ASSERT_EQUALS(result->dataY(i)[j - 1], inputWS->dataY(i)[j - 1] / factor);
-        TS_ASSERT_EQUALS(result->dataE(i)[j - 1], inputWS->dataE(i)[j - 1] / factor);
+        TS_ASSERT_EQUALS(result->x(i)[j - 1], inputWS->x(i)[j - 1]);
+        TS_ASSERT_EQUALS(result->y(i)[j - 1], inputWS->y(i)[j - 1] / factor);
+        TS_ASSERT_EQUALS(result->e(i)[j - 1], inputWS->e(i)[j - 1] / factor);
       }
     }
 

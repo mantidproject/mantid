@@ -50,7 +50,7 @@ public:
     alg.initialize();
     auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction([](double, int) { return 0.0; }, 1, 0.0, 1.0, 0.1);
     double w = 0.0;
-    std::generate(ws->dataE(0).begin(), ws->dataE(0).end(), [&w] {
+    std::generate(ws->mutableE(0).begin(), ws->mutableE(0).end(), [&w] {
       w += 1.0;
       return w;
     });
@@ -72,7 +72,7 @@ public:
     alg.initialize();
     auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction([](double, int) { return 1.0; }, 1, 0.0, 1.0, 0.1);
     double w = 0.0;
-    std::generate(ws->dataE(0).begin(), ws->dataE(0).end(), [&w] {
+    std::generate(ws->mutableE(0).begin(), ws->mutableE(0).end(), [&w] {
       w += 1.0;
       return w;
     });

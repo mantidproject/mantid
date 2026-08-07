@@ -123,9 +123,9 @@ public:
 
     // check some values near the center tubes to verify the geometry
     // used is from the older version
-    TS_ASSERT_EQUALS(output2D->dataY(1050)[1156], 16)
-    TS_ASSERT_EQUALS(output2D->dataY(871)[1157], 17)
-    TS_ASSERT_EQUALS(output2D->dataY(746)[1157], 18)
+    TS_ASSERT_EQUALS(output2D->y(1050)[1156], 16)
+    TS_ASSERT_EQUALS(output2D->y(871)[1157], 17)
+    TS_ASSERT_EQUALS(output2D->y(746)[1157], 18)
     checkTimeFormat(output2D);
   }
   void test_diffraction_doppler() {
@@ -145,9 +145,9 @@ public:
 
     // check some values near the center tubes to verify the geometry
     // used is from the newer version
-    TS_ASSERT_EQUALS(output2D->dataY(1050)[558], 2)
-    TS_ASSERT_EQUALS(output2D->dataY(873)[557], 2)
-    TS_ASSERT_EQUALS(output2D->dataY(724)[561], 3)
+    TS_ASSERT_EQUALS(output2D->y(1050)[558], 2)
+    TS_ASSERT_EQUALS(output2D->y(873)[557], 2)
+    TS_ASSERT_EQUALS(output2D->y(724)[561], 3)
     checkTimeFormat(output2D);
   }
 
@@ -193,7 +193,7 @@ public:
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 2049)
     TS_ASSERT_EQUALS(outputWS->blocksize(), 2048)
 
-    TS_ASSERT_EQUALS(outputWS->dataY(58)[3], 1.0)
+    TS_ASSERT_EQUALS(outputWS->y(58)[3], 1.0)
   }
 
   void checkTimeFormat(MatrixWorkspace_const_sptr outputWS) {

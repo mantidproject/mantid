@@ -285,8 +285,8 @@ public:
     auto outputWS = getOutputWorkspace(mcAbsorb);
 
     verifyDimensions(wsProps, outputWS);
-    auto yData = outputWS->getSpectrum(0).dataY();
-    auto eData = outputWS->getSpectrum(0).dataE();
+    auto yData = outputWS->getSpectrum(0).y();
+    auto eData = outputWS->getSpectrum(0).e();
     // recreate the sd of the set of simulated paths from the sd on the mean
     double attenuationFactorsSD1 = eData[0] * sqrt(NEVENTS);
 
@@ -334,8 +334,8 @@ public:
     auto outputWS = getOutputWorkspace(mcAbsorb);
 
     verifyDimensions(wsProps, outputWS);
-    auto yData = outputWS->getSpectrum(0).dataY();
-    auto eData = outputWS->getSpectrum(0).dataE();
+    auto yData = outputWS->getSpectrum(0).y();
+    auto eData = outputWS->getSpectrum(0).e();
 
     constexpr double delta(1e-03);
     const double calculatedAttFactor = (1 - 2 * exp(-2) + exp(-4)) / 4;
@@ -371,8 +371,8 @@ public:
     auto outputWS = getOutputWorkspace(mcAbsorb);
 
     verifyDimensions(wsProps, outputWS);
-    auto yData = outputWS->getSpectrum(0).dataY();
-    auto eData = outputWS->getSpectrum(0).dataE();
+    auto yData = outputWS->getSpectrum(0).y();
+    auto eData = outputWS->getSpectrum(0).e();
 
     constexpr double delta(1e-03);
     const double calculatedAttFactor = (1 - 2 * exp(-2) + exp(-4)) / 4;
@@ -395,7 +395,7 @@ public:
     auto outputWS = getOutputWorkspace(mcAbsorb);
 
     verifyDimensions(wsProps, outputWS);
-    auto yData = outputWS->getSpectrum(0).dataY();
+    auto yData = outputWS->getSpectrum(0).y();
 
     constexpr double delta(1e-03);
     const double calculatedAttFactor = exp(-2);
@@ -418,7 +418,7 @@ public:
     auto outputWS = getOutputWorkspace(mcAbsorb);
 
     verifyDimensions(wsProps, outputWS);
-    auto yData = outputWS->getSpectrum(0).dataY();
+    auto yData = outputWS->getSpectrum(0).y();
 
     constexpr double delta(1e-03);
     // pass straight through - all path lengths are exactly 2cm
@@ -444,7 +444,7 @@ public:
     auto outputWS = getOutputWorkspace(mcAbsorb);
 
     verifyDimensions(wsProps, outputWS);
-    auto yData = outputWS->getSpectrum(0).dataY();
+    auto yData = outputWS->getSpectrum(0).y();
 
     constexpr double delta(1e-02);
     // calculated theoretical absoprtion for this cylinder, using https://doi.org/10.1107/S0567739471000652
@@ -479,7 +479,7 @@ public:
     auto outputWS = getOutputWorkspace(mcAbsorb);
 
     verifyDimensions(wsProps, outputWS);
-    auto yData = outputWS->getSpectrum(0).dataY();
+    auto yData = outputWS->getSpectrum(0).y();
 
     constexpr double delta(1e-03);
     const double calculatedAttFactor1 = 2 * (2 * exp(-1) - 3 * exp(-2)) / 3;
@@ -662,7 +662,7 @@ public:
     // zero
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 5);
     TS_ASSERT_EQUALS(outputWS->spectrumInfo().isMasked(0), true);
-    auto yData = outputWS->getSpectrum(0).dataY();
+    auto yData = outputWS->getSpectrum(0).y();
     bool allZero = std::all_of(yData.begin(), yData.end(), [](double i) { return i == 0; });
     TS_ASSERT_EQUALS(allZero, true);
   }

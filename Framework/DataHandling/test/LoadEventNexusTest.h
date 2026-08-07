@@ -869,11 +869,11 @@ public:
     TS_ASSERT_EQUALS((*WS->sharedX(0)).size(), 200002);
     TS_ASSERT_DELTA((*WS->sharedX(0))[1], 1.0, 1e-6);
     // Data
-    TS_ASSERT_EQUALS(WS->dataY(0).size(), 200001);
-    TS_ASSERT_DELTA(WS->dataY(0)[12], 0.0, 1e-6);
+    TS_ASSERT_EQUALS(WS->y(0).size(), 200001);
+    TS_ASSERT_DELTA(WS->y(0)[12], 0.0, 1e-6);
     // Error
-    TS_ASSERT_EQUALS(WS->dataE(0).size(), 200001);
-    TS_ASSERT_DELTA(WS->dataE(0)[12], 0.0, 1e-6);
+    TS_ASSERT_EQUALS(WS->e(0).size(), 200001);
+    TS_ASSERT_DELTA(WS->e(0)[12], 0.0, 1e-6);
     // Check geometry for a monitor
     const auto &specInfo = WS->spectrumInfo();
     TS_ASSERT(specInfo.isMonitor(2));

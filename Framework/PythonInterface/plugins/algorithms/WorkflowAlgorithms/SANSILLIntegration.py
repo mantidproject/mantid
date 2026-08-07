@@ -571,7 +571,7 @@ class SANSILLIntegration(PythonAlgorithm):
                 mid_x = (x[1:] + x[:-1]) / 2
                 res = self._deltaQ(mid_x)
             for i in range(mtd[ws].getNumberHistograms()):
-                mtd[ws].setDx(i, res)
+                mtd[ws].setSharedDx(i, res)
         return res
 
 

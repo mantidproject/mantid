@@ -614,8 +614,8 @@ class CanSubtraction(ReductionStep):
         """
         if not original_ws.hasDx(0):
             return
-        for index in range(0, original_ws.getNumHistograms()):
-            subtracted_ws.setDx(index, original_ws.dataDX(index))
+        for index in range(0, original_ws.getNumberHistograms()):
+            subtracted_ws.setSharedDx(index, original_ws.dx(index))
 
 
 class Mask_ISIS(ReductionStep):

@@ -68,11 +68,11 @@ public:
     // "../../../../Test/Nexus/emu00006473.nxs";
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 32);
     // Check two X vectors are the same
-    TS_ASSERT((output2D->dataX(3)) == (output2D->dataX(31)));
+    TS_ASSERT((output2D->x(3)) == (output2D->x(31)));
     // Check two Y arrays have the same number of elements
-    TS_ASSERT_EQUALS(output2D->dataY(5).size(), output2D->dataY(17).size());
+    TS_ASSERT_EQUALS(output2D->y(5).size(), output2D->y(17).size());
     // Check one particular value
-    TS_ASSERT_EQUALS(output2D->dataY(11)[686], 81);
+    TS_ASSERT_EQUALS(output2D->y(11)[686], 81);
   }
 
   void testExec2() {
@@ -112,15 +112,15 @@ public:
     // "../../../../Test/Nexus/emu00006475.nxs";
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 32);
     // Check two X vectors are the same
-    TS_ASSERT((output2D->dataX(3)) == (output2D->dataX(31)));
+    TS_ASSERT((output2D->x(3)) == (output2D->x(31)));
     // Check two Y arrays have the same number of elements
-    TS_ASSERT_EQUALS(output2D->dataY(5).size(), output2D->dataY(17).size());
+    TS_ASSERT_EQUALS(output2D->y(5).size(), output2D->y(17).size());
     // Check one particular value
-    TS_ASSERT_EQUALS(output2D2->dataY(8)[502], 121);
+    TS_ASSERT_EQUALS(output2D2->y(8)[502], 121);
     // Check that the error on that value is correct
-    TS_ASSERT_EQUALS(output2D2->dataE(8)[502], 11);
+    TS_ASSERT_EQUALS(output2D2->e(8)[502], 11);
     // Check that the time is as expected from bin boundary update
-    TS_ASSERT_DELTA(output2D->dataX(11)[687], 10.738, 0.001);
+    TS_ASSERT_DELTA(output2D->x(11)[687], 10.738, 0.001);
 
     // Check the unit has been set correctly
     TS_ASSERT_EQUALS(output2->getAxis(0)->unit()->unitID(), "Label");
