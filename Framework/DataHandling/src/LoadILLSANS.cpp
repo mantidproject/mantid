@@ -31,6 +31,8 @@
 #include "MantidNexus/NexusException.h"
 #include "MantidNexus/NexusFile.h"
 
+#include <filesystem>
+
 namespace Mantid::DataHandling {
 
 using namespace Kernel;

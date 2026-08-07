@@ -12,6 +12,7 @@
 #include "MantidAPI/IArchiveSearch.h"
 #include "MantidDataHandling/DllConfig.h"
 
+#include <filesystem>
 #include <sstream>
 #include <string>
 

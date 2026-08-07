@@ -98,6 +98,38 @@ public:
     TS_ASSERT_EQUALS(descriptor.isEntry("/entry/instrument/pants"), false);
   }
 
+  /// Regression guard against a use-after-move in operator[]: it once did
+  /// `m_allEntries[name] = std::move(nxclass); return nxclass;`, so the FIRST (uncached, disk-path)
+  /// lookup of an entry returned the moved-from empty string. That made the first openGroup NX_class
+  /// validation of an uncached group spuriously fail ("... does not have class NXnote"), breaking loads.
+  void test_operator_index_first_call_returns_real_class() {
+    std::cout << "\nTesting operator[] first-call (disk path) in NexusDescriptorLazy" << std::endl;
+    std::string const filename = NexusTest::getFullPath("EQSANS_89157.nxs.h5");
+    // These sit at depth 3, below the bounded init scan, so the FIRST query takes the disk branch.
+    std::string const uncachedGroup = "/entry/DASlogs/BL6:CS:DataType"; // NX_class == NXlog
+    std::string const uncachedData = "/entry/user1/facility_user_id";   // a dataset -> "SDS"
+
+    { // group: the very first call must be the real class, not empty/moved-from
+      Mantid::Nexus::NexusDescriptorLazy descriptor(filename);
+      std::string const firstCall = descriptor[uncachedGroup];
+      TS_ASSERT_EQUALS(firstCall, "NXlog");
+      TS_ASSERT_EQUALS(descriptor[uncachedGroup], firstCall); // idempotent (now cached)
+    }
+    { // dataset: first call must report SDS
+      Mantid::Nexus::NexusDescriptorLazy descriptor(filename);
+      TS_ASSERT_EQUALS(descriptor[uncachedData], "SDS");
+    }
+    // the class-checking helpers route through operator[]; they must be correct on the first call
+    {
+      Mantid::Nexus::NexusDescriptorLazy descriptor(filename);
+      TS_ASSERT_EQUALS(descriptor.isEntry(uncachedGroup, "NXlog"), true);
+    }
+    {
+      Mantid::Nexus::NexusDescriptorLazy descriptor(filename);
+      TS_ASSERT_EQUALS(descriptor.isDataSet(uncachedData), true);
+    }
+  }
+
   void test_hasRootAttr() {
     std::cout << "\nTesting hasRootAttr in NexusDescriptorLazy" << std::endl;
     // create a descriptor with the correct values
