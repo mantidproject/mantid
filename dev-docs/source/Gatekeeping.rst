@@ -90,7 +90,7 @@ Code quality
 ------------
 
 * Have a brief scan of some of the changes to check that they adhere to standards.
-* Consider any design decisions that have been made and if these are appropriate and not breaking any obvious design patters, e.g. it is common to see MVP being broken where logic is added to the view and is not testable; the lack of tests can be an indicator here. Is there any pollution of e.g. Qt in a non-Qt class; again this may make testing more difficult/complicated.
+* Consider any design decisions that have been made and if these are appropriate and not breaking any obvious design patterns, e.g. it is common to see MVP being broken where logic is added to the view and is not testable; the lack of tests can be an indicator here. Is there any pollution of e.g. Qt in a non-Qt class; again this may make testing more difficult/complicated.
 * Have a brief check that any tests look to be of good quality; unit tests should be clear and test things in isolation. Check for appropriate use of mocks.
 * Keep an eye out for any other code smells - unclear tests, files/classes too long, long comments etc.
 
@@ -208,7 +208,7 @@ Workspace Groups
 IDFs and IPFs
 -------------
 
-* These changes take effect as soon as they are merged to ``main`` - ensure the developer and their user(s) are aware of this. They may want to decouple these changes from code changes, and ensure backwards compatibility. Release notes may or may not be helpful (the changes are not tied to a release so in that case could be confusing, but some people prefer to add them because at least then the changes do get higlighted to users; it depends somewhat on the change and the audience).
+* These changes take effect as soon as they are merged to ``main`` - ensure the developer and their user(s) are aware of this. They may want to decouple these changes from code changes, and ensure backwards compatibility. Release notes may or may not be helpful (the changes are not tied to a release so in that case could be confusing, but some people prefer to add them because at least then the changes do get highlighted to users; it depends somewhat on the change and the audience).
 
 
 Unit tests
