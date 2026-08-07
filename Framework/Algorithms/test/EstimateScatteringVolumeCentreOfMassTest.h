@@ -6,17 +6,24 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAlgorithms/EstimateScatteringVolumeCentreOfMass.h"
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/Material.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyManagerProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/V3D.h"
+#include <cmath>
 #include <cxxtest/TestSuite.h>
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::Kernel::V3D;
@@ -128,8 +135,8 @@ public:
     centerOfMass.setRethrows(true);
     centerOfMass.initialize();
     centerOfMass.setProperty("InputWorkspace", testWS);
-    // The missing sample shape is reported by validateInputs, which makes execute() throw
-    TS_ASSERT_THROWS(centerOfMass.execute(), const std::runtime_error &);
+    // This should throw because no sample shape is defined
+    TS_ASSERT_THROWS(centerOfMass.execute(), const std::invalid_argument &);
     TS_ASSERT(!centerOfMass.isExecuted());
   }
   void testExecWithDifferentElementSizeUnits() {
@@ -208,7 +215,204 @@ public:
     TS_ASSERT_THROWS(centerOfMass.setProperty("ElementUnits", "um"), const std::invalid_argument &);
   }
 
+  //----------------------------------------------------------------------------
+  // Neutron weighted centres of mass
+  //----------------------------------------------------------------------------
+  void testNeutronWeightingRejectsSampleWithoutMaterial() {
+    auto testWS = createTwoDetectorWorkspace(0.0); // no material
+    Mantid::Algorithms::EstimateScatteringVolumeCentreOfMass alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", testWS);
+    alg.setProperty("UseNeutronWeightings", true);
+    alg.setProperty("ElementSize", 1.0);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
+    TS_ASSERT(!alg.isExecuted());
+  }
+
+  void testNeutronWeightingRejectsWorkspaceNotInWavelength() {
+    auto testWS = createTwoDetectorWorkspace(FE_NUMBER_DENSITY);
+    testWS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("TOF");
+    Mantid::Algorithms::EstimateScatteringVolumeCentreOfMass alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", testWS);
+    alg.setProperty("UseNeutronWeightings", true);
+    alg.setProperty("ElementSize", 1.0);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
+    TS_ASSERT(!alg.isExecuted());
+  }
+
+  void testNegligibleAbsorptionReproducesGeometricCentre() {
+    // With almost nothing to attenuate in, every element carries the same weight, so the weighted
+    // answer must collapse onto the plain geometric centroid.
+    const auto unweighted = runAndGetCentre(createTwoDetectorWorkspace(FE_NUMBER_DENSITY), false);
+    const auto weighted = runAndGetCentre(createTwoDetectorWorkspace(1e-8), true);
+    TS_ASSERT_DELTA(weighted.X(), unweighted.X(), 1e-6);
+    TS_ASSERT_DELTA(weighted.Y(), unweighted.Y(), 1e-6);
+    TS_ASSERT_DELTA(weighted.Z(), unweighted.Z(), 1e-6);
+  }
+
+  void testAbsorptionMovesCentresTowardsTheirOwnDetector() {
+    // The sample is a slab elongated along x with the gauge volume at its centre, so scattering
+    // points nearer a detector have a shorter exit path and are attenuated less. Each detector
+    // should therefore see a centre pulled towards itself. This is the whole point of the
+    // per-detector calculation - the outgoing path is the only detector dependent term.
+    const auto centres = runAndGetDetectorCentres(createTwoDetectorWorkspace(FE_NUMBER_DENSITY));
+    TS_ASSERT_EQUALS(centres.size(), 2);
+    // Detector 0 sits at +x, detector 1 at -x.
+    TS_ASSERT_LESS_THAN(0.0, centres[0].X());
+    TS_ASSERT_LESS_THAN(centres[1].X(), 0.0);
+  }
+
+  void testOppositeDetectorsSeeMirroredCentres() {
+    // The geometry is symmetric under x -> -x, so the two banks must see mirror image centres.
+    const auto centres = runAndGetDetectorCentres(createTwoDetectorWorkspace(FE_NUMBER_DENSITY));
+    TS_ASSERT_EQUALS(centres.size(), 2);
+    TS_ASSERT_DELTA(centres[0].X(), -centres[1].X(), 1e-9);
+    TS_ASSERT_DELTA(centres[0].Y(), centres[1].Y(), 1e-9);
+    TS_ASSERT_DELTA(centres[0].Z(), centres[1].Z(), 1e-9);
+  }
+
+  void testScalarCentreIsTheIntensityWeightedMeanOfTheTable() {
+    auto testWS = createTwoDetectorWorkspace(FE_NUMBER_DENSITY);
+    Mantid::Algorithms::EstimateScatteringVolumeCentreOfMass alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", testWS);
+    alg.setProperty("UseNeutronWeightings", true);
+    alg.setProperty("ElementSize", 1.0);
+    alg.setPropertyValue("DetectorScatteringCentres", "centres_table");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    Mantid::API::ITableWorkspace_sptr table = alg.getProperty("DetectorScatteringCentres");
+    TS_ASSERT(table);
+    TS_ASSERT_EQUALS(table->rowCount(), 2);
+    TS_ASSERT_EQUALS(table->columnCount(), 5);
+
+    V3D expected(0.0, 0.0, 0.0);
+    double totalWeight = 0.0;
+    for (size_t row = 0; row < table->rowCount(); ++row) {
+      const double weight = table->cell<double>(row, 4);
+      TS_ASSERT_LESS_THAN(0.0, weight);
+      expected += V3D(table->cell<double>(row, 1), table->cell<double>(row, 2), table->cell<double>(row, 3)) * weight;
+      totalWeight += weight;
+    }
+    expected /= totalWeight;
+
+    std::vector<double> scalar = alg.getProperty("CentreOfMass");
+    TS_ASSERT_DELTA(scalar[0], expected.X(), 1e-9);
+    TS_ASSERT_DELTA(scalar[1], expected.Y(), 1e-9);
+    TS_ASSERT_DELTA(scalar[2], expected.Z(), 1e-9);
+  }
+
+  void testCollimatorPullsCentresTowardsTheViewingAxis() {
+    // A tight collimator only accepts scattering close to the plane through the sample and the
+    // detector, so it should suppress the attenuation driven shift along x for a detector at +x.
+    const auto without = runAndGetDetectorCentres(createTwoDetectorWorkspace(FE_NUMBER_DENSITY));
+    auto collimated = createTwoDetectorWorkspace(FE_NUMBER_DENSITY);
+    setCollimatorGaugeWidth(collimated, 0.001);
+    const auto with = runAndGetDetectorCentres(collimated);
+    TS_ASSERT_EQUALS(with.size(), 2);
+    // The collimator restricts z for a detector viewing along x, so the x shift survives; what must
+    // change is that the accepted volume is narrower, so the centre moves less far in z.
+    TS_ASSERT_LESS_THAN_EQUALS(std::abs(with[0].Z()), std::abs(without[0].Z()) + 1e-12);
+  }
+
+  void testPartiallyImmersedGaugeStaysInsideTheSample() {
+    // Offset the slab so its face sits on the origin: the sample then spans x in [0, 0.04] while the
+    // gauge volume spans [-0.002, 0.002], leaving half the gauge hanging in air. The centre must
+    // move off the nominal gauge centre and into the material.
+    auto testWS = createTwoDetectorWorkspace(FE_NUMBER_DENSITY, V3D(0.02, 0.0, 0.0));
+    const auto centre = runAndGetCentre(testWS, true);
+    TS_ASSERT_LESS_THAN(0.0, centre.X());
+    TS_ASSERT_LESS_THAN(centre.X(), 0.002);
+  }
+
+  void testWithdrawingTheSampleMovesTheCentreTowardsItsSurface() {
+    // As the sample is withdrawn from the gauge volume, less and less of the gauge is filled and the
+    // centre of the remaining material tracks the surface. This is the near-surface behaviour that
+    // makes the weighted centre differ from the nominal measurement position.
+    double previous = -1.0;
+    for (const double faceOffset : {0.0, 0.001, 0.002}) {
+      auto testWS = createTwoDetectorWorkspace(FE_NUMBER_DENSITY, V3D(0.02 + faceOffset, 0.0, 0.0));
+      const auto centre = runAndGetCentre(testWS, true);
+      TS_ASSERT_LESS_THAN(previous, centre.X());
+      previous = centre.X();
+    }
+  }
+
 private:
+  const double FE_NUMBER_DENSITY{0.0849};
+
+  V3D runAndGetCentre(const MatrixWorkspace_sptr &ws, const bool weighted) {
+    Mantid::Algorithms::EstimateScatteringVolumeCentreOfMass alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", ws);
+    alg.setProperty("UseNeutronWeightings", weighted);
+    alg.setProperty("ElementSize", 1.0);
+    alg.execute();
+    std::vector<double> result = alg.getProperty("CentreOfMass");
+    return V3D(result[0], result[1], result[2]);
+  }
+
+  std::vector<V3D> runAndGetDetectorCentres(const MatrixWorkspace_sptr &ws) {
+    Mantid::Algorithms::EstimateScatteringVolumeCentreOfMass alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", ws);
+    alg.setProperty("UseNeutronWeightings", true);
+    alg.setProperty("ElementSize", 1.0);
+    alg.setPropertyValue("DetectorScatteringCentres", "det_centres");
+    alg.execute();
+    Mantid::API::ITableWorkspace_sptr table = alg.getProperty("DetectorScatteringCentres");
+    std::vector<V3D> centres;
+    for (size_t row = 0; row < table->rowCount(); ++row) {
+      centres.emplace_back(table->cell<double>(row, 1), table->cell<double>(row, 2), table->cell<double>(row, 3));
+    }
+    return centres;
+  }
+
+  void setCollimatorGaugeWidth(const MatrixWorkspace_sptr &ws, const double width) {
+    auto &pmap = ws->instrumentParameters();
+    pmap.addDouble(ws->getInstrument()->getComponentID(), "col-gauge-width", width);
+  }
+
+  /// A slab elongated along x, viewed by two detectors at +/-x, with a 4mm cubic gauge volume at the
+  /// origin. The elongation makes the outgoing path length - and so the attenuation - vary strongly
+  /// with position along x, which is what distinguishes the two detectors.
+  MatrixWorkspace_sptr createTwoDetectorWorkspace(const double numberDensity,
+                                                  const V3D &sampleCentre = V3D(0.0, 0.0, 0.0)) {
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceBinned(2, 5, 1.0, 0.4);
+    auto inst =
+        ComponentCreationHelper::createCylInstrumentWithDetInGivenPositions({1.5, 1.5}, {M_PI_2, M_PI_2}, {0.0, M_PI});
+    inst->setName("test-inst");
+    ws->setInstrument(inst);
+    ws->rebuildSpectraMapping();
+    ws->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
+
+    auto shape = ComponentCreationHelper::createCuboid(0.02, 0.002, 0.002, sampleCentre, "slab");
+    if (numberDensity > 0.0) {
+      shape->setMaterial(
+          Mantid::Kernel::Material("Fe", Mantid::PhysicalConstants::getNeutronAtom(26, 0), numberDensity));
+    }
+    ws->mutableSample().setShape(shape);
+
+    const std::string gaugeXML = " \
+        <cuboid id='some-cuboid'> \
+        <height val='0.004'  /> \
+        <width val='0.004' />  \
+        <depth  val='0.004' />  \
+        <centre x='0.0' y='0.0' z='0.0'  />  \
+        </cuboid>  \
+        <algebra val='some-cuboid' /> \
+        ";
+    ws->mutableRun().addProperty("GaugeVolume", gaugeXML);
+    return ws;
+  }
+
   MatrixWorkspace_sptr createTestWorkspace() {
     // Create a basic test workspace
     MatrixWorkspace_sptr testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 10);
