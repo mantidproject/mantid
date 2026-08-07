@@ -73,9 +73,13 @@ function(PY_ADD_TEST _test_type _test_runner_module _additional_flags _test_src_
     get_filename_component(_suitename ${part} NAME_WE)
     # We duplicate the suitename so that it matches the junit output name
     set(_pyunit_separate_name "${_testname_prefix}.${_suitename}.${_suitename}")
-    add_test(NAME ${_pyunit_separate_name}
-             COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin/Testing" ${Python_EXECUTABLE}
-                     ${_test_runner_module} ${_test_src_dir}/${_filename} ${_additional_flags}
+    # this errors if warnings come from mantid, mantidqt, or any DeprecationWarnings mantid should avoid using its own
+    # code that produces warnings
+    add_test(
+      NAME ${_pyunit_separate_name}
+      COMMAND
+        ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin/Testing" ${Python_EXECUTABLE} -Werror::DeprecationWarning
+        -Werror:::mantid -Werror:::mantidqt ${_test_runner_module} ${_test_src_dir}/${_filename} ${_additional_flags}
     )
     # Set the PYTHONPATH so that the built modules can be found
     set_tests_properties(
