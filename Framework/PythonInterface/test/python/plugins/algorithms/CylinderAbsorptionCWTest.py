@@ -128,6 +128,28 @@ class CylinderAbsorptionCWTest(unittest.TestCase):
         # Check multiple scattering, should be 0 since we set MultipleScattering=False
         self.assertEqual(result.MultipleScatteringWorkspace.extractY()[0][0], 0)
 
+    def testSabineLargeZ(self):
+        """When z is large, the algorithm should use the asymptotic expansion of I_n(z) - L_n(z) to avoid numerical overflow."""
+        ws = self.createWorkspace()
+
+        # Run the algorithm with Sabine method using large attenuation cross-section to produce large z values
+        result = CylinderAbsorptionCW(
+            InputWorkspace=ws,
+            Radius=2,  # cm
+            Height=10,  # cm
+            Wavelength=1.7982,  # Å
+            AttenuationXSection=100,  # barn at 1.798 Å
+            ScatteringXSection=5.1,  # barn
+            SampleNumberDensity=0.0723,  # atoms/Å^3
+            AbsorptionCorrectionMethod="Sabine",
+            AbsorptionWorkspace="Absorption",
+            MultipleScatteringWorkspace="MultipleScattering",
+            MultipleScattering=False,
+        )
+
+        # Check absorption
+        np.testing.assert_allclose(result.AbsorptionWorkspace.extractY()[:, 0], [0.00299123, 0.01043025, 0.01786926, 0.01043025], rtol=1e-6)
+
     def testMissingProperties(self):
         ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=1)
 
