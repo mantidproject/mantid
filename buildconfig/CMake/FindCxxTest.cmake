@@ -130,14 +130,14 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname)
   add_executable(${_cxxtest_testname} EXCLUDE_FROM_ALL ${_cxxtest_cpp_files} ${_cxxtest_h_files} ${TESTHELPER_SRCS})
 
   set(_misc_bin $ENV{CONDA_PREFIX}/bin)
-  set(_qt5_bin $ENV{CONDA_PREFIX}/Library/bin $ENV{CONDA_PREFIX}/Library/lib)
+  set(_qt_bin $ENV{CONDA_PREFIX}/Library/bin $ENV{CONDA_PREFIX}/Library/lib)
   set(_qt_qpa_platform_plugin $ENV{CONDA_PREFIX}/Library/plugins)
   set(_python_home $ENV{CONDA_PREFIX})
 
   # Note: %PATH% isn't understood by cmake but it is by Visual Studio\Windows where it gets used
   set_target_properties(
     ${_cxxtest_testname}
-    PROPERTIES VS_DEBUGGER_ENVIRONMENT "PATH=${_misc_bin};${_qt5_bin};${_python_home};${_python_home}/Scripts;%PATH%\n\
+    PROPERTIES VS_DEBUGGER_ENVIRONMENT "PATH=${_misc_bin};${_qt_bin};${_python_home};${_python_home}/Scripts;%PATH%\n\
 QT_QPA_PLATFORM_PLUGIN_PATH=${_qt_qpa_platform_plugin}\n\
 PYTHONHOME=${_python_home}"
   )
@@ -166,7 +166,7 @@ PYTHONHOME=${_python_home}"
         APPEND
         PROPERTY ENVIRONMENT "PYTHONHOME=${_python_home}"
       )
-      set(_new_path ${_misc_bin} ${_qt5_bin} ${_python_home} ${_python_home}/Scripts $ENV{PATH})
+      set(_new_path ${_misc_bin} ${_qt_bin} ${_python_home} ${_python_home}/Scripts $ENV{PATH})
       # the value used for PATH has to have explicit semi colons for some reason
       string(REPLACE ";" "\;" _new_path "${_new_path}")
       set_property(

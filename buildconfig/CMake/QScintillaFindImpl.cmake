@@ -1,7 +1,7 @@
 # Implementation of searching for QScintilla. It contains a function parameterized by the major version of Qt to be
 # linked against.
 #
-# The function creates an imported target prefixed in a similar manner to the Qt5 targets.
+# The function creates an imported target prefixed in a similar manner to the Qt targets.
 function(find_qscintilla qt_version)
   if(NOT Qt${qt_version}_FOUND)
     message(FATAL_ERROR "find_package ( Qt${qt_version} ...) must be called first")

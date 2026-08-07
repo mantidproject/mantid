@@ -11,7 +11,7 @@ Qt-based matplotlib canvas
 
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QPen, QColor, QPaintEvent
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, draw_if_interactive, show  # noqa: F401
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg, draw_if_interactive, show  # noqa: F401
 from mantid.plots.mantidimage import MantidImage, ImageIntensity
 
 
