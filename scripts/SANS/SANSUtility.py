@@ -841,37 +841,31 @@ def get_workspace_type(file_name):
     return workspace_type
 
 
-def bundle_added_event_data_as_group(out_file_name, out_file_monitors_name, is_multi_period):
+def bundle_added_event_data_as_group(out_file_path, out_file_monitors_path, _is_multi_period):
     """
     We load an added event data file and its associated monitor file. Combine
     the data in a group workspace and delete the original files.
-    @param out_file_name :: the file name of the event data file
-    @param out_file_monitors_name :: the file name of the monitors file
-    @param is_multi_period: if the data set is multiperid
+    @param out_file_path : the file path of the event data file
+    @param out_file_monitors_path : the file name path of the monitors file
+    @param _is_multi_period: if the data set is multiperiod (unused)
     @return the name fo the new group workspace file
     """
+
+    # This is a validation and extracting name out of path
+    full_data_path_name, filename = get_full_path_for_added_event_data(out_file_path)
+    full_monitor_path_name, _ = get_full_path_for_added_event_data(out_file_monitors_path)
     # Extract the file name and the extension
-    file_name, file_extension = os.path.splitext(out_file_name)
+    file_name, _ = os.path.splitext(filename)
+
     event_data_temp = file_name + ADDED_EVENT_DATA_TAG
-    Load(Filename=out_file_name, OutputWorkspace=event_data_temp)
+    Load(Filename=full_data_path_name, OutputWorkspace=event_data_temp)
     event_data_ws = mtd[event_data_temp]
 
     monitor_temp = file_name + "_monitors" + ADDED_EVENT_DATA_TAG
-    Load(Filename=out_file_monitors_name, OutputWorkspace=monitor_temp)
+    Load(Filename=full_monitor_path_name, OutputWorkspace=monitor_temp)
 
     monitor_ws = mtd[monitor_temp]
-
-    out_group_file_name = file_name + file_extension
     out_group_ws_name = file_name
-
-    # Delete the intermediate files
-    full_data_path_name = get_full_path_for_added_event_data(out_file_name)
-    full_monitor_path_name = get_full_path_for_added_event_data(out_file_monitors_name)
-
-    if os.path.exists(full_data_path_name):
-        os.remove(full_data_path_name)
-    if os.path.exists(full_monitor_path_name):
-        os.remove(full_monitor_path_name)
 
     # Create a grouped workspace with the data and the monitor child workspaces
     workspace_names_to_group = []
@@ -889,13 +883,18 @@ def bundle_added_event_data_as_group(out_file_name, out_file_monitors_name, is_m
     GroupWorkspaces(InputWorkspaces=workspace_names_to_group, OutputWorkspace=out_group_ws_name)
     group_ws = mtd[out_group_ws_name]
 
+    # Delete the intermediate files
+    if os.path.exists(full_data_path_name):
+        os.remove(full_data_path_name)
+    if os.path.exists(full_monitor_path_name):
+        os.remove(full_monitor_path_name)
     # Save the group
-    SaveNexusProcessed(InputWorkspace=group_ws, Filename=out_group_file_name, Append=False)
+    SaveNexusProcessed(InputWorkspace=group_ws, Filename=full_data_path_name, Append=False)
     # Delete the files and the temporary workspaces
     if out_group_ws_name in mtd:
         DeleteWorkspace(out_group_ws_name)
 
-    return out_group_file_name
+    return full_data_path_name
 
 
 def get_full_path_for_added_event_data(file_name):
@@ -907,8 +906,7 @@ def get_full_path_for_added_event_data(file_name):
             path = os.getcwd()
         assert base in os.listdir(path)
     full_path_name = os.path.join(path, base)
-
-    return full_path_name
+    return full_path_name, base
 
 
 def extract_spectra(ws, det_ids, output_ws_name):
