@@ -298,6 +298,7 @@ set(SRC_FILES
     src/SampleCorrections/MCInteractionVolume.cpp
     src/SampleCorrections/MayersSampleCorrection.cpp
     src/SampleCorrections/MayersSampleCorrectionStrategy.cpp
+    src/SampleCorrections/RadialCollimatorProfile.cpp
     src/SampleCorrections/RectangularBeamProfile.cpp
     src/SampleCorrections/SparseWorkspace.cpp
     src/SassenaFFT.cpp
@@ -658,6 +659,7 @@ set(INC_FILES
     inc/MantidAlgorithms/SampleCorrections/MCInteractionVolume.h
     inc/MantidAlgorithms/SampleCorrections/MayersSampleCorrection.h
     inc/MantidAlgorithms/SampleCorrections/MayersSampleCorrectionStrategy.h
+    inc/MantidAlgorithms/SampleCorrections/RadialCollimatorProfile.h
     inc/MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h
     inc/MantidAlgorithms/SampleCorrections/SparseWorkspace.h
     inc/MantidAlgorithms/SassenaFFT.h
