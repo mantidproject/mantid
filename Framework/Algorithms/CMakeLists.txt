@@ -51,6 +51,7 @@ set(SRC_FILES
     src/CombineTableWorkspaces.cpp
     src/Comment.cpp
     src/CommutativeBinaryOperation.cpp
+    src/CalculateLogLikelihoodEvidence.cpp
     src/CompareWorkspaces.cpp
     src/ConjoinWorkspaces.cpp
     src/ConjoinXRuns.cpp
@@ -406,6 +407,7 @@ set(INC_FILES
     inc/MantidAlgorithms/CombineTableWorkspaces.h
     inc/MantidAlgorithms/Comment.h
     inc/MantidAlgorithms/CommutativeBinaryOperation.h
+    inc/MantidAlgorithms/CalculateLogLikelihoodEvidence.h
     inc/MantidAlgorithms/CompareWorkspaces.h
     inc/MantidAlgorithms/ConjoinWorkspaces.h
     inc/MantidAlgorithms/ConjoinXRuns.h
@@ -767,6 +769,7 @@ set(TEST_FILES
     CombineTableWorkspacesTest.h
     CommentTest.h
     CommutativeBinaryOperationTest.h
+    CalculateLogLikelihoodEvidenceTest.h
     CompareWorkspacesTest.h
     ConjoinWorkspacesTest.h
     ConjoinXRunsTest.h
