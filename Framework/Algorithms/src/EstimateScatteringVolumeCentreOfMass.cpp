@@ -5,21 +5,34 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/EstimateScatteringVolumeCentreOfMass.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/BeamProfileFactory.h"
+#include "MantidAlgorithms/SampleCorrections/IBeamProfile.h"
+#include "MantidAlgorithms/SampleCorrections/RadialCollimatorProfile.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Rasterize.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/V3D.h"
 #include <algorithm>
+#include <cmath>
 #include <map>
 #include <unordered_map>
 
@@ -34,6 +47,11 @@ const std::string UNIT_M = "m";
 const std::string UNIT_CM = "cm";
 const std::string UNIT_MM = "mm";
 static const std::unordered_map<std::string, double> unitToMeters{{UNIT_M, 1.0}, {UNIT_CM, 0.01}, {UNIT_MM, 0.001}};
+/// Instrument parameter holding the calibrated collimator gauge width, in metres. Written by the
+/// Engineering Diffraction correction workflow from the known experimental configuration.
+const std::string COL_GAUGE_WIDTH_PARAM = "col-gauge-width";
+/// Upper bound on the number of wavelength points summed over when weighting by attenuation.
+constexpr size_t MAX_WAVELENGTH_SAMPLES = 50;
 } // namespace
 
 // Register the algorithm into the AlgorithmFactory
@@ -50,8 +68,8 @@ void EstimateScatteringVolumeCentreOfMass::init() {
   declareProperty(std::make_unique<PropertyWithValue<std::vector<double>>>("CentreOfMass", V3D(), Direction::Output),
                   "Estimated centre of mass of illuminated sample volume");
 
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("DetectorScatteringCentres", "", Direction::Output,
-                                                                 PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>("DetectorScatteringCentres", "",
+                                                                       Direction::Output, PropertyMode::Optional),
                   "TableWorkspace containing estimated neutron weighted scattering centres per spectra.");
 
   declareProperty(std::make_unique<PropertyWithValue<bool>>("UseNeutronWeightings", false, Direction::Input),
@@ -122,6 +140,12 @@ std::map<std::string, std::string> EstimateScatteringVolumeCentreOfMass::validat
       issues["UseNeutronWeightings"] = "Neutron weighting requires a sample material - set one with SetSampleMaterial, "
                                        "or leave UseNeutronWeightings off for a purely geometric centre of mass";
     }
+    // The attenuation is summed over the workspace's wavelength bins, so they have to be wavelengths.
+    const auto &xUnit = inputWS->getAxis(0)->unit();
+    if (!xUnit || xUnit->unitID() != "Wavelength") {
+      issues["InputWorkspace"] = "Neutron weighting sums attenuation over the workspace's wavelength bins, so the "
+                                 "InputWorkspace must be in units of Wavelength - run ConvertUnits first";
+    }
   }
 
   return issues;
@@ -137,12 +161,204 @@ void EstimateScatteringVolumeCentreOfMass::exec() {
   const std::string elementUnits = getProperty("ElementUnits");
   m_cubeSide *= unitToMeters.at(elementUnits); // now in m
 
+  m_doWeighted = getProperty("UseNeutronWeightings");
+
   const Geometry::IObject_sptr sampleObject = extractValidSampleObject(m_inputWS->mutableSample());
   const Kernel::Matrix<double> gonioR = m_inputWS->run().getGoniometer().getR();
 
   const auto elements = generateScatteringVolumeElements(*sampleObject, gonioR, beamDirection);
-  const V3D averagePosInLabFrame = calcAveragePosition(elements);
-  setProperty("CentreOfMass", std::vector<double>(averagePosInLabFrame));
+
+  if (!m_doWeighted) {
+    const V3D averagePosInLabFrame = calcAveragePosition(elements);
+    setProperty("CentreOfMass", std::vector<double>(averagePosInLabFrame));
+    return;
+  }
+
+  std::vector<V3D> centres;
+  std::vector<double> weights;
+  calcDetectorScatteringCentres(*sampleObject, gonioR, elements, centres, weights);
+
+  // The centre of mass for the experiment as a whole is the mean of the per-detector centres weighted
+  // by how much each detector actually sees, mirroring the intensity weighting of eq. 20 of
+  // Creek, Santisteban & Edwards (2005).
+  V3D weightedSum(0.0, 0.0, 0.0);
+  double totalWeight = 0.0;
+  auto table = WorkspaceFactory::Instance().createTable();
+  table->addColumn("int", "detid");
+  table->addColumn("double", "x");
+  table->addColumn("double", "y");
+  table->addColumn("double", "z");
+  table->addColumn("double", "weight");
+
+  const auto &spectrumInfo = m_inputWS->spectrumInfo();
+  size_t unseenCount = 0;
+  for (size_t i = 0; i < weights.size(); ++i) {
+    if (weights[i] <= 0.0) {
+      if (spectrumInfo.hasDetectors(i) && !spectrumInfo.isMonitor(i) && !spectrumInfo.isMasked(i)) {
+        ++unseenCount;
+      }
+      continue;
+    }
+    weightedSum += centres[i] * weights[i];
+    totalWeight += weights[i];
+    for (const auto detid : m_inputWS->getSpectrum(i).getDetectorIDs()) {
+      TableRow row = table->appendRow();
+      row << static_cast<int>(detid) << centres[i].X() << centres[i].Y() << centres[i].Z() << weights[i];
+    }
+  }
+  if (unseenCount > 0) {
+    g_log.warning("No part of the scattering volume is visible to " + std::to_string(unseenCount) +
+                  " detectors - they have been left out of the scattering centre table");
+  }
+  if (totalWeight <= 0.0) {
+    const std::string mess("No detector sees any part of the scattering volume - check the sample shape, gauge "
+                           "volume, beam and collimator definitions");
+    g_log.error(mess);
+    throw std::runtime_error(mess);
+  }
+
+  setProperty("CentreOfMass", std::vector<double>(weightedSum / totalWeight));
+  if (!getPropertyValue("DetectorScatteringCentres").empty()) {
+    setProperty("DetectorScatteringCentres", table);
+  }
+}
+
+/// Weight each integration element by the spatial resolution function SRF(r) = P_i(r) P_s(r) P_d(r)
+/// and reduce to one centre of mass per detector.
+///
+/// P_i, the incident beam profile, and the incoming attenuation path are detector independent, so
+/// they are evaluated once per element. P_d, the collimator acceptance, and the outgoing attenuation
+/// path depend on the detector and are evaluated in the per-detector loop - the outgoing path is the
+/// only genuinely per-detector physical effect here, and is what makes the centres differ between
+/// detectors.
+void EstimateScatteringVolumeCentreOfMass::calcDetectorScatteringCentres(const Geometry::IObject &sampleObject,
+                                                                         const Kernel::Matrix<double> &gonioR,
+                                                                         const std::vector<V3D> &elements,
+                                                                         std::vector<V3D> &centres,
+                                                                         std::vector<double> &weights) {
+  const auto instrument = m_inputWS->getInstrument();
+  const auto &spectrumInfo = m_inputWS->spectrumInfo();
+  const auto nHist = m_inputWS->getNumberHistograms();
+
+  Kernel::Matrix<double> gonioRInv(gonioR);
+  gonioRInv.Invert();
+  const bool gonioIsIdentity = (gonioR == Kernel::Matrix<double>(3, 3, true));
+  const auto toShapeFrame = [&](const V3D &pLab) { return gonioIsIdentity ? pLab : gonioRInv * pLab; };
+
+  // P_i - the beam profile knows nothing about the goniometer, so it is evaluated in the lab frame.
+  const auto beamProfile = BeamProfileFactory::createBeamProfile(*instrument, m_inputWS->sample());
+
+  // P_d - only applied when the collimator has been calibrated onto the workspace.
+  std::unique_ptr<RadialCollimatorProfile> collimator;
+  if (instrument->hasParameter(COL_GAUGE_WIDTH_PARAM)) {
+    const auto widths = instrument->getNumberParameter(COL_GAUGE_WIDTH_PARAM, true);
+    if (!widths.empty() && widths.front() > 0.0) {
+      collimator =
+          std::make_unique<RadialCollimatorProfile>(widths.front(), instrument->getReferenceFrame()->vecPointingUp());
+    }
+  }
+  g_log.information(collimator ? "Applying the calibrated radial collimator acceptance"
+                               : "No calibrated collimator width on the instrument - collimator acceptance ignored");
+
+  // Take a copy - points() returns by value, so a reference into it would dangle. The attenuation is
+  // summed over these, and the cost of the per-detector loop is linear in their number, so sample a
+  // bounded subset of a finely binned workspace. The centroid is insensitive to this: it depends on
+  // how mu*L varies across a few-mm gauge, and mu itself varies only ~10% across a typical band.
+  const auto lambdaPoints = m_inputWS->points(0);
+  std::vector<double> lambdas;
+  if (lambdaPoints.size() <= MAX_WAVELENGTH_SAMPLES) {
+    lambdas.assign(lambdaPoints.begin(), lambdaPoints.end());
+  } else {
+    lambdas.reserve(MAX_WAVELENGTH_SAMPLES);
+    const double step = static_cast<double>(lambdaPoints.size() - 1) / static_cast<double>(MAX_WAVELENGTH_SAMPLES - 1);
+    for (size_t s = 0; s < MAX_WAVELENGTH_SAMPLES; ++s) {
+      lambdas.emplace_back(lambdaPoints[static_cast<size_t>(std::round(static_cast<double>(s) * step))]);
+    }
+    g_log.information("Sampling " + std::to_string(MAX_WAVELENGTH_SAMPLES) + " of the workspace's " +
+                      std::to_string(lambdaPoints.size()) + " wavelength points for the attenuation weighting");
+  }
+
+  const V3D beamDirection = instrument->getBeamDirection();
+  const V3D samplePos = instrument->getSample()->getPos();
+
+  // Detector independent per element: the incident intensity and the incoming attenuation path.
+  std::vector<V3D> livePoints;
+  std::vector<double> incidentWeights;
+  livePoints.reserve(elements.size());
+  incidentWeights.reserve(elements.size());
+  for (const auto &element : elements) {
+    const double incidentIntensity = beamProfile->intensityAt(element);
+    if (incidentIntensity <= 0.0) {
+      continue; // not illuminated
+    }
+    livePoints.emplace_back(element);
+    incidentWeights.emplace_back(incidentIntensity);
+  }
+  if (livePoints.empty()) {
+    const std::string mess("The incident beam does not illuminate any of the scattering volume - check the beam "
+                           "definition set by SetBeam against the gauge volume position");
+    g_log.error(mess);
+    throw std::runtime_error(mess);
+  }
+
+  g_log.notice("Calculating scattering centres for " + std::to_string(livePoints.size()) + " volume elements over " +
+               std::to_string(nHist) + " spectra");
+
+  // Attenuation along the incoming leg is shared by every detector, so trace it once per element.
+  std::vector<std::vector<double>> incidentAttenuation(livePoints.size(), std::vector<double>(lambdas.size(), 0.0));
+  const V3D toSourceInShapeFrame = gonioIsIdentity ? -beamDirection : gonioRInv * (-beamDirection);
+  for (size_t e = 0; e < livePoints.size(); ++e) {
+    Geometry::Track incoming(toShapeFrame(livePoints[e]), toSourceInShapeFrame);
+    sampleObject.interceptSurface(incoming);
+    for (size_t l = 0; l < lambdas.size(); ++l) {
+      incidentAttenuation[e][l] = incoming.calculateAttenuation(lambdas[l]);
+    }
+  }
+
+  centres.assign(nHist, V3D(0.0, 0.0, 0.0));
+  weights.assign(nHist, 0.0);
+
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS))
+  for (int64_t idx = 0; idx < static_cast<int64_t>(nHist); ++idx) {
+    PARALLEL_START_INTERRUPT_REGION
+    const auto i = static_cast<size_t>(idx);
+    if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i)) {
+      continue;
+    }
+    const auto detPos = spectrumInfo.position(i);
+
+    V3D weightedSum(0.0, 0.0, 0.0);
+    double summedWeight = 0.0;
+    for (size_t e = 0; e < livePoints.size(); ++e) {
+      const auto &element = livePoints[e];
+      const double acceptance = collimator ? collimator->intensityAt(element, samplePos, detPos) : 1.0;
+      if (acceptance <= 0.0) {
+        continue;
+      }
+      const auto elementInShapeFrame = toShapeFrame(element);
+      auto toDetector = toShapeFrame(detPos) - elementInShapeFrame;
+      if (toDetector.norm2() == 0.0) {
+        continue;
+      }
+      toDetector.normalize();
+      Geometry::Track outgoing(elementInShapeFrame, toDetector);
+      sampleObject.interceptSurface(outgoing);
+
+      double attenuation = 0.0;
+      for (size_t l = 0; l < lambdas.size(); ++l) {
+        attenuation += incidentAttenuation[e][l] * outgoing.calculateAttenuation(lambdas[l]);
+      }
+      const double weight = incidentWeights[e] * acceptance * attenuation;
+      weightedSum += element * weight;
+      summedWeight += weight;
+    }
+    if (summedWeight > 0.0) {
+      centres[i] = weightedSum / summedWeight;
+      weights[i] = summedWeight;
+    }
+    PARALLEL_END_INTERRUPT_REGION
+  }
+  PARALLEL_CHECK_INTERRUPT_REGION
 }
 
 /// Build the integration elements making up the scattering volume, as voxel centres in the lab frame.

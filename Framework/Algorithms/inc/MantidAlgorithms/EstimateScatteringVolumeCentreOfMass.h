@@ -39,7 +39,14 @@ public:
 
   API::MatrixWorkspace_sptr m_inputWS; ///< A pointer to the input workspace
   double m_cubeSide;                   ///< Element size of raster
+  bool m_doWeighted{false};            ///< Whether to weight the elements by the spatial resolution function
   const Kernel::V3D calcAveragePosition(const std::vector<Kernel::V3D> &pos);
+  /// Weight each element by the spatial resolution function and find the centre of mass seen by each
+  /// detector. Returns the per-detector centres and their total weights, indexed by workspace index;
+  /// a zero weight means that detector sees nothing of the scattering volume.
+  void calcDetectorScatteringCentres(const Geometry::IObject &sampleObject, const Kernel::Matrix<double> &gonioR,
+                                     const std::vector<Kernel::V3D> &elements, std::vector<Kernel::V3D> &centres,
+                                     std::vector<double> &weights);
   const Geometry::IObject_sptr extractValidSampleObject(const API::Sample &sample);
   /// Build the integration elements making up the scattering volume, returned as voxel centres in
   /// the lab frame. This is the single source of the volume for both the plain geometric centre of
