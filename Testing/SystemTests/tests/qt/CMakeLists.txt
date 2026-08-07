@@ -6,4 +6,5 @@ set(SYSTEST_NAMES CppInterfacesStartupTest.py FitScriptGeneratorStartupTest.py P
 
 if(ENABLE_WORKBENCH)
   pysystemtest_add_test(${CMAKE_CURRENT_SOURCE_DIR} qt ${SYSTEST_NAMES})
+  add_subdirectory(AutomatedUITest)
 endif()

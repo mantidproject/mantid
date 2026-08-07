@@ -1867,12 +1867,7 @@ double FitPeaks::fitIndividualPeak(size_t wi, const API::IAlgorithm_sptr &fitter
  * GSL tolerance-limited stopping conditions are also treated as converged.
  */
 bool FitPeaks::fitStatusIsConverged(const std::string &fitStatus, const bool strict) {
-  if (fitStatus == API::MinimizerStatus::SUCCESS)
-    return true;
-  if (strict)
-    return false;
-  return fitStatus == API::MinimizerStatus::CHANGES_IN_FUNCTION_TOO_SMALL ||
-         fitStatus == API::MinimizerStatus::CHANGES_IN_PARAMETER_TOO_SMALL;
+  return API::MinimizerStatus::isConverged(fitStatus, strict);
 }
 
 //----------------------------------------------------------------------------------------------
