@@ -262,6 +262,15 @@ if(BUILD_MANTIDFRAMEWORK
   add_subdirectory(Testing/SystemTests/tests)
 endif()
 
+# Tests for the developer tooling. Guarded by the same conditions as the system tests above because that is what
+# determines whether PyUnitTest has been included and enable_testing() called.
+if(BUILD_MANTIDFRAMEWORK
+   OR BUILD_MANTIDQT
+   OR ENABLE_WORKBENCH
+)
+  add_subdirectory(tools)
+endif()
+
 if(COVERAGE)
   get_property(ALL_SRCS GLOBAL PROPERTY COVERAGE_SRCS)
   set(SRCS_FILE "")
