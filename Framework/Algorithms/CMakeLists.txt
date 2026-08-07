@@ -832,6 +832,7 @@ set(TEST_FILES
     DiffractionFocussingTest.h
     DirectILLTubeBackgroundTest.h
     DiscusMultipleScatteringCorrectionTest.h
+    DivergentSlitBeamProfileTest.h
     DivideTest.h
     EQSANSCorrectFrameTest.h
     EditInstrumentGeometryTest.h
@@ -969,6 +970,7 @@ set(TEST_FILES
     Q1D2Test.h
     Q1DWeightedTest.h
     QxyTest.h
+    RadialCollimatorProfileTest.h
     RadiusSumTest.h
     RayTracerTesterTest.h
     ReadGroupsFromFileTest.h
