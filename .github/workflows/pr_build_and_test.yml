@@ -201,14 +201,37 @@ jobs:
         # telling jenkins scripts this is a PR build
         run: echo "JOB_NAME=pull_requests" >> $GITHUB_ENV
 
+      - name: Register GCC Problem Matchers
+        if: ${{ matrix.os == 'Linux' }}
+        run: echo "::add-matcher::.github/matchers/gcc.json"
+
+      - name: Register MSVC Problem Matchers
+        if: ${{ matrix.os == 'Windows' }}
+        run: echo "::add-matcher::.github/matchers/msvc.json"
+
       - name: Build code
         if: ${{ steps.changes.outputs.code_changes == 'true' }}
         run: |
+          set -o pipefail
           echo "For Jenkins scripts JOB_NAME=${JOB_NAME}"
           cd ${GITHUB_WORKSPACE}
-          echo "::add-matcher::.github/matchers/gcc.json"
-          pixi run --frozen bash -ex ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/build ${GITHUB_WORKSPACE} $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE_BUILD_CODE $ENABLE_UNIT_TESTS $ENABLE_SYSTEM_TESTS $ENABLE_DOC_TESTS $EXTRA_CMAKE_FLAGS
-          echo "::remove-matcher owner=gcc-problem-matcher::"
+          pixi run --frozen bash -ex ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/build ${GITHUB_WORKSPACE} $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE_BUILD_CODE $ENABLE_UNIT_TESTS $ENABLE_SYSTEM_TESTS $ENABLE_DOC_TESTS $EXTRA_CMAKE_FLAGS 2>&1 | tee ${GITHUB_WORKSPACE}/build.log
+
+      - name: Fail on Compiler Warnings
+        if: ${{ steps.changes.outputs.code_changes == 'true' && success() }}
+        run: |
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            warning_pattern='^([[:space:]]+[0-9]+>)?[^[:space:]].*\([0-9]+,?([0-9]+)?([,][0-9]+[,][0-9]+)?\)[[:space:]]*:[[:space:]]*warning[[:space:]]+[A-Za-z]{1,2}[0-9]+[[:space:]]*:[[:space:]]*.*$'
+          else
+            warning_pattern='^.*:([0-9]+):([0-9]*):?[[:space:]]+(fatal[[:space:]]+)?warning:[[:space:]]+.*$'
+          fi
+
+          if grep -E "$warning_pattern" ${GITHUB_WORKSPACE}/build.log | grep -vE '(^|[\\/])\.pixi([\\/]|$)'; then
+            echo "Compiler warnings detected in build log"
+            exit 1
+          fi
+
+          echo "Zero compiler warnings detected."
 
       - name: Run unit tests
         if: ${{ steps.changes.outputs.code_changes == 'true' }}

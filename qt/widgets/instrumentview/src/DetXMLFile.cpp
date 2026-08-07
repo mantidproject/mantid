@@ -10,6 +10,7 @@
 #include <QTemporaryFile>
 
 #include <fstream>
+#include <stdexcept>
 
 namespace MantidQt::MantidWidgets {
 /**
@@ -48,7 +49,9 @@ DetXMLFile::DetXMLFile(const std::vector<int> &dets, Option opt, const QString &
 
   if (fname.isEmpty()) {
     QTemporaryFile mapFile;
-    mapFile.open();
+    if (!mapFile.open()) {
+      throw std::runtime_error("Failed to create temporary detector grouping file.");
+    }
     m_fileName = mapFile.fileName() + ".xml";
     mapFile.close();
     m_delete = true;
@@ -95,7 +98,7 @@ void DetXMLFile::makeSumFile(const std::vector<int> &dets) {
 DetXMLFile::~DetXMLFile() {
   if (m_delete) {
     QDir dir;
-    dir.remove(m_fileName);
+    (void)dir.remove(m_fileName);
   }
 }
 

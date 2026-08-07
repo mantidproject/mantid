@@ -71,6 +71,8 @@ public:
   virtual void updateSelectedSpectra() override {}
 };
 
+} // namespace
+
 // Exposes the protected setNumericQAxis method so that the axis/unit
 // conversion logic behind the "Add Numeric Workspace" button can be tested
 // directly, without needing to drive the real Qt dialog widgets.
@@ -79,8 +81,6 @@ public:
   using FitDataPresenter::FitDataPresenter;
   using FitDataPresenter::setNumericQAxis;
 };
-
-} // namespace
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 

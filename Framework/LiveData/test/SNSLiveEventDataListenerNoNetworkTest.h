@@ -8,6 +8,7 @@
 
 #include "ADARAPacketBuilders.h"
 #include "MantidAPI/LiveListenerFactory.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidLiveData/SNSLiveEventDataListener.h"
 #include <algorithm>
 #include <cxxtest/TestSuite.h>
