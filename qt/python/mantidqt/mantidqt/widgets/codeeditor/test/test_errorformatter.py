@@ -60,7 +60,8 @@ foo()
             "NameError:.*'_local'.*",
             r'  File ".*test_errorformatter.py", line \d+, in test_standard_exception',
             "    exec(.*).*",
-            r"    \^+",
+            # Since 3.13 the callable of a call is marked with ~ and the arguments with ^
+            r"    ~*\^+",
             r'  File "<string>", line \d+, in <module>',
             r'  File "<string>", line \d+, in foo',
             r'  File "<string>", line \d+, in bar',
