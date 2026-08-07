@@ -40,17 +40,20 @@ public:
   API::MatrixWorkspace_sptr m_inputWS; ///< A pointer to the input workspace
   double m_cubeSide;                   ///< Element size of raster
   const Kernel::V3D calcAveragePosition(const std::vector<Kernel::V3D> &pos);
-  const Kernel::V3D rasterizeGaugeVolumeAndCalculateMeanElementPosition(const Kernel::V3D beamDirection,
-                                                                        const Geometry::IObject_sptr integrationVolume,
-                                                                        const Geometry::IObject_sptr sampleObject);
   const Geometry::IObject_sptr extractValidSampleObject(const API::Sample &sample);
+  /// Build the integration elements making up the scattering volume, returned as voxel centres in
+  /// the lab frame. This is the single source of the volume for both the plain geometric centre of
+  /// mass and the neutron weighted per-detector centres, so the two cannot drift apart.
+  const std::vector<Kernel::V3D> generateScatteringVolumeElements(const Geometry::IObject &sampleObject,
+                                                                  const Kernel::Matrix<double> &gonioR,
+                                                                  const Kernel::V3D &beamDirection);
   /// Rasterise the workspace's lab-frame GaugeVolume directly, transforming each candidate voxel
   /// into the sample shape's frame via gonioR.inv() before testing it against the sample. Keeping
   /// the gauge in its own frame avoids inflating its axis-aligned bounding box for non-axis-aligned
   /// goniometer rotations, which would otherwise admit voxels lying outside the actual gauge
-  /// volume. Returns the mean accepted position directly in the lab frame.
-  const Kernel::V3D rasterizeLabGaugeAndCalculateMeanElementPosition(const Geometry::IObject &sampleObject,
-                                                                     const Kernel::Matrix<double> &gonioR);
+  /// volume. Returns the accepted element positions directly in the lab frame.
+  const std::vector<Kernel::V3D> rasterizeLabGaugeElements(const Geometry::IObject &sampleObject,
+                                                           const Kernel::Matrix<double> &gonioR);
 
 private:
   /// Initialisation code
