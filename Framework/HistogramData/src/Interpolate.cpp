@@ -109,7 +109,7 @@ void sanityCheck(const Histogram &input, const Histogram &output, const size_t m
 void interpolateYCSplineInplace(const Mantid::HistogramData::Histogram &input,
                                 const Mantid::HistogramData::Points &points, Mantid::HistogramData::Histogram &output,
                                 const bool calculateErrors = false, const bool independentErrors = true) {
-  auto xs = input.dataX();
+  const auto xs = input.x().rawData();
   // Interpolation and Error propagation follows method described in Gardner paper
   // "Uncertainties in Interpolated Spectral Data", Journal of Research of the
   // National Institute of Standards and Technology, 2003
@@ -133,7 +133,7 @@ void interpolateYCSplineInplace(const Mantid::HistogramData::Histogram &input,
   double hMaxEpsilon = xsMaxEpsilon * 2 / 3;
 
   std::vector<double> d(xs.size() - 2);
-  auto ys = input.dataY();
+  const auto ys = input.y().rawData();
   for (size_t i = 0; i < xs.size() - 2; i++) {
     d[i] = (ys[i + 2] - ys[i + 1]) / (xs[i + 2] - xs[i + 1]) - (ys[i + 1] - ys[i]) / (xs[i + 1] - xs[i]);
   }
@@ -151,7 +151,7 @@ void interpolateYCSplineInplace(const Mantid::HistogramData::Histogram &input,
 
   // calculate some covariances to support error propagation
   auto &enew = output.mutableE();
-  const auto &eold = input.dataE();
+  const auto &eold = input.e();
   // u_ypp_ypp - covariance of y'' vs y''
   std::vector<double> u_ypp_ypp(xs.size());
   // u_ypp_y - covariance of y'' vs y

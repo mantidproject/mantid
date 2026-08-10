@@ -19,10 +19,10 @@ DECLARE_WORKSPACE(WorkspaceSingleValue)
 /// Constructor
 WorkspaceSingleValue::WorkspaceSingleValue(double value, double error) : API::HistoWorkspace() {
   initialize(1, 1, 1);
-  // Set the "histogram" to the single value
-  data.dataX().resize(1, 0.0);
-  data.setCounts(1, value);
-  data.setCountStandardDeviations(1, error);
+  // Set the "histogram" to the single value. X, Y and E must be set together: the arrays
+  // start out empty, so setting any one of them on its own fails the size check.
+  data.setHistogram(HistogramData::Points(1, 0.0), HistogramData::Counts(1, value),
+                    HistogramData::CountStandardDeviations(1, error));
   data.setPointStandardDeviations(1, 0.0);
   setDistribution(true);
   // Add a set of axes to the workspace
