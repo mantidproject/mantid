@@ -28,7 +28,7 @@ from qtpy.QtWidgets import (
     QFrame,
 )
 from qtpy.QtGui import QDoubleValidator, QDragEnterEvent, QDropEvent, QDragMoveEvent, QColor, QPalette, QPixmap, QIcon, QPainter
-from qtpy.QtCore import Qt, QEvent, QSize
+from qtpy.QtCore import Qt, QEvent, QSize, QMetaObject
 from qtpy.QtWidgets import QFileDialog
 from superqt import QDoubleRangeSlider
 from pyvistaqt import BackgroundPlotter
@@ -229,6 +229,7 @@ class FullInstrumentViewView(QWidget):
         self._last_camera_position = None
         self._last_parallel_scale = None
         self._detector_spectrum_fig = None
+        self._line_edit_connections: dict[QLineEdit, QMetaObject.Connection] = {}
 
         self._create_main_widgets()
         self._set_layouts()
@@ -524,10 +525,8 @@ class FullInstrumentViewView(QWidget):
         """Closes view, not window"""
         self._closing = True
         with suppress(TypeError):
-            self._contour_range_max_edit.disconnect()
-            self._contour_range_min_edit.disconnect()
-            self._integration_limit_max_edit.disconnect()
-            self._integration_limit_min_edit.disconnect()
+            for line_edit in self._line_edit_connections:
+                line_edit.disconnect(self._line_edit_connections[line_edit])
         # Shut down any callbacks before closing the plotter and the figure
         if hasattr(self, "_presenter") and self._presenter is not None:
             self._presenter.handle_close()
@@ -685,8 +684,8 @@ class FullInstrumentViewView(QWidget):
 
         # Connections to sync sliders and edits
         slider.valueChanged.connect(lambda lims: self._set_min_max_edit_boxes(min_edit, max_edit, lims))
-        min_edit.editingFinished.connect(set_slider(callled_from_min=True))
-        max_edit.editingFinished.connect(set_slider(callled_from_min=False))
+        self._line_edit_connections[min_edit] = min_edit.editingFinished.connect(set_slider(callled_from_min=True))
+        self._line_edit_connections[max_edit] = max_edit.editingFinished.connect(set_slider(callled_from_min=False))
 
     def _add_detector_info_boxes(self, parent_box: QVBoxLayout, label: str) -> QTextEdit:
         """Adds a text box to the given parent that is designed to show read-only information about the selected detector"""
