@@ -322,7 +322,7 @@ void DiffractionFocussing2::exec() {
         // generateHistogram overwrites the data in Y and E so write to a temporary vector
         MantidVec Ytemp;
         MantidVec Etemp;
-        el.generateHistogram(group2xstep.at(group), Xout.rawData(), Ytemp, Etemp);
+        el.generateHistogram(group2xstep.at(group), Xout, Ytemp, Etemp);
         // accumulate the histogram into the output
         std::transform(Ytemp.cbegin(), Ytemp.cend(), Yout.begin(), Yout.begin(),
                        [](const auto &left, const auto &right) { return left + right; });
@@ -330,8 +330,8 @@ void DiffractionFocussing2::exec() {
         std::transform(Etemp.cbegin(), Etemp.cend(), Eout.begin(), Eout.begin(),
                        [](const auto &left, const auto &right) { return left * left + right; });
       } else {
-        auto &Yin = inSpec.y();
-        auto &Ein = inSpec.e();
+        auto const &Yin = inSpec.y();
+        auto const &Ein = inSpec.e();
 
         try {
           // TODO This should be implemented in Histogram as rebin

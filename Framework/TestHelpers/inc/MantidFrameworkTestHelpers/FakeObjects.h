@@ -26,6 +26,7 @@
 #include <algorithm>
 #include <fstream>
 #include <map>
+#include <span>
 #include <string>
 
 #include "MantidAPI/IMDHistoWorkspace.h"
@@ -174,7 +175,7 @@ public:
     return m_vec[index];
   }
   const ISpectrum &getSpectrum(const size_t index) const override { return m_vec[index]; }
-  void generateHistogram(const std::size_t, const MantidVec &, MantidVec &, MantidVec &, bool) const override {}
+  void generateHistogram(const std::size_t, std::span<double const>, MantidVec &, MantidVec &, bool) const override {}
   Mantid::Kernel::SpecialCoordinateSystem getSpecialCoordinateSystem() const override { return Mantid::Kernel::None; }
 
 protected:

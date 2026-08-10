@@ -322,7 +322,7 @@ size_t Workspace2D::getHistogramNumberHelper() const { return data.size(); }
  * @param skipError :: if true, the error vector is NOT calculated.
  *        CURRENTLY IGNORED, the Error is always calculated.
  */
-void Workspace2D::generateHistogram(const std::size_t index, const MantidVec &X, MantidVec &Y, MantidVec &E,
+void Workspace2D::generateHistogram(const std::size_t index, std::span<double const> X, MantidVec &Y, MantidVec &E,
                                     bool skipError) const {
   UNUSED_ARG(skipError);
   if (index >= data.size())

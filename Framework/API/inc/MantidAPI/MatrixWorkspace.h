@@ -16,6 +16,7 @@
 #include <atomic>
 #include <map>
 #include <mutex>
+#include <span>
 
 namespace Mantid {
 
@@ -356,7 +357,9 @@ public:
   virtual bool hasDx(const std::size_t index) const { return getSpectrum(index).hasDx(); }
 
   /// Generate the histogram or rebin the existing histogram.
-  virtual void generateHistogram(const std::size_t index, const MantidVec &X, MantidVec &Y, MantidVec &E,
+  /// X is a span so that the size-checked HistogramData types can be passed without a
+  /// std::vector<double>; Y and E stay vectors because they are resized to match X.
+  virtual void generateHistogram(const std::size_t index, std::span<double const> X, MantidVec &Y, MantidVec &E,
                                  bool skipError = false) const = 0;
 
   /// Return a vector with the integrated counts for all spectra withing the

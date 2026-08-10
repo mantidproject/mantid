@@ -121,8 +121,8 @@ void Divide::setOutputUnits(const API::MatrixWorkspace_const_sptr lhs, const API
 void Divide::performEventBinaryOperation(DataObjects::EventList &lhs, const DataObjects::EventList &rhs) {
   // We must histogram the rhs event list to divide.
   MantidVec rhsY, rhsE;
-  rhs.generateHistogram(rhs.x().rawData(), rhsY, rhsE);
-  lhs.divide(rhs.x().rawData(), rhsY, rhsE);
+  rhs.generateHistogram(rhs.x(), rhsY, rhsE);
+  lhs.divide(rhs.x(), rhsY, rhsE);
 }
 
 /** Carries out the binary operation IN-PLACE on a single EventList,
@@ -133,8 +133,8 @@ void Divide::performEventBinaryOperation(DataObjects::EventList &lhs, const Data
  *  @param rhsY :: The vector of rhs data values
  *  @param rhsE :: The vector of rhs error values
  */
-void Divide::performEventBinaryOperation(DataObjects::EventList &lhs, const MantidVec &rhsX, const MantidVec &rhsY,
-                                         const MantidVec &rhsE) {
+void Divide::performEventBinaryOperation(DataObjects::EventList &lhs, std::span<double const> rhsX,
+                                         std::span<double const> rhsY, std::span<double const> rhsE) {
   // Divide is implemented at the EventList level.
   lhs.divide(rhsX, rhsY, rhsE);
 }

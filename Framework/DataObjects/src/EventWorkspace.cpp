@@ -563,7 +563,7 @@ Kernel::cow_ptr<HistogramData::HistogramX> EventWorkspace::refX(const std::size_
  * @param skipError :: if true, the error vector is NOT calculated.
  *        This may save some processing time.
  */
-void EventWorkspace::generateHistogram(const std::size_t index, const MantidVec &X, MantidVec &Y, MantidVec &E,
+void EventWorkspace::generateHistogram(const std::size_t index, std::span<double const> X, MantidVec &Y, MantidVec &E,
                                        bool skipError) const {
   if (index >= data.size())
     throw std::range_error("EventWorkspace::generateHistogram, histogram number out of range");
@@ -580,8 +580,8 @@ void EventWorkspace::generateHistogram(const std::size_t index, const MantidVec 
  * @param skipError :: if true, the error vector is NOT calculated.
  *        This may save some processing time.
  */
-void EventWorkspace::generateHistogramPulseTime(const std::size_t index, const MantidVec &X, MantidVec &Y, MantidVec &E,
-                                                bool skipError) const {
+void EventWorkspace::generateHistogramPulseTime(const std::size_t index, std::span<double const> X, MantidVec &Y,
+                                                MantidVec &E, bool skipError) const {
   if (index >= data.size())
     throw std::range_error("EventWorkspace::generateHistogramPulseTime, "
                            "histogram number out of range");

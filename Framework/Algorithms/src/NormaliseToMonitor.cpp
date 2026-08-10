@@ -690,7 +690,8 @@ void NormaliseToMonitor::normaliseBinByBin(const MatrixWorkspace_sptr &inputWork
       if (inputEvent) {
         // --- EventWorkspace ---
         EventList &outEL = outputEvent->getSpectrum(i);
-        outEL.divide(X.rawData(), Y.mutableRawData(), E.mutableRawData());
+        // read-only inputs: as_const avoids detaching the cow_ptr that Y/E may share with monY/monE
+        outEL.divide(X, std::as_const(Y), std::as_const(E));
       } else {
         // --- Workspace2D ---
         auto &YOut = outputWorkspace->mutableY(i);

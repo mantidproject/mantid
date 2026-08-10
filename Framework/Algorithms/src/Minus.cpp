@@ -58,8 +58,8 @@ void Minus::performEventBinaryOperation(DataObjects::EventList &lhs, const DataO
  *  @param rhsY :: The vector of rhs data values
  *  @param rhsE :: The vector of rhs error values
  */
-void Minus::performEventBinaryOperation(DataObjects::EventList &lhs, const MantidVec &rhsX, const MantidVec &rhsY,
-                                        const MantidVec &rhsE) {
+void Minus::performEventBinaryOperation(DataObjects::EventList &lhs, std::span<double const> rhsX,
+                                        std::span<double const> rhsY, std::span<double const> rhsE) {
   (void)lhs; // Avoid compiler warnings
   (void)rhsX;
   (void)rhsY;

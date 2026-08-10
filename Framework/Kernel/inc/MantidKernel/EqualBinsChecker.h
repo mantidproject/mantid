@@ -26,9 +26,8 @@ public:
   enum class ReferenceBin { Average, First };
   /// Type of errors to check
   enum class ErrorType { Cumulative, Individual };
-  /// @param xData :: a non-owning view of the x data; it must outlive this object.
-  ///                 Taken as a span so that the size-checked histogram data types can be
-  ///                 checked directly, without going through a std::vector<double>.
+  // Note: xData is a non-owning view and must outlive this object. It is a span so that the
+  // size-checked histogram data types can be checked directly, without a std::vector<double>.
   EqualBinsChecker(std::span<double const> xData, const double errorLevel, const double warningLevel = -1);
   virtual ~EqualBinsChecker() = default;
   virtual std::string validate() const;
