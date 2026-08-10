@@ -1,4 +1,9 @@
-from instrumentview.InteractorStyles import CursorZoomInteractorStyle, SwappedButtonTrackballCamera, _display_to_world
+from instrumentview.InteractorStyles import (
+    CursorZoomInteractorStyle,
+    RubberBandZoomInteractorStyle,
+    SwappedButtonTrackballCamera,
+    _display_to_world,
+)
 import unittest
 from unittest import mock
 
@@ -164,6 +169,48 @@ class TestDisplayToWorld(unittest.TestCase):
         result = _display_to_world(renderer, 50, 50)
         # z component should always be 0
         self.assertAlmostEqual(result[2], 0.0)
+
+
+class TestRubberBandZoomInteractorStyle(unittest.TestCase):
+    def _create_style(self, **plotter_kwargs):
+        plotter = _make_mock_plotter(**plotter_kwargs)
+        style = RubberBandZoomInteractorStyle(plotter)
+        return style, plotter
+
+    def test_set_picking_callback_stores_callback(self):
+        style, _ = self._create_style()
+        callback = mock.MagicMock()
+
+        style.set_picking_callback(callback)
+
+        self.assertIs(style._picking_callback, callback)
+
+    def test_left_press_calls_picking_callback_when_modifier_pressed(self):
+        style, _ = self._create_style()
+        callback = mock.MagicMock()
+        style.set_picking_callback(callback)
+
+        with mock.patch.object(style, "_modifier_key_pressed", return_value=True):
+            style._on_left_button_press_event("obj", "event")
+
+        callback.assert_called_once_with("obj", "event")
+        self.assertTrue(style._ignore_rubberband_interaction)
+
+    def test_left_press_with_modifier_and_no_callback_does_not_raise(self):
+        style, _ = self._create_style()
+
+        with mock.patch.object(style, "_modifier_key_pressed", return_value=True):
+            style._on_left_button_press_event("obj", "event")
+
+        self.assertTrue(style._ignore_rubberband_interaction)
+
+    def test_left_button_release_clears_ignore_state(self):
+        style, _ = self._create_style()
+        style._ignore_rubberband_interaction = True
+
+        style._on_left_button_release_event(None, None)
+
+        self.assertFalse(style._ignore_rubberband_interaction)
 
 
 class TestSwappedButtonTrackballCamera(unittest.TestCase):
