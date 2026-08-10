@@ -12,7 +12,6 @@ from mantidqt.utils.qt.qsettings_change_aware import QSettingsChangeAware
 # Settings in this set are stored per experiment, under an "RB_SCOPE/<number>/" subgroup, so different
 # experiments can carry different values. Everything not in SCOPED SETTINGS remains global
 RB_SCOPE = "rb/"
-
 SCOPED_SETTINGS = {
     "rd_name",
     "nd_name",
