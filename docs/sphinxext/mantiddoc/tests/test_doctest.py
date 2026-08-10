@@ -84,6 +84,10 @@ class TestSuiteReportTest(unittest.TestCase):
         return TestSuiteReport(name, testcases, package)
 
 
+# Python <=3.12 always printed the plural forms 'items'/'tests'/'failures'.
+# Python 3.13 (gh-113632) pluralises correctly, so both wordings appear in
+# the wild and the parser has to cope with either. Fixtures named
+# *_PY313 use the newer wording.
 ALL_PASS_EX = """
 Document: algorithms/AllPassed
 ------------------------------
@@ -97,6 +101,29 @@ Test passed.
    1 tests in Ex (cleanup code)
 1 tests in 1 items.
 1 passed and 0 failed.
+Test passed.
+
+Doctest summary
+===============
+3 tests
+0 failures in tests
+0 failures in setup code
+0 failures in cleanup code
+"""  # noqa: S105
+
+ALL_PASS_EX_PY313 = """
+Document: algorithms/AllPassed
+------------------------------
+2 items passed all tests:
+   1 test in Ex 2
+   2 tests in default
+3 tests in 2 items.
+3 passed.
+Test passed.
+1 item passed all tests:
+   1 test in Ex (cleanup code)
+1 test in 1 item.
+1 passed.
 Test passed.
 
 Doctest summary
@@ -141,6 +168,73 @@ Doctest summary
 1 failures in setup code
 0 failures in cleanup code
 """  # noqa: S105
+
+TEST_PASS_CLEANUP_FAIL_PY313 = """
+Document: algorithms/TestPassedCleanupFail
+------------------------------------------
+**********************************************************************
+File "algorithms/AllPassed.rst", line 64, in default (cleanup code)
+Failed example:
+    failed
+Exception raised:
+    Traceback (most recent call last):
+      File "/usr/lib/python3.13/doctest.py", line 1398, in __run
+        exec(compile(example.source, filename, "single",
+      File "<doctest default (cleanup code)[0]>", line 1, in <module>
+        failed
+    NameError: name 'failed' is not defined
+2 items passed all tests:
+   1 test in Ex 2
+   2 tests in default
+3 tests in 2 items.
+3 passed.
+Test passed.
+**********************************************************************
+1 item had failures:
+   1 of   1 in default (cleanup code)
+1 test in 1 item.
+0 passed and 1 failed.
+***Test Failed*** 1 failure.
+
+Doctest summary
+===============
+3 tests
+0 failures in tests
+1 failure in setup code
+0 failures in cleanup code
+"""  # noqa: S105
+
+# A single failure exercises the singular '***Test Failed*** 1 failure.'
+# wording, which is what separates the main tests from the cleanup section
+SINGLE_FAIL_EX_PY313 = """Document: algorithms/SingleFailed
+---------------------------------
+**********************************************************************
+File "algorithms/SingleFailed.rst", line 111, in Ex1
+Failed example:
+    print("Single line failed test")
+Expected:
+    No match
+Got:
+    Single line failed test
+**********************************************************************
+1 item had failures:
+   1 of   1 in Ex1
+1 test in 1 item.
+0 passed and 1 failed.
+***Test Failed*** 1 failure.
+1 item passed all tests:
+   1 test in Ex1 (cleanup code)
+1 test in 1 item.
+1 passed.
+Test passed.
+
+Doctest summary
+===============
+1 test
+1 failure in tests
+0 failures in setup code
+0 failures in cleanup code
+"""
 
 ALL_FAIL_EX = """Document: algorithms/AllFailed
 ------------------------------
@@ -228,37 +322,51 @@ Doctest summary
 
 class DocTestOutputParserTest(unittest.TestCase):
     def test_all_passed_gives_expected_results(self):
-        parser = DocTestOutputParser(ALL_PASS_EX, isfile=False)
+        for output in (ALL_PASS_EX, ALL_PASS_EX_PY313):
+            with self.subTest(output=output):
+                parser = DocTestOutputParser(output, isfile=False)
 
-        self.assertTrue(hasattr(parser, "testsuite"))
-        suite = parser.testsuite
-        self.assertEqual("doctests", suite.name)
-        self.assertEqual("docs", suite.package)
-        self.assertEqual(3, suite.ntests)
+                self.assertTrue(hasattr(parser, "testsuite"))
+                suite = parser.testsuite
+                self.assertEqual("doctests", suite.name)
+                self.assertEqual("docs", suite.package)
+                self.assertEqual(3, suite.ntests)
 
-        cases = suite.testcases
-        expected_names = ["Ex 2", "default", "default"]
-        for idx, case in enumerate(cases):
-            self.assertTrue(case.passed)
-            self.assertEqual(expected_names[idx], case.name)
-            self.assertEqual("docs.algorithms/AllPassed", case.classname)
+                cases = suite.testcases
+                expected_names = ["Ex 2", "default", "default"]
+                for idx, case in enumerate(cases):
+                    self.assertTrue(case.passed)
+                    self.assertEqual(expected_names[idx], case.name)
+                    self.assertEqual("docs.algorithms/AllPassed", case.classname)
 
     def test_pass_with_cleanup_fail_parse_correctly(self):
-        parser = DocTestOutputParser(TEST_PASS_CLEANUP_FAIL, isfile=False)
+        for output in (TEST_PASS_CLEANUP_FAIL, TEST_PASS_CLEANUP_FAIL_PY313):
+            with self.subTest(output=output):
+                parser = DocTestOutputParser(output, isfile=False)
 
-        self.assertTrue(hasattr(parser, "testsuite"))
+                self.assertTrue(hasattr(parser, "testsuite"))
+                suite = parser.testsuite
+                self.assertEqual("doctests", suite.name)
+                self.assertEqual("docs", suite.package)
+                self.assertEqual(3, suite.ntests)
+
+                cases = suite.testcases
+                expected_names = ["Ex 2", "default", "default"]
+                expected_pass = [True, False, True]
+                for idx, case in enumerate(cases):
+                    self.assertEqual(expected_pass[idx], case.passed)
+                    self.assertEqual(expected_names[idx], case.name)
+                    self.assertEqual("docs.algorithms/TestPassedCleanupFail", case.classname)
+
+    def test_single_failure_gives_expected_results(self):
+        parser = DocTestOutputParser(SINGLE_FAIL_EX_PY313, isfile=False)
+
         suite = parser.testsuite
-        self.assertEqual("doctests", suite.name)
-        self.assertEqual("docs", suite.package)
-        self.assertEqual(3, suite.ntests)
-
-        cases = suite.testcases
-        expected_names = ["Ex 2", "default", "default"]
-        expected_pass = [True, False, True]
-        for idx, case in enumerate(cases):
-            self.assertEqual(expected_pass[idx], case.passed)
-            self.assertEqual(expected_names[idx], case.name)
-            self.assertEqual("docs.algorithms/TestPassedCleanupFail", case.classname)
+        self.assertEqual(1, suite.ntests)
+        case = suite.testcases[0]
+        self.assertTrue(case.failed)
+        self.assertEqual("Ex1", case.name)
+        self.assertEqual("docs.algorithms/SingleFailed", case.classname)
 
     def test_all_failed_gives_expected_results(self):
         parser = DocTestOutputParser(ALL_FAIL_EX, isfile=False)
