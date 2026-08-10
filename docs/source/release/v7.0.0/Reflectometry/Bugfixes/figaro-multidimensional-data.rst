@@ -1,1 +1,0 @@
-- Fixed loading processed FIGARO data creating hundreds of thousands of sample logs from multidimensional detector data, which caused files to become very large and extremely slow to reload.
