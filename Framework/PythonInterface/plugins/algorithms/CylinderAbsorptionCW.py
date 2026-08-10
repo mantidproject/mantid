@@ -251,11 +251,17 @@ def bilinear_interpolate(x, y, x_grid, y_grid, Z):
 def asymptotic_diff(n, z, n_terms=6):
     """
     Computes the asymptotic expansion of I_n(z) - L_n(z) to N_terms.
+
+    Uses Eq. (6) in Sabine et al. (1998), doi:10.1107/S0021889897006961.
+    That equation is written for L_n(z) - I_{-n}(z); for integer n, I_{-n}=I_n,
+    so I_n(z) - L_n(z) uses the same series with an overall sign flip.
     """
     total = 0.0
 
+    # n_terms=6 was chosen empirically: it balances runtime and accuracy for
+    # the z cutoffs used below in the Sabine correction path.
     for k in range(n_terms):
-        num = gamma(k + 0.5)
+        num = ((-1) ** k) * gamma(k + 0.5)
         den = gamma(n + 0.5 - k)
         power = (z / 2.0) ** (2 * k - n + 1)
         total += num / (den * power)

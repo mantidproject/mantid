@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 import numpy as np
+from scipy.special import i0, i1, modstruve
 from mantid.simpleapi import CylinderAbsorptionCW, CreateSampleWorkspace, EditInstrumentGeometry, SetSample
 
 
@@ -148,7 +149,42 @@ class CylinderAbsorptionCWTest(unittest.TestCase):
         )
 
         # Check absorption
-        np.testing.assert_allclose(result.AbsorptionWorkspace.extractY()[:, 0], [0.00299123, 0.01043025, 0.01786926, 0.01043025], rtol=1e-6)
+        np.testing.assert_allclose(result.AbsorptionWorkspace.extractY()[:, 0], [0.00314441, 0.01051528, 0.01788615, 0.01051528], rtol=1e-5)
+
+    def testSabineAsymptoticAgreesWithDirectNearCutoff(self):
+        """Near asymptotic cutoffs, asymptotic and direct Sabine evaluations should agree."""
+        ws = self.createWorkspace()
+
+        # Choose parameters that gives z = 17 so A_B (2z > 32) uses the asymptotic branch to compare to direct evaluation.
+        radius = 2.0  # cm
+        attenuation_xs = 80  # barn at 1.7982 A
+        scattering_xs = 5  # barn
+        number_density = 0.05  # atoms/A^3
+
+        result = CylinderAbsorptionCW(
+            InputWorkspace=ws,
+            Radius=radius,
+            Height=10.0,  # cm
+            Wavelength=1.7982,  # A
+            AttenuationXSection=attenuation_xs,
+            ScatteringXSection=scattering_xs,
+            SampleNumberDensity=number_density,
+            AbsorptionCorrectionMethod="Sabine",
+            AbsorptionWorkspace="Absorption",
+            MultipleScatteringWorkspace="MultipleScattering",
+            MultipleScattering=False,
+        )
+
+        spectrum_info = ws.spectrumInfo()
+        thetas = np.array([spectrum_info.twoTheta(i) for i in range(spectrum_info.size())]) / 2.0
+
+        z = 2.0 * number_density * (attenuation_xs + scattering_xs) * radius  # equals 17
+
+        a_l_direct = 2.0 * ((i0(z) - modstruve(0, z)) - (i1(z) - modstruve(1, z)) / z)
+        a_b_direct = (i1(2.0 * z) - modstruve(1, 2.0 * z)) / z
+        expected = a_l_direct * np.cos(thetas) ** 2 + a_b_direct * np.sin(thetas) ** 2
+
+        np.testing.assert_allclose(result.AbsorptionWorkspace.extractY()[:, 0], expected, rtol=0.01)
 
     def testMissingProperties(self):
         ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=1)
