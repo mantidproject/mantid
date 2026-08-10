@@ -151,7 +151,7 @@ public:
   }
 
   std::size_t getNumberBins(const std::size_t &index) const override {
-    if (index > m_vec.size())
+    if (index >= m_vec.size())
       return 0;
     return m_vec[index].dataY().size();
   }
