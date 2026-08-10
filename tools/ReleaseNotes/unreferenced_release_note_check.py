@@ -16,11 +16,11 @@ any toctree" warning. This script closes that gap by checking both directions:
 - an ``.. amalgamate::`` directive pointing at a directory that does not exist (the directive silently
   does nothing in that case).
 
-Releases that have already been published are skipped: release_editor.py replaces the directives with the
-collated note text, so a version directory with no directives left has nothing to check.
+Releases that have already been published are checked too. release_editor.py replaces the directives with
+the collated note text, so a version directory with no directives left should hold nothing but its pages;
+anything still sitting in a subdirectory is a note that was left out of the published release.
 """
 
-import sys
 from argparse import ArgumentParser
 from pathlib import Path
 import re
@@ -78,20 +78,30 @@ def find_note_directories(version_dir: Path) -> set[Path]:
 def check_version(version_dir: Path) -> list[str]:
     """Return a problem description for every unreferenced note directory and every dangling directive."""
     targets = find_amalgamate_targets(version_dir)
-    if not targets:
-        # already released, the directives have been replaced by the collated notes
-        return []
+    # release_editor.py strips the directives out as it collates the notes, so a version directory with none
+    # left is one that has already been published and can no longer pick anything up
+    published = not targets
 
     problems = []
     for directory in sorted(find_note_directories(version_dir) - set(targets)):
         notes = sorted(note.name for note in directory.glob("*.rst"))
         plural = "note" if len(notes) == 1 else "notes"
+        if published:
+            advice = (
+                f"  {version_dir.name} has already been published, so these notes were left out of it. Fold\n"
+                f"  their text into the relevant page in {display_path(version_dir)}/ and delete them, or move\n"
+                f"  them to the release being prepared."
+            )
+        else:
+            advice = (
+                f"  These notes will be missing from the published release notes. Add\n"
+                f"    .. amalgamate:: {directory.relative_to(version_dir).as_posix()}\n"
+                f"  under a heading in the relevant page in {display_path(version_dir)}/."
+            )
         problems.append(
             f"{display_path(directory)} holds {len(notes)} release {plural} that no page references:\n"
             + "".join(f"    {name}\n" for name in notes)
-            + f"  These notes will be missing from the published release notes. Add\n"
-            f"    .. amalgamate:: {directory.relative_to(version_dir).as_posix()}\n"
-            f"  under a heading in the relevant page in {display_path(version_dir)}/."
+            + advice
         )
 
     for target, references in sorted(targets.items()):
@@ -107,24 +117,16 @@ def check_version(version_dir: Path) -> list[str]:
     return problems
 
 
-def find_version_directories(release: str | None) -> list[Path]:
-    if release is not None:
-        if not release.startswith("v"):
-            release = "v" + release
-        return [RELEASE_ROOT / release]
+def find_version_directories() -> list[Path]:
+    """Every release directory, published or not."""
     return sorted(path for path in RELEASE_ROOT.glob("v*") if path.is_dir())
 
 
 def main() -> int:
-    parser = ArgumentParser(description="Find release notes that no amalgamate directive references")
-    parser.add_argument("--release", help="only check this release, e.g. v7.0.0. Defaults to every release.")
-    args = parser.parse_args()
+    ArgumentParser(description="Find release notes that no amalgamate directive references").parse_args()
 
     problems = []
-    for version_dir in find_version_directories(args.release):
-        if not version_dir.is_dir():
-            print(f"No such release directory: {display_path(version_dir)}", file=sys.stderr)
-            return 1
+    for version_dir in find_version_directories():
         problems += check_version(version_dir)
 
     for problem in problems:

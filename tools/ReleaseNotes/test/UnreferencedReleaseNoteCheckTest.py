@@ -7,7 +7,7 @@
 import io
 import sys
 import unittest
-from contextlib import redirect_stderr, redirect_stdout
+from contextlib import redirect_stdout
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import mock
@@ -42,17 +42,16 @@ class UnreferencedReleaseNoteCheckTest(unittest.TestCase):
         note.write_text("- A release note.\n", encoding="utf-8")
         return note
 
-    def _run_main(self, argv: list) -> tuple:
-        """Run main() against the temporary release tree, returning (exit code, stdout, stderr)."""
-        stdout, stderr = io.StringIO(), io.StringIO()
+    def _run_main(self) -> tuple:
+        """Run main() against the temporary release tree, returning (exit code, stdout)."""
+        stdout = io.StringIO()
         with (
             mock.patch.object(checker, "RELEASE_ROOT", self.release_root),
-            mock.patch.object(sys, "argv", ["unreferenced_release_note_check.py"] + argv),
+            mock.patch.object(sys, "argv", ["unreferenced_release_note_check.py"]),
             redirect_stdout(stdout),
-            redirect_stderr(stderr),
         ):
             exit_code = checker.main()
-        return exit_code, stdout.getvalue(), stderr.getvalue()
+        return exit_code, stdout.getvalue()
 
     # ------------------------------------------------------------------ no problems
 
@@ -93,11 +92,11 @@ class UnreferencedReleaseNoteCheckTest(unittest.TestCase):
 
         self.assertEqual([], checker.check_version(version_dir))
 
-    def test_released_version_with_no_directives_is_skipped(self):
-        # release_editor.py replaces the directives with the collated text, so there is nothing left to check
+    def test_published_release_holding_nothing_but_pages_has_no_problems(self):
+        # release_editor.py replaces the directives with the collated text and clears the note directories out
         version_dir = self._make_version()
-        self._write_note(version_dir, "Framework/Python/Bugfixes")
         self._write_page(version_dir, "framework.rst")
+        self._write_page(version_dir, "index.rst")
 
         self.assertEqual([], checker.check_version(version_dir))
 
@@ -147,6 +146,30 @@ class UnreferencedReleaseNoteCheckTest(unittest.TestCase):
         problems = checker.check_version(version_dir)
 
         self.assertEqual(2, len(problems))
+
+    def test_note_left_behind_in_a_published_release_is_reported(self):
+        # the notes for a published release have been collated into the pages, so a directory left holding one
+        # means it never made it into the release
+        version_dir = self._make_version()
+        self._write_note(version_dir, "Framework/Python/Bugfixes", name="40629.rst")
+        self._write_page(version_dir, "framework.rst")
+
+        problems = checker.check_version(version_dir)
+
+        self.assertEqual(1, len(problems))
+        self.assertIn("Framework/Python/Bugfixes", problems[0])
+        self.assertIn("40629.rst", problems[0])
+
+    def test_report_for_a_published_release_does_not_suggest_adding_a_directive(self):
+        # the release has gone out, so the fix is to fold the text into the page rather than reference it
+        version_dir = self._make_version()
+        self._write_note(version_dir, "Framework/Python/Bugfixes")
+        self._write_page(version_dir, "framework.rst")
+
+        problems = checker.check_version(version_dir)
+
+        self.assertNotIn(".. amalgamate::", problems[0])
+        self.assertIn("already been published", problems[0])
 
     def test_note_count_is_pluralised(self):
         version_dir = self._make_version()
@@ -216,7 +239,7 @@ class UnreferencedReleaseNoteCheckTest(unittest.TestCase):
         self._write_note(version_dir, "Framework/Python/Bugfixes")
         self._write_page(version_dir, "framework.rst", "Framework/Python/Bugfixes")
 
-        exit_code, stdout, _ = self._run_main([])
+        exit_code, stdout = self._run_main()
 
         self.assertEqual(0, exit_code)
         self.assertEqual("", stdout)
@@ -227,12 +250,12 @@ class UnreferencedReleaseNoteCheckTest(unittest.TestCase):
         self._write_page(version_dir, "framework.rst", "Framework/Python/New_features")
         self._write_note(version_dir, "Framework/Python/New_features")
 
-        exit_code, stdout, _ = self._run_main([])
+        exit_code, stdout = self._run_main()
 
         self.assertEqual(1, exit_code)
         self.assertIn("Framework/Python/Deprecated", stdout)
 
-    def test_main_checks_every_release_directory_by_default(self):
+    def test_main_checks_every_release_directory(self):
         clean = self._make_version("v1.0.0")
         self._write_note(clean, "Framework/Python/Bugfixes")
         self._write_page(clean, "framework.rst", "Framework/Python/Bugfixes")
@@ -241,36 +264,20 @@ class UnreferencedReleaseNoteCheckTest(unittest.TestCase):
         self._write_page(broken, "framework.rst", "Framework/Python/New_features")
         self._write_note(broken, "Framework/Python/New_features")
 
-        exit_code, stdout, _ = self._run_main([])
+        exit_code, stdout = self._run_main()
 
         self.assertEqual(1, exit_code)
         self.assertIn("v2.0.0", stdout)
         self.assertNotIn("v1.0.0", stdout)
 
-    def test_main_can_be_limited_to_a_single_release(self):
-        broken = self._make_version("v2.0.0")
-        self._write_note(broken, "Framework/Python/Deprecated")
-        self._write_page(broken, "framework.rst", "Framework/Python/New_features")
-        self._write_note(broken, "Framework/Python/New_features")
-        clean = self._make_version("v1.0.0")
-        self._write_note(clean, "Framework/Python/Bugfixes")
-        self._write_page(clean, "framework.rst", "Framework/Python/Bugfixes")
-
-        self.assertEqual(0, self._run_main(["--release", "v1.0.0"])[0])
-        self.assertEqual(1, self._run_main(["--release", "v2.0.0"])[0])
-
-    def test_main_accepts_a_release_without_the_v_prefix(self):
-        version_dir = self._make_version("v1.0.0")
+    def test_main_ignores_anything_in_the_release_root_that_is_not_a_version_directory(self):
+        version_dir = self._make_version()
         self._write_note(version_dir, "Framework/Python/Bugfixes")
         self._write_page(version_dir, "framework.rst", "Framework/Python/Bugfixes")
+        (self.release_root / "index.rst").write_text("=====\nTitle\n=====\n", encoding="utf-8")
+        (self.release_root / "templates").mkdir()
 
-        self.assertEqual(0, self._run_main(["--release", "1.0.0"])[0])
-
-    def test_main_returns_one_for_an_unknown_release(self):
-        exit_code, _, stderr = self._run_main(["--release", "v9.9.9"])
-
-        self.assertEqual(1, exit_code)
-        self.assertIn("No such release directory", stderr)
+        self.assertEqual(0, self._run_main()[0])
 
 
 if __name__ == "__main__":
