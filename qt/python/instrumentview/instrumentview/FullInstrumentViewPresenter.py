@@ -457,9 +457,14 @@ class FullInstrumentViewPresenter:
     def on_overlaid_shape_removed(self) -> None:
         self._update_interactor_style()
         self._view.set_add_selection_and_mask_buttons_enabled(False)
+        # Retire the generation so any queued or part-way-through preview update is discarded
+        # instead of drawing a preview for a shape that no longer exists
+        self._shape_update_generation += 1
         if not self._shape_preview_active:
             return
-        # The preview replaced the plot of the committed selection, so put that back
+        self._callback_queue.put((self._restore_committed_line_plot, ()))
+
+    def _restore_committed_line_plot(self) -> None:
         self._shape_preview_active = False
         self._update_line_plot_ws_and_draw(self._view.current_selected_lineplot_unit())
 
@@ -486,22 +491,30 @@ class FullInstrumentViewPresenter:
             return
         self.on_shape_changed()
 
+    def _is_current_shape_update(self, generation: int) -> bool:
+        """Whether a queued shape preview update is still the one that should be shown.
+
+        It is superseded either by a newer update (e.g. a burst of mouse-wheel zooms) or by the
+        shape being removed, both of which retire the generation it was queued with.
+        """
+        return generation == self._shape_update_generation and self._view.is_active_current_overlaid_shape()
+
     def _on_shape_changed(self, centres: np.ndarray, generation: int) -> None:
-        if generation != self._shape_update_generation:
-            # A newer update has been requested since this one was queued (e.g. a burst of
-            # mouse-wheel zooms), so this result would be thrown away anyway
-            return
-        if not self._view.is_active_current_overlaid_shape():
-            # Shape was removed before this queued update ran, so there is nothing to preview
+        if not self._is_current_shape_update(generation):
             return
         mask = self._view.get_shape_mask(centres)
         if self._select_bank_tube:
             mask = self._model.expand_pickable_mask_to_parent_subtrees(mask)
 
-        self._shape_preview_active = True
         self._model.extract_spectra_for_line_plot(
             self._view.current_selected_lineplot_unit(), self._view.sum_spectra_selected(), np.flatnonzero(mask)
         )
+        if not self._is_current_shape_update(generation):
+            # Extracting takes long enough for the shape to be removed or moved again meanwhile,
+            # and drawing now would put back a preview that has already been superseded
+            return
+
+        self._shape_preview_active = True
         self._view.show_plot_for_detectors(self._model.line_plot_workspace, self._model.lineplot_limits)
         # A shape typically covers far too many detectors for the per-detector info to be useful
         self._view.set_selected_detector_info([])

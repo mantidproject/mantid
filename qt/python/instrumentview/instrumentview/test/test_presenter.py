@@ -425,6 +425,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._presenter._update_line_plot_ws_and_draw = MagicMock()
 
         self._presenter.on_overlaid_shape_removed()
+        self._presenter._callback_queue.join()
 
         self._presenter._update_line_plot_ws_and_draw.assert_called_once()
         self.assertFalse(self._presenter._shape_preview_active)
@@ -433,8 +434,24 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._presenter._update_line_plot_ws_and_draw = MagicMock()
 
         self._presenter.on_overlaid_shape_removed()
+        self._presenter._callback_queue.join()
 
         self._presenter._update_line_plot_ws_and_draw.assert_not_called()
+
+    def test_removing_shape_while_extracting_keeps_the_committed_line_plot(self):
+        """An extraction already in flight must not draw its preview over the restored plot."""
+        self._presenter._shape_preview_active = True
+        self._presenter._update_line_plot_ws_and_draw = MagicMock()
+        # Stand in for the shape being deleted part-way through the extraction on the worker
+        self._model.extract_spectra_for_line_plot = MagicMock(side_effect=lambda *_: self._presenter.on_overlaid_shape_removed())
+
+        self._presenter._on_shape_changed(np.array(self._model.detector_positions), self._presenter._shape_update_generation)
+        self._presenter._callback_queue.join()
+
+        self._model.extract_spectra_for_line_plot.assert_called_once()
+        self._mock_view.show_plot_for_detectors.assert_not_called()
+        self._presenter._update_line_plot_ws_and_draw.assert_called_once()
+        self.assertFalse(self._presenter._shape_preview_active)
 
     def test_on_add_item_projects_points_before_queueing(self):
         """on_add_item_clicked projects detector points on the main thread
