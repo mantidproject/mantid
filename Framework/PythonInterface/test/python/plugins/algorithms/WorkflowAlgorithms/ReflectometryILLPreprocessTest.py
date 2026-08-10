@@ -112,6 +112,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         assertRaisesNothing(self, alg.execute)
         outWS = alg.getProperty("OutputWorkspace").value
         self.assertEqual(outWS.getAxis(0).getUnit().caption(), "Wavelength")
+        self.assertAlmostEqual(outWS.run().getProperty(common.SampleLogs.LINE_POSITION).value, 202.177, delta=0.001)
         self.assertEqual(mtd.getObjectNames(), [])
 
     def test_no_normalisation(self):
