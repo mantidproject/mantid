@@ -24,6 +24,8 @@ RB Number
     number at ISIS). Leaving this field empty will result in no user directories
     being created, and only the general directory will be used for file storage.
 
+    Additionally, some experiment specific settings will be saved relative to this RB Number.
+
 Instrument
     Select the instrument (ENGINX or IMAT). Currently only ENGINX is fully
     supported.
@@ -40,6 +42,18 @@ Settings
     are recommended for the UI) which will be set on opening the interface. Note that
     the user can select any peak function to fit (even a non-recommended one) at a
     later point when adding a peak in the fitting tab.
+
+    Settings are designed to persist across uses of the interface. Some settings are set
+    globally, and so will not change based on the RB Number or the Instrument selected.
+
+    Others will be saved relative to those choices.
+
+    Full Instrument Calibration File and Default Peak Shape are instrument specific settings
+    and so each instrument can retain a different saved value for these fields.
+
+    The Texture Sample Directions, Orientation loading settings, Monte-Carlo Parameters,
+    and pole figure settings are experiment specific settings and so each RB Number used
+    can retain a different value for these fields.
 
 Close
     Close the interface.

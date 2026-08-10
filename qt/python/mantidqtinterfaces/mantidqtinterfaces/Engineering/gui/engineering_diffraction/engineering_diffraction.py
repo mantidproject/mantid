@@ -84,6 +84,7 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         self.set_on_rb_num_changed(self.presenter.gsas2_presenter.set_rb_num)
         # Settings Tab
         self.set_on_instrument_changed(self.presenter.settings_presenter.set_instrument_override)
+        self.set_on_rb_num_changed(self.presenter.settings_presenter.set_rb_num)
 
         # load most recent calibration, if one saved
         self.presenter.calibration_presenter.load_last_calibration()

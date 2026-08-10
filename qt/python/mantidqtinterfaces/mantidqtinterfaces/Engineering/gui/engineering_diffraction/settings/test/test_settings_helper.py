@@ -154,6 +154,69 @@ class SettingsHelperTest(unittest.TestCase):
 
         self.assertRaises(TypeError, get_setting, GROUP, PREFIX, "something", return_type=bool)
 
+    # ---------------- RB scoping ----------------
+    # "rd_dir" is in SCOPED_SETTINGS; "save_location" is not.
+
+    def test_rb_scoped_setting_is_written_under_the_rb(self):
+        set_setting(GROUP, PREFIX, "rd_dir", "9,9,9", rb="12345")
+
+        settings = QSettings()
+        settings.beginGroup(GROUP)
+        scoped = settings.value(PREFIX + "rb/12345/rd_dir")
+        unscoped = settings.value(PREFIX + "rd_dir")
+        settings.endGroup()
+        self.assertEqual(scoped, "9,9,9")
+        # the global value must be left alone
+        self.assertIsNone(unscoped)
+
+    def test_unscoped_setting_ignores_the_rb(self):
+        set_setting(GROUP, PREFIX, "save_location", "/some/path", rb="12345")
+
+        self.assertEqual(get_setting(GROUP, PREFIX, "save_location"), "/some/path")
+        self.assertEqual(get_setting(GROUP, PREFIX, "save_location", rb="12345"), "/some/path")
+
+    def test_scoped_setting_inherits_global_until_the_rb_has_its_own(self):
+        set_setting(GROUP, PREFIX, "rd_dir", "0,0,1")
+
+        # an RB that has never been saved reads the user's global value, not a hard-coded default
+        self.assertEqual(get_setting(GROUP, PREFIX, "rd_dir", rb="12345"), "0,0,1")
+
+        set_setting(GROUP, PREFIX, "rd_dir", "1,0,0", rb="12345")
+
+        self.assertEqual(get_setting(GROUP, PREFIX, "rd_dir", rb="12345"), "1,0,0")
+        self.assertEqual(get_setting(GROUP, PREFIX, "rd_dir"), "0,0,1")
+        self.assertEqual(get_setting(GROUP, PREFIX, "rd_dir", rb="99999"), "0,0,1")
+
+    def test_scopes_are_isolated_from_each_other(self):
+        set_setting(GROUP, PREFIX, "rd_dir", "1,0,0", rb="A")
+        set_setting(GROUP, PREFIX, "rd_dir", "0,1,0", rb="B")
+
+        self.assertEqual(get_setting(GROUP, PREFIX, "rd_dir", rb="A"), "1,0,0")
+        self.assertEqual(get_setting(GROUP, PREFIX, "rd_dir", rb="B"), "0,1,0")
+
+    def test_blank_rb_is_the_global_scope(self):
+        set_setting(GROUP, PREFIX, "rd_dir", "0,0,1")
+
+        for blank in (None, "", "   "):
+            self.assertEqual(get_setting(GROUP, PREFIX, "rd_dir", rb=blank), "0,0,1")
+
+    def test_rb_separators_are_sanitised_into_one_scope(self):
+        # "/" and "\" are permitted in an RB but are QSettings group separators; both map to "$"
+        set_setting(GROUP, PREFIX, "rd_dir", "1,2,3", rb="2024/1")
+
+        settings = QSettings()
+        settings.beginGroup(GROUP)
+        stored = settings.value(PREFIX + "rb/2024$1/rd_dir")
+        settings.endGroup()
+        self.assertEqual(stored, "1,2,3")
+        # the same experiment folder however it was typed
+        self.assertEqual(get_setting(GROUP, PREFIX, "rd_dir", rb="2024\\1"), "1,2,3")
+
+    def test_surrounding_whitespace_in_rb_is_ignored(self):
+        set_setting(GROUP, PREFIX, "rd_dir", "4,5,6", rb="12345")
+
+        self.assertEqual(get_setting(GROUP, PREFIX, "rd_dir", rb="  12345  "), "4,5,6")
+
 
 if __name__ == "__main__":
     unittest.main()
