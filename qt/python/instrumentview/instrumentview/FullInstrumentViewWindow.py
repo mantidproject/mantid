@@ -86,6 +86,7 @@ def _ensure_overlay_manager(method):
         shape = method(self, *args, **kwargs)
         self._shape_overlay_manager.set_shape(shape)
         self._presenter.on_overlaid_shape_added()
+        self._register_shape_changed_callback()
 
     return wrapper
 
@@ -983,6 +984,18 @@ class FullInstrumentViewView(QWidget):
     def enable_parallel_projection(self) -> None:
         self.main_plotter.view_xy()
         self.main_plotter.enable_parallel_projection()
+
+    def _register_shape_changed_callback(self) -> None:
+        """Make the line plot follow the overlaid shape.
+
+        The overlay manager fires the callback whenever the shape is dragged, resized or
+        rotated. It is also called once here so the plot reflects the shape where it is
+        first drawn.
+        """
+        if self._shape_overlay_manager is None:
+            return
+        self._shape_overlay_manager.set_on_shape_changed(self._presenter.on_shape_changed)
+        self._presenter.on_shape_changed()
 
     @_ensure_overlay_manager
     def add_circle_widget(self) -> None:

@@ -82,6 +82,9 @@ class FullInstrumentViewPresenter:
         self._interactor_styles = InteractorStyles(self._view.main_plotter, picking_callback=lambda: None, hover_callback=lambda: None)
         self._last_hovered_point_index: Optional[int] = None
         self._select_bank_tube = False
+        self._shape_preview_active = False
+        # Incremented per requested shape update so the worker can drop superseded ones
+        self._shape_update_generation = 0
         self._callback_queue = Queue()
         self._callback_stop_sentinel = object()
         self._callback_thread = Thread(None, self._callback_worker, daemon=True)
@@ -454,6 +457,57 @@ class FullInstrumentViewPresenter:
     def on_overlaid_shape_removed(self) -> None:
         self._update_interactor_style()
         self._view.set_add_selection_and_mask_buttons_enabled(False)
+        if not self._shape_preview_active:
+            return
+        # The preview replaced the plot of the committed selection, so put that back
+        self._shape_preview_active = False
+        self._update_line_plot_ws_and_draw(self._view.current_selected_lineplot_unit())
+
+    def on_shape_changed(self) -> None:
+        """Live-update the line plot with the spectra covered by the overlaid shape.
+
+        Called on the Qt thread when a shape is first drawn, and again by the shape overlay
+        manager each time it is dragged, resized or rotated, so the plot always shows what
+        would be committed by Add ROI / Add Mask.
+        """
+        centres = self._transform_vectors_with_matrix(np.array(self._model.detector_positions), self._transform)
+        # Projection uses VTK, so must be done on the Qt thread before queueing the rest
+        self._view.project_and_cache_detector_points(centres)
+        self._shape_update_generation += 1
+        self._callback_queue.put((self._on_shape_changed, (centres, self._shape_update_generation)))
+
+    def on_camera_changed(self) -> None:
+        """Keep the line plot in step with the overlaid shape when the view is zoomed.
+
+        The shape is drawn in fixed screen coordinates, so zooming moves the instrument
+        underneath it and changes which detectors it covers.
+        """
+        if not self._view.is_active_current_overlaid_shape():
+            return
+        self.on_shape_changed()
+
+    def _on_shape_changed(self, centres: np.ndarray, generation: int) -> None:
+        if generation != self._shape_update_generation:
+            # A newer update has been requested since this one was queued (e.g. a burst of
+            # mouse-wheel zooms), so this result would be thrown away anyway
+            return
+        if not self._view.is_active_current_overlaid_shape():
+            # Shape was removed before this queued update ran, so there is nothing to preview
+            return
+        mask = self._view.get_shape_mask(centres)
+        if self._select_bank_tube:
+            mask = self._model.expand_pickable_mask_to_parent_subtrees(mask)
+
+        self._shape_preview_active = True
+        self._model.extract_spectra_for_line_plot(
+            self._view.current_selected_lineplot_unit(), self._view.sum_spectra_selected(), np.flatnonzero(mask)
+        )
+        self._view.show_plot_for_detectors(self._model.line_plot_workspace, self._model.lineplot_limits)
+        # A shape typically covers far too many detectors for the per-detector info to be useful
+        self._view.set_selected_detector_info([])
+        self._view.set_relative_detector_angle(None)
+        # Peak overlays annotate the plotted spectra, so they have to follow the shape as well
+        self.refresh_lineplot_peaks()
 
     def _on_add_item_clicked(self) -> None:
         centres = self._transform_vectors_with_matrix(np.array(self._model.detector_positions), self._transform)
@@ -766,7 +820,10 @@ class FullInstrumentViewPresenter:
         )
 
         self._interactor_styles = InteractorStyles(
-            self._view.main_plotter, picking_callback=wrapped_picking_callback, hover_callback=wrapped_hover_callback
+            self._view.main_plotter,
+            picking_callback=wrapped_picking_callback,
+            hover_callback=wrapped_hover_callback,
+            camera_changed_callback=self.on_camera_changed,
         )
         self._update_interactor_style()
 

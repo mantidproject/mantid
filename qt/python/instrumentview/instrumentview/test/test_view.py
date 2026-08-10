@@ -173,6 +173,14 @@ class TestFullInstrumentViewView(unittest.TestCase):
         self.assertIsNotNone(self._view._shape_overlay_manager)
         self.assertIsInstance(self._view._shape_overlay_manager.current_shape, HollowRectangleSelectionShape)
 
+    def test_adding_a_shape_registers_the_live_line_plot_callback(self) -> None:
+        self._view.add_circle_widget()
+        self.assertEqual(self._view._shape_overlay_manager._on_shape_changed, self._view._presenter.on_shape_changed)
+
+    def test_adding_a_shape_plots_the_spectra_it_covers_straight_away(self) -> None:
+        self._view.add_circle_widget()
+        self._view._presenter.on_shape_changed.assert_called_once()
+
     def test_add_selected_shape_uses_dropdown_choice(self) -> None:
         self._view._shape_selector_combo_box.setCurrentText("Ellipse")
         self._view.add_selected_shape(True)
