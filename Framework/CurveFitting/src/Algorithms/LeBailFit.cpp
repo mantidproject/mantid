@@ -313,7 +313,7 @@ void LeBailFit::exec() {
   setProperty("OutputWorkspace", m_outputWS);
 
   // 8. Final statistic
-  Rfactor finalR = getRFactor(m_outputWS->y(0).rawData(), m_outputWS->y(1).rawData(), m_outputWS->e(0).rawData());
+  Rfactor finalR = getRFactor(m_outputWS->y(0), m_outputWS->y(1), m_outputWS->e(0));
   g_log.notice() << "\nFinal R factor: Rwp = " << finalR.Rwp << ", Rp = " << finalR.Rp
                  << ", Data points = " << m_outputWS->y(1).size() << ", Range = " << m_outputWS->x(0)[0] << ", "
                  << m_outputWS->x(0).back() << "\n";
@@ -392,7 +392,7 @@ void LeBailFit::processInputBackground() {
  */
 void LeBailFit::execPatternCalculation() {
   // Generate domain and values vectors
-  const auto &vecX = m_dataWS->x(m_wsIndex).rawData();
+  const auto &vecX = m_dataWS->x(m_wsIndex);
   std::vector<double> vecY(m_outputWS->y(CALDATAINDEX).size(), 0);
 
   // Calculate diffraction pattern
@@ -426,7 +426,8 @@ void LeBailFit::execPatternCalculation() {
   g_log.information() << "Output individual peaks  = " << ploteachpeak << ".\n";
   if (ploteachpeak) {
     for (size_t ipk = 0; ipk < m_lebailFunction->getNumberOfPeaks(); ++ipk) {
-      m_outputWS->mutableY(9 + ipk) = m_lebailFunction->calPeak(ipk, vecX, m_outputWS->y(9 + ipk).size());
+      // calPeak still requires a std::vector<double>
+      m_outputWS->mutableY(9 + ipk) = m_lebailFunction->calPeak(ipk, vecX.rawData(), m_outputWS->y(9 + ipk).size());
     }
   }
 
@@ -467,7 +468,7 @@ void LeBailFit::execRefineBackground() {
   }
 
   // 1. Generate domain and value
-  const auto &vecX = m_dataWS->x(m_wsIndex).rawData();
+  const auto &vecX = m_dataWS->x(m_wsIndex);
   const auto &vecY = m_dataWS->y(m_wsIndex);
   vector<double> valueVec(vecX.size(), 0);
   size_t numpts = vecX.size();
@@ -1326,7 +1327,7 @@ void LeBailFit::execRandomWalkMinimizer(size_t maxcycles, map<string, Parameter>
   const auto &vecX = m_dataWS->x(m_wsIndex);
   const auto &vecInY = m_dataWS->y(m_wsIndex);
 
-  const auto &domain = m_dataWS->x(m_wsIndex).rawData();
+  const auto &domain = m_dataWS->x(m_wsIndex);
   std::vector<double> vecCalPurePeaks(domain.size(), 0.0);
 
   //    Strategy and map
@@ -1354,7 +1355,7 @@ void LeBailFit::execRandomWalkMinimizer(size_t maxcycles, map<string, Parameter>
   Rfactor startR(-DBL_MAX, -DBL_MAX);
 
   // Process background to make a pure peak spectrum in output workspace
-  HistogramY vecBkgd = m_lebailFunction->function(vecX.rawData(), false, true);
+  HistogramY vecBkgd = m_lebailFunction->function(vecX, false, true);
   m_outputWS->mutableY(INPUTBKGDINDEX) = vecBkgd;
   m_outputWS->mutableY(INPUTPUREPEAKINDEX) = vecInY - vecBkgd;
 
@@ -1855,7 +1856,7 @@ bool LeBailFit::calculateDiffractionPattern(const HistogramX &vecX, const Histog
       g_log.information() << "Calculate diffraction pattern from input data "
                              "and newly calculated background. "
                           << ".\n";
-      veccalbkgd = m_lebailFunction->function(vecX.rawData(), false, true);
+      veccalbkgd = m_lebailFunction->function(vecX, false, true);
       ::transform(vecY.begin(), vecY.end(), veccalbkgd.begin(), vecPureY.begin(), ::minus<double>());
       veccalbkgdIsEmpty = false;
     }
@@ -1887,7 +1888,7 @@ bool LeBailFit::calculateDiffractionPattern(const HistogramX &vecX, const Histog
         throw runtime_error("Programming logic error.");
       ::transform(values.begin(), values.end(), veccalbkgd.begin(), values.begin(), ::plus<double>());
     }
-    rfactor = getRFactor(m_dataWS->y(m_wsIndex).rawData(), values, m_dataWS->e(m_wsIndex).rawData());
+    rfactor = getRFactor(m_dataWS->y(m_wsIndex), values, m_dataWS->e(m_wsIndex));
   } else {
     vector<double> caldata(values.size(), 0.0);
     if (vecBkgd.size() == vecY.size()) {
@@ -1899,7 +1900,7 @@ bool LeBailFit::calculateDiffractionPattern(const HistogramX &vecX, const Histog
         throw runtime_error("Programming logic error (2). ");
       std::transform(values.begin(), values.end(), veccalbkgd.begin(), caldata.begin(), std::plus<double>());
     }
-    rfactor = getRFactor(m_dataWS->y(m_wsIndex).rawData(), caldata, m_dataWS->e(m_wsIndex).rawData());
+    rfactor = getRFactor(m_dataWS->y(m_wsIndex), caldata, m_dataWS->e(m_wsIndex));
   }
 
   if (!peaksvalid) {

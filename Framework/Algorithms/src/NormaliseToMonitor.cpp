@@ -27,6 +27,7 @@
 
 #include <cfloat>
 #include <numeric>
+#include <utility>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -638,6 +639,7 @@ void NormaliseToMonitor::normaliseBinByBin(const MatrixWorkspace_sptr &inputWork
   for (auto &workspaceIndex : m_workspaceIndexes) {
     // Get hold of the monitor spectrum
     const auto &monX = m_monitor->binEdges(workspaceIndex);
+    // not const: normalisationFactor() below rescales these in place
     auto monY = m_monitor->counts(workspaceIndex);
     auto monE = m_monitor->countStandardDeviations(workspaceIndex);
     size_t timeIndex = 0;
@@ -677,8 +679,10 @@ void NormaliseToMonitor::normaliseBinByBin(const MatrixWorkspace_sptr &inputWork
           continue;
         // Rebin the monitor spectrum to match the binning of the current data
         // spectrum
-        VectorHelper::rebinHistogram(monX.rawData(), monY.mutableRawData(), monE.mutableRawData(), X.rawData(),
-                                     Y.mutableRawData(), E.mutableRawData(), false);
+        // as_const on the monitor data: these are read-only inputs, and binding a
+        // non-const Counts/CountStandardDeviations to a span would detach the cow_ptr
+        VectorHelper::rebinHistogram(monX, std::as_const(monY), std::as_const(monE), X, Y.mutableRawData(),
+                                     E.mutableRawData(), false);
         // Recalculate the overall normalization factor
         this->normalisationFactor(X, Y, E);
       }

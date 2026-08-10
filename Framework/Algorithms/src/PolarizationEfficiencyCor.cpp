@@ -310,7 +310,7 @@ bool PolarizationEfficiencyCor::needInterpolation(MatrixWorkspace const &efficie
 
   auto const &x = inWS.x(0);
   for (size_t i = 0; i < efficiencies.getNumberHistograms(); ++i) {
-    if (efficiencies.x(i).rawData() != x.rawData())
+    if (efficiencies.x(i) != x)
       return true;
   }
   return false;

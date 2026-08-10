@@ -114,9 +114,9 @@ API::MatrixWorkspace_sptr Transpose::createOutputWorkspace(const API::MatrixWork
   // Values come from input X
   std::unique_ptr<API::NumericAxis> newYAxis(nullptr);
   if (inputWorkspace->isHistogramData()) {
-    newYAxis = std::make_unique<API::BinEdgeAxis>(inX.rawData());
+    newYAxis = std::make_unique<API::BinEdgeAxis>(inX);
   } else {
-    newYAxis = std::make_unique<API::NumericAxis>(inX.rawData());
+    newYAxis = std::make_unique<API::NumericAxis>(inX);
   }
 
   newYAxis->unit() = inputWorkspace->getAxis(0)->unit();

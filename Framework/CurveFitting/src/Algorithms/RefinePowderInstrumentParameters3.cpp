@@ -113,7 +113,7 @@ void RefinePowderInstrumentParameters3::exec() {
   setFunctionParameterValues(m_positionFunc, m_profileParameters);
 
   // b) Generate some global useful value and Calculate starting chi^2
-  API::FunctionDomain1DVector domain(m_dataWS->x(m_wsIndex).rawData());
+  API::FunctionDomain1DVector domain(m_dataWS->x(m_wsIndex));
   API::FunctionValues rawvalues(domain);
   m_positionFunc->function(domain, rawvalues);
 
@@ -1068,7 +1068,7 @@ Workspace2D_sptr RefinePowderInstrumentParameters3::genOutputWorkspace(const Fun
   outws->mutableY(4) = dataY - rawvalues.toVector();
 
   // 5. Zscore
-  vector<double> zscore = Kernel::getZscore(outws->y(2).rawData());
+  vector<double> zscore = Kernel::getZscore(outws->y(2));
   outws->mutableY(5) = zscore;
 
   return outws;

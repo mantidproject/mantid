@@ -531,7 +531,7 @@ void PoldiPeakSearch::exec() {
 
   g_log.information() << "   Parameters set.\n";
 
-  MantidVec summedNeighborCounts = getNeighborSums(correlatedCounts.rawData());
+  MantidVec summedNeighborCounts = getNeighborSums(correlatedCounts);
   g_log.information() << "   Neighboring counts summed, contains " << summedNeighborCounts.size() << " data points.\n";
 
   std::list<MantidVec::const_iterator> peakPositionsSummed =

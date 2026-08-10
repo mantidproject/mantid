@@ -172,20 +172,18 @@ void SplineInterpolation::exec() {
     // perform cubic spline interpolation
     // for each histogram in workspace, calculate interpolation and derivatives
     spline_creator = [iwspt](size_t i) {
-      return std::make_unique<Mantid::Kernel::CubicSpline<double, double>>(iwspt->x(i).rawData(),
-                                                                           iwspt->y(i).rawData());
+      return std::make_unique<Mantid::Kernel::CubicSpline<double, double>>(iwspt->x(i), iwspt->y(i));
     };
   } else {
     // perform linear interpolation
 
     // first check that the x-axis (first spectrum) is sorted ascending
-    if (!std::is_sorted(mwspt->x(0).rawData().begin(), mwspt->x(0).rawData().end())) {
+    if (!std::is_sorted(mwspt->x(0).begin(), mwspt->x(0).end())) {
       throw std::runtime_error("X-axis of the workspace to match is not sorted. "
                                "Consider calling SortXAxis before.");
     }
     spline_creator = [iwspt](size_t i) {
-      return std::make_unique<Mantid::Kernel::LinearSpline<double, double>>(iwspt->x(i).rawData(),
-                                                                            iwspt->y(i).rawData());
+      return std::make_unique<Mantid::Kernel::LinearSpline<double, double>>(iwspt->x(i), iwspt->y(i));
     };
   }
 
@@ -290,7 +288,7 @@ std::pair<size_t, size_t> SplineInterpolation::findInterpolationRange(const Matr
 
   auto xAxisIn = iwspt->x(row).rawData();
   std::sort(xAxisIn.begin(), xAxisIn.end());
-  const auto &xAxisOut = mwspt->x(0).rawData();
+  const auto &xAxisOut = mwspt->x(0);
 
   size_t firstIndex = 0;
   size_t lastIndex = xAxisOut.size();

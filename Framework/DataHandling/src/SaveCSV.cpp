@@ -123,7 +123,7 @@ void SaveCSV::exec() {
         auto &xValue = localworkspace->x(i);
         auto &xValuePrevious = localworkspace->x(i - 1);
 
-        if (xValue.rawData() != xValuePrevious.rawData()) {
+        if (xValue != xValuePrevious) {
           outCSV_File << "A";
 
           for (double j : xValue) {

@@ -274,14 +274,14 @@ void NormaliseByPeakArea::normaliseTOFData(const double area, const size_t index
 void NormaliseByPeakArea::saveToOutput(const API::MatrixWorkspace_sptr &accumWS,
                                        const Kernel::cow_ptr<HistogramData::HistogramY> &yValues,
                                        const Kernel::cow_ptr<HistogramData::HistogramE> &eValues, const size_t index) {
-  assert(yValues->rawData().size() == eValues->rawData().size());
+  assert(yValues->size() == eValues->size());
 
   if (m_sumResults) {
     const size_t npts(accumWS->blocksize());
     auto &accumY = accumWS->mutableY(0);
     auto &accumE = accumWS->mutableE(0);
-    const auto &yValuesRaw = yValues->rawData();
-    const auto &eValuesRaw = eValues->rawData();
+    const auto &yValuesRaw = *yValues;
+    const auto &eValuesRaw = *eValues;
 
     for (size_t j = 0; j < npts; ++j) {
       double accumYj = accumWS->y(0)[j];

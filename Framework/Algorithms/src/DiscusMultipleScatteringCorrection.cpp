@@ -291,7 +291,7 @@ std::map<std::string, std::string> DiscusMultipleScatteringCorrection::validateI
           issues["StructureFactorWorkspace"] += "S(Q,w) must have common w values at all Q";
       }
 
-      auto checkEqualQBins = [&issues](const MantidVec &qValues) {
+      auto checkEqualQBins = [&issues](std::span<double const> qValues) {
         Kernel::EqualBinsChecker checker(qValues, 1.0E-07, -1);
         if (!checker.validate().empty())
           issues["StructureFactorWorkspace"] +=
@@ -301,8 +301,7 @@ std::map<std::string, std::string> DiscusMultipleScatteringCorrection::validateI
 
       if (SQWS->getAxis(0)->unit()->unitID() == "MomentumTransfer") {
         for (size_t iHist = 0; iHist < SQWS->getNumberHistograms(); iHist++) {
-          const auto &qValues = SQWS->x(iHist).rawData();
-          checkEqualQBins(qValues);
+          checkEqualQBins(SQWS->x(iHist));
         }
       } else if (SQWS->getAxis(1)->unit()->unitID() == "MomentumTransfer") {
         auto qAxis = dynamic_cast<NumericAxis *>(SQWS->getAxis(1));

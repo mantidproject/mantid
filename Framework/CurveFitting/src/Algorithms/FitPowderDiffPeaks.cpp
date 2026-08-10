@@ -744,7 +744,7 @@ bool FitPowderDiffPeaks::fitSinglePeakRobust(const BackToBackExponential_sptr &p
   }
 
   // 9. Plot function
-  FunctionDomain1DVector domain(peakws->x(0).rawData());
+  FunctionDomain1DVector domain(peakws->x(0));
   plotFunction(peak, backgroundfunction, domain);
 
   return fitgood;
@@ -1319,7 +1319,7 @@ bool FitPowderDiffPeaks::fitSinglePeakConfident(const BackToBackExponential_sptr
 
   // 6. Plot the peak in the output workspace data
   if (goodfit) {
-    FunctionDomain1DVector domain(peakdataws->x(1).rawData());
+    FunctionDomain1DVector domain(peakdataws->x(1));
     plotFunction(peak, backgroundfunction, domain);
   } else {
     // Throw exception if fit peak bad.  This is NOT a PERMANANT solution.
@@ -1792,7 +1792,7 @@ bool FitPowderDiffPeaks::fitOverlappedPeaks(vector<BackToBackExponential_sptr> p
 
   // 9. Plot peaks
   if (fitsuccess) {
-    FunctionDomain1DVector domain(peaksws->x(1).rawData());
+    FunctionDomain1DVector domain(peaksws->x(1));
     plotFunction(peaksfunction, backgroundfunction, domain);
   }
 
@@ -1893,7 +1893,7 @@ bool FitPowderDiffPeaks::doFitMultiplePeaks(const Workspace2D_sptr &dataws, size
     restoreFunctionParameters(peaksfunc, peaksfuncparams);
 
   // -1. Final debug output
-  FunctionDomain1DVector domain(dataws->x(wsindex).rawData());
+  FunctionDomain1DVector domain(dataws->x(wsindex));
   FunctionValues values(domain);
   peaksfunc->function(domain, values);
   stringstream rss;
@@ -1913,7 +1913,7 @@ bool FitPowderDiffPeaks::doFitMultiplePeaks(const Workspace2D_sptr &dataws, size
 void FitPowderDiffPeaks::estimatePeakHeightsLeBail(const Workspace2D_sptr &dataws, size_t wsindex,
                                                    vector<BackToBackExponential_sptr> peaks) {
   // 1. Build data structures
-  FunctionDomain1DVector domain(dataws->x(wsindex).rawData());
+  FunctionDomain1DVector domain(dataws->x(wsindex));
   FunctionValues values(domain);
   vector<vector<double>> peakvalues;
   for (size_t i = 0; i < (peaks.size() + 1); ++i) {
@@ -2938,7 +2938,7 @@ void estimateBackgroundCoarse(const DataObjects::Workspace2D_sptr &dataws, const
   background->setParameter("A1", b1);
 
   // 4. Calcualte background
-  FunctionDomain1DVector domain(X.rawData());
+  FunctionDomain1DVector domain(X);
   FunctionValues values(domain);
   background->function(domain, values);
 

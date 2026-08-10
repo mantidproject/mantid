@@ -342,12 +342,11 @@ void Workspace2D::generateHistogram(const std::size_t index, const MantidVec &X,
   {                                       // VectorHelper::rebin, assumes bin boundaries, even if
     std::vector<double> histX;            // it is a distribution!
     histX.resize(currentX.size() + 1);
-    Mantid::Kernel::VectorHelper::convertToBinBoundary(currentX.rawData(), histX);
-    Mantid::Kernel::VectorHelper::rebin(histX, currentY.rawData(), currentE.rawData(), X, Y, E, true);
+    Mantid::Kernel::VectorHelper::convertToBinBoundary(currentX, histX);
+    Mantid::Kernel::VectorHelper::rebin(histX, currentY, currentE, X, Y, E, true);
   } else // assume x_size = y_size + 1
   {
-    Mantid::Kernel::VectorHelper::rebin(currentX.rawData(), currentY.rawData(), currentE.rawData(), X, Y, E,
-                                        this->isDistribution());
+    Mantid::Kernel::VectorHelper::rebin(currentX, currentY, currentE, X, Y, E, this->isDistribution());
   }
 }
 

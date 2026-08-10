@@ -125,7 +125,7 @@ MatrixWorkspace_sptr medianWorkspaceGlobal(const MatrixWorkspace_sptr &ws) {
   std::vector<double> allY;
   allY.reserve(ws->getNumberHistograms() * ws->blocksize());
   for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
-    const auto spectrum = ws->mutableY(i).rawData();
+    const auto &spectrum = ws->y(i);
     std::copy(spectrum.cbegin(), spectrum.cend(), std::back_inserter(allY));
   }
   auto &y = out->mutableY(0);

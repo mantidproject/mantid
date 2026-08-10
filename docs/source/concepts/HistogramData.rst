@@ -577,9 +577,36 @@ Things to watch for while migrating:
   throws, so there are no in-place ``EventList`` writes to migrate.
 - **Code that genuinely needs a raw vector** can use ``x(i).rawData()``, which returns
   ``const std::vector<double> &``. There is deliberately no public route to a
-  *modifiable* ``std::vector<double> &``; callees that require one should be given an
-  iterator-range or ``HistogramX``/``HistogramY``/``HistogramE`` overload instead.
-  ``Kernel::Unit::toTOF()``/``fromTOF()`` provide such an iterator-range overload.
+  *modifiable* ``std::vector<double> &``; callees that require one should be given a
+  ``std::span``, iterator-range, or ``HistogramX``/``HistogramY``/``HistogramE`` overload
+  instead. ``Kernel::Unit::toTOF()``/``fromTOF()`` provide such an iterator-range overload.
+- **Prefer ``std::span`` for the parameters of Mantid-defined callees.** All of the
+  histogram data types satisfy ``std::ranges::contiguous_range`` and
+  ``std::ranges::sized_range``, so they convert implicitly to ``std::span<double const>``
+  (read-only) and ``std::span<double>`` (fixed-size in-place write). A plain
+  ``std::vector<double>`` still converts too, so changing a parameter from
+  ``const std::vector<double> &`` to ``std::span<double const>`` breaks no existing caller
+  while letting every histogram type be passed without ``rawData()``.
+  ``Kernel::VectorHelper::rebin()``, ``Kernel::EqualBinsChecker`` and
+  ``DataObjects::FractionalRebinning`` are examples. Two caveats:
+
+  - A ``std::span`` parameter must *not* replace a ``std::vector<double> &`` out-parameter
+    that resizes its argument, and in C++20 ``std::span`` cannot be constructed from a
+    braced initializer list, so callees invoked as ``f({a, b, c})`` must keep their vector
+    parameter.
+  - Do not write ``template <typename T> f(std::span<T const>)`` in place of
+    ``f(const std::vector<T> &)``: ``T`` is not deducible from a ``std::vector`` argument,
+    so every existing caller would stop compiling. Add a non-template overload for the
+    concrete element type instead, as ``Kernel::getZscore()`` does.
+- **Beware copy-on-write detachment when taking a span of the ``cow_ptr``-backed types.**
+  ``BinEdges``, ``Points``, ``Counts``, ``Frequencies`` and friends reach ``begin()``
+  through ``Iterable``, whose non-``const`` overload calls ``mutableData()`` and therefore
+  detaches the ``cow_ptr``. ``rawData()`` is ``const``-qualified and never did this, so
+  binding a **non-const** lvalue of one of those types to ``std::span<double const>`` can
+  introduce a silent copy where the old code had none. Bind such arguments through a
+  ``const`` reference -- or wrap them in ``std::as_const()`` -- when they are read-only.
+  ``x(i)``, ``y(i)`` and ``e(i)`` already return ``const`` references, so the common case
+  is safe; named ``BinEdges``/``Points``/``Counts`` locals are the ones to check.
 
 
 Rollout status

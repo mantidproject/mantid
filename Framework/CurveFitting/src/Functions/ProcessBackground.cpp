@@ -611,7 +611,7 @@ Workspace2D_sptr ProcessBackground::filterForBackground(const BackgroundFunction
 
   // Calcualte theoretical values
   const auto &x = m_dataWS->x(m_wsIndex);
-  API::FunctionDomain1DVector domain(x.rawData());
+  API::FunctionDomain1DVector domain(x);
   API::FunctionValues values(domain);
   bkgdfunction->function(domain, values);
 
@@ -752,7 +752,7 @@ void ProcessBackground::fitBackgroundFunction(const std::string &bkgdfunctiontyp
   // Set output workspace
   const auto &vecX = m_outputWS->x(0);
   const auto &vecY = m_outputWS->y(0);
-  FunctionDomain1DVector domain(vecX.rawData());
+  FunctionDomain1DVector domain(vecX);
   FunctionValues values(domain);
 
   funcout->function(domain, values);
