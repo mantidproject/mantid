@@ -27,15 +27,12 @@ def set_matplotlib_backend():
     This will set the backend if it hasn't been already. It also returns
     the name of the backend to be the name to be used for importing the
     correct matplotlib widgets."""
-    from qtpy import PYQT5
-
-    # Qt5 uses the legacy "Qt5Agg" backend; Qt6 (and other modern bindings) use
-    # the binding-agnostic "QtAgg" backend introduced in matplotlib 3.5.
-    qtagg_backend = "Qt5Agg" if PYQT5 else "QtAgg"
+    # Qt6 uses the binding-agnostic "QtAgg" backend introduced in matplotlib 3.5.
+    qtagg_backend = "QtAgg"
 
     backend = matplotlib.get_backend()
     if backend.startswith("module://"):
-        for suffix in ["workbench", "qt5agg", "qtagg", "backend_interagg"]:
+        for suffix in ["workbench", "qtagg", "backend_interagg"]:
             if backend.endswith(suffix):
                 backend = qtagg_backend
                 break

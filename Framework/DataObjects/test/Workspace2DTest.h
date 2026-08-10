@@ -71,11 +71,11 @@ public:
     ;
 
     for (int i = 0; i < nhist; ++i) {
-      TS_ASSERT_EQUALS(ws->dataX(i).size(), nbins + 1);
+      TS_ASSERT_EQUALS(ws->x(i).size(), nbins + 1);
       ;
-      TS_ASSERT_EQUALS(ws->dataY(i).size(), nbins);
+      TS_ASSERT_EQUALS(ws->y(i).size(), nbins);
       ;
-      TS_ASSERT_EQUALS(ws->dataE(i).size(), nbins);
+      TS_ASSERT_EQUALS(ws->e(i).size(), nbins);
       ;
     }
   }
@@ -137,7 +137,7 @@ public:
     double aNumber = 5.3;
     auto v = std::make_shared<HistogramData::HistogramX>(nbins + 1, LinearGenerator(aNumber, 1.0));
     TS_ASSERT_THROWS_NOTHING(ws->setSharedX(0, v));
-    TS_ASSERT_EQUALS(ws->dataX(0)[0], aNumber);
+    TS_ASSERT_EQUALS(ws->x(0)[0], aNumber);
     TS_ASSERT_THROWS(ws->setSharedX(-1, v), const std::range_error &);
     TS_ASSERT_THROWS(ws->setSharedX(nhist + 5, v), const std::range_error &);
   }
@@ -146,7 +146,7 @@ public:
     double aNumber = 5.4;
     auto v = Kernel::make_cow<HistogramData::HistogramX>(nbins + 1, LinearGenerator(aNumber, 1.0));
     TS_ASSERT_THROWS_NOTHING(ws->setSharedX(0, v));
-    TS_ASSERT_EQUALS(ws->dataX(0)[0], aNumber);
+    TS_ASSERT_EQUALS(ws->x(0)[0], aNumber);
     TS_ASSERT_THROWS(ws->setSharedX(-1, v), const std::range_error &);
     TS_ASSERT_THROWS(ws->setSharedX(nhist + 5, v), const std::range_error &);
   }
@@ -155,8 +155,8 @@ public:
     double aNumber = 5.5;
     auto v = Kernel::make_cow<HistogramData::HistogramY>(nbins, aNumber);
     TS_ASSERT_THROWS_NOTHING(ws->setCounts(0, v));
-    TS_ASSERT_EQUALS(ws->dataY(0)[0], aNumber);
-    TS_ASSERT_DIFFERS(ws->dataY(1)[0], aNumber);
+    TS_ASSERT_EQUALS(ws->y(0)[0], aNumber);
+    TS_ASSERT_DIFFERS(ws->y(1)[0], aNumber);
   }
 
   void testSetCounts_cowptr2() {
@@ -165,10 +165,10 @@ public:
     auto e = Kernel::make_cow<HistogramData::HistogramE>(nbins, aNumber * 2);
     TS_ASSERT_THROWS_NOTHING(ws->setCounts(0, v));
     TS_ASSERT_THROWS_NOTHING(ws->setCountStandardDeviations(0, e));
-    TS_ASSERT_EQUALS(ws->dataY(0)[0], aNumber);
-    TS_ASSERT_EQUALS(ws->dataE(0)[0], aNumber * 2);
-    TS_ASSERT_DIFFERS(ws->dataY(1)[0], aNumber);
-    TS_ASSERT_DIFFERS(ws->dataE(1)[0], aNumber * 2);
+    TS_ASSERT_EQUALS(ws->y(0)[0], aNumber);
+    TS_ASSERT_EQUALS(ws->e(0)[0], aNumber * 2);
+    TS_ASSERT_DIFFERS(ws->y(1)[0], aNumber);
+    TS_ASSERT_DIFFERS(ws->e(1)[0], aNumber * 2);
   }
 
   void testSetCounts() {
@@ -177,10 +177,10 @@ public:
     auto e = std::make_shared<HistogramData::HistogramE>(nbins, aNumber * 2);
     TS_ASSERT_THROWS_NOTHING(ws->setCounts(0, v));
     TS_ASSERT_THROWS_NOTHING(ws->setCountStandardDeviations(0, e));
-    TS_ASSERT_EQUALS(ws->dataY(0)[0], aNumber);
-    TS_ASSERT_EQUALS(ws->dataE(0)[0], aNumber * 2);
-    TS_ASSERT_DIFFERS(ws->dataY(1)[0], aNumber);
-    TS_ASSERT_DIFFERS(ws->dataE(1)[0], aNumber * 2);
+    TS_ASSERT_EQUALS(ws->y(0)[0], aNumber);
+    TS_ASSERT_EQUALS(ws->e(0)[0], aNumber * 2);
+    TS_ASSERT_DIFFERS(ws->y(1)[0], aNumber);
+    TS_ASSERT_DIFFERS(ws->e(1)[0], aNumber * 2);
   }
 
   void testIntegrateSpectra_entire_range() {

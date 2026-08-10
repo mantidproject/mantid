@@ -269,7 +269,7 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
             for i in range(wksp.getNumberHistograms()):
                 if spectrum_info.hasDetectors(i) and spectrum_info.isMonitor(i):
                     continue  # skip monitor spectra
-                writeDx = not np.all(wksp.readDx(i) == 0)
+                writeDx = not np.all(wksp.dx(i) == 0)
 
                 dataname = "spectrum_%d" % wksp.getSpectrum(i).getSpectrumNo()
 

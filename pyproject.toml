@@ -45,9 +45,7 @@ lint.ignore = [
   "S318", # use of xml module https://docs.astral.sh/ruff/rules/suspicious-xml-mini-dom-usage/
 ]
 exclude = [
-  "qt/applications/workbench/workbench/app/resources.py",
-  "qt/python/mantidqt/mantidqt/resources.py",
-  "qt/python/mantidqt/mantidqt/dialogs/errorreports/resources_qt5.py",
+  "qt/python/mantidqt/mantidqt/dialogs/errorreports/resources.py",
   "Testing/PerformanceTests",
   "Testing/SystemTests/lib",
   "Testing/SystemTests/scripts",
@@ -70,7 +68,6 @@ exclude = [
 "buildconfig/**" = ["INP001"]
 "Framework/Doxygen/**" = ["INP001"]
 "qt/icons/**" = ["INP001"]
-"qt/python/mantidqt/resources.py" = ["INP001"]
 "Framework/DataObjects/src/**" = ["INP001"]
 
 [tool.ruff.lint.mccabe]

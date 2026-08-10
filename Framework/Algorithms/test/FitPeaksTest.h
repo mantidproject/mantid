@@ -2190,7 +2190,7 @@ public:
         window_ws->mutableX(i)[j * 2] = peak_center - halfwidth;
         window_ws->mutableX(i)[j * 2 + 1] = peak_center + halfwidth;
       }
-      TS_ASSERT(window_ws->dataX(i).size() == num_peaks * 2);
+      TS_ASSERT(window_ws->x(i).size() == num_peaks * 2);
     }
 
     AnalysisDataService::Instance().addOrReplace(workspace_name, window_ws);

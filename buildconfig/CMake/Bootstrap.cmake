@@ -21,20 +21,7 @@ endif()
 
 # Clean out python variables set from a previous build so they can be rediscovered again
 function(unset_cached_Python_variables)
-  foreach(
-    _var
-    Python_INCLUDE_DIR
-    Python_LIBRARY
-    Python_NUMPY_INCLUDE_DIR
-    SIP_INCLUDE_DIR
-    PYQT5_PYUIC
-    PYQT5_SIP_DIR
-    PYQT5_SIP_FLAGS
-    PYQT5_VERSION
-    PYQT5_VERSION_STR
-    PYQT5_VERSION_TAG
-    PYRCC5_CMD
-  )
+  foreach(_var Python_INCLUDE_DIR Python_LIBRARY Python_NUMPY_INCLUDE_DIR SIP_INCLUDE_DIR)
     unset(${_var} CACHE)
   endforeach()
 endfunction()

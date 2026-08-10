@@ -19,7 +19,7 @@
    // Allow a Python string (or a unicode string) whenever a string is
    // expected.
    // SIPBytes_* compatibility macros were removed in the sip v6/abi-13 (PyQt6)
-   // module; use the CPython PyBytes_* API directly (valid for Python 3 / PyQt5 too).
+   // module; use the CPython PyBytes_* API directly.
    if (sipIsErr == NULL)
     return (PyBytes_Check(sipPy) || PyUnicode_Check(sipPy));
    if (sipPy == Py_None) {

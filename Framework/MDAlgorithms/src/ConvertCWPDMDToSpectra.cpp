@@ -634,8 +634,8 @@ void ConvertCWPDMDToSpectra::scaleMatrixWorkspace(const API::MatrixWorkspace_spt
                                                   const double &infinitesimal) {
   size_t numspec = matrixws->getNumberHistograms();
   for (size_t iws = 0; iws < numspec; ++iws) {
-    MantidVec &datay = matrixws->dataY(iws);
-    MantidVec &datae = matrixws->dataE(iws);
+    auto &datay = matrixws->mutableY(iws);
+    auto &datae = matrixws->mutableE(iws);
     size_t numelements = datay.size();
     for (size_t i = 0; i < numelements; ++i) {
       // bin with zero counts is not scaled up

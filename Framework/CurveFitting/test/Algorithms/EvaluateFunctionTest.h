@@ -201,7 +201,7 @@ private:
     void makeWorkspace() {
       size_t dn = isHisto ? 1 : 0;
       workspace = WorkspaceFactory::Instance().create("Workspace2D", nSpec, nData + dn, nData);
-      workspace->dataX(workspaceIndex).assign(xBins.begin(), xBins.end());
+      workspace->mutableX(workspaceIndex).assign(xBins.begin(), xBins.end());
     }
 
     void makeFunction() {

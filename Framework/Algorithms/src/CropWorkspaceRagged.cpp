@@ -120,9 +120,9 @@ void CropWorkspaceRagged::exec() {
   for (int64_t i = 0; i < int64_t(numSpectra); ++i) {
     PARALLEL_START_INTERRUPT_REGION
     auto points = tmp->points(i);
-    auto &dataX = outputWS->dataX(i);
-    auto &dataY = outputWS->dataY(i);
-    auto &dataE = outputWS->dataE(i);
+    const auto &xValues = outputWS->x(i);
+    const auto &yValues = outputWS->y(i);
+    const auto &eValues = outputWS->e(i);
 
     // get iterators for cropped region using points
     auto low = std::lower_bound(points.begin(), points.end(), xMin[i]);
@@ -132,19 +132,17 @@ void CropWorkspaceRagged::exec() {
     int64_t upperIndex = std::distance(points.begin(), up);
 
     // get new vectors
-    std::vector<double> newY = getSubVector(dataY, lowerIndex, upperIndex);
-    std::vector<double> newE = getSubVector(dataE, lowerIndex, upperIndex);
-    if (histogram && upperIndex + (size_t)1 <= dataX.size()) {
+    std::vector<double> newY = getSubVector(yValues.rawData(), lowerIndex, upperIndex);
+    std::vector<double> newE = getSubVector(eValues.rawData(), lowerIndex, upperIndex);
+    if (histogram && upperIndex + (size_t)1 <= xValues.size()) {
       // the offset adds one to the upper index for histograms
       // only use the offset if the end is cropped
       upperIndex += 1;
     }
-    std::vector<double> newX = getSubVector(dataX, lowerIndex, upperIndex);
+    std::vector<double> newX = getSubVector(xValues.rawData(), lowerIndex, upperIndex);
 
-    // resize the data
-    dataX.resize(newX.size());
-    dataY.resize(newY.size());
-    dataE.resize(newE.size());
+    // resize the histogram; this keeps X, Y and E consistent with the storage mode
+    outputWS->resizeHistogram(i, newY.size());
 
     // update the data
     outputWS->mutableX(i) = newX;

@@ -149,7 +149,7 @@ void RingProfile::exec() {
       API::WorkspaceFactory::Instance().create(inputWS, 1, output_bins.size() + 1, output_bins.size());
   m_progress->report("Preparing the output");
   // populate Y data getting the values from the output_bins
-  MantidVec &refY = outputWS->dataY(0);
+  auto &refY = outputWS->mutableY(0);
   if (clockwise) {
     for (size_t j = 0; j < output_bins.size(); j++)
       refY[j] = output_bins[output_bins.size() - j - 1];
@@ -160,7 +160,7 @@ void RingProfile::exec() {
 
   // prepare the output for the angles:
   // populate X data
-  MantidVec &refX = outputWS->dataX(0);
+  auto &refX = outputWS->mutableX(0);
 
   std::vector<double> angles(output_bins.size() + 1);
   // we always keep the angle in relative from where it starts and growing in
@@ -399,7 +399,7 @@ void RingProfile::processInstrumentRingProfile(const API::MatrixWorkspace_sptr &
 
     g_log.debug() << "Bin for the index " << i << " = " << bin_n << " Pos = " << spectrumInfo.position(i) << '\n';
 
-    const MantidVec &refY = inputWS->getSpectrum(i).dataY();
+    const auto &refY = inputWS->getSpectrum(i).y();
     // accumulate the values of this spectrum inside this bin
     for (double sp_ind : refY)
       output_bins[bin_n] += sp_ind;
@@ -462,7 +462,7 @@ int RingProfile::getBinForPixel(const Kernel::V3D &position) {
 void RingProfile::processNumericImageRingProfile(const API::MatrixWorkspace_sptr &inputWS,
                                                  std::vector<double> &output_bins) {
   // allocate the bin positions vector
-  std::vector<int> bin_n(inputWS->dataY(0).size(), -1);
+  std::vector<int> bin_n(inputWS->y(0).size(), -1);
 
   // consider that each spectrum is a row in the image
   for (int i = 0; i < static_cast<int>(inputWS->getNumberHistograms()); i++) {
@@ -473,7 +473,7 @@ void RingProfile::processNumericImageRingProfile(const API::MatrixWorkspace_sptr
 
     // accumulate the values from the spectrum to the target bin
     // each column has it correspondend bin_position inside bin_n
-    const MantidVec &refY = inputWS->dataY(i);
+    const auto &refY = inputWS->y(i);
     for (size_t j = 0; j < bin_n.size(); j++) {
 
       // is valid bin? No -> skip
@@ -515,7 +515,7 @@ void RingProfile::processNumericImageRingProfile(const API::MatrixWorkspace_sptr
  */
 void RingProfile::getBinForPixel(const API::MatrixWorkspace_sptr &ws, int spectrum_index, std::vector<int> &bins_pos) {
 
-  if (bins_pos.size() != ws->dataY(spectrum_index).size())
+  if (bins_pos.size() != ws->y(spectrum_index).size())
     throw std::runtime_error("Invalid bin positions vector");
 
   API::NumericAxis *oldAxis2 = dynamic_cast<API::NumericAxis *>(ws->getAxis(1));
@@ -532,7 +532,7 @@ void RingProfile::getBinForPixel(const API::MatrixWorkspace_sptr &ws, int spectr
 
   // the reference to X bins (the limits for each pixel in the horizontal
   // direction)
-  auto xvec = ws->dataX(spectrum_index);
+  const auto &xvec = ws->x(spectrum_index);
 
   // for each pixel inside this row
   for (size_t i = 0; i < xvec.size() - 1; i++) {

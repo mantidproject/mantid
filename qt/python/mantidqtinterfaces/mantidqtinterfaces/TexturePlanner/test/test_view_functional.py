@@ -999,7 +999,7 @@ class TestInstrumentGeometryCounts(_FunctionalTestBase):
         grouping_ws = CreateGroupingWorkspace(InputWorkspace=sim, FixedGroupCount=2, OutputWorkspace="__texplan_test_poldi_grp")[0]
         n_hist = grouping_ws.getNumberHistograms()
         for i in range(n_hist):
-            grouping_ws.dataY(i)[0] = 1.0 if i < n_hist // 2 else 2.0
+            grouping_ws.mutableY(i)[0] = 1.0 if i < n_hist // 2 else 2.0
         grouping_path = os.path.join(self._tmpdir, "poldi_grouping.xml")
         SaveDetectorsGrouping(InputWorkspace=grouping_ws, OutputFile=grouping_path)
 

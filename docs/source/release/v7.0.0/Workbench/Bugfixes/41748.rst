@@ -1,0 +1,1 @@
+- The :ref:`Project Recovery <Project Recovery>` feature is now guarded against a ``TypeError`` emanating from the ``listdir_fullpath`` method.

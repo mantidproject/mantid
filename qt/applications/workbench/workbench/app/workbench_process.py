@@ -73,9 +73,6 @@ def qapplication():
         # The report is sent when the FrameworkManager kicks up
         UsageService.setApplicationName(APPNAME)
 
-        # High-DPI pixmaps are always enabled in Qt6, where this attribute was removed
-        if hasattr(Qt, "AA_UseHighDpiPixmaps"):
-            app.setAttribute(Qt.AA_UseHighDpiPixmaps)
         if hasattr(Qt, "AA_DisableWindowContextHelpButton"):
             app.setAttribute(Qt.AA_DisableWindowContextHelpButton)
 
