@@ -163,9 +163,9 @@ void ConvertAxisByFormula::exec() {
       Progress prog(this, 0.6, 1.0, numberOfSpectra_i);
       for (size_t i = 0; i < numberOfSpectra_i; ++i) {
         try {
-          MantidVec &vec = outputWs->dataX(i);
+          auto &xValues = outputWs->mutableX(i);
           setGeometryValues(spectrumInfo, i, variables);
-          calculateValues(p, vec, variables);
+          calculateValues(p, xValues, variables);
         } catch (std::runtime_error &)
         // two possible exceptions runtime error and NotFoundError
         // both handled the same way
@@ -185,8 +185,8 @@ void ConvertAxisByFormula::exec() {
       // common bins - we only have to calculate once
 
       // Calculate the new (common) X values
-      MantidVec &vec = outputWs->dataX(0);
-      calculateValues(p, vec, variables);
+      auto &xValues = outputWs->mutableX(0);
+      calculateValues(p, xValues, variables);
 
       // copy xVals to every spectra
       auto numberOfSpectra_i = static_cast<int64_t>(outputWs->getNumberHistograms()); // cast to make openmp happy
@@ -212,8 +212,8 @@ void ConvertAxisByFormula::exec() {
   // If the units conversion has flipped the ascending direction of X, reverse
   // all the vectors
   size_t midSpectra = outputWs->getNumberHistograms() / 2;
-  if (!outputWs->dataX(0).empty() && (outputWs->dataX(0).front() > outputWs->dataX(0).back() ||
-                                      outputWs->dataX(midSpectra).front() > outputWs->dataX(midSpectra).back())) {
+  if (!outputWs->x(0).empty() && (outputWs->x(0).front() > outputWs->x(0).back() ||
+                                  outputWs->x(midSpectra).front() > outputWs->x(midSpectra).back())) {
     g_log.information("Reversing data within the workspace to keep the axes in "
                       "increasing order.");
     this->reverse(outputWs);
@@ -243,9 +243,9 @@ void ConvertAxisByFormula::setAxisValue(const double value, const std::vector<Va
   }
 }
 
-void ConvertAxisByFormula::calculateValues(mu::Parser &p, MantidVec &vec, const std::vector<Variable_ptr> &variables) {
-  MantidVec::iterator iter;
-  for (iter = vec.begin(); iter != vec.end(); ++iter) {
+void ConvertAxisByFormula::calculateValues(mu::Parser &p, HistogramData::HistogramX &xValues,
+                                           const std::vector<Variable_ptr> &variables) {
+  for (auto iter = xValues.begin(); iter != xValues.end(); ++iter) {
     setAxisValue(*iter, variables);
     *iter = evaluateResult(p);
   }

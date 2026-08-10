@@ -294,9 +294,8 @@ void DiffractionFocussing2::exec() {
     outSpec.setSpectrumNo(group);
 
     // Get the references to Y and E output and rebin
-    // TODO can only be changed once rebin implemented in HistogramData
-    auto &Yout = outSpec.dataY();
-    auto &Eout = outSpec.dataE();
+    auto &Yout = outSpec.mutableY();
+    auto &Eout = outSpec.mutableE();
 
     // Initialize the group's weight vector here and the dummy vector used for
     // accumulating errors.

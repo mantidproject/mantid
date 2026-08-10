@@ -410,7 +410,7 @@ private:
       temp_ws->mutableE(0)[i] = 0.1 * dataYvalues.getCalculated(i); // assume the error is 10% of the actual value
     }
     const double dw = xView[1] - xView[0]; // bin width
-    temp_ws->mutableX(0)[M] = temp_ws->dataX(0)[M - 1] + dw;
+    temp_ws->mutableX(0)[M] = temp_ws->x(0)[M - 1] + dw;
     //  save workspace to file.
     auto save = Mantid::API::AlgorithmFactory::Instance().create("SaveNexus", 1);
     if (!save)
@@ -534,7 +534,7 @@ private:
     for (size_t i = 0; i < M; i++) {
       ws->mutableX(0)[i] = dataX[i] - dw / 2; // bin boundaries are shifted by half the bind width
       ws->mutableY(0)[i] = dataYvalues.getCalculated(i);
-      ws->dataE(0)[i] =
+      ws->mutableE(0)[i] =
           fractional_error * dataYvalues.getCalculated(i); // assume the error is a small percent of the actual value
     }
     ws->mutableX(0)[M] = dataX[M - 1] + dw / 2; // recall number of bin boundaries is 1 + #bins

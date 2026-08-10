@@ -141,7 +141,7 @@ double SpecialWorkspace2D::getValue(const detid_t detectorID) const {
        << "  Size(Map) = " << this->detID_to_WI.size() << '\n';
     throw std::invalid_argument(os.str());
   } else {
-    return this->dataY(it->second)[0];
+    return this->y(it->second)[0];
   }
 }
 
@@ -160,7 +160,7 @@ double SpecialWorkspace2D::getValue(const detid_t detectorID, const double defau
   else {
     if (it->second < getNumberHistograms()) // don't let it generate an exception
     {
-      return this->dataY(it->second)[0];
+      return this->y(it->second)[0];
     } else {
       g_log.debug() << "getValue(" << detectorID << "->" << (it->second) << ", " << defaultValue
                     << ") index out of range\n";
@@ -271,8 +271,8 @@ void SpecialWorkspace2D::binaryOperation(const unsigned int operatortype) {
 void SpecialWorkspace2D::binaryAND(const std::shared_ptr<const SpecialWorkspace2D> &ws) {
 
   for (size_t i = 0; i < this->getNumberHistograms(); i++) {
-    double y1 = this->dataY(i)[0];
-    double y2 = ws->dataY(i)[0];
+    double y1 = this->y(i)[0];
+    double y2 = ws->y(i)[0];
 
     if (y1 < 1.0E-10 || y2 < 1.0E-10) {
       this->mutableY(i)[0] = 0.0;
@@ -288,8 +288,8 @@ void SpecialWorkspace2D::binaryAND(const std::shared_ptr<const SpecialWorkspace2
 void SpecialWorkspace2D::binaryOR(const std::shared_ptr<const SpecialWorkspace2D> &ws) {
 
   for (size_t i = 0; i < this->getNumberHistograms(); i++) {
-    double y1 = this->dataY(i)[0];
-    double y2 = ws->dataY(i)[0];
+    double y1 = this->y(i)[0];
+    double y2 = ws->y(i)[0];
 
     double max = y1;
     if (y2 > y1) {
@@ -313,8 +313,8 @@ if (y1 < 1.0E-10 && y2 < 1.0E-10){
 void SpecialWorkspace2D::binaryXOR(const std::shared_ptr<const SpecialWorkspace2D> &ws) {
 
   for (size_t i = 0; i < this->getNumberHistograms(); i++) {
-    double y1 = this->dataY(i)[0];
-    double y2 = ws->dataY(i)[0];
+    double y1 = this->y(i)[0];
+    double y2 = ws->y(i)[0];
     if (y1 < 1.0E-10 && y2 < 1.0E-10) {
       this->mutableY(i)[0] = 0.0;
     } else if (y1 > 1.0E-10 && y2 > 1.0E-10) {
@@ -331,7 +331,7 @@ void SpecialWorkspace2D::binaryXOR(const std::shared_ptr<const SpecialWorkspace2
 void SpecialWorkspace2D::binaryNOT() {
 
   for (size_t i = 0; i < this->getNumberHistograms(); i++) {
-    double y1 = this->dataY(i)[0];
+    double y1 = this->y(i)[0];
     if (y1 < 1.0E-10) {
       this->mutableY(i)[0] = 1.0;
     } else {

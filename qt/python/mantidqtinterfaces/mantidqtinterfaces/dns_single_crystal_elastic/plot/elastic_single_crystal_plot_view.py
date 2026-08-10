@@ -10,8 +10,8 @@ DNS single crystal elastic plot tab view of DNS reduction GUI.
 """
 
 from mantidqt.utils.qt import load_ui
-from matplotlib.backends.backend_qt5agg import FigureCanvas
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+from matplotlib.backends.backend_qtagg import FigureCanvas
+from matplotlib.backends.backend_qtagg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 from qtpy.QtCore import Signal
 from qtpy.QtWidgets import QSizePolicy

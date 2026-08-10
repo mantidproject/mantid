@@ -303,7 +303,7 @@ std::size_t createAxisFromRebinParams(const std::vector<double> &params, std::ve
  *  @throw invalid_argument Thrown if input to function is incorrect.
  **/
 void rebin(const std::vector<double> &xold, const std::vector<double> &yold, const std::vector<double> &eold,
-           const std::vector<double> &xnew, std::vector<double> &ynew, std::vector<double> &enew, bool distribution,
+           const std::vector<double> &xnew, std::span<double> ynew, std::span<double> enew, bool distribution,
            bool addition) {
   // Make sure y and e vectors are of correct sizes
   const size_t size_xold = xold.size();
@@ -420,8 +420,7 @@ void rebin(const std::vector<double> &xold, const std::vector<double> &yold, con
  *  @throw runtime_error Thrown if vector sizes are inconsistent
  **/
 void rebinHistogram(const std::vector<double> &xold, const std::vector<double> &yold, const std::vector<double> &eold,
-                    const std::vector<double> &xnew, std::vector<double> &ynew, std::vector<double> &enew,
-                    bool addition) {
+                    const std::vector<double> &xnew, std::span<double> ynew, std::span<double> enew, bool addition) {
   // Make sure y and e vectors are of correct sizes
   const size_t size_yold = yold.size();
   if (xold.size() != (size_yold + 1) || size_yold != eold.size())
@@ -432,8 +431,8 @@ void rebinHistogram(const std::vector<double> &xold, const std::vector<double> &
 
   // If not adding to existing vectors, make sure ynew & enew contain zeroes
   if (!addition) {
-    ynew.assign(size_ynew, 0.0);
-    enew.assign(size_ynew, 0.0);
+    std::fill(ynew.begin(), ynew.end(), 0.0);
+    std::fill(enew.begin(), enew.end(), 0.0);
   }
 
   // Find the starting points to avoid wasting time processing irrelevant bins

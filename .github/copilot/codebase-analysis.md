@@ -3,7 +3,7 @@
 ## 1. Repository Overview
 
 - **Language Stack**: C++20 and Python 3.12
-- **GUI Framework**: Qt5-based Workbench
+- **GUI Framework**: Qt6-based Workbench
 - **Build System**: CMake 3.21+ with Ninja generator
 - **Package Manager**: Conda (with pixi for development)
 - **Purpose**: High-performance framework for materials-science data processing (Neutron scattering, Muon spectroscopy)
@@ -473,7 +473,7 @@ pre-commit run --all-files           # Run all pre-commit hooks
 ### Runtime
 
 - Python 3.12
-- Qt5 / PyQt5
+- Qt6 / PyQt6
 - HDF5 (NeXus format)
 - Boost
 - Various scientific libraries (numpy, scipy, matplotlib via Conda)

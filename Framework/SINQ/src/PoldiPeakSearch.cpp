@@ -286,7 +286,7 @@ double PoldiPeakSearch::getFWHMEstimate(const MantidVec::const_iterator &baseLis
  * @param error :: Error that is set on the workspace.
  */
 void PoldiPeakSearch::setErrorsOnWorkspace(const Workspace2D_sptr &correlationWorkspace, double error) const {
-  MantidVec &errors = correlationWorkspace->dataE(0);
+  auto &errors = correlationWorkspace->mutableE(0);
 
   std::fill(errors.begin(), errors.end(), error);
 }

@@ -375,10 +375,6 @@ MatrixWorkspace_sptr ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUni
   const std::string emodeStr = getProperty("EMode");
   DeltaEMode::Type emode = DeltaEMode::fromString(emodeStr);
 
-  // Not doing anything with the Y vector in to/fromTOF yet, so just pass
-  // empty
-  // vector
-  std::vector<double> emptyVec;
   double efixedProp = getProperty("Efixed");
   if (efixedProp == EMPTY_DBL() && emode == DeltaEMode::Type::Direct) {
     try {
@@ -405,9 +401,9 @@ MatrixWorkspace_sptr ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUni
   auto checkXValues = inputWS->x(checkIndex).rawData();
   try {
     // Convert the input unit to time-of-flight
-    checkFromUnit->toTOF(checkXValues, emptyVec, l1, emode, upmap);
+    checkFromUnit->toTOF(checkXValues.begin(), checkXValues.end(), l1, emode, upmap);
     // Convert from time-of-flight to the desired unit
-    checkOutputUnit->fromTOF(checkXValues, emptyVec, l1, emode, upmap);
+    checkOutputUnit->fromTOF(checkXValues.begin(), checkXValues.end(), l1, emode, upmap);
   } catch (std::runtime_error &) { // if it's a detector specific problem then ignore
   }
 
@@ -437,9 +433,10 @@ MatrixWorkspace_sptr ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUni
     }
     outSpectrumInfo.getDetectorValues(*fromUnit, *outputUnit, emode, signedTheta, i, pmap);
     try {
-      localFromUnit->toTOF(outputWS->dataX(i), emptyVec, l1, emode, pmap);
+      auto &xValues = outputWS->mutableX(i);
+      localFromUnit->toTOF(xValues.begin(), xValues.end(), l1, emode, pmap);
       // Convert from time-of-flight to the desired unit
-      localOutputUnit->fromTOF(outputWS->dataX(i), emptyVec, l1, emode, pmap);
+      localOutputUnit->fromTOF(xValues.begin(), xValues.end(), l1, emode, pmap);
 
       // EventWorkspace part, modifying the EventLists.
       if (m_inputEvents) {
@@ -532,8 +529,8 @@ void ConvertUnits::reverse(const API::MatrixWorkspace_sptr &WS) {
     auto reverseX = make_cow<HistogramData::HistogramX>(WS->x(0).crbegin(), WS->x(0).crend());
     for (size_t j = 0; j < numberOfSpectra; ++j) {
       WS->setSharedX(j, reverseX);
-      std::reverse(WS->dataY(j).begin(), WS->dataY(j).end());
-      std::reverse(WS->dataE(j).begin(), WS->dataE(j).end());
+      std::reverse(WS->mutableY(j).begin(), WS->mutableY(j).end());
+      std::reverse(WS->mutableE(j).begin(), WS->mutableE(j).end());
       if (j % 100 == 0)
         interruption_point();
     }

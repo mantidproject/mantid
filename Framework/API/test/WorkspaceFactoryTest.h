@@ -82,7 +82,7 @@ public:
     TS_ASSERT_EQUALS(child->id(), "Workspace1DTest");
     TS_ASSERT_EQUALS(child->getSpectrum(0).getSpectrumNo(), 123);
     TS_ASSERT_EQUALS(*child->getSpectrum(1).getDetectorIDs().begin(), 456);
-    TS_ASSERT_DIFFERS(child->getSpectrum(2).dataY()[0], 789);
+    TS_ASSERT_DIFFERS(child->getSpectrum(2).y()[0], 789);
 
     // run/logs
     double ei(0.0);
