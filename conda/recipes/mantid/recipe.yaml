@@ -69,6 +69,7 @@ outputs:
       - if: win
         then:
         - lib3mf
+        - fontconfig ${{ fontconfig }}
       - if: osx
         then:
         - libopenblas ${{ libopenblas }}
