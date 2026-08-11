@@ -58,6 +58,8 @@ New features
   now use a lazy file descriptor to check for the correct loading algorithm, further reducing the time taken to load files.
 - (`#40444 <https://github.com/mantidproject/mantid/pull/40444>`_) :ref:`algm-ApplyDetailedBalanceMD`
   has a new parameter, ``RescaleToTemperature``, which allows the scaling of data from one temperature to another.
+- (`#40570 <https://github.com/mantidproject/mantid/pull/40570>`_) - :ref:`algm-Load` and the file loader search process,
+  now use a lazy file descriptor to check for the correct loading algorithm, further reducing time for :ref:`algm-Load`.
 
 Bugfixes
 ########
@@ -111,6 +113,8 @@ Bugfixes
 - (`#40545 <https://github.com/mantidproject/mantid/pull/40545>`_) ``jemalloc`` has been removed from the conda
   activation scripts because it was causing crashes with unrelated applications on Linux due to ``LD_PRELOAD`` being set
   globally. Behaviour is now reverted to Mantid v6.13 where ``jemalloc`` is used only when launching ``mantidworkbench``.
+- (`#40494 <https://github.com/mantidproject/mantid/pull/40494>`_) The Figure Options in the :ref:`Workbench Plot Window <WorkbenchPlotWindow>`
+  no longer throw an error due to missing list entries.
 
 
 Dependencies
@@ -132,6 +136,14 @@ New features
   :py:obj:`IPropertyManager <mantid.kernel.IPropertyManager>` now support the application of multiple
   :py:obj:`IPropertySettings <mantid.kernel.IPropertySettings>` instances to a single property instance. From Python, a
   property's ``getSettings`` method will now return a *vector* of ``IPropertySetting`` when appropriate.
+
+Nexus
+-----
+
+Bugfixes
+########
+- (`#40629 <https://github.com/mantidproject/mantid/pull/40629>`_) :ref:`LoadEventNexus <algm-LoadEventNexus>` will
+  no longer error when loading files originating outside of ISIS that contain the ``detector_1_events`` group.
 
 
 MantidWorkbench

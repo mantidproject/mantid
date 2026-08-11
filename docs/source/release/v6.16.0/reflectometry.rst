@@ -10,6 +10,8 @@ New Features
 - (`#41415 <https://github.com/mantidproject/mantid/pull/41415>`_) The :ref:`Reduction Preview <refl_preview>` tab in the :ref:`ISIS Reflectometry Interface <interface-isis-refl>` now supports creating mask and inverted mask tables using rectangular, elliptical and polygonal selectors.
 - (`#41074 <https://github.com/mantidproject/mantid/pull/41074>`_) The :ref:`Reduction Preview <refl_preview>` tab in the :ref:`ISIS Reflectometry Interface <interface-isis-refl>` now has a checkbox to toggle the Y-axis scale between log and symlog. An input field has also been added to set the linthresh value.
 - (`#41425 <https://github.com/mantidproject/mantid/pull/41025>`_) The :ref:`Save <refl_save>` tab in the :ref:`ISIS Reflectometry Interface <interface-isis-refl>` now has an additional text box to save the model description metadata into ORSO file formats. The model description can also be optionally validated.
+- (`#41353 <https://github.com/mantidproject/mantid/pull/41353>`_) The :ref:`ISIS Reflectometry Interface <interface-isis-refl>` polarization input spin state order field can now be used to specify the :ref:`algm-PolarizationCorrectionWildes` flipper configuration as well as the :ref:`algm-PolarizationCorrectionFredrikze` input spin state order. Leaving the field empty continues to use the defaults from the instrument parameter file or correction algorithm.
+- (`#41353 <https://github.com/mantidproject/mantid/pull/41353>`_) :ref:`algm-ReflectometryReductionOneAuto` now reports when a Fredrikze spin state order is supplied for a Wildes correction, or a Wildes flipper configuration is supplied for a Fredrikze correction.
 
 Bugfixes
 --------
