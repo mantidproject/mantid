@@ -4,7 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.rb_scope import RbScope, RbScopeConsumer
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.instrument_scope import InstrumentScope, InstrumentScopeConsumer
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.data_handling.data_widget import FittingDataWidget
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.plotting.plot_presenter import FittingPlotPresenter
 from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing, GenericObserver
@@ -12,7 +13,7 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.vie
 from typing import List, Dict
 
 
-class FittingPresenter(object):
+class FittingPresenter(RbScopeConsumer, InstrumentScopeConsumer):
     def __init__(self, view: FittingView):
         self.view = view
         self.data_widget = FittingDataWidget(self.view, view=self.view.get_data_widget())
@@ -45,7 +46,9 @@ class FittingPresenter(object):
 
         self.connect_view_signals()
 
-        self._rb_num = None
+        # both replaced by the main window's shared scopes in EngineeringDiffractionPresenter
+        self._rb_scope = RbScope()
+        self._instrument_scope = InstrumentScope()
 
     def fit_all_started(self, do_sequential: bool) -> None:
         if do_sequential:
@@ -120,8 +123,8 @@ class FittingPresenter(object):
         self.plot_widget.set_progress_bar_zero()
 
     def set_rb_num(self, rb_num: str) -> None:
-        self._rb_num = rb_num
-        self.plot_widget.set_rb_num(rb_num)
+        super().set_rb_num(rb_num)
+        self.plot_widget.set_rb_num(self.rb_num)
 
-    def set_instrument_override(self, instrument_index: int) -> None:
-        self.plot_widget.set_instrument(INSTRUMENT_DICT[instrument_index])
+    def _on_instrument_changed(self) -> None:
+        self.plot_widget.set_instrument(self.instrument)

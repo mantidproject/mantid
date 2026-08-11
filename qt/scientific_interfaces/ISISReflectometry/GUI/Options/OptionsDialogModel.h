@@ -18,13 +18,9 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL OptionsDialogModel : public IOptionsDialogM
 public:
   OptionsDialogModel();
   ~OptionsDialogModel() override = default;
-  void applyDefaultOptions(std::map<std::string, bool> &boolOptions, std::map<std::string, int> &intOptions) override;
-  void loadSettings(std::map<std::string, bool> &boolOptions, std::map<std::string, int> &intOptions) override;
-  void saveSettings(const std::map<std::string, bool> &boolOptions,
-                    const std::map<std::string, int> &intOptions) override;
-
-private:
-  const std::string REFLECTOMETRY_SETTINGS_GROUP = "ISISReflectometryUI";
+  [[nodiscard]] OptionsDialogSettings defaultSettings() const override;
+  [[nodiscard]] OptionsDialogSettings readSettings() const override;
+  void saveSettings(OptionsDialogSettings const &settings) override;
 };
 
 } // namespace ISISReflectometry

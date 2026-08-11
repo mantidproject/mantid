@@ -13,13 +13,12 @@
 #include <string>
 
 #include <QMessageBox>
-#include <QSettings>
 #include <QString>
 
 namespace MantidQt::CustomInterfaces {
 
 ALFInstrumentViewBase::ALFInstrumentViewBase(QWidget *parent)
-    : QWidget(parent), m_presenter(), m_settingsGroup("CustomInterfaces/ALFView"), m_sample(), m_vanadium() {}
+    : QWidget(parent), m_presenter(), m_sample(), m_vanadium() {}
 
 QWidget *ALFInstrumentViewBase::generateSampleLoadWidget() {
   m_sample = new API::FileFinderWidget(this);
@@ -48,25 +47,15 @@ QWidget *ALFInstrumentViewBase::generateVanadiumLoadWidget() {
   return m_vanadium;
 }
 
-void ALFInstrumentViewBase::loadSettings() {
-  QSettings settings;
-
-  // Load the last used vanadium run
-  settings.beginGroup(m_settingsGroup);
-  auto const vanadiumRun = settings.value("vanadium-run", "");
-  settings.endGroup();
-
-  if (!vanadiumRun.toString().isEmpty()) {
+void ALFInstrumentViewBase::restoreSettings(const ALFInstrumentSettings &settings) {
+  if (!settings.vanadiumRun().isEmpty()) {
     disable("Loading vanadium");
-    m_vanadium->setUserInput(vanadiumRun);
+    m_vanadium->setUserInput(settings.vanadiumRun());
   }
 }
 
-void ALFInstrumentViewBase::saveSettings() {
-  QSettings settings;
-  settings.beginGroup(m_settingsGroup);
-  settings.setValue("vanadium-run", m_vanadium->getText());
-  settings.endGroup();
+ALFInstrumentSettings ALFInstrumentViewBase::captureSettings() const {
+  return ALFInstrumentSettings(m_vanadium->getText());
 }
 
 void ALFInstrumentViewBase::disable(std::string const &reason) {

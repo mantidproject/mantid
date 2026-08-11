@@ -33,7 +33,6 @@ void InelasticInterface::settings() {
   auto settingsWidget = new Settings(this);
   settingsWidget->connectExistingInterfaces(InterfaceManager::existingInterfaces());
 
-  settingsWidget->loadSettings();
   settingsWidget->setAttribute(Qt::WA_DeleteOnClose);
   settingsWidget->setWindowFlag(Qt::Window);
   settingsWidget->setWindowModality(Qt::WindowModal);

@@ -10,11 +10,10 @@ from mantidqt.utils.observer_pattern import GenericObservable, GenericObserverWi
 from mantid.kernel import logger
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.rb_scope import RbScope, RbScopeConsumer
 from Engineering.common.calibration_info import CalibrationInfo
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import (
-    INSTRUMENT_DICT,
-    CalibrationObserver,
-)
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import CalibrationObserver
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.instrument_scope import InstrumentScope, InstrumentScopeConsumer
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.show_sample.show_sample_presenter import ShowSamplePresenter
 from typing import Callable, TYPE_CHECKING, List, Sequence, Tuple, Any, Type
 
@@ -33,7 +32,7 @@ def redraws_table(func: Callable):
     return wrapper
 
 
-class TexturePresenter:
+class TexturePresenter(RbScopeConsumer, InstrumentScopeConsumer):
     def __init__(self, model: ProjectionModel, view: TextureView):
         # set up mvp components
         self.model = model
@@ -57,8 +56,9 @@ class TexturePresenter:
 
         # set some metadata
         self.current_calibration = CalibrationInfo()
-        self.instrument = "ENGINX"
-        self.rb_num = None
+        # both replaced by the main window's shared scopes in EngineeringDiffractionPresenter
+        self._rb_scope = RbScope()
+        self._instrument_scope = InstrumentScope()
 
         # connect view slots
         # loader slots
@@ -242,9 +242,8 @@ class TexturePresenter:
         self.worker = self.get_worker()
         self.worker.start()
 
-    @staticmethod
-    def _get_ax_data() -> Tuple[ndarray, Tuple[str, str, str]]:
-        return output_settings.get_texture_axes_transform()
+    def _get_ax_data(self) -> Tuple[ndarray, Tuple[str, str, str]]:
+        return output_settings.get_texture_axes_transform(self.rb_num)
 
     def set_worker(self, worker: AsyncTask) -> None:
         self.worker = worker
@@ -289,19 +288,18 @@ class TexturePresenter:
         """
         self.current_calibration = calibration
 
-    def set_instrument_override(self, instrument_index: int) -> None:
-        instrument = INSTRUMENT_DICT[instrument_index]
-        self.view.set_instrument_override(instrument)
-        self.instrument = instrument
+    def _on_instrument_changed(self) -> None:
+        self.view.set_instrument_override(self.instrument)
 
     def set_default_directories(self) -> None:
         save_dir = output_settings.get_output_path()
         self.view.finder_texture_ws.setLastDirectory(save_dir)
         self.view.finder_texture_tables.setLastDirectory(save_dir)
 
-    @staticmethod
-    def _get_setting(setting_name, return_type: Type = str) -> Any:
-        return get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, setting_name, return_type)
+    def _get_setting(self, setting_name: str, return_type: Type = str) -> Any:
+        return get_setting(
+            output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, setting_name, return_type, rb=self.rb_num
+        )
 
     # ------- UI state tracking ----------------------
 
@@ -357,5 +355,12 @@ class TexturePresenter:
         self.view.btn_setCrystal.setEnabled(enabled)
         self.view.btn_setAllCrystal.setEnabled(self.model.can_set_all_crystal(enabled, self._has_selected_wss()))
 
+    def set_rb_scope(self, rb_scope: RbScope) -> None:
+        super().set_rb_scope(rb_scope)
+        # built in __init__, before the window hands over the shared scope, so pass it on
+        self.show_sample_presenter.set_rb_scope(rb_scope)
+
     def set_rb_num(self, rb_num: str) -> None:
-        self.rb_num = rb_num
+        super().set_rb_num(rb_num)
+        # set on model as well
+        self.model.set_rb_num(self.rb_num)

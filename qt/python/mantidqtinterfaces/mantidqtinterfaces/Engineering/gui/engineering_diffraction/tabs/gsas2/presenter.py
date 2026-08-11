@@ -11,18 +11,21 @@ from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.fitting_ads_observer import FittingADSObserver
 from typing import TYPE_CHECKING, List
 
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.rb_scope import RbScope, RbScopeConsumer
+
 if TYPE_CHECKING:
     from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2.model import GSAS2Model
     from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2.view import GSAS2View
     from mantid.api import MatrixWorkspace
 
 
-class GSAS2Presenter(object):
+class GSAS2Presenter(RbScopeConsumer):
     def __init__(self, model: GSAS2Model, view: GSAS2View, test=False):
         self.model = model
         self.view = view
 
-        self.rb_num = None
+        # replaced by the main window's shared scope in EngineeringDiffractionPresenter
+        self._rb_scope = RbScope()
         self.instrument = "ENGINX"
         self.current_plot_index = None
         self.latest_load_parameters = None
@@ -73,9 +76,6 @@ class GSAS2Presenter(object):
     # =================
     # Component Setters
     # =================
-
-    def set_rb_num(self, rb_num: str) -> None:
-        self.rb_num = rb_num
 
     def save_latest_load_parameters(self) -> None:
         self.latest_load_parameters = self._get_load_parameters()

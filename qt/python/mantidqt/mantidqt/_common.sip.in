@@ -61,28 +61,27 @@ qRegisterMetaType<QVector<int>>("QVector<int>");
 // Classes
 // ----------------------------------------------------------------------------
 
-class Configurable {
-%TypeHeaderCode
-#include "MantidQtWidgets/Common/Configurable.h"
-%End
-
-public:
-  void readSettings(const QSettings &storage);
-  void writeSettings(QSettings &storage);
-
-private:
-  // Not constructible or copyable
-  Configurable();
-  Configurable(const Configurable&);
-};
-
-class AlgorithmInputHistoryImpl : Configurable /PyName=AlgorithmInputHistory/ {
+class AlgorithmInputHistorySettings {
 %TypeHeaderCode
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 %End
 
 public:
-static SIP_PYOBJECT Instance() const;
+  AlgorithmInputHistorySettings();
+};
+
+class AlgorithmInputHistoryImpl /PyName=AlgorithmInputHistory/ {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
+%End
+
+public:
+  AlgorithmInputHistorySettings readSettings(const QSettings &storage) const;
+  void restoreSettings(const AlgorithmInputHistorySettings &settings);
+  AlgorithmInputHistorySettings captureSettings() const;
+  void saveSettings(QSettings &storage, const AlgorithmInputHistorySettings &settings) const;
+
+  static SIP_PYOBJECT Instance() const;
 %MethodCode
   auto &cppInstance = MantidQt::API::AlgorithmInputHistory::Instance();
   return sipConvertFromType(&cppInstance, sipType_AlgorithmInputHistoryImpl, nullptr);
@@ -95,7 +94,16 @@ private:
   AlgorithmInputHistoryImpl(const AlgorithmInputHistoryImpl &);
 };
 
-class MessageDisplay : QWidget, Configurable {
+class MessageDisplaySettings {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/MessageDisplay.h"
+%End
+
+public:
+  MessageDisplaySettings();
+};
+
+class MessageDisplay : QWidget {
 %TypeHeaderCode
 #include "MantidQtWidgets/Common/MessageDisplay.h"
 %End
@@ -103,6 +111,10 @@ class MessageDisplay : QWidget, Configurable {
 public:
   MessageDisplay(QWidget *parent = 0);
   MessageDisplay(const QFont &font, QWidget *parent = 0);
+  MessageDisplaySettings readSettings(const QSettings &storage) const;
+  void restoreSettings(const MessageDisplaySettings &settings);
+  MessageDisplaySettings captureSettings() const;
+  void saveSettings(QSettings &storage, const MessageDisplaySettings &settings) const;
   void attachLoggingChannel(int logLevel = -1);
   QPlainTextEdit *getTextEdit();
   void filterMessages();
@@ -1077,6 +1089,19 @@ public:
 };
 
 // ---------------------------------
+// FileFinderSettings
+// ---------------------------------
+class FileFinderSettings
+{
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/FileFinderWidget.h"
+%End
+public:
+    FileFinderSettings(const QString &lastDirectory = QString());
+    const QString &lastDirectory() const;
+};
+
+// ---------------------------------
 // FileFinderWidget
 // ---------------------------------
 class FileFinderWidget : QWidget
@@ -1111,8 +1136,10 @@ public:
     void setLastDirectory(const QString &lastDir);
     void setUseNativeWidget(bool native);
     void setProxyModel(QAbstractProxyModel* /Transfer/);
-    void readSettings(const QString &group);
-    void saveSettings(const QString &group);
+    static FileFinderSettings readSettings(const QSettings &settings);
+    void restoreSettings(const FileFinderSettings &settings);
+    FileFinderSettings captureSettings() const;
+    void saveSettings(QSettings &settings, const FileFinderSettings &values) const;
 
 signals:
     void fileTextChanged(const QString & /*_t1*/);

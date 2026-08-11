@@ -21,6 +21,10 @@
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidKernel/WarningSuppressions.h"
 
+#include <QFile>
+#include <QSettings>
+#include <QTemporaryDir>
+
 #include <memory>
 #include <string>
 #include <utility>
@@ -110,14 +114,48 @@ public:
     m_presenter->getInstrumentView();
   }
 
-  void test_loadSettings_will_load_the_settings_in_the_view() {
-    EXPECT_CALL(*m_view, loadSettings()).Times(1);
-    m_presenter->loadSettings();
+  void test_restoreSettings_restores_the_settings_in_the_view() {
+    ALFInstrumentSettings settings("12345");
+    EXPECT_CALL(*m_view, restoreSettings(testing::Ref(settings))).Times(1);
+    m_presenter->restoreSettings(settings);
   }
 
-  void test_saveSettings_will_save_the_settings_in_the_view() {
-    EXPECT_CALL(*m_view, saveSettings()).Times(1);
-    m_presenter->saveSettings();
+  void test_captureSettings_captures_the_settings_from_the_view() {
+    EXPECT_CALL(*m_view, captureSettings()).Times(1).WillOnce(Return(ALFInstrumentSettings("12345")));
+    TS_ASSERT_EQUALS(m_presenter->captureSettings().vanadiumRun(), QString("12345"));
+  }
+
+  void test_readSettings_does_not_modify_persistent_storage() {
+    QTemporaryDir directory;
+    TS_ASSERT(directory.isValid());
+    auto const filename = directory.filePath("settings.ini");
+    QSettings storage(filename, QSettings::IniFormat);
+    storage.beginGroup("CustomInterfaces/ALFView");
+    storage.setValue("vanadium-run", "12345");
+    storage.setValue("unrelated", "preserved");
+    storage.sync();
+    auto const contentsBefore = fileContents(filename);
+
+    auto const values = ALFInstrumentSettings::readSettings(storage);
+    storage.sync();
+
+    TS_ASSERT_EQUALS(values.vanadiumRun(), QString("12345"));
+    TS_ASSERT_EQUALS(fileContents(filename), contentsBefore);
+  }
+
+  void test_saveSettings_writes_only_documented_key() {
+    QTemporaryDir directory;
+    TS_ASSERT(directory.isValid());
+    QSettings storage(directory.filePath("settings.ini"), QSettings::IniFormat);
+    storage.beginGroup("CustomInterfaces/ALFView");
+    storage.setValue("unrelated", "preserved");
+
+    ALFInstrumentSettings::saveSettings(storage, ALFInstrumentSettings("54321"));
+    storage.sync();
+
+    TS_ASSERT_EQUALS(storage.value("vanadium-run").toString(), QString("54321"));
+    TS_ASSERT_EQUALS(storage.value("unrelated").toString(), QString("preserved"));
+    TS_ASSERT_EQUALS(storage.childKeys().size(), 2);
   }
 
   void test_loadSample_will_not_attempt_a_load_when_an_empty_filepath_is_provided() {
@@ -288,6 +326,12 @@ public:
   }
 
 private:
+  QByteArray fileContents(const QString &filename) {
+    QFile file(filename);
+    TS_ASSERT(file.open(QIODevice::ReadOnly));
+    return file.readAll();
+  }
+
   void expectUpdateInstrumentViewFromModel(std::vector<DetectorTube> const &tubes) {
     EXPECT_CALL(*m_view, clearShapes()).Times(1);
     EXPECT_CALL(*m_model, selectedTubes()).Times(1).WillOnce(Return(tubes));

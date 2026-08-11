@@ -11,11 +11,16 @@
 #include "MantidFrameworkTestHelpers/ScopedFileHelper.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidQtWidgets/Common/IConfiguredAlgorithm.h"
+#include "Reduction/DataReduction.h"
 #include "Reduction/ReductionAlgorithmUtils.h"
 #include <filesystem>
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
+
+#include <QFile>
+#include <QSettings>
+#include <QTemporaryDir>
 
 using namespace MantidQt::CustomInterfaces;
 
@@ -132,6 +137,45 @@ public:
     TS_ASSERT(!ads.doesExist(run2));
   }
 
+  void test_readSettings_does_not_modify_persistent_storage() {
+    QTemporaryDir directory;
+    TS_ASSERT(directory.isValid());
+    auto const filename = directory.filePath("settings.ini");
+    QSettings storage(filename, QSettings::IniFormat);
+    storage.beginGroup("CustomInterfaces/DataReduction");
+    storage.setValue("instrument-name", "IRIS");
+    storage.setValue("analyser-name", "graphite");
+    storage.setValue("reflection-name", "002");
+    storage.setValue("unrelated", "preserved");
+    storage.sync();
+    auto const contentsBefore = fileContents(filename);
+
+    auto const values = DataReductionSettings::readSettings(storage);
+    storage.sync();
+
+    TS_ASSERT_EQUALS(values.instrumentName(), QString("IRIS"));
+    TS_ASSERT_EQUALS(values.analyserName(), QString("graphite"));
+    TS_ASSERT_EQUALS(values.reflectionName(), QString("002"));
+    TS_ASSERT_EQUALS(fileContents(filename), contentsBefore);
+  }
+
+  void test_saveSettings_writes_only_documented_keys() {
+    QTemporaryDir directory;
+    TS_ASSERT(directory.isValid());
+    QSettings storage(directory.filePath("settings.ini"), QSettings::IniFormat);
+    storage.beginGroup("CustomInterfaces/DataReduction");
+    storage.setValue("unrelated", "preserved");
+
+    DataReductionSettings::saveSettings(storage, DataReductionSettings("OSIRIS", "graphite", "004"));
+    storage.sync();
+
+    TS_ASSERT_EQUALS(storage.value("instrument-name").toString(), QString("OSIRIS"));
+    TS_ASSERT_EQUALS(storage.value("analyser-name").toString(), QString("graphite"));
+    TS_ASSERT_EQUALS(storage.value("reflection-name").toString(), QString("004"));
+    TS_ASSERT_EQUALS(storage.value("unrelated").toString(), QString("preserved"));
+    TS_ASSERT_EQUALS(storage.childKeys().size(), 4);
+  }
+
 private:
   Mantid::API::IAlgorithm_sptr createTestAlgorithm(std::string const &name) {
     auto algorithm = Mantid::API::AlgorithmManager::Instance().createUnmanaged(name);
@@ -192,6 +236,12 @@ private:
 )xml";
 
     return ScopedFileHelper::ScopedFile(contents, "test_ParamFile.xml");
+  }
+
+  QByteArray fileContents(const QString &filename) {
+    QFile file(filename);
+    TS_ASSERT(file.open(QIODevice::ReadOnly));
+    return file.readAll();
   }
 
   std::string m_filename;

@@ -218,13 +218,13 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(Nexus::File &filehandle, API::R
         case (NXnumtype::FLOAT32):
         case (NXnumtype::FLOAT64):
           // some 1d float arrays may be loaded
-          read_property = (nxinfo.dims[0] <= 9);
+          read_property = read_property && (nxinfo.dims[0] <= 9);
           break;
         case (NXnumtype::INT16):
         case (NXnumtype::INT32):
         case (NXnumtype::UINT16):
           // only read scalar values for everything else - e.g. integers
-          read_property = (nxinfo.dims.front() == 1);
+          read_property = read_property && (nxinfo.dims.front() == 1);
           break;
         default:
           read_property = false;

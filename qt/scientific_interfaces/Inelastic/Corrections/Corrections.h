@@ -58,8 +58,8 @@ private:
   void initLayout() override;
   /// Initialize Python-dependent sections
   void initLocalPython() override;
-  /// Load the settings of the interface (and child tabs).
-  void loadSettings();
+  /// Legacy operation that writes the default directory, then restores each tab; see @ref settings_lifecycle.
+  void restoreSettings();
 
   /// Called upon a close event.
   void closeEvent(QCloseEvent * /*unused*/) override;

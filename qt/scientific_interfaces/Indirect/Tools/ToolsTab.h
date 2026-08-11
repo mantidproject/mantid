@@ -9,7 +9,7 @@
 #include "../DllConfig.h"
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Spectroscopy/InelasticTab.h"
-#include <QSettings>
+#include <MantidQtWidgets/Common/FileFinderWidget.h>
 #include <QWidget>
 
 namespace MantidQt {
@@ -31,8 +31,12 @@ public:
   ToolsTab(QWidget *parent = nullptr);
   ~ToolsTab() override;
 
-  /// Base methods implemented in derived classes
-  virtual void loadSettings(const QSettings &settings) = 0;
+  /**
+   * Legacy restore operation. It may query the supplied const settings and
+   * update tab widgets, but must not write or synchronize persistent storage.
+   * See @ref settings_lifecycle.
+   */
+  virtual void restoreSettings(const API::FileFinderSettings &settings) = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

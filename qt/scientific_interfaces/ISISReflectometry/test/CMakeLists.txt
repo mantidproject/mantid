@@ -31,6 +31,7 @@ set(TEST_FILES
     Runs/QtSearchModelTest.h
     Runs/SearchResultTest.h
     Options/OptionsDialogPresenterTest.h
+    Options/OptionsDialogSettingsTest.h
     Common/ClipboardTest.h
     Common/DecoderTest.h
     Common/DetectorTest.h
@@ -52,6 +53,7 @@ set(TEST_FILES
     Preview/PreviewJobManagerTest.h
     Preview/PreviewModelTest.h
     Preview/PreviewPresenterTest.h
+    Preview/PreviewSettingsTest.h
 )
 
 set(CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/InterfacesReflectometryTestInitialization.h)
