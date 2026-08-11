@@ -7,6 +7,7 @@
 #  This file is part of the mantid workbench.
 import argparse
 import atexit
+from dataclasses import dataclass
 import os
 import sys
 from pathlib import Path
@@ -37,6 +38,12 @@ from workbench.identity import APPNAME, ORG_DOMAIN, ORGANIZATION  # noqa: E402
 SYSCHECK_INTERVAL = 50
 ORIGINAL_SYS_EXIT = sys.exit
 _QSETTINGS_STAGING_WARNING_EMITTED = False
+
+
+@dataclass(frozen=True)
+class WorkbenchLaunchResult:
+    exit_code: int
+    clean_shutdown: bool
 
 
 def _evaluate_qsettings_staging():
@@ -105,6 +112,48 @@ def _verify_qsettings_staging(session):
     from workbench.config import CONF
 
     _verify_qsettings_filename(session, CONF.filename)
+
+
+def _abort_qsettings_staging(session, reason):
+    """Release the staging coordinator and retain the session for recovery."""
+    try:
+        session.abort()
+    except Exception as error:
+        reason = f"{reason}; coordinator release also failed: {error}"
+    _warn_about_qsettings_staging(
+        f"QSettings staging was not copied back ({reason}). Recoverable files remain under {session.staging_root}."
+    )
+
+
+def _sync_and_finalize_qsettings_staging(session):
+    """Synchronize Workbench settings and copy a clean staged session back."""
+    from qtpy.QtCore import QSettings
+    from workbench.config import CONF
+
+    try:
+        CONF.qsettings.sync()
+        status = CONF.qsettings.status()
+        if status != QSettings.NoError:
+            _abort_qsettings_staging(session, f"QSettings sync failed with status {status}")
+            return
+    except Exception as error:
+        _abort_qsettings_staging(session, f"QSettings sync failed: {error}")
+        return
+
+    try:
+        finalization = session.finalize()
+    except Exception as error:
+        _abort_qsettings_staging(session, f"copy-back failed: {error}")
+        return
+
+    if not finalization.successful:
+        failed_paths = ", ".join(
+            str(result.relative_path) for result in finalization.files if result.status.value in {"conflict", "failed"}
+        )
+        detail = finalization.error or failed_paths or "unknown finalization error"
+        _warn_about_qsettings_staging(
+            f"QSettings staging copy-back was incomplete ({detail}). Recoverable files remain under {session.staging_root}."
+        )
 
 
 ORIGINAL_STDERR = sys.stderr
@@ -186,7 +235,6 @@ def create_and_launch_workbench(app, command_line_options, qsettings_staging_ses
     The optional staging session remains referenced by this stack frame for the
     lifetime of the event loop. Clean-shutdown finalization is wired separately.
     """
-    exit_value = 0
     try:
         # MainWindow needs to be imported locally to ensure the matplotlib
         # backend is not imported too early.
@@ -240,7 +288,8 @@ def create_and_launch_workbench(app, command_line_options, qsettings_staging_ses
                 main_window.close()
 
                 # for task exit code descriptions see the classes AsyncTask and TaskExitCode
-                return int(editor_task.exit_code) if editor_task else 0
+                exit_code = int(editor_task.exit_code) if editor_task else 0
+                return WorkbenchLaunchResult(exit_code, main_window.shutdown_accepted)
 
         main_window.show()
         main_window.setWindowIcon(QIcon(":/images/MantidIcon.ico"))
@@ -256,7 +305,8 @@ def create_and_launch_workbench(app, command_line_options, qsettings_staging_ses
                 AboutPresenter(main_window).show()
 
         # lift-off!
-        exit_value = app.exec()
+        exit_code = app.exec()
+        return WorkbenchLaunchResult(exit_code, main_window.shutdown_accepted)
     except BaseException:
         # We count this as a crash
         import traceback
@@ -271,40 +321,50 @@ def create_and_launch_workbench(app, command_line_options, qsettings_staging_ses
                 traceback.print_exc(file=print_file)
         except OSError:
             pass
-        exit_value = -1
-    finally:
-        ORIGINAL_SYS_EXIT(exit_value)
+        return WorkbenchLaunchResult(-1, False)
 
 
 def initialise_qapp_and_launch_workbench(command_line_options):
     # QSettings staging must be active before anything can import workbench.config.
     qsettings_staging_session = _prepare_qsettings_staging()
 
-    # Set the global figure manager before any other matplotlib initialization.
-    from workbench.plotting.config import init_mpl_gcf
+    try:
+        # Set the global figure manager before any other matplotlib initialization.
+        from workbench.plotting.config import init_mpl_gcf
 
-    init_mpl_gcf()
+        init_mpl_gcf()
 
-    # cleanup static resources at exit
-    atexit.register(cleanup_resources)
+        # cleanup static resources at exit
+        atexit.register(cleanup_resources)
 
-    # fix/validate arguments
-    if command_line_options.script is not None:
-        # convert into absolute path
-        command_line_options.script = os.path.abspath(os.path.expanduser(command_line_options.script))
-        if not os.path.exists(command_line_options.script):
-            print('script "{}" does not exist'.format(command_line_options.script))
-            command_line_options.script = None
+        # fix/validate arguments
+        if command_line_options.script is not None:
+            # convert into absolute path
+            command_line_options.script = os.path.abspath(os.path.expanduser(command_line_options.script))
+            if not os.path.exists(command_line_options.script):
+                print('script "{}" does not exist'.format(command_line_options.script))
+                command_line_options.script = None
 
-    app = initialize()
+        app = initialize()
+        if qsettings_staging_session is not None:
+            _verify_qsettings_staging(qsettings_staging_session)
+
+        # the default sys check interval leads to long lags
+        # when request scripts to be aborted
+        setswitchinterval(SYSCHECK_INTERVAL)
+
+        result = create_and_launch_workbench(app, command_line_options, qsettings_staging_session)
+    except BaseException:
+        if qsettings_staging_session is not None:
+            _abort_qsettings_staging(qsettings_staging_session, "Workbench startup failed")
+        raise
+
     if qsettings_staging_session is not None:
-        _verify_qsettings_staging(qsettings_staging_session)
-
-    # the default sys check interval leads to long lags
-    # when request scripts to be aborted
-    setswitchinterval(SYSCHECK_INTERVAL)
-
-    create_and_launch_workbench(app, command_line_options, qsettings_staging_session)
+        if result.clean_shutdown:
+            _sync_and_finalize_qsettings_staging(qsettings_staging_session)
+        else:
+            _abort_qsettings_staging(qsettings_staging_session, "Workbench did not complete a clean shutdown")
+    ORIGINAL_SYS_EXIT(result.exit_code)
 
 
 if __name__ == "__main__":
