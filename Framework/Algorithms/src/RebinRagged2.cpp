@@ -274,8 +274,8 @@ void RebinRagged::exec() {
       for (int hist = 0; hist < histnumber; ++hist) {
         HistogramBuilder builder;
         builder.setX(outputWS->histogram(hist).points().rawData());
-        builder.setY(outputWS->y(hist).rawData());
-        builder.setE(outputWS->e(hist).rawData());
+        builder.setY(outputWS->y(hist));
+        builder.setE(outputWS->e(hist));
         if (outputWS->hasDx(hist))
           builder.setDx(outputWS->dx(hist));
         builder.setDistribution(dist);

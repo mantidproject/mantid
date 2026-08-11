@@ -521,8 +521,10 @@ void DiscusMultipleScatteringCorrection::exec() {
   prepareQSQ(qmax);
 
   m_simulateEnergiesIndependently = getProperty("SimulateEnergiesIndependently");
-  // call this function with dummy efixed to determine total possible simulation points
-  const auto inputNbins = generateInputKOutputWList(-1.0, inputWS->points(0).rawData()).size();
+  // call this function with dummy efixed to determine total possible simulation points.
+  // the Points is named and const, so that viewing it as a span does not trigger a copy-on-write detach
+  auto const inputPoints = inputWS->points(0);
+  auto const inputNbins = generateInputKOutputWList(-1.0, inputPoints).size();
 
   int nSimulationPointsInt = getProperty("NumberOfSimulationPoints");
   size_t nSimulationPoints = static_cast<size_t>(nSimulationPointsInt);
@@ -599,7 +601,7 @@ void DiscusMultipleScatteringCorrection::exec() {
     if (spectrumInfo.hasDetectors(i) && !spectrumInfo.isMonitor(i) && !spectrumInfo.isMasked(i)) {
 
       const double eFixedValue = efixed.value(spectrumInfo.detector(i).getID());
-      auto xPoints = instrumentWS.points(i).rawData();
+      const auto xPoints = instrumentWS.points(i);
 
       auto kInW = generateInputKOutputWList(eFixedValue, xPoints);
 
@@ -627,7 +629,8 @@ void DiscusMultipleScatteringCorrection::exec() {
                         " bin index=" + std::to_string(std::get<1>(kInW[bin])));
           continue;
         }
-        std::vector<double> wValues = std::get<1>(kInW[bin]) == -1 ? xPoints : std::vector{std::get<2>(kInW[bin])};
+        std::vector<double> wValues = std::get<1>(kInW[bin]) == -1 ? std::vector<double>(xPoints.begin(), xPoints.end())
+                                                                   : std::vector{std::get<2>(kInW[bin])};
 
         if (m_importanceSampling)
           prepareCumulativeProbForQ(kinc, componentWorkspaces);
@@ -790,7 +793,8 @@ void DiscusMultipleScatteringCorrection::exec() {
  * @param xPoints The x points either in momentum (elastic) or energy transfer (inelastic)
  */
 std::vector<std::tuple<double, int, double>>
-DiscusMultipleScatteringCorrection::generateInputKOutputWList(const double efixed, const std::vector<double> &xPoints) {
+DiscusMultipleScatteringCorrection::generateInputKOutputWList(const double efixed,
+                                                              std::span<double const> const xPoints) {
   std::vector<std::tuple<double, int, double>> kInW;
   const double kFixed = toWaveVector(efixed);
   if (m_EMode == DeltaEMode::Elastic) {

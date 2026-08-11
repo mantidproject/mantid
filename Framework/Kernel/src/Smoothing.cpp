@@ -90,7 +90,7 @@ template <typename T> struct GeometricAverager : public Averager<T> {
 };
 
 template <typename T>
-std::vector<T> boxcarSmoothWithFunction(std::vector<T> const &input, unsigned int const numPoints,
+std::vector<T> boxcarSmoothWithFunction(std::span<T const> const input, unsigned int const numPoints,
                                         Averager<T> &averager) {
   if (numPoints < 3) {
     throw std::invalid_argument("Boxcar Smoothing requires at least 3 points in the moving average");
@@ -140,22 +140,33 @@ std::vector<T> boxcarSmoothWithFunction(std::vector<T> const &input, unsigned in
 
 template <typename T> std::vector<T> boxcarSmooth(std::vector<T> const &input, unsigned int const numPoints) {
   detail::ArithmeticAverager<T> averager;
-  return detail::boxcarSmoothWithFunction(input, numPoints, averager);
+  // the template argument is explicit because a std::vector cannot deduce a std::span
+  return detail::boxcarSmoothWithFunction<T>(input, numPoints, averager);
 }
 
 template <typename T> std::vector<T> boxcarErrorSmooth(std::vector<T> const &input, unsigned int const numPoints) {
   detail::ErrorPropagationAverager<T> averager;
-  return detail::boxcarSmoothWithFunction(input, numPoints, averager);
+  return detail::boxcarSmoothWithFunction<T>(input, numPoints, averager);
 }
 
 template <typename T> std::vector<T> boxcarRMSESmooth(std::vector<T> const &input, unsigned int const numPoints) {
   detail::SumSquareAverager<T> averager;
-  return detail::boxcarSmoothWithFunction(input, numPoints, averager);
+  return detail::boxcarSmoothWithFunction<T>(input, numPoints, averager);
 }
 
 template MANTID_KERNEL_DLL std::vector<double> boxcarSmooth(std::vector<double> const &, unsigned int const);
 template MANTID_KERNEL_DLL std::vector<double> boxcarRMSESmooth(std::vector<double> const &, unsigned int const);
 template MANTID_KERNEL_DLL std::vector<double> boxcarErrorSmooth(std::vector<double> const &, unsigned int const);
+
+std::vector<double> boxcarSmooth(std::span<double const> const input, unsigned int const numPoints) {
+  detail::ArithmeticAverager<double> averager;
+  return detail::boxcarSmoothWithFunction(input, numPoints, averager);
+}
+
+std::vector<double> boxcarErrorSmooth(std::span<double const> const input, unsigned int const numPoints) {
+  detail::ErrorPropagationAverager<double> averager;
+  return detail::boxcarSmoothWithFunction(input, numPoints, averager);
+}
 
 // FFT SMOOTHING METHODS
 
