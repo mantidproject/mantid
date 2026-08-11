@@ -1,0 +1,1 @@
+- Fixed a bug in the DataHandling library that caused files to become very large and extremely slow to load. This particulary effected the loading of processed FIGARO data.
