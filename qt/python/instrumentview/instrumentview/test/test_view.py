@@ -50,10 +50,19 @@ class TestFullInstrumentViewView(unittest.TestCase):
         self.assertEqual(self._view._select_bank_tube.text(), "Select Bank/Tube")
         self.assertTrue(self._view._select_bank_tube.isCheckable())
 
+    def test_select_peaks_button_is_checkable(self):
+        self.assertEqual(self._view._select_peaks.text(), "Select Peaks")
+        self.assertTrue(self._view._select_peaks.isCheckable())
+
     def test_is_select_bank_tube_checked(self):
         self.assertFalse(self._view.is_select_bank_tube_checked())
         self._view._select_bank_tube.setChecked(True)
         self.assertTrue(self._view.is_select_bank_tube_checked())
+
+    def test_is_select_peaks_checked(self):
+        self.assertFalse(self._view.is_select_peaks_checked())
+        self._view._select_peaks.setChecked(True)
+        self.assertTrue(self._view.is_select_peaks_checked())
 
     def test_figure_canvas_created(self):
         self._mock_figure_canvas.assert_called_once()

@@ -338,6 +338,8 @@ class FullInstrumentViewView(QWidget):
         )
         self._select_bank_tube = QPushButton("Select Bank/Tube")
         self._select_bank_tube.setCheckable(True)
+        self._select_peaks = QPushButton("Select Peaks")
+        self._select_peaks.setCheckable(True)
         self._render_mode_combo_box = NoWheelComboBox()
         self._render_mode_combo_box.addItems(self._RENDER_MODE_OPTIONS)
         saved_mode = ConfigService.Instance()[self._RENDER_MODE_SETTING_STRING]
@@ -463,6 +465,7 @@ class FullInstrumentViewView(QWidget):
         picking_layout = QHBoxLayout(self._picking_group_box)
         picking_layout.addWidget(self._rubberband_zoom)
         picking_layout.addWidget(self._hover_pick)
+        picking_layout.addWidget(self._select_peaks)
         picking_layout.addWidget(self._select_bank_tube)
         picking_layout.addWidget(self._clear_point_picked_detectors)
 
@@ -774,7 +777,6 @@ class FullInstrumentViewView(QWidget):
         self._count_scale_combo_box.currentIndexChanged.connect(self._presenter.on_count_scale_selected)
         self._flip_beam_check_box.clicked.connect(self._presenter.on_flip_beam_check_box_clicked)
         self._render_mode_combo_box.currentIndexChanged.connect(self._presenter.on_render_mode_changed)
-        self._select_bank_tube.toggled.connect(self._presenter.on_select_bank_tube_toggled)
 
         self._add_connections_to_edits_and_slider(
             self._contour_range_min_edit,
@@ -795,6 +797,9 @@ class FullInstrumentViewView(QWidget):
         self._add_mask.setDisabled(True)
         self._add_selection.clicked.connect(self._presenter.on_add_item_clicked)
         self._add_selection.setDisabled(True)
+
+    def is_select_peaks_checked(self) -> bool:
+        return self._select_peaks.isChecked()
 
     def is_select_bank_tube_checked(self) -> bool:
         return self._select_bank_tube.isChecked()

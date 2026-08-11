@@ -38,23 +38,23 @@ class TestWorkspaceDetectorPeaks(unittest.TestCase):
             mock_workspace = mock.MagicMock()
             mock_workspace.getIndicesFromDetectorIDs.return_value = np.array([], dtype=int)
             wdp = WorkspaceDetectorPeaks("dummy", "TOF", (0, 1e10))
-        wdp.detector_peaks = detector_peaks
+        wdp._detector_peaks = detector_peaks
         return wdp
 
-    def test_get_positions_and_labels_empty(self):
+    def test_get_peaks_indices_and_labels_empty(self):
         wdp = self._create_workspace_detector_peaks([])
-        positions_and_labels = wdp.get_positions_and_labels(np.array([[0, 0, 0]]), np.array([1]))
+        positions_and_labels = wdp.get_peaks_indices_and_labels(np.array([[0, 0, 0]]), np.array([1]))
         # Should still return a tuple with two items
         self.assertEqual(2, len(positions_and_labels))
 
-    def test_get_positions_and_labels(self):
+    def test_get_peaks_indices_and_labels(self):
         peak1 = Peak(1, 0, (1, 0, 0), 100, 10, 10, 10)
         peak2 = Peak(2, 1, (0, 1, 0), 200, 20, 20, 20)
         wdp = self._create_workspace_detector_peaks([DetectorPeaks([peak1]), DetectorPeaks([peak2])])
         detector_positions = np.array([[1, 1, 1], [2, 2, 2], [3, 3, 3]])
         detector_ids = np.array([1, 2, 3])
-        positions, labels = wdp.get_positions_and_labels(detector_positions, detector_ids)
-        np.testing.assert_array_equal(positions, [[1, 1, 1], [2, 2, 2]])
+        indices, labels = wdp.get_peaks_indices_and_labels(detector_positions, detector_ids)
+        np.testing.assert_array_equal(indices, [0, 1])
         self.assertEqual(["(1, 0, 0)", "(0, 1, 0)"], labels)
 
     def test_get_x_values_and_labels(self):
@@ -79,7 +79,7 @@ class TestWorkspaceDetectorPeaks(unittest.TestCase):
         peaks = wdp.get_x_values_and_labels([99])
         self.assertEqual([], peaks)
 
-    def test_get_positions_and_labels_peak_id_larger_than_all_detector_ids(self):
+    def test_get_peaks_indices_and_labels_peak_id_larger_than_all_detector_ids(self):
         # Peak detector ID (999) is larger than every entry in detector_ids.
         # np.searchsorted would return an out-of-bounds index; the valid mask must
         # filter it out so the result is empty rather than raising an IndexError.
@@ -87,8 +87,8 @@ class TestWorkspaceDetectorPeaks(unittest.TestCase):
         wdp = self._create_workspace_detector_peaks([DetectorPeaks([peak])])
         detector_positions = np.array([[1, 1, 1], [2, 2, 2]])
         detector_ids = np.array([1, 2])
-        positions, labels = wdp.get_positions_and_labels(detector_positions, detector_ids)
-        self.assertEqual(0, len(positions))
+        indices, labels = wdp.get_peaks_indices_and_labels(detector_positions, detector_ids)
+        self.assertEqual(0, len(indices))
 
     @mock.patch("instrumentview.Peaks.WorkspaceDetectorPeaks.AnalysisDataService")
     def test_peaks_read_from_ads_workspace(self, peaks_mock_ads):
@@ -107,8 +107,8 @@ class TestWorkspaceDetectorPeaks(unittest.TestCase):
         peaks_mock_ads.retrieve.return_value = mock_peaks_ws
 
         wdp = WorkspaceDetectorPeaks("dummy", "TOF", (0, 100))
-        self.assertEqual(1, len(wdp.detector_peaks))
-        detector_peak = wdp.detector_peaks[0]
+        self.assertEqual(1, len(wdp._detector_peaks))
+        detector_peak = wdp._detector_peaks[0]
         self.assertEqual(1, len(detector_peak.peaks))
         self.assertEqual(test_detector_id, detector_peak.detector_id)
         self.assertEqual("(2, 2, 2)", detector_peak.label)
@@ -130,8 +130,8 @@ class TestWorkspaceDetectorPeaks(unittest.TestCase):
         peaks_mock_ads.retrieve.return_value = mock_peaks_ws
 
         wdp = WorkspaceDetectorPeaks("dummy", "TOF", (0, 100))
-        self.assertEqual(1, len(wdp.detector_peaks))
-        self.assertEqual(1, wdp.detector_peaks[0].detector_id)
+        self.assertEqual(1, len(wdp._detector_peaks))
+        self.assertEqual(1, wdp._detector_peaks[0].detector_id)
 
 
 if __name__ == "__main__":
