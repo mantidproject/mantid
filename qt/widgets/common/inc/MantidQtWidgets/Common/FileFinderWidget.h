@@ -30,6 +30,17 @@ namespace MantidQt {
 // }
 namespace API {
 
+/** Immutable snapshot of the persistent state used by FileFinderWidget. */
+class EXPORT_OPT_MANTIDQT_COMMON FileFinderSettings {
+public:
+  explicit FileFinderSettings(const QString &lastDirectory = {}) : m_lastDirectory(lastDirectory) {}
+
+  const QString &lastDirectory() const { return m_lastDirectory; }
+
+private:
+  QString m_lastDirectory;
+};
+
 /**
 This class defines a widget for file searching. It allows either single or
 multiple files
@@ -128,10 +139,14 @@ public:
   void setFileProblem(const QString &message);
   /// Get file problem, empty string means no error.
   const QString &getFileProblem() const;
-  /// Read settings from the given group
-  void readSettings(const QString &group);
-  /// Save settings in the given group
-  void saveSettings(const QString &group);
+  /// Query `last_directory` from const storage without changing this widget or writing settings.
+  [[nodiscard]] static FileFinderSettings readSettings(const QSettings &settings);
+  /// Restore this widget from an in-memory snapshot without persistent I/O.
+  void restoreSettings(const FileFinderSettings &settings);
+  /// Capture the current state of this widget without persistent I/O.
+  [[nodiscard]] FileFinderSettings captureSettings() const;
+  /// Persist the supplied snapshot to mutable storage positioned at the target group.
+  void saveSettings(QSettings &settings, const FileFinderSettings &values) const;
   /// Alters the text label that contains the number of entries, normally run
   /// when the file is loaded
   void setNumberOfEntries(int number);

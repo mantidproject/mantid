@@ -313,6 +313,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/ProgressableView.h
     inc/MantidQtWidgets/Common/PropertyWidgetFactory.h
     inc/MantidQtWidgets/Common/QSettingsHelper.h
+    inc/MantidQtWidgets/Common/QSettingsChangeAware.h
     inc/MantidQtWidgets/Common/QtAlgorithmRunner.h
     inc/MantidQtWidgets/Common/QtJSONUtils.h
     inc/MantidQtWidgets/Common/SequentialFitDialog.h
@@ -517,6 +518,7 @@ set(INC_FILES
     inc/MantidQtWidgets/Common/QScienceSpinBox.h
     inc/MantidQtWidgets/Common/QtAlgorithmRunner.h
     inc/MantidQtWidgets/Common/QSettingsHelper.h
+    inc/MantidQtWidgets/Common/QSettingsChangeAware.h
     inc/MantidQtWidgets/Common/QStringUtils.h
     inc/MantidQtWidgets/Common/QtJSONUtils.h
     inc/MantidQtWidgets/Common/ScriptRepositoryView.h
@@ -701,7 +703,9 @@ set(QT5_TEST_FILES
     test/AlgorithmPropertiesWidgetTest.h
     test/BatchAlgorithmRunnerTest.h
     test/ConvolutionFunctionModelTest.h
+    test/ConfigurableSettingsTest.h
     test/FileDialogHandlerTest.h
+    test/FileFinderSettingsTest.h
     test/FindFilesThreadPoolManagerTest.h
     test/FindFilesWorkerTest.h
     test/FitDomainTest.h
@@ -727,6 +731,8 @@ set(QT5_TEST_FILES
     test/QtJSONUtilsTest.h
     test/RepoModelTest.h
     test/ParseKeyValueStringTest.h
+    test/ProcessingAlgoWidgetSettingsTest.h
+    test/QSettingsChangeAwareTest.h
     test/ProgressableViewTest.h
     test/WorkspaceUtilsTest.h
     test/Python/SipTest.h

@@ -7,16 +7,27 @@
 #  This file is part of the mantidqt package
 #
 #
+from dataclasses import dataclass
+
 from qtpy.QtWidgets import QAction, QActionGroup
 from qtpy.QtGui import QFont
 
 from mantidqt.utils.qt import import_qt
+from mantidqt.utils.qt.qsettings_change_aware import QSettingsChangeAware
 
 SHOW_FRAMEWORK_OUTPUT_KEY = "MessageDisplay/ShowFrameworkOutput"
 SHOW_ALL_SCRIPT_OUTPUT_KEY = "MessageDisplay/ShowAllScriptOutput"
 SHOW_ACTIVE_SCRIPT_OUTPUT_KEY = "MessageDisplay/ShowActiveScriptOutput"
 
 MessageDisplay_cpp = import_qt(".._common", "mantidqt.widgets", "MessageDisplay")
+
+
+@dataclass(frozen=True)
+class MessageDisplaySettings:
+    cpp_settings: object
+    show_framework_output: bool
+    show_active_script_output: bool
+    show_all_script_output: bool
 
 
 class Priority:
@@ -40,10 +51,18 @@ class MessageDisplay(MessageDisplay_cpp):
         self.last_executed_script = ""
 
     def readSettings(self, qsettings):
-        super(MessageDisplay, self).readSettings(qsettings)
-        self.setShowFrameworkOutput(self.ReadSettingSafely(qsettings, SHOW_FRAMEWORK_OUTPUT_KEY, True, bool))
-        self.setShowActiveScriptOutput(self.ReadSettingSafely(qsettings, SHOW_ACTIVE_SCRIPT_OUTPUT_KEY, True, bool))
-        self.setShowAllScriptOutput(self.ReadSettingSafely(qsettings, SHOW_ALL_SCRIPT_OUTPUT_KEY, False, bool))
+        return MessageDisplaySettings(
+            super(MessageDisplay, self).readSettings(qsettings),
+            self.ReadSettingSafely(qsettings, SHOW_FRAMEWORK_OUTPUT_KEY, True, bool),
+            self.ReadSettingSafely(qsettings, SHOW_ACTIVE_SCRIPT_OUTPUT_KEY, True, bool),
+            self.ReadSettingSafely(qsettings, SHOW_ALL_SCRIPT_OUTPUT_KEY, False, bool),
+        )
+
+    def restoreSettings(self, settings):
+        super(MessageDisplay, self).restoreSettings(settings.cpp_settings)
+        self.setShowFrameworkOutput(settings.show_framework_output)
+        self.setShowActiveScriptOutput(settings.show_active_script_output)
+        self.setShowAllScriptOutput(settings.show_all_script_output)
 
     def ReadSettingSafely(self, qsettings, key, default, type):
         """
@@ -59,11 +78,20 @@ class MessageDisplay(MessageDisplay_cpp):
         except (KeyError, TypeError):
             return default
 
-    def writeSettings(self, qsettings):
-        super(MessageDisplay, self).writeSettings(qsettings)
-        qsettings.setValue(SHOW_FRAMEWORK_OUTPUT_KEY, self.showFrameworkOutput())
-        qsettings.setValue(SHOW_ALL_SCRIPT_OUTPUT_KEY, self.showAllScriptOutput())
-        qsettings.setValue(SHOW_ACTIVE_SCRIPT_OUTPUT_KEY, self.showActiveScriptOutput())
+    def captureSettings(self):
+        return MessageDisplaySettings(
+            super(MessageDisplay, self).captureSettings(),
+            self.showFrameworkOutput(),
+            self.showActiveScriptOutput(),
+            self.showAllScriptOutput(),
+        )
+
+    def saveSettings(self, qsettings, settings):
+        super(MessageDisplay, self).saveSettings(qsettings, settings.cpp_settings)
+        writer = QSettingsChangeAware(qsettings)
+        writer.setValue(SHOW_FRAMEWORK_OUTPUT_KEY, settings.show_framework_output)
+        writer.setValue(SHOW_ALL_SCRIPT_OUTPUT_KEY, settings.show_all_script_output)
+        writer.setValue(SHOW_ACTIVE_SCRIPT_OUTPUT_KEY, settings.show_active_script_output)
 
     def generateContextMenu(self):
         """

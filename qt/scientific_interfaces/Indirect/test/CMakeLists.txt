@@ -2,6 +2,7 @@ set(ALL_TEST_FILES)
 set(ALL_TEST_HELPERS)
 
 add_subdirectory(Common)
+add_subdirectory(Diffraction)
 add_subdirectory(Reduction)
 
 set(CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/InterfacesIndirectTestInitialization.h)

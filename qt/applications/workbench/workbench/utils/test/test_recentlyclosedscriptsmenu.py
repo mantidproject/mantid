@@ -23,7 +23,7 @@ fake_script = os.path.join(working_directory, "fake_script.py")
 class MockCONF(object):
     def __init__(self):
         self.set = MagicMock()
-        self.get = MagicMock(side_effect=lambda x: test_CONF_settings[x])
+        self.get = MagicMock(side_effect=lambda x, **_: test_CONF_settings[x])
         self.has = MagicMock(side_effect=lambda x: x in test_CONF_settings)
 
 
@@ -139,7 +139,7 @@ class RecentlyClosedScriptsMenuTest(TestCase):
 
         menu.remove_script_from_settings("C:/script1.py")
 
-        get.assert_called_once_with(RECENT_SCRIPTS_KEY)
+        get.assert_called_once_with(RECENT_SCRIPTS_KEY, type=list)
         set.assert_called_once_with(RECENT_SCRIPTS_KEY, [(0, "C:/script2.py")])
 
     @patch("workbench.utils.recentlyclosedscriptsmenu.CONF.get", side_effect=KeyError)
@@ -147,7 +147,27 @@ class RecentlyClosedScriptsMenuTest(TestCase):
         menu = RecentlyClosedScriptsMenu(None)
 
         self.assertEqual([], menu._get_scripts_from_settings())
-        get.assert_called_once_with(RECENT_SCRIPTS_KEY)
+        get.assert_called_once_with(RECENT_SCRIPTS_KEY, type=list)
+
+    @patch("workbench.utils.recentlyclosedscriptsmenu.CONF.set")
+    @patch("workbench.utils.recentlyclosedscriptsmenu.CONF.get", side_effect=TypeError)
+    def test_load_malformed_scripts_returns_empty_without_repairing_settings(self, get, set):
+        menu = RecentlyClosedScriptsMenu(None)
+
+        self.assertEqual([], menu._get_scripts_from_settings())
+
+        get.assert_called_once_with(RECENT_SCRIPTS_KEY, type=list)
+        set.assert_not_called()
+
+    @patch("workbench.utils.recentlyclosedscriptsmenu.CONF.set")
+    @patch("workbench.utils.recentlyclosedscriptsmenu.CONF.get", side_effect=TypeError)
+    def test_adding_after_malformed_scripts_performs_explicit_save(self, get, set):
+        menu = RecentlyClosedScriptsMenu(None)
+
+        menu.add_script_to_settings("C:/new.py")
+
+        get.assert_called_once_with(RECENT_SCRIPTS_KEY, type=list)
+        set.assert_called_once_with(RECENT_SCRIPTS_KEY, [(0, "C:/new.py")])
 
     @patch(
         "workbench.utils.recentlyclosedscriptsmenu.CONF.get",
@@ -158,7 +178,7 @@ class RecentlyClosedScriptsMenuTest(TestCase):
 
         load = menu._get_scripts_from_settings()
 
-        get.assert_called_once_with(RECENT_SCRIPTS_KEY)
+        get.assert_called_once_with(RECENT_SCRIPTS_KEY, type=list)
         self.assertEqual(3, len(load))
         self.assertTrue("C:/script1.py" in load)
         self.assertTrue("C:/script2.py" in load)
@@ -171,7 +191,7 @@ class RecentlyClosedScriptsMenuTest(TestCase):
 
         menu.add_script_to_settings("C:/script3.py")
 
-        get.assert_called_once_with(RECENT_SCRIPTS_KEY)
+        get.assert_called_once_with(RECENT_SCRIPTS_KEY, type=list)
         set.assert_called_once_with(RECENT_SCRIPTS_KEY, [(0, "C:/script3.py"), (1, "C:/script1.py"), (2, "C:/script2.py")])
 
     @patch("workbench.utils.recentlyclosedscriptsmenu.CONF.set")
@@ -181,7 +201,7 @@ class RecentlyClosedScriptsMenuTest(TestCase):
 
         menu.add_script_to_settings("C:/script1.py")
 
-        get.assert_called_once_with(RECENT_SCRIPTS_KEY)
+        get.assert_called_once_with(RECENT_SCRIPTS_KEY, type=list)
         set.assert_not_called()
 
     @patch("workbench.utils.recentlyclosedscriptsmenu.CONF.set")
@@ -214,7 +234,7 @@ class RecentlyClosedScriptsMenuTest(TestCase):
 
         menu.add_script_to_settings("11")
 
-        get.assert_called_once_with(RECENT_SCRIPTS_KEY)
+        get.assert_called_once_with(RECENT_SCRIPTS_KEY, type=list)
         self.assertEqual(RECENT_SCRIPT_MAX_NUMBER, len(set.call_args[0][1]))
         set.assert_called_once_with(
             RECENT_SCRIPTS_KEY, [(0, "11"), (1, "1"), (2, "2"), (3, "3"), (4, "4"), (5, "5"), (6, "6"), (7, "7"), (8, "8"), (9, "9")]
@@ -230,7 +250,7 @@ class RecentlyClosedScriptsMenuTest(TestCase):
 
         menu.add_script_to_settings("11")
 
-        get.assert_called_once_with(RECENT_SCRIPTS_KEY)
+        get.assert_called_once_with(RECENT_SCRIPTS_KEY, type=list)
         set.assert_called_once_with(
             RECENT_SCRIPTS_KEY, [(0, "11"), (1, "1"), (2, "2"), (3, "3"), (4, "4"), (5, "5"), (6, "6"), (7, "7"), (8, "8"), (9, "9")]
         )

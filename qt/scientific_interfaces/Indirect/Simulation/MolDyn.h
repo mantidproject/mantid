@@ -20,7 +20,7 @@ public:
   MolDyn(QWidget *parent = nullptr);
 
   /// Load default settings into the interface
-  void loadSettings(const QSettings &settings) override;
+  void restoreSettings(const API::FileFinderSettings &settings) override;
 
   void handleValidation(IUserInputValidator *validator) const override;
   void handleRun() override;

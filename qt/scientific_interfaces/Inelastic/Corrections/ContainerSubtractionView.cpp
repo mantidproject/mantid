@@ -74,9 +74,9 @@ void ContainerSubtractionView::validate(IUserInputValidator *validator) {
   validator->checkDataSelectorIsValid("Container", m_uiForm.dsContainer);
 }
 
-void ContainerSubtractionView::loadSettings(const QSettings &settings) {
-  m_uiForm.dsContainer->readSettings(settings.group());
-  m_uiForm.dsSample->readSettings(settings.group());
+void ContainerSubtractionView::restoreSettings(const API::FileFinderSettings &settings) {
+  m_uiForm.dsContainer->restoreSettings(settings);
+  m_uiForm.dsSample->restoreSettings(settings);
 }
 
 void ContainerSubtractionView::setSampleFBSuffixes(const QStringList &suffixes) {

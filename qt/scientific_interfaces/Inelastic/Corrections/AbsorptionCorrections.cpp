@@ -468,8 +468,8 @@ void AbsorptionCorrections::validateContainerGeometryInputs(IUserInputValidator 
   }
 }
 
-void AbsorptionCorrections::loadSettings(const QSettings &settings) {
-  m_uiForm.dsSampleInput->readSettings(settings.group());
+void AbsorptionCorrections::restoreSettings(const API::FileFinderSettings &settings) {
+  m_uiForm.dsSampleInput->restoreSettings(settings);
 }
 
 void AbsorptionCorrections::setFileExtensionsByName(bool filter) {
