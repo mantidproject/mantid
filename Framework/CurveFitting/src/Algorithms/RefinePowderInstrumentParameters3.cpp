@@ -744,7 +744,7 @@ double RefinePowderInstrumentParameters3::calculateFunction(const map<string, Pa
     setFunctionParameterValues(m_positionFunc, parammap);
 
   // 2. Calculate
-  const auto &vecX = m_dataWS->x(m_wsIndex).rawData();
+  const auto &vecX = m_dataWS->x(m_wsIndex);
   //    Check
   if (vecY.size() != vecX.size())
     throw runtime_error("vecY must be initialized with proper size!");
@@ -752,7 +752,7 @@ double RefinePowderInstrumentParameters3::calculateFunction(const map<string, Pa
   m_positionFunc->function1D(vecY, vecX);
 
   // 3. Calcualte error
-  double chisq = calculateFunctionChiSquare(vecY, m_dataWS->y(m_wsIndex).rawData(), m_dataWS->e(m_wsIndex).rawData());
+  double chisq = calculateFunctionChiSquare(vecY, m_dataWS->y(m_wsIndex), m_dataWS->e(m_wsIndex));
 
   return chisq;
 }
@@ -760,8 +760,8 @@ double RefinePowderInstrumentParameters3::calculateFunction(const map<string, Pa
 //----------------------------------------------------------------------------------------------
 /** Calculate Chi^2
  */
-double calculateFunctionChiSquare(const vector<double> &modelY, const vector<double> &dataY,
-                                  const vector<double> &dataE) {
+double calculateFunctionChiSquare(std::span<double const> const modelY, std::span<double const> const dataY,
+                                  std::span<double const> const dataE) {
   // 1. Check
   if (modelY.size() != dataY.size() || dataY.size() != dataE.size())
     throw runtime_error("Input model, data and error have different size.");

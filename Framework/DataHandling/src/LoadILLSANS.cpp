@@ -1025,16 +1025,18 @@ void LoadILLSANS::adjustTOF() {
 
   // Try to set sensible (but not strictly physical) wavelength axes for monitors
   // Normalisation is done by acquisition time, so these axes should not be used
-  auto firstPixel = m_localWorkspace->x(0).rawData();
+  // scaled in place on a copy of the first pixel's axis, so the pixel itself is untouched
+  auto firstPixel = m_localWorkspace->x(0);
   const double l2 = specInfo.l2(0);
   const double monitor2 = -specInfo.position(nHist - 1).Z();
   const double l1Monitor2 = m_sourcePos - monitor2;
   const double monScale = (l1 + l2) / l1Monitor2;
   std::transform(firstPixel.begin(), firstPixel.end(), firstPixel.begin(),
                  [monScale](double lambda) { return monScale * lambda; });
+  // all the monitors share these bin edges, so build them once
+  const HistogramData::BinEdges binEdges(std::move(firstPixel));
   for (size_t mIndex = nHist - m_numberOfMonitors; mIndex < nHist; ++mIndex) {
     const HistogramData::Counts counts = m_localWorkspace->histogram(mIndex).counts();
-    const HistogramData::BinEdges binEdges(firstPixel);
     m_localWorkspace->setHistogram(mIndex, binEdges, counts);
   }
 }

@@ -11,6 +11,7 @@
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/SplittingInterval.h"
 
+#include <span>
 #include <vector>
 
 namespace Mantid {
@@ -68,8 +69,9 @@ public:
   /// update property "duration" with the duration of the Run's TimeROI attribute
   void setDuration();
 
-  /// Store the given values as a set of histogram bin boundaries
-  void storeHistogramBinBoundaries(const std::vector<double> &histoBins);
+  /// Store the given values as a set of histogram bin boundaries. Taken as a span so that the
+  /// size-checked histogram data types can be stored directly.
+  void storeHistogramBinBoundaries(std::span<double const> histoBins);
   /// Returns the bin boundaries for a given value
   std::pair<double, double> histogramBinBoundaries(const double value) const;
   /// Returns the vector of bin boundaries

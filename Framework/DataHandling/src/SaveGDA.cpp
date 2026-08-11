@@ -143,7 +143,8 @@ void SaveGDA::exec() {
     const auto ws = inputWS->getItem(i);
     const auto matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
 
-    auto x = matrixWS->x(0).rawData();
+    // converted to TOF in place below, but never resized
+    auto x = matrixWS->x(0);
     const size_t bankIndex(groupingScheme[i] - 1);
     if (bankIndex >= calibParams.size()) {
       throw Kernel::Exception::IndexError(bankIndex, calibParams.size(), "Bank number out of range");
@@ -155,11 +156,10 @@ void SaveGDA::exec() {
     std::vector<double> tofScaled;
     tofScaled.reserve(x.size());
     Kernel::Units::dSpacing dSpacingUnit;
-    std::vector<double> yunused;
-    dSpacingUnit.toTOF(x, yunused, 0., Kernel::DeltaEMode::Elastic,
-                       {{Kernel::UnitParams::difa, bankCalibParams.difa},
-                        {Kernel::UnitParams::difc, bankCalibParams.difc},
-                        {Kernel::UnitParams::tzero, bankCalibParams.tzero}});
+    dSpacingUnit.toTOF(x.begin(), x.end(), 0., Kernel::DeltaEMode::Elastic,
+                       Kernel::UnitParametersMap{{Kernel::UnitParams::difa, bankCalibParams.difa},
+                                                 {Kernel::UnitParams::difc, bankCalibParams.difc},
+                                                 {Kernel::UnitParams::tzero, bankCalibParams.tzero}});
     std::transform(x.begin(), x.end(), std::back_inserter(tofScaled),
                    [](const double tofVal) { return tofVal * tofScale; });
     const auto averageDeltaTByT = computeAverageDeltaTByT(tofScaled);

@@ -446,10 +446,10 @@ void Run::setDuration() {
  * Store the given values as a set of energy bin boundaries. Throws
  *    - an invalid_argument if fewer than 2 values are given;
  *    - an out_of_range error if first value is greater of equal to the last
- * @param histoBins :: A vector of values that are interpreted as bin boundaries
- * from a histogram
+ * @param histoBins :: A contiguous range of values that are interpreted as bin
+ * boundaries from a histogram
  */
-void Run::storeHistogramBinBoundaries(const std::vector<double> &histoBins) {
+void Run::storeHistogramBinBoundaries(std::span<double const> const histoBins) {
   if (histoBins.size() < 2) {
     std::ostringstream os;
     os << "Run::storeEnergyBinBoundaries - Fewer than 2 values given, size=" << histoBins.size()
@@ -463,7 +463,7 @@ void Run::storeHistogramBinBoundaries(const std::vector<double> &histoBins) {
        << histoBins.size() << ". Cannot interpret values as bin boundaries.";
     throw std::out_of_range(os.str());
   }
-  m_histoBins = histoBins;
+  m_histoBins.assign(histoBins.begin(), histoBins.end());
 }
 
 /**

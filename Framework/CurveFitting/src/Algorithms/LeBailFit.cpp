@@ -426,8 +426,7 @@ void LeBailFit::execPatternCalculation() {
   g_log.information() << "Output individual peaks  = " << ploteachpeak << ".\n";
   if (ploteachpeak) {
     for (size_t ipk = 0; ipk < m_lebailFunction->getNumberOfPeaks(); ++ipk) {
-      // calPeak still requires a std::vector<double>
-      m_outputWS->mutableY(9 + ipk) = m_lebailFunction->calPeak(ipk, vecX.rawData(), m_outputWS->y(9 + ipk).size());
+      m_outputWS->mutableY(9 + ipk) = m_lebailFunction->calPeak(ipk, vecX, m_outputWS->y(9 + ipk).size());
     }
   }
 
@@ -1372,7 +1371,7 @@ void LeBailFit::execRandomWalkMinimizer(size_t maxcycles, map<string, Parameter>
                         " unphyiscal parameters values.");
   }
 
-  doMarkovChain(parammap, vecX, vecPurePeak, vecBkgd.rawData(), maxcycles, startR, randomseed);
+  doMarkovChain(parammap, vecX, vecPurePeak, vecBkgd, maxcycles, startR, randomseed);
 
   // 5. Sum up: retrieve the best result from class variable: m_bestParameters
   Rfactor finalR(-DBL_MAX, -DBL_MAX);
@@ -1406,8 +1405,9 @@ void LeBailFit::execRandomWalkMinimizer(size_t maxcycles, map<string, Parameter>
 /** Work on Markov chain to 'solve' LeBail function
  */
 void LeBailFit::doMarkovChain(const map<string, Parameter> &parammap, const Mantid::HistogramData::HistogramX &vecX,
-                              const Mantid::HistogramData::HistogramY &vecPurePeak, const vector<double> &vecBkgd,
-                              size_t maxcycles, const Rfactor &startR, int randomseed) {
+                              const Mantid::HistogramData::HistogramY &vecPurePeak,
+                              const Mantid::HistogramData::HistogramY &vecBkgd, size_t maxcycles, const Rfactor &startR,
+                              int randomseed) {
 
   // Rfactors in loop
   Rfactor currR(-DBL_MAX, -DBL_MAX), newR(-DBL_MAX, -DBL_MAX);
@@ -1862,14 +1862,14 @@ bool LeBailFit::calculateDiffractionPattern(const HistogramX &vecX, const Histog
     }
 
     // Calculate peak intensity
-    peaksvalid = m_lebailFunction->calculatePeaksIntensities(vecX.rawData(), vecPureY, values);
+    peaksvalid = m_lebailFunction->calculatePeaksIntensities(vecX, vecPureY, values);
   } // [input is raw]
   else {
     // Calculate peaks intensities
     g_log.debug() << "Calculate diffraction pattern from input data with "
                      "background removed. "
                   << ".\n";
-    peaksvalid = m_lebailFunction->calculatePeaksIntensities(vecX.rawData(), vecY.rawData(), values);
+    peaksvalid = m_lebailFunction->calculatePeaksIntensities(vecX, vecY, values);
   }
 
   // Calculate Le Bail function
@@ -2148,7 +2148,7 @@ bool LeBailFit::acceptOrDeny(Rfactor currR, Rfactor newR) {
  * @param rfactor :: R-factor (Rwp and Rp)
  * @param istep:     current MC step to be recorded
  */
-void LeBailFit::bookKeepBestMCResult(const map<string, Parameter> &parammap, const vector<double> &bkgddata,
+void LeBailFit::bookKeepBestMCResult(const map<string, Parameter> &parammap, std::span<double const> const bkgddata,
                                      Rfactor rfactor, size_t istep) {
   // TODO : [RPRWP] Here is a metric of goodness of it.
   double goodness = rfactor.Rwp;
@@ -2172,7 +2172,7 @@ void LeBailFit::bookKeepBestMCResult(const map<string, Parameter> &parammap, con
     }
 
     // c) Background
-    m_bestBackgroundData = bkgddata;
+    m_bestBackgroundData.assign(bkgddata.begin(), bkgddata.end());
   } else {
     // In code calling this function, it should be better always.
     g_log.warning("[Book keep best MC result] Shouldn't be here as it is found "

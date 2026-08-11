@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 
+#include <span>
 #include <utility>
 
 #include "MantidAPI/ADSValidator.h"
@@ -81,15 +82,15 @@ std::pair<double, double> getOverlap(const MatrixWorkspace_sptr &ws1, const Matr
 }
 
 /**
- * @brief Calculates the median of a vector
- * @param vec : input vector
+ * @brief Calculates the median of a contiguous range
+ * @param vec : input range
  * @return the median if not empty, 1 otherwise
  */
-double median(const std::vector<double> &vec) {
+double median(std::span<double const> const vec) {
   if (vec.empty())
     return 1;
   const size_t s = vec.size();
-  std::vector<double> sorted = vec;
+  std::vector<double> sorted(vec.begin(), vec.end());
   std::sort(sorted.begin(), sorted.end());
   if (s % 2 == 0) {
     return 0.5 * (sorted[s / 2] + sorted[s / 2 - 1]);
@@ -110,7 +111,7 @@ MatrixWorkspace_sptr medianWorkspaceLocal(const MatrixWorkspace_sptr &ws) {
   for (int i = 0; i < static_cast<int>(nSpectra); ++i) {
     const size_t wsIndex = static_cast<size_t>(i);
     auto &y = out->mutableY(wsIndex);
-    y = std::vector<double>(1, median(ws->y(wsIndex).rawData()));
+    y = std::vector<double>(1, median(ws->y(wsIndex)));
   }
   return out;
 }

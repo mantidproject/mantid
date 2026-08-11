@@ -49,7 +49,7 @@ public:
   // virtual double height()const;
 
   using IFunction1D::function;
-  void function(std::vector<double> &out, const std::vector<double> &xValues) const override;
+  void function(std::span<double> out, std::span<double const> xValues) const override;
 
   /// Function you want to fit to.
   void function1D(double *out, const double *xValues, const size_t nData) const override;

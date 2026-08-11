@@ -1148,7 +1148,7 @@ bool FitPowderDiffPeaks::fitSinglePeakConfident(const BackToBackExponential_sptr
   g_log.notice(dbss2.str());
 
   // 3. Estimate peak heights
-  size_t imaxheight = findMaxValue(peakdataws->y(1).rawData());
+  size_t imaxheight = findMaxValue(peakdataws->y(1));
   double maxheight = peakdataws->y(1)[imaxheight];
   if (maxheight <= m_minPeakHeight) {
     // Max height / peak height is smaller than user defined minimum height.  No
@@ -2968,7 +2968,7 @@ bool observePeakParameters(const Workspace2D_sptr &dataws, size_t wsindex, doubl
   const auto &Y = dataws->y(wsindex);
 
   // 2. The highest peak should be the centre
-  size_t icentre = findMaxValue(Y.rawData());
+  size_t icentre = findMaxValue(Y);
   centre = X[icentre];
   height = Y[icentre];
 
@@ -3056,7 +3056,7 @@ bool observePeakParameters(const Workspace2D_sptr &dataws, size_t wsindex, doubl
  * @param Y :: vector to get maximum value from
  * @return index of the maximum value
  */
-size_t findMaxValue(const std::vector<double> &Y) {
+size_t findMaxValue(std::span<double const> const Y) {
 
   auto maxIt = std::max_element(Y.begin(), Y.end());
   return std::distance(Y.begin(), maxIt);

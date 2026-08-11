@@ -286,7 +286,8 @@ std::pair<size_t, size_t> SplineInterpolation::findInterpolationRange(const Matr
                                                                       const MatrixWorkspace_sptr &mwspt,
                                                                       const size_t row) {
 
-  auto xAxisIn = iwspt->x(row).rawData();
+  // a sorted copy is needed, so this must not alias the input; the length is unchanged
+  auto xAxisIn = iwspt->x(row);
   std::sort(xAxisIn.begin(), xAxisIn.end());
   const auto &xAxisOut = mwspt->x(0);
 
