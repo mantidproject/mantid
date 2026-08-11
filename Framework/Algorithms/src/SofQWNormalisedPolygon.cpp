@@ -357,7 +357,7 @@ void SofQWNormalisedPolygon::exec() {
   for (int64_t i = 0; i < static_cast<int64_t>(nHistos); ++i) {
     PARALLEL_START_INTERRUPT_REGION
 
-    if (spectrumInfo.isMasked(i) || spectrumInfo.isMonitor(i)) {
+    if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMasked(i) || spectrumInfo.isMonitor(i)) {
       continue;
     }
     const auto *det = m_EmodeProperties.m_emode == 1 ? nullptr : &spectrumInfo.detector(i);

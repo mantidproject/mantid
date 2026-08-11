@@ -35,32 +35,16 @@ using namespace Kernel;
  * @return A summary of the algorithm
  */
 const std::string SofQW::summary() const {
-  return "Computes S(Q,w) using a either centre point or parallel-piped "
-         "rebinning.\n"
-         "The output from each method is:\n"
-         "CentrePoint - centre-point rebin that takes no account of pixel "
-         "curvature or area overlap\n\n"
-         "Polygon - parallel-piped rebin, outputting a weighted-sum of "
-         "overlapping polygons\n\n"
-         "NormalisedPolygon - parallel-piped rebin, outputting a weighted-sum "
-         "of "
-         "overlapping polygons normalised by the fractional area of each "
+  return "Computes S(Q,w) via the SofQWNormalisedPolygon algorithm.\n"
+         "The output is a parallel-piped rebin, outputting a weighted-sum "
+         "of overlapping polygons normalised by the fractional area of each "
          "overlap";
 }
 
 /**
  * Create the input properties
  */
-void SofQW::init() {
-  createCommonInputProperties(*this);
-
-  // Add the Method property to control which algorithm is called
-  const char *methodOptions[] = {"Centre", "Polygon", "NormalisedPolygon"};
-  this->declareProperty(
-      "Method", "Centre",
-      std::make_shared<StringListValidator>(std::vector<std::string>(methodOptions, methodOptions + 3)),
-      "Defines the method used to compute the output.");
-}
+void SofQW::init() { createCommonInputProperties(*this); }
 
 /**
  * Create the common set of input properties for the given algorithm
@@ -108,9 +92,7 @@ void SofQW::createCommonInputProperties(API::Algorithm &alg) {
 }
 
 void SofQW::exec() {
-  // Find the approopriate algorithm
-  std::string method = this->getProperty("Method");
-  std::string child = "SofQW" + method;
+  std::string child = "SofQWNormalisedPolygon";
 
   // Setup and run
   Algorithm_sptr childAlg = std::dynamic_pointer_cast<Algorithm>(createChildAlgorithm(child, 0.0, 1.0));
