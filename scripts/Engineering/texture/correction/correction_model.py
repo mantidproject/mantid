@@ -14,6 +14,7 @@ from mantid.simpleapi import (
     SetInstrumentParameter,
     ConvertUnits,
     MonteCarloAbsorption,
+    EstimateScatteringVolumeCentreOfMass,
     CloneWorkspace,
     SaveNexus,
     logger,
@@ -31,8 +32,14 @@ from Engineering.common.texture_sample_viewer import has_valid_shape
 from typing import Sequence, Tuple
 from mantid.dataobjects import Workspace2D
 from Engineering.common.calibration_info import CalibrationInfo
-from Engineering.common.instrument_config import get_experiment_config
-from Engineering.texture.texture_helper import get_gauge_vol_str, load_all_orientations
+from Engineering.common.instrument_config import ExperimentConfig, get_experiment_config
+from Engineering.texture.texture_helper import estimate_element_size, get_gauge_vol_str, load_all_orientations
+
+# the per-detector scattering centres are handed to the focusing as run logs, so that they survive
+# being saved and reloaded with the corrected data
+SCATTERING_CENTRE_TABLE = "_scattering_centres"
+SCATTERING_CENTRE_DETID_LOG = "ScatteringCentreDetIDs"
+SCATTERING_CENTRE_POSITION_LOGS = {"X": "ScatteringCentreX", "Y": "ScatteringCentreY", "Z": "ScatteringCentreZ"}
 
 
 class TextureCorrectionModel:
@@ -53,6 +60,67 @@ class TextureCorrectionModel:
         temp_ws = ConvertUnits(ws, Target="Wavelength")
         method_dict["OutputWorkspace"] = "_abs_corr"
         MonteCarloAbsorption(temp_ws, **method_dict)
+
+    def calc_scattering_centres(self, ws: str, preset: str | None = None) -> None:
+        """Estimate a neutron weighted scattering centre for each detector and attach them to `ws`.
+
+        The centres depend on the sample shape, the gauge volume and the beam optics, all of which
+        have already been set up for the absorption correction, so they are calculated alongside it.
+        They are attached to the workspace as run logs so that they travel with the corrected data
+        through saving and reloading, and can be picked up by the focusing to correct the calibration
+        DIFCs for a scattering volume which is not centred on the sample position.
+
+        A failure here is not fatal - the correction the centres feed is an improvement on assuming
+        the scattering comes from the sample position, so if they cannot be calculated the focusing
+        simply falls back to its previous behaviour.
+        """
+        workspace = ADS.retrieve(ws)
+        element_size, units = estimate_element_size(workspace, self._get_gauge_extent(preset))
+        # the attenuation is summed over the workspace's wavelength bins, so it has to be in wavelength
+        temp_ws = ConvertUnits(workspace, Target="Wavelength", StoreInADS=False)
+        try:
+            EstimateScatteringVolumeCentreOfMass(
+                InputWorkspace=temp_ws,
+                UseNeutronWeightings=True,
+                DetectorScatteringCentres=SCATTERING_CENTRE_TABLE,
+                ElementSize=element_size,
+                ElementUnits=units,
+            )
+        except (RuntimeError, ValueError) as err:
+            logger.warning(
+                f"Could not estimate per-detector scattering centres for {ws} ({err}); the focusing will assume "
+                f"the scattering volume is centred on the sample position"
+            )
+            return
+        self.attach_scattering_centres(ws, SCATTERING_CENTRE_TABLE)
+
+    @staticmethod
+    def attach_scattering_centres(ws: str, table_name: str = SCATTERING_CENTRE_TABLE) -> None:
+        """Move the scattering centre table onto the run of `ws` as array logs, then discard it.
+
+        Positions are in metres in the lab frame, matching the detector positions the focusing
+        compares them against.
+        """
+        table = ADS.retrieve(table_name)
+        run = ADS.retrieve(ws).mutableRun()
+        run.addProperty(SCATTERING_CENTRE_DETID_LOG, [int(detid) for detid in table.column("detid")], True)
+        for column, log in SCATTERING_CENTRE_POSITION_LOGS.items():
+            run.addProperty(log, [float(pos) for pos in table.column(column.lower())], True)
+        ADS.remove(table_name)
+
+    def _get_gauge_extent(self, preset: str | None) -> float | None:
+        """The shortest dimension of the gauge volume in metres, where the setup is known."""
+        config = self._get_experiment_config(preset)
+        if config is None:
+            return None
+        extents = [config.slit_width, config.slit_height]
+        if config.collimator:
+            extents.append(config.collimator.gauge_width)
+        return min(extents)
+
+    def _get_experiment_config(self, preset: str | None) -> ExperimentConfig | None:
+        instrument = self.calibration.get_instrument() if self.calibration else None
+        return get_experiment_config(instrument, preset)
 
     def calc_divergence(self, ws_name: str, horz: float, vert: float, det_horz: float) -> None:
         # estimate of divergence taken from divergence component of equation 3 in
@@ -98,6 +166,7 @@ class TextureCorrectionModel:
                 self.define_gauge_volume(ws, abs_args["gauge_vol_preset"], abs_args["gauge_vol_file"])
                 self.define_beam_and_collimator(ws, abs_args["gauge_vol_preset"])
                 self.calc_absorption(ws, abs_args["mc_param_str"])
+                self.calc_scattering_centres(ws, abs_args["gauge_vol_preset"])
                 abs_corr = "_abs_corr"
                 if self.include_atten:
                     val, units = atten_args["atten_val"], atten_args["atten_units"]
@@ -294,8 +363,7 @@ class TextureCorrectionModel:
         properly. A custom gauge volume carries no such information, so it is left undefined and the
         whole sample is treated as uniformly illuminated.
         """
-        instrument = self.calibration.get_instrument() if self.calibration else None
-        config = get_experiment_config(instrument, preset)
+        config = self._get_experiment_config(preset)
         if config is None:
             logger.notice(
                 f"No known instrument setup for gauge volume preset '{preset}' - the beam and collimator "

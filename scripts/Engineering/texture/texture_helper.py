@@ -22,7 +22,7 @@ from mantid.simpleapi import (
     SaveAscii,
 )
 from mantid.api import AnalysisDataService as ADS
-from typing import Optional, Sequence
+from typing import Optional, Sequence, Tuple
 from mantid.dataobjects import Workspace2D, TableWorkspace
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
@@ -667,16 +667,19 @@ def define_gauge_volume(ws: Workspace2D, gauge_str: Optional[str]) -> None:
         DefineGaugeVolume(ws, gauge_str)
 
 
-def get_scattering_centre(ws) -> np.ndarray:
-    """Return a rough estimate centre of mass of the illuminated sample volume, or the origin
-    if the estimate fails (e.g. when the sample lies outside the gauge volume).
+def estimate_element_size(ws, gauge_extent: Optional[float] = None) -> Tuple[float, str]:
+    """Choose an integration element size for EstimateScatteringVolumeCentreOfMass, so that callers
+    do not have to expose one as a user parameter.
 
-    For more accurate calculations, use EstimateScatteringVolumeCentreOfMass directly
+    ``gauge_extent`` is the shortest dimension of the gauge volume in metres, where the caller knows
+    it (the gauge volume itself is only available as an xml string on the run). It is only used to
+    stop the elements being larger than the gauge, which the algorithm rejects.
     """
     if ws.run().hasProperty("GaugeVolume"):
         # if there is a defined gauge volume this will be rasterized and should be small enough
-        # for 1mm elements to be appropriate
-        element_size = 1
+        # for 1mm elements to be appropriate, unless the gauge itself is smaller than that - in which
+        # case put four elements across its shortest side
+        element_size = 1 if gauge_extent is None else min(1, 1000 * gauge_extent / 4)
         units = "mm"
     else:
         # if there is no gauge volume the whole sample shape will be rasterized
@@ -695,6 +698,16 @@ def get_scattering_centre(ws) -> np.ndarray:
         factor = 5 if longest / shortest < 5 else 2
         element_size = shortest / factor
         units = "m"
+    return element_size, units
+
+
+def get_scattering_centre(ws) -> np.ndarray:
+    """Return a rough estimate centre of mass of the illuminated sample volume, or the origin
+    if the estimate fails (e.g. when the sample lies outside the gauge volume).
+
+    For more accurate calculations, use EstimateScatteringVolumeCentreOfMass directly
+    """
+    element_size, units = estimate_element_size(ws)
     try:
         return np.asarray(EstimateScatteringVolumeCentreOfMass(InputWorkspace=ws, ElementSize=element_size, ElementUnits=units))
     except RuntimeError as err:

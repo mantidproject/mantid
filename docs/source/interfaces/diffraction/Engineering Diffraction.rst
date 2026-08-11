@@ -211,6 +211,14 @@ Absorption Correction
 This tab allows corrections to be applied to the input data files, as well as attaching sample information, such as shape, material and orientation. Additional functionality is to correct experimental intensity for beam divergence and
 to calculate a table of attenuation coefficients for a given bin in the spectra.
 
+Where the absorption correction is calculated, a scattering centre is also estimated for every detector with
+:ref:`algm-EstimateScatteringVolumeCentreOfMass` and attached to the corrected data as the sample logs
+``ScatteringCentreDetIDs`` and ``ScatteringCentreX/Y/Z`` (positions in metres in the lab frame). These describe where the
+detected neutrons actually scattered from, which is not the sample position when the gauge volume is only partially
+immersed in the sample. The Focus tab uses them to adjust the calibration DIFCs per detector; when they are absent it
+falls back to the single geometric centre of mass of the illuminated volume, and failing that assumes the gauge volume
+is fully within the sample.
+
 .. image:: ../../images/EngDiff_Correction.png
     :width: 600px
     :align: center

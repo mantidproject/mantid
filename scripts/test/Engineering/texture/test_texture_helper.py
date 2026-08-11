@@ -34,6 +34,7 @@ from Engineering.texture.texture_helper import (
     project_orientation,
     vec_string_to_norm_array,
     define_gauge_volume,
+    estimate_element_size,
     get_scattering_centre,
     convert_to_sscanss_frame,
 )
@@ -907,6 +908,19 @@ class TestGetScatteringCentre(unittest.TestCase):
 
         np.testing.assert_array_equal(out, [0.0, 0.0, 0.0])
         mock_logger.warning.assert_called_once()
+
+    def test_a_gauge_smaller_than_the_default_element_shrinks_the_elements(self):
+        # the algorithm rejects elements bigger than the gauge volume, so a sub-mm gauge needs 4
+        # elements across its shortest side instead of the 1mm default
+        ws = self._make_ws(has_gauge_vol=True)
+
+        self.assertEqual(estimate_element_size(ws, gauge_extent=0.0005), (0.125, "mm"))
+        self.assertEqual(estimate_element_size(ws, gauge_extent=0.004), (1, "mm"))
+
+    def test_the_gauge_extent_is_ignored_when_there_is_no_gauge_volume(self):
+        ws = self._make_ws(has_gauge_vol=False, extents=(0.01, 0.01, 0.01))
+
+        self.assertEqual(estimate_element_size(ws, gauge_extent=0.0005), (0.01 / 5, "m"))
 
 
 class TestConvertToSscanssFrame(unittest.TestCase):
