@@ -18,6 +18,7 @@ from workbench.plotting.plotscriptgenerator.utils import (
     get_plotted_workspaces_names,
     clean_variable_name,
     generate_workspace_retrieval_commands,
+    get_figure_layout,
 )
 
 
@@ -57,6 +58,14 @@ class PlotScriptGeneratorUtilsTest(unittest.TestCase):
             except (SyntaxError, TypeError, ValueError):
                 msg = "Invalid variable name: {}".format(clean_name)
                 self.fail(msg)
+
+    def test_get_default_engine_returns_layout_descriptor_for_tight_engine(self):
+        from matplotlib.layout_engine import TightLayoutEngine
+
+        mock_fig = Mock()
+        mock_fig.get_layout_engine.side_effect = [None, TightLayoutEngine()]
+        self.assertEqual(None, get_figure_layout(mock_fig))
+        self.assertEqual("tight", get_figure_layout(mock_fig))
 
 
 if __name__ == "__main__":
