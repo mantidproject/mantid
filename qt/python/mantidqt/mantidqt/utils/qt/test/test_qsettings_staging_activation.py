@@ -62,6 +62,9 @@ canonical_directory.mkdir()
 canonical_file = canonical_directory / "mantidworkbench.ini"
 canonical_contents = b"[General]\\nseeded=canonical\\n"
 canonical_file.write_bytes(canonical_contents)
+canonical_native_file = config_root / "QtProject.conf"
+canonical_native_contents = b"[General]\\nseeded=canonical-native\\n"
+canonical_native_file.write_bytes(canonical_native_contents)
 
 session = QSettingsStagingSessionManager(eligibility).prepare()
 assert not session.active
@@ -72,19 +75,28 @@ QSettings.setDefaultFormat(QSettings.IniFormat)
 QCoreApplication.setOrganizationName("mantidproject")
 QCoreApplication.setApplicationName("mantidworkbench")
 expected_file = session.staging_root / "mantidproject/mantidworkbench.ini"
+expected_native_file = session.staging_root / "QtProject.conf"
 
 explicit_settings = QSettings(QSettings.IniFormat, QSettings.UserScope, "mantidproject", "mantidworkbench")
 assert Path(explicit_settings.fileName()) == expected_file
 assert explicit_settings.value("seeded") == "canonical"
+
+native_settings = QSettings(QSettings.NativeFormat, QSettings.UserScope, "QtProject", "")
+assert Path(native_settings.fileName()) == expected_native_file
+assert native_settings.value("seeded") == "canonical-native"
 
 libc = ctypes.CDLL(None, use_errno=True)
 inotify_descriptor = libc.inotify_init1(os.O_NONBLOCK | os.O_CLOEXEC)
 assert inotify_descriptor >= 0
 IN_ALL_EVENTS = 0x00000FFF
 staged_watch = libc.inotify_add_watch(inotify_descriptor, os.fsencode(expected_file.parent), IN_ALL_EVENTS)
+staged_root_watch = libc.inotify_add_watch(inotify_descriptor, os.fsencode(session.staging_root), IN_ALL_EVENTS)
 canonical_watch = libc.inotify_add_watch(inotify_descriptor, os.fsencode(canonical_directory), IN_ALL_EVENTS)
+canonical_root_watch = libc.inotify_add_watch(inotify_descriptor, os.fsencode(config_root), IN_ALL_EVENTS)
 assert staged_watch >= 0
+assert staged_root_watch >= 0
 assert canonical_watch >= 0
+assert canonical_root_watch >= 0
 
 explicit_settings.setValue("explicit", "staged")
 explicit_settings.sync()
@@ -95,6 +107,10 @@ assert Path(default_settings.fileName()) == expected_file
 default_settings.setValue("default", "staged")
 default_settings.sync()
 assert default_settings.status() == QSettings.NoError
+
+native_settings.setValue("native", "staged")
+native_settings.sync()
+assert native_settings.status() == QSettings.NoError
 
 events = os.read(inotify_descriptor, 65536)
 os.close(inotify_descriptor)
@@ -109,8 +125,11 @@ while offset < len(events):
     names_by_watch.setdefault(watch, []).append(name)
 
 assert "mantidworkbench.ini.lock" in names_by_watch.get(staged_watch, []), names_by_watch
+assert "QtProject.conf.lock" in names_by_watch.get(staged_root_watch, []), names_by_watch
 assert names_by_watch.get(canonical_watch, []) == [], names_by_watch
+assert names_by_watch.get(canonical_root_watch, []) == [], names_by_watch
 assert canonical_file.read_bytes() == canonical_contents
+assert canonical_native_file.read_bytes() == canonical_native_contents
 assert sorted(path.name for path in canonical_directory.iterdir()) == ["mantidworkbench.ini"]
 assert explicit_settings.value("explicit") == "staged"
 assert explicit_settings.value("default") == "staged"
@@ -170,6 +189,7 @@ real_qsettings = QtCore.QSettings
 
 class FailingQSettings:
     IniFormat = real_qsettings.IniFormat
+    NativeFormat = real_qsettings.NativeFormat
     UserScope = real_qsettings.UserScope
 
     @staticmethod

@@ -95,6 +95,8 @@ class QSettingsStagingSessionManagerTest(unittest.TestCase):
         reporter_settings.write_bytes(b"[ContactInfo]\nName=Reporter\n")
         secondary = nested_root / "Mantid Reduction.ini"
         secondary.write_bytes(b"[Reduction]\nfacility=SNS\n")
+        native_settings = self.config_root / "QtProject.conf"
+        native_settings.write_bytes(b"[General]\nstyle=system\n")
         for artifact in ("mantidworkbench.ini.lock", "old.rmlock", "write.tmp", ".nfs123"):
             (organization_root / artifact).write_text("ignored", encoding="utf-8")
 
@@ -104,6 +106,7 @@ class QSettingsStagingSessionManagerTest(unittest.TestCase):
         staged_secondary = session.staging_root / "mantidproject/nested/Mantid Reduction.ini"
         self.assertEqual(settings.read_bytes(), staged_settings.read_bytes())
         self.assertEqual(secondary.read_bytes(), staged_secondary.read_bytes())
+        self.assertEqual(native_settings.read_bytes(), (session.staging_root / "QtProject.conf").read_bytes())
         self.assertEqual(0o600, staged_settings.stat().st_mode & 0o777)
         self.assertFalse((session.staging_root / "mantidproject/mantidworkbench.ini.lock").exists())
         self.assertFalse((session.staging_root / "mantidproject/mantid-error-reporter.ini").exists())
@@ -116,7 +119,7 @@ class QSettingsStagingSessionManagerTest(unittest.TestCase):
         self.assertEqual(entry.canonical_relative_path, entry.staged_relative_path)
         manifest = json.loads((session.staging_root / MANIFEST_FILENAME).read_text(encoding="utf-8"))
         self.assertNotIn("value=unchanged", json.dumps(manifest))
-        self.assertEqual(2, len(manifest["files"]))
+        self.assertEqual(3, len(manifest["files"]))
         session.abort()
 
     def test_does_not_record_error_reporter_when_supplied_as_an_expected_path(self):
@@ -128,7 +131,7 @@ class QSettingsStagingSessionManagerTest(unittest.TestCase):
     def test_records_expected_file_as_absent_without_creating_it(self):
         session = self.manager().prepare()
 
-        entry = session.manifest[0]
+        entry = next(entry for entry in session.manifest if entry.canonical_relative_path == Path("mantidproject/mantidworkbench.ini"))
         self.assertEqual(Path("mantidproject/mantidworkbench.ini"), entry.canonical_relative_path)
         self.assertIsNone(entry.canonical_sha256)
         self.assertIsNone(entry.canonical_mode)

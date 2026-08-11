@@ -164,7 +164,11 @@ class ReductionApplicationQSettingsStagingTest(unittest.TestCase):
         ):
             result = reduction_application._prepare_qsettings_staging()
 
-        manager_type.assert_called_once_with(eligibility, expected_settings_paths=(reduction_application.REDUCTION_SETTINGS_PATH,))
+        from mantidqt.utils.qt.qsettings_staging_session import QT_PROJECT_SETTINGS_PATH
+
+        manager_type.assert_called_once_with(
+            eligibility, expected_settings_paths=(reduction_application.REDUCTION_SETTINGS_PATH, QT_PROJECT_SETTINGS_PATH)
+        )
         session.activate.assert_called_once_with()
         self.assertIs(session, result)
 
@@ -184,6 +188,7 @@ class ReductionApplicationQSettingsStagingTest(unittest.TestCase):
                     from mantidqt.utils.qt.qsettings_staging import QSettingsStagingEligibility, QSettingsStagingReason
                     from mantidqt.utils.qt.qsettings_staging_session import (
                         COMPLETED_FILENAME,
+                        QT_PROJECT_SETTINGS_PATH,
                         QSettingsStagingSessionManager,
                     )
                     from mantidqtinterfaces import reduction_application
@@ -209,7 +214,7 @@ class ReductionApplicationQSettingsStagingTest(unittest.TestCase):
                         )
                         session = QSettingsStagingSessionManager(
                             eligibility,
-                            expected_settings_paths=(reduction_application.REDUCTION_SETTINGS_PATH,),
+                            expected_settings_paths=(reduction_application.REDUCTION_SETTINGS_PATH, QT_PROJECT_SETTINGS_PATH),
                         ).prepare()
                         session.activate()
 
