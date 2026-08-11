@@ -15,7 +15,6 @@ requirements:
     - doxygen ${{ doxygen }}
     - eigen ${{ eigen }}
     - euphonic ${{ euphonic }}
-    - fontconfig ${{ fontconfig }}
     - graphviz ${{ graphviz }}
     - gsl ${{ gsl }}
     - gtest ${{ gtest }}
