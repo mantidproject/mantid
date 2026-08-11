@@ -187,7 +187,11 @@ class InstrumentRenderer(ABC):
         instrument.  This marker is drawn in screen-space units instead (line
         width / point size), so it stays legible at any zoom level.
 
-        Safe to call from any thread — see ``create_picked_highlight_actor``.
+        Must be called on the Qt thread: it mutates VTK state and renders.  The
+        persistent actor (see ``create_picked_highlight_actor``) keeps that
+        cheap — no actor is added or removed — but callers on the presenter's
+        worker thread still have to marshal via
+        ``FullInstrumentViewView.run_on_main_thread``.
 
         Parameters
         ----------
