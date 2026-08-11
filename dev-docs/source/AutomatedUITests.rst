@@ -153,11 +153,11 @@ threads.
 
 **Neutralise anything modal before the first click.** An unattended test that pops a modal message
 box hangs until the suite times out. ``patch_error_messages``, ``patch_confirmation_box`` and
-``algorithm_dialog_runs`` on the base class cover the three cases that come up.
+``algorithm_dialog_runs`` on the base class cover three common cases that come up.
 
-**Go through the interface, not around it.** Use ``add_data_search_dir`` and let the interface's own
-file finder resolve a run, rather than reaching past the view to inject a workspace - what is being
-tested is the path a user takes.
+**Go through the interface, not around it.** Where possible use ``add_data_search_dir`` and let the
+interface's own file finder resolve a run, rather than reaching past the view to inject a workspace -
+what is being tested is the path a user takes.
 
 **Do not create a ``QApplication`` at module scope.** The base class creates one lazily in ``setUp``
 via ``ensure_qapp()``. Settings are isolated per test into a temporary ini file, so a test can never
