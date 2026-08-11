@@ -313,6 +313,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
             renderer.add_pickable_mesh_to_plotter,
             renderer.add_masked_mesh_to_plotter,
             renderer.create_picked_highlight_actor,
+            renderer.update_picked_highlight,
         ):
             self.assertIn(expected, marshalled)
 
@@ -330,11 +331,17 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
 
         self._presenter.update_picked_detectors_on_view()
 
-        self._presenter._renderer.update_picked_highlight.assert_called_once()
-        args = self._presenter._renderer.update_picked_highlight.call_args[0]
+        renderer = self._presenter._renderer
+        renderer.update_picked_highlight.assert_called_once()
+        args = renderer.update_picked_highlight.call_args[0]
         self.assertIs(args[0], self._mock_view.main_plotter)
         self.assertIs(args[1], self._presenter._pickable_mesh)
         np.testing.assert_array_equal(args[2], self._model._detector_is_picked)
+
+        # This path is reached from the callback worker thread, so the highlight update
+        # must be marshalled onto the Qt thread rather than called directly.
+        marshalled = [call[0][0] for call in self._mock_view.run_on_main_thread.call_args_list]
+        self.assertIn(renderer.update_picked_highlight, marshalled)
 
     def test_on_add_selection_clicked(self):
         n_hist = self._ws.getNumberHistograms()

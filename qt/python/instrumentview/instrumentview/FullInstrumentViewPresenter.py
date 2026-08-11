@@ -311,7 +311,7 @@ class FullInstrumentViewPresenter:
                 mesh.transform(self._transform, inplace=True)
 
         # Must follow the transform so the highlight is built from display coordinates
-        renderer.update_picked_highlight(self._view.main_plotter, self._pickable_mesh, self._model.picked_visibility)
+        run_on_main_thread(renderer.update_picked_highlight, self._view.main_plotter, self._pickable_mesh, self._model.picked_visibility)
 
         # If refreshing the limits we reset both the contour and integration sliders.
         # If not, we need to manually update the contour limits to what they were set to before we added the
@@ -447,7 +447,9 @@ class FullInstrumentViewPresenter:
         # Update to visibility shows up in real time
         picked_visibility = self._model.picked_visibility
         self._renderer.set_pickable_scalars(self._pickable_mesh, picked_visibility, self._visible_label)
-        self._renderer.update_picked_highlight(self._view.main_plotter, self._pickable_mesh, picked_visibility)
+        self._view.run_on_main_thread(
+            self._renderer.update_picked_highlight, self._view.main_plotter, self._pickable_mesh, picked_visibility
+        )
         self._update_line_plot_ws_and_draw(self._view.current_selected_lineplot_unit())
 
     def _on_clear_point_picked_detectors_clicked(self) -> None:
