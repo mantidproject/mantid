@@ -983,6 +983,24 @@ class FullInstrumentViewView(QWidget):
         self.main_plotter.add_mesh(mesh, color=colour, pickable=pickable)
 
     @_skip_if_closing
+    def run_on_main_thread(self, func: Callable, *args, **kwargs):
+        """Run *func* on the Qt thread and return its result.
+
+        Every public method of this class is wrapped in a blocking
+        ``QAppThreadCall`` by the ``@run_on_qapp_thread`` decorator, so calling
+        this one from the presenter's callback worker thread hands the work to
+        the Qt thread and waits for it.  Anything that mutates ``main_plotter``
+        needs that: VTK removes an actor by releasing its graphics resources,
+        which makes the OpenGL context current and fails when the Qt thread
+        already holds it.
+
+        Methods on this class get that protection for free.  This exists for the
+        calls that reach the plotter directly instead — the renderers, which are
+        handed ``main_plotter`` and add actors to it themselves.
+        """
+        return func(*args, **kwargs)
+
+    @_skip_if_closing
     def clear_main_plotter(self) -> None:
         self.delete_current_overlaid_shape()
         self.main_plotter.clear()
