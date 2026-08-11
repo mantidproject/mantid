@@ -34,6 +34,7 @@ outputs:
         - llvm-openmp ${{ llvm_openmp }}
       host:
       - eigen ${{ eigen }}
+      - fontconfig ${{ fontconfig }}
       - gsl ${{ gsl }}
       - gtest ${{ gtest }}
       - gmock ${{ gmock }}
@@ -69,7 +70,6 @@ outputs:
       - if: win
         then:
         - lib3mf
-        - fontconfig ${{ fontconfig }}
       - if: osx
         then:
         - libopenblas ${{ libopenblas }}
