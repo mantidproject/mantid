@@ -291,6 +291,26 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.set_selected_detector_info.assert_called_once_with(["a", "a"])
         self._model.extract_spectra_for_line_plot.assert_called_once_with("TOF", True)
 
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._update_relative_detector_angle")
+    def test_update_picked_detectors_refreshes_highlight(self, _mock_update_det_angle):
+        self._model._workspace_indices = np.array([0, 1, 2])
+        self._model._is_valid = np.array([True, True, True])
+        self._model._is_masked = np.array([False, False, False])
+        self._model._is_selected_in_tree = np.array([True, True, True])
+        self._model._detector_is_picked = np.array([True, False, False])
+        self._model._detector_ids = np.array([1, 2, 3])
+        self._model.picked_detectors_info_text = MagicMock(return_value=["a"])
+        self._model.extract_spectra_for_line_plot = MagicMock()
+        self._presenter._pickable_mesh = MagicMock()
+
+        self._presenter.update_picked_detectors_on_view()
+
+        self._presenter._renderer.update_picked_highlight.assert_called_once()
+        args = self._presenter._renderer.update_picked_highlight.call_args[0]
+        self.assertIs(args[0], self._mock_view.main_plotter)
+        self.assertIs(args[1], self._presenter._pickable_mesh)
+        np.testing.assert_array_equal(args[2], self._model._detector_is_picked)
+
     def test_on_add_selection_clicked(self):
         n_hist = self._ws.getNumberHistograms()
         mock_mask = np.array([i < n_hist // 2 for i in range(n_hist)])

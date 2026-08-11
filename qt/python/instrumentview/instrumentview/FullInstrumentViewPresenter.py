@@ -289,6 +289,7 @@ class FullInstrumentViewPresenter:
         self._pickable_mesh = renderer.build_pickable_mesh(self._model.detector_positions, self._model.flip_beam)
         renderer.set_pickable_scalars(self._pickable_mesh, self._model.picked_visibility, self._visible_label)
         renderer.add_pickable_mesh_to_plotter(self._view.main_plotter, self._pickable_mesh, scalars=self._visible_label)
+        renderer.create_picked_highlight_actor(self._view.main_plotter)
 
         self._masked_mesh = renderer.build_masked_mesh(self._model.masked_positions, self._model.flip_beam, self._model)
         renderer.add_masked_mesh_to_plotter(self._view.main_plotter, self._masked_mesh)
@@ -304,6 +305,9 @@ class FullInstrumentViewPresenter:
         for mesh in [self._detector_mesh, self._pickable_mesh, self._masked_mesh, monitor_mesh, sample_position_mesh]:
             if mesh is not None:
                 mesh.transform(self._transform, inplace=True)
+
+        # Must follow the transform so the highlight is built from display coordinates
+        renderer.update_picked_highlight(self._view.main_plotter, self._pickable_mesh, self._model.picked_visibility)
 
         # If refreshing the limits we reset both the contour and integration sliders.
         # If not, we need to manually update the contour limits to what they were set to before we added the
@@ -437,7 +441,9 @@ class FullInstrumentViewPresenter:
 
     def update_picked_detectors_on_view(self) -> None:
         # Update to visibility shows up in real time
-        self._renderer.set_pickable_scalars(self._pickable_mesh, self._model.picked_visibility, self._visible_label)
+        picked_visibility = self._model.picked_visibility
+        self._renderer.set_pickable_scalars(self._pickable_mesh, picked_visibility, self._visible_label)
+        self._renderer.update_picked_highlight(self._view.main_plotter, self._pickable_mesh, picked_visibility)
         self._update_line_plot_ws_and_draw(self._view.current_selected_lineplot_unit())
 
     def _on_clear_point_picked_detectors_clicked(self) -> None:

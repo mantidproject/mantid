@@ -25,6 +25,9 @@ class PointCloudRenderer(InstrumentRenderer):
     _PICKABLE_POINT_SIZE = 30
     _MASKED_COLOUR = (0.25, 0.25, 0.25)
     _DEFAULT_PICKING_TOLERANCE = 0.01
+    # Larger than _DETECTOR_POINT_SIZE so a ring of highlight colour shows around
+    # the picked detector's own point.
+    _PICKED_HALO_POINT_SIZE = 26
 
     def __init__(self) -> None:
         super().__init__()
@@ -66,7 +69,7 @@ class PointCloudRenderer(InstrumentRenderer):
         plotter.add_mesh(
             mesh,
             scalars=scalars,
-            opacity=[0.0, 0.3],
+            opacity=self._PICKED_FILL_OPACITY,
             clim=[0, 1],
             show_scalar_bar=False,
             pickable=True,
@@ -107,6 +110,38 @@ class PointCloudRenderer(InstrumentRenderer):
                     callback(point_id)
 
         return _on_pick
+
+    # ----------------------------------------------------- picked highlight
+    def _add_picked_highlight_actor(self, plotter: BackgroundPlotter, mesh: pv.PolyData):
+        """Add the halo actor that sits behind the picked detectors.
+
+        Point size is in screen pixels, so the halo stays the same size however
+        far the view is zoomed out.
+
+        The halo deliberately does *not* use ``render_points_as_spheres``.  A
+        sphere point sprite writes per-fragment depth, so the larger halo would
+        win the depth test against the detector's own point and hide it
+        completely.  A flat sprite is drawn at the detector's own depth instead,
+        which lets the detector sphere — already drawn, and nearer the camera
+        across its whole face — punch through the middle.  The counts colour
+        therefore stays visible, and keeps tracking the contour limits, without
+        the highlight having to redraw or recolour anything itself.
+        """
+        return plotter.add_points(
+            mesh,
+            color=self._PICKED_HIGHLIGHT_COLOUR,
+            point_size=self._PICKED_HALO_POINT_SIZE,
+            lighting=False,
+            pickable=False,
+            show_scalar_bar=False,
+            render=False,
+        )
+
+    def _build_picked_highlight_mesh(self, mesh: pv.PolyData, visibility: np.ndarray) -> Optional[pv.PolyData]:
+        picked = np.flatnonzero(visibility)
+        if mesh.number_of_points == 0 or picked.size == 0 or int(picked.max()) >= mesh.number_of_points:
+            return None
+        return pv.PolyData(mesh.points[picked])
 
     # -------------------------------------------------------------- scalars
     def set_detector_scalars(self, mesh: pv.PolyData, counts: np.ndarray, label: str) -> None:

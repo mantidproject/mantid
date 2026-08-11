@@ -80,6 +80,8 @@ class TestPointCloudRenderer(unittest.TestCase):
         call_kwargs = plotter.add_mesh.call_args[1]
         self.assertTrue(call_kwargs["render_points_as_spheres"])
         self.assertTrue(call_kwargs["pickable"])
+        # The overlay is a pick target only — the magenta marker shows the selection.
+        self.assertEqual(list(call_kwargs["opacity"]), [0.0, 0.0])
 
     def test_add_masked_mesh_empty_does_not_add(self):
         plotter = MagicMock()
@@ -168,6 +170,66 @@ class TestPointCloudRenderer(unittest.TestCase):
         observer_fn = self.renderer.get_callback_tied_to_detector_index(plotter, callback, hover=True)
         observer_fn(None, None)
         callback.assert_not_called()
+
+    def _build_highlight_plotter(self):
+        """Return a mock plotter with the detector mesh and highlight actor already added."""
+        plotter = MagicMock()
+        plotter.off_screen = False
+        mesh = self.renderer.build_detector_mesh(self.positions, False)
+        self.renderer.set_detector_scalars(mesh, np.array([10.0, 20.0, 30.0]), "Counts")
+        self.renderer.add_detector_mesh_to_plotter(plotter, mesh, scalars="Counts")
+        self.renderer.create_picked_highlight_actor(plotter)
+        plotter.reset_mock()
+        return plotter
+
+    def test_create_picked_highlight_actor_starts_hidden_with_halo_styling(self):
+        plotter = MagicMock()
+        plotter.off_screen = False
+        self.renderer.create_picked_highlight_actor(plotter)
+
+        self.assertIsNotNone(self.renderer._picked_highlight_actor)
+        self.renderer._picked_highlight_actor.SetVisibility.assert_called_once_with(False)
+
+        halo_call = plotter.add_points.call_args
+        self.assertEqual(halo_call[1]["color"], self.renderer._PICKED_HIGHLIGHT_COLOUR)
+        self.assertEqual(halo_call[1]["point_size"], self.renderer._PICKED_HALO_POINT_SIZE)
+        self.assertFalse(halo_call[1]["pickable"])
+        # Sphere sprites write per-fragment depth, which would make the larger halo
+        # hide the detector's own point entirely.  See _add_picked_highlight_actor.
+        self.assertNotIn("render_points_as_spheres", halo_call[1])
+
+    def test_update_picked_highlight_hides_actor_when_nothing_picked(self):
+        plotter = self._build_highlight_plotter()
+        mesh = self.renderer.build_pickable_mesh(self.positions, False)
+        self.renderer.update_picked_highlight(plotter, mesh, np.array([0, 0, 0]))
+        self.renderer._picked_highlight_actor.SetVisibility.assert_called_once_with(False)
+
+    def test_update_picked_highlight_shows_halo_at_picked_points(self):
+        plotter = self._build_highlight_plotter()
+        mesh = self.renderer.build_pickable_mesh(self.positions, False)
+        self.renderer.update_picked_highlight(plotter, mesh, np.array([0, 1, 1]))
+
+        self.renderer._picked_highlight_actor.SetVisibility.assert_called_once_with(True)
+        np.testing.assert_allclose(self.renderer._picked_highlight_mesh.points, self.positions[[1, 2]])
+
+    def test_update_picked_highlight_reuses_the_same_actor(self):
+        """Removing an actor releases graphics resources, which is not thread safe."""
+        plotter = self._build_highlight_plotter()
+        mesh = self.renderer.build_pickable_mesh(self.positions, False)
+        actor = self.renderer._picked_highlight_actor
+
+        self.renderer.update_picked_highlight(plotter, mesh, np.array([1, 0, 0]))
+        self.renderer.update_picked_highlight(plotter, mesh, np.array([0, 0, 1]))
+        self.renderer.update_picked_highlight(plotter, mesh, np.array([0, 0, 0]))
+
+        self.assertIs(self.renderer._picked_highlight_actor, actor)
+        plotter.remove_actor.assert_not_called()
+        plotter.add_points.assert_not_called()
+        np.testing.assert_allclose(self.renderer._picked_highlight_mesh.points, self.positions[[2]])
+
+    def test_halo_is_larger_than_the_detector_point(self):
+        """Otherwise no ring of highlight colour would show around the detector."""
+        self.assertGreater(self.renderer._PICKED_HALO_POINT_SIZE, self.renderer._DETECTOR_POINT_SIZE)
 
 
 class TestTrianglesToVertsFaces(unittest.TestCase):
@@ -684,6 +746,111 @@ class TestShapeRenderer(unittest.TestCase):
         self.assertTrue(np.all(z_no_flip > 0), f"Expected positive z without flip, got {z_no_flip}")
         self.assertTrue(np.all(z_flip < 0), f"Expected negative z with flip, got {z_flip}")
         np.testing.assert_allclose(z_flip, -z_no_flip)
+
+    def _build_two_detector_mesh(self):
+        """Build a 2-detector mesh and return its pickable copy."""
+        workspace = self._refresh_render_with_mock_workspace(n_detectors=2)
+        model = self._create_mock_model(workspace, n_pickable=2)
+        positions = np.array([[0, 0, 0], [1, 0, 0]], dtype=np.float64)
+        self.renderer.build_detector_mesh(positions, False, model)
+        return self.renderer.build_pickable_mesh(positions, False)
+
+    def test_add_pickable_mesh_uses_fully_transparent_fill(self):
+        """The overlay is a pick target only — the magenta outline shows the selection."""
+        mesh = self._build_two_detector_mesh()
+        plotter = self._make_shape_mock_plotter()
+        self.renderer.add_pickable_mesh_to_plotter(plotter, mesh, scalars="Vis")
+        call_kwargs = plotter.add_mesh.call_args[1]
+        self.assertTrue(call_kwargs["pickable"])
+        self.assertEqual(list(call_kwargs["opacity"]), [0.0, 0.0])
+
+    def test_build_picked_highlight_mesh_none_when_nothing_picked(self):
+        mesh = self._build_two_detector_mesh()
+        self.assertIsNone(self.renderer._build_picked_highlight_mesh(mesh, np.array([0, 0])))
+
+    def test_build_picked_highlight_mesh_traces_only_picked_detector(self):
+        mesh = self._build_two_detector_mesh()
+        outline = self.renderer._build_picked_highlight_mesh(mesh, np.array([0, 1]))
+
+        self.assertIsNotNone(outline)
+        self.assertGreater(outline.number_of_cells, 0)
+        # Detector 1 sits at x=1, detector 0 at x=0, so the outline must not
+        # stray back towards the unpicked detector.
+        self.assertGreater(float(np.min(outline.points[:, 0])), 0.5)
+
+    def test_build_picked_highlight_mesh_carries_no_scalar_data(self):
+        """Scalars inherited from the pickable mesh would override the solid highlight colour."""
+        mesh = self._build_two_detector_mesh()
+        self.renderer.set_pickable_scalars(mesh, np.array([0, 1]), "Visible Picked")
+        outline = self.renderer._build_picked_highlight_mesh(mesh, np.array([0, 1]))
+        self.assertEqual(len(outline.cell_data.keys()), 0)
+        self.assertEqual(len(outline.point_data.keys()), 0)
+
+    def test_build_picked_highlight_mesh_skipped_above_cell_cap(self):
+        mesh = self._build_two_detector_mesh()
+        self.renderer._MAX_OUTLINE_CELLS = 1
+        self.assertIsNone(self.renderer._build_picked_highlight_mesh(mesh, np.array([1, 1])))
+
+    def test_build_picked_highlight_mesh_none_when_cell_map_stale(self):
+        mesh = self._build_two_detector_mesh()
+        self.renderer._cell_to_detector = np.array([0])
+        self.assertIsNone(self.renderer._build_picked_highlight_mesh(mesh, np.array([0, 1])))
+
+    def test_create_picked_highlight_actor_uses_outline_styling(self):
+        plotter = self._make_shape_mock_plotter()
+        self.renderer.create_picked_highlight_actor(plotter)
+
+        call_kwargs = plotter.add_mesh.call_args[1]
+        self.assertEqual(call_kwargs["color"], self.renderer._PICKED_HIGHLIGHT_COLOUR)
+        self.assertEqual(call_kwargs["line_width"], self.renderer._PICKED_OUTLINE_WIDTH)
+        self.assertFalse(call_kwargs["pickable"])
+        self.renderer._picked_highlight_actor.SetVisibility.assert_called_once_with(False)
+
+    def test_update_picked_highlight_shows_outline(self):
+        mesh = self._build_two_detector_mesh()
+        plotter = self._make_shape_mock_plotter()
+        self.renderer.create_picked_highlight_actor(plotter)
+        plotter.reset_mock()
+
+        self.renderer.update_picked_highlight(plotter, mesh, np.array([0, 1]))
+
+        self.renderer._picked_highlight_actor.SetVisibility.assert_called_once_with(True)
+        self.assertGreater(self.renderer._picked_highlight_mesh.number_of_cells, 0)
+        self.assertGreater(float(np.min(self.renderer._picked_highlight_mesh.points[:, 0])), 0.5)
+
+    def test_update_picked_highlight_reuses_the_same_actor(self):
+        """Removing an actor releases graphics resources, which is not thread safe."""
+        mesh = self._build_two_detector_mesh()
+        plotter = self._make_shape_mock_plotter()
+        self.renderer.create_picked_highlight_actor(plotter)
+        actor = self.renderer._picked_highlight_actor
+        plotter.reset_mock()
+
+        self.renderer.update_picked_highlight(plotter, mesh, np.array([0, 1]))
+        self.renderer.update_picked_highlight(plotter, mesh, np.array([1, 0]))
+        self.renderer.update_picked_highlight(plotter, mesh, np.array([0, 0]))
+
+        self.assertIs(self.renderer._picked_highlight_actor, actor)
+        plotter.remove_actor.assert_not_called()
+        plotter.add_mesh.assert_not_called()
+
+    def test_update_picked_highlight_hides_outline_when_selection_emptied(self):
+        mesh = self._build_two_detector_mesh()
+        plotter = self._make_shape_mock_plotter()
+        self.renderer.create_picked_highlight_actor(plotter)
+        self.renderer.update_picked_highlight(plotter, mesh, np.array([0, 1]))
+        self.renderer._picked_highlight_actor.reset_mock()
+
+        self.renderer.update_picked_highlight(plotter, mesh, np.array([0, 0]))
+
+        self.renderer._picked_highlight_actor.SetVisibility.assert_called_once_with(False)
+
+    def test_update_picked_highlight_noop_without_actor(self):
+        """Selection changes before the first rebuild must not fail."""
+        mesh = self._build_two_detector_mesh()
+        plotter = self._make_shape_mock_plotter()
+        self.renderer.update_picked_highlight(plotter, mesh, np.array([0, 1]))
+        plotter.add_mesh.assert_not_called()
 
     def _make_shape_mock_plotter(self, off_screen=False):
         plotter = MagicMock()
