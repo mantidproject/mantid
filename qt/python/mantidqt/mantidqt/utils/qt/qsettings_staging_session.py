@@ -29,7 +29,8 @@ MANAGER_RELATIVE_PATH = Path("mantidproject/qsettings-stage")
 MANIFEST_FILENAME = ".qsettings-staging-manifest.json"
 COMPLETED_FILENAME = ".qsettings-staging-complete"
 COORDINATOR_FILENAME = "coordinator.lock"
-DEFAULT_SETTINGS_PATHS = (Path("mantidproject/mantidworkbench.ini"),)
+QT_PROJECT_SETTINGS_PATH = Path("QtProject.conf")
+DEFAULT_SETTINGS_PATHS = (Path("mantidproject/mantidworkbench.ini"), QT_PROJECT_SETTINGS_PATH)
 ERROR_REPORTER_SETTINGS_PATH = Path("mantidproject/mantid-error-reporter.ini")
 
 _PRIVATE_DIRECTORY_MODE = 0o700
@@ -116,7 +117,7 @@ class PreparedQSettingsSession:
         return self._active
 
     def activate(self) -> None:
-        """Redirect user-scope INI settings to this session exactly once.
+        """Redirect user-scope INI and native settings to this session exactly once.
 
         The caller must invoke this before constructing any QSettings object.
         Existing instances cannot be detected reliably, so startup ordering is
@@ -132,6 +133,7 @@ class PreparedQSettingsSession:
 
             from qtpy.QtCore import QSettings
 
+            QSettings.setPath(QSettings.NativeFormat, QSettings.UserScope, str(self.staging_root))
             QSettings.setPath(QSettings.IniFormat, QSettings.UserScope, str(self.staging_root))
             _QSETTINGS_PATH_ACTIVATED = True
             self._active = True
@@ -225,8 +227,10 @@ def _create_qlockfile(path: Path) -> _Coordinator:
 
 def _validated_settings_path(path: Path) -> Path:
     path = Path(path)
-    if path.is_absolute() or ".." in path.parts or not path.parts or path.parts[0] != "mantidproject":
-        raise ValueError(f"settings path must be relative and below mantidproject: {path}")
+    if path.is_absolute() or ".." in path.parts or not path.parts:
+        raise ValueError(f"settings path must be relative: {path}")
+    if path != QT_PROJECT_SETTINGS_PATH and path.parts[0] != "mantidproject":
+        raise ValueError(f"settings path must be below mantidproject or be {QT_PROJECT_SETTINGS_PATH}: {path}")
     return path
 
 
@@ -318,8 +322,23 @@ def _seed_session(
     for relative_path in expected_settings_paths:
         if _is_excluded_settings_path(relative_path):
             continue
-        entries.setdefault(relative_path, StagedSettingsFile(relative_path, relative_path, None, None))
+        if relative_path not in entries:
+            entries[relative_path] = _seed_expected_file(canonical_root, session_root, relative_path)
     return tuple(entries[path] for path in sorted(entries))
+
+
+def _seed_expected_file(canonical_root: Path, session_root: Path, relative_path: Path) -> StagedSettingsFile:
+    source = canonical_root / relative_path
+    if not source.exists() and not source.is_symlink():
+        return StagedSettingsFile(relative_path, relative_path, None, None)
+
+    source_stat = source.lstat()
+    if stat.S_ISLNK(source_stat.st_mode) or not stat.S_ISREG(source_stat.st_mode):
+        raise StagingPreparationError(f"canonical settings path is not a regular file: {source}")
+    staged = session_root / relative_path
+    staged.parent.mkdir(mode=_PRIVATE_DIRECTORY_MODE, parents=True, exist_ok=True)
+    digest, canonical_mode = _copy_and_hash(source, staged)
+    return StagedSettingsFile(relative_path, relative_path, digest, canonical_mode)
 
 
 def _seed_directory(
@@ -463,11 +482,24 @@ def _finalize_session(
     return QSettingsStagingFinalization(successful, tuple(results), finalization_error)
 
 
+def _is_qt_project_lock_artifact(name: str) -> bool:
+    lock_name = f"{QT_PROJECT_SETTINGS_PATH.name}.lock"
+    return name == lock_name or name.startswith(f"{lock_name}.rmlock")
+
+
 def _discover_staged_settings(staging_root: Path) -> set[Path]:
+    discovered = set()
     for path in staging_root.iterdir():
-        if path.name in {MANIFEST_FILENAME, COMPLETED_FILENAME}:
+        if path.name in {MANIFEST_FILENAME, COMPLETED_FILENAME} or _is_qt_project_lock_artifact(path.name):
             continue
-        if path.name != "mantidproject":
+        if path.name == "mantidproject":
+            continue
+        if path.name == QT_PROJECT_SETTINGS_PATH.name:
+            path_stat = path.lstat()
+            if stat.S_ISLNK(path_stat.st_mode) or not stat.S_ISREG(path_stat.st_mode):
+                raise StagingFinalizationError(f"staged settings path is not a regular file: {path}")
+            discovered.add(QT_PROJECT_SETTINGS_PATH)
+        else:
             raise StagingFinalizationError(f"unexpected staged settings path outside mantidproject: {path}")
 
     organization_root = staging_root / "mantidproject"
@@ -475,7 +507,6 @@ def _discover_staged_settings(staging_root: Path) -> set[Path]:
     if stat.S_ISLNK(organization_stat.st_mode) or not stat.S_ISDIR(organization_stat.st_mode):
         raise StagingFinalizationError(f"staged settings root is not a real directory: {organization_root}")
 
-    discovered = set()
     _discover_staged_directory(organization_root, staging_root, discovered)
     return discovered
 
