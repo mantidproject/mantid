@@ -311,9 +311,7 @@ set(SRC_FILES
     src/SmoothNeighbours.cpp
     src/SofQCommon.cpp
     src/SofQW.cpp
-    src/SofQWCentre.cpp
     src/SofQWNormalisedPolygon.cpp
-    src/SofQWPolygon.cpp
     src/SolidAngle.cpp
     src/SortEvents.cpp
     src/SortXAxis.cpp
@@ -672,9 +670,7 @@ set(INC_FILES
     inc/MantidAlgorithms/SmoothNeighbours.h
     inc/MantidAlgorithms/SofQCommon.h
     inc/MantidAlgorithms/SofQW.h
-    inc/MantidAlgorithms/SofQWCentre.h
     inc/MantidAlgorithms/SofQWNormalisedPolygon.h
-    inc/MantidAlgorithms/SofQWPolygon.h
     inc/MantidAlgorithms/SolidAngle.h
     inc/MantidAlgorithms/SortEvents.h
     inc/MantidAlgorithms/SortXAxis.h
@@ -1010,10 +1006,8 @@ set(TEST_FILES
     SmoothDataTest.h
     SmoothNeighboursTest.h
     SofQCommonTest.h
-    SofQWCentreTest.h
     SofQWCutTest.h
     SofQWNormalisedPolygonTest.h
-    SofQWPolygonTest.h
     SofQWTest.h
     SolidAngleTest.h
     SortEventsTest.h

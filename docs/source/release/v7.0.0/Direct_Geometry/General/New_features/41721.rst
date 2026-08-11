@@ -1,0 +1,1 @@
+- Since SofQWCentre and SofQWPolygon have been removed this release, :ref:`algm-SofQW` no longer has a ``Method`` property. It now simply wraps :ref:`algm-SofQWNormalisedPolygon`.
