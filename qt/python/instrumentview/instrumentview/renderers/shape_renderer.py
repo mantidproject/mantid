@@ -45,6 +45,10 @@ class ShapeRenderer(InstrumentRenderer):
 
     _MASKED_COLOUR = (0.25, 0.25, 0.25)
     _DEFAULT_PICKING_TOLERANCE = 0.0001
+    _PICKED_OUTLINE_WIDTH = 3
+    # Above this many picked cells the outline is skipped: extracting the edges
+    # becomes slow, and a selection that large is already plainly visible.
+    _MAX_OUTLINE_CELLS = 50000
 
     def __init__(self, workspace, use_optimised_shapes: bool = True):
         super().__init__()
@@ -250,7 +254,7 @@ class ShapeRenderer(InstrumentRenderer):
         actor = plotter.add_mesh(
             mesh,
             scalars=scalars,
-            opacity=[0.0, 0.3],
+            opacity=self._PICKED_FILL_OPACITY,
             clim=[0, 1],
             show_scalar_bar=False,
             pickable=True,
@@ -271,6 +275,64 @@ class ShapeRenderer(InstrumentRenderer):
             pickable=False,
             show_edges=False,
         )
+
+    def _add_picked_highlight_actor(self, plotter: BackgroundPlotter, mesh: pv.PolyData):
+        """Add the actor that traces the picked detectors' outline.
+
+        The line width is in screen pixels, so the outline stays visible even
+        when each detector covers barely one pixel, and it leaves the detector's
+        counts colour showing through in the middle.
+        """
+        actor = plotter.add_mesh(
+            mesh,
+            color=self._PICKED_HIGHLIGHT_COLOUR,
+            line_width=self._PICKED_OUTLINE_WIDTH,
+            render_lines_as_tubes=True,
+            lighting=False,
+            pickable=False,
+            show_scalar_bar=False,
+            render=False,
+        )
+        # The outline traces the detector surface exactly, so it needs the same
+        # polygon offset treatment as the pickable mesh to avoid z-fighting.
+        mapper = actor.mapper
+        mapper.SetResolveCoincidentTopologyToPolygonOffset()
+        mapper.SetResolveCoincidentTopologyLineOffsetParameters(-4, -4)
+        return actor
+
+    def _build_picked_highlight_mesh(self, mesh: pv.PolyData, visibility: np.ndarray) -> pv.PolyData | None:
+        """Return the edges bounding the picked detectors, or None if there is nothing to draw.
+
+        Each detector carries its own copy of its template vertices, so
+        neighbouring detectors do not share points and every detector is
+        outlined individually rather than the selection being outlined as one
+        region.  Both boundary edges (flat quad shapes) and feature edges
+        (closed solids, which have no boundary edges at all) are extracted so
+        that every render mode produces a visible outline.
+        """
+        c2d = self._cell_to_detector
+        if c2d is None or mesh.number_of_cells == 0 or len(c2d) != mesh.number_of_cells:
+            return None
+        if c2d.size == 0 or int(c2d.max()) >= len(visibility):
+            return None
+
+        picked_cells = visibility[c2d] != 0
+        n_picked = int(np.count_nonzero(picked_cells))
+        if n_picked == 0 or n_picked > self._MAX_OUTLINE_CELLS:
+            return None
+
+        # remove_cells keeps the result a PolyData, which extract_feature_edges needs.
+        outline = mesh.remove_cells(~picked_cells, inplace=False).extract_feature_edges(
+            boundary_edges=True,
+            feature_edges=True,
+            non_manifold_edges=False,
+            manifold_edges=False,
+        )
+        if outline.number_of_cells == 0:
+            return None
+        # Drop the inherited counts/visibility arrays so the outline is drawn as a solid colour.
+        outline.clear_data()
+        return outline
 
     def get_callback_tied_to_detector_index(
         self, plotter: BackgroundPlotter, callback: Callable[[int], None], hover: bool = False
