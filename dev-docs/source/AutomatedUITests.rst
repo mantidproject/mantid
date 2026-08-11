@@ -168,6 +168,69 @@ visible in a module, imported ones included, and falls back to a ``runTest`` met
 no ``test_*`` methods. ``AutomatedUITestBase`` therefore defines neither. Keep it that way, and give
 any per-interface base class you add the same treatment.
 
+The helpers
+###########
+
+``qt_interaction_helpers`` holds free functions for driving widgets. They have no dependency on the
+harness, so an ordinary unit test can use them too. Each one exists because the obvious Qt call does
+something other than what a test wants - usually failing silently rather than loudly.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 70
+
+   * - Widget
+     - Helpers
+   * - Anything
+     - ``click``, ``process_events``, ``wait_until``, ``top_level_widget_names``
+   * - ``QCheckBox``
+     - ``click_checkbox``, ``set_checkbox`` - click the *indicator*, not the label
+   * - ``QRadioButton``
+     - ``click_radio``, ``select_radio``, ``radio_buttons`` - by label, from a widget or a
+       ``QButtonGroup``
+   * - ``QGroupBox`` (checkable)
+     - ``set_group_box``
+   * - ``QComboBox``
+     - ``combo_items``, ``select_combo``
+   * - ``QLineEdit``
+     - ``set_line_edit`` - replays keystrokes, so ``editingFinished`` fires and any validator applies
+   * - ``QSpinBox`` / ``QDoubleSpinBox``
+     - ``set_spin_box`` - checks the value was not clamped away
+   * - ``QTabWidget``
+     - ``tab_titles``, ``select_tab`` - by title, because indices move
+   * - ``QListWidget``
+     - ``list_items``, ``select_list_item``
+   * - ``QTableWidget``
+     - ``table_column``, ``cell_widget``, ``table_checkbox``, ``cell_button``, ``cell_combo``,
+       ``cell_line_edit``, ``cell_spin_box``, ``item_check_state``, ``set_item_checked``
+   * - ``QTableView`` / ``QTreeView`` / ``QListView``
+     - ``model_row_count``, ``model_column_count``, ``model_index``, ``model_cell``,
+       ``model_column``, ``index_check_state``, ``click_index``, ``double_click_index``,
+       ``edit_index``, ``select_index``, ``click_row_header``, ``click_column_header``,
+       ``tree_rows``
+   * - ``FileFinderWidget``
+     - ``set_finder_text``, ``wait_for_file_finder`` - both wait out the background search
+   * - matplotlib
+     - ``figure_numbers``, ``close_all_figures`` (pyplot-managed figures only)
+
+Two things are worth knowing before reaching for one of them.
+
+**The two table families are not interchangeable.** ``table_*`` works on a ``QTableWidget``, which
+owns its cells through ``item()`` and ``cellWidget()``. Anything backed by a ``QAbstractItemModel``
+- ``QTableView``, ``QTreeView``, ``QListView`` - has neither method, and needs the ``model_*`` and
+``*_index`` helpers instead. Several Mantid interfaces are model-backed, so check which kind of view
+you have before writing the assertion.
+
+**A click on an item view has to go to its viewport.** The view is only a frame; the cells are drawn
+by delegates inside ``view.viewport()``, so ``click(view)`` does nothing at all. ``click_index``
+handles this - and scrolls the index into sight first, because ``visualRect`` is an empty rectangle
+for a row that is not currently drawn, which would send the click to the top-left corner and select
+the wrong thing.
+
+A few widgets are best not driven with ``QTest`` at all. ``FunctionBrowser`` and
+``FitPropertyBrowser`` are Qt property browsers whose cells are nested editors; use their Python API
+(``setFunction``, ``getParameter``, ``loadFunction``) instead.
+
 Adding a new interface
 ######################
 
