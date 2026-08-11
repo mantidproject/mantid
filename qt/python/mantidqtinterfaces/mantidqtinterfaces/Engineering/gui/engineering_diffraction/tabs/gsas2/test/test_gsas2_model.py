@@ -392,7 +392,12 @@ class TestGSAS2Model(unittest.TestCase):
             rb_num = "valid_rb_number"
             self.model.organize_save_directories(rb_num)
             self.assertEqual(self.model.user_save_directory, mock_user_directory)
-            self.assertEqual(self.model.save_directories.temporary_save_directory[:-20], expected_temp_directory)
+            # the name carries a timestamp and a unique suffix, so only the stem is fixed
+            self.assertTrue(
+                self.model.save_directories.temporary_save_directory.startswith(expected_temp_directory),
+                f"{self.model.save_directories.temporary_save_directory} does not start with {expected_temp_directory}",
+            )
+            self.assertTrue(os.path.isdir(self.model.save_directories.temporary_save_directory))
             self.assertEqual(self.model.file_paths.gsas2_save_dirs[0], os.path.join(current_directory, "GSAS2", ""))
             self.assertEqual(len(self.model.file_paths.gsas2_save_dirs), 2)
             self.assertEqual(
