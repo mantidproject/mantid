@@ -591,10 +591,16 @@ def _prepare_qsettings_staging():
             )
         return None
 
-    from mantidqt.utils.qt.qsettings_staging_session import QSettingsStagingSessionManager, StagingPreparationError
+    from mantidqt.utils.qt.qsettings_staging_session import (
+        QT_PROJECT_SETTINGS_PATH,
+        QSettingsStagingSessionManager,
+        StagingPreparationError,
+    )
 
     try:
-        session = QSettingsStagingSessionManager(eligibility, expected_settings_paths=(REDUCTION_SETTINGS_PATH,)).prepare()
+        session = QSettingsStagingSessionManager(
+            eligibility, expected_settings_paths=(REDUCTION_SETTINGS_PATH, QT_PROJECT_SETTINGS_PATH)
+        ).prepare()
     except StagingPreparationError as error:
         _warn_about_qsettings_staging(
             f"QSettings staging preparation failed ({error}). Mantid Reduction will use the canonical configuration directory."

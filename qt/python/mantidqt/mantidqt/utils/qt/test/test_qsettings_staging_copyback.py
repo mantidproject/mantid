@@ -106,6 +106,20 @@ class QSettingsStagingCopyBackTest(unittest.TestCase):
         self.assertEqual(["mantidworkbench.ini"], sorted(path.name for path in self.canonical_directory.iterdir()))
         self.assertTrue(self.coordinators[0].unlocked)
 
+    def test_changed_qt_project_native_settings_are_copied_back(self):
+        native_file = self.config_root / "QtProject.conf"
+        native_file.write_bytes(b"native original")
+        session = self.prepare()
+        (session.staging_root / "QtProject.conf").write_bytes(b"native changed")
+        (session.staging_root / "QtProject.conf.lock").write_bytes(b"local lock artifact")
+
+        finalization = session.finalize()
+
+        self.assertTrue(finalization.successful)
+        self.assertEqual(CopyBackStatus.COPIED, self.result_for(finalization, "QtProject.conf").status)
+        self.assertEqual(b"native changed", native_file.read_bytes())
+        self.assertFalse((self.config_root / "QtProject.conf.lock").exists())
+
     def test_currently_identical_files_are_not_opened_for_update(self):
         session = self.prepare()
         staged_file = session.staging_root / "mantidproject/mantidworkbench.ini"
