@@ -45,6 +45,12 @@ then be included in the suite of tests from the following night.
 Alternatively, any tests relating to testing qt interfaces should be added to
 the ``Testing/SystemTests/tests/qt`` directory.
 
+A test that drives an interface by clicking its widgets - replacing a manual test
+guide rather than checking a workflow's numbers - belongs in
+``Testing/AutomatedUITests`` instead. Those run weekly and report-only, so they can
+be slower and more numerous than a system test is allowed to be; see
+:ref:`AutomatedUITests`.
+
 Specifying Validation
 ---------------------
 
