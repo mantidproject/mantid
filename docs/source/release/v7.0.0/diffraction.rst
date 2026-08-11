@@ -13,6 +13,10 @@ Bugfixes
 ############
 .. amalgamate:: Diffraction/Powder/Bugfixes
 
+Removed
+############
+.. amalgamate:: Diffraction/Powder/Removed
+
 
 Engineering Diffraction
 -----------------------

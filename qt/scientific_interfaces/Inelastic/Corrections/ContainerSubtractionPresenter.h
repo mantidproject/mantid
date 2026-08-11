@@ -55,7 +55,7 @@ protected:
 
 private:
   std::string createOutputName();
-  void loadSettings(const QSettings &settings) override;
+  void restoreSettings(const API::FileFinderSettings &settings) override;
   void setFileExtensionsByName(bool filter) override;
   void setLoadHistory(bool doLoadHistory) override;
 

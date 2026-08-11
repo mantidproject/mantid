@@ -34,7 +34,7 @@ void Tools::initLayout() {
     connect(iter->second, &ToolsTab::showMessageBox, this, &Tools::showMessageBox);
   }
 
-  loadSettings();
+  restoreSettings();
 
   connect(m_uiForm.pbSettings, &QPushButton::clicked, this, &Tools::settings);
   connect(m_uiForm.pbHelp, &QPushButton::clicked, this, &Tools::help);
@@ -58,31 +58,23 @@ void Tools::closeEvent(QCloseEvent * /*unused*/) {
 void Tools::handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf) {
   std::string key = pNf->key();
   if (key == "defaultsave.directory") {
-    loadSettings();
+    restoreSettings();
   }
 }
 
 /**
- * Load the setting for each tab on the interface.
+ * Restore the setting for each tab on the interface.
  *
  * This includes setting the default browsing directory to be the default save
  *directory.
  */
-void Tools::loadSettings() {
-  QSettings settings;
-  QString settingsGroup = "CustomInterfaces/IndirectAnalysis/";
-  QString saveDir =
-      QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
+void Tools::restoreSettings() {
+  auto const settings = API::FileFinderSettings(
+      QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory")));
 
-  settings.beginGroup(settingsGroup + "ProcessedFiles");
-  settings.setValue("last_directory", saveDir);
-
-  std::map<unsigned int, ToolsTab *>::iterator iter;
-  for (iter = m_tabs.begin(); iter != m_tabs.end(); ++iter) {
-    iter->second->loadSettings(settings);
+  for (auto const &[_, tab] : m_tabs) {
+    tab->restoreSettings(settings);
   }
-
-  settings.endGroup();
 }
 
 std::string Tools::documentationPage() const { return "Indirect Tools"; }

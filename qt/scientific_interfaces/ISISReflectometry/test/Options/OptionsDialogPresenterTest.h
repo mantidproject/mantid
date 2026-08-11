@@ -56,7 +56,7 @@ public:
     auto mainWindowSubscriber = std::make_unique<NiceMock<MockOptionsDialogPresenterSubscriber>>();
     presenter.subscribe(mainWindowSubscriber.get());
     presenter.notifySaveOptions();
-    EXPECT_CALL(*m_model, loadSettingsProxy(presenter.m_boolOptions, presenter.m_intOptions)).WillOnce(Return());
+    EXPECT_CALL(*m_model, readSettingsProxy()).WillOnce(Return());
     presenter.initOptions();
     assertLoadOptions(presenter);
   }
@@ -64,8 +64,8 @@ public:
   void testInitOptionsAppliesDefaultOptionsIfLoadUnsuccessful() {
     auto model = std::make_unique<NiceMock<MockOptionsDialogModelUnsuccessfulDefaults>>();
     auto presenter = makePresenter(std::move(model));
-    EXPECT_CALL(*m_modelUnsuccessfulDefaults, loadSettings(_, _)).WillOnce(Return());
-    EXPECT_CALL(*m_modelUnsuccessfulDefaults, applyDefaultOptionsProxy(_, _)).WillOnce(Return());
+    EXPECT_CALL(*m_modelUnsuccessfulDefaults, readSettings()).Times(1);
+    EXPECT_CALL(*m_modelUnsuccessfulDefaults, defaultSettingsProxy()).WillOnce(Return());
     presenter.initOptions();
     assertDefaultOptions(presenter);
   }
@@ -75,7 +75,7 @@ public:
     auto mainWindowSubscriber = std::make_unique<NiceMock<MockOptionsDialogPresenterSubscriber>>();
     presenter.subscribe(mainWindowSubscriber.get());
     presenter.notifySaveOptions();
-    EXPECT_CALL(*m_model, loadSettingsProxy(presenter.m_boolOptions, presenter.m_intOptions)).Times(AtLeast(1));
+    EXPECT_CALL(*m_model, readSettingsProxy()).Times(AtLeast(1));
     EXPECT_CALL(*mainWindowSubscriber.get(), notifyOptionsChanged()).Times(AtLeast(1));
     presenter.notifyLoadOptions();
   }
@@ -105,7 +105,7 @@ public:
     auto mainWindowSubscriber = std::make_unique<NiceMock<MockOptionsDialogPresenterSubscriber>>();
     presenter.subscribe(mainWindowSubscriber.get());
     presenter.notifyLoadOptions();
-    EXPECT_CALL(*m_model, saveSettings(presenter.m_boolOptions, presenter.m_intOptions)).Times(AtLeast(1));
+    EXPECT_CALL(*m_model, saveSettingsProxy(_)).Times(AtLeast(1));
     presenter.notifySaveOptions();
   }
 

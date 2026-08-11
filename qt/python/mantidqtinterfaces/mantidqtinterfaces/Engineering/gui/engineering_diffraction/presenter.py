@@ -28,6 +28,8 @@ from .settings.settings_model import SettingsModel
 from .settings.settings_view import SettingsView
 from .settings.settings_presenter import SettingsPresenter
 from .settings.settings_helper import get_setting, set_setting
+from .tabs.common.rb_scope import RbScope
+from .tabs.common.instrument_scope import InstrumentScope
 
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.observer_pattern import GenericObservable
@@ -40,6 +42,12 @@ if TYPE_CHECKING:
 
 class EngineeringDiffractionPresenter(object):
     def __init__(self):
+        # one RB scope, shared by every presenter that needs it, so the tabs and the settings
+        # layer cannot drift apart
+        self.rb_scope = RbScope()
+        # likewise for the instrument, which the tabs, the cropping widget and the settings layer
+        # all key their saved values off
+        self.instrument_scope = InstrumentScope()
         self.calibration_presenter = None
         self.correction_presenter = None
         self.focus_presenter = None
@@ -68,6 +76,10 @@ class EngineeringDiffractionPresenter(object):
         cal_view = CalibrationView(parent=view.tabs)
         self.calibration_presenter = CalibrationPresenter(cal_model, cal_view)
         self.focus_presenter = FocusPresenter(focus_model, cal_view)
+        self.calibration_presenter.set_rb_scope(self.rb_scope)
+        self.focus_presenter.set_rb_scope(self.rb_scope)
+        self.calibration_presenter.set_instrument_scope(self.instrument_scope)
+        self.focus_presenter.set_instrument_scope(self.instrument_scope)
         view.tabs.addTab(cal_view, "Run Processing")
 
     def setup_calibration_notifier(self) -> None:
@@ -78,12 +90,16 @@ class EngineeringDiffractionPresenter(object):
         correction_model = CorrectionModel()
         correction_view = TextureCorrectionView()
         self.correction_presenter = TextureCorrectionPresenter(correction_model, correction_view)
+        self.correction_presenter.set_rb_scope(self.rb_scope)
+        self.correction_presenter.set_instrument_scope(self.instrument_scope)
         view.tabs.addTab(correction_view, "Absorption Correction")
         self.correction_presenter.add_correction_subscriber(self.focus_presenter.correction_observer)
 
     def setup_fitting(self, view: "EngineeringDiffractionGui") -> None:
         fitting_view = FittingView()
         self.fitting_presenter = FittingPresenter(fitting_view)
+        self.fitting_presenter.set_rb_scope(self.rb_scope)
+        self.fitting_presenter.set_instrument_scope(self.instrument_scope)
         self.focus_presenter.add_focus_subscriber(self.fitting_presenter.data_widget.presenter.focus_run_observer)
         self.focus_presenter.add_focus_texture_subscriber(self.fitting_presenter.data_widget.presenter.focus_combined_observer)
         view.tabs.addTab(fitting_view, "Fitting")
@@ -92,6 +108,7 @@ class EngineeringDiffractionPresenter(object):
         gsas2_model = GSAS2Model()
         gsas2_view = GSAS2View(parent=view.tabs)
         self.gsas2_presenter = GSAS2Presenter(gsas2_model, gsas2_view)
+        self.gsas2_presenter.set_rb_scope(self.rb_scope)
         self.focus_presenter.add_focus_gsas2_subscriber(self.gsas2_presenter.focus_run_observer_gsas2)
         self.calibration_presenter.add_prm_gsas2_subscriber(self.gsas2_presenter.prm_filepath_observer_gsas2)
         view.tabs.addTab(gsas2_view, "GSAS II")
@@ -100,6 +117,8 @@ class EngineeringDiffractionPresenter(object):
         texture_model = ProjectionModel()
         texture_view = TextureView()
         self.texture_presenter = TexturePresenter(texture_model, texture_view)
+        self.texture_presenter.set_rb_scope(self.rb_scope)
+        self.texture_presenter.set_instrument_scope(self.instrument_scope)
         self.focus_presenter.add_focus_texture_subscriber(self.texture_presenter.focus_run_observer)
         view.tabs.addTab(texture_view, "Texture")
 
@@ -107,6 +126,8 @@ class EngineeringDiffractionPresenter(object):
         settings_model = SettingsModel()
         settings_view = SettingsView(view)
         settings_presenter = SettingsPresenter(settings_model, settings_view)
+        settings_presenter.set_rb_scope(self.rb_scope)
+        settings_presenter.set_instrument_scope(self.instrument_scope)
         settings_presenter.load_settings_from_file_or_default()
         self.settings_presenter = settings_presenter
         self.setup_savedir_notifier(view)

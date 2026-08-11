@@ -40,7 +40,7 @@ void Simulation::initLayout() {
     connect(iter->second, &SimulationTab::showMessageBox, this, &Simulation::showMessageBox);
   }
 
-  loadSettings();
+  restoreSettings();
 
   connect(m_uiForm.pbSettings, &QPushButton::clicked, this, &Simulation::settings);
   connect(m_uiForm.pbHelp, &QPushButton::clicked, this, &Simulation::help);
@@ -64,31 +64,23 @@ void Simulation::closeEvent(QCloseEvent * /*unused*/) {
 void Simulation::handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf) {
   std::string key = pNf->key();
   if (key == "defaultsave.directory") {
-    loadSettings();
+    restoreSettings();
   }
 }
 
 /**
- * Load the setting for each tab on the interface.
+ * Restore the setting for each tab on the interface.
  *
  * This includes setting the default browsing directory to be the default save
  *directory.
  */
-void Simulation::loadSettings() {
-  QSettings settings;
-  QString settingsGroup = "CustomInterfaces/IndirectAnalysis/";
-  QString saveDir =
-      QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
+void Simulation::restoreSettings() {
+  auto const settings = API::FileFinderSettings(
+      QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory")));
 
-  settings.beginGroup(settingsGroup + "ProcessedFiles");
-  settings.setValue("last_directory", saveDir);
-
-  std::map<unsigned int, SimulationTab *>::iterator iter;
-  for (iter = m_simulationTabs.begin(); iter != m_simulationTabs.end(); ++iter) {
-    iter->second->loadSettings(settings);
+  for (auto const &[_, tab] : m_simulationTabs) {
+    tab->restoreSettings(settings);
   }
-
-  settings.endGroup();
 }
 
 void Simulation::applySettings(std::map<std::string, QVariant> const &settings) {

@@ -14,6 +14,7 @@
 #include "ALFInstrumentWidget.h"
 #include "ALFPythonInstrumentView.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
+#include "MantidQtWidgets/Common/QSettingsChangeAware.h"
 #include "MantidQtWidgets/Common/QtJobRunner.h"
 
 #include <QCloseEvent>
@@ -22,7 +23,25 @@
 #include <QString>
 #include <QVBoxLayout>
 
+namespace {
+[[nodiscard]] bool readUseNewInstrumentView(const QSettings &settings) {
+  return settings.value("InstrumentView/use_new_instrument_view", false).toBool();
+}
+} // namespace
+
 namespace MantidQt::CustomInterfaces {
+
+ALFInstrumentSettings::ALFInstrumentSettings(QString vanadiumRun) : m_vanadiumRun(std::move(vanadiumRun)) {}
+
+const QString &ALFInstrumentSettings::vanadiumRun() const { return m_vanadiumRun; }
+
+ALFInstrumentSettings ALFInstrumentSettings::readSettings(const QSettings &settings) {
+  return ALFInstrumentSettings(settings.value("vanadium-run", "").toString());
+}
+
+void ALFInstrumentSettings::saveSettings(QSettings &settings, const ALFInstrumentSettings &values) {
+  MantidQt::MantidWidgets::QSettingsChangeAware(settings).setValue("vanadium-run", values.vanadiumRun());
+}
 
 DECLARE_SUBWINDOW(ALFView)
 
@@ -33,8 +52,8 @@ ALFView::ALFView(QWidget *parent) : UserSubWindow(parent), m_instrumentPresenter
   auto jobRunnerInst = std::make_unique<MantidQt::API::QtJobRunner>();
   auto algorithmManagerInst = std::make_unique<ALFAlgorithmManager>(std::move(jobRunnerInst));
 
-  QSettings settings(QSettings::IniFormat, QSettings::UserScope, "mantidproject", "mantidworkbench");
-  const bool useNewInstrumentView = settings.value("InstrumentView/use_new_instrument_view", false).toBool();
+  const QSettings settings(QSettings::IniFormat, QSettings::UserScope, "mantidproject", "mantidworkbench");
+  const bool useNewInstrumentView = readUseNewInstrumentView(settings);
 
   IALFInstrumentView *view;
   if (useNewInstrumentView) {
@@ -58,7 +77,10 @@ ALFView::ALFView(QWidget *parent) : UserSubWindow(parent), m_instrumentPresenter
 }
 
 void ALFView::closeEvent(QCloseEvent *event) {
-  m_instrumentPresenter->saveSettings();
+  QSettings settings;
+  settings.beginGroup("CustomInterfaces/ALFView");
+  ALFInstrumentSettings::saveSettings(settings, m_instrumentPresenter->captureSettings());
+  settings.endGroup();
   // Explicitly close the Python view widget before the Qt widget hierarchy is
   // torn down, so that its closeEvent fires and resources (e.g. VTK plotter)
   // are cleaned up while all child widgets are still valid.
@@ -106,7 +128,10 @@ void ALFView::initLayout() {
 
   this->setCentralWidget(centralWidget);
 
-  m_instrumentPresenter->loadSettings();
+  QSettings settings;
+  settings.beginGroup("CustomInterfaces/ALFView");
+  m_instrumentPresenter->restoreSettings(ALFInstrumentSettings::readSettings(settings));
+  settings.endGroup();
 }
 
 QWidget *ALFView::createHelpWidget() {

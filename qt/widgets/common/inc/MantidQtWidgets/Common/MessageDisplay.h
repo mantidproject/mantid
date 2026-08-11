@@ -34,20 +34,37 @@ class QSignalMapper;
 namespace MantidQt {
 namespace MantidWidgets {
 
+class EXPORT_OPT_MANTIDQT_COMMON MessageDisplaySettings {
+public:
+  MessageDisplaySettings(int logLevel = 0, int maximumLineCount = 8192);
+
+  [[nodiscard]] int logLevel() const;
+  [[nodiscard]] int maximumLineCount() const;
+
+private:
+  int m_logLevel;
+  int m_maximumLineCount;
+};
+
 /** @class MessageDisplay
  * Provides a widget for display messages in a text box
  * It deals with Message objects which in turn hide whether
  * a message is a framework Poco message or a simple string.
  * It can connect to the Mantid logging framework if required
  */
-class EXPORT_OPT_MANTIDQT_COMMON MessageDisplay : public QWidget, public Configurable {
+class EXPORT_OPT_MANTIDQT_COMMON MessageDisplay : public QWidget, public Configurable<MessageDisplaySettings> {
   Q_OBJECT
   Q_PROPERTY(QString source READ source WRITE setSource)
 
 public:
-  // Configurable interface
-  void readSettings(const QSettings &storage) override;
-  void writeSettings(QSettings &storage) const override;
+  /// Query persistent storage without changing the widget.
+  [[nodiscard]] MessageDisplaySettings readSettings(const QSettings &storage) const;
+  /// Apply an already-read snapshot without persistent I/O.
+  void restoreSettings(const MessageDisplaySettings &settings) override;
+  /// Capture current widget state without persistent I/O.
+  [[nodiscard]] MessageDisplaySettings captureSettings() const override;
+  /// Persist an explicit snapshot.
+  void saveSettings(QSettings &storage, const MessageDisplaySettings &settings) const;
 
 public:
   /// Default constructor with optional parent

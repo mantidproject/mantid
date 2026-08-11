@@ -49,7 +49,9 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         super(FittingDataView, self).__init__(parent)
         self.setupUi(self)
         # file finder
-        self.finder_data.readSettings(output_settings.INTERFACES_SETTINGS_GROUP + "/" + output_settings.ENGINEERING_PREFIX)
+        settings = QtCore.QSettings()
+        settings.beginGroup(output_settings.INTERFACES_SETTINGS_GROUP + "/" + output_settings.ENGINEERING_PREFIX)
+        self.finder_data.restoreSettings(self.finder_data.readSettings(settings))
         self.finder_data.setLabelText("")
         self.finder_data.isForRunFiles(False)
         self.finder_data.allowMultipleFiles(True)
@@ -60,7 +62,9 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         self.finder_data.set_filter_generator(_file_filter_generator)
 
     def saveSettings(self) -> None:
-        self.finder_data.saveSettings(output_settings.INTERFACES_SETTINGS_GROUP + "/" + output_settings.ENGINEERING_PREFIX)
+        settings = QtCore.QSettings()
+        settings.beginGroup(output_settings.INTERFACES_SETTINGS_GROUP + "/" + output_settings.ENGINEERING_PREFIX)
+        self.finder_data.saveSettings(settings, self.finder_data.captureSettings())
 
     # =================
     # Slot Connectors

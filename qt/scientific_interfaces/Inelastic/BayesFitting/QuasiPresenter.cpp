@@ -234,6 +234,6 @@ void QuasiPresenter::setFileExtensionsByName(bool const filter) { m_view->setFil
 
 void QuasiPresenter::setLoadHistory(bool const loadHistory) { m_view->setLoadHistory(loadHistory); }
 
-void QuasiPresenter::loadSettings(const QSettings &settings) { m_view->loadSettings(settings); }
+void QuasiPresenter::restoreSettings(const API::FileFinderSettings &settings) { m_view->restoreSettings(settings); }
 
 } // namespace MantidQt::CustomInterfaces

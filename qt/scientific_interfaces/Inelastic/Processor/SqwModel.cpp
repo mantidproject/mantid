@@ -70,14 +70,13 @@ API::IConfiguredAlgorithm_sptr SqwModel::setupSofQWAlgorithm() const {
   auto const sqwWsName = getOutputWorkspace();
   auto const eRebinWsName = m_baseName + "_r";
 
-  auto sqwAlg = AlgorithmManager::Instance().create("SofQW");
+  auto sqwAlg = AlgorithmManager::Instance().create("SofQWNormalisedPolygon");
   sqwAlg->initialize();
   auto sqwInputProps = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
   sqwInputProps->setProperty("OutputWorkspace", sqwWsName);
   sqwInputProps->setProperty("QAxisBinning", qRebinString);
   sqwInputProps->setProperty("EMode", "Indirect");
   sqwInputProps->setProperty("EFixed", m_eFixed);
-  sqwInputProps->setProperty("Method", "NormalisedPolygon");
   sqwInputProps->setProperty("ReplaceNaNs", true);
 
   if (m_rebinInEnergy) {

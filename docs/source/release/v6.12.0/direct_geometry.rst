@@ -7,7 +7,7 @@ General
 
 New features
 ############
-- :ref:`SofQWCentre <algm-SofQWCentre>` and :ref:`SofQWPolygon <algm-SofQWPolygon>` have been deprecated.
+- SofQWCentre and SofQWPolygon have been deprecated.
 
 Bugfixes
 ############

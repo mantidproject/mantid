@@ -7,17 +7,18 @@
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.cropping.cropping_view import CroppingView
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.cropping.cropping_model import CroppingModel
 from enum import Enum
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.instrument_scope import InstrumentScope, InstrumentScopeConsumer
 from typing import Any
 
 
-class CroppingPresenter(object):
+class CroppingPresenter(InstrumentScopeConsumer):
     def __init__(self, parent: Any, view: CroppingView | None = None, model: CroppingModel | None = None):
         self.parent = parent
         self.model = model or CroppingModel()
         self.view = view or CroppingView(parent)
 
-        self.instrument = "ENGINX"
+        # replaced by the main window's shared scope in EngineeringDiffractionPresenter
+        self._instrument_scope = InstrumentScope()
         self.group = None  # default if no cropping requested
         self.custom_spectra_enabled = False
         self.custom_spectra = None
@@ -110,10 +111,8 @@ class CroppingPresenter(object):
         options = [option[1] for option in self.model.get_cropping_options(self.instrument)]
         self.view.set_combo_options(options)
 
-    def set_instrument_override(self, instrument_index: int) -> None:
-        instrument = INSTRUMENT_DICT[instrument_index]
-        # self.view.set_instrument_override(instrument) # don't think this is needed as it is just a subsection
-        self.instrument = instrument
+    def _on_instrument_changed(self) -> None:
+        # no view override here, don't think this is needed as it is just a subsection
         # update the cropping option combo box
         self.set_cropping_options()
         self.on_combo_changed(0)
