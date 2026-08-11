@@ -41,3 +41,4 @@ if(TARGET StandardTestData AND TARGET SystemTestData)
 endif()
 
 add_subdirectory(Example)
+add_subdirectory(EngineeringDiffraction)

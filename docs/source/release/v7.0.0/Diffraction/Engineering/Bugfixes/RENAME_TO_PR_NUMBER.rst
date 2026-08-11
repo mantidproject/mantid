@@ -1,0 +1,10 @@
+- Loading an existing calibration from a ``.prm`` file in the Engineering Diffraction interface now records the vanadium run, so the calibration reports itself as valid immediately instead of only once the Focus tab has been used.
+- The region of interest options on ENGIN-X are now labelled ``Texture20`` and ``Texture30`` consistently, instead of being renamed to ``Texture (20 spec)`` and ``Texture (30 spec)`` until the instrument was changed.
+- The custom gauge volume file finder on the Absorption Correction tab is no longer shown when a preset gauge volume shape is selected.
+- Selecting ``No Gauge Volume`` on the Absorption Correction tab now clears any gauge volume already defined on a run, rather than silently leaving the previous one in use.
+- A sample material is no longer reported as set on the Absorption Correction tab for runs loaded from a processed NeXus file that have no material.
+- A sequential fit in the Engineering Diffraction interface no longer reports a failure when the minimizer stops because the change in the fitted values fell below tolerance. That is the normal outcome for a fit started from an already-optimal set of parameters, so it now counts as a converged fit, and its result is carried over to seed the next workspace.
+- Plotting the output of a calibration no longer fails with a ``KeyError`` when the default peak function has been changed from ``BackToBackExponential``.
+- A GSAS-II refinement that is rejected by validation or that fails no longer leaves an empty ``tmp_EngDiff_GSASII_*`` directory behind in the save location, and two refinements started within the same second no longer collide.
+- A GSAS-II refinement with no project name is now rejected with an error rather than proceeding.
+- The GSAS-II plot window keeps the title naming the refined file instead of reverting to ``GSAS-II Plot`` when the range markers are moved or the toolbar's home button is pressed.
