@@ -281,18 +281,20 @@ class FullInstrumentViewPresenter:
         self._view.clear_main_plotter()
         renderer = self._renderer
 
+        run_on_main_thread = self._view.run_on_main_thread
+
         self._detector_mesh = renderer.build_detector_mesh(self._model.detector_positions, self._model.flip_beam, self._model)
         display_counts = self._transform_counts(self._model.detector_counts)
         renderer.set_detector_scalars(self._detector_mesh, display_counts, self._counts_label)
-        renderer.add_detector_mesh_to_plotter(self._view.main_plotter, self._detector_mesh, scalars=self._counts_label)
+        run_on_main_thread(renderer.add_detector_mesh_to_plotter, self._view.main_plotter, self._detector_mesh, scalars=self._counts_label)
 
         self._pickable_mesh = renderer.build_pickable_mesh(self._model.detector_positions, self._model.flip_beam)
         renderer.set_pickable_scalars(self._pickable_mesh, self._model.picked_visibility, self._visible_label)
-        renderer.add_pickable_mesh_to_plotter(self._view.main_plotter, self._pickable_mesh, scalars=self._visible_label)
-        renderer.create_picked_highlight_actor(self._view.main_plotter)
+        run_on_main_thread(renderer.add_pickable_mesh_to_plotter, self._view.main_plotter, self._pickable_mesh, scalars=self._visible_label)
+        run_on_main_thread(renderer.create_picked_highlight_actor, self._view.main_plotter)
 
         self._masked_mesh = renderer.build_masked_mesh(self._model.masked_positions, self._model.flip_beam, self._model)
-        renderer.add_masked_mesh_to_plotter(self._view.main_plotter, self._masked_mesh)
+        run_on_main_thread(renderer.add_masked_mesh_to_plotter, self._view.main_plotter, self._masked_mesh)
 
         monitor_mesh = self._create_and_add_monitor_mesh()
         sample_position_mesh = self._create_and_add_sample_mesh()
