@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from abc import ABC, abstractmethod
-from typing import Callable, Optional
+from typing import Callable, Optional, ClassVar
 
 import numpy as np
 import pyvista as pv
@@ -22,14 +22,14 @@ class InstrumentRenderer(ABC):
     # Marker colour for picked detectors.  Deliberately distinct from the monitor
     # colour (red) and from the counts colour map, so a selection can never be
     # mistaken for either.
-    _PICKED_HIGHLIGHT_COLOUR = "magenta"
+    _PICKED_HIGHLIGHT_COLOUR: ClassVar[str] = "magenta"
 
     # Opacity transfer function for the pickable overlay, as [unpicked, picked].
     # The picked entry is fully transparent: the magenta marker drawn by
     # update_picked_highlight marks the selection instead, and a tinted fill on
     # top of it only muddied the colour and hid the detector's counts.  The
     # overlay actor itself is still needed — it is the pick target.
-    _PICKED_FILL_OPACITY = [0.0, 0.0]
+    _PICKED_FILL_OPACITY: ClassVar[list[float]] = [0.0, 0.0]
 
     def __init__(self) -> None:
         super().__init__()
