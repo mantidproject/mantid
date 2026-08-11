@@ -9,7 +9,11 @@
 #
 
 
+import tempfile
 import unittest
+from pathlib import Path
+
+from qtpy.QtCore import QSettings
 
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.widgets.messagedisplay import MessageDisplay, Priority
@@ -24,6 +28,33 @@ class MessageDisplayTest(unittest.TestCase):
 
     def setUp(self):
         self.display = MessageDisplay()
+
+    def test_settings_read_restore_capture_and_save_are_separate(self):
+        with tempfile.TemporaryDirectory() as directory:
+            filename = str(Path(directory) / "settings.ini")
+            storage = QSettings(filename, QSettings.IniFormat)
+            storage.setValue("MessageDisplay/ShowFrameworkOutput", False)
+            storage.setValue("MessageDisplay/ShowActiveScriptOutput", False)
+            storage.setValue("MessageDisplay/ShowAllScriptOutput", True)
+            storage.setValue("unrelated", "preserved")
+            storage.sync()
+            contents_before = Path(filename).read_bytes()
+            self.display.setShowFrameworkOutput(True)
+
+            settings = self.display.readSettings(storage)
+
+            self.assertTrue(self.display.showFrameworkOutput())
+            self.assertEqual(contents_before, Path(filename).read_bytes())
+
+            self.display.restoreSettings(settings)
+            self.assertFalse(self.display.showFrameworkOutput())
+            self.assertFalse(self.display.showActiveScriptOutput())
+            self.assertTrue(self.display.showAllScriptOutput())
+
+            captured = self.display.captureSettings()
+            self.display.saveSettings(storage, captured)
+            storage.sync()
+            self.assertEqual("preserved", storage.value("unrelated"))
 
     def test_that_the_Filter_By_menu_is_in_the_context_menu(self):
         context_menu = self.display.generateContextMenu()

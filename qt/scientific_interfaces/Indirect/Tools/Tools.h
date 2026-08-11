@@ -51,8 +51,8 @@ public: // public constructor, destructor and functions
 private:
   std::string documentationPage() const override;
 
-  /// Load default interface settings for each tab
-  void loadSettings();
+  /// Legacy operation that writes the default directory, then restores each tab; see @ref settings_lifecycle.
+  void restoreSettings();
   /// Called upon a close event.
   void closeEvent(QCloseEvent * /*unused*/) override;
   /// Handle POCO event

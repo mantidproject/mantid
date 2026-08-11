@@ -44,8 +44,6 @@ public:
   static QIcon icon();
   static std::map<std::string, QVariant> getSettings();
 
-  void loadSettings();
-
   void notifyApplySettings() override;
   void notifyCloseSettings() override;
 

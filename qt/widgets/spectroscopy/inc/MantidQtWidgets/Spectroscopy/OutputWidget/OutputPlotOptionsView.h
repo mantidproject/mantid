@@ -19,10 +19,27 @@
 #include <QStringList>
 #include <QStringListModel>
 
+class QSettings;
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
 class IOutputPlotOptionsPresenter;
+
+class MANTID_SPECTROSCOPY_DLL IndicesSuggestionsSettings {
+public:
+  explicit IndicesSuggestionsSettings(QStringList suggestions = {});
+
+  [[nodiscard]] const QStringList &suggestions() const;
+
+  /// Query persistent storage without changing widgets or writing settings.
+  [[nodiscard]] static IndicesSuggestionsSettings readSettings(const QSettings &settings);
+  /// Persist only the suggestions list from a snapshot.
+  static void saveSettings(QSettings &settings, const IndicesSuggestionsSettings &values);
+
+private:
+  QStringList m_suggestions;
+};
 
 enum PlotWidget { Spectra, SpectraBin, SpectraSliceSurface, SpectraTiled, SpectraUnit, SpectraSliceSurfaceUnit };
 
@@ -87,6 +104,11 @@ public:
   void setIndicesErrorLabelVisible(bool visible) override;
 
   void addIndicesSuggestion(QString const &spectra) override;
+
+  /// Apply an immutable settings snapshot without persistent access.
+  void restoreSettings(const IndicesSuggestionsSettings &settings);
+  /// Capture current suggestions without persistent access.
+  [[nodiscard]] IndicesSuggestionsSettings captureSettings() const;
 
   void displayWarning(QString const &message) override;
 

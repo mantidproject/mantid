@@ -35,7 +35,7 @@ void Corrections::handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotificat
   std::string key = pNf->key();
 
   if (key == "defaultsave.directory")
-    loadSettings();
+    restoreSettings();
 }
 
 /**
@@ -79,26 +79,18 @@ void Corrections::initLayout() {
 /**
  * Allow Python to be called locally.
  */
-void Corrections::initLocalPython() { loadSettings(); }
+void Corrections::initLocalPython() { restoreSettings(); }
 
 /**
- * Load the settings saved for this interface.
+ * Restore settings for this interface.
  */
-void Corrections::loadSettings() {
-  QSettings settings;
-  QString settingsGroup = "CustomInterfaces/IndirectAnalysis/";
-  QString saveDir =
-      QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
+void Corrections::restoreSettings() {
+  auto const settings = API::FileFinderSettings(
+      QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory")));
 
-  settings.beginGroup(settingsGroup + "ProcessedFiles");
-  settings.setValue("last_directory", saveDir);
-
-  // Load each tab's settings.
-  auto tab = m_tabs.begin();
-  for (; tab != m_tabs.end(); ++tab)
-    tab->second->loadTabSettings(settings);
-
-  settings.endGroup();
+  for (auto const &[_, tab] : m_tabs) {
+    tab->restoreSettings(settings);
+  }
 }
 
 void Corrections::applySettings(std::map<std::string, QVariant> const &settings) {

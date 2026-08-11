@@ -16,48 +16,42 @@ namespace ISISReflectometry {
 class MockOptionsDialogModel : public IOptionsDialogModel {
 public:
   GNU_DIAG_OFF_SUGGEST_OVERRIDE
-  MOCK_METHOD2(applyDefaultOptionsProxy, void(std::map<std::string, bool> &, std::map<std::string, int> &));
-  void applyDefaultOptions(std::map<std::string, bool> &boolOptions, std::map<std::string, int> &intOptions) {
-    boolOptions["WarnProcessAll"] = false;
-    boolOptions["WarnDiscardChanges"] = false;
-    boolOptions["WarnProcessPartialGroup"] = false;
-    boolOptions["Round"] = true;
-    intOptions["RoundPrecision"] = 5;
-    applyDefaultOptionsProxy(boolOptions, intOptions);
+  MOCK_CONST_METHOD0(defaultSettingsProxy, void());
+  OptionsDialogSettings defaultSettings() const override {
+    defaultSettingsProxy();
+    return OptionsDialogSettings(
+        {{"WarnProcessAll", false}, {"WarnDiscardChanges", false}, {"WarnProcessPartialGroup", false}, {"Round", true}},
+        {{"RoundPrecision", 5}});
   }
-  MOCK_METHOD2(loadSettingsProxy, void(std::map<std::string, bool> &, std::map<std::string, int> &));
-  void loadSettings(std::map<std::string, bool> &boolOptions, std::map<std::string, int> &intOptions) {
-    boolOptions["WarnProcessAll"] = false;
-    boolOptions["WarnDiscardChanges"] = true;
-    boolOptions["WarnProcessPartialGroup"] = false;
-    boolOptions["Round"] = true;
-    intOptions["RoundPrecision"] = 2;
-    loadSettingsProxy(boolOptions, intOptions);
+  MOCK_CONST_METHOD0(readSettingsProxy, void());
+  OptionsDialogSettings readSettings() const override {
+    readSettingsProxy();
+    return OptionsDialogSettings(
+        {{"WarnProcessAll", false}, {"WarnDiscardChanges", true}, {"WarnProcessPartialGroup", false}, {"Round", true}},
+        {{"RoundPrecision", 2}});
   }
-  MOCK_METHOD2(saveSettings, void(const std::map<std::string, bool> &, const std::map<std::string, int> &));
+  MOCK_METHOD1(saveSettingsProxy, void(OptionsDialogSettings const &));
+  void saveSettings(OptionsDialogSettings const &settings) override { saveSettingsProxy(settings); }
 };
 
 class MockOptionsDialogModelUnsuccessfulLoad : public IOptionsDialogModel {
 public:
-  MOCK_METHOD2(applyDefaultOptions, void(std::map<std::string, bool> &, std::map<std::string, int> &));
-  MOCK_METHOD2(loadSettings, void(std::map<std::string, bool> &, std::map<std::string, int> &));
-  MOCK_METHOD2(saveSettings, void(const std::map<std::string, bool> &, const std::map<std::string, int> &));
+  MOCK_CONST_METHOD0(defaultSettings, OptionsDialogSettings());
+  MOCK_CONST_METHOD0(readSettings, OptionsDialogSettings());
+  MOCK_METHOD1(saveSettings, void(OptionsDialogSettings const &));
 };
 
 class MockOptionsDialogModelUnsuccessfulDefaults : public IOptionsDialogModel {
 public:
-  MOCK_METHOD2(applyDefaultOptionsProxy, void(std::map<std::string, bool> &, std::map<std::string, int> &));
-  void applyDefaultOptions(std::map<std::string, bool> &boolOptions, std::map<std::string, int> &intOptions) {
-    boolOptions["WarnProcessAll"] = false;
-    boolOptions["WarnDiscardChanges"] = false;
-    boolOptions["WarnProcessPartialGroup"] = false;
-    boolOptions["Round"] = true;
-    intOptions["RoundPrecision"] = 5;
-    applyDefaultOptionsProxy(boolOptions, intOptions);
+  MOCK_CONST_METHOD0(defaultSettingsProxy, void());
+  OptionsDialogSettings defaultSettings() const override {
+    defaultSettingsProxy();
+    return OptionsDialogSettings(
+        {{"WarnProcessAll", false}, {"WarnDiscardChanges", false}, {"WarnProcessPartialGroup", false}, {"Round", true}},
+        {{"RoundPrecision", 5}});
   }
-  MOCK_METHOD2(loadSettings, void(std::map<std::string, bool> &, std::map<std::string, int> &));
-
-  MOCK_METHOD2(saveSettings, void(const std::map<std::string, bool> &, const std::map<std::string, int> &));
+  MOCK_CONST_METHOD0(readSettings, OptionsDialogSettings());
+  MOCK_METHOD1(saveSettings, void(OptionsDialogSettings const &));
 };
 GNU_DIAG_ON_SUGGEST_OVERRIDE
 } // namespace ISISReflectometry

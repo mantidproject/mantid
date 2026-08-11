@@ -10,6 +10,10 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include <QFile>
+#include <QSettings>
+#include <QTemporaryDir>
+
 #include <memory>
 
 using namespace MantidQt::MantidWidgets;
@@ -65,7 +69,52 @@ public:
     TS_ASSERT_EQUALS(m_fitOptionsBrowser->getCurrentFittingType(), FittingMode::SIMULTANEOUS);
   }
 
+  void test_read_and_restore_do_not_modify_persistent_storage() {
+    QTemporaryDir directory;
+    TS_ASSERT(directory.isValid());
+    auto const filename = directory.filePath("settings.ini");
+    QSettings storage(filename, QSettings::IniFormat);
+    storage.beginGroup("FitOptions");
+    storage.setValue("MaxIterations", "123");
+    storage.setValue("unrelated", "preserved");
+    storage.sync();
+    auto const contentsBefore = fileContents(filename);
+    m_fitOptionsBrowser = std::make_unique<FitOptionsBrowser>(nullptr);
+
+    auto const values = m_fitOptionsBrowser->readSettings(storage);
+    m_fitOptionsBrowser->restoreSettings(values);
+    storage.sync();
+
+    TS_ASSERT_EQUALS(m_fitOptionsBrowser->getProperty("MaxIterations"), QString("123"));
+    TS_ASSERT_EQUALS(m_fitOptionsBrowser->captureSettings().values().value("MaxIterations"), QString("123"));
+    TS_ASSERT_EQUALS(fileContents(filename), contentsBefore);
+  }
+
+  void test_saveSettings_writes_only_snapshot_keys() {
+    QTemporaryDir directory;
+    TS_ASSERT(directory.isValid());
+    QSettings storage(directory.filePath("settings.ini"), QSettings::IniFormat);
+    storage.beginGroup("FitOptions");
+    storage.setValue("unrelated", "preserved");
+    FitOptionsBrowserSettings values(
+        QMap<QString, QString>{{"MaxIterations", "42"}, {"CostFunction", "Least squares"}});
+
+    FitOptionsBrowserSettings::saveSettings(storage, values);
+    storage.sync();
+
+    TS_ASSERT_EQUALS(storage.value("MaxIterations").toString(), QString("42"));
+    TS_ASSERT_EQUALS(storage.value("CostFunction").toString(), QString("Least squares"));
+    TS_ASSERT_EQUALS(storage.value("unrelated").toString(), QString("preserved"));
+    TS_ASSERT_EQUALS(storage.childKeys().size(), 3);
+  }
+
 private:
+  QByteArray fileContents(const QString &filename) {
+    QFile file(filename);
+    TS_ASSERT(file.open(QIODevice::ReadOnly));
+    return file.readAll();
+  }
+
   std::size_t m_numberOfTries;
   std::unique_ptr<FitOptionsBrowser> m_fitOptionsBrowser;
 };

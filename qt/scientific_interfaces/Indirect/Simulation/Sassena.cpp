@@ -71,7 +71,9 @@ void Sassena::handleAlgorithmFinish(bool error) {
  *
  * @param settings :: The settings to loading into the interface
  */
-void Sassena::loadSettings(const QSettings &settings) { m_uiForm.mwInputFile->readSettings(settings.group()); }
+void Sassena::restoreSettings(const API::FileFinderSettings &settings) {
+  m_uiForm.mwInputFile->restoreSettings(settings);
+}
 
 /**
  * Handle saving of workspace

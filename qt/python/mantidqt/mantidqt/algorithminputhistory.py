@@ -22,7 +22,13 @@ class AlgorithmInputHistory(object):
         pass
 
     def readSettings(self, settings):
-        self._singleton.readSettings(toQSettings(settings))
+        return self._singleton.readSettings(toQSettings(settings))
 
-    def writeSettings(self, settings):
-        self._singleton.writeSettings(toQSettings(settings))
+    def restoreSettings(self, settings):
+        self._singleton.restoreSettings(settings)
+
+    def captureSettings(self):
+        return self._singleton.captureSettings()
+
+    def saveSettings(self, settings, values):
+        self._singleton.saveSettings(toQSettings(settings), values)

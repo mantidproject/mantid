@@ -47,8 +47,8 @@ public:
 
   MOCK_METHOD1(subscribePresenter, void(IALFInstrumentPresenter *presenter));
 
-  MOCK_METHOD0(loadSettings, void());
-  MOCK_METHOD0(saveSettings, void());
+  MOCK_METHOD1(restoreSettings, void(const ALFInstrumentSettings &settings));
+  MOCK_CONST_METHOD0(captureSettings, ALFInstrumentSettings());
 
   MOCK_METHOD1(disable, void(std::string const &reason));
   MOCK_METHOD0(enable, void());
@@ -118,8 +118,8 @@ public:
 
   MOCK_METHOD1(subscribeAnalysisPresenter, void(IALFAnalysisPresenter *presenter));
 
-  MOCK_METHOD0(loadSettings, void());
-  MOCK_METHOD0(saveSettings, void());
+  MOCK_METHOD1(restoreSettings, void(const ALFInstrumentSettings &settings));
+  MOCK_CONST_METHOD0(captureSettings, ALFInstrumentSettings());
 
   MOCK_METHOD0(loadSample, void());
   MOCK_METHOD0(loadVanadium, void());

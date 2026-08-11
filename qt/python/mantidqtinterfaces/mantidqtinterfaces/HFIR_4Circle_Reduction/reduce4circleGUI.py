@@ -49,6 +49,8 @@ from mantid.kernel import Logger
 from qtpy.QtWidgets import QButtonGroup, QFileDialog, QMessageBox, QMainWindow, QInputDialog
 from qtpy.QtCore import QSettings
 
+from mantidqt.utils.qt.qsettings_change_aware import QSettingsChangeAware
+
 try:
     from mantidqt.utils.qt import load_ui
 except ImportError:
@@ -3741,7 +3743,7 @@ class MainWindow(QMainWindow):
         Save settings (parameter set) upon quitting
         :return:
         """
-        settings = QSettings()
+        settings = QSettingsChangeAware()
 
         # directories
         local_spice_dir = str(self.ui.lineEdit_localSpiceDir.text())

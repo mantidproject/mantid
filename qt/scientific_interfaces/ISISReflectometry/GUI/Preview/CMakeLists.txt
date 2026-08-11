@@ -20,6 +20,7 @@ set(PREVIEW_INC_FILES
     PreviewJobManager.h
     IPreviewPresenter.h
     PreviewPresenterFactory.h
+    PreviewSettings.h
     PreviewPresenter.h
     IPreviewView.h
     IPreviewDockedWidgets.h
