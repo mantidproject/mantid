@@ -89,6 +89,7 @@ outputs:
 
     requirements:
       run:
+        - fontconfig ${{ fontconfig }}
         - gsl ${{ gsl }}
         - hdf4 ${{ hdf4 }}
         - h5py
