@@ -703,7 +703,6 @@ class FullInstrumentViewPresenter:
     def on_start_adding_peaks_toggled(self, checked) -> None:
         if checked:
             self._model.turn_on_single_point_picking()
-            self._view.set_rubberband_zoom_checked(False)
             self._view.set_hover_pick_checked(False)
             self._view.add_peak_cursor_to_lineplot()
             self._view.disable_and_uncheck_selection_list()

@@ -35,6 +35,10 @@ class WorkspaceDetectorPeaks:
         for _, peaks_for_spec in groupby(peaks, lambda x: x.detector_id):
             self._detector_peaks.append(DetectorPeaks(list(peaks_for_spec)))
 
+    @property
+    def detector_peaks(self):
+        return self._detector_peaks
+
     def get_peaks_indices_and_labels(self, detector_positions, detector_ids) -> tuple[np.ndarray, list]:
         peaks_ids = np.array([p.detector_id for p in self._detector_peaks])
         if len(peaks_ids) == 0 or len(detector_ids) == 0:
