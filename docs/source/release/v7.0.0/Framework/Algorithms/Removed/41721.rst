@@ -1,0 +1,1 @@
+- Removed SofQWCentre and SofQWPolygon (deprecated since release 6.12.0).
