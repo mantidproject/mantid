@@ -333,7 +333,10 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
 
     def set_absorption_section_visibility(self, vis: bool) -> None:
         self.combo_shapeMethod.setVisible(vis)
-        self.finder_gauge_vol.setVisible(vis)
+        # the file finder belongs to the "Custom Shape" option only, so revealing the whole section
+        # must not reveal it for a preset - the combo's own handler would otherwise not correct this
+        # until the selection changed
+        self.set_finder_gauge_vol_visible(vis and self.get_shape_method() == "Custom Shape")
 
     def set_divergence_section_visibility(self, vis: bool) -> None:
         self.label_divHorz.setVisible(vis)

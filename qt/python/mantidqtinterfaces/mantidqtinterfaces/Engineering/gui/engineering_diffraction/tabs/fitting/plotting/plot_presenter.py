@@ -8,7 +8,7 @@ from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing, Gener
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.plotting.plot_model import FittingPlotModel
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.plotting.plot_view import FittingPlotView
 from mantid.simpleapi import Fit, logger
-from mantid.api import MatrixWorkspace
+from mantid.api import MatrixWorkspace, MinimizerStatus
 from mantidqt.utils.asynchronous import AsyncTask, AsyncTaskSuccess, AsyncTaskFailure
 from copy import deepcopy
 from typing import List, Dict
@@ -187,7 +187,7 @@ class FittingPlotPresenter(object):
             fitprop["status"] = fit_output.OutputStatus
             funcstr = str(fit_output.Function.fun)
             fitprop["properties"]["Function"] = funcstr
-            if "success" in fitprop["status"].lower() and do_sequential:
+            if MinimizerStatus.isConverged(fitprop["status"]) and do_sequential:
                 # update function in prev fitprop to use for next workspace
                 prev_fitprop["properties"]["Function"] = funcstr
             # append a deep copy to output list (will be initial parameters if not successful)
@@ -221,8 +221,12 @@ class FittingPlotPresenter(object):
 
     def set_final_state_progress_bar(self, output_list: List[Dict[str, str]] | None, status: str | None = None) -> None:
         if not status:
-            status = output_list[-1]["status"].lower()
-        if "success" in status:
+            status = output_list[-1]["status"]
+        # MinimizerStatus rather than a substring test for "success": a minimizer started from an
+        # already-optimal set of parameters - which is the normal case for every run after the first
+        # in a sequential fit - stops with "Changes in function value are too small", and reporting
+        # that as a failed fit is wrong
+        if MinimizerStatus.isConverged(status):
             self.set_progress_bar_success(status)
         else:
             self.set_progress_bar_failed(status)
