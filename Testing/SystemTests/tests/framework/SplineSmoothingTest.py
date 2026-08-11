@@ -33,7 +33,7 @@ class SplineSmoothingTest(systemtesting.MantidSystemTest):
         # Custom code to create and run this single test suite
         # and then mark as success or failure
         suite = unittest.TestSuite()
-        suite.addTest(unittest.makeSuite(LoadTests, "test"))
+        suite.addTest(unittest.defaultTestLoader.loadTestsFromTestCase(LoadTests))
         runner = unittest.TextTestRunner()
         # Run using either runner
         res = runner.run(suite)
