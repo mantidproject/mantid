@@ -464,6 +464,12 @@ def _finalize_session(
 
 
 def _discover_staged_settings(staging_root: Path) -> set[Path]:
+    for path in staging_root.iterdir():
+        if path.name in {MANIFEST_FILENAME, COMPLETED_FILENAME}:
+            continue
+        if path.name != "mantidproject":
+            raise StagingFinalizationError(f"unexpected staged settings path outside mantidproject: {path}")
+
     organization_root = staging_root / "mantidproject"
     organization_stat = organization_root.lstat()
     if stat.S_ISLNK(organization_stat.st_mode) or not stat.S_ISDIR(organization_stat.st_mode):

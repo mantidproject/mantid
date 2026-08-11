@@ -148,6 +148,20 @@ class QSettingsStagingCopyBackTest(unittest.TestCase):
         self.assertEqual(b"reduction settings", copied.read_bytes())
         self.assertEqual(0o600, copied.stat().st_mode & 0o777)
 
+    def test_unexpected_settings_organization_fails_finalization_and_retains_session(self):
+        session = self.prepare()
+        unexpected = session.staging_root / "Other Organization/settings.ini"
+        unexpected.parent.mkdir()
+        unexpected.write_text("[General]\nvalue=unexpected\n")
+
+        finalization = session.finalize()
+
+        self.assertFalse(finalization.successful)
+        self.assertIn("outside mantidproject", finalization.error)
+        self.assertTrue(unexpected.exists())
+        self.assertFalse((session.staging_root / COMPLETED_FILENAME).exists())
+        self.assertTrue(self.coordinators[0].unlocked)
+
     def test_error_reporter_settings_are_never_seeded_or_copied_back(self):
         self.canonical_directory.mkdir()
         reporter_file = self.canonical_directory / "mantid-error-reporter.ini"
