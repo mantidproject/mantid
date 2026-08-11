@@ -148,6 +148,23 @@ class QSettingsStagingCopyBackTest(unittest.TestCase):
         self.assertEqual(b"reduction settings", copied.read_bytes())
         self.assertEqual(0o600, copied.stat().st_mode & 0o777)
 
+    def test_error_reporter_settings_are_never_seeded_or_copied_back(self):
+        self.canonical_directory.mkdir()
+        reporter_file = self.canonical_directory / "mantid-error-reporter.ini"
+        reporter_file.write_bytes(b"canonical reporter settings")
+        session = self.prepare()
+        staged_reporter_file = session.staging_root / "mantidproject/mantid-error-reporter.ini"
+        self.assertFalse(staged_reporter_file.exists())
+
+        staged_reporter_file.write_bytes(b"transient staged reporter settings")
+        (session.staging_root / "mantidproject/mantidworkbench.ini").write_bytes(b"changed workbench settings")
+        finalization = session.finalize()
+
+        self.assertTrue(finalization.successful)
+        self.assertEqual(b"canonical reporter settings", reporter_file.read_bytes())
+        self.assertEqual(b"changed workbench settings", self.canonical_file.read_bytes())
+        self.assertNotIn(Path("mantidproject/mantid-error-reporter.ini"), {result.relative_path for result in finalization.files})
+
     def test_missing_seeded_file_fails_without_deleting_canonical_file(self):
         session = self.prepare()
         (session.staging_root / "mantidproject/mantidworkbench.ini").unlink()

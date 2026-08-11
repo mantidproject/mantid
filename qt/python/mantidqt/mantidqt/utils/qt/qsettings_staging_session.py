@@ -30,6 +30,7 @@ MANIFEST_FILENAME = ".qsettings-staging-manifest.json"
 COMPLETED_FILENAME = ".qsettings-staging-complete"
 COORDINATOR_FILENAME = "coordinator.lock"
 DEFAULT_SETTINGS_PATHS = (Path("mantidproject/mantidworkbench.ini"),)
+ERROR_REPORTER_SETTINGS_PATH = Path("mantidproject/mantid-error-reporter.ini")
 
 _PRIVATE_DIRECTORY_MODE = 0o700
 _PRIVATE_FILE_MODE = 0o600
@@ -315,6 +316,8 @@ def _seed_session(
         _seed_directory(source_organization_root, staged_organization_root, canonical_root, session_root, entries)
 
     for relative_path in expected_settings_paths:
+        if _is_excluded_settings_path(relative_path):
+            continue
         entries.setdefault(relative_path, StagedSettingsFile(relative_path, relative_path, None, None))
     return tuple(entries[path] for path in sorted(entries))
 
@@ -332,7 +335,8 @@ def _seed_directory(
         raise StagingPreparationError(f"cannot inspect canonical settings directory: {source_directory}") from error
 
     for source in children:
-        if _is_excluded_artifact(source.name):
+        relative_path = source.relative_to(canonical_root)
+        if _is_excluded_settings_path(relative_path) or _is_excluded_artifact(source.name):
             continue
         source_stat = source.lstat()
         if stat.S_ISLNK(source_stat.st_mode):
@@ -342,7 +346,6 @@ def _seed_directory(
             staged.mkdir(mode=_PRIVATE_DIRECTORY_MODE)
             _seed_directory(source, staged, canonical_root, session_root, entries)
         elif stat.S_ISREG(source_stat.st_mode):
-            relative_path = source.relative_to(canonical_root)
             digest, canonical_mode = _copy_and_hash(source, staged)
             entries[relative_path] = StagedSettingsFile(
                 canonical_relative_path=relative_path,
@@ -362,6 +365,10 @@ def _is_excluded_artifact(name: str) -> bool:
         or lowered.endswith((".lock", ".rmlock", ".tmp", ".temp", ".swp", "~"))
         or ".rmlock." in lowered
     )
+
+
+def _is_excluded_settings_path(relative_path: Path) -> bool:
+    return relative_path == ERROR_REPORTER_SETTINGS_PATH
 
 
 def _copy_and_hash(source: Path, staged: Path) -> tuple[str, int]:
@@ -421,7 +428,9 @@ def _finalize_session(
     staging_root: Path,
     manifest: tuple[StagedSettingsFile, ...],
 ) -> QSettingsStagingFinalization:
-    manifest_by_path = {entry.canonical_relative_path: entry for entry in manifest}
+    manifest_by_path = {
+        entry.canonical_relative_path: entry for entry in manifest if not _is_excluded_settings_path(entry.canonical_relative_path)
+    }
     try:
         staged_paths = _discover_staged_settings(staging_root)
     except (OSError, StagingFinalizationError) as error:
@@ -467,7 +476,8 @@ def _discover_staged_settings(staging_root: Path) -> set[Path]:
 
 def _discover_staged_directory(directory: Path, staging_root: Path, discovered: set[Path]) -> None:
     for path in directory.iterdir():
-        if _is_excluded_artifact(path.name):
+        relative_path = path.relative_to(staging_root)
+        if _is_excluded_settings_path(relative_path) or _is_excluded_artifact(path.name):
             continue
         path_stat = path.lstat()
         if stat.S_ISLNK(path_stat.st_mode):
@@ -475,7 +485,7 @@ def _discover_staged_directory(directory: Path, staging_root: Path, discovered: 
         if stat.S_ISDIR(path_stat.st_mode):
             _discover_staged_directory(path, staging_root, discovered)
         elif stat.S_ISREG(path_stat.st_mode):
-            discovered.add(path.relative_to(staging_root))
+            discovered.add(relative_path)
         else:
             raise StagingFinalizationError(f"staged settings path is not a regular file: {path}")
 

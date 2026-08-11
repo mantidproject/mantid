@@ -91,6 +91,8 @@ class QSettingsStagingSessionManagerTest(unittest.TestCase):
         settings = organization_root / "mantidworkbench.ini"
         settings.write_bytes(b"[General]\nvalue=unchanged\n")
         settings.chmod(0o640)
+        reporter_settings = organization_root / "mantid-error-reporter.ini"
+        reporter_settings.write_bytes(b"[ContactInfo]\nName=Reporter\n")
         secondary = nested_root / "Mantid Reduction.ini"
         secondary.write_bytes(b"[Reduction]\nfacility=SNS\n")
         for artifact in ("mantidworkbench.ini.lock", "old.rmlock", "write.tmp", ".nfs123"):
@@ -104,8 +106,10 @@ class QSettingsStagingSessionManagerTest(unittest.TestCase):
         self.assertEqual(secondary.read_bytes(), staged_secondary.read_bytes())
         self.assertEqual(0o600, staged_settings.stat().st_mode & 0o777)
         self.assertFalse((session.staging_root / "mantidproject/mantidworkbench.ini.lock").exists())
+        self.assertFalse((session.staging_root / "mantidproject/mantid-error-reporter.ini").exists())
 
         entries = {entry.canonical_relative_path: entry for entry in session.manifest}
+        self.assertNotIn(Path("mantidproject/mantid-error-reporter.ini"), entries)
         entry = entries[Path("mantidproject/mantidworkbench.ini")]
         self.assertEqual(hashlib.sha256(settings.read_bytes()).hexdigest(), entry.canonical_sha256)
         self.assertEqual(0o640, entry.canonical_mode)
@@ -113,6 +117,12 @@ class QSettingsStagingSessionManagerTest(unittest.TestCase):
         manifest = json.loads((session.staging_root / MANIFEST_FILENAME).read_text(encoding="utf-8"))
         self.assertNotIn("value=unchanged", json.dumps(manifest))
         self.assertEqual(2, len(manifest["files"]))
+        session.abort()
+
+    def test_does_not_record_error_reporter_when_supplied_as_an_expected_path(self):
+        session = self.manager(expected_settings_paths=(Path("mantidproject/mantid-error-reporter.ini"),)).prepare()
+
+        self.assertEqual((), session.manifest)
         session.abort()
 
     def test_records_expected_file_as_absent_without_creating_it(self):
