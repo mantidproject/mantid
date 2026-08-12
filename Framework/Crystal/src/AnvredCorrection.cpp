@@ -554,17 +554,17 @@ void AnvredCorrection::scale_init(const Instrument_const_sptr &inst, const Compo
                                   const double L2, const double depth, double &pathlength,
                                   const std::string &bankName) {
   // Distance to center of detector
-  const IComponent *det0 = inst->getComponentByName(bankName).get();
+  size_t detIndex = componentInfo.indexOfAny(bankName);
   if ("CORELLI" == inst->getName()) // for Corelli with sixteenpack under bank
   {
-    const size_t bankIndex = componentInfo.indexOfAny(bankName);
-    const auto children = componentInfo.children(bankIndex);
+    const auto children = componentInfo.children(detIndex);
     if (!children.empty()) {
-      det0 = componentInfo.componentID(children[0]);
+      detIndex = children[0];
     }
   }
-  IComponent_const_sptr sample = inst->getSample();
-  double cosA = det0->getDistance(*sample) / L2;
+  // NOTE: take the position from ComponentInfo. Dereferencing componentID() would yield the *base* component,
+  //       whose getDistance() ignores the ParameterMap and so reports uncalibrated IDF geometry.
+  double cosA = componentInfo.position(detIndex).distance(componentInfo.samplePosition()) / L2;
   pathlength = depth / cosA;
 }
 

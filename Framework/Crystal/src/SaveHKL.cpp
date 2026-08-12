@@ -366,18 +366,18 @@ void SaveHKL::exec() {
           double eff_center = 1.0 - std::exp(-mu * depth); // efficiency at center of detector
 
           // Distance to center of detector
-          const IComponent *det0 = inst->getComponentByName(p.getBankName()).get();
+          const auto &componentInfo = m_ws->componentInfo();
+          size_t detIndex = componentInfo.indexOfAny(p.getBankName());
           if (inst->getName() == "CORELLI") // for Corelli with sixteenpack under bank
           {
-            const auto &componentInfo = m_ws->componentInfo();
-            const size_t bankIndex = componentInfo.indexOfAny(p.getBankName());
-            const auto children = componentInfo.children(bankIndex);
+            const auto children = componentInfo.children(detIndex);
             if (!children.empty()) {
-              det0 = componentInfo.componentID(children[0]);
+              detIndex = children[0];
             }
           }
-          IComponent_const_sptr sample = inst->getSample();
-          double cosA = det0->getDistance(*sample) / p.getL2();
+          // NOTE: take the position from ComponentInfo. Dereferencing componentID() would yield the *base* component,
+          //       whose getDistance() ignores the ParameterMap and so reports uncalibrated IDF geometry.
+          double cosA = componentInfo.position(detIndex).distance(componentInfo.samplePosition()) / p.getL2();
           double pathlength = depth / cosA;
           double eff_R = 1.0 - exp(-mu * pathlength); // efficiency at point R
           double sp_ratio = eff_center / eff_R;       // slant path efficiency ratio

@@ -7,17 +7,25 @@
 #pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidCrystal/LoadIsawPeaks.h"
 #include "MantidCrystal/SaveIsawPeaks.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/V3D.h"
 #include <cxxtest/TestSuite.h>
 #include <filesystem>
 #include <fstream>
+#include <iterator>
+#include <sstream>
+#include <string>
+#include <vector>
 
 using namespace Mantid;
 using namespace Mantid::Crystal;
@@ -96,6 +104,70 @@ public:
 
     if (std::filesystem::exists(outfile))
       std::filesystem::remove(outfile);
+  }
+
+  /** Regression test: geometry held in the ParameterMap must reach the written file.
+   *
+   * On CORELLI the panel is the "sixteenpack" child of bankNN, which the algorithm reaches via
+   * ComponentInfo::componentID(). Dereferencing that ID yields the *base* component, whose getPos()
+   * ignores the ParameterMap, so a calibrated panel was previously written at its engineering position.
+   */
+  void test_corelli_panel_written_from_calibrated_geometry() {
+    FrameworkManager::Instance().exec("LoadEmptyInstrument", 4, "InstrumentName", "CORELLI", "OutputWorkspace",
+                                      "_corelli_inst_");
+    MatrixWorkspace_sptr inst_ws;
+    TS_ASSERT_THROWS_NOTHING(inst_ws = std::dynamic_pointer_cast<MatrixWorkspace>(
+                                 AnalysisDataService::Instance().retrieve("_corelli_inst_")))
+    TS_ASSERT(inst_ws)
+
+    PeaksWorkspace_sptr ws(new PeaksWorkspace());
+    ws->setInstrument(inst_ws->getInstrument());
+
+    // One peak anywhere in bank21, so that the algorithm emits a record for that bank.
+    const size_t bankIndex = ws->componentInfo().indexOfAny("bank21");
+    const auto detectorsInBank = ws->componentInfo().detectorsInSubtree(bankIndex);
+    TS_ASSERT(!detectorsInBank.empty())
+    const auto detID = ws->detectorInfo().detectorIDs()[detectorsInBank.front()];
+    ws->addPeak(Peak(ws->getInstrument(), detID, 1.5));
+
+    // Displace the panel through ComponentInfo, which is how a calibration records its result.
+    auto &componentInfo = ws->mutableComponentInfo();
+    const size_t panelIndex = componentInfo.children(bankIndex).front();
+    const V3D pristine = componentInfo.position(panelIndex);
+    const V3D displaced = pristine + V3D(0.005, 0.0, 0.0);
+    componentInfo.setPosition(panelIndex, displaced);
+
+    SaveIsawPeaks alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "./SaveIsawPeaksTest_corelli.peaks"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+
+    const std::string outfile = alg.getPropertyValue("Filename");
+    // Locate the "5" record for bank 21 and read its centre, stored in centimetres.
+    std::ifstream in(outfile.c_str());
+    std::string line;
+    bool found(false);
+    while (std::getline(in, line)) {
+      std::istringstream stream(line);
+      std::vector<std::string> fields{std::istream_iterator<std::string>(stream), {}};
+      if (fields.size() > 10 && fields[0] == "5" && std::stoi(fields[1]) == 21) {
+        found = true;
+        TS_ASSERT_DELTA(std::stod(fields[8]), 100.0 * displaced.X(), 1e-3);
+        TS_ASSERT_DELTA(std::stod(fields[9]), 100.0 * displaced.Y(), 1e-3);
+        TS_ASSERT_DELTA(std::stod(fields[10]), 100.0 * displaced.Z(), 1e-3);
+        // Guard against the assertions above passing trivially.
+        TS_ASSERT_DELTA(std::stod(fields[8]) - 100.0 * pristine.X(), 0.5, 1e-3);
+        break;
+      }
+    }
+    in.close();
+    TS_ASSERT(found)
+
+    if (std::filesystem::exists(outfile))
+      std::filesystem::remove(outfile);
+    AnalysisDataService::Instance().remove("_corelli_inst_");
   }
 
   /// Test with an empty PeaksWorkspace
