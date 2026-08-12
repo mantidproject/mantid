@@ -24,8 +24,8 @@
 #include <QVBoxLayout>
 
 namespace {
-[[nodiscard]] bool readUseNewInstrumentView(const QSettings &settings) {
-  return settings.value("InstrumentView/use_new_instrument_view", false).toBool();
+[[nodiscard]] bool readUseLegacyInstrumentView(const QSettings &settings) {
+  return settings.value("InstrumentView/use_legacy_instrument_view", false).toBool();
 }
 } // namespace
 
@@ -53,13 +53,13 @@ ALFView::ALFView(QWidget *parent) : UserSubWindow(parent), m_instrumentPresenter
   auto algorithmManagerInst = std::make_unique<ALFAlgorithmManager>(std::move(jobRunnerInst));
 
   const QSettings settings(QSettings::IniFormat, QSettings::UserScope, "mantidproject", "mantidworkbench");
-  const bool useNewInstrumentView = readUseNewInstrumentView(settings);
+  const bool useLegacyInstrumentView = readUseLegacyInstrumentView(settings);
 
   IALFInstrumentView *view;
-  if (useNewInstrumentView) {
-    view = new ALFPythonInstrumentView(this);
-  } else {
+  if (useLegacyInstrumentView) {
     view = new ALFInstrumentView(this);
+  } else {
+    view = new ALFPythonInstrumentView(this);
   }
 
   m_instrumentPresenter = std::make_unique<ALFInstrumentPresenter>(

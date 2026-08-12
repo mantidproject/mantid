@@ -16,7 +16,8 @@ The instrument view also allows users to see close-ups of any component.
 
 Instrument View Pane
 --------------------
-The instrument view window can be obtained by right clicking on the workspace of interest and selecting ``Show Instrument``.
+This page describes the legacy instrument view, which can be obtained by right clicking on the workspace of interest and selecting ``Show Instrument (Legacy)``.
+Selecting ``Show Instrument`` opens the new instrument view instead.
 A 2D projection of the detector arrangement will be visible with each detector pixel color coded depending on the integrated number of counts in its corresponding spectrum, as in the image below.
 
 .. figure:: ../images/Workbench/InstrumentViewer/Overview.png
