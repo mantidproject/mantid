@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
+import re
 from dataclasses import dataclass, field
 from math import atan
 from typing import Dict, Tuple, Sequence, Type
@@ -104,6 +105,25 @@ class ExperimentConfig:
         other: broadening = slit_distance * tan(divergence).
         """
         return atan(self.edge_broadening / self.slit_distance) if self.slit_distance > 0.0 else 0.0
+
+
+# Gauge volume presets which describe a cube, named for the length of their side in mm. The name is
+# the only thing the interface passes around, so it has to carry the size with it.
+CUBE_PRESET_PATTERN = re.compile(r"^(\d+(?:\.\d+)?)mmCube$")
+
+# Presets which are not a named instrument setup, but a choice about how the volume is defined.
+CUSTOM_SHAPE_PRESET = "Custom Shape"
+NO_GAUGE_VOLUME_PRESET = "No Gauge Volume"
+
+
+def cube_preset_name(width_mm: float) -> str:
+    return f"{width_mm:g}mmCube"
+
+
+def get_cube_preset_extent(preset: str | None) -> float | None:
+    """The side of a cubic gauge volume preset in metres, or None if the preset is not a cube."""
+    match = CUBE_PRESET_PATTERN.match(preset) if preset else None
+    return float(match.group(1)) / 1000.0 if match else None
 
 
 # ENGIN-X radial collimators, keyed by the nominal gauge width in mm.
@@ -228,7 +248,7 @@ CONFIGS: Dict[str, InstrumentConfig] = {
         # A cubic gauge volume is the usual ENGIN-X setup: the slits are opened to match the
         # collimator, so the volume is the same size in all three directions.
         experiment_configs={
-            f"{width:g}mmCube": ExperimentConfig(
+            cube_preset_name(width): ExperimentConfig(
                 collimator=collimator,
                 slit_width=collimator.nominal_gauge_width,
                 slit_height=collimator.nominal_gauge_width,
@@ -344,6 +364,20 @@ def get_instr_config(instrument: str | None) -> InstrumentConfig | None:
     if key not in CONFIGS:
         raise RuntimeError(f"No instrument config registered for instrument='{instrument}'")
     return CONFIGS[key]
+
+
+def get_gauge_volume_presets(instrument: str | None) -> Tuple[str, ...]:
+    """The named gauge volume setups to offer for an instrument, ordered by size.
+
+    Instruments whose optics have not been characterised still get the cubic presets: a cube of a
+    given size can be defined for any instrument, only the beam and collimator modelling on top of it
+    needs the setup to be known.
+    """
+    key = str(instrument).upper() if instrument else None
+    key = PSEUDONYMS.get(key, key)
+    configs = CONFIGS[key].experiment_configs if key in CONFIGS else {}
+    presets = tuple(configs) if configs else tuple(cube_preset_name(width) for width in sorted(ENGINX_COLLIMATORS))
+    return tuple(sorted(presets, key=lambda preset: get_cube_preset_extent(preset) or 0.0))
 
 
 def get_experiment_config(instrument: str | None, preset: str | None) -> ExperimentConfig | None:

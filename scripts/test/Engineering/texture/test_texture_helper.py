@@ -64,6 +64,15 @@ class TestHelperGaugeVolume(BaseTextureTestClass):
         mock_get_cube_xml.assert_called_once_with("some-gv", 0.004)
         self.assertEqual(output_xml, "example 4mm cube xml")
 
+    @patch(texture_utils_path + ".get_cube_xml", return_value="example cube xml")
+    def test_get_gauge_volume_string_with_other_cube_presets(self, mock_get_cube_xml):
+        for preset, expected_extent in (("0.5mmCube", 0.0005), ("1mmCube", 0.001), ("2mmCube", 0.002), ("3mmCube", 0.003)):
+            with self.subTest(preset=preset):
+                mock_get_cube_xml.reset_mock()
+                output_xml = get_gauge_vol_str(preset=preset)
+                mock_get_cube_xml.assert_called_once_with("some-gv", expected_extent)
+                self.assertEqual(output_xml, "example cube xml")
+
     @patch(texture_utils_path + "._read_xml", return_value="example xml")
     def test_get_gauge_volume_string_with_custom_xml(self, mock_read_xml):
         file = "example.xml"

@@ -43,7 +43,8 @@ def run_abs_corr(
     copy_ref: Whether the reference sample should be copied to each ws
     include_abs_corr: Whether the workspaces should have the absorption correction applied
     monte_carlo_args: String of arguments to supply to the MonteCarloAbsorption alg e.g. "Arg1: val1, Arg2: val2"
-    gauge_vol_preset: Name of the preset to use for the gauge volume, currently ("4mmCube"), otherwise should be Custom or No Gauge Volume
+    gauge_vol_preset: Name of the preset to use for the gauge volume, a cubic preset named for its side length
+                      (e.g. "0.5mmCube", "4mmCube"), otherwise should be Custom or No Gauge Volume
     gauge_vol_shape_file: Path to custom gauge volume shape file
     include_atten_table: flag for whether a table of attenuation values at a specified point should be created
     eval_point: point to calculate the attenuation coefficient at
