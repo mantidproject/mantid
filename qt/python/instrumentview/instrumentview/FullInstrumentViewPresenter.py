@@ -85,6 +85,7 @@ class FullInstrumentViewPresenter:
         self._shape_preview_active = False
         # Incremented per requested shape update so the worker can drop superseded ones
         self._shape_update_generation = 0
+        self._sum_spectra_before_shape: Optional[bool] = None
         self._callback_queue = Queue()
         self._callback_stop_sentinel = object()
         self._callback_thread = Thread(None, self._callback_worker, daemon=True)
@@ -453,10 +454,18 @@ class FullInstrumentViewPresenter:
     def on_overlaid_shape_added(self) -> None:
         self._update_interactor_style()
         self._view.set_add_selection_and_mask_buttons_enabled(True)
+        if self._sum_spectra_before_shape is None:
+            self._sum_spectra_before_shape = self._view.sum_spectra_selected()
+        self._view.set_sum_spectra_selected(True)
+        self._view.set_sum_spectra_checkbox_disabled(True)
 
     def on_overlaid_shape_removed(self) -> None:
         self._update_interactor_style()
         self._view.set_add_selection_and_mask_buttons_enabled(False)
+        if self._sum_spectra_before_shape is not None:
+            self._view.set_sum_spectra_selected(self._sum_spectra_before_shape)
+            self._sum_spectra_before_shape = None
+            self._view.set_sum_spectra_checkbox_disabled(False)
         # Retire the generation so any queued or part-way-through preview update is discarded
         # instead of drawing a preview for a shape that no longer exists
         self._shape_update_generation += 1

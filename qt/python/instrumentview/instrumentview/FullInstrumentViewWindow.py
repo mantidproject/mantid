@@ -841,6 +841,9 @@ class FullInstrumentViewView(QWidget):
     def set_sum_spectra_checkbox_disabled(self, disabled):
         self._sum_spectra_checkbox.setDisabled(disabled)
 
+    def set_sum_spectra_selected(self, selected: bool) -> None:
+        self._sum_spectra_checkbox.setChecked(selected)
+
     def set_select_bank_tube_disabled(self, disabled):
         self._select_bank_tube.setDisabled(disabled)
 

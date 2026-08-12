@@ -328,6 +328,47 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._presenter.on_select_bank_tube_toggled(False)
         self.assertFalse(self._presenter._select_bank_tube)
 
+    def test_adding_a_shape_forces_summed_spectra(self):
+        """A shape covers too many detectors to plot individually, so the choice is taken away."""
+        self._mock_view.sum_spectra_selected.return_value = False
+
+        self._presenter.on_overlaid_shape_added()
+
+        self._mock_view.set_sum_spectra_selected.assert_called_once_with(True)
+        self._mock_view.set_sum_spectra_checkbox_disabled.assert_called_once_with(True)
+
+    def test_removing_a_shape_restores_the_users_sum_spectra_choice(self):
+        self._mock_view.sum_spectra_selected.return_value = False
+        self._presenter.on_overlaid_shape_added()
+        self._mock_view.reset_mock()
+
+        self._presenter.on_overlaid_shape_removed()
+        self._presenter._callback_queue.join()
+
+        self._mock_view.set_sum_spectra_selected.assert_called_once_with(False)
+        self._mock_view.set_sum_spectra_checkbox_disabled.assert_called_once_with(False)
+
+    def test_replacing_a_shape_remembers_the_original_sum_spectra_choice(self):
+        """Swapping shape type re-runs the added handler; it must not remember the forced value."""
+        self._mock_view.sum_spectra_selected.return_value = False
+        self._presenter.on_overlaid_shape_added()
+        self._mock_view.sum_spectra_selected.return_value = True
+        self._presenter.on_overlaid_shape_added()
+        self._mock_view.reset_mock()
+
+        self._presenter.on_overlaid_shape_removed()
+        self._presenter._callback_queue.join()
+
+        self._mock_view.set_sum_spectra_selected.assert_called_once_with(False)
+
+    def test_removing_a_shape_that_was_never_added_leaves_the_checkbox_alone(self):
+        """Deleting the shape is unconditional, so it must not re-enable a box hover pick disabled."""
+        self._presenter.on_overlaid_shape_removed()
+        self._presenter._callback_queue.join()
+
+        self._mock_view.set_sum_spectra_selected.assert_not_called()
+        self._mock_view.set_sum_spectra_checkbox_disabled.assert_not_called()
+
     def test_on_shape_changed_projects_points_before_queueing(self):
         """on_shape_changed projects detector points on the main thread before
         dispatching work to the background queue, because projection uses VTK."""
