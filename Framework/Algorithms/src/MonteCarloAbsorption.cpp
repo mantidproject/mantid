@@ -348,7 +348,7 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(const MatrixWorkspace &i
     const double lambdaFixed = toWavelength(efixed.value(spectrumInfo.detector(i).getID()));
     MersenneTwister rng(seed + int(i));
 
-    const auto lambdas = simulationWS.points(i).rawData();
+    const auto lambdas = simulationWS.points(i);
 
     const auto nbins = lambdas.size();
     const size_t lambdaStepSize = nbins / nlambda;

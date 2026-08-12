@@ -21,6 +21,9 @@ class MANTID_API_DLL BinEdgeAxis : public NumericAxis {
 public:
   BinEdgeAxis(const std::size_t &length);
   BinEdgeAxis(const std::vector<double> &edges);
+  /// Construct from a contiguous range, so that the size-checked histogram data types
+  /// can be used directly. A std::vector<double> argument still selects the overload above.
+  BinEdgeAxis(std::span<double const> edges);
 
   Axis *clone(const MatrixWorkspace *const parentWorkspace) override;
   Axis *clone(const std::size_t length, const MatrixWorkspace *const parentWorkspace) override;

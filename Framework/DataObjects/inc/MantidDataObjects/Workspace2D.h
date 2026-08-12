@@ -67,7 +67,7 @@ public:
   const Histogram1D &getSpectrum(const size_t index) const override;
 
   /// Generate a new histogram by rebinning the existing histogram.
-  void generateHistogram(const std::size_t index, const MantidVec &X, MantidVec &Y, MantidVec &E,
+  void generateHistogram(const std::size_t index, std::span<double const> X, MantidVec &Y, MantidVec &E,
                          bool skipError = false) const override;
 
   /** sets the monitorWorkspace indexlist

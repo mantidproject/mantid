@@ -57,7 +57,7 @@ public:
     if (iter >= m_data.size() - 1) {
       API::MatrixWorkspace_sptr ws =
           API::WorkspaceFactory::Instance().create("Workspace2D", 1, m_data.size(), m_data.size());
-      auto &Y = ws->dataY(0);
+      auto &Y = ws->mutableY(0);
       for (size_t i = 0; i < Y.size(); ++i) {
         Y[i] = static_cast<double>(m_data[i]);
       }
@@ -174,9 +174,9 @@ public:
     // create mock data to test against
     int ndata = 21;
     API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, ndata, ndata);
-    Mantid::MantidVec &x = ws->dataX(0);
-    Mantid::MantidVec &y = ws->dataY(0);
-    Mantid::MantidVec &e = ws->dataE(0);
+    auto &x = ws->mutableX(0);
+    auto &y = ws->mutableY(0);
+    auto &e = ws->mutableE(0);
     for (int i = 0; i < ndata; i++) {
       x[i] = static_cast<double>(i);
       e[i] = 0.01;
@@ -209,9 +209,9 @@ public:
     // Mock data
     int ndata = 19;
     API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, ndata, ndata);
-    Mantid::MantidVec &x = ws->dataX(0);
-    Mantid::MantidVec &y = ws->dataY(0);
-    Mantid::MantidVec &e = ws->dataE(0);
+    auto &x = ws->mutableX(0);
+    auto &y = ws->mutableY(0);
+    auto &e = ws->mutableE(0);
     for (int i = 0; i < ndata; i++) {
       x[i] = static_cast<double>(i);
       e[i] = 1.0;
@@ -259,9 +259,9 @@ public:
     const double sqrh = 0.70710678; // cos( 45 degrees )
 
     API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, ndata, ndata);
-    Mantid::MantidVec &x = ws->dataX(0);
-    Mantid::MantidVec &y = ws->dataY(0);
-    Mantid::MantidVec &e = ws->dataE(0);
+    auto &x = ws->mutableX(0);
+    auto &y = ws->mutableY(0);
+    auto &e = ws->mutableE(0);
     for (int i = 0; i < ndata; i++) {
       x[i] = static_cast<double>(i);
       e[i] = 1.;
@@ -308,9 +308,9 @@ public:
     // Mock data
     int ndata = 18;
     API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, ndata, ndata);
-    Mantid::MantidVec &x = ws->dataX(0);
-    Mantid::MantidVec &y = ws->dataY(0);
-    Mantid::MantidVec &e = ws->dataE(0);
+    auto &x = ws->mutableX(0);
+    auto &y = ws->mutableY(0);
+    auto &e = ws->mutableE(0);
     for (int i = 0; i < ndata; i++) {
       x[i] = static_cast<double>(i - 8);
       e[i] = 1.0;
@@ -338,9 +338,9 @@ public:
     // Mock data
     int ndata = 18;
     API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, ndata, ndata);
-    Mantid::MantidVec &x = ws->dataX(0);
-    Mantid::MantidVec &y = ws->dataY(0);
-    Mantid::MantidVec &e = ws->dataE(0);
+    auto &x = ws->mutableX(0);
+    auto &y = ws->mutableY(0);
+    auto &e = ws->mutableE(0);
     for (int i = 0; i < ndata; i++) {
       x[i] = static_cast<double>(i - 8);
       e[i] = 1.0;
@@ -374,9 +374,9 @@ public:
     // Mock data
     int ndata = 41;
     API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, ndata, ndata);
-    Mantid::MantidVec &x = ws->dataX(0);
-    Mantid::MantidVec &y = ws->dataY(0);
-    Mantid::MantidVec &e = ws->dataE(0);
+    auto &x = ws->mutableX(0);
+    auto &y = ws->mutableY(0);
+    auto &e = ws->mutableE(0);
     for (int i = 0; i < ndata; i++) {
       x[i] = 0.146785 * static_cast<double>(i);
     }
@@ -414,9 +414,9 @@ public:
     // Mock data
     int ndata = 18;
     API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, ndata, ndata);
-    Mantid::MantidVec &x = ws->dataX(0);
-    Mantid::MantidVec &y = ws->dataY(0);
-    Mantid::MantidVec &e = ws->dataE(0);
+    auto &x = ws->mutableX(0);
+    auto &y = ws->mutableY(0);
+    auto &e = ws->mutableE(0);
     for (int i = 0; i < ndata; i++) {
       x[i] = static_cast<double>(i);
       e[i] = 0.01;
@@ -447,9 +447,9 @@ public:
     // Mock data
     int ndata = 15;
     API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, ndata, ndata);
-    Mantid::MantidVec &x = ws->dataX(0);
-    Mantid::MantidVec &y = ws->dataY(0);
-    Mantid::MantidVec &e = ws->dataE(0);
+    auto &x = ws->mutableX(0);
+    auto &y = ws->mutableY(0);
+    auto &e = ws->mutableE(0);
     for (int i = 0; i < ndata; i++) {
       x[i] = static_cast<double>(i);
       e[i] = 1.0;
@@ -480,9 +480,9 @@ public:
     // Mock data
     int ndata = 15;
     API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, ndata, ndata);
-    Mantid::MantidVec &x = ws->dataX(0);
-    Mantid::MantidVec &y = ws->dataY(0);
-    Mantid::MantidVec &e = ws->dataE(0);
+    auto &x = ws->mutableX(0);
+    auto &y = ws->mutableY(0);
+    auto &e = ws->mutableE(0);
     for (int i = 0; i < ndata; i++) {
       x[i] = static_cast<double>(i);
       e[i] = 1.0;
@@ -513,9 +513,9 @@ public:
     // Mock data
     int ndata = 18;
     API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, ndata, ndata);
-    Mantid::MantidVec &x = ws->dataX(0);
-    Mantid::MantidVec &y = ws->dataY(0);
-    Mantid::MantidVec &e = ws->dataE(0);
+    auto &x = ws->mutableX(0);
+    auto &y = ws->mutableY(0);
+    auto &e = ws->mutableE(0);
     for (int i = 0; i < ndata; i++) {
       x[i] = static_cast<double>(i);
       e[i] = 1.0;
@@ -549,9 +549,9 @@ public:
     // Mock data
     int ndata = 20;
     API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, ndata, ndata);
-    Mantid::MantidVec &x = ws->dataX(0);
-    Mantid::MantidVec &y = ws->dataY(0);
-    Mantid::MantidVec &e = ws->dataE(0);
+    auto &x = ws->mutableX(0);
+    auto &y = ws->mutableY(0);
+    auto &e = ws->mutableE(0);
     // values extracted from y(x)=2*exp(-(x/4)^0.5)
     y = {2,          1.2130613,  0.98613738, 0.84124005, 0.73575888, 0.65384379, 0.58766531,
          0.53273643, 0.48623347, 0.44626032, 0.41148132, 0.38092026, 0.35384241, 0.32968143,
@@ -585,9 +585,9 @@ public:
     // Mock data
     int ndata = 13;
     API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, ndata, ndata);
-    Mantid::MantidVec &x = ws->dataX(0);
-    Mantid::MantidVec &y = ws->dataY(0);
-    Mantid::MantidVec &e = ws->dataE(0);
+    auto &x = ws->mutableX(0);
+    auto &y = ws->mutableY(0);
+    auto &e = ws->mutableE(0);
     // values extracted from y(x)=2*exp(-(x/4)^0.5)
     y = {1, 3, 4, 28, 221, 872, 1495, 1832, 1830, 1917, 2045, 1996, 0};
     for (int i = 0; i < ndata; i++) {
@@ -622,9 +622,9 @@ public:
     // Mock data
     int ndata = 30;
     API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, ndata, ndata);
-    Mantid::MantidVec &x = ws->dataX(0);
-    Mantid::MantidVec &y = ws->dataY(0);
-    Mantid::MantidVec &e = ws->dataE(0);
+    auto &x = ws->mutableX(0);
+    auto &y = ws->mutableY(0);
+    auto &e = ws->mutableE(0);
     x = {0,   0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1,   1.1, 1.2, 1.3, 1.4,
          1.5, 1.6, 1.7, 1.8, 1.9, 2,   2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9};
     y = {0.001362, 0.00434468, 0.0127937, 0.0347769, 0.0872653, 0.202138, 0.432228,  0.853165,  1.55457,   2.61483,
@@ -700,21 +700,26 @@ public:
     MatrixWorkspace_sptr ws =
         std::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceFactory::Instance().create("Workspace2D", 1, nX, nY));
 
-    const double dx = 10 / 99;
+    const double dx = 10.0 / nY;
 
-    Mantid::MantidVec &X = ws->dataX(0);
-    Mantid::MantidVec &Y = ws->dataY(0);
-    Mantid::MantidVec &E = ws->dataE(0);
+    auto &X = ws->mutableX(0);
+    auto &Y = ws->mutableY(0);
+    auto &E = ws->mutableE(0);
 
-    X = {0.000000, 0.101010, 0.202020, 0.303030, 0.404040, 0.505051, 0.606061, 0.707071, 0.808081, 0.909091, 1.010101,
-         1.111111, 1.212121, 1.313131, 1.414141, 1.515152, 1.616162, 1.717172, 1.818182, 1.919192, 2.020202, 2.121212,
-         2.222222, 2.323232, 2.424242, 2.525253, 2.626263, 2.727273, 2.828283, 2.929293, 3.030303, 3.131313, 3.232323,
-         3.333333, 3.434343, 3.535354, 3.636364, 3.737374, 3.838384, 3.939394, 4.040404, 4.141414, 4.242424, 4.343434,
-         4.444444, 4.545455, 4.646465, 4.747475, 4.848485, 4.949495, 5.050505, 5.151515, 5.252525, 5.353535, 5.454545,
-         5.555556, 5.656566, 5.757576, 5.858586, 5.959596, 6.060606, 6.161616, 6.262626, 6.363636, 6.464646, 6.565657,
-         6.666667, 6.767677, 6.868687, 6.969697, 7.070707, 7.171717, 7.272727, 7.373737, 7.474747, 7.575758, 7.676768,
-         7.777778, 7.878788, 7.979798, 8.080808, 8.181818, 8.282828, 8.383838, 8.484848, 8.585859, 8.686869, 8.787879,
-         8.888889, 8.989899, 9.090909, 9.191919, 9.292929, 9.393939, 9.494949, 9.595960, 9.696970, 9.797980, 9.898990};
+    // Only the first nY of the nX bin edges are listed; the last one is computed below. These are
+    // copied into X rather than assigned to it, since assigning a shorter list would change the
+    // length of the histogram.
+    const std::vector<double> binEdges = {
+        0.000000, 0.101010, 0.202020, 0.303030, 0.404040, 0.505051, 0.606061, 0.707071, 0.808081, 0.909091, 1.010101,
+        1.111111, 1.212121, 1.313131, 1.414141, 1.515152, 1.616162, 1.717172, 1.818182, 1.919192, 2.020202, 2.121212,
+        2.222222, 2.323232, 2.424242, 2.525253, 2.626263, 2.727273, 2.828283, 2.929293, 3.030303, 3.131313, 3.232323,
+        3.333333, 3.434343, 3.535354, 3.636364, 3.737374, 3.838384, 3.939394, 4.040404, 4.141414, 4.242424, 4.343434,
+        4.444444, 4.545455, 4.646465, 4.747475, 4.848485, 4.949495, 5.050505, 5.151515, 5.252525, 5.353535, 5.454545,
+        5.555556, 5.656566, 5.757576, 5.858586, 5.959596, 6.060606, 6.161616, 6.262626, 6.363636, 6.464646, 6.565657,
+        6.666667, 6.767677, 6.868687, 6.969697, 7.070707, 7.171717, 7.272727, 7.373737, 7.474747, 7.575758, 7.676768,
+        7.777778, 7.878788, 7.979798, 8.080808, 8.181818, 8.282828, 8.383838, 8.484848, 8.585859, 8.686869, 8.787879,
+        8.888889, 8.989899, 9.090909, 9.191919, 9.292929, 9.393939, 9.494949, 9.595960, 9.696970, 9.797980, 9.898990};
+    std::copy(binEdges.cbegin(), binEdges.cend(), X.begin());
     Y = {0.000000, 0.000000, 0.000000, 0.000000, 0.000001, 0.000001, 0.000002, 0.000004, 0.000006, 0.000012, 0.000021,
          0.000036, 0.000063, 0.000108, 0.000183, 0.000305, 0.000503, 0.000818, 0.001314, 0.002084, 0.003262, 0.005041,
          0.007692, 0.011586, 0.017229, 0.025295, 0.036664, 0.052465, 0.074121, 0.103380, 0.142353, 0.193520, 0.259728,
@@ -726,7 +731,7 @@ public:
          0.004829, 0.003121, 0.001991, 0.001254, 0.000780, 0.000479, 0.000290, 0.000174, 0.000103, 0.000060, 0.000034};
     E.assign(nY, 1.0);
 
-    X.back() = X[98] + dx;
+    X.back() = X[nY - 1] + dx;
     AnalysisDataService::Instance().add("ResolutionTest_WS", ws);
 
     Algorithms::Fit fit;
@@ -739,9 +744,12 @@ public:
     fit.setPropertyValue("InputWorkspace", "ResolutionTest_WS");
     fit.setPropertyValue("WorkspaceIndex", "0");
     fit.execute();
+    TS_ASSERT(fit.isExecuted());
+
+    AnalysisDataService::Instance().remove("ResolutionTest_WS");
   }
 
-  void getStretchExpMockData(Mantid::MantidVec &y, Mantid::MantidVec &e) {
+  void getStretchExpMockData(Mantid::HistogramData::HistogramY &y, Mantid::HistogramData::HistogramE &e) {
     // values extracted from y(x)=2*exp(-(x/4)^0.5)
     y = {2,          1.2130613,  0.98613738, 0.84124005, 0.73575888, 0.65384379, 0.58766531,
          0.53273643, 0.48623347, 0.44626032, 0.41148132, 0.38092026, 0.35384241, 0.32968143,
@@ -762,12 +770,12 @@ public:
     Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", histogramNumber, timechannels, timechannels);
     Workspace2D_sptr ws2D = std::dynamic_pointer_cast<Workspace2D>(ws);
     // in this case, x-values are just the running index
-    auto &x = ws2D->dataX(0);
+    auto &x = ws2D->mutableX(0);
     for (int i = 0; i < timechannels; i++)
       x[i] = 1.0 * i + 0.00001;
 
-    Mantid::MantidVec &y = ws2D->dataY(0); // y-values (counts)
-    Mantid::MantidVec &e = ws2D->dataE(0); // error values of counts
+    auto &y = ws2D->mutableY(0); // y-values (counts)
+    auto &e = ws2D->mutableE(0); // error values of counts
     getStretchExpMockData(y, e);
 
     // put this workspace in the data service
@@ -811,9 +819,9 @@ public:
     std::shared_ptr<WorkspaceTester> data = std::make_shared<WorkspaceTester>();
     data->initialize(1, 100, 100);
 
-    auto &x = data->dataX(0);
-    auto &y = data->dataY(0);
-    auto &e = data->dataE(0);
+    auto &x = data->mutableX(0);
+    auto &y = data->mutableY(0);
+    auto &e = data->mutableE(0);
 
     y = {0.00679397551246448, 0.00684266083126313, 0.00698285916556982, 0.00719965548825388, 0.00747519954546736,
          0.00779445649068509, 0.00814796531751759, 0.0085316132498512,  0.00894499942724,    0.00938983058044737,
@@ -961,11 +969,11 @@ public:
     const int timechannels = 20;
     Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", histogramNumber, timechannels, timechannels);
     Workspace2D_sptr ws2D = std::dynamic_pointer_cast<Workspace2D>(ws);
-    Mantid::MantidVec &x = ws2D->dataX(0); // x-values
+    auto &x = ws2D->mutableX(0); // x-values
     for (int i = 0; i < timechannels; i++)
       x[i] = i;
-    Mantid::MantidVec &y = ws2D->dataY(0); // y-values (counts)
-    Mantid::MantidVec &e = ws2D->dataE(0); // error values of counts
+    auto &y = ws2D->mutableY(0); // y-values (counts)
+    auto &e = ws2D->mutableE(0); // error values of counts
 
     y = {5,
          3.582656552869,
@@ -1114,8 +1122,8 @@ public:
     ws->initialize(1, 30, 30);
     {
       const double dx = 1.0;
-      Mantid::MantidVec &x = ws->dataX(0);
-      Mantid::MantidVec &y = ws->dataY(0);
+      auto &x = ws->mutableX(0);
+      auto &y = ws->mutableY(0);
       for (size_t i = 0; i < 10; ++i) {
         x[i] = dx * double(i);
         y[i] = A0 + B0 * x[i];
@@ -1252,9 +1260,9 @@ public:
     // Mock data
     int ndata = 35;
     API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, ndata, ndata);
-    Mantid::MantidVec &x = ws->dataX(0);
-    Mantid::MantidVec &y = ws->dataY(0);
-    Mantid::MantidVec &e = ws->dataE(0);
+    auto &x = ws->mutableX(0);
+    auto &y = ws->mutableY(0);
+    auto &e = ws->mutableE(0);
     // values extracted from y(x)=2*exp(-(x/4)^0.5)
     x = {54999.094000, 55010.957000, 55022.820000, 55034.684000, 55046.547000, 55058.410000, 55070.273000,
          55082.137000, 55094.000000, 55105.863000, 55117.727000, 55129.590000, 55141.453000, 55153.320000,
@@ -1300,9 +1308,9 @@ public:
     // Mock data
     int ndata = 20;
     API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, ndata, ndata);
-    Mantid::MantidVec &x = ws->dataX(0);
-    Mantid::MantidVec &y = ws->dataY(0);
-    Mantid::MantidVec &e = ws->dataE(0);
+    auto &x = ws->mutableX(0);
+    auto &y = ws->mutableY(0);
+    auto &e = ws->mutableE(0);
     y = {3.56811123, 3.25921675,  2.69444562,  3.05054488,   2.86077216,  2.29916480,  2.57468876,
          3.65843827, 15.31622763, 56.57989073, 101.20662386, 76.30364797, 31.54892552, 8.09166673,
          3.20615343, 2.95246554,  2.75421444,  3.70180447,   2.77832668,  2.29507565};
@@ -1338,9 +1346,9 @@ public:
     // Mock data
     int ndata = 20;
     API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, ndata, ndata);
-    Mantid::MantidVec &x = ws->dataX(0);
-    Mantid::MantidVec &y = ws->dataY(0);
-    Mantid::MantidVec &e = ws->dataE(0);
+    auto &x = ws->mutableX(0);
+    auto &y = ws->mutableY(0);
+    auto &e = ws->mutableE(0);
     y = {3.56811123, 3.25921675,  2.69444562,  3.05054488,   2.86077216,  2.29916480,  2.57468876,
          3.65843827, 15.31622763, 56.57989073, 101.20662386, 76.30364797, 31.54892552, 8.09166673,
          3.20615343, 2.95246554,  2.75421444,  3.70180447,   2.77832668,  2.29507565};
@@ -1383,9 +1391,9 @@ public:
 
     int ndata = 41;
     API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, ndata, ndata);
-    Mantid::MantidVec &x = ws->dataX(0);
-    Mantid::MantidVec &y = ws->dataY(0);
-    Mantid::MantidVec &e = ws->dataE(0);
+    auto &x = ws->mutableX(0);
+    auto &y = ws->mutableY(0);
+    auto &e = ws->mutableE(0);
     // x-values in time-of-flight
     for (int i = 0; i < 8; i++)
       x[i] = 79292.4375 + 7.875 * double(i);
@@ -1438,9 +1446,9 @@ public:
 
     int ndata = 41;
     API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, ndata, ndata);
-    Mantid::MantidVec &x = ws->dataX(0);
-    Mantid::MantidVec &y = ws->dataY(0);
-    Mantid::MantidVec &e = ws->dataE(0);
+    auto &x = ws->mutableX(0);
+    auto &y = ws->mutableY(0);
+    auto &e = ws->mutableE(0);
     // x-values in time-of-flight
     for (int i = 0; i < 8; i++)
       x[i] = 79292.4375 + 7.875 * double(i);
@@ -1487,9 +1495,9 @@ public:
 
     int ndata = 31;
     API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, ndata, ndata);
-    Mantid::MantidVec &x = ws->dataX(0);
-    Mantid::MantidVec &y = ws->dataY(0);
-    Mantid::MantidVec &e = ws->dataE(0);
+    auto &x = ws->mutableX(0);
+    auto &y = ws->mutableY(0);
+    auto &e = ws->mutableE(0);
     y = {0.0000,  0.0003,  0.0028,  0.0223,  0.1405,  0.6996,  2.7608,  8.6586, 21.6529, 43.3558, 69.8781,
          91.2856, 97.5646, 86.4481, 64.7703, 42.3348, 25.3762, 15.0102, 9.4932, 6.7037,  5.2081,  4.2780,
          3.6037,  3.0653,  2.6163,  2.2355,  1.9109,  1.6335,  1.3965,  1.1938, 1.0206};
@@ -1540,9 +1548,9 @@ public:
     for (int i = 0; i < ndata; i++) {
       ws->mutableX(0)[i] = i * 5;
     }
-    Mantid::MantidVec &x = ws->dataX(0);
-    Mantid::MantidVec &y = ws->dataY(0);
-    Mantid::MantidVec &e = ws->dataE(0);
+    auto &x = ws->mutableX(0);
+    auto &y = ws->mutableY(0);
+    auto &e = ws->mutableE(0);
     y = {0.0000,  0.0003,  0.0028,  0.0223,  0.1405,  0.6996,  2.7608,  8.6586, 21.6529, 43.3558, 69.8781,
          91.2856, 97.5646, 86.4481, 64.7703, 42.3348, 25.3762, 15.0102, 9.4932, 6.7037,  5.2081,  4.2780,
          3.6037,  3.0653,  2.6163,  2.2355,  1.9109,  1.6335,  1.3965,  1.1938, 1.0206};
@@ -1603,9 +1611,9 @@ public:
     // Mock data
     int ndata = 20;
     API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, ndata, ndata);
-    Mantid::MantidVec &x = ws->dataX(0);
-    Mantid::MantidVec &y = ws->dataY(0);
-    Mantid::MantidVec &e = ws->dataE(0);
+    auto &x = ws->mutableX(0);
+    auto &y = ws->mutableY(0);
+    auto &e = ws->mutableE(0);
     y = {0.0,       1.52798e-15, 6.4577135e-07, 0.0020337351, 0.12517292, 1.2282908, 4.3935083,
          8.5229866, 11.127883,   11.110426,     9.1925694,    6.6457304,  4.353104,  2.6504159,
          1.5279732, 0.84552286,  0.45371715,    0.23794487,   0.12268847, 0.0624878};
@@ -1638,9 +1646,9 @@ public:
     // Mock data
     int ndata = 100;
     API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, ndata, ndata);
-    Mantid::MantidVec &x = ws->dataX(0);
-    Mantid::MantidVec &y = ws->dataY(0);
-    Mantid::MantidVec &e = ws->dataE(0);
+    auto &x = ws->mutableX(0);
+    auto &y = ws->mutableY(0);
+    auto &e = ws->mutableE(0);
     y = {0.680508, 0.459591, 0.332266, 1.2717,  0.925787, 1.36216,  0.890605, 0.983653, 0.965918, 0.916039,
          0.979414, 0.861061, 0.973214, 1.53418, 1.52668,  1.10537,  1.36965,  1.64708,  1.52887,  2.0042,
          2.11257,  2.44183,  2.29917,  2.61657, 2.25268,  2.82788,  3.089,    3.45517,  3.41001,  4.39168,
@@ -1690,9 +1698,9 @@ public:
   void test_function_Chebyshev() {
     Mantid::API::MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 11, 11);
 
-    Mantid::MantidVec &X = ws->dataX(0);
-    Mantid::MantidVec &Y = ws->dataY(0);
-    Mantid::MantidVec &E = ws->dataE(0);
+    auto &X = ws->mutableX(0);
+    auto &Y = ws->mutableY(0);
+    auto &E = ws->mutableE(0);
     for (size_t i = 0; i < Y.size(); i++) {
       double x = -1. + 0.1 * static_cast<double>(i);
       X[i] = x;
@@ -1721,9 +1729,9 @@ public:
   void test_function_Chebyshev_Background() {
     Mantid::API::MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 21, 21);
 
-    Mantid::MantidVec &X = ws->dataX(0);
-    Mantid::MantidVec &Y = ws->dataY(0);
-    Mantid::MantidVec &E = ws->dataE(0);
+    auto &X = ws->mutableX(0);
+    auto &Y = ws->mutableY(0);
+    auto &E = ws->mutableE(0);
     for (size_t i = 0; i < Y.size(); i++) {
       double x = -10. + 1 * static_cast<double>(i);
       X[i] = x;
@@ -1772,9 +1780,9 @@ public:
     double tof0 = 8000.;
     double dtof = 5.;
 
-    Mantid::MantidVec &X = ws2D->dataX(0);
-    Mantid::MantidVec &Y = ws2D->dataY(0);
-    Mantid::MantidVec &E = ws2D->dataE(0);
+    auto &X = ws2D->mutableX(0);
+    auto &Y = ws2D->mutableY(0);
+    auto &E = ws2D->mutableE(0);
     for (int i = 0; i < timechannels; i++) {
       X[i] = static_cast<double>(i) * dtof + tof0;
       Y[i] = X[i] * 0.013;
@@ -2109,9 +2117,9 @@ private:
 
     siFn->function(xValues, yValues);
 
-    std::vector<double> &xData = ws->dataX(0);
-    std::vector<double> &yData = ws->dataY(0);
-    std::vector<double> &eData = ws->dataE(0);
+    auto &xData = ws->mutableX(0);
+    auto &yData = ws->mutableY(0);
+    auto &eData = ws->mutableE(0);
 
     for (size_t i = 0; i < n; ++i) {
       xData[i] = xValues[i];

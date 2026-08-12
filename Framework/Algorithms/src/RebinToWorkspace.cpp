@@ -159,7 +159,7 @@ void RebinToWorkspace::histogram(API::MatrixWorkspace_sptr &toRebin, API::Matrix
     // TODO this should be in HistogramData/Rebin
     const auto &eventlist = inputWS->getSpectrum(i);
     MantidVec y_data(edges.size() - 1), e_data(edges.size() - 1);
-    eventlist.generateHistogram(edges.rawData(), y_data, e_data);
+    eventlist.generateHistogram(edges, y_data, e_data);
 
     outputWS->setHistogram(i, edges, Counts(std::move(y_data)), CountStandardDeviations(std::move(e_data)));
     prog.report();

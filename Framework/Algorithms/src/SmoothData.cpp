@@ -136,12 +136,10 @@ Histogram smooth(const Histogram &histogram, unsigned int const npts) {
 
   Histogram smoothed(histogram);
 
-  auto const &Y = histogram.y().rawData();
-  auto const &E = histogram.e().rawData();
   auto &newY = smoothed.mutableY();
   auto &newE = smoothed.mutableE();
-  newY = Mantid::Kernel::Smoothing::boxcarSmooth(Y, npts);
-  newE = Mantid::Kernel::Smoothing::boxcarErrorSmooth(E, npts);
+  newY = Mantid::Kernel::Smoothing::boxcarSmooth(histogram.y(), npts);
+  newE = Mantid::Kernel::Smoothing::boxcarErrorSmooth(histogram.e(), npts);
   return smoothed;
 }
 

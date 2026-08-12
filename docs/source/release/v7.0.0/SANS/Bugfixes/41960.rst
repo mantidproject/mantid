@@ -1,0 +1,1 @@
+- Fixed an error in the old ISIS SANS reduction when the sample workspace carries X error (``Dx``) values. Passing those values on to the can-subtracted workspace called two methods that do not exist on :class:`~mantid.api.MatrixWorkspace` (``getNumHistograms`` and ``dataDX``), which raised an ``AttributeError`` instead of copying the values.

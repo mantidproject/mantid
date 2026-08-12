@@ -8,6 +8,7 @@
 
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/cow_ptr.h"
+#include <span>
 #include <string>
 
 namespace Mantid {
@@ -25,7 +26,9 @@ public:
   enum class ReferenceBin { Average, First };
   /// Type of errors to check
   enum class ErrorType { Cumulative, Individual };
-  EqualBinsChecker(const MantidVec &xData, const double errorLevel, const double warningLevel = -1);
+  // Note: xData is a non-owning view and must outlive this object. It is a span so that the
+  // size-checked histogram data types can be checked directly, without a std::vector<double>.
+  EqualBinsChecker(std::span<double const> xData, const double errorLevel, const double warningLevel = -1);
   virtual ~EqualBinsChecker() = default;
   virtual std::string validate() const;
   virtual void setReferenceBin(const ReferenceBin &refBinType);
@@ -36,7 +39,7 @@ protected:
   virtual double getDifference(const size_t bin, const double dx) const;
 
 private:
-  const MantidVec &m_xData;
+  std::span<double const> const m_xData;
   const double m_errorLevel;
   const bool m_warn;
   const double m_warningLevel;

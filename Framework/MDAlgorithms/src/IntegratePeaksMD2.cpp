@@ -834,7 +834,7 @@ template <typename MDE, size_t nd> void IntegratePeaksMD2::integrate(typename MD
         wsFit2D->setSharedX(i, wsProfile2D->sharedX(i));
         wsDiff2D->setSharedX(i, wsProfile2D->sharedX(i));
 
-        FunctionDomain1DVector domain(x.rawData());
+        FunctionDomain1DVector domain(x);
         FunctionValues yy(domain);
         fun->function(domain, yy);
         auto funcValues = yy.toVector();

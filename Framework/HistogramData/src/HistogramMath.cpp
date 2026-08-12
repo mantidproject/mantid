@@ -62,7 +62,7 @@ void checkSameYMode(const Histogram &hist1, const Histogram &hist2) {
 }
 
 void checkSameX(const Histogram &hist1, const Histogram &hist2) {
-  if (!(hist1.sharedX() == hist2.sharedX()) && (hist1.x().rawData() != hist2.x().rawData()))
+  if (!(hist1.sharedX() == hist2.sharedX()) && (hist1.x() != hist2.x()))
     throw std::runtime_error("Invalid operation: Histogram X data must match");
 }
 } // namespace

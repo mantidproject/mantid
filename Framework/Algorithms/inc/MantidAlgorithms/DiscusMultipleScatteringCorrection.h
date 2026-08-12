@@ -20,6 +20,7 @@
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
 #include <boost/container/small_vector.hpp>
 #include <shared_mutex>
+#include <span>
 
 namespace Mantid {
 namespace API {
@@ -168,7 +169,7 @@ private:
   void convertWsBothAxesToPoints(API::MatrixWorkspace_sptr &ws);
   std::tuple<double, double> getKinematicRange(double kf, double ki);
   std::vector<std::tuple<double, int, double>> generateInputKOutputWList(const double efixed,
-                                                                         const std::vector<double> &xPoints);
+                                                                         std::span<double const> xPoints);
   std::tuple<std::vector<double>, std::vector<double>, std::vector<double>>
   integrateQSQ(const std::shared_ptr<DiscusData2D> &QSQ, double kinc, const bool returnCumulative);
   double getQSQIntegral(const DiscusData1D &QSQScaleFactor, double k);

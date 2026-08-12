@@ -41,7 +41,7 @@ public:
   virtual Mantid::Types::Core::DateAndTime getTimeAtSampleMax(double tofOffset = 0) const = 0;
   virtual Mantid::Types::Core::DateAndTime getTimeAtSampleMin(double tofOffset = 0) const = 0;
   virtual EventType getEventType() const = 0;
-  void generateHistogram(const std::size_t index, const MantidVec &X, MantidVec &Y, MantidVec &E,
+  void generateHistogram(const std::size_t index, std::span<double const> X, MantidVec &Y, MantidVec &E,
                          bool skipError = false) const override = 0;
 
   virtual void setAllX(const HistogramData::BinEdges &x) = 0;

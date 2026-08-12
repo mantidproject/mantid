@@ -16,6 +16,8 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidHistogramData/Histogram.h"
 
+#include <span>
+
 namespace Mantid {
 namespace Algorithms {
 
@@ -123,9 +125,10 @@ protected:
   virtual void performEventBinaryOperation(DataObjects::EventList &lhs, const DataObjects::EventList &rhs);
 
   /// Carries out the binary operation IN-PLACE on a single EventList, with another (histogrammed) spectrum as the
-  /// right-hand operand.
-  virtual void performEventBinaryOperation(DataObjects::EventList &lhs, const MantidVec &rhsX, const MantidVec &rhsY,
-                                           const MantidVec &rhsE);
+  /// right-hand operand. The rhs arrays are spans so that the size-checked HistogramData types can
+  /// be passed without going through a std::vector<double>.
+  virtual void performEventBinaryOperation(DataObjects::EventList &lhs, std::span<double const> rhsX,
+                                           std::span<double const> rhsY, std::span<double const> rhsE);
 
   /// Carries out the binary operation IN-PLACE on a single EventList, with a single (double) value as the right-hand
   /// operand

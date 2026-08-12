@@ -12,9 +12,11 @@
 #include "MantidKernel/MandatoryValidator.h"
 
 #include <algorithm>
+#include <span>
 
 namespace {
-std::vector<double> getSubVector(Mantid::MantidVec const &data, const int64_t &lowerIndex, const int64_t &upperIndex) {
+std::vector<double> getSubVector(std::span<double const> const data, const int64_t &lowerIndex,
+                                 const int64_t &upperIndex) {
   auto low = std::next(data.begin(), lowerIndex);
   auto up = std::next(data.begin(), upperIndex);
   // get new vectors
@@ -132,14 +134,14 @@ void CropWorkspaceRagged::exec() {
     int64_t upperIndex = std::distance(points.begin(), up);
 
     // get new vectors
-    std::vector<double> newY = getSubVector(yValues.rawData(), lowerIndex, upperIndex);
-    std::vector<double> newE = getSubVector(eValues.rawData(), lowerIndex, upperIndex);
+    std::vector<double> newY = getSubVector(yValues, lowerIndex, upperIndex);
+    std::vector<double> newE = getSubVector(eValues, lowerIndex, upperIndex);
     if (histogram && upperIndex + (size_t)1 <= xValues.size()) {
       // the offset adds one to the upper index for histograms
       // only use the offset if the end is cropped
       upperIndex += 1;
     }
-    std::vector<double> newX = getSubVector(xValues.rawData(), lowerIndex, upperIndex);
+    std::vector<double> newX = getSubVector(xValues, lowerIndex, upperIndex);
 
     // resize the histogram; this keeps X, Y and E consistent with the storage mode
     outputWS->resizeHistogram(i, newY.size());

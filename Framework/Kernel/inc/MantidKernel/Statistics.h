@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidKernel/DllConfig.h"
+#include <span>
 #include <vector>
 
 namespace Mantid {
@@ -80,13 +81,21 @@ template <typename TYPE>
 Statistics getStatistics(const std::vector<TYPE> &data, const unsigned int flags = StatOptions::AllStats);
 /// Return the Z score values for a dataset
 template <typename TYPE> std::vector<double> getZscore(const std::vector<TYPE> &data);
+
+/// Overloads taking a contiguous range of doubles, so that the size-checked histogram
+/// data types can be used directly. A std::vector<double> argument still selects the
+/// template above; deduction cannot produce a std::span, hence these are not templates.
+MANTID_KERNEL_DLL Statistics getStatistics(std::span<double const> data,
+                                           const unsigned int flags = StatOptions::AllStats);
+MANTID_KERNEL_DLL std::vector<double> getZscore(std::span<double const> data);
+
 template <typename TYPE>
 std::vector<double> getWeightedZscore(const std::vector<TYPE> &data, const std::vector<TYPE> &weights);
 /// Return the modified Z score values for a dataset
 template <typename TYPE> std::vector<double> getModifiedZscore(const std::vector<TYPE> &data);
 /// Return the R-factors (Rwp) of a diffraction pattern data
-Rfactor MANTID_KERNEL_DLL getRFactor(const std::vector<double> &obsI, const std::vector<double> &calI,
-                                     const std::vector<double> &obsE);
+Rfactor MANTID_KERNEL_DLL getRFactor(std::span<double const> obsI, std::span<double const> calI,
+                                     std::span<double const> obsE);
 
 /// Return the first n-moments of the supplied data.
 template <typename TYPE>

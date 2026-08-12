@@ -245,18 +245,18 @@ void ConvFunctionTemplateModel::removeBackground() {
 bool ConvFunctionTemplateModel::hasBackground() const { return m_backgroundType != BackgroundType::None; }
 
 EstimationDataSelector ConvFunctionTemplateModel::getEstimationDataSelector() const {
-  return [](const Mantid::MantidVec &x, const Mantid::MantidVec &y,
+  return [](std::span<double const> const x, std::span<double const> const y,
             const std::pair<double, double> &range) -> DataForParameterEstimation {
     (void)range;
 
-    auto const maxElement = std::max_element(y.cbegin(), y.cend());
+    auto const maxElement = std::max_element(y.begin(), y.end());
     auto const halfMaxElement =
-        std::find_if(y.cbegin(), y.cend(), [&maxElement](double const val) { return val > *maxElement / 2.0; });
-    if (maxElement == y.cend() || halfMaxElement == y.cend())
+        std::find_if(y.begin(), y.end(), [&maxElement](double const val) { return val > *maxElement / 2.0; });
+    if (maxElement == y.end() || halfMaxElement == y.end())
       return DataForParameterEstimation{{}, {}};
 
-    auto const maxElementIndex = std::distance(y.cbegin(), maxElement);
-    auto const halfMaxElementIndex = std::distance(y.cbegin(), halfMaxElement);
+    auto const maxElementIndex = std::distance(y.begin(), maxElement);
+    auto const halfMaxElementIndex = std::distance(y.begin(), halfMaxElement);
 
     return DataForParameterEstimation{{x[halfMaxElementIndex], x[maxElementIndex]}, {*halfMaxElement, *maxElement}};
   };

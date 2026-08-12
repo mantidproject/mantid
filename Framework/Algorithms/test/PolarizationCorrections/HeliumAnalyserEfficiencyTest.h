@@ -195,8 +195,8 @@ private:
     TS_ASSERT_EQUALS(groupOut->getNumberOfEntries(), HeFitSize);
     for (size_t index = 0; index < HeFitSize; index++) {
       const auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(groupOut->getItem(index));
-      const auto &y = ws->dataY(0);
-      TS_ASSERT_DELTA(y, m_polParameters.outEfficiencies.at(index)->dataY(0), DELTA);
+      const auto &y = ws->y(0).rawData();
+      TS_ASSERT_DELTA(y, m_polParameters.outEfficiencies.at(index)->y(0).rawData(), DELTA);
     }
 
     // Assert Polarization parameters

@@ -89,8 +89,8 @@ public:
   MOCK_CONST_METHOD1(getTimeAtSampleMax, DateAndTime(double));
   MOCK_CONST_METHOD1(getTimeAtSampleMin, DateAndTime(double));
   MOCK_CONST_METHOD0(getEventType, EventType());
-  MOCK_CONST_METHOD5(generateHistogram, void(const std::size_t, const Mantid::MantidVec &, Mantid::MantidVec &,
-                                             Mantid::MantidVec &, bool));
+  MOCK_CONST_METHOD5(generateHistogram,
+                     void(const std::size_t, std::span<double const>, Mantid::MantidVec &, Mantid::MantidVec &, bool));
   MOCK_METHOD1(setAllX, void(const Mantid::HistogramData::BinEdges &));
   MOCK_METHOD0(resetAllXToSingleBin, void());
   MOCK_METHOD0(clearMRU, void());

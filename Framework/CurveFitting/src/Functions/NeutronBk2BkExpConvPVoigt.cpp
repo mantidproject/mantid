@@ -302,7 +302,7 @@ void NeutronBk2BkExpConvPVoigt::setParameter(const std::string &name, const doub
  * with a value of zero everywhere.
  * @param xValues: The x-values to evaluate the peak at.
  */
-void NeutronBk2BkExpConvPVoigt::function(vector<double> &out, const vector<double> &xValues) const {
+void NeutronBk2BkExpConvPVoigt::function(std::span<double> const out, std::span<double const> const xValues) const {
   // Calculate peak parameters
   if (m_hasNewParameterValue)
     calculateParameters(false);
@@ -317,10 +317,10 @@ void NeutronBk2BkExpConvPVoigt::function(vector<double> &out, const vector<doubl
   const double RANGE = m_fwhm * PEAKRANGE;
 
   const double LEFT_VALUE = m_centre - RANGE;
-  auto iter = std::lower_bound(xValues.cbegin(), xValues.cend(), LEFT_VALUE);
+  auto iter = std::lower_bound(xValues.begin(), xValues.end(), LEFT_VALUE);
 
   const double RIGHT_VALUE = m_centre + RANGE;
-  auto iter_end = std::lower_bound(iter, xValues.cend(), RIGHT_VALUE);
+  auto iter_end = std::lower_bound(iter, xValues.end(), RIGHT_VALUE);
 
   // Calcualte
   std::size_t pos(std::distance(xValues.begin(), iter)); // second loop variable

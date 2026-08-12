@@ -217,10 +217,10 @@ Histogram InterpolatingRebin::cubicInterpolation(const Histogram &oldHistogram, 
 
   // get the bin centres of the input data
   auto xCensOld = oldHistogram.points();
-  VectorHelper::convertToBinCentre(oldHistogram.x().rawData(), xCensOld.mutableRawData());
+  VectorHelper::convertToBinCentre(oldHistogram.x(), xCensOld.mutableRawData());
   // the centres of the output data
   Points xCensNew(size_new);
-  VectorHelper::convertToBinCentre(xNew.rawData(), xCensNew.mutableRawData());
+  VectorHelper::convertToBinCentre(xNew, xCensNew.mutableRawData());
 
   // find the range of input values whose x-values just suround the output
   // x-values
@@ -274,7 +274,7 @@ Histogram InterpolatingRebin::cubicInterpolation(const Histogram &oldHistogram, 
 
   // No Interpolation branch
   if (!canInterpol) {
-    if (VectorHelper::isConstantValue(yOld.rawData())) {
+    if (VectorHelper::isConstantValue(yOld)) {
       // this copies the single y-value into the output array, errors are still
       // calculated from the nearest input data points
       // this is as much as we need to do in this (trival) case
