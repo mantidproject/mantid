@@ -243,6 +243,7 @@ private:
     TS_ASSERT(file.open(QIODevice::ReadOnly));
     return file.readAll();
   }
+
   std::string m_filename;
   std::string m_inputWorkspace;
   std::vector<int> m_detectorList;
