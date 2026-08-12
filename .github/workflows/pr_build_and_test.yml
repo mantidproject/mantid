@@ -11,7 +11,7 @@ on:
         required: false
         type: string
       CLEAN:
-        description: 'Run clean-builder before building'
+        description: 'Run clean-builder before building. Only available via workflow_dispatch; use Run workflow, not Re-run jobs.'
         required: false
         default: false
         type: boolean
@@ -200,7 +200,7 @@ jobs:
         if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
         run: |
           CLEAN_ARGS=""
-          if ${{ inputs.CLEAN }}; then
+          if [ "${{ inputs.CLEAN }}" == "true" ]; then
             CLEAN_ARGS="--clean-build"
           fi
           ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/clean-builder ${GITHUB_WORKSPACE} ${CLEAN_ARGS}
@@ -330,7 +330,7 @@ jobs:
         if: ${{ needs.check-filters.outputs.user_docs == 'true' }}
         run: |
           CLEAN_ARGS=""
-          if ${{ inputs.CLEAN }}; then
+          if [ "${{ inputs.CLEAN }}" == "true" ]; then
             CLEAN_ARGS="--clean-build"
           fi
           ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/clean-builder ${GITHUB_WORKSPACE} ${CLEAN_ARGS}
