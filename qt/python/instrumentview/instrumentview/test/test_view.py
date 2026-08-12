@@ -206,8 +206,34 @@ class TestFullInstrumentViewView(unittest.TestCase):
         event.inaxes = self._view._detector_spectrum_axes
         event.xdata = 5.0
         event.button = 1
-        self._view._on_axes_click(event)
+        self._view._on_axes_click_during_peak_selection(event)
         self._view._presenter.on_peak_selected_in_lineplot.assert_called_once_with(5.0, "left")
+
+    def test_on_axes_click_zoom_enabled_calls_default_callbacks(self):
+        event = MagicMock()
+        callback_1 = MagicMock()
+        callback_2 = MagicMock()
+        self._view._default_lineplot_callbacks = {1: callback_1, 2: callback_2}
+        self._view._plot_toolbar.zoom_enabled = MagicMock(return_value=True)
+        self._view._plot_toolbar.pan_enabled = MagicMock(return_value=False)
+
+        self._view._on_axes_click_during_peak_selection(event)
+
+        callback_1.assert_called_once_with(event)
+        callback_2.assert_called_once_with(event)
+        self._view._presenter.on_peak_selected_in_lineplot.assert_not_called()
+
+    def test_on_axes_click_pan_enabled_calls_default_callbacks(self):
+        event = MagicMock()
+        callback = MagicMock()
+        self._view._default_lineplot_callbacks = {1: callback}
+        self._view._plot_toolbar.zoom_enabled = MagicMock(return_value=False)
+        self._view._plot_toolbar.pan_enabled = MagicMock(return_value=True)
+
+        self._view._on_axes_click_during_peak_selection(event)
+
+        callback.assert_called_once_with(event)
+        self._view._presenter.on_peak_selected_in_lineplot.assert_not_called()
 
     @mock.patch("instrumentview.FullInstrumentViewWindow.ConfigService")
     def test_get_render_mode_option_returns_current_text(self, mock_config):
@@ -261,15 +287,54 @@ class TestFullInstrumentViewView(unittest.TestCase):
         event.inaxes = self._view._detector_spectrum_axes
         event.xdata = 7.0
         event.button = 3
-        self._view._on_axes_click(event)
+        self._view._on_axes_click_during_peak_selection(event)
         self._view._presenter.on_peak_selected_in_lineplot.assert_called_once_with(7.0, "right")
 
     def test_on_axes_click_outside_axes_does_nothing(self):
         event = MagicMock()
         event.inaxes = MagicMock()  # different axes
         event.xdata = 5.0
-        self._view._on_axes_click(event)
+        self._view._on_axes_click_during_peak_selection(event)
         self._view._presenter.on_peak_selected_in_lineplot.assert_not_called()
+
+    @mock.patch("instrumentview.FullInstrumentViewWindow.Cursor")
+    def test_start_peak_selection_in_lineplot_sets_cursor_disconnects_defaults_and_connects_click_handler(self, mock_cursor):
+        callback_1 = MagicMock()
+        callback_2 = MagicMock()
+        self._view._default_lineplot_callbacks = {11: callback_1, 22: callback_2}
+        self._view._detector_figure_canvas.mpl_disconnect = MagicMock()
+        self._view._detector_figure_canvas.mpl_connect = MagicMock(return_value=333)
+
+        self._view.start_peak_selection_in_lineplot()
+
+        mock_cursor.assert_called_once_with(self._view._detector_spectrum_axes, color="tab:red", linewidth=1, horizOn=False)
+        self._view._detector_figure_canvas.mpl_disconnect.assert_has_calls([mock.call(11), mock.call(22)])
+        self._view._detector_figure_canvas.mpl_connect.assert_called_once_with(
+            "button_press_event", self._view._on_axes_click_during_peak_selection
+        )
+        self.assertEqual(self._view._figure_canvas_click_id, 333)
+        self.assertIsNotNone(self._view._lineplot_peak_cursor)
+
+    def test_end_peak_selection_in_lineplot_restores_callbacks_and_clears_state(self):
+        callback_1 = MagicMock()
+        callback_2 = MagicMock()
+        self._view._default_lineplot_callbacks = {11: callback_1, 22: callback_2}
+        self._view._lineplot_peak_cursor = MagicMock()
+        self._view._figure_canvas_click_id = 999
+        self._view._detector_figure_canvas.mpl_disconnect = MagicMock()
+        self._view._detector_figure_canvas.mpl_connect = MagicMock(side_effect=[111, 222])
+        self._view._detector_figure_canvas.draw_idle = MagicMock()
+
+        self._view.end_peak_selection_in_lineplot()
+
+        self._view._detector_figure_canvas.mpl_disconnect.assert_called_once_with(999)
+        self._view._detector_figure_canvas.mpl_connect.assert_has_calls(
+            [mock.call("button_press_event", callback_1), mock.call("button_press_event", callback_2)]
+        )
+        self.assertEqual(self._view._default_lineplot_callbacks, {111: callback_1, 222: callback_2})
+        self.assertIsNone(self._view._figure_canvas_click_id)
+        self.assertIsNone(self._view._lineplot_peak_cursor)
+        self._view._detector_figure_canvas.draw_idle.assert_called_once()
 
     def test_disable_and_uncheck_selection_list(self):
         mock_item_0 = MagicMock()
