@@ -786,10 +786,46 @@ class TestShapeRenderer(unittest.TestCase):
         self.assertEqual(len(outline.cell_data.keys()), 0)
         self.assertEqual(len(outline.point_data.keys()), 0)
 
-    def test_build_picked_highlight_mesh_skipped_above_cell_cap(self):
+    def test_build_picked_highlight_mesh_falls_back_to_markers_above_cell_cap(self):
+        """Too large to outline still means marked — a whole-bank selection is not self-evident."""
         mesh = self._build_two_detector_mesh()
         self.renderer._MAX_OUTLINE_CELLS = 1
-        self.assertIsNone(self.renderer._build_picked_highlight_mesh(mesh, np.array([1, 1])))
+
+        markers = self.renderer._build_picked_highlight_mesh(mesh, np.array([1, 1]))
+
+        self.assertIsNotNone(markers)
+        self.assertEqual(markers.number_of_points, 2)
+        self.assertEqual(markers.n_lines, 0)
+        # One marker per picked detector, and the detectors sit 1.0 apart in x.
+        xs = np.sort(markers.points[:, 0])
+        self.assertAlmostEqual(float(xs[1] - xs[0]), 1.0, places=6)
+
+    def test_marker_fallback_covers_only_the_picked_detectors(self):
+        mesh = self._build_two_detector_mesh()
+        self.renderer._MAX_OUTLINE_CELLS = 1
+
+        markers = self.renderer._build_picked_highlight_mesh(mesh, np.array([0, 1]))
+
+        self.assertEqual(markers.number_of_points, 1)
+        # Detector 1 sits at x=1, detector 0 at x=0.
+        self.assertGreater(float(markers.points[0, 0]), 0.5)
+
+    def test_marker_fallback_carries_no_scalar_data(self):
+        """The markers share an actor with the outline, so inherited scalars would recolour them."""
+        mesh = self._build_two_detector_mesh()
+        self.renderer.set_pickable_scalars(mesh, np.array([1, 1]), "Visible Picked")
+        self.renderer._MAX_OUTLINE_CELLS = 1
+
+        markers = self.renderer._build_picked_highlight_mesh(mesh, np.array([1, 1]))
+
+        self.assertEqual(len(markers.point_data.keys()), 0)
+        self.assertEqual(len(markers.cell_data.keys()), 0)
+
+    def test_empty_selection_stays_unmarked_above_the_cell_cap(self):
+        """The cap must not turn an empty selection into a marker."""
+        mesh = self._build_two_detector_mesh()
+        self.renderer._MAX_OUTLINE_CELLS = 1
+        self.assertIsNone(self.renderer._build_picked_highlight_mesh(mesh, np.array([0, 0])))
 
     def test_build_picked_highlight_mesh_none_when_cell_map_stale(self):
         mesh = self._build_two_detector_mesh()
@@ -805,6 +841,10 @@ class TestShapeRenderer(unittest.TestCase):
         self.assertEqual(call_kwargs["line_width"], self.renderer._PICKED_OUTLINE_WIDTH)
         self.assertFalse(call_kwargs["pickable"])
         self.renderer._picked_highlight_actor.SetVisibility.assert_called_once_with(False)
+        # The same actor draws the marker-point fallback, so it is styled for both.
+        # Only one applies at a time: the mesh holds lines or vertices, never both.
+        self.assertEqual(call_kwargs["point_size"], self.renderer._PICKED_MARKER_POINT_SIZE)
+        self.assertTrue(call_kwargs["render_points_as_spheres"])
 
     def test_update_picked_highlight_shows_outline(self):
         mesh = self._build_two_detector_mesh()
