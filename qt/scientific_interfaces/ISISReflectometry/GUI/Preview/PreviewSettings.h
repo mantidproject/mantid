@@ -12,17 +12,17 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 class PreviewSettings {
 public:
-  explicit PreviewSettings(bool useNewInstrumentView = false) : m_useNewInstrumentView(useNewInstrumentView) {}
+  explicit PreviewSettings(bool useLegacyInstrumentView = false) : m_useLegacyInstrumentView(useLegacyInstrumentView) {}
 
-  [[nodiscard]] bool useNewInstrumentView() const { return m_useNewInstrumentView; }
+  [[nodiscard]] bool useLegacyInstrumentView() const { return m_useLegacyInstrumentView; }
 
   /// Query persistent storage without changing application state or writing settings.
   [[nodiscard]] static PreviewSettings readSettings(const QSettings &settings) {
-    return PreviewSettings(settings.value("InstrumentView/use_new_instrument_view", false).toBool());
+    return PreviewSettings(settings.value("InstrumentView/use_legacy_instrument_view", false).toBool());
   }
 
 private:
-  bool m_useNewInstrumentView;
+  bool m_useLegacyInstrumentView;
 };
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
