@@ -33,6 +33,7 @@ from qt_interaction_helpers import (  # noqa: E402
     click,
     process_events,
     select_combo,
+    select_tab,
     set_checkbox,
     set_finder_text,
     wait_for_file_finder,
@@ -224,15 +225,13 @@ class EngDiffGuiTestBase(AutomatedUITestBase):
     # ------------------------------------------------------------------ interface state
 
     def show_tab(self, title):
-        """Make a tab current. Widgets only report ``isVisible()`` on the current tab, so any
-        visibility check has to select the tab first."""
-        tabs = self.gui.tabs
-        for index in range(tabs.count()):
-            if tabs.tabText(index) == title:
-                tabs.setCurrentIndex(index)
-                process_events()
-                return tabs.widget(index)
-        raise AssertionError(f"no tab titled '{title}'; found {[tabs.tabText(i) for i in range(tabs.count())]}")
+        """Make one of this interface's tabs current, by its title.
+
+        Widgets only report ``isVisible()`` on the current tab, so any visibility check has to
+        select the tab first. Kept as a method because every call site is about *this* interface's
+        tab bar and should not have to reach for it.
+        """
+        return select_tab(self.gui.tabs, title)
 
     def statusbar_text(self):
         """The 'info bar' at the bottom of the interface, which reports the loaded calibration."""
