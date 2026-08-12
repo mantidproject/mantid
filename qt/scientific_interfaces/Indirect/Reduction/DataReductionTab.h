@@ -77,6 +77,7 @@ protected:
   QString getInstrumentName() const;
   QString getAnalyserName() const;
   QString getReflectionName() const;
+  std::string getIpfFilename() const;
 
   std::map<std::string, double> getRangesFromInstrument(QString instName = "", QString analyser = "",
                                                         QString reflection = "");

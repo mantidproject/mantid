@@ -21,7 +21,7 @@ os.environ["MPLBACKEND"] = "Agg"
 # Set up the command line options
 #########################################################################
 
-DEFAULT_QT_API = "pyqt5"
+DEFAULT_QT_API = "pyqt6"
 THIS_MODULE_DIR = os.path.dirname(os.path.realpath(__file__))
 DEFAULT_FRAMEWORK_LOC = os.path.realpath(os.path.join(THIS_MODULE_DIR, "..", "lib", "systemtests"))
 SANS_TEST_LOC = os.path.realpath(os.path.join(THIS_MODULE_DIR, "..", "tests", "framework", "ISIS", "SANS"))

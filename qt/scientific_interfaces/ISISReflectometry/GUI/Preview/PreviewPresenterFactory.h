@@ -13,6 +13,7 @@
 #include "PreviewJobManager.h"
 #include "PreviewModel.h"
 #include "PreviewPresenter.h"
+#include "PreviewSettings.h"
 #include <QSettings>
 #include <memory>
 
@@ -25,10 +26,11 @@ public:
   std::unique_ptr<IPreviewPresenter> make(IPreviewView *view, std::unique_ptr<IReflAlgorithmFactory> algFactory) {
     auto jobRunner = std::make_unique<MantidQt::API::QtJobRunner>();
     auto jobManager = std::make_unique<PreviewJobManager>(std::move(jobRunner), std::move(algFactory));
-    QSettings settings(QSettings::IniFormat, QSettings::UserScope, "mantidproject", "mantidworkbench");
-    const bool useNewInstrumentView = settings.value("InstrumentView/use_new_instrument_view", false).toBool();
+    const QSettings settings(QSettings::IniFormat, QSettings::UserScope, "mantidproject", "mantidworkbench");
+    const auto previewSettings = PreviewSettings::readSettings(settings);
     auto dependencies = PreviewPresenter::Dependencies{
-        view, std::make_unique<PreviewModel>(), std::move(jobManager), nullptr, nullptr, nullptr, useNewInstrumentView};
+        view,    std::make_unique<PreviewModel>(),      std::move(jobManager), nullptr, nullptr,
+        nullptr, previewSettings.useNewInstrumentView()};
     return std::make_unique<PreviewPresenter>(std::move(dependencies));
   }
 };

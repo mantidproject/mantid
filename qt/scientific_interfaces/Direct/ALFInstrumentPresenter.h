@@ -25,6 +25,7 @@ namespace MantidQt::CustomInterfaces {
 class ALFInstrumentWidget;
 class IALFInstrumentView;
 class IALFAnalysisPresenter;
+class ALFInstrumentSettings;
 
 class MANTIDQT_DIRECT_DLL IALFInstrumentPresenter {
 
@@ -35,8 +36,10 @@ public:
 
   virtual void subscribeAnalysisPresenter(IALFAnalysisPresenter *presenter) = 0;
 
-  virtual void loadSettings() = 0;
-  virtual void saveSettings() = 0;
+  /// Delegate restoration of an immutable settings snapshot to the view.
+  virtual void restoreSettings(const ALFInstrumentSettings &settings) = 0;
+  /// Capture current view state without persistent I/O.
+  [[nodiscard]] virtual ALFInstrumentSettings captureSettings() const = 0;
 
   virtual void loadSample() = 0;
   virtual void loadVanadium() = 0;
@@ -59,8 +62,8 @@ public:
 
   void subscribeAnalysisPresenter(IALFAnalysisPresenter *presenter) override;
 
-  void loadSettings() override;
-  void saveSettings() override;
+  void restoreSettings(const ALFInstrumentSettings &settings) override;
+  [[nodiscard]] ALFInstrumentSettings captureSettings() const override;
 
   void loadSample() override;
   void loadVanadium() override;

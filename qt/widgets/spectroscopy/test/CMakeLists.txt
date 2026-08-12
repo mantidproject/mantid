@@ -9,6 +9,7 @@ set(TEST_FILES
     RunWidget/RunPresenterTest.h
     SettingsWidget/SettingsModelTest.h
     SettingsWidget/SettingsPresenterTest.h
+    SettingsWidget/SpectroscopySettingsTest.h
     ValidationUtilsTest.h
     InterfaceUtilsTest.h
 )

@@ -34,9 +34,11 @@ void ALFInstrumentPresenter::subscribeAnalysisPresenter(IALFAnalysisPresenter *p
   m_analysisPresenter = presenter;
 }
 
-void ALFInstrumentPresenter::loadSettings() { m_view->loadSettings(); }
+void ALFInstrumentPresenter::restoreSettings(const ALFInstrumentSettings &settings) {
+  m_view->restoreSettings(settings);
+}
 
-void ALFInstrumentPresenter::saveSettings() { m_view->saveSettings(); }
+ALFInstrumentSettings ALFInstrumentPresenter::captureSettings() const { return m_view->captureSettings(); }
 
 void ALFInstrumentPresenter::notifyAlgorithmError(std::string const &message) {
   m_view->enable();

@@ -47,8 +47,8 @@ mtd_add_qt_library(
   LINK_LIBS Mantid::API Mantid::DataObjects Mantid::Geometry Mantid::Kernel Mantid::PythonInterfaceCore Python::Python
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon MantidQtWidgetsInstrumentView MantidQtWidgetsPlotting MantidQtWidgetsMplCpp
   INSTALL_DIR_BASE ${WORKBENCH_PLUGINS_DIR}
-  OSX_INSTALL_RPATH @loader_path/../../MacOS @loader_path/../../plugins/qt5
-  LINUX_INSTALL_RPATH "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../plugins/qt5/"
+  OSX_INSTALL_RPATH @loader_path/../../MacOS @loader_path/../../plugins/qt6
+  LINUX_INSTALL_RPATH "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../plugins/qt6/"
 )
 # Testing target We can currently only include the tests if we are building the framework. This is bceause we depend on
 # a non-exported library of frameworks in the tests.

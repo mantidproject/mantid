@@ -7,6 +7,8 @@ set(TEST_PY_FILES
     engineering_diffraction/tabs/common/data_handling/test/test_data_presenter.py
     engineering_diffraction/tabs/common/show_sample/test/test_show_sample_presenter.py
     engineering_diffraction/tabs/common/show_sample/test/test_show_sample_model.py
+    engineering_diffraction/tabs/common/test/test_rb_scope.py
+    engineering_diffraction/tabs/common/test/test_instrument_scope.py
     # Cropping
     engineering_diffraction/tabs/common/cropping/test/test_cropping_model.py
     engineering_diffraction/tabs/common/cropping/test/test_cropping_presenter.py
@@ -14,6 +16,7 @@ set(TEST_PY_FILES
     engineering_diffraction/settings/test/test_settings_helper.py
     engineering_diffraction/settings/test/test_settings_model.py
     engineering_diffraction/settings/test/test_settings_presenter.py
+    engineering_diffraction/settings/test/test_settings_view.py
     # Calibration
     engineering_diffraction/tabs/calibration/test/test_calib_model.py
     engineering_diffraction/tabs/calibration/test/test_calib_presenter.py

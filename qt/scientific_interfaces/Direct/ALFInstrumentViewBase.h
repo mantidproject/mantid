@@ -35,8 +35,8 @@ public:
 
   void subscribePresenter(IALFInstrumentPresenter *presenter) override;
 
-  void loadSettings() override;
-  void saveSettings() override;
+  void restoreSettings(const ALFInstrumentSettings &settings) override;
+  [[nodiscard]] ALFInstrumentSettings captureSettings() const override;
 
   void disable(std::string const &reason) override;
   void enable() override;
@@ -59,7 +59,6 @@ protected:
   IALFInstrumentPresenter *m_presenter;
 
 private:
-  QString m_settingsGroup;
   API::FileFinderWidget *m_sample;
   API::FileFinderWidget *m_vanadium;
 };

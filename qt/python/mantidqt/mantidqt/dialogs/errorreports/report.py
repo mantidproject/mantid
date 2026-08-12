@@ -7,13 +7,14 @@
 import re
 
 from qtpy import QtCore, QtGui, QtWidgets
-from qtpy.QtCore import Signal, QSettings
+from qtpy.QtCore import Signal
 from qtpy.QtWidgets import QMessageBox
 
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt import load_ui
 
 from .details import MoreDetailsDialog
+from . import settings as errorreport_settings
 
 DEFAULT_PLAIN_TEXT = """Please enter any additional information about your problems. (Max 3200 characters)
 
@@ -36,9 +37,9 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
     quit_signal = Signal()
     free_text_edited = False
     interface_manager = InterfaceManager()
-    CONTACT_INFO = "ContactInfo"
-    NAME = "Name"
-    EMAIL = "Email"
+    CONTACT_INFO = errorreport_settings.CONTACT_INFO
+    NAME = errorreport_settings.NAME
+    EMAIL = errorreport_settings.EMAIL
 
     def __init__(self, parent=None, show_continue_terminate=False):
         super(self.__class__, self).__init__(parent)
@@ -109,12 +110,8 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
         # Set default focus to the editing box, rather then letting qt try and guess
         self.input_free_text.setFocus()
 
-        # Prefill name and email saved in QSettings
-        qSettings = QSettings()
-        qSettings.beginGroup(self.CONTACT_INFO)
-        self.saved_name = qSettings.value(self.NAME, "", type=str)
-        self.saved_email = qSettings.value(self.EMAIL, "", type=str)
-        qSettings.endGroup()
+        # Prefer the dedicated reporter store and read missing values from the Workbench store without migrating them.
+        self.saved_name, self.saved_email = errorreport_settings.read_contact_information()
         if self.saved_name or self.saved_email:
             self.input_name_line_edit.setText(self.saved_name)
             self.input_email_line_edit.setText(self.saved_email)

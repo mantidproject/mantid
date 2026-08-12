@@ -26,4 +26,8 @@ MANTIDQT_INDIRECT_DLL MantidQt::API::IConfiguredAlgorithm_sptr
 groupDetectorsConfiguredAlg(std::string const &inputWorkspace, std::vector<int> const &detectorList,
                             std::string const &outputWorkspace);
 
+MANTIDQT_INDIRECT_DLL std::string loadFilesWithSum(const std::vector<std::string> &filenames,
+                                                   const std::string &ipfFilename, bool loadLogFiles = false,
+                                                   bool deleteMonitors = true);
+
 } // namespace MantidQt::CustomInterfaces

@@ -57,50 +57,6 @@ template<TYPE>
 %End
 };
 
-%If (!Qt6Bindings)
-template<TYPE>
-%MappedType std::optional<std::vector<TYPE>>
-{
-%TypeHeaderCode
-#include <vector>
-#include <optional>
-%End
-
-%ConvertFromTypeCode
-  return optionalToPyObject(*sipCpp, [&](std::vector<TYPE> const& vector) -> PyObject* {
-    return vectorToPythonList(vector, [&](TYPE const& item) -> PyObject* {
-      auto *heapCopy = new TYPE(item);
-      return sipConvertFromType(heapCopy, sipType_TYPE, sipTransferObj);
-    });
-  });
-%End
-
-%ConvertToTypeCode
-    if (!sipIsErr) {
-      // Check if type is compatible
-      return isIterable(sipPy) || sipPy == Py_None;
-    } else {
-      auto cppValue = pythonObjectToOptional<std::vector<TYPE>>(sipPy, [&](PyObject* pythonList) -> std::optional<std::vector<TYPE>> {
-        return pythonListToVector<TYPE>(pythonList, [&](PyObject* pyItem) -> std::optional<TYPE> {
-          if (!sipCanConvertToType(pyItem, sipType_TYPE, SIP_NOT_NONE)) {
-            PyErr_Format(PyExc_TypeError, "object in iterable cannot be converted to TYPE");
-            return std::nullopt;
-          } else {
-            int state;
-            auto* cppItemPtr = reinterpret_cast<TYPE*>(
-               sipConvertToType(pyItem, sipType_TYPE, 0, SIP_NOT_NONE, &state, sipIsErr));
-
-            sipReleaseType(cppItemPtr, sipType_TYPE, state);
-            return asOptional(sipIsErr, cppItemPtr);
-          }
-        });
-      });
-      return transferToSip(cppValue, sipCppPtr, sipIsErr, sipGetState(sipTransferObj));
-    }
-%End
-};
-%End
-
 // ****************************************************
 // Specialization for std::vector<double>
 // ****************************************************
@@ -137,10 +93,9 @@ template<TYPE>
 // ****************************************************
 // Specialization for QVector<double>
 // ****************************************************
-// PyQt5 provided QVector mapped types; PyQt6 does not (QVector is an alias for
-// QList in Qt6 and PyQt6 only maps QList<int/float/...>, not <double>). Guard to
-// Qt6 so we don't redefine PyQt5's QVector<double> on the Qt5 build.
-%If (Qt6Bindings)
+// PyQt6 does not provide a QVector<double> mapped type (QVector is an alias for
+// QList in Qt6 and PyQt6 only maps QList<int/float/...>, not <double>), so we
+// provide one here.
 %MappedType QVector<double>
 {
 %TypeHeaderCode
@@ -180,7 +135,6 @@ template<TYPE>
   return sipGetState(sipTransferObj);
 %End
 };
-%End
 
 // ****************************************************
 // Specialization for std::vector<int>
@@ -324,59 +278,3 @@ template<TYPE>
   }
 %End
 };
-
-// ****************************************************
-// Specialization for std::vector<std::vector<TYPE>>
-// ****************************************************
-
-%If (!Qt6Bindings)
-template<TYPE>
-%MappedType std::optional<std::vector<std::vector<TYPE>>>
-{
-%TypeHeaderCode
-#include <vector>
-#include <string>
-#include <memory>
-%End
-
-%ConvertFromTypeCode
-  return optionalToPyObject(*sipCpp, [&, sipTransferObj](std::vector<std::vector<TYPE>> const& vector) -> PyObject* {
-    return vectorToPythonList(vector, [&](std::vector<TYPE> const& item) -> PyObject* {
-      return vectorToPythonList(item, [&](TYPE const& item) -> PyObject* {
-        auto *heapCopy = new TYPE(item);
-        return sipConvertFromType(heapCopy, sipType_TYPE, sipTransferObj);
-      });
-    });
-  });
-%End
-
-%ConvertToTypeCode
-
-  if (!sipIsErr) {
-    // Check if type is compatible
-    return isIterable(sipPy) || sipPy == Py_None;
-  } else {
-    auto cppValue = pythonObjectToOptional<std::vector<std::vector<TYPE>>>(sipPy,
-        [&](PyObject* pythonList) -> std::optional<std::vector<std::vector<TYPE>>> {
-          return pythonListToVector<std::vector<TYPE>>(pythonList, [&](PyObject* pythonInnerList) -> std::optional<std::vector<TYPE>> {
-            return pythonListToVector<TYPE>(pythonInnerList, [&](PyObject* pyItem) -> std::optional<TYPE> {
-              if (!sipCanConvertToType(pyItem, sipType_TYPE, SIP_NOT_NONE)) {
-                PyErr_Format(PyExc_TypeError, "object in iterable cannot be converted to TYPE");
-                return std::nullopt;
-              } else {
-                int state;
-                auto* cppItemPtr = reinterpret_cast<TYPE*>(
-                   sipConvertToType(pyItem, sipType_TYPE, 0, SIP_NOT_NONE, &state, sipIsErr));
-
-                sipReleaseType(cppItemPtr, sipType_TYPE, state);
-                return asOptional(sipIsErr, cppItemPtr);
-              }
-            });
-          });
-        });
-    return transferToSip(cppValue, sipCppPtr, sipIsErr, sipGetState(sipTransferObj));
-  }
-
-%End
-};
-%End

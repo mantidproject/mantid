@@ -13,7 +13,7 @@ from qtpy.QtCore import Signal, Qt
 from qtpy.QtWidgets import QToolBar, QFileDialog, QMessageBox, QLabel, QSizePolicy
 import matplotlib
 from matplotlib.backend_bases import NavigationToolbar2
-from matplotlib.backends.backend_qt5 import SubplotToolQt
+from matplotlib.backends.backend_qt import SubplotToolQt
 from matplotlib import backend_tools
 
 import os

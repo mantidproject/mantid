@@ -31,7 +31,7 @@ public:
   virtual ~MockStretchView() = default;
 
   MOCK_METHOD(void, subscribePresenter, (IStretchViewSubscriber * presenter), (override));
-  MOCK_METHOD(void, loadSettings, (const QSettings &settings), (override));
+  MOCK_METHOD(void, restoreSettings, (const API::FileFinderSettings &settings), (override));
   MOCK_METHOD(void, applySettings, ((std::map<std::string, QVariant> const &settings)), (override));
   MOCK_METHOD(void, validateUserInput, (IUserInputValidator * validator), (const, override));
 
@@ -106,7 +106,7 @@ public:
   MOCK_METHOD(bool, displaySaveDirectoryMessage, (), (const, override));
   MOCK_METHOD(void, setFileExtensionsByName, (bool const filter), (override));
   MOCK_METHOD(void, setLoadHistory, (bool const loadHistory), (override));
-  MOCK_METHOD(void, loadSettings, (const QSettings &settings), (override));
+  MOCK_METHOD(void, restoreSettings, (const API::FileFinderSettings &settings), (override));
 };
 
 class MockQuasiModel : public IQuasiModel {

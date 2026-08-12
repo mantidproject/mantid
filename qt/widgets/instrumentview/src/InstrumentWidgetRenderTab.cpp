@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetRenderTab.h"
+#include "MantidQtWidgets/Common/QSettingsChangeAware.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentRenderer.h"
 #include "MantidQtWidgets/InstrumentView/Projection3D.h"
 #include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
@@ -35,6 +36,19 @@
 #include <utility>
 
 namespace MantidQt::MantidWidgets {
+
+InstrumentWidgetRenderTabSettings::InstrumentWidgetRenderTabSettings(bool axesShown) : m_axesShown(axesShown) {}
+
+bool InstrumentWidgetRenderTabSettings::axesShown() const { return m_axesShown; }
+
+InstrumentWidgetRenderTabSettings InstrumentWidgetRenderTabSettings::readSettings(const QSettings &settings) {
+  return InstrumentWidgetRenderTabSettings(settings.value("3DAxesShown", 1).toInt() != 0);
+}
+
+void InstrumentWidgetRenderTabSettings::saveSettings(QSettings &settings,
+                                                     const InstrumentWidgetRenderTabSettings &values) {
+  MantidQt::MantidWidgets::QSettingsChangeAware(settings).setValue("3DAxesShown", QVariant(values.axesShown() ? 1 : 0));
+}
 
 Mantid::Kernel::Logger g_log("InstrumentWidgetRenderTab");
 
@@ -450,19 +464,15 @@ void InstrumentWidgetRenderTab::changeColorMap(const QString &filename, const bo
   m_instrWidget->changeColormap(filename, highlightZeroDets);
 }
 
-void InstrumentWidgetRenderTab::loadSettings(const QSettings &settings) {
-  int show3daxes = settings.value("3DAxesShown", 1).toInt();
-  m_instrWidget->set3DAxesState(show3daxes != 0);
+void InstrumentWidgetRenderTab::restoreSettings(const InstrumentWidgetRenderTabSettings &settings) {
+  m_instrWidget->set3DAxesState(settings.axesShown());
   m_displayAxes->blockSignals(true);
-  m_displayAxes->setChecked(show3daxes != 0);
+  m_displayAxes->setChecked(settings.axesShown());
   m_displayAxes->blockSignals(false);
 }
 
-void InstrumentWidgetRenderTab::saveSettings(QSettings &settings) const {
-  int val = 0;
-  if (m_displayAxes->isChecked())
-    val = 1;
-  settings.setValue("3DAxesShown", QVariant(val));
+InstrumentWidgetRenderTabSettings InstrumentWidgetRenderTab::captureSettings() const {
+  return InstrumentWidgetRenderTabSettings(m_displayAxes->isChecked());
 }
 
 /**
@@ -841,16 +851,18 @@ void InstrumentWidgetRenderTab::setUCorrection() {
         rotSurface->setUCorrection(ucorr.x(),
                                    ucorr.y()); // manually set the correction
         rotSurface->requestRedraw();           // redraw the view
-        settings.setValue(EntryManualUCorrection, true);
-        settings.setValue(EntryUCorrectionMin, ucorr.x());
-        settings.setValue(EntryUCorrectionMax, ucorr.y());
+        MantidQt::MantidWidgets::QSettingsChangeAware writer(settings);
+        writer.setValue(EntryManualUCorrection, true);
+        writer.setValue(EntryUCorrectionMin, ucorr.x());
+        writer.setValue(EntryUCorrectionMax, ucorr.y());
       }
     } else {
       rotSurface->setAutomaticUCorrection(); // switch to automatic correction
       rotSurface->requestRedraw();           // redraw the view
-      settings.remove(EntryManualUCorrection);
-      settings.remove(EntryUCorrectionMin);
-      settings.remove(EntryUCorrectionMax);
+      MantidQt::MantidWidgets::QSettingsChangeAware writer(settings);
+      writer.remove(EntryManualUCorrection);
+      writer.remove(EntryUCorrectionMin);
+      writer.remove(EntryUCorrectionMax);
     }
   }
 }

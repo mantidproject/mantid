@@ -37,10 +37,11 @@ void Settings::connectExistingInterfaces(QList<QPointer<MantidQt::API::UserSubWi
 QIcon Settings::icon() { return Icons::getIcon(SETTINGS_ICON); }
 
 std::map<std::string, QVariant> Settings::getSettings() {
+  auto const values = SettingsHelper::readSettings();
   std::map<std::string, QVariant> interfaceSettings;
-  interfaceSettings["RestrictInput"] = SettingsHelper::restrictInputDataByName();
-  interfaceSettings["ErrorBars"] = SettingsHelper::externalPlotErrorBars();
-  interfaceSettings["LoadHistory"] = SettingsHelper::loadHistory();
+  interfaceSettings["RestrictInput"] = values.restrictInputByName();
+  interfaceSettings["ErrorBars"] = values.externalPlotErrorBars();
+  interfaceSettings["LoadHistory"] = values.loadHistory();
   return interfaceSettings;
 }
 
@@ -50,7 +51,5 @@ void Settings::notifyCloseSettings() {
   if (auto settingsWindow = window())
     settingsWindow->close();
 }
-
-void Settings::loadSettings() { m_presenter->loadSettings(); }
 
 } // namespace MantidQt::CustomInterfaces

@@ -17,7 +17,6 @@ from importlib import import_module
 import warnings
 
 # 3rd-party modules
-from qtpy import QT_VERSION
 from qtpy.QtCore import QPoint
 from qtpy.QtGui import QKeySequence
 from qtpy.QtWidgets import QAction, QApplication, QMenu
@@ -27,15 +26,13 @@ warnings.filterwarnings(action="ignore", category=DeprecationWarning, module=".*
 
 from qtpy.uic import loadUi, loadUiType  # noqa: E402
 
-LIB_SUFFIX = "qt" + QT_VERSION[0]
+LIB_SUFFIX = "qt6"
 
 
 def import_qt(modulename, package, attr=None):
     """Import a module built against the version of Qt we are running.
-    The provided name is suffixed with the string 'qtX' where
-    X is the major version of Qt that the library was built against.
-    The version is determined by inspecting the loaded Python Qt
-    bindings. If none can be found then Qt5 is assumed.
+    The provided name is suffixed with the string 'qt6' as the libraries
+    are built against Qt6.
 
     If modulename looks like a relative name then the import is first tried as specified
     and if this fails it is attempted as a top-level import without a package name and the relative prefixes removed.

@@ -1,2 +1,3 @@
-- The Error Reporter Dialog no longer updates saved contact information after clicking ``Don't share any information`` or when ``Remember me`` is disabled. Submitting unchanged contact
-  information also leaves the Workbench settings file untouched.
+- The Error Reporter Dialog now stores remembered contact information in its own settings file instead of the Workbench settings file. Previously saved Workbench contact information remains
+  available as a read-only fallback for values not yet set in the new file. The dialog also avoids updating its settings after clicking ``Don't share any information``, when ``Remember me`` is
+  disabled, or when the submitted contact information is unchanged.

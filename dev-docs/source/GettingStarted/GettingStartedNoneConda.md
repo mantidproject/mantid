@@ -121,7 +121,7 @@ See the instructions on [this](RunningTheUnitTests) page to run the Mantid unit 
 #### Ubuntu 20.04
 
 - Mantid uses `qtpy` to talk to Python bindings of Qt.
-  It is recommended to have the environment var `QT_API=pyqt5` exported to the shell before building with CMake.
+  It is recommended to have the environment var `QT_API=pyqt6` exported to the shell before building with CMake.
 - The header and lib shipped with Anaconda (if installed) could interfere with Mantid building
   process. It is highly recommended to remove Anaconda Python from your env prior to building
   using `conda deactivate`.

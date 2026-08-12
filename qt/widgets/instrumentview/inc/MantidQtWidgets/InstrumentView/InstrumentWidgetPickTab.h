@@ -66,6 +66,27 @@ enum EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW IWPickXUnits {
   _NUMBER_OF_UNITS
 };
 
+/// Persisted values owned by the instrument-view Pick tab.
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidgetPickTabSettings {
+public:
+  InstrumentWidgetPickTabSettings(int tubeXUnits = 0, int plotType = IWPickPlotType::SINGLE,
+                                  bool rebinKeepOriginal = true);
+
+  [[nodiscard]] int tubeXUnits() const;
+  [[nodiscard]] int plotType() const;
+  [[nodiscard]] bool rebinKeepOriginal() const;
+
+  /// Read values without modifying or synchronizing the backing settings file.
+  [[nodiscard]] static InstrumentWidgetPickTabSettings readSettings(const QSettings &settings);
+  /// Persist an explicit snapshot.
+  static void saveSettings(QSettings &settings, const InstrumentWidgetPickTabSettings &values);
+
+private:
+  int m_tubeXUnits;
+  int m_plotType;
+  bool m_rebinKeepOriginal;
+};
+
 /**
  * Implements the Pick tab in InstrumentWidget.
  * Contains a set of tools which allow one to:
@@ -103,8 +124,10 @@ public:
   explicit InstrumentWidgetPickTab(InstrumentWidget *instrWidget, std::vector<IWPickToolType> const &tools);
   bool canUpdateTouchedDetector() const;
   void initSurface() override;
-  void saveSettings(QSettings &settings) const override;
-  void loadSettings(const QSettings &settings) override;
+  /// Apply an already-read snapshot to the tab without performing file I/O.
+  void restoreSettings(const InstrumentWidgetPickTabSettings &settings);
+  /// Capture the current UI state without performing file I/O.
+  [[nodiscard]] InstrumentWidgetPickTabSettings captureSettings() const;
   bool addToDisplayContextMenu(QMenu & /*unused*/) const override;
   void expandPlotPanel();
   void selectTool(const IWPickToolType tool);
