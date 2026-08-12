@@ -120,10 +120,10 @@ void SaveCSV::exec() {
       // check if x-axis has changed. If yes print out new x-axis line
 
       if (i > 0) {
-        auto &xValue = localworkspace->x(i);
-        auto &xValuePrevious = localworkspace->x(i - 1);
+        auto const &xValue = localworkspace->x(i);
+        auto const &xValuePrevious = localworkspace->x(i - 1);
 
-        if (xValue.rawData() != xValuePrevious.rawData()) {
+        if (xValue != xValuePrevious) {
           outCSV_File << "A";
 
           for (double j : xValue) {

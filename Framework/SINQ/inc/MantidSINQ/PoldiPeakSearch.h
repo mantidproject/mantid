@@ -18,6 +18,8 @@
 #include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
 #include "MantidSINQ/PoldiUtilities/UncertainValue.h"
 
+#include <span>
+
 namespace Mantid {
 namespace HistogramData {
 class HistogramY;
@@ -76,11 +78,11 @@ protected:
   double getTransformedCenter(double value, const Kernel::Unit_sptr &unit) const;
   std::vector<PoldiPeak_sptr> getPeaks(const MantidVec::const_iterator &baseListStart,
                                        const MantidVec::const_iterator &baseListEnd,
-                                       std::list<MantidVec::const_iterator> peakPositions, const MantidVec &xData,
-                                       const Kernel::Unit_sptr &unit) const;
+                                       std::list<MantidVec::const_iterator> peakPositions,
+                                       std::span<double const> xData, const Kernel::Unit_sptr &unit) const;
 
   double getFWHMEstimate(const MantidVec::const_iterator &baseListStart, const MantidVec::const_iterator &baseListEnd,
-                         MantidVec::const_iterator peakPosition, const MantidVec &xData) const;
+                         MantidVec::const_iterator peakPosition, std::span<double const> xData) const;
 
   void setErrorsOnWorkspace(const DataObjects::Workspace2D_sptr &correlationWorkspace, double error) const;
 

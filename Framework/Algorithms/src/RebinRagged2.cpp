@@ -17,6 +17,8 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/VectorHelper.h"
 
+#include <utility>
+
 namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
@@ -196,7 +198,7 @@ void RebinRagged::exec() {
 
         MantidVec y_data, e_data;
         // The EventList takes care of histogramming.
-        el.generateHistogram(delta, XValues_new.rawData(), y_data, e_data);
+        el.generateHistogram(delta, std::as_const(XValues_new), y_data, e_data);
 
         // Create and set the output histogram
         HistogramBuilder builder;
@@ -272,8 +274,8 @@ void RebinRagged::exec() {
       for (int hist = 0; hist < histnumber; ++hist) {
         HistogramBuilder builder;
         builder.setX(outputWS->histogram(hist).points().rawData());
-        builder.setY(outputWS->y(hist).rawData());
-        builder.setE(outputWS->e(hist).rawData());
+        builder.setY(outputWS->y(hist));
+        builder.setE(outputWS->e(hist));
         if (outputWS->hasDx(hist))
           builder.setDx(outputWS->dx(hist));
         builder.setDistribution(dist);

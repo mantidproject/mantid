@@ -406,8 +406,7 @@ void HeliumAnalyserEfficiency::convertToTheoreticalEfficiencies(const std::vecto
     const auto pHeError = pHeErrorVec.at(index);
     const auto eff = efficiencies.at(index);
 
-    const auto &pointData = eff->histogram(0).points();
-    const auto &binPoints = pointData.rawData();
+    const auto &binPoints = eff->histogram(0).points();
     const auto &binBoundaries = eff->x(0);
 
     auto &theoreticalEff = eff->mutableY(0);

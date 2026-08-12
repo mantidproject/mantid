@@ -9,6 +9,7 @@
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/EventList.h"
 
+#include <span>
 #include <vector>
 
 namespace Mantid {
@@ -45,7 +46,7 @@ private:
   double m_divisor;
   double m_offset;
   /// function pointer on how to find the bin boundaries
-  std::optional<size_t> (*m_findBin)(const MantidVec &, const double, const double, const double, const bool);
+  std::optional<size_t> (*m_findBin)(std::span<double const>, const double, const double, const double, const bool);
 
 protected:
   /// track whether this has allocated the "big" memory objects

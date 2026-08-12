@@ -1757,9 +1757,9 @@ signal_t MatrixWorkspace::getSignalAtCoord(const coord_t *coords,
     try {
       coord_t xCoord = coords[0];
       if (isHistogramData())
-        i = Kernel::VectorHelper::indexOfValueFromEdges(xVals.rawData(), xCoord);
+        i = Kernel::VectorHelper::indexOfValueFromEdges(xVals, xCoord);
       else
-        i = Kernel::VectorHelper::indexOfValueFromCenters(xVals.rawData(), xCoord);
+        i = Kernel::VectorHelper::indexOfValueFromCenters(xVals, xCoord);
     } catch (std::out_of_range &) {
       return std::numeric_limits<double>::quiet_NaN();
     }

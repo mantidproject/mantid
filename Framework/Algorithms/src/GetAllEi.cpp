@@ -479,7 +479,7 @@ bool GetAllEi::peakGuess(const API::MatrixWorkspace_sptr &inputWS, size_t index,
   double SmoothRange = 2 * maxSigma;
 
   std::vector<double> SAvrg, binsAvrg;
-  Kernel::VectorHelper::smoothInRange(S.rawData(), SAvrg, SmoothRange, &X.rawData(), ind_min, ind_max, &binsAvrg);
+  Kernel::VectorHelper::smoothInRange(S, SAvrg, SmoothRange, X, ind_min, ind_max, &binsAvrg);
 
   double realPeakPos(xOfMax); // this position is less shifted
   // due to the skew in averaging formula
@@ -495,7 +495,7 @@ bool GetAllEi::peakGuess(const API::MatrixWorkspace_sptr &inputWS, size_t index,
   size_t ic(0), stay_still_count(0);
   bool iterations_fail(false);
   while ((nPeaks > 1 || nHills > 2) && (!iterations_fail)) {
-    Kernel::VectorHelper::smoothInRange(SAvrg, SAvrg1, SmoothRange, &binsAvrg, 0, ind_max - ind_min, &binsAvrg1);
+    Kernel::VectorHelper::smoothInRange(SAvrg, SAvrg1, SmoothRange, binsAvrg, 0, ind_max - ind_min, &binsAvrg1);
     const auto nPrevHills = nHills;
 
     nPeaks = this->calcDerivativeAndCountZeros(binsAvrg1, SAvrg1, der1Avrg, peaks);
@@ -681,7 +681,7 @@ namespace { // for lambda extracted from findBinRanges
 void getBinRange(const HistogramData::HistogramX &eBins, double eMin, double eMax, size_t &index_min,
                  size_t &index_max) {
 
-  const auto &bins = eBins.rawData();
+  const auto &bins = eBins;
   const size_t nBins = bins.size();
   if (eMin <= bins[0]) {
     index_min = 0;

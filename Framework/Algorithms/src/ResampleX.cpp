@@ -442,8 +442,7 @@ void ResampleX::exec() {
 
       // output data arrays are implicitly filled by function
       try {
-        VectorHelper::rebin(XValues.rawData(), YValues.rawData(), YErrors.rawData(), XValues_new, YValues_new,
-                            YErrors_new, m_isDistribution);
+        VectorHelper::rebin(XValues, YValues, YErrors, XValues_new, YValues_new, YErrors_new, m_isDistribution);
       } catch (std::exception &ex) {
         g_log.error() << "Error in rebin function: " << ex.what() << '\n';
         throw;

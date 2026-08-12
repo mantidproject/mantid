@@ -544,10 +544,9 @@ public:
     std::vector<double> inputBoundaries(ib, ib + sizeof(ib) / sizeof(double));
 
     std::vector<double> output;
-    TS_ASSERT_THROWS(VectorHelper::smoothInRange(inputData, output, 6, &inputBoundaries),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(VectorHelper::smoothInRange(inputData, output, 6, inputBoundaries), const std::invalid_argument &);
     inputBoundaries.emplace_back(6);
-    VectorHelper::smoothInRange(inputData, output, 6, &inputBoundaries);
+    VectorHelper::smoothInRange(inputData, output, 6, inputBoundaries);
 
     TS_ASSERT_DELTA(output[1] - output[0], 0.492, 1.e-3);
     TS_ASSERT_DELTA(output[3] - output[2], 0.4545, 1.e-3);
@@ -558,13 +557,13 @@ public:
     inputBoundaries[4] = 10;
     inputBoundaries[5] = 15;
     inputBoundaries[6] = 21;
-    VectorHelper::smoothInRange(inputData, output, 6, &inputBoundaries);
+    VectorHelper::smoothInRange(inputData, output, 6, inputBoundaries);
     TS_ASSERT_DELTA(output[2], 3, 1.e-8);
     TS_ASSERT_DELTA(output[0], 1, 1.e-8);
     TS_ASSERT_DELTA(output[5], 6, 1.e-8);
 
     std::vector<double> out_bins;
-    VectorHelper::smoothInRange(inputData, output, 3, &inputBoundaries, 1, 5, &out_bins);
+    VectorHelper::smoothInRange(inputData, output, 3, inputBoundaries, 1, 5, &out_bins);
     TS_ASSERT_EQUALS(output.size(), 4);
     TS_ASSERT_DELTA(output[1], 3, 1.e-8);
   }
@@ -596,7 +595,7 @@ public:
 
     TS_ASSERT(iLeft < fMax);
     TS_ASSERT(iRight < fMax);
-    VectorHelper::smoothInRange(inputData, output, 10, &inputBoundaries);
+    VectorHelper::smoothInRange(inputData, output, 10, inputBoundaries);
     fMax = output[indOfMax] / (inputBoundaries[indOfMax + 1] - inputBoundaries[indOfMax]);
     iLeft = inputData[indOfMax - 1] / (inputBoundaries[indOfMax] - inputBoundaries[indOfMax - 1]);
     iRight = inputData[indOfMax + 1] / (inputBoundaries[indOfMax + 2] - inputBoundaries[indOfMax + 1]);
@@ -605,7 +604,7 @@ public:
     TS_ASSERT(iRight < fMax);
 
     output.swap(inputData);
-    VectorHelper::smoothInRange(inputData, output, 10, &inputBoundaries);
+    VectorHelper::smoothInRange(inputData, output, 10, inputBoundaries);
 
     fMax = output[indOfMax] / (inputBoundaries[indOfMax + 1] - inputBoundaries[indOfMax]);
     iLeft = inputData[indOfMax - 1] / (inputBoundaries[indOfMax] - inputBoundaries[indOfMax - 1]);
@@ -615,7 +614,7 @@ public:
     TS_ASSERT(iRight < fMax);
 
     output.swap(inputData);
-    VectorHelper::smoothInRange(inputData, output, 10, &inputBoundaries);
+    VectorHelper::smoothInRange(inputData, output, 10, inputBoundaries);
 
     fMax = output[indOfMax] / (inputBoundaries[indOfMax + 1] - inputBoundaries[indOfMax]);
     iLeft = inputData[indOfMax - 1] / (inputBoundaries[indOfMax] - inputBoundaries[indOfMax - 1]);
@@ -625,7 +624,7 @@ public:
     TS_ASSERT(iRight < fMax);
 
     output.swap(inputData);
-    VectorHelper::smoothInRange(inputData, output, 10, &inputBoundaries);
+    VectorHelper::smoothInRange(inputData, output, 10, inputBoundaries);
 
     fMax = output[indOfMax] / (inputBoundaries[indOfMax + 1] - inputBoundaries[indOfMax]);
     iLeft = inputData[indOfMax - 1] / (inputBoundaries[indOfMax] - inputBoundaries[indOfMax - 1]);

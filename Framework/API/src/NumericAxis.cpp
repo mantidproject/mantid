@@ -66,6 +66,8 @@ NumericAxis::NumericAxis(const std::size_t &length) : Axis(), m_values(length) {
  */
 NumericAxis::NumericAxis(std::vector<double> centres) : Axis(), m_values(std::move(centres)) {}
 
+NumericAxis::NumericAxis(std::span<double const> centres) : Axis(), m_values(centres.begin(), centres.end()) {}
+
 /** Virtual constructor
  *  @param parentWorkspace :: The workspace is not used in this implementation
  *  @returns A pointer to a copy of the NumericAxis on which the method is

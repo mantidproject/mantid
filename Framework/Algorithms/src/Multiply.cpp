@@ -70,8 +70,8 @@ void Multiply::setOutputUnits(const API::MatrixWorkspace_const_sptr lhs, const A
 void Multiply::performEventBinaryOperation(DataObjects::EventList &lhs, const DataObjects::EventList &rhs) {
   // We must histogram the rhs event list to multiply.
   MantidVec rhsY, rhsE;
-  rhs.generateHistogram(rhs.x().rawData(), rhsY, rhsE);
-  lhs.multiply(rhs.x().rawData(), rhsY, rhsE);
+  rhs.generateHistogram(rhs.x(), rhsY, rhsE);
+  lhs.multiply(rhs.x(), rhsY, rhsE);
 }
 
 /** Carries out the binary operation IN-PLACE on a single EventList,
@@ -82,8 +82,8 @@ void Multiply::performEventBinaryOperation(DataObjects::EventList &lhs, const Da
  *  @param rhsY :: The vector of rhs data values
  *  @param rhsE :: The vector of rhs error values
  */
-void Multiply::performEventBinaryOperation(DataObjects::EventList &lhs, const MantidVec &rhsX, const MantidVec &rhsY,
-                                           const MantidVec &rhsE) {
+void Multiply::performEventBinaryOperation(DataObjects::EventList &lhs, std::span<double const> rhsX,
+                                           std::span<double const> rhsY, std::span<double const> rhsE) {
   // Multiply is implemented at the EventList level.
   lhs.multiply(rhsX, rhsY, rhsE);
 }

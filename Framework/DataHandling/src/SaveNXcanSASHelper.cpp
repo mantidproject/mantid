@@ -88,7 +88,7 @@ public:
   T const *operator()(const MatrixWorkspace_sptr &ws, size_t index) {
     if (ws->isHistogramData()) {
       qxPointData.clear();
-      VectorHelper::convertToBinCentre(ws->x(index).rawData(), qxPointData);
+      VectorHelper::convertToBinCentre(ws->x(index), qxPointData);
       return qxPointData.data();
     }
     return ws->x(index).rawData().data();

@@ -227,7 +227,7 @@ void VesuvioCalculateGammaBackground::calculateSpectrumFromDetector(const size_t
   // at the detector point & sum to a single spectrum
   auto &ctdet = m_correctedWS->mutableY(outputIndex);
   std::vector<double> tmpWork(ctdet.size());
-  ctdet = calculateTofSpectrum(ctdet.rawData(), tmpWork, outputIndex, detPar, detRes);
+  ctdet = calculateTofSpectrum(ctdet, tmpWork, outputIndex, detPar, detRes);
   // Correct for distance to the detector: 0.5/l2^2
   const double detDistCorr = 0.5 / detPar.l2 / detPar.l2;
   std::transform(ctdet.begin(), ctdet.end(), ctdet.begin(), std::bind(std::multiplies<double>(), _1, detDistCorr));
@@ -345,7 +345,7 @@ void VesuvioCalculateGammaBackground::calculateBackgroundSingleFoil(std::vector<
  * @param detpar Struct containing parameters about the detector
  * @param respar Struct containing parameters about the resolution
  */
-std::vector<double> VesuvioCalculateGammaBackground::calculateTofSpectrum(const std::vector<double> &inSpectrum,
+std::vector<double> VesuvioCalculateGammaBackground::calculateTofSpectrum(std::span<double const> const inSpectrum,
                                                                           std::vector<double> &tmpWork,
                                                                           const size_t wsIndex,
                                                                           const DetectorParams &detpar,
@@ -362,7 +362,7 @@ std::vector<double> VesuvioCalculateGammaBackground::calculateTofSpectrum(const 
   auto profileFunction =
       std::dynamic_pointer_cast<CompositeFunction>(FunctionFactory::Instance().createInitialized(m_profileFunction));
 
-  std::vector<double> correctedVals(inSpectrum);
+  std::vector<double> correctedVals(inSpectrum.begin(), inSpectrum.end());
 
   for (size_t i = 0; i < m_npeaks; ++i) {
     auto profile = std::dynamic_pointer_cast<CurveFitting::Functions::ComptonProfile>(profileFunction->getFunction(i));

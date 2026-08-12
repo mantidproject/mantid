@@ -207,7 +207,7 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
   m_Function = std::make_shared<ThermalNeutronDtoTOFFunction>();
   m_Function->initialize();
 
-  API::FunctionDomain1DVector domain(m_dataWS->x(1).rawData());
+  API::FunctionDomain1DVector domain(m_dataWS->x(1));
   API::FunctionValues values(domain);
   const auto &rawY = m_dataWS->y(0);
   const auto &rawE = m_dataWS->e(0);
@@ -325,9 +325,9 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
   // 7. Play with Zscore:     template<typename TYPE>
   //    std::vector<double> getZscore(const std::vector<TYPE>& data, const bool
   //    sorted=false);
-  vector<double> z0 = Kernel::getZscore(m_dataWS->y(0).rawData());
-  vector<double> z1 = Kernel::getZscore(m_dataWS->y(1).rawData());
-  vector<double> z2 = Kernel::getZscore(m_dataWS->y(2).rawData());
+  vector<double> z0 = Kernel::getZscore(m_dataWS->y(0));
+  vector<double> z1 = Kernel::getZscore(m_dataWS->y(1));
+  vector<double> z2 = Kernel::getZscore(m_dataWS->y(2));
   stringstream zss;
   zss << setw(20) << "d_h" << setw(20) << "Z DataY" << setw(20) << "Z ModelY" << setw(20) << "Z DiffY" << setw(20)
       << "DiffY\n";
@@ -453,7 +453,7 @@ void RefinePowderInstrumentParameters::refineInstrumentParametersMC(const TableW
   const auto &X = m_dataWS->x(0);
   const auto &Y = m_dataWS->y(0);
   const auto &E = m_dataWS->e(0);
-  FunctionDomain1DVector domain(X.rawData());
+  FunctionDomain1DVector domain(X);
   FunctionValues values(domain);
   for (size_t i = 0; i < m_BestFitParameters.size(); ++i) {
     // a. Set the function with the
@@ -506,7 +506,7 @@ void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(const vector<s
   const auto &X = m_dataWS->x(0);
   const auto &rawY = m_dataWS->y(0);
   const auto &rawE = m_dataWS->e(0);
-  FunctionDomain1DVector domain(X.rawData());
+  FunctionDomain1DVector domain(X);
   FunctionValues values(domain);
 
   // 2. Determine the parameters to fit
