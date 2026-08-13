@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, MatrixWorkspace, PropertyMode
+from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspace, PropertyMode, WorkspaceProperty
 from mantid.kernel import Direction
 
 
@@ -32,14 +32,13 @@ class ReflectometryISISSumBanks(DataProcessorAlgorithm):
 
     def PyInit(self):
         self.declareProperty(
-            MatrixWorkspaceProperty(self._WORKSPACE, "", direction=Direction.Input, optional=PropertyMode.Mandatory),
-            doc="An input 2D detector workspace",
+            WorkspaceProperty(self._WORKSPACE, "", direction=Direction.Input, optional=PropertyMode.Mandatory),
+            doc="An input 2D detector workspace or workspace group",
         )
         self.declareProperty(self._ROI, defaultValue="", doc="List of detector IDs to include")
         self.declareProperty(
-            MatrixWorkspaceProperty(self._OUTPUT_WS, "", direction=Direction.Output),
-            doc="The preprocessed output workspace. If multiple input runs are specified "
-            "they will be summed into a single output workspace.",
+            WorkspaceProperty(self._OUTPUT_WS, "", direction=Direction.Output),
+            doc="The preprocessed output workspace or workspace group.",
         )
 
     def PyExec(self):
