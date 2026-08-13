@@ -145,7 +145,7 @@ jobs:
   build-and-test:
     needs: [cppcheck, doxygen, check-filters]
     concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}-build-and-test
+      group: ${{ github.workflow }}-${{ github.ref }}-build-and-test-${{ matrix.os }}
       cancel-in-progress: true
     permissions:
       contents: read
