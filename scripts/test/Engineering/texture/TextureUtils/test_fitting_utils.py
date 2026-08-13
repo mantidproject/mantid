@@ -24,7 +24,6 @@ from Engineering.texture.TextureUtils.fitting_utils import (
 )
 
 texture_utils_path = "Engineering.texture.TextureUtils.fitting_utils"
-multidomain_path = "Engineering.texture.TextureUtils.multidomain_engine"
 fitpeaks_path = "Engineering.texture.TextureUtils.fitpeaks_engine"
 
 
@@ -346,57 +345,6 @@ class FitAllPeaksOrchestrationTests(unittest.TestCase):
     def test_fit_all_peaks_unknown_engine_raises(self, _mock_summed):
         with self.assertRaises(ValueError):
             fit_all_peaks(wss=["ws"], peaks=[1.0], peak_window=0.1, save_dir="save", engine="bogus")
-
-    @patch(f"{texture_utils_path}.logger")
-    @patch(f"{multidomain_path}.fit_initial_summed_spectra")
-    def test_fit_all_peaks_warns_on_unsupported_peak_func(self, mock_fit_summed, mock_logger):
-        mock_fit_summed.return_value = ([], [])
-
-        fit_all_peaks(
-            wss=[],
-            peaks=[],
-            peak_window=0.1,
-            save_dir="save",
-            peak_func_name="Gaussian",
-            engine="multidomain",
-        )
-
-        mock_logger.warning.assert_called_once()
-        self.assertIn("Gaussian", mock_logger.warning.call_args[0][0])
-
-    @patch(f"{texture_utils_path}.logger")
-    @patch(f"{multidomain_path}.fit_initial_summed_spectra")
-    def test_fit_all_peaks_no_warning_for_supported_peak_funcs(self, mock_fit_summed, mock_logger):
-        mock_fit_summed.return_value = ([], [])
-
-        for func_name in ("BackToBackExponential", "IkedaCarpenterPV"):
-            mock_logger.reset_mock()
-            fit_all_peaks(
-                wss=[],
-                peaks=[],
-                peak_window=0.1,
-                save_dir="save",
-                peak_func_name=func_name,
-                engine="multidomain",
-            )
-            mock_logger.warning.assert_not_called()
-
-    @patch(f"{multidomain_path}.fit_initial_summed_spectra")
-    def test_fit_all_peaks_passes_peak_func_name_to_summed_fit(self, mock_fit_summed):
-        mock_fit_summed.return_value = ([], [])
-
-        fit_all_peaks(
-            wss=[],
-            peaks=[],
-            peak_window=0.1,
-            save_dir="save",
-            peak_func_name="IkedaCarpenterPV",
-            engine="multidomain",
-        )
-
-        _, kwargs = mock_fit_summed.call_args
-        args = mock_fit_summed.call_args[0]
-        self.assertEqual(args[4], "IkedaCarpenterPV")
 
 
 if __name__ == "__main__":

@@ -37,6 +37,12 @@ def _make_fit_tables(chi2, i_col, x0):
     return param_table, error_table
 
 
+def _n_output_tables(mock_create_tab):
+    """Number of CreateEmptyTableWorkspace calls that made a reported output table.  The same
+    algorithm also builds a per-pass seed table, so the raw call count is not the table count."""
+    return sum(1 for c in mock_create_tab.call_args_list if c.kwargs["OutputWorkspace"].endswith("_Fit_Parameters"))
+
+
 def _ads_retrieve(ws, param_table, error_table, ws_names):
     """ADS.retrieve side_effect: raw workspaces by name, else the params/errors table by name."""
 
@@ -505,7 +511,7 @@ class FitPeaksEngineTests(unittest.TestCase):
         self.assertEqual(mock_fitpeaks.call_args_list[2].kwargs["InputWorkspace"], combined_tof)
         self.assertEqual(mock_fitpeaks.call_args_list[3].kwargs["InputWorkspace"], combined_tof)
 
-        self.assertEqual(mock_create_tab.call_count, 1)
+        self.assertEqual(_n_output_tables(mock_create_tab), 1)
         self.assertEqual(mock_save_nexus.call_count, 1)
 
     @patch(f"{fitpeaks_path}._estimate_peak_intensities", side_effect=lambda ws, windows_ws: np.zeros(ws.spectrumInfo().size()))
@@ -725,7 +731,7 @@ class FitPeaksEngineTests(unittest.TestCase):
 
         # each peak combines its own crops (one ConvertUnits->TOF per peak) and writes one output table
         self.assertEqual(mock_convert_units.call_count, 2)
-        self.assertEqual(mock_create_tab.call_count, 2)
+        self.assertEqual(_n_output_tables(mock_create_tab), 2)
         self.assertEqual(mock_save_nexus.call_count, 2)
         self.assertEqual(mock_populate.call_count, 2)
         # per peak: 2 smoothing passes + 1 raw fit, and 2 rebunches
