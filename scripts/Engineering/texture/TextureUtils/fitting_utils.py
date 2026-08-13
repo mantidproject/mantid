@@ -234,7 +234,6 @@ def fit_all_peaks(
 
     # currently the only fit functions intended to be used - less flexibility here allows for less user input
     supported_peaks = ("BackToBackExponential", "IkedaCarpenterPV")
-    bg_func_name = "LinearBackground"
 
     if peak_func_name not in supported_peaks:
         logger.warning(
@@ -271,32 +270,8 @@ def fit_all_peaks(
             last_fit_ic,
         )
         return
-    elif engine == "multidomain":
-        from .multidomain_engine import _fit_all_peaks_multidomain
-
-        _fit_all_peaks_multidomain(
-            wss,
-            peaks,
-            peak_window,
-            save_dir,
-            override_dir,
-            i_over_sigma_thresh,
-            nan_replacement,
-            no_fit_value_dict,
-            smooth_vals,
-            tied_bkgs,
-            final_fit_raw,
-            parameters_to_tie,
-            subsequent_fit_param_fix,
-            peak_func_name,
-            bg_func_name,
-            last_fit_ic,
-            max_fit_iters,
-            fit_kwargs,
-        )
-        return
     else:
-        raise ValueError(f"Unknown fitting engine '{engine}'. Expected 'fitpeaks' or 'multidomain'.")
+        raise ValueError(f"Unknown fitting engine '{engine}'. Expected 'fitpeaks'.")
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ shared fitting utility functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

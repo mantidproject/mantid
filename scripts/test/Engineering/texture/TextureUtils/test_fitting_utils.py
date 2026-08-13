@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #
 # Tests for the shared fitting utilities and the fit_all_peaks orchestration/dispatch layer.
-# The per-engine behaviour lives in test_fitpeaks_engine.py and test_multidomain_engine.py.
+# The per-engine behaviour lives in test_fitpeaks_engine.py.
 import unittest
 from unittest.mock import patch, MagicMock, call
 from os import path
