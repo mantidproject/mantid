@@ -1,2 +1,2 @@
-- :ref:`ReflectometryISISSumBanks <algm-ReflectometryISISSumBanks>`, :ref:`ReflectometryReductionOneAuto <algm-ReflectometryReductionOneAuto>`,
+- ``ReflectometryISISSumBanks``, :ref:`ReflectometryReductionOneAuto <algm-ReflectometryReductionOneAuto>`,
   and :ref:`ReflectometryISISLoadAndProcess <algm-ReflectometryISISLoadAndProcess>` can now apply ``ROIDetectorIDs`` bank summing to workspace groups.

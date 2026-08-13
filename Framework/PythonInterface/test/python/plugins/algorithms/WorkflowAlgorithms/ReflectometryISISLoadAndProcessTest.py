@@ -695,6 +695,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
             "TOF_38415_1_summed_segment",
             "TOF_38415_2",
             "TOF_38415_2_summed_segment",
+            "TOF_summed_segment",
         ]
 
         self._assert_run_algorithm_succeeds(args, outputs)
@@ -717,7 +718,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         assertRaisesNothing(self, alg.execute)
 
         self.assertEqual(
-            list(AnalysisDataService.retrieve("TOF_38415_summed_segment").getNames()),
+            list(AnalysisDataService.retrieve("TOF_summed_segment").getNames()),
             ["TOF_38415_1_summed_segment", "TOF_38415_2_summed_segment"],
         )
         self.assertEqual(list(AnalysisDataService.retrieve("IvsQ_38415").getNames()), ["IvsQ_38415_1", "IvsQ_38415_2"])
@@ -736,7 +737,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         assertRaisesNothing(self, alg.execute)
 
         self.assertEqual(
-            list(AnalysisDataService.retrieve("TOF_38415_summed_segment").getNames()),
+            list(AnalysisDataService.retrieve("TOF_summed_segment").getNames()),
             ["TOF_38415_up_summed_segment", "TOF_38415_down_summed_segment"],
         )
         self.assertEqual(list(AnalysisDataService.retrieve("IvsQ_38415").getNames()), ["IvsQ_38415_up", "IvsQ_38415_down"])
@@ -781,6 +782,10 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         self._assert_run_algorithm_succeeds(args)
 
         self.assertEqual(list(AnalysisDataService.retrieve("IvsQ_38415").getNames()), ["IvsQ_38415_1", "IvsQ_38415_2"])
+        self.assertEqual(
+            list(AnalysisDataService.retrieve("__TOF_summed_segment").getNames()),
+            ["__TOF_38415_1_summed_segment", "__TOF_38415_2_summed_segment"],
+        )
         self.assertTrue(AnalysisDataService.doesExist("__TOF_38415_1_summed_segment"))
         self.assertTrue(AnalysisDataService.doesExist("__TOF_38415_2_summed_segment"))
 

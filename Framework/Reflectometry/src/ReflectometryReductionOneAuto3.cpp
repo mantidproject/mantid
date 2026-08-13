@@ -1083,15 +1083,13 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto3::getFloodWorkspace(const Ins
  */
 std::string ReflectometryReductionOneAuto3::getSummedWorkspaceName(const Workspace_sptr &workspace,
                                                                    const bool isTransWs) {
-  auto matrixWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(workspace);
-  if (!matrixWorkspace)
-    matrixWorkspace =
-        std::dynamic_pointer_cast<MatrixWorkspace>(std::dynamic_pointer_cast<WorkspaceGroup>(workspace)->getItem(0));
-
   const auto &ws_prefix = isTransWs ? TRANS_WORKSPACE_PREFIX : TOF_WORKSPACE_PREFIX;
   const std::string hide_prefix = getProperty("HideSummedWorkspaces") ? "__" : "";
+  if (std::dynamic_pointer_cast<WorkspaceGroup>(workspace))
+    return hide_prefix + ws_prefix + SUMMED_WORKSPACE_SUFFIX;
 
-  return hide_prefix + ws_prefix + getRunNumber(*matrixWorkspace) + SUMMED_WORKSPACE_SUFFIX;
+  return hide_prefix + ws_prefix + getRunNumber(*std::dynamic_pointer_cast<MatrixWorkspace>(workspace)) +
+         SUMMED_WORKSPACE_SUFFIX;
 }
 
 /**
