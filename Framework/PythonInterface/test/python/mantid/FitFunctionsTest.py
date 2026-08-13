@@ -86,7 +86,7 @@ class FitFunctionsTest(unittest.TestCase):
         index_g0 = c.getIndexOfFunction("Gaussian 0")
         self.assertEqual(index_g0, 1)
         index_g1 = c.getIndexOfFunction("Gaussian 1")
-        self.assertEqual(index_g1, 5)
+        self.assertEqual(index_g1, 4)
 
     def test_compositefunction_f(self):
         lb = FunctionWrapper("LinearBackground", A0=0.5, A1=1.5)
