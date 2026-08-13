@@ -640,7 +640,9 @@ def _sync_and_finalize_qsettings_staging(session, settings):
 
     if not finalization.successful:
         failed_paths = ", ".join(
-            str(result.relative_path) for result in finalization.files if result.status.value in {"conflict", "failed"}
+            f"{result.relative_path} ({result.status.value})"
+            for result in finalization.files
+            if result.status.value in {"conflict", "failed"}
         )
         detail = finalization.error or failed_paths or "unknown finalization error"
         _warn_about_qsettings_staging(

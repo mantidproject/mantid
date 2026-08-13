@@ -70,13 +70,13 @@ class QSettingsStagingSessionManagerTest(unittest.TestCase):
             **kwargs,
         )
 
-    def test_prepares_private_unique_session_and_holds_coordinator(self):
+    def test_prepares_private_unique_session_and_releases_coordinator(self):
         session = self.manager().prepare()
 
         self.assertEqual(0o700, session.staging_root.stat().st_mode & 0o777)
         self.assertEqual(0o700, (self.cache_root / MANAGER_RELATIVE_PATH).stat().st_mode & 0o777)
         self.assertEqual(self.cache_root / MANAGER_RELATIVE_PATH / "coordinator.lock", self.coordinators[0].path)
-        self.assertFalse(self.coordinators[0].unlocked)
+        self.assertTrue(self.coordinators[0].unlocked)
         self.assertTrue((session.staging_root / "mantidproject").is_dir())
 
         other_session = self.manager().prepare()
@@ -148,15 +148,13 @@ class QSettingsStagingSessionManagerTest(unittest.TestCase):
         self.assertEqual([], list(manager_root.glob("session-*")))
         self.assertFalse(self.coordinators[0].unlocked)
 
-    def test_real_qlockfile_coordinator_prevents_a_second_owner(self):
+    def test_real_qlockfile_coordinator_allows_concurrent_sessions(self):
         first_session = QSettingsStagingSessionManager(self.eligibility).prepare()
+        second_session = QSettingsStagingSessionManager(self.eligibility).prepare()
 
-        with self.assertRaises(CoordinatorUnavailable):
-            QSettingsStagingSessionManager(self.eligibility).prepare()
-
+        self.assertNotEqual(first_session.staging_root, second_session.staging_root)
         first_session.abort()
-        next_session = QSettingsStagingSessionManager(self.eligibility).prepare()
-        next_session.abort()
+        second_session.abort()
 
     def test_completed_session_is_cleaned_but_incomplete_and_unrelated_paths_are_retained(self):
         manager_root = self.cache_root / MANAGER_RELATIVE_PATH
