@@ -12,141 +12,13 @@ on:
         type: string
 
 
+# cancel previous job if a new commit is pushed
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  check-filters:
-    runs-on: ubuntu-latest
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}-check-filters
-      cancel-in-progress: true
-    outputs:
-      code_changes: ${{ steps.changes.outputs.code_changes }}
-      doxygen: ${{ steps.changes.outputs.doxygen }}
-      user_docs: ${{ steps.changes.outputs.user_docs }}
-      files_cppcheck: ${{ steps.changes.outputs.files_cppcheck }}
-
-    steps:
-    - uses: actions/checkout@v7
-
-    - uses: dorny/paths-filter@v4
-      id: changes
-      with:
-        filters: .github/filters.yaml
-
-  doxygen:
-    needs: [check-filters]
-    runs-on: ubuntu-latest
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}-doxygen
-      cancel-in-progress: true
-    steps:
-      - uses: actions/checkout@v7
-
-      - uses: ./.github/actions/setup-pixi
-        if: ${{ needs.check-filters.outputs.doxygen == 'true' }}
-
-      - uses: ./.github/actions/doxygen-build
-        name: Build doxygen
-        if: ${{ needs.check-filters.outputs.doxygen == 'true' }}
-
-  conda-packaging-linux:
-    needs: [cppcheck, doxygen, check-filters]
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}-conda-packaging-linux
-      cancel-in-progress: true
-    runs-on:
-      - ${{ (inputs.RUNNER_LABEL == '' && 'self-hosted') || inputs.RUNNER_LABEL }}
-      - self-hosted
-      - Linux
-      - X64
-
-    defaults:
-      run:
-        shell: bash
-
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 100
-          fetch-tags: true
-          path: source
-
-      - uses: ./.github/actions/setup-pixi
-        if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
-
-      - name: Build conda packages
-        if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
-        run: |
-          rm -rf ${GITHUB_WORKSPACE}/conda-bld
-          bash -ex ${GITHUB_WORKSPACE}/source/buildconfig/Jenkins/Conda/package-conda ${GITHUB_WORKSPACE} --build-mantid --build-qt --build-docs --build-workbench
-
-      - name: Upload conda packages
-        if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: conda_packages
-          if-no-files-found: error
-          path: ${{ github.workspace }}/conda-bld/**/*.conda
-
-      - name: Upload conda environment logs
-        if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: env_logs
-          if-no-files-found: warn
-          path: ${{ github.workspace }}/**/env_logs/*/*.txt
-
-  cppcheck:
-    needs: [check-filters]
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}-cppcheck
-      cancel-in-progress: true
-    runs-on:
-      - ${{ (inputs.RUNNER_LABEL == '' && 'self-hosted') || inputs.RUNNER_LABEL }}
-      - self-hosted
-      - Linux
-      - X64
-
-    defaults:
-      run:
-        shell: bash
-
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Install pixi
-        uses: ./.github/actions/setup-pixi
-        if: ${{ needs.check-filters.outputs.files_cppcheck == 'true' }}
-
-      - name: Clean build tree
-        if: ${{ needs.check-filters.outputs.files_cppcheck == 'true' }}
-        run: ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/clean-builder ${GITHUB_WORKSPACE}
-
-      - name: Add cppcheck matcher
-        if: ${{ needs.check-filters.outputs.files_cppcheck == 'true' }}
-        run: echo "::add-matcher::.github/matchers/cppcheck.json"
-
-      - uses: ./.github/actions/cppcheck-build
-        if: ${{ needs.check-filters.outputs.files_cppcheck == 'true' }}
-        name: Run cppcheck
-
-      - name: Remove cppcheck matcher
-        if: ${{ always() && needs.check-filters.outputs.files_cppcheck == 'true' }}
-        run: echo "::remove-matcher owner=cppcheck::"
-
-      - name: Upload cppcheck SARIF report
-        uses: actions/upload-artifact@v7
-        if: ${{ always() && needs.check-filters.outputs.files_cppcheck == 'true' && hashFiles('build/cppcheck.sarif') != '' }}
-        with:
-          name: cppcheck_sarif_report
-          if-no-files-found: warn
-          path: ${{ github.workspace }}/build/cppcheck.sarif
-
-
   build-and-test:
-    needs: [cppcheck, doxygen, check-filters]
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}-build-and-test-${{ matrix.os }}
-      cancel-in-progress: true
     permissions:
       contents: read
 
@@ -197,22 +69,27 @@ jobs:
           fetch-depth: 100
           fetch-tags: true
 
+      - uses: dorny/paths-filter@v4
+        id: changes
+        with:
+          filters: .github/filters.yaml
+
       - name: Install pixi
         uses: ./.github/actions/setup-pixi
-        if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
+        if: ${{ steps.changes.outputs.code_changes == 'true' }}
 
       - name: Clean build tree
-        if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
+        if: ${{ steps.changes.outputs.code_changes == 'true' }}
         # supplying --clean-build or CLEAN_BUILD=true should be added here
         run: ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/clean-builder ${GITHUB_WORKSPACE}
 
       - name: Determine if a PR build
-        if: ${{ github.event_name == 'pull_request' && needs.check-filters.outputs.code_changes == 'true' }}
+        if: ${{ github.event_name == 'pull_request' && steps.changes.outputs.code_changes == 'true' }}
         # telling jenkins scripts this is a PR build
         run: echo "JOB_NAME=pull_requests" >> $GITHUB_ENV
 
       - name: Build code
-        if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
+        if: ${{ steps.changes.outputs.code_changes == 'true' }}
         run: |
           echo "For Jenkins scripts JOB_NAME=${JOB_NAME}"
           cd ${GITHUB_WORKSPACE}
@@ -221,7 +98,7 @@ jobs:
           echo "::remove-matcher owner=gcc-problem-matcher::"
 
       - name: Run unit tests
-        if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
+        if: ${{ steps.changes.outputs.code_changes == 'true' }}
         id: testunit
         run: |
           cd ${GITHUB_WORKSPACE}
@@ -248,7 +125,7 @@ jobs:
           path: ${{ github.workspace }}/build/Testing/*unittest.xml
 
       - name: Run system tests
-        if: ${{ matrix.os == 'Linux' && needs.check-filters.outputs.code_changes == 'true' }}
+        if: ${{ matrix.os == 'Linux' && steps.changes.outputs.code_changes == 'true' }}
         id: testsystem
         run: |
           cd ${GITHUB_WORKSPACE}
@@ -286,93 +163,5 @@ jobs:
         if: always()
         with:
           name: test_logs_${{ matrix.os }}
-          if-no-files-found: ignore
-          path: ${{ github.workspace }}/build/test_logs/*.log
-
-
-  user-docs-build-and-test:
-    needs: [cppcheck, doxygen, check-filters]
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}-user-docs-build-and-test
-      cancel-in-progress: true
-    permissions:
-      contents: read
-
-    runs-on:
-      - ${{ (inputs.RUNNER_LABEL == '' && 'self-hosted') || inputs.RUNNER_LABEL }}
-      - self-hosted
-      - Linux
-      - X64
-
-    defaults:
-      run:
-        shell: bash
-
-    env:
-      CMAKE_PRESET: linux-64-ci
-      EXTRA_CMAKE_FLAGS: "-DENABLE_PRECOMMIT=OFF"
-      ENABLE_BUILD_CODE: true
-      ENABLE_UNIT_TESTS: false
-      ENABLE_SYSTEM_TESTS: false
-      ENABLE_DOCS: true
-      ENABLE_DOC_TESTS: true
-      # Developer docs are built and published separately by devdocs-publish.yml
-      ENABLE_DEV_DOCS: false
-
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          # Needed to fetch the tags for versioningit
-          fetch-depth: 100
-          fetch-tags: true
-
-      - name: Install pixi
-        uses: ./.github/actions/setup-pixi
-        if: ${{ needs.check-filters.outputs.user_docs == 'true' }}
-
-      - name: Clean build tree
-        if: ${{ needs.check-filters.outputs.user_docs == 'true' }}
-        # supplying --clean-build or CLEAN_BUILD=true should be added here
-        run: ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/clean-builder ${GITHUB_WORKSPACE}
-
-      - name: Build code and user docs
-        if: ${{ needs.check-filters.outputs.user_docs == 'true' }}
-        run: |
-          cd ${GITHUB_WORKSPACE}
-          echo "::add-matcher::.github/matchers/gcc.json"
-          pixi run --frozen bash -ex ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/build ${GITHUB_WORKSPACE} $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE_BUILD_CODE $ENABLE_UNIT_TESTS $ENABLE_SYSTEM_TESTS $ENABLE_DOC_TESTS $EXTRA_CMAKE_FLAGS
-          echo "::remove-matcher owner=gcc-problem-matcher::"
-
-      - name: Run doctests
-        if: ${{ needs.check-filters.outputs.user_docs == 'true' }}
-        id: testdocs
-        run: |
-          cd ${GITHUB_WORKSPACE}
-          # Not physical but logical cores, includes hyper threaded - different for darwin
-          BUILD_THREADS="$(grep -c ^processor /proc/cpuinfo)"
-          # bool flags for this are
-          # SYSTEM_TESTS UNIT_TESTS DOCS DOC_TESTS
-          pixi run --frozen bash -ex ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/run-tests ${GITHUB_WORKSPACE} false false $ENABLE_DOCS $ENABLE_DOC_TESTS ${BUILD_THREADS}
-
-      - name: Upload doctest results
-        uses: actions/upload-artifact@v7
-        if: ${{ failure() && steps.testdocs.conclusion == 'failure' }}
-        with:
-          name: junit-doctest
-          if-no-files-found: ignore
-          path: ${{ github.workspace }}/build/docs/doctest/TEST-doctest.xml
-
-      - name: Upload event payload
-        uses: actions/upload-artifact@v7
-        if: ${{ failure() && github.event_name == 'pull_request' }}
-        with:
-          name: event-file-doctest
-          path: ${{ github.event_path }}
-
-      - name: Upload build and test log artifacts
-        uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: user_docs_test_logs_Linux
           if-no-files-found: ignore
           path: ${{ github.workspace }}/build/test_logs/*.log

@@ -1,0 +1,36 @@
+name: PR Doxygen
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+  workflow_dispatch:
+    inputs:
+      RUNNER_LABEL:
+        description: 'Match Runner Label'
+        required: false
+        type: string
+
+
+# cancel previous job if a new commit is pushed
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  doxygen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: dorny/paths-filter@v4
+        id: changes
+        with:
+          filters: .github/filters.yaml
+
+      - uses: ./.github/actions/setup-pixi
+        if: ${{ steps.changes.outputs.doxygen == 'true' }}
+
+      - uses: ./.github/actions/doxygen-build
+        name: Build doxygen
+        if: ${{ steps.changes.outputs.doxygen == 'true' }}

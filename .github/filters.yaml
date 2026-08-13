@@ -38,6 +38,7 @@ doxygen:
  - '.github/filters.yaml'
  - '.github/actions/doxygen-build/**'
  - '.github/workflows/doxygen-publish.yml'
+ - '.github/workflows/pr_doxygen.yml'
 devsite:
  - *files_config
  - *files_pixi
@@ -71,7 +72,7 @@ cppcheck: &files_cppcheck_config
  - '.github/filters.yaml'
  - '.github/actions/cppcheck-build/**'
  - '.github/matchers/cppcheck.json'
- - '.github/workflows/pr_build_and_test.yml'
+ - '.github/workflows/pr_cppcheck.yml'
 # cpp source changes OR cppcheck config changes -> run cppcheck
 files_cppcheck:
  - *files_cpp
