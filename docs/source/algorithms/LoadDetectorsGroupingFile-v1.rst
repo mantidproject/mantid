@@ -146,8 +146,8 @@ Usage
 .. testcode:: LoadDetectorsGroupingFile
 
     # create some grouping file
-    import mantid
-    filename=mantid.config.getString("defaultsave.directory")+"test.xml"
+    import os,mantid
+    filename=os.path.join(mantid.config.getString("defaultsave.directory"),"test.xml")
     f=open(filename,'w')
     f.write('<?xml version="1.0" encoding="UTF-8" ?> \n')
     f.write('<detector-grouping instrument="VULCAN" idf-date="2018-01-01 00:00:00"> \n')
@@ -182,7 +182,7 @@ Usage
 
    DeleteWorkspace(ws)
    import os,mantid
-   filename=mantid.config.getString("defaultsave.directory")+"test.xml"
+   filename=os.path.join(mantid.config.getString("defaultsave.directory"),"test.xml")
    os.remove(filename)
 
 Output:
@@ -198,8 +198,8 @@ Output:
 .. testcode:: LoadDetectorsGroupingFileMap
 
     # create some grouping file
-    import mantid
-    filename=mantid.config.getString("defaultsave.directory")+"test.map"
+    import os,mantid
+    filename=os.path.join(mantid.config.getString("defaultsave.directory"),"test.map")
     f=open(filename,'w')
     f.write('3\n')
     f.write('1\n')
@@ -225,7 +225,7 @@ Output:
 
    DeleteWorkspace(ws)
    import os,mantid
-   filename=mantid.config.getString("defaultsave.directory")+"test.map"
+   filename=os.path.join(mantid.config.getString("defaultsave.directory"),"test.map")
    os.remove(filename)
 
 Output:
