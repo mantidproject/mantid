@@ -107,7 +107,7 @@ public:
 
     TS_ASSERT(alg->isExecuted());
     const MatrixWorkspace_sptr out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(OUTPUT_NAME);
-    TS_ASSERT_DELTA(out->dataY(0), effTest->dataY(0), DELTA);
+    TS_ASSERT_DELTA(out->y(0).rawData(), effTest->y(0).rawData(), DELTA);
   }
 
   void test_algorithm_unpolarized_transmission_output_with_string_time_stamp_input() {
@@ -124,7 +124,7 @@ public:
     TS_ASSERT(alg->isExecuted());
     const MatrixWorkspace_sptr out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outUnpolarized);
 
-    TS_ASSERT_DELTA(out->dataY(0), unpolTest->dataY(0), DELTA);
+    TS_ASSERT_DELTA(out->y(0).rawData(), unpolTest->y(0).rawData(), DELTA);
   }
 
   void test_algorithm_output_with_reference_workspace_input() {
@@ -139,7 +139,7 @@ public:
 
     TS_ASSERT(alg->isExecuted());
     const MatrixWorkspace_sptr out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(OUTPUT_NAME);
-    TS_ASSERT_DELTA(out->dataY(0), effTest->dataY(0), DELTA);
+    TS_ASSERT_DELTA(out->y(0).rawData(), effTest->y(0).rawData(), DELTA);
   }
 
   void test_reference_workspace_takes_precedence_over_timestamp_if_both_are_provided() {
@@ -154,7 +154,7 @@ public:
 
     TS_ASSERT(alg->isExecuted());
     const MatrixWorkspace_sptr out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(OUTPUT_NAME);
-    TS_ASSERT_DELTA(out->dataY(0), effTest->dataY(0), DELTA)
+    TS_ASSERT_DELTA(out->y(0).rawData(), effTest->y(0).rawData(), DELTA)
   }
 
 private:

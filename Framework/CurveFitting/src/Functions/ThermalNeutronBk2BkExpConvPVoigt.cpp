@@ -381,7 +381,8 @@ void ThermalNeutronBk2BkExpConvPVoigt::functionLocal(double *out, const double *
  * with a value of zero everywhere.
  * @param xValues: The x-values to evaluate the peak at.
  */
-void ThermalNeutronBk2BkExpConvPVoigt::function(vector<double> &out, const vector<double> &xValues) const {
+void ThermalNeutronBk2BkExpConvPVoigt::function(std::span<double> const out,
+                                                std::span<double const> const xValues) const {
   // calculate peak parameters
   const double HEIGHT = getParameter(0);
   const double INVERT_SQRT2SIGMA = 1.0 / sqrt(2.0 * m_Sigma2);

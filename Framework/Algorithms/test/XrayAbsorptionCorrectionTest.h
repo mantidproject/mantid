@@ -52,7 +52,7 @@ public:
   void test_NormaliseMounIntensity() {
     TestableXrayAbsorptionCorrection alg;
     API::MatrixWorkspace_sptr muonProfile = createWorkspace(1);
-    std::vector<double> normalisedIntensity = alg.normaliseMuonIntensity(muonProfile->y(0).rawData());
+    std::vector<double> normalisedIntensity = alg.normaliseMuonIntensity(muonProfile->y(0));
     for (auto intensity : normalisedIntensity) {
       TS_ASSERT_DELTA(intensity, 0.1, 1.0e-6);
     }

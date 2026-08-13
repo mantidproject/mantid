@@ -57,6 +57,23 @@ public:
     runTestSaveORSOAlgorithmCalledForFileFormat(NamedFormat::ORSONexus);
   }
 
+  void test_save_orso_algorithm_does_not_include_q_resolution_when_only_additional_columns_are_requested() {
+    auto mockSaveAlgorithmRunner = std::make_unique<MockSaveAlgorithmRunner>();
+    auto mockFileHandler = MockFileHandler();
+    auto wsNames = createWorkspaces();
+    std::vector<std::string> logParams;
+    auto formatOptions = FileFormatOptions(NamedFormat::ORSOAscii, m_prefix, m_includeHeader, m_separator, false, true,
+                                           false, m_model, m_validation);
+
+    expectIsValidSaveDirectory(mockFileHandler);
+    EXPECT_CALL(*mockSaveAlgorithmRunner, runSaveORSOAlgorithm(_, expectedSavePath("ws_1", NamedFormat::ORSOAscii),
+                                                               false, true, m_model, m_validation))
+        .Times(1);
+
+    auto saver = createSaver(std::move(mockSaveAlgorithmRunner), mockFileHandler);
+    saver.save(m_saveDirectory, wsNames, logParams, formatOptions);
+  }
+
   void test_saving_multiple_workspaces_to_separate_files_with_save_ascii_algorithm() {
     std::vector<std::string> const workspacesToSave = {"ws_1", "ws_2", "ws_3"};
     runTestSaveAsciiAlgorithmCalledForFileFormat(NamedFormat::ANSTO, workspacesToSave);

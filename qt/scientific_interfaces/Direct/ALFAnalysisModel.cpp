@@ -41,7 +41,7 @@ IFunction_sptr createGaussian(double const height = 0.0, double const peakCentre
   return gaussian;
 }
 
-IFunction_sptr createGaussian(Mantid::MantidVec const &xData, Mantid::MantidVec const &yData,
+IFunction_sptr createGaussian(std::span<double const> const xData, std::span<double const> const yData,
                               double const backgroundHeight) {
   const auto maxValue = *std::max_element(yData.begin(), yData.end());
 
@@ -113,7 +113,7 @@ IFunction_sptr ALFAnalysisModel::calculateEstimateImpl(MatrixWorkspace_sptr cons
   auto const backgroundHeight = std::accumulate(yData.begin(), yData.end(), 0.0) / static_cast<double>(yData.size());
 
   return createCompositeFunction(createFlatBackground(backgroundHeight),
-                                 createGaussian(xData.rawData(), yData.rawData(), backgroundHeight));
+                                 createGaussian(xData, yData, backgroundHeight));
 }
 
 void ALFAnalysisModel::exportWorkspaceCopyToADS() const {

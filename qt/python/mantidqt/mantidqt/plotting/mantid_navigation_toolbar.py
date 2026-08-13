@@ -12,7 +12,7 @@ from qtpy.QtGui import QIcon
 from qtpy.QtCore import Signal, Qt
 from qtpy.QtWidgets import QToolBar, QFileDialog, QMessageBox, QLabel, QSizePolicy
 import matplotlib
-from matplotlib.backend_bases import NavigationToolbar2
+from matplotlib.backend_bases import NavigationToolbar2, _Mode
 from matplotlib.backends.backend_qt import SubplotToolQt
 from matplotlib import backend_tools
 
@@ -119,6 +119,12 @@ class MantidNavigationToolbar(NavigationToolbar2, QToolBar):
             labelAction = self.addWidget(self.locLabel)
             labelAction.setVisible(True)
         NavigationToolbar2.__init__(self, canvas)
+
+    def zoom_enabled(self):
+        return self.mode == _Mode.ZOOM
+
+    def pan_enabled(self):
+        return self.mode == _Mode.PAN
 
     def _init_toolbar(self):
         # Empty init_toolbar method kept for backwards compatibility

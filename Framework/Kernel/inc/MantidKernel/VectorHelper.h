@@ -36,34 +36,34 @@ std::size_t MANTID_KERNEL_DLL createAxisFromRebinParams(
     const bool full_bins_only = false, const double xMinHint = std::nan(""), const double xMaxHint = std::nan(""),
     const bool useReverseLogarithmic = false, const double power = -1);
 
-/// The output ranges are taken as spans so that the size-checked histogram data types, which do not
-/// hand out a modifiable std::vector<double>, can be rebinned into directly. The outputs must already
-/// be sized; neither function resizes them.
-void MANTID_KERNEL_DLL rebin(const std::vector<double> &xold, const std::vector<double> &yold,
-                             const std::vector<double> &eold, const std::vector<double> &xnew, std::span<double> ynew,
-                             std::span<double> enew, bool distribution, bool addition = false);
+/// The input and output ranges are taken as spans so that the size-checked histogram data types,
+/// which do not hand out a modifiable std::vector<double>, can be rebinned from and into directly.
+/// The outputs must already be sized; neither function resizes them.
+void MANTID_KERNEL_DLL rebin(std::span<double const> xold, std::span<double const> yold, std::span<double const> eold,
+                             std::span<double const> xnew, std::span<double> ynew, std::span<double> enew,
+                             bool distribution, bool addition = false);
 
 // New method to rebin Histogram data, should be faster than previous one
-void MANTID_KERNEL_DLL rebinHistogram(const std::vector<double> &xold, const std::vector<double> &yold,
-                                      const std::vector<double> &eold, const std::vector<double> &xnew,
+void MANTID_KERNEL_DLL rebinHistogram(std::span<double const> xold, std::span<double const> yold,
+                                      std::span<double const> eold, std::span<double const> xnew,
                                       std::span<double> ynew, std::span<double> enew, bool addition);
 
 /// Convert an array of bin boundaries to bin center values.
-void MANTID_KERNEL_DLL convertToBinCentre(const std::vector<double> &bin_edges, std::vector<double> &bin_centres);
+void MANTID_KERNEL_DLL convertToBinCentre(std::span<double const> bin_edges, std::vector<double> &bin_centres);
 
 /// Convert an array of bin centers to bin boundary values.
-void MANTID_KERNEL_DLL convertToBinBoundary(const std::vector<double> &bin_centers, std::vector<double> &bin_edges);
+void MANTID_KERNEL_DLL convertToBinBoundary(std::span<double const> bin_centers, std::vector<double> &bin_edges);
 
 /// Gets the bin of a value from a vector of bin centers and throws exception if out of range
-size_t MANTID_KERNEL_DLL indexOfValueFromCenters(const std::vector<double> &bin_centers, const double value);
+size_t MANTID_KERNEL_DLL indexOfValueFromCenters(std::span<double const> bin_centers, const double value);
 
 /// Gets the bin of a value from a vector of bin centers and returns -1 if out of range
-int MANTID_KERNEL_DLL indexOfValueFromCentersNoThrow(const std::vector<double> &bin_centers, const double value);
+int MANTID_KERNEL_DLL indexOfValueFromCentersNoThrow(std::span<double const> bin_centers, const double value);
 
 /// Gets the bin of a value from a vector of bin edges
-size_t MANTID_KERNEL_DLL indexOfValueFromEdges(const std::vector<double> &bin_edges, const double value);
+size_t MANTID_KERNEL_DLL indexOfValueFromEdges(std::span<double const> bin_edges, const double value);
 
-bool MANTID_KERNEL_DLL isConstantValue(const std::vector<double> &arra);
+bool MANTID_KERNEL_DLL isConstantValue(std::span<double const> arra);
 
 /**
  * A convenience function to "flatten" the given vector of vectors
@@ -87,14 +87,14 @@ template <typename T> std::vector<T> flattenVector(const std::vector<std::vector
 template <typename NumT>
 MANTID_KERNEL_DLL std::vector<NumT> splitStringIntoVector(std::string listString, const std::string &separators = ", ");
 
-MANTID_KERNEL_DLL int getBinIndex(const std::vector<double> &bins, const double value);
+MANTID_KERNEL_DLL int getBinIndex(std::span<double const> bins, const double value);
 
 // Do running average of input vector within specified range, considering
 // heterogeneous bin-boundaries
-// if such boundaries are provided
-MANTID_KERNEL_DLL void smoothInRange(const std::vector<double> &input, std::vector<double> &output, double avrgInterval,
-                                     std::vector<double> const *const binBndrs = nullptr, size_t startIndex = 0,
-                                     size_t endIndex = 0, std::vector<double> *const outBins = nullptr);
+// if such boundaries are provided. An empty binBndrs means no boundaries were provided.
+MANTID_KERNEL_DLL void smoothInRange(std::span<double const> input, std::vector<double> &output, double avrgInterval,
+                                     std::span<double const> binBndrs = {}, size_t startIndex = 0, size_t endIndex = 0,
+                                     std::vector<double> *const outBins = nullptr);
 
 // Forward declare SumSquares to use it in lengthVector
 template <class T> struct SumSquares;

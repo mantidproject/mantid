@@ -130,8 +130,8 @@ void StripVanadiumPeaks::exec() {
         // Find the bin indices on both sides.
         //  We use averaging regions of 1/2 width, centered at +- width/2 from
         //  the center
-        int L1 = getBinIndex(X.rawData(), center - width * 0.75);
-        int L2 = getBinIndex(X.rawData(), center - width * 0.25);
+        int L1 = getBinIndex(X, center - width * 0.75);
+        int L2 = getBinIndex(X, center - width * 0.25);
         double leftX = (midX[L1] + midX[L2]) / 2;
         double totY = 0;
 
@@ -141,8 +141,8 @@ void StripVanadiumPeaks::exec() {
 
         double leftY = totY / (L2 - L1 + 1);
 
-        int R1 = getBinIndex(X.rawData(), center + width * 0.25);
-        int R2 = getBinIndex(X.rawData(), center + width * 0.75);
+        int R1 = getBinIndex(X, center + width * 0.25);
+        int R2 = getBinIndex(X, center + width * 0.75);
         double rightX = (midX[R1] + midX[R2]) / 2;
         totY = 0;
 

@@ -106,7 +106,6 @@ HistogramY LeBailFunction::function(const Mantid::HistogramData::HistogramX &xva
 
   // Reset output elements to zero
   std::vector<double> out(xvalues.size(), 0);
-  const auto &xvals = xvalues.rawData();
 
   // Peaks
   if (calpeaks) {
@@ -114,7 +113,7 @@ HistogramY LeBailFunction::function(const Mantid::HistogramData::HistogramX &xva
       // Reset temporary vector for output
       vector<double> temp(xvalues.size(), 0);
       IPowderDiffPeakFunction_sptr peak = m_vecPeaks[ipk];
-      peak->function(temp, xvals);
+      peak->function(temp, xvalues);
       transform(out.begin(), out.end(), temp.begin(), out.begin(), ::plus<double>());
     }
   }
@@ -125,7 +124,7 @@ HistogramY LeBailFunction::function(const Mantid::HistogramData::HistogramX &xva
       throw runtime_error("Must define background first!");
     }
 
-    FunctionDomain1DVector domain(xvals);
+    FunctionDomain1DVector domain(xvalues);
     FunctionValues values(domain);
     g_log.information() << "Background function (in LeBailFunction): " << m_background->asString() << ".\n";
     m_background->function(domain, values);
@@ -139,7 +138,7 @@ HistogramY LeBailFunction::function(const Mantid::HistogramData::HistogramX &xva
 
 /**  Calculate a single peak's value
  */
-HistogramY LeBailFunction::calPeak(size_t ipk, const std::vector<double> &xvalues, size_t ySize) const {
+HistogramY LeBailFunction::calPeak(size_t ipk, std::span<double const> const xvalues, size_t ySize) const {
 
   if (ipk >= m_numPeaks) {
     stringstream errss;
@@ -321,7 +320,7 @@ IPowderDiffPeakFunction_sptr LeBailFunction::generatePeak(int h, int k, int l) {
  *
  * Return: True if all peaks' height are physical.  False otherwise
  */
-bool LeBailFunction::calculatePeaksIntensities(const vector<double> &vecX, const vector<double> &vecY,
+bool LeBailFunction::calculatePeaksIntensities(std::span<double const> const vecX, std::span<double const> const vecY,
                                                vector<double> &vec_summedpeaks) {
   // Clear inputs
   std::fill(vec_summedpeaks.begin(), vec_summedpeaks.end(), 0.0);
@@ -365,7 +364,8 @@ bool LeBailFunction::calculatePeaksIntensities(const vector<double> &vecX, const
  * @return :: boolean whether the peaks' heights are physical
  */
 bool LeBailFunction::calculateGroupPeakIntensities(vector<pair<double, IPowderDiffPeakFunction_sptr>> peakgroup,
-                                                   const vector<double> &vecX, const vector<double> &vecY,
+                                                   std::span<double const> const vecX,
+                                                   std::span<double const> const vecY,
                                                    vector<double> &vec_summedpeaks) {
   // Check input peaks group and sort peak by d-spacing
   if (peakgroup.empty()) {
@@ -416,9 +416,7 @@ bool LeBailFunction::calculateGroupPeakIntensities(vector<pair<double, IPowderDi
   }
 
   // Determine calculation range to input workspace: [ileft, iright)
-  vector<double>::const_iterator cviter;
-
-  cviter = lower_bound(vecX.begin(), vecX.end(), leftbound);
+  auto cviter = lower_bound(vecX.begin(), vecX.end(), leftbound);
   size_t ileft = static_cast<size_t>(cviter - vecX.begin());
   if (ileft > 0)
     --ileft;

@@ -246,8 +246,7 @@ void CrossCorrelate::exec() {
     std::vector<double> tempY(static_cast<size_t>(numReferenceY));
     std::vector<double> tempE(static_cast<size_t>(numReferenceY));
 
-    VectorHelper::rebin(inputXVector.rawData(), inputYVector.rawData(), inputEVector.rawData(), referenceXVector, tempY,
-                        tempE, isDistribution);
+    VectorHelper::rebin(inputXVector, inputYVector, inputEVector, referenceXVector, tempY, tempE, isDistribution);
     const auto tempVar = subtractMean(tempY, tempE);
 
     // Calculate the normalisation constant

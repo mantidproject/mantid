@@ -588,7 +588,7 @@ void BinaryOperation::doSingleSpectrum() {
       for (int64_t i = 0; i < numHists; ++i) {
         PARALLEL_START_INTERRUPT_REGION
         // Perform the operation on the event list on the output (== lhs)
-        performEventBinaryOperation(m_eout->getSpectrum(i), rhsX.rawData(), rhsY.rawData(), rhsE.rawData());
+        performEventBinaryOperation(m_eout->getSpectrum(i), rhsX, rhsY, rhsE);
         m_progress->report(this->name());
         PARALLEL_END_INTERRUPT_REGION
       }
@@ -702,8 +702,7 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
         }
 
         // Reach here? Do the division
-        performEventBinaryOperation(m_eout->getSpectrum(i), m_rhs->x(rhs_wi).rawData(), m_rhs->y(rhs_wi).rawData(),
-                                    m_rhs->e(rhs_wi).rawData());
+        performEventBinaryOperation(m_eout->getSpectrum(i), m_rhs->x(rhs_wi), m_rhs->y(rhs_wi), m_rhs->e(rhs_wi));
 
         // Free up memory on the RHS if that is possible
         if (m_ClearRHSWorkspace)
@@ -808,8 +807,8 @@ void BinaryOperation::performEventBinaryOperation(DataObjects::EventList &lhs, c
  *  @param rhsY :: Rhs data values
  *  @param rhsE :: Rhs error values
  */
-void BinaryOperation::performEventBinaryOperation(DataObjects::EventList &lhs, const MantidVec &rhsX,
-                                                  const MantidVec &rhsY, const MantidVec &rhsE) {
+void BinaryOperation::performEventBinaryOperation(DataObjects::EventList &lhs, std::span<double const> rhsX,
+                                                  std::span<double const> rhsY, std::span<double const> rhsE) {
   UNUSED_ARG(lhs);
   UNUSED_ARG(rhsX);
   UNUSED_ARG(rhsY);

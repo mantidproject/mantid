@@ -53,7 +53,7 @@ void convertXToWorkspaceIndex(Mantid::API::MatrixWorkspace &ws) {
  */
 double median(const Mantid::API::MatrixWorkspace &ws) {
   using namespace Mantid::Kernel;
-  const auto statistics = getStatistics(ws.y(0).rawData(), StatOptions::Median);
+  const auto statistics = getStatistics(ws.y(0), StatOptions::Median);
   return statistics.median;
 }
 

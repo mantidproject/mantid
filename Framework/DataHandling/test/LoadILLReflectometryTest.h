@@ -328,6 +328,7 @@ public:
     MatrixWorkspace_sptr output;
     getWorkspaceFor(output, m_figaroDirectBeamFile, m_outWSName, emptyProperties());
     commonProperties(output, "FIGARO");
+    TS_ASSERT(!output->run().hasProperty("data.PSD_data_0"))
   }
 
   // Following tests are introduced after Nexus file changes.

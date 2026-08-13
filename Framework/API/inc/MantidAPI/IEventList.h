@@ -10,6 +10,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/DateAndTime.h"
 #include <functional>
+#include <span>
 
 namespace Mantid {
 namespace API {
@@ -45,16 +46,20 @@ public:
   virtual std::size_t getNumberEvents() const = 0;
   /// Get memory size of event list
   size_t getMemorySize() const override = 0;
-  /// Get copy of counts and errors, rebinned using on the given X values
-  virtual void generateHistogram(const MantidVec &X, MantidVec &Y, MantidVec &E, bool skipError = false) const = 0;
+  /// Get copy of counts and errors, rebinned using on the given X values.
+  /// X is a span so that the size-checked HistogramData types can be passed without a
+  /// std::vector<double>; Y and E stay vectors because they are resized to match X.
+  virtual void generateHistogram(std::span<double const> X, MantidVec &Y, MantidVec &E,
+                                 bool skipError = false) const = 0;
   /// Get copy of counts and errors rebinned using the given X values w.r.t
   /// pulse time.
-  virtual void generateHistogramPulseTime(const MantidVec &X, MantidVec &Y, MantidVec &E,
+  virtual void generateHistogramPulseTime(std::span<double const> X, MantidVec &Y, MantidVec &E,
                                           bool skipError = false) const = 0;
   /// Get copy of counts and errors rebinning using the given X values w.r.t
   /// absolute time at the sample.
-  virtual void generateHistogramTimeAtSample(const MantidVec &X, MantidVec &Y, MantidVec &E, const double &tofFactor,
-                                             const double &tofOffset, bool skipError = false) const = 0;
+  virtual void generateHistogramTimeAtSample(std::span<double const> X, MantidVec &Y, MantidVec &E,
+                                             const double &tofFactor, const double &tofOffset,
+                                             bool skipError = false) const = 0;
   /// Integrate the event list
   virtual double integrate(const double minX, const double maxX, const bool entireRange) const = 0;
   /// Convert the TOF values
@@ -107,10 +112,11 @@ public:
   virtual void multiply(const double value, const double error = 0.0) = 0;
   /// Divide event list by a constant with error
   virtual void divide(const double value, const double error = 0.0) = 0;
-  /// Multiply event list by a histogram
-  virtual void multiply(const MantidVec &X, const MantidVec &Y, const MantidVec &E) = 0;
+  /// Multiply event list by a histogram. The histogram is taken as spans so that the
+  /// size-checked HistogramData types can be passed without a std::vector<double>.
+  virtual void multiply(std::span<double const> X, std::span<double const> Y, std::span<double const> E) = 0;
   /// Divide event list by a histogram
-  virtual void divide(const MantidVec &X, const MantidVec &Y, const MantidVec &E) = 0;
+  virtual void divide(std::span<double const> X, std::span<double const> Y, std::span<double const> E) = 0;
 };
 
 } // namespace API

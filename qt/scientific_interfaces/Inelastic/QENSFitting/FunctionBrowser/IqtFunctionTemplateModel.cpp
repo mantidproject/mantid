@@ -266,7 +266,7 @@ void IqtFunctionTemplateModel::tieIntensities(bool on) {
 }
 
 EstimationDataSelector IqtFunctionTemplateModel::getEstimationDataSelector() const {
-  return [](const Mantid::MantidVec &x, const Mantid::MantidVec &y,
+  return [](std::span<double const> const x, std::span<double const> const y,
             const std::pair<double, double> range) -> DataForParameterEstimation {
     (void)range;
     size_t const n = 4;

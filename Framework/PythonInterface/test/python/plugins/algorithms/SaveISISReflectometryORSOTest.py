@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
+import json
 import unittest
 import tempfile
 import numpy as np
@@ -16,7 +17,7 @@ from collections import namedtuple
 from mantid import config
 from mantid.simpleapi import CreateSampleWorkspace, SaveISISReflectometryORSO, ConvertToPointData, GroupWorkspaces, AddSampleLog
 from mantid.api import AnalysisDataService
-from mantid.kernel import version, DateAndTime
+from mantid.kernel import version, DateAndTime, Logger
 from mantid.utils.reflectometry.orso_helper import MantidORSODataset, MantidORSOSaver
 from mantid.utils.reflectometry import SpinStatesORSO
 
@@ -42,7 +43,8 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
     _NUM_COLS_BASIC = 3
     _NUM_COLS_BASIC_WITH_RES = 4
-    _NUM_COLS_EXTENDED = 7
+    _NUM_COLS_EXTENDED = 6
+    _NUM_COLS_EXTENDED_WITH_THETA_ERROR = 7
     _NUM_COLS_EXTENDED_WITH_RES = 8
 
     # Algorithm names
@@ -62,6 +64,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
     _REDUCTION_HEADING = "# reduction:\n"
     _REDUCTION_CALL_HEADING = "#   call:"
     _DATA_SET_HEADING = "# data_set:"
+    _REDUCTION_TIMESTAMP_HEADING = "#   timestamp:"
 
     # Error messages
     _WS_UNITS_ERROR = "must have units of"
@@ -369,21 +372,6 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
             [f"{self._get_affiliation_entry()}\n{self._REDUCTION_CALL_HEADING} CreateSampleWorkspace(OutputWorkspace='ws'"]
         )
 
-    def test_file_excludes_reduction_call_for_ws_groups(self):
-        ws = self._create_sample_workspace_group(["ws_1", "ws_2"], instrument_name="INTER")
-
-        self._run_save_alg(ws)
-
-        self._check_file_header(excluded_header_values=[f"{self._get_affiliation_entry()}\n{self._REDUCTION_CALL_HEADING}"])
-
-    def test_file_excludes_reduction_call_for_ws_group_member(self):
-        ws_name = "ws_1"
-        self._create_sample_workspace_group([ws_name, "ws_2"], instrument_name="INTER")
-
-        self._run_save_alg(ws_name)
-
-        self._check_file_header(excluded_header_values=[f"{self._get_affiliation_entry()}\n{self._REDUCTION_CALL_HEADING}"])
-
     @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
     def test_flood_correction_ws_included_in_additional_files(self, mock_alg_histories):
         test_cases = [
@@ -444,6 +432,40 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         self._run_save_alg(ws)
 
         self._check_file_header(None, [filename])
+
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_hybrid_source_uses_flood_correction_from_history_when_manual_property_is_default(self, mock_alg_histories):
+        ws = self._create_sample_workspace(instrument_name="INTER")
+        mock_alg_histories.return_value = self._create_hybrid_validation_history("calib.nxs")
+
+        self._run_save_alg(ws, MetadataSource="HistoryWherePossible")
+
+        self._check_file_header(["#     - file: flood_ws\n#       comment: Flood correction workspace or file"])
+
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_hybrid_source_uses_manual_flood_correction_when_property_is_set(self, mock_alg_histories):
+        ws = self._create_sample_workspace(instrument_name="INTER")
+        mock_alg_histories.return_value = self._create_hybrid_validation_history("calib.nxs")
+
+        self._run_save_alg(
+            ws,
+            MetadataSource="HistoryWherePossible",
+            FloodCorrectionSource=["manual_flood.nxs", "Manual flood correction"],
+        )
+
+        self._check_file_header(
+            included_header_values=["#     - file: manual_flood.nxs\n#       comment: Manual flood correction"],
+            excluded_header_values=["#     - file: flood_ws\n#       comment: Flood correction workspace or file"],
+        )
+
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_hybrid_source_allows_manual_flood_correction_to_clear_history(self, mock_alg_histories):
+        ws = self._create_sample_workspace(instrument_name="INTER")
+        mock_alg_histories.return_value = self._create_hybrid_validation_history("calib.nxs")
+
+        self._run_save_alg(ws, MetadataSource="HistoryWherePossible", FloodCorrectionSource=[""])
+
+        self._check_file_header(excluded_header_values=["#     - file: flood_ws\n#       comment: Flood correction workspace or file"])
 
     @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
     def test_calibration_file_included_in_additional_files(self, mock_alg_histories):
@@ -527,13 +549,18 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
         self._check_file_header([self._get_dataset_name_entry(ws_name) for ws_name in ws_names])
 
+    @patch.object(Logger, "warning")
     @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
-    def test_additional_columns_included_if_requested_and_is_unstitched_data_no_resolution(self, mock_alg_histories):
+    def test_additional_columns_included_if_requested_and_is_unstitched_data_no_resolution(self, mock_alg_histories, mock_warning):
         angle = "2.3"
         ws = self._create_sample_workspace()
         self._configure_q_conversion_alg_mock_history(mock_alg_histories, self._REF_ROI, {"ScatteringAngle": angle})
         self._run_save_alg(ws, write_resolution=False, include_extra_cols=True)
         self._check_num_columns_in_file(self._NUM_COLS_EXTENDED)
+        mock_warning.assert_any_call(
+            "Dataset '2.300': Unable to calculate incident theta error as resolution metadata was not found. "
+            "The incident theta error column will be excluded."
+        )
 
     @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
     def test_additional_columns_included_if_requested_and_is_unstitched_data_with_resolution(self, mock_alg_histories):
@@ -541,28 +568,270 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         ws = self._create_sample_workspace()
         self._configure_q_conversion_alg_mock_history(mock_alg_histories, self._REF_ROI, {"ScatteringAngle": angle}, True)
         self._run_save_alg(ws, write_resolution=False, include_extra_cols=True)
-        self._check_num_columns_in_file(self._NUM_COLS_EXTENDED_WITH_RES)
+        self._check_num_columns_in_file(self._NUM_COLS_EXTENDED_WITH_THETA_ERROR)
 
     @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
-    def test_additional_columns_excluded_if_requested_but_is_stitched_data(self, mock_alg_histories):
+    def test_resolution_and_additional_columns_included_if_both_requested(self, mock_alg_histories):
+        angle = "2.3"
+        ws = self._create_sample_workspace()
+        self._configure_q_conversion_alg_mock_history(mock_alg_histories, self._REF_ROI, {"ScatteringAngle": angle}, True)
+        self._run_save_alg(ws, write_resolution=True, include_extra_cols=True)
+        self._check_num_columns_in_file(self._NUM_COLS_EXTENDED_WITH_RES)
+
+    def test_manual_source_uses_json_data_file_angle_to_calculate_ref_roi_lambda_columns(self):
+        angle = 2.3
+        ws = self._create_sample_workspace()
+        metadata = json.dumps({ws.name(): {"data-files": [{"file-name": "INTER00013460", "angle": angle}]}})
+
+        self._run_save_alg(
+            ws,
+            write_resolution=False,
+            include_extra_cols=True,
+            MetadataSource="Manual",
+            QConversionMethod=self._REF_ROI,
+            DatasetSpecificMetadata=metadata,
+        )
+
+        orso_data = self._check_num_columns_in_file(self._NUM_COLS_EXTENDED)
+        q_data = orso_data[:, 0]
+        lambda_data = orso_data[:, 3]
+        theta_data = orso_data[:, 5]
+        self.assertTrue(np.allclose(lambda_data, 4 * np.pi * np.sin(np.radians(angle)) / q_data, atol=1e-10, equal_nan=True))
+        self.assertTrue(np.allclose(theta_data, np.full(q_data.size, angle), atol=1e-10, equal_nan=True))
+
+    @patch.object(Logger, "warning")
+    def test_manual_source_excludes_ref_roi_additional_columns_if_json_angle_is_missing(self, mock_warning):
+        ws = self._create_sample_workspace()
+        metadata = json.dumps({ws.name(): {"data-files": [{"file-name": "INTER00013460"}]}})
+
+        self._run_save_alg(
+            ws,
+            write_resolution=False,
+            include_extra_cols=True,
+            MetadataSource="Manual",
+            QConversionMethod=self._REF_ROI,
+            DatasetSpecificMetadata=metadata,
+        )
+
+        self._check_num_columns_in_file(self._NUM_COLS_BASIC)
+        mock_warning.assert_any_call(
+            f"Dataset '{ws.name()}': Unable to calculate lambda values. An angle was not provided. "
+            "Additional data columns will be excluded."
+        )
+
+    @patch.object(Logger, "warning")
+    def test_manual_source_excludes_ref_roi_additional_columns_if_json_angle_is_invalid(self, mock_warning):
+        ws = self._create_sample_workspace()
+        metadata = json.dumps({ws.name(): {"data-files": [{"file-name": "INTER00013460", "angle": "invalid"}]}})
+
+        self._run_save_alg(
+            ws,
+            write_resolution=False,
+            include_extra_cols=True,
+            MetadataSource="Manual",
+            QConversionMethod=self._REF_ROI,
+            DatasetSpecificMetadata=metadata,
+        )
+
+        self._check_num_columns_in_file(self._NUM_COLS_BASIC)
+        mock_warning.assert_any_call(
+            f"Dataset '{ws.name()}': Unable to calculate lambda values. An angle was not provided. "
+            "Additional data columns will be excluded."
+        )
+
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_hybrid_source_uses_history_angle_for_ref_roi_additional_columns_if_json_angle_is_missing(self, mock_alg_histories):
+        angle = 2.3
+        ws = self._create_sample_workspace()
+        self._configure_q_conversion_alg_mock_history(mock_alg_histories, self._REF_ROI, {"ScatteringAngle": angle})
+
+        self._run_save_alg(
+            ws,
+            write_resolution=False,
+            include_extra_cols=True,
+            MetadataSource="HistoryWherePossible",
+            IgnoredProperties=["FirstTransmissionFileList", "SecondTransmissionFileList", "FloodCorrectionSource", "CalibrationFile"],
+        )
+
+        orso_data = self._check_num_columns_in_file(self._NUM_COLS_EXTENDED)
+        q_data = orso_data[:, 0]
+        lambda_data = orso_data[:, 3]
+        theta_data = orso_data[:, 5]
+        self.assertTrue(np.allclose(lambda_data, 4 * np.pi * np.sin(np.radians(angle)) / q_data, atol=1e-10, equal_nan=True))
+        self.assertTrue(np.allclose(theta_data, np.full(q_data.size, angle), atol=1e-10, equal_nan=True))
+
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_history_source_uses_supported_q_conversion_algorithm_if_it_is_not_the_last_reduction_child(self, mock_alg_histories):
+        angle = 2.3
+        ws = self._create_sample_workspace()
+        self._configure_q_conversion_alg_mock_history(
+            mock_alg_histories,
+            self._REF_ROI,
+            {"ScatteringAngle": angle},
+            later_rro_child_histories=[self._create_mock_alg_history("UnsupportedAlgorithm", {})],
+        )
+
+        self._run_save_alg(ws, write_resolution=False, include_extra_cols=True)
+
+        orso_data = self._check_num_columns_in_file(self._NUM_COLS_EXTENDED)
+        q_data = orso_data[:, 0]
+        lambda_data = orso_data[:, 3]
+        theta_data = orso_data[:, 5]
+        self.assertTrue(np.allclose(lambda_data, 4 * np.pi * np.sin(np.radians(angle)) / q_data, atol=1e-10, equal_nan=True))
+        self.assertTrue(np.allclose(theta_data, np.full(q_data.size, angle), atol=1e-10, equal_nan=True))
+
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_history_source_prefers_requested_q_conversion_method_when_multiple_supported_methods_are_in_history(self, mock_alg_histories):
+        angle = 0.4
+        ws = self._create_sample_workspace()
+        ref_roi_history = self._create_mock_alg_history(self._REF_ROI, {"ScatteringAngle": angle})
+        convert_units_history = self._create_mock_alg_history(self._CONVERT_UNITS, {})
+        rro_history = self._create_mock_alg_history(self._RRO_ALG, {}, [ref_roi_history, convert_units_history])
+        red_history = self._create_mock_alg_history(self._REDUCTION_ALG, {}, [rro_history])
+        mock_alg_histories.return_value = [red_history]
+
+        self._run_save_alg(ws, write_resolution=False, include_extra_cols=True, QConversionMethod=self._REF_ROI)
+
+        orso_data = self._check_num_columns_in_file(self._NUM_COLS_EXTENDED)
+        q_data = orso_data[:, 0]
+        lambda_data = orso_data[:, 3]
+        theta_data = orso_data[:, 5]
+        self.assertTrue(np.allclose(lambda_data, 4 * np.pi * np.sin(np.radians(angle)) / q_data, atol=1e-10, equal_nan=True))
+        self.assertTrue(np.allclose(theta_data, np.full(q_data.size, angle), atol=1e-10, equal_nan=True))
+
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_history_source_uses_supported_q_conversion_algorithm_from_final_rro_call(self, mock_alg_histories):
+        angle = 2.3
+        ws = self._create_sample_workspace()
+        unsupported_rro_history = self._create_mock_alg_history(
+            self._RRO_ALG,
+            {},
+            [self._create_mock_alg_history("UnsupportedAlgorithm", {})],
+        )
+        ref_roi_history = self._create_mock_alg_history(self._REF_ROI, {"ScatteringAngle": angle})
+        supported_rro_history = self._create_mock_alg_history(self._RRO_ALG, {}, [ref_roi_history])
+        red_history = self._create_mock_alg_history(self._REDUCTION_ALG, {}, [unsupported_rro_history, supported_rro_history])
+        mock_alg_histories.return_value = [red_history]
+
+        self._run_save_alg(ws, write_resolution=False, include_extra_cols=True)
+
+        orso_data = self._check_num_columns_in_file(self._NUM_COLS_EXTENDED)
+        q_data = orso_data[:, 0]
+        lambda_data = orso_data[:, 3]
+        theta_data = orso_data[:, 5]
+        self.assertTrue(np.allclose(lambda_data, 4 * np.pi * np.sin(np.radians(angle)) / q_data, atol=1e-10, equal_nan=True))
+        self.assertTrue(np.allclose(theta_data, np.full(q_data.size, angle), atol=1e-10, equal_nan=True))
+
+    @patch.object(Logger, "warning")
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_hybrid_source_warns_when_falling_back_to_q_conversion_method_property(self, mock_alg_histories, mock_warning):
+        ws = self._create_sample_workspace()
+        self._configure_q_conversion_alg_mock_history(mock_alg_histories, "UnsupportedAlgorithm", {})
+
+        self._run_save_alg(
+            ws,
+            write_resolution=False,
+            include_extra_cols=True,
+            MetadataSource="HistoryWherePossible",
+            IgnoredProperties=["FirstTransmissionFileList", "SecondTransmissionFileList", "FloodCorrectionSource", "CalibrationFile"],
+        )
+
+        self._check_num_columns_in_file(self._NUM_COLS_BASIC)
+        mock_warning.assert_any_call(
+            f"Dataset '{ws.name()}': Unable to find a supported Q conversion method in the workspace history. "
+            f"Falling back to the 'QConversionMethod' property value: {self._REF_ROI}."
+        )
+        mock_warning.assert_any_call(
+            f"Dataset '{ws.name()}': Unable to calculate lambda values. An angle was not provided. "
+            "Additional data columns will be excluded."
+        )
+
+    def test_json_data_file_angles_are_not_required_when_ref_roi_additional_columns_are_not_requested(self):
+        ws = self._create_sample_workspace()
+        metadata = json.dumps({ws.name(): {"data-files": [{"file-name": "INTER00013460"}]}})
+
+        self._run_save_alg(
+            ws,
+            write_resolution=False,
+            include_extra_cols=False,
+            MetadataSource="Manual",
+            QConversionMethod=self._REF_ROI,
+            DatasetSpecificMetadata=metadata,
+        )
+
+        self._check_num_columns_in_file(self._NUM_COLS_BASIC)
+
+    @patch.object(Logger, "debug")
+    @patch.object(Logger, "warning")
+    def test_json_data_file_angles_are_not_required_for_stitched_data(self, mock_warning, mock_debug):
+        ws = self._create_sample_workspace()
+        metadata = json.dumps(
+            {
+                ws.name(): {
+                    "is-stitched": True,
+                    "data-files": [
+                        {"file-name": "INTER00013460", "angle": 0.7},
+                        {"file-name": "INTER00013461"},
+                        {"file-name": "INTER00013462"},
+                    ],
+                }
+            }
+        )
+
+        self._run_save_alg(
+            ws,
+            write_resolution=False,
+            include_extra_cols=True,
+            MetadataSource="Manual",
+            QConversionMethod=self._REF_ROI,
+            DatasetSpecificMetadata=metadata,
+        )
+
+        self._check_num_columns_in_file(self._NUM_COLS_BASIC)
+        mock_debug.assert_any_call(
+            f"Dataset '{ws.name()}': Additional data columns cannot be calculated for stitched datasets and will be excluded."
+        )
+        warning_messages = [args[0] for args, _ in mock_warning.call_args_list]
+        self.assertNotIn(
+            f"Dataset '{ws.name()}': Unable to calculate lambda values. An angle was not provided. "
+            "Additional data columns will be excluded.",
+            warning_messages,
+        )
+
+    @patch.object(Logger, "debug")
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_additional_columns_excluded_if_requested_but_is_stitched_data(self, mock_alg_histories, mock_debug):
         ws = self._create_sample_workspace()
         self._configure_mock_alg_history(mock_alg_histories, [(self._STITCH_ALG, {"Params": 0.02})])
         self._run_save_alg(ws, write_resolution=False, include_extra_cols=True)
-        self._check_num_columns_in_file(self._NUM_COLS_BASIC_WITH_RES)
+        self._check_num_columns_in_file(self._NUM_COLS_BASIC)
+        mock_debug.assert_any_call(
+            "Dataset 'Stitched': Additional data columns cannot be calculated for stitched datasets and will be excluded."
+        )
 
-    def test_additional_columns_excluded_if_no_conversion_history(self):
+    @patch.object(Logger, "warning")
+    def test_additional_columns_excluded_if_no_conversion_history(self, mock_warning):
         ws = self._create_sample_workspace()
         self._run_save_alg(ws, write_resolution=True, include_extra_cols=True)
         self._check_num_columns_in_file(self._NUM_COLS_BASIC)
+        mock_warning.assert_any_call(
+            f"Dataset '{ws.name()}': Unable to calculate lambda values. A supported conversion method was not given. "
+            "Additional data columns will be excluded."
+        )
 
+    @patch.object(Logger, "warning")
     @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
-    def test_additional_columns_excluded_if_no_supported_conversion_alg_in_history(self, mock_alg_histories):
+    def test_additional_columns_excluded_if_no_supported_conversion_alg_in_history(self, mock_alg_histories, mock_warning):
         ws = self._create_sample_workspace()
         self._configure_q_conversion_alg_mock_history(mock_alg_histories, "UnsupportedAlgorithm", {})
 
         self._run_save_alg(ws, write_resolution=True, include_extra_cols=True)
 
         self._check_num_columns_in_file(self._NUM_COLS_BASIC)
+        mock_warning.assert_any_call(
+            f"Dataset '{ws.name()}': Unable to calculate lambda values. A supported conversion method was not given. "
+            "Additional data columns will be excluded."
+        )
 
     def test_filename_must_have_supported_extension(self):
         ws = self._create_sample_workspace()
@@ -612,6 +881,178 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         for state in spin_states:
             with self.subTest(test_case=state):
                 self._check_file_header([f"#       polarization: {state}"])
+
+    def test_manual_source_exludes_non_entered_metadata_from_header(self):
+        ws = self._create_sample_workspace()
+        alg_kwargs = {"MetadataSource": "Manual"}
+        self._run_save_alg(ws, **alg_kwargs)
+
+        blank_entries = [
+            self._get_dataset_name_entry(ws.name()),
+            f"{self._DATA_FILES_HEADING} []",
+        ]
+        absent_entries = [f"{self._REDUCTION_TIMESTAMP_HEADING}", f"{self._REDUCTION_CALL_HEADING} ''"]
+
+        self._check_file_header(included_header_values=blank_entries, excluded_header_values=absent_entries)
+
+    def test_manual_source_allows_manual_setting_of_metadata(self):
+        ws = self._create_sample_workspace()
+        timestamp = datetime.combine(date(2024, 2, 13), time(12, 14, 36)).replace(tzinfo=timezone.utc).astimezone(tz=None)
+        alg_kwargs = {
+            "MetadataSource": "Manual",
+            "ReductionTimestamp": str(timestamp.isoformat()),
+            "DatasetSpecificMetadata": f'{{ "{ws.name()}" : {{ "dataset-name" : "manual-name", "reduction-call" : "example():" }} }}',
+        }
+        self._run_save_alg(ws, **alg_kwargs)
+
+        expected_manual_entries = [
+            self._get_dataset_name_entry("manual-name"),
+            f"{self._REDUCTION_CALL_HEADING} 'example():'",
+            f"{self._REDUCTION_TIMESTAMP_HEADING} {str(timestamp.isoformat())}",
+            f"{self._DATA_FILES_HEADING} []",
+        ]
+
+        self._check_file_header(included_header_values=expected_manual_entries)
+
+    def test_manual_source_invalid_dataset_specific_metadata_json_fails_validation(self):
+        ws = self._create_sample_workspace()
+
+        with self.assertRaisesRegex(RuntimeError, "DatasetSpecificMetadata: DatasetSpecificMetadata must be valid JSON"):
+            self._run_save_alg(ws, MetadataSource="Manual", DatasetSpecificMetadata="{invalid")
+
+    def test_hybrid_source_invalid_dataset_specific_metadata_json_fails_validation(self):
+        ws = self._create_sample_workspace()
+
+        with self.assertRaisesRegex(RuntimeError, "DatasetSpecificMetadata: DatasetSpecificMetadata must be valid JSON"):
+            self._run_save_alg(ws, MetadataSource="HistoryWherePossible", DatasetSpecificMetadata="{invalid")
+
+    def test_dataset_specific_metadata_json_must_be_an_object(self):
+        ws = self._create_sample_workspace()
+
+        with self.assertRaisesRegex(RuntimeError, "DatasetSpecificMetadata: DatasetSpecificMetadata must be a JSON object"):
+            self._run_save_alg(ws, MetadataSource="Manual", DatasetSpecificMetadata="[]")
+
+    def test_history_source_ignores_invalid_dataset_specific_metadata_json(self):
+        ws = self._create_sample_workspace()
+
+        self._run_save_alg(ws, MetadataSource="History", DatasetSpecificMetadata="{invalid")
+
+        self._check_file_header([self._get_dataset_name_entry(ws.name())])
+
+    def test_hybrid_source_requests_missing_metadata(self):
+        ws = self._create_sample_workspace()
+        alg_kwargs = {"MetadataSource": "HistoryWherePossible"}
+        with self.assertRaisesRegex(RuntimeError, "CalibrationFile: Metadata could not be found"):
+            self._run_save_alg(ws, **alg_kwargs)
+
+    @patch("plugins.algorithms.SaveISISReflectometryORSO.ReflectometryDatasetHistory._get_reduction_script")
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_hybrid_source_checks_each_top_level_workspace_for_missing_metadata(self, mock_alg_histories, mock_reduction_script):
+        mock_reduction_script.return_value = None
+        self._create_sample_workspace(instrument_name="INTER", ws_name="ws_1")
+        self._create_sample_workspace(instrument_name="INTER", ws_name="ws_2")
+
+        complete_history = self._create_hybrid_validation_history(calibration_file="calib.nxs")
+        incomplete_history = self._create_hybrid_validation_history(calibration_file="")
+        mock_alg_histories.side_effect = [complete_history, complete_history, incomplete_history, incomplete_history]
+
+        alg_kwargs = {"MetadataSource": "HistoryWherePossible"}
+        with self.assertRaisesRegex(RuntimeError, "CalibrationFile: Metadata could not be found.*ws_2"):
+            self._run_save_alg(["ws_1", "ws_2"], **alg_kwargs)
+
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_hybrid_source_allows_manual_first_transmission_with_no_second_transmission(self, mock_alg_histories):
+        ws = self._create_sample_workspace(instrument_name="INTER")
+        self._configure_mock_alg_history(
+            mock_alg_histories,
+            [
+                (
+                    self._REDUCTION_WORKFLOW_ALG,
+                    {
+                        "FloodWorkspace": "flood_ws",
+                        "CalibrationFile": "calib.nxs",
+                    },
+                )
+            ],
+        )
+
+        alg_kwargs = {
+            "MetadataSource": "HistoryWherePossible",
+            "IgnoredProperties": ["ReductionTimestamp", "SecondTransmissionFileList"],
+            "FirstTransmissionFileList": ["manual_first.nxs"],
+        }
+        self._run_save_alg(ws, **alg_kwargs)
+
+        expected_additional_file_entries = {
+            "manual_first.nxs": self._FIRST_TRANS_COMMENT,
+            "flood_ws": self._FLOOD_WS_COMMENT,
+            "calib.nxs": self._CALIB_FILE_COMMENT,
+        }
+        self._check_file_header([self._get_expected_additional_file_metadata(expected_additional_file_entries, self._REDUCTION_HEADING)])
+
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_hybrid_source_allows_manual_transmission_metadata_to_clear_history(self, mock_alg_histories):
+        ws = self._create_sample_workspace(instrument_name="INTER")
+        self._configure_mock_alg_history(
+            mock_alg_histories,
+            [
+                (
+                    self._REDUCTION_WORKFLOW_ALG,
+                    {
+                        "FirstTransmissionRunList": "13463",
+                        "SecondTransmissionRunList": "13464",
+                        "FloodWorkspace": "flood_ws",
+                        "CalibrationFile": "calib.nxs",
+                    },
+                )
+            ],
+        )
+
+        alg_kwargs = {
+            "MetadataSource": "HistoryWherePossible",
+            "IgnoredProperties": ["ReductionTimestamp"],
+            "FirstTransmissionFileList": [""],
+        }
+        self._run_save_alg(ws, **alg_kwargs)
+
+        expected_additional_file_entries = {
+            "INTER00013464": self._SECOND_TRANS_COMMENT,
+            "flood_ws": self._FLOOD_WS_COMMENT,
+            "calib.nxs": self._CALIB_FILE_COMMENT,
+        }
+        self._check_file_header(
+            included_header_values=[self._get_expected_additional_file_metadata(expected_additional_file_entries, self._REDUCTION_HEADING)],
+            excluded_header_values=["#     - file: INTER00013463\n#       comment: First transmission run"],
+        )
+
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_hybrid_source_allows_manual_reduction_timestamp_to_clear_history(self, mock_alg_histories):
+        ws = self._create_sample_workspace(instrument_name="INTER")
+        mock_alg_histories.return_value = self._create_hybrid_validation_history("calib.nxs")
+
+        self._run_save_alg(ws, MetadataSource="HistoryWherePossible", ReductionTimestamp="")
+
+        self._check_file_header(
+            included_header_values=[f"{self._REDUCTION_TIMESTAMP_HEADING} ''"],
+            excluded_header_values=[f"{self._REDUCTION_TIMESTAMP_HEADING} 2024"],
+        )
+
+    @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
+    def test_hybrid_source_allows_manual_calibration_file_to_clear_history(self, mock_alg_histories):
+        ws = self._create_sample_workspace(instrument_name="INTER")
+        mock_alg_histories.return_value = self._create_hybrid_validation_history("calib.nxs")
+
+        self._run_save_alg(ws, MetadataSource="HistoryWherePossible", CalibrationFile="")
+
+        expected_additional_file_entries = {
+            "INTER00013463": self._FIRST_TRANS_COMMENT,
+            "INTER00013464": self._SECOND_TRANS_COMMENT,
+            "flood_ws": self._FLOOD_WS_COMMENT,
+        }
+        self._check_file_header(
+            included_header_values=[self._get_expected_additional_file_metadata(expected_additional_file_entries, self._REDUCTION_HEADING)],
+            excluded_header_values=["#     - file: calib.nxs\n#       comment: Calibration file"],
+        )
 
     def _create_sample_workspace(self, rb_num_log_name=_LOG_RB_NUMBER, instrument_name="", ws_name="ws"):
         # Create a single spectrum workspace in units of momentum transfer
@@ -686,15 +1127,32 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         history.getPropertyValue = Mock(side_effect=mock_get_property_value)
         return history
 
-    def _configure_q_conversion_alg_mock_history(self, mock_alg_histories, q_convert_alg_name, property_values, has_resolution=False):
+    def _configure_q_conversion_alg_mock_history(
+        self, mock_alg_histories, q_convert_alg_name, property_values, has_resolution=False, later_rro_child_histories=None
+    ):
         convert_history = self._create_mock_alg_history(q_convert_alg_name, property_values)
-        rro_history = self._create_mock_alg_history(self._RRO_ALG, {}, [convert_history])
+        later_rro_child_histories = later_rro_child_histories or []
+        rro_history = self._create_mock_alg_history(self._RRO_ALG, {}, [convert_history, *later_rro_child_histories])
         if has_resolution:
             rebin_history = self._create_mock_alg_history(self._REBIN_ALG, {"Params": "0.1,0.02,0.3"})
             red_history = self._create_mock_alg_history(self._REDUCTION_ALG, {}, [rro_history, rebin_history])
         else:
             red_history = self._create_mock_alg_history(self._REDUCTION_ALG, {}, [rro_history])
         mock_alg_histories.return_value = [red_history]
+
+    def _create_hybrid_validation_history(self, calibration_file):
+        red_history = self._create_mock_alg_history(self._REDUCTION_ALG, {}, [])
+        workflow_history = self._create_mock_alg_history(
+            self._REDUCTION_WORKFLOW_ALG,
+            {
+                "FirstTransmissionRunList": "13463",
+                "SecondTransmissionRunList": "13464",
+                "FloodWorkspace": "flood_ws",
+                "CalibrationFile": calibration_file,
+            },
+            [red_history],
+        )
+        return [workflow_history]
 
     def _check_file_contents(self, header_values_to_check, ws, resolution, excluded_header_values=None):
         self._check_file_header(header_values_to_check, excluded_header_values)
@@ -751,12 +1209,13 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         self.assertEqual(1, spectrum_info.size())
         return float(np.rad2deg(spectrum_info.signedTwoTheta(0))) / 2.0
 
-    def _run_save_alg(self, ws_list, write_resolution=True, include_extra_cols=False, filename=None):
+    def _run_save_alg(self, ws_list, write_resolution=True, include_extra_cols=False, filename=None, **kwargs):
         SaveISISReflectometryORSO(
             WorkspaceList=ws_list,
             WriteResolution=write_resolution,
             IncludeAdditionalColumns=include_extra_cols,
             Filename=self._output_filename if filename is None else os.path.join(self._temp_dir.name, filename),
+            **kwargs,
         )
 
 

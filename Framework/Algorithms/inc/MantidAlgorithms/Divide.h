@@ -54,8 +54,8 @@ private:
 
   void performEventBinaryOperation(DataObjects::EventList &lhs, const DataObjects::EventList &rhs) override;
 
-  void performEventBinaryOperation(DataObjects::EventList &lhs, const MantidVec &rhsX, const MantidVec &rhsY,
-                                   const MantidVec &rhsE) override;
+  void performEventBinaryOperation(DataObjects::EventList &lhs, std::span<double const> rhsX,
+                                   std::span<double const> rhsY, std::span<double const> rhsE) override;
 
   void performEventBinaryOperation(DataObjects::EventList &lhs, const double &rhsY, const double &rhsE) override;
 

@@ -59,12 +59,12 @@ public:
         dx(0.5); // chosen to give put us near the peak for this mass & spectrum
     auto testWS =
         ComptonProfileTestHelpers::createTestWorkspace(1, x0, x1, dx, ComptonProfileTestHelpers::NoiseType::None);
-    auto &dataX = testWS->dataX(0);
+    auto &dataX = testWS->mutableX(0);
     using std::placeholders::_1;
     std::transform(dataX.begin(), dataX.end(), dataX.begin(),
                    std::bind(std::multiplies<double>(), _1, 1e-06)); // to seconds
     func->setMatrixWorkspace(testWS, 0, dataX.front(), dataX.back());
-    FunctionDomain1DView domain(dataX.data(), dataX.size());
+    FunctionDomain1DView domain(dataX.rawData().data(), dataX.size());
     FunctionValues values(domain);
 
     TS_ASSERT_THROWS_NOTHING(func->function(domain, values));

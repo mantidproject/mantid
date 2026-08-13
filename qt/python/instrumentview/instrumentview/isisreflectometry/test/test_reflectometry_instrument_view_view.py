@@ -8,6 +8,8 @@ import unittest
 from unittest import mock
 from unittest.mock import MagicMock
 
+from qtpy.QtCore import QSize
+
 from mantidqt.utils.qt.testing import start_qapplication
 from instrumentview.isisreflectometry.ReflectometryInstrumentViewView import ReflectometryInstrumentViewView
 from instrumentview.ShapeWidgets import RectangleSelectionShape
@@ -194,6 +196,66 @@ class TestReflectometryInstrumentViewView(unittest.TestCase):
     def test_on_resize_finished_no_op_when_no_plotter(self):
         """_on_resize_finished should not raise if the plotter has not been created."""
         self._view._on_resize_finished()  # no exception expected
+
+    @mock.patch("instrumentview.isisreflectometry.ReflectometryInstrumentViewView.BackgroundPlotter")
+    def test_schedule_refresh_starts_debounce_timer(self, mock_bg_plotter_cls):
+        """schedule_refresh runs the resize callback path without a real resize event."""
+        self._view.initialise()
+        self._view._resize_timer = MagicMock()
+        self._view.schedule_refresh()
+        self._view._resize_timer.start.assert_called_once()
+
+    def test_schedule_refresh_no_op_when_no_plotter(self):
+        self._view._resize_timer = MagicMock()
+        self._view.schedule_refresh()
+        self._view._resize_timer.start.assert_not_called()
+
+    @mock.patch("qtpy.QtWidgets.QWidget.showEvent")
+    @mock.patch("instrumentview.isisreflectometry.ReflectometryInstrumentViewView.BackgroundPlotter")
+    def test_show_event_schedules_refresh(self, mock_bg_plotter_cls, _mock_super_show):
+        """Becoming visible is when VTK finally gets its true size, so re-fill."""
+        self._view.initialise()
+        self._view._resize_timer = MagicMock()
+        self._view.showEvent(MagicMock())
+        self._view._resize_timer.start.assert_called_once()
+
+    @mock.patch("qtpy.QtWidgets.QWidget.showEvent")
+    def test_show_event_no_op_when_no_plotter(self, _mock_super_show):
+        self._view._resize_timer = MagicMock()
+        self._view.showEvent(MagicMock())
+        self._view._resize_timer.start.assert_not_called()
+
+    def test_render_area_size_falls_back_to_widget_size(self):
+        """Before the plotter exists there is nothing else to measure."""
+        self._view.resize(640, 480)
+        self.assertEqual(self._view.render_area_size(), (640, 480))
+
+    @mock.patch("instrumentview.isisreflectometry.ReflectometryInstrumentViewView.BackgroundPlotter")
+    def test_render_area_size_prefers_the_interactor_widget(self, mock_bg_plotter_cls):
+        """The plotter is inset from this widget by its frame margins, so measure the plotter."""
+        self._view.initialise()
+        self._view.resize(640, 480)
+        self._view.main_plotter.size.return_value = QSize(622, 462)
+        self.assertEqual(self._view.render_area_size(), (622, 462))
+
+    @mock.patch("instrumentview.isisreflectometry.ReflectometryInstrumentViewView.BackgroundPlotter")
+    def test_render_area_size_ignores_unsized_interactor(self, mock_bg_plotter_cls):
+        self._view.initialise()
+        self._view.resize(640, 480)
+        self._view.main_plotter.size.return_value = QSize(0, 0)
+        self.assertEqual(self._view.render_area_size(), (640, 480))
+
+    @mock.patch("instrumentview.isisreflectometry.ReflectometryInstrumentViewView.BackgroundPlotter")
+    def test_render_area_size_ignores_interactor_larger_than_this_widget(self, mock_bg_plotter_cls):
+        """Before Qt lays it out the plotter still reports its default window size.
+
+        It is nested inside this widget, so a larger size can only mean stale
+        geometry — using it gives the mesh the wrong aspect ratio.
+        """
+        self._view.initialise()
+        self._view.resize(640, 480)
+        self._view.main_plotter.size.return_value = QSize(1024, 768)
+        self.assertEqual(self._view.render_area_size(), (640, 480))
 
 
 if __name__ == "__main__":

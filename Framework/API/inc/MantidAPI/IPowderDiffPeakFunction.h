@@ -10,6 +10,7 @@
 #include "MantidAPI/ParamFunction.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
 #include <complex>
+#include <span>
 
 namespace Mantid {
 namespace API {
@@ -74,9 +75,11 @@ public:
   // void functionLocal(double* out, const double* xValues, const size_t
   // nData)const;
 
-  /// Calculate function in a range
+  /// Calculate function in a range. The ranges are taken as spans so that the size-checked
+  /// histogram data types can be evaluated over, and written into, directly. `out` must already
+  /// be sized; implementations do not resize it.
   using IFunction1D::function;
-  virtual void function(std::vector<double> &out, const std::vector<double> &xValues) const = 0;
+  virtual void function(std::span<double> out, std::span<double const> xValues) const = 0;
 
   /// Get maximum value on a given set of data points
   virtual double getMaximumValue(const std::vector<double> &xValues, size_t &indexmax) const;

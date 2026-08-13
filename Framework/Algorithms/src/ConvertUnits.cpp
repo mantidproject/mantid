@@ -398,7 +398,7 @@ MatrixWorkspace_sptr ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUni
   size_t checkIndex = 0;
   spectrumInfo.getDetectorValues(*fromUnit, *outputUnit, emode, signedTheta, checkIndex, upmap);
   // copy the X values for the check
-  auto checkXValues = inputWS->x(checkIndex).rawData();
+  auto checkXValues = inputWS->x(checkIndex);
   try {
     // Convert the input unit to time-of-flight
     checkFromUnit->toTOF(checkXValues.begin(), checkXValues.end(), l1, emode, upmap);
