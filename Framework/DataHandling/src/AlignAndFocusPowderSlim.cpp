@@ -733,7 +733,7 @@ AlignAndFocusPowderSlim::initializeSpectraProcessingData(const API::MatrixWorksp
   for (size_t i = 0; i < numSpectra; ++i) {
     const auto &spectrum = outputWS->getSpectrum(i);
     processingData.binedges.emplace_back(&spectrum.x().rawData());
-    processingData.counts.emplace_back(spectrum.dataY().size());
+    processingData.counts.emplace_back(spectrum.y().size());
   }
   return processingData;
 }
@@ -743,11 +743,11 @@ void AlignAndFocusPowderSlim::storeSpectraProcessingData(const SpectraProcessing
   const size_t numSpectra = outputWS->getNumberHistograms();
   for (size_t i = 0; i < numSpectra; ++i) {
     auto &spectrum = outputWS->getSpectrum(i);
-    auto &y_values = spectrum.dataY();
+    auto &y_values = spectrum.mutableY();
     std::transform(
         processingData.counts[i].cbegin(), processingData.counts[i].cend(), y_values.begin(),
         [](const std::atomic_uint32_t &val) { return static_cast<double>(val.load(std::memory_order_relaxed)); });
-    auto &e_values = spectrum.dataE();
+    auto &e_values = spectrum.mutableE();
     std::transform(processingData.counts[i].cbegin(), processingData.counts[i].cend(), e_values.begin(),
                    [](const std::atomic_uint32_t &val) {
                      return std::sqrt(static_cast<double>(val.load(std::memory_order_relaxed)));

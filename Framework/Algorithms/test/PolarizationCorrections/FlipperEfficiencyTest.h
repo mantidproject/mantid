@@ -123,8 +123,8 @@ public:
     MatrixWorkspace_sptr const outWs = alg->getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(outWs->getNumberHistograms(),
                      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(group->getItem(0))->getNumberHistograms())
-    auto const &outY = outWs->dataY(0);
-    auto const &outE = outWs->dataE(0);
+    auto const &outY = outWs->y(0);
+    auto const &outE = outWs->e(0);
     auto const numBins = outY.size();
     for (size_t i = 0; i < numBins; ++i) {
       TS_ASSERT_EQUALS(1.0, outY[i])
@@ -141,8 +141,8 @@ public:
     MatrixWorkspace_sptr const outWs = alg->getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(outWs->getNumberHistograms(),
                      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(group->getItem(0))->getNumberHistograms())
-    auto const &outY = outWs->dataY(0);
-    auto const &outE = outWs->dataE(0);
+    auto const &outY = outWs->y(0);
+    auto const &outE = outWs->e(0);
     auto const numBins = outY.size();
     for (size_t i = 0; i < numBins; ++i) {
       TS_ASSERT_EQUALS(1.0, outY[i])
@@ -161,8 +161,8 @@ public:
     alg->execute();
     MatrixWorkspace_sptr const outWsP = alg->getProperty("OutputWorkspace");
 
-    auto const &outYA = outWsA->dataY(0);
-    auto const &outYP = outWsP->dataY(0);
+    auto const &outYA = outWsA->y(0).rawData();
+    auto const &outYP = outWsP->y(0).rawData();
     TS_ASSERT_DELTA(outYA, outYP, 1e-8);
   }
 
@@ -176,8 +176,8 @@ public:
     MatrixWorkspace_sptr const outWs = alg->getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(outWs->getNumberHistograms(),
                      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(group->getItem(0))->getNumberHistograms())
-    auto const &outY = outWs->dataY(0);
-    auto const &outE = outWs->dataE(0);
+    auto const &outY = outWs->y(0);
+    auto const &outE = outWs->e(0);
     auto const numBins = outY.size();
     for (size_t i = 0; i < numBins; ++i) {
       TS_ASSERT_DELTA(0.9710144925, outY[i], 1e-8);

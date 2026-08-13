@@ -1197,8 +1197,8 @@ public:
 
     MatrixWorkspace_sptr ws(new CompositeFunctionTest_MocMatrixWorkspace(10, 11, 10));
 
-    MantidVec &x = ws->dataX(3);
-    MantidVec &y = ws->dataY(3);
+    auto &x = ws->mutableX(3);
+    auto &y = ws->mutableY(3);
     for (size_t i = 0; i < y.size(); ++i) {
       x[i] = 0.1 * static_cast<double>(i);
       y[i] = static_cast<double>(i);

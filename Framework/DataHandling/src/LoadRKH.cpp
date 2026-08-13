@@ -366,7 +366,7 @@ const MatrixWorkspace_sptr LoadRKH::read2D(const std::string &firstLine) {
     outWrksp->setSharedX(i, toPass);
 
     // now read in the Y values
-    MantidVec &YOut = outWrksp->dataY(i);
+    auto &YOut = outWrksp->mutableY(i);
     for (double &value : YOut) {
       m_fileIn >> value;
     }
@@ -375,7 +375,7 @@ const MatrixWorkspace_sptr LoadRKH::read2D(const std::string &firstLine) {
 
   // the error values form one big block after the Y-values
   for (size_t i = 0; i < nAxis1Values; ++i) {
-    MantidVec &EOut = outWrksp->dataE(i);
+    auto &EOut = outWrksp->mutableE(i);
     for (double &value : EOut) {
       m_fileIn >> value;
     }

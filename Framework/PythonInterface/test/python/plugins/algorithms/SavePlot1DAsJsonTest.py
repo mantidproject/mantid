@@ -123,7 +123,7 @@ class SavePlot1DAsJsonTest(unittest.TestCase):
         err = intensity**0.5
         # create workspace
         dataws = api.CreateWorkspace(DataX=Q, DataY=intensity, DataE=err, NSpec=1, UnitX="Momentum")
-        dataws.setDx(0, dQ)
+        dataws.setSharedDx(0, dQ)
         # Add to data service
         AnalysisDataService.addOrReplace(datawsname, dataws)
         return Q, intensity, err, dQ

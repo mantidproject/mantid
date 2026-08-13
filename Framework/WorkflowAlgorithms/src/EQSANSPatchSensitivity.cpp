@@ -106,8 +106,8 @@ void EQSANSPatchSensitivity::exec() {
           g_log.warning() << "Spectrum " << patched_id << " has no detector, skipping (not clearing mask)\n";
           continue;
         }
-        MantidVec &YValues = inputWS->dataY(patched_id);
-        MantidVec &YErrors = inputWS->dataE(patched_id);
+        auto &YValues = inputWS->mutableY(patched_id);
+        auto &YErrors = inputWS->mutableE(patched_id);
         if (useRegression) {
           YValues[0] = alpha + beta * inSpectrumInfo.position(patched_id).Y();
           YErrors[0] = error;

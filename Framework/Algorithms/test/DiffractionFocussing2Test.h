@@ -665,7 +665,7 @@ public:
         TS_ASSERT_EQUALS(outputEvent->sharedX(workspace_index)->size(), 16);
         // There should be some data in the bins
         for (int i = 0; i < 15; i++)
-          events_after_binning += outputEvent->dataY(workspace_index)[i];
+          events_after_binning += outputEvent->y(workspace_index)[i];
       }
       // The count sums up to the same as the number of events
       TS_ASSERT_DELTA(events_after_binning,
