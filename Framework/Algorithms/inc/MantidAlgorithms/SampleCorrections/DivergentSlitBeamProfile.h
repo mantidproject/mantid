@@ -27,6 +27,7 @@ public:
   DivergentSlitBeamProfile(const Geometry::ReferenceFrame &frame, const Kernel::V3D &center, double width,
                            double height, double horDiv, double verDiv, double slitD);
   double intensityAt(const Kernel::V3D &scatteringPoint) const override;
+  bool hasSpatialProfile() const override { return true; }
 
 private:
   const double m_horDiv;

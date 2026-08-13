@@ -37,7 +37,10 @@ public:
   virtual Ray generatePoint(Kernel::PseudoRandomNumberGenerator &rng) const = 0;
   virtual Ray generatePoint(Kernel::PseudoRandomNumberGenerator &rng, const Geometry::BoundingBox &) const = 0;
   virtual Geometry::BoundingBox defineActiveRegion(const Geometry::BoundingBox &) const = 0;
-  virtual double intensityAt(const Kernel::V3D &scatteringPoint) const { return 1.0; };
+  virtual double intensityAt(const Kernel::V3D & /*scatteringPoint*/) const { return 1.0; }
+  /// Whether intensityAt actually varies with position. The default implementation above is uniform, so
+  /// it imposes no spatial restriction and cannot be relied on to bound an illuminated volume.
+  virtual bool hasSpatialProfile() const { return false; }
   Geometry::IObject_sptr getIntersectionWithSample(const Geometry::IObject &sample) const;
 
 protected:

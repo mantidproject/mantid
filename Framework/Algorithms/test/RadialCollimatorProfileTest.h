@@ -79,6 +79,21 @@ public:
                         wide.intensityAt(offset, ORIGIN, EAST_DETECTOR));
   }
 
+  void test_restriction_is_independent_of_detector_height() {
+    // The collimator blades are vertical, so a detector high in the bank restricts the same horizontal
+    // direction as one at beam height. ENGIN-X banks span +/-21 degrees vertically, so this covers real
+    // detectors - an implementation using the full 3D transverse direction would get this wrong.
+    const RadialCollimatorProfile profile(FWHM, UP);
+    const V3D offset(0.0, 0.0, 0.4 * FWHM);
+    const double atBeamHeight = profile.intensityAt(offset, ORIGIN, EAST_DETECTOR);
+    // 0.6 m up at 1.5 m out is ~22 degrees, just past the top of an ENGIN-X bank.
+    const V3D raisedDetector(1.5, 0.6, 0.0);
+    TS_ASSERT_DELTA(profile.intensityAt(offset, ORIGIN, raisedDetector), atBeamHeight, 1e-12);
+    TS_ASSERT_LESS_THAN(atBeamHeight, 1.0);
+    // A vertical offset stays unrestricted for such a detector too.
+    TS_ASSERT_DELTA(profile.intensityAt(V3D(0.0, 0.05, 0.0), ORIGIN, raisedDetector), 1.0, 1e-12);
+  }
+
   void test_decreases_monotonically_away_from_the_axis() {
     const RadialCollimatorProfile profile(FWHM, UP);
     double previous = 2.0;
@@ -88,6 +103,15 @@ public:
       TS_ASSERT_LESS_THAN_EQUALS(0.0, acceptance);
       previous = acceptance;
     }
+  }
+
+  void test_rejects_offsets_far_outside_the_gauge_width() {
+    // Beyond the cutoff the acceptance is identically zero, so callers can skip the element outright.
+    const RadialCollimatorProfile profile(FWHM, UP);
+    const double sigma = FWHM / 2.354820045030949;
+    TS_ASSERT_LESS_THAN(0.0, profile.intensityAt(V3D(0.0, 0.0, 4.9 * sigma), ORIGIN, EAST_DETECTOR));
+    TS_ASSERT_EQUALS(profile.intensityAt(V3D(0.0, 0.0, 5.1 * sigma), ORIGIN, EAST_DETECTOR), 0.0);
+    TS_ASSERT_EQUALS(profile.intensityAt(V3D(0.0, 0.0, -5.1 * sigma), ORIGIN, EAST_DETECTOR), 0.0);
   }
 
   void test_degenerate_geometry_imposes_no_restriction() {

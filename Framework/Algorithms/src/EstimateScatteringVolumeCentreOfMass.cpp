@@ -260,6 +260,18 @@ void EstimateScatteringVolumeCentreOfMass::calcDetectorScatteringCentres(const G
   g_log.information(collimator ? "Applying the calibrated radial collimator acceptance"
                                : "No calibrated collimator width on the instrument - collimator acceptance ignored");
 
+  // The collimator only bounds the horizontal direction transverse to each detector's viewing axis. The
+  // remaining directions have to be bounded by the incident beam profile or by an explicit gauge volume,
+  // otherwise every element of the sample is weighted by attenuation alone along those directions and the
+  // result is not a gauge volume centroid at all.
+  if (collimator && !beamProfile->hasSpatialProfile() && !m_inputWS->run().hasProperty("GaugeVolume")) {
+    g_log.warning("The collimator acceptance only restricts the direction transverse to each detector's "
+                  "viewing axis, but the incident beam profile is uniform and no GaugeVolume sample log is "
+                  "set, so nothing bounds the scattering volume along the viewing axis or vertically. The "
+                  "result will be an attenuation-weighted average over the whole sample rather than a gauge "
+                  "volume centre of mass - define a GaugeVolume, or set beam divergence with SetBeam.");
+  }
+
   // Take a copy - points() returns by value, so a reference into it would dangle. The attenuation is
   // summed over these, and the cost of the per-detector loop is linear in their number, so sample a
   // bounded subset of a finely binned workspace. The centroid is insensitive to this: it depends on
@@ -279,7 +291,11 @@ void EstimateScatteringVolumeCentreOfMass::calcDetectorScatteringCentres(const G
   }
 
   const V3D beamDirection = instrument->getBeamDirection();
-  const V3D samplePos = instrument->getSample()->getPos();
+  // The collimator's focal point is fixed in the laboratory - the sample is translated through it. On
+  // ENGIN-X the sample component sits at the instrument origin, which is that focal point, so it is
+  // taken from there. It must not be replaced with an actual sample centre: that would drag the
+  // collimator's field of view along with the sample.
+  const V3D collimatorFocalPoint = instrument->getSample()->getPos();
 
   // Detector independent per element: the incident intensity and the incoming attenuation path.
   std::vector<V3D> livePoints;
@@ -331,7 +347,7 @@ void EstimateScatteringVolumeCentreOfMass::calcDetectorScatteringCentres(const G
     double summedWeight = 0.0;
     for (size_t e = 0; e < livePoints.size(); ++e) {
       const auto &element = livePoints[e];
-      const double acceptance = collimator ? collimator->intensityAt(element, samplePos, detPos) : 1.0;
+      const double acceptance = collimator ? collimator->intensityAt(element, collimatorFocalPoint, detPos) : 1.0;
       if (acceptance <= 0.0) {
         continue;
       }
