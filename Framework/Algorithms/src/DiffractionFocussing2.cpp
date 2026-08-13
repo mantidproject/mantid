@@ -277,7 +277,8 @@ void DiffractionFocussing2::exec() {
     auto group = static_cast<int>(m_validGroups[outWorkspaceIndex]);
 
     // Get the group
-    auto &Xout = group2xvector.at(group);
+    // const so that binding it to a std::span does not detach the cow_ptr
+    auto const &Xout = group2xvector.at(group);
 
     // Assign the new X axis only once (i.e when this group is encountered the
     // first time)
@@ -294,9 +295,8 @@ void DiffractionFocussing2::exec() {
     outSpec.setSpectrumNo(group);
 
     // Get the references to Y and E output and rebin
-    // TODO can only be changed once rebin implemented in HistogramData
-    auto &Yout = outSpec.dataY();
-    auto &Eout = outSpec.dataE();
+    auto &Yout = outSpec.mutableY();
+    auto &Eout = outSpec.mutableE();
 
     // Initialize the group's weight vector here and the dummy vector used for
     // accumulating errors.
@@ -322,7 +322,7 @@ void DiffractionFocussing2::exec() {
         // generateHistogram overwrites the data in Y and E so write to a temporary vector
         MantidVec Ytemp;
         MantidVec Etemp;
-        el.generateHistogram(group2xstep.at(group), Xout.rawData(), Ytemp, Etemp);
+        el.generateHistogram(group2xstep.at(group), Xout, Ytemp, Etemp);
         // accumulate the histogram into the output
         std::transform(Ytemp.cbegin(), Ytemp.cend(), Yout.begin(), Yout.begin(),
                        [](const auto &left, const auto &right) { return left + right; });
@@ -330,13 +330,12 @@ void DiffractionFocussing2::exec() {
         std::transform(Etemp.cbegin(), Etemp.cend(), Eout.begin(), Eout.begin(),
                        [](const auto &left, const auto &right) { return left * left + right; });
       } else {
-        auto &Yin = inSpec.y();
-        auto &Ein = inSpec.e();
+        auto const &Yin = inSpec.y();
+        auto const &Ein = inSpec.e();
 
         try {
           // TODO This should be implemented in Histogram as rebin
-          Mantid::Kernel::VectorHelper::rebinHistogram(Xin.rawData(), Yin.rawData(), Ein.rawData(), Xout.rawData(),
-                                                       Yout, Eout, true);
+          Mantid::Kernel::VectorHelper::rebinHistogram(Xin, Yin, Ein, Xout, Yout, Eout, true);
         } catch (...) {
           // Should never happen because Xout is constructed to envelop all of the
           // Xin vectors
@@ -378,7 +377,7 @@ void DiffractionFocussing2::exec() {
         // here
         const MantidVec zeroes(weights.size(), 0.0);
         // Rebin the weights - note that this is a distribution
-        VectorHelper::rebin(weight_bins, weights, zeroes, Xout.rawData(), groupWgt, EOutDummy, true, true);
+        VectorHelper::rebin(weight_bins, weights, zeroes, Xout, groupWgt, EOutDummy, true, true);
       } else // If no masked bins we want to add 1 to the weight of the output
              // bins that this input covers
       {
@@ -395,7 +394,7 @@ void DiffractionFocussing2::exec() {
         }
 
         // Rebin the weights - note that this is a distribution
-        VectorHelper::rebin(limits, weights_default, emptyVec, Xout.rawData(), groupWgt, EOutDummy, true, true);
+        VectorHelper::rebin(limits, weights_default, emptyVec, Xout, groupWgt, EOutDummy, true, true);
       }
       prog.report();
     } // end of loop for input spectra

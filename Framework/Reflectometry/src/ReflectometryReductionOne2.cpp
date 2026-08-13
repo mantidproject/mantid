@@ -990,7 +990,7 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::sumInQ(const MatrixWorkspace_sp
   const size_t numGroups = detectorGroups().size();
   for (size_t groupIdx = 0; groupIdx < numGroups; ++groupIdx) {
     auto &detectors = detectorGroups()[groupIdx];
-    auto &outputE = IvsLam->dataE(groupIdx);
+    auto &outputE = IvsLam->mutableE(groupIdx);
 
     // Loop through each spectrum in the detector group
     for (auto spIdx : detectors) {
@@ -1094,8 +1094,8 @@ void ReflectometryReductionOne2::sumInQShareCounts(const double inputCounts, con
                                                    const size_t outSpecIdx, const MatrixWorkspace_sptr &IvsLam,
                                                    std::vector<double> &outputE) {
   // Check that we have histogram data
-  const auto &outputX = IvsLam->dataX(outSpecIdx);
-  auto &outputY = IvsLam->dataY(outSpecIdx);
+  const auto &outputX = IvsLam->x(outSpecIdx);
+  auto &outputY = IvsLam->mutableY(outSpecIdx);
   if (outputX.size() != outputY.size() + 1) {
     throw std::runtime_error("Expected output array to be histogram data (got X len=" + std::to_string(outputX.size()) +
                              ", Y len=" + std::to_string(outputY.size()) + ")");

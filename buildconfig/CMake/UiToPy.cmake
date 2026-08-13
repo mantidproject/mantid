@@ -1,8 +1,8 @@
 # ######################################################################################################################
-# Function to convert ui files into PyQt5 python files
+# Function to convert ui files into PyQt python files for the configured Qt major version
 # ######################################################################################################################
 
-function(UiToPy5 ui_files target_name)
+function(UiToPy ui_files target_name)
   set(ui_dir ${CMAKE_CURRENT_SOURCE_DIR})
   set(_outputs "")
   foreach(ui_file ${${ui_files}})
@@ -15,7 +15,7 @@ function(UiToPy5 ui_files target_name)
     # Command to run the translation
     add_custom_command(
       OUTPUT ${generated_file}
-      COMMAND ${PYTHON_EXECUTABLE} -m PyQt5.uic.pyuic -x ${source_file} -o ${generated_file}
+      COMMAND ${PYTHON_EXECUTABLE} -m PyQt${MANTID_QT_VERSION}.uic.pyuic -x ${source_file} -o ${generated_file}
       DEPENDS ${source_file}
     )
     # Record all generated files
@@ -24,7 +24,4 @@ function(UiToPy5 ui_files target_name)
   endforeach(ui_file)
   # Create a custom target
   add_custom_target(${target_name} DEPENDS ${_outputs})
-  if(USE_PRIVATE_SIPPYQT5)
-    add_dependencies(${target_name} extern-pyqt5)
-  endif()
-endfunction(UiToPy5)
+endfunction(UiToPy)

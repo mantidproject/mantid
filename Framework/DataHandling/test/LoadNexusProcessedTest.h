@@ -1575,6 +1575,8 @@ private:
       inputWs->setPointStandardDeviations(0, dx1);
       inputWs->setPointStandardDeviations(1, dx2);
       if (legacyXErrors) {
+        // Deliberately grow Dx to the legacy length (one longer than Y). Only the legacy
+        // accessor can do this; the size-checked histogram types forbid it by design.
         inputWs->dataDx(0).emplace_back(1);
         inputWs->dataDx(1).emplace_back(1);
       }

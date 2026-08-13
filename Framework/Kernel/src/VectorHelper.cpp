@@ -302,8 +302,8 @@ std::size_t createAxisFromRebinParams(const std::vector<double> &params, std::ve
  *  @throw runtime_error Thrown if algorithm cannot execute.
  *  @throw invalid_argument Thrown if input to function is incorrect.
  **/
-void rebin(const std::vector<double> &xold, const std::vector<double> &yold, const std::vector<double> &eold,
-           const std::vector<double> &xnew, std::vector<double> &ynew, std::vector<double> &enew, bool distribution,
+void rebin(std::span<double const> xold, std::span<double const> yold, std::span<double const> eold,
+           std::span<double const> xnew, std::span<double> ynew, std::span<double> enew, bool distribution,
            bool addition) {
   // Make sure y and e vectors are of correct sizes
   const size_t size_xold = xold.size();
@@ -419,9 +419,8 @@ void rebin(const std::vector<double> &xold, const std::vector<double> &yold, con
  *SQUARED ERRORS!
  *  @throw runtime_error Thrown if vector sizes are inconsistent
  **/
-void rebinHistogram(const std::vector<double> &xold, const std::vector<double> &yold, const std::vector<double> &eold,
-                    const std::vector<double> &xnew, std::vector<double> &ynew, std::vector<double> &enew,
-                    bool addition) {
+void rebinHistogram(std::span<double const> xold, std::span<double const> yold, std::span<double const> eold,
+                    std::span<double const> xnew, std::span<double> ynew, std::span<double> enew, bool addition) {
   // Make sure y and e vectors are of correct sizes
   const size_t size_yold = yold.size();
   if (xold.size() != (size_yold + 1) || size_yold != eold.size())
@@ -432,25 +431,25 @@ void rebinHistogram(const std::vector<double> &xold, const std::vector<double> &
 
   // If not adding to existing vectors, make sure ynew & enew contain zeroes
   if (!addition) {
-    ynew.assign(size_ynew, 0.0);
-    enew.assign(size_ynew, 0.0);
+    std::fill(ynew.begin(), ynew.end(), 0.0);
+    std::fill(enew.begin(), enew.end(), 0.0);
   }
 
   // Find the starting points to avoid wasting time processing irrelevant bins
   size_t iold = 0, inew = 0; // iold/inew is the bin number under consideration
                              // (counting from 1, so index+1)
   if (xnew.front() > xold.front()) {
-    auto it = std::upper_bound(xold.cbegin(), xold.cend(), xnew.front());
+    auto it = std::upper_bound(xold.begin(), xold.end(), xnew.front());
     if (it == xold.end())
       return;
     //      throw std::runtime_error("No overlap: max of X-old < min of X-new");
     iold = std::distance(xold.begin(), it) - 1; // Old bin to start at (counting from 0)
   } else {
-    auto it = std::upper_bound(xnew.cbegin(), xnew.cend(), xold.front());
-    if (it == xnew.cend())
+    auto it = std::upper_bound(xnew.begin(), xnew.end(), xold.front());
+    if (it == xnew.end())
       return;
     //      throw std::runtime_error("No overlap: max of X-new < min of X-old");
-    inew = std::distance(xnew.cbegin(), it) - 1; // New bin to start at (counting from 0)
+    inew = std::distance(xnew.begin(), it) - 1; // New bin to start at (counting from 0)
   }
 
   double frac, fracE;
@@ -511,7 +510,7 @@ void rebinHistogram(const std::vector<double> &xold, const std::vector<double> &
  * @param bin_edges :: A vector of values specifying bin boundaries
  * @param bin_centres :: An output vector of bin centre values.
  */
-void convertToBinCentre(const std::vector<double> &bin_edges, std::vector<double> &bin_centres) {
+void convertToBinCentre(std::span<double const> bin_edges, std::vector<double> &bin_centres) {
   const std::vector<double>::size_type npoints = bin_edges.size();
   if (bin_centres.size() != npoints) {
     bin_centres.resize(npoints);
@@ -543,7 +542,7 @@ void convertToBinCentre(const std::vector<double> &bin_edges, std::vector<double
  *                       boundaries
  *
  */
-void convertToBinBoundary(const std::vector<double> &bin_centers, std::vector<double> &bin_edges) {
+void convertToBinBoundary(std::span<double const> bin_centers, std::vector<double> &bin_edges) {
   const auto n = bin_centers.size();
 
   // Special case empty input: output is also empty
@@ -581,7 +580,7 @@ void convertToBinBoundary(const std::vector<double> &bin_centers, std::vector<do
  * (in bin edge representation)
  */
 
-size_t indexOfValueFromCenters(const std::vector<double> &bin_centers, const double value) {
+size_t indexOfValueFromCenters(std::span<double const> bin_centers, const double value) {
   int index = indexOfValueFromCentersNoThrow(bin_centers, value);
   if (index >= 0)
     return static_cast<size_t>(index);
@@ -589,7 +588,7 @@ size_t indexOfValueFromCenters(const std::vector<double> &bin_centers, const dou
     throw std::out_of_range("indexOfValue - value out of range");
 }
 
-int indexOfValueFromCentersNoThrow(const std::vector<double> &bin_centers, const double value) {
+int indexOfValueFromCentersNoThrow(std::span<double const> bin_centers, const double value) {
   if (bin_centers.empty()) {
     throw std::out_of_range("indexOfValue - vector is empty");
   }
@@ -629,7 +628,7 @@ int indexOfValueFromCentersNoThrow(const std::vector<double> &bin_centers, const
  * @throw std::out_of_range : if vector is empty, contains one element,
  *  or value is out of it's range
  */
-size_t indexOfValueFromEdges(const std::vector<double> &bin_edges, const double value) {
+size_t indexOfValueFromEdges(std::span<double const> bin_edges, const double value) {
   if (bin_edges.empty()) {
     throw std::out_of_range("indexOfValue - vector is empty");
   }
@@ -657,11 +656,11 @@ size_t indexOfValueFromEdges(const std::vector<double> &bin_edges, const double 
  * different values
  *  @param[in] arra the vector to examine
  */
-bool isConstantValue(const std::vector<double> &arra) {
+bool isConstantValue(std::span<double const> arra) {
   // make comparisons with the first value
-  auto i = arra.cbegin();
+  auto i = arra.begin();
 
-  if (i == arra.cend()) { // empty array
+  if (i == arra.end()) { // empty array
     return true;
   }
 
@@ -670,14 +669,14 @@ bool isConstantValue(const std::vector<double> &arra) {
   // != nan, deal with these first
   for (; val != val;) {
     ++i;
-    if (i == arra.cend()) {
+    if (i == arra.end()) {
       // all values are contant (NAN)
       return true;
     }
     val = *i;
   }
 
-  for (; i != arra.cend(); ++i) {
+  for (; i != arra.end(); ++i) {
     if (*i != val) {
       return false;
     }
@@ -723,7 +722,7 @@ std::vector<NumT> splitStringIntoVector(std::string listString, const std::strin
  *               monotonically increasing values and this is NOT checked
  *  @param value The value whose boundaries should be found
  */
-int getBinIndex(const std::vector<double> &bins, const double value) {
+int getBinIndex(std::span<double const> bins, const double value) {
   assert(bins.size() >= 2);
   // Since we cast to an int below:
   assert(bins.size() < static_cast<size_t>(std::numeric_limits<int>::max()));
@@ -756,22 +755,22 @@ namespace {
  *                     should be: index<=endIndex<=input.size()
  *@param halfWidth  -- half width of the interval to integrate.
  *@param input      -- vector of input signal
- *@param binBndrs   -- pointer to vector of bin boundaries or NULL pointer.
+ *@param binBndrs   -- vector of bin boundaries, or an empty span if none were provided.
  */
 double runAverage(size_t index, size_t startIndex, size_t endIndex, const double halfWidth,
-                  const std::vector<double> &input, std::vector<double> const *const binBndrs) {
+                  std::span<double const> input, std::span<double const> binBndrs) {
 
   size_t iStart, iEnd;
   double weight0(0), weight1(0), start(0.0), end(0.0);
   //
-  if (binBndrs) {
+  if (!binBndrs.empty()) {
     // identify initial and final bins to
     // integrate over. Notice the difference
     // between start and end bin and shift of
     // the interpolating function into the center
     // of each bin
-    auto &rBndrs = *binBndrs;
-    // bin0 = binBndrs->operator[](index + 1) - binBndrs->operator[](index);
+    auto const &rBndrs = binBndrs;
+    // bin0 = binBndrs[index + 1] - binBndrs[index];
 
     double binC = 0.5 * (rBndrs[index + 1] + rBndrs[index]);
     start = binC - halfWidth;
@@ -780,7 +779,7 @@ double runAverage(size_t index, size_t startIndex, size_t endIndex, const double
       iStart = startIndex;
       start = rBndrs[iStart];
     } else {
-      iStart = getBinIndex(*binBndrs, start);
+      iStart = getBinIndex(binBndrs, start);
       weight0 = (rBndrs[iStart + 1] - start) / (rBndrs[iStart + 1] - rBndrs[iStart]);
       iStart++;
     }
@@ -788,7 +787,7 @@ double runAverage(size_t index, size_t startIndex, size_t endIndex, const double
       iEnd = endIndex; // the signal defined up to i<iEnd
       end = rBndrs[endIndex];
     } else {
-      iEnd = getBinIndex(*binBndrs, end);
+      iEnd = getBinIndex(binBndrs, end);
       weight1 = (end - rBndrs[iEnd]) / (rBndrs[iEnd + 1] - rBndrs[iEnd]);
     }
     if (iStart > iEnd) { // start and end get into the same bin
@@ -811,7 +810,7 @@ double runAverage(size_t index, size_t startIndex, size_t endIndex, const double
     avrg += input[j];
     ic++;
   }
-  if (binBndrs) { // add values at edges
+  if (!binBndrs.empty()) { // add values at edges
     if (iStart != startIndex)
       avrg += input[iStart - 1] * weight0;
     if (iEnd != endIndex)
@@ -841,7 +840,7 @@ double runAverage(size_t index, size_t startIndex, size_t endIndex, const double
  * @param output::  resulting vector (can not coincide with input)
  * @param avrgInterval:: the interval to average function in.
  *                      the function is averaged within +-0.5*avrgInterval
- * @param binBndrs :: pointer to the vector, containing bin boundaries.
+ * @param binBndrs :: span over the bin boundaries, empty if there are none.
  *                    If provided, its length has to be input.size()+1,
  *                    if not, equal size bins of size 1 are assumed,
  *                    so avrgInterval becomes the number of points
@@ -856,9 +855,10 @@ double runAverage(size_t index, size_t startIndex, size_t endIndex, const double
  * @param outBins ::   if present, pointer to a vector to return
  *                     bin boundaries for output array.
  */
-void smoothInRange(const std::vector<double> &input, std::vector<double> &output, const double avrgInterval,
-                   std::vector<double> const *const binBndrs, size_t startIndex, size_t endIndex,
+void smoothInRange(std::span<double const> input, std::vector<double> &output, const double avrgInterval,
+                   std::span<double const> binBndrs, size_t startIndex, size_t endIndex,
                    std::vector<double> *const outBins) {
+  bool const haveBndrs = !binBndrs.empty();
 
   if (endIndex == 0)
     endIndex = input.size();
@@ -871,8 +871,8 @@ void smoothInRange(const std::vector<double> &input, std::vector<double> &output
   }
 
   size_t max_size = input.size();
-  if (binBndrs) {
-    if (binBndrs->size() != max_size + 1) {
+  if (haveBndrs) {
+    if (binBndrs.size() != max_size + 1) {
       throw std::invalid_argument("Array of bin boundaries, "
                                   "if present, have to be one bigger then the input array");
     }
@@ -882,7 +882,7 @@ void smoothInRange(const std::vector<double> &input, std::vector<double> &output
   output.resize(length);
 
   double halfWidth = avrgInterval / 2;
-  if (!binBndrs) {
+  if (!haveBndrs) {
     if (std::floor(halfWidth) * 2 - avrgInterval > 1.e-6) {
       halfWidth = std::floor(halfWidth) + 1;
     }
@@ -894,16 +894,16 @@ void smoothInRange(const std::vector<double> &input, std::vector<double> &output
   //  Run averaging
   double binSize = 1;
   for (size_t i = startIndex; i < endIndex; i++) {
-    if (binBndrs) {
-      binSize = binBndrs->operator[](i + 1) - binBndrs->operator[](i);
+    if (haveBndrs) {
+      binSize = binBndrs[i + 1] - binBndrs[i];
     }
     output[i - startIndex] = runAverage(i, startIndex, endIndex, halfWidth, input, binBndrs) * binSize;
-    if (outBins && binBndrs) {
-      outBins->operator[](i - startIndex) = binBndrs->operator[](i);
+    if (outBins && haveBndrs) {
+      outBins->operator[](i - startIndex) = binBndrs[i];
     }
   }
-  if (outBins && binBndrs) {
-    outBins->operator[](endIndex - startIndex) = binBndrs->operator[](endIndex);
+  if (outBins && haveBndrs) {
+    outBins->operator[](endIndex - startIndex) = binBndrs[endIndex];
   }
 }
 

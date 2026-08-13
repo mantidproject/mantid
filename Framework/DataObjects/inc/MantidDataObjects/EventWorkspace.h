@@ -108,11 +108,11 @@ public:
   Kernel::cow_ptr<HistogramData::HistogramX> refX(const std::size_t) const override;
 
   /// Generate a new histogram from specified event list at the given index.
-  void generateHistogram(const std::size_t index, const MantidVec &X, MantidVec &Y, MantidVec &E,
+  void generateHistogram(const std::size_t index, std::span<double const> X, MantidVec &Y, MantidVec &E,
                          bool skipError = false) const override;
 
   /// Generate a new histogram from specified event list at the given index.
-  void generateHistogramPulseTime(const std::size_t index, const MantidVec &X, MantidVec &Y, MantidVec &E,
+  void generateHistogramPulseTime(const std::size_t index, std::span<double const> X, MantidVec &Y, MantidVec &E,
                                   bool skipError = false) const;
 
   // Set the x-axis data (histogram bins) for all pixels

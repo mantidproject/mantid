@@ -715,16 +715,21 @@ class FullInstrumentViewModel:
     def add_new_detector_key(self, new_value: list[bool], kind: CurrentTab):
         if kind is CurrentTab.Masking:
             new_key = f"Mask {len(self._cached_masks_map) + 1} (unsaved)"
-            mask_to_save = self._is_masked_in_ws.copy()
-            mask_to_save[self.is_pickable] = new_value
-            self._cached_masks_map[new_key] = mask_to_save
-            return new_key
         else:
             new_key = f"Pick Selection {len(self._cached_rois_map) + 1} (unsaved)"
+        return self.set_detector_key(new_key, new_value, kind)
+
+    def set_detector_key(self, key: str, new_value: list[bool], kind: CurrentTab) -> str:
+        """Store new_value (one entry per pickable detector) under key, replacing any existing entry."""
+        if kind is CurrentTab.Masking:
+            mask_to_save = self._is_masked_in_ws.copy()
+            mask_to_save[self.is_pickable] = new_value
+            self._cached_masks_map[key] = mask_to_save
+        else:
             selection_to_save = np.zeros_like(self._workspace_indices, dtype=bool)
             selection_to_save[self.is_pickable] = new_value
-            self._cached_rois_map[new_key] = selection_to_save
-            return new_key
+            self._cached_rois_map[key] = selection_to_save
+        return key
 
     def _get_boolean_masks_from_workspaces_in_ads(self, selected_keys: list[str], kind: CurrentTab):
         ws_in_ads = (

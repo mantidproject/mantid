@@ -74,7 +74,7 @@ std::string getIDFfromWorkspace(const Mantid::API::MatrixWorkspace_sptr &workspa
 }
 
 void setXValuesOn1DWorkspace(const Mantid::API::MatrixWorkspace_sptr &workspace, double xmin, double xmax) {
-  auto &xValues = workspace->dataX(0);
+  auto &xValues = workspace->mutableX(0);
   const double step = (xmax - xmin) / static_cast<double>(xValues.size() - 1);
   double value(xmin);
   std::generate(std::begin(xValues), std::end(xValues), [&value, &step]() {

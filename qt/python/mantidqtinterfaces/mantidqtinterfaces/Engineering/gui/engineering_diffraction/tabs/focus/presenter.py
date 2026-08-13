@@ -7,11 +7,12 @@
 # pylint: disable=invalid-name
 from __future__ import annotations  # this prevents the imports from TYPE_CHECKING from being evaluated at runtime
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import (
-    INSTRUMENT_DICT,
     create_error_message,
     CalibrationObserver,
 )
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.rb_scope import RbScope, RbScopeConsumer
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.instrument_scope import InstrumentScope, InstrumentScopeConsumer
 from Engineering.common.calibration_info import CalibrationInfo
 from mantidqt.utils.asynchronous import AsyncTask, AsyncTaskFailure
 from mantidqt.utils.observer_pattern import GenericObservable, GenericObserverWithArgPassing
@@ -24,7 +25,7 @@ if TYPE_CHECKING:
     from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration.view import CalibrationView
 
 
-class FocusPresenter(object):
+class FocusPresenter(RbScopeConsumer, InstrumentScopeConsumer):
     def __init__(self, model: FocusModel, view: CalibrationView):
         self.model = model
         self.view = view
@@ -43,8 +44,9 @@ class FocusPresenter(object):
 
         # Variables from other GUI tabs.
         self.current_calibration = CalibrationInfo()
-        self.instrument = "ENGINX"
-        self.rb_num = None
+        # both replaced by the main window's shared scopes in EngineeringDiffractionPresenter
+        self._rb_scope = RbScope()
+        self._instrument_scope = InstrumentScope()
 
         self.set_default_directories()
         self.view.set_focus_button_enabled(False)
@@ -96,16 +98,11 @@ class FocusPresenter(object):
         self.focus_run_notifier_gsas2.notify_subscribers(self.model.get_last_focused_files_gsas2())
         self.focus_run_notifier_texture.notify_subscribers(self.model.get_last_focused_files_texture())
 
-    def set_instrument_override(self, instrument_index: int) -> None:
-        instrument = INSTRUMENT_DICT[instrument_index]
-        self.view.set_instrument_override(instrument)
-        self.instrument = instrument
+    def _on_instrument_changed(self) -> None:
+        self.view.set_instrument_override(self.instrument)
 
     def set_default_directories(self) -> None:
         self.view.set_finder_last_directory(output_settings.get_output_path())
-
-    def set_rb_num(self, rb_num: str) -> None:
-        self.rb_num = rb_num
 
     def _validate(self) -> bool:
         """

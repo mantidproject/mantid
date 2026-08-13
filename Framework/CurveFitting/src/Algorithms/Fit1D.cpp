@@ -674,12 +674,12 @@ void Fit1D::exec() {
     ws->getAxis(0)->unit() = inputWorkspace->getAxis(0)->unit(); //    UnitFactory::Instance().create("TOF");
 
     for (int i = 0; i < 3; i++)
-      ws->dataX(i).assign(inputX.begin() + m_minX, inputX.begin() + m_maxX + histN);
+      ws->mutableX(i).assign(inputX.begin() + m_minX, inputX.begin() + m_maxX + histN);
 
-    ws->dataY(0).assign(inputY.begin() + m_minX, inputY.begin() + m_maxX);
+    ws->mutableY(0).assign(inputY.begin() + m_minX, inputY.begin() + m_maxX);
 
-    MantidVec &Y = ws->dataY(1);
-    MantidVec &E = ws->dataY(2);
+    auto &Y = ws->mutableY(1);
+    auto &E = ws->mutableY(2);
 
     auto lOut = new double[l_data.n];                 // to capture output from call to function()
     modifyInitialFittedParameters(m_fittedParameter); // does nothing except if

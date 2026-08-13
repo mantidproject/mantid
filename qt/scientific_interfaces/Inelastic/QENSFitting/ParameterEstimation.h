@@ -13,6 +13,7 @@
 #include "ParameterEstimation.h"
 
 #include <optional>
+#include <span>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -24,8 +25,10 @@ struct DataForParameterEstimation {
 };
 
 using DataForParameterEstimationCollection = std::vector<DataForParameterEstimation>;
+/// The x and y ranges are taken as spans so that the size-checked histogram data types can be
+/// selected from directly, without first copying them out into a std::vector.
 using EstimationDataSelector = std::function<DataForParameterEstimation(
-    const Mantid::MantidVec &x, const Mantid::MantidVec &y, const std::pair<double, double> range)>;
+    std::span<double const> x, std::span<double const> y, const std::pair<double, double> range)>;
 
 class MANTIDQT_INELASTIC_DLL FunctionParameterEstimation {
 

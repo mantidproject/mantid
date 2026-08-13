@@ -363,6 +363,48 @@ public:
                     -5.0865, 0.0001);
   }
 
+  void testWavelength_toTOF_iteratorRange() {
+    UnitParametersMap const params{{UnitParams::l2, 1.0}, {UnitParams::efixed, 1.0}};
+    std::vector<double> const input{1.5, 2.0};
+    std::vector<double> const emptyVec;
+    // Reference values from the vector overload
+    std::vector<double> expected = input;
+    lambda.toTOF(expected, emptyVec, 1.0, 1, params);
+    TS_ASSERT_DELTA(expected[0], 2665.4390, 0.0001) // matches testWavelength_toTOF
+
+    // The iterator overload must give the same answer ...
+    std::vector<double> x = input;
+    TS_ASSERT_THROWS_NOTHING(lambda.toTOF(x.begin(), x.end(), 1.0, 1, params))
+    TS_ASSERT_EQUALS(x, expected)
+
+    // ... and must convert only the values within the given range
+    std::vector<double> partial = input;
+    TS_ASSERT_THROWS_NOTHING(lambda.toTOF(partial.begin(), partial.begin() + 1, 1.0, 1, params))
+    TS_ASSERT_EQUALS(partial[0], expected[0])
+    TS_ASSERT_EQUALS(partial[1], input[1])
+  }
+
+  void testWavelength_fromTOF_iteratorRange() {
+    UnitParametersMap const params{{UnitParams::l2, 1.0}, {UnitParams::efixed, 1.0}};
+    std::vector<double> const input{1000.5, 1500.5};
+    std::vector<double> const emptyVec;
+    // Reference values from the vector overload
+    std::vector<double> expected = input;
+    lambda.fromTOF(expected, emptyVec, 1.0, 1, params);
+    TS_ASSERT_DELTA(expected[0], -5.0865, 0.0001) // matches testWavelength_fromTOF
+
+    // The iterator overload must give the same answer ...
+    std::vector<double> x = input;
+    TS_ASSERT_THROWS_NOTHING(lambda.fromTOF(x.begin(), x.end(), 1.0, 1, params))
+    TS_ASSERT_EQUALS(x, expected)
+
+    // ... and must convert only the values within the given range
+    std::vector<double> partial = input;
+    TS_ASSERT_THROWS_NOTHING(lambda.fromTOF(partial.begin(), partial.begin() + 1, 1.0, 1, params))
+    TS_ASSERT_EQUALS(partial[0], expected[0])
+    TS_ASSERT_EQUALS(partial[1], input[1])
+  }
+
   void testWavelength_quickConversions() {
     // Test it gives the same answer as going 'the long way'
     double factor, power;

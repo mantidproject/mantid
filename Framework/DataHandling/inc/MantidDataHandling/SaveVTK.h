@@ -12,6 +12,8 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataHandling/DllConfig.h"
 
+#include <span>
+
 namespace Mantid {
 namespace DataHandling {
 /**
@@ -70,8 +72,8 @@ private:
   void checkOptionalProperties();
 
   /// Write a histogram to the file
-  void writeVTKPiece(std::ostream &outVTP, const std::vector<double> &xValue, const std::vector<double> &yValue,
-                     const std::vector<double> &errors, int index) const;
+  void writeVTKPiece(std::ostream &outVTP, std::span<double const> xValue, std::span<double const> yValue,
+                     std::span<double const> errors, int index) const;
 
   /// The x-axis minimum
   double m_Xmin;

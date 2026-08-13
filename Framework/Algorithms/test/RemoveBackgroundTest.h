@@ -182,7 +182,7 @@ public:
 
     auto clone = cloneSourceWS();
     // set negative values to signal
-    auto &Y = clone->dataY(0);
+    auto &Y = clone->mutableY(0);
     for (double &i : Y) {
       i = -1000;
     }

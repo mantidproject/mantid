@@ -15,11 +15,7 @@ of **energy transfer** against spectrum number (which can be seen as equivalent 
 angle, with the angle being taken from the detector(s) to which the
 spectrum pertains).
 
-This algorithm can operate in one of three modes. Each mode simply runs a different algorithm to perform the computation:
-
-- *Centre*: performs a basic centre-point rebinning, see :ref:`algm-SofQWCentre`
-- *Polygon*: performs a parallel-piped rebin, taking into account the curvature of the output bins, see :ref:`algm-SofQWPolygon`
-- *NormalisedPolygon*: performs the same rebin as *Polygon* but the output bins normalised by the contributing overlap area, see :ref:`algm-SofQWNormalisedPolygon`
+Since the removal of deprecated algorithms SofQWCentre and SofQWPolygon (release 7.0.0), this algorithm now simply wraps :ref:`algm-SofQWNormalisedPolygon`.
 
 The energy binning will not be changed by this algorithm, so the input
 workspace should already have the desired bins (though this axis can be
@@ -69,8 +65,8 @@ Usage
    [-10.  -9.  -8.  -7.  -6.  -5.  -4.  -3.  -2.  -1.]
    [ 0.  1.  2.  3.  4.  5.  6.  7.  8.  9. 10.]
    The converted Y values are:
-   [12. 18. 18. 18. 18. 21. 18. 18. 21. 12.]
-   [18. 21. 24. 24. 24. 21. 24. 33. 39. 45.]
+   [1. 1. 1. 1. 1. 1. 1. 1. 1. 1.]
+   [1. 1. 1. 1. 1. 1. 1. 1. 1. 1.]
 
 
 .. categories::

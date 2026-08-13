@@ -37,7 +37,7 @@ public:
     return inWS;
   }
 
-  template <typename SQWType> static Mantid::API::MatrixWorkspace_sptr runSQW(const std::string &method = "") {
+  template <typename SQWType> static Mantid::API::MatrixWorkspace_sptr runSQW() {
     auto inWS = loadTestFile();
 
     SQWType sqw;
@@ -51,8 +51,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(sqw.setPropertyValue("EMode", "Indirect"));
     TS_ASSERT_THROWS_NOTHING(sqw.setPropertyValue("EFixed", "1.84"));
     TS_ASSERT_THROWS_NOTHING(sqw.setProperty("ReplaceNaNs", true));
-    if (!method.empty())
-      sqw.setPropertyValue("Method", method);
     TS_ASSERT_THROWS_NOTHING(sqw.execute());
     TS_ASSERT(sqw.isExecuted());
 
@@ -79,47 +77,8 @@ public:
     TS_ASSERT(sqw.isInitialized());
   }
 
-  void testExecWithDefaultMethodUsesSofQWCentre() {
-    auto result = SofQWTest::runSQW<Mantid::Algorithms::SofQW>();
-
-    TS_ASSERT(isAlgorithmInHistory(*result, "SofQWCentre"));
-
-    TS_ASSERT_EQUALS(result->getAxis(0)->length(), 1904);
-    TS_ASSERT_EQUALS(result->getAxis(0)->unit()->unitID(), "DeltaE");
-    TS_ASSERT_DELTA((*(result->getAxis(0)))(0), -0.5590, 0.0001);
-    TS_ASSERT_DELTA((*(result->getAxis(0)))(999), -0.0971, 0.0001);
-    TS_ASSERT_DELTA((*(result->getAxis(0)))(1900), 0.5728, 0.0001);
-
-    TS_ASSERT_EQUALS(result->getAxis(1)->length(), 7);
-    TS_ASSERT_EQUALS(result->getAxis(1)->unit()->unitID(), "MomentumTransfer");
-    TS_ASSERT_EQUALS((*(result->getAxis(1)))(0), 0.5);
-    TS_ASSERT_EQUALS((*(result->getAxis(1)))(3), 1.25);
-    TS_ASSERT_EQUALS((*(result->getAxis(1)))(6), 2.0);
-
-    const double delta(1e-08);
-    TS_ASSERT_DELTA(result->y(0)[1160], 54.85624399, delta);
-    TS_ASSERT_DELTA(result->e(0)[1160], 0.34252858, delta);
-    TS_ASSERT_DELTA(result->y(1)[1145], 22.72491806, delta);
-    TS_ASSERT_DELTA(result->e(1)[1145], 0.19867742, delta);
-    TS_ASSERT_DELTA(result->y(2)[1200], 6.76047436, delta);
-    TS_ASSERT_DELTA(result->e(2)[1200], 0.10863549, delta);
-    TS_ASSERT_DELTA(result->y(3)[99], 0.16439574, delta);
-    TS_ASSERT_DELTA(result->e(3)[99], 0.03414360, delta);
-    TS_ASSERT_DELTA(result->y(4)[1654], 0.069311442, delta);
-    TS_ASSERT_DELTA(result->e(4)[1654], 0.007573484, delta);
-    TS_ASSERT_DELTA(result->y(5)[1025], 0.226287179, delta);
-    TS_ASSERT_DELTA(result->e(5)[1025], 0.02148236, delta);
-  }
-
-  void testExecUsingDifferentMethodChoosesDifferentAlgorithm() {
-    auto result = SofQWTest::runSQW<Mantid::Algorithms::SofQW>("Polygon");
-
-    TS_ASSERT(isAlgorithmInHistory(*result, "SofQWPolygon"));
-    // results are checked in the dedicated algorithm test
-  }
-
   void testExecNansReplaced() {
-    auto result = SofQWTest::runSQW<Mantid::Algorithms::SofQW>("NormalisedPolygon");
+    auto result = SofQWTest::runSQW<Mantid::Algorithms::SofQW>();
     bool nanFound = false;
 
     for (size_t i = 0; i < result->getNumberHistograms(); i++) {

@@ -33,7 +33,7 @@ public:
   MOCK_METHOD1(setSampleFBSuffixes, void(const QStringList &suffixes));
   MOCK_METHOD1(setCanWSSuffixes, void(const QStringList &suffixes));
   MOCK_METHOD1(setCanFBSuffixes, void(const QStringList &suffixes));
-  MOCK_METHOD1(loadSettings, void(const QSettings &settings));
+  MOCK_METHOD1(restoreSettings, void(const API::FileFinderSettings &settings));
   MOCK_METHOD1(setLoadHistory, void(bool doLoadHistory));
   MOCK_METHOD1(enableSaveButton, void(bool enable));
   MOCK_CONST_METHOD0(getShift, double());

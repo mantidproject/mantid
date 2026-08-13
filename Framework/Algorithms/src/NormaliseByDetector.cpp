@@ -126,8 +126,9 @@ void NormaliseByDetector::processHistogram(size_t wsIndex, const MatrixWorkspace
     function->setParameter(fitParam.getName(), paramValue);
   }
 
-  auto wavelengths = inWS->points(wsIndex);
-  FunctionDomain1DVector domain(wavelengths.rawData());
+  // const so that binding it to a std::span does not detach the cow_ptr
+  auto const wavelengths = inWS->points(wsIndex);
+  FunctionDomain1DVector domain(wavelengths);
   FunctionValues values(domain);
   function->function(domain, values);
 

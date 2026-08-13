@@ -45,6 +45,7 @@ New features
     View in a Jupyter Notebook.
   - (`#40101 <https://github.com/mantidproject/mantid/pull/40101>`_) Added a peak overlay. Peaks workspaces can be
     selected within the interface and those peaks will be plotted on both the projection and the 1D plot.
+  - (`#40579 <https://github.com/mantidproject/mantid/pull/40579>`_) Added ability to use in a Jupyter Notebook.
 
   .. figure:: ../../images/6_15_release/new-iv-features.gif
    :class: screenshot
@@ -61,6 +62,10 @@ Bugfixes
     missing presenter.
   - (`#40198 <https://github.com/mantidproject/mantid/pull/40198>`_) When deleting lots of peaks in a short space of
     time, a crash should no longer occur when erasing peaks.
+  - (`#40682 <https://github.com/mantidproject/mantid/pull/40682>`_) When an algorithm is run on the workspace currently
+    open in the interface, a hang will no longer occur.
+  - (`#40727 <https://github.com/mantidproject/mantid/pull/40727>`_) When closing, an error due to a missing presenter
+    will no longer occur.
 
 
 SliceViewer

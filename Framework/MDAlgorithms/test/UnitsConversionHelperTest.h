@@ -162,7 +162,7 @@ public:
     }
 
     // Let WS know that it is in TOF now (one column)
-    auto &T = ws2D->dataX(0);
+    auto &T = ws2D->mutableX(0);
 
     auto pAxis0 = std::make_unique<NumericAxis>(n_bins - 1);
     for (size_t i = 0; i < n_bins - 1; i++) {

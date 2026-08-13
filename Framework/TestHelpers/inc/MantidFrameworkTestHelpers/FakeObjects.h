@@ -26,6 +26,7 @@
 #include <algorithm>
 #include <fstream>
 #include <map>
+#include <span>
 #include <string>
 
 #include "MantidAPI/IMDHistoWorkspace.h"
@@ -84,14 +85,14 @@ public:
   const MantidVec &dataY() const override { return m_histogram.y().rawData(); }
   const MantidVec &dataE() const override { return m_histogram.e().rawData(); }
 
-  size_t getMemorySize() const override { return readY().size() * sizeof(double) * 2; }
+  size_t getMemorySize() const override { return y().size() * sizeof(double) * 2; }
 
   /// Mask the spectrum to this value
   void clearData() override {
     // Assign the value to the data and error arrays
-    MantidVec &yValues = this->dataY();
+    auto &yValues = this->mutableY();
     std::fill(yValues.begin(), yValues.end(), 0.0);
-    MantidVec &eValues = this->dataE();
+    auto &eValues = this->mutableE();
     std::fill(eValues.begin(), eValues.end(), 0.0);
   }
 
@@ -126,9 +127,9 @@ public:
     if (m_vec.empty()) {
       throw std::runtime_error("Vector data is empty, cannot check for ragged workspace.");
     } else {
-      const auto numberOfBins = m_vec[0].dataY().size();
+      const auto numberOfBins = m_vec[0].y().size();
       return std::any_of(m_vec.cbegin(), m_vec.cend(),
-                         [&numberOfBins](const auto &spectrum) { return numberOfBins != spectrum.dataY().size(); });
+                         [&numberOfBins](const auto &spectrum) { return numberOfBins != spectrum.y().size(); });
     }
   }
 
@@ -137,13 +138,13 @@ public:
   const std::string id() const override { return "AxeslessWorkspaceTester"; }
   size_t size() const override {
     return std::accumulate(m_vec.cbegin(), m_vec.cend(), static_cast<size_t>(0),
-                           [](size_t total, const SpectrumTester &i) { return total + i.dataY().size(); });
+                           [](size_t total, const SpectrumTester &i) { return total + i.y().size(); });
   }
   size_t blocksize() const override {
     if (m_vec.empty()) {
       return 0;
     }
-    size_t numY = m_vec[0].dataY().size();
+    size_t numY = m_vec[0].y().size();
     if (std::any_of(m_vec.cbegin(), m_vec.cend(), [numY](auto it) { return it.y().size() != numY; })) {
       throw std::logic_error("non-constant number of bins");
     }
@@ -151,9 +152,9 @@ public:
   }
 
   std::size_t getNumberBins(const std::size_t &index) const override {
-    if (index > m_vec.size())
+    if (index >= m_vec.size())
       return 0;
-    return m_vec[index].dataY().size();
+    return m_vec[index].y().size();
   }
 
   std::size_t getMaxNumberBins() const override {
@@ -162,9 +163,9 @@ public:
     } else {
       const auto iter =
           std::max_element(m_vec.cbegin(), m_vec.cend(), [](const SpectrumTester &s1, const SpectrumTester &s2) {
-            return s1.dataY().size() < s2.dataY().size();
+            return s1.y().size() < s2.y().size();
           });
-      return iter->dataY().size();
+      return iter->y().size();
     }
   }
 
@@ -174,7 +175,7 @@ public:
     return m_vec[index];
   }
   const ISpectrum &getSpectrum(const size_t index) const override { return m_vec[index]; }
-  void generateHistogram(const std::size_t, const MantidVec &, MantidVec &, MantidVec &, bool) const override {}
+  void generateHistogram(const std::size_t, std::span<double const>, MantidVec &, MantidVec &, bool) const override {}
   Mantid::Kernel::SpecialCoordinateSystem getSpecialCoordinateSystem() const override { return Mantid::Kernel::None; }
 
 protected:
@@ -184,9 +185,15 @@ protected:
                                         Mantid::HistogramData::Histogram::YMode::Counts));
     for (size_t i = 0; i < m_spec; i++) {
       m_vec[i].setMatrixWorkspace(this, i);
-      m_vec[i].dataX().resize(j, 1.0);
-      m_vec[i].dataY().resize(k, 1.0);
-      m_vec[i].dataE().resize(k, 1.0);
+      // The data arrays cannot be resized individually, so set them all at the required lengths.
+      // getHistogramXMode() above guarantees that j is either k (points) or k + 1 (bin edges).
+      if (m_vec[i].histogram().xMode() == Mantid::HistogramData::Histogram::XMode::BinEdges) {
+        m_vec[i].setHistogram(Mantid::HistogramData::BinEdges(j, 1.0), Mantid::HistogramData::Counts(k, 1.0),
+                              Mantid::HistogramData::CountStandardDeviations(k, 1.0));
+      } else {
+        m_vec[i].setHistogram(Mantid::HistogramData::Points(j, 1.0), Mantid::HistogramData::Counts(k, 1.0),
+                              Mantid::HistogramData::CountStandardDeviations(k, 1.0));
+      }
       m_vec[i].addDetectorID(detid_t(i));
       m_vec[i].setSpectrumNo(specnum_t(i + 1));
     }
@@ -611,8 +618,8 @@ private:
 
 class VariableBinThrowingTester : public AxeslessWorkspaceTester {
   size_t blocksize() const override {
-    if (getSpectrum(0).dataY().size() == getSpectrum(1).dataY().size())
-      return getSpectrum(0).dataY().size();
+    if (getSpectrum(0).y().size() == getSpectrum(1).y().size())
+      return getSpectrum(0).y().size();
     else
       throw std::length_error("Mismatched bins sizes");
 

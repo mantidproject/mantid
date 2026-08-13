@@ -9,12 +9,12 @@ import json
 import os
 import zlib
 from typing import Optional
-from qtpy.QtCore import QSettings
 
 from mantid.kernel import ConfigService, ErrorReporter, Logger, UsageService
 from mantid.kernel.environment import is_linux
 from mantidqt.dialogs.errorreports.report import MAX_STACK_TRACE_LENGTH
 from mantidqt.dialogs.errorreports.run_pystack import retrieve_thread_traces_from_coredump_file
+from mantidqt.dialogs.errorreports.settings import create_error_reporter_settings
 
 
 class ErrorReporterPresenter(object):
@@ -33,6 +33,8 @@ class ErrorReporterPresenter(object):
         self._application = application
         self._traceback = traceback or ""
         self._cpp_traces = b""
+        self._saved_name = self._view.saved_name.strip()
+        self._saved_email = self._view.saved_email.strip()
         self._view.set_report_callback(self.error_handler)
         self._view.moreDetailsButton.clicked.connect(self.show_more_details)
 
@@ -51,22 +53,29 @@ class ErrorReporterPresenter(object):
 
     def do_not_share(self, continue_working=True, remember_contact_info=False, name="", email=""):
         self.error_log.notice("No information shared")
-        self._manage_remember_me_setting(remember_contact_info, name, email)
         self._handle_exit(continue_working)
         return -1
 
     def _manage_remember_me_setting(self, remember_contact_info=False, name: str = "", email: str = "") -> None:
-        """
-        Stores locally the name and email set by the user on the error reporter form if they choose to do so
-        when clicking on the `Remember Me` checkbox. This information is never shared if the button
-        `Don't share any information` is clicked.
-        """
+        """Store changed contact information after a report is shared with `Remember Me` selected."""
         if not remember_contact_info:
-            name = email = ""
-        settings = QSettings()
+            return
+
+        name = name.strip()
+        email = email.strip()
+        name_changed = name != self._saved_name
+        email_changed = email != self._saved_email
+        if not name_changed and not email_changed:
+            return
+
+        settings = create_error_reporter_settings()
         settings.beginGroup(self._view.CONTACT_INFO)
-        settings.setValue(self._view.NAME, name)
-        settings.setValue(self._view.EMAIL, email)
+        if name_changed:
+            settings.setValue(self._view.NAME, name)
+            self._saved_name = name
+        if email_changed:
+            settings.setValue(self._view.EMAIL, email)
+            self._saved_email = email
         settings.endGroup()
 
     def share_all_information(self, continue_working, remember_contact_info, new_name, new_email, text_box):

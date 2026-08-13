@@ -421,7 +421,7 @@ def create_output_files(calibration_dir: str, calibration: "CalibrationInfo", ws
             filepath, ext = path.splitext(prm_filepath_bank)
             nxs_filepath_bank = filepath + ".nxs"
             copy2(nxs_filepath, nxs_filepath_bank)
-    logger.notice(f'\n\nCalibration files saved to: "{calibration_dir}"\n\n')
+    logger.information(f'\n\nCalibration files saved to: "{calibration_dir}"\n\n')
 
     return prm_filepath  # if both banks, do not pass individual banks (prm_filepath_bank) to GSAS II tab
 
@@ -616,8 +616,11 @@ def _load_run_and_convert_to_dSpacing(filepath: str, instrument: str, full_calib
         logger.warning(f"Run {ws.name()} has invalid proton charge.")
         mantid.DeleteWorkspace(ws)
         return None
-    mantid.ApplyDiffCal(InstrumentWorkspace=ws, CalibrationWorkspace=full_calib)
+    cal = _correct_full_calib_for_offset_scattering_com(ws, full_calib) if _can_calculate_scattering_com(ws) else full_calib
+    mantid.ApplyDiffCal(InstrumentWorkspace=ws, CalibrationWorkspace=cal)
     ws = mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws.name(), Target="dSpacing")
+    if cal is not full_calib:
+        mantid.DeleteWorkspace(cal)
     return ws
 
 
@@ -659,7 +662,7 @@ def _apply_vanadium_norm(sample_ws_foc: MatrixWorkspace, van_ws_foc: MatrixWorks
     return sample_ws_foc
 
 
-def _apply_vanadium_norm_histogram(sample_ws_foc, van_ws_foc, xmin=0.45):
+def _apply_vanadium_norm_histogram(sample_ws_foc: MatrixWorkspace, van_ws_foc: MatrixWorkspace, xmin: float = 0.45) -> MatrixWorkspace:
     # if Histogram data want to ragged crop to avoid zeroing out of scope bins which will affect fitting
     sample_ws_foc = mantid.CropWorkspaceRagged(
         InputWorkspace=sample_ws_foc, OutputWorkspace=sample_ws_foc.name(), XMin=xmin, XMax=float("inf")
@@ -677,7 +680,7 @@ def _apply_vanadium_norm_histogram(sample_ws_foc, van_ws_foc, xmin=0.45):
     return sample_ws_foc
 
 
-def _apply_vanadium_norm_event(sample_ws_foc, van_ws_foc, xmin=0.45):
+def _apply_vanadium_norm_event(sample_ws_foc: MatrixWorkspace, van_ws_foc: MatrixWorkspace, xmin: float = 0.45) -> MatrixWorkspace:
     sample_ws_foc = mantid.CropWorkspace(InputWorkspace=sample_ws_foc, OutputWorkspace=sample_ws_foc.name(), XMin=xmin, XMax=float("inf"))
     # alter the bins attached to the event workspace (used for histogram conversion) to remove any bins before the crop
     nspec = sample_ws_foc.getNumberHistograms()
@@ -698,7 +701,9 @@ def _apply_vanadium_norm_event(sample_ws_foc, van_ws_foc, xmin=0.45):
     return sample_ws_foc
 
 
-def _save_output_files(focus_dirs, sample_ws_foc, calibration, van_run, rb_num=None):
+def _save_output_files(
+    focus_dirs: List[str], sample_ws_foc: MatrixWorkspace, calibration: "CalibrationInfo", van_run: str, rb_num: str | None = None
+) -> Tuple[List[str], List[str], List[str]]:
     # set bankid for use in fit tab
     foc_suffix = calibration.get_foc_ws_suffix()
     xunit = sample_ws_foc.getDimension(0).name
@@ -745,8 +750,99 @@ def _save_output_files(focus_dirs, sample_ws_foc, calibration, van_run, rb_num=N
     return nxs_paths, gss_paths, combined_paths  # from last focus_dir only
 
 
-def _generate_output_file_name(inst, sample_run_no, van_run_no, suffix, xunit, ext=""):
+def _generate_output_file_name(inst: str, sample_run_no: str, van_run_no: str, suffix: str, xunit: str, ext: str = "") -> str:
     return "_".join([inst, sample_run_no, van_run_no, suffix, xunit]) + ext
+
+
+def _correct_full_calib_for_offset_scattering_com(ws: MatrixWorkspace, full_calib: TableWorkspace) -> TableWorkspace:
+    """
+    Adjusts the DIFC in the full calibration to account for an offset scattering volume centre of mass.
+
+    The reason for this is as follows:
+
+    Assuming the true DIFC for the experiment is DIFC_t = k.(L1+L2).sin(theta)
+
+    where k is a physical constant and L1 and L2 are the primary and secondary flight paths
+    and theta is the scattering angle - all of these L1, L2 and theta quantities are the averaged values across the
+    neutrons collected in each detector.
+
+    By default these values are taken assuming the average scattering position of the neutron is the same as
+    the sample position, i.e. the scattering volume (volume of the sample from which scattering occurs) has a
+    centre of mass which is the same as the sample position.
+
+    If this assumption is not true L1, L2 and most importantly (read: biggest error) sin(theta) will be wrong.
+
+    Additionally this formulation assumes that L2 can be calculated using this C.O.M and the as-defined detector positions
+    in the IDF. The calibration is however done to correct for these deviations, so we need to find a way to correct
+    the calibration DIFCs solely for the COM offset.
+
+
+    Broadly this means: DIFC_t = k.G(r, e) where G is a function of the scattering C.O.M, r, and the detector position
+    errors e.
+
+    To correct this we can say, to a first order approximation, G(r,e) = H(r)F(e)
+
+    This gives DIFC_t = k.H(r).F(e)
+
+    We can observe that we have calibrated DIFC for calibration sample (ceria) centred at the origin
+
+    So DIFC_cal = k.H(r0).F(e), where r0 is position of the sample origin
+
+    We can see that DIFC_t = DIFC_cal*H(r)/H(r0)
+    (assuming F(e) is constant - i.e the detector position errors haven't changed since ceria sample collection)
+
+    As we can calculate DIFC for the generic IDF geometry (i.e. calculate without F(e)) we can get
+
+    DIFC_1 = k.H(r) and DIFC_0 = k.H(r0)
+
+    DIFC_1/DIFC_0 = H(r)/H(r0)
+
+    This means DIFC_t = DIFC_cal * DIFC_1/DIFC_0
+    """
+
+    # gauge volume is expected to be present (see _can_calculate_scattering_com)
+    # engineering instrument gauge volumes are on the order of a few mm so this should be an
+    # appropriate level of detail
+    com = mantid.EstimateScatteringVolumeCentreOfMass(ws, ElementUnits="mm", ElementSize=0.1)
+
+    # per-detector ratio of DIFC1(at com) / DIFC(at (0,0,0))
+    difc0 = mantid.CalculateDIFC(InputWorkspace=ws, OutputWorkspace="__difc0", StoreInADS=False)
+
+    # extract sample information
+    sample = ws.getInstrument().getSample()
+    name = sample.getFullName()
+
+    # move the nominal sample location to the scattering COM and calculate the DIFCs from here
+    # (do this on a small copy of the ws to make sure data workspace state is never corrupted)
+    tmp_ws = mantid.ExtractSpectra(
+        InputWorkspace=ws, StartWorkspaceIndex=0, EndWorkspaceIndex=0, OutputWorkspace="__tmp_copy", StoreInADS=False
+    )
+    mantid.MoveInstrumentComponent(Workspace=tmp_ws, ComponentName=name, X=com[0], Y=com[1], Z=com[2], RelativePosition=False)
+    difc1 = mantid.CalculateDIFC(InputWorkspace=tmp_ws, OutputWorkspace="__difc1", StoreInADS=False)
+
+    # scale DIFC column only, per detector; leave DIFA/TZERO untouched
+    cal = mantid.CloneWorkspace(InputWorkspace=full_calib, OutputWorkspace="__full_calib_com")
+    difc_col, detid_col = cal.column("difc"), cal.column("detid")
+    for irow, detid in enumerate(detid_col):
+        cal.setCell("difc", irow, difc_col[irow] * difc1.getValue(detid) / difc0.getValue(detid))
+
+    return cal
+
+
+def _can_calculate_scattering_com(ws: MatrixWorkspace) -> bool:
+    do_com_calc = ws.getRun().hasProperty("GaugeVolume") and ws.sample().getShape().hasValidShape()
+    if do_com_calc:
+        logger.information(
+            f"Workspace {ws.name()} has a Gauge Volume and Sample Shape defined - Calibration DIFCs will "
+            f"be adjusted to account for any offset in the scattering volume centre of mass"
+        )
+    else:
+        logger.notice(
+            f"Workspace {ws.name()} does not have a Gauge Volume and Sample Shape defined - use of calibration DIFCs "
+            f"assume the gauge volume is fully within the sample. "
+            f"If this is not correct, please define sample shape and gauge volume."
+        )
+    return do_com_calc
 
 
 # DEPRECATED FUNCTIONS BELOW

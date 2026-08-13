@@ -18,6 +18,8 @@ From mantidplot:
 
 from qtpy.QtCore import QObject, QSettings, Signal
 
+from mantidqt.utils.qt.qsettings_change_aware import QSettingsChangeAware
+
 unicode = str
 
 
@@ -73,7 +75,7 @@ class GeneralSettings(QObject):
     @data_path.setter
     def data_path(self, val):
         val = str(val)
-        self._settings.setValue("general_data_path", val)
+        QSettingsChangeAware(self._settings).setValue("general_data_path", val)
         self._data_path = val
 
     @property
@@ -84,7 +86,7 @@ class GeneralSettings(QObject):
     @debug.setter
     def debug(self, val):
         val = str(val)
-        self._settings.setValue("debug_mode", val)
+        QSettingsChangeAware(self._settings).setValue("debug_mode", val)
         self._debug = val
 
     @property
@@ -95,7 +97,7 @@ class GeneralSettings(QObject):
     @advanced.setter
     def advanced(self, val):
         val = str(val)
-        self._settings.setValue("advanced_mode", val)
+        QSettingsChangeAware(self._settings).setValue("advanced_mode", val)
         self._advanced = val
 
     @property
@@ -111,7 +113,7 @@ class GeneralSettings(QObject):
     @instrument_name.setter
     def instrument_name(self, val):
         val = str(val)
-        self._settings.setValue("instrument_name", val)
+        QSettingsChangeAware(self._settings).setValue("instrument_name", val)
         self._instrument_name = val
 
     @property
@@ -124,7 +126,7 @@ class GeneralSettings(QObject):
     @facility_name.setter
     def facility_name(self, val):
         val = str(val)
-        self._settings.setValue("facility_name", val)
+        QSettingsChangeAware(self._settings).setValue("facility_name", val)
         self._facility_name = val
 
     @property
@@ -135,7 +137,7 @@ class GeneralSettings(QObject):
     @data_output_dir.setter
     def data_output_dir(self, val):
         val = str(val)
-        self._settings.setValue("data_output_dir", val)
+        QSettingsChangeAware(self._settings).setValue("data_output_dir", val)
         self._data_output_dir = val
 
     @property
@@ -146,5 +148,5 @@ class GeneralSettings(QObject):
     @catalog_data_path.setter
     def catalog_data_path(self, val):
         val = str(val)
-        self._settings.setValue("catalog_data_path", val)
+        QSettingsChangeAware(self._settings).setValue("catalog_data_path", val)
         self._data_path = val

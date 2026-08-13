@@ -13,7 +13,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/System.h"
 
-#include <QSettings>
+#include <MantidQtWidgets/Common/FileFinderWidget.h>
 #include <QWidget>
 
 namespace MantidQt {
@@ -39,7 +39,12 @@ public:
   void clearOutputPlotOptionsWorkspaces();
 
   void enableLoadHistoryProperty(bool doLoadHistory);
-  virtual void loadSettings(const QSettings &settings) = 0;
+  /**
+   * Legacy restore operation. It queries the supplied const settings and
+   * updates tab widgets, but must not write or synchronize persistent storage.
+   * See @ref settings_lifecycle.
+   */
+  virtual void restoreSettings(const API::FileFinderSettings &settings) = 0;
 
 private:
   virtual void setLoadHistory(bool doLoadHistory) { UNUSED_ARG(doLoadHistory); }

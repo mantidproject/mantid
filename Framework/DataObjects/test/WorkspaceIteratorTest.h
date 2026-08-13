@@ -52,9 +52,9 @@ public:
     int count = 0;
     for (MatrixWorkspace::const_iterator ti(*workspace); ti != ti.end(); ++ti) {
       TS_ASSERT_THROWS_NOTHING(LocatedDataRef tr = *ti; int datablock = count / size; int blockindex = count % size;
-                               TS_ASSERT_EQUALS(tr.X(), workspace->dataX(datablock)[blockindex]);
-                               TS_ASSERT_EQUALS(tr.Y(), workspace->dataY(datablock)[blockindex]);
-                               TS_ASSERT_EQUALS(tr.E(), workspace->dataE(datablock)[blockindex]);)
+                               TS_ASSERT_EQUALS(tr.X(), workspace->x(datablock)[blockindex]);
+                               TS_ASSERT_EQUALS(tr.Y(), workspace->y(datablock)[blockindex]);
+                               TS_ASSERT_EQUALS(tr.E(), workspace->e(datablock)[blockindex]);)
       count++;
     }
     TS_ASSERT_EQUALS(count, size * histogramCount);
@@ -78,9 +78,9 @@ public:
       for (MatrixWorkspace::const_iterator ti(*workspace, loopCount); ti != ti.end(); ++ti) {
         TS_ASSERT_THROWS_NOTHING(LocatedDataRef tr = *ti; int indexPosition = count % (size * histogramCount);
                                  int datablock = indexPosition / size; int blockindex = indexPosition % size;
-                                 TS_ASSERT_EQUALS(tr.X(), workspace->dataX(datablock)[blockindex]);
-                                 TS_ASSERT_EQUALS(tr.Y(), workspace->dataY(datablock)[blockindex]);
-                                 TS_ASSERT_EQUALS(tr.E(), workspace->dataE(datablock)[blockindex]);)
+                                 TS_ASSERT_EQUALS(tr.X(), workspace->x(datablock)[blockindex]);
+                                 TS_ASSERT_EQUALS(tr.Y(), workspace->y(datablock)[blockindex]);
+                                 TS_ASSERT_EQUALS(tr.E(), workspace->e(datablock)[blockindex]);)
         count++;
       }
       TS_ASSERT_EQUALS(count, size * histogramCount * loopCount);
@@ -123,9 +123,9 @@ public:
 
     int count = 0;
     for (MatrixWorkspace::const_iterator ti(*workspace); ti != ti.end(); ++ti) {
-      TS_ASSERT_THROWS_NOTHING(LocatedDataRef tr = *ti; TS_ASSERT_EQUALS(tr.X(), workspace->dataX(0)[count]);
-                               TS_ASSERT_EQUALS(tr.Y(), workspace->dataY(0)[count]);
-                               TS_ASSERT_EQUALS(tr.E(), workspace->dataE(0)[count]);)
+      TS_ASSERT_THROWS_NOTHING(LocatedDataRef tr = *ti; TS_ASSERT_EQUALS(tr.X(), workspace->x(0)[count]);
+                               TS_ASSERT_EQUALS(tr.Y(), workspace->y(0)[count]);
+                               TS_ASSERT_EQUALS(tr.E(), workspace->e(0)[count]);)
       count++;
     }
     TS_ASSERT_EQUALS(count, 1);
@@ -149,9 +149,9 @@ public:
       for (MatrixWorkspace::const_iterator ti(*workspace, loopCount); ti != ti.end(); ++ti) {
         TS_ASSERT_THROWS_NOTHING(LocatedDataRef tr = *ti; int indexPosition = count % (size * histogramCount);
                                  int datablock = indexPosition / size; int blockindex = indexPosition % size;
-                                 TS_ASSERT_EQUALS(tr.X(), workspace->dataX(datablock)[blockindex]);
-                                 TS_ASSERT_EQUALS(tr.Y(), workspace->dataY(datablock)[blockindex]);
-                                 TS_ASSERT_EQUALS(tr.E(), workspace->dataE(datablock)[blockindex]);)
+                                 TS_ASSERT_EQUALS(tr.X(), workspace->x(datablock)[blockindex]);
+                                 TS_ASSERT_EQUALS(tr.Y(), workspace->y(datablock)[blockindex]);
+                                 TS_ASSERT_EQUALS(tr.E(), workspace->e(datablock)[blockindex]);)
         count++;
       }
       TS_ASSERT_EQUALS(count, size * histogramCount * loopCount);

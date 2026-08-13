@@ -1883,7 +1883,7 @@ def correct_q_resolution_for_merged(count_ws_front, count_ws_rear, output_ws, sc
     q_resolution = divide_q_resolution_by_counts(new_q_res, new_counts)
 
     # Set the dx error
-    output_ws.setDx(0, q_resolution)
+    output_ws.setSharedDx(0, q_resolution)
 
 
 class MeasurementTimeFromNexusFileExtractor(object):

@@ -10,7 +10,7 @@ from typing import Union
 
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 
 
 class PlotView(QWidget):

@@ -410,8 +410,8 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 3);
 
-    auto &X = ws->dataX(0);
-    auto &Y = ws->dataY(0);
+    auto &X = ws->mutableX(0);
+    auto &Y = ws->mutableY(0);
     // X[0] is 0 by default, unit is seconds.
     X[1] = 10.0;
     X[2] = 15.0;
@@ -448,8 +448,8 @@ public:
     splitter.addROI(DateAndTime(0) + offset_ns, DateAndTime(10, 0) + offset_ns, 1);
 
     Mantid::API::MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
-    auto &X = ws->dataX(0);
-    auto &Y = ws->dataY(0);
+    auto &X = ws->mutableX(0);
+    auto &Y = ws->mutableY(0);
     // X[0] is 0 by default, unit is seconds.
     X[1] = 10.0;
     Y[0] = 1.0;
@@ -467,8 +467,8 @@ public:
     g_log.notice("\ntest_timeSplitterFromMatrixWorkspaceError...");
     // Testing the case where an X value in the MatrixWorkspace is negative.
     Mantid::API::MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 3);
-    auto &X = ws->dataX(0);
-    auto &Y = ws->dataY(0);
+    auto &X = ws->mutableX(0);
+    auto &Y = ws->mutableY(0);
     X[0] = -5.0;
     X[1] = 10.0;
     X[2] = 15.0;

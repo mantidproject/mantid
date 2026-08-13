@@ -26,7 +26,7 @@ Histogram rebinCounts(const Histogram &input, const BinEdges &binEdges) {
   const auto &yold = input.y();
   const auto &eold = input.e();
 
-  const auto &xnew = binEdges.rawData();
+  const auto &xnew = binEdges;
   Counts newCounts(xnew.size() - 1);
   CountVariances newCountVariances(xnew.size() - 1);
   auto &ynew = newCounts.mutableData();
@@ -84,7 +84,7 @@ Histogram rebinFrequencies(const Histogram &input, const BinEdges &binEdges) {
   const auto &yold = input.y();
   const auto &eold = input.e();
 
-  const auto &xnew = binEdges.rawData();
+  const auto &xnew = binEdges;
   Frequencies newFrequencies(xnew.size() - 1);
   FrequencyStandardDeviations newFrequencyStdDev(xnew.size() - 1);
   auto &ynew = newFrequencies.mutableData();

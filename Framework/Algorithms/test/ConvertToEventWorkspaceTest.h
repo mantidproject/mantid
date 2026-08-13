@@ -202,7 +202,7 @@ public:
     Workspace2D_sptr inWS = WorkspaceCreationHelper::create2DWorkspace(1, 10);
 
     // Clear the vector
-    inWS->dataY(0).assign(10, 0.0);
+    inWS->mutableY(0).assign(10, 0.0);
 
     // Name of the output workspace.
     std::string outWSName("ConvertToEventWorkspaceTest_OutputWS");

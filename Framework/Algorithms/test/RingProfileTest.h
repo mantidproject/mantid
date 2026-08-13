@@ -123,20 +123,20 @@ public:
     goodWS->replaceAxis(0, std::move(xAxis));
 
     // 0 values
-    goodWS->mutableY(0)[0] = goodWS->dataY(0)[2] = goodWS->mutableY(0)[4] = 0;
-    goodWS->mutableY(1)[1] = goodWS->dataY(1)[3] = 0;
-    goodWS->mutableY(2)[0] = goodWS->dataY(2)[2] = goodWS->mutableY(2)[4] = 0;
-    goodWS->mutableY(3)[1] = goodWS->dataY(3)[3] = 0;
-    goodWS->mutableY(4)[0] = goodWS->dataY(4)[2] = goodWS->mutableY(4)[4] = 0;
+    goodWS->mutableY(0)[0] = goodWS->mutableY(0)[2] = goodWS->mutableY(0)[4] = 0;
+    goodWS->mutableY(1)[1] = goodWS->mutableY(1)[3] = 0;
+    goodWS->mutableY(2)[0] = goodWS->mutableY(2)[2] = goodWS->mutableY(2)[4] = 0;
+    goodWS->mutableY(3)[1] = goodWS->mutableY(3)[3] = 0;
+    goodWS->mutableY(4)[0] = goodWS->mutableY(4)[2] = goodWS->mutableY(4)[4] = 0;
 
     // 2 values
-    goodWS->mutableY(0)[1] = goodWS->dataY(1)[0] = goodWS->mutableY(1)[2] = 2;
+    goodWS->mutableY(0)[1] = goodWS->mutableY(1)[0] = goodWS->mutableY(1)[2] = 2;
     // 1 values
-    goodWS->mutableY(0)[3] = goodWS->dataY(1)[4] = goodWS->mutableY(2)[3] = 1;
+    goodWS->mutableY(0)[3] = goodWS->mutableY(1)[4] = goodWS->mutableY(2)[3] = 1;
     // 3 values
-    goodWS->mutableY(2)[1] = goodWS->dataY(3)[0] = goodWS->mutableY(4)[1] = 3;
+    goodWS->mutableY(2)[1] = goodWS->mutableY(3)[0] = goodWS->mutableY(4)[1] = 3;
     // 4 values
-    goodWS->mutableY(3)[2] = goodWS->dataY(3)[4] = goodWS->mutableY(4)[3] = 4;
+    goodWS->mutableY(3)[2] = goodWS->mutableY(3)[4] = goodWS->mutableY(4)[3] = 4;
 
     return goodWS;
   }
@@ -322,20 +322,20 @@ public:
     MatrixWorkspace_sptr goodWS = WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(1, 5, 1);
 
     // 0 values
-    goodWS->mutableY(0)[0] = goodWS->dataY(2)[0] = goodWS->mutableY(4)[0] = 0;
-    goodWS->mutableY(6)[0] = goodWS->dataY(8)[0] = 0;
-    goodWS->mutableY(10)[0] = goodWS->dataY(12)[0] = goodWS->mutableY(14)[0] = 0;
-    goodWS->mutableY(16)[0] = goodWS->dataY(18)[0] = 0;
-    goodWS->mutableY(20)[0] = goodWS->dataY(22)[0] = goodWS->mutableY(24)[0] = 0;
+    goodWS->mutableY(0)[0] = goodWS->mutableY(2)[0] = goodWS->mutableY(4)[0] = 0;
+    goodWS->mutableY(6)[0] = goodWS->mutableY(8)[0] = 0;
+    goodWS->mutableY(10)[0] = goodWS->mutableY(12)[0] = goodWS->mutableY(14)[0] = 0;
+    goodWS->mutableY(16)[0] = goodWS->mutableY(18)[0] = 0;
+    goodWS->mutableY(20)[0] = goodWS->mutableY(22)[0] = goodWS->mutableY(24)[0] = 0;
 
     // 2 values
-    goodWS->mutableY(1)[0] = goodWS->dataY(5)[0] = goodWS->mutableY(7)[0] = 2;
+    goodWS->mutableY(1)[0] = goodWS->mutableY(5)[0] = goodWS->mutableY(7)[0] = 2;
     // 1 values
-    goodWS->mutableY(3)[0] = goodWS->dataY(9)[0] = goodWS->mutableY(13)[0] = 1;
+    goodWS->mutableY(3)[0] = goodWS->mutableY(9)[0] = goodWS->mutableY(13)[0] = 1;
     // 3 values
-    goodWS->mutableY(11)[0] = goodWS->dataY(15)[0] = goodWS->mutableY(21)[0] = 3;
+    goodWS->mutableY(11)[0] = goodWS->mutableY(15)[0] = goodWS->mutableY(21)[0] = 3;
     // 4 values
-    goodWS->mutableY(17)[0] = goodWS->dataY(19)[0] = goodWS->mutableY(23)[0] = 4;
+    goodWS->mutableY(17)[0] = goodWS->mutableY(19)[0] = goodWS->mutableY(23)[0] = 4;
 
     return goodWS;
   }

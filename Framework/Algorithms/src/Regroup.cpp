@@ -66,7 +66,7 @@ void Regroup::exec() {
   std::vector<int> xoldIndex; // indeces of new x in XValues_old
   // create new output X axis
   std::vector<double> xAxisTmp;
-  int ntcnew = newAxis(rb_params, XValues_old.rawData(), xAxisTmp, xoldIndex);
+  int ntcnew = newAxis(rb_params, XValues_old, xAxisTmp, xoldIndex);
   HistogramData::BinEdges XValues_new(std::move(xAxisTmp));
 
   // make output Workspace the same type is the input, but with new length of
@@ -174,7 +174,7 @@ void Regroup::rebin(const HistogramX &xold, const HistogramY &yold, const Histog
  *  @param xoldIndex :: indeces of new x in XValues_old
  *  @return The number of bin boundaries in the new X array
  **/
-int Regroup::newAxis(const std::vector<double> &params, const std::vector<double> &xold, std::vector<double> &xnew,
+int Regroup::newAxis(const std::vector<double> &params, std::span<double const> const xold, std::vector<double> &xnew,
                      std::vector<int> &xoldIndex) {
   double xcurr, xs;
   int ibound(2), istep(1), inew(0);
@@ -183,7 +183,7 @@ int Regroup::newAxis(const std::vector<double> &params, const std::vector<double
 
   xcurr = params[0];
   using std::placeholders::_1;
-  auto iup = std::find_if(xold.cbegin(), xold.cend(), std::bind(std::greater_equal<double>(), _1, xcurr));
+  auto iup = std::find_if(xold.begin(), xold.end(), std::bind(std::greater_equal<double>(), _1, xcurr));
   if (iup != xold.end()) {
     xcurr = *iup;
     xnew.emplace_back(xcurr);

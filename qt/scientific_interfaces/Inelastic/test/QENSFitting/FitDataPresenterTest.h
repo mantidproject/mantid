@@ -25,6 +25,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include <span>
 
 using namespace Mantid::API;
 using namespace Mantid::IndirectFitDataCreationHelper;
@@ -91,7 +92,7 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 MATCHER_P(NoCheck, selector, "") { return arg != selector; }
 
 EstimationDataSelector getEstimationDataSelector() {
-  return [](const std::vector<double> &x, const std::vector<double> &y,
+  return [](std::span<double const> const x, std::span<double const> const y,
             const std::pair<double, double> range) -> DataForParameterEstimation {
     // Find data thats within range
     double xmin = range.first;
@@ -103,14 +104,14 @@ EstimationDataSelector getEstimationDataSelector() {
     }
 
     const auto startItr =
-        std::find_if(x.cbegin(), x.cend(), [xmin](const double &val) -> bool { return val >= (xmin - 1e-7); });
-    auto endItr = std::find_if(x.cbegin(), x.cend(), [xmax](const double &val) -> bool { return val > xmax; });
+        std::find_if(x.begin(), x.end(), [xmin](const double &val) -> bool { return val >= (xmin - 1e-7); });
+    auto endItr = std::find_if(x.begin(), x.end(), [xmax](const double &val) -> bool { return val > xmax; });
 
     if (std::distance(startItr, endItr - 1) < 2)
       return DataForParameterEstimation{};
 
-    size_t first = std::distance(x.cbegin(), startItr);
-    size_t end = std::distance(x.cbegin(), endItr);
+    size_t first = std::distance(x.begin(), startItr);
+    size_t end = std::distance(x.begin(), endItr);
     size_t m = first + (end - first) / 2;
 
     return DataForParameterEstimation{{x[first], x[m]}, {y[first], y[m]}};

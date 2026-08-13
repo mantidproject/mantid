@@ -28,18 +28,20 @@ class ErrorReportPresenterTest(unittest.TestCase):
         self.errorreport_mock.return_value = self.errorreport_mock_instance
 
         self.q_settings_mock_instance = mock.MagicMock()
-        q_settings_patcher = mock.patch(f"{self.PRESENTER_CLS_PATH}.QSettings")
+        q_settings_patcher = mock.patch(f"{self.PRESENTER_CLS_PATH}.create_error_reporter_settings")
         self.addCleanup(q_settings_patcher.stop)
         self.q_settings_mock = q_settings_patcher.start()
         self.q_settings_mock.return_value = self.q_settings_mock_instance
 
         self.view = mock.MagicMock()
+        self.view.CONTACT_INFO = "ContactInfo"
+        self.view.NAME = "Name"
+        self.view.EMAIL = "Email"
+        self.view.saved_name = "Saved User"
+        self.view.saved_email = "saved.user@example.com"
         self.exit_code = 255
         self.app_name = "ErrorReportPresenterTest"
         self.error_report_presenter = ErrorReporterPresenter(self.view, self.exit_code, application=self.app_name, workbench_pid=None)
-        self.view.CONTACT_INFO = "ContactInfo"
-        self.view.NAME = "John Smith"
-        self.view.EMAIL = "john.smith@example.com"
 
     def test_sets_logger_view_and_exit_code_upon_construction(self):
         self.assertEqual(self.error_report_presenter._exit_code, self.exit_code)
@@ -60,21 +62,63 @@ class ErrorReportPresenterTest(unittest.TestCase):
         self.logger_mock_instance.error.assert_called_once_with("Terminated by user.")
         self.assertEqual(self.view.quit.call_count, 1)
 
-    def test_remember_me_ticked_stores_user_info_on_local_qsettings_when_do_not_share_is_clicked(self):
+    def test_do_not_share_does_not_construct_qsettings_when_remember_me_is_ticked(self):
         self.error_report_presenter.do_not_share(False, True, "MantidUser", "MantidUser@mail.com")
 
-        self.q_settings_mock_instance.beginGroup.assert_called_once()
-        self.q_settings_mock_instance.endGroup.assert_called_once()
-        self.q_settings_mock_instance.setValue.assert_has_calls(
-            [mock.call(self.view.NAME, "MantidUser"), mock.call(self.view.EMAIL, "MantidUser@mail.com")]
+        self.q_settings_mock.assert_not_called()
+
+    def test_share_does_not_construct_qsettings_when_remember_me_is_unticked(self):
+        self.error_report_presenter._send_report_to_server = mock.MagicMock(return_value=201)
+
+        self.error_report_presenter.share_all_information(False, False, "MantidUser", "MantidUser@mail.com", "details")
+
+        self.q_settings_mock.assert_not_called()
+
+    def test_share_does_not_construct_qsettings_when_contact_info_is_unchanged(self):
+        self.error_report_presenter._send_report_to_server = mock.MagicMock(return_value=201)
+
+        self.error_report_presenter.share_all_information(False, True, self.view.saved_name, self.view.saved_email, "details")
+
+        self.q_settings_mock.assert_not_called()
+
+    def test_share_does_not_construct_qsettings_when_contact_info_changes_only_in_whitespace(self):
+        self.error_report_presenter._send_report_to_server = mock.MagicMock(return_value=201)
+
+        self.error_report_presenter.share_all_information(
+            False, True, f"  {self.view.saved_name}  ", f"\t{self.view.saved_email}\n", "details"
         )
 
-    def test_remember_me_unticked_does_not_store_user_info_on_local_qsettings_when_do_not_share_is_clicked(self):
-        self.error_report_presenter.do_not_share(False, False, "MantidUser", "MantidUser@mail.com")
+        self.q_settings_mock.assert_not_called()
 
-        self.q_settings_mock_instance.beginGroup.assert_called_once()
-        self.q_settings_mock_instance.endGroup.assert_called_once()
-        self.q_settings_mock_instance.setValue.assert_has_calls([mock.call(self.view.NAME, ""), mock.call(self.view.EMAIL, "")])
+    def test_share_stores_only_changed_name_stripped(self):
+        self.error_report_presenter._send_report_to_server = mock.MagicMock(return_value=201)
+
+        self.error_report_presenter.share_all_information(False, True, "  New User  ", self.view.saved_email, "details")
+
+        self.q_settings_mock_instance.beginGroup.assert_called_once_with(self.view.CONTACT_INFO)
+        self.q_settings_mock_instance.setValue.assert_called_once_with(self.view.NAME, "New User")
+        self.q_settings_mock_instance.endGroup.assert_called_once_with()
+
+    def test_share_stores_only_changed_email_stripped(self):
+        self.error_report_presenter._send_report_to_server = mock.MagicMock(return_value=201)
+
+        self.error_report_presenter.share_all_information(False, True, self.view.saved_name, "  new.user@example.com\t", "details")
+
+        self.q_settings_mock_instance.beginGroup.assert_called_once_with(self.view.CONTACT_INFO)
+        self.q_settings_mock_instance.setValue.assert_called_once_with(self.view.EMAIL, "new.user@example.com")
+        self.q_settings_mock_instance.endGroup.assert_called_once_with()
+
+    def test_share_stores_both_changed_contact_values_stripped(self):
+        self.error_report_presenter._send_report_to_server = mock.MagicMock(return_value=201)
+
+        self.error_report_presenter.share_all_information(False, True, "  New User  ", "  new.user@example.com  ", "details")
+
+        self.q_settings_mock_instance.beginGroup.assert_called_once_with(self.view.CONTACT_INFO)
+        self.q_settings_mock_instance.setValue.assert_has_calls(
+            [mock.call(self.view.NAME, "New User"), mock.call(self.view.EMAIL, "new.user@example.com")]
+        )
+        self.assertEqual(self.q_settings_mock_instance.setValue.call_count, 2)
+        self.q_settings_mock_instance.endGroup.assert_called_once_with()
 
     def test_send_error_report_to_server_calls_ErrorReport_correctly(self):
         name = "John Smith"

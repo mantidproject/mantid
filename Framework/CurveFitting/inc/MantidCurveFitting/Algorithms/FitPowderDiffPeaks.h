@@ -18,6 +18,8 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
 
+#include <span>
+
 namespace Mantid {
 namespace CurveFitting {
 namespace Algorithms {
@@ -367,7 +369,7 @@ bool observePeakParameters(const DataObjects::Workspace2D_sptr &dataws, size_t w
                            double &fwhm, std::string &errmsg);
 
 /// Find maximum value
-size_t findMaxValue(const std::vector<double> &Y);
+size_t findMaxValue(std::span<double const> Y);
 
 /// Find maximum value
 size_t findMaxValue(const API::MatrixWorkspace_sptr &dataws, size_t wsindex, double leftbound, double rightbound);

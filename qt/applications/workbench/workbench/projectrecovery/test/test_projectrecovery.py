@@ -164,6 +164,12 @@ class ProjectRecoveryTest(unittest.TestCase):
         # There is no concern for list order in this equality assertion
         self.assertCountEqual([one, two], self.pr.listdir_fullpath(self.working_directory))
 
+    @mock.patch("workbench.projectrecovery.projectrecovery.os.listdir", side_effect=[[None], OSError])
+    def test_list_dir_full_path_with_error(self, mock):
+        self.assertEqual([], self.pr.listdir_fullpath("dir"))
+        self.assertEqual([], self.pr.listdir_fullpath("dir"))
+        self.assertEqual(2, mock.call_count)
+
     def test_recovery_save_when_nothing_is_present(self):
         self.pr.saver._spin_off_another_time_thread = mock.MagicMock()
         self.assertIsNone(self.pr.recovery_save())

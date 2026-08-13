@@ -1,2 +1,3 @@
-- The Error Reporter Dialog now does not erase the local contact information of the user after clicking ``Don't share any information``. This information is never shared if the button
-  ``Don't share any information`` is clicked.
+- The Error Reporter Dialog now stores remembered contact information in its own settings file instead of the Workbench settings file. Previously saved Workbench contact information remains
+  available as a read-only fallback for values not yet set in the new file. The dialog also avoids updating its settings after clicking ``Don't share any information``, when ``Remember me`` is
+  disabled, or when the submitted contact information is unchanged.

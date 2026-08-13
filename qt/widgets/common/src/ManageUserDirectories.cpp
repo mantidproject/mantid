@@ -7,6 +7,7 @@
 #include "MantidQtWidgets/Common/ManageUserDirectories.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
+#include "MantidQtWidgets/Common/QSettingsChangeAware.h"
 #include <QDir>
 #include <QFileDialog>
 #include <QPointer>
@@ -257,7 +258,7 @@ void ManageUserDirectories::browseToDirectory() {
                                                         QFileDialog::ShowDirsOnly);
 
   if (!newDir.isEmpty()) {
-    settings.setValue(QSettingsKeys::LastDirectory, newDir);
+    MantidQt::MantidWidgets::QSettingsChangeAware(settings).setValue(QSettingsKeys::LastDirectory, newDir);
     listWidget(sender())->addItem(newDir);
   }
 }
@@ -312,7 +313,7 @@ void ManageUserDirectories::selectSaveDir() {
 
   if (!newDir.isEmpty()) {
     const auto path = newDir + QDir::separator();
-    settings.setValue(QSettingsKeys::LastDirectory, path);
+    MantidQt::MantidWidgets::QSettingsChangeAware(settings).setValue(QSettingsKeys::LastDirectory, path);
     m_uiForm.leDefaultSave->setText(path);
   }
 }

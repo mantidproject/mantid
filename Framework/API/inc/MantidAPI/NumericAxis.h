@@ -11,6 +11,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Axis.h"
 
+#include <span>
 #include <string>
 #include <vector>
 
@@ -30,6 +31,9 @@ class MANTID_API_DLL NumericAxis : public Axis {
 public:
   NumericAxis(const std::size_t &length);
   NumericAxis(std::vector<double> centres);
+  /// Construct from a contiguous range, so that the size-checked histogram data types
+  /// can be used directly. A std::vector<double> argument still selects the overload above.
+  NumericAxis(std::span<double const> centres);
 
   Axis *clone(const MatrixWorkspace *const parentWorkspace) override;
   Axis *clone(const std::size_t length, const MatrixWorkspace *const parentWorkspace) override;

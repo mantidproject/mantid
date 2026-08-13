@@ -7,23 +7,26 @@
 #
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.show_sample.show_sample_model import ShowSampleModel
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.rb_scope import RbScope, RbScopeConsumer
 from Engineering.texture.texture_helper import get_gauge_vol_str
 from typing import Any
 
 
-class ShowSamplePresenter(object):
+class ShowSamplePresenter(RbScopeConsumer):
     def __init__(self, model: Any, view: Any, include_gauge_volume: bool):
         self.tab_model = model
         self.sample_model = ShowSampleModel(inc_gauge_vol=include_gauge_volume)
         self.view = view
         self.include_gauge_volume = include_gauge_volume
+        # replaced by the owning tab presenter's shared scope in its set_rb_scope
+        self._rb_scope = RbScope()
         self.view.set_on_view_shape_requested(self._on_view_shape_clicked)
 
     def _view_shape(self, ws_name: str, fix_axes: bool) -> None:
         self.sample_model.set_ws_name(ws_name)
         self.sample_model.set_fix_axes_to_sample(fix_axes)
         self._set_gauge_vol_str()
-        ax_transform, ax_labels = output_settings.get_texture_axes_transform()
+        ax_transform, ax_labels = output_settings.get_texture_axes_transform(self.rb_num)
         self.sample_model.show_shape_plot(ax_transform, ax_labels)
 
     def _on_view_shape_clicked(self, ws_name: str) -> None:

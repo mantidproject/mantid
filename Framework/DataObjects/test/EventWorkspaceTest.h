@@ -653,9 +653,9 @@ public:
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i = 0; i < numpix; i++) {
       for (int j = 0; j < 10; j++) {
-        MantidVec Y = ew1->dataY(i);
-        const MantidVec &E = ew1->dataE(i);
-        MantidVec E2 = E;
+        MantidVec Y = ew1->y(i).rawData();
+        Mantid::HistogramData::HistogramE const &E = ew1->e(i);
+        MantidVec E2 = E.rawData();
       }
     }
   }

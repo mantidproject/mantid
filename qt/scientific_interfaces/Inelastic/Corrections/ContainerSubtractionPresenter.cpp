@@ -160,7 +160,9 @@ void ContainerSubtractionPresenter::handleUpdateContainerPlot() {
   updatePlot(m_view->getSpNo());
 }
 
-void ContainerSubtractionPresenter::loadSettings(const QSettings &settings) { m_view->loadSettings(settings); }
+void ContainerSubtractionPresenter::restoreSettings(const API::FileFinderSettings &settings) {
+  m_view->restoreSettings(settings);
+}
 
 void ContainerSubtractionPresenter::handleSaveClicked() {
   if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))

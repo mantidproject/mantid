@@ -293,7 +293,7 @@ public:
     vector<double> vecoutput(vecY.size(), 0.);
 
     // Calculate peaks' intensities
-    lebailfunction.calculatePeaksIntensities(vecX.rawData(), vecY.rawData(), vecoutput);
+    lebailfunction.calculatePeaksIntensities(vecX, vecY, vecoutput);
 
     // Check
     size_t ipeak1 = 6;

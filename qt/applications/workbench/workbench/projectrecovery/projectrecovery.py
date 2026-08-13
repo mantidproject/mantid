@@ -184,7 +184,7 @@ class ProjectRecovery(object):
         """
         try:
             return [os.path.join(directory, item) for item in os.listdir(directory)]
-        except OSError:
+        except (OSError, TypeError):
             return []
 
     def remove_current_pid_folder(self, ignore_errors=False):

@@ -61,28 +61,28 @@ public:
 
     // Test the size of the data vectors (there should be 102 data points so x
     // have 103)
-    TS_ASSERT_EQUALS((ws2d->dataX(0).size()), 102);
-    TS_ASSERT_EQUALS((ws2d->dataY(0).size()), 102);
-    TS_ASSERT_EQUALS((ws2d->dataE(0).size()), 102);
+    TS_ASSERT_EQUALS((ws2d->x(0).size()), 102);
+    TS_ASSERT_EQUALS((ws2d->y(0).size()), 102);
+    TS_ASSERT_EQUALS((ws2d->e(0).size()), 102);
 
     double tolerance(1e-06);
-    TS_ASSERT_DELTA(ws2d->dataX(0)[0], 0.0604703, tolerance);
-    TS_ASSERT_DELTA(ws2d->dataX(0)[1], 0.0620232, tolerance);
-    TS_ASSERT_DELTA(ws2d->dataX(0)[2], 0.0635737, tolerance);
+    TS_ASSERT_DELTA(ws2d->x(0)[0], 0.0604703, tolerance);
+    TS_ASSERT_DELTA(ws2d->x(0)[1], 0.0620232, tolerance);
+    TS_ASSERT_DELTA(ws2d->x(0)[2], 0.0635737, tolerance);
     ////Test a couple of random ones
-    TS_ASSERT_DELTA(ws2d->dataX(0)[20], 0.0991537, tolerance);
-    TS_ASSERT_DELTA(ws2d->dataX(0)[64], 0.293873, tolerance);
+    TS_ASSERT_DELTA(ws2d->x(0)[20], 0.0991537, tolerance);
+    TS_ASSERT_DELTA(ws2d->x(0)[64], 0.293873, tolerance);
 
-    TS_ASSERT_DELTA(ws2d->dataX(0)[100], 0.714858, tolerance);
-    TS_ASSERT_DELTA(ws2d->dataX(0)[101], 0.732729, tolerance);
+    TS_ASSERT_DELTA(ws2d->x(0)[100], 0.714858, tolerance);
+    TS_ASSERT_DELTA(ws2d->x(0)[101], 0.732729, tolerance);
 
-    TS_ASSERT_DELTA(ws2d->dataY(0)[0], 12, tolerance);
-    TS_ASSERT_DELTA(ws2d->dataY(0)[25], 4674, tolerance);
-    TS_ASSERT_DELTA(ws2d->dataY(0)[99], 1, tolerance);
+    TS_ASSERT_DELTA(ws2d->y(0)[0], 12, tolerance);
+    TS_ASSERT_DELTA(ws2d->y(0)[25], 4674, tolerance);
+    TS_ASSERT_DELTA(ws2d->y(0)[99], 1, tolerance);
 
-    TS_ASSERT_DELTA(ws2d->dataE(0)[0], 3.4641, tolerance);
-    TS_ASSERT_DELTA(ws2d->dataE(0)[25], 68.3667, tolerance);
-    TS_ASSERT_DELTA(ws2d->dataE(0)[99], 1, tolerance);
+    TS_ASSERT_DELTA(ws2d->e(0)[0], 3.4641, tolerance);
+    TS_ASSERT_DELTA(ws2d->e(0)[25], 68.3667, tolerance);
+    TS_ASSERT_DELTA(ws2d->e(0)[99], 1, tolerance);
   }
 
   void testMultipleEntries() {
@@ -123,7 +123,7 @@ public:
     TS_ASSERT_EQUALS(ws2d->getInstrument()->getName(), "LOQ")
 
     TS_ASSERT_EQUALS(ws2d->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(ws2d->dataX(0).size(), 143);
+    TS_ASSERT_EQUALS(ws2d->x(0).size(), 143);
 
     // some of the data is only stored to 3 decimal places
     double tolerance(1e-04);
@@ -131,9 +131,9 @@ public:
     // has all its values check below
     const int testIndices[] = {0, 70, 142};
     for (int i = 0; i < 3; ++i) {
-      TS_ASSERT_DELTA(ws2d->dataX(0)[testIndices[i]], xs99631[i], tolerance);
-      TS_ASSERT_DELTA(ws2d->dataY(0)[testIndices[i]], ys99631[i], tolerance);
-      TS_ASSERT_DELTA(ws2d->dataE(0)[testIndices[i]], es99631[i], tolerance);
+      TS_ASSERT_DELTA(ws2d->x(0)[testIndices[i]], xs99631[i], tolerance);
+      TS_ASSERT_DELTA(ws2d->y(0)[testIndices[i]], ys99631[i], tolerance);
+      TS_ASSERT_DELTA(ws2d->e(0)[testIndices[i]], es99631[i], tolerance);
     }
 
     ws = Mantid::API::AnalysisDataService::Instance().retrieve(wNames[1]);
@@ -147,13 +147,13 @@ public:
     TS_ASSERT_EQUALS(ws2d->getInstrument()->getName(), "SANS2D")
 
     TS_ASSERT_EQUALS(ws2d->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(ws2d->dataX(0).size(), 23);
+    TS_ASSERT_EQUALS(ws2d->x(0).size(), 23);
 
     // testing all workspace data, as there isn't much
     for (int i = 0; i < 23; ++i) {
-      TS_ASSERT_DELTA(ws2d->dataX(0)[i], xs808[i], tolerance);
-      TS_ASSERT_DELTA(ws2d->dataY(0)[i], ys808[i], tolerance);
-      TS_ASSERT_DELTA(ws2d->dataE(0)[i], es808[i], tolerance);
+      TS_ASSERT_DELTA(ws2d->x(0)[i], xs808[i], tolerance);
+      TS_ASSERT_DELTA(ws2d->y(0)[i], ys808[i], tolerance);
+      TS_ASSERT_DELTA(ws2d->e(0)[i], es808[i], tolerance);
     }
   }
 
@@ -178,25 +178,25 @@ public:
 
     TS_ASSERT_EQUALS(ws2d->getNumberHistograms(), 1);
 
-    TS_ASSERT_EQUALS((ws2d->dataX(0).size()), 4);
-    TS_ASSERT_EQUALS((ws2d->dataY(0).size()), 4);
-    TS_ASSERT_EQUALS((ws2d->dataE(0).size()), 4);
+    TS_ASSERT_EQUALS((ws2d->x(0).size()), 4);
+    TS_ASSERT_EQUALS((ws2d->y(0).size()), 4);
+    TS_ASSERT_EQUALS((ws2d->e(0).size()), 4);
 
     double tolerance(1e-06);
-    TS_ASSERT_DELTA(ws2d->dataX(0)[0], 1.0, tolerance);
-    TS_ASSERT_DELTA(ws2d->dataX(0)[1], 2.0, tolerance);
-    TS_ASSERT_DELTA(ws2d->dataX(0)[2], 3.0, tolerance);
-    TS_ASSERT_DELTA(ws2d->dataX(0)[3], 4.0, tolerance);
+    TS_ASSERT_DELTA(ws2d->x(0)[0], 1.0, tolerance);
+    TS_ASSERT_DELTA(ws2d->x(0)[1], 2.0, tolerance);
+    TS_ASSERT_DELTA(ws2d->x(0)[2], 3.0, tolerance);
+    TS_ASSERT_DELTA(ws2d->x(0)[3], 4.0, tolerance);
 
-    TS_ASSERT_DELTA(ws2d->dataY(0)[0], 4.0, tolerance);
-    TS_ASSERT_DELTA(ws2d->dataY(0)[1], 9.0, tolerance);
-    TS_ASSERT_DELTA(ws2d->dataY(0)[2], 16.0, tolerance);
-    TS_ASSERT_DELTA(ws2d->dataY(0)[3], 25.0, tolerance);
+    TS_ASSERT_DELTA(ws2d->y(0)[0], 4.0, tolerance);
+    TS_ASSERT_DELTA(ws2d->y(0)[1], 9.0, tolerance);
+    TS_ASSERT_DELTA(ws2d->y(0)[2], 16.0, tolerance);
+    TS_ASSERT_DELTA(ws2d->y(0)[3], 25.0, tolerance);
 
-    TS_ASSERT_DELTA(ws2d->dataE(0)[0], 2.0, tolerance);
-    TS_ASSERT_DELTA(ws2d->dataE(0)[1], 3.0, tolerance);
-    TS_ASSERT_DELTA(ws2d->dataE(0)[2], 4.0, tolerance);
-    TS_ASSERT_DELTA(ws2d->dataE(0)[3], 5.0, tolerance);
+    TS_ASSERT_DELTA(ws2d->e(0)[0], 2.0, tolerance);
+    TS_ASSERT_DELTA(ws2d->e(0)[1], 3.0, tolerance);
+    TS_ASSERT_DELTA(ws2d->e(0)[2], 4.0, tolerance);
+    TS_ASSERT_DELTA(ws2d->e(0)[3], 5.0, tolerance);
   }
 
 private:

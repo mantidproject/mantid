@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FileFinderWidget.h"
 #include "MantidQtWidgets/Common/DropEventHelper.h"
+#include "MantidQtWidgets/Common/QSettingsChangeAware.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileProperty.h"
@@ -402,17 +403,8 @@ void FileFinderWidget::setFileProblem(const QString &message) {
  */
 const QString &FileFinderWidget::getFileProblem() const { return m_fileProblem; }
 
-/**
- * Save settings to the given group
- * @param group :: The name of the group key to save to
- */
-void FileFinderWidget::saveSettings(const QString &group) {
-  QSettings settings;
-  settings.beginGroup(group);
-
-  settings.setValue("last_directory", m_lastDir);
-
-  settings.endGroup();
+void FileFinderWidget::saveSettings(QSettings &settings, const FileFinderSettings &values) const {
+  MantidQt::MantidWidgets::QSettingsChangeAware(settings).setValue("last_directory", values.lastDirectory());
 }
 
 /** Writes the total number of periods in a file to the NumEntries
@@ -628,25 +620,23 @@ void FileFinderWidget::inspectThreadResult(const FindFilesSearchResults &results
     emit filesFoundChanged();
 }
 
-/**
- * Read settings from the given group
- * @param group :: The name of the group key to retrieve data from
- */
-void FileFinderWidget::readSettings(const QString &group) {
-  QSettings settings;
-  settings.beginGroup(group);
-  m_lastDir = settings.value("last_directory", "").toString();
+FileFinderSettings FileFinderWidget::readSettings(const QSettings &settings) {
+  auto lastDirectory = settings.value("last_directory", "").toString();
 
-  if (m_lastDir == "") {
+  if (lastDirectory.isEmpty()) {
     QStringList datadirs =
         QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories"))
             .split(";", Qt::SkipEmptyParts);
     if (!datadirs.isEmpty())
-      m_lastDir = datadirs[0];
+      lastDirectory = datadirs[0];
   }
 
-  settings.endGroup();
+  return FileFinderSettings(lastDirectory);
 }
+
+void FileFinderWidget::restoreSettings(const FileFinderSettings &settings) { m_lastDir = settings.lastDirectory(); }
+
+FileFinderSettings FileFinderWidget::captureSettings() const { return FileFinderSettings(m_lastDir); }
 
 /**
  * Set a new file filter for the file dialog based on the given extensions

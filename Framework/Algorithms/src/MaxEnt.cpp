@@ -85,12 +85,8 @@ MatrixWorkspace_sptr removeZeros(MatrixWorkspace_sptr &ws, const std::vector<siz
     return ws; // In case, we don't have any spectra
   }
   for (size_t spec = 0; spec < nspec; spec++) {
-    auto &dataX = ws->dataX(spec);
-    dataX.resize(itCount[spec]);
-    auto &dataY = ws->dataY(spec);
-    dataY.resize(itCount[spec]);
-    auto &dataE = ws->dataE(spec);
-    dataE.resize(itCount[spec]);
+    // the workspace holds point data, so this resizes X, Y and E alike
+    ws->resizeHistogram(spec, itCount[spec]);
   }
   return ws;
 }
@@ -245,7 +241,7 @@ void MaxEnt::validateBinEdges(const std::string &wsName, std::map<std::string, s
   MatrixWorkspace_const_sptr ws = getProperty(wsName);
   if (ws) {
 
-    Kernel::EqualBinsChecker binChecker(ws->x(0).rawData(), BIN_WIDTH_ERROR_LEVEL, warningLevel);
+    Kernel::EqualBinsChecker binChecker(ws->x(0), BIN_WIDTH_ERROR_LEVEL, warningLevel);
     const std::string binError = binChecker.validate();
     if (!binError.empty()) {
       messages[wsName] = binError;

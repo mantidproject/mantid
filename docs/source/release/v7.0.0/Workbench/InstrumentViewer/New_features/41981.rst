@@ -1,0 +1,1 @@
+- New Instrument View now allows for zooming and panning in lineplot when adding/removing peaks.

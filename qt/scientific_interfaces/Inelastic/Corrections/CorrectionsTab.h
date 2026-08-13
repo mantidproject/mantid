@@ -15,8 +15,8 @@
 
 #include "MantidQtWidgets/Common/IAlgorithmRunnerSubscriber.h"
 #include <MantidQtWidgets/Common/AlgorithmRunner.h>
+#include <MantidQtWidgets/Common/FileFinderWidget.h>
 
-class QSettings;
 class QString;
 
 namespace MantidQt {
@@ -76,8 +76,8 @@ public:
   /// Used to clear the workspaces held by the output plotting widget
   void clearOutputPlotOptionsWorkspaces();
 
-  /// Loads the tab's settings.
-  void loadTabSettings(const QSettings &settings);
+  /// Restore widget state from an immutable settings snapshot.
+  virtual void restoreSettings(const API::FileFinderSettings &settings) = 0;
 
   /// Prevent loading of data with incorrect naming
   void filterInputData(bool filter);
@@ -108,7 +108,6 @@ protected:
   QtCheckBoxFactory *m_blnEdFac;
 
 private:
-  virtual void loadSettings(const QSettings &settings) = 0;
   virtual void setFileExtensionsByName(bool filter) = 0;
   virtual void setLoadHistory(bool doLoadHistory) { (void)doLoadHistory; };
 };

@@ -40,7 +40,7 @@ Improvements
 Bugfixes
 ########
 
-- Fixed a crash in :ref:`SofQW <algm-SofQW>`, :ref:`SofQWCentre <algm-SofQWCentre>`, :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>` and :ref:`SofQWPolygon <algm-SofQWPolygon>` algorithms when they were supplied with energy or :math:`Q` binning params containing the bin width only.
+- Fixed a crash in :ref:`SofQW <algm-SofQW>`, SofQWCentre, :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>` and SofQWPolygon algorithms when they were supplied with energy or :math:`Q` binning params containing the bin width only.
 - Fixed a failure in the wavelength interpolation of :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` which occurred under certain input property combinations.
 
 Deprecated
