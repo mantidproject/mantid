@@ -1,0 +1,1 @@
+- On Linux systems with an NFS-backed configuration directory, Workbench now stages its QSettings files in the local cache. This avoids lock-file failures when running multiple Workbench instances and preserves conflicting settings for recovery.
