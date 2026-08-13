@@ -112,7 +112,7 @@ class PythonChannelTest(systemtesting.MantidSystemTest):
         self._server = Process(target=run_server)
         self._server.start()
         suite = unittest.TestSuite()
-        suite.addTest(unittest.makeSuite(PythonLoggingTests, "test"))
+        suite.addTest(unittest.defaultTestLoader.loadTestsFromTestCase(PythonLoggingTests))
         runner = unittest.TextTestRunner()
         try:
             self.assertTrue(runner.run(suite).wasSuccessful())

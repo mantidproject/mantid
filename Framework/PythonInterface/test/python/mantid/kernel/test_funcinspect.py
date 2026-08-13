@@ -51,10 +51,41 @@ class FuncInspectTest(unittest.TestCase):
         self.assertEqual(len(a[1]), 1)
         self.assertEqual(a[1][0], "a")
 
+    def test_lhs_info_with_keyword_arguments(self):
+        # Keyword arguments given directly in the call, as opposed to expanded from a dict,
+        # compile to a CALL_KW instruction since 3.13
+        result = self._function_returns_lhs_info(InputWorkspace="ws")
+        self.assertEqual(result, (1, ("result",)))
+
+    def test_lhs_info_with_ignored_values(self):
+        # Since 3.13 the store for a target is replaced by a POP_TOP when the same variable is
+        # assigned to again straight afterwards, which is the case for the first "_" here
+        info, _, _ = self._function_returns_lhs_info_and_padding()
+        self.assertEqual(info, (3, ("info", "_", "_")))
+
+    def test_lhs_info_with_two_return_values(self):
+        # Since 3.13 the two stores are fused into a single STORE_FAST_STORE_FAST instruction
+        first, second = self._function_returns_lhs_info()
+        self.assertEqual(first, 2)
+        self.assertEqual(second, ("first", "second"))
+
+    def test_lhs_info_with_two_return_values_and_multiple_assignment(self):
+        first, second = other_first, other_second = self._function_returns_lhs_info()
+        self.assertEqual((first, second), (other_first, other_second))
+        self.assertEqual(first, 2)
+        self.assertEqual(second, (["first", "second"], ["other_first", "other_second"]))
+
     @classmethod
     def _function_returns_lhs_info(cls, **kwargs):
         n_outputs, var_names = lhs_info("both")
         return n_outputs, var_names
+
+    @classmethod
+    def _function_returns_lhs_info_and_padding(cls, **kwargs):
+        """Returns the lhs_info of the caller in the first element, padded out so that
+        callers can unpack it into three targets
+        """
+        return lhs_info("both"), None, None
 
 
 if __name__ == "__main__":

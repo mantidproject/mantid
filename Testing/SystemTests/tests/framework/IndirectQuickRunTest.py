@@ -108,7 +108,7 @@ class IndirectQuickRunTestRunner(systemtesting.MantidSystemTest):
 
     def runTest(self):
         suite = unittest.TestSuite()
-        suite.addTest(unittest.makeSuite(IndirectQuickRunTest, "test"))
+        suite.addTest(unittest.defaultTestLoader.loadTestsFromTestCase(IndirectQuickRunTest))
         runner = unittest.TextTestRunner()
         res = runner.run(suite)
         if res.wasSuccessful():

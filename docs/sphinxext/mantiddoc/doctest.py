@@ -23,16 +23,22 @@ Below are examples of the output for each of the above
 outcomes, given a document named 'FooDoc' in a
 directory 'bar' relative to the documentation root.
 
+The examples use the wording produced by Python 3.13 and later,
+which pluralises 'item'/'test'/'failure' correctly. Earlier versions
+always printed the plural form ('1 items passed all tests:',
+'1 tests in Ex1', '***Test Failed*** 1 failures.') and the parser
+accepts both.
+
 - All Passed:
  ============
 
 Document: algorithms/AllPassed
 ------------------------------
 2 items passed all tests:
-   1 tests in Ex 2
+   1 test in Ex 2
    2 tests in default
 3 tests in 2 items.
-3 passed and 0 failed.
+3 passed.
 Test passed.
 
 Doctest summary
@@ -73,10 +79,10 @@ Got:
 0 passed and 2 failed.
 ***Test Failed*** 2 failures.
 2 items passed all tests:
-   1 tests in Ex1 (cleanup code)
-   1 tests in Ex2[31] (cleanup code)
+   1 test in Ex1 (cleanup code)
+   1 test in Ex2[31] (cleanup code)
 2 tests in 2 items.
-2 passed and 0 failed.
+2 passed.
 Test passed.
 
 Doctest summary
@@ -107,8 +113,8 @@ Expected:
     Not a success again
 Got:
     Second failed test
-1 items passed all tests:
-    1 tests in Ex3
+1 item passed all tests:
+    1 test in Ex3
 **********************************************************************
 2 items had failures:
    1 of   1 in Ex1
@@ -116,10 +122,10 @@ Got:
 4 tests in 3 items.
 2 passed and 2 failed.
 ***Test Failed*** 2 failures.
-1 items passed all tests:
-   1 tests in Ex (cleanup code)
-1 tests in 1 items.
-1 passed and 0 failed.
+1 item passed all tests:
+   1 test in Ex (cleanup code)
+1 test in 1 item.
+1 passed.
 Test passed.
 
 Doctest summary
@@ -163,11 +169,16 @@ DOCTEST_SUMMARY_TITLE = "Doctest summary"
 FAILURE_MARKER = "*" * 70
 
 # Regexes
-ALLPASS_TEST_NAMES_RE = re.compile(r"^\s+(\d+) tests in (.+)$")
-NUMBER_PASSED_RE = re.compile(r"^(\d+) items passed all tests:$")
+# Note: Python 3.13 (gh-113632) made the doctest summary lines pluralise
+# correctly, e.g. '1 item passed all tests:'/'1 test in Foo' where earlier
+# versions always printed 'items'/'tests'. The optional 's' in the patterns
+# below keeps this parser working with both wordings.
+ALLPASS_TEST_NAMES_RE = re.compile(r"^\s+(\d+) tests? in (.+)$")
+NUMBER_PASSED_RE = re.compile(r"^(\d+) items? passed all tests:$")
 
 TEST_PASSED_END_RE = re.compile(r"Test passed.")
-TEST_FAILED_END_RE = re.compile(r"\*\*\*Test Failed\*\*\* (\d+) failures.")
+# Python 3.13 can also append ' and N skipped test(s)' to this line
+TEST_FAILED_END_RE = re.compile(r"\*\*\*Test Failed\*\*\* (\d+) failures?")
 FAILURE_LOC_RE = re.compile(r"^File \"(.+)\",\s+line\s+(\d+),\s+in\s+(\S+)(\s\((setup|cleanup) code\))?$")
 MIX_FAIL_RE = re.compile(r"^\s+(\d+)\s+of\s+(\d+)\s+in\s+(\w+)$")
 
@@ -412,7 +423,7 @@ class DocTestOutputParser(object):
         classname = self.__create_classname(fullname)
 
         # Find index marker lines that delineate failures or
-        # a line containing 'items passed all tests:'. It looks as if
+        # a line containing 'item(s) passed all tests:'. It looks as if
         # this is a bug in sphinx.doctest output that doesn't delineate
         # the failures and successes properly.
         fail_markers = []
@@ -423,7 +434,7 @@ class DocTestOutputParser(object):
                     success_markers.append(idx)
                 else:
                     fail_markers.append(idx)
-            if line.endswith("items passed all tests:"):
+            if NUMBER_PASSED_RE.match(line):
                 success_markers.append(idx)
                 fail_markers.append(idx)
         # Parse failure text first as the last section can contain

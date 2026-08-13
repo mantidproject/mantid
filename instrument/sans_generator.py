@@ -39,7 +39,7 @@ class Generator(object):
     def _create_definition(self):
         output = open("%s_Definition.xml" % self.name.upper(), 'w')
         input = open(DEFINITION_TEMPLATE, 'r')
-        for l in input.readlines():
+        for l in input:
             l=l.replace("%instrument_name%", self.name)
             l=l.replace("%last_modified%", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
             l=l.replace("%pixel_positions%", self._get_positions())
@@ -82,7 +82,7 @@ class Generator(object):
     def _create_parameters(self):
         output = open("%s_Parameters.xml" % self.name.upper(), 'w')
         input = open(PARAMETERS_TEMPLATE, 'r')
-        for l in input.readlines():
+        for l in input:
             l=l.replace("%instrument_name%", self.name.upper())
             l=l.replace("%last_modified%", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
             l=l.replace("%n_x_pixels%", "%d" % self.n_pixels_x)

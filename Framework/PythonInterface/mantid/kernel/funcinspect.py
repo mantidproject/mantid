@@ -165,6 +165,7 @@ def decompile(code_object, show_caches=False):
 # This is for the lhs functionality
 OPERATOR_NAMES = {
     "CALL",
+    "CALL_KW",
     "CALL_FUNCTION_VAR",
     "CALL_FUNCTION_VAR_KW",
     "UNARY_POSITIVE",
@@ -183,6 +184,104 @@ OPERATOR_NAMES = {
     "SET_UPDATE",
     "BUILD_CONST_KEY_MAP",
 }
+
+# Instructions that assign the value on the top of the stack to a single name
+STORE_NAMES = {"STORE_FAST", "STORE_NAME"}
+
+# Since 3.13 the compiler fuses pairs of adjacent local variable operations into single
+# "superinstructions" whose argument is a tuple holding both of the names. The value
+# here is the number of leading names in that tuple that are actually assigned to.
+# https://docs.python.org/3/whatsnew/3.13.html#cpython-bytecode-changes
+FUSED_STORE_NAMES = {"STORE_FAST_STORE_FAST": 2, "STORE_FAST_LOAD_FAST": 1}
+
+
+def stored_names(instruction):
+    """Returns the names that a single instruction assigns to.
+
+    Call signature(s)::
+
+    Required arguments:
+    ===========================   ==========
+    instruction                   A single entry from the list returned by decompile()
+
+    Outputs:
+    =========
+    A list of names, empty if the instruction does not assign to anything and holding
+    more than one name if the compiler has fused several stores into one instruction
+    """
+    _, _, name, _, argvalue = instruction
+    if name in STORE_NAMES:
+        return [argvalue]
+    n_stored = FUSED_STORE_NAMES.get(name)
+    if n_stored is None:
+        return []
+    return list(argvalue[:n_stored])
+
+
+def next_stored_name(ins_stack, start_index):
+    """Returns the first name assigned to by the instructions from start_index onwards.
+
+    Call signature(s)::
+
+    Required arguments:
+    ===========================   ==========
+    ins_stack                     The list of instructions returned by decompile()
+    start_index                   Index of the instruction to start looking from
+
+    Outputs:
+    =========
+    A name, or None if none of the remaining instructions assigns to anything
+    """
+    for instruction in ins_stack[start_index:]:
+        names = stored_names(instruction)
+        if names:
+            return names[0]
+    return None
+
+
+def collect_target_names(ins_stack, start_index, n_names):
+    """Returns the names of the targets of an unpacking assignment.
+
+    Call signature(s)::
+
+    Required arguments:
+    ===========================   ==========
+    ins_stack                     The list of instructions returned by decompile()
+    start_index                   Index of the first instruction after the UNPACK_SEQUENCE
+    n_names                       The number of targets being assigned to
+
+    Outputs:
+    =========
+    A tuple of the names found and the number of instructions they occupied
+
+    There is normally a single store instruction, and so a single name, per target, but
+    since 3.13 the compiler may fuse a pair of adjacent stores into one instruction that
+    carries both names. Targets that are not plain variables, e.g. an attribute or a
+    subscript, take more than one instruction and contribute whichever argument those
+    instructions happen to carry, which is the long standing behaviour here.
+    """
+    names = []
+    elided = []
+    index = start_index
+    while len(names) < n_names and index < len(ins_stack):
+        _, _, name, _, argvalue = ins_stack[index]
+        if name in FUSED_STORE_NAMES:
+            names.extend(argvalue[: FUSED_STORE_NAMES[name]])
+        elif name == "POP_TOP":
+            # Since 3.13 the store for a target is dropped in favour of a POP_TOP when
+            # the same variable is assigned to again straight afterwards, as in the
+            # first "_" of "a, _, _ = f()". Take the name from the later store.
+            elided.append((len(names), index))
+            names.append(None)
+        else:
+            names.append(argvalue)
+        index += 1
+
+    names = names[:n_names]
+    for position, instruction_index in elided:
+        if position < len(names):
+            names[position] = next_stored_name(ins_stack, instruction_index + 1)
+    return names, index - start_index
 
 
 def process_frame(frame):
@@ -245,16 +344,19 @@ def process_frame(frame):
         last_func_offset += 1
         last_i = next_instruction_offset
 
-    _, _, name, _, argvalue = ins_stack[last_func_offset + 1]
+    instruction = ins_stack[last_func_offset + 1]
+    _, _, name, _, argvalue = instruction
+    single_store = stored_names(instruction)
+    max_returns = 0
     if name == "POP_TOP":  # no return values
         pass
-    elif name == "STORE_FAST" or name == "STORE_NAME":  # one return value
-        output_var_names.append(argvalue)
+    elif single_store:  # one return value
+        output_var_names.append(single_store[0])
+        max_returns = 1
     elif name == "UNPACK_SEQUENCE":  # Many Return Values, One equal sign
-        for index in range(argvalue):
-            _, _, _, _, sequence_argvalue = ins_stack[last_func_offset + 2 + index]
-            output_var_names.append(sequence_argvalue)
-    max_returns = len(output_var_names)
+        names, _ = collect_target_names(ins_stack, last_func_offset + 2, argvalue)
+        output_var_names.extend(names)
+        max_returns = argvalue
     if name == "COPY":  # Many Return Values, Many equal signs
         # The output here should be a multi-dim list which mimics the variable unpacking sequence.
         # For instance a,b=c,d=f() => [ ['a','b'] , ['c','d'] ]
@@ -263,22 +365,22 @@ def process_frame(frame):
         # put this in a loop and stack the results in an array.
         count = 0
         max_returns = 0  # Must count the max_returns ourselves in this case
-        while count < len(ins_stack[call_function_locs[last_i][0] : call_function_locs[last_i][1]]):
-            _, _, multi_name, _, multi_argvalue = ins_stack[call_function_locs[last_i][0] + count]
+        first_index, last_index = call_function_locs[last_i]
+        while first_index + count < last_index:
+            instruction = ins_stack[first_index + count]
+            _, _, multi_name, _, multi_argvalue = instruction
             if multi_name == "UNPACK_SEQUENCE":  # Many Return Values, One equal sign
-                hold = []
                 if multi_argvalue > max_returns:
                     max_returns = multi_argvalue
-                for index in range(multi_argvalue):
-                    _, _, _, _, sequence_argvalue = ins_stack[call_function_locs[last_i][0] + count + 1 + index]
-                    hold.append(sequence_argvalue)
-                count += multi_argvalue
+                hold, n_instructions = collect_target_names(ins_stack, first_index + count + 1, multi_argvalue)
                 output_var_names.append(hold)
-            # Need to now skip the entries we just appended with the for loop.
-            if multi_name == "STORE_FAST" or multi_name == "STORE_NAME":  # One Return Value
-                if max_returns == 0:
+                # Need to now skip the entries we just collected.
+                count += n_instructions
+            else:
+                names_here = stored_names(instruction)  # One Return Value, or a fused pair of them
+                if names_here and max_returns == 0:
                     max_returns = 1
-                output_var_names.append(multi_argvalue)
+                output_var_names.extend(names_here)
             count += 1
 
     return max_returns, tuple(output_var_names)
