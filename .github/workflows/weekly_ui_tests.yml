@@ -8,7 +8,8 @@ name: Weekly Automated UI Tests
 #   * there is no `pull_request` trigger, so this never runs against a PR;
 #   * the tests carry the AutomatedUITest CTest label, which neither `ctest -L UnitTest` in the
 #     pull request build nor runSystemTests.py in the nightly selects;
-#   * the test step is continue-on-error, and the job publishes results rather than gating on them.
+#   * the test step is continue-on-error, and a separate job publishes results rather than gating
+#     on them.
 # This workflow must not be added to the repository's required status checks.
 
 on:
@@ -33,7 +34,6 @@ jobs:
     if: ${{ github.repository_owner == 'mantidproject' }}
     permissions:
       contents: read
-      checks: write
 
     strategy:
       # a failure on one platform must not cancel the others - the point of the run is the
@@ -122,19 +122,6 @@ jobs:
           if-no-files-found: ignore
           path: ${{ github.workspace }}/build/test_logs/**
 
-      - name: Publish results
-        uses: EnricoMi/publish-unit-test-result-action/linux@v2
-        # the action only ships a Linux implementation
-        if: ${{ always() && matrix.os == 'Linux' && hashFiles('build/Testing/junit-uitest.xml') != '' }}
-        with:
-          check_name: "Automated UI test results (${{ matrix.os }})"
-          check_run_annotations: skipped tests
-          comment_mode: off
-          files: ${{ github.workspace }}/build/Testing/junit-uitest.xml
-          # a failing UI test is something to look at on Monday, not a broken workflow
-          action_fail: false
-          action_fail_on_inconclusive: false
-
       - name: Summarise
         if: always()
         run: |
@@ -143,3 +130,47 @@ jobs:
           else
             echo ":warning: Automated UI tests reported failures on ${{ matrix.os }}. See the \`junit-automated-ui-${{ matrix.os }}\` artifact." >> $GITHUB_STEP_SUMMARY
           fi
+
+  publish-results:
+    # Separate from the test job, and GitHub-hosted, because the publish action is a Docker
+    # container action: the self-hosted builders above are not guaranteed to have a usable Docker
+    # daemon, and a report-only workflow must not go red over that. This is the same split
+    # publish_test_results.yml already uses - the results come from the uploaded JUnit artifacts
+    # rather than from a build tree, so one Linux runner can report both platforms.
+    needs: automated-ui-tests
+    if: ${{ always() && github.repository_owner == 'mantidproject' }}
+    runs-on: ubuntu-latest
+    permissions:
+      checks: write
+
+    steps:
+      - name: Download JUnit results
+        uses: actions/download-artifact@v8
+        # nothing to publish is a normal outcome here, e.g. if every build failed
+        continue-on-error: true
+        with:
+          pattern: junit-automated-ui-*
+          path: artifacts
+
+      - name: Publish results (Linux)
+        uses: EnricoMi/publish-unit-test-result-action/linux@v2
+        if: ${{ hashFiles('artifacts/junit-automated-ui-Linux/junit-uitest.xml') != '' }}
+        with:
+          check_name: "Automated UI test results (Linux)"
+          check_run_annotations: skipped tests
+          comment_mode: "off"
+          files: artifacts/junit-automated-ui-Linux/junit-uitest.xml
+          # a failing UI test is something to look at on Monday, not a broken workflow
+          action_fail: false
+          action_fail_on_inconclusive: false
+
+      - name: Publish results (Windows)
+        uses: EnricoMi/publish-unit-test-result-action/linux@v2
+        if: ${{ hashFiles('artifacts/junit-automated-ui-Windows/junit-uitest.xml') != '' }}
+        with:
+          check_name: "Automated UI test results (Windows)"
+          check_run_annotations: skipped tests
+          comment_mode: "off"
+          files: artifacts/junit-automated-ui-Windows/junit-uitest.xml
+          action_fail: false
+          action_fail_on_inconclusive: false

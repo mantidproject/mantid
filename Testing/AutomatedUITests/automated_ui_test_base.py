@@ -304,28 +304,46 @@ class AutomatedUITestBase(unittest.TestCase):
             patcher.start()
             self.addCleanup(patcher.stop)
 
+    # button names that mean "the user agreed" and "the user declined". Every accepting name shares
+    # one sentinel and every declining name shares the other, so the answer holds whichever
+    # constant the interface happens to compare its result against.
+    _ACCEPTING_BUTTONS = ("Ok", "Yes", "YesToAll", "Apply", "Save", "SaveAll", "Open", "Retry")
+    _DECLINING_BUTTONS = ("Cancel", "No", "NoToAll", "Close", "Abort", "Discard", "Ignore")
+
     def patch_confirmation_box(self, module, answer):
-        """Answer a blocking ``QMessageBox.warning`` confirmation prompt with ``answer``.
+        """Answer a blocking ``QMessageBox`` confirmation prompt with ``answer``.
 
         Distinct from ``patch_error_messages`` because the interface *uses* the return value to
         decide whether to continue, so the test has to choose which button the user pressed.
+
+        The accepting and declining button constants must be distinct sentinels: an interface
+        decides by comparing the returned value against one of them, so a shared value would make
+        a rejection read as an acceptance. Leaving any of them as the auto-created attribute of the
+        ``QMessageBox`` mock is just as bad in the other direction - a fresh ``Mock`` equals
+        nothing, so an interface that asks for ``QMessageBox.Yes`` would read ``answer=True`` as a
+        rejection - so every button name a confirmation prompt might use is assigned here.
         """
         if not hasattr(self, "message_box_messages"):
             self.message_box_messages = []
 
         patcher = mock.patch(f"{module}.QMessageBox")
         mocked = patcher.start()
-        # Ok and Cancel must be distinct sentinels: callers decide by comparing the returned value
-        # against QMessageBox.Ok, so a shared value would make a rejection read as an acceptance.
-        mocked.Ok = object()
-        mocked.Cancel = object()
+        accepted, declined = object(), object()
+        for name in self._ACCEPTING_BUTTONS:
+            setattr(mocked, name, accepted)
+        for name in self._DECLINING_BUTTONS:
+            setattr(mocked, name, declined)
 
-        def record(*args, **_kwargs):
+        def record(*args, **kwargs):
             # QMessageBox.warning(parent, title, text, buttons, default_button)
-            self.message_box_messages.append(str(args[2]) if len(args) > 2 else "")
-            return mocked.Ok if answer else mocked.Cancel
+            text = args[2] if len(args) > 2 else kwargs.get("text", "")
+            self.message_box_messages.append(str(text))
+            return accepted if answer else declined
 
+        # question as well as warning: both are used for confirmation prompts, and an unpatched one
+        # would return a Mock that matches no button at all
         mocked.warning.side_effect = record
+        mocked.question.side_effect = record
         self.addCleanup(patcher.stop)
         return mocked
 

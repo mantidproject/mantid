@@ -553,6 +553,18 @@ class ExampleUITest(AutomatedUITestBase):
         observed = []
 
         class _Inner(AutomatedUITestBase):
+            # The base lifecycle is deliberately replaced rather than run. This throwaway case
+            # executes inside a live test, and the base setUp/tearDown act on process-global state:
+            # they repoint the QSettings ini path and, on the way out, clear the ADS and close every
+            # figure - pulling the enclosing test's own state out from under it. Nothing checked
+            # here needs either. A test case copied from this module as a template should not
+            # inherit that pattern.
+            def setUp(inner_self):
+                pass
+
+            def tearDown(inner_self):
+                pass
+
             def test_inner(inner_self):
                 with inner_self.check("first"):
                     observed.append("first")

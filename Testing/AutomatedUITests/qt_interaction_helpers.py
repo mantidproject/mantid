@@ -375,10 +375,17 @@ def model_column(view, col):
 
 
 def index_check_state(view, row, col=0):
-    """Whether a model index is ticked, for models that expose ``Qt.CheckStateRole``."""
+    """Whether a model index is ticked, for models that expose ``Qt.CheckStateRole``.
+
+    The role is normalised through ``Qt.CheckState`` before comparing: a C++-backed model such as
+    ``QStandardItemModel`` hands back a plain ``int``, which never compares equal to the scoped
+    enum ``Qt.Checked`` under PyQt6, so a direct comparison silently reports every ticked item as
+    unticked. ``None`` means the model does not answer the role at all, i.e. not ticked.
+    """
     from qtpy.QtCore import Qt
 
-    return model_index(view, row, col).data(Qt.CheckStateRole) == Qt.Checked
+    state = model_index(view, row, col).data(Qt.CheckStateRole)
+    return state is not None and Qt.CheckState(state) == Qt.Checked
 
 
 def click_index(view, row, col=0, modifier=None, parent=None):
