@@ -12,14 +12,12 @@ on:
         type: string
 
 
-# cancel previous job if a new commit is pushed
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   check-filters:
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-check-filters
+      cancel-in-progress: true
     outputs:
       code_changes: ${{ steps.changes.outputs.code_changes }}
       doxygen: ${{ steps.changes.outputs.doxygen }}
@@ -37,6 +35,9 @@ jobs:
   doxygen:
     needs: [check-filters]
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-doxygen
+      cancel-in-progress: true
     steps:
       - uses: actions/checkout@v7
 
@@ -49,6 +50,9 @@ jobs:
 
   conda-packaging-linux:
     needs: [cppcheck, doxygen, check-filters]
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-conda-packaging-linux
+      cancel-in-progress: true
     runs-on:
       - ${{ (inputs.RUNNER_LABEL == '' && 'self-hosted') || inputs.RUNNER_LABEL }}
       - self-hosted
@@ -93,6 +97,9 @@ jobs:
 
   cppcheck:
     needs: [check-filters]
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-cppcheck
+      cancel-in-progress: true
     runs-on:
       - ${{ (inputs.RUNNER_LABEL == '' && 'self-hosted') || inputs.RUNNER_LABEL }}
       - self-hosted
@@ -137,6 +144,9 @@ jobs:
 
   build-and-test:
     needs: [cppcheck, doxygen, check-filters]
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-build-and-test
+      cancel-in-progress: true
     permissions:
       contents: read
 
@@ -282,6 +292,9 @@ jobs:
 
   user-docs-build-and-test:
     needs: [cppcheck, doxygen, check-filters]
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-user-docs-build-and-test
+      cancel-in-progress: true
     permissions:
       contents: read
 
