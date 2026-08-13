@@ -169,7 +169,7 @@ public:
    * that is that it equals depth * L2 / distance(panel, sample) using the
    * position held in ComponentInfo.
    *
-   * Guards the distance lookup in scale_init. On CORELLI the panel is the "sixteenpack" child of bankNN,
+   * Guards the distance lookup in slantPathLength. On CORELLI the panel is the "sixteenpack" child of bankNN,
    * reached via ComponentInfo::componentID(). Dereferencing that ID yields the *base* component, whose
    * getDistance() does not consult the ParameterMap, so the correction used the nominal distance from the
    * instrument definition.
@@ -177,7 +177,7 @@ public:
    * Note the perturbation and why the assertion is on the returned quantity rather than on a corrected
    * workspace: displacing a panel also changes each peak's L2 and scattering angle, which move the
    * correction through other factors whether or not this distance is calibrated. An end-to-end comparison
-   * therefore cannot isolate this term, so scale_init is called directly and its result compared against
+   * therefore cannot isolate this term, so slantPathLength is called directly and its result compared against
    * the distance computed from ComponentInfo. The displacement is radial, along the sample-to-panel
    * direction, because that is what changes the distance the correction depends on.
    */
@@ -188,6 +188,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         ws = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("_corelli_anvred_")))
     TS_ASSERT(ws)
+    if (!ws)
+      return;
 
     auto &componentInfo = ws->mutableComponentInfo();
     const size_t panelIndex = componentInfo.children(componentInfo.indexOfAny("bank21")).front();
@@ -203,8 +205,8 @@ public:
 
     const double L2 = 2.5;
     const double depth = 0.2;
-    double pathlength = 0.0;
-    AnvredCorrection::scale_init(ws->getInstrument(), ws->componentInfo(), L2, depth, pathlength, "bank21");
+    const double pathlength =
+        AnvredCorrection::slantPathLength(ws->getInstrument(), ws->componentInfo(), "bank21", L2, depth);
 
     TS_ASSERT_DELTA(pathlength, depth * L2 / distance, 1e-9);
     // Guard against the assertion above passing trivially: the displacement must be observable.

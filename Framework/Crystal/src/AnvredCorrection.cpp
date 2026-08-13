@@ -217,7 +217,7 @@ void AnvredCorrection::exec() {
     if (m_useScaleFactors) {
       const auto &det = spectrumInfo.detector(i);
       bankName = det.getParent()->getParent()->getName();
-      scale_init(inst, componentInfo, L2, depth, pathlength, bankName);
+      pathlength = slantPathLength(inst, componentInfo, bankName, L2, depth);
     }
 
     auto points = m_inputWS->points(i);
@@ -323,7 +323,7 @@ void AnvredCorrection::execEvent() {
     if (m_useScaleFactors) {
       const auto &det = spectrumInfo.detector(i);
       bankName = det.getParent()->getParent()->getName();
-      scale_init(inst, componentInfo, L2, depth, pathlength, bankName);
+      pathlength = slantPathLength(inst, componentInfo, bankName, L2, depth);
     }
 
     // multiplying an event list by a scalar value
@@ -550,9 +550,18 @@ void AnvredCorrection::BuildLamdaWeights() {
   }
 }
 
-void AnvredCorrection::scale_init(const Instrument_const_sptr &inst, const ComponentInfo &componentInfo,
-                                  const double L2, const double depth, double &pathlength,
-                                  const std::string &bankName) {
+/** Slant path length through the detector, used to correct for the oblique path through the
+ * scintillator glass away from the panel centre.
+ *
+ * @param inst :: the instrument, used only to identify CORELLI
+ * @param componentInfo :: the parameterized view of the instrument geometry
+ * @param bankName :: name of the bank holding the detector
+ * @param L2 :: sample-to-detector distance
+ * @param depth :: thickness of the scintillator glass
+ * @return the slant path length
+ */
+double AnvredCorrection::slantPathLength(const Instrument_const_sptr &inst, const ComponentInfo &componentInfo,
+                                         const std::string &bankName, const double L2, const double depth) {
   // Distance to center of detector
   size_t detIndex = componentInfo.indexOfAny(bankName);
   if ("CORELLI" == inst->getName()) // for Corelli with sixteenpack under bank
@@ -564,8 +573,8 @@ void AnvredCorrection::scale_init(const Instrument_const_sptr &inst, const Compo
   }
   // NOTE: take the position from ComponentInfo. Dereferencing componentID() would yield the *base* component,
   //       whose getDistance() ignores the ParameterMap and so reports uncalibrated IDF geometry.
-  double cosA = componentInfo.position(detIndex).distance(componentInfo.samplePosition()) / L2;
-  pathlength = depth / cosA;
+  const double cosA = componentInfo.position(detIndex).distance(componentInfo.samplePosition()) / L2;
+  return depth / cosA;
 }
 
 double AnvredCorrection::scale_exec(std::string &bankName, const double lambda, const double depth,

@@ -24,7 +24,9 @@
 #include <fstream>
 #include <iterator>
 #include <sstream>
+#include <stdexcept>
 #include <string>
+#include <utility>
 #include <vector>
 
 using namespace Mantid;
@@ -165,6 +167,9 @@ public:
    */
   void test_corelli_panel_centre_written_from_calibrated_geometry() {
     PeaksWorkspace_sptr ws = makeCorelliPeaksWorkspace();
+    TS_ASSERT(ws)
+    if (!ws)
+      return;
     auto &componentInfo = ws->mutableComponentInfo();
     const size_t panelIndex = corelliPanelIndex(componentInfo);
 
@@ -202,6 +207,9 @@ public:
    */
   void test_corelli_panel_extents_written_from_calibrated_geometry() {
     PeaksWorkspace_sptr ws = makeCorelliPeaksWorkspace();
+    TS_ASSERT(ws)
+    if (!ws)
+      return;
     auto &componentInfo = ws->mutableComponentInfo();
     const size_t panelIndex = corelliPanelIndex(componentInfo);
 
@@ -251,6 +259,9 @@ public:
    */
   void test_corelli_panel_orientation_written_from_calibrated_geometry() {
     PeaksWorkspace_sptr ws = makeCorelliPeaksWorkspace();
+    TS_ASSERT(ws)
+    if (!ws)
+      return;
     auto &componentInfo = ws->mutableComponentInfo();
     const size_t panelIndex = corelliPanelIndex(componentInfo);
 
@@ -360,6 +371,8 @@ private:
     TS_ASSERT_THROWS_NOTHING(inst_ws = std::dynamic_pointer_cast<MatrixWorkspace>(
                                  AnalysisDataService::Instance().retrieve("_corelli_inst_")))
     TS_ASSERT(inst_ws)
+    if (!inst_ws)
+      return PeaksWorkspace_sptr();
 
     PeaksWorkspace_sptr ws(new PeaksWorkspace());
     ws->setInstrument(inst_ws->getInstrument());

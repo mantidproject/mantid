@@ -18,8 +18,11 @@
 #include <cxxtest/TestSuite.h>
 #include <filesystem>
 #include <fstream>
+#include <iterator>
 #include <sstream>
+#include <stdexcept>
 #include <string>
+#include <utility>
 #include <vector>
 
 using namespace Mantid;

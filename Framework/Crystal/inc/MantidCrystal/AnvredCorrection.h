@@ -104,8 +104,9 @@ public:
    * because displacing a panel also changes L2 and the scattering angle, which move the correction
    * through other factors whether or not the distance is taken from calibrated geometry.
    */
-  static void scale_init(const Geometry::Instrument_const_sptr &inst, const Geometry::ComponentInfo &componentInfo,
-                         const double L2, const double depth, double &pathlength, const std::string &bankName);
+  static double slantPathLength(const Geometry::Instrument_const_sptr &inst,
+                                const Geometry::ComponentInfo &componentInfo, const std::string &bankName,
+                                const double L2, const double depth);
 
 protected:
   /** A virtual function in which additional properties of an algorithm should

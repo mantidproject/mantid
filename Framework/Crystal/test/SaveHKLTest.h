@@ -235,6 +235,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         ws = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("_corelli_savehkl_")))
     TS_ASSERT(ws)
+    if (!ws)
+      return;
 
     auto &componentInfo = ws->mutableComponentInfo();
     const size_t panelIndex = componentInfo.children(componentInfo.indexOfAny("bank21")).front();
