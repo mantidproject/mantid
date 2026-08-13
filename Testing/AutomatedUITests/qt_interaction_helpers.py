@@ -453,7 +453,11 @@ def click_row_header(view, row, modifier=None):
     from qtpy.QtTest import QTest
 
     header = view.verticalHeader()
-    pos = QPoint(int(header.length() / 2), int(header.sectionPosition(row) + header.sectionSize(row) / 2))
+    # sectionViewportPosition, not sectionPosition: the click is delivered to the viewport, and the
+    # two differ by the scroll offset as soon as the view has been scrolled. The cross-axis
+    # coordinate is the viewport's width - length() is the sum of every section, which for anything
+    # but a one-row view lands outside the header entirely.
+    pos = QPoint(int(header.viewport().width() / 2), int(header.sectionViewportPosition(row) + header.sectionSize(row) / 2))
     QTest.mouseClick(header.viewport(), Qt.LeftButton, Qt.NoModifier if modifier is None else modifier, pos)
     process_events()
 
@@ -464,7 +468,8 @@ def click_column_header(view, col, modifier=None):
     from qtpy.QtTest import QTest
 
     header = view.horizontalHeader()
-    pos = QPoint(int(header.sectionPosition(col) + header.sectionSize(col) / 2), int(header.length() / 2))
+    # see click_row_header for why this is the viewport position and the viewport's height
+    pos = QPoint(int(header.sectionViewportPosition(col) + header.sectionSize(col) / 2), int(header.viewport().height() / 2))
     QTest.mouseClick(header.viewport(), Qt.LeftButton, Qt.NoModifier if modifier is None else modifier, pos)
     process_events()
 

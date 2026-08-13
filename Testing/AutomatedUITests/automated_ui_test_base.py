@@ -14,7 +14,7 @@ second interface can subclass ``AutomatedUITestBase`` and only supply its own se
 They are ordinary ``unittest`` tests, registered with CTest under the ``AutomatedUITest`` label by
 ``pyunittest_add_test_ui``. They are deliberately not unit tests and not system tests: they are slow and
 GUI-driven, so they run weekly and report-only rather than on every pull request. See
-``dev-docs/source/Testing/AutomatedUITests.rst``.
+``dev-docs/source/AutomatedUITests.rst``.
 
 Four details shape everything here, and each of them contradicts the obvious approach:
 

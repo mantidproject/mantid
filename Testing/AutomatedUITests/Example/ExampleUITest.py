@@ -23,9 +23,11 @@ from qt_interaction_helpers import (
     cell_combo,
     click,
     click_checkbox,
+    click_column_header,
     click_index,
     click_row_header,
     combo_items,
+    double_click_index,
     edit_index,
     index_check_state,
     item_check_state,
@@ -35,6 +37,7 @@ from qt_interaction_helpers import (
     model_row_count,
     process_events,
     select_combo,
+    select_index,
     select_list_item,
     select_radio,
     select_tab,
@@ -500,9 +503,17 @@ class ExampleUITest(AutomatedUITestBase):
             # a click on the view rather than its viewport would leave the selection untouched
             self.assertEqual(view.currentIndex().row(), 2)
 
+        select_index(view, 0, 2)
+        with self.check("Example / an index can be made current without a click"):
+            self.assertEqual((view.currentIndex().row(), view.currentIndex().column()), (0, 2))
+
         click_row_header(view, 1)
         with self.check("Example / clicking a row header selects the whole row"):
             self.assertEqual(sorted(i.column() for i in view.selectionModel().selectedIndexes()), [0, 1, 2])
+
+        click_column_header(view, 2)
+        with self.check("Example / clicking a column header selects the whole column"):
+            self.assertEqual(sorted(i.row() for i in view.selectionModel().selectedIndexes()), [0, 1, 2])
 
         edit_index(view, 0, 2, "edited")
         with self.check("Example / typing into a cell reaches the model through its delegate"):
@@ -514,6 +525,14 @@ class ExampleUITest(AutomatedUITestBase):
         rows = tree_rows(self.widget.tree_view)
         with self.check("Example / a tree walks depth-first with its nesting"):
             self.assertEqual([(depth, text) for depth, text, _ in rows], [(0, "North"), (1, "N1"), (1, "N2"), (0, "South"), (1, "S1")])
+
+        # last, because it leaves an editor open - nothing after it would see a settled view
+        with self.check("Example / double-clicking an editable cell opens its delegate's editor"):
+            # what edit_index is built on: a single click only selects, so there would be nothing to type into
+            double_click_index(view, 1, 2)
+            editor = view.focusWidget()
+            self.assertIsNotNone(editor)
+            self.assertIsNot(editor, view)
 
     def test_waiting_for_work_that_finishes_on_the_event_loop(self):
         click(self.widget.button_start_task)
