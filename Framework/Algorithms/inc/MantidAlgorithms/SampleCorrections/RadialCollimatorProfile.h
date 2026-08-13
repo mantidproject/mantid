@@ -45,8 +45,12 @@ public:
   /// Relative acceptance, (between 0 and 1) of a neutron scattered at scatterPoint toward a detector at
   /// detectorPos. All positions are in the lab frame.
   ///
+  /// @param scatterPoint The position the neutron scatters from
   /// @param focalPoint The collimator's focal point, about which the profile is centred. This is fixed in
   /// the laboratory - the sample is translated through it - so it must not be made to track the sample.
+  /// @param detectorPos The position of the detector viewing the scattering point. Only the direction from
+  /// the focal point to it matters, since that sets which horizontal direction is restricted.
+  /// @return The relative acceptance, between 0 and 1
   double intensityAt(const Kernel::V3D &scatterPoint, const Kernel::V3D &focalPoint,
                      const Kernel::V3D &detectorPos) const;
 
