@@ -4,13 +4,13 @@
 # They live outside Testing/SystemTests on purpose. runSystemTests.py collects by walking the "framework" and "qt"
 # directories, so a suite under either of those is picked up by the nightly system test run whatever CTest label it
 # carries. From here, the AutomatedUITest label given by pyunittest_add_test_ui is the only way in, and neither the pull
-# request build (ctest -L UnitTest) nor the nightly selects it. See dev-docs/source/Testing/AutomatedUITests.rst.
+# request build (ctest -L UnitTest) nor the nightly selects it. See dev-docs/source/AutomatedUITests.rst.
 #
 # No tests are registered at this level - each interface gets its own subdirectory. The shared harness modules here
 # (automated_ui_test_base.py, qt_interaction_helpers.py) are deliberately not listed as tests; putting this directory on
 # the test PYTHONPATH is what makes them importable from the interface subdirectories, and CMake variables propagate
 # into add_subdirectory.
-set(PYUNITTEST_PYTHONPATH_EXTRA ${CMAKE_CURRENT_SOURCE_DIR})
+list(APPEND PYUNITTEST_PYTHONPATH_EXTRA ${CMAKE_CURRENT_SOURCE_DIR})
 set(PYUNITTEST_QT_API pyqt${MANTID_QT_VERSION}) # force to use the configured Qt version
 # these drive a real interface and run real algorithms, so they are both slow and greedy: give them a longer limit than
 # the global one and keep them off each other's toes

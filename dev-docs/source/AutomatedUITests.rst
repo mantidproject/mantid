@@ -65,7 +65,9 @@ matrix has a placeholder for one.
 Running them
 ############
 
-They are registered with CTest, so from the build directory:
+The suite is only added to the build when ``ENABLE_WORKBENCH`` is on, which is the default;
+configure with it enabled or CTest will not know about these tests at all. From the build
+directory:
 
 .. code-block:: sh
 
@@ -79,9 +81,10 @@ They are registered with CTest, so from the build directory:
    ctest -R AutomatedUITest.Example.ExampleUITest --output-on-failure
 
 Most suites need data from the ExternalData store; build the ``StandardTestData`` and
-``SystemTestData`` targets first, or they will report a skip. Tests run offscreen (the harness sets
-``QT_QPA_PLATFORM=offscreen`` and ``MPLBACKEND=Agg`` on import), so nothing appears on screen and no
-display is needed.
+``SystemTestData`` targets first, or they will report a skip. Tests run offscreen (the harness
+*defaults* ``QT_QPA_PLATFORM`` to ``offscreen`` and ``MPLBACKEND`` to ``Agg`` on import, leaving
+either alone if it is already set), so nothing appears on screen and no display is needed. Set
+``QT_QPA_PLATFORM`` yourself if you want to watch a test run.
 
 The data directories are named by ``PYUNITTEST_DATA_DIRS`` in
 ``Testing/AutomatedUITests/CMakeLists.txt``, passed to each test as ``MANTID_TEST_DATA_DIRS`` and
@@ -90,11 +93,21 @@ added to Mantid's search path in ``setUp`` - the built properties file lists onl
 SystemTest set. The search path is restored in ``tearDown``.
 
 A module is an ordinary ``unittest`` file, so it can also be run directly for debugging - which is
-usually easier, because you get a normal traceback:
+usually easier, because you get a normal traceback. It still needs the environment CTest would have
+given it: the build's ``bin`` and the harness directory on ``PYTHONPATH``, the configured ``QT_API``,
+and ``MANTID_TEST_DATA_DIRS`` if the test calls ``require_files``. From the source directory, with
+``$BUILD`` the build directory:
 
 .. code-block:: sh
 
+   export PYTHONPATH=$BUILD/bin:$PWD/Testing/AutomatedUITests:$PYTHONPATH
+   export QT_API=pyqt6
+   export MANTID_TEST_DATA_DIRS=$BUILD/ExternalData/Testing/Data/SystemTest:$BUILD/ExternalData/Testing/Data/DocTest:$BUILD/ExternalData/Testing/Data/UnitTest
+
    python Testing/AutomatedUITests/Example/ExampleUITest.py ExampleUITest.test_tables
+
+``ctest -R AutomatedUITest.Example.ExampleUITest -V -N`` prints the exact command and environment
+that CTest uses, which is the reference if any of the above has moved.
 
 Writing a test
 ##############

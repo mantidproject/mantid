@@ -1,6 +1,6 @@
 name: Weekly Automated UI Tests
 
-# The automated UI tests drive real Qt interfaces (see dev-docs/source/Testing/AutomatedUITests.rst).
+# The automated UI tests drive real Qt interfaces (see dev-docs/source/AutomatedUITests.rst).
 # They are slow and GUI-driven, so they are kept out of the pull request and nightly pipelines
 # entirely and run here instead, once a week, purely to report what they found.
 #
@@ -69,6 +69,9 @@ jobs:
           # Needed to fetch the tags for versioningit
           fetch-depth: 100
           fetch-tags: true
+          # nothing here pushes, and the checkout is reused by long build and test steps on a
+          # self-hosted runner - do not leave the job token in the checkout's git config
+          persist-credentials: false
 
       - name: Install pixi
         uses: ./.github/actions/setup-pixi

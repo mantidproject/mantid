@@ -1,3 +1,20 @@
+# _PYUNITTEST_RUNNER resolves the runner module the unittest-based suites use: PYUNITTEST_RUNNER if the caller set one,
+# otherwise the standard testrunner. Shared by PYUNITTEST_ADD_TEST and PYUNITTEST_ADD_TEST_UI, which differ only in the
+# CTest label they hand to py_add_test.
+function(_PYUNITTEST_RUNNER _out_var)
+  if(NOT PYUNITTEST_RUNNER)
+    set(${_out_var}
+        ${CMAKE_SOURCE_DIR}/Framework/PythonInterface/test/testhelpers/testrunner.py
+        PARENT_SCOPE
+    )
+  else()
+    set(${_out_var}
+        ${PYUNITTEST_RUNNER}
+        PARENT_SCOPE
+    )
+  endif()
+endfunction()
+
 # PYUNITTEST_ADD_TEST (public macro to add unit tests) Adds a set of python tests based upon the unittest module
 #
 # The variable PYUNITTEST_PYTHONPATH_EXTRA can be defined with extra paths to add to PYTHONPATH during the tests
@@ -5,11 +22,7 @@
 # test. This directory is added to the PYTHONPATH when tests are executed _testname_prefix :: A prefix for each test
 # that is added to ctest, the name will be ${_testname_prefix}_TestName ${ARGN} :: List of test files
 function(PYUNITTEST_ADD_TEST _test_src_dir _testname_prefix)
-  if(NOT PYUNITTEST_RUNNER)
-    set(_test_runner_module ${CMAKE_SOURCE_DIR}/Framework/PythonInterface/test/testhelpers/testrunner.py)
-  else()
-    set(_test_runner_module ${PYUNITTEST_RUNNER})
-  endif()
+  _pyunittest_runner(_test_runner_module)
 
   py_add_test("UnitTest" ${_test_runner_module} "" ${ARGV})
 
@@ -44,11 +57,7 @@ endfunction()
 # that register python tests by grepping for that string, and a test registered through a function it cannot see would
 # be reported as unregistered on every commit.
 function(PYUNITTEST_ADD_TEST_UI _test_src_dir _testname_prefix)
-  if(NOT PYUNITTEST_RUNNER)
-    set(_test_runner_module ${CMAKE_SOURCE_DIR}/Framework/PythonInterface/test/testhelpers/testrunner.py)
-  else()
-    set(_test_runner_module ${PYUNITTEST_RUNNER})
-  endif()
+  _pyunittest_runner(_test_runner_module)
 
   py_add_test("AutomatedUITest" ${_test_runner_module} "" ${ARGV})
 
