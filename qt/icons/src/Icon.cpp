@@ -12,6 +12,7 @@
 #include <QJsonObject>
 
 #include <stdexcept>
+#include <string>
 
 namespace {
 MantidQt::Icons::IconicFont &iconFontInstance() {
@@ -22,7 +23,7 @@ MantidQt::Icons::IconicFont &iconFontInstance() {
 QHash<QString, QVariant> loadJsonFile(const QString &charmapFileName) {
   QFile jsonFile(charmapFileName);
   if (!jsonFile.open(QFile::ReadOnly)) {
-    throw std::runtime_error(("Failed to open icon charmap: " + charmapFileName).toStdString());
+    throw std::runtime_error(std::string("Failed to open icon charmap: ") + charmapFileName.toStdString());
   }
   const auto jsonDocument = QJsonDocument().fromJson(jsonFile.readAll());
   const auto jsonObject = jsonDocument.object();
