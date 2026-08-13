@@ -899,12 +899,12 @@ def bundle_added_event_data_as_group(out_file_path, out_file_monitors_path, _is_
 
 def get_full_path_for_added_event_data(file_name):
     path, base = os.path.split(file_name)
-    if path == "" or base not in os.listdir(path):
-        path = config["defaultsave.directory"] + path
+    if path == "" or not os.path.isfile(file_name):
+        path = os.path.join(config["defaultsave.directory"], path)
         # If the path is still an empty string check in the current working directory
         if path == "":
             path = os.getcwd()
-        assert base in os.listdir(path)
+        assert os.path.isfile(os.path.join(path, base))
     full_path_name = os.path.join(path, base)
     return full_path_name, base
 
