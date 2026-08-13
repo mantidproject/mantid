@@ -101,13 +101,15 @@ class StagedSettingsFile:
 
 @dataclass
 class PreparedQSettingsSession:
-    """A seeded staging session that retains coordinator ownership."""
+    """A seeded staging session with a private local lifetime."""
 
     canonical_root: Path
     staging_root: Path
     manifest: tuple[StagedSettingsFile, ...]
     retained_session_roots: tuple[Path, ...]
-    _coordinator: _Coordinator = field(repr=False)
+    _coordinator_path: Path = field(repr=False)
+    _lock_factory: Callable[[Path], _Coordinator] = field(repr=False)
+    _coordinator: _Coordinator | None = field(default=None, repr=False)
     _released: bool = field(default=False, init=False, repr=False)
     _active: bool = field(default=False, init=False, repr=False)
 
@@ -141,7 +143,6 @@ class PreparedQSettingsSession:
     def abort(self) -> None:
         """Release ownership while retaining this session for recovery."""
         if not self._released:
-            self._coordinator.unlock()
             self._released = True
 
     def finalize(self) -> QSettingsStagingFinalization:
@@ -153,15 +154,18 @@ class PreparedQSettingsSession:
         """
         if self._released:
             raise StagingFinalizationError("cannot finalize a released QSettings staging session")
+        coordinator = self._lock_factory(self._coordinator_path)
+        if not coordinator.tryLock(0):
+            raise StagingFinalizationError("QSettings staging coordinator is busy; staged settings were retained")
         try:
             return _finalize_session(self.canonical_root, self.staging_root, self.manifest)
         finally:
-            self._coordinator.unlock()
+            coordinator.unlock()
             self._released = True
 
 
 class QSettingsStagingSessionManager:
-    """Create one private, coordinator-owned staging session."""
+    """Create one private staging session; coordinate only short preparation and finalization critical sections."""
 
     def __init__(
         self,
@@ -179,7 +183,7 @@ class QSettingsStagingSessionManager:
         self._effective_uid = os.geteuid() if effective_uid is None else effective_uid
 
     def prepare(self) -> PreparedQSettingsSession:
-        """Acquire ownership, seed a unique session, and record its manifest."""
+        """Acquire the coordinator briefly, seed a unique session, release the coordinator, and record its manifest."""
         _ensure_directory(self._cache_root, self._effective_uid, private_if_created=True)
         manager_parent = self._cache_root / MANAGER_RELATIVE_PATH.parent
         _ensure_directory(manager_parent, self._effective_uid, private_if_created=True)
@@ -201,13 +205,16 @@ class QSettingsStagingSessionManager:
                 self._expected_settings_paths,
             )
             _write_manifest(session_root, manifest)
-            return PreparedQSettingsSession(
+            prepared = PreparedQSettingsSession(
                 canonical_root=self._canonical_root,
                 staging_root=session_root,
                 manifest=manifest,
                 retained_session_roots=retained_sessions,
-                _coordinator=coordinator,
+                _coordinator_path=manager_root / COORDINATOR_FILENAME,
+                _lock_factory=self._lock_factory,
             )
+            coordinator.unlock()
+            return prepared
         except BaseException:
             try:
                 if session_root is not None:

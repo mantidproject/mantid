@@ -120,6 +120,28 @@ class QSettingsStagingCopyBackTest(unittest.TestCase):
         self.assertEqual(b"native changed", native_file.read_bytes())
         self.assertFalse((self.config_root / "QtProject.conf.lock").exists())
 
+    def test_concurrent_sessions_conflict_for_workbench_and_qt_project_files(self):
+        native_file = self.config_root / "QtProject.conf"
+        native_file.write_bytes(b"native original")
+        first = self.prepare()
+        second = QSettingsStagingSessionManager(self.eligibility, lock_factory=self.lock_factory).prepare()
+
+        (first.staging_root / "mantidproject/mantidworkbench.ini").write_bytes(b"first workbench")
+        (first.staging_root / "QtProject.conf").write_bytes(b"first native")
+        (second.staging_root / "mantidproject/mantidworkbench.ini").write_bytes(b"second workbench")
+        (second.staging_root / "QtProject.conf").write_bytes(b"second native")
+
+        first_finalization = first.finalize()
+        second_finalization = second.finalize()
+
+        self.assertTrue(first_finalization.successful)
+        self.assertEqual(b"first workbench", self.canonical_file.read_bytes())
+        self.assertEqual(b"first native", native_file.read_bytes())
+        self.assertFalse(second_finalization.successful)
+        self.assertEqual(CopyBackStatus.CONFLICT, self.result_for(second_finalization).status)
+        self.assertEqual(CopyBackStatus.CONFLICT, self.result_for(second_finalization, "QtProject.conf").status)
+        self.assertFalse((second.staging_root / COMPLETED_FILENAME).exists())
+
     def test_currently_identical_files_are_not_opened_for_update(self):
         session = self.prepare()
         staged_file = session.staging_root / "mantidproject/mantidworkbench.ini"
