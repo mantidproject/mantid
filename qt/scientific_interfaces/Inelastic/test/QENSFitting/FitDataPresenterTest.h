@@ -71,8 +71,6 @@ public:
   virtual void updateSelectedSpectra() override {}
 };
 
-} // namespace
-
 // Exposes the protected setNumericQAxis method so that the axis/unit
 // conversion logic behind the "Add Numeric Workspace" button can be tested
 // directly, without needing to drive the real Qt dialog widgets.
@@ -81,6 +79,12 @@ public:
   using FitDataPresenter::FitDataPresenter;
   using FitDataPresenter::setNumericQAxis;
 };
+
+void setNumericQAxis(FitDataPresenter &presenter, const std::string &workspaceName) {
+  static_cast<TestableFitDataPresenter &>(presenter).setNumericQAxis(workspaceName);
+}
+
+} // namespace
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
@@ -224,7 +228,7 @@ public:
   }
 
   void test_setNumericQAxis_does_nothing_when_given_an_empty_workspace_name() {
-    TS_ASSERT_THROWS_NOTHING(m_presenter->setNumericQAxis(""));
+    TS_ASSERT_THROWS_NOTHING(setNumericQAxis(*m_presenter, ""));
   }
 
   void test_setNumericQAxis_converts_non_numeric_axis_to_numeric_with_momentum_transfer_unit() {
@@ -237,7 +241,7 @@ public:
     }
     m_ads->addOrReplace("NumericWs", ws);
 
-    m_presenter->setNumericQAxis("NumericWs");
+    setNumericQAxis(*m_presenter, "NumericWs");
 
     auto *axis = ws->getAxis(1);
     TS_ASSERT(axis->isNumeric());
@@ -255,7 +259,7 @@ public:
     TS_ASSERT_DIFFERS(ws->getAxis(1)->unit()->unitID(), "MomentumTransfer");
     m_ads->addOrReplace("NumericWs", ws);
 
-    m_presenter->setNumericQAxis("NumericWs");
+    setNumericQAxis(*m_presenter, "NumericWs");
 
     auto *axis = ws->getAxis(1);
     TS_ASSERT(axis->isNumeric());
@@ -272,7 +276,7 @@ public:
     ws->getAxis(1)->setUnit("MomentumTransfer");
     m_ads->addOrReplace("NumericWs", ws);
 
-    m_presenter->setNumericQAxis("NumericWs");
+    setNumericQAxis(*m_presenter, "NumericWs");
 
     auto *axis = ws->getAxis(1);
     TS_ASSERT(axis->isNumeric());
@@ -304,7 +308,7 @@ private:
   std::unique_ptr<NiceMock<MockFitTab>> m_tab;
   std::unique_ptr<NiceMock<MockFitDataView>> m_view;
   std::unique_ptr<NiceMock<MockDataModel>> m_model;
-  std::unique_ptr<TestableFitDataPresenter> m_presenter;
+  std::unique_ptr<FitDataPresenter> m_presenter;
 
   MatrixWorkspace_sptr m_workspace;
   std::unique_ptr<SetUpADSWithWorkspace> m_ads;
