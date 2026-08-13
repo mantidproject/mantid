@@ -13,6 +13,7 @@
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/Quat.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/V3D.h"
 #include <cxxtest/TestSuite.h>
@@ -33,9 +34,11 @@ using Mantid::Kernel::Quat;
 using Mantid::Kernel::V3D;
 
 namespace {
-/// Absolute path in the system temporary directory, so tests never write into the runner's cwd.
+/// Absolute path in the system temporary directory, carrying a random token so that concurrent runs, and
+/// files orphaned by a failed test, cannot collide. The runner's cwd is never written to.
 std::string tempPath(const std::string &filename) {
-  return (std::filesystem::temp_directory_path() / filename).string();
+  return (std::filesystem::temp_directory_path() / (Mantid::Kernel::Strings::randomString(8) + "_" + filename))
+      .string();
 }
 
 /** Return the fields of the "5" record written for the given bank.

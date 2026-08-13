@@ -16,6 +16,7 @@
 #include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
 #include <filesystem>
@@ -29,9 +30,11 @@ using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
 namespace {
-/// Absolute path in the system temporary directory, so tests never write into the runner's cwd.
+/// Absolute path in the system temporary directory, carrying a random token so that concurrent runs, and
+/// files orphaned by a failed test, cannot collide. The runner's cwd is never written to.
 std::string tempPath(const std::string &filename) {
-  return (std::filesystem::temp_directory_path() / filename).string();
+  return (std::filesystem::temp_directory_path() / (Mantid::Kernel::Strings::randomString(8) + "_" + filename))
+      .string();
 }
 } // namespace
 
