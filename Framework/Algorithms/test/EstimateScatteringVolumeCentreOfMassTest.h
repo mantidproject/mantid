@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Run.h"
@@ -135,8 +136,9 @@ public:
     centerOfMass.setRethrows(true);
     centerOfMass.initialize();
     centerOfMass.setProperty("InputWorkspace", testWS);
-    // This should throw because no sample shape is defined
-    TS_ASSERT_THROWS(centerOfMass.execute(), const std::invalid_argument &);
+    // This should throw because no sample shape is defined - the check lives in validateInputs, so
+    // the algorithm reports it as an invalid property before exec is reached
+    TS_ASSERT_THROWS(centerOfMass.execute(), const std::runtime_error &);
     TS_ASSERT(!centerOfMass.isExecuted());
   }
   void testExecWithDifferentElementSizeUnits() {
@@ -286,8 +288,11 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    Mantid::API::ITableWorkspace_sptr table = alg.getProperty("DetectorScatteringCentres");
+    const auto table = retrieveAndRemoveTable("centres_table");
     TS_ASSERT(table);
+    if (!table) {
+      return;
+    }
     TS_ASSERT_EQUALS(table->rowCount(), 2);
     TS_ASSERT_EQUALS(table->columnCount(), 5);
 
@@ -334,10 +339,16 @@ public:
     // As the sample is withdrawn from the gauge volume, less and less of the gauge is filled and the
     // centre of the remaining material tracks the surface. This is the near-surface behaviour that
     // makes the weighted centre differ from the nominal measurement position.
+    //
+    // The sample face sits at x = faceOffset while the gauge volume spans x in [-0.002, 0.002], so the
+    // face has to stay strictly inside the gauge - at an offset of 0.002 the two are merely tangent,
+    // nothing is illuminated and the algorithm rightly refuses to run. A 0.25mm element is used so the
+    // sliver left at the largest offset still holds several voxels and the centre moves smoothly
+    // rather than in whole-element jumps.
     double previous = -1.0;
-    for (const double faceOffset : {0.0, 0.001, 0.002}) {
+    for (const double faceOffset : {0.0, 0.001, 0.0015}) {
       auto testWS = createTwoDetectorWorkspace(FE_NUMBER_DENSITY, V3D(0.02 + faceOffset, 0.0, 0.0));
-      const auto centre = runAndGetCentre(testWS, true);
+      const auto centre = runAndGetCentre(testWS, true, 0.25);
       TS_ASSERT_LESS_THAN(previous, centre.X());
       previous = centre.X();
     }
@@ -346,13 +357,13 @@ public:
 private:
   const double FE_NUMBER_DENSITY{0.0849};
 
-  V3D runAndGetCentre(const MatrixWorkspace_sptr &ws, const bool weighted) {
+  V3D runAndGetCentre(const MatrixWorkspace_sptr &ws, const bool weighted, const double elementSize = 1.0) {
     Mantid::Algorithms::EstimateScatteringVolumeCentreOfMass alg;
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("InputWorkspace", ws);
     alg.setProperty("UseNeutronWeightings", weighted);
-    alg.setProperty("ElementSize", 1.0);
+    alg.setProperty("ElementSize", elementSize);
     alg.execute();
     std::vector<double> result = alg.getProperty("CentreOfMass");
     return V3D(result[0], result[1], result[2]);
@@ -367,12 +378,28 @@ private:
     alg.setProperty("ElementSize", 1.0);
     alg.setPropertyValue("DetectorScatteringCentres", "det_centres");
     alg.execute();
-    Mantid::API::ITableWorkspace_sptr table = alg.getProperty("DetectorScatteringCentres");
+    const auto table = retrieveAndRemoveTable("det_centres");
     std::vector<V3D> centres;
+    if (!table) {
+      TS_FAIL("The algorithm did not produce a DetectorScatteringCentres table");
+      return centres;
+    }
     for (size_t row = 0; row < table->rowCount(); ++row) {
       centres.emplace_back(table->cell<double>(row, 1), table->cell<double>(row, 2), table->cell<double>(row, 3));
     }
     return centres;
+  }
+
+  /// Output workspace properties are cleared once the algorithm has stored them, so the table has to
+  /// be fetched from the ADS by name rather than read back off the property.
+  Mantid::API::ITableWorkspace_sptr retrieveAndRemoveTable(const std::string &name) {
+    auto &ads = Mantid::API::AnalysisDataService::Instance();
+    if (!ads.doesExist(name)) {
+      return nullptr;
+    }
+    const auto table = ads.retrieveWS<Mantid::API::ITableWorkspace>(name);
+    ads.remove(name);
+    return table;
   }
 
   void setCollimatorGaugeWidth(const MatrixWorkspace_sptr &ws, const double width) {

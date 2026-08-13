@@ -44,8 +44,10 @@ namespace {
  * Eq. 14 of Creek, Santisteban & Edwards (2005)
  *
  * The paper normalises to unit integral (a 1/s prefactor, giving a probability density).
- * Here we normalise instead so a fully illuminated point returns 1.0, matching the existing
- * value when divergence is not accounted for.
+ * Here we normalise instead against the undiverged top hat, so a point well inside the aperture
+ * returns 1.0, matching the existing value when divergence is not accounted for. The on-axis value
+ * only reaches 1.0 in the limit of a slit much wider than the smearing - once sigma is comparable
+ * with the aperture, flux is smeared out of the beam even on axis and the peak drops below 1.
  */
 double apertureTransmission(const double axCoord, const double axSlitCentre, const double slitWidth,
                             const double sigma) {

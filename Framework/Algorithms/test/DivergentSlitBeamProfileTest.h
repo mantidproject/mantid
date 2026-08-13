@@ -80,7 +80,13 @@ public:
   }
 
   void test_Divergence_Smears_The_Edge_To_Half_Intensity() {
-    DivergentSlitBeamProfile profile(createTestFrame(), V3D(), WIDTH, HEIGHT, DIVERGENCE, DIVERGENCE, SLIT_DISTANCE);
+    // The half intensity edge and the fully illuminated centre are only exact when the smearing is
+    // confined to the edges, so use a divergence giving sigma = 0.25mm against the 4mm aperture.
+    // At the realistic DIVERGENCE the aperture is only ~2.7 sigma wide and even the centre loses
+    // ~1.2% - test_Matches_Analytic_Erf_Profile pins that regime exactly.
+    const double narrowDivergence = 0.005; // rad, sigma = 0.25mm at the sample
+    DivergentSlitBeamProfile profile(createTestFrame(), V3D(), WIDTH, HEIGHT, narrowDivergence, narrowDivergence,
+                                     SLIT_DISTANCE);
     // Exactly on the aperture edge, half the smeared distribution falls inside.
     TS_ASSERT_DELTA(profile.intensityAt(V3D(0.0, 0.5 * WIDTH, 0.0)), 0.5, 1e-9);
     TS_ASSERT_DELTA(profile.intensityAt(V3D(0.0, 0.0, 0.5 * HEIGHT)), 0.5, 1e-9);
@@ -105,14 +111,19 @@ public:
   }
 
   void test_Smearing_Grows_With_Slit_Distance() {
-    // Further from the slit, the beam has diverged more, so the edge is softer - the intensity just
-    // outside the nominal aperture is higher.
+    // Further from the slit, the beam has diverged more, so the edge is softer. This has to be
+    // measured relative to each profile's own on-axis intensity: the absolute intensity drops
+    // everywhere as the beam spreads, because the smearing leaks flux out of the perpendicular
+    // aperture too. It is the relative height of the tail outside the nominal aperture that
+    // measures the softening.
     DivergentSlitBeamProfile closeToSlit(createTestFrame(), V3D(), WIDTH, HEIGHT, DIVERGENCE, DIVERGENCE,
                                          SLIT_DISTANCE);
     DivergentSlitBeamProfile farFromSlit(createTestFrame(), V3D(), WIDTH, HEIGHT, DIVERGENCE, DIVERGENCE,
                                          4.0 * SLIT_DISTANCE);
     const V3D justOutside(0.0, 0.6 * WIDTH, 0.0);
-    TS_ASSERT_LESS_THAN(closeToSlit.intensityAt(justOutside), farFromSlit.intensityAt(justOutside));
+    const double closeTail = closeToSlit.intensityAt(justOutside) / closeToSlit.intensityAt(V3D());
+    const double farTail = farFromSlit.intensityAt(justOutside) / farFromSlit.intensityAt(V3D());
+    TS_ASSERT_LESS_THAN(closeTail, farTail);
   }
 
   void test_Upstream_Of_The_Slit_Is_Not_Illuminated() {
@@ -141,5 +152,9 @@ private:
   const double HEIGHT{0.004};
   const double DIVERGENCE{0.0146};  // rad, ~0.84 degrees
   const double SLIT_DISTANCE{0.05}; // m
-  const V3D CENTRE{1.0, 2.0, -3.0};
+  // beam = X, hor = Y, up = Z. The transverse (Y, Z) components must lie inside the test cylinder of
+  // test_DefineActiveRegion_Matches_RectangularProfile (y in [-0.5, 0.5], z in [0, 1]), otherwise the
+  // active region is empty and BoundingBox rejects the inverted limits. The beam component is
+  // deliberately non-zero as it must not affect either result.
+  const V3D CENTRE{1.0, 0.2, 0.5};
 };
