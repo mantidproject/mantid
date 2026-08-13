@@ -1087,7 +1087,6 @@ std::string ReflectometryReductionOneAuto3::getSummedWorkspaceName(const Workspa
   const std::string hide_prefix = getProperty("HideSummedWorkspaces") ? "__" : "";
   if (std::dynamic_pointer_cast<WorkspaceGroup>(workspace))
     return hide_prefix + ws_prefix + SUMMED_WORKSPACE_SUFFIX;
-
   return hide_prefix + ws_prefix + getRunNumber(*std::dynamic_pointer_cast<MatrixWorkspace>(workspace)) +
          SUMMED_WORKSPACE_SUFFIX;
 }
