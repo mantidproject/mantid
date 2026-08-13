@@ -11,6 +11,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/FunctionDomain.h"
 
+#include <span>
 #include <vector>
 
 namespace Mantid {
@@ -77,6 +78,9 @@ public:
   FunctionDomain1DVector(const double startX, const double endX, const size_t n);
   /// Constructor.
   FunctionDomain1DVector(const std::vector<double> &xvalues);
+  /// Constructor taking a contiguous range. Allows the size-checked histogram data
+  /// types, which do not hand out a std::vector<double>, to be used directly.
+  FunctionDomain1DVector(std::span<double const> xvalues);
   /// No-copy constructor.
   FunctionDomain1DVector(std::vector<double> &&xvalues);
   /// Constructor.

@@ -32,7 +32,7 @@ std::string EqualBinSizesValidator::checkValidity(const MatrixWorkspace_sptr &va
   if (value->getNumberHistograms() == 0 || value->blocksize() == 0)
     return "Enter a workspace with some data in it";
 
-  Kernel::EqualBinsChecker checker(value->x(0).rawData(), m_errorLevel, -1);
+  Kernel::EqualBinsChecker checker(value->x(0), m_errorLevel, -1);
   return checker.validate();
 }
 

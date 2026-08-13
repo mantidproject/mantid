@@ -23,6 +23,8 @@
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VectorHelper.h"
 
+#include <utility>
+
 namespace Mantid {
 
 namespace PropertyNames {
@@ -338,10 +340,12 @@ void Rebin::exec() {
         const EventList &el = eventInputWS->getSpectrum(i);
         MantidVec y_data, e_data;
         // The EventList takes care of histogramming.
+        // as_const: XValues_new is shared with every output spectrum, so binding it
+        // non-const to a span would deep-copy the X data on each iteration
         if (useUnsortingHistogram)
-          el.generateHistogram(rbParams[1], XValues_new.rawData(), y_data, e_data);
+          el.generateHistogram(rbParams[1], std::as_const(XValues_new), y_data, e_data);
         else
-          el.generateHistogram(XValues_new.rawData(), y_data, e_data);
+          el.generateHistogram(std::as_const(XValues_new), y_data, e_data);
 
         // Copy the data over.
         outputWS->mutableY(i) = y_data;

@@ -13,6 +13,8 @@
 
 #include <map>
 
+#include <span>
+
 namespace Mantid {
 
 namespace Kernel {
@@ -71,7 +73,7 @@ private:
                                      const Kernel::V3D &detPos, const DetectorParams &detPar,
                                      const CurveFitting::Functions::ResolutionParams &detRes);
   /// Compute a TOF spectrum for the given inputs & spectrum
-  std::vector<double> calculateTofSpectrum(const std::vector<double> &inSpectrum, std::vector<double> &tmpWork,
+  std::vector<double> calculateTofSpectrum(std::span<double const> inSpectrum, std::vector<double> &tmpWork,
                                            const size_t wsIndex, const DetectorParams &detpar,
                                            const CurveFitting::Functions::ResolutionParams &respar);
 

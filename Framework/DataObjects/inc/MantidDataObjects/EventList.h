@@ -14,6 +14,7 @@
 
 #include <iosfwd>
 #include <optional>
+#include <span>
 #include <vector>
 
 namespace Mantid {
@@ -210,13 +211,13 @@ public:
   void compressFatEvents(const double tolerance, const Types::Core::DateAndTime &timeStart, const double seconds,
                          EventList *destination);
   // get EventType declaration
-  void generateHistogram(const MantidVec &X, MantidVec &Y, MantidVec &E, bool skipError = false) const override;
-  void generateHistogram(const double step, const MantidVec &X, MantidVec &Y, MantidVec &E,
+  void generateHistogram(std::span<double const> X, MantidVec &Y, MantidVec &E, bool skipError = false) const override;
+  void generateHistogram(const double step, std::span<double const> X, MantidVec &Y, MantidVec &E,
                          bool skipError = false) const;
-  void generateHistogramPulseTime(const MantidVec &X, MantidVec &Y, MantidVec &E,
+  void generateHistogramPulseTime(std::span<double const> X, MantidVec &Y, MantidVec &E,
                                   bool skipError = false) const override;
 
-  void generateHistogramTimeAtSample(const MantidVec &X, MantidVec &Y, MantidVec &E, const double &tofFactor,
+  void generateHistogramTimeAtSample(std::span<double const> X, MantidVec &Y, MantidVec &E, const double &tofFactor,
                                      const double &tofOffset, bool skipError = false) const override;
 
   void integrate(const double minX, const double maxX, const bool entireRange, double &sum, double &error) const;
@@ -283,12 +284,12 @@ public:
   void multiply(const double value, const double error = 0.0) override;
   EventList &operator*=(const double value);
 
-  void multiply(const MantidVec &X, const MantidVec &Y, const MantidVec &E) override;
+  void multiply(std::span<double const> X, std::span<double const> Y, std::span<double const> E) override;
 
   void divide(const double value, const double error = 0.0) override;
   EventList &operator/=(const double value);
 
-  void divide(const MantidVec &X, const MantidVec &Y, const MantidVec &E) override;
+  void divide(std::span<double const> X, std::span<double const> Y, std::span<double const> E) override;
 
   void convertUnitsViaTof(Mantid::Kernel::Unit const *fromUnit, Mantid::Kernel::Unit const *toUnit);
   void convertUnitsQuickly(const double &factor, const double &power);
@@ -359,24 +360,24 @@ private:
                                                                      const double seek_time, const double &tofFactor,
                                                                      const double &tofOffset) const;
 
-  void generateCountsHistogram(const MantidVec &X, MantidVec &Y) const;
-  void generateCountsHistogram(const double step, const MantidVec &X, MantidVec &Y) const;
+  void generateCountsHistogram(std::span<double const> X, MantidVec &Y) const;
+  void generateCountsHistogram(const double step, std::span<double const> X, MantidVec &Y) const;
 
 public:
-  static std::optional<size_t> findLinearBin(const MantidVec &X, const double tof, const double divisor,
+  static std::optional<size_t> findLinearBin(std::span<double const> X, const double tof, const double divisor,
                                              const double offset, const bool findExact = true);
-  static std::optional<size_t> findLogBin(const MantidVec &X, const double tof, const double divisor,
+  static std::optional<size_t> findLogBin(std::span<double const> X, const double tof, const double divisor,
                                           const double offset, const bool findExact = true);
 
 private:
-  static size_t findExactBin(const MantidVec &X, const double tof, const size_t n_bin);
+  static size_t findExactBin(std::span<double const> X, const double tof, const size_t n_bin);
 
-  void generateCountsHistogramPulseTime(const MantidVec &X, MantidVec &Y) const;
+  void generateCountsHistogramPulseTime(std::span<double const> X, MantidVec &Y) const;
 
-  void generateCountsHistogramTimeAtSample(const MantidVec &X, MantidVec &Y, const double &tofFactor,
+  void generateCountsHistogramTimeAtSample(std::span<double const> X, MantidVec &Y, const double &tofFactor,
                                            const double &tofOffset) const;
 
-  void generateErrorsHistogram(const MantidVec &Y, MantidVec &E) const;
+  void generateErrorsHistogram(std::span<double const> Y, MantidVec &E) const;
 
   void switchToWeightedEvents();
   void switchToWeightedEventsNoTime();
@@ -404,9 +405,10 @@ private:
                                       const double seconds);
 
   template <class T>
-  static void histogramForWeightsHelper(const std::vector<T> &events, const MantidVec &X, MantidVec &Y, MantidVec &E);
+  static void histogramForWeightsHelper(const std::vector<T> &events, std::span<double const> X, MantidVec &Y,
+                                        MantidVec &E);
   template <class T>
-  static void histogramForWeightsHelper(const std::vector<T> &events, const double step, const MantidVec &X,
+  static void histogramForWeightsHelper(const std::vector<T> &events, const double step, std::span<double const> X,
                                         MantidVec &Y, MantidVec &E);
   template <class T>
   static void integrateHelper(std::vector<T> &events, const double minX, const double maxX, const bool entireRange,
@@ -440,10 +442,11 @@ private:
 
   template <class T> static void multiplyHelper(std::vector<T> &events, const double value, const double error = 0.0);
   template <class T>
-  static void multiplyHistogramHelper(std::vector<T> &events, const MantidVec &X, const MantidVec &Y,
-                                      const MantidVec &E);
+  static void multiplyHistogramHelper(std::vector<T> &events, std::span<double const> X, std::span<double const> Y,
+                                      std::span<double const> E);
   template <class T>
-  static void divideHistogramHelper(std::vector<T> &events, const MantidVec &X, const MantidVec &Y, const MantidVec &E);
+  static void divideHistogramHelper(std::vector<T> &events, std::span<double const> X, std::span<double const> Y,
+                                    std::span<double const> E);
   template <class T>
   void convertUnitsViaTofHelper(typename std::vector<T> &events, Mantid::Kernel::Unit const *fromUnit,
                                 Mantid::Kernel::Unit const *toUnit);

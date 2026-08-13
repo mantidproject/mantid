@@ -199,7 +199,7 @@ FitDataPresenter::getDataForParameterEstimation(const EstimationDataSelector &se
       auto const &x = ws->x(spectrum.value);
       auto const &y = ws->y(spectrum.value);
       auto range = m_model->getFittingRange(i, spectrum);
-      dataCollection.emplace_back(selector(x.rawData(), y.rawData(), range));
+      dataCollection.emplace_back(selector(x, y, range));
     }
   }
   return dataCollection;

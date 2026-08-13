@@ -12,6 +12,8 @@
 #include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/Functions/BackgroundFunction.h"
 
+#include <span>
+
 namespace Mantid {
 namespace HistogramData {
 class HistogramX;
@@ -73,7 +75,7 @@ public:
                                              bool calbkgd) const;
 
   ///  Calculate a single peak's value
-  Mantid::HistogramData::HistogramY calPeak(size_t ipk, const std::vector<double> &xvalues, size_t ySize) const;
+  Mantid::HistogramData::HistogramY calPeak(size_t ipk, std::span<double const> xvalues, size_t ySize) const;
 
   /// Return the composite function
   API::IFunction_sptr getFunction();
@@ -100,7 +102,7 @@ public:
   void setFixPeakHeights();
 
   /// Calculate peak intensities by Le Bail algorithm
-  bool calculatePeaksIntensities(const std::vector<double> &vecX, const std::vector<double> &vecY,
+  bool calculatePeaksIntensities(std::span<double const> vecX, std::span<double const> vecY,
                                  std::vector<double> &vec_summedpeaks);
 
   /// Get the maximum value of a peak in a given set of data points
@@ -122,7 +124,7 @@ private:
 
   /// Calculate the peaks intensities in same group
   bool calculateGroupPeakIntensities(std::vector<std::pair<double, API::IPowderDiffPeakFunction_sptr>> peakgroup,
-                                     const std::vector<double> &vecX, const std::vector<double> &vecY,
+                                     std::span<double const> vecX, std::span<double const> vecY,
                                      std::vector<double> &vec_summedpeaks);
 
   /// Group close peaks together

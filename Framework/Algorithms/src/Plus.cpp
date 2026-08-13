@@ -61,8 +61,8 @@ void Plus::performEventBinaryOperation(DataObjects::EventList &lhs, const DataOb
  *  @param rhsY :: The vector of rhs data values
  *  @param rhsE :: The vector of rhs error values
  */
-void Plus::performEventBinaryOperation(DataObjects::EventList &lhs, const MantidVec &rhsX, const MantidVec &rhsY,
-                                       const MantidVec &rhsE) {
+void Plus::performEventBinaryOperation(DataObjects::EventList &lhs, std::span<double const> rhsX,
+                                       std::span<double const> rhsY, std::span<double const> rhsE) {
   (void)lhs; // Avoid compiler warnings
   (void)rhsX;
   (void)rhsY;

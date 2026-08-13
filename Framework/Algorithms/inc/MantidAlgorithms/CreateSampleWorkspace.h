@@ -14,6 +14,8 @@
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
 
+#include <span>
+
 namespace Mantid {
 namespace Algorithms {
 
@@ -56,8 +58,7 @@ private:
   Geometry::IObject_sptr createCappedCylinder(double radius, double height, const Kernel::V3D &baseCentre,
                                               const Kernel::V3D &axis, const std::string &id);
   Geometry::IObject_sptr createSphere(double radius, const Kernel::V3D &centre, const std::string &id);
-  std::vector<double> evalFunction(const std::string &functionString, const std::vector<double> &xVal,
-                                   double noiseScale);
+  std::vector<double> evalFunction(const std::string &functionString, std::span<double const> xVal, double noiseScale);
   void replaceAll(std::string &str, const std::string &from, const std::string &to);
   void addChopperParameters(API::MatrixWorkspace_sptr &ws);
 

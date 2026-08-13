@@ -15,6 +15,7 @@
 
 #include <list>
 #include <optional>
+#include <span>
 
 namespace Mantid {
 namespace API {
@@ -124,12 +125,11 @@ private:
   using Mantid::API::Algorithm::validateInputs;
   bool validateInputsForEventWorkspaces(const std::vector<std::string> &inputWorkspaces);
   std::optional<std::vector<double>> checkRebinning();
-  static std::vector<double> calculateRebinParams(const std::vector<double> &bins1, const std::vector<double> &bins2);
-  static void noOverlapParams(const HistogramData::HistogramX &X1, const HistogramData::HistogramX &X2,
-                              std::vector<double> &params);
-  static void intersectionParams(const HistogramData::HistogramX &X1, size_t &i, const HistogramData::HistogramX &X2,
+  static std::vector<double> calculateRebinParams(std::span<double const> bins1, std::span<double const> bins2);
+  static void noOverlapParams(std::span<double const> X1, std::span<double const> X2, std::vector<double> &params);
+  static void intersectionParams(std::span<double const> X1, size_t &i, std::span<double const> X2,
                                  std::vector<double> &params);
-  static void inclusionParams(const HistogramData::HistogramX &X1, size_t &i, const HistogramData::HistogramX &X2,
+  static void inclusionParams(std::span<double const> X1, size_t &i, std::span<double const> X2,
                               std::vector<double> &params);
   API::MatrixWorkspace_sptr rebinInput(const API::MatrixWorkspace_sptr &workspace, const std::vector<double> &params);
   API::MatrixWorkspace_sptr buildScanningOutputWorkspace(const API::MatrixWorkspace_sptr &outWS,

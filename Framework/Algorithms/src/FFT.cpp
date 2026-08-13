@@ -363,7 +363,7 @@ bool FFT::areBinWidthsUneven(const HistogramData::BinEdges &xBins) const {
   const double warnValue = acceptXRoundingErrors ? 0.1 : -1;
 
   // TODO should be added to HistogramData as a convenience function
-  Kernel::EqualBinsChecker binChecker(xBins.rawData(), tolerance, warnValue);
+  Kernel::EqualBinsChecker binChecker(xBins, tolerance, warnValue);
 
   // Compatibility with previous behaviour
   if (!acceptXRoundingErrors) {

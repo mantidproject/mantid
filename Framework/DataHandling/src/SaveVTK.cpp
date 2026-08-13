@@ -88,8 +88,7 @@ void SaveVTK::exec() {
     Progress prog(this, 0.0, 1.0, 97);
     if (!xMin && !xMax) {
       for (int hNum = 2; hNum < 100; ++hNum) {
-        writeVTKPiece(outVTP, localWorkspace->x(hNum).rawData(), localWorkspace->y(hNum).rawData(),
-                      localWorkspace->e(hNum).rawData(), hNum);
+        writeVTKPiece(outVTP, localWorkspace->x(hNum), localWorkspace->y(hNum), localWorkspace->e(hNum), hNum);
         prog.report();
       }
     } else {
@@ -160,8 +159,9 @@ void SaveVTK::checkOptionalProperties() {
  * @param errors :: The error data
  * @param index :: The histogram number
  */
-void SaveVTK::writeVTKPiece(std::ostream &outVTP, const std::vector<double> &xValue, const std::vector<double> &yValue,
-                            const std::vector<double> &errors, int index) const {
+void SaveVTK::writeVTKPiece(std::ostream &outVTP, std::span<double const> const xValue,
+                            std::span<double const> const yValue, std::span<double const> const errors,
+                            int index) const {
   (void)errors; // Avoid compiler warning
 
   auto nY = static_cast<int>(yValue.size());

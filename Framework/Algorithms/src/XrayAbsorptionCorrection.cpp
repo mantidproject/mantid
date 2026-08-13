@@ -113,17 +113,18 @@ Kernel::V3D XrayAbsorptionCorrection::calculateDetectorPos(double const detector
 
 /**
  * normalise moun intensity to 1.
- * @param muonIntensity A MantidVec which contains the intensity of muons as a
- * function  of depth
+ * @param muonIntensity A contiguous range which contains the intensity of muons
+ * as a function  of depth
  * @return A vector of doubles which contains the normalised muon intensity
  */
-std::vector<double> XrayAbsorptionCorrection::normaliseMuonIntensity(MantidVec muonIntensity) {
+std::vector<double> XrayAbsorptionCorrection::normaliseMuonIntensity(std::span<double const> const muonIntensity) {
 
   double sum_of_elems = std::accumulate(muonIntensity.begin(), muonIntensity.end(), 0.0);
 
-  std::transform(muonIntensity.begin(), muonIntensity.end(), muonIntensity.begin(),
+  std::vector<double> normalised(muonIntensity.size());
+  std::transform(muonIntensity.begin(), muonIntensity.end(), normalised.begin(),
                  [sum_of_elems](double d) { return d / sum_of_elems; });
-  return muonIntensity;
+  return normalised;
 }
 
 /**
@@ -172,7 +173,7 @@ void XrayAbsorptionCorrection::exec() {
 
   MatrixWorkspace_sptr muonProfile = getProperty("MuonImplantationProfile");
   Mantid::HistogramData::HistogramY const &muonIntensity = muonProfile->y(0);
-  std::vector<double> normalisedMuonIntensity = normaliseMuonIntensity(muonIntensity.rawData());
+  std::vector<double> normalisedMuonIntensity = normaliseMuonIntensity(muonIntensity);
   double detectorAngle = getProperty("DetectorAngle");
   double detectorDistance = getProperty("DetectorDistance");
   Kernel::V3D detectorPos = calculateDetectorPos(detectorAngle, detectorDistance);

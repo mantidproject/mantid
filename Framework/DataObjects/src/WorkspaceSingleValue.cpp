@@ -57,8 +57,8 @@ Histogram1D &WorkspaceSingleValue::getSpectrumWithoutInvalidation(const size_t /
 }
 
 /// Rebin the workspace. Not implemented for this workspace.
-void WorkspaceSingleValue::generateHistogram(const std::size_t index, const MantidVec &X, MantidVec &Y, MantidVec &E,
-                                             bool skipError) const {
+void WorkspaceSingleValue::generateHistogram(const std::size_t index, std::span<double const> X, MantidVec &Y,
+                                             MantidVec &E, bool skipError) const {
   UNUSED_ARG(index);
   UNUSED_ARG(X);
   UNUSED_ARG(Y);

@@ -70,7 +70,7 @@ public:
   const std::string id(void) const override { return ""; }
   void init(const size_t &, const size_t &, const size_t &) override {}
   void init(const HistogramData::Histogram &) override {}
-  void generateHistogram(const std::size_t, const MantidVec &, MantidVec &, MantidVec &, bool) const override {}
+  void generateHistogram(const std::size_t, std::span<double const>, MantidVec &, MantidVec &, bool) const override {}
 
   void clearFileBacked(bool) override {};
   ITableWorkspace_sptr makeBoxTable(size_t /* start*/, size_t /*num*/) override { return ITableWorkspace_sptr(); }

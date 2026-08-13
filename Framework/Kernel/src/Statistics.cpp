@@ -36,6 +36,11 @@ void assertMomentIsValid(const int maxMoment) {
 using std::string;
 using std::vector;
 
+/// Shared implementations, generic over any sized contiguous range, so that the
+/// std::vector and std::span entry points below do not duplicate the algorithms.
+template <typename Range> Statistics getStatisticsImpl(Range const &data, const unsigned int flags);
+template <typename Range> std::vector<double> getZscoreImpl(Range const &data);
+
 Statistics::Statistics() {
   constexpr double nan = std::numeric_limits<double>::quiet_NaN();
   minimum = nan;
@@ -49,12 +54,13 @@ Statistics::Statistics() {
  * There are enough special cases in determining the median where it useful to
  * put it in a single function.
  */
-template <typename TYPE> double getMedian(const vector<TYPE> &data) {
+template <typename Range> double getMedian(Range const &data) {
+  using value_type = std::decay_t<decltype(data[0])>;
   const size_t size = data.size();
   if (size == 1)
     return static_cast<double>(data[0]);
 
-  const bool isSorted = std::is_sorted(data.cbegin(), data.cend());
+  const bool isSorted = std::is_sorted(data.begin(), data.end());
   const bool is_even = (size % 2 == 0);
   if (isSorted) {
     if (is_even)
@@ -62,7 +68,7 @@ template <typename TYPE> double getMedian(const vector<TYPE> &data) {
     else
       return static_cast<double>(data[size / 2]);
   } else {
-    std::vector<TYPE> tmpSortedData(data);
+    std::vector<value_type> tmpSortedData(data.begin(), data.end());
     std::sort(tmpSortedData.begin(), tmpSortedData.end());
     if (is_even)
       return (static_cast<double>(tmpSortedData[size / 2 - 1]) + static_cast<double>(tmpSortedData[size / 2])) / 2;
@@ -75,24 +81,28 @@ template <typename TYPE> double getMedian(const vector<TYPE> &data) {
  * There are enough special cases in determining the Z score where it useful to
  * put it in a single function.
  */
-template <typename TYPE> std::vector<double> getZscore(const vector<TYPE> &data) {
+template <typename Range> std::vector<double> getZscoreImpl(Range const &data) {
   std::vector<double> Zscore;
   if (data.size() < 3) {
     Zscore.resize(data.size(), 0.);
     return Zscore;
   }
-  Statistics stats = getStatistics(data);
+  Statistics stats = getStatisticsImpl(data, StatOptions::AllStats);
   if (stats.standard_deviation == 0.) {
     Zscore.resize(data.size(), 0.);
     return Zscore;
   }
-  for (auto it = data.cbegin(); it != data.cend(); ++it) {
+  for (auto it = data.begin(); it != data.end(); ++it) {
     auto tmp = static_cast<double>(*it);
     // unclear why Zscore is non-negative, was first implemented in #5316
     Zscore.emplace_back(fabs((stats.mean - tmp) / stats.standard_deviation));
   }
   return Zscore;
 }
+
+template <typename TYPE> std::vector<double> getZscore(const vector<TYPE> &data) { return getZscoreImpl(data); }
+
+std::vector<double> getZscore(std::span<double const> data) { return getZscoreImpl(data); }
 /**
  * There are enough special cases in determining the Z score where it useful to
  * put it in a single function.
@@ -162,7 +172,7 @@ template <typename TYPE> std::vector<double> getModifiedZscore(const vector<TYPE
  * @param data Data points whose statistics are to be evaluated
  * @param flags A set of flags to control the computation of the stats
  */
-template <typename TYPE> Statistics getStatistics(const vector<TYPE> &data, const unsigned int flags) {
+template <typename Range> Statistics getStatisticsImpl(Range const &data, const unsigned int flags) {
   Statistics statistics;
   if (data.empty()) { // don't do anything
     return statistics;
@@ -203,6 +213,14 @@ template <typename TYPE> Statistics getStatistics(const vector<TYPE> &data, cons
   return statistics;
 }
 
+template <typename TYPE> Statistics getStatistics(const vector<TYPE> &data, const unsigned int flags) {
+  return getStatisticsImpl(data, flags);
+}
+
+Statistics getStatistics(std::span<double const> data, const unsigned int flags) {
+  return getStatisticsImpl(data, flags);
+}
+
 /// Getting statistics of a string array should just give a bunch of NaNs
 template <> DLLExport Statistics getStatistics<string>(const vector<string> &data, const unsigned int flags) {
   UNUSED_ARG(flags);
@@ -224,7 +242,7 @@ template <> DLLExport Statistics getStatistics<bool>(const vector<bool> &data, c
  * @return :: RFactor including Rp and Rwp
  *
  */
-Rfactor getRFactor(const std::vector<double> &obsI, const std::vector<double> &calI, const std::vector<double> &obsE) {
+Rfactor getRFactor(std::span<double const> obsI, std::span<double const> calI, std::span<double const> obsE) {
   // 1. Check
   if (obsI.size() != calI.size() || obsI.size() != obsE.size()) {
     std::stringstream errss;

@@ -245,8 +245,8 @@ std::pair<size_t, bool> FindPeaksConvolve::getKernelBinCount(const HistogramData
 
   size_t kernelBinCount{0};
   if (peakExtent != EMPTY_DBL()) {
-    const double x1{xData->rawData()[static_cast<size_t>(std::floor((xData->size() - 1) / 2))]};
-    const double x2{xData->rawData()[static_cast<size_t>(std::floor((xData->size() - 1) / 2)) + 1]};
+    const double x1{(*xData)[static_cast<size_t>(std::floor((xData->size() - 1) / 2))]};
+    const double x2{(*xData)[static_cast<size_t>(std::floor((xData->size() - 1) / 2)) + 1]};
     kernelBinCount = static_cast<size_t>(std::floor(peakExtent * 2 / (x2 - x1)));
   } else {
     kernelBinCount = static_cast<size_t>(peakExtentNBins);
@@ -296,9 +296,9 @@ void FindPeaksConvolve::extractPeaks(const size_t dataIndex, const Tensor1D &iOv
 
 double FindPeaksConvolve::getXDataValue(const HistogramData::HistogramX *xData, const size_t xIndex) const {
   if (m_centreBins) {
-    return (xData->rawData()[xIndex] + xData->rawData()[xIndex + 1]) / 2;
+    return ((*xData)[xIndex] + (*xData)[xIndex + 1]) / 2;
   } else {
-    return xData->rawData()[xIndex];
+    return (*xData)[xIndex];
   }
 }
 
