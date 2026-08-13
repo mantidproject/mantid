@@ -86,7 +86,7 @@ def add_runs(  # noqa: C901
     else:
         period = _NO_INDIVIDUAL_PERIODS
 
-    if not save_directory or save_directory == "" or not os.path.isdir(save_directory):
+    if not save_directory or not os.path.isdir(save_directory):
         save_directory = config["defaultsave.directory"] if config["defaultsave.directory"] != "" else os.getcwd()
 
     if outFile:
@@ -234,7 +234,7 @@ def handle_saving_event_workspace_when_saving_as_histogram(binning, runs, defTyp
 
     # loading the nexus file using LoadNexus is necessary because it has some metadata
     # that is not in LoadEventNexus. This must be fixed.
-    filename, ext = _make_filename(runs[0], defType, inst)
+    filename, _ = _make_filename(runs[0], defType, inst)
     workspace_type = get_workspace_type(filename)
     if workspace_type is WorkspaceType.MultiperiodEvent:
         # If we are dealing with multi-period event workspaces then there is no way of getting any other
@@ -274,7 +274,7 @@ def _can_load_periods(runs, defType, rawTypes):
     returns False if some appear to be raw files else True
     """
     for i in runs:
-        dummy, ext = os.path.splitext(i)
+        _, ext = os.path.splitext(i)
         if ext == "":
             ext = defType
         if _is_type(ext, rawTypes):
