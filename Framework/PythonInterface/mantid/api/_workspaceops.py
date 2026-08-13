@@ -200,6 +200,12 @@ def attach_tableworkspaceiterator():
                 self.__pos = 0
                 self.__max = wksp.rowCount()
 
+            def __iter__(self):
+                # An iterator is required to be iterable itself. Without this a list
+                # comprehension over a table workspace fails on Python 3.13, which
+                # calls iter() on the object returned by ITableWorkspace.__iter__.
+                return self
+
             def __next__(self):
                 if self.__pos + 1 > self.__max:
                     raise StopIteration

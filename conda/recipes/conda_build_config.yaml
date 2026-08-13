@@ -24,7 +24,7 @@ c_stdlib_version:
   - '2022.*'                 # [win]
 
 python:
-  - '3.12.*'
+  - '3.13.*'
 
 # Aim to follow conda-forge
 libboost:

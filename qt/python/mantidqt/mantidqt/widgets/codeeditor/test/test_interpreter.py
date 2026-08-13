@@ -36,7 +36,9 @@ class PythonFileInterpreterTest(unittest.TestCase):
     def test_successful_execution(self):
         w = PythonFileInterpreter()
         w.editor.setText("x = 1 + 2")
-        w.execute_async()
+        # Wait for the worker to finish. If the test returns first then w is garbage collected and the
+        # success signal is delivered to a completer whose C++ editor has already been destroyed.
+        w.execute_async().join()
         self.assertTrue("Status: Idle", w.status.currentMessage())
 
     def test_clear_key_binding(self):

@@ -923,7 +923,8 @@ class TestManager(object):
         parent = pathlib.Path(self._config.testDir) / parent_dir
         found = []
         for sub_dir in parent.glob("**"):
-            if "__pycache__" not in sub_dir.name:
+            # Python 3.13 changed glob("**") to also return files, so filter them out here
+            if sub_dir.is_dir() and "__pycache__" not in sub_dir.name:
                 found.append(sub_dir)
         return found
 
