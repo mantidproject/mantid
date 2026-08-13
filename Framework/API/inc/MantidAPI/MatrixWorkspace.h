@@ -582,7 +582,7 @@ private:
                             size_t indexEnd) const;
   /// Copy data from an image.
   template <class Accessor>
-  void setImage(Accessor mutableVec, const MantidImage &image, size_t start, [[maybe_unused]] bool parallelExecution);
+  void setImage(Accessor mutableData, const MantidImage &image, size_t start, [[maybe_unused]] bool parallelExecution);
 
   void setIndexInfoWithoutISpectrumUpdate(const Indexing::IndexInfo &indexInfo);
   void buildDefaultSpectrumDefinitions();

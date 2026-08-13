@@ -1827,8 +1827,9 @@ bool MatrixWorkspace::hasOrientedLattice() const { return Mantid::API::Experimen
 
 /**
  * Creates a 2D image.
- * @param read :: Pointer to a method returning a MantidVec to provide data for
- * the image.
+ * @tparam Accessor :: Pointer to a const member function returning a spectrum's histogram
+ * data, e.g. &MatrixWorkspace::y. Templated because y() and e() do not share a return type.
+ * @param read :: Accessor for the data to provide for the image.
  * @param start :: First workspace index for the image.
  * @param stop :: Last workspace index for the image.
  * @param width :: Image width. Must divide (stop - start + 1) exactly.
@@ -2054,14 +2055,15 @@ std::pair<size_t, double> MatrixWorkspace::getXIndex(size_t i, double x, bool is
 
 /**
  * Copy data from an image.
- * @param dataVec :: A method returning non-const references to data vectors to
- * copy the image to.
+ * @tparam Accessor :: Pointer to a member function returning mutable references to a spectrum's
+ * histogram data, e.g. &MatrixWorkspace::mutableY.
+ * @param mutableData :: Accessor for the data to copy the image to.
  * @param image :: An image to copy the data from.
  * @param start :: Startinf workspace indx to copy data to.
  * @param parallelExecution :: Should inner loop run as parallel operation
  */
 template <class Accessor>
-void MatrixWorkspace::setImage(Accessor mutableVec, const MantidImage &image, size_t start,
+void MatrixWorkspace::setImage(Accessor mutableData, const MantidImage &image, size_t start,
                                [[maybe_unused]] bool parallelExecution) {
 
   if (image.empty())
@@ -2090,7 +2092,7 @@ void MatrixWorkspace::setImage(Accessor mutableVec, const MantidImage &image, si
     size_t spec = start + static_cast<size_t>(i) * width;
     auto rowEnd = row.end();
     for (auto pixel = row.begin(); pixel != rowEnd; ++pixel, ++spec) {
-      (this->*mutableVec)(spec)[0] = *pixel;
+      (this->*mutableData)(spec)[0] = *pixel;
     }
   }
 }
