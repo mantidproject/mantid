@@ -136,6 +136,7 @@ public:
   const std::vector<uint32_t> &getTriangles() const;
 
   void rotate(const Kernel::Matrix<double> &);
+  const Kernel::Matrix<double> &getAppliedRotation() const override { return m_appliedRotation; }
   void translate(const Kernel::V3D &);
   void multiply(const Kernel::Matrix<double> &);
   void scale(const double scaleFactor);
@@ -185,6 +186,9 @@ private:
   std::vector<Kernel::V3D> m_vertices;
   /// material composition
   Kernel::Material m_material;
+  /// Rotation accumulated by calls to rotate(), i.e. how far the mesh has been turned from the
+  /// frame its vertices were originally defined in
+  Kernel::Matrix<double> m_appliedRotation{3, 3, true};
 };
 
 } // NAMESPACE Geometry
