@@ -830,6 +830,7 @@ set(TEST_FILES
     DiffractionFocussingTest.h
     DirectILLTubeBackgroundTest.h
     DiscusMultipleScatteringCorrectionTest.h
+    DivergentSlitBeamProfileTest.h
     DivideTest.h
     EQSANSCorrectFrameTest.h
     EditInstrumentGeometryTest.h
