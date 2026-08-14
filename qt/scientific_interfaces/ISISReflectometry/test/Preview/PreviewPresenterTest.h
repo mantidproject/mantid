@@ -273,7 +273,7 @@ public:
     MatrixWorkspace_sptr const workspace = WorkspaceCreationHelper::create2DWorkspace(1, 1);
 
     EXPECT_CALL(*mockModel, getSelectedLoadedWs()).Times(AtLeast(1)).WillRepeatedly(Return(workspace));
-    EXPECT_CALL(*mockModel, getGroupMemberDisplayNames()).WillOnce(Return(members));
+    EXPECT_CALL(*mockModel, getGroupMemberDisplayNames()).Times(2).WillRepeatedly(Return(members));
     EXPECT_CALL(*mockView, setGroupMembers(members));
 
     auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel)));
@@ -291,6 +291,7 @@ public:
     MatrixWorkspace_sptr const summed = WorkspaceCreationHelper::create2DWorkspace(2, 1);
     MatrixWorkspace_sptr const reduced = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     Workspace_sptr const summedWorkspace = summed;
+    auto const groupMemberNames = std::vector<std::string>{"POLREF_1", "POLREF_2"};
     loaded->setTitle("selected member");
 
     EXPECT_CALL(*mockView, getSelectedGroupMember()).WillOnce(Return(1));
@@ -300,7 +301,10 @@ public:
     EXPECT_CALL(*mockDockedWidgets, updateWorkspacePreservingSelection(loaded));
     EXPECT_CALL(*mockDockedWidgets, plotInstView()).Times(0);
     EXPECT_CALL(*mockModel, getSelectedSummedWs()).Times(2).WillRepeatedly(Return(summed));
-    EXPECT_CALL(*mockRegionSelector, updateWorkspace(summedWorkspace));
+    EXPECT_CALL(*mockModel, getGroupMemberDisplayNames()).WillOnce(Return(groupMemberNames));
+    EXPECT_CALL(*mockModel, getSelectedGroupMember()).WillOnce(Return(1));
+    EXPECT_CALL(*mockRegionSelector, updateWorkspaceForGroupMember(summedWorkspace, "POLREF_2"));
+    EXPECT_CALL(*mockRegionSelector, updateWorkspace(summedWorkspace)).Times(0);
     EXPECT_CALL(*mockRegionSelector, clearWorkspace()).Times(0);
     EXPECT_CALL(*mockModel, getSelectedReducedWs()).Times(2).WillRepeatedly(Return(reduced));
     EXPECT_CALL(*mockLinePlot, setSpectrum(reduced, 0));
