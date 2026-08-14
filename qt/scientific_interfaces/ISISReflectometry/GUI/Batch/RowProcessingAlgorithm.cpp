@@ -15,6 +15,7 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Logger.h"
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
@@ -352,6 +353,9 @@ std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps
   updateProcessingInstructionsProperties(*properties, previewRow);
 
   properties->setProperty("HideInputWorkspaces", true);
+  if (std::dynamic_pointer_cast<WorkspaceGroup>(previewRow.getLoadedWs())) {
+    properties->setProperty("GroupTOFWorkspaces", false);
+  }
   return properties;
 }
 

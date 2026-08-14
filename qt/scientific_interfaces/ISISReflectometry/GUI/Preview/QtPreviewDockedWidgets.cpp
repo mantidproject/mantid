@@ -131,6 +131,10 @@ void QtPreviewDockedWidgets::updateWorkspace(Mantid::API::MatrixWorkspace_sptr &
   m_instDisplay->updateWorkspace(workspace);
 }
 
+void QtPreviewDockedWidgets::updateWorkspacePreservingSelection(Mantid::API::MatrixWorkspace_sptr &workspace) {
+  m_instDisplay->updateWorkspacePreservingSelection(workspace);
+}
+
 void QtPreviewDockedWidgets::resetInstView() { m_instDisplay->resetInstView(); }
 
 void QtPreviewDockedWidgets::plotInstView() { m_instDisplay->plotInstView(); }

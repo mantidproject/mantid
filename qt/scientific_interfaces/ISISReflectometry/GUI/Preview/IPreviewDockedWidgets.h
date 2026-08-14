@@ -47,6 +47,7 @@ public:
 
   // Instrument display
   virtual void updateWorkspace(Mantid::API::MatrixWorkspace_sptr &workspace) = 0;
+  virtual void updateWorkspacePreservingSelection(Mantid::API::MatrixWorkspace_sptr &workspace) = 0;
   virtual void resetInstView() = 0;
   virtual void plotInstView() = 0;
   //  Instrument viewer toolbar
