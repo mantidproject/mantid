@@ -225,7 +225,7 @@ jobs:
 
       - name: Remove MSVC Problem Matchers
         if: ${{ matrix.os == 'Windows' }}
-        run: echo "::remove-matcher msvc-problem-matcher::"
+        run: echo "::remove-matcher owner=msvc-problem-matcher::"
 
       - name: Run unit tests
         if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
