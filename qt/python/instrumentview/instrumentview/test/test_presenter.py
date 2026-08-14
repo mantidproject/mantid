@@ -328,12 +328,6 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._model.expand_pickable_mask_to_parent_subtrees.assert_called_once()
         np.testing.assert_array_equal(self._model.add_new_detector_key.call_args.args[0], mask)
 
-    def test_on_select_bank_tube_toggled(self):
-        self._presenter.on_select_bank_tube_toggled(True)
-        self.assertTrue(self._presenter._select_bank_tube)
-        self._presenter.on_select_bank_tube_toggled(False)
-        self.assertFalse(self._presenter._select_bank_tube)
-
     def test_adding_a_shape_forces_summed_spectra(self):
         """A shape covers too many detectors to plot individually, so the choice is taken away."""
         self._mock_view.sum_spectra_selected.return_value = False
@@ -416,7 +410,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         mask = np.array([i < 3 for i in range(n_hist)])
         expanded = np.array([i < 5 for i in range(n_hist)])
         self._mock_view.get_shape_mask.return_value = mask
-        self._presenter._select_bank_tube = True
+        self._mock_view.is_select_bank_tube_checked.return_value = True
         self._model.expand_pickable_mask_to_parent_subtrees = MagicMock(return_value=expanded)
         self._model.extract_spectra_for_line_plot = MagicMock()
 

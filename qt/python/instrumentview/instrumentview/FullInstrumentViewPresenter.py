@@ -81,7 +81,6 @@ class FullInstrumentViewPresenter:
         self._renderer = self._get_renderer_for_mode(view.get_render_mode_option())
         self._interactor_styles = InteractorStyles(self._view.main_plotter, picking_callback=lambda: None, hover_callback=lambda: None)
         self._last_hovered_point_index: Optional[int] = None
-        self._select_bank_tube = False
         self._shape_preview_active = False
         # Incremented per requested shape update so the worker can drop superseded ones
         self._shape_update_generation = 0
@@ -511,7 +510,7 @@ class FullInstrumentViewPresenter:
         if not self._is_current_shape_update(generation):
             return
         mask = self._view.get_shape_mask(centres)
-        if self._select_bank_tube:
+        if self._view.is_select_bank_tube_checked():
             mask = self._model.expand_pickable_mask_to_parent_subtrees(mask)
 
         self._model.extract_spectra_for_line_plot(
