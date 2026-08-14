@@ -37,6 +37,8 @@ public:
   MOCK_METHOD(std::string, getRegionType, (), (const, override));
   MOCK_METHOD(double, getLinthresh, (), (const, override));
   MOCK_METHOD(bool, getSymlogEnabled, (), (const, override));
+  MOCK_METHOD(bool, getPlotAllGroupMembers, (), (const, override));
+  MOCK_METHOD(void, setPlotAllGroupMembersCheckboxVisible, (bool), (override));
   MOCK_METHOD(QLayout *, getRegionSelectorLayout, (), (const, override));
   MOCK_METHOD(MantidQt::MantidWidgets::IPlotView *, getLinePlotView, (), (const, override));
 };

@@ -246,6 +246,12 @@ public:
 
     TS_ASSERT_EQUALS(model.getReducedWs(), expectedGroup);
     TS_ASSERT_EQUALS(model.getSelectedReducedWs(), secondOutput);
+    TS_ASSERT_EQUALS(model.getReducedWorkspaceMembers(),
+                     std::vector<MatrixWorkspace_sptr>({firstOutput, secondOutput}));
+
+    model.clearReducedWorkspace();
+
+    TS_ASSERT(!model.getReducedWs());
   }
 
   void test_export_summed_ws_to_ads() {
