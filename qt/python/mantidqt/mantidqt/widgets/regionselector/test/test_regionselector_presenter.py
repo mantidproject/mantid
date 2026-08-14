@@ -79,6 +79,18 @@ class RegionSelectorTest(unittest.TestCase):
         mock_view.set_workspace.assert_called_once_with(mock_ws)
         region_selector.show_all_data_clicked.assert_called_once()
 
+    def test_update_workspace_preserves_selector_extents(self):
+        region_selector = RegionSelector(view=Mock())
+        region_selector.show_all_data_clicked = Mock()
+        selector = Mock()
+        selector.extents = (1000.0, 5000.0, 10.0, 20.0)
+        region_selector._selectors = [selector]
+
+        region_selector.update_workspace(Mock(spec=MatrixWorkspace))
+
+        self.assertEqual(region_selector._selectors, [selector])
+        self.assertEqual(selector.extents, (1000.0, 5000.0, 10.0, 20.0))
+
     def test_add_rectangular_region_creates_selector(self):
         region_selector = RegionSelector(ws=Mock(spec=MatrixWorkspace), view=self.mock_view)
 

@@ -68,6 +68,28 @@ public:
     TS_ASSERT_EQUALS(model.getSelectedLoadedWs(), second);
   }
 
+  void test_group_member_names_are_returned_in_group_order() {
+    PreviewModel model;
+    auto const first = createWorkspace();
+    auto const second = createWorkspace();
+    AnalysisDataService::Instance().addOrReplace("first", first);
+    AnalysisDataService::Instance().addOrReplace("second", second);
+    auto const group = createWorkspaceGroup({first, second});
+    AnalysisDataService::Instance().addOrReplace("group", group);
+
+    model.loadWorkspaceFromAds("group");
+
+    TS_ASSERT_EQUALS(model.getGroupMemberDisplayNames(), std::vector<std::string>({"first", "second"}));
+  }
+
+  void test_group_member_names_are_empty_for_matrix_workspace() {
+    PreviewModel model;
+    AnalysisDataService::Instance().addOrReplace("workspace", createWorkspace());
+    model.loadWorkspaceFromAds("workspace");
+
+    TS_ASSERT(model.getGroupMemberDisplayNames().empty());
+  }
+
   void test_load_workspace_from_ads_throws_if_group_is_empty() {
     PreviewModel model;
     auto workspaceName = std::string("test workspace");
@@ -116,11 +138,13 @@ public:
     EXPECT_CALL(mockJobManager, startPreprocessing(_)).Times(1).WillOnce(Invoke(wsLoadEffect));
 
     PreviewModel model;
-    model.loadAndPreprocessWorkspaceAsync("group", mockJobManager);
+    model.loadAndPreprocessWorkspaceAsync("/data/POLREF00004699.nxs", mockJobManager);
 
     TS_ASSERT(model.isWorkspaceGroup());
     TS_ASSERT_EQUALS(model.getLoadedWs(), expectedGroup);
     TS_ASSERT_EQUALS(model.getSelectedLoadedWs(), first);
+    TS_ASSERT_EQUALS(model.getGroupMemberDisplayNames(),
+                     std::vector<std::string>({"POLREF00004699_1", "POLREF00004699_2"}));
   }
 
   void test_set_and_get_selected_banks() {
