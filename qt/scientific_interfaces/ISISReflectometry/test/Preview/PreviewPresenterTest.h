@@ -66,6 +66,7 @@ public:
 
     EXPECT_CALL(*mockView, getWorkspaceName()).Times(1).WillOnce(Return(workspaceName));
     EXPECT_CALL(*mockView, disableMainWidget()).Times(1);
+    EXPECT_CALL(*mockView, setGroupMembers(std::vector<std::string>{}));
     EXPECT_CALL(*mockDockedWidgets, setPlotAllGroupMembersCheckboxVisible(false));
     EXPECT_CALL(*mockModel, loadWorkspaceFromAds(workspaceName)).Times(1).WillOnce(Return(false));
     EXPECT_CALL(*mockModel, loadAndPreprocessWorkspaceAsync(Eq(workspaceName), Ref(*mockJobManager))).Times(1);
