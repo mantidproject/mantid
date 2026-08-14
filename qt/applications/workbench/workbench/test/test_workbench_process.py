@@ -228,8 +228,8 @@ class WorkbenchProcessQSettingsStagingTest(unittest.TestCase):
             workbench_process._sync_and_finalize_qsettings_staging(session)
 
         warning.assert_called_once()
-        self.assertIn("mantidproject/mantidworkbench.ini", warning.call_args.args[0].replace(chr(92), "/"))
-        self.assertIn("/local/cache/session", warning.call_args.args[0])
+        self.assertIn(str(Path("mantidproject/mantidworkbench.ini")), warning.call_args.args[0])
+        self.assertIn(str(Path("/local/cache/session")), warning.call_args.args[0])
 
     def test_normal_launch_returns_clean_result_after_accepted_close(self):
         app = Mock()
