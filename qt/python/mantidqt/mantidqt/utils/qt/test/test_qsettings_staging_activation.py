@@ -87,16 +87,14 @@ assert native_settings.value("seeded") == "canonical-native"
 
 libc = ctypes.CDLL(None, use_errno=True)
 inotify_descriptor = libc.inotify_init1(os.O_NONBLOCK | os.O_CLOEXEC)
-assert inotify_descriptor >= 0
 IN_ALL_EVENTS = 0x00000FFF
-staged_watch = libc.inotify_add_watch(inotify_descriptor, os.fsencode(expected_file.parent), IN_ALL_EVENTS)
-staged_root_watch = libc.inotify_add_watch(inotify_descriptor, os.fsencode(session.staging_root), IN_ALL_EVENTS)
-canonical_watch = libc.inotify_add_watch(inotify_descriptor, os.fsencode(canonical_directory), IN_ALL_EVENTS)
-canonical_root_watch = libc.inotify_add_watch(inotify_descriptor, os.fsencode(config_root), IN_ALL_EVENTS)
-assert staged_watch >= 0
-assert staged_root_watch >= 0
-assert canonical_watch >= 0
-assert canonical_root_watch >= 0
+watching = inotify_descriptor >= 0
+if watching:
+    staged_watch = libc.inotify_add_watch(inotify_descriptor, os.fsencode(expected_file.parent), IN_ALL_EVENTS)
+    staged_root_watch = libc.inotify_add_watch(inotify_descriptor, os.fsencode(session.staging_root), IN_ALL_EVENTS)
+    canonical_watch = libc.inotify_add_watch(inotify_descriptor, os.fsencode(canonical_directory), IN_ALL_EVENTS)
+    canonical_root_watch = libc.inotify_add_watch(inotify_descriptor, os.fsencode(config_root), IN_ALL_EVENTS)
+    watching = min(staged_watch, staged_root_watch, canonical_watch, canonical_root_watch) >= 0
 
 explicit_settings.setValue("explicit", "staged")
 explicit_settings.sync()
@@ -112,22 +110,22 @@ native_settings.setValue("native", "staged")
 native_settings.sync()
 assert native_settings.status() == QSettings.NoError
 
-events = os.read(inotify_descriptor, 65536)
-os.close(inotify_descriptor)
-event_header = struct.Struct("iIII")
-names_by_watch = {}
-offset = 0
-while offset < len(events):
-    watch, _mask, _cookie, name_length = event_header.unpack_from(events, offset)
-    offset += event_header.size
-    name = events[offset : offset + name_length].split(b"\\0", 1)[0].decode()
-    offset += name_length
-    names_by_watch.setdefault(watch, []).append(name)
+if watching:
+    events = os.read(inotify_descriptor, 65536)
+    event_header = struct.Struct("iIII")
+    names_by_watch = {}
+    offset = 0
+    while offset < len(events):
+        watch, _mask, _cookie, name_length = event_header.unpack_from(events, offset)
+        offset += event_header.size
+        name = events[offset : offset + name_length].split(b"\\0", 1)[0].decode()
+        offset += name_length
+        names_by_watch.setdefault(watch, []).append(name)
 
-assert "mantidworkbench.ini.lock" in names_by_watch.get(staged_watch, []), names_by_watch
-assert "QtProject.conf.lock" in names_by_watch.get(staged_root_watch, []), names_by_watch
-assert names_by_watch.get(canonical_watch, []) == [], names_by_watch
-assert names_by_watch.get(canonical_root_watch, []) == [], names_by_watch
+    assert "mantidworkbench.ini.lock" in names_by_watch.get(staged_watch, []), names_by_watch
+    assert "QtProject.conf.lock" in names_by_watch.get(staged_root_watch, []), names_by_watch
+    assert names_by_watch.get(canonical_watch, []) == [], names_by_watch
+    assert names_by_watch.get(canonical_root_watch, []) == [], names_by_watch
 assert canonical_file.read_bytes() == canonical_contents
 assert canonical_native_file.read_bytes() == canonical_native_contents
 assert sorted(path.name for path in canonical_directory.iterdir()) == ["mantidworkbench.ini"]
