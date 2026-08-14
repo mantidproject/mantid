@@ -459,7 +459,9 @@ class MaskingModel:
 
     def invert_masking_clicked(self, active):
         self._apply_inverted_mask = active
-        if self._auto_update_mask_file and self._active_mask:
-            self._masks.append(self._active_mask)
+        if self._auto_update_mask_file and (self._active_mask or self._masks):
+            if self._active_mask:
+                self._masks.append(self._active_mask)
             self.export_selectors()
-            self._masks.remove(self._active_mask)
+            if self._active_mask:
+                self._masks.pop()

@@ -417,7 +417,13 @@ void PreviewPresenter::updateSelectedRegionInModelFromView() {
 }
 
 void PreviewPresenter::updateRegionSelectorWorkspace() {
-  m_regionSelector->updateWorkspace(m_model->getSelectedSummedWs());
+  auto const groupMemberNames = m_model->getGroupMemberDisplayNames();
+  if (groupMemberNames.empty()) {
+    m_regionSelector->updateWorkspace(m_model->getSelectedSummedWs());
+  } else {
+    m_regionSelector->updateWorkspaceForGroupMember(m_model->getSelectedSummedWs(),
+                                                    groupMemberNames[m_model->getSelectedGroupMember()]);
+  }
 }
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

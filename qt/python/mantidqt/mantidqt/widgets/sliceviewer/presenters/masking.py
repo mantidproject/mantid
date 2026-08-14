@@ -29,6 +29,10 @@ class SelectionMaskingBase(ABC):
     def set_active(self, state):
         self._selector.set_active(state)
 
+    def set_visible(self, visible):
+        for artist in self._selector.artists:
+            artist.set_visible(visible)
+
     def clear(self):
         if self._clear:
             return
@@ -231,6 +235,13 @@ class Masking:
     def clear_model(self):
         self._model.clear_active_mask()
         self._model.clear_stored_masks()
+
+    def set_visible(self, visible):
+        for selector in self._selectors:
+            selector.set_visible(visible)
+        if self._active_selector:
+            self._active_selector.set_visible(visible)
+            self._active_selector.set_active(visible)
 
     def invert_masking_clicked(self, active):
         self._model.invert_masking_clicked(active)
