@@ -26,10 +26,11 @@ public:
   int version() const override { return 1; }
   const std::string category() const override { return "Utility\\Workspaces"; }
 
+  double calculateLogLikelihoodEvidence(const API::MatrixWorkspace_sptr pdfWorkspace) const;
+
 private:
   void init() override;
   void exec() override;
-  double calculateLogLikelihoodEvidence(const API::MatrixWorkspace_sptr pdfWorkspace) const;
 };
 
 } // namespace Algorithms

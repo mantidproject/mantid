@@ -57,11 +57,11 @@ void CalculateLogLikelihoodEvidence::exec() {
     if (!AnalysisDataService::Instance().doesExist(wsName)) {
       continue;
     }
-    auto pdfWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
-    if (!pdfWorkspace) {
+    auto chi2Workspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
+    if (!chi2Workspace) {
       continue;
     }
-    wsNameToLogEvidence[wsName] = calculateLogLikelihoodEvidence(pdfWorkspace);
+    wsNameToLogEvidence[wsName] = calculateLogLikelihoodEvidence(chi2Workspace);
     API::TableRow row = logEvidenceTable->appendRow();
     row << wsName << wsNameToLogEvidence[wsName];
   }
@@ -93,15 +93,14 @@ void CalculateLogLikelihoodEvidence::exec() {
   setProperty("OutputRelativeFactors", groupPdf);
 }
 
-double CalculateLogLikelihoodEvidence::calculateLogLikelihoodEvidence(const MatrixWorkspace_sptr pdfWorkspace) const {
-  if (!pdfWorkspace || pdfWorkspace->getNumberHistograms() == 0) {
+double CalculateLogLikelihoodEvidence::calculateLogLikelihoodEvidence(const MatrixWorkspace_sptr chi2Workspace) const {
+  if (!chi2Workspace || chi2Workspace->getNumberHistograms() == 0) {
     return 0.0;
   }
 
-  // In FABADA PDF output, the last spectrum stores the chi^2 PDF
-  const auto iChi2 = pdfWorkspace->getNumberHistograms() - 1;
-  const MantidVec &chi2 = pdfWorkspace->readX(iChi2);
-  const MantidVec &probChi2 = pdfWorkspace->readY(iChi2);
+  // Workspace should contain only one histogram with chi2 probability profile
+  const MantidVec &chi2 = chi2Workspace->readX(0);
+  const MantidVec &probChi2 = chi2Workspace->readY(0);
 
   if (chi2.size() < 2 || probChi2.empty()) {
     return 0.0;
@@ -140,6 +139,10 @@ double CalculateLogLikelihoodEvidence::calculateLogLikelihoodEvidence(const Matr
     const double chi2Value = (chi2[i] + chi2[i + 1]) / 2;
     const double logTerm = std::log(probChi2[i]) - 0.5 * chi2Value + std::log(dchi2);
     sumExp += std::exp(logTerm - maxLogTerm);
+  }
+
+  if (sumExp <= 0.0) {
+    return -std::numeric_limits<double>::infinity();
   }
 
   // log(sum_i exp(a_i)) = m + log(sum_i exp(a_i - m)), with m = max_i(a_i).

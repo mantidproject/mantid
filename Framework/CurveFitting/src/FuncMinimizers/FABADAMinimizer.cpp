@@ -818,7 +818,7 @@ void FABADAMinimizer::outputPDF(std::vector<double> &xValues, std::vector<double
     groupPdf = std::make_shared<WorkspaceGroup>();
   }
 
-  for (size_t i = 0; i < parameterNames.size(); i++) {
+  for (int i = 0; i < static_cast<int>(parameterNames.size()); i++) {
     int xstart = i * (pdfLength + 1);
     int xend = xstart + (pdfLength + 1);
     std::vector<double> x(xValues.begin() + xstart, xValues.begin() + xend);
