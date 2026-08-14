@@ -124,6 +124,7 @@ void PreviewPresenter::updatePlotAxes() {
  */
 void PreviewPresenter::notifyLoadWorkspaceRequested() {
   m_view->disableMainWidget();
+  m_view->setGroupMembers({});
   m_dockedWidgets->setPlotAllGroupMembersCheckboxVisible(false);
   auto const name = m_view->getWorkspaceName();
   try {
