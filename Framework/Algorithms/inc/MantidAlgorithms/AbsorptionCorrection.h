@@ -128,13 +128,16 @@ protected:
   size_t m_numVolumeElements;                  ///< The number of volume elements
   double m_sampleVolume;                       ///< The total volume of the sample
 
-private:
   /// Initialisation code
   void init() override;
+  /// Validates the properties shared by every absorption correction. A subclass adding checks of
+  /// its own should call this and merge the result, or the ScatterFrom checks are lost.
   std::map<std::string, std::string> validateInputs() override;
-  /// Execution code
+  /// Execution code. Protected so a subclass can run the standard correction and then derive
+  /// further outputs from what the quadrature accumulated.
   void exec() override;
 
+private:
   void retrieveBaseProperties();
   void constructSample(API::Sample &sample);
   void calculateDistances(const Geometry::IDetector &detector, std::vector<double> &L2s) const;

@@ -91,7 +91,7 @@ public:
   /// Algorithm's version
   int version() const override { return (1); }
 
-private:
+protected:
   void defineProperties() override;
   void retrieveProperties() override;
   std::string sampleXML() override;
