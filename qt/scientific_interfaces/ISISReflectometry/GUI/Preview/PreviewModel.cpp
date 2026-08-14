@@ -22,7 +22,9 @@
 #include <boost/optional.hpp>
 #include <boost/utility/in_place_factory.hpp>
 
+#include <algorithm>
 #include <filesystem>
+#include <iterator>
 #include <optional>
 #include <stdexcept>
 #include <string>
@@ -101,8 +103,9 @@ std::vector<MatrixWorkspace_sptr> PreviewModel::getReducedWorkspaceMembers() con
   auto const group = std::dynamic_pointer_cast<WorkspaceGroup>(m_runDetails->getReducedWs());
   std::vector<MatrixWorkspace_sptr> members;
   members.reserve(group->size());
-  for (auto const &member : group->getAllItems())
-    members.emplace_back(std::dynamic_pointer_cast<MatrixWorkspace>(member));
+  auto const &allItems = group->getAllItems();
+  std::transform(allItems.cbegin(), allItems.cend(), std::back_inserter(members),
+                 [](auto const &member) { return std::dynamic_pointer_cast<MatrixWorkspace>(member); });
   return members;
 }
 
