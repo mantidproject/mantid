@@ -215,6 +215,8 @@ jobs:
           set -o pipefail
           echo "For Jenkins scripts JOB_NAME=${JOB_NAME}"
           cd ${GITHUB_WORKSPACE}
+          # 2>&1 is required as compiler diagnostics are written to stderr, and the
+          # warning check in the next step reads them back out of this log
           mkdir -p ${GITHUB_WORKSPACE}/build/test_logs/
           pixi run --frozen bash -ex ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/build ${GITHUB_WORKSPACE} $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE_BUILD_CODE $ENABLE_UNIT_TESTS $ENABLE_SYSTEM_TESTS $ENABLE_DOC_TESTS $EXTRA_CMAKE_FLAGS 2>&1 \
               | tee ${GITHUB_WORKSPACE}/build/test_logs/build_${{ matrix.os }}.log
@@ -226,6 +228,14 @@ jobs:
       - name: Remove MSVC Problem Matchers
         if: ${{ matrix.os == 'Windows' }}
         run: echo "::remove-matcher owner=msvc-problem-matcher::"
+
+      # Runs after the whole build has completed so that every warning is reported at once,
+      # and before the tests so that a warning stops the job from proceeding any further.
+      - uses: ./.github/actions/check-build-warnings
+        name: Check for compiler warnings
+        if: ${{ matrix.os == 'Linux' && needs.check-filters.outputs.code_changes == 'true' }}
+        with:
+          log-file: build/test_logs/build_${{ matrix.os }}.log
 
       - name: Run unit tests
         if: ${{ needs.check-filters.outputs.code_changes == 'true' }}

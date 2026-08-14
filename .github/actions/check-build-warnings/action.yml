@@ -1,0 +1,16 @@
+name: 'Check Build Warnings'
+description: 'Fails the job if the C++ compiler emitted warnings, after the whole build has completed'
+inputs:
+  log-file:
+    description: 'Path to the captured build log, relative to the workspace'
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Check for compiler warnings
+      shell: bash
+      working-directory: ${{ github.workspace }}
+      env:
+        BUILD_LOG: ${{ inputs.log-file }}
+      run: |
+        pixi run --frozen python ${GITHUB_WORKSPACE}/.github/actions/check-build-warnings/count_warnings.py "${GITHUB_WORKSPACE}/${BUILD_LOG}"
