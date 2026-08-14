@@ -276,8 +276,9 @@ class TextureUtilsSummedSpectraTests(unittest.TestCase):
             any_order=False,
         )
 
-    def test_fit_initial_summed_spectra_returns_shared_params(self):
-        # exercised via a light patch set; only checks the extra return element is populated
+    def test_fit_initial_summed_spectra_returns_centre_limits_and_crop_wss(self):
+        # exercised via a light patch set: the fitted centre becomes the narrow x0 limits, and the
+        # per-workspace crop names come straight from crop_wss_and_combine
         with (
             patch(f"{texture_utils_path}.Fit") as mock_fit,
             patch(f"{texture_utils_path}._make_composite"),
@@ -286,7 +287,7 @@ class TextureUtilsSummedSpectraTests(unittest.TestCase):
             patch(f"{texture_utils_path}.crop_wss_and_combine") as mock_crop_and_combine,
         ):
             window_ws = MagicMock()
-            window_ws.readX.return_value = [1, 1.5, 2]
+            window_ws.x.return_value = [1, 1.5, 2]
             window_ws.name.return_value = "peak_window_0"
             mock_crop_and_combine.return_value = (window_ws, ["ws1_1.0"])
             mock_func_factory.createFunction.return_value = MagicMock()
@@ -295,18 +296,12 @@ class TextureUtilsSummedSpectraTests(unittest.TestCase):
             mock_instance.createPeakFunction.return_value = MagicMock()
 
             out_peak_func = mock_fit.return_value.Function.function.getFunction.return_value
-            out_peak_func.nParams.return_value = 3
-            out_peak_func.getParamName.side_effect = lambda i: ["I", "X0", "A"][i]
-            # getParameterValue is called with the "X0" name (for the centre) and with integer indices
-            # (when building the shared-params dict)
-            out_peak_func.getParameterValue.side_effect = lambda k: {"X0": 1.0, 0: 100.0, 1: 1.0, 2: 0.5}[k]
+            out_peak_func.getParameterValue.side_effect = lambda k: {"X0": 1.0}[k]
 
-            x0_lims, shared_params, all_wss = fit_initial_summed_spectra(
-                ["ws1"], [1.0], 0.05, {}, "BackToBackExponential", return_shared_params=True
-            )
+            x0_lims, all_wss = fit_initial_summed_spectra(["ws1"], [1.0], 0.05, {}, "BackToBackExponential")
 
-        self.assertEqual(len(shared_params), 1)
-        self.assertEqual(shared_params[0], {"I": 100.0, "X0": 1.0, "A": 0.5})
+        self.assertEqual(len(x0_lims), 1)
+        np.testing.assert_allclose(x0_lims[0], (1.0 * (1 - 3e-3), 1.0 * (1 + 3e-3)))
         self.assertEqual(all_wss, [["ws1_1.0"]])
 
 
@@ -337,9 +332,31 @@ class FitAllPeaksOrchestrationTests(unittest.TestCase):
     @patch(f"{fitpeaks_path}._fit_all_peaks_fitpeaks")
     @patch(f"{texture_utils_path}.fit_initial_summed_spectra", return_value=([], []))
     def test_fit_all_peaks_dispatches_to_fitpeaks_by_default(self, _mock_summed, mock_fitpeaks_path):
-        # default engine is "fitpeaks" - fit_all_peaks should delegate and not run the multidomain path
-        fit_all_peaks(wss=["ws"], peaks=[1.0], peak_window=0.1, save_dir="save")
-        mock_fitpeaks_path.assert_called_once()
+        # default engine is "fitpeaks": the engine is called with the full positional argument list,
+        # so a reordering of e.g. nan_replacement and no_fit_value_dict is caught here
+        fit_all_peaks(wss=["ws"], peaks=[1.0], peak_window=0.1, save_dir="save", nan_replacement="min", smooth_vals=(4, 2))
+        mock_fitpeaks_path.assert_called_once_with(
+            ["ws"],  # wss
+            [1.0],  # peaks
+            0.1,  # peak_window
+            "save",  # save_dir
+            False,  # override_dir
+            2.0,  # i_over_sigma_thresh
+            "min",  # nan_replacement
+            None,  # no_fit_value_dict
+            "BackToBackExponential",  # peak_func_name
+            50,  # max_fit_iters
+            {
+                "StepSizeMethod": "Sqrt epsilon",
+                "IgnoreInvalidData": False,
+                "CreateOutput": True,
+                "OutputCompositeMembers": True,
+                "Minimizer": "Levenberg-Marquardt",
+                "CostFunction": "Unweighted least squares",
+            },  # fit_kwargs
+            (4, 2),  # smooth_vals
+            False,  # last_fit_ic
+        )
 
     @patch(f"{texture_utils_path}.fit_initial_summed_spectra", return_value=([], []))
     def test_fit_all_peaks_unknown_engine_raises(self, _mock_summed):

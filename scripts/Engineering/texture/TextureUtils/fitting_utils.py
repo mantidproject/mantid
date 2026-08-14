@@ -6,12 +6,11 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 # Shared core for the texture peak-fitting workflow: the small conversion/IO helpers, the
-# crop/rebin routines, the summed-spectrum seeding shared by both engines, and the public
-# fit_all_peaks entry point that dispatches to one of the two fitting engines:
-#   - fitpeaks_engine._fit_all_peaks_fitpeaks       (multithreaded FitPeaks)
-#   - multidomain_engine._fit_all_peaks_multidomain (iterative MultiDomainFunction)
-# Both engines import the helpers below; the engine modules are imported lazily inside
-# fit_all_peaks so this module has no import-time dependency on them.
+# crop/rebin routines, the summed-spectrum seeding, and the public fit_all_peaks entry point that
+# dispatches to the fitting engine:
+#   - fitpeaks_engine._fit_all_peaks_fitpeaks (multithreaded FitPeaks)
+# The engine imports the helpers below; it is imported lazily inside fit_all_peaks so this module
+# has no import-time dependency on it.
 
 from os import path
 from typing import Sequence, Tuple, List
@@ -115,15 +114,13 @@ def fit_initial_summed_spectra(
     peak_window: float,
     fit_kwargs: dict,
     peak_func_name: str,
-    return_shared_params: bool = False,
-) -> Tuple[Sequence[Tuple[float, float]], Sequence[Workspace2D]]:
-    # return_shared_params: if True, also return (as the middle element of the tuple) a list - one
-    # dict per peak - of the peak function parameters fitted on the summed spectrum.  These are used
-    # by the FitPeaks engine to seed the per-spectrum fits.  They are unit-consistent with that
-    # engine because both fit in the workspace's native (d-spacing) units.
+) -> Tuple[List[Tuple[float, float]], List[List[str]]]:
+    """Fit each peak on the summed (high-SNR) spectrum to seed the per-spectrum fits.
+
+    Returns (x0_lims, all_peak_crop_wss): per peak, the narrow d-spacing bounds around the fitted
+    centre, and the names of each input workspace cropped+rebinned onto that peak's common grid."""
     x0_lims = []
     all_peak_crop_wss = []
-    shared_params = []
     for i, peak in enumerate(peaks):
         # set the ws bounds based on the supplied peak window
         low_bound, hi_bound = peak - peak_window, peak + peak_window
@@ -165,12 +162,6 @@ def fit_initial_summed_spectra(
         out_peak_func = fit_object.Function.function.getFunction(0)
         x0 = out_peak_func.getParameterValue(_PEAK_CENTRE_PARAM)
         x0_lims.append((x0 * (1 - 3e-3), x0 * (1 + 3e-3)))
-        if return_shared_params:
-            shared_params.append(
-                {out_peak_func.getParamName(ip): out_peak_func.getParameterValue(ip) for ip in range(out_peak_func.nParams())}
-            )
-    if return_shared_params:
-        return x0_lims, shared_params, all_peak_crop_wss
     return x0_lims, all_peak_crop_wss
 
 
@@ -209,27 +200,18 @@ def fit_all_peaks(
                      min/max/mean - will replace all nans in a column with the min/max/mean non-nan value (otherwise will remain nan)
     no_fit_value_dict: allows the user to specify the unfit default value of parameters as a dict of key:value pairs
     smooth_vals: the number of bins which should be combined together to improve SNR stats
-    tied_bkgs: a bool flag for each of the subsequent fits whether the background fits should be independent for spectra
-    final_fit_raw: flag for whether the final fit should be done with no smoothing
-    parameters_to_tie: the shared broadening/shape parameters. On the first (coarsely rebunched)
-                       fit these are tied across spectra to establish a single, unit-correct value;
-                       every subsequent fit (including the final raw fit) then holds that value
-                       FIXED per-spectrum rather than tying, so the domains decouple and the
-                       multi-domain solve stays block-diagonal. If None, defaults are used based on
-                       peak function:
-                       BackToBackExponential: ("A", "B"), IkedaCarpenterPV: ("Alpha0", "Alpha1", "Beta0", "Kappa")
-    subsequent_fit_param_fix: parameters which should be fixed after the initial fit (Default is None)
+    tied_bkgs: ignored by the "fitpeaks" engine (FitPeaks fits each spectrum's background independently)
+    final_fit_raw: ignored by the "fitpeaks" engine, which always ends on a raw (unsmoothed) fit
+    parameters_to_tie: ignored by the "fitpeaks" engine, which carries the fitted peak shape forward
+                       per-spectrum between passes rather than tying/fixing it across spectra
+    subsequent_fit_param_fix: ignored by the "fitpeaks" engine
     peak_func_name: peak function to use, should be either BackToBackExponential or IkedaCarpenterPV
     max_fit_iters: maximum number of iterations for a single fit
-    engine: fitting engine to use.
-            "fitpeaks" (default) - hand each peak to the FitPeaks algorithm, which fits it across all
-                spectra of all workspaces at once with OpenMP multithreading.  Fits in TOF (like the
-                multidomain engine) but with FitPeaks' weighted "Least squares" cost (it cannot do
-                unweighted); rebunch smoothing only refines the per-spectrum centre seed for a final
-                raw fit, which is what gets reported.  Faster on many spectra.
-            "multidomain" - the original iterative MultiDomainFunction fit (smoothing passes,
-                summed-centre seeding, tied-then-fixed broadening) run serially per (ws, peak).
-                Retained for comparison/validation and for the unweighted-cost behaviour.
+    engine: fitting engine to use.  "fitpeaks" (the only supported value) hands each peak to the
+            FitPeaks algorithm, which fits it across all spectra of all workspaces at once with
+            OpenMP multithreading.  It fits in TOF with the same minimizer/cost function as the
+            summed seeding fit; rebunch smoothing only refines the per-spectrum centre and shape
+            seeds for a final raw fit, which is what gets reported.
     """
 
     # currently the only fit functions intended to be used - less flexibility here allows for less user input
@@ -251,27 +233,26 @@ def fit_all_peaks(
         "CostFunction": "Unweighted least squares",
     }
 
-    if engine == "fitpeaks":
-        from .fitpeaks_engine import _fit_all_peaks_fitpeaks
-
-        _fit_all_peaks_fitpeaks(
-            wss,
-            peaks,
-            peak_window,
-            save_dir,
-            override_dir,
-            i_over_sigma_thresh,
-            nan_replacement,
-            no_fit_value_dict,
-            peak_func_name,
-            max_fit_iters,
-            fit_kwargs,
-            smooth_vals,
-            last_fit_ic,
-        )
-        return
-    else:
+    if engine != "fitpeaks":
         raise ValueError(f"Unknown fitting engine '{engine}'. Expected 'fitpeaks'.")
+
+    from .fitpeaks_engine import _fit_all_peaks_fitpeaks
+
+    _fit_all_peaks_fitpeaks(
+        wss,
+        peaks,
+        peak_window,
+        save_dir,
+        override_dir,
+        i_over_sigma_thresh,
+        nan_replacement,
+        no_fit_value_dict,
+        peak_func_name,
+        max_fit_iters,
+        fit_kwargs,
+        smooth_vals,
+        last_fit_ic,
+    )
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ shared fitting utility functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
