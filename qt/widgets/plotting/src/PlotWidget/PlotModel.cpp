@@ -26,4 +26,9 @@ void PlotModel::setSpectrum(const Mantid::API::MatrixWorkspace_sptr &ws, const s
   m_workspaces = std::vector<MatrixWorkspace_sptr>{ws};
   m_workspaceIndices = std::vector<int>{static_cast<int>(wsIndex)};
 }
+
+void PlotModel::setSpectra(const std::vector<MatrixWorkspace_sptr> &workspaces, const size_t wsIndex) {
+  m_workspaces = workspaces;
+  m_workspaceIndices = std::vector<int>{static_cast<int>(wsIndex)};
+}
 } // namespace MantidQt::MantidWidgets

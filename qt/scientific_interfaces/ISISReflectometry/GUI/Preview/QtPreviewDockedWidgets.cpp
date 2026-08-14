@@ -16,6 +16,7 @@
 #include <QAction>
 #include <QMainWindow>
 #include <QMenu>
+#include <QSignalBlocker>
 #include <QVBoxLayout>
 
 using namespace Mantid::Kernel;
@@ -93,6 +94,7 @@ void QtPreviewDockedWidgets::connectSignals() const {
   // Line plot toolbar
   connect(m_ui.lp_ads_export_button, SIGNAL(clicked()), this, SLOT(onLinePlotExportToAdsClicked()));
   connect(m_ui.set_yaxis_symlog_checkbox, SIGNAL(toggled(bool)), this, SLOT(onYAxisSymlogToggled(bool)));
+  connect(m_ui.plot_all_group_members_checkbox, SIGNAL(toggled(bool)), this, SLOT(onPlotAllGroupMembersToggled()));
   connect(m_ui.linthresh_line_edit, SIGNAL(textChanged(QString)), this, SLOT(onLineEditUpdated()));
   connect(m_ui.apply_button, SIGNAL(clicked()), this, SLOT(onApplyButtonClicked()));
 }
@@ -113,6 +115,8 @@ void QtPreviewDockedWidgets::onYAxisSymlogToggled(bool checked) const {
   onLineEditUpdated();
   m_notifyee->notifySetYAxisSymlogChanged();
 }
+
+void QtPreviewDockedWidgets::onPlotAllGroupMembersToggled() const { m_notifyee->notifyPlotAllGroupMembersChanged(); }
 
 void QtPreviewDockedWidgets::onLineEditUpdated() const {
   m_ui.apply_button->setEnabled(!m_ui.linthresh_line_edit->text().isEmpty());
@@ -163,6 +167,18 @@ void QtPreviewDockedWidgets::setInstViewToolbarEnabled(bool enable) {
 }
 
 bool QtPreviewDockedWidgets::getSymlogEnabled() const { return m_ui.set_yaxis_symlog_checkbox->isChecked(); }
+
+bool QtPreviewDockedWidgets::getPlotAllGroupMembers() const {
+  return m_ui.plot_all_group_members_checkbox->isChecked();
+}
+
+void QtPreviewDockedWidgets::setPlotAllGroupMembersCheckboxVisible(bool visible) {
+  m_ui.plot_all_group_members_checkbox->setVisible(visible);
+  if (!visible) {
+    QSignalBlocker const blocker(m_ui.plot_all_group_members_checkbox);
+    m_ui.plot_all_group_members_checkbox->setChecked(false);
+  }
+}
 
 double QtPreviewDockedWidgets::getLinthresh() const {
   bool ok = false;

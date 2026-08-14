@@ -42,6 +42,7 @@ public:
   std::optional<ProcessingInstructions> getProcessingInstructions(ROIType regionType) const override;
   Mantid::API::Workspace_sptr getReducedWs() const override;
   Mantid::API::MatrixWorkspace_sptr getSelectedReducedWs() const override;
+  std::vector<Mantid::API::MatrixWorkspace_sptr> getReducedWorkspaceMembers() const override;
   bool isWorkspaceGroup() const override;
   std::vector<std::string> getGroupMemberDisplayNames() const override;
   size_t getNumberOfGroupMembers() const override;
@@ -53,6 +54,7 @@ public:
 
   void setLoadedWs(Mantid::API::Workspace_sptr workspace);
   void setSummedWs(Mantid::API::Workspace_sptr workspace) override;
+  void clearReducedWorkspace() override;
   void setTheta(double theta) override;
   void setSelectedBanks(std::optional<ProcessingInstructions> selectedBanks) override;
   void setSelectedRegion(ROIType regionType, Selection const &selection) override;

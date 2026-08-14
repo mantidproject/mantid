@@ -38,6 +38,7 @@ public:
   virtual void notifyEditROIModeRequested() = 0;
   virtual void notifyRectangularROIModeRequested() = 0;
   virtual void notifySetYAxisSymlogChanged() = 0;
+  virtual void notifyPlotAllGroupMembersChanged() = 0;
 };
 
 class IPreviewDockedWidgets {
@@ -67,6 +68,8 @@ public:
   virtual std::string getRegionType() const = 0;
   virtual double getLinthresh() const = 0;
   virtual bool getSymlogEnabled() const = 0;
+  virtual bool getPlotAllGroupMembers() const = 0;
+  virtual void setPlotAllGroupMembersCheckboxVisible(bool visible) = 0;
 
   virtual QLayout *getRegionSelectorLayout() const = 0;
   virtual MantidQt::MantidWidgets::IPlotView *getLinePlotView() const = 0;

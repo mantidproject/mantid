@@ -80,6 +80,7 @@ public:
   void notifyEditROIModeRequested() override;
   void notifyRectangularROIModeRequested() override;
   void notifySetYAxisSymlogChanged() override;
+  void notifyPlotAllGroupMembersChanged() override;
 
   void notifyApplyRequested() override;
 
