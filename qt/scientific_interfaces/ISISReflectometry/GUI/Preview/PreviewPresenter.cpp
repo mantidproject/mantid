@@ -136,6 +136,8 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
   auto ws = m_model->getSelectedLoadedWs();
   assert(ws);
 
+  m_view->setGroupMembers(m_model->getGroupMemberDisplayNames());
+
   // Set the angle so that it has a non-zero value when the reduction is run
   if (auto const theta = m_model->getDefaultTheta()) {
     m_view->setAngle(*theta);
@@ -154,6 +156,23 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
   m_dockedWidgets->setInstViewToolbarEnabled(true);
   notifyInstViewZoomRequested();
   runSumBanks(true);
+}
+
+void PreviewPresenter::notifyGroupMemberSelectionChanged() {
+  m_model->setSelectedGroupMember(m_view->getSelectedGroupMember());
+  updateSelectedGroupMemberDisplay();
+}
+
+void PreviewPresenter::updateSelectedGroupMemberDisplay() {
+  auto loadedWs = m_model->getSelectedLoadedWs();
+  assert(loadedWs);
+  m_view->setTitle(loadedWs->getTitle());
+  m_dockedWidgets->updateWorkspacePreservingSelection(loadedWs);
+
+  if (m_model->getSelectedSummedWs())
+    updateRegionSelectorWorkspace();
+  if (m_model->getSelectedReducedWs())
+    plotLinePlot();
 }
 
 void PreviewPresenter::notifyUpdateAngle() {

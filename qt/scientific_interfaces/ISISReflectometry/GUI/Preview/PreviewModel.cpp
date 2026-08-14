@@ -22,6 +22,7 @@
 #include <boost/optional.hpp>
 #include <boost/utility/in_place_factory.hpp>
 
+#include <filesystem>
 #include <optional>
 #include <stdexcept>
 #include <string>
@@ -95,6 +96,19 @@ MatrixWorkspace_sptr PreviewModel::getSelectedReducedWs() const {
 
 bool PreviewModel::isWorkspaceGroup() const {
   return static_cast<bool>(std::dynamic_pointer_cast<WorkspaceGroup>(m_runDetails->getLoadedWs()));
+}
+
+std::vector<std::string> PreviewModel::getGroupMemberDisplayNames() const {
+  auto const group = std::dynamic_pointer_cast<WorkspaceGroup>(m_runDetails->getLoadedWs());
+  if (!group)
+    return {};
+
+  auto names = group->getNames();
+  auto const prefix = std::filesystem::path(m_runDetails->runNumbers().front()).stem().string();
+  for (size_t i = 0; i < names.size(); ++i)
+    if (names[i].empty())
+      names[i] = prefix + "_" + std::to_string(i + 1);
+  return names;
 }
 
 size_t PreviewModel::getNumberOfGroupMembers() const {

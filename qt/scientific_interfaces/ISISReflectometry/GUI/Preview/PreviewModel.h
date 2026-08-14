@@ -43,6 +43,7 @@ public:
   Mantid::API::Workspace_sptr getReducedWs() const override;
   Mantid::API::MatrixWorkspace_sptr getSelectedReducedWs() const override;
   bool isWorkspaceGroup() const override;
+  std::vector<std::string> getGroupMemberDisplayNames() const override;
   size_t getNumberOfGroupMembers() const override;
   size_t getSelectedGroupMember() const override;
   void setSelectedGroupMember(size_t index) override;

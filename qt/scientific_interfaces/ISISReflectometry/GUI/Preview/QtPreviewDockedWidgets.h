@@ -38,6 +38,7 @@ public:
 
   // Instrument display
   void updateWorkspace(Mantid::API::MatrixWorkspace_sptr &workspace) override;
+  void updateWorkspacePreservingSelection(Mantid::API::MatrixWorkspace_sptr &workspace) override;
   void resetInstView() override;
   void plotInstView() override;
   // Instrument viewer toolbar
