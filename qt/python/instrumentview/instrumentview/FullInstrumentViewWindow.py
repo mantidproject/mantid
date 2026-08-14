@@ -28,7 +28,7 @@ from qtpy.QtWidgets import (
     QFrame,
 )
 from qtpy.QtGui import QDoubleValidator, QDragEnterEvent, QDropEvent, QDragMoveEvent, QColor, QPalette, QPixmap, QIcon, QPainter
-from qtpy.QtCore import Qt, QEvent, QSize
+from qtpy.QtCore import Qt, QEvent, QSize, QMetaObject
 from qtpy.QtWidgets import QFileDialog
 from superqt import QDoubleRangeSlider
 from pyvistaqt import BackgroundPlotter
@@ -86,6 +86,7 @@ def _ensure_overlay_manager(method):
         shape = method(self, *args, **kwargs)
         self._shape_overlay_manager.set_shape(shape)
         self._presenter.on_overlaid_shape_added()
+        self._register_shape_changed_callback()
 
     return wrapper
 
@@ -229,6 +230,7 @@ class FullInstrumentViewView(QWidget):
         self._last_camera_position = None
         self._last_parallel_scale = None
         self._detector_spectrum_fig = None
+        self._line_edit_connections: dict[QLineEdit, QMetaObject.Connection] = {}
 
         self._create_main_widgets()
         self._set_layouts()
@@ -523,10 +525,8 @@ class FullInstrumentViewView(QWidget):
         """Closes view, not window"""
         self._closing = True
         with suppress(TypeError):
-            self._contour_range_max_edit.disconnect()
-            self._contour_range_min_edit.disconnect()
-            self._integration_limit_max_edit.disconnect()
-            self._integration_limit_min_edit.disconnect()
+            for line_edit in self._line_edit_connections:
+                line_edit.disconnect(self._line_edit_connections[line_edit])
         # Shut down any callbacks before closing the plotter and the figure
         if hasattr(self, "_presenter") and self._presenter is not None:
             self._presenter.handle_close()
@@ -681,8 +681,8 @@ class FullInstrumentViewView(QWidget):
 
         # Connections to sync sliders and edits
         slider.valueChanged.connect(lambda lims: self._set_min_max_edit_boxes(min_edit, max_edit, lims))
-        min_edit.editingFinished.connect(set_slider(callled_from_min=True))
-        max_edit.editingFinished.connect(set_slider(callled_from_min=False))
+        self._line_edit_connections[min_edit] = min_edit.editingFinished.connect(set_slider(callled_from_min=True))
+        self._line_edit_connections[max_edit] = max_edit.editingFinished.connect(set_slider(callled_from_min=False))
 
     def _add_detector_info_boxes(self, parent_box: QVBoxLayout, label: str) -> QTextEdit:
         """Adds a text box to the given parent that is designed to show read-only information about the selected detector"""
@@ -837,6 +837,9 @@ class FullInstrumentViewView(QWidget):
     def set_sum_spectra_checkbox_disabled(self, disabled):
         self._sum_spectra_checkbox.setDisabled(disabled)
 
+    def set_sum_spectra_selected(self, selected: bool) -> None:
+        self._sum_spectra_checkbox.setChecked(selected)
+
     def set_select_bank_tube_disabled(self, disabled):
         self._select_bank_tube.setDisabled(disabled)
 
@@ -980,6 +983,18 @@ class FullInstrumentViewView(QWidget):
     def enable_parallel_projection(self) -> None:
         self.main_plotter.view_xy()
         self.main_plotter.enable_parallel_projection()
+
+    def _register_shape_changed_callback(self) -> None:
+        """Make the line plot follow the overlaid shape.
+
+        The overlay manager fires the callback whenever the shape is dragged, resized or
+        rotated. It is also called once here so the plot reflects the shape where it is
+        first drawn.
+        """
+        if self._shape_overlay_manager is None:
+            return
+        self._shape_overlay_manager.set_on_shape_changed(self._presenter.on_shape_changed)
+        self._presenter.on_shape_changed()
 
     @_ensure_overlay_manager
     def add_circle_widget(self) -> None:

@@ -52,6 +52,7 @@ class FullInstrumentViewModel:
     _source_position = np.array([0, 0, 0])
     _beam_axis = np.array([0, 0, 1])
     line_plot_workspace = None
+    line_plot_det_ids = np.array([], dtype=int)
     _lineplot_ws_in_base_units_not_summed = None
     _lineplot_ws_in_selected_units_not_summed = None
     _line_plot_workspace = None
@@ -599,7 +600,10 @@ class FullInstrumentViewModel:
         wrapped_workspaces = [
             WorkspaceDetectorPeaks(ws_name, self.get_integration_units(), self._integration_limits) for ws_name in selected_peaks_workspaces
         ]
-        peaks_by_pws = [wws.get_x_values_and_labels(self.picked_detector_ids) for wws in wrapped_workspaces]
+        # Key off the detectors actually plotted rather than the picked selection: they differ
+        # when the plot is previewing an overlaid shape or a hovered detector, and the x-position
+        # lookup below can only resolve detectors present in the extracted line plot workspace.
+        peaks_by_pws = [wws.get_x_values_and_labels(self.line_plot_det_ids) for wws in wrapped_workspaces]
         labels_by_pws = [[p.label for p in peaks] for peaks in peaks_by_pws]
         # Convert peak units to currently plotted units
         # NOTE: Need to get x coords in workspace unit for better acuracy

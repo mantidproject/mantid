@@ -130,6 +130,45 @@ class TestCursorZoomInteractorStyle(unittest.TestCase):
         self.assertEqual(plotter.renderer.camera.position, [7, 8, 9])
         self.assertAlmostEqual(plotter.renderer.camera.parallel_scale, 5.0)
 
+    def test_zoom_notifies_camera_changed(self):
+        style, plotter = self._create_style(parallel_scale=1.0)
+        callback = mock.MagicMock()
+        style.set_camera_changed_callback(callback)
+        style._cursor_world_pos = np.array([0.0, 0.0, 0.0])
+        with mock.patch("instrumentview.InteractorStyles._display_to_world", return_value=np.array([0.0, 0.0, 0.0])):
+            style._zoom(style.zoom_factor)
+        callback.assert_called_once()
+
+    def test_zoom_out_past_default_notifies_camera_changed_only_once(self):
+        style, plotter = self._create_style(position=(0, 0, 1), focal_point=(0, 0, 0), parallel_scale=1.0)
+        plotter.renderer.camera.parallel_scale = 0.9
+        callback = mock.MagicMock()
+        style.set_camera_changed_callback(callback)
+        style._cursor_world_pos = np.array([0.0, 0.0, 0.0])
+        with mock.patch("instrumentview.InteractorStyles._display_to_world", return_value=np.array([0.0, 0.0, 0.0])):
+            style._zoom(1.0 / style.zoom_factor)
+        callback.assert_called_once()
+
+    def test_zoom_does_not_notify_camera_changed_when_no_cursor_pos(self):
+        style, plotter = self._create_style()
+        callback = mock.MagicMock()
+        style.set_camera_changed_callback(callback)
+        style._cursor_world_pos = None
+        style._zoom(1.1)
+        callback.assert_not_called()
+
+    def test_reset_camera_and_notify_notifies_camera_changed(self):
+        style, plotter = self._create_style()
+        callback = mock.MagicMock()
+        style.set_camera_changed_callback(callback)
+        style._reset_camera_and_notify()
+        callback.assert_called_once()
+
+    def test_camera_changed_callback_exceptions_do_not_escape_into_vtk(self):
+        style, plotter = self._create_style()
+        style.set_camera_changed_callback(mock.MagicMock(side_effect=RuntimeError("boom")))
+        style._notify_camera_changed()
+
     def test_wheel_forward_calls_zoom_in(self):
         style, plotter = self._create_style()
         with mock.patch.object(style, "_zoom") as zoom_mock:

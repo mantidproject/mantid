@@ -1353,7 +1353,28 @@ class TestFullInstrumentViewModel(unittest.TestCase):
 
         model.get_peak_lineplot_overlay_arguments(["ws1"])
 
-        mock_wdp.get_x_values_and_labels.assert_called_once_with(model.picked_detector_ids)
+        mock_wdp.get_x_values_and_labels.assert_called_once_with(model.line_plot_det_ids)
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel._match_workspace_unit")
+    @mock.patch("instrumentview.FullInstrumentViewModel.AnalysisDataService")
+    @mock.patch("instrumentview.FullInstrumentViewModel.WorkspaceDetectorPeaks")
+    def test_get_peak_lineplot_overlay_arguments_follows_plotted_not_picked_detectors(self, mock_wdp_cls, mock_ads, mock_match_unit):
+        """The plot can preview an overlaid shape or hovered detector, in which case the peaks
+        must annotate what is plotted rather than the picked selection."""
+        model, _ = self._setup_model([1, 2, 3])
+        model._detector_is_picked = np.array([True, False, False])
+        model.line_plot_det_ids = np.array([2, 3])
+        model._lineplot_ws_in_base_units_not_summed = MagicMock()
+        model._lineplot_ws_in_selected_units_not_summed = MagicMock()
+        mock_ads.doesExist.return_value = True
+        mock_match_unit.side_effect = lambda ws_from, idx, x_from, ws_to: x_from
+        mock_wdp = MagicMock()
+        mock_wdp.get_x_values_and_labels.return_value = []
+        mock_wdp_cls.return_value = mock_wdp
+
+        model.get_peak_lineplot_overlay_arguments(["ws1"])
+
+        np.testing.assert_array_equal(np.array([2, 3]), mock_wdp.get_x_values_and_labels.call_args.args[0])
 
 
 if __name__ == "__main__":
