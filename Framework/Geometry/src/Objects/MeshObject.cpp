@@ -477,6 +477,9 @@ std::shared_ptr<GeometryHandler> MeshObject::getGeometryHandler() const {
 void MeshObject::rotate(const Kernel::Matrix<double> &rotationMatrix) {
   std::for_each(m_vertices.begin(), m_vertices.end(),
                 [&rotationMatrix](auto &vertex) { vertex.rotate(rotationMatrix); });
+  // Accumulate, so a caller can tell how far the mesh has been turned from its original frame
+  // however many times it has been rotated.
+  m_appliedRotation = rotationMatrix * m_appliedRotation;
 }
 
 /**
