@@ -8,6 +8,7 @@
 #include "LookupTable.h"
 #include "IGroup.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "ParseReflectometryStrings.h"
 #include "PreviewRow.h"
 #include "Row.h"
@@ -24,6 +25,13 @@ bool equalWithinTolerance(double val1, double val2, double tolerance) {
 }
 
 static const std::string EMPTY_SEARCH_TITLE = "";
+
+std::string getPreviewTitle(MantidQt::CustomInterfaces::ISISReflectometry::PreviewRow const &previewRow) {
+  auto workspace = previewRow.getLoadedWs();
+  if (auto const group = std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(workspace))
+    workspace = group->getItem(0);
+  return workspace ? workspace->getTitle() : EMPTY_SEARCH_TITLE;
+}
 } // namespace
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
@@ -42,7 +50,7 @@ std::optional<LookupRow> LookupTable::findLookupRow(Row const &row, double toler
 }
 
 std::optional<LookupRow> LookupTable::findLookupRow(PreviewRow const &previewRow, double tolerance) const {
-  auto const title = !previewRow.getLoadedWs() ? EMPTY_SEARCH_TITLE : previewRow.getLoadedWs()->getTitle();
+  auto const title = getPreviewTitle(previewRow);
   auto titleAndTheta = parseTitleAndThetaFromRunTitle(title);
 
   if (titleAndTheta.has_value()) {

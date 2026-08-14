@@ -13,7 +13,7 @@
 #include "MantidAPI/AlgorithmProperties.h"
 #include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/IAlgorithm.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "Reduction/Item.h"
 #include "Reduction/PreviewRow.h"
@@ -69,10 +69,8 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model, Preview
 void updateRowOnAlgorithmComplete(const Mantid::API::IAlgorithm_sptr &algorithm, Item &item) {
   auto &row = dynamic_cast<PreviewRow &>(item);
   Mantid::API::Workspace_sptr outputWs = algorithm->getProperty("OutputWorkspace");
-  auto matrixWs = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(outputWs);
-  if (!matrixWs)
-    throw std::runtime_error("Unsupported workspace type; expected MatrixWorkspace");
-  row.setLoadedWs(matrixWs);
+  validatePreviewWorkspace(outputWs);
+  row.setLoadedWs(outputWs);
   // TODO reset the rest of the workspaces associated with the workflow
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry::PreprocessRow
