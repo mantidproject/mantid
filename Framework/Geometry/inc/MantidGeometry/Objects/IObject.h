@@ -9,6 +9,7 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/SolidAngleParams.h"
 #include "MantidGeometry/Rendering/ShapeInfo.h"
+#include "MantidKernel/Matrix.h"
 #include <map>
 #include <memory>
 #include <optional>
@@ -47,6 +48,20 @@ public:
   virtual bool isFiniteGeometry() const { return true; }
   virtual void setFiniteGeometryFlag(bool) {}
   virtual bool hasValidShape() const = 0;
+
+  /** The rotation already applied to this shape's definition.
+   *
+   * A shape may be stored either in its own frame or already rotated into the lab frame -
+   * CopySample bakes the destination workspace's goniometer in, while SetGoniometer alone leaves
+   * the shape untouched. Both produce a workspace whose run carries a goniometer, so the matrix is
+   * the only way to tell which frame the shape is in and avoid rotating it a second time.
+   *
+   * Identity means the shape has not been rotated and is expressed in its own frame.
+   */
+  virtual const Kernel::Matrix<double> &getAppliedRotation() const {
+    static const Kernel::Matrix<double> identity(3, 3, true);
+    return identity;
+  }
   virtual IObject *clone() const = 0;
   virtual IObject *cloneWithMaterial(const Kernel::Material &material) const = 0;
 

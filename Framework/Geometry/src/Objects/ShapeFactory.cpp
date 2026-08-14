@@ -137,6 +137,11 @@ std::shared_ptr<CSGObject> ShapeFactory::createShape(Poco::XML::Element *pElem) 
     }
   }
 
+  // Record what the shape has been rotated by. The surfaces below are rotated by this matrix as
+  // they are parsed, so afterwards nothing in the shape says which frame it ended up in; a caller
+  // that also has a goniometer on the run needs this to avoid applying the rotation twice.
+  retVal->setAppliedRotation(m_gonioRotateMatrix);
+
   Poco::AutoPtr<NodeList> pNL_rotate_all = pElem->getElementsByTagName("rotate-all");
   auto *pElemRotateAll = static_cast<Element *>(pNL_rotate_all->item(0));
   m_rotateAllMatrix.identityMatrix();
