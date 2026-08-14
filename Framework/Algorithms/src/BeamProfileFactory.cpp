@@ -7,6 +7,7 @@
 
 #include "MantidAlgorithms/BeamProfileFactory.h"
 #include "MantidAlgorithms/SampleCorrections/CircularBeamProfile.h"
+#include "MantidAlgorithms/SampleCorrections/DivergentSlitBeamProfile.h"
 #include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -26,7 +27,16 @@ std::unique_ptr<IBeamProfile> BeamProfileFactory::createBeamProfile(const Geomet
   if (beamShapeParam == "Slit") {
     const auto beamWidthParam = source->getNumberParameter("beam-width");
     const auto beamHeightParam = source->getNumberParameter("beam-height");
-    if (beamWidthParam.size() == 1 && beamHeightParam.size() == 1) {
+    const auto horDivParam = source->getNumberParameter("beam-divergence-horizontal");
+    const auto verDivParam = source->getNumberParameter("beam-divergence-vertical");
+    const auto slitDistanceParam = source->getNumberParameter("slit-distance");
+    // define some criteria for different profile constructions
+    const bool slitDefined = beamWidthParam.size() == 1 && beamHeightParam.size() == 1;
+    const bool divDefined = horDivParam.size() == 1 && verDivParam.size() == 1 && slitDistanceParam.size() == 1;
+    if (slitDefined && divDefined) {
+      return std::make_unique<DivergentSlitBeamProfile>(*frame, source->getPos(), beamWidthParam[0], beamHeightParam[0],
+                                                        horDivParam[0], verDivParam[0], slitDistanceParam[0]);
+    } else if (slitDefined && !divDefined) {
       return std::make_unique<RectangularBeamProfile>(*frame, source->getPos(), beamWidthParam[0], beamHeightParam[0]);
     }
   } else if (beamShapeParam == "Circle") {

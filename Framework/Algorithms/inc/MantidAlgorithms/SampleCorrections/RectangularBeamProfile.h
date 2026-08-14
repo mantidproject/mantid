@@ -22,7 +22,7 @@ namespace Algorithms {
   Defines a flat, rectangular beam profile that has a width, height and center
   point. The profile is assumed infinitely thin.
 */
-class MANTID_ALGORITHMS_DLL RectangularBeamProfile final : public IBeamProfile {
+class MANTID_ALGORITHMS_DLL RectangularBeamProfile : public IBeamProfile {
 public:
   RectangularBeamProfile(const Geometry::ReferenceFrame &frame, const Kernel::V3D &center, double width, double height);
 
@@ -40,7 +40,7 @@ public:
     return maxPt;
   }
 
-private:
+protected:
   const unsigned short m_upIdx;
   const unsigned short m_beamIdx;
   const unsigned short m_horIdx;

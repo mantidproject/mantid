@@ -291,6 +291,7 @@ set(SRC_FILES
     src/SANSCollimationLengthEstimator.cpp
     src/SampleCorrections/CircularBeamProfile.cpp
     src/SampleCorrections/DetectorGridDefinition.cpp
+    src/SampleCorrections/DivergentSlitBeamProfile.cpp
     src/SampleCorrections/IBeamProfile.cpp
     src/SampleCorrections/MCAbsorptionStrategy.cpp
     src/SampleCorrections/MCInteractionStatistics.cpp
@@ -648,6 +649,7 @@ set(INC_FILES
     inc/MantidAlgorithms/SANSCollimationLengthEstimator.h
     inc/MantidAlgorithms/SampleCorrections/CircularBeamProfile.h
     inc/MantidAlgorithms/SampleCorrections/DetectorGridDefinition.h
+    inc/MantidAlgorithms/SampleCorrections/DivergentSlitBeamProfile.h
     inc/MantidAlgorithms/SampleCorrections/IBeamProfile.h
     inc/MantidAlgorithms/SampleCorrections/IMCAbsorptionStrategy.h
     inc/MantidAlgorithms/SampleCorrections/IMCInteractionVolume.h
