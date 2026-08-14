@@ -9,6 +9,7 @@
 #include "GUI/Common/IJobManager.h"
 #include "IPreviewModel.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/Workspace_fwd.h"
 #include "MantidGeometry/IDTypes.h"
 #include "ROIType.h"
 #include "Reduction/PreviewRow.h"
@@ -19,6 +20,7 @@
 #include <string>
 
 using Mantid::API::MatrixWorkspace_sptr;
+using Mantid::API::Workspace_sptr;
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
@@ -26,16 +28,23 @@ class MockPreviewModel : public IPreviewModel {
 public:
   MOCK_METHOD(bool, loadWorkspaceFromAds, (std::string const &workspaceName), (override));
   MOCK_METHOD(void, loadAndPreprocessWorkspaceAsync, (std::string const &, IJobManager &), (override));
-  MOCK_METHOD(MatrixWorkspace_sptr, getLoadedWs, (), (const, override));
-  MOCK_METHOD(MatrixWorkspace_sptr, getSummedWs, (), (const, override));
-  MOCK_METHOD(MatrixWorkspace_sptr, getReducedWs, (), (const, override));
+  MOCK_METHOD(Workspace_sptr, getLoadedWs, (), (const, override));
+  MOCK_METHOD(MatrixWorkspace_sptr, getSelectedLoadedWs, (), (const, override));
+  MOCK_METHOD(Workspace_sptr, getSummedWs, (), (const, override));
+  MOCK_METHOD(MatrixWorkspace_sptr, getSelectedSummedWs, (), (const, override));
+  MOCK_METHOD(Workspace_sptr, getReducedWs, (), (const, override));
+  MOCK_METHOD(MatrixWorkspace_sptr, getSelectedReducedWs, (), (const, override));
+  MOCK_METHOD(bool, isWorkspaceGroup, (), (const, override));
+  MOCK_METHOD(size_t, getNumberOfGroupMembers, (), (const, override));
+  MOCK_METHOD(size_t, getSelectedGroupMember, (), (const, override));
+  MOCK_METHOD(void, setSelectedGroupMember, (size_t), (override));
   MOCK_METHOD(std::optional<ProcessingInstructions>, getSelectedBanks, (), (const, override));
   MOCK_METHOD(std::optional<ProcessingInstructions>, getProcessingInstructions, (ROIType), (const, override));
   MOCK_METHOD(std::optional<double>, getDefaultTheta, (), (const, override));
   MOCK_METHOD(PreviewRow const &, getPreviewRow, (), (const, override));
   MOCK_METHOD(std::optional<Selection> const, getSelectedRegion, (ROIType), (override));
 
-  MOCK_METHOD(void, setSummedWs, (MatrixWorkspace_sptr), (override));
+  MOCK_METHOD(void, setSummedWs, (Workspace_sptr), (override));
   MOCK_METHOD(void, setTheta, (double), (override));
   MOCK_METHOD(void, setSelectedBanks, (std::optional<ProcessingInstructions>), (override));
   MOCK_METHOD(void, setSelectedRegion, (ROIType, Selection const &), (override));

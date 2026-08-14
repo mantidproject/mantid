@@ -11,6 +11,7 @@
 #include "../../../ISISReflectometry/Reduction/PreviewRow.h"
 #include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
@@ -73,6 +74,15 @@ public:
     TS_ASSERT_EQUALS(result->getPropertyValue("TransmissionProcessingInstructions"), "6-7");
     TS_ASSERT_EQUALS(result->getPropertyValue("ROIDetectorIDs"), "10-50");
     assertProperty(*result, "ThetaIn", theta);
+  }
+
+  void testWorkspaceGroupNameIsForwardedAsPreviewInputRunList() {
+    auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
+    auto previewRow = PreviewRow({"polarized_group"});
+
+    auto result = Reduction::createAlgorithmRuntimeProps(model, previewRow);
+
+    TS_ASSERT_EQUALS(result->getPropertyValue("InputRunList"), "polarized_group");
   }
 
   void testLookupRowWithAngleLookup() {
@@ -288,7 +298,8 @@ public:
     auto mockAlg = std::make_shared<StubbedReduction>();
     const bool isHistogram = true;
     Mantid::API::MatrixWorkspace_sptr mockWs = WorkspaceCreationHelper::create1DWorkspaceRand(1, isHistogram);
-    mockAlg->addOutputWorkspace(mockWs);
+    Mantid::API::Workspace_sptr output = mockWs;
+    mockAlg->addOutputWorkspace(output);
 
     auto runNumbers = std::vector<std::string>{};
     auto row = PreviewRow(runNumbers);
@@ -296,6 +307,19 @@ public:
     Reduction::updateRowOnAlgorithmComplete(mockAlg, row);
 
     TS_ASSERT_EQUALS(row.getReducedWs(), mockWs);
+  }
+
+  void test_preview_row_is_updated_with_workspace_group_on_reduction_algorithm_complete() {
+    auto mockAlg = std::make_shared<StubbedReduction>();
+    auto group = std::make_shared<Mantid::API::WorkspaceGroup>();
+    group->addWorkspace(WorkspaceCreationHelper::create2DWorkspace(1, 1));
+    Mantid::API::Workspace_sptr output = group;
+    mockAlg->addOutputWorkspace(output);
+    auto row = PreviewRow({});
+
+    Reduction::updateRowOnAlgorithmComplete(mockAlg, row);
+
+    TS_ASSERT_EQUALS(row.getReducedWs(), group);
   }
 
 private:
@@ -315,7 +339,7 @@ private:
       declareProperty(std::move(prop));
     }
 
-    void addOutputWorkspace(Mantid::API::MatrixWorkspace_sptr &ws) {
+    void addOutputWorkspace(Mantid::API::Workspace_sptr &ws) {
       this->getPointerToProperty("OutputWorkspaceBinned")->createTemporaryValue();
       setProperty(m_propName, ws);
     }
