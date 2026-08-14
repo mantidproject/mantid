@@ -90,8 +90,20 @@ MatrixWorkspace_sptr PreviewModel::getSelectedSummedWs() const {
   return getWorkspaceGroupMember(m_runDetails->getSummedWs());
 }
 Workspace_sptr PreviewModel::getReducedWs() const { return m_runDetails->getReducedWs(); }
+
+void PreviewModel::clearReducedWorkspace() { m_runDetails->setReducedWs(nullptr); }
+
 MatrixWorkspace_sptr PreviewModel::getSelectedReducedWs() const {
   return getWorkspaceGroupMember(m_runDetails->getReducedWs());
+}
+
+std::vector<MatrixWorkspace_sptr> PreviewModel::getReducedWorkspaceMembers() const {
+  auto const group = std::dynamic_pointer_cast<WorkspaceGroup>(m_runDetails->getReducedWs());
+  std::vector<MatrixWorkspace_sptr> members;
+  members.reserve(group->size());
+  for (auto const &member : group->getAllItems())
+    members.emplace_back(std::dynamic_pointer_cast<MatrixWorkspace>(member));
+  return members;
 }
 
 bool PreviewModel::isWorkspaceGroup() const {

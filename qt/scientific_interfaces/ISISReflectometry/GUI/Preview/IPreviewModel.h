@@ -38,6 +38,7 @@ public:
   virtual Mantid::API::MatrixWorkspace_sptr getSelectedSummedWs() const = 0;
   virtual Mantid::API::Workspace_sptr getReducedWs() const = 0;
   virtual Mantid::API::MatrixWorkspace_sptr getSelectedReducedWs() const = 0;
+  virtual std::vector<Mantid::API::MatrixWorkspace_sptr> getReducedWorkspaceMembers() const = 0;
   virtual bool isWorkspaceGroup() const = 0;
   virtual std::vector<std::string> getGroupMemberDisplayNames() const = 0;
   virtual size_t getNumberOfGroupMembers() const = 0;
@@ -49,6 +50,7 @@ public:
   virtual std::optional<Selection> const getSelectedRegion(ROIType regionType) = 0;
 
   virtual void setSummedWs(Mantid::API::Workspace_sptr workspace) = 0;
+  virtual void clearReducedWorkspace() = 0;
 
   virtual void setTheta(double theta) = 0;
 

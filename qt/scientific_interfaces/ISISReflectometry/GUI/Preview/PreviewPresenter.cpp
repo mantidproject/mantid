@@ -32,6 +32,11 @@ class QLayout;
 
 namespace {
 Mantid::Kernel::Logger g_log("Reflectometry Preview Presenter");
+
+void warnIfUnexpectedSpectrumCount(MatrixWorkspace_sptr const &workspace) {
+  if (workspace->getNumberHistograms() != 1)
+    g_log.warning("Reduced workspace has " + std::to_string(workspace->getNumberHistograms()) + " spectra; expected 1");
+}
 } // namespace
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
@@ -88,6 +93,11 @@ void PreviewPresenter::notifyAutoreductionPaused() { updateWidgetEnabledState();
 
 void PreviewPresenter::notifySetYAxisSymlogChanged() { updatePlotAxes(); }
 
+void PreviewPresenter::notifyPlotAllGroupMembersChanged() {
+  if (m_model->getReducedWs())
+    plotLinePlot();
+}
+
 void PreviewPresenter::updateWidgetEnabledState() {
   if (mainPresenter().isProcessing() || mainPresenter().isAutoreducing()) {
     m_view->disableMainWidget();
@@ -114,6 +124,7 @@ void PreviewPresenter::updatePlotAxes() {
  */
 void PreviewPresenter::notifyLoadWorkspaceRequested() {
   m_view->disableMainWidget();
+  m_dockedWidgets->setPlotAllGroupMembersCheckboxVisible(false);
   auto const name = m_view->getWorkspaceName();
   try {
     if (m_model->loadWorkspaceFromAds(name)) {
@@ -137,6 +148,7 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
   assert(ws);
 
   m_view->setGroupMembers(m_model->getGroupMemberDisplayNames());
+  m_dockedWidgets->setPlotAllGroupMembersCheckboxVisible(m_model->isWorkspaceGroup());
 
   // Set the angle so that it has a non-zero value when the reduction is run
   if (auto const theta = m_model->getDefaultTheta()) {
@@ -340,13 +352,17 @@ void PreviewPresenter::plotRegionSelector() {
 }
 
 void PreviewPresenter::plotLinePlot() {
-  auto ws = m_model->getSelectedReducedWs();
-  assert(ws);
-  auto const numSpec = ws->getNumberHistograms();
-  if (numSpec != 1) {
-    g_log.warning("Reduced workspace has " + std::to_string(numSpec) + " spectra; expected 1");
+  if (m_dockedWidgets->getPlotAllGroupMembers()) {
+    auto const workspaces = m_model->getReducedWorkspaceMembers();
+    for (auto const &workspace : workspaces)
+      warnIfUnexpectedSpectrumCount(workspace);
+    m_plotPresenter->setSpectra(workspaces, 0);
+  } else {
+    auto const workspace = m_model->getSelectedReducedWs();
+    assert(workspace);
+    warnIfUnexpectedSpectrumCount(workspace);
+    m_plotPresenter->setSpectrum(workspace, 0);
   }
-  m_plotPresenter->setSpectrum(ws, 0);
   m_plotPresenter->plot();
 }
 
@@ -394,6 +410,7 @@ void PreviewPresenter::runReduction() {
   // Ensure the selected regions are up to date. Required when Loading new data because an empty run details is created.
   updateSelectedRegionInModelFromView();
   // Perform the reduction
+  m_model->clearReducedWorkspace();
   m_model->reduceAsync(*m_jobManager);
 }
 
