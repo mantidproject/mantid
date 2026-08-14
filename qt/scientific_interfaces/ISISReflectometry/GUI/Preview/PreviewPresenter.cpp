@@ -133,7 +133,7 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
   // The model has already been updated by another callback to contain the loaded workspace. If loading fails
   // then it should bail out early and this method should never be called, so the workspace should
   // always be valid at this point.
-  auto ws = m_model->getLoadedWs();
+  auto ws = m_model->getSelectedLoadedWs();
   assert(ws);
 
   // Set the angle so that it has a non-zero value when the reduction is run
@@ -321,7 +321,7 @@ void PreviewPresenter::plotRegionSelector() {
 }
 
 void PreviewPresenter::plotLinePlot() {
-  auto ws = m_model->getReducedWs();
+  auto ws = m_model->getSelectedReducedWs();
   assert(ws);
   auto const numSpec = ws->getNumberHistograms();
   if (numSpec != 1) {
@@ -334,7 +334,7 @@ void PreviewPresenter::plotLinePlot() {
 void PreviewPresenter::runSumBanks(bool const addExistingROIsToPlot) {
   m_plotExistingROIs = addExistingROIsToPlot;
 
-  if (!m_model->getLoadedWs()) {
+  if (!m_model->getSelectedLoadedWs()) {
     g_log.error("Unable to perform sum banks step because there is no run loaded");
     return;
   }
@@ -364,7 +364,7 @@ void PreviewPresenter::runSumBanks(bool const addExistingROIsToPlot) {
 }
 
 void PreviewPresenter::runReduction() {
-  if (!m_model->getLoadedWs()) {
+  if (!m_model->getSelectedLoadedWs()) {
     g_log.error("Unable to perform preview reduction because there is no run loaded");
     return;
   }
@@ -397,6 +397,8 @@ void PreviewPresenter::updateSelectedRegionInModelFromView() {
                              m_regionSelector->getRegion(roiTypeToString(ROIType::Transmission)));
 }
 
-void PreviewPresenter::updateRegionSelectorWorkspace() { m_regionSelector->updateWorkspace(m_model->getSummedWs()); }
+void PreviewPresenter::updateRegionSelectorWorkspace() {
+  m_regionSelector->updateWorkspace(m_model->getSelectedSummedWs());
+}
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

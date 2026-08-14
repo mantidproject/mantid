@@ -10,6 +10,7 @@
 #include "Common/DllConfig.h"
 #include "IPreviewModel.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/Workspace_fwd.h"
 #include "MantidGeometry/IDTypes.h"
 #include "ROIType.h"
 #include "Reduction/PreviewRow.h"
@@ -33,17 +34,24 @@ public:
   void sumBanksAsync(IJobManager &jobManager) override;
   void reduceAsync(IJobManager &jobManager) override;
 
-  Mantid::API::MatrixWorkspace_sptr getLoadedWs() const override;
+  Mantid::API::Workspace_sptr getLoadedWs() const override;
+  Mantid::API::MatrixWorkspace_sptr getSelectedLoadedWs() const override;
   std::optional<ProcessingInstructions> getSelectedBanks() const override;
-  Mantid::API::MatrixWorkspace_sptr getSummedWs() const override;
+  Mantid::API::Workspace_sptr getSummedWs() const override;
+  Mantid::API::MatrixWorkspace_sptr getSelectedSummedWs() const override;
   std::optional<ProcessingInstructions> getProcessingInstructions(ROIType regionType) const override;
-  Mantid::API::MatrixWorkspace_sptr getReducedWs() const override;
+  Mantid::API::Workspace_sptr getReducedWs() const override;
+  Mantid::API::MatrixWorkspace_sptr getSelectedReducedWs() const override;
+  bool isWorkspaceGroup() const override;
+  size_t getNumberOfGroupMembers() const override;
+  size_t getSelectedGroupMember() const override;
+  void setSelectedGroupMember(size_t index) override;
   std::optional<double> getDefaultTheta() const override;
   PreviewRow const &getPreviewRow() const override;
   std::optional<Selection> const getSelectedRegion(ROIType regionType) override;
 
-  void setLoadedWs(Mantid::API::MatrixWorkspace_sptr workspace);
-  void setSummedWs(Mantid::API::MatrixWorkspace_sptr workspace) override;
+  void setLoadedWs(Mantid::API::Workspace_sptr workspace);
+  void setSummedWs(Mantid::API::Workspace_sptr workspace) override;
   void setTheta(double theta) override;
   void setSelectedBanks(std::optional<ProcessingInstructions> selectedBanks) override;
   void setSelectedRegion(ROIType regionType, Selection const &selection) override;
@@ -53,8 +61,10 @@ public:
 
 private:
   std::optional<PreviewRow> m_runDetails;
+  size_t m_selectedGroupMember{0};
 
   void createRunDetails(std::string const &workspaceName);
+  Mantid::API::MatrixWorkspace_sptr getWorkspaceGroupMember(Mantid::API::Workspace_sptr const &workspace) const;
 
   std::optional<double> getThetaFromLogs(std::string const &logName) const;
 
