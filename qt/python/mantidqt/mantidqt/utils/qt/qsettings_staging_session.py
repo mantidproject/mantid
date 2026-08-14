@@ -180,7 +180,7 @@ class QSettingsStagingSessionManager:
         self._cache_root = eligibility.cache_root
         self._lock_factory = _create_qlockfile if lock_factory is None else lock_factory
         self._expected_settings_paths = tuple(_validated_settings_path(path) for path in expected_settings_paths)
-        self._effective_uid = os.geteuid() if effective_uid is None else effective_uid
+        self._effective_uid = (getattr(os, "geteuid", lambda: 0)()) if effective_uid is None else effective_uid
 
     def prepare(self) -> PreparedQSettingsSession:
         """Acquire the coordinator briefly, seed a unique session, release the coordinator, and record its manifest."""
