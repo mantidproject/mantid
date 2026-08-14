@@ -684,6 +684,19 @@ CuboidCorners ShapeFactory::parseCuboid(Poco::XML::Element *pElem) {
     result.lft = parsePosition(pElem_lft);
     result.lbb = parsePosition(pElem_lbb);
     result.rfb = parsePosition(pElem_rfb);
+
+    // The automatic rotations apply here just as they do to the alternate syntax below. They were
+    // previously missed, so a <goniometer> or <rotate-all> tag was silently dropped for a cuboid
+    // written as four corners - the form ComponentCreationHelper and FlatPlateAbsorption emit -
+    // leaving the shape unrotated while everything else on the workspace assumed it had been
+    // rotated. The corners are absolute positions, so they rotate about the origin, which is what
+    // the goniometer describes.
+    if (m_rotateAllMatrix != Kernel::Matrix<double>(3, 3, true)) {
+      result.rotatePoints(m_rotateAllMatrix);
+    }
+    if (m_gonioRotateMatrix != Kernel::Matrix<double>(3, 3, true)) {
+      result.rotatePoints(m_gonioRotateMatrix);
+    }
   } else if (usingAlternateSyntax && !usingPointSyntax) {
     if (usedPointSyntaxField)
       throw std::invalid_argument(SYNTAX_ERROR_MSG);
@@ -851,14 +864,25 @@ std::string ShapeFactory::parseInfiniteCone(Poco::XML::Element *pElem, std::map<
   Element *pElemAxis = getShapeElement(pElem, "axis");
   Element *pElemAngle = getShapeElement(pElem, "angle");
 
-  const V3D normVec = normalize(parsePosition(pElemAxis));
+  V3D normVec = normalize(parsePosition(pElemAxis));
+  V3D tipPoint = parsePosition(pElemTipPoint);
 
   // getDoubleAttribute can throw - put the calls above any new
   const double angle = getDoubleAttribute(pElemAngle, "val");
 
+  // Rotate the tip and the axis by the rotate-all and goniometer tags, as for the other primitives
+  if (m_rotateAllMatrix != Kernel::Matrix<double>(3, 3, true)) {
+    tipPoint.rotate(m_rotateAllMatrix);
+    normVec.rotate(m_rotateAllMatrix);
+  }
+  if (m_gonioRotateMatrix != Kernel::Matrix<double>(3, 3, true)) {
+    tipPoint.rotate(m_gonioRotateMatrix);
+    normVec.rotate(m_gonioRotateMatrix);
+  }
+
   // add infinite double cone
   auto pCone = std::make_shared<Cone>();
-  pCone->setCentre(parsePosition(pElemTipPoint));
+  pCone->setCentre(tipPoint);
   pCone->setNorm(normVec);
   pCone->setAngle(angle);
   prim[l_id] = pCone;
@@ -869,7 +893,7 @@ std::string ShapeFactory::parseInfiniteCone(Poco::XML::Element *pElem, std::map<
 
   // plane top cut of top part of double cone
   auto pPlaneBottom = std::make_shared<Plane>();
-  pPlaneBottom->setPlane(parsePosition(pElemTipPoint), normVec);
+  pPlaneBottom->setPlane(tipPoint, normVec);
   prim[l_id] = pPlaneBottom;
   retAlgebraMatch << "-" << l_id << ")";
   l_id++;
@@ -895,15 +919,26 @@ std::string ShapeFactory::parseCone(Poco::XML::Element *pElem, std::map<int, std
   Element *pElemAngle = getShapeElement(pElem, "angle");
   Element *pElemHeight = getShapeElement(pElem, "height");
 
-  const V3D normVec = normalize(parsePosition(pElemAxis));
+  V3D normVec = normalize(parsePosition(pElemAxis));
+  V3D tipPoint = parsePosition(pElemTipPoint);
 
   // getDoubleAttribute can throw - put the calls above any new
   const double angle = getDoubleAttribute(pElemAngle, "val");
   const double height = getDoubleAttribute(pElemHeight, "val");
 
+  // Rotate the tip and the axis by the rotate-all and goniometer tags, as for the other primitives
+  if (m_rotateAllMatrix != Kernel::Matrix<double>(3, 3, true)) {
+    tipPoint.rotate(m_rotateAllMatrix);
+    normVec.rotate(m_rotateAllMatrix);
+  }
+  if (m_gonioRotateMatrix != Kernel::Matrix<double>(3, 3, true)) {
+    tipPoint.rotate(m_gonioRotateMatrix);
+    normVec.rotate(m_gonioRotateMatrix);
+  }
+
   // add infinite double cone
   auto pCone = std::make_shared<Cone>();
-  pCone->setCentre(parsePosition(pElemTipPoint));
+  pCone->setCentre(tipPoint);
   pCone->setNorm(normVec);
   pCone->setAngle(angle);
   prim[l_id] = pCone;
@@ -914,7 +949,7 @@ std::string ShapeFactory::parseCone(Poco::XML::Element *pElem, std::map<int, std
 
   // Plane to cut off cone from below
   auto pPlaneTop = std::make_shared<Plane>();
-  V3D pointInPlane = parsePosition(pElemTipPoint);
+  V3D pointInPlane = tipPoint;
   pointInPlane -= (normVec * height);
   pPlaneTop->setPlane(pointInPlane, normVec);
   prim[l_id] = pPlaneTop;
