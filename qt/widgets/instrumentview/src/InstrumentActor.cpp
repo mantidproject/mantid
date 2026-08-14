@@ -17,6 +17,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/MessageHandler.h"
+#include "MantidQtWidgets/Common/QSettingsChangeAware.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include "MantidGeometry/Instrument.h"
@@ -45,6 +46,33 @@ using namespace Mantid::API;
 using namespace Mantid;
 
 namespace MantidQt::MantidWidgets {
+
+InstrumentActorSettings::InstrumentActorSettings(QString colorMapFile, bool highlightZeros, int scaleType,
+                                                 bool showGuides)
+    : m_colorMapFile(std::move(colorMapFile)), m_highlightZeros(highlightZeros), m_scaleType(scaleType),
+      m_showGuides(showGuides) {}
+
+const QString &InstrumentActorSettings::colorMapFile() const { return m_colorMapFile; }
+
+bool InstrumentActorSettings::highlightZeros() const { return m_highlightZeros; }
+
+int InstrumentActorSettings::scaleType() const { return m_scaleType; }
+
+bool InstrumentActorSettings::showGuides() const { return m_showGuides; }
+
+InstrumentActorSettings InstrumentActorSettings::readSettings(const QSettings &settings) {
+  return InstrumentActorSettings(settings.value("ColormapFile", ColorMap::defaultColorMap()).toString(),
+                                 settings.value("ColormapFileHighlightZeros", false).toBool(),
+                                 settings.value("ScaleType", 0).toInt(), settings.value("ShowGuides", false).toBool());
+}
+
+void InstrumentActorSettings::saveSettings(QSettings &settings, const InstrumentActorSettings &values) {
+  MantidQt::MantidWidgets::QSettingsChangeAware writer(settings);
+  writer.setValue("ColormapFile", values.colorMapFile());
+  writer.setValue("ColormapFileHighlightZeros", values.highlightZeros());
+  writer.setValue("ScaleType", values.scaleType());
+  writer.setValue("ShowGuides", values.showGuides());
+}
 namespace {
 bool isPhysicalView() {
   std::string view = Mantid::Kernel::ConfigService::Instance().getString("instrument.view.geometry");
@@ -79,7 +107,10 @@ InstrumentActor::InstrumentActor(MatrixWorkspace_sptr workspace, MantidWidgets::
     : m_workspace(workspace), m_settingsGroup(std::move(settingsGroup)), m_ragged(true), m_autoscaling(autoscaling),
       m_defaultPos(), m_initialized(false), m_isPhysicalInstrument(false), m_messageHandler(messageHandler) {
 
-  loadSettings();
+  QSettings settings;
+  settings.beginGroup(m_settingsGroup);
+  restoreSettings(InstrumentActorSettings::readSettings(settings));
+  settings.endGroup();
 
   m_scaleMin = scaleMin;
   m_scaleMax = scaleMax;
@@ -704,25 +735,21 @@ void InstrumentActor::changeNthPower(double nth_power) {
   resetColors();
 }
 
-void InstrumentActor::loadSettings() {
-  QSettings settings;
-  settings.beginGroup(m_settingsGroup);
-  m_scaleType = ColorMap::ScaleType(settings.value("ScaleType", 0).toInt());
-  // Load Colormap. If the file is invalid the default stored colour map is used
-  m_currentCMap.first = settings.value("ColormapFile", ColorMap::defaultColorMap()).toString();
-  m_currentCMap.second = settings.value("ColormapFileHighlightZeros", false).toBool();
-  // Set values from settings
-  m_showGuides = settings.value("ShowGuides", false).toBool();
-  settings.endGroup();
+void InstrumentActor::restoreSettings(const InstrumentActorSettings &settings) {
+  m_scaleType = ColorMap::ScaleType(settings.scaleType());
+  m_currentCMap = std::make_pair(settings.colorMapFile(), settings.highlightZeros());
+  m_showGuides = settings.showGuides();
 }
 
-void InstrumentActor::saveSettings() const {
+InstrumentActorSettings InstrumentActor::captureSettings() const {
+  return InstrumentActorSettings(m_currentCMap.first, m_currentCMap.second,
+                                 static_cast<int>(m_renderer->getColorMap().getScaleType()), m_showGuides);
+}
+
+void InstrumentActor::persistSettings() const {
   QSettings settings;
   settings.beginGroup(m_settingsGroup);
-  settings.setValue("ColormapFile", m_currentCMap.first);
-  settings.setValue("ColormapFileHighlightZeros", m_currentCMap.second);
-  settings.setValue("ScaleType", static_cast<int>(m_renderer->getColorMap().getScaleType()));
-  settings.setValue("ShowGuides", m_showGuides);
+  InstrumentActorSettings::saveSettings(settings, captureSettings());
   settings.endGroup();
 }
 

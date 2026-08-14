@@ -63,8 +63,8 @@ private:
   void performBinaryOperation(const HistogramData::Histogram &, const double, const double, HistogramData::HistogramY &,
                               HistogramData::HistogramE &) override {}
   void performEventBinaryOperation(DataObjects::EventList &, const DataObjects::EventList &) override {}
-  void performEventBinaryOperation(DataObjects::EventList &, const MantidVec &, const MantidVec &,
-                                   const MantidVec &) override {}
+  void performEventBinaryOperation(DataObjects::EventList &, std::span<double const>, std::span<double const>,
+                                   std::span<double const>) override {}
   void performEventBinaryOperation(DataObjects::EventList &, const double &, const double &) override {}
 };
 

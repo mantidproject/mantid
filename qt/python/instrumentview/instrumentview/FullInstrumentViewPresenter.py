@@ -81,6 +81,11 @@ class FullInstrumentViewPresenter:
         self._renderer = self._get_renderer_for_mode(view.get_render_mode_option())
         self._interactor_styles = InteractorStyles(self._view.main_plotter, picking_callback=lambda: None, hover_callback=lambda: None)
         self._last_hovered_point_index: Optional[int] = None
+        self._select_bank_tube = False
+        self._shape_preview_active = False
+        # Incremented per requested shape update so the worker can drop superseded ones
+        self._shape_update_generation = 0
+        self._sum_spectra_before_shape: Optional[bool] = None
         self._callback_queue = Queue()
         self._callback_stop_sentinel = object()
         self._callback_thread = Thread(None, self._callback_worker, daemon=True)
@@ -402,7 +407,7 @@ class FullInstrumentViewPresenter:
             self._view.show_plot_for_detectors(self._model.line_plot_workspace, self._model.lineplot_limits)
             self._view.set_selected_detector_info([])
             self._view.set_relative_detector_angle(None)
-            self._view.remove_peak_cursor_from_lineplot()
+            self._view.end_peak_selection_in_lineplot()
 
         self._view.set_clear_point_picked_detectors_disabled(checked)
         self._view.set_sum_spectra_checkbox_disabled(checked)
@@ -448,10 +453,82 @@ class FullInstrumentViewPresenter:
     def on_overlaid_shape_added(self) -> None:
         self._update_interactor_style()
         self._view.set_add_selection_and_mask_buttons_enabled(True)
+        if self._sum_spectra_before_shape is None:
+            self._sum_spectra_before_shape = self._view.sum_spectra_selected()
+        self._view.set_sum_spectra_selected(True)
+        self._view.set_sum_spectra_checkbox_disabled(True)
 
     def on_overlaid_shape_removed(self) -> None:
         self._update_interactor_style()
         self._view.set_add_selection_and_mask_buttons_enabled(False)
+        if self._sum_spectra_before_shape is not None:
+            self._view.set_sum_spectra_selected(self._sum_spectra_before_shape)
+            self._sum_spectra_before_shape = None
+            self._view.set_sum_spectra_checkbox_disabled(False)
+        # Retire the generation so any queued or part-way-through preview update is discarded
+        # instead of drawing a preview for a shape that no longer exists
+        self._shape_update_generation += 1
+        if not self._shape_preview_active:
+            return
+        self._callback_queue.put((self._restore_committed_line_plot, ()))
+
+    def _restore_committed_line_plot(self) -> None:
+        self._shape_preview_active = False
+        self._update_line_plot_ws_and_draw(self._view.current_selected_lineplot_unit())
+
+    def on_shape_changed(self) -> None:
+        """Live-update the line plot with the spectra covered by the overlaid shape.
+
+        Called on the Qt thread when a shape is first drawn, and again by the shape overlay
+        manager each time it is dragged, resized or rotated, so the plot always shows what
+        would be committed by Add ROI / Add Mask.
+        """
+        centres = self._transform_vectors_with_matrix(np.array(self._model.detector_positions), self._transform)
+        # Projection uses VTK, so must be done on the Qt thread before queueing the rest
+        self._view.project_and_cache_detector_points(centres)
+        self._shape_update_generation += 1
+        self._callback_queue.put((self._on_shape_changed, (centres, self._shape_update_generation)))
+
+    def on_camera_changed(self) -> None:
+        """Keep the line plot in step with the overlaid shape when the view is zoomed.
+
+        The shape is drawn in fixed screen coordinates, so zooming moves the instrument
+        underneath it and changes which detectors it covers.
+        """
+        if not self._view.is_active_current_overlaid_shape():
+            return
+        self.on_shape_changed()
+
+    def _is_current_shape_update(self, generation: int) -> bool:
+        """Whether a queued shape preview update is still the one that should be shown.
+
+        It is superseded either by a newer update (e.g. a burst of mouse-wheel zooms) or by the
+        shape being removed, both of which retire the generation it was queued with.
+        """
+        return generation == self._shape_update_generation and self._view.is_active_current_overlaid_shape()
+
+    def _on_shape_changed(self, centres: np.ndarray, generation: int) -> None:
+        if not self._is_current_shape_update(generation):
+            return
+        mask = self._view.get_shape_mask(centres)
+        if self._select_bank_tube:
+            mask = self._model.expand_pickable_mask_to_parent_subtrees(mask)
+
+        self._model.extract_spectra_for_line_plot(
+            self._view.current_selected_lineplot_unit(), self._view.sum_spectra_selected(), np.flatnonzero(mask)
+        )
+        if not self._is_current_shape_update(generation):
+            # Extracting takes long enough for the shape to be removed or moved again meanwhile,
+            # and drawing now would put back a preview that has already been superseded
+            return
+
+        self._shape_preview_active = True
+        self._view.show_plot_for_detectors(self._model.line_plot_workspace, self._model.lineplot_limits)
+        # A shape typically covers far too many detectors for the per-detector info to be useful
+        self._view.set_selected_detector_info([])
+        self._view.set_relative_detector_angle(None)
+        # Peak overlays annotate the plotted spectra, so they have to follow the shape as well
+        self.refresh_lineplot_peaks()
 
     def _on_add_item_clicked(self) -> None:
         centres = self._transform_vectors_with_matrix(np.array(self._model.detector_positions), self._transform)
@@ -579,7 +656,7 @@ class FullInstrumentViewPresenter:
         self._update_relative_detector_angle()
         self.refresh_lineplot_peaks()
         if self._model.peak_picking_enabled():
-            self._view.add_peak_cursor_to_lineplot()
+            self._view.start_peak_selection_in_lineplot()
 
     def _update_relative_detector_angle(self) -> None:
         if len(self._model.picked_detector_ids) != 2:
@@ -704,11 +781,11 @@ class FullInstrumentViewPresenter:
         if checked:
             self._model.turn_on_single_point_picking()
             self._view.set_hover_pick_checked(False)
-            self._view.add_peak_cursor_to_lineplot()
+            self._view.start_peak_selection_in_lineplot()
             self._view.disable_and_uncheck_selection_list()
         else:
             self._model.turn_off_single_point_picking()
-            self._view.remove_peak_cursor_from_lineplot()
+            self._view.end_peak_selection_in_lineplot()
             self._view.enable_and_restore_selection_list()
 
         self._on_list_item_selected(CurrentTab.Grouping)
@@ -762,7 +839,10 @@ class FullInstrumentViewPresenter:
         )
 
         self._interactor_styles = InteractorStyles(
-            self._view.main_plotter, picking_callback=wrapped_picking_callback, hover_callback=wrapped_hover_callback
+            self._view.main_plotter,
+            picking_callback=wrapped_picking_callback,
+            hover_callback=wrapped_hover_callback,
+            camera_changed_callback=self.on_camera_changed,
         )
         self._update_interactor_style()
 

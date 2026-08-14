@@ -47,6 +47,18 @@ FunctionDomain1DVector::FunctionDomain1DVector(const std::vector<double> &xvalue
 }
 
 /**
+ * Create a domain from a contiguous range.
+ * @param xvalues :: Range with function arguments to be copied from.
+ */
+FunctionDomain1DVector::FunctionDomain1DVector(std::span<double const> xvalues) : FunctionDomain1D(nullptr, 0) {
+  if (xvalues.empty()) {
+    throw std::invalid_argument("FunctionDomain1D cannot have zero size.");
+  }
+  m_X.assign(xvalues.begin(), xvalues.end());
+  resetData(&m_X[0], m_X.size());
+}
+
+/**
  * Create a domain from a vector using move semantics - no copy overhead.
  * @param xvalues :: Vector with function arguments to be moved from.
  */

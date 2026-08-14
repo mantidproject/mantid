@@ -9,12 +9,12 @@ import json
 import os
 import zlib
 from typing import Optional
-from qtpy.QtCore import QSettings
 
 from mantid.kernel import ConfigService, ErrorReporter, Logger, UsageService
 from mantid.kernel.environment import is_linux
 from mantidqt.dialogs.errorreports.report import MAX_STACK_TRACE_LENGTH
 from mantidqt.dialogs.errorreports.run_pystack import retrieve_thread_traces_from_coredump_file
+from mantidqt.dialogs.errorreports.settings import create_error_reporter_settings
 
 
 class ErrorReporterPresenter(object):
@@ -68,7 +68,7 @@ class ErrorReporterPresenter(object):
         if not name_changed and not email_changed:
             return
 
-        settings = QSettings()
+        settings = create_error_reporter_settings()
         settings.beginGroup(self._view.CONTACT_INFO)
         if name_changed:
             settings.setValue(self._view.NAME, name)

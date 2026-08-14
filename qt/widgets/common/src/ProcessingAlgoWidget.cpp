@@ -7,6 +7,7 @@
 #include "MantidQtWidgets/Common/ProcessingAlgoWidget.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidQtWidgets/Common/QSettingsChangeAware.h"
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QMessageBox>
@@ -14,11 +15,24 @@
 #include <Qsci/qscilexerpython.h>
 #include <fstream>
 #include <iosfwd>
+#include <utility>
 
 using Mantid::API::Algorithm_sptr;
 using Mantid::API::AlgorithmManager;
 
 namespace MantidQt::MantidWidgets {
+
+ProcessingAlgoWidgetSettings::ProcessingAlgoWidgetSettings(QString lastFile) : m_lastFile(std::move(lastFile)) {}
+
+const QString &ProcessingAlgoWidgetSettings::lastFile() const { return m_lastFile; }
+
+ProcessingAlgoWidgetSettings ProcessingAlgoWidgetSettings::readSettings(const QSettings &settings) {
+  return ProcessingAlgoWidgetSettings(settings.value("LastFile", QString()).toString());
+}
+
+void ProcessingAlgoWidgetSettings::saveSettings(QSettings &settings, const ProcessingAlgoWidgetSettings &values) {
+  QSettingsChangeAware(settings).setValue("LastFile", values.lastFile());
+}
 
 //----------------------
 // Public member functions
@@ -47,33 +61,32 @@ ProcessingAlgoWidget::ProcessingAlgoWidget(QWidget *parent) : QWidget(parent) {
   connect(ui.btnSave, SIGNAL(clicked()), this, SLOT(btnSaveClicked()));
   connect(ui.btnLoad, SIGNAL(clicked()), this, SLOT(btnLoadClicked()));
 
-  loadSettings();
+  QSettings settings;
+  settings.beginGroup("Mantid/ProcessingAlgoWidget");
+  restoreSettings(ProcessingAlgoWidgetSettings::readSettings(settings));
+  settings.endGroup();
 }
 
 //------------------------------------------------------------------------------
 /// Destructor
-ProcessingAlgoWidget::~ProcessingAlgoWidget() { saveSettings(); }
+ProcessingAlgoWidget::~ProcessingAlgoWidget() {
+  QSettings settings;
+  settings.beginGroup("Mantid/ProcessingAlgoWidget");
+  ProcessingAlgoWidgetSettings::saveSettings(settings, captureSettings());
+  settings.endGroup();
+}
 
 //------------------------------------------------------------------------------
 /** Save the inputs to algorithm history */
 void ProcessingAlgoWidget::saveInput() { ui.algoProperties->saveInput(); }
 
 //------------------------------------------------------------------------------------
-/** Load QSettings from .ini-type files */
-void ProcessingAlgoWidget::loadSettings() {
-  QSettings settings;
-  settings.beginGroup("Mantid/ProcessingAlgoWidget");
-  m_lastFile = settings.value("LastFile", QString()).toString();
-  settings.endGroup();
+void ProcessingAlgoWidget::restoreSettings(const ProcessingAlgoWidgetSettings &settings) {
+  m_lastFile = settings.lastFile();
 }
 
-//------------------------------------------------------------------------------------
-/** Save settings for next time. */
-void ProcessingAlgoWidget::saveSettings() {
-  QSettings settings;
-  settings.beginGroup("Mantid/ProcessingAlgoWidget");
-  settings.setValue("LastFile", m_lastFile);
-  settings.endGroup();
+ProcessingAlgoWidgetSettings ProcessingAlgoWidget::captureSettings() const {
+  return ProcessingAlgoWidgetSettings(m_lastFile);
 }
 
 //------------------------------------------------------------------------------

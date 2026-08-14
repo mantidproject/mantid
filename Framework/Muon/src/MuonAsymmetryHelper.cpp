@@ -93,8 +93,8 @@ double estimateNormalisationConst(const HistogramData::Histogram &histogram, con
   size_t i0 = startIndexFromTime(xData, startX);
   size_t iN = endIndexFromTime(xData, endX);
   // remove an extra index as XData is bin boundaries and not point data
-  auto iy0 = std::next(yData.rawData().begin(), i0);
-  auto iyN = std::next(yData.rawData().begin(), iN);
+  auto iy0 = std::next(yData.begin(), i0);
+  auto iyN = std::next(yData.begin(), iN);
   double summation = std::accumulate(iy0, iyN, 0.0);
   double denominator = 0.0;
   /* this replaces (from doc):
@@ -117,12 +117,12 @@ double estimateNormalisationConst(const HistogramData::Histogram &histogram, con
  * @returns :: The index to start calculations from
  */
 size_t startIndexFromTime(const HistogramData::BinEdges &xData, const double startX) {
-  auto upper = std::lower_bound(xData.rawData().begin(), xData.rawData().end(), startX);
+  auto upper = std::lower_bound(xData.begin(), xData.end(), startX);
 
-  if (upper == xData.rawData().end()) {
+  if (upper == xData.end()) {
     throw std::invalid_argument("Start of range is after data end.");
   }
-  return std::distance(xData.rawData().begin(), upper);
+  return std::distance(xData.begin(), upper);
 }
 /**
  * find the last index in bin edges that is before
@@ -133,11 +133,11 @@ size_t startIndexFromTime(const HistogramData::BinEdges &xData, const double sta
  */
 size_t endIndexFromTime(const HistogramData::BinEdges &xData, const double endX) {
 
-  auto lower = std::upper_bound(xData.rawData().begin(), xData.rawData().end(), endX);
-  if (lower == xData.rawData().begin()) {
+  auto lower = std::upper_bound(xData.begin(), xData.end(), endX);
+  if (lower == xData.begin()) {
     throw std::invalid_argument("End of range is before data start.");
   }
-  return std::distance(xData.rawData().begin(), lower - 1);
+  return std::distance(xData.begin(), lower - 1);
 }
 
 /*****

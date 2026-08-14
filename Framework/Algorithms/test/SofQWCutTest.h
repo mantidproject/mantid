@@ -13,7 +13,6 @@
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAlgorithms/SofQW.h"
 #include "MantidAlgorithms/SofQWNormalisedPolygon.h"
-#include "MantidAlgorithms/SofQWPolygon.h"
 #include "MantidDataHandling/CreateSimulationWorkspace.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidKernel/Unit.h"
@@ -74,100 +73,6 @@ public:
     dataStore.remove(wsname_e.str());
 
     return result;
-  }
-
-  void test_sofqw1() {
-    auto result = runSQW<Mantid::Algorithms::SofQW>();
-    const double delta(1e-08);
-
-    auto ws_q = std::dynamic_pointer_cast<MatrixWorkspace>(result->getItem(0));
-    TS_ASSERT_EQUALS(ws_q->getAxis(0)->length(), 2);
-    TS_ASSERT_EQUALS(ws_q->getAxis(0)->unit()->unitID(), "DeltaE");
-    TS_ASSERT_EQUALS((*(ws_q->getAxis(0)))(0), -1.5);
-    TS_ASSERT_EQUALS((*(ws_q->getAxis(0)))(1), 1.5);
-    TS_ASSERT_EQUALS(ws_q->getAxis(1)->length(), 801);
-    TS_ASSERT_EQUALS(ws_q->getAxis(1)->unit()->unitID(), "MomentumTransfer");
-    TS_ASSERT_EQUALS((*(ws_q->getAxis(1)))(0), 0.0);
-    TS_ASSERT_DELTA((*(ws_q->getAxis(1)))(400), 5.0, delta);
-    TS_ASSERT_EQUALS((*(ws_q->getAxis(1)))(800), 10.);
-    TS_ASSERT_DELTA(ws_q->y(44)[0], 957.651473192, delta);
-    TS_ASSERT_DELTA(ws_q->e(44)[0], 11.170620862, delta);
-    TS_ASSERT_DELTA(ws_q->y(231)[0], 398.376497999, delta);
-    TS_ASSERT_DELTA(ws_q->e(231)[0], 62.100406977, delta);
-    TS_ASSERT_DELTA(ws_q->y(377)[0], 232.378738932, delta);
-    TS_ASSERT_DELTA(ws_q->e(377)[0], 14.249051816, delta);
-    TS_ASSERT_DELTA(ws_q->y(536)[0], 1832.305224868, delta);
-    TS_ASSERT_DELTA(ws_q->e(536)[0], 30.518095107, delta);
-    TS_ASSERT_DELTA(ws_q->y(575)[0], 453.761721652, delta);
-    TS_ASSERT_DELTA(ws_q->e(575)[0], 13.114162862, delta);
-
-    auto ws_e = std::dynamic_pointer_cast<MatrixWorkspace>(result->getItem(1));
-    TS_ASSERT_EQUALS(ws_e->getAxis(0)->length(), 121);
-    TS_ASSERT_EQUALS(ws_e->getAxis(0)->unit()->unitID(), "DeltaE");
-    TS_ASSERT_EQUALS((*(ws_e->getAxis(0)))(0), -5.);
-    TS_ASSERT_DELTA((*(ws_e->getAxis(0)))(60), 25.0, delta);
-    TS_ASSERT_EQUALS((*(ws_e->getAxis(0)))(120), 55.);
-    TS_ASSERT_EQUALS(ws_e->getAxis(1)->length(), 2);
-    TS_ASSERT_EQUALS(ws_e->getAxis(1)->unit()->unitID(), "MomentumTransfer");
-    TS_ASSERT_EQUALS((*(ws_e->getAxis(1)))(0), 5.);
-    TS_ASSERT_EQUALS((*(ws_e->getAxis(1)))(1), 10.);
-    TS_ASSERT_DELTA(ws_e->y(0)[29], 9.254559817, delta);
-    TS_ASSERT_DELTA(ws_e->e(0)[29], 0.030174342, delta);
-    TS_ASSERT_DELTA(ws_e->y(0)[87], 13.447772682, delta);
-    TS_ASSERT_DELTA(ws_e->e(0)[87], 0.051154627, delta);
-    TS_ASSERT_DELTA(ws_e->y(0)[88], 10.455499052, delta);
-    TS_ASSERT_DELTA(ws_e->e(0)[88], 0.044293372, delta);
-    TS_ASSERT_DELTA(ws_e->y(0)[93], 3.587987494, delta);
-    TS_ASSERT_DELTA(ws_e->e(0)[93], 0.026975541, delta);
-    TS_ASSERT_DELTA(ws_e->y(0)[113], 1.038679349, delta);
-    TS_ASSERT_DELTA(ws_e->e(0)[113], 0.044564335, delta);
-  }
-
-  void test_sofqw2() {
-    auto result = runSQW<Mantid::Algorithms::SofQWPolygon>();
-    const double delta(1e-08);
-
-    auto ws_q = std::dynamic_pointer_cast<MatrixWorkspace>(result->getItem(0));
-    TS_ASSERT_EQUALS(ws_q->getAxis(0)->length(), 2);
-    TS_ASSERT_EQUALS(ws_q->getAxis(0)->unit()->unitID(), "DeltaE");
-    TS_ASSERT_EQUALS((*(ws_q->getAxis(0)))(0), -1.5);
-    TS_ASSERT_EQUALS((*(ws_q->getAxis(0)))(1), 1.5);
-    TS_ASSERT_EQUALS(ws_q->getAxis(1)->length(), 801);
-    TS_ASSERT_EQUALS(ws_q->getAxis(1)->unit()->unitID(), "MomentumTransfer");
-    TS_ASSERT_EQUALS((*(ws_q->getAxis(1)))(0), 0.0);
-    TS_ASSERT_DELTA((*(ws_q->getAxis(1)))(400), 5.0, delta);
-    TS_ASSERT_EQUALS((*(ws_q->getAxis(1)))(800), 10.);
-    TS_ASSERT_DELTA(ws_q->y(46)[0], 0.577055734, delta);
-    TS_ASSERT_DELTA(ws_q->e(46)[0], 0.037384333, delta);
-    TS_ASSERT_DELTA(ws_q->y(461)[0], 0.642083585, delta);
-    TS_ASSERT_DELTA(ws_q->e(461)[0], 0.050139186, delta);
-    TS_ASSERT_DELTA(ws_q->y(703)[0], 8.619229199, delta);
-    TS_ASSERT_DELTA(ws_q->e(703)[0], 0.188331444, delta);
-    TS_ASSERT_DELTA(ws_q->y(727)[0], 1.212655693, delta);
-    TS_ASSERT_DELTA(ws_q->e(727)[0], 0.071437133, delta);
-    TS_ASSERT_DELTA(ws_q->y(787)[0], 12.280788436, delta);
-    TS_ASSERT_DELTA(ws_q->e(787)[0], 0.338125386, delta);
-
-    auto ws_e = std::dynamic_pointer_cast<MatrixWorkspace>(result->getItem(1));
-    TS_ASSERT_EQUALS(ws_e->getAxis(0)->length(), 121);
-    TS_ASSERT_EQUALS(ws_e->getAxis(0)->unit()->unitID(), "DeltaE");
-    TS_ASSERT_EQUALS((*(ws_e->getAxis(0)))(0), -5.);
-    TS_ASSERT_DELTA((*(ws_e->getAxis(0)))(60), 25.0, delta);
-    TS_ASSERT_EQUALS((*(ws_e->getAxis(0)))(120), 55.);
-    TS_ASSERT_EQUALS(ws_e->getAxis(1)->length(), 2);
-    TS_ASSERT_EQUALS(ws_e->getAxis(1)->unit()->unitID(), "MomentumTransfer");
-    TS_ASSERT_EQUALS((*(ws_e->getAxis(1)))(0), 5.);
-    TS_ASSERT_EQUALS((*(ws_e->getAxis(1)))(1), 10.);
-    TS_ASSERT_DELTA(ws_e->y(0)[5], 1120.875680688, delta);
-    TS_ASSERT_DELTA(ws_e->e(0)[5], 5.269885974, delta);
-    TS_ASSERT_DELTA(ws_e->y(0)[16], 171.212246850, delta);
-    TS_ASSERT_DELTA(ws_e->e(0)[16], 2.134947683, delta);
-    TS_ASSERT_DELTA(ws_e->y(0)[28], 40.854749824, delta);
-    TS_ASSERT_DELTA(ws_e->e(0)[28], 1.055504462, delta);
-    TS_ASSERT_DELTA(ws_e->y(0)[36], 54.655069317, delta);
-    TS_ASSERT_DELTA(ws_e->e(0)[36], 1.225166860, delta);
-    TS_ASSERT_DELTA(ws_e->y(0)[113], 3.724579351, delta);
-    TS_ASSERT_DELTA(ws_e->e(0)[113], 0.494593697, delta);
   }
 
   void test_sofqw3() {

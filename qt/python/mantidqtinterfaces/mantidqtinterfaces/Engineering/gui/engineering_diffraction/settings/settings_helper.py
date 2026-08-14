@@ -7,6 +7,8 @@
 from qtpy.QtCore import QSettings
 from typing import Any, Type
 
+from mantidqt.utils.qt.qsettings_change_aware import QSettingsChangeAware
+
 # Settings in this set are stored per experiment, under an "RB_SCOPE/<number>/" subgroup, so different
 # experiments can carry different values. Everything not in SCOPED SETTINGS remains global
 RB_SCOPE = "rb/"
@@ -79,7 +81,7 @@ def set_setting(group: str, prefix: str, setting_name: str, value: Any, rb: str 
     prefix = _write_prefix(prefix, rb, setting_name)
     settings = QSettings()
     settings.beginGroup(group)
-    settings.setValue(prefix + setting_name, value)
+    QSettingsChangeAware(settings).setValue(prefix + setting_name, value)
     settings.endGroup()
 
 

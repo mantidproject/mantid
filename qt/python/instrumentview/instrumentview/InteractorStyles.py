@@ -3,6 +3,8 @@ from vtkmodules.vtkInteractionStyle import vtkInteractorStyleUser, vtkInteractor
 from vtkmodules.vtkCommonCore import vtkCommand
 import numpy as np
 
+from mantid.kernel import logger
+
 
 class _PlotterWrapper:
     """Wrapper to provide PyVista-compatible interface for picking."""
@@ -13,7 +15,7 @@ class _PlotterWrapper:
 
 
 class InteractorStyles:
-    def __init__(self, plotter, picking_callback, hover_callback):
+    def __init__(self, plotter, picking_callback, hover_callback, camera_changed_callback: Callable | None = None):
         self.SCROLL_ZOOM_WITH_PICKING = CursorZoomInteractorStyle(plotter)
         self.SCROLL_ZOOM_WITH_HOVER = CursorZoomInteractorStyle(plotter)
         self.SCROLL_ZOOM_NO_PICKING = CursorZoomInteractorStyle(plotter)
@@ -24,6 +26,9 @@ class InteractorStyles:
         self.SCROLL_ZOOM_WITH_PICKING.set_picking_callback(picking_callback)
         self.RUBBERBAND_ZOOM.set_picking_callback(picking_callback)
         self.SCROLL_ZOOM_WITH_HOVER.set_hover_callback(hover_callback)
+
+        for style in (self.SCROLL_ZOOM_WITH_PICKING, self.SCROLL_ZOOM_WITH_HOVER, self.SCROLL_ZOOM_NO_PICKING):
+            style.set_camera_changed_callback(camera_changed_callback)
 
 
 class RubberBandZoomInteractorStyle(vtkInteractorStyleRubberBandZoom):
@@ -103,6 +108,7 @@ class CursorZoomInteractorStyle(vtkInteractorStyleUser):
         # Cache the current world coordinates under the cursor
         self._cursor_world_pos = None
         self._zoom_in_progress = False
+        self._camera_changed_callback = None
 
         # Setup plotter
         self.plotter.track_mouse_position()
@@ -111,7 +117,23 @@ class CursorZoomInteractorStyle(vtkInteractorStyleUser):
         self.AddObserver(vtkCommand.MouseMoveEvent, self._on_mouse_move)
         self.AddObserver(vtkCommand.MouseWheelForwardEvent, self._on_wheel_forward)
         self.AddObserver(vtkCommand.MouseWheelBackwardEvent, self._on_wheel_backward)
-        self.AddObserver(vtkCommand.RightButtonPressEvent, lambda *_: self._reset_camera())
+        self.AddObserver(vtkCommand.RightButtonPressEvent, lambda *_: self._reset_camera_and_notify())
+
+    def set_camera_changed_callback(self, camera_changed_callback: Callable | None):
+        """Register a zero-argument callable fired after this style has moved the camera.
+
+        Anything drawn in fixed screen coordinates (e.g. an overlaid selection shape) covers a
+        different part of the instrument once the view is zoomed, so it needs to be told.
+        """
+        self._camera_changed_callback = camera_changed_callback
+
+    def _notify_camera_changed(self):
+        if self._camera_changed_callback is None:
+            return
+        try:
+            self._camera_changed_callback()
+        except Exception as ex:
+            logger.debug(f"Exception in camera_changed callback: {ex}")
 
     def set_picking_callback(self, picking_callback: Callable):
         self.RemoveObservers(vtkCommand.LeftButtonPressEvent)
@@ -195,6 +217,8 @@ class CursorZoomInteractorStyle(vtkInteractorStyleUser):
 
         renderer.reset_camera_clipping_range()
         self.plotter.render_window.Render()
+        # Covers both branches above, so a zoom-out past the default notifies only once
+        self._notify_camera_changed()
 
     def _reset_camera(self):
         renderer = self.plotter.renderer
@@ -204,6 +228,10 @@ class CursorZoomInteractorStyle(vtkInteractorStyleUser):
         camera.parallel_scale = self._default_parallel_scale
         renderer.reset_camera_clipping_range()
         self.plotter.render_window.Render()
+
+    def _reset_camera_and_notify(self):
+        self._reset_camera()
+        self._notify_camera_changed()
 
     def update_default_camera_state(self):
         """Re-cache the current camera state as the default (right-click reset) state.

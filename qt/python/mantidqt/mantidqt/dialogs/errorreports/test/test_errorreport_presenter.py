@@ -28,7 +28,7 @@ class ErrorReportPresenterTest(unittest.TestCase):
         self.errorreport_mock.return_value = self.errorreport_mock_instance
 
         self.q_settings_mock_instance = mock.MagicMock()
-        q_settings_patcher = mock.patch(f"{self.PRESENTER_CLS_PATH}.QSettings")
+        q_settings_patcher = mock.patch(f"{self.PRESENTER_CLS_PATH}.create_error_reporter_settings")
         self.addCleanup(q_settings_patcher.stop)
         self.q_settings_mock = q_settings_patcher.start()
         self.q_settings_mock.return_value = self.q_settings_mock_instance

@@ -19,6 +19,7 @@
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/TimeROI.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidQtWidgets/Common/QSettingsChangeAware.h"
 
 #include <QCheckBox>
 #include <QComboBox>
@@ -310,15 +311,16 @@ void WidgetAutoSaver::saveWidgetValue() {
 
   QSettings settings;
   settings.beginGroup(senderGroup);
+  MantidQt::MantidWidgets::QSettingsChangeAware writer(settings);
 
   if (auto w = qobject_cast<QLineEdit *>(sender)) {
-    settings.setValue(senderName, w->text());
+    writer.setValue(senderName, w->text());
   } else if (auto w = qobject_cast<QCheckBox *>(sender)) {
-    settings.setValue(senderName, w->isChecked());
+    writer.setValue(senderName, w->isChecked());
   } else if (auto w = qobject_cast<QComboBox *>(sender)) {
-    settings.setValue(senderName, w->currentIndex());
+    writer.setValue(senderName, w->currentIndex());
   } else if (auto w = qobject_cast<QSpinBox *>(sender)) {
-    settings.setValue(senderName, w->value());
+    writer.setValue(senderName, w->value());
   }
   // ... add more as neccessary
 }

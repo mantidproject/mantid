@@ -47,5 +47,9 @@ fi
 # Use QT_QPA_PLATFORM instead of Xvfb because Xvfb hides a lot of the useful output
 MANTIDPROPERTIES="${PREFIX}"/bin/Mantid.properties QT_QPA_PLATFORM=offscreen cmake --build . --target docs-html
 
+# Remove fontconfig caches before packaging
+# Since these files are runtime-generated caches, they normally do not belong in a conda package.
+rm -rf "${PREFIX}/var/cache/fontconfig"
+
 # install the docs into the final location
 cmake --build . --target install

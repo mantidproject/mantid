@@ -62,8 +62,8 @@ public:
     output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWSName);
 
     // Get a spectrum
-    MantidVec X = output->dataX(2);
-    MantidVec Y = output->dataX(2);
+    MantidVec X = output->x(2).rawData();
+    MantidVec Y = output->x(2).rawData();
 
     // Check the height at a couple of peak position
     int bin;

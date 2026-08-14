@@ -241,7 +241,7 @@ void MaxEnt::validateBinEdges(const std::string &wsName, std::map<std::string, s
   MatrixWorkspace_const_sptr ws = getProperty(wsName);
   if (ws) {
 
-    Kernel::EqualBinsChecker binChecker(ws->x(0).rawData(), BIN_WIDTH_ERROR_LEVEL, warningLevel);
+    Kernel::EqualBinsChecker binChecker(ws->x(0), BIN_WIDTH_ERROR_LEVEL, warningLevel);
     const std::string binError = binChecker.validate();
     if (!binError.empty()) {
       messages[wsName] = binError;

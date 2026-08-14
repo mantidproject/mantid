@@ -57,7 +57,7 @@ void BayesFitting::initLayout() {
     connect(tab.second, &BayesFittingTab::showMessageBox, this, &BayesFitting::showMessageBox);
   }
 
-  loadSettings();
+  restoreSettings();
 
   connect(m_uiForm.pbSettings, &QPushButton::clicked, this, &BayesFitting::settings);
   connect(m_uiForm.pbHelp, &QPushButton::clicked, this, &BayesFitting::help);
@@ -82,30 +82,22 @@ void BayesFitting::handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotifica
   std::string key = pNf->key();
 
   if (key == "defaultsave.directory")
-    loadSettings();
+    restoreSettings();
 }
 
 /**
- * Load the setting for each tab on the interface.
+ * Restore the setting for each tab on the interface.
  *
  * This includes setting the default browsing directory to be the default save
  *directory.
  */
-void BayesFitting::loadSettings() {
-  QSettings settings;
-  QString settingsGroup = "CustomInterfaces/IndirectAnalysis/";
-  QString saveDir =
-      QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
+void BayesFitting::restoreSettings() {
+  auto const settings = API::FileFinderSettings(
+      QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory")));
 
-  settings.beginGroup(settingsGroup + "ProcessedFiles");
-  settings.setValue("last_directory", saveDir);
-
-  std::map<unsigned int, BayesFittingTab *>::iterator iter;
-  for (iter = m_bayesTabs.begin(); iter != m_bayesTabs.end(); ++iter) {
-    iter->second->loadSettings(settings);
+  for (auto const &[_, tab] : m_bayesTabs) {
+    tab->restoreSettings(settings);
   }
-
-  settings.endGroup();
 }
 
 void BayesFitting::applySettings(std::map<std::string, QVariant> const &settings) {

@@ -13,6 +13,8 @@
 #include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidGeometry/Math/Quadrilateral.h"
 
+#include <span>
+
 namespace Mantid {
 //------------------------------------------------------------------------------
 // Forward declarations
@@ -33,9 +35,10 @@ namespace DataObjects {
 
 namespace FractionalRebinning {
 
-/// Find the intersect region on the output grid
-MANTID_DATAOBJECTS_DLL bool getIntersectionRegion(const std::vector<double> &xAxis,
-                                                  const std::vector<double> &verticalAxis,
+/// Find the intersect region on the output grid.
+/// The axes are taken as spans so that the size-checked histogram data types can be
+/// passed directly, without going through a std::vector<double>.
+MANTID_DATAOBJECTS_DLL bool getIntersectionRegion(std::span<double const> xAxis, std::span<double const> verticalAxis,
                                                   const Geometry::Quadrilateral &inputQ, size_t &qstart, size_t &qend,
                                                   size_t &x_start, size_t &x_end);
 
@@ -48,13 +51,13 @@ MANTID_DATAOBJECTS_DLL void normaliseOutput(const API::MatrixWorkspace_sptr &out
 MANTID_DATAOBJECTS_DLL void rebinToOutput(const Geometry::Quadrilateral &inputQ,
                                           const API::MatrixWorkspace_const_sptr &inputWS, const size_t i,
                                           const size_t j, API::MatrixWorkspace &outputWS,
-                                          const std::vector<double> &verticalAxis);
+                                          std::span<double const> verticalAxis);
 
 /// Rebin the input quadrilateral to to output grid
 MANTID_DATAOBJECTS_DLL void rebinToFractionalOutput(const Geometry::Quadrilateral &inputQ,
                                                     const API::MatrixWorkspace_const_sptr &inputWS, const size_t i,
                                                     const size_t j, DataObjects::RebinnedOutput &outputWS,
-                                                    const std::vector<double> &verticalAxis,
+                                                    std::span<double const> verticalAxis,
                                                     const DataObjects::RebinnedOutput_const_sptr &inputRB = nullptr);
 
 /// Set finalize flag after fractional rebinning loop

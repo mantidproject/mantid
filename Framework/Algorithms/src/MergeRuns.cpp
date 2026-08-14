@@ -461,7 +461,7 @@ std::optional<std::vector<double>> MergeRuns::checkRebinning() {
                                       ". Binning is different from the reference run.");
         }
       }
-      rebinParams = this->calculateRebinParams(bins, (*it)->x(0).rawData());
+      rebinParams = this->calculateRebinParams(bins, (*it)->x(0));
       VectorHelper::createAxisFromRebinParams(*rebinParams, bins);
     }
   }
@@ -476,8 +476,8 @@ std::optional<std::vector<double>> MergeRuns::checkRebinning() {
  *  @param bins2 ::    The second bin edges
  *  @return :: The rebinning parameters
  */
-std::vector<double> MergeRuns::calculateRebinParams(const std::vector<double> &bins1,
-                                                    const std::vector<double> &bins2) {
+std::vector<double> MergeRuns::calculateRebinParams(std::span<double const> const bins1,
+                                                    std::span<double const> const bins2) {
   std::vector<double> newParams;
   // Try to reserve memory for the worst-case scenario: two non-overlapping
   // ranges.
@@ -520,7 +520,8 @@ std::vector<double> MergeRuns::calculateRebinParams(const std::vector<double> &b
  *  @param X2 ::     The bin boundaries from the second workspace
  *  @param params :: A reference to the vector of rebinning parameters
  */
-void MergeRuns::noOverlapParams(const HistogramX &X1, const HistogramX &X2, std::vector<double> &params) {
+void MergeRuns::noOverlapParams(std::span<double const> const X1, std::span<double const> const X2,
+                                std::vector<double> &params) {
   // Add all the bins from the first workspace
   for (size_t i = 1; i < X1.size(); ++i) {
     params.emplace_back(X1[i - 1]);
@@ -549,16 +550,17 @@ void MergeRuns::noOverlapParams(const HistogramX &X1, const HistogramX &X2, std:
  *  @param X2 ::     The bin boundaries from the second workspace
  *  @param params :: A reference to the vector of rebinning parameters
  */
-void MergeRuns::intersectionParams(const HistogramX &X1, size_t &i, const HistogramX &X2, std::vector<double> &params) {
+void MergeRuns::intersectionParams(std::span<double const> const X1, size_t &i, std::span<double const> const X2,
+                                   std::vector<double> &params) {
   // First calculate the number of bins in each workspace that are in the
   // overlap region
   auto const overlapbins1 = X1.size() - i;
-  auto const iterX2 = std::lower_bound(X2.cbegin(), X2.cend(), X1.back());
+  auto const iterX2 = std::lower_bound(X2.begin(), X2.end(), X1.back());
   if (iterX2 == X2.end()) {
     throw std::runtime_error("MergerRuns::intersectionParams: no intersection "
                              "between the histograms.");
   }
-  auto const overlapbins2 = std::distance(X2.cbegin(), iterX2);
+  auto const overlapbins2 = std::distance(X2.begin(), iterX2);
   // We want to use whichever one has the larger bins (on average)
   if (overlapbins1 < static_cast<size_t>(overlapbins2)) {
     // In this case we want the rest of the bins from the first workspace.....
@@ -594,14 +596,15 @@ void MergeRuns::intersectionParams(const HistogramX &X1, size_t &i, const Histog
  *  @param X2 ::     The bin boundaries from the second workspace
  *  @param params :: A reference to the vector of rebinning parameters
  */
-void MergeRuns::inclusionParams(const HistogramX &X1, size_t &i, const HistogramX &X2, std::vector<double> &params) {
+void MergeRuns::inclusionParams(std::span<double const> const X1, size_t &i, std::span<double const> const X2,
+                                std::vector<double> &params) {
   // First calculate the number of bins in each workspace that are in the
   // overlap region
-  const auto iterX1 = std::lower_bound(X1.cbegin() + i, X1.cend(), X2.back());
-  if (iterX1 == X1.cend()) {
+  const auto iterX1 = std::lower_bound(X1.begin() + i, X1.end(), X2.back());
+  if (iterX1 == X1.end()) {
     throw std::runtime_error("MergeRuns::inclusionParams: no overlap between the histograms");
   }
-  auto const overlapbins1 = std::distance(X1.cbegin(), iterX1) - i;
+  auto const overlapbins1 = std::distance(X1.begin(), iterX1) - i;
   auto const overlapbins2 = X2.size() - 1;
 
   // In the overlap region, we want to use whichever one has the larger bins (on

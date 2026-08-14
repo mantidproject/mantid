@@ -313,7 +313,7 @@ void LeBailFit::exec() {
   setProperty("OutputWorkspace", m_outputWS);
 
   // 8. Final statistic
-  Rfactor finalR = getRFactor(m_outputWS->y(0).rawData(), m_outputWS->y(1).rawData(), m_outputWS->e(0).rawData());
+  Rfactor finalR = getRFactor(m_outputWS->y(0), m_outputWS->y(1), m_outputWS->e(0));
   g_log.notice() << "\nFinal R factor: Rwp = " << finalR.Rwp << ", Rp = " << finalR.Rp
                  << ", Data points = " << m_outputWS->y(1).size() << ", Range = " << m_outputWS->x(0)[0] << ", "
                  << m_outputWS->x(0).back() << "\n";
@@ -392,7 +392,7 @@ void LeBailFit::processInputBackground() {
  */
 void LeBailFit::execPatternCalculation() {
   // Generate domain and values vectors
-  const auto &vecX = m_dataWS->x(m_wsIndex).rawData();
+  const auto &vecX = m_dataWS->x(m_wsIndex);
   std::vector<double> vecY(m_outputWS->y(CALDATAINDEX).size(), 0);
 
   // Calculate diffraction pattern
@@ -467,7 +467,7 @@ void LeBailFit::execRefineBackground() {
   }
 
   // 1. Generate domain and value
-  const auto &vecX = m_dataWS->x(m_wsIndex).rawData();
+  const auto &vecX = m_dataWS->x(m_wsIndex);
   const auto &vecY = m_dataWS->y(m_wsIndex);
   vector<double> valueVec(vecX.size(), 0);
   size_t numpts = vecX.size();
@@ -1326,7 +1326,7 @@ void LeBailFit::execRandomWalkMinimizer(size_t maxcycles, map<string, Parameter>
   const auto &vecX = m_dataWS->x(m_wsIndex);
   const auto &vecInY = m_dataWS->y(m_wsIndex);
 
-  const auto &domain = m_dataWS->x(m_wsIndex).rawData();
+  const auto &domain = m_dataWS->x(m_wsIndex);
   std::vector<double> vecCalPurePeaks(domain.size(), 0.0);
 
   //    Strategy and map
@@ -1354,7 +1354,7 @@ void LeBailFit::execRandomWalkMinimizer(size_t maxcycles, map<string, Parameter>
   Rfactor startR(-DBL_MAX, -DBL_MAX);
 
   // Process background to make a pure peak spectrum in output workspace
-  HistogramY vecBkgd = m_lebailFunction->function(vecX.rawData(), false, true);
+  HistogramY vecBkgd = m_lebailFunction->function(vecX, false, true);
   m_outputWS->mutableY(INPUTBKGDINDEX) = vecBkgd;
   m_outputWS->mutableY(INPUTPUREPEAKINDEX) = vecInY - vecBkgd;
 
@@ -1371,7 +1371,7 @@ void LeBailFit::execRandomWalkMinimizer(size_t maxcycles, map<string, Parameter>
                         " unphyiscal parameters values.");
   }
 
-  doMarkovChain(parammap, vecX, vecPurePeak, vecBkgd.rawData(), maxcycles, startR, randomseed);
+  doMarkovChain(parammap, vecX, vecPurePeak, vecBkgd, maxcycles, startR, randomseed);
 
   // 5. Sum up: retrieve the best result from class variable: m_bestParameters
   Rfactor finalR(-DBL_MAX, -DBL_MAX);
@@ -1405,8 +1405,9 @@ void LeBailFit::execRandomWalkMinimizer(size_t maxcycles, map<string, Parameter>
 /** Work on Markov chain to 'solve' LeBail function
  */
 void LeBailFit::doMarkovChain(const map<string, Parameter> &parammap, const Mantid::HistogramData::HistogramX &vecX,
-                              const Mantid::HistogramData::HistogramY &vecPurePeak, const vector<double> &vecBkgd,
-                              size_t maxcycles, const Rfactor &startR, int randomseed) {
+                              const Mantid::HistogramData::HistogramY &vecPurePeak,
+                              const Mantid::HistogramData::HistogramY &vecBkgd, size_t maxcycles, const Rfactor &startR,
+                              int randomseed) {
 
   // Rfactors in loop
   Rfactor currR(-DBL_MAX, -DBL_MAX), newR(-DBL_MAX, -DBL_MAX);
@@ -1855,20 +1856,20 @@ bool LeBailFit::calculateDiffractionPattern(const HistogramX &vecX, const Histog
       g_log.information() << "Calculate diffraction pattern from input data "
                              "and newly calculated background. "
                           << ".\n";
-      veccalbkgd = m_lebailFunction->function(vecX.rawData(), false, true);
+      veccalbkgd = m_lebailFunction->function(vecX, false, true);
       ::transform(vecY.begin(), vecY.end(), veccalbkgd.begin(), vecPureY.begin(), ::minus<double>());
       veccalbkgdIsEmpty = false;
     }
 
     // Calculate peak intensity
-    peaksvalid = m_lebailFunction->calculatePeaksIntensities(vecX.rawData(), vecPureY, values);
+    peaksvalid = m_lebailFunction->calculatePeaksIntensities(vecX, vecPureY, values);
   } // [input is raw]
   else {
     // Calculate peaks intensities
     g_log.debug() << "Calculate diffraction pattern from input data with "
                      "background removed. "
                   << ".\n";
-    peaksvalid = m_lebailFunction->calculatePeaksIntensities(vecX.rawData(), vecY.rawData(), values);
+    peaksvalid = m_lebailFunction->calculatePeaksIntensities(vecX, vecY, values);
   }
 
   // Calculate Le Bail function
@@ -1887,7 +1888,7 @@ bool LeBailFit::calculateDiffractionPattern(const HistogramX &vecX, const Histog
         throw runtime_error("Programming logic error.");
       ::transform(values.begin(), values.end(), veccalbkgd.begin(), values.begin(), ::plus<double>());
     }
-    rfactor = getRFactor(m_dataWS->y(m_wsIndex).rawData(), values, m_dataWS->e(m_wsIndex).rawData());
+    rfactor = getRFactor(m_dataWS->y(m_wsIndex), values, m_dataWS->e(m_wsIndex));
   } else {
     vector<double> caldata(values.size(), 0.0);
     if (vecBkgd.size() == vecY.size()) {
@@ -1899,7 +1900,7 @@ bool LeBailFit::calculateDiffractionPattern(const HistogramX &vecX, const Histog
         throw runtime_error("Programming logic error (2). ");
       std::transform(values.begin(), values.end(), veccalbkgd.begin(), caldata.begin(), std::plus<double>());
     }
-    rfactor = getRFactor(m_dataWS->y(m_wsIndex).rawData(), caldata, m_dataWS->e(m_wsIndex).rawData());
+    rfactor = getRFactor(m_dataWS->y(m_wsIndex), caldata, m_dataWS->e(m_wsIndex));
   }
 
   if (!peaksvalid) {
@@ -2147,7 +2148,7 @@ bool LeBailFit::acceptOrDeny(Rfactor currR, Rfactor newR) {
  * @param rfactor :: R-factor (Rwp and Rp)
  * @param istep:     current MC step to be recorded
  */
-void LeBailFit::bookKeepBestMCResult(const map<string, Parameter> &parammap, const vector<double> &bkgddata,
+void LeBailFit::bookKeepBestMCResult(const map<string, Parameter> &parammap, std::span<double const> const bkgddata,
                                      Rfactor rfactor, size_t istep) {
   // TODO : [RPRWP] Here is a metric of goodness of it.
   double goodness = rfactor.Rwp;
@@ -2171,7 +2172,7 @@ void LeBailFit::bookKeepBestMCResult(const map<string, Parameter> &parammap, con
     }
 
     // c) Background
-    m_bestBackgroundData = bkgddata;
+    m_bestBackgroundData.assign(bkgddata.begin(), bkgddata.end());
   } else {
     // In code calling this function, it should be better always.
     g_log.warning("[Book keep best MC result] Shouldn't be here as it is found "

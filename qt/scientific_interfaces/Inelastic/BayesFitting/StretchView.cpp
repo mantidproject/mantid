@@ -65,9 +65,9 @@ StretchView::StretchView(QWidget *parent)
 
 void StretchView::subscribePresenter(IStretchViewSubscriber *presenter) { m_presenter = presenter; }
 
-void StretchView::loadSettings(const QSettings &settings) {
-  m_uiForm.dsSample->readSettings(settings.group());
-  m_uiForm.dsResolution->readSettings(settings.group());
+void StretchView::restoreSettings(const API::FileFinderSettings &settings) {
+  m_uiForm.dsSample->restoreSettings(settings);
+  m_uiForm.dsResolution->restoreSettings(settings);
 }
 
 void StretchView::applySettings(std::map<std::string, QVariant> const &settings) {

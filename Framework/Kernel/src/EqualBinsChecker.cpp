@@ -22,14 +22,15 @@ namespace Mantid::Kernel {
 /**
  * Constructor, setting data and thresholds for errors and warnings.
  * By default, checks against average bin width and uses cumulative errors.
- * @param xData :: [input] Reference to bins to check
+ * @param xData :: [input] Non-owning view of the bins to check; it must outlive this
+ * object, exactly as the previous reference parameter had to.
  * @param errorLevel :: [input] Threshold for error. If bin differences are
  * larger than this, check fails.
  * @param warningLevel :: [input] Threshold for warning. If bin difference are
  * larger than this, the user is warned but the check doesn't necessarily fail.
  * If set negative, warnings are off and only error level is used (default).
  */
-EqualBinsChecker::EqualBinsChecker(const MantidVec &xData, const double errorLevel, const double warningLevel)
+EqualBinsChecker::EqualBinsChecker(std::span<double const> xData, const double errorLevel, const double warningLevel)
     : m_xData(xData), m_errorLevel(errorLevel), m_warn(warningLevel > 0), m_warningLevel(warningLevel),
       m_refBinType(ReferenceBin::Average), m_errorType(ErrorType::Cumulative) {}
 

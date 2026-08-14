@@ -6,6 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidKernel/DllConfig.h"
+
+#include <span>
 #include <vector>
 
 namespace Mantid::Kernel {
@@ -33,6 +36,19 @@ template <typename T> std::vector<T> boxcarSmooth(std::vector<T> const &input, u
  * @tparam T Numeric type (e.g., int, float, double)
  */
 template <typename T> std::vector<T> boxcarErrorSmooth(std::vector<T> const &input, unsigned int const numPoints);
+
+/** Overloads taking a contiguous range of doubles, so that the size-checked histogram data
+ * types, which do not hand out a std::vector<double>, can be smoothed directly. A
+ * std::vector<double> argument still selects the templates above; deduction cannot produce a
+ * std::span, hence these are not templates.
+ *
+ * @param input The contiguous range to be smoothed
+ * @param numPoints The width of the boxcar window (must be >= 3)
+ * @return A new vector containing the smoothed data
+ * @throw std::invalid_argument if numPoints is too small
+ */
+MANTID_KERNEL_DLL std::vector<double> boxcarSmooth(std::span<double const> input, unsigned int const numPoints);
+MANTID_KERNEL_DLL std::vector<double> boxcarErrorSmooth(std::span<double const> input, unsigned int const numPoints);
 
 /** Performs boxcar (moving average) smoothing on the input data,
  * using a RMSE average, as is appropriate for error averaging.

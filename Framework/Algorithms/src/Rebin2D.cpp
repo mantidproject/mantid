@@ -19,6 +19,8 @@
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VectorHelper.h"
 
+#include <utility>
+
 namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
@@ -129,9 +131,10 @@ void Rebin2D::exec() {
       const double x_jp1 = oldXEdges[j + 1];
       Quadrilateral inputQ(x_j, x_jp1, vlo, vhi);
       if (!useFractionalArea) {
-        FractionalRebinning::rebinToOutput(inputQ, inputWS, i, j, *outputWS, newYBins.rawData());
+        FractionalRebinning::rebinToOutput(inputQ, inputWS, i, j, *outputWS, std::as_const(newYBins));
       } else {
-        FractionalRebinning::rebinToFractionalOutput(inputQ, inputWS, i, j, *outputRB, newYBins.rawData(), inputHasFA);
+        FractionalRebinning::rebinToFractionalOutput(inputQ, inputWS, i, j, *outputRB, std::as_const(newYBins),
+                                                     inputHasFA);
       }
     }
 
@@ -185,7 +188,7 @@ MatrixWorkspace_sptr Rebin2D::createOutputWorkspace(const MatrixWorkspace_const_
   } else {
     outputWS = create<RebinnedOutput>(*parent, newYSize - 1, binEdges);
   }
-  auto verticalAxis = std::make_unique<BinEdgeAxis>(newYBins.rawData());
+  auto verticalAxis = std::make_unique<BinEdgeAxis>(std::as_const(newYBins));
   // Meta data
   verticalAxis->unit() = parent->getAxis(1)->unit();
   verticalAxis->title() = parent->getAxis(1)->title();

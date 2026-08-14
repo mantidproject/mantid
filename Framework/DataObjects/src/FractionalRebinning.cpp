@@ -70,8 +70,8 @@ QuadrilateralType getQuadrilateralType(const Quadrilateral &inputQ) {
  * Find the possible region of intersection on the output workspace for the
  * given polygon. The given polygon must have a CLOCKWISE winding and the
  * first vertex must be the "lowest left" point.
- * @param xAxis A vector containing the output horizontal axis edges
- * @param verticalAxis A vector containing the output vertical axis edges
+ * @param xAxis The output horizontal axis edges
+ * @param verticalAxis The output vertical axis edges
  * @param inputQ The input polygon (Polygon winding must be clockwise)
  * @param qstart An output giving the starting index in the Q direction
  * @param qend An output giving the end index in the Q direction
@@ -79,7 +79,7 @@ QuadrilateralType getQuadrilateralType(const Quadrilateral &inputQ) {
  * @param x_end An output giving the end index in the dX direction
  * @return True if an intersection is possible
  */
-bool getIntersectionRegion(const std::vector<double> &xAxis, const std::vector<double> &verticalAxis,
+bool getIntersectionRegion(std::span<double const> xAxis, std::span<double const> verticalAxis,
                            const Quadrilateral &inputQ, size_t &qstart, size_t &qend, size_t &x_start, size_t &x_end) {
   const double xn_lo(inputQ.minX()), xn_hi(inputQ.maxX());
   const double yn_lo(inputQ.minY()), yn_hi(inputQ.maxY());
@@ -87,20 +87,20 @@ bool getIntersectionRegion(const std::vector<double> &xAxis, const std::vector<d
   if (xn_hi < xAxis.front() || xn_lo > xAxis.back() || yn_hi < verticalAxis.front() || yn_lo > verticalAxis.back())
     return false;
 
-  auto start_it = std::upper_bound(xAxis.cbegin(), xAxis.cend(), xn_lo);
-  auto end_it = std::upper_bound(start_it, xAxis.cend(), xn_hi);
+  auto start_it = std::upper_bound(xAxis.begin(), xAxis.end(), xn_lo);
+  auto end_it = std::upper_bound(start_it, xAxis.end(), xn_hi);
   x_start = 0;
-  if (start_it != xAxis.cbegin()) {
-    x_start = (start_it - xAxis.cbegin() - 1);
+  if (start_it != xAxis.begin()) {
+    x_start = (start_it - xAxis.begin() - 1);
   }
   x_end = xAxis.size() - 1;
-  if (end_it != xAxis.cend()) {
-    x_end = end_it - xAxis.cbegin();
+  if (end_it != xAxis.end()) {
+    x_end = end_it - xAxis.begin();
   }
 
   // Q region
-  start_it = std::upper_bound(verticalAxis.cbegin(), verticalAxis.cend(), yn_lo);
-  end_it = std::upper_bound(start_it, verticalAxis.cend(), yn_hi);
+  start_it = std::upper_bound(verticalAxis.begin(), verticalAxis.end(), yn_lo);
+  end_it = std::upper_bound(start_it, verticalAxis.end(), yn_hi);
   qstart = 0;
   if (start_it != verticalAxis.begin()) {
     qstart = (start_it - verticalAxis.begin() - 1);
@@ -116,7 +116,7 @@ bool getIntersectionRegion(const std::vector<double> &xAxis, const std::vector<d
 /**
  * Computes the output grid bins which intersect the input quad and their
  * overlapping areas assuming both input and output grids are rectangular
- * @param xAxis A vector containing the output horizontal axis edges
+ * @param xAxis The output horizontal axis edges
  * @param yAxis The output data vertical axis
  * @param inputQ The input quadrilateral
  * @param y_start The starting y-axis index
@@ -125,7 +125,7 @@ bool getIntersectionRegion(const std::vector<double> &xAxis, const std::vector<d
  * @param x_end The starting x-axis index
  * @param areaInfos Output vector of indices and areas of overlapping bins
  */
-void calcRectangleIntersections(const std::vector<double> &xAxis, const std::vector<double> &yAxis,
+void calcRectangleIntersections(std::span<double const> xAxis, std::span<double const> yAxis,
                                 const Quadrilateral &inputQ, const size_t y_start, const size_t y_end,
                                 const size_t x_start, const size_t x_end, std::vector<AreaInfo> &areaInfos) {
   std::vector<double> width;
@@ -150,7 +150,7 @@ void calcRectangleIntersections(const std::vector<double> &xAxis, const std::vec
 /**
  * Computes the output grid bins which intersect the input quad and their
  * overlapping areas assuming input quad is a y-axis aligned trapezoid.
- * @param xAxis A vector containing the output horizontal axis edges
+ * @param xAxis The output horizontal axis edges
  * @param yAxis The output data vertical axis
  * @param inputQ The input quadrilateral
  * @param y_start The starting y-axis index
@@ -159,7 +159,7 @@ void calcRectangleIntersections(const std::vector<double> &xAxis, const std::vec
  * @param x_end The ending x-axis index
  * @param areaInfos Output vector of indices and areas of overlapping bins
  */
-void calcTrapezoidYIntersections(const std::vector<double> &xAxis, const std::vector<double> &yAxis,
+void calcTrapezoidYIntersections(std::span<double const> xAxis, std::span<double const> yAxis,
                                  const Quadrilateral &inputQ, const size_t y_start, const size_t y_end,
                                  const size_t x_start, const size_t x_end, std::vector<AreaInfo> &areaInfos) {
   // The algorithm proceeds as follows:
@@ -430,7 +430,7 @@ void calcTrapezoidYIntersections(const std::vector<double> &xAxis, const std::ve
 /**
  * Computes the output grid bins which intersect the input quad and their
  * overlapping areas for arbitrary shaped input grids
- * @param xAxis A vector containing the output horizontal axis edges
+ * @param xAxis The output horizontal axis edges
  * @param yAxis The output data vertical axis
  * @param inputQ The input quadrilateral
  * @param qstart The starting y-axis index
@@ -439,9 +439,9 @@ void calcTrapezoidYIntersections(const std::vector<double> &xAxis, const std::ve
  * @param x_end The starting x-axis index
  * @param areaInfos Output vector of indices and areas of overlapping bins
  */
-void calcGeneralIntersections(const std::vector<double> &xAxis, const std::vector<double> &yAxis,
-                              const Quadrilateral &inputQ, const size_t qstart, const size_t qend, const size_t x_start,
-                              const size_t x_end, std::vector<AreaInfo> &areaInfos) {
+void calcGeneralIntersections(std::span<double const> xAxis, std::span<double const> yAxis, const Quadrilateral &inputQ,
+                              const size_t qstart, const size_t qend, const size_t x_start, const size_t x_end,
+                              std::vector<AreaInfo> &areaInfos) {
   ConvexPolygon intersectOverlap;
   areaInfos.reserve((qend - qstart) * (x_end - x_start));
   for (size_t yi = qstart; yi < qend; ++yi) {
@@ -498,18 +498,18 @@ void normaliseOutput(const MatrixWorkspace_sptr &outputWS, const MatrixWorkspace
  * @param i The index in the vertical axis direction that inputQ references
  * @param j The index in the horizontal axis direction that inputQ references
  * @param outputWS A pointer to the output workspace that accumulates the data
- * @param verticalAxis A vector containing the output vertical axis bin
+ * @param verticalAxis The output vertical axis bin
  * boundaries
  */
 void rebinToOutput(const Quadrilateral &inputQ, const MatrixWorkspace_const_sptr &inputWS, const size_t i,
-                   const size_t j, MatrixWorkspace &outputWS, const std::vector<double> &verticalAxis) {
+                   const size_t j, MatrixWorkspace &outputWS, std::span<double const> verticalAxis) {
   const auto &inY = inputWS->y(i);
   // Check once whether the signal
   if (std::isnan(inY[j])) {
     return;
   }
 
-  const auto &X = outputWS.x(0).rawData();
+  const auto &X = outputWS.x(0);
   size_t qstart(0), qend(verticalAxis.size() - 1), x_start(0), x_end(X.size() - 1);
   if (!getIntersectionRegion(X, verticalAxis, inputQ, qstart, qend, x_start, x_end))
     return;
@@ -561,7 +561,7 @@ void rebinToOutput(const Quadrilateral &inputQ, const MatrixWorkspace_const_sptr
  * @param outputWS A pointer to the output workspace that accumulates the data
  *        Note that the error array of the output workspace contains the
  *        **variance** and not the errors (standard deviations).
- * @param verticalAxis A vector containing the output vertical axis bin
+ * @param verticalAxis The output vertical axis bin
  * boundaries
  * @param inputRB A pointer, of RebinnedOutput type, to the input workspace.
  * It is used to take into account the input area fractions when calcuting
@@ -569,7 +569,7 @@ void rebinToOutput(const Quadrilateral &inputQ, const MatrixWorkspace_const_sptr
  * This can be null to indicate that the input was a standard 2D workspace.
  */
 void rebinToFractionalOutput(const Quadrilateral &inputQ, const MatrixWorkspace_const_sptr &inputWS, const size_t i,
-                             const size_t j, RebinnedOutput &outputWS, const std::vector<double> &verticalAxis,
+                             const size_t j, RebinnedOutput &outputWS, std::span<double const> verticalAxis,
                              const RebinnedOutput_const_sptr &inputRB) {
   const auto &inX = inputWS->binEdges(i);
   const auto &inY = inputWS->y(i);
@@ -578,7 +578,7 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ, const MatrixWorkspace_
   if (std::isnan(signal))
     return;
 
-  const auto &X = outputWS.x(0).rawData();
+  const auto &X = outputWS.x(0);
   size_t qstart(0), qend(verticalAxis.size() - 1), x_start(0), x_end(X.size() - 1);
   if (!getIntersectionRegion(X, verticalAxis, inputQ, qstart, qend, x_start, x_end))
     return;

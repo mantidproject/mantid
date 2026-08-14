@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+from unittest import mock
 from mantid.api import mtd, AnalysisDataService
 from mantid.kernel import config
 from mantid.simpleapi import ClearMaskFlag, DeleteWorkspace, LoadEmptyInstrument, MaskBTP
@@ -149,6 +150,18 @@ class MaskBTPTest(unittest.TestCase):
         # keep on masking the same workspace to speed up the test
         masking = MaskBTP(Workspace="TOPAZMaskBTP", Tube="edges")
         self.assertEqual(2 * 256 * 25, len(masking))
+
+    def test_wish_workspace_with_padded_instrument_name(self):
+        ws_name = "wish"
+        ws = LoadEmptyInstrument(InstrumentName="WISH", OutputWorkspace=ws_name)
+
+        expected = MaskBTP(Workspace=ws_name, Pixel="1-16,496-512")
+
+        with mock.patch.object(type(ws), "getInstrumentName", return_value="WISH    "):
+            masked = MaskBTP(Workspace=ws_name, Pixel="1-16,496-512")
+
+        self.assertTrue(array_equal(masked, expected))
+        DeleteWorkspace(ws_name)
 
     def test_eqsans_simple(self):
         ws_name = "eqsans"

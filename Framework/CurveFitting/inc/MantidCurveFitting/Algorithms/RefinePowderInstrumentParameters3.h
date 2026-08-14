@@ -16,6 +16,8 @@
 #include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/Functions/ThermalNeutronDtoTOFFunction.h"
 
+#include <span>
+
 namespace Mantid {
 namespace CurveFitting {
 namespace Algorithms {
@@ -181,8 +183,8 @@ void duplicateParameters(const std::map<std::string, Parameter> &source, std::ma
 void copyParametersValues(const std::map<std::string, Parameter> &source, std::map<std::string, Parameter> &target);
 
 /// Calculate Chi^2
-double calculateFunctionChiSquare(const std::vector<double> &modelY, const std::vector<double> &dataY,
-                                  const std::vector<double> &dataE);
+double calculateFunctionChiSquare(std::span<double const> modelY, std::span<double const> dataY,
+                                  std::span<double const> dataE);
 
 } // namespace Algorithms
 } // namespace CurveFitting

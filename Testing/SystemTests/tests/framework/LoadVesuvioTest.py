@@ -461,7 +461,7 @@ class LoadVesuvioTest(systemtesting.MantidSystemTest):
         self._success = False
         # Custom code to create and run this single test suite
         suite = unittest.TestSuite()
-        suite.addTest(unittest.makeSuite(VesuvioTests, "test"))
+        suite.addTest(unittest.defaultTestLoader.loadTestsFromTestCase(VesuvioTests))
         runner = unittest.TextTestRunner()
         # Run using either runner
         res = runner.run(suite)

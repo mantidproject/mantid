@@ -142,7 +142,7 @@ struct comparePulseTimeTOFDelta {
 struct FindBin {
   double divisor;
   double offset;
-  std::optional<size_t> (*findBin)(const Mantid::MantidVec &, const double, const double, const double, const bool);
+  std::optional<size_t> (*findBin)(std::span<double const>, const double, const double, const double, const bool);
   FindBin(double step, double xmin) {
     if (step < 0) {
       findBin = Mantid::DataObjects::EventList::findLogBin;
@@ -155,7 +155,7 @@ struct FindBin {
     }
   }
 
-  std::optional<size_t> operator()(const Mantid::MantidVec &X, const double tof, const bool findExact) {
+  std::optional<size_t> operator()(std::span<double const> X, const double tof, const bool findExact) {
     return findBin(X, tof, divisor, offset, findExact);
   }
 };
@@ -2117,7 +2117,7 @@ template <class T> typename std::vector<T>::iterator static findFirstEvent(std::
  * @throw runtime_error if the EventList does not have weighted events
  */
 template <class T>
-void EventList::histogramForWeightsHelper(const std::vector<T> &events, const MantidVec &X, MantidVec &Y,
+void EventList::histogramForWeightsHelper(const std::vector<T> &events, std::span<double const> X, MantidVec &Y,
                                           MantidVec &E) {
   // For slight speed=up.
   size_t x_size = X.size();
@@ -2213,7 +2213,7 @@ void EventList::histogramForWeightsHelper(const std::vector<T> &events, const Ma
  * @throw runtime_error if the EventList does not have weighted events
  */
 template <class T>
-void EventList::histogramForWeightsHelper(const std::vector<T> &events, const double step, const MantidVec &X,
+void EventList::histogramForWeightsHelper(const std::vector<T> &events, const double step, std::span<double const> X,
                                           MantidVec &Y, MantidVec &E) {
   size_t x_size = X.size();
 
@@ -2268,7 +2268,8 @@ void EventList::histogramForWeightsHelper(const std::vector<T> &events, const do
  * @param skipError: skip calculating the error. This has no effect for weighted
  *        events; you can just ignore the returned E vector.
  */
-void EventList::generateHistogramPulseTime(const MantidVec &X, MantidVec &Y, MantidVec &E, bool skipError) const {
+void EventList::generateHistogramPulseTime(std::span<double const> X, MantidVec &Y, MantidVec &E,
+                                           bool skipError) const {
   // All types of weights need to be sorted by Pulse Time
   this->sortPulseTime();
 
@@ -2300,8 +2301,8 @@ void EventList::generateHistogramPulseTime(const MantidVec &X, MantidVec &Y, Man
  * weighted
  *          events; you can just ignore the returned E vector.
  */
-void EventList::generateHistogramTimeAtSample(const MantidVec &X, MantidVec &Y, MantidVec &E, const double &tofFactor,
-                                              const double &tofOffset, bool skipError) const {
+void EventList::generateHistogramTimeAtSample(std::span<double const> X, MantidVec &Y, MantidVec &E,
+                                              const double &tofFactor, const double &tofOffset, bool skipError) const {
   // All types of weights need to be sorted by time at sample
   this->sortTimeAtSample(tofFactor, tofOffset);
 
@@ -2332,7 +2333,7 @@ void EventList::generateHistogramTimeAtSample(const MantidVec &X, MantidVec &Y, 
  * @param skipError: skip calculating the error. This has no effect for weighted
  *        events; you can just ignore the returned E vector.
  */
-void EventList::generateHistogram(const MantidVec &X, MantidVec &Y, MantidVec &E, bool skipError) const {
+void EventList::generateHistogram(std::span<double const> X, MantidVec &Y, MantidVec &E, bool skipError) const {
   // All types of weights need to be sorted by TOF
 
   this->sortTof();
@@ -2370,7 +2371,7 @@ void EventList::generateHistogram(const MantidVec &X, MantidVec &Y, MantidVec &E
  * @param skipError: skip calculating the error. This has no effect for weighted
  *        events; you can just ignore the returned E vector.
  */
-void EventList::generateHistogram(const double step, const MantidVec &X, MantidVec &Y, MantidVec &E,
+void EventList::generateHistogram(const double step, std::span<double const> X, MantidVec &Y, MantidVec &E,
                                   bool skipError) const {
   // if events are already sorted, use faster sorted histogram method
   if (isSortedByTof() || empty())
@@ -2400,7 +2401,7 @@ void EventList::generateHistogram(const double step, const MantidVec &X, MantidV
  * @param X :: The x bins
  * @param Y :: The generated counts histogram
  */
-void EventList::generateCountsHistogramPulseTime(const MantidVec &X, MantidVec &Y) const {
+void EventList::generateCountsHistogramPulseTime(std::span<double const> X, MantidVec &Y) const {
   // For slight speed=up.
   size_t x_size = X.size();
 
@@ -2508,7 +2509,7 @@ void EventList::generateCountsHistogramPulseTime(const double &xMin, const doubl
  * @param tofFactor :: time of flight factor
  * @param tofOffset :: time of flight offset
  */
-void EventList::generateCountsHistogramTimeAtSample(const MantidVec &X, MantidVec &Y, const double &tofFactor,
+void EventList::generateCountsHistogramTimeAtSample(std::span<double const> X, MantidVec &Y, const double &tofFactor,
                                                     const double &tofOffset) const {
   // For slight speed=up.
   const size_t x_size = X.size();
@@ -2573,7 +2574,7 @@ void EventList::generateCountsHistogramTimeAtSample(const MantidVec &X, MantidVe
  * @param X :: The x bins
  * @param Y :: The generated counts histogram
  */
-void EventList::generateCountsHistogram(const MantidVec &X, MantidVec &Y) const {
+void EventList::generateCountsHistogram(std::span<double const> X, MantidVec &Y) const {
   // For slight speed=up.
   size_t x_size = X.size();
 
@@ -2598,13 +2599,13 @@ void EventList::generateCountsHistogram(const MantidVec &X, MantidVec &Y) const 
     auto itev = findFirstEvent(*this->events, TofEvent(X[0]));
     const auto itend = this->events->end();
     // Go through all the events,
-    for (auto itx = X.cbegin(); itev != itend; ++itev) {
+    for (auto itx = X.begin(); itev != itend; ++itev) {
       const double tof = itev->tof();
-      itx = std::find_if(itx, X.cend(), [tof](const double x) { return tof < x; });
-      if (itx == X.cend()) {
+      itx = std::find_if(itx, X.end(), [tof](const double x) { return tof < x; });
+      if (itx == X.end()) {
         break;
       }
-      const auto bin = static_cast<size_t>(std::max(std::distance(X.cbegin(), itx) - 1, std::ptrdiff_t{0}));
+      const auto bin = static_cast<size_t>(std::max(std::distance(X.begin(), itx) - 1, std::ptrdiff_t{0}));
       ++Y[bin];
     }
   } // end if (there are any events to histogram)
@@ -2620,7 +2621,7 @@ void EventList::generateCountsHistogram(const MantidVec &X, MantidVec &Y) const 
  * @param offset :: pre-calculated offset
  * @param findExact :: do extra check of supplied time-of-flight compared to bin boundaries and move the bin if needed
  */
-std::optional<size_t> EventList::findLinearBin(const MantidVec &X, const double tof, const double divisor,
+std::optional<size_t> EventList::findLinearBin(std::span<double const> X, const double tof, const double divisor,
                                                const double offset, const bool findExact) {
   const auto bin = static_cast<size_t>(tof * divisor - offset);
   if (bin >= X.size())
@@ -2649,7 +2650,7 @@ std::optional<size_t> EventList::findLinearBin(const MantidVec &X, const double 
  * @param offset :: pre-calculated offset
  * @param findExact :: do extra check of supplied time-of-flight compared to bin boundaries and move the bin if needed
  */
-std::optional<size_t> EventList::findLogBin(const MantidVec &X, const double tof, const double divisor,
+std::optional<size_t> EventList::findLogBin(std::span<double const> X, const double tof, const double divisor,
                                             const double offset, const bool findExact) {
   const auto bin = static_cast<size_t>(log(tof) * divisor - offset);
   if (bin >= X.size())
@@ -2667,9 +2668,9 @@ std::optional<size_t> EventList::findLogBin(const MantidVec &X, const double tof
  * @param tof :: TOF of the event we are trying to bin
  * @param n_bin :: starting estiamted bin number
  */
-size_t EventList::findExactBin(const MantidVec &X, const double tof, const size_t n_bin) {
+size_t EventList::findExactBin(std::span<double const> X, const double tof, const size_t n_bin) {
   // is tof slower than suggested bin
-  auto tof_of_bin = X.cbegin() + n_bin; // boundary suggested
+  auto tof_of_bin = X.begin() + n_bin; // boundary suggested
   if (tof < *tof_of_bin)
     return std::move(n_bin - 1);
 
@@ -2693,7 +2694,7 @@ size_t EventList::findExactBin(const MantidVec &X, const double tof, const size_
  * @param X :: The x bins
  * @param Y :: The generated counts histogram
  */
-void EventList::generateCountsHistogram(const double step, const MantidVec &X, MantidVec &Y) const {
+void EventList::generateCountsHistogram(const double step, std::span<double const> X, MantidVec &Y) const {
   // For slight speed=up.
   size_t x_size = X.size();
 
@@ -2739,12 +2740,12 @@ void EventList::generateCountsHistogram(const double step, const MantidVec &X, M
  * @param Y :: The counts histogram
  * @param E :: The generated error histogram
  */
-void EventList::generateErrorsHistogram(const MantidVec &Y, MantidVec &E) const {
+void EventList::generateErrorsHistogram(std::span<double const> Y, MantidVec &E) const {
   // Fill the vector for the errors, containing sqrt(count)
   E.resize(Y.size(), 0);
 
   // windows can get confused about std::sqrt
-  std::transform(Y.cbegin(), Y.cend(), E.begin(), static_cast<double (*)(double)>(sqrt));
+  std::transform(Y.begin(), Y.end(), E.begin(), static_cast<double (*)(double)>(sqrt));
 
 } //----------------------------------------------------------------------------------
 
@@ -3834,8 +3835,8 @@ void EventList::multiply(const double value, const double error) {
  * @throw invalid_argument if the sizes of X, Y, E are not consistent.
  * */
 template <class T>
-void EventList::multiplyHistogramHelper(std::vector<T> &events, const MantidVec &X, const MantidVec &Y,
-                                        const MantidVec &E) {
+void EventList::multiplyHistogramHelper(std::vector<T> &events, std::span<double const> X, std::span<double const> Y,
+                                        std::span<double const> E) {
   // Validate inputs
   if ((X.size() < 2) || (Y.size() != E.size()) || (X.size() != 1 + Y.size())) {
     std::stringstream msg;
@@ -3928,7 +3929,7 @@ void EventList::multiplyHistogramHelper(std::vector<T> &events, const MantidVec 
  * @param E: error on the value to multiply.
  * @throw invalid_argument if the sizes of X, Y, E are not consistent.
  */
-void EventList::multiply(const MantidVec &X, const MantidVec &Y, const MantidVec &E) {
+void EventList::multiply(std::span<double const> X, std::span<double const> Y, std::span<double const> E) {
   switch (eventType) {
   case TOF:
     // Switch to weights if needed.
@@ -3959,8 +3960,8 @@ void EventList::multiply(const MantidVec &X, const MantidVec &Y, const MantidVec
  * @throw invalid_argument if the sizes of X, Y, E are not consistent.
  * */
 template <class T>
-void EventList::divideHistogramHelper(std::vector<T> &events, const MantidVec &X, const MantidVec &Y,
-                                      const MantidVec &E) {
+void EventList::divideHistogramHelper(std::vector<T> &events, std::span<double const> X, std::span<double const> Y,
+                                      std::span<double const> E) {
   // Validate inputs
   if ((X.size() < 2) || (Y.size() != E.size()) || (X.size() != 1 + Y.size())) {
     std::stringstream msg;
@@ -4065,7 +4066,7 @@ void EventList::divideHistogramHelper(std::vector<T> &events, const MantidVec &X
  * @param E: error on the value to multiply.
  * @throw invalid_argument if the sizes of X, Y, E are not consistent.
  */
-void EventList::divide(const MantidVec &X, const MantidVec &Y, const MantidVec &E) {
+void EventList::divide(std::span<double const> X, std::span<double const> Y, std::span<double const> E) {
   switch (eventType) {
   case TOF:
     // Switch to weights if needed.
