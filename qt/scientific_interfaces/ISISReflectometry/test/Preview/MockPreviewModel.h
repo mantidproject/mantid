@@ -34,6 +34,7 @@ public:
   MOCK_METHOD(MatrixWorkspace_sptr, getSelectedSummedWs, (), (const, override));
   MOCK_METHOD(Workspace_sptr, getReducedWs, (), (const, override));
   MOCK_METHOD(MatrixWorkspace_sptr, getSelectedReducedWs, (), (const, override));
+  MOCK_METHOD(std::vector<MatrixWorkspace_sptr>, getReducedWorkspaceMembers, (), (const, override));
   MOCK_METHOD(bool, isWorkspaceGroup, (), (const, override));
   MOCK_METHOD(std::vector<std::string>, getGroupMemberDisplayNames, (), (const, override));
   MOCK_METHOD(size_t, getNumberOfGroupMembers, (), (const, override));
@@ -46,6 +47,7 @@ public:
   MOCK_METHOD(std::optional<Selection> const, getSelectedRegion, (ROIType), (override));
 
   MOCK_METHOD(void, setSummedWs, (Workspace_sptr), (override));
+  MOCK_METHOD(void, clearReducedWorkspace, (), (override));
   MOCK_METHOD(void, setTheta, (double), (override));
   MOCK_METHOD(void, setSelectedBanks, (std::optional<ProcessingInstructions>), (override));
   MOCK_METHOD(void, setSelectedRegion, (ROIType, Selection const &), (override));
