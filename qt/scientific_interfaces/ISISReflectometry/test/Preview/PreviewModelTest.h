@@ -31,6 +31,7 @@ public:
     PreviewModel model;
     // This will throw if the underlying RunDetails is null
     TS_ASSERT_THROWS_NOTHING(model.getSelectedBanks())
+    TS_ASSERT_EQUALS(model.getNumberOfGroupMembers(), 0)
   }
 
   void test_load_workspace_from_ads() {
@@ -42,21 +43,51 @@ public:
     AnalysisDataService::Instance().addOrReplace(workspaceName, createWorkspace());
 
     TS_ASSERT(model.loadWorkspaceFromAds(workspaceName));
-    auto workspace = model.getLoadedWs();
+    auto workspace = model.getSelectedLoadedWs();
     TS_ASSERT(workspace);
     TS_ASSERT_EQUALS(workspace->getName(), workspaceName);
   }
 
-  void test_load_workspace_from_ads_throws_if_wrong_type() {
-    auto mockJobManager = MockJobManager();
-    EXPECT_CALL(mockJobManager, startPreprocessing(_)).Times(0);
+  void test_load_workspace_group_from_ads() {
+    PreviewModel model;
+    auto const first = createWorkspace();
+    auto const second = createWorkspace();
+    auto const group = createWorkspaceGroup({first, second});
+    auto const workspaceName = std::string("test group");
+    AnalysisDataService::Instance().addOrReplace(workspaceName, group);
 
+    TS_ASSERT(model.loadWorkspaceFromAds(workspaceName));
+    TS_ASSERT(model.isWorkspaceGroup());
+    TS_ASSERT_EQUALS(model.getNumberOfGroupMembers(), 2);
+    TS_ASSERT_EQUALS(model.getSelectedGroupMember(), 0);
+    TS_ASSERT_EQUALS(model.getLoadedWs(), group);
+    TS_ASSERT_EQUALS(model.getSelectedLoadedWs(), first);
+
+    model.setSelectedGroupMember(1);
+
+    TS_ASSERT_EQUALS(model.getSelectedLoadedWs(), second);
+  }
+
+  void test_load_workspace_from_ads_throws_if_group_is_empty() {
     PreviewModel model;
     auto workspaceName = std::string("test workspace");
-    // We don't currently support workspace groups so it should throw with this type
     AnalysisDataService::Instance().addOrReplace(workspaceName, std::make_shared<WorkspaceGroup>());
 
-    TS_ASSERT_THROWS(model.loadWorkspaceFromAds(workspaceName), std::runtime_error const &);
+    TS_ASSERT_THROWS_EQUALS(model.loadWorkspaceFromAds(workspaceName), std::runtime_error const &e,
+                            std::string(e.what()),
+                            "Unsupported workspace type; expected MatrixWorkspace or WorkspaceGroup of "
+                            "MatrixWorkspaces");
+  }
+
+  void test_setting_group_member_outside_loaded_group_is_rejected() {
+    PreviewModel model;
+    auto const group = createWorkspaceGroup({createWorkspace(), createWorkspace()});
+    AnalysisDataService::Instance().addOrReplace("group", group);
+    model.loadWorkspaceFromAds("group");
+
+    TS_ASSERT_THROWS_EQUALS(model.setSelectedGroupMember(2), std::out_of_range const &e, std::string(e.what()),
+                            "Workspace group member index is out of range");
+    TS_ASSERT_EQUALS(model.getSelectedGroupMember(), 0);
   }
 
   void test_load_workspace_from_file() {
@@ -71,9 +102,25 @@ public:
     auto workspaceName = std::string("not there");
 
     model.loadAndPreprocessWorkspaceAsync(workspaceName, mockJobManager);
-    auto workspace = model.getLoadedWs();
+    auto workspace = model.getSelectedLoadedWs();
     TS_ASSERT(workspace);
     TS_ASSERT_EQUALS(workspace, expectedWs);
+  }
+
+  void test_load_workspace_group_from_file() {
+    auto mockJobManager = MockJobManager();
+    auto const first = createWorkspace();
+    auto const second = createWorkspace();
+    auto const expectedGroup = createWorkspaceGroup({first, second});
+    auto wsLoadEffect = [&expectedGroup](PreviewRow &row) { row.setLoadedWs(expectedGroup); };
+    EXPECT_CALL(mockJobManager, startPreprocessing(_)).Times(1).WillOnce(Invoke(wsLoadEffect));
+
+    PreviewModel model;
+    model.loadAndPreprocessWorkspaceAsync("group", mockJobManager);
+
+    TS_ASSERT(model.isWorkspaceGroup());
+    TS_ASSERT_EQUALS(model.getLoadedWs(), expectedGroup);
+    TS_ASSERT_EQUALS(model.getSelectedLoadedWs(), first);
   }
 
   void test_set_and_get_selected_banks() {
@@ -116,9 +163,26 @@ public:
     PreviewModel model;
     model.sumBanksAsync(mockJobManager);
 
-    auto workspace = model.getSummedWs();
+    auto workspace = model.getSelectedSummedWs();
     TS_ASSERT(workspace);
     TS_ASSERT_EQUALS(workspace, expectedWs);
+  }
+
+  void test_sum_banks_stores_group_and_exposes_selected_member() {
+    auto mockJobManager = MockJobManager();
+    auto const first = createWorkspace();
+    auto const second = createWorkspace();
+    auto const expectedGroup = createWorkspaceGroup({first, second});
+    auto wsSumBanksEffect = [&expectedGroup](PreviewRow &row) { row.setSummedWs(expectedGroup); };
+    EXPECT_CALL(mockJobManager, startSumBanks(_)).Times(1).WillOnce(Invoke(wsSumBanksEffect));
+
+    PreviewModel model;
+    model.setLoadedWs(expectedGroup);
+    model.sumBanksAsync(mockJobManager);
+    model.setSelectedGroupMember(1);
+
+    TS_ASSERT_EQUALS(model.getSummedWs(), expectedGroup);
+    TS_ASSERT_EQUALS(model.getSelectedSummedWs(), second);
   }
 
   void test_reduce() {
@@ -130,9 +194,34 @@ public:
     PreviewModel model;
     model.reduceAsync(mockJobManager);
 
-    auto workspace = model.getReducedWs();
+    auto workspace = model.getSelectedReducedWs();
     TS_ASSERT(workspace);
     TS_ASSERT_EQUALS(workspace, expectedWs);
+  }
+
+  void test_reduce_stores_group_and_exposes_selected_member() {
+    auto mockJobManager = MockJobManager();
+    auto const inputGroup = createWorkspaceGroup({createWorkspace(), createWorkspace()});
+    auto const firstOutput = createWorkspace();
+    auto const secondOutput = createWorkspace();
+    auto const expectedGroup = createWorkspaceGroup({firstOutput, secondOutput});
+    auto const groupName = std::string("input_group");
+    AnalysisDataService::Instance().addOrReplace(groupName, inputGroup);
+    auto wsReductionEffect = [&expectedGroup, &inputGroup, &groupName](PreviewRow &row) {
+      TS_ASSERT_EQUALS(row.getLoadedWs(), inputGroup);
+      TS_ASSERT_EQUALS(row.runNumbers().size(), 1);
+      TS_ASSERT_EQUALS(row.runNumbers()[0], groupName);
+      row.setReducedWs(expectedGroup);
+    };
+    EXPECT_CALL(mockJobManager, startReduction(_)).Times(1).WillOnce(Invoke(wsReductionEffect));
+
+    PreviewModel model;
+    model.loadWorkspaceFromAds(groupName);
+    model.reduceAsync(mockJobManager);
+    model.setSelectedGroupMember(1);
+
+    TS_ASSERT_EQUALS(model.getReducedWs(), expectedGroup);
+    TS_ASSERT_EQUALS(model.getSelectedReducedWs(), secondOutput);
   }
 
   void test_export_summed_ws_to_ads() {
@@ -147,6 +236,21 @@ public:
     TS_ASSERT(ads.doesExist(expectedName));
     TS_ASSERT_EQUALS(ws, ads.retrieveWS<MatrixWorkspace>(expectedName));
     ads.remove(expectedName);
+  }
+
+  void test_export_summed_workspace_group_to_ads() {
+    PreviewModel model;
+    auto const first = createWorkspace();
+    auto const second = createWorkspace();
+    auto const group = createWorkspaceGroup({first, second});
+    model.setSummedWs(group);
+
+    model.exportSummedWsToAds();
+
+    auto const exported = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("preview_summed_ws");
+    TS_ASSERT_EQUALS(exported, group);
+    TS_ASSERT_EQUALS(exported->getItem(0), first);
+    TS_ASSERT_EQUALS(exported->getItem(1), second);
   }
 
   void test_export_summed_ws_with_no_ws_set_does_not_throw() {
@@ -169,6 +273,24 @@ public:
     ads.remove(expectedName);
   }
 
+  void test_export_reduced_workspace_group_to_ads() {
+    PreviewModel model;
+    auto mockJobManager = MockJobManager();
+    auto const first = createWorkspace();
+    auto const second = createWorkspace();
+    auto const group = createWorkspaceGroup({first, second});
+    auto wsReductionEffect = [&group](PreviewRow &row) { row.setReducedWs(group); };
+    EXPECT_CALL(mockJobManager, startReduction(_)).WillOnce(Invoke(wsReductionEffect));
+    model.reduceAsync(mockJobManager);
+
+    model.exportReducedWsToAds();
+
+    auto const exported = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("preview_reduced_ws");
+    TS_ASSERT_EQUALS(exported, group);
+    TS_ASSERT_EQUALS(exported->getItem(0), first);
+    TS_ASSERT_EQUALS(exported->getItem(1), second);
+  }
+
   void test_export_reduced_ws_with_no_ws_set_does_not_throw() {
     PreviewModel model;
     // This should emit an error, but we cannot observe this from our test
@@ -180,7 +302,22 @@ public:
     auto ws = createWorkspace();
     model.setLoadedWs(ws);
 
-    TS_ASSERT_EQUALS(model.getLoadedWs(), ws);
+    TS_ASSERT_EQUALS(model.getSelectedLoadedWs(), ws);
+  }
+
+  void test_loading_new_workspace_resets_selected_group_member() {
+    PreviewModel model;
+    auto const firstGroup = createWorkspaceGroup({createWorkspace(), createWorkspace()});
+    AnalysisDataService::Instance().addOrReplace("first", firstGroup);
+    AnalysisDataService::Instance().addOrReplace("second", createWorkspace());
+    model.loadWorkspaceFromAds("first");
+    model.setSelectedGroupMember(1);
+
+    model.loadWorkspaceFromAds("second");
+
+    TS_ASSERT_EQUALS(model.getSelectedGroupMember(), 0);
+    TS_ASSERT(!model.isWorkspaceGroup());
+    TS_ASSERT_EQUALS(model.getNumberOfGroupMembers(), 1);
   }
 
   void test_get_theta_from_workspace() {
@@ -241,4 +378,11 @@ private:
   }
 
   MatrixWorkspace_sptr createWorkspace() { return WorkspaceCreationHelper::create2DWorkspace(1, 1); }
+
+  WorkspaceGroup_sptr createWorkspaceGroup(std::initializer_list<MatrixWorkspace_sptr> members) {
+    auto group = std::make_shared<WorkspaceGroup>();
+    for (auto const &member : members)
+      group->addWorkspace(member);
+    return group;
+  }
 };
