@@ -877,6 +877,8 @@ Typical usage of the tool is as follows:
 - Enter a **run** number and **angle**.
 
   - The run is loaded, and a plot of the workspace is displayed, with pre-processing (e.g. calibration) applied.
+  - If the run contains a workspace group, use **Group Member** to choose which member is displayed in the detector
+    image and TOF plot.
   - For **2D detectors**, a **detector image** is displayed
   - For **linear** detectors, a **Spectrum vs TOF** plot is displayed
 
@@ -889,6 +891,11 @@ Typical usage of the tool is as follows:
   - A full **reduction** is run using the selected regions, and a plot of the final **reflectivity curve** is displayed.
 
 - **Adjust** the regions of interest until you are happy with the reflectivity curve.
+
+  - When previewing a workspace group, detector and TOF region bounds are retained when changing group member.
+    Masks drawn on the TOF plot are retained separately for each member.
+  - Select **Plot reduction preview for all group members** to compare the reduced reflectivity curves on the same
+    plot.
 
 - Click the **Apply** button to save the regions of interest into the batch settings.
 
