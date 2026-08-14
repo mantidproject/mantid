@@ -97,6 +97,28 @@ protected:
    */
   virtual void initialiseCachedDistances() = 0;
 
+  /** The illumination weight of each volume element as seen by this detector, in the same order as
+   * m_elementPositions. This is where a subclass expresses how strongly a point is lit by the
+   * incident beam and how much of it the detector can actually see; the attenuation itself is
+   * already handled by the integration.
+   *
+   * The weight is per detector because a collimator restricts each detector to its own corridor
+   * through the sample, so it cannot be cached once for all spectra.
+   *
+   * Leaving @p weights empty means unit weight for every element, which is both the default and
+   * the behaviour of every subclass that does not override this - so their results are unchanged.
+   */
+  virtual void calculateElementWeights(const Geometry::IDetector & /*detector*/, std::vector<double> &weights) const {
+    weights.clear(); // unit weight everywhere
+  }
+
+  /** Called once per spectrum, after its L2 distances and element weights are known but before the
+   * next spectrum is started, so a subclass can accumulate a per-detector quantity from the same
+   * quadrature without repeating it. Does nothing by default.
+   */
+  virtual void perSpectrumHook(size_t /*wsIndex*/, const std::vector<double> & /*L2s*/,
+                               const std::vector<double> & /*weights*/) { /*Empty in base class*/ }
+
   API::MatrixWorkspace_sptr m_inputWS;         ///< A pointer to the input workspace
   const Geometry::IObject *m_sampleObject;     ///< Local cache of sample object.
   Kernel::V3D m_beamDirection;                 ///< The direction of the beam.
@@ -116,10 +138,11 @@ private:
   void retrieveBaseProperties();
   void constructSample(API::Sample &sample);
   void calculateDistances(const Geometry::IDetector &detector, std::vector<double> &L2s) const;
-  inline double doIntegration(const double linearCoefAbs, const std::vector<double> &L2s, const size_t startIndex,
-                              const size_t endIndex) const;
+  inline double doIntegration(const double linearCoefAbs, const std::vector<double> &L2s,
+                              const std::vector<double> &weights, const size_t startIndex, const size_t endIndex) const;
   inline double doIntegration(const double linearCoefAbsL1, const double linearCoefAbsL2,
-                              const std::vector<double> &L2s, const size_t startIndex, const size_t endIndex) const;
+                              const std::vector<double> &L2s, const std::vector<double> &weights,
+                              const size_t startIndex, const size_t endIndex) const;
 
   Kernel::Material m_material;
   double m_linearCoefTotScatt; ///< The total scattering cross-section in 1/m

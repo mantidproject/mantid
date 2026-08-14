@@ -215,6 +215,25 @@ void AbsorptionCorrection::exec() {
     std::vector<double> L2s(m_numVolumeElements);
     calculateDistances(det, L2s);
 
+    // Empty unless a subclass weights the elements, in which case the integral has to be
+    // renormalised by the weighted volume so that the result is still an attenuation factor
+    // tending to one as the attenuation vanishes.
+    std::vector<double> weights;
+    calculateElementWeights(det, weights);
+    double normalisation = m_sampleVolume;
+    if (!weights.empty()) {
+      normalisation = 0.0;
+      for (size_t k = 0; k < m_numVolumeElements; ++k) {
+        normalisation += m_elementVolumes[k] * weights[k];
+      }
+      if (normalisation <= 0.0) {
+        // Nothing of the sample is both lit and visible to this detector, so there is no
+        // meaningful correction. Leave the spectrum at zero rather than dividing by zero.
+        g_log.debug() << "Spectrum " << i << " sees no illuminated part of the sample\n";
+        continue;
+      }
+    }
+
     // If an indirect instrument, see if there's an efixed in the parameter map
     double lambdaFixed = m_lambdaFixed;
     if (m_emode == DeltaEMode::Indirect) {
@@ -240,15 +259,15 @@ void AbsorptionCorrection::exec() {
     // Loop through the bins in the current spectrum every m_xStep
     for (int64_t j = 0; j < specSize; j = j + m_xStep) {
       if (m_emode == DeltaEMode::Elastic) {
-        Y[j] = this->doIntegration(-linearCoefAbs[j], L2s, 0, L2s.size());
+        Y[j] = this->doIntegration(-linearCoefAbs[j], L2s, weights, 0, L2s.size());
       } else if (m_emode == DeltaEMode::Direct) {
-        Y[j] = this->doIntegration(linearCoefAbsFixed, -linearCoefAbs[j], L2s, 0, L2s.size());
+        Y[j] = this->doIntegration(linearCoefAbsFixed, -linearCoefAbs[j], L2s, weights, 0, L2s.size());
       } else if (m_emode == DeltaEMode::Indirect) {
-        Y[j] = this->doIntegration(-linearCoefAbs[j], linearCoefAbsFixed, L2s, 0, L2s.size());
+        Y[j] = this->doIntegration(-linearCoefAbs[j], linearCoefAbsFixed, L2s, weights, 0, L2s.size());
       } else { // should never happen
         throw std::runtime_error("AbsorptionCorrection doesn't have a known DeltaEMode defined");
       }
-      Y[j] /= m_sampleVolume; // Divide by total volume of the shape
+      Y[j] /= normalisation; // Divide by total volume of the shape
 
       // Make certain that last point is calculated
       if (m_xStep > 1 && j + m_xStep >= specSize && j + 1 != specSize) {
@@ -263,6 +282,10 @@ void AbsorptionCorrection::exec() {
       interpolateLinearInplace(histnew, m_xStep);
       correctionFactors->setHistogram(i, histnew);
     }
+
+    // The L2 distances and element weights for this detector are about to go out of scope, so give
+    // a subclass the chance to derive anything else it needs from the same quadrature.
+    perSpectrumHook(static_cast<size_t>(i), L2s, weights);
 
     prog.report();
 
@@ -419,21 +442,24 @@ void AbsorptionCorrection::calculateDistances(const IDetector &detector, std::ve
 /// Carries out the numerical integration over the sample for elastic
 /// instruments
 double AbsorptionCorrection::doIntegration(const double linearCoefAbs, const std::vector<double> &L2s,
-                                           const size_t startIndex, const size_t endIndex) const {
+                                           const std::vector<double> &weights, const size_t startIndex,
+                                           const size_t endIndex) const {
   // Seems cppcheck is using the same temporary size_t to evaluate endIndex-startIndex in static analysis,
   // so it thinks the result of the comparison is always 0<1000. Hence the suppresion.
   // cppcheck-suppress knownConditionTrueFalse
   if (endIndex - startIndex > MAX_INTEGRATION_LENGTH) {
     size_t middle = findMiddle(startIndex, endIndex);
 
-    return doIntegration(linearCoefAbs, L2s, startIndex, middle) + doIntegration(linearCoefAbs, L2s, middle, endIndex);
+    return doIntegration(linearCoefAbs, L2s, weights, startIndex, middle) +
+           doIntegration(linearCoefAbs, L2s, weights, middle, endIndex);
   } else {
     double integral = 0.0;
 
     // Iterate over all the elements, summing up the integral
     for (size_t i = startIndex; i < endIndex; ++i) {
       const double exponent = (linearCoefAbs + m_linearCoefTotScatt) * (m_L1s[i] + L2s[i]);
-      integral += (EXPONENTIAL(exponent) * (m_elementVolumes[i]));
+      const double weight = weights.empty() ? 1.0 : weights[i];
+      integral += (EXPONENTIAL(exponent) * (m_elementVolumes[i]) * weight);
     }
 
     return integral;
@@ -443,8 +469,8 @@ double AbsorptionCorrection::doIntegration(const double linearCoefAbs, const std
 /// Carries out the numerical integration over the sample for inelastic
 /// instruments
 double AbsorptionCorrection::doIntegration(const double linearCoefAbsL1, const double linearCoefAbsL2,
-                                           const std::vector<double> &L2s, const size_t startIndex,
-                                           const size_t endIndex) const {
+                                           const std::vector<double> &L2s, const std::vector<double> &weights,
+                                           const size_t startIndex, const size_t endIndex) const {
 
   // L2s is initiliazed by m_numVolumeElements which is set to 0 in this class but it is overriden in subclasses
   // like FlatAbsorptionCorrection
@@ -454,8 +480,8 @@ double AbsorptionCorrection::doIntegration(const double linearCoefAbsL1, const d
   if (endIndex - startIndex > MAX_INTEGRATION_LENGTH) {
     size_t middle = findMiddle(startIndex, endIndex);
 
-    return doIntegration(linearCoefAbsL1, linearCoefAbsL2, L2s, startIndex, middle) +
-           doIntegration(linearCoefAbsL1, linearCoefAbsL2, L2s, middle, endIndex);
+    return doIntegration(linearCoefAbsL1, linearCoefAbsL2, L2s, weights, startIndex, middle) +
+           doIntegration(linearCoefAbsL1, linearCoefAbsL2, L2s, weights, middle, endIndex);
   } else {
     double integral = 0.0;
 
@@ -463,7 +489,8 @@ double AbsorptionCorrection::doIntegration(const double linearCoefAbsL1, const d
     for (size_t i = startIndex; i < endIndex; ++i) {
       double exponent = (linearCoefAbsL1 + m_linearCoefTotScatt) * m_L1s[i];
       exponent += (linearCoefAbsL2 + m_linearCoefTotScatt) * L2s[i];
-      integral += (EXPONENTIAL(exponent) * (m_elementVolumes[i]));
+      const double weight = weights.empty() ? 1.0 : weights[i];
+      integral += (EXPONENTIAL(exponent) * (m_elementVolumes[i]) * weight);
     }
 
     return integral;
