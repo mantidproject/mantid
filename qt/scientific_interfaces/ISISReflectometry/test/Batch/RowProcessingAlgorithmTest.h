@@ -85,6 +85,38 @@ public:
     TS_ASSERT_EQUALS(result->getPropertyValue("InputRunList"), "polarized_group");
   }
 
+  void testPreviewWorkspaceGroupIsNotFlattenedIntoHiddenTOFGroup() {
+    auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
+    auto previewRow = PreviewRow({"polarized_group"});
+    auto group = std::make_shared<Mantid::API::WorkspaceGroup>();
+    group->addWorkspace(WorkspaceCreationHelper::create2DWorkspace(1, 1));
+    previewRow.setLoadedWs(group);
+
+    auto result = Reduction::createAlgorithmRuntimeProps(model, previewRow);
+
+    TS_ASSERT(result->existsProperty("GroupTOFWorkspaces"));
+    TS_ASSERT(!static_cast<bool>(result->getProperty("GroupTOFWorkspaces")));
+  }
+
+  void testPreviewMatrixWorkspaceRetainsDefaultTOFGrouping() {
+    auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
+    auto previewRow = PreviewRow({"12345"});
+    previewRow.setLoadedWs(WorkspaceCreationHelper::create2DWorkspace(1, 1));
+
+    auto result = Reduction::createAlgorithmRuntimeProps(model, previewRow);
+
+    TS_ASSERT(!result->existsProperty("GroupTOFWorkspaces"));
+  }
+
+  void testRunsTabReductionRetainsDefaultTOFGrouping() {
+    auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
+    auto row = makeRow("12345");
+
+    auto result = RowProcessing::createAlgorithmRuntimeProps(model, row);
+
+    TS_ASSERT(!result->existsProperty("GroupTOFWorkspaces"));
+  }
+
   void testLookupRowWithAngleLookup() {
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
     // angle within tolerance of 2.3

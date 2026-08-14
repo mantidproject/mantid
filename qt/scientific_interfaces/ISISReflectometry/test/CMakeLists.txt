@@ -53,6 +53,7 @@ set(TEST_FILES
     Preview/PreviewJobManagerTest.h
     Preview/PreviewModelTest.h
     Preview/PreviewPresenterTest.h
+    Preview/QtPreviewViewTest.h
     Preview/PreviewSettingsTest.h
 )
 

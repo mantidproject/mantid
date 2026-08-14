@@ -35,6 +35,7 @@ public:
   MOCK_METHOD(Workspace_sptr, getReducedWs, (), (const, override));
   MOCK_METHOD(MatrixWorkspace_sptr, getSelectedReducedWs, (), (const, override));
   MOCK_METHOD(bool, isWorkspaceGroup, (), (const, override));
+  MOCK_METHOD(std::vector<std::string>, getGroupMemberDisplayNames, (), (const, override));
   MOCK_METHOD(size_t, getNumberOfGroupMembers, (), (const, override));
   MOCK_METHOD(size_t, getSelectedGroupMember, (), (const, override));
   MOCK_METHOD(void, setSelectedGroupMember, (size_t), (override));

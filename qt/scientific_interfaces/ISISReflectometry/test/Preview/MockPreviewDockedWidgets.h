@@ -20,6 +20,7 @@ class MockPreviewDockedWidgets : public IPreviewDockedWidgets {
 public:
   MOCK_METHOD(void, subscribe, (PreviewDockedWidgetsSubscriber *), (noexcept, override));
   MOCK_METHOD(void, updateWorkspace, (Mantid::API::MatrixWorkspace_sptr &), (override));
+  MOCK_METHOD(void, updateWorkspacePreservingSelection, (Mantid::API::MatrixWorkspace_sptr &), (override));
   MOCK_METHOD(void, resetInstView, (), (override));
   MOCK_METHOD(void, plotInstView, (), (override));
   MOCK_METHOD(void, setInstViewZoomState, (bool), (override));
