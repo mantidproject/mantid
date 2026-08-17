@@ -89,6 +89,9 @@ individual reductions will produce three output workspaces: an output workspace 
 wavelength, an output workspace in Q with native binning, and a rebinned workspace in Q.
 Output workspaces in wavelength will be grouped together to produce an output workspace group in wavelength, and output
 workspaces in Q will be grouped together to produce an output workspace group in Q.
+If ``ROIDetectorIDs`` is provided for a workspace group containing a single two-dimensional rectangular detector per
+member, the selected detector region is summed independently for every member before reduction. The summed workspaces
+and reduced outputs retain the order of the input group.
 The diagram below illustrates this process (note that, for the sake of clarity, the rebinned output
 workspace in Q, :literal:`OutputWorkspaceBinned`, is not represented but it is handled analogously to
 :literal:`OutputWorkspace` and :literal:`OutputWorkspaceWavelength`):

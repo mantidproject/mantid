@@ -119,10 +119,10 @@ private:
   WorkspaceGroup_sptr applyPolarizationCorrection(const WorkspaceGroup_sptr &outputIvsLam,
                                                   const std::string &outputGroupName);
   API::MatrixWorkspace_sptr getFloodWorkspace(const Instrument_const_sptr &instrument);
-  std::string getSummedWorkspaceName(const std::string &wsPropertyName, const bool isTransWs = false);
-  void sumBanksForWorkspace(const std::string &roiDetectorIDs, const std::string &wsPropertyName,
-                            const bool isTransWs = false);
-  void sumBanks();
+  std::string getSummedWorkspaceName(const Workspace_sptr &workspace, const bool isTransWs = false);
+  Workspace_sptr sumBanksForWorkspace(const std::string &roiDetectorIDs, const Workspace_sptr &inputWorkspace,
+                                      const std::string &outputWorkspaceName);
+  bool sumBanks(Workspace_sptr &inputWorkspace);
   double getPropertyOrDefault(const std::string &propertyName, const double defaultValue, bool &isDefault);
   WorkspaceNames getOutputNamesForGroupMember(const std::string &inputNames, const std::string &runNumber,
                                               const size_t wsGroupNumber);
@@ -133,7 +133,8 @@ private:
   void setOutputPropertyFromChild(const Algorithm_sptr &alg, std::string const &name);
   void setOutputPropertiesFromChild(const Algorithm_sptr &alg);
   processGroupMembersOutput processGroupMembers(const Algorithm::WorkspaceVector &members, std::string const &runNumber,
-                                                std::vector<std::string> const &taskOrder, const bool reduced = false);
+                                                std::vector<std::string> const &taskOrder, const bool banksSummed,
+                                                const bool reduced = false);
   WorkspaceGroup_sptr groupWorkspaces(const std::vector<std::string> &workspaceNames,
                                       std::string const &outputName = "");
   RROOutputs performCoreReduction(MatrixWorkspace_sptr inputWS, const std::vector<std::string> &taskOrder = {},
