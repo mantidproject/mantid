@@ -180,12 +180,13 @@ Once you have set the orientations on the workspaces you need to then define the
 Setting the Gauge Volume
 ------------------------
 
-Now ensure you have the ``Include Absorption Correction`` selected and you can set a gauge volume on the experiment. Here your options are to use: the preset gauge volume (a 4mm cube);
+Now ensure you have the ``Include Absorption Correction`` selected and you can set a gauge volume on the experiment. Here your options are to use: one of the preset cubic gauge volumes,
+matching the instrument's radial collimator setups (on ENGIN-X: ``0.5mmCube``, ``1mmCube``, ``2mmCube``, ``3mmCube`` and ``4mmCube``);
 a custom gauge volume; or no gauge volume (see :ref:`initial_setup` if using your own data).
 
-* *4mmCube*:
+* *Cubic presets*:
 
-#. Select the ``4mmCube`` option (select this one for this tutorial)
+#. Select the preset matching the collimator used, e.g. ``4mmCube`` (select this one for this tutorial)
 
 * *No Gauge Volume*:
 

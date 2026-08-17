@@ -11,7 +11,10 @@ from mantid.api import AnalysisDataService as ADS
 from mantid.kernel import UnitFactory
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.show_sample.show_sample_view import ShowSampleView
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.data_handling.data_view import create_workspace_table
+from Engineering.common.instrument_config import CUSTOM_SHAPE_PRESET, NO_GAUGE_VOLUME_PRESET, get_gauge_volume_presets
 from typing import Callable, Dict, List, Sequence
+
+DEFAULT_GAUGE_VOLUME_PRESET = "4mmCube"
 
 Ui_texture, _ = load_ui(__file__, "correction_tab.ui")
 
@@ -49,6 +52,7 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
         self.set_include_absorption(True)
         self.set_include_divergence(True)
 
+        self.populate_gauge_volume_presets(instrument)
         self.populate_workspace_list()
         self.populate_unit_list()
         self.set_default_unit("dSpacing")
@@ -104,7 +108,8 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
             "Copies the sample information from the workspace in the dropdown menu onto all of the selected workspaces"
         )
         self.combo_shapeMethod.setToolTip(
-            "Gauge Volume to use for correction, select either: the preset 4mm x 4mm x 4mm cube; "
+            "Gauge Volume to use for correction, select either: one of the cubic presets, named for "
+            "the side of the cube and matching the instrument's collimator setups; "
             "No Gauge Volume; or Custom Shape (to be provided as an XML file)"
         )
         self.line_evalVal.setToolTip(
@@ -216,6 +221,22 @@ class TextureCorrectionView(QtWidgets.QWidget, Ui_texture):
         workspace_names = list(ADS.getObjectNames())
         self.combo_workspaceList.clear()
         self.combo_workspaceList.addItems(sorted(workspace_names))
+
+    def populate_gauge_volume_presets(self, instrument: str) -> None:
+        """List the gauge volume setups known for the instrument, plus the two non-preset options.
+
+        The selection is kept across a change of instrument where the same preset exists there too.
+        """
+        previous = self.get_shape_method()
+        presets = [*get_gauge_volume_presets(instrument), CUSTOM_SHAPE_PRESET, NO_GAUGE_VOLUME_PRESET]
+        self.combo_shapeMethod.blockSignals(True)
+        self.combo_shapeMethod.clear()
+        self.combo_shapeMethod.addItems(presets)
+        self.combo_shapeMethod.blockSignals(False)
+        for preset in (previous, DEFAULT_GAUGE_VOLUME_PRESET):
+            if preset in presets:
+                self.combo_shapeMethod.setCurrentText(preset)
+                break
 
     def populate_unit_list(self) -> None:
         units = UnitFactory.getKeys()

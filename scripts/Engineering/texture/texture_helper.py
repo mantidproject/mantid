@@ -22,7 +22,7 @@ from mantid.simpleapi import (
     SaveAscii,
 )
 from mantid.api import AnalysisDataService as ADS
-from typing import Optional, Sequence
+from typing import Optional, Sequence, Tuple
 from mantid.dataobjects import Workspace2D, TableWorkspace
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
@@ -31,6 +31,7 @@ from scipy.ndimage import gaussian_filter
 import matplotlib.pyplot as plt
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.show_sample.show_sample_model import ShowSampleModel
 from Engineering.common.xml_shapes import get_cube_xml
+from Engineering.common.instrument_config import NO_GAUGE_VOLUME_PRESET, get_cube_preset_extent
 
 # ---------------------------------------------------------#
 ##### Utility Gauge Volume Setup Functions ################
@@ -41,13 +42,15 @@ def get_gauge_vol_str(preset: str, custom_file: Optional[str] = None) -> str:
     """
     Create an xml string for a gauge volume
 
-    preset: [4mmCube, No Gauge Volume] If 4mmCube will create a 4mm x 4mm x 4mm gauge volume
+    preset: a cubic preset named for its side length (e.g. 4mmCube gives a 4mm x 4mm x 4mm gauge
+            volume), or No Gauge Volume
     custom: if preset is not one of the defaults, the custom file will be read
 
     """
-    if preset == "4mmCube":
-        gauge_str = get_cube_xml("some-gv", 0.004)
-    elif preset == "No Gauge Volume":
+    cube_extent = get_cube_preset_extent(preset)
+    if cube_extent is not None:
+        gauge_str = get_cube_xml("some-gv", cube_extent)
+    elif preset == NO_GAUGE_VOLUME_PRESET:
         gauge_str = None
     else:
         try:
@@ -93,7 +96,7 @@ def show_texture_sample_shape(
     ws: Workspace/ Workspace name which the sample should be shown for
     ax_transform: 3x3 numpy array which defines the sample directions
     ax_labels: length 3 sequence of the names of the corresponding sample directions
-    gauge_vol_preset: [4mmCube, No Gauge Volume] If 4mmCube will create a 4mm x 4mm x 4mm gauge volume,
+    gauge_vol_preset: a cubic preset named for its side length (e.g. 4mmCube) or No Gauge Volume,
                       if None, no gauge volume will be shown
     custom_file: if preset is not None or one of the defaults, this custom file will be read
     """
@@ -104,7 +107,7 @@ def show_texture_sample_shape(
     ax_transform = ax_transform if np.any(ax_transform) else np.eye(3)
     if gauge_vol_preset:
         model.set_gauge_vol_str(get_gauge_vol_str(gauge_vol_preset, custom_file))
-        model.set_include_gauge_vol(gauge_vol_preset != "No Gauge Volume")
+        model.set_include_gauge_vol(gauge_vol_preset != NO_GAUGE_VOLUME_PRESET)
     model.show_shape_plot(ax_transform, ax_labels)
 
 
@@ -667,16 +670,19 @@ def define_gauge_volume(ws: Workspace2D, gauge_str: Optional[str]) -> None:
         DefineGaugeVolume(ws, gauge_str)
 
 
-def get_scattering_centre(ws) -> np.ndarray:
-    """Return a rough estimate centre of mass of the illuminated sample volume, or the origin
-    if the estimate fails (e.g. when the sample lies outside the gauge volume).
+def estimate_element_size(ws, gauge_extent: Optional[float] = None) -> Tuple[float, str]:
+    """Choose an integration element size for the raster, so that callers do not have to expose one
+    as a user parameter.
 
-    For more accurate calculations, use EstimateScatteringVolumeCentreOfMass directly
+    ``gauge_extent`` is the shortest dimension of the gauge volume in metres, where the caller knows
+    it - the gauge volume itself is only available as an XML string on the run, so it cannot be
+    measured here. Scaling the elements with the gauge keeps the quadrature error roughly constant
+    across setups, and stops the elements being larger than the gauge, which the raster rejects.
     """
     if ws.run().hasProperty("GaugeVolume"):
         # if there is a defined gauge volume this will be rasterized and should be small enough
-        # for 1mm elements to be appropriate
-        element_size = 1
+        # for 16 elements per dimension (eg. 4mm x 4mm x 4mm cube has elements of 0.25x0.25x0.25)
+        element_size = 1 if gauge_extent is None else 1000 * gauge_extent / 16
         units = "mm"
     else:
         # if there is no gauge volume the whole sample shape will be rasterized
@@ -695,6 +701,16 @@ def get_scattering_centre(ws) -> np.ndarray:
         factor = 5 if longest / shortest < 5 else 2
         element_size = shortest / factor
         units = "m"
+    return element_size, units
+
+
+def get_scattering_centre(ws) -> np.ndarray:
+    """Return a rough estimate centre of mass of the illuminated sample volume, or the origin
+    if the estimate fails (e.g. when the sample lies outside the gauge volume).
+
+    For more accurate calculations, use EstimateScatteringVolumeCentreOfMass directly
+    """
+    element_size, units = estimate_element_size(ws)
     try:
         return np.asarray(EstimateScatteringVolumeCentreOfMass(InputWorkspace=ws, ElementSize=element_size, ElementUnits=units))
     except RuntimeError as err:
