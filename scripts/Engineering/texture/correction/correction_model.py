@@ -74,10 +74,14 @@ class TextureCorrectionModel:
         through the sample alone, so anything with a container or sample environment, or with no
         gauge volume to bound the integration, still needs the Monte Carlo treatment.
         """
-        workspace = ADS.retrieve(ws)
-        if not workspace.run().hasProperty("GaugeVolume"):
+        try:
+            workspace = ADS.retrieve(ws) if isinstance(ws, str) else ws
+            if not workspace.run().hasProperty("GaugeVolume"):
+                return False
+            return not workspace.sample().hasEnvironment()
+        except (KeyError, RuntimeError, AttributeError):
+            # if the preconditions cannot be established, use the generally applicable correction
             return False
-        return not workspace.sample().hasEnvironment()
 
     def _calc_weighted_absorption(self, ws: str, temp_ws: Workspace2D, preset: str | None, had_mc_args: bool) -> None:
         """Correct for attenuation and locate the per-detector scattering centres in one pass.
