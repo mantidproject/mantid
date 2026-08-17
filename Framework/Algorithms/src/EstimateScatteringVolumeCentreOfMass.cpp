@@ -72,10 +72,9 @@ void EstimateScatteringVolumeCentreOfMass::exec() {
   }
   m_cubeSide *= it->second; // now in m
 
-  // The sample shape on the workspace already has any initial rotation baked into its definition,
-  // so it is expressed in the sample shape's own frame. The workspace's goniometer R describes
-  // the additional rotation from that frame into the lab frame. The gauge volume (if any) is
-  // defined in the lab frame.
+  // The sample shape may be expressed in its own frame, or may already have been rotated into the
+  // lab frame - see outstandingSampleRotation. Whatever is left to apply is gonioR here. The gauge
+  // volume, if any, is always defined in the lab frame.
   //
   // When a gauge volume is present we rasterise it in the lab frame and transform each candidate
   // voxel into the sample shape's frame via R.inv() to test inclusion against the sample. Doing
@@ -87,7 +86,7 @@ void EstimateScatteringVolumeCentreOfMass::exec() {
   // in its own frame (where the rasterise loop only ever accepts points inside the sample anyway)
   // and rotate the resulting mean position into the lab frame.
   const Geometry::IObject_sptr sampleObject = extractValidSampleObject(m_inputWS->mutableSample());
-  const Kernel::Matrix<double> gonioR = m_inputWS->run().getGoniometer().getR();
+  const Kernel::Matrix<double> gonioR = outstandingSampleRotation(*sampleObject);
 
   V3D averagePosInLabFrame;
   if (m_inputWS->run().hasProperty("GaugeVolume")) {
@@ -98,6 +97,30 @@ void EstimateScatteringVolumeCentreOfMass::exec() {
     averagePosInLabFrame = gonioR * averagePosInShapeFrame;
   }
   setProperty("CentreOfMass", std::vector<double>(averagePosInLabFrame));
+}
+
+/// How much of the workspace's goniometer rotation still has to be applied to reach the lab frame.
+///
+/// A workspace can arrive here with its sample shape in either frame. CopySample bakes the
+/// destination's goniometer into the shape definition, so the shape is already in the lab frame,
+/// while SetGoniometer on its own leaves the shape untouched in its own frame. Both leave the same
+/// goniometer on the run, so the run alone cannot distinguish them - applying R unconditionally
+/// rotates an already-rotated shape a second time.
+///
+/// Asking the shape what it has already been rotated by resolves it: with B baked in and the run
+/// reporting R, what remains is R*B^-1. That is the identity when the shape is already in the lab
+/// frame, and R when it is not, without the caller having to know which route built the workspace.
+const Kernel::Matrix<double>
+EstimateScatteringVolumeCentreOfMass::outstandingSampleRotation(const Geometry::IObject &sampleObject) const {
+  const auto gonioR = m_inputWS->run().getGoniometer().getR();
+  Kernel::Matrix<double> alreadyApplied = sampleObject.getAppliedRotation();
+  if (alreadyApplied == Kernel::Matrix<double>(3, 3, true)) {
+    return gonioR;
+  }
+  g_log.information("The sample shape already carries a rotation, so only the remainder of the "
+                    "goniometer rotation is applied");
+  alreadyApplied.Invert();
+  return gonioR * alreadyApplied;
 }
 
 /// Calculate as raster of the illumination volume, evaluating which points are within the sample geometry.
