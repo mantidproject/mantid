@@ -63,6 +63,21 @@ public:
     AnalysisDataService::Instance().remove("WSRenamed");
   }
 
+  void testExecWithUnnamedInput() {
+    Workspace_sptr inputWS = createWorkspace();
+
+    Mantid::Algorithms::RenameWorkspace rename;
+    rename.initialize();
+    TS_ASSERT_THROWS_NOTHING(rename.setProperty("InputWorkspace", inputWS));
+    TS_ASSERT_THROWS_NOTHING(rename.setPropertyValue("OutputWorkspace", "NamedWorkspace"));
+
+    TS_ASSERT_THROWS_NOTHING(rename.execute());
+
+    auto result = AnalysisDataService::Instance().retrieveWS<Workspace>("NamedWorkspace");
+    TS_ASSERT_EQUALS(result, inputWS);
+    AnalysisDataService::Instance().remove("NamedWorkspace");
+  }
+
   void testExecSameNames() {
     AnalysisDataService::Instance().clear();
     MatrixWorkspace_sptr inputWS = createWorkspace();

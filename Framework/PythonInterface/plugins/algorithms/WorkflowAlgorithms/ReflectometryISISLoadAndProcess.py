@@ -359,10 +359,18 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             return
 
         perform_sum = []
-        for workspace_name in [inputWorkspace, firstTransWorkspace, secondTransWorkspace]:
+        for workspace_name, inspect_all_group_members in [
+            (inputWorkspace, True),
+            (firstTransWorkspace, False),
+            (secondTransWorkspace, False),
+        ]:
             if workspace_name is not None:
                 workspace = AnalysisDataService.retrieve(workspace_name)
-                perform_sum.append(self._has_single_2D_rectangular_detector(workspace))
+                if isinstance(workspace, WorkspaceGroup):
+                    workspaces = workspace if inspect_all_group_members else [workspace[0]]
+                else:
+                    workspaces = [workspace]
+                perform_sum.extend(self._has_single_2D_rectangular_detector(member) for member in workspaces)
 
         should_sum = perform_sum[0]
         if not all(sum_ws == should_sum for sum_ws in perform_sum):
@@ -373,10 +381,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             self.setProperty(Prop.ROI_DETECTOR_IDS, "")
 
     def _has_single_2D_rectangular_detector(self, workspace) -> bool:
-        """Returns true if workspace has a single 2D rectangular detector, and is not a group workspace."""
-        is_group = isinstance(workspace, WorkspaceGroup)
-        if is_group:
-            workspace = workspace[0]
+        """Returns true if workspace has a single 2D rectangular detector."""
 
         rect_detectors = workspace.getInstrument().findRectDetectors()
         num_rect_detectors = len(rect_detectors)
@@ -390,9 +395,6 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         # We don't sum banks for a linear detector
         if rect_detectors[0].xpixels() == 1 or rect_detectors[0].ypixels() == 1:
             return False
-
-        if is_group:
-            raise NotImplementedError("Not implemented for a WorkspaceGroup containing 2D detectors.")
 
         if not self._all_spectra_refer_to_rectangular_detector(workspace, rect_detectors[0]):
             return False
