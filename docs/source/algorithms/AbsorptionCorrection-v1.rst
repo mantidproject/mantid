@@ -63,6 +63,12 @@ the sample then you will get a more accurate result from the
 :ref:`algm-CuboidGaugeVolumeAbsorption`
 algorithm.)
 
+Every element within the integration volume is treated as scattering equally into every detector.
+If the beam does not illuminate the gauge volume uniformly, or a collimator restricts what each
+detector sees of it, use :ref:`algm-WeightedGaugeVolumeAbsorption`, which weights the same elements
+by the incident beam profile and the collimator acceptance and can additionally report the
+neutron weighted scattering centre seen by each detector.
+
 Restrictions on the input workspace
 ###################################
 
