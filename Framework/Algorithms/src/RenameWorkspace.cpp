@@ -101,7 +101,10 @@ void RenameWorkspace::exec() {
   setProperty("OutputWorkspace", inputWS);
 
   // rename the input workspace using the rename method
-  ADS.rename(inputwsName, outputwsName);
+  if (inputwsName.empty())
+    ADS.addOrReplace(outputwsName, inputWS);
+  else
+    ADS.rename(inputwsName, outputwsName);
 
   const bool renameMonitors = getProperty("RenameMonitors");
   if (!renameMonitors)

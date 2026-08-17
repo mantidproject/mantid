@@ -31,8 +31,11 @@ class SumBanksAlgorithmTest : public CxxTest::TestSuite {
   public:
     StubbedPreProcess() {
       this->setChild(true);
-      auto prop = std::make_unique<Mantid::API::WorkspaceProperty<>>(m_propName, "", Mantid::Kernel::Direction::Output);
-      declareProperty(std::move(prop));
+      declareProperty(std::make_unique<Mantid::API::WorkspaceProperty<Mantid::API::Workspace>>(
+          "InputWorkspace", "", Mantid::Kernel::Direction::Input));
+      declareProperty("ROIDetectorIDs", "");
+      declareProperty(std::make_unique<Mantid::API::WorkspaceProperty<Mantid::API::Workspace>>(
+          m_propName, "", Mantid::Kernel::Direction::Output));
     }
 
     void addOutputWorkspace(Mantid::API::MatrixWorkspace_sptr &ws) {
@@ -65,16 +68,15 @@ public:
     // Create the algorithm
     auto configuredAlg = createConfiguredAlgorithm(batch, row, mockAlg);
 
-    auto expectedProps = std::make_unique<AlgorithmRuntimeProps>();
-    expectedProps->setProperty(inputPropName, mockWs);
-    // We expect the same detector IDs that were set on the preview row to be set on the algorithm
-    expectedProps->setPropertyValue(roiPropName, "2,3");
     const auto &setProps = configuredAlg->getAlgorithmRuntimeProps();
 
     TS_ASSERT_EQUALS(configuredAlg->algorithm(), mockAlg);
-    TS_ASSERT_EQUALS(static_cast<decltype(mockWs)>(expectedProps->getProperty(inputPropName)),
-                     static_cast<decltype(mockWs)>(setProps.getProperty(inputPropName)))
-    TS_ASSERT_EQUALS(expectedProps->getPropertyValue(roiPropName), setProps.getPropertyValue(roiPropName))
+    Mantid::API::Workspace_sptr inputWorkspace = setProps.getProperty(inputPropName);
+    TS_ASSERT_EQUALS(inputWorkspace, mockWs)
+    TS_ASSERT_EQUALS(setProps.getPropertyValue(roiPropName), "2,3")
+    TS_ASSERT_THROWS_NOTHING(mockAlg->updatePropertyValues(setProps))
+    Mantid::API::Workspace_sptr algorithmInput = mockAlg->getProperty(inputPropName);
+    TS_ASSERT_EQUALS(algorithmInput, mockWs)
   }
 
   void test_lookup_table_properties_forwarded() {

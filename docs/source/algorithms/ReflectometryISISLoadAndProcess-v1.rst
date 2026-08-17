@@ -36,6 +36,10 @@ If ``SliceWorkspace`` is true, the time slicing will be performed using the :ref
 
 The reduction is performed using :ref:`algm-ReflectometryReductionOneAuto`.
 
+When the input is a workspace group, ``ROIDetectorIDs`` can be used if every member contains a compatible single
+two-dimensional rectangular detector. Bank summing is applied independently to every group member while preserving
+the group order, including when polarization analysis is enabled.
+
 Finally, the TOF workspaces are cleaned up by grouping them into a workspace group named ``TOF``. If a group by this name already exists then they will be added to that group.
 
 Usage
