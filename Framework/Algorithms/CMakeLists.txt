@@ -1043,6 +1043,7 @@ set(TEST_FILES
     UnwrapMonitorsInTOFTest.h
     UnwrapSNSTest.h
     VesuvioL1ThetaResolutionTest.h
+    WeightedGaugeVolumeAbsorptionTest.h
     WeightedMeanOfWorkspaceTest.h
     WeightedMeanTest.h
     WeightingStrategyTest.h

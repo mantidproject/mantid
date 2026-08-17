@@ -195,7 +195,11 @@ void WeightedGaugeVolumeAbsorption::perSpectrumHook(size_t wsIndex, const std::v
     m_scatteringCentres[wsIndex] = weightedSum / summedWeight;
     m_centreWeights[wsIndex] = summedWeight;
   }
-  m_illuminatedFraction[wsIndex] = m_sampleVolume > 0.0 ? illuminatedVolume / m_sampleVolume : 0.0;
+  // Deliberately not m_sampleVolume: with a gauge volume the base class sets that to the rasterised
+  // gauge-and-sample volume, so dividing by it would return one by construction. The whole sample
+  // shape is what makes this a meaningful fraction.
+  const double wholeSampleVolume = m_sampleObject->volume();
+  m_illuminatedFraction[wsIndex] = wholeSampleVolume > 0.0 ? illuminatedVolume / wholeSampleVolume : 0.0;
 }
 
 void WeightedGaugeVolumeAbsorption::exec() {
