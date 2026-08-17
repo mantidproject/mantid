@@ -18,6 +18,7 @@
 #include "MantidAlgorithms/WeightedGaugeVolumeAbsorption.h"
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/V3D.h"
@@ -199,8 +200,11 @@ public:
     }
   }
 
-  /// A gauge volume centred on the sample is symmetric, so the centre of gravity stays at the
-  /// origin however the attenuation weights the elements.
+  /// A gauge volume centred on the sample keeps its centre of gravity near the origin. Only near:
+  /// attenuation always pulls the centre towards the surfaces the neutrons enter and leave by, so a
+  /// centred gauge is not a centred scattering centre. This asserts the weaker property that the
+  /// centre stays well inside the gauge - the direction of the displacement is pinned by
+  /// testScatteringCentresMirrorBetweenOpposedDetectors, which is where the physics is checked.
   void testScatteringCentreOfSymmetricGaugeIsAtTheCentre() {
     auto ws = makeWorkspace();
     ws->mutableRun().addProperty("GaugeVolume", cubeXML("gv", 0.01, V3D(0.0, 0.0, 0.0)));
@@ -220,6 +224,40 @@ public:
       TS_ASSERT_DELTA(centres->cell<double>(row, 3), 0.0, 1e-3);
       TS_ASSERT_LESS_THAN(0.0, centres->cell<double>(row, 4));
     }
+  }
+
+  /// Which way the attenuation displaces the centre, which nothing else here pins down. Two
+  /// detectors placed on opposite sides of a symmetric sample view a symmetric gauge volume through
+  /// mirror-image geometry, so their centres must be each other's reflection in x: each pulled
+  /// towards its own detector, because that is the shorter way out, and both pulled equally towards
+  /// the entry face. A sign error in the outgoing leg would put both on the same side and leave every
+  /// other test in this file passing.
+  void testScatteringCentresMirrorBetweenOpposedDetectors() {
+    auto ws = makeWorkspace(2, 0.02);
+    ws->mutableRun().addProperty("GaugeVolume", cubeXML("gv", 0.01, V3D(0.0, 0.0, 0.0)));
+    // the helper maps spectrum i to detector i, so detector indices follow the spectrum order the
+    // scattering centre table is filled in
+    auto &detectorInfo = ws->mutableDetectorInfo();
+    detectorInfo.setPosition(0, V3D(1.0, 0.0, 0.0));
+    detectorInfo.setPosition(1, V3D(-1.0, 0.0, 0.0));
+
+    auto alg = makeWeighted(ws, 1.0);
+    alg->setPropertyValue("ScatteringCentres", "centres");
+    alg->execute();
+    TS_ASSERT(alg->isExecuted());
+
+    ITableWorkspace_sptr centres = alg->getProperty("ScatteringCentres");
+    TS_ASSERT_EQUALS(centres->rowCount(), 2);
+    const double plusX = centres->cell<double>(0, 1);
+    const double minusX = centres->cell<double>(1, 1);
+    // each towards its own detector, by a displacement large enough to be the effect and not noise
+    TS_ASSERT_LESS_THAN(1e-4, plusX);
+    TS_ASSERT_LESS_THAN(minusX, -1e-4);
+    // and by the same amount, since the geometry is a mirror image
+    TS_ASSERT_DELTA(plusX + minusX, 0.0, 1e-9);
+    // the incident leg is shared, so the other two coordinates agree
+    TS_ASSERT_DELTA(centres->cell<double>(0, 2), centres->cell<double>(1, 2), 1e-9);
+    TS_ASSERT_DELTA(centres->cell<double>(0, 3), centres->cell<double>(1, 3), 1e-9);
   }
 
   /// The point of the algorithm. A gauge volume pushed half out of the sample is truncated by the
