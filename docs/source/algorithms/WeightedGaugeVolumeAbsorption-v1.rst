@@ -69,6 +69,27 @@ geometric centre; for one only partly immersed it is displaced back inside the s
 leading cause of pseudo-strain in near-surface measurements. Where a spectrum groups several
 detectors, its weight is divided between them so that summing the column recovers the total.
 
+Interpreting the scattering centres
+###################################
+
+Even a fully immersed, perfectly symmetric gauge volume has its centres displaced, because
+attenuation always favours the elements with the shortest way in and the shortest way out. The
+displacement has two parts, and only one of them differs between detectors:
+
+- The **outgoing** part points towards the detector's own bank, since that is the shorter exit. It
+  reverses between opposed detectors, which is the behaviour most people expect to see.
+- The **incident** part is shared by every detector and points towards the face the beam enters by.
+  It runs along the beam only when that face is normal to the beam. For a plane face with outward
+  normal :math:`\mathbf{n}`, the displacement direction is :math:`-\mathbf{n}/(\mathbf{n}\cdot\hat{z})`,
+  so a face inclined to the beam both amplifies the displacement by
+  :math:`1/|\mathbf{n}\cdot\hat{z}|` and turns it sideways.
+
+For a sample rotated well away from the beam axis the second part can dominate the first, putting
+the centres for *both* banks on the same side of the gauge volume. That is expected, not a fault:
+compare against the geometric centre of the gauge-and-sample intersection reported by
+:ref:`algm-EstimateScatteringVolumeCentreOfMass`, and split the difference into its shared and
+reversing parts before concluding anything is wrong.
+
 Choosing an element size
 ########################
 
@@ -96,9 +117,24 @@ Restrictions and assumptions
 - Single scattering only.
 - Attenuation is computed through the sample alone; containers and sample environments are ignored.
 - The input workspace must have units of wavelength and a fully defined instrument.
-- Cost scales as the number of detectors multiplied by the number of elements, so a whole-sample
-  integration at a small element size over many detectors can be slow. Defining a gauge volume is
-  the usual way to keep this in hand.
+- A sample orientation is honoured however it was set. The gauge volume and the detector positions
+  are in the lab frame while the sample shape may be in its own, and the algorithm reconciles them by
+  comparing the goniometer on the run against the rotation the shape reports already carrying, then
+  applying only the remainder. So :ref:`algm-SetGoniometer` on its own, which leaves the shape
+  untouched, and :ref:`algm-CopySample` onto an oriented workspace, which bakes the rotation into the
+  shape definition, describe the same experiment and give the same answer.
+  :ref:`algm-EstimateScatteringVolumeCentreOfMass` resolves this the same way, so the two agree on
+  where the sample is.
+- Cost scales as the number of detectors multiplied by the number of elements multiplied by the
+  number of wavelength points, so a whole-sample integration at a small element size over many
+  detectors can be slow. Defining a gauge volume is the usual way to keep the first two in hand. For
+  the third, note that the default is to evaluate the integral at *every* bin: raw time-of-flight
+  data converted to wavelength routinely carries several thousand, and the attenuation factor varies
+  smoothly enough over that range that ``NumberOfWavelengthPoints`` can be set to a couple of
+  hundred, with the values between interpolated. On a 2500 spectrum ENGIN-X run binned to 10186
+  wavelength points, that reduces the run time from 90 s to 2.6 s and changes the correction by at
+  most 1 part in 10\ :sup:`5`. It does not affect the scattering centres at all, which sum over
+  their own bounded subsample of wavelengths.
 
 Usage
 -----
