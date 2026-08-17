@@ -10,7 +10,7 @@ from matplotlib import rcParams
 from numpy import isclose
 
 from mantid.plots.utility import convert_color_to_hex
-from workbench.plotting.plotscriptgenerator.utils import convert_args_to_string
+from workbench.plotting.plotscriptgenerator.utils import convert_args_to_string, get_default_layout, get_figure_layout
 
 BASE_SUBPLOTS_COMMAND = "plt.subplots({})"
 
@@ -20,6 +20,7 @@ default_kwargs = {
     "facecolor": convert_color_to_hex(rcParams["figure.facecolor"]),
     "figsize": rcParams["figure.figsize"],
     "frameon": rcParams["figure.frameon"],
+    "layout": get_default_layout(),
     "ncols": 1,
     "nrows": 1,
     "num": "",
@@ -29,10 +30,11 @@ default_kwargs = {
 def get_subplots_command_kwargs(fig):
     ax = fig.get_axes()[0]
     kwargs = {
-        "dpi": fig.dpi,
+        "dpi": fig.dpi / fig.canvas.device_pixel_ratio if hasattr(fig.canvas, "device_pixel_ratio") else fig.dpi,
         "edgecolor": convert_color_to_hex(fig.get_edgecolor()),
         "facecolor": convert_color_to_hex(fig.get_facecolor()),
         "figsize": [fig.get_figwidth(), fig.get_figheight()],
+        "layout": get_figure_layout(fig),
         "frameon": fig.frameon,
         "num": fig.get_label(),
         "subplot_kw": {"projection": "mantid"},
