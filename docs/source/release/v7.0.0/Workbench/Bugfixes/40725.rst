@@ -1,0 +1,1 @@
+- :ref:`Script generation<generate_plot_script>` of a mantid plot now considers the device pixel ratio and figure layout to generate the script.
