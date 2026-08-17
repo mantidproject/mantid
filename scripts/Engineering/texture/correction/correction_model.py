@@ -41,6 +41,13 @@ SCATTERING_CENTRE_TABLE = "_scattering_centres"
 SCATTERING_CENTRE_DETID_LOG = "ScatteringCentreDetIDs"
 SCATTERING_CENTRE_POSITION_LOGS = {"X": "ScatteringCentreX", "Y": "ScatteringCentreY", "Z": "ScatteringCentreZ"}
 
+# Wavelengths at which the analytical correction evaluates its integral, the rest being interpolated
+# between. Left to itself it uses every bin, and raw data converted to wavelength carries thousands
+# of them: on a 2500 spectrum ENGIN-X run binned to 10186 points that is 90 s rather than 2.6 s, for
+# a correction that differs by at most one part in 1e5 and scattering centres that do not differ at
+# all. The attenuation factor is smooth in wavelength, which is what makes this safe.
+ABSORPTION_WAVELENGTH_POINTS = 200
+
 
 class TextureCorrectionModel:
     def __init__(self):
@@ -103,6 +110,7 @@ class TextureCorrectionModel:
                 ScatteringCentres=SCATTERING_CENTRE_TABLE,
                 ElementSize=element_size,
                 ElementUnits=units,
+                NumberOfWavelengthPoints=ABSORPTION_WAVELENGTH_POINTS,
             )
         except (RuntimeError, ValueError) as err:
             logger.warning(

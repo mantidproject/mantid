@@ -10,10 +10,22 @@ import tempfile
 import numpy as np
 from unittest.mock import patch, MagicMock, mock_open, call
 from mantid.api import AnalysisDataService as ADS
-from mantid.simpleapi import CreateSampleWorkspace, DefineGaugeVolume, SetGoniometer, SetSample
+from mantid.simpleapi import (
+    ConvertUnits,
+    CreateSampleWorkspace,
+    DefineGaugeVolume,
+    Rebin,
+    SetGoniometer,
+    SetSample,
+    WeightedGaugeVolumeAbsorption,
+)
 from Engineering.common.xml_shapes import get_cube_xml
 
-from Engineering.texture.correction.correction_model import TextureCorrectionModel, read_attenuation_coefficient_at_value
+from Engineering.texture.correction.correction_model import (
+    ABSORPTION_WAVELENGTH_POINTS,
+    TextureCorrectionModel,
+    read_attenuation_coefficient_at_value,
+)
 
 correction_model_path = "Engineering.texture.correction.correction_model"
 texture_helper_path = "Engineering.texture.texture_helper"
@@ -493,6 +505,33 @@ class TextureCorrectionModelScatteringCentreTest(unittest.TestCase):
             self.assertTrue(np.all(np.abs(positions) <= 0.002))
         # the table is a handover detail and should not be left cluttering the ADS
         self.assertFalse(ADS.doesExist("_scattering_centres"))
+
+    def test_capping_the_wavelength_points_leaves_the_correction_alone(self):
+        """The correction is asked for at ABSORPTION_WAVELENGTH_POINTS wavelengths and interpolated
+        between, because evaluating it at every bin of a finely binned run costs tens of seconds. The
+        saving is only worth having if the interpolation is invisible, so check it against the answer
+        every bin gives, on a workspace binned finely enough for the cap to bite."""
+        DefineGaugeVolume(self.ws, get_cube_xml("gauge", 0.004))
+        in_wavelength = ConvertUnits(self.ws, Target="Wavelength", StoreInADS=False)
+        in_wavelength = Rebin(in_wavelength, Params=[0.5, 0.002, 5.0], StoreInADS=False)
+        self.assertGreater(in_wavelength.blocksize(), 10 * ABSORPTION_WAVELENGTH_POINTS)
+
+        kwargs = {"InputWorkspace": in_wavelength, "ElementSize": 1.0, "ElementUnits": "mm"}
+        every_bin = WeightedGaugeVolumeAbsorption(OutputWorkspace="_every_bin_abs", ScatteringCentres="_every_bin", **kwargs)
+        capped = WeightedGaugeVolumeAbsorption(
+            OutputWorkspace="_capped_abs",
+            NumberOfWavelengthPoints=ABSORPTION_WAVELENGTH_POINTS,
+            ScatteringCentres="_capped",
+            **kwargs,
+        )
+
+        # several outputs are declared, so the algorithm hands back a tuple of them
+        reference = every_bin.OutputWorkspace.extractY()
+        self.assertTrue(np.all(reference > 0.0))
+        self.assertLess(np.max(np.abs(capped.OutputWorkspace.extractY() - reference) / reference), 1e-3)
+        # the centres sum over their own bounded subsample of wavelengths, so they cannot move at all
+        for column in ("x", "y", "z"):
+            np.testing.assert_array_equal(ADS.retrieve("_capped").column(column), ADS.retrieve("_every_bin").column(column))
 
     def test_calc_absorption_without_a_gauge_volume_stays_on_monte_carlo(self):
         # no gauge volume means no bounded integration region, so the analytical path does not apply
