@@ -21,6 +21,7 @@ public:
   virtual void clearModel();
 
   virtual void setSpectrum(const Mantid::API::MatrixWorkspace_sptr &ws, const size_t wsIndex);
+  virtual void setSpectra(const std::vector<Mantid::API::MatrixWorkspace_sptr> &workspaces, const size_t wsIndex);
 
   virtual void setScaleLinear(const AxisID axisID);
   virtual void setScaleLog(const AxisID axisID);

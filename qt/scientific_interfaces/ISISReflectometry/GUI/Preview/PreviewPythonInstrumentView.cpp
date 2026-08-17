@@ -106,6 +106,10 @@ void PreviewPythonInstrumentView::updateWorkspace(MatrixWorkspace_sptr &workspac
   }
 }
 
+void PreviewPythonInstrumentView::updateWorkspacePreservingSelection(MatrixWorkspace_sptr &workspace) {
+  updateWorkspace(workspace);
+}
+
 void PreviewPythonInstrumentView::resetInstView() {
   try {
     GlobalInterpreterLock lock;

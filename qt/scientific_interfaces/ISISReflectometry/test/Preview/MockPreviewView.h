@@ -24,9 +24,11 @@ public:
   MOCK_METHOD(void, enableMainWidget, (), (override));
   MOCK_METHOD(void, disableMainWidget, (), (override));
   MOCK_METHOD(std::string, getWorkspaceName, (), (const, override));
+  MOCK_METHOD(size_t, getSelectedGroupMember, (), (const, override));
   MOCK_METHOD(double, getAngle, (), (const, override));
   MOCK_METHOD(void, setAngle, (double), (override));
   MOCK_METHOD(void, setUpdateAngleButtonEnabled, (bool), (override));
   MOCK_METHOD(void, setTitle, (const std::string &), (override));
+  MOCK_METHOD(void, setGroupMembers, (std::vector<std::string> const &), (override));
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
