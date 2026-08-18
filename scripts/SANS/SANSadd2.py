@@ -209,8 +209,7 @@ def add_runs(  # noqa: C901
             path = os.getcwd()
         assert base in os.listdir(path)
     path_out = path
-    if log_file:
-        _copy_log(last_path, log_file, path_out)
+    _copy_log(last_path, log_file, path_out)
 
     return "The following file has been created:\n" + outFile
 
@@ -377,8 +376,6 @@ def _load_ws(entry, ext, inst, ws_name, rawTypes, period=_NO_INDIVIDUAL_PERIODS)
         sample.setWidth(width)
         sample.setThickness(thickness)
 
-    # Change below when logs in Nexus files work  file types of .raw need their log files to be copied too
-    # if isType(ext, rawTypes):
     log_file = os.path.splitext(f_name)[0] + ".log"
     try:
         outWs = mtd[ws_name]
