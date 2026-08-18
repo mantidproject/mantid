@@ -24,6 +24,8 @@ class ReflectometryISISPreprocess(DataProcessorAlgorithm):
     _MONITOR_WS = "MonitorWorkspace"
     _EVENT_MODE = "EventMode"
     _CALIBRATION_FILE = "CalibrationFile"
+    _THETA_IN = "ThetaIn"
+    _THETA_LOG_NAME = "ThetaLogName"
 
     def __init__(self):
         """Initialize an instance of the algorithm."""
@@ -61,6 +63,7 @@ class ReflectometryISISPreprocess(DataProcessorAlgorithm):
             doc="The loaded monitors workspace. This is only output in event mode.",
         )
         self.copyProperties("ReflectometryISISCalibration", [self._CALIBRATION_FILE])
+        self.copyProperties("ReflectometryReductionOneAuto", [self._THETA_IN, self._THETA_LOG_NAME])
 
     def PyExec(self):
         workspace, monitor_ws = self._loadRun(self.getPropertyValue(self._RUNS))
@@ -108,10 +111,48 @@ class ReflectometryISISPreprocess(DataProcessorAlgorithm):
         alg = self.createChildAlgorithm("ReflectometryISISCalibration")
         alg.setProperty("InputWorkspace", ws)
         alg.setProperty("CalibrationFile", calibration_filepath)
+
+        if ws.getInstrument().getName() == "POLREF":
+            alg.setProperty("InstrumentWorkflow", "POLREF")
+
+            lines_alg = self.createChildAlgorithm("FindReflectometryLines")
+            lines_alg.setProperty("InputWorkspace", ws)
+            lines_alg.execute()
+            line_centre = lines_alg.getProperty("LineCentre").value
+            specular_pixel_spectrum_no = self._spectrum_number_for_workspace_index(ws, line_centre)
+
+            alg.setProperty("SpecularPixelSpectrumNo", specular_pixel_spectrum_no)
+            alg.setProperty("ExperimentAngle", self._experiment_angle(ws))
+
         alg.execute()
         calibrated_ws = alg.getProperty("OutputWorkspace").value
         self.log().information("Calibrated workspace")
         return calibrated_ws
+
+    def _experiment_angle(self, ws: MatrixWorkspace) -> float:
+        theta = self.getProperty(self._THETA_IN)
+        if not theta.isDefault:
+            return theta.value
+
+        theta_log_name = self.getPropertyValue(self._THETA_LOG_NAME)
+        if theta_log_name:
+            theta_log = ws.run().getProperty(theta_log_name)
+            if hasattr(theta_log, "lastValue"):
+                return theta_log.lastValue()
+            return float(theta_log.value)
+
+        raise RuntimeError("ThetaIn or ThetaLogName must be provided when calibrating POLREF data")
+
+    @staticmethod
+    def _spectrum_number_for_workspace_index(ws: MatrixWorkspace, workspace_index: float) -> float:
+        lower_index = int(workspace_index)
+        fraction = workspace_index - lower_index
+        lower_spectrum_no = ws.getSpectrum(lower_index).getSpectrumNo()
+        if fraction == 0.0:
+            return float(lower_spectrum_no)
+
+        upper_spectrum_no = ws.getSpectrum(lower_index + 1).getSpectrumNo()
+        return lower_spectrum_no + fraction * (upper_spectrum_no - lower_spectrum_no)
 
     @staticmethod
     def _validate_event_ws(workspace):
