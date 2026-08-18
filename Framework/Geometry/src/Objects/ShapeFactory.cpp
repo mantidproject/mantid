@@ -1581,7 +1581,7 @@ std::shared_ptr<CSGObject> ShapeFactory::createHexahedralShape(double xlb, doubl
  * ShapeInfo that the bounding box, the rendered mesh and the volume come from - and when only one of
  * them rotated, a rotated shape ended up described in two different places at once.
  *
- * @param pElem :: the primitive's XML element, read for an optional <rotate>
+ * @param pElem :: the primitive's XML element, read for an optional "rotate" tag
  * @param centre :: the primitive's centre, tip or base
  * @param axis :: the primitive's axis; pass anything for a shape that has none, and ignore the result
  * @return the rotated centre and axis
