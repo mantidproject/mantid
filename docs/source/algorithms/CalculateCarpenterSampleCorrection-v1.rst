@@ -161,7 +161,7 @@ References
 
 .. [2] D.F.R. Mildner, J.M. Carpenter, and C.A. Pelizzari *Generalized Attenuation Correction Factor for Scattering from Cylindrical Targets* Review of Scientific Instruments **45.4** (1974): 572. doi: `10.1063/1.1686687 <https://doi.org/10.1063/1.1686687>`_
 
-.. [3] D.F.R. Mildner and J.M.Carpenter *Improvements to the Chebyshev Expansion of Attenuation Correction Factors for Cylindrical Samples.* J Appl Crystallogr **23.5** (1990): 378–386 doi: `10.1107/S0021889890005258 <https://doi.org/10.1107/S0021889890005258>`_
+.. [3] D.F.R. Mildner and J.M.Carpenter *Improvements to the Chebyshev Expansion of Attenuation Correction Factors for Cylindrical Samples.* Journal of Applied Crystallography **23.5** (1990): 378–386 doi: `10.1107/S0021889890005258 <https://doi.org/10.1107/S0021889890005258>`_
 
 .. categories::
 

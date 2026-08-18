@@ -87,7 +87,7 @@ observed data.
 References
 ----------
 
-#. M.A.Mariscotti, *A method for automatic identification of peaks in the presence of background and its application to spectrum analysis* , `NIM 50 (1967) 309 <https://doi.org/10.1016/0029-554X(67)90058-4>`_
+#. M.A.Mariscotti, *A method for automatic identification of peaks in the presence of background and its application to spectrum analysis* , `Nuclear Instruments and Methods 50 (1967) 309 <https://doi.org/10.1016/0029-554X(67)90058-4>`_
 
 Usage
 -----

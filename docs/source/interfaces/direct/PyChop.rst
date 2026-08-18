@@ -226,7 +226,7 @@ T G Perring, Ph.D. Thesis, University of Cambridge (1991)
 .. _[3]:
 
 [3] `M. Marseguerra and G. Pauli, Neutron transmission probability through a
-curved revolving slit, Nucl. Inst. Meth. 4 (1959) 140
+curved revolving slit, Nuclear Instruments and Methods. 4 (1959) 140
 <https://doi.org/10.1016/0029-554X(59)90066-7>`_
 
 .. _[4]:

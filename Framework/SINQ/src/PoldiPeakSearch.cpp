@@ -417,7 +417,7 @@ double PoldiPeakSearch::getMedianFromSortedVector(MantidVec::const_iterator begi
 /** Calculates Sn as estimator of scale for given vector
  *
  * This method implements a naive calculation of Sn, as defined by Rousseeuw
- *and Croux (https://doi.org/10.2307%2F2291267).
+ *and Croux (https://doi.org/10.2307/2291267).
  * In contrast to standard deviation, this is more robust towards outliers.
  *
  * @param begin :: Beginning of vector.

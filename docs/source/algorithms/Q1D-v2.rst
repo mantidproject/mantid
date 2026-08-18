@@ -191,8 +191,8 @@ difference in CPU time required by these two methods.
 References
 ##########
 
-Calculation of Q is from Seeger, P. A. and Hjelm, R. P. Jr, "Small-Angle
-Neutron Scattering at Pulsed Spallation Sources" (1991) `J. Appl 24
+Calculation of Q is from Seeger, P. A. and Hjelm, R. P. Jnr, "Small-Angle
+Neutron Scattering at Pulsed Spallation Sources" (1991) `Journal of Applied Crystallography 24
 467-478 <https://doi.org/10.1107/S0021889891004764>`_
 
 Previous Versions

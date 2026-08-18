@@ -24,7 +24,7 @@ being 1. The k value is called ``SigmaConstant`` in the algorithm input.
 References
 ----------
 **Objective algorithm to separate signal from noise in a Poisson-distributed pixel data set**
-by T. |Straaso|, D. Mueter, H. O. |Sorensen| and J. Als-Nielsen Strass
+by T. |Straasø|, D. Müter, H. O. |Sørensen| and J. Als-Nielsen
 `J. Appl. Cryst. (2013). 46, 663-671 <https://doi.org/10.1107/S0021889813006511>`__
 
 .. |Straaso| unicode:: Straas U+00F8 ..

@@ -73,8 +73,8 @@ Polymer
 
 References:
 
-1. J S Higgins, R E Ghosh, W S Howells & G Allen, `JCS Faraday II 73 40 (1977) <https://doi.org/10.1039/F29777300040>`_
-2. J S Higgins, G Allen, R E Ghosh, W S Howells & B Farnoux, `Chem Phys Lett 49 197 (1977) <https://doi.org/10.1016/0009-2614(77)80569-1>`_
+1. J S Higgins, R E Ghosh, W S Howells & G Allen, `Journal of the Chemical Society, Faraday Transactions II 73 40 (1977) <https://doi.org/10.1039/F29777300040>`_
+2. J S Higgins, G Allen, R E Ghosh, W S Howells & B Farnoux, `Chemical Physics Letter 49 197 (1977) <https://doi.org/10.1016/0009-2614(77)80569-1>`_
 
 
 .. categories:: Concepts

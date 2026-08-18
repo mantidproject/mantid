@@ -35,7 +35,7 @@ parameters into those used for this function see
 
 References
 
-1. R.B. Von Dreele, J.D. Jorgensen & C.G. Windsor, `J. Appl. Cryst., 15,
+1. R.B. Von Dreele, J.D. Jorgensen & C.G. Windsor, `Journal of Applied Crystallography, 15,
 581-589, 1982 <https://doi.org/10.1107/S0021889882012722>`_
 
 The figure below illustrate this peakshape function fitted to a TOF

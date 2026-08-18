@@ -132,7 +132,7 @@ normalized by the transmission counters.
 References
 ----------
 
-.. [#Brulet] Annie Brulet et al. - Improvement of data treatment in small-angle neutron scattering - `J. Appl.Cryst. (2007). 40 <https://doi.org/10.1107/S0021889806051442>`_
+.. [#Brûlet] Annie Brûlet et al. - Improvement of data treatment in small-angle neutron scattering - `Journal of Applied Crystallography. (2007). 40 <https://doi.org/10.1107/S0021889806051442>`_
 
 .. [#Ghosh] Ghosh, Egelhaaf & Rennie - Computing guide for Small Angle Scattering
 

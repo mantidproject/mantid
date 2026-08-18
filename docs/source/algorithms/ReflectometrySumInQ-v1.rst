@@ -124,7 +124,7 @@ Usage
 References
 ----------
 
-.. [#CUBITT] Cubitt et al., *J. Appl. Crystallogr.*, **6** 2006 (2015)
+.. [#CUBITT] Cubitt et al., *Journal of Applied Crystallography*, **6** 2006 (2015)
              `doi: 10.1107/S1600576715019500 <https://doi.org/10.1107/S1600576715019500>`_
 
 .. categories::

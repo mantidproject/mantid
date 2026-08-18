@@ -303,7 +303,7 @@ void SpaceGroupFactoryImpl::unsubscribeSpaceGroup(const std::string &hmSymbol) {
  * The method will throw an exception if the number or symbol is already
  * registered.
  *
- * [1] Shmueli, U. Acta Crystallogr. A 40, 559–567 (1984).
+ * [1] Shmueli, U. Acta Crystallographica. Section A 40, 559–567 (1984).
  *     https://doi.org/10.1107/S0108767384001161
  *
  * @param number :: Space group number (ITA)

@@ -81,7 +81,7 @@ automatic back transform is not provided.
 References
 ----------
 
-.. [1] U P Wild, R Holzwarth & H P Good, `Rev Sci Instr 48 1621 (1977) <https://doi.org/10.1063/1.1134962>`_
+.. [1] U P Wild, A R Holzwarth & H P Good, `Review of Scientific Instruments 48 1621 (1977) <https://doi.org/10.1063/1.1134962>`_
 
 Workflow
 --------

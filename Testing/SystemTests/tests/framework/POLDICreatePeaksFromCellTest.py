@@ -13,7 +13,7 @@ from mantid.simpleapi import PoldiCreatePeaksFromCell
 # publication:
 #
 # K. Momma and F. Izumi, "VESTA 3 for three-dimensional visualization of crystal,
-#           volumetric and morphology data," J. Appl. Crystallogr., 44, 1272-1276 (2011)
+#           volumetric and morphology data," Journal of Applied Crystallography, 44, 1272-1276 (2011)
 #
 #           https://doi.org/10.1107/S0021889811038970
 #

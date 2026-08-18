@@ -138,7 +138,7 @@ The data used in this algorithm comes from the following paper.
    `doi: 10.1080/10448639208218770 <https://doi.org/10.1080/10448639208218770>`_
 #. J. A. K. Howard, O. Johnson, A. J. Schultz and A. M. Stringer, *Determination of the neutron
    absorption cross section for hydrogen as a function of wavelength with a pulsed neutron
-   source*, J. Appl. Cryst. (1987). 20, 120-122
+   source*, Journal of Applied Crystallography. (1987). 20, 120-122
    `doi: 10.1107/S0021889887087028 <https://doi.org/10.1107/S0021889887087028>`_
 
 Reference
