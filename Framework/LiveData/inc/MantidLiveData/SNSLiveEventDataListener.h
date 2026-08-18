@@ -47,7 +47,7 @@ public:
   API::ListenerState listenerState() const override;
   std::optional<RunStatus> lastTransition() const override;
 
-  int runNumber() const override { return m_runNumber; };
+  int runNumber() const override { return m_runNumber.load(); };
 
   bool isConnected() override;
 
@@ -66,6 +66,11 @@ protected:
   /// normally. Clears the committed transition edge after a successful
   /// workspace hand-off.
   void onAfterExtract() override;
+
+  /// Sends all bytes in buf over m_socket, retrying short writes.  Returns
+  /// the total bytes sent (== size on success, < size on unrecoverable failure).
+  /// Virtual so test subclasses can inject short-write or failure scenarios.
+  virtual int sendHelloPacket(const void *buf, int size);
 
   /// Called from onBeforeExtract() when a BeginRun transition is dequeued.
   /// Acquires m_mutex itself.
@@ -141,10 +146,17 @@ private:
   // Both values are designed to be passed straight into the TofEvent
   // constructor.
 
-  int m_runNumber{0};
+  /// Atomic as belt-and-suspenders (POD member touched cross-thread): written
+  /// under m_mutex by setRunDetails() (bg parse path / onBeginRun()), read
+  /// lock-free by the inline runNumber() getter.
+  std::atomic<int> m_runNumber{0};
   DataObjects::EventWorkspace_sptr m_eventBuffer;
   ///< Used to buffer events between calls to extractData()
 
+  /// Workspace title, composed as <instrumentName><runNumber> once both are
+  /// known.  Written under the parse lock in initWorkspacePart2(); applied to
+  /// the extracted workspace under the doExtractData() critical section;
+  /// cleared at run boundaries in onBeginRun()/onEndRun().
   std::string m_wsName;
   detid2index_map m_indexMap;        // maps pixel id's to workspace indexes
   detid2index_map m_monitorIndexMap; // Same as above for the monitor workspace
@@ -154,7 +166,6 @@ private:
   std::vector<std::string> m_monitorLogs;
 
   Poco::Net::StreamSocket m_socket;
-  bool m_isConnected{false};
 
   Poco::Thread m_thread;
   /// Background thread checks this periodically. If true, the thread exits.
@@ -203,7 +214,11 @@ private:
   void replayVariableCache();
 
   // ---------------------------------------------------------------------------
-  bool m_ignorePackets{false}; // used by filterPacket() below...
+  /// Used by ignorePacket() below.  Guarded by the doExtractData() critical
+  /// section on the foreground side (read at the top of doExtractData()) and
+  /// by the parse lock on the background side (ignorePacket()); also atomic
+  /// as belt-and-suspenders (POD member touched cross-thread).
+  std::atomic<bool> m_ignorePackets{false};
   bool m_filterUntilRunStart{false};
 
   // Called by the rxPacket() functions to determine if the packet should be
@@ -227,13 +242,34 @@ protected:
   // ---------------------------------------------------------------------------
   // Fields in protected: so that test subclasses can inject state without
   // requiring friend declarations (which cannot name a class defined in a test
-  // header).  All fields here are guarded by m_mutex unless otherwise noted.
+  // header).
+  //
+  // Atomic (lock-free, no mutex needed):
+  //   m_isConnected, m_pauseNetRead, m_bgThreadCaughtUp, m_stopThread,
+  //   m_isDasPaused, m_runNumber.
+  //
+  // Atomic AND mutex-guarded (belt-and-suspenders convention: any POD-typed
+  // member that needs cross-thread protection is made atomic even though it
+  // is also covered by the lock, rather than relying on the lock alone):
+  //   m_ignorePackets — guarded by the single doExtractData() critical section
+  //   on the foreground side and by the parse lock on the background side
+  //   (ignorePacket()).
+  //
+  // Mutex-guarded (always access under m_mutex):
+  //   m_backgroundException, m_eventBuffer, m_adaraRunStatus,
+  //   m_pendingTransition, m_lastTransition, m_instrumentXML,
+  //   m_instrumentName, m_nameMap, m_requiredLogs, m_deferredRunDetailsPkt,
+  //   m_workspaceInitialized, m_previousExtractCompleted, m_dataStartTime,
+  //   m_monitorLogs, m_wsName.  (m_monitorLogs and m_wsName are accessed on
+  //   the foreground side only inside the doExtractData() critical section.)
+  //
+  // All rxPacket() overrides run under m_mutex, acquired once by run()
+  // around bufferParse().  Do NOT acquire m_mutex inside any rxPacket() body
+  // or any function called exclusively from rxPacket() — std::mutex is
+  // non-recursive and a second acquisition would deadlock.
   // ---------------------------------------------------------------------------
-  /// Protects m_eventBuffer, m_adaraRunStatus, m_pendingTransition,
-  /// m_lastTransition, m_isDasPaused, m_instrumentXML, m_instrumentName,
-  /// m_nameMap, m_requiredLogs, m_deferredRunDetailsPkt, and m_workspaceInitialized.
-  /// Does NOT protect m_pauseNetRead, m_stopThread, or m_bgThreadCaughtUp —
-  /// those are std::atomic<bool> and are accessed lock-free.
+  std::atomic<bool> m_isConnected{false};
+
   mutable std::mutex m_mutex;
   /// Back-pressure flag set true by rxPacket(RunStatusPkt) on NEW_RUN/END_RUN
   /// to halt the bg-thread read loop until the foreground calls extractData().
@@ -292,9 +328,10 @@ protected:
 
   // These 2 determine whether or not we filter out events that arrive when
   // the run is paused.
-  bool m_isDasPaused{false}; // Set to true or false when we receive a
-                             // pause/resume marker in an annotation packet. (See
-                             // rxPacket( const ADARA::AnnotationPkt &pkt))
+  /// Pause state is orthogonal to run state: m_adaraRunStatus remains Running
+  /// while the DAS is paused.  Written under m_mutex (rxPacket(AnnotationPkt));
+  /// read lock-free by isPaused() and rxPacket(BankedEventPkt).
+  std::atomic<bool> m_isDasPaused{false};
 
   // Holds on to any exceptions that were thrown in the background thread so
   // that we can re-throw them in the foreground thread
