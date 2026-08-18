@@ -695,6 +695,13 @@ public:
     ConfigService::Instance().reset();
   }
 
+  void testISISUrlPrefix() {
+    ConfigServiceImpl &configs = ConfigService::Instance();
+    TS_ASSERT_EQUALS(configs.hasProperty("isisjournal.url_prefix"), true);
+    std::string urlPrefix = configs.getString("isisjournal.url_prefix");
+    TS_ASSERT_EQUALS(urlPrefix, "http://data.isis.rl.ac.uk/journals/ndx");
+  }
+
 protected:
   bool m_valueChangedSent;
   std::string m_key;
