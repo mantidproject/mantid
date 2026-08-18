@@ -6,10 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadILLReflectometry.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
@@ -22,7 +19,6 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/DeltaEMode.h"
-#include "MantidKernel/DynamicPointerCastHelper.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PropertyManagerProperty.h"
 #include "MantidKernel/Quat.h"
@@ -81,14 +77,6 @@ std::pair<int, int> fitIntegrationWSIndexRange(const Mantid::API::MatrixWorkspac
     --end;
   }
   return std::pair<int, int>{begin, end};
-}
-
-/** Fill the X values of the first histogram of ws with values 0, 1, 2,...
- *  @param ws a workspace to modify
- */
-void rebinIntegralWorkspace(Mantid::API::MatrixWorkspace &ws) {
-  auto &xs = ws.mutableX(0);
-  std::iota(xs.begin(), xs.end(), 0.0);
 }
 
 /// Enumerations to define the rotation plane of the detector.
@@ -548,76 +536,23 @@ double LoadILLReflectometry::reflectometryPeak() {
   if (!isDefault("FitEndWorkspaceIndex")) {
     endIndex = getProperty("FitEndWorkspaceIndex");
   }
-  auto integration = createChildAlgorithm("Integration");
-  integration->initialize();
-  integration->setProperty("InputWorkspace", m_localWorkspace);
-  integration->setProperty("OutputWorkspace", "__unused_for_child");
-  integration->setProperty("StartWorkspaceIndex", startIndex);
-  integration->setProperty("EndWorkspaceIndex", endIndex);
+  auto findLine = createChildAlgorithm("FindReflectometryLines", -1.0, -1.0, true, 3);
+  findLine->setProperty("InputWorkspace", m_localWorkspace);
+  findLine->setProperty("StartWorkspaceIndex", startIndex);
+  findLine->setProperty("EndWorkspaceIndex", endIndex);
+  findLine->setProperty("BackgroundType", "Linear");
+  findLine->setProperty("AcceptChangesInFunctionTooSmall", false);
+  findLine->setProperty("AcceptChangesInParameterTooSmall", false);
   if (!isDefault("FitRangeLower")) {
-    integration->setProperty("RangeLower",
-                             wavelengthToTOF(getProperty("FitRangeLower"), m_sourceDistance, m_detectorDistance));
+    findLine->setProperty("RangeLower",
+                          wavelengthToTOF(getProperty("FitRangeLower"), m_sourceDistance, m_detectorDistance));
   }
   if (!isDefault("FitRangeUpper")) {
-    integration->setProperty("RangeUpper",
-                             wavelengthToTOF(getProperty("FitRangeUpper"), m_sourceDistance, m_detectorDistance));
+    findLine->setProperty("RangeUpper",
+                          wavelengthToTOF(getProperty("FitRangeUpper"), m_sourceDistance, m_detectorDistance));
   }
-  integration->execute();
-  MatrixWorkspace_sptr integralWS = integration->getProperty("OutputWorkspace");
-  auto transpose = createChildAlgorithm("Transpose");
-  transpose->initialize();
-  transpose->setProperty("InputWorkspace", integralWS);
-  transpose->setProperty("OutputWorkspace", "__unused_for_child");
-  transpose->execute();
-  integralWS = transpose->getProperty("OutputWorkspace");
-  rebinIntegralWorkspace(*integralWS);
-  // determine initial height: maximum value
-  const auto maxValueIt = std::max_element(integralWS->y(0).cbegin(), integralWS->y(0).cend());
-  const double height = *maxValueIt;
-  // determine initial centre: index of the maximum value
-  const size_t maxIndex = std::distance(integralWS->y(0).cbegin(), maxValueIt);
-  const auto centreByMax = static_cast<double>(maxIndex);
-  const auto &ys = integralWS->y(0);
-  auto lessThanHalfMax = [height](const double x) { return x < 0.5 * height; };
-  using IterType = HistogramData::HistogramY::const_iterator;
-  std::reverse_iterator<IterType> revMaxValueIt{maxValueIt};
-  auto revMinFwhmIt = std::find_if(revMaxValueIt, ys.crend(), lessThanHalfMax);
-  auto maxFwhmIt = std::find_if(maxValueIt, ys.cend(), lessThanHalfMax);
-  std::reverse_iterator<IterType> revMaxFwhmIt{maxFwhmIt};
-  if (revMinFwhmIt == ys.crend() || maxFwhmIt == ys.cend()) {
-    return centreByMax + startIndex;
-  }
-  const auto fwhm = static_cast<double>(std::distance(revMaxFwhmIt, revMinFwhmIt) + 1);
-  // generate Gaussian
-  auto func = API::FunctionFactory::Instance().createFunction("CompositeFunction");
-  auto sum =
-      Kernel::DynamicPointerCastHelper::dynamicPointerCastWithCheck<API::CompositeFunction, API::IFunction>(func);
-  func = API::FunctionFactory::Instance().createFunction("Gaussian");
-  auto gaussian =
-      Kernel::DynamicPointerCastHelper::dynamicPointerCastWithCheck<API::IPeakFunction, API::IFunction>(func);
-  gaussian->setHeight(height);
-  gaussian->setCentre(centreByMax);
-  gaussian->setFwhm(fwhm);
-  sum->addFunction(gaussian);
-  func = API::FunctionFactory::Instance().createFunction("LinearBackground");
-  func->setParameter("A0", 0.);
-  func->setParameter("A1", 0.);
-  sum->addFunction(func);
-  // call Fit child algorithm
-  auto fit = createChildAlgorithm("Fit");
-  fit->initialize();
-  fit->setProperty("Function", std::dynamic_pointer_cast<API::IFunction>(sum));
-  fit->setProperty("InputWorkspace", integralWS);
-  fit->setProperty("StartX", centreByMax - 3 * fwhm);
-  fit->setProperty("EndX", centreByMax + 3 * fwhm);
-  fit->execute();
-  const std::string fitStatus = fit->getProperty("OutputStatus");
-  if (fitStatus != "success") {
-    g_log.warning("Fit not successful, using position of max value.\n");
-    return centreByMax + startIndex;
-  }
-  const auto centre = gaussian->centre();
-  return centre + startIndex;
+  findLine->execute();
+  return findLine->getProperty("LineCentre");
 }
 
 /** Compute the detector rotation angle around origin
