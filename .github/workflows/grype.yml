@@ -74,6 +74,14 @@ jobs:
         shell: bash
         run: pixi install --manifest-path "${{ steps.pixi-project.outputs.project_dir }}/pixi.toml"
 
+      - name: List versions installed
+        shell: bash
+        run: |
+          echo "Top level dependencies"
+          pixi list --explicit --manifest-path "${{ steps.pixi-project.outputs.project_dir }}/pixi.toml"
+          echo "::group::All dependencies"
+          pixi list --manifest-path "${{ steps.pixi-project.outputs.project_dir }}/pixi.toml"
+          echo "::endgroup::"
       - name: Scan with Grype
         id: scan
         uses: anchore/scan-action@v7
