@@ -691,7 +691,7 @@ CuboidCorners ShapeFactory::parseCuboid(Poco::XML::Element *pElem) {
     result.rfb = parsePosition(pElem_rfb);
 
     // The automatic rotations apply here just as they do to the alternate syntax below. They were
-    // previously missed, so a <goniometer> or <rotate-all> tag was silently dropped for a cuboid
+    // previously missed, so a \<goniometer\> or \<rotate-all\> tag was silently dropped for a cuboid
     // written as four corners - the form ComponentCreationHelper and FlatPlateAbsorption emit -
     // leaving the shape unrotated while everything else on the workspace assumed it had been
     // rotated. The corners are absolute positions, so they rotate about the origin, which is what
@@ -1572,16 +1572,16 @@ std::shared_ptr<CSGObject> ShapeFactory::createHexahedralShape(double xlb, doubl
 /// create a special geometry handler for the known finite primitives
 /** Apply to a primitive's centre and axis every rotation its surfaces will have had applied to them.
  *
- * Three tags contribute and they do not all act on the same things. A per-primitive <rotate> turns
- * the shape about its own centre, so it moves the axis and leaves the centre alone. <rotate-all> and
- * the automatic <goniometer> reorient the whole shape about the origin, so they move both.
+ * Three tags contribute and they do not all act on the same things. A per-primitive \<rotate\> turns
+ * the shape about its own centre, so it moves the axis and leaves the centre alone. \<rotate-all\> and
+ * the automatic \<goniometer\> reorient the whole shape about the origin, so they move both.
  *
  * This exists so that createGeometryHandler and the parse* functions cannot disagree. They read the
  * same XML separately - one to build the surfaces the CSG tests against, the other to build the
  * ShapeInfo that the bounding box, the rendered mesh and the volume come from - and when only one of
  * them rotated, a rotated shape ended up described in two different places at once.
  *
- * @param pElem :: the primitive's XML element, read for an optional <rotate>
+ * @param pElem :: the primitive's XML element, read for an optional \<rotate\> tag
  * @param centre :: the primitive's centre, tip or base
  * @param axis :: the primitive's axis; pass anything for a shape that has none, and ignore the result
  * @return the rotated centre and axis
