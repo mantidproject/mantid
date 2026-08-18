@@ -10,13 +10,18 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAlgorithms/AnyShapeAbsorption.h"
 #include "MantidAlgorithms/BeamProfileFactory.h"
 #include "MantidAlgorithms/CylinderAbsorption.h"
 #include "MantidAlgorithms/FlatPlateAbsorption.h"
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/UnitFactory.h"
+#include <algorithm>
 
 using Mantid::API::AlgorithmManager;
 using Mantid::API::AnalysisDataService;
@@ -371,6 +376,93 @@ public:
     TS_ASSERT(asaAlgo.isExecuted());
   }
 
+  /// The gauge volume and the detectors are in the lab frame, but the sample shape need not be, so
+  /// the rotation has to be undone before the paths through the sample can be traced. If it is not,
+  /// the goniometer is simply ignored - the sample is integrated and traced as though it had never
+  /// been turned.
+  void testGoniometerRotationIsApplied() {
+    const auto unrotated = correctionFactors(makeRotatedWorkspace(Mantid::Geometry::Goniometer(), false));
+    const auto rotated = correctionFactors(makeRotatedWorkspace(rotatedGoniometer(), false));
+
+    TS_ASSERT_EQUALS(unrotated.size(), rotated.size());
+    double largestDifference = 0.0;
+    for (size_t i = 0; i < unrotated.size(); ++i) {
+      largestDifference = std::max(largestDifference, std::abs(rotated[i] - unrotated[i]) / unrotated[i]);
+    }
+    // turning the sample moves its faces through the gauge volume, so the paths really do change
+    TS_ASSERT_LESS_THAN(0.01, largestDifference);
+  }
+
+  /// The two ways a sample arrives oriented describe the same experiment, so they have to give the
+  /// same correction. SetGoniometer leaves the shape in the sample's own frame while CopySample onto
+  /// an oriented workspace bakes the rotation into the shape definition, and the run reports the same
+  /// goniometer either way. Applying R unconditionally double-rotates the second; applying nothing
+  /// ignores the first. Only R*B^-1 satisfies both.
+  void testBothWaysOfOrientingTheSampleAgree() {
+    const auto gonio = rotatedGoniometer();
+    const auto viaGoniometer = correctionFactors(makeRotatedWorkspace(gonio, false));
+    const auto viaBakedShape = correctionFactors(makeRotatedWorkspace(gonio, true));
+
+    TS_ASSERT_EQUALS(viaGoniometer.size(), viaBakedShape.size());
+    for (size_t i = 0; i < viaGoniometer.size(); ++i) {
+      // a baked rotation survives as XML written by std::to_string, so it comes back with six decimal
+      // places and the two routes cannot agree exactly
+      TS_ASSERT_DELTA(viaGoniometer[i], viaBakedShape[i], 1e-6);
+    }
+  }
+
 private:
+  /// A goniometer well away from the identity, so a rotation left unapplied cannot be mistaken for
+  /// the rounding that baking one into a shape's XML introduces.
+  static Mantid::Geometry::Goniometer rotatedGoniometer() {
+    Mantid::Geometry::Goniometer gonio;
+    gonio.pushAxis("phi", 0.0, 1.0, 0.0, 40.0, 1);
+    return gonio;
+  }
+
+  /// A 40 mm cuboid sample with a 20 mm gauge volume straddling its +x face, so half the gauge is
+  /// outside the sample and turning the sample changes which part of it scatters. Oriented either by
+  /// the goniometer alone, or with the rotation baked into the shape as CopySample does it.
+  MatrixWorkspace_sptr makeRotatedWorkspace(const Mantid::Geometry::Goniometer &gonio, const bool bakeIntoShape) {
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 5);
+    ws->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
+
+    auto shape = ComponentCreationHelper::createCuboid(0.02, 0.02, 0.02, Mantid::Kernel::V3D(0.0, 0.0, 0.0), "sample");
+    if (bakeIntoShape) {
+      Mantid::Geometry::ShapeFactory factory;
+      const auto baked = factory.addGoniometerTag(gonio.getR(), shape->getShapeXML());
+      ws->mutableSample().setShape(factory.createShape(baked, false));
+    } else {
+      ws->mutableSample().setShape(shape);
+    }
+    ws->mutableRun().addProperty("GaugeVolume",
+                                 std::string("<cuboid id='gv'><height val='0.02'/><width val='0.02'/>"
+                                             "<depth val='0.02'/><centre x='0.02' y='0.0' z='0.0'/></cuboid>"
+                                             "<algebra val='gv'/>"));
+    ws->mutableRun().setGoniometer(gonio, false);
+    return ws;
+  }
+
+  std::vector<double> correctionFactors(const MatrixWorkspace_sptr &ws) {
+    Mantid::Algorithms::AnyShapeAbsorption alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.setProperty("InputWorkspace", ws);
+    alg.setPropertyValue("OutputWorkspace", "unused");
+    alg.setPropertyValue("AttenuationXSection", "5.08");
+    alg.setPropertyValue("ScatteringXSection", "5.1");
+    alg.setPropertyValue("SampleNumberDensity", "0.07192");
+    alg.setProperty("ElementSize", 2.0);
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
+    MatrixWorkspace_sptr out = alg.getProperty("OutputWorkspace");
+    std::vector<double> factors;
+    for (size_t i = 0; i < out->getNumberHistograms(); ++i) {
+      factors.insert(factors.end(), out->y(i).cbegin(), out->y(i).cend());
+    }
+    return factors;
+  }
+
   Mantid::Algorithms::AnyShapeAbsorption atten;
 };
