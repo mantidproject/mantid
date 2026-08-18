@@ -291,12 +291,14 @@ set(SRC_FILES
     src/SANSCollimationLengthEstimator.cpp
     src/SampleCorrections/CircularBeamProfile.cpp
     src/SampleCorrections/DetectorGridDefinition.cpp
+    src/SampleCorrections/DivergentSlitBeamProfile.cpp
     src/SampleCorrections/IBeamProfile.cpp
     src/SampleCorrections/MCAbsorptionStrategy.cpp
     src/SampleCorrections/MCInteractionStatistics.cpp
     src/SampleCorrections/MCInteractionVolume.cpp
     src/SampleCorrections/MayersSampleCorrection.cpp
     src/SampleCorrections/MayersSampleCorrectionStrategy.cpp
+    src/SampleCorrections/RadialCollimatorProfile.cpp
     src/SampleCorrections/RectangularBeamProfile.cpp
     src/SampleCorrections/SparseWorkspace.cpp
     src/SassenaFFT.cpp
@@ -648,6 +650,7 @@ set(INC_FILES
     inc/MantidAlgorithms/SANSCollimationLengthEstimator.h
     inc/MantidAlgorithms/SampleCorrections/CircularBeamProfile.h
     inc/MantidAlgorithms/SampleCorrections/DetectorGridDefinition.h
+    inc/MantidAlgorithms/SampleCorrections/DivergentSlitBeamProfile.h
     inc/MantidAlgorithms/SampleCorrections/IBeamProfile.h
     inc/MantidAlgorithms/SampleCorrections/IMCAbsorptionStrategy.h
     inc/MantidAlgorithms/SampleCorrections/IMCInteractionVolume.h
@@ -656,6 +659,7 @@ set(INC_FILES
     inc/MantidAlgorithms/SampleCorrections/MCInteractionVolume.h
     inc/MantidAlgorithms/SampleCorrections/MayersSampleCorrection.h
     inc/MantidAlgorithms/SampleCorrections/MayersSampleCorrectionStrategy.h
+    inc/MantidAlgorithms/SampleCorrections/RadialCollimatorProfile.h
     inc/MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h
     inc/MantidAlgorithms/SampleCorrections/SparseWorkspace.h
     inc/MantidAlgorithms/SassenaFFT.h
@@ -828,6 +832,7 @@ set(TEST_FILES
     DiffractionFocussingTest.h
     DirectILLTubeBackgroundTest.h
     DiscusMultipleScatteringCorrectionTest.h
+    DivergentSlitBeamProfileTest.h
     DivideTest.h
     EQSANSCorrectFrameTest.h
     EditInstrumentGeometryTest.h
@@ -965,6 +970,7 @@ set(TEST_FILES
     Q1D2Test.h
     Q1DWeightedTest.h
     QxyTest.h
+    RadialCollimatorProfileTest.h
     RadiusSumTest.h
     RayTracerTesterTest.h
     ReadGroupsFromFileTest.h

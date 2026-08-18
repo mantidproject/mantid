@@ -130,8 +130,9 @@ public:
     centerOfMass.setRethrows(true);
     centerOfMass.initialize();
     centerOfMass.setProperty("InputWorkspace", testWS);
-    // This should throw because no sample shape is defined
-    TS_ASSERT_THROWS(centerOfMass.execute(), const std::invalid_argument &);
+    // This should throw because no sample shape is defined - the check lives in validateInputs, so
+    // the algorithm reports it as an invalid property before exec is reached
+    TS_ASSERT_THROWS(centerOfMass.execute(), const std::runtime_error &);
     TS_ASSERT(!centerOfMass.isExecuted());
   }
   void testExecWithDifferentElementSizeUnits() {

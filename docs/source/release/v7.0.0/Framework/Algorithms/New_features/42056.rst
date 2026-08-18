@@ -1,0 +1,1 @@
+- Algorithm :ref:`algm-SetBeam` now accepts optional `HorizontalDivergence`, `VerticalDivergence` and `SlitDistance` geometry flags, describing a beam whose edges blur with distance from the defining slit rather than one that is perfectly collimated.

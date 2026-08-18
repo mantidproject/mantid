@@ -14,6 +14,7 @@
 #include <numeric>
 
 using namespace Mantid::Geometry;
+using Mantid::Kernel::DblMatrix;
 using Mantid::Kernel::V3D;
 
 class RasterizeTest : public CxxTest::TestSuite {
@@ -292,6 +293,81 @@ public:
       // all l1s should be greater or equal to 1
       TS_ASSERT_LESS_THAN_EQUALS(1.0, raster_result.l1[i])
     };
+  }
+
+  void test_calculateInLabFrame_WithIdentityRotationMatchesCalculate() {
+    // With no rotation the two frames coincide, so the lab-frame overload must reproduce the
+    // existing generic raster exactly - this is what makes it safe to route callers through it.
+    const V3D center(0., 0., 0.);
+    const std::shared_ptr<CSGObject> sample = ComponentCreationHelper::createCuboid(2, 2, 2, center, "sample");
+    const std::shared_ptr<CSGObject> integVolume = ComponentCreationHelper::createCuboid(1, 1, 1, center, "gauge");
+    const V3D beamDirection(0., 0., 1.);
+
+    const auto expected = Rasterize::calculate(beamDirection, *integVolume, *sample, 1.0);
+    const auto actual =
+        Rasterize::calculateInLabFrame(beamDirection, *integVolume, *sample, 1.0, DblMatrix(3, 3, true));
+
+    TS_ASSERT_EQUALS(actual.position.size(), expected.position.size());
+    TS_ASSERT_DELTA(actual.totalvolume, expected.totalvolume, 1e-12);
+    for (size_t i = 0; i < expected.position.size(); ++i) {
+      TS_ASSERT_EQUALS(actual.position[i], expected.position[i]);
+      TS_ASSERT_DELTA(actual.l1[i], expected.l1[i], 1e-12);
+      TS_ASSERT_DELTA(actual.volume[i], expected.volume[i], 1e-12);
+    }
+  }
+
+  void test_calculateInLabFrame_AppliesTheRotationToTheSample() {
+    // The sample is thin along x in its own frame; the integration volume is long along x in the
+    // lab frame. Rotating the sample by 90 degrees about y turns its thin direction into z, so the
+    // whole length of the integration volume then lies inside it. If the rotation were ignored the
+    // sample would still be thin along x and most of the volume would be rejected, so the rotated
+    // raster having strictly more elements is what proves the transform is applied.
+    const V3D center(0., 0., 0.);
+    const std::shared_ptr<CSGObject> sample = ComponentCreationHelper::createCuboid(0.5, 3.0, 3.0, center, "sample");
+    const std::shared_ptr<CSGObject> integVolume =
+        ComponentCreationHelper::createCuboid(2.0, 0.5, 0.5, center, "gauge");
+    const V3D beamDirection(0., 0., 1.);
+    constexpr double ELEMENT_SIZE{0.5};
+
+    // maps shape (1,0,0) to lab (0,0,-1), so lab x corresponds to the sample's z
+    DblMatrix rotationY90(3, 3, false);
+    rotationY90[0][2] = 1.0;
+    rotationY90[1][1] = 1.0;
+    rotationY90[2][0] = -1.0;
+
+    const auto unrotated =
+        Rasterize::calculateInLabFrame(beamDirection, *integVolume, *sample, ELEMENT_SIZE, DblMatrix(3, 3, true));
+    const auto rotated =
+        Rasterize::calculateInLabFrame(beamDirection, *integVolume, *sample, ELEMENT_SIZE, rotationY90);
+
+    TS_ASSERT_LESS_THAN(unrotated.position.size(), rotated.position.size());
+
+    // Every returned position is reported in the lab frame, so it must lie inside the integration
+    // volume as authored, and must lie inside the sample once mapped back into the sample's frame.
+    DblMatrix rotationInv(rotationY90);
+    rotationInv.Invert();
+    for (const auto &positionInLabFrame : rotated.position) {
+      TS_ASSERT(integVolume->isValid(positionInLabFrame));
+      TS_ASSERT(sample->isValid(rotationInv * positionInLabFrame));
+    }
+
+    // l1 is traced through the sample, so it cannot exceed the sample's longest dimension
+    for (const auto &l1 : rotated.l1) {
+      TS_ASSERT_LESS_THAN(0.0, l1);
+      TS_ASSERT_LESS_THAN_EQUALS(l1, 6.0);
+    }
+    TS_ASSERT_DELTA(rotated.totalvolume,
+                    static_cast<double>(rotated.volume.size()) * ELEMENT_SIZE * ELEMENT_SIZE * ELEMENT_SIZE, 1e-12);
+  }
+
+  void test_calculateInLabFrame_ThrowsWhenVolumeIsThinnerThanOneElement() {
+    const V3D center(0., 0., 0.);
+    const std::shared_ptr<CSGObject> sample = ComponentCreationHelper::createCuboid(2, 2, 2, center, "sample");
+    const std::shared_ptr<CSGObject> integVolume =
+        ComponentCreationHelper::createCuboid(0.1, 0.1, 0.1, center, "gauge");
+
+    TS_ASSERT_THROWS(Rasterize::calculateInLabFrame(V3D(0., 0., 1.), *integVolume, *sample, 1.0, DblMatrix(3, 3, true)),
+                     const std::runtime_error &);
   }
 
   void test_LargerIntegrationVolumeThanSample() {

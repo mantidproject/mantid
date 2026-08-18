@@ -185,6 +185,87 @@ Raster calculate(const V3D &beamDirection, const IObject &integShape, const IObj
   }
 }
 
+Raster calculateInLabFrame(const V3D &beamDirection, const IObject &integShape, const IObject &sampleShape,
+                           const double cubeSizeInMetre, const Kernel::Matrix<double> &rotation) {
+  if (cubeSizeInMetre <= 0.)
+    throw std::runtime_error("Tried to section shape into zero size elements");
+
+  const auto integBbox = integShape.getBoundingBox();
+  const double xLength = integBbox.xMax() - integBbox.xMin();
+  const double yLength = integBbox.yMax() - integBbox.yMin();
+  const double zLength = integBbox.zMax() - integBbox.zMin();
+
+  const auto numXSlices = static_cast<size_t>(xLength / cubeSizeInMetre);
+  const auto numYSlices = static_cast<size_t>(yLength / cubeSizeInMetre);
+  const auto numZSlices = static_cast<size_t>(zLength / cubeSizeInMetre);
+  // Guard the division below. A shape thinner than one element in any direction would otherwise
+  // divide by zero and fill the raster with non-finite positions.
+  if (numXSlices == 0 || numYSlices == 0 || numZSlices == 0)
+    throw std::runtime_error("The integration volume is smaller than a single element in at least one "
+                             "dimension - reduce the element size");
+
+  const double XSliceThickness = xLength / static_cast<double>(numXSlices);
+  const double YSliceThickness = yLength / static_cast<double>(numYSlices);
+  const double ZSliceThickness = zLength / static_cast<double>(numZSlices);
+  const double elementVolume = XSliceThickness * YSliceThickness * ZSliceThickness;
+
+  const size_t numVolumeElements = numXSlices * numYSlices * numZSlices;
+
+  Raster result;
+  try {
+    result.reserve(numVolumeElements);
+  } catch (...) {
+    // Typically get here if the number of volume elements is too large
+    // Provide a bit more information
+    throw std::logic_error("Too many volume elements requested - try increasing the value "
+                           "of the ElementSize property.");
+  }
+
+  Kernel::Matrix<double> rotationInv(rotation);
+  rotationInv.Invert();
+  const bool rotationIsIdentity = (rotation == Kernel::Matrix<double>(3, 3, true));
+  const auto toShapeFrame = [&](const V3D &pLab) { return rotationIsIdentity ? pLab : rotationInv * pLab; };
+  // The beam direction is a lab-frame vector, so it needs the same treatment as the positions
+  // before it can be used to trace through the sample in the sample's frame.
+  const V3D toSourceInShapeFrame = rotationIsIdentity ? -beamDirection : rotationInv * (-beamDirection);
+
+  for (size_t i = 0; i < numZSlices; ++i) {
+    const double z = (static_cast<double>(i) + 0.5) * ZSliceThickness + integBbox.zMin();
+
+    for (size_t j = 0; j < numYSlices; ++j) {
+      const double y = (static_cast<double>(j) + 0.5) * YSliceThickness + integBbox.yMin();
+
+      for (size_t k = 0; k < numXSlices; ++k) {
+        const double x = (static_cast<double>(k) + 0.5) * XSliceThickness + integBbox.xMin();
+        const V3D positionInLabFrame(x, y, z);
+        // Reject voxels inside the bounding box but outside the integration volume itself. For an
+        // axis-aligned shape the box is tight and this is a no-op, but for a rotated or otherwise
+        // non-axis-aligned shape it is what confines the raster to the real volume.
+        if (!integShape.isValid(positionInLabFrame))
+          continue;
+
+        const V3D positionInShapeFrame = toShapeFrame(positionInLabFrame);
+        if (sampleShape.isValid(positionInShapeFrame)) {
+          // Create track for distance in sample before scattering point
+          Track incoming(positionInShapeFrame, toSourceInShapeFrame);
+          // As in calculateGeneric, a point can occasionally be inside the object without a track
+          // segment to the surface being created; such elements are discarded. This also discards
+          // points inside the integration volume but outside the sample.
+          if (sampleShape.interceptSurface(incoming) > 0) {
+            result.l1.emplace_back(incoming.totalDistInsideObject());
+            result.position.emplace_back(positionInLabFrame);
+            result.volume.emplace_back(elementVolume);
+          }
+        }
+      }
+    }
+  }
+
+  result.totalvolume = static_cast<double>(result.l1.size()) * elementVolume;
+
+  return result;
+}
+
 Raster calculateCylinder(const V3D &beamDirection, const IObject &integShape, const IObject &sampleShape,
                          const size_t numSlices, const size_t numAnnuli) {
   if (integShape.shape() != detail::ShapeInfo::GeometryShape::CYLINDER)
