@@ -4,7 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from numpy import array, degrees, isfinite, reshape, nan, diff, ndarray
+from numpy import array, asarray, atleast_1d, clip, degrees, isfinite, reshape, nan, diff, ndarray, sqrt, stack
+from numpy.linalg import norm
 from os import path, makedirs
 from shutil import copy2
 
@@ -31,6 +32,9 @@ CALIB_PARAMS_WORKSPACE_NAME = "engggui_calibration_banks_parameters"
 CURVES_PREFIX = "engggui_curves_"
 VAN_CURVE_REBINNED_NAME = "van_ws_foc_rb"
 XUNIT_SUFFIXES = {"d-Spacing": "dSpacing", "Time-of-flight": "TOF"}  # to put in saved focused data filename
+# per-detector scattering centres, written by the Correction tab (see texture correction_model)
+SCATTERING_CENTRE_DETID_LOG = "ScatteringCentreDetIDs"
+SCATTERING_CENTRE_POSITION_LOGS = ("ScatteringCentreX", "ScatteringCentreY", "ScatteringCentreZ")
 
 
 def plot_tof_vs_d_from_calibration(
@@ -616,7 +620,14 @@ def _load_run_and_convert_to_dSpacing(filepath: str, instrument: str, full_calib
         logger.warning(f"Run {ws.name()} has invalid proton charge.")
         mantid.DeleteWorkspace(ws)
         return None
-    cal = _correct_full_calib_for_offset_scattering_com(ws, full_calib) if _can_calculate_scattering_com(ws) else full_calib
+    # a scattering centre per detector is the better correction where the correction tab has provided
+    # one; otherwise fall back to the single geometric centre of mass, and then to no correction
+    if _has_per_detector_scattering_centres(ws):
+        cal = _correct_full_calib_for_per_detector_scattering_centres(ws, full_calib)
+    elif _can_calculate_scattering_com(ws):
+        cal = _correct_full_calib_for_offset_scattering_com(ws, full_calib)
+    else:
+        cal = full_calib
     mantid.ApplyDiffCal(InstrumentWorkspace=ws, CalibrationWorkspace=cal)
     ws = mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws.name(), Target="dSpacing")
     if cal is not full_calib:
@@ -827,6 +838,101 @@ def _correct_full_calib_for_offset_scattering_com(ws: MatrixWorkspace, full_cali
         cal.setCell("difc", irow, difc_col[irow] * difc1.getValue(detid) / difc0.getValue(detid))
 
     return cal
+
+
+def _difc_geometric(scatter_pos: ndarray, det_pos: ndarray, source_pos: ndarray) -> ndarray:
+    """DIFC = k.(L1 + L2).sin(theta) for scattering at `scatter_pos`, without the physical constant k.
+
+    Only ever used as a ratio of two such values, so k cancels. `scatter_pos` is either one position
+    or one per detector; `det_pos` is one per detector. All positions are in metres in the lab frame.
+    """
+    d_in = scatter_pos - source_pos
+    d_out = det_pos - scatter_pos
+    l1 = norm(d_in, axis=-1)
+    l2 = norm(d_out, axis=-1)
+    cos_two_theta = clip((d_in * d_out).sum(axis=-1) / (l1 * l2), -1.0, 1.0)
+    sin_theta = sqrt((1.0 - cos_two_theta) / 2.0)
+    return (l1 + l2) * sin_theta
+
+
+def _correct_full_calib_for_per_detector_scattering_centres(ws: MatrixWorkspace, full_calib: TableWorkspace) -> TableWorkspace:
+    """
+    Adjusts the DIFC in the full calibration using a scattering centre calculated for each detector.
+
+    This is the per-detector form of _correct_full_calib_for_offset_scattering_com, and the reasoning
+    for scaling by DIFC_1/DIFC_0 is identical - see that docstring. The difference is where the
+    scattering centre comes from: rather than one geometric centre of mass shared by every detector,
+    these are the neutron weighted centres logged by the Correction tab, which account for the
+    attenuation of the outgoing path and so differ from detector to detector. That per-detector
+    variation is exactly what a partially immersed gauge volume produces, and what the single centre
+    of mass cannot represent.
+
+    Detectors without a logged centre (monitors, masked detectors, anything the gauge volume is
+    invisible to) are left with their calibrated DIFC untouched.
+    """
+    run = ws.getRun()
+    # a length 1 array log reloads from nexus as a scalar, hence atleast_1d
+    detids = atleast_1d(asarray(run.getProperty(SCATTERING_CENTRE_DETID_LOG).value)).astype(int)
+    centres = stack([atleast_1d(asarray(run.getProperty(log).value, dtype=float)) for log in SCATTERING_CENTRE_POSITION_LOGS], axis=-1)
+
+    instrument = ws.getInstrument()
+    source_pos = asarray(instrument.getSource().getPos())
+    sample_pos = asarray(instrument.getSample().getPos())
+
+    # keep only the logged detectors which are on this instrument and can actually detect something
+    det_info = ws.detectorInfo()
+    det_positions = []
+    found = []
+    for i, detid in enumerate(detids):
+        try:
+            index = det_info.indexOf(int(detid))
+        except (RuntimeError, IndexError):
+            continue  # a detector which is not part of this instrument
+        if det_info.isMonitor(index):
+            continue
+        det_positions.append(asarray(det_info.position(index)))
+        found.append(i)
+
+    if not found:
+        logger.warning(
+            f"None of the scattering centres logged on {ws.name()} correspond to detectors of this instrument - "
+            f"the calibration DIFCs have not been adjusted"
+        )
+        return full_calib
+
+    det_positions = asarray(det_positions)
+    # per-detector ratio of DIFC(at that detector's scattering centre) / DIFC(at the sample position)
+    ratios = _difc_geometric(centres[found], det_positions, source_pos) / _difc_geometric(sample_pos, det_positions, source_pos)
+    ratio_by_detid = {int(detids[i]): ratio for i, ratio in zip(found, ratios)}
+
+    # scale DIFC column only, per detector; leave DIFA/TZERO untouched
+    cal = mantid.CloneWorkspace(InputWorkspace=full_calib, OutputWorkspace="__full_calib_per_det_com")
+    difc_col, detid_col = cal.column("difc"), cal.column("detid")
+    for irow, detid in enumerate(detid_col):
+        ratio = ratio_by_detid.get(int(detid))
+        if ratio is not None:
+            cal.setCell("difc", irow, difc_col[irow] * ratio)
+
+    return cal
+
+
+def _has_per_detector_scattering_centres(ws: MatrixWorkspace) -> bool:
+    run = ws.getRun()
+    logs = (SCATTERING_CENTRE_DETID_LOG, *SCATTERING_CENTRE_POSITION_LOGS)
+    if not all(run.hasProperty(log) for log in logs):
+        return False
+    lengths = {len(atleast_1d(asarray(run.getProperty(log).value))) for log in logs}
+    if len(lengths) != 1 or lengths == {0}:
+        logger.warning(
+            f"Workspace {ws.name()} has per-detector scattering centre logs of inconsistent length - they will be "
+            f"ignored when adjusting the calibration DIFCs"
+        )
+        return False
+    logger.information(
+        f"Workspace {ws.name()} has per-detector scattering centres - Calibration DIFCs will be adjusted to "
+        f"account for the scattering volume seen by each detector"
+    )
+    return True
 
 
 def _can_calculate_scattering_com(ws: MatrixWorkspace) -> bool:

@@ -11,13 +11,17 @@ from Engineering.EnggUtils import (
     _save_output_files,
     _load_run_and_convert_to_dSpacing,
     _correct_full_calib_for_offset_scattering_com,
+    _correct_full_calib_for_per_detector_scattering_centres,
     _can_calculate_scattering_com,
+    _has_per_detector_scattering_centres,
     process_vanadium,
     focus_run,
     convert_TOFerror_to_derror,
 )
 from Engineering.common.instrument_config import ENGINX_GROUP
+from mantid.api import AnalysisDataService as ADS
 from mantid.kernel import UnitConversion, DeltaEModeType, UnitParams, UnitParametersMap
+from mantid.simpleapi import CreateSampleWorkspace, CreateEmptyTableWorkspace, MoveInstrumentComponent
 
 enggutils_path = "Engineering.EnggUtils"
 
@@ -335,14 +339,16 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
     @patch(enggutils_path + ".mantid.DeleteWorkspace")
     @patch(enggutils_path + ".mantid.ConvertUnits")
     @patch(enggutils_path + ".mantid.ApplyDiffCal")
+    @patch(enggutils_path + "._has_per_detector_scattering_centres")
     @patch(enggutils_path + "._correct_full_calib_for_offset_scattering_com")
     @patch(enggutils_path + "._can_calculate_scattering_com")
     @patch(enggutils_path + ".mantid.NormaliseByCurrent")
     @patch(enggutils_path + ".path_handling.get_run_number_from_path")
     @patch(enggutils_path + ".mantid.Load")
     def test_load_run_applies_com_corrected_calib_when_possible(
-        self, mock_load, mock_runno, mock_norm, mock_can, mock_correct, mock_apply, mock_conv, mock_del
+        self, mock_load, mock_runno, mock_norm, mock_can, mock_correct, mock_has_per_det, mock_apply, mock_conv, mock_del
     ):
+        mock_has_per_det.return_value = False
         ws = MagicMock()
         ws.getRun().getProtonCharge.return_value = 1.0
         mock_load.return_value = ws
@@ -361,13 +367,14 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
     @patch(enggutils_path + ".mantid.DeleteWorkspace")
     @patch(enggutils_path + ".mantid.ConvertUnits")
     @patch(enggutils_path + ".mantid.ApplyDiffCal")
+    @patch(enggutils_path + "._has_per_detector_scattering_centres")
     @patch(enggutils_path + "._correct_full_calib_for_offset_scattering_com")
     @patch(enggutils_path + "._can_calculate_scattering_com")
     @patch(enggutils_path + ".mantid.NormaliseByCurrent")
     @patch(enggutils_path + ".path_handling.get_run_number_from_path")
     @patch(enggutils_path + ".mantid.Load")
     def test_load_run_uses_uncorrected_calib_when_com_not_possible(
-        self, mock_load, mock_runno, mock_norm, mock_can, mock_correct, mock_apply, mock_conv, mock_del
+        self, mock_load, mock_runno, mock_norm, mock_can, mock_correct, mock_has_per_det, mock_apply, mock_conv, mock_del
     ):
         ws = MagicMock()
         ws.getRun().getProtonCharge.return_value = 1.0
@@ -375,12 +382,55 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
         mock_norm.return_value = ws
         mock_conv.return_value = "ws_dSpacing"
         mock_can.return_value = False
+        mock_has_per_det.return_value = False
 
         result = _load_run_and_convert_to_dSpacing("fpath", "ENGINX", "full_calib")
 
         mock_correct.assert_not_called()
         mock_apply.assert_called_once_with(InstrumentWorkspace=ws, CalibrationWorkspace="full_calib")
         mock_del.assert_not_called()  # full_calib is reused, nothing temporary to delete
+        self.assertEqual(result, "ws_dSpacing")
+
+    @patch(enggutils_path + ".mantid.DeleteWorkspace")
+    @patch(enggutils_path + ".mantid.ConvertUnits")
+    @patch(enggutils_path + ".mantid.ApplyDiffCal")
+    @patch(enggutils_path + "._correct_full_calib_for_per_detector_scattering_centres")
+    @patch(enggutils_path + "._correct_full_calib_for_offset_scattering_com")
+    @patch(enggutils_path + "._can_calculate_scattering_com")
+    @patch(enggutils_path + "._has_per_detector_scattering_centres")
+    @patch(enggutils_path + ".mantid.NormaliseByCurrent")
+    @patch(enggutils_path + ".path_handling.get_run_number_from_path")
+    @patch(enggutils_path + ".mantid.Load")
+    def test_load_run_prefers_per_detector_scattering_centres_over_single_com(
+        self,
+        mock_load,
+        mock_runno,
+        mock_norm,
+        mock_has_per_det,
+        mock_can,
+        mock_correct_com,
+        mock_correct_per_det,
+        mock_apply,
+        mock_conv,
+        mock_del,
+    ):
+        ws = MagicMock()
+        ws.getRun().getProtonCharge.return_value = 1.0
+        mock_load.return_value = ws
+        mock_norm.return_value = ws
+        mock_conv.return_value = "ws_dSpacing"
+        # both corrections are available - the per-detector one wins
+        mock_has_per_det.return_value = True
+        mock_can.return_value = True
+        mock_correct_per_det.return_value = "per_det_cal"
+
+        result = _load_run_and_convert_to_dSpacing("fpath", "ENGINX", "full_calib")
+
+        mock_correct_per_det.assert_called_once_with(ws, "full_calib")
+        mock_correct_com.assert_not_called()
+        mock_can.assert_not_called()
+        mock_apply.assert_called_once_with(InstrumentWorkspace=ws, CalibrationWorkspace="per_det_cal")
+        mock_del.assert_called_once_with("per_det_cal")
         self.assertEqual(result, "ws_dSpacing")
 
     @patch(enggutils_path + ".path.exists")
@@ -560,6 +610,96 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
 
         self.assertAlmostEqual(tof / d, 18000, delta=1e-10)
         self.assertAlmostEqual(d_error / d, tof_error / tof, delta=1e-10)
+
+
+class EnggUtilsPerDetectorScatteringCentreTest(unittest.TestCase):
+    """The per-detector DIFC correction is pure geometry, so it is tested against real workspaces."""
+
+    def setUp(self):
+        self.ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=2, OutputWorkspace="_engg_scatter_ws")
+        # the bank is on the beam axis as created, where sin(theta) and so DIFC are zero - move it out
+        # to a realistic diffraction geometry
+        MoveInstrumentComponent(Workspace=self.ws, ComponentName="bank1", X=1.0, Y=0.0, Z=1.0, RelativePosition=False)
+        det_info = self.ws.detectorInfo()
+        self.detids = [int(det_info.detectorIDs()[i]) for i in range(len(det_info)) if not det_info.isMonitor(i)]
+        self.difcs = [1000.0 * (i + 1) for i in range(len(self.detids))]
+
+    def tearDown(self):
+        ADS.clear()
+
+    def _make_calib(self, detids=None, difcs=None):
+        table = CreateEmptyTableWorkspace(OutputWorkspace="_engg_scatter_calib")
+        for col_type, name in (("int", "detid"), ("double", "difc"), ("double", "difa"), ("double", "tzero")):
+            table.addColumn(col_type, name)
+        for detid, difc in zip(self.detids if detids is None else detids, self.difcs if difcs is None else difcs):
+            table.addRow([int(detid), float(difc), 0.5, 0.25])
+        return table
+
+    def _log_centres(self, centres, detids=None):
+        run = self.ws.mutableRun()
+        run.addProperty("ScatteringCentreDetIDs", [int(d) for d in (self.detids if detids is None else detids)], True)
+        for axis, log in enumerate(("ScatteringCentreX", "ScatteringCentreY", "ScatteringCentreZ")):
+            run.addProperty(log, [float(centre[axis]) for centre in centres], True)
+
+    def test_centres_at_the_sample_position_leave_the_calibration_unchanged(self):
+        sample_pos = self.ws.getInstrument().getSample().getPos()
+        self._log_centres([(sample_pos.X(), sample_pos.Y(), sample_pos.Z())] * len(self.detids))
+
+        cal = _correct_full_calib_for_per_detector_scattering_centres(self.ws, self._make_calib())
+
+        for irow, difc in enumerate(self.difcs):
+            self.assertAlmostEqual(cal.cell("difc", irow) / difc, 1.0, places=12)
+
+    def test_a_shared_centre_reproduces_the_single_centre_of_mass_correction(self):
+        # with every detector given the same scattering centre the two corrections describe the same
+        # geometry, so this cross-checks the maths against the existing (CalculateDIFC based) route
+        centre = (0.001, 0.002, 0.003)
+        self._log_centres([centre] * len(self.detids))
+
+        with patch(enggutils_path + ".mantid.EstimateScatteringVolumeCentreOfMass", return_value=centre):
+            expected = _correct_full_calib_for_offset_scattering_com(self.ws, self._make_calib())
+        cal = _correct_full_calib_for_per_detector_scattering_centres(self.ws, self._make_calib())
+
+        for irow in range(len(self.detids)):
+            self.assertAlmostEqual(cal.cell("difc", irow) / expected.cell("difc", irow), 1.0, places=8)
+            self.assertNotAlmostEqual(cal.cell("difc", irow), self.difcs[irow], places=6)
+
+    def test_unlogged_detectors_and_other_columns_are_untouched(self):
+        # only the first detector gets a centre, and it is offset enough to move its difc
+        self._log_centres([(0.002, 0.0, 0.0)], detids=self.detids[:1])
+
+        cal = _correct_full_calib_for_per_detector_scattering_centres(self.ws, self._make_calib())
+
+        self.assertNotAlmostEqual(cal.cell("difc", 0), self.difcs[0], places=6)
+        for irow in range(1, len(self.detids)):
+            self.assertEqual(cal.cell("difc", irow), self.difcs[irow])
+        for irow in range(len(self.detids)):
+            self.assertEqual(cal.cell("difa", irow), 0.5)
+            self.assertEqual(cal.cell("tzero", irow), 0.25)
+
+    def test_detids_not_on_the_instrument_are_ignored(self):
+        self._log_centres([(0.002, 0.0, 0.0)] * 2, detids=[self.detids[0], 999999])
+
+        cal = _correct_full_calib_for_per_detector_scattering_centres(self.ws, self._make_calib())
+
+        self.assertNotAlmostEqual(cal.cell("difc", 0), self.difcs[0], places=6)
+        self.assertEqual(cal.cell("difc", 1), self.difcs[1])
+
+    def test_no_logged_detector_on_the_instrument_returns_the_calibration_unaltered(self):
+        self._log_centres([(0.002, 0.0, 0.0)], detids=[999999])
+        full_calib = self._make_calib()
+
+        self.assertIs(_correct_full_calib_for_per_detector_scattering_centres(self.ws, full_calib), full_calib)
+
+    def test_has_per_detector_scattering_centres(self):
+        self.assertFalse(_has_per_detector_scattering_centres(self.ws))
+
+        self._log_centres([(0.0, 0.0, 0.0)] * len(self.detids))
+        self.assertTrue(_has_per_detector_scattering_centres(self.ws))
+
+        # a truncated log is not something to guess at
+        self.ws.mutableRun().addProperty("ScatteringCentreY", [0.0], True)
+        self.assertFalse(_has_per_detector_scattering_centres(self.ws))
 
 
 if __name__ == "__main__":

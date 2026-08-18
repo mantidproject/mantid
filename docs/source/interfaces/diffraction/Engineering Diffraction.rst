@@ -211,6 +211,21 @@ Absorption Correction
 This tab allows corrections to be applied to the input data files, as well as attaching sample information, such as shape, material and orientation. Additional functionality is to correct experimental intensity for beam divergence and
 to calculate a table of attenuation coefficients for a given bin in the spectra.
 
+Where a gauge volume has been defined and the sample has no container or environment, the absorption correction is
+calculated with :ref:`algm-WeightedGaugeVolumeAbsorption` rather than :ref:`algm-MonteCarloAbsorption`. That accounts
+for the incident beam profile and the radial collimator, and is free of Monte Carlo noise. As a by-product of the same
+calculation it estimates a scattering centre for every detector, attached to the corrected data as the sample logs
+``ScatteringCentreDetIDs`` and ``ScatteringCentreX/Y/Z`` (positions in metres in the lab frame).
+
+These describe where the detected neutrons actually scattered from, which is not the sample position when the gauge
+volume is only partially immersed in the sample. The Focus tab uses them to adjust the calibration DIFCs per detector;
+when they are absent it falls back to the single geometric centre of mass of the illuminated volume, and failing that
+assumes the gauge volume is fully within the sample.
+
+A sample with a container or environment, or a correction run without a gauge volume, still uses
+:ref:`algm-MonteCarloAbsorption`, which is the only path that attenuates through the surrounding material. No scattering
+centres are produced in that case and the Focus tab behaves as it did previously.
+
 .. image:: ../../images/EngDiff_Correction.png
     :width: 600px
     :align: center

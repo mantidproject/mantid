@@ -10,10 +10,22 @@ import tempfile
 import numpy as np
 from unittest.mock import patch, MagicMock, mock_open, call
 from mantid.api import AnalysisDataService as ADS
-from mantid.simpleapi import CreateSampleWorkspace, SetGoniometer, SetSample
+from mantid.simpleapi import (
+    ConvertUnits,
+    CreateSampleWorkspace,
+    DefineGaugeVolume,
+    Rebin,
+    SetGoniometer,
+    SetSample,
+    WeightedGaugeVolumeAbsorption,
+)
 from Engineering.common.xml_shapes import get_cube_xml
 
-from Engineering.texture.correction.correction_model import TextureCorrectionModel, read_attenuation_coefficient_at_value
+from Engineering.texture.correction.correction_model import (
+    ABSORPTION_WAVELENGTH_POINTS,
+    TextureCorrectionModel,
+    read_attenuation_coefficient_at_value,
+)
 
 correction_model_path = "Engineering.texture.correction.correction_model"
 texture_helper_path = "Engineering.texture.texture_helper"
@@ -434,7 +446,7 @@ class TextureCorrectionModelTest(unittest.TestCase):
         self.model.calc_all_corrections(wss, out_wss, root_dir, abs_args, atten_args, div_args)
 
         mock_define_gauge_volume.assert_called_once_with(self.mock_ws, abs_args["gauge_vol_preset"], abs_args["gauge_vol_file"])
-        mock_calc_absorption.assert_called_once_with(self.mock_ws, abs_args["mc_param_str"])
+        mock_calc_absorption.assert_called_once_with(self.mock_ws, abs_args["mc_param_str"], abs_args["gauge_vol_preset"])
         mock_read_attenuation_coefficient_at_value.assert_called_once_with("_abs_corr", atten_args["atten_val"], atten_args["atten_units"])
         mock_write_atten_val_table.assert_called_once_with(
             self.mock_ws,
@@ -458,6 +470,101 @@ class TextureCorrectionModelTest(unittest.TestCase):
                 mock_calib.is_texture_group.return_value = is_texture
                 self.assertEqual(TextureCorrectionModel.is_texture(mock_calib), is_texture)
                 mock_calib.is_texture_group.assert_called_once_with()
+
+
+class TextureCorrectionModelScatteringCentreTest(unittest.TestCase):
+    """The scattering centres are handed to the focusing through the workspace itself, so these run
+    the real algorithm against a real workspace rather than checking a call was made."""
+
+    ws_name = "_scattering_centre_ws"
+
+    def setUp(self):
+        self.model = TextureCorrectionModel()
+        self.ws = CreateSampleWorkspace(NumBanks=2, BankPixelWidth=2, OutputWorkspace=self.ws_name)
+        SetSample(
+            self.ws,
+            Geometry={"Shape": "CSG", "Value": get_cube_xml("sample", 0.01)},
+            Material={"ChemicalFormula": "Fe"},
+        )
+
+    def tearDown(self):
+        ADS.clear()
+
+    def test_calc_absorption_attaches_a_centre_per_detector(self):
+        DefineGaugeVolume(self.ws, get_cube_xml("gauge", 0.004))
+
+        self.model.calc_absorption(self.ws_name, "")
+
+        run = ADS.retrieve(self.ws_name).getRun()
+        detids = run.getProperty("ScatteringCentreDetIDs").value
+        self.assertEqual(len(detids), self.ws.getNumberHistograms())
+        for log in ("ScatteringCentreX", "ScatteringCentreY", "ScatteringCentreZ"):
+            positions = run.getProperty(log).value
+            self.assertEqual(len(positions), len(detids))
+            # every centre has to lie within the gauge volume it was integrated over
+            self.assertTrue(np.all(np.abs(positions) <= 0.002))
+        # the table is a handover detail and should not be left cluttering the ADS
+        self.assertFalse(ADS.doesExist("_scattering_centres"))
+
+    def test_capping_the_wavelength_points_leaves_the_correction_alone(self):
+        """The correction is asked for at ABSORPTION_WAVELENGTH_POINTS wavelengths and interpolated
+        between, because evaluating it at every bin of a finely binned run costs tens of seconds. The
+        saving is only worth having if the interpolation is invisible, so check it against the answer
+        every bin gives, on a workspace binned finely enough for the cap to bite."""
+        DefineGaugeVolume(self.ws, get_cube_xml("gauge", 0.004))
+        in_wavelength = ConvertUnits(self.ws, Target="Wavelength", StoreInADS=False)
+        in_wavelength = Rebin(in_wavelength, Params=[0.5, 0.002, 5.0], StoreInADS=False)
+        self.assertGreater(in_wavelength.blocksize(), 10 * ABSORPTION_WAVELENGTH_POINTS)
+
+        kwargs = {"InputWorkspace": in_wavelength, "ElementSize": 1.0, "ElementUnits": "mm"}
+        every_bin = WeightedGaugeVolumeAbsorption(OutputWorkspace="_every_bin_abs", ScatteringCentres="_every_bin", **kwargs)
+        capped = WeightedGaugeVolumeAbsorption(
+            OutputWorkspace="_capped_abs",
+            NumberOfWavelengthPoints=ABSORPTION_WAVELENGTH_POINTS,
+            ScatteringCentres="_capped",
+            **kwargs,
+        )
+
+        # several outputs are declared, so the algorithm hands back a tuple of them
+        reference = every_bin.OutputWorkspace.extractY()
+        self.assertTrue(np.all(reference > 0.0))
+        self.assertLess(np.max(np.abs(capped.OutputWorkspace.extractY() - reference) / reference), 1e-3)
+        # the centres sum over their own bounded subsample of wavelengths, so they cannot move at all
+        for column in ("x", "y", "z"):
+            np.testing.assert_array_equal(ADS.retrieve("_capped").column(column), ADS.retrieve("_every_bin").column(column))
+
+    def test_calc_absorption_without_a_gauge_volume_stays_on_monte_carlo(self):
+        # no gauge volume means no bounded integration region, so the analytical path does not apply
+        # and there are no per-detector centres to hand on
+        self.model.calc_absorption(self.ws_name, "")
+
+        self.assertFalse(ADS.retrieve(self.ws_name).getRun().hasProperty("ScatteringCentreDetIDs"))
+        self.assertTrue(ADS.doesExist("_abs_corr"))
+
+    @patch(correction_model_path + ".logger")
+    def test_calc_absorption_falls_back_to_monte_carlo_on_failure(self, mock_logger):
+        # without a material there is nothing to attenuate in, and the algorithm refuses to weight
+        no_material = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=1, OutputWorkspace="_no_material_ws")
+        SetSample(no_material, Geometry={"Shape": "CSG", "Value": get_cube_xml("sample", 0.01)})
+        DefineGaugeVolume(no_material, get_cube_xml("gauge", 0.004))
+
+        self.model.calc_absorption("_no_material_ws", "")
+
+        mock_logger.warning.assert_called_once()
+        # the correction still has to be produced, just without the centres
+        self.assertTrue(ADS.doesExist("_abs_corr"))
+        self.assertFalse(no_material.getRun().hasProperty("ScatteringCentreDetIDs"))
+
+    def test_gauge_extent_comes_from_the_known_experiment_configuration(self):
+        calibration = MagicMock()
+        calibration.get_instrument.return_value = "ENGINX"
+        self.model.set_calibration(calibration)
+
+        # a sub-mm gauge needs elements smaller than the 1mm default, which is what the extent is for
+        self.assertAlmostEqual(self.model._get_gauge_extent("0.5mmCube"), 0.0005)
+        self.assertAlmostEqual(self.model._get_gauge_extent("4mmCube"), 0.00395)  # measured collimator fwhm
+        self.assertIsNone(self.model._get_gauge_extent("No Gauge Volume"))
+        self.assertIsNone(self.model._get_gauge_extent(None))
 
 
 if __name__ == "__main__":

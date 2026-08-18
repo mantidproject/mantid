@@ -14,6 +14,7 @@ from mantid.simpleapi import (
     SetInstrumentParameter,
     ConvertUnits,
     MonteCarloAbsorption,
+    WeightedGaugeVolumeAbsorption,
     CloneWorkspace,
     SaveNexus,
     logger,
@@ -31,8 +32,21 @@ from Engineering.common.texture_sample_viewer import has_valid_shape
 from typing import Sequence, Tuple
 from mantid.dataobjects import Workspace2D
 from Engineering.common.calibration_info import CalibrationInfo
-from Engineering.common.instrument_config import get_experiment_config
-from Engineering.texture.texture_helper import get_gauge_vol_str, load_all_orientations
+from Engineering.common.instrument_config import ExperimentConfig, get_experiment_config
+from Engineering.texture.texture_helper import estimate_element_size, get_gauge_vol_str, load_all_orientations
+
+# the per-detector scattering centres are handed to the focusing as run logs, so that they survive
+# being saved and reloaded with the corrected data
+SCATTERING_CENTRE_TABLE = "_scattering_centres"
+SCATTERING_CENTRE_DETID_LOG = "ScatteringCentreDetIDs"
+SCATTERING_CENTRE_POSITION_LOGS = {"X": "ScatteringCentreX", "Y": "ScatteringCentreY", "Z": "ScatteringCentreZ"}
+
+# Wavelengths at which the analytical correction evaluates its integral, the rest being interpolated
+# between. Left to itself it uses every bin, and raw data converted to wavelength carries thousands
+# of them: on a 2500 spectrum ENGIN-X run binned to 10186 points that is 90 s rather than 2.6 s, for
+# a correction that differs by at most one part in 1e5 and scattering centres that do not differ at
+# all. The attenuation factor is smooth in wavelength, which is what makes this safe.
+ABSORPTION_WAVELENGTH_POINTS = 200
 
 
 class TextureCorrectionModel:
@@ -48,11 +62,95 @@ class TextureCorrectionModel:
 
     # ~~~~~ Correction Functions ~~~~~~~~~~~~~
 
-    def calc_absorption(self, ws: str, mc_param_str: str) -> None:
+    def calc_absorption(self, ws: str, mc_param_str: str, preset: str | None = None) -> None:
         method_dict = self._param_str_to_dict(mc_param_str) if mc_param_str else {}  # allow no kwargs to be given
         temp_ws = ConvertUnits(ws, Target="Wavelength")
         method_dict["OutputWorkspace"] = "_abs_corr"
-        MonteCarloAbsorption(temp_ws, **method_dict)
+        if self._can_use_weighted_gauge_volume(ws):
+            self._calc_weighted_absorption(ws, temp_ws, preset, bool(mc_param_str))
+        else:
+            MonteCarloAbsorption(temp_ws, **method_dict)
+
+    @staticmethod
+    def _can_use_weighted_gauge_volume(ws: str) -> bool:
+        """Whether the analytical correction is applicable to this workspace.
+
+        It is preferred where it applies: it is free of the Monte Carlo noise that would otherwise
+        propagate into the per-detector scattering centres, and it is the only path that accounts
+        for the beam profile and collimator. But it integrates over a gauge volume and attenuates
+        through the sample alone, so anything with a container or sample environment, or with no
+        gauge volume to bound the integration, still needs the Monte Carlo treatment.
+        """
+        try:
+            workspace = ADS.retrieve(ws) if isinstance(ws, str) else ws
+            if not workspace.run().hasProperty("GaugeVolume"):
+                return False
+            return not workspace.sample().hasEnvironment()
+        except (KeyError, RuntimeError, AttributeError):
+            # if the preconditions cannot be established, use the generally applicable correction
+            return False
+
+    def _calc_weighted_absorption(self, ws: str, temp_ws: Workspace2D, preset: str | None, had_mc_args: bool) -> None:
+        """Correct for attenuation and locate the per-detector scattering centres in one pass.
+
+        Both come from the same quadrature over the same elements, so asking for the centres here
+        rather than in a separate step avoids repeating the expensive part.
+
+        A failure is not fatal. The correction is the important output, so fall back to the Monte
+        Carlo treatment and let the focusing revert to assuming the scattering comes from the sample
+        position.
+        """
+        if had_mc_args:
+            logger.notice("The Monte Carlo parameters do not apply to the analytical gauge volume correction and will be ignored")
+        element_size, units = estimate_element_size(ADS.retrieve(ws), self._get_gauge_extent(preset))
+        try:
+            WeightedGaugeVolumeAbsorption(
+                InputWorkspace=temp_ws,
+                OutputWorkspace="_abs_corr",
+                ScatteringCentres=SCATTERING_CENTRE_TABLE,
+                ElementSize=element_size,
+                ElementUnits=units,
+                NumberOfWavelengthPoints=ABSORPTION_WAVELENGTH_POINTS,
+            )
+        except (RuntimeError, ValueError) as err:
+            logger.warning(
+                f"The analytical gauge volume correction failed for {ws} ({err}); falling back to MonteCarloAbsorption "
+                f"and the focusing will assume the scattering volume is centred on the sample position"
+            )
+            MonteCarloAbsorption(temp_ws, OutputWorkspace="_abs_corr")
+            return
+        self.attach_scattering_centres(ws, SCATTERING_CENTRE_TABLE)
+
+    @staticmethod
+    def attach_scattering_centres(ws: str, table_name: str = SCATTERING_CENTRE_TABLE) -> None:
+        """Move the scattering centre table onto the run of `ws` as array logs, then discard it.
+
+        Run logs are used rather than a workspace so that the centres travel with the corrected data
+        through saving and reloading, and can be picked up later by the focusing. Positions are in
+        metres in the lab frame, matching the detector positions the focusing compares them against.
+        """
+        table = ADS.retrieve(table_name)
+        run = ADS.retrieve(ws).mutableRun()
+        run.addProperty(SCATTERING_CENTRE_DETID_LOG, [int(detid) for detid in table.column("detid")], True)
+        for column, log in SCATTERING_CENTRE_POSITION_LOGS.items():
+            run.addProperty(log, [float(pos) for pos in table.column(column.lower())], True)
+        ADS.remove(table_name)
+
+    def _get_experiment_config(self, preset: str | None) -> ExperimentConfig | None:
+        """The known instrument setup behind a gauge volume preset, or None if it is not one we
+        have the optics for - a custom gauge volume, for instance."""
+        instrument = self.calibration.get_instrument() if self.calibration else None
+        return get_experiment_config(instrument, preset)
+
+    def _get_gauge_extent(self, preset: str | None) -> float | None:
+        """The shortest dimension of the gauge volume in metres, where the setup is known."""
+        config = self._get_experiment_config(preset)
+        if config is None:
+            return None
+        extents = [config.slit_width, config.slit_height]
+        if config.collimator:
+            extents.append(config.collimator.gauge_width)
+        return min(extents)
 
     def calc_divergence(self, ws_name: str, horz: float, vert: float, det_horz: float) -> None:
         # estimate of divergence taken from divergence component of equation 3 in
@@ -97,7 +195,7 @@ class TextureCorrectionModel:
             if self.include_abs:
                 self.define_gauge_volume(ws, abs_args["gauge_vol_preset"], abs_args["gauge_vol_file"])
                 self.define_beam_and_collimator(ws, abs_args["gauge_vol_preset"])
-                self.calc_absorption(ws, abs_args["mc_param_str"])
+                self.calc_absorption(ws, abs_args["mc_param_str"], abs_args["gauge_vol_preset"])
                 abs_corr = "_abs_corr"
                 if self.include_atten:
                     val, units = atten_args["atten_val"], atten_args["atten_units"]
@@ -294,8 +392,7 @@ class TextureCorrectionModel:
         properly. A custom gauge volume carries no such information, so it is left undefined and the
         whole sample is treated as uniformly illuminated.
         """
-        instrument = self.calibration.get_instrument() if self.calibration else None
-        config = get_experiment_config(instrument, preset)
+        config = self._get_experiment_config(preset)
         if config is None:
             logger.notice(
                 f"No known instrument setup for gauge volume preset '{preset}' - the beam and collimator "
