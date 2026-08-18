@@ -119,6 +119,19 @@ protected:
   virtual void perSpectrumHook(size_t /*wsIndex*/, const std::vector<double> & /*L2s*/,
                                const std::vector<double> & /*weights*/) { /*Empty in base class*/ }
 
+  /** The distance travelled inside the sample on the way out to @p detector, for each element of
+   * m_elementPositions in order.
+   *
+   * Traces straight from the element to the detector, which assumes m_elementPositions, the detector
+   * positions and the sample shape are all in the same frame. A subclass whose elements are not in
+   * the sample's frame has to reconcile them here, since this is the only place the two meet.
+   */
+  virtual void calculateDistances(const Geometry::IDetector &detector, std::vector<double> &L2s) const;
+
+  /// Where to trace to for this detector: its position, or for a group the position implied by the
+  /// group's average angles.
+  Kernel::V3D detectorPositionToTraceTo(const Geometry::IDetector &detector) const;
+
   API::MatrixWorkspace_sptr m_inputWS;         ///< A pointer to the input workspace
   const Geometry::IObject *m_sampleObject;     ///< Local cache of sample object.
   Kernel::V3D m_beamDirection;                 ///< The direction of the beam.
@@ -140,7 +153,6 @@ protected:
 private:
   void retrieveBaseProperties();
   void constructSample(API::Sample &sample);
-  void calculateDistances(const Geometry::IDetector &detector, std::vector<double> &L2s) const;
   inline double doIntegration(const double linearCoefAbs, const std::vector<double> &L2s,
                               const std::vector<double> &weights, const size_t startIndex, const size_t endIndex) const;
   inline double doIntegration(const double linearCoefAbsL1, const double linearCoefAbsL2,
