@@ -18,6 +18,7 @@
 #include "MantidAlgorithms/WeightedGaugeVolumeAbsorption.h"
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/V3D.h"
 
@@ -170,6 +171,29 @@ public:
     // The gauge is a 10 mm cube inside a 20 mm cube, so an eighth of the sample volume
     MatrixWorkspace_sptr fraction = alg->getProperty("IlluminatedVolumeFraction");
     TS_ASSERT_EQUALS(fraction->getNumberHistograms(), out->getNumberHistograms());
+    for (size_t i = 0; i < fraction->getNumberHistograms(); ++i) {
+      TS_ASSERT_DELTA(fraction->y(i)[0], 0.125, 0.02);
+    }
+  }
+
+  /// The same eighth, but for a sample written the way SetSample and the interface write one.
+  /// CSGObject::volume() sums a signed contribution per vertex, and for a cuboid given as
+  /// height/width/depth/centre the winding order makes that sum negative - so the fraction has to be
+  /// taken against the magnitude. The test above passes either way, because the C++ helper it uses
+  /// happens to wind a cuboid the other way round.
+  void testIlluminatedFractionWhenTheSampleVolumeComesBackNegative() {
+    auto ws = makeWorkspace();
+    ws->mutableSample().setShape(
+        Mantid::Geometry::ShapeFactory().createShape(cubeXML("sample", 0.02, V3D(0.0, 0.0, 0.0))));
+    TS_ASSERT_LESS_THAN(ws->sample().getShape().volume(), 0.0); // the behaviour being guarded against
+    ws->mutableRun().addProperty("GaugeVolume", cubeXML("gv", 0.01, V3D(0.0, 0.0, 0.0)));
+
+    auto alg = makeWeighted(ws, 1.0);
+    alg->setPropertyValue("IlluminatedVolumeFraction", "fraction");
+    alg->execute();
+    TS_ASSERT(alg->isExecuted());
+
+    MatrixWorkspace_sptr fraction = alg->getProperty("IlluminatedVolumeFraction");
     for (size_t i = 0; i < fraction->getNumberHistograms(); ++i) {
       TS_ASSERT_DELTA(fraction->y(i)[0], 0.125, 0.02);
     }

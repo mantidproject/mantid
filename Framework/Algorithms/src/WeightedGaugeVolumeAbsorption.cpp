@@ -198,7 +198,12 @@ void WeightedGaugeVolumeAbsorption::perSpectrumHook(size_t wsIndex, const std::v
   // Deliberately not m_sampleVolume: with a gauge volume the base class sets that to the rasterised
   // gauge-and-sample volume, so dividing by it would return one by construction. The whole sample
   // shape is what makes this a meaningful fraction.
-  const double wholeSampleVolume = m_sampleObject->volume();
+  //
+  // Taken as a magnitude because CSGObject::volume() computes a cuboid's volume as a signed sum
+  // over its vertices, and the sign follows the winding order ShapeFactory happened to produce. A
+  // cuboid written as height/width/depth/centre - which is what SetSample and the interface produce
+  // - comes back negative, so a straight positivity guard silently zeroed the whole output.
+  const double wholeSampleVolume = std::abs(m_sampleObject->volume());
   m_illuminatedFraction[wsIndex] = wholeSampleVolume > 0.0 ? illuminatedVolume / wholeSampleVolume : 0.0;
 }
 
