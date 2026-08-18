@@ -25,6 +25,7 @@
 #include "MantidKernel/Unit.h"
 #include <algorithm>
 #include <cmath>
+#include <numeric>
 
 namespace Mantid::Algorithms {
 
@@ -181,10 +182,10 @@ void WeightedGaugeVolumeAbsorption::perSpectrumHook(size_t wsIndex, const std::v
     illuminatedVolume += elementWeight;
 
     const double pathLength = m_L1s[i] + L2s[i];
-    double attenuation = 0.0;
-    for (const auto lambda : m_lambdas) {
-      attenuation += std::exp(-material.attenuationCoefficient(lambda) * pathLength);
-    }
+    const double attenuation =
+        std::accumulate(m_lambdas.cbegin(), m_lambdas.cend(), 0.0, [&](const double sum, const double lambda) {
+          return sum + std::exp(-material.attenuationCoefficient(lambda) * pathLength);
+        });
 
     const double weight = elementWeight * attenuation;
     weightedSum += m_elementPositions[i] * weight;
