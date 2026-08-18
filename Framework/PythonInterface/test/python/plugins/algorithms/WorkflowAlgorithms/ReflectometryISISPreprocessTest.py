@@ -6,11 +6,14 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
+import numpy as np
+
 from mantid import config, FileFinder
 from mantid.api import AnalysisDataService, IEventWorkspace, MatrixWorkspace, WorkspaceGroup
-from mantid.simpleapi import AddSampleLog, AddTimeSeriesLog, CreateSampleWorkspace
+from mantid.simpleapi import AddSampleLog, AddTimeSeriesLog, ConvertUnits, CreateSampleWorkspace
 from plugins.algorithms.WorkflowAlgorithms.ReflectometryISISPreprocess import ReflectometryISISPreprocess
 from testhelpers import create_algorithm
+from testhelpers.tempfile_wrapper import TemporaryFileHelper
 
 
 class ReflectometryISISPreprocessTest(unittest.TestCase):
@@ -23,11 +26,14 @@ class ReflectometryISISPreprocessTest(unittest.TestCase):
         self._oldInstrument = config["default.instrument"]
         config["default.facility"] = "ISIS"
         config["default.instrument"] = "INTER"
+        self._temp_calibration_file = None
 
     def tearDown(self):
         AnalysisDataService.clear()
         config["default.facility"] = self._oldFacility
         config["default.instrument"] = self._oldInstrument
+        if self._temp_calibration_file:
+            del self._temp_calibration_file
 
     def test_input_run_is_loaded_histo_mode_by_default(self):
         args = {"InputRunList": "INTER13460", "OutputWorkspace": "ws"}
@@ -76,9 +82,24 @@ class ReflectometryISISPreprocessTest(unittest.TestCase):
         self.assertIsInstance(output_ws, WorkspaceGroup)
         self.assertEqual(output_ws.getNumberOfEntries(), 2)
 
-    def test_workspace_group_with_calibration_throws(self):
-        args = {"InputRunList": "POLREF14966", "CalibrationFile": self._CALIBRATION_TEST_DATA, "OutputWorkspace": "ws"}
-        self._assert_run_algorithm_raises_exception(args, "Workspace Group")
+    def test_polref_workspace_group_uses_consistent_wavelength_bins_after_calibration(self):
+        calibration_lines = ["spectrumnumber angle\n"]
+        calibration_lines.extend(f"{spectrum_no} {3.5 - spectrum_no * 0.005}\n" for spectrum_no in range(5, 645))
+        self._temp_calibration_file = TemporaryFileHelper(fileContent="".join(calibration_lines), extension=".dat")
+        args = {
+            "InputRunList": "POLREF14966",
+            "CalibrationFile": self._temp_calibration_file.getName(),
+            "ThetaIn": 0.5,
+            "OutputWorkspace": "ws",
+        }
+
+        output_ws = self._run_test(args)
+        AnalysisDataService.addOrReplace("calibrated", output_ws)
+        wavelength_ws = ConvertUnits(InputWorkspace="calibrated", Target="Wavelength", OutputWorkspace="wavelength")
+
+        self.assertIsInstance(output_ws, WorkspaceGroup)
+        for workspace_index in range(wavelength_ws[0].getNumberHistograms()):
+            np.testing.assert_array_equal(wavelength_ws[0].x(workspace_index), wavelength_ws[1].x(workspace_index))
 
     def test_experiment_angle_uses_theta_in_when_provided(self):
         ws = CreateSampleWorkspace()
