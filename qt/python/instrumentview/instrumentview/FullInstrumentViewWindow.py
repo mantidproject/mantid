@@ -797,6 +797,9 @@ class FullInstrumentViewView(QWidget):
     def is_select_peaks_checked(self) -> bool:
         return self._select_peaks.isChecked()
 
+    def set_select_peaks_enabled(self, enabled: bool) -> None:
+        self._select_peaks.setEnabled(enabled)
+
     def is_select_bank_tube_checked(self) -> bool:
         return self._select_bank_tube.isChecked()
 
@@ -1132,6 +1135,9 @@ class FullInstrumentViewView(QWidget):
             self.main_plotter.remove_actor(mesh[1])
         self._overlay_meshes.clear()
 
+    def has_any_peak_overlays_in_pyvista_plotter(self) -> bool:
+        return bool(self._overlay_meshes)
+
     @_skip_if_closing
     def clear_lineplot_overlays(self) -> None:
         for line in self._lineplot_overlays:
@@ -1234,7 +1240,7 @@ class FullInstrumentViewView(QWidget):
             removed = list_to_clear.takeItem(i)
             del removed
 
-    def has_any_peak_overlays(self) -> bool:
+    def has_any_peak_overlays_in_lineplot(self) -> bool:
         return len(self._lineplot_overlays) > 0
 
     def _on_axes_click_during_peak_selection(self, event) -> None:

@@ -111,8 +111,8 @@ class FullInstrumentViewPresenter:
     def setup(self):
         self._view.subscribe_presenter(self)
         self._view.set_projection_combo_options(self._model.get_projection_options())
-        self._view.set_default_projection(self._model.get_default_projection())
         self._view.setup_connections_to_presenter()
+        self._view.set_default_projection(self._model.get_default_projection())
         self._view.set_contour_range_limits(self._model.counts_limits)
         self._view.set_integration_range_limits(self._model.integration_limits)
         self._view.show_axes()
@@ -126,7 +126,7 @@ class FullInstrumentViewPresenter:
             add_callback=self.add_workspace_callback,
         )
         self._view.hide_status_box()
-        self.update_plotter(False)
+        self.update_plotter(refresh_limits=False)
 
         if self._model.workspace_base_unit in self._UNIT_OPTIONS:
             self._view.set_unit_combo_box_index(self._UNIT_OPTIONS.index(self._model.workspace_base_unit))
@@ -769,6 +769,8 @@ class FullInstrumentViewPresenter:
         pos, labels, selected_peaks_workspaces = self._model.get_peak_overlay_arguments(self._view.selected_peaks_workspaces())
         transformed_pos = [self._transform_vectors_with_matrix(p, self._transform) for p in pos]
         self._view.plot_overlay_meshes(transformed_pos, labels, selected_peaks_workspaces)
+        # Everytime the pyvista plotter gets updated with peaks, the button for peak picking should be updated
+        self._view.set_select_peaks_enabled(self._view.has_any_peak_overlays_in_pyvista_plotter())
 
     def refresh_lineplot_peaks(self) -> None:
         # Plot vertical lines on the lineplot if the peak detector is selected
