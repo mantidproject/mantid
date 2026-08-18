@@ -38,7 +38,7 @@ class SansRunTabAsyncTest(unittest.TestCase):
         errors = {}
         get_states_mock.return_value = states, errors
 
-        expected_shift_scale_factors = (1.1, 2.2)
+        expected_shift_scale_factors = (1.1, 2.2, "")
         self.async_worker.batch_processor.return_value = expected_shift_scale_factors
 
         self.async_worker.process_states_on_thread(
