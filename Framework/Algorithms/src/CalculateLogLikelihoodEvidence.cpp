@@ -85,8 +85,8 @@ void CalculateLogLikelihoodEvidence::exec() {
         continue;
       }
       API::TableRow row = table->appendRow();
-      row << wsName + " - " + wsNameSecond << evidence - evidenceSecond << wsName + " / " + wsNameSecond
-          << std::exp(evidence - evidenceSecond);
+      row << wsName + " - " + wsNameSecond << evidence - evidenceSecond
+          << "exp( " + wsName + " - " + wsNameSecond + " )" << std::exp(evidence - evidenceSecond);
     }
   }
   setProperty("OutputWorkspace", logEvidenceTable);

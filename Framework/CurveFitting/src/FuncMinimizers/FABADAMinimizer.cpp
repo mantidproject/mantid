@@ -808,7 +808,7 @@ void FABADAMinimizer::outputPDF(std::vector<double> &xValues, std::vector<double
                                 int const &pdfLength) {
   setParameterXAndYValuesForPDF(xValues, yValues, reducedChain, convLength, pdfLength);
   auto parameterNames = m_fitFunction->getParameterNames();
-  parameterNames.emplace_back("Chi Squared");
+  parameterNames.emplace_back("Chi_Squared");
 
   const auto groupPdfName = getPropertyValue("PDF");
   API::WorkspaceGroup_sptr groupPdf;
