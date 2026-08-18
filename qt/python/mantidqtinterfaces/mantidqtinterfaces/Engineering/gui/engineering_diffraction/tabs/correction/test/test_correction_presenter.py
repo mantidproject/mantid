@@ -112,6 +112,12 @@ class TestTextureCorrectionPresenter(unittest.TestCase):
         self.presenter.update_custom_shape_finder_vis()
         self.view.set_finder_gauge_vol_visible.assert_called_with(False)
 
+    def test_set_instrument_override_repopulates_gauge_volume_presets(self):
+        self.view.get_shape_method.return_value = "4mmCube"
+        self.presenter.set_instrument_override(1)
+        self.view.populate_gauge_volume_presets.assert_called_once_with(self.presenter.instrument)
+        self.view.set_finder_gauge_vol_visible.assert_called_with(False)
+
     def test_load_all_orientations_calls_model_and_redraws(self):
         self.view.get_selected_workspaces.return_value = ["ws1", "ws2"]
         self.view.get_orientation_file.return_value = "orient.txt"
