@@ -1,0 +1,3 @@
+- The socket-read poll loop of the ``SNSLiveEventDataListener`` is refactored to provide clean detection
+  of a peer disconnect, and to improve its responsiveness. These changes are expected to fix several cases
+  where the live-data system hung up in response to changes in the ADARA-server state.

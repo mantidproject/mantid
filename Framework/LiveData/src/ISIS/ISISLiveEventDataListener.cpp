@@ -184,7 +184,7 @@ std::shared_ptr<API::Workspace> ISISLiveEventDataListener::doExtractData() {
     // Swap the workspaces
     std::swap(m_eventBuffer[i], temp);
 
-    outWorkspaces[i] = temp;
+    outWorkspaces[i] = std::move(temp); // Coverity CID 1663861: copy-instead-of-move
   }
 
   if (m_numberOfPeriods > 1) {
