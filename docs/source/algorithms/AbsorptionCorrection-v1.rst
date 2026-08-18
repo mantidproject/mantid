@@ -69,6 +69,16 @@ detector sees of it, use :ref:`algm-WeightedGaugeVolumeAbsorption`, which weight
 by the incident beam profile and the collimator acceptance and can additionally report the
 neutron weighted scattering centre seen by each detector.
 
+A sample orientation is honoured however it was set. Unlike the other algorithms in this family, this
+one integrates over the sample shape attached to the workspace rather than one built from its own
+dimensions, so it has to know which frame that shape is in: the gauge volume and the detectors are
+described in the lab frame, while the sample shape is there only if something has already rotated it.
+:ref:`algm-CopySample` onto an oriented workspace bakes the goniometer into the shape definition,
+whereas :ref:`algm-SetGoniometer` on its own leaves the shape untouched. The algorithm compares the
+goniometer on the run against the rotation the shape reports already carrying and applies only the
+remainder, so both routes describe the same experiment and give the same answer.
+:ref:`algm-EstimateScatteringVolumeCentreOfMass` resolves this the same way.
+
 Restrictions on the input workspace
 ###################################
 
