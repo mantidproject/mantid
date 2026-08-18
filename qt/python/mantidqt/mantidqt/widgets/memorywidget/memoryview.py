@@ -11,6 +11,7 @@ from qtpy.QtCore import Qt, Slot, Signal
 
 NORMAL_STYLE = """
 QProgressBar {
+    text-align: center;
     border-radius: 3px;
 }
 QProgressBar::chunk {
@@ -22,6 +23,7 @@ QProgressBar::chunk {
 
 CRITICAL_STYLE = """
 QProgressBar {
+    text-align: center;
     border-radius: 3px;
 }
 QProgressBar::chunk {
@@ -31,7 +33,7 @@ QProgressBar::chunk {
 }
 """
 
-CRITICAL_PERCENTAGE = 40
+CRITICAL_PERCENTAGE = 90
 
 
 def from_normal_to_critical(critical: int, current_value: int, new_value: int) -> bool:
