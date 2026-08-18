@@ -8,7 +8,7 @@ import unittest
 
 from mantid import config, FileFinder
 from mantid.api import AnalysisDataService, IEventWorkspace, MatrixWorkspace, WorkspaceGroup
-from mantid.simpleapi import CreateSampleWorkspace
+from mantid.simpleapi import AddSampleLog, AddTimeSeriesLog, CreateSampleWorkspace
 from plugins.algorithms.WorkflowAlgorithms.ReflectometryISISPreprocess import ReflectometryISISPreprocess
 from testhelpers import create_algorithm
 
@@ -79,6 +79,52 @@ class ReflectometryISISPreprocessTest(unittest.TestCase):
     def test_workspace_group_with_calibration_throws(self):
         args = {"InputRunList": "POLREF14966", "CalibrationFile": self._CALIBRATION_TEST_DATA, "OutputWorkspace": "ws"}
         self._assert_run_algorithm_raises_exception(args, "Workspace Group")
+
+    def test_experiment_angle_uses_theta_in_when_provided(self):
+        ws = CreateSampleWorkspace()
+        AddSampleLog(Workspace=ws, LogName="theta", LogText="0.5", LogType="Number", NumberType="Double")
+        alg = self._initialized_algorithm(ThetaIn=1.2, ThetaLogName="theta")
+
+        self.assertEqual(1.2, alg._experiment_angle(ws))
+
+    def test_experiment_angle_uses_scalar_log_when_theta_in_is_not_provided(self):
+        ws = CreateSampleWorkspace()
+        AddSampleLog(Workspace=ws, LogName="theta", LogText="0.7", LogType="Number", NumberType="Double")
+        alg = self._initialized_algorithm(ThetaLogName="theta")
+
+        self.assertEqual(0.7, alg._experiment_angle(ws))
+
+    def test_experiment_angle_uses_last_time_series_log_value_when_theta_in_is_not_provided(self):
+        ws = CreateSampleWorkspace()
+        AddTimeSeriesLog(Workspace=ws, Name="theta", Time="2010-01-01T00:00:00", Value=0.5)
+        AddTimeSeriesLog(Workspace=ws, Name="theta", Time="2010-01-01T00:10:00", Value=0.7)
+        alg = self._initialized_algorithm(ThetaLogName="theta")
+
+        self.assertEqual(0.7, alg._experiment_angle(ws))
+
+    def test_experiment_angle_throws_when_theta_in_and_theta_log_name_are_not_provided(self):
+        ws = CreateSampleWorkspace()
+        alg = self._initialized_algorithm()
+
+        with self.assertRaisesRegex(RuntimeError, "ThetaIn or ThetaLogName"):
+            alg._experiment_angle(ws)
+
+    def test_fractional_workspace_index_is_converted_to_fractional_spectrum_number(self):
+        ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=2)
+        ws.getSpectrum(0).setSpectrumNo(100)
+        ws.getSpectrum(1).setSpectrumNo(104)
+
+        spectrum_number = ReflectometryISISPreprocess._spectrum_number_for_workspace_index(ws, 0.25)
+
+        self.assertEqual(101.0, spectrum_number)
+
+    @staticmethod
+    def _initialized_algorithm(**kwargs):
+        alg = ReflectometryISISPreprocess()
+        alg.initialize()
+        for property_name, value in kwargs.items():
+            alg.setProperty(property_name, value)
+        return alg
 
     def _setup_algorithm(self, args):
         alg = create_algorithm("ReflectometryISISPreprocess", **args)
