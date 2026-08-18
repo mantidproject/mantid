@@ -8,7 +8,7 @@ import unittest
 
 from mantid.api import AnalysisDataService, FrameworkManager
 from mantid.kernel import V3D, Quat
-from unittest import mock
+from unittest.mock import Mock, call, patch
 from sans.common.constants import SANS2D, LOQ, LARMOR
 from sans.common.enums import (
     ReductionMode,
@@ -40,6 +40,7 @@ from sans.common.general_functions import (
     wav_range_to_str,
     wav_ranges_to_str,
     parse_simple_range_of_number_pairs,
+    delete_workspaces,
 )
 from sans.state.StateObjects.StateData import StateData
 from sans.test_helper.test_director import TestDirector
@@ -76,6 +77,14 @@ class SANSFunctionsTest(unittest.TestCase):
         sample_alg = create_unmanaged_algorithm(sample_name, **sample_options)
         sample_alg.execute()
         return sample_alg.getProperty("OutputWorkspace").value
+
+    @staticmethod
+    def _make_ws_mock(name):
+        if not name:
+            return None
+        ws_mock = Mock()
+        ws_mock.name.return_value = name
+        return ws_mock
 
     def _do_test_quaternion(self, angle, axis, expected_axis=None):
         # Act
@@ -586,7 +595,7 @@ class SANSFunctionsTest(unittest.TestCase):
         self.assertEqual(output_name, "12345_rear_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37")
         self.assertEqual(group_output_name, "12345_rear_1DPhi12.0_56.0")
 
-    @mock.patch("sans.common.general_functions.AlgorithmManager")
+    @patch("sans.common.general_functions.AlgorithmManager")
     def test_that_can_create_versioned_managed_non_child_algorithms(self, alg_manager_mock):
         create_managed_non_child_algorithm("TestAlg", version=2, **{"test_val": 5})
         alg_manager_mock.create.assert_called_once_with("TestAlg", 2)
@@ -609,6 +618,62 @@ class SANSFunctionsTest(unittest.TestCase):
         input_values = (2, 200)
         expected_output = "2-200"
         self.assertEqual(expected_output, wav_range_to_str(input_values))
+
+    @patch("sans.common.general_functions.create_unmanaged_algorithm")
+    def test_delete_workspaces_returns_on_invalid_entries(self, create_alg_mock):
+        test_cases = [{}, [], None, set()]
+        for case in test_cases:
+            with self.subTest(case=case):
+                delete_workspaces(case)
+                create_alg_mock.assert_not_called()
+
+    @patch("sans.common.general_functions.create_unmanaged_algorithm")
+    @patch("sans.common.general_functions.AnalysisDataService")
+    def test_delete_workspaces_dict_entries(self, ads_mock, create_alg_mock):
+        delete_alg_instance = Mock()
+        ads_mock.doesExist.return_value = True
+        create_alg_mock.return_value = delete_alg_instance
+        workspaces = {name: [self._make_ws_mock(name)] for name in ["test1", "test2", "test3", None, ""]}
+
+        delete_workspaces(workspaces)
+
+        self.assertEqual(delete_alg_instance.execute.call_count, 3)
+        self.assertEqual(delete_alg_instance.setProperty.call_count, 3)
+        delete_alg_instance.setProperty.assert_has_calls(
+            [call("Workspace", "test1"), call("Workspace", "test2"), call("Workspace", "test3")], any_order=True
+        )
+
+    @patch("sans.common.general_functions.create_unmanaged_algorithm")
+    @patch("sans.common.general_functions.AnalysisDataService")
+    def test_delete_workspaces_ws_entries(self, ads_mock, create_alg_mock):
+        delete_alg_instance = Mock()
+        ads_mock.doesExist.return_value = True
+        create_alg_mock.return_value = delete_alg_instance
+        workspaces = [self._make_ws_mock(name) for name in ["test1", "test2", None]]
+
+        delete_workspaces(workspaces, use_names=False)
+
+        self.assertEqual(delete_alg_instance.execute.call_count, 2)
+        self.assertEqual(delete_alg_instance.setProperty.call_count, 2)
+        delete_alg_instance.setProperty.assert_has_calls(
+            [call("Workspace", workspaces[0]), call("Workspace", workspaces[1])], any_order=True
+        )
+
+    @patch("sans.common.general_functions.create_unmanaged_algorithm")
+    @patch("sans.common.general_functions.AnalysisDataService")
+    def test_delete_workspaces_list_of_names(self, ads_mock, create_alg_mock):
+        delete_alg_instance = Mock()
+        ads_mock.doesExist.return_value = True
+        create_alg_mock.return_value = delete_alg_instance
+        workspaces = ["test1", "test2", "test3"]
+
+        delete_workspaces(workspaces, use_names=False)
+
+        self.assertEqual(delete_alg_instance.execute.call_count, 3)
+        self.assertEqual(delete_alg_instance.setProperty.call_count, 3)
+        delete_alg_instance.setProperty.assert_has_calls(
+            [call("Workspace", workspaces[0]), call("Workspace", workspaces[1]), call("Workspace", workspaces[2])], any_order=True
+        )
 
 
 class SANSEventSliceParsing(unittest.TestCase):
