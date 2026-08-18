@@ -95,24 +95,30 @@ void SemanticVersion::parse_version(const std::string &version) {
   std::uint32_t value = 0;
 
   std::string_view sv = m[1].str();
-  auto [ptr, ec] = std::from_chars(sv.data(), sv.data() + sv.size(), value);
-  if (ec != std::errc())
-    throw std::runtime_error(std::format("Invalid major revision number: {}", m[1].str()));
+  {
+    auto [ptr, ec] = std::from_chars(sv.data(), sv.data() + sv.size(), value);
+    if (ec != std::errc())
+      throw std::runtime_error(std::format("Invalid major revision number: {}", m[1].str()));
+  }
   m_major = value;
 
   if (m[2].matched) {
     sv = m[2].str();
-    auto [ptr, ec] = std::from_chars(sv.data(), sv.data() + sv.size(), value);
-    if (ec != std::errc())
-      throw std::runtime_error(std::format("Invalid minor revision number: {}", m[2].str()));
+    {
+      auto [ptr, ec] = std::from_chars(sv.data(), sv.data() + sv.size(), value);
+      if (ec != std::errc())
+        throw std::runtime_error(std::format("Invalid minor revision number: {}", m[2].str()));
+    }
     m_minor = value;
   }
 
   if (m[3].matched) {
     sv = m[3].str();
-    auto [ptr, ec] = std::from_chars(sv.data(), sv.data() + sv.size(), value);
-    if (ec != std::errc())
-      throw std::runtime_error(std::format("Invalid minor revision number: {}", m[3].str()));
+    {
+      auto [ptr, ec] = std::from_chars(sv.data(), sv.data() + sv.size(), value);
+      if (ec != std::errc())
+        throw std::runtime_error(std::format("Invalid minor revision number: {}", m[3].str()));
+    }
     m_patch = value;
   }
 

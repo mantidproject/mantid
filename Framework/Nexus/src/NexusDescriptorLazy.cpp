@@ -192,7 +192,7 @@ void NexusDescriptorLazy::loadGroups(std::map<std::string, std::string> &allEntr
   for (hsize_t i = 0; i < numObjs; i++) {
     H5G_obj_t type = H5Gget_objtype_by_idx(groupID, i);
     size_t name_len = H5Gget_objname_by_idx(groupID, i, nullptr, 0);
-    if (name_len <= 0)
+    if (name_len == 0)
       continue;
     std::string memberName(name_len, 'X');                              // fill with X for obvious errors
     H5Gget_objname_by_idx(groupID, i, memberName.data(), name_len + 1); // +1 for null terminator,
