@@ -95,7 +95,7 @@ private:
   void parse_version(const std::string &);
 
   // The full version
-  std::string m_version;
+  std::string m_version = "";
 
   // The major number
   std::uint32_t m_major = 0;
