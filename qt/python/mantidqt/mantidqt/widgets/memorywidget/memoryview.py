@@ -10,18 +10,28 @@ from qtpy.QtWidgets import QWidget, QProgressBar
 from qtpy.QtCore import Qt, Slot, Signal
 
 NORMAL_STYLE = """
+QProgressBar {
+    border-radius: 3px;
+}
 QProgressBar::chunk {
     background-color: lightgreen;
+    border-radius: 3px;
+    border: 1px solid transparent;
 }
 """
 
 CRITICAL_STYLE = """
+QProgressBar {
+    border-radius: 3px;
+}
 QProgressBar::chunk {
     background-color: red;
+    border-radius: 3px;
+    border: 1px solid transparent;
 }
 """
 
-CRITICAL_PERCENTAGE = 90
+CRITICAL_PERCENTAGE = 40
 
 
 def from_normal_to_critical(critical: int, current_value: int, new_value: int) -> bool:
@@ -58,10 +68,12 @@ class MemoryView(QWidget):
         self.critical = CRITICAL_PERCENTAGE
 
         self.mantid_memory_bar = QProgressBar(self)
+        self.mantid_memory_bar.setStyleSheet(NORMAL_STYLE)
         self.mantid_memory_bar.setAlignment(Qt.AlignCenter)
         self.set_mantid_value.connect(self._set_mantid_value)
 
         self.memory_bar = QProgressBar(self)
+        self.memory_bar.setStyleSheet(NORMAL_STYLE)
         self.memory_bar.setAlignment(Qt.AlignCenter)
         self.set_value.connect(self._set_value)
 
@@ -75,8 +87,6 @@ class MemoryView(QWidget):
             self.memory_bar.setStyleSheet(CRITICAL_STYLE)
         elif from_critical_to_normal(self.critical, current_value, new_value):
             self.memory_bar.setStyleSheet(NORMAL_STYLE)
-        else:
-            pass
 
     def set_mantid_bar_color(self, current_value: int, new_value: int):
         """
