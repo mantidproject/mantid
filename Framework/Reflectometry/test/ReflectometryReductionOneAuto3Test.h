@@ -10,6 +10,7 @@
 
 #include "MantidReflectometry/ReflectometryReductionOneAuto3.h"
 
+#include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -1254,6 +1255,31 @@ public:
     TS_ASSERT_DELTA(out1->y(0)[0], 4.5, 0.000001);
     auto out2 = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(1));
     TS_ASSERT_DELTA(out2->y(0)[0], 9.0, 0.000001);
+    TS_ASSERT_EQUALS(countAlgorithmInHistory(out1, "ApplyFloodWorkspace"), 2);
+  }
+
+  void test_flood_correction_transmission_is_reused_for_group_members() {
+    auto inputWS1 = create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
+    auto inputWS2 = create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
+    auto group = std::make_shared<WorkspaceGroup>();
+    group->addWorkspace(inputWS1);
+    group->addWorkspace(inputWS2);
+    AnalysisDataService::Instance().addOrReplace(TEST_GROUP_NAME, group);
+
+    auto transWS = create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
+    auto flood = createFloodWorkspace(inputWS1->getInstrument());
+    const auto alg = create_refl_algorithm(TEST_GROUP_NAME, 1.5, "2+3", 1.0, 15.0, true, false);
+    setup_optional_properties(alg, {{"MomentumTransferStep", 0.01},
+                                    {"AnalysisMode", "MultiDetectorAnalysis"},
+                                    {"DetectorCorrectionType", "RotateAroundSample"},
+                                    {"FloodWorkspace", flood},
+                                    {"FirstTransmissionRun", transWS}});
+
+    alg->execute();
+
+    WorkspaceGroup_sptr out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("IvsQ");
+    auto out1 = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(0));
+    TS_ASSERT_EQUALS(countAlgorithmInHistory(out1, "ApplyFloodWorkspace"), 3);
   }
 
   void test_flood_correction_polarization_correction() {
@@ -1277,6 +1303,7 @@ public:
     TS_ASSERT_DELTA(out3->y(0)[0], 70.0, 0.003);
     auto out4 = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(3));
     TS_ASSERT_DELTA(out4->y(0)[0], 60.0, 0.003);
+    TS_ASSERT_EQUALS(countAlgorithmInHistory(out1, "ApplyFloodWorkspace"), 4);
   }
 
   void test_flood_correction_parameter_file() {
@@ -1299,6 +1326,7 @@ public:
     TS_ASSERT_DELTA(out3->y(0)[0], 70.0, 1e-15);
     auto out4 = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(3));
     TS_ASSERT_DELTA(out4->y(0)[0], 60.0, 1e-14);
+    TS_ASSERT_EQUALS(countAlgorithmInHistory(out1, "CreateFloodWorkspace"), 1);
   }
 
   void test_flood_correction_parameter_file_no_flood_parameters() {
@@ -1612,6 +1640,21 @@ private:
     clearAlg.setProperty("InstrumentCache", true);
     clearAlg.execute();
   }
+
+  size_t countAlgorithmInHistory(const AlgorithmHistory_const_sptr &history, const std::string &algorithmName) {
+    size_t count = history->name() == algorithmName ? 1 : 0;
+    for (const auto &childHistory : history->getChildHistories())
+      count += countAlgorithmInHistory(childHistory, algorithmName);
+    return count;
+  }
+
+  size_t countAlgorithmInHistory(const MatrixWorkspace_sptr &workspace, const std::string &algorithmName) {
+    size_t count = 0;
+    for (const auto &history : workspace->getHistory().getAlgorithmHistories())
+      count += countAlgorithmInHistory(history, algorithmName);
+    return count;
+  }
+
   void check_algorithm_properties_in_child_histories(MatrixWorkspace_sptr &workspace, int topLevelIdx,
                                                      int childLevelIdx,
                                                      std::map<std::string, std::string> const &propValues) {
