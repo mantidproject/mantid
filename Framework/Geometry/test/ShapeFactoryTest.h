@@ -916,7 +916,59 @@ public:
     TS_ASSERT(!sliceRotateAll_sptr->isValid(pointRotate));
   }
 
+  /// A rotated shape's ShapeInfo has to move with its surfaces.
+  ///
+  /// createShape reads the XML twice: once through the parse* functions, which build the surfaces the
+  /// CSG tests points against, and once through createGeometryHandler, which builds the ShapeInfo the
+  /// bounding box, the rendered mesh and the volume all come from. Only the first applied the
+  /// automatic rotations, so a rotated shape was described in two places at once and its bounding box
+  /// enclosed where it used to be.
+  ///
+  /// Checked against the same shape written out with its centre and axis already rotated, which
+  /// carries no tag and so cannot be affected by whether the tags are honoured. Cuboids are exempt
+  /// because createGeometryHandler builds their ShapeInfo from the shared parseCuboid.
+  void testRotatedShapeInfoFollowsTheSurfaces() {
+    const std::string rotateAll = "<rotate-all x=\"90\" y=\"0\" z=\"0\" /> ";
+
+    // sphere: 1.0 radius centred 10 along +y, so rotating about x takes it to 10 along +z
+    assertShapeInfoIsRotated("<sphere id=\"s\"><centre x=\"0\" y=\"10.0\" z=\"0\"/><radius val=\"1.0\"/></sphere>"
+                             "<algebra val=\"s\"/> ",
+                             "<sphere id=\"s\"><centre x=\"0\" y=\"0\" z=\"10.0\"/><radius val=\"1.0\"/></sphere>"
+                             "<algebra val=\"s\"/> ",
+                             rotateAll);
+
+    // cylinder: base 10 along +y with its axis along +y, so both the base and the axis move
+    assertShapeInfoIsRotated("<cylinder id=\"c\"><centre-of-bottom-base x=\"0\" y=\"10.0\" z=\"0\"/>"
+                             "<axis x=\"0\" y=\"1\" z=\"0\"/><radius val=\"1.0\"/><height val=\"2.0\"/></cylinder>"
+                             "<algebra val=\"c\"/> ",
+                             "<cylinder id=\"c\"><centre-of-bottom-base x=\"0\" y=\"0\" z=\"10.0\"/>"
+                             "<axis x=\"0\" y=\"0\" z=\"1\"/><radius val=\"1.0\"/><height val=\"2.0\"/></cylinder>"
+                             "<algebra val=\"c\"/> ",
+                             rotateAll);
+
+    // cone: the case that exposed this, since a cone's ShapeInfo is built by re-parsing the XML
+    assertShapeInfoIsRotated("<cone id=\"k\"><tip-point x=\"0\" y=\"10.0\" z=\"0\"/>"
+                             "<axis x=\"0\" y=\"1\" z=\"0\"/><angle val=\"20\"/><height val=\"2.0\"/></cone>"
+                             "<algebra val=\"k\"/> ",
+                             "<cone id=\"k\"><tip-point x=\"0\" y=\"0\" z=\"10.0\"/>"
+                             "<axis x=\"0\" y=\"0\" z=\"1\"/><angle val=\"20\"/><height val=\"2.0\"/></cone>"
+                             "<algebra val=\"k\"/> ",
+                             rotateAll);
+  }
+
 private:
+  /// Assert that `xml` plus `rotationTag` describes the same bounding box as `preRotatedXML`, which
+  /// has the rotation written into it by hand and carries no tag.
+  void assertShapeInfoIsRotated(const std::string &xml, const std::string &preRotatedXML,
+                                const std::string &rotationTag) {
+    const auto tagged = getObject(xml + rotationTag)->getBoundingBox();
+    const auto byHand = getObject(preRotatedXML)->getBoundingBox();
+    for (size_t axis = 0; axis < 3; ++axis) {
+      TS_ASSERT_DELTA(tagged.minPoint()[axis], byHand.minPoint()[axis], 1e-9);
+      TS_ASSERT_DELTA(tagged.maxPoint()[axis], byHand.maxPoint()[axis], 1e-9);
+    }
+  }
+
   void compareMatrix(const std::vector<double> &vectorToMatch, const Matrix<double> &rotationMatrix) {
     auto checkVector = rotationMatrix.getVector();
     for (size_t i = 0; i < 9; ++i) {
