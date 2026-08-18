@@ -121,6 +121,21 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         history = ["ReflectometryReductionOneAuto", "GroupWorkspaces"]
         self._check_history(AnalysisDataService.retrieve("IvsQ_binned_13460"), history)
 
+    def test_input_workspace_with_requested_calibration_is_reused(self):
+        self._create_workspace(13460, "TOF_")
+        AddSampleLog(
+            Workspace="TOF_13460",
+            LogName="reflectometry_calibration_file",
+            LogText=self._CALIBRATION_TEST_DATA,
+        )
+        alg = ReflectometryISISLoadAndProcess()
+        alg.initialize()
+        alg.setProperty("CalibrationFile", self._CALIBRATION_TEST_DATA)
+
+        workspace_name = alg._getRunFromADSOrNone("13460", False)
+
+        self.assertEqual(workspace_name, "TOF_13460")
+
     def test_input_run_that_is_in_ADS_without_prefix_is_not_reloaded(self):
         self._create_workspace(13460)
         args = self._default_options
@@ -855,6 +870,21 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         outputs = ["IvsQ_45455", "IvsQ_binned_45455", "TOF", "TOF_45455", "TOF_45455_summed_segment"]
         self._assert_run_algorithm_succeeds(args, outputs)
         self._check_calibration(AnalysisDataService.retrieve("IvsQ_binned_45455"), is_calibrated=True)
+
+    def test_uncalibrated_workspace_in_ads_is_reloaded_when_calibration_file_is_provided(self):
+        self._create_workspace(45455, "TOF_")
+        args = self._default_options
+        args["InputRunList"] = "45455"
+        del args["ProcessingInstructions"]
+        args["CalibrationFile"] = self._CALIBRATION_TEST_DATA
+        args["AnalysisMode"] = "MultiDetectorAnalysis"
+        args["ROIDetectorIDs"] = self._INTER45455_DETECTOR_ROI
+
+        self._assert_run_algorithm_succeeds(args)
+
+        self._check_calibration(AnalysisDataService.retrieve("IvsQ_binned_45455"), is_calibrated=True)
+        calibration_log = AnalysisDataService.retrieve("TOF_45455").run().getProperty("reflectometry_calibration_file")
+        self.assertEqual(calibration_log.value, self._CALIBRATION_TEST_DATA)
 
     def test_calibration_is_skipped_if_file_not_provided(self):
         args = self._default_options

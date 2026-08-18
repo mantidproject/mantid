@@ -46,6 +46,8 @@ class Prop:
 
 
 class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
+    _CALIBRATION_FILE_LOG = "reflectometry_calibration_file"
+
     def __init__(self):
         """Initialize an instance of the algorithm."""
         DataProcessorAlgorithm.__init__(self)
@@ -464,9 +466,23 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             return False
         self.log().information("Workspace " + workspace_name + " exists")
         if not isTrans and self._slicingEnabled():
-            return self._isValidWorkspace(workspace_name, "EventWorkspace")
+            is_valid = self._isValidWorkspace(workspace_name, "EventWorkspace")
         else:
-            return self._isValidWorkspace(workspace_name, "Workspace2D")
+            is_valid = self._isValidWorkspace(workspace_name, "Workspace2D")
+
+        if is_valid and not self._workspaceHasRequestedCalibration(AnalysisDataService.retrieve(workspace_name)):
+            self.log().information(f'Workspace "{workspace_name}" does not have the requested calibration')
+            return False
+        return is_valid
+
+    def _workspaceHasRequestedCalibration(self, workspace):
+        calibration_filepath = self.getPropertyValue("CalibrationFile")
+        if not calibration_filepath:
+            return True
+        if isinstance(workspace, WorkspaceGroup):
+            return all(self._workspaceHasRequestedCalibration(member) for member in workspace)
+        run = workspace.run()
+        return run.hasProperty(self._CALIBRATION_FILE_LOG) and run.getProperty(self._CALIBRATION_FILE_LOG).value == calibration_filepath
 
     def _getRunFromADSOrNone(self, run, isTrans):
         """Given a run name, return the name of the equivalent workspace in the ADS (

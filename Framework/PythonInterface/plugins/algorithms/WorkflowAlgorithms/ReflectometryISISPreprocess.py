@@ -26,6 +26,7 @@ class ReflectometryISISPreprocess(DataProcessorAlgorithm):
     _CALIBRATION_FILE = "CalibrationFile"
     _THETA_IN = "ThetaIn"
     _THETA_LOG_NAME = "ThetaLogName"
+    _CALIBRATION_FILE_LOG = "reflectometry_calibration_file"
 
     def __init__(self):
         """Initialize an instance of the algorithm."""
@@ -104,10 +105,9 @@ class ReflectometryISISPreprocess(DataProcessorAlgorithm):
             self.log().information("Loaded workspace ")
         return ws, monitor_ws
 
-    def _applyCalibration(self, ws: MatrixWorkspace, calibration_filepath: str) -> MatrixWorkspace:
-        if isinstance(ws, WorkspaceGroup):
-            raise RuntimeError("Calibrating a Workspace Group as part of pre-processing is not currently supported")
-
+    def _apply_calibration_impl(
+        self, ws: MatrixWorkspace, calibration_filepath: str, specular_pixel_spectrum_no: float | None = None
+    ) -> MatrixWorkspace:
         alg = self.createChildAlgorithm("ReflectometryISISCalibration")
         alg.setProperty("InputWorkspace", ws)
         alg.setProperty("CalibrationFile", calibration_filepath)
@@ -115,19 +115,37 @@ class ReflectometryISISPreprocess(DataProcessorAlgorithm):
         if ws.getInstrument().getName() == "POLREF":
             alg.setProperty("InstrumentWorkflow", "POLREF")
 
-            lines_alg = self.createChildAlgorithm("FindReflectometryLines")
-            lines_alg.setProperty("InputWorkspace", ws)
-            lines_alg.execute()
-            line_centre = lines_alg.getProperty("LineCentre").value
-            specular_pixel_spectrum_no = self._spectrum_number_for_workspace_index(ws, line_centre)
+            if specular_pixel_spectrum_no is None:
+                specular_pixel_spectrum_no = self._find_specular_pixel_spectrum_no(ws)
 
             alg.setProperty("SpecularPixelSpectrumNo", specular_pixel_spectrum_no)
             alg.setProperty("ExperimentAngle", self._experiment_angle(ws))
 
         alg.execute()
         calibrated_ws = alg.getProperty("OutputWorkspace").value
-        self.log().information("Calibrated workspace")
+        calibrated_ws.run().addProperty(self._CALIBRATION_FILE_LOG, calibration_filepath, True)
+        self.log().information(f"Calibrated workspace {ws.getName()}")
         return calibrated_ws
+
+    def _applyCalibration(self, ws: MatrixWorkspace, calibration_filepath: str) -> MatrixWorkspace:
+        if isinstance(ws, WorkspaceGroup):
+            specular_pixel_spectrum_no = None
+            if ws[0].getInstrument().getName() == "POLREF":
+                specular_pixel_spectrum_no = self._find_specular_pixel_spectrum_no(ws[0])
+
+            calibrated_group = WorkspaceGroup()
+            for member in ws:
+                calibrated_group.addWorkspace(self._apply_calibration_impl(member, calibration_filepath, specular_pixel_spectrum_no))
+            return calibrated_group
+        return self._apply_calibration_impl(ws, calibration_filepath)
+
+    def _find_specular_pixel_spectrum_no(self, ws: MatrixWorkspace) -> float:
+        lines_alg = self.createChildAlgorithm("FindReflectometryLines")
+        lines_alg.setProperty("InputWorkspace", ws)
+        lines_alg.setProperty("StartWorkspaceIndex", 4)
+        lines_alg.execute()
+        line_centre = lines_alg.getProperty("LineCentre").value
+        return self._spectrum_number_for_workspace_index(ws, line_centre)
 
     def _experiment_angle(self, ws: MatrixWorkspace) -> float:
         theta = self.getProperty(self._THETA_IN)
