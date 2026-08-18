@@ -29,14 +29,16 @@ With great power comes great responsibility
 Performing a merge on Github
 ============================
 
-*The* ``Merge pull request`` *button*
+* Gatekeepers should use ``Squash and merge`` for all pull requests. This option:
 
-* Generally we perform the default merge which is to create a merge commit, so you can just click ``Merge pull request``.
-* This button should be green if all checks have passed and there is an approved review. The button will be red if this is not the case but you have the power to override it and merge anyway - it is not recommended to do this but very occasionally may be needed if e.g. it is urgent and being held up by an unreliable test you are certain is unrelated. If you do need to do this, make sure you add a clear comment describing why.
-* Occasionally you might want to use ``Squash and merge`` from the drop-down menu, but typically this is only done if the developer specifically asked for it (although feel free to ask the developer if you can squash if you think that's more appropriate).
-* When you click the button you will get the chance to edit the commit message before committing. Typically we leave the commit title as per the default text so it is clear it is a merge, and paste the PR title into the body of the commit message. (Any other useful information can also be added here.)
-* Click ``Confirm merge`` to merge the commit to the destination branch.
-* If a PR is approved but still finishing its CI checks then the button will read ``Enable auto merge``. Feel free to use this if you are happy for the PR to be automatically merged once it passes all the CI checks.
+  * Helps maintain a tidy Git history by combining all of the commits in a PR into a single commit on the destination branch.
+  * Ensures that every commit on the destination branch is a complete, CI-tested change that compile. This keeps the Git history self-consistent and makes it easier to use ``git bisect`` to track down regressions.
+  * Makes it easier to identify which PR introduced a failure in a nightly build.
+
+* The ``Squash and merge`` button will be green if all checks have passed and there is an approved review. The button will be red if this is not the case but you have the power to override it and merge anyway. It is not recommended to do this but very occasionally may be needed if, for example, it is urgent and being held up by an unreliable test you are certain is unrelated. If you do need to do this, make sure you add a clear comment describing why.
+* When you click the button you will get the chance to edit the commit message before committing. Feel free to edit the commit message if the PR title can be improved upon. If required, add any useful information to the ``Extended description`` box.
+* Click ``Confirm merge (squash)`` to merge the commit to the destination branch.
+* If a PR is approved but still finishing its CI checks then the button will read ``Enable auto-merge (squash)``. Use this if you are happy for the PR to be automatically merged once it passes all the CI checks.
 
 
 Don't panic
