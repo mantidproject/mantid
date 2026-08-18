@@ -1,0 +1,1 @@
+- :ref:`ReflectometryISISLoadAndProcess <algm-ReflectometryISISLoadAndProcess>` now utilises the POLREF calibration workflow as part of :ref:`ReflectometryISISCalibration <algm-ReflectometryISISCalibration>` through ``ReflectometryISISPreprocess``.

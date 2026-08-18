@@ -538,10 +538,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         """Load a run as an event workspace if slicing is requested, or a histogram
         workspace otherwise. Transmission runs are always loaded as histogram workspaces."""
         event_mode = not isTrans and self._slicingEnabled()
-        args = {"InputRunList": [run], "EventMode": event_mode}
-        calibration_filepath = self.getPropertyValue("CalibrationFile")
-        if calibration_filepath:
-            args["CalibrationFile"] = calibration_filepath
+        args = self._preprocess_arguments(run, event_mode)
         alg = self.createChildAlgorithm("ReflectometryISISPreprocess", **args)
         alg.setRethrows(True)
         alg.execute()
@@ -560,6 +557,16 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             self.log().information("Loaded workspace " + workspace_name)
 
         return workspace_name
+
+    def _preprocess_arguments(self, run, event_mode):
+        args = {"InputRunList": [run], "EventMode": event_mode}
+        calibration_filepath = self.getPropertyValue("CalibrationFile")
+        if calibration_filepath:
+            args["CalibrationFile"] = calibration_filepath
+        for property_name in ["ThetaIn", "ThetaLogName"]:
+            if not self.getProperty(property_name).isDefault:
+                args[property_name] = self.getPropertyValue(property_name)
+        return args
 
     def _sumWorkspaces(self, workspaces, isTrans):
         """If there are multiple input workspaces, sum them and return the result. Otherwise

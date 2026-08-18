@@ -18,6 +18,7 @@ from mantid.simpleapi import (
     JoinISISPolarizationEfficiencies,
     Rebin,
 )
+from plugins.algorithms.WorkflowAlgorithms.ReflectometryISISLoadAndProcess import ReflectometryISISLoadAndProcess
 from testhelpers import assertRaisesNothing, create_algorithm
 
 
@@ -864,6 +865,26 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         outputs = ["IvsQ_45455", "IvsQ_binned_45455", "TOF", "TOF_45455", "TOF_45455_summed_segment"]
         self._assert_run_algorithm_succeeds(args, outputs)
         self._check_calibration(AnalysisDataService.retrieve("IvsQ_binned_45455"), is_calibrated=False)
+
+    def test_theta_properties_are_forwarded_to_preprocessing(self):
+        alg = ReflectometryISISLoadAndProcess()
+        alg.initialize()
+        alg.setProperty("ThetaIn", 0.5)
+        alg.setProperty("ThetaLogName", "theta")
+
+        args = alg._preprocess_arguments("INTER13460", False)
+
+        self.assertEqual("0.5", args["ThetaIn"])
+        self.assertEqual("theta", args["ThetaLogName"])
+
+    def test_default_theta_properties_are_not_forwarded_to_preprocessing(self):
+        alg = ReflectometryISISLoadAndProcess()
+        alg.initialize()
+
+        args = alg._preprocess_arguments("INTER13460", False)
+
+        self.assertNotIn("ThetaIn", args)
+        self.assertNotIn("ThetaLogName", args)
 
     def test_invalid_polarization_efficiency_file_name_raises_error(self):
         args = self._default_options
