@@ -754,31 +754,64 @@ std::string ReflectometryWorkflowBase2::findProcessingInstructions(const Instrum
   return instructions;
 }
 
-/** Set transmission properties
+/** Populate transmission properties on alg, including application of flood correction if relevant
  *
  * @param alg :: The algorithm to populate parameters for
+ * @param flood :: The flood workspace to use for correction
  * @return Boolean, whether or not any transmission runs were found
  */
 bool ReflectometryWorkflowBase2::populateTransmissionProperties(const IAlgorithm_sptr &alg,
                                                                 const MatrixWorkspace_sptr &flood) {
-  bool transRunsExist = false;
-  auto firstWS = getWorkspaceFromProperty("FirstTransmissionRun");
-  if (firstWS) {
-    transRunsExist = true;
-    firstWS = (flood) ? runFloodCorrectionAlg(flood, firstWS) : firstWS;
-    alg->setProperty("FirstTransmissionRun", firstWS);
-    auto secondWS = getWorkspaceFromProperty("SecondTransmissionRun");
-    if (secondWS) {
-      secondWS = (flood) ? runFloodCorrectionAlg(flood, secondWS) : secondWS;
-      alg->setProperty("SecondTransmissionRun", secondWS);
-      alg->setPropertyValue("StartOverlap", getPropertyValue("StartOverlap"));
-      alg->setPropertyValue("EndOverlap", getPropertyValue("EndOverlap"));
-      alg->setPropertyValue("Params", getPropertyValue("Params"));
-      alg->setProperty("ScaleRHSWorkspace", getPropertyValue("ScaleRHSWorkspace"));
-    }
-  }
+  const auto &firstWS = getWorkspaceFromProperty("FirstTransmissionRun");
+  const auto &secondWS = getWorkspaceFromProperty("SecondTransmissionRun");
+  if (!firstWS && !secondWS)
+    return false;
+  const auto &correctedWorkspaces = applyFloodCorrectionToTransmission(flood, firstWS, secondWS);
+  setTransmissionProperties(alg, correctedWorkspaces.first, correctedWorkspaces.second);
+  return true;
+}
 
-  return transRunsExist;
+/** Apply flood correction to transmission workspaces
+ *
+ * @param alg :: The algorithm to populate parameters for
+ * @param flood :: The flood workspace to use for correction
+ * @param firstWS :: The first transmission workspace
+ * @param secondWS :: The second transmission workspace
+ * @return std::pair<MatrixWorkspace_sptr, MatrixWorkspace_sptr>, the corrected transmission workspaces
+ */
+std::pair<MatrixWorkspace_sptr, MatrixWorkspace_sptr> ReflectometryWorkflowBase2::applyFloodCorrectionToTransmission(
+    const MatrixWorkspace_sptr &flood, const MatrixWorkspace_sptr &firstWS, const MatrixWorkspace_sptr &secondWS) {
+  if (!flood) {
+    return {firstWS, secondWS};
+  }
+  MatrixWorkspace_sptr firstWSCorrected, secondWSCorrected;
+  if (firstWS) {
+    firstWSCorrected = runFloodCorrectionAlg(flood, firstWS);
+  }
+  if (secondWS) {
+    secondWSCorrected = runFloodCorrectionAlg(flood, secondWS);
+  }
+  return {firstWSCorrected, secondWSCorrected};
+}
+
+/** Set the transmission properties on the algorithm
+ *
+ * @param alg :: The algorithm to populate parameters for
+ * @param firstWS :: The first transmission workspace
+ * @param secondWS :: The second transmission workspace
+ */
+void ReflectometryWorkflowBase2::setTransmissionProperties(const IAlgorithm_sptr &alg,
+                                                           const MatrixWorkspace_sptr &firstWS,
+                                                           const MatrixWorkspace_sptr &secondWS) const {
+  if (firstWS)
+    alg->setProperty("FirstTransmissionRun", firstWS);
+  if (secondWS) {
+    alg->setProperty("SecondTransmissionRun", secondWS);
+    alg->setPropertyValue("StartOverlap", getPropertyValue("StartOverlap"));
+    alg->setPropertyValue("EndOverlap", getPropertyValue("EndOverlap"));
+    alg->setPropertyValue("Params", getPropertyValue("Params"));
+    alg->setProperty("ScaleRHSWorkspace", getPropertyValue("ScaleRHSWorkspace"));
+  }
 }
 
 MatrixWorkspace_sptr ReflectometryWorkflowBase2::runFloodCorrectionAlg(const MatrixWorkspace_sptr &flood,
