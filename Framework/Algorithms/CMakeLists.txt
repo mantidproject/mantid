@@ -342,6 +342,7 @@ set(SRC_FILES
     src/UnwrapSNS.cpp
     src/UpdateScriptRepository.cpp
     src/VesuvioL1ThetaResolution.cpp
+    src/WeightedGaugeVolumeAbsorption.cpp
     src/WeightedMean.cpp
     src/WeightedMeanOfWorkspace.cpp
     src/WeightingStrategy.cpp
@@ -703,6 +704,7 @@ set(INC_FILES
     inc/MantidAlgorithms/UnwrapSNS.h
     inc/MantidAlgorithms/UpdateScriptRepository.h
     inc/MantidAlgorithms/VesuvioL1ThetaResolution.h
+    inc/MantidAlgorithms/WeightedGaugeVolumeAbsorption.h
     inc/MantidAlgorithms/WeightedMean.h
     inc/MantidAlgorithms/WeightedMeanOfWorkspace.h
     inc/MantidAlgorithms/WeightingStrategy.h
@@ -1041,6 +1043,7 @@ set(TEST_FILES
     UnwrapMonitorsInTOFTest.h
     UnwrapSNSTest.h
     VesuvioL1ThetaResolutionTest.h
+    WeightedGaugeVolumeAbsorptionTest.h
     WeightedMeanOfWorkspaceTest.h
     WeightedMeanTest.h
     WeightingStrategyTest.h

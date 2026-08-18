@@ -63,6 +63,12 @@ namespace Algorithms {
    will only use
     points within the defined gauge volume (and also within the sample).
 
+    Unlike the other algorithms in this family, this one integrates over the sample shape attached to
+    the workspace rather than one built from its own properties, so it has to care which frame that
+    shape is in. A gauge volume, a beam and the detectors are all described in the lab frame, while
+    the sample shape is in the lab frame only if something has already rotated it there. See
+    outstandingSampleRotation.
+
     @author Russell Taylor, Tessella plc
     @date 11/03/2010
 */
@@ -74,8 +80,9 @@ public:
   const std::string name() const override { return "AbsorptionCorrection"; }
 
   const std::vector<std::string> seeAlso() const override {
-    return {"SetSampleMaterial",   "CreateSampleShape",     "DefineGaugeVolume",          "CylinderAbsorption",
-            "FlatPlateAbsorption", "AnnularRingAbsorption", "CuboidGaugeVolumeAbsorption"};
+    return {
+        "SetSampleMaterial",   "CreateSampleShape",     "DefineGaugeVolume",           "CylinderAbsorption",
+        "FlatPlateAbsorption", "AnnularRingAbsorption", "CuboidGaugeVolumeAbsorption", "WeightedGaugeVolumeAbsorption"};
   }
 
   /// Summary of algorithms purpose
@@ -91,15 +98,27 @@ public:
   /// Algorithm's version
   int version() const override { return (1); }
 
-private:
+protected:
   void defineProperties() override;
   void retrieveProperties() override;
   std::string sampleXML() override;
   void initialiseCachedDistances() override;
+  void calculateDistances(const Geometry::IDetector &detector, std::vector<double> &L2s) const override;
   /// Create the gague volume for the correction
-  std::shared_ptr<const Geometry::IObject> constructGaugeVolume();
+  std::shared_ptr<const Geometry::IObject> constructGaugeVolume() const;
 
   double m_cubeSide; ///< The length of the side of an element cube in m
+
+private:
+  /// How much of the workspace's goniometer rotation the sample shape has not had applied to it
+  Kernel::Matrix<double> outstandingSampleRotation() const;
+  /// Map a lab frame point into the sample shape's own frame
+  Kernel::V3D toShapeFrame(const Kernel::V3D &labFramePoint) const;
+
+  /// Lab frame to sample shape frame: the inverse of the outstanding rotation, held inverted because
+  /// that is the direction every use needs, and with a flag so that no rotation costs nothing.
+  Kernel::Matrix<double> m_labToShapeFrame{3, 3, true};
+  bool m_shapeIsInLabFrame{true};
 };
 
 } // namespace Algorithms

@@ -97,6 +97,41 @@ protected:
    */
   virtual void initialiseCachedDistances() = 0;
 
+  /** The illumination weight of each volume element as seen by this detector, in the same order as
+   * m_elementPositions. This is where a subclass expresses how strongly a point is lit by the
+   * incident beam and how much of it the detector can actually see; the attenuation itself is
+   * already handled by the integration.
+   *
+   * The weight is per detector because a collimator restricts each detector to its own corridor
+   * through the sample, so it cannot be cached once for all spectra.
+   *
+   * Leaving @p weights empty means unit weight for every element, which is both the default and
+   * the behaviour of every subclass that does not override this - so their results are unchanged.
+   */
+  virtual void calculateElementWeights(const Geometry::IDetector & /*detector*/, std::vector<double> &weights) const {
+    weights.clear(); // unit weight everywhere
+  }
+
+  /** Called once per spectrum, after its L2 distances and element weights are known but before the
+   * next spectrum is started, so a subclass can accumulate a per-detector quantity from the same
+   * quadrature without repeating it. Does nothing by default.
+   */
+  virtual void perSpectrumHook(size_t /*wsIndex*/, const std::vector<double> & /*L2s*/,
+                               const std::vector<double> & /*weights*/) { /*Empty in base class*/ }
+
+  /** The distance travelled inside the sample on the way out to @p detector, for each element of
+   * m_elementPositions in order.
+   *
+   * Traces straight from the element to the detector, which assumes m_elementPositions, the detector
+   * positions and the sample shape are all in the same frame. A subclass whose elements are not in
+   * the sample's frame has to reconcile them here, since this is the only place the two meet.
+   */
+  virtual void calculateDistances(const Geometry::IDetector &detector, std::vector<double> &L2s) const;
+
+  /// Where to trace to for this detector: its position, or for a group the position implied by the
+  /// group's average angles.
+  Kernel::V3D detectorPositionToTraceTo(const Geometry::IDetector &detector) const;
+
   API::MatrixWorkspace_sptr m_inputWS;         ///< A pointer to the input workspace
   const Geometry::IObject *m_sampleObject;     ///< Local cache of sample object.
   Kernel::V3D m_beamDirection;                 ///< The direction of the beam.
@@ -106,20 +141,23 @@ protected:
   size_t m_numVolumeElements;                  ///< The number of volume elements
   double m_sampleVolume;                       ///< The total volume of the sample
 
-private:
   /// Initialisation code
   void init() override;
+  /// Validates the properties shared by every absorption correction. A subclass adding checks of
+  /// its own should call this and merge the result, or the ScatterFrom checks are lost.
   std::map<std::string, std::string> validateInputs() override;
-  /// Execution code
+  /// Execution code. Protected so a subclass can run the standard correction and then derive
+  /// further outputs from what the quadrature accumulated.
   void exec() override;
 
+private:
   void retrieveBaseProperties();
   void constructSample(API::Sample &sample);
-  void calculateDistances(const Geometry::IDetector &detector, std::vector<double> &L2s) const;
-  inline double doIntegration(const double linearCoefAbs, const std::vector<double> &L2s, const size_t startIndex,
-                              const size_t endIndex) const;
+  inline double doIntegration(const double linearCoefAbs, const std::vector<double> &L2s,
+                              const std::vector<double> &weights, const size_t startIndex, const size_t endIndex) const;
   inline double doIntegration(const double linearCoefAbsL1, const double linearCoefAbsL2,
-                              const std::vector<double> &L2s, const size_t startIndex, const size_t endIndex) const;
+                              const std::vector<double> &L2s, const std::vector<double> &weights,
+                              const size_t startIndex, const size_t endIndex) const;
 
   Kernel::Material m_material;
   double m_linearCoefTotScatt; ///< The total scattering cross-section in 1/m
