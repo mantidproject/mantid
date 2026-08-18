@@ -151,6 +151,8 @@ private:
   std::vector<std::string> getTaskExecutionOrder(const bool reduced, const bool summingInQ) const;
   WorkspaceGroup_sptr applyFloodCorrection(const WorkspaceGroup_sptr &ws);
   MatrixWorkspace_sptr applyFloodCorrection(const MatrixWorkspace_sptr &ws);
+  void applyFloodCorrectionToTransmissionRuns();
+  void clearCachedWorkspaces();
   std::pair<MatrixWorkspace_sptr, MatrixWorkspace_sptr> getTransmissionRuns();
 };
 } // namespace Reflectometry
