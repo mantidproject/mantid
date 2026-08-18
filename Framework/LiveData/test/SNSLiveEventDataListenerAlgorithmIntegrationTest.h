@@ -193,24 +193,25 @@ public:
     // Script ordering:
     //   STATE + Geometry + Beamline + NEW_RUN — bg thread parses these and enters
     //     the pause loop (m_bgThreadCaughtUp=true, m_pendingTransition=BeginRun).
-    //   PktWaitForExtract — holds the server here.  bg thread has completed its
-    //     bufferParse (caughtUp=true) and is in the pause loop.  onBeforeExtract()
-    //     sees caughtUp=true, snapshots BeginRun, dispatches onBeginRun() (writes
-    //     run_number, clears m_workspaceInitialized), clears m_pauseNetRead.
-    //     bg thread exits pause, enters receiveBytes.
-    //   releaseExtractGate() — server sends 2nd Geometry + Beamline + BankedEvent +
-    //     Disconnect.  bg thread parses → m_workspaceInitialized=true, events appended.
-    //   doExtractData() returns the workspace with run_number and events.
+    //   Gate 1 (PktWaitForExtract) — holds the server at scriptIndex 5.
+    //   releaseExtractGate() (gate 1) — server sends 2nd Geometry + Beamline +
+    //     BankedEvent, then blocks at gate 2 (scriptIndex 9).  The connection
+    //     stays open so the listener does NOT detect a disconnect before
+    //     doExtractData() succeeds.
+    //   Gate 2 (PktWaitForExtract) — holds the server at scriptIndex 9 until the
+    //     algorithm has completed and the assertions have been verified.
+    //   releaseExtractGate() (gate 2) — server sends Disconnect and exits.
     m_server->script({
         Testing::buildRunStatusPkt(ADARA::RunStatus::STATE, /*runNum=*/0, kPulseId),
         Testing::buildGeometryPkt(kAIMinimalIDF()),
         Testing::buildBeamlineInfoPkt(kAIInstrumentName),
         Testing::buildRunStatusPkt(ADARA::RunStatus::NEW_RUN, kRunNum, kPulseId),
-        Testing::PktWaitForExtract{}, // gate (index 4 → scriptIndex 5 when server blocks)
+        Testing::PktWaitForExtract{}, // gate 1 (index 4 → scriptIndex 5 when server blocks)
         // onBeginRun() clears m_workspaceInitialized; re-init needs these:
         Testing::buildGeometryPkt(kAIMinimalIDF()),
         Testing::buildBeamlineInfoPkt(kAIInstrumentName),
         Testing::buildBankedEventPkt(kPulseId, /*chargePc=*/1000.0, {{/*tof=*/100u, /*pixel=*/1u}}),
+        Testing::PktWaitForExtract{}, // gate 2 (index 8 → scriptIndex 9); keeps connection open
         Testing::PktDisconnect{},
     });
     m_server->start();
@@ -226,22 +227,30 @@ public:
 
     Poco::ActiveResult<bool> res = loadAlg->executeAsync();
 
-    // Wait for the server to have sent the first 4 packets (STATE + Geom + Beamline
-    // + NEW_RUN) and to be blocking at the PktWaitForExtract gate.  By this point
-    // the bg thread has parsed through NEW_RUN and is in the pause loop
-    // (m_bgThreadCaughtUp=true), so onBeforeExtract() will snapshot BeginRun.
-    // Then release the gate so the bg thread can drain the remaining packets.
+    // Wait for gate 1 (server blocked after STATE+Geom+Beamline+NEW_RUN).
+    // Release it so the server sends the 2nd Geom+Beamline+BankedEvent and
+    // blocks at gate 2 — keeping the connection open while the algorithm extracts.
     if (aiWaitFor([&] { return m_server->scriptIndex() >= 5; }, std::chrono::seconds{10})) {
-      m_server->releaseExtractGate();
+      m_server->releaseExtractGate(); // gate 1
     }
+
+    // Wait for gate 2 (server blocked after 2nd Geom+Beamline+BankedEvent).
+    // By this point the network buffer holds all data needed for doExtractData()
+    // to succeed, and the server is NOT disconnecting — so no background exception
+    // is set while the algorithm is still running.
+    aiWaitFor([&] { return m_server->scriptIndex() >= 9; }, std::chrono::seconds{10});
 
     const bool finished = res.tryWait(10000); // ms
     TSM_ASSERT("LoadLiveData did not complete within 10 s — deadlock regression", finished);
     if (!finished) {
       loadAlg->cancel();
       res.wait();
+      m_server->releaseExtractGate(); // gate 2: let server exit cleanly
       return;
     }
+
+    // Release gate 2 now that the algorithm has completed; the disconnect is harmless.
+    m_server->releaseExtractGate(); // gate 2
 
     TS_ASSERT(loadAlg->isExecuted());
 
@@ -282,7 +291,6 @@ public:
   //   NEW_RUN 10002 — white-lie path again (onEndRun clears m_workspaceInitialized).
   //   BankedEvent (run B, pixel 1).
   //   END_RUN 10002 — triggers rename to "ts2_monitor_10002".
-  //   Disconnect.
   //
   // No PktWaitForExtract gates are needed: the single-slot m_pendingTransition
   // queue plus m_pauseNetRead serialise the two EndRun edges across separate
