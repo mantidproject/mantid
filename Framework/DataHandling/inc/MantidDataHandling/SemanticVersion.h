@@ -6,12 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidDataHandling/DllConfig.h"
+
 #include <compare>
 #include <cstdint>
 #include <regex>
 #include <string>
-
-#include "MantidDataHandling/DllConfig.h"
 
 namespace Mantid {
 
