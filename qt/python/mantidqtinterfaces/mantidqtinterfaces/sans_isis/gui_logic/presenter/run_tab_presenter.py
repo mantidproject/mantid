@@ -567,6 +567,7 @@ class RunTabPresenter(PresenterCommon):
             self._view.output_mode,
             self.output_fig,
             save_can,
+            self._view.clean_up_ads,
         )
 
     def on_reduction_dimensionality_changed(self):

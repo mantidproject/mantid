@@ -1125,6 +1125,14 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
         self.use_optimizations_checkbox.setChecked(value)
 
     @property
+    def clean_up_ads(self):
+        return self.clean_up_ads_checkbox.isChecked()
+
+    @clean_up_ads.setter
+    def clean_up_ads(self, value):
+        self.clean_up_ads_checkbox.setChecked(value)
+
+    @property
     def output_mode(self):
         if self.output_mode_memory_radio_button.isChecked():
             return OutputMode.PUBLISH_TO_ADS
