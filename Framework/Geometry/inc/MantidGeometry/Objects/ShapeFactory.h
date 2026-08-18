@@ -80,7 +80,7 @@ shapes
 described in the XML instrument definition file.
 
 This class is now also use elsewhere, and in addition to create geometric shapes
-from an DOM-element-node pointing to a \<type> element with shape information,
+from an DOM-element-node pointing to a \<type\> element with shape information,
 shapes
 can also be created directly from a XML shape string.
 
