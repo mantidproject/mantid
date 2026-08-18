@@ -35,10 +35,7 @@ std::string trim(std::string s) {
 std::regex
     SemanticVersion::version_regex(R"(^(\d+)(?:\.(\d+))?(?:\.(\d+))?(?:-([0-9A-Za-z.-]+))?(?:\+([0-9A-Za-z.-]+))?$)");
 
-SemanticVersion::SemanticVersion(const std::string &version) {
-  parse_version(version);
-  m_version = version;
-}
+SemanticVersion::SemanticVersion(const std::string &version) : m_version(version) { parse_version(version); }
 
 SemanticVersion::SemanticVersion(std::uint32_t major, std::uint32_t minor, std::uint32_t patch,
                                  const std::string &prerelease, const std::string &build)
