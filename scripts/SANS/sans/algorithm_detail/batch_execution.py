@@ -18,6 +18,7 @@ from sans.common.general_functions import (
     get_base_name_from_multi_period_name,
     get_transmission_output_name,
     get_wav_range_from_ws,
+    delete_workspaces,
 )
 from sans.common.enums import SANSDataType, SaveType, OutputMode, ReductionMode, DataType, CanonicalCoordinates, ReductionDimensionality
 from sans.common.constants import (
@@ -143,7 +144,9 @@ def select_reduction_alg(split_for_event_slices, use_compatibility_mode, event_s
     return event_slice_optimisation, reduction_packages
 
 
-def single_reduction_for_batch(state, use_optimizations, output_mode, plot_results, output_graph, save_can=False):
+def single_reduction_for_batch(
+    state, use_optimizations, output_mode, plot_results, output_graph, save_can=False, output_diagnostic_names=False
+):
     """
     Runs a single reduction.
 
@@ -158,6 +161,8 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
                          with event slice compatibility
     :param output_graph: The graph object for plotting workspaces.
     :param save_can: bool. whether or not to save out can workspaces
+    :param output_diagnostic_names: whether or not output a list of diagnostic workspace names used on the reduction on
+                                    the ADS (raw, transmission, optimization). Used for deletion at the end of batch processing
     """
     # ------------------------------------------------------------------------------------------------------------------
     # Load the data
@@ -298,7 +303,11 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
         delete_optimization_workspaces(reduction_packages, workspaces, monitors, save_can)
 
     if scaled_background_ws:
-        delete_workspace_by_name(scaled_background_ws)
+        delete_workspaces([scaled_background_ws], use_names=True)
+
+    delete_names_list = []
+    if output_diagnostic_names:
+        delete_names_list = get_names_to_delete(reduction_packages, workspaces, monitors, save_can)
 
     out_scale_factors = []
     out_shift_factors = []
@@ -309,7 +318,7 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
         out_scale_factors.extend(reduction_package.out_scale_factor)
         out_shift_factors.extend(reduction_package.out_shift_factor)
 
-    return out_scale_factors, out_shift_factors
+    return out_scale_factors, out_shift_factors, delete_names_list
 
 
 def _get_ws_from_alg(reduction_alg, reduction_package):
@@ -1610,17 +1619,8 @@ def delete_reduced_workspaces(reduction_packages, include_non_transmission=True)
     :param include_non_transmission: an optional bool. If true then also delete reduced hab, lab, merged
     """
 
-    def _delete_workspaces(_delete_alg, _workspaces):
-        for _workspace in _workspaces:
-            if _workspace is not None:
-                _delete_alg.setProperty("Workspace", _workspace)
-                _delete_alg.execute()
-
     # Get all names which were saved out to workspaces
     # Delete each workspace
-    delete_name = "DeleteWorkspace"
-    delete_options = {}
-    delete_alg = create_unmanaged_algorithm(delete_name, **delete_options)
 
     for reduction_package in reduction_packages:
         # Remove transmissions
@@ -1645,42 +1645,18 @@ def delete_reduced_workspaces(reduction_packages, include_non_transmission=True)
             if reduced_bgsub is not None:
                 workspaces_to_delete.extend(reduced_bgsub)
 
-        _delete_workspaces(delete_alg, workspaces_to_delete)
+        delete_workspaces(workspaces_to_delete)
 
 
 def delete_optimization_workspaces(reduction_packages, workspaces, monitors, save_can):
     """
     Deletes all workspaces which are used for optimizations. This can be loaded workspaces or can optimizations
 
-    :param reduction_packages: a list of reductioin packages.
+    :param reduction_packages: a list of reduction packages.
     """
 
-    def _delete_workspaces(_delete_alg, _workspaces):
-        _workspace_names_to_delete = set([_workspace.name() for _workspace in _workspaces if _workspace is not None])
-        for _workspace_name_to_delete in _workspace_names_to_delete:
-            if _workspace_name_to_delete and AnalysisDataService.doesExist(_workspace_name_to_delete):
-                _delete_alg.setProperty("Workspace", _workspace_name_to_delete)
-                _delete_alg.execute()
-
-    def _delete_workspaces_from_dict(_delete_alg, workspaces):
-        _workspace_names_to_delete = []
-        for key, workspace_list in workspaces.items():
-            for workspace in workspace_list:
-                if workspace and workspace.name():
-                    _workspace_names_to_delete.append(workspace.name())
-
-        for _workspace_name_to_delete in _workspace_names_to_delete:
-            if _workspace_name_to_delete and AnalysisDataService.doesExist(_workspace_name_to_delete):
-                _delete_alg.setProperty("Workspace", _workspace_name_to_delete)
-                _delete_alg.execute()
-
-    delete_name = "DeleteWorkspace"
-    delete_options = {}
-    delete_alg = create_unmanaged_algorithm(delete_name, **delete_options)
-
-    _delete_workspaces_from_dict(delete_alg, workspaces)
-
-    _delete_workspaces_from_dict(delete_alg, monitors)
+    delete_workspaces(workspaces)
+    delete_workspaces(monitors)
 
     for reduction_package in reduction_packages:
         # Delete can optimizations
@@ -1692,16 +1668,38 @@ def delete_optimization_workspaces(reduction_packages, workspaces, monitors, sav
         ]
         if not save_can:
             optimizations_to_delete.extend([reduction_package.reduced_lab_can, reduction_package.reduced_hab_can])
-        _delete_workspaces(delete_alg, optimizations_to_delete)
+        delete_workspaces(optimizations_to_delete)
 
 
-def delete_workspace_by_name(ws_name):
-    delete_name = "DeleteWorkspace"
-    delete_options = {}
-    delete_alg = create_unmanaged_algorithm(delete_name, **delete_options)
-    if ws_name and AnalysisDataService.doesExist(ws_name):
-        delete_alg.setProperty("Workspace", ws_name)
-        delete_alg.execute()
+def get_names_to_delete(reduction_packages, workspaces, monitors, save_can):
+    def _add_from_dict(_ws_dict):
+        for ws_list in _ws_dict.values():
+            if ws_list:
+                for ws in ws_list:
+                    if ws and (name := ws.name()):
+                        yield name
+
+    ws_names = []
+    ws_names.extend(list(_add_from_dict(workspaces)))
+    ws_names.extend(list(_add_from_dict(monitors)))
+    optimizations_to_delete = dict()
+    for reduction_package in reduction_packages:
+        optimizations_to_delete.update(
+            {
+                "lab_can_count": reduction_package.reduced_lab_can_count,
+                "lab_can_norm": reduction_package.reduced_lab_can_norm,
+                "hab_can_count": reduction_package.reduced_hab_can_count,
+                "hab_can_norm": reduction_package.reduced_hab_can_norm,
+                "unfitted_trans_can": reduction_package.unfitted_transmission_can,
+                "unfitted_trans": reduction_package.unfitted_transmission,
+                "fitted_trans_can": reduction_package.calculated_transmission_can,
+                "fitted_trans": reduction_package.calculated_transmission,
+            }
+        )
+        if not save_can:
+            optimizations_to_delete.update({"lab_can": reduction_package.reduced_lab_can, "hab_can": reduction_package.reduced_hab_can})
+        ws_names.extend(list(_add_from_dict(optimizations_to_delete)))
+    return ws_names
 
 
 def get_transmission_names_to_save(reduction_package, can):
