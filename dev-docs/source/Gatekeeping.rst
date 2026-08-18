@@ -126,40 +126,9 @@ While not vital and often not something I'd ask for changes on, it is good to ke
 Fixing a merge conflict between ``main`` and a protected branch
 ===============================================================
 
-There may occasionally be a merge conflict when the automated "Merge protected branches" workflow attempts to merge a protected branch into ``main``. The following instructions detail how to fix the conflict, using the ``release-next`` branch as an example:
+There may occasionally be a merge conflict when the automated "Merge protected branches" workflow attempts to merge a protected branch into ``main``. Since all PRs are now squash merged, these conflicts must be resolved by performing the merge directly on ``main`` so that the merge commit is preserved. The instructions below detail how to fix the conflict, using the ``release-next`` branch as an example.
 
-From a fork
------------
-
-Assuming your fork has the following remote setup
-
-.. code-block:: bash
-
-    $ git remote -v
-    mantid  https://github.com/mantidproject/mantid.git (fetch)
-    mantid  https://github.com/mantidproject/mantid.git (push)
-    origin  https://github.com/<username>/mantid.git (fetch)
-    origin  https://github.com/<username>/mantid.git (push)
-
-
-then you can follow these instructions to fix the merge conflict:
-
-.. code-block:: bash
-
-    git fetch --all
-    git checkout release-next
-    git pull mantid release-next
-    git checkout main
-    git pull mantid main
-    git checkout -b 0-fix-conflicts
-    git merge release-next
-
-You should then fix the merge conflicts, git add and commit the changes. Then push the branch to the ``mantid`` remote repository and open a PR. The PR should be reviewed and then merged into ``main``.
-
-From a non-fork
----------------
-
-Assuming you have the following remote setup
+Assuming you have the following remote setup:
 
 .. code-block:: bash
 
@@ -168,19 +137,22 @@ Assuming you have the following remote setup
     origin  https://github.com/mantidproject/mantid.git (push)
 
 
-then you can follow these instructions to fix the merge conflict:
+you can follow these instructions to fix the merge conflict:
 
 .. code-block:: bash
 
-    git fetch --all
-    git checkout release-next
-    git pull origin release-next
+    git fetch origin
     git checkout main
     git pull origin main
-    git checkout -b 0-fix-conflicts
-    git merge release-next
+    git merge origin/release-next
 
-You should then fix the merge conflicts, git add and commit the changes. Then push the branch to the ``origin`` remote repository and open a PR. The PR should be reviewed and then merged into ``main``.
+resolve any conflicts, then:
+
+.. code-block:: bash
+
+    git add <resolved-files>
+    git commit
+    git push origin main
 
 Specific quirks of Mantid
 =========================
