@@ -13,8 +13,6 @@ import tempfile
 import sys
 import unittest
 
-if not sys.platform.startswith("linux"):
-    raise unittest.SkipTest("QSettings staging is Linux-only")
 from unittest.mock import patch
 
 from mantidqt.utils.qt.qsettings_staging import QSettingsStagingEligibility, QSettingsStagingReason
@@ -39,6 +37,7 @@ class FakeCoordinator:
         self.unlocked = True
 
 
+@unittest.skipUnless(sys.platform.startswith("linux"), "QSettings staging is Linux-only")
 class QSettingsStagingCopyBackTest(unittest.TestCase):
     def setUp(self):
         self.temporary_directory = tempfile.TemporaryDirectory()

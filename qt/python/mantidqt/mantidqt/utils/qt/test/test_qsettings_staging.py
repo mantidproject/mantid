@@ -11,8 +11,6 @@ from pathlib import Path
 import sys
 import unittest
 
-if not sys.platform.startswith("linux"):
-    raise unittest.SkipTest("QSettings staging is Linux-only")
 from unittest.mock import patch
 
 from mantidqt.utils.qt.qsettings_staging import (
@@ -27,6 +25,7 @@ from mantidqt.utils.qt.qsettings_staging import (
 )
 
 
+@unittest.skipUnless(sys.platform.startswith("linux"), "QSettings staging is Linux-only")
 class ResolveXdgPathsTest(unittest.TestCase):
     def test_uses_defaults_when_environment_is_empty(self):
         with tempfile.TemporaryDirectory() as temporary_home:
@@ -80,6 +79,7 @@ class ResolveXdgPathsTest(unittest.TestCase):
             self.assertFalse(cache.exists())
 
 
+@unittest.skipUnless(sys.platform.startswith("linux"), "QSettings staging is Linux-only")
 class ParseMountInfoTest(unittest.TestCase):
     def test_parses_mount_id_point_and_filesystem(self):
         mounts = parse_mountinfo(["36 25 0:32 / /home rw,relatime - nfs4 server:/home rw\n"])
@@ -104,6 +104,7 @@ class ParseMountInfoTest(unittest.TestCase):
         self.assertEqual((), mounts)
 
 
+@unittest.skipUnless(sys.platform.startswith("linux"), "QSettings staging is Linux-only")
 class FindMountTest(unittest.TestCase):
     def test_selects_longest_component_wise_mount(self):
         mounts = (
@@ -142,6 +143,7 @@ class FindMountTest(unittest.TestCase):
         self.assertIsNone(match.mount)
 
 
+@unittest.skipUnless(sys.platform.startswith("linux"), "QSettings staging is Linux-only")
 class DiscoverQSettingsStorageTest(unittest.TestCase):
     def test_discovers_config_and_cache_mounts(self):
         with tempfile.TemporaryDirectory() as temporary_home:
@@ -195,6 +197,7 @@ class DiscoverQSettingsStorageTest(unittest.TestCase):
             self.assertEqual(MountMatchStatus.AMBIGUOUS, discovery.cache_mount.status)
 
 
+@unittest.skipUnless(sys.platform.startswith("linux"), "QSettings staging is Linux-only")
 class EvaluateQSettingsStagingTest(unittest.TestCase):
     def setUp(self):
         self.temporary_home = tempfile.TemporaryDirectory()
