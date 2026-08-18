@@ -78,7 +78,7 @@ public:
 
   const Kernel::Matrix<double> &getAppliedRotation() const override { return m_appliedRotation; }
   /// Record the rotation that has been applied to this shape's definition. Set by ShapeFactory
-  /// when the shape XML carries a <goniometer> tag; the surfaces are already rotated by then, so
+  /// when the shape XML carries a "goniometer" tag; the surfaces are already rotated by then, so
   /// this only records what was done.
   void setAppliedRotation(const Kernel::Matrix<double> &rotation) { m_appliedRotation = rotation; }
   const std::string &id() const override { return m_id; }
@@ -242,7 +242,7 @@ private:
   mutable std::unique_ptr<Kernel::Material> m_material;
   /// Whether or not the object geometry is finite
   bool m_isFiniteGeometry = true;
-  /// Rotation already applied to the shape definition, from a <goniometer> tag in the XML
+  /// Rotation already applied to the shape definition, from a "goniometer" tag in the XML
   Kernel::Matrix<double> m_appliedRotation{3, 3, true};
 
 protected:
