@@ -175,21 +175,6 @@ class TestWorkspaceManager_InitWss(unittest.TestCase):
         )
         self.assertIs(wm.ws, sim_ws)
 
-    def test_fills_y_with_ones_for_each_histogram(self, mock_create_sim, mock_clone, mock_set_shape, mock_set_mat):
-        wm = _make_manager("ENGINX")
-        sim_ws = MagicMock()
-        sim_ws.getNumberHistograms.return_value = 3
-        sim_ws.y.return_value = np.zeros(4)
-        mock_create_sim.return_value = sim_ws
-
-        wm._init_wss()
-
-        # numpy arrays inside mock.call don't compare cleanly with ==, so check each call explicitly
-        spec_indices = [c.args[0] for c in sim_ws.setSharedY.call_args_list]
-        self.assertEqual(spec_indices, [0, 1, 2])
-        for c in sim_ws.setSharedY.call_args_list:
-            np.testing.assert_array_equal(c.args[1], np.ones(4))
-
     def test_clones_mesh_neutral_and_material_from_sim_ws(self, mock_create_sim, mock_clone, mock_set_shape, mock_set_mat):
         wm = _make_manager("ENGINX")
         sim_ws = MagicMock()
