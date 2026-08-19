@@ -158,8 +158,6 @@ class WorkspaceManager:
 
     def _init_wss(self) -> None:
         ws = self.create_simulation_workspace(self.wsname)
-        for ispec in range(ws.getNumberHistograms()):
-            ws.setSharedY(ispec, np.ones_like(ws.y(ispec)))
         mesh_ws = CloneWorkspace(InputWorkspace=ws, OutputWorkspace=self.WS_MESH_RAW)
         updated_mesh_ws = CloneWorkspace(InputWorkspace=ws, OutputWorkspace=self.WS_MESH_NEUTRAL)
         self.ws = ws
