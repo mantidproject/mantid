@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from mantid.simpleapi import ConvertUnits, CopySample, MonteCarloAbsorption, RotateSampleShape
+from mantid.simpleapi import ConvertUnits, CopySample, MonteCarloAbsorption, RotateSampleShape, DeleteLog
 from mantid.api import MatrixWorkspace
 from mantid.kernel import logger
 from Engineering.texture.correction.correction_model import read_attenuation_coefficient_at_value
@@ -98,7 +98,10 @@ class AbsorptionCalculator:
             RotateSampleShape(wsm.WS_MC_INPUT, f"{ang},{vec[0]},{vec[1]},{vec[2]},1")
 
         # define the gauge volume
-        define_gauge_volume(mc_ws, wsm.gauge_volume_str)
+        if wsm.gauge_volume_str:
+            define_gauge_volume(mc_ws, wsm.gauge_volume_str)
+        elif mc_ws.run().hasProperty("GaugeVolume"):
+            DeleteLog(Workspace=mc_ws, Name="GaugeVolume")
 
     def calc_all(self) -> None:
         for i in self._model.orientations.keys():
