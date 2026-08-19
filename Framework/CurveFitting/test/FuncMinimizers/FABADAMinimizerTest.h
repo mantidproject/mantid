@@ -99,7 +99,7 @@ void doTestExpDecay(const MatrixWorkspace_sptr &ws2) {
   size_t n = fun->nParams();
 
   TS_ASSERT(AnalysisDataService::Instance().doesExist(DEFAULT_PDF_GROUP_NAME));
-  assertPdfWorkspaceOutputs({"Height", "Lifetime", "Chi Squared"});
+  assertPdfWorkspaceOutputs({"Height", "Lifetime", "Chi_Squared"});
 
   auto const wsPDF = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(DEFAULT_PDF_GROUP_NAME + "_Height");
   const auto &X = wsPDF->mutableX(0);
@@ -208,7 +208,7 @@ public:
     size_t nParams = fun->nParams();
 
     // Test PDF workspace
-    assertPdfWorkspaceOutputs({"Height", "Lifetime", "Chi Squared"});
+    assertPdfWorkspaceOutputs({"Height", "Lifetime", "Chi_Squared"});
 
     TS_ASSERT_DELTA(
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(DEFAULT_PDF_GROUP_NAME + "_Height")->y(0)[8], 0.41,
@@ -217,7 +217,7 @@ public:
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(DEFAULT_PDF_GROUP_NAME + "_Lifetime")->y(0)[8], 3.5,
         1.0);
     TS_ASSERT_DELTA(
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(DEFAULT_PDF_GROUP_NAME + "_Chi Squared")->y(0)[0],
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(DEFAULT_PDF_GROUP_NAME + "_Chi_Squared")->y(0)[0],
         0.44, 0.3);
 
     //  Test CostFunction table
