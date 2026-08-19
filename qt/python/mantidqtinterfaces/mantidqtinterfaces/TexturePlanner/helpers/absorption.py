@@ -9,7 +9,7 @@ from __future__ import annotations
 import numpy as np
 
 from mantid.simpleapi import ConvertUnits, CopySample, MonteCarloAbsorption, RotateSampleShape, DeleteLog
-from mantid.api import MatrixWorkspace
+from mantid.api import AnalysisDataService as ADS, MatrixWorkspace
 from mantid.kernel import logger
 from Engineering.texture.correction.correction_model import read_attenuation_coefficient_at_value
 from Engineering.texture.texture_helper import define_gauge_volume
@@ -37,6 +37,7 @@ class AbsorptionCalculator:
             "SimulateScatteringPointIn": "SampleOnly",
             "ResimulateTracksForDifferentWavelengths": False,
         }
+        self.mc_ws_init_args = None
 
     def calc_for_index(self, index: int) -> None:
         wsm = self._model.workspaces
@@ -62,13 +63,24 @@ class AbsorptionCalculator:
 
     def _create_mc_ws(self) -> MatrixWorkspace:
         wsm = self._model.workspaces
-        # create a ws with params binned around the evaluation point
-        src_ws = wsm.create_simulation_workspace(
-            wsm.WS_MC_INPUT,
-            unit=wsm.attenuation_kwargs["unit"],
-            bin_params=wsm.create_bin_params_around_point(wsm.attenuation_kwargs["point"]),
-        )
-        mc_ws = ConvertUnits(InputWorkspace=src_ws, Target="Wavelength", OutputWorkspace=wsm.WS_MC_INPUT)
+        # create a ws with params binned around the evaluation point, if the init args have changed
+        input_args = (wsm.WS_MC_INPUT, wsm.attenuation_kwargs["unit"], wsm.attenuation_kwargs["point"])
+        # if the workspace isn't in the ADS it needs to be rebuilt
+        # if the workspace is in the ADS rebuild it if the args have changes
+        rebuild = input_args != self.mc_ws_init_args if ADS.doesExist(wsm.WS_MC_INPUT) else True
+        if rebuild:
+            src_ws = wsm.create_simulation_workspace(
+                wsm.WS_MC_INPUT,
+                unit=wsm.attenuation_kwargs["unit"],
+                bin_params=wsm.create_bin_params_around_point(wsm.attenuation_kwargs["point"]),
+            )
+            mc_ws = ConvertUnits(InputWorkspace=src_ws, Target="Wavelength", OutputWorkspace=wsm.WS_MC_INPUT)
+            mc_ws.run().getGoniometer().setR(np.eye(3))
+            self.mc_ws_init_args = input_args
+            return mc_ws
+        # to reach here rebuild must be False and so "ADS.doesExist(wsm.WS_MC_INPUT)" check must be True
+        # and the args must be the same, just retrieve the ws and ensure the goniometer is I
+        mc_ws = ADS.retrieve(wsm.WS_MC_INPUT)
         mc_ws.run().getGoniometer().setR(np.eye(3))
         return mc_ws
 
