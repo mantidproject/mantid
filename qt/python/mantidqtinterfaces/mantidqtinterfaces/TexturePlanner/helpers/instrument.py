@@ -14,6 +14,7 @@ from mantid.kernel import logger
 from Engineering.EnggUtils import CALIB_DIR
 from Engineering.common.instrument_config import get_instr_config, SUPPORTED_INSTRUMENTS
 from typing import TYPE_CHECKING, List, Sequence
+from functools import lru_cache
 
 if TYPE_CHECKING:
     from mantidqtinterfaces.TexturePlanner.model import TexturePlannerModel
@@ -81,20 +82,10 @@ class InstrumentHelper:
         untouched) rather than with a bare try/except around the real recompute. A leading null
         group is tolerated to match DetectorGeometry.recompute, but any other detector-less group
         means the file references detectors this instrument does not have - i.e. it does not fit.
+
+        Calls are cached for quick evaluation of repeated calls
         """
-        if not instrument or not grouping_path:
-            return False
-        try:
-            ws = CreateSimulationWorkspace(Instrument=instrument, BinParams="0,1,2", StoreInADS=False)
-            grouped = GroupDetectors(InputWorkspace=ws, MapFile=grouping_path, StoreInADS=False)
-        except (RuntimeError, ValueError):
-            return False
-        spec_info = grouped.spectrumInfo()
-        n_hist = grouped.getNumberHistograms()
-        first = 0
-        while first < n_hist and not spec_info.hasDetectors(first):
-            first += 1
-        return first < n_hist and all(spec_info.hasDetectors(i) for i in range(first, n_hist))
+        return _is_grouping_file_applicable(instrument, grouping_path)
 
     def set_group(self, group_str: str) -> None:
         if group_str == CUSTOM_GROUP:
@@ -128,3 +119,29 @@ class InstrumentHelper:
             # user-supplied file is already an absolute path
             return self.custom_grouping_file
         return os.path.join(CALIB_DIR, self.get_grouping_file())
+
+
+@lru_cache(maxsize=32)
+def _is_grouping_file_applicable(instrument: str, grouping_path: str) -> bool:
+    """Whether grouping_path can be applied to instrument.
+
+    Checked on throwaway workspaces (StoreInADS=False, so the live state and the ADS are
+    untouched) rather than with a bare try/except around the real recompute. A leading null
+    group is tolerated to match DetectorGeometry.recompute, but any other detector-less group
+    means the file references detectors this instrument does not have - i.e. it does not fit.
+
+    cached for repeated calls
+    """
+    if not instrument or not grouping_path:
+        return False
+    try:
+        ws = CreateSimulationWorkspace(Instrument=instrument, BinParams="0,1,2", StoreInADS=False)
+        grouped = GroupDetectors(InputWorkspace=ws, MapFile=grouping_path, StoreInADS=False)
+    except (RuntimeError, ValueError):
+        return False
+    spec_info = grouped.spectrumInfo()
+    n_hist = grouped.getNumberHistograms()
+    first = 0
+    while first < n_hist and not spec_info.hasDetectors(first):
+        first += 1
+    return first < n_hist and all(spec_info.hasDetectors(i) for i in range(first, n_hist))
