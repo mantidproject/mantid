@@ -126,6 +126,15 @@ class CodeCompletionTest(unittest.TestCase):
         for import_name, alias in aliases.items():
             self.assertEqual(alias, get_module_import_alias(import_name, script))
 
+    @patch("mantidqt.widgets.codeeditor.completion.isalive", return_value=False)
+    def test_update_completion_api_does_nothing_if_editor_is_not_alive(self, mock_isalive):
+        completer = self._get_completer("")
+        # editor.updateCompletionAPI() is called in the CodeCompleter init,
+        # so reset the mock before checking it's not called when running update_completion_api().
+        completer.editor.updateCompletionAPI.reset_mock()
+        completer.update_completion_api()
+        completer.editor.updateCompletionAPI.assert_not_called()
+
 
 if __name__ == "__main__":
     unittest.main()
