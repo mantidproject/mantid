@@ -14,6 +14,7 @@ from scipy.spatial.transform import Rotation
 from mantid.simpleapi import (
     CloneWorkspace,
     CopySample,
+    CreateSampleWorkspace,
     CreateSimulationWorkspace,
     DeleteLog,
     LoadSampleShape,
@@ -69,6 +70,14 @@ class WorkspaceManager:
         #                    reloaded, so it survives shape changes and lets set_material re-apply the
         #                    full material (formula + number/mass density) via CopySample rather than a
         #                    round-trip through SetSampleMaterial.
+        #
+        # Only WS_DATA, WS_UNGROUPED, WS_MC_INPUT and WS_REFERENCE carry the real instrument, because
+        # only they have their detectors read (GroupDetectors, spectrumInfo/componentInfo positions,
+        # MonteCarloAbsorption, the saved reference file). The rest are pure sample holders built by
+        # create_shape_workspace: nothing ever queries their geometry, and building the real IDF for
+        # them costs seconds on a large instrument. They are not instrument-free only because
+        # LoadSampleShape declares an InstrumentValidator, which needs a sample position and nothing
+        # more - so a stub instrument is behaviourally identical here.
         suffix = f"_{uuid4().hex[:8]}"
         self.WS_DATA = "__texture_planning_ws" + suffix
         self.WS_UNGROUPED = "__texture_planning_ws_ungrouped" + suffix
@@ -132,7 +141,7 @@ class WorkspaceManager:
         if self.ws:
             # rebuilding for a new instrument: _update_existing_wss copies the sample (including
             # whatever material the user set via the SetSampleMaterial dialog) onto the new
-            # workspaces, so we must not reset the material here
+            # workspace, so we must not reset the material here
             self._update_existing_wss()
         else:
             # brand-new workspaces have no material; seed the default so absorption works out of the box
@@ -143,23 +152,16 @@ class WorkspaceManager:
             define_gauge_volume(self.ws, self.gauge_volume_str)
 
     def _update_existing_wss(self) -> None:
-        # ws and updated_mesh_ws carry the user's initial shape rotation (init_R); it must survive the
+        # ws carries the user's initial shape rotation (init_R); it must survive the
         # instrument switch, but a plain CopySample drops it for a CSG shape (see
-        # copy_sample_preserving_initial_rotation), so preserve it explicitly. mesh_ws is the pristine,
-        # un-rotated sample and is copied as-is.
-        ws = self._create_new_ws_with_copied_sample(self.wsname, self.ws, clone=True, preserve_initial_rotation=True)
-        mesh_ws = self._create_new_ws_with_copied_sample(self.WS_MESH_RAW, self.mesh_ws, clone=True)
-        updated_mesh_ws = self._create_new_ws_with_copied_sample(
-            self.WS_MESH_NEUTRAL, self.updated_mesh_ws, clone=True, preserve_initial_rotation=True
-        )
+        # copy_sample_preserving_initial_rotation), so preserve it explicitly.
+        ws = self._create_new_ws_with_copied_sample(self.wsname, self.ws, preserve_initial_rotation=True)
         self.ws = ws
-        self.mesh_ws = mesh_ws
-        self.updated_mesh_ws = updated_mesh_ws
 
     def _init_wss(self) -> None:
         ws = self.create_simulation_workspace(self.wsname)
-        mesh_ws = CloneWorkspace(InputWorkspace=ws, OutputWorkspace=self.WS_MESH_RAW)
-        updated_mesh_ws = CloneWorkspace(InputWorkspace=ws, OutputWorkspace=self.WS_MESH_NEUTRAL)
+        mesh_ws = self.create_shape_workspace(self.WS_MESH_RAW)
+        updated_mesh_ws = self.create_shape_workspace(self.WS_MESH_NEUTRAL)
         self.ws = ws
         self.mesh_ws = mesh_ws
         self.updated_mesh_ws = updated_mesh_ws
@@ -237,7 +239,10 @@ class WorkspaceManager:
     def update_initial_shape(
         self, x_rot: float | int, y_rot: float | int, z_rot: float | int, x_pos: float | int, y_pos: float | int, z_pos: float | int
     ) -> None:
-        _tmp_ws = self._create_new_ws_with_copied_sample(self.WS_TMP, self.mesh_ws)
+        # this runs on every tick of the six initial-shape spin boxes, and the working copy only ever
+        # holds a sample, so build it as a stub-instrument shape ws rather than on the real instrument
+        _tmp_ws = self.create_shape_workspace(self.WS_TMP)
+        self._copy_sample(self.mesh_ws, _tmp_ws, preserve_initial_rotation=False)
         self.offset = (x_pos, y_pos, z_pos)
         rots_zero = self._all_rots_zero(x_rot, y_rot, z_rot)
         # The initial orientation should be applied before the initial translation:
@@ -304,22 +309,36 @@ class WorkspaceManager:
             DeleteLog(Workspace=self.ws, Name="GaugeVolume")
 
     def _create_new_ws_with_copied_sample(
-        self, new_wsname: str, sample_to_copy: MatrixWorkspace, clone: bool = False, preserve_initial_rotation: bool = False
+        self, new_wsname: str, sample_to_copy: MatrixWorkspace, preserve_initial_rotation: bool = False
     ) -> MatrixWorkspace:
-        if clone:
-            shape_ws = CloneWorkspace(InputWorkspace=sample_to_copy, OutputWorkspace=self._SHAPE_TMP)
-        else:
-            shape_ws = sample_to_copy
+        """Rebuild new_wsname on the current instrument, carrying sample_to_copy's sample across.
+
+        sample_to_copy is normally the workspace living at new_wsname, which
+        create_simulation_workspace is about to overwrite in the ADS, so the sample is first
+        stashed on a throwaway shape workspace. That stash only ever holds a sample, so it is a
+        cheap stub-instrument workspace rather than a clone of what may be a very large workspace.
+
+        Both hops use the same copy semantics: repeating
+        copy_sample_preserving_initial_rotation is idempotent (it re-bakes init_R from the
+        *destination's* goniometer, and CopySample preserves the shape type so _shape_is_mesh
+        answers the same each time), whereas mixing the two would re-bake init_R on one hop and
+        strip it on the other.
+        """
         try:
+            shape_ws = self.create_shape_workspace(self._SHAPE_TMP)
+            self._copy_sample(sample_to_copy, shape_ws, preserve_initial_rotation)
             new_ws = self.create_simulation_workspace(new_wsname)
-            if preserve_initial_rotation:
-                self.copy_sample_preserving_initial_rotation(shape_ws, new_ws)
-            else:
-                CopySample(InputWorkspace=shape_ws, OutputWorkspace=new_wsname, CopyName=False, CopyEnvironment=False, CopyLattice=False)
+            self._copy_sample(shape_ws, new_ws, preserve_initial_rotation)
         finally:
-            if clone and ADS.doesExist(self._SHAPE_TMP):
+            if ADS.doesExist(self._SHAPE_TMP):
                 ADS.remove(self._SHAPE_TMP)
         return new_ws
+
+    def _copy_sample(self, source_ws: MatrixWorkspace, dest_ws: MatrixWorkspace, preserve_initial_rotation: bool) -> None:
+        if preserve_initial_rotation:
+            self.copy_sample_preserving_initial_rotation(source_ws, dest_ws)
+        else:
+            CopySample(InputWorkspace=source_ws, OutputWorkspace=dest_ws, CopyName=False, CopyEnvironment=False, CopyLattice=False)
 
     @staticmethod
     def _shape_is_mesh(ws: MatrixWorkspace) -> bool:
@@ -345,6 +364,19 @@ class WorkspaceManager:
     def create_simulation_workspace(self, name: str, unit: str = "dSpacing", bin_params: str | None = None) -> MatrixWorkspace:
         return CreateSimulationWorkspace(
             Instrument=self.instr, BinParams=bin_params or self.DEFAULT_BIN_PARAMS, OutputWorkspace=name, UnitX=unit
+        )
+
+    @staticmethod
+    def create_shape_workspace(wsname: str) -> MatrixWorkspace:
+        """A minimal single-spectrum workspace used purely as a sample shape/material holder.
+
+        Carries a stub instrument rather than the real one: nothing reads detectors from these
+        workspaces, but LoadSampleShape declares an InstrumentValidator (which only requires a
+        sample position), so they cannot be instrument-free. Building the real IDF here costs
+        seconds on a large instrument, for geometry that is never queried.
+        """
+        return CreateSampleWorkspace(
+            OutputWorkspace=wsname, WorkspaceType="Histogram", NumBanks=1, BankPixelWidth=1, XMin=0, XMax=1, BinWidth=1
         )
 
     @staticmethod
