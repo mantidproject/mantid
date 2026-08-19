@@ -221,7 +221,7 @@ Several optional parameters can control different aspects of the reduction
   If this parameter is omitted, the default behaviour will be to publish the output to the ADS and save it in a file if there is a ``saveAlgs``.
 - ``use_reduction_mode_as_suffix``: If ``True``, appends second suffix to output name based on reduction mode.
 - ``output_diagnostic_ads_names``: If ``True``, this command will make the reduction output a second parameter containing a list of non-reduced workspace names in the ADS. Mainly to be used as part of :ref:`BatchReduce <SANSScriptingBatchReduce>` to delete
-unneeded or unwanted workspaces at the end of a batch reduction.
+  unneeded or unwanted workspaces at the end of a batch reduction.
 
 .. _SANSScriptingBatchReduce:
 
