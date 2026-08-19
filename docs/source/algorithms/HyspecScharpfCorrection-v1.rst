@@ -56,7 +56,7 @@ The Scharpf angle is then:
 
 For more information, see
 
-#. Werner Schweika - *XYZ-polarisation analysis of diffuse magnetic neutron scattering from single crystals*, Journal of Physics: Conference Series, **211**,012026, (2010) doi: `10.1088/1742-6596/211/1/012026 <http://dx.doi.org/10.1088/1742-6596/211/1/012026>`_
+#. Werner Schweika - *XYZ-polarisation analysis of diffuse magnetic neutron scattering from single crystals*, Journal of Physics: Conference Series, **211**,012026, (2010) doi: `10.1088/1742-6596/211/1/012026 <https://doi.org/10.1088/1742-6596/211/1/012026>`_
 
 
 

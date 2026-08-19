@@ -91,8 +91,8 @@ Output:
 References
 ----------
 
-.. [#SEARS] Sears, V. F. and Shelley, S. A., *Acta Cryst. A* **47** 441 (1991)
-          `doi: 10.1107/S0108767391002441 <http://dx.doi.org/10.1107/S0108767391002441>`_
+.. [#SEARS] Sears, V. F. and Shelley, S. A., *Acta Crystallographica. Section A* **47** 441 (1991)
+          `doi: 10.1107/S0108767391002970 <https://doi.org/10.1107/S0108767391002970>`_
 
 .. categories::
 

@@ -12,7 +12,7 @@ Description
 Keren's generalization of the Abragam relaxation function to a longitudinal field,
 for fitting the time-dependent muon polarization.
 
-The function is derived in `*Phys Rev B, vol. 50, 14, 10039-42 (1994)* <http://dx.doi.org/10.1103/PhysRevB.50.10039>`_ and is given by
+The function is derived in `*Physical Review B, vol. 50, 14, 10039-42 (1994)* <https://doi.org/10.1103/PhysRevB.50.10039>`_ and is given by
 
 .. math:: P_z(t) = A\exp\left[-\Gamma(t)t\right]
 

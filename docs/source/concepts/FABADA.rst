@@ -4,7 +4,7 @@ FABADA
 ======
 
 FABADA is a fitting algorithm for Bayesian data analysis, the theory of which is
-detailed here: http://dx.doi.org/10.1088/1742-6596/325/1/012006
+detailed here: https://doi.org/10.1088/1742-6596/325/1/012006
 
 This documentation covers details of it's implementation in Mantid.
 

@@ -17,8 +17,8 @@ namespace PhysicalConstants {
  * rare earth, and actinide atoms and ions. Data is taken from International
  * Tables for Crystalography, volume C, section 4.4.5
  * http://it.iucr.org/Cb/ch4o4v0001/sec4o4o5/
- * and from Kobayashi, Nagao and Ito, Acta. Cryst. A67 473 (2011)
- * http://dx.doi.org/10.1107/S010876731102633X
+ * and from Kobayashi, Nagao and Ito, Acta Crystallographica, Section A. A67 473 (2011)
+ * https://doi.org/10.1107/S010876731102633X
  * The theory is outlined in the ITC vol C, section 6.1.2
  * http://it.iucr.org/Cb/ch6o1v0001/sec6o1o2/
  */

@@ -456,7 +456,7 @@ def run(args):
     # Print out a custom success message, depending on the initial options.
     if not args.test:
         method = "resolved"
-        doi_add = "http://dx.doi.org/" + doi
+        doi_add = "https://doi.org/" + doi
         meta_add = "https://mds.datacite.org/metadata/" + doi
         prev_meta_add = "https://mds.datacite.org/metadata/" + prev_doi
     else:

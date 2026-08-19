@@ -14,7 +14,7 @@ class CompareAbsorptionCorrectionToInternationalTablesCylinder(systemtesting.Man
     AbsorptionCorrection algorithm for a cylinder to the values in the
     tables 6.3.3.2 from "International Tables for Crystallography
     Volume C: Mathematical, physical and chemical tables"
-    http://dx.doi.org/10.1107/97809553602060000103
+    https://doi.org/10.1107/97809553602060000103
 
     """
 
@@ -575,7 +575,7 @@ class CompareAbsorptionCorrectionToInternationalTablesSphere(systemtesting.Manti
     AbsorptionCorrection algorithm for a sphere to the values in the
     tables 6.3.3.3 from "International Tables for Crystallography
     Volume C: Mathematical, physical and chemical tables"
-    http://dx.doi.org/10.1107/97809553602060000103
+    https://doi.org/10.1107/97809553602060000103
 
     """
 
