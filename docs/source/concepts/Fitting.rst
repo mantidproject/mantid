@@ -142,7 +142,7 @@ Many well known global fitting algorithms are very simple in their
 implementation.
 
 To demonstrate an example of this, below is shown how to script
-a global fitting algorithm, which for example in http://dx.doi.org/10.1107/S0021889810008113
+a global fitting algorithm, which for example in https://doi.org/10.1107/S0021889810008113
 has been shown to be competitive with a tuned Simulation Annealing algorithm
 (https://en.wikipedia.org/wiki/Simulated_annealing)
 implementation used for solving crystal structures from powder diffraction data.
