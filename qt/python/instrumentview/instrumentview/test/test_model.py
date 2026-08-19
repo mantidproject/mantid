@@ -1282,6 +1282,31 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         self.assertEqual(labels[1], ["hkl_2", "hkl_3"])
         np.testing.assert_array_equal(model._peaks_indices_in_detector_positions, np.array([0, 1, 2]))
 
+    @mock.patch("instrumentview.FullInstrumentViewModel.AnalysisDataService")
+    @mock.patch("instrumentview.FullInstrumentViewModel.WorkspaceDetectorPeaks")
+    def test_get_peak_overlay_arguments_after_last_lineplot_peak_deleted(self, mock_wdp_cls, mock_ads):
+        """Refreshing overlays after deleting the last peak should not error on empty indices."""
+        model, _ = self._setup_model([1, 2, 3])
+        mock_ads.doesExist.return_value = True
+
+        wdp_with_peak = MagicMock()
+        wdp_with_peak.get_peaks_indices_and_labels.return_value = (np.array([1]), ["hkl_1"])
+        wdp_without_peaks = MagicMock()
+        wdp_without_peaks.get_peaks_indices_and_labels.return_value = (np.array([], dtype=int), [])
+        # First call returns a workspace with a peak, second call returns a workspace with no peaks
+        mock_wdp_cls.side_effect = [wdp_with_peak, wdp_without_peaks]
+
+        positions_before_delete, labels_before_delete, _ = model.get_peak_overlay_arguments(["ws1"])
+        self.assertEqual(labels_before_delete, [["hkl_1"]])
+        np.testing.assert_array_equal(positions_before_delete[0], np.array([[1, 1, 1]]))
+
+        # Simulate deleting the final peak and refreshing overlays again.
+        positions_after_delete, labels_after_delete, ws_names_after_delete = model.get_peak_overlay_arguments(["ws1"])
+        self.assertEqual(ws_names_after_delete, ["ws1"])
+        self.assertEqual(labels_after_delete, [[]])
+        np.testing.assert_array_equal(positions_after_delete[0], np.array([], dtype=float).reshape(0, 3))
+        np.testing.assert_array_equal(model._peaks_indices_in_detector_positions, np.array([], dtype=int))
+
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel._match_workspace_unit")
     @mock.patch("instrumentview.FullInstrumentViewModel.AnalysisDataService")
     @mock.patch("instrumentview.FullInstrumentViewModel.WorkspaceDetectorPeaks")

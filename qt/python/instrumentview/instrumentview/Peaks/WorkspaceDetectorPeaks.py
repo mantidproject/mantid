@@ -42,7 +42,7 @@ class WorkspaceDetectorPeaks:
     def get_peaks_indices_and_labels(self, detector_positions, detector_ids) -> tuple[np.ndarray, list]:
         peaks_ids = np.array([p.detector_id for p in self._detector_peaks])
         if len(peaks_ids) == 0 or len(detector_ids) == 0:
-            return np.array([]), []
+            return np.array([], dtype=int), []
 
         # Use argsort + searchsorted for fast lookup. Using np.where(np.isin) does not
         # maintain the original order. It is faster to sort then search the sorted
