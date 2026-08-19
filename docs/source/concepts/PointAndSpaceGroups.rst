@@ -661,7 +661,7 @@ In this case, the script gave the right answer, because the list of reflections 
 
 .. [ITAPointGroups] International Tables for Crystallography (2006). Vol. A, ch. 10.1, p. 762
 
-.. [Shmueli84] U. Shmueli, Acta Crystallogr. A, 40, p. 559 `DOI: 10.1107/S0108767384001161 <http://dx.doi.org/10.1107/S0108767384001161>`_)
+.. [Shmueli84] U. Shmueli, Acta Crystallographica. Section A, 40, p. 559 `DOI: 10.1107/S0108767384001161 <https://doi.org/10.1107/S0108767384001161>`_)
 
 .. [#f1] In the case of the monoclinic Laue class :math:`2/m` it's a bit more complicated, because there are two conventions regarding the unique axis. According to current crystallographic standards, the :math:`b`-axis is used, but in some cases one may find the :math:`c`-axis for this purpose. To resolve this, both options are offered in Mantid. When using the symbol ``2/m``, the :math:`b`-axis convention is used, for :math:`c` one has to explicitly provide the symbol as ``112/m``.
 

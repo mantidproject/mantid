@@ -49,11 +49,11 @@ papers, although it does not yet fully implement all aspects discussed
 there (e.g. there's no multiple scattering and no concentric cylinders).
 
 #. I.A. Blech & B.L. Averbach, *Multiple Scattering of Neutrons in
-   Vanadium and Copper*, Phys. Rev. **137 4A** (1965) A1113
-   `doi: 10.1103/PhysRev.137.A1113 <http://dx.doi.org/10.1103/PhysRev.137.A1113>`_
+   Vanadium and Copper*, Physical Review. **137 4A** (1965) A1113
+   `doi: 10.1103/PhysRev.137.A1113 <https://doi.org/10.1103/PhysRev.137.A1113>`_
 #. A.K. Soper & P.A. Egelstaff, *Multiple Scattering and Attenuation of
-   Neutrons in Concentric Cylinders*, NIM **178** (1980) 415
-   `doi: 10.1016/0029-554X(80)90820-4 <http://dx.doi.org/10.1016/0029-554X(80)90820-4>`_
+   Neutrons in Concentric Cylinders*, Nuclear Instruments and Methods **178** (1980) 415
+   `doi: 10.1016/0029-554X(80)90820-4 <https://doi.org/10.1016/0029-554X(80)90820-4>`_
 
 Usage
 -----

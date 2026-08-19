@@ -539,7 +539,7 @@ Example ``playback`` mode session
   (mantid-developer) [scripts]> LD_PRELOAD=${LOCAL_PRELOAD} PYTHONPATH=${LOCAL_PYTHONPATH}\
     python adara_player_StartLiveData.py
   FrameworkManager-[Notice] Welcome to Mantid 6.14.0.1.dev87
-  FrameworkManager-[Notice] Please cite: http://dx.doi.org/10.1016/j.nima.2014.07.029 and this release: http://dx.doi.org/10.5286/Software/Mantid
+  FrameworkManager-[Notice] Please cite: https://doi.org/10.1016/j.nima.2014.07.029 and this release: https://doi.org/10.5286/Software/Mantid
   StartLiveData-[Notice] StartLiveData started
   SNSLiveEventDataListener-[Notice] Run number is 68851
   LoadLiveData-[Warning] The SNSLiveEventDataListener is not ready to return data: The workspace has not yet been initialized.
