@@ -100,7 +100,7 @@ Types::Core::DateAndTime create_releaseDateAndTime() {
   return release;
 }
 
-const std::string DOI{"http://dx.doi.org/10.1016/j.nima.2014.07.029"};
+const std::string DOI{"https://doi.org/10.1016/j.nima.2014.07.029"};
 const std::string VERSION_FULL{"@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@@VERSION_TWEAK@"};
 const std::string VERSION_SHORT{"@VERSION_MAJOR@.@VERSION_MINOR@"};
 const std::string REVISION_SHORT{"@REVISION_SHORT@"};
@@ -168,7 +168,7 @@ std::string MantidVersion::releaseDate() {
 }
 
 std::string MantidVersion::doi() {
-  const std::string MAIN = "http://dx.doi.org/10.5286/Software/Mantid";
+  const std::string MAIN = "https://doi.org/10.5286/Software/Mantid";
   // Cast here in those cases where patch number is of the form 20131022.1356.
   const unsigned int patchVersion = static_cast<unsigned int>(@VERSION_PATCH@);
 

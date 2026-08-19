@@ -259,18 +259,18 @@ default facility and instrument respectively. The definition can be found at
 References
 ----------
 
-.. [#DAR] Darwin, C. G., *Philos. Mag.*, **43** 800 (1922)
-          `doi: 10.1080/10448639208218770 <http://dx.doi.org/10.1080/10448639208218770>`_
-.. [#HAM] Hamilton, W.C., *Acta Cryst*, **10**, 629 (1957)
-          `doi: 10.1107/S0365110X57002212 <http://dx.doi.org/10.1107/S0365110X57002212>`_
+.. [#DAR] Darwin, C. G., *The Philosophical Magazine: A Journal of Theoretical Experimental and Applied Physics*, **43** 800 (1922)
+          `doi: 10.1080/14786442208633940 <https://doi.org/10.1080/14786442208633940>`_
+.. [#HAM] Hamilton, W.C., *Acta Crystallographica*, **10**, 629 (1957)
+          `doi: 10.1107/S0365110X57002212 <https://doi.org/10.1107/S0365110X57002212>`_
 .. [#SAB] Sabine, T. M., *International Tables for Crystallography*, Vol. C, Page 609, Ed. Wilson, A. J. C and Prince, E. Kluwer Publishers (2004)
-          `doi: 10.1107/97809553602060000103 <http://dx.doi.org/10.1107/97809553602060000103>`_
+          `doi: 10.1107/97809553602060000103 <https://doi.org/10.1107/97809553602060000103>`_
 .. [#GAR] Gardner, James L., *Journal of Research of the National Institute of Standards and Technology*, section 4 (2003),
           `https://nvlpubs.nist.gov/nistpubs/jres/108/1/j80gar.pdf <https://nvlpubs.nist.gov/nistpubs/jres/108/1/j80gar.pdf>`_
 .. [#SEV] Severens, Ivo, technische universiteit eindhoven, (2003),
           `https://www.win.tue.nl/casa/meetings/seminar/previous/_abstract030122_files/4.pdf <https://www.win.tue.nl/casa/meetings/seminar/previous/_abstract030122_files/4.pdf>`_
-.. [#HUO] Hu, G. Y., O'Connell, R.F. , *Journal of Physics A*, **29** 1511 (1996),
-          `doi: 10.1088/0305-4470/29/7/020 <http://dx.doi.org/10.1088/0305-4470/29/7/020>`_
+.. [#HUO] Hu, G. Y., O'Connell, R.F. , *Journal of Physics A: Mathematical and General*, **29** 1511 (1996),
+          `doi: 10.1088/0305-4470/29/7/020 <https://doi.org/10.1088/0305-4470/29/7/020>`_
           Note: the following edits have been applied to the formulae in the paper for the case -2 < D < 2:
           a) D = -2 cos :math:`\lambda` has been implemented instead of D = 2 cos :math:`\lambda`
           b) equation (10) has been modified for the -2 < D < 2 case so that the leading minus sign on the right hand side is removed
