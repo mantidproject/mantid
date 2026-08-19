@@ -22,7 +22,7 @@ fi
 if [ -z "${MPLCONFIGDIR+x}" ]; then
     # use XDG_CACHE_HOME if someone set it
     # otherwise matplotlib defaults to ~/.cache/matplotlib/
-    if [ -z "${XDG_CACHE_HOME}" ]; then
+    if [ -n "${XDG_CACHE_HOME}" ]; then
         # matplotlib will cache fonts here
         # useful on those pesky nfs systems
         export MPLCONFIGDIR="${XDG_CACHE_HOME}/matplotlib"
