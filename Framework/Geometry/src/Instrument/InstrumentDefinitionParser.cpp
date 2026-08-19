@@ -2487,20 +2487,36 @@ void InstrumentDefinitionParser::setComponentLinks(std::shared_ptr<Geometry::Ins
 /**
 Apply the cache.
 @param cacheToApply : Cache file object to use the geometries.
+@return true if the cache was read and applied, false if the cache file could
+not be read. An unreadable cache file is deleted so that it is recreated from
+the instrument definition.
 */
-void InstrumentDefinitionParser::applyCache(const IDFObject_const_sptr &cacheToApply) {
+bool InstrumentDefinitionParser::applyCache(const IDFObject_const_sptr &cacheToApply) {
   const std::string cacheFullPath = cacheToApply->getFileFullPathStr();
   g_log.information("Loading geometry cache from " + cacheFullPath);
   // create a vtk reader
+  std::shared_ptr<Mantid::Geometry::vtkGeometryCacheReader> reader;
+  try {
+    reader = std::make_shared<Mantid::Geometry::vtkGeometryCacheReader>(cacheFullPath);
+  } catch (const std::exception &e) {
+    g_log.warning() << "Unable to read geometry cache " << cacheFullPath << ": " << e.what()
+                    << "\nThe cache file will be deleted and recreated.\n";
+    std::error_code removeError;
+    std::filesystem::remove(cacheFullPath, removeError);
+    if (removeError) {
+      g_log.warning() << "Unable to delete the invalid geometry cache " << cacheFullPath << ": "
+                      << removeError.message() << "\n";
+    }
+    return false;
+  }
   std::map<std::string, std::shared_ptr<Geometry::IObject>>::iterator objItr;
-  std::shared_ptr<Mantid::Geometry::vtkGeometryCacheReader> reader(
-      new Mantid::Geometry::vtkGeometryCacheReader(cacheFullPath));
   for (objItr = mapTypeNameToShape.begin(); objItr != mapTypeNameToShape.end(); ++objItr) {
     // caching only applies to CSGObject
     if (auto csgObj = std::dynamic_pointer_cast<CSGObject>(((*objItr).second))) {
       csgObj->setVtkGeometryCacheReader(reader);
     }
   }
+  return true;
 }
 
 /**
@@ -2563,11 +2579,11 @@ InstrumentDefinitionParser::CachingOption InstrumentDefinitionParser::setupGeome
       std::filesystem::path(ConfigService::Instance().getTempDir()) / (this->getMangledName() + ".vtp");
   IDFObject_const_sptr fallBackCache = std::make_shared<const IDFObject>(fallBackPath.string());
   CachingOption cachingOption = NoneApplied;
-  if (m_cacheFile->exists()) {
-    applyCache(m_cacheFile);
+  // An existing cache file that cannot be read is deleted by applyCache, so
+  // that it is regenerated below from the instrument definition.
+  if (m_cacheFile->exists() && applyCache(m_cacheFile)) {
     cachingOption = ReadGeomCache;
-  } else if (fallBackCache->exists()) {
-    applyCache(fallBackCache);
+  } else if (fallBackCache->exists() && applyCache(fallBackCache)) {
     cachingOption = ReadFallBack;
   } else {
     cachingOption = writeAndApplyCache(m_cacheFile, fallBackCache);

@@ -243,8 +243,9 @@ public: // for testing
   Kernel::V3D getAbsolutPositionInCompCoorSys(Geometry::ICompAssembly *comp, Kernel::V3D);
 
 private:
-  /// Reads from a cache file.
-  void applyCache(const IDFObject_const_sptr &cacheToApply);
+  /// Reads from a cache file. Returns false, and deletes the cache file, if it
+  /// cannot be read.
+  bool applyCache(const IDFObject_const_sptr &cacheToApply);
 
   /// Write out a cache file.
   CachingOption writeAndApplyCache(IDFObject_const_sptr firstChoiceCache, IDFObject_const_sptr fallBackCache);
