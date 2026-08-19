@@ -64,9 +64,13 @@ public:
   /// Destructor
   ~MeshObject() override = default;
   /// Clone
-  IObject *clone() const override { return new MeshObject(m_triangles, m_vertices, m_material); }
+  IObject *clone() const override { return cloneWithMaterial(m_material); }
   IObject *cloneWithMaterial(const Kernel::Material &material) const override {
-    return new MeshObject(m_triangles, m_vertices, material);
+    auto *copy = new MeshObject(m_triangles, m_vertices, material);
+    // the vertices are already turned, so the copy has been rotated just as far as this mesh has;
+    // without this the copy would claim to sit in the frame its vertices were defined in
+    copy->m_appliedRotation = m_appliedRotation;
+    return copy;
   }
 
   void setID(const std::string &id) override { m_id = id; }
