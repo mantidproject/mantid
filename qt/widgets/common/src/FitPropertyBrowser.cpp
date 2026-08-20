@@ -706,7 +706,7 @@ FitPropertyBrowser::~FitPropertyBrowser() {
 
 /// Get handler to the root composite function
 PropertyHandler *FitPropertyBrowser::getHandler() const {
-  return dynamic_cast<PropertyHandler *>(m_compositeFunction->getHandler());
+  return static_cast<PropertyHandler *>(m_compositeFunction->getHandler());
 }
 
 PropertyHandler *FitPropertyBrowser::addFunction(const std::string &fnName, bool notify /*= true*/) {
