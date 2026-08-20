@@ -1434,6 +1434,24 @@ public:
     TS_ASSERT(results.count("SecondTransmissionRun"));
   }
 
+  void test_second_transmission_run_requires_first_for_group_input() {
+    MatrixWorkspace_sptr inputWorkspace = m_TOF->clone();
+    auto inputGroup = std::make_shared<WorkspaceGroup>();
+    inputGroup->addWorkspace(inputWorkspace);
+    AnalysisDataService::Instance().addOrReplace("input", inputGroup);
+
+    MatrixWorkspace_sptr secondTransmissionRun = m_TOF->clone();
+    const auto alg = create_refl_algorithm("input", std::nullopt, "1", 1.0, 15.0);
+    alg->setProperty("SecondTransmissionRun", secondTransmissionRun);
+
+    const auto results = alg->validateInputs();
+    TS_ASSERT(results.count("SecondTransmissionRun"));
+    TS_ASSERT_THROWS_EQUALS(
+        alg->execute(), const std::runtime_error &e, std::string(e.what()),
+        "SecondTransmissionRun property: If a second transmission run is provided, a first transmission run must "
+        "also be provided.");
+  }
+
 private:
   MatrixWorkspace_sptr m_notTOF;
   MatrixWorkspace_sptr m_TOF;
