@@ -29,6 +29,7 @@
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/Timer.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "PropertyManagerHelper.h"
 
 using namespace Mantid;
@@ -275,10 +276,15 @@ public:
     TS_ASSERT_EQUALS(el5.getNumberEvents(), 55);
 
     // Out of range
-    TS_ASSERT_THROWS(uneven->dataX(-3), const std::range_error &);
-    TS_ASSERT_THROWS(uneven->dataX(NUMPIXELS / 10), const std::range_error &);
+    TS_ASSERT_THROWS(uneven->mutableX(-3), const std::range_error &);
+    TS_ASSERT_THROWS(uneven->mutableX(NUMPIXELS / 10), const std::range_error &);
   }
 
+  // This test pins the error contract of the deprecated accessors themselves, which differs from
+  // the modern ones: dataY()/dataE() throw NotImplementedError, whereas mutableY()/mutableE() reach
+  // EventList::checkIsYAndEWritable() and throw std::runtime_error. The warnings are therefore
+  // suppressed rather than migrated.
+  GNU_DIAG_OFF("deprecated-declarations")
   void test_data_access() {
     // Non-const access throws errors for Y & E - not for X
     TS_ASSERT_THROWS_NOTHING(ew->dataX(1));
@@ -292,6 +298,7 @@ public:
 
     // Can't try the const access; copy constructors are not allowed.
   }
+  GNU_DIAG_ON("deprecated-declarations")
 
   void test_setX_individually() {
     // Create A DIFFERENT x-axis for histogramming.
@@ -356,13 +363,13 @@ public:
     EventWorkspace_const_sptr ew2 = std::dynamic_pointer_cast<const EventWorkspace>(ew);
 
     // Are the returned arrays the right size?
-    MantidVec data1 = ew2->dataY(1);
+    MantidVec data1 = ew2->y(1).rawData();
     TS_ASSERT_EQUALS(data1.size(), NUMBINS - 1);
     // A single cached value now
     TS_ASSERT_EQUALS(ew2->MRUSize(), 1);
 
     // This should get the cached one
-    MantidVec data2 = ew2->dataY(1);
+    MantidVec data2 = ew2->y(1).rawData();
     TS_ASSERT_EQUALS(data2.size(), NUMBINS - 1);
     // Still a single cached value
     TS_ASSERT_EQUALS(ew2->MRUSize(), 1);
@@ -373,11 +380,11 @@ public:
 
     // Now test the caching. The first 100 will load in memory
     for (int i = 0; i < 100; i++)
-      data1 = ew2->dataY(i);
+      data1 = ew2->y(i).rawData();
 
     // Check the bins contain 2
-    data1 = ew2->dataY(0);
-    TS_ASSERT_DELTA(ew2->dataY(0)[1], 2.0, 1e-6);
+    data1 = ew2->y(0).rawData();
+    TS_ASSERT_DELTA(ew2->y(0)[1], 2.0, 1e-6);
     TS_ASSERT_DELTA(data1[1], 2.0, 1e-6);
     // Cache should now be full
     TS_ASSERT_EQUALS(ew2->MRUSize(), 50);
@@ -385,7 +392,7 @@ public:
     int last = 100;
     // Read more;
     for (int i = last; i < last + 100; i++)
-      data1 = ew2->dataY(i);
+      data1 = ew2->y(i).rawData();
 
     // Cache should now be full still
     TS_ASSERT_EQUALS(ew2->MRUSize(), 50);
@@ -393,7 +400,7 @@ public:
     // Do it some more
     last = 200;
     for (int i = last; i < last + 100; i++)
-      data1 = ew2->dataY(i);
+      data1 = ew2->y(i).rawData();
 
     //----- Now we test that setAllX clears the memory ----
 
@@ -411,10 +418,10 @@ public:
     // Try caching and most-recently-used MRU list.
     EventWorkspace_const_sptr ew2 = ew;
     // Are the returned arrays the right size?
-    MantidVec data1 = ew2->dataE(1);
+    MantidVec data1 = ew2->e(1).rawData();
     TS_ASSERT_EQUALS(data1.size(), NUMBINS - 1);
     // This should get the cached one
-    MantidVec data2 = ew2->dataE(1);
+    MantidVec data2 = ew2->e(1).rawData();
     TS_ASSERT_EQUALS(data2.size(), NUMBINS - 1);
     // All elements are the same
     for (std::size_t i = 0; i < data1.size(); i++)
@@ -422,24 +429,24 @@ public:
 
     // Now test the caching. The first 100 will load in memory
     for (int i = 0; i < 100; i++)
-      data1 = ew2->dataE(i);
+      data1 = ew2->e(i).rawData();
 
     // Check the bins contain 2
-    data1 = ew2->dataE(0);
-    TS_ASSERT_DELTA(ew2->dataE(0)[1], M_SQRT2, 1e-6);
+    data1 = ew2->e(0).rawData();
+    TS_ASSERT_DELTA(ew2->e(0)[1], M_SQRT2, 1e-6);
     TS_ASSERT_DELTA(data1[1], M_SQRT2, 1e-6);
     // But the Y is still 2.0
-    TS_ASSERT_DELTA(ew2->dataY(0)[1], 2.0, 1e-6);
+    TS_ASSERT_DELTA(ew2->y(0)[1], 2.0, 1e-6);
 
     int last = 100;
     // Read more; memory use should be the same?
     for (int i = last; i < last + 100; i++)
-      data1 = ew2->dataE(i);
+      data1 = ew2->e(i).rawData();
 
     // Do it some more
     last = 200;
     for (int i = last; i < last + 100; i++)
-      data1 = ew2->dataE(i);
+      data1 = ew2->e(i).rawData();
   }
 
   void test_histogram_pulse_time_throws_if_index_too_large() {
@@ -788,6 +795,9 @@ public:
     TS_ASSERT(ws->isCommonBins())
   }
 
+  // This test deliberately covers the deprecated accessors alongside the modern ones, so the
+  // warnings are suppressed rather than migrated.
+  GNU_DIAG_OFF("deprecated-declarations")
   void test_readYE() {
     int numEvents = 2;
     int numHistograms = 2;
@@ -797,6 +807,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(ws->e(0));
     TS_ASSERT_THROWS_NOTHING(ws->dataE(0));
   }
+  GNU_DIAG_ON("deprecated-declarations")
 
   void test_histogram() {
     int numEvents = 2;
