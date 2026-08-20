@@ -123,6 +123,17 @@ public:
     TS_ASSERT_THROWS_ANYTHING(alg.setProperty("SecondTransmissionRun", m_notTOF));
   }
 
+  void test_caches_are_cleared_when_execution_fails() {
+    MatrixWorkspace_sptr transmissionWorkspace = m_TOF->clone();
+    const auto alg = create_refl_algorithm(m_TOF, std::nullopt, "invalid", 1.0, 15.0);
+    alg->setProperty("FirstTransmissionRun", transmissionWorkspace);
+    const auto referenceCountBeforeExecution = transmissionWorkspace.use_count();
+
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
+
+    TS_ASSERT_EQUALS(transmissionWorkspace.use_count(), referenceCountBeforeExecution);
+  }
+
   void test_correct_detector_position_INTER() {
     auto inter = loadRun("INTER00013460.nxs");
     const double theta = 0.7;
