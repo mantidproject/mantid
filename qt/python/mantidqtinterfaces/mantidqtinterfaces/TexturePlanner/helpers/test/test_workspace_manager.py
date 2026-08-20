@@ -158,15 +158,16 @@ class TestWorkspaceManager_UpdateWorkspace(unittest.TestCase):
 @patch(file_path + ".SetSampleShape")
 @patch(file_path + ".CloneWorkspace")
 @patch(file_path + ".CreateSimulationWorkspace")
+@patch(file_path + ".CreateSampleWorkspace")
 class TestWorkspaceManager_InitWss(unittest.TestCase):
-    def test_creates_sim_workspace_with_expected_args(self, mock_create_sim, mock_clone, mock_set_shape, mock_set_mat):
+    def test_creates_sim_workspace_with_expected_args(self, mock_create_shape, mock_create_sim, mock_clone, mock_set_shape, mock_set_mat):
         wm = _make_manager("ENGINX")
         sim_ws = MagicMock()
-        sim_ws.getNumberHistograms.return_value = 0
         mock_create_sim.return_value = sim_ws
 
         wm._init_wss()
 
+        # only WS_DATA has its detectors read, so it is the only ws built on the real instrument
         mock_create_sim.assert_called_once_with(
             Instrument="ENGINX",
             BinParams=WorkspaceManager.DEFAULT_BIN_PARAMS,
@@ -175,60 +176,46 @@ class TestWorkspaceManager_InitWss(unittest.TestCase):
         )
         self.assertIs(wm.ws, sim_ws)
 
-    def test_fills_y_with_ones_for_each_histogram(self, mock_create_sim, mock_clone, mock_set_shape, mock_set_mat):
+    def test_builds_mesh_wss_as_stub_instrument_shape_wss(
+        self, mock_create_shape, mock_create_sim, mock_clone, mock_set_shape, mock_set_mat
+    ):
+        # the mesh workspaces are pure sample holders; building them on the real instrument would
+        # cost a full IDF load each for geometry that is never queried
         wm = _make_manager("ENGINX")
-        sim_ws = MagicMock()
-        sim_ws.getNumberHistograms.return_value = 3
-        sim_ws.y.return_value = np.zeros(4)
-        mock_create_sim.return_value = sim_ws
+        mock_create_shape.side_effect = ["mesh", "neutral"]
 
         wm._init_wss()
 
-        # numpy arrays inside mock.call don't compare cleanly with ==, so check each call explicitly
-        spec_indices = [c.args[0] for c in sim_ws.setSharedY.call_args_list]
-        self.assertEqual(spec_indices, [0, 1, 2])
-        for c in sim_ws.setSharedY.call_args_list:
-            np.testing.assert_array_equal(c.args[1], np.ones(4))
-
-    def test_clones_mesh_neutral_and_material_from_sim_ws(self, mock_create_sim, mock_clone, mock_set_shape, mock_set_mat):
-        wm = _make_manager("ENGINX")
-        sim_ws = MagicMock()
-        sim_ws.getNumberHistograms.return_value = 0
-        mock_create_sim.return_value = sim_ws
-        mock_clone.side_effect = ["mesh", "neutral", "material"]
-
-        wm._init_wss()
-
-        self.assertEqual(
-            mock_clone.call_args_list,
-            [
-                call(InputWorkspace=sim_ws, OutputWorkspace=wm.WS_MESH_RAW),
-                call(InputWorkspace=sim_ws, OutputWorkspace=wm.WS_MESH_NEUTRAL),
-                # material holder is cloned from the (cube-shaped) mesh ws so it owns a shape
-                call(InputWorkspace="mesh", OutputWorkspace=wm.WS_MATERIAL),
-            ],
-        )
+        built = [c.kwargs["OutputWorkspace"] for c in mock_create_shape.call_args_list]
+        self.assertEqual(built, [wm.WS_MESH_RAW, wm.WS_MESH_NEUTRAL])
         self.assertEqual(wm.mesh_ws, "mesh")
         self.assertEqual(wm.updated_mesh_ws, "neutral")
+
+    def test_clones_material_holder_from_mesh_ws(self, mock_create_shape, mock_create_sim, mock_clone, mock_set_shape, mock_set_mat):
+        wm = _make_manager("ENGINX")
+        mock_create_shape.side_effect = ["mesh", "neutral"]
+        mock_clone.return_value = "material"
+
+        wm._init_wss()
+
+        # material holder is cloned from the (cube-shaped) mesh ws so it owns a shape
+        mock_clone.assert_called_once_with(InputWorkspace="mesh", OutputWorkspace=wm.WS_MATERIAL)
         self.assertEqual(wm.material_ws, "material")
 
-    def test_seeds_material_holder_with_default(self, mock_create_sim, mock_clone, mock_set_shape, mock_set_mat):
+    def test_seeds_material_holder_with_default(self, mock_create_shape, mock_create_sim, mock_clone, mock_set_shape, mock_set_mat):
         wm = _make_manager("ENGINX")
-        sim_ws = MagicMock()
-        sim_ws.getNumberHistograms.return_value = 0
-        mock_create_sim.return_value = sim_ws
-        mock_clone.side_effect = ["mesh", "neutral", "material"]
+        mock_create_shape.side_effect = ["mesh", "neutral"]
+        mock_clone.return_value = "material"
 
         wm._init_wss()
 
         mock_set_mat.assert_called_once_with("material", WorkspaceManager.DEFAULT_MATERIAL)
 
-    def test_sets_default_cube_shape_on_all_three_wss(self, mock_create_sim, mock_clone, mock_set_shape, mock_set_mat):
+    def test_sets_default_cube_shape_on_all_three_wss(self, mock_create_shape, mock_create_sim, mock_clone, mock_set_shape, mock_set_mat):
         wm = _make_manager("ENGINX")
         sim_ws = MagicMock()
-        sim_ws.getNumberHistograms.return_value = 0
         mock_create_sim.return_value = sim_ws
-        mock_clone.side_effect = ["mesh", "neutral", "material"]
+        mock_create_shape.side_effect = ["mesh", "neutral"]
 
         wm._init_wss()
 
@@ -240,101 +227,124 @@ class TestWorkspaceManager_InitWss(unittest.TestCase):
 
 
 class TestWorkspaceManager_UpdateExistingWss(unittest.TestCase):
-    def test_rebuilds_three_wss_via_create_new_helper(self):
+    def test_rebuilds_only_the_data_ws(self):
         wm = _make_manager("ENGINX")
         wm.ws = "old_ws"
         wm.mesh_ws = "old_mesh"
         wm.updated_mesh_ws = "old_neutral"
-        wm._create_new_ws_with_copied_sample = MagicMock(side_effect=["new_ws", "new_mesh", "new_neutral"])
+        wm.material_ws = "old_material"
+        wm._create_new_ws_with_copied_sample = MagicMock(return_value="new_ws")
 
         wm._update_existing_wss()
 
-        # ws and updated_mesh_ws hold the initial shape rotation and must preserve it across the
-        # instrument switch; the raw mesh_ws is un-rotated and is copied as-is
-        self.assertEqual(
-            wm._create_new_ws_with_copied_sample.call_args_list,
-            [
-                call(wm.WS_DATA, "old_ws", clone=True, preserve_initial_rotation=True),
-                call(wm.WS_MESH_RAW, "old_mesh", clone=True),
-                call(wm.WS_MESH_NEUTRAL, "old_neutral", clone=True, preserve_initial_rotation=True),
-            ],
-        )
+        # ws holds the initial shape rotation and must preserve it across the instrument switch
+        wm._create_new_ws_with_copied_sample.assert_called_once_with(wm.WS_DATA, "old_ws", preserve_initial_rotation=True)
         self.assertEqual(wm.ws, "new_ws")
-        self.assertEqual(wm.mesh_ws, "new_mesh")
-        self.assertEqual(wm.updated_mesh_ws, "new_neutral")
+
+    def test_leaves_the_instrument_free_sample_holders_untouched(self):
+        # the mesh and material workspaces carry a stub instrument, so an instrument switch has
+        # nothing to rebuild on them - rebuilding would cost IDF loads for no behavioural gain
+        wm = _make_manager("ENGINX")
+        wm.ws = "old_ws"
+        wm.mesh_ws = "old_mesh"
+        wm.updated_mesh_ws = "old_neutral"
+        wm.material_ws = "old_material"
+        wm._create_new_ws_with_copied_sample = MagicMock(return_value="new_ws")
+
+        wm._update_existing_wss()
+
+        self.assertEqual(wm.mesh_ws, "old_mesh")
+        self.assertEqual(wm.updated_mesh_ws, "old_neutral")
+        self.assertEqual(wm.material_ws, "old_material")
 
 
 @patch(file_path + ".ADS")
 @patch(file_path + ".CopySample")
 @patch(file_path + ".CreateSimulationWorkspace")
-@patch(file_path + ".CloneWorkspace")
+@patch(file_path + ".CreateSampleWorkspace")
 class TestWorkspaceManager_CreateNewWsWithCopiedSample(unittest.TestCase):
-    def test_clone_true_clones_sample_into_shape_tmp(self, mock_clone, mock_create_sim, mock_copy, mock_ads):
+    def test_stashes_sample_on_a_stub_shape_ws(self, mock_create_shape, mock_create_sim, mock_copy, mock_ads):
+        # create_simulation_workspace is about to overwrite new_wsname in the ADS, so the sample is
+        # parked on a throwaway ws first. That stash only holds a sample, so it needs no real
+        # instrument - cloning the (potentially huge) source workspace would defeat the point.
         wm = _make_manager("ENGINX")
         sample = MagicMock(name="sample")
-        mock_clone.return_value = "shape_tmp"
+        mock_create_shape.return_value = "shape_tmp"
         mock_create_sim.return_value = "new_ws"
         mock_ads.doesExist.return_value = True
 
-        wm._create_new_ws_with_copied_sample("dest_ws", sample, clone=True)
+        wm._create_new_ws_with_copied_sample("dest_ws", sample)
 
-        mock_clone.assert_called_once_with(InputWorkspace=sample, OutputWorkspace=wm._SHAPE_TMP)
+        mock_create_shape.assert_called_once()
+        self.assertEqual(mock_create_shape.call_args.kwargs["OutputWorkspace"], wm._SHAPE_TMP)
+        self.assertEqual(mock_copy.call_args_list[0], call(InputWorkspace=sample, OutputWorkspace="shape_tmp", **COPY_KWARGS))
 
-    def test_clone_true_copies_from_shape_tmp_into_new_ws(self, mock_clone, mock_create_sim, mock_copy, mock_ads):
+    def test_copies_from_shape_tmp_into_new_ws(self, mock_create_shape, mock_create_sim, mock_copy, mock_ads):
         wm = _make_manager("ENGINX")
-        mock_clone.return_value = "shape_tmp"
+        sample = MagicMock(name="sample")
+        mock_create_shape.return_value = "shape_tmp"
         mock_create_sim.return_value = "new_ws"
         mock_ads.doesExist.return_value = True
 
-        result = wm._create_new_ws_with_copied_sample("dest_ws", MagicMock(), clone=True)
+        result = wm._create_new_ws_with_copied_sample("dest_ws", sample)
 
         mock_create_sim.assert_called_once_with(
             Instrument="ENGINX", BinParams=WorkspaceManager.DEFAULT_BIN_PARAMS, OutputWorkspace="dest_ws", UnitX="dSpacing"
         )
-        mock_copy.assert_called_once_with(InputWorkspace="shape_tmp", OutputWorkspace="dest_ws", **COPY_KWARGS)
+        self.assertEqual(
+            mock_copy.call_args_list,
+            [
+                call(InputWorkspace=sample, OutputWorkspace="shape_tmp", **COPY_KWARGS),
+                call(InputWorkspace="shape_tmp", OutputWorkspace="new_ws", **COPY_KWARGS),
+            ],
+        )
         self.assertEqual(result, "new_ws")
 
-    def test_clone_true_removes_shape_tmp_when_it_exists(self, mock_clone, mock_create_sim, mock_copy, mock_ads):
+    def test_removes_shape_tmp_when_it_exists(self, mock_create_shape, mock_create_sim, mock_copy, mock_ads):
         wm = _make_manager("ENGINX")
-        mock_clone.return_value = "shape_tmp"
+        mock_create_shape.return_value = "shape_tmp"
         mock_ads.doesExist.return_value = True
 
-        wm._create_new_ws_with_copied_sample("dest_ws", MagicMock(), clone=True)
+        wm._create_new_ws_with_copied_sample("dest_ws", MagicMock())
 
         mock_ads.doesExist.assert_called_once_with(wm._SHAPE_TMP)
         mock_ads.remove.assert_called_once_with(wm._SHAPE_TMP)
 
-    def test_clone_true_skips_remove_if_shape_tmp_missing(self, mock_clone, mock_create_sim, mock_copy, mock_ads):
+    def test_skips_remove_if_shape_tmp_missing(self, mock_create_shape, mock_create_sim, mock_copy, mock_ads):
         wm = _make_manager("ENGINX")
         mock_ads.doesExist.return_value = False
 
-        wm._create_new_ws_with_copied_sample("dest_ws", MagicMock(), clone=True)
+        wm._create_new_ws_with_copied_sample("dest_ws", MagicMock())
 
         mock_ads.remove.assert_not_called()
 
-    def test_clone_false_copies_directly_from_sample(self, mock_clone, mock_create_sim, mock_copy, mock_ads):
+    def test_removes_shape_tmp_when_the_copy_fails(self, mock_create_shape, mock_create_sim, mock_copy, mock_ads):
+        # the stash is built inside the try, so a failure part-way through cannot leave it behind
+        wm = _make_manager("ENGINX")
+        mock_create_shape.return_value = "shape_tmp"
+        mock_ads.doesExist.return_value = True
+        mock_copy.side_effect = RuntimeError("CopySample failed")
+
+        with self.assertRaises(RuntimeError):
+            wm._create_new_ws_with_copied_sample("dest_ws", MagicMock())
+
+        mock_ads.remove.assert_called_once_with(wm._SHAPE_TMP)
+
+    def test_preserve_initial_rotation_used_for_both_hops(self, mock_create_shape, mock_create_sim, mock_copy, mock_ads):
+        # both hops must use the same copy semantics: the preserving helper is idempotent, but
+        # mixing it with a bare CopySample would re-bake init_R on one hop and strip it on the other
         wm = _make_manager("ENGINX")
         sample = MagicMock(name="sample")
-        mock_create_sim.return_value = "new_ws"
-
-        result = wm._create_new_ws_with_copied_sample("dest_ws", sample, clone=False)
-
-        mock_clone.assert_not_called()
-        mock_copy.assert_called_once_with(InputWorkspace=sample, OutputWorkspace="dest_ws", **COPY_KWARGS)
-        mock_ads.remove.assert_not_called()
-        self.assertEqual(result, "new_ws")
-
-    def test_preserve_initial_rotation_delegates_to_preserving_copy(self, mock_clone, mock_create_sim, mock_copy, mock_ads):
-        # when asked to preserve init_R, the bare CopySample is bypassed in favour of the helper that
-        # re-bakes init_R onto the destination (a plain CopySample drops it for a CSG shape)
-        wm = _make_manager("ENGINX")
-        mock_clone.return_value = "shape_tmp"
+        mock_create_shape.return_value = "shape_tmp"
         mock_create_sim.return_value = "new_ws"
         wm.copy_sample_preserving_initial_rotation = MagicMock()
 
-        wm._create_new_ws_with_copied_sample("dest_ws", MagicMock(), clone=True, preserve_initial_rotation=True)
+        wm._create_new_ws_with_copied_sample("dest_ws", sample, preserve_initial_rotation=True)
 
-        wm.copy_sample_preserving_initial_rotation.assert_called_once_with("shape_tmp", "new_ws")
+        self.assertEqual(
+            wm.copy_sample_preserving_initial_rotation.call_args_list,
+            [call(sample, "shape_tmp"), call("shape_tmp", "new_ws")],
+        )
         mock_copy.assert_not_called()
 
 
@@ -635,17 +645,21 @@ class TestWorkspaceManager_UpdateInitialShape(unittest.TestCase):
         wm.ws.run.return_value.getGoniometer.return_value = gonio
         wm.mesh_ws = MagicMock()
         wm.updated_mesh_ws = "neutral"
-        wm._create_new_ws_with_copied_sample = MagicMock(return_value="tmp_ws")
+        wm.create_shape_workspace = MagicMock(return_value="tmp_ws")
+        wm._copy_sample = MagicMock()
         wm.translate_shape = MagicMock()
         wm.rotate_samples_by_initial_goniometer = MagicMock()
         return wm, gonio
 
     def test_creates_tmp_ws_from_mesh(self, mock_copy, mock_ads):
+        # this runs on every tick of the six initial-shape spin boxes, so the working copy is a
+        # stub-instrument shape ws - it only ever holds a sample
         wm, _ = self._make_wm_with_ws()
 
         wm.update_initial_shape(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
 
-        wm._create_new_ws_with_copied_sample.assert_called_once_with(wm.WS_TMP, wm.mesh_ws)
+        wm.create_shape_workspace.assert_called_once_with(wm.WS_TMP)
+        wm._copy_sample.assert_called_once_with(wm.mesh_ws, "tmp_ws", preserve_initial_rotation=False)
 
     def test_stores_offset_and_translates_tmp_ws(self, mock_copy, mock_ads):
         wm, _ = self._make_wm_with_ws()

@@ -193,7 +193,7 @@ class TexturePlannerPresenter(AlgorithmObserver):
 
     def on_directions_updated(self) -> None:
         self.set_model_texture_directions()
-        self.model.geometry.recompute()
+        self.refresh_scattering_geometry()
         self.model.update_all_projected_data()
         self.update_plots()
 
