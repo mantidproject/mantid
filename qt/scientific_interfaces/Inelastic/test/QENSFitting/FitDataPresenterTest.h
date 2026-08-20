@@ -72,15 +72,6 @@ public:
   virtual void updateSelectedSpectra() override {}
 };
 
-// Exposes the protected setNumericQAxis method so that the axis/unit
-// conversion logic behind the "Add Numeric Workspace" button can be tested
-// directly, without needing to drive the real Qt dialog widgets.
-class TestableFitDataPresenter : public FitDataPresenter {
-public:
-  using FitDataPresenter::FitDataPresenter;
-  using FitDataPresenter::setNumericQAxis;
-};
-
 } // namespace
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
@@ -299,6 +290,15 @@ private:
   }
 
   std::string getTableItem(int row, int column) const { return m_table->item(row, column)->text().toStdString(); }
+
+  // Exposes the protected setNumericQAxis method so that the axis/unit
+  // conversion logic behind the "Add Numeric Workspace" button can be tested
+  // directly, without needing to drive the real Qt dialog widgets.
+  class TestableFitDataPresenter : public FitDataPresenter {
+  public:
+    using FitDataPresenter::FitDataPresenter;
+    using FitDataPresenter::setNumericQAxis;
+  };
 
   std::unique_ptr<QTableWidget> m_table;
 
