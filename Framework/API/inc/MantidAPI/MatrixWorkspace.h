@@ -12,6 +12,7 @@
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/EmptyValues.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #include <atomic>
 #include <map>
@@ -299,30 +300,32 @@ public:
   /// @param index :: workspace index to retrieve.
   [[deprecated("use x() instead")]]
   const MantidVec &readX(std::size_t const index) const {
-    return getSpectrum(index).dataX();
+    return getSpectrum(index).x().rawData();
   }
   /// Deprecated, use y() instead. Returns a read-only (i.e. const) reference to
   /// the specified Y array
   /// @param index :: workspace index to retrieve.
   [[deprecated("use y() instead")]]
   const MantidVec &readY(std::size_t const index) const {
-    return getSpectrum(index).dataY();
+    return getSpectrum(index).y().rawData();
   }
   /// Deprecated, use e() instead. Returns a read-only (i.e. const) reference to
   /// the specified E array
   /// @param index :: workspace index to retrieve.
   [[deprecated("use e() instead")]]
   const MantidVec &readE(std::size_t const index) const {
-    return getSpectrum(index).dataE();
+    return getSpectrum(index).e().rawData();
   }
   /// Deprecated, use dx() instead. Returns a read-only (i.e. const) reference
   /// to the specified X error array
   /// @param index :: workspace index to retrieve.
   [[deprecated("use dx() instead")]]
   const MantidVec &readDx(size_t const index) const {
-    return getSpectrum(index).dataDx();
+    return getSpectrum(index).dx().rawData();
   }
 
+  // The mutable legacy accessors require ISpectrum's own legacy interface
+  GNU_DIAG_OFF("deprecated-declarations")
   /// Deprecated, use mutableX() instead. Returns the x data
   [[deprecated("use mutableX() instead")]]
   virtual MantidVec &dataX(const std::size_t index) {
@@ -343,26 +346,27 @@ public:
   virtual MantidVec &dataDx(const std::size_t index) {
     return getSpectrumWithoutInvalidation(index).dataDx();
   }
+  GNU_DIAG_ON("deprecated-declarations")
 
   /// Deprecated, use x() instead. Returns the x data const
   [[deprecated("use x() instead")]]
   virtual const MantidVec &dataX(const std::size_t index) const {
-    return getSpectrum(index).dataX();
+    return getSpectrum(index).x().rawData();
   }
   /// Deprecated, use y() instead. Returns the y data const
   [[deprecated("use y() instead")]]
   virtual const MantidVec &dataY(const std::size_t index) const {
-    return getSpectrum(index).dataY();
+    return getSpectrum(index).y().rawData();
   }
   /// Deprecated, use e() instead. Returns the error const
   [[deprecated("use e() instead")]]
   virtual const MantidVec &dataE(const std::size_t index) const {
-    return getSpectrum(index).dataE();
+    return getSpectrum(index).e().rawData();
   }
   /// Deprecated, use dx() instead. Returns the error const
   [[deprecated("use dx() instead")]]
   virtual const MantidVec &dataDx(const std::size_t index) const {
-    return getSpectrum(index).dataDx();
+    return getSpectrum(index).dx().rawData();
   }
 
   virtual double getXMin() const;
