@@ -75,6 +75,25 @@ public:
 };
 DECLARE_ALGORITHM(StubbedWorkspaceAlgorithm)
 
+class GenericOutputWorkspaceAlgorithm : public Algorithm {
+public:
+  const std::string name() const override { return "GenericOutputWorkspaceAlgorithm"; }
+  int version() const override { return 1; }
+  const std::string category() const override { return "Test"; }
+  const std::string summary() const override { return "Test generic output workspace properties"; }
+
+  void init() override {
+    declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input));
+    declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "", Direction::Output));
+  }
+
+  void exec() override {
+    Workspace_sptr outputWorkspace = std::make_shared<WorkspaceTester>();
+    setProperty("OutputWorkspace", outputWorkspace);
+  }
+};
+DECLARE_ALGORITHM(GenericOutputWorkspaceAlgorithm)
+
 class ProcessGroupsHistoryAlgorithm : public Algorithm {
 public:
   const std::string name() const override { return "ProcessGroupsHistoryAlgorithm"; }
@@ -712,6 +731,21 @@ public:
     TS_ASSERT_EQUALS(ws2->getTitle(), "A_2+B_2+C_2");
     TS_ASSERT_EQUALS(ws3->getName(), "D_3");
     TS_ASSERT_EQUALS(ws3->getTitle(), "A_3+B_3+C_3");
+  }
+
+  void test_processGroups_sets_generic_output_workspace_property_to_group() {
+    makeWorkspaceGroup("genericInput", "genericInput_1,genericInput_2");
+    GenericOutputWorkspaceAlgorithm alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", "genericInput");
+    alg.setPropertyValue("OutputWorkspace", "genericOutput");
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    Workspace_sptr outputWorkspace = alg.getProperty("OutputWorkspace");
+    auto outputGroup = std::dynamic_pointer_cast<WorkspaceGroup>(outputWorkspace);
+    TS_ASSERT(outputGroup)
+    TS_ASSERT_EQUALS(outputGroup->size(), 2)
   }
 
   /// All groups are the same size, but they don't all match the rigid naming

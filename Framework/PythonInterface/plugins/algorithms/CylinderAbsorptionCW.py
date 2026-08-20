@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import numpy as np
-from scipy.special import modstruve, i0, i1
+from scipy.special import modstruve, i0, i1, gamma
 
 from mantid.api import AlgorithmFactory, PythonAlgorithm, WorkspaceProperty
 from mantid.kernel import Direction, Property, StringListValidator, FloatBoundedValidator, FloatMandatoryValidator, CompositeValidator
@@ -248,6 +248,47 @@ def bilinear_interpolate(x, y, x_grid, y_grid, Z):
 )
 
 
+def asymptotic_diff(n, z, n_terms=6):
+    """
+    Computes the asymptotic expansion of I_n(z) - L_n(z) to N_terms.
+
+    Uses Eq. (6) in Sabine et al. (1998), doi:10.1107/S0021889897006961.
+    That equation is written for L_n(z) - I_{-n}(z); for integer n, I_{-n}=I_n,
+    so I_n(z) - L_n(z) uses the same series with an overall sign flip.
+    """
+    total = 0.0
+
+    # n_terms=6 was chosen empirically: it balances runtime and accuracy for
+    # the z cutoffs used below in the Sabine correction path.
+    for k in range(n_terms):
+        num = ((-1) ** k) * gamma(k + 0.5)
+        den = gamma(n + 0.5 - k)
+        power = (z / 2.0) ** (2 * k - n + 1)
+        total += num / (den * power)
+
+    return total / np.pi
+
+
+def get_diff0(z, cutoff):
+    """
+    Computes I_0(z) - L_0(z) using the asymptotic expansion for large z.
+    """
+    if z > cutoff:
+        return asymptotic_diff(0, z)
+    else:
+        return i0(z) - modstruve(0, z)
+
+
+def get_diff1(z, cutoff):
+    """
+    Computes I_1(z) - L_1(z) using the asymptotic expansion for large z.
+    """
+    if z > cutoff:
+        return asymptotic_diff(1, z)
+    else:
+        return i1(z) - modstruve(1, z)
+
+
 class CylinderAbsorptionCW(PythonAlgorithm):
     def category(self):
         return "CorrectionFunctions\\AbsorptionCorrection"
@@ -440,8 +481,10 @@ class CylinderAbsorptionCW(PythonAlgorithm):
             if z == 0:
                 A = np.ones_like(thetas, dtype=float)
             else:
-                A_L = 2 * (i0(z) - modstruve(0, z) - (i1(z) - modstruve(1, z)) / z)
-                A_B = (i1(2 * z) - modstruve(1, 2 * z)) / z
+                # Use different cutoffs for the asymptotic expansion based on the Sabine paper recommendations.
+                # Use asymptotic expansions for A_L when z > 24 and for A_B when z > 16.
+                A_L = 2 * (get_diff0(z, cutoff=24) - get_diff1(z, cutoff=24) / z)
+                A_B = get_diff1(2 * z, cutoff=32) / z  # cutoff=32 because input is 2z for A_B, so z > 16
                 A = A_L * np.cos(thetas) ** 2 + A_B * np.sin(thetas) ** 2
 
         # Create output absorption correction workspace

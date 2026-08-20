@@ -201,14 +201,41 @@ jobs:
         # telling jenkins scripts this is a PR build
         run: echo "JOB_NAME=pull_requests" >> $GITHUB_ENV
 
+      - name: Register GCC Problem Matchers
+        if: ${{ matrix.os == 'Linux' }}
+        run: echo "::add-matcher::.github/matchers/gcc.json"
+
+      - name: Register MSVC Problem Matchers
+        if: ${{ matrix.os == 'Windows' }}
+        run: echo "::add-matcher::.github/matchers/msvc.json"
+
       - name: Build code
         if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
         run: |
+          set -o pipefail
           echo "For Jenkins scripts JOB_NAME=${JOB_NAME}"
           cd ${GITHUB_WORKSPACE}
-          echo "::add-matcher::.github/matchers/gcc.json"
-          pixi run --frozen bash -ex ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/build ${GITHUB_WORKSPACE} $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE_BUILD_CODE $ENABLE_UNIT_TESTS $ENABLE_SYSTEM_TESTS $ENABLE_DOC_TESTS $EXTRA_CMAKE_FLAGS
-          echo "::remove-matcher owner=gcc-problem-matcher::"
+          # 2>&1 is required as compiler diagnostics are written to stderr, and the
+          # warning check in the next step reads them back out of this log
+          mkdir -p ${GITHUB_WORKSPACE}/build/test_logs/
+          pixi run --frozen bash -ex ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/build ${GITHUB_WORKSPACE} $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE_BUILD_CODE $ENABLE_UNIT_TESTS $ENABLE_SYSTEM_TESTS $ENABLE_DOC_TESTS $EXTRA_CMAKE_FLAGS 2>&1 \
+              | tee ${GITHUB_WORKSPACE}/build/test_logs/build_${{ matrix.os }}.log
+
+      - name: Remove GCC Problem Matchers
+        if: ${{ matrix.os == 'Linux' }}
+        run: echo "::remove-matcher owner=gcc-problem-matcher::"
+
+      - name: Remove MSVC Problem Matchers
+        if: ${{ matrix.os == 'Windows' }}
+        run: echo "::remove-matcher owner=msvc-problem-matcher::"
+
+      # Runs after the whole build has completed so that every warning is reported at once,
+      # and before the tests so that a warning stops the job from proceeding any further.
+      - uses: ./.github/actions/check-build-warnings
+        name: Check for compiler warnings
+        if: ${{ matrix.os == 'Linux' && needs.check-filters.outputs.code_changes == 'true' }}
+        with:
+          log-file: build/test_logs/build_${{ matrix.os }}.log
 
       - name: Run unit tests
         if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
@@ -223,7 +250,7 @@ jobs:
 
       - name: Archive unit test output (Linux)
         uses: actions/upload-artifact@v7
-        if: ${{ matrix.os == 'Linux' && failure() && steps.testunit.conclusion == 'failure' }}
+        if: ${{ matrix.os == 'Linux' && !cancelled() && github.event_name == 'pull_request' && steps.testunit.conclusion != 'skipped' }}
         with:
           name: junit-unit-Linux
           if-no-files-found: ignore
@@ -231,7 +258,7 @@ jobs:
 
       - name: Archive unit test output (Windows)
         uses: actions/upload-artifact@v7
-        if: ${{ matrix.os == 'Windows' && failure() && steps.testunit.conclusion == 'failure' }}
+        if: ${{ matrix.os == 'Windows' && !cancelled() && github.event_name == 'pull_request' && steps.testunit.conclusion != 'skipped' }}
         with:
           name: junit-unit-Windows
           if-no-files-found: ignore
@@ -258,7 +285,7 @@ jobs:
 
       - name: Archive system test output
         uses: actions/upload-artifact@v7
-        if: ${{ matrix.os == 'Linux' && failure() && steps.testsystem.conclusion == 'failure' }}
+        if: ${{ matrix.os == 'Linux' && !cancelled() && github.event_name == 'pull_request' && steps.testsystem.conclusion != 'skipped' }}
         with:
           name: junit-system
           if-no-files-found: ignore
@@ -266,7 +293,7 @@ jobs:
 
       - name: Upload event payload
         uses: actions/upload-artifact@v7
-        if: ${{ matrix.os == 'Linux' && failure() && github.event_name == 'pull_request' }}
+        if: ${{ matrix.os == 'Linux' && !cancelled() && github.event_name == 'pull_request' }}
         with:
           name: event-file
           path: ${{ github.event_path }}
@@ -343,7 +370,7 @@ jobs:
 
       - name: Upload doctest results
         uses: actions/upload-artifact@v7
-        if: ${{ failure() && steps.testdocs.conclusion == 'failure' }}
+        if: ${{ !cancelled() && github.event_name == 'pull_request' && steps.testdocs.conclusion != 'skipped' }}
         with:
           name: junit-doctest
           if-no-files-found: ignore
@@ -351,7 +378,7 @@ jobs:
 
       - name: Upload event payload
         uses: actions/upload-artifact@v7
-        if: ${{ failure() && github.event_name == 'pull_request' }}
+        if: ${{ !cancelled() && github.event_name == 'pull_request' }}
         with:
           name: event-file-doctest
           path: ${{ github.event_path }}

@@ -41,7 +41,7 @@ Citation
 
 Please cite any usage of Mantid as follows:
 
-- *Mantid 6.2.0: Manipulation and Analysis Toolkit for Instrument Data.; Mantid Project*. `doi: 10.5286/SOFTWARE/MANTID6.2 <https://dx.doi.org/10.5286/SOFTWARE/MANTID6.2>`_
+- *Mantid 6.2.0: Manipulation and Analysis Toolkit for Instrument Data.; Mantid Project*. `doi: 10.5286/SOFTWARE/MANTID6.2 <https://doi.org/10.5286/SOFTWARE/MANTID6.2>`_
 
 - Arnold, O. et al. *Mantid-Data Analysis and Visualization Package for Neutron Scattering and mu-SR Experiments.* Nuclear Instruments
   and Methods in Physics Research Section A: Accelerators, Spectrometers, Detectors and Associated Equipment 764 (2014): 156-166

@@ -44,6 +44,8 @@ requirements:
         - xorg-libxxf86vm
         - xorg-libx11
         - xorg-xorgproto
+        # needs to appear here to get right qt6-main version in run section
+        - qt6-gtk-platformtheme
     - if: osx or linux
       then:
         - libopenblas ${{ libopenblas }}
