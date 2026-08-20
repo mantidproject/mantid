@@ -709,7 +709,7 @@ PropertyHandler *FitPropertyBrowser::getHandler() const {
   return dynamic_cast<PropertyHandler *>(m_compositeFunction->getHandler());
 }
 
-PropertyHandler *FitPropertyBrowser::addFunction(const std::string &fnName, bool notify /*= false*/) {
+PropertyHandler *FitPropertyBrowser::addFunction(const std::string &fnName, bool notify /*= true*/) {
   PropertyHandler *h = getHandler()->addFunction(fnName);
   if (notify) {
     emit functionChanged();
@@ -786,7 +786,7 @@ void FitPropertyBrowser::createCompositeFunction(const Mantid::API::IFunction_sp
 
   auto h = std::make_unique<PropertyHandler>(m_compositeFunction, Mantid::API::CompositeFunction_sptr(), this);
   m_compositeFunction->setHandler(std::move(h));
-  setCurrentFunction(dynamic_cast<PropertyHandler *>(m_compositeFunction->getHandler()));
+  setCurrentFunction(static_cast<PropertyHandler *>(m_compositeFunction->getHandler()));
 
   if (m_auto_back) {
     addAutoBackground();
@@ -3319,7 +3319,7 @@ bool FitPropertyBrowser::createAndAddFunction(const Mantid::API::MatrixWorkspace
     f->setCentre(findPeakStrategy->getPeakCentre(peakIndex));
     f->setFwhm(findPeakStrategy->getPeakWidth(peakIndex));
     f->setHeight(findPeakStrategy->getPeakHeight(peakIndex));
-    addFunction(f->asString());
+    addFunction(f->asString(), false);
   }
   return validFn;
 }

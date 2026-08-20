@@ -123,7 +123,7 @@ public:
   /// save function
   void saveFunction(const QString &fnName);
   /// Create a new function
-  PropertyHandler *addFunction(const std::string &fnName, bool notify = false);
+  PropertyHandler *addFunction(const std::string &fnName, bool notify = true);
 
   /// Removes the function held by the property handler
   virtual void removeFunction(PropertyHandler *handler);
