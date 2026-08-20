@@ -705,6 +705,13 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, const IPeaksWo
     //-- step 4: update the instrument with optimization results
     std::string bn = bankname;
     std::ostringstream calilog;
+    // On CORELLI the panel sits one level deeper: bankNN is an empty grouping
+    // node (at the origin, identity rotation) whose sixteenpack child carries
+    // the actual position and orientation. The objective function perturbs
+    // bankNN/sixteenpack (see SCDCalibratePanels2ObjFunc::setPeakWorkspace),
+    // so the same component must be adjusted here for the applied correction
+    // to match the fitted one. Rotating bankNN instead would rotate the panel
+    // about the sample position rather than about its own centre.
     if (pws->getInstrument()->getName().compare("CORELLI") == 0) {
       bn.append("/sixteenpack");
     }

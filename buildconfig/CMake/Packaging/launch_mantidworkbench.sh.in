@@ -19,6 +19,16 @@ fi
 
 @GSETTINGS_SCHEMA_DEFINITIONS@
 
+if [ -z "${MPLCONFIGDIR+x}" ]; then
+    # use XDG_CACHE_HOME if someone set it
+    # otherwise matplotlib defaults to ~/.cache/matplotlib/
+    if [ -n "${XDG_CACHE_HOME}" ]; then
+        # matplotlib will cache fonts here
+        # useful on those pesky nfs systems
+        export MPLCONFIGDIR="${XDG_CACHE_HOME}/matplotlib"
+    fi
+fi
+
 # Force the xcb (X11/XWayland) Qt platform plugin to avoid rendering and
 # stability issues seen under the native Wayland plugin.
 if [ -z "${QT_QPA_PLATFORM}" ]; then

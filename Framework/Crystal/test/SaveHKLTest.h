@@ -18,6 +18,7 @@
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/Material.h"
@@ -208,6 +209,56 @@ public:
 
     if (std::filesystem::exists(outfile))
       std::filesystem::remove(outfile);
+  }
+
+  /** Regression test for the slant-path distance.
+   *
+   * Asserts that the path length is computed from the calibrated sample-to-panel distance,
+   * that is that it equals depth * L2 / distance(panel, sample) using the
+   * position held in ComponentInfo.
+   *
+   * Guards the distance lookup extracted from exec into slantPathLength. On CORELLI the panel is the
+   * "sixteenpack" child of bankNN, reached via ComponentInfo::componentID(). Dereferencing that ID yields
+   * the *base* component, whose getDistance() does not consult the ParameterMap, so the correction used
+   * the nominal distance from the instrument definition.
+   *
+   * Note the perturbation and why the assertion is on the returned quantity rather than on a written .hkl
+   * file: displacing a panel also changes each peak's L2 and scattering angle, which move the correction
+   * through other factors whether or not this distance is calibrated. An end-to-end comparison therefore
+   * cannot isolate this term. The displacement is radial, along the sample-to-panel direction, because
+   * that is what changes the distance the correction depends on.
+   */
+  void test_corelli_slant_path_uses_calibrated_geometry() {
+    FrameworkManager::Instance().exec("LoadEmptyInstrument", 4, "InstrumentName", "CORELLI", "OutputWorkspace",
+                                      "_corelli_savehkl_");
+    MatrixWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(
+        ws = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("_corelli_savehkl_")))
+    TS_ASSERT(ws)
+    if (!ws)
+      return;
+
+    auto &componentInfo = ws->mutableComponentInfo();
+    const size_t panelIndex = componentInfo.children(componentInfo.indexOfAny("bank21")).front();
+    const V3D sample = componentInfo.samplePosition();
+    const V3D pristine = componentInfo.position(panelIndex);
+    const double pristineDistance = pristine.distance(sample);
+
+    // Displace the panel radially, away from the sample, through ComponentInfo.
+    V3D radial = pristine - sample;
+    radial.normalize();
+    componentInfo.setPosition(panelIndex, pristine + radial * 0.005);
+    const double distance = componentInfo.position(panelIndex).distance(componentInfo.samplePosition());
+
+    const double L2 = 2.5;
+    const double depth = 0.2;
+    const double pathlength = SaveHKL::slantPathLength(ws->getInstrument(), ws->componentInfo(), "bank21", L2, depth);
+
+    TS_ASSERT_DELTA(pathlength, depth * L2 / distance, 1e-9);
+    // Guard against the assertion above passing trivially: the displacement must be observable.
+    TS_ASSERT(std::abs(pathlength - depth * L2 / pristineDistance) > 1e-6);
+
+    AnalysisDataService::Instance().remove("_corelli_savehkl_");
   }
 
 private:
