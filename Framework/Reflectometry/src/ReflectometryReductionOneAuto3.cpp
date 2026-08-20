@@ -75,9 +75,8 @@ const std::string ReflectometryReductionOneAuto3::summary() const {
  */
 void ReflectometryReductionOneAuto3::validateTransmissionRun(std::map<std::string, std::string> &results,
                                                              const std::string &transmissionRun) {
-  const std::string str = getPropertyValue(transmissionRun);
-  if (!str.empty()) {
-    auto transmissionGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(str);
+  if (!transmissionRun.empty()) {
+    auto transmissionGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(transmissionRun);
     // If it is not a group, we don't need to validate its size
     if (!transmissionGroup)
       return;
@@ -95,6 +94,12 @@ void ReflectometryReductionOneAuto3::validateTransmissionRun(std::map<std::strin
 std::map<std::string, std::string> ReflectometryReductionOneAuto3::validateInputs() {
   std::map<std::string, std::string> results;
 
+  const std::string firstTrans = getPropertyValue("FirstTransmissionRun");
+  const std::string secondTrans = getPropertyValue("SecondTransmissionRun");
+  if (!secondTrans.empty() && firstTrans.empty()) {
+    results[secondTrans] = "If a second transmission run is provided, a first transmission run must also be provided.";
+  }
+
   // Validate transmission runs only if our input workspace is a group
   if (!checkGroups())
     return results;
@@ -104,9 +109,8 @@ std::map<std::string, std::string> ReflectometryReductionOneAuto3::validateInput
     return results;
 
   // First and second transmission runs
-  validateTransmissionRun(results, "FirstTransmissionRun");
-  validateTransmissionRun(results, "SecondTransmissionRun");
-
+  validateTransmissionRun(results, firstTrans);
+  validateTransmissionRun(results, secondTrans);
   return results;
 }
 
@@ -376,8 +380,8 @@ ReflectometryReductionOneAuto3::performCoreReduction(MatrixWorkspace_sptr inputW
   alg->setPropertyValue("NormalizeByIntegratedMonitors", getPropertyValue("NormalizeByIntegratedMonitors"));
 
   const auto &[firstTransRun, secondTransRun] = getTransmissionRuns();
-  setTransmissionProperties(alg, firstTransRun, secondTransRun);
-  if (!firstTransRun && !secondTransRun)
+  const bool transPropsSet = setTransmissionProperties(alg, firstTransRun, secondTransRun);
+  if (!transPropsSet)
     populateAlgorithmicCorrectionProperties(alg);
 
   alg->setPropertyValue("SubtractBackground", getPropertyValue("SubtractBackground"));
