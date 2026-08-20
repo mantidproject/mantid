@@ -118,7 +118,6 @@ PyArrayObject *cloneArray(MatrixWorkspace const &workspace, size_t const start, 
   if (nparray == nullptr) {
     throw boost::python::error_already_set();
   }
-  // cppcheck-suppress constVariablePointer
   auto *dest = reinterpret_cast<double *>(PyArray_DATA(nparray)); // HEAD of the contiguous numpy data array
 
   PARALLEL_FOR_IF(threadSafe(workspace))

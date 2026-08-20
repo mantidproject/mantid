@@ -1270,8 +1270,11 @@ EventSortType EventList::getSortType() const { return this->order; }
  * Does nothing if sorted otherwise or unsorted.
  * */
 void EventList::reverse() {
-  // reverse the histogram bin parameters
-  MantidVec &x = dataX();
+  // reverse the histogram bin parameters. Changing X invalidates any histogram cached in the MRU,
+  // so drop it first -- this is what the deprecated dataX() used to do implicitly.
+  if (mru)
+    mru->deleteIndex(this);
+  auto &x = mutableX();
   std::reverse(x.begin(), x.end());
 
   // flip the events if they are tof sorted
@@ -2864,8 +2867,11 @@ void EventList::integrate(const double minX, const double maxX, const bool entir
  * positive = unchanged, negative = reverse.
  */
 void EventList::convertTof(std::function<double(double)> func, const int sorting) {
-  // fix the histogram parameter
-  MantidVec &x = dataX();
+  // fix the histogram parameter. Changing X invalidates any histogram cached in the MRU, so drop
+  // it first -- this is what the deprecated dataX() used to do implicitly.
+  if (mru)
+    mru->deleteIndex(this);
+  auto &x = mutableX();
   transform(x.cbegin(), x.cend(), x.begin(), func);
 
   // do nothing if sorting > 0
