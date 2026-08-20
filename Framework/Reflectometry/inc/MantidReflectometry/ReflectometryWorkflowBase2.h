@@ -144,7 +144,7 @@ protected:
   /// Populate transmission properties
   bool populateTransmissionProperties(const Mantid::API::IAlgorithm_sptr &alg,
                                       const MatrixWorkspace_sptr &flood = nullptr);
-  void setTransmissionProperties(const IAlgorithm_sptr &alg, const MatrixWorkspace_sptr &firstWS,
+  bool setTransmissionProperties(const IAlgorithm_sptr &alg, const MatrixWorkspace_sptr &firstWS,
                                  const MatrixWorkspace_sptr &secondWS) const;
   std::pair<MatrixWorkspace_sptr, MatrixWorkspace_sptr>
   applyFloodCorrectionToTransmission(const MatrixWorkspace_sptr &flood, const MatrixWorkspace_sptr &firstWS,

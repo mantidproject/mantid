@@ -764,11 +764,10 @@ bool ReflectometryWorkflowBase2::populateTransmissionProperties(const IAlgorithm
                                                                 const MatrixWorkspace_sptr &flood) {
   const auto &firstWS = getWorkspaceFromProperty("FirstTransmissionRun");
   const auto &secondWS = getWorkspaceFromProperty("SecondTransmissionRun");
-  if (!firstWS && !secondWS)
+  if (!firstWS)
     return false;
   const auto &correctedWorkspaces = applyFloodCorrectionToTransmission(flood, firstWS, secondWS);
-  setTransmissionProperties(alg, correctedWorkspaces.first, correctedWorkspaces.second);
-  return true;
+  return setTransmissionProperties(alg, correctedWorkspaces.first, correctedWorkspaces.second);
 }
 
 /** Apply flood correction to transmission workspaces
@@ -799,19 +798,23 @@ std::pair<MatrixWorkspace_sptr, MatrixWorkspace_sptr> ReflectometryWorkflowBase2
  * @param alg :: The algorithm to populate parameters for
  * @param firstWS :: The first transmission workspace
  * @param secondWS :: The second transmission workspace
+ * @return bool, returns true if properties have been set
  */
-void ReflectometryWorkflowBase2::setTransmissionProperties(const IAlgorithm_sptr &alg,
+bool ReflectometryWorkflowBase2::setTransmissionProperties(const IAlgorithm_sptr &alg,
                                                            const MatrixWorkspace_sptr &firstWS,
                                                            const MatrixWorkspace_sptr &secondWS) const {
-  if (firstWS)
+  if (firstWS) {
     alg->setProperty("FirstTransmissionRun", firstWS);
-  if (secondWS) {
-    alg->setProperty("SecondTransmissionRun", secondWS);
-    alg->setPropertyValue("StartOverlap", getPropertyValue("StartOverlap"));
-    alg->setPropertyValue("EndOverlap", getPropertyValue("EndOverlap"));
-    alg->setPropertyValue("Params", getPropertyValue("Params"));
-    alg->setProperty("ScaleRHSWorkspace", getPropertyValue("ScaleRHSWorkspace"));
+    if (secondWS) {
+      alg->setProperty("SecondTransmissionRun", secondWS);
+      alg->setPropertyValue("StartOverlap", getPropertyValue("StartOverlap"));
+      alg->setPropertyValue("EndOverlap", getPropertyValue("EndOverlap"));
+      alg->setPropertyValue("Params", getPropertyValue("Params"));
+      alg->setProperty("ScaleRHSWorkspace", getPropertyValue("ScaleRHSWorkspace"));
+    }
+    return true;
   }
+  return false;
 }
 
 MatrixWorkspace_sptr ReflectometryWorkflowBase2::runFloodCorrectionAlg(const MatrixWorkspace_sptr &flood,
