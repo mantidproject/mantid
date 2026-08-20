@@ -17,7 +17,7 @@ from mantid.api import (
 )
 from mantid.geometry import Detector
 from mantid.kernel import V3D
-from mantid.simpleapi import CreateSampleWorkspace, Rebin
+from mantid.simpleapi import CreateSampleWorkspace, Rebin, RebinRagged
 import numpy as np
 
 
@@ -338,6 +338,15 @@ class MatrixWorkspaceTest(unittest.TestCase):
 
         self.assertTrue(len(dx), 0)
         self._do_numpy_comparison(self._test_ws, x, y, e)
+
+    def test_data_cannot_be_extracted_to_numpy_from_a_ragged_workspace(self):
+        # A numpy array is rectangular, so there is no valid output for histograms of differing lengths
+        ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=2, XMin=0, XMax=100, BinWidth=10, StoreInADS=False)
+        ragged = RebinRagged(InputWorkspace=ws, XMin=[0, 0, 0, 0], XMax=[100, 90, 80, 70], Delta=[10, 10, 10, 10], StoreInADS=False)
+        self.assertTrue(ragged.isRaggedWorkspace())
+
+        for extract in (ragged.extractX, ragged.extractY, ragged.extractE, ragged.extractDx):
+            self.assertRaises(RuntimeError, extract)
 
     def _do_numpy_comparison(self, workspace, x_np, y_np, e_np, index=None):
         if index is None:
