@@ -87,6 +87,20 @@ private:
     std::string polynomial;
   };
 
+  class CacheHandler {
+    ReflectometryReductionOneAuto3 &m_parent;
+
+  public:
+    CacheHandler(ReflectometryReductionOneAuto3 &parent) : m_parent(parent) {};
+    ~CacheHandler();
+
+    // deleted methods
+    CacheHandler(const CacheHandler &) = delete;
+    CacheHandler &operator=(const CacheHandler &) = delete;
+    CacheHandler(CacheHandler &&) = delete;
+    CacheHandler &operator=(CacheHandler &&) = delete;
+  };
+
   // A class member to cache properties associated with the algorithmic correction to be applied
   CorrectionProperties m_correctionProperties;
   // cache flood workspace
@@ -152,7 +166,7 @@ private:
   WorkspaceGroup_sptr applyFloodCorrection(const WorkspaceGroup_sptr &ws);
   MatrixWorkspace_sptr applyFloodCorrection(const MatrixWorkspace_sptr &ws);
   void applyFloodCorrectionToTransmissionRuns();
-  void clearCachedWorkspaces();
+  void clearCaches();
   std::pair<MatrixWorkspace_sptr, MatrixWorkspace_sptr> getTransmissionRuns();
 };
 } // namespace Reflectometry

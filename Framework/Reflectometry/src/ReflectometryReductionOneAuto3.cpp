@@ -487,6 +487,7 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto3::postReductionProcessing(con
 /** Execute the algorithm.
  */
 void ReflectometryReductionOneAuto3::exec() {
+  CacheHandler cacheHandler(*this);
   Workspace_sptr inputWorkspace = getWorkspaceFromProperty("InputWorkspace");
   sumBanks(inputWorkspace);
 
@@ -501,7 +502,6 @@ void ReflectometryReductionOneAuto3::exec() {
   const auto binnedWS = postReductionProcessing(out, params);
   setOutputWorkspaces(out, binnedWS);
   updatePropertiesAfterReduction(out, params);
-  clearCachedWorkspaces();
 }
 
 /** Returns the detectors of interest, specified via processing instructions.
@@ -946,6 +946,8 @@ std::vector<std::string> ReflectometryReductionOneAuto3::getTaskExecutionOrder(c
  * runs and polarization analysis.
  */
 bool ReflectometryReductionOneAuto3::processGroups() {
+  CacheHandler cacheHandler(*this);
+
   // this algorithm effectively behaves as MultiPeriodGroupAlgorithm
   // Validate inputs as this is not run for group workspace inputs not called via alg dialog
   const auto &results = validateInputs();
@@ -988,7 +990,6 @@ bool ReflectometryReductionOneAuto3::processGroups() {
   }
   postReductionProcessingGroups(processGroupsOutput.rroOutputs, processGroupsOutput.outputNames, groupedOutputNames,
                                 !polarizationAnalysisOn);
-  clearCachedWorkspaces();
   return true;
 }
 
@@ -1202,10 +1203,11 @@ void ReflectometryReductionOneAuto3::applyFloodCorrectionToTransmissionRuns() {
     m_secondTransmissionRun = applyFloodCorrection(m_secondTransmissionRun);
 }
 
-void ReflectometryReductionOneAuto3::clearCachedWorkspaces() {
+void ReflectometryReductionOneAuto3::clearCaches() {
   m_floodWorkspace.reset();
   m_firstTransmissionRun.reset();
   m_secondTransmissionRun.reset();
+  m_correctionProperties = {};
 }
 
 WorkspaceGroup_sptr ReflectometryReductionOneAuto3::applyFloodCorrection(const WorkspaceGroup_sptr &group) {
@@ -1221,5 +1223,7 @@ WorkspaceGroup_sptr ReflectometryReductionOneAuto3::applyFloodCorrection(const W
   }
   return outGroup;
 }
+
+ReflectometryReductionOneAuto3::CacheHandler::~CacheHandler() { m_parent.clearCaches(); }
 
 } // namespace Mantid::Reflectometry
