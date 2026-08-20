@@ -1,0 +1,36 @@
+name: Build Warning Parser Tests
+
+# The compiler warning gate in pr_build_and_test.yml is what stops a build with warnings
+# from reaching the tests. Its parser is ordinary Python, so it is unit tested here rather
+# than in the build. Only runs when the action itself changes.
+on:
+  pull_request:
+    paths:
+      - .github/workflows/check_build_warnings_tests.yml
+      - .github/actions/check-build-warnings/**
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-warning-parser:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout workflow dependencies
+        uses: actions/checkout@v7
+        with:
+          sparse-checkout: |
+            .github/workflows/check_build_warnings_tests.yml
+            .github/actions/check-build-warnings/
+          sparse-checkout-cone-mode: false
+
+      # The tests use only the standard library, so no pixi environment is needed
+      - name: Run the warning parser unit tests
+        run: python3 -m unittest discover --start-directory .github/actions/check-build-warnings --verbose
