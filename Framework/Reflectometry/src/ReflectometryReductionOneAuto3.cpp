@@ -74,17 +74,21 @@ const std::string ReflectometryReductionOneAuto3::summary() const {
  * @return :: void
  */
 void ReflectometryReductionOneAuto3::validateTransmissionRun(std::map<std::string, std::string> &results,
-                                                             const std::string &transmissionRun) {
-  if (!transmissionRun.empty()) {
-    auto transmissionGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(transmissionRun);
-    // If it is not a group, we don't need to validate its size
-    if (!transmissionGroup)
-      return;
-    g_log.warning("Transmission run provided as a group. Only the first member of the group will be used.");
-    if (transmissionGroup->size() < 1) {
-      results[transmissionRun] = transmissionRun + " group is empty. ";
-    }
-  }
+                                                             const Property &transmissionRun) {
+  if (transmissionRun.isDefault())
+    return;
+
+  const auto transmissionRunName = transmissionRun.value();
+  if (transmissionRunName.empty())
+    return;
+
+  auto transmissionGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(transmissionRunName);
+  // If it is not a group, we don't need to validate its size
+  if (!transmissionGroup)
+    return;
+  g_log.warning("Transmission run provided as a group. Only the first member of the group will be used.");
+  if (transmissionGroup->size() < 1)
+    results[transmissionRun.name()] = transmissionRunName + " group is empty. ";
 }
 
 /** Validate transmission runs
@@ -94,10 +98,10 @@ void ReflectometryReductionOneAuto3::validateTransmissionRun(std::map<std::strin
 std::map<std::string, std::string> ReflectometryReductionOneAuto3::validateInputs() {
   std::map<std::string, std::string> results;
 
-  const std::string firstTrans = getPropertyValue("FirstTransmissionRun");
-  const std::string secondTrans = getPropertyValue("SecondTransmissionRun");
-  if (!secondTrans.empty() && firstTrans.empty()) {
-    results["SecondTransmissionRun"] =
+  const auto *firstTrans = getPointerToProperty("FirstTransmissionRun");
+  const auto *secondTrans = getPointerToProperty("SecondTransmissionRun");
+  if (!secondTrans->isDefault() && firstTrans->isDefault()) {
+    results[secondTrans->name()] =
         "If a second transmission run is provided, a first transmission run must also be provided.";
   }
 
@@ -110,8 +114,8 @@ std::map<std::string, std::string> ReflectometryReductionOneAuto3::validateInput
     return results;
 
   // First and second transmission runs
-  validateTransmissionRun(results, firstTrans);
-  validateTransmissionRun(results, secondTrans);
+  validateTransmissionRun(results, *firstTrans);
+  validateTransmissionRun(results, *secondTrans);
   return results;
 }
 
