@@ -9,6 +9,7 @@ tracked in the repository. Warnings from third-party or generated code, and
 warnings without a source location, are reported but do not fail the job.
 """
 
+import argparse
 import os
 import pathlib
 import re
@@ -110,10 +111,35 @@ def _write_step_summary(warnings: list) -> None:
         handle.write("\n".join(lines))
 
 
+def _parse_args(argv: list) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Fail a CI job when the C++ compiler emitted warnings.")
+    parser.add_argument("log_file", type=pathlib.Path, help="Build log to scan")
+    parser.add_argument(
+        "--build-dir",
+        type=pathlib.Path,
+        help="Directory the build tool ran in, used to resolve relative paths (default: <workspace>/build)",
+    )
+    parser.add_argument(
+        "--allowed-warnings",
+        type=int,
+        default=0,
+        metavar="N",
+        help="Number of warnings tolerated before the job fails. Should always be 0; a non-zero value is a "
+        "temporary measure so that a known backlog does not break every build while it is dealt with.",
+    )
+
+    return parser.parse_args(argv)
+
+
 def main() -> int:
-    log_path = pathlib.Path(sys.argv[1])
+    args = _parse_args(sys.argv[1:])
+    log_path = args.log_file
     workspace = pathlib.Path(os.environ.get("GITHUB_WORKSPACE", os.getcwd())).resolve()
-    build_dir = pathlib.Path(sys.argv[2]).resolve() if len(sys.argv) > 2 else workspace / "build"
+    build_dir = args.build_dir.resolve() if args.build_dir else workspace / "build"
+
+    if args.allowed_warnings < 0:
+        print(f"::error::--allowed-warnings must not be negative, got {args.allowed_warnings}")
+        return 1
 
     if not log_path.exists():
         print(f"::error::Build log {log_path} does not exist, cannot check for compiler warnings")
@@ -147,7 +173,16 @@ def main() -> int:
         print(f"  {count:5d}  {flag}")
 
     _write_step_summary(counted)
-    print(f"::error::Build produced {len(counted)} compiler warning(s). See the build log artifact for full context.")
+
+    if len(counted) <= args.allowed_warnings:
+        print(
+            f"::warning::Build produced {len(counted)} compiler warning(s), within the allowance of "
+            f"{args.allowed_warnings}. Fix these and lower the allowance."
+        )
+        return 0
+
+    allowance = f" Only {args.allowed_warnings} are allowed." if args.allowed_warnings else ""
+    print(f"::error::Build produced {len(counted)} compiler warning(s).{allowance} See the build log artifact for full context.")
 
     return 1
 

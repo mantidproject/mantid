@@ -4,6 +4,13 @@ inputs:
   log-file:
     description: 'Path to the captured build log, relative to the workspace'
     required: true
+  allowed-warnings-count:
+    description: |
+      If warnings slip through to main this can be used to set a non-zero allowed count while those
+      warnings are dealt with. This avoids breaking all builds for all developers. It should always
+      be zero otherwise.
+    required: false
+    default: '0'
 runs:
   using: "composite"
   steps:
@@ -12,5 +19,7 @@ runs:
       working-directory: ${{ github.workspace }}
       env:
         BUILD_LOG: ${{ inputs.log-file }}
+        ALLOWED_WARNINGS_COUNT: ${{ inputs.allowed-warnings-count }}
       run: |
-        pixi run --frozen python ${GITHUB_WORKSPACE}/.github/actions/check-build-warnings/count_warnings.py "${GITHUB_WORKSPACE}/${BUILD_LOG}"
+        pixi run --frozen python ${GITHUB_WORKSPACE}/.github/actions/check-build-warnings/count_warnings.py \
+          "${GITHUB_WORKSPACE}/${BUILD_LOG}" --allowed-warnings "${ALLOWED_WARNINGS_COUNT}"

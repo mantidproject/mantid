@@ -57,6 +57,10 @@ class CountWarningsTestCase(unittest.TestCase):
 
         return exit_code, stdout.getvalue()
 
+    def _build_dir_args(self) -> list:
+        """The flags every main() call needs so relative log paths resolve like they do in CI."""
+        return ["--build-dir", str(self.build_dir)]
+
 
 class TestScan(CountWarningsTestCase):
     def test_counts_warning_for_workspace_source_file(self):
@@ -215,7 +219,7 @@ class TestMain(CountWarningsTestCase):
             "cc1plus: warning: some toolchain noise",
         )
 
-        exit_code, output = self._run_main([str(log_path), str(self.build_dir)])
+        exit_code, output = self._run_main([str(log_path), *self._build_dir_args()])
 
         self.assertEqual(exit_code, 0)
         self.assertIn("No compiler warnings found", output)
@@ -223,7 +227,7 @@ class TestMain(CountWarningsTestCase):
     def test_fails_when_there_are_countable_warnings(self):
         log_path = self._write_log(f"../Framework/Kernel/src/Foo.cpp:12:5: warning: {WARNING}")
 
-        exit_code, output = self._run_main([str(log_path), str(self.build_dir)])
+        exit_code, output = self._run_main([str(log_path), *self._build_dir_args()])
 
         self.assertEqual(exit_code, 1)
         self.assertIn("::error::Build produced 1 compiler warning(s)", output)
@@ -234,8 +238,63 @@ class TestMain(CountWarningsTestCase):
         log_path = self._write_log(f"../Framework/Kernel/src/Foo.cpp:12:5: warning: {WARNING}")
         summary_path = self.workspace / "summary.md"
 
-        self._run_main([str(log_path), str(self.build_dir)], env={"GITHUB_STEP_SUMMARY": str(summary_path)})
+        self._run_main([str(log_path), *self._build_dir_args()], env={"GITHUB_STEP_SUMMARY": str(summary_path)})
 
         summary = summary_path.read_text()
         self.assertIn("1 compiler warning(s)", summary)
         self.assertIn("Framework/Kernel/src/Foo.cpp:12:5", summary)
+
+
+class TestAllowedWarnings(CountWarningsTestCase):
+    def _log_with_warnings(self, count: int) -> pathlib.Path:
+        lines = [f"../Framework/Kernel/src/Foo.cpp:{line}:5: warning: {WARNING}" for line in range(1, count + 1)]
+
+        return self._write_log(*lines)
+
+    def test_defaults_to_allowing_no_warnings(self):
+        log_path = self._log_with_warnings(1)
+
+        exit_code, _ = self._run_main([str(log_path), *self._build_dir_args()])
+
+        self.assertEqual(exit_code, 1)
+
+    def test_passes_when_the_count_is_within_the_allowance(self):
+        log_path = self._log_with_warnings(3)
+
+        exit_code, output = self._run_main([str(log_path), *self._build_dir_args(), "--allowed-warnings", "3"])
+
+        self.assertEqual(exit_code, 0)
+        self.assertIn("::warning::Build produced 3 compiler warning(s), within the allowance of 3", output)
+
+    def test_passes_when_the_count_is_below_the_allowance(self):
+        log_path = self._log_with_warnings(1)
+
+        exit_code, output = self._run_main([str(log_path), *self._build_dir_args(), "--allowed-warnings", "5"])
+
+        self.assertEqual(exit_code, 0)
+        self.assertIn("within the allowance of 5", output)
+
+    def test_fails_when_the_count_exceeds_the_allowance(self):
+        log_path = self._log_with_warnings(4)
+
+        exit_code, output = self._run_main([str(log_path), *self._build_dir_args(), "--allowed-warnings", "3"])
+
+        self.assertEqual(exit_code, 1)
+        self.assertIn("::error::Build produced 4 compiler warning(s). Only 3 are allowed.", output)
+
+    def test_reports_no_warnings_rather_than_an_allowance_when_the_build_is_clean(self):
+        log_path = self._write_log("[1/1] Building CXX object Foo.cpp.o")
+
+        exit_code, output = self._run_main([str(log_path), *self._build_dir_args(), "--allowed-warnings", "3"])
+
+        self.assertEqual(exit_code, 0)
+        self.assertIn("No compiler warnings found", output)
+        self.assertNotIn("allowance", output)
+
+    def test_rejects_a_negative_allowance(self):
+        log_path = self._log_with_warnings(1)
+
+        exit_code, output = self._run_main([str(log_path), *self._build_dir_args(), "--allowed-warnings", "-1"])
+
+        self.assertEqual(exit_code, 1)
+        self.assertIn("must not be negative", output)
