@@ -51,6 +51,7 @@ class SettingsPresenterTest(unittest.TestCase):
             "timeout": 10,
             "use_euler_angles": False,
             "auto_pop_texture": False,
+            "read_texture_dirs_from_ref": True,
         }
 
     def setup_view_getters(self, blank_log=False):
@@ -79,6 +80,7 @@ class SettingsPresenterTest(unittest.TestCase):
         self.view.get_plot_exp_pf.return_value = self.settings["plot_exp_pf"]
         self.view.get_contour_kernel.return_value = self.settings["contour_kernel"]
         self.view.get_auto_populate_texture.return_value = self.settings["auto_pop_texture"]
+        self.view.get_read_texture_dirs_from_ref.return_value = self.settings["read_texture_dirs_from_ref"]
 
     @patch(dir_path + ".path.isfile")
     def test_load_existing_settings(self, mock_isfile):
@@ -200,6 +202,37 @@ class SettingsPresenterTest(unittest.TestCase):
     def test_settings_not_changed_when_cancelled(self):
         self.presenter.close_dialog()
         self.model.set_settings_dict.assert_not_called()
+
+    @patch(dir_path + ".path.isfile")
+    def test_reload_settings_from_file_refreshes_the_cache(self, mock_isfile):
+        # something outside the dialog (a reference workspace load) has rewritten a setting; the
+        # cached copy must be dropped or the next Apply would write the stale values back
+        mock_isfile.return_value = True
+        self.presenter.settings = {"stale": True}
+        reloaded = self.settings.copy()
+        reloaded["rd_dir"] = "0,1,0"
+        self.model.get_settings_dict.return_value = reloaded
+        self.model.validate_settings.return_value = reloaded
+        self.view.isVisible.return_value = False
+
+        self.presenter.reload_settings_from_file()
+
+        self.assertEqual(self.presenter.settings["rd_dir"], "0,1,0")
+        # the dialog is closed, so there is nothing to repopulate
+        self.view.set_rd_dir.assert_not_called()
+
+    @patch(dir_path + ".path.isfile")
+    def test_reload_settings_from_file_repopulates_an_open_dialog(self, mock_isfile):
+        mock_isfile.return_value = True
+        reloaded = self.settings.copy()
+        reloaded["rd_dir"] = "0,1,0"
+        self.model.get_settings_dict.return_value = reloaded
+        self.model.validate_settings.return_value = reloaded
+        self.view.isVisible.return_value = True
+
+        self.presenter.reload_settings_from_file()
+
+        self.view.set_rd_dir.assert_called_with("0,1,0")
 
     def test_default_calib_file_correct_location(self):
         self.assertTrue(path.exists(settings_presenter.DEFAULT_SETTINGS[f"full_calibration_{self.presenter.instrument}"]))

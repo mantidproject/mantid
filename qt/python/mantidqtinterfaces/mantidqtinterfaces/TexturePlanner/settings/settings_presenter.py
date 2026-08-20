@@ -71,6 +71,7 @@ class TexturePlannerSettingsPresenter(object):
             "att_point": self.view.get_att_point(),
             "att_unit": self.view.get_att_unit(),
             "att_use_data_range": self.view.get_att_use_data_range(),
+            "att_show_current": self.view.get_att_show_current(),
         }
 
     def _apply_settings_to_texture_model(self, settings: Dict[str, Any]) -> None:
@@ -98,6 +99,7 @@ class TexturePlannerSettingsPresenter(object):
         self.texture_model.workspaces.attenuation_kwargs["unit"] = settings["att_unit"]
 
         self.texture_model.plotter.transmission_use_data_range = settings["att_use_data_range"]
+        self.texture_model.plotter.att_show_current = settings["att_show_current"]
 
     def _populate_view_from_texture_model(self) -> None:
         """Populate the settings dialog fields from the current state of the texture model."""
@@ -129,3 +131,4 @@ class TexturePlannerSettingsPresenter(object):
         self.view.set_att_point(att["point"])
         self.view.set_att_unit(att["unit"])
         self.view.set_att_use_data_range(self.texture_model.plotter.transmission_use_data_range)
+        self.view.set_att_show_current(self.texture_model.plotter.att_show_current)

@@ -79,7 +79,20 @@ class EngineeringDiffractionPresenterTest(unittest.TestCase):
         # Should add both observers as subscribers
         notifier.add_subscriber.assert_any_call(self.presenter.focus_presenter.calibration_observer)
         notifier.add_subscriber.assert_any_call(self.presenter.calibration_observer)
-        self.assertEqual(notifier.add_subscriber.call_count, 2)
+
+    def test_setup_reference_frame_notifier_reloads_the_settings_cache(self):
+        self.presenter.correction_presenter = MagicMock()
+        self.presenter.settings_presenter = MagicMock()
+        notifier = MagicMock()
+        self.presenter.correction_presenter.reference_frame_notifier = notifier
+
+        self.presenter.setup_reference_frame_notifier()
+
+        notifier.add_subscriber.assert_called_once()
+        # firing the observer must re-read the settings the reference load has just rewritten
+        observer = notifier.add_subscriber.call_args.args[0]
+        observer.update(notifier, None)
+        self.presenter.settings_presenter.reload_settings_from_file.assert_called_once_with()
 
     @patch(presenter_path + ".TextureCorrectionPresenter")
     @patch(presenter_path + ".TextureCorrectionView")

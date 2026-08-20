@@ -230,6 +230,15 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
             "Show estimated transmission values per virtual detector (Monte Carlo) instead of pole figure coverage."
         )
 
+        self.chkTransformDirs.setToolTip(
+            "Apply Orientation to the provided Sample Direction Vectors (useful if the shape is misaligned in the beam)"
+        )
+
+        self.chkLabDirs.setToolTip(
+            "View the Sample Texture Directions in terms of the Lab Reference Frame "
+            "(currently they can only be updated in terms of the Sample Reference Frame)"
+        )
+
         # Orientation table
         self.tableWidget.setToolTip(
             "Axis information for every orientation. Use Include to choose orientations for the pole figure and outputs, "
@@ -357,6 +366,12 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
 
     def set_on_show_transmission_toggled(self, slot: Callable) -> None:
         self.chkTransmission.toggled.connect(slot)
+
+    def set_on_transform_dirs_toggled(self, slot: Callable) -> None:
+        self.chkTransformDirs.toggled.connect(slot)
+
+    def set_on_lab_dirs_toggled(self, slot: Callable) -> None:
+        self.chkLabDirs.toggled.connect(slot)
 
     def set_on_init_x_changed(self, slot: Callable) -> None:
         self.spnInitX.valueChanged.connect(slot)
@@ -487,6 +502,12 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
     def get_show_transmission(self) -> bool:
         return self.chkTransmission.isChecked()
 
+    def get_transform_dirs(self) -> bool:
+        return self.chkTransformDirs.isChecked()
+
+    def get_lab_dirs(self) -> bool:
+        return self.chkLabDirs.isChecked()
+
     def get_init_x(self) -> float:
         return self.spnInitX.value()
 
@@ -523,19 +544,19 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         self.lineedit_TD.setText(text)
 
     def set_rd_dir(self, vec: Tuple[int | float, int | float, int | float]) -> None:
-        self.lineedit_RD0.setText(str(vec[0]))
-        self.lineedit_RD1.setText(str(vec[1]))
-        self.lineedit_RD2.setText(str(vec[2]))
+        self.lineedit_RD0.setText(str(round(vec[0], 2)))
+        self.lineedit_RD1.setText(str(round(vec[1], 2)))
+        self.lineedit_RD2.setText(str(round(vec[2], 2)))
 
     def set_td_dir(self, vec: Tuple[int | float, int | float, int | float]) -> None:
-        self.lineedit_TD0.setText(str(vec[0]))
-        self.lineedit_TD1.setText(str(vec[1]))
-        self.lineedit_TD2.setText(str(vec[2]))
+        self.lineedit_TD0.setText(str(round(vec[0], 2)))
+        self.lineedit_TD1.setText(str(round(vec[1], 2)))
+        self.lineedit_TD2.setText(str(round(vec[2], 2)))
 
     def set_nd_dir(self, vec: Tuple[int | float, int | float, int | float]) -> None:
-        self.lineedit_ND0.setText(str(vec[0]))
-        self.lineedit_ND1.setText(str(vec[1]))
-        self.lineedit_ND2.setText(str(vec[2]))
+        self.lineedit_ND0.setText(str(round(vec[0], 2)))
+        self.lineedit_ND1.setText(str(round(vec[1], 2)))
+        self.lineedit_ND2.setText(str(round(vec[2], 2)))
 
     def set_max_ind(self, ind: int) -> None:
         self.spnIndex.setMaximum(ind)
@@ -583,6 +604,12 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
 
     def set_show_transmission(self, check: bool) -> None:
         self.chkTransmission.setChecked(check)
+
+    def set_transform_dirs(self, check: bool) -> None:
+        self.chkTransformDirs.setChecked(check)
+
+    def set_lab_dirs(self, check: bool) -> None:
+        self.chkLabDirs.setChecked(check)
 
     def _setup_pf_plot(self) -> None:
         self.pf_figure = Figure(layout="constrained")
@@ -778,6 +805,19 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
 
     def set_set_gauge_vol_enabled(self, enabled: bool) -> None:
         self.setGV.setEnabled(enabled)
+
+    def set_texture_directions_enabled(self, enabled: bool) -> None:
+        self.lineedit_RD0.setEnabled(enabled)
+        self.lineedit_RD1.setEnabled(enabled)
+        self.lineedit_RD2.setEnabled(enabled)
+
+        self.lineedit_TD0.setEnabled(enabled)
+        self.lineedit_TD1.setEnabled(enabled)
+        self.lineedit_TD2.setEnabled(enabled)
+
+        self.lineedit_ND0.setEnabled(enabled)
+        self.lineedit_ND1.setEnabled(enabled)
+        self.lineedit_ND2.setEnabled(enabled)
 
     def set_on_clear_gauge_volume_clicked(self, slot: Callable) -> None:
         self.clearGV.clicked.connect(slot)
