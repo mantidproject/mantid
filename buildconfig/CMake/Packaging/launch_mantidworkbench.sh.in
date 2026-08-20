@@ -49,9 +49,6 @@ if [ -z "${MANTID_QSETTINGS_STAGING+x}" ] && command -v findmnt >/dev/null 2>&1;
                     if [ "${XDG_CONFIG_ROOT}" != "${XDG_CACHE_ROOT}" ]; then
                         export MANTID_QSETTINGS_STAGING=1
                     fi
-                    if [ -z "${MPLCONFIGDIR+x}" ]; then
-                        export MPLCONFIGDIR="${XDG_CACHE_ROOT}/matplotlib"
-                    fi
                     ;;
             esac
             ;;
