@@ -809,22 +809,22 @@ void export_MatrixWorkspace() {
       .def("extractX", Mantid::PythonInterface::cloneX, args("self"),
            "Extracts (copies) the X data from the workspace into a 2D numpy array. "
            "Note: This can fail for large workspaces as numpy will require a block of memory free that will fit all of "
-           "the data."
+           "the data. "
            "Note: This will fail for ragged workspaces.")
       .def("extractY", Mantid::PythonInterface::cloneY, args("self"),
            "Extracts (copies) the Y data from the workspace into a 2D numpy array. "
            "Note: This can fail for large workspaces as numpy will require a block of memory free that will fit all of "
-           "the data."
+           "the data. "
            "Note: This will fail for ragged workspaces.")
       .def("extractE", Mantid::PythonInterface::cloneE, args("self"),
            "Extracts (copies) the E data from the workspace into a 2D numpy array. "
            "Note: This can fail for large workspaces as numpy will require a block of memory free that will fit all of "
-           "the data."
+           "the data. "
            "Note: This will fail for ragged workspaces.")
       .def("extractDx", Mantid::PythonInterface::cloneDx, args("self"),
            "Extracts (copies) the E data from the workspace into a 2D numpy array. "
            "Note: This can fail for large workspaces as numpy will require a block of memory free that will fit all of "
-           "the data."
+           "the data. "
            "Note: This will fail for ragged workspaces.")
       .def("getSignalAtCoord", &getSignalAtCoord, args("self", "coords", "normalization"),
            "Return signal for array of coordinates")

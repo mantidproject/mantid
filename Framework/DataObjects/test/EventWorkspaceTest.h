@@ -280,10 +280,8 @@ public:
     TS_ASSERT_THROWS(uneven->mutableX(NUMPIXELS / 10), const std::range_error &);
   }
 
-  // This test pins the error contract of the deprecated accessors themselves, which differs from
-  // the modern ones: dataY()/dataE() throw NotImplementedError, whereas mutableY()/mutableE() reach
-  // EventList::checkIsYAndEWritable() and throw std::runtime_error. The warnings are therefore
-  // suppressed rather than migrated.
+  // This test pins the error contract of the deprecated accessors themselves
+  // The warnings are therefore suppressed rather than migrated.
   GNU_DIAG_OFF("deprecated-declarations")
   void test_data_access() {
     // Non-const access throws errors for Y & E - not for X
