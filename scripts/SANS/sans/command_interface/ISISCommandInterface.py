@@ -1006,17 +1006,22 @@ def BatchReduce(
         # suffix that the user can set already -- was there previously, so we have to provide that)
         use_reduction_mode_as_suffix = combineDet is not None
 
+        reduction_kwargs = {
+            "combineDet": combineDet,
+            "output_name": output_name,
+            "output_mode": output_mode,
+            "use_reduction_mode_as_suffix": use_reduction_mode_as_suffix,
+            "saveAlgs": saveAlgs,
+            "save_as_zero_error_free": save_as_zero_error_free,
+            "output_diagnostic_names": clean_up_ads,
+        }
+
         # Run the reduction for a single state
-        reduced_workspace_name, new_clean_up_names = WavRangeReduction(
-            combineDet=combineDet,
-            output_name=output_name,
-            output_mode=output_mode,
-            use_reduction_mode_as_suffix=use_reduction_mode_as_suffix,
-            saveAlgs=saveAlgs,
-            save_as_zero_error_free=save_as_zero_error_free,
-            output_diagnostic_names=clean_up_ads,
-        )
-        clean_up_names.extend(new_clean_up_names)
+        if clean_up_ads:
+            reduced_workspace_name, new_clean_up_names = WavRangeReduction(**reduction_kwargs)
+            clean_up_names.extend(new_clean_up_names)
+        else:
+            reduced_workspace_name = WavRangeReduction(**reduction_kwargs)
 
         # Remove the settings which were very specific for this single reduction which are:
         # 1. The last user file (if any was set)
