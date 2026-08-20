@@ -98,6 +98,16 @@ public:
   }
   static double calc_Astar(const double theta, const double mur);
 
+  /** Slant path length through the detector, derived from the calibrated sample-to-panel distance.
+   *
+   * Static and public so that it can be asserted directly. An end-to-end test cannot isolate this term,
+   * because displacing a panel also changes L2 and the scattering angle, which move the correction
+   * through other factors whether or not the distance is taken from calibrated geometry.
+   */
+  static double slantPathLength(const Geometry::Instrument_const_sptr &inst,
+                                const Geometry::ComponentInfo &componentInfo, const std::string &bankName,
+                                const double L2, const double depth);
+
 protected:
   /** A virtual function in which additional properties of an algorithm should
    * be declared.
@@ -129,8 +139,6 @@ private:
   double getEventWeight(const double lamda, const double two_theta, bool &muRTooLarge);
   void BuildLamdaWeights();
   double absor_sphere(const double twoth, const double wl, bool &muRTooLarge);
-  void scale_init(const Geometry::Instrument_const_sptr &inst, const Geometry::ComponentInfo &componentInfo,
-                  const double L2, const double depth, double &pathlength, const std::string &bankName);
   double scale_exec(std::string &bankName, const double lambda, const double depth,
                     const Geometry::Instrument_const_sptr &inst, const double pathlength, double eventWeight);
 

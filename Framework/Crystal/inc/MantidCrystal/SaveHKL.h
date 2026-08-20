@@ -11,6 +11,10 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 
 namespace Mantid {
+namespace Geometry {
+class ComponentInfo;
+}
+
 namespace Crystal {
 
 /** Save a PeaksWorkspace to a Gsas-style ASCII .hkl file.
@@ -31,6 +35,16 @@ public:
   const std::vector<std::string> seeAlso() const override { return {"LoadHKL", "SaveHKLCW"}; }
   /// Algorithm's category for identification
   const std::string category() const override { return "Crystal\\DataHandling;DataHandling\\Text"; }
+
+  /** Slant path length through the detector, derived from the calibrated sample-to-panel distance.
+   *
+   * Static and public so that it can be asserted directly. An end-to-end test cannot isolate this term,
+   * because displacing a panel also changes L2 and the scattering angle, which move the correction
+   * through other factors whether or not the distance is taken from calibrated geometry.
+   */
+  static double slantPathLength(const Geometry::Instrument_const_sptr &inst,
+                                const Geometry::ComponentInfo &componentInfo, const std::string &bankName,
+                                const double L2, const double depth);
 
 private:
   /// Initialise the properties

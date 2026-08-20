@@ -366,19 +366,7 @@ void SaveHKL::exec() {
           double eff_center = 1.0 - std::exp(-mu * depth); // efficiency at center of detector
 
           // Distance to center of detector
-          const IComponent *det0 = inst->getComponentByName(p.getBankName()).get();
-          if (inst->getName() == "CORELLI") // for Corelli with sixteenpack under bank
-          {
-            const auto &componentInfo = m_ws->componentInfo();
-            const size_t bankIndex = componentInfo.indexOfAny(p.getBankName());
-            const auto children = componentInfo.children(bankIndex);
-            if (!children.empty()) {
-              det0 = componentInfo.componentID(children[0]);
-            }
-          }
-          IComponent_const_sptr sample = inst->getSample();
-          double cosA = det0->getDistance(*sample) / p.getL2();
-          double pathlength = depth / cosA;
+          const double pathlength = slantPathLength(inst, m_ws->componentInfo(), p.getBankName(), p.getL2(), depth);
           double eff_R = 1.0 - exp(-mu * pathlength); // efficiency at point R
           double sp_ratio = eff_center / eff_R;       // slant path efficiency ratio
           double sinsqt = std::pow(lambda / (2.0 * dsp), 2);
@@ -530,6 +518,32 @@ void SaveHKL::exec() {
 
   setProperty("OutputWorkspace", peaksW);
 } // namespace Crystal
+
+/** Slant path length through the detector, used to correct for the oblique path through the
+ * scintillator glass away from the panel centre.
+ *
+ * @param inst :: the instrument, used only to identify CORELLI
+ * @param componentInfo :: the parameterized view of the instrument geometry
+ * @param bankName :: name of the bank holding the detector
+ * @param L2 :: sample-to-detector distance for the peak
+ * @param depth :: thickness of the scintillator glass
+ * @return the slant path length
+ */
+double SaveHKL::slantPathLength(const Instrument_const_sptr &inst, const ComponentInfo &componentInfo,
+                                const std::string &bankName, const double L2, const double depth) {
+  size_t detIndex = componentInfo.indexOfAny(bankName);
+  if (inst->getName() == "CORELLI") // for Corelli with sixteenpack under bank
+  {
+    const auto children = componentInfo.children(detIndex);
+    if (!children.empty()) {
+      detIndex = children[0];
+    }
+  }
+  // NOTE: take the position from ComponentInfo. Dereferencing componentID() would yield the *base* component,
+  //       whose getDistance() ignores the ParameterMap and so reports uncalibrated IDF geometry.
+  const double cosA = componentInfo.position(detIndex).distance(componentInfo.samplePosition()) / L2;
+  return depth / cosA;
+}
 
 /**
  *       function to calculate a spherical absorption correction

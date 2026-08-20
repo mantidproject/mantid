@@ -248,8 +248,10 @@ void SaveIsawPeaks::exec() {
         }
       }
       if (det) {
-        // Center of the detector
-        V3D center = det->getPos();
+        // Center of the detector.
+        // NOTE: componentID() above returns the *base* component, whose getPos() ignores the ParameterMap and so
+        //       reports uncalibrated IDF geometry. ComponentInfo is the parameterized view, so query it instead.
+        V3D center = componentInfo.position(componentInfo.indexOf(det->getComponentID()));
 
         // Distance to center of detector
         double detd = (center - inst->getSample()->getPos()).norm();
@@ -468,8 +470,9 @@ V3D SaveIsawPeaks::findPixelPos(const std::string &bankName, int col, int row) {
       col0 = (col % 2 == 0 ? col / 2 + 75 : (col - 1) / 2);
 
     auto grandchildren = componentInfo.children(children[col0]);
-    const auto *first = componentInfo.componentID(grandchildren[row - 1]);
-    return first->getPos();
+    // NOTE: query ComponentInfo rather than dereferencing componentID(). The latter yields the *base* component,
+    //       whose getPos() ignores the ParameterMap and so reports uncalibrated IDF geometry.
+    return componentInfo.position(grandchildren[row - 1]);
   }
 }
 void SaveIsawPeaks::sizeBanks(const std::string &bankName, int &NCOLS, int &NROWS, double &xsize, double &ysize) {
@@ -495,12 +498,10 @@ void SaveIsawPeaks::sizeBanks(const std::string &bankName, int &NCOLS, int &NROW
     auto grandchildren = componentInfo.children(children[0]);
     NROWS = static_cast<int>(grandchildren.size());
     NCOLS = static_cast<int>(children.size());
-    const auto *first = componentInfo.componentID(children[0]);
-    const auto *last = componentInfo.componentID(children[NCOLS - 1]);
-    xsize = first->getDistance(*last);
-    first = componentInfo.componentID(grandchildren[0]);
-    last = componentInfo.componentID(grandchildren[NROWS - 1]);
-    ysize = first->getDistance(*last);
+    // NOTE: measure via ComponentInfo::position(), not by dereferencing componentID(). The latter yields the *base*
+    //       component, whose getDistance() ignores the ParameterMap and so reports uncalibrated IDF geometry.
+    xsize = componentInfo.position(children[0]).distance(componentInfo.position(children[NCOLS - 1]));
+    ysize = componentInfo.position(grandchildren[0]).distance(componentInfo.position(grandchildren[NROWS - 1]));
   }
 }
 void SaveIsawPeaks::writeOffsets(std::ofstream &out, double qSign, const std::vector<double> &offset) {

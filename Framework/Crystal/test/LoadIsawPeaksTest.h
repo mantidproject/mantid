@@ -16,8 +16,11 @@
 #include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
+#include <string>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -25,6 +28,15 @@ using namespace Mantid::Crystal;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
+
+namespace {
+/// Absolute path in the system temporary directory, carrying a random token so that concurrent runs, and
+/// files orphaned by a failed test, cannot collide. The runner's cwd is never written to.
+std::string tempPath(const std::string &filename) {
+  return (std::filesystem::temp_directory_path() / (Mantid::Kernel::Strings::randomString(8) + "_" + filename))
+      .string();
+}
+} // namespace
 
 class LoadIsawPeaksTest : public CxxTest::TestSuite {
 public:
@@ -234,7 +246,7 @@ public:
 
     ws->getPeak(0).setIntMNP(V3D(1, -1, 2));
 
-    std::string outfile = "./SaveIsawModulated.peaks";
+    std::string outfile = tempPath("SaveIsawModulated.peaks");
     SaveIsawPeaks save;
     TS_ASSERT_THROWS_NOTHING(save.initialize());
     TS_ASSERT(save.isInitialized());
@@ -251,5 +263,8 @@ public:
 
     TS_ASSERT(load.execute());
     TS_ASSERT(load.isExecuted());
+
+    if (std::filesystem::exists(outfile))
+      std::filesystem::remove(outfile);
   }
 };
