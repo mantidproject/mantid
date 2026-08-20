@@ -106,7 +106,7 @@ public:
     WorkspaceSingleValue_sptr output = AnalysisDataService::Instance().retrieveWS<WorkspaceSingleValue>("WSCor");
 
     Mantid::MantidVec expectedValue(1, 4);
-    TSM_ASSERT_EQUALS("Power has not been determined correctly", expectedValue, output->dataY(0));
+    TSM_ASSERT_EQUALS("Power has not been determined correctly", expectedValue, output->y(0).rawData());
 
     AnalysisDataService::Instance().remove("InputWS");
     AnalysisDataService::Instance().remove("WSCor");
@@ -129,10 +129,10 @@ public:
     WorkspaceSingleValue_sptr output = AnalysisDataService::Instance().retrieveWS<WorkspaceSingleValue>("WSCor");
 
     Mantid::MantidVec expectedValue(1, 0.25);
-    TSM_ASSERT_EQUALS("Power has not been determined correctly", expectedValue, output->dataY(0));
+    TSM_ASSERT_EQUALS("Power has not been determined correctly", expectedValue, output->y(0).rawData());
 
     Mantid::MantidVec expectedError(1, 0.35355);
-    TS_ASSERT_DELTA(0.353553391, output->dataE(0)[0], 0.001);
+    TS_ASSERT_DELTA(0.353553391, output->e(0)[0], 0.001);
 
     AnalysisDataService::Instance().remove("InputWS");
     AnalysisDataService::Instance().remove("WSCor");
@@ -159,7 +159,7 @@ public:
     WorkspaceSingleValue_sptr output = AnalysisDataService::Instance().retrieveWS<WorkspaceSingleValue>("WSCor");
 
     Mantid::MantidVec expectedError(1, 16);
-    TSM_ASSERT_EQUALS("Error has not been determined correctly", expectedError, output->dataE(0));
+    TSM_ASSERT_EQUALS("Error has not been determined correctly", expectedError, output->e(0).rawData());
 
     AnalysisDataService::Instance().remove("InputWS");
     AnalysisDataService::Instance().remove("WSCor");

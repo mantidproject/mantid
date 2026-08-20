@@ -397,8 +397,8 @@ private:
     MatrixWorkspace_sptr ws2(new WorkspaceTester);
     ws2->initialize(1, 20, 20);
 
-    Mantid::MantidVec &x = ws2->dataX(0);
-    Mantid::MantidVec &y = ws2->dataY(0);
+    auto &x = ws2->mutableX(0);
+    auto &y = ws2->mutableY(0);
     for (size_t i = 0; i < ws2->blocksize(); ++i) {
       x[i] = 0.1 * double(i);
       y[i] = 10.0 * exp(-(x[i]) / 0.5);
@@ -411,8 +411,8 @@ private:
     MatrixWorkspace_sptr ws2(new WorkspaceTester);
     ws2->initialize(1, 20, 20);
 
-    Mantid::MantidVec &x = ws2->dataX(0);
-    Mantid::MantidVec &y = ws2->dataY(0);
+    auto &x = ws2->mutableX(0);
+    auto &y = ws2->mutableY(0);
     for (size_t i = 0; i < ws2->blocksize(); ++i) {
       double xx = 2. * M_PI * double(i) / 20.;
       x[i] = xx;

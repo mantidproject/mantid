@@ -92,9 +92,9 @@ class RecentlyClosedScriptsMenu(QMenu):
             # Happens quite often and should fail silently.
             pass
         except TypeError:
-            # Happens when garbage data is found in the QSettings .ini file
+            # Querying malformed data must not repair the persistent store. A
+            # later explicit add/remove operation will save its resulting list.
             logger.error("Recently Opened Scripts were lost during save, and workbench has recovered from an error.")
-            CONF.set(RECENT_SCRIPTS_KEY, [])
 
         def sort_key(sub_list):
             return sub_list[0]

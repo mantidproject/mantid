@@ -16,6 +16,8 @@
 #include "MantidAlgorithms/SampleCorrections/MCInteractionVolume.h"
 #include "MantidAlgorithms/SampleCorrections/SparseWorkspace.h"
 
+#include <span>
+
 namespace Mantid {
 namespace API {
 class Sample;
@@ -55,7 +57,7 @@ protected:
   std::vector<Kernel::V3D> calculateMuonPos(API::MatrixWorkspace_sptr &muonProfile,
                                             const API::MatrixWorkspace_sptr &inputWS, double detectorDistance);
 
-  std::vector<double> normaliseMuonIntensity(MantidVec muonIntensity);
+  std::vector<double> normaliseMuonIntensity(std::span<double const> muonIntensity);
 
 private:
   void init() override;

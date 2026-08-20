@@ -8,6 +8,8 @@
 from qtpy.QtCore import QSettings
 from typing import Dict, Any, Type
 
+from mantidqt.utils.qt.qsettings_change_aware import QSettingsChangeAware
+
 INTERFACES_SETTINGS_GROUP = "CustomInterfaces"
 TEXTURE_PLANNER_PREFIX = "TexturePlanner/"
 
@@ -102,5 +104,5 @@ class TexturePlannerSettingsModel:
     def _set_setting(name: str, value: Any) -> None:
         qs = QSettings()
         qs.beginGroup(INTERFACES_SETTINGS_GROUP)
-        qs.setValue(TEXTURE_PLANNER_PREFIX + name, value)
+        QSettingsChangeAware(qs).setValue(TEXTURE_PLANNER_PREFIX + name, value)
         qs.endGroup()

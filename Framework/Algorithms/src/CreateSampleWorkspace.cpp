@@ -333,9 +333,9 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(int numPixe
                                                                      const Geometry::Instrument_sptr &inst,
                                                                      const std::string &functionString, bool isRandom) {
   BinEdges x(numBins + 1, LinearGenerator(x0, binDelta));
-  Points xValues(x);
+  Points const xValues(x);
 
-  Counts y(evalFunction(functionString, xValues.rawData(), isRandom ? 1 : 0));
+  Counts y(evalFunction(functionString, xValues, isRandom ? 1 : 0));
 
   std::vector<SpectrumDefinition> specDefs(numPixels + numMonitors);
   for (int wi = 0; wi < numMonitors + numPixels; wi++)
@@ -439,8 +439,8 @@ EventWorkspace_sptr CreateSampleWorkspace::createEventWorkspace(int numPixels, i
  *no noise
  * @returns the calculated values
  */
-std::vector<double> CreateSampleWorkspace::evalFunction(const std::string &functionString,
-                                                        const std::vector<double> &xVal, double noiseScale = 0) {
+std::vector<double> CreateSampleWorkspace::evalFunction(std::string const &functionString,
+                                                        std::span<double const> const xVal, double noiseScale = 0) {
   size_t xSize = xVal.size();
   // replace $PCx$ values
   std::string parsedFuncString = functionString;

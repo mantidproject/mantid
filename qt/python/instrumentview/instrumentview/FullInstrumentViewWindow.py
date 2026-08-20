@@ -28,11 +28,11 @@ from qtpy.QtWidgets import (
     QFrame,
 )
 from qtpy.QtGui import QDoubleValidator, QDragEnterEvent, QDropEvent, QDragMoveEvent, QColor, QPalette, QPixmap, QIcon, QPainter
-from qtpy.QtCore import Qt, QEvent, QSize
+from qtpy.QtCore import Qt, QEvent, QSize, QMetaObject
 from qtpy.QtWidgets import QFileDialog
 from superqt import QDoubleRangeSlider
 from pyvistaqt import BackgroundPlotter
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.widgets import Cursor
 
 import numpy as np
@@ -86,6 +86,7 @@ def _ensure_overlay_manager(method):
         shape = method(self, *args, **kwargs)
         self._shape_overlay_manager.set_shape(shape)
         self._presenter.on_overlaid_shape_added()
+        self._register_shape_changed_callback()
 
     return wrapper
 
@@ -229,6 +230,7 @@ class FullInstrumentViewView(QWidget):
         self._last_camera_position = None
         self._last_parallel_scale = None
         self._detector_spectrum_fig = None
+        self._line_edit_connections: dict[QLineEdit, QMetaObject.Connection] = {}
 
         self._create_main_widgets()
         self._set_layouts()
@@ -248,11 +250,11 @@ class FullInstrumentViewView(QWidget):
         self._right_column_graphics = QWidget()
         self._parent_hsplitter = QSplitter(Qt.Horizontal)
         # TODO: get connections out of setup
-        self._parent_hsplitter.splitterMoved.connect(self._on_splitter_moved)
         self.main_plotter = BackgroundPlotter(show=False, menu_bar=False, toolbar=False, off_screen=self._off_screen)
 
         self._detector_spectrum_fig = Figure()
         self._detector_spectrum_axes = self._detector_spectrum_fig.add_subplot(111, projection="mantid")
+        self._detector_spectrum_fig.subplots_adjust(left=0.05, right=0.98, bottom=0.1, top=0.95)
         self._detector_figure_canvas = FigureCanvas(self._detector_spectrum_fig)
         self._detector_figure_canvas.setMinimumSize(QSize(0, 0))
         self._plot_toolbar = MantidNavigationToolbar(self._detector_figure_canvas, None)
@@ -266,7 +268,6 @@ class FullInstrumentViewView(QWidget):
         self._lineplot_peak_cursor = None
 
         self._graphics_vsplitter = QSplitter(Qt.Vertical)
-        self._graphics_vsplitter.splitterMoved.connect(self._on_splitter_moved)
 
         # Used as a single widget
         self._detector_info_group_box = QGroupBox("Detector Info")
@@ -524,10 +525,8 @@ class FullInstrumentViewView(QWidget):
         """Closes view, not window"""
         self._closing = True
         with suppress(TypeError):
-            self._contour_range_max_edit.disconnect()
-            self._contour_range_min_edit.disconnect()
-            self._integration_limit_max_edit.disconnect()
-            self._integration_limit_min_edit.disconnect()
+            for line_edit in self._line_edit_connections:
+                line_edit.disconnect(self._line_edit_connections[line_edit])
         # Shut down any callbacks before closing the plotter and the figure
         if hasattr(self, "_presenter") and self._presenter is not None:
             self._presenter.handle_close()
@@ -594,9 +593,6 @@ class FullInstrumentViewView(QWidget):
 
     def set_render_mode_combo_enabled(self, enabled: bool) -> None:
         self._render_mode_combo_box.setEnabled(enabled)
-
-    def _on_splitter_moved(self, pos, index) -> None:
-        self._detector_spectrum_fig.tight_layout()
 
     def hide_status_box(self) -> None:
         self.status_group_box.hide()
@@ -685,8 +681,8 @@ class FullInstrumentViewView(QWidget):
 
         # Connections to sync sliders and edits
         slider.valueChanged.connect(lambda lims: self._set_min_max_edit_boxes(min_edit, max_edit, lims))
-        min_edit.editingFinished.connect(set_slider(callled_from_min=True))
-        max_edit.editingFinished.connect(set_slider(callled_from_min=False))
+        self._line_edit_connections[min_edit] = min_edit.editingFinished.connect(set_slider(callled_from_min=True))
+        self._line_edit_connections[max_edit] = max_edit.editingFinished.connect(set_slider(callled_from_min=False))
 
     def _add_detector_info_boxes(self, parent_box: QVBoxLayout, label: str) -> QTextEdit:
         """Adds a text box to the given parent that is designed to show read-only information about the selected detector"""
@@ -841,6 +837,9 @@ class FullInstrumentViewView(QWidget):
     def set_sum_spectra_checkbox_disabled(self, disabled):
         self._sum_spectra_checkbox.setDisabled(disabled)
 
+    def set_sum_spectra_selected(self, selected: bool) -> None:
+        self._sum_spectra_checkbox.setChecked(selected)
+
     def set_select_bank_tube_disabled(self, disabled):
         self._select_bank_tube.setDisabled(disabled)
 
@@ -984,6 +983,18 @@ class FullInstrumentViewView(QWidget):
     def enable_parallel_projection(self) -> None:
         self.main_plotter.view_xy()
         self.main_plotter.enable_parallel_projection()
+
+    def _register_shape_changed_callback(self) -> None:
+        """Make the line plot follow the overlaid shape.
+
+        The overlay manager fires the callback whenever the shape is dragged, resized or
+        rotated. It is also called once here so the plot reflects the shape where it is
+        first drawn.
+        """
+        if self._shape_overlay_manager is None:
+            return
+        self._shape_overlay_manager.set_on_shape_changed(self._presenter.on_shape_changed)
+        self._presenter.on_shape_changed()
 
     @_ensure_overlay_manager
     def add_circle_widget(self) -> None:
@@ -1184,7 +1195,6 @@ class FullInstrumentViewView(QWidget):
 
     @_skip_if_closing
     def redraw_lineplot(self) -> None:
-        self._detector_spectrum_fig.tight_layout()
         self._detector_figure_canvas.draw()
 
     def get_current_selected_tab(self) -> CurrentTab:
@@ -1222,8 +1232,12 @@ class FullInstrumentViewView(QWidget):
     def has_any_peak_overlays(self) -> bool:
         return len(self._lineplot_overlays) > 0
 
-    def _on_axes_click(self, event) -> None:
-        self._plot_toolbar.setDisabled(False)
+    def _on_axes_click_during_peak_selection(self, event) -> None:
+        if self._plot_toolbar.zoom_enabled() or self._plot_toolbar.pan_enabled():
+            # Delegate to matplotlib's default click callbacks when zoom is active.
+            for callback in self._default_lineplot_callbacks.values():
+                callback(event)
+            return
         if event.inaxes is not self._detector_spectrum_axes or event.xdata is None:
             return
         if event.button == 1:  # Left click
@@ -1231,16 +1245,17 @@ class FullInstrumentViewView(QWidget):
         elif event.button == 3:  # Right click
             self._presenter.on_peak_selected_in_lineplot(event.xdata, "right")
 
-    def add_peak_cursor_to_lineplot(self) -> None:
+    def start_peak_selection_in_lineplot(self) -> None:
         if self._lineplot_peak_cursor is not None:
-            self.remove_peak_cursor_from_lineplot()
+            self.end_peak_selection_in_lineplot()
         self._lineplot_peak_cursor = Cursor(self._detector_spectrum_axes, color="tab:red", linewidth=1, horizOn=False)
         for cid in self._default_lineplot_callbacks:
             self._detector_figure_canvas.mpl_disconnect(cid)
-        self._figure_canvas_click_id = self._detector_figure_canvas.mpl_connect("button_press_event", self._on_axes_click)
-        self._plot_toolbar.setDisabled(True)
+        self._figure_canvas_click_id = self._detector_figure_canvas.mpl_connect(
+            "button_press_event", self._on_axes_click_during_peak_selection
+        )
 
-    def remove_peak_cursor_from_lineplot(self) -> None:
+    def end_peak_selection_in_lineplot(self) -> None:
         if self._lineplot_peak_cursor is None:
             return
         self._detector_figure_canvas.mpl_disconnect(self._figure_canvas_click_id)
@@ -1252,7 +1267,6 @@ class FullInstrumentViewView(QWidget):
         self._figure_canvas_click_id = None
         del self._lineplot_peak_cursor
         self._lineplot_peak_cursor = None
-        self._plot_toolbar.setDisabled(False)
         self._detector_figure_canvas.draw_idle()
 
     def get_filename_from_dialog(self, file_filter: str):

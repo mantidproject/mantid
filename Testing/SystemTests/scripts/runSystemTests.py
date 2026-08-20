@@ -20,7 +20,7 @@ os.environ["MPLBACKEND"] = "Agg"
 
 start_time = time.time()
 
-DEFAULT_QT_API = "pyqt5"
+DEFAULT_QT_API = "pyqt6"
 THIS_MODULE_DIR = os.path.dirname(os.path.realpath(__file__))
 DEFAULT_FRAMEWORK_LOC = os.path.realpath(os.path.join(THIS_MODULE_DIR, "..", "lib", "systemtests"))
 DATA_DIRS_LIST_PATH = os.path.join(THIS_MODULE_DIR, "datasearch-directories.txt")

@@ -286,8 +286,8 @@ private:
     for (size_t j = 0; j < nSpec; ++j) {
       ws->setBinEdges(j, x);
       ws->setPointStandardDeviations(j, dx);
-      ws->dataY(j).assign(y_length, double(1));
-      ws->dataE(j).assign(y_length, double(1));
+      ws->mutableY(j).assign(y_length, double(1));
+      ws->mutableE(j).assign(y_length, double(1));
     }
     return ws;
   }

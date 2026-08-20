@@ -163,7 +163,7 @@ void PeakIntegration::exec() {
     if (TOFmax > numbins)
       TOFmax = numbins;
 
-    TOFPeak = VectorHelper::getBinIndex(X.rawData(), TOFPeakd);
+    TOFPeak = VectorHelper::getBinIndex(X, TOFPeakd);
     const double peakLoc = X[TOFPeak];
     int iTOF;
     for (iTOF = TOFmin; iTOF < TOFmax; iTOF++) {

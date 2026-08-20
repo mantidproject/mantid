@@ -15,6 +15,7 @@
 #include <QComboBox>
 #include <QFileInfo>
 #include <QScreen>
+#include <QSettings>
 #include <QUrl>
 
 // Mantid
@@ -155,7 +156,9 @@ void LoadDialog::initLayout() {
     m_form.instructions->setText(getOptionalMessage());
 
   m_form.dialogLayout->addLayout(this->createDefaultButtonLayout());
-  m_form.fileWidget->readSettings("Mantid/Algorithms/Load");
+  QSettings settings;
+  settings.beginGroup("Mantid/Algorithms/Load");
+  m_form.fileWidget->restoreSettings(FileFinderWidget::readSettings(settings));
   m_initialHeight = this->height();
 
   const std::string &outWsName = getAlgorithm()->getPropertyValue("OutputWorkspace");
@@ -185,7 +188,9 @@ void LoadDialog::initLayout() {
  * Save the input after OK is clicked
  */
 void LoadDialog::saveInput() {
-  m_form.fileWidget->saveSettings("Mantid/Algorithms/Load");
+  QSettings settings;
+  settings.beginGroup("Mantid/Algorithms/Load");
+  m_form.fileWidget->saveSettings(settings, m_form.fileWidget->captureSettings());
   AlgorithmDialog::saveInput();
   // Ensure the filename is store as the full file
   API::AlgorithmInputHistory::Instance().storeNewValue("Load", std::pair<QString, QString>("Filename", m_currentFiles));

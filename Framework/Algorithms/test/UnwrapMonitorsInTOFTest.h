@@ -59,7 +59,7 @@ public:
     for (const auto &index : indicesToCheck) {
       auto histogram = outputWorkspace->histogram(index);
       auto binEdges = histogram.binEdges();
-      auto counts = histogram.dataY();
+      auto counts = histogram.y();
       TSM_ASSERT_EQUALS("Should have 21 bin edges.", binEdges.size(), 21);
       TSM_ASSERT_EQUALS("Should have 20 counts.", counts.size(), 20);
 
@@ -86,7 +86,7 @@ public:
 
       auto histogramDetector = outputWorkspace->histogram(0);
       auto binEdgesDetector = histogramDetector.binEdges();
-      auto countsDetector = histogramDetector.dataY();
+      auto countsDetector = histogramDetector.y();
       TSM_ASSERT_EQUALS("Should have 11 bin edges.", binEdgesDetector.size(), 11);
       TSM_ASSERT_EQUALS("Should have 10 counts.", countsDetector.size(), 10);
 

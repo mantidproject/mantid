@@ -2,30 +2,30 @@
 include(TargetFunctions)
 
 # name: mtd_add_qt_library brief: create a library target for linked against Qt The global ENABLE_WORKBENCH option
-# controls if a Qt5 target is created. To limit the Qt version for a specific library use QT_VERSION, e.g.
+# controls if a Qt target is created. To limit the Qt version for a specific library use QT_VERSION, e.g.
 #
-# mtd_add_qt_library ( QT_VERSION 5 ... ... )
+# mtd_add_qt_library ( QT_VERSION 6 ... ... )
 #
 # For all options see mtd_add_qt_target
 function(mtd_add_qt_library)
   _qt_versions(_qt_vers ${ARGN})
   # Create targets
   foreach(_ver ${_qt_vers})
-    if((_ver EQUAL 5 OR _ver EQUAL 6) AND (ENABLE_WORKBENCH OR BUILD_MANTIDQT))
+    if(_ver EQUAL 6 AND (ENABLE_WORKBENCH OR BUILD_MANTIDQT))
       mtd_add_qt_target(LIBRARY QT_VERSION ${_ver} ${ARGN})
     endif()
   endforeach()
 endfunction()
 
 # name: mtd_add_qt_executable brief: create a library target for linked against Qt The global ENABLE_WORKBENCH option
-# controls if a Qt5 target is created. To limit the Qt version for a specific library use QT_VERSION, e.g.
+# controls if a Qt target is created. To limit the Qt version for a specific library use QT_VERSION, e.g.
 #
-# mtd_add_qt_executable ( QT_VERSION 5 ... ... ) For all options see mtd_add_qt_target
+# mtd_add_qt_executable ( QT_VERSION 6 ... ... ) For all options see mtd_add_qt_target
 function(mtd_add_qt_executable)
   _qt_versions(_qt_vers ${ARGN})
   # Create targets
   foreach(_ver ${_qt_vers})
-    if((_ver EQUAL 5 OR _ver EQUAL 6) AND (ENABLE_WORKBENCH OR BUILD_MANTIDQT))
+    if(_ver EQUAL 6 AND (ENABLE_WORKBENCH OR BUILD_MANTIDQT))
       mtd_add_qt_target(EXECUTABLE QT_VERSION ${_ver} ${ARGN})
     endif()
   endforeach()
@@ -41,7 +41,6 @@ endfunction()
 # * keyword: OUTPUT_NAME An optional filename for the library
 # * keyword: QT_VERSION The major version of Qt to build against
 # * keyword: SRC .cpp files to include in the target build
-# * keyword: QT5_SRC .cpp files to include in a Qt5 build
 # * keyword: MOC Header files that are to be parsed by moc
 # * keyword: UI Qt designer ui files that are to be parsed by the UI compiler
 # * keyword: NOMOC Additional headers that are not to be passed to moc
@@ -54,7 +53,6 @@ endfunction()
 # * keyword: SYSTEM_INCLUDE_DIRS A list of include directories to add to the target and marked as system headers
 # * keyword: PRECOMPILED A name of the precompiled header
 # * keyword: LINK_LIBS A list of additional libraries to link to the target that are not dependent on Qt
-# * keyword: QT5_LINK_LIBS A list of additional Qt libraries to link to. QtWidgets is linked to by default
 # * keyword: MTD_QT_LINK_LIBS A list of additional libraries to link to the target. It is assumed each was produced with
 #   this function and will have the -Qt{QT_VERSION} suffix appended.
 # * keyword: INSTALL_DIR A destination directory for the install command.
@@ -72,14 +70,11 @@ function(mtd_add_qt_target)
       NOMOC
       RES
       DEFS
-      QT5_DEFS
       QT6_DEFS
       INCLUDE_DIRS
       SYSTEM_INCLUDE_DIRS
       LINK_LIBS
-      QT5_LINK_LIBS
       QT6_LINK_LIBS
-      QT5_SRC
       QT6_SRC
       MTD_QT_LINK_LIBS
       OSX_INSTALL_RPATH
@@ -103,13 +98,7 @@ function(mtd_add_qt_target)
   _append_qt_suffix(AS_DIR VERSION ${PARSED_QT_VERSION} OUTPUT_VARIABLE _ui_dir ${CMAKE_CURRENT_BINARY_DIR})
   set(CMAKE_CURRENT_BINARY_DIR ${_ui_dir})
   set(_all_defines ${PARSED_DEFS};${PARSED_QT${PARSED_QT_VERSION}_DEFS})
-  if(PARSED_QT_VERSION EQUAL 5)
-    qt5_wrap_ui(UI_HEADERS ${PARSED_UI})
-    _internal_qt_wrap_cpp(5 MOC_GENERATED DEFS ${_all_defines} INFILES ${PARSED_MOC})
-    set(ALL_SRC ${PARSED_SRC} ${PARSED_QT5_SRC} ${MOC_GENERATED})
-    qt5_add_resources(RES_FILES ${PARSED_RES})
-    set(_qt_link_libraries Qt5::Widgets ${PARSED_QT5_LINK_LIBS})
-  elseif(PARSED_QT_VERSION EQUAL 6)
+  if(PARSED_QT_VERSION EQUAL 6)
     qt6_wrap_ui(UI_HEADERS ${PARSED_UI})
     _internal_qt_wrap_cpp(6 MOC_GENERATED DEFS ${_all_defines} INFILES ${PARSED_MOC})
     set(ALL_SRC ${PARSED_SRC} ${PARSED_QT6_SRC} ${MOC_GENERATED})
@@ -177,7 +166,6 @@ function(mtd_add_qt_target)
     )
   endif()
   set_target_properties(${_target} PROPERTIES CXX_CLANG_TIDY "")
-  _disable_suggest_override(${PARSED_QT_VERSION} ${_target})
   # Use public headers to populate the INTERFACE_INCLUDE_DIRECTORIES target property
   target_include_directories(${_target} PUBLIC ${_ui_dir} ${_other_ui_dirs} ${PARSED_INCLUDE_DIRS})
   if(PARSED_SYSTEM_INCLUDE_DIRS)
@@ -259,7 +247,7 @@ function(mtd_add_qt_tests)
   _qt_versions(_qt_vers ${ARGN})
   # Create test executables
   foreach(_ver ${_qt_vers})
-    if((_ver EQUAL 5 OR _ver EQUAL 6) AND (ENABLE_WORKBENCH OR BUILD_MANTIDQT))
+    if(_ver EQUAL 6 AND (ENABLE_WORKBENCH OR BUILD_MANTIDQT))
       mtd_add_qt_test_executable(QT_VERSION ${_ver} ${ARGN})
     endif()
   endforeach()
@@ -269,7 +257,7 @@ endfunction()
 # suite. The version of Qt will be appended to it keyword: SRC The list of test headers containing the unit test code
 # keyword: QT_VERSION The major version of Qt to build against keyword: INCLUDE_DIRS A list of include directories to
 # add to the target keyword: TEST_HELPER_SRCS A list of test helper files to compile in with the target keyword:
-# LINK_LIBS A list of additional libraries to link to the target that are not dependent on Qt keyword: QT5_LINK_LIBS A
+# LINK_LIBS A list of additional libraries to link to the target that are not dependent on Qt keyword: QT6_LINK_LIBS A
 # list of additional Qt libraries to link to. QtWidgets islinked to by default keyword: MTD_QT_LINK_LIBS A list of
 # additional libraries to link to the target. It is assumed each was produced with this function and will have the
 # Qt{QT_VERSION} suffix appended. keyword: PARENT_DEPENDENCIES Any targets listed here will have this new target as a
@@ -279,12 +267,10 @@ function(mtd_add_qt_test_executable)
   set(oneValueArgs TARGET_NAME QT_VERSION)
   set(multiValueArgs
       SRC
-      QT5_SRC
       QT6_SRC
       INCLUDE_DIRS
       TEST_HELPER_SRCS
       LINK_LIBS
-      QT5_LINK_LIBS
       QT6_LINK_LIBS
       MTD_QT_LINK_LIBS
       PARENT_DEPENDENCIES
@@ -300,14 +286,9 @@ function(mtd_add_qt_test_executable)
   set(TESTHELPER_SRCS ${PARSED_TEST_HELPER_SRCS})
   cxxtest_add_test(${_target_name} ${PARSED_SRC})
 
-  # Warning suppression
-  _disable_suggest_override(${PARSED_QT_VERSION} ${_target_name})
-
   # libraries
   set(_link_libs ${PARSED_LINK_LIBS} ${_mtd_qt_libs})
-  if(PARSED_QT_VERSION EQUAL 5)
-    set(_link_libs Qt5::Widgets ${PARSED_QT5_LINK_LIBS} ${_link_libs})
-  elseif(PARSED_QT_VERSION EQUAL 6)
+  if(PARSED_QT_VERSION EQUAL 6)
     set(_link_libs Qt6::Widgets ${PARSED_QT6_LINK_LIBS} ${_link_libs})
   else()
     message(FATAL_ERROR "Unknown Qt version. Please specify only the major version.")
@@ -391,9 +372,7 @@ function(_internal_qt_wrap_cpp qtversion moc_generated)
     list(APPEND _moc_defs "-D${_def}")
   endforeach()
   foreach(_infile ${PARSED_INFILES})
-    if(qtversion EQUAL 5)
-      qt5_wrap_cpp(moc_generated ${_infile} OPTIONS -i -f${CMAKE_CURRENT_LIST_DIR}/${_infile} ${_moc_defs})
-    elseif(qtversion EQUAL 6)
+    if(qtversion EQUAL 6)
       qt6_wrap_cpp(moc_generated ${_infile} OPTIONS -i -f${CMAKE_CURRENT_LIST_DIR}/${_infile} ${_moc_defs})
     else()
       message(FATAL_ERROR "Unknown Qt version='${qtversion}'.")
@@ -404,17 +383,4 @@ function(_internal_qt_wrap_cpp qtversion moc_generated)
       ${${moc_generated}}
       PARENT_SCOPE
   )
-endfunction()
-
-# Disables suggest override for versions of Qt < 5.6.2 as Q_OBJECT produces them and the cannot be avoided.
-function(_disable_suggest_override _qt_version _target)
-  # For Qt < 5.6.2 gcc-5 produces warnings when it encounters the Q_OBJECT macro. We disable the warning in this case
-  if(_qt_version EQUAL 5
-     AND CMAKE_COMPILER_IS_GNUCXX
-     AND Qt5Core_VERSION_STRING VERSION_LESS "5.6.2"
-  )
-    get_target_property(_options ${_target} COMPILE_OPTIONS)
-    string(REPLACE "-Wsuggest-override" "" _options "${_options}")
-    set_target_properties(${_target} PROPERTIES COMPILE_OPTIONS "${_options}")
-  endif()
 endfunction()

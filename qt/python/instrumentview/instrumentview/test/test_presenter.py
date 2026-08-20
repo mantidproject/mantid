@@ -188,7 +188,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.show_plot_for_detectors.assert_called_once_with(None, None)
         self._mock_view.set_selected_detector_info.assert_called_once_with([])
         self._mock_view.set_relative_detector_angle.assert_called_once_with(None)
-        self._mock_view.remove_peak_cursor_from_lineplot.assert_called_once()
+        self._mock_view.end_peak_selection_in_lineplot.assert_called_once()
         self._mock_view.set_clear_point_picked_detectors_disabled.assert_called_once_with(True)
         self._mock_view.set_sum_spectra_checkbox_disabled.assert_called_once_with(True)
         self._mock_view.set_select_bank_tube_disabled.assert_called_once_with(True)
@@ -327,6 +327,172 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self.assertTrue(self._presenter._select_bank_tube)
         self._presenter.on_select_bank_tube_toggled(False)
         self.assertFalse(self._presenter._select_bank_tube)
+
+    def test_adding_a_shape_forces_summed_spectra(self):
+        """A shape covers too many detectors to plot individually, so the choice is taken away."""
+        self._mock_view.sum_spectra_selected.return_value = False
+
+        self._presenter.on_overlaid_shape_added()
+
+        self._mock_view.set_sum_spectra_selected.assert_called_once_with(True)
+        self._mock_view.set_sum_spectra_checkbox_disabled.assert_called_once_with(True)
+
+    def test_removing_a_shape_restores_the_users_sum_spectra_choice(self):
+        self._mock_view.sum_spectra_selected.return_value = False
+        self._presenter.on_overlaid_shape_added()
+        self._mock_view.reset_mock()
+
+        self._presenter.on_overlaid_shape_removed()
+        self._presenter._callback_queue.join()
+
+        self._mock_view.set_sum_spectra_selected.assert_called_once_with(False)
+        self._mock_view.set_sum_spectra_checkbox_disabled.assert_called_once_with(False)
+
+    def test_replacing_a_shape_remembers_the_original_sum_spectra_choice(self):
+        """Swapping shape type re-runs the added handler; it must not remember the forced value."""
+        self._mock_view.sum_spectra_selected.return_value = False
+        self._presenter.on_overlaid_shape_added()
+        self._mock_view.sum_spectra_selected.return_value = True
+        self._presenter.on_overlaid_shape_added()
+        self._mock_view.reset_mock()
+
+        self._presenter.on_overlaid_shape_removed()
+        self._presenter._callback_queue.join()
+
+        self._mock_view.set_sum_spectra_selected.assert_called_once_with(False)
+
+    def test_removing_a_shape_that_was_never_added_leaves_the_checkbox_alone(self):
+        """Deleting the shape is unconditional, so it must not re-enable a box hover pick disabled."""
+        self._presenter.on_overlaid_shape_removed()
+        self._presenter._callback_queue.join()
+
+        self._mock_view.set_sum_spectra_selected.assert_not_called()
+        self._mock_view.set_sum_spectra_checkbox_disabled.assert_not_called()
+
+    def test_on_shape_changed_projects_points_before_queueing(self):
+        """on_shape_changed projects detector points on the main thread before
+        dispatching work to the background queue, because projection uses VTK."""
+        self._presenter._callback_queue = MagicMock()
+        self._presenter.on_shape_changed()
+        self._mock_view.project_and_cache_detector_points.assert_called_once()
+        self._presenter._callback_queue.put.assert_called_once()
+
+    def test_on_shape_changed_plots_spectra_covered_by_the_shape(self):
+        n_hist = self._ws.getNumberHistograms()
+        mask = np.array([i < 3 for i in range(n_hist)])
+        self._mock_view.get_shape_mask.return_value = mask
+        self._mock_view.current_selected_lineplot_unit.return_value = "TOF"
+        self._mock_view.sum_spectra_selected.return_value = True
+        self._model.extract_spectra_for_line_plot = MagicMock()
+
+        self._presenter._on_shape_changed(np.array(self._model.detector_positions), self._presenter._shape_update_generation)
+
+        unit, sum_spectra = self._model.extract_spectra_for_line_plot.call_args.args[:2]
+        self.assertEqual("TOF", unit)
+        self.assertTrue(sum_spectra)
+        np.testing.assert_array_equal(np.flatnonzero(mask), self._model.extract_spectra_for_line_plot.call_args.args[2])
+        self._mock_view.show_plot_for_detectors.assert_called_once_with(self._model.line_plot_workspace, self._model.lineplot_limits)
+        self.assertTrue(self._presenter._shape_preview_active)
+
+    def test_on_shape_changed_refreshes_the_lineplot_peak_overlays(self):
+        """Peak lines from a previously picked detector must not linger over the shape's plot."""
+        n_hist = self._ws.getNumberHistograms()
+        self._mock_view.get_shape_mask.return_value = np.array([i < 3 for i in range(n_hist)])
+        self._model.extract_spectra_for_line_plot = MagicMock()
+        self._presenter.refresh_lineplot_peaks = MagicMock()
+
+        self._presenter._on_shape_changed(np.array(self._model.detector_positions), self._presenter._shape_update_generation)
+
+        self._presenter.refresh_lineplot_peaks.assert_called_once()
+
+    def test_on_shape_changed_select_bank_tube_expands_mask(self):
+        n_hist = self._ws.getNumberHistograms()
+        mask = np.array([i < 3 for i in range(n_hist)])
+        expanded = np.array([i < 5 for i in range(n_hist)])
+        self._mock_view.get_shape_mask.return_value = mask
+        self._presenter._select_bank_tube = True
+        self._model.expand_pickable_mask_to_parent_subtrees = MagicMock(return_value=expanded)
+        self._model.extract_spectra_for_line_plot = MagicMock()
+
+        self._presenter._on_shape_changed(np.array(self._model.detector_positions), self._presenter._shape_update_generation)
+
+        self._model.expand_pickable_mask_to_parent_subtrees.assert_called_once()
+        np.testing.assert_array_equal(np.flatnonzero(expanded), self._model.extract_spectra_for_line_plot.call_args.args[2])
+
+    def test_on_shape_changed_does_nothing_if_the_shape_has_already_been_removed(self):
+        self._mock_view.is_active_current_overlaid_shape.return_value = False
+        self._model.extract_spectra_for_line_plot = MagicMock()
+
+        self._presenter._on_shape_changed(np.array(self._model.detector_positions), self._presenter._shape_update_generation)
+
+        self._model.extract_spectra_for_line_plot.assert_not_called()
+        self.assertFalse(self._presenter._shape_preview_active)
+
+    def test_on_shape_changed_drops_updates_superseded_by_a_newer_one(self):
+        """A burst of zooms queues several updates; only the newest is worth running."""
+        self._model.extract_spectra_for_line_plot = MagicMock()
+        stale_generation = self._presenter._shape_update_generation
+        self._presenter._shape_update_generation += 1
+
+        self._presenter._on_shape_changed(np.array(self._model.detector_positions), stale_generation)
+
+        self._model.extract_spectra_for_line_plot.assert_not_called()
+
+    def test_zooming_updates_the_line_plot_while_a_shape_is_overlaid(self):
+        self._mock_view.is_active_current_overlaid_shape.return_value = True
+        self._presenter._callback_queue = MagicMock()
+
+        self._presenter.on_camera_changed()
+
+        self._mock_view.project_and_cache_detector_points.assert_called_once()
+        self._presenter._callback_queue.put.assert_called_once()
+
+    def test_zooming_does_nothing_when_no_shape_is_overlaid(self):
+        self._mock_view.is_active_current_overlaid_shape.return_value = False
+        self._presenter._callback_queue = MagicMock()
+
+        self._presenter.on_camera_changed()
+
+        self._mock_view.project_and_cache_detector_points.assert_not_called()
+        self._presenter._callback_queue.put.assert_not_called()
+
+    def test_reload_interactor_styles_wires_the_camera_changed_callback(self):
+        with mock.patch("instrumentview.FullInstrumentViewPresenter.InteractorStyles") as mock_styles:
+            self._presenter.reload_interactor_styles()
+        self.assertEqual(self._presenter.on_camera_changed, mock_styles.call_args.kwargs["camera_changed_callback"])
+
+    def test_removing_shape_restores_the_line_plot_for_the_committed_selection(self):
+        self._presenter._shape_preview_active = True
+        self._presenter._update_line_plot_ws_and_draw = MagicMock()
+
+        self._presenter.on_overlaid_shape_removed()
+        self._presenter._callback_queue.join()
+
+        self._presenter._update_line_plot_ws_and_draw.assert_called_once()
+        self.assertFalse(self._presenter._shape_preview_active)
+
+    def test_removing_shape_leaves_the_line_plot_alone_when_no_preview_was_shown(self):
+        self._presenter._update_line_plot_ws_and_draw = MagicMock()
+
+        self._presenter.on_overlaid_shape_removed()
+        self._presenter._callback_queue.join()
+
+        self._presenter._update_line_plot_ws_and_draw.assert_not_called()
+
+    def test_removing_shape_while_extracting_keeps_the_committed_line_plot(self):
+        """An extraction already in flight must not draw its preview over the restored plot."""
+        self._presenter._shape_preview_active = True
+        self._presenter._update_line_plot_ws_and_draw = MagicMock()
+        # Stand in for the shape being deleted part-way through the extraction on the worker
+        self._model.extract_spectra_for_line_plot = MagicMock(side_effect=lambda *_: self._presenter.on_overlaid_shape_removed())
+
+        self._presenter._on_shape_changed(np.array(self._model.detector_positions), self._presenter._shape_update_generation)
+        self._presenter._callback_queue.join()
+
+        self._model.extract_spectra_for_line_plot.assert_called_once()
+        self._mock_view.show_plot_for_detectors.assert_not_called()
+        self._presenter._update_line_plot_ws_and_draw.assert_called_once()
+        self.assertFalse(self._presenter._shape_preview_active)
 
     def test_on_add_item_projects_points_before_queueing(self):
         """on_add_item_clicked projects detector points on the main thread
@@ -571,7 +737,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._presenter._model = MagicMock()
         self._presenter.on_start_adding_peaks_toggled(True)
         self._presenter._model.turn_on_single_point_picking.assert_called_once()
-        self._mock_view.add_peak_cursor_to_lineplot.assert_called_once()
+        self._mock_view.start_peak_selection_in_lineplot.assert_called_once()
         self._mock_view.set_delete_all_selected_peaks_button_enabled.assert_called_once_with(False)
         self._mock_view.disable_and_uncheck_selection_list.assert_called_once()
         mock_on_list_item_selected.assert_called_once_with(CurrentTab.Grouping)
@@ -582,7 +748,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._presenter._model = MagicMock()
         self._presenter.on_start_adding_peaks_toggled(False)
         self._presenter._model.turn_off_single_point_picking.assert_called_once()
-        self._mock_view.remove_peak_cursor_from_lineplot.assert_called_once()
+        self._mock_view.end_peak_selection_in_lineplot.assert_called_once()
         self._mock_view.set_delete_all_selected_peaks_button_enabled.assert_called_once_with(True)
         self._mock_view.enable_and_restore_selection_list.assert_called_once()
         mock_on_list_item_selected.assert_called_once_with(CurrentTab.Grouping)

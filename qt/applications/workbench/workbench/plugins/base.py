@@ -35,14 +35,19 @@ class PluginWidget(QWidget):
         raise NotImplementedError()
 
     def readSettings(self, qsettings):
-        """Load user configuration"""
+        """Read and return user configuration without changing the widget or store."""
         raise NotImplementedError()
+
+    def restoreSettings(self, settings):
+        """Apply settings returned by readSettings without persistent writes."""
+        return None
 
     def readSettingsIfNotDone(self, qsettings):
         """Called by the main window to ask the plugin to
         load user configuration"""
         if not self.settings_read:
-            self.readSettings(qsettings)
+            settings = self.readSettings(qsettings)
+            self.restoreSettings(settings)
             self.settings_read = True
 
     def writeSettings(self, qsettings):

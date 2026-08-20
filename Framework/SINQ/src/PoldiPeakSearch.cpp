@@ -221,7 +221,8 @@ double PoldiPeakSearch::getTransformedCenter(double value, const Unit_sptr &unit
 std::vector<PoldiPeak_sptr> PoldiPeakSearch::getPeaks(const MantidVec::const_iterator &baseListStart,
                                                       const MantidVec::const_iterator &baseListEnd,
                                                       std::list<MantidVec::const_iterator> peakPositions,
-                                                      const MantidVec &xData, const Unit_sptr &unit) const {
+                                                      std::span<double const> const xData,
+                                                      const Unit_sptr &unit) const {
   std::vector<PoldiPeak_sptr> peakData;
   peakData.reserve(peakPositions.size());
 
@@ -253,7 +254,8 @@ std::vector<PoldiPeak_sptr> PoldiPeakSearch::getPeaks(const MantidVec::const_ite
  */
 double PoldiPeakSearch::getFWHMEstimate(const MantidVec::const_iterator &baseListStart,
                                         const MantidVec::const_iterator &baseListEnd,
-                                        MantidVec::const_iterator peakPosition, const MantidVec &xData) const {
+                                        MantidVec::const_iterator peakPosition,
+                                        std::span<double const> const xData) const {
   size_t peakPositionIndex = std::distance(baseListStart, peakPosition);
   double halfPeakIntensity = *peakPosition / 2.0;
 
@@ -286,7 +288,7 @@ double PoldiPeakSearch::getFWHMEstimate(const MantidVec::const_iterator &baseLis
  * @param error :: Error that is set on the workspace.
  */
 void PoldiPeakSearch::setErrorsOnWorkspace(const Workspace2D_sptr &correlationWorkspace, double error) const {
-  MantidVec &errors = correlationWorkspace->dataE(0);
+  auto &errors = correlationWorkspace->mutableE(0);
 
   std::fill(errors.begin(), errors.end(), error);
 }
@@ -415,7 +417,7 @@ double PoldiPeakSearch::getMedianFromSortedVector(MantidVec::const_iterator begi
 /** Calculates Sn as estimator of scale for given vector
  *
  * This method implements a naive calculation of Sn, as defined by Rousseeuw
- *and Croux (http://dx.doi.org/10.2307%2F2291267).
+ *and Croux (https://doi.org/10.2307/2291267).
  * In contrast to standard deviation, this is more robust towards outliers.
  *
  * @param begin :: Beginning of vector.
@@ -531,7 +533,7 @@ void PoldiPeakSearch::exec() {
 
   g_log.information() << "   Parameters set.\n";
 
-  MantidVec summedNeighborCounts = getNeighborSums(correlatedCounts.rawData());
+  MantidVec summedNeighborCounts = getNeighborSums(correlatedCounts);
   g_log.information() << "   Neighboring counts summed, contains " << summedNeighborCounts.size() << " data points.\n";
 
   std::list<MantidVec::const_iterator> peakPositionsSummed =
@@ -552,8 +554,8 @@ void PoldiPeakSearch::exec() {
    * original count data,
    * along with the Q-values.
    */
-  std::vector<PoldiPeak_sptr> peakCoordinates = getPeaks(correlatedCounts.cbegin(), correlatedCounts.cend(),
-                                                         peakPositionsCorrelation, correlationQValues.rawData(), xUnit);
+  std::vector<PoldiPeak_sptr> peakCoordinates =
+      getPeaks(correlatedCounts.cbegin(), correlatedCounts.cend(), peakPositionsCorrelation, correlationQValues, xUnit);
   g_log.information() << "   Extracted peak positions in Q and intensity guesses.\n";
 
   UncertainValue backgroundWithSigma = getBackgroundWithSigma(peakPositionsCorrelation, correlatedCounts.rawData());

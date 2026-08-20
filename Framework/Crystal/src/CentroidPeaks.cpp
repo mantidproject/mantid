@@ -105,7 +105,7 @@ void CentroidPeaks::integrate() {
     size_t workspaceIndex = detidIterator->second;
     double TOFPeakd = peak.getTOF();
     const auto &X = m_inWS->x(workspaceIndex);
-    int chan = Kernel::VectorHelper::getBinIndex(X.rawData(), TOFPeakd);
+    int chan = Kernel::VectorHelper::getBinIndex(X, TOFPeakd);
     std::string bankName = peak.getBankName();
     int nCols = 0, nRows = 0;
     sizeBanks(bankName, nCols, nRows);

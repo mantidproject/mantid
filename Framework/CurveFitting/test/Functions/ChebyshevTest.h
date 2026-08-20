@@ -95,9 +95,9 @@ public:
     cheb.setAttributeValue("EndX", 10.0);
 
     Mantid::API::MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 21, 21);
-    Mantid::MantidVec &X = ws->dataX(0);
+    auto &X = ws->mutableX(0);
 
-    Mantid::API::FunctionDomain1DVector domain(X);
+    Mantid::API::FunctionDomain1DVector domain(X.rawData());
     Mantid::API::FunctionValues values(domain);
 
     cheb.function(domain, values);

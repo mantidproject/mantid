@@ -70,7 +70,7 @@ public:
   const std::string id(void) const override { return ""; }
   void init(const size_t &, const size_t &, const size_t &) override {}
   void init(const HistogramData::Histogram &) override {}
-  void generateHistogram(const std::size_t, const MantidVec &, MantidVec &, MantidVec &, bool) const override {}
+  void generateHistogram(const std::size_t, std::span<double const>, MantidVec &, MantidVec &, bool) const override {}
 
   void clearFileBacked(bool) override {};
   ITableWorkspace_sptr makeBoxTable(size_t /* start*/, size_t /*num*/) override { return ITableWorkspace_sptr(); }
@@ -1197,8 +1197,8 @@ public:
 
     MatrixWorkspace_sptr ws(new CompositeFunctionTest_MocMatrixWorkspace(10, 11, 10));
 
-    MantidVec &x = ws->dataX(3);
-    MantidVec &y = ws->dataY(3);
+    auto &x = ws->mutableX(3);
+    auto &y = ws->mutableY(3);
     for (size_t i = 0; i < y.size(); ++i) {
       x[i] = 0.1 * static_cast<double>(i);
       y[i] = static_cast<double>(i);

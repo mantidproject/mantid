@@ -20,12 +20,14 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidQtWidgets/Common/QSettingsChangeAware.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
 #include "Reduction/ISISEnergyTransferPresenter.h"
 #include "Transmission.h"
 
 #include <QDir>
 #include <QMessageBox>
+#include <QSettings>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -37,11 +39,33 @@ Mantid::Kernel::Logger g_log("DataReduction");
 }
 
 namespace MantidQt::CustomInterfaces {
+
+DataReductionSettings::DataReductionSettings(QString instrumentName, QString analyserName, QString reflectionName)
+    : m_instrumentName(std::move(instrumentName)), m_analyserName(std::move(analyserName)),
+      m_reflectionName(std::move(reflectionName)) {}
+
+const QString &DataReductionSettings::instrumentName() const { return m_instrumentName; }
+
+const QString &DataReductionSettings::analyserName() const { return m_analyserName; }
+
+const QString &DataReductionSettings::reflectionName() const { return m_reflectionName; }
+
+DataReductionSettings DataReductionSettings::readSettings(const QSettings &settings) {
+  return DataReductionSettings(settings.value("instrument-name", "").toString(),
+                               settings.value("analyser-name", "").toString(),
+                               settings.value("reflection-name", "").toString());
+}
+
+void DataReductionSettings::saveSettings(QSettings &settings, const DataReductionSettings &values) {
+  MantidQt::MantidWidgets::QSettingsChangeAware writer(settings);
+  writer.setValue("instrument-name", values.instrumentName());
+  writer.setValue("analyser-name", values.analyserName());
+  writer.setValue("reflection-name", values.reflectionName());
+}
 DECLARE_SUBWINDOW(DataReduction)
 
 DataReduction::DataReduction(QWidget *parent)
-    : InelasticInterface(parent), m_settingsGroup("CustomInterfaces/DataReduction"),
-      m_changeObserver(*this, &DataReduction::handleConfigChange), m_ipfFilename(""),
+    : InelasticInterface(parent), m_changeObserver(*this, &DataReduction::handleConfigChange), m_ipfFilename(""),
       m_idfDirectory(Mantid::Kernel::ConfigService::Instance().getString("instrumentDefinition.directory")),
       m_instDetails() {
   Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
@@ -49,7 +73,10 @@ DataReduction::DataReduction(QWidget *parent)
 
 DataReduction::~DataReduction() {
   Mantid::Kernel::ConfigService::Instance().removeObserver(m_changeObserver);
-  saveSettings();
+  QSettings settings;
+  settings.beginGroup("CustomInterfaces/DataReduction");
+  DataReductionSettings::saveSettings(settings, captureSettings());
+  settings.endGroup();
 }
 
 std::string DataReduction::documentationPage() const { return "Indirect Data Reduction"; }
@@ -91,7 +118,11 @@ void DataReduction::initLayout() {
   filterUiForFacility(QString::fromStdString(facility.name()));
 
   // Update the instrument configuration across the UI
-  readSettings();
+  updateDirectories();
+  QSettings settings;
+  settings.beginGroup("CustomInterfaces/DataReduction");
+  restoreSettings(DataReductionSettings::readSettings(settings));
+  settings.endGroup();
   m_uiForm.iicInstrumentConfiguration->updateInstrumentConfigurations(
       m_uiForm.iicInstrumentConfiguration->getInstrumentName());
 
@@ -113,8 +144,11 @@ void DataReduction::applySettings(std::map<std::string, QVariant> const &setting
  * Python scripts are located here.
  */
 void DataReduction::initLocalPython() {
-  // select starting instrument
-  readSettings();
+  // Select the starting instrument once Python-backed initialization is available.
+  QSettings settings;
+  settings.beginGroup("CustomInterfaces/DataReduction");
+  restoreSettings(DataReductionSettings::readSettings(settings));
+  settings.endGroup();
 }
 
 /**
@@ -343,7 +377,7 @@ void DataReduction::handleConfigChange(Mantid::Kernel::ConfigValChangeNotificati
   std::string value = pNf->curValue();
 
   if (key == "datasearch.directories" || key == "defaultsave.directory") {
-    readSettings();
+    updateDirectories();
   } else if (key == "default.facility") {
     QString facility = QString::fromStdString(value);
 
@@ -355,54 +389,27 @@ void DataReduction::handleConfigChange(Mantid::Kernel::ConfigValChangeNotificati
       m_uiForm.iicInstrumentConfiguration->getInstrumentName());
 }
 
-/**
- * Read Qt settings for the interface.
- */
-void DataReduction::readSettings() {
-  // Set values of m_dataDir and m_saveDir
+void DataReduction::updateDirectories() {
   m_dataDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories"));
   m_dataDir.replace(" ", "");
-  if (m_dataDir.length() > 0)
+  if (!m_dataDir.isEmpty())
     m_dataDir = m_dataDir.split(";", Qt::SkipEmptyParts)[0];
   m_saveDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
-
-  QSettings settings;
-
-  // Load the last used instrument
-  settings.beginGroup(m_settingsGroup);
-
-  auto const instrumentName = settings.value("instrument-name", "").toString();
-  if (!instrumentName.isEmpty())
-    m_uiForm.iicInstrumentConfiguration->setInstrument(instrumentName);
-
-  auto const analyserName = settings.value("analyser-name", "").toString();
-  if (!analyserName.isEmpty())
-    m_uiForm.iicInstrumentConfiguration->setAnalyser(analyserName);
-
-  auto const reflectionName = settings.value("reflection-name", "").toString();
-  if (!reflectionName.isEmpty())
-    m_uiForm.iicInstrumentConfiguration->setReflection(reflectionName);
-
-  settings.endGroup();
 }
 
-/**
- * Save settings to a persistent storage.
- */
-void DataReduction::saveSettings() {
-  QSettings settings;
-  settings.beginGroup(m_settingsGroup);
+void DataReduction::restoreSettings(const DataReductionSettings &settings) {
+  if (!settings.instrumentName().isEmpty())
+    m_uiForm.iicInstrumentConfiguration->setInstrument(settings.instrumentName());
+  if (!settings.analyserName().isEmpty())
+    m_uiForm.iicInstrumentConfiguration->setAnalyser(settings.analyserName());
+  if (!settings.reflectionName().isEmpty())
+    m_uiForm.iicInstrumentConfiguration->setReflection(settings.reflectionName());
+}
 
-  QString instrumentName = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
-  settings.setValue("instrument-name", instrumentName);
-
-  QString analyserName = m_uiForm.iicInstrumentConfiguration->getAnalyserName();
-  settings.setValue("analyser-name", analyserName);
-
-  QString reflectionName = m_uiForm.iicInstrumentConfiguration->getReflectionName();
-  settings.setValue("reflection-name", reflectionName);
-
-  settings.endGroup();
+DataReductionSettings DataReduction::captureSettings() const {
+  return DataReductionSettings(m_uiForm.iicInstrumentConfiguration->getInstrumentName(),
+                               m_uiForm.iicInstrumentConfiguration->getAnalyserName(),
+                               m_uiForm.iicInstrumentConfiguration->getReflectionName());
 }
 
 /**

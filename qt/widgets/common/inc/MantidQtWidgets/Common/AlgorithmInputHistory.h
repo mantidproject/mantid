@@ -18,10 +18,25 @@
 namespace MantidQt {
 namespace API {
 
+class EXPORT_OPT_MANTIDQT_COMMON AlgorithmInputHistorySettings {
+public:
+  using InputHistory = QHash<QString, QHash<QString, QString>>;
+
+  AlgorithmInputHistorySettings(InputHistory lastInput = {}, QString previousDirectory = {});
+
+  [[nodiscard]] InputHistory const &lastInput() const;
+  [[nodiscard]] QString const &previousDirectory() const;
+
+private:
+  InputHistory m_lastInput;
+  QString m_previousDirectory;
+};
+
 /** This abstract class deals with the loading and saving of previous algorithm
     property values to/from MantidPlot's QSettings.
 */
-class EXPORT_OPT_MANTIDQT_COMMON AbstractAlgorithmInputHistory : public MantidWidgets::Configurable {
+class EXPORT_OPT_MANTIDQT_COMMON AbstractAlgorithmInputHistory
+    : public MantidWidgets::Configurable<AlgorithmInputHistorySettings> {
 public:
   AbstractAlgorithmInputHistory(const AbstractAlgorithmInputHistory &) = delete;
   AbstractAlgorithmInputHistory &operator=(const AbstractAlgorithmInputHistory &) = delete;
@@ -49,11 +64,14 @@ public:
   /// Save the values stored here to persistent storage
   void save() const;
 
-  /// @copydoc MantidWidgets::Configurable::readSettings
-  void readSettings(const QSettings &storage) override;
-
-  /// @copydoc MantidWidgets::Configurable::writeSettings
-  void writeSettings(QSettings &storage) const override;
+  /// Query persistent storage without changing the history.
+  [[nodiscard]] AlgorithmInputHistorySettings readSettings(const QSettings &storage) const;
+  /// Apply an already-read snapshot without persistent I/O.
+  void restoreSettings(const AlgorithmInputHistorySettings &settings) override;
+  /// Capture current history without persistent I/O.
+  [[nodiscard]] AlgorithmInputHistorySettings captureSettings() const override;
+  /// Persist an explicit snapshot.
+  void saveSettings(QSettings &storage, const AlgorithmInputHistorySettings &settings) const;
 
 protected:
   /// Constructor
@@ -61,7 +79,7 @@ protected:
 
 private:
   /// Load any values that are available from persistent storage
-  void load();
+  void initializeSettings();
 
   /// A map indexing the algorithm name and a list of property name:value pairs
   QHash<QString, QHash<QString, QString>> m_lastInput;

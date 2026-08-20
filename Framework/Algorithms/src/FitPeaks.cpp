@@ -1782,9 +1782,9 @@ bool FitPeaks::fitBackground(const size_t &ws_index, const std::pair<double, dou
   // find out how to fit background
   const auto histogram = m_inputMatrixWS->histogram(ws_index);
   const auto &points = histogram.points();
-  size_t start_index = findXIndex(points.rawData(), fit_window.first);
-  size_t expected_peak_index = findXIndex(points.rawData(), expected_peak_pos, start_index);
-  size_t stop_index = findXIndex(points.rawData(), fit_window.second, expected_peak_index);
+  size_t start_index = findXIndex(points, fit_window.first);
+  size_t expected_peak_index = findXIndex(points, expected_peak_pos, start_index);
+  size_t stop_index = findXIndex(points, fit_window.second, expected_peak_index);
 
   // treat 5 as a magic number - TODO explain why
   bool good_fit(false);
@@ -2312,7 +2312,7 @@ void FitPeaks::processOutputs(std::vector<std::shared_ptr<FitPeaksAlgorithm::Pea
  */
 double FitPeaks::numberCounts(size_t iws) {
   const Histogram histogram = m_inputMatrixWS->histogram(iws);
-  const auto &vec_y = histogram.y().rawData();
+  const auto &vec_y = histogram.y();
   double total = std::accumulate(vec_y.begin(), vec_y.end(), 0.);
   return total;
 }
@@ -2396,8 +2396,8 @@ void FitPeaks::getRangeData(size_t iws, const std::pair<double, double> &range, 
 
   size_t num_datapoints = m_inputMatrixWS->isHistogramData() ? num_elements_x - 1 : num_elements_x;
 
-  const auto &orig_y = histogram.y().rawData();
-  const auto &orig_e = histogram.e().rawData();
+  const auto &orig_y = histogram.y();
+  const auto &orig_e = histogram.e();
   vec_y.resize(num_datapoints);
   vec_e.resize(num_datapoints);
   std::copy(orig_y.begin() + left_index, orig_y.begin() + left_index + num_datapoints, vec_y.begin());

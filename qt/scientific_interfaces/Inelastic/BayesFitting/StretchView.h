@@ -13,6 +13,7 @@
 #include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
 #include "StretchData.h"
 #include "ui_Stretch.h"
+#include <MantidQtWidgets/Common/FileFinderWidget.h>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -33,7 +34,8 @@ public:
   virtual ~IStretchView() = default;
 
   virtual void subscribePresenter(IStretchViewSubscriber *presenter) = 0;
-  virtual void loadSettings(const QSettings &settings) = 0;
+  /// Restore widget state from an immutable settings snapshot.
+  virtual void restoreSettings(const API::FileFinderSettings &settings) = 0;
   virtual void applySettings(std::map<std::string, QVariant> const &settings) = 0;
   virtual void validateUserInput(IUserInputValidator *validator) const = 0;
 
@@ -69,7 +71,7 @@ public:
   ~StretchView() override = default;
 
   void subscribePresenter(IStretchViewSubscriber *presenter) override;
-  void loadSettings(const QSettings &settings) override;
+  void restoreSettings(const API::FileFinderSettings &settings) override;
   void applySettings(std::map<std::string, QVariant> const &settings) override;
   void validateUserInput(IUserInputValidator *validator) const override;
 

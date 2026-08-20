@@ -11,7 +11,7 @@ from unittest.mock import call, Mock, patch
 
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.testing.strict_mock import StrictMock
-from workbench.widgets.about.presenter import AboutPresenter
+from workbench.widgets.about.presenter import AboutPresenter, AboutSettings
 
 
 class MockInstrument(object):
@@ -122,6 +122,70 @@ class AboutPresenterTest(TestCase):
         MockConfigService.getString.assert_has_calls([call(AboutPresenter.FACILITY), call(AboutPresenter.INSTRUMENT)])
         MockConfigService.getFacility.assert_has_calls([call("FACILITY1")])
         MockConfigService.getInstrument.assert_has_calls([call("FACILITY1")])
+
+    def test_read_settings_returns_snapshot_without_writing(self):
+        settings = Mock()
+        settings.value.side_effect = [1, "6.13"]
+
+        snapshot = AboutPresenter.readSettings(settings)
+
+        self.assertEqual(AboutSettings(1, "6.13"), snapshot)
+        settings.setValue.assert_not_called()
+        settings.beginGroup.assert_called_once_with(AboutPresenter.DO_NOT_SHOW_GROUP)
+        settings.endGroup.assert_called_once_with()
+
+    def test_save_settings_writes_an_explicit_snapshot(self):
+        settings = Mock()
+
+        AboutPresenter.saveSettings(settings, AboutSettings(1, "6.13"))
+
+        settings.setValue.assert_has_calls([call(AboutPresenter.DO_NOT_SHOW, 1), call(AboutPresenter.PREVIOUS_VERSION, "6.13")])
+
+    def test_unchanged_settings_do_not_construct_or_write_qsettings(self):
+        presenter = AboutPresenter.__new__(AboutPresenter)
+        presenter._saved_settings = AboutSettings(1, "6.13")
+
+        with patch(self.QSETTINGS_CLASSPATH) as qsettings, patch.object(AboutPresenter, "saveSettings") as save_settings:
+            changed = presenter._save_settings_if_changed(AboutSettings(1, "6.13"))
+
+        self.assertFalse(changed)
+        qsettings.assert_not_called()
+        save_settings.assert_not_called()
+
+    def test_changed_settings_are_written_and_become_the_new_baseline(self):
+        presenter = AboutPresenter.__new__(AboutPresenter)
+        presenter._saved_settings = AboutSettings(1, "6.13")
+        changed_settings = AboutSettings(0, "6.14")
+
+        with patch(self.QSETTINGS_CLASSPATH) as qsettings, patch.object(AboutPresenter, "saveSettings") as save_settings:
+            changed = presenter._save_settings_if_changed(changed_settings)
+
+        self.assertTrue(changed)
+        save_settings.assert_called_once_with(qsettings.return_value, changed_settings)
+        self.assertEqual(changed_settings, presenter._saved_settings)
+
+    def test_unchanged_checkbox_state_does_not_write_qsettings(self):
+        presenter = AboutPresenter.__new__(AboutPresenter)
+        presenter._saved_settings = AboutSettings(1, "6.13")
+
+        with patch(self.QSETTINGS_CLASSPATH) as qsettings:
+            presenter.action_do_not_show_until_next_release(2)
+
+        qsettings.assert_not_called()
+
+    def test_closing_with_unchanged_settings_does_not_write_qsettings(self):
+        presenter = AboutPresenter.__new__(AboutPresenter)
+        presenter._saved_settings = AboutSettings(1, "6.13")
+        presenter.captureSettings = Mock(return_value=presenter._saved_settings)
+        presenter.store_facility = Mock()
+        presenter.action_instrument_changed = Mock()
+        presenter.view = Mock()
+        presenter.parent = Mock()
+
+        with patch(self.QSETTINGS_CLASSPATH) as qsettings, patch(self.CONFIG_SERVICE_CLASSPATH):
+            presenter.save_on_closing()
+
+        qsettings.assert_not_called()
 
     def assert_connected_once(self, owner, signal):
         self.assertEqual(1, owner.receivers(signal))

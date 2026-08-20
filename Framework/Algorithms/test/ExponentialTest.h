@@ -87,22 +87,22 @@ private:
   void checkData(const MatrixWorkspace_sptr &work_in1, const MatrixWorkspace_sptr &work_out1) {
 
     for (size_t i = 0; i < work_out1->size(); i++) {
-      double sig1 = work_in1->dataY(i / work_in1->blocksize())[i % work_in1->blocksize()];
-      double sig3 = work_out1->dataY(i / work_in1->blocksize())[i % work_in1->blocksize()];
-      TS_ASSERT_DELTA(work_in1->dataX(i / work_in1->blocksize())[i % work_in1->blocksize()],
-                      work_out1->dataX(i / work_in1->blocksize())[i % work_in1->blocksize()], 1.e-10);
+      double sig1 = work_in1->y(i / work_in1->blocksize())[i % work_in1->blocksize()];
+      double sig3 = work_out1->y(i / work_in1->blocksize())[i % work_in1->blocksize()];
+      TS_ASSERT_DELTA(work_in1->x(i / work_in1->blocksize())[i % work_in1->blocksize()],
+                      work_out1->x(i / work_in1->blocksize())[i % work_in1->blocksize()], 1.e-10);
       double expsig3 = exp(sig1);
       TS_ASSERT_DELTA(expsig3, sig3, 1e-10 * sig3);
-      double err1 = work_in1->dataE(i / work_in1->blocksize())[i % work_in1->blocksize()];
+      double err1 = work_in1->e(i / work_in1->blocksize())[i % work_in1->blocksize()];
       double err3 = err1 * expsig3;
-      TS_ASSERT_DELTA(err3, work_out1->dataE(i / work_in1->blocksize())[i % work_in1->blocksize()], 0.0001);
+      TS_ASSERT_DELTA(err3, work_out1->e(i / work_in1->blocksize())[i % work_in1->blocksize()], 0.0001);
     }
   }
   // loopOrientation 0=Horizontal, 1=Vertical
   void setError(const MatrixWorkspace_sptr &work_in1) {
 
     for (size_t i = 0; i < work_in1->size(); i++) {
-      double sig1 = work_in1->dataY(i / work_in1->blocksize())[i % work_in1->blocksize()];
+      double sig1 = work_in1->y(i / work_in1->blocksize())[i % work_in1->blocksize()];
       work_in1->mutableE(i / work_in1->blocksize())[i % work_in1->blocksize()] = sqrt(sig1);
     }
   }

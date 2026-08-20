@@ -85,13 +85,13 @@ H5::DSetCreatPropList setCompression(const size_t rank, const hsize_t *chunkDims
  */
 template <typename T> class QxExtractor {
 public:
-  T *operator()(const MatrixWorkspace_sptr &ws, size_t index) {
+  T const *operator()(const MatrixWorkspace_sptr &ws, size_t index) {
     if (ws->isHistogramData()) {
       qxPointData.clear();
-      VectorHelper::convertToBinCentre(ws->dataX(index), qxPointData);
+      VectorHelper::convertToBinCentre(ws->x(index), qxPointData);
       return qxPointData.data();
     }
-    return ws->dataX(index).data();
+    return ws->x(index).rawData().data();
   }
 
   std::vector<T> qxPointData;
@@ -111,7 +111,7 @@ public:
     const double value = isPointData ? m_spectrumAxisValues[index]
                                      : (m_spectrumAxisValues[index + 1] + m_spectrumAxisValues[index]) / 2.0;
 
-    Mantid::MantidVec tempVec(m_workspace->dataY(index).size(), value);
+    Mantid::MantidVec tempVec(m_workspace->y(index).size(), value);
     m_currentAxisValues.swap(tempVec);
     return m_currentAxisValues.data();
   }
@@ -138,9 +138,9 @@ public:
   explicit WorkspaceGroupDataExtractor(const WorkspaceGroup_sptr &workspace, bool extractError = false)
       : m_workspace(workspace), m_extractError(extractError) {}
 
-  T *operator()(size_t groupIndex, size_t spectraIndex = 0) {
+  T const *operator()(size_t groupIndex, size_t spectraIndex = 0) {
     const auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(m_workspace->getItem(groupIndex));
-    return m_extractError ? ws->dataE(spectraIndex).data() : ws->dataY(spectraIndex).data();
+    return m_extractError ? ws->e(spectraIndex).rawData().data() : ws->y(spectraIndex).rawData().data();
   }
 
   void setExtractErrors(bool extractError) { m_extractError = extractError; }
@@ -759,14 +759,14 @@ void addData2D(H5::Group &data, const MatrixWorkspace_sptr &workspace) {
   // Get 2D I data and store it
   auto iAttributes = prepareUnitAttributes(workspace);
 
-  auto iExtractor = [](const MatrixWorkspace_sptr &ws, size_t index) { return ws->dataY(index).data(); };
+  auto iExtractor = [](const MatrixWorkspace_sptr &ws, size_t index) { return ws->y(index).rawData().data(); };
   write2DWorkspace(data, workspace, sasDataI, iExtractor, iAttributes);
 
   // Get 2D Idev data and store it
   AttrMap eAttributes;
   eAttributes.insert(std::make_pair(sasUnitAttr, iAttributes[sasUnitAttr])); // same units as intensity
 
-  auto iDevExtractor = [](const MatrixWorkspace_sptr &ws, size_t index) { return ws->dataE(index).data(); };
+  auto iDevExtractor = [](const MatrixWorkspace_sptr &ws, size_t index) { return ws->e(index).rawData().data(); };
   write2DWorkspace(data, workspace, sasDataIdev, iDevExtractor, eAttributes);
 }
 

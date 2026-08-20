@@ -1,4 +1,4 @@
-Mantid is a C++20 and Python 3.12 repository with a Qt GUI frontend.
+Mantid is a C++20 and Python 3.13 repository with a Qt GUI frontend.
 It is configured with CMake and uses pixi/conda for dependencies.
 The project provides tools for processing materials-science data from neutron scattering, muon spectroscopy, and simulation.
 

@@ -63,14 +63,14 @@ public:
     // Should be 2584 for file LOQ48127.RAW
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 8);
     // Check two X vectors are the same
-    TS_ASSERT((output2D->dataX(2)) == (output2D->dataX(6)));
+    TS_ASSERT((output2D->x(2)) == (output2D->x(6)));
     // Check two Y arrays have the same number of elements
-    TS_ASSERT_EQUALS(output2D->dataY(2).size(), output2D->dataY(6).size());
+    TS_ASSERT_EQUALS(output2D->y(2).size(), output2D->y(6).size());
 
     // Check one particular value
-    TS_ASSERT_EQUALS(output2D->dataY(3)[0], 0.);
+    TS_ASSERT_EQUALS(output2D->y(3)[0], 0.);
     // Check that the error on that value is correct
-    TS_ASSERT_EQUALS(output2D->dataE(2)[0], std::sqrt(output2D->dataY(2)[0]));
+    TS_ASSERT_EQUALS(output2D->e(2)[0], std::sqrt(output2D->y(2)[0]));
 
     // Check the unit has been set correctly
     TS_ASSERT_EQUALS(output2D->getAxis(0)->unit()->unitID(), "TOF")
@@ -122,7 +122,7 @@ public:
     MatrixWorkspace_sptr outsptr2;
     TS_ASSERT_THROWS_NOTHING(outsptr2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>((*++itr)));
 
-    TS_ASSERT_EQUALS(outsptr1->dataX(0), outsptr2->dataX(0))
+    TS_ASSERT_EQUALS(outsptr1->x(0), outsptr2->x(0))
 
     TS_ASSERT_EQUALS(&(outsptr1->sample()), &(outsptr2->sample()))
     TS_ASSERT_DIFFERS(&(outsptr1->run()), &(outsptr2->run()))

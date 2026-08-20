@@ -113,7 +113,7 @@ void RefinePowderInstrumentParameters3::exec() {
   setFunctionParameterValues(m_positionFunc, m_profileParameters);
 
   // b) Generate some global useful value and Calculate starting chi^2
-  API::FunctionDomain1DVector domain(m_dataWS->x(m_wsIndex).rawData());
+  API::FunctionDomain1DVector domain(m_dataWS->x(m_wsIndex));
   API::FunctionValues rawvalues(domain);
   m_positionFunc->function(domain, rawvalues);
 
@@ -744,7 +744,7 @@ double RefinePowderInstrumentParameters3::calculateFunction(const map<string, Pa
     setFunctionParameterValues(m_positionFunc, parammap);
 
   // 2. Calculate
-  const auto &vecX = m_dataWS->x(m_wsIndex).rawData();
+  const auto &vecX = m_dataWS->x(m_wsIndex);
   //    Check
   if (vecY.size() != vecX.size())
     throw runtime_error("vecY must be initialized with proper size!");
@@ -752,7 +752,7 @@ double RefinePowderInstrumentParameters3::calculateFunction(const map<string, Pa
   m_positionFunc->function1D(vecY, vecX);
 
   // 3. Calcualte error
-  double chisq = calculateFunctionChiSquare(vecY, m_dataWS->y(m_wsIndex).rawData(), m_dataWS->e(m_wsIndex).rawData());
+  double chisq = calculateFunctionChiSquare(vecY, m_dataWS->y(m_wsIndex), m_dataWS->e(m_wsIndex));
 
   return chisq;
 }
@@ -760,8 +760,8 @@ double RefinePowderInstrumentParameters3::calculateFunction(const map<string, Pa
 //----------------------------------------------------------------------------------------------
 /** Calculate Chi^2
  */
-double calculateFunctionChiSquare(const vector<double> &modelY, const vector<double> &dataY,
-                                  const vector<double> &dataE) {
+double calculateFunctionChiSquare(std::span<double const> const modelY, std::span<double const> const dataY,
+                                  std::span<double const> const dataE) {
   // 1. Check
   if (modelY.size() != dataY.size() || dataY.size() != dataE.size())
     throw runtime_error("Input model, data and error have different size.");
@@ -1068,7 +1068,7 @@ Workspace2D_sptr RefinePowderInstrumentParameters3::genOutputWorkspace(const Fun
   outws->mutableY(4) = dataY - rawvalues.toVector();
 
   // 5. Zscore
-  vector<double> zscore = Kernel::getZscore(outws->y(2).rawData());
+  vector<double> zscore = Kernel::getZscore(outws->y(2));
   outws->mutableY(5) = zscore;
 
   return outws;

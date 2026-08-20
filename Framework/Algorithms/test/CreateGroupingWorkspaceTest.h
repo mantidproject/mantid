@@ -41,9 +41,9 @@ public:
 
     TS_ASSERT_EQUALS(ws->blocksize(), 1);
     // All zero.
-    TS_ASSERT_EQUALS(ws->dataY(0)[0], 0.0);
-    TS_ASSERT_EQUALS(ws->dataY(100)[0], 0.0);
-    TS_ASSERT_EQUALS(ws->dataY(10000)[0], 0.0);
+    TS_ASSERT_EQUALS(ws->y(0)[0], 0.0);
+    TS_ASSERT_EQUALS(ws->y(100)[0], 0.0);
+    TS_ASSERT_EQUALS(ws->y(10000)[0], 0.0);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
@@ -104,11 +104,11 @@ public:
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 51200);
     TS_ASSERT_EQUALS(ws->blocksize(), 1);
     for (int i = 1; i <= 4; ++i) {
-      TS_ASSERT_EQUALS(ws->dataY((i - 1) * 1024)[0], double(i) * 1.0);
-      TS_ASSERT_EQUALS(ws->dataY((i - 1) * 1024 + 1023)[0], double(i) * 1.0);
+      TS_ASSERT_EQUALS(ws->y((i - 1) * 1024)[0], double(i) * 1.0);
+      TS_ASSERT_EQUALS(ws->y((i - 1) * 1024 + 1023)[0], double(i) * 1.0);
     }
     // The rest is zero
-    TS_ASSERT_EQUALS(ws->dataY(5 * 1024)[0], 0.0);
+    TS_ASSERT_EQUALS(ws->y(5 * 1024)[0], 0.0);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
@@ -183,15 +183,15 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     const auto groupingWorkspace = ads.retrieveWS<GroupingWorkspace>(outputWS);
-    TS_ASSERT_DELTA(groupingWorkspace->dataY(0)[0], 1.0, 0.000001);
-    TS_ASSERT_DELTA(groupingWorkspace->dataY(1)[0], 1.0, 0.000001);
-    TS_ASSERT_DELTA(groupingWorkspace->dataY(2)[0], 1.0, 0.000001);
-    TS_ASSERT_DELTA(groupingWorkspace->dataY(3)[0], 2.0, 0.000001);
-    TS_ASSERT_DELTA(groupingWorkspace->dataY(4)[0], 2.0, 0.000001);
-    TS_ASSERT_DELTA(groupingWorkspace->dataY(5)[0], 3.0, 0.000001);
-    TS_ASSERT_DELTA(groupingWorkspace->dataY(6)[0], 4.0, 0.000001);
-    TS_ASSERT_DELTA(groupingWorkspace->dataY(7)[0], 5.0, 0.000001);
-    TS_ASSERT_DELTA(groupingWorkspace->dataY(8)[0], 0.0, 0.000001);
+    TS_ASSERT_DELTA(groupingWorkspace->y(0)[0], 1.0, 0.000001);
+    TS_ASSERT_DELTA(groupingWorkspace->y(1)[0], 1.0, 0.000001);
+    TS_ASSERT_DELTA(groupingWorkspace->y(2)[0], 1.0, 0.000001);
+    TS_ASSERT_DELTA(groupingWorkspace->y(3)[0], 2.0, 0.000001);
+    TS_ASSERT_DELTA(groupingWorkspace->y(4)[0], 2.0, 0.000001);
+    TS_ASSERT_DELTA(groupingWorkspace->y(5)[0], 3.0, 0.000001);
+    TS_ASSERT_DELTA(groupingWorkspace->y(6)[0], 4.0, 0.000001);
+    TS_ASSERT_DELTA(groupingWorkspace->y(7)[0], 5.0, 0.000001);
+    TS_ASSERT_DELTA(groupingWorkspace->y(8)[0], 0.0, 0.000001);
 
     ads.remove(outputWS);
   }
@@ -261,7 +261,7 @@ public:
     TS_ASSERT_EQUALS(ws->blocksize(), 1);
     // Check one entry in each group
     for (int i = 0; i < 15; ++i) {
-      TS_ASSERT_EQUALS(ws->dataY(i * 65536)[0],
+      TS_ASSERT_EQUALS(ws->y(i * 65536)[0],
                        double(i + 1) * 1.0); // Groups start at 1.0
     }
   }

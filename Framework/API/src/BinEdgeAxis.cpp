@@ -31,6 +31,12 @@ BinEdgeAxis::BinEdgeAxis(const std::vector<double> &edges)
   m_values = edges;
 }
 
+BinEdgeAxis::BinEdgeAxis(std::span<double const> edges)
+    : NumericAxis() // default constructor
+{
+  m_values.assign(edges.begin(), edges.end());
+}
+
 /** Virtual constructor
  *  @param parentWorkspace :: The workspace is not used in this implementation
  *  @returns A pointer to a copy of the NumericAxis on which the method is

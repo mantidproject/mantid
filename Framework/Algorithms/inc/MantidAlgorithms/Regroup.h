@@ -13,6 +13,8 @@
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidAlgorithms/DllConfig.h"
 
+#include <span>
+
 namespace Mantid {
 namespace HistogramData {
 class HistogramX;
@@ -47,7 +49,7 @@ public:
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Transforms\\Rebin"; }
 
-  int newAxis(const std::vector<double> &params, const std::vector<double> &xold, std::vector<double> &xnew,
+  int newAxis(const std::vector<double> &params, std::span<double const> xold, std::vector<double> &xnew,
               std::vector<int> &xoldIndex);
 
 private:

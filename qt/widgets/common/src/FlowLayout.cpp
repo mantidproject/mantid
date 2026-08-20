@@ -128,19 +128,25 @@ int FlowLayout::doLayout(const QRect &rect, bool testOnly) const {
     int spaceY = verticalSpacing();
     if (spaceY == -1)
       spaceY = wid->style()->layoutSpacing(QSizePolicy::PushButton, QSizePolicy::PushButton, Qt::Vertical);
-    int nextX = x + item->sizeHint().width() + spaceX;
-    if (nextX - spaceX > effectiveRect.right() && lineHeight > 0) {
+    QSize size = item->sizeHint();
+#ifdef Q_OS_MACOS
+    if (size.height() <= 28)
+      size.setHeight(28);
+    lineHeight = size.height() / 2;
+#else
+    lineHeight = qMax(lineHeight, size.height());
+#endif
+    int nextX = x + size.width() + spaceX;
+    if (nextX - spaceX > effectiveRect.right()) {
       x = effectiveRect.x();
       y = y + lineHeight + spaceY;
-      nextX = x + item->sizeHint().width() + spaceX;
-      lineHeight = 0;
+      nextX = x + size.width() + spaceX;
     }
 
     if (!testOnly)
-      item->setGeometry(QRect(QPoint(x, y), item->sizeHint()));
+      item->setGeometry(QRect(QPoint(x, y), size));
 
     x = nextX;
-    lineHeight = qMax(lineHeight, item->sizeHint().height());
   }
   return y + lineHeight - rect.y() + bottom;
 }

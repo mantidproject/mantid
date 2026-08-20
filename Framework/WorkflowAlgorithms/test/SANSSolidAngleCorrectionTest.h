@@ -87,7 +87,7 @@ public:
     double ix = (int)((i - nmon) / 192);
     double r = sqrt(1.0 + 5.15 * 5.15 / 6000 / 6000 * ((ix - 16.0) * (ix - 16.0) + (iy - 95.0) * (iy - 95.0)));
     double corr = r * r * r;
-    double ratio = ws2d_out->dataY(130 + nmon)[0] / ws2d_in->dataY(130 + nmon)[0];
+    double ratio = ws2d_out->y(130 + nmon)[0] / ws2d_in->y(130 + nmon)[0];
 
     double tolerance(1e-03);
     TS_ASSERT_DELTA(ratio, corr, tolerance);

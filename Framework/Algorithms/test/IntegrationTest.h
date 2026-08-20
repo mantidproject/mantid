@@ -98,9 +98,9 @@ public:
     TS_ASSERT_EQUALS(max = output2D->getNumberHistograms(), 3);
     double yy[3] = {36, 51, 66};
     for (size_t i = 0; i < max; ++i) {
-      Mantid::MantidVec &x = output2D->dataX(i);
-      Mantid::MantidVec &y = output2D->dataY(i);
-      Mantid::MantidVec &e = output2D->dataE(i);
+      const auto &x = output2D->x(i);
+      const auto &y = output2D->y(i);
+      const auto &e = output2D->e(i);
 
       TS_ASSERT_EQUALS(x.size(), 2);
       TS_ASSERT_EQUALS(y.size(), 1);
@@ -135,11 +135,11 @@ public:
 
     Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 5);
-    TS_ASSERT_EQUALS(output2D->dataX(0)[0], 0);
-    TS_ASSERT_EQUALS(output2D->dataX(0)[1], 5);
-    TS_ASSERT_EQUALS(output2D->dataY(0)[0], 10);
-    TS_ASSERT_EQUALS(output2D->dataY(4)[0], 110);
-    TS_ASSERT_DELTA(output2D->dataE(2)[0], 7.746, 0.001);
+    TS_ASSERT_EQUALS(output2D->x(0)[0], 0);
+    TS_ASSERT_EQUALS(output2D->x(0)[1], 5);
+    TS_ASSERT_EQUALS(output2D->y(0)[0], 10);
+    TS_ASSERT_EQUALS(output2D->y(4)[0], 110);
+    TS_ASSERT_DELTA(output2D->e(2)[0], 7.746, 0.001);
   }
 
   void testRangeWithPartialBins() {
@@ -258,8 +258,8 @@ public:
 
     double tol = 1.e-5;
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), expectedNumHists);
-    TS_ASSERT_DELTA(outputWS->dataY(1)[0], expectedVals[0], tol);
-    TS_ASSERT_DELTA(outputWS->dataE(1)[0], expectedVals[1], tol);
+    TS_ASSERT_DELTA(outputWS->y(1)[0], expectedVals[0], tol);
+    TS_ASSERT_DELTA(outputWS->e(1)[0], expectedVals[1], tol);
 
     AnalysisDataService::Instance().remove(inName);
     AnalysisDataService::Instance().remove(outName);
@@ -350,12 +350,12 @@ public:
     TS_ASSERT_EQUALS(inWs->getNumberHistograms(), outWs->getNumberHistograms());
 
     if (checkRanges) {
-      TS_ASSERT_LESS_THAN_EQUALS(std::stod(rangeLower), outWs->dataX(0).front());
+      TS_ASSERT_LESS_THAN_EQUALS(std::stod(rangeLower), outWs->x(0).front());
 
-      TS_ASSERT_LESS_THAN_EQUALS(outWs->dataX(0).back(), std::stod(rangeUpper));
+      TS_ASSERT_LESS_THAN_EQUALS(outWs->x(0).back(), std::stod(rangeUpper));
     }
     // At last, check numerical results
-    TS_ASSERT_DELTA(outWs->dataY(0)[0], expectedVal, 1e-8);
+    TS_ASSERT_DELTA(outWs->y(0)[0], expectedVal, 1e-8);
   }
 
   void testProperHandlingOfIntegrationBoundaries() {
@@ -756,9 +756,9 @@ private:
     TS_ASSERT_EQUALS(max = output2D->getNumberHistograms(), 3);
 
     for (size_t i = 0; i < max; ++i) {
-      Mantid::MantidVec &x = output2D->dataX(i);
-      Mantid::MantidVec &y = output2D->dataY(i);
-      Mantid::MantidVec &e = output2D->dataE(i);
+      const auto &x = output2D->x(i);
+      const auto &y = output2D->y(i);
+      const auto &e = output2D->e(i);
 
       TS_ASSERT_EQUALS(x.size(), 2);
       TS_ASSERT_EQUALS(y.size(), 1);

@@ -7,6 +7,7 @@
 #pragma once
 
 #include "../DllConfig.h"
+#include "SettingsHelper.h"
 #include "SettingsModel.h"
 #include "SettingsView.h"
 
@@ -24,13 +25,17 @@ public:
   QWidget *getView();
   void subscribeParent(ISettings *parent);
 
-  void loadSettings();
+  /// Apply an immutable settings snapshot without persistent access.
+  void restoreSettings(const SettingsHelper::SpectroscopySettings &settings);
+  /// Capture current view state without persistent access.
+  [[nodiscard]] SettingsHelper::SpectroscopySettings captureSettings() const;
 
   void notifyOkClicked();
   void notifyApplyClicked();
   void notifyCancelClicked();
 
 private:
+  /// Persist the option values currently represented by the view.
   void saveSettings();
 
   void setApplyingChanges(bool applyingChanges);

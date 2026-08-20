@@ -321,9 +321,9 @@ class WeightedLeastSquaresTest(systemtesting.MantidSystemTest):
         # Custom code to create and run one or more test suites
         suite = unittest.TestSuite()
         # Add the tests for all the datasets
-        suite.addTest(unittest.makeSuite(TwoGaussPeaksEVSData, "test"))
-        suite.addTest(unittest.makeSuite(SineLikeMuonExperimentAsymmetry, "test"))
-        suite.addTest(unittest.makeSuite(VanadiumPatternFromENGINXSmoothing, "test"))
+        suite.addTest(unittest.defaultTestLoader.loadTestsFromTestCase(TwoGaussPeaksEVSData))
+        suite.addTest(unittest.defaultTestLoader.loadTestsFromTestCase(SineLikeMuonExperimentAsymmetry))
+        suite.addTest(unittest.defaultTestLoader.loadTestsFromTestCase(VanadiumPatternFromENGINXSmoothing))
 
         runner = unittest.TextTestRunner()
         # Run using either runner

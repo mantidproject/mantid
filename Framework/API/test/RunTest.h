@@ -801,7 +801,7 @@ public:
     a.addProperty(std::make_unique<ConcreteProperty>());
     const DblMatrix rotation_x{{1, 0, 0, 0, 0, -1, 0, 1, 0}}; // 90 degrees around x axis
     a.setGoniometer(Goniometer{rotation_x}, false /*do not use log angles*/);
-    a.storeHistogramBinBoundaries({1, 2, 3, 4});
+    a.storeHistogramBinBoundaries(std::vector<double>{1, 2, 3, 4});
     Run b{a};
     TS_ASSERT_EQUALS(a, b);
     TS_ASSERT(!(a != b));
@@ -812,9 +812,9 @@ public:
     a.addProperty(std::make_unique<ConcreteProperty>());
     DblMatrix rotation_x{{1, 0, 0, 0, 0, -1, 0, 1, 0}}; // 90 degrees around x axis
     a.setGoniometer(Goniometer{rotation_x}, false /*do not use log angles*/);
-    a.storeHistogramBinBoundaries({1, 2, 3, 4});
+    a.storeHistogramBinBoundaries(std::vector<double>{1, 2, 3, 4});
     Run b{a};
-    b.storeHistogramBinBoundaries({0, 2, 3, 4});
+    b.storeHistogramBinBoundaries(std::vector<double>{0, 2, 3, 4});
     TS_ASSERT_DIFFERS(a, b);
     TS_ASSERT(!(a == b));
   }
@@ -824,7 +824,7 @@ public:
     a.addProperty(std::make_unique<ConcreteProperty>());
     DblMatrix rotation_x{{1, 0, 0, 0, 0, -1, 0, 1, 0}}; // 90 degrees around x axis
     a.setGoniometer(Goniometer{rotation_x}, false /*do not use log angles*/);
-    a.storeHistogramBinBoundaries({1, 2, 3, 4});
+    a.storeHistogramBinBoundaries(std::vector<double>{1, 2, 3, 4});
     Run b{a};
     b.removeProperty("Test");
     TS_ASSERT_DIFFERS(a, b);
@@ -836,7 +836,7 @@ public:
     a.addProperty(std::make_unique<ConcreteProperty>());
     DblMatrix rotation_x{{1, 0, 0, 0, 0, -1, 0, 1, 0}}; // 90 degrees around x axis
     a.setGoniometer(Goniometer{rotation_x}, false /*do not use log angles*/);
-    a.storeHistogramBinBoundaries({1, 2, 3, 4});
+    a.storeHistogramBinBoundaries(std::vector<double>{1, 2, 3, 4});
     Run b{a};
     Mantid::Kernel::DblMatrix rotation_y{{0, 0, 1, 0, 1, 0, -1, 0, 0}}; // 90 degrees around y axis
     b.setGoniometer(Goniometer{rotation_y}, false /*do not use log angles*/);

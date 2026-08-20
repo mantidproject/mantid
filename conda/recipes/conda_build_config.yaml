@@ -24,7 +24,7 @@ c_stdlib_version:
   - '2022.*'                 # [win]
 
 python:
-  - '3.12.*'
+  - '3.13.*'
 
 # Aim to follow conda-forge
 libboost:
@@ -39,10 +39,6 @@ doxygen:
 
 eigen:
   - '5.*'
-
-# Not a primary dependency, but we pin it to avoid 2.18, which breaks button icons on Linux.
-fontconfig:
-  - '2.17.*'
 
 hdf4:
   - '4.2.*'

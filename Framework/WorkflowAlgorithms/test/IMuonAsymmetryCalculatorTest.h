@@ -614,9 +614,9 @@ private:
     MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspace(3, 3);
 
     for (size_t i = 0; i < ws->getNumberHistograms(); i++) {
-      auto &x = ws->dataX(i);
-      auto &y = ws->dataY(i);
-      auto &e = ws->dataE(i);
+      auto &x = ws->mutableX(i);
+      auto &y = ws->mutableY(i);
+      auto &e = ws->mutableE(i);
 
       const size_t numBins = y.size();
       for (size_t j = 0; j < numBins; j++) {

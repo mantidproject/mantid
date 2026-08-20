@@ -86,7 +86,7 @@ private:
     ExpectationSet expectations = EXPECT_CALL(*m_model, getFacility()).WillOnce(Return(facility));
     expectations += EXPECT_CALL(*m_view, setSelectedFacility(QString::fromStdString(facility))).Times(1);
 
-    m_presenter->loadSettings();
+    m_presenter->restoreSettings(SettingsHelper::SpectroscopySettings(false, true, false, {"flag"}));
   }
 
   void checkForSavingOfSettings() {

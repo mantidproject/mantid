@@ -1,0 +1,19 @@
+{
+  "problemMatcher": [
+    {
+      "owner": "msvc-problem-matcher",
+      "pattern": [
+        {
+          "regexp": "^(?:\\s+\\d+\\>)?(.*[\\\\/]mantid[\\\\/])(.+?)\\((\\d+),?(\\d+)?(?:,\\d+,\\d+)?\\)\\s*:\\s+(error|warning|info)\\s+(\\w{1,2}\\d+)\\s*:\\s*(.*)$",
+          "fromPath": 1,
+          "file": 2,
+          "line": 3,
+          "column": 4,
+          "severity": 5,
+          "code": 6,
+          "message": 7
+        }
+      ]
+    }
+  ]
+}

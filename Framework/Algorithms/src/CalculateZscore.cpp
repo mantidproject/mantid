@@ -91,8 +91,8 @@ void CalculateZscore::exec() {
     }
 
     // b) Calculate Zscore
-    auto &inpY = inpWS->y(wsindex).rawData();
-    auto &inpE = inpWS->e(wsindex).rawData();
+    auto &inpY = inpWS->y(wsindex);
+    auto &inpE = inpWS->e(wsindex);
 
     auto &histY = outWS->mutableY(i);
     auto &histE = outWS->mutableE(i);

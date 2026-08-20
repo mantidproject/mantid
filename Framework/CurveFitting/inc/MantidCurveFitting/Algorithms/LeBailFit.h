@@ -20,6 +20,8 @@
 
 #include <gsl/gsl_sf_erf.h>
 
+#include <span>
+
 namespace Mantid {
 namespace HistogramData {
 class HistogramX;
@@ -135,8 +137,9 @@ private:
 
   /// Work on Markov chain to 'solve' LeBail function
   void doMarkovChain(const std::map<std::string, Parameter> &parammap, const Mantid::HistogramData::HistogramX &vecX,
-                     const Mantid::HistogramData::HistogramY &vecPurePeak, const std::vector<double> &vecBkgd,
-                     size_t maxcycles, const Kernel::Rfactor &startR, int randomseed);
+                     const Mantid::HistogramData::HistogramY &vecPurePeak,
+                     const Mantid::HistogramData::HistogramY &vecBkgd, size_t maxcycles, const Kernel::Rfactor &startR,
+                     int randomseed);
 
   /// Set up Monte Carlo random walk strategy
   void setupBuiltInRandomWalkStrategy();
@@ -164,7 +167,7 @@ private:
   double limitProposedValueInBound(const Parameter &param, double newvalue, double direction, int choice);
 
   /// Book keep the (sopposed) best MC result
-  void bookKeepBestMCResult(const std::map<std::string, Parameter> &parammap, const std::vector<double> &bkgddata,
+  void bookKeepBestMCResult(const std::map<std::string, Parameter> &parammap, std::span<double const> bkgddata,
                             Kernel::Rfactor rfactor, size_t istep);
 
   /// Apply the value of parameters in the source to target

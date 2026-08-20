@@ -16,6 +16,8 @@
 #include <cmath>
 #include <gsl/gsl_sf_erf.h>
 
+#include <span>
+
 namespace Mantid {
 namespace CurveFitting {
 namespace Functions {
@@ -35,7 +37,7 @@ public:
   const std::string category() const override { return "General"; }
 
   /// Calculate function values
-  void function1D(std::vector<double> &out, const std::vector<double> &xValues) const;
+  void function1D(std::span<double> out, std::span<double const> xValues) const;
 
 protected:
   /// overwrite IFunction base class method, which declare function parameters

@@ -414,7 +414,7 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const {
   uint16_t nexpts = mdEventWS->getNumExperimentInfo();
   if (nexpts > 0) {
     ExperimentInfo_sptr expt = mdEventWS->getExperimentInfo(static_cast<uint16_t>(nexpts - 1));
-    expt->mutableRun().storeHistogramBinBoundaries(binBoundaries.rawData());
+    expt->mutableRun().storeHistogramBinBoundaries(binBoundaries);
   }
 }
 

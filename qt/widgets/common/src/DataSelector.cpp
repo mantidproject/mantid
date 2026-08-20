@@ -389,17 +389,19 @@ void DataSelector::setLoadBtnText(const QString &text) { m_uiForm.pbLoadFile->se
  */
 void DataSelector::setAlwaysLoadAsGroup(bool const loadAsGroup) { m_alwaysLoadAsGroup = loadAsGroup; }
 
-/**
- * Read settings from the given group
- * @param group :: The name of the group key to retrieve data from
- */
-void DataSelector::readSettings(const QString &group) { m_uiForm.rfFileInput->readSettings(group); }
+API::FileFinderSettings DataSelector::readSettings(const QSettings &settings) {
+  return API::FileFinderWidget::readSettings(settings);
+}
 
-/**
- * Save settings to the given group
- * @param group :: The name of the group key to save to
- */
-void DataSelector::saveSettings(const QString &group) { m_uiForm.rfFileInput->saveSettings(group); }
+void DataSelector::restoreSettings(const API::FileFinderSettings &settings) {
+  m_uiForm.rfFileInput->restoreSettings(settings);
+}
+
+API::FileFinderSettings DataSelector::captureSettings() const { return m_uiForm.rfFileInput->captureSettings(); }
+
+void DataSelector::saveSettings(QSettings &settings, const API::FileFinderSettings &values) const {
+  m_uiForm.rfFileInput->saveSettings(settings, values);
+}
 
 /**
  * Check if the load button will be shown on the interface

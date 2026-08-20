@@ -288,7 +288,7 @@ References
 #. H. H. Paalman, and C. J. Pings. *Numerical Evaluation of X‐Ray
    Absorption Factors for Cylindrical Samples and Annular Sample Cells*,
    Journal of Applied Physics **33.8** (1962) 2635–2639
-   `doi: 10.1063/1.1729034 <http://dx.doi.org/10.1063/1.1729034>`_
+   `doi: 10.1063/1.1729034 <https://doi.org/10.1063/1.1729034>`_
 
 .. categories::
 
