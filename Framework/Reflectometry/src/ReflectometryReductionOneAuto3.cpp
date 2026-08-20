@@ -97,7 +97,8 @@ std::map<std::string, std::string> ReflectometryReductionOneAuto3::validateInput
   const std::string firstTrans = getPropertyValue("FirstTransmissionRun");
   const std::string secondTrans = getPropertyValue("SecondTransmissionRun");
   if (!secondTrans.empty() && firstTrans.empty()) {
-    results[secondTrans] = "If a second transmission run is provided, a first transmission run must also be provided.";
+    results["SecondTransmissionRun"] =
+        "If a second transmission run is provided, a first transmission run must also be provided.";
   }
 
   // Validate transmission runs only if our input workspace is a group
@@ -946,6 +947,12 @@ std::vector<std::string> ReflectometryReductionOneAuto3::getTaskExecutionOrder(c
  */
 bool ReflectometryReductionOneAuto3::processGroups() {
   // this algorithm effectively behaves as MultiPeriodGroupAlgorithm
+  // Validate inputs as this is not run for group workspace inputs not called via alg dialog
+  const auto &results = validateInputs();
+  for (const auto &result : results) {
+    throw std::runtime_error(result.first + " property: " + result.second);
+  }
+
   m_usingBaseProcessGroups = true;
   enableHistoryRecordingForProcessGroups(true);
 
