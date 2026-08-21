@@ -62,4 +62,12 @@ public:
     TS_ASSERT_EQUALS(MantidVersion::versionForReleaseNotes({"1", "2", "3", "+something"}), "1.2.3");
   }
 
+  void testReleaseNotesNightlyVersion7() {
+    TS_ASSERT_EQUALS(MantidVersion::versionForReleaseNotes({"6", "16", "20260821.1142", ""}), "7.0.0");
+  }
+
+  void testReleaseNotesNightlyAfterVersion7() {
+    TS_ASSERT_EQUALS(MantidVersion::versionForReleaseNotes({"7", "0", "20261010.1234", ""}), "7.1.0");
+  }
+
 };
