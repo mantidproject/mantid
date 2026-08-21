@@ -325,7 +325,6 @@ class FullInstrumentViewPresenter:
             self._model.transform = np.eye(4)
         else:
             self._model.transform = self._transform_mesh_to_fill_window()
-        self._model.update_transformed_detector_positions()
 
     def _transform_mesh_to_fill_window(self) -> np.ndarray:
         xmin, xmax, ymin, ymax, zmin, zmax = self._detector_mesh_bounds
@@ -464,7 +463,6 @@ class FullInstrumentViewPresenter:
         manager each time it is dragged, resized or rotated, so the plot always shows what
         would be committed by Add ROI / Add Mask.
         """
-        self._update_transform()
         centres = self._model.transformed_detector_positions
         # Projection uses VTK, so must be done on the Qt thread before queueing the rest
         self._view.project_and_cache_detector_points(centres)
@@ -525,7 +523,6 @@ class FullInstrumentViewPresenter:
         self._view.set_overlaid_shape_controls_checked(False)
 
     def on_add_item_clicked(self) -> None:
-        self._update_transform()
         centres = self._model.transformed_detector_positions
         self._view.project_and_cache_detector_points(centres)
         self._callback_queue.put((self._on_add_item_clicked, ()))
@@ -750,9 +747,7 @@ class FullInstrumentViewPresenter:
 
     def refresh_plotter_peaks(self) -> None:
         self._view.clear_overlay_meshes()
-        pos, labels, selected_peaks_workspaces = self._model.get_peak_overlay_arguments(self._view.selected_peaks_workspaces())
-        transformed_pos = [self._model.transform_vectors_with_matrix(p) for p in pos]
-        self._view.plot_overlay_meshes(transformed_pos, labels, selected_peaks_workspaces)
+        self._view.plot_overlay_meshes(*self._model.get_peak_overlay_arguments(self._view.selected_peaks_workspaces()))
         # Everytime the pyvista plotter gets updated with peaks, the button for peak picking should be updated
         self._view.set_select_peaks_enabled(self._view.has_any_peak_overlays_in_pyvista_plotter())
 
