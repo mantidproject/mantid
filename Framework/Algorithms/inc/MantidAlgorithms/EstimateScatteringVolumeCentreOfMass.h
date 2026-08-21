@@ -51,6 +51,8 @@ public:
   /// volume. Returns the mean accepted position directly in the lab frame.
   const Kernel::V3D rasterizeLabGaugeAndCalculateMeanElementPosition(const Geometry::IObject &sampleObject,
                                                                      const Kernel::Matrix<double> &gonioR);
+  /// The part of the workspace's goniometer rotation that the sample shape does not already carry.
+  const Kernel::Matrix<double> outstandingSampleRotation(const Geometry::IObject &sampleObject) const;
 
 private:
   /// Initialisation code

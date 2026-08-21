@@ -916,7 +916,147 @@ public:
     TS_ASSERT(!sliceRotateAll_sptr->isValid(pointRotate));
   }
 
+  /// A rotated shape's ShapeInfo has to move with its surfaces.
+  ///
+  /// createShape reads the XML twice: once through the parse* functions, which build the surfaces the
+  /// CSG tests points against, and once through createGeometryHandler, which builds the ShapeInfo the
+  /// bounding box, the rendered mesh and the volume all come from. Only the first applied the
+  /// automatic rotations, so a rotated shape was described in two places at once and its bounding box
+  /// enclosed where it used to be.
+  ///
+  /// Checked against the same shape written out with its centre and axis already rotated, which
+  /// carries no tag and so cannot be affected by whether the tags are honoured. Cuboids are exempt
+  /// because createGeometryHandler builds their ShapeInfo from the shared parseCuboid.
+  void testRotatedShapeInfoFollowsTheSurfaces() {
+    const std::string rotateAll = "<rotate-all x=\"90\" y=\"0\" z=\"0\" /> ";
+
+    // sphere: 1.0 radius centred 10 along +y, so rotating about x takes it to 10 along +z
+    assertShapeInfoIsRotated("<sphere id=\"s\"><centre x=\"0\" y=\"10.0\" z=\"0\"/><radius val=\"1.0\"/></sphere>"
+                             "<algebra val=\"s\"/> ",
+                             "<sphere id=\"s\"><centre x=\"0\" y=\"0\" z=\"10.0\"/><radius val=\"1.0\"/></sphere>"
+                             "<algebra val=\"s\"/> ",
+                             rotateAll);
+
+    // cylinder: base 10 along +y with its axis along +y, so both the base and the axis move
+    assertShapeInfoIsRotated("<cylinder id=\"c\"><centre-of-bottom-base x=\"0\" y=\"10.0\" z=\"0\"/>"
+                             "<axis x=\"0\" y=\"1\" z=\"0\"/><radius val=\"1.0\"/><height val=\"2.0\"/></cylinder>"
+                             "<algebra val=\"c\"/> ",
+                             "<cylinder id=\"c\"><centre-of-bottom-base x=\"0\" y=\"0\" z=\"10.0\"/>"
+                             "<axis x=\"0\" y=\"0\" z=\"1\"/><radius val=\"1.0\"/><height val=\"2.0\"/></cylinder>"
+                             "<algebra val=\"c\"/> ",
+                             rotateAll);
+
+    // cone: the case that exposed this, since a cone's ShapeInfo is built by re-parsing the XML
+    assertShapeInfoIsRotated("<cone id=\"k\"><tip-point x=\"0\" y=\"10.0\" z=\"0\"/>"
+                             "<axis x=\"0\" y=\"1\" z=\"0\"/><angle val=\"20\"/><height val=\"2.0\"/></cone>"
+                             "<algebra val=\"k\"/> ",
+                             "<cone id=\"k\"><tip-point x=\"0\" y=\"0\" z=\"10.0\"/>"
+                             "<axis x=\"0\" y=\"0\" z=\"1\"/><angle val=\"20\"/><height val=\"2.0\"/></cone>"
+                             "<algebra val=\"k\"/> ",
+                             rotateAll);
+  }
+
+  /// A per-primitive <rotate> has to move a shape's ShapeInfo and its surfaces together.
+  ///
+  /// <rotate> turns a shape about its own centre, which for a cylinder is the midpoint of its axis and
+  /// not the centre of the bottom base it is defined by. createGeometryHandler rotated that base
+  /// directly, swinging the cylinder about its end while parseCylinder held the midpoint still, and
+  /// parseCone ignored <rotate> altogether even though the cone's ShapeInfo honoured it. Either way the
+  /// surfaces and the metadata described the shape in two different places.
+  void testRotateTagMovesShapeInfoAndSurfacesTogether() {
+    // a per-primitive <rotate> sits inside the shape element, unlike <rotate-all>
+    const std::string rotate = "<rotate x=\"90\" y=\"0\" z=\"0\" /> ";
+
+    // cylinder: base 10 along +y with its axis along +y, so its midpoint is 11 along +y and stays
+    // there while the axis turns onto +z, leaving the base a half-height below it along -z
+    assertShapesMatch("<cylinder id=\"c\"><centre-of-bottom-base x=\"0\" y=\"10.0\" z=\"0\"/>"
+                      "<axis x=\"0\" y=\"1\" z=\"0\"/><radius val=\"1.0\"/><height val=\"2.0\"/>" +
+                          rotate + "</cylinder><algebra val=\"c\"/> ",
+                      "<cylinder id=\"c\"><centre-of-bottom-base x=\"0\" y=\"11.0\" z=\"-1.0\"/>"
+                      "<axis x=\"0\" y=\"0\" z=\"1\"/><radius val=\"1.0\"/><height val=\"2.0\"/></cylinder>"
+                      "<algebra val=\"c\"/> ");
+
+    assertShapesMatch("<hollow-cylinder id=\"h\"><centre-of-bottom-base x=\"0\" y=\"10.0\" z=\"0\"/>"
+                      "<axis x=\"0\" y=\"1\" z=\"0\"/><inner-radius val=\"0.5\"/><outer-radius val=\"1.0\"/>"
+                      "<height val=\"2.0\"/>" +
+                          rotate + "</hollow-cylinder><algebra val=\"h\"/> ",
+                      "<hollow-cylinder id=\"h\"><centre-of-bottom-base x=\"0\" y=\"11.0\" z=\"-1.0\"/>"
+                      "<axis x=\"0\" y=\"0\" z=\"1\"/><inner-radius val=\"0.5\"/><outer-radius val=\"1.0\"/>"
+                      "<height val=\"2.0\"/></hollow-cylinder><algebra val=\"h\"/> ");
+
+    // cone: a cone turns about its tip, so only the axis moves
+    assertShapesMatch("<cone id=\"k\"><tip-point x=\"0\" y=\"10.0\" z=\"0\"/>"
+                      "<axis x=\"0\" y=\"1\" z=\"0\"/><angle val=\"20\"/><height val=\"2.0\"/>" +
+                          rotate + "</cone><algebra val=\"k\"/> ",
+                      "<cone id=\"k\"><tip-point x=\"0\" y=\"10.0\" z=\"0\"/>"
+                      "<axis x=\"0\" y=\"0\" z=\"1\"/><angle val=\"20\"/><height val=\"2.0\"/></cone>"
+                      "<algebra val=\"k\"/> ");
+  }
+
 private:
+  /// Assert that `xml`, which carries a rotation tag, describes the same shape as `preRotatedXML`,
+  /// which has the rotation written into it by hand, both in its ShapeInfo - where the bounding box,
+  /// the rendered mesh and the volume come from - and in the points it contains, which come from the
+  /// CSG surfaces. The ShapeInfo is read directly rather than through the bounding box because a
+  /// hollow cylinder has no bounding box of its own to read it back from.
+  void assertShapesMatch(const std::string &xml, const std::string &preRotatedXML) {
+    const auto tagged = getObject(xml);
+    const auto byHand = getObject(preRotatedXML);
+
+    assertShapeInfoEquals(*tagged, *byHand);
+
+    // Walk the centres of a grid of cells spanning the shape's box, so surfaces left behind in the
+    // unrotated frame show up as a disagreement about which points are inside. Cell centres rather
+    // than corners keeps the samples off the surfaces themselves, where the two shapes may round
+    // differently.
+    constexpr int cells = 8;
+    const auto byHandBox = byHand->getBoundingBox();
+    const V3D min = byHandBox.minPoint();
+    const V3D step = (byHandBox.maxPoint() - min) / static_cast<double>(cells);
+    for (int i = 0; i < cells; ++i) {
+      for (int j = 0; j < cells; ++j) {
+        for (int k = 0; k < cells; ++k) {
+          const V3D point(min.X() + (i + 0.5) * step.X(), min.Y() + (j + 0.5) * step.Y(),
+                          min.Z() + (k + 0.5) * step.Z());
+          TS_ASSERT_EQUALS(tagged->isValid(point), byHand->isValid(point));
+        }
+      }
+    }
+  }
+
+  /// Assert that two shapes carry the same ShapeInfo: same primitive, same defining points, same sizes.
+  void assertShapeInfoEquals(const CSGObject &actual, const CSGObject &expected) {
+    detail::ShapeInfo::GeometryShape actualType, expectedType;
+    double actualInner(0.0), actualRadius(0.0), actualHeight(0.0);
+    double expectedInner(0.0), expectedRadius(0.0), expectedHeight(0.0);
+    std::vector<V3D> actualPoints, expectedPoints;
+    actual.GetObjectGeom(actualType, actualPoints, actualInner, actualRadius, actualHeight);
+    expected.GetObjectGeom(expectedType, expectedPoints, expectedInner, expectedRadius, expectedHeight);
+
+    TS_ASSERT_EQUALS(actualType, expectedType);
+    TS_ASSERT_DELTA(actualInner, expectedInner, 1e-9);
+    TS_ASSERT_DELTA(actualRadius, expectedRadius, 1e-9);
+    TS_ASSERT_DELTA(actualHeight, expectedHeight, 1e-9);
+    TS_ASSERT_EQUALS(actualPoints.size(), expectedPoints.size());
+    for (size_t i = 0; i < std::min(actualPoints.size(), expectedPoints.size()); ++i) {
+      for (size_t axis = 0; axis < 3; ++axis) {
+        TS_ASSERT_DELTA(actualPoints[i][axis], expectedPoints[i][axis], 1e-9);
+      }
+    }
+  }
+
+  /// Assert that `xml` plus `rotationTag` describes the same bounding box as `preRotatedXML`, which
+  /// has the rotation written into it by hand and carries no tag.
+  void assertShapeInfoIsRotated(const std::string &xml, const std::string &preRotatedXML,
+                                const std::string &rotationTag) {
+    const auto tagged = getObject(xml + rotationTag)->getBoundingBox();
+    const auto byHand = getObject(preRotatedXML)->getBoundingBox();
+    for (size_t axis = 0; axis < 3; ++axis) {
+      TS_ASSERT_DELTA(tagged.minPoint()[axis], byHand.minPoint()[axis], 1e-9);
+      TS_ASSERT_DELTA(tagged.maxPoint()[axis], byHand.maxPoint()[axis], 1e-9);
+    }
+  }
+
   void compareMatrix(const std::vector<double> &vectorToMatch, const Matrix<double> &rotationMatrix) {
     auto checkVector = rotationMatrix.getVector();
     for (size_t i = 0; i < 9; ++i) {

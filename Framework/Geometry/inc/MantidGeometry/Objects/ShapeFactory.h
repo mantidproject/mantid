@@ -14,6 +14,7 @@
 #include "MantidKernel/V3D.h"
 #ifndef Q_MOC_RUN
 #include <memory>
+#include <utility>
 #endif
 #include <map>
 
@@ -79,7 +80,7 @@ shapes
 described in the XML instrument definition file.
 
 This class is now also use elsewhere, and in addition to create geometric shapes
-from an DOM-element-node pointing to a \<type> element with shape information,
+from an DOM-element-node pointing to a \<type\> element with shape information,
 shapes
 can also be created directly from a XML shape string.
 
@@ -127,6 +128,10 @@ private:
   Poco::XML::Element *getOptionalShapeElement(Poco::XML::Element *pElem, const std::string &name);
   double getDoubleAttribute(Poco::XML::Element *pElem, const std::string &name);
   Kernel::V3D parsePosition(Poco::XML::Element *pElem);
+  std::pair<Kernel::V3D, Kernel::V3D> applyShapeRotations(Poco::XML::Element *pElem, Kernel::V3D centre,
+                                                          Kernel::V3D axis);
+  std::pair<Kernel::V3D, Kernel::V3D> rotatedCylinderBase(Poco::XML::Element *pElem, const Kernel::V3D &base,
+                                                          const Kernel::V3D &axis, const double height);
   void createGeometryHandler(Poco::XML::Element *, const std::shared_ptr<CSGObject> &);
 
   Kernel::Matrix<double> m_gonioRotateMatrix = Kernel::Matrix<double>(3, 3, 1);
