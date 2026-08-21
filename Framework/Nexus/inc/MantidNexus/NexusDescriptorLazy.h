@@ -9,18 +9,43 @@
 #include "MantidNexus/DllConfig.h"
 #include "MantidNexus/UniqueID.h"
 
+#include <cmath>
+#include <concepts>
+#include <format>
 #include <map>
+#include <optional>
 #include <shared_mutex>
 #include <string>
+#include <tuple>
 #include <unordered_set>
+#include <variant>
 #include <vector>
+
+#include <H5Cpp.h>
 
 namespace Mantid {
 namespace Nexus {
 
+template <typename T>
+concept entryTypes = std::integral<T> || std::floating_point<T> || std::same_as<T, std::string>;
+
+template <typename T> hid_t getH5NativeType();
+
 class MANTID_NEXUS_DLL NexusDescriptorLazy {
 
 public:
+  enum class CacheReturnStatus_t {
+    FOUND,
+    CACHED,
+    DATASET_NOT_FOUND,
+    WRONG_TYPE,
+    ERROR,
+    UNSET,
+  };
+
+  using CacheValue_t = std::variant<float, double, int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, int64_t,
+                                    uint64_t, std::string, CacheReturnStatus_t>;
+
   /**
    * Unique constructor
    * @param filename input HDF5 Nexus file name
@@ -93,6 +118,15 @@ public:
    */
   bool isEntry(std::string const &entryName) const;
 
+  /**
+   * @brief Gets the value of an entry in the Nexus file.
+   * Only single values are returned, either numeric or strings.
+   * @param entryName full address for an entry name
+   * @return pair<value, status> where value is valid only if the return status is FOUND or CACHED
+   */
+  template <typename T>
+  std::pair<T, NexusDescriptorLazy::CacheReturnStatus_t> getEntryValue(const std::string &entryName) const;
+
   /// Query if a given type exists somewhere in the file
   bool classTypeExists(std::string const &classType) const;
 
@@ -113,6 +147,8 @@ private:
   std::map<std::string, std::string> initAllEntries();
   void loadGroups(std::map<std::string, std::string> &allEntries, std::string const &address, unsigned int depth,
                   const unsigned int maxDepth);
+
+  const CacheValue_t _getEntryValue(const std::string &entryName) const;
 
   /** Nexus HDF5 file name */
   std::string const m_filename;
@@ -140,6 +176,9 @@ private:
 
   /// the set of non-existent entries that have been checked
   mutable std::unordered_set<std::string> m_allMisses;
+
+  /// the map of all read entry values that have been checked
+  mutable std::map<std::string, CacheValue_t> m_readEntries;
 };
 
 } // namespace Nexus
