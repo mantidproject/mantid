@@ -94,6 +94,15 @@ void RegionSelector::updateWorkspace(Workspace_sptr const &workspace) {
   pyobj().attr("update_workspace")(*boost::python::tuple(), **kwargs);
 }
 
+void RegionSelector::updateWorkspaceForGroupMember(Workspace_sptr const &workspace,
+                                                   std::string const &groupMemberName) {
+  GlobalInterpreterLock lock;
+  boost::python::dict kwargs;
+  kwargs["workspace"] = workspace;
+  kwargs["group_member_name"] = groupMemberName;
+  pyobj().attr("update_workspace")(*boost::python::tuple(), **kwargs);
+}
+
 void RegionSelector::addRectangularRegion(const std::string &regionType, const std::string &color,
                                           const std::string &hatch) {
   GlobalInterpreterLock lock;

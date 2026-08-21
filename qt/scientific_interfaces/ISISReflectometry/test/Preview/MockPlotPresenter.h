@@ -18,6 +18,7 @@ public:
 
   MOCK_METHOD(void, clearModel, (), (override));
   MOCK_METHOD(void, setSpectrum, (const Mantid::API::MatrixWorkspace_sptr &, const size_t), (override));
+  MOCK_METHOD(void, setSpectra, (const std::vector<Mantid::API::MatrixWorkspace_sptr> &, const size_t), (override));
   MOCK_METHOD(void, setScaleLinear, (const AxisID), (override));
   MOCK_METHOD(void, setScaleLog, (const AxisID), (override));
   MOCK_METHOD(void, setScaleSymLog, (const AxisID, const double), (override));

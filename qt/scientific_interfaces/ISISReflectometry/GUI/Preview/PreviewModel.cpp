@@ -10,6 +10,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Logger.h"
@@ -21,7 +22,11 @@
 #include <boost/optional.hpp>
 #include <boost/utility/in_place_factory.hpp>
 
+#include <algorithm>
+#include <filesystem>
+#include <iterator>
 #include <optional>
+#include <stdexcept>
 #include <string>
 
 using namespace Mantid::API;
@@ -29,7 +34,7 @@ using namespace Mantid::Kernel;
 
 namespace {
 Mantid::Kernel::Logger g_log("Reflectometry Preview Model");
-}
+} // namespace
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
@@ -49,10 +54,8 @@ bool PreviewModel::loadWorkspaceFromAds(std::string const &workspaceName) {
   if (!adsInstance.doesExist(workspaceName)) {
     return false;
   }
-  auto ws = adsInstance.retrieveWS<MatrixWorkspace>(workspaceName);
-  if (!ws) {
-    throw std::runtime_error("Unsupported workspace type; expected MatrixWorkspace");
-  }
+  auto ws = adsInstance.retrieve(workspaceName);
+  validatePreviewWorkspace(ws);
 
   createRunDetails(workspaceName);
   m_runDetails->setLoadedWs(ws);
@@ -80,9 +83,64 @@ void PreviewModel::sumBanksAsync(IJobManager &jobManager) { jobManager.startSumB
 
 void PreviewModel::reduceAsync(IJobManager &jobManager) { jobManager.startReduction(*m_runDetails); }
 
-MatrixWorkspace_sptr PreviewModel::getLoadedWs() const { return m_runDetails->getLoadedWs(); }
-MatrixWorkspace_sptr PreviewModel::getSummedWs() const { return m_runDetails->getSummedWs(); }
-MatrixWorkspace_sptr PreviewModel::getReducedWs() const { return m_runDetails->getReducedWs(); }
+Workspace_sptr PreviewModel::getLoadedWs() const { return m_runDetails->getLoadedWs(); }
+MatrixWorkspace_sptr PreviewModel::getSelectedLoadedWs() const {
+  return getWorkspaceGroupMember(m_runDetails->getLoadedWs());
+}
+Workspace_sptr PreviewModel::getSummedWs() const { return m_runDetails->getSummedWs(); }
+MatrixWorkspace_sptr PreviewModel::getSelectedSummedWs() const {
+  return getWorkspaceGroupMember(m_runDetails->getSummedWs());
+}
+Workspace_sptr PreviewModel::getReducedWs() const { return m_runDetails->getReducedWs(); }
+
+void PreviewModel::clearReducedWorkspace() { m_runDetails->setReducedWs(nullptr); }
+
+MatrixWorkspace_sptr PreviewModel::getSelectedReducedWs() const {
+  return getWorkspaceGroupMember(m_runDetails->getReducedWs());
+}
+
+std::vector<MatrixWorkspace_sptr> PreviewModel::getReducedWorkspaceMembers() const {
+  auto const group = std::dynamic_pointer_cast<WorkspaceGroup>(m_runDetails->getReducedWs());
+  std::vector<MatrixWorkspace_sptr> members;
+  members.reserve(group->size());
+  auto const &allItems = group->getAllItems();
+  std::transform(allItems.cbegin(), allItems.cend(), std::back_inserter(members),
+                 [](auto const &member) { return std::dynamic_pointer_cast<MatrixWorkspace>(member); });
+  return members;
+}
+
+bool PreviewModel::isWorkspaceGroup() const {
+  return static_cast<bool>(std::dynamic_pointer_cast<WorkspaceGroup>(m_runDetails->getLoadedWs()));
+}
+
+std::vector<std::string> PreviewModel::getGroupMemberDisplayNames() const {
+  auto const group = std::dynamic_pointer_cast<WorkspaceGroup>(m_runDetails->getLoadedWs());
+  if (!group)
+    return {};
+
+  auto names = group->getNames();
+  auto const prefix = std::filesystem::path(m_runDetails->runNumbers().front()).stem().string();
+  for (size_t i = 0; i < names.size(); ++i)
+    if (names[i].empty())
+      names[i] = prefix + "_" + std::to_string(i + 1);
+  return names;
+}
+
+size_t PreviewModel::getNumberOfGroupMembers() const {
+  auto const workspace = m_runDetails->getLoadedWs();
+  if (!workspace)
+    return 0;
+  auto const group = std::dynamic_pointer_cast<WorkspaceGroup>(workspace);
+  return group ? group->size() : 1;
+}
+
+size_t PreviewModel::getSelectedGroupMember() const { return m_selectedGroupMember; }
+
+void PreviewModel::setSelectedGroupMember(size_t index) {
+  if (index >= getNumberOfGroupMembers())
+    throw std::out_of_range("Workspace group member index is out of range");
+  m_selectedGroupMember = index;
+}
 
 std::optional<double> PreviewModel::getDefaultTheta() const {
   auto theta = getThetaFromLogs("Theta");
@@ -98,9 +156,9 @@ std::optional<ProcessingInstructions> PreviewModel::getSelectedBanks() const {
   return m_runDetails->getSelectedBanks();
 }
 
-void PreviewModel::setLoadedWs(Mantid::API::MatrixWorkspace_sptr workspace) { m_runDetails->setLoadedWs(workspace); }
+void PreviewModel::setLoadedWs(Mantid::API::Workspace_sptr workspace) { m_runDetails->setLoadedWs(workspace); }
 
-void PreviewModel::setSummedWs(Mantid::API::MatrixWorkspace_sptr workspace) { m_runDetails->setSummedWs(workspace); }
+void PreviewModel::setSummedWs(Mantid::API::Workspace_sptr workspace) { m_runDetails->setSummedWs(workspace); }
 
 void PreviewModel::setTheta(double theta) { m_runDetails->setTheta(theta); }
 void PreviewModel::setSelectedBanks(std::optional<ProcessingInstructions> selectedBanks) {
@@ -165,6 +223,13 @@ std::optional<IPreviewModel::Selection> const PreviewModel::getSelectedRegion(RO
 
 void PreviewModel::createRunDetails(const std::string &workspaceName) {
   m_runDetails = std::make_optional<PreviewRow>(std::vector<std::string>{workspaceName});
+  m_selectedGroupMember = 0;
+}
+
+MatrixWorkspace_sptr PreviewModel::getWorkspaceGroupMember(Workspace_sptr const &workspace) const {
+  if (auto const group = std::dynamic_pointer_cast<WorkspaceGroup>(workspace))
+    return std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(m_selectedGroupMember));
+  return std::dynamic_pointer_cast<MatrixWorkspace>(workspace);
 }
 
 void PreviewModel::exportSummedWsToAds() const {
@@ -185,7 +250,7 @@ void PreviewModel::exportReducedWsToAds() const {
 }
 
 std::optional<double> PreviewModel::getThetaFromLogs(const std::string &logName) const {
-  const Mantid::API::Run &run = getLoadedWs()->run();
+  const Mantid::API::Run &run = getSelectedLoadedWs()->run();
   if (!run.hasProperty(logName)) {
     return std::nullopt;
   }

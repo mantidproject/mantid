@@ -7,12 +7,32 @@
 #include "PreviewRow.h"
 #include "GUI/Preview/ROIType.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/IDTypes.h"
 
+#include <algorithm>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
+void validatePreviewWorkspace(Mantid::API::Workspace_sptr const &workspace) {
+  if (std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(workspace))
+    return;
+
+  auto const group = std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(workspace);
+  if (group && group->size() > 0) {
+    auto const members = group->getAllItems();
+    if (std::all_of(members.cbegin(), members.cend(),
+                    [](auto const &member) { return std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(member); }))
+      return;
+  }
+
+  throw std::runtime_error("Unsupported workspace type; expected MatrixWorkspace or WorkspaceGroup of "
+                           "MatrixWorkspaces");
+}
+
 PreviewRow::PreviewRow(const std::vector<std::string> &runNumbers)
     : Item(), m_runNumbers(std::move(runNumbers)), m_theta{0.0} {
   std::sort(m_runNumbers.begin(), m_runNumbers.end());
@@ -32,13 +52,13 @@ int PreviewRow::totalItems() const { return 1; }
 
 int PreviewRow::completedItems() const { return 1; }
 
-Mantid::API::MatrixWorkspace_sptr PreviewRow::getLoadedWs() const noexcept { return m_loadedWs; }
-Mantid::API::MatrixWorkspace_sptr PreviewRow::getSummedWs() const noexcept { return m_summedWs; }
-Mantid::API::MatrixWorkspace_sptr PreviewRow::getReducedWs() const noexcept { return m_reducedWs; }
+Mantid::API::Workspace_sptr PreviewRow::getLoadedWs() const noexcept { return m_loadedWs; }
+Mantid::API::Workspace_sptr PreviewRow::getSummedWs() const noexcept { return m_summedWs; }
+Mantid::API::Workspace_sptr PreviewRow::getReducedWs() const noexcept { return m_reducedWs; }
 
-void PreviewRow::setLoadedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept { m_loadedWs = std::move(ws); }
-void PreviewRow::setSummedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept { m_summedWs = std::move(ws); }
-void PreviewRow::setReducedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept { m_reducedWs = std::move(ws); }
+void PreviewRow::setLoadedWs(Mantid::API::Workspace_sptr ws) noexcept { m_loadedWs = std::move(ws); }
+void PreviewRow::setSummedWs(Mantid::API::Workspace_sptr ws) noexcept { m_summedWs = std::move(ws); }
+void PreviewRow::setReducedWs(Mantid::API::Workspace_sptr ws) noexcept { m_reducedWs = std::move(ws); }
 
 std::optional<ProcessingInstructions> PreviewRow::getSelectedBanks() const noexcept { return m_selectedBanks; }
 

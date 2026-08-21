@@ -38,6 +38,7 @@ public:
 
   // Instrument display
   void updateWorkspace(Mantid::API::MatrixWorkspace_sptr &workspace) override;
+  void updateWorkspacePreservingSelection(Mantid::API::MatrixWorkspace_sptr &workspace) override;
   void resetInstView() override;
   void plotInstView() override;
   // Instrument viewer toolbar
@@ -57,6 +58,8 @@ public:
   std::string getRegionType() const override;
   double getLinthresh() const override;
   bool getSymlogEnabled() const override;
+  bool getPlotAllGroupMembers() const override;
+  void setPlotAllGroupMembersCheckboxVisible(bool visible) override;
 
   QLayout *getRegionSelectorLayout() const override;
   MantidQt::MantidWidgets::IPlotView *getLinePlotView() const override;
@@ -80,6 +83,7 @@ private slots:
   void onEditROIClicked() const;
   void onAddRectangularROIClicked(QAction *regionType) const;
   void onYAxisSymlogToggled(bool checked) const;
+  void onPlotAllGroupMembersToggled() const;
   void onLineEditUpdated() const;
   void onApplyButtonClicked() const;
 };

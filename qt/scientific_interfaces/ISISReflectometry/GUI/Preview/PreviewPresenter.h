@@ -66,6 +66,7 @@ public:
 
   // PreviewViewSubscriber overrides
   void notifyLoadWorkspaceRequested() override;
+  void notifyGroupMemberSelectionChanged() override;
   void notifyUpdateAngle() override;
 
   void notifyInstViewZoomRequested() override;
@@ -79,6 +80,7 @@ public:
   void notifyEditROIModeRequested() override;
   void notifyRectangularROIModeRequested() override;
   void notifySetYAxisSymlogChanged() override;
+  void notifyPlotAllGroupMembersChanged() override;
 
   void notifyApplyRequested() override;
 
@@ -124,5 +126,6 @@ private:
   bool isRegionSelectionChanged();
   bool isRegionChanged(ROIType type);
   void updatePlotAxes();
+  void updateSelectedGroupMemberDisplay();
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

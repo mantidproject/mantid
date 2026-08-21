@@ -38,6 +38,7 @@ public:
   virtual void notifyEditROIModeRequested() = 0;
   virtual void notifyRectangularROIModeRequested() = 0;
   virtual void notifySetYAxisSymlogChanged() = 0;
+  virtual void notifyPlotAllGroupMembersChanged() = 0;
 };
 
 class IPreviewDockedWidgets {
@@ -47,6 +48,7 @@ public:
 
   // Instrument display
   virtual void updateWorkspace(Mantid::API::MatrixWorkspace_sptr &workspace) = 0;
+  virtual void updateWorkspacePreservingSelection(Mantid::API::MatrixWorkspace_sptr &workspace) = 0;
   virtual void resetInstView() = 0;
   virtual void plotInstView() = 0;
   //  Instrument viewer toolbar
@@ -66,6 +68,8 @@ public:
   virtual std::string getRegionType() const = 0;
   virtual double getLinthresh() const = 0;
   virtual bool getSymlogEnabled() const = 0;
+  virtual bool getPlotAllGroupMembers() const = 0;
+  virtual void setPlotAllGroupMembersCheckboxVisible(bool visible) = 0;
 
   virtual QLayout *getRegionSelectorLayout() const = 0;
   virtual MantidQt::MantidWidgets::IPlotView *getLinePlotView() const = 0;
