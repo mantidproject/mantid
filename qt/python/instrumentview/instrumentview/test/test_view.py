@@ -73,6 +73,20 @@ class TestFullInstrumentViewView(unittest.TestCase):
         self._view.set_plotter_scalar_bar_range((0, 100), "label")
         self._view.main_plotter.update_scalar_bar_range.assert_has_calls([mock.call((0, 100), "label")])
 
+    def test_run_on_main_thread_calls_through(self):
+        func = MagicMock(return_value="result")
+        self.assertEqual(self._view.run_on_main_thread(func, 1, kw=2), "result")
+        func.assert_called_once_with(1, kw=2)
+
+    def test_run_on_main_thread_skipped_while_closing(self):
+        func = MagicMock()
+        self._view._closing = True
+        try:
+            self.assertIsNone(self._view.run_on_main_thread(func))
+            func.assert_not_called()
+        finally:
+            self._view._closing = False
+
     def test_add_simple_shape(self):
         self._view.main_plotter.reset_mock()
         mock_mesh = MagicMock()

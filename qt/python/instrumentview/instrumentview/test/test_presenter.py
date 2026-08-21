@@ -35,6 +35,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.is_select_bank_tube_checked.return_value = False
         self._mock_view.get_contour_limits.return_value = (0.0, 1.0)
         self._mock_view.selected_peaks_workspaces.return_value = []
+        self._mock_view.run_on_main_thread.side_effect = lambda func, *args, **kwargs: func(*args, **kwargs)
         self._ws = CreateSampleWorkspace(OutputWorkspace="TestFullInstrumentViewPresenter", EnableLogging=False)
         self._model = FullInstrumentViewModel(self._ws)
         self._presenter = self._create_test_presenter()
@@ -290,6 +291,51 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.show_plot_for_detectors.assert_called_once_with(self._model.line_plot_workspace, self._model.lineplot_limits)
         self._mock_view.set_selected_detector_info.assert_called_once_with(["a", "a"])
         self._model.extract_spectra_for_line_plot.assert_called_once_with("TOF", True)
+
+    def test_actors_are_added_on_the_qt_thread(self):
+        """The renderers get the plotter directly, so their actor additions must be marshalled.
+
+        Adding or removing a VTK actor off the Qt thread fails with wglMakeCurrent
+        errors, because the Qt thread already holds the OpenGL context.
+        """
+        self._presenter.update_plotter()
+
+        marshalled = [call[0][0] for call in self._mock_view.run_on_main_thread.call_args_list]
+        renderer = self._presenter._renderer
+        for expected in (
+            renderer.add_detector_mesh_to_plotter,
+            renderer.add_pickable_mesh_to_plotter,
+            renderer.add_masked_mesh_to_plotter,
+            renderer.create_picked_highlight_actor,
+            renderer.update_picked_highlight,
+        ):
+            self.assertIn(expected, marshalled)
+
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._update_relative_detector_angle")
+    def test_update_picked_detectors_refreshes_highlight(self, _mock_update_det_angle):
+        self._model._workspace_indices = np.array([0, 1, 2])
+        self._model._is_valid = np.array([True, True, True])
+        self._model._is_masked = np.array([False, False, False])
+        self._model._is_selected_in_tree = np.array([True, True, True])
+        self._model._detector_is_picked = np.array([True, False, False])
+        self._model._detector_ids = np.array([1, 2, 3])
+        self._model.picked_detectors_info_text = MagicMock(return_value=["a"])
+        self._model.extract_spectra_for_line_plot = MagicMock()
+        self._presenter._pickable_mesh = MagicMock()
+
+        self._presenter.update_picked_detectors_on_view()
+
+        renderer = self._presenter._renderer
+        renderer.update_picked_highlight.assert_called_once()
+        args = renderer.update_picked_highlight.call_args[0]
+        self.assertIs(args[0], self._mock_view.main_plotter)
+        self.assertIs(args[1], self._presenter._pickable_mesh)
+        np.testing.assert_array_equal(args[2], self._model._detector_is_picked)
+
+        # This path is reached from the callback worker thread, so the highlight update
+        # must be marshalled onto the Qt thread rather than called directly.
+        marshalled = [call[0][0] for call in self._mock_view.run_on_main_thread.call_args_list]
+        self.assertIn(renderer.update_picked_highlight, marshalled)
 
     def test_on_add_selection_clicked(self):
         n_hist = self._ws.getNumberHistograms()

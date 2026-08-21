@@ -45,6 +45,14 @@ class ShapeRenderer(InstrumentRenderer):
 
     _MASKED_COLOUR = (0.25, 0.25, 0.25)
     _DEFAULT_PICKING_TOLERANCE = 0.0001
+    _PICKED_OUTLINE_WIDTH = 3
+    _PICKED_MARKER_POINT_SIZE = 8
+    # Above this many picked cells the exact outline is replaced by one marker
+    # point per picked detector.  Edge extraction scales badly -- roughly 90 ms
+    # at this cap but 1.2 s at four times it -- and it runs on the Qt thread,
+    # so it cannot be allowed to grow with the selection.  The fallback is
+    # linear, and costs about 9 ms at this same cap.
+    _MAX_OUTLINE_CELLS = 50000
 
     def __init__(self, workspace, use_optimised_shapes: bool = True):
         super().__init__()
@@ -250,7 +258,7 @@ class ShapeRenderer(InstrumentRenderer):
         actor = plotter.add_mesh(
             mesh,
             scalars=scalars,
-            opacity=[0.0, 0.3],
+            opacity=self._PICKED_FILL_OPACITY,
             clim=[0, 1],
             show_scalar_bar=False,
             pickable=True,
@@ -271,6 +279,101 @@ class ShapeRenderer(InstrumentRenderer):
             pickable=False,
             show_edges=False,
         )
+
+    def _add_picked_highlight_actor(self, plotter: BackgroundPlotter, mesh: pv.PolyData):
+        """Add the actor that traces the picked detectors' outline.
+
+        The line width is in screen pixels, so the outline stays visible even
+        when each detector covers barely one pixel, and it leaves the detector's
+        counts colour showing through in the middle.
+
+        The point styling is for the marker-point fallback used on selections
+        too large to outline (see ``_build_picked_highlight_mesh``).  One actor
+        serves both: the highlight mesh holds either lines or vertices, never
+        both, so only one of the two styles is ever in effect.
+        """
+        actor = plotter.add_mesh(
+            mesh,
+            color=self._PICKED_HIGHLIGHT_COLOUR,
+            line_width=self._PICKED_OUTLINE_WIDTH,
+            render_lines_as_tubes=True,
+            point_size=self._PICKED_MARKER_POINT_SIZE,
+            render_points_as_spheres=True,
+            lighting=False,
+            pickable=False,
+            show_scalar_bar=False,
+            render=False,
+        )
+        # The outline traces the detector surface exactly, so it needs the same
+        # polygon offset treatment as the pickable mesh to avoid z-fighting.
+        # The marker points sit on that surface too, hence the point offset.
+        mapper = actor.mapper
+        mapper.SetResolveCoincidentTopologyToPolygonOffset()
+        mapper.SetResolveCoincidentTopologyLineOffsetParameters(-4, -4)
+        mapper.SetResolveCoincidentTopologyPointOffsetParameter(-4)
+        return actor
+
+    def _build_picked_highlight_mesh(self, mesh: pv.PolyData, visibility: np.ndarray) -> pv.PolyData | None:
+        """Return the edges bounding the picked detectors, or None if there is nothing to draw.
+
+        Each detector carries its own copy of its template vertices, so
+        neighbouring detectors do not share points and every detector is
+        outlined individually rather than the selection being outlined as one
+        region.  Both boundary edges (flat quad shapes) and feature edges
+        (closed solids, which have no boundary edges at all) are extracted so
+        that every render mode produces a visible outline.
+
+        Past ``_MAX_OUTLINE_CELLS`` the outline is replaced by marker points
+        rather than dropped: a whole-bank selection is not necessarily obvious
+        on screen, and leaving it unmarked would mean the marker silently
+        disappearing at the point the selection got big enough to need it.
+        """
+        c2d = self._cell_to_detector
+        if c2d is None or mesh.number_of_cells == 0 or len(c2d) != mesh.number_of_cells:
+            return None
+        if c2d.size == 0 or int(c2d.max()) >= len(visibility):
+            return None
+
+        picked_cells = visibility[c2d] != 0
+        n_picked = int(np.count_nonzero(picked_cells))
+        if n_picked == 0:
+            return None
+        if n_picked > self._MAX_OUTLINE_CELLS:
+            return self._build_picked_marker_points(mesh, picked_cells, c2d)
+
+        # remove_cells keeps the result a PolyData, which extract_feature_edges needs.
+        outline = mesh.remove_cells(~picked_cells, inplace=False).extract_feature_edges(
+            boundary_edges=True,
+            feature_edges=True,
+            non_manifold_edges=False,
+            manifold_edges=False,
+        )
+        if outline.number_of_cells == 0:
+            return None
+        # Drop the inherited counts/visibility arrays so the outline is drawn as a solid colour.
+        outline.clear_data()
+        return outline
+
+    def _build_picked_marker_points(self, mesh: pv.PolyData, picked_cells: np.ndarray, c2d: np.ndarray) -> pv.PolyData | None:
+        """Return one marker point at the centre of each picked detector.
+
+        Used for selections too large to outline.  Marking each picked detector
+        individually — rather than, say, drawing a box round the whole
+        selection or outlining a sample of it — keeps the marker truthful about
+        which detectors are picked, which matters most exactly when the
+        selection is too large to take in at a glance.
+
+        The work is linear in the cell count: one pass for the cell centres and
+        a grouped mean over them.
+        """
+        centres = mesh.cell_centers().points
+        detectors = c2d[picked_cells]
+        cells_per_detector = np.bincount(detectors)
+        picked_detectors = np.flatnonzero(cells_per_detector)
+        if picked_detectors.size == 0:
+            return None
+        totals = np.stack([np.bincount(detectors, weights=centres[picked_cells, axis]) for axis in range(3)], axis=1)
+        return pv.PolyData(totals[picked_detectors] / cells_per_detector[picked_detectors, None])
 
     def get_callback_tied_to_detector_index(
         self, plotter: BackgroundPlotter, callback: Callable[[int], None], hover: bool = False
