@@ -10,6 +10,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidMDAlgorithms/DllConfig.h"
+#include <filesystem>
 #include <set>
 
 namespace {}

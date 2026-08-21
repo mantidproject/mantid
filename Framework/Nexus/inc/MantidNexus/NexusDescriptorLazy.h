@@ -10,22 +10,36 @@
 #include "MantidNexus/UniqueID.h"
 
 #include <map>
+#include <optional>
+#include <set>
 #include <shared_mutex>
 #include <string>
+#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
 namespace Mantid {
 namespace Nexus {
 
+using SharedFileID = SharedID<&H5Fclose>;
+using EntryMap = std::unordered_map<std::string, std::string>;
+
 class MANTID_NEXUS_DLL NexusDescriptorLazy {
 
 public:
   /**
-   * Unique constructor
+   * Construct by opening the file internally.
    * @param filename input HDF5 Nexus file name
    */
   NexusDescriptorLazy(std::string const &filename);
+
+  /**
+   * Construct from an already-open HDF5 file handle. Increments the HDF5 reference
+   * count so the handle can be closed independently by both owner and descriptor.
+   * @param fileID open HDF5 file hid_t
+   * @param filename file path (used for error messages and extension)
+   */
+  NexusDescriptorLazy(SharedFileID fileID, std::string const &filename);
 
   NexusDescriptorLazy() = delete;
 
@@ -69,7 +83,7 @@ public:
    *   value: group class (e.g., NXentry, NXlog)
    * </pre>
    */
-  std::map<std::string, std::string> const &getAllEntries() const noexcept { return m_allEntries; }
+  EntryMap const &getAllEntries() const noexcept { return m_allEntries; }
 
   /**
    * Checks if a full-address entry exists for a particular groupClass in a Nexus
@@ -78,14 +92,7 @@ public:
    * @param groupClass e.g. NxLog , Nexus entry attribute
    * @return true: entryName exists for a groupClass, otherwise false
    */
-  bool isEntry(std::string const &entryName, std::string const &groupClass) const {
-    if (isEntry(entryName)) {
-      return m_allEntries.at(entryName) == groupClass;
-    } else {
-      return false;
-    }
-  }
-
+  bool isEntry(std::string const &entryName, std::string const &groupClass) const;
   /**
    * Checks if a full-address entry exists in a Nexus dataset
    * @param entryName full address for an entry name /entry/NXlogs
@@ -93,12 +100,51 @@ public:
    */
   bool isEntry(std::string const &entryName) const;
 
+  /**
+   * Checks if a full-address entry exists and is a dataset
+   * @param entryName full address for an entry name /entry/NXlogs
+   * @return true: entryName exists and is a dataset, otherwise false
+   */
+  bool isDataSet(std::string const &entryName) const;
+
   /// Query if a given type exists somewhere in the file
   bool classTypeExists(std::string const &classType) const;
+
+  /// Query if a given type exists among the already-cached entries only. Unlike classTypeExists, this never
+  /// walks the file: it consults the bounded init-scan cache and returns false on a miss. Correct only for
+  /// classes the init scan is tuned to reach (root-level NXentry; NXevent_data directly under a
+  /// SPECIAL_ADDRESS entry). Intended for confidence() checks, where escalating to a full-file walk just to
+  /// prove a class is absent is the wrong tradeoff.
+  bool classTypeExistsInCache(std::string const &classType) const;
 
   /// Query if a given type exists as a decendant of the supplied parentPath. It is expected to be used only to check
   /// for direct children.
   bool classTypeExistsChild(const std::string &parentPath, const std::string &classType) const;
+
+  /**
+   * Return the absolute addresses of every entry with the given NX_class (groups) or "SDS" (datasets).
+   * Triggers a one-time full scan of the file on first use, then serves subsequent queries from the cache.
+   * @param classType e.g. NXlog, NXentry, SDS
+   * @return ordered set of absolute addresses, e.g. {/entry/DASlogs/log_0, /entry/DASlogs/log_1, ...}
+   */
+  std::set<std::string> allAddressesOfType(std::string const &classType) const;
+
+  /**
+   * Register a known entry — call after creating a group or dataset so the cache stays
+   * consistent with the file. Also removes the path from the miss cache if present.
+   * @param entryName absolute path of the new entry
+   * @param groupClass NXclass for a group, or SDS for a dataset
+   */
+  void registerEntry(std::string const &entryName, std::string const &groupClass) const;
+
+  void registerDataSet(std::string const &entryName) const;
+
+  /**
+   * Return the group NX_class for a given entry name, if it exists.  Else, UNKNOWN_CLASS.
+   * @param entryName absolute path of the entry
+   * @return the group NX_class for a given entry name, if it exists.  Else, UNKNOWN_CLASS.
+   */
+  std::string operator[](std::string const &entryName) const;
 
   /// @brief Get string data from a dataset at address
   /// @param address Full HDF5 address of the dataset
@@ -110,16 +156,23 @@ private:
    * Sets m_allEntries, called in HDF5 constructor.
    * m_filename must be set
    */
-  std::map<std::string, std::string> initAllEntries();
-  void loadGroups(std::map<std::string, std::string> &allEntries, std::string const &address, unsigned int depth,
-                  const unsigned int maxDepth);
+  EntryMap initAllEntries();
+  void loadGroups(EntryMap &allEntries, std::string const &address, unsigned int depth, const unsigned int maxDepth);
+
+  /**
+   * Perform a single full-file scan (cycle-safe, via H5Lvisit2) that caches every entry's class into
+   * m_allEntries and sets m_fullyScanned. A no-op once the file has been fully scanned. Enumeration
+   * queries (allAddressesOfType, classTypeExists) call this so they read from a complete map instead of
+   * re-walking the file on every call.
+   */
+  void ensureAllEntries() const;
 
   /** Nexus HDF5 file name */
   std::string const m_filename;
   /// Extension
   std::string const m_extension;
   /// HDF5 File Handle
-  UniqueID<&H5Fclose> m_fileID;
+  SharedFileID m_fileID;
 
   /** Root attributes cache. This is mutable because it is modified in a const method. */
   mutable std::unordered_set<std::string> m_rootAttrs;
@@ -133,13 +186,17 @@ private:
    *   value: group class (e.g. NXentry, NXlog)
    * </pre>
    */
-  mutable std::map<std::string, std::string> m_allEntries;
+  mutable EntryMap m_allEntries;
 
   /// mutex to protect reading from file after initialization in const methods
   mutable std::shared_mutex m_readNexusMutex;
 
   /// the set of non-existent entries that have been checked
   mutable std::unordered_set<std::string> m_allMisses;
+
+  /// true once the whole file has been scanned into m_allEntries, so enumeration queries are complete.
+  /// mutable because it is set from const enumeration methods via ensureAllEntries().
+  mutable std::atomic<bool> m_fullyScanned{false};
 };
 
 } // namespace Nexus

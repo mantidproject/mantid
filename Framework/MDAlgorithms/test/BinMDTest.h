@@ -27,6 +27,7 @@
 #include "MantidMDAlgorithms/SaveMD2.h"
 
 #include <cmath>
+#include <filesystem>
 #include <utility>
 
 #include <cxxtest/TestSuite.h>
