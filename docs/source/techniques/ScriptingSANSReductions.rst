@@ -220,7 +220,10 @@ Several optional parameters can control different aspects of the reduction
   with ``from sans.common.enums import OutputMode``.
   If this parameter is omitted, the default behaviour will be to publish the output to the ADS and save it in a file if there is a ``saveAlgs``.
 - ``use_reduction_mode_as_suffix``: If ``True``, appends second suffix to output name based on reduction mode.
+- ``output_diagnostic_ads_names``: If ``True``, this command will make the reduction output a second parameter containing a list of non-reduced workspace names in the ADS. Mainly to be used as part of :ref:`BatchReduce <SANSScriptingBatchReduce>` to delete
+  unneeded or unwanted workspaces at the end of a batch reduction.
 
+.. _SANSScriptingBatchReduce:
 
 BatchReduce
 ^^^^^^^^^^^
@@ -229,7 +232,7 @@ BatchReduce
 
     BatchReduce(filename, plotresults=False, saveAlgs=None,
                 centreit=False, combineDet=None, save_as_zero_error_Free=False,
-                output_mode=OutputMode.PUBLISH_TO_ADS)
+                output_mode=OutputMode.PUBLISH_TO_ADS, clean_up_ads=False)
 
 This parses a list of files to analyse from a batch file, then it calls :ref:`WavRangeReduction <SANSScriptingWavRangeReduction>` to perform each reduction.
 The filename is a mandatory parameter:
@@ -243,7 +246,8 @@ Optional parameters:
     - ``centreit``: Do centre finding (False by default).
     - ``combineDet``: Same as :ref:`WavRangeReduction <SANSScriptingWavRangeReduction>`.
     - ``save_as_zero_error_free``: Same as :ref:`WavRangeReduction <SANSScriptingWavRangeReduction>`.
-    - ``output_mode``: Same as :ref:`WavRangeReduction <SANSScriptingWavRangeReduction>`..
+    - ``output_mode``: Same as :ref:`WavRangeReduction <SANSScriptingWavRangeReduction>`.
+    - ``clean_up_ads``: At the end of a batch processing, removes all non-reduced (optimization, raw and transmission) workspaces from the ADS.
 
 Function returns a dictionary with some values from the reduction (scale and shift as of now).
 
