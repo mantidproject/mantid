@@ -65,7 +65,7 @@ private:
   Helper method to create a pair of corresponding resource managed, IDF and VTP
   files.
   */
-  IDFEnvironment create_idf_and_vtp_pair(bool put_vtp_next_to_IDF = true) {
+  IDFEnvironment create_idf_and_vtp_pair(bool put_vtp_next_to_IDF = true, const std::string &vtp_contents = "") {
     const std::string instrument_name = "MinimalForTesting";
     const std::string idf_filename = instrument_name + "_Definition.xml";
     const std::string idf_file_contents = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
@@ -92,8 +92,10 @@ private:
     // expected name
     const std::string vtp_filename =
         instrument_name + ChecksumHelper::sha1FromString(Strings::strip(idf_file_contents)) + ".vtp";
-    const std::string vtp_file_contents = "<VTKFile byte_order=\"LittleEndian\" type=\"PolyData\" "
-                                          "version=\"1.0\"><PolyData/></VTKFile>";
+    const std::string vtp_file_contents = vtp_contents.empty()
+                                              ? "<VTKFile byte_order=\"LittleEndian\" type=\"PolyData\" "
+                                                "version=\"1.0\"><PolyData/></VTKFile>"
+                                              : vtp_contents;
 
     const std::string instrument_dir = ConfigService::Instance().getInstrumentDirectory() + "/unit_testing/";
     std::string vtp_dir = ConfigService::Instance().getVTPFileDirectory();
@@ -703,6 +705,53 @@ public:
                      parser.getAppliedCachingOption()); // Check that the geometry cache file was used.
     TS_ASSERT(Mock::VerifyAndClearExpectations(mockIDF));
     TS_ASSERT(Mock::VerifyAndClearExpectations(mockCache));
+  }
+
+  /**
+  A cache file that cannot be parsed should be deleted and recreated from the
+  instrument definition rather than causing the load to fail.
+  */
+  void testCacheFileIsRewrittenIfItCannotBeParsed() {
+    const std::string corrupt_vtp_contents = "<VTKFile byte_order=\"LittleEndian\" type=\"PolyData\" version=\"1.0\">"
+                                             "<PolyData>"; // truncated, so unparsable
+    IDFEnvironment instrumentEnv = create_idf_and_vtp_pair(true, corrupt_vtp_contents);
+
+    const std::string idfFileName = instrumentEnv._idf.getFileName();
+    const std::string cacheFileName = instrumentEnv._vtp.getFileName();
+
+    MockIDFObject *mockIDF = new MockIDFObject(idfFileName);
+    MockIDFObject *mockCache = new MockIDFObject(cacheFileName);
+
+    EXPECT_CALL(*mockIDF, exists()).WillRepeatedly(Return(true));
+    EXPECT_CALL(*mockCache, exists()).WillRepeatedly(Return(true)); // The (corrupt) cache file does exist.
+
+    IDFObject_const_sptr idf(mockIDF);
+    IDFObject_const_sptr cache(mockCache);
+
+    InstrumentDefinitionParser parser(idf, cache, instrumentEnv._instName, instrumentEnv._xmlText);
+    // make sure the fallback cache is not picked up instead
+    RemoveFallbackVTPFile(parser);
+
+    TS_ASSERT_THROWS_NOTHING(parser.parseXML(nullptr));
+
+    TS_ASSERT_EQUALS(InstrumentDefinitionParser::WroteGeomCache,
+                     parser.getAppliedCachingOption()); // Check the cache was recreated.
+    TS_ASSERT(std::filesystem::exists(cacheFileName));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(mockIDF));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(mockCache));
+
+    // The recreated cache file is readable, so a subsequent load uses it.
+    MockIDFObject *mockIDF2 = new MockIDFObject(idfFileName);
+    MockIDFObject *mockCache2 = new MockIDFObject(cacheFileName);
+    EXPECT_CALL(*mockIDF2, exists()).WillRepeatedly(Return(true));
+    EXPECT_CALL(*mockCache2, exists()).WillRepeatedly(Return(true));
+
+    InstrumentDefinitionParser parser2(IDFObject_const_sptr(mockIDF2), IDFObject_const_sptr(mockCache2),
+                                       instrumentEnv._instName, instrumentEnv._xmlText);
+    TS_ASSERT_THROWS_NOTHING(parser2.parseXML(nullptr));
+    TS_ASSERT_EQUALS(InstrumentDefinitionParser::ReadGeomCache, parser2.getAppliedCachingOption());
+    TS_ASSERT(Mock::VerifyAndClearExpectations(mockIDF2));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(mockCache2));
   }
 
   /**
