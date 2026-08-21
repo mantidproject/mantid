@@ -28,8 +28,6 @@ from instrumentview.renderers.side_by_side_shape_renderer import SideBySideShape
 
 from instrumentview.InteractorStyles import InteractorStyles
 
-from vtkmodules.vtkRenderingCore import vtkCoordinate
-
 
 class SuppressRendering:
     def __init__(self, plotter):
@@ -335,18 +333,12 @@ class FullInstrumentViewPresenter:
         max_point = np.array([xmax, ymax, zmax])
 
         # Convert to display coordinates (pixels)
-        plotter = self._view.main_plotter
-        coordinate = vtkCoordinate()
-        coordinate.SetCoordinateSystemToWorld()
-        display_coords = []
-        for p in (min_point, max_point):
-            coordinate.SetValue(*p)
-            display_coords.append(coordinate.GetComputedDisplayValue(plotter.renderer))
+        display_coords = [self._view.world_to_display(*p) for p in (min_point, max_point)]
 
         mesh_width = display_coords[1][0] - display_coords[0][0]
         mesh_height = display_coords[1][1] - display_coords[0][1]
 
-        window_width, window_height = plotter.window_size
+        window_width, window_height = self._view.main_plotter.window_size
 
         # Safeguard against division by zero
         mesh_width = mesh_width if mesh_width > 0 else window_width
