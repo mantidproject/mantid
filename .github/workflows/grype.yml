@@ -33,6 +33,8 @@ jobs:
             platform: linux-64
           - os: windows-latest
             platform: win-64
+          - os: macos-latest
+            platform: osx-arm64
 
     steps:
       - name: Checkout workflow dependencies
