@@ -123,6 +123,8 @@ class FullInstrumentViewModel:
         self.full_counts_limits = self._counts_limits
 
         self._sample_shape = self._get_sample_shape_from_workspace(self._workspace)
+        self._transform = np.eye(4)
+        self._transformed_detector_positions = self.detector_positions.copy()
 
     @property
     def workspace(self) -> Workspace2D:
@@ -463,6 +465,33 @@ class FullInstrumentViewModel:
         if self._projection_type == ProjectionType.THREE_D:
             return self._detector_positions_3d[self.is_pickable]
         return self._calculate_projection()[self.is_pickable]
+
+    @property
+    def transform(self) -> np.ndarray:
+        return self._transform
+
+    @transform.setter
+    def transform(self, value: np.ndarray) -> None:
+        self._transform = value
+
+    @property
+    def transformed_detector_positions(self) -> np.ndarray:
+        return self._transformed_detector_positions
+
+    def transform_vectors_with_matrix(self, points: np.ndarray, transform: Optional[np.ndarray] = None) -> np.ndarray:
+        if points.size == 0:
+            return points
+        if transform is None:
+            transform = self._transform
+
+        # The transform is a 4x4 matrix while the points are 3D vectors,
+        # so first append the homogeneous coordinate.
+        transformed_points = np.hstack([points, np.ones((points.shape[0], 1))])
+        transformed_points = transformed_points @ transform.T
+        return transformed_points[:, :3]
+
+    def update_transformed_detector_positions(self) -> None:
+        self._transformed_detector_positions = self.transform_vectors_with_matrix(self.detector_positions)
 
     @property
     def masked_positions(self) -> np.ndarray:

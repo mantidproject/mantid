@@ -63,7 +63,6 @@ class FullInstrumentViewPresenter:
         self._view = view
         self._model = model
         self._closing = False
-        self._transform = np.eye(4)
         self._counts_label = "Integrated Counts"
         self._visible_label = "Visible Picked"
         self._count_scale_mode = self._LINEAR
@@ -303,7 +302,7 @@ class FullInstrumentViewPresenter:
         self._update_transform()
         for mesh in [self._detector_mesh, self._pickable_mesh, self._masked_mesh, monitor_mesh, sample_position_mesh]:
             if mesh is not None:
-                mesh.transform(self._transform, inplace=True)
+                mesh.transform(self._model.transform, inplace=True)
 
         # If refreshing the limits we reset both the contour and integration sliders.
         # If not, we need to manually update the contour limits to what they were set to before we added the
@@ -323,9 +322,10 @@ class FullInstrumentViewPresenter:
 
     def _update_transform(self) -> None:
         if not self._model.is_2d_projection or self._view.is_maintain_aspect_ratio_checkbox_checked():
-            self._transform = np.eye(4)
+            self._model.transform = np.eye(4)
         else:
-            self._transform = self._transform_mesh_to_fill_window()
+            self._model.transform = self._transform_mesh_to_fill_window()
+        self._model.update_transformed_detector_positions()
 
     def _transform_mesh_to_fill_window(self) -> np.ndarray:
         xmin, xmax, ymin, ymax, zmin, zmax = self._detector_mesh_bounds
@@ -351,16 +351,6 @@ class FullInstrumentViewPresenter:
         # The matrix below is the product of those three transformations
         c_x, c_y, _ = centre
         return np.array([[scale_x, 0, 0, c_x * (1 - scale_x)], [0, scale_y, 0, c_y * (1 - scale_y)], [0, 0, 1, 0], [0, 0, 0, 1]])
-
-    def _transform_vectors_with_matrix(self, points: np.ndarray, transform: np.ndarray) -> np.ndarray:
-        if points.size == 0:
-            return points
-        # The transform is a 4x4 matrix, the points are 3D vectors, first we need an extra
-        # entry on the points
-        transformed_points = np.hstack([points, np.ones((points.shape[0], 1))])
-        transformed_points = transformed_points @ transform.T
-        # Now remove extra point
-        return transformed_points[:, :3]
 
     def on_aspect_ratio_check_box_clicked(self) -> None:
         self._view.store_maintain_aspect_ratio_option()
@@ -474,7 +464,8 @@ class FullInstrumentViewPresenter:
         manager each time it is dragged, resized or rotated, so the plot always shows what
         would be committed by Add ROI / Add Mask.
         """
-        centres = self._transform_vectors_with_matrix(np.array(self._model.detector_positions), self._transform)
+        self._update_transform()
+        centres = self._model.transformed_detector_positions
         # Projection uses VTK, so must be done on the Qt thread before queueing the rest
         self._view.project_and_cache_detector_points(centres)
         self._shape_update_generation += 1
@@ -522,7 +513,7 @@ class FullInstrumentViewPresenter:
         self.refresh_lineplot_peaks()
 
     def _on_add_item_clicked(self) -> None:
-        centres = self._transform_vectors_with_matrix(np.array(self._model.detector_positions), self._transform)
+        centres = self._model.transformed_detector_positions
         mask = self._view.get_shape_mask(centres)
         if not np.any(mask):
             return
@@ -534,7 +525,8 @@ class FullInstrumentViewPresenter:
         self._view.set_overlaid_shape_controls_checked(False)
 
     def on_add_item_clicked(self) -> None:
-        centres = self._transform_vectors_with_matrix(np.array(self._model.detector_positions), self._transform)
+        self._update_transform()
+        centres = self._model.transformed_detector_positions
         self._view.project_and_cache_detector_points(centres)
         self._callback_queue.put((self._on_add_item_clicked, ()))
 
@@ -759,7 +751,7 @@ class FullInstrumentViewPresenter:
     def refresh_plotter_peaks(self) -> None:
         self._view.clear_overlay_meshes()
         pos, labels, selected_peaks_workspaces = self._model.get_peak_overlay_arguments(self._view.selected_peaks_workspaces())
-        transformed_pos = [self._transform_vectors_with_matrix(p, self._transform) for p in pos]
+        transformed_pos = [self._model.transform_vectors_with_matrix(p) for p in pos]
         self._view.plot_overlay_meshes(transformed_pos, labels, selected_peaks_workspaces)
         # Everytime the pyvista plotter gets updated with peaks, the button for peak picking should be updated
         self._view.set_select_peaks_enabled(self._view.has_any_peak_overlays_in_pyvista_plotter())
