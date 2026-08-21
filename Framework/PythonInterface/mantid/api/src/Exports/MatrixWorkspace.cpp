@@ -822,7 +822,7 @@ void export_MatrixWorkspace() {
            "the data. "
            "Note: This will fail for ragged workspaces.")
       .def("extractDx", Mantid::PythonInterface::cloneDx, args("self"),
-           "Extracts (copies) the E data from the workspace into a 2D numpy array. "
+           "Extracts (copies) the Dx data from the workspace into a 2D numpy array. "
            "Note: This can fail for large workspaces as numpy will require a block of memory free that will fit all of "
            "the data. "
            "Note: This will fail for ragged workspaces.")

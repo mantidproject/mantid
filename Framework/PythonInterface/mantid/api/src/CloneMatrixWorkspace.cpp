@@ -82,7 +82,7 @@ template <> size_t fieldSize<EValues>(MatrixWorkspace const &workspace, size_t c
 }
 
 template <> size_t fieldSize<DxValues>(MatrixWorkspace const &workspace, size_t const index) {
-  return workspace.histogramSize(index);
+  return workspace.dx(index).size();
 }
 
 /**
