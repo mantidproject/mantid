@@ -8,6 +8,7 @@ from qtpy import QtWidgets, QtCore
 from qtpy.QtGui import QIntValidator, QDoubleValidator
 
 from mantidqt.utils.qt import load_ui
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.direction_fields import autosize_direction_fields
 
 Ui_settings, _ = load_ui(__file__, "settings_widget.ui")
 
@@ -31,6 +32,21 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
         self.finder_path_to_gsas2.isForRunFiles(False)
         self.finder_path_to_gsas2.isForDirectory(True)
         self.finder_path_to_gsas2.isOptional(True)
+
+        self.direction_fields = (
+            self.lineedit_RD0,
+            self.lineedit_RD1,
+            self.lineedit_RD2,
+            self.lineedit_ND0,
+            self.lineedit_ND1,
+            self.lineedit_ND2,
+            self.lineedit_TD0,
+            self.lineedit_TD1,
+            self.lineedit_TD2,
+        )
+        # directions adopted from a reference workspace are written to full precision, so a fixed
+        # narrow box would hide most of the value
+        autosize_direction_fields(self.direction_fields)
 
         self.timeout_lineedit.setValidator(QIntValidator(0, 200))
         self.dSpacing_min_lineedit.setValidator(QDoubleValidator(0.0, 200.0, 3))

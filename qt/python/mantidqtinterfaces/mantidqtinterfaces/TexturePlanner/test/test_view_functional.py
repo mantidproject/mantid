@@ -1193,6 +1193,44 @@ class TestTextureDirectionFrames(_FunctionalTestBase):
         rotated = Rotation.from_euler("x", 90, degrees=True).apply(entered)
         np.testing.assert_allclose(self._displayed_directions(), rotated, atol=1e-9)
 
+    def test_lab_frame_display_follows_a_later_change_of_initial_rotation(self):
+        # the displayed values are derived from the initial rotation, so editing the rotation while
+        # the lab frame is on must refresh them rather than leave the old frame on screen
+        self._click_checkbox(self.view.chkTransformDirs)
+        self._click_checkbox(self.view.chkLabDirs)
+        QApplication.processEvents()
+        np.testing.assert_allclose(self._displayed_directions(), np.eye(3), atol=1e-9)
+
+        self._rotate_initial_shape_x90()
+
+        np.testing.assert_allclose(self._displayed_directions(), (self._ROT_X90_RD, self._ROT_X90_ND, self._ROT_X90_TD), atol=1e-9)
+
+    def test_entered_directions_keep_their_precision_through_an_update(self):
+        # the sample-frame fields are read straight back into the model, so rounding them for
+        # display would quietly rewrite the frame the user entered
+        rotated = Rotation.from_euler("z", 30, degrees=True).as_matrix()
+        self._set_entered_directions(*rotated.T)
+
+        np.testing.assert_allclose(self._displayed_directions(), rotated.T, atol=1e-9)
+        np.testing.assert_allclose(self.model.ax_transform, rotated, atol=1e-9)
+        self.assertEqual(self.model.dir_names, ["RD", "ND", "TD"])
+
+    def test_direction_boxes_grow_to_fit_the_longest_entry(self):
+        # the entered directions are kept at full precision, so the boxes have to show them
+        widths = {field.maximumWidth() for field in self.view.direction_fields}
+        self.assertEqual(len(widths), 1)  # a grid: every box the same width
+        before = widths.pop()
+
+        rotated = Rotation.from_euler("z", 30, degrees=True).as_matrix()
+        self._set_entered_directions(*rotated.T)
+
+        widths = {field.maximumWidth() for field in self.view.direction_fields}
+        self.assertEqual(len(widths), 1)
+        width = widths.pop()
+        self.assertGreater(width, before)
+        longest = max(self.view.get_rd_dir().split(","), key=len)
+        self.assertGreaterEqual(width, self.view.lineedit_RD0.fontMetrics().horizontalAdvance(longest))
+
     def test_update_directions_in_lab_frame_renames_without_rewriting_the_vectors(self):
         # the fields are showing derived values, so Update must not feed them back into the model
         self._set_entered_directions((0, 1, 0), (0, 0, 1), (1, 0, 0))
