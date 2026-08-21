@@ -625,8 +625,8 @@ class FullInstrumentViewModel:
         return transformed_pos, labels_by_pws, selected_peaks_workspaces
 
     def _get_index_of_closest_detector_with_peak(self, index_in_detector_positions: int) -> int:
-        clicked_position = self.detector_positions[index_in_detector_positions]
-        positions_detectors_with_peaks = self.detector_positions[self._peaks_indices_in_detector_positions]
+        clicked_position = self.transformed_detector_positions[index_in_detector_positions]
+        positions_detectors_with_peaks = self.transformed_detector_positions[self._peaks_indices_in_detector_positions]
         if len(positions_detectors_with_peaks) == 0:
             return index_in_detector_positions
         closest_peak_index = np.argmin(np.linalg.norm(positions_detectors_with_peaks - clicked_position, axis=1))
