@@ -492,6 +492,10 @@ class TexturePlannerPresenter(AlgorithmObserver):
         self.refresh_scattering_geometry()
         self.model.update_all_projected_data()
         self.update_plots()
+        if self.view.get_lab_dirs():
+            # the initial rotation is what maps the sample frame onto the lab frame, so the
+            # displayed lab directions are stale until they are re-derived
+            self.set_view_with_texture_directions()
 
     def set_gauge_volume(self) -> None:
         self.model.workspaces.set_gauge_volume_str(self.view.get_shape_method(), self.view.get_custom_shape())

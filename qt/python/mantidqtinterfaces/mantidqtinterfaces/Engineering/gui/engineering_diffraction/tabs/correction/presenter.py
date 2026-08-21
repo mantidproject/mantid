@@ -183,10 +183,23 @@ class TextureCorrectionPresenter(RbScopeConsumer, InstrumentScopeConsumer, Algor
         changes = []
         for key, new_value in new_values.items():
             old_value = self._get_setting(key)
-            if old_value != new_value:
+            unchanged = self._same_direction(old_value, new_value) if key.endswith("_dir") else old_value == new_value
+            if not unchanged:
                 changes.append(f"{key} {old_value} -> {new_value}")
             set_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, key, new_value, rb=self.rb_num)
         return changes
+
+    @staticmethod
+    def _same_direction(old_value: str, new_value: str) -> bool:
+        """Whether two direction settings describe the same vector at the precision written here.
+
+        The stored value may have been typed by hand ("1,0,0") while these are always written as
+        floats ("1.0,0.0,0.0"), so a string comparison would report an unchanged frame as a change."""
+        try:
+            old = [round(float(x), 6) for x in old_value.split(",")]
+        except (AttributeError, ValueError):
+            return False  # unreadable (or unset) settings are always worth overwriting
+        return old == [float(x) for x in new_value.split(",")]
 
     def on_apply_clicked(self) -> None:
         wss = self.view.get_selected_workspaces()

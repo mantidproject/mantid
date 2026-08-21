@@ -4,11 +4,23 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from qtpy.QtWidgets import QMainWindow, QHeaderView, QTableWidgetItem, QCheckBox, QWidget, QHBoxLayout, QPushButton, QToolBar, QGroupBox
+from qtpy.QtWidgets import (
+    QMainWindow,
+    QHeaderView,
+    QTableWidgetItem,
+    QCheckBox,
+    QWidget,
+    QHBoxLayout,
+    QPushButton,
+    QToolBar,
+    QGroupBox,
+    QLineEdit,
+)
 from qtpy import QtCore
 from qtpy.QtGui import QCloseEvent
 from mantidqt.utils.qt import load_ui
 from mantidqt.icons import get_icon
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.direction_fields import autosize_direction_fields
 from mantid.kernel import FeatureType
 from mantid import UsageService
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -17,7 +29,7 @@ from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 from qtpy.QtWidgets import QVBoxLayout
 from functools import partial
-from typing import Callable, List, Tuple
+from typing import Callable, List, Sequence
 
 Ui_texplan, _ = load_ui(__file__, "texture_planner.ui")
 
@@ -105,6 +117,19 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         self.gonio_senses = (self.cmbSense0, self.cmbSense1, self.cmbSense2, self.cmbSense3, self.cmbSense4, self.cmbSense5)
         self.gonio_vecs = (self.edtVec0, self.edtVec1, self.edtVec2, self.edtVec3, self.edtVec4, self.edtVec5)
         self.init_angles = (self.spnInitX, self.spnInitY, self.spnInitZ)
+        self.direction_fields = (
+            self.lineedit_RD0,
+            self.lineedit_RD1,
+            self.lineedit_RD2,
+            self.lineedit_ND0,
+            self.lineedit_ND1,
+            self.lineedit_ND2,
+            self.lineedit_TD0,
+            self.lineedit_TD1,
+            self.lineedit_TD2,
+        )
+        # the sample-frame values are held to full precision, so a fixed narrow box would hide them
+        autosize_direction_fields(self.direction_fields)
 
         self._setup_pf_plot()
         self._setup_lab_plot()
@@ -543,20 +568,24 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
     def set_td_name(self, text: str) -> None:
         self.lineedit_TD.setText(text)
 
-    def set_rd_dir(self, vec: Tuple[int | float, int | float, int | float]) -> None:
-        self.lineedit_RD0.setText(str(round(vec[0], 2)))
-        self.lineedit_RD1.setText(str(round(vec[1], 2)))
-        self.lineedit_RD2.setText(str(round(vec[2], 2)))
+    def _set_dir_fields(self, fields: Sequence[QLineEdit], vec: Sequence[int | float]) -> None:
+        """Populate one direction row.
 
-    def set_td_dir(self, vec: Tuple[int | float, int | float, int | float]) -> None:
-        self.lineedit_TD0.setText(str(round(vec[0], 2)))
-        self.lineedit_TD1.setText(str(round(vec[1], 2)))
-        self.lineedit_TD2.setText(str(round(vec[2], 2)))
+        The lab-frame values are derived and shown read-only, so they are rounded for legibility.
+        The sample-frame values are editable and are read straight back into the model on Update,
+        so they must keep their full precision - rounding them would quietly rewrite the frame the
+        user entered."""
+        for field, component in zip(fields, vec):
+            field.setText(str(round(component, 2) if self.get_lab_dirs() else component))
 
-    def set_nd_dir(self, vec: Tuple[int | float, int | float, int | float]) -> None:
-        self.lineedit_ND0.setText(str(round(vec[0], 2)))
-        self.lineedit_ND1.setText(str(round(vec[1], 2)))
-        self.lineedit_ND2.setText(str(round(vec[2], 2)))
+    def set_rd_dir(self, vec: Sequence[int | float]) -> None:
+        self._set_dir_fields((self.lineedit_RD0, self.lineedit_RD1, self.lineedit_RD2), vec)
+
+    def set_td_dir(self, vec: Sequence[int | float]) -> None:
+        self._set_dir_fields((self.lineedit_TD0, self.lineedit_TD1, self.lineedit_TD2), vec)
+
+    def set_nd_dir(self, vec: Sequence[int | float]) -> None:
+        self._set_dir_fields((self.lineedit_ND0, self.lineedit_ND1, self.lineedit_ND2), vec)
 
     def set_max_ind(self, ind: int) -> None:
         self.spnIndex.setMaximum(ind)

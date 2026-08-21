@@ -242,6 +242,17 @@ class TestAdoptReferenceTextureDirections(unittest.TestCase):
         mock_logger.notice.assert_not_called()
         self.presenter.reference_frame_notifier.notify_subscribers.assert_not_called()
 
+    @patch(presenter_path + ".logger")
+    def test_the_default_direction_strings_are_not_reported_as_a_change(self, mock_logger, mock_set_setting):
+        # the stored defaults are typed as "1,0,0" while these are always written as floats, so
+        # comparing the strings would report an identity reference as a re-framing
+        self.model.get_reference_texture_directions.return_value = (np.eye(3), ("RD", "ND", "TD"))
+
+        self.presenter._adopt_reference_texture_directions()
+
+        mock_logger.notice.assert_not_called()
+        self.presenter.reference_frame_notifier.notify_subscribers.assert_not_called()
+
     def test_the_settings_dialog_is_told_to_drop_its_cache(self, mock_set_setting):
         # otherwise the dialog's pre-load cache would be written back over these values on Apply
         self.model.get_reference_texture_directions.return_value = (self._AX_TRANSFORM, self._DIR_NAMES)

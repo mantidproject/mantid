@@ -163,6 +163,14 @@ def _write_ax_transform_to_log(ws: str | Workspace2D, ax_transform: np.ndarray) 
 
 
 def _write_texture_dir_names_to_log(ws: str | Workspace2D, dir_names: tuple[str, str, str]) -> None:
+    # the log is a comma separated list of exactly three labels, so a label containing a comma would
+    # be read back as several labels - silently shifting the frame rather than failing here
+    offenders = [name for name in dir_names if "," in name]
+    if offenders:
+        raise ValueError(
+            f"Texture direction labels cannot contain commas: ({','.join(offenders)}). "
+            f"The {TEXTURE_DIRECTION_LABELS_LOG} log stores the three labels comma separated."
+        )
     AddSampleLog(Workspace=ws, LogName=TEXTURE_DIRECTION_LABELS_LOG, LogText=",".join(dir_names))
 
 

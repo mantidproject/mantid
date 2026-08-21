@@ -1020,6 +1020,12 @@ class TestTextureDirectionLogIO(unittest.TestCase):
 
         np.testing.assert_allclose(matrix, rotated, atol=1e-12)
 
+    def test_a_label_containing_a_comma_is_rejected(self):
+        # the labels share one comma separated log, so "RD, rolling" would be read back as four
+        # labels and silently truncated to the wrong three
+        with self.assertRaises(ValueError):
+            write_texture_direction_info_to_log(self.ws_name, self._AX_TRANSFORM, ("RD, rolling", "ND", "TD"))
+
     def test_rewriting_replaces_rather_than_appends(self):
         write_texture_direction_info_to_log(self.ws_name, np.eye(3), ("A", "B", "C"))
         write_texture_direction_info_to_log(self.ws_name, self._AX_TRANSFORM, self._DIR_NAMES)
