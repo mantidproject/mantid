@@ -24,6 +24,7 @@ class InteractorStyles:
 
         self.TRACKBALL.set_picking_callback(picking_callback)
         self.SCROLL_ZOOM_WITH_PICKING.set_picking_callback(picking_callback)
+        self.RUBBERBAND_ZOOM.set_picking_callback(picking_callback)
         self.SCROLL_ZOOM_WITH_HOVER.set_hover_callback(hover_callback)
 
         for style in (self.SCROLL_ZOOM_WITH_PICKING, self.SCROLL_ZOOM_WITH_HOVER, self.SCROLL_ZOOM_NO_PICKING):
@@ -35,8 +36,42 @@ class RubberBandZoomInteractorStyle(vtkInteractorStyleRubberBandZoom):
         super().__init__()
         self.plotter = plotter
         self._pyvista_plotter = _PlotterWrapper(plotter)  # HACK: Wrapper for PyVista compatibility
+        self._picking_callback = None
+        self._ignore_rubberband_interaction = False
         self.update_default_camera_state()
         self.AddObserver(vtkCommand.RightButtonPressEvent, lambda *_: self._reset_camera())
+        self.RemoveObservers(vtkCommand.LeftButtonPressEvent)
+        self.RemoveObservers(vtkCommand.MouseMoveEvent)
+        self.RemoveObservers(vtkCommand.LeftButtonReleaseEvent)
+        self.AddObserver(vtkCommand.LeftButtonPressEvent, self._on_left_button_press_event)
+        self.AddObserver(vtkCommand.MouseMoveEvent, self._on_mouse_move_event)
+        self.AddObserver(vtkCommand.LeftButtonReleaseEvent, self._on_left_button_release_event)
+
+    def _modifier_key_pressed(self):
+        interactor = self.GetInteractor()
+        return bool(interactor and (interactor.GetShiftKey() or interactor.GetControlKey() or interactor.GetAltKey()))
+
+    def _on_left_button_press_event(self, obj, event):
+        self._ignore_rubberband_interaction = self._modifier_key_pressed()
+        if self._ignore_rubberband_interaction:
+            if self._picking_callback is not None:
+                self._picking_callback(obj, event)
+            return
+        super().OnLeftButtonDown()
+
+    def set_picking_callback(self, picking_callback: Callable):
+        self._picking_callback = picking_callback
+
+    def _on_mouse_move_event(self, obj, event):
+        if self._ignore_rubberband_interaction:
+            return
+        super().OnMouseMove()
+
+    def _on_left_button_release_event(self, obj, event):
+        if self._ignore_rubberband_interaction:
+            self._ignore_rubberband_interaction = False
+            return
+        super().OnLeftButtonUp()
 
     def update_default_camera_state(self):
         """Re-cache the current camera state as the default (right-click reset) state.

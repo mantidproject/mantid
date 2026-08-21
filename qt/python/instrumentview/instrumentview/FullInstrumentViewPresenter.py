@@ -81,7 +81,6 @@ class FullInstrumentViewPresenter:
         self._renderer = self._get_renderer_for_mode(view.get_render_mode_option())
         self._interactor_styles = InteractorStyles(self._view.main_plotter, picking_callback=lambda: None, hover_callback=lambda: None)
         self._last_hovered_point_index: Optional[int] = None
-        self._select_bank_tube = False
         self._shape_preview_active = False
         # Incremented per requested shape update so the worker can drop superseded ones
         self._shape_update_generation = 0
@@ -112,8 +111,8 @@ class FullInstrumentViewPresenter:
     def setup(self):
         self._view.subscribe_presenter(self)
         self._view.set_projection_combo_options(self._model.get_projection_options())
-        self._view.set_default_projection(self._model.get_default_projection())
         self._view.setup_connections_to_presenter()
+        self._view.set_default_projection(self._model.get_default_projection())
         self._view.set_contour_range_limits(self._model.counts_limits)
         self._view.set_integration_range_limits(self._model.integration_limits)
         self._view.show_axes()
@@ -127,8 +126,7 @@ class FullInstrumentViewPresenter:
             add_callback=self.add_workspace_callback,
         )
         self._view.hide_status_box()
-        self._select_bank_tube = self._view.is_select_bank_tube_checked()
-        self.update_plotter(False)
+        self.update_plotter(refresh_limits=False)
 
         if self._model.workspace_base_unit in self._UNIT_OPTIONS:
             self._view.set_unit_combo_box_index(self._UNIT_OPTIONS.index(self._model.workspace_base_unit))
@@ -512,7 +510,7 @@ class FullInstrumentViewPresenter:
         if not self._is_current_shape_update(generation):
             return
         mask = self._view.get_shape_mask(centres)
-        if self._select_bank_tube:
+        if self._view.is_select_bank_tube_checked():
             mask = self._model.expand_pickable_mask_to_parent_subtrees(mask)
 
         self._model.extract_spectra_for_line_plot(
@@ -537,14 +535,11 @@ class FullInstrumentViewPresenter:
         if not np.any(mask):
             return
 
-        if self._select_bank_tube:
+        if self._view.is_select_bank_tube_checked():
             mask = self._model.expand_pickable_mask_to_parent_subtrees(mask)
         new_key = self._model.add_new_detector_key(mask.tolist(), self._view.get_current_selected_tab())
         self._view.set_new_item_key(self._view.get_current_selected_tab(), new_key)
         self._view.set_overlaid_shape_controls_checked(False)
-
-    def on_select_bank_tube_toggled(self, checked: bool) -> None:
-        self._select_bank_tube = checked
 
     def on_add_item_clicked(self) -> None:
         centres = self._transform_vectors_with_matrix(np.array(self._model.detector_positions), self._transform)
@@ -774,6 +769,8 @@ class FullInstrumentViewPresenter:
         pos, labels, selected_peaks_workspaces = self._model.get_peak_overlay_arguments(self._view.selected_peaks_workspaces())
         transformed_pos = [self._transform_vectors_with_matrix(p, self._transform) for p in pos]
         self._view.plot_overlay_meshes(transformed_pos, labels, selected_peaks_workspaces)
+        # Everytime the pyvista plotter gets updated with peaks, the button for peak picking should be updated
+        self._view.set_select_peaks_enabled(self._view.has_any_peak_overlays_in_pyvista_plotter())
 
     def refresh_lineplot_peaks(self) -> None:
         # Plot vertical lines on the lineplot if the peak detector is selected
@@ -784,7 +781,6 @@ class FullInstrumentViewPresenter:
     def on_start_adding_peaks_toggled(self, checked) -> None:
         if checked:
             self._model.turn_on_single_point_picking()
-            self._view.set_rubberband_zoom_checked(False)
             self._view.set_hover_pick_checked(False)
             self._view.start_peak_selection_in_lineplot()
             self._view.disable_and_uncheck_selection_list()
@@ -830,7 +826,9 @@ class FullInstrumentViewPresenter:
             return
 
         def detector_picked(detector_index: int) -> None:
-            self._model.update_point_picked_detectors(detector_index, self._select_bank_tube)
+            self._model.update_point_picked_detectors(
+                detector_index, self._view.is_select_peaks_checked(), self._view.is_select_bank_tube_checked()
+            )
             self.update_picked_detectors_on_view()
             return
 

@@ -322,13 +322,12 @@ class FullInstrumentViewModel:
     def get_integration_units(self):
         return self._integration_workspace.getAxis(0).getUnit().unitID()
 
-    def _detector_table_indices_for_parent_subtree(self, selected_indices: np.ndarray, pickable_only: bool) -> np.ndarray:
-        pickable_mask = self.is_pickable if pickable_only else None
+    def _detector_table_indices_for_parent_subtree(self, selected_indices: np.ndarray) -> np.ndarray:
         return detector_table_indices_for_parent_subtrees(
             selected_indices=selected_indices,
             component_idxs=self._component_idxs,
             component_info=self._workspace.componentInfo(),
-            pickable_mask=pickable_mask,
+            pickable_mask=self.is_pickable,
         )
 
     def expand_pickable_mask_to_parent_subtrees(self, pickable_mask: list[bool] | np.ndarray) -> np.ndarray:
@@ -338,7 +337,7 @@ class FullInstrumentViewModel:
             raise ValueError("pickable_mask must have one value per pickable detector")
 
         selected_pickable_indices = pickable_table_indices[pickable_mask]
-        expanded_pickable_table_indices = self._detector_table_indices_for_parent_subtree(selected_pickable_indices, pickable_only=True)
+        expanded_pickable_table_indices = self._detector_table_indices_for_parent_subtree(selected_pickable_indices)
 
         expanded_pickable_mask = np.zeros_like(pickable_mask, dtype=bool)
         if expanded_pickable_table_indices.size == 0:
@@ -363,12 +362,16 @@ class FullInstrumentViewModel:
         # Restoring groupings will handle the rest
         self._detector_is_picked = self._point_picked_detectors
 
-    def update_point_picked_detectors(self, index: int, expand_to_parent_subtree: bool) -> None:
+    def update_point_picked_detectors(self, index: int, pick_detector_with_peak, expand_to_parent_subtree: bool) -> None:
+        if pick_detector_with_peak:
+            index = self._get_index_of_closest_detector_with_peak(index)
+
         if self._peak_picking_status == PeakPickingStatus.Off:
             global_index = np.argwhere(self.is_pickable).flatten()[index]
             indices_to_update = np.array([global_index], dtype=int)
+
             if expand_to_parent_subtree:
-                indices_to_update = self._detector_table_indices_for_parent_subtree(indices_to_update, pickable_only=True)
+                indices_to_update = self._detector_table_indices_for_parent_subtree(indices_to_update)
 
             new_selection_value = ~self._detector_is_picked[global_index]
             self._detector_is_picked[indices_to_update] = new_selection_value
@@ -583,12 +586,22 @@ class FullInstrumentViewModel:
         wrapped_workspaces = [
             WorkspaceDetectorPeaks(ws_name, self.get_integration_units(), self.integration_limits) for ws_name in selected_peaks_workspaces
         ]
-        positions_and_labels_by_pws = [
-            wws.get_positions_and_labels(self.detector_positions, self.pickable_detector_ids) for wws in wrapped_workspaces
+        indices_and_labels_by_pws = [
+            wws.get_peaks_indices_and_labels(self.detector_positions, self.pickable_detector_ids) for wws in wrapped_workspaces
         ]
-        positions_by_pws = [pair[0] for pair in positions_and_labels_by_pws]
-        labels_by_pws = [pair[1] for pair in positions_and_labels_by_pws]
+        indices_by_pws = [pair[0] for pair in indices_and_labels_by_pws]
+        self._peaks_indices_in_detector_positions = np.concatenate(indices_by_pws or [np.array([], dtype=int)])
+        positions_by_pws = [self.detector_positions[indices] for indices in indices_by_pws]
+        labels_by_pws = [pair[1] for pair in indices_and_labels_by_pws]
         return positions_by_pws, labels_by_pws, selected_peaks_workspaces
+
+    def _get_index_of_closest_detector_with_peak(self, index_in_detector_positions: int) -> int:
+        clicked_position = self.detector_positions[index_in_detector_positions]
+        positions_detectors_with_peaks = self.detector_positions[self._peaks_indices_in_detector_positions]
+        if len(positions_detectors_with_peaks) == 0:
+            return index_in_detector_positions
+        closest_peak_index = np.argmin(np.linalg.norm(positions_detectors_with_peaks - clicked_position, axis=1))
+        return self._peaks_indices_in_detector_positions[closest_peak_index]
 
     def get_peak_lineplot_overlay_arguments(
         self, selected_peaks_workspaces: list[str]
