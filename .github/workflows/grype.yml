@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - .github/workflows/grype.yml
+      - .github/actions/grype/merge_sarif.py
       - .grype.yaml
   schedule:
     - cron: '0 12 * * *'
@@ -23,14 +24,17 @@ jobs:
     if: ${{ github.repository_owner == 'mantidproject' }}
     permissions:
       contents: read
-      security-events: write
-      actions: read
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os:
-          - ubuntu-latest
+        include:
+          - os: ubuntu-latest
+            platform: linux-64
+          - os: windows-latest
+            platform: win-64
+          - os: macos-latest
+            platform: osx-arm64
 
     steps:
       - name: Checkout workflow dependencies
@@ -50,12 +54,18 @@ jobs:
         id: pixi-project
         shell: bash
         run: |
-          project_dir="${RUNNER_TEMP}/grype-scan"
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            # git-bash reports RUNNER_TEMP with backslashes - use a mixed path
+            # (e.g. D:/a/_temp) that both bash and native executables accept
+            project_dir="$(cygpath --mixed "$RUNNER_TEMP")/grype-scan"
+          else
+            project_dir="${RUNNER_TEMP}/grype-scan"
+          fi
           mkdir -p "$project_dir"
           cat > "$project_dir/pixi.toml" <<'EOF'
           [workspace]
           channels = ["conda-forge", "mantid/label/nightly", "mantid", "neutrons"]
-          platforms = ["linux-64"]
+          platforms = ["${{ matrix.platform }}"]
 
           [dependencies]
           mantidworkbench = "*"
@@ -90,8 +100,67 @@ jobs:
           fail-build: false
           only-fixed: true
 
+      - name: Stage SARIF report
+        id: report
+        shell: bash
+        env:
+          SARIF: ${{ steps.scan.outputs.sarif }}
+        run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            source_path=$(cygpath --mixed "$SARIF")
+            temp_dir=$(cygpath --mixed "$RUNNER_TEMP")
+          else
+            source_path="$SARIF"
+            temp_dir="$RUNNER_TEMP"
+          fi
+          # the merge job reads the platform from the file name
+          report="$temp_dir/grype-${{ matrix.platform }}.sarif"
+          cp "$source_path" "$report"
+          echo "path=$report" >> "$GITHUB_OUTPUT"
+
+      - name: Upload SARIF report
+        uses: actions/upload-artifact@v7
+        with:
+          name: grype-sarif-${{ matrix.platform }}
+          path: ${{ steps.report.outputs.path }}
+          if-no-files-found: error
+          retention-days: 1
+
+  merge-and-upload:
+    # every platform has to report for the platform labels to be complete, so
+    # this deliberately does not run when one leg of the matrix failed
+    needs: scan-package
+    if: ${{ github.repository_owner == 'mantidproject' }}
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout workflow dependencies
+        uses: actions/checkout@v7
+        with:
+          sparse-checkout: |
+            .github/actions/grype/merge_sarif.py
+          sparse-checkout-cone-mode: false
+
+      - name: Download SARIF reports
+        uses: actions/download-artifact@v8
+        with:
+          pattern: grype-sarif-*
+          path: ${{ runner.temp }}/reports
+          merge-multiple: true
+
+      - name: Merge SARIF reports
+        run: |
+          python3 .github/actions/grype/merge_sarif.py \
+            "${{ runner.temp }}/grype.sarif" "${{ runner.temp }}"/reports/grype-*.sarif
+
       - name: Upload vulnerability report
         if: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.dry_run != 'true' }}
         uses: github/codeql-action/upload-sarif@v4
         with:
-          sarif_file: ${{ steps.scan.outputs.sarif }}
+          sarif_file: ${{ runner.temp }}/grype.sarif
+          # one category for all platforms, so the merged results are a single analysis
+          category: grype
