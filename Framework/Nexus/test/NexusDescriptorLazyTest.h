@@ -130,6 +130,67 @@ public:
     }
   }
 
+  void test_classTypeExistsInCache() {
+    std::cout << "\nTesting classTypeExistsInCache in NexusDescriptorLazy" << std::endl;
+    std::string const filename = NexusTest::getFullPath("EQSANS_89157.nxs.h5");
+    Mantid::Nexus::NexusDescriptorLazy descriptor(filename);
+
+    // NXentry (root-level) and NXevent_data (direct child of /entry) are both within
+    // the bounded init scan, so they must be found without walking the file.
+    TS_ASSERT_EQUALS(descriptor.classTypeExistsInCache("NXentry"), true);
+    TS_ASSERT_EQUALS(descriptor.classTypeExistsInCache("NXevent_data"), true);
+
+    // a class that appears nowhere in the file cannot be in the cache either.
+    TS_ASSERT_EQUALS(descriptor.classTypeExistsInCache("NXthisClassDoesNotExist"), false);
+  }
+
+  void test_allAddressesOfType() {
+    std::cout << "\nTesting allAddressesOfType in NexusDescriptorLazy" << std::endl;
+    std::string const filename = NexusTest::getFullPath("EQSANS_89157.nxs.h5");
+    Mantid::Nexus::NexusDescriptorLazy descriptor(filename);
+
+    // /entry/DASlogs/BL6:CS:DataType is NXlog, but sits below the bounded init scan,
+    // so this call must trigger (and cache) the one-time full-file scan.
+    auto const addresses = descriptor.allAddressesOfType("NXlog");
+    TS_ASSERT(addresses.count("/entry/DASlogs/BL6:CS:DataType") == 1);
+
+    // a repeat call must be served from the now-memoized cache and return the same result
+    auto const addressesAgain = descriptor.allAddressesOfType("NXlog");
+    TS_ASSERT_EQUALS(addresses, addressesAgain);
+  }
+
+  void test_classTypeExistsChild() {
+    std::cout << "\nTesting classTypeExistsChild in NexusDescriptorLazy" << std::endl;
+    std::string const filename = NexusTest::getFullPath("EQSANS_89157.nxs.h5");
+    Mantid::Nexus::NexusDescriptorLazy descriptor(filename);
+
+    // matching: /entry/DASlogs has a NXlog descendant
+    TS_ASSERT_EQUALS(descriptor.classTypeExistsChild("/entry/DASlogs", "NXlog"), true);
+    // non-matching: /entry/DASlogs has no NXevent_data descendant
+    TS_ASSERT_EQUALS(descriptor.classTypeExistsChild("/entry/DASlogs", "NXevent_data"), false);
+    // absent parent: the child cannot exist if the parent does not
+    TS_ASSERT_EQUALS(descriptor.classTypeExistsChild("/entry/not_a_real_group", "NXlog"), false);
+  }
+
+  void test_registerEntry_and_registerDataSet() {
+    std::cout << "\nTesting registerEntry/registerDataSet in NexusDescriptorLazy" << std::endl;
+    std::string const filename = NexusTest::getFullPath("EQSANS_89157.nxs.h5");
+    Mantid::Nexus::NexusDescriptorLazy descriptor(filename);
+
+    std::string const newGroup = "/entry/a_newly_made_group";
+    std::string const newData = "/entry/a_newly_made_dataset";
+
+    // query first so the address is cached as a miss, then verify registration overrides it
+    TS_ASSERT_EQUALS(descriptor.isEntry(newGroup), false);
+    descriptor.registerEntry(newGroup, "NXcollection");
+    TS_ASSERT_EQUALS(descriptor.isEntry(newGroup), true);
+    TS_ASSERT_EQUALS(descriptor.isEntry(newGroup, "NXcollection"), true);
+
+    TS_ASSERT_EQUALS(descriptor.isDataSet(newData), false);
+    descriptor.registerDataSet(newData);
+    TS_ASSERT_EQUALS(descriptor.isDataSet(newData), true);
+  }
+
   void test_hasRootAttr() {
     std::cout << "\nTesting hasRootAttr in NexusDescriptorLazy" << std::endl;
     // create a descriptor with the correct values

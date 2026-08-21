@@ -9,6 +9,7 @@
 
 #include <ostream>
 #include <string>
+#include <string_view>
 
 namespace Mantid::Nexus {
 
@@ -86,10 +87,10 @@ NexusAddress NexusAddress::operator/(NexusAddress const &p) const {
   if (p.isRoot())
     return NexusAddress(m_path);
   // strip leading '/' from rhs so we can append cleanly
-  std::string const &rhs = p.isAbsolute() ? p.m_path.substr(1) : p.m_path;
-  if (m_path == "/")
-    return NexusAddress("/" + rhs);
-  return NexusAddress(m_path + "/" + rhs);
+  std::string_view const rhs = p.isAbsolute() ? std::string_view(p.m_path).substr(1) : std::string_view(p.m_path);
+  std::string result = (m_path == "/") ? "/" : m_path + "/";
+  result.append(rhs);
+  return NexusAddress(std::move(result));
 }
 
 NexusAddress &NexusAddress::operator/=(std::string const &s) { return *this /= NexusAddress(s); }
@@ -142,14 +143,19 @@ std::vector<std::string> NexusAddress::parts() const {
 }
 
 void NexusAddress::appendComponent(std::string const &name) {
-  if (m_path.back() != '/')
+  if (!m_path.empty() && m_path.back() != '/')
     m_path += '/';
   m_path += name;
 }
 
 void NexusAddress::popComponent() {
   auto const pos = m_path.rfind('/');
-  m_path.resize(pos == 0 ? 1 : pos);
+  if (pos == std::string::npos) {
+    // no separator to pop back to -- leave a slash-free relative path empty
+    m_path.clear();
+  } else {
+    m_path.resize(pos == 0 ? 1 : pos);
+  }
 }
 
 bool NexusAddress::hasChild(std::string const &child) const {

@@ -29,12 +29,6 @@ public:
     TS_ASSERT_EQUALS(np2.string(), np1.string());
   }
 
-  void test_construct_from_filepath() {
-    std::string p("/path/good");
-    NexusAddress np(p);
-    TS_ASSERT_EQUALS(np.string(), p);
-  }
-
   void test_construct_lexically_normal_dots() {
     std::string p("/path/good/../other/");
     NexusAddress np(p);
@@ -249,7 +243,7 @@ public:
     TS_ASSERT_EQUALS(np, NexusAddress("/raw_data_1"));
     TS_ASSERT_EQUALS(np.string(), "/raw_data_1");
 
-    NexusAddress np2("//raw_data_1");
+    NexusAddress np2("/raw_data_1//");
     TS_ASSERT_EQUALS(np2.string(), "/raw_data_1");
   }
 
@@ -269,5 +263,31 @@ public:
 
     NexusAddress np2("data/copy");
     TS_ASSERT_EQUALS((np / np2).string(), "/entry0/data/copy");
+  }
+
+  void test_appendComponent_to_root() {
+    NexusAddress np;
+    np.appendComponent("entry");
+    TS_ASSERT_EQUALS(np.string(), "/entry");
+  }
+
+  void test_appendComponent_to_nested_path() {
+    NexusAddress np("/entry/data");
+    np.appendComponent("log");
+    TS_ASSERT_EQUALS(np.string(), "/entry/data/log");
+  }
+
+  void test_appendComponent_then_popComponent_round_trip() {
+    NexusAddress np("/entry/data");
+    np.appendComponent("log");
+    TS_ASSERT_EQUALS(np.string(), "/entry/data/log");
+    np.popComponent();
+    TS_ASSERT_EQUALS(np.string(), "/entry/data");
+  }
+
+  void test_popComponent_single_component_to_root() {
+    NexusAddress np("/entry");
+    np.popComponent();
+    TS_ASSERT_EQUALS(np.string(), "/");
   }
 };

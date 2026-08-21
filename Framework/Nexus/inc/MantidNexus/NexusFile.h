@@ -226,6 +226,12 @@ private:
   NexusAddress groupAddress(NexusAddress const &) const;
   NexusAddress formAbsoluteAddress(NexusAddress const &) const;
 
+  /** Access the lazy descriptor, throwing a clear error instead of a null dereference
+   * if this File has already been closed.
+   * \returns a reference to the held NexusDescriptorLazy
+   */
+  NexusDescriptorLazy &descriptor() const;
+
   //------------------------------------------------------------------------------------------------------------------
   // GROUP MAKE / OPEN / CLOSE
   //------------------------------------------------------------------------------------------------------------------

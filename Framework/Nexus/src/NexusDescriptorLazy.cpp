@@ -120,9 +120,7 @@ namespace Mantid::Nexus {
 
 // PUBLIC
 
-NexusDescriptorLazy::NexusDescriptorLazy(std::string const &filename)
-    : m_filename(filename), m_extension(std::filesystem::path(m_filename).extension().string()), m_firstEntryNameType(),
-      m_allEntries(initAllEntries()), m_allMisses() {}
+NexusDescriptorLazy::NexusDescriptorLazy(std::string const &filename) : NexusDescriptorLazy(SharedFileID(), filename) {}
 
 NexusDescriptorLazy::NexusDescriptorLazy(SharedFileID fileID, std::string const &filename)
     : m_filename(filename), m_extension(std::filesystem::path(m_filename).extension().string()), m_fileID(fileID),
@@ -243,15 +241,17 @@ std::string NexusDescriptorLazy::operator[](std::string const &entryName) const 
   if (known_miss) {
     return UNKNOWN_CLASS;
   } else {
-    EntryMap::iterator it, iend;
+    std::optional<std::string> cached;
     {
       std::shared_lock<std::shared_mutex> lock(m_readNexusMutex);
-      it = m_allEntries.find(entryName);
-      iend = m_allEntries.end();
+      auto const it = m_allEntries.find(entryName);
+      if (it != m_allEntries.end()) {
+        cached = it->second;
+      }
     }
-    if (it != iend) {
+    if (cached) {
       // if it is found in the cache, use it
-      return it->second;
+      return *cached;
     } else {
       // otherwise check if it exists in the file
       if (H5Oexists_by_name(m_fileID, entryName.c_str(), H5P_DEFAULT) > 0) {
@@ -315,17 +315,21 @@ void NexusDescriptorLazy::ensureAllEntries() const {
   // fast path: already fully scanned
   if (m_fullyScanned.load()) {
     return;
-  } else {
-    // Walk the whole file once. H5Lvisit2 is cycle-safe, so hard-linked groups cannot cause infinite
-    // recursion. Build into a local map with no lock held, then merge — readers are not blocked during I/O.
-    std::lock_guard<std::shared_mutex> lock(m_readNexusMutex);
-    EntryMap scanned;
-    H5Lvisit2(m_fileID, H5_INDEX_NAME, H5_ITER_NATIVE, &fullScanCallback, &scanned);
-    for (auto &entry : scanned) {
-      m_allEntries.insert_or_assign(entry.first, std::move(entry.second));
-    }
-    m_fullyScanned.store(true);
   }
+  // Walk the whole file once. H5Lvisit2 is cycle-safe, so hard-linked groups cannot cause infinite
+  // recursion. Build into a local map with no lock held, so concurrent readers are not blocked during I/O.
+  EntryMap scanned;
+  H5Lvisit2(m_fileID, H5_INDEX_NAME, H5_ITER_NATIVE, &fullScanCallback, &scanned);
+
+  std::lock_guard<std::shared_mutex> lock(m_readNexusMutex);
+  if (m_fullyScanned.load()) {
+    // another thread finished the scan while this one was walking the file
+    return;
+  }
+  for (auto &entry : scanned) {
+    m_allEntries.insert_or_assign(entry.first, std::move(entry.second));
+  }
+  m_fullyScanned.store(true);
 }
 
 void NexusDescriptorLazy::loadGroups(EntryMap &allEntries, std::string const &address, unsigned int depth,
@@ -387,13 +391,17 @@ EntryMap NexusDescriptorLazy::initAllEntries() {
   {
     unsigned int depth = 0;
     loadGroups(allEntries, "/", depth, INIT_DEPTH);
-    // set the first entry name/type — find the first direct child of root
-    // (unordered_map has no ordering, so we can't rely on iterator arithmetic)
+    // set the first entry name/type — find the lexicographically smallest direct child of root
+    // (unordered_map has no ordering, so a deterministic choice needs an explicit comparison)
     m_firstEntryNameType = std::make_pair("", UNKNOWN_CLASS);
+    bool foundFirstEntry = false;
     for (auto const &[path, cls] : allEntries) {
       if (path.size() > 1 && path.find('/', 1) == std::string::npos) {
-        m_firstEntryNameType = {path.substr(1), cls};
-        break;
+        std::string name = path.substr(1);
+        if (!foundFirstEntry || name < m_firstEntryNameType.first) {
+          m_firstEntryNameType = {std::move(name), cls};
+          foundFirstEntry = true;
+        }
       }
     }
 

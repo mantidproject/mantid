@@ -9,6 +9,7 @@
 #include "MantidNexus/DllConfig.h"
 #include "MantidNexus/UniqueID.h"
 
+#include <atomic>
 #include <map>
 #include <optional>
 #include <set>
@@ -34,9 +35,10 @@ public:
   NexusDescriptorLazy(std::string const &filename);
 
   /**
-   * Construct from an already-open HDF5 file handle. Increments the HDF5 reference
-   * count so the handle can be closed independently by both owner and descriptor.
-   * @param fileID open HDF5 file hid_t
+   * Construct from an already-open HDF5 file handle. fileID is a SharedFileID: this constructor
+   * copies it, incrementing the shared leash-counter so the underlying handle is closed only
+   * once every SharedFileID sharing it (owner and descriptor alike) has been destroyed.
+   * @param fileID open HDF5 file, shared with the caller
    * @param filename file path (used for error messages and extension)
    */
   NexusDescriptorLazy(SharedFileID fileID, std::string const &filename);
