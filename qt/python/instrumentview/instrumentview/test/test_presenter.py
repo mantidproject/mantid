@@ -522,22 +522,22 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         mock_peaks_workspaces_in_ads.assert_called_once()
         self.assertEqual([self._ws.name(), self._ws.name()], workspaces)
 
-    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._transform_vectors_with_matrix")
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.transform_vectors_with_matrix")
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.get_peak_overlay_arguments")
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.refresh_lineplot_peaks")
     def test_on_peaks_workspace_selected(
         self,
         mock_refresh_lineplot_peaks,
         mock_get_peak_overlay_arguments,
-        mock_transform,
+        mock_model_transform,
     ):
         mock_get_peak_overlay_arguments.return_value = ([np.zeros((1, 3))], [["(1, 1, 1)"]], ["ws1"])
-        mock_transform.return_value = np.zeros((1, 3))
+        mock_model_transform.return_value = np.zeros((1, 3))
         self._presenter.on_peaks_workspace_selected()
         mock_refresh_lineplot_peaks.assert_called_once()
         self._mock_view.clear_overlay_meshes.assert_called_once()
         self._mock_view.plot_overlay_meshes.assert_called_once()
-        mock_transform.assert_called_once()
+        mock_model_transform.assert_called_once()
 
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.get_peak_lineplot_overlay_arguments")
     def test_refresh_lineplot_peaks(self, mock_get_lineplot_args):
@@ -618,14 +618,21 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._transform_mesh_to_fill_window")
     def test_update_transform(self, mock_transform_mesh):
         self._presenter._update_transform()
-        np.testing.assert_allclose(np.eye(4), self._presenter._transform, atol=1e-10)
+        np.testing.assert_allclose(np.eye(4), self._model.transform, atol=1e-10)
+        np.testing.assert_allclose(self._model.detector_positions, self._model.transformed_detector_positions, atol=1e-10)
         mock_transform_mesh.assert_not_called()
         self._mock_view.is_maintain_aspect_ratio_checkbox_checked.return_value = True
         self._presenter._update_transform()
-        np.testing.assert_allclose(np.eye(4), self._presenter._transform, atol=1e-10)
+        np.testing.assert_allclose(np.eye(4), self._model.transform, atol=1e-10)
+        np.testing.assert_allclose(self._model.detector_positions, self._model.transformed_detector_positions, atol=1e-10)
         mock_transform_mesh.assert_not_called()
+        scale_transform = np.eye(4)
+        scale_transform[0][0] = 2
+        scale_transform[1][1] = 3
+        mock_transform_mesh.return_value = scale_transform
         self._mock_view.is_maintain_aspect_ratio_checkbox_checked.return_value = False
         self._presenter._update_transform()
+        np.testing.assert_allclose(scale_transform, self._model.transform, atol=1e-10)
         mock_transform_mesh.assert_called()
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._scale_matrix_relative_to_centre")
@@ -678,7 +685,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         scale_matrix = np.eye(4)
         scale_matrix[0][0] = 3
         scale_matrix[1][1] = 10
-        transformed_vectors = self._presenter._transform_vectors_with_matrix(vectors, scale_matrix)
+        transformed_vectors = self._model.transform_vectors_with_matrix(vectors, scale_matrix)
         expected_vectors = np.array([[3, 0, 0], [0, 10, 0]])
         np.testing.assert_allclose(expected_vectors, transformed_vectors)
 
