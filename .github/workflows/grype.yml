@@ -29,8 +29,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os:
-          - ubuntu-latest
+        include:
+          - os: ubuntu-latest
+            platform: linux-64
+          - os: windows-latest
+            platform: win-64
 
     steps:
       - name: Checkout workflow dependencies
@@ -50,12 +53,18 @@ jobs:
         id: pixi-project
         shell: bash
         run: |
-          project_dir="${RUNNER_TEMP}/grype-scan"
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            # git-bash reports RUNNER_TEMP with backslashes - use a mixed path
+            # (e.g. D:/a/_temp) that both bash and native executables accept
+            project_dir="$(cygpath --mixed "$RUNNER_TEMP")/grype-scan"
+          else
+            project_dir="${RUNNER_TEMP}/grype-scan"
+          fi
           mkdir -p "$project_dir"
           cat > "$project_dir/pixi.toml" <<'EOF'
           [workspace]
           channels = ["conda-forge", "mantid/label/nightly", "mantid", "neutrons"]
-          platforms = ["linux-64"]
+          platforms = ["${{ matrix.platform }}"]
 
           [dependencies]
           mantidworkbench = "*"
@@ -95,3 +104,5 @@ jobs:
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: ${{ steps.scan.outputs.sarif }}
+          # distinct category per platform so matrix uploads do not overwrite each other
+          category: grype-${{ matrix.platform }}
