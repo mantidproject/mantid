@@ -22,7 +22,7 @@ plugins.setup_library_paths()
 
 # Importing resources loads the data in. This must be imported before the
 # QApplication is created or paths to Qt's resources will not be set up correctly
-from workbench.config import APPNAME, ORG_DOMAIN, ORGANIZATION  # noqa: E402
+from workbench.identity import APPNAME, ORG_DOMAIN, ORGANIZATION  # noqa: E402
 
 import workbench.app.workbench_process as wp  # noqa: E402
 
