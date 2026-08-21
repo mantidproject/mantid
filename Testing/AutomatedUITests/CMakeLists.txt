@@ -27,3 +27,4 @@ set(PYUNITTEST_DATA_DIRS
 )
 
 add_subdirectory(Example)
+add_subdirectory(EngineeringDiffraction)
