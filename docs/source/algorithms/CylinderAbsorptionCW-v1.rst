@@ -16,6 +16,11 @@ Two methods are available for calculating the absorption correction: Using Equat
 
 Multiple scattering is calculated using Equation 16 and Table 1 from Blech and Averbach [3]_, using a bilinear interpolation of the tabulated values. Equation 16 gives :math:`\sigma_m` but the output from this algorithm is the multiple scattering factor, :math:`\delta` = :math:`\sigma_m/(\sigma_s + \sigma_m)`.
 
+The cross-sections and number density are either taken from the sample material of the input workspace, as set by
+:ref:`algm-SetSample` or :ref:`algm-SetSampleMaterial`, or provided directly through the ``AttenuationXSection``,
+``ScatteringXSection`` and ``SampleNumberDensity`` properties. As with the sample material, ``AttenuationXSection`` is
+the value tabulated at the reference wavelength of 1.7982 Å and is scaled linearly to ``Wavelength``,
+:math:`\sigma_a(\lambda) = \sigma_a(1.7982\,\text{Å}) \times \lambda / 1.7982\,\text{Å}`.
 
 Usage
 -----
