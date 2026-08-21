@@ -10,6 +10,7 @@
 #   4. ENABLE_DOCS: Whether or not the docs have been built
 #   5. ENABLE_DOC_TESTS: Whether or not the doc tests should be run
 #   6. BUILD_THREADS: The number of threads to use during testing
+#   7. ENABLE_UI_TESTS: whether or not the automated UI tests should be run (optional, defaults to false)
 
 WORKSPACE=$1
 ENABLE_SYSTEM_TESTS=$2
@@ -17,6 +18,8 @@ ENABLE_UNIT_TESTS=$3
 ENABLE_DOCS=$4
 ENABLE_DOC_TESTS=$5
 BUILD_THREADS=$6
+# appended last and defaulted so the existing callers, which pass six arguments, are unaffected
+ENABLE_UI_TESTS=${7:-false}
 
 XVFB_SERVER_NUM=101
 
@@ -132,4 +135,20 @@ if [[ $ENABLE_SYSTEM_TESTS == true ]]; then
     fi
 
     run_with_xvfb $SYSTEM_TEST_EXECUTABLE $WINDOWS_TEST_OPTIONS $SYSTEM_TEST_OPTIONS
+fi
+
+# Run the automated UI tests. Selected by their own CTest label, so this never overlaps with the
+# unit tests above. Only the weekly workflow passes true here; that workflow treats a failure as
+# something to report rather than something to block on, so this block stays honest and fails.
+if [[ $ENABLE_UI_TESTS == true ]]; then
+    rm -fr $userconfig_dir
+    rm -f $workbench_ini
+
+    # Turn off any auto updating on startup
+    mkdir -p $userconfig_dir
+    echo "UpdateInstrumentDefinitions.OnStartup = 0" > $userprops
+    echo "usagereports.enabled = 0" >> $userprops
+    echo "CheckMantidVersion.OnStartup = 0" >> $userprops
+
+    run_with_xvfb ctest -L AutomatedUITest -j${UI_TEST_THREADS:-2} --no-compress-output -T Test -O test_logs/ctest_uitest_$OSTYPE.log --output-on-failure $WINDOWS_TEST_OPTIONS --output-junit Testing/junit-uitest.xml
 fi
