@@ -473,12 +473,13 @@ class FullInstrumentViewModel:
     @transform.setter
     def transform(self, value: np.ndarray) -> None:
         self._transform = value
+        self._transformed_detector_positions = self._transform_vectors_with_matrix(self.detector_positions)
 
     @property
     def transformed_detector_positions(self) -> np.ndarray:
         return self._transformed_detector_positions
 
-    def transform_vectors_with_matrix(self, points: np.ndarray, transform: Optional[np.ndarray] = None) -> np.ndarray:
+    def _transform_vectors_with_matrix(self, points: np.ndarray, transform: Optional[np.ndarray] = None) -> np.ndarray:
         if points.size == 0:
             return points
         if transform is None:
@@ -489,9 +490,6 @@ class FullInstrumentViewModel:
         transformed_points = np.hstack([points, np.ones((points.shape[0], 1))])
         transformed_points = transformed_points @ transform.T
         return transformed_points[:, :3]
-
-    def update_transformed_detector_positions(self) -> None:
-        self._transformed_detector_positions = self.transform_vectors_with_matrix(self.detector_positions)
 
     @property
     def masked_positions(self) -> np.ndarray:
@@ -622,7 +620,10 @@ class FullInstrumentViewModel:
         self._peaks_indices_in_detector_positions = np.concatenate(indices_by_pws or [np.array([], dtype=int)])
         positions_by_pws = [self.detector_positions[indices] for indices in indices_by_pws]
         labels_by_pws = [pair[1] for pair in indices_and_labels_by_pws]
-        return positions_by_pws, labels_by_pws, selected_peaks_workspaces
+
+        transformed_pos = [self._transform_vectors_with_matrix(p) for p in positions_by_pws]
+
+        return transformed_pos, labels_by_pws, selected_peaks_workspaces
 
     def _get_index_of_closest_detector_with_peak(self, index_in_detector_positions: int) -> int:
         clicked_position = self.detector_positions[index_in_detector_positions]

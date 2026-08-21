@@ -522,22 +522,23 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         mock_peaks_workspaces_in_ads.assert_called_once()
         self.assertEqual([self._ws.name(), self._ws.name()], workspaces)
 
-    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.transform_vectors_with_matrix")
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.get_peak_overlay_arguments")
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.refresh_lineplot_peaks")
     def test_on_peaks_workspace_selected(
         self,
         mock_refresh_lineplot_peaks,
         mock_get_peak_overlay_arguments,
-        mock_model_transform,
     ):
-        mock_get_peak_overlay_arguments.return_value = ([np.zeros((1, 3))], [["(1, 1, 1)"]], ["ws1"])
-        mock_model_transform.return_value = np.zeros((1, 3))
+        expected_positions = [np.zeros((1, 3))]
+        mock_get_peak_overlay_arguments.return_value = (expected_positions, [["(1, 1, 1)"]], ["ws1"])
         self._presenter.on_peaks_workspace_selected()
         mock_refresh_lineplot_peaks.assert_called_once()
         self._mock_view.clear_overlay_meshes.assert_called_once()
         self._mock_view.plot_overlay_meshes.assert_called_once()
-        mock_model_transform.assert_called_once()
+        args, _ = self._mock_view.plot_overlay_meshes.call_args
+        np.testing.assert_array_equal(args[0], expected_positions)
+        self.assertEqual(args[1], [["(1, 1, 1)"]])
+        self.assertEqual(args[2], ["ws1"])
 
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.get_peak_lineplot_overlay_arguments")
     def test_refresh_lineplot_peaks(self, mock_get_lineplot_args):
@@ -685,7 +686,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         scale_matrix = np.eye(4)
         scale_matrix[0][0] = 3
         scale_matrix[1][1] = 10
-        transformed_vectors = self._model.transform_vectors_with_matrix(vectors, scale_matrix)
+        transformed_vectors = self._model._transform_vectors_with_matrix(vectors, scale_matrix)
         expected_vectors = np.array([[3, 0, 0], [0, 10, 0]])
         np.testing.assert_allclose(expected_vectors, transformed_vectors)
 
