@@ -634,26 +634,12 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         mock_mask_mesh = MagicMock(bounds=[0, 1, -1, 1, -1, 1])
 
         self._mock_view.main_plotter.window_size = (10, 10)
+        self._mock_view.world_to_display.side_effect = [(-4, -4, -4), (4, 4, 4)]
 
-        class mock_vtkCoordinate(MagicMock):
-            def __init__(self, *args, **kwargs):
-                super().__init__(*args, **kwargs)
-                self.GetComputedDisplayValueCount = 0
-
-            def GetComputedDisplayValue(self, _):
-                self.GetComputedDisplayValueCount += 1
-                if self.GetComputedDisplayValueCount % 2 == 1:
-                    return [-4, -4, -4]
-                return [4, 4, 4]
-
-        with mock.patch("instrumentview.FullInstrumentViewPresenter.vtkCoordinate") as mock_vtk:
-            mock_vtk_instance = mock_vtkCoordinate()
-            mock_vtk.return_value = mock_vtk_instance
-            self._presenter._detector_mesh = mock_det_mesh
-            self._presenter._masked_mesh = mock_mask_mesh
-            self._presenter._transform_mesh_to_fill_window()
-            mock_vtk.assert_called_once()
-            self.assertEqual(2, mock_vtk_instance.GetComputedDisplayValueCount)
+        self._presenter._detector_mesh = mock_det_mesh
+        self._presenter._masked_mesh = mock_mask_mesh
+        self._presenter._transform_mesh_to_fill_window()
+        self._mock_view.world_to_display.assert_has_calls([mock.call(-1, -1, -1), mock.call(1, 1, 1)])
 
         # The mesh width and height in pixels are 8 each, the window is width 10,
         # hence the scale factor should be 10 / 8 = 1.25
