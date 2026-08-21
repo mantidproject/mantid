@@ -216,6 +216,26 @@ class TestRubberBandZoomInteractorStyle(unittest.TestCase):
         style = RubberBandZoomInteractorStyle(plotter)
         return style, plotter
 
+    def _create_style_with_super_spy(self, **plotter_kwargs):
+        parent_calls = []
+
+        class _RubberBandZoomSuperSpy(RubberBandZoomInteractorStyle.__bases__[0]):
+            def OnLeftButtonDown(self):
+                parent_calls.append("left-down")
+
+            def OnMouseMove(self):
+                parent_calls.append("mouse-move")
+
+            def OnLeftButtonUp(self):
+                parent_calls.append("left-up")
+
+        class _RubberBandZoomStyleSpy(RubberBandZoomInteractorStyle, _RubberBandZoomSuperSpy):
+            pass
+
+        plotter = _make_mock_plotter(**plotter_kwargs)
+        style = _RubberBandZoomStyleSpy(plotter)
+        return style, plotter, parent_calls
+
     def test_set_picking_callback_stores_callback(self):
         style, _ = self._create_style()
         callback = mock.MagicMock()
@@ -242,6 +262,30 @@ class TestRubberBandZoomInteractorStyle(unittest.TestCase):
             style._on_left_button_press_event("obj", "event")
 
         self.assertTrue(style._ignore_rubberband_interaction)
+
+    def test_left_press_without_modifier_delegates_to_rubberband_zoom(self):
+        style, _, parent_calls = self._create_style_with_super_spy()
+
+        with mock.patch.object(style, "_modifier_key_pressed", return_value=False):
+            style._on_left_button_press_event("obj", "event")
+
+        self.assertEqual(parent_calls, ["left-down"])
+        self.assertFalse(style._ignore_rubberband_interaction)
+
+    def test_mouse_move_without_ignore_delegates_to_rubberband_zoom(self):
+        style, _, parent_calls = self._create_style_with_super_spy()
+
+        style._on_mouse_move_event("obj", "event")
+
+        self.assertEqual(parent_calls, ["mouse-move"])
+
+    def test_left_button_release_without_ignore_delegates_to_rubberband_zoom(self):
+        style, _, parent_calls = self._create_style_with_super_spy()
+
+        style._on_left_button_release_event("obj", "event")
+
+        self.assertEqual(parent_calls, ["left-up"])
+        self.assertFalse(style._ignore_rubberband_interaction)
 
     def test_left_button_release_clears_ignore_state(self):
         style, _ = self._create_style()
