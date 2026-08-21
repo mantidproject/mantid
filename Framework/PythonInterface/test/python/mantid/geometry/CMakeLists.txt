@@ -3,6 +3,8 @@
 set(TEST_PY_FILES
     BoundingBoxTest.py
     CSGObjectTest.py
+    MemoryCheckTest.py
+    PixelAssemblyTest.py
     GoniometerTest.py
     IComponentTest.py
     IPeakTest.py

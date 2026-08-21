@@ -10,6 +10,7 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
+#include "MantidGeometry/Instrument/PixelAssembly.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/StructuredDetector.h"
@@ -1517,6 +1518,89 @@ void InstrumentDefinitionParser::createRectangularDetector(Geometry::ICompAssemb
   }
 }
 
+void InstrumentDefinitionParser::createPixelAssembly(Geometry::ICompAssembly *parent,
+                                                     const Poco::XML::Element *pLocElem,
+                                                     const Poco::XML::Element *pCompElem, const std::string &filename,
+                                                     const Poco::XML::Element *pType) {
+  //-------------- Create a PixelAssembly (virtual pixel bank) ---------------
+
+  std::string const name = InstrumentDefinitionParser::getNameOfLocationElement(pLocElem, pCompElem);
+
+  // PixelAssembly inherits Component (not CompAssembly), so it does NOT add
+  // itself to the parent in its constructor — we do it explicitly below.
+  auto *bank = new Geometry::PixelAssembly(name, parent);
+
+  // Position, orientation and logfile parameters
+  setLocation(bank, pLocElem, m_angleConvertConst, m_deltaOffsets);
+  setFacing(bank, pLocElem);
+  setLogfile(bank, pCompElem, m_instrument->getLogfileCache());
+  setLogfile(bank, pLocElem, m_instrument->getLogfileCache());
+
+  // ----- Grid parameters from the type element -----
+  int xpixels = 0;
+  int ypixels = 0;
+  int zpixels = 0; // 0 → flat (normalised to 1 inside PixelAssembly::initialize)
+
+  const std::string shapeType = pType->getAttribute("type");
+  std::shared_ptr<Geometry::IObject> shape = mapTypeNameToShape[shapeType];
+
+  if (pType->hasAttribute("xpixels"))
+    xpixels = std::stoi(pType->getAttribute("xpixels"));
+  double const xstart = attrToDouble(pType, "xstart");
+  double const xstep = attrToDouble(pType, "xstep");
+
+  if (pType->hasAttribute("ypixels"))
+    ypixels = std::stoi(pType->getAttribute("ypixels"));
+  double const ystart = attrToDouble(pType, "ystart");
+  double const ystep = attrToDouble(pType, "ystep");
+
+  if (pType->hasAttribute("zpixels"))
+    zpixels = std::stoi(pType->getAttribute("zpixels"));
+  double const zstart = attrToDouble(pType, "zstart");
+  double const zstep = attrToDouble(pType, "zstep");
+
+  // ----- ID scheme from the component element -----
+  int idstart = 0;
+  int idstep = 1;
+  // Default fill order: x-fastest.  The IDF attribute is "idfillorder" with
+  // the fastest-varying axis first (e.g. "yxz" means Y fastest, then X, Z).
+  std::string idfillorder = "xyz";
+
+  if (pCompElem->hasAttribute("idstart"))
+    idstart = std::stoi(pCompElem->getAttribute("idstart"));
+  if (pCompElem->hasAttribute("idfillorder"))
+    idfillorder = pCompElem->getAttribute("idfillorder");
+  if (pCompElem->hasAttribute("idstep"))
+    idstep = std::stoi(pCompElem->getAttribute("idstep"));
+
+  // Pad to 3 characters if the user wrote a 2-char shorthand (e.g. "yx").
+  if (idfillorder.size() < 3) {
+    for (char c : {'x', 'y', 'z'}) {
+      if (idfillorder.find(c) == std::string::npos)
+        idfillorder += c;
+      if (idfillorder.size() == 3)
+        break;
+    }
+  }
+
+  // Initialise the virtual bank (stores parameters; creates no child objects).
+  bank->initialize(shape, static_cast<size_t>(xpixels), xstart, xstep, static_cast<size_t>(ypixels), ystart, ystep,
+                   static_cast<size_t>(zpixels), zstart, zstep, static_cast<detid_t>(idstart), idfillorder, idstep);
+
+  // Register all pixel IDs with the instrument so that InstrumentVisitor can
+  // build its detectorId → index map.  No per-pixel Detector object is created.
+  try {
+    m_instrument->markAsVirtualBankDetectors(*bank);
+  } catch (Kernel::Exception::ExistsError &) {
+    throw Kernel::Exception::InstrumentDefinitionError("Duplicate detector ID found when adding PixelAssembly " + name +
+                                                       " in XML instrument file" + filename);
+  }
+
+  // Add the bank to its parent (must be explicit — Component ctor does not do
+  // this, unlike CompAssembly).
+  parent->add(bank);
+}
+
 void InstrumentDefinitionParser::createStructuredDetector(Geometry::ICompAssembly *parent,
                                                           const Poco::XML::Element *pLocElem,
                                                           const Poco::XML::Element *pCompElem,
@@ -1710,6 +1794,8 @@ void InstrumentDefinitionParser::appendLeaf(Geometry::ICompAssembly *parent, con
     createRectangularDetector(parent, pLocElem, pCompElem, filename, pType);
   } else if (StructuredDetector::compareName(category)) {
     createStructuredDetector(parent, pLocElem, pCompElem, filename, pType);
+  } else if (PixelAssembly::compareName(category)) {
+    createPixelAssembly(parent, pLocElem, pCompElem, filename, pType);
   } else if (boost::regex_match(category, exp)) {
     createDetectorOrMonitor(parent, pLocElem, pCompElem, filename, idList, category);
   } else {

@@ -24,6 +24,7 @@
 #include <QPainterPath>
 #include <QtDebug>
 
+#include <algorithm>
 #include <numeric>
 
 using namespace Mantid::Geometry;
@@ -226,6 +227,71 @@ void PanelsSurface::processGrid(size_t rootIndex) {
   const auto &layers = compInfo.children(rootIndex);
 
   processStructured(layers[layerIndex]);
+}
+
+void PanelsSurface::processVirtualBank(size_t rootIndex) {
+  const auto &componentInfo = m_instrActor->componentInfo();
+  const auto *seg = componentInfo.findVirtualBankByCompIdx(rootIndex);
+  if (!seg)
+    return;
+
+  // Compute the four corner world positions analytically — no children to traverse.
+  auto panel = componentInfo.quadrilateralComponent(rootIndex);
+  std::vector<V3D> corners = {componentInfo.position(panel.bottomLeft), componentInfo.position(panel.bottomRight),
+                              componentInfo.position(panel.topRight), componentInfo.position(panel.topLeft)};
+
+  // Apply half-pixel offsets to extend corners to the outer pixel edges,
+  // mirroring the logic in retrievePanelCorners.
+  const auto &shape = componentInfo.shape(panel.bottomLeft);
+  const auto &shapeInfo = shape.getGeometryHandler()->shapeInfo();
+  const auto &pts = shapeInfo.points();
+  double xoff = 0.0, yoff = 0.0;
+  for (size_t k = 0; k + 1 < pts.size(); ++k) {
+    const double xd = std::abs(pts[k + 1].X() - pts[k].X());
+    const double yd = std::abs(pts[k + 1].Y() - pts[k].Y());
+    if (xd != 0.0)
+      xoff = xd * 0.5;
+    if (yd != 0.0)
+      yoff = yd * 0.5;
+  }
+  double xmin = corners[0].X(), xmax = corners[0].X();
+  double ymin = corners[0].Y(), ymax = corners[0].Y();
+  for (const auto &c : corners) {
+    xmin = std::min(xmin, c.X());
+    xmax = std::max(xmax, c.X());
+    ymin = std::min(ymin, c.Y());
+    ymax = std::max(ymax, c.Y());
+  }
+  for (auto &c : corners) {
+    c.setX(c.X() == xmin ? c.X() - xoff : c.X() + xoff);
+    c.setY(c.Y() == ymin ? c.Y() - yoff : c.Y() + yoff);
+  }
+
+  auto normal = this->m_calculator.calculatePanelNormal(corners);
+
+  const int index = static_cast<int>(m_flatBanks.size());
+  auto *info = new FlatBankInfo(this);
+  m_flatBanks << info;
+  const auto ref = corners[0];
+  info->refPos = ref;
+  info->rotation = this->m_calculator.calcBankRotation(ref, normal, m_zaxis, m_yaxis, m_pos);
+  info->startDetectorIndex = seg->firstIndex;
+  info->endDetectorIndex = seg->lastIndex;
+
+  QVector<QPointF> verts;
+  for (auto &corner : corners) {
+    auto pos = corner - ref;
+    info->rotation.rotate(pos);
+    pos += ref;
+    verts << QPointF(pos.X(), pos.Y());
+  }
+  info->polygon = QPolygonF(verts);
+
+  for (size_t det = seg->firstIndex; det <= seg->lastIndex; ++det) {
+    addDetector(det, index);
+  }
+
+  info->bankCentreOverride = m_calculator.getSideBySideViewPos(componentInfo, m_instrActor->getInstrument(), rootIndex);
 }
 
 /// Find an assembly containing detector tubes placed next to each other
@@ -458,6 +524,12 @@ void PanelsSurface::findFlatPanels(size_t rootIndex, std::vector<bool> &visited)
     return;
   }
 
+  if (componentType == ComponentType::VirtualAssembly) {
+    processVirtualBank(rootIndex);
+    this->m_calculator.setBankVisited(componentInfo, rootIndex, visited);
+    return;
+  }
+
   processUnstructured(rootIndex, visited);
 }
 
@@ -468,10 +540,11 @@ void PanelsSurface::constructFromComponentInfo() {
   for (int64_t i = static_cast<int64_t>(componentInfo.root() - 1); i > 0; --i) {
     auto children = componentInfo.children(i);
 
-    if (children.size() > 0 && !visited[i]) {
+    const bool isVirtualAssembly = componentInfo.componentType(i) == ComponentType::VirtualAssembly;
+    if ((children.size() > 0 || isVirtualAssembly) && !visited[i]) {
       visited[i] = true;
       findFlatPanels(i, visited);
-    } else if (children.size() == 0 && componentInfo.parent(i) == componentInfo.root()) {
+    } else if (children.size() == 0 && !isVirtualAssembly && componentInfo.parent(i) == componentInfo.root()) {
       visited[i] = true;
     }
   }
