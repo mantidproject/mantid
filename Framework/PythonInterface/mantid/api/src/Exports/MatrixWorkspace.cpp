@@ -53,9 +53,6 @@ using namespace boost::python;
 GET_POINTER_SPECIALIZATION(MatrixWorkspace)
 
 namespace {
-/// Typedef for data access, i.e. dataX,Y,E members
-using data_modifier = Mantid::MantidVec &(MatrixWorkspace::*)(const std::size_t);
-
 /// return_value_policy for read-only numpy array
 using return_readonly_numpy = return_value_policy<VectorRefToNumpy<WrapReadOnly>>;
 /// return_value_policy for read-write numpy array
@@ -75,23 +72,27 @@ GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
 
 /**
- * Set the values from an python array-style object into the given spectrum in
- * the workspace
- * @param self :: A reference to the calling object
- * @param accessor :: A member-function pointer to the data{X,Y,E} member that
- * will extract the writable values.
- * @param wsIndex :: The workspace index for the spectrum to set
- * @param values :: A numpy array. The length must match the size of the
+ * Set the values from an python array-style object into the given histogram data
+ * @param histogram :: The writable data of a single spectrum, obtained from one of the
+ * MatrixWorkspace::mutable{X,Y,E,Dx} accessors
+ * @param values :: A numpy array. The length must match the size of the histogram
+ *
+ * The converters fill a destination that is already the right length, and throw
+ * std::invalid_argument (ValueError in Python) if the lengths differ. The current values are
+ * therefore copied out, filled in place and handed back through the histogram, which keeps its
+ * length invariant intact; mutableRawData() is deliberately not part of the public interface.
  */
-void setSpectrumFromPyObject(MatrixWorkspace &self, data_modifier accessor, const size_t wsIndex,
-                             const boost::python::object &values) {
+template <typename HistogramType>
+void setSpectrumFromPyObject(HistogramType &histogram, const boost::python::object &values) {
+  auto data = histogram.rawData();
   if (NDArray::check(values)) {
     NDArrayToVector<double> converter(values);
-    converter.copyTo((self.*accessor)(wsIndex));
+    converter.copyTo(data);
   } else {
     PySequenceToVector<double> converter(values);
-    converter.copyTo((self.*accessor)(wsIndex));
+    converter.copyTo(data);
   }
+  histogram = HistogramType(std::move(data));
 }
 
 /**
@@ -285,7 +286,7 @@ const Mantid::MantidVec &dataDxDeprecated(MatrixWorkspace &self, const size_t in
  * @param values :: A numpy array. The length must match the size of the
  */
 void setXFromPyObject(MatrixWorkspace &self, const size_t wsIndex, const boost::python::object &values) {
-  setSpectrumFromPyObject(self, &MatrixWorkspace::dataX, wsIndex, values);
+  setSpectrumFromPyObject(self.mutableX(wsIndex), values);
 }
 
 /**
@@ -295,7 +296,7 @@ void setXFromPyObject(MatrixWorkspace &self, const size_t wsIndex, const boost::
  * @param values :: A numpy array. The length must match the size of the
  */
 void setYFromPyObject(MatrixWorkspace &self, const size_t wsIndex, const boost::python::object &values) {
-  setSpectrumFromPyObject(self, &MatrixWorkspace::dataY, wsIndex, values);
+  setSpectrumFromPyObject(self.mutableY(wsIndex), values);
 }
 
 /**
@@ -305,7 +306,7 @@ void setYFromPyObject(MatrixWorkspace &self, const size_t wsIndex, const boost::
  * @param values :: A numpy array. The length must match the size of the
  */
 void setEFromPyObject(MatrixWorkspace &self, const size_t wsIndex, const boost::python::object &values) {
-  setSpectrumFromPyObject(self, &MatrixWorkspace::dataE, wsIndex, values);
+  setSpectrumFromPyObject(self.mutableE(wsIndex), values);
 }
 
 /**
@@ -315,7 +316,7 @@ void setEFromPyObject(MatrixWorkspace &self, const size_t wsIndex, const boost::
  * @param values :: A numpy array. The length must match the size of the
  */
 void setDxFromPyObject(MatrixWorkspace &self, const size_t wsIndex, const boost::python::object &values) {
-  setSpectrumFromPyObject(self, &MatrixWorkspace::dataDx, wsIndex, values);
+  setSpectrumFromPyObject(self.mutableDx(wsIndex), values);
 }
 
 /**
@@ -806,29 +807,25 @@ void export_MatrixWorkspace() {
       // --------------------------------------- Extract data
       // ------------------------------
       .def("extractX", Mantid::PythonInterface::cloneX, args("self"),
-           "Extracts (copies) the X data from the workspace into a 2D numpy "
-           "array. "
-           "Note: This can fail for large workspaces as numpy will require a "
-           "block "
-           "of memory free that will fit all of the data.")
+           "Extracts (copies) the X data from the workspace into a 2D numpy array. "
+           "Note: This can fail for large workspaces as numpy will require a block of memory free that will fit all of "
+           "the data. "
+           "Note: This will fail for ragged workspaces.")
       .def("extractY", Mantid::PythonInterface::cloneY, args("self"),
-           "Extracts (copies) the Y data from the workspace into a 2D numpy "
-           "array. "
-           "Note: This can fail for large workspaces as numpy will require a "
-           "block "
-           "of memory free that will fit all of the data.")
+           "Extracts (copies) the Y data from the workspace into a 2D numpy array. "
+           "Note: This can fail for large workspaces as numpy will require a block of memory free that will fit all of "
+           "the data. "
+           "Note: This will fail for ragged workspaces.")
       .def("extractE", Mantid::PythonInterface::cloneE, args("self"),
-           "Extracts (copies) the E data from the workspace into a 2D numpy "
-           "array. "
-           "Note: This can fail for large workspaces as numpy will require a "
-           "block "
-           "of memory free that will fit all of the data.")
+           "Extracts (copies) the E data from the workspace into a 2D numpy array. "
+           "Note: This can fail for large workspaces as numpy will require a block of memory free that will fit all of "
+           "the data. "
+           "Note: This will fail for ragged workspaces.")
       .def("extractDx", Mantid::PythonInterface::cloneDx, args("self"),
-           "Extracts (copies) the E data from the workspace into a 2D numpy "
-           "array. "
-           "Note: This can fail for large workspaces as numpy will require a "
-           "block "
-           "of memory free that will fit all of the data.")
+           "Extracts (copies) the Dx data from the workspace into a 2D numpy array. "
+           "Note: This can fail for large workspaces as numpy will require a block of memory free that will fit all of "
+           "the data. "
+           "Note: This will fail for ragged workspaces.")
       .def("getSignalAtCoord", &getSignalAtCoord, args("self", "coords", "normalization"),
            "Return signal for array of coordinates")
       .def("getIntegratedCountsForWorkspaceIndices", &getIntegratedCountsForWorkspaceIndices,

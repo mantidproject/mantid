@@ -40,6 +40,7 @@
 
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -1576,9 +1577,12 @@ private:
       inputWs->setPointStandardDeviations(1, dx2);
       if (legacyXErrors) {
         // Deliberately grow Dx to the legacy length (one longer than Y). Only the legacy
-        // accessor can do this; the size-checked histogram types forbid it by design.
+        // accessor can do this; the size-checked histogram types forbid it by design, so the
+        // deprecation warning is suppressed rather than migrated.
+        GNU_DIAG_OFF("deprecated-declarations")
         inputWs->dataDx(0).emplace_back(1);
         inputWs->dataDx(1).emplace_back(1);
+        GNU_DIAG_ON("deprecated-declarations")
       }
     }
     if (numericAxis) {

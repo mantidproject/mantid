@@ -232,7 +232,7 @@ public:
     TS_ASSERT_EQUALS(ws->dx(0).size(), 5);
     TS_ASSERT_EQUALS(ws->dx(6)[3], 0.0);
 
-    TS_ASSERT_THROWS_NOTHING(ws->dataDx(6)[3] = 9.9);
+    TS_ASSERT_THROWS_NOTHING(ws->mutableDx(6)[3] = 9.9);
     TS_ASSERT_EQUALS(ws->dx(6)[3], 9.9);
   }
 

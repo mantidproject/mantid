@@ -170,29 +170,45 @@ public:
   EventSortType getSortType() const;
 
   // X-vector accessors. These reset the MRU for this spectrum
+  [[deprecated("use setSharedX() instead")]]
   void setX(const Kernel::cow_ptr<HistogramData::HistogramX> &X) override;
+  [[deprecated("use mutableX() instead")]]
   MantidVec &dataX() override;
+  [[deprecated("use x() instead")]]
   const MantidVec &dataX() const override;
+  [[deprecated("use x() instead")]]
   const MantidVec &readX() const override;
+  [[deprecated("use sharedX() instead")]]
   Kernel::cow_ptr<HistogramData::HistogramX> ptrX() const override;
 
+  [[deprecated("use mutableDx() instead")]]
   MantidVec &dataDx() override;
+  [[deprecated("use dx() instead")]]
   const MantidVec &dataDx() const override;
+  [[deprecated("use dx() instead")]]
   const MantidVec &readDx() const override;
 
   /// Deprecated, use mutableY() instead. Disallowed data accessors - can't
   /// modify Y/E on a EventList
-  MantidVec &dataY() override { throw std::runtime_error("EventList: non-const access to Y data is not possible."); }
+  [[deprecated("use mutableY() instead")]]
+  MantidVec &dataY() override {
+    throw std::runtime_error("EventList: non-const access to Y data is not possible.");
+  }
   /// Deprecated, use mutableE() instead. Disallowed data accessors - can't
   /// modify Y/E on a EventList
-  MantidVec &dataE() override { throw std::runtime_error("EventList: non-const access to E data is not possible."); }
+  [[deprecated("use mutableE() instead")]]
+  MantidVec &dataE() override {
+    throw std::runtime_error("EventList: non-const access to E data is not possible.");
+  }
 
   // Allowed data accessors - read-only Y/E histogram VIEWS of an event list
   /// Deprecated, use y() instead. Return a read-only Y histogram view of an
   /// event list
+  [[deprecated("use y() instead")]]
   const MantidVec &dataY() const override;
   /// Deprecated, use e() instead. Return a read-only E histogram view of an
   /// event list
+  [[deprecated("use e() instead")]]
   const MantidVec &dataE() const override;
 
   MantidVec *makeDataY() const;

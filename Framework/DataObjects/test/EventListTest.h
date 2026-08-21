@@ -16,6 +16,7 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -904,7 +905,11 @@ public:
     el = EventList();
     MantidVec inVec(10, 1.0);
     el.mutableX() = inVec;
+    // This test exists to cover the deprecated accessor itself, so the warning is suppressed
+    // rather than migrated to x().
+    GNU_DIAG_OFF("deprecated-declarations")
     const MantidVec &vec = el.dataX();
+    GNU_DIAG_ON("deprecated-declarations")
     TS_ASSERT_EQUALS(vec, inVec);
   }
 
