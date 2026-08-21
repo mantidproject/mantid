@@ -465,6 +465,10 @@
      </livedata>
    </instrument>
 
+   <instrument name="CG3" shortname="CG3">
+      <technique>Small Angle Scattering</technique>
+   </instrument>
+
    <instrument name="IMAGINE" shortname="CG4D">
      <technique>Neutron Diffraction</technique>
      <technique>Single Crystal Diffraction</technique>
