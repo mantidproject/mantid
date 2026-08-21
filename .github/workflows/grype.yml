@@ -99,6 +99,31 @@ jobs:
           fail-build: false
           only-fixed: true
 
+      - name: Normalize SARIF paths
+        # grype prepends the scan root to every location unless the location is
+        # already absolute. On windows "\conda-meta\..." is not absolute to go, so
+        # results come out as "D:/.../default/\conda-meta\openssl.json" and code
+        # scanning rejects the file - it reads the "D:" drive letter as a URI
+        # scheme. Rewrite the locations relative to the scanned environment, which
+        # is the form grype already emits on linux.
+        if: ${{ runner.os == 'Windows' }}
+        shell: bash
+        env:
+          ENV_DIR: ${{ steps.pixi-project.outputs.environment_dir }}
+        run: |
+          sarif=$(cygpath --mixed "${{ steps.scan.outputs.sarif }}")
+          jq --arg root "$ENV_DIR" '
+            (.runs[]?.results[]?.locations[]?.physicalLocation.artifactLocation.uri) |=
+              ( gsub("\\\\"; "/")
+              | if startswith($root) then .[($root | length):] else . end
+              | gsub("/+"; "/")
+              | if startswith("/") then . else "/" + . end )
+          ' "$sarif" > "$sarif.normalized"
+          mv "$sarif.normalized" "$sarif"
+          echo "::group::Normalized locations"
+          jq -r '[.runs[].results[].locations[].physicalLocation.artifactLocation.uri] | unique | .[]' "$sarif"
+          echo "::endgroup::"
+
       - name: Upload vulnerability report
         if: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.dry_run != 'true' }}
         uses: github/codeql-action/upload-sarif@v4
