@@ -667,7 +667,7 @@ class SANSFunctionsTest(unittest.TestCase):
         create_alg_mock.return_value = delete_alg_instance
         workspaces = ["test1", "test2", "test3"]
 
-        delete_workspaces(workspaces, use_names=False)
+        delete_workspaces(workspaces, use_names=True)
 
         self.assertEqual(delete_alg_instance.execute.call_count, 3)
         self.assertEqual(delete_alg_instance.setProperty.call_count, 3)

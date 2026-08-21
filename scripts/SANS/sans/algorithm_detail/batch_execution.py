@@ -1674,6 +1674,8 @@ def delete_optimization_workspaces(reduction_packages, workspaces, monitors, sav
 def get_names_to_delete(reduction_packages, workspaces, monitors, save_can):
     def _add_from_dict(_ws_dict):
         for ws_list in _ws_dict.values():
+            if isinstance(ws_list, (Workspace2D, WorkspaceGroup, IEventWorkspace)):
+                ws_list = [ws_list]
             if ws_list:
                 for ws in ws_list:
                     if ws and (name := ws.name()):
