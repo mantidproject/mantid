@@ -18,6 +18,7 @@ from mantid.simpleapi import (
     JoinISISPolarizationEfficiencies,
     Rebin,
 )
+from plugins.algorithms.WorkflowAlgorithms.ReflectometryISISLoadAndProcess import ReflectometryISISLoadAndProcess
 from testhelpers import assertRaisesNothing, create_algorithm
 
 
@@ -119,6 +120,21 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ["ReflectometryReductionOneAuto", "GroupWorkspaces"]
         self._check_history(AnalysisDataService.retrieve("IvsQ_binned_13460"), history)
+
+    def test_input_workspace_with_requested_calibration_is_reused(self):
+        self._create_workspace(13460, "TOF_")
+        AddSampleLog(
+            Workspace="TOF_13460",
+            LogName="reflectometry_calibration_file",
+            LogText=self._CALIBRATION_TEST_DATA,
+        )
+        alg = ReflectometryISISLoadAndProcess()
+        alg.initialize()
+        alg.setProperty("CalibrationFile", self._CALIBRATION_TEST_DATA)
+
+        workspace_name = alg._getRunFromADSOrNone("13460", False)
+
+        self.assertEqual(workspace_name, "TOF_13460")
 
     def test_input_run_that_is_in_ADS_without_prefix_is_not_reloaded(self):
         self._create_workspace(13460)
@@ -855,6 +871,21 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         self._assert_run_algorithm_succeeds(args, outputs)
         self._check_calibration(AnalysisDataService.retrieve("IvsQ_binned_45455"), is_calibrated=True)
 
+    def test_uncalibrated_workspace_in_ads_is_reloaded_when_calibration_file_is_provided(self):
+        self._create_workspace(45455, "TOF_")
+        args = self._default_options
+        args["InputRunList"] = "45455"
+        del args["ProcessingInstructions"]
+        args["CalibrationFile"] = self._CALIBRATION_TEST_DATA
+        args["AnalysisMode"] = "MultiDetectorAnalysis"
+        args["ROIDetectorIDs"] = self._INTER45455_DETECTOR_ROI
+
+        self._assert_run_algorithm_succeeds(args)
+
+        self._check_calibration(AnalysisDataService.retrieve("IvsQ_binned_45455"), is_calibrated=True)
+        calibration_log = AnalysisDataService.retrieve("TOF_45455").run().getProperty("reflectometry_calibration_file")
+        self.assertEqual(calibration_log.value, self._CALIBRATION_TEST_DATA)
+
     def test_calibration_is_skipped_if_file_not_provided(self):
         args = self._default_options
         args["InputRunList"] = "INTER45455"
@@ -864,6 +895,26 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         outputs = ["IvsQ_45455", "IvsQ_binned_45455", "TOF", "TOF_45455", "TOF_45455_summed_segment"]
         self._assert_run_algorithm_succeeds(args, outputs)
         self._check_calibration(AnalysisDataService.retrieve("IvsQ_binned_45455"), is_calibrated=False)
+
+    def test_theta_properties_are_forwarded_to_preprocessing(self):
+        alg = ReflectometryISISLoadAndProcess()
+        alg.initialize()
+        alg.setProperty("ThetaIn", 0.5)
+        alg.setProperty("ThetaLogName", "theta")
+
+        args = alg._preprocess_arguments("INTER13460", False)
+
+        self.assertEqual("0.5", args["ThetaIn"])
+        self.assertEqual("theta", args["ThetaLogName"])
+
+    def test_default_theta_properties_are_not_forwarded_to_preprocessing(self):
+        alg = ReflectometryISISLoadAndProcess()
+        alg.initialize()
+
+        args = alg._preprocess_arguments("INTER13460", False)
+
+        self.assertNotIn("ThetaIn", args)
+        self.assertNotIn("ThetaLogName", args)
 
     def test_invalid_polarization_efficiency_file_name_raises_error(self):
         args = self._default_options
