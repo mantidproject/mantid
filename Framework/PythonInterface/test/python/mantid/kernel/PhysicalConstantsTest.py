@@ -27,6 +27,7 @@ class PhysicalConstantsTest(unittest.TestCase):
         self.assertNotEqual(0, pc.StandardAtmosphere)
         self.assertNotEqual(0, pc.BoltzmannConstant)
         self.assertNotEqual(0, pc.MuonGyromagneticRatio)
+        self.assertNotEqual(0, pc.ReferenceLambda)
 
 
 if __name__ == "__main__":
