@@ -1,0 +1,1 @@
+- Fixed a crash in Fit Property Browser ocurring when trying to find peaks for HRP data due to an unhandled exception raised from the :ref:`Levenberg-MarquardtMD minimizer <LevenbergMarquardtMD>`.

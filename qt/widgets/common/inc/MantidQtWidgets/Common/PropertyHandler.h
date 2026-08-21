@@ -221,6 +221,9 @@ private:
   // mutable FunctionCurve* m_curve;//< the curve to plot the handled function
   mutable bool m_hasPlot;
 
+  /// QtProperties to PropertyHandler map for faster lookup
+  QMap<QtProperty *, PropertyHandler *> m_paramToPropertyHandlerMap;
+
   /// Sync function parameter value with the manager
   void updateParameter(QtProperty *prop);
 
