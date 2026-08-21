@@ -165,8 +165,10 @@ void SaveIsawDetCal::exec() {
       }
     }
     if (det) {
-      // Center of the detector
-      V3D center = det->getPos();
+      // Center of the detector.
+      // NOTE: componentID() above returns the *base* component, whose getPos() ignores the ParameterMap and so
+      //       reports uncalibrated IDF geometry. ComponentInfo is the parameterized view, so query it instead.
+      V3D center = componentInfo.position(componentInfo.indexOf(det->getComponentID()));
 
       // Distance to center of detector
       double detd = (center - inst->getSample()->getPos()).norm();
@@ -249,12 +251,10 @@ void SaveIsawDetCal::sizeBanks(const std::string &bankName, int &NCOLS, int &NRO
     const auto grandchildren = componentInfo.children(children[0]);
     NROWS = static_cast<int>(grandchildren.size());
     NCOLS = static_cast<int>(children.size());
-    const auto &first = componentInfo.componentID(children[0]);
-    const auto &last = componentInfo.componentID(children[NCOLS - 1]);
-    xsize = first->getDistance(*last);
-    const auto &firstGrand = componentInfo.componentID(grandchildren[0]);
-    const auto &lastGrand = componentInfo.componentID(grandchildren[NROWS - 1]);
-    ysize = firstGrand->getDistance(*lastGrand);
+    // NOTE: measure via ComponentInfo::position(), not by dereferencing componentID(). The latter yields the *base*
+    //       component, whose getDistance() ignores the ParameterMap and so reports uncalibrated IDF geometry.
+    xsize = componentInfo.position(children[0]).distance(componentInfo.position(children[NCOLS - 1]));
+    ysize = componentInfo.position(grandchildren[0]).distance(componentInfo.position(grandchildren[NROWS - 1]));
   }
 }
 } // namespace Mantid::DataHandling
