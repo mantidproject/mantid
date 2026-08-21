@@ -1,0 +1,1 @@
+- BIOSANS data now loads with its instrument parameters attached, so :ref:`algm-SolidAngle` works again. The instrument parameters had been missing since v6.16 whenever the instrument was loaded under its short name ``CG3``.
