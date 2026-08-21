@@ -32,6 +32,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view._RENDER_MODE_POINTS = "Points (Fastest)"
         self._mock_view._RENDER_MODE_SHAPES_FAST = "Approximated Shapes (Fast)"
         self._mock_view._RENDER_MODE_RAW_SHAPES = "Raw Shapes (Slowest)"
+        self._mock_view.is_select_peaks_checked.return_value = False
         self._mock_view.is_select_bank_tube_checked.return_value = False
         self._mock_view.get_contour_limits.return_value = (0.0, 1.0)
         self._mock_view.selected_peaks_workspaces.return_value = []
@@ -112,14 +113,19 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.InteractorStyles")
     def test_reload_interactor_styles_single(self, mock_interactor_styles):
-        self._reload_interactor_styles(select_bank_tube=False)
+        self._reload_interactor_styles(select_peaks=False, select_bank_tube=False)
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.InteractorStyles")
     def test_reload_interactor_styles_bank_tube(self, mock_interactor_styles):
-        self._reload_interactor_styles(select_bank_tube=True)
+        self._reload_interactor_styles(select_peaks=False, select_bank_tube=True)
 
-    def _reload_interactor_styles(self, select_bank_tube: bool):
-        self._presenter._select_bank_tube = select_bank_tube
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.InteractorStyles")
+    def test_reload_interactor_styles_select_peaks(self, mock_interactor_styles):
+        self._reload_interactor_styles(select_peaks=True, select_bank_tube=False)
+
+    def _reload_interactor_styles(self, select_peaks: bool, select_bank_tube: bool):
+        self._mock_view.is_select_peaks_checked.return_value = select_peaks
+        self._mock_view.is_select_bank_tube_checked.return_value = select_bank_tube
         self._presenter._renderer.get_callback_tied_to_detector_index.side_effect = lambda _plotter, callback, hover=False: callback
         self._presenter._update_interactor_style = MagicMock()
         self._presenter._model.update_point_picked_detectors = MagicMock()
@@ -136,7 +142,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         )
         callback = self._presenter._renderer.get_callback_tied_to_detector_index.call_args_list[0].kwargs["callback"]
         callback(3)
-        self._presenter._model.update_point_picked_detectors.assert_called_once_with(3, select_bank_tube)
+        self._presenter._model.update_point_picked_detectors.assert_called_once_with(3, select_peaks, select_bank_tube)
         self._presenter.update_picked_detectors_on_view.assert_called_once()
         self._presenter._update_interactor_style.assert_called_once()
 
@@ -313,7 +319,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._model._is_valid = np.array([True, True, True])
         self._model._is_selected_in_tree = np.array([True, True, True])
         self._model._detector_positions_3d = np.array([[0, 0, 0], [1, 1, 1], [2, 2, 2]])
-        self._presenter._select_bank_tube = True
+        self._mock_view.is_select_bank_tube_checked.return_value = True
         self._model.expand_pickable_mask_to_parent_subtrees = MagicMock(return_value=mask)
         self._model.add_new_detector_key = MagicMock(return_value="mock_key")
 
@@ -321,12 +327,6 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
 
         self._model.expand_pickable_mask_to_parent_subtrees.assert_called_once()
         np.testing.assert_array_equal(self._model.add_new_detector_key.call_args.args[0], mask)
-
-    def test_on_select_bank_tube_toggled(self):
-        self._presenter.on_select_bank_tube_toggled(True)
-        self.assertTrue(self._presenter._select_bank_tube)
-        self._presenter.on_select_bank_tube_toggled(False)
-        self.assertFalse(self._presenter._select_bank_tube)
 
     def test_adding_a_shape_forces_summed_spectra(self):
         """A shape covers too many detectors to plot individually, so the choice is taken away."""
@@ -410,7 +410,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         mask = np.array([i < 3 for i in range(n_hist)])
         expanded = np.array([i < 5 for i in range(n_hist)])
         self._mock_view.get_shape_mask.return_value = mask
-        self._presenter._select_bank_tube = True
+        self._mock_view.is_select_bank_tube_checked.return_value = True
         self._model.expand_pickable_mask_to_parent_subtrees = MagicMock(return_value=expanded)
         self._model.extract_spectra_for_line_plot = MagicMock()
 

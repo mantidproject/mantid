@@ -13,9 +13,9 @@ from mantid.simpleapi import AnalysisDataService
 
 class WorkspaceDetectorPeaks:
     def __init__(self, pws_name, unit, limits):
+        self._detector_peaks = []
         # Read peaks from workspace in a given unit range
         pws = AnalysisDataService.retrieve(pws_name)
-        self.detector_peaks = []
         peaks_dict = pws.toDict()
         detector_ids = peaks_dict["DetID"]
         hkls = zip(peaks_dict["h"], peaks_dict["k"], peaks_dict["l"], strict=True)
@@ -33,12 +33,16 @@ class WorkspaceDetectorPeaks:
         # groupby groups consecutive matches, so must be sorted
         peaks.sort(key=lambda x: x.detector_id)
         for _, peaks_for_spec in groupby(peaks, lambda x: x.detector_id):
-            self.detector_peaks.append(DetectorPeaks(list(peaks_for_spec)))
+            self._detector_peaks.append(DetectorPeaks(list(peaks_for_spec)))
 
-    def get_positions_and_labels(self, detector_positions, detector_ids) -> tuple[np.ndarray, list]:
-        peaks_ids = np.array([p.detector_id for p in self.detector_peaks])
+    @property
+    def detector_peaks(self):
+        return self._detector_peaks
+
+    def get_peaks_indices_and_labels(self, detector_positions, detector_ids) -> tuple[np.ndarray, list]:
+        peaks_ids = np.array([p.detector_id for p in self._detector_peaks])
         if len(peaks_ids) == 0 or len(detector_ids) == 0:
-            return np.array([]), []
+            return np.array([], dtype=int), []
 
         # Use argsort + searchsorted for fast lookup. Using np.where(np.isin) does not
         # maintain the original order. It is faster to sort then search the sorted
@@ -50,11 +54,11 @@ class WorkspaceDetectorPeaks:
         ordered_indices = sorter[positions]
         valid = sorted_detector_ids[positions] == peaks_ids
         ordered_indices = ordered_indices[valid]
-        labels = [p.label for p in np.array(self.detector_peaks)[valid]]
-        return detector_positions[ordered_indices], labels
+        labels = [p.label for p in np.array(self._detector_peaks)[valid]]
+        return ordered_indices, labels
 
     def get_x_values_and_labels(self, picked_detector_ids) -> list[Peak]:
-        picked_peaks = [p for peak in self.detector_peaks for p in peak.peaks if peak.detector_id in picked_detector_ids]
+        picked_peaks = [p for peak in self._detector_peaks for p in peak.peaks if peak.detector_id in picked_detector_ids]
         return picked_peaks
 
     def _is_within_limits(self, x, limits):

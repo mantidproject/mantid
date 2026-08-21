@@ -169,7 +169,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
     def test_negate_picked_visibility(self):
         model, _ = self._setup_model([1, 2, 3])
         model._detector_is_picked = np.array([False, False, False])
-        model.update_point_picked_detectors(1, False)
+        model.update_point_picked_detectors(1, False, False)
         np.testing.assert_equal(model._detector_is_picked, [False, True, False])
 
     def test_clear_point_picked_detectors(self):
@@ -191,7 +191,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model._is_masked = np.array([False, False, False, False])
         model._is_selected_in_tree = np.array([True, True, True, True])
 
-        model.update_point_picked_detectors(1, expand_to_parent_subtree=True)
+        model.update_point_picked_detectors(1, False, expand_to_parent_subtree=True)
         np.testing.assert_equal(model._detector_is_picked, [False, True, True, False])
         np.testing.assert_equal(model._point_picked_detectors, [False, True, True, False])
 
@@ -244,13 +244,24 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model, _ = self._setup_model([1, 2, 3])
         model._detector_is_picked = np.array([False, False, False])
         model.turn_on_single_point_picking()
-        model.update_point_picked_detectors(0, False)
+        model.update_point_picked_detectors(0, False, False)
         np.testing.assert_equal(model._detector_is_picked, [True, False, False])
         np.testing.assert_equal(model._point_picked_detectors, [True, False, False])
         # Picking another detector clears the previous one
-        model.update_point_picked_detectors(1, False)
+        model.update_point_picked_detectors(1, False, False)
         np.testing.assert_equal(model._detector_is_picked, [False, True, False])
         np.testing.assert_equal(model._point_picked_detectors, [False, True, False])
+
+    def test_update_point_picked_detectors_select_peaks_uses_closest_peak_detector(self):
+        model, _ = self._setup_model([1, 2, 3, 4])
+        model._detector_positions_3d = np.array([[0.0, 0.0, 0.0], [0.9, 0.0, 0.0], [2.0, 0.0, 0.0], [5.0, 0.0, 0.0]])
+        model._projection_type = ProjectionType.THREE_D
+        model._peaks_indices_in_detector_positions = np.array([1, 3])
+
+        model.update_point_picked_detectors(0, True, False)
+
+        np.testing.assert_equal(model._detector_is_picked, [False, True, False, False])
+        np.testing.assert_equal(model._point_picked_detectors, [False, True, False, False])
 
     def test_detectors_with_no_spectra(self):
         self._setup_mocks([1, 20, 300, 400], monitors=np.array(["no", "no", "n/a", "yes"]))
@@ -1227,7 +1238,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model, _ = self._setup_model([1, 2, 3])
         mock_ads.doesExist.side_effect = lambda name: name == "ws1"
         mock_wdp = MagicMock()
-        mock_wdp.get_positions_and_labels.return_value = (np.array([[0, 0, 0]]), ["label1"])
+        mock_wdp.get_peaks_indices_and_labels.return_value = (np.array([0]), ["label1"])
         mock_wdp_cls.return_value = mock_wdp
 
         positions, labels, ws_names = model.get_peak_overlay_arguments(["ws1", "ws_gone"])
@@ -1257,18 +1268,44 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_ads.doesExist.return_value = True
 
         ws1_wdp = MagicMock()
-        ws1_wdp.get_positions_and_labels.return_value = (np.array([[1, 1, 1]]), ["hkl_1"])
+        ws1_wdp.get_peaks_indices_and_labels.return_value = (np.array([0]), ["hkl_1"])
         ws2_wdp = MagicMock()
-        ws2_wdp.get_positions_and_labels.return_value = (np.array([[2, 2, 2], [3, 3, 3]]), ["hkl_2", "hkl_3"])
+        ws2_wdp.get_peaks_indices_and_labels.return_value = (np.array([1, 2]), ["hkl_2", "hkl_3"])
         mock_wdp_cls.side_effect = lambda name, unit, limits: {"ws1": ws1_wdp, "ws2": ws2_wdp}[name]
 
         positions, labels, ws_names = model.get_peak_overlay_arguments(["ws1", "ws2"])
 
         self.assertEqual(ws_names, ["ws1", "ws2"])
-        np.testing.assert_array_equal(positions[0], np.array([[1, 1, 1]]))
-        np.testing.assert_array_equal(positions[1], np.array([[2, 2, 2], [3, 3, 3]]))
+        np.testing.assert_array_equal(positions[0], np.array([[0, 0, 0]]))
+        np.testing.assert_array_equal(positions[1], np.array([[1, 1, 1], [2, 2, 2]]))
         self.assertEqual(labels[0], ["hkl_1"])
         self.assertEqual(labels[1], ["hkl_2", "hkl_3"])
+        np.testing.assert_array_equal(model._peaks_indices_in_detector_positions, np.array([0, 1, 2]))
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.AnalysisDataService")
+    @mock.patch("instrumentview.FullInstrumentViewModel.WorkspaceDetectorPeaks")
+    def test_get_peak_overlay_arguments_after_last_lineplot_peak_deleted(self, mock_wdp_cls, mock_ads):
+        """Refreshing overlays after deleting the last peak should not error on empty indices."""
+        model, _ = self._setup_model([1, 2, 3])
+        mock_ads.doesExist.return_value = True
+
+        wdp_with_peak = MagicMock()
+        wdp_with_peak.get_peaks_indices_and_labels.return_value = (np.array([1]), ["hkl_1"])
+        wdp_without_peaks = MagicMock()
+        wdp_without_peaks.get_peaks_indices_and_labels.return_value = (np.array([], dtype=int), [])
+        # First call returns a workspace with a peak, second call returns a workspace with no peaks
+        mock_wdp_cls.side_effect = [wdp_with_peak, wdp_without_peaks]
+
+        positions_before_delete, labels_before_delete, _ = model.get_peak_overlay_arguments(["ws1"])
+        self.assertEqual(labels_before_delete, [["hkl_1"]])
+        np.testing.assert_array_equal(positions_before_delete[0], np.array([[1, 1, 1]]))
+
+        # Simulate deleting the final peak and refreshing overlays again.
+        positions_after_delete, labels_after_delete, ws_names_after_delete = model.get_peak_overlay_arguments(["ws1"])
+        self.assertEqual(ws_names_after_delete, ["ws1"])
+        self.assertEqual(labels_after_delete, [[]])
+        np.testing.assert_array_equal(positions_after_delete[0], np.array([], dtype=float).reshape(0, 3))
+        np.testing.assert_array_equal(model._peaks_indices_in_detector_positions, np.array([], dtype=int))
 
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel._match_workspace_unit")
     @mock.patch("instrumentview.FullInstrumentViewModel.AnalysisDataService")
