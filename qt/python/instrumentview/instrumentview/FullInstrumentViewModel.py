@@ -126,6 +126,8 @@ class FullInstrumentViewModel:
         self._transform = np.eye(4)
         self._transformed_detector_positions = self.detector_positions.copy()
 
+        self._peaks_indices_in_detector_positions = np.array([], dtype=int)
+
     @property
     def workspace(self) -> Workspace2D:
         return self._workspace
@@ -613,16 +615,13 @@ class FullInstrumentViewModel:
         wrapped_workspaces = [
             WorkspaceDetectorPeaks(ws_name, self.get_integration_units(), self.integration_limits) for ws_name in selected_peaks_workspaces
         ]
-        indices_and_labels_by_pws = [
-            wws.get_peaks_indices_and_labels(self.detector_positions, self.pickable_detector_ids) for wws in wrapped_workspaces
-        ]
+        indices_and_labels_by_pws = [wws.get_peaks_indices_and_labels(self.pickable_detector_ids) for wws in wrapped_workspaces]
         indices_by_pws = [pair[0] for pair in indices_and_labels_by_pws]
         self._peaks_indices_in_detector_positions = np.concatenate(indices_by_pws or [np.array([], dtype=int)])
         positions_by_pws = [self.detector_positions[indices] for indices in indices_by_pws]
         labels_by_pws = [pair[1] for pair in indices_and_labels_by_pws]
 
         transformed_pos = [self._transform_vectors_with_matrix(p) for p in positions_by_pws]
-
         return transformed_pos, labels_by_pws, selected_peaks_workspaces
 
     def _get_index_of_closest_detector_with_peak(self, index_in_detector_positions: int) -> int:

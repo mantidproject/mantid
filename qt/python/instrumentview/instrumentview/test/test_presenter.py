@@ -166,7 +166,6 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
 
         self._presenter.on_rubberband_zoom_toggled(True)
 
-        self._mock_view.set_start_adding_peaks_checked.assert_called_once_with(False)
         self._mock_view.set_hover_pick_checked.assert_called_once_with(False)
         self._mock_view.delete_current_overlaid_shape.assert_called_once()
         self._mock_view.set_overlaid_shape_controls_enabled.assert_called_once_with(False)

@@ -108,8 +108,8 @@ class FullInstrumentViewPresenter:
     def setup(self):
         self._view.subscribe_presenter(self)
         self._view.set_projection_combo_options(self._model.get_projection_options())
-        self._view.setup_connections_to_presenter()
         self._view.set_default_projection(self._model.get_default_projection())
+        self._view.setup_connections_to_presenter()
         self._view.set_contour_range_limits(self._model.counts_limits)
         self._view.set_integration_range_limits(self._model.integration_limits)
         self._view.show_axes()
@@ -372,7 +372,6 @@ class FullInstrumentViewPresenter:
 
     def on_rubberband_zoom_toggled(self, checked: bool) -> None:
         if checked:
-            self._view.set_start_adding_peaks_checked(False)
             self._view.set_hover_pick_checked(False)
             self._view.delete_current_overlaid_shape()
         self._view.set_overlaid_shape_controls_enabled(not checked)

@@ -1248,9 +1248,6 @@ class FullInstrumentViewView(QWidget):
             removed = list_to_clear.takeItem(i)
             del removed
 
-    def has_any_peak_overlays_in_lineplot(self) -> bool:
-        return len(self._lineplot_overlays) > 0
-
     def _on_axes_click_during_peak_selection(self, event) -> None:
         if self._plot_toolbar.zoom_enabled() or self._plot_toolbar.pan_enabled():
             # Delegate to matplotlib's default click callbacks when zoom is active.
