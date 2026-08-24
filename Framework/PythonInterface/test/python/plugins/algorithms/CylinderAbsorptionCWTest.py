@@ -7,6 +7,7 @@
 import unittest
 import numpy as np
 from mantid.simpleapi import CylinderAbsorptionCW, CreateSampleWorkspace, EditInstrumentGeometry, SetSample
+from mantid.kernel import PhysicalConstants
 
 
 class CylinderAbsorptionCWTest(unittest.TestCase):
@@ -103,6 +104,60 @@ class CylinderAbsorptionCWTest(unittest.TestCase):
 
         # Check multiple scattering
         self.assertAlmostEqual(result.MultipleScatteringWorkspace.extractY()[0][0], 0.120424)
+
+    def testManualCrossSectionsMatchSampleMaterial(self):
+        """Cross-sections given directly must give the same result as the same values set on the sample material.
+
+        The AttenuationXSection property is quoted at 1.7982 Å and must be scaled to the requested
+        wavelength, just as the sample material does, so both paths agree at any wavelength.
+        """
+        for wavelength in (1.0, PhysicalConstants.ReferenceLambda, 2.41):
+            ws_material = self.createWorkspace()
+            SetSample(
+                ws_material,
+                Geometry={
+                    "Shape": "Cylinder",
+                    "Height": 1.0,  # cm
+                    "Radius": 0.5,  # cm
+                },
+                Material={
+                    "ChemicalFormula": "V",
+                    "SampleNumberDensity": 0.0723,
+                },
+            )
+            material = ws_material.sample().getMaterial()
+
+            from_material = CylinderAbsorptionCW(
+                InputWorkspace=ws_material,
+                Wavelength=wavelength,
+                AbsorptionCorrectionMethod="Sears",
+                AbsorptionWorkspace="AbsorptionFromMaterial",
+                MultipleScatteringWorkspace="MultipleScatteringFromMaterial",
+            )
+
+            from_properties = CylinderAbsorptionCW(
+                InputWorkspace=self.createWorkspace(),
+                Radius=0.5,  # cm
+                Height=1.0,  # cm
+                Wavelength=wavelength,
+                AttenuationXSection=material.absorbXSection(PhysicalConstants.ReferenceLambda),  # barn at 1.7982 Å
+                ScatteringXSection=material.totalScatterXSection(),  # barn
+                SampleNumberDensity=material.numberDensity,  # atoms/Å^3
+                AbsorptionCorrectionMethod="Sears",
+                AbsorptionWorkspace="AbsorptionFromProperties",
+                MultipleScatteringWorkspace="MultipleScatteringFromProperties",
+            )
+
+            np.testing.assert_allclose(
+                from_properties.AbsorptionWorkspace.extractY(),
+                from_material.AbsorptionWorkspace.extractY(),
+                err_msg=f"absorption differs at {wavelength} Å",
+            )
+            np.testing.assert_allclose(
+                from_properties.MultipleScatteringWorkspace.extractY(),
+                from_material.MultipleScatteringWorkspace.extractY(),
+                err_msg=f"multiple scattering differs at {wavelength} Å",
+            )
 
     def testSabine(self):
         ws = self.createWorkspace()
