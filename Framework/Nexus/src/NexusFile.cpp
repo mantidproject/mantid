@@ -99,8 +99,13 @@ std::size_t getStringDataLength(hid_t const data_id, hid_t const type_id, hid_t 
         throw Mantid::Nexus::Exception("Failed to read scalar variable-length string length");
       length = vbuf ? strlen(vbuf) : 0; // treat null pointer as empty string
       H5free_memory(vbuf);
-    } else if (H5Dvlen_get_buf_size(data_id, type_id, space_id, &length) < 0) {
-      throw Mantid::Nexus::Exception("Failed to read string length for variable-length string");
+    } else {
+      // MacOS treats size_T as ulonglong, which is not the same as hsize_t.  Use hsize_t to avoid warnings.
+      hsize_t buf_size = 0;
+      if (H5Dvlen_get_buf_size(data_id, type_id, space_id, &buf_size) < 0) {
+        throw Mantid::Nexus::Exception("Failed to read string length for variable-length string");
+      }
+      length = static_cast<std::size_t>(buf_size);
     }
   } else {
     // fixed-length: byte width is encoded in the datatype itself
