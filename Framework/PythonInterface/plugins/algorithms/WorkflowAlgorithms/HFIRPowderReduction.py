@@ -993,16 +993,30 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
                     raw_vanadium_background_ws, ws_name, mask_name, xMin, xMax, self.vanadium_ws
                 )
 
+            # The sample is put onto the vanadium's monitor/time scale here. Anything later
+            # subtracted from it has to be brought onto that same scale first.
+            normalisation_scale = self._get_scale(self.vanadium_ws)
+
             Scale(
                 InputWorkspace=ws_name,
                 OutputWorkspace=ws_name,
-                Factor=self._get_scale(self.vanadium_ws) / self._get_scale(ws_name),
+                Factor=normalisation_scale / self._get_scale(ws_name),
                 EnableLogging=False,
             )
 
             if raw_sample_background_ws is not None:
                 self.sample_background_ws = self._resample_background(
                     raw_sample_background_ws, ws_name, mask_name, xMin, xMax, self.vanadium_ws
+                )
+                # Match the normalisation just applied to the sample, and apply fB, so that
+                # _apply_sample_absorption_correction subtracts SB in the sample's units.
+                Scale(
+                    InputWorkspace=self.sample_background_ws,
+                    OutputWorkspace=self.sample_background_ws,
+                    Factor=self.getProperty("SampleBackgroundScaleFactor").value
+                    * normalisation_scale
+                    / self._get_scale(raw_sample_background_ws),
+                    EnableLogging=False,
                 )
 
             # Calibration & Normalization (vanadium correction)
@@ -1439,7 +1453,9 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         absolute-intensity normalization factor if AbsoluteIntensityUnits=True,
         otherwise fnorm = 1.
 
-        When DoAttenuationCorrection=False, BG subtraction is applied here
+        When DoAttenuationCorrection=False, BG subtraction is applied here. sample_bg_ws
+        has already been scaled by fB * (V_scale / SB_scale) in _resample_inputs, matching
+        the normalisation applied to sample_ws, so it is subtracted as-is.
         """
         s = self.getProperty("Scale").value
         do_attenuation = self.getProperty("DoAttenuationCorrection").value
