@@ -39,6 +39,8 @@ enum DataField { XValues = 0, YValues = 1, EValues = 2, DxValues = 3 };
  * @return A const reference to the histogram data of that field
  */
 template <DataField Field> decltype(auto) fieldData(MatrixWorkspace const &workspace, size_t const index) {
+  UNUSED_ARG(workspace);
+  UNUSED_ARG(index);
   throw std::logic_error("fieldData does not handle this DataField");
 }
 
@@ -66,6 +68,8 @@ template <> decltype(auto) fieldData<DxValues>(MatrixWorkspace const &workspace,
  * @return The number of values the field holds for that spectrum
  */
 template <DataField Field> size_t fieldSize(MatrixWorkspace const &workspace, size_t const index) {
+  UNUSED_ARG(workspace);
+  UNUSED_ARG(index);
   throw std::logic_error("fieldSize does not handle this DataField");
 }
 
