@@ -13,6 +13,7 @@
 #include <QEvent>
 #include <QMouseEvent>
 #include <QPainter>
+#include <QPalette>
 #include <QStandardItem>
 #include <QStyledItemDelegate>
 #include <stdexcept>
@@ -23,8 +24,6 @@ namespace {
 auto constexpr itemTypeRole = Qt::UserRole + 1;
 auto constexpr outputTypeRole = Qt::UserRole + 2;
 auto constexpr workspaceNameRole = Qt::UserRole + 3;
-
-auto const metadataTextColour = QColor(112, 112, 112);
 
 template <typename Enum> int enumIndex(Enum value) { return static_cast<int>(value); }
 
@@ -56,13 +55,18 @@ QString displayName(PlottingWorkspaceOutputType outputType) {
   throw std::runtime_error("Unexpected plotting workspace output type.");
 }
 
-QStandardItem *createNonEditableItem(QString const &text, bool muted = false) {
+QStandardItem *createNonEditableItem(QString const &text) {
   auto item = new QStandardItem(text);
   item->setEditable(false);
-  if (muted) {
-    item->setForeground(QBrush(metadataTextColour));
-  }
   return item;
+}
+
+void applyMutedTextPalette(QStyleOptionViewItem &option) {
+  auto const mutedText = option.palette.brush(QPalette::Disabled, QPalette::Text);
+  option.palette.setBrush(QPalette::Active, QPalette::Text, mutedText);
+  option.palette.setBrush(QPalette::Inactive, QPalette::Text, mutedText);
+  option.palette.setBrush(QPalette::Active, QPalette::WindowText, mutedText);
+  option.palette.setBrush(QPalette::Inactive, QPalette::WindowText, mutedText);
 }
 
 /// Draws column separators for workspace tree rows.
@@ -73,7 +77,11 @@ public:
   }
 
   void paint(QPainter *painter, QStyleOptionViewItem const &option, QModelIndex const &index) const override {
-    QStyledItemDelegate::paint(painter, option, index);
+    auto itemOption = option;
+    if (index.data(WorkspaceTree::mutedRole).toBool()) {
+      applyMutedTextPalette(itemOption);
+    }
+    QStyledItemDelegate::paint(painter, itemOption, index);
 
     if (index.column() < index.model()->columnCount(index.parent()) - 1) {
       painter->save();
@@ -154,15 +162,12 @@ void WorkspaceTreeController::setItemsMutedForCurrentPlotOutputType(QStandardIte
 }
 
 void WorkspaceTreeController::setItemMuted(QStandardItem *parent, int row, bool muted) {
-  auto const background = muted ? QBrush(WorkspaceTree::mutedBackgroundColour()) : QBrush();
+  auto const background = muted ? WorkspaceTree::mutedBackgroundBrush(m_workspaceTree->palette()) : QBrush();
   for (auto column = 0; column < parent->columnCount(); ++column) {
     auto *item = parent->child(row, column);
     item->setBackground(background);
     item->setData(muted, WorkspaceTree::mutedRole);
   }
-
-  auto const itemLabel = parent->child(row, ItemColumn);
-  itemLabel->setForeground(muted ? QBrush(metadataTextColour) : QBrush());
 }
 
 bool WorkspaceTreeController::eventFilter(QObject *watched, QEvent *event) {
@@ -184,8 +189,8 @@ bool WorkspaceTreeController::eventFilter(QObject *watched, QEvent *event) {
 }
 
 void WorkspaceTreeController::addTreeItem(QStandardItem *parent, PlottingWorkspaceTreeItem const &item) {
-  auto treeItem = createNonEditableItem(displayName(item.itemType), true);
-  auto outputTypeItem = createNonEditableItem(displayName(item.outputType), true);
+  auto treeItem = createNonEditableItem(displayName(item.itemType));
+  auto outputTypeItem = createNonEditableItem(displayName(item.outputType));
   auto itemLabel = createNonEditableItem(QString::fromStdString(item.label));
   for (auto *rowItem : {treeItem, outputTypeItem, itemLabel}) {
     rowItem->setData(enumIndex(item.itemType), itemTypeRole);

@@ -7,6 +7,7 @@
 #pragma once
 
 #include "../../../ISISReflectometry/GUI/Plotting/view/QtPlottingView.h"
+#include "../../../ISISReflectometry/GUI/Plotting/view/WorkspaceTreeView.h"
 
 #include <QApplication>
 #include <QBrush>
@@ -15,6 +16,7 @@
 #include <QComboBox>
 #include <QItemSelectionModel>
 #include <QMouseEvent>
+#include <QPalette>
 #include <QPushButton>
 #include <QTreeView>
 #include <QVBoxLayout>
@@ -410,14 +412,12 @@ public:
     TS_ASSERT_EQUALS(tree->model()->data(workspaceItemIndex(tree)).toString().toStdString(), "IvsQ_12345");
   }
 
-  void testWorkspaceTreeMetadataColumnsUseMutedText() {
+  void testWorkspaceTreeItemsAreEnabledByDefault() {
     QtPlottingView view;
     view.setWorkspaceItems(workspaceItems());
     auto tree = workspaceTree(view);
 
-    TS_ASSERT_EQUALS(foregroundColour(tree, workspaceIndex(tree)), QColor(112, 112, 112));
-    TS_ASSERT_EQUALS(foregroundColour(tree, workspaceOutputTypeIndex(tree)), QColor(112, 112, 112));
-    TS_ASSERT_DIFFERS(foregroundColour(tree, workspaceItemIndex(tree)), QColor(112, 112, 112));
+    TS_ASSERT(rowIsEnabled(tree, workspaceIndex(tree)));
   }
 
   void testWorkspaceTreeUsesDelegateForSubtleColumnDivider() {
@@ -695,13 +695,14 @@ public:
     view.setWorkspaceItems(workspaceItemsWithBinnedOutput());
     auto tree = workspaceTree(view);
 
-    TS_ASSERT_EQUALS(foregroundColour(tree, workspaceItemIndex(tree, 0, 0, 0)), QColor(112, 112, 112));
-    TS_ASSERT_DIFFERS(foregroundColour(tree, workspaceItemIndex(tree, 0, 0, 1)), QColor(112, 112, 112));
-    TS_ASSERT_DIFFERS(foregroundColour(tree, workspaceItemIndex(tree, 0, 0, 2)), QColor(112, 112, 112));
-    TS_ASSERT_EQUALS(backgroundColour(tree, workspaceIndex(tree, 0, 0, 0)), QColor(238, 238, 238));
-    TS_ASSERT_EQUALS(backgroundColour(tree, workspaceOutputTypeIndex(tree, 0, 0, 0)), QColor(238, 238, 238));
-    TS_ASSERT_EQUALS(backgroundColour(tree, workspaceItemIndex(tree, 0, 0, 0)), QColor(238, 238, 238));
-    TS_ASSERT_DIFFERS(backgroundColour(tree, workspaceItemIndex(tree, 0, 0, 1)), QColor(238, 238, 238));
+    TS_ASSERT(rowIsMuted(tree, workspaceIndex(tree, 0, 0, 0)));
+    TS_ASSERT(rowIsEnabled(tree, workspaceIndex(tree, 0, 0, 0)));
+    TS_ASSERT(!rowIsMuted(tree, workspaceIndex(tree, 0, 0, 1)));
+    TS_ASSERT(!rowIsMuted(tree, workspaceIndex(tree, 0, 0, 2)));
+    TS_ASSERT_EQUALS(backgroundColour(tree, workspaceIndex(tree, 0, 0, 0)), mutedBackgroundColour(tree));
+    TS_ASSERT_EQUALS(backgroundColour(tree, workspaceOutputTypeIndex(tree, 0, 0, 0)), mutedBackgroundColour(tree));
+    TS_ASSERT_EQUALS(backgroundColour(tree, workspaceItemIndex(tree, 0, 0, 0)), mutedBackgroundColour(tree));
+    TS_ASSERT_DIFFERS(backgroundColour(tree, workspaceItemIndex(tree, 0, 0, 1)), mutedBackgroundColour(tree));
   }
 
   void testReflectivityDoesNotSelectIvsLambdaWorkspaceDirectly() {
@@ -732,9 +733,12 @@ public:
     selectSpinAsymmetry(view);
     auto tree = workspaceTree(view);
 
-    TS_ASSERT_EQUALS(foregroundColour(tree, workspaceItemIndex(tree, 0, 0, 0)), QColor(112, 112, 112));
-    TS_ASSERT_EQUALS(foregroundColour(tree, workspaceItemIndex(tree, 0, 0, 1)), QColor(112, 112, 112));
-    TS_ASSERT_EQUALS(foregroundColour(tree, workspaceItemIndex(tree, 0, 0, 2)), QColor(112, 112, 112));
+    TS_ASSERT(rowIsMuted(tree, workspaceIndex(tree, 0, 0, 0)));
+    TS_ASSERT(rowIsMuted(tree, workspaceIndex(tree, 0, 0, 1)));
+    TS_ASSERT(rowIsMuted(tree, workspaceIndex(tree, 0, 0, 2)));
+    TS_ASSERT(rowIsEnabled(tree, workspaceIndex(tree, 0, 0, 0)));
+    TS_ASSERT(rowIsEnabled(tree, workspaceIndex(tree, 0, 0, 1)));
+    TS_ASSERT(rowIsEnabled(tree, workspaceIndex(tree, 0, 0, 2)));
   }
 
   void testSpinAsymmetryDoesNotSelectWorkspaceItemsDirectly() {
@@ -784,12 +788,15 @@ public:
     selectAlignment(view);
     auto tree = workspaceTree(view);
 
-    TS_ASSERT_EQUALS(foregroundColour(tree, groupChildItemIndex(tree, 0)), QColor(112, 112, 112));
-    TS_ASSERT_EQUALS(foregroundColour(tree, groupChildItemIndex(tree, 1)), QColor(112, 112, 112));
-    TS_ASSERT_EQUALS(foregroundColour(tree, groupChildItemIndex(tree, 1, 0)), QColor(112, 112, 112));
-    TS_ASSERT_EQUALS(backgroundColour(tree, groupChildIndex(tree, 0)), QColor(238, 238, 238));
-    TS_ASSERT_EQUALS(backgroundColour(tree, groupChildIndex(tree, 1)), QColor(238, 238, 238));
-    TS_ASSERT_EQUALS(backgroundColour(tree, groupChildIndex(tree, 1, 0)), QColor(238, 238, 238));
+    TS_ASSERT(rowIsMuted(tree, groupChildIndex(tree, 0)));
+    TS_ASSERT(rowIsMuted(tree, groupChildIndex(tree, 1)));
+    TS_ASSERT(rowIsMuted(tree, groupChildIndex(tree, 1, 0)));
+    TS_ASSERT(rowIsEnabled(tree, groupChildIndex(tree, 0)));
+    TS_ASSERT(rowIsEnabled(tree, groupChildIndex(tree, 1)));
+    TS_ASSERT(rowIsEnabled(tree, groupChildIndex(tree, 1, 0)));
+    TS_ASSERT_EQUALS(backgroundColour(tree, groupChildIndex(tree, 0)), mutedBackgroundColour(tree));
+    TS_ASSERT_EQUALS(backgroundColour(tree, groupChildIndex(tree, 1)), mutedBackgroundColour(tree));
+    TS_ASSERT_EQUALS(backgroundColour(tree, groupChildIndex(tree, 1, 0)), mutedBackgroundColour(tree));
   }
 
   void testAlignmentDoesNotSelectStitchedWorkspaceGroupDirectly() {
@@ -811,12 +818,15 @@ public:
     selectDetectorMap(view);
     auto tree = workspaceTree(view);
 
-    TS_ASSERT_EQUALS(foregroundColour(tree, groupChildItemIndex(tree, 0)), QColor(112, 112, 112));
-    TS_ASSERT_EQUALS(foregroundColour(tree, groupChildItemIndex(tree, 1)), QColor(112, 112, 112));
-    TS_ASSERT_EQUALS(foregroundColour(tree, groupChildItemIndex(tree, 1, 0)), QColor(112, 112, 112));
-    TS_ASSERT_EQUALS(backgroundColour(tree, groupChildIndex(tree, 0)), QColor(238, 238, 238));
-    TS_ASSERT_EQUALS(backgroundColour(tree, groupChildIndex(tree, 1)), QColor(238, 238, 238));
-    TS_ASSERT_EQUALS(backgroundColour(tree, groupChildIndex(tree, 1, 0)), QColor(238, 238, 238));
+    TS_ASSERT(rowIsMuted(tree, groupChildIndex(tree, 0)));
+    TS_ASSERT(rowIsMuted(tree, groupChildIndex(tree, 1)));
+    TS_ASSERT(rowIsMuted(tree, groupChildIndex(tree, 1, 0)));
+    TS_ASSERT(rowIsEnabled(tree, groupChildIndex(tree, 0)));
+    TS_ASSERT(rowIsEnabled(tree, groupChildIndex(tree, 1)));
+    TS_ASSERT(rowIsEnabled(tree, groupChildIndex(tree, 1, 0)));
+    TS_ASSERT_EQUALS(backgroundColour(tree, groupChildIndex(tree, 0)), mutedBackgroundColour(tree));
+    TS_ASSERT_EQUALS(backgroundColour(tree, groupChildIndex(tree, 1)), mutedBackgroundColour(tree));
+    TS_ASSERT_EQUALS(backgroundColour(tree, groupChildIndex(tree, 1, 0)), mutedBackgroundColour(tree));
   }
 
   void testDetectorMapDoesNotSelectStitchedWorkspaceDirectly() {
@@ -1003,8 +1013,26 @@ private:
 
   QTreeView *workspaceTree(QtPlottingView &view) const { return view.findChild<QTreeView *>("workspaceTree"); }
 
-  QColor foregroundColour(QTreeView *tree, QModelIndex const &index) const {
-    return tree->model()->data(index, Qt::ForegroundRole).value<QBrush>().color();
+  QColor mutedBackgroundColour(QTreeView *tree) const { return tree->palette().brush(QPalette::AlternateBase).color(); }
+
+  bool rowIsMuted(QTreeView *tree, QModelIndex const &index) const {
+    for (auto column = 0; column < tree->model()->columnCount(index.parent()); ++column) {
+      if (!tree->model()->index(index.row(), column, index.parent()).data(WorkspaceTree::mutedRole).toBool()) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  bool rowIsEnabled(QTreeView *tree, QModelIndex const &index) const {
+    for (auto column = 0; column < tree->model()->columnCount(index.parent()); ++column) {
+      if (!tree->model()
+               ->flags(tree->model()->index(index.row(), column, index.parent()))
+               .testFlag(Qt::ItemIsEnabled)) {
+        return false;
+      }
+    }
+    return true;
   }
 
   QColor backgroundColour(QTreeView *tree, QModelIndex const &index) const {

@@ -7,7 +7,8 @@
 #pragma once
 
 #include "Common/DllConfig.h"
-#include <QColor>
+#include <QBrush>
+#include <QPalette>
 #include <QTreeView>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
@@ -15,8 +16,8 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 namespace WorkspaceTree {
 /// Item data role used to mark rows muted by the current plot output type.
 auto constexpr mutedRole = Qt::UserRole + 4;
-/// Background colour for rows that are not selectable for the current plot output type.
-inline QColor mutedBackgroundColour() { return QColor(238, 238, 238); }
+/// Background brush for rows that are not selectable for the current plot output type.
+inline QBrush mutedBackgroundBrush(QPalette const &palette) { return palette.brush(QPalette::AlternateBase); }
 } // namespace WorkspaceTree
 
 /// Tree view that paints muted plotting workspace rows across all columns.

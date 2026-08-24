@@ -14,7 +14,7 @@ WorkspaceTreeView::WorkspaceTreeView(QWidget *parent) : QTreeView(parent) {}
 
 void WorkspaceTreeView::drawRow(QPainter *painter, QStyleOptionViewItem const &option, QModelIndex const &index) const {
   if (index.data(WorkspaceTree::mutedRole).toBool()) {
-    painter->fillRect(option.rect, WorkspaceTree::mutedBackgroundColour());
+    painter->fillRect(option.rect, WorkspaceTree::mutedBackgroundBrush(palette()));
   }
 
   QTreeView::drawRow(painter, option, index);
