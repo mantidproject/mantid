@@ -1674,7 +1674,7 @@ def delete_optimization_workspaces(reduction_packages, workspaces, monitors, sav
 def get_names_to_delete(reduction_packages, workspaces, monitors, save_can):
     def _add_from_dict(_ws_dict):
         for ws_list in _ws_dict.values():
-            if isinstance(ws_list, (Workspace2D, WorkspaceGroup, IEventWorkspace)):
+            if isinstance(ws_list, (Workspace2D, IEventWorkspace)):
                 ws_list = [ws_list]
             if ws_list:
                 for ws in ws_list:
@@ -1692,12 +1692,13 @@ def get_names_to_delete(reduction_packages, workspaces, monitors, save_can):
                 "lab_can_norm": reduction_package.reduced_lab_can_norm,
                 "hab_can_count": reduction_package.reduced_hab_can_count,
                 "hab_can_norm": reduction_package.reduced_hab_can_norm,
-                "unfitted_trans_can": reduction_package.unfitted_transmission_can,
-                "unfitted_trans": reduction_package.unfitted_transmission,
                 "fitted_trans_can": reduction_package.calculated_transmission_can,
                 "fitted_trans": reduction_package.calculated_transmission,
             }
         )
+        # using base names to avoid bug described in get_transmission_to_save
+        ws_names.extend(get_transmission_names_to_save(reduction_package, False))
+        ws_names.extend(get_transmission_names_to_save(reduction_package, True))
         if not save_can:
             optimizations_to_delete.update({"lab_can": reduction_package.reduced_lab_can, "hab_can": reduction_package.reduced_hab_can})
         ws_names.extend(list(_add_from_dict(optimizations_to_delete)))
