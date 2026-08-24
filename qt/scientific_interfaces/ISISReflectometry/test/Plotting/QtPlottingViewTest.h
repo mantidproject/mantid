@@ -692,7 +692,7 @@ public:
 
   void testReflectivityMutesIvsLambdaWorkspaceItems() {
     QtPlottingView view;
-    view.setWorkspaceItems(workspaceItemsWithBinnedOutput());
+    view.setWorkspaceItems(workspaceItemsWithMutedIvsLambda());
     auto tree = workspaceTree(view);
 
     TS_ASSERT(rowIsMuted(tree, workspaceIndex(tree, 0, 0, 0)));
@@ -707,7 +707,7 @@ public:
 
   void testReflectivityDoesNotSelectIvsLambdaWorkspaceDirectly() {
     QtPlottingView view;
-    view.setWorkspaceItems(workspaceItemsWithBinnedOutput());
+    view.setWorkspaceItems(workspaceItemsWithMutedIvsLambda());
     auto tree = workspaceTree(view);
     auto workspace = workspaceIndex(tree, 0, 0, 0);
 
@@ -718,7 +718,7 @@ public:
 
   void testReflectivityDoesNotSelectIvsLambdaWorkspaceGroupDirectly() {
     QtPlottingView view;
-    view.setWorkspaceItems(workspaceItemsWithWorkspaceGroups());
+    view.setWorkspaceItems(workspaceItemsWithMutedIvsLambdaWorkspaceGroup());
     auto tree = workspaceTree(view);
     auto workspaceGroup = workspaceIndex(tree, 0, 0, 0);
 
@@ -729,8 +729,7 @@ public:
 
   void testSpinAsymmetryMutesWorkspaceItemsThatCannotBeSelectedDirectly() {
     QtPlottingView view;
-    view.setWorkspaceItems(workspaceItemsWithBinnedOutput());
-    selectSpinAsymmetry(view);
+    view.setWorkspaceItems(workspaceItemsForSpinAsymmetry());
     auto tree = workspaceTree(view);
 
     TS_ASSERT(rowIsMuted(tree, workspaceIndex(tree, 0, 0, 0)));
@@ -743,8 +742,7 @@ public:
 
   void testSpinAsymmetryDoesNotSelectWorkspaceItemsDirectly() {
     QtPlottingView view;
-    view.setWorkspaceItems(workspaceItemsWithBinnedOutput());
-    selectSpinAsymmetry(view);
+    view.setWorkspaceItems(workspaceItemsForSpinAsymmetry());
     auto tree = workspaceTree(view);
     auto workspace = workspaceIndex(tree, 0, 0, 2);
 
@@ -755,8 +753,7 @@ public:
 
   void testSpinAsymmetryCanSelectRunAndReturnsIvsQBinnedWorkspacesOnly() {
     QtPlottingView view;
-    view.setWorkspaceItems(workspaceItemsWithBinnedOutput());
-    selectSpinAsymmetry(view);
+    view.setWorkspaceItems(workspaceItemsForSpinAsymmetry());
     auto tree = workspaceTree(view);
 
     click(tree, runIndex(tree));
@@ -769,8 +766,7 @@ public:
 
   void testSpinAsymmetryCanSelectWorkspaceGroupWithIvsQBinnedChildren() {
     QtPlottingView view;
-    view.setWorkspaceItems(workspaceItemsWithWorkspaceGroups());
-    selectSpinAsymmetry(view);
+    view.setWorkspaceItems(workspaceItemsWithWorkspaceGroupsForSpinAsymmetry());
     auto tree = workspaceTree(view);
     auto workspaceGroup = workspaceIndex(tree, 0, 0, 1);
 
@@ -784,8 +780,7 @@ public:
 
   void testAlignmentMutesStitchedWorkspaceAndAssociatedWorkspaceGroup() {
     QtPlottingView view;
-    view.setWorkspaceItems(workspaceItemsWithStitchedOutput());
-    selectAlignment(view);
+    view.setWorkspaceItems(workspaceItemsWithMutedStitchedOutput());
     auto tree = workspaceTree(view);
 
     TS_ASSERT(rowIsMuted(tree, groupChildIndex(tree, 0)));
@@ -801,8 +796,7 @@ public:
 
   void testAlignmentDoesNotSelectStitchedWorkspaceGroupDirectly() {
     QtPlottingView view;
-    view.setWorkspaceItems(workspaceItemsWithStitchedOutput());
-    selectAlignment(view);
+    view.setWorkspaceItems(workspaceItemsWithMutedStitchedOutput());
     auto tree = workspaceTree(view);
     auto workspaceGroup = groupChildIndex(tree, 1);
 
@@ -814,8 +808,7 @@ public:
 
   void testDetectorMapMutesStitchedWorkspaceAndAssociatedWorkspaceGroup() {
     QtPlottingView view;
-    view.setWorkspaceItems(workspaceItemsWithStitchedOutput());
-    selectDetectorMap(view);
+    view.setWorkspaceItems(workspaceItemsWithMutedStitchedOutput());
     auto tree = workspaceTree(view);
 
     TS_ASSERT(rowIsMuted(tree, groupChildIndex(tree, 0)));
@@ -831,8 +824,7 @@ public:
 
   void testDetectorMapDoesNotSelectStitchedWorkspaceDirectly() {
     QtPlottingView view;
-    view.setWorkspaceItems(workspaceItemsWithStitchedOutput());
-    selectDetectorMap(view);
+    view.setWorkspaceItems(workspaceItemsWithMutedStitchedOutput());
     auto tree = workspaceTree(view);
     auto workspace = groupChildIndex(tree, 0);
 
@@ -844,8 +836,7 @@ public:
 
   void testDetectorMapDoesNotSelectStitchedWorkspaceGroupDirectly() {
     QtPlottingView view;
-    view.setWorkspaceItems(workspaceItemsWithStitchedOutput());
-    selectDetectorMap(view);
+    view.setWorkspaceItems(workspaceItemsWithMutedStitchedOutput());
     auto tree = workspaceTree(view);
     auto workspaceGroup = groupChildIndex(tree, 1);
 
@@ -896,6 +887,7 @@ private:
     void notifyPlotOverplotClicked() override { ++overplotClicked; }
     void notifyPlotIndividualClicked() override { ++individualClicked; }
     void notifyAddToExistingPlotChanged() override { ++addToExistingPlotChanged; }
+    void notifyPlotOutputTypeChanged() override {}
     void notifyActivePlotCompatibilityChanged() override {}
 
     int tiledClicked{0};
@@ -947,6 +939,12 @@ private:
                                       workspaceItem("IvsQ_binned_12345", PlottingWorkspaceOutputType::IvsQBinned)})})};
   }
 
+  std::vector<PlottingWorkspaceTreeItem> workspaceItemsWithMutedIvsLambda() const {
+    auto items = workspaceItemsWithBinnedOutput();
+    items[0].children[0].children[0] = mutedItem(std::move(items[0].children[0].children[0]), false);
+    return items;
+  }
+
   std::vector<PlottingWorkspaceTreeItem> workspaceItemsWithBinnedWorkspaces(int workspaceCount) const {
     auto workspaces = std::vector<PlottingWorkspaceTreeItem>{};
     for (auto workspace = 1; workspace <= workspaceCount; ++workspace) {
@@ -977,11 +975,45 @@ private:
                                {workspaceItem("IvsQ_binned_group_1", PlottingWorkspaceOutputType::IvsQBinned)})})})};
   }
 
+  std::vector<PlottingWorkspaceTreeItem> workspaceItemsWithMutedIvsLambdaWorkspaceGroup() const {
+    auto items = workspaceItemsWithWorkspaceGroups();
+    items[0].children[0].children[0] = mutedItem(std::move(items[0].children[0].children[0]), false);
+    items[0].children[0].children[0].children[0] =
+        mutedItem(std::move(items[0].children[0].children[0].children[0]), false);
+    return items;
+  }
+
+  std::vector<PlottingWorkspaceTreeItem> workspaceItemsForSpinAsymmetry() const {
+    auto items = workspaceItemsWithBinnedOutput();
+    auto &workspaces = items[0].children[0].children;
+    workspaces[0] = mutedItem(std::move(workspaces[0]), false);
+    workspaces[1] = mutedItem(std::move(workspaces[1]), false);
+    workspaces[2] = mutedItem(std::move(workspaces[2]), true);
+    return items;
+  }
+
+  std::vector<PlottingWorkspaceTreeItem> workspaceItemsWithWorkspaceGroupsForSpinAsymmetry() const {
+    auto items = workspaceItemsWithWorkspaceGroups();
+    auto &workspaceGroups = items[0].children[0].children;
+    workspaceGroups[0] = mutedItem(std::move(workspaceGroups[0]), false);
+    workspaceGroups[0].children[0] = mutedItem(std::move(workspaceGroups[0].children[0]), false);
+    workspaceGroups[1].children[0] = mutedItem(std::move(workspaceGroups[1].children[0]), true);
+    return items;
+  }
+
   std::vector<PlottingWorkspaceTreeItem> workspaceItemsWithStitchedOutput() const {
     return {groupItem(
         "Group 1", {workspaceItem("stitched_12345", PlottingWorkspaceOutputType::IvsQBinned),
                     workspaceGroupItem("stitched_group",
                                        {workspaceItem("stitched_group_1", PlottingWorkspaceOutputType::IvsQBinned)})})};
+  }
+
+  std::vector<PlottingWorkspaceTreeItem> workspaceItemsWithMutedStitchedOutput() const {
+    auto items = workspaceItemsWithStitchedOutput();
+    items[0].children[0] = mutedItem(std::move(items[0].children[0]), false);
+    items[0].children[1] = mutedItem(std::move(items[0].children[1]), false);
+    items[0].children[1].children[0] = mutedItem(std::move(items[0].children[1].children[0]), false);
+    return items;
   }
 
   PlottingWorkspaceTreeItem groupItem(std::string label, std::vector<PlottingWorkspaceTreeItem> children) const {
@@ -1009,6 +1041,13 @@ private:
   PlottingWorkspaceTreeItem workspaceItem(std::string label, PlottingWorkspaceOutputType outputType) const {
     auto const workspaceName = label;
     return {std::move(label), PlottingWorkspaceTreeItemType::Workspace, outputType, "", {}, workspaceName, {}};
+  }
+
+  PlottingWorkspaceTreeItem mutedItem(PlottingWorkspaceTreeItem item, bool selectableAsChild) const {
+    item.muted = true;
+    item.selectable = false;
+    item.selectableAsChild = selectableAsChild;
+    return item;
   }
 
   QTreeView *workspaceTree(QtPlottingView &view) const { return view.findChild<QTreeView *>("workspaceTree"); }

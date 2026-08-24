@@ -7,6 +7,7 @@
 #pragma once
 
 #include "Common/DllConfig.h"
+#include "GUI/Common/PlotOptions.h"
 #include "GUI/Plotting/model/PlottingWorkspace.h"
 
 #include <string>
@@ -22,6 +23,9 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL PlottingWorkspaceTree {
 public:
   /// Build tree items from successful reduction groups and rows in the runs table.
   std::vector<PlottingWorkspaceTreeItem> makeWorkspaceItems(RunsTable const &runsTable);
+  /// Return tree items annotated with output-type specific selectable and muted state.
+  std::vector<PlottingWorkspaceTreeItem>
+  workspaceItemsForPlotOutputType(std::vector<PlottingWorkspaceTreeItem> const &items, PlotOutputType outputType) const;
   /// Return plot metadata for selected workspace names that are still known to the tree.
   std::vector<PlottingWorkspaceSelection> selectedWorkspacesFor(std::vector<std::string> const &workspaceNames) const;
 

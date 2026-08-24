@@ -11,8 +11,8 @@
 #include "GUI/Common/Plotter.h"
 #include "GUI/Plotting/model/IPlottingModel.h"
 #include "GUI/Plotting/model/PlottingModel.h"
+#include "GUI/Plotting/model/PlottingWorkspaceTree.h"
 #include "GUI/Plotting/presenter/IPlottingPresenter.h"
-#include "GUI/Plotting/presenter/PlottingWorkspaceTree.h"
 #include "GUI/Plotting/view/IPlottingView.h"
 
 #include <string>
@@ -43,6 +43,8 @@ public:
   void notifyPlotIndividualClicked() override;
   /// Refresh active-plot compatibility after the add-to-existing option changes.
   void notifyAddToExistingPlotChanged() override;
+  /// Refresh tree state after the selected output type changes.
+  void notifyPlotOutputTypeChanged() override;
   /// Refresh active-plot compatibility for controls that depend on open figures.
   void notifyActivePlotCompatibilityChanged() override;
 
@@ -53,6 +55,8 @@ private:
   void updateActivePlotCompatibility() const;
   /// Update output types for the selected instrument.
   void updateAvailablePlotOutputTypes(std::string const &instrumentName);
+  /// Reapply output-type specific tree state and display it in the view.
+  void updateWorkspaceItemsForCurrentOutputType();
   /// Update controls that depend on reduction and autoreduction state.
   void updateWidgetEnabledState();
   bool isProcessing() const;
@@ -67,6 +71,7 @@ private:
   IPlotOptionsProvider const *m_plotOptionsProvider;
   IPlottingModel const *m_plottingModel;
   PlottingWorkspaceTree m_workspaceTree;
+  std::vector<PlottingWorkspaceTreeItem> m_workspaceItems;
   std::string m_instrumentName;
 };
 

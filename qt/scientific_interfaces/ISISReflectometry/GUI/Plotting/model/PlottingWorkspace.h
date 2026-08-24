@@ -29,6 +29,9 @@ struct MANTIDQT_ISISREFLECTOMETRY_DLL PlottingWorkspaceTreeItem {
   std::vector<std::string> runNumbers;
   std::string workspaceName;
   std::vector<PlottingWorkspaceTreeItem> children;
+  bool muted{false};
+  bool selectable{true};
+  bool selectableAsChild{true};
 };
 
 /// Metadata required by the model to produce plot-ready workspaces from a tree selection.

@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "../../../ISISReflectometry/GUI/Plotting/model/PlottingWorkspaceTree.h"
 #include "../../../ISISReflectometry/GUI/Plotting/presenter/PlottingPresenter.h"
 #include "../../../ISISReflectometry/Reduction/RunsTable.h"
 #include "../../../ISISReflectometry/TestHelpers/PlottingTestHelpers.h"
@@ -25,6 +26,16 @@
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 using testing::NiceMock;
 using testing::Return;
+
+inline std::vector<PlottingWorkspaceTreeItem>
+workspaceItemsForOutputType(std::vector<PlottingWorkspaceTreeItem> const &items, PlotOutputType outputType) {
+  return PlottingWorkspaceTree().workspaceItemsForPlotOutputType(items, outputType);
+}
+
+inline std::vector<PlottingWorkspaceTreeItem>
+workspaceItemsForDefaultOutputType(std::vector<PlottingWorkspaceTreeItem> const &items) {
+  return workspaceItemsForOutputType(items, PlotOutputType::ReflectivityCurve);
+}
 
 MATCHER_P(WorkspaceItemsEqual, expected, "matches plotting workspace tree items") {
   if (arg == expected)
@@ -150,7 +161,7 @@ public:
                                       workspaceItem("IvsQ_12345", PlottingWorkspaceOutputType::IvsQ),
                                       workspaceItem("IvsQ_binned_12345", PlottingWorkspaceOutputType::IvsQBinned)})})};
 
-    EXPECT_CALL(view, setWorkspaceItems(WorkspaceItemsEqual(expected))).Times(1);
+    EXPECT_CALL(view, setWorkspaceItems(WorkspaceItemsEqual(workspaceItemsForDefaultOutputType(expected)))).Times(1);
 
     presenter.notifyRunsTableChanged(runsTable);
   }
@@ -177,7 +188,7 @@ public:
     auto const expected = std::vector<PlottingWorkspaceTreeItem>{
         groupItem("Group 1", {runItem("12345", {workspaceItem("IvsQ_12345", PlottingWorkspaceOutputType::IvsQ)})})};
 
-    EXPECT_CALL(view, setWorkspaceItems(WorkspaceItemsEqual(expected))).Times(1);
+    EXPECT_CALL(view, setWorkspaceItems(WorkspaceItemsEqual(workspaceItemsForDefaultOutputType(expected)))).Times(1);
 
     presenter.notifyRunsTableChanged(runsTable);
   }
@@ -192,7 +203,7 @@ public:
     auto const expected = std::vector<PlottingWorkspaceTreeItem>{groupItem(
         "Group 1", {workspaceItem("Group 1", {}, "stitched_12345", PlottingWorkspaceOutputType::IvsQBinned)})};
 
-    EXPECT_CALL(view, setWorkspaceItems(WorkspaceItemsEqual(expected))).Times(1);
+    EXPECT_CALL(view, setWorkspaceItems(WorkspaceItemsEqual(workspaceItemsForDefaultOutputType(expected)))).Times(1);
 
     presenter.notifyRunsTableChanged(runsTable);
   }
@@ -209,7 +220,7 @@ public:
                                               {workspaceItem("IvsQ_12345_1", PlottingWorkspaceOutputType::IvsQ),
                                                workspaceItem("IvsQ_12345_2", PlottingWorkspaceOutputType::IvsQ)})})})};
 
-    EXPECT_CALL(view, setWorkspaceItems(WorkspaceItemsEqual(expected))).Times(1);
+    EXPECT_CALL(view, setWorkspaceItems(WorkspaceItemsEqual(workspaceItemsForDefaultOutputType(expected)))).Times(1);
 
     presenter.notifyRunsTableChanged(runsTable);
   }
@@ -227,7 +238,7 @@ public:
                        {workspaceItem("Group 1", {}, "stitched_12345_1", PlottingWorkspaceOutputType::IvsQBinned),
                         workspaceItem("Group 1", {}, "stitched_12345_2", PlottingWorkspaceOutputType::IvsQBinned)})})};
 
-    EXPECT_CALL(view, setWorkspaceItems(WorkspaceItemsEqual(expected))).Times(1);
+    EXPECT_CALL(view, setWorkspaceItems(WorkspaceItemsEqual(workspaceItemsForDefaultOutputType(expected)))).Times(1);
 
     presenter.notifyRunsTableChanged(runsTable);
   }
@@ -243,9 +254,39 @@ public:
                                       {workspaceItem("Group 1", {"12345"}, "IvsQ_binned_12345",
                                                      PlottingWorkspaceOutputType::IvsQBinned)})})};
 
-    EXPECT_CALL(view, setWorkspaceItems(WorkspaceItemsEqual(expected))).Times(1);
+    EXPECT_CALL(view, setWorkspaceItems(WorkspaceItemsEqual(workspaceItemsForDefaultOutputType(expected)))).Times(1);
 
     presenter.notifyRunsTableChanged(runsTable);
+  }
+
+  void testPlotOutputTypeChangedReevaluatesWorkspaceTreeItems() {
+    NiceMock<MockPlottingView> view;
+    PlottingPresenter presenter(&view);
+    auto group = successfulGroup("Group 1", {successfulRow("12345")}, "stitched_12345");
+    auto runsTable = RunsTable({}, 0.0, ReductionJobs({group}));
+    addWorkspaces({"IvsLam_12345", "IvsQ_12345", "IvsQ_binned_12345", "stitched_12345"});
+    auto const expected = std::vector<PlottingWorkspaceTreeItem>{groupItem(
+        "Group 1", {workspaceItem("Group 1", {}, "stitched_12345", PlottingWorkspaceOutputType::IvsQBinned),
+                    runItem("12345", {workspaceItem("IvsLam_12345", PlottingWorkspaceOutputType::IvsLambda),
+                                      workspaceItem("IvsQ_12345", PlottingWorkspaceOutputType::IvsQ),
+                                      workspaceItem("IvsQ_binned_12345", PlottingWorkspaceOutputType::IvsQBinned)})})};
+
+    EXPECT_CALL(view, selectedPlotOutputType())
+        .Times(2)
+        .WillOnce(Return(PlotOutputType::ReflectivityCurve))
+        .WillOnce(Return(PlotOutputType::Alignment));
+    {
+      testing::InSequence sequence;
+      EXPECT_CALL(view, setWorkspaceItems(WorkspaceItemsEqual(
+                            workspaceItemsForOutputType(expected, PlotOutputType::ReflectivityCurve))))
+          .Times(1);
+      EXPECT_CALL(view, setWorkspaceItems(
+                            WorkspaceItemsEqual(workspaceItemsForOutputType(expected, PlotOutputType::Alignment))))
+          .Times(1);
+    }
+
+    presenter.notifyRunsTableChanged(runsTable);
+    presenter.notifyPlotOutputTypeChanged();
   }
 
   void testPlotPassesPeriodMetadataToModelForPeriodWorkspaces() {

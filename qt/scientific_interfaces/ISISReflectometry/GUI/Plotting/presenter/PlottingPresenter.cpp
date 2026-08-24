@@ -67,7 +67,8 @@ void PlottingPresenter::notifyInstrumentChanged(std::string const &instrumentNam
 }
 
 void PlottingPresenter::notifyRunsTableChanged(RunsTable const &runsTable) {
-  m_view->setWorkspaceItems(m_workspaceTree.makeWorkspaceItems(runsTable));
+  m_workspaceItems = m_workspaceTree.makeWorkspaceItems(runsTable);
+  updateWorkspaceItemsForCurrentOutputType();
 }
 
 void PlottingPresenter::notifyPlotTiledClicked() { plotSelectedWorkspaces(PlotLayout::Tiled); }
@@ -77,6 +78,8 @@ void PlottingPresenter::notifyPlotOverplotClicked() { plotSelectedWorkspaces(Plo
 void PlottingPresenter::notifyPlotIndividualClicked() { plotSelectedWorkspaces(PlotLayout::Individual); }
 
 void PlottingPresenter::notifyAddToExistingPlotChanged() { updateActivePlotCompatibility(); }
+
+void PlottingPresenter::notifyPlotOutputTypeChanged() { updateWorkspaceItemsForCurrentOutputType(); }
 
 void PlottingPresenter::notifyActivePlotCompatibilityChanged() { updateActivePlotCompatibility(); }
 
@@ -121,6 +124,12 @@ void PlottingPresenter::updateActivePlotCompatibility() const {
 
 void PlottingPresenter::updateAvailablePlotOutputTypes(std::string const &instrumentName) {
   m_view->setAvailablePlotOutputTypes(m_plotOptionsProvider->availableTypes(instrumentName));
+  updateWorkspaceItemsForCurrentOutputType();
+}
+
+void PlottingPresenter::updateWorkspaceItemsForCurrentOutputType() {
+  m_view->setWorkspaceItems(
+      m_workspaceTree.workspaceItemsForPlotOutputType(m_workspaceItems, m_view->selectedPlotOutputType()));
 }
 
 bool PlottingPresenter::isProcessing() const { return m_mainPresenter && m_mainPresenter->isProcessing(); }

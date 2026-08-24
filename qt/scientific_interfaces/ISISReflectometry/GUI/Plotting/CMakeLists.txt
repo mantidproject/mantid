@@ -1,10 +1,10 @@
 set(PLOTTING_SRC_FILES
     model/PlotOutputTypeProperties.cpp
     model/PlottingModel.cpp
+    model/PlottingWorkspaceTree.cpp
     presenter/PlottingPresenter.cpp
-    presenter/PlottingWorkspaceTree.cpp
     view/QtPlottingView.cpp
-    view/WorkspaceTreeController.cpp
+    view/QtWorkspaceTreeViewAdapter.cpp
     view/WorkspaceTreeView.cpp
 )
 
@@ -15,13 +15,13 @@ set(PLOTTING_INC_FILES
     model/PlotOutputTypeProperties.h
     model/PlottingModel.h
     model/PlottingWorkspace.h
+    model/PlottingWorkspaceTree.h
     presenter/IPlottingPresenter.h
     presenter/PlottingPresenter.h
     presenter/PlottingPresenterFactory.h
-    presenter/PlottingWorkspaceTree.h
     view/IPlottingView.h
     view/QtPlottingView.h
-    view/WorkspaceTreeController.h
+    view/QtWorkspaceTreeViewAdapter.h
     view/WorkspaceTreeView.h
 )
 

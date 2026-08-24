@@ -4,8 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "WorkspaceTreeController.h"
-#include "GUI/Plotting/model/PlotOutputTypeProperties.h"
+#include "QtWorkspaceTreeViewAdapter.h"
 #include "WorkspaceTreeView.h"
 
 #include <QBrush>
@@ -24,6 +23,8 @@ namespace {
 auto constexpr itemTypeRole = Qt::UserRole + 1;
 auto constexpr outputTypeRole = Qt::UserRole + 2;
 auto constexpr workspaceNameRole = Qt::UserRole + 3;
+auto constexpr selectableRole = Qt::UserRole + 5;
+auto constexpr selectableAsChildRole = Qt::UserRole + 6;
 
 template <typename Enum> int enumIndex(Enum value) { return static_cast<int>(value); }
 
@@ -93,9 +94,8 @@ public:
 };
 } // namespace
 
-WorkspaceTreeController::WorkspaceTreeController(WorkspaceTreeView *workspaceTree, QObject *parent)
-    : QObject(parent), m_workspaceTree(workspaceTree), m_plotOutputType(PlotOutputType::ReflectivityCurve),
-      m_updatingSelection(false) {
+QtWorkspaceTreeViewAdapter::QtWorkspaceTreeViewAdapter(WorkspaceTreeView *workspaceTree, QObject *parent)
+    : QObject(parent), m_workspaceTree(workspaceTree), m_updatingSelection(false) {
   m_model.setHorizontalHeaderLabels({QString("Item type"), QString("Output type"), QString("Item")});
   m_workspaceTree->setModel(&m_model);
   m_workspaceTree->setTreePosition(ItemColumn);
@@ -106,27 +106,21 @@ WorkspaceTreeController::WorkspaceTreeController(WorkspaceTreeView *workspaceTre
   m_workspaceTree->viewport()->installEventFilter(this);
 }
 
-void WorkspaceTreeController::setItems(std::vector<PlottingWorkspaceTreeItem> const &items) {
+void QtWorkspaceTreeViewAdapter::setItems(std::vector<PlottingWorkspaceTreeItem> const &items) {
   m_model.removeRows(0, m_model.rowCount());
   for (auto const &item : items) {
     addTreeItem(m_model.invisibleRootItem(), item);
   }
-  setItemsMutedForCurrentPlotOutputType();
   m_workspaceTree->expandAll();
 }
 
-void WorkspaceTreeController::clearSelection() {
+void QtWorkspaceTreeViewAdapter::clearSelection() {
   m_updatingSelection = true;
   m_workspaceTree->selectionModel()->clearSelection();
   m_updatingSelection = false;
 }
 
-void WorkspaceTreeController::setCurrentPlotOutputType(PlotOutputType outputType) {
-  m_plotOutputType = outputType;
-  setItemsMutedForCurrentPlotOutputType();
-}
-
-std::vector<std::string> WorkspaceTreeController::selectedWorkspaceNames() const {
+std::vector<std::string> QtWorkspaceTreeViewAdapter::selectedWorkspaceNames() const {
   auto workspaces = std::vector<std::string>{};
   for (auto const &index : m_workspaceTree->selectionModel()->selectedRows()) {
     auto const selectedIndex = itemIndex(index);
@@ -137,31 +131,18 @@ std::vector<std::string> WorkspaceTreeController::selectedWorkspaceNames() const
   return workspaces;
 }
 
-size_t WorkspaceTreeController::selectedWorkspaceGroupCount() const {
+size_t QtWorkspaceTreeViewAdapter::selectedWorkspaceGroupCount() const {
   auto count = size_t{0};
   for (auto const &index : m_workspaceTree->selectionModel()->selectedRows()) {
     auto const selectedIndex = itemIndex(index);
-    if (itemType(selectedIndex) == PlottingWorkspaceTreeItemType::WorkspaceGroup &&
-        isSelectableForCurrentPlotOutputType(selectedIndex)) {
+    if (itemType(selectedIndex) == PlottingWorkspaceTreeItemType::WorkspaceGroup && isSelectable(selectedIndex)) {
       ++count;
     }
   }
   return count;
 }
 
-void WorkspaceTreeController::setItemsMutedForCurrentPlotOutputType() {
-  setItemsMutedForCurrentPlotOutputType(m_model.invisibleRootItem());
-}
-
-void WorkspaceTreeController::setItemsMutedForCurrentPlotOutputType(QStandardItem *parent) {
-  for (auto row = 0; row < parent->rowCount(); ++row) {
-    auto const itemTypeItem = parent->child(row, ItemTypeColumn);
-    setItemMuted(parent, row, !isSelectableForCurrentPlotOutputType(itemTypeItem->index()));
-    setItemsMutedForCurrentPlotOutputType(itemTypeItem);
-  }
-}
-
-void WorkspaceTreeController::setItemMuted(QStandardItem *parent, int row, bool muted) {
+void QtWorkspaceTreeViewAdapter::setItemMuted(QStandardItem *parent, int row, bool muted) {
   auto const background = muted ? WorkspaceTree::mutedBackgroundBrush(m_workspaceTree->palette()) : QBrush();
   for (auto column = 0; column < parent->columnCount(); ++column) {
     auto *item = parent->child(row, column);
@@ -170,7 +151,7 @@ void WorkspaceTreeController::setItemMuted(QStandardItem *parent, int row, bool 
   }
 }
 
-bool WorkspaceTreeController::eventFilter(QObject *watched, QEvent *event) {
+bool QtWorkspaceTreeViewAdapter::eventFilter(QObject *watched, QEvent *event) {
   if (watched != m_workspaceTree->viewport()) {
     return QObject::eventFilter(watched, event);
   }
@@ -188,7 +169,7 @@ bool WorkspaceTreeController::eventFilter(QObject *watched, QEvent *event) {
   return QObject::eventFilter(watched, event);
 }
 
-void WorkspaceTreeController::addTreeItem(QStandardItem *parent, PlottingWorkspaceTreeItem const &item) {
+void QtWorkspaceTreeViewAdapter::addTreeItem(QStandardItem *parent, PlottingWorkspaceTreeItem const &item) {
   auto treeItem = createNonEditableItem(displayName(item.itemType));
   auto outputTypeItem = createNonEditableItem(displayName(item.outputType));
   auto itemLabel = createNonEditableItem(QString::fromStdString(item.label));
@@ -196,112 +177,37 @@ void WorkspaceTreeController::addTreeItem(QStandardItem *parent, PlottingWorkspa
     rowItem->setData(enumIndex(item.itemType), itemTypeRole);
     rowItem->setData(enumIndex(item.outputType), outputTypeRole);
     rowItem->setData(QString::fromStdString(item.workspaceName), workspaceNameRole);
+    rowItem->setData(item.selectable, selectableRole);
+    rowItem->setData(item.selectableAsChild, selectableAsChildRole);
   }
   parent->appendRow({treeItem, outputTypeItem, itemLabel});
+  setItemMuted(parent, parent->rowCount() - 1, item.muted);
   for (auto const &child : item.children) {
     addTreeItem(treeItem, child);
   }
 }
 
-QModelIndex WorkspaceTreeController::itemIndex(QModelIndex const &index) const {
+QModelIndex QtWorkspaceTreeViewAdapter::itemIndex(QModelIndex const &index) const {
   return index.sibling(index.row(), ItemTypeColumn);
 }
 
-PlottingWorkspaceTreeItemType WorkspaceTreeController::itemType(QModelIndex const &index) const {
+PlottingWorkspaceTreeItemType QtWorkspaceTreeViewAdapter::itemType(QModelIndex const &index) const {
   return static_cast<PlottingWorkspaceTreeItemType>(itemIndex(index).data(itemTypeRole).toInt());
 }
 
-PlottingWorkspaceOutputType WorkspaceTreeController::outputType(QModelIndex const &index) const {
-  return static_cast<PlottingWorkspaceOutputType>(itemIndex(index).data(outputTypeRole).toInt());
-}
-
-std::string WorkspaceTreeController::workspaceName(QModelIndex const &index) const {
+std::string QtWorkspaceTreeViewAdapter::workspaceName(QModelIndex const &index) const {
   return itemIndex(index).data(workspaceNameRole).toString().toStdString();
 }
 
-bool WorkspaceTreeController::isWorkspaceItem(QModelIndex const &index) const { return m_model.rowCount(index) == 0; }
-
-bool WorkspaceTreeController::hasWorkspaceDescendant(QModelIndex const &index) const {
-  if (isWorkspaceItem(index)) {
-    return itemType(index) == PlottingWorkspaceTreeItemType::Workspace;
-  }
-
-  auto const rows = m_model.rowCount(index);
-  for (auto row = 0; row < rows; ++row) {
-    if (hasWorkspaceDescendant(m_model.index(row, 0, index))) {
-      return true;
-    }
-  }
-  return false;
+bool QtWorkspaceTreeViewAdapter::isSelectable(QModelIndex const &index) const {
+  return itemIndex(index).data(selectableRole).toBool();
 }
 
-bool WorkspaceTreeController::allWorkspaceDescendantsIncludedForCurrentPlotOutputType(QModelIndex const &index) const {
-  if (isWorkspaceItem(index)) {
-    return itemType(index) != PlottingWorkspaceTreeItemType::Workspace ||
-           isWorkspaceIncludedForCurrentPlotOutputType(index);
-  }
-
-  auto const rows = m_model.rowCount(index);
-  for (auto row = 0; row < rows; ++row) {
-    if (!allWorkspaceDescendantsIncludedForCurrentPlotOutputType(m_model.index(row, 0, index))) {
-      return false;
-    }
-  }
-  return true;
+bool QtWorkspaceTreeViewAdapter::isSelectableAsChild(QModelIndex const &index) const {
+  return itemIndex(index).data(selectableAsChildRole).toBool();
 }
 
-bool WorkspaceTreeController::isSelectableForCurrentPlotOutputType(QModelIndex const &index) const {
-  auto const &plotProperties = plotOutputTypeProperties(m_plotOutputType);
-  auto const indexItemType = itemType(index);
-  if (isPostprocessedGroupOutputExcludedForCurrentPlotOutputType(index)) {
-    return false;
-  }
-  if (!plotProperties.allowsItemType(indexItemType)) {
-    return false;
-  }
-  if (indexItemType == PlottingWorkspaceTreeItemType::Workspace) {
-    return isWorkspaceIncludedForCurrentPlotOutputType(index);
-  }
-  if (indexItemType == PlottingWorkspaceTreeItemType::WorkspaceGroup) {
-    return hasWorkspaceDescendant(index) && allWorkspaceDescendantsIncludedForCurrentPlotOutputType(index);
-  }
-  return true;
-}
-
-bool WorkspaceTreeController::isWorkspaceIncludedForCurrentPlotOutputType(QModelIndex const &index) const {
-  if (isPostprocessedGroupOutputExcludedForCurrentPlotOutputType(index)) {
-    return false;
-  }
-  return plotOutputTypeProperties(m_plotOutputType).includesWorkspaceOutput(outputType(index));
-}
-
-bool WorkspaceTreeController::isPostprocessedGroupOutputExcludedForCurrentPlotOutputType(
-    QModelIndex const &index) const {
-  return plotOutputTypeProperties(m_plotOutputType).excludesPostprocessedGroupOutputs() &&
-         isPostprocessedGroupOutputItem(index);
-}
-
-bool WorkspaceTreeController::isPostprocessedGroupOutputItem(QModelIndex const &index) const {
-  auto const indexItemType = itemType(index);
-  if (indexItemType != PlottingWorkspaceTreeItemType::WorkspaceGroup &&
-      indexItemType != PlottingWorkspaceTreeItemType::Workspace) {
-    return false;
-  }
-
-  auto const parentIndex = itemIndex(index).parent();
-  if (!parentIndex.isValid()) {
-    return false;
-  }
-  if (itemType(parentIndex) == PlottingWorkspaceTreeItemType::Group) {
-    return true;
-  }
-
-  auto const grandparentIndex = parentIndex.parent();
-  return grandparentIndex.isValid() && itemType(parentIndex) == PlottingWorkspaceTreeItemType::WorkspaceGroup &&
-         itemType(grandparentIndex) == PlottingWorkspaceTreeItemType::Group;
-}
-
-bool WorkspaceTreeController::handleWorkspaceTreeClick(QMouseEvent const &event) {
+bool QtWorkspaceTreeViewAdapter::handleWorkspaceTreeClick(QMouseEvent const &event) {
   if (event.button() != Qt::LeftButton) {
     return false;
   }
@@ -312,7 +218,7 @@ bool WorkspaceTreeController::handleWorkspaceTreeClick(QMouseEvent const &event)
   }
 
   auto const index = itemIndex(clickedIndex);
-  if (!isSelectableForCurrentPlotOutputType(index)) {
+  if (!isSelectable(index)) {
     return true;
   }
   if (hasSelectedAncestor(index)) {
@@ -333,13 +239,13 @@ bool WorkspaceTreeController::handleWorkspaceTreeClick(QMouseEvent const &event)
   return true;
 }
 
-bool WorkspaceTreeController::isAdditiveSelectionModifier(QMouseEvent const &event) const {
+bool QtWorkspaceTreeViewAdapter::isAdditiveSelectionModifier(QMouseEvent const &event) const {
   auto const modifiers = event.modifiers();
   return modifiers.testFlag(Qt::ControlModifier) || modifiers.testFlag(Qt::MetaModifier) ||
          modifiers.testFlag(Qt::ShiftModifier);
 }
 
-bool WorkspaceTreeController::hasSelectedAncestor(QModelIndex const &index) const {
+bool QtWorkspaceTreeViewAdapter::hasSelectedAncestor(QModelIndex const &index) const {
   auto const selectionModel = m_workspaceTree->selectionModel();
   auto ancestor = index.parent();
   while (ancestor.isValid()) {
@@ -351,7 +257,7 @@ bool WorkspaceTreeController::hasSelectedAncestor(QModelIndex const &index) cons
   return false;
 }
 
-bool WorkspaceTreeController::isSubtreeSelected(QModelIndex const &parentIndex) const {
+bool QtWorkspaceTreeViewAdapter::isSubtreeSelected(QModelIndex const &parentIndex) const {
   auto const selectionModel = m_workspaceTree->selectionModel();
   if (!selectionModel->isSelected(parentIndex)) {
     return false;
@@ -367,8 +273,8 @@ bool WorkspaceTreeController::isSubtreeSelected(QModelIndex const &parentIndex) 
   return true;
 }
 
-void WorkspaceTreeController::selectSubtree(QModelIndex const &parentIndex,
-                                            QItemSelectionModel::SelectionFlags selectionFlags) {
+void QtWorkspaceTreeViewAdapter::selectSubtree(QModelIndex const &parentIndex,
+                                               QItemSelectionModel::SelectionFlags selectionFlags) {
   m_updatingSelection = true;
   if (selectionFlags.testFlag(QItemSelectionModel::Clear)) {
     m_workspaceTree->selectionModel()->clearSelection();
@@ -379,8 +285,8 @@ void WorkspaceTreeController::selectSubtree(QModelIndex const &parentIndex,
   m_updatingSelection = false;
 }
 
-void WorkspaceTreeController::updateChildSelection(QItemSelection const &selection,
-                                                   QItemSelectionModel::SelectionFlags selectionFlags) {
+void QtWorkspaceTreeViewAdapter::updateChildSelection(QItemSelection const &selection,
+                                                      QItemSelectionModel::SelectionFlags selectionFlags) {
   if (m_updatingSelection) {
     return;
   }
@@ -394,13 +300,13 @@ void WorkspaceTreeController::updateChildSelection(QItemSelection const &selecti
   m_updatingSelection = false;
 }
 
-void WorkspaceTreeController::updateChildSelection(QModelIndex const &parentIndex,
-                                                   QItemSelectionModel::SelectionFlags selectionFlags) {
+void QtWorkspaceTreeViewAdapter::updateChildSelection(QModelIndex const &parentIndex,
+                                                      QItemSelectionModel::SelectionFlags selectionFlags) {
   auto const rows = m_model.rowCount(parentIndex);
   for (auto row = 0; row < rows; ++row) {
     auto const childIndex = m_model.index(row, 0, parentIndex);
-    if (selectionFlags.testFlag(QItemSelectionModel::Deselect) || isSelectableForCurrentPlotOutputType(childIndex) ||
-        isWorkspaceIncludedForCurrentPlotOutputType(childIndex)) {
+    if (selectionFlags.testFlag(QItemSelectionModel::Deselect) || isSelectable(childIndex) ||
+        isSelectableAsChild(childIndex)) {
       m_workspaceTree->selectionModel()->select(childIndex, selectionFlags | QItemSelectionModel::Rows);
     }
     updateChildSelection(childIndex, selectionFlags);

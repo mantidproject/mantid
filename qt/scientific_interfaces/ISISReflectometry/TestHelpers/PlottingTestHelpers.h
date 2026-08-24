@@ -71,7 +71,8 @@ inline void PrintTo(PlottingWorkspaceTreeItem const &item, std::ostream *os) {
       *os << ", ";
     PrintTo(item.children[index], os);
   }
-  *os << "]}";
+  *os << "], muted: " << item.muted << ", selectable: " << item.selectable
+      << ", selectableAsChild: " << item.selectableAsChild << "}";
 }
 
 inline bool operator==(PlotOutputSelection const &lhs, PlotOutputSelection const &rhs) {
@@ -107,7 +108,8 @@ inline bool operator!=(PlotRequest const &lhs, PlotRequest const &rhs) { return 
 inline bool operator==(PlottingWorkspaceTreeItem const &lhs, PlottingWorkspaceTreeItem const &rhs) {
   return lhs.label == rhs.label && lhs.itemType == rhs.itemType && lhs.outputType == rhs.outputType &&
          lhs.groupName == rhs.groupName && lhs.runNumbers == rhs.runNumbers && lhs.workspaceName == rhs.workspaceName &&
-         lhs.children == rhs.children;
+         lhs.children == rhs.children && lhs.muted == rhs.muted && lhs.selectable == rhs.selectable &&
+         lhs.selectableAsChild == rhs.selectableAsChild;
 }
 
 inline bool operator!=(PlottingWorkspaceTreeItem const &lhs, PlottingWorkspaceTreeItem const &rhs) {

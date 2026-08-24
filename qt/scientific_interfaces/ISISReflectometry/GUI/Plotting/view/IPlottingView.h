@@ -28,6 +28,8 @@ public:
   virtual void notifyPlotIndividualClicked() = 0;
   /// Notify that the add-to-existing checkbox changed state.
   virtual void notifyAddToExistingPlotChanged() = 0;
+  /// Notify that the selected plot output type changed.
+  virtual void notifyPlotOutputTypeChanged() = 0;
   /// Notify that controls depending on active-plot compatibility should be refreshed.
   virtual void notifyActivePlotCompatibilityChanged() = 0;
 };

@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtPlottingView.h"
 #include "GUI/Plotting/model/PlotOutputTypeProperties.h"
-#include "WorkspaceTreeController.h"
+#include "QtWorkspaceTreeViewAdapter.h"
 #include <QCheckBox>
 #include <QComboBox>
 #include <QItemSelection>
@@ -94,7 +94,7 @@ void QtPlottingView::initLayout() {
   m_ui.detectorMapXAxis->addItem("Lambda", enumIndex(DetectorMapXAxis::Lambda));
   m_ui.alignmentXAxis->addItem("Detector Index", enumIndex(AlignmentXAxis::DetectorId));
   m_ui.alignmentXAxis->addItem("Detector angle, theta", enumIndex(AlignmentXAxis::Theta));
-  m_workspaceTree = std::make_unique<WorkspaceTreeController>(m_ui.workspaceTree, this);
+  m_workspaceTree = std::make_unique<QtWorkspaceTreeViewAdapter>(m_ui.workspaceTree, this);
   connect(m_ui.workspaceTree->selectionModel(), &QItemSelectionModel::selectionChanged, this,
           [this](QItemSelection const &selected, QItemSelection const &deselected) {
             m_workspaceTree->updateChildSelection(deselected, QItemSelectionModel::Deselect);
@@ -107,6 +107,9 @@ void QtPlottingView::initLayout() {
   connect(m_ui.plotPreset, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, [this](int) {
     clearWorkspaceSelection();
     updatePlotOutputProperties();
+    if (m_notifyee) {
+      m_notifyee->notifyPlotOutputTypeChanged();
+    }
   });
   setAvailablePlotOutputTypes({PlotOutputType::ReflectivityCurve});
   connect(m_ui.plotTiled, &QPushButton::clicked, this, [this]() {
@@ -206,7 +209,6 @@ void QtPlottingView::updatePlotOutputProperties() {
   m_ui.detectorMapXAxis->setVisible(plotProperties.showsDetectorMapProperties());
   m_ui.alignmentXAxisLabel->setVisible(plotProperties.showsAlignmentProperties());
   m_ui.alignmentXAxis->setVisible(plotProperties.showsAlignmentProperties());
-  m_workspaceTree->setCurrentPlotOutputType(selectedPlotOutputType());
   updatePlotButtonEnabledStates();
 }
 
