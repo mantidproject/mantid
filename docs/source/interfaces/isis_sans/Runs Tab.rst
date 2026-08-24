@@ -199,6 +199,6 @@ Save Options
 | **Use optimizations**    | (Strongly Recommended) This will reuse already loaded data rather than reloading it     |
 |                          | for each run in the table, speeding up processing considerably.                         |
 +--------------------------+-----------------------------------------------------------------------------------------+
-| **Clean up ADS**         | This will remove all non-reduced workspaces (optimization, raw and transmission) from   |
-|                          | the ADS when a batch processing finishes.                                               |
+| **Clean up ADS**         | This will remove all non-reduced workspaces (optimization, raw, transmission            |
+|                          | and their monitors) from  the ADS when a batch processing finishes.                     |
 +--------------------------+-----------------------------------------------------------------------------------------+
