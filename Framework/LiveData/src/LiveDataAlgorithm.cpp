@@ -11,10 +11,12 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Strings.h"
 
+#include <algorithm>
 #include <boost/algorithm/string/trim.hpp>
 #include <unordered_set>
 #include <utility>
@@ -32,15 +34,25 @@ const std::string LiveDataAlgorithm::category() const { return "DataHandling\\Li
 /** Initialize the algorithm's properties.
  */
 void LiveDataAlgorithm::initProps() {
-  // Add all the instruments (in the default facility) that have a listener
-  // specified
+  // Add all the instruments, in any facility, that have a listener specified.
+  //
+  // Note that these are deliberately *not* restricted to the default facility.  `createLiveListener`
+  // resolves the instrument using `ConfigService::getInstrument`, which searches every facility, so a
+  // list restricted to the default facility would reject instruments this algorithm is perfectly able
+  // to use -- and would be empty altogether for a user whose default facility has no live listeners.
+  // The `Facility` property below disambiguates when an instrument name occurs in more than one
+  // facility.
   std::vector<std::string> instruments;
-  const auto &instrInfo = Kernel::ConfigService::Instance().getFacility().instruments();
-  for (const auto &instrument : instrInfo) {
-    if (instrument.hasLiveListenerInfo()) {
-      instruments.emplace_back(instrument.name());
+  for (const auto &facility : Kernel::ConfigService::Instance().getFacilities()) {
+    for (const auto &instrument : facility->instruments()) {
+      if (instrument.hasLiveListenerInfo()) {
+        instruments.emplace_back(instrument.name());
+      }
     }
   }
+  // The same instrument name may appear in more than one facility.
+  std::sort(instruments.begin(), instruments.end());
+  instruments.erase(std::unique(instruments.begin(), instruments.end()), instruments.end());
 
   // All available listener class names
   auto listeners = LiveListenerFactory::Instance().getKeys();
@@ -49,6 +61,10 @@ void LiveDataAlgorithm::initProps() {
   declareProperty(std::make_unique<PropertyWithValue<std::string>>("Instrument", "",
                                                                    std::make_shared<StringListValidator>(instruments)),
                   "Name of the instrument to monitor.");
+
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>("Facility", "", Direction::Input),
+                  "Facility owning 'Instrument'. If not specified, the instrument is looked up in the "
+                  "default facility first, and then in all other facilities.");
 
   declareProperty(std::make_unique<PropertyWithValue<std::string>>("Connection", "", Direction::Input),
                   "Selects the listener connection entry to use. "
@@ -203,9 +219,13 @@ ILiveListener_sptr LiveDataAlgorithm::getLiveListener(bool start) {
 ILiveListener_sptr LiveDataAlgorithm::createLiveListener(bool connect) {
   // Get the LiveListenerInfo from Facilities.xml
   std::string inst_name = this->getPropertyValue("Instrument");
+  std::string facility_name = this->getPropertyValue("Facility");
   std::string conn_name = this->getPropertyValue("Connection");
 
-  const auto &inst = ConfigService::Instance().getInstrument(inst_name);
+  // When a facility is named, resolve the instrument within it: `getInstrument` would otherwise
+  // search the default facility first, which silently prefers a same-named instrument there.
+  const auto &inst = facility_name.empty() ? ConfigService::Instance().getInstrument(inst_name)
+                                           : ConfigService::Instance().getFacility(facility_name).instrument(inst_name);
   const auto &conn = inst.liveListenerInfo(conn_name);
 
   // See if listener and/or address override has been specified
@@ -312,6 +332,30 @@ std::map<std::string, std::string> LiveDataAlgorithm::validateInputs() {
   std::map<std::string, std::string> out;
 
   const std::string instrument = getPropertyValue("Instrument");
+  const std::string facility = getPropertyValue("Facility");
+
+  // Resolve the instrument before anything else.  `createLiveListener` below throws a `NotFoundError`
+  // for an unknown facility or instrument, which escapes `validateInputs` as an exception rather than
+  // being reported against the offending property.
+  if (!facility.empty()) {
+    try {
+      const auto &facilityInfo = ConfigService::Instance().getFacility(facility);
+      try {
+        if (!facilityInfo.instrument(instrument).hasLiveListenerInfo()) {
+          out["Instrument"] = "Instrument '" + instrument + "' in facility '" + facility +
+                              "' has no live listener; live data cannot be collected from it.";
+          return out;
+        }
+      } catch (const Exception::NotFoundError &) {
+        out["Instrument"] = "Instrument '" + instrument + "' is not part of facility '" + facility + "'.";
+        return out;
+      }
+    } catch (const Exception::NotFoundError &) {
+      out["Facility"] = "Facility '" + facility + "' is not known to Mantid.";
+      return out;
+    }
+  }
+
   bool eventListener;
   if (m_listener) {
     eventListener = m_listener->buffersEvents();

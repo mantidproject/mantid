@@ -103,6 +103,11 @@ Getting Started
 1. **Configure Mantid settings** - Open Workbench: File → Settings. Set Facility (e.g., "SNS" or "ISIS")
    and Default Instrument (e.g., "POWGEN", "REF_M")
 
+   This is a convenience rather than a requirement: any instrument with a live listener may be
+   selected, whichever facility owns it. Set the ``Facility`` property to name that facility
+   explicitly, which is also how an instrument name occurring in more than one facility is
+   disambiguated.
+
 2. **Open StartLiveData** - Click the algorithm search or press Ctrl+F, type "StartLiveData" and open it
 
 3. **Configure basic properties:**
