@@ -458,7 +458,7 @@ ISIS Journal Settings
 +------------------------------+------------------------------------+-------------------------------------------+
 |Property                      |Description                         |Example value                              |
 +==============================+====================================+===========================================+
-|``isisjournal.url_prefix``    |URL prefix of the ISIS journal      | http://data.isis.rl.ac.uk/journals/ndx    |
+|``isisjournal.url_prefix``    |URL prefix of the ISIS journal      | ``http://data.isis.rl.ac.uk/journals/ndx``    |
 +------------------------------+------------------------------------+-------------------------------------------+
 
 
