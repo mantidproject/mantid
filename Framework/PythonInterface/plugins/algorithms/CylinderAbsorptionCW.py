@@ -9,9 +9,21 @@ import numpy as np
 from scipy.special import modstruve, i0, i1, gamma
 
 from mantid.api import AlgorithmFactory, PythonAlgorithm, WorkspaceProperty
-from mantid.kernel import Direction, Property, StringListValidator, FloatBoundedValidator, FloatMandatoryValidator, CompositeValidator
+from mantid.kernel import (
+    Direction,
+    Property,
+    StringListValidator,
+    FloatBoundedValidator,
+    FloatMandatoryValidator,
+    CompositeValidator,
+    PhysicalConstants,
+)
 from mantid.simpleapi import CreateWorkspace, CreateSingleValuedWorkspace
 from mantid.geometry import GeometryShape
+
+# Wavelength (Å) that tabulated attenuation cross-sections are quoted at, the same
+# reference the sample material scales its absorption cross-section from.
+REFERENCE_LAMBDA = PhysicalConstants.ReferenceLambda
 
 
 def bilinear_interpolate(x, y, x_grid, y_grid, Z):
@@ -439,7 +451,9 @@ class CylinderAbsorptionCW(PythonAlgorithm):
             totalXSection = absorbXSection + totalScatterXSection
             numberDensity = material.numberDensity
         else:
-            absorbXSection = self.getProperty("AttenuationXSection").value
+            # AttenuationXSection is given at REFERENCE_LAMBDA, so scale it linearly to the
+            # requested wavelength exactly as Material::absorbXSection does.
+            absorbXSection = self.getProperty("AttenuationXSection").value * wavelength / REFERENCE_LAMBDA
             totalScatterXSection = self.getProperty("ScatteringXSection").value
             totalXSection = absorbXSection + totalScatterXSection
             numberDensity = self.getProperty("SampleNumberDensity").value
