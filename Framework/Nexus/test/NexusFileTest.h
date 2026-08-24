@@ -505,6 +505,62 @@ public:
     TS_ASSERT_EQUALS(in, out);
   }
 
+  /** A NULL-valued variable-length string is legal HDF5, and occurs in real ISIS muon
+   * files -- /raw_data_1/instrument/source/notes in a HIFI run is one, produced by a
+   * pre-allocated NeXus skeleton whose string fields were never populated.  H5Dread
+   * reports *success* and hands back a NULL pointer, so the condition cannot be
+   * detected from the return code alone.  NeXus has no concept of null, so the only
+   * sane mapping is the empty string -- which is also what h5py yields for these.
+   */
+  void test_data_get_null_vlen_string() {
+    cout << "\ntest dataset read -- NULL variable-length UTF-8 string" << std::endl;
+
+    FileResource resource("test_nexus_null_vlen_string.h5");
+    std::string const filename = resource.fullPath();
+
+    // Nexus::File cannot create this fixture itself: makeData always produces a
+    // fixed-length ASCII string, so build the file with raw HDF5.
+    {
+      H5::H5File h5file(filename, H5F_ACC_TRUNC);
+      H5::StrType vlenUtf8(H5::PredType::C_S1, H5T_VARIABLE);
+      vlenUtf8.setCset(H5T_CSET_UTF8);
+      vlenUtf8.setStrpad(H5T_STR_NULLTERM);
+      H5::DataSpace const scalar(H5S_SCALAR);
+
+      H5::Group entry = h5file.createGroup("entry");
+      entry.createAttribute("NX_class", vlenUtf8, scalar).write(vlenUtf8, std::string("NXentry"));
+
+      // created but never written -- how the ISIS skeleton leaves an unset field
+      entry.createDataSet("unwritten", vlenUtf8, scalar);
+
+      // a NULL pointer written deliberately -- same observable result
+      char const *nothing = nullptr;
+      entry.createDataSet("explicit_null", vlenUtf8, scalar).write(&nothing, vlenUtf8);
+
+      // control: a genuine zero-length string, which must behave identically
+      char const *empty = "";
+      entry.createDataSet("empty_string", vlenUtf8, scalar).write(&empty, vlenUtf8);
+    }
+
+    // all three must read back cleanly, as an empty string
+    Mantid::Nexus::File file(filename, NXaccess::READ);
+    for (std::string const name : {"unwritten", "explicit_null", "empty_string"}) {
+      std::string const address("/entry/" + name);
+
+      TS_ASSERT_THROWS_NOTHING(file.openAddress(address));
+
+      Mantid::Nexus::Info info;
+      TSM_ASSERT_THROWS_NOTHING(address, info = file.getInfo());
+      TSM_ASSERT_EQUALS(address, info.type, NXnumtype::CHAR);
+      TSM_ASSERT_EQUALS(address, info.dims.size(), 1);
+      TSM_ASSERT_EQUALS(address, info.dims.front(), 0);
+
+      std::string value("XXXXXXXXXX"); // junk data
+      TSM_ASSERT_THROWS_NOTHING(address, value = file.getStrData());
+      TSM_ASSERT_EQUALS(address, value, "");
+    }
+  }
+
   void test_check_str_length() {
     cout << "\ntest dataset read/write -- string length" << std::endl;
     FileResource resource("test_nexus_str_len.h5");

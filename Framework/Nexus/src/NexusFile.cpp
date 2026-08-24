@@ -88,6 +88,48 @@ static herr_t getEntriesCallback(hid_t gid, const char *name, const H5L_info2_t 
   return 0;
 }
 
+std::size_t getStringDataLength(hid_t const data_id, hid_t const type_id, hid_t const space_id) {
+  std::size_t length = 0;
+  if (H5Tis_variable_str(type_id)) {
+    if (H5Sget_simple_extent_ndims(space_id) == 0) {
+      // H5Dvlen_get_buf_size is unreliable with H5S_SCALAR in some HDF5 versions.
+      // Read the single vlen string and measure directly.
+      char *vbuf = nullptr;
+      if (H5Dread(data_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &vbuf) < 0)
+        throw Mantid::Nexus::Exception("Failed to read scalar variable-length string length");
+      length = vbuf ? strlen(vbuf) : 0; // treat null pointer as empty string
+      H5free_memory(vbuf);
+    } else if (H5Dvlen_get_buf_size(data_id, type_id, space_id, &length) < 0) {
+      throw Mantid::Nexus::Exception("Failed to read string length for variable-length string");
+    }
+  } else {
+    // fixed-length: byte width is encoded in the datatype itself
+    length = H5Tget_size(type_id);
+  }
+  return length;
+}
+
+/** Trim leading and trailing whitespace from a null-terminated character buffer, in place.
+ */
+void trimWhiteSpace(std::vector<char> &str) {
+  // the buffer holds a NUL-terminated string -- bound the search by the buffer itself
+  char const *begin = str.data();
+  char const *end = begin + strnlen(str.data(), str.size());
+  // cast to unsigned char: isspace() has undefined behaviour for >= 0x80 (as in UTF8)
+  while (begin < end && isspace(static_cast<unsigned char>(*begin))) {
+    ++begin;
+  }
+  while (end > begin && isspace(static_cast<unsigned char>(end[-1]))) {
+    --end;
+  }
+  std::size_t const length = static_cast<std::size_t>(end - begin);
+
+  // move before resizing
+  std::memmove(str.data(), begin, length);
+  str.resize(length + 1);
+  str[length] = '\0';
+}
+
 } // end of anonymous namespace
 
 namespace Mantid::Nexus {
@@ -677,7 +719,7 @@ template <typename NumT> void File::putData(const vector<NumT> &data) {
 // GET DATA -- STRING / CHAR
 
 template <> void File::getData<char>(char *data) {
-  if (H5Iis_valid(m_current_data_id) <= 0) {
+  if (!isDataSetOpen()) {
     throw NXEXCEPTION("getData ERROR: no dataset open");
   }
 
@@ -690,12 +732,16 @@ template <> void File::getData<char>(char *data) {
   if (H5Tis_variable_str(m_current_type_id)) {
     char *cdata = nullptr;
     ret = H5Dread(m_current_data_id, m_current_type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &cdata);
-    if (ret < 0 || cdata == nullptr)
+    if (ret < 0) {
       throw NXEXCEPTION("getData ERROR: failed to read variable length string dataset");
-
-    size = strlen(cdata);
-    buffer.assign(cdata, cdata + size + 1);
-    H5free_memory(cdata);
+    } else if (!cdata) {
+      size = 0;
+      buffer.assign(1, '\0');
+    } else {
+      size = strlen(cdata);
+      buffer.assign(cdata, cdata + size + 1);
+      H5free_memory(cdata);
+    }
   } else {
     hsize_t len = H5Tget_size(m_current_type_id);
     for (int i = 0; i < rank; i++) {
@@ -713,32 +759,8 @@ template <> void File::getData<char>(char *data) {
 
   // strip whitespace
   if (rank == 0 || rank == 1) {
-    if (size == 1) {
-      if (isspace(buffer[0])) {
-        *data = '\0'; // if the only character is whitespace, return null
-      } else if (buffer[0] == '\0') {
-        *data = '\0'; // if the only character is null, return null
-      } else {
-        *data = buffer[0];
-      }
-      return;
-    }
-    // skip over any front whitespace
-    char *start = buffer.data();
-    while (*start && isspace(*start))
-      ++start;
-    // work from back until first non-whitespace char found
-    int i = (int)strlen(start);
-    while (--i >= 0) {
-      if (!isspace(start[i])) {
-        break;
-      }
-    }
-    // add a null terminator to the end
-    start[++i] = '\0';
-
-    std::memcpy(data, start, i);
-    data[i] = '\0';
+    trimWhiteSpace(buffer);
+    std::memcpy(data, buffer.data(), strlen(buffer.data()) + 1);
   } else {
     std::memcpy(data, buffer.data(), size);
   }
@@ -761,28 +783,11 @@ string File::getStrData() {
     msg << "getStrData() only understands rank<=1 data. Found rank=" << rank;
     throw NXEXCEPTION(msg.str());
   }
-  // determine storage size: type_size × npoints (mirrors H5Cpp's getInMemDataSize approach)
-  dimsize_t storage_size;
-  if (H5Tis_variable_str(m_current_type_id)) {
-    if (rank == 0) {
-      // H5Dvlen_get_buf_size is unreliable with H5S_SCALAR in some HDF5 versions.
-      char *vbuf = nullptr;
-      if (H5Dread(m_current_data_id, m_current_type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &vbuf) < 0 || !vbuf)
-        throw NXEXCEPTION("Failed to read scalar variable-length string");
-      storage_size = strlen(vbuf);
-      H5free_memory(vbuf);
-    } else if (H5Dvlen_get_buf_size(m_current_data_id, m_current_type_id, m_current_space_id, &storage_size) < 0) {
-      throw NXEXCEPTION("Failed to read string length for variable-length string");
-    }
-  } else {
-    hssize_t npoints = H5Sget_simple_extent_npoints(m_current_space_id);
-    if (npoints < 0)
-      throw NXEXCEPTION("Failed to get dataspace extent");
-    storage_size = H5Tget_size(m_current_type_id) * static_cast<dimsize_t>(npoints);
-  }
-  std::vector<char> value(static_cast<size_t>(storage_size) + 1, '\0');
-  this->getData(value.data());
-  return std::string(value.data(), strlen(value.data()));
+  std::size_t len = getStringDataLength(m_current_data_id, m_current_type_id, m_current_space_id);
+  std::string value(len, '\0');
+  this->getData<char>(value.data());
+  value.resize(strlen(value.c_str())); // trim to actual length
+  return value;
 }
 
 // GET DATA -- NUMERIC
@@ -1388,23 +1393,7 @@ Info File::getInfo() {
   // String scalars (rank=0 in HDF5) were promoted to rank=1 with dims={1} above,
   // so they fall into this branch uniformly.
   if (tclass == H5T_STRING && !info.dims.empty() && info.dims.back() == 1) {
-    dimsize_t length;
-    if (H5Tis_variable_str(m_current_type_id)) {
-      if (H5Sget_simple_extent_ndims(m_current_space_id) == 0) {
-        // H5Dvlen_get_buf_size is unreliable with H5S_SCALAR in some HDF5 versions.
-        // Read the single vlen string and measure directly.
-        char *vbuf = nullptr;
-        if (H5Dread(m_current_data_id, m_current_type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &vbuf) < 0 || !vbuf)
-          throw NXEXCEPTION("Failed to read scalar variable-length string length");
-        length = strlen(vbuf);
-        H5free_memory(vbuf);
-      } else if (H5Dvlen_get_buf_size(m_current_data_id, m_current_type_id, m_current_space_id, &length) < 0) {
-        throw NXEXCEPTION("Failed to read string length for variable-length string");
-      }
-    } else {
-      // fixed-length: byte width is encoded in the datatype itself
-      length = H5Tget_size(m_current_type_id);
-    }
+    dimsize_t length = getStringDataLength(m_current_data_id, m_current_type_id, m_current_space_id);
     info.dims.back() = length;
   }
 
