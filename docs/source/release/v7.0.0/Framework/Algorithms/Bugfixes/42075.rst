@@ -1,0 +1,1 @@
+- Unreadable instrument geometry cache is now deleted, and the cache gets recreated to prevent a load failure
