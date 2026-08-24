@@ -1,0 +1,1 @@
+- A new configuration property ``isisjournal.url_prefix`` has been added to ``Mantid.properties`` file to specify the URL prefix of the ISIS journal allowing it to be configurable as necessary whenever needed.
