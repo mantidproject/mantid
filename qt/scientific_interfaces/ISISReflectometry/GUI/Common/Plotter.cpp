@@ -498,12 +498,21 @@ void applyPostPlotting(PlotRequest const &request, PlottedFigure const &plottedF
 }
 } // namespace
 
+bool Plotter::hasActiveReflectometryFigure() const {
+  Mantid::PythonInterface::GlobalInterpreterLock lock;
+  try {
+    return currentFigureOrNone().has_value();
+  } catch (MantidQt::Widgets::Common::Python::ErrorAlreadySet &) {
+    throw Mantid::PythonInterface::PythonException();
+  }
+}
+
 bool Plotter::canOverplotActiveFigure() const {
   using namespace MantidQt::Widgets::Common;
 
   Mantid::PythonInterface::GlobalInterpreterLock lock;
   try {
-    if (!currentFigureOrNone().has_value())
+    if (!hasActiveReflectometryFigure())
       return false;
     auto const plotFunctions = Python::Object(Python::NewRef(PyImport_ImportModule("mantidqt.plotting.functions")));
     return boost::python::extract<bool>(plotFunctions.attr("can_overplot")())();

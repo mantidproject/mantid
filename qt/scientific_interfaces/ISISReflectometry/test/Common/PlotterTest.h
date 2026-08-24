@@ -78,13 +78,22 @@ public:
                       &parent}));
   }
 
-  void testHasActiveFigureIgnoresNonReflectometryFigure() {
+  void testHasActiveReflectometryFigureIgnoresNonReflectometryFigure() {
     closeAllFigures();
     createPlainMatplotlibLineFigure();
 
     MantidQt::CustomInterfaces::ISISReflectometry::Plotter plotter;
 
+    TS_ASSERT(!plotter.hasActiveReflectometryFigure());
     TS_ASSERT(!plotter.canOverplotActiveFigure());
+  }
+
+  void testHasActiveReflectometryFigureReturnsFalseWhenAllFiguresAreClosed() {
+    closeAllFigures();
+
+    MantidQt::CustomInterfaces::ISISReflectometry::Plotter plotter;
+
+    TS_ASSERT(!plotter.hasActiveReflectometryFigure());
   }
 
   void testCanOverplotActiveFigureAcceptsReflectometryFigure() {
@@ -97,6 +106,7 @@ public:
                       MantidQt::CustomInterfaces::ISISReflectometry::PlotOutputType::ReflectivityCurve,
                       MantidQt::CustomInterfaces::ISISReflectometry::PlotLayout::Individual)});
 
+    TS_ASSERT(plotter.hasActiveReflectometryFigure());
     TS_ASSERT(plotter.canOverplotActiveFigure());
   }
 

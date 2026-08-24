@@ -8,6 +8,7 @@
 
 #include "Common/DllConfig.h"
 #include "GUI/Plotting/model/PlottingWorkspace.h"
+#include "GUI/Plotting/view/PlottingWorkspaceTreeDisplayItem.h"
 
 #include <QItemSelection>
 #include <QItemSelectionModel>
@@ -31,7 +32,7 @@ public:
   explicit QtWorkspaceTreeViewAdapter(WorkspaceTreeView *workspaceTree, QObject *parent = nullptr);
 
   /// Replace all displayed evaluated workspace tree items.
-  void setItems(std::vector<PlottingWorkspaceTreeItem> const &items);
+  void setItems(std::vector<PlottingWorkspaceTreeDisplayItem> const &items);
   /// Clear all selected tree rows without recursively updating children.
   void clearSelection();
   /// Return selected leaf workspace names.
@@ -51,7 +52,7 @@ private:
   /// Apply muted visual state to every column in a row.
   void setItemMuted(QStandardItem *parent, int row, bool muted);
   /// Add a tree node and its children to the Qt item model.
-  void addTreeItem(QStandardItem *parent, PlottingWorkspaceTreeItem const &item);
+  void addTreeItem(QStandardItem *parent, PlottingWorkspaceTreeDisplayItem const &item);
   /// Return the canonical item-type column index for any row column index.
   QModelIndex itemIndex(QModelIndex const &index) const;
   /// Return the plotting tree item type stored on a model row.
@@ -59,9 +60,11 @@ private:
   /// Return the ADS workspace name stored on a model row.
   std::string workspaceName(QModelIndex const &index) const;
   /// Return true if the evaluated row can be selected directly.
-  bool isSelectable(QModelIndex const &index) const;
+  bool canSelectDirectly(QModelIndex const &index) const;
   /// Return true if the evaluated row can be selected through a selected parent.
-  bool isSelectableAsChild(QModelIndex const &index) const;
+  bool canSelectViaParent(QModelIndex const &index) const;
+  /// Return true if a selected row may contribute to the selected workspaces.
+  bool canContributeSelection(QModelIndex const &index) const;
   /// Handle row clicks by selecting or deselecting whole subtrees.
   bool handleWorkspaceTreeClick(QMouseEvent const &event);
   /// Return true for keyboard modifiers that should preserve existing selections.

@@ -43,6 +43,7 @@ set(TEST_FILES
     Experiment/ExperimentOptionDefaultsTest.h
     Plotting/PlottingModelTest.h
     Plotting/PlottingPresenterTest.h
+    Plotting/PlottingViewStateBuilderTest.h
     Plotting/QtPlottingViewTest.h
     Reduction/BatchLookupIndexTest.h
     Reduction/LookupTableTest.h

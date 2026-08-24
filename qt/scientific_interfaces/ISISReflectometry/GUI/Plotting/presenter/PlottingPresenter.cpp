@@ -33,18 +33,27 @@ PresenterPlotRequest plotRequestFor(IPlottingView &view, std::string const &inst
 } // namespace
 
 PlottingPresenter::PlottingPresenter(IPlottingView *view)
-    : m_view(view), m_mainPresenter(nullptr), m_plotter(&m_defaultPlotter),
-      m_plotOptionsProvider(&m_defaultPlotOptionsProvider), m_plottingModel(&m_defaultPlottingModel) {
-  m_view->subscribe(this);
-  updateWidgetEnabledState();
+    : m_defaultActiveFigureMonitor(), m_view(view), m_mainPresenter(nullptr), m_plotter(&m_defaultPlotter),
+      m_plotOptionsProvider(&m_defaultPlotOptionsProvider), m_plottingModel(&m_defaultPlottingModel),
+      m_activeFigureMonitor(&m_defaultActiveFigureMonitor), m_outputSelectionEnabled(false),
+      m_hasActiveReflectometryFigure(false), m_activePlotOverplotCompatible(false) {
+  initialise();
 }
 
 PlottingPresenter::PlottingPresenter(IPlottingView *view, IPlotter const &plotter,
                                      IPlotOptionsProvider const &plotOptionsProvider,
                                      IPlottingModel const &plottingModel)
-    : m_view(view), m_mainPresenter(nullptr), m_plotter(&plotter), m_plotOptionsProvider(&plotOptionsProvider),
-      m_plottingModel(&plottingModel) {
+    : m_defaultActiveFigureMonitor(), m_view(view), m_mainPresenter(nullptr), m_plotter(&plotter),
+      m_plotOptionsProvider(&plotOptionsProvider), m_plottingModel(&plottingModel),
+      m_activeFigureMonitor(&m_defaultActiveFigureMonitor), m_outputSelectionEnabled(false),
+      m_hasActiveReflectometryFigure(false), m_activePlotOverplotCompatible(false) {
+  initialise();
+}
+
+void PlottingPresenter::initialise() {
   m_view->subscribe(this);
+  m_activeFigureMonitor->subscribe([this]() { notifyActiveFigureChanged(); });
+  m_activeFigureMonitor->start();
   updateWidgetEnabledState();
 }
 
@@ -77,15 +86,24 @@ void PlottingPresenter::notifyPlotOverplotClicked() { plotSelectedWorkspaces(Plo
 
 void PlottingPresenter::notifyPlotIndividualClicked() { plotSelectedWorkspaces(PlotLayout::Individual); }
 
-void PlottingPresenter::notifyAddToExistingPlotChanged() { updateActivePlotCompatibility(); }
+void PlottingPresenter::notifyAddToExistingPlotChanged() { updatePlotActionState(); }
 
-void PlottingPresenter::notifyPlotOutputTypeChanged() { updateWorkspaceItemsForCurrentOutputType(); }
+void PlottingPresenter::notifyPlotOutputTypeChanged() {
+  updateWorkspaceItemsForCurrentOutputType();
+  updatePlotOutputControlsState();
+  updatePlotActionState();
+}
 
-void PlottingPresenter::notifyActivePlotCompatibilityChanged() { updateActivePlotCompatibility(); }
+void PlottingPresenter::notifyWorkspaceSelectionChanged() { updatePlotActionState(); }
 
-void PlottingPresenter::plotSelectedWorkspaces(PlotLayout layout) const {
+void PlottingPresenter::notifyActiveFigureChanged() { updateActivePlotCompatibility(); }
+
+void PlottingPresenter::plotSelectedWorkspaces(PlotLayout layout) {
   auto const selectedWorkspaces = m_workspaceTree.selectedWorkspacesFor(m_view->selectedWorkspaceNames());
   if (selectedWorkspaces.empty()) {
+    return;
+  }
+  if (!m_view->selectedPlotOutputType()) {
     return;
   }
 
@@ -114,22 +132,53 @@ void PlottingPresenter::plotSelectedWorkspaces(PlotLayout layout) const {
 }
 
 void PlottingPresenter::updateWidgetEnabledState() {
-  m_view->setOutputSelectionEnabled(!isProcessing() && !isAutoreducing());
+  m_outputSelectionEnabled = !isProcessing() && !isAutoreducing();
+  m_view->setOutputSelectionEnabled(m_outputSelectionEnabled);
   updateActivePlotCompatibility();
 }
 
-void PlottingPresenter::updateActivePlotCompatibility() const {
-  m_view->setActivePlotOverplotCompatible(m_plotter->canOverplotActiveFigure());
+void PlottingPresenter::updateActivePlotCompatibility() {
+  m_hasActiveReflectometryFigure = m_plotter->hasActiveReflectometryFigure();
+  m_activePlotOverplotCompatible = m_plotter->canOverplotActiveFigure();
+  updatePlotActionState();
 }
 
 void PlottingPresenter::updateAvailablePlotOutputTypes(std::string const &instrumentName) {
-  m_view->setAvailablePlotOutputTypes(m_plotOptionsProvider->availableTypes(instrumentName));
+  m_view->setAvailablePlotOutputTypes(
+      m_viewStateBuilder.outputTypeViewItems(m_plotOptionsProvider->availableTypes(instrumentName)));
+  updatePlotOutputControlsState();
   updateWorkspaceItemsForCurrentOutputType();
+  updatePlotActionState();
 }
 
 void PlottingPresenter::updateWorkspaceItemsForCurrentOutputType() {
+  auto const selectedOutputType = m_view->selectedPlotOutputType();
+  if (!selectedOutputType) {
+    m_view->setWorkspaceItems({});
+    return;
+  }
+
   m_view->setWorkspaceItems(
-      m_workspaceTree.workspaceItemsForPlotOutputType(m_workspaceItems, m_view->selectedPlotOutputType()));
+      m_workspaceTreeDisplayStateBuilder.workspaceItemsForPlotOutputType(m_workspaceItems, *selectedOutputType));
+}
+
+void PlottingPresenter::updatePlotActionState() const {
+  auto const selectedOutputType = m_view->selectedPlotOutputType();
+  if (!selectedOutputType) {
+    m_view->setPlotActionState({});
+    return;
+  }
+
+  m_view->setPlotActionState(m_viewStateBuilder.plotActionState(
+      m_outputSelectionEnabled, m_view->selectedWorkspaceNames().size(), m_view->selectedWorkspaceGroupCount(),
+      *selectedOutputType, m_view->addToExistingPlot(), m_hasActiveReflectometryFigure,
+      m_activePlotOverplotCompatible));
+}
+
+void PlottingPresenter::updatePlotOutputControlsState() const {
+  auto const selectedOutputType = m_view->selectedPlotOutputType();
+  m_view->setPlotOutputControlsState(selectedOutputType ? m_viewStateBuilder.outputControlsState(*selectedOutputType)
+                                                        : PlotOutputControlsState{});
 }
 
 bool PlottingPresenter::isProcessing() const { return m_mainPresenter && m_mainPresenter->isProcessing(); }

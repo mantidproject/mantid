@@ -1,8 +1,11 @@
 set(PLOTTING_SRC_FILES
-    model/PlotOutputTypeProperties.cpp
     model/PlottingModel.cpp
     model/PlottingWorkspaceTree.cpp
+    presenter/PlotOutputTypeProperties.cpp
     presenter/PlottingPresenter.cpp
+    presenter/PlottingViewStateBuilder.cpp
+    presenter/PlottingWorkspaceTreeDisplayStateBuilder.cpp
+    presenter/QtActiveFigureMonitor.cpp
     view/QtPlottingView.cpp
     view/QtWorkspaceTreeViewAdapter.cpp
     view/WorkspaceTreeView.cpp
@@ -12,14 +15,19 @@ set(PLOTTING_SRC_FILES
 # the MOC_FILES set. Scroll down to find it.
 set(PLOTTING_INC_FILES
     model/IPlottingModel.h
-    model/PlotOutputTypeProperties.h
     model/PlottingModel.h
     model/PlottingWorkspace.h
     model/PlottingWorkspaceTree.h
     presenter/IPlottingPresenter.h
+    presenter/PlotOutputTypeProperties.h
     presenter/PlottingPresenter.h
     presenter/PlottingPresenterFactory.h
+    presenter/PlottingViewStateBuilder.h
+    presenter/PlottingWorkspaceTreeDisplayStateBuilder.h
+    presenter/QtActiveFigureMonitor.h
     view/IPlottingView.h
+    view/PlottingWorkspaceTreeDisplayItem.h
+    view/PlottingViewState.h
     view/QtPlottingView.h
     view/QtWorkspaceTreeViewAdapter.h
     view/WorkspaceTreeView.h

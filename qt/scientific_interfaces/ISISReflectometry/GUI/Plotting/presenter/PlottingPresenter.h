@@ -13,6 +13,9 @@
 #include "GUI/Plotting/model/PlottingModel.h"
 #include "GUI/Plotting/model/PlottingWorkspaceTree.h"
 #include "GUI/Plotting/presenter/IPlottingPresenter.h"
+#include "GUI/Plotting/presenter/PlottingViewStateBuilder.h"
+#include "GUI/Plotting/presenter/PlottingWorkspaceTreeDisplayStateBuilder.h"
+#include "GUI/Plotting/presenter/QtActiveFigureMonitor.h"
 #include "GUI/Plotting/view/IPlottingView.h"
 
 #include <string>
@@ -45,14 +48,22 @@ public:
   void notifyAddToExistingPlotChanged() override;
   /// Refresh tree state after the selected output type changes.
   void notifyPlotOutputTypeChanged() override;
-  /// Refresh active-plot compatibility for controls that depend on open figures.
-  void notifyActivePlotCompatibilityChanged() override;
+  /// Refresh action state after the workspace tree selection changes.
+  void notifyWorkspaceSelectionChanged() override;
+  /// Refresh action state for controls that depend on the active figure.
+  void notifyActiveFigureChanged();
 
 private:
+  /// Connect the presenter to view and active-figure notifications.
+  void initialise();
   /// Evaluate selected workspaces and dispatch a plot request for the chosen layout.
-  void plotSelectedWorkspaces(PlotLayout layout) const;
+  void plotSelectedWorkspaces(PlotLayout layout);
   /// Update view state for active-figure overplot compatibility.
-  void updateActivePlotCompatibility() const;
+  void updateActivePlotCompatibility();
+  /// Recalculate and apply plotting action state.
+  void updatePlotActionState() const;
+  /// Recalculate and apply output-specific control visibility.
+  void updatePlotOutputControlsState() const;
   /// Update output types for the selected instrument.
   void updateAvailablePlotOutputTypes(std::string const &instrumentName);
   /// Reapply output-type specific tree state and display it in the view.
@@ -65,14 +76,21 @@ private:
   Plotter m_defaultPlotter;
   PlotOptionsProvider m_defaultPlotOptionsProvider;
   PlottingModel m_defaultPlottingModel;
+  QtActiveFigureMonitor m_defaultActiveFigureMonitor;
   IPlottingView *m_view;
   IBatchPresenter *m_mainPresenter;
   IPlotter const *m_plotter;
   IPlotOptionsProvider const *m_plotOptionsProvider;
   IPlottingModel const *m_plottingModel;
+  IActiveFigureMonitor *m_activeFigureMonitor;
   PlottingWorkspaceTree m_workspaceTree;
+  PlottingViewStateBuilder m_viewStateBuilder;
+  PlottingWorkspaceTreeDisplayStateBuilder m_workspaceTreeDisplayStateBuilder;
   std::vector<PlottingWorkspaceTreeItem> m_workspaceItems;
   std::string m_instrumentName;
+  bool m_outputSelectionEnabled;
+  bool m_hasActiveReflectometryFigure;
+  bool m_activePlotOverplotCompatible;
 };
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "PlottingWorkspaceTree.h"
 
-#include "GUI/Plotting/model/PlotOutputTypeProperties.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
@@ -16,7 +15,6 @@
 
 #include <boost/algorithm/string/join.hpp>
 
-#include <algorithm>
 #include <exception>
 #include <optional>
 #include <utility>
@@ -146,89 +144,6 @@ void addWorkspaceItemIfPresent(PlottingWorkspaceTreeItem &parent, std::string co
   parent.children.emplace_back(std::move(item));
 }
 
-bool isWorkspaceItem(PlottingWorkspaceTreeItem const &item) { return item.children.empty(); }
-
-bool isPostprocessedGroupOutputItem(PlottingWorkspaceTreeItem const &item, bool parentIsGroup,
-                                    bool parentIsWorkspaceGroup, bool grandparentIsGroup) {
-  if (item.itemType != PlottingWorkspaceTreeItemType::WorkspaceGroup &&
-      item.itemType != PlottingWorkspaceTreeItemType::Workspace) {
-    return false;
-  }
-  return parentIsGroup || (parentIsWorkspaceGroup && grandparentIsGroup);
-}
-
-bool isPostprocessedGroupOutputExcluded(PlottingWorkspaceTreeItem const &item,
-                                        PlotOutputTypeProperties const &properties, bool parentIsGroup,
-                                        bool parentIsWorkspaceGroup, bool grandparentIsGroup) {
-  return properties.excludesPostprocessedGroupOutputs() &&
-         isPostprocessedGroupOutputItem(item, parentIsGroup, parentIsWorkspaceGroup, grandparentIsGroup);
-}
-
-bool isWorkspaceIncluded(PlottingWorkspaceTreeItem const &item, PlotOutputTypeProperties const &properties,
-                         bool parentIsGroup, bool parentIsWorkspaceGroup, bool grandparentIsGroup) {
-  if (isPostprocessedGroupOutputExcluded(item, properties, parentIsGroup, parentIsWorkspaceGroup, grandparentIsGroup)) {
-    return false;
-  }
-  return properties.includesWorkspaceOutput(item.outputType);
-}
-
-bool hasWorkspaceDescendant(PlottingWorkspaceTreeItem const &item) {
-  if (isWorkspaceItem(item)) {
-    return item.itemType == PlottingWorkspaceTreeItemType::Workspace;
-  }
-  return std::any_of(item.children.cbegin(), item.children.cend(), hasWorkspaceDescendant);
-}
-
-bool allWorkspaceDescendantsIncluded(PlottingWorkspaceTreeItem const &item, PlotOutputTypeProperties const &properties,
-                                     bool parentIsGroup, bool parentIsWorkspaceGroup, bool grandparentIsGroup);
-
-bool isSelectable(PlottingWorkspaceTreeItem const &item, PlotOutputTypeProperties const &properties, bool parentIsGroup,
-                  bool parentIsWorkspaceGroup, bool grandparentIsGroup) {
-  if (isPostprocessedGroupOutputExcluded(item, properties, parentIsGroup, parentIsWorkspaceGroup, grandparentIsGroup)) {
-    return false;
-  }
-  if (!properties.allowsItemType(item.itemType)) {
-    return false;
-  }
-  if (item.itemType == PlottingWorkspaceTreeItemType::Workspace) {
-    return isWorkspaceIncluded(item, properties, parentIsGroup, parentIsWorkspaceGroup, grandparentIsGroup);
-  }
-  if (item.itemType == PlottingWorkspaceTreeItemType::WorkspaceGroup) {
-    return hasWorkspaceDescendant(item) &&
-           allWorkspaceDescendantsIncluded(item, properties, parentIsGroup, parentIsWorkspaceGroup, grandparentIsGroup);
-  }
-  return true;
-}
-
-bool allWorkspaceDescendantsIncluded(PlottingWorkspaceTreeItem const &item, PlotOutputTypeProperties const &properties,
-                                     bool parentIsGroup, bool parentIsWorkspaceGroup, bool grandparentIsGroup) {
-  if (isWorkspaceItem(item)) {
-    return item.itemType != PlottingWorkspaceTreeItemType::Workspace ||
-           isWorkspaceIncluded(item, properties, parentIsGroup, parentIsWorkspaceGroup, grandparentIsGroup);
-  }
-
-  auto const itemIsGroup = item.itemType == PlottingWorkspaceTreeItemType::Group;
-  auto const itemIsWorkspaceGroup = item.itemType == PlottingWorkspaceTreeItemType::WorkspaceGroup;
-  return std::all_of(item.children.cbegin(), item.children.cend(), [&](auto const &child) {
-    return allWorkspaceDescendantsIncluded(child, properties, itemIsGroup, itemIsWorkspaceGroup, parentIsGroup);
-  });
-}
-
-PlottingWorkspaceTreeItem evaluateItemState(PlottingWorkspaceTreeItem item, PlotOutputTypeProperties const &properties,
-                                            bool parentIsGroup = false, bool parentIsWorkspaceGroup = false,
-                                            bool grandparentIsGroup = false) {
-  auto const itemIsGroup = item.itemType == PlottingWorkspaceTreeItemType::Group;
-  auto const itemIsWorkspaceGroup = item.itemType == PlottingWorkspaceTreeItemType::WorkspaceGroup;
-  for (auto &child : item.children) {
-    child = evaluateItemState(std::move(child), properties, itemIsGroup, itemIsWorkspaceGroup, parentIsGroup);
-  }
-  item.selectable = isSelectable(item, properties, parentIsGroup, parentIsWorkspaceGroup, grandparentIsGroup);
-  item.selectableAsChild = item.selectable || (item.itemType == PlottingWorkspaceTreeItemType::Workspace &&
-                                               isWorkspaceIncluded(item, properties, parentIsGroup,
-                                                                   parentIsWorkspaceGroup, grandparentIsGroup));
-  item.muted = !item.selectable;
-  return item;
-}
 } // namespace
 
 std::vector<PlottingWorkspaceTreeItem> PlottingWorkspaceTree::makeWorkspaceItems(RunsTable const &runsTable) {
@@ -278,17 +193,6 @@ std::vector<PlottingWorkspaceTreeItem> PlottingWorkspaceTree::makeWorkspaceItems
     }
   }
   return workspaceItems;
-}
-
-std::vector<PlottingWorkspaceTreeItem>
-PlottingWorkspaceTree::workspaceItemsForPlotOutputType(std::vector<PlottingWorkspaceTreeItem> const &items,
-                                                       PlotOutputType outputType) const {
-  auto const &properties = plotOutputTypeProperties(outputType);
-  auto evaluatedItems = items;
-  for (auto &item : evaluatedItems) {
-    item = evaluateItemState(std::move(item), properties);
-  }
-  return evaluatedItems;
 }
 
 std::vector<PlottingWorkspaceSelection>

@@ -10,6 +10,7 @@
 #include "ui_PlottingWidget.h"
 
 #include <memory>
+#include <optional>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
@@ -28,21 +29,25 @@ public:
   /// Enable or disable plot output controls while reduction state changes.
   void setOutputSelectionEnabled(bool enabled) override;
   /// Replace the available plot output types in the output selector.
-  void setAvailablePlotOutputTypes(std::vector<PlotOutputType> const &outputTypes) override final;
+  void setAvailablePlotOutputTypes(std::vector<PlotOutputTypeViewItem> const &outputTypes) override final;
+  /// Apply visibility for output-specific controls.
+  void setPlotOutputControlsState(PlotOutputControlsState const &state) override;
+  /// Apply enabled and checked state for plotting action controls.
+  void setPlotActionState(PlotActionState const &state) override;
   /// Replace the workspace tree contents.
-  void setWorkspaceItems(std::vector<PlottingWorkspaceTreeItem> const &items) override;
+  void setWorkspaceItems(std::vector<PlottingWorkspaceTreeDisplayItem> const &items) override;
   /// Return names of selected workspace leaf nodes.
   std::vector<std::string> selectedWorkspaceNames() const override;
+  /// Return the number of selected workspace-group rows.
+  size_t selectedWorkspaceGroupCount() const override;
   /// Return the selected plot output type.
-  PlotOutputType selectedPlotOutputType() const override;
+  std::optional<PlotOutputType> selectedPlotOutputType() const override;
   /// Return the full output selection, including output-specific axis controls.
   PlotOutputSelection selectedPlotOutputSelection() const override;
   /// Return true if the next plot should be added to the active plot.
   bool addToExistingPlot() const override;
   /// Return true if tiled plots should fill vertically before horizontally.
   bool plotTiledVertically() const override;
-  /// Update controls that depend on the active figure accepting overplots.
-  void setActivePlotOverplotCompatible(bool compatible) override;
   /// Return the widget to use as the parent for plot windows.
   QWidget *plotParent() override;
   /// Ask the user to confirm plotting a large number of items.
@@ -53,18 +58,12 @@ private:
   void initLayout();
   /// Enable or disable output selectors.
   void setOutputSelectionControlsEnabled(bool enabled);
-  /// Recalculate enabled states for all plotting action controls.
-  void updatePlotButtonEnabledStates();
-  /// Show, hide and apply controls for the selected output type.
-  void updatePlotOutputProperties();
-  /// Clear selected tree rows and refresh action states.
+  /// Clear selected tree rows.
   void clearWorkspaceSelection();
 
   Ui::PlottingWidget m_ui;
   std::unique_ptr<QtWorkspaceTreeViewAdapter> m_workspaceTree;
   PlottingViewSubscriber *m_notifyee;
-  bool m_outputSelectionEnabled;
-  bool m_activePlotOverplotCompatible;
 };
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

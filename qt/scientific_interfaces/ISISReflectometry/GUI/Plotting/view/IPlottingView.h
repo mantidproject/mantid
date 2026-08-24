@@ -9,6 +9,9 @@
 #include "Common/DllConfig.h"
 #include "GUI/Common/PlotOptions.h"
 #include "GUI/Plotting/model/PlottingWorkspace.h"
+#include "GUI/Plotting/view/PlottingViewState.h"
+#include "GUI/Plotting/view/PlottingWorkspaceTreeDisplayItem.h"
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -30,8 +33,8 @@ public:
   virtual void notifyAddToExistingPlotChanged() = 0;
   /// Notify that the selected plot output type changed.
   virtual void notifyPlotOutputTypeChanged() = 0;
-  /// Notify that controls depending on active-plot compatibility should be refreshed.
-  virtual void notifyActivePlotCompatibilityChanged() = 0;
+  /// Notify that the workspace tree selection changed.
+  virtual void notifyWorkspaceSelectionChanged() = 0;
 };
 
 /// Interface for the ISIS Reflectometry plotting tab view.
@@ -43,21 +46,25 @@ public:
   /// Enable or disable the plot-output selection controls.
   virtual void setOutputSelectionEnabled(bool enabled) = 0;
   /// Set output types available for the current instrument.
-  virtual void setAvailablePlotOutputTypes(std::vector<PlotOutputType> const &outputTypes) = 0;
+  virtual void setAvailablePlotOutputTypes(std::vector<PlotOutputTypeViewItem> const &outputTypes) = 0;
+  /// Show or hide output-type specific controls.
+  virtual void setPlotOutputControlsState(PlotOutputControlsState const &state) = 0;
+  /// Enable, disable and update plotting action controls.
+  virtual void setPlotActionState(PlotActionState const &state) = 0;
   /// Replace the displayed workspace tree.
-  virtual void setWorkspaceItems(std::vector<PlottingWorkspaceTreeItem> const &items) = 0;
+  virtual void setWorkspaceItems(std::vector<PlottingWorkspaceTreeDisplayItem> const &items) = 0;
   /// Return selected workspace leaf names.
   virtual std::vector<std::string> selectedWorkspaceNames() const = 0;
-  /// Return the selected output type.
-  virtual PlotOutputType selectedPlotOutputType() const = 0;
+  /// Return the number of selected workspace-group rows.
+  virtual size_t selectedWorkspaceGroupCount() const = 0;
+  /// Return the selected output type, or empty if no output type is available.
+  virtual std::optional<PlotOutputType> selectedPlotOutputType() const = 0;
   /// Return the full output selection, including output-specific axes.
   virtual PlotOutputSelection selectedPlotOutputSelection() const = 0;
   /// Return true if plotting should target the active figure.
   virtual bool addToExistingPlot() const = 0;
   /// Return true if tiled plots should be arranged vertically first.
   virtual bool plotTiledVertically() const = 0;
-  /// Update controls that require the active figure to support overplotting.
-  virtual void setActivePlotOverplotCompatible(bool compatible) = 0;
   /// Return the parent widget for plot windows.
   virtual QWidget *plotParent() = 0;
   /// Confirm large plot requests with the user.

@@ -9,7 +9,7 @@
 #include "GUI/Common/PlotOptions.h"
 #include "GUI/Plotting/model/PlottingWorkspace.h"
 #include "MantidKernel/System.h"
-#include <QString>
+#include <string>
 #include <vector>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
@@ -32,7 +32,7 @@ public:
                            PlotOutputTypeCapabilities capabilities);
 
   /// Return the label shown in the plot output selector.
-  QString const &displayName() const;
+  std::string const &displayName() const;
   /// Return true if tree items of this type may be selected.
   bool allowsItemType(PlottingWorkspaceTreeItemType itemType) const;
   /// Return true if workspaces with this reduced output type may be selected.

@@ -37,7 +37,7 @@ std::vector<PlottingWorkspaceOutputType> reflectivityWorkspaceOutputTypes() {
   return {PlottingWorkspaceOutputType::IvsQ, PlottingWorkspaceOutputType::IvsQBinned};
 }
 
-const std::unordered_map<PlotOutputType, QString> plotOutputTypeDisplayNames{
+const std::unordered_map<PlotOutputType, std::string> plotOutputTypeDisplayNames{
     {PlotOutputType::ReflectivityCurve, "Reflectivity Curve"},
     {PlotOutputType::DetectorMap, "Detector Map"},
     {PlotOutputType::SpinAsymmetry, "Spin Asymmetry"},
@@ -83,7 +83,9 @@ PlotOutputTypeProperties::PlotOutputTypeProperties(
     : m_plotOutputType(plotOutputType), m_selectableItemTypes(std::move(selectableItemTypes)),
       m_includedWorkspaceOutputTypes(std::move(includedWorkspaceOutputTypes)), m_capabilities(capabilities) {}
 
-QString const &PlotOutputTypeProperties::displayName() const { return plotOutputTypeDisplayNames.at(m_plotOutputType); }
+std::string const &PlotOutputTypeProperties::displayName() const {
+  return plotOutputTypeDisplayNames.at(m_plotOutputType);
+}
 
 bool PlotOutputTypeProperties::allowsItemType(PlottingWorkspaceTreeItemType itemType) const {
   return contains(m_selectableItemTypes, itemType);
