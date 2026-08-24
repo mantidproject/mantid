@@ -8,6 +8,7 @@ import unittest
 import numpy as np
 from scipy.special import i0, i1, modstruve
 from mantid.simpleapi import CylinderAbsorptionCW, CreateSampleWorkspace, EditInstrumentGeometry, SetSample
+from mantid.kernel import PhysicalConstants
 
 
 class CylinderAbsorptionCWTest(unittest.TestCase):
@@ -111,7 +112,7 @@ class CylinderAbsorptionCWTest(unittest.TestCase):
         The AttenuationXSection property is quoted at 1.7982 Å and must be scaled to the requested
         wavelength, just as the sample material does, so both paths agree at any wavelength.
         """
-        for wavelength in (1.0, 1.7982, 2.41):
+        for wavelength in (1.0, PhysicalConstants.ReferenceLambda, 2.41):
             ws_material = self.createWorkspace()
             SetSample(
                 ws_material,
@@ -140,7 +141,7 @@ class CylinderAbsorptionCWTest(unittest.TestCase):
                 Radius=0.5,  # cm
                 Height=1.0,  # cm
                 Wavelength=wavelength,
-                AttenuationXSection=material.absorbXSection(1.7982),  # barn at 1.7982 Å
+                AttenuationXSection=material.absorbXSection(PhysicalConstants.ReferenceLambda),  # barn at 1.7982 Å
                 ScatteringXSection=material.totalScatterXSection(),  # barn
                 SampleNumberDensity=material.numberDensity,  # atoms/Å^3
                 AbsorptionCorrectionMethod="Sears",
