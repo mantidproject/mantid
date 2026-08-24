@@ -1,0 +1,5 @@
+- The live-data algorithms, such as :ref:`StartLiveData <algm-StartLiveData>`, no longer restrict their
+  ``Instrument`` property to instruments belonging to the *default* facility. Choosing an instrument
+  owned by any other facility was previously impossible, even though execution has always resolved
+  instruments across every facility, and the property accepted no value at all when the default
+  facility had no live listeners.

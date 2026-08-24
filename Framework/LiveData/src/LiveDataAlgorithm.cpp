@@ -351,7 +351,15 @@ std::map<std::string, std::string> LiveDataAlgorithm::validateInputs() {
         return out;
       }
     } catch (const Exception::NotFoundError &) {
-      out["Facility"] = "Facility '" + facility + "' is not known to Mantid.";
+      // List the known facilities: 'Facility' carries no list validator, so this message is the only
+      // discoverability a caller gets.
+      std::vector<std::string> knownFacilities;
+      for (const auto &knownFacility : ConfigService::Instance().getFacilities()) {
+        knownFacilities.emplace_back(knownFacility->name());
+      }
+      std::sort(knownFacilities.begin(), knownFacilities.end());
+      out["Facility"] = "Facility '" + facility + "' is not known to Mantid. Known facilities are: " +
+                        Strings::join(knownFacilities.cbegin(), knownFacilities.cend(), ", ") + ".";
       return out;
     }
   }

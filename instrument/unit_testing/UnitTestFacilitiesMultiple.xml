@@ -9,12 +9,14 @@
 
 <facility name="TESTDEFAULT" FileExtensions=".nxs,.dat,.xml">
 
-  <livedata listener="MockLiveListener"/>
+  <timezone>US/Eastern</timezone>
+
+  <livedata listener="FakeEventDataListener"/>
 
   <instrument name="DEFAULTLISTENER">
     <technique>Test Listener</technique>
     <livedata>
-      <connection name="default" address="127.0.0.1:0" listener="MockLiveListener" />
+      <connection name="default" address="127.0.0.1:0" listener="FakeEventDataListener" />
     </livedata>
   </instrument>
 
@@ -27,12 +29,14 @@
 
 <facility name="TESTOTHER" FileExtensions=".nxs,.dat,.xml">
 
-  <livedata listener="MockLiveListener"/>
+  <timezone>US/Eastern</timezone>
+
+  <livedata listener="FakeEventDataListener"/>
 
   <instrument name="OTHERLISTENER">
     <technique>Test Listener</technique>
     <livedata>
-      <connection name="default" address="127.0.0.1:0" listener="MockLiveListener" />
+      <connection name="default" address="127.0.0.1:0" listener="FakeEventDataListener" />
     </livedata>
   </instrument>
 

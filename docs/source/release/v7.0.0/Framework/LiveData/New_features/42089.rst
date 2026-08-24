@@ -1,0 +1,5 @@
+- The live-data algorithms gain an optional ``Facility`` property, naming the facility that
+  ``Instrument`` is resolved against. This disambiguates instrument names appearing in more than one
+  facility; left empty, the default facility is searched first and then all others, as before.
+  Mismatched ``Facility`` and ``Instrument`` values are now reported against the offending property
+  rather than raising an exception.

@@ -1,9 +1,0 @@
-- The live-data algorithms (:ref:`StartLiveData <algm-StartLiveData>`, :ref:`LoadLiveData
-  <algm-LoadLiveData>` and :ref:`MonitorLiveData <algm-MonitorLiveData>`) no longer restrict their
-  ``Instrument`` property to instruments belonging to the *default* facility. Previously, selecting an
-  instrument was impossible whenever the user's default facility differed from the one owning that
-  instrument, even though execution itself has always resolved the instrument across all facilities.
-  For a default facility with no live listeners at all, the property accepted no value whatsoever.
-  A new optional ``Facility`` property has also been added, which disambiguates instrument names that
-  occur in more than one facility, and mismatches between ``Facility`` and ``Instrument`` are now
-  reported against the offending property instead of raising an exception.
