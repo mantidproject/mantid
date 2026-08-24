@@ -110,7 +110,8 @@ public:
     LiveDataAlgorithmImpl alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
 
-    const auto allowed = alg.getProperty("Instrument")->allowedValues();
+    const Mantid::Kernel::Property *instrumentProp = alg.getProperty("Instrument");
+    const auto allowed = instrumentProp->allowedValues();
     TSM_ASSERT("instrument in the default facility", contains(allowed, "DEFAULTLISTENER"));
     TSM_ASSERT("instrument in another facility", contains(allowed, "OTHERLISTENER"));
     TSM_ASSERT("instrument without live data", !contains(allowed, "NOLIVEDATA"));
@@ -126,9 +127,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Facility", "TESTOTHER"))
     alg.setPropertyValue("OutputWorkspace", "out_ws");
 
-    const auto errors = alg.validateInputs();
-    TS_ASSERT_EQUALS(errors.count("Instrument"), 0)
-    TS_ASSERT_EQUALS(errors.count("Facility"), 0)
+    auto errors = alg.validateInputs();
+    TSM_ASSERT("instrument from another facility is accepted", errors["Instrument"].empty());
+    TSM_ASSERT("named facility is accepted", errors["Facility"].empty());
   }
 
   void test_Facility_defaults_to_empty() {
