@@ -8,12 +8,14 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidDataHandling/SetSample.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/CSGObject.h"
@@ -293,6 +295,99 @@ public:
     TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0.0105, 0.025, 0.02)));
     // Origin
     TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, 0, 0.0)));
+  }
+
+  // ~~~~ Baking the run's goniometer into the sample shape ~~~~
+  //
+  // The rule is that the goniometer is baked in only when there is no sample environment, because
+  // the container is never rotated. Neither of the two environment paths bakes - they are the same
+  // feature for the two shape types, <samplegeometry> giving a CSGObject and <samplestlfile> a
+  // MeshObject - so a sample turned inside a stationary can cannot arise. None of this was covered:
+  // the suite had no goniometer in it at all.
+
+  static Mantid::Kernel::Matrix<double> ninetyAboutZ() {
+    return Mantid::Kernel::Matrix<double>(std::vector<double>{0, -1, 0, 1, 0, 0, 0, 0, 1});
+  }
+
+  void test_Goniometer_Is_Baked_Into_A_Bare_Sample_Shape() {
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
+    setTestReferenceFrame(inputWS);
+    inputWS->mutableRun().mutableGoniometer().setR(ninetyAboutZ());
+
+    auto alg = createAlgorithm(inputWS);
+    alg->setProperty("Geometry", createFlatPlateGeometryProps());
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+
+    // the shape has been moved into the lab frame, and says so
+    TS_ASSERT_EQUALS(inputWS->sample().getShape().getAppliedRotation(), ninetyAboutZ());
+  }
+
+  void test_Identity_Goniometer_Leaves_The_Shape_In_Its_Own_Frame() {
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
+    setTestReferenceFrame(inputWS);
+
+    auto alg = createAlgorithm(inputWS);
+    alg->setProperty("Geometry", createFlatPlateGeometryProps());
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+
+    TS_ASSERT_EQUALS(inputWS->sample().getShape().getAppliedRotation(), Mantid::Kernel::Matrix<double>(3, 3, true));
+  }
+
+  void test_Goniometer_Is_Not_Baked_When_There_Is_A_Sample_Environment() {
+    using Mantid::Kernel::ConfigService;
+
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
+    auto testInst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    testInst->setName(m_instName);
+    inputWS->setInstrument(testInst);
+    inputWS->mutableRun().mutableGoniometer().setR(ninetyAboutZ());
+
+    auto &config = ConfigService::Instance();
+    const auto defaultDirs = config.getString("instrumentDefinition.directory");
+    config.setString("instrumentDefinition.directory", m_testRoot);
+    auto alg = createAlgorithm(inputWS);
+    alg->setProperty("Environment", createEnvironmentProps("10mm"));
+    alg->setProperty("Geometry", createOverrideGeometryProps());
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+    config.setString("instrumentDefinition.directory", defaultDirs);
+
+    // the can is not rotated, so the sample inside it must not be either
+    TS_ASSERT_EQUALS(inputWS->sample().getShape().getAppliedRotation(), Mantid::Kernel::Matrix<double>(3, 3, true));
+  }
+
+  void test_Setting_The_Same_Environment_Twice_Gives_The_Same_Shape() {
+    using Mantid::Kernel::ConfigService;
+    // Sample environment specs are held in a process-wide cache and the container hands out its own
+    // shape pointer, so anything done to that shape in passing would leak into every later call.
+    auto &config = ConfigService::Instance();
+    const auto defaultDirs = config.getString("instrumentDefinition.directory");
+    config.setString("instrumentDefinition.directory", m_testRoot);
+
+    const auto firstBox = boundingBoxAfterSettingEnvironment();
+    const auto secondBox = boundingBoxAfterSettingEnvironment();
+
+    config.setString("instrumentDefinition.directory", defaultDirs);
+
+    TS_ASSERT_DELTA(firstBox.xMin(), secondBox.xMin(), 1e-12);
+    TS_ASSERT_DELTA(firstBox.xMax(), secondBox.xMax(), 1e-12);
+    TS_ASSERT_DELTA(firstBox.yMin(), secondBox.yMin(), 1e-12);
+    TS_ASSERT_DELTA(firstBox.yMax(), secondBox.yMax(), 1e-12);
+  }
+
+  Mantid::Geometry::BoundingBox boundingBoxAfterSettingEnvironment() {
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
+    auto testInst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    testInst->setName(m_instName);
+    inputWS->setInstrument(testInst);
+
+    auto alg = createAlgorithm(inputWS);
+    alg->setProperty("Environment", createEnvironmentProps("10mm"));
+    alg->setProperty("Geometry", createOverrideGeometryProps());
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    return inputWS->sample().getShape().getBoundingBox();
   }
 
   void test_Setting_Geometry_As_FlatPlate_With_Rotation() {
