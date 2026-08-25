@@ -34,6 +34,9 @@
 #include "boost/make_shared.hpp"
 
 #include <algorithm>
+#include <iomanip>
+#include <limits>
+#include <sstream>
 
 using Poco::XML::Document;
 using Poco::XML::DOMParser;
@@ -125,22 +128,32 @@ std::shared_ptr<CSGObject> ShapeFactory::createShape(Poco::XML::Element *pElem) 
     return retVal;
   }
 
+  // <goniometer> is the TOTAL rotation applied to the surfaces below as they are parsed.
   Poco::AutoPtr<NodeList> pNL_gonio = pElem->getElementsByTagName("goniometer");
   auto *pElemGonio = static_cast<Element *>(pNL_gonio->item(0));
   m_gonioRotateMatrix.identityMatrix();
   if (pElemGonio) {
-    // Parse the rotate matrix, defined in units of radians
-    for (size_t i = 0; i < 3; ++i) {
-      for (size_t j = 0; j < 3; ++j) {
-        m_gonioRotateMatrix[i][j] = getDoubleAttribute(pElemGonio, "a" + std::to_string(i + 1) + std::to_string(j + 1));
-      }
-    }
+    m_gonioRotateMatrix = parseMatrixElement(pElemGonio);
   }
 
-  // Record what the shape has been rotated by. The surfaces below are rotated by this matrix as
-  // they are parsed, so afterwards nothing in the shape says which frame it ended up in; a caller
+  // <applied-goniometer> says how much of that total is a bake into the lab frame, as opposed to a
+  // rotation of the shape within its own frame. It is pure metadata and rotates nothing: once the
+  // surfaces are parsed nothing else in the shape says which frame it ended up in, and a caller
   // that also has a goniometer on the run needs this to avoid applying the rotation twice.
-  retVal->setAppliedGoniometerRotation(m_gonioRotateMatrix);
+  Poco::AutoPtr<NodeList> pNL_applied = pElem->getElementsByTagName("applied-goniometer");
+  auto *pElemApplied = static_cast<Element *>(pNL_applied->item(0));
+  Kernel::Matrix<double> bakedRotation(3, 3, true);
+  if (pElemApplied && !pElemGonio) {
+    g_log.warning() << "An <applied-goniometer> tag was given without a <goniometer> tag. There is "
+                    << "no rotation for it to describe, so it is ignored.\n";
+  } else if (pElemApplied) {
+    bakedRotation = parseMatrixElement(pElemApplied);
+  } else {
+    // Shapes written before the tag existed used <goniometer> only for a bake, so treat the whole
+    // of it as one. This keeps XML saved by earlier versions reading back the way it used to.
+    bakedRotation = m_gonioRotateMatrix;
+  }
+  retVal->setAppliedGoniometerRotation(bakedRotation);
 
   Poco::AutoPtr<NodeList> pNL_rotate_all = pElem->getElementsByTagName("rotate-all");
   auto *pElemRotateAll = static_cast<Element *>(pNL_rotate_all->item(0));
@@ -1723,41 +1736,114 @@ Kernel::Matrix<double> ShapeFactory::generateZRotation(double zrotate) {
   return Kernel::Matrix<double>(matrixList);
 }
 
-std::string ShapeFactory::addGoniometerTag(const Kernel::Matrix<double> &rotateMatrix, std::string xml) {
+/**
+ * Read a 3x3 matrix held as a11..a33 attributes on an XML element
+ * @param pElem The element carrying the attributes
+ * @return The matrix
+ */
+Kernel::Matrix<double> ShapeFactory::parseMatrixElement(Poco::XML::Element *pElem) {
+  Kernel::Matrix<double> matrix(3, 3, true);
+  for (size_t i = 0; i < 3; ++i) {
+    for (size_t j = 0; j < 3; ++j) {
+      matrix[i][j] = getDoubleAttribute(pElem, "a" + std::to_string(i + 1) + std::to_string(j + 1));
+    }
+  }
+  return matrix;
+}
 
-  // Delete previous goniometer from xml
-  std::size_t foundGonioTag = xml.find("<goniometer");
-  if (foundGonioTag != std::string::npos) {
-    std::size_t gonioTagLength = xml.find(">", foundGonioTag + 1) - foundGonioTag;
-    xml.erase(foundGonioTag, gonioTagLength);
+/**
+ * Replace, or insert, a tag holding a 3x3 matrix as a11..a33 attributes.
+ * @param tagName The element name, without angle brackets
+ * @param matrix The matrix to write
+ * @param xml The shape XML to edit
+ * @return The edited XML
+ */
+std::string ShapeFactory::insertMatrixTag(const std::string &tagName, const Kernel::Matrix<double> &matrix,
+                                          std::string xml) {
+  const std::string openTag = "<" + tagName;
+
+  // Delete any previous tag of this name. The closing bracket is part of the tag, so erase it too -
+  // leaving it behind drops a stray '>' into the character data on every rewrite, which is legal
+  // XML and so goes unnoticed until the tags are rewritten repeatedly.
+  const std::size_t foundTag = xml.find(openTag);
+  if (foundTag != std::string::npos) {
+    const std::size_t tagLength = xml.find(">", foundTag + 1) - foundTag + 1;
+    xml.erase(foundTag, tagLength);
   }
 
-  // Put goniometer tag in correct place in xml
-  std::size_t gonioPlace;
-  std::size_t foundType = xml.find("</type>");
-  std::size_t foundSampleGeometry = xml.find("</samplegeometry");
+  // Put the tag in the correct place in the xml
+  std::size_t tagPlace;
+  const std::size_t foundType = xml.find("</type>");
+  const std::size_t foundSampleGeometry = xml.find("</samplegeometry");
 
   if (foundType != std::string::npos) {
-    // Add goniometer BEFORE Type end tag
-    gonioPlace = foundType;
+    // Add BEFORE Type end tag
+    tagPlace = foundType;
   } else if (foundSampleGeometry != std::string::npos) {
-    // If no type tag, add goniometer BEFORE SampleGeometry end tag
-    gonioPlace = foundSampleGeometry;
+    // If no type tag, add BEFORE SampleGeometry end tag
+    tagPlace = foundSampleGeometry;
   } else {
-    // If no Type or SampleGeometry tag, add goniometer to the end
-    gonioPlace = xml.size();
+    // If no Type or SampleGeometry tag, add to the end
+    tagPlace = xml.size();
   }
 
   const std::vector<std::string> matrixElementNames = {"a11", "a12", "a13", "a21", "a22", "a23", "a31", "a32", "a33"};
-  std::string goniometerRotate = " <goniometer ";
-  for (size_t i = 0; i < rotateMatrix.numRows(); ++i) {
-    for (size_t j = 0; j < rotateMatrix.numCols(); ++j) {
-      goniometerRotate += matrixElementNames[3 * i + j] + " = '" + std::to_string(rotateMatrix[i][j]) + "' ";
+  // Full precision: these matrices are now composed rather than overwritten, so rounding here
+  // accumulates over repeated CopySample and RotateSampleShape calls.
+  std::ostringstream tag;
+  tag << std::setprecision(std::numeric_limits<double>::max_digits10);
+  tag << " " << openTag << " ";
+  for (size_t i = 0; i < matrix.numRows(); ++i) {
+    for (size_t j = 0; j < matrix.numCols(); ++j) {
+      tag << matrixElementNames[3 * i + j] << " = '" << matrix[i][j] << "' ";
     }
   }
-  goniometerRotate += "/>";
-  xml.insert(gonioPlace, goniometerRotate);
+  tag << "/>";
+  xml.insert(tagPlace, tag.str());
 
   return xml;
+}
+
+std::string ShapeFactory::addGoniometerTag(const Kernel::Matrix<double> &rotateMatrix, std::string xml) {
+  // "<goniometer" cannot match inside "<applied-goniometer" - the character before the name is '-',
+  // not '<' - so replacing one tag never disturbs the other.
+  return insertMatrixTag("goniometer", rotateMatrix, std::move(xml));
+}
+
+std::string ShapeFactory::addAppliedGoniometerTag(const Kernel::Matrix<double> &bakedRotation, std::string xml) {
+  return insertMatrixTag("applied-goniometer", bakedRotation, std::move(xml));
+}
+
+Kernel::Matrix<double> ShapeFactory::goniometerFromXML(const std::string &xml) {
+  Kernel::Matrix<double> total(3, 3, true);
+  const std::size_t foundTag = xml.find("<goniometer");
+  if (foundTag == std::string::npos) {
+    return total;
+  }
+  const std::size_t tagEnd = xml.find(">", foundTag + 1);
+  const std::string tag = xml.substr(foundTag, tagEnd - foundTag);
+  for (size_t i = 0; i < 3; ++i) {
+    for (size_t j = 0; j < 3; ++j) {
+      const std::string name = "a" + std::to_string(i + 1) + std::to_string(j + 1);
+      const std::size_t attr = tag.find(name);
+      if (attr == std::string::npos) {
+        continue;
+      }
+      const std::size_t open = tag.find("'", attr);
+      const std::size_t close = tag.find("'", open + 1);
+      total[i][j] = std::stod(tag.substr(open + 1, close - open - 1));
+    }
+  }
+  return total;
+}
+
+std::string ShapeFactory::rebakeGoniometer(const Kernel::Matrix<double> &newBake, std::string xml,
+                                           const Kernel::Matrix<double> &currentBake) {
+  // Strip the old bake off the total, leaving the definition-frame rotation, then put the new bake
+  // on the outside of it. These are orthonormal so the transpose is the exact inverse.
+  const Kernel::Matrix<double> total = goniometerFromXML(xml);
+  const Kernel::Matrix<double> newTotal = newBake * currentBake.Tprime() * total;
+  xml = addGoniometerTag(newTotal, std::move(xml));
+  return addAppliedGoniometerTag(newBake, std::move(xml));
 }
 } // namespace Mantid::Geometry
