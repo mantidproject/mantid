@@ -159,16 +159,19 @@ void CopySample::copyParameters(Sample &from, Sample &to, bool nameFlag, bool ma
     }
     auto rhsObject = std::shared_ptr<IObject>(from.getShape().cloneWithMaterial(rhsMaterial));
 
+    // Leave the copy baked to exactly the destination's goniometer, whatever frame the source was
+    // in. Only the part of that rotation not already present is applied, so a shape carrying a bake
+    // is not turned twice, and a shape rotated within its own frame keeps that rotation. Previously
+    // the CSG branch overwrote the tag, discarding any rotation of the shape in its own frame,
+    // while the mesh branch composed and so applied an existing bake a second time.
+    const auto currentBake = rhsObject->getAppliedRotation();
+
     if (auto csgObj = std::dynamic_pointer_cast<Geometry::CSGObject>(rhsObject)) {
-      // Rotate CSGObject by goniometer by editing XML, if possible for that shape
-      std::string xml = csgObj->getShapeXML();
-      xml = Geometry::ShapeFactory().addGoniometerTag(rotationMatrix, xml);
+      const auto xml = Geometry::ShapeFactory().rebakeGoniometer(rotationMatrix, csgObj->getShapeXML(), currentBake);
       rhsObject = Geometry::ShapeFactory().createShape(xml, false);
       rhsObject->setMaterial(rhsMaterial); // add back in Material
-    }
-    if (auto meshObj = std::dynamic_pointer_cast<Geometry::MeshObject>(rhsObject)) {
-      // Bake the destination's goniometer into the copy, moving it into that workspace's lab frame
-      meshObj->bakeGoniometerRotation(rotationMatrix);
+    } else if (auto meshObj = std::dynamic_pointer_cast<Geometry::MeshObject>(rhsObject)) {
+      meshObj->bakeGoniometerRotation(rotationMatrix * currentBake.Tprime());
     }
 
     to.setShape(rhsObject);
