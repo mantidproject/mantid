@@ -1584,9 +1584,9 @@ class CrystalFieldFit(object):
         self.check_fit_properties()
         self._iterations = Iterations
         if self._overwrite_maxiterations is not None:
-            Options = {"disp": False, "maxiter": self._overwrite_maxiterations[0]}
+            Options = {"maxiter": self._overwrite_maxiterations[0]}
         else:
-            Options = {"disp": False}
+            Options = {}
         self.check_consistency()
         self.find_free_cef_parameters()
         self._two_step_fit_sc(Options)
@@ -1801,7 +1801,7 @@ class CrystalFieldFit(object):
         for par_id in self._free_cef_parameters:
             x0.append(fun.getParameterValue(par_id))
             fun.fixParameter(par_id)
-        opt = {"disp": False}
+        opt = {}
         if Options is not None:
             opt = Options
         for x, pos in zip(x0, self._free_cef_parameters):
@@ -1810,10 +1810,7 @@ class CrystalFieldFit(object):
             fun.fixParameter(pos)
             if res.success:
                 if self._function is not None:
-                    if isinstance(res.x, list):
-                        fun.setParameter(pos, float(res.x[0]))
-                    else:
-                        fun.setParameter(pos, float(res.x))
+                    fun.setParameter(pos, res.x.item())
         self.model.update(fun)
 
     def _evaluate_cf(self, x0: float, fun: IFunction, cef_pos: int) -> float:

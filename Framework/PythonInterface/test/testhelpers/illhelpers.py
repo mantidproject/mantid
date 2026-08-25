@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import mtd
-from mantid.kernel import DeltaEModeType, UnitConversion
+from mantid.kernel import DeltaEModeType, UnitConversion, UnitParametersMap, UnitParams
 import numpy
 from testhelpers import create_algorithm, run_algorithm
 import ReflectometryILL_common as common
@@ -16,6 +16,13 @@ def _gaussian(x, height, x0, sigma):
     x = x - x0
     sigma2 = 2 * sigma * sigma
     return height * numpy.exp(-x * x / sigma2)
+
+
+def _convert_unit(source, destination, value, l1, l2):
+    parameters = UnitParametersMap()
+    parameters[UnitParams.l2] = l2
+    parameters[UnitParams.twoTheta] = 0.0
+    return UnitConversion.run(source, destination, value, l1, DeltaEModeType.Direct, parameters)
 
 
 def _fillTemplateReflectometryWorkspace(ws, XUnit="TOF"):
@@ -60,14 +67,13 @@ def _fillTemplateTOFWorkspace(templateWS, bkgLevel):
     ys = numpy.empty(nHistograms * nBins)
     es = numpy.empty(nHistograms * nBins)
     spectrumInfo = templateWS.spectrumInfo()
-    instrument = templateWS.getInstrument()
     l1 = spectrumInfo.l1()
-    l2 = float(instrument.getStringParameter("l2")[0])
-    tofElastic = UnitConversion.run("Energy", "TOF", E_i, l1, l2, 0.0, DeltaEModeType.Direct, 0.0)
+    l2 = spectrumInfo.l2(0)
+    tofElastic = _convert_unit("Energy", "TOF", E_i, l1, l2)
     tofBegin = tofElastic - elasticIndex * binWidth
     monitorSampleDistance = 0.5
     tofElasticMonitor = tofBegin + monitorElasticIndex * binWidth
-    tofMonitorDetector = UnitConversion.run("Energy", "TOF", E_i, monitorSampleDistance, l2, 0.0, DeltaEModeType.Direct, 0.0)
+    tofMonitorDetector = _convert_unit("Energy", "TOF", E_i, monitorSampleDistance, l2)
     elasticPeakSigma = nBins * binWidth * 0.03
     elasticPeakHeight = 1723.0
     bkgMonitor = 1
@@ -85,7 +91,7 @@ def _fillTemplateTOFWorkspace(templateWS, bkgLevel):
 
     for histogramIndex in range(0, nHistograms - 1):
         trueL2 = spectrumInfo.l2(histogramIndex)
-        trueTOF = UnitConversion.run("Energy", "TOF", E_i, l1, trueL2, 0.0, DeltaEModeType.Direct, 0.0)
+        trueTOF = _convert_unit("Energy", "TOF", E_i, l1, trueL2)
         fillBins(histogramIndex, trueTOF, elasticPeakHeight, bkgLevel)
     fillBins(nHistograms - 1, tofElasticMonitor, 1623 * elasticPeakHeight, bkgMonitor)
     kwargs = {"DataX": xs, "DataY": ys, "DataE": es, "NSpec": nHistograms, "ParentWorkspace": templateWS, "child": True}
@@ -94,7 +100,7 @@ def _fillTemplateTOFWorkspace(templateWS, bkgLevel):
     ws.getAxis(0).setUnit("TOF")
     run = ws.run()
     run.addProperty("Ei", float(E_i), True)
-    wavelength = UnitConversion.run("Energy", "Wavelength", E_i, l1, l2, 0.0, DeltaEModeType.Direct, 0.0)
+    wavelength = _convert_unit("Energy", "Wavelength", E_i, l1, l2)
     run.addProperty("wavelength", float(wavelength), True)
     pulseInterval = tofMonitorDetector + (monitorElasticIndex - elasticIndex) * binWidth
     run.addProperty("pulse_interval", float(pulseInterval * 1e-6), True)

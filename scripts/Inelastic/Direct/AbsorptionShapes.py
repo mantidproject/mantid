@@ -347,8 +347,7 @@ class anAbsorptionShape(object):
     def _check_MARI_axis_(self, workspace):
         """method verifies, if default axis needs to be changed for MARI"""
         if self._axis_is_default:
-            instrument = workspace.getInstrument()
-            instr_name = instrument.getName()
+            instr_name = workspace.getInstrumentName()
             short_n = instr_name[0:3]
             if short_n.lower() == "mar":
                 self._ShapeDescription["Axis"] = [1.0, 0.0, 0.0]

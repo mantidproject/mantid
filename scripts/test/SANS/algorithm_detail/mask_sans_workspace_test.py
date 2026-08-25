@@ -23,12 +23,11 @@ from copy import deepcopy
 
 
 def get_masked_spectrum_numbers(workspace):
+    spectrum_info = workspace.spectrumInfo()
     for index in range(workspace.getNumberHistograms()):
-        try:
-            det = workspace.getDetector(index)
-        except RuntimeError:
+        if not spectrum_info.hasDetectors(index):
             break
-        if det.isMasked():
+        if spectrum_info.isMasked(index):
             yield workspace.getSpectrum(index).getSpectrumNo()
 
 

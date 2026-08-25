@@ -129,7 +129,7 @@ class IndirectILLReductionFWS(unittest.TestCase):
 
         self.assertEqual(item.blocksize(), nbins, "{0} should contain {1} bins".format(name, nbins))
 
-        self.assertTrue(item.getSampleDetails(), "{0} should have sample logs".format(name))
+        self.assertTrue(item.getRun(), "{0} should have sample logs".format(name))
 
         self.assertTrue(item.getHistory().lastAlgorithm(), "{0} should have history".format(name))
 

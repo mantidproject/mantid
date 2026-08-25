@@ -99,9 +99,9 @@ def get_workspace_indices_for_monitors(workspace):
     :param workspace: workspace to check for monitors.
     :return: a generator for workspace indices.
     """
+    spectrum_info = workspace.spectrumInfo()
     for index in range(workspace.getNumberHistograms()):
-        detector = workspace.getDetector(index)
-        if detector.isMonitor():
+        if spectrum_info.isMonitor(index):
             yield index
 
 
@@ -115,8 +115,7 @@ def get_detector_id_for_spectrum_number(workspace, spectrum_number):
     """
     try:
         workspace_index = workspace.getIndexFromSpectrumNumber(spectrum_number)
-        detector = workspace.getDetector(workspace_index)
-        detector_id = detector.getID()
+        detector_id = next(iter(workspace.getSpectrum(workspace_index).getDetectorIDs()))
     except RuntimeError:
         detector_id = None
     return detector_id
@@ -131,8 +130,7 @@ def get_idf_path_from_workspace(workspace):
     :return: the full IDF path for the instrument of the workspace.
     """
     run = workspace.run()
-    instrument = workspace.getInstrument()
-    instrument_name = instrument.getName()
+    instrument_name = workspace.getInstrumentName()
     instrument_name = sanitise_instrument_name(instrument_name)
     if run.hasProperty("start_time"):
         time = run.getProperty("start_time").value
@@ -178,7 +176,7 @@ def yield_masked_det_ids(masking_workspace):
     """
     for ws_index in range(masking_workspace.getNumberHistograms()):
         if masking_workspace.y(ws_index)[0] == 1:
-            yield masking_workspace.getDetector(ws_index).getID()
+            yield from masking_workspace.getSpectrum(ws_index).getDetectorIDs()
 
 
 def get_masked_det_ids(workspace):
@@ -189,15 +187,14 @@ def get_masked_det_ids(workspace):
     :param workspace : the workspace to extract the det IDs from
     :return: a list of IDs for masked detectors
     """
+    spectrum_info = workspace.spectrumInfo()
     for ws_index in range(workspace.getNumberHistograms()):
-        try:
-            detector = workspace.getDetector(ws_index)
-        except RuntimeError:
+        if not spectrum_info.hasDetectors(ws_index):
             # Skip the rest after finding the first spectra with no detectors,
             # which is a big speed increase for SANS2D.
             break
-        if detector.isMasked():
-            yield detector.getID()
+        if spectrum_info.isMasked(ws_index):
+            yield from workspace.getSpectrum(ws_index).getDetectorIDs()
 
 
 def infinite_cylinder_xml(id_name, centre, radius, axis):

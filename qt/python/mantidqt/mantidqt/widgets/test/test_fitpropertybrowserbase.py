@@ -11,11 +11,12 @@ from qtpy.QtCore import Qt, QMetaObject
 
 from mantid import FrameworkManager
 from mantidqt.utils.qt.testing import start_qapplication
+from mantidqt.utils.qt.testing.gui_window_test import GuiWindowTest
 from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowserBase
 
 
 @start_qapplication
-class TestFitPropertyBrowser(unittest.TestCase):
+class TestFitPropertyBrowser(GuiWindowTest):
     def create_widget(self):
         return FitPropertyBrowserBase()
 
