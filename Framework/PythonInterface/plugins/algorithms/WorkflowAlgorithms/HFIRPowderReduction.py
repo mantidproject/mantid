@@ -203,7 +203,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             "Scale",
             1.0,
             validator=FloatBoundedValidator(0.0),
-            doc="The background will be scaled by this number before being subtracted.",
+            doc="Overall scale factor (s) applied to the output. Use SampleBackgroundScaleFactor to scale the background.",
         )
         # TODO: This field below will be autopopulated from the sample file in a future PR, handled by EWM item 13209
         self.declareProperty(
