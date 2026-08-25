@@ -7,7 +7,6 @@
 #pragma once
 
 #include "../../../ISISReflectometry/GUI/Plotting/presenter/PlottingViewStateBuilder.h"
-#include "../../../ISISReflectometry/GUI/Plotting/presenter/PlottingWorkspaceTreeDisplayStateBuilder.h"
 
 #include <cxxtest/TestSuite.h>
 #include <string>
@@ -57,18 +56,19 @@ public:
     TS_ASSERT_EQUALS(state.addToExistingPlotChecked, false);
   }
 
-  void testWorkspaceTreeDisplayStateMutesStitchedOutputsForAlignment() {
-    PlottingWorkspaceTreeDisplayStateBuilder builder;
-    auto const workspaceItems = std::vector<PlottingWorkspaceTreeItem>{groupItem(
+  void testPlottingWorkspaceTreeItemStatesMuteStitchedOutputsForAlignment() {
+    PlottingViewStateBuilder builder;
+    auto const plottingWorkspaceTreeItems = std::vector<PlottingWorkspaceTreeItem>{groupItem(
         "Group 1", {workspaceItem("stitched_12345", ReducedWorkspaceOutputType::IvsQBinned),
                     runItem("12345", {workspaceItem("IvsQ_binned_12345", ReducedWorkspaceOutputType::IvsQBinned)})})};
 
-    auto const displayItems = builder.build(workspaceItems, PlotOutputType::Alignment);
+    auto const itemStates =
+        builder.plottingWorkspaceTreeItemStates(plottingWorkspaceTreeItems, PlotOutputType::Alignment);
 
-    TS_ASSERT(displayItems[0].children[0].muted);
-    TS_ASSERT_EQUALS(displayItems[0].children[0].selectionMode, PlottingWorkspaceTreeSelectionMode::None);
-    TS_ASSERT(!displayItems[0].children[1].children[0].muted);
-    TS_ASSERT_EQUALS(displayItems[0].children[1].children[0].selectionMode,
+    TS_ASSERT(itemStates[0].children[0].muted);
+    TS_ASSERT_EQUALS(itemStates[0].children[0].selectionMode, PlottingWorkspaceTreeSelectionMode::None);
+    TS_ASSERT(!itemStates[0].children[1].children[0].muted);
+    TS_ASSERT_EQUALS(itemStates[0].children[1].children[0].selectionMode,
                      PlottingWorkspaceTreeSelectionMode::DirectAndParent);
   }
 

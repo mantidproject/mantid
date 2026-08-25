@@ -7,7 +7,6 @@
 #pragma once
 
 #include "../../../ISISReflectometry/GUI/Plotting/presenter/PlottingPresenter.h"
-#include "../../../ISISReflectometry/GUI/Plotting/presenter/PlottingWorkspaceTreeDisplayStateBuilder.h"
 #include "../../../ISISReflectometry/Reduction/RunsTable.h"
 #include "../../../ISISReflectometry/TestHelpers/PlottingTestHelpers.h"
 #include "../ReflMockObjects.h"
@@ -27,17 +26,18 @@ using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 using testing::NiceMock;
 using testing::Return;
 
-inline std::vector<PlottingWorkspaceTreeDisplayItem>
-displayItemsForOutputType(std::vector<PlottingWorkspaceTreeItem> const &items, PlotOutputType outputType) {
-  return PlottingWorkspaceTreeDisplayStateBuilder().build(items, outputType);
+inline std::vector<PlottingWorkspaceTreeItemState>
+plottingWorkspaceTreeItemStatesForOutputType(std::vector<PlottingWorkspaceTreeItem> const &items,
+                                             PlotOutputType outputType) {
+  return PlottingViewStateBuilder().plottingWorkspaceTreeItemStates(items, outputType);
 }
 
-inline std::vector<PlottingWorkspaceTreeDisplayItem>
-displayItemsForDefaultOutputType(std::vector<PlottingWorkspaceTreeItem> const &items) {
-  return displayItemsForOutputType(items, PlotOutputType::ReflectivityCurve);
+inline std::vector<PlottingWorkspaceTreeItemState>
+plottingWorkspaceTreeItemStatesForDefaultOutputType(std::vector<PlottingWorkspaceTreeItem> const &items) {
+  return plottingWorkspaceTreeItemStatesForOutputType(items, PlotOutputType::ReflectivityCurve);
 }
 
-MATCHER_P(WorkspaceItemsEqual, expected, "matches plotting workspace tree items") {
+MATCHER_P(PlottingWorkspaceTreeItemStatesEqual, expected, "matches plotting workspace tree item states") {
   if (arg == expected)
     return true;
 
@@ -52,9 +52,10 @@ public:
   MOCK_METHOD(void, setAvailablePlotOutputTypes, (std::vector<PlotOutputTypeViewItem> const &), (override));
   MOCK_METHOD(void, setPlotOutputControlsState, (PlotOutputControlsState const &), (override));
   MOCK_METHOD(void, setPlotActionState, (PlotActionState const &), (override));
-  MOCK_METHOD(void, setWorkspaceItems, (std::vector<PlottingWorkspaceTreeDisplayItem> const &), (override));
-  MOCK_METHOD(std::vector<std::string>, selectedWorkspaceNames, (), (const, override));
-  MOCK_METHOD(size_t, selectedWorkspaceGroupCount, (), (const, override));
+  MOCK_METHOD(void, setPlottingWorkspaceTreeItemStates, (std::vector<PlottingWorkspaceTreeItemState> const &),
+              (override));
+  MOCK_METHOD(std::vector<std::string>, selectedPlottingWorkspaceNames, (), (const, override));
+  MOCK_METHOD(size_t, selectedPlottingWorkspaceGroupCount, (), (const, override));
   MOCK_METHOD(std::optional<PlotOutputType>, selectedPlotOutputType, (), (const, override));
   MOCK_METHOD(PlotOutputSelection, selectedPlotOutputSelection, (), (const, override));
   MOCK_METHOD(bool, addToExistingPlot, (), (const, override));
@@ -144,7 +145,9 @@ public:
     addWorkspaces({"IvsQ_12345"});
 
     EXPECT_CALL(view, selectedPlotOutputType()).WillOnce(Return(std::nullopt));
-    EXPECT_CALL(view, setWorkspaceItems(WorkspaceItemsEqual(std::vector<PlottingWorkspaceTreeDisplayItem>{}))).Times(1);
+    EXPECT_CALL(view, setPlottingWorkspaceTreeItemStates(
+                          PlottingWorkspaceTreeItemStatesEqual(std::vector<PlottingWorkspaceTreeItemState>{})))
+        .Times(1);
 
     presenter.notifyRunsTableChanged(runsTable);
   }
@@ -164,7 +167,7 @@ public:
     EXPECT_CALL(view, setAvailablePlotOutputTypes(testing::_)).Times(1);
     presenter.notifyInstrumentChanged("POLREF");
     populateWorkspaceTree(presenter, view, workspaces);
-    EXPECT_CALL(view, selectedWorkspaceNames()).Times(1).WillOnce(Return(workspaces));
+    EXPECT_CALL(view, selectedPlottingWorkspaceNames()).Times(1).WillOnce(Return(workspaces));
     EXPECT_CALL(view, selectedPlotOutputSelection()).Times(1).WillOnce(Return(viewOutputSelection));
     EXPECT_CALL(plottingModel, workspacesForPlotting(selectedPlottingWorkspaces, expectedOutputSelection))
         .Times(1)
@@ -185,7 +188,9 @@ public:
                                       workspaceItem("IvsQ_12345", ReducedWorkspaceOutputType::IvsQ),
                                       workspaceItem("IvsQ_binned_12345", ReducedWorkspaceOutputType::IvsQBinned)})})};
 
-    EXPECT_CALL(view, setWorkspaceItems(WorkspaceItemsEqual(displayItemsForDefaultOutputType(expected)))).Times(1);
+    EXPECT_CALL(view, setPlottingWorkspaceTreeItemStates(PlottingWorkspaceTreeItemStatesEqual(
+                          plottingWorkspaceTreeItemStatesForDefaultOutputType(expected))))
+        .Times(1);
 
     presenter.notifyRunsTableChanged(runsTable);
   }
@@ -198,7 +203,9 @@ public:
     auto runsTable = RunsTable({}, 0.0, ReductionJobs({Group("Group 1", {row})}));
     addWorkspaces({"IvsLam_12345", "IvsQ_12345", "IvsQ_binned_12345"});
 
-    EXPECT_CALL(view, setWorkspaceItems(WorkspaceItemsEqual(std::vector<PlottingWorkspaceTreeDisplayItem>{}))).Times(1);
+    EXPECT_CALL(view, setPlottingWorkspaceTreeItemStates(
+                          PlottingWorkspaceTreeItemStatesEqual(std::vector<PlottingWorkspaceTreeItemState>{})))
+        .Times(1);
 
     presenter.notifyRunsTableChanged(runsTable);
   }
@@ -212,7 +219,9 @@ public:
     auto const expected = std::vector<PlottingWorkspaceTreeItem>{
         groupItem("Group 1", {runItem("12345", {workspaceItem("IvsQ_12345", ReducedWorkspaceOutputType::IvsQ)})})};
 
-    EXPECT_CALL(view, setWorkspaceItems(WorkspaceItemsEqual(displayItemsForDefaultOutputType(expected)))).Times(1);
+    EXPECT_CALL(view, setPlottingWorkspaceTreeItemStates(PlottingWorkspaceTreeItemStatesEqual(
+                          plottingWorkspaceTreeItemStatesForDefaultOutputType(expected))))
+        .Times(1);
 
     presenter.notifyRunsTableChanged(runsTable);
   }
@@ -227,7 +236,9 @@ public:
     auto const expected = std::vector<PlottingWorkspaceTreeItem>{
         groupItem("Group 1", {workspaceItem("stitched_12345", ReducedWorkspaceOutputType::IvsQBinned)})};
 
-    EXPECT_CALL(view, setWorkspaceItems(WorkspaceItemsEqual(displayItemsForDefaultOutputType(expected)))).Times(1);
+    EXPECT_CALL(view, setPlottingWorkspaceTreeItemStates(PlottingWorkspaceTreeItemStatesEqual(
+                          plottingWorkspaceTreeItemStatesForDefaultOutputType(expected))))
+        .Times(1);
 
     presenter.notifyRunsTableChanged(runsTable);
   }
@@ -244,7 +255,9 @@ public:
                                               {workspaceItem("IvsQ_12345_1", ReducedWorkspaceOutputType::IvsQ),
                                                workspaceItem("IvsQ_12345_2", ReducedWorkspaceOutputType::IvsQ)})})})};
 
-    EXPECT_CALL(view, setWorkspaceItems(WorkspaceItemsEqual(displayItemsForDefaultOutputType(expected)))).Times(1);
+    EXPECT_CALL(view, setPlottingWorkspaceTreeItemStates(PlottingWorkspaceTreeItemStatesEqual(
+                          plottingWorkspaceTreeItemStatesForDefaultOutputType(expected))))
+        .Times(1);
 
     presenter.notifyRunsTableChanged(runsTable);
   }
@@ -261,7 +274,9 @@ public:
                                        {workspaceItem("stitched_12345_1", ReducedWorkspaceOutputType::IvsQBinned),
                                         workspaceItem("stitched_12345_2", ReducedWorkspaceOutputType::IvsQBinned)})})};
 
-    EXPECT_CALL(view, setWorkspaceItems(WorkspaceItemsEqual(displayItemsForDefaultOutputType(expected)))).Times(1);
+    EXPECT_CALL(view, setPlottingWorkspaceTreeItemStates(PlottingWorkspaceTreeItemStatesEqual(
+                          plottingWorkspaceTreeItemStatesForDefaultOutputType(expected))))
+        .Times(1);
 
     presenter.notifyRunsTableChanged(runsTable);
   }
@@ -283,11 +298,11 @@ public:
         .WillRepeatedly(Return(std::optional<PlotOutputType>{PlotOutputType::Alignment}));
     {
       testing::InSequence sequence;
-      EXPECT_CALL(view, setWorkspaceItems(WorkspaceItemsEqual(
-                            displayItemsForOutputType(expected, PlotOutputType::ReflectivityCurve))))
+      EXPECT_CALL(view, setPlottingWorkspaceTreeItemStates(PlottingWorkspaceTreeItemStatesEqual(
+                            plottingWorkspaceTreeItemStatesForOutputType(expected, PlotOutputType::ReflectivityCurve))))
           .Times(1);
-      EXPECT_CALL(
-          view, setWorkspaceItems(WorkspaceItemsEqual(displayItemsForOutputType(expected, PlotOutputType::Alignment))))
+      EXPECT_CALL(view, setPlottingWorkspaceTreeItemStates(PlottingWorkspaceTreeItemStatesEqual(
+                            plottingWorkspaceTreeItemStatesForOutputType(expected, PlotOutputType::Alignment))))
           .Times(1);
     }
 
@@ -307,9 +322,9 @@ public:
     auto const expectedPlottingWorkspaces = std::vector<PlottingWorkspace>{{"IvsQ_binned_12345_2", {"12345"}, "", 2}};
     auto const outputSelection = PlotOutputSelection{PlotOutputType::Alignment};
 
-    EXPECT_CALL(view, setWorkspaceItems(testing::_)).Times(1);
+    EXPECT_CALL(view, setPlottingWorkspaceTreeItemStates(testing::_)).Times(1);
     presenter.notifyRunsTableChanged(RunsTable({}, 0.0, ReductionJobs({successfulGroup("Group 1", {row})})));
-    EXPECT_CALL(view, selectedWorkspaceNames())
+    EXPECT_CALL(view, selectedPlottingWorkspaceNames())
         .Times(1)
         .WillOnce(Return(std::vector<std::string>{"IvsQ_binned_12345_2"}));
     EXPECT_CALL(view, selectedPlotOutputSelection()).Times(1).WillOnce(Return(outputSelection));
@@ -332,15 +347,15 @@ public:
     groupExistingWorkspaces("IvsQ_binned_12345", {"IvsQ_binned_12345_1", "IvsQ_binned_12345_2"});
     auto row = successfulRow("12345");
     row.setOutputNames({"", "", "IvsQ_binned_12345"});
-    auto const selectedWorkspaceNames = std::vector<std::string>{"IvsQ_binned_12345_1", "IvsQ_binned_12345_2"};
+    auto const selectedPlottingWorkspaceNames = std::vector<std::string>{"IvsQ_binned_12345_1", "IvsQ_binned_12345_2"};
     auto const expectedPlottingWorkspaces =
         std::vector<PlottingWorkspace>{{"IvsQ_binned_12345_1", {"12345"}, "IvsQ_binned_12345", 1},
                                        {"IvsQ_binned_12345_2", {"12345"}, "IvsQ_binned_12345", 2}};
     auto const outputSelection = PlotOutputSelection{PlotOutputType::Alignment};
 
-    EXPECT_CALL(view, setWorkspaceItems(testing::_)).Times(1);
+    EXPECT_CALL(view, setPlottingWorkspaceTreeItemStates(testing::_)).Times(1);
     presenter.notifyRunsTableChanged(RunsTable({}, 0.0, ReductionJobs({successfulGroup("Group 1", {row})})));
-    EXPECT_CALL(view, selectedWorkspaceNames()).Times(1).WillOnce(Return(selectedWorkspaceNames));
+    EXPECT_CALL(view, selectedPlottingWorkspaceNames()).Times(1).WillOnce(Return(selectedPlottingWorkspaceNames));
     EXPECT_CALL(view, selectedPlotOutputSelection()).Times(1).WillOnce(Return(outputSelection));
     EXPECT_CALL(plottingModel, workspacesForPlotting(expectedPlottingWorkspaces, outputSelection))
         .Times(1)
@@ -363,9 +378,9 @@ public:
         std::vector<PlottingWorkspace>{{"IvsQ_binned_12345_2", {"12345"}, "", std::nullopt}};
     auto const outputSelection = PlotOutputSelection{PlotOutputType::Alignment};
 
-    EXPECT_CALL(view, setWorkspaceItems(testing::_)).Times(1);
+    EXPECT_CALL(view, setPlottingWorkspaceTreeItemStates(testing::_)).Times(1);
     presenter.notifyRunsTableChanged(RunsTable({}, 0.0, ReductionJobs({successfulGroup("Group 1", {row})})));
-    EXPECT_CALL(view, selectedWorkspaceNames())
+    EXPECT_CALL(view, selectedPlottingWorkspaceNames())
         .Times(1)
         .WillOnce(Return(std::vector<std::string>{"IvsQ_binned_12345_2"}));
     EXPECT_CALL(view, selectedPlotOutputSelection()).Times(1).WillOnce(Return(outputSelection));
@@ -390,9 +405,11 @@ public:
         std::vector<PlottingWorkspace>{{"IvsQ_POLREF12345", {"12345"}, "", std::nullopt}};
     auto const outputSelection = PlotOutputSelection{PlotOutputType::Alignment};
 
-    EXPECT_CALL(view, setWorkspaceItems(testing::_)).Times(1);
+    EXPECT_CALL(view, setPlottingWorkspaceTreeItemStates(testing::_)).Times(1);
     presenter.notifyRunsTableChanged(RunsTable({}, 0.0, ReductionJobs({successfulGroup("Group 1", {row})})));
-    EXPECT_CALL(view, selectedWorkspaceNames()).Times(1).WillOnce(Return(std::vector<std::string>{"IvsQ_POLREF12345"}));
+    EXPECT_CALL(view, selectedPlottingWorkspaceNames())
+        .Times(1)
+        .WillOnce(Return(std::vector<std::string>{"IvsQ_POLREF12345"}));
     EXPECT_CALL(view, selectedPlotOutputSelection()).Times(1).WillOnce(Return(outputSelection));
     EXPECT_CALL(plottingModel, workspacesForPlotting(expectedPlottingWorkspaces, outputSelection))
         .Times(1)
@@ -415,9 +432,11 @@ public:
     auto const expectedPlottingWorkspaces = std::vector<PlottingWorkspace>{{"IvsQ_12345", {}, "", std::nullopt}};
     auto const outputSelection = PlotOutputSelection{PlotOutputType::Alignment};
 
-    EXPECT_CALL(view, setWorkspaceItems(testing::_)).Times(1);
+    EXPECT_CALL(view, setPlottingWorkspaceTreeItemStates(testing::_)).Times(1);
     presenter.notifyRunsTableChanged(RunsTable({}, 0.0, ReductionJobs({successfulGroup("Group 1", {row})})));
-    EXPECT_CALL(view, selectedWorkspaceNames()).Times(1).WillOnce(Return(std::vector<std::string>{"IvsQ_12345"}));
+    EXPECT_CALL(view, selectedPlottingWorkspaceNames())
+        .Times(1)
+        .WillOnce(Return(std::vector<std::string>{"IvsQ_12345"}));
     EXPECT_CALL(view, selectedPlotOutputSelection()).Times(1).WillOnce(Return(outputSelection));
     EXPECT_CALL(plottingModel, workspacesForPlotting(expectedPlottingWorkspaces, outputSelection))
         .Times(1)
@@ -434,7 +453,9 @@ public:
     auto runsTable = RunsTable({}, 0.0, ReductionJobs({group}));
     Mantid::API::AnalysisDataService::Instance().add("stitched_12345", std::make_shared<Mantid::API::WorkspaceGroup>());
 
-    EXPECT_CALL(view, setWorkspaceItems(WorkspaceItemsEqual(std::vector<PlottingWorkspaceTreeDisplayItem>{}))).Times(1);
+    EXPECT_CALL(view, setPlottingWorkspaceTreeItemStates(
+                          PlottingWorkspaceTreeItemStatesEqual(std::vector<PlottingWorkspaceTreeItemState>{})))
+        .Times(1);
 
     presenter.notifyRunsTableChanged(runsTable);
   }
@@ -451,7 +472,7 @@ public:
     auto const options = reflectivityCurvePlotOptions(PlotOutputType::ReflectivityCurve, PlotLayout::Individual);
 
     populateWorkspaceTree(presenter, view, workspaces);
-    EXPECT_CALL(view, selectedWorkspaceNames()).Times(2).WillRepeatedly(Return(workspaces));
+    EXPECT_CALL(view, selectedPlottingWorkspaceNames()).Times(2).WillRepeatedly(Return(workspaces));
     EXPECT_CALL(view, selectedPlotOutputSelection()).Times(1).WillOnce(Return(outputSelection));
     EXPECT_CALL(plottingModel, workspacesForPlotting(selectedPlottingWorkspaces, outputSelection))
         .Times(1)
@@ -475,7 +496,7 @@ public:
     auto const options = reflectivityCurvePlotOptions(PlotOutputType::ReflectivityCurve, PlotLayout::Individual);
 
     populateWorkspaceTree(presenter, view, workspaces);
-    EXPECT_CALL(view, selectedWorkspaceNames()).Times(2).WillRepeatedly(Return(workspaces));
+    EXPECT_CALL(view, selectedPlottingWorkspaceNames()).Times(2).WillRepeatedly(Return(workspaces));
     EXPECT_CALL(view, selectedPlotOutputSelection()).Times(1).WillOnce(Return(outputSelection));
     EXPECT_CALL(view, plotParent()).Times(1).WillOnce(Return(&plotParent));
     EXPECT_CALL(plottingModel, workspacesForPlotting(selectedPlottingWorkspaces, outputSelection))
@@ -498,7 +519,7 @@ public:
     auto const outputSelection = PlotOutputSelection{PlotOutputType::ReflectivityCurve};
 
     populateWorkspaceTree(presenter, view, workspaces);
-    EXPECT_CALL(view, selectedWorkspaceNames()).Times(1).WillOnce(Return(workspaces));
+    EXPECT_CALL(view, selectedPlottingWorkspaceNames()).Times(1).WillOnce(Return(workspaces));
     EXPECT_CALL(view, selectedPlotOutputSelection()).Times(1).WillOnce(Return(outputSelection));
     EXPECT_CALL(view, plotParent()).Times(1).WillOnce(Return(nullptr));
     EXPECT_CALL(plottingModel, workspacesForPlotting(selectedPlottingWorkspaces, outputSelection))
@@ -522,7 +543,7 @@ public:
     auto const outputSelection = PlotOutputSelection{PlotOutputType::ReflectivityCurve};
 
     populateWorkspaceTree(presenter, view, workspaces);
-    EXPECT_CALL(view, selectedWorkspaceNames()).Times(2).WillRepeatedly(Return(workspaces));
+    EXPECT_CALL(view, selectedPlottingWorkspaceNames()).Times(2).WillRepeatedly(Return(workspaces));
     EXPECT_CALL(view, selectedPlotOutputSelection()).Times(1).WillOnce(Return(outputSelection));
     EXPECT_CALL(view, plotParent()).Times(1).WillOnce(Return(nullptr));
     EXPECT_CALL(plottingModel, workspacesForPlotting(selectedPlottingWorkspaces, outputSelection))
@@ -545,7 +566,7 @@ public:
     auto const outputSelection = PlotOutputSelection{PlotOutputType::ReflectivityCurve};
 
     populateWorkspaceTree(presenter, view, workspaces);
-    EXPECT_CALL(view, selectedWorkspaceNames()).Times(2).WillRepeatedly(Return(workspaces));
+    EXPECT_CALL(view, selectedPlottingWorkspaceNames()).Times(2).WillRepeatedly(Return(workspaces));
     EXPECT_CALL(view, selectedPlotOutputSelection()).Times(1).WillOnce(Return(outputSelection));
     EXPECT_CALL(plottingModel, workspacesForPlotting(selectedPlottingWorkspaces, outputSelection))
         .Times(1)
@@ -569,7 +590,7 @@ public:
 
     populateWorkspaceTree(presenter, view, workspaces);
     EXPECT_CALL(view, addToExistingPlot()).WillRepeatedly(Return(true));
-    EXPECT_CALL(view, selectedWorkspaceNames()).Times(2).WillRepeatedly(Return(workspaces));
+    EXPECT_CALL(view, selectedPlottingWorkspaceNames()).Times(2).WillRepeatedly(Return(workspaces));
     EXPECT_CALL(view, selectedPlotOutputSelection()).Times(1).WillOnce(Return(outputSelection));
     EXPECT_CALL(plottingModel, workspacesForPlotting(selectedPlottingWorkspaces, outputSelection))
         .Times(1)
@@ -595,7 +616,7 @@ public:
     auto const outputSelection = PlotOutputSelection{PlotOutputType::ReflectivityCurve};
 
     populateWorkspaceTree(presenter, view, workspaces);
-    EXPECT_CALL(view, selectedWorkspaceNames()).Times(1).WillOnce(Return(workspaces));
+    EXPECT_CALL(view, selectedPlottingWorkspaceNames()).Times(1).WillOnce(Return(workspaces));
     EXPECT_CALL(view, selectedPlotOutputSelection()).Times(1).WillOnce(Return(outputSelection));
     EXPECT_CALL(view, plotParent()).Times(1).WillOnce(Return(nullptr));
     EXPECT_CALL(plottingModel, workspacesForPlotting(selectedPlottingWorkspaces, outputSelection))
@@ -618,7 +639,7 @@ public:
     auto const outputSelection = PlotOutputSelection{PlotOutputType::ReflectivityCurve};
 
     populateWorkspaceTree(presenter, view, workspaces);
-    EXPECT_CALL(view, selectedWorkspaceNames()).Times(2).WillRepeatedly(Return(workspaces));
+    EXPECT_CALL(view, selectedPlottingWorkspaceNames()).Times(2).WillRepeatedly(Return(workspaces));
     EXPECT_CALL(view, selectedPlotOutputSelection()).Times(1).WillOnce(Return(outputSelection));
     EXPECT_CALL(plottingModel, workspacesForPlotting(selectedPlottingWorkspaces, outputSelection))
         .Times(1)
@@ -642,7 +663,7 @@ public:
 
     populateWorkspaceTree(presenter, view, workspaces);
     EXPECT_CALL(view, addToExistingPlot()).WillRepeatedly(Return(true));
-    EXPECT_CALL(view, selectedWorkspaceNames()).Times(2).WillRepeatedly(Return(workspaces));
+    EXPECT_CALL(view, selectedPlottingWorkspaceNames()).Times(2).WillRepeatedly(Return(workspaces));
     EXPECT_CALL(view, selectedPlotOutputSelection()).Times(1).WillOnce(Return(outputSelection));
     EXPECT_CALL(plottingModel, workspacesForPlotting(selectedPlottingWorkspaces, outputSelection))
         .Times(1)
@@ -668,7 +689,7 @@ public:
 
     populateWorkspaceTree(presenter, view, workspaces);
     EXPECT_CALL(view, plotTiledVertically()).Times(1).WillOnce(Return(true));
-    EXPECT_CALL(view, selectedWorkspaceNames()).Times(2).WillRepeatedly(Return(workspaces));
+    EXPECT_CALL(view, selectedPlottingWorkspaceNames()).Times(2).WillRepeatedly(Return(workspaces));
     EXPECT_CALL(view, selectedPlotOutputSelection()).Times(1).WillOnce(Return(outputSelection));
     EXPECT_CALL(plottingModel, workspacesForPlotting(selectedPlottingWorkspaces, outputSelection))
         .Times(1)
@@ -722,7 +743,7 @@ public:
     auto const outputSelection = PlotOutputSelection{PlotOutputType::ReflectivityCurve};
 
     populateWorkspaceTree(presenter, view, workspaces);
-    EXPECT_CALL(view, selectedWorkspaceNames()).Times(1).WillOnce(Return(workspaces));
+    EXPECT_CALL(view, selectedPlottingWorkspaceNames()).Times(1).WillOnce(Return(workspaces));
     EXPECT_CALL(view, selectedPlotOutputSelection()).Times(1).WillOnce(Return(outputSelection));
     EXPECT_CALL(view, plotParent()).Times(1).WillOnce(Return(nullptr));
     EXPECT_CALL(plottingModel, workspacesForPlotting(selectedPlottingWorkspaces, outputSelection))
@@ -741,7 +762,7 @@ public:
     NiceMock<MockPlottingModel> plottingModel;
     PlottingPresenter presenter(&view, plotter, plotOptionsProvider, plottingModel);
 
-    EXPECT_CALL(view, selectedWorkspaceNames()).Times(1).WillOnce(Return(std::vector<std::string>{}));
+    EXPECT_CALL(view, selectedPlottingWorkspaceNames()).Times(1).WillOnce(Return(std::vector<std::string>{}));
     EXPECT_CALL(view, selectedPlotOutputSelection()).Times(0);
     EXPECT_CALL(plottingModel, workspacesForPlotting(testing::_, testing::_)).Times(0);
     EXPECT_CALL(plotter, plot(testing::_)).Times(0);
@@ -758,7 +779,7 @@ public:
     auto const workspaces = std::vector<std::string>{"IvsQ_12345"};
 
     populateWorkspaceTree(presenter, view, workspaces);
-    EXPECT_CALL(view, selectedWorkspaceNames()).Times(1).WillOnce(Return(workspaces));
+    EXPECT_CALL(view, selectedPlottingWorkspaceNames()).Times(1).WillOnce(Return(workspaces));
     EXPECT_CALL(view, selectedPlotOutputType()).Times(1).WillOnce(Return(std::nullopt));
     EXPECT_CALL(view, selectedPlotOutputSelection()).Times(0);
     EXPECT_CALL(plottingModel, workspacesForPlotting(testing::_, testing::_)).Times(0);
@@ -779,7 +800,7 @@ public:
     auto const outputSelection = PlotOutputSelection{PlotOutputType::SpinAsymmetry};
 
     populateWorkspaceTreeWithBinnedWorkspace(presenter, view, workspaces.front());
-    EXPECT_CALL(view, selectedWorkspaceNames()).Times(1).WillOnce(Return(workspaces));
+    EXPECT_CALL(view, selectedPlottingWorkspaceNames()).Times(1).WillOnce(Return(workspaces));
     EXPECT_CALL(view, selectedPlotOutputSelection()).Times(1).WillOnce(Return(outputSelection));
     EXPECT_CALL(plottingModel, workspacesForPlotting(selectedPlottingWorkspaces, outputSelection))
         .Times(1)
@@ -812,7 +833,7 @@ private:
       rows.emplace_back(successfulRow(runNumberFromWorkspaceName(workspaceName)));
     }
 
-    EXPECT_CALL(view, setWorkspaceItems(testing::_)).Times(1);
+    EXPECT_CALL(view, setPlottingWorkspaceTreeItemStates(testing::_)).Times(1);
     presenter.notifyRunsTableChanged(RunsTable({}, 0.0, ReductionJobs({successfulGroup("Group 1", std::move(rows))})));
   }
 
@@ -822,7 +843,7 @@ private:
     auto row = successfulRow("12345");
     row.setOutputNames({"", "", workspaceName});
 
-    EXPECT_CALL(view, setWorkspaceItems(testing::_)).Times(1);
+    EXPECT_CALL(view, setPlottingWorkspaceTreeItemStates(testing::_)).Times(1);
     presenter.notifyRunsTableChanged(RunsTable({}, 0.0, ReductionJobs({successfulGroup("Group 1", {row})})));
   }
 

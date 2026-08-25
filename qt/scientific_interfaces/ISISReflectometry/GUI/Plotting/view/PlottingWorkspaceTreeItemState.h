@@ -17,13 +17,13 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 /// Selection behaviour requested by the presenter for one displayed workspace tree row.
 enum class PlottingWorkspaceTreeSelectionMode { None, Direct, ParentOnly, DirectAndParent };
 
-/// View-facing display state for one node in the plotting-tab workspace tree.
-struct MANTIDQT_ISISREFLECTOMETRY_DLL PlottingWorkspaceTreeDisplayItem {
+/// View-facing state for one node in the plotting workspace tree.
+struct MANTIDQT_ISISREFLECTOMETRY_DLL PlottingWorkspaceTreeItemState {
   std::string label;
   PlottingWorkspaceTreeItemType itemType;
   ReducedWorkspaceOutputType reducedOutputType;
   std::string workspaceName;
-  std::vector<PlottingWorkspaceTreeDisplayItem> children;
+  std::vector<PlottingWorkspaceTreeItemState> children;
   bool muted{false};
   PlottingWorkspaceTreeSelectionMode selectionMode{PlottingWorkspaceTreeSelectionMode::DirectAndParent};
 };

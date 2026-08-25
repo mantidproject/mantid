@@ -14,7 +14,6 @@
 #include "GUI/Plotting/model/PlottingWorkspaceTree.h"
 #include "GUI/Plotting/presenter/IPlottingPresenter.h"
 #include "GUI/Plotting/presenter/PlottingViewStateBuilder.h"
-#include "GUI/Plotting/presenter/PlottingWorkspaceTreeDisplayStateBuilder.h"
 #include "GUI/Plotting/presenter/QtActiveFigureMonitor.h"
 #include "GUI/Plotting/view/IPlottingView.h"
 
@@ -49,7 +48,7 @@ public:
   /// Refresh tree state after the selected output type changes.
   void notifyPlotOutputTypeChanged() override;
   /// Refresh action state after the workspace tree selection changes.
-  void notifyWorkspaceSelectionChanged() override;
+  void notifyPlottingWorkspaceTreeSelectionChanged() override;
   /// Refresh action state for controls that depend on the active figure.
   void notifyActiveFigureChanged();
 
@@ -66,8 +65,8 @@ private:
   void updatePlotOutputControlsState() const;
   /// Update output types for the selected instrument.
   void updateAvailablePlotOutputTypes(std::string const &instrumentName);
-  /// Reapply output-type specific tree state and display it in the view.
-  void updateWorkspaceItemsForCurrentOutputType();
+  /// Reapply output-type specific plotting workspace tree state in the view.
+  void updatePlottingWorkspaceTreeItemStates();
   /// Update controls that depend on reduction and autoreduction state.
   void updateWidgetEnabledState();
   bool isProcessing() const;
@@ -83,9 +82,8 @@ private:
   IPlotOptionsProvider const *m_plotOptionsProvider;
   IPlottingModel const *m_plottingModel;
   IActiveFigureMonitor *m_activeFigureMonitor;
-  PlottingWorkspaceTree m_workspaceTree;
+  PlottingWorkspaceTree m_plottingWorkspaceTree;
   PlottingViewStateBuilder m_viewStateBuilder;
-  PlottingWorkspaceTreeDisplayStateBuilder m_workspaceTreeDisplayStateBuilder;
   std::string m_instrumentName;
   bool m_outputSelectionEnabled;
   bool m_hasActiveReflectometryFigure;

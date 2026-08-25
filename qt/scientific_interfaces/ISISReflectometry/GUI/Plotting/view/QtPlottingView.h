@@ -14,7 +14,7 @@
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-class QtWorkspaceTreeViewAdapter;
+class QtPlottingWorkspaceTreeViewAdapter;
 
 /// Qt implementation of the ISIS Reflectometry plotting tab.
 class MANTIDQT_ISISREFLECTOMETRY_DLL QtPlottingView : public QWidget, public IPlottingView {
@@ -34,12 +34,12 @@ public:
   void setPlotOutputControlsState(PlotOutputControlsState const &state) override;
   /// Apply enabled and checked state for plotting action controls.
   void setPlotActionState(PlotActionState const &state) override;
-  /// Replace the workspace tree contents.
-  void setWorkspaceItems(std::vector<PlottingWorkspaceTreeDisplayItem> const &items) override;
+  /// Replace the plotting workspace tree contents.
+  void setPlottingWorkspaceTreeItemStates(std::vector<PlottingWorkspaceTreeItemState> const &itemStates) override;
   /// Return names of selected workspace leaf nodes.
-  std::vector<std::string> selectedWorkspaceNames() const override;
+  std::vector<std::string> selectedPlottingWorkspaceNames() const override;
   /// Return the number of selected workspace-group rows.
-  size_t selectedWorkspaceGroupCount() const override;
+  size_t selectedPlottingWorkspaceGroupCount() const override;
   /// Return the selected plot output type.
   std::optional<PlotOutputType> selectedPlotOutputType() const override;
   /// Return the full output selection, including output-specific axis controls.
@@ -59,10 +59,10 @@ private:
   /// Enable or disable output selectors.
   void setOutputSelectionControlsEnabled(bool enabled);
   /// Clear selected tree rows.
-  void clearWorkspaceSelection();
+  void clearPlottingWorkspaceTreeSelection();
 
   Ui::PlottingWidget m_ui;
-  std::unique_ptr<QtWorkspaceTreeViewAdapter> m_workspaceTree;
+  std::unique_ptr<QtPlottingWorkspaceTreeViewAdapter> m_plottingWorkspaceTreeViewAdapter;
   PlottingViewSubscriber *m_notifyee;
 };
 

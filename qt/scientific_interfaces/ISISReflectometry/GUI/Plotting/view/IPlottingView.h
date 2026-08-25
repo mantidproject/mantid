@@ -10,7 +10,7 @@
 #include "GUI/Common/PlotOptions.h"
 #include "GUI/Plotting/model/PlottingWorkspace.h"
 #include "GUI/Plotting/view/PlottingViewState.h"
-#include "GUI/Plotting/view/PlottingWorkspaceTreeDisplayItem.h"
+#include "GUI/Plotting/view/PlottingWorkspaceTreeItemState.h"
 #include <optional>
 #include <string>
 #include <vector>
@@ -34,7 +34,7 @@ public:
   /// Notify that the selected plot output type changed.
   virtual void notifyPlotOutputTypeChanged() = 0;
   /// Notify that the workspace tree selection changed.
-  virtual void notifyWorkspaceSelectionChanged() = 0;
+  virtual void notifyPlottingWorkspaceTreeSelectionChanged() = 0;
 };
 
 /// Interface for the ISIS Reflectometry plotting tab view.
@@ -51,12 +51,12 @@ public:
   virtual void setPlotOutputControlsState(PlotOutputControlsState const &state) = 0;
   /// Enable, disable and update plotting action controls.
   virtual void setPlotActionState(PlotActionState const &state) = 0;
-  /// Replace the displayed workspace tree.
-  virtual void setWorkspaceItems(std::vector<PlottingWorkspaceTreeDisplayItem> const &items) = 0;
+  /// Replace the displayed plotting workspace tree state.
+  virtual void setPlottingWorkspaceTreeItemStates(std::vector<PlottingWorkspaceTreeItemState> const &itemStates) = 0;
   /// Return selected workspace leaf names.
-  virtual std::vector<std::string> selectedWorkspaceNames() const = 0;
+  virtual std::vector<std::string> selectedPlottingWorkspaceNames() const = 0;
   /// Return the number of selected workspace-group rows.
-  virtual size_t selectedWorkspaceGroupCount() const = 0;
+  virtual size_t selectedPlottingWorkspaceGroupCount() const = 0;
   /// Return the selected output type, or empty if no output type is available.
   virtual std::optional<PlotOutputType> selectedPlotOutputType() const = 0;
   /// Return the full output selection, including output-specific axes.

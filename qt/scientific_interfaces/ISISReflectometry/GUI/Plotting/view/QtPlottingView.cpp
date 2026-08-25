@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtPlottingView.h"
-#include "QtWorkspaceTreeViewAdapter.h"
+#include "QtPlottingWorkspaceTreeViewAdapter.h"
 #include <QCheckBox>
 #include <QComboBox>
 #include <QItemSelection>
@@ -34,17 +34,18 @@ void QtPlottingView::initLayout() {
   m_ui.detectorMapXAxis->addItem("Lambda", enumIndex(DetectorMapXAxis::Lambda));
   m_ui.alignmentXAxis->addItem("Detector Index", enumIndex(AlignmentXAxis::DetectorId));
   m_ui.alignmentXAxis->addItem("Detector angle, theta", enumIndex(AlignmentXAxis::Theta));
-  m_workspaceTree = std::make_unique<QtWorkspaceTreeViewAdapter>(m_ui.workspaceTree, this);
-  connect(m_ui.workspaceTree->selectionModel(), &QItemSelectionModel::selectionChanged, this,
+  m_plottingWorkspaceTreeViewAdapter =
+      std::make_unique<QtPlottingWorkspaceTreeViewAdapter>(m_ui.plottingWorkspaceTree, this);
+  connect(m_ui.plottingWorkspaceTree->selectionModel(), &QItemSelectionModel::selectionChanged, this,
           [this](QItemSelection const &selected, QItemSelection const &deselected) {
-            m_workspaceTree->updateChildSelection(deselected, QItemSelectionModel::Deselect);
-            m_workspaceTree->updateChildSelection(selected, QItemSelectionModel::Select);
+            m_plottingWorkspaceTreeViewAdapter->updateChildSelection(deselected, QItemSelectionModel::Deselect);
+            m_plottingWorkspaceTreeViewAdapter->updateChildSelection(selected, QItemSelectionModel::Select);
             if (m_notifyee) {
-              m_notifyee->notifyWorkspaceSelectionChanged();
+              m_notifyee->notifyPlottingWorkspaceTreeSelectionChanged();
             }
           });
   connect(m_ui.plotPreset, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, [this](int) {
-    clearWorkspaceSelection();
+    clearPlottingWorkspaceTreeSelection();
     if (m_notifyee) {
       m_notifyee->notifyPlotOutputTypeChanged();
     }
@@ -89,7 +90,7 @@ void QtPlottingView::setAvailablePlotOutputTypes(std::vector<PlotOutputTypeViewI
     m_ui.plotPreset->setCurrentIndex(previousIndex);
   }
   if (previousIndex < 0 && !outputTypes.empty()) {
-    clearWorkspaceSelection();
+    clearPlottingWorkspaceTreeSelection();
   }
 }
 
@@ -123,17 +124,19 @@ void QtPlottingView::setPlotOutputControlsState(PlotOutputControlsState const &s
   m_ui.alignmentXAxis->setVisible(state.alignmentControlsVisible);
 }
 
-void QtPlottingView::clearWorkspaceSelection() { m_workspaceTree->clearSelection(); }
+void QtPlottingView::clearPlottingWorkspaceTreeSelection() { m_plottingWorkspaceTreeViewAdapter->clearSelection(); }
 
-void QtPlottingView::setWorkspaceItems(std::vector<PlottingWorkspaceTreeDisplayItem> const &items) {
-  m_workspaceTree->setItems(items);
+void QtPlottingView::setPlottingWorkspaceTreeItemStates(std::vector<PlottingWorkspaceTreeItemState> const &itemStates) {
+  m_plottingWorkspaceTreeViewAdapter->setPlottingWorkspaceTreeItemStates(itemStates);
 }
 
-std::vector<std::string> QtPlottingView::selectedWorkspaceNames() const {
-  return m_workspaceTree->selectedWorkspaceNames();
+std::vector<std::string> QtPlottingView::selectedPlottingWorkspaceNames() const {
+  return m_plottingWorkspaceTreeViewAdapter->selectedPlottingWorkspaceNames();
 }
 
-size_t QtPlottingView::selectedWorkspaceGroupCount() const { return m_workspaceTree->selectedWorkspaceGroupCount(); }
+size_t QtPlottingView::selectedPlottingWorkspaceGroupCount() const {
+  return m_plottingWorkspaceTreeViewAdapter->selectedPlottingWorkspaceGroupCount();
+}
 
 std::optional<PlotOutputType> QtPlottingView::selectedPlotOutputType() const {
   auto const currentData = m_ui.plotPreset->currentData();

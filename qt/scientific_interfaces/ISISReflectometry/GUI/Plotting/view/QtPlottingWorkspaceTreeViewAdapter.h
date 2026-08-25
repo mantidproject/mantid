@@ -8,7 +8,7 @@
 
 #include "Common/DllConfig.h"
 #include "GUI/Plotting/model/PlottingWorkspace.h"
-#include "GUI/Plotting/view/PlottingWorkspaceTreeDisplayItem.h"
+#include "GUI/Plotting/view/PlottingWorkspaceTreeItemState.h"
 
 #include <QItemSelection>
 #include <QItemSelectionModel>
@@ -23,22 +23,23 @@ class QStandardItem;
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-class WorkspaceTreeView;
+class QtPlottingWorkspaceTreeView;
 
 /// Adapts evaluated workspace tree state to the Qt tree widget.
-class MANTIDQT_ISISREFLECTOMETRY_DLL QtWorkspaceTreeViewAdapter : public QObject {
+class MANTIDQT_ISISREFLECTOMETRY_DLL QtPlottingWorkspaceTreeViewAdapter : public QObject {
 public:
   /// Attach an adapter and model to the supplied workspace tree view.
-  explicit QtWorkspaceTreeViewAdapter(WorkspaceTreeView *workspaceTree, QObject *parent = nullptr);
+  explicit QtPlottingWorkspaceTreeViewAdapter(QtPlottingWorkspaceTreeView *plottingWorkspaceTreeView,
+                                              QObject *parent = nullptr);
 
-  /// Replace all displayed evaluated workspace tree items.
-  void setItems(std::vector<PlottingWorkspaceTreeDisplayItem> const &items);
+  /// Replace all displayed plotting workspace tree item states.
+  void setPlottingWorkspaceTreeItemStates(std::vector<PlottingWorkspaceTreeItemState> const &itemStates);
   /// Clear all selected tree rows without recursively updating children.
   void clearSelection();
   /// Return selected leaf workspace names.
-  std::vector<std::string> selectedWorkspaceNames() const;
+  std::vector<std::string> selectedPlottingWorkspaceNames() const;
   /// Return the number of selected workspace-group nodes.
-  size_t selectedWorkspaceGroupCount() const;
+  size_t selectedPlottingWorkspaceGroupCount() const;
   /// Apply the same selection change to descendants marked eligible for parent selection.
   void updateChildSelection(QItemSelection const &selection, QItemSelectionModel::SelectionFlags selectionFlags);
 
@@ -47,12 +48,12 @@ protected:
   bool eventFilter(QObject *watched, QEvent *event) override;
 
 private:
-  enum WorkspaceTreeColumn { ItemTypeColumn, OutputTypeColumn, ItemColumn };
+  enum PlottingWorkspaceTreeColumn { ItemTypeColumn, OutputTypeColumn, ItemColumn };
 
   /// Apply muted visual state to every column in a row.
   void setItemMuted(QStandardItem *parent, int row, bool muted);
   /// Add a tree node and its children to the Qt item model.
-  void addTreeItem(QStandardItem *parent, PlottingWorkspaceTreeDisplayItem const &item);
+  void addPlottingWorkspaceTreeItemState(QStandardItem *parent, PlottingWorkspaceTreeItemState const &itemState);
   /// Return the canonical item-type column index for any row column index.
   QModelIndex itemIndex(QModelIndex const &index) const;
   /// Return the plotting tree item type stored on a model row.
@@ -66,7 +67,7 @@ private:
   /// Return true if a selected row may contribute to the selected workspaces.
   bool canContributeSelection(QModelIndex const &index) const;
   /// Handle row clicks by selecting or deselecting whole subtrees.
-  bool handleWorkspaceTreeClick(QMouseEvent const &event);
+  bool handlePlottingWorkspaceTreeClick(QMouseEvent const &event);
   /// Return true for keyboard modifiers that should preserve existing selections.
   bool isAdditiveSelectionModifier(QMouseEvent const &event) const;
   /// Return true if any ancestor row is selected.
@@ -78,7 +79,7 @@ private:
   /// Apply a selection change to eligible descendants of one row.
   void updateChildSelection(QModelIndex const &parentIndex, QItemSelectionModel::SelectionFlags selectionFlags);
 
-  WorkspaceTreeView *m_workspaceTree;
+  QtPlottingWorkspaceTreeView *m_plottingWorkspaceTreeView;
   QStandardItemModel m_model;
   bool m_updatingSelection;
 };

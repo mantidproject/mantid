@@ -13,17 +13,17 @@
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-namespace WorkspaceTree {
+namespace PlottingWorkspaceTreeView {
 /// Item data role used to mark rows muted by the current plot output type.
 auto constexpr mutedRole = Qt::UserRole + 4;
 /// Background brush for rows that are not selectable for the current plot output type.
 inline QBrush mutedBackgroundBrush(QPalette const &palette) { return palette.brush(QPalette::AlternateBase); }
-} // namespace WorkspaceTree
+} // namespace PlottingWorkspaceTreeView
 
 /// Tree view that paints muted plotting workspace rows across all columns.
-class MANTIDQT_ISISREFLECTOMETRY_DLL WorkspaceTreeView : public QTreeView {
+class MANTIDQT_ISISREFLECTOMETRY_DLL QtPlottingWorkspaceTreeView : public QTreeView {
 public:
-  explicit WorkspaceTreeView(QWidget *parent = nullptr);
+  explicit QtPlottingWorkspaceTreeView(QWidget *parent = nullptr);
 
 protected:
   /// Paint muted rows as a continuous background across the full tree row.

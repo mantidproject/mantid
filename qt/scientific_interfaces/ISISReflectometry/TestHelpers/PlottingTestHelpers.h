@@ -9,7 +9,7 @@
 #include "../../ISISReflectometry/GUI/Common/PlotOptions.h"
 #include "../../ISISReflectometry/GUI/Plotting/model/PlottingWorkspace.h"
 #include "../../ISISReflectometry/GUI/Plotting/view/PlottingViewState.h"
-#include "../../ISISReflectometry/GUI/Plotting/view/PlottingWorkspaceTreeDisplayItem.h"
+#include "../../ISISReflectometry/GUI/Plotting/view/PlottingWorkspaceTreeItemState.h"
 
 #include <cstddef>
 #include <ostream>
@@ -107,19 +107,19 @@ inline void PrintTo(PlottingWorkspaceTreeItem const &item, std::ostream *os) {
   *os << "]}";
 }
 
-inline void PrintTo(PlottingWorkspaceTreeDisplayItem const &item, std::ostream *os) {
-  *os << "{label: \"" << item.label << "\", itemType: ";
-  PrintTo(item.itemType, os);
+inline void PrintTo(PlottingWorkspaceTreeItemState const &state, std::ostream *os) {
+  *os << "{label: \"" << state.label << "\", itemType: ";
+  PrintTo(state.itemType, os);
   *os << ", reducedOutputType: ";
-  PrintTo(item.reducedOutputType, os);
-  *os << ", workspaceName: \"" << item.workspaceName << "\", children: [";
-  for (std::size_t index = 0; index < item.children.size(); ++index) {
+  PrintTo(state.reducedOutputType, os);
+  *os << ", workspaceName: \"" << state.workspaceName << "\", children: [";
+  for (std::size_t index = 0; index < state.children.size(); ++index) {
     if (index != 0)
       *os << ", ";
-    PrintTo(item.children[index], os);
+    PrintTo(state.children[index], os);
   }
-  *os << "], muted: " << item.muted << ", selectionMode: ";
-  PrintTo(item.selectionMode, os);
+  *os << "], muted: " << state.muted << ", selectionMode: ";
+  PrintTo(state.selectionMode, os);
   *os << "}";
 }
 
@@ -186,13 +186,13 @@ inline bool operator!=(PlottingWorkspaceTreeItem const &lhs, PlottingWorkspaceTr
   return !(lhs == rhs);
 }
 
-inline bool operator==(PlottingWorkspaceTreeDisplayItem const &lhs, PlottingWorkspaceTreeDisplayItem const &rhs) {
+inline bool operator==(PlottingWorkspaceTreeItemState const &lhs, PlottingWorkspaceTreeItemState const &rhs) {
   return lhs.label == rhs.label && lhs.itemType == rhs.itemType && lhs.reducedOutputType == rhs.reducedOutputType &&
          lhs.workspaceName == rhs.workspaceName && lhs.children == rhs.children && lhs.muted == rhs.muted &&
          lhs.selectionMode == rhs.selectionMode;
 }
 
-inline bool operator!=(PlottingWorkspaceTreeDisplayItem const &lhs, PlottingWorkspaceTreeDisplayItem const &rhs) {
+inline bool operator!=(PlottingWorkspaceTreeItemState const &lhs, PlottingWorkspaceTreeItemState const &rhs) {
   return !(lhs == rhs);
 }
 

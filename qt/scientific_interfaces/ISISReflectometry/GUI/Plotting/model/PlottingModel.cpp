@@ -399,7 +399,8 @@ workspaceGroupInputs(std::vector<PlottingWorkspace> const &selectedPlottingWorks
   return groupedWorkspaces;
 }
 
-std::vector<std::string> selectedWorkspaceNames(std::vector<PlottingWorkspace> const &selectedPlottingWorkspaces) {
+std::vector<std::string>
+selectedPlottingWorkspaceNames(std::vector<PlottingWorkspace> const &selectedPlottingWorkspaces) {
   auto workspaceNames = std::vector<std::string>{};
   workspaceNames.reserve(selectedPlottingWorkspaces.size());
   std::transform(selectedPlottingWorkspaces.cbegin(), selectedPlottingWorkspaces.cend(),
@@ -534,7 +535,7 @@ std::vector<std::string> createDetectorMapWorkspaces(std::vector<PlottingWorkspa
 
 std::vector<std::string> reflectivityCurveWorkspaces(std::vector<PlottingWorkspace> const &selectedPlottingWorkspaces,
                                                      PlotOutputSelection const &) {
-  return selectedWorkspaceNames(selectedPlottingWorkspaces);
+  return selectedPlottingWorkspaceNames(selectedPlottingWorkspaces);
 }
 
 std::vector<std::string> spinAsymmetryWorkspaces(std::vector<PlottingWorkspace> const &selectedPlottingWorkspaces,

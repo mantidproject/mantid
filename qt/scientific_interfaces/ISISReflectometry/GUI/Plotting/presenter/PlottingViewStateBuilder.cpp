@@ -8,6 +8,7 @@
 
 #include "GUI/Plotting/presenter/PlotOutputTypeProperties.h"
 
+#include <algorithm>
 #include <utility>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
@@ -17,19 +18,128 @@ auto constexpr minimumSelectedItemsForMultiPlot = size_t{2};
 
 bool hasSelectedItems(size_t selectedItemCount) { return selectedItemCount > 0; }
 
-bool hasEnoughSelectedItemsForMultiPlot(size_t selectedItemCount, size_t selectedWorkspaceGroupCount,
+bool hasEnoughSelectedItemsForMultiPlot(size_t selectedItemCount, size_t selectedPlottingWorkspaceGroupCount,
                                         PlotOutputTypeProperties const &plotProperties) {
   if (plotProperties.requiresWorkspaceGroupsForMultiPlot()) {
-    return selectedWorkspaceGroupCount >= minimumSelectedItemsForMultiPlot;
+    return selectedPlottingWorkspaceGroupCount >= minimumSelectedItemsForMultiPlot;
   }
   return selectedItemCount >= minimumSelectedItemsForMultiPlot;
 }
 
-bool hasEnoughSelectedItemsForMultiOutputPlot(size_t selectedItemCount, size_t selectedWorkspaceGroupCount,
+bool hasEnoughSelectedItemsForMultiOutputPlot(size_t selectedItemCount, size_t selectedPlottingWorkspaceGroupCount,
                                               PlotOutputTypeProperties const &plotProperties, bool addToExistingPlot) {
-  return addToExistingPlot
-             ? hasSelectedItems(selectedItemCount)
-             : hasEnoughSelectedItemsForMultiPlot(selectedItemCount, selectedWorkspaceGroupCount, plotProperties);
+  return addToExistingPlot ? hasSelectedItems(selectedItemCount)
+                           : hasEnoughSelectedItemsForMultiPlot(selectedItemCount, selectedPlottingWorkspaceGroupCount,
+                                                                plotProperties);
+}
+
+bool isWorkspaceItem(PlottingWorkspaceTreeItem const &item) { return item.children.empty(); }
+
+bool isPostprocessedGroupOutputItem(PlottingWorkspaceTreeItem const &item, bool parentIsGroup,
+                                    bool parentIsWorkspaceGroup, bool grandparentIsGroup) {
+  if (item.itemType != PlottingWorkspaceTreeItemType::WorkspaceGroup &&
+      item.itemType != PlottingWorkspaceTreeItemType::Workspace) {
+    return false;
+  }
+  return parentIsGroup || (parentIsWorkspaceGroup && grandparentIsGroup);
+}
+
+bool isPostprocessedGroupOutputExcluded(PlottingWorkspaceTreeItem const &item,
+                                        PlotOutputTypeProperties const &properties, bool parentIsGroup,
+                                        bool parentIsWorkspaceGroup, bool grandparentIsGroup) {
+  return properties.excludesPostprocessedGroupOutputs() &&
+         isPostprocessedGroupOutputItem(item, parentIsGroup, parentIsWorkspaceGroup, grandparentIsGroup);
+}
+
+bool isWorkspaceIncluded(PlottingWorkspaceTreeItem const &item, PlotOutputTypeProperties const &properties,
+                         bool parentIsGroup, bool parentIsWorkspaceGroup, bool grandparentIsGroup) {
+  if (isPostprocessedGroupOutputExcluded(item, properties, parentIsGroup, parentIsWorkspaceGroup, grandparentIsGroup)) {
+    return false;
+  }
+  return properties.includesReducedWorkspaceOutput(item.reducedOutputType);
+}
+
+bool hasWorkspaceDescendant(PlottingWorkspaceTreeItem const &item) {
+  if (isWorkspaceItem(item)) {
+    return item.itemType == PlottingWorkspaceTreeItemType::Workspace;
+  }
+  return std::any_of(item.children.cbegin(), item.children.cend(), hasWorkspaceDescendant);
+}
+
+bool allWorkspaceDescendantsIncluded(PlottingWorkspaceTreeItem const &item, PlotOutputTypeProperties const &properties,
+                                     bool parentIsGroup, bool parentIsWorkspaceGroup, bool grandparentIsGroup);
+
+bool isSelectable(PlottingWorkspaceTreeItem const &item, PlotOutputTypeProperties const &properties, bool parentIsGroup,
+                  bool parentIsWorkspaceGroup, bool grandparentIsGroup) {
+  if (isPostprocessedGroupOutputExcluded(item, properties, parentIsGroup, parentIsWorkspaceGroup, grandparentIsGroup)) {
+    return false;
+  }
+  if (!properties.allowsItemType(item.itemType)) {
+    return false;
+  }
+  if (item.itemType == PlottingWorkspaceTreeItemType::Workspace) {
+    return isWorkspaceIncluded(item, properties, parentIsGroup, parentIsWorkspaceGroup, grandparentIsGroup);
+  }
+  if (item.itemType == PlottingWorkspaceTreeItemType::WorkspaceGroup) {
+    return hasWorkspaceDescendant(item) &&
+           allWorkspaceDescendantsIncluded(item, properties, parentIsGroup, parentIsWorkspaceGroup, grandparentIsGroup);
+  }
+  return true;
+}
+
+bool allWorkspaceDescendantsIncluded(PlottingWorkspaceTreeItem const &item, PlotOutputTypeProperties const &properties,
+                                     bool parentIsGroup, bool parentIsWorkspaceGroup, bool grandparentIsGroup) {
+  if (isWorkspaceItem(item)) {
+    return item.itemType != PlottingWorkspaceTreeItemType::Workspace ||
+           isWorkspaceIncluded(item, properties, parentIsGroup, parentIsWorkspaceGroup, grandparentIsGroup);
+  }
+
+  auto const itemIsGroup = item.itemType == PlottingWorkspaceTreeItemType::ReductionGroup;
+  auto const itemIsWorkspaceGroup = item.itemType == PlottingWorkspaceTreeItemType::WorkspaceGroup;
+  return std::all_of(item.children.cbegin(), item.children.cend(), [&](auto const &child) {
+    return allWorkspaceDescendantsIncluded(child, properties, itemIsGroup, itemIsWorkspaceGroup, parentIsGroup);
+  });
+}
+
+PlottingWorkspaceTreeSelectionMode selectionMode(bool canSelectDirectly, bool canSelectViaParent) {
+  if (canSelectDirectly && canSelectViaParent) {
+    return PlottingWorkspaceTreeSelectionMode::DirectAndParent;
+  }
+  if (canSelectDirectly) {
+    return PlottingWorkspaceTreeSelectionMode::Direct;
+  }
+  if (canSelectViaParent) {
+    return PlottingWorkspaceTreeSelectionMode::ParentOnly;
+  }
+  return PlottingWorkspaceTreeSelectionMode::None;
+}
+
+PlottingWorkspaceTreeItemState plottingWorkspaceTreeItemState(PlottingWorkspaceTreeItem const &item,
+                                                              PlotOutputTypeProperties const &properties,
+                                                              bool parentIsGroup = false,
+                                                              bool parentIsWorkspaceGroup = false,
+                                                              bool grandparentIsGroup = false) {
+  auto const itemIsGroup = item.itemType == PlottingWorkspaceTreeItemType::ReductionGroup;
+  auto const itemIsWorkspaceGroup = item.itemType == PlottingWorkspaceTreeItemType::WorkspaceGroup;
+  auto childStates = std::vector<PlottingWorkspaceTreeItemState>{};
+  childStates.reserve(item.children.size());
+  for (auto const &child : item.children) {
+    childStates.emplace_back(
+        plottingWorkspaceTreeItemState(child, properties, itemIsGroup, itemIsWorkspaceGroup, parentIsGroup));
+  }
+  auto const canSelectItemDirectly =
+      isSelectable(item, properties, parentIsGroup, parentIsWorkspaceGroup, grandparentIsGroup);
+  auto const canSelectItemViaParent =
+      canSelectItemDirectly ||
+      (item.itemType == PlottingWorkspaceTreeItemType::Workspace &&
+       isWorkspaceIncluded(item, properties, parentIsGroup, parentIsWorkspaceGroup, grandparentIsGroup));
+  return {item.label,
+          item.itemType,
+          item.reducedOutputType,
+          item.workspaceName,
+          std::move(childStates),
+          !canSelectItemDirectly,
+          selectionMode(canSelectItemDirectly, canSelectItemViaParent)};
 }
 } // namespace
 
@@ -49,23 +159,37 @@ PlotOutputControlsState PlottingViewStateBuilder::outputControlsState(PlotOutput
           plotProperties.showsAlignmentProperties()};
 }
 
-PlotActionState PlottingViewStateBuilder::plotActionState(bool outputSelectionEnabled, size_t selectedWorkspaceCount,
-                                                          size_t selectedWorkspaceGroupCount, PlotOutputType outputType,
-                                                          bool addToExistingPlot, bool hasActiveReflectometryFigure,
+PlotActionState PlottingViewStateBuilder::plotActionState(bool outputSelectionEnabled,
+                                                          size_t selectedPlottingWorkspaceCount,
+                                                          size_t selectedPlottingWorkspaceGroupCount,
+                                                          PlotOutputType outputType, bool addToExistingPlot,
+                                                          bool hasActiveReflectometryFigure,
                                                           bool activePlotOverplotCompatible) const {
   auto const &plotProperties = plotOutputTypeProperties(outputType);
   auto const addToExistingEnabled =
       outputSelectionEnabled && hasActiveReflectometryFigure && plotProperties.supportsAddToExistingPlot();
   auto const addToExistingChecked = addToExistingPlot && addToExistingEnabled;
   auto const hasEnoughSelectedItems = hasEnoughSelectedItemsForMultiOutputPlot(
-      selectedWorkspaceCount, selectedWorkspaceGroupCount, plotProperties, addToExistingChecked);
-  return {outputSelectionEnabled && !addToExistingChecked && hasSelectedItems(selectedWorkspaceCount),
+      selectedPlottingWorkspaceCount, selectedPlottingWorkspaceGroupCount, plotProperties, addToExistingChecked);
+  return {outputSelectionEnabled && !addToExistingChecked && hasSelectedItems(selectedPlottingWorkspaceCount),
           outputSelectionEnabled && plotProperties.supportsOverplot() &&
               (!addToExistingChecked || activePlotOverplotCompatible) && hasEnoughSelectedItems,
           outputSelectionEnabled && hasEnoughSelectedItems,
-          outputSelectionEnabled && hasSelectedItems(selectedWorkspaceCount),
+          outputSelectionEnabled && hasSelectedItems(selectedPlottingWorkspaceCount),
           addToExistingEnabled,
           addToExistingChecked};
+}
+
+std::vector<PlottingWorkspaceTreeItemState>
+PlottingViewStateBuilder::plottingWorkspaceTreeItemStates(std::vector<PlottingWorkspaceTreeItem> const &items,
+                                                          PlotOutputType outputType) const {
+  auto const &properties = plotOutputTypeProperties(outputType);
+  auto itemStates = std::vector<PlottingWorkspaceTreeItemState>{};
+  itemStates.reserve(items.size());
+  for (auto const &item : items) {
+    itemStates.emplace_back(plottingWorkspaceTreeItemState(item, properties));
+  }
+  return itemStates;
 }
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

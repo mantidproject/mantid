@@ -35,7 +35,7 @@ The principal dependencies are:
        |                                         |
        +--> PlottingWorkspaceTree          QtPlottingView
        |                                         |
-       +--> IPlottingModel                 QtWorkspaceTreeViewAdapter
+       +--> IPlottingModel                 QtPlottingWorkspaceTreeViewAdapter
        |
        +--> IPlotOptionsProvider
        |
@@ -45,7 +45,7 @@ The principal dependencies are:
 
 :code:`PlottingWorkspaceTree` is presenter-owned domain state rather than a Qt
 tree model. The presenter converts this state into
-:code:`PlottingWorkspaceTreeDisplayItem` objects before passing it to the view.
+:code:`PlottingWorkspaceTreeItemState` objects before passing it to the view.
 This keeps output-type selection policy out of the model and Qt-specific tree
 handling out of the presenter.
 
@@ -132,7 +132,7 @@ Coordinates the complete tab workflow. Its responsibilities are to:
 * subscribe to view notifications and active-figure changes;
 * enable or disable output selection while reduction or autoreduction runs;
 * rebuild the model-side workspace tree when the runs table changes;
-* ask the state builders for output-specific tree and control state;
+* ask the state builder for output-specific tree and control state;
 * resolve the user's selected workspace names;
 * request plot-ready workspaces from :code:`IPlottingModel`;
 * request rendering options from :code:`IPlotOptionsProvider`;
@@ -158,16 +158,17 @@ capability flags. The flags describe support for overplotting, adding to an
 existing figure, postprocessed group outputs, and multi-plot selection based on
 workspace groups.
 
-The presenter and its state builders query these properties instead of
+The presenter and its state builder query these properties instead of
 containing output-type conditionals. This is the main extension point for tree
 selection and action behavior when adding another plot output type.
 
-:code:`presenter/PlottingWorkspaceTreeDisplayStateBuilder.h/.cpp`
-#################################################################
+:code:`presenter/PlottingViewStateBuilder.h/.cpp`
+#################################################
 
-Converts model-side :code:`PlottingWorkspaceTreeItem` objects into
-view-facing :code:`PlottingWorkspaceTreeDisplayItem` objects for the selected
-output type. It evaluates whether each node:
+Builds all state passed from the presenter to the view. For the plotting
+workspace tree, it converts model-side :code:`PlottingWorkspaceTreeItem`
+objects into view-facing :code:`PlottingWorkspaceTreeItemState` objects for the
+selected output type. It evaluates whether each node:
 
 * is included by the output type;
 * is a postprocessed group output that must be excluded;
@@ -178,10 +179,7 @@ output type. It evaluates whether each node:
 Keeping this policy in the presenter layer means that
 :code:`PlottingWorkspaceTree` knows nothing about GUI selection behavior.
 
-:code:`presenter/PlottingViewStateBuilder.h/.cpp`
-#################################################
-
-Builds the remaining view-facing state:
+The same builder creates state for the other parts of the Plotting tab:
 
 * output selector labels;
 * visibility of detector-map and alignment controls; and
@@ -230,8 +228,8 @@ Defines small view-state structures created by
 :code:`PlotOutputControlsState`, and :code:`PlotActionState`. These structures
 let the presenter update a related set of controls in one call.
 
-:code:`view/PlottingWorkspaceTreeDisplayItem.h`
-################################################
+:code:`view/PlottingWorkspaceTreeItemState.h`
+#################################################
 
 Defines the evaluated, view-facing workspace-tree node and its
 :code:`PlottingWorkspaceTreeSelectionMode`. Unlike the model-side tree item,
@@ -247,18 +245,18 @@ Implements :code:`IPlottingView` as the Plotting tab widget. It:
 * connects Qt signals to :code:`PlottingViewSubscriber` notifications;
 * applies presenter-provided control state;
 * reads the current output, axes, layout options, and selection;
-* owns :code:`QtWorkspaceTreeViewAdapter`; and
+* owns :code:`QtPlottingWorkspaceTreeViewAdapter`; and
 * displays the confirmation dialog for large plot requests.
 
 The view reports user actions but does not decide which actions or tree entries
 are valid.
 
-:code:`view/QtWorkspaceTreeViewAdapter.h/.cpp`
-################################################
+:code:`view/QtPlottingWorkspaceTreeViewAdapter.h/.cpp`
+################################################################################
 
-Adapts :code:`PlottingWorkspaceTreeDisplayItem` objects to a
-:code:`QStandardItemModel` displayed by :code:`WorkspaceTreeView`. It owns the
-Qt-specific details of:
+Adapts :code:`PlottingWorkspaceTreeItemState` objects to a
+:code:`QStandardItemModel` displayed by
+:code:`QtPlottingWorkspaceTreeView`. It owns the Qt-specific details of:
 
 * columns and custom data roles;
 * output and item type display names;
@@ -270,8 +268,8 @@ Qt-specific details of:
 The adapter applies selection behavior already specified by the presenter. It
 does not determine whether a particular output type permits a workspace.
 
-:code:`view/WorkspaceTreeView.h/.cpp`
-######################################
+:code:`view/QtPlottingWorkspaceTreeView.h/.cpp`
+################################################
 
 Provides the specialised :code:`QTreeView` used by the tab. Its painting logic
 extends selected-row backgrounds across muted cells and obtains disabled colors
@@ -432,11 +430,11 @@ Updating the workspace tree
    as a :code:`PlottingWorkspace` with run, containing-group, and period
    metadata.
 #. The presenter reads the currently selected :code:`PlotOutputType` and asks
-   :code:`PlottingWorkspaceTreeDisplayStateBuilder` to evaluate the hierarchy
-   using :code:`PlotOutputTypeProperties`.
-#. The resulting display items are passed to
-   :code:`IPlottingView::setWorkspaceItems`.
-#. :code:`QtWorkspaceTreeViewAdapter` rebuilds its
+   :code:`PlottingViewStateBuilder::plottingWorkspaceTreeItemStates` to evaluate
+   the hierarchy using :code:`PlotOutputTypeProperties`.
+#. The resulting item states are passed to
+   :code:`IPlottingView::setPlottingWorkspaceTreeItemStates`.
+#. :code:`QtPlottingWorkspaceTreeViewAdapter` rebuilds its
    :code:`QStandardItemModel`, applies muted state and selection modes, and
    expands the tree.
 
@@ -449,8 +447,8 @@ User interaction
    rebuilds the display state, shows the relevant axis controls, and recalculates
    enabled plotting actions.
 #. Clicking a selectable tree row is handled by
-   :code:`QtWorkspaceTreeViewAdapter`. Parent selection is propagated only to
-   descendants whose presenter-supplied selection mode permits it.
+   :code:`QtPlottingWorkspaceTreeViewAdapter`. Parent selection is propagated
+   only to descendants whose presenter-supplied selection mode permits it.
 #. A selection change notifies :code:`PlottingPresenter`. The presenter obtains
    selected leaf names and workspace-group counts from the view and asks
    :code:`PlottingViewStateBuilder` for a new :code:`PlotActionState`.
