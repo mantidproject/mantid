@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/NeutronAtom.h"
 #include <boost/python/class.hpp>
 
 namespace {
@@ -31,5 +32,6 @@ void export_PhysicalConstants() {
       .def_readonly("MuonLifetime", &Mantid::PhysicalConstants::MuonLifetime)
       .def_readonly("StandardAtmosphere", &Mantid::PhysicalConstants::StandardAtmosphere)
       .def_readonly("BoltzmannConstant", &Mantid::PhysicalConstants::BoltzmannConstant)
-      .def_readonly("MuonGyromagneticRatio", &Mantid::PhysicalConstants::MuonGyromagneticRatio);
+      .def_readonly("MuonGyromagneticRatio", &Mantid::PhysicalConstants::MuonGyromagneticRatio)
+      .def_readonly("ReferenceLambda", &Mantid::PhysicalConstants::NeutronAtom::ReferenceLambda);
 }

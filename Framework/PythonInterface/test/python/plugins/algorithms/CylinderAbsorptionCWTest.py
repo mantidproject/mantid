@@ -6,7 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 import numpy as np
+from scipy.special import i0, i1, modstruve
 from mantid.simpleapi import CylinderAbsorptionCW, CreateSampleWorkspace, EditInstrumentGeometry, SetSample
+from mantid.kernel import PhysicalConstants
 
 
 class CylinderAbsorptionCWTest(unittest.TestCase):
@@ -104,6 +106,60 @@ class CylinderAbsorptionCWTest(unittest.TestCase):
         # Check multiple scattering
         self.assertAlmostEqual(result.MultipleScatteringWorkspace.extractY()[0][0], 0.120424)
 
+    def testManualCrossSectionsMatchSampleMaterial(self):
+        """Cross-sections given directly must give the same result as the same values set on the sample material.
+
+        The AttenuationXSection property is quoted at 1.7982 Å and must be scaled to the requested
+        wavelength, just as the sample material does, so both paths agree at any wavelength.
+        """
+        for wavelength in (1.0, PhysicalConstants.ReferenceLambda, 2.41):
+            ws_material = self.createWorkspace()
+            SetSample(
+                ws_material,
+                Geometry={
+                    "Shape": "Cylinder",
+                    "Height": 1.0,  # cm
+                    "Radius": 0.5,  # cm
+                },
+                Material={
+                    "ChemicalFormula": "V",
+                    "SampleNumberDensity": 0.0723,
+                },
+            )
+            material = ws_material.sample().getMaterial()
+
+            from_material = CylinderAbsorptionCW(
+                InputWorkspace=ws_material,
+                Wavelength=wavelength,
+                AbsorptionCorrectionMethod="Sears",
+                AbsorptionWorkspace="AbsorptionFromMaterial",
+                MultipleScatteringWorkspace="MultipleScatteringFromMaterial",
+            )
+
+            from_properties = CylinderAbsorptionCW(
+                InputWorkspace=self.createWorkspace(),
+                Radius=0.5,  # cm
+                Height=1.0,  # cm
+                Wavelength=wavelength,
+                AttenuationXSection=material.absorbXSection(PhysicalConstants.ReferenceLambda),  # barn at 1.7982 Å
+                ScatteringXSection=material.totalScatterXSection(),  # barn
+                SampleNumberDensity=material.numberDensity,  # atoms/Å^3
+                AbsorptionCorrectionMethod="Sears",
+                AbsorptionWorkspace="AbsorptionFromProperties",
+                MultipleScatteringWorkspace="MultipleScatteringFromProperties",
+            )
+
+            np.testing.assert_allclose(
+                from_properties.AbsorptionWorkspace.extractY(),
+                from_material.AbsorptionWorkspace.extractY(),
+                err_msg=f"absorption differs at {wavelength} Å",
+            )
+            np.testing.assert_allclose(
+                from_properties.MultipleScatteringWorkspace.extractY(),
+                from_material.MultipleScatteringWorkspace.extractY(),
+                err_msg=f"multiple scattering differs at {wavelength} Å",
+            )
+
     def testSabine(self):
         ws = self.createWorkspace()
 
@@ -127,6 +183,63 @@ class CylinderAbsorptionCWTest(unittest.TestCase):
 
         # Check multiple scattering, should be 0 since we set MultipleScattering=False
         self.assertEqual(result.MultipleScatteringWorkspace.extractY()[0][0], 0)
+
+    def testSabineLargeZ(self):
+        """When z is large, the algorithm should use the asymptotic expansion of I_n(z) - L_n(z) to avoid numerical overflow."""
+        ws = self.createWorkspace()
+
+        # Run the algorithm with Sabine method using large attenuation cross-section to produce large z values
+        result = CylinderAbsorptionCW(
+            InputWorkspace=ws,
+            Radius=2,  # cm
+            Height=10,  # cm
+            Wavelength=1.7982,  # Å
+            AttenuationXSection=100,  # barn at 1.798 Å
+            ScatteringXSection=5.1,  # barn
+            SampleNumberDensity=0.0723,  # atoms/Å^3
+            AbsorptionCorrectionMethod="Sabine",
+            AbsorptionWorkspace="Absorption",
+            MultipleScatteringWorkspace="MultipleScattering",
+            MultipleScattering=False,
+        )
+
+        # Check absorption
+        np.testing.assert_allclose(result.AbsorptionWorkspace.extractY()[:, 0], [0.00314441, 0.01051528, 0.01788615, 0.01051528], rtol=1e-5)
+
+    def testSabineAsymptoticAgreesWithDirectNearCutoff(self):
+        """Near asymptotic cutoffs, asymptotic and direct Sabine evaluations should agree."""
+        ws = self.createWorkspace()
+
+        # Choose parameters that gives z = 17 so A_B (2z > 32) uses the asymptotic branch to compare to direct evaluation.
+        radius = 2.0  # cm
+        attenuation_xs = 80  # barn at 1.7982 A
+        scattering_xs = 5  # barn
+        number_density = 0.05  # atoms/A^3
+
+        result = CylinderAbsorptionCW(
+            InputWorkspace=ws,
+            Radius=radius,
+            Height=10.0,  # cm
+            Wavelength=1.7982,  # A
+            AttenuationXSection=attenuation_xs,
+            ScatteringXSection=scattering_xs,
+            SampleNumberDensity=number_density,
+            AbsorptionCorrectionMethod="Sabine",
+            AbsorptionWorkspace="Absorption",
+            MultipleScatteringWorkspace="MultipleScattering",
+            MultipleScattering=False,
+        )
+
+        spectrum_info = ws.spectrumInfo()
+        thetas = np.array([spectrum_info.twoTheta(i) for i in range(spectrum_info.size())]) / 2.0
+
+        z = 2.0 * number_density * (attenuation_xs + scattering_xs) * radius  # equals 17
+
+        a_l_direct = 2.0 * ((i0(z) - modstruve(0, z)) - (i1(z) - modstruve(1, z)) / z)
+        a_b_direct = (i1(2.0 * z) - modstruve(1, 2.0 * z)) / z
+        expected = a_l_direct * np.cos(thetas) ** 2 + a_b_direct * np.sin(thetas) ** 2
+
+        np.testing.assert_allclose(result.AbsorptionWorkspace.extractY()[:, 0], expected, rtol=0.01)
 
     def testMissingProperties(self):
         ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=1)
