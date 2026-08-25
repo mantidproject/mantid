@@ -13,7 +13,7 @@ from mantid.simpleapi import FindUBFromConventionalCell, Load
 
 # Real macromolecular peaks data. The lattice is orthorhombic P with these
 # conventional-cell parameters.
-PEAKS_FILE = "INSTRUMENT_Macromolecular_Orthorhombic_P.nxs"
+PEAKS_FILE = "MANDI_Macromolecular_Orthorhombic_P.nxs"
 A, B, C = 85.2, 89.6, 110.9
 ALPHA = BETA = GAMMA = 90.0
 
