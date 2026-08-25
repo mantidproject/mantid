@@ -9,8 +9,10 @@ set(DOCTREE_DIR ${CMAKE_CURRENT_BINARY_DIR}/doctree)
 # not always reliable as they can have hardcoded paths in them. -W turns warnings into errors.
 add_custom_target(
   dev-docs-${BUILDER}
-  COMMAND ${Python_EXECUTABLE} -m ${SPHINX_MAIN} ${SPHINX_NO_COLOR} -W -w dev_docs_warnings.txt ${SPHINX_KEEPGOING} -b
-          ${BUILDER} -d ${DOCTREE_DIR} ${CMAKE_CURRENT_LIST_DIR}/source ${OUT_DIR}
+  COMMAND
+    ${Python_EXECUTABLE} -Werror::DeprecationWarning -Werror:::mantid -Werror:::mantidqt -m ${SPHINX_MAIN}
+    ${SPHINX_NO_COLOR} -W -w dev_docs_warnings.txt ${SPHINX_KEEPGOING} -b ${BUILDER} -d ${DOCTREE_DIR}
+    ${CMAKE_CURRENT_LIST_DIR}/source ${OUT_DIR}
   COMMENT "Building html developer documentation"
 )
 
