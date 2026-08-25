@@ -32,6 +32,9 @@ Briefly the structure is as follows:
   - The :code:`Runs` tab is where the user specifies which runs to process. The actual runs list is specified in the embedded :code:`RunsTable` component, which comprises of the generic `JobTreeView <BatchWidget/API/JobTreeView.html>`_ table along with a reflectometry-specific toolbar. The :code:`Runs` tab also contains various other operations to do with finding and processing runs, such as searching and autoprocessing by investigation ID and a live data monitor. Note that a *table* here actually refers to a two-level tree, due to the way sets of runs can be grouped together for post-processing.
   - The :code:`Experiment` tab allows the user to enter default settings related to a particular experiment.
   - The :code:`Instrument` tab allows the user to enter default settings related to the current instrument.
+  - The :code:`Plotting` tab displays successful reduction outputs and creates reflectivity curves, detector maps,
+    spin asymmetry plots, and alignment plots. Its implementation is described in
+    :ref:`ISISReflectometryPlottingTab`.
   - The :code:`Save` tab allows easy saving of a batch of outputs in ASCII format. It essentially just works on the ADS so this might not be necessary longer term if similar batch-saving functionality could be provided from the workspaces list.
 
 .. figure:: images/ISISReflectometryInterface_structure.png
