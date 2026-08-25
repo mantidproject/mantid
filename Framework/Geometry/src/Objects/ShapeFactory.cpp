@@ -1829,8 +1829,21 @@ Kernel::Matrix<double> ShapeFactory::goniometerFromXML(const std::string &xml) {
       if (attr == std::string::npos) {
         continue;
       }
-      const std::size_t open = tag.find("'", attr);
-      const std::size_t close = tag.find("'", open + 1);
+      // Accept either quote character. This tag is written here with single quotes, but the XML
+      // goes back through Poco's writer every time createShape rebuilds a shape from it, and the
+      // quoting style that comes back out is not ours to assume.
+      const std::size_t equals = tag.find("=", attr + name.size());
+      if (equals == std::string::npos) {
+        continue;
+      }
+      const std::size_t open = tag.find_first_of("'\"", equals);
+      if (open == std::string::npos) {
+        continue;
+      }
+      const std::size_t close = tag.find(tag[open], open + 1);
+      if (close == std::string::npos) {
+        continue;
+      }
       total[i][j] = std::stod(tag.substr(open + 1, close - open - 1));
     }
   }

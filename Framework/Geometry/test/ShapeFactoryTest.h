@@ -997,6 +997,26 @@ public:
     TS_ASSERT_EQUALS(shape->getAppliedRotation(), Matrix<double>(3, 3, true));
   }
 
+  /// The tags have to be readable back off a shape that has been rebuilt.
+  ///
+  /// createShape re-serialises the XML through Poco's writer, so what comes back out is not
+  /// character-for-character what was written in - the quoting style in particular is not ours to
+  /// choose. Anything composing onto an existing rotation reads the tag off a rebuilt shape, so
+  /// this is the path that matters rather than the raw string.
+  void testTagsSurviveAShapeXMLRoundTrip() {
+    const Matrix<double> total(std::vector<double>{0, -1, 0, 1, 0, 0, 0, 0, 1});
+    const Matrix<double> bake(std::vector<double>{1, 0, 0, 0, 0, -1, 0, 1, 0});
+    const std::string plain = "<sphere id=\"s\"><centre x=\"1.0\" y=\"0\" z=\"0\"/><radius val=\"0.5\"/></sphere>"
+                              "<algebra val=\"s\"/> ";
+    auto xml = ShapeFactory().addGoniometerTag(total, plain);
+    xml = ShapeFactory().addAppliedGoniometerTag(bake, xml);
+
+    const auto rebuilt = ShapeFactory().createShape(xml)->getShapeXML();
+
+    assertMatrixDelta(ShapeFactory::goniometerFromXML(rebuilt), total);
+    TS_ASSERT_EQUALS(ShapeFactory().createShape(rebuilt)->getAppliedRotation(), bake);
+  }
+
   /// rotate-all turns the surfaces but is a definition-frame rotation, so it is never recorded as
   /// a bake. An IDF-defined rotated shape must not look like it is already in the lab frame.
   void testRotateAllIsNotRecordedAsABake() {
