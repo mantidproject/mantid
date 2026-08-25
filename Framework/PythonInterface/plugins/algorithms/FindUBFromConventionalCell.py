@@ -477,7 +477,7 @@ def resolvability_metric(scores, directions, best_dir, exclude_deg=10.0):
     return rho, smax, s2
 
 
-def choose_best_anchor(q_vectors, coarse_dirs, lengths, exclude_deg=10.0):
+def choose_best_anchor(q_vectors, coarse_dirs, lengths, exclude_deg=10.0, length_resolution=0.0001):
     """
     Pick which lattice axis gives the most distinctly resolvable direction.
 
@@ -491,6 +491,9 @@ def choose_best_anchor(q_vectors, coarse_dirs, lengths, exclude_deg=10.0):
         Mapping of axis name ("a", "b", "c") to its real-space length.
     exclude_deg : float, optional
         Passed to `resolvability_metric`.
+    length_resolution : float, optional
+        Lattice-length resolution, in angstroms; closer lengths are
+        scored once.
 
     Returns
     -------
@@ -501,9 +504,15 @@ def choose_best_anchor(q_vectors, coarse_dirs, lengths, exclude_deg=10.0):
         "scores", "resolvability", "smax", and "s2".
     """
     results = {}
+    cache = []
     for name, d in lengths.items():
-        best_dir, best_score, scores = best_direction_from_candidates(q_vectors, coarse_dirs, d)
-        rho, smax, s2 = resolvability_metric(scores, coarse_dirs, best_dir, exclude_deg)
+        cached = next((item for item in cache if abs(d - item[0]) < length_resolution), None)
+        if cached is None:
+            best_dir, best_score, scores = best_direction_from_candidates(q_vectors, coarse_dirs, d)
+            rho, smax, s2 = resolvability_metric(scores, coarse_dirs, best_dir, exclude_deg)
+            cache.append((d, best_dir, best_score, scores, rho, smax, s2))
+        else:
+            _, best_dir, best_score, scores, rho, smax, s2 = cached
         results[name] = {
             "dir": normalize(best_dir),
             "score": best_score,
