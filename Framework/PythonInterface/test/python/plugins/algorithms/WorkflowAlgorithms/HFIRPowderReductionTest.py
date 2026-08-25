@@ -2124,6 +2124,36 @@ class SampleAbsorptionCorrectionTests(unittest.TestCase):
         self.assertLess(fnorm, 10000)
 
 
+class SampleBackgroundAndNormalisationTests(unittest.TestCase):
+    """Basic tests for SampleBackground and Vanadium handling"""
+
+    def test_sample_background(self):
+        """Sample background subtraction test. Sample background subtracted by itself should yield zero."""
+        result = HFIRPowderReduction(
+            SampleFilename="HB2C_7000",
+            SampleBackgroundFilename="HB2C_7000",
+            Instrument="WAND^2",
+            XMin=10,
+            XMax=170,
+            Wavelength=1.4865,
+            VanadiumDiameter=0,
+        )
+        np.testing.assert_allclose(result.extractY(), 0)
+
+    def test_sample_vanadium(self):
+        """Sample normalized by vanadium. Sample divided by itself should yield 1."""
+        result = HFIRPowderReduction(
+            SampleFilename="HB2C_7000",
+            VanadiumFilename="HB2C_7000",
+            Instrument="WAND^2",
+            XMin=10,
+            XMax=170,
+            Wavelength=1.4865,
+            VanadiumDiameter=0,
+        )
+        np.testing.assert_allclose(result.extractY(), 1)
+
+
 # A minimal but valid instrument definition file with a distinctive name. When applied via the
 # IDFFilename property, the loaded workspace's instrument name becomes this file's basename.
 _CUSTOM_IDF = """<?xml version='1.0' encoding='UTF-8'?>
