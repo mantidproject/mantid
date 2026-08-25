@@ -89,8 +89,7 @@ class TestComponentSelectionUtils(unittest.TestCase):
 
     def _make_workspace(self, vec):
         ws = unittest.mock.MagicMock()
-        ws.componentInfo().sourcePosition.return_value = np.zeros(3)
-        ws.componentInfo().samplePosition.return_value = vec
+        ws.getInstrument().getReferenceFrame().vecPointingAlongBeam.return_value = vec
         return ws
 
     def test_unit_vector_returned_unchanged(self):

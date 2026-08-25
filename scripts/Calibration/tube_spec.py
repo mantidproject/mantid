@@ -16,6 +16,7 @@ from typing import Union
 
 # Mantid imports
 from mantid.api import mtd, Workspace
+from plugins.algorithms.component_info_utils import resolve_component_index
 
 
 class TubeSpec:
@@ -164,7 +165,7 @@ class TubeSpec:
         # We look for the component
         print("Looking for", self.componentNameArray[0], end="")
 
-        component_index = self.component_info.indexOfAny(self.componentNameArray[0])
+        component_index = resolve_component_index(self.componentNameArray[0], self.component_info)
         self.componentArray.append(component_index)
 
         return self.componentArray[0]
@@ -183,7 +184,7 @@ class TubeSpec:
             print("Looking for", self.componentNameArray[i])
 
             try:
-                component_index = self.component_info.indexOfAny(self.componentNameArray[i])
+                component_index = resolve_component_index(self.componentNameArray[i], self.component_info)
             except ValueError:
                 print("Did not find", self.componentNameArray[i])
                 print("Tube specification not valid")
