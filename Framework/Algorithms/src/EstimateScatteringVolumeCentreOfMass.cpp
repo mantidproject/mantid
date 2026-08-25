@@ -12,6 +12,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidGeometry/Objects/ShapeRotation.h"
 #include "MantidGeometry/Rasterize.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -73,54 +74,31 @@ void EstimateScatteringVolumeCentreOfMass::exec() {
   m_cubeSide *= it->second; // now in m
 
   // The sample shape may be expressed in its own frame, or may already have been rotated into the
-  // lab frame - see outstandingSampleRotation. Whatever is left to apply is gonioR here. The gauge
-  // volume, if any, is always defined in the lab frame.
-  //
-  // When a gauge volume is present we rasterise it in the lab frame and transform each candidate
-  // voxel into the sample shape's frame via R.inv() to test inclusion against the sample. Doing
-  // the intersection this way - rather than rotating the gauge into the sample frame - keeps the
-  // gauge's axis-aligned bounding box tight even for non-axis-aligned rotations; rotating the
-  // gauge would inflate its bbox and silently admit voxels outside the actual gauge volume.
-  //
-  // With no gauge volume the illumination volume equals the sample, so we rasterise the sample
-  // in its own frame (where the rasterise loop only ever accepts points inside the sample anyway)
-  // and rotate the resulting mean position into the lab frame.
+  // lab frame - see Geometry::outstandingGoniometerRotation. The gauge volume, if any, is always
+  // defined in the lab frame. The two branches below reconcile that differently, on purpose.
   const Geometry::IObject_sptr sampleObject = extractValidSampleObject(m_inputWS->mutableSample());
-  const Kernel::Matrix<double> gonioR = outstandingSampleRotation(*sampleObject);
+  const Kernel::Matrix<double> runGonioR = m_inputWS->run().getGoniometer().getR();
 
   V3D averagePosInLabFrame;
   if (m_inputWS->run().hasProperty("GaugeVolume")) {
-    averagePosInLabFrame = rasterizeLabGaugeAndCalculateMeanElementPosition(*sampleObject, gonioR);
+    // Both the gauge and the sample are put in the lab frame and intersected there. Rasterising the
+    // gauge in its own frame keeps its axis-aligned bounding box tight even for non-axis-aligned
+    // rotations; rotating the gauge into the sample frame instead would inflate that box and
+    // silently admit voxels lying outside the actual gauge volume.
+    const auto labSampleShape = Geometry::getLabFrameShape(*sampleObject, runGonioR);
+    averagePosInLabFrame = rasterizeLabGaugeAndCalculateMeanElementPosition(*labSampleShape);
   } else {
+    // The illumination volume equals the sample, so we rasterise the sample in its own frame - where
+    // an axis-aligned voxel grid is tight and the loop only ever accepts points inside the sample
+    // anyway - and rotate the resulting mean position into the lab frame afterwards. Asking for a
+    // lab-frame shape here would inflate the bounding box and change the discretisation, which is
+    // why this branch wants the matrix rather than the shape.
+    const Kernel::Matrix<double> gonioR = Geometry::outstandingGoniometerRotation(*sampleObject, runGonioR);
     const V3D averagePosInShapeFrame =
         rasterizeGaugeVolumeAndCalculateMeanElementPosition(beamDirection, sampleObject, sampleObject);
     averagePosInLabFrame = gonioR * averagePosInShapeFrame;
   }
   setProperty("CentreOfMass", std::vector<double>(averagePosInLabFrame));
-}
-
-/// How much of the workspace's goniometer rotation still has to be applied to reach the lab frame.
-///
-/// A workspace can arrive here with its sample shape in either frame. CopySample bakes the
-/// destination's goniometer into the shape definition, so the shape is already in the lab frame,
-/// while SetGoniometer on its own leaves the shape untouched in its own frame. Both leave the same
-/// goniometer on the run, so the run alone cannot distinguish them - applying R unconditionally
-/// rotates an already-rotated shape a second time.
-///
-/// Asking the shape what it has already been rotated by resolves it: with B baked in and the run
-/// reporting R, what remains is R*B^-1. That is the identity when the shape is already in the lab
-/// frame, and R when it is not, without the caller having to know which route built the workspace.
-const Kernel::Matrix<double>
-EstimateScatteringVolumeCentreOfMass::outstandingSampleRotation(const Geometry::IObject &sampleObject) const {
-  const auto gonioR = m_inputWS->run().getGoniometer().getR();
-  Kernel::Matrix<double> alreadyApplied = sampleObject.getAppliedRotation();
-  if (alreadyApplied == Kernel::Matrix<double>(3, 3, true)) {
-    return gonioR;
-  }
-  g_log.information("The sample shape already carries a rotation, so only the remainder of the "
-                    "goniometer rotation is applied");
-  alreadyApplied.Invert();
-  return gonioR * alreadyApplied;
 }
 
 /// Calculate as raster of the illumination volume, evaluating which points are within the sample geometry.
@@ -155,14 +133,10 @@ const Geometry::IObject_sptr EstimateScatteringVolumeCentreOfMass::extractValidS
 }
 
 const V3D EstimateScatteringVolumeCentreOfMass::rasterizeLabGaugeAndCalculateMeanElementPosition(
-    const Geometry::IObject &sampleObject, const Kernel::Matrix<double> &gonioR) {
+    const Geometry::IObject &labSampleShape) {
   g_log.information("Calculating scattering within the gauge volume defined on the input workspace");
   const std::string xml = m_inputWS->run().getProperty("GaugeVolume")->value();
   const Geometry::IObject_sptr gauge = Geometry::ShapeFactory().createShape(xml);
-
-  Kernel::Matrix<double> gonioRInv(gonioR);
-  gonioRInv.Invert();
-  const bool gonioIsIdentity = (gonioR == Kernel::Matrix<double>(3, 3, true));
 
   const auto bbox = gauge->getBoundingBox();
   const double xLength = bbox.xMax() - bbox.xMin();
@@ -196,9 +170,8 @@ const V3D EstimateScatteringVolumeCentreOfMass::rasterizeLabGaugeAndCalculateMea
         if (!gauge->isValid(pLab)) {
           continue;
         }
-        // Test inclusion against the sample shape in its own frame.
-        const V3D pShape = gonioIsIdentity ? pLab : gonioRInv * pLab;
-        if (!sampleObject.isValid(pShape)) {
+        // Both shapes are in the lab frame, so the voxel can be tested against the sample directly.
+        if (!labSampleShape.isValid(pLab)) {
           continue;
         }
         sum += pLab;
