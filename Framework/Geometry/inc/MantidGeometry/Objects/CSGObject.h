@@ -77,10 +77,10 @@ public:
   void setID(const std::string &id) override { m_id = id; }
 
   const Kernel::Matrix<double> &getAppliedRotation() const override { return m_appliedRotation; }
-  /// Record the rotation that has been applied to this shape's definition. Set by ShapeFactory
-  /// when the shape XML carries a "goniometer" tag; the surfaces are already rotated by then, so
-  /// this only records what was done.
-  void setAppliedRotation(const Kernel::Matrix<double> &rotation) { m_appliedRotation = rotation; }
+  /// Record the goniometer rotation baked into this shape's definition. Record-only: the surfaces
+  /// are already rotated by the time this is called, so it rotates nothing itself. Set by
+  /// ShapeFactory from the shape XML, which is also how it survives a Nexus round trip.
+  void setAppliedGoniometerRotation(const Kernel::Matrix<double> &rotation) { m_appliedRotation = rotation; }
   const std::string &id() const override { return m_id; }
 
   void setName(const int objNum) { m_objNum = objNum; } ///< Set Name

@@ -85,7 +85,7 @@ public:
     auto original_ptr = ComponentCreationHelper::createSphere(1.0);
     auto &original = dynamic_cast<CSGObject &>(*original_ptr);
     const Kernel::Matrix<double> goniometer(std::vector<double>{0, -1, 0, 1, 0, 0, 0, 0, 1});
-    original.setAppliedRotation(goniometer);
+    original.setAppliedGoniometerRotation(goniometer);
 
     CSGObject copy(original);
     TS_ASSERT_EQUALS(copy.getAppliedRotation(), goniometer);
