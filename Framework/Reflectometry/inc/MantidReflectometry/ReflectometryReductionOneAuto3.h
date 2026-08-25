@@ -87,8 +87,27 @@ private:
     std::string polynomial;
   };
 
+  class CacheHandler {
+    ReflectometryReductionOneAuto3 &m_parent;
+
+  public:
+    CacheHandler(ReflectometryReductionOneAuto3 &parent) : m_parent(parent) {};
+    ~CacheHandler();
+
+    // deleted methods
+    CacheHandler(const CacheHandler &) = delete;
+    CacheHandler &operator=(const CacheHandler &) = delete;
+    CacheHandler(CacheHandler &&) = delete;
+    CacheHandler &operator=(CacheHandler &&) = delete;
+  };
+
   // A class member to cache properties associated with the algorithmic correction to be applied
   CorrectionProperties m_correctionProperties;
+  // cache flood workspace
+  MatrixWorkspace_sptr m_floodWorkspace;
+  // cache transmission workspaces
+  MatrixWorkspace_sptr m_firstTransmissionRun;
+  MatrixWorkspace_sptr m_secondTransmissionRun;
 
   void init() override;
   void exec() override;
@@ -126,7 +145,7 @@ private:
   double getPropertyOrDefault(const std::string &propertyName, const double defaultValue, bool &isDefault);
   WorkspaceNames getOutputNamesForGroupMember(const std::string &inputNames, const std::string &runNumber,
                                               const size_t wsGroupNumber);
-  void validateTransmissionRun(std::map<std::string, std::string> &results, const std::string &transmissionRun);
+  void validateTransmissionRun(std::map<std::string, std::string> &results, const Property &transmissionRun);
   void setOutputGroupedWorkspaces(std::vector<WorkspaceNames> const &outputNames,
                                   WorkspaceNames const &outputGroupNames, const bool outputIvsLam, bool outputTrans,
                                   bool outputTrans1, bool outputTrans2);
@@ -137,14 +156,18 @@ private:
                                                 const bool reduced = false);
   WorkspaceGroup_sptr groupWorkspaces(const std::vector<std::string> &workspaceNames,
                                       std::string const &outputName = "");
-  RROOutputs performCoreReduction(MatrixWorkspace_sptr inputWS, const std::vector<std::string> &taskOrder = {},
-                                  const bool applyFloodCorrections = true);
+  RROOutputs performCoreReduction(MatrixWorkspace_sptr inputWS, const std::vector<std::string> &taskOrder = {});
   MatrixWorkspace_sptr postReductionProcessing(const RROOutputs &out, const RebinParams &params);
   void postReductionProcessingGroups(std::vector<RROOutputs> &outputs, std::vector<WorkspaceNames> const &outputNames,
                                      const WorkspaceNames &groupedOutputNames, const bool outputIvsLam);
   void setOutputWorkspaces(const RROOutputs &out, const MatrixWorkspace_sptr &binnedWS);
   void updatePropertiesAfterReduction(RROOutputs &out, const RebinParams &params);
   std::vector<std::string> getTaskExecutionOrder(const bool reduced, const bool summingInQ) const;
+  WorkspaceGroup_sptr applyFloodCorrection(const WorkspaceGroup_sptr &ws);
+  MatrixWorkspace_sptr applyFloodCorrection(const MatrixWorkspace_sptr &ws);
+  void applyFloodCorrectionToTransmissionRuns();
+  void clearCaches();
+  std::pair<MatrixWorkspace_sptr, MatrixWorkspace_sptr> getTransmissionRuns();
 };
 } // namespace Reflectometry
 } // namespace Mantid
