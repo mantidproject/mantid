@@ -2137,7 +2137,7 @@ class SampleBackgroundAndNormalisationTests(unittest.TestCase):
             Wavelength=1.4865,
             VanadiumDiameter=0,
         )
-        np.testing.assert_allclose(result.extractY(), np.zeros_like(result.extractY()))
+        np.testing.assert_allclose(result.extractY(), 0)
 
     def test_sample_vanadium(self):
         """Sample normalized by vanadium. Sample divided by itself should yield 1."""
@@ -2150,7 +2150,7 @@ class SampleBackgroundAndNormalisationTests(unittest.TestCase):
             Wavelength=1.4865,
             VanadiumDiameter=0,
         )
-        np.testing.assert_allclose(result.extractY(), np.ones_like(result.extractY()))
+        np.testing.assert_allclose(result.extractY(), 1)
 
 
 # A minimal but valid instrument definition file with a distinctive name. When applied via the

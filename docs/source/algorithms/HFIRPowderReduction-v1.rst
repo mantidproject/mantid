@@ -113,12 +113,12 @@ Absorption and multiple scattering
 For the vanadium, the correction is applied only when ``VanadiumDiameter`` is greater than
 zero; otherwise :math:`A_V = 1` and :math:`\Delta_V = 0`, so
 :math:`\hat{V}_\mathrm{corr} = \hat{V} - \hat{V}_B`. The rod is modelled as vanadium metal
-at 6.1172 g/cm³ with radius ``VanadiumDiameter``/2 and height ``VanadiumHeight``.
+at 6.1172 g/cm³ with radius ``VanadiumDiameter`` / 2 and height ``VanadiumHeight``.
 
 For the sample, the correction is applied only when ``DoAttenuationCorrection`` is set;
 otherwise :math:`A_S = 1` and :math:`\Delta_S = 0`. The sample is modelled with
 ``SampleChemicalFormula`` at a mass density of
-``SampleCrystalDensity`` × ``SamplePackingFraction``, with radius ``SampleDiameter``/2 and
+``SampleCrystalDensity`` × ``SamplePackingFraction``, with radius ``SampleDiameter`` / 2 and
 height ``SampleHeight``. Multiple scattering is included only when
 ``DoMultipleScatteringCorrection`` is also set; when it is not, :math:`\Delta_S = 0` while
 the absorption correction :math:`A_S` still applies.
