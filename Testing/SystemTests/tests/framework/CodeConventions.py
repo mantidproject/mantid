@@ -26,6 +26,7 @@ ALG_BAD_PARAMS = {
     "EstimateDivergence(v1)": ("alpha", "beta0", "beta1"),
     "FindUBFromScatteringPlane(v1)": ("a", "b", "c", "alpha", "beta", "gamma"),
     "FindUBUsingLatticeParameters(v1)": ("a", "b", "c", "alpha", "beta", "gamma"),
+    "FindUBFromConventionalCell(v1)": ("a", "b", "c", "alpha", "beta", "gamma"),
     "FindGlobalBMatrix(v1)": ("a", "b", "c", "alpha", "beta", "gamma"),
     "FindMultipleUMatrices(v1)": ("a", "b", "c", "alpha", "beta", "gamma"),
     "IndexSXPeaks(v1)": ("a", "b", "c", "alpha", "beta", "gamma", "dTolerance"),
