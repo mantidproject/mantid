@@ -223,6 +223,10 @@ def centering_transform_to_primitive(centering):
     """
     centering = centering.upper()
 
+    # In every entry below the *columns* are the primitive vectors expressed in the conventional
+    # basis, matching the `A_c @ T_cp` use in `conventional_to_primitive_lattice`. For A, B and C
+    # the row and column readings differ only by a sign or an axis relabel within the same lattice,
+    # and I and F are symmetric, so only R is sensitive to getting this convention wrong.
     transforms = {
         "P": np.eye(3),
         "A": np.array([[1.0, 0.0, 0.0], [0.0, 0.5, 0.5], [0.0, -0.5, 0.5]], dtype=float),
@@ -230,11 +234,14 @@ def centering_transform_to_primitive(centering):
         "C": np.array([[0.5, 0.5, 0.0], [-0.5, 0.5, 0.0], [0.0, 0.0, 1.0]], dtype=float),
         "I": 0.5 * np.array([[-1.0, 1.0, 1.0], [1.0, -1.0, 1.0], [1.0, 1.0, -1.0]], dtype=float),
         "F": 0.5 * np.array([[0.0, 1.0, 1.0], [1.0, 0.0, 1.0], [1.0, 1.0, 0.0]], dtype=float),
+        # Obverse setting: the columns are the rhombohedral vectors
+        # a_R = (2a + b + c)/3, b_R = (-a + b + c)/3, c_R = (-a - 2b + c)/3
+        # expressed in the conventional hexagonal basis.
         "R": np.array(
             [
-                [2.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0],
-                [-1.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0],
-                [-1.0 / 3.0, -2.0 / 3.0, 1.0 / 3.0],
+                [2.0 / 3.0, -1.0 / 3.0, -1.0 / 3.0],
+                [1.0 / 3.0, 1.0 / 3.0, -2.0 / 3.0],
+                [1.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0],
             ],
             dtype=float,
         ),
