@@ -100,7 +100,7 @@ def direct_basis_from_lattice(a, b, c, alpha, beta, gamma):
     """
     Build the direct-lattice basis matrix from lattice parameters.
 
-    This matrix stores direct-lattice vectors as columns; reciprocal-lattice vectors are stored as rows.
+    This matrix stores direct-lattice vectors as columns; reciprocal-lattice vectors are stored as columns.
 
     Parameters
     ----------
@@ -167,7 +167,7 @@ def reciprocal_basis_from_direct_basis(A):
     """
     Compute the reciprocal-lattice basis conjugate to a direct-lattice basis.
 
-    The inverse transpose is used because direct-lattice vectors are stored as columns and reciprocal vectors as rows.
+    The inverse transpose is used because direct-lattice vectors and reciprocal vectors are stored as columns.
 
     Parameters
     ----------
@@ -247,6 +247,8 @@ def centering_transform_to_primitive(centering):
         ),
     }
 
+    if centering not in transforms:
+        raise ValueError("Unknown centering '{}'.".format(centering))
     return transforms[centering]
 
 
@@ -1170,12 +1172,15 @@ class FindUBFromConventionalCell(PythonAlgorithm):
         gamma = self.getProperty("gamma").value
 
         if centering == "R":
+            r_issues = []
             if not np.isclose(a, b, atol=1e-6):
-                issues["Centering"] = "R centering expects conventional hexagonal input with a=b."
+                r_issues.append("R centering expects conventional hexagonal input with a=b.")
             if not np.isclose(alpha, 90.0, atol=1e-6) or not np.isclose(beta, 90.0, atol=1e-6):
-                issues["Centering"] = "R centering expects alpha=beta=90."
+                r_issues.append("R centering expects alpha=beta=90.")
             if not np.isclose(gamma, 120.0, atol=1e-6):
-                issues["Centering"] = "R centering expects gamma=120."
+                r_issues.append("R centering expects gamma=120.")
+            if r_issues:
+                issues["Centering"] = " ".join(r_issues)
 
         return issues
 

@@ -57,10 +57,10 @@ class FindUBFromConventionalCellTest(unittest.TestCase):
 
         SetUB(Workspace=ws, UB=UB)
 
-        np.random.seed(26)
+        rng = np.random.default_rng(26)
 
         for h, k, l in hkls:
-            rand = 2 * np.random.random(3) - 1
+            rand = 2 * rng.random(3) - 1
             hkl = np.array([h, k, l], dtype=float) + dhkl * rand
             peak = ws.createPeakHKL(V3D(hkl[0], hkl[1], hkl[2]))
             peak.setHKL(h, k, l)
@@ -84,7 +84,7 @@ class FindUBFromConventionalCellTest(unittest.TestCase):
         self.assertEqual(metrics["n_near_integer"], float(len(hkls)))
         self.assertEqual(metrics["n_centering_ok"], float(len(hkls)))
 
-    def _validate_peaks(self, hkls):
+    def _validate_peaks(self, hkls, **properties):
         ws = CreatePeaksWorkspace(NumberOfPeaks=0, OutputType="LeanElasticPeak")
         SetUB(Workspace=ws, UB=np.eye(3))
         for hkl in hkls:
@@ -93,6 +93,8 @@ class FindUBFromConventionalCellTest(unittest.TestCase):
         alg = AlgorithmManager.create("FindUBFromConventionalCell")
         alg.initialize()
         alg.setProperty("PeaksWorkspace", ws)
+        for name, value in properties.items():
+            alg.setProperty(name, value)
         return alg.validateInputs()
 
     def test_validation_rejects_zero_q_peak(self):
@@ -104,6 +106,22 @@ class FindUBFromConventionalCellTest(unittest.TestCase):
         issues = self._validate_peaks([[1, 0, 0], [2, 0, 0], [3, 0, 0]])
 
         self.assertEqual(issues["PeaksWorkspace"], "At least 3 peaks with distinct Q directions are required.")
+
+    def test_validation_reports_all_r_centering_constraints(self):
+        issues = self._validate_peaks(
+            [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
+            Centering="R",
+            a=5.0,
+            b=6.0,
+            alpha=80.0,
+            beta=90.0,
+            gamma=90.0,
+        )
+
+        message = issues["Centering"]
+        self.assertIn("a=b", message)
+        self.assertIn("alpha=beta=90", message)
+        self.assertIn("gamma=120", message)
 
     def test_resolvability_metric_matches_scalar_angular_distance(self):
         directions = np.array(
@@ -626,6 +644,10 @@ class CenteringTransformTest(unittest.TestCase):
             with self.subTest(centering=centering):
                 T_cp = find_ub_module.centering_transform_to_primitive(centering)
                 self.assertAlmostEqual(abs(np.linalg.det(T_cp)), 1.0 / self.MULTIPLICITY[centering])
+
+    def test_unknown_centering_raises_value_error(self):
+        with self.assertRaisesRegex(ValueError, "Unknown centering 'X'"):
+            find_ub_module.centering_transform_to_primitive("X")
 
     def test_r_transform_gives_rhombohedral_primitive_cell(self):
         """
