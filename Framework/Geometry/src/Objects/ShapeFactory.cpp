@@ -1855,6 +1855,17 @@ std::string ShapeFactory::rebakeGoniometer(const Kernel::Matrix<double> &newBake
   // Strip the old bake off the total, leaving the definition-frame rotation, then put the new bake
   // on the outside of it. These are orthonormal so the transpose is the exact inverse.
   const Kernel::Matrix<double> total = goniometerFromXML(xml);
+
+  // When the whole of the total is the bake there is no definition-frame rotation to preserve and
+  // the answer is just the new bake. Taking that shortcut is not only cheaper, it is exact: going
+  // the long way round would multiply by the old bake and its transpose, and the result of that is
+  // identity only to within rounding. Those last bits are visible - they reorder the triangles of
+  // the rendered mesh - and they would accumulate over repeated copies.
+  if (total == currentBake) {
+    xml = addGoniometerTag(newBake, std::move(xml));
+    return addAppliedGoniometerTag(newBake, std::move(xml));
+  }
+
   const Kernel::Matrix<double> newTotal = newBake * currentBake.Tprime() * total;
   xml = addGoniometerTag(newTotal, std::move(xml));
   return addAppliedGoniometerTag(newBake, std::move(xml));

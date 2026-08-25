@@ -152,9 +152,8 @@ class WorkspaceManager:
             define_gauge_volume(self.ws, self.gauge_volume_str)
 
     def _update_existing_wss(self) -> None:
-        # ws carries the user's initial shape rotation (init_R); it must survive the
-        # instrument switch, but a plain CopySample drops it for a CSG shape (see
-        # copy_sample_preserving_initial_rotation), so preserve it explicitly.
+        # ws carries the user's initial shape rotation (init_R), which must survive the instrument
+        # switch.
         ws = self._create_new_ws_with_copied_sample(self.wsname, self.ws, preserve_initial_rotation=True)
         self.ws = ws
 
@@ -314,11 +313,9 @@ class WorkspaceManager:
         stashed on a throwaway shape workspace. That stash only ever holds a sample, so it is a
         cheap stub-instrument workspace rather than a clone of what may be a very large workspace.
 
-        Both hops use the same copy semantics: repeating
-        copy_sample_preserving_initial_rotation is idempotent (it re-bakes init_R from the
-        *destination's* goniometer, and CopySample preserves the shape type so _shape_is_mesh
-        answers the same each time), whereas mixing the two would re-bake init_R on one hop and
-        strip it on the other.
+        Both hops use the same copy semantics: copying into an identity goniometer leaves the shape
+        in its own frame, so repeating it is idempotent, whereas mixing the two would leave the
+        destination's goniometer baked into the shape on one hop and not the other.
         """
         try:
             shape_ws = self.create_shape_workspace(self._SHAPE_TMP)
@@ -337,25 +334,16 @@ class WorkspaceManager:
             CopySample(InputWorkspace=source_ws, OutputWorkspace=dest_ws, CopyName=False, CopyEnvironment=False, CopyLattice=False)
 
     @staticmethod
-    def _shape_is_mesh(ws: MatrixWorkspace) -> bool:
-        # a loaded STL becomes a MeshObject; the default cube and a loaded CSG xml are CSGObjects.
-        return type(ws.sample().getShape()).__name__ == "MeshObject"
+    def copy_sample_preserving_initial_rotation(source_ws: MatrixWorkspace, dest_ws: MatrixWorkspace) -> None:
+        """CopySample source_ws's sample onto dest_ws while keeping source_ws's initial shape
+        rotation (init_R).
 
-    def copy_sample_preserving_initial_rotation(self, source_ws: MatrixWorkspace, dest_ws: MatrixWorkspace) -> None:
-        """CopySample source_ws's sample onto dest_ws while keeping source_ws's baked-in initial
-        shape rotation (init_R).
-
-        CopySample re-bakes the *destination* workspace's run goniometer into the copied shape: for a
-        CSG shape it overwrites the <goniometer> tag that holds init_R (so a copy into an
-        identity-goniometer workspace silently strips init_R), while for a MeshObject it rotates the
-        vertices that already hold init_R. So the destination must carry init_R for a CSG shape, and
-        stay at identity for a mesh (otherwise init_R would be applied a second time). The destination
-        goniometer is only a vehicle for re-baking init_R into the shape, so it is restored to
-        identity afterwards - init_R must live in the shape, never in the run goniometer."""
-        gonio_R = np.eye(3) if self._shape_is_mesh(source_ws) else self.init_R.as_matrix()
-        dest_ws.run().getGoniometer().setR(gonio_R)
-        CopySample(InputWorkspace=source_ws, OutputWorkspace=dest_ws, CopyName=False, CopyEnvironment=False, CopyLattice=False)
+        CopySample leaves the copy baked to the destination workspace's run goniometer, so the
+        destination is set to identity first. That leaves the shape in its own frame, still carrying
+        init_R as a rotation within that frame exactly as the source had it - init_R must live in
+        the shape, never in the run goniometer. The same call works for both shape types."""
         dest_ws.run().getGoniometer().setR(np.eye(3))
+        CopySample(InputWorkspace=source_ws, OutputWorkspace=dest_ws, CopyName=False, CopyEnvironment=False, CopyLattice=False)
 
     def create_simulation_workspace(self, name: str, unit: str = "dSpacing", bin_params: str | None = None) -> MatrixWorkspace:
         return CreateSimulationWorkspace(
