@@ -83,13 +83,23 @@ void RotateSampleShape::exec() {
     return;
   }
 
-  const auto &oldRotation = ei->run().getGoniometer().getR();
-  auto newSampleShapeRot = sampleShapeRotation * oldRotation;
+  // Rotate the shape within its own frame, and leave the run's goniometer to whoever consumes it.
+  // Folding the run's rotation in here as well made a deliberate reorientation of the sample
+  // indistinguishable from a shape that had been moved into the lab frame.
   if (isMeshShape) {
     auto meshShape = std::dynamic_pointer_cast<MeshObject>(ei->sample().getShapePtr());
-    meshShape->rotate(newSampleShapeRot);
+    meshShape->rotate(sampleShapeRotation);
   } else {
-    shapeXML = Geometry::ShapeFactory().addGoniometerTag(newSampleShapeRot, shapeXML);
+    // Pin the bake before touching <goniometer>: without an <applied-goniometer> tag already in
+    // place, growing the total would leave the whole of it looking like a bake.
+    const auto bakedRotation = ei->sample().getShape().getAppliedRotation();
+    shapeXML = Geometry::ShapeFactory().addAppliedGoniometerTag(bakedRotation, shapeXML);
+
+    // Compose, rather than replace, so that repeated calls accumulate the way the mesh branch
+    // always has. A mesh cannot do anything else - its vertices are the only record of how far it
+    // has been turned - so composing is what lets the two shape types agree.
+    const auto total = Geometry::ShapeFactory::goniometerFromXML(shapeXML);
+    shapeXML = Geometry::ShapeFactory().addGoniometerTag(sampleShapeRotation * total, shapeXML);
     Mantid::DataHandling::CreateSampleShape::setSampleShape(*ei, shapeXML, false);
   }
 }

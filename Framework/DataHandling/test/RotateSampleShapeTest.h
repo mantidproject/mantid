@@ -208,9 +208,7 @@ public:
   //
   // Everything above asserts only that the algorithm ran, that a <goniometer> tag appeared and that
   // the shape is still of the type it started as. Nothing checked that a point moved, so a sign
-  // error or a swapped axis order would pass the whole suite. The tests below pin the geometry, and
-  // the ones marked CHARACTERISATION pin behaviour that is about to change, so that the change
-  // shows up as an edit to an assertion rather than disappearing into a file that asserted nothing.
+  // error or a swapped axis order would pass the whole suite. The tests below pin the geometry.
 
   static Mantid::Kernel::Matrix<double> ninetyAboutZ() {
     return Mantid::Kernel::Matrix<double>(std::vector<double>{0, -1, 0, 1, 0, 0, 0, 0, 1});
@@ -244,33 +242,46 @@ public:
     TS_ASSERT(!shape.isValid(V3D(1.0, 0.0, 0.0)));
   }
 
-  void test_run_goniometer_is_currently_folded_into_the_shape() {
-    // CHARACTERISATION: the algorithm reads the run's goniometer and multiplies its own rotation by
-    // it, so a 90 degree request against a 90 degree run goniometer turns the sphere a full 180 and
-    // lands it on -x. Rotating the sample shape and enacting the run's orientation are two separate
-    // jobs, and doing both here is what makes a user rotation indistinguishable from a bake.
+  void test_run_goniometer_is_ignored() {
+    // The algorithm applies the rotation it was asked for and nothing else. A 90 degree request
+    // against a 90 degree run goniometer turns the sphere 90 degrees, not 180: enacting the run's
+    // orientation is a separate job belonging to whoever consumes the shape.
     auto ws = rotateSphere("RotSampleShapeTest_gonio", "90,0,0,1,1", ninetyAboutZ());
+
+    const auto &shape = ws->sample().getShape();
+    TS_ASSERT(shape.isValid(V3D(0.0, 1.0, 0.0)));
+    TS_ASSERT(!shape.isValid(V3D(-1.0, 0.0, 0.0)));
+    // and it is left on the run untouched, for that consumer to apply
+    TS_ASSERT_EQUALS(ws->run().getGoniometer().getR(), ninetyAboutZ());
+  }
+
+  void test_two_calls_compose() {
+    // Two 90 degree turns leave the sphere on -x. The CSG branch used to replace the tag, so the
+    // second call discarded the first; it now composes, which is what a mesh has always done and
+    // the only thing a mesh can do, since its vertices are the sole record of how far it turned.
+    auto ws = rotateSphere("RotSampleShapeTest_twice", "90,0,0,1,1", Mantid::Kernel::Matrix<double>(3, 3, true));
+    runRotateSampleShape("RotSampleShapeTest_twice", "90,0,0,1,1");
 
     const auto &shape = ws->sample().getShape();
     TS_ASSERT(shape.isValid(V3D(-1.0, 0.0, 0.0)));
     TS_ASSERT(!shape.isValid(V3D(0.0, 1.0, 0.0)));
   }
 
-  void test_two_calls_on_a_csg_shape_currently_overwrite() {
-    // CHARACTERISATION: addGoniometerTag replaces the tag outright, so the second call discards the
-    // first and the sphere is left turned 90 degrees rather than 180. A mesh shape composes, so the
-    // two shape types already disagree here.
-    auto ws = rotateSphere("RotSampleShapeTest_twice", "90,0,0,1,1", Mantid::Kernel::Matrix<double>(3, 3, true));
-    runRotateSampleShape("RotSampleShapeTest_twice", "90,0,0,1,1");
+  void test_two_calls_compose_for_a_mesh_shape_too() {
+    // the same pair of turns carries an offset cube spanning x = 4..6 round to x = -6..-4
+    auto cube = createCube(2, V3D(5.0, 0.0, 0.0));
+    Workspace2D_sptr ws = getWsWithMeshSampleShape(cube, "RotSampleShapeTest_mesh_twice");
 
-    const auto &shape = ws->sample().getShape();
-    TS_ASSERT(shape.isValid(V3D(0.0, 1.0, 0.0)));
-    TS_ASSERT(!shape.isValid(V3D(-1.0, 0.0, 0.0)));
+    runRotateSampleShape("RotSampleShapeTest_mesh_twice", "90,0,0,1,1");
+    runRotateSampleShape("RotSampleShapeTest_mesh_twice", "90,0,0,1,1");
+
+    const auto &box = ws->sample().getShape().getBoundingBox();
+    TS_ASSERT_DELTA(box.xMin(), -6.0, 1e-8);
+    TS_ASSERT_DELTA(box.xMax(), -4.0, 1e-8);
   }
 
-  void test_mesh_shape_currently_folds_in_the_run_goniometer_too() {
-    // CHARACTERISATION: the mesh branch composes the same product onto the vertices, so an offset
-    // cube spanning x = 4..6 is carried right round to x = -6..-4.
+  void test_mesh_shape_ignores_the_run_goniometer() {
+    // an offset cube spanning x = 4..6 turns 90 degrees onto y, not 180 degrees back onto -x
     auto cube = createCube(2, V3D(5.0, 0.0, 0.0));
     Workspace2D_sptr ws = getWsWithMeshSampleShape(cube, "RotSampleShapeTest_mesh_gonio");
     ws->mutableRun().mutableGoniometer().setR(ninetyAboutZ());
@@ -278,29 +289,36 @@ public:
     runRotateSampleShape("RotSampleShapeTest_mesh_gonio", "90,0,0,1,1");
 
     const auto &box = ws->sample().getShape().getBoundingBox();
-    TS_ASSERT_DELTA(box.xMin(), -6.0, 1e-8);
-    TS_ASSERT_DELTA(box.xMax(), -4.0, 1e-8);
+    TS_ASSERT_DELTA(box.yMin(), 4.0, 1e-8);
+    TS_ASSERT_DELTA(box.yMax(), 6.0, 1e-8);
   }
 
-  void test_csg_rotation_is_currently_reported_as_a_goniometer_bake() {
-    // CHARACTERISATION, and the defect this whole change exists to fix. The user's rotation is
-    // written into <goniometer>, and with nothing beside it to say how much of that tag is a bake
-    // the whole of it is taken to be one. So a shape the user deliberately turned within its own
-    // frame claims to have been moved into the lab frame, and a caller that then asks how much of
-    // the run's goniometer is still outstanding gets the wrong answer.
+  void test_rotating_does_not_claim_the_shape_has_been_baked() {
+    // The defect this change exists to fix. A rotation the user asked for re-expresses the shape
+    // within its own frame, so the frame marker has to stay identity for both shape types - the
+    // CSG branch keeps that true by pinning <applied-goniometer> alongside the total it writes.
     auto ws = rotateSphere("RotSampleShapeTest_marker", "90,0,0,1,1", Mantid::Kernel::Matrix<double>(3, 3, true));
+    TS_ASSERT_EQUALS(ws->sample().getShape().getAppliedRotation(), Mantid::Kernel::Matrix<double>(3, 3, true));
+
+    auto cube = createCube(2, V3D(5.0, 0.0, 0.0));
+    Workspace2D_sptr meshWs = getWsWithMeshSampleShape(cube, "RotSampleShapeTest_mesh_marker");
+    runRotateSampleShape("RotSampleShapeTest_mesh_marker", "90,0,0,1,1");
+    TS_ASSERT_EQUALS(meshWs->sample().getShape().getAppliedRotation(), Mantid::Kernel::Matrix<double>(3, 3, true));
+  }
+
+  void test_a_baked_rotation_survives_a_user_rotation() {
+    // A shape that really was moved into the lab frame keeps saying so afterwards. The user's turn
+    // goes on top of the total, but the record of how much of that total is a bake is unchanged.
+    auto shapeXML = ComponentCreationHelper::sphereXML(0.5, V3D(1.0, 0.0, 0.0), "sphere");
+    ShapeFactory factory;
+    auto baked = factory.rebakeGoniometer(ninetyAboutZ(), shapeXML, Mantid::Kernel::Matrix<double>(3, 3, true));
+    Workspace2D_sptr ws = getWsWithCSGSampleShape(baked, "RotSampleShapeTest_baked");
+    TS_ASSERT_EQUALS(ws->sample().getShape().getAppliedRotation(), ninetyAboutZ());
+
+    runRotateSampleShape("RotSampleShapeTest_baked", "90,0,0,1,1");
 
     TS_ASSERT_EQUALS(ws->sample().getShape().getAppliedRotation(), ninetyAboutZ());
-  }
-
-  void test_mesh_rotation_does_not_claim_the_shape_has_been_baked() {
-    // The mesh branch already gets this right: rotating vertices re-expresses the shape within its
-    // own frame and leaves the frame marker alone. This is an invariant, not characterisation.
-    auto cube = createCube(2, V3D(5.0, 0.0, 0.0));
-    Workspace2D_sptr ws = getWsWithMeshSampleShape(cube, "RotSampleShapeTest_mesh_marker");
-
-    runRotateSampleShape("RotSampleShapeTest_mesh_marker", "90,0,0,1,1");
-
-    TS_ASSERT_EQUALS(ws->sample().getShape().getAppliedRotation(), Mantid::Kernel::Matrix<double>(3, 3, true));
+    // the bake and the user rotation together carry the sphere from +x round to -x
+    TS_ASSERT(ws->sample().getShape().isValid(V3D(-1.0, 0.0, 0.0)));
   }
 };
