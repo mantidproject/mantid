@@ -11,7 +11,7 @@ from mantid.api import mtd
 from mantid.simpleapi import CreateWorkspace, Fit, Polynomial
 from mantid.kernel import logger
 from scipy.interpolate import interp1d
-from scipy.ndimage.filters import convolve
+from scipy.ndimage import convolve
 import ICConvoluted as ICC
 import BivariateGaussian
 
