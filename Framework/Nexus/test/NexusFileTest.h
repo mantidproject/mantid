@@ -505,14 +505,11 @@ public:
     TS_ASSERT_EQUALS(in, out);
   }
 
-  /** A NULL-valued variable-length string is legal HDF5, and occurs in real ISIS muon
-   * files -- /raw_data_1/instrument/source/notes in a HIFI run is one, produced by a
-   * pre-allocated NeXus skeleton whose string fields were never populated.  H5Dread
-   * reports *success* and hands back a NULL pointer, so the condition cannot be
-   * detected from the return code alone.  NeXus has no concept of null, so the only
-   * sane mapping is the empty string -- which is also what h5py yields for these.
-   */
   void test_data_get_null_vlen_string() {
+    // this test guards against regressions in the handling of NULL variable-length strings
+    // at some point, certain muon data files were written to assign numerical data to
+    // a null pointer to a variable-length string.  That is technically legal HDF5, but illegal NeXus.
+    // this test ensures these 2files can be read without raising errors
     cout << "\ntest dataset read -- NULL variable-length UTF-8 string" << std::endl;
 
     FileResource resource("test_nexus_null_vlen_string.h5");
@@ -558,6 +555,36 @@ public:
       std::string value("XXXXXXXXXX"); // junk data
       TSM_ASSERT_THROWS_NOTHING(address, value = file.getStrData());
       TSM_ASSERT_EQUALS(address, value, "");
+    }
+  }
+
+  void test_data_get_char_writes_exactly_one_byte() {
+    // this test handles the use of getData<char>() for a *single* char, instead of a string
+    // this can have its own problems, especially around trimming whitespace
+    cout << "\ntest dataset read -- single character does not overrun the caller" << std::endl;
+
+    FileResource resource("test_nexus_char_no_overrun.h5");
+    Mantid::Nexus::File file(resource.fullPath(), NXaccess::CREATE5);
+    file.makeGroup("entry", "NXentry", true);
+
+    std::vector<char> input{'x', ' ', '\0'};
+    std::vector<char> expected{'x', '\0', '\0'};
+    std::size_t const GUARD_SIZE(8);
+    for (std::size_t c = 0; c < input.size(); c++) {
+      std::string const name("c" + std::to_string(c));
+
+      file.makeData(name, NXnumtype::CHAR, 1, true);
+      file.putData(&input[c]);
+
+      // over-allocate, but hand getData only the address of the first byte
+      std::vector<char> guarded(GUARD_SIZE, '?');
+      file.getData(guarded.data());
+      file.closeData();
+
+      TS_ASSERT_EQUALS(guarded.front(), expected[c]);
+      for (std::size_t i = 1; i < GUARD_SIZE; i++) {
+        TSM_ASSERT_EQUALS("getData<char> wrote past the one byte of a single-character dataset", guarded[i], '?');
+      }
     }
   }
 

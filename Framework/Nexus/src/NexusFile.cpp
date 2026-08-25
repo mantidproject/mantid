@@ -764,8 +764,15 @@ template <> void File::getData<char>(char *data) {
 
   // strip whitespace
   if (rank == 0 || rank == 1) {
-    trimWhiteSpace(buffer);
-    std::memcpy(data, buffer.data(), strlen(buffer.data()) + 1);
+    // if reading a single char, do not null-terminate
+    if (size == 1) {
+      // a lone whitespace or null character reads back as null
+      buffer[0] = isspace(static_cast<unsigned char>(buffer[0])) ? '\0' : buffer[0];
+      *data = buffer[0];
+    } else {
+      trimWhiteSpace(buffer);
+      std::memcpy(data, buffer.data(), strlen(buffer.data()) + 1);
+    }
   } else {
     std::memcpy(data, buffer.data(), size);
   }
