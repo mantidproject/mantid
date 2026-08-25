@@ -115,7 +115,7 @@ def get_detector_id_for_spectrum_number(workspace, spectrum_number):
     """
     try:
         workspace_index = workspace.getIndexFromSpectrumNumber(spectrum_number)
-        detector_id = next(iter(workspace.getSpectrum(workspace_index).getDetectorIDs()))
+        detector_id = next(iter(workspace.getSpectrum(workspace_index).getDetectorIDs()), None)
     except RuntimeError:
         detector_id = None
     return detector_id
