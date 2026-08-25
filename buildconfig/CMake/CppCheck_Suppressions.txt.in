@@ -95,9 +95,6 @@ pureVirtualCall:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common
 // primary cppcheck location is the virtual function declaration in the header
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/SINQ/inc/MantidSINQ/PoldiUtilities/PoldiDetectorDecorator.h
 
-// cstyleCast: using declaration for a pointer-to-member-function type is misidentified as a C-style cast
-cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/CloneMatrixWorkspace.cpp
-
 // publicAllocationError: m_mainLayout is owned by the Qt parent widget (QGridLayout(parent) transfers ownership);
 // cppcheck does not model Qt parent-child memory management
 publicAllocationError:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtbuttonpropertybrowser.cpp

@@ -23,6 +23,7 @@
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #include "tbb/parallel_for.h"
 #include <algorithm>
@@ -496,6 +497,11 @@ size_t EventWorkspace::getMemorySize() const {
   return total;
 }
 
+// The two mutable accessors below can only be expressed in terms of EventList's own legacy
+// interface: handing out a mutable MantidVec would allow the length to be changed, so
+// FixedLengthVector::mutableRawData() is protected and Histogram is its only friend.
+GNU_DIAG_OFF("deprecated-declarations")
+
 /// Deprecated, use mutableX() instead. Return the data X vector at a given
 /// workspace index
 /// @param index :: the workspace index to return
@@ -507,6 +513,8 @@ MantidVec &EventWorkspace::dataX(const std::size_t index) { return getSpectrum(i
 /// @param index :: the workspace index to return
 /// @returns A reference to the vector of binned error values
 MantidVec &EventWorkspace::dataDx(const std::size_t index) { return getSpectrum(index).dataDx(); }
+
+GNU_DIAG_ON("deprecated-declarations")
 
 /// Deprecated, use mutableY() instead. Return the data Y vector at a given
 /// workspace index
@@ -529,22 +537,22 @@ MantidVec &EventWorkspace::dataE(const std::size_t /*index*/) {
 /** Deprecated, use x() instead.
  * @return the const data X vector at a given workspace index
  * @param index :: workspace index   */
-const MantidVec &EventWorkspace::dataX(const std::size_t index) const { return getSpectrum(index).readX(); }
+const MantidVec &EventWorkspace::dataX(const std::size_t index) const { return getSpectrum(index).x().rawData(); }
 
 /** Deprecated, use dx() instead.
  * @return the const data X error vector at a given workspace index
  * @param index :: workspace index   */
-const MantidVec &EventWorkspace::dataDx(const std::size_t index) const { return getSpectrum(index).readDx(); }
+const MantidVec &EventWorkspace::dataDx(const std::size_t index) const { return getSpectrum(index).dx().rawData(); }
 
 /** Deprecated, use y() instead.
  * @return the const data Y vector at a given workspace index
  * @param index :: workspace index   */
-const MantidVec &EventWorkspace::dataY(const std::size_t index) const { return getSpectrum(index).readY(); }
+const MantidVec &EventWorkspace::dataY(const std::size_t index) const { return getSpectrum(index).y().rawData(); }
 
 /** Deprecated, use e() instead.
  * @return the const data E (error) vector at a given workspace index
  * @param index :: workspace index   */
-const MantidVec &EventWorkspace::dataE(const std::size_t index) const { return getSpectrum(index).readE(); }
+const MantidVec &EventWorkspace::dataE(const std::size_t index) const { return getSpectrum(index).e().rawData(); }
 
 /** Deprecated, use sharedX() instead.
  * @return a pointer to the X data vector at a given workspace index

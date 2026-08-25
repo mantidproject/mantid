@@ -1744,7 +1744,7 @@ public:
     for (size_t spec = 0; spec < numspec; ++spec) {
       TSM_ASSERT("Should not have any x resolution values", !ws.hasDx(spec));
     }
-    ws.dataDx(workspaceIndexWithDx[0]) = dxSpec0;
+    ws.mutableDx(workspaceIndexWithDx[0]) = dxSpec0;
     ws.setSharedDx(workspaceIndexWithDx[1], dxSpec1);
     ws.setSharedDx(workspaceIndexWithDx[2], dxSpec2);
 
@@ -1752,10 +1752,10 @@ public:
     auto compareValue = [&values](double data, size_t index) { return data == values[index]; };
     for (auto &index : workspaceIndexWithDx) {
       TSM_ASSERT("Should have x resolution values", ws.hasDx(index));
-      TSM_ASSERT_EQUALS("Should have a length of 3", ws.dataDx(index).size(), j);
+      TSM_ASSERT_EQUALS("Should have a length of 3", ws.dx(index).size(), j);
       auto compareValueForSpecificWorkspaceIndex = std::bind(compareValue, std::placeholders::_1, index);
 
-      auto &dataDx = ws.dataDx(index);
+      auto &dataDx = ws.dx(index);
       TSM_ASSERT("dataDx should allow access to the spectrum",
                  std::all_of(std::begin(dataDx), std::end(dataDx), compareValueForSpecificWorkspaceIndex));
 

@@ -12,6 +12,7 @@
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/EmptyValues.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #include <atomic>
 #include <map>
@@ -297,55 +298,97 @@ public:
   /// Deprecated, use x() instead. Returns a read-only (i.e. const) reference to
   /// the specified X array
   /// @param index :: workspace index to retrieve.
-  const MantidVec &readX(std::size_t const index) const { return getSpectrum(index).dataX(); }
+  [[deprecated("use x() instead")]]
+  const MantidVec &readX(std::size_t const index) const {
+    return getSpectrum(index).x().rawData();
+  }
   /// Deprecated, use y() instead. Returns a read-only (i.e. const) reference to
   /// the specified Y array
   /// @param index :: workspace index to retrieve.
-  const MantidVec &readY(std::size_t const index) const { return getSpectrum(index).dataY(); }
+  [[deprecated("use y() instead")]]
+  const MantidVec &readY(std::size_t const index) const {
+    return getSpectrum(index).y().rawData();
+  }
   /// Deprecated, use e() instead. Returns a read-only (i.e. const) reference to
   /// the specified E array
   /// @param index :: workspace index to retrieve.
-  const MantidVec &readE(std::size_t const index) const { return getSpectrum(index).dataE(); }
+  [[deprecated("use e() instead")]]
+  const MantidVec &readE(std::size_t const index) const {
+    return getSpectrum(index).e().rawData();
+  }
   /// Deprecated, use dx() instead. Returns a read-only (i.e. const) reference
   /// to the specified X error array
   /// @param index :: workspace index to retrieve.
-  const MantidVec &readDx(size_t const index) const { return getSpectrum(index).dataDx(); }
+  [[deprecated("use dx() instead")]]
+  const MantidVec &readDx(size_t const index) const {
+    return getSpectrum(index).dx().rawData();
+  }
 
+  // The mutable legacy accessors require ISpectrum's own legacy interface
+  GNU_DIAG_OFF("deprecated-declarations")
   /// Deprecated, use mutableX() instead. Returns the x data
-  virtual MantidVec &dataX(const std::size_t index) { return getSpectrum(index).dataX(); }
+  [[deprecated("use mutableX() instead")]]
+  virtual MantidVec &dataX(const std::size_t index) {
+    return getSpectrum(index).dataX();
+  }
   /// Deprecated, use mutableY() instead. Returns the y data
-  virtual MantidVec &dataY(const std::size_t index) { return getSpectrumWithoutInvalidation(index).dataY(); }
+  [[deprecated("use mutableY() instead")]]
+  virtual MantidVec &dataY(const std::size_t index) {
+    return getSpectrumWithoutInvalidation(index).dataY();
+  }
   /// Deprecated, use mutableE() instead. Returns the error data
-  virtual MantidVec &dataE(const std::size_t index) { return getSpectrumWithoutInvalidation(index).dataE(); }
+  [[deprecated("use mutableE() instead")]]
+  virtual MantidVec &dataE(const std::size_t index) {
+    return getSpectrumWithoutInvalidation(index).dataE();
+  }
   /// Deprecated, use mutableDx() instead. Returns the x error data
-  virtual MantidVec &dataDx(const std::size_t index) { return getSpectrumWithoutInvalidation(index).dataDx(); }
+  [[deprecated("use mutableDx() instead")]]
+  virtual MantidVec &dataDx(const std::size_t index) {
+    return getSpectrumWithoutInvalidation(index).dataDx();
+  }
+  GNU_DIAG_ON("deprecated-declarations")
 
   /// Deprecated, use x() instead. Returns the x data const
-  virtual const MantidVec &dataX(const std::size_t index) const { return getSpectrum(index).dataX(); }
+  [[deprecated("use x() instead")]]
+  virtual const MantidVec &dataX(const std::size_t index) const {
+    return getSpectrum(index).x().rawData();
+  }
   /// Deprecated, use y() instead. Returns the y data const
-  virtual const MantidVec &dataY(const std::size_t index) const { return getSpectrum(index).dataY(); }
+  [[deprecated("use y() instead")]]
+  virtual const MantidVec &dataY(const std::size_t index) const {
+    return getSpectrum(index).y().rawData();
+  }
   /// Deprecated, use e() instead. Returns the error const
-  virtual const MantidVec &dataE(const std::size_t index) const { return getSpectrum(index).dataE(); }
+  [[deprecated("use e() instead")]]
+  virtual const MantidVec &dataE(const std::size_t index) const {
+    return getSpectrum(index).e().rawData();
+  }
   /// Deprecated, use dx() instead. Returns the error const
-  virtual const MantidVec &dataDx(const std::size_t index) const { return getSpectrum(index).dataDx(); }
+  [[deprecated("use dx() instead")]]
+  virtual const MantidVec &dataDx(const std::size_t index) const {
+    return getSpectrum(index).dx().rawData();
+  }
 
   virtual double getXMin() const;
   virtual double getXMax() const;
   virtual void getXMinMax(double &xmin, double &xmax) const;
 
   /// Deprecated, use sharedX() instead. Returns a pointer to the x data
+  [[deprecated("use sharedX() instead")]]
   virtual Kernel::cow_ptr<HistogramData::HistogramX> refX(const std::size_t index) const {
     return getSpectrum(index).sharedX();
   }
 
   /// Deprecated, use setSharedX() instead. Set the specified X array to point
   /// to the given existing array
+  [[deprecated("use setSharedX() instead")]]
   virtual void setX(const std::size_t index, const Kernel::cow_ptr<HistogramData::HistogramX> &X) {
     getSpectrum(index).setSharedX(X);
   }
 
   /// Deprecated, use setSharedX() instead. Set the specified X array to point
   /// to the given existing array
+  [[deprecated("use setSharedX() instead")]]
   virtual void setX(const std::size_t index, const std::shared_ptr<HistogramData::HistogramX> &X) {
     getSpectrum(index).setSharedX(X);
   }
@@ -536,12 +579,14 @@ private:
   MatrixWorkspace *doClone() const override = 0;
   MatrixWorkspace *doCloneEmpty() const override = 0;
 
-  /// Create an MantidImage instance.
-  MantidImage_sptr getImage(const MantidVec &(MatrixWorkspace::*read)(std::size_t const) const, size_t start,
-                            size_t stop, size_t width, size_t indexStart, size_t indexEnd) const;
+  /// Create an MantidImage instance. Templated on the accessor so that the histogram data types,
+  /// which are distinct per axis, can be used: y() and e() do not share a return type.
+  template <class Accessor>
+  MantidImage_sptr getImage(Accessor read, size_t start, size_t stop, size_t width, size_t indexStart,
+                            size_t indexEnd) const;
   /// Copy data from an image.
-  void setImage(MantidVec &(MatrixWorkspace::*dataVec)(const std::size_t), const MantidImage &image, size_t start,
-                [[maybe_unused]] bool parallelExecution);
+  template <class Accessor>
+  void setImage(Accessor mutableData, const MantidImage &image, size_t start, [[maybe_unused]] bool parallelExecution);
 
   void setIndexInfoWithoutISpectrumUpdate(const Indexing::IndexInfo &indexInfo);
   void buildDefaultSpectrumDefinitions();
