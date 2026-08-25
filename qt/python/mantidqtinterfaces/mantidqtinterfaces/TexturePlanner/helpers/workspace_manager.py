@@ -141,10 +141,8 @@ class WorkspaceManager:
             define_gauge_volume(self.ws, self.gauge_volume_str)
 
     def _update_existing_wss(self) -> None:
-        # ws and updated_mesh_ws carry the user's initial shape rotation (init_R); it must survive the
-        # instrument switch, but a plain CopySample drops it for a CSG shape (see
-        # copy_sample_preserving_initial_rotation), so preserve it explicitly. mesh_ws is the pristine,
-        # un-rotated sample and is copied as-is.
+        # ws and updated_mesh_ws carry the user's initial shape rotation (init_R), which must survive
+        # the instrument switch. mesh_ws is the pristine, un-rotated sample and is copied as-is.
         ws = self._create_new_ws_with_copied_sample(self.wsname, self.ws, clone=True, preserve_initial_rotation=True)
         mesh_ws = self._create_new_ws_with_copied_sample(self.WS_MESH_RAW, self.mesh_ws, clone=True)
         updated_mesh_ws = self._create_new_ws_with_copied_sample(
@@ -322,22 +320,13 @@ class WorkspaceManager:
         return new_ws
 
     @staticmethod
-    def _shape_is_mesh(ws: MatrixWorkspace) -> bool:
-        # a loaded STL becomes a MeshObject; the default cube and a loaded CSG xml are CSGObjects.
-        return type(ws.sample().getShape()).__name__ == "MeshObject"
+    def copy_sample_preserving_initial_rotation(source_ws: MatrixWorkspace, dest_ws: MatrixWorkspace) -> None:
+        """CopySample source_ws's sample onto dest_ws while keeping source_ws's initial shape
+        rotation (init_R).
 
-    def copy_sample_preserving_initial_rotation(self, source_ws: MatrixWorkspace, dest_ws: MatrixWorkspace) -> None:
-        """CopySample source_ws's sample onto dest_ws while keeping source_ws's baked-in initial
-        shape rotation (init_R).
-
-        CopySample re-bakes the *destination* workspace's run goniometer into the copied shape: for a
-        CSG shape it overwrites the <goniometer> tag that holds init_R (so a copy into an
-        identity-goniometer workspace silently strips init_R), while for a MeshObject it rotates the
-        vertices that already hold init_R. So the destination must carry init_R for a CSG shape, and
-        stay at identity for a mesh (otherwise init_R would be applied a second time). The destination
-        goniometer is only a vehicle for re-baking init_R into the shape, so it is restored to
-        identity afterwards - init_R must live in the shape, never in the run goniometer."""
-        gonio_R = np.eye(3) if self._shape_is_mesh(source_ws) else self.init_R.as_matrix()
-        dest_ws.run().getGoniometer().setR(gonio_R)
-        CopySample(InputWorkspace=source_ws, OutputWorkspace=dest_ws, CopyName=False, CopyEnvironment=False, CopyLattice=False)
+        CopySample leaves the copy baked to the destination workspace's run goniometer, so the
+        destination is set to identity first. That leaves the shape in its own frame, still carrying
+        init_R as a rotation within that frame exactly as the source had it - init_R must live in
+        the shape, never in the run goniometer. The same call works for both shape types."""
         dest_ws.run().getGoniometer().setR(np.eye(3))
+        CopySample(InputWorkspace=source_ws, OutputWorkspace=dest_ws, CopyName=False, CopyEnvironment=False, CopyLattice=False)
