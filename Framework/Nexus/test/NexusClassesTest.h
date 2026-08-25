@@ -158,19 +158,16 @@ public:
 
       // setup the empty datasets
       hsize_t const zero[] = {0};
-      Mantid::Nexus::DataSpaceID dataspace = H5Screate_simple(1, zero, nullptr); // H5Screate(H5S_SCALAR);
+      Mantid::Nexus::DataSpaceID dataspace = H5Screate_simple(1, zero, nullptr);
       // empty int32
       Mantid::Nexus::DataSetID i32 =
           H5Dcreate(groupid, "empty_int32", H5T_NATIVE_INT32, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-      H5Dwrite(i32, H5T_NATIVE_INT32, H5S_ALL, H5S_ALL, H5P_DEFAULT, nullptr);
       // empty float
       Mantid::Nexus::DataSetID f32 =
           H5Dcreate(groupid, "empty_float", H5T_NATIVE_FLOAT, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-      H5Dwrite(f32, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, nullptr);
       // empty double
       Mantid::Nexus::DataSetID d64 =
           H5Dcreate(groupid, "empty_double", H5T_NATIVE_DOUBLE, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-      H5Dwrite(d64, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, nullptr);
       // cleanup and close file
       H5Fclose(fid.release());
     }
