@@ -309,7 +309,6 @@ void ISISCalibration::handleRun() {
 
   if (m_outputNamePrefix.isEmpty()) {
     m_outputNamePrefix = outputWorkspaceName().toLower();
-    ;
   }
   m_outputCalibrationName = m_outputNamePrefix + "_calib";
 
