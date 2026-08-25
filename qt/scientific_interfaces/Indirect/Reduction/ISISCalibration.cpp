@@ -24,6 +24,8 @@ using namespace MantidQt::MantidWidgets;
 namespace {
 Mantid::Kernel::Logger g_log("ISISCalibration");
 const static std::string CALIBRATION_OUTPUT = "__IndirectCalibration_reduction";
+constexpr double PEAK_QUARTILE = 0.25;
+constexpr double BCKGRND_PERCENTILE = 0.125;
 
 template <typename Map, typename Key, typename Value>
 Value getValueOr(const Map &map, const Key &key, const Value &defaultValue) {
@@ -304,11 +306,12 @@ void ISISCalibration::algorithmComplete(bool error) {
 
 void ISISCalibration::handleRun() {
   const auto filenames = m_uiForm.leRunNo->getFilenames().join(",");
-  const auto outputWorkspaceNameStem = outputWorkspaceName().toLower();
 
-  m_outputCalibrationName =
-      m_outputNamePrefix.empty() ? outputWorkspaceNameStem : QString::fromStdString(m_outputNamePrefix);
-  m_outputCalibrationName += "_calib";
+  if (m_outputNamePrefix.isEmpty()) {
+    m_outputNamePrefix = outputWorkspaceName().toLower();
+    ;
+  }
+  m_outputCalibrationName = m_outputNamePrefix + "_calib";
 
   try {
     m_batchAlgoRunner->addAlgorithm(calibrationAlgorithm(filenames));
@@ -321,9 +324,7 @@ void ISISCalibration::handleRun() {
   m_pythonExportWsName = m_outputCalibrationName.toStdString();
   // Configure the resolution algorithm
   if (m_uiForm.ckCreateResolution->isChecked()) {
-    m_outputResolutionName =
-        m_outputNamePrefix.empty() ? outputWorkspaceNameStem : QString::fromStdString(m_outputNamePrefix);
-    m_outputResolutionName += "_res";
+    m_outputResolutionName = m_outputNamePrefix + "_res";
     m_batchAlgoRunner->addAlgorithm(resolutionAlgorithm(filenames));
 
     if (m_uiForm.ckSmoothResolution->isChecked())
@@ -423,8 +424,11 @@ void ISISCalibration::calPlotRaw(const std::string &inputName) {
   disconnectRangeSelectors();
   if (dataX.back() <= getValueOr(ranges, "peak-end-tof", 0.0) ||
       dataX.front() >= getValueOr(ranges, "peak-start-tof", 0.0)) {
-    setPeakRange((3.0 * dataX.front() + dataX.back()) / 4.0, (dataX.front() + 3.0 * dataX.back()) / 4.0);
-    setBackgroundRange(dataX.front(), (7.0 * dataX.front() + dataX.back()) / 8.0);
+    // Sets peak beginning/end within start/end 25% of the dataX range and background range within the first 12.5% of
+    // dataX range.
+    setPeakRange(dataX.front() + (dataX.back() - dataX.front()) * PEAK_QUARTILE,
+                 (dataX.back() - (dataX.back() - dataX.front()) * PEAK_QUARTILE));
+    setBackgroundRange(dataX.front(), dataX.front() + (dataX.back() - dataX.front()) * BCKGRND_PERCENTILE);
   } else {
     setPeakRange(getValueOr(ranges, "peak-start-tof", 0.0), getValueOr(ranges, "peak-end-tof", 0.0));
     setBackgroundRange(getValueOr(ranges, "back-start-tof", 0.0), getValueOr(ranges, "back-end-tof", 0.0));
@@ -471,7 +475,7 @@ void ISISCalibration::calPlotEnergy() {
   const auto &wsName = energyWs->getName();
   const auto prefix_pos = wsName.find("_red");
   if (prefix_pos != std::string::npos) {
-    m_outputNamePrefix = wsName.substr(0, prefix_pos);
+    m_outputNamePrefix = QString::fromStdString(wsName.substr(0, prefix_pos)).toLower();
   }
 
   const auto &dataX = energyWs->x(0);

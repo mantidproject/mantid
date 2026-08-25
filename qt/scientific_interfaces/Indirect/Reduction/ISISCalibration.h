@@ -87,7 +87,7 @@ private:
 
   QString m_outputCalibrationName;
   QString m_outputResolutionName;
-  std::string m_outputNamePrefix;
+  QString m_outputNamePrefix;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
