@@ -63,14 +63,14 @@ class ALFInstrumentViewPresenter(FullInstrumentViewPresenter):
         manager each time it is dragged, resized or rotated, so that the ALF tube selection
         always follows the rectangle.
         """
-        centres = self._transform_vectors_with_matrix(np.array(self._model.detector_positions), self._transform)
+        centres = self._model.transformed_detector_positions
         # Projection uses VTK, so must be done on the Qt thread before queueing the rest
         self._view.project_and_cache_detector_points(centres)
         self._callback_queue.put((self._on_roi_shape_changed, (centres,)))
 
     def _on_roi_shape_changed(self, centres: np.ndarray) -> None:
         mask = self._view.get_shape_mask(centres)
-        if self._select_bank_tube:
+        if self._view.is_select_bank_tube_checked():
             mask = self._model.expand_pickable_mask_to_parent_subtrees(mask)
         # A single stored key so that moving the rectangle replaces the selection rather than adding to it
         self._model.set_detector_key(self._ROI_SELECTION_KEY, mask.tolist(), CurrentTab.Grouping)
