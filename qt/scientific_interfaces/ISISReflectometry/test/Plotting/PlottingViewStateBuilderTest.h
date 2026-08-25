@@ -60,10 +60,10 @@ public:
   void testWorkspaceTreeDisplayStateMutesStitchedOutputsForAlignment() {
     PlottingWorkspaceTreeDisplayStateBuilder builder;
     auto const workspaceItems = std::vector<PlottingWorkspaceTreeItem>{groupItem(
-        "Group 1", {workspaceItem("Group 1", {}, "stitched_12345", PlottingWorkspaceOutputType::IvsQBinned),
-                    runItem("12345", {workspaceItem("IvsQ_binned_12345", PlottingWorkspaceOutputType::IvsQBinned)})})};
+        "Group 1", {workspaceItem("stitched_12345", ReducedWorkspaceOutputType::IvsQBinned),
+                    runItem("12345", {workspaceItem("IvsQ_binned_12345", ReducedWorkspaceOutputType::IvsQBinned)})})};
 
-    auto const displayItems = builder.workspaceItemsForPlotOutputType(workspaceItems, PlotOutputType::Alignment);
+    auto const displayItems = builder.build(workspaceItems, PlotOutputType::Alignment);
 
     TS_ASSERT(displayItems[0].children[0].muted);
     TS_ASSERT_EQUALS(displayItems[0].children[0].selectionMode, PlottingWorkspaceTreeSelectionMode::None);
@@ -74,35 +74,17 @@ public:
 
 private:
   PlottingWorkspaceTreeItem groupItem(std::string label, std::vector<PlottingWorkspaceTreeItem> children) const {
-    return {
-        std::move(label),   PlottingWorkspaceTreeItemType::Group, PlottingWorkspaceOutputType::None, "Group 1", {}, "",
-        std::move(children)};
-  }
-
-  PlottingWorkspaceTreeItem runItem(std::string label, std::vector<PlottingWorkspaceTreeItem> children) const {
-    auto runNumbers = std::vector<std::string>{label};
-    return {std::move(label),
-            PlottingWorkspaceTreeItemType::Run,
-            PlottingWorkspaceOutputType::None,
-            "Group 1",
-            std::move(runNumbers),
-            "",
+    return {std::move(label), PlottingWorkspaceTreeItemType::ReductionGroup, ReducedWorkspaceOutputType::None, "",
             std::move(children)};
   }
 
-  PlottingWorkspaceTreeItem workspaceItem(std::string groupName, std::vector<std::string> runNumbers, std::string label,
-                                          PlottingWorkspaceOutputType outputType) const {
-    auto const workspaceName = label;
-    return {std::move(label),
-            PlottingWorkspaceTreeItemType::Workspace,
-            outputType,
-            std::move(groupName),
-            std::move(runNumbers),
-            workspaceName,
-            {}};
+  PlottingWorkspaceTreeItem runItem(std::string label, std::vector<PlottingWorkspaceTreeItem> children) const {
+    return {std::move(label), PlottingWorkspaceTreeItemType::Run, ReducedWorkspaceOutputType::None, "",
+            std::move(children)};
   }
 
-  PlottingWorkspaceTreeItem workspaceItem(std::string label, PlottingWorkspaceOutputType outputType) const {
-    return workspaceItem("Group 1", {"12345"}, std::move(label), outputType);
+  PlottingWorkspaceTreeItem workspaceItem(std::string label, ReducedWorkspaceOutputType reducedOutputType) const {
+    auto const workspaceName = label;
+    return {std::move(label), PlottingWorkspaceTreeItemType::Workspace, reducedOutputType, workspaceName, {}};
   }
 };

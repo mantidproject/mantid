@@ -731,8 +731,8 @@ private:
 
   std::vector<PlottingWorkspaceTreeDisplayItem> workspaceItems() const {
     return {groupItem(
-        "Group 1", {runItem("12345", {workspaceItem("IvsQ_12345", PlottingWorkspaceOutputType::IvsQ),
-                                      workspaceItem("IvsQ_binned_12345", PlottingWorkspaceOutputType::IvsQBinned)})})};
+        "Group 1", {runItem("12345", {workspaceItem("IvsQ_12345", ReducedWorkspaceOutputType::IvsQ),
+                                      workspaceItem("IvsQ_binned_12345", ReducedWorkspaceOutputType::IvsQBinned)})})};
   }
 
   std::vector<PlottingWorkspaceTreeDisplayItem> workspaceItemsWithGroups(int groups) const {
@@ -740,16 +740,16 @@ private:
     for (auto group = 1; group <= groups; ++group) {
       auto const run = std::to_string(group) + "2345";
       items.emplace_back(groupItem("Group " + std::to_string(group),
-                                   {runItem(run, {workspaceItem("IvsQ_" + run, PlottingWorkspaceOutputType::IvsQ)})}));
+                                   {runItem(run, {workspaceItem("IvsQ_" + run, ReducedWorkspaceOutputType::IvsQ)})}));
     }
     return items;
   }
 
   std::vector<PlottingWorkspaceTreeDisplayItem> workspaceItemsWithBinnedOutput() const {
     return {groupItem(
-        "Group 1", {runItem("12345", {workspaceItem("IvsLam_12345", PlottingWorkspaceOutputType::IvsLambda),
-                                      workspaceItem("IvsQ_12345", PlottingWorkspaceOutputType::IvsQ),
-                                      workspaceItem("IvsQ_binned_12345", PlottingWorkspaceOutputType::IvsQBinned)})})};
+        "Group 1", {runItem("12345", {workspaceItem("IvsLam_12345", ReducedWorkspaceOutputType::IvsLambda),
+                                      workspaceItem("IvsQ_12345", ReducedWorkspaceOutputType::IvsQ),
+                                      workspaceItem("IvsQ_binned_12345", ReducedWorkspaceOutputType::IvsQBinned)})})};
   }
 
   std::vector<PlottingWorkspaceTreeDisplayItem> workspaceItemsWithMutedIvsLambda() const {
@@ -762,7 +762,7 @@ private:
     auto workspaces = std::vector<PlottingWorkspaceTreeDisplayItem>{};
     for (auto workspace = 1; workspace <= workspaceCount; ++workspace) {
       workspaces.emplace_back(
-          workspaceItem("IvsQ_binned_" + std::to_string(workspace), PlottingWorkspaceOutputType::IvsQBinned));
+          workspaceItem("IvsQ_binned_" + std::to_string(workspace), ReducedWorkspaceOutputType::IvsQBinned));
     }
     return {groupItem("Group 1", {runItem("12345", std::move(workspaces))})};
   }
@@ -773,7 +773,7 @@ private:
       workspaceGroups.emplace_back(
           workspaceGroupItem("IvsQ_binned_group_" + std::to_string(workspaceGroup),
                              {workspaceItem("IvsQ_binned_group_" + std::to_string(workspaceGroup) + "_1",
-                                            PlottingWorkspaceOutputType::IvsQBinned)}));
+                                            ReducedWorkspaceOutputType::IvsQBinned)}));
     }
     return {groupItem("Group 1", {runItem("12345", std::move(workspaceGroups))})};
   }
@@ -781,11 +781,11 @@ private:
   std::vector<PlottingWorkspaceTreeDisplayItem> workspaceItemsWithWorkspaceGroups() const {
     return {groupItem(
         "Group 1",
-        {runItem("12345", {workspaceGroupItem("IvsLam_group", {workspaceItem("IvsLam_group_1",
-                                                                             PlottingWorkspaceOutputType::IvsLambda)}),
-                           workspaceGroupItem(
-                               "IvsQ_binned_group",
-                               {workspaceItem("IvsQ_binned_group_1", PlottingWorkspaceOutputType::IvsQBinned)})})})};
+        {runItem("12345",
+                 {workspaceGroupItem("IvsLam_group",
+                                     {workspaceItem("IvsLam_group_1", ReducedWorkspaceOutputType::IvsLambda)}),
+                  workspaceGroupItem("IvsQ_binned_group", {workspaceItem("IvsQ_binned_group_1",
+                                                                         ReducedWorkspaceOutputType::IvsQBinned)})})})};
   }
 
   std::vector<PlottingWorkspaceTreeDisplayItem> workspaceItemsWithMutedIvsLambdaWorkspaceGroup() const {
@@ -816,9 +816,9 @@ private:
 
   std::vector<PlottingWorkspaceTreeDisplayItem> workspaceItemsWithStitchedOutput() const {
     return {groupItem(
-        "Group 1", {workspaceItem("stitched_12345", PlottingWorkspaceOutputType::IvsQBinned),
+        "Group 1", {workspaceItem("stitched_12345", ReducedWorkspaceOutputType::IvsQBinned),
                     workspaceGroupItem("stitched_group",
-                                       {workspaceItem("stitched_group_1", PlottingWorkspaceOutputType::IvsQBinned)})})};
+                                       {workspaceItem("stitched_group_1", ReducedWorkspaceOutputType::IvsQBinned)})})};
   }
 
   std::vector<PlottingWorkspaceTreeDisplayItem> workspaceItemsWithMutedStitchedOutput() const {
@@ -831,24 +831,24 @@ private:
 
   PlottingWorkspaceTreeDisplayItem groupItem(std::string label,
                                              std::vector<PlottingWorkspaceTreeDisplayItem> children) const {
-    return {std::move(label), PlottingWorkspaceTreeItemType::Group, PlottingWorkspaceOutputType::None, "",
+    return {std::move(label), PlottingWorkspaceTreeItemType::ReductionGroup, ReducedWorkspaceOutputType::None, "",
             std::move(children)};
   }
 
   PlottingWorkspaceTreeDisplayItem runItem(std::string label,
                                            std::vector<PlottingWorkspaceTreeDisplayItem> children) const {
-    return {std::move(label), PlottingWorkspaceTreeItemType::Run, PlottingWorkspaceOutputType::None, "",
+    return {std::move(label), PlottingWorkspaceTreeItemType::Run, ReducedWorkspaceOutputType::None, "",
             std::move(children)};
   }
 
   PlottingWorkspaceTreeDisplayItem workspaceGroupItem(std::string label,
                                                       std::vector<PlottingWorkspaceTreeDisplayItem> children) const {
     auto const workspaceName = label;
-    return {std::move(label), PlottingWorkspaceTreeItemType::WorkspaceGroup, PlottingWorkspaceOutputType::None,
+    return {std::move(label), PlottingWorkspaceTreeItemType::WorkspaceGroup, ReducedWorkspaceOutputType::None,
             workspaceName, std::move(children)};
   }
 
-  PlottingWorkspaceTreeDisplayItem workspaceItem(std::string label, PlottingWorkspaceOutputType outputType) const {
+  PlottingWorkspaceTreeDisplayItem workspaceItem(std::string label, ReducedWorkspaceOutputType outputType) const {
     auto const workspaceName = label;
     return {std::move(label), PlottingWorkspaceTreeItemType::Workspace, outputType, workspaceName, {}};
   }

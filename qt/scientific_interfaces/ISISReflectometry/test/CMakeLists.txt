@@ -44,6 +44,7 @@ set(TEST_FILES
     Plotting/PlottingModelTest.h
     Plotting/PlottingPresenterTest.h
     Plotting/PlottingViewStateBuilderTest.h
+    Plotting/PlottingWorkspaceTreeTest.h
     Plotting/QtPlottingViewTest.h
     Reduction/BatchLookupIndexTest.h
     Reduction/LookupTableTest.h

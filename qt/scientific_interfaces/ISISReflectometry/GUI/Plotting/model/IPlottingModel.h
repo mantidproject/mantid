@@ -15,13 +15,14 @@
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-/// Interface for converting plotting-tab selections into plot-ready workspaces.
+/// Interface for producing plot-ready workspaces from selected plotting workspaces.
 class MANTIDQT_ISISREFLECTOMETRY_DLL IPlottingModel {
 public:
   virtual ~IPlottingModel() = default;
   /// Return workspace names to plot for the selected output type.
-  virtual std::vector<std::string> workspacesForPlotting(std::vector<PlottingWorkspaceSelection> const &workspaces,
-                                                         PlotOutputSelection const &selection) const = 0;
+  virtual std::vector<std::string>
+  workspacesForPlotting(std::vector<PlottingWorkspace> const &selectedPlottingWorkspaces,
+                        PlotOutputSelection const &outputSelection) const = 0;
 };
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -21,8 +21,8 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 inline char const *toString(PlottingWorkspaceTreeItemType type) {
   switch (type) {
-  case PlottingWorkspaceTreeItemType::Group:
-    return "Group";
+  case PlottingWorkspaceTreeItemType::ReductionGroup:
+    return "ReductionGroup";
   case PlottingWorkspaceTreeItemType::Run:
     return "Run";
   case PlottingWorkspaceTreeItemType::WorkspaceGroup:
@@ -33,15 +33,15 @@ inline char const *toString(PlottingWorkspaceTreeItemType type) {
   return "Unknown";
 }
 
-inline char const *toString(PlottingWorkspaceOutputType type) {
+inline char const *toString(ReducedWorkspaceOutputType type) {
   switch (type) {
-  case PlottingWorkspaceOutputType::None:
+  case ReducedWorkspaceOutputType::None:
     return "None";
-  case PlottingWorkspaceOutputType::IvsQ:
+  case ReducedWorkspaceOutputType::IvsQ:
     return "IvsQ";
-  case PlottingWorkspaceOutputType::IvsLambda:
+  case ReducedWorkspaceOutputType::IvsLambda:
     return "IvsLambda";
-  case PlottingWorkspaceOutputType::IvsQBinned:
+  case ReducedWorkspaceOutputType::IvsQBinned:
     return "IvsQBinned";
   }
   return "Unknown";
@@ -49,7 +49,7 @@ inline char const *toString(PlottingWorkspaceOutputType type) {
 
 inline void PrintTo(PlottingWorkspaceTreeItemType type, std::ostream *os) { *os << toString(type); }
 
-inline void PrintTo(PlottingWorkspaceOutputType type, std::ostream *os) { *os << toString(type); }
+inline void PrintTo(ReducedWorkspaceOutputType type, std::ostream *os) { *os << toString(type); }
 
 inline char const *toString(PlottingWorkspaceTreeSelectionMode mode) {
   switch (mode) {
@@ -81,13 +81,23 @@ inline void printStringVector(std::vector<std::string> const &values, std::ostre
   *os << "]";
 }
 
+inline void PrintTo(PlottingWorkspace const &workspace, std::ostream *os) {
+  *os << "{workspaceName: \"" << workspace.workspaceName << "\", runNumbers: ";
+  printStringVector(workspace.runNumbers, os);
+  *os << ", containingWorkspaceGroupName: \"" << workspace.containingWorkspaceGroupName << "\", periodNumber: ";
+  if (workspace.periodNumber) {
+    *os << *workspace.periodNumber;
+  } else {
+    *os << "none";
+  }
+  *os << "}";
+}
+
 inline void PrintTo(PlottingWorkspaceTreeItem const &item, std::ostream *os) {
   *os << "{label: \"" << item.label << "\", itemType: ";
   PrintTo(item.itemType, os);
-  *os << ", outputType: ";
-  PrintTo(item.outputType, os);
-  *os << ", groupName: \"" << item.groupName << "\", runNumbers: ";
-  printStringVector(item.runNumbers, os);
+  *os << ", reducedOutputType: ";
+  PrintTo(item.reducedOutputType, os);
   *os << ", workspaceName: \"" << item.workspaceName << "\", children: [";
   for (std::size_t index = 0; index < item.children.size(); ++index) {
     if (index != 0)
@@ -100,8 +110,8 @@ inline void PrintTo(PlottingWorkspaceTreeItem const &item, std::ostream *os) {
 inline void PrintTo(PlottingWorkspaceTreeDisplayItem const &item, std::ostream *os) {
   *os << "{label: \"" << item.label << "\", itemType: ";
   PrintTo(item.itemType, os);
-  *os << ", outputType: ";
-  PrintTo(item.outputType, os);
+  *os << ", reducedOutputType: ";
+  PrintTo(item.reducedOutputType, os);
   *os << ", workspaceName: \"" << item.workspaceName << "\", children: [";
   for (std::size_t index = 0; index < item.children.size(); ++index) {
     if (index != 0)
@@ -168,9 +178,8 @@ inline bool operator==(PlotActionState const &lhs, PlotActionState const &rhs) {
 inline bool operator!=(PlotActionState const &lhs, PlotActionState const &rhs) { return !(lhs == rhs); }
 
 inline bool operator==(PlottingWorkspaceTreeItem const &lhs, PlottingWorkspaceTreeItem const &rhs) {
-  return lhs.label == rhs.label && lhs.itemType == rhs.itemType && lhs.outputType == rhs.outputType &&
-         lhs.groupName == rhs.groupName && lhs.runNumbers == rhs.runNumbers && lhs.workspaceName == rhs.workspaceName &&
-         lhs.children == rhs.children;
+  return lhs.label == rhs.label && lhs.itemType == rhs.itemType && lhs.reducedOutputType == rhs.reducedOutputType &&
+         lhs.workspaceName == rhs.workspaceName && lhs.children == rhs.children;
 }
 
 inline bool operator!=(PlottingWorkspaceTreeItem const &lhs, PlottingWorkspaceTreeItem const &rhs) {
@@ -178,7 +187,7 @@ inline bool operator!=(PlottingWorkspaceTreeItem const &lhs, PlottingWorkspaceTr
 }
 
 inline bool operator==(PlottingWorkspaceTreeDisplayItem const &lhs, PlottingWorkspaceTreeDisplayItem const &rhs) {
-  return lhs.label == rhs.label && lhs.itemType == rhs.itemType && lhs.outputType == rhs.outputType &&
+  return lhs.label == rhs.label && lhs.itemType == rhs.itemType && lhs.reducedOutputType == rhs.reducedOutputType &&
          lhs.workspaceName == rhs.workspaceName && lhs.children == rhs.children && lhs.muted == rhs.muted &&
          lhs.selectionMode == rhs.selectionMode;
 }
@@ -187,14 +196,11 @@ inline bool operator!=(PlottingWorkspaceTreeDisplayItem const &lhs, PlottingWork
   return !(lhs == rhs);
 }
 
-inline bool operator==(PlottingWorkspaceSelection const &lhs, PlottingWorkspaceSelection const &rhs) {
-  return lhs.workspaceName == rhs.workspaceName && lhs.outputType == rhs.outputType && lhs.groupName == rhs.groupName &&
-         lhs.runNumbers == rhs.runNumbers && lhs.workspaceGroupName == rhs.workspaceGroupName &&
-         lhs.period == rhs.period;
+inline bool operator==(PlottingWorkspace const &lhs, PlottingWorkspace const &rhs) {
+  return lhs.workspaceName == rhs.workspaceName && lhs.runNumbers == rhs.runNumbers &&
+         lhs.containingWorkspaceGroupName == rhs.containingWorkspaceGroupName && lhs.periodNumber == rhs.periodNumber;
 }
 
-inline bool operator!=(PlottingWorkspaceSelection const &lhs, PlottingWorkspaceSelection const &rhs) {
-  return !(lhs == rhs);
-}
+inline bool operator!=(PlottingWorkspace const &lhs, PlottingWorkspace const &rhs) { return !(lhs == rhs); }
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

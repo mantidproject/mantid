@@ -18,9 +18,9 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 /// Builds view-facing workspace tree display state from raw workspace tree data.
 class MANTIDQT_ISISREFLECTOMETRY_DLL PlottingWorkspaceTreeDisplayStateBuilder {
 public:
-  /// Return tree items annotated with output-type specific selectable and muted state.
-  std::vector<PlottingWorkspaceTreeDisplayItem>
-  workspaceItemsForPlotOutputType(std::vector<PlottingWorkspaceTreeItem> const &items, PlotOutputType outputType) const;
+  /// Build tree items annotated with output-type specific selectable and muted state.
+  std::vector<PlottingWorkspaceTreeDisplayItem> build(std::vector<PlottingWorkspaceTreeItem> const &items,
+                                                      PlotOutputType outputType) const;
 };
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

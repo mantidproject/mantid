@@ -28,7 +28,7 @@ public:
   /// Create properties from selectable tree item types, included workspace outputs and capabilities.
   PlotOutputTypeProperties(PlotOutputType plotOutputType,
                            std::vector<PlottingWorkspaceTreeItemType> selectableItemTypes,
-                           std::vector<PlottingWorkspaceOutputType> includedWorkspaceOutputTypes,
+                           std::vector<ReducedWorkspaceOutputType> includedReducedWorkspaceOutputTypes,
                            PlotOutputTypeCapabilities capabilities);
 
   /// Return the label shown in the plot output selector.
@@ -36,7 +36,7 @@ public:
   /// Return true if tree items of this type may be selected.
   bool allowsItemType(PlottingWorkspaceTreeItemType itemType) const;
   /// Return true if workspaces with this reduced output type may be selected.
-  bool includesWorkspaceOutput(PlottingWorkspaceOutputType outputType) const;
+  bool includesReducedWorkspaceOutput(ReducedWorkspaceOutputType outputType) const;
   /// Return true if the output can be plotted over compatible axes.
   bool supportsOverplot() const;
   /// Return true if the output can be added to an existing figure.
@@ -55,7 +55,7 @@ public:
 private:
   PlotOutputType m_plotOutputType;
   std::vector<PlottingWorkspaceTreeItemType> m_selectableItemTypes;
-  std::vector<PlottingWorkspaceOutputType> m_includedWorkspaceOutputTypes;
+  std::vector<ReducedWorkspaceOutputType> m_includedReducedWorkspaceOutputTypes;
   PlotOutputTypeCapabilities m_capabilities;
 };
 

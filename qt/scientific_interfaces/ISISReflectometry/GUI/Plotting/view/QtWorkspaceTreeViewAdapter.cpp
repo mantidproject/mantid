@@ -21,7 +21,7 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 namespace {
 auto constexpr itemTypeRole = Qt::UserRole + 1;
-auto constexpr outputTypeRole = Qt::UserRole + 2;
+auto constexpr reducedOutputTypeRole = Qt::UserRole + 2;
 auto constexpr workspaceNameRole = Qt::UserRole + 3;
 auto constexpr selectionModeRole = Qt::UserRole + 5;
 
@@ -29,7 +29,7 @@ template <typename Enum> int enumIndex(Enum value) { return static_cast<int>(val
 
 QString displayName(PlottingWorkspaceTreeItemType itemType) {
   switch (itemType) {
-  case PlottingWorkspaceTreeItemType::Group:
+  case PlottingWorkspaceTreeItemType::ReductionGroup:
     return "Group";
   case PlottingWorkspaceTreeItemType::Run:
     return "Run";
@@ -41,18 +41,18 @@ QString displayName(PlottingWorkspaceTreeItemType itemType) {
   throw std::runtime_error("Unexpected plotting workspace tree item type.");
 }
 
-QString displayName(PlottingWorkspaceOutputType outputType) {
+QString displayName(ReducedWorkspaceOutputType outputType) {
   switch (outputType) {
-  case PlottingWorkspaceOutputType::None:
+  case ReducedWorkspaceOutputType::None:
     return "";
-  case PlottingWorkspaceOutputType::IvsQ:
+  case ReducedWorkspaceOutputType::IvsQ:
     return "IvsQ";
-  case PlottingWorkspaceOutputType::IvsLambda:
+  case ReducedWorkspaceOutputType::IvsLambda:
     return "IvsLambda";
-  case PlottingWorkspaceOutputType::IvsQBinned:
+  case ReducedWorkspaceOutputType::IvsQBinned:
     return "IvsQBinned";
   }
-  throw std::runtime_error("Unexpected plotting workspace output type.");
+  throw std::runtime_error("Unexpected reduced workspace output type.");
 }
 
 QStandardItem *createNonEditableItem(QString const &text) {
@@ -170,11 +170,11 @@ bool QtWorkspaceTreeViewAdapter::eventFilter(QObject *watched, QEvent *event) {
 
 void QtWorkspaceTreeViewAdapter::addTreeItem(QStandardItem *parent, PlottingWorkspaceTreeDisplayItem const &item) {
   auto treeItem = createNonEditableItem(displayName(item.itemType));
-  auto outputTypeItem = createNonEditableItem(displayName(item.outputType));
+  auto outputTypeItem = createNonEditableItem(displayName(item.reducedOutputType));
   auto itemLabel = createNonEditableItem(QString::fromStdString(item.label));
   for (auto *rowItem : {treeItem, outputTypeItem, itemLabel}) {
     rowItem->setData(enumIndex(item.itemType), itemTypeRole);
-    rowItem->setData(enumIndex(item.outputType), outputTypeRole);
+    rowItem->setData(enumIndex(item.reducedOutputType), reducedOutputTypeRole);
     rowItem->setData(QString::fromStdString(item.workspaceName), workspaceNameRole);
     rowItem->setData(enumIndex(item.selectionMode), selectionModeRole);
   }

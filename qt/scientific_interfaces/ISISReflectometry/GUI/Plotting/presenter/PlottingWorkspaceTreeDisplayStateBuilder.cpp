@@ -37,7 +37,7 @@ bool isWorkspaceIncluded(PlottingWorkspaceTreeItem const &item, PlotOutputTypePr
   if (isPostprocessedGroupOutputExcluded(item, properties, parentIsGroup, parentIsWorkspaceGroup, grandparentIsGroup)) {
     return false;
   }
-  return properties.includesWorkspaceOutput(item.outputType);
+  return properties.includesReducedWorkspaceOutput(item.reducedOutputType);
 }
 
 bool hasWorkspaceDescendant(PlottingWorkspaceTreeItem const &item) {
@@ -75,7 +75,7 @@ bool allWorkspaceDescendantsIncluded(PlottingWorkspaceTreeItem const &item, Plot
            isWorkspaceIncluded(item, properties, parentIsGroup, parentIsWorkspaceGroup, grandparentIsGroup);
   }
 
-  auto const itemIsGroup = item.itemType == PlottingWorkspaceTreeItemType::Group;
+  auto const itemIsGroup = item.itemType == PlottingWorkspaceTreeItemType::ReductionGroup;
   auto const itemIsWorkspaceGroup = item.itemType == PlottingWorkspaceTreeItemType::WorkspaceGroup;
   return std::all_of(item.children.cbegin(), item.children.cend(), [&](auto const &child) {
     return allWorkspaceDescendantsIncluded(child, properties, itemIsGroup, itemIsWorkspaceGroup, parentIsGroup);
@@ -99,7 +99,7 @@ PlottingWorkspaceTreeDisplayItem evaluateItemState(PlottingWorkspaceTreeItem con
                                                    PlotOutputTypeProperties const &properties,
                                                    bool parentIsGroup = false, bool parentIsWorkspaceGroup = false,
                                                    bool grandparentIsGroup = false) {
-  auto const itemIsGroup = item.itemType == PlottingWorkspaceTreeItemType::Group;
+  auto const itemIsGroup = item.itemType == PlottingWorkspaceTreeItemType::ReductionGroup;
   auto const itemIsWorkspaceGroup = item.itemType == PlottingWorkspaceTreeItemType::WorkspaceGroup;
   auto children = std::vector<PlottingWorkspaceTreeDisplayItem>{};
   children.reserve(item.children.size());
@@ -114,7 +114,7 @@ PlottingWorkspaceTreeDisplayItem evaluateItemState(PlottingWorkspaceTreeItem con
        isWorkspaceIncluded(item, properties, parentIsGroup, parentIsWorkspaceGroup, grandparentIsGroup));
   return {item.label,
           item.itemType,
-          item.outputType,
+          item.reducedOutputType,
           item.workspaceName,
           std::move(children),
           !canSelectItemDirectly,
@@ -122,8 +122,9 @@ PlottingWorkspaceTreeDisplayItem evaluateItemState(PlottingWorkspaceTreeItem con
 }
 } // namespace
 
-std::vector<PlottingWorkspaceTreeDisplayItem> PlottingWorkspaceTreeDisplayStateBuilder::workspaceItemsForPlotOutputType(
-    std::vector<PlottingWorkspaceTreeItem> const &items, PlotOutputType outputType) const {
+std::vector<PlottingWorkspaceTreeDisplayItem>
+PlottingWorkspaceTreeDisplayStateBuilder::build(std::vector<PlottingWorkspaceTreeItem> const &items,
+                                                PlotOutputType outputType) const {
   auto const &properties = plotOutputTypeProperties(outputType);
   auto evaluatedItems = std::vector<PlottingWorkspaceTreeDisplayItem>{};
   evaluatedItems.reserve(items.size());

@@ -86,7 +86,6 @@ private:
   PlottingWorkspaceTree m_workspaceTree;
   PlottingViewStateBuilder m_viewStateBuilder;
   PlottingWorkspaceTreeDisplayStateBuilder m_workspaceTreeDisplayStateBuilder;
-  std::vector<PlottingWorkspaceTreeItem> m_workspaceItems;
   std::string m_instrumentName;
   bool m_outputSelectionEnabled;
   bool m_hasActiveReflectometryFigure;

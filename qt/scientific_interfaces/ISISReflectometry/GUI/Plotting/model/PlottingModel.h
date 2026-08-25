@@ -14,8 +14,8 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 class MANTIDQT_ISISREFLECTOMETRY_DLL PlottingModel : public IPlottingModel {
 public:
   /// Return existing or generated workspace names to plot for the selected output type.
-  std::vector<std::string> workspacesForPlotting(std::vector<PlottingWorkspaceSelection> const &workspaces,
-                                                 PlotOutputSelection const &selection) const override;
+  std::vector<std::string> workspacesForPlotting(std::vector<PlottingWorkspace> const &selectedPlottingWorkspaces,
+                                                 PlotOutputSelection const &outputSelection) const override;
 };
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

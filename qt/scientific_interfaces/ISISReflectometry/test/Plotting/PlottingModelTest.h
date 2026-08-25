@@ -28,7 +28,7 @@ public:
 
   void testReturnsSelectedWorkspacesForNonSpinAsymmetryPlotOutputTypes() {
     auto model = PlottingModel{};
-    auto const workspaces = workspaceSelections({"IvsQ_12345", "IvsQ_22345"});
+    auto const workspaces = plottingWorkspaces({"IvsQ_12345", "IvsQ_22345"});
 
     auto const workspacesForPlotting =
         model.workspacesForPlotting(workspaces, PlotOutputSelection{PlotOutputType::ReflectivityCurve});
@@ -39,7 +39,7 @@ public:
 
   void testReturnsSelectedWorkspaceGroupChildrenForNonSpinAsymmetryPlotOutputTypes() {
     auto model = PlottingModel{};
-    auto const workspaces = workspaceSelections({"IvsQ_12345_1", "IvsQ_12345_2"}, "IvsQ_12345");
+    auto const workspaces = plottingWorkspaces({"IvsQ_12345_1", "IvsQ_12345_2"}, "IvsQ_12345");
 
     auto const workspacesForPlotting =
         model.workspacesForPlotting(workspaces, PlotOutputSelection{PlotOutputType::ReflectivityCurve});
@@ -52,7 +52,7 @@ public:
     createConstantWorkspace("up", 6.0);
     createConstantWorkspace("down", 2.0);
     auto model = PlottingModel{};
-    auto const workspaces = workspaceSelections({"up", "down"}, "polarized_group");
+    auto const workspaces = plottingWorkspaces({"up", "down"}, "polarized_group");
 
     auto const workspacesForPlotting =
         model.workspacesForPlotting(workspaces, PlotOutputSelection{PlotOutputType::SpinAsymmetry});
@@ -67,7 +67,7 @@ public:
     createConstantWorkspace("up", 6.0);
     createConstantWorkspace("down", 2.0);
     auto model = PlottingModel{};
-    auto const workspaces = workspaceSelections({"up", "down"});
+    auto const workspaces = plottingWorkspaces({"up", "down"});
 
     auto const workspacesForPlotting =
         model.workspacesForPlotting(workspaces, PlotOutputSelection{PlotOutputType::SpinAsymmetry});
@@ -81,7 +81,7 @@ public:
     createConstantWorkspace("du", 4.0);
     createConstantWorkspace("dd", 2.0);
     auto model = PlottingModel{};
-    auto const workspaces = workspaceSelections({"uu", "ud", "du", "dd"}, "polarized_group");
+    auto const workspaces = plottingWorkspaces({"uu", "ud", "du", "dd"}, "polarized_group");
 
     auto const workspacesForPlotting =
         model.workspacesForPlotting(workspaces, PlotOutputSelection{PlotOutputType::SpinAsymmetry});
@@ -95,7 +95,7 @@ public:
     createConstantWorkspace("up", 6.0);
     createConstantWorkspace("down", 2.0);
     auto model = PlottingModel{};
-    auto const workspaces = workspaceSelections({"up", "down"}, "polarized_group");
+    auto const workspaces = plottingWorkspaces({"up", "down"}, "polarized_group");
 
     model.workspacesForPlotting(workspaces, PlotOutputSelection{PlotOutputType::SpinAsymmetry});
     auto const firstWorkspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(
@@ -110,7 +110,7 @@ public:
   void testSpinAsymmetryReturnsNoWorkspacesForUnsupportedSelectionSize() {
     createConstantWorkspace("only_one", 6.0);
     auto model = PlottingModel{};
-    auto const workspaces = workspaceSelections({"only_one"}, "polarized_group");
+    auto const workspaces = plottingWorkspaces({"only_one"}, "polarized_group");
 
     auto const workspacesForPlotting =
         model.workspacesForPlotting(workspaces, PlotOutputSelection{PlotOutputType::SpinAsymmetry});
@@ -123,7 +123,7 @@ public:
     createAlignmentInputWorkspace("raw_input_name", "12345", alignmentYValues(100, 7.0));
     createTOFGroup({"raw_input_name"});
     auto model = PlottingModel{};
-    auto const workspaces = workspaceSelections({"IvsQ_12345"});
+    auto const workspaces = plottingWorkspaces({"IvsQ_12345"});
 
     auto const workspacesForPlotting = model.workspacesForPlotting(workspaces, alignmentOutputSelection());
 
@@ -144,7 +144,7 @@ public:
                                   std::vector<double>(644, std::numeric_limits<double>::quiet_NaN()));
     createTOFGroup({"raw_input_name"});
     auto model = PlottingModel{};
-    auto const workspaces = workspaceSelections({"IvsQ_12345"});
+    auto const workspaces = plottingWorkspaces({"IvsQ_12345"});
 
     auto const workspacesForPlotting = model.workspacesForPlotting(workspaces, alignmentOutputSelection());
 
@@ -165,8 +165,8 @@ public:
     createAlignmentInputWorkspace("raw_input_name_2", "22345", alignmentYValues(110, 9.0));
     createTOFGroup({"raw_input_name_1", "raw_input_name_2"});
     auto model = PlottingModel{};
-    auto const workspaces = std::vector<PlottingWorkspaceSelection>{workspaceSelection("IvsQ_12345", {"12345"}),
-                                                                    workspaceSelection("IvsQ_22345", {"22345"})};
+    auto const workspaces = std::vector<PlottingWorkspace>{plottingWorkspace("IvsQ_12345", {"12345"}),
+                                                           plottingWorkspace("IvsQ_22345", {"22345"})};
 
     auto const workspacesForPlotting = model.workspacesForPlotting(workspaces, alignmentOutputSelection());
 
@@ -183,8 +183,7 @@ public:
     createAlignmentInputWorkspace("summed_raw_input_name", "12345+12346", {1.0, 3.0, 6.0, 3.0, 1.0});
     createTOFGroup({"summed_raw_input_name"});
     auto model = PlottingModel{};
-    auto const workspaces =
-        std::vector<PlottingWorkspaceSelection>{workspaceSelection("IvsQ_12345+12346", {"12345", "12346"})};
+    auto const workspaces = std::vector<PlottingWorkspace>{plottingWorkspace("IvsQ_12345+12346", {"12345", "12346"})};
 
     auto const workspacesForPlotting = model.workspacesForPlotting(workspaces, alignmentOutputSelection());
 
@@ -197,7 +196,7 @@ public:
     createAlignmentInputWorkspace("period_2_raw_input_name", "12345", alignmentYValues(100, 10.0), 2);
     createTOFGroup({"period_1_raw_input_name", "period_2_raw_input_name"});
     auto model = PlottingModel{};
-    auto const workspaces = std::vector<PlottingWorkspaceSelection>{workspaceSelection("IvsQ_12345_2", {"12345"}, 2)};
+    auto const workspaces = std::vector<PlottingWorkspace>{plottingWorkspace("IvsQ_12345_2", {"12345"}, 2)};
 
     auto const workspacesForPlotting = model.workspacesForPlotting(workspaces, alignmentOutputSelection());
 
@@ -211,7 +210,7 @@ public:
     createAlignmentInputWorkspace("raw_input_name", "12345", alignmentYValues(100, 7.0));
     createTOFGroup({"raw_input_name"});
     auto model = PlottingModel{};
-    auto const workspaces = workspaceSelections({"IvsQ_12345"});
+    auto const workspaces = plottingWorkspaces({"IvsQ_12345"});
 
     model.workspacesForPlotting(workspaces, alignmentOutputSelection());
     auto const firstWorkspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>(
@@ -231,7 +230,7 @@ public:
     auto outputSelection = PlotOutputSelection{PlotOutputType::Alignment};
     outputSelection.instrumentName = "UNKNOWN";
 
-    TS_ASSERT_THROWS(model.workspacesForPlotting(workspaceSelections({"IvsQ_12345"}), outputSelection),
+    TS_ASSERT_THROWS(model.workspacesForPlotting(plottingWorkspaces({"IvsQ_12345"}), outputSelection),
                      std::invalid_argument const &);
   }
 
@@ -240,7 +239,7 @@ public:
     createDetectorMapInputWorkspace("raw_input_name", "12345", 10.0);
     createTOFGroup({"raw_input_name"});
     auto model = PlottingModel{};
-    auto const workspaces = workspaceSelections({"IvsQ_12345"});
+    auto const workspaces = plottingWorkspaces({"IvsQ_12345"});
 
     auto const workspacesForPlotting = model.workspacesForPlotting(workspaces, detectorMapOutputSelection());
 
@@ -260,8 +259,8 @@ public:
     createDetectorMapInputWorkspace("raw_input_name_2", "22345", 20.0);
     createTOFGroup({"raw_input_name_1", "raw_input_name_2"});
     auto model = PlottingModel{};
-    auto const workspaces = std::vector<PlottingWorkspaceSelection>{workspaceSelection("IvsQ_12345", {"12345"}),
-                                                                    workspaceSelection("IvsQ_22345", {"22345"})};
+    auto const workspaces = std::vector<PlottingWorkspace>{plottingWorkspace("IvsQ_12345", {"12345"}),
+                                                           plottingWorkspace("IvsQ_22345", {"22345"})};
 
     auto const workspacesForPlotting = model.workspacesForPlotting(workspaces, detectorMapOutputSelection());
 
@@ -277,7 +276,7 @@ public:
     createDetectorMapInputWorkspace("period_2_raw_input_name", "12345", 20.0, 2);
     createTOFGroup({"period_1_raw_input_name", "period_2_raw_input_name"});
     auto model = PlottingModel{};
-    auto const workspaces = std::vector<PlottingWorkspaceSelection>{workspaceSelection("IvsQ_12345_2", {"12345"}, 2)};
+    auto const workspaces = std::vector<PlottingWorkspace>{plottingWorkspace("IvsQ_12345_2", {"12345"}, 2)};
 
     auto const workspacesForPlotting = model.workspacesForPlotting(workspaces, detectorMapOutputSelection());
 
@@ -295,7 +294,7 @@ public:
     auto model = PlottingModel{};
 
     auto const workspacesForPlotting =
-        model.workspacesForPlotting(workspaceSelections({"IvsQ_12345"}),
+        model.workspacesForPlotting(plottingWorkspaces({"IvsQ_12345"}),
                                     detectorMapOutputSelection(DetectorMapXAxis::Lambda, DetectorMapYAxis::DetectorId));
 
     TS_ASSERT_EQUALS(workspacesForPlotting.size(), 1);
@@ -310,7 +309,7 @@ public:
     createTOFGroup({"raw_input_name"});
     auto model = PlottingModel{};
 
-    model.workspacesForPlotting(workspaceSelections({"IvsQ_12345"}),
+    model.workspacesForPlotting(plottingWorkspaces({"IvsQ_12345"}),
                                 detectorMapOutputSelection(DetectorMapXAxis::TimeOfFlight, DetectorMapYAxis::Theta));
 
     auto outputWorkspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(
@@ -323,7 +322,7 @@ public:
     createDetectorMapInputWorkspace("raw_input_name", "12345", 10.0);
     createTOFGroup({"raw_input_name"});
     auto model = PlottingModel{};
-    auto const workspaces = workspaceSelections({"IvsQ_12345"});
+    auto const workspaces = plottingWorkspaces({"IvsQ_12345"});
 
     model.workspacesForPlotting(workspaces, detectorMapOutputSelection());
     auto const firstWorkspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(
@@ -342,8 +341,8 @@ public:
     createDetectorMapInputWorkspace("raw_input_name_minus", "12345--", 20.0);
     createTOFGroup({"raw_input_name_plus", "raw_input_name_minus"});
     auto model = PlottingModel{};
-    auto const workspaces = std::vector<PlottingWorkspaceSelection>{workspaceSelection("IvsQ_12345++", {"12345++"}),
-                                                                    workspaceSelection("IvsQ_12345--", {"12345--"})};
+    auto const workspaces = std::vector<PlottingWorkspace>{plottingWorkspace("IvsQ_12345++", {"12345++"}),
+                                                           plottingWorkspace("IvsQ_12345--", {"12345--"})};
 
     auto const workspacesForPlotting = model.workspacesForPlotting(workspaces, detectorMapOutputSelection());
 
@@ -362,7 +361,7 @@ public:
     auto outputSelection = detectorMapOutputSelection();
     outputSelection.instrumentName = "UNKNOWN";
 
-    TS_ASSERT_THROWS(model.workspacesForPlotting(workspaceSelections({"IvsQ_12345"}), outputSelection),
+    TS_ASSERT_THROWS(model.workspacesForPlotting(plottingWorkspaces({"IvsQ_12345"}), outputSelection),
                      std::invalid_argument const &);
   }
 
@@ -390,25 +389,21 @@ private:
     return values;
   }
 
-  PlottingWorkspaceSelection workspaceSelection(std::string workspaceName, std::vector<std::string> runNumbers,
-                                                std::optional<int> period = std::nullopt,
-                                                std::string const &workspaceGroupName = "") {
-    return {std::move(workspaceName),
-            PlottingWorkspaceOutputType::IvsQBinned,
-            "Group 1",
-            std::move(runNumbers),
-            workspaceGroupName,
-            period};
+  PlottingWorkspace plottingWorkspace(std::string workspaceName, std::vector<std::string> runNumbers,
+                                      std::optional<int> periodNumber = std::nullopt,
+                                      std::string const &containingWorkspaceGroupName = "") {
+    return {std::move(workspaceName), std::move(runNumbers), containingWorkspaceGroupName, periodNumber};
   }
 
-  std::vector<PlottingWorkspaceSelection> workspaceSelections(std::vector<std::string> workspaceNames,
-                                                              std::string const &workspaceGroupName = "") {
-    auto selections = std::vector<PlottingWorkspaceSelection>{};
-    selections.reserve(workspaceNames.size());
+  std::vector<PlottingWorkspace> plottingWorkspaces(std::vector<std::string> workspaceNames,
+                                                    std::string const &containingWorkspaceGroupName = "") {
+    auto plottingWorkspaces = std::vector<PlottingWorkspace>{};
+    plottingWorkspaces.reserve(workspaceNames.size());
     for (auto const &workspaceName : workspaceNames) {
-      selections.push_back(workspaceSelection(workspaceName, {"12345"}, std::nullopt, workspaceGroupName));
+      plottingWorkspaces.push_back(
+          plottingWorkspace(workspaceName, {"12345"}, std::nullopt, containingWorkspaceGroupName));
     }
-    return selections;
+    return plottingWorkspaces;
   }
 
   void createConstantWorkspace(std::string const &name, double yValue) {

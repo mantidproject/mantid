@@ -19,22 +19,22 @@ template <typename T> bool contains(std::vector<T> const &values, T value) {
 }
 
 std::vector<PlottingWorkspaceTreeItemType> allSelectableItemTypes() {
-  return {PlottingWorkspaceTreeItemType::Group, PlottingWorkspaceTreeItemType::Run,
+  return {PlottingWorkspaceTreeItemType::ReductionGroup, PlottingWorkspaceTreeItemType::Run,
           PlottingWorkspaceTreeItemType::WorkspaceGroup, PlottingWorkspaceTreeItemType::Workspace};
 }
 
-std::vector<PlottingWorkspaceOutputType> allReflectometryWorkspaceOutputTypes() {
-  return {PlottingWorkspaceOutputType::IvsQ, PlottingWorkspaceOutputType::IvsLambda,
-          PlottingWorkspaceOutputType::IvsQBinned};
+std::vector<ReducedWorkspaceOutputType> allReducedWorkspaceOutputTypes() {
+  return {ReducedWorkspaceOutputType::IvsQ, ReducedWorkspaceOutputType::IvsLambda,
+          ReducedWorkspaceOutputType::IvsQBinned};
 }
 
 std::vector<PlottingWorkspaceTreeItemType> groupOrRunItemTypes() {
-  return {PlottingWorkspaceTreeItemType::Group, PlottingWorkspaceTreeItemType::Run,
+  return {PlottingWorkspaceTreeItemType::ReductionGroup, PlottingWorkspaceTreeItemType::Run,
           PlottingWorkspaceTreeItemType::WorkspaceGroup};
 }
 
-std::vector<PlottingWorkspaceOutputType> reflectivityWorkspaceOutputTypes() {
-  return {PlottingWorkspaceOutputType::IvsQ, PlottingWorkspaceOutputType::IvsQBinned};
+std::vector<ReducedWorkspaceOutputType> reflectivityReducedWorkspaceOutputTypes() {
+  return {ReducedWorkspaceOutputType::IvsQ, ReducedWorkspaceOutputType::IvsQBinned};
 }
 
 const std::unordered_map<PlotOutputType, std::string> plotOutputTypeDisplayNames{
@@ -46,7 +46,7 @@ const std::unordered_map<PlotOutputType, std::string> plotOutputTypeDisplayNames
 
 PlotOutputTypeProperties const reflectivityCurveProperties{PlotOutputType::ReflectivityCurve,
                                                            allSelectableItemTypes(),
-                                                           reflectivityWorkspaceOutputTypes(),
+                                                           reflectivityReducedWorkspaceOutputTypes(),
                                                            {.supportsOverplot = true,
                                                             .supportsAddToExistingPlot = true,
                                                             .excludesPostprocessedGroupOutputs = false,
@@ -54,7 +54,7 @@ PlotOutputTypeProperties const reflectivityCurveProperties{PlotOutputType::Refle
 
 PlotOutputTypeProperties const detectorMapProperties{PlotOutputType::DetectorMap,
                                                      allSelectableItemTypes(),
-                                                     allReflectometryWorkspaceOutputTypes(),
+                                                     allReducedWorkspaceOutputTypes(),
                                                      {.supportsOverplot = false,
                                                       .supportsAddToExistingPlot = false,
                                                       .excludesPostprocessedGroupOutputs = true,
@@ -62,7 +62,7 @@ PlotOutputTypeProperties const detectorMapProperties{PlotOutputType::DetectorMap
 
 PlotOutputTypeProperties const spinAsymmetryProperties{PlotOutputType::SpinAsymmetry,
                                                        groupOrRunItemTypes(),
-                                                       {PlottingWorkspaceOutputType::IvsQBinned},
+                                                       {ReducedWorkspaceOutputType::IvsQBinned},
                                                        {.supportsOverplot = true,
                                                         .supportsAddToExistingPlot = true,
                                                         .excludesPostprocessedGroupOutputs = false,
@@ -70,7 +70,7 @@ PlotOutputTypeProperties const spinAsymmetryProperties{PlotOutputType::SpinAsymm
 
 PlotOutputTypeProperties const alignmentProperties{PlotOutputType::Alignment,
                                                    allSelectableItemTypes(),
-                                                   allReflectometryWorkspaceOutputTypes(),
+                                                   allReducedWorkspaceOutputTypes(),
                                                    {.supportsOverplot = true,
                                                     .supportsAddToExistingPlot = true,
                                                     .excludesPostprocessedGroupOutputs = true,
@@ -79,9 +79,11 @@ PlotOutputTypeProperties const alignmentProperties{PlotOutputType::Alignment,
 
 PlotOutputTypeProperties::PlotOutputTypeProperties(
     PlotOutputType plotOutputType, std::vector<PlottingWorkspaceTreeItemType> selectableItemTypes,
-    std::vector<PlottingWorkspaceOutputType> includedWorkspaceOutputTypes, PlotOutputTypeCapabilities capabilities)
+    std::vector<ReducedWorkspaceOutputType> includedReducedWorkspaceOutputTypes,
+    PlotOutputTypeCapabilities capabilities)
     : m_plotOutputType(plotOutputType), m_selectableItemTypes(std::move(selectableItemTypes)),
-      m_includedWorkspaceOutputTypes(std::move(includedWorkspaceOutputTypes)), m_capabilities(capabilities) {}
+      m_includedReducedWorkspaceOutputTypes(std::move(includedReducedWorkspaceOutputTypes)),
+      m_capabilities(capabilities) {}
 
 std::string const &PlotOutputTypeProperties::displayName() const {
   return plotOutputTypeDisplayNames.at(m_plotOutputType);
@@ -91,8 +93,8 @@ bool PlotOutputTypeProperties::allowsItemType(PlottingWorkspaceTreeItemType item
   return contains(m_selectableItemTypes, itemType);
 }
 
-bool PlotOutputTypeProperties::includesWorkspaceOutput(PlottingWorkspaceOutputType outputType) const {
-  return contains(m_includedWorkspaceOutputTypes, outputType);
+bool PlotOutputTypeProperties::includesReducedWorkspaceOutput(ReducedWorkspaceOutputType outputType) const {
+  return contains(m_includedReducedWorkspaceOutputTypes, outputType);
 }
 
 bool PlotOutputTypeProperties::supportsOverplot() const { return m_capabilities.supportsOverplot; }

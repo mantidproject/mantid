@@ -15,30 +15,26 @@
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 /// Node type used by the plotting-tab workspace tree.
-enum class PlottingWorkspaceTreeItemType { Group, Run, WorkspaceGroup, Workspace };
+enum class PlottingWorkspaceTreeItemType { ReductionGroup, Run, WorkspaceGroup, Workspace };
 
-/// Reduced workspace output represented by a selectable workspace tree item.
-enum class PlottingWorkspaceOutputType { None, IvsQ, IvsLambda, IvsQBinned };
+/// Reduction output represented by a workspace tree item.
+enum class ReducedWorkspaceOutputType { None, IvsQ, IvsLambda, IvsQBinned };
 
-/// Display and metadata for one node in the plotting-tab workspace tree.
+/// Domain data for one node in the plotting-tab workspace tree.
 struct MANTIDQT_ISISREFLECTOMETRY_DLL PlottingWorkspaceTreeItem {
   std::string label;
   PlottingWorkspaceTreeItemType itemType;
-  PlottingWorkspaceOutputType outputType;
-  std::string groupName;
-  std::vector<std::string> runNumbers;
+  ReducedWorkspaceOutputType reducedOutputType;
   std::string workspaceName;
   std::vector<PlottingWorkspaceTreeItem> children;
 };
 
-/// Metadata required by the model to produce plot-ready workspaces from a tree selection.
-struct MANTIDQT_ISISREFLECTOMETRY_DLL PlottingWorkspaceSelection {
+/// Workspace from which the plotting model can produce one or more plot-ready workspaces.
+struct MANTIDQT_ISISREFLECTOMETRY_DLL PlottingWorkspace {
   std::string workspaceName;
-  PlottingWorkspaceOutputType outputType;
-  std::string groupName;
   std::vector<std::string> runNumbers;
-  std::string workspaceGroupName;
-  std::optional<int> period;
+  std::string containingWorkspaceGroupName;
+  std::optional<int> periodNumber;
 };
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -39,7 +39,7 @@ auto constexpr alignmentWorkspacePrefix = "__isis_refl_align_";
 auto constexpr detectorMapWorkspacePrefix = "__isis_refl_det_map_";
 
 using IndexRegion = std::pair<int, int>;
-using WorkspaceCreator = std::vector<std::string> (*)(std::vector<PlottingWorkspaceSelection> const &,
+using WorkspaceCreator = std::vector<std::string> (*)(std::vector<PlottingWorkspace> const &,
                                                       PlotOutputSelection const &);
 
 struct GaussianParameters {
@@ -48,8 +48,8 @@ struct GaussianParameters {
   double sigma;
 };
 
-struct WorkspaceGroupSelection {
-  std::string key;
+struct WorkspaceGroupInputs {
+  std::string workspaceGroupName;
   std::vector<std::string> workspaceNames;
 };
 
@@ -301,20 +301,20 @@ bool workspaceHasCurrentPeriod(Mantid::API::MatrixWorkspace const &workspace, in
   }
 }
 
-bool workspaceMatchesTOFSelection(Mantid::API::MatrixWorkspace const &workspace,
-                                  PlottingWorkspaceSelection const &selection, std::string const &expectedRunNumber) {
+bool workspaceMatchesRunAndPeriod(Mantid::API::MatrixWorkspace const &workspace,
+                                  PlottingWorkspace const &plottingWorkspace, std::string const &expectedRunNumber) {
   if (!workspaceHasRunNumber(workspace, expectedRunNumber)) {
     return false;
   }
-  return !selection.period || workspaceHasCurrentPeriod(workspace, *selection.period);
+  return !plottingWorkspace.periodNumber || workspaceHasCurrentPeriod(workspace, *plottingWorkspace.periodNumber);
 }
 
-Mantid::API::MatrixWorkspace_sptr rawTOFWorkspaceForSelection(PlottingWorkspaceSelection const &workspace) {
-  if (workspace.runNumbers.size() != 1) {
+Mantid::API::MatrixWorkspace_sptr rawTOFWorkspaceFor(PlottingWorkspace const &plottingWorkspace) {
+  if (plottingWorkspace.runNumbers.size() != 1) {
     return nullptr;
   }
 
-  auto const &expectedRunNumber = workspace.runNumbers.front();
+  auto const &expectedRunNumber = plottingWorkspace.runNumbers.front();
   for (auto const &groupName : std::vector<std::string>{"TOF", "__TOF"}) {
     auto const workspaceGroup = workspaceGroupFromADS(groupName);
     if (!workspaceGroup) {
@@ -322,7 +322,7 @@ Mantid::API::MatrixWorkspace_sptr rawTOFWorkspaceForSelection(PlottingWorkspaceS
     }
     for (auto index = 0u; index < workspaceGroup->size(); ++index) {
       auto const groupMember = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(workspaceGroup->getItem(index));
-      if (groupMember && workspaceMatchesTOFSelection(*groupMember, workspace, expectedRunNumber)) {
+      if (groupMember && workspaceMatchesRunAndPeriod(*groupMember, plottingWorkspace, expectedRunNumber)) {
         return groupMember;
       }
     }
@@ -347,14 +347,14 @@ bool workspaceExists(std::string const &workspaceName) {
   return Mantid::API::AnalysisDataService::Instance().doesExist(workspaceName);
 }
 
-std::string createSpinAsymmetryWorkspace(WorkspaceGroupSelection const &workspaceGroup) {
-  auto const &workspaces = workspaceGroup.workspaceNames;
+std::string createSpinAsymmetryWorkspace(WorkspaceGroupInputs const &inputs) {
+  auto const &workspaces = inputs.workspaceNames;
   auto const upDownWorkspaces = spinAsymmetryUpDownWorkspaces(workspaces);
   if (!upDownWorkspaces) {
     return "";
   }
 
-  auto const outputWorkspace = std::string{spinAsymmetryWorkspacePrefix} + workspaceGroup.key;
+  auto const outputWorkspace = std::string{spinAsymmetryWorkspacePrefix} + inputs.workspaceGroupName;
   if (workspaceExists(outputWorkspace)) {
     return outputWorkspace;
   }
@@ -370,45 +370,48 @@ std::string createSpinAsymmetryWorkspace(WorkspaceGroupSelection const &workspac
   return outputWorkspace;
 }
 
-std::optional<std::string> groupingKey(PlottingWorkspaceSelection const &workspace) {
-  if (workspace.workspaceGroupName.empty()) {
+std::optional<std::string> containingWorkspaceGroupName(PlottingWorkspace const &plottingWorkspace) {
+  if (plottingWorkspace.containingWorkspaceGroupName.empty()) {
     return std::nullopt;
   }
-  return workspace.workspaceGroupName;
+  return plottingWorkspace.containingWorkspaceGroupName;
 }
 
-std::vector<WorkspaceGroupSelection>
-workspaceGroups(std::vector<PlottingWorkspaceSelection> const &selectedWorkspaces) {
-  auto keys = std::vector<std::string>{};
-  auto groupedWorkspaces = std::vector<WorkspaceGroupSelection>{};
-  for (auto const &workspace : selectedWorkspaces) {
-    auto const key = groupingKey(workspace);
-    if (!key) {
+std::vector<WorkspaceGroupInputs>
+workspaceGroupInputs(std::vector<PlottingWorkspace> const &selectedPlottingWorkspaces) {
+  auto workspaceGroupNames = std::vector<std::string>{};
+  auto groupedWorkspaces = std::vector<WorkspaceGroupInputs>{};
+  for (auto const &plottingWorkspace : selectedPlottingWorkspaces) {
+    auto const workspaceGroupName = containingWorkspaceGroupName(plottingWorkspace);
+    if (!workspaceGroupName) {
       continue;
     }
-    auto const keyIter = std::find(keys.cbegin(), keys.cend(), *key);
-    if (keyIter == keys.cend()) {
-      keys.emplace_back(*key);
-      groupedWorkspaces.push_back({*key, {workspace.workspaceName}});
+    auto const workspaceGroupNameIter =
+        std::find(workspaceGroupNames.cbegin(), workspaceGroupNames.cend(), *workspaceGroupName);
+    if (workspaceGroupNameIter == workspaceGroupNames.cend()) {
+      workspaceGroupNames.emplace_back(*workspaceGroupName);
+      groupedWorkspaces.push_back({*workspaceGroupName, {plottingWorkspace.workspaceName}});
     } else {
-      groupedWorkspaces[std::distance(keys.cbegin(), keyIter)].workspaceNames.emplace_back(workspace.workspaceName);
+      groupedWorkspaces[std::distance(workspaceGroupNames.cbegin(), workspaceGroupNameIter)]
+          .workspaceNames.emplace_back(plottingWorkspace.workspaceName);
     }
   }
   return groupedWorkspaces;
 }
 
-std::vector<std::string> selectedWorkspaceNames(std::vector<PlottingWorkspaceSelection> const &selectedWorkspaces) {
+std::vector<std::string> selectedWorkspaceNames(std::vector<PlottingWorkspace> const &selectedPlottingWorkspaces) {
   auto workspaceNames = std::vector<std::string>{};
-  workspaceNames.reserve(selectedWorkspaces.size());
-  std::transform(selectedWorkspaces.cbegin(), selectedWorkspaces.cend(), std::back_inserter(workspaceNames),
-                 [](const auto &workspace) { return workspace.workspaceName; });
+  workspaceNames.reserve(selectedPlottingWorkspaces.size());
+  std::transform(selectedPlottingWorkspaces.cbegin(), selectedPlottingWorkspaces.cend(),
+                 std::back_inserter(workspaceNames), [](const auto &workspace) { return workspace.workspaceName; });
   return workspaceNames;
 }
 
-std::vector<std::string> createSpinAsymmetryWorkspaces(std::vector<PlottingWorkspaceSelection> const &workspaces) {
+std::vector<std::string>
+createSpinAsymmetryWorkspaces(std::vector<PlottingWorkspace> const &selectedPlottingWorkspaces) {
   auto outputWorkspaces = std::vector<std::string>{};
-  for (auto const &workspaceGroup : workspaceGroups(workspaces)) {
-    auto outputWorkspace = createSpinAsymmetryWorkspace(workspaceGroup);
+  for (auto const &inputs : workspaceGroupInputs(selectedPlottingWorkspaces)) {
+    auto outputWorkspace = createSpinAsymmetryWorkspace(inputs);
     if (!outputWorkspace.empty()) {
       outputWorkspaces.emplace_back(std::move(outputWorkspace));
     }
@@ -431,19 +434,19 @@ std::string detectorMapAxisSuffix(DetectorMapXAxis const xAxis, DetectorMapYAxis
   return suffix;
 }
 
-std::string alignmentWorkspaceName(PlottingWorkspaceSelection const &workspace, AlignmentXAxis const xAxis) {
+std::string alignmentWorkspaceName(PlottingWorkspace const &workspace, AlignmentXAxis const xAxis) {
   return std::string{alignmentWorkspacePrefix} + workspace.workspaceName + alignmentXAxisSuffix(xAxis);
 }
 
-std::string detectorMapWorkspaceName(PlottingWorkspaceSelection const &workspace, DetectorMapXAxis const xAxis,
+std::string detectorMapWorkspaceName(PlottingWorkspace const &workspace, DetectorMapXAxis const xAxis,
                                      DetectorMapYAxis const yAxis) {
   return std::string{detectorMapWorkspacePrefix} + workspace.workspaceName + detectorMapAxisSuffix(xAxis, yAxis);
 }
 
-std::string createAlignmentWorkspace(PlottingWorkspaceSelection const &workspace, AlignmentXAxis const xAxis,
+std::string createAlignmentWorkspace(PlottingWorkspace const &workspace, AlignmentXAxis const xAxis,
                                      std::string const &instrumentName) {
   auto &ads = Mantid::API::AnalysisDataService::Instance();
-  auto const rawWorkspace = rawTOFWorkspaceForSelection(workspace);
+  auto const rawWorkspace = rawTOFWorkspaceFor(workspace);
   if (!rawWorkspace) {
     return "";
   }
@@ -481,7 +484,7 @@ std::string createAlignmentWorkspace(PlottingWorkspaceSelection const &workspace
   return outputWorkspace;
 }
 
-std::vector<std::string> createAlignmentWorkspaces(std::vector<PlottingWorkspaceSelection> const &workspaces,
+std::vector<std::string> createAlignmentWorkspaces(std::vector<PlottingWorkspace> const &workspaces,
                                                    AlignmentXAxis const xAxis, std::string const &instrumentName) {
   auto outputWorkspaces = std::vector<std::string>{};
   for (auto const &workspace : workspaces) {
@@ -493,10 +496,10 @@ std::vector<std::string> createAlignmentWorkspaces(std::vector<PlottingWorkspace
   return outputWorkspaces;
 }
 
-std::string createDetectorMapWorkspace(PlottingWorkspaceSelection const &workspace, DetectorMapXAxis const xAxis,
+std::string createDetectorMapWorkspace(PlottingWorkspace const &workspace, DetectorMapXAxis const xAxis,
                                        DetectorMapYAxis const yAxis, std::string const &instrumentName) {
   auto &ads = Mantid::API::AnalysisDataService::Instance();
-  auto const rawWorkspace = rawTOFWorkspaceForSelection(workspace);
+  auto const rawWorkspace = rawTOFWorkspaceFor(workspace);
   if (!rawWorkspace) {
     return "";
   }
@@ -516,7 +519,7 @@ std::string createDetectorMapWorkspace(PlottingWorkspaceSelection const &workspa
   return outputWorkspace;
 }
 
-std::vector<std::string> createDetectorMapWorkspaces(std::vector<PlottingWorkspaceSelection> const &workspaces,
+std::vector<std::string> createDetectorMapWorkspaces(std::vector<PlottingWorkspace> const &workspaces,
                                                      DetectorMapXAxis const xAxis, DetectorMapYAxis const yAxis,
                                                      std::string const &instrumentName) {
   auto outputWorkspaces = std::vector<std::string>{};
@@ -529,45 +532,47 @@ std::vector<std::string> createDetectorMapWorkspaces(std::vector<PlottingWorkspa
   return outputWorkspaces;
 }
 
-std::vector<std::string> selectedWorkspaceNamesForSelection(std::vector<PlottingWorkspaceSelection> const &workspaces,
-                                                            PlotOutputSelection const &) {
-  return selectedWorkspaceNames(workspaces);
+std::vector<std::string> reflectivityCurveWorkspaces(std::vector<PlottingWorkspace> const &selectedPlottingWorkspaces,
+                                                     PlotOutputSelection const &) {
+  return selectedWorkspaceNames(selectedPlottingWorkspaces);
 }
 
-std::vector<std::string> spinAsymmetryWorkspacesForSelection(std::vector<PlottingWorkspaceSelection> const &workspaces,
-                                                             PlotOutputSelection const &) {
-  return createSpinAsymmetryWorkspaces(workspaces);
+std::vector<std::string> spinAsymmetryWorkspaces(std::vector<PlottingWorkspace> const &selectedPlottingWorkspaces,
+                                                 PlotOutputSelection const &) {
+  return createSpinAsymmetryWorkspaces(selectedPlottingWorkspaces);
 }
 
-std::vector<std::string> alignmentWorkspacesForSelection(std::vector<PlottingWorkspaceSelection> const &workspaces,
-                                                         PlotOutputSelection const &selection) {
-  return createAlignmentWorkspaces(workspaces, selection.alignmentXAxis, selection.instrumentName);
+std::vector<std::string> alignmentWorkspaces(std::vector<PlottingWorkspace> const &selectedPlottingWorkspaces,
+                                             PlotOutputSelection const &outputSelection) {
+  return createAlignmentWorkspaces(selectedPlottingWorkspaces, outputSelection.alignmentXAxis,
+                                   outputSelection.instrumentName);
 }
 
-std::vector<std::string> detectorMapWorkspacesForSelection(std::vector<PlottingWorkspaceSelection> const &workspaces,
-                                                           PlotOutputSelection const &selection) {
-  return createDetectorMapWorkspaces(workspaces, selection.detectorMapXAxis, selection.detectorMapYAxis,
-                                     selection.instrumentName);
+std::vector<std::string> detectorMapWorkspaces(std::vector<PlottingWorkspace> const &selectedPlottingWorkspaces,
+                                               PlotOutputSelection const &outputSelection) {
+  return createDetectorMapWorkspaces(selectedPlottingWorkspaces, outputSelection.detectorMapXAxis,
+                                     outputSelection.detectorMapYAxis, outputSelection.instrumentName);
 }
 
 WorkspaceCreator workspaceCreatorFor(PlotOutputType const outputType) {
   switch (outputType) {
   case PlotOutputType::ReflectivityCurve:
-    return selectedWorkspaceNamesForSelection;
+    return reflectivityCurveWorkspaces;
   case PlotOutputType::DetectorMap:
-    return detectorMapWorkspacesForSelection;
+    return detectorMapWorkspaces;
   case PlotOutputType::SpinAsymmetry:
-    return spinAsymmetryWorkspacesForSelection;
+    return spinAsymmetryWorkspaces;
   case PlotOutputType::Alignment:
-    return alignmentWorkspacesForSelection;
+    return alignmentWorkspaces;
   }
   throw std::runtime_error("Unexpected reflectometry plot output type.");
 }
 } // namespace
 
-std::vector<std::string> PlottingModel::workspacesForPlotting(std::vector<PlottingWorkspaceSelection> const &workspaces,
-                                                              PlotOutputSelection const &selection) const {
-  return workspaceCreatorFor(selection.outputType)(workspaces, selection);
+std::vector<std::string>
+PlottingModel::workspacesForPlotting(std::vector<PlottingWorkspace> const &selectedPlottingWorkspaces,
+                                     PlotOutputSelection const &outputSelection) const {
+  return workspaceCreatorFor(outputSelection.outputType)(selectedPlottingWorkspaces, outputSelection);
 }
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

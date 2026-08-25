@@ -17,16 +17,19 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 class RunsTable;
 
-/// Builds workspace tree data and resolves selected workspace names.
+/// Owns the plotting workspaces and hierarchy derived from the runs table.
 class MANTIDQT_ISISREFLECTOMETRY_DLL PlottingWorkspaceTree {
 public:
-  /// Build tree items from successful reduction groups and rows in the runs table.
-  std::vector<PlottingWorkspaceTreeItem> makeWorkspaceItems(RunsTable const &runsTable);
-  /// Return plot metadata for selected workspace names that are still known to the tree.
-  std::vector<PlottingWorkspaceSelection> selectedWorkspacesFor(std::vector<std::string> const &workspaceNames) const;
+  /// Replace the tree with plotting workspaces from successful reductions in the runs table.
+  void rebuild(RunsTable const &runsTable);
+  /// Return the current plotting workspace hierarchy.
+  std::vector<PlottingWorkspaceTreeItem> const &items() const;
+  /// Return the known plotting workspaces matching the supplied ADS workspace names.
+  std::vector<PlottingWorkspace> plottingWorkspacesForNames(std::vector<std::string> const &workspaceNames) const;
 
 private:
-  std::unordered_map<std::string, PlottingWorkspaceSelection> m_workspaceSelectionsByName;
+  std::vector<PlottingWorkspaceTreeItem> m_items;
+  std::unordered_map<std::string, PlottingWorkspace> m_plottingWorkspacesByName;
 };
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

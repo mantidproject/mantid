@@ -21,7 +21,7 @@ enum class PlottingWorkspaceTreeSelectionMode { None, Direct, ParentOnly, Direct
 struct MANTIDQT_ISISREFLECTOMETRY_DLL PlottingWorkspaceTreeDisplayItem {
   std::string label;
   PlottingWorkspaceTreeItemType itemType;
-  PlottingWorkspaceOutputType outputType;
+  ReducedWorkspaceOutputType reducedOutputType;
   std::string workspaceName;
   std::vector<PlottingWorkspaceTreeDisplayItem> children;
   bool muted{false};
