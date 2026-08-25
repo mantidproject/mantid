@@ -9,7 +9,9 @@
 # (https://github.com/neutrons/garnet-tools, src/garnet/reduction/search.py,
 # branch main). Relicensed under GPL-3.0+ with permission for inclusion in
 # Mantid.
-# ruff: noqa: E741  # Ambiguous variable name (h, k, l are Miller indices)
+#
+# E741 is suppressed because h, k, l are Miller indices, not ambiguous names.
+# ruff: noqa: E741
 from mantid.api import (
     PythonAlgorithm,
     AlgorithmFactory,
@@ -77,7 +79,9 @@ def orthonormal_frame(n):
 
 def angular_distance_antipodal(u, v):
     """
-    Angle between two directions, treating antipodal directions as equal.
+    Angle between the two straight lines spanned by `u` and `v`.
+
+    The angle between `u` and `v` is the same as the angle between `-u` and `v`, since `u` and `-u` span the same line.
 
     Parameters
     ----------
@@ -95,6 +99,8 @@ def angular_distance_antipodal(u, v):
 def direct_basis_from_lattice(a, b, c, alpha, beta, gamma):
     """
     Build the direct-lattice basis matrix from lattice parameters.
+
+    This matrix stores direct-lattice vectors as columns; reciprocal-lattice vectors are stored as rows.
 
     Parameters
     ----------
@@ -161,6 +167,8 @@ def reciprocal_basis_from_direct_basis(A):
     """
     Compute the reciprocal-lattice basis conjugate to a direct-lattice basis.
 
+    The inverse transpose is used because direct-lattice vectors are stored as columns and reciprocal vectors as rows.
+
     Parameters
     ----------
     A : ndarray of shape (3, 3)
@@ -174,7 +182,7 @@ def reciprocal_basis_from_direct_basis(A):
     return np.linalg.inv(A).T
 
 
-def direct_basis_from_axes(a, b, c, a_hat, b_hat, c_hat):
+def direct_basis_from_axes(a, b, c, a_vec, b_vec, c_vec):
     """
     Build a direct-lattice basis from lattice lengths and axis directions.
 
@@ -182,7 +190,7 @@ def direct_basis_from_axes(a, b, c, a_hat, b_hat, c_hat):
     ----------
     a, b, c : float
         Lattice lengths.
-    a_hat, b_hat, c_hat : ndarray of shape (3,)
+    a_vec, b_vec, c_vec : ndarray of shape (3,)
         Directions of the a, b, c axes (not required to be unit length).
 
     Returns
@@ -192,9 +200,9 @@ def direct_basis_from_axes(a, b, c, a_hat, b_hat, c_hat):
     """
     return np.column_stack(
         [
-            a * normalize(a_hat),
-            b * normalize(b_hat),
-            c * normalize(c_hat),
+            a * normalize(a_vec),
+            b * normalize(b_vec),
+            c * normalize(c_vec),
         ]
     )
 
@@ -211,9 +219,7 @@ def centering_transform_to_primitive(centering):
     Returns
     -------
     T_cp : ndarray of shape (3, 3)
-        Transform such that the primitive direct-lattice basis is
-        `A_c @ T_cp`, where `A_c` is the conventional direct-lattice
-        basis.
+        Transform such that the primitive direct-lattice basis is `A_c @ T_cp`.
     """
     centering = centering.upper()
 
@@ -253,11 +259,9 @@ def conventional_to_primitive_lattice(a, b, c, alpha, beta, gamma, centering):
     Returns
     -------
     lattice_p : tuple
-        Primitive lattice parameters `(a, b, c, alpha, beta, gamma)`,
-        with angles in radians.
+        Primitive lattice parameters `(a, b, c, alpha, beta, gamma)`, with angles in radians.
     T_cp : ndarray of shape (3, 3)
-        Transform from the conventional to the primitive direct-lattice
-        basis, as returned by `centering_transform_to_primitive`.
+        Transform from the conventional to the primitive direct-lattice basis.
     """
     A_c = direct_basis_from_lattice(a, b, c, alpha, beta, gamma)
     T_cp = centering_transform_to_primitive(centering)
@@ -270,17 +274,16 @@ def primitive_ub_to_conventional_ub(UB_p, T_cp):
     """
     Convert a primitive-cell UB matrix to the conventional-cell UB matrix.
 
-    Miller indices reindex as `hkl_p = T_cp.T @ hkl_c`, so
-    `UB_c = UB_p @ T_cp.T`. Since `T_cp` is generally not orthogonal for
-    centered cells, this is not the same as `UB_p @ inv(T_cp)`.
+    Miller indices reindex as `hkl_p = T_cp.T @ hkl_c`, so `UB_c = UB_p @ T_cp.T`.
+
+    This is not generally the same as `UB_p @ inv(T_cp)` for centered cells.
 
     Parameters
     ----------
     UB_p : ndarray of shape (3, 3)
         UB matrix indexed on the primitive cell.
     T_cp : ndarray of shape (3, 3)
-        Transform from the conventional to the primitive direct-lattice
-        basis, as returned by `centering_transform_to_primitive`.
+        Transform from the conventional to the primitive direct-lattice basis.
 
     Returns
     -------
@@ -294,8 +297,7 @@ def sample_hemisphere_grid(n_az=160, n_pol=160):
     """
     Sample directions on a hemisphere on a regular azimuth/polar grid.
 
-    Only a hemisphere is sampled since `periodic_alignment_score` cannot
-    distinguish antipodal directions.
+    Only a hemisphere is sampled since `periodic_alignment_scores` cannot distinguish antipodal directions.
 
     Parameters
     ----------
@@ -335,14 +337,12 @@ def sample_spherical_cap(n, theta_max_deg, n_samples, rng=None):
     n_samples : int
         Number of directions to sample.
     rng : numpy.random.Generator, optional
-        Random number generator. A default generator is created if
-        omitted.
+        Random number generator. A default generator is created if omitted.
 
     Returns
     -------
     directions : ndarray of shape (n_samples, 3)
-        Unit vectors within the cap, or `n` itself (reshaped to shape
-        (1, 3)) if `theta_max_deg` is zero or negative.
+        Unit vectors within the cap, or `n` itself (reshaped to shape (1, 3)) if `theta_max_deg` is zero or negative.
     """
     if rng is None:
         rng = np.random.default_rng()
@@ -370,7 +370,7 @@ def project_reflections_onto_directions(q_vectors, directions):
     q_vectors : ndarray of shape (n_peaks, 3)
         Peak positions in the Q-sample frame, in inverse angstroms.
     directions : ndarray of shape (3,) or (n_directions, 3)
-        Candidate unit directions.
+        Candidate directions, assumed to be normalized.
 
     Returns
     -------
@@ -381,30 +381,25 @@ def project_reflections_onto_directions(q_vectors, directions):
     return q_vectors @ directions.T
 
 
-def periodic_alignment_score(s, spacing):
+def periodic_alignment_scores(s, spacing):
     """
     Score how closely values cluster near integers, via circular statistics.
 
-    If `direction` and `spacing` in `project_reflections_onto_directions`
-    match a true lattice axis and its length, `s * spacing` is exactly the
-    axis's Miller index and clusters near integers; the resultant vector
-    length of `exp(2j * pi * s * spacing)` is then close to 1. For an
-    unrelated direction or spacing the phases are effectively random and
-    the score is close to 0.
+    A true axis gives `s * spacing` near integer Miller indices, producing a score close to 1.
+
+    Unrelated directions have nearly random phases and score close to 0.
 
     Parameters
     ----------
     s : ndarray
-        Projections to test, as returned by
-        `project_reflections_onto_directions`.
+        Projections to test, with shape (n_peaks, n_directions), as returned by `project_reflections_onto_directions`.
     spacing : float
-        Candidate real-space lattice length along the projection
-        direction.
+        Candidate real-space lattice length along the projection direction.
 
     Returns
     -------
     score : ndarray
-        Mean resultant length, in [0, 1], reduced over axis 0.
+        Resultant phase length for each direction, in [0, 1], averaged over all peaks.
     """
     x = s * spacing
     return np.abs(np.exp(2j * np.pi * x).mean(axis=0))
@@ -433,9 +428,9 @@ def best_direction_from_candidates(q_vectors, directions, spacing):
         Score of every candidate direction.
     """
     s = project_reflections_onto_directions(q_vectors, directions)
-    score = periodic_alignment_score(s, spacing)
-    i_best = np.argmax(score)
-    return directions[i_best], score[i_best], score
+    scores = periodic_alignment_scores(s, spacing)
+    i_best = np.argmax(scores)
+    return directions[i_best], scores[i_best], scores
 
 
 def resolvability_metric(scores, directions, best_dir, exclude_deg=10.0):
@@ -451,20 +446,16 @@ def resolvability_metric(scores, directions, best_dir, exclude_deg=10.0):
     best_dir : ndarray of shape (3,)
         Highest-scoring direction.
     exclude_deg : float, optional
-        Angular radius, in degrees, around `best_dir` (and its
-        antipode) excluded when looking for the next-best competing
-        direction.
+        Angular radius, in degrees, around `best_dir` and its antipode for excluding nearby directions.
 
     Returns
     -------
     rho : float
-        Ratio of the gap between the best and next-best score to the
-        median score; larger values indicate a more distinct maximum.
+        Ratio of the score gap outside the excluded region to the median score.
     smax : float
         Score of the best direction.
     s2 : float
-        Best score outside the excluded region, or 0 if every
-        direction falls within it.
+        Best score outside the excluded region, or 0 if every direction falls within it.
     """
     exclude = np.deg2rad(exclude_deg)
     ang = np.array([angular_distance_antipodal(d, best_dir) for d in directions])
@@ -488,20 +479,18 @@ def choose_best_anchor(q_vectors, coarse_dirs, lengths, exclude_deg=10.0, length
     coarse_dirs : ndarray of shape (n_directions, 3)
         Candidate unit directions to search over.
     lengths : dict
-        Mapping of axis name ("a", "b", "c") to its real-space length.
+        Mapping of axis names ("a", "b", "c") to real-space lattice lengths.
     exclude_deg : float, optional
         Passed to `resolvability_metric`.
     length_resolution : float, optional
-        Lattice-length resolution, in angstroms; closer lengths are
-        scored once.
+        Lattice-length resolution, in angstroms; closer lengths are scored once.
 
     Returns
     -------
     best_name : str
         Name of the axis with the highest resolvability.
     results : dict
-        Mapping of axis name to a dict with keys "dir", "score",
-        "scores", "resolvability", "smax", and "s2".
+        Mapping of axis name to a dict with keys "dir", "score", "scores", "resolvability", "smax", and "s2".
     """
     results = {}
     cache = []
@@ -530,40 +519,31 @@ def cone_pair_from_anchor(anchor_hat, ang1, ang2, mutual_ang, psi):
     """
     Sample directions on two cones around an anchor direction.
 
-    For each azimuth in `psi`, generates a candidate direction for a
-    second axis at angle `ang1` from the anchor, and candidate
-    directions for a third axis at angle `ang2`, offset azimuthally
-    from the second axis by the angle implied by `mutual_ang` (the
-    angle between the second and third axes). Both azimuthal offset
-    directions (`+delta` and `-delta`) are returned, since the sign is
-    not determined by the angles alone.
+    For each azimuth in `psi`, generates candidate directions for the two non-anchor axes at the requested angles.
+
+    Both azimuthal offset directions (`+delta` and `-delta`) are returned because angles alone do not set the sign.
 
     Parameters
     ----------
     anchor_hat : ndarray of shape (3,)
         Anchor axis direction.
     ang1 : float
-        Angle between the anchor and the first candidate axis, in
-        radians.
+        Angle between the anchor and the first candidate axis, in radians.
     ang2 : float
-        Angle between the anchor and the second candidate axis, in
-        radians.
+        Angle between the anchor and the second candidate axis, in radians.
     mutual_ang : float
         Angle between the first and second candidate axes, in radians.
     psi : ndarray
-        Azimuthal angles, in radians, around the anchor at which to
-        sample.
+        Azimuthal angles, in radians, around the anchor at which to sample.
 
     Returns
     -------
     x_dirs : ndarray of shape (len(psi), 3)
         Candidate directions for the first axis, at azimuth `psi`.
     y_dirs_plus : ndarray of shape (len(psi), 3)
-        Candidate directions for the second axis, at azimuth
-        `psi + delta`.
+        Candidate directions for the second axis, at azimuth `psi + delta`.
     y_dirs_minus : ndarray of shape (len(psi), 3)
-        Candidate directions for the second axis, at azimuth
-        `psi - delta`.
+        Candidate directions for the second axis, at azimuth `psi - delta`.
     """
     anchor_hat = normalize(anchor_hat)
     u, v = orthonormal_frame(anchor_hat)
@@ -589,35 +569,21 @@ def cone_pair_from_anchor(anchor_hat, ang1, ang2, mutual_ang, psi):
 
 def right_handed_dirs2(anchor_hat, name_anchor, name1, name2, dirs1, dirs2_plus, dirs2_minus):
     """
-    Pick whichever of `dirs2_plus`/`dirs2_minus` gives a right-handed
-    (a, b, c) frame together with `anchor_hat` and `dirs1`.
+    Pick the `dirs2_plus` or `dirs2_minus` branch that gives a right-handed (a, b, c) frame.
 
-    `cone_pair_from_anchor`'s `+delta`/`-delta` branches are exact
-    mirror images of each other (through the plane containing
-    `anchor_hat` and the azimuth-`psi` rotation axis), so both satisfy
-    the requested inter-axial angles equally well -- mirroring
-    preserves every pairwise angle and length. Only their handedness
-    differs, and a rotation about `anchor_hat` (varying `psi`) can't
-    change chirality, so each branch's handedness is constant across
-    the whole `psi` sweep. This only needs checking once, at a single
-    `psi` (index 0), not per-candidate -- and letting the periodicity
-    score alone pick between the branches (as opposed to filtering by
-    handedness first) is exactly what let this search return a
-    left-handed UB roughly as often as a right-handed one.
+    The `+delta` and `-delta` branches are mirror images, so both satisfy the requested inter-axial angles equally well.
+    Only handedness differs, and varying `psi` cannot change chirality, so handedness only needs checking once.
 
     Parameters
     ----------
     anchor_hat : ndarray of shape (3,)
         Anchor axis direction.
     name_anchor, name1, name2 : str
-        Names ("a", "b", or "c") of the anchor axis and the two
-        candidate axes described by `dirs1` and `dirs2_plus`/
-        `dirs2_minus` respectively.
+        Names ("a", "b", or "c") of the anchor and two candidate axes.
     dirs1 : ndarray of shape (n_psi, 3)
         Candidate directions for `name1`.
     dirs2_plus, dirs2_minus : ndarray of shape (n_psi, 3)
-        Candidate directions for `name2`, for each azimuthal-offset
-        branch.
+        Candidate directions for `name2`, for each azimuthal-offset branch.
 
     Returns
     -------
@@ -638,12 +604,9 @@ def joint_pair_search_from_anchor(q_vectors, anchor_hat, name_anchor, a, b, c, a
     """
     Find the pair of non-anchor axes best matching the observed reflections.
 
-    Scans the azimuthal angle around the anchor axis over the full
-    circle and, at each value, scores candidate directions for the two
-    remaining lattice axes using `cone_pair_from_anchor`. Of its two
-    azimuthal-offset branches (`+delta` and `-delta`), only the one
-    that keeps (a, b, c) right-handed is searched -- see
-    `right_handed_dirs2`.
+    Scans the azimuthal angle around the anchor axis over the full circle and, at each value, scores candidate
+    directions for the two remaining lattice axes using `cone_pair_from_anchor`. Of its two azimuthal-offset branches
+    (`+delta` and `-delta`), only the one that keeps (a, b, c) right-handed is searched -- see `right_handed_dirs2`.
 
     Parameters
     ----------
@@ -669,8 +632,7 @@ def joint_pair_search_from_anchor(q_vectors, anchor_hat, name_anchor, a, b, c, a
     joint_score : float
         Combined score of `vec1` and `vec2`.
     branch : int
-        +1 if the `+delta` azimuthal offset was the right-handed (and
-        hence searched) branch, -1 if `-delta` was.
+        +1 if the `+delta` azimuthal offset was the right-handed (and hence searched) branch, -1 if `-delta` was.
     """
     psi = np.linspace(0.0, 2.0 * np.pi, n_psi, endpoint=False)
 
@@ -691,8 +653,8 @@ def joint_pair_search_from_anchor(q_vectors, anchor_hat, name_anchor, a, b, c, a
 
     dirs2, branch = right_handed_dirs2(anchor_hat, name_anchor, name1, name2, dirs1, dirs2_plus, dirs2_minus)
 
-    R1 = periodic_alignment_score(project_reflections_onto_directions(q_vectors, dirs1), d1)
-    R2 = periodic_alignment_score(project_reflections_onto_directions(q_vectors, dirs2), d2)
+    R1 = periodic_alignment_scores(project_reflections_onto_directions(q_vectors, dirs1), d1)
+    R2 = periodic_alignment_scores(project_reflections_onto_directions(q_vectors, dirs2), d2)
 
     joint = R1 * R2
     i_best = np.argmax(joint)
@@ -715,11 +677,10 @@ def refine_pair_from_anchor_local(
     n_psi=1440,
 ):
     """
-    Refine `joint_pair_search_from_anchor` within a narrow azimuthal window.
+    Refine the coarse azimuthal placement of the two non-anchor axes around the fixed anchor.
 
-    Of `cone_pair_from_anchor`'s two azimuthal-offset branches
-    (`+delta` and `-delta`), only the one that keeps (a, b, c)
-    right-handed is searched -- see `right_handed_dirs2`.
+    The joint search first finds the coarse azimuth around the anchor that best scores the two non-anchor axes.
+    Only the azimuthal-offset branch that keeps (a, b, c) right-handed is searched.
 
     Parameters
     ----------
@@ -751,8 +712,7 @@ def refine_pair_from_anchor_local(
     psi_best : float
         Azimuthal angle, in radians, that gave `joint_score`.
     branch : int
-        +1 if the `+delta` azimuthal offset was the right-handed (and
-        hence searched) branch, -1 if `-delta` was.
+        +1 if the `+delta` azimuthal offset was the right-handed (and hence searched) branch, -1 if `-delta` was.
     """
     psi_half_width = np.deg2rad(psi_half_width_deg)
     psi = np.linspace(
@@ -779,8 +739,8 @@ def refine_pair_from_anchor_local(
 
     dirs2, branch = right_handed_dirs2(anchor_hat, name_anchor, name1, name2, dirs1, dirs2_plus, dirs2_minus)
 
-    R1 = periodic_alignment_score(project_reflections_onto_directions(q_vectors, dirs1), d1)
-    R2 = periodic_alignment_score(project_reflections_onto_directions(q_vectors, dirs2), d2)
+    R1 = periodic_alignment_scores(project_reflections_onto_directions(q_vectors, dirs1), d1)
+    R2 = periodic_alignment_scores(project_reflections_onto_directions(q_vectors, dirs2), d2)
 
     joint = R1 * R2
     i_best = np.argmax(joint)
@@ -811,12 +771,9 @@ def estimate_frame_from_q(
     rng=None,
 ):
     """
-    Estimate lab-frame directions for the primitive a, b, c axes from Q.
+    Estimate lab-frame directions for the primitive a, b, c axes from a set of peak positions in the sample frame.
 
-    Chooses the most resolvable axis as an anchor, refines its direction
-    within a small cap, then locates the remaining two axes via a
-    coarse azimuthal search (`joint_pair_search_from_anchor`) followed
-    by a local refinement (`refine_pair_from_anchor_local`).
+    Chooses the most resolvable axis as an anchor, refines it, then finds the remaining axes by azimuthal search.
 
     Parameters
     ----------
@@ -829,24 +786,20 @@ def estimate_frame_from_q(
     coarse_dirs : ndarray of shape (n_directions, 3)
         Candidate unit directions for the initial anchor search.
     cap_angle_deg : float, optional
-        Half-angle, in degrees, of the local refinement region around
-        the anchor and around the coarse azimuthal estimate.
+        Half-angle, in degrees, of the local refinement cap around the anchor and coarse azimuthal estimate.
     cap_samples : int, optional
         Number of directions sampled when refining the anchor.
     n_psi : int, optional
-        Number of azimuthal samples used in the coarse and local
-        searches.
+        Number of azimuthal samples used in the coarse and local searches.
     rng : numpy.random.Generator, optional
-        Random number generator used to sample the anchor refinement
-        cap.
+        Random number generator used to sample the anchor refinement cap.
 
     Returns
     -------
     a_hat, b_hat, c_hat : ndarray of shape (3,)
         Estimated lab-frame directions of the primitive a, b, c axes.
     info : dict
-        Diagnostics with keys "anchor_name", "anchor_results",
-        "joint_score", "psi_best", and "branch".
+        Diagnostics with keys "anchor_name", "anchor_results", "joint_score", "psi_best", and "branch".
     """
     if rng is None:
         rng = np.random.default_rng(1234)
@@ -859,51 +812,16 @@ def estimate_frame_from_q(
     anchor_hat, _, _ = best_direction_from_candidates(q_vectors, anchor_refine, lengths[anchor_name])
     anchor_hat = normalize(anchor_hat)
 
-    (
-        name1,
-        name2,
-        vec1,
-        vec2,
-        joint_score,
-        branch,
-    ) = joint_pair_search_from_anchor(
-        q_vectors,
-        anchor_hat,
-        anchor_name,
-        a,
-        b,
-        c,
-        alpha,
-        beta,
-        gamma,
-        n_psi=n_psi,
+    name1, name2, vec1, vec2, joint_score, branch = joint_pair_search_from_anchor(
+        q_vectors, anchor_hat, anchor_name, a, b, c, alpha, beta, gamma, n_psi=n_psi
     )
 
     u, v = orthonormal_frame(anchor_hat)
     tangential = normalize(vec1 - np.dot(vec1, anchor_hat) * anchor_hat)
     psi_center = np.arctan2(np.dot(tangential, v), np.dot(tangential, u))
 
-    (
-        name1,
-        name2,
-        vec1,
-        vec2,
-        joint_score,
-        psi_best,
-        branch,
-    ) = refine_pair_from_anchor_local(
-        q_vectors,
-        anchor_hat,
-        anchor_name,
-        a,
-        b,
-        c,
-        alpha,
-        beta,
-        gamma,
-        psi_center,
-        psi_half_width_deg=cap_angle_deg,
-        n_psi=n_psi,
+    name1, name2, vec1, vec2, joint_score, psi_best, branch = refine_pair_from_anchor_local(
+        q_vectors, anchor_hat, anchor_name, a, b, c, alpha, beta, gamma, psi_center, psi_half_width_deg=cap_angle_deg, n_psi=n_psi
     )
 
     axes = {
@@ -930,17 +848,9 @@ def resolve_axis_length_degeneracy(q_vectors, a, b, c, a_hat, b_hat, c_hat, T_cp
     """
     Disambiguate near-degenerate axis lengths by comparing global fit quality.
 
-    `estimate_frame_from_q` decides which fitted direction belongs to
-    which axis using `periodic_alignment_score` against that axis's
-    target length. That test loses resolving power when two axis
-    lengths are close, since a direction with period close to one
-    length also scores well against the other, making the assignment
-    an effective coin flip. This tries swapping the fitted directions
-    for any pair of axes whose lengths are within `tol` (relative) of
-    each other, and keeps whichever assignment gives the lowest RMS
-    deviation of `hkl` from integers over the full peak set — a
-    discriminator the per-direction periodicity test doesn't have
-    access to.
+    The per-axis periodicity score loses resolving power when two axis lengths are close.
+
+    This tries swapping near-degenerate fitted directions and keeps the assignment with the lowest global hkl RMS.
 
     Parameters
     ----------
@@ -949,29 +859,24 @@ def resolve_axis_length_degeneracy(q_vectors, a, b, c, a_hat, b_hat, c_hat, T_cp
     a, b, c : float
         Primitive lattice lengths.
     a_hat, b_hat, c_hat : ndarray of shape (3,)
-        Estimated lab-frame directions of the primitive a, b, c axes,
-        as returned by `estimate_frame_from_q`.
+        Estimated lab-frame directions of the primitive a, b, c axes, as returned by `estimate_frame_from_q`.
     T_cp : ndarray of shape (3, 3)
-        Transform from the conventional to the primitive direct-lattice
-        basis, as returned by `centering_transform_to_primitive`.
+        Transform from the conventional to the primitive direct-lattice basis.
     tol : float, optional
-        Relative length difference, at or below which two axes are
-        treated as degenerate and their directions are tried swapped.
+        Relative length difference for treating two axes as degenerate.
 
     Returns
     -------
     a_hat, b_hat, c_hat : ndarray of shape (3,)
         Directions for the axes, possibly swapped from the input.
     UB_conv : ndarray of shape (3, 3)
-        UB matrix indexed on the conventional cell, for the chosen
-        assignment.
+        UB matrix indexed on the conventional cell, for the chosen assignment.
     hkl_conv : ndarray of shape (n_peaks, 3)
         Fractional Miller indices for the chosen assignment.
     rms_hkl : float
         RMS deviation of `hkl_conv` from the nearest integers.
     swap_applied : str
-        Which pair of axes was swapped relative to the input
-        directions: "none", "ab", "ac", or "bc".
+        Which pair of input axes was swapped: "none", "ab", "ac", or "bc".
     """
     lengths = {"a": a, "b": b, "c": c}
     hats = {"a": a_hat, "b": b_hat, "c": c_hat}
@@ -1022,10 +927,18 @@ def centering_mask(h, k, l, centering):
     """
     Test integer Miller indices against a centering's reflection condition.
 
+    In a centered lattice, not every integer (h, k, l) reflection is allowed.
+    The centering introduces systematic absences. This function returns a boolean mask marking
+    which `(h, k, l)` values satisfy the requested centering and which are systematic absences.
+
     Parameters
     ----------
-    h, k, l : ndarray
-        Integer Miller indices.
+    h : ndarray
+        Integer Miller h indices.
+    k : ndarray
+        Integer Miller k indices.
+    l : ndarray
+        Integer Miller l indices.
     centering : str
         Centering symbol: "P", "A", "B", "C", "I", "F", or "R".
 
@@ -1059,22 +972,18 @@ def score_centering_condition(hkl_frac, centering, tol=0.2):
     Parameters
     ----------
     hkl_frac : ndarray of shape (n_peaks, 3)
-        Fractional Miller indices, as computed from a candidate UB
-        matrix.
+        Fractional Miller indices, as computed from a candidate UB matrix.
     centering : str
         Centering symbol: "P", "A", "B", "C", "I", "F", or "R".
     tol : float, optional
-        Maximum deviation from an integer, per index, to count a
-        reflection as near-integer.
+        Maximum deviation from an integer, per index, to count a reflection as near-integer.
 
     Returns
     -------
     fraction_ok : float
-        Fraction of near-integer reflections that also satisfy the
-        centering condition; 0 if none are near-integer.
+        Fraction of near-integer reflections that also satisfy the centering condition; 0 if none are near-integer.
     info : dict
-        Counts with keys "n_total", "n_near_integer", and
-        "n_centering_ok".
+        Counts with keys "n_total", "n_near_integer", and "n_centering_ok".
     """
     hkl_frac = np.asarray(hkl_frac, dtype=float)
     hkl_round = np.rint(hkl_frac).astype(int)
@@ -1094,7 +1003,7 @@ def score_centering_condition(hkl_frac, centering, tol=0.2):
     ok = centering_mask(h, k, l, centering)
 
     return float(np.mean(ok)), {
-        "n_total": int(len(hkl_frac)),
+        "n_total": len(hkl_frac),
         "n_near_integer": int(np.sum(near_integer)),
         "n_centering_ok": int(np.sum(ok)),
     }
@@ -1102,14 +1011,11 @@ def score_centering_condition(hkl_frac, centering, tol=0.2):
 
 class FindUBFromConventionalCell(PythonAlgorithm):
     """
-    Determine a UB matrix from unindexed peaks and known conventional-cell
-    lattice parameters.
+    Determine a UB matrix from unindexed peaks and known conventional-cell lattice parameters.
 
-    Reduces the conventional cell to its primitive setting, searches for
-    the lab-frame directions of the primitive a, b, c axes by scoring
-    how well peak Q-vectors align with periodic projections along
-    candidate directions, then converts the resulting primitive UB back
-    to the conventional cell.
+    Reduces the conventional cell to its primitive setting, searches for the lab-frame directions of the primitive a, b,
+    c axes by scoring how well peak Q-vectors align with periodic projections along candidate directions, then converts
+    the resulting primitive UB back to the conventional cell.
     """
 
     def category(self):
@@ -1155,18 +1061,40 @@ class FindUBFromConventionalCell(PythonAlgorithm):
         )
 
         self.declareProperty(
-            "NumAzimuth", 240, IntBoundedValidator(lower=8), doc="Number of azimuthal samples in the coarse direction grid."
+            "NumAzimuth",
+            240,
+            IntBoundedValidator(lower=8),
+            doc="Number of azimuthal samples in the coarse direction grid.",
         )
-        self.declareProperty("NumPolar", 120, IntBoundedValidator(lower=8), doc="Number of polar samples in the coarse direction grid.")
+        self.declareProperty(
+            "NumPolar",
+            120,
+            IntBoundedValidator(lower=8),
+            doc="Number of polar samples in the coarse direction grid.",
+        )
         self.declareProperty("CapAngleDeg", 10.0, doc="Half-angle (degrees) of the local refinement cap.")
         self.declareProperty(
-            "CapSamples", 10000, IntBoundedValidator(lower=10), doc="Number of random directions sampled when refining the anchor axis."
+            "CapSamples",
+            10000,
+            IntBoundedValidator(lower=10),
+            doc="Number of random directions sampled when refining the anchor axis.",
         )
-        self.declareProperty("NumPsi", 1440, IntBoundedValidator(lower=30), doc="Number of azimuthal samples used in the axis-pair search.")
-        self.declareProperty("RandomSeed", 1234, doc="Seed for the random-number generator used in the cap refinement.")
-        self.declareProperty("Tolerance", 0.2, doc="Maximum per-index deviation from an integer to count a reflection as indexed.")
         self.declareProperty(
-            "AxisDegeneracyTolerance", 0.05, doc="Relative length difference below which two axes are treated as degenerate."
+            "NumPsi",
+            1440,
+            IntBoundedValidator(lower=30),
+            doc="Number of azimuthal samples used in the axis-pair search.",
+        )
+        self.declareProperty("RandomSeed", 1234, doc="Seed for the random-number generator used in the cap refinement.")
+        self.declareProperty(
+            "Tolerance",
+            0.2,
+            doc="Maximum per-index deviation from an integer to count a reflection as indexed.",
+        )
+        self.declareProperty(
+            "AxisDegeneracyTolerance",
+            0.05,
+            doc="Relative length difference below which two axes are treated as degenerate.",
         )
 
         self.declareProperty(
@@ -1189,8 +1117,7 @@ class FindUBFromConventionalCell(PythonAlgorithm):
         Returns
         -------
         issues : dict
-            Mapping of property name to an error message, for
-            properties that fail validation.
+            Mapping of property name to an error message, for properties that fail validation.
         """
         issues = {}
 
@@ -1238,10 +1165,7 @@ class FindUBFromConventionalCell(PythonAlgorithm):
         """
         Read peak positions from a workspace into an array.
 
-        Mantid's `getQSampleFrame` follows the convention
-        `Q = 2 * pi * UB @ hkl`; every other function in this module
-        assumes `Q = UB @ hkl` with `a_i . a*_j = delta_ij`, so the
-        `2 * pi` factor is divided out here.
+        Mantid's `getQSampleFrame` follows `Q = 2 * pi * UB @ hkl`; this module divides out `2 * pi`.
 
         Parameters
         ----------
@@ -1264,11 +1188,7 @@ class FindUBFromConventionalCell(PythonAlgorithm):
         """
         Attach a UB matrix to a peaks workspace's oriented lattice.
 
-        `SetUB`/`OrientedLattice.setUB` compute lattice parameters from
-        `UB` directly, with no `2 * pi` factor, matching this module's
-        convention already, so `UB_conv` is stored as-is. Only reading
-        `Q` back out (via `getQSampleFrame`) reintroduces the `2 * pi`
-        factor, which `_extract_q_vectors` accounts for.
+        `SetUB` and `OrientedLattice.setUB` use this module's no-`2 * pi` UB convention, so `UB_conv` is stored as-is.
 
         Parameters
         ----------
@@ -1303,19 +1223,15 @@ class FindUBFromConventionalCell(PythonAlgorithm):
         info : dict
             Diagnostics returned by `estimate_frame_from_q`.
         rms_hkl : float
-            RMS deviation of fitted Miller indices from their nearest
-            integers.
+            RMS deviation of fitted Miller indices from their nearest integers.
         centering_score : float
-            Fraction of near-integer reflections consistent with the
-            requested centering, from `score_centering_condition`.
+            Fraction of near-integer reflections consistent with the requested centering.
         centering_info : dict
             Counts returned by `score_centering_condition`.
         lattice_p : tuple
-            Primitive lattice parameters `(a, b, c, alpha, beta, gamma)`,
-            with angles in radians.
+            Primitive lattice parameters `(a, b, c, alpha, beta, gamma)`, with angles in radians.
         swap_applied : str
-            Axis pair swapped by `resolve_axis_length_degeneracy`:
-            "none", "ab", "ac", or "bc".
+            Axis pair swapped by `resolve_axis_length_degeneracy`: "none", "ab", "ac", or "bc".
 
         Returns
         -------
@@ -1360,16 +1276,14 @@ class FindUBFromConventionalCell(PythonAlgorithm):
         q_vectors : ndarray of shape (n_peaks, 3)
             Peak positions in the Q-sample frame, in inverse angstroms.
         a_hat, b_hat, c_hat : ndarray of shape (3,)
-            Estimated lab-frame directions of the primitive a, b, c
-            axes.
+            Estimated lab-frame directions of the primitive a, b, c axes.
         a, b, c : float
             Primitive lattice lengths.
 
         Returns
         -------
         ws : Workspace2D
-            Workspace with 3 spectra ("h", "k", "l") of projected
-            reflection counts binned over a common axis.
+            Workspace with 3 spectra ("h", "k", "l") of projected reflection counts binned over a common axis.
         """
         h_proj = project_reflections_onto_directions(q_vectors, a_hat).ravel() * a
         k_proj = project_reflections_onto_directions(q_vectors, b_hat).ravel() * b
@@ -1460,24 +1374,8 @@ class FindUBFromConventionalCell(PythonAlgorithm):
             rng=np.random.default_rng(seed),
         )
 
-        (
-            a_hat,
-            b_hat,
-            c_hat,
-            UB_conv,
-            hkl_conv,
-            rms_hkl,
-            swap_applied,
-        ) = resolve_axis_length_degeneracy(
-            q_vectors,
-            a_p,
-            b_p,
-            c_p,
-            a_hat,
-            b_hat,
-            c_hat,
-            T_cp,
-            tol=degeneracy_tol,
+        a_hat, b_hat, c_hat, UB_conv, hkl_conv, rms_hkl, swap_applied = resolve_axis_length_degeneracy(
+            q_vectors, a_p, b_p, c_p, a_hat, b_hat, c_hat, T_cp, tol=degeneracy_tol
         )
         if swap_applied != "none":
             self.log().notice(
