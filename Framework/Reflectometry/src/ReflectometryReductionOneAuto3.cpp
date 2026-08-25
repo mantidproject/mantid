@@ -74,18 +74,21 @@ const std::string ReflectometryReductionOneAuto3::summary() const {
  * @return :: void
  */
 void ReflectometryReductionOneAuto3::validateTransmissionRun(std::map<std::string, std::string> &results,
-                                                             const std::string &transmissionRun) {
-  const std::string str = getPropertyValue(transmissionRun);
-  if (!str.empty()) {
-    auto transmissionGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(str);
-    // If it is not a group, we don't need to validate its size
-    if (!transmissionGroup)
-      return;
-    g_log.warning("Transmission run provided as a group. Only the first member of the group will be used.");
-    if (transmissionGroup->size() < 1) {
-      results[transmissionRun] = transmissionRun + " group is empty. ";
-    }
-  }
+                                                             const Property &transmissionRun) {
+  if (transmissionRun.isDefault())
+    return;
+
+  const auto transmissionRunName = transmissionRun.value();
+  if (transmissionRunName.empty())
+    return;
+
+  auto transmissionGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(transmissionRunName);
+  // If it is not a group, we don't need to validate its size
+  if (!transmissionGroup)
+    return;
+  g_log.warning("Transmission run provided as a group. Only the first member of the group will be used.");
+  if (transmissionGroup->size() < 1)
+    results[transmissionRun.name()] = transmissionRunName + " group is empty. ";
 }
 
 /** Validate transmission runs
@@ -94,6 +97,13 @@ void ReflectometryReductionOneAuto3::validateTransmissionRun(std::map<std::strin
  */
 std::map<std::string, std::string> ReflectometryReductionOneAuto3::validateInputs() {
   std::map<std::string, std::string> results;
+
+  const auto *firstTrans = getPointerToProperty("FirstTransmissionRun");
+  const auto *secondTrans = getPointerToProperty("SecondTransmissionRun");
+  if (!secondTrans->isDefault() && firstTrans->isDefault()) {
+    results[secondTrans->name()] =
+        "If a second transmission run is provided, a first transmission run must also be provided.";
+  }
 
   // Validate transmission runs only if our input workspace is a group
   if (!checkGroups())
@@ -104,9 +114,8 @@ std::map<std::string, std::string> ReflectometryReductionOneAuto3::validateInput
     return results;
 
   // First and second transmission runs
-  validateTransmissionRun(results, "FirstTransmissionRun");
-  validateTransmissionRun(results, "SecondTransmissionRun");
-
+  validateTransmissionRun(results, *firstTrans);
+  validateTransmissionRun(results, *secondTrans);
   return results;
 }
 
@@ -320,14 +329,9 @@ void ReflectometryReductionOneAuto3::init() {
 }
 
 // Performs the reduction using ReflectometryReductionOne
-ReflectometryReductionOneAuto3::RROOutputs ReflectometryReductionOneAuto3::performCoreReduction(
-    MatrixWorkspace_sptr inputWS, const std::vector<std::string> &taskOrder, const bool applyFloodCorrections) {
-  auto instrument = inputWS->getInstrument();
-  MatrixWorkspace_sptr flood = (applyFloodCorrections) ? getFloodWorkspace(instrument) : MatrixWorkspace_sptr{};
-  if (flood) {
-    inputWS = runFloodCorrectionAlg(flood, inputWS);
-  }
-
+ReflectometryReductionOneAuto3::RROOutputs
+ReflectometryReductionOneAuto3::performCoreReduction(MatrixWorkspace_sptr inputWS,
+                                                     const std::vector<std::string> &taskOrder) {
   bool const isDebug = getProperty("Debug");
 
   Algorithm_sptr alg = createChildAlgorithm("ReflectometryReductionOne");
@@ -342,6 +346,8 @@ ReflectometryReductionOneAuto3::RROOutputs ReflectometryReductionOneAuto3::perfo
   alg->setProperty("IncludePartialBins", getPropertyValue("IncludePartialBins"));
   alg->setProperty("Diagnostics", getPropertyValue("Diagnostics"));
   alg->setProperty("Debug", isDebug);
+
+  const auto instrument = inputWS->getInstrument();
   double wavMin = checkForMandatoryInstrumentDefault<double>(this, "WavelengthMin", instrument, "LambdaMin");
   alg->setProperty("WavelengthMin", wavMin);
   double wavMax = checkForMandatoryInstrumentDefault<double>(this, "WavelengthMax", instrument, "LambdaMax");
@@ -378,8 +384,9 @@ ReflectometryReductionOneAuto3::RROOutputs ReflectometryReductionOneAuto3::perfo
   populateMonitorProperties(alg, instrument);
   alg->setPropertyValue("NormalizeByIntegratedMonitors", getPropertyValue("NormalizeByIntegratedMonitors"));
 
-  bool transRunsFound = populateTransmissionProperties(alg, flood);
-  if (!transRunsFound)
+  const auto &[firstTransRun, secondTransRun] = getTransmissionRuns();
+  const bool transPropsSet = setTransmissionProperties(alg, firstTransRun, secondTransRun);
+  if (!transPropsSet)
     populateAlgorithmicCorrectionProperties(alg);
 
   alg->setPropertyValue("SubtractBackground", getPropertyValue("SubtractBackground"));
@@ -402,6 +409,14 @@ ReflectometryReductionOneAuto3::RROOutputs ReflectometryReductionOneAuto3::perfo
           .trans2 = alg->getProperty("OutputWorkspaceSecondTransmission"),
           .out = alg->getProperty("OutputWorkspace"),
           .theta = theta};
+}
+
+std::pair<MatrixWorkspace_sptr, MatrixWorkspace_sptr> ReflectometryReductionOneAuto3::getTransmissionRuns() {
+  if (!m_firstTransmissionRun) {
+    m_firstTransmissionRun = getWorkspaceFromProperty("FirstTransmissionRun");
+    m_secondTransmissionRun = getWorkspaceFromProperty("SecondTransmissionRun");
+  }
+  return {m_firstTransmissionRun, m_secondTransmissionRun};
 }
 
 void ReflectometryReductionOneAuto3::postReductionProcessingGroups(std::vector<RROOutputs> &outputs,
@@ -476,11 +491,15 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto3::postReductionProcessing(con
 /** Execute the algorithm.
  */
 void ReflectometryReductionOneAuto3::exec() {
+  CacheHandler cacheHandler(*this);
   Workspace_sptr inputWorkspace = getWorkspaceFromProperty("InputWorkspace");
   sumBanks(inputWorkspace);
-  setDefaultOutputWorkspaceNames();
 
   auto inputWS = std::dynamic_pointer_cast<MatrixWorkspace>(inputWorkspace);
+  inputWS = applyFloodCorrection(inputWS);
+  applyFloodCorrectionToTransmissionRuns();
+
+  setDefaultOutputWorkspaceNames();
   determineCorrectionAlgorithm(inputWS->getInstrument());
   RROOutputs out = performCoreReduction(inputWS);
   const auto params = getRebinParams(out.IvsQ, out.theta);
@@ -899,7 +918,7 @@ ReflectometryReductionOneAuto3::processGroupMembersOutput ReflectometryReduction
     if (reduced) {
       const auto &origProcessingInstructions = getPropertyValue("ProcessingInstructions");
       setPropertyValue("ProcessingInstructions", convertToSpectrumNumber("0", matrixWs));
-      allRROOutputs.push_back(performCoreReduction(std::move(matrixWs), taskOrder, false));
+      allRROOutputs.push_back(performCoreReduction(std::move(matrixWs), taskOrder));
       setPropertyValue("ProcessingInstructions", origProcessingInstructions);
     } else {
       allRROOutputs.push_back(performCoreReduction(std::move(matrixWs), taskOrder));
@@ -931,18 +950,28 @@ std::vector<std::string> ReflectometryReductionOneAuto3::getTaskExecutionOrder(c
  * runs and polarization analysis.
  */
 bool ReflectometryReductionOneAuto3::processGroups() {
+  CacheHandler cacheHandler(*this);
+
   // this algorithm effectively behaves as MultiPeriodGroupAlgorithm
+  // Validate inputs as this is not run for group workspace inputs not called via alg dialog
+  const auto &results = validateInputs();
+  for (const auto &result : results) {
+    throw std::runtime_error(result.first + " property: " + result.second);
+  }
+
   m_usingBaseProcessGroups = true;
   enableHistoryRecordingForProcessGroups(true);
 
   Workspace_sptr inputWorkspace =
       AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(getPropertyValue("InputWorkspace"));
   const bool banksSummed = sumBanks(inputWorkspace);
-  const auto inputGroup = std::dynamic_pointer_cast<WorkspaceGroup>(inputWorkspace);
+  WorkspaceGroup_sptr inputGroup = std::dynamic_pointer_cast<WorkspaceGroup>(inputWorkspace);
   const auto groupName = inputGroup->getName();
-  const auto groupMembers = inputGroup->getAllItems();
   std::string const runNumber = getRunNumberForWorkspaceGroup(groupName);
+  inputGroup = applyFloodCorrection(inputGroup);
+  const auto groupMembers = inputGroup->getAllItems();
   determineCorrectionAlgorithm(std::dynamic_pointer_cast<MatrixWorkspace>(groupMembers[0])->getInstrument());
+  applyFloodCorrectionToTransmissionRuns();
 
   const bool polarizationAnalysisOn = getProperty("PolarizationAnalysis");
   std::vector<std::string> taskOrder;
@@ -1035,6 +1064,8 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto3::getFloodWorkspace(const Ins
   }
   if (method == "Workspace" && !isDefault("FloodWorkspace")) {
     return getProperty("FloodWorkspace");
+  } else if (m_floodWorkspace) {
+    return m_floodWorkspace;
   } else if (method == "ParameterFile") {
     if (!isDefault("FloodWorkspace")) {
       g_log.warning() << "Flood correction is performed using data in the "
@@ -1070,6 +1101,7 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto3::getFloodWorkspace(const Ins
       }
       alg->execute();
       MatrixWorkspace_sptr out = alg->getProperty("OutputWorkspace");
+      m_floodWorkspace = out; // cache so this function does not repeat
       return out;
     }
   }
@@ -1158,5 +1190,45 @@ bool ReflectometryReductionOneAuto3::sumBanks(Workspace_sptr &inputWorkspace) {
   }
   return true;
 }
+
+MatrixWorkspace_sptr ReflectometryReductionOneAuto3::applyFloodCorrection(const MatrixWorkspace_sptr &ws) {
+  const auto &flood = getFloodWorkspace(ws->getInstrument());
+  if (!flood)
+    return ws;
+  return runFloodCorrectionAlg(flood, ws);
+}
+
+void ReflectometryReductionOneAuto3::applyFloodCorrectionToTransmissionRuns() {
+  m_firstTransmissionRun = getWorkspaceFromProperty("FirstTransmissionRun");
+  if (m_firstTransmissionRun)
+    m_firstTransmissionRun = applyFloodCorrection(m_firstTransmissionRun);
+
+  m_secondTransmissionRun = getWorkspaceFromProperty("SecondTransmissionRun");
+  if (m_secondTransmissionRun)
+    m_secondTransmissionRun = applyFloodCorrection(m_secondTransmissionRun);
+}
+
+void ReflectometryReductionOneAuto3::clearCaches() {
+  m_floodWorkspace.reset();
+  m_firstTransmissionRun.reset();
+  m_secondTransmissionRun.reset();
+  m_correctionProperties = {};
+}
+
+WorkspaceGroup_sptr ReflectometryReductionOneAuto3::applyFloodCorrection(const WorkspaceGroup_sptr &group) {
+  const auto &instrument = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0))->getInstrument();
+  const auto &flood = getFloodWorkspace(instrument);
+  if (!flood)
+    return group;
+
+  WorkspaceGroup_sptr outGroup = std::make_shared<WorkspaceGroup>();
+  for (const auto &ws : group->getAllItems()) {
+    const auto &correctedWs = runFloodCorrectionAlg(flood, std::dynamic_pointer_cast<MatrixWorkspace>(ws));
+    outGroup->addWorkspace(correctedWs); // Generic output ws will be IvsLam at this point due specified task order
+  }
+  return outGroup;
+}
+
+ReflectometryReductionOneAuto3::CacheHandler::~CacheHandler() { m_parent.clearCaches(); }
 
 } // namespace Mantid::Reflectometry
