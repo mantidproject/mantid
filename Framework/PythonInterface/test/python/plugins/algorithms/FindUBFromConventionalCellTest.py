@@ -5,22 +5,14 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # ruff: noqa: E741  # Ambiguous variable name (h, k, l are Miller indices)
-import os
 import unittest
 import numpy as np
 
-from mantid.simpleapi import CreatePeaksWorkspace, Load, SetUB
+from mantid.simpleapi import CreatePeaksWorkspace, SetUB
 from mantid.kernel import V3D
 from mantid.api import AlgorithmManager
 
 import plugins.algorithms.FindUBFromConventionalCell as find_ub_module
-
-# The real-data test file is not yet contributed to Mantid's ExternalData.
-# Until it is, the test below is guarded with `@skipUnless` and looks for the
-# file locally at `<this dir>/data/macro.nxs`. Once the file is added to
-# ExternalData (Testing/Data/UnitTest/macro.nxs.md5), this path handling and
-# the skip guard can be replaced with a bare-filename Load.
-MACRO_NXS_PATH = os.path.join(os.path.dirname(__file__), "data", "macro.nxs")
 
 
 def rotation_matrix_from_axis_angle(axis, angle_rad):
@@ -584,60 +576,6 @@ class FindUBFromConventionalCellTest(unittest.TestCase):
         rms = np.sqrt(np.mean(err**2))
 
         self.assertLess(rms, 0.3)
-
-
-@unittest.skipUnless(
-    os.path.exists(MACRO_NXS_PATH),
-    "tests/data/macro.nxs not available locally",
-)
-class FindUBFromConventionalCellRealDataTest(unittest.TestCase):
-    def test_macromolecular_orthorhombic_p(self):
-        ws = Load(Filename=MACRO_NXS_PATH, OutputWorkspace="macro")
-
-        alg = AlgorithmManager.create("FindUBFromConventionalCell")
-        alg.initialize()
-        alg.setProperty("PeaksWorkspace", ws)
-        alg.setProperty("a", 85.2)
-        alg.setProperty("b", 89.6)
-        alg.setProperty("c", 110.9)
-        alg.setProperty("alpha", 90.0)
-        alg.setProperty("beta", 90.0)
-        alg.setProperty("gamma", 90.0)
-        alg.setProperty("Centering", "P")
-        alg.setProperty("NumAzimuth", 240)
-        alg.setProperty("NumPolar", 120)
-        alg.setProperty("CapAngleDeg", 10.0)
-        alg.setProperty("CapSamples", 1000)
-        alg.setProperty("NumPsi", 720)
-        alg.setProperty("RandomSeed", 1234)
-        alg.execute()
-
-        ws_out = alg.getProperty("PeaksWorkspace").value
-        ol = ws_out.sample().getOrientedLattice()
-
-        self.assertAlmostEqual(ol.a(), 85.2, delta=0.5)
-        self.assertAlmostEqual(ol.b(), 89.6, delta=0.5)
-        self.assertAlmostEqual(ol.c(), 110.9, delta=0.5)
-        self.assertAlmostEqual(ol.alpha(), 90.0, delta=1.0)
-        self.assertAlmostEqual(ol.beta(), 90.0, delta=1.0)
-        self.assertAlmostEqual(ol.gamma(), 90.0, delta=1.0)
-
-        UB_est = ol.getUB().copy()
-        q_vectors = np.array(
-            [
-                [
-                    ws_out.getPeak(i).getQSampleFrame().X(),
-                    ws_out.getPeak(i).getQSampleFrame().Y(),
-                    ws_out.getPeak(i).getQSampleFrame().Z(),
-                ]
-                for i in range(ws_out.getNumberPeaks())
-            ]
-        )
-        hkl_est = np.linalg.solve(UB_est, q_vectors.T).T / (2.0 * np.pi)
-        err = np.abs(hkl_est - np.rint(hkl_est))
-        fail_frac = np.mean(np.any(err > 0.3, axis=1))
-
-        self.assertLess(fail_frac, 0.2)
 
 
 class CenteringTransformTest(unittest.TestCase):
