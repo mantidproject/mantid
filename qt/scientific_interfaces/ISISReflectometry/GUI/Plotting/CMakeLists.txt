@@ -25,7 +25,6 @@ set(PLOTTING_INC_FILES
     presenter/QtActiveFigureMonitor.h
     view/IPlottingView.h
     view/PlottingViewState.h
-    view/PlottingWorkspaceTreeItemState.h
     view/QtPlottingView.h
     view/QtPlottingWorkspaceTreeView.h
     view/QtPlottingWorkspaceTreeViewAdapter.h

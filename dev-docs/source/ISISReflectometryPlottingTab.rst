@@ -225,16 +225,11 @@ plot parent :code:`QWidget` required by the plotting service.
 
 Defines small view-state structures created by
 :code:`PlottingViewStateBuilder`: :code:`PlotOutputTypeViewItem`,
-:code:`PlotOutputControlsState`, and :code:`PlotActionState`. These structures
-let the presenter update a related set of controls in one call.
-
-:code:`view/PlottingWorkspaceTreeItemState.h`
-#################################################
-
-Defines the evaluated, view-facing workspace-tree node and its
-:code:`PlottingWorkspaceTreeSelectionMode`. Unlike the model-side tree item,
-this type contains muted and selection behavior that has already been decided
-by the presenter layer.
+:code:`PlotOutputControlsState`, :code:`PlotActionState`, and
+:code:`PlottingWorkspaceTreeItemState`. These structures let the presenter
+update related controls in one call. The workspace-tree item state includes
+muted and selection behavior that has already been decided by the presenter
+layer, including :code:`PlottingWorkspaceTreeSelectionMode`.
 
 :code:`view/QtPlottingView.h/.cpp`
 ##################################

@@ -9,7 +9,6 @@
 #include "../../ISISReflectometry/GUI/Common/PlotOptions.h"
 #include "../../ISISReflectometry/GUI/Plotting/model/PlottingWorkspace.h"
 #include "../../ISISReflectometry/GUI/Plotting/view/PlottingViewState.h"
-#include "../../ISISReflectometry/GUI/Plotting/view/PlottingWorkspaceTreeItemState.h"
 
 #include <cstddef>
 #include <ostream>

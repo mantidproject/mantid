@@ -8,6 +8,7 @@
 
 #include "Common/DllConfig.h"
 #include "GUI/Common/PlotOptions.h"
+#include "GUI/Plotting/model/PlottingWorkspace.h"
 
 #include <string>
 #include <vector>
@@ -35,6 +36,20 @@ struct MANTIDQT_ISISREFLECTOMETRY_DLL PlotActionState {
   bool plotTiledVerticallyEnabled{false};
   bool addToExistingPlotEnabled{false};
   bool addToExistingPlotChecked{false};
+};
+
+/// Selection behaviour requested by the presenter for one displayed workspace tree row.
+enum class PlottingWorkspaceTreeSelectionMode { None, Direct, ParentOnly, DirectAndParent };
+
+/// View-facing state for one node in the plotting workspace tree.
+struct MANTIDQT_ISISREFLECTOMETRY_DLL PlottingWorkspaceTreeItemState {
+  std::string label;
+  PlottingWorkspaceTreeItemType itemType;
+  ReducedWorkspaceOutputType reducedOutputType;
+  std::string workspaceName;
+  std::vector<PlottingWorkspaceTreeItemState> children;
+  bool muted{false};
+  PlottingWorkspaceTreeSelectionMode selectionMode{PlottingWorkspaceTreeSelectionMode::DirectAndParent};
 };
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

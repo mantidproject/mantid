@@ -8,9 +8,7 @@
 
 #include "Common/DllConfig.h"
 #include "GUI/Common/PlotOptions.h"
-#include "GUI/Plotting/model/PlottingWorkspace.h"
 #include "GUI/Plotting/view/PlottingViewState.h"
-#include "GUI/Plotting/view/PlottingWorkspaceTreeItemState.h"
 #include <optional>
 #include <string>
 #include <vector>
