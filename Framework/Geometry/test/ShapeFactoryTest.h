@@ -916,6 +916,99 @@ public:
     TS_ASSERT(!sliceRotateAll_sptr->isValid(pointRotate));
   }
 
+  /// <goniometer> rotates the surfaces, and with no <applied-goniometer> beside it the whole of it
+  /// is taken to be a bake into the lab frame - how shapes written before the second tag existed
+  /// have to keep reading.
+  void testGoniometerTagAloneIsTakenToBeAllBake() {
+    const Matrix<double> rotation(std::vector<double>{0, -1, 0, 1, 0, 0, 0, 0, 1});
+    const std::string plain = "<sphere id=\"s\"><centre x=\"1.0\" y=\"0\" z=\"0\"/><radius val=\"0.5\"/></sphere>"
+                              "<algebra val=\"s\"/> ";
+    auto shape = ShapeFactory().createShape(ShapeFactory().addGoniometerTag(rotation, plain));
+
+    TS_ASSERT_EQUALS(shape->getAppliedRotation(), rotation);
+    // and the surfaces moved: the sphere sat at +x, so a 90 degree turn about z puts it at +y
+    TS_ASSERT(shape->isValid(V3D(0.0, 1.0, 0.0)));
+    TS_ASSERT(!shape->isValid(V3D(1.0, 0.0, 0.0)));
+  }
+
+  /// <applied-goniometer> is metadata only: it says how much of <goniometer> was a bake, and must
+  /// not rotate anything itself.
+  void testAppliedGoniometerTagRecordsWithoutRotating() {
+    const Matrix<double> total(std::vector<double>{0, -1, 0, 1, 0, 0, 0, 0, 1});
+    const Matrix<double> bake(3, 3, true);
+    const std::string plain = "<sphere id=\"s\"><centre x=\"1.0\" y=\"0\" z=\"0\"/><radius val=\"0.5\"/></sphere>"
+                              "<algebra val=\"s\"/> ";
+    auto xml = ShapeFactory().addGoniometerTag(total, plain);
+    xml = ShapeFactory().addAppliedGoniometerTag(bake, xml);
+    auto shape = ShapeFactory().createShape(xml);
+
+    // the shape reports itself as still in its own frame, even though its surfaces have turned
+    TS_ASSERT_EQUALS(shape->getAppliedRotation(), bake);
+    TS_ASSERT(shape->isValid(V3D(0.0, 1.0, 0.0)));
+    TS_ASSERT(!shape->isValid(V3D(1.0, 0.0, 0.0)));
+  }
+
+  /// The two tags are independent: rewriting one must leave the other alone. "<goniometer" cannot
+  /// match inside "<applied-goniometer", and neither rewrite may leave a stray '>' behind.
+  void testRewritingOneTagLeavesTheOtherIntact() {
+    const Matrix<double> first(std::vector<double>{0, -1, 0, 1, 0, 0, 0, 0, 1});
+    const Matrix<double> bake(std::vector<double>{1, 0, 0, 0, 0, -1, 0, 1, 0});
+    const Matrix<double> second(std::vector<double>{-1, 0, 0, 0, -1, 0, 0, 0, 1});
+    const std::string plain = "<sphere id=\"s\"><centre x=\"1.0\" y=\"0\" z=\"0\"/><radius val=\"0.5\"/></sphere>"
+                              "<algebra val=\"s\"/> ";
+
+    auto xml = ShapeFactory().addGoniometerTag(first, plain);
+    xml = ShapeFactory().addAppliedGoniometerTag(bake, xml);
+    xml = ShapeFactory().addGoniometerTag(second, xml);
+
+    TS_ASSERT_EQUALS(ShapeFactory::goniometerFromXML(xml), second);
+    TS_ASSERT_EQUALS(ShapeFactory().createShape(xml)->getAppliedRotation(), bake);
+    // exactly one of each tag, and no orphaned bracket from the erase
+    TS_ASSERT_EQUALS(countOccurrences(xml, "<goniometer"), 1);
+    TS_ASSERT_EQUALS(countOccurrences(xml, "<applied-goniometer"), 1);
+    TS_ASSERT_EQUALS(countOccurrences(xml, "/>>"), 0);
+  }
+
+  /// Rebasing swaps which bake is recorded while leaving the definition-frame rotation in place.
+  void testRebakeGoniometerPreservesTheDefinitionFrameRotation() {
+    const Matrix<double> definition(std::vector<double>{0, -1, 0, 1, 0, 0, 0, 0, 1});
+    const Matrix<double> oldBake(std::vector<double>{1, 0, 0, 0, 0, -1, 0, 1, 0});
+    const Matrix<double> newBake(std::vector<double>{-1, 0, 0, 0, -1, 0, 0, 0, 1});
+    const std::string plain = "<sphere id=\"s\"><centre x=\"1.0\" y=\"0\" z=\"0\"/><radius val=\"0.5\"/></sphere>"
+                              "<algebra val=\"s\"/> ";
+
+    auto xml = ShapeFactory().addGoniometerTag(oldBake * definition, plain);
+    xml = ShapeFactory().addAppliedGoniometerTag(oldBake, xml);
+
+    const auto rebaked = ShapeFactory().rebakeGoniometer(newBake, xml, oldBake);
+
+    TS_ASSERT_EQUALS(ShapeFactory().createShape(rebaked)->getAppliedRotation(), newBake);
+    // the definition-frame part survived: the total is the new bake wrapped around the same D
+    assertMatrixDelta(ShapeFactory::goniometerFromXML(rebaked), newBake * definition);
+  }
+
+  /// An applied tag with no goniometer tag describes nothing, so it is warned about and ignored.
+  void testAppliedGoniometerWithoutGoniometerIsIgnored() {
+    const Matrix<double> bake(std::vector<double>{0, -1, 0, 1, 0, 0, 0, 0, 1});
+    const std::string plain = "<sphere id=\"s\"><centre x=\"1.0\" y=\"0\" z=\"0\"/><radius val=\"0.5\"/></sphere>"
+                              "<algebra val=\"s\"/> ";
+    auto shape = ShapeFactory().createShape(ShapeFactory().addAppliedGoniometerTag(bake, plain));
+
+    TS_ASSERT_EQUALS(shape->getAppliedRotation(), Matrix<double>(3, 3, true));
+  }
+
+  /// rotate-all turns the surfaces but is a definition-frame rotation, so it is never recorded as
+  /// a bake. An IDF-defined rotated shape must not look like it is already in the lab frame.
+  void testRotateAllIsNotRecordedAsABake() {
+    const std::string xml = "<sphere id=\"s\"><centre x=\"0\" y=\"10.0\" z=\"0\"/><radius val=\"1.0\"/></sphere>"
+                            "<algebra val=\"s\"/> <rotate-all x=\"90\" y=\"0\" z=\"0\" /> ";
+    auto shape = ShapeFactory().createShape(xml);
+
+    TS_ASSERT_EQUALS(shape->getAppliedRotation(), Matrix<double>(3, 3, true));
+    // but the surfaces did move
+    TS_ASSERT(shape->isValid(V3D(0.0, 0.0, 10.0)));
+  }
+
   /// A rotated shape's ShapeInfo has to move with its surfaces.
   ///
   /// createShape reads the XML twice: once through the parse* functions, which build the surfaces the
@@ -994,6 +1087,22 @@ public:
   }
 
 private:
+  static size_t countOccurrences(const std::string &haystack, const std::string &needle) {
+    size_t count = 0;
+    for (size_t at = haystack.find(needle); at != std::string::npos; at = haystack.find(needle, at + 1)) {
+      ++count;
+    }
+    return count;
+  }
+
+  static void assertMatrixDelta(const Matrix<double> &actual, const Matrix<double> &expected) {
+    for (size_t i = 0; i < 3; ++i) {
+      for (size_t j = 0; j < 3; ++j) {
+        TS_ASSERT_DELTA(actual[i][j], expected[i][j], 1e-12);
+      }
+    }
+  }
+
   /// Assert that `xml`, which carries a rotation tag, describes the same shape as `preRotatedXML`,
   /// which has the rotation written into it by hand, both in its ShapeInfo - where the bounding box,
   /// the rendered mesh and the volume come from - and in the points it contains, which come from the
