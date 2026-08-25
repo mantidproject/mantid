@@ -164,3 +164,6 @@ jobs:
           sarif_file: ${{ runner.temp }}/grype.sarif
           # one category for all platforms, so the merged results are a single analysis
           category: grype
+      - name: Remove SARIF file
+        if: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.dry_run != 'true' }}
+        run: rm ${{ runner.temp }}/grype.sarif
