@@ -162,7 +162,9 @@ carrying on would only produce a cascade of meaningless failures.
 queued - sometimes *blocking* queued - Qt connection, which cannot be delivered unless the calling
 thread is running its event loop. Use ``wait_until`` from ``qt_interaction_helpers`` or
 ``self.wait_for_async_task(worker)`` from the base class; a bare ``worker.join()`` deadlocks both
-threads.
+threads. Both default to a short timeout, so a wait on something genuinely slow has to pass a
+longer ``timeout`` explicitly rather than every wait in the suite inheriting one long enough to
+hide a hang.
 
 **Neutralise anything modal before the first click.** An unattended test that pops a modal message
 box hangs until the suite times out. ``patch_error_messages``, ``patch_confirmation_box`` and
@@ -210,7 +212,7 @@ something other than what a test wants - usually failing silently rather than lo
    * - ``QSpinBox`` / ``QDoubleSpinBox``
      - ``set_spin_box`` - checks the value was not clamped away
    * - ``QTabWidget``
-     - ``tab_titles``, ``select_tab`` - by title, because indices move
+     - ``select_tab`` - by title, because indices move
    * - ``QListWidget``
      - ``list_items``, ``select_list_item``
    * - ``QTableWidget``

@@ -46,7 +46,6 @@ from qt_interaction_helpers import (
     set_item_checked,
     set_line_edit,
     set_spin_box,
-    tab_titles,
     table_checkbox,
     table_column,
     tree_rows,
@@ -362,6 +361,13 @@ class ExampleUITest(AutomatedUITestBase):
         with self.check("Example / clicking the indicator toggles the checkbox"):
             self.assertTrue(self.widget.check_shout.isChecked())
 
+        with self.check("Example / a plain click() lands on the indicator too"):
+            # click() dispatches on the widget kind, so reaching for the obvious call is not a trap
+            click(self.widget.check_shout)
+            self.assertFalse(self.widget.check_shout.isChecked())
+            click(self.widget.check_shout)
+            self.assertTrue(self.widget.check_shout.isChecked())
+
         with self.check("Example / setting a checkbox to the state it is already in is a no-op"):
             self.assertTrue(set_checkbox(self.widget.check_shout, True))
 
@@ -438,9 +444,8 @@ class ExampleUITest(AutomatedUITestBase):
             self.assertFalse(self.widget.check_nested.isEnabled())
 
     def test_tabs_and_lists(self):
-        with self.check("Example / every tab is listed by title"):
-            self.assertEqual(tab_titles(self.widget.tabs), list(_TAB_TITLES))
-
+        # deliberately no assertion on the whole list of tab titles: that only restates the tab bar
+        # and needs updating whenever a tab is added. Selecting a tab is what proves it exists.
         page = select_tab(self.widget.tabs, "Diagnostics")
         with self.check("Example / a tab is selected by title, not by index"):
             self.assertEqual(self.widget.tabs.tabText(self.widget.tabs.currentIndex()), "Diagnostics")

@@ -35,12 +35,12 @@ Four details shape everything here, and each of them contradicts the obvious app
 """
 
 import os
-import shutil
 import sys
 import tempfile
 import time
 import unittest
 from contextlib import contextmanager
+from pathlib import Path
 from unittest import mock
 
 # make the shared helpers importable when this file is run by hand rather than through CMake, which
@@ -134,16 +134,21 @@ class AutomatedUITestBase(unittest.TestCase):
     # ------------------------------------------------------------------ lifecycle
 
     def setUp(self):
+        # recorded text of any message box a patch intercepts; see patch_error_messages
+        self.message_box_messages = []
         if not qt_is_available():
             self.skipTest("this build has no Qt interfaces")
         self._saved_qsettings_state = None
-        self._settings_dir = None
+        self._settings_tmpdir = None
         self._saved_data_dirs = None
         ensure_qapp()
         self._isolate_qsettings()
         self._add_configured_data_search_dirs()
-        self.tmp_root = tempfile.mkdtemp(prefix="automated_ui_test_")
-        self.addCleanup(shutil.rmtree, self.tmp_root, True)
+        # ignore_cleanup_errors because a widget can still hold a file open on Windows when the
+        # test ends, and failing to delete a temporary directory is not a test failure
+        self._tmp_root = tempfile.TemporaryDirectory(prefix="automated_ui_test_", ignore_cleanup_errors=True)
+        self.tmp_root = self._tmp_root.name
+        self.addCleanup(self._tmp_root.cleanup)
 
     def tearDown(self):
         # setUp may have failed part way through, so nothing here may assume it completed
@@ -183,7 +188,7 @@ class AutomatedUITestBase(unittest.TestCase):
         """
         from qtpy.QtCore import QCoreApplication, QSettings
 
-        self._settings_dir = tempfile.mkdtemp(prefix="automated_ui_qsettings_")
+        self._settings_tmpdir = tempfile.TemporaryDirectory(prefix="automated_ui_qsettings_", ignore_cleanup_errors=True)
         self._saved_qsettings_state = (
             QSettings.defaultFormat(),
             QCoreApplication.organizationName(),
@@ -191,7 +196,7 @@ class AutomatedUITestBase(unittest.TestCase):
         )
         # on Windows the default format is the registry, which setPath cannot redirect
         QSettings.setDefaultFormat(QSettings.IniFormat)
-        QSettings.setPath(QSettings.IniFormat, QSettings.UserScope, self._settings_dir)
+        QSettings.setPath(QSettings.IniFormat, QSettings.UserScope, self._settings_tmpdir.name)
         QCoreApplication.setOrganizationName(self.SETTINGS_ORG)
         QCoreApplication.setApplicationName(self.SETTINGS_APP)
 
@@ -208,14 +213,14 @@ class AutomatedUITestBase(unittest.TestCase):
         # point the ini path somewhere that still exists before the temporary directory goes, so a
         # later bare QSettings() in this process does not write into a deleted directory
         QSettings.setPath(QSettings.IniFormat, QSettings.UserScope, tempfile.gettempdir())
-        shutil.rmtree(self._settings_dir, ignore_errors=True)
-        self._settings_dir = None
+        self._settings_tmpdir.cleanup()
+        self._settings_tmpdir = None
 
     def settings_file(self):
         """Path of the isolated ini file, for asserting on what an interface stored."""
-        if self._settings_dir is None:
+        if self._settings_tmpdir is None:
             raise RuntimeError("settings are not isolated - settings_file() is only valid between setUp and tearDown")
-        return os.path.join(self._settings_dir, self.SETTINGS_ORG, f"{self.SETTINGS_APP}.ini")
+        return os.path.join(self._settings_tmpdir.name, self.SETTINGS_ORG, f"{self.SETTINGS_APP}.ini")
 
     # ------------------------------------------------------------------ data search directories
 
@@ -258,8 +263,11 @@ class AutomatedUITestBase(unittest.TestCase):
 
     # ------------------------------------------------------------------ waiting
 
-    def wait_for_async_task(self, worker, timeout=1800.0, what="worker"):
+    def wait_for_async_task(self, worker, timeout=10.0, what="worker"):
         """Block until an ``AsyncTask`` finishes, pumping the event loop throughout.
+
+        The default timeout is deliberately short: a test that drives genuinely slow work has to
+        say so, rather than every test inheriting a timeout long enough to hide a hang.
 
         ``AsyncTask.run`` calls its success/error callback on the worker thread. Mantid presenters
         typically notify their observers from that callback, and ``Observable.notify_subscribers``
@@ -275,7 +283,7 @@ class AutomatedUITestBase(unittest.TestCase):
         deadline = time.time() + timeout
         while worker.is_alive():
             process_events()
-            worker.join(0.01)
+            worker.join(0.1)
             if time.time() > deadline:
                 raise RuntimeError(f"{what} did not finish within {timeout}s")
         # drain the callbacks the worker queued on its way out (e.g. re-enabling controls)
@@ -294,7 +302,6 @@ class AutomatedUITestBase(unittest.TestCase):
         ``modules`` are module paths that import the popup helper *by name*, so each one needs its
         own patch - patching the definition would not affect any of them.
         """
-        self.message_box_messages = []
 
         def record(_parent, message):
             self.message_box_messages.append(str(message))
@@ -323,9 +330,6 @@ class AutomatedUITestBase(unittest.TestCase):
         nothing, so an interface that asks for ``QMessageBox.Yes`` would read ``answer=True`` as a
         rejection - so every button name a confirmation prompt might use is assigned here.
         """
-        if not hasattr(self, "message_box_messages"):
-            self.message_box_messages = []
-
         patcher = mock.patch(f"{module}.QMessageBox")
         mocked = patcher.start()
         accepted, declined = object(), object()
@@ -407,14 +411,11 @@ class AutomatedUITestBase(unittest.TestCase):
         Used for the save-layout checks, where the point is both which files appear and which
         directories they appear in.
         """
-        if not os.path.isdir(directory):
+        root = Path(directory)
+        if not root.is_dir():
             return []
-        found = []
-        for root, _dirs, files in os.walk(directory):
-            for name in files:
-                if extension is None or name.endswith(extension):
-                    found.append(os.path.relpath(os.path.join(root, name), directory))
-        return sorted(found)
+        pattern = "*" if extension is None else f"*{extension}"
+        return sorted(str(path.relative_to(root)) for path in root.rglob(pattern) if path.is_file())
 
     @staticmethod
     def basenames_under(directory, extension=None):

@@ -33,6 +33,10 @@ import time
 # enough to drain a burst of queued signals without making the polling loops feel sluggish
 _EVENT_SLICE_MS = 20
 
+# how long ``wait_until`` waits between checks of its predicate. Events are still processed
+# throughout (QTest.qWait pumps the loop), so this only sets how often the predicate is re-run
+_POLL_INTERVAL_MS = 100
+
 
 def process_events(rounds=1):
     """Drain the Qt event queue. Several rounds are sometimes needed because handlers post further
@@ -45,10 +49,20 @@ def process_events(rounds=1):
 
 
 def click(widget):
-    """Left-click the centre of a widget."""
+    """Left-click a widget, using the dependable hot-spot for its kind.
+
+    The centre is right for a push button but wrong for a check box or a radio button, whose hot
+    spot is the indicator (see ``click_checkbox``), so those two are dispatched to their own helper
+    rather than left as a trap for a caller who reaches for the obvious ``click``.
+    """
     from qtpy.QtCore import Qt
     from qtpy.QtTest import QTest
+    from qtpy.QtWidgets import QCheckBox, QRadioButton
 
+    if isinstance(widget, QCheckBox):
+        return click_checkbox(widget)
+    if isinstance(widget, QRadioButton):
+        return click_radio(widget)
     QTest.mouseClick(widget, Qt.LeftButton)
     process_events()
 
@@ -178,7 +192,10 @@ def set_spin_box(spin_box, value):
     return spin_box.value()
 
 
-def tab_titles(tab_widget):
+def _tab_titles(tab_widget):
+    """Private: a tab bar is fixed by the .ui file, so a test asserting on the whole list of titles
+    is only restating it. Prove a tab exists by selecting it with ``select_tab`` instead - which is
+    also what reports the available titles when it is not there."""
     return [tab_widget.tabText(i) for i in range(tab_widget.count())]
 
 
@@ -194,7 +211,7 @@ def select_tab(tab_widget, title):
             tab_widget.setCurrentIndex(index)
             process_events()
             return tab_widget.widget(index)
-    raise AssertionError(f"no tab titled '{title}'; found {tab_titles(tab_widget)}")
+    raise AssertionError(f"no tab titled '{title}'; found {_tab_titles(tab_widget)}")
 
 
 def list_items(list_widget):
@@ -501,25 +518,34 @@ def tree_rows(view, parent=None, depth=0, col=0):
     return rows
 
 
-def wait_until(predicate, timeout=120.0, msg=""):
+def wait_until(predicate, timeout=10.0, msg=""):
     """Block until ``predicate()`` is true, pumping the event loop while waiting.
 
     Never use a bare ``sleep`` or ``thread.join()`` in a GUI test: work that finishes on a
     background thread usually reports back through a queued - sometimes *blocking* queued - Qt
-    connection, which cannot be delivered unless this thread is running its event loop.
+    connection, which cannot be delivered unless this thread is running its event loop. ``qWait``
+    is what does both here: it sleeps *and* keeps processing events for the duration.
+
+    The default timeout is short on purpose - waiting on something genuinely slow should be a
+    deliberate choice at the call site rather than the default for everything.
     """
+    from qtpy.QtTest import QTest
+
     deadline = time.time() + timeout
     while not predicate():
-        process_events()
+        QTest.qWait(_POLL_INTERVAL_MS)
         if time.time() > deadline:
             raise RuntimeError(f"timed out after {timeout}s waiting for {msg or 'condition'}")
-        time.sleep(0.005)
     process_events()
 
 
-def wait_for_file_finder(finder, msg=""):
-    """Wait for a FileFinderWidget to finish its background search."""
-    wait_until(lambda: not finder.isSearching(), msg=msg or "file finder search")
+def wait_for_file_finder(finder, timeout=60.0, msg=""):
+    """Wait for a FileFinderWidget to finish its background search.
+
+    Longer than the ``wait_until`` default by deliberate choice: the search walks every data search
+    directory, which on a real instrument mount is a network round trip per candidate name.
+    """
+    wait_until(lambda: not finder.isSearching(), timeout=timeout, msg=msg or "file finder search")
 
 
 def set_finder_text(finder, text, expect_valid=True):
