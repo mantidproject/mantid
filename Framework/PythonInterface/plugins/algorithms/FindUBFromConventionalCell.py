@@ -465,7 +465,14 @@ def resolvability_metric(scores, directions, best_dir, exclude_deg=10.0):
         Best score outside the excluded region, or 0 if every direction falls within it.
     """
     exclude = np.deg2rad(exclude_deg)
-    ang = np.array([angular_distance_antipodal(d, best_dir) for d in directions])
+    directions = np.atleast_2d(directions)
+    direction_norms = np.linalg.norm(directions, axis=1)
+    if np.any(direction_norms < 1e-15):
+        raise ValueError("Cannot normalize near-zero vector.")
+    directions_hat = directions / direction_norms[:, None]
+    best_dir_hat = normalize(best_dir)
+    cos_ang = np.abs(directions_hat @ best_dir_hat)
+    ang = np.arccos(np.clip(cos_ang, -1.0, 1.0))
     mask = ang > exclude
 
     smax = scores.max()
@@ -1136,15 +1143,19 @@ class FindUBFromConventionalCell(PythonAlgorithm):
         if peaks.getNumberPeaks() < 3:
             issues["PeaksWorkspace"] = "At least 3 peaks are required."
         else:
-            non_coincident_pairs = 0
-            for i in range(peaks.getNumberPeaks() - 1):
-                q0 = peaks.getPeak(i).getQSampleFrame()
-                q1 = peaks.getPeak(i + 1).getQSampleFrame()
-                cos_theta = np.dot(q0, q1) / np.linalg.norm(q0) / np.linalg.norm(q1)
-                if np.abs(np.rad2deg(np.arccos(cos_theta))) > 10:
-                    non_coincident_pairs += 1
-            if non_coincident_pairs < 2:
-                issues["PeaksWorkspace"] = "At least 3 non-coplanar peaks are required."
+            q_norms = [np.linalg.norm(peaks.getPeak(i).getQSampleFrame()) for i in range(peaks.getNumberPeaks())]
+            if any(norm < 1e-10 for norm in q_norms):
+                issues["PeaksWorkspace"] = "All peaks must have non-zero Q vectors."
+            else:
+                non_coincident_pairs = 0
+                for i in range(peaks.getNumberPeaks() - 1):
+                    q0 = peaks.getPeak(i).getQSampleFrame()
+                    q1 = peaks.getPeak(i + 1).getQSampleFrame()
+                    cos_theta = np.clip(np.dot(q0, q1) / (q_norms[i] * q_norms[i + 1]), -1.0, 1.0)
+                    if np.rad2deg(np.arccos(cos_theta)) > 10:
+                        non_coincident_pairs += 1
+                if non_coincident_pairs < 2:
+                    issues["PeaksWorkspace"] = "At least 3 peaks with distinct Q directions are required."
 
         for name in ["alpha", "beta", "gamma"]:
             ang = self.getProperty(name).value
@@ -1209,6 +1220,7 @@ class FindUBFromConventionalCell(PythonAlgorithm):
             ol = sample.getOrientedLattice()
         except RuntimeError:
             SetUB(Workspace=peaks_ws, UB=UB_conv)
+            return
 
         ol = sample.getOrientedLattice()
         ol.setUB(UB_conv)

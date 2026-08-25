@@ -92,6 +92,61 @@ class FindUBFromConventionalCellTest(unittest.TestCase):
         self.assertEqual(metrics["n_near_integer"], float(len(hkls)))
         self.assertEqual(metrics["n_centering_ok"], float(len(hkls)))
 
+    def _validate_peaks(self, hkls):
+        ws = CreatePeaksWorkspace(NumberOfPeaks=0, OutputType="LeanElasticPeak")
+        SetUB(Workspace=ws, UB=np.eye(3))
+        for hkl in hkls:
+            ws.addPeak(ws.createPeakHKL(V3D(*hkl)))
+
+        alg = AlgorithmManager.create("FindUBFromConventionalCell")
+        alg.initialize()
+        alg.setProperty("PeaksWorkspace", ws)
+        return alg.validateInputs()
+
+    def test_validation_rejects_zero_q_peak(self):
+        issues = self._validate_peaks([[0, 0, 0], [1, 0, 0], [0, 1, 0]])
+
+        self.assertEqual(issues["PeaksWorkspace"], "All peaks must have non-zero Q vectors.")
+
+    def test_validation_reports_distinct_q_direction_requirement(self):
+        issues = self._validate_peaks([[1, 0, 0], [2, 0, 0], [3, 0, 0]])
+
+        self.assertEqual(issues["PeaksWorkspace"], "At least 3 peaks with distinct Q directions are required.")
+
+    def test_resolvability_metric_matches_scalar_angular_distance(self):
+        directions = np.array(
+            [
+                [1.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0],
+                [-1.0, 0.0, 0.0],
+                [1.0, 1.0, 0.0],
+            ]
+        )
+        best_dir = np.array([1.0, 0.0, 0.0])
+        scores = np.array([0.9, 0.2, 0.8, 0.4])
+        exclude = np.deg2rad(10.0)
+        scalar_angles = np.array([find_ub_module.angular_distance_antipodal(direction, best_dir) for direction in directions])
+        mask = scalar_angles > exclude
+        smax = scores.max()
+        s2 = scores[mask].max()
+        expected = (smax - s2) / (np.median(scores) + 1e-15)
+
+        rho, actual_smax, actual_s2 = find_ub_module.resolvability_metric(scores, directions, best_dir)
+
+        self.assertAlmostEqual(rho, expected)
+        self.assertEqual(actual_smax, smax)
+        self.assertEqual(actual_s2, s2)
+
+    def test_assign_ub_without_existing_lattice(self):
+        ws = CreatePeaksWorkspace(NumberOfPeaks=0, OutputType="LeanElasticPeak")
+        alg = find_ub_module.FindUBFromConventionalCell()
+        alg.initialize()
+        ub = np.diag([0.1, 0.2, 0.3])
+
+        alg._assign_ub_to_workspace(ws, ub)
+
+        np.testing.assert_allclose(ws.sample().getOrientedLattice().getUB(), ub)
+
     def test_recovers_primitive_hexagonal_like_case(self):
         a, b, c = 6.0, 6.0, 8.0
         alpha_deg, beta_deg, gamma_deg = 90.0, 90.0, 120.0
