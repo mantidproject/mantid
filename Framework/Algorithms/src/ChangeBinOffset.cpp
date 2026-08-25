@@ -45,8 +45,8 @@ void ChangeBinOffset::exec() {
                                           [offset](EventList &eventList) { eventList.addTof(offset); });
   } else {
     this->for_each<Indices::FromProperty>(
-        *outputW, std::make_tuple(MatrixWorkspaceAccess::x), [offset](std::vector<double> &dataX) {
-          std::transform(dataX.begin(), dataX.end(), dataX.begin(), [offset](double x) { return x + offset; });
+        *outputW, std::make_tuple(MatrixWorkspaceAccess::x), [offset](HistogramData::HistogramX &X) {
+          std::transform(X.begin(), X.end(), X.begin(), [offset](double x) { return x + offset; });
         });
   }
 }

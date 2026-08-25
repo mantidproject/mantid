@@ -46,24 +46,38 @@ public:
   /// Copy data from another ISpectrum with double-dynamic dispatch.
   virtual void copyDataFrom(const ISpectrum &source) = 0;
 
+  [[deprecated("use setSharedX() instead")]]
   virtual void setX(const Kernel::cow_ptr<HistogramData::HistogramX> &X) = 0;
+  [[deprecated("use mutableX() instead")]]
   virtual MantidVec &dataX() = 0;
+  [[deprecated("use x() instead")]]
   virtual const MantidVec &dataX() const = 0;
+  [[deprecated("use x() instead")]]
   virtual const MantidVec &readX() const = 0;
+  [[deprecated("use sharedX() instead")]]
   virtual Kernel::cow_ptr<HistogramData::HistogramX> ptrX() const = 0;
 
+  [[deprecated("use mutableDx() instead")]]
   virtual MantidVec &dataDx() = 0;
+  [[deprecated("use dx() instead")]]
   virtual const MantidVec &dataDx() const = 0;
+  [[deprecated("use dx() instead")]]
   virtual const MantidVec &readDx() const = 0;
 
   virtual void clearData() = 0;
 
+  [[deprecated("use mutableY() instead")]]
   virtual MantidVec &dataY() = 0;
+  [[deprecated("use mutableE() instead")]]
   virtual MantidVec &dataE() = 0;
 
+  [[deprecated("use y() instead")]]
   virtual const MantidVec &dataY() const = 0;
+  [[deprecated("use e() instead")]]
   virtual const MantidVec &dataE() const = 0;
+  [[deprecated("use y() instead")]]
   virtual const MantidVec &readY() const;
+  [[deprecated("use e() instead")]]
   virtual const MantidVec &readE() const;
 
   virtual size_t getMemorySize() const = 0;
