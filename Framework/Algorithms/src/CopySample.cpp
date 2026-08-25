@@ -167,8 +167,8 @@ void CopySample::copyParameters(Sample &from, Sample &to, bool nameFlag, bool ma
       rhsObject->setMaterial(rhsMaterial); // add back in Material
     }
     if (auto meshObj = std::dynamic_pointer_cast<Geometry::MeshObject>(rhsObject)) {
-      // Rotate MeshObject by goniometer
-      meshObj->rotate(rotationMatrix);
+      // Bake the destination's goniometer into the copy, moving it into that workspace's lab frame
+      meshObj->bakeGoniometerRotation(rotationMatrix);
     }
 
     to.setShape(rhsObject);

@@ -49,14 +49,21 @@ public:
   virtual void setFiniteGeometryFlag(bool) {}
   virtual bool hasValidShape() const = 0;
 
-  /** The rotation already applied to this shape's definition.
+  /** The goniometer rotation baked into this shape, applied outermost.
    *
    * A shape may be stored either in its own frame or already rotated into the lab frame -
    * CopySample bakes the destination workspace's goniometer in, while SetGoniometer alone leaves
    * the shape untouched. Both produce a workspace whose run carries a goniometer, so the matrix is
    * the only way to tell which frame the shape is in and avoid rotating it a second time.
    *
-   * Identity means the shape has not been rotated and is expressed in its own frame.
+   * This reports which frame the shape is in, NOT every rotation it has ever had. Definition-frame
+   * rotations - the file-load orientation of LoadSampleShape and the sample environment spec,
+   * "rotate-all" and per-primitive "rotate" tags, and RotateSampleShape - re-express the shape
+   * within its own frame and are deliberately excluded. Only a genuine move into the lab frame
+   * counts.
+   *
+   * Identity therefore means the shape is expressed in its own frame, however much its definition
+   * has been rotated within that frame.
    */
   virtual const Kernel::Matrix<double> &getAppliedRotation() const {
     static const Kernel::Matrix<double> identity(3, 3, true);

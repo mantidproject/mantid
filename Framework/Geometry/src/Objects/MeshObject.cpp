@@ -471,15 +471,43 @@ std::shared_ptr<GeometryHandler> MeshObject::getGeometryHandler() const {
 }
 
 /**
- * Rotate the mesh according to the supplied rotation matrix
+ * Rotate the mesh according to the supplied rotation matrix.
+ *
+ * This is a definition-frame rotation: the shape is being re-expressed within its own frame, so
+ * getAppliedRotation() is deliberately left alone. File-load orientation (MeshFileIO::rotate) and
+ * RotateSampleShape both belong here - they change where the shape's own material sits, not which
+ * frame the shape is in. Use bakeGoniometerRotation for the latter.
+ *
  * @param rotationMatrix Rotation matrix to be applied
  */
 void MeshObject::rotate(const Kernel::Matrix<double> &rotationMatrix) {
   std::for_each(m_vertices.begin(), m_vertices.end(),
                 [&rotationMatrix](auto &vertex) { vertex.rotate(rotationMatrix); });
-  // Accumulate, so a caller can tell how far the mesh has been turned from its original frame
-  // however many times it has been rotated.
+}
+
+/**
+ * Rotate the mesh and record the rotation as a goniometer bake.
+ *
+ * The bake is applied outermost and accumulates, so a caller can tell how far the mesh has been
+ * turned out of its own frame however many times it has been baked.
+ *
+ * @param rotationMatrix Rotation matrix to be applied
+ */
+void MeshObject::bakeGoniometerRotation(const Kernel::Matrix<double> &rotationMatrix) {
+  rotate(rotationMatrix);
   m_appliedRotation = rotationMatrix * m_appliedRotation;
+}
+
+/**
+ * Record a goniometer bake without rotating the vertices.
+ *
+ * Only for reconstructing a mesh whose vertices already carry the rotation - loading from Nexus.
+ * Rotating them again here would double the bake.
+ *
+ * @param bakedRotation The rotation already present in the vertices
+ */
+void MeshObject::setAppliedGoniometerRotation(const Kernel::Matrix<double> &bakedRotation) {
+  m_appliedRotation = bakedRotation;
 }
 
 /**

@@ -156,6 +156,32 @@ public:
     TS_ASSERT_EQUALS(shape->getBoundingBox().yMin(), -0.29);
   }
 
+  void testOnlyTheGoniometerIsRecordedAsAnAppliedRotation() {
+    // xDegrees re-expresses the shape within its own frame; only the run goniometer moves it into
+    // the lab frame. If the user rotation were recorded too, a caller working out how much of the
+    // goniometer is still outstanding would get neither identity nor R, but R*Rx^-1*R^-1.
+    LoadSampleShape alg;
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "cylinderOffsetZ.stl"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("xDegrees", "90"));
+    auto inputWS = prepareWorkspaces(alg, true);
+    const Mantid::Kernel::Matrix<double> goniometer(std::vector<double>{0, -1, 0, 1, 0, 0, 0, 0, 1});
+    inputWS->mutableRun().mutableGoniometer().setR(goniometer);
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    TS_ASSERT_EQUALS(getMeshObject(alg)->getAppliedRotation(), goniometer);
+  }
+
+  void testNoGoniometerLeavesTheShapeInItsOwnFrame() {
+    // a user rotation on its own must still report identity - the shape has been re-expressed, but
+    // it has not been moved into the lab frame
+    LoadSampleShape alg;
+    auto shape = loadMeshObject(alg, "cylinderOffsetZ.stl", false, "90", "0", "0");
+    TS_ASSERT_EQUALS(shape->getAppliedRotation(), Mantid::Kernel::Matrix<double>(3, 3, true));
+  }
+
 private:
   // Create workspaces and add them to algorithm properties
   MatrixWorkspace_sptr prepareWorkspaces(LoadSampleShape &alg, bool outputWsSameAsInputWs) {
