@@ -3,7 +3,7 @@
 # Copyright &copy; 2026 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
-# SPDX - License - Identifier: GPL - 3.0 +
+# SPDX-License-Identifier: GPL-3.0+
 # pylint: disable=no-init,attribute-defined-outside-init
 import systemtesting
 from mantid.simpleapi import CalculateLogLikelihoodEvidence, Load

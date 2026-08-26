@@ -811,12 +811,7 @@ void FABADAMinimizer::outputPDF(std::vector<double> &xValues, std::vector<double
   parameterNames.emplace_back("Chi_Squared");
 
   const auto groupPdfName = getPropertyValue("PDF");
-  API::WorkspaceGroup_sptr groupPdf;
-  if (AnalysisDataService::Instance().doesExist(groupPdfName)) {
-    groupPdf = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupPdfName);
-  } else {
-    groupPdf = std::make_shared<WorkspaceGroup>();
-  }
+  auto groupPdf = std::make_shared<WorkspaceGroup>();
 
   for (int i = 0; i < static_cast<int>(parameterNames.size()); i++) {
     int xstart = i * (pdfLength + 1);

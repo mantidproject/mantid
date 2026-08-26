@@ -16,7 +16,7 @@ set(SYSTEST_NAMES
     BilbySANSDataProcessorTest.py
     # BuildSQWTest  # Tests skipped due to missing data.
     CalMuonDeadTimeTest.py
-    CalculateLogLikelihoodEvidence.py
+    CalculateLogLikelihoodEvidenceSystemTest.py
     # CNCSReductionTest  # All tests skipped due to NaN Comparisons. See Issue #38088
     CodeConventions.py
     CompareMDWorkspacesTest.py

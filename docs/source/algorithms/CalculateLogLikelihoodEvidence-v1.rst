@@ -37,13 +37,13 @@ In this example we compare the fit of two gaussians against two lorentzians. The
 
   # Linear combination of Lorentzians
   function_str = 'composite=CompositeFunction,NumDeriv=true;name=Lorentzian,Amplitude=1,PeakCentre=0.01,FWHM=0.5;name=Lorentzian,Amplitude=1,PeakCentre=0.01,FWHM=0.5'
-  minimizer_str = "FABADA,Chain Length=1000000,Steps between values=10,Convergence Criteria=0.01,PDF=Lorentzians"
+  minimizer_str = "FABADA,ChainLength=1000000,StepsBetweenValues=10,ConvergenceCriteria=0.01,PDF=Lorentzians"
 
   Fit(Function = function_str,InputWorkspace=ws_data,WorkspaceIndex=3,StartX=-0.25,EndX=0.25,CreateOutput=True,Output = 'result_lorentzians',OutputCompositeMembers=True,MaxIterations=2000000, Minimizer=minimizer_str)
 
   # Linear combination of Gaussians
   function_str = 'composite=CompositeFunction,NumDeriv=true;name=Gaussian, Height=1, PeakCentre=0.01, Sigma=0.5;name=Gaussian, Height=1, PeakCentre=0.01, Sigma=0.5'
-  minimizer_str = "FABADA,Chain Length=1000000,Steps between values=10,Convergence Criteria=0.01,PDF=Gaussians"
+  minimizer_str = "FABADA,ChainLength=1000000,StepsBetweenValues=10,ConvergenceCriteria=0.01,PDF=Gaussians"
 
 
   Fit(Function = function_str,InputWorkspace=ws_data,WorkspaceIndex=3,StartX=-0.25,EndX=0.25,CreateOutput=True,Output = 'result_gaussians',OutputCompositeMembers=True,MaxIterations=2000000, Minimizer=minimizer_str)

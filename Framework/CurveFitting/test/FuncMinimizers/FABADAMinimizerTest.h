@@ -31,13 +31,14 @@ namespace {
 
 std::string const DEFAULT_PDF_GROUP_NAME = "__PDF_Workspace";
 
-void assertPdfWorkspaceOutputs(const std::vector<std::string> &workspaceNames) {
-  auto const pdfGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(DEFAULT_PDF_GROUP_NAME);
+void assertPdfWorkspaceOutputs(const std::vector<std::string> &workspaceNames,
+                               const std::string &pdfGroupName = DEFAULT_PDF_GROUP_NAME) {
+  auto const pdfGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(pdfGroupName);
   TS_ASSERT(pdfGroup);
   TS_ASSERT_EQUALS(pdfGroup->size(), workspaceNames.size());
 
   for (size_t i = 0; i < workspaceNames.size(); ++i) {
-    auto const workspaceName = DEFAULT_PDF_GROUP_NAME + "_" + workspaceNames[i];
+    auto const workspaceName = pdfGroupName + "_" + workspaceNames[i];
     TS_ASSERT(AnalysisDataService::Instance().doesExist(workspaceName));
 
     auto const workspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
@@ -46,6 +47,13 @@ void assertPdfWorkspaceOutputs(const std::vector<std::string> &workspaceNames) {
     TS_ASSERT_EQUALS(workspace->x(0).size(), 21);
     TS_ASSERT_EQUALS(workspace->y(0).size(), 20);
     TS_ASSERT_EQUALS(pdfGroup->getItem(i), workspace);
+  }
+}
+
+void removeWorkspaceIfPresent(const std::string &workspaceName) {
+  auto &ads = AnalysisDataService::Instance();
+  if (ads.doesExist(workspaceName)) {
+    ads.remove(workspaceName);
   }
 }
 
@@ -291,6 +299,56 @@ public:
     TS_ASSERT_THROWS(fit.execute(), const std::length_error &);
 
     TS_ASSERT(!fit.isExecuted());
+  }
+
+  void test_repeated_runs_with_same_pdf_name_do_not_retain_stale_group_members() {
+    auto ws2 = createExpDecayWorkspace();
+    const std::string pdfGroupName = "FABADA_PDF_RepeatedRuns";
+    const std::vector<std::string> pdfWorkspaceNames = {"Height", "Lifetime", "Chi_Squared"};
+
+    removeWorkspaceIfPresent(pdfGroupName);
+    for (const auto &name : pdfWorkspaceNames) {
+      removeWorkspaceIfPresent(pdfGroupName + "_" + name);
+    }
+
+    auto runFit = [&ws2, &pdfGroupName]() {
+      Mantid::API::IFunction_sptr fun(new ExpDecay);
+      fun->setParameter("Height", 8.);
+      fun->setParameter("Lifetime", 1.0);
+
+      Fit fit;
+      fit.initialize();
+      fit.setChild(true);
+      fit.setProperty("Function", fun);
+      fit.setProperty("InputWorkspace", ws2);
+      fit.setProperty("WorkspaceIndex", 0);
+      fit.setProperty("CreateOutput", true);
+      fit.setProperty("MaxIterations", 100000);
+      fit.setProperty("Minimizer",
+                      "FABADA,ChainLength=10000,StepsBetweenValues=10,ConvergenceCriteria=0.1,PDF=" + pdfGroupName);
+
+      TS_ASSERT_THROWS_NOTHING(fit.execute());
+      TS_ASSERT(fit.isExecuted());
+      TS_ASSERT_EQUALS(fit.getPropertyValue("OutputStatus"), "success");
+    };
+
+    runFit();
+    auto const firstPdfGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(pdfGroupName);
+    TS_ASSERT(firstPdfGroup);
+    TS_ASSERT_EQUALS(firstPdfGroup->size(), pdfWorkspaceNames.size());
+    assertPdfWorkspaceOutputs(pdfWorkspaceNames, pdfGroupName);
+
+    runFit();
+    auto const secondPdfGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(pdfGroupName);
+    TS_ASSERT(secondPdfGroup);
+    TS_ASSERT(firstPdfGroup != secondPdfGroup);
+    TS_ASSERT_EQUALS(secondPdfGroup->size(), pdfWorkspaceNames.size());
+    assertPdfWorkspaceOutputs(pdfWorkspaceNames, pdfGroupName);
+
+    removeWorkspaceIfPresent(pdfGroupName);
+    for (const auto &name : pdfWorkspaceNames) {
+      removeWorkspaceIfPresent(pdfGroupName + "_" + name);
+    }
   }
 
   //  void test_cosineWithConstraint() {
