@@ -76,7 +76,10 @@ private:
   void initialiseCachedDistances();
   Geometry::Raster rasterize(const Geometry::IObject *object);
 
-  API::MatrixWorkspace_sptr m_inputWS;                  ///< A pointer to the input workspace
+  API::MatrixWorkspace_sptr m_inputWS; ///< A pointer to the input workspace
+  /// Owns the sample shape rotated into the lab frame, which m_sampleObject points at. The gauge
+  /// volume, the beam and the detectors are all in the lab frame, so the sample has to be too.
+  Geometry::IObject_sptr m_labFrameSampleShape;
   const Geometry::IObject *m_sampleObject;              ///< Local cache of sample object.
   const Geometry::IObject *m_containerObject;           ///< Local cache of container object.
   Kernel::V3D m_beamDirection;                          ///< The direction of the beam.
