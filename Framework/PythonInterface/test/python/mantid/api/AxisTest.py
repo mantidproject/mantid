@@ -35,7 +35,7 @@ class AxisTest(unittest.TestCase):
         xunit = xAxis.getUnit()
         self.assertEqual(xunit.unitID(), "TOF")
         self.assertEqual(xunit.caption(), "Time-of-flight")
-        self.assertEqual(str(xunit.symbol()), "microsecond")
+        self.assertEqual(xunit.symbol().ascii(), "microsecond")
 
     def test_axis_unit_can_be_replaced(self):
         datY = [1, 2, 3]
@@ -52,9 +52,9 @@ class AxisTest(unittest.TestCase):
         unitx = ws.getAxis(0).getUnit()
         unity = ws.getAxis(1).getUnit()
         self.assertEqual("Time", unitx.caption())
-        self.assertEqual("ns", str(unitx.symbol()))
+        self.assertEqual("ns", unitx.symbol().ascii())
         self.assertEqual("Temperature", unity.caption())
-        self.assertEqual("K", str(unity.symbol()))
+        self.assertEqual("K", unity.symbol().ascii())
 
     def test_value_axis(self):
         yAxis = self._test_ws.getAxis(1)

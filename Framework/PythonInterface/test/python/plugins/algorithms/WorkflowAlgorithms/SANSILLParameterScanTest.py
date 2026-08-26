@@ -87,9 +87,9 @@ class SANSILLParameterScanTest(unittest.TestCase):
     def _check_output(self, ws, spectra, blocksize):
         self.assertTrue(ws)
         self.assertTrue(isinstance(ws, MatrixWorkspace))
-        self.assertEqual(str(ws.getAxis(0).getUnit().symbol()), "degrees")
+        self.assertEqual(ws.getAxis(0).getUnit().symbol().ascii(), "degrees")
         self.assertEqual(ws.getAxis(0).getUnit().caption(), "Scattering angle")
-        self.assertEqual(str(ws.getAxis(1).getUnit().symbol()), "degrees")
+        self.assertEqual(ws.getAxis(1).getUnit().symbol().ascii(), "degrees")
         self.assertEqual(ws.getAxis(1).getUnit().caption(), "Omega.value")
         self.assertEqual(ws.getNumberHistograms(), spectra)
         self.assertTrue(ws.getInstrument())

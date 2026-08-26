@@ -64,12 +64,12 @@ class MatrixWorkspaceTest(unittest.TestCase):
 
         xunit = xaxis.getUnit()
         self.assertEqual(xunit.caption(), "Time-of-flight")
-        self.assertEqual(str(xunit.symbol()), "microsecond")
+        self.assertEqual(xunit.symbol().ascii(), "microsecond")
         self.assertEqual(xunit.unitID(), "TOF")
 
         yunit = yaxis.getUnit()
         self.assertEqual(yunit.caption(), "Spectrum")
-        self.assertEqual(str(yunit.symbol()), "")
+        self.assertEqual(yunit.symbol().ascii(), "")
         self.assertEqual(yunit.unitID(), "Label")
 
     def test_replace_axis(self):

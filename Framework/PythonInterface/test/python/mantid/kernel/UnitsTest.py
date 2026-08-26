@@ -15,7 +15,7 @@ class UnitsTest(unittest.TestCase):
         self.assertTrue(isinstance(label_unit, Label))
         label_unit.setLabel("Temperature", "K")
         self.assertEqual("Temperature", label_unit.caption())
-        self.assertEqual("K", str(label_unit.symbol()))
+        self.assertEqual("K", label_unit.symbol().ascii())
         self.assertTrue(isinstance(label_unit.symbol(), UnitLabel))
 
     def test_quick_conversion_with_string_input(self):

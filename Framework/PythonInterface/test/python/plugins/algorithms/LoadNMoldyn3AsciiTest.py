@@ -61,7 +61,7 @@ class LoadNMoldyn3AsciiTest(unittest.TestCase):
         self.assertTrue(isinstance(moldyn_ws, MatrixWorkspace))
         self.assertTrue(moldyn_ws.getNumberHistograms(), 1)
 
-        self.assertEqual(str(moldyn_ws.getAxis(0).getUnit().symbol()), "THz")
+        self.assertEqual(moldyn_ws.getAxis(0).getUnit().symbol().ascii(), "THz")
         self.assertEqual(moldyn_ws.YUnitLabel(), "dos-total vs frequency")
 
     def test_load_from_dat(self):
