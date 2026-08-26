@@ -8,7 +8,6 @@
 
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
-#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Strings.h"
@@ -203,98 +202,6 @@ void MDNormDirectSC::cacheInputs() {
   m_ki = std::sqrt(energyToK * m_Ei);
   m_kfmin = std::sqrt(energyToK * (m_Ei - originaldEmin));
   m_kfmax = std::sqrt(energyToK * (m_Ei - originaldEmax));
-}
-
-/**
- * Currently looks for the ConvertToMD algorithm in the history
- * @return A string donating the energy transfer mode of the input workspace
- */
-std::string MDNormDirectSC::inputEnergyMode() const {
-  const auto &hist = m_inputWS->getHistory();
-  const size_t nalgs = hist.size();
-  const auto &lastAlgHist = hist.getAlgorithmHistory(nalgs - 1);
-
-  std::string emode;
-  if (lastAlgHist->name() == "ConvertToMD") {
-    // get dEAnalysisMode
-    emode = lastAlgHist->getPropertyValue("dEAnalysisMode");
-  } else {
-    if ((lastAlgHist->name() == "Load" || lastAlgHist->name() == "LoadMD") && nalgs > 1) {
-      const auto &penultimateAlgHist = hist.getAlgorithmHistory(nalgs - 2);
-      if (penultimateAlgHist->name() == "ConvertToMD") {
-        return penultimateAlgHist->getPropertyValue("dEAnalysisMode");
-      }
-    }
-    throw std::invalid_argument("The last algorithm in the history of the "
-                                "input workspace is not ConvertToMD");
-  }
-  return emode;
-}
-
-/**
- * Runs the BinMD algorithm on the input to provide the output workspace
- * All slicing algorithm properties are passed along
- * @return MDHistoWorkspace as a result of the binning
- */
-MDHistoWorkspace_sptr MDNormDirectSC::binInputWS() {
-  const auto &props = getProperties();
-  auto binMD = createChildAlgorithm("BinMD", 0.0, 0.3);
-  binMD->setPropertyValue("AxisAligned", "1");
-  for (auto prop : props) {
-    const auto &propName = prop->name();
-    if (propName != "SolidAngleWorkspace" && propName != "TemporaryNormalizationWorkspace" &&
-        propName != "OutputNormalizationWorkspace" && propName != "SkipSafetyCheck") {
-      binMD->setPropertyValue(propName, prop->value());
-    }
-  }
-  binMD->executeAsChildAlg();
-  Workspace_sptr outputWS = binMD->getProperty("OutputWorkspace");
-  return std::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
-}
-
-/**
- * Create & cached the normalization workspace
- * @param dataWS The binned workspace that will be used for the data
- */
-void MDNormDirectSC::createNormalizationWS(const MDHistoWorkspace &dataWS) {
-  // Copy the MDHisto workspace, and change signals and errors to 0.
-  std::shared_ptr<IMDHistoWorkspace> tmp = this->getProperty("TemporaryNormalizationWorkspace");
-  m_normWS = std::dynamic_pointer_cast<MDHistoWorkspace>(tmp);
-  if (!m_normWS) {
-    m_normWS = dataWS.clone();
-    m_normWS->setTo(0., 0., 0.);
-  }
-}
-
-/**
- * Retrieve logged values from non-HKL dimensions
- * @param skipNormalization [InOut] Updated to false if any values are outside
- * range measured by input workspace
- * @param expInfoIndex current experiment info index
- * @return A vector of values from other dimensions to be include in normalized
- * MD position calculation
- */
-std::vector<coord_t> MDNormDirectSC::getValuesFromOtherDimensions(bool &skipNormalization,
-                                                                  uint16_t expInfoIndex) const {
-  const auto &currentRun = m_inputWS->getExperimentInfo(expInfoIndex)->run();
-
-  std::vector<coord_t> otherDimValues;
-  for (size_t i = 4; i < m_inputWS->getNumDims(); i++) {
-    const auto dimension = m_inputWS->getDimension(i);
-    auto dimMin = static_cast<float>(dimension->getMinimum());
-    auto dimMax = static_cast<float>(dimension->getMaximum());
-    auto *dimProp = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(currentRun.getProperty(dimension->getName()));
-    if (dimProp) {
-      auto value = static_cast<coord_t>(dimProp->firstValue());
-      otherDimValues.emplace_back(value);
-      // in the original MD data no time was spent measuring between dimMin and
-      // dimMax
-      if (value < dimMin || value > dimMax) {
-        skipNormalization = true;
-      }
-    }
-  }
-  return otherDimValues;
 }
 
 } // namespace Mantid::MDAlgorithms

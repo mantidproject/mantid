@@ -32,6 +32,10 @@ public:
   static constexpr double STATIONARYANGLIM = 0.1; // Angle size (degrees) below which a gonio is considered stationary
 
 protected:
+  std::string inputEnergyMode() const;
+  DataObjects::MDHistoWorkspace_sptr binInputWS();
+  void createNormalizationWS(const DataObjects::MDHistoWorkspace &dataWS);
+  std::vector<coord_t> getValuesFromOtherDimensions(bool &skipNormalization, uint16_t expInfoIndex = 0) const;
   Kernel::Matrix<coord_t> findIntergratedDimensions(const std::vector<coord_t> &otherDimValues,
                                                     bool &skipNormalization);
   void cacheDimensionXValues();

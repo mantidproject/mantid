@@ -8,11 +8,7 @@
 
 #include "MantidMDAlgorithms/MDNormBase.h"
 
-namespace Mantid {
-namespace DataObjects {
-class EventWorkspace;
-}
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 /** MDNormSCD : Generate MD normalization for single crystal diffraction
  */
@@ -31,12 +27,6 @@ private:
   void exec() override;
 
   void cacheInputs();
-  std::string inputEnergyMode() const;
-
-  DataObjects::MDHistoWorkspace_sptr binInputWS();
-  void createNormalizationWS(const DataObjects::MDHistoWorkspace &dataWS);
-  std::vector<coord_t> getValuesFromOtherDimensions(bool &skipNormalization, uint16_t expInfoIndex = 0) const;
 };
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms
