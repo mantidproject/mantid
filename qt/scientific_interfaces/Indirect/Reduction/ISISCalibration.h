@@ -52,9 +52,8 @@ public:
   const std::string getSubscriberName() const override { return "ISISCalibration"; }
 
 private slots:
+  void handleLoadFiles();
   void algorithmComplete(bool error);
-  void calPlotRaw();
-  void calPlotEnergy();
   void calMinChanged(double /*val*/);
   void calMaxChanged(double /*val*/);
   void calUpdateRS(QtProperty * /*prop*/, double /*val*/);
@@ -70,6 +69,8 @@ private slots:
   void setSaveEnabled(bool enabled);
 
 private:
+  void calPlotRaw(const std::string &inputName);
+  void calPlotEnergy();
   void updateInstrumentConfiguration() override;
 
   void setDefaultInstDetails(QMap<QString, QString> const &instrumentDetails);
@@ -83,10 +84,10 @@ private:
   Mantid::API::IAlgorithm_sptr energyTransferReductionAlgorithm(const QString &inputFiles) const;
 
   Ui::ISISCalibration m_uiForm;
-  QString m_lastCalPlotFilename;
 
   QString m_outputCalibrationName;
   QString m_outputResolutionName;
+  QString m_outputNamePrefix;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
