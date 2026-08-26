@@ -107,6 +107,16 @@ class FindUBFromConventionalCellTest(unittest.TestCase):
 
         self.assertEqual(issues["PeaksWorkspace"], "At least 3 peaks with distinct Q directions are required.")
 
+    def test_validation_counts_distinct_directions_not_neighbouring_pairs(self):
+        issues = self._validate_peaks([[1, 0, 0], [0, 1, 0], [1, 0, 0], [0, 1, 0]])
+
+        self.assertEqual(issues["PeaksWorkspace"], "At least 3 peaks with distinct Q directions are required.")
+
+    def test_validation_accepts_distinct_directions_in_any_order(self):
+        issues = self._validate_peaks([[1, 0, 0], [2, 0, 0], [0, 1, 0], [0, 0, 1]])
+
+        self.assertNotIn("PeaksWorkspace", issues)
+
     def test_validation_reports_all_r_centering_constraints(self):
         issues = self._validate_peaks(
             [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
@@ -214,6 +224,11 @@ class FindUBFromConventionalCellTest(unittest.TestCase):
         rms = np.sqrt(np.mean(err**2))
 
         self.assertLess(rms, 0.3)
+
+        histograms = alg.getProperty("ProjectionHistograms").value
+        self.assertTrue(histograms.isHistogramData())
+        for spectrum in range(histograms.getNumberHistograms()):
+            self.assertEqual(histograms.readX(spectrum).size, histograms.readY(spectrum).size + 1)
 
     def test_accepts_primitive_rhombohedral_as_P(self):
         a = b = c = 5.5

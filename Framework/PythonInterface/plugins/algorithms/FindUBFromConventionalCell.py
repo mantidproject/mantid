@@ -1088,7 +1088,12 @@ class FindUBFromConventionalCell(PythonAlgorithm):
             IntBoundedValidator(lower=8),
             doc="Number of polar samples in the coarse direction grid.",
         )
-        self.declareProperty("CapAngleDeg", 10.0, doc="Half-angle (degrees) of the local refinement cap.")
+        self.declareProperty(
+            "CapAngleDeg",
+            10.0,
+            FloatBoundedValidator(lower=0.0, upper=180.0),
+            doc="Half-angle (degrees) of the local refinement cap.",
+        )
         self.declareProperty(
             "CapSamples",
             10000,
@@ -1105,11 +1110,13 @@ class FindUBFromConventionalCell(PythonAlgorithm):
         self.declareProperty(
             "Tolerance",
             0.2,
+            FloatBoundedValidator(lower=0.0),
             doc="Maximum per-index deviation from an integer to count a reflection as indexed.",
         )
         self.declareProperty(
             "AxisDegeneracyTolerance",
             0.05,
+            FloatBoundedValidator(lower=0.0),
             doc="Relative length difference below which two axes are treated as degenerate.",
         )
 
@@ -1149,14 +1156,14 @@ class FindUBFromConventionalCell(PythonAlgorithm):
             if any(norm < 1e-10 for norm in q_norms):
                 issues["PeaksWorkspace"] = "All peaks must have non-zero Q vectors."
             else:
-                non_coincident_pairs = 0
-                for i in range(peaks.getNumberPeaks() - 1):
-                    q0 = peaks.getPeak(i).getQSampleFrame()
-                    q1 = peaks.getPeak(i + 1).getQSampleFrame()
-                    cos_theta = np.clip(np.dot(q0, q1) / (q_norms[i] * q_norms[i + 1]), -1.0, 1.0)
-                    if np.rad2deg(np.arccos(cos_theta)) > 10:
-                        non_coincident_pairs += 1
-                if non_coincident_pairs < 2:
+                distinct_directions = []
+                for i in range(peaks.getNumberPeaks()):
+                    direction = np.array(peaks.getPeak(i).getQSampleFrame()) / q_norms[i]
+                    if all(np.rad2deg(np.arccos(np.clip(np.dot(direction, kept), -1.0, 1.0))) > 10 for kept in distinct_directions):
+                        distinct_directions.append(direction)
+                    if len(distinct_directions) == 3:
+                        break
+                if len(distinct_directions) < 3:
                     issues["PeaksWorkspace"] = "At least 3 peaks with distinct Q directions are required."
 
         for name in ["alpha", "beta", "gamma"]:
@@ -1227,7 +1234,6 @@ class FindUBFromConventionalCell(PythonAlgorithm):
             SetUB(Workspace=peaks_ws, UB=UB_conv)
             return
 
-        ol = sample.getOrientedLattice()
         ol.setUB(UB_conv)
 
     def _make_diagnostic_table(
@@ -1322,10 +1328,8 @@ class FindUBFromConventionalCell(PythonAlgorithm):
         k_hist, _ = np.histogram(k_proj, bins=bins)
         l_hist, _ = np.histogram(l_proj, bins=bins)
 
-        x = 0.5 * (edges[:-1] + edges[1:])
-
         ws = CreateWorkspace(
-            DataX=np.concatenate([x, x, x]),
+            DataX=np.tile(edges, 3),
             DataY=np.concatenate([h_hist, k_hist, l_hist]),
             NSpec=3,
             UnitX="Label",
