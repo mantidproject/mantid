@@ -123,10 +123,9 @@ PlottingWorkspaceTreeItemState plottingWorkspaceTreeItemState(PlottingWorkspaceT
   auto const itemIsWorkspaceGroup = item.itemType == PlottingWorkspaceTreeItemType::WorkspaceGroup;
   auto childStates = std::vector<PlottingWorkspaceTreeItemState>{};
   childStates.reserve(item.children.size());
-  for (auto const &child : item.children) {
-    childStates.emplace_back(
-        plottingWorkspaceTreeItemState(child, properties, itemIsGroup, itemIsWorkspaceGroup, parentIsGroup));
-  }
+  std::transform(item.children.cbegin(), item.children.cend(), std::back_inserter(childStates), [&](const auto &child) {
+    return plottingWorkspaceTreeItemState(child, properties, itemIsGroup, itemIsWorkspaceGroup, parentIsGroup);
+  });
   auto const canSelectItemDirectly =
       isSelectable(item, properties, parentIsGroup, parentIsWorkspaceGroup, grandparentIsGroup);
   auto const canSelectItemViaParent =
@@ -147,9 +146,9 @@ std::vector<PlotOutputTypeViewItem>
 PlottingViewStateProvider::outputTypeViewItems(std::vector<PlotOutputType> const &outputTypes) const {
   auto viewItems = std::vector<PlotOutputTypeViewItem>{};
   viewItems.reserve(outputTypes.size());
-  for (auto outputType : outputTypes) {
-    viewItems.push_back({outputType, plotOutputTypeProperties(outputType).displayName()});
-  }
+  std::transform(outputTypes.cbegin(), outputTypes.cend(), std::back_inserter(viewItems), [&](const auto &outputType) {
+    return PlotOutputTypeViewItem{outputType, plotOutputTypeProperties(outputType).displayName()};
+  });
   return viewItems;
 }
 
@@ -186,10 +185,8 @@ PlottingViewStateProvider::plottingWorkspaceTreeItemStates(std::vector<PlottingW
   auto const &properties = plotOutputTypeProperties(outputType);
   auto itemStates = std::vector<PlottingWorkspaceTreeItemState>{};
   itemStates.reserve(items.size());
-  for (auto const &item : items) {
-    itemStates.emplace_back(plottingWorkspaceTreeItemState(item, properties));
-  }
-  return itemStates;
+  std::transform(items.cbegin(), items.cend(), std::back_inserter(itemStates),
+                 [&](const auto &item) { return plottingWorkspaceTreeItemState(item, properties); });
 }
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
