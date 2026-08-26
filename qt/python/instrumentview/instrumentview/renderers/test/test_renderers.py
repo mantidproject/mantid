@@ -194,9 +194,35 @@ class TestPointCloudRenderer(unittest.TestCase):
         self.assertEqual(halo_call[1]["color"], self.renderer._PICKED_HIGHLIGHT_COLOUR)
         self.assertEqual(halo_call[1]["point_size"], self.renderer._PICKED_HALO_POINT_SIZE)
         self.assertFalse(halo_call[1]["pickable"])
-        # Sphere sprites write per-fragment depth, which would make the larger halo
-        # hide the detector's own point entirely.  See _add_picked_highlight_actor.
-        self.assertNotIn("render_points_as_spheres", halo_call[1])
+        self.assertTrue(halo_call[1]["render_points_as_spheres"])
+
+    def test_picked_highlight_halo_is_a_ring_not_a_disc(self):
+        """A filled halo would cover the counts colour of the detector it marks."""
+        plotter = MagicMock()
+        plotter.off_screen = False
+        self.renderer.create_picked_highlight_actor(plotter)
+
+        shader = plotter.add_points.return_value.GetShaderProperty.return_value
+        shader.AddFragmentShaderReplacement.assert_called_once()
+        marker, replace_first, source, replace_all = shader.AddFragmentShaderReplacement.call_args[0]
+        self.assertEqual(marker, "//VTK::Color::Impl")
+        self.assertTrue(replace_first)
+        self.assertFalse(replace_all)
+        # The marker has to survive in the replacement, or VTK cannot substitute
+        # its own colour code afterwards.
+        self.assertIn(marker, source)
+        self.assertIn("discard", source)
+
+    def test_halo_hole_matches_the_detector_point(self):
+        """The hole exposes the detector's own point, so it is sized from it.
+
+        The shader works in fractions of the sprite's radius, so the hole is
+        expressed as the squared ratio of the two sizes.
+        """
+        self.assertEqual(self.renderer._PICKED_HALO_HOLE_SIZE, self.renderer._DETECTOR_POINT_SIZE)
+        self.assertLess(self.renderer._PICKED_HALO_HOLE_SIZE, self.renderer._PICKED_HALO_POINT_SIZE)
+        expected = (self.renderer._PICKED_HALO_HOLE_SIZE / self.renderer._PICKED_HALO_POINT_SIZE) ** 2
+        self.assertIn(f"{expected:.4f}", self.renderer._halo_ring_shader())
 
     def test_update_picked_highlight_hides_actor_when_nothing_picked(self):
         plotter = self._build_highlight_plotter()
@@ -228,7 +254,12 @@ class TestPointCloudRenderer(unittest.TestCase):
         np.testing.assert_allclose(self.renderer._picked_highlight_mesh.points, self.positions[[2]])
 
     def test_halo_is_larger_than_the_detector_point(self):
-        """Otherwise no ring of highlight colour would show around the detector."""
+        """The halo has to out-bulge its neighbours' sprites to survive a packed instrument.
+
+        The depth a sphere sprite writes follows its screen size, so a halo no bigger
+        than a detector point would sit at the same depth as the detectors crowding it
+        and be overdrawn by them.
+        """
         self.assertGreater(self.renderer._PICKED_HALO_POINT_SIZE, self.renderer._DETECTOR_POINT_SIZE)
 
 

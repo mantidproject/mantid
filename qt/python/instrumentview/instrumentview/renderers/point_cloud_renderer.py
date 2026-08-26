@@ -25,9 +25,15 @@ class PointCloudRenderer(InstrumentRenderer):
     _PICKABLE_POINT_SIZE = 30
     _MASKED_COLOUR = (0.25, 0.25, 0.25)
     _DEFAULT_PICKING_TOLERANCE = 0.01
-    # Larger than _DETECTOR_POINT_SIZE so a ring of highlight colour shows around
-    # the picked detector's own point.
+    # Larger than _DETECTOR_POINT_SIZE so the picked detector reads as a bigger,
+    # differently coloured dot than its neighbours.  The halo's depth bulge grows
+    # with its point size, and past this it starts showing through detectors
+    # that should hide it.
     _PICKED_HALO_POINT_SIZE = 26
+    # The hole punched through the middle of the halo is exactly a detector
+    # point, so the picked detector — and with it the counts colour — shows
+    # through while the magenta reads as a ring around it.
+    _PICKED_HALO_HOLE_SIZE = _DETECTOR_POINT_SIZE
 
     def __init__(self) -> None:
         super().__init__()
@@ -113,29 +119,66 @@ class PointCloudRenderer(InstrumentRenderer):
 
     # ----------------------------------------------------- picked highlight
     def _add_picked_highlight_actor(self, plotter: BackgroundPlotter, mesh: pv.PolyData):
-        """Add the halo actor that sits behind the picked detectors.
+        """Add the halo actor that marks the picked detectors.
 
         Point size is in screen pixels, so the halo stays the same size however
         far the view is zoomed out.
 
-        The halo deliberately does *not* use ``render_points_as_spheres``.  A
-        sphere point sprite writes per-fragment depth, so the larger halo would
-        win the depth test against the detector's own point and hide it
-        completely.  A flat sprite is drawn at the detector's own depth instead,
-        which lets the detector sphere — already drawn, and nearer the camera
-        across its whole face — punch through the middle.  The counts colour
-        therefore stays visible, and keeps tracking the contour limits, without
-        the highlight having to redraw or recolour anything itself.
+        ``render_points_as_spheres`` is what makes the halo survive a crowd.  A
+        detector point is also a screen-sized sprite, so on a packed instrument
+        the neighbours tile the halo's whole area — a bigger halo cannot outrun
+        them, because they close in on it at exactly the same rate.  The only
+        way through is depth: a sphere sprite writes per-fragment depth, so the
+        larger halo bulges further towards the camera than its neighbours' own
+        sprites and wins the depth test against them.  A flat sprite sits at the
+        detector's own depth and loses, leaving a few stray pixels of magenta
+        peeking between neighbours.
+
+        A filled halo would then hide the detector's counts colour, because a
+        larger sprite always covers a smaller one drawn at the same centre — the
+        depth bulge that beats the neighbours beats the detector's own point too.
+        ``_punch_halo_hole`` carves the middle out so the colour still reads.
         """
-        return plotter.add_points(
+        actor = plotter.add_points(
             mesh,
             color=self._PICKED_HIGHLIGHT_COLOUR,
             point_size=self._PICKED_HALO_POINT_SIZE,
+            render_points_as_spheres=True,
             lighting=False,
             pickable=False,
             show_scalar_bar=False,
             render=False,
         )
+        self._punch_halo_hole(actor)
+        return actor
+
+    @classmethod
+    def _halo_ring_shader(cls) -> str:
+        """GLSL that discards the middle of the halo's point sprite.
+
+        ``gl_PointCoord`` runs 0..1 across the sprite, so this is the sprite's
+        squared radius, compared against the hole's as a fraction of the halo's.
+        Discarding rather than colouring matters: a discarded fragment writes no
+        depth, which is what lets the detector's own point occupy the hole.
+        """
+        inner_fraction = (cls._PICKED_HALO_HOLE_SIZE / cls._PICKED_HALO_POINT_SIZE) ** 2
+        return (
+            "//VTK::Color::Impl\n"
+            "  float haloX = 2.0 * gl_PointCoord.x - 1.0;\n"
+            "  float haloY = 1.0 - 2.0 * gl_PointCoord.y;\n"
+            f"  if (haloX * haloX + haloY * haloY < {inner_fraction:.4f}) {{ discard; }}\n"
+        )
+
+    def _punch_halo_hole(self, actor) -> None:
+        """Turn the halo's filled disc into a ring.
+
+        VTK has no annular point sprite, so the shape has to come from the
+        fragment shader.  The replacement is keyed on a marker VTK substitutes
+        into its own shader; if a future VTK drops that marker the substitution
+        simply does not happen and the halo stays a filled disc, which is a
+        cosmetic regression rather than a broken render.
+        """
+        actor.GetShaderProperty().AddFragmentShaderReplacement("//VTK::Color::Impl", True, self._halo_ring_shader(), False)
 
     def _build_picked_highlight_mesh(self, mesh: pv.PolyData, visibility: np.ndarray) -> Optional[pv.PolyData]:
         picked = np.flatnonzero(visibility)
