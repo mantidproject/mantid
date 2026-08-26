@@ -633,6 +633,9 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.is_maintain_aspect_ratio_checkbox_checked.return_value = False
         self._presenter._update_transform()
         np.testing.assert_allclose(scale_transform, self._model.transform, atol=1e-10)
+        np.testing.assert_allclose(
+            self._model.detector_positions * np.array([2, 3, 1]), self._model.transformed_detector_positions, atol=1e-10
+        )
         mock_transform_mesh.assert_called()
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._scale_matrix_relative_to_centre")
