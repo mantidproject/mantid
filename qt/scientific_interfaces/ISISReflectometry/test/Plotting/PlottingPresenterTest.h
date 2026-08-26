@@ -29,7 +29,7 @@ using testing::Return;
 inline std::vector<PlottingWorkspaceTreeItemState>
 plottingWorkspaceTreeItemStatesForOutputType(std::vector<PlottingWorkspaceTreeItem> const &items,
                                              PlotOutputType outputType) {
-  return PlottingViewStateBuilder().plottingWorkspaceTreeItemStates(items, outputType);
+  return PlottingViewStateProvider().plottingWorkspaceTreeItemStates(items, outputType);
 }
 
 inline std::vector<PlottingWorkspaceTreeItemState>

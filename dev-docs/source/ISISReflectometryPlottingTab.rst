@@ -132,7 +132,7 @@ Coordinates the complete tab workflow. Its responsibilities are to:
 * subscribe to view notifications and active-figure changes;
 * enable or disable output selection while reduction or autoreduction runs;
 * rebuild the model-side workspace tree when the runs table changes;
-* ask the state builder for output-specific tree and control state;
+* ask the state provider for output-specific tree and control state;
 * resolve the user's selected workspace names;
 * request plot-ready workspaces from :code:`IPlottingModel`;
 * request rendering options from :code:`IPlotOptionsProvider`;
@@ -158,14 +158,14 @@ capability flags. The flags describe support for overplotting, adding to an
 existing figure, postprocessed group outputs, and multi-plot selection based on
 workspace groups.
 
-The presenter and its state builder query these properties instead of
+The presenter and its state provider query these properties instead of
 containing output-type conditionals. This is the main extension point for tree
 selection and action behavior when adding another plot output type.
 
-:code:`presenter/PlottingViewStateBuilder.h/.cpp`
-#################################################
+:code:`presenter/PlottingViewStateProvider.h/.cpp`
+##################################################
 
-Builds all state passed from the presenter to the view. For the plotting
+Provides all state passed from the presenter to the view. For the plotting
 workspace tree, it converts model-side :code:`PlottingWorkspaceTreeItem`
 objects into view-facing :code:`PlottingWorkspaceTreeItemState` objects for the
 selected output type. It evaluates whether each node:
@@ -179,7 +179,7 @@ selected output type. It evaluates whether each node:
 Keeping this policy in the presenter layer means that
 :code:`PlottingWorkspaceTree` knows nothing about GUI selection behavior.
 
-The same builder creates state for the other parts of the Plotting tab:
+The same provider creates state for the other parts of the Plotting tab:
 
 * output selector labels;
 * visibility of detector-map and alignment controls; and
@@ -224,7 +224,7 @@ plot parent :code:`QWidget` required by the plotting service.
 ################################
 
 Defines small view-state structures created by
-:code:`PlottingViewStateBuilder`: :code:`PlotOutputTypeViewItem`,
+:code:`PlottingViewStateProvider`: :code:`PlotOutputTypeViewItem`,
 :code:`PlotOutputControlsState`, :code:`PlotActionState`, and
 :code:`PlottingWorkspaceTreeItemState`. These structures let the presenter
 update related controls in one call. The workspace-tree item state includes
@@ -369,7 +369,7 @@ The focused test files are:
   metadata construction from runs-table and ADS state;
 * :code:`test/Plotting/PlottingModelTest.h`, covering workspace selection and
   generation for each output type;
-* :code:`test/Plotting/PlottingViewStateBuilderTest.h`, covering output labels,
+* :code:`test/Plotting/PlottingViewStateProviderTest.h`, covering output labels,
   control visibility, and plot action enablement;
 * :code:`test/Plotting/PlottingPresenterTest.h`, covering Batch and view
   notifications, display-state updates, request construction, and plotting
@@ -425,7 +425,7 @@ Updating the workspace tree
    as a :code:`PlottingWorkspace` with run, containing-group, and period
    metadata.
 #. The presenter reads the currently selected :code:`PlotOutputType` and asks
-   :code:`PlottingViewStateBuilder::plottingWorkspaceTreeItemStates` to evaluate
+   :code:`PlottingViewStateProvider::plottingWorkspaceTreeItemStates` to evaluate
    the hierarchy using :code:`PlotOutputTypeProperties`.
 #. The resulting item states are passed to
    :code:`IPlottingView::setPlottingWorkspaceTreeItemStates`.
@@ -446,7 +446,7 @@ User interaction
    only to descendants whose presenter-supplied selection mode permits it.
 #. A selection change notifies :code:`PlottingPresenter`. The presenter obtains
    selected leaf names and workspace-group counts from the view and asks
-   :code:`PlottingViewStateBuilder` for a new :code:`PlotActionState`.
+   :code:`PlottingViewStateProvider` for a new :code:`PlotActionState`.
 #. The active-figure monitor causes the same action-state calculation when the
    current matplotlib figure changes. Add-to-existing is enabled only for a
    compatible Reflectometry figure and output type. Overplotting additionally
@@ -492,5 +492,5 @@ its existing boundary:
 #. Add plot-ready workspace creation or selection to :code:`PlottingModel.cpp`.
 #. Add rendering options and instrument availability to
    :code:`PlotOptions.cpp` and :code:`PlotOptionsProvider.cpp`.
-#. Add focused model, presenter/state-builder, options-provider, view, and
+#. Add focused model, presenter/state-provider, options-provider, view, and
    plotter tests for behavior introduced at each boundary.

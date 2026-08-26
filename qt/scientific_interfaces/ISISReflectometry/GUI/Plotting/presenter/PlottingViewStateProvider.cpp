@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "PlottingViewStateBuilder.h"
+#include "PlottingViewStateProvider.h"
 
 #include "GUI/Plotting/presenter/PlotOutputTypeProperties.h"
 
@@ -144,7 +144,7 @@ PlottingWorkspaceTreeItemState plottingWorkspaceTreeItemState(PlottingWorkspaceT
 } // namespace
 
 std::vector<PlotOutputTypeViewItem>
-PlottingViewStateBuilder::outputTypeViewItems(std::vector<PlotOutputType> const &outputTypes) const {
+PlottingViewStateProvider::outputTypeViewItems(std::vector<PlotOutputType> const &outputTypes) const {
   auto viewItems = std::vector<PlotOutputTypeViewItem>{};
   viewItems.reserve(outputTypes.size());
   for (auto outputType : outputTypes) {
@@ -153,18 +153,18 @@ PlottingViewStateBuilder::outputTypeViewItems(std::vector<PlotOutputType> const 
   return viewItems;
 }
 
-PlotOutputControlsState PlottingViewStateBuilder::outputControlsState(PlotOutputType outputType) const {
+PlotOutputControlsState PlottingViewStateProvider::outputControlsState(PlotOutputType outputType) const {
   auto const &plotProperties = plotOutputTypeProperties(outputType);
   return {plotProperties.showsPlotProperties(), plotProperties.showsDetectorMapProperties(),
           plotProperties.showsAlignmentProperties()};
 }
 
-PlotActionState PlottingViewStateBuilder::plotActionState(bool outputSelectionEnabled,
-                                                          size_t selectedPlottingWorkspaceCount,
-                                                          size_t selectedPlottingWorkspaceGroupCount,
-                                                          PlotOutputType outputType, bool addToExistingPlot,
-                                                          bool hasActiveReflectometryFigure,
-                                                          bool activePlotOverplotCompatible) const {
+PlotActionState PlottingViewStateProvider::plotActionState(bool outputSelectionEnabled,
+                                                           size_t selectedPlottingWorkspaceCount,
+                                                           size_t selectedPlottingWorkspaceGroupCount,
+                                                           PlotOutputType outputType, bool addToExistingPlot,
+                                                           bool hasActiveReflectometryFigure,
+                                                           bool activePlotOverplotCompatible) const {
   auto const &plotProperties = plotOutputTypeProperties(outputType);
   auto const addToExistingEnabled =
       outputSelectionEnabled && hasActiveReflectometryFigure && plotProperties.supportsAddToExistingPlot();
@@ -181,8 +181,8 @@ PlotActionState PlottingViewStateBuilder::plotActionState(bool outputSelectionEn
 }
 
 std::vector<PlottingWorkspaceTreeItemState>
-PlottingViewStateBuilder::plottingWorkspaceTreeItemStates(std::vector<PlottingWorkspaceTreeItem> const &items,
-                                                          PlotOutputType outputType) const {
+PlottingViewStateProvider::plottingWorkspaceTreeItemStates(std::vector<PlottingWorkspaceTreeItem> const &items,
+                                                           PlotOutputType outputType) const {
   auto const &properties = plotOutputTypeProperties(outputType);
   auto itemStates = std::vector<PlottingWorkspaceTreeItemState>{};
   itemStates.reserve(items.size());

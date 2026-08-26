@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "../../../ISISReflectometry/GUI/Plotting/presenter/PlottingViewStateBuilder.h"
+#include "../../../ISISReflectometry/GUI/Plotting/presenter/PlottingViewStateProvider.h"
 
 #include <cxxtest/TestSuite.h>
 #include <string>
@@ -15,12 +15,12 @@
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 
-class PlottingViewStateBuilderTest : public CxxTest::TestSuite {
+class PlottingViewStateProviderTest : public CxxTest::TestSuite {
 public:
   void testPlotActionStateEnablesAddToExistingActionsForSingleCompatibleReflectivitySelection() {
-    PlottingViewStateBuilder builder;
+    PlottingViewStateProvider provider;
 
-    auto const state = builder.plotActionState(true, 1, 0, PlotOutputType::ReflectivityCurve, true, true, true);
+    auto const state = provider.plotActionState(true, 1, 0, PlotOutputType::ReflectivityCurve, true, true, true);
 
     TS_ASSERT_EQUALS(state.plotIndividualEnabled, false);
     TS_ASSERT_EQUALS(state.plotOverplotEnabled, true);
@@ -31,9 +31,9 @@ public:
   }
 
   void testPlotActionStateEnablesTiledAddToExistingForNonOverplottableActiveFigure() {
-    PlottingViewStateBuilder builder;
+    PlottingViewStateProvider provider;
 
-    auto const state = builder.plotActionState(true, 1, 0, PlotOutputType::ReflectivityCurve, true, true, false);
+    auto const state = provider.plotActionState(true, 1, 0, PlotOutputType::ReflectivityCurve, true, true, false);
 
     TS_ASSERT_EQUALS(state.plotIndividualEnabled, false);
     TS_ASSERT_EQUALS(state.plotOverplotEnabled, false);
@@ -44,9 +44,9 @@ public:
   }
 
   void testPlotActionStateDisablesAddToExistingForDetectorMap() {
-    PlottingViewStateBuilder builder;
+    PlottingViewStateProvider provider;
 
-    auto const state = builder.plotActionState(true, 1, 0, PlotOutputType::DetectorMap, true, true, true);
+    auto const state = provider.plotActionState(true, 1, 0, PlotOutputType::DetectorMap, true, true, true);
 
     TS_ASSERT_EQUALS(state.plotIndividualEnabled, true);
     TS_ASSERT_EQUALS(state.plotOverplotEnabled, false);
@@ -57,13 +57,13 @@ public:
   }
 
   void testPlottingWorkspaceTreeItemStatesMuteStitchedOutputsForAlignment() {
-    PlottingViewStateBuilder builder;
+    PlottingViewStateProvider provider;
     auto const plottingWorkspaceTreeItems = std::vector<PlottingWorkspaceTreeItem>{groupItem(
         "Group 1", {workspaceItem("stitched_12345", ReducedWorkspaceOutputType::IvsQBinned),
                     runItem("12345", {workspaceItem("IvsQ_binned_12345", ReducedWorkspaceOutputType::IvsQBinned)})})};
 
     auto const itemStates =
-        builder.plottingWorkspaceTreeItemStates(plottingWorkspaceTreeItems, PlotOutputType::Alignment);
+        provider.plottingWorkspaceTreeItemStates(plottingWorkspaceTreeItems, PlotOutputType::Alignment);
 
     TS_ASSERT(itemStates[0].children[0].muted);
     TS_ASSERT_EQUALS(itemStates[0].children[0].selectionMode, PlottingWorkspaceTreeSelectionMode::None);

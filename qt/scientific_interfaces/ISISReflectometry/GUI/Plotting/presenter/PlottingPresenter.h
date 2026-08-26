@@ -13,7 +13,7 @@
 #include "GUI/Plotting/model/PlottingModel.h"
 #include "GUI/Plotting/model/PlottingWorkspaceTree.h"
 #include "GUI/Plotting/presenter/IPlottingPresenter.h"
-#include "GUI/Plotting/presenter/PlottingViewStateBuilder.h"
+#include "GUI/Plotting/presenter/PlottingViewStateProvider.h"
 #include "GUI/Plotting/presenter/QtActiveFigureMonitor.h"
 #include "GUI/Plotting/view/IPlottingView.h"
 
@@ -83,7 +83,7 @@ private:
   IPlottingModel const *m_plottingModel;
   IActiveFigureMonitor *m_activeFigureMonitor;
   PlottingWorkspaceTree m_plottingWorkspaceTree;
-  PlottingViewStateBuilder m_viewStateBuilder;
+  PlottingViewStateProvider m_viewStateProvider;
   std::string m_instrumentName;
   bool m_outputSelectionEnabled;
   bool m_hasActiveReflectometryFigure;

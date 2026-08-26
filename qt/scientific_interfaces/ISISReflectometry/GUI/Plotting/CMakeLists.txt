@@ -3,7 +3,7 @@ set(PLOTTING_SRC_FILES
     model/PlottingWorkspaceTree.cpp
     presenter/PlotOutputTypeProperties.cpp
     presenter/PlottingPresenter.cpp
-    presenter/PlottingViewStateBuilder.cpp
+    presenter/PlottingViewStateProvider.cpp
     presenter/QtActiveFigureMonitor.cpp
     view/QtPlottingView.cpp
     view/QtPlottingWorkspaceTreeView.cpp
@@ -21,7 +21,7 @@ set(PLOTTING_INC_FILES
     presenter/PlotOutputTypeProperties.h
     presenter/PlottingPresenter.h
     presenter/PlottingPresenterFactory.h
-    presenter/PlottingViewStateBuilder.h
+    presenter/PlottingViewStateProvider.h
     presenter/QtActiveFigureMonitor.h
     view/IPlottingView.h
     view/PlottingViewState.h

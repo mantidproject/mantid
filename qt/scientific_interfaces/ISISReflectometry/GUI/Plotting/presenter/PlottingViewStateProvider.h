@@ -15,8 +15,8 @@
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-/// Builds plotting-tab view state from presenter and model state.
-class MANTIDQT_ISISREFLECTOMETRY_DLL PlottingViewStateBuilder {
+/// Provides plotting-tab view state derived from presenter and model state.
+class MANTIDQT_ISISREFLECTOMETRY_DLL PlottingViewStateProvider {
 public:
   /// Return labelled output types for display in the output selector.
   std::vector<PlotOutputTypeViewItem> outputTypeViewItems(std::vector<PlotOutputType> const &outputTypes) const;

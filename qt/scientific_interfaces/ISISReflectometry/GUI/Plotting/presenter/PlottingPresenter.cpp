@@ -147,7 +147,7 @@ void PlottingPresenter::updateActivePlotCompatibility() {
 
 void PlottingPresenter::updateAvailablePlotOutputTypes(std::string const &instrumentName) {
   m_view->setAvailablePlotOutputTypes(
-      m_viewStateBuilder.outputTypeViewItems(m_plotOptionsProvider->availableTypes(instrumentName)));
+      m_viewStateProvider.outputTypeViewItems(m_plotOptionsProvider->availableTypes(instrumentName)));
   updatePlotOutputControlsState();
   updatePlottingWorkspaceTreeItemStates();
   updatePlotActionState();
@@ -161,7 +161,7 @@ void PlottingPresenter::updatePlottingWorkspaceTreeItemStates() {
   }
 
   m_view->setPlottingWorkspaceTreeItemStates(
-      m_viewStateBuilder.plottingWorkspaceTreeItemStates(m_plottingWorkspaceTree.items(), *selectedOutputType));
+      m_viewStateProvider.plottingWorkspaceTreeItemStates(m_plottingWorkspaceTree.items(), *selectedOutputType));
 }
 
 void PlottingPresenter::updatePlotActionState() const {
@@ -171,7 +171,7 @@ void PlottingPresenter::updatePlotActionState() const {
     return;
   }
 
-  m_view->setPlotActionState(m_viewStateBuilder.plotActionState(
+  m_view->setPlotActionState(m_viewStateProvider.plotActionState(
       m_outputSelectionEnabled, m_view->selectedPlottingWorkspaceNames().size(),
       m_view->selectedPlottingWorkspaceGroupCount(), *selectedOutputType, m_view->addToExistingPlot(),
       m_hasActiveReflectometryFigure, m_activePlotOverplotCompatible));
@@ -179,7 +179,7 @@ void PlottingPresenter::updatePlotActionState() const {
 
 void PlottingPresenter::updatePlotOutputControlsState() const {
   auto const selectedOutputType = m_view->selectedPlotOutputType();
-  m_view->setPlotOutputControlsState(selectedOutputType ? m_viewStateBuilder.outputControlsState(*selectedOutputType)
+  m_view->setPlotOutputControlsState(selectedOutputType ? m_viewStateProvider.outputControlsState(*selectedOutputType)
                                                         : PlotOutputControlsState{});
 }
 
