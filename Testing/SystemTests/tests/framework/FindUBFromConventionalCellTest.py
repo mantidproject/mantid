@@ -9,11 +9,11 @@ import systemtesting
 import numpy as np
 
 from mantid.api import AnalysisDataService as ADS
-from mantid.simpleapi import FindUBFromConventionalCell, Load
+from mantid.simpleapi import FindUBFromConventionalCell, LoadIsawPeaks
 
 # Real macromolecular peaks data. The lattice is orthorhombic P with these
 # conventional-cell parameters.
-PEAKS_FILE = "MANDI_Macromolecular_Orthorhombic_P.nxs"
+PEAKS_FILE = "MANDI_Macromolecular_Orthorhombic_P.peaks"
 A, B, C = 85.2, 89.6, 110.9
 ALPHA = BETA = GAMMA = 90.0
 
@@ -35,7 +35,7 @@ class FindUBFromConventionalCellTest(systemtesting.MantidSystemTest):
         return [PEAKS_FILE]
 
     def runTest(self):
-        ws = Load(Filename=PEAKS_FILE, OutputWorkspace="peaks")
+        ws = LoadIsawPeaks(Filename=PEAKS_FILE, OutputWorkspace="peaks")
 
         # RandomSeed fixes the spherical-cap refinement so the result is reproducible.
         FindUBFromConventionalCell(
