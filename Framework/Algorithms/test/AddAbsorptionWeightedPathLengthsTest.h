@@ -19,6 +19,7 @@
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "SampleFrameEquivalence.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::DataObjects;
@@ -178,7 +179,42 @@ public:
     TS_ASSERT_DELTA(0.2, peak.getAbsorptionWeightedPathLength(), delta);
   }
 
+  void test_single_path_both_ways_of_orienting_the_sample_agree() {
+    // Here the rotation comes from the peak, not the run, and it varies peak to peak. A sample in
+    // its own frame and the same sample already rotated into the lab frame describe the same
+    // experiment, so the path length through them must match.
+    const auto rotation = SampleFrameEquivalence::rotationY(30.0);
+    const double ownFrame = singlePathThroughPlate(rotation, false);
+    const double labFrame = singlePathThroughPlate(rotation, true);
+
+    TS_ASSERT_DELTA(ownFrame, labFrame, 1e-9);
+    // and the rotation actually mattered - otherwise the assertion above proves nothing
+    const double unrotated = singlePathThroughPlate(Matrix<double>(3, 3, true), false);
+    TS_ASSERT(std::abs(ownFrame - unrotated) > 1e-6);
+  }
+
 private:
+  /// The single-path absorption weighted path length through a plate held in the given frame, with
+  /// the peak carrying the same rotation either way.
+  double singlePathThroughPlate(const Matrix<double> &rotation, const bool baked) {
+    auto peaksWS = WorkspaceCreationHelper::createPeaksWorkspace(1);
+    if (baked) {
+      SampleFrameEquivalence::setSampleInLabFrame(*peaksWS, rotation);
+    } else {
+      SampleFrameEquivalence::setSampleInOwnFrame(*peaksWS, rotation);
+    }
+    peaksWS->getPeak(0).setGoniometerMatrix(rotation);
+
+    Mantid::Algorithms::AddAbsorptionWeightedPathLengths alg;
+    alg.initialize();
+    alg.setRethrows(true);
+    alg.setChild(true); // the InOut workspace is modified in place; keep it out of the ADS
+    alg.setProperty("InputWorkspace", peaksWS);
+    alg.setProperty("UseSinglePath", true);
+    alg.execute();
+    return peaksWS->getPeak(0).getAbsorptionWeightedPathLength();
+  }
+
   void setTestInstrument(std::shared_ptr<PeaksWorkspace> peaksWS) {
     // create a test instrument with a single detector on the beam line so
     // that a test case with a simple path length calculation can be created

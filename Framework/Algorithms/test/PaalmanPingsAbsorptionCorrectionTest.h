@@ -11,12 +11,15 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/Run.h"
 #include "MantidAlgorithms/PaalmanPingsAbsorptionCorrection.h"
 #include "MantidDataHandling/DefineGaugeVolume.h"
 #include "MantidDataHandling/SetBeam.h"
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/UnitFactory.h"
+#include "SampleFrameEquivalence.h"
 
 using Mantid::Algorithms::PaalmanPingsAbsorptionCorrection;
 using Mantid::API::AlgorithmManager;
@@ -114,6 +117,85 @@ public:
     TS_ASSERT_DELTA(acc->y(1)[0], absorptionCorrection_acc->y(1)[0], 1e-7);
     TS_ASSERT_DELTA(acc->y(2)[0], absorptionCorrection_acc->y(2)[0], 1e-7);
     TS_ASSERT_DELTA(acc->y(3)[0], absorptionCorrection_acc->y(3)[0], 1e-7);
+  }
+
+  /// A flat plate in a matching holder. Unlike the LaB6 cylinder, tilting a plate about y changes
+  /// how much material the beam crosses, so the sample's orientation is visible in the answer.
+  void createPlateWorkspace(const std::string &wsName) {
+    auto testWS = WorkspaceCreationHelper::create2DWorkspaceBinned(4, 1, 1.7981, 0.0002);
+    auto testInst = ComponentCreationHelper::createCylInstrumentWithDetInGivenPositions(
+        {2., 2., 2., 2.}, {10. * M_PI / 180, 90. * M_PI / 180, 170. * M_PI / 180, 90 * M_PI / 180},
+        {0., 0., 0., 45 * M_PI / 180});
+    testWS->setInstrument(testInst);
+    testWS->rebuildSpectraMapping();
+    testWS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
+    AnalysisDataService::Instance().addOrReplace(wsName, testWS);
+
+    auto setSampleAlg = AlgorithmManager::Instance().createUnmanaged("SetSample");
+    setSampleAlg->setRethrows(true);
+    setSampleAlg->initialize();
+    setSampleAlg->setPropertyValue("InputWorkspace", wsName);
+    setSampleAlg->setPropertyValue("Material",
+                                   R"({"ChemicalFormula": "La-(B11)5.94-(B10)0.06", "SampleNumberDensity": 0.1})");
+    setSampleAlg->setPropertyValue(
+        "Geometry", R"({"Shape": "FlatPlate", "Height": 2.0, "Width": 2.0, "Thick": 0.2, "Center": [0., 0., 0.]})");
+    setSampleAlg->setPropertyValue("ContainerMaterial", R"({"ChemicalFormula":"V", "SampleNumberDensity": 0.0721})");
+    setSampleAlg->setPropertyValue("ContainerGeometry",
+                                   R"({"Shape": "FlatPlateHolder", "Height": 2.0, "Width": 2.0, "Thick": 0.2,)"
+                                   R"( "FrontThick": 0.1, "BackThick": 0.1, "Center": [0., 0., 0.]})");
+    TS_ASSERT_THROWS_NOTHING(setSampleAlg->execute());
+  }
+
+  /// Run the correction and return the four sample self-attenuation factors.
+  std::array<double, 4> runPlateCorrection(const std::string &wsName, const Mantid::Kernel::Matrix<double> &rotation,
+                                           const bool baked) {
+    createPlateWorkspace(wsName);
+    auto ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
+    ws->mutableRun().mutableGoniometer().setR(rotation);
+
+    if (baked) {
+      // Bake the rotation into the shape the way a user would - through CopySample onto a
+      // workspace already carrying the goniometer. Deliberately the real algorithm, so this test
+      // cannot pass by agreeing with the helper it is checking.
+      const std::string srcName = wsName + "_src";
+      createPlateWorkspace(srcName);
+      auto copyAlg = AlgorithmManager::Instance().createUnmanaged("CopySample");
+      copyAlg->setRethrows(true);
+      copyAlg->initialize();
+      copyAlg->setPropertyValue("InputWorkspace", srcName);
+      copyAlg->setPropertyValue("OutputWorkspace", wsName);
+      copyAlg->setProperty("CopyName", false);
+      copyAlg->setProperty("CopyEnvironment", false);
+      copyAlg->setProperty("CopyLattice", false);
+      TS_ASSERT_THROWS_NOTHING(copyAlg->execute());
+    }
+
+    auto alg = AlgorithmManager::Instance().createUnmanaged("PaalmanPingsAbsorptionCorrection");
+    alg->setRethrows(true);
+    alg->initialize();
+    alg->setPropertyValue("InputWorkspace", wsName);
+    alg->setProperty("ElementSize", 0.4);
+    alg->setPropertyValue("OutputWorkspace", wsName + "_out");
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+
+    auto ass = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve(wsName + "_out_ass"));
+    return {ass->y(0)[0], ass->y(1)[0], ass->y(2)[0], ass->y(3)[0]};
+  }
+
+  void test_both_ways_of_orienting_the_sample_agree() {
+    // A sample in its own frame with the goniometer on the run, and the same sample already rotated
+    // into the lab frame by CopySample, describe the same experiment and must attenuate identically.
+    const auto rotation = SampleFrameEquivalence::rotationY(30.0);
+    const auto ownFrame = runPlateCorrection("pp_own", rotation, false);
+    const auto labFrame = runPlateCorrection("pp_lab", rotation, true);
+
+    for (size_t i = 0; i < 4; ++i) {
+      TS_ASSERT_DELTA(ownFrame[i], labFrame[i], 1e-9);
+    }
+    // and the rotation actually mattered - otherwise the assertions above prove nothing
+    const auto unrotated = runPlateCorrection("pp_flat", Mantid::Kernel::Matrix<double>(3, 3, true), false);
+    TS_ASSERT(std::abs(ownFrame[0] - unrotated[0]) > 1e-6);
   }
 
   void test_missing_container() {

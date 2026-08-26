@@ -26,6 +26,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/WarningSuppressions.h"
 
+#include "SampleFrameEquivalence.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
@@ -303,6 +304,22 @@ public:
     TS_ASSERT_DELTA(calculatedAttFactor2, yData[1], delta);
     const double calculatedAttFactorSD2 = sqrt(calculatedAttFactorSq2 - pow(calculatedAttFactor2, 2));
     TS_ASSERT_DELTA(calculatedAttFactorSD2, attenuationFactorsSD2, delta);
+  }
+
+  void test_Both_Ways_Of_Orienting_The_Sample_Agree() {
+    // A sample in its own frame with the goniometer on the run, and the same sample already rotated
+    // into the lab frame, describe the same experiment and must attenuate identically.
+    const auto rotation = SampleFrameEquivalence::rotationY(30.0);
+    const auto ownFrameY = runOverPlate(rotation, false);
+    const auto labFrameY = runOverPlate(rotation, true);
+
+    TS_ASSERT_EQUALS(ownFrameY.size(), labFrameY.size());
+    for (size_t i = 0; i < ownFrameY.size(); ++i) {
+      TS_ASSERT_DELTA(ownFrameY[i], labFrameY[i], 1.0e-10);
+    }
+    // and the rotation actually mattered - otherwise the assertion above proves nothing
+    const auto unrotatedY = runOverPlate(Mantid::Kernel::Matrix<double>(3, 3, true), false);
+    TS_ASSERT(std::abs(ownFrameY[0] - unrotatedY[0]) > 1.0e-6);
   }
 
   void test_Workspace_With_Just_Sample_For_Direct() {
@@ -851,6 +868,25 @@ private:
     }
     mcabs->execute();
     return getOutputWorkspace(mcabs);
+  }
+
+  /// Run the correction over a plate sample held in the given frame, with a fixed seed so two runs
+  /// over identical geometry give identical numbers.
+  Mantid::HistogramData::HistogramY runOverPlate(const Mantid::Kernel::Matrix<double> &rotation, const bool baked) {
+    using Mantid::Kernel::DeltaEMode;
+    TestWorkspaceDescriptor wsProps = {1, 2, false, Environment::CubeSampleOnly, DeltaEMode::Elastic, -1};
+    auto testWS = setUpWS(wsProps);
+    if (baked) {
+      SampleFrameEquivalence::setSampleInLabFrame(*testWS, rotation);
+    } else {
+      SampleFrameEquivalence::setSampleInOwnFrame(*testWS, rotation);
+    }
+    auto mcAbsorb = createAlgorithm();
+    mcAbsorb->setProperty("EventsPerPoint", 2000);
+    mcAbsorb->setProperty("SeedValue", 123456789);
+    mcAbsorb->setProperty("InputWorkspace", testWS);
+    mcAbsorb->execute();
+    return getOutputWorkspace(mcAbsorb)->getSpectrum(0).y();
   }
 
   Mantid::API::IAlgorithm_sptr createAlgorithm() {

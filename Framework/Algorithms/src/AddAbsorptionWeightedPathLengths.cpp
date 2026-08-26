@@ -17,6 +17,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
+#include "MantidGeometry/Objects/ShapeRotation.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Material.h"
@@ -126,6 +127,25 @@ void AddAbsorptionWeightedPathLengths::exec() {
   bool applyCorrection = getProperty("ApplyCorrection");
   const auto npeaks = inputWS->getNumberPeaks();
 
+  // The Monte Carlo path cannot yet reconcile the sample frame the way the single-path branch below
+  // does. Its interaction volume and beam profile are built once, before the loop, while the
+  // goniometer rotation varies peak to peak - so there is no single shape orientation they could be
+  // built in. Warn rather than silently return numbers computed with the sample in the wrong place.
+  if (!useSinglePath) {
+    const Kernel::Matrix<double> identity(3, 3, true);
+    const auto &shape = inputWS->sample().getShape();
+    bool anyOutstanding = false;
+    for (int i = 0; i < npeaks && !anyOutstanding; ++i) {
+      anyOutstanding =
+          Geometry::outstandingGoniometerRotation(shape, inputWS->getPeak(i).getGoniometerMatrix()) != identity;
+    }
+    if (anyOutstanding) {
+      g_log.warning("The sample shape is not in the lab frame and this workspace has peaks with a "
+                    "goniometer rotation. The Monte Carlo path ignores that rotation - bake it into "
+                    "the shape with CopySample, or use UseSinglePath, to account for it.");
+    }
+  }
+
   // Configure progress
   Progress prog(this, 0.0, 1.0, npeaks);
   prog.setNotifyStep(0.01);
@@ -145,13 +165,21 @@ void AddAbsorptionWeightedPathLengths::exec() {
     const auto samplePos = peak.getSamplePos();
 
     if (useSinglePath) {
-      const auto reverseBeamDir = normalize(samplePos - sourcePos);
+      // sourcePos and detectorPos have just been rotated into the lab frame by R, but the sample
+      // shape is only there if something has already rotated it too. Rather than rebuild a rotated
+      // shape for every peak - R varies peak to peak and this loop is parallel - take the rotation
+      // the shape still owes and carry the ray into the shape's own frame instead. Path lengths are
+      // unchanged by the rotation, so the attenuation is the same either way.
+      const auto labToShape = Geometry::outstandingGoniometerRotation(inputWS->sample().getShape(), R).Tprime();
       const IObject *sampleShape = &(inputWS->sample().getShape());
 
-      Track beforeScatter(samplePos, reverseBeamDir);
+      const auto scatterPos = labToShape * samplePos;
+      const auto reverseBeamDir = normalize(labToShape * (samplePos - sourcePos));
+
+      Track beforeScatter(scatterPos, reverseBeamDir);
       sampleShape->interceptSurface(beforeScatter);
-      const auto detDir = normalize(detectorPos - samplePos);
-      Track afterScatter(samplePos, detDir);
+      const auto detDir = normalize(labToShape * (detectorPos - samplePos));
+      Track afterScatter(scatterPos, detDir);
       sampleShape->interceptSurface(afterScatter);
 
       absFactors[0] = beforeScatter.calculateAttenuation(lambdas[0]) * afterScatter.calculateAttenuation(lambdas[0]);

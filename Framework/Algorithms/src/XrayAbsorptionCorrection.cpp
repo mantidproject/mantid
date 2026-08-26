@@ -5,9 +5,12 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/XrayAbsorptionCorrection.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidGeometry/Objects/ShapeRotation.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/Material.h"
@@ -141,7 +144,7 @@ std::vector<Kernel::V3D> XrayAbsorptionCorrection::calculateMuonPos(API::MatrixW
   Mantid::HistogramData::HistogramX const &muonDepth = muonProfile->x(0);
   Kernel::V3D const muonPoint = {0.0, 0.0, detectorDistance};
   Kernel::V3D toStart = {0.0, 0.0, -1.0};
-  const Geometry::IObject *shape = &inputWS->sample().getShape();
+  const auto shape = Geometry::getLabFrameShape(inputWS->sample().getShape(), inputWS->run().getGoniometer().getR());
   Geometry::Track muonPath = Geometry::Track(muonPoint, toStart);
   shape->interceptSurface(muonPath);
   if (muonPath.count() == 0) {
@@ -179,6 +182,14 @@ void XrayAbsorptionCorrection::exec() {
   Kernel::V3D detectorPos = calculateDetectorPos(detectorAngle, detectorDistance);
   std::vector<Kernel::V3D> muonPos = calculateMuonPos(muonProfile, inputWS, detectorDistance);
 
+  // The muon implantation positions and the detector are described in the lab frame, but the sample
+  // shape is only there if something has already rotated it - CopySample bakes the destination
+  // goniometer in, while SetGoniometer alone leaves the shape in its own frame. Move it the rest of
+  // the way, once, rather than re-fetching it for every muon of every bin of every spectrum. This is
+  // a no-op for an unrotated workspace, which is every workspace that reaches here today.
+  const auto sampleShape =
+      Geometry::getLabFrameShape(inputWS->sample().getShape(), inputWS->run().getGoniometer().getR());
+
   for (size_t j = 0; j < inputWS->getNumberHistograms(); j++) {
     auto &yData = outputWS->mutableY(j);
     auto const &xData = pointDataWS->x(j);
@@ -188,7 +199,6 @@ void XrayAbsorptionCorrection::exec() {
         Kernel::V3D pos = muonPos[k];
         Kernel::V3D detectorDirection = normalize(detectorPos - pos);
         Geometry::Track xrayPath = Geometry::Track(pos, detectorDirection);
-        const Geometry::IObject *sampleShape = &inputWS->sample().getShape();
         sampleShape->interceptSurface(xrayPath);
         double factor{1.0};
         if (xrayPath.count() == 0) {
