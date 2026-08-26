@@ -35,12 +35,12 @@ class MANTID_NEXUS_DLL NexusDescriptorLazy {
 
 public:
   enum class CacheReturnStatus_t {
-    FOUND,
-    CACHED,
-    DATASET_NOT_FOUND,
-    WRONG_TYPE,
-    ERROR,
-    UNSET,
+    NXFOUND,
+    NXCACHED,
+    NXDATASET_NOT_FOUND,
+    NXWRONG_TYPE,
+    NXERROR,
+    NXUNSET,
   };
 
   using CacheValue_t = std::variant<float, double, int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, int64_t,
