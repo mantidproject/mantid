@@ -18,6 +18,8 @@
 #include "../QENSFitting/MockObjects.h"
 #include "MantidQtWidgets/Spectroscopy/MockObjects.h"
 
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 #include "MantidFrameworkTestHelpers/MockAlgorithm.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
@@ -49,7 +51,7 @@ public:
     ON_CALL(*m_view, getPlotOptions()).WillByDefault(Return((m_outputPlotView.get())));
     ON_CALL(*m_view, getRunView()).WillByDefault(Return((m_runView.get())));
     m_presenter =
-        std::make_unique<MomentsPresenter>(nullptr, std::move(algorithmRunner), m_view.get(), std::move(model));
+        std::make_unique<TestableMomentsPresenter>(nullptr, std::move(algorithmRunner), m_view.get(), std::move(model));
 
     m_workspace = createWorkspace(5);
     m_ads = std::make_unique<SetUpADSWithWorkspace>("workspace_test", m_workspace);
@@ -132,13 +134,65 @@ public:
     m_presenter->runComplete(m_algorithm, false);
   }
 
+  ///----------------------------------------------------------------------
+  /// Unit Tests for the numeric Q-axis conversion used for text file data
+  ///----------------------------------------------------------------------
+
+  void test_setNumericQAxis_converts_non_numeric_axis_to_numeric_with_momentum_transfer_unit() {
+    TS_ASSERT(!m_workspace->getAxis(1)->isNumeric());
+
+    m_presenter->setNumericQAxis("workspace_test");
+
+    auto const axis = m_workspace->getAxis(1);
+    TS_ASSERT(axis->isNumeric());
+    TS_ASSERT_EQUALS(axis->unit()->unitID(), "MomentumTransfer");
+  }
+
+  void test_setNumericQAxis_sets_unit_when_axis_is_already_numeric_with_wrong_unit() {
+    auto numericAxis = std::make_unique<NumericAxis>(m_workspace->getNumberHistograms());
+    for (size_t i = 0; i < m_workspace->getNumberHistograms(); ++i) {
+      numericAxis->setValue(i, static_cast<double>(i));
+    }
+    m_workspace->replaceAxis(1, std::move(numericAxis));
+    TS_ASSERT_DIFFERS(m_workspace->getAxis(1)->unit()->unitID(), "MomentumTransfer");
+
+    m_presenter->setNumericQAxis("workspace_test");
+
+    TS_ASSERT_EQUALS(m_workspace->getAxis(1)->unit()->unitID(), "MomentumTransfer");
+  }
+
+  void test_setNumericQAxis_leaves_axis_unchanged_when_already_numeric_with_momentum_transfer_unit() {
+    auto numericAxis = std::make_unique<NumericAxis>(m_workspace->getNumberHistograms());
+    for (size_t i = 0; i < m_workspace->getNumberHistograms(); ++i) {
+      numericAxis->setValue(i, static_cast<double>(i));
+    }
+    m_workspace->replaceAxis(1, std::move(numericAxis));
+    m_workspace->getAxis(1)->setUnit("MomentumTransfer");
+
+    TS_ASSERT_THROWS_NOTHING(m_presenter->setNumericQAxis("workspace_test"));
+
+    TS_ASSERT_EQUALS(m_workspace->getAxis(1)->unit()->unitID(), "MomentumTransfer");
+  }
+
+  void test_setNumericQAxis_does_nothing_for_a_workspace_that_does_not_exist() {
+    TS_ASSERT_THROWS_NOTHING(m_presenter->setNumericQAxis("not_a_real_workspace"));
+  }
+
 private:
+  // Exposes the protected setNumericQAxis method so that the axis/unit conversion
+  // logic needed for text file input can be tested directly.
+  class TestableMomentsPresenter : public MomentsPresenter {
+  public:
+    using MomentsPresenter::MomentsPresenter;
+    using MomentsPresenter::setNumericQAxis;
+  };
+
   NiceMock<MockMomentsModel> *m_model;
   NiceMock<MockAlgorithmRunner> *m_algorithmRunner;
   std::unique_ptr<NiceMock<MockOutputPlotOptionsView>> m_outputPlotView;
   std::unique_ptr<NiceMock<MockRunView>> m_runView;
   std::unique_ptr<NiceMock<MockMomentsView>> m_view;
-  std::unique_ptr<MomentsPresenter> m_presenter;
+  std::unique_ptr<TestableMomentsPresenter> m_presenter;
 
   MatrixWorkspace_sptr m_workspace;
   std::unique_ptr<SetUpADSWithWorkspace> m_ads;

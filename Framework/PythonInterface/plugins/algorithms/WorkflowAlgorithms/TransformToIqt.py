@@ -181,10 +181,20 @@ class TransformToIqt(PythonAlgorithm):
             workflow_prog.report("IPF resolution obtained")
         except (AttributeError, IndexError):
             workflow_prog.report("Resorting to Default")
-            resolution = get_efixed(self._sample) * 0.01
-            logger.warning(
-                "Could not get the resolution from the IPF, using 1% of the E Fixed value for the resolution: {0}".format(resolution)
-            )
+            try:
+                resolution = get_efixed(self._sample) * 0.01
+                logger.warning(
+                    "Could not get the resolution from the IPF, using 1% of the E Fixed value for the resolution: {0}".format(resolution)
+                )
+            except ValueError:
+                # No IPF and no Efixed/Ei available, e.g. for a workspace loaded from a text file.
+                # Resolution is only used for the informational ResolutionBins warning below, so
+                # fall back to a value that does not stop the transform from running.
+                resolution = 0.0
+                logger.warning(
+                    "Could not get the resolution from the IPF or determine an EFixed value for the sample "
+                    "workspace. The reported ResolutionBins value will not be meaningful."
+                )
 
         resolution_bins = int(round((2 * resolution) / self._e_width))
 
