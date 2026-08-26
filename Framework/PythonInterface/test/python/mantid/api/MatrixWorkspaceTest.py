@@ -17,7 +17,7 @@ from mantid.api import (
 )
 from mantid.geometry import Detector
 from mantid.kernel import V3D
-from mantid.simpleapi import CreateSampleWorkspace, Rebin
+from mantid.simpleapi import CreateSampleWorkspace, Rebin, RebinRagged
 import numpy as np
 
 
@@ -252,6 +252,32 @@ class MatrixWorkspaceTest(unittest.TestCase):
             with self.assertWarns(DeprecationWarning):
                 getattr(test_ws, method_name)(0, values)
 
+    def test_deprecated_set_x_y_e_dx_replace_the_spectrum_values(self):
+        # setX/setY/setE/setDx funnel through setSpectrumFromPyObject, which has one branch for
+        # numpy arrays and another for arbitrary python sequences. Both branches must actually
+        # replace the data, not merely emit the deprecation warning.
+        xlength = 11
+        ylength = 10
+        counts = np.arange(1.0, ylength + 1.0)
+        expected = {
+            "X": np.linspace(2.0, 12.0, xlength),
+            "Y": counts,
+            "E": np.sqrt(counts),
+            "Dx": 0.5 * counts,
+        }
+
+        for as_sequence in (False, True):
+            test_ws = WorkspaceFactory.create("Workspace2D", 1, xlength, ylength)
+            for field, values in expected.items():
+                given = list(values) if as_sequence else values
+                with self.assertWarns(DeprecationWarning):
+                    getattr(test_ws, "set" + field)(0, given)
+
+            self.assertTrue(np.array_equal(expected["X"], test_ws.x(0)))
+            self.assertTrue(np.array_equal(expected["Y"], test_ws.y(0)))
+            self.assertTrue(np.array_equal(expected["E"], test_ws.e(0)))
+            self.assertTrue(np.array_equal(expected["Dx"], test_ws.dx(0)))
+
     def test_setting_spectra_from_array_of_incorrect_length_raises_error(self):
         nvectors = 2
         xlength = 11
@@ -338,6 +364,15 @@ class MatrixWorkspaceTest(unittest.TestCase):
 
         self.assertTrue(len(dx), 0)
         self._do_numpy_comparison(self._test_ws, x, y, e)
+
+    def test_data_cannot_be_extracted_to_numpy_from_a_ragged_workspace(self):
+        # A numpy array is rectangular, so there is no valid output for histograms of differing lengths
+        ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=2, XMin=0, XMax=100, BinWidth=10, StoreInADS=False)
+        ragged = RebinRagged(InputWorkspace=ws, XMin=[0, 0, 0, 0], XMax=[100, 90, 80, 70], Delta=[10, 10, 10, 10], StoreInADS=False)
+        self.assertTrue(ragged.isRaggedWorkspace())
+
+        for extract in (ragged.extractX, ragged.extractY, ragged.extractE, ragged.extractDx):
+            self.assertRaises(RuntimeError, extract)
 
     def _do_numpy_comparison(self, workspace, x_np, y_np, e_np, index=None):
         if index is None:

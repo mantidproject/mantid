@@ -112,27 +112,27 @@ public:
 
   void testsetgetXvector() {
     h.setPoints(x1);
-    TS_ASSERT_EQUALS(x1, h.dataX());
+    TS_ASSERT_EQUALS(x1, h.x().rawData());
   }
   void testcopyX() {
     h2.setPoints(x1);
-    h.mutableX() = h2.dataX();
-    TS_ASSERT_EQUALS(h.dataX(), x1);
+    h.mutableX() = h2.x();
+    TS_ASSERT_EQUALS(h.x().rawData(), x1);
   }
   void testsetgetDataYVector() {
     h.setCounts(y1);
-    TS_ASSERT_EQUALS(h.dataY(), y1);
+    TS_ASSERT_EQUALS(h.y().rawData(), y1);
   }
   void testsetgetDataYEVector() {
     h.setCounts(y1);
     h.setCountStandardDeviations(e1);
-    TS_ASSERT_EQUALS(h.dataY(), y1);
-    TS_ASSERT_EQUALS(h.dataE(), e1);
+    TS_ASSERT_EQUALS(h.y().rawData(), y1);
+    TS_ASSERT_EQUALS(h.e().rawData(), e1);
   }
   void testmaskSpectrum() {
     h.clearData();
-    TS_ASSERT_EQUALS(h.dataY()[5], 0.0);
-    TS_ASSERT_EQUALS(h.dataE()[12], 0.0);
+    TS_ASSERT_EQUALS(h.y()[5], 0.0);
+    TS_ASSERT_EQUALS(h.e()[12], 0.0);
   }
   void testsetgetXPointer() {
     auto px = std::make_shared<HistogramX>(nel);
@@ -141,39 +141,39 @@ public:
   }
   void testsetgetDataYPointer() {
     h.setCounts(pa);
-    TS_ASSERT_EQUALS(h.dataY(), pa->rawData());
+    TS_ASSERT_EQUALS(h.y().rawData(), pa->rawData());
   }
   void testsetgetDataYEPointer() {
     h.setCounts(pa);
     h.setCountStandardDeviations(pb);
-    TS_ASSERT_EQUALS(h.dataY(), pa->rawData());
-    TS_ASSERT_EQUALS(h.dataE(), pb->rawData());
+    TS_ASSERT_EQUALS(h.y().rawData(), pa->rawData());
+    TS_ASSERT_EQUALS(h.e().rawData(), pb->rawData());
   }
   void testgetXindex() {
     h.setPoints(x1);
-    TS_ASSERT_EQUALS(h.dataX()[4], x1[4]);
+    TS_ASSERT_EQUALS(h.x()[4], x1[4]);
   }
   void testgetYindex() {
     h.setCounts(y1);
-    TS_ASSERT_EQUALS(h.dataY()[4], y1[4]);
+    TS_ASSERT_EQUALS(h.y()[4], y1[4]);
   }
   void testgetEindex() {
     h.setCounts(y1);
     h.setCountStandardDeviations(e1);
-    TS_ASSERT_EQUALS(h.dataE()[4], e1[4]);
+    TS_ASSERT_EQUALS(h.e()[4], e1[4]);
   }
   void testrangeexceptionX() {
     h.setPoints(x1);
-    TS_ASSERT_THROWS(h.dataX().at(nel), const std::out_of_range &);
+    TS_ASSERT_THROWS(h.x().at(nel), const std::out_of_range &);
   }
   void testrangeexceptionY() {
     h.setCounts(y1);
-    TS_ASSERT_THROWS(h.dataY().at(nel), const std::out_of_range &);
+    TS_ASSERT_THROWS(h.y().at(nel), const std::out_of_range &);
   }
   void testrangeexceptionE() {
     h.setCounts(y1);
     h.setCountStandardDeviations(e1);
-    TS_ASSERT_THROWS(h.dataE().at(nel), const std::out_of_range &);
+    TS_ASSERT_THROWS(h.e().at(nel), const std::out_of_range &);
   }
 
   void test_copy_constructor() {

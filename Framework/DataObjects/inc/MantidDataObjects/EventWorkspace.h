@@ -97,14 +97,23 @@ public:
   double getEventXMax() const;
   void getEventXMinMax(double &xmin, double &xmax) const;
 
+  [[deprecated("use mutableX() instead")]]
   MantidVec &dataX(const std::size_t) override;
+  [[deprecated("use mutableY() instead")]]
   MantidVec &dataY(const std::size_t) override;
+  [[deprecated("use mutableE() instead")]]
   MantidVec &dataE(const std::size_t) override;
+  [[deprecated("use mutableDx() instead")]]
   MantidVec &dataDx(const std::size_t) override;
+  [[deprecated("use x() instead")]]
   const MantidVec &dataX(const std::size_t) const override;
+  [[deprecated("use y() instead")]]
   const MantidVec &dataY(const std::size_t) const override;
+  [[deprecated("use e() instead")]]
   const MantidVec &dataE(const std::size_t) const override;
+  [[deprecated("use dx() instead")]]
   const MantidVec &dataDx(const std::size_t) const override;
+  [[deprecated("use sharedX() instead")]]
   Kernel::cow_ptr<HistogramData::HistogramX> refX(const std::size_t) const override;
 
   /// Generate a new histogram from specified event list at the given index.

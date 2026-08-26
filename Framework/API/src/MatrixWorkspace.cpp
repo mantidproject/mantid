@@ -1827,16 +1827,17 @@ bool MatrixWorkspace::hasOrientedLattice() const { return Mantid::API::Experimen
 
 /**
  * Creates a 2D image.
- * @param read :: Pointer to a method returning a MantidVec to provide data for
- * the image.
+ * @tparam Accessor :: Pointer to a const member function returning a spectrum's histogram
+ * data, e.g. &MatrixWorkspace::y. Templated because y() and e() do not share a return type.
+ * @param read :: Accessor for the data to provide for the image.
  * @param start :: First workspace index for the image.
  * @param stop :: Last workspace index for the image.
  * @param width :: Image width. Must divide (stop - start + 1) exactly.
  * @param indexStart :: First index of the x integration range.
  * @param indexEnd :: Last index of the x integration range.
  */
-MantidImage_sptr MatrixWorkspace::getImage(const MantidVec &(MatrixWorkspace::*read)(std::size_t const) const,
-                                           size_t start, size_t stop, size_t width, size_t indexStart,
+template <class Accessor>
+MantidImage_sptr MatrixWorkspace::getImage(Accessor read, size_t start, size_t stop, size_t width, size_t indexStart,
                                            size_t indexEnd) const {
   // width must be provided (for now)
   if (width == 0) {
@@ -1979,7 +1980,7 @@ std::pair<size_t, size_t> MatrixWorkspace::getImageStartEndXIndices(size_t i, do
  */
 MantidImage_sptr MatrixWorkspace::getImageY(size_t start, size_t stop, size_t width, double startX, double endX) const {
   auto p = getImageStartEndXIndices(0, startX, endX);
-  return getImage(&MatrixWorkspace::readY, start, stop, width, p.first, p.second);
+  return getImage(&MatrixWorkspace::y, start, stop, width, p.first, p.second);
 }
 
 /**
@@ -1992,7 +1993,7 @@ MantidImage_sptr MatrixWorkspace::getImageY(size_t start, size_t stop, size_t wi
  */
 MantidImage_sptr MatrixWorkspace::getImageE(size_t start, size_t stop, size_t width, double startX, double endX) const {
   auto p = getImageStartEndXIndices(0, startX, endX);
-  return getImage(&MatrixWorkspace::readE, start, stop, width, p.first, p.second);
+  return getImage(&MatrixWorkspace::e, start, stop, width, p.first, p.second);
 }
 
 /**
@@ -2054,14 +2055,16 @@ std::pair<size_t, double> MatrixWorkspace::getXIndex(size_t i, double x, bool is
 
 /**
  * Copy data from an image.
- * @param dataVec :: A method returning non-const references to data vectors to
- * copy the image to.
+ * @tparam Accessor :: Pointer to a member function returning mutable references to a spectrum's
+ * histogram data, e.g. &MatrixWorkspace::mutableY.
+ * @param mutableData :: Accessor for the data to copy the image to.
  * @param image :: An image to copy the data from.
  * @param start :: Startinf workspace indx to copy data to.
  * @param parallelExecution :: Should inner loop run as parallel operation
  */
-void MatrixWorkspace::setImage(MantidVec &(MatrixWorkspace::*dataVec)(const std::size_t), const MantidImage &image,
-                               size_t start, [[maybe_unused]] bool parallelExecution) {
+template <class Accessor>
+void MatrixWorkspace::setImage(Accessor mutableData, const MantidImage &image, size_t start,
+                               [[maybe_unused]] bool parallelExecution) {
 
   if (image.empty())
     return;
@@ -2089,7 +2092,7 @@ void MatrixWorkspace::setImage(MantidVec &(MatrixWorkspace::*dataVec)(const std:
     size_t spec = start + static_cast<size_t>(i) * width;
     auto rowEnd = row.end();
     for (auto pixel = row.begin(); pixel != rowEnd; ++pixel, ++spec) {
-      (this->*dataVec)(spec)[0] = *pixel;
+      (this->*mutableData)(spec)[0] = *pixel;
     }
   }
 }
@@ -2101,7 +2104,7 @@ void MatrixWorkspace::setImage(MantidVec &(MatrixWorkspace::*dataVec)(const std:
  * @param parallelExecution :: Should inner loop run as parallel operation
  */
 void MatrixWorkspace::setImageY(const MantidImage &image, size_t start, bool parallelExecution) {
-  setImage(&MatrixWorkspace::dataY, image, start, parallelExecution);
+  setImage(&MatrixWorkspace::mutableY, image, start, parallelExecution);
 }
 
 /**
@@ -2111,7 +2114,7 @@ void MatrixWorkspace::setImageY(const MantidImage &image, size_t start, bool par
  * @param parallelExecution :: Should inner loop run as parallel operation
  */
 void MatrixWorkspace::setImageE(const MantidImage &image, size_t start, bool parallelExecution) {
-  setImage(&MatrixWorkspace::dataE, image, start, parallelExecution);
+  setImage(&MatrixWorkspace::mutableE, image, start, parallelExecution);
 }
 
 void MatrixWorkspace::invalidateCachedSpectrumNumbers() { m_indexInfoNeedsUpdate = true; }

@@ -13,6 +13,9 @@ cmake_install.cmake
 install_manifest.txt
 compile_commands.json
 
+# CxxTest was copied into the repository; retain its Makefiles as part of the source tree.
+!Testing/Tools/cxxtest/**/Makefile
+
 # Ignore CMakeUserPresets
 CMakeUserPresets.json
 
@@ -72,6 +75,13 @@ local.properties
 *.exe
 *.vcxproj
 *.filters
+
+# VS project files for using ArielToMantidXML
+!tools/ArielToMantidXML/ArielToMantidXML.sln
+!tools/ArielToMantidXML/ArielToMantidXML/ArielToMantidXML.vcproj
+
+# Visual leak detector tool
+!vld-2.0-setup.exe
 
 # User-specific files
 *.suo
