@@ -243,6 +243,10 @@ class TestRubberBandZoomInteractorStyle(unittest.TestCase):
 
         self.assertTrue(style._ignore_rubberband_interaction)
 
+    def test_aspect_is_locked_to_viewport_so_zoom_matches_selected_rectangle(self):
+        style, _ = self._create_style()
+        self.assertTrue(style.GetLockAspectToViewport())
+
     def test_left_button_release_clears_ignore_state(self):
         style, _ = self._create_style()
         style._ignore_rubberband_interaction = True
@@ -250,6 +254,51 @@ class TestRubberBandZoomInteractorStyle(unittest.TestCase):
         style._on_left_button_release_event(None, None)
 
         self.assertFalse(style._ignore_rubberband_interaction)
+
+    def test_drag_pauses_auto_render_so_the_rectangle_does_not_flicker(self):
+        style, plotter = self._create_style()
+
+        with mock.patch.object(style, "_modifier_key_pressed", return_value=False):
+            style._on_left_button_press_event("obj", "event")
+
+        plotter.render_timer.stop.assert_called_once()
+        self.assertTrue(style._auto_render_paused)
+
+        style._on_left_button_release_event("obj", "event")
+
+        plotter.render_timer.start.assert_called_once()
+        self.assertFalse(style._auto_render_paused)
+
+    def test_picking_with_modifier_leaves_auto_render_running(self):
+        style, plotter = self._create_style()
+
+        with mock.patch.object(style, "_modifier_key_pressed", return_value=True):
+            style._on_left_button_press_event("obj", "event")
+
+        plotter.render_timer.stop.assert_not_called()
+        self.assertFalse(style._auto_render_paused)
+
+    def test_auto_render_not_restarted_if_it_was_not_running(self):
+        style, plotter = self._create_style()
+        plotter.render_timer.isActive.return_value = False
+
+        with mock.patch.object(style, "_modifier_key_pressed", return_value=False):
+            style._on_left_button_press_event("obj", "event")
+        style._on_left_button_release_event("obj", "event")
+
+        plotter.render_timer.stop.assert_not_called()
+        plotter.render_timer.start.assert_not_called()
+
+    def test_drag_without_a_render_timer_does_not_raise(self):
+        plotter = _make_mock_plotter()
+        del plotter.render_timer
+        style = RubberBandZoomInteractorStyle(plotter)
+
+        with mock.patch.object(style, "_modifier_key_pressed", return_value=False):
+            style._on_left_button_press_event("obj", "event")
+        style._on_left_button_release_event("obj", "event")
+
+        self.assertFalse(style._auto_render_paused)
 
 
 class TestSwappedButtonTrackballCamera(unittest.TestCase):

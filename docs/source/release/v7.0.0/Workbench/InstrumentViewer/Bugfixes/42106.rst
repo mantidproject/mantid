@@ -1,0 +1,1 @@
+- In new Instrument View, the ``Rectangle Zoom`` view now matches the rectangle that was drawn. Previously part of the selected region could be cut off when the view was not square.

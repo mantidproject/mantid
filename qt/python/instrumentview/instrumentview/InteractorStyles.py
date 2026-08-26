@@ -38,6 +38,13 @@ class RubberBandZoomInteractorStyle(vtkInteractorStyleRubberBandZoom):
         self._pyvista_plotter = _PlotterWrapper(plotter)  # HACK: Wrapper for PyVista compatibility
         self._picking_callback = None
         self._ignore_rubberband_interaction = False
+        self._auto_render_paused = False
+        # Without this, VTK picks the zoom factor by comparing the width and height of the dragged
+        # rectangle in pixels rather than comparing its aspect ratio to the viewport's. In a
+        # non-square viewport that over-zooms and crops part of what was selected. Locking the
+        # aspect expands the rectangle to the viewport's aspect ratio first, so the resulting view
+        # always contains the whole selection.
+        self.SetLockAspectToViewport(True)
         self.update_default_camera_state()
         self.AddObserver(vtkCommand.RightButtonPressEvent, lambda *_: self._reset_camera())
         self.RemoveObservers(vtkCommand.LeftButtonPressEvent)
@@ -51,12 +58,35 @@ class RubberBandZoomInteractorStyle(vtkInteractorStyleRubberBandZoom):
         interactor = self.GetInteractor()
         return bool(interactor and (interactor.GetShiftKey() or interactor.GetControlKey() or interactor.GetAltKey()))
 
+    def _pause_auto_render(self):
+        """Stop the plotter's periodic re-render for the duration of a rubber band drag.
+
+        VTK paints the rubber band straight into the frame buffer and only repaints it on mouse
+        move. The plotter's auto-update timer re-renders the scene several times a second, which
+        wipes the rectangle out until the next mouse move, so it flickers and vanishes whenever the
+        mouse is held still.
+        """
+        render_timer = getattr(self.plotter, "render_timer", None)
+        if render_timer is None or not render_timer.isActive():
+            return
+        render_timer.stop()
+        self._auto_render_paused = True
+
+    def _resume_auto_render(self):
+        if not self._auto_render_paused:
+            return
+        self._auto_render_paused = False
+        render_timer = getattr(self.plotter, "render_timer", None)
+        if render_timer is not None:
+            render_timer.start()
+
     def _on_left_button_press_event(self, obj, event):
         self._ignore_rubberband_interaction = self._modifier_key_pressed()
         if self._ignore_rubberband_interaction:
             if self._picking_callback is not None:
                 self._picking_callback(obj, event)
             return
+        self._pause_auto_render()
         super().OnLeftButtonDown()
 
     def set_picking_callback(self, picking_callback: Callable):
@@ -71,7 +101,10 @@ class RubberBandZoomInteractorStyle(vtkInteractorStyleRubberBandZoom):
         if self._ignore_rubberband_interaction:
             self._ignore_rubberband_interaction = False
             return
-        super().OnLeftButtonUp()
+        try:
+            super().OnLeftButtonUp()
+        finally:
+            self._resume_auto_render()
 
     def update_default_camera_state(self):
         """Re-cache the current camera state as the default (right-click reset) state.
