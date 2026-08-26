@@ -725,26 +725,24 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         if instrument == "":
             issues["Instrument"] = "Instrument must be provided"
 
-        xMinBool = len(self.getProperty("XMin").value)
-        if xMinBool == 0:
-            issues["XMin"] = "XMin must be provided"
-        xMaxBool = len(self.getProperty("XMax").value)
-        if xMaxBool == 0:
-            issues["XMax"] = "XMax must be provided"
+        if self.getProperty("XBinWidth").value <= 0.0:
+            issues["XBinWidth"] = "XBinWidth must be greater than zero"
 
-        size = xMinBool
+        # XMin and XMax are both optional, see _locate_global_xlimit for how the range
+        # is completed from the data when either is left out
         xmins = self.getProperty("XMin").value
         xmaxs = self.getProperty("XMax").value
-        if (xMinBool != xMaxBool) and (xMinBool and xMaxBool):
-            msg = f"XMin and XMax do not define same number of spectra ({xMinBool} != {xMaxBool})"
-            issues["XMin"] = msg
-            issues["XMax"] = msg
-        elif xMinBool and xMaxBool:
-            for i in range(size):
-                if xmins[i] >= xmaxs[i]:
-                    msg = f"XMin ({xmins[i]}) cannot be greater than or equal to XMax ({xmaxs[i]})"
-                    issues["XMin"] = msg
-                    issues["XMax"] = msg
+        if len(xmins) and len(xmaxs):
+            if len(xmins) != len(xmaxs):
+                msg = f"XMin and XMax do not define same number of spectra ({len(xmins)} != {len(xmaxs)})"
+                issues["XMin"] = msg
+                issues["XMax"] = msg
+            else:
+                for xmin, xmax in zip(xmins, xmaxs):
+                    if xmin >= xmax:
+                        msg = f"XMin ({xmin}) cannot be greater than or equal to XMax ({xmax})"
+                        issues["XMin"] = msg
+                        issues["XMax"] = msg
 
         wavelength = self.getProperty("Wavelength").value
         if wavelength == Property.EMPTY_DBL:
@@ -901,7 +899,6 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         outWS = self.getPropertyValue("OutputWorkspace")
         summing = self.getProperty("Sum").value
         self.instrument = self.getProperty("Instrument").value
-        binWidth = self.getProperty("XBinWidth").value
 
         # Step 1: Load sample data
         logger.information("Step 1: Loading sample data")
@@ -924,9 +921,9 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
 
         # Step 4: Resampling, normalization, calibration & correction
         logger.information("Step 4: Resampling, normalization, calibration & correction")
-        xMin, xMax = self._locate_global_xlimit(sample_workspaces)
+        xMin, xMax, numBins = self._locate_global_xlimit(sample_workspaces)
 
-        self._resample_inputs(sample_workspaces, sample_masks, xMin, xMax, binWidth, summing)
+        self._resample_inputs(sample_workspaces, sample_masks, xMin, xMax, numBins, summing)
 
         # Step 5: Output (Summing or Grouping)
         logger.information("Step 5: Creating output workspace")
@@ -966,7 +963,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             if mtd.doesExist(ws):
                 DeleteWorkspace(ws, EnableLogging=False)
 
-    def _resample_inputs(self, sample_workspaces, sample_masks, xMin, xMax, binWidth, summing):
+    def _resample_inputs(self, sample_workspaces, sample_masks, xMin, xMax, numBins, summing):
         # Apply vanadium absorption correction and background subtraction on raw workspace
         self._apply_vanadium_absorption_correction()
 
@@ -981,16 +978,16 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
                 OutputWorkspace=ws_name,
                 XMin=xMin,
                 XMax=xMax,
-                NumberBins=int((xMax - xMin) / binWidth),
+                NumberBins=numBins,
                 EnableLogging=False,
             )
 
             if self.vanadium_ws:
-                self.vanadium_ws = self._resample_vanadium(ws_name, mask_name, xMin, xMax)
+                self.vanadium_ws = self._resample_vanadium(ws_name, mask_name, xMin, xMax, numBins)
 
             if raw_vanadium_background_ws is not None:
                 self.vanadium_background_ws = self._resample_background(
-                    raw_vanadium_background_ws, ws_name, mask_name, xMin, xMax, self.vanadium_ws
+                    raw_vanadium_background_ws, ws_name, mask_name, xMin, xMax, numBins, self.vanadium_ws
                 )
 
             # The sample is put onto the vanadium's monitor/time scale here. Anything later
@@ -1006,7 +1003,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
 
             if raw_sample_background_ws is not None:
                 self.sample_background_ws = self._resample_background(
-                    raw_sample_background_ws, ws_name, mask_name, xMin, xMax, self.vanadium_ws
+                    raw_sample_background_ws, ws_name, mask_name, xMin, xMax, numBins, self.vanadium_ws
                 )
                 # Match the normalisation just applied to the sample, and apply fB, so that
                 # _apply_sample_absorption_correction subtracts SB in the sample's units.
@@ -1645,30 +1642,63 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
                 EnableLogging=False,
             )
 
+    @staticmethod
+    def _grid_boundary(value, anchor, bin_width, round_up):
+        """Index of the bin boundary at, below (round_up=False) or above (round_up=True) value.
+
+        A value sitting on a boundary to within a small tolerance is taken to be exactly on
+        it, so that data starting or ending on a bin edge does not gain an empty bin.
+        """
+        position = (value - anchor) / bin_width
+        nearest = round(position)
+        if abs(position - nearest) < 1e-9:
+            return int(nearest)
+        return int(np.ceil(position)) if round_up else int(np.floor(position))
+
     def _locate_global_xlimit(self, workspaces):
-        """Find the global bin from all spectrum"""
-        # Due to range difference among incoming spectra, a common bin para is needed
-        # such that all data can be binned exactly the same way.
+        """Find the common binning grid for all spectra.
 
-        # use the supplied start value
-        if self.getProperty("xMin").isDefault:
-            _xMin = 1e16
-        else:
-            _xMin = self.getProperty("XMin").value
-        if self.getProperty("xMax").isDefault:
-            _xMax = -1e16
-        else:
-            _xMax = self.getProperty("XMax").value
+        Due to range difference among incoming spectra, a common bin para is needed
+        such that all data can be binned exactly the same way.
 
-        # update values based on all workspaces
+        Bins are placed on a grid of width ``XBinWidth`` anchored at ``XMin``, or at zero
+        when ``XMin`` is not supplied, so bin centres always fall on
+        ``anchor + XBinWidth * (n + 1/2)``. The grid is then trimmed to those bins that
+        hold data, never starting below ``XMin`` and never passing ``XMax``.
+
+        Returns the first boundary, the last boundary and the number of bins between them.
+        """
+        bin_width = self.getProperty("XBinWidth").value
+
+        # the range covered by every one of the incoming spectra
+        data_min, data_max = -np.inf, np.inf
         for name in workspaces:
             _ws_tmp = mtd[name]
-            _xMin = max(_xMin, _ws_tmp.x(0).min())
-            _xMax = min(_xMax, _ws_tmp.x(0).max())
+            data_min = max(data_min, _ws_tmp.x(0).min())
+            data_max = min(data_max, _ws_tmp.x(0).max())
 
-        return _xMin, _xMax
+        xmins = self.getProperty("XMin").value
+        xmaxs = self.getProperty("XMax").value
+        anchor = float(xmins[0]) if len(xmins) else 0.0
+        limit = float(xmaxs[0]) if len(xmaxs) else np.inf
 
-    def _to_spectrum_axis_resample(self, workspace_in, workspace_out, mask, instrument_donor, x_min, x_max):
+        # only keep the part of the data the user asked for
+        first_value = max(data_min, anchor)
+        last_value = min(data_max, limit)
+        if first_value >= last_value:
+            raise RuntimeError(f"The requested range ({anchor}, {limit}) does not overlap the data ({data_min}, {data_max})")
+
+        first = self._grid_boundary(first_value, anchor, bin_width, round_up=False)
+        last = self._grid_boundary(last_value, anchor, bin_width, round_up=True)
+        if np.isfinite(limit):
+            # the final bin is not allowed to reach past XMax
+            last = min(last, self._grid_boundary(limit, anchor, bin_width, round_up=False))
+        if last <= first:
+            raise RuntimeError(f"XBinWidth ({bin_width}) is too large to fit a bin inside the requested range ({anchor}, {limit})")
+
+        return anchor + first * bin_width, anchor + last * bin_width, last - first
+
+    def _to_spectrum_axis_resample(self, workspace_in, workspace_out, mask, instrument_donor, x_min, x_max, num_bins):
         # common part of converting axis
         self._to_spectrum_axis(workspace_in, workspace_out, mask, instrument_donor)
 
@@ -1678,7 +1708,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             OutputWorkspace=workspace_out,
             XMin=x_min,
             XMax=x_max,
-            NumberBins=int((x_max - x_min) / self.getProperty("XBinWidth").value),
+            NumberBins=num_bins,
             EnableLogging=False,
         )
 
@@ -1688,11 +1718,12 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         mask_name,
         x_min,
         x_max,
+        num_bins,
     ):
         """Perform resample on Vanadium"""
         ws_name = "vanadium_0"
 
-        return self._to_spectrum_axis_resample(ws_name, "_ws_cal", mask_name, current_workspace, x_min, x_max)
+        return self._to_spectrum_axis_resample(ws_name, "_ws_cal", mask_name, current_workspace, x_min, x_max, num_bins)
 
     def _resample_background(
         self,
@@ -1701,13 +1732,14 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         mask_name,
         x_min,
         x_max,
+        num_bins,
         resampled_calibration,
     ):
         """Perform resample on background"""
         outname = str(current_background) + str(current_workspace)
         self.temp_workspace_list.append(outname)
 
-        self._to_spectrum_axis_resample(current_background, outname, mask_name, current_workspace, x_min, x_max)
+        self._to_spectrum_axis_resample(current_background, outname, mask_name, current_workspace, x_min, x_max, num_bins)
 
         return outname
 
