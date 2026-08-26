@@ -42,6 +42,8 @@ protected:
   void calculateNormInner(const API::SpectrumInfo &spectrumInfo, const double protonCharge,
                           const std::vector<coord_t> &otherValues, const Kernel::Matrix<coord_t> &affineTrans);
 
+  void calcIntegralsForIntersections(const std::vector<double> &xValues, const API::MatrixWorkspace &integrFlux,
+                                     size_t sp, std::vector<double> &yValues) const;
   void calculateIntersections(std::vector<std::array<double, 4>> &intersections, const double theta, const double phi);
 
   /// Input workspace
@@ -68,6 +70,8 @@ protected:
   std::string m_convention;
   /// number of experiment infos
   uint16_t m_numExptInfos;
+  /// Flag indicating if the input workspace is from diffraction
+  bool m_diffraction;
   /// Progress bar
   std::unique_ptr<API::Progress> m_progress;
   /// internal array to accumulate signals to avoid copying (serial) each loop

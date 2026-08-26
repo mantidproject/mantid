@@ -46,6 +46,7 @@ Kernel::Matrix<coord_t> MDNormBase::findIntergratedDimensions(const std::vector<
 
   const size_t nrm1 = affineMat.numRows() - 1;
   const size_t ncm1 = affineMat.numCols() - 1;
+  const size_t lastCol = m_diffraction ? 3 : 4;
   for (size_t row = 0; row < nrm1; row++) // affine matrix, ignore last row
   {
     const auto dimen = m_normWS->getDimension(row);
@@ -78,7 +79,7 @@ Kernel::Matrix<coord_t> MDNormBase::findIntergratedDimensions(const std::vector<
       }
     }
 
-    if (affineMat[row][3] == 1.) {
+    if (!m_diffraction && affineMat[row][3] == 1.) {
       m_dEIntegrated = false;
       m_eIdx = row;
       m_dEmin = std::max(m_dEmin, dimMin);
@@ -87,7 +88,7 @@ Kernel::Matrix<coord_t> MDNormBase::findIntergratedDimensions(const std::vector<
         skipNormalization = true;
       }
     }
-    for (size_t col = 4; col < ncm1; col++) // affine matrix, ignore last column
+    for (size_t col = lastCol; col < ncm1; col++) // affine matrix, ignore last column
     {
       if (affineMat[row][col] == 1.) {
         double val = otherDimValues.at(col - 3);
@@ -154,9 +155,14 @@ void MDNormBase::calculateNormalization(const std::vector<coord_t> &otherValues,
   const auto &currentExptInfo = *(m_inputWS->getExperimentInfo(expInfoIndex));
   const auto &spectrumInfo = currentExptInfo.spectrumInfo();
   auto *rubwLog = dynamic_cast<VectorDoubleProperty *>(currentExptInfo.getLog("RUBW_MATRIX"));
-  Kernel::DblMatrix rubwValue((*rubwLog)()); // includes the 2*pi factor but not goniometer for now :)
-  m_rubw = currentExptInfo.run().getGoniometerMatrix() * rubwValue;
-  m_rubw.Invert();
+  if (!rubwLog) {
+    throw std::runtime_error("Wokspace does not contain a log entry for the RUBW matrix."
+                             "Cannot continue.");
+  } else {
+    Kernel::DblMatrix rubwValue((*rubwLog)()); // includes the 2*pi factor but not goniometer for now :)
+    m_rubw = currentExptInfo.run().getGoniometerMatrix() * rubwValue;
+    m_rubw.Invert();
+  }
   const double protonCharge = currentExptInfo.run().getProtonCharge();
 
   calculateNormInner(spectrumInfo, protonCharge, otherValues, affineTrans);
@@ -281,8 +287,13 @@ void MDNormBase::calculateNormInner(const API::SpectrumInfo &spectrumInfo, const
   // Mapping
   const auto ndets = static_cast<int64_t>(spectrumInfo.size());
   bool haveSA = false;
-  API::MatrixWorkspace_const_sptr solidAngleWS = getProperty("SolidAngleWorkspace");
-  detid2index_map solidAngDetToIdx;
+  API::MatrixWorkspace_const_sptr integrFlux, solidAngleWS = getProperty("SolidAngleWorkspace");
+  detid2index_map fluxDetToIdx, solidAngDetToIdx;
+  if (m_diffraction) {
+    integrFlux = getProperty("FluxWorkspace"); // FluxWorkspace is mandatory for diffraction
+    integrFlux->getXMinMax(m_kfmin, m_kfmax);
+    fluxDetToIdx = integrFlux->getDetectorIDToWorkspaceIndexMap();
+  }
   if (solidAngleWS != nullptr) {
     haveSA = true;
     solidAngDetToIdx = solidAngleWS->getDetectorIDToWorkspaceIndexMap();
@@ -315,6 +326,26 @@ void MDNormBase::calculateNormInner(const API::SpectrumInfo &spectrumInfo, const
     if (haveSA) {
       solid = solidAngleWS->y(solidAngDetToIdx.find(detID)->second)[0] * protonCharge;
     }
+
+    // -- calculate integrals for the intersection --
+    // momentum values at intersections
+    std::vector<double> yValues;
+    if (m_diffraction) {
+      // get the flux spetrum number
+      size_t wsIdx = fluxDetToIdx.find(detID)->second;
+      // copy momenta to xValues
+      std::vector<double> xValues(intersections.size());
+      yValues.resize(intersections.size());
+      auto x = xValues.begin();
+      for (auto it = intersections.begin(); it != intersections.end(); ++it, ++x) {
+        *x = (*it)[3];
+      }
+      // calculate integrals at momenta from xValues by interpolating between
+      // points in spectrum sp
+      // of workspace integrFlux. The result is stored in yValues
+      calcIntegralsForIntersections(xValues, *integrFlux, wsIdx, yValues);
+    }
+
     // Compute final position in HKL
     // pre-allocate for efficiency and copy non-hkl dim values into place
     pos.resize(vmdDims + otherValues.size() + 1);
@@ -333,20 +364,101 @@ void MDNormBase::calculateNormInner(const API::SpectrumInfo &spectrumInfo, const
                      [](const double rhs, const double lhs) { return static_cast<coord_t>(0.5 * (rhs + lhs)); });
 
       // transform kf to energy transfer
-      pos[3] = static_cast<coord_t>(m_Ei - pos[3] * pos[3] / energyToK);
+      if (!m_diffraction) {
+        pos[3] = static_cast<coord_t>(m_Ei - pos[3] * pos[3] / energyToK);
+      }
       affineTrans.multiplyPoint(pos, posNew);
       size_t linIndex = m_normWS->getLinearIndexAtCoord(posNew.data());
       if (linIndex == static_cast<size_t>(-1))
         continue;
 
-      // signal = integral between two consecutive intersections *solid angle
-      // *PC
-      double signal = solid * delta;
-      Mantid::Kernel::AtomicOp(m_signalArray[linIndex], signal, std::plus<signal_t>());
+      if (m_diffraction) {
+        // index of the current intersection
+        auto k = static_cast<size_t>(std::distance(intersections.begin(), it));
+        delta = (yValues[k] - yValues[k - 1]);
+      }
+      // signal = delta * solid = integral between two consecutive intersections * solid angle
+      Mantid::Kernel::AtomicOp(m_signalArray[linIndex], delta * solid, std::plus<signal_t>());
     }
     PARALLEL_END_INTERRUPT_REGION
   }
   PARALLEL_CHECK_INTERRUPT_REGION
+}
+
+/**
+ * Linearly interpolate between the points in integrFlux at xValues and save the
+ * results in yValues.
+ * @param xValues :: X-values at which to interpolate
+ * @param integrFlux :: A workspace with the spectra to interpolate
+ * @param sp :: A workspace index for a spectrum in integrFlux to interpolate.
+ * @param yValues :: A vector to save the results.
+ */
+void MDNormBase::calcIntegralsForIntersections(const std::vector<double> &xValues,
+                                               const API::MatrixWorkspace &integrFlux, size_t sp,
+                                               std::vector<double> &yValues) const {
+  assert(xValues.size() == yValues.size());
+
+  // the x-data from the workspace
+  const auto &xData = integrFlux.x(sp);
+  const double xStart = xData.front();
+  const double xEnd = xData.back();
+
+  // the values in integrFlux are expected to be integrals of a non-negative
+  // function
+  // ie they must make a non-decreasing function
+  const auto &yData = integrFlux.y(sp);
+  size_t spSize = yData.size();
+
+  const double yMin = 0.0;
+  const double yMax = yData.back();
+
+  size_t nData = xValues.size();
+  // all integrals below xStart must be 0
+  if (xValues[nData - 1] < xStart) {
+    std::fill(yValues.begin(), yValues.end(), yMin);
+    return;
+  }
+
+  // all integrals above xEnd must be equal tp yMax
+  if (xValues[0] > xEnd) {
+    std::fill(yValues.begin(), yValues.end(), yMax);
+    return;
+  }
+
+  size_t i = 0;
+  // integrals below xStart must be 0
+  while (i < nData - 1 && xValues[i] < xStart) {
+    yValues[i] = yMin;
+    i++;
+  }
+  size_t j = 0;
+  for (; i < nData; i++) {
+    // integrals above xEnd must be equal tp yMax
+    if (j >= spSize - 1) {
+      yValues[i] = yMax;
+    } else {
+      double xi = xValues[i];
+      while (j < spSize - 1 && xi > xData[j])
+        j++;
+      // if x falls onto an interpolation point return the corresponding y
+      if (xi == xData[j]) {
+        yValues[i] = yData[j];
+      } else if (j == spSize - 1) {
+        // if we get above xEnd it's yMax
+        yValues[i] = yMax;
+      } else if (j > 0) {
+        // interpolate between the consecutive points
+        double x0 = xData[j - 1];
+        double x1 = xData[j];
+        double y0 = yData[j - 1];
+        double y1 = yData[j];
+        yValues[i] = y0 + (y1 - y0) * (xi - x0) / (x1 - x0);
+      } else // j == 0
+      {
+        yValues[i] = yMin;
+      }
+    }
+  }
 }
 
 /**
@@ -359,7 +471,14 @@ void MDNormBase::calculateNormInner(const API::SpectrumInfo &spectrumInfo, const
  */
 void MDNormBase::calculateIntersections(std::vector<std::array<double, 4>> &intersections, const double theta,
                                         const double phi) {
-  V3D qout(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta)), qin(0., 0., m_ki);
+  V3D qin, qout;
+  if (m_diffraction) {
+    qout = V3D(-sin(theta) * cos(phi), -sin(theta) * sin(phi), 1. - cos(theta));
+    qin = qout;
+  } else {
+    qout = V3D(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta));
+    qin = V3D(0., 0., m_ki);
+  }
 
   qout = m_rubw * qout;
   qin = m_rubw * qin;
@@ -470,6 +589,8 @@ void MDNormBase::calculateIntersections(std::vector<std::array<double, 4>> &inte
       for (size_t i = 0; i < lNBins; i++) {
         double li = m_lX[i];
         if ((li >= m_lmin) && (li <= m_lmax) && ((lStart - li) * (lEnd - li) < 0)) {
+          // if li is between lStart and lEnd, then hi and ki will be between
+          // hStart, hEnd and kStart, kEnd
           double hi = fh * (li - lStart) + hStart;
           double ki = fk * (li - lStart) + kStart;
           if ((hi >= m_hmin) && (hi <= m_hmax) && (ki >= m_kmin) && (ki <= m_kmax)) {
