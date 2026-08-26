@@ -62,24 +62,6 @@ Linux
 
 ``valgrind --tool=memcheck --leak-check=full --show-reachable=yes --num-callers=20 --track-fds=yes --track-origins=yes --freelist-vol=500000000 ``\ \ `` [args...]``
 
-Windows
-~~~~~~~
-
-`Visual Leak Detector <https://vld.codeplex.com/releases>`__
-
-#. Setup the additional paths as defined in the readme file
-#. Adjust the configuration file, "C:\Program Files\Visual Leak
-   Detector\vld.ini" to output to both File and debugger by changing the
-   ``ReportTo`` to
-
-``ReportTo = both``
-
-#. Add #include <vld.h> to the system.h file in Kernel
-#. Compile everything in debug
-#. Running unit tests should now create a file memory_leak_report.txt in
-   the test directory.
-#. IMPORTANT remove the #include <vld.ini> before checking in.
-
 Thread checking
 ---------------
 
