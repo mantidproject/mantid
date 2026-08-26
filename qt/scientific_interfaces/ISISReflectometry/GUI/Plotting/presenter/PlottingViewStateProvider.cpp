@@ -187,6 +187,7 @@ PlottingViewStateProvider::plottingWorkspaceTreeItemStates(std::vector<PlottingW
   itemStates.reserve(items.size());
   std::transform(items.cbegin(), items.cend(), std::back_inserter(itemStates),
                  [&](const auto &item) { return plottingWorkspaceTreeItemState(item, properties); });
+  return itemStates;
 }
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
