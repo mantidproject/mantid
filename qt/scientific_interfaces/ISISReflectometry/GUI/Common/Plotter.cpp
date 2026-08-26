@@ -97,6 +97,9 @@ std::vector<std::vector<std::string>> groupedWorkspaceNames(std::vector<std::str
   return groupedWorkspaces;
 }
 
+// Python-facing helpers require a caller-held GIL. Public Plotter methods keep
+// it held until all Python::Object instances created by an operation are destroyed.
+
 /// Apply a callback to every axis in a matplotlib figure.
 void forEachAxis(MantidQt::Widgets::Common::Python::Object const &figure,
                  std::function<void(MantidQt::Widgets::Common::Python::Object const &)> const &callback) {
@@ -122,7 +125,6 @@ void forEachAxisInList(MantidQt::Widgets::Common::Python::Object const &axes,
 void applyAxisLabelsToAxes(MantidQt::Widgets::Common::Python::Object const &axes, PlotOptions const &options) {
   using namespace MantidQt::Widgets::Common;
 
-  Mantid::PythonInterface::GlobalInterpreterLock lock;
   try {
     auto const xLabel = axisLabel(options.xAxis);
     auto const yLabel = axisLabel(options.yAxis);
@@ -143,7 +145,6 @@ void applyAxisLabelsToAxes(MantidQt::Widgets::Common::Python::Object const &axes
 void applyAxisLabels(MantidQt::Widgets::Common::Python::Object const &figure, PlotOptions const &options) {
   using namespace MantidQt::Widgets::Common;
 
-  Mantid::PythonInterface::GlobalInterpreterLock lock;
   try {
     auto const xLabel = axisLabel(options.xAxis);
     auto const yLabel = axisLabel(options.yAxis);
@@ -162,7 +163,6 @@ void applyAxisLabels(MantidQt::Widgets::Common::Python::Object const &figure, Pl
 void applyColorfillAxisLabels(MantidQt::Widgets::Common::Python::Object const &figure, PlotOptions const &options) {
   using namespace MantidQt::Widgets::Common;
 
-  Mantid::PythonInterface::GlobalInterpreterLock lock;
   try {
     auto const xLabel = axisLabel(options.xAxis);
     auto const yLabel = axisLabel(options.yAxis);
@@ -191,7 +191,6 @@ void addHorizontalMarkersToAxes(MantidQt::Widgets::Common::Python::Object const 
                                 MantidQt::Widgets::Common::Python::Object const &axes, double position) {
   using namespace MantidQt::Widgets::Common;
 
-  Mantid::PythonInterface::GlobalInterpreterLock lock;
   try {
     auto const canvas = Python::Object(figure.attr("canvas"));
     auto const manager = Python::Object(canvas.attr("manager"));
@@ -214,7 +213,6 @@ void addHorizontalMarkersToAxes(MantidQt::Widgets::Common::Python::Object const 
 void addHorizontalMarkers(MantidQt::Widgets::Common::Python::Object const &figure, double position) {
   using namespace MantidQt::Widgets::Common;
 
-  Mantid::PythonInterface::GlobalInterpreterLock lock;
   try {
     auto const canvas = Python::Object(figure.attr("canvas"));
     auto const manager = Python::Object(canvas.attr("manager"));
@@ -240,7 +238,6 @@ void setPlotWindowParent(MantidQt::Widgets::Common::Python::Object const &figure
   if (!parent)
     return;
 
-  Mantid::PythonInterface::GlobalInterpreterLock lock;
   try {
     auto const canvas = Python::Object(figure.attr("canvas"));
     auto const manager = Python::Object(canvas.attr("manager"));
@@ -339,7 +336,6 @@ MantidQt::Widgets::Common::Python::Object plotCustomTiled(std::vector<std::strin
                                                           PlotOptions const &options, bool vertical = false) {
   using namespace MantidQt::Widgets::Common;
 
-  Mantid::PythonInterface::GlobalInterpreterLock lock;
   try {
     auto const groupedWorkspaces = groupedWorkspaceNames(workspaces);
     auto const figure = createSubplots(groupedWorkspaces.size(), vertical);
@@ -395,7 +391,6 @@ ExistingTiledPlot plotTiledOnExistingFigure(MantidQt::Widgets::Common::Python::O
                                             bool vertical) {
   using namespace MantidQt::Widgets::Common;
 
-  Mantid::PythonInterface::GlobalInterpreterLock lock;
   try {
     auto const groupedWorkspaces = groupedWorkspaceNames(workspaces);
     auto const axes = addTiledAxesToFigure(figure, groupedWorkspaces.size(), vertical);
@@ -512,7 +507,7 @@ bool Plotter::canOverplotActiveFigure() const {
 
   Mantid::PythonInterface::GlobalInterpreterLock lock;
   try {
-    if (!hasActiveReflectometryFigure())
+    if (!currentFigureOrNone())
       return false;
     auto const plotFunctions = Python::Object(Python::NewRef(PyImport_ImportModule("mantidqt.plotting.functions")));
     return boost::python::extract<bool>(plotFunctions.attr("can_overplot")())();
