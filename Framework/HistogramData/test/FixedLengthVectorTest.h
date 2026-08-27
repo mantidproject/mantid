@@ -220,6 +220,15 @@ public:
     TS_ASSERT_THROWS_NOTHING((values = {0.1, 0.2, 0.3}));
     TS_ASSERT_EQUALS(values.size(), 3);
     TS_ASSERT_EQUALS(values[2], 0.3);
+  }
+
+  // Deliberately separate from the test above: with the growing assignment and
+  // the failing one inlined into a single function, GCC 13 at -O3 merges their
+  // value ranges and reports a bogus -Wstringop-overflow against the assignment
+  // below, which checkAssignmentSize never actually reaches.
+  void test_assignment_after_growing_from_empty_throws() {
+    FixedLengthVectorTester values(0);
+    values = {0.1, 0.2, 0.3};
     TS_ASSERT_THROWS((values = {0.1, 0.2}), const std::logic_error &);
   }
 
