@@ -1039,6 +1039,14 @@ class FullInstrumentViewView(QWidget):
         world_x, world_y, world_z, world_w = renderer.GetWorldPoint()
         return world_x / world_w, world_y / world_w, world_z / world_w
 
+    def world_to_display(self, x, y, z):
+        # Convert from world coordinates to display coordinates
+        renderer = self.main_plotter.renderer
+        renderer.SetWorldPoint(x, y, z, 1.0)
+        renderer.WorldToDisplay()
+        display_x, display_y, display_z = renderer.GetDisplayPoint()
+        return display_x, display_y, display_z
+
     def get_shape_mask(self, points: np.ndarray) -> np.ndarray:
         """Return a boolean mask of which 3D points are inside the current selection shape.
 
@@ -1239,9 +1247,6 @@ class FullInstrumentViewView(QWidget):
                 continue
             removed = list_to_clear.takeItem(i)
             del removed
-
-    def has_any_peak_overlays_in_lineplot(self) -> bool:
-        return len(self._lineplot_overlays) > 0
 
     def _on_axes_click_during_peak_selection(self, event) -> None:
         if self._plot_toolbar.zoom_enabled() or self._plot_toolbar.pan_enabled():

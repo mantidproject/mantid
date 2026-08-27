@@ -58,7 +58,7 @@ class TestALFInstrumentViewPresenter(unittest.TestCase):
     def test_on_roi_shape_changed_picks_the_detectors_inside_the_shape(self):
         mask = self._mask_for_first_n_pickable_detectors(5)
         self._mock_view.get_shape_mask.return_value = mask
-        self._presenter._select_bank_tube = False
+        self._mock_view.is_select_bank_tube_checked.return_value = False
 
         with mock.patch.object(self._presenter, "update_picked_detectors_on_view"):
             self._presenter._on_roi_shape_changed(np.zeros((self._n_pickable, 3)))
@@ -68,7 +68,7 @@ class TestALFInstrumentViewPresenter(unittest.TestCase):
     def test_on_roi_shape_changed_expands_the_selection_to_whole_tubes(self):
         expanded_mask = self._mask_for_first_n_pickable_detectors(64)
         self._mock_view.get_shape_mask.return_value = self._mask_for_first_n_pickable_detectors(5)
-        self._presenter._select_bank_tube = True
+        self._mock_view.is_select_bank_tube_checked.return_value = True
         self._model.expand_pickable_mask_to_parent_subtrees = MagicMock(return_value=expanded_mask)
 
         with mock.patch.object(self._presenter, "update_picked_detectors_on_view"):
@@ -81,7 +81,7 @@ class TestALFInstrumentViewPresenter(unittest.TestCase):
         first_mask = self._mask_for_first_n_pickable_detectors(10)
         second_mask = np.zeros(self._n_pickable, dtype=bool)
         second_mask[20:30] = True
-        self._presenter._select_bank_tube = False
+        self._mock_view.is_select_bank_tube_checked.return_value = False
 
         with mock.patch.object(self._presenter, "update_picked_detectors_on_view"):
             self._mock_view.get_shape_mask.return_value = first_mask
@@ -93,7 +93,7 @@ class TestALFInstrumentViewPresenter(unittest.TestCase):
         self.assertEqual(self._model.cached_pick_selections_keys, [ALFInstrumentViewPresenter._ROI_SELECTION_KEY])
 
     def test_empty_shape_clears_the_selection(self):
-        self._presenter._select_bank_tube = False
+        self._mock_view.is_select_bank_tube_checked.return_value = False
 
         with mock.patch.object(self._presenter, "update_picked_detectors_on_view"):
             self._mock_view.get_shape_mask.return_value = self._mask_for_first_n_pickable_detectors(10)
@@ -106,7 +106,7 @@ class TestALFInstrumentViewPresenter(unittest.TestCase):
     def test_on_roi_shape_changed_stores_the_selection_as_a_grouping_item(self):
         mask = self._mask_for_first_n_pickable_detectors(5)
         self._mock_view.get_shape_mask.return_value = mask
-        self._presenter._select_bank_tube = False
+        self._mock_view.is_select_bank_tube_checked.return_value = False
         self._model.set_detector_key = MagicMock(return_value=ALFInstrumentViewPresenter._ROI_SELECTION_KEY)
 
         with mock.patch.object(self._presenter, "update_picked_detectors_on_view"):
@@ -118,7 +118,7 @@ class TestALFInstrumentViewPresenter(unittest.TestCase):
 
     def test_on_roi_shape_changed_updates_the_view_and_notifies_alf(self):
         self._mock_view.get_shape_mask.return_value = self._mask_for_first_n_pickable_detectors(5)
-        self._presenter._select_bank_tube = False
+        self._mock_view.is_select_bank_tube_checked.return_value = False
 
         with mock.patch.object(self._presenter, "notify_cpp_callback") as mock_notify:
             with mock.patch.object(ALFInstrumentViewPresenter.__bases__[0], "update_picked_detectors_on_view"):
