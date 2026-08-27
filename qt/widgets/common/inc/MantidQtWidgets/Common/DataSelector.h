@@ -115,10 +115,6 @@ public:
   void setLoadProperty(std::string const &propertyName, bool const value);
   /// Set an extra string-valued property on the load algorithm before execution
   void setLoadProperty(std::string const &propertyName, std::string const &value);
-  /// Set an extra string-valued property on the load algorithm before execution (const char* overload)
-  void setLoadProperty(std::string const &propertyName, const char *value) {
-    setLoadProperty(propertyName, std::string(value));
-  }
 
   // These are accessors/modifiers of the child FileFinderWidget
   /**
@@ -373,8 +369,6 @@ private slots:
   void handleAutoLoadComplete(bool error);
 
 private:
-  friend class DataSelectorTest;
-
   /// Attempt to automatically load a file
   void autoLoadFile(const QString &filenames);
   /// Execute load algorithm
