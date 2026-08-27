@@ -1,1 +1,3 @@
 - On Linux systems with an NFS-backed configuration directory, Workbench now stages its QSettings files in the local cache. This avoids lock-file failures when running multiple Workbench instances and preserves conflicting settings for recovery.
+
+.. NOTE: The settings used by ``qt/python/mantidqtinterfaces/mantidqtinterfaces/reduction_application.py`` need a one-time migration to the staged INI location.
