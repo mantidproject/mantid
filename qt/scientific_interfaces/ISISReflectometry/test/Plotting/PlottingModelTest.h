@@ -30,7 +30,6 @@ public:
   void testReturnsSelectedWorkspacesForNonSpinAsymmetryPlotOutputTypes() {
     auto model = PlottingModel{};
     auto const workspaces = plottingWorkspaces({"IvsQ_12345", "IvsQ_22345"});
-
     auto const workspacesForPlotting =
         model.workspacesForPlotting(workspaces, PlotOutputSelection{PlotOutputType::ReflectivityCurve});
 
@@ -41,7 +40,6 @@ public:
   void testReturnsSelectedWorkspaceGroupChildrenForNonSpinAsymmetryPlotOutputTypes() {
     auto model = PlottingModel{};
     auto const workspaces = plottingWorkspaces({"IvsQ_12345_1", "IvsQ_12345_2"}, "IvsQ_12345");
-
     auto const workspacesForPlotting =
         model.workspacesForPlotting(workspaces, PlotOutputSelection{PlotOutputType::ReflectivityCurve});
 
@@ -54,7 +52,6 @@ public:
     createConstantWorkspace("down", 2.0);
     auto model = PlottingModel{};
     auto const workspaces = plottingWorkspaces({"up", "down"}, "polarized_group");
-
     auto const workspacesForPlotting =
         model.workspacesForPlotting(workspaces, PlotOutputSelection{PlotOutputType::SpinAsymmetry});
 
@@ -69,7 +66,6 @@ public:
     createConstantWorkspace("down", 2.0);
     auto model = PlottingModel{};
     auto const workspaces = plottingWorkspaces({"up", "down"});
-
     auto const workspacesForPlotting =
         model.workspacesForPlotting(workspaces, PlotOutputSelection{PlotOutputType::SpinAsymmetry});
 
@@ -82,8 +78,8 @@ public:
     createConstantWorkspace("du", 4.0);
     createConstantWorkspace("dd", 2.0);
     auto model = PlottingModel{};
-    auto const workspaces = plottingWorkspaces({"uu", "ud", "du", "dd"}, "polarized_group");
 
+    auto const workspaces = plottingWorkspaces({"uu", "ud", "du", "dd"}, "polarized_group");
     auto const workspacesForPlotting =
         model.workspacesForPlotting(workspaces, PlotOutputSelection{PlotOutputType::SpinAsymmetry});
 
@@ -97,7 +93,6 @@ public:
     createConstantWorkspace("down", 2.0);
     auto model = PlottingModel{};
     auto const workspaces = plottingWorkspaces({"up", "down"}, "polarized_group");
-
     model.workspacesForPlotting(workspaces, PlotOutputSelection{PlotOutputType::SpinAsymmetry});
     auto const firstWorkspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(
         "__isis_refl_spin_asym_polarized_group");
@@ -112,7 +107,6 @@ public:
     createConstantWorkspace("only_one", 6.0);
     auto model = PlottingModel{};
     auto const workspaces = plottingWorkspaces({"only_one"}, "polarized_group");
-
     auto const workspacesForPlotting =
         model.workspacesForPlotting(workspaces, PlotOutputSelection{PlotOutputType::SpinAsymmetry});
 
@@ -125,7 +119,6 @@ public:
     createTOFGroup({"raw_input_name"});
     auto model = PlottingModel{};
     auto const workspaces = plottingWorkspaces({"IvsQ_12345"});
-
     auto const workspacesForPlotting = model.workspacesForPlotting(workspaces, alignmentOutputSelection());
 
     TS_ASSERT_EQUALS(workspacesForPlotting.size(), 1);
@@ -147,7 +140,6 @@ public:
     createTOFGroup({"raw_input_name"});
     auto model = PlottingModel{};
     auto const workspaces = plottingWorkspaces({"IvsQ_12345"});
-
     TS_ASSERT_THROWS(model.workspacesForPlotting(workspaces, alignmentOutputSelection()), std::runtime_error const &);
     TS_ASSERT(!Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_align_IvsQ_12345"));
     TS_ASSERT(!Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_align_IvsQ_12345_profile"));
@@ -160,9 +152,8 @@ public:
     createAlignmentInputWorkspace("raw_input_name", "12345", alignmentYValues(4, 7.0));
     createTOFGroup({"raw_input_name"});
     auto model = PlottingModel{};
-
-    auto const workspacesForPlotting =
-        model.workspacesForPlotting(workspaceSelections({"IvsQ_12345"}), alignmentOutputSelection());
+    auto const workspaces = std::vector<PlottingWorkspace>{plottingWorkspace("IvsQ_12345", {"12345"})};
+    auto const workspacesForPlotting = model.workspacesForPlotting(workspaces, alignmentOutputSelection());
 
     TS_ASSERT_EQUALS(workspacesForPlotting, std::vector<std::string>{"__isis_refl_align_IvsQ_12345"});
     auto group = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>(
@@ -180,9 +171,8 @@ public:
     auto model = PlottingModel{};
     auto outputSelection = alignmentOutputSelection();
     outputSelection.alignmentXAxis = AlignmentXAxis::Theta;
-
-    auto const workspacesForPlotting =
-        model.workspacesForPlotting(workspaceSelections({"IvsQ_12345"}), outputSelection);
+    auto const workspaces = std::vector<PlottingWorkspace>{plottingWorkspace("IvsQ_12345", {"12345"})};
+    auto const workspacesForPlotting = model.workspacesForPlotting(workspaces, outputSelection);
 
     TS_ASSERT_EQUALS(workspacesForPlotting, std::vector<std::string>{"__isis_refl_align_IvsQ_12345_theta"});
     auto const rawWorkspace =
@@ -202,8 +192,8 @@ public:
     createAlignmentInputWorkspace("raw_input_name", "12345", yValues);
     createTOFGroup({"raw_input_name"});
     auto model = PlottingModel{};
-
-    model.workspacesForPlotting(workspaceSelections({"IvsQ_12345"}), alignmentOutputSelection());
+    auto const workspaces = std::vector<PlottingWorkspace>{plottingWorkspace("IvsQ_12345", {"12345"})};
+    model.workspacesForPlotting(workspaces, alignmentOutputSelection());
 
     auto marker = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(
         "__isis_refl_align_IvsQ_12345_peak_centre");
@@ -238,7 +228,6 @@ public:
     createTOFGroup({"summed_raw_input_name"});
     auto model = PlottingModel{};
     auto const workspaces = std::vector<PlottingWorkspace>{plottingWorkspace("IvsQ_12345+12346", {"12345", "12346"})};
-
     auto const workspacesForPlotting = model.workspacesForPlotting(workspaces, alignmentOutputSelection());
 
     TS_ASSERT(workspacesForPlotting.empty());
@@ -265,7 +254,6 @@ public:
     createTOFGroup({"raw_input_name"});
     auto model = PlottingModel{};
     auto const workspaces = plottingWorkspaces({"IvsQ_12345"});
-
     model.workspacesForPlotting(workspaces, alignmentOutputSelection());
     auto const firstWorkspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>(
         "__isis_refl_align_IvsQ_12345");
@@ -294,7 +282,6 @@ public:
     createTOFGroup({"raw_input_name"});
     auto model = PlottingModel{};
     auto const workspaces = plottingWorkspaces({"IvsQ_12345"});
-
     auto const workspacesForPlotting = model.workspacesForPlotting(workspaces, detectorMapOutputSelection());
 
     auto const expected = std::vector<std::string>{"__isis_refl_det_map_IvsQ_12345"};
@@ -315,7 +302,6 @@ public:
     auto model = PlottingModel{};
     auto const workspaces = std::vector<PlottingWorkspace>{plottingWorkspace("IvsQ_12345", {"12345"}),
                                                            plottingWorkspace("IvsQ_22345", {"22345"})};
-
     auto const workspacesForPlotting = model.workspacesForPlotting(workspaces, detectorMapOutputSelection());
 
     auto const expected = std::vector<std::string>{"__isis_refl_det_map_IvsQ_12345", "__isis_refl_det_map_IvsQ_22345"};
@@ -331,7 +317,6 @@ public:
     createTOFGroup({"period_1_raw_input_name", "period_2_raw_input_name"});
     auto model = PlottingModel{};
     auto const workspaces = std::vector<PlottingWorkspace>{plottingWorkspace("IvsQ_12345_2", {"12345"}, 2)};
-
     auto const workspacesForPlotting = model.workspacesForPlotting(workspaces, detectorMapOutputSelection());
 
     auto const expected = std::vector<std::string>{"__isis_refl_det_map_IvsQ_12345_2"};
@@ -346,7 +331,6 @@ public:
     createDetectorMapInputWorkspace("raw_input_name", "12345", 10.0);
     createTOFGroup({"raw_input_name"});
     auto model = PlottingModel{};
-
     auto const workspacesForPlotting =
         model.workspacesForPlotting(plottingWorkspaces({"IvsQ_12345"}),
                                     detectorMapOutputSelection(DetectorMapXAxis::Lambda, DetectorMapYAxis::DetectorId));
@@ -362,7 +346,6 @@ public:
     createDetectorMapInputWorkspace("raw_input_name", "12345", 10.0);
     createTOFGroup({"raw_input_name"});
     auto model = PlottingModel{};
-
     model.workspacesForPlotting(plottingWorkspaces({"IvsQ_12345"}),
                                 detectorMapOutputSelection(DetectorMapXAxis::TimeOfFlight, DetectorMapYAxis::Theta));
 
@@ -377,7 +360,6 @@ public:
     createTOFGroup({"raw_input_name"});
     auto model = PlottingModel{};
     auto const workspaces = plottingWorkspaces({"IvsQ_12345"});
-
     model.workspacesForPlotting(workspaces, detectorMapOutputSelection());
     auto const firstWorkspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(
         "__isis_refl_det_map_IvsQ_12345");
@@ -397,7 +379,6 @@ public:
     auto model = PlottingModel{};
     auto const workspaces = std::vector<PlottingWorkspace>{plottingWorkspace("IvsQ_12345++", {"12345++"}),
                                                            plottingWorkspace("IvsQ_12345--", {"12345--"})};
-
     auto const workspacesForPlotting = model.workspacesForPlotting(workspaces, detectorMapOutputSelection());
 
     auto const expected =
