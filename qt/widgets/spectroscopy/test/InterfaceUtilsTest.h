@@ -33,7 +33,7 @@ public:
 
     // There are many similar functions in the interface, this test will try only one pair of such functions
     TS_ASSERT_EQUALS(getResolutionWSSuffixes("Iqt"), QStringList());
-    TS_ASSERT_EQUALS(getResolutionFBSuffixes("Iqt"), QStringList({".nxs"}));
+    TS_ASSERT_EQUALS(getResolutionFBSuffixes("Iqt"), QStringList({".nxs", ".txt"}));
   }
 
   void test_get_FB_WS_suffixes_when_restrict_data_is_on() {
@@ -42,6 +42,6 @@ public:
 
     // There are many similar functions in the interface, this test will try only one pair of such functions
     TS_ASSERT_EQUALS(getResolutionWSSuffixes("Iqt"), QStringList({"_res", "_red", "_sqw"}));
-    TS_ASSERT_EQUALS(getResolutionFBSuffixes("Iqt"), QStringList({"_res.nxs", "_red.nxs", "_sqw.nxs"}));
+    TS_ASSERT_EQUALS(getResolutionFBSuffixes("Iqt"), QStringList({"_res.nxs", "_red.nxs", "_sqw.nxs", ".txt"}));
   }
 };

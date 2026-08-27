@@ -61,6 +61,10 @@ void MomentsPresenter::handleDataReady(std::string const &dataName) {
  * text file, whose vertical axis otherwise has no physical unit set.
  */
 void MomentsPresenter::setNumericQAxis(std::string const &wsName) {
+  if (!ads.doesExist(wsName)) {
+    return;
+  }
+
   auto ws = ads.retrieveWS<MatrixWorkspace>(wsName);
   if (!ws) {
     return;
