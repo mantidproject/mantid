@@ -172,6 +172,25 @@ class ReductionApplicationQSettingsStagingTest(unittest.TestCase):
         session.activate.assert_called_once_with()
         self.assertIs(session, result)
 
+    def test_staging_activation_failure_aborts_session_and_returns_none(self):
+        from mantidqt.utils.qt.qsettings_staging_session import StagingActivationError
+
+        eligibility = SimpleNamespace(active=True)
+        session = Mock()
+        session.activate.side_effect = StagingActivationError("activation failed")
+        manager = Mock()
+        manager.prepare.return_value = session
+
+        with (
+            patch("mantidqt.utils.qt.qsettings_staging.evaluate_qsettings_staging", return_value=eligibility),
+            patch("mantidqt.utils.qt.qsettings_staging_session.QSettingsStagingSessionManager", return_value=manager),
+            patch.object(reduction_application, "_abort_qsettings_staging") as abort,
+        ):
+            result = reduction_application._prepare_qsettings_staging()
+
+        abort.assert_called_once_with(session, "QSettings staging activation failed: activation failed")
+        self.assertIsNone(result)
+
     @unittest.skipUnless(sys.platform.startswith("linux"), "QSettings staging is Linux-only")
     def test_real_reduction_settings_round_trip(self):
         result = subprocess.run(

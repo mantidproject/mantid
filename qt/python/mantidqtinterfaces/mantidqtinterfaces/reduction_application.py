@@ -594,6 +594,7 @@ def _prepare_qsettings_staging():
     from mantidqt.utils.qt.qsettings_staging_session import (
         QT_PROJECT_SETTINGS_PATH,
         QSettingsStagingSessionManager,
+        StagingActivationError,
         StagingPreparationError,
     )
 
@@ -607,7 +608,11 @@ def _prepare_qsettings_staging():
         )
         return None
 
-    session.activate()
+    try:
+        session.activate()
+    except StagingActivationError as error:
+        _abort_qsettings_staging(session, f"QSettings staging activation failed: {error}")
+        return None
     return session
 
 
