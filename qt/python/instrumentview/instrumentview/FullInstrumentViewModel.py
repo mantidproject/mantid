@@ -180,32 +180,42 @@ class FullInstrumentViewModel:
         return ~self._is_masked & self._is_valid & self._is_selected_in_tree
 
     @property
-    def picked_visibility(self) -> np.ndarray:
-        return self._detector_is_picked.astype(int)[self.is_pickable]
-
-    @property
     def picked_detector_mask(self) -> np.ndarray:
         return self._detector_is_picked[self.is_pickable]
 
     @property
+    def picked_visibility(self) -> np.ndarray:
+        """picked_detector_mask as the numeric scalars the renderers hand to VTK."""
+        return self.picked_detector_mask.astype(int)
+
+    @property
+    def _is_picked_and_pickable(self) -> np.ndarray:
+        """Mask over all detectors of those that are both pickable and currently selected.
+
+        Unlike picked_detector_mask this has one entry per detector, so it indexes the
+        per-detector arrays built in setup().
+        """
+        return self.is_pickable & self._detector_is_picked
+
+    @property
     def picked_detector_ids(self) -> np.ndarray:
-        return self._detector_ids[self.is_pickable & self._detector_is_picked]
+        return self._detector_ids[self._is_picked_and_pickable]
 
     @property
     def picked_workspace_indices(self) -> np.ndarray:
-        return self._workspace_indices[self.is_pickable & self._detector_is_picked]
+        return self._workspace_indices[self._is_picked_and_pickable]
 
     @property
     def picked_detector_positions_3d(self) -> np.ndarray:
-        return self._detector_positions_3d[self.is_pickable & self._detector_is_picked]
+        return self._detector_positions_3d[self._is_picked_and_pickable]
 
     @property
     def picked_spherical_positions(self) -> np.ndarray:
-        return self._spherical_positions[self.is_pickable & self._detector_is_picked]
+        return self._spherical_positions[self._is_picked_and_pickable]
 
     @property
     def picked_counts(self) -> np.ndarray:
-        return self._counts[self.is_pickable & self._detector_is_picked]
+        return self._counts[self._is_picked_and_pickable]
 
     @property
     def detector_counts(self) -> np.ndarray:
