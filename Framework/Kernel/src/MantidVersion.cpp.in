@@ -126,11 +126,13 @@ std::string MantidVersion::versionForReleaseNotes(const VersionInfo &version) {
   // Convert here in those cases where patch number is of the form "20131022.1356".
   const unsigned long patchVersion = std::stoul(version.patch);
 
-  // Released versions point to their own release notes.
-  if ((patchVersion < 100 && version.tweak.empty()) || version.tweak[0] == '+' || version.tweak.substr(0, 2) == "rc") {
+  // A development/nightly version has either a .dev suffix or date-based patch.
+  const bool isDevelopmentVersion = version.tweak.starts_with(".dev") || patchVersion > 100;
+
+  // Released versions and release candidates point to their own release notes.
+  if (!isDevelopmentVersion) {
     std::stringstream versionLabel;
-    versionLabel << version.major << "." << version.minor;
-    versionLabel << "." << patchVersion;
+    versionLabel << version.major << "." << version.minor << "." << patchVersion;
     return versionLabel.str();
   }
 
