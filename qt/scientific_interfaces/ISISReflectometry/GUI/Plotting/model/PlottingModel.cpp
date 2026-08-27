@@ -37,7 +37,7 @@ using IndexRegion = std::pair<int, int>;
 using WorkspaceCreator = std::vector<std::string> (*)(std::vector<PlottingWorkspace> const &,
                                                       PlotOutputSelection const &);
 
-struct WorkspaceGroupSelection {
+struct WorkspaceGroupInputs {
   std::string key;
   std::vector<std::string> workspaceNames;
 };
@@ -279,7 +279,7 @@ std::string createSpinAsymmetryWorkspace(WorkspaceGroupInputs const &inputs) {
     return "";
   }
 
-  auto const outputWorkspace = std::string{spinAsymmetryWorkspacePrefix} + inputs.workspaceGroupName;
+  auto const outputWorkspace = std::string{spinAsymmetryWorkspacePrefix} + inputs.key;
   if (workspaceExists(outputWorkspace)) {
     return outputWorkspace;
   }
