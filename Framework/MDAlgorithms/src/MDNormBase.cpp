@@ -20,16 +20,20 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
 namespace {
+using VectorDoubleProperty = Kernel::PropertyWithValue<std::vector<double>>;
 // function to  compare two intersections (h,k,l,Momentum) by Momentum
 bool compareMomentum(const std::array<double, 4> &v1, const std::array<double, 4> &v2) { return (v1[3] < v2[3]); }
+// k=sqrt(energyToK * E)
+constexpr double energyToK = 8.0 * M_PI * M_PI * PhysicalConstants::NeutronMass * PhysicalConstants::meV * 1e-20 /
+                             (PhysicalConstants::h * PhysicalConstants::h);
 const std::string LOG_CHARGE_NAME("proton_charge");
 } // namespace
 
 MDNormBase::MDNormBase()
     : m_hmin(0.0f), m_hmax(0.0f), m_kmin(0.0f), m_kmax(0.0f), m_lmin(0.0f), m_lmax(0.0f), m_dEmin(0.f), m_dEmax(0.f),
       m_Ei(0.), m_ki(0.), m_kfmin(0.), m_kfmax(0.), m_hIntegrated(true), m_kIntegrated(true), m_lIntegrated(true),
-      m_dEIntegrated(true), m_rubw(3, 3), m_hIdx(-1), m_kIdx(-1), m_lIdx(-1), m_eIdx(-1), m_hX(), m_kX(), m_lX(),
-      m_eX(), m_samplePos(), m_beamDir() {}
+      m_dEIntegrated(true), m_UB(3, 3, true), m_W(3, 3, true), m_rubw(3, 3), m_hIdx(-1), m_kIdx(-1), m_lIdx(-1),
+      m_eIdx(-1), m_hX(), m_kX(), m_lX(), m_eX(), m_samplePos(), m_beamDir() {}
 
 /**
  * Currently looks for the ConvertToMD algorithm in the history
@@ -202,8 +206,6 @@ Kernel::Matrix<coord_t> MDNormBase::findIntergratedDimensions(const std::vector<
  * Energy dimension is transformed to final wavevector.
  */
 void MDNormBase::cacheDimensionXValues() {
-  constexpr double energyToK = 8.0 * M_PI * M_PI * PhysicalConstants::NeutronMass * PhysicalConstants::meV * 1e-20 /
-                               (PhysicalConstants::h * PhysicalConstants::h);
   if (!m_hIntegrated) {
     auto &hDim = *m_normWS->getDimension(m_hIdx);
     m_hX.resize(hDim.getNBoundaries());
@@ -238,15 +240,38 @@ void MDNormBase::cacheDimensionXValues() {
 }
 
 /**
- * Computed the normalization for the input workspace. Results are stored in
- * m_normWS
+ * Calculate QTransform = (R * UB * SymmetryOperation * m_W)^-1
+ * @param currentExpInfo
+ * @param so
+ * @return
+ */
+Mantid::Kernel::DblMatrix MDNormBase::calQTransform(const ExperimentInfo &currentExpInfo,
+                                                    const Geometry::SymmetryOperation &so) {
+  // Make it to a method!
+  DblMatrix R = currentExpInfo.run().getGoniometerMatrix();
+  DblMatrix soMatrix(3, 3);
+  auto v = so.transformHKL(V3D(1, 0, 0));
+  soMatrix.setColumn(0, v);
+  v = so.transformHKL(V3D(0, 1, 0));
+  soMatrix.setColumn(1, v);
+  v = so.transformHKL(V3D(0, 0, 1));
+  soMatrix.setColumn(2, v);
+  soMatrix.Invert();
+  DblMatrix Qtransform = R * m_UB * soMatrix * m_W;
+  Qtransform.Invert();
+
+  return Qtransform;
+}
+
+/**
+ * Computed the normalization for the input workspace (for MDNormSCD/MDNormDirectSC).
+ * Results are stored in m_normWS
  * @param otherValues non HKLE dimensions
  * @param affineTrans affine matrix
  * @param expInfoIndex current experiment info index
  */
 void MDNormBase::calculateNormalization(const std::vector<coord_t> &otherValues,
                                         const Kernel::Matrix<coord_t> &affineTrans, uint16_t expInfoIndex) {
-  using VectorDoubleProperty = Kernel::PropertyWithValue<std::vector<double>>;
   const auto &currentExptInfo = *(m_inputWS->getExperimentInfo(expInfoIndex));
   const auto &spectrumInfo = currentExptInfo.spectrumInfo();
   auto *rubwLog = dynamic_cast<VectorDoubleProperty *>(currentExptInfo.getLog("RUBW_MATRIX"));
@@ -264,6 +289,37 @@ void MDNormBase::calculateNormalization(const std::vector<coord_t> &otherValues,
 }
 
 /**
+ * Computed the normalization for the input workspace (for MDNorm). Results are stored in
+ * m_normWS
+ * @param otherValues - values for dimensions other than Q or DeltaE
+ * @param so - symmetry operation
+ * @param expInfoIndex - current experiment info index
+ * @param soIndex - the index of symmetry operation (for progress purposes only)
+ *
+void MDNorm::calculateNormalization(const std::vector<coord_t> &otherValues, const Geometry::SymmetryOperation &so,
+                                    uint16_t expInfoIndex, size_t soIndex) {
+  const auto &currentExptInfo = *(m_inputWS->getExperimentInfo(expInfoIndex));
+  std::vector<double> lowValues, highValues;
+  auto *lowValuesLog = dynamic_cast<VectorDoubleProperty *>(currentExptInfo.getLog("MDNorm_low"));
+  lowValues = (*lowValuesLog)();
+  auto *highValuesLog = dynamic_cast<VectorDoubleProperty *>(currentExptInfo.getLog("MDNorm_high"));
+  highValues = (*highValuesLog)();
+
+  // calculate Q transformation matrix (R * UB * SymmetryOperation * m_W)^-1
+  // in order to calculate intersections
+  Kernel::DblMatrix Qtransform = calQTransform(currentExptInfo, so);
+
+  // get proton charges
+  const double protonCharge = currentExptInfo.run().getProtonCharge();
+  // [Task 89]
+  const double protonChargeBkgd =
+      (m_backgroundWS != nullptr) ? m_backgroundWS->getExperimentInfo(0)->run().getProtonCharge() : 0;
+
+  const auto &spectrumInfo = currentExptInfo.spectrumInfo();
+
+}*/
+
+/**
  * Computes the normalization for the input workspace for the case of a continous rotation
  * @param otherValues non HKLE dimensions
  * @param affineTrans affine matrix
@@ -271,7 +327,6 @@ void MDNormBase::calculateNormalization(const std::vector<coord_t> &otherValues,
  */
 void MDNormBase::calculateNormContinuous(const std::vector<coord_t> &otherValues,
                                          const Kernel::Matrix<coord_t> &affineTrans, uint16_t expInfoIndex) {
-  using VectorDoubleProperty = Kernel::PropertyWithValue<std::vector<double>>;
   const auto &currentExptInfo = *(m_inputWS->getExperimentInfo(expInfoIndex));
   const auto &spectrumInfo = currentExptInfo.spectrumInfo();
   auto *rubwLog = dynamic_cast<VectorDoubleProperty *>(currentExptInfo.getLog("RUBW_MATRIX"));
@@ -377,8 +432,6 @@ void MDNormBase::calculateNormContinuous(const std::vector<coord_t> &otherValues
 void MDNormBase::calculateNormInner(const API::SpectrumInfo &spectrumInfo, const double protonCharge,
                                     const std::vector<coord_t> &otherValues,
                                     const Kernel::Matrix<coord_t> &affineTrans) {
-  constexpr double energyToK = 8.0 * M_PI * M_PI * PhysicalConstants::NeutronMass * PhysicalConstants::meV * 1e-20 /
-                               (PhysicalConstants::h * PhysicalConstants::h);
   // Mapping
   const auto ndets = static_cast<int64_t>(spectrumInfo.size());
   bool haveSA = false;
@@ -565,25 +618,58 @@ void MDNormBase::calcIntegralsForIntersections(const std::vector<double> &xValue
  * @param phi Azimuthal angle with detector
  */
 void MDNormBase::calculateIntersections(std::vector<std::array<double, 4>> &intersections, const double theta,
-                                        const double phi) {
+                                        const double phi, const Kernel::DblMatrix &transform, double lowvalue,
+                                        double highvalue) {
   V3D qin, qout;
-  if (m_diffraction) {
-    qout = V3D(-sin(theta) * cos(phi), -sin(theta) * sin(phi), 1. - cos(theta));
-    qin = qout;
+  double kfmin, kfmax, kimin, kimax;
+  bool isMDNorm = false;
+  if (m_diffraction && std::isnan(lowvalue)) {
+    // For MDNormSCD
+    qin = qout = V3D(-sin(theta) * cos(phi), -sin(theta) * sin(phi), 1. - cos(theta));
+    kimin = kfmin = m_kfmin;
+    kimax = kfmax = m_kfmax;
   } else {
     qout = V3D(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta));
-    qin = V3D(0., 0., m_ki);
+    qin = V3D(0., 0., 1.);
+    if (std::isnan(lowvalue) || std::isnan(highvalue)) {
+      // For MDNormDirectSC
+      kimin = kimax = m_ki;
+      kfmin = m_kfmin;
+      kfmax = m_kfmax;
+    } else {
+      // For MDNorm
+      isMDNorm = true;
+      if (m_diffraction) {
+        kimin = kfmin = lowvalue;
+        kimax = kfmax = highvalue;
+      } else {
+        kimin = kimax = std::sqrt(energyToK * m_Ei);
+        kfmin = std::sqrt(energyToK * (m_Ei - highvalue));
+        kfmax = std::sqrt(energyToK * (m_Ei - lowvalue));
+      }
+      m_hmin = static_cast<coord_t>(m_hX[0]);
+      m_kmin = static_cast<coord_t>(m_kX[0]);
+      m_lmin = static_cast<coord_t>(m_lX[0]);
+      m_hmax = static_cast<coord_t>(m_hX.back());
+      m_kmax = static_cast<coord_t>(m_kX.back());
+      m_lmax = static_cast<coord_t>(m_lX.back());
+    }
   }
 
-  qout = m_rubw * qout;
-  qin = m_rubw * qin;
+  if (transform.Ssize() == 1) {
+    qout = m_rubw * qout;
+    qin = m_rubw * qin;
+  } else {
+    qout = transform * qout;
+    qin = transform * qin;
+  }
   if (m_convention == "Crystallography") {
     qout *= -1;
     qin *= -1;
   }
-  double hStart = qin.X() - qout.X() * m_kfmin, hEnd = qin.X() - qout.X() * m_kfmax;
-  double kStart = qin.Y() - qout.Y() * m_kfmin, kEnd = qin.Y() - qout.Y() * m_kfmax;
-  double lStart = qin.Z() - qout.Z() * m_kfmin, lEnd = qin.Z() - qout.Z() * m_kfmax;
+  double hStart = qin.X() * kimin - qout.X() * kfmin, hEnd = qin.X() * kimax - qout.X() * kfmax;
+  double kStart = qin.Y() * kimin - qout.Y() * kfmin, kEnd = qin.Y() * kimax - qout.Y() * kfmax;
+  double lStart = qin.Z() * kimin - qout.Z() * kfmin, lEnd = qin.Z() * kimax - qout.Z() * kfmax;
   double eps = 1e-10;
   auto hNBins = m_hX.size();
   auto kNBins = m_kX.size();
@@ -594,7 +680,7 @@ void MDNormBase::calculateIntersections(std::vector<std::array<double, 4>> &inte
 
   // calculate intersections with planes perpendicular to h
   if (fabs(hStart - hEnd) > eps) {
-    double fmom = (m_kfmax - m_kfmin) / (hEnd - hStart);
+    double fmom = (kfmax - kfmin) / (hEnd - hStart);
     double fk = (kEnd - kStart) / (hEnd - hStart);
     double fl = (lEnd - lStart) / (hEnd - hStart);
     if (!m_hIntegrated) {
@@ -602,41 +688,42 @@ void MDNormBase::calculateIntersections(std::vector<std::array<double, 4>> &inte
         double hi = m_hX[i];
         if ((hi >= m_hmin) && (hi <= m_hmax) && ((hStart - hi) * (hEnd - hi) < 0)) {
           // if hi is between hStart and hEnd, then ki and li will be between
-          // kStart, kEnd and lStart, lEnd and momi will be between m_kfmin and
-          // m_kfmax
+          // kStart, kEnd and lStart, lEnd and momi will be between kfmin and kfmax
           double ki = fk * (hi - hStart) + kStart;
           double li = fl * (hi - hStart) + lStart;
           if ((ki >= m_kmin) && (ki <= m_kmax) && (li >= m_lmin) && (li <= m_lmax)) {
-            double momi = fmom * (hi - hStart) + m_kfmin;
+            double momi = fmom * (hi - hStart) + kfmin;
             intersections.push_back({{hi, ki, li, momi}});
           }
         }
       }
     }
-    double momhMin = fmom * (m_hmin - hStart) + m_kfmin;
-    if ((momhMin - m_kfmin) * (momhMin - m_kfmax) < 0) // m_kfmin>m_kfmax
-    {
-      // khmin and lhmin
-      double khmin = fk * (m_hmin - hStart) + kStart;
-      double lhmin = fl * (m_hmin - hStart) + lStart;
-      if ((khmin >= m_kmin) && (khmin <= m_kmax) && (lhmin >= m_lmin) && (lhmin <= m_lmax)) {
-        intersections.push_back({{m_hmin, khmin, lhmin, momhMin}});
+    if (!isMDNorm) {
+      double momhMin = fmom * (m_hmin - hStart) + kfmin;
+      if ((momhMin - kfmin) * (momhMin - kfmax) < 0) // kfmin>kfmax
+      {
+        // khmin and lhmin
+        double khmin = fk * (m_hmin - hStart) + kStart;
+        double lhmin = fl * (m_hmin - hStart) + lStart;
+        if ((khmin >= m_kmin) && (khmin <= m_kmax) && (lhmin >= m_lmin) && (lhmin <= m_lmax)) {
+          intersections.push_back({{m_hmin, khmin, lhmin, momhMin}});
+        }
       }
-    }
-    double momhMax = fmom * (m_hmax - hStart) + m_kfmin;
-    if ((momhMax - m_kfmin) * (momhMax - m_kfmax) <= 0) {
-      // khmax and lhmax
-      double khmax = fk * (m_hmax - hStart) + kStart;
-      double lhmax = fl * (m_hmax - hStart) + lStart;
-      if ((khmax >= m_kmin) && (khmax <= m_kmax) && (lhmax >= m_lmin) && (lhmax <= m_lmax)) {
-        intersections.push_back({{m_hmax, khmax, lhmax, momhMax}});
+      double momhMax = fmom * (m_hmax - hStart) + kfmin;
+      if ((momhMax - kfmin) * (momhMax - kfmax) <= 0) {
+        // khmax and lhmax
+        double khmax = fk * (m_hmax - hStart) + kStart;
+        double lhmax = fl * (m_hmax - hStart) + lStart;
+        if ((khmax >= m_kmin) && (khmax <= m_kmax) && (lhmax >= m_lmin) && (lhmax <= m_lmax)) {
+          intersections.push_back({{m_hmax, khmax, lhmax, momhMax}});
+        }
       }
     }
   }
 
   // calculate intersections with planes perpendicular to k
   if (fabs(kStart - kEnd) > eps) {
-    double fmom = (m_kfmax - m_kfmin) / (kEnd - kStart);
+    double fmom = (kfmax - kfmin) / (kEnd - kStart);
     double fh = (hEnd - hStart) / (kEnd - kStart);
     double fl = (lEnd - lStart) / (kEnd - kStart);
     if (!m_kIntegrated) {
@@ -644,40 +731,41 @@ void MDNormBase::calculateIntersections(std::vector<std::array<double, 4>> &inte
         double ki = m_kX[i];
         if ((ki >= m_kmin) && (ki <= m_kmax) && ((kStart - ki) * (kEnd - ki) < 0)) {
           // if ki is between kStart and kEnd, then hi and li will be between
-          // hStart, hEnd and lStart, lEnd and momi will be between m_kfmin and
-          // m_kfmax
+          // hStart, hEnd and lStart, lEnd and momi will be between kfmin and kfmax
           double hi = fh * (ki - kStart) + hStart;
           double li = fl * (ki - kStart) + lStart;
           if ((hi >= m_hmin) && (hi <= m_hmax) && (li >= m_lmin) && (li <= m_lmax)) {
-            double momi = fmom * (ki - kStart) + m_kfmin;
+            double momi = fmom * (ki - kStart) + kfmin;
             intersections.push_back({{hi, ki, li, momi}});
           }
         }
       }
     }
-    double momkMin = fmom * (m_kmin - kStart) + m_kfmin;
-    if ((momkMin - m_kfmin) * (momkMin - m_kfmax) < 0) {
-      // hkmin and lkmin
-      double hkmin = fh * (m_kmin - kStart) + hStart;
-      double lkmin = fl * (m_kmin - kStart) + lStart;
-      if ((hkmin >= m_hmin) && (hkmin <= m_hmax) && (lkmin >= m_lmin) && (lkmin <= m_lmax)) {
-        intersections.push_back({{hkmin, m_kmin, lkmin, momkMin}});
+    if (!isMDNorm) {
+      double momkMin = fmom * (m_kmin - kStart) + kfmin;
+      if ((momkMin - kfmin) * (momkMin - kfmax) < 0) {
+        // hkmin and lkmin
+        double hkmin = fh * (m_kmin - kStart) + hStart;
+        double lkmin = fl * (m_kmin - kStart) + lStart;
+        if ((hkmin >= m_hmin) && (hkmin <= m_hmax) && (lkmin >= m_lmin) && (lkmin <= m_lmax)) {
+          intersections.push_back({{hkmin, m_kmin, lkmin, momkMin}});
+        }
       }
-    }
-    double momkMax = fmom * (m_kmax - kStart) + m_kfmin;
-    if ((momkMax - m_kfmin) * (momkMax - m_kfmax) <= 0) {
-      // hkmax and lkmax
-      double hkmax = fh * (m_kmax - kStart) + hStart;
-      double lkmax = fl * (m_kmax - kStart) + lStart;
-      if ((hkmax >= m_hmin) && (hkmax <= m_hmax) && (lkmax >= m_lmin) && (lkmax <= m_lmax)) {
-        intersections.push_back({{hkmax, m_kmax, lkmax, momkMax}});
+      double momkMax = fmom * (m_kmax - kStart) + kfmin;
+      if ((momkMax - kfmin) * (momkMax - kfmax) <= 0) {
+        // hkmax and lkmax
+        double hkmax = fh * (m_kmax - kStart) + hStart;
+        double lkmax = fl * (m_kmax - kStart) + lStart;
+        if ((hkmax >= m_hmin) && (hkmax <= m_hmax) && (lkmax >= m_lmin) && (lkmax <= m_lmax)) {
+          intersections.push_back({{hkmax, m_kmax, lkmax, momkMax}});
+        }
       }
     }
   }
 
   // calculate intersections with planes perpendicular to l
   if (fabs(lStart - lEnd) > eps) {
-    double fmom = (m_kfmax - m_kfmin) / (lEnd - lStart);
+    double fmom = (kfmax - kfmin) / (lEnd - lStart);
     double fh = (hEnd - hStart) / (lEnd - lStart);
     double fk = (kEnd - kStart) / (lEnd - lStart);
     if (!m_lIntegrated) {
@@ -689,28 +777,30 @@ void MDNormBase::calculateIntersections(std::vector<std::array<double, 4>> &inte
           double hi = fh * (li - lStart) + hStart;
           double ki = fk * (li - lStart) + kStart;
           if ((hi >= m_hmin) && (hi <= m_hmax) && (ki >= m_kmin) && (ki <= m_kmax)) {
-            double momi = fmom * (li - lStart) + m_kfmin;
+            double momi = fmom * (li - lStart) + kfmin;
             intersections.push_back({{hi, ki, li, momi}});
           }
         }
       }
     }
-    double momlMin = fmom * (m_lmin - lStart) + m_kfmin;
-    if ((momlMin - m_kfmin) * (momlMin - m_kfmax) <= 0) {
-      // hlmin and klmin
-      double hlmin = fh * (m_lmin - lStart) + hStart;
-      double klmin = fk * (m_lmin - lStart) + kStart;
-      if ((hlmin >= m_hmin) && (hlmin <= m_hmax) && (klmin >= m_kmin) && (klmin <= m_kmax)) {
-        intersections.push_back({{hlmin, klmin, m_lmin, momlMin}});
+    if (!isMDNorm) {
+      double momlMin = fmom * (m_lmin - lStart) + kfmin;
+      if ((momlMin - kfmin) * (momlMin - kfmax) <= 0) {
+        // hlmin and klmin
+        double hlmin = fh * (m_lmin - lStart) + hStart;
+        double klmin = fk * (m_lmin - lStart) + kStart;
+        if ((hlmin >= m_hmin) && (hlmin <= m_hmax) && (klmin >= m_kmin) && (klmin <= m_kmax)) {
+          intersections.push_back({{hlmin, klmin, m_lmin, momlMin}});
+        }
       }
-    }
-    double momlMax = fmom * (m_lmax - lStart) + m_kfmin;
-    if ((momlMax - m_kfmin) * (momlMax - m_kfmax) < 0) {
-      // hlmax and klmax
-      double hlmax = fh * (m_lmax - lStart) + hStart;
-      double klmax = fk * (m_lmax - lStart) + kStart;
-      if ((hlmax >= m_hmin) && (hlmax <= m_hmax) && (klmax >= m_kmin) && (klmax <= m_kmax)) {
-        intersections.push_back({{hlmax, klmax, m_lmax, momlMax}});
+      double momlMax = fmom * (m_lmax - lStart) + kfmin;
+      if ((momlMax - kfmin) * (momlMax - kfmax) < 0) {
+        // hlmax and klmax
+        double hlmax = fh * (m_lmax - lStart) + hStart;
+        double klmax = fk * (m_lmax - lStart) + kStart;
+        if ((hlmax >= m_hmin) && (hlmax <= m_hmax) && (klmax >= m_kmin) && (klmax <= m_kmax)) {
+          intersections.push_back({{hlmax, klmax, m_lmax, momlMax}});
+        }
       }
     }
   }
@@ -719,10 +809,10 @@ void MDNormBase::calculateIntersections(std::vector<std::array<double, 4>> &inte
   if (!m_dEIntegrated) {
     for (size_t i = 0; i < eNBins; i++) {
       double kfi = m_eX[i];
-      if ((kfi - m_kfmin) * (kfi - m_kfmax) <= 0) {
-        double h = qin.X() - qout.X() * kfi;
-        double k = qin.Y() - qout.Y() * kfi;
-        double l = qin.Z() - qout.Z() * kfi;
+      if ((kfi - kfmin) * (kfi - kfmax) <= 0) {
+        double h = qin.X() * kimin - qout.X() * kfi;
+        double k = qin.Y() * kimin - qout.Y() * kfi;
+        double l = qin.Z() * kimin - qout.Z() * kfi;
         if ((h >= m_hmin) && (h <= m_hmax) && (k >= m_kmin) && (k <= m_kmax) && (l >= m_lmin) && (l <= m_lmax)) {
           intersections.push_back({{h, k, l, kfi}});
         }
@@ -733,11 +823,11 @@ void MDNormBase::calculateIntersections(std::vector<std::array<double, 4>> &inte
   // endpoints
   if ((hStart >= m_hmin) && (hStart <= m_hmax) && (kStart >= m_kmin) && (kStart <= m_kmax) && (lStart >= m_lmin) &&
       (lStart <= m_lmax)) {
-    intersections.push_back({{hStart, kStart, lStart, m_kfmin}});
+    intersections.push_back({{hStart, kStart, lStart, kfmin}});
   }
   if ((hEnd >= m_hmin) && (hEnd <= m_hmax) && (kEnd >= m_kmin) && (kEnd <= m_kmax) && (lEnd >= m_lmin) &&
       (lEnd <= m_lmax)) {
-    intersections.push_back({{hEnd, kEnd, lEnd, m_kfmax}});
+    intersections.push_back({{hEnd, kEnd, lEnd, kfmax}});
   }
 
   // sort intersections by final momentum

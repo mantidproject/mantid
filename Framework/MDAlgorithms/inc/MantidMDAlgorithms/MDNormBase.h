@@ -10,6 +10,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidGeometry/Crystal/SymmetryOperation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidMDAlgorithms/DllConfig.h"
 
@@ -41,6 +42,7 @@ protected:
   void cacheDimensionXValues();
   void calculateNormalization(const std::vector<coord_t> &otherValues, const Kernel::Matrix<coord_t> &affineTrans,
                               uint16_t expInfoIndex);
+
   void calculateNormContinuous(const std::vector<coord_t> &otherValues, const Kernel::Matrix<coord_t> &affineTrans,
                                uint16_t expInfoIndex);
   void calculateNormInner(const API::SpectrumInfo &spectrumInfo, const double protonCharge,
@@ -48,7 +50,11 @@ protected:
 
   void calcIntegralsForIntersections(const std::vector<double> &xValues, const API::MatrixWorkspace &integrFlux,
                                      size_t sp, std::vector<double> &yValues) const;
-  void calculateIntersections(std::vector<std::array<double, 4>> &intersections, const double theta, const double phi);
+  void calculateIntersections(std::vector<std::array<double, 4>> &intersections, const double theta, const double phi,
+                              const Kernel::DblMatrix &transform = Kernel::DblMatrix(1, 1),
+                              double lowvalue = std::nan(""), double highvalue = std::nan(""));
+  Mantid::Kernel::DblMatrix calQTransform(const Mantid::API::ExperimentInfo &currentExpInfo,
+                                          const Mantid::Geometry::SymmetryOperation &so);
 
   /// Input workspace
   API::IMDEventWorkspace_sptr m_inputWS;
@@ -60,6 +66,10 @@ protected:
   double m_Ei, m_ki, m_kfmin, m_kfmax;
   /// flag for integrated h,k,l, dE dimensions
   bool m_hIntegrated, m_kIntegrated, m_lIntegrated, m_dEIntegrated;
+  /// UB matrix
+  Mantid::Kernel::DblMatrix m_UB;
+  /// W matrix
+  Mantid::Kernel::DblMatrix m_W;
   /// (2*PiRUBW)^-1
   Mantid::Kernel::DblMatrix m_rubw;
   /// index of h,k,l, dE dimensions in the output workspaces

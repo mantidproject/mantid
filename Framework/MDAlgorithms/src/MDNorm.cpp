@@ -42,8 +42,6 @@ using namespace Mantid::DataObjects;
 
 namespace {
 using VectorDoubleProperty = Kernel::PropertyWithValue<std::vector<double>>;
-// function to  compare two intersections (h,k,l,Momentum) by Momentum
-bool compareMomentum(const std::array<double, 4> &v1, const std::array<double, 4> &v2) { return (v1[3] < v2[3]); }
 
 // k=sqrt(energyToK * E)
 constexpr double energyToK = 8.0 * M_PI * M_PI * PhysicalConstants::NeutronMass * PhysicalConstants::meV * 1e-20 /
@@ -60,10 +58,7 @@ DECLARE_ALGORITHM(MDNorm)
 /**
  * Constructor
  */
-MDNorm::MDNorm()
-    : m_normWS(), m_inputWS(), m_isRLU(false), m_UB(3, 3, true), m_W(3, 3, true), m_transformation(), m_hX(), m_kX(),
-      m_lX(), m_eX(), m_hIdx(-1), m_kIdx(-1), m_lIdx(-1), m_eIdx(-1), m_numExptInfos(0), m_Ei(0.0), m_diffraction(true),
-      m_monochromatic(false), m_accumulate(false), m_dEIntegrated(true), m_samplePos(), m_beamDir(), convention("") {}
+MDNorm::MDNorm() : m_isRLU(false), m_transformation(), m_monochromatic(false), m_accumulate(false) {}
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string MDNorm::name() const { return "MDNorm"; }
@@ -497,7 +492,8 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
 /** Execute the algorithm.
  */
 void MDNorm::exec() {
-  convention = Kernel::ConfigService::Instance().getString("Q.convention");
+  m_convention = Kernel::ConfigService::Instance().getString("Q.convention");
+  m_hIntegrated = m_kIntegrated = m_lIntegrated = false;
   // symmetry operations
   std::string symOps = this->getProperty("SymmetryOperations");
   std::vector<Geometry::SymmetryOperation> symmetryOps;
@@ -1442,30 +1438,6 @@ void MDNorm::cacheDimensionXValues() {
 }
 
 /**
- * Calculate QTransform = (R * UB * SymmetryOperation * m_W)^-1
- * @param currentExpInfo
- * @param so
- * @return
- */
-inline Mantid::Kernel::DblMatrix MDNorm::calQTransform(const ExperimentInfo &currentExpInfo,
-                                                       const Geometry::SymmetryOperation &so) {
-  // Make it to a method!
-  DblMatrix R = currentExpInfo.run().getGoniometerMatrix();
-  DblMatrix soMatrix(3, 3);
-  auto v = so.transformHKL(V3D(1, 0, 0));
-  soMatrix.setColumn(0, v);
-  v = so.transformHKL(V3D(0, 1, 0));
-  soMatrix.setColumn(1, v);
-  v = so.transformHKL(V3D(0, 0, 1));
-  soMatrix.setColumn(2, v);
-  soMatrix.Invert();
-  DblMatrix Qtransform = R * m_UB * soMatrix * m_W;
-  Qtransform.Invert();
-
-  return Qtransform;
-}
-
-/**
  * Calculate the diffraction MDE's intersection integral of a certain
  * detector/spectru
  * @param intersections: vector of intersections
@@ -1721,216 +1693,6 @@ if (m_accumulate) {
     std::copy(bkgdSignalArray.cbegin(), bkgdSignalArray.cend(), m_bkgdNormWS->mutableSignalArray());
 }
 m_accumulate = true;
-}
-
-/**
- * Calculate the points of intersection for the given detector with cuboid
- * surrounding the detector position in HKL
- * @param intersections A list of intersections in HKL space
- * @param theta Polar angle withd detector
- * @param phi Azimuthal angle with detector
- * @param transform Matrix to convert frm Q_lab to HKL (2Pi*R *UB*W*SO)^{-1}
- * @param lowvalue The lowest momentum or energy transfer for the trajectory
- * @param highvalue The highest momentum or energy transfer for the trajectory
- */
-void MDNorm::calculateIntersections(std::vector<std::array<double, 4>> &intersections, const double theta,
-                                    const double phi, const Kernel::DblMatrix &transform, double lowvalue,
-                                    double highvalue) {
-  V3D qout(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta)), qin(0., 0., 1);
-
-  qout = transform * qout;
-  qin = transform * qin;
-  if (convention == "Crystallography") {
-    qout *= -1;
-    qin *= -1;
-  }
-  double kfmin, kfmax, kimin, kimax;
-  if (m_diffraction) {
-    kimin = lowvalue;
-    kimax = highvalue;
-    kfmin = kimin;
-    kfmax = kimax;
-  } else {
-    kimin = std::sqrt(energyToK * m_Ei);
-    kimax = kimin;
-    kfmin = std::sqrt(energyToK * (m_Ei - highvalue));
-    kfmax = std::sqrt(energyToK * (m_Ei - lowvalue));
-  }
-
-  double hStart = qin.X() * kimin - qout.X() * kfmin, hEnd = qin.X() * kimax - qout.X() * kfmax;
-  double kStart = qin.Y() * kimin - qout.Y() * kfmin, kEnd = qin.Y() * kimax - qout.Y() * kfmax;
-  double lStart = qin.Z() * kimin - qout.Z() * kfmin, lEnd = qin.Z() * kimax - qout.Z() * kfmax;
-
-  double eps = 1e-10;
-  auto hNBins = m_hX.size();
-  auto kNBins = m_kX.size();
-  auto lNBins = m_lX.size();
-  auto eNBins = m_eX.size();
-  intersections.clear();
-  intersections.reserve(hNBins + kNBins + lNBins + eNBins + 2);
-
-  // calculate intersections with planes perpendicular to h
-  if (fabs(hStart - hEnd) > eps) {
-    double fmom = (kfmax - kfmin) / (hEnd - hStart);
-    double fk = (kEnd - kStart) / (hEnd - hStart);
-    double fl = (lEnd - lStart) / (hEnd - hStart);
-    for (size_t i = 0; i < hNBins; i++) {
-      double hi = m_hX[i];
-      if (((hStart - hi) * (hEnd - hi) < 0)) {
-        // if hi is between hStart and hEnd, then ki and li will be between
-        // kStart, kEnd and lStart, lEnd and momi will be between kfmin and
-        // kfmax
-        double ki = fk * (hi - hStart) + kStart;
-        double li = fl * (hi - hStart) + lStart;
-        if ((ki >= m_kX[0]) && (ki <= m_kX[kNBins - 1]) && (li >= m_lX[0]) && (li <= m_lX[lNBins - 1])) {
-          double momi = fmom * (hi - hStart) + kfmin;
-          intersections.push_back({{hi, ki, li, momi}});
-        }
-      }
-    }
-  }
-  // calculate intersections with planes perpendicular to k
-  if (fabs(kStart - kEnd) > eps) {
-    double fmom = (kfmax - kfmin) / (kEnd - kStart);
-    double fh = (hEnd - hStart) / (kEnd - kStart);
-    double fl = (lEnd - lStart) / (kEnd - kStart);
-    for (size_t i = 0; i < kNBins; i++) {
-      double ki = m_kX[i];
-      if (((kStart - ki) * (kEnd - ki) < 0)) {
-        // if ki is between kStart and kEnd, then hi and li will be between
-        // hStart, hEnd and lStart, lEnd and momi will be between kfmin and
-        // kfmax
-        double hi = fh * (ki - kStart) + hStart;
-        double li = fl * (ki - kStart) + lStart;
-        if ((hi >= m_hX[0]) && (hi <= m_hX[hNBins - 1]) && (li >= m_lX[0]) && (li <= m_lX[lNBins - 1])) {
-          double momi = fmom * (ki - kStart) + kfmin;
-          intersections.push_back({{hi, ki, li, momi}});
-        }
-      }
-    }
-  }
-
-  // calculate intersections with planes perpendicular to l
-  if (fabs(lStart - lEnd) > eps) {
-    double fmom = (kfmax - kfmin) / (lEnd - lStart);
-    double fh = (hEnd - hStart) / (lEnd - lStart);
-    double fk = (kEnd - kStart) / (lEnd - lStart);
-
-    for (size_t i = 0; i < lNBins; i++) {
-      double li = m_lX[i];
-      if (((lStart - li) * (lEnd - li) < 0)) {
-        double hi = fh * (li - lStart) + hStart;
-        double ki = fk * (li - lStart) + kStart;
-        if ((hi >= m_hX[0]) && (hi <= m_hX[hNBins - 1]) && (ki >= m_kX[0]) && (ki <= m_kX[kNBins - 1])) {
-          double momi = fmom * (li - lStart) + kfmin;
-          intersections.push_back({{hi, ki, li, momi}});
-        }
-      }
-    }
-  }
-  // intersections with dE
-  if (!m_dEIntegrated) {
-    for (size_t i = 0; i < eNBins; i++) {
-      double kfi = m_eX[i];
-      if ((kfi - kfmin) * (kfi - kfmax) <= 0) {
-        double h = qin.X() * kimin - qout.X() * kfi;
-        double k = qin.Y() * kimin - qout.Y() * kfi;
-        double l = qin.Z() * kimin - qout.Z() * kfi;
-        if ((h >= m_hX[0]) && (h <= m_hX[hNBins - 1]) && (k >= m_kX[0]) && (k <= m_kX[kNBins - 1]) && (l >= m_lX[0]) &&
-            (l <= m_lX[lNBins - 1])) {
-          intersections.push_back({{h, k, l, kfi}});
-        }
-      }
-    }
-  }
-
-  // endpoints
-  if ((hStart >= m_hX[0]) && (hStart <= m_hX[hNBins - 1]) && (kStart >= m_kX[0]) && (kStart <= m_kX[kNBins - 1]) &&
-      (lStart >= m_lX[0]) && (lStart <= m_lX[lNBins - 1])) {
-    intersections.push_back({{hStart, kStart, lStart, kfmin}});
-  }
-  if ((hEnd >= m_hX[0]) && (hEnd <= m_hX[hNBins - 1]) && (kEnd >= m_kX[0]) && (kEnd <= m_kX[kNBins - 1]) &&
-      (lEnd >= m_lX[0]) && (lEnd <= m_lX[lNBins - 1])) {
-    intersections.push_back({{hEnd, kEnd, lEnd, kfmax}});
-  }
-
-  // sort intersections by final momentum
-  std::stable_sort(intersections.begin(), intersections.end(), compareMomentum);
-}
-
-/**
- * Linearly interpolate between the points in integrFlux at xValues and save the
- * results in yValues.
- * @param xValues :: X-values at which to interpolate
- * @param integrFlux :: A workspace with the spectra to interpolate
- * @param sp :: A workspace index for a spectrum in integrFlux to interpolate.
- * @param yValues :: A vector to save the results.
- */
-void MDNorm::calcIntegralsForIntersections(const std::vector<double> &xValues, const API::MatrixWorkspace &integrFlux,
-                                           size_t sp, std::vector<double> &yValues) {
-  assert(xValues.size() == yValues.size());
-
-  // the x-data from the workspace
-  const auto &xData = integrFlux.x(sp);
-  const double xStart = xData.front();
-  const double xEnd = xData.back();
-
-  // the values in integrFlux are expected to be integrals of a non-negative
-  // function
-  // ie they must make a non-decreasing function
-  const auto &yData = integrFlux.y(sp);
-  size_t spSize = yData.size();
-
-  const double yMin = 0.0;
-  const double yMax = yData.back();
-
-  size_t nData = xValues.size();
-  // all integrals below xStart must be 0
-  if (xValues[nData - 1] < xStart) {
-    std::fill(yValues.begin(), yValues.end(), yMin);
-    return;
-  }
-
-  // all integrals above xEnd must be equal tp yMax
-  if (xValues[0] > xEnd) {
-    std::fill(yValues.begin(), yValues.end(), yMax);
-    return;
-  }
-
-  size_t i = 0;
-  // integrals below xStart must be 0
-  while (i < nData - 1 && xValues[i] < xStart) {
-    yValues[i] = yMin;
-    i++;
-  }
-  size_t j = 0;
-  for (; i < nData; i++) {
-    // integrals above xEnd must be equal tp yMax
-    if (j >= spSize - 1) {
-      yValues[i] = yMax;
-    } else {
-      double xi = xValues[i];
-      while (j < spSize - 1 && xi > xData[j])
-        j++;
-      // if x falls onto an interpolation point return the corresponding y
-      if (xi == xData[j]) {
-        yValues[i] = yData[j];
-      } else if (j == spSize - 1) {
-        // if we get above xEnd it's yMax
-        yValues[i] = yMax;
-      } else if (j > 0) {
-        // interpolate between the consecutive points
-        double x0 = xData[j - 1];
-        double x1 = xData[j];
-        double y0 = yData[j - 1];
-        double y1 = yData[j];
-        yValues[i] = y0 + (y1 - y0) * (xi - x0) / (x1 - x0);
-      } else // j == 0
-      {
-        yValues[i] = yMin;
-      }
-    }
-  }
 }
 
 } // namespace Mantid::MDAlgorithms
