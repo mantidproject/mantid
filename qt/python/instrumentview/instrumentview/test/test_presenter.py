@@ -421,7 +421,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         np.testing.assert_array_equal(self._model._point_picked_detectors, expected)
         np.testing.assert_array_equal(self._model._detector_is_picked, expected)
 
-    def test_on_create_item_from_selection_abandoned_if_the_pickable_detectors_change(self):
+    def test_on_create_item_from_selection_abandoned_if_a_pickable_detector_is_removed(self):
         self._model._detector_is_picked = np.full(self._ws.getNumberHistograms(), True)
         self._mock_view.get_current_selected_tab.return_value = CurrentTab.Grouping
 
@@ -431,6 +431,31 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         # no longer has one entry per pickable detector
         self._model._is_masked = self._model._is_masked.copy()
         self._model._is_masked[np.flatnonzero(self._model.is_pickable)[0]] = True
+
+        with mock.patch("instrumentview.FullInstrumentViewPresenter.logger") as mock_logger:
+            func(*args)
+
+        mock_logger.warning.assert_called_once()
+        self._model.add_new_detector_key.assert_not_called()
+        self._mock_view.set_new_item_key.assert_not_called()
+
+    def test_on_create_item_from_selection_abandoned_if_a_pickable_detector_is_swapped(self):
+        """A swap keeps the count the same, so only the identity of the pickable detectors gives it away."""
+        n_hist = self._ws.getNumberHistograms()
+        self._model._is_masked = np.full(n_hist, False)
+        masked_at_click, masked_after_click = np.flatnonzero(self._model.is_pickable)[:2]
+        self._model._is_masked[masked_at_click] = True
+        self._model._detector_is_picked = np.full(n_hist, True)
+        self._mock_view.get_current_selected_tab.return_value = CurrentTab.Grouping
+
+        func, args = self._click_create_from_selection()
+        pickable_at_click = np.count_nonzero(self._model.is_pickable)
+
+        # Unmasking one detector and masking another leaves as many pickable detectors as before,
+        # but every snapshot entry between the two now lines up against a different detector
+        self._model._is_masked[masked_at_click] = False
+        self._model._is_masked[masked_after_click] = True
+        self.assertEqual(np.count_nonzero(self._model.is_pickable), pickable_at_click)
 
         with mock.patch("instrumentview.FullInstrumentViewPresenter.logger") as mock_logger:
             func(*args)
