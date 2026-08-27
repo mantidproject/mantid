@@ -177,7 +177,7 @@ Mantid::API::MatrixWorkspace_sptr createPointWorkspace(size_t const numberOfPoin
 
 void setAlignmentXAxisValues(Mantid::API::MatrixWorkspace_sptr const &profileWorkspace,
                              Mantid::API::MatrixWorkspace const &rawWorkspace, AlignmentXAxis const xAxis) {
-  auto &x = profileWorkspace->dataX(0);
+  auto &x = profileWorkspace->mutableX(0);
   for (size_t idx = 0; idx < x.size(); ++idx) {
     x[idx] = xValueForWorkspaceIndex(rawWorkspace, idx, xAxis);
   }
@@ -267,9 +267,9 @@ Mantid::API::MatrixWorkspace_sptr createPeakCentreWorkspace(Mantid::API::MatrixW
   auto const &profileY = profileWorkspace->y(0);
   auto const yRange = std::minmax_element(profileY.cbegin(), profileY.cend());
 
-  auto &x = peakCentreWorkspace->dataX(0);
-  auto &y = peakCentreWorkspace->dataY(0);
-  auto &e = peakCentreWorkspace->dataE(0);
+  auto &x = peakCentreWorkspace->mutableX(0);
+  auto &y = peakCentreWorkspace->mutableY(0);
+  auto &e = peakCentreWorkspace->mutableE(0);
   x[0] = peakCentre;
   x[1] = peakCentre;
   y[0] = *yRange.first;

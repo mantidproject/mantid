@@ -420,10 +420,10 @@ private:
       workspace->mutableRun().addProperty("current_period", *currentPeriod);
     }
     for (size_t workspaceIndex = 0; workspaceIndex < yValues.size(); ++workspaceIndex) {
-      workspace->dataX(workspaceIndex)[0] = 0.0;
-      workspace->dataX(workspaceIndex)[1] = 1.0;
-      workspace->dataY(workspaceIndex)[0] = yValues[workspaceIndex];
-      workspace->dataE(workspaceIndex)[0] = 1.0;
+      workspace->mutableX(workspaceIndex)[0] = 0.0;
+      workspace->mutableX(workspaceIndex)[1] = 1.0;
+      workspace->mutableY(workspaceIndex)[0] = yValues[workspaceIndex];
+      workspace->mutableE(workspaceIndex)[0] = 1.0;
       workspace->getSpectrum(workspaceIndex).addDetectorID(static_cast<int>(100 + workspaceIndex));
     }
     Mantid::API::AnalysisDataService::Instance().addOrReplace(name, workspace);
@@ -438,8 +438,8 @@ private:
     }
     for (size_t workspaceIndex = 0; workspaceIndex < workspace->getNumberHistograms(); ++workspaceIndex) {
       for (size_t bin = 0; bin < workspace->y(workspaceIndex).size(); ++bin) {
-        workspace->dataY(workspaceIndex)[bin] = yOffset + static_cast<double>(workspaceIndex);
-        workspace->dataE(workspaceIndex)[bin] = 1.0;
+        workspace->mutableY(workspaceIndex)[bin] = yOffset + static_cast<double>(workspaceIndex);
+        workspace->mutableE(workspaceIndex)[bin] = 1.0;
       }
     }
     Mantid::API::AnalysisDataService::Instance().addOrReplace(name, workspace);
