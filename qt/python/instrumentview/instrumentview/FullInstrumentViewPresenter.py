@@ -529,20 +529,30 @@ class FullInstrumentViewPresenter:
         self._view.project_and_cache_detector_points(centres)
         self._callback_queue.put((self._on_add_item_clicked, ()))
 
-    def _on_create_item_from_selection_clicked(self) -> None:
-        """Commit the detectors currently picked in the projection as a new ROI or mask."""
-        mask = self._model.picked_detector_mask
-        if not np.any(mask):
+    def _on_create_item_from_selection_clicked(self, selection: np.ndarray, point_picks: np.ndarray, tab: CurrentTab) -> None:
+        """Commit a snapshot of the picked detectors, taken when the button was clicked, as a new ROI or mask."""
+        if not np.any(selection):
             return
 
-        tab = self._view.get_current_selected_tab()
-        new_key = self._model.add_new_detector_key(mask.tolist(), tab)
+        if selection.size != np.count_nonzero(self._model.is_pickable):
+            # Masking or a component tree selection changed which detectors are pickable between the
+            # click and now, so the snapshot no longer lines up with what the model can store
+            logger.warning("Detectors changed before the selection could be committed, so no item was created.")
+            return
+
+        new_key = self._model.add_new_detector_key(selection.tolist(), tab)
         self._view.set_new_item_key(tab, new_key)
-        self._model.clear_point_picked_detectors()
+        # Only the picks that went into the item are cleared, so anything picked since the click stands
+        self._model.clear_point_picked_detectors(point_picks)
         self.update_picked_detectors_on_view()
 
     def on_create_item_from_selection_clicked(self) -> None:
-        self._callback_queue.put((self._on_create_item_from_selection_clicked, ()))
+        # Snapshot on the Qt thread so the item that gets created is the one the user saw
+        # themselves ask for, whatever they select or which tab they open before the worker runs
+        selection = self._model.picked_detector_mask
+        point_picks = self._model.point_picked_detectors
+        tab = self._view.get_current_selected_tab()
+        self._callback_queue.put((self._on_create_item_from_selection_clicked, (selection, point_picks, tab)))
 
     def refresh_create_from_selection_enabled(self) -> None:
         """Only offer to create an item from the selection while there is a selection to create it from.

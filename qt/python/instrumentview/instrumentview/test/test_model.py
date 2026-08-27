@@ -180,6 +180,22 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         np.testing.assert_equal(model._point_picked_detectors, [False, False, False])
         np.testing.assert_equal(model._detector_is_picked, [True, False, False])
 
+    def test_clear_point_picked_detectors_for_given_detectors_only(self):
+        model, _ = self._setup_model([1, 2, 3])
+        model._detector_is_picked = np.array([True, True, True])
+        model._point_picked_detectors = np.array([False, True, True])
+        model.clear_point_picked_detectors(np.array([True, True, False]))
+        # Detector 1 was never point picked, and detector 3 was not asked for, so both are left alone
+        np.testing.assert_equal(model._point_picked_detectors, [False, False, True])
+        np.testing.assert_equal(model._detector_is_picked, [True, False, True])
+
+    def test_point_picked_detectors_is_a_snapshot(self):
+        model, _ = self._setup_model([1, 2, 3])
+        model._point_picked_detectors = np.array([False, True, False])
+        snapshot = model.point_picked_detectors
+        model._point_picked_detectors[2] = True
+        np.testing.assert_equal(snapshot, [False, True, False])
+
     def test_update_point_picked_detectors_expand_to_parent_subtree(self):
         model, mock_workspace = self._setup_model([10, 11, 12, 13])
         component_info = mock_workspace.componentInfo.return_value

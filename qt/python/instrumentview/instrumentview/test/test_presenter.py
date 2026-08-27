@@ -327,15 +327,26 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._model.expand_pickable_mask_to_parent_subtrees.assert_called_once()
         np.testing.assert_array_equal(self._model.add_new_detector_key.call_args.args[0], mask)
 
+    def _click_create_from_selection(self):
+        """Click the button and return the queued work, without letting the worker run it yet.
+
+        Lets a test change the selection or the tab in between, as a user can while the work waits.
+        """
+        self._mock_view.current_selected_lineplot_unit.return_value = "TOF"
+        self._model.add_new_detector_key = MagicMock(return_value="mock_key")
+        with mock.patch.object(self._presenter, "_callback_queue") as mock_queue:
+            self._presenter.on_create_item_from_selection_clicked()
+        func, args = mock_queue.put.call_args.args[0]
+        return func, args
+
     def test_on_create_item_from_selection_clicked(self):
         n_hist = self._ws.getNumberHistograms()
         picked = np.array([i % 3 == 0 for i in range(n_hist)])
         self._model._detector_is_picked = picked
-        self._mock_view.current_selected_lineplot_unit.return_value = "TOF"
         self._mock_view.get_current_selected_tab.return_value = CurrentTab.Masking
-        self._model.add_new_detector_key = MagicMock(return_value="mock_key")
 
-        self._presenter._on_create_item_from_selection_clicked()
+        func, args = self._click_create_from_selection()
+        func(*args)
 
         np.testing.assert_array_equal(self._model.add_new_detector_key.call_args.args[0], picked[self._model.is_pickable].tolist())
         self.assertEqual(self._model.add_new_detector_key.call_args.args[1], CurrentTab.Masking)
@@ -345,11 +356,10 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         n_hist = self._ws.getNumberHistograms()
         self._model._detector_is_picked = np.full(n_hist, True)
         self._model._point_picked_detectors = np.full(n_hist, True)
-        self._mock_view.current_selected_lineplot_unit.return_value = "TOF"
         self._mock_view.get_current_selected_tab.return_value = CurrentTab.Masking
-        self._model.add_new_detector_key = MagicMock(return_value="mock_key")
 
-        self._presenter._on_create_item_from_selection_clicked()
+        func, args = self._click_create_from_selection()
+        func(*args)
 
         self.assertFalse(np.any(self._model._detector_is_picked))
         self.assertFalse(np.any(self._model._point_picked_detectors))
@@ -360,10 +370,72 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     def test_on_create_item_from_selection_clicked_does_nothing_without_a_selection(self):
         self._model._detector_is_picked = np.full(self._ws.getNumberHistograms(), False)
         self._mock_view.get_current_selected_tab.return_value = CurrentTab.Grouping
-        self._model.add_new_detector_key = MagicMock(return_value="mock_key")
 
-        self._presenter._on_create_item_from_selection_clicked()
+        func, args = self._click_create_from_selection()
+        func(*args)
 
+        self._model.add_new_detector_key.assert_not_called()
+        self._mock_view.set_new_item_key.assert_not_called()
+
+    def test_on_create_item_from_selection_commits_the_selection_and_tab_from_when_it_was_clicked(self):
+        n_hist = self._ws.getNumberHistograms()
+        picked_at_click = np.array([i % 3 == 0 for i in range(n_hist)])
+        self._model._detector_is_picked = picked_at_click.copy()
+        self._model._point_picked_detectors = picked_at_click.copy()
+        self._mock_view.get_current_selected_tab.return_value = CurrentTab.Grouping
+
+        func, args = self._click_create_from_selection()
+
+        # The user carries on selecting, and switches tab, before the queued work runs
+        self._model._detector_is_picked[:] = True
+        self._model._point_picked_detectors[:] = True
+        self._mock_view.get_current_selected_tab.return_value = CurrentTab.Masking
+
+        func(*args)
+
+        expected = picked_at_click[self._model.is_pickable].tolist()
+        np.testing.assert_array_equal(self._model.add_new_detector_key.call_args.args[0], expected)
+        self.assertEqual(self._model.add_new_detector_key.call_args.args[1], CurrentTab.Grouping)
+        self._mock_view.set_new_item_key.assert_called_once_with(CurrentTab.Grouping, "mock_key")
+
+    def test_on_create_item_from_selection_keeps_detectors_picked_after_it_was_clicked(self):
+        n_hist = self._ws.getNumberHistograms()
+        at_click, after_click = np.flatnonzero(self._model.is_pickable)[:2]
+        self._model._detector_is_picked = np.full(n_hist, False)
+        self._model._point_picked_detectors = np.full(n_hist, False)
+        self._model._detector_is_picked[at_click] = True
+        self._model._point_picked_detectors[at_click] = True
+        self._mock_view.get_current_selected_tab.return_value = CurrentTab.Grouping
+
+        func, args = self._click_create_from_selection()
+
+        # Another detector is picked while the work is still queued
+        self._model._detector_is_picked[after_click] = True
+        self._model._point_picked_detectors[after_click] = True
+
+        func(*args)
+
+        # Only what went into the new item is cleared, so the later pick survives
+        expected = np.full(n_hist, False)
+        expected[after_click] = True
+        np.testing.assert_array_equal(self._model._point_picked_detectors, expected)
+        np.testing.assert_array_equal(self._model._detector_is_picked, expected)
+
+    def test_on_create_item_from_selection_abandoned_if_the_pickable_detectors_change(self):
+        self._model._detector_is_picked = np.full(self._ws.getNumberHistograms(), True)
+        self._mock_view.get_current_selected_tab.return_value = CurrentTab.Grouping
+
+        func, args = self._click_create_from_selection()
+
+        # A mask applied in the meantime takes a detector out of the pickable set, so the snapshot
+        # no longer has one entry per pickable detector
+        self._model._is_masked = self._model._is_masked.copy()
+        self._model._is_masked[np.flatnonzero(self._model.is_pickable)[0]] = True
+
+        with mock.patch("instrumentview.FullInstrumentViewPresenter.logger") as mock_logger:
+            func(*args)
+
+        mock_logger.warning.assert_called_once()
         self._model.add_new_detector_key.assert_not_called()
         self._mock_view.set_new_item_key.assert_not_called()
 

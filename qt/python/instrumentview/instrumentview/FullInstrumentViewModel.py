@@ -184,6 +184,15 @@ class FullInstrumentViewModel:
         return self._detector_is_picked[self.is_pickable]
 
     @property
+    def point_picked_detectors(self) -> np.ndarray:
+        """A copy of the mask over all detectors of those picked directly in the projection.
+
+        A copy because the model picks into this array in place, so callers holding on to it as a
+        snapshot would otherwise see it change underneath them.
+        """
+        return self._point_picked_detectors.copy()
+
+    @property
     def picked_visibility(self) -> np.ndarray:
         """picked_detector_mask as the numeric scalars the renderers hand to VTK."""
         return self.picked_detector_mask.astype(int)
@@ -429,9 +438,14 @@ class FullInstrumentViewModel:
             self._counts[index],
         )
 
-    def clear_point_picked_detectors(self) -> None:
-        self._detector_is_picked[self._point_picked_detectors] = False
-        self._point_picked_detectors.fill(False)
+    def clear_point_picked_detectors(self, detectors: Optional[np.ndarray] = None) -> None:
+        """Deselect detectors picked directly in the projection.
+
+        Pass a mask over all detectors to clear only those, leaving any picked since it was taken.
+        """
+        to_clear = self._point_picked_detectors if detectors is None else self._point_picked_detectors & detectors
+        self._detector_is_picked[to_clear] = False
+        self._point_picked_detectors[to_clear] = False
 
     def picked_detectors_info_text(self) -> list[DetectorInfo]:
         """For the specified detector, extract info that can be displayed in the View, and wrap it all up in a DetectorInfo class"""
