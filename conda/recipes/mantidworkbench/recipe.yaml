@@ -41,12 +41,11 @@ requirements:
     - ipykernel
     - mantidqt == ${{ version }}
     - psutil ${{ psutil }}
-    - ${{ pin_compatible("python", upper_bound="x.x") }}
+    - python ${{ python }}
     - matplotlib ${{ matplotlib }}
     - pyvista ${{ pyvista }}
     - pyvistaqt ${{ pyvistaqt }}
     - superqt
-    - ${{ pin_compatible("setuptools", upper_bound="x.x") }}
     # qtconsole-base avoids pulling in PyQt5 on the Qt6 build
     - qtconsole-base ${{ qtconsole }}
     - if: linux
