@@ -1,5 +1,4 @@
 - The live-data algorithms gain an optional ``Facility`` property, naming the facility that
-  ``Instrument`` is resolved against. This disambiguates instrument names appearing in more than one
-  facility; left empty, the default facility is searched first and then all others, as before.
-  Mismatched ``Facility`` and ``Instrument`` values are now reported against the offending property
-  rather than raising an exception.
+  ``Instrument`` is resolved against. The Mantid default facility is used when it is not set. An
+  instrument name is only meaningful with respect to a facility, so the two are now validated together,
+  and a mismatch is reported against the offending property rather than raising an exception.

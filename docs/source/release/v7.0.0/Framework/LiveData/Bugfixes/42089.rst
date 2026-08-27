@@ -1,5 +1,8 @@
-- The live-data algorithms, such as :ref:`StartLiveData <algm-StartLiveData>`, no longer restrict their
-  ``Instrument`` property to instruments belonging to the *default* facility. Choosing an instrument
-  owned by any other facility was previously impossible, even though execution has always resolved
-  instruments across every facility, and the property accepted no value at all when the default
-  facility had no live listeners.
+- The live-data algorithms, such as :ref:`StartLiveData <algm-StartLiveData>`, previously could not use
+  an instrument outside the default facility at all, since the allowed values for ``Instrument`` were
+  built from the default facility alone. Naming the new ``Facility`` property now selects the facility
+  that ``Instrument`` is resolved against.
+- Resolving ``Instrument`` no longer falls back to searching every other facility once the resolved
+  facility has been tried. That fallback made instrument names shared between facilities ambiguous, and
+  worked against the purpose of having a default facility. Scripts that relied on an instrument being
+  found outside the default facility must now name its ``Facility``.

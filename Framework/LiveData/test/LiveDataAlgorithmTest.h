@@ -98,37 +98,58 @@ public:
   }
 
   /**
-   * The `Instrument` property must offer live-data instruments from *every* facility, not only from
-   * the default one.  `createLiveListener` resolves the instrument with
-   * `ConfigService::getInstrument`, which searches all facilities, so a list restricted to the
-   * default facility rejects instruments the algorithm can actually use -- and is empty altogether
-   * for a default facility that has no live listeners.
+   * An instrument name is only meaningful with respect to a facility, so `Instrument` carries no list
+   * validator: the valid set depends on `Facility`, whose value is not available until after
+   * initialization.  Validation happens in `validateInputs` instead.
    */
-  void test_instrument_allowed_values_span_all_facilities() {
+  void test_instrument_has_no_list_validator() {
     FacilityHelper::ScopedFacilities loadTESTFacility("unit_testing/UnitTestFacilitiesMultiple.xml", "TESTDEFAULT");
 
     LiveDataAlgorithmImpl alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
 
     const Mantid::Kernel::Property *instrumentProp = alg.getProperty("Instrument");
-    const auto allowed = instrumentProp->allowedValues();
-    TSM_ASSERT("instrument in the default facility", contains(allowed, "DEFAULTLISTENER"));
-    TSM_ASSERT("instrument in another facility", contains(allowed, "OTHERLISTENER"));
-    TSM_ASSERT("instrument without live data", !contains(allowed, "NOLIVEDATA"));
+    TSM_ASSERT("no frozen allowed-values list", instrumentProp->allowedValues().empty());
   }
 
-  /** An instrument from a non-default facility must be selectable, which is the whole point. */
-  void test_instrument_from_another_facility_is_accepted() {
+  /** Resolution is confined to one facility: the default one when 'Facility' is not given. */
+  void test_liveListenerInstruments_uses_the_default_facility() {
     FacilityHelper::ScopedFacilities loadTESTFacility("unit_testing/UnitTestFacilitiesMultiple.xml", "TESTDEFAULT");
 
     LiveDataAlgorithmImpl alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Instrument", "OTHERLISTENER"))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Facility", "TESTOTHER"))
+
+    const auto instruments = alg.liveListenerInstruments();
+    TSM_ASSERT("default facility's listener instrument", contains(instruments, "DEFAULTLISTENER"));
+    TSM_ASSERT("other facility is not searched", !contains(instruments, "OTHERLISTENER"));
+    TSM_ASSERT("instrument without live data", !contains(instruments, "NOLIVEDATA"));
+  }
+
+  /** Naming 'Facility' moves resolution to that facility. */
+  void test_liveListenerInstruments_uses_the_named_facility() {
+    FacilityHelper::ScopedFacilities loadTESTFacility("unit_testing/UnitTestFacilitiesMultiple.xml", "TESTDEFAULT");
+
+    LiveDataAlgorithmImpl alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    alg.setPropertyValue("Facility", "TESTOTHER");
+
+    const auto instruments = alg.liveListenerInstruments();
+    TSM_ASSERT("named facility's listener instrument", contains(instruments, "OTHERLISTENER"));
+    TSM_ASSERT("default facility is no longer searched", !contains(instruments, "DEFAULTLISTENER"));
+  }
+
+  /** The point of the facility argument: an instrument outside the default facility is selectable. */
+  void test_instrument_in_named_facility_is_accepted() {
+    FacilityHelper::ScopedFacilities loadTESTFacility("unit_testing/UnitTestFacilitiesMultiple.xml", "TESTDEFAULT");
+
+    LiveDataAlgorithmImpl alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    alg.setPropertyValue("Instrument", "OTHERLISTENER");
+    alg.setPropertyValue("Facility", "TESTOTHER");
     alg.setPropertyValue("OutputWorkspace", "out_ws");
 
     auto errors = alg.validateInputs();
-    TSM_ASSERT("instrument from another facility is accepted", errors["Instrument"].empty());
+    TSM_ASSERT("instrument in the named facility is accepted", errors["Instrument"].empty());
     TSM_ASSERT("named facility is accepted", errors["Facility"].empty());
   }
 
@@ -152,16 +173,38 @@ public:
     TSM_ASSERT("unknown facility is reported", !alg.validateInputs()["Facility"].empty());
   }
 
-  void test_validateInputs_instrument_not_in_named_facility() {
+  /** An instrument outside the resolved facility is rejected, rather than found elsewhere. */
+  void test_validateInputs_instrument_outside_the_resolved_facility() {
     FacilityHelper::ScopedFacilities loadTESTFacility("unit_testing/UnitTestFacilitiesMultiple.xml", "TESTDEFAULT");
 
     LiveDataAlgorithmImpl alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    // 'OTHERLISTENER' exists, but in TESTOTHER, and no facility is named here.
     alg.setPropertyValue("Instrument", "OTHERLISTENER");
-    alg.setPropertyValue("Facility", "TESTDEFAULT");
     alg.setPropertyValue("OutputWorkspace", "out_ws");
 
-    TSM_ASSERT("mismatched instrument is reported", !alg.validateInputs()["Instrument"].empty());
+    TSM_ASSERT("instrument outside the default facility is reported", !alg.validateInputs()["Instrument"].empty());
+  }
+
+  void test_validateInputs_instrument_without_live_listener() {
+    FacilityHelper::ScopedFacilities loadTESTFacility("unit_testing/UnitTestFacilitiesMultiple.xml", "TESTDEFAULT");
+
+    LiveDataAlgorithmImpl alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    alg.setPropertyValue("Instrument", "NOLIVEDATA");
+    alg.setPropertyValue("OutputWorkspace", "out_ws");
+
+    TSM_ASSERT("instrument with no live listener is reported", !alg.validateInputs()["Instrument"].empty());
+  }
+
+  void test_validateInputs_missing_instrument() {
+    FacilityHelper::ScopedFacilities loadTESTFacility("unit_testing/UnitTestFacilitiesMultiple.xml", "TESTDEFAULT");
+
+    LiveDataAlgorithmImpl alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    alg.setPropertyValue("OutputWorkspace", "out_ws");
+
+    TSM_ASSERT("missing instrument is reported", !alg.validateInputs()["Instrument"].empty());
   }
 
   /** Test creating the processing algorithm.
