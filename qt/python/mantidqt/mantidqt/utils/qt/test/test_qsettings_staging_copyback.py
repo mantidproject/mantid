@@ -92,7 +92,7 @@ class QSettingsStagingCopyBackTest(unittest.TestCase):
         self.assertTrue((session.staging_root / COMPLETED_FILENAME).is_file())
         self.assertTrue(self.coordinators[0].unlocked)
 
-    def test_changed_file_is_overwritten_directly_and_preserves_mode_and_inode(self):
+    def test_changed_file_is_atomically_replaced_and_preserves_mode(self):
         session = self.prepare()
         self.canonical_file.chmod(0o640)
         original_inode = self.canonical_file.stat().st_ino
@@ -104,7 +104,7 @@ class QSettingsStagingCopyBackTest(unittest.TestCase):
         self.assertTrue(finalization.successful)
         self.assertEqual(CopyBackStatus.COPIED, self.result_for(finalization).status)
         self.assertEqual(b"changed", self.canonical_file.read_bytes())
-        self.assertEqual(original_inode, self.canonical_file.stat().st_ino)
+        self.assertNotEqual(original_inode, self.canonical_file.stat().st_ino)
         self.assertEqual(0o640, self.canonical_file.stat().st_mode & 0o777)
         self.assertEqual(["mantidworkbench.ini"], sorted(path.name for path in self.canonical_directory.iterdir()))
         self.assertTrue(self.coordinators[0].unlocked)
@@ -325,24 +325,38 @@ class QSettingsStagingCopyBackTest(unittest.TestCase):
         self.assertIn("fsync failed", self.result_for(finalization).error)
         self.assertFalse((session.staging_root / COMPLETED_FILENAME).exists())
 
-    def test_close_error_is_reported_and_retains_session(self):
+    def test_replace_error_is_reported_and_removes_temporary_file(self):
+        session = self.prepare()
+        (session.staging_root / "mantidproject/mantidworkbench.ini").write_bytes(b"changed")
+
+        with patch.object(os, "replace", side_effect=OSError("replace failed")):
+            finalization = session.finalize()
+
+        self.assertFalse(finalization.successful)
+        self.assertEqual(CopyBackStatus.FAILED, self.result_for(finalization).status)
+        self.assertIn("replace failed", self.result_for(finalization).error)
+        self.assertEqual(b"original", self.canonical_file.read_bytes())
+        self.assertEqual(["mantidworkbench.ini"], sorted(path.name for path in self.canonical_directory.iterdir()))
+
+    def test_temporary_file_close_error_is_reported_and_retains_session(self):
         session = self.prepare()
         (session.staging_root / "mantidproject/mantidworkbench.ini").write_bytes(b"changed")
         real_close = os.close
 
-        def fail_canonical_close(descriptor):
+        def fail_temporary_close(descriptor):
             descriptor_path = Path(f"/proc/self/fd/{descriptor}").resolve()
             real_close(descriptor)
-            if descriptor_path == self.canonical_file:
+            if descriptor_path.parent == self.canonical_directory and descriptor_path.name.startswith(f".{self.canonical_file.name}."):
                 raise OSError("close failed")
 
-        with patch.object(os, "close", side_effect=fail_canonical_close):
+        with patch.object(os, "close", side_effect=fail_temporary_close):
             finalization = session.finalize()
 
         self.assertFalse(finalization.successful)
         self.assertEqual(CopyBackStatus.FAILED, self.result_for(finalization).status)
         self.assertIn("close failed", self.result_for(finalization).error)
         self.assertFalse((session.staging_root / COMPLETED_FILENAME).exists())
+        self.assertEqual(["mantidworkbench.ini"], sorted(path.name for path in self.canonical_directory.iterdir()))
 
     def test_canonical_parent_symlink_is_rejected(self):
         session = self.prepare(canonical_contents=None)

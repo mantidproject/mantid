@@ -18,6 +18,7 @@ import os
 from pathlib import Path
 import shutil
 import stat
+import tempfile
 from threading import Lock
 from typing import Protocol
 from uuid import uuid4
@@ -582,21 +583,45 @@ def _copy_changed_file(
 
             _ensure_destination_parent(canonical_path.parent, canonical_root)
             destination_existed = canonical_hash is not None
-            flags = os.O_RDWR | no_follow
-            if not destination_existed:
-                flags |= os.O_CREAT | os.O_EXCL
-            with _opened_descriptor(canonical_path, flags, _PRIVATE_FILE_MODE) as canonical_descriptor:
-                current_hash = _hash_descriptor(canonical_descriptor, canonical_path) if destination_existed else None
+            destination_mode = _PRIVATE_FILE_MODE
+            if destination_existed:
+                with _opened_descriptor(canonical_path, os.O_RDONLY | no_follow) as canonical_descriptor:
+                    current_hash = _hash_descriptor(canonical_descriptor, canonical_path)
+                    destination_mode = stat.S_IMODE(os.fstat(canonical_descriptor).st_mode)
+            else:
+                current_hash = _snapshot_file(canonical_path)
+
+            if current_hash == staged_hash:
+                return CopyBackFileResult(relative_path, CopyBackStatus.ALREADY_SYNCHRONIZED)
+            if current_hash != baseline_hash:
+                return CopyBackFileResult(relative_path, CopyBackStatus.CONFLICT)
+
+            temporary_descriptor, temporary_name = tempfile.mkstemp(
+                prefix=f".{canonical_path.name}.", suffix=".tmp", dir=canonical_path.parent
+            )
+            temporary_path: Path | None = Path(temporary_name)
+            try:
+                with _opened_existing_descriptor(temporary_descriptor):
+                    os.fchmod(temporary_descriptor, destination_mode)
+                    os.lseek(staged_descriptor, 0, os.SEEK_SET)
+                    while contents := os.read(staged_descriptor, 1024 * 1024):
+                        _write_all(temporary_descriptor, contents)
+                    os.fsync(temporary_descriptor)
+
+                current_hash = _snapshot_file(canonical_path)
                 if current_hash == staged_hash:
                     return CopyBackFileResult(relative_path, CopyBackStatus.ALREADY_SYNCHRONIZED)
                 if current_hash != baseline_hash:
                     return CopyBackFileResult(relative_path, CopyBackStatus.CONFLICT)
 
-                os.ftruncate(canonical_descriptor, 0)
-                os.lseek(staged_descriptor, 0, os.SEEK_SET)
-                while contents := os.read(staged_descriptor, 1024 * 1024):
-                    _write_all(canonical_descriptor, contents)
-                os.fsync(canonical_descriptor)
+                directory_flags = os.O_RDONLY | no_follow | getattr(os, "O_DIRECTORY", 0)
+                with _opened_descriptor(canonical_path.parent, directory_flags) as directory_descriptor:
+                    os.replace(temporary_path, canonical_path)
+                    temporary_path = None
+                    os.fsync(directory_descriptor)
+            finally:
+                if temporary_path is not None:
+                    temporary_path.unlink(missing_ok=True)
         return CopyBackFileResult(relative_path, CopyBackStatus.COPIED)
     except (OSError, StagingFinalizationError) as error:
         return _failed_copy(relative_path, error)
@@ -652,6 +677,14 @@ def _validate_real_directory(path: Path) -> None:
 @contextmanager
 def _opened_descriptor(path: Path, flags: int, mode: int | None = None) -> Iterator[int]:
     descriptor = os.open(path, flags) if mode is None else os.open(path, flags, mode)
+    try:
+        yield descriptor
+    finally:
+        os.close(descriptor)
+
+
+@contextmanager
+def _opened_existing_descriptor(descriptor: int) -> Iterator[int]:
     try:
         yield descriptor
     finally:
