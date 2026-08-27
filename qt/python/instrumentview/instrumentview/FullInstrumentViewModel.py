@@ -184,6 +184,10 @@ class FullInstrumentViewModel:
         return self._detector_is_picked.astype(int)[self.is_pickable]
 
     @property
+    def picked_detector_mask(self) -> np.ndarray:
+        return self._detector_is_picked[self.is_pickable]
+
+    @property
     def picked_detector_ids(self) -> np.ndarray:
         return self._detector_ids[self.is_pickable & self._detector_is_picked]
 

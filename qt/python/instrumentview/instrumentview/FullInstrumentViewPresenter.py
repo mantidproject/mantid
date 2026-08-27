@@ -254,6 +254,7 @@ class FullInstrumentViewPresenter:
         with SuppressRendering(self._view.main_plotter):
             self._update_view_main_plotter(refresh_limits=refresh_limits)
             self.refresh_plotter_peaks()
+        self.refresh_create_from_selection_enabled()
 
     def count_scale_combo_options(self) -> list[str]:
         return [self._LINEAR, self._LOGARITHMIC]
@@ -398,6 +399,7 @@ class FullInstrumentViewPresenter:
         self._update_interactor_style()
 
         if checked:
+            self.refresh_create_from_selection_enabled()
             return
 
         self.update_picked_detectors_on_view()
@@ -420,6 +422,7 @@ class FullInstrumentViewPresenter:
     def update_picked_detectors_on_view(self) -> None:
         # Update to visibility shows up in real time
         self._renderer.set_pickable_scalars(self._pickable_mesh, self._model.picked_visibility, self._visible_label)
+        self.refresh_create_from_selection_enabled()
         self._update_line_plot_ws_and_draw(self._view.current_selected_lineplot_unit())
 
     def _on_clear_point_picked_detectors_clicked(self) -> None:
@@ -525,6 +528,34 @@ class FullInstrumentViewPresenter:
         centres = self._model.transformed_detector_positions
         self._view.project_and_cache_detector_points(centres)
         self._callback_queue.put((self._on_add_item_clicked, ()))
+
+    def _on_create_item_from_selection_clicked(self) -> None:
+        """Commit the detectors currently picked in the projection as a new ROI or mask."""
+        mask = self._model.picked_detector_mask
+        if not np.any(mask):
+            return
+
+        tab = self._view.get_current_selected_tab()
+        new_key = self._model.add_new_detector_key(mask.tolist(), tab)
+        self._view.set_new_item_key(tab, new_key)
+        self._model.clear_point_picked_detectors()
+        self.update_picked_detectors_on_view()
+
+    def on_create_item_from_selection_clicked(self) -> None:
+        self._callback_queue.put((self._on_create_item_from_selection_clicked, ()))
+
+    def refresh_create_from_selection_enabled(self) -> None:
+        """Only offer to create an item from the selection while there is a selection to create it from.
+
+        Hover pick and peak picking both take over the picked detectors for their own purposes, so
+        what is highlighted then is not a selection the user has deliberately built up.
+        """
+        can_create = (
+            not self._view.is_hover_pick_mode_checked()
+            and not self._model.peak_picking_enabled()
+            and bool(np.any(self._model.picked_detector_mask))
+        )
+        self._view.set_create_from_selection_buttons_enabled(can_create)
 
     def _on_list_item_selected(self, kind: CurrentTab) -> None:
         self._model.apply_detector_items(self._view.selected_items_in_list(kind), kind)
