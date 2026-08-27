@@ -145,7 +145,7 @@ class LoadInputErrorMessages(unittest.TestCase):
 
         # Test that XMin >= XMax raises a RuntimeError
         with self.assertRaises(RuntimeError) as cm:
-            res = HFIRPowderReduction(
+            res = HFIRPowderReduction(  # noqa: F841
                 SampleFilename="HB2C_7000.nxs.h5",
                 XMin=10.0,
                 XMax=5.0,
@@ -157,20 +157,6 @@ class LoadInputErrorMessages(unittest.TestCase):
         self.assertIn("XMin", error_msg)
         self.assertIn("XMax", error_msg)
         self.assertIn("XMin (10.0) cannot be greater than or equal to XMax (5.0)", error_msg)
-
-        # Test that XMin and XMax of different lengths raises a RuntimeError
-        with self.assertRaises(RuntimeError) as cm:
-            res = HFIRPowderReduction(  # noqa: F841
-                SampleFilename="HB2C_7000.nxs.h5",
-                XMin=[1.0, 2.0],
-                XMax=[5.0],
-                Instrument="WAND^2",
-                OutputWorkspace="test_workspace",
-            )
-        error_msg = str(cm.exception)
-        self.assertIn("XMin", error_msg)
-        self.assertIn("XMax", error_msg)
-        self.assertIn("XMin and XMax do not define same number of spectra (2 != 1)", error_msg)
 
     def test_validate_bin_width(self):
         # Test that a zero bin width raises a RuntimeError
@@ -980,8 +966,8 @@ class MetadataConsistencyTests(unittest.TestCase):
         # Single file should not check metadata consistency
         algo.setProperty("SampleFilename", existing_file)
         algo.setProperty("Instrument", "WAND^2")
-        algo.setProperty("XMin", [1.0])
-        algo.setProperty("XMax", [10.0])
+        algo.setProperty("XMin", 1.0)
+        algo.setProperty("XMax", 10.0)
         algo.setProperty("Wavelength", 2.5)
         algo.setProperty("VanadiumDiameter", 0.5)
 
@@ -1003,8 +989,8 @@ class MetadataConsistencyTests(unittest.TestCase):
         algo.setProperty("SampleIPTS", 123)
         algo.setProperty("SampleRunNumbers", [456])  # Single run - no metadata check
         algo.setProperty("Instrument", "WAND^2")
-        algo.setProperty("XMin", [1.0])
-        algo.setProperty("XMax", [10.0])
+        algo.setProperty("XMin", 1.0)
+        algo.setProperty("XMax", 10.0)
         algo.setProperty("Wavelength", 2.5)
         algo.setProperty("VanadiumDiameter", 0.5)
 
@@ -1038,8 +1024,8 @@ class MetadataConsistencyTests(unittest.TestCase):
             # Use a comma-separated string for multiple files
             algo.setProperty("SampleFilename", f"{existing_file},{modified_file}")
             algo.setProperty("Instrument", "WAND^2")
-            algo.setProperty("XMin", [1.0])
-            algo.setProperty("XMax", [10.0])
+            algo.setProperty("XMin", 1.0)
+            algo.setProperty("XMax", 10.0)
             algo.setProperty("Wavelength", 2.5)
             algo.setProperty("VanadiumDiameter", 0.5)
 
@@ -1073,8 +1059,8 @@ class MetadataConsistencyTests(unittest.TestCase):
 
             algo.setProperty("SampleFilename", f"{existing_file},{modified_file}")
             algo.setProperty("Instrument", "WAND^2")
-            algo.setProperty("XMin", [1.0])
-            algo.setProperty("XMax", [10.0])
+            algo.setProperty("XMin", 1.0)
+            algo.setProperty("XMax", 10.0)
             algo.setProperty("Wavelength", 2.5)
             algo.setProperty("VanadiumDiameter", 0.5)
 
@@ -1116,51 +1102,77 @@ class BinningGridTests(unittest.TestCase):
 
     def test_both_limits_given(self):
         # case B: the grid is anchored at XMin and stops before XMax
-        first, last, num_bins = self._centres(XMin=[6.0], XMax=[40.0])
+        first, last, num_bins = self._centres(XMin=6.0, XMax=40.0)
         self.assertAlmostEqual(first, 6.05)
         self.assertAlmostEqual(last, 39.95)
         self.assertEqual(num_bins, 340)
 
     def test_xmax_only(self):
         # case C: the grid is anchored at zero and stops before XMax
-        first, last, num_bins = self._centres(XMax=[40.0])
+        first, last, num_bins = self._centres(XMax=40.0)
         self.assertAlmostEqual(first, 6.05)
         self.assertAlmostEqual(last, 39.95)
         self.assertEqual(num_bins, 340)
 
     def test_xmin_only(self):
         # case D: the grid is anchored at XMin and trimmed to the data
-        first, last, _ = self._centres(XMin=[6.1])
+        first, last, _ = self._centres(XMin=6.1)
         self.assertAlmostEqual(first, 6.15)
         self.assertAlmostEqual(last, 69.95)
 
     def test_xmin_outside_the_data_keeps_the_grid(self):
         # XMin below the start of the data anchors the grid without shifting it onto the data
         for x_min in (6.0, 5.0, 0.0):
-            first, _, _ = self._centres(XMin=[x_min])
+            first, _, _ = self._centres(XMin=x_min)
             self.assertAlmostEqual(first, 6.05)
 
     def test_xmin_inside_the_data_trims_the_data(self):
-        first, last, _ = self._centres(XMin=[10.0])
+        first, last, _ = self._centres(XMin=10.0)
         self.assertAlmostEqual(first, 10.05)
         self.assertAlmostEqual(last, 69.95)
 
     def test_last_bin_does_not_pass_xmax(self):
         # 6.0 + 213 * 0.3 = 69.9, the next bin would end at 70.2 which is past XMax
-        algo = _create_algo(XBinWidth=0.3, XMin=[0.0], XMax=[70.0])
+        algo = _create_algo(XBinWidth=0.3, XMin=0.0, XMax=70.0)
         x_min, x_max, num_bins = algo._locate_global_xlimit(["__grid_data"])
         self.assertAlmostEqual(x_min, 6.0)
         self.assertAlmostEqual(x_max, 69.9)
         self.assertEqual(num_bins, 213)
 
+    def test_data_starting_on_a_bin_boundary_gains_no_empty_bin(self):
+        # 6.1 / 0.1 is 60.99999999999999, so without a tolerance the first boundary would
+        # round down and put an empty bin in front of the data
+        x = np.arange(6.1, 70.0, 0.01)
+        CreateWorkspace(DataX=x, DataY=np.ones_like(x), NSpec=1, OutputWorkspace="__grid_edge_data")
+        try:
+            algo = _create_algo(XBinWidth=self.BIN_WIDTH)
+            x_min, _, _ = algo._locate_global_xlimit(["__grid_edge_data"])
+            self.assertAlmostEqual(x_min, 6.1)
+        finally:
+            mtd.remove("__grid_edge_data")
+
+    def test_data_ending_on_a_bin_boundary_gains_no_empty_bin(self):
+        # 69.9 / 0.3 is 233.00000000000003, so without a tolerance the last boundary would
+        # round up and put an empty bin after the data
+        x = np.append(np.arange(6.07, 69.9, 0.01), 69.9)
+        CreateWorkspace(DataX=x, DataY=np.ones_like(x), NSpec=1, OutputWorkspace="__grid_edge_data")
+        try:
+            algo = _create_algo(XBinWidth=0.3)
+            x_min, x_max, num_bins = algo._locate_global_xlimit(["__grid_edge_data"])
+            self.assertAlmostEqual(x_min, 6.0)
+            self.assertAlmostEqual(x_max, 69.9)
+            self.assertEqual(num_bins, 213)
+        finally:
+            mtd.remove("__grid_edge_data")
+
     def test_range_outside_the_data_raises(self):
-        algo = _create_algo(XBinWidth=self.BIN_WIDTH, XMin=[100.0], XMax=[200.0])
+        algo = _create_algo(XBinWidth=self.BIN_WIDTH, XMin=100.0, XMax=200.0)
         with self.assertRaises(RuntimeError) as cm:
             algo._locate_global_xlimit(["__grid_data"])
         self.assertIn("does not overlap the data", str(cm.exception))
 
     def test_bin_width_larger_than_the_range_raises(self):
-        algo = _create_algo(XBinWidth=10.0, XMin=[6.0], XMax=[12.0])
+        algo = _create_algo(XBinWidth=10.0, XMin=6.0, XMax=12.0)
         with self.assertRaises(RuntimeError) as cm:
             algo._locate_global_xlimit(["__grid_data"])
         self.assertIn("too large to fit a bin", str(cm.exception))

@@ -192,7 +192,16 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             doc="The unit to which spectrum axis is converted to",
         )
         # TODO: These 2 fields below will be autopopulated from the sample file in a future PR, handled by EWM item 13209
-        self.copyProperties("ResampleX", ["XMin", "XMax"])
+        self.declareProperty(
+            "XMin",
+            Property.EMPTY_DBL,
+            doc="Lower limit of the binning grid, which the bin boundaries are aligned to. Defaults to zero.",
+        )
+        self.declareProperty(
+            "XMax",
+            Property.EMPTY_DBL,
+            doc="Upper limit of the binning grid. Defaults to the end of the data.",
+        )
         self.declareProperty(
             "XBinWidth",
             0.1,
@@ -730,19 +739,12 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
 
         # XMin and XMax are both optional, see _locate_global_xlimit for how the range
         # is completed from the data when either is left out
-        xmins = self.getProperty("XMin").value
-        xmaxs = self.getProperty("XMax").value
-        if len(xmins) and len(xmaxs):
-            if len(xmins) != len(xmaxs):
-                msg = f"XMin and XMax do not define same number of spectra ({len(xmins)} != {len(xmaxs)})"
-                issues["XMin"] = msg
-                issues["XMax"] = msg
-            else:
-                for xmin, xmax in zip(xmins, xmaxs):
-                    if xmin >= xmax:
-                        msg = f"XMin ({xmin}) cannot be greater than or equal to XMax ({xmax})"
-                        issues["XMin"] = msg
-                        issues["XMax"] = msg
+        xmin = self.getProperty("XMin").value
+        xmax = self.getProperty("XMax").value
+        if xmin != Property.EMPTY_DBL and xmax != Property.EMPTY_DBL and xmin >= xmax:
+            msg = f"XMin ({xmin}) cannot be greater than or equal to XMax ({xmax})"
+            issues["XMin"] = msg
+            issues["XMax"] = msg
 
         wavelength = self.getProperty("Wavelength").value
         if wavelength == Property.EMPTY_DBL:
@@ -1642,16 +1644,24 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
                 EnableLogging=False,
             )
 
-    @staticmethod
-    def _grid_boundary(value, anchor, bin_width, round_up):
+    # Rounding error of the division in _grid_boundary, in units of the last place. The
+    # tolerance it gives is applied relative to the index as well as absolutely, since the
+    # error of the division grows with the size of the index.
+    GRID_BOUNDARY_ULPS = 32
+
+    @classmethod
+    def _grid_boundary(cls, value, anchor, bin_width, round_up):
         """Index of the bin boundary at, below (round_up=False) or above (round_up=True) value.
 
-        A value sitting on a boundary to within a small tolerance is taken to be exactly on
-        it, so that data starting or ending on a bin edge does not gain an empty bin.
+        A value sitting on a boundary is taken to be exactly on it, up to the rounding error
+        of the division, so that data starting or ending on a bin edge does not gain an empty
+        bin. For example 6.1 / 0.1 is 60.99999999999999 and 69.9 / 0.3 is 233.00000000000003,
+        both of which have to be recognised as whole numbers of bins.
         """
         position = (value - anchor) / bin_width
         nearest = round(position)
-        if abs(position - nearest) < 1e-9:
+        tolerance = cls.GRID_BOUNDARY_ULPS * np.finfo(float).eps
+        if np.isclose(position, nearest, rtol=tolerance, atol=tolerance):
             return int(nearest)
         return int(np.ceil(position)) if round_up else int(np.floor(position))
 
@@ -1677,10 +1687,10 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             data_min = max(data_min, _ws_tmp.x(0).min())
             data_max = min(data_max, _ws_tmp.x(0).max())
 
-        xmins = self.getProperty("XMin").value
-        xmaxs = self.getProperty("XMax").value
-        anchor = float(xmins[0]) if len(xmins) else 0.0
-        limit = float(xmaxs[0]) if len(xmaxs) else np.inf
+        xmin = self.getProperty("XMin").value
+        xmax = self.getProperty("XMax").value
+        anchor = 0.0 if xmin == Property.EMPTY_DBL else xmin
+        limit = np.inf if xmax == Property.EMPTY_DBL else xmax
 
         # only keep the part of the data the user asked for
         first_value = max(data_min, anchor)
