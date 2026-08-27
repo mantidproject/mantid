@@ -39,7 +39,7 @@ class WorkspaceDetectorPeaks:
     def detector_peaks(self):
         return self._detector_peaks
 
-    def get_peaks_indices_and_labels(self, detector_positions, detector_ids) -> tuple[np.ndarray, list]:
+    def get_peaks_indices_and_labels(self, detector_ids) -> tuple[np.ndarray, list]:
         peaks_ids = np.array([p.detector_id for p in self._detector_peaks])
         if len(peaks_ids) == 0 or len(detector_ids) == 0:
             return np.array([], dtype=int), []

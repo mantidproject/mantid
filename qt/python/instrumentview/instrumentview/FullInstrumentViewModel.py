@@ -123,6 +123,10 @@ class FullInstrumentViewModel:
         self.full_counts_limits = self._counts_limits
 
         self._sample_shape = self._get_sample_shape_from_workspace(self._workspace)
+        self._transform = np.eye(4)
+        self._transformed_detector_positions = self.detector_positions.copy()
+
+        self._peaks_indices_in_detector_positions = np.array([], dtype=int)
 
     @property
     def workspace(self) -> Workspace2D:
@@ -465,6 +469,31 @@ class FullInstrumentViewModel:
         return self._calculate_projection()[self.is_pickable]
 
     @property
+    def transform(self) -> np.ndarray:
+        return self._transform
+
+    @transform.setter
+    def transform(self, value: np.ndarray) -> None:
+        self._transform = value
+        self._transformed_detector_positions = self._transform_vectors_with_matrix(self.detector_positions)
+
+    @property
+    def transformed_detector_positions(self) -> np.ndarray:
+        return self._transformed_detector_positions
+
+    def _transform_vectors_with_matrix(self, points: np.ndarray, transform: Optional[np.ndarray] = None) -> np.ndarray:
+        if points.size == 0:
+            return points
+        if transform is None:
+            transform = self._transform
+
+        # The transform is a 4x4 matrix while the points are 3D vectors,
+        # so first append the homogeneous coordinate.
+        transformed_points = np.hstack([points, np.ones((points.shape[0], 1))])
+        transformed_points = transformed_points @ transform.T
+        return transformed_points[:, :3]
+
+    @property
     def masked_positions(self) -> np.ndarray:
         if self._projection_type == ProjectionType.THREE_D:
             return self._detector_positions_3d[(self._is_masked | ~self._is_selected_in_tree) & self._is_valid]
@@ -586,18 +615,18 @@ class FullInstrumentViewModel:
         wrapped_workspaces = [
             WorkspaceDetectorPeaks(ws_name, self.get_integration_units(), self.integration_limits) for ws_name in selected_peaks_workspaces
         ]
-        indices_and_labels_by_pws = [
-            wws.get_peaks_indices_and_labels(self.detector_positions, self.pickable_detector_ids) for wws in wrapped_workspaces
-        ]
+        indices_and_labels_by_pws = [wws.get_peaks_indices_and_labels(self.pickable_detector_ids) for wws in wrapped_workspaces]
         indices_by_pws = [pair[0] for pair in indices_and_labels_by_pws]
         self._peaks_indices_in_detector_positions = np.concatenate(indices_by_pws or [np.array([], dtype=int)])
         positions_by_pws = [self.detector_positions[indices] for indices in indices_by_pws]
         labels_by_pws = [pair[1] for pair in indices_and_labels_by_pws]
-        return positions_by_pws, labels_by_pws, selected_peaks_workspaces
+
+        transformed_pos = [self._transform_vectors_with_matrix(p) for p in positions_by_pws]
+        return transformed_pos, labels_by_pws, selected_peaks_workspaces
 
     def _get_index_of_closest_detector_with_peak(self, index_in_detector_positions: int) -> int:
-        clicked_position = self.detector_positions[index_in_detector_positions]
-        positions_detectors_with_peaks = self.detector_positions[self._peaks_indices_in_detector_positions]
+        clicked_position = self.transformed_detector_positions[index_in_detector_positions]
+        positions_detectors_with_peaks = self.transformed_detector_positions[self._peaks_indices_in_detector_positions]
         if len(positions_detectors_with_peaks) == 0:
             return index_in_detector_positions
         closest_peak_index = np.argmin(np.linalg.norm(positions_detectors_with_peaks - clicked_position, axis=1))
