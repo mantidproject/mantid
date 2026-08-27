@@ -46,7 +46,7 @@ class IndirectCommonTests(unittest.TestCase):
 
     def test_get_instrument_and_run_failure(self):
         ws = self.make_dummy_QENS_workspace(add_logs=False)
-        instrument, run_number = indirect_common.get_instrument_and_run(ws)
+        _instrument, run_number = indirect_common.get_instrument_and_run(ws)
 
         self.assertEqual(run_number, "0")
 
