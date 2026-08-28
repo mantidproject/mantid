@@ -20,6 +20,7 @@
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/Rules.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Surfaces/Sphere.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ConfigService.h"
@@ -323,6 +324,41 @@ public:
     TS_ASSERT_EQUALS(inputWS->sample().getShape().getAppliedRotation(), ninetyAboutZ());
   }
 
+  static Mantid::Kernel::Matrix<double> ninetyAboutX() {
+    return Mantid::Kernel::Matrix<double>(std::vector<double>{1, 0, 0, 0, 0, -1, 0, 1, 0});
+  }
+
+  void test_Goniometer_Replaces_Rather_Than_Composes_With_A_Bake_Already_In_The_CSG() {
+    using Mantid::Geometry::ShapeFactory;
+    using Mantid::Kernel::V3D;
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
+    setTestReferenceFrame(inputWS);
+    inputWS->mutableRun().mutableGoniometer().setR(ninetyAboutZ());
+
+    // Shape XML as it comes back off a sample that something else already baked a - different -
+    // goniometer into, e.g. CopySample. Rebaking must replace that bake, not stack on top of it.
+    const auto bakedXML =
+        ShapeFactory().rebakeGoniometer(ninetyAboutX(), ComponentCreationHelper::sphereXML(0.02, V3D(), "sp-1"),
+                                        Mantid::Kernel::Matrix<double>(3, 3, true));
+    TS_ASSERT_EQUALS(ShapeFactory::appliedGoniometerFromXML(bakedXML), ninetyAboutX());
+
+    auto props = std::make_shared<Mantid::Kernel::PropertyManager>();
+    using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
+    props->declareProperty(std::make_unique<StringProperty>("Shape", "CSG"), "");
+    props->declareProperty(std::make_unique<StringProperty>("Value", bakedXML), "");
+
+    auto alg = createAlgorithm(inputWS);
+    alg->setProperty("Geometry", props);
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+
+    const auto &sampleShape = inputWS->sample().getShape();
+    // the run's rotation is now the whole of the bake - not ninetyAboutZ() * ninetyAboutX()
+    TS_ASSERT_EQUALS(sampleShape.getAppliedRotation(), ninetyAboutZ());
+    const auto &csgShape = dynamic_cast<const Mantid::Geometry::CSGObject &>(sampleShape);
+    TS_ASSERT_EQUALS(ShapeFactory::goniometerFromXML(csgShape.getShapeXML()), ninetyAboutZ());
+  }
+
   void test_Identity_Goniometer_Leaves_The_Shape_In_Its_Own_Frame() {
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
     setTestReferenceFrame(inputWS);
@@ -378,14 +414,25 @@ public:
   }
 
   Mantid::Geometry::BoundingBox boundingBoxAfterSettingEnvironment() {
+    using Mantid::Kernel::PropertyManager;
+    using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
+
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
     auto testInst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
     testInst->setName(m_instName);
     inputWS->setInstrument(testInst);
+    // The mesh is only at risk of being rotated in place when there is a rotation to apply.
+    inputWS->mutableRun().mutableGoniometer().setR(ninetyAboutZ());
+
+    // The fixed-geometry spec's sample is an STL mesh handed out straight from the cached
+    // environment, rather than a shape rebuilt per call from <samplegeometry> values. A Geometry
+    // override is rejected for that spec, so there is none here.
+    auto props = std::make_shared<PropertyManager>();
+    props->declareProperty(std::make_unique<StringProperty>("Name", m_envName + "_fixedgeometry"), "");
+    props->declareProperty(std::make_unique<StringProperty>("Container", "10mm"), "");
 
     auto alg = createAlgorithm(inputWS);
-    alg->setProperty("Environment", createEnvironmentProps("10mm"));
-    alg->setProperty("Geometry", createOverrideGeometryProps());
+    alg->setProperty("Environment", props);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     return inputWS->sample().getShape().getBoundingBox();
   }

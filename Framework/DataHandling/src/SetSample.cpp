@@ -741,7 +741,12 @@ void SetSample::setSampleShape(API::ExperimentInfo &experiment, const Kernel::Pr
       // decline to bake for the same reason.
       const bool bakeRunGoniometer = rotationMatrix != Kernel::Matrix<double>(3, 3, true) && !sampleEnv;
       if (bakeRunGoniometer) {
-        xml = Geometry::ShapeFactory().rebakeGoniometer(rotationMatrix, xml, Kernel::Matrix<double>(3, 3, true));
+        // A CSG string handed straight through by the user can already carry a bake - shape XML read
+        // back off a sample that CopySample rotated, say. Rebaking against that replaces it; passing
+        // identity here would compose the two and rotate the shape twice. The generated shapes have
+        // no rotation of their own, so this is identity for them.
+        const auto currentBake = Geometry::ShapeFactory::appliedGoniometerFromXML(xml);
+        xml = Geometry::ShapeFactory().rebakeGoniometer(rotationMatrix, xml, currentBake);
       }
       CreateSampleShape::setSampleShape(experiment, xml);
       return;

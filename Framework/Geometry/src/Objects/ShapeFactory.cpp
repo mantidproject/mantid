@@ -36,6 +36,7 @@
 #include <algorithm>
 #include <iomanip>
 #include <limits>
+#include <optional>
 #include <sstream>
 
 using Poco::XML::Document;
@@ -1814,11 +1815,14 @@ std::string ShapeFactory::addAppliedGoniometerTag(const Kernel::Matrix<double> &
   return insertMatrixTag("applied-goniometer", bakedRotation, std::move(xml));
 }
 
-Kernel::Matrix<double> ShapeFactory::goniometerFromXML(const std::string &xml) {
+namespace {
+/// The matrix held in the named tag of a shape XML string, or nullopt when the tag is absent. The
+/// name is matched with its opening '<' attached, so "goniometer" cannot match "applied-goniometer".
+std::optional<Kernel::Matrix<double>> matrixFromXMLTag(const std::string &xml, const std::string &tagName) {
   Kernel::Matrix<double> total(3, 3, true);
-  const std::size_t foundTag = xml.find("<goniometer");
+  const std::size_t foundTag = xml.find("<" + tagName);
   if (foundTag == std::string::npos) {
-    return total;
+    return std::nullopt;
   }
   const std::size_t tagEnd = xml.find(">", foundTag + 1);
   const std::string tag = xml.substr(foundTag, tagEnd - foundTag);
@@ -1848,6 +1852,27 @@ Kernel::Matrix<double> ShapeFactory::goniometerFromXML(const std::string &xml) {
     }
   }
   return total;
+}
+} // namespace
+
+Kernel::Matrix<double> ShapeFactory::goniometerFromXML(const std::string &xml) {
+  return matrixFromXMLTag(xml, "goniometer").value_or(Kernel::Matrix<double>(3, 3, true));
+}
+
+Kernel::Matrix<double> ShapeFactory::appliedGoniometerFromXML(const std::string &xml) {
+  // Mirrors how createShape reads the pair, so a shape rebuilt from this XML reports what is
+  // returned here through getAppliedRotation.
+  if (const auto applied = matrixFromXMLTag(xml, "applied-goniometer")) {
+    // The tag only describes a rotation when there is a <goniometer> for it to describe; on its own
+    // createShape ignores it, so nothing has been baked.
+    if (matrixFromXMLTag(xml, "goniometer")) {
+      return *applied;
+    }
+    return Kernel::Matrix<double>(3, 3, true);
+  }
+  // Shapes written before <applied-goniometer> existed used <goniometer> only for a bake, so the
+  // whole of it is the bake. Identity when there is no rotation at all.
+  return goniometerFromXML(xml);
 }
 
 std::string ShapeFactory::rebakeGoniometer(const Kernel::Matrix<double> &newBake, std::string xml,

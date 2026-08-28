@@ -107,6 +107,9 @@ public:
                                const Kernel::Matrix<double> &currentBake);
   /// The total rotation held in a shape XML string's \<goniometer\> tag, identity if there is none.
   static Kernel::Matrix<double> goniometerFromXML(const std::string &xml);
+  /// The baked part of a shape XML string's rotation - what a shape built from this XML reports
+  /// through getAppliedRotation. Suitable as rebakeGoniometer's currentBake.
+  static Kernel::Matrix<double> appliedGoniometerFromXML(const std::string &xml);
   static Kernel::Matrix<double> generateMatrix(double xRotation, double yRotation, double zRotation);
   static Kernel::Matrix<double> generateXRotation(double xRotation);
   static Kernel::Matrix<double> generateYRotation(double yRotation);
