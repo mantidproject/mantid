@@ -455,6 +455,31 @@ public:
     TS_ASSERT(meshOut != nullptr);
   }
 
+  void test_translating_a_mesh_does_not_disturb_a_workspace_sharing_it() {
+    // Sample's copy constructor shares the shape pointer, so a workspace copied from another holds
+    // the very same mesh. Translating one used to move the other's sample with it, because the mesh
+    // branch shifted the vertices where they lay while the CSG branch replaced the pointer.
+    auto ws = getWorkspaceWithMeshShape(makeUnitCubeMesh(V3D(0, 0, 0)));
+    Workspace2D_sptr sharer = WorkspaceCreationHelper::create2DWorkspace(3, 3);
+    sharer->mutableSample() = ws->sample();
+    TS_ASSERT_EQUALS(sharer->sample().getShapePtr(), ws->sample().getShapePtr());
+
+    const std::vector<V3D> before =
+        std::dynamic_pointer_cast<const MeshObject>(sharer->sample().getShapePtr())->getV3Ds();
+
+    runTranslate(ws, V3D(0.1, -0.2, 0.3));
+
+    // the translated workspace got a new shape rather than a shifted one
+    TS_ASSERT_DIFFERS(ws->sample().getShapePtr(), sharer->sample().getShapePtr());
+    const std::vector<V3D> after =
+        std::dynamic_pointer_cast<const MeshObject>(sharer->sample().getShapePtr())->getV3Ds();
+    TS_ASSERT_EQUALS(before, after);
+    // and the workspace that was asked for a translation did get one
+    const std::vector<V3D> translated =
+        std::dynamic_pointer_cast<const MeshObject>(ws->sample().getShapePtr())->getV3Ds();
+    TS_ASSERT_DIFFERS(translated, after);
+  }
+
   // ---------- Error paths ----------
   void test_throws_if_no_shape() {
     auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);

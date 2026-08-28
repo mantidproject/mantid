@@ -87,8 +87,14 @@ void RotateSampleShape::exec() {
   // Folding the run's rotation in here as well made a deliberate reorientation of the sample
   // indistinguishable from a shape that had been moved into the lab frame.
   if (isMeshShape) {
-    auto meshShape = std::dynamic_pointer_cast<MeshObject>(ei->sample().getShapePtr());
+    // Rotate a copy and put that on the sample, rather than turning the vertices where they lie.
+    // Sample's copy constructor shares the shape pointer, so every workspace cloned from this one
+    // holds the same mesh, and rotating in place turned all of their samples too. The CSG branch
+    // below has always replaced the pointer; this makes the mesh branch behave the same way. The
+    // clone carries its own applied rotation across, so it keeps the frame it was in.
+    auto meshShape = std::dynamic_pointer_cast<MeshObject>(std::shared_ptr<IObject>(ei->sample().getShape().clone()));
     meshShape->rotate(sampleShapeRotation);
+    ei->mutableSample().setShape(meshShape);
   } else {
     // Pin the bake before touching <goniometer>: without an <applied-goniometer> tag already in
     // place, growing the total would leave the whole of it looking like a bake.
