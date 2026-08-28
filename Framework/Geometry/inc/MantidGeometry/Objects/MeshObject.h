@@ -142,8 +142,8 @@ public:
   /// Rotate the vertices. Definition-frame only: the shape is being re-expressed within its own
   /// frame, not moved into the lab frame, so getAppliedRotation() is deliberately unchanged.
   void rotate(const Kernel::Matrix<double> &);
-  /// Rotate the vertices and record the rotation as a goniometer bake, applied outermost.
-  /// Use this only where the shape is genuinely being moved into the lab frame.
+  /// Rotate the vertices and record the rotation as a goniometer bake, composed onto any bake
+  /// already recorded. Use this only where the shape is genuinely being moved into the lab frame.
   void bakeGoniometerRotation(const Kernel::Matrix<double> &);
   /// Record a bake without touching the vertices, for when they are already rotated - Nexus load.
   void setAppliedGoniometerRotation(const Kernel::Matrix<double> &);

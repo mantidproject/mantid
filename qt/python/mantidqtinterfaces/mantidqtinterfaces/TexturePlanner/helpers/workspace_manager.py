@@ -273,11 +273,12 @@ class WorkspaceManager:
         """The vector to feed TranslateSampleShape so that the initial translation is applied *after*
         the initial orientation.
 
-        The offset the user enters is a lab-frame shift of the already-oriented sample. init_R is
-        baked into the shape as an *outermost* rotation - the <goniometer> tag for a CSG shape (always
-        applied last when the shape is realised) or the mesh vertices for a mesh shape - so any
-        translation baked into the shape gets rotated by init_R as well. Pre-rotating the offset by
-        init_R^-1 cancels that, leaving a net lab-frame translation of exactly self.offset"""
+        The offset the user enters is a lab-frame shift of the already-oriented sample. init_R is the
+        only rotation the shape carries here, and it is applied after the translation - the
+        <goniometer> tag for a CSG shape is applied last when the shape is realised, and for a mesh
+        the vertices are turned after being shifted - so any translation baked into the shape gets
+        rotated by init_R as well. Pre-rotating the offset by init_R^-1 cancels that, leaving a net
+        lab-frame translation of exactly self.offset"""
         return self.init_R.inv().apply(self.offset)
 
     @staticmethod

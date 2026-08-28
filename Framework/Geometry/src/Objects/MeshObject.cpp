@@ -488,8 +488,9 @@ void MeshObject::rotate(const Kernel::Matrix<double> &rotationMatrix) {
 /**
  * Rotate the mesh and record the rotation as a goniometer bake.
  *
- * The bake is applied outermost and accumulates, so a caller can tell how far the mesh has been
- * turned out of its own frame however many times it has been baked.
+ * The bake composes onto any bake already recorded, so a caller can tell how far the mesh has been
+ * turned out of its own frame however many times it has been baked. See IObject::getAppliedRotation
+ * for what that total does and does not account for.
  *
  * @param rotationMatrix Rotation matrix to be applied
  */
