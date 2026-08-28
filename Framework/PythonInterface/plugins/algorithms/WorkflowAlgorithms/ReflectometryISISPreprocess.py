@@ -96,19 +96,19 @@ class ReflectometryISISPreprocess(DataProcessorAlgorithm):
 
     def handle_if_already_calibrated(self, workspace):
         handle_method = self.getPropertyValue(self._HANDLE_METHOD_ALREADY_CALIBRATED)
-        if handle_method == "None":
+        if handle_method == "NONE":
             return
         if isinstance(workspace, WorkspaceGroup):
             for ws in workspace:
                 self.handle_if_already_calibrated(ws)
             return
         if workspace.run().hasProperty(self._CALIBRATION_FILE_LOG):
-            if handle_method == "Warn":
+            if handle_method == "WARN":
                 self.log().warning(
-                    f"Workspace with run no. {workspace.getRunNumber()} already has a calibration file log. The calibration algorithm \
-                    will be rerun with may be erroneous."
+                    f"Workspace with run no. {workspace.getRunNumber()} already has a calibration file log. "
+                    "The calibration algorithm will be rerun, which may produce erroneous results."
                 )
-            else:  # handle_method == Throw
+            else:  # handle_method == "THROW"
                 raise RuntimeError(f"Workspace with run no. {workspace.getRunNumber()} already has a calibration file log.")
 
     @staticmethod

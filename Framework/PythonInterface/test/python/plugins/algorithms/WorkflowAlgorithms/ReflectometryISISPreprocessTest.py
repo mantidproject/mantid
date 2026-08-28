@@ -5,11 +5,13 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+from unittest.mock import patch
 
 import numpy as np
 
 from mantid import config, FileFinder
 from mantid.api import AnalysisDataService, IEventWorkspace, MatrixWorkspace, WorkspaceGroup
+from mantid.kernel import Logger
 from mantid.simpleapi import AddSampleLog, AddTimeSeriesLog, ConvertUnits, CreateSampleWorkspace
 from plugins.algorithms.WorkflowAlgorithms.ReflectometryISISPreprocess import ReflectometryISISPreprocess
 from testhelpers import create_algorithm
@@ -82,6 +84,51 @@ class ReflectometryISISPreprocessTest(unittest.TestCase):
         self.assertIsInstance(output_ws, WorkspaceGroup)
         self.assertEqual(output_ws.getNumberOfEntries(), 2)
 
+    @patch.object(Logger, "warning")
+    def test_already_calibrated_workspace_is_ignored_by_default(self, mock_warning):
+        ws = self._workspace_with_calibration_log()
+        alg = self._initialized_algorithm()
+
+        alg.handle_if_already_calibrated(ws)
+
+        mock_warning.assert_not_called()
+
+    @patch.object(Logger, "warning")
+    def test_already_calibrated_workspace_logs_warning_for_warn(self, mock_warning):
+        ws = self._workspace_with_calibration_log()
+        alg = self._initialized_algorithm(IfAlreadyCalibrated="WARN")
+
+        alg.handle_if_already_calibrated(ws)
+
+        mock_warning.assert_called_once_with(
+            f"Workspace with run no. {ws.getRunNumber()} already has a calibration file log. "
+            "The calibration algorithm will be rerun, which may produce erroneous results."
+        )
+
+    def test_already_calibrated_workspace_raises_for_throw(self):
+        ws = self._workspace_with_calibration_log()
+        alg = self._initialized_algorithm(IfAlreadyCalibrated="THROW")
+
+        with self.assertRaisesRegex(RuntimeError, "already has a calibration file log"):
+            alg.handle_if_already_calibrated(ws)
+
+    def test_uncalibrated_workspace_does_not_raise_for_throw(self):
+        ws = CreateSampleWorkspace()
+        alg = self._initialized_algorithm(IfAlreadyCalibrated="THROW")
+
+        alg.handle_if_already_calibrated(ws)
+
+    def test_already_calibrated_workspace_group_members_are_checked(self):
+        uncalibrated_ws = CreateSampleWorkspace()
+        calibrated_ws = self._workspace_with_calibration_log()
+        group = WorkspaceGroup()
+        group.addWorkspace(uncalibrated_ws)
+        group.addWorkspace(calibrated_ws)
+        alg = self._initialized_algorithm(IfAlreadyCalibrated="THROW")
+
+        with self.assertRaisesRegex(RuntimeError, "already has a calibration file log"):
+            alg.handle_if_already_calibrated(group)
+
     def test_polref_workspace_group_uses_consistent_wavelength_bins_after_calibration(self):
         calibration_lines = ["spectrumnumber angle\n"]
         calibration_lines.extend(f"{spectrum_no} {3.5 - spectrum_no * 0.005}\n" for spectrum_no in range(5, 645))
@@ -146,6 +193,12 @@ class ReflectometryISISPreprocessTest(unittest.TestCase):
         for property_name, value in kwargs.items():
             alg.setProperty(property_name, value)
         return alg
+
+    @staticmethod
+    def _workspace_with_calibration_log():
+        ws = CreateSampleWorkspace()
+        AddSampleLog(Workspace=ws, LogName="reflectometry_calibration_file", LogText="calibration.dat")
+        return ws
 
     def _setup_algorithm(self, args):
         alg = create_algorithm("ReflectometryISISPreprocess", **args)

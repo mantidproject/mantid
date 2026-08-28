@@ -896,6 +896,15 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         self._assert_run_algorithm_succeeds(args, outputs)
         self._check_calibration(AnalysisDataService.retrieve("IvsQ_binned_45455"), is_calibrated=False)
 
+    def test_calibration_file_enables_warning_for_already_calibrated_loaded_files(self):
+        alg = ReflectometryISISLoadAndProcess()
+        alg.initialize()
+        alg.setProperty("CalibrationFile", self._CALIBRATION_TEST_DATA)
+
+        args = alg._preprocess_arguments("INTER45455", False)
+
+        self.assertEqual("WARN", args["IfAlreadyCalibrated"])
+
     def test_theta_properties_are_forwarded_to_preprocessing(self):
         alg = ReflectometryISISLoadAndProcess()
         alg.initialize()

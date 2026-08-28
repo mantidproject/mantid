@@ -26,6 +26,8 @@ Input runs and transmission runs are loaded if required, or existing workspaces 
 
 If a value is provided for the ``CalibrationFile`` property then calibration will be applied for input runs that are loaded (but not where existing workspaces are being used). The calibration will be performed using :ref:`algm-ReflectometryISISCalibration`. See the documentation for the required calibration file format. When using the POLREF calibration workflow, the experiment angle is taken from ``ThetaIn`` or, when ``ThetaIn`` is not supplied, from the run log selected by ``ThetaLogName``.
 
+If a loaded file already contains a ``reflectometry_calibration_file`` run log, the algorithm warns that the data have previously been calibrated. The calibration selected in ``CalibrationFile`` is still applied, but applying a calibration more than once may produce erroneous results.
+
 If time slicing is enabled, the input run must be an event workspace and have monitors loaded; otherwise, it must be a histogram workspace. If the workspace already exists but is the incorrect type or is missing monitors, it will be reloaded.
 
 Input runs can be combined before reduction by supplying a comma-separated list of run numbers. They will be summed using the :ref:`algm-Plus` algorithm. Similarly, multiple input workspaces for the first and/or second transmission inputs can be summed prior to reduction.
