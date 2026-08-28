@@ -1,0 +1,1 @@
+- In :ref:`algm-HFIRPowderReduction`, the ``OutputWorskpace`` field now has a defualt based on the IPTS and run number. ``OutputDirectory`` now browses to a directory and user can manually set the file name by typing it in the box.
