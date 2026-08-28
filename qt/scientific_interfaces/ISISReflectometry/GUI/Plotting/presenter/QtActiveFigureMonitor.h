@@ -8,33 +8,35 @@
 
 #include "Common/DllConfig.h"
 
-#include <QTimer>
+#include <QObject>
 #include <functional>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-/// Emits periodic refresh requests for presenter state that depends on the active plot figure.
+/// Notifies presenter state when the active plot figure changes.
 class MANTIDQT_ISISREFLECTOMETRY_DLL IActiveFigureMonitor {
 public:
   virtual ~IActiveFigureMonitor() = default;
-  /// Set the callback to invoke when active-figure state should be refreshed.
+  /// Subscribe to notifications that the active figure changed.
   virtual void subscribe(std::function<void()> callback) = 0;
-  /// Start periodic active-figure refresh notifications.
-  virtual void start() = 0;
 };
 
 /// Qt-backed active-figure monitor for the Reflectometry plotting presenter.
-class MANTIDQT_ISISREFLECTOMETRY_DLL QtActiveFigureMonitor : public IActiveFigureMonitor {
+class MANTIDQT_ISISREFLECTOMETRY_DLL QtActiveFigureMonitor : public QObject, public IActiveFigureMonitor {
+  Q_OBJECT
 public:
-  /// Create a monitor that refreshes once per second.
+  /// Create a monitor for Workbench active-figure notifications.
   QtActiveFigureMonitor();
 
   void subscribe(std::function<void()> callback) override;
-  void start() override;
+
+  // cppcheck-suppress unknownMacro
+private slots:
+  void notifyActiveFigureChanged();
 
 private:
-  QTimer m_timer;
   std::function<void()> m_callback;
+  bool m_isSubscribed{false};
 };
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

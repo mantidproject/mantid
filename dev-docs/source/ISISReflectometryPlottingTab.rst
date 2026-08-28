@@ -279,10 +279,12 @@ Defines:
 
 * :code:`IActiveFigureMonitor`, the interface for notifications that the active
   matplotlib figure may have changed; and
-* :code:`QtActiveFigureMonitor`, the Qt timer implementation.
+* :code:`QtActiveFigureMonitor`, which bridges active-order changes from
+  Workbench's global figure manager observer facility to Qt.
 
 The presenter uses these notifications to refresh add-to-existing and overplot
-action state when plots are opened, activated, or closed outside the tab.
+action state immediately when plots are opened, focused, or closed outside the
+tab.
 
 View Files
 ----------
@@ -512,8 +514,8 @@ Construction
    :code:`PlotOptionsProvider`, and :code:`Plotter` into the presenter. The
    presenter directly owns its :code:`PlottingWorkspaceTree` and
    :code:`PlottingViewStateProvider`.
-#. The plotting presenter subscribes to the view and starts its
-   :code:`QtActiveFigureMonitor`.
+#. The plotting presenter subscribes to the view and to active-figure changes
+   through :code:`QtActiveFigureMonitor`.
 #. :code:`BatchPresenter` takes ownership of the plotting presenter and passes
    itself as the parent coordinator.
 
