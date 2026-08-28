@@ -30,7 +30,7 @@ set(PLOTTING_INC_FILES
     view/QtPlottingWorkspaceTreeViewAdapter.h
 )
 
-set(PLOTTING_MOC_FILES view/QtPlottingView.h)
+set(PLOTTING_MOC_FILES presenter/QtActiveFigureMonitor.h view/QtPlottingView.h)
 
 set(PLOTTING_UI_FILES view/PlottingWidget.ui)
 

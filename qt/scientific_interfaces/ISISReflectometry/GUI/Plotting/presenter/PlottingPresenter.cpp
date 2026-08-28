@@ -53,7 +53,6 @@ PlottingPresenter::PlottingPresenter(IPlottingView *view, IPlotter const &plotte
 void PlottingPresenter::initialise() {
   m_view->subscribe(this);
   m_activeFigureMonitor->subscribe([this]() { notifyActiveFigureChanged(); });
-  m_activeFigureMonitor->start();
   updateWidgetEnabledState();
 }
 
