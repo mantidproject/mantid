@@ -674,9 +674,9 @@ class CenteringTransformTest(unittest.TestCase):
         a = 6.0
         c = 10.0
 
-        A_conv = find_ub_module.direct_basis_from_lattice(a, a, c, np.pi / 2.0, np.pi / 2.0, np.deg2rad(120.0))
-        T_cp = find_ub_module.centering_transform_to_primitive("R")
-        a_p, b_p, c_p, alpha_p, beta_p, gamma_p = find_ub_module.lattice_from_direct_basis(A_conv @ T_cp)
+        (a_p, b_p, c_p, alpha_p, beta_p, gamma_p), _ = find_ub_module.conventional_to_primitive_lattice(
+            a, a, c, np.pi / 2.0, np.pi / 2.0, np.deg2rad(120.0), "R"
+        )
 
         self.assertAlmostEqual(a_p, b_p)
         self.assertAlmostEqual(b_p, c_p)
@@ -689,6 +689,44 @@ class CenteringTransformTest(unittest.TestCase):
 
         self.assertAlmostEqual(a_p, a_expected)
         self.assertAlmostEqual(alpha_p, alpha_expected)
+
+    def test_primitive_lattice_matches_closed_forms_for_centred_cells(self):
+        """
+        The primitive cell of a centred orthorhombic lattice has closed-form parameters.
+
+        This pins `conventional_to_primitive_lattice` to values independent of how the
+        conventional-to-primitive transform is applied internally.
+        """
+        a, b, c = 4.0, 6.0, 9.0
+        right = np.pi / 2.0
+
+        # Face-centred: primitive vectors are the three face-diagonal halves.
+        (a_p, b_p, c_p, _, _, _), _ = find_ub_module.conventional_to_primitive_lattice(a, b, c, right, right, right, "F")
+        expected_f = sorted([np.hypot(b, c) / 2.0, np.hypot(a, c) / 2.0, np.hypot(a, b) / 2.0])
+        for value, expected in zip(sorted([a_p, b_p, c_p]), expected_f):
+            self.assertAlmostEqual(value, expected)
+
+        # Body-centred: every primitive vector is half a body diagonal, so the cell is rhombohedral.
+        (a_p, b_p, c_p, _, _, _), _ = find_ub_module.conventional_to_primitive_lattice(a, b, c, right, right, right, "I")
+        expected_i = np.sqrt(a**2 + b**2 + c**2) / 2.0
+        for value in (a_p, b_p, c_p):
+            self.assertAlmostEqual(value, expected_i)
+
+        # C-centred: two base-diagonal halves plus the unchanged c axis.
+        (a_p, b_p, c_p, _, _, gamma_p), _ = find_ub_module.conventional_to_primitive_lattice(a, b, c, right, right, right, "C")
+        expected_c = sorted([np.hypot(a, b) / 2.0, np.hypot(a, b) / 2.0, c])
+        for value, expected in zip(sorted([a_p, b_p, c_p]), expected_c):
+            self.assertAlmostEqual(value, expected)
+        self.assertAlmostEqual(gamma_p, 2.0 * np.arctan(b / a))
+
+    def test_primitive_lattice_is_unchanged_for_primitive_centring(self):
+        lattice = (5.0, 7.0, 11.0, np.deg2rad(85.0), np.deg2rad(95.0), np.deg2rad(105.0))
+
+        lattice_p, T_cp = find_ub_module.conventional_to_primitive_lattice(*lattice, "P")
+
+        np.testing.assert_allclose(T_cp, np.eye(3), atol=1e-12)
+        for value, expected in zip(lattice_p, lattice):
+            self.assertAlmostEqual(value, expected)
 
 
 if __name__ == "__main__":

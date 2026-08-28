@@ -14,9 +14,9 @@ known **conventional-cell** lattice parameters (``a``, ``b``, ``c``, ``alpha``, 
 ``gamma``) and ``Centering``, this algorithm determines a **UB matrix** describing the
 orientation of the crystal and sets it on the workspace's oriented lattice.
 
-The measured peak positions fix the shape and size of the crystal's reciprocal lattice but
-not how it is oriented in the instrument. The algorithm treats that orientation as the
-unknown and searches for it:
+The input lattice parameters and centering condition describe the expected reciprocal
+lattice positions up to a rotation corresponding to how the sample is oriented in the
+instrument. The algorithm treats that orientation as the unknown and searches for it:
 
 #. The conventional cell is reduced to its **primitive** setting so the search works on a
    lattice with a single lattice point per cell.

@@ -26,7 +26,7 @@ from mantid.kernel import (
 )
 from mantid.dataobjects import TableWorkspaceProperty
 from mantid.simpleapi import CreateEmptyTableWorkspace, CreateWorkspace, SetUB
-from mantid.geometry import UnitCell
+from mantid.geometry import AngleUnits, UnitCell
 
 import numpy as np
 
@@ -94,73 +94,6 @@ def angular_distance_antipodal(u, v):
         Angle in radians, in [0, pi / 2].
     """
     return np.arccos(np.clip(abs(np.dot(normalize(u), normalize(v))), -1.0, 1.0))
-
-
-def direct_basis_from_lattice(a, b, c, alpha, beta, gamma):
-    """
-    Build the direct-lattice basis matrix from lattice parameters.
-
-    This matrix stores direct-lattice vectors as columns; reciprocal-lattice vectors are stored as columns.
-
-    Parameters
-    ----------
-    a, b, c : float
-        Lattice lengths.
-    alpha, beta, gamma : float
-        Lattice angles, in radians.
-
-    Returns
-    -------
-    A : ndarray of shape (3, 3)
-        Direct-lattice basis with a, b, c as columns.
-    """
-    ca, cb, cg = np.cos(alpha), np.cos(beta), np.cos(gamma)
-    sg = np.sin(gamma)
-
-    if abs(sg) < 1e-14:
-        raise ValueError("gamma is too close to 0 or pi.")
-
-    volume_factor = 1.0 + 2.0 * ca * cb * cg - ca**2 - cb**2 - cg**2
-    if volume_factor <= 0.0:
-        raise ValueError("Invalid lattice parameters.")
-
-    return np.array(
-        [
-            [a, b * cg, c * cb],
-            [0.0, b * sg, c * (ca - cb * cg) / sg],
-            [0.0, 0.0, c * np.sqrt(volume_factor) / sg],
-        ],
-        dtype=float,
-    )
-
-
-def lattice_from_direct_basis(A):
-    """
-    Recover lattice parameters from a direct-lattice basis matrix.
-
-    Parameters
-    ----------
-    A : ndarray of shape (3, 3)
-        Direct-lattice basis with a, b, c as columns.
-
-    Returns
-    -------
-    a, b, c : float
-        Lattice lengths.
-    alpha, beta, gamma : float
-        Lattice angles, in radians.
-    """
-    a_vec, b_vec, c_vec = A[:, 0], A[:, 1], A[:, 2]
-
-    a = np.linalg.norm(a_vec)
-    b = np.linalg.norm(b_vec)
-    c = np.linalg.norm(c_vec)
-
-    alpha = np.arccos(np.clip(np.dot(b_vec, c_vec) / (b * c), -1.0, 1.0))
-    beta = np.arccos(np.clip(np.dot(a_vec, c_vec) / (a * c), -1.0, 1.0))
-    gamma = np.arccos(np.clip(np.dot(a_vec, b_vec) / (a * b), -1.0, 1.0))
-
-    return a, b, c, alpha, beta, gamma
 
 
 def reciprocal_basis_from_direct_basis(A):
@@ -272,10 +205,20 @@ def conventional_to_primitive_lattice(a, b, c, alpha, beta, gamma, centering):
     T_cp : ndarray of shape (3, 3)
         Transform from the conventional to the primitive direct-lattice basis.
     """
-    A_c = direct_basis_from_lattice(a, b, c, alpha, beta, gamma)
+    uc_c = UnitCell(a, b, c, alpha, beta, gamma, AngleUnits.Radians)
     T_cp = centering_transform_to_primitive(centering)
-    A_p = A_c @ T_cp
-    lattice_p = lattice_from_direct_basis(A_p)
+
+    # The direct metric tensor of a basis A holding a, b, c as columns is G = A.T @ A, so the
+    # primitive basis A_p = A_c @ T_cp has G_p = T_cp.T @ G_c @ T_cp. UnitCell recovers lattice
+    # parameters from the reciprocal metric tensor, which is the inverse of the direct one.
+    G_p = T_cp.T @ uc_c.getG() @ T_cp
+
+    uc_p = UnitCell()
+    uc_p.recalculateFromGstar(np.linalg.inv(G_p))
+
+    # UnitCell has no radian accessor for gamma, so all three angles are converted here
+    # rather than mixing the radian and degree accessors.
+    lattice_p = (uc_p.a(), uc_p.b(), uc_p.c(), *np.deg2rad([uc_p.alpha(), uc_p.beta(), uc_p.gamma()]))
     return lattice_p, T_cp
 
 
