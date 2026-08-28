@@ -70,6 +70,7 @@ public:
   // interface: handing out a mutable MantidVec would allow the length to be changed, so
   // FixedLengthVector::mutableRawData() is protected and Histogram is its only friend.
   GNU_DIAG_OFF("deprecated-declarations")
+  MSVC_DIAG_OFF(4996)
   /// Deprecated, use mutableY() instead. Returns the y data
   [[deprecated("use mutableY() instead")]]
   MantidVec &dataY() override {
@@ -80,6 +81,7 @@ public:
   MantidVec &dataE() override {
     return m_histogram.dataE();
   }
+  MSVC_DIAG_ON(4996)
   GNU_DIAG_ON("deprecated-declarations")
 
   virtual std::size_t size() const { return m_histogram.y().size(); } ///< get pseudo size
