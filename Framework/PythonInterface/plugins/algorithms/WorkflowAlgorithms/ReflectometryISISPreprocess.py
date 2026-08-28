@@ -14,7 +14,14 @@ from mantid.api import (
     WorkspaceGroup,
     WorkspaceProperty,
 )
-from mantid.kernel import CompositeValidator, StringArrayLengthValidator, StringArrayMandatoryValidator, StringArrayProperty, Direction
+from mantid.kernel import (
+    CompositeValidator,
+    StringArrayLengthValidator,
+    StringArrayMandatoryValidator,
+    StringArrayProperty,
+    Direction,
+    StringListValidator,
+)
 
 
 class ReflectometryISISPreprocess(DataProcessorAlgorithm):
@@ -29,6 +36,7 @@ class ReflectometryISISPreprocess(DataProcessorAlgorithm):
     _CALIBRATION_FILE_LOG = "reflectometry_calibration_file"
     _POLREF = "POLREF"
     _POLREF_START_WS_INDEX = 4
+    _HANDLE_METHOD_ALREADY_CALIBRATED = "IfAlreadyCalibrated"
 
     def __init__(self):
         """Initialize an instance of the algorithm."""
@@ -67,17 +75,41 @@ class ReflectometryISISPreprocess(DataProcessorAlgorithm):
         )
         self.copyProperties("ReflectometryISISCalibration", [self._CALIBRATION_FILE])
         self.copyProperties("ReflectometryReductionOneAuto", [self._THETA_IN, self._THETA_LOG_NAME])
+        self.declareProperty(
+            self._HANDLE_METHOD_ALREADY_CALIBRATED,
+            "NONE",
+            validator=StringListValidator(["NONE", "WARN", "THROW"]),
+            doc="How to handle loaded files that have already been calibrated, if calibration file specified.",
+        )
 
     def PyExec(self):
         workspace, monitor_ws = self._loadRun(self.getPropertyValue(self._RUNS))
 
         calibration_file = self.getPropertyValue(self._CALIBRATION_FILE)
         if calibration_file:
+            self.handle_if_already_calibrated(workspace)
             workspace = self._applyCalibration(workspace, calibration_file)
 
         self.setProperty(self._OUTPUT_WS, workspace)
         if monitor_ws:
             self.setProperty(self._MONITOR_WS, monitor_ws)
+
+    def handle_if_already_calibrated(self, workspace):
+        handle_method = self.getPropertyValue(self._HANDLE_METHOD_ALREADY_CALIBRATED)
+        if handle_method == "None":
+            return
+        if isinstance(workspace, WorkspaceGroup):
+            for ws in workspace:
+                self.handle_if_already_calibrated(ws)
+            return
+        if workspace.run().hasProperty(self._CALIBRATION_FILE_LOG):
+            if handle_method == "Warn":
+                self.log().warning(
+                    f"Workspace with run no. {workspace.getRunNumber()} already has a calibration file log. The calibration algorithm \
+                    will be rerun with may be erroneous."
+                )
+            else:  # handle_method == Throw
+                raise RuntimeError(f"Workspace with run no. {workspace.getRunNumber()} already has a calibration file log.")
 
     @staticmethod
     def _get_input_runs_validator():

@@ -579,6 +579,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         calibration_filepath = self.getPropertyValue("CalibrationFile")
         if calibration_filepath:
             args["CalibrationFile"] = calibration_filepath
+            args["IfAlreadyCalibrated"] = "WARN"
         for property_name in ["ThetaIn", "ThetaLogName"]:
             if not self.getProperty(property_name).isDefault:
                 args[property_name] = self.getPropertyValue(property_name)
