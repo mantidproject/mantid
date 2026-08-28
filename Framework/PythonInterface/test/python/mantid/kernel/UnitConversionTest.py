@@ -15,11 +15,14 @@ class UnitConversionTest(unittest.TestCase):
         src_value = 1.5
         dest_unit = "Momentum"
 
-        l1 = l2 = theta = efixed = 0.0
+        l1 = l2 = theta = 0.0
         emode = DeltaEModeType.Indirect
         expected = 2.0 * math.pi / src_value
+        params = UnitParametersMap()
+        params[UnitParams.l2] = l2
+        params[UnitParams.twoTheta] = theta
 
-        result = UnitConversion.run(src_unit, dest_unit, src_value, l1, l2, theta, emode, efixed)
+        result = UnitConversion.run(src_unit, dest_unit, src_value, l1, emode, params)
         self.assertAlmostEqual(result, expected, 12)
 
     def test_run_accepts_params_version(self):

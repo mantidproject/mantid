@@ -32,10 +32,9 @@ def get_expected_for_spectrum_n(data_workspace, selected_workspace_index, value_
 
     # The second bin should have abs(4.0-4.7)/abs(3.2 - 4.7)*value + abs(4.7-6.0)/abs(4.7 - 6.3)*value
     # The third bin should have abs(6.0-6.3)/abs(4.7 - 6.3)*value + value
-    instrument = data_workspace.getInstrument()
-    source = instrument.getSource()
-    detector = data_workspace.getDetector(selected_workspace_index)
-    distance_source_detector = detector.getDistance(source)
+    source_position = data_workspace.componentInfo().sourcePosition()
+    detector_position = data_workspace.spectrumInfo().position(selected_workspace_index)
+    distance_source_detector = detector_position.distance(source_position)
     h = 6.62606896e-34
     mass = 1.674927211e-27
     times = data_workspace.x(0)

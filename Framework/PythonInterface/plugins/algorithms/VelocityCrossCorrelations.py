@@ -10,7 +10,7 @@ from mantid.api import AlgorithmFactory, FileAction, FileProperty, PythonAlgorit
 from mantid.kernel import logger, Direction
 from mantid.simpleapi import CreateWorkspace
 
-from scipy.io import netcdf
+from scipy.io import netcdf_file
 import numpy as np
 import re
 import time
@@ -42,7 +42,7 @@ class VelocityCrossCorrelations(PythonAlgorithm):
         file_name = self.getPropertyValue("InputFile")
 
         # Load trajectory file
-        trajectory = netcdf.netcdf_file(file_name, mode="r")
+        trajectory = netcdf_file(file_name, mode="r")
 
         logger.information("Loading particle id's and coordinate array...")
         start_time = time.time()

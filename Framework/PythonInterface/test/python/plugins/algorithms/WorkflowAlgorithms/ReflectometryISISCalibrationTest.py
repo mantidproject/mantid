@@ -415,7 +415,7 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         info_out = output_ws.spectrumInfo()
 
         for i in range(input_ws.getNumberHistograms()):
-            det_id = input_ws.getDetector(i).getID()
+            det_id = next(iter(input_ws.getSpectrum(i).getDetectorIDs()))
 
             two_theta_in = info_in.signedTwoTheta(i)
             two_theta_out = info_out.signedTwoTheta(i)

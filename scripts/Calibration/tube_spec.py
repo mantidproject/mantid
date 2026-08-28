@@ -16,6 +16,7 @@ from typing import Union
 
 # Mantid imports
 from mantid.api import mtd, Workspace
+from plugins.algorithms.component_info_utils import resolve_component_index
 
 
 class TubeSpec:
@@ -53,7 +54,8 @@ class TubeSpec:
         """
         ws = mtd[str(input_workspace)]
         self.ws = ws
-        self.inst = ws.getInstrument()
+        self.component_info = ws.componentInfo()
+        self.detector_info = ws.detectorInfo()
         self.numTubes = 0
         self.componentNameArray = []
         self.componentArray = []
@@ -104,37 +106,32 @@ class TubeSpec:
             self.setTubeSpecByString(tubeSpecArray[i])
 
     def getInstrumentName(self):
-        return self.inst.getName()
+        return self.ws.getInstrumentName()
 
-    def isTube(self, comp):
+    def isTube(self, component_index):
         """
         Determines whether the component is a tube.
 
-        :param comp: the component
+        :param component_index: the ComponentInfo index of the component
 
         :rtype: Value, true if component passes test as being a tube
         """
         # We simply assume it's a tube if it has a large number of children
-        if hasattr(comp, "nelements"):
-            return comp.nelements() >= self.minNumDetsInTube
-        else:
-            return False
+        return len(self.component_info.children(component_index)) >= self.minNumDetsInTube
 
-    def searchForTubes(self, comp):
+    def searchForTubes(self, component_index):
         """
         Searches the component for tubes and saves them in array, appending if array is not empty.
 
-        :param comp: the component
+        :param component_index: the ComponentInfo index of the component
         """
         # Go through all descendents that are not a descendent of a tube and if it's a tube, store and count it.
 
-        if self.isTube(comp):
-            self.tubes.append(comp)
-        # If not tube, Search children, if any
+        if self.isTube(component_index):
+            self.tubes.append(component_index)
         else:
-            if hasattr(comp, "nelements"):
-                for i in range(comp.nelements()):
-                    self.searchForTubes(comp[i])
+            for child_index in self.component_info.children(component_index):
+                self.searchForTubes(int(child_index))
 
     def getNumTubes(self):
         """
@@ -160,7 +157,7 @@ class TubeSpec:
         """
         Returns instrument component corresponding to specification
 
-        :rtype: instrument component
+        :rtype: ComponentInfo index
         """
         if self.componentArray != []:
             return self.componentArray[0]
@@ -168,10 +165,8 @@ class TubeSpec:
         # We look for the component
         print("Looking for", self.componentNameArray[0], end="")
 
-        comp = self.inst.getComponentByName(self.componentNameArray[0])
-
-        if comp:
-            self.componentArray.append(comp)
+        component_index = resolve_component_index(self.componentNameArray[0], self.component_info)
+        self.componentArray.append(component_index)
 
         return self.componentArray[0]
 
@@ -179,7 +174,7 @@ class TubeSpec:
         """
         Returns instrument components corresponding to specification
 
-        :rtype: array of instrument components
+        :rtype: array of ComponentInfo indices
         """
         if self.componentArray != []:
             return self.componentArray
@@ -188,15 +183,14 @@ class TubeSpec:
         for i in range(len(self.componentNameArray)):
             print("Looking for", self.componentNameArray[i])
 
-            comp = self.inst.getComponentByName(self.componentNameArray[i])
-
-        if comp:
-            self.componentArray.append(comp)
-        else:
-            print("Did not find", self.componentNameArray[i])
-            print("Tube specification not valid")
-            self.componentArray = []
-            return []
+            try:
+                component_index = resolve_component_index(self.componentNameArray[i], self.component_info)
+            except ValueError:
+                print("Did not find", self.componentNameArray[i])
+                print("Tube specification not valid")
+                self.componentArray = []
+                return []
+            self.componentArray.append(component_index)
 
         return self.componentArray
 
@@ -225,13 +219,14 @@ class TubeSpec:
             print("Tube index", tubeIx, "out of range 0 to", nTubes)
             return 0, 0, 1
 
-        comp = self.tubes[tubeIx]
+        tube_index = self.tubes[tubeIx]
 
-        if comp != 0:
-            firstDet = comp[0].getID()
-            numDet = comp.nelements()
+        if tube_index != 0:
+            detector_indices = self.component_info.detectorsInSubtree(tube_index)
+            firstDet = int(self.detector_info.detectorIDs()[detector_indices[0]])
+            numDet = len(detector_indices)
             # Allow for reverse numbering of Detectors
-            lastDet = comp[numDet - 1].getID()
+            lastDet = int(self.detector_info.detectorIDs()[detector_indices[-1]])
             if lastDet < firstDet:
                 step = -1
                 if firstDet - lastDet + 1 != numDet:
@@ -266,11 +261,13 @@ class TubeSpec:
             print("Tube index", tubeIx, "out of range 0 to", nTubes)
             return 0.0
 
-        comp = self.tubes[tubeIx]
+        tube_index = self.tubes[tubeIx]
 
-        if comp != 0:
-            numDet = comp.nelements()
-            return comp[0].getDistance(comp[numDet - 1])
+        if tube_index != 0:
+            detector_indices = self.component_info.detectorsInSubtree(tube_index)
+            first_detector_index = int(detector_indices[0])
+            last_detector_index = int(detector_indices[-1])
+            return self.component_info.position(first_detector_index).distance(self.component_info.position(last_detector_index))
         else:
             print(self.componentNameArray[0], tubeIx, "not found")
             return 0.0
@@ -294,10 +291,10 @@ class TubeSpec:
             print("Tube index", tubeIx, "out of range 0 to", nTubes)
             return "Unknown"
 
-        comp = self.tubes[tubeIx]
+        tube_index = self.tubes[tubeIx]
 
-        if comp != 0:
-            return comp.getFullName()
+        if tube_index != 0:
+            return self.component_info.name(tube_index)
         else:
             print(self.componentNameArray[0], tubeIx, "not found")
             return "Unknown"
@@ -333,13 +330,16 @@ class TubeSpec:
         else:
             startDet = firstDet
         if numDet > 0:
+            spectrum_info = self.ws.spectrumInfo()
             for i in range(0, self.ws.getNumberHistograms(), numDet):
-                try:
-                    deti = self.ws.getDetector(i)
-                except:
+                if not spectrum_info.hasDetectors(i):
                     skipped.append(i)
                     continue
-                detID = deti.getID()
+                detector_ids = self.ws.getSpectrum(i).getDetectorIDs()
+                if len(detector_ids) != 1:
+                    skipped.append(i)
+                    continue
+                detID = next(iter(detector_ids))
                 if detID >= startDet and detID < startDet + numDet:
                     iPixel = detID - firstDet
                     wkIds = range(i - iPixel, i - iPixel + step * numDet, step)

@@ -151,7 +151,7 @@ class TestCorelliDatabase(unittest.TestCase):
     def test_combine_spatial_banks(self):
         # test with name
         combined_table = combine_spatial_banks(self.ws_group, name="calibrated_banks")
-        self.assertTrue(combined_table.getName() == "calibrated_banks")
+        self.assertTrue(combined_table.name() == "calibrated_banks")
 
         # test without name
         combined_table = combine_spatial_banks(self.ws_group)

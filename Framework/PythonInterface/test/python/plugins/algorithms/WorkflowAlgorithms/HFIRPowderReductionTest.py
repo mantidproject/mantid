@@ -21,7 +21,7 @@ from mantid.simpleapi import (
     mtd,
 )
 from mantid.api import AlgorithmManager, MatrixWorkspace, WorkspaceGroup
-from mantid.kernel import Logger, Property, V3D
+from mantid.kernel import Logger, Property
 from plugins.algorithms.WorkflowAlgorithms.HFIRPowderReduction import HFIRPowderReduction as _HFIRPowderReduction
 import h5py
 import os
@@ -1151,10 +1151,11 @@ class ReductionExecutionTests(unittest.TestCase):
             tt2 = 45
             return get_bkg_counts(n) + 10 * np.exp(-((twoTheta - tt1) ** 2) / 1) + 20 * np.exp(-((twoTheta - tt2) ** 2) / 0.2)
 
+        spectrum_info = data.spectrumInfo()
         for i in range(cal.getNumberHistograms()):
             cal.setSharedY(i, [get_cal_counts(i) * 2.0])
             bkg.setSharedY(i, [get_bkg_counts(i) / 2.0])
-            twoTheta = data.getInstrument().getDetector(i + 10000).getTwoTheta(V3D(0, 0, 0), V3D(0, 0, 1)) * 180 / np.pi
+            twoTheta = np.rad2deg(spectrum_info.twoTheta(i))
             data.setSharedY(i, [get_data_counts(i, twoTheta)])
 
         data_file_name = os.path.join(self._test_dir, "sample_workspace.nxs")

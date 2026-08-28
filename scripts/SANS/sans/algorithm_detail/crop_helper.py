@@ -15,8 +15,7 @@ from sans.common.enums import SANSInstrument
 
 
 def get_component_name(workspace, detector_type):
-    instrument = workspace.getInstrument()
-    instrument_name = instrument.getName().strip()
+    instrument_name = workspace.getInstrumentName().strip()
     instrument_name = instrument_name.upper()
     instrument = SANSInstrument[instrument_name]
     return convert_instrument_and_detector_type_to_bank_name(instrument, detector_type)

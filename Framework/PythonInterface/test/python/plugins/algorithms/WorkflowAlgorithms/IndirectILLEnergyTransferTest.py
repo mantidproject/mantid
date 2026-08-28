@@ -195,7 +195,7 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
 
         self.assertEqual(item.blocksize(), nbins)
 
-        self.assertTrue(item.getSampleDetails())
+        self.assertTrue(item.getRun())
 
         self.assertTrue(item.getHistory().lastAlgorithm())
 

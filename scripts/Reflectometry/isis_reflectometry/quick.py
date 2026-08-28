@@ -218,7 +218,6 @@ def quick_explicit(
         bg_max=background_max,
     )
 
-    inst = _sample_ws.getInstrument()
     # Some beamline constants from IDF
 
     print(i0_monitor_index)
@@ -284,15 +283,15 @@ def quick_explicit(
         # Convert to I vs Q
         # check if detector in direct beam
         if theta is None or theta == 0 or theta == "":
-            inst = groupGet("IvsLam", "inst")
-            detLocation = inst.getComponentByName(detector_component_name).getPos()
-            sampleLocation = inst.getComponentByName(sample_component_name).getPos()
-            detLocation = inst.getComponentByName(detector_component_name).getPos()
-            source = inst.getSource()
-            beamPos = sampleLocation - source.getPos()
+            component_info = IvsLam.componentInfo()
+            detector_index = component_info.indexOfAny(detector_component_name)
+            detLocation = component_info.position(detector_index)
+            sampleLocation = component_info.position(component_info.indexOfAny(sample_component_name))
+            beamPos = sampleLocation - component_info.sourcePosition()
             theta = groupGet(str(_sample_ws), "samp", "theta")
             if not theta:
-                theta = inst.getComponentByName(detector_component_name).getTwoTheta(sampleLocation, beamPos) * 180.0 / math.pi / 2.0
+                detector_direction = detLocation - sampleLocation
+                theta = detector_direction.angle(beamPos) * 180.0 / math.pi / 2.0
             print("Det location: ", detLocation, "Calculated theta = ", theta)
             if correct_positions:  # detector is not in correct place
                 # Get detector angle theta from NeXuS
@@ -728,9 +727,9 @@ def groupGet(wksp, whattoget, field=""):
     """
     if whattoget == "inst":
         if isinstance(mtd[wksp], WorkspaceGroup):
-            return mtd[wksp + "_1"].getInstrument()
+            return mtd[wksp + "_1"].getInstrumentName()
         else:
-            return mtd[wksp].getInstrument()
+            return mtd[wksp].getInstrumentName()
 
     elif whattoget == "samp" and field != "":
         if isinstance(mtd[wksp], WorkspaceGroup):
