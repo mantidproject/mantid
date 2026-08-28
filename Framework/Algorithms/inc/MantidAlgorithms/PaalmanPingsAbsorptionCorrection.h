@@ -62,7 +62,7 @@ private:
   void exec() override;
 
   void retrieveBaseProperties();
-  void constructSample(API::Sample &sample);
+  void constructSample(const API::Sample &sample);
   void calculateDistances(const Geometry::IDetector &detector, std::vector<double> &sample_L2s,
                           std::vector<double> &sample_container_L2s, std::vector<double> &container_L2s,
                           std::vector<double> &container_sample_L2s) const;

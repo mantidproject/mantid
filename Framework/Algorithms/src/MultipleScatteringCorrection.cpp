@@ -383,7 +383,17 @@ void MultipleScatteringCorrection::calculateSampleAndContainer(const API::Matrix
   const auto &containerMaterial = sample.getEnvironment().getContainer().material();
 
   // get the sample and container shapes
-  const auto &sampleShape = sample.getShape();
+  // The beam and the detector positions are described in the lab frame, but the sample shape is
+  // only there if something has already rotated it - CopySample bakes the destination goniometer
+  // in, while SetGoniometer alone leaves the shape in its own frame. Move it the rest of the way,
+  // exactly as the SampleOnly branch does, so the two methods agree about where the sample is.
+  // Held in a local because the shape is borrowed by reference for the rest of this function.
+  //
+  // The container is deliberately left as it stands: it is never goniometer-rotated anywhere in
+  // Mantid, so rotating the sample inside a fixed can is what the assembly is meant to describe.
+  const auto labFrameSampleShape =
+      Geometry::getLabFrameShape(sample.getShape(), m_inputWS->run().getGoniometer().getR());
+  const auto &sampleShape = *labFrameSampleShape;
   const auto &containerShape = sample.getEnvironment().getContainer();
 
   MultipleScatteringCorrectionDistGraber distGraberSample(sampleShape, m_sampleElementSize);
