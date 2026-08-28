@@ -1,0 +1,4 @@
+- Added optional duration- and monitor-count normalization to
+  :ref:`algm-HFIRGoniometerIndependentBackground`. Backgrounds can now be calculated from
+  exposure-normalized rotations and either retained in normalized units or restored to the
+  per-rotation exposure scale.
