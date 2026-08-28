@@ -15,6 +15,13 @@ to generate the background for the input workspace. In the case that BackgroundW
 `Numpy.percentile <https://numpy.org/doc/stable/reference/generated/numpy.percentile.html>`_ is used to generate the background as
 it is much faster.
 
+The optional ``NormalizeBy`` property can be set to ``Time`` or ``Monitor`` to divide each rotation
+by its duration or monitor count before calculating the percentile. ``None`` does no normalization.
+``NormalizeOutput`` controls the units of the result. When it is ``True``, the output background
+remains normalized when the user chooses ``Time`` or ``Monitor``.
+When it is ``False`` (the default), the result is multiplied by time duration or monitor count of each rotation.
+The corresponding error variances are scaled consistently.
+
 
 
 Usage
