@@ -268,7 +268,7 @@ using CRS_t = NexusDescriptorLazy::CacheReturnStatus_t;
 const NexusDescriptorLazy::CacheValue_t NexusDescriptorLazy::_getEntryValue(const std::string &entryName) const {
   // Otherwise fetch if possible the entry and performs the comparison
   if (H5Oexists_by_name(m_fileID, entryName.c_str(), H5P_DEFAULT) <= 0)
-    return CRS_t::DATASET_NOT_FOUND;
+    return CRS_t::NXDATASET_NOT_FOUND;
 
   UniqueID<&H5Dclose> entryID(H5Dopen(m_fileID, entryName.c_str(), H5P_DEFAULT));
 
@@ -303,7 +303,7 @@ const NexusDescriptorLazy::CacheValue_t NexusDescriptorLazy::_getEntryValue(cons
     // Numeric type
   } else {
     if (H5Tget_class(datatype) != H5T_FLOAT && H5Tget_class(datatype) != H5T_INTEGER)
-      return CRS_t::WRONG_TYPE;
+      return CRS_t::NXWRONG_TYPE;
 
     hid_t dataspace = H5Dget_space(entryID.get());
     int ndims = H5Sget_simple_extent_ndims(dataspace);
@@ -311,7 +311,7 @@ const NexusDescriptorLazy::CacheValue_t NexusDescriptorLazy::_getEntryValue(cons
     // The ndims < 0 is for case when an error occured while fetching the dims
     if (ndims < 0 || ndims > 1) {
       H5Sclose(dataspace);
-      return CRS_t::ERROR;
+      return CRS_t::NXERROR;
     }
     hsize_t size = 1;
     hsize_t dims[1] = {1};
@@ -329,7 +329,7 @@ const NexusDescriptorLazy::CacheValue_t NexusDescriptorLazy::_getEntryValue(cons
       H5Dread(entryID.get(), H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer.data());
 
       if (buffer.size() != 1)
-        return CRS_t::ERROR;
+        return CRS_t::NXERROR;
       else
         return buffer[0];
     } else if (H5Tget_class(datatype) == H5T_INTEGER) {
@@ -338,14 +338,14 @@ const NexusDescriptorLazy::CacheValue_t NexusDescriptorLazy::_getEntryValue(cons
       H5Dread(entryID.get(), H5T_NATIVE_INT32, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer.data());
 
       if (buffer.size() != 1)
-        return CRS_t::ERROR;
+        return CRS_t::NXERROR;
       else
         return buffer[0];
     }
 
   } // else numeric
 
-  return CRS_t::ERROR;
+  return CRS_t::NXERROR;
 }
 
 template <typename T>
@@ -353,14 +353,14 @@ std::pair<T, NexusDescriptorLazy::CacheReturnStatus_t>
 NexusDescriptorLazy::getEntryValue(const std::string &entryName) const {
 
   T value = T{};
-  NexusDescriptorLazy::CacheReturnStatus_t returnStatus = NexusDescriptorLazy::CacheReturnStatus_t::CACHED;
+  NexusDescriptorLazy::CacheReturnStatus_t returnStatus = NexusDescriptorLazy::CacheReturnStatus_t::NXCACHED;
   // Checks if the entry is cached and if so compare the value with the cached one
   auto it = m_readEntries.find(entryName);
   if (it == m_readEntries.end()) {
     auto result = _getEntryValue(entryName);
 
     std::tie(it, std::ignore) = m_readEntries.insert(std::pair{entryName, result});
-    returnStatus = NexusDescriptorLazy::CacheReturnStatus_t::FOUND;
+    returnStatus = NexusDescriptorLazy::CacheReturnStatus_t::NXFOUND;
   }
 
   // value not found or not available
@@ -369,7 +369,7 @@ NexusDescriptorLazy::getEntryValue(const std::string &entryName) const {
   else if (auto ptr = std::get_if<T>(&it->second))
     value = *ptr;
   else
-    returnStatus = NexusDescriptorLazy::CacheReturnStatus_t::WRONG_TYPE;
+    returnStatus = NexusDescriptorLazy::CacheReturnStatus_t::NXWRONG_TYPE;
 
   // the value type is wrong
   return std::pair<T, NexusDescriptorLazy::CacheReturnStatus_t>{value, returnStatus};

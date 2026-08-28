@@ -143,29 +143,29 @@ public:
 
     {
       auto v = descriptor.getEntryValue<std::string>("/entry/instrument/not_a_data");
-      TS_ASSERT_EQUALS(v.second, Mantid::Nexus::NexusDescriptorLazy::CacheReturnStatus_t::DATASET_NOT_FOUND)
+      TS_ASSERT_EQUALS(v.second, Mantid::Nexus::NexusDescriptorLazy::CacheReturnStatus_t::NXDATASET_NOT_FOUND)
     }
     {
       auto v = descriptor.getEntryValue<std::string>("/entry/entry_identifier");
-      TS_ASSERT_EQUALS(v.second, Mantid::Nexus::NexusDescriptorLazy::CacheReturnStatus_t::FOUND)
+      TS_ASSERT_EQUALS(v.second, Mantid::Nexus::NexusDescriptorLazy::CacheReturnStatus_t::NXFOUND)
       TS_ASSERT_EQUALS(v.first, "89157")
     }
     {
       auto v = descriptor.getEntryValue<int>("/entry/entry_identifier");
-      TS_ASSERT_EQUALS(v.second, Mantid::Nexus::NexusDescriptorLazy::CacheReturnStatus_t::WRONG_TYPE)
+      TS_ASSERT_EQUALS(v.second, Mantid::Nexus::NexusDescriptorLazy::CacheReturnStatus_t::NXWRONG_TYPE)
     }
     {
       auto v = descriptor.getEntryValue<float>("/entry/duration");
-      TS_ASSERT_EQUALS(v.second, Mantid::Nexus::NexusDescriptorLazy::CacheReturnStatus_t::FOUND)
+      TS_ASSERT_EQUALS(v.second, Mantid::Nexus::NexusDescriptorLazy::CacheReturnStatus_t::NXFOUND)
       TS_ASSERT_DELTA(v.first, 7200.01, 1e-2)
 
       auto v2 = descriptor.getEntryValue<float>("/entry/duration");
-      TS_ASSERT_EQUALS(v2.second, Mantid::Nexus::NexusDescriptorLazy::CacheReturnStatus_t::CACHED)
+      TS_ASSERT_EQUALS(v2.second, Mantid::Nexus::NexusDescriptorLazy::CacheReturnStatus_t::NXCACHED)
       TS_ASSERT_DELTA(v2.first, 7200.01, 1e-2)
     }
     {
       auto v = descriptor.getEntryValue<int>("/entry/duration");
-      TS_ASSERT_EQUALS(v.second, Mantid::Nexus::NexusDescriptorLazy::CacheReturnStatus_t::WRONG_TYPE)
+      TS_ASSERT_EQUALS(v.second, Mantid::Nexus::NexusDescriptorLazy::CacheReturnStatus_t::NXWRONG_TYPE)
     }
   }
 
