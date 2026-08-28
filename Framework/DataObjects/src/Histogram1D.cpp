@@ -55,10 +55,12 @@ void Histogram1D::setX(const Kernel::cow_ptr<HistogramData::HistogramX> &X) { m_
 // interface: handing out a mutable MantidVec would allow the length to be changed, so
 // FixedLengthVector::mutableRawData() is protected and Histogram is its only friend.
 GNU_DIAG_OFF("deprecated-declarations")
+MSVC_DIAG_OFF(4996)
 
 /// Deprecated, use mutableX() instead. Returns the x data
 MantidVec &Histogram1D::dataX() { return m_histogram.dataX(); }
 
+MSVC_DIAG_ON(4996)
 GNU_DIAG_ON("deprecated-declarations")
 
 /// Deprecated, use x() instead. Returns the x data const
@@ -71,8 +73,10 @@ const MantidVec &Histogram1D::readX() const { return m_histogram.x().rawData(); 
 Kernel::cow_ptr<HistogramData::HistogramX> Histogram1D::ptrX() const { return m_histogram.sharedX(); }
 
 GNU_DIAG_OFF("deprecated-declarations")
+MSVC_DIAG_OFF(4996)
 /// Deprecated, use mutableDx() instead.
 MantidVec &Histogram1D::dataDx() { return m_histogram.dataDx(); }
+MSVC_DIAG_ON(4996)
 GNU_DIAG_ON("deprecated-declarations")
 /// Deprecated, use dx() instead.
 const MantidVec &Histogram1D::dataDx() const { return m_histogram.dx().rawData(); }
