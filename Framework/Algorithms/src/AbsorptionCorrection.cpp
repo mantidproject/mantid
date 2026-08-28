@@ -7,14 +7,17 @@
 #include "MantidAlgorithms/AbsorptionCorrection.h"
 #include "MantidAPI/HistoWorkspace.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidGeometry/Objects/ShapeRotation.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidHistogramData/Interpolate.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -375,6 +378,21 @@ void AbsorptionCorrection::constructSample(API::Sample &sample) {
       const std::string mess("No shape has been defined for the sample in the input workspace");
       g_log.error(mess);
       throw std::invalid_argument(mess);
+    }
+
+    if (scatterFrom == CALC_SAMPLE) {
+      // The beam and the detector positions are described in the lab frame, but the sample shape is
+      // only there if something has already rotated it - CopySample bakes the destination
+      // goniometer in, while SetGoniometer alone leaves the shape in its own frame. Move it the rest
+      // of the way, so the tracks below are traced through a shape that is where the experiment puts
+      // it. getLabFrameShape returns a plain clone when nothing is outstanding, so an unrotated
+      // workspace is unchanged. Held in a member because m_sampleObject only borrows it.
+      //
+      // The container and environment are deliberately left as they stand: neither is ever
+      // goniometer-rotated anywhere in Mantid, which is the same reason SetSample declines to bake
+      // the run's goniometer when a sample environment is present.
+      m_labFrameShape = Geometry::getLabFrameShape(*m_sampleObject, m_inputWS->run().getGoniometer().getR());
+      m_sampleObject = m_labFrameShape.get();
     }
   } else if (scatterFrom != CALC_SAMPLE) { // should never be in this case
     std::stringstream msg;

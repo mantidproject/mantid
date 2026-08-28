@@ -11,10 +11,14 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAlgorithms/CylinderAbsorption.h"
 #include "MantidDataHandling/SetSample.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/UnitFactory.h"
+#include "SampleFrameEquivalence.h"
+
+#include <cmath>
 
 using Mantid::API::MatrixWorkspace_sptr;
 
@@ -267,7 +271,49 @@ public:
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
   }
 
+  void test_both_ways_of_orienting_the_sample_agree() {
+    // A sample in its own frame with the rotation on the run, and the same sample already rotated
+    // into the lab frame, describe the same experiment and must correct identically. This exercises
+    // the branch that takes its shape from the sample rather than building its own cylinder, and
+    // the rasterisation follows the cylinder's own axis, so the tilted shape dices correctly.
+    const auto rotation = SampleFrameEquivalence::rotationX(30.0);
+    const double ownFrame = runSampleShapeCorrection("cylabs_own", rotation, false);
+    const double labFrame = runSampleShapeCorrection("cylabs_lab", rotation, true);
+
+    TS_ASSERT_DELTA(ownFrame, labFrame, 1e-9);
+    // and the rotation actually mattered - otherwise the assertion above proves nothing
+    const double unrotated = runSampleShapeCorrection("cylabs_flat", Mantid::Kernel::Matrix<double>(3, 3, true), false);
+    TS_ASSERT(std::abs(ownFrame - unrotated) > 1e-6);
+  }
+
 private:
+  /// Correct a cylinder sample held in the given frame and return the first attenuation factor.
+  /// No CylinderSampleHeight or CylinderSampleRadius is set, so the algorithm takes its shape from
+  /// the sample - the only branch of this algorithm that looks at the sample shape at all. The
+  /// cylinder stands along y and is tilted about x, so its orientation is visible to a beam along z.
+  double runSampleShapeCorrection(const std::string &name, const Mantid::Kernel::Matrix<double> &rotation,
+                                  const bool baked) {
+    MatrixWorkspace_sptr ws = createTestWorkspace();
+    const auto cylinderXML = ComponentCreationHelper::cappedCylinderXML(
+        0.004, 0.04, Mantid::Kernel::V3D(0.0, -0.02, 0.0), Mantid::Kernel::V3D(0.0, 1.0, 0.0), "sample");
+    if (baked) {
+      SampleFrameEquivalence::setSampleInLabFrame(*ws, rotation, SampleFrameEquivalence::vanadium(), cylinderXML);
+    } else {
+      SampleFrameEquivalence::setSampleInOwnFrame(*ws, rotation, SampleFrameEquivalence::vanadium(), cylinderXML);
+    }
+
+    Mantid::Algorithms::CylinderAbsorption alg;
+    alg.setRethrows(true);
+    configureAbsCommon(alg, ws, name);
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
+
+    auto result = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(name);
+    const double value = result->y(0).front();
+    Mantid::API::AnalysisDataService::Instance().remove(name);
+    return value;
+  }
+
   MatrixWorkspace_sptr createTestWorkspace() {
     // Create a small test workspace
     MatrixWorkspace_sptr testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 10);
