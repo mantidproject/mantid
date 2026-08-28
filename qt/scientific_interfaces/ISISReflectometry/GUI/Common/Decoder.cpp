@@ -434,7 +434,7 @@ Decoder::decodeSearchResult(const QMap<QString, QVariant> &map) {
       map[QString("runNumber")].toString().toStdString(), map[QString("title")].toString().toStdString(),
       map[QString("groupName")].toString().toStdString(), map[QString("theta")].toString().toStdString(),
       map[QString("error")].toString().toStdString(), map[QString("excludeReason")].toString().toStdString(),
-      map[QString("comment")].toString().toStdString());
+      map[QString("comment")].toString().toStdString(), map[QString("model")].toString().toStdString());
   return searchResult;
 }
 
