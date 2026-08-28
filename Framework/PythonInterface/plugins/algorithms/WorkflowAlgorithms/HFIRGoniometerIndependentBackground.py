@@ -14,6 +14,13 @@ from scipy.stats import norm
 
 
 class HFIRGoniometerIndependentBackground(PythonAlgorithm):
+    _NORMALIZATION_LOGS = {
+        "WAND": {"Time": "duration", "Monitor": "monitor_count"},
+        "HB2C": {"Time": "duration", "Monitor": "monitor_count"},
+        "HB3A": {"Time": "time", "Monitor": "monitor"},
+        "DEMAND": {"Time": "time", "Monitor": "monitor"},
+    }
+
     def category(self):
         return "Diffraction\\Reduction;Diffraction\\Utility"
 
@@ -32,15 +39,15 @@ class HFIRGoniometerIndependentBackground(PythonAlgorithm):
             name="BackgroundLevel",
             defaultValue=50.0,
             direction=Direction.Input,
-            doc="Backgound level defines percentile range, (default 50, median filter)",
-            validator=FloatBoundedValidator(-100.0, 100.0),
+            doc="Percentile in the range 0 to 100 defining the background level (default 50, median filter)",
+            validator=FloatBoundedValidator(0.0, 100.0),
         )
         self.declareProperty(
             name="BackgroundWindowSize",
             defaultValue=Property.EMPTY_INT,
             direction=Direction.Input,
-            doc="Background Window Size, only applies to the rotation axis, assumes the detectors are already \
-              grouped. Integer value or -1 for All values",
+            doc="Background window size, only applies to the rotation axis, assumes the detectors are already \
+              grouped. Leave unset to use every value along the rotation axis",
             validator=IntBoundedValidator(lower=1),
         )
         self.declareProperty(
@@ -73,12 +80,20 @@ class HFIRGoniometerIndependentBackground(PythonAlgorithm):
 
         return issues
 
-    @staticmethod
-    def _get_normalization_factors(data_ws, normalize_by, n_rotations):
+    @classmethod
+    def _get_normalization_factors(cls, data_ws, normalize_by, n_rotations):
         if normalize_by == "None":
             return np.ones(n_rotations)
 
-        log_name = {"Time": "duration", "Monitor": "monitor_count"}[normalize_by]
+        instrument_name = data_ws.getExperimentInfo(0).getInstrumentName()
+        try:
+            log_name = cls._NORMALIZATION_LOGS[instrument_name][normalize_by]
+        except KeyError:
+            raise ValueError(
+                f"Normalization by {normalize_by} is not supported for instrument {instrument_name}. "
+                "Supported instruments are WAND/HB2C and DEMAND/HB3A."
+            ) from None
+
         factors = np.asarray(data_ws.getExperimentInfo(0).run().getProperty(log_name).value, dtype=float)
         if factors.size != n_rotations:
             raise ValueError(f"The {log_name} log has {factors.size} values, but the workspace has {n_rotations} rotations.")

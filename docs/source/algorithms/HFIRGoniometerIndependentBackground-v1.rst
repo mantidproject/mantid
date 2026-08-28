@@ -9,11 +9,22 @@
 Description
 -----------
 
-This algorithm is used to generate a background for HFIR monochromatic diffraction data. This algorithm wraps
-`Scipy.ndimage.percentile_filter <https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.percentile_filter.html>`_
-to generate the background for the input workspace. In the case that BackgroundWindowSize is -1,
-`Numpy.percentile <https://numpy.org/doc/stable/reference/generated/numpy.percentile.html>`_ is used to generate the background as
-it is much faster.
+This algorithm is used to generate a background for HFIR monochromatic diffraction data. For every
+detector pixel it takes a percentile of the intensities recorded along the rotation axis. Bragg
+scattering illuminates a pixel for only part of the scan while the background persists, so a
+percentile rejects the peaks and retains the goniometer-independent level.
+
+When ``BackgroundWindowSize`` is set, the percentile is taken over a sliding window of that many
+rotation steps, allowing the background to vary slowly with rotation angle. It selects a ranked value
+in the same way as
+`Scipy.ndimage.percentile_filter <https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.percentile_filter.html>`_.
+When the property is left unset, the percentile is taken over the whole rotation axis and the
+background is constant in rotation for each pixel; the value is interpolated linearly between
+order statistics, as
+`Numpy.percentile <https://numpy.org/doc/stable/reference/generated/numpy.percentile.html>`_ does.
+
+``BackgroundLevel`` is a percentile and must lie between 0 and 100. It defaults to 50, which
+takes the median along the rotation axis.
 
 The optional ``NormalizeBy`` property can be set to ``Time`` or ``Monitor`` to divide each rotation
 by its duration or monitor count before calculating the percentile. ``None`` does no normalization.
@@ -21,6 +32,10 @@ by its duration or monitor count before calculating the percentile. ``None`` doe
 remains normalized when the user chooses ``Time`` or ``Monitor``.
 When it is ``False`` (the default), the result is multiplied by time duration or monitor count of each rotation.
 The corresponding error variances are scaled consistently.
+
+For WAND (HB2C), the ``duration`` and ``monitor_count`` sample logs are used. For DEMAND (HB3A),
+the corresponding logs are named ``time`` and ``monitor``. Normalization is not supported for
+other instruments.
 
 Uncertainties
 -------------
