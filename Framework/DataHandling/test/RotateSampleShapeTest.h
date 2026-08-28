@@ -152,6 +152,36 @@ public:
     return ws;
   }
 
+  void test_rotating_a_mesh_does_not_disturb_a_workspace_sharing_it() {
+    // Sample's copy constructor shares the shape pointer, so a workspace copied from another holds
+    // the very same mesh. Rotating one used to turn the other's sample with it, because the mesh
+    // branch mutated the vertices where they lay while the CSG branch replaced the pointer.
+    auto cube = createCube(2.0, V3D(0.0, 0.0, 0.0));
+    Workspace2D_sptr ws = getWsWithMeshSampleShape(cube, "RotSampleShapeTest_ws");
+    Workspace2D_sptr sharer = WorkspaceCreationHelper::create2DWorkspace(10, 10);
+    sharer->mutableSample() = ws->sample();
+    TS_ASSERT_EQUALS(sharer->sample().getShapePtr(), ws->sample().getShapePtr());
+
+    const std::vector<V3D> before =
+        std::dynamic_pointer_cast<const MeshObject>(sharer->sample().getShapePtr())->getV3Ds();
+
+    RotateSampleShape alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Workspace", "RotSampleShapeTest_ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Axis0", "90,0,0,1,1"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // the rotated workspace got a new shape rather than a turned one
+    TS_ASSERT_DIFFERS(ws->sample().getShapePtr(), sharer->sample().getShapePtr());
+    const std::vector<V3D> after =
+        std::dynamic_pointer_cast<const MeshObject>(sharer->sample().getShapePtr())->getV3Ds();
+    TS_ASSERT_EQUALS(before, after);
+    // and the workspace that was asked for a rotation did get one
+    const std::vector<V3D> rotated = std::dynamic_pointer_cast<const MeshObject>(ws->sample().getShapePtr())->getV3Ds();
+    TS_ASSERT_DIFFERS(rotated, after);
+  }
+
   std::unique_ptr<MeshObject> createCube(const double size, const V3D &centre) {
     /**
      * Create cube of side length size with specified centre,
