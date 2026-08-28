@@ -10,6 +10,7 @@ from mantid.kernel import Direction, FloatBoundedValidator, IntBoundedValidator,
 from mantid.simpleapi import CloneWorkspace
 
 import numpy as np
+from scipy.stats import norm
 
 
 class HFIRGoniometerIndependentBackground(PythonAlgorithm):
@@ -85,7 +86,7 @@ class HFIRGoniometerIndependentBackground(PythonAlgorithm):
 
     @staticmethod
     def _global_percentile(signal, error_squared, percentile):
-        """Return a percentile and its paired error variance along the rotation axis."""
+        """Return a percentile and the error variance of the value it selected."""
         order = np.argsort(signal, axis=2)
         sorted_signal = np.take_along_axis(signal, order, axis=2)
         sorted_error_squared = np.take_along_axis(error_squared, order, axis=2)
@@ -101,7 +102,7 @@ class HFIRGoniometerIndependentBackground(PythonAlgorithm):
 
     @staticmethod
     def _windowed_percentile(signal, error_squared, percentile, window_size, filter_mode):
-        """Return windowed percentiles and paired error variances along the rotation axis."""
+        """Return windowed percentiles and the error variance of each value they selected."""
         pad_before = window_size // 2
         pad_after = window_size - 1 - pad_before
         mode = "edge" if filter_mode == "nearest" else "wrap"
@@ -121,6 +122,25 @@ class HFIRGoniometerIndependentBackground(PythonAlgorithm):
             selected_error[row] = np.take_along_axis(error_windows, order[:, :, rank : rank + 1], axis=2)[..., 0]
         return selected, selected_error
 
+    @staticmethod
+    def _estimator_variance_scale(percentile, n_samples):
+        """Return the factor converting a selected value's variance into the percentile estimator's variance.
+
+        The percentile is not a measurement but an estimator built from ``n_samples`` rotation steps, so it is
+        more precise than the single value it selects. For samples of standard deviation ``sigma`` drawn from a
+        distribution that is locally normal around the percentile, the estimator's variance is
+        ``p (1 - p) / phi(z_p)**2 * sigma**2 / n_samples``, where ``z_p`` is the standard normal quantile at
+        ``p`` and ``phi`` its density. The leading factor is pi/2 for the median.
+
+        The asymptotic result does not hold for the smallest or largest value, or for a single sample, so those
+        cases fall back to the variance of the selected value itself, which is a conservative upper bound.
+        """
+        p = percentile / 100.0
+        if not 0.0 < p < 1.0 or n_samples < 2:
+            return 1.0
+        density = norm.pdf(norm.ppf(p))
+        return p * (1.0 - p) / density**2 / n_samples
+
     def PyExec(self):
         data_ws = self.getProperty("InputWorkspace").value
         signal = data_ws.getSignalArray().copy()
@@ -137,11 +157,19 @@ class HFIRGoniometerIndependentBackground(PythonAlgorithm):
         error_squared /= factors[np.newaxis, np.newaxis, :] ** 2
 
         if bkg_size == Property.EMPTY_INT:
+            n_samples = signal.shape[2]
             percent, percent_error_squared = self._global_percentile(signal, error_squared, bkg_level)
-            bkg = np.repeat(percent[:, :, np.newaxis], signal.shape[2], axis=2)
-            bkg_error_squared = np.repeat(percent_error_squared[:, :, np.newaxis], signal.shape[2], axis=2)
+            bkg = np.repeat(percent[:, :, np.newaxis], n_samples, axis=2)
+            bkg_error_squared = np.repeat(percent_error_squared[:, :, np.newaxis], n_samples, axis=2)
         else:
+            n_samples = bkg_size
             bkg, bkg_error_squared = self._windowed_percentile(signal, error_squared, bkg_level, bkg_size, filter_mode)
+
+        # The selected value's variance is the uncertainty of a single measurement. Rescale it to the
+        # uncertainty of the percentile estimator, which averages over n_samples rotation steps. Taking the
+        # single-measurement variance at the percentile rather than across the whole window keeps the estimate
+        # free of the Bragg peaks that the percentile is chosen to reject.
+        bkg_error_squared *= self._estimator_variance_scale(bkg_level, n_samples)
 
         if not normalize_output:
             bkg *= factors[np.newaxis, np.newaxis, :]

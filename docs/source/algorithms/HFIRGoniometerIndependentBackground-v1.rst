@@ -22,6 +22,36 @@ remains normalized when the user chooses ``Time`` or ``Monitor``.
 When it is ``False`` (the default), the result is multiplied by time duration or monitor count of each rotation.
 The corresponding error variances are scaled consistently.
 
+Uncertainties
+-------------
+
+The percentile is an estimator built from the rotation steps that contribute to it, not a single
+measurement, so it is more precise than the value it selects. For :math:`n` contributing rotations
+whose values have standard deviation :math:`\sigma`, the output variance is
+
+.. math::
+
+   \mathrm{Var}(\hat{q}_p) = \frac{p(1-p)}{\phi(z_p)^2} \frac{\sigma^2}{n}
+
+where :math:`p` is ``BackgroundLevel`` expressed as a fraction, :math:`z_p` is the standard normal
+quantile at :math:`p` and :math:`\phi` its density. The leading factor is :math:`\pi/2` for the
+median, giving the familiar :math:`1.2533\,\sigma/\sqrt{n}`. Here :math:`n` is the length of the
+rotation axis when ``BackgroundWindowSize`` is unset, and ``BackgroundWindowSize`` otherwise, while
+:math:`\sigma^2` is the input variance of the value the percentile selected. Taking :math:`\sigma`
+at the percentile rather than across all contributing rotations keeps the estimate free of the Bragg
+peaks that the percentile is chosen to reject.
+
+A ``BackgroundLevel`` of 0 or 100 selects the smallest or largest value, for which this limit does not
+apply; those cases keep the variance of the selected value, which is a conservative upper bound.
+
+Two limitations are worth noting. Where the sliding window is padded at the ends of an incomplete
+rotation, it repeats values, so fewer than ``BackgroundWindowSize`` independent rotations contribute
+and the variance is slightly underestimated. More importantly, the output uncertainties are strongly
+correlated - completely so across the rotation axis when ``BackgroundWindowSize`` is unset, and
+between neighbouring rotations otherwise, since their windows overlap. A ``MDHistoWorkspace`` cannot
+represent that correlation, so any subsequent operation that combines these values along the rotation
+axis will underestimate the resulting uncertainty.
+
 
 
 Usage
