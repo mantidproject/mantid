@@ -261,6 +261,51 @@ Integrate3DEvents::integrateWeakPeak(const IntegrationParameters &params, PeakSh
                                                     "IntegrateEllipsoidsTwoStep");
 }
 
+/**
+ * Integrate a peak using a fixed ellipsoidal shape, rather than fitting one
+ * from the events themselves. The shape's directions and radii (peak and
+ * background) are used exactly as supplied, centered on peak_q.
+ *
+ * @param shape   The ellipsoid shape (directions, peak radii, background
+ *                inner/outer radii) to integrate with.
+ * @param peak_q  Q-vector at which to center the shape.
+ * @param inti    Returns the net (background-subtracted) integrated intensity.
+ * @param sigi    Returns the standard deviation of inti.
+ */
+std::shared_ptr<const Geometry::PeakShape> Integrate3DEvents::integrateUsingShape(PeakShapeEllipsoid_const_sptr shape,
+                                                                                  const V3D &peak_q, double &inti,
+                                                                                  double &sigi) {
+  inti = 0.0; // default values, in case something
+  sigi = 0.0; // is wrong with the peak.
+
+  auto result = getEvents(peak_q);
+  if (!result)
+    return shape;
+
+  const auto &events = *result;
+
+  const auto &directions = shape->directions();
+  const auto &abcRadii = shape->abcRadii();
+  const auto &abcBackgroundInnerRadii = shape->abcRadiiBackgroundInner();
+  const auto &abcBackgroundOuterRadii = shape->abcRadiiBackgroundOuter();
+
+  const std::pair<double, double> backgrd = numInEllipsoidBkg(
+      events, directions, abcBackgroundOuterRadii, abcBackgroundInnerRadii, m_useOnePercentBackgroundCorrection);
+  const std::pair<double, double> peak = numInEllipsoid(events, directions, abcRadii);
+
+  // volume ratio between the peak ellipsoid and the background shell, used to
+  // scale the background counts to the peak's volume before subtracting
+  const auto peakVolume = abcRadii[0] * abcRadii[1] * abcRadii[2];
+  const auto backgroundVolume = abcBackgroundOuterRadii[0] * abcBackgroundOuterRadii[1] * abcBackgroundOuterRadii[2] -
+                                abcBackgroundInnerRadii[0] * abcBackgroundInnerRadii[1] * abcBackgroundInnerRadii[2];
+  const auto ratio = backgroundVolume > 0 ? peakVolume / backgroundVolume : 0.0;
+
+  inti = peak.first - ratio * backgrd.first;
+  sigi = sqrt(peak.second + ratio * ratio * backgrd.second);
+
+  return shape;
+}
+
 double Integrate3DEvents::estimateSignalToNoiseRatio(const IntegrationParameters &params, const V3D &center,
                                                      bool forceSpherical, double sphericityTol) {
 
