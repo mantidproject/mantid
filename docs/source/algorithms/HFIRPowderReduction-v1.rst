@@ -18,6 +18,28 @@ and reduction steps are slightly modified.
 By default the instrument geometry is determined by the sample file. An instrument definition file (IDF) can
 optionally be supplied through the ``IDFFilename`` property to override the geometry used by the sample file.
 
+Binning
+-------
+
+The reduced spectrum is binned onto a grid of constant width ``XBinWidth`` in the unit
+selected by ``XUnits``. The grid is anchored at ``XMin`` when that is given and at zero
+otherwise, so the bin centres always fall on
+
+.. math::
+
+   x_n = x_\mathrm{anchor} + \left( n + \tfrac{1}{2} \right) \Delta x , \qquad
+   x_\mathrm{anchor} = \begin{cases} \texttt{XMin} & \text{if given} \\ 0 & \text{otherwise} \end{cases}
+
+``XMin`` and ``XMax`` are both optional and act as limits on that grid rather than as the
+first and last bin boundary: no bin starts below ``XMin`` and no bin reaches past ``XMax``.
+Within those limits only the bins that hold data are kept, so supplying an ``XMin`` below
+the start of the data (or an ``XMax`` above its end) does not add empty bins and, unlike in
+previous versions, does not shift the grid onto the data.
+
+For example, with data starting at :math:`2\theta = 6.07^\circ` and
+``XBinWidth`` = 0.1, both ``XMin`` = 6 and ``XMin`` unset give bins centred at
+6.05, 6.15, 6.25 ..., while ``XMin`` = 6.1 gives bins centred at 6.15, 6.25, 6.35 ...
+
 Reduction formula
 -----------------
 
