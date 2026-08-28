@@ -137,12 +137,12 @@ class FindPeaksAutomaticTest(unittest.TestCase):
             FindPeaksAutomatic(InputWorkspace=self.data_ws, MaxPeakSigma=-0.1, PlotPeaks=False)
 
     def test_algorithm_creates_all_output_workspaces(self):
-        ws_name = self.raw_ws.getName()
+        ws_name = self.raw_ws.name()
         FindPeaksAutomatic(self.raw_ws)
 
         self.assertIn("{}_with_errors".format(ws_name), mtd)
-        self.assertIn("{}_{}".format(self.raw_ws.getName(), "properties"), mtd)
-        self.assertIn("{}_{}".format(self.raw_ws.getName(), "refit_properties"), mtd)
+        self.assertIn("{}_{}".format(self.raw_ws.name(), "properties"), mtd)
+        self.assertIn("{}_{}".format(self.raw_ws.name(), "refit_properties"), mtd)
 
     def test_algorithm_works_on_specified_spectrum(self):
         x_values = np.array([np.linspace(0, 100, 1001), np.linspace(0, 100, 1001)], dtype=float)
@@ -175,7 +175,7 @@ class FindPeaksAutomaticTest(unittest.TestCase):
             MinPeakSigma=3,
             MaxPeakSigma=15,
         )
-        peak_table = mtd["{}_{}".format(raw_ws.getName(), "properties")]
+        peak_table = mtd["{}_{}".format(raw_ws.name(), "properties")]
         print(peak_table.row(1))
         self.assertPeakFound(peak_table.row(0), 10, 40, 8)
         self.assertPeakFound(peak_table.row(1), 60, 50, 6)
@@ -226,8 +226,8 @@ class FindPeaksAutomaticTest(unittest.TestCase):
     def test_output_tables_are_correctly_formatted(self):
         FindPeaksAutomatic(self.raw_ws, FitToBaseline=True)
 
-        peak_table = mtd["{}_{}".format(self.raw_ws.getName(), "properties")]
-        refit_peak_table = mtd["{}_{}".format(self.raw_ws.getName(), "refit_properties")]
+        peak_table = mtd["{}_{}".format(self.raw_ws.name(), "properties")]
+        refit_peak_table = mtd["{}_{}".format(self.raw_ws.name(), "refit_properties")]
         self.assertEqual(self.peak_table_header, peak_table.getColumnNames())
         self.assertEqual(self.peak_table_header, refit_peak_table.getColumnNames())
         self.assertEqual(2, peak_table.rowCount())
@@ -493,8 +493,8 @@ class FindPeaksAutomaticTest(unittest.TestCase):
             MinPeakSigma=3,
             MaxPeakSigma=15,
         )
-        peak_table = mtd["{}_{}".format(self.raw_ws.getName(), "properties")]
-        refit_peak_table = mtd["{}_{}".format(self.raw_ws.getName(), "refit_properties")]
+        peak_table = mtd["{}_{}".format(self.raw_ws.name(), "properties")]
+        refit_peak_table = mtd["{}_{}".format(self.raw_ws.name(), "refit_properties")]
 
         self.assertEqual(2, peak_table.rowCount())
         self.assertEqual(0, refit_peak_table.rowCount())

@@ -153,10 +153,11 @@ class ReflectometryISISSumBanksTest(unittest.TestCase):
         prepended_ws = ReflectometryISISSumBanks()._prepend_monitors(test_ws, summed_ws)
 
         self.assertEqual(num_banks + num_monitors, prepended_ws.getNumberHistograms())
+        spectrum_info = prepended_ws.spectrumInfo()
         for idx in range(prepended_ws.getNumberHistograms()):
             # The monitors are at the start
             expected_monitor = idx < num_monitors
-            self.assertEqual(expected_monitor, prepended_ws.getDetector(idx).isMonitor())
+            self.assertEqual(expected_monitor, spectrum_info.isMonitor(idx))
 
 
 if __name__ == "__main__":

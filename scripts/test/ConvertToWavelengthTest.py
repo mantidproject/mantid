@@ -110,9 +110,9 @@ class ConvertToWavelengthTest(unittest.TestCase):
         temp_ws = ConvertToWavelength.crop_range(original_ws, ((1, 3)))
         self.assertEqual(3, temp_ws.getNumberHistograms())
         # First and last dectors are cropped off, so indexes go 2-4 rather than 1-5
-        self.assertEqual(2, temp_ws.getDetector(0).getID())
-        self.assertEqual(3, temp_ws.getDetector(1).getID())
-        self.assertEqual(4, temp_ws.getDetector(2).getID())
+        self.assertEqual({2}, set(temp_ws.getSpectrum(0).getDetectorIDs()))
+        self.assertEqual({3}, set(temp_ws.getSpectrum(1).getDetectorIDs()))
+        self.assertEqual({4}, set(temp_ws.getSpectrum(2).getDetectorIDs()))
 
         # Test resilience to junk inputs
         self.assertRaises(ValueError, ConvertToWavelength.crop_range, original_ws, "a")

@@ -9,11 +9,12 @@ import unittest
 
 from mantid.api import AnalysisDataService
 from mantid.kernel import config, ConfigService
-from mantid.simpleapi import CreateSampleWorkspace, MaskDetectors, DeleteWorkspace, LoadNexusProcessed, Load, Rebin
+from mantid.simpleapi import CreateSampleWorkspace, CreateWorkspace, MaskDetectors, DeleteWorkspace, LoadNexusProcessed, Load, Rebin
 from sans.algorithm_detail.calculate_transmission_helper import (
     get_masked_det_ids,
     get_idf_path_from_workspace,
     get_workspace_indices_for_monitors,
+    get_detector_id_for_spectrum_number,
     apply_flat_background_correction_to_monitors,
     apply_flat_background_correction_to_detectors,
     get_region_of_interest,
@@ -148,6 +149,15 @@ class CalculateTransmissionHelperTest(unittest.TestCase):
         self.assertEqual(workspace_indices, [])
         # Clean up
         DeleteWorkspace(test_workspace_for_monitors)
+
+    def test_that_returns_none_if_spectrum_has_no_detector(self):
+        workspace = CreateWorkspace(DataX=[0.0, 1.0], DataY=[1.0], NSpec=1)
+        spectrum_number = workspace.getSpectrum(0).getSpectrumNo()
+
+        detector_id = get_detector_id_for_spectrum_number(workspace, spectrum_number)
+
+        self.assertIsNone(detector_id)
+        DeleteWorkspace(workspace)
 
     def test_that_applies_flat_background_correction_only_to_monitors(self):
         # Arrange

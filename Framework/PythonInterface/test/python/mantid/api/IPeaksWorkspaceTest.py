@@ -150,7 +150,9 @@ class IPeaksWorkspaceTest(unittest.TestCase):
         # Incident wavevector
         wavelength = 2.0  # Angstroms
         k = 2 * math.pi / wavelength
-        ki = pws.getInstrument().getReferenceFrame().vecPointingAlongBeam() * k
+        component_info = pws.componentInfo()
+        beam_direction = component_info.samplePosition() - component_info.sourcePosition()
+        ki = beam_direction * (k / beam_direction.norm())
 
         # Final Wavevector
         detector_id = 42  # column_id = 4, row_id = 2

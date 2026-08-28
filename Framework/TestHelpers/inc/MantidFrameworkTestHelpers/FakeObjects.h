@@ -73,10 +73,12 @@ public:
   void setX(const Mantid::Kernel::cow_ptr<Mantid::HistogramData::HistogramX> &X) override { m_histogram.setSharedX(X); }
   // The mutable legacy accessors below require Histogram's legacy interface
   GNU_DIAG_OFF("deprecated-declarations")
+  MSVC_DIAG_OFF(4996)
   MantidVec &dataX() override { return m_histogram.dataX(); }
   MantidVec &dataDx() override { return m_histogram.dataDx(); }
   MantidVec &dataY() override { return m_histogram.dataY(); }
   MantidVec &dataE() override { return m_histogram.dataE(); }
+  MSVC_DIAG_ON(4996)
   GNU_DIAG_ON("deprecated-declarations")
 
   const MantidVec &dataX() const override { return m_histogram.x().rawData(); }

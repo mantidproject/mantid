@@ -446,11 +446,12 @@ template <size_t nd> static MDGridBox<MDLeanEvent<nd>, nd> *makeRecursiveMDGridB
   // Splits into splitInto x splitInto x ... boxes
   splitter->setSplitInto(splitInto);
   // Set the size to splitInto*1.0 in all directions
-  auto box = std::make_unique<MDBox<MDLeanEvent<nd>, nd>>(splitter);
+  MDBox<MDLeanEvent<nd>, nd> box(splitter);
   for (size_t d = 0; d < nd; d++)
-    box->setExtents(d, 0.0, static_cast<coord_t>(splitInto));
-  // Split into the gridbox.
-  auto gridbox = new MDGridBox<MDLeanEvent<nd>, nd>(box.get());
+    box.setExtents(d, 0.0, static_cast<coord_t>(splitInto));
+  // Split into the gridbox. MDGridBox copies the events out and does not take
+  // ownership, so the box can live on the stack.
+  auto gridbox = new MDGridBox<MDLeanEvent<nd>, nd>(&box);
   // Now recursively split more
   recurseSplit(gridbox, 0, levels);
 

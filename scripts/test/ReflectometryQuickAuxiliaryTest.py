@@ -45,12 +45,12 @@ class ReflectometryQuickAuxiliaryTest(unittest.TestCase):
         expectedInstrument = "POLREF"
 
         # Test with group workspace as input
-        instrument = quick.groupGet(self.__wsName, "inst")
-        self.assertEqual(expectedInstrument, instrument.getName(), "Did not fetch the instrument from ws group")
+        instrument_name = quick.groupGet(self.__wsName, "inst")
+        self.assertEqual(expectedInstrument, instrument_name, "Did not fetch the instrument from ws group")
 
         # Test with single workspace as input
-        instrument = quick.groupGet(mtd[self.__wsName][0].name(), "inst")
-        self.assertEqual(expectedInstrument, instrument.getName(), "Did not fetch the instrument from ws")
+        instrument_name = quick.groupGet(mtd[self.__wsName][0].name(), "inst")
+        self.assertEqual(expectedInstrument, instrument_name, "Did not fetch the instrument from ws")
 
     def test_groupGet_histogram_count(self):
         expectedNHistograms = mtd[self.__wsName][0].getNumberHistograms()

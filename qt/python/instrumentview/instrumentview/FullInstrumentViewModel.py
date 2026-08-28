@@ -74,7 +74,7 @@ class FullInstrumentViewModel:
 
         x_unit = self._workspace.getAxis(0).getUnit()
         self._workspace_x_unit = x_unit.unitID()
-        self._workspace_x_unit_display = f"{str(x_unit.caption())} ({str(x_unit.symbol())})"
+        self._workspace_x_unit_display = f"{str(x_unit.caption())} ({x_unit.symbol().ascii()})"
         self._selected_peaks_workspaces = []
         self._instrument_view_peaks_ws_name = f"instrument_view_peaks_{self._workspace.name()}"
 

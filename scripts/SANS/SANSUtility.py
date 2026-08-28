@@ -940,7 +940,7 @@ def get_masked_det_ids(ws):
             # which is a big speed increase for SANS2D.
             break
         if spectrumInfo.isMasked(ws_index):
-            yield ws.getDetector(ws_index).getID()
+            yield from ws.getSpectrum(ws_index).getDetectorIDs()
 
 
 def create_zero_error_free_workspace(input_workspace_name, output_workspace_name):
@@ -987,7 +987,7 @@ def remove_zero_errors_from_workspace(ws):
         raise ValueError("Cannot remove zero errors from a workspace which is not of type MatrixWorkspace.")
     # Iterate over the workspace and replace the zero values with a large default value
     numSpectra = ws.getNumberHistograms()
-    errors = ws.dataE
+    errors = ws.mutableE
     for index in range(0, numSpectra):
         spectrum = errors(index)
         spectrum[spectrum <= 0.0] = ZERO_ERROR_DEFAULT

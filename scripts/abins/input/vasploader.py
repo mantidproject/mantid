@@ -253,7 +253,7 @@ class VASPLoader(AbInitioLoader):
                 selective_varray = None
 
         # Selective dynamics limits the degrees of freedom; treat the system as though only the mobile atoms are present
-        if selective_varray:
+        if selective_varray is not None:
             selective_bools = np.asarray(
                 list(map(_collapse_bools, [_to_text(v).split() for v in selective_varray.findall("v")])), dtype=bool
             )
@@ -267,7 +267,7 @@ class VASPLoader(AbInitioLoader):
             return int(atom_type)
 
         atom_types = [_rc_to_atom_type(rc) for rc in _find_or_error(_find_or_error(atom_info, "array", name="atoms"), "set").findall("rc")]
-        if selective_varray:
+        if selective_varray is not None:
             atom_types = np.asarray(atom_types)[selective_bools]
 
         # Get symbols and masses corresponding to these types, and construct full lists of atom properties

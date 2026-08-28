@@ -174,7 +174,7 @@ MDTransfNoQ::MDTransfNoQ() : m_NMatrixDim(0), m_YAxis(nullptr), m_Det(nullptr) {
  * @return coord_t pair with min and max bounds of selected dimension.
  */
 std::pair<coord_t, coord_t> MDTransfNoQ::getDimBounds(size_t dim) const {
-  return std::make_pair(m_DimMin[dim], m_DimMax[dim]);
+  return std::make_pair(static_cast<coord_t>(m_DimMin[dim]), static_cast<coord_t>(m_DimMax[dim]));
 }
 
 /**

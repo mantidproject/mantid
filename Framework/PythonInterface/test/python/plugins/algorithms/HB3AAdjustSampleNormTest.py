@@ -69,10 +69,12 @@ class HB3AAdjustSampleNormTest(unittest.TestCase):
         height_adj = 0.75
         dist_adj = 0.25
         # Get the original detector position before adjustment
-        orig_pos = mtd[self._input_ws].getExperimentInfo(0).getInstrument().getDetector(1).getPos()
+        input_detector_info = mtd[self._input_ws].getExperimentInfo(0).detectorInfo()
+        orig_pos = input_detector_info.position(input_detector_info.indexOf(1))
         result = HB3AAdjustSampleNorm(InputWorkspaces=self._input_ws, DetectorHeightOffset=height_adj, DetectorDistanceOffset=dist_adj)
         # Get the updated detector position
-        new_pos = result.getExperimentInfo(0).getInstrument().getDetector(1).getPos()
+        result_detector_info = result.getExperimentInfo(0).detectorInfo()
+        new_pos = result_detector_info.position(result_detector_info.indexOf(1))
 
         # Verify detector adjustment
         self.__checkAdjustments(orig_pos, new_pos, height_adj, dist_adj)
@@ -81,9 +83,11 @@ class HB3AAdjustSampleNormTest(unittest.TestCase):
 
     def testDoNotAdjustDetector(self):
         # Ensure detector position does not change when no offsets are given
-        orig_pos = mtd[self._input_ws].getExperimentInfo(0).getInstrument().getDetector(1).getPos()
+        input_detector_info = mtd[self._input_ws].getExperimentInfo(0).detectorInfo()
+        orig_pos = input_detector_info.position(input_detector_info.indexOf(1))
         result = HB3AAdjustSampleNorm(InputWorkspaces=self._input_ws, DetectorHeightOffset=0.0, DetectorDistanceOffset=0.0)
-        new_pos = result.getExperimentInfo(0).getInstrument().getDetector(1).getPos()
+        result_detector_info = result.getExperimentInfo(0).detectorInfo()
+        new_pos = result_detector_info.position(result_detector_info.indexOf(1))
 
         # Verify detector adjustment
         self.__checkAdjustments(orig_pos, new_pos, 0.0, 0.0)
