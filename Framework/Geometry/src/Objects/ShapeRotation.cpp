@@ -11,6 +11,8 @@
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/Logger.h"
 
+#include <stdexcept>
+
 namespace Mantid::Geometry {
 
 namespace {
@@ -43,11 +45,29 @@ std::shared_ptr<IObject> getLabFrameShape(const IObject &shape, const Kernel::Ma
   }
 
   if (const auto *csgShape = dynamic_cast<const CSGObject *>(&shape)) {
+    // Rotating a CSG shape means rewriting its definition and rebuilding from that, so a shape
+    // assembled surface by surface rather than parsed - ShapeFactory::createSphere and
+    // createHexahedralShape both do this - has nothing to rewrite. Rebasing an empty string yields
+    // a bare pair of tags that will not parse, and createShape answers that with an empty shape:
+    // silently no sample at all, where the caller asked for a rotated one. Say so instead.
+    //
+    // Unlike the untouched MeshObject2D below, this is not a shape that has no frame to move into.
+    // It is a shape that can be rotated and whose rotation we have no way to express, which is a
+    // defect rather than a definition, so it is worth an exception rather than a warning.
+    if (csgShape->getShapeXML().empty()) {
+      throw std::invalid_argument("The sample shape ('" + shape.id() +
+                                  "') carries no XML definition, so it cannot be rotated into the lab frame. It was "
+                                  "built directly from surfaces rather than parsed from a shape definition. Define "
+                                  "the sample with SetSample or CreateSampleShape to make it rotatable.");
+    }
+
     // Rebase the XML so the baked part becomes exactly goniometerR, preserving any rotation of the
-    // shape within its own frame, then rebuild. createShape does not carry the material over.
+    // shape within its own frame, then rebuild. createShape carries over neither the material nor
+    // the id.
     const auto xml = ShapeFactory().rebakeGoniometer(goniometerR, csgShape->getShapeXML(), shape.getAppliedRotation());
     auto labShape = ShapeFactory().createShape(xml, false);
     labShape->setMaterial(shape.material());
+    labShape->setID(shape.id());
     return labShape;
   }
 

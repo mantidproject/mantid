@@ -302,6 +302,39 @@ public:
     TS_ASSERT_EQUALS(getLabFrameShape(*meshShape, rotation)->material().name(), meshShape->material().name());
   }
 
+  void test_a_csg_shape_without_xml_cannot_be_moved_to_the_lab_frame() {
+    // createSphere assembles the surfaces directly rather than parsing a definition, so the shape
+    // has no XML to rewrite. Rebasing an empty string would build an empty shape and hand back a
+    // sample with nothing in it, so this is reported instead.
+    const auto sphere = ShapeFactory::createSphere(V3D(2.0, 0.0, 0.0), 0.5);
+    TS_ASSERT(sphere->hasValidShape());
+    TS_ASSERT(sphere->getShapeXML().empty());
+
+    TS_ASSERT_THROWS(getLabFrameShape(*sphere, rotationZ(90.0)), const std::invalid_argument &);
+  }
+
+  void test_a_csg_shape_without_xml_is_returned_when_nothing_is_outstanding() {
+    // Nothing has to be expressed, so the missing XML does not matter and the caller still gets a
+    // usable shape back.
+    const auto sphere = ShapeFactory::createSphere(V3D(2.0, 0.0, 0.0), 0.5);
+
+    std::shared_ptr<IObject> labShape;
+    TS_ASSERT_THROWS_NOTHING(labShape = getLabFrameShape(*sphere, IDENTITY));
+    TS_ASSERT(labShape);
+    TS_ASSERT(labShape->hasValidShape());
+    TS_ASSERT(labShape->isValid(V3D(2.0, 0.0, 0.0)));
+  }
+
+  void test_the_lab_frame_csg_shape_keeps_the_id() {
+    // createShape carries neither the material nor the id over, and the id is what SampleTest's
+    // Nexus round trip saves - a shape that lost it would come back anonymous.
+    const auto sphere = createOffsetSphere();
+    sphere->setID("my-sample");
+
+    const auto labShape = getLabFrameShape(*sphere, rotationZ(90.0));
+    TS_ASSERT_EQUALS(labShape->id(), "my-sample");
+  }
+
   void test_a_shape_that_cannot_be_rotated_is_returned_unchanged() {
     // MeshObject2D offers no way to express a rotation, so it is taken to be defined in the frame
     // it is meant to be used in. The caller gets it back as it stands, plus a warning in the log.
