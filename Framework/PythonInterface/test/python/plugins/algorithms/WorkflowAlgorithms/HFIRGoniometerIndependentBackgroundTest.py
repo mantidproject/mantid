@@ -81,13 +81,19 @@ class HFIRGoniometerIndependentBackgroundTest(unittest.TestCase):
         """Verify that rotation durations normalize the data before windowed percentile filtering."""
         signal = self.workspace.getSignalArray().copy()
         normalized_signal = signal / self.duration[np.newaxis, np.newaxis, :]
-        expected = scipy.ndimage.percentile_filter(normalized_signal, 50, size=(1, 1, 25), mode="nearest")
+        for background_level in (10, 50, 90):
+            with self.subTest(background_level=background_level):
+                expected = scipy.ndimage.percentile_filter(normalized_signal, background_level, size=(1, 1, 25), mode="nearest")
 
-        outputWS = HFIRGoniometerIndependentBackground(
-            self.workspace, BackgroundLevel=50, BackgroundWindowSize=25, NormalizeBy="Time", NormalizeOutput=True
-        )
+                outputWS = HFIRGoniometerIndependentBackground(
+                    self.workspace,
+                    BackgroundLevel=background_level,
+                    BackgroundWindowSize=25,
+                    NormalizeBy="Time",
+                    NormalizeOutput=True,
+                )
 
-        np.testing.assert_array_equal(outputWS.getSignalArray(), expected)
+                np.testing.assert_array_equal(outputWS.getSignalArray(), expected)
 
     def test_monitor_normalization_can_be_restored_per_rotation(self):
         """Verify that monitor-normalized global backgrounds can be restored to each rotation's scale."""
@@ -134,6 +140,24 @@ class HFIRGoniometerIndependentBackgroundTest(unittest.TestCase):
             HFIRGoniometerIndependentBackground(workspace, NormalizeBy="Time", OutputWorkspace="unsupported_output")
         DeleteWorkspace(workspace)
         DeleteWorkspace("unsupported_instrument")
+
+    def test_missing_normalization_log_is_reported(self):
+        workspace = CreateMDHistoWorkspace(
+            SignalInput=np.ones((1, 1, 1)),
+            ErrorInput=np.ones((1, 1, 1)),
+            Dimensionality=3,
+            Extents="0,1,0,1,0,1",
+            Names="x,y,z",
+            NumberOfBins="1,1,1",
+            Units="number,number,number",
+            OutputWorkspace="missing_log_input",
+        )
+        missing_instrument = LoadEmptyInstrument(InstrumentName="HB2C", OutputWorkspace="missing_log_instrument")
+        workspace.addExperimentInfo(missing_instrument)
+        with self.assertRaisesRegex(RuntimeError, "Required normalization log 'duration'.*instrument (WAND|HB2C)"):
+            HFIRGoniometerIndependentBackground(workspace, NormalizeBy="Time", OutputWorkspace="missing_log_output")
+        DeleteWorkspace(workspace)
+        DeleteWorkspace(missing_instrument)
 
     def test_invalid_normalization_factors_are_rejected(self):
         for normalize_by, log_name in (("Time", "duration"), ("Monitor", "monitor_count")):
@@ -206,6 +230,11 @@ class HFIRGoniometerIndependentBackgroundTest(unittest.TestCase):
 
             expected = np.ones_like(self.workspace.getErrorSquaredArray())
             np.testing.assert_allclose(outputWS.getErrorSquaredArray(), expected)
+
+    def test_percentile_variance_scale_handles_underflow_near_zero(self):
+        background_level = np.nextafter(0.0, 1.0) * 100.0
+        outputWS = HFIRGoniometerIndependentBackground(self.workspace, BackgroundLevel=background_level)
+        np.testing.assert_array_equal(outputWS.getErrorSquaredArray(), np.ones_like(self.workspace.getErrorSquaredArray()))
 
     def test_negative_background_level_is_rejected(self):
         """Verify a negative percentile is refused rather than silently selecting the wrong value."""

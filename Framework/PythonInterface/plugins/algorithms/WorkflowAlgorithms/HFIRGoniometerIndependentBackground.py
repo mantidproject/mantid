@@ -98,7 +98,12 @@ class HFIRGoniometerIndependentBackground(PythonAlgorithm):
                 "Supported instruments are WAND/HB2C and DEMAND/HB3A."
             ) from None
 
-        factors = np.asarray(data_ws.getExperimentInfo(0).run().getProperty(log_name).value, dtype=float)
+        try:
+            factors = np.asarray(data_ws.getExperimentInfo(0).run().getProperty(log_name).value, dtype=float)
+        except RuntimeError as error:
+            raise ValueError(
+                f"Required normalization log '{log_name}' for {normalize_by} normalization is missing from instrument {instrument_name}."
+            ) from error
         if factors.size != n_rotations:
             raise ValueError(f"The {log_name} log has {factors.size} values, but the workspace has {n_rotations} rotations.")
         if np.any(~np.isfinite(factors)) or np.any(factors <= 0):
@@ -160,7 +165,10 @@ class HFIRGoniometerIndependentBackground(PythonAlgorithm):
         if not 0.0 < p < 1.0 or n_samples < 2:
             return 1.0
         density = norm.pdf(norm.ppf(p))
-        return p * (1.0 - p) / density**2 / n_samples
+        density_squared = density**2
+        if density_squared == 0.0:
+            return 1.0
+        return p * (1.0 - p) / density_squared / n_samples
 
     def PyExec(self):
         data_ws = self.getProperty("InputWorkspace").value
