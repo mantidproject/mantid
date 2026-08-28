@@ -37,6 +37,11 @@ class IObject;
 ///
 /// A shape offering no rotation mechanism at all - MeshObject2D, the flat plate - is by definition
 /// already in the frame it is meant to be used in, so it is returned unchanged with a warning.
+///
+/// @throws std::invalid_argument if the shape is a CSGObject that was assembled from surfaces rather
+/// than parsed, so carries no XML to rewrite, and a rotation is actually outstanding. Such a shape
+/// can be rotated in principle but offers no way to express it, so it is reported rather than
+/// quietly left where it was.
 MANTID_GEOMETRY_DLL std::shared_ptr<IObject> getLabFrameShape(const IObject &shape,
                                                               const Kernel::Matrix<double> &goniometerR);
 
