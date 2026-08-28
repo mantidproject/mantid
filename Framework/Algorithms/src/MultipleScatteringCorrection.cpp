@@ -9,6 +9,7 @@
 #include "MantidAPI/HistoWorkspace.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SampleValidator.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -18,7 +19,9 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
+#include "MantidGeometry/Objects/ShapeRotation.h"
 #include "MantidHistogramData/Interpolate.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -155,8 +158,13 @@ void MultipleScatteringCorrection::exec() {
     ws_sampleOnly->setDistribution(true); // The output of this is a distribution
     ws_sampleOnly->setYUnitLabel("Multiple Scattering Correction factor");
     //-- Fill the workspace with sample only correction factors
-    const auto &sampleShape = m_inputWS->sample().getShape();
-    calculateSingleComponent(ws_sampleOnly, sampleShape, m_sampleElementSize);
+    // The beam and the detector positions are described in the lab frame, but the sample shape is
+    // only there if something has already rotated it - CopySample bakes the destination goniometer
+    // in, while SetGoniometer alone leaves the shape in its own frame. Move it the rest of the way.
+    // This is a no-op for an unrotated workspace, which is every workspace that reaches here today.
+    const auto labFrameSampleShape =
+        Geometry::getLabFrameShape(m_inputWS->sample().getShape(), m_inputWS->run().getGoniometer().getR());
+    calculateSingleComponent(ws_sampleOnly, *labFrameSampleShape, m_sampleElementSize);
     //-- Package output to workspace group
     const std::string outWSName = getProperty("OutputWorkspace");
     std::vector<std::string> names;
