@@ -30,7 +30,6 @@ public:
 
   void subscribe(std::function<void()> callback) override;
 
-  // cppcheck-suppress unknownMacro
 private slots:
   void notifyActiveFigureChanged();
 
