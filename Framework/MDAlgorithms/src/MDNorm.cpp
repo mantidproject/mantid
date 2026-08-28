@@ -58,7 +58,7 @@ DECLARE_ALGORITHM(MDNorm)
 /**
  * Constructor
  */
-MDNorm::MDNorm() : m_isRLU(false), m_transformation(), m_monochromatic(false), m_accumulate(false) {}
+MDNorm::MDNorm() : m_isRLU(false), m_monochromatic(false), m_accumulate(false) {}
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string MDNorm::name() const { return "MDNorm"; }
@@ -494,6 +494,7 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
 void MDNorm::exec() {
   m_convention = Kernel::ConfigService::Instance().getString("Q.convention");
   m_hIntegrated = m_kIntegrated = m_lIntegrated = false;
+  m_isMDNorm = true;
   // symmetry operations
   std::string symOps = this->getProperty("SymmetryOperations");
   std::vector<Geometry::SymmetryOperation> symmetryOps;
@@ -1401,40 +1402,6 @@ std::vector<coord_t> MDNorm::getValuesFromOtherDimensions(bool &skipNormalizatio
     }
   }
   return otherDimValues;
-}
-
-/**
- * Stores the X values from each H,K,L, and optionally DeltaE dimension as
- * member variables
- */
-void MDNorm::cacheDimensionXValues() {
-  auto &hDim = *m_normWS->getDimension(m_hIdx);
-  m_hX.resize(hDim.getNBoundaries());
-  for (size_t i = 0; i < m_hX.size(); ++i) {
-    m_hX[i] = hDim.getX(i);
-  }
-  auto &kDim = *m_normWS->getDimension(m_kIdx);
-  m_kX.resize(kDim.getNBoundaries());
-  for (size_t i = 0; i < m_kX.size(); ++i) {
-    m_kX[i] = kDim.getX(i);
-  }
-
-  auto &lDim = *m_normWS->getDimension(m_lIdx);
-  m_lX.resize(lDim.getNBoundaries());
-  for (size_t i = 0; i < m_lX.size(); ++i) {
-    m_lX[i] = lDim.getX(i);
-  }
-
-  if ((!m_diffraction) && (!m_dEIntegrated)) {
-    // NOTE: store k final instead
-    auto &eDim = *m_normWS->getDimension(m_eIdx);
-    m_eX.resize(eDim.getNBoundaries());
-    for (size_t i = 0; i < m_eX.size(); ++i) {
-      double temp = m_Ei - eDim.getX(i);
-      temp = std::max(temp, 0.);
-      m_eX[i] = std::sqrt(energyToK * temp);
-    }
-  }
 }
 
 /**

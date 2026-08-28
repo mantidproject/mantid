@@ -107,6 +107,7 @@ void MDNormDirectSC::exec() {
   createNormalizationWS(*outputWS);
   m_normWS->setDisplayNormalization(Mantid::API::NoNormalization);
   setProperty("OutputNormalizationWorkspace", m_normWS);
+  m_diffraction = false;
 
   m_numExptInfos = outputWS->getNumExperimentInfo();
   m_signalArray = std::vector<std::atomic<signal_t>>(m_normWS->getNPoints());
@@ -122,14 +123,14 @@ void MDNormDirectSC::exec() {
     // data
     bool skipNormalization = false;
     const std::vector<coord_t> otherValues = getValuesFromOtherDimensions(skipNormalization, expInfoIndex);
-    const auto affineTrans = findIntergratedDimensions(otherValues, skipNormalization);
+    findIntergratedDimensions(otherValues, skipNormalization);
     cacheDimensionXValues();
 
     if (!skipNormalization) {
       if (currentExptInfo.run().hasProperty("useLogTimes")) {
-        calculateNormContinuous(otherValues, affineTrans, expInfoIndex);
+        calculateNormContinuous(otherValues, expInfoIndex);
       } else {
-        calculateNormalization(otherValues, affineTrans, expInfoIndex);
+        calculateNormalization(otherValues, expInfoIndex);
       }
     } else {
       g_log.warning("Binning limits are outside the limits of the MDWorkspace. "

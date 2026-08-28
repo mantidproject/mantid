@@ -70,7 +70,6 @@ private:
 
   std::vector<coord_t> getValuesFromOtherDimensions(bool &skipNormalization, uint16_t expInfoIndex = 0) const;
 
-  void cacheDimensionXValues();
   void calculateNormalization(const std::vector<coord_t> &otherValues, const Geometry::SymmetryOperation &so,
                               uint16_t expInfoIndex, size_t soIndex);
 
@@ -87,18 +86,10 @@ private:
                                   const std::string &outputwsname, const double &startProgress,
                                   const double &endProgress);
 
-  /// Normalization workspace
-  DataObjects::MDHistoWorkspace_sptr m_bkgdNormWS;
-  /// Input background workspace
-  API::IMDEventWorkspace_sptr m_backgroundWS;
-
   /// flag for reciprocal lattice units
   bool m_isRLU;
   /// The projection vectors
   std::vector<double> m_Q0Basis{1., 0., 0.}, m_Q1Basis{0., 1., 0.}, m_Q2Basis{0., 0., 1.};
-  /** matrix for transforming from intersections to positions in the
-  normalization workspace */
-  Mantid::Kernel::Matrix<coord_t> m_transformation;
   /// number of symmetry operations
   size_t m_numSymmOps;
   /// Flag indicating a pre-computed MonoSCDNormalizationWorkspace was provided

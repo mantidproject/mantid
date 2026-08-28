@@ -111,23 +111,24 @@ void MDNormSCD::exec() {
   m_diffraction = true;
 
   m_numExptInfos = outputWS->getNumExperimentInfo();
+  m_signalArray = std::vector<std::atomic<signal_t>>(m_normWS->getNPoints());
   // loop over all experiment infos
   for (uint16_t expInfoIndex = 0; expInfoIndex < m_numExptInfos; expInfoIndex++) {
     // Check for other dimensions if we could measure anything in the original
     // data
     bool skipNormalization = false;
     const std::vector<coord_t> otherValues = getValuesFromOtherDimensions(skipNormalization, expInfoIndex);
-    const auto affineTrans = findIntergratedDimensions(otherValues, skipNormalization);
+    findIntergratedDimensions(otherValues, skipNormalization);
     cacheDimensionXValues();
 
     if (!skipNormalization) {
-      calculateNormalization(otherValues, affineTrans, expInfoIndex);
+      calculateNormalization(otherValues, expInfoIndex);
     } else {
       g_log.warning("Binning limits are outside the limits of the MDWorkspace. "
                     "Not applying normalization.");
     }
-    std::copy(m_signalArray.cbegin(), m_signalArray.cend(), m_normWS->mutableSignalArray());
   }
+  std::copy(m_signalArray.cbegin(), m_signalArray.cend(), m_normWS->mutableSignalArray());
 }
 
 /**

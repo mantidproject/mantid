@@ -16,6 +16,8 @@
 
 namespace Mantid::MDAlgorithms {
 
+using Mantid::Kernel::DblMatrix;
+
 /** Base class for the three MDNorm, MDNormDirectSC and MDNormSCD algorithms
  * with the common normalization and detector intersections algorithms
  */
@@ -37,22 +39,17 @@ protected:
   DataObjects::MDHistoWorkspace_sptr binInputWS();
   void createNormalizationWS(const DataObjects::MDHistoWorkspace &dataWS);
   std::vector<coord_t> getValuesFromOtherDimensions(bool &skipNormalization, uint16_t expInfoIndex = 0) const;
-  Kernel::Matrix<coord_t> findIntergratedDimensions(const std::vector<coord_t> &otherDimValues,
-                                                    bool &skipNormalization);
+  void findIntergratedDimensions(const std::vector<coord_t> &otherDimValues, bool &skipNormalization);
   void cacheDimensionXValues();
-  void calculateNormalization(const std::vector<coord_t> &otherValues, const Kernel::Matrix<coord_t> &affineTrans,
-                              uint16_t expInfoIndex);
-
-  void calculateNormContinuous(const std::vector<coord_t> &otherValues, const Kernel::Matrix<coord_t> &affineTrans,
-                               uint16_t expInfoIndex);
-  void calculateNormInner(const API::SpectrumInfo &spectrumInfo, const double protonCharge,
-                          const std::vector<coord_t> &otherValues, const Kernel::Matrix<coord_t> &affineTrans);
+  void calculateNormalization(const std::vector<coord_t> &otherValues, uint16_t expInfoIndex);
+  void calculateNormContinuous(const std::vector<coord_t> &otherValues, uint16_t expInfoIndex);
+  void calculateNormInner(const API::SpectrumInfo &spectrumInfo, const std::vector<coord_t> &otherValues,
+                          const double protonCharge);
 
   void calcIntegralsForIntersections(const std::vector<double> &xValues, const API::MatrixWorkspace &integrFlux,
                                      size_t sp, std::vector<double> &yValues) const;
   void calculateIntersections(std::vector<std::array<double, 4>> &intersections, const double theta, const double phi,
-                              const Kernel::DblMatrix &transform = Kernel::DblMatrix(1, 1),
-                              double lowvalue = std::nan(""), double highvalue = std::nan(""));
+                              const DblMatrix &transform = DblMatrix(1, 1), double lowvalue = 0, double highvalue = 0);
   Mantid::Kernel::DblMatrix calQTransform(const Mantid::API::ExperimentInfo &currentExpInfo,
                                           const Mantid::Geometry::SymmetryOperation &so);
 
@@ -60,6 +57,9 @@ protected:
   API::IMDEventWorkspace_sptr m_inputWS;
   /// Normalization workspace
   DataObjects::MDHistoWorkspace_sptr m_normWS;
+  DataObjects::MDHistoWorkspace_sptr m_bkgdNormWS;
+  /// Input background workspace
+  API::IMDEventWorkspace_sptr m_backgroundWS;
   /// limits for h,k,l, dE dimensions
   coord_t m_hmin, m_hmax, m_kmin, m_kmax, m_lmin, m_lmax, m_dEmin, m_dEmax;
   /// cached values for incident energy and momentum, final momentum min/max
@@ -72,6 +72,8 @@ protected:
   Mantid::Kernel::DblMatrix m_W;
   /// (2*PiRUBW)^-1
   Mantid::Kernel::DblMatrix m_rubw;
+  /// matrix for transforming from intersections to positions in the normalization workspace
+  Mantid::Kernel::Matrix<coord_t> m_transformation;
   /// index of h,k,l, dE dimensions in the output workspaces
   size_t m_hIdx, m_kIdx, m_lIdx, m_eIdx;
   /// cached X values along dimensions h,k,l. dE
@@ -86,6 +88,8 @@ protected:
   uint16_t m_numExptInfos;
   /// Flag indicating if the input workspace is from diffraction
   bool m_diffraction;
+  /// Flag indicating if calling algorithm is MDNorm
+  bool m_isMDNorm;
   /// Progress bar
   std::unique_ptr<API::Progress> m_progress;
   /// internal array to accumulate signals to avoid copying (serial) each loop

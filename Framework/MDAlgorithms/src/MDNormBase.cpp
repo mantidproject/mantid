@@ -33,7 +33,7 @@ MDNormBase::MDNormBase()
     : m_hmin(0.0f), m_hmax(0.0f), m_kmin(0.0f), m_kmax(0.0f), m_lmin(0.0f), m_lmax(0.0f), m_dEmin(0.f), m_dEmax(0.f),
       m_Ei(0.), m_ki(0.), m_kfmin(0.), m_kfmax(0.), m_hIntegrated(true), m_kIntegrated(true), m_lIntegrated(true),
       m_dEIntegrated(true), m_UB(3, 3, true), m_W(3, 3, true), m_rubw(3, 3), m_hIdx(-1), m_kIdx(-1), m_lIdx(-1),
-      m_eIdx(-1), m_hX(), m_kX(), m_lX(), m_eX(), m_samplePos(), m_beamDir() {}
+      m_eIdx(-1), m_hX(), m_kX(), m_lX(), m_eX(), m_samplePos(), m_beamDir(), m_diffraction(true), m_isMDNorm(false) {}
 
 /**
  * Currently looks for the ConvertToMD algorithm in the history
@@ -137,20 +137,19 @@ std::vector<coord_t> MDNormBase::getValuesFromOtherDimensions(bool &skipNormaliz
  * are outside of original inputs
  * @return Affine trasform matrix
  */
-Kernel::Matrix<coord_t> MDNormBase::findIntergratedDimensions(const std::vector<coord_t> &otherDimValues,
-                                                              bool &skipNormalization) {
+void MDNormBase::findIntergratedDimensions(const std::vector<coord_t> &otherDimValues, bool &skipNormalization) {
   // Get indices of the original dimensions in the output workspace,
   // and if not found, the corresponding dimension is integrated
-  Kernel::Matrix<coord_t> affineMat = m_normWS->getTransformFromOriginal(0)->makeAffineMatrix();
+  m_transformation = m_normWS->getTransformFromOriginal(0)->makeAffineMatrix();
 
-  const size_t nrm1 = affineMat.numRows() - 1;
-  const size_t ncm1 = affineMat.numCols() - 1;
+  const size_t nrm1 = m_transformation.numRows() - 1;
+  const size_t ncm1 = m_transformation.numCols() - 1;
   const size_t lastCol = m_diffraction ? 3 : 4;
   for (size_t row = 0; row < nrm1; row++) // affine matrix, ignore last row
   {
     const auto dimen = m_normWS->getDimension(row);
     const auto dimMin(dimen->getMinimum()), dimMax(dimen->getMaximum());
-    if (affineMat[row][0] == 1.) {
+    if (m_transformation[row][0] == 1.) {
       m_hIntegrated = false;
       m_hIdx = row;
       m_hmin = std::max(m_hmin, dimMin);
@@ -159,7 +158,7 @@ Kernel::Matrix<coord_t> MDNormBase::findIntergratedDimensions(const std::vector<
         skipNormalization = true;
       }
     }
-    if (affineMat[row][1] == 1.) {
+    if (m_transformation[row][1] == 1.) {
       m_kIntegrated = false;
       m_kIdx = row;
       m_kmin = std::max(m_kmin, dimMin);
@@ -168,7 +167,7 @@ Kernel::Matrix<coord_t> MDNormBase::findIntergratedDimensions(const std::vector<
         skipNormalization = true;
       }
     }
-    if (affineMat[row][2] == 1.) {
+    if (m_transformation[row][2] == 1.) {
       m_lIntegrated = false;
       m_lIdx = row;
       m_lmin = std::max(m_lmin, dimMin);
@@ -178,7 +177,7 @@ Kernel::Matrix<coord_t> MDNormBase::findIntergratedDimensions(const std::vector<
       }
     }
 
-    if (!m_diffraction && affineMat[row][3] == 1.) {
+    if (!m_diffraction && m_transformation[row][3] == 1.) {
       m_dEIntegrated = false;
       m_eIdx = row;
       m_dEmin = std::max(m_dEmin, dimMin);
@@ -189,7 +188,7 @@ Kernel::Matrix<coord_t> MDNormBase::findIntergratedDimensions(const std::vector<
     }
     for (size_t col = lastCol; col < ncm1; col++) // affine matrix, ignore last column
     {
-      if (affineMat[row][col] == 1.) {
+      if (m_transformation[row][col] == 1.) {
         double val = otherDimValues.at(col - 3);
         if (val > dimMax || val < dimMin) {
           skipNormalization = true;
@@ -197,8 +196,6 @@ Kernel::Matrix<coord_t> MDNormBase::findIntergratedDimensions(const std::vector<
       }
     }
   }
-
-  return affineMat;
 }
 
 /**
@@ -227,7 +224,7 @@ void MDNormBase::cacheDimensionXValues() {
       m_lX[i] = lDim.getX(i);
     }
   }
-  if (!m_dEIntegrated) {
+  if ((!m_diffraction) && (!m_dEIntegrated)) {
     // NOTE: store k final instead
     auto &eDim = *m_normWS->getDimension(m_eIdx);
     m_eX.resize(eDim.getNBoundaries());
@@ -267,11 +264,9 @@ Mantid::Kernel::DblMatrix MDNormBase::calQTransform(const ExperimentInfo &curren
  * Computed the normalization for the input workspace (for MDNormSCD/MDNormDirectSC).
  * Results are stored in m_normWS
  * @param otherValues non HKLE dimensions
- * @param affineTrans affine matrix
  * @param expInfoIndex current experiment info index
  */
-void MDNormBase::calculateNormalization(const std::vector<coord_t> &otherValues,
-                                        const Kernel::Matrix<coord_t> &affineTrans, uint16_t expInfoIndex) {
+void MDNormBase::calculateNormalization(const std::vector<coord_t> &otherValues, uint16_t expInfoIndex) {
   const auto &currentExptInfo = *(m_inputWS->getExperimentInfo(expInfoIndex));
   const auto &spectrumInfo = currentExptInfo.spectrumInfo();
   auto *rubwLog = dynamic_cast<VectorDoubleProperty *>(currentExptInfo.getLog("RUBW_MATRIX"));
@@ -285,48 +280,15 @@ void MDNormBase::calculateNormalization(const std::vector<coord_t> &otherValues,
   }
   const double protonCharge = currentExptInfo.run().getProtonCharge();
 
-  calculateNormInner(spectrumInfo, protonCharge, otherValues, affineTrans);
+  calculateNormInner(spectrumInfo, otherValues, protonCharge);
 }
-
-/**
- * Computed the normalization for the input workspace (for MDNorm). Results are stored in
- * m_normWS
- * @param otherValues - values for dimensions other than Q or DeltaE
- * @param so - symmetry operation
- * @param expInfoIndex - current experiment info index
- * @param soIndex - the index of symmetry operation (for progress purposes only)
- *
-void MDNorm::calculateNormalization(const std::vector<coord_t> &otherValues, const Geometry::SymmetryOperation &so,
-                                    uint16_t expInfoIndex, size_t soIndex) {
-  const auto &currentExptInfo = *(m_inputWS->getExperimentInfo(expInfoIndex));
-  std::vector<double> lowValues, highValues;
-  auto *lowValuesLog = dynamic_cast<VectorDoubleProperty *>(currentExptInfo.getLog("MDNorm_low"));
-  lowValues = (*lowValuesLog)();
-  auto *highValuesLog = dynamic_cast<VectorDoubleProperty *>(currentExptInfo.getLog("MDNorm_high"));
-  highValues = (*highValuesLog)();
-
-  // calculate Q transformation matrix (R * UB * SymmetryOperation * m_W)^-1
-  // in order to calculate intersections
-  Kernel::DblMatrix Qtransform = calQTransform(currentExptInfo, so);
-
-  // get proton charges
-  const double protonCharge = currentExptInfo.run().getProtonCharge();
-  // [Task 89]
-  const double protonChargeBkgd =
-      (m_backgroundWS != nullptr) ? m_backgroundWS->getExperimentInfo(0)->run().getProtonCharge() : 0;
-
-  const auto &spectrumInfo = currentExptInfo.spectrumInfo();
-
-}*/
 
 /**
  * Computes the normalization for the input workspace for the case of a continous rotation
  * @param otherValues non HKLE dimensions
- * @param affineTrans affine matrix
  * @param expInfoIndex current experiment info index
  */
-void MDNormBase::calculateNormContinuous(const std::vector<coord_t> &otherValues,
-                                         const Kernel::Matrix<coord_t> &affineTrans, uint16_t expInfoIndex) {
+void MDNormBase::calculateNormContinuous(const std::vector<coord_t> &otherValues, uint16_t expInfoIndex) {
   const auto &currentExptInfo = *(m_inputWS->getExperimentInfo(expInfoIndex));
   const auto &spectrumInfo = currentExptInfo.spectrumInfo();
   auto *rubwLog = dynamic_cast<VectorDoubleProperty *>(currentExptInfo.getLog("RUBW_MATRIX"));
@@ -391,7 +353,7 @@ void MDNormBase::calculateNormContinuous(const std::vector<coord_t> &otherValues
       gonio.setRotationAngle(movingGonioIndex[0], nn * GONIOBINSTEP + *min);
       m_rubw = gonio.getR() * rubwValue;
       m_rubw.Invert();
-      calculateNormInner(spectrumInfo, gonioCharge[n] / normfac, otherValues, affineTrans);
+      calculateNormInner(spectrumInfo, otherValues, gonioCharge[n] / normfac);
       m_progress->report();
     }
   } else {
@@ -416,7 +378,7 @@ void MDNormBase::calculateNormContinuous(const std::vector<coord_t> &otherValues
         if (!skipIter) {
           m_rubw = gonio.getR() * rubwValue;
           m_rubw.Invert();
-          calculateNormInner(spectrumInfo, chargeSum / normfac, otherValues, affineTrans);
+          calculateNormInner(spectrumInfo, otherValues, chargeSum / normfac);
         }
         chargeSum = 0;
         i0 = n;
@@ -429,9 +391,8 @@ void MDNormBase::calculateNormContinuous(const std::vector<coord_t> &otherValues
   }
 }
 
-void MDNormBase::calculateNormInner(const API::SpectrumInfo &spectrumInfo, const double protonCharge,
-                                    const std::vector<coord_t> &otherValues,
-                                    const Kernel::Matrix<coord_t> &affineTrans) {
+void MDNormBase::calculateNormInner(const API::SpectrumInfo &spectrumInfo, const std::vector<coord_t> &otherValues,
+                                    const double protonCharge) {
   // Mapping
   const auto ndets = static_cast<int64_t>(spectrumInfo.size());
   bool haveSA = false;
@@ -515,7 +476,7 @@ void MDNormBase::calculateNormInner(const API::SpectrumInfo &spectrumInfo, const
       if (!m_diffraction) {
         pos[3] = static_cast<coord_t>(m_Ei - pos[3] * pos[3] / energyToK);
       }
-      affineTrans.multiplyPoint(pos, posNew);
+      m_transformation.multiplyPoint(pos, posNew);
       size_t linIndex = m_normWS->getLinearIndexAtCoord(posNew.data());
       if (linIndex == static_cast<size_t>(-1))
         continue;
@@ -622,37 +583,34 @@ void MDNormBase::calculateIntersections(std::vector<std::array<double, 4>> &inte
                                         double highvalue) {
   V3D qin, qout;
   double kfmin, kfmax, kimin, kimax;
-  bool isMDNorm = false;
-  if (m_diffraction && std::isnan(lowvalue)) {
-    // For MDNormSCD
-    qin = qout = V3D(-sin(theta) * cos(phi), -sin(theta) * sin(phi), 1. - cos(theta));
-    kimin = kfmin = m_kfmin;
-    kimax = kfmax = m_kfmax;
-  } else {
+  if (m_isMDNorm) {
     qout = V3D(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta));
     qin = V3D(0., 0., 1.);
-    if (std::isnan(lowvalue) || std::isnan(highvalue)) {
-      // For MDNormDirectSC
+    if (m_diffraction) {
+      kimin = kfmin = lowvalue;
+      kimax = kfmax = highvalue;
+    } else {
+      kimin = kimax = std::sqrt(energyToK * m_Ei);
+      kfmin = std::sqrt(energyToK * (m_Ei - highvalue));
+      kfmax = std::sqrt(energyToK * (m_Ei - lowvalue));
+    }
+    m_hmin = static_cast<coord_t>(m_hX[0]);
+    m_kmin = static_cast<coord_t>(m_kX[0]);
+    m_lmin = static_cast<coord_t>(m_lX[0]);
+    m_hmax = static_cast<coord_t>(m_hX.back());
+    m_kmax = static_cast<coord_t>(m_kX.back());
+    m_lmax = static_cast<coord_t>(m_lX.back());
+  } else {
+    if (m_diffraction) {
+      qin = qout = V3D(-sin(theta) * cos(phi), -sin(theta) * sin(phi), 1. - cos(theta));
+      kimin = kfmin = m_kfmin;
+      kimax = kfmax = m_kfmax;
+    } else {
+      qout = V3D(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta));
+      qin = V3D(0., 0., 1.);
       kimin = kimax = m_ki;
       kfmin = m_kfmin;
       kfmax = m_kfmax;
-    } else {
-      // For MDNorm
-      isMDNorm = true;
-      if (m_diffraction) {
-        kimin = kfmin = lowvalue;
-        kimax = kfmax = highvalue;
-      } else {
-        kimin = kimax = std::sqrt(energyToK * m_Ei);
-        kfmin = std::sqrt(energyToK * (m_Ei - highvalue));
-        kfmax = std::sqrt(energyToK * (m_Ei - lowvalue));
-      }
-      m_hmin = static_cast<coord_t>(m_hX[0]);
-      m_kmin = static_cast<coord_t>(m_kX[0]);
-      m_lmin = static_cast<coord_t>(m_lX[0]);
-      m_hmax = static_cast<coord_t>(m_hX.back());
-      m_kmax = static_cast<coord_t>(m_kX.back());
-      m_lmax = static_cast<coord_t>(m_lX.back());
     }
   }
 
@@ -698,7 +656,7 @@ void MDNormBase::calculateIntersections(std::vector<std::array<double, 4>> &inte
         }
       }
     }
-    if (!isMDNorm) {
+    if (!m_isMDNorm) {
       double momhMin = fmom * (m_hmin - hStart) + kfmin;
       if ((momhMin - kfmin) * (momhMin - kfmax) < 0) // kfmin>kfmax
       {
@@ -741,7 +699,7 @@ void MDNormBase::calculateIntersections(std::vector<std::array<double, 4>> &inte
         }
       }
     }
-    if (!isMDNorm) {
+    if (!m_isMDNorm) {
       double momkMin = fmom * (m_kmin - kStart) + kfmin;
       if ((momkMin - kfmin) * (momkMin - kfmax) < 0) {
         // hkmin and lkmin
@@ -783,7 +741,7 @@ void MDNormBase::calculateIntersections(std::vector<std::array<double, 4>> &inte
         }
       }
     }
-    if (!isMDNorm) {
+    if (!m_isMDNorm) {
       double momlMin = fmom * (m_lmin - lStart) + kfmin;
       if ((momlMin - kfmin) * (momlMin - kfmax) <= 0) {
         // hlmin and klmin
