@@ -283,6 +283,7 @@ public:
   // This test pins the error contract of the deprecated accessors themselves
   // The warnings are therefore suppressed rather than migrated.
   GNU_DIAG_OFF("deprecated-declarations")
+  MSVC_DIAG_OFF(4996)
   void test_data_access() {
     // Non-const access throws errors for Y & E - not for X
     TS_ASSERT_THROWS_NOTHING(ew->dataX(1));
@@ -296,6 +297,7 @@ public:
 
     // Can't try the const access; copy constructors are not allowed.
   }
+  MSVC_DIAG_ON(4996)
   GNU_DIAG_ON("deprecated-declarations")
 
   void test_setX_individually() {
@@ -796,6 +798,7 @@ public:
   // This test deliberately covers the deprecated accessors alongside the modern ones, so the
   // warnings are suppressed rather than migrated.
   GNU_DIAG_OFF("deprecated-declarations")
+  MSVC_DIAG_OFF(4996)
   void test_readYE() {
     int numEvents = 2;
     int numHistograms = 2;
@@ -805,6 +808,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(ws->e(0));
     TS_ASSERT_THROWS_NOTHING(ws->dataE(0));
   }
+  MSVC_DIAG_ON(4996)
   GNU_DIAG_ON("deprecated-declarations")
 
   void test_histogram() {

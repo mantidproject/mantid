@@ -326,6 +326,7 @@ public:
 
   // The mutable legacy accessors require ISpectrum's own legacy interface
   GNU_DIAG_OFF("deprecated-declarations")
+  MSVC_DIAG_OFF(4996)
   /// Deprecated, use mutableX() instead. Returns the x data
   [[deprecated("use mutableX() instead")]]
   virtual MantidVec &dataX(const std::size_t index) {
@@ -346,6 +347,7 @@ public:
   virtual MantidVec &dataDx(const std::size_t index) {
     return getSpectrumWithoutInvalidation(index).dataDx();
   }
+  MSVC_DIAG_ON(4996)
   GNU_DIAG_ON("deprecated-declarations")
 
   /// Deprecated, use x() instead. Returns the x data const

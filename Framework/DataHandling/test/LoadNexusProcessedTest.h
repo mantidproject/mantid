@@ -1580,8 +1580,10 @@ private:
         // accessor can do this; the size-checked histogram types forbid it by design, so the
         // deprecation warning is suppressed rather than migrated.
         GNU_DIAG_OFF("deprecated-declarations")
+        MSVC_DIAG_OFF(4996)
         inputWs->dataDx(0).emplace_back(1);
         inputWs->dataDx(1).emplace_back(1);
+        MSVC_DIAG_ON(4996)
         GNU_DIAG_ON("deprecated-declarations")
       }
     }
