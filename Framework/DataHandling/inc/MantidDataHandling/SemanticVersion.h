@@ -56,7 +56,7 @@ public:
   SemanticVersion(const std::string &);
 
   // Constructor from major, minor, patch and identifier;
-  SemanticVersion(std::uint32_t major = 0, std::uint32_t minor = 0, std::uint32_t patch = 0,
+  SemanticVersion(std::uint32_t major, std::uint32_t minor = 0, std::uint32_t patch = 0,
                   const std::string &prerelease = "", const std::string &build = "");
 
   // Destructor
