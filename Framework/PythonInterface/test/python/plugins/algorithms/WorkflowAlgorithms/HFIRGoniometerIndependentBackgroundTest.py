@@ -135,6 +135,20 @@ class HFIRGoniometerIndependentBackgroundTest(unittest.TestCase):
         DeleteWorkspace(workspace)
         DeleteWorkspace("unsupported_instrument")
 
+    def test_invalid_normalization_factors_are_rejected(self):
+        for normalize_by, log_name in (("Time", "duration"), ("Monitor", "monitor_count")):
+            for invalid_factor in (0.0, -1.0, np.nan, np.inf):
+                factors = np.ones_like(self.duration)
+                factors[0] = invalid_factor
+                self.workspace.getExperimentInfo(0).run().addProperty(log_name, factors.tolist(), True)
+
+                with self.assertRaisesRegex(RuntimeError, "must contain finite, positive normalization factors"):
+                    HFIRGoniometerIndependentBackground(self.workspace, NormalizeBy=normalize_by, OutputWorkspace="invalid_factors_output")
+
+    def test_window_larger_than_rotation_axis_is_rejected(self):
+        with self.assertRaisesRegex(TypeError, "Some invalid Properties found"):
+            HFIRGoniometerIndependentBackground(self.workspace, BackgroundWindowSize=self.signal.shape[2] + 1)
+
     def test_normalized_output_error_is_selected_and_scaled(self):
         """Verify percentile-associated errors are retained when normalized and rescaled correctly."""
         signal = self.workspace.getSignalArray().copy()

@@ -78,6 +78,10 @@ class HFIRGoniometerIndependentBackground(PythonAlgorithm):
         if inWS.getNumDims() != 3:
             issues["InputWorkspace"] = "InputWorkspace has wrong number of dimensions, need 3"
 
+        bkg_size = self.getProperty("BackgroundWindowSize").value
+        if inWS.getNumDims() == 3 and bkg_size != Property.EMPTY_INT and bkg_size > inWS.getSignalArray().shape[2]:
+            issues["BackgroundWindowSize"] = "BackgroundWindowSize cannot be larger than the number of rotations in InputWorkspace"
+
         return issues
 
     @classmethod
@@ -97,6 +101,8 @@ class HFIRGoniometerIndependentBackground(PythonAlgorithm):
         factors = np.asarray(data_ws.getExperimentInfo(0).run().getProperty(log_name).value, dtype=float)
         if factors.size != n_rotations:
             raise ValueError(f"The {log_name} log has {factors.size} values, but the workspace has {n_rotations} rotations.")
+        if np.any(~np.isfinite(factors)) or np.any(factors <= 0):
+            raise ValueError(f"The {log_name} log must contain finite, positive normalization factors.")
         return factors
 
     @staticmethod
