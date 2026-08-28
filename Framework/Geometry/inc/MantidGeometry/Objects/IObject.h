@@ -49,7 +49,7 @@ public:
   virtual void setFiniteGeometryFlag(bool) {}
   virtual bool hasValidShape() const = 0;
 
-  /** The goniometer rotation baked into this shape, applied outermost.
+  /** The goniometer rotation baked into this shape.
    *
    * A shape may be stored either in its own frame or already rotated into the lab frame -
    * CopySample bakes the destination workspace's goniometer in, while SetGoniometer alone leaves
@@ -64,6 +64,14 @@ public:
    *
    * Identity therefore means the shape is expressed in its own frame, however much its definition
    * has been rotated within that frame.
+   *
+   * More precisely, this is the ordered product of the goniometer bakes the shape has been given.
+   * That is outermost among the bakes, but not necessarily the outermost rotation overall: a
+   * definition-frame rotation applied after a bake - RotateSampleShape on a shape CopySample has
+   * already baked - ends up outside it. A mesh cannot record anything else, its vertices being the
+   * only account of how far it has been turned, and the CSG side composes to match so that the two
+   * agree. Re-baking such a shape is still correct: stripping the old bake and applying the new one
+   * conjugates that later rotation into the new frame, which is where it belongs.
    */
   virtual const Kernel::Matrix<double> &getAppliedRotation() const {
     static const Kernel::Matrix<double> identity(3, 3, true);

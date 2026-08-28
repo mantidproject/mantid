@@ -922,8 +922,8 @@ public:
   }
 
   void testBakeGoniometerRotationRecordsAndComposes()
-  /* Baking does move the shape into the lab frame, so it is recorded - applied outermost, and
-   * accumulating over repeated bakes. */
+  /* Baking does move the shape into the lab frame, so it is recorded, each bake composing onto the
+   * one before it. */
   {
     auto lShape = createLShape();
     const auto original = lShape->getV3Ds();

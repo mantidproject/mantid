@@ -25,7 +25,7 @@ void export_IObject() {
 
   class_<IObject, boost::noncopyable>("IObject", no_init)
       .def("getAppliedRotation", &IObject::getAppliedRotation, arg("self"), return_readonly_numpy(),
-           "Return the goniometer rotation baked into this shape, applied outermost.\n\n"
+           "Return the goniometer rotation baked into this shape.\n\n"
            "This reports which frame the shape is in, not every rotation it has ever had. "
            "Definition-frame rotations - the file-load orientation of :ref:`algm-LoadSampleShape`, "
            "the sample environment spec, 'rotate-all' and per-primitive 'rotate' tags, and "
