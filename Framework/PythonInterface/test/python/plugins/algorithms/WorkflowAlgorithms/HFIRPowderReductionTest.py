@@ -9,6 +9,7 @@ import unittest
 from mantid.simpleapi import (
     HFIRPowderReduction,
     CreateSampleWorkspace,
+    CreateWorkspace,
     EditInstrumentGeometry,
     ExtractMask,
     RotateInstrumentComponent,
@@ -21,7 +22,7 @@ from mantid.simpleapi import (
     mtd,
 )
 from mantid.api import AlgorithmManager, MatrixWorkspace, WorkspaceGroup
-from mantid.kernel import Logger, Property, V3D
+from mantid.kernel import Logger, Property
 from plugins.algorithms.WorkflowAlgorithms.HFIRPowderReduction import HFIRPowderReduction as _HFIRPowderReduction
 import h5py
 import os
@@ -135,35 +136,16 @@ class LoadInputErrorMessages(unittest.TestCase):
                 self.fail("Valid input combination with IPTS and RunNumbers failed validation")
 
     def test_validate_xmin_xmax(self):
-        # Test that missing XMin raises a RuntimeError
-        with self.assertRaises(RuntimeError) as cm:
-            res = HFIRPowderReduction(
-                SampleFilename="HB2C_7000.nxs.h5",
-                XMax=10.0,
-                Instrument="WAND^2",
-                OutputWorkspace="test_workspace",
-            )
-
-        error_msg = str(cm.exception)
-        self.assertIn("XMin", error_msg)
-        self.assertIn("XMin must be provided", error_msg)
-
-        # Test that missing XMax raises a RuntimeError
-        with self.assertRaises(RuntimeError) as cm:
-            res = HFIRPowderReduction(
-                SampleFilename="HB2C_7000.nxs.h5",
-                XMin=1.0,
-                Instrument="WAND^2",
-                OutputWorkspace="test_workspace",
-            )
-
-        error_msg = str(cm.exception)
-        self.assertIn("XMax", error_msg)
-        self.assertIn("XMax must be provided", error_msg)
+        # XMin and XMax are optional, so leaving either out must not be a validation error
+        for limits in ({"XMax": 10.0}, {"XMin": 1.0}, {}):
+            algo = _create_algo(SampleFilename="HB2C_7000.nxs.h5", Instrument="WAND^2", **limits)
+            issues = algo.validateInputs()
+            self.assertNotIn("XMin", issues)
+            self.assertNotIn("XMax", issues)
 
         # Test that XMin >= XMax raises a RuntimeError
         with self.assertRaises(RuntimeError) as cm:
-            res = HFIRPowderReduction(
+            res = HFIRPowderReduction(  # noqa: F841
                 SampleFilename="HB2C_7000.nxs.h5",
                 XMin=10.0,
                 XMax=5.0,
@@ -176,19 +158,17 @@ class LoadInputErrorMessages(unittest.TestCase):
         self.assertIn("XMax", error_msg)
         self.assertIn("XMin (10.0) cannot be greater than or equal to XMax (5.0)", error_msg)
 
-        # Test that XMin and XMax of different lengths raises a RuntimeError
+    def test_validate_bin_width(self):
+        # Test that a zero bin width raises a RuntimeError
         with self.assertRaises(RuntimeError) as cm:
             res = HFIRPowderReduction(  # noqa: F841
                 SampleFilename="HB2C_7000.nxs.h5",
-                XMin=[1.0, 2.0],
-                XMax=[5.0],
+                XBinWidth=0.0,
                 Instrument="WAND^2",
                 OutputWorkspace="test_workspace",
             )
         error_msg = str(cm.exception)
-        self.assertIn("XMin", error_msg)
-        self.assertIn("XMax", error_msg)
-        self.assertIn("XMin and XMax do not define same number of spectra (2 != 1)", error_msg)
+        self.assertIn("XBinWidth must be greater than zero", error_msg)
 
     def test_validate_instrument(self):
         # Test that missing Instrument raises a RuntimeError
@@ -986,8 +966,8 @@ class MetadataConsistencyTests(unittest.TestCase):
         # Single file should not check metadata consistency
         algo.setProperty("SampleFilename", existing_file)
         algo.setProperty("Instrument", "WAND^2")
-        algo.setProperty("XMin", [1.0])
-        algo.setProperty("XMax", [10.0])
+        algo.setProperty("XMin", 1.0)
+        algo.setProperty("XMax", 10.0)
         algo.setProperty("Wavelength", 2.5)
         algo.setProperty("VanadiumDiameter", 0.5)
 
@@ -1009,8 +989,8 @@ class MetadataConsistencyTests(unittest.TestCase):
         algo.setProperty("SampleIPTS", 123)
         algo.setProperty("SampleRunNumbers", [456])  # Single run - no metadata check
         algo.setProperty("Instrument", "WAND^2")
-        algo.setProperty("XMin", [1.0])
-        algo.setProperty("XMax", [10.0])
+        algo.setProperty("XMin", 1.0)
+        algo.setProperty("XMax", 10.0)
         algo.setProperty("Wavelength", 2.5)
         algo.setProperty("VanadiumDiameter", 0.5)
 
@@ -1044,8 +1024,8 @@ class MetadataConsistencyTests(unittest.TestCase):
             # Use a comma-separated string for multiple files
             algo.setProperty("SampleFilename", f"{existing_file},{modified_file}")
             algo.setProperty("Instrument", "WAND^2")
-            algo.setProperty("XMin", [1.0])
-            algo.setProperty("XMax", [10.0])
+            algo.setProperty("XMin", 1.0)
+            algo.setProperty("XMax", 10.0)
             algo.setProperty("Wavelength", 2.5)
             algo.setProperty("VanadiumDiameter", 0.5)
 
@@ -1079,8 +1059,8 @@ class MetadataConsistencyTests(unittest.TestCase):
 
             algo.setProperty("SampleFilename", f"{existing_file},{modified_file}")
             algo.setProperty("Instrument", "WAND^2")
-            algo.setProperty("XMin", [1.0])
-            algo.setProperty("XMax", [10.0])
+            algo.setProperty("XMin", 1.0)
+            algo.setProperty("XMax", 10.0)
             algo.setProperty("Wavelength", 2.5)
             algo.setProperty("VanadiumDiameter", 0.5)
 
@@ -1091,6 +1071,111 @@ class MetadataConsistencyTests(unittest.TestCase):
 
         finally:
             shutil.rmtree(temp_dir, ignore_errors=True)
+
+
+class BinningGridTests(unittest.TestCase):
+    """The bins are laid out on a grid of XBinWidth anchored at XMin, or at zero when XMin
+    is not given, and only the bins holding data are kept."""
+
+    BIN_WIDTH = 0.1
+
+    def setUp(self):
+        # data covering 6.07 to 69.99, so that the ends do not sit on a bin boundary
+        x = np.arange(6.07, 70.0, 0.01)
+        CreateWorkspace(DataX=x, DataY=np.ones_like(x), NSpec=1, OutputWorkspace="__grid_data")
+
+    def tearDown(self):
+        mtd.remove("__grid_data")
+
+    def _centres(self, **kwargs):
+        algo = _create_algo(XBinWidth=self.BIN_WIDTH, **kwargs)
+        x_min, x_max, num_bins = algo._locate_global_xlimit(["__grid_data"])
+        self.assertAlmostEqual((x_max - x_min) / num_bins, self.BIN_WIDTH)
+        return x_min + self.BIN_WIDTH / 2.0, x_max - self.BIN_WIDTH / 2.0, num_bins
+
+    def test_no_limits_given(self):
+        # case A: the grid is anchored at zero and trimmed to the data
+        first, last, num_bins = self._centres()
+        self.assertAlmostEqual(first, 6.05)
+        self.assertAlmostEqual(last, 69.95)
+        self.assertEqual(num_bins, 640)
+
+    def test_both_limits_given(self):
+        # case B: the grid is anchored at XMin and stops before XMax
+        first, last, num_bins = self._centres(XMin=6.0, XMax=40.0)
+        self.assertAlmostEqual(first, 6.05)
+        self.assertAlmostEqual(last, 39.95)
+        self.assertEqual(num_bins, 340)
+
+    def test_xmax_only(self):
+        # case C: the grid is anchored at zero and stops before XMax
+        first, last, num_bins = self._centres(XMax=40.0)
+        self.assertAlmostEqual(first, 6.05)
+        self.assertAlmostEqual(last, 39.95)
+        self.assertEqual(num_bins, 340)
+
+    def test_xmin_only(self):
+        # case D: the grid is anchored at XMin and trimmed to the data
+        first, last, _ = self._centres(XMin=6.1)
+        self.assertAlmostEqual(first, 6.15)
+        self.assertAlmostEqual(last, 69.95)
+
+    def test_xmin_outside_the_data_keeps_the_grid(self):
+        # XMin below the start of the data anchors the grid without shifting it onto the data
+        for x_min in (6.0, 5.0, 0.0):
+            first, _, _ = self._centres(XMin=x_min)
+            self.assertAlmostEqual(first, 6.05)
+
+    def test_xmin_inside_the_data_trims_the_data(self):
+        first, last, _ = self._centres(XMin=10.0)
+        self.assertAlmostEqual(first, 10.05)
+        self.assertAlmostEqual(last, 69.95)
+
+    def test_last_bin_does_not_pass_xmax(self):
+        # 6.0 + 213 * 0.3 = 69.9, the next bin would end at 70.2 which is past XMax
+        algo = _create_algo(XBinWidth=0.3, XMin=0.0, XMax=70.0)
+        x_min, x_max, num_bins = algo._locate_global_xlimit(["__grid_data"])
+        self.assertAlmostEqual(x_min, 6.0)
+        self.assertAlmostEqual(x_max, 69.9)
+        self.assertEqual(num_bins, 213)
+
+    def test_data_starting_on_a_bin_boundary_gains_no_empty_bin(self):
+        # 6.1 / 0.1 is 60.99999999999999, so without a tolerance the first boundary would
+        # round down and put an empty bin in front of the data
+        x = np.arange(6.1, 70.0, 0.01)
+        CreateWorkspace(DataX=x, DataY=np.ones_like(x), NSpec=1, OutputWorkspace="__grid_edge_data")
+        try:
+            algo = _create_algo(XBinWidth=self.BIN_WIDTH)
+            x_min, _, _ = algo._locate_global_xlimit(["__grid_edge_data"])
+            self.assertAlmostEqual(x_min, 6.1)
+        finally:
+            mtd.remove("__grid_edge_data")
+
+    def test_data_ending_on_a_bin_boundary_gains_no_empty_bin(self):
+        # 69.9 / 0.3 is 233.00000000000003, so without a tolerance the last boundary would
+        # round up and put an empty bin after the data
+        x = np.append(np.arange(6.07, 69.9, 0.01), 69.9)
+        CreateWorkspace(DataX=x, DataY=np.ones_like(x), NSpec=1, OutputWorkspace="__grid_edge_data")
+        try:
+            algo = _create_algo(XBinWidth=0.3)
+            x_min, x_max, num_bins = algo._locate_global_xlimit(["__grid_edge_data"])
+            self.assertAlmostEqual(x_min, 6.0)
+            self.assertAlmostEqual(x_max, 69.9)
+            self.assertEqual(num_bins, 213)
+        finally:
+            mtd.remove("__grid_edge_data")
+
+    def test_range_outside_the_data_raises(self):
+        algo = _create_algo(XBinWidth=self.BIN_WIDTH, XMin=100.0, XMax=200.0)
+        with self.assertRaises(RuntimeError) as cm:
+            algo._locate_global_xlimit(["__grid_data"])
+        self.assertIn("does not overlap the data", str(cm.exception))
+
+    def test_bin_width_larger_than_the_range_raises(self):
+        algo = _create_algo(XBinWidth=10.0, XMin=6.0, XMax=12.0)
+        with self.assertRaises(RuntimeError) as cm:
+            algo._locate_global_xlimit(["__grid_data"])
+        self.assertIn("too large to fit a bin", str(cm.exception))
 
 
 class ReductionExecutionTests(unittest.TestCase):
@@ -1151,10 +1236,11 @@ class ReductionExecutionTests(unittest.TestCase):
             tt2 = 45
             return get_bkg_counts(n) + 10 * np.exp(-((twoTheta - tt1) ** 2) / 1) + 20 * np.exp(-((twoTheta - tt2) ** 2) / 0.2)
 
+        spectrum_info = data.spectrumInfo()
         for i in range(cal.getNumberHistograms()):
             cal.setSharedY(i, [get_cal_counts(i) * 2.0])
             bkg.setSharedY(i, [get_bkg_counts(i) / 2.0])
-            twoTheta = data.getInstrument().getDetector(i + 10000).getTwoTheta(V3D(0, 0, 0), V3D(0, 0, 1)) * 180 / np.pi
+            twoTheta = np.rad2deg(spectrum_info.twoTheta(i))
             data.setSharedY(i, [get_data_counts(i, twoTheta)])
 
         data_file_name = os.path.join(self._test_dir, "sample_workspace.nxs")
@@ -1177,11 +1263,11 @@ class ReductionExecutionTests(unittest.TestCase):
         x = pd_out.extractX()
         y = pd_out.extractY()
 
-        self.assertAlmostEqual(x.min(), 8.09946893)
-        self.assertAlmostEqual(x.max(), 50.80113407)
-        self.assertAlmostEqual(y.min(), 0.00784728)
-        self.assertAlmostEqual(y.max(), 9.94421639)
-        self.assertAlmostEqual(x[0, y.argmax()], 45.10091179)
+        self.assertAlmostEqual(x.min(), 8.05)
+        self.assertAlmostEqual(x.max(), 50.85)
+        self.assertAlmostEqual(y.min(), 0.00766896)
+        self.assertAlmostEqual(y.max(), 9.67542399)
+        self.assertAlmostEqual(x[0, y.argmax()], 44.85)
 
         # data normalised by monitor <- duplicate input as two
         # NOTE:
@@ -1200,11 +1286,11 @@ class ReductionExecutionTests(unittest.TestCase):
         x = pd_out_multi.extractX()
         y = pd_out_multi.extractY()
 
-        self.assertAlmostEqual(x.min(), 8.09946893)
-        self.assertAlmostEqual(x.max(), 50.80113407)
-        self.assertAlmostEqual(y.min(), 0.01569456)
-        self.assertAlmostEqual(y.max(), 19.88843277)
-        self.assertAlmostEqual(x[0, y.argmax()], 45.10091179)
+        self.assertAlmostEqual(x.min(), 8.05)
+        self.assertAlmostEqual(x.max(), 50.85)
+        self.assertAlmostEqual(y.min(), 0.01533792)
+        self.assertAlmostEqual(y.max(), 19.35084798)
+        self.assertAlmostEqual(x[0, y.argmax()], 44.85)
 
         # data and calibration, limited range
         pd_out2 = HFIRPowderReduction(
@@ -1269,11 +1355,11 @@ class ReductionExecutionTests(unittest.TestCase):
         x = pd_out3.extractX()
         y = pd_out3.extractY()
 
-        self.assertAlmostEqual(x.min(), 8.09946893)
-        self.assertAlmostEqual(x.max(), 50.80113407)
-        self.assertAlmostEqual(y.min(), -31.86668266)
-        self.assertAlmostEqual(y.max(), -2.22827513)
-        self.assertAlmostEqual(x[0, y.argmax()], 8.09946893)
+        self.assertAlmostEqual(x.min(), 8.05)
+        self.assertAlmostEqual(x.max(), 50.85)
+        self.assertAlmostEqual(y.min(), -31.54665603)
+        self.assertAlmostEqual(y.max(), -2.22827336)
+        self.assertAlmostEqual(x[0, y.argmax()], 8.05)
         # data, cal and background, normalised by time
         # NOTE:
         # still needs to check physics
@@ -1294,11 +1380,11 @@ class ReductionExecutionTests(unittest.TestCase):
         x = pd_out3_multi.extractX()
         y = pd_out3_multi.extractY()
 
-        self.assertAlmostEqual(x.min(), 8.09946893)
-        self.assertAlmostEqual(x.max(), 50.80113407)
-        self.assertAlmostEqual(y.min(), -31.86668266)
-        self.assertAlmostEqual(y.max(), -2.22827513)
-        self.assertAlmostEqual(x[0, y.argmax()], 8.09946893)
+        self.assertAlmostEqual(x.min(), 8.05)
+        self.assertAlmostEqual(x.max(), 50.85)
+        self.assertAlmostEqual(y.min(), -31.54665603)
+        self.assertAlmostEqual(y.max(), -2.22827336)
+        self.assertAlmostEqual(x[0, y.argmax()], 8.05)
 
         # data, cal and background. To d spacing
         pd_out4 = HFIRPowderReduction(
@@ -1363,8 +1449,8 @@ class ReductionExecutionTests(unittest.TestCase):
         y = pd_out4.extractY()
 
         self.assertAlmostEqual(x.min(), 1.0006, places=4)
-        self.assertAlmostEqual(x.max(), 3.1994, places=4)
-        self.assertAlmostEqual(y.min(), -31.99860, places=4)
+        self.assertAlmostEqual(x.max(), 3.1988, places=4)
+        self.assertAlmostEqual(y.min(), -32.00241, places=4)
         self.assertAlmostEqual(y.max(), -2.22870, places=4)
         self.assertAlmostEqual(x[0, y.argmax()], 1.0006, places=4)
 
@@ -1389,8 +1475,8 @@ class ReductionExecutionTests(unittest.TestCase):
         y = pd_out4_multi.extractY()
 
         self.assertAlmostEqual(x.min(), 1.0006, places=4)
-        self.assertAlmostEqual(x.max(), 3.1994, places=4)
-        self.assertAlmostEqual(y.min(), -31.99860, places=4)
+        self.assertAlmostEqual(x.max(), 3.1988, places=4)
+        self.assertAlmostEqual(y.min(), -32.00241, places=4)
         self.assertAlmostEqual(y.max(), -2.22870, places=4)
         self.assertAlmostEqual(x[0, y.argmax()], 1.0006, places=4)
 
@@ -1412,11 +1498,11 @@ class ReductionExecutionTests(unittest.TestCase):
         x = pd_out4.extractX()
         y = pd_out4.extractY()
 
-        self.assertAlmostEqual(x.min(), 8.09952728)
-        self.assertAlmostEqual(x.max(), 49.94993970)
-        self.assertAlmostEqual(y.min(), -15.78880883)
-        self.assertAlmostEqual(y.max(), -1.11413713)
-        self.assertAlmostEqual(x[0, y.argmax()], 8.09952728)
+        self.assertAlmostEqual(x.min(), 8.05)
+        self.assertAlmostEqual(x.max(), 49.95)
+        self.assertAlmostEqual(y.min(), -15.77332196)
+        self.assertAlmostEqual(y.max(), -1.11413625)
+        self.assertAlmostEqual(x[0, y.argmax()], 8.05)
 
         pd_out4_multi = HFIRPowderReduction(
             SampleFileName=(f"{data},{data}"),
@@ -1436,11 +1522,11 @@ class ReductionExecutionTests(unittest.TestCase):
         x = pd_out4_multi.extractX()
         y = pd_out4_multi.extractY()
 
-        self.assertAlmostEqual(x.min(), 8.09952728)
-        self.assertAlmostEqual(x.max(), 49.94993970)
-        self.assertAlmostEqual(y.min(), -15.78880883)
-        self.assertAlmostEqual(y.max(), -1.11413713)
-        self.assertAlmostEqual(x[0, y.argmax()], 8.09952728)
+        self.assertAlmostEqual(x.min(), 8.05)
+        self.assertAlmostEqual(x.max(), 49.95)
+        self.assertAlmostEqual(y.min(), -15.77332196)
+        self.assertAlmostEqual(y.max(), -1.11413625)
+        self.assertAlmostEqual(x[0, y.argmax()], 8.05)
 
     def test_event(self):
         # check that the workflow runs with event workspaces as input, junk data

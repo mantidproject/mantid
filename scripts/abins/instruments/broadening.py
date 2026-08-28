@@ -382,7 +382,7 @@ def trunc_and_sum_inplace(
     if not np.isclose(points[1] - points[0], bin_width):
         raise ValueError("Bin spacing and point spacing are not consistent")
 
-    freq_range = limit * max(sigma)
+    freq_range = limit * np.max(sigma)
     nrows = len(center)
     ncols = int(np.ceil((freq_range * 2) / bin_width))
     if ncols > len(points):

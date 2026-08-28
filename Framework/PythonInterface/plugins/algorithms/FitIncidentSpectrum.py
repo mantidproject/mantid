@@ -145,8 +145,8 @@ class FitIncidentSpectrum(PythonAlgorithm):
             from scipy.signal.windows import gaussian
 
             b = gaussian(n, sig)
-            average = ndimage.filters.convolve1d(y, b / b.sum())
-            var = ndimage.filters.convolve1d(np.power(y - average, 2), b / b.sum())
+            average = ndimage.convolve1d(y, b / b.sum())
+            var = ndimage.convolve1d(np.power(y - average, 2), b / b.sum())
             return average, var
 
         avg, var = moving_average(y_fit)

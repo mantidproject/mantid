@@ -34,8 +34,8 @@ def create_test_ws_and_group():
 
     # make the first spectra in each group brighter
     # this forces an issue with np.argmax and all values being the same
-    ws.getEventList(0).multiply(1.10, 0.0)
-    ws.getEventList(4).multiply(1.05, 0.0)
+    ws.getSpectrum(0).multiply(1.10, 0.0)
+    ws.getSpectrum(4).multiply(1.05, 0.0)
 
     # the banks are named bank1...bank8
     # move the position of the detectors

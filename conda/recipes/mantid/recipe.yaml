@@ -96,7 +96,7 @@ outputs:
         - occt ${{ occt }}
         - pycifrw
         - pydantic ${{ pydantic }}
-        - python
+        - python ${{ python }}
         - pyyaml ${{ pyyaml }}
         - scipy ${{ scipy }}
         - euphonic ${{ euphonic }}

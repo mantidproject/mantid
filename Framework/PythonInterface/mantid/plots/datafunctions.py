@@ -950,7 +950,7 @@ def get_axes_labels(workspace, indices=None, normalization=PlotNormalizationType
         for index in range(workspace.axes()):
             axis = workspace.getAxis(index)
             unit = axis.getUnit()
-            if len(str(unit.symbol())) > 0:
+            if len(unit.symbol().ascii()) > 0:
                 unit = "{} (${}$)".format(unit.caption(), unit.symbol().latex())
             else:
                 unit = unit.caption()

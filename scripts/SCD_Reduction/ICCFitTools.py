@@ -15,7 +15,7 @@ from mantid.kernel import logger, V3D
 import ICConvoluted as ICC
 import itertools
 from functools import reduce
-from scipy.ndimage.filters import convolve
+from scipy.ndimage import convolve
 
 plt.ion()
 

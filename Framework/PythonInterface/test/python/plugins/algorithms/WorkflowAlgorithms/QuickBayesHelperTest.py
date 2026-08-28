@@ -75,7 +75,7 @@ class QuickBayesHelperTest(unittest.TestCase):
 
         ax = ws.getAxis(0)
         self.assertEqual(ax.getUnit().caption(), "Energy")
-        self.assertEqual(str(ax.getUnit().symbol()), "meV")
+        self.assertEqual(ax.getUnit().symbol().ascii(), "meV")
         self.assertEqual(ws.YUnitLabel(), "TOF")
 
         ax = ws.getAxis(1)

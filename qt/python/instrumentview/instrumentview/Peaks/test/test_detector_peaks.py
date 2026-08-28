@@ -43,7 +43,7 @@ class TestWorkspaceDetectorPeaks(unittest.TestCase):
 
     def test_get_peaks_indices_and_labels_empty(self):
         wdp = self._create_workspace_detector_peaks([])
-        positions_and_labels = wdp.get_peaks_indices_and_labels(np.array([[0, 0, 0]]), np.array([1]))
+        positions_and_labels = wdp.get_peaks_indices_and_labels(np.array([1]))
         # Should still return a tuple with two items
         self.assertEqual(2, len(positions_and_labels))
 
@@ -51,9 +51,8 @@ class TestWorkspaceDetectorPeaks(unittest.TestCase):
         peak1 = Peak(1, 0, (1, 0, 0), 100, 10, 10, 10)
         peak2 = Peak(2, 1, (0, 1, 0), 200, 20, 20, 20)
         wdp = self._create_workspace_detector_peaks([DetectorPeaks([peak1]), DetectorPeaks([peak2])])
-        detector_positions = np.array([[1, 1, 1], [2, 2, 2], [3, 3, 3]])
         detector_ids = np.array([1, 2, 3])
-        indices, labels = wdp.get_peaks_indices_and_labels(detector_positions, detector_ids)
+        indices, labels = wdp.get_peaks_indices_and_labels(detector_ids)
         np.testing.assert_array_equal(indices, [0, 1])
         self.assertEqual(["(1, 0, 0)", "(0, 1, 0)"], labels)
 
@@ -85,9 +84,8 @@ class TestWorkspaceDetectorPeaks(unittest.TestCase):
         # filter it out so the result is empty rather than raising an IndexError.
         peak = Peak(999, 0, (1, 0, 0), 100, 10, 10, 10)
         wdp = self._create_workspace_detector_peaks([DetectorPeaks([peak])])
-        detector_positions = np.array([[1, 1, 1], [2, 2, 2]])
         detector_ids = np.array([1, 2])
-        indices, labels = wdp.get_peaks_indices_and_labels(detector_positions, detector_ids)
+        indices, _labels = wdp.get_peaks_indices_and_labels(detector_ids)
         self.assertEqual(0, len(indices))
 
     @mock.patch("instrumentview.Peaks.WorkspaceDetectorPeaks.AnalysisDataService")
