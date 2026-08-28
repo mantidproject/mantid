@@ -10,6 +10,11 @@ on:
         description: 'Match Runner Label'
         required: false
         type: string
+      CLEAN:
+        description: 'Run clean-builder before building. Only available via workflow_dispatch; use Run workflow, not Re-run jobs.'
+        required: false
+        default: false
+        type: boolean
 
 
 # cancel previous job if a new commit is pushed
@@ -193,8 +198,12 @@ jobs:
 
       - name: Clean build tree
         if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
-        # supplying --clean-build or CLEAN_BUILD=true should be added here
-        run: ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/clean-builder ${GITHUB_WORKSPACE}
+        run: |
+          CLEAN_ARGS=""
+          if [ "${{ inputs.CLEAN }}" == "true" ]; then
+            CLEAN_ARGS="--clean-build"
+          fi
+          ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/clean-builder ${GITHUB_WORKSPACE} ${CLEAN_ARGS}
 
       - name: Determine if a PR build
         if: ${{ github.event_name == 'pull_request' && needs.check-filters.outputs.code_changes == 'true' }}
@@ -346,8 +355,12 @@ jobs:
 
       - name: Clean build tree
         if: ${{ needs.check-filters.outputs.user_docs == 'true' }}
-        # supplying --clean-build or CLEAN_BUILD=true should be added here
-        run: ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/clean-builder ${GITHUB_WORKSPACE}
+        run: |
+          CLEAN_ARGS=""
+          if [ "${{ inputs.CLEAN }}" == "true" ]; then
+            CLEAN_ARGS="--clean-build"
+          fi
+          ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/clean-builder ${GITHUB_WORKSPACE} ${CLEAN_ARGS}
 
       - name: Build code and user docs
         if: ${{ needs.check-filters.outputs.user_docs == 'true' }}
