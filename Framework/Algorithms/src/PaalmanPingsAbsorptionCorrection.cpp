@@ -384,7 +384,7 @@ void PaalmanPingsAbsorptionCorrection::retrieveBaseProperties() {
 }
 
 /// Create the sample object using the Geometry classes, or use the existing one
-void PaalmanPingsAbsorptionCorrection::constructSample(API::Sample &sample) {
+void PaalmanPingsAbsorptionCorrection::constructSample(const API::Sample &sample) {
   m_containerObject = &(sample.getEnvironment().getContainer());
 
   // Check there is one, and fail if not
