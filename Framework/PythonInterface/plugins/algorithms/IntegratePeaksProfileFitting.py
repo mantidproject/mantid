@@ -190,7 +190,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
     def PyExec(self):
         import ICCFitTools as ICCFT
         import BVGFitTools as BVGFT
-        from scipy.ndimage.filters import convolve
+        from scipy.ndimage import convolve
 
         MDdata = self.getProperty("InputWorkspace").value
         peaks_ws = self.getProperty("PeaksWorkspace").value

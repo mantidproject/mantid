@@ -799,12 +799,12 @@ class LimitParser(UserFileComponentParser):
         return output
 
     def _extract_simple_pattern(self, simple_range_input, tag):
-        if re.sub(self._range, "", simple_range_input, 1) == "":
+        if re.sub(self._range, "", simple_range_input, count=1) == "":
             float_range = extract_float_range(simple_range_input)
             output = {tag: simple_range(start=float_range[0], stop=float_range[1], step=None, step_type=None)}
         else:
             # Extract the step information
-            range_removed = re.sub(self._range, "", simple_range_input, 1)
+            range_removed = re.sub(self._range, "", simple_range_input, count=1)
 
             # Get the step type
             step_type = self._get_step_type(range_removed)

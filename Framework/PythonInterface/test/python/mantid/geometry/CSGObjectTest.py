@@ -19,17 +19,15 @@ class CSGObjectTest(unittest.TestCase):
             self.__class__._testws = alg.getProperty("OutputWorkspace").value
 
     def test_objects_XML_can_be_retrieved(self):
-        inst = self._testws.getInstrument()
-        pixel = inst.getComponentByName("pixel")
-        shape = pixel.shape()
+        component_info = self._testws.componentInfo()
+        shape = component_info.shape(component_info.indexOfAny("pixel"))
         self.assertTrue(isinstance(shape, CSGObject))
-        xml = pixel.shape().getShapeXML()
+        xml = shape.getShapeXML()
         self.assertTrue('radius val="0.0127"' in xml)
 
     def test_boundingBox_retrieval(self):
-        inst = self._testws.getInstrument()
-        pixel = inst.getComponentByName("pixel")
-        shape = pixel.shape()
+        component_info = self._testws.componentInfo()
+        shape = component_info.shape(component_info.indexOfAny("pixel"))
         box = shape.getBoundingBox()
         self.assertTrue(isinstance(box, BoundingBox))
 

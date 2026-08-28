@@ -40,7 +40,7 @@ def add_workspace_with_data(func):
         dX = dataY
 
         ws = CreateWorkspace(DataX=dataX, DataY=dataY, DataE=dataE, NSpec=4, UnitX="Wavelength", Dx=dX)
-        return func(self, ws)
+        func(self, ws)
 
     return wrapper
 
@@ -72,7 +72,7 @@ def add_md_workspace_with_data(dimensions=2):
                     Names="Dim1,Dim2,Dim3",
                     Units="MomentumTransfer,EnergyTransfer,EnergyTransfer",
                 )
-            return func(self, mdws)
+            func(self, mdws)
 
         return wrapper
 
@@ -714,7 +714,7 @@ class DataFunctionsTest(unittest.TestCase):
         self.assertEqual(False, res_distribution)
         self.assertEqual(res_kwargs["label"], "ws: bin 0")
 
-    @add_md_workspace_with_data
+    @add_md_workspace_with_data()
     def test_get_md_data_no_error(self, mdws):
         dim_arrays, data, err = funcs.get_md_data(mdws, md_normalization=None)
         self.assertEqual(11, len(dim_arrays[0]))
@@ -731,7 +731,7 @@ class DataFunctionsTest(unittest.TestCase):
 
         self.assertIsNone(err)
 
-    @add_md_workspace_with_data
+    @add_md_workspace_with_data()
     def test_get_md_data_with_error(self, mdws):
         dim_arrays, data, err = funcs.get_md_data(mdws, md_normalization=None, withError=True)
         self.assertEqual(11, len(dim_arrays[0]))

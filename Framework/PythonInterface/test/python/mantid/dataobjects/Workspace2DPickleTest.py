@@ -26,9 +26,7 @@ class Workspace2DPickleTest(unittest.TestCase):
         self.assertEqual(self.ws_orig.getTitle(), self.ws_copy.getTitle())
 
     def test_instrument_match(self):
-        inst1 = self.ws_orig.getInstrument()
-        inst2 = self.ws_copy.getInstrument()
-        self.assertEqual(inst1.getName(), inst2.getName())
+        self.assertEqual(self.ws_orig.getInstrumentName(), self.ws_copy.getInstrumentName())
 
     def test_axis_unit_match(self):
         x_orig = self.ws_orig.getAxis(0).getUnit().unitID()

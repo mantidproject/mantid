@@ -1605,7 +1605,7 @@ class RunDescriptor(PropDescriptor):
                     # sample workspace was loaded with monitors in and bg_ws with monitors out.
                     # Add zero monitor spectra to smaller workspace
                     n_monitors = ws.getNumberHistograms() - ebg_ws.getNumberHistograms()
-                    monitors_at_start = ws.getDetector(0).isMonitor()
+                    monitors_at_start = ws.spectrumInfo().isMonitor(0)
                     if n_monitors > 0:
                         ebg_ws = self._add_empty_spectra(ebg_ws, n_monitors, monitors_at_start)
                     else:

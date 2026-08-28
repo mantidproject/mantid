@@ -18,11 +18,8 @@ class LoadEmptyVesuvioTest(unittest.TestCase):
         self.assertEqual(evs_ws.getNumberHistograms(), 198)
         self.assertEqual(evs_ws.blocksize(), 1)
 
-        evs = evs_ws.getInstrument()
-        sample_pos = evs.getSample().getPos()
-
-        bs_det_1 = evs_ws.getDetector(2)
-        bs_det_1_l1 = sample_pos.distance(bs_det_1.getPos())
+        sample_pos = evs_ws.componentInfo().samplePosition()
+        bs_det_1_l1 = sample_pos.distance(evs_ws.spectrumInfo().position(2))
 
         self.assertAlmostEqual(bs_det_1_l1, 0.6747705, places=7)
 
@@ -35,11 +32,8 @@ class LoadEmptyVesuvioTest(unittest.TestCase):
         self.assertEqual(evs_ws.getNumberHistograms(), 198)
         self.assertEqual(evs_ws.blocksize(), 1)
 
-        evs = evs_ws.getInstrument()
-        sample_pos = evs.getSample().getPos()
-
-        bs_det_1 = evs_ws.getDetector(2)
-        bs_det_1_l1 = sample_pos.distance(bs_det_1.getPos())
+        sample_pos = evs_ws.componentInfo().samplePosition()
+        bs_det_1_l1 = sample_pos.distance(evs_ws.spectrumInfo().position(2))
 
         self.assertAlmostEqual(bs_det_1_l1, 0.6707999706268, places=7)
 

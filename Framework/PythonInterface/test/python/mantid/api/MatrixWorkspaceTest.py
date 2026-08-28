@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-import math
 from testhelpers import create_algorithm, run_algorithm, can_be_instantiated, WorkspaceCreationHelper
 from mantid.api import (
     MatrixWorkspace,
@@ -15,8 +14,6 @@ from mantid.api import (
     WorkspaceFactory,
     NumericAxis,
 )
-from mantid.geometry import Detector
-from mantid.kernel import V3D
 from mantid.simpleapi import CreateSampleWorkspace, Rebin, RebinRagged
 import numpy as np
 
@@ -67,12 +64,12 @@ class MatrixWorkspaceTest(unittest.TestCase):
 
         xunit = xaxis.getUnit()
         self.assertEqual(xunit.caption(), "Time-of-flight")
-        self.assertEqual(str(xunit.symbol()), "microsecond")
+        self.assertEqual(xunit.symbol().ascii(), "microsecond")
         self.assertEqual(xunit.unitID(), "TOF")
 
         yunit = yaxis.getUnit()
         self.assertEqual(yunit.caption(), "Spectrum")
-        self.assertEqual(str(yunit.symbol()), "")
+        self.assertEqual(yunit.symbol().ascii(), "")
         self.assertEqual(yunit.unitID(), "Label")
 
     def test_replace_axis(self):
@@ -87,11 +84,10 @@ class MatrixWorkspaceTest(unittest.TestCase):
         except:
             self.fail("Segmentation violation when deleting the same axis twice")
 
-    def test_detector_retrieval(self):
-        det = self._test_ws.getDetector(0)
-        self.assertTrue(isinstance(det, Detector))
-        self.assertEqual(det.getID(), 1)
-        self.assertAlmostEqual(math.pi, det.getTwoTheta(V3D(0, 0, 11), V3D(0, 0, 1)))
+    def test_detector_information_retrieval(self):
+        detector_info = self._test_ws.detectorInfo()
+        self.assertEqual(detector_info.size(), 2)
+        self.assertEqual(detector_info.detectorIDs()[0], 1)
 
     def test_spectrum_retrieval(self):
         # Spectrum
@@ -112,10 +108,10 @@ class MatrixWorkspaceTest(unittest.TestCase):
         self.assertEqual([x for x in range(1, num_vec + 1)], spec_nums)
 
     def test_detector_two_theta(self):
-        det = self._test_ws.getDetector(1)
-        two_theta = self._test_ws.detectorTwoTheta(det)
+        spectrum_info = self._test_ws.spectrumInfo()
+        two_theta = spectrum_info.twoTheta(1)
         self.assertAlmostEqual(two_theta, 0.01999733, places=8)
-        signed_two_theta = self._test_ws.detectorSignedTwoTheta(det)
+        signed_two_theta = spectrum_info.signedTwoTheta(1)
         self.assertAlmostEqual(signed_two_theta, 0.01999733, places=8)
 
     def test_that_a_histogram_workspace_is_returned_as_a_MatrixWorkspace_from_a_property(self):
@@ -285,9 +281,9 @@ class MatrixWorkspaceTest(unittest.TestCase):
         test_ws = WorkspaceFactory.create("Workspace2D", nvectors, xlength, ylength)
 
         values = np.arange(xlength + 1)
-        self.assertRaises(ValueError, test_ws.setX, 0, values)
-        self.assertRaises(ValueError, test_ws.setY, 0, values)
-        self.assertRaises(ValueError, test_ws.setE, 0, values)
+        self.assertRaises(RuntimeError, test_ws.setSharedX, 0, values)
+        self.assertRaises(RuntimeError, test_ws.setSharedY, 0, values)
+        self.assertRaises(RuntimeError, test_ws.setSharedE, 0, values)
 
     def test_setting_spectra_from_array_using_incorrect_index_raises_error(self):
         nvectors = 2
@@ -296,7 +292,7 @@ class MatrixWorkspaceTest(unittest.TestCase):
 
         test_ws = WorkspaceFactory.create("Workspace2D", nvectors, xlength, ylength)
         xvalues = np.arange(xlength)
-        self.assertRaises(RuntimeError, test_ws.setX, 3, xvalues)
+        self.assertRaises(RuntimeError, test_ws.setSharedX, 3, xvalues)
 
     def test_setting_spectra_from_array_sets_expected_values(self):
         nvectors = 2

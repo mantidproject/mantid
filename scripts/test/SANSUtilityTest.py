@@ -209,9 +209,9 @@ class SANSUtilityTest(unittest.TestCase):
         self.assertEqual(2, len(mtd))
 
         self.assertEqual(result.getNumberHistograms(), len(det_ids))
-        self.assertEqual(result.getDetector(0).getID(), 100)
-        self.assertEqual(result.getDetector(1).getID(), 102)
-        self.assertEqual(result.getDetector(2).getID(), 104)
+        self.assertEqual(set(result.getSpectrum(0).getDetectorIDs()), {100})
+        self.assertEqual(set(result.getSpectrum(1).getDetectorIDs()), {102})
+        self.assertEqual(set(result.getSpectrum(2).getDetectorIDs()), {104})
 
         ws = CreateSampleWorkspace("Histogram", "Multiple Peaks")
         det_ids = list(range(100, 299, 2))
@@ -761,7 +761,7 @@ class TestZeroErrorFreeWorkspace(unittest.TestCase):
             BankDistanceFromSample=1,
         )
         if type == "Histogram":
-            errors = ws.dataE
+            errors = ws.mutableE
             # For first and third spectra set to 0.0
             errors(0)[0] = 0.0
             errors(2)[0] = 0.0
@@ -837,7 +837,7 @@ class TestZeroErrorFreeWorkspace(unittest.TestCase):
         ws = mtd[ws_name]
 
         # Act and Assert
-        errors = ws.dataE
+        errors = ws.mutableE
         self.assertEqual(errors(0)[0], 0.0)
         self.assertNotEqual(errors(1)[0], 0.0)
         self.assertEqual(errors(2)[0], 0.0)
