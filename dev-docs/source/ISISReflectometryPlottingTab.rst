@@ -407,9 +407,8 @@ The implementation provides output-specific option factory functions for
 reflectivity, detector-map, spin-asymmetry, and alignment plots. They define
 labels, scales, styles, error bars, markers, and window titles.
 
-:code:`Common/IPlotOptionsProvider.h` and
-:code:`Common/PlotOptionsProvider.h/.cpp`
-################################################
+:code:`Common/IPlotOptionsProvider.h` and :code:`PlotOptionsProvider.h/.cpp`
+################################################################################
 
 Defines:
 
@@ -460,9 +459,8 @@ Lists plotting sources, headers, the Qt MOC input, and
 :code:`PlottingWidget.ui`, then exports those lists to the enclosing
 ISISReflectometry CMake configuration.
 
-:code:`Batch/BatchPresenter.h/.cpp` and
-:code:`Batch/BatchPresenterFactory.h`
-############################################
+:code:`Batch/BatchPresenter.h/.cpp` and :code:`BatchPresenterFactory.h`
+################################################################################
 
 These existing Batch files integrate the new component. The factory constructs
 the plotting presenter from the plotting view. :code:`BatchPresenter` owns it,
