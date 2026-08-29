@@ -93,9 +93,8 @@ public:
 
   /// Integrate a peak using a shape supplied by the caller (e.g. from an
   /// already-integrated PeaksWorkspace) instead of one fit from the events
-  std::shared_ptr<const Geometry::PeakShape>
-  integrateUsingShape(Mantid::DataObjects::PeakShapeEllipsoid_const_sptr shape, const Mantid::Kernel::V3D &peak_q,
-                      double &inti, double &sigi);
+  void integrateUsingShape(const Mantid::DataObjects::PeakShapeEllipsoid &shape, const Mantid::Kernel::V3D &peak_q,
+                           double &inti, double &sigi);
 
   double estimateSignalToNoiseRatio(const IntegrationParameters &params, const Mantid::Kernel::V3D &center,
                                     bool forceSpherical = false, double sphericityTol = 0.02);

@@ -100,8 +100,7 @@ void IntegratePeaksShapeMD::exec() {
   std::vector<V3D> hkl_vectors;
   std::vector<std::pair<std::pair<double, double>, V3D>> qList;
   for (size_t i = 0; i < n_peaks; i++) {
-    auto shape = std::dynamic_pointer_cast<const PeakShapeEllipsoid>(peaks[i].getPeakShape());
-    if (!shape)
+    if (!dynamic_cast<const PeakShapeEllipsoid *>(&peaks[i].getPeakShape()))
       throw std::runtime_error("Peak " + std::to_string(i) +
                                " does not have an ellipsoidal shape. Integrate the "
                                "PeaksWorkspace first, e.g. with IntegrateEllipsoids, "
@@ -138,11 +137,11 @@ void IntegratePeaksShapeMD::exec() {
 
   for (size_t i = 0; i < n_peaks; i++) {
     auto &peak = peaks[i];
-    auto shape = std::dynamic_pointer_cast<const PeakShapeEllipsoid>(peak.getPeakShape());
+    const auto *shape = dynamic_cast<const PeakShapeEllipsoid *>(&peak.getPeakShape());
 
     double inti = 0.0;
     double sigi = 0.0;
-    integrator.integrateUsingShape(shape, peak.getQLabFrame(), inti, sigi);
+    integrator.integrateUsingShape(*shape, peak.getQLabFrame(), inti, sigi);
 
     peak.setIntensity(inti);
     peak.setSigmaIntensity(sigi);

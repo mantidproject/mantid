@@ -272,22 +272,21 @@ Integrate3DEvents::integrateWeakPeak(const IntegrationParameters &params, PeakSh
  * @param inti    Returns the net (background-subtracted) integrated intensity.
  * @param sigi    Returns the standard deviation of inti.
  */
-std::shared_ptr<const Geometry::PeakShape> Integrate3DEvents::integrateUsingShape(PeakShapeEllipsoid_const_sptr shape,
-                                                                                  const V3D &peak_q, double &inti,
-                                                                                  double &sigi) {
+void Integrate3DEvents::integrateUsingShape(const PeakShapeEllipsoid &shape, const V3D &peak_q, double &inti,
+                                            double &sigi) {
   inti = 0.0; // default values, in case something
   sigi = 0.0; // is wrong with the peak.
 
   auto result = getEvents(peak_q);
   if (!result)
-    return shape;
+    return;
 
   const auto &events = *result;
 
-  const auto &directions = shape->directions();
-  const auto &abcRadii = shape->abcRadii();
-  const auto &abcBackgroundInnerRadii = shape->abcRadiiBackgroundInner();
-  const auto &abcBackgroundOuterRadii = shape->abcRadiiBackgroundOuter();
+  const auto &directions = shape.directions();
+  const auto &abcRadii = shape.abcRadii();
+  const auto &abcBackgroundInnerRadii = shape.abcRadiiBackgroundInner();
+  const auto &abcBackgroundOuterRadii = shape.abcRadiiBackgroundOuter();
 
   const std::pair<double, double> backgrd = numInEllipsoidBkg(
       events, directions, abcBackgroundOuterRadii, abcBackgroundInnerRadii, m_useOnePercentBackgroundCorrection);
@@ -302,8 +301,6 @@ std::shared_ptr<const Geometry::PeakShape> Integrate3DEvents::integrateUsingShap
 
   inti = peak.first - ratio * backgrd.first;
   sigi = sqrt(peak.second + ratio * ratio * backgrd.second);
-
-  return shape;
 }
 
 double Integrate3DEvents::estimateSignalToNoiseRatio(const IntegrationParameters &params, const V3D &center,

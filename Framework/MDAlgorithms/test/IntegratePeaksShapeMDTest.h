@@ -8,6 +8,7 @@
 
 #include "MantidMDAlgorithms/IntegratePeaksShapeMD.h"
 
+#include "MantidAPI/Run.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidFrameworkTestHelpers/SingleCrystalDiffractionTestHelper.h"
 #include "MantidKernel/V3D.h"
