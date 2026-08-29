@@ -9,9 +9,11 @@
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 
+#include <algorithm>
 #include <boost/math/special_functions/round.hpp>
 #include <cmath>
 #include <fstream>
+#include <limits>
 #include <memory>
 #include <numeric>
 #include <tuple>
@@ -261,6 +263,106 @@ Integrate3DEvents::integrateWeakPeak(const IntegrationParameters &params, PeakSh
                                                     "IntegrateEllipsoidsTwoStep");
 }
 
+namespace {
+/// Maximize the (weighted) Poisson log-likelihood
+/// sum(w_i * ln(A*g_i + b)) - (A*normG + b*volume) over A, b >= 0, via a
+/// bounded, backtracking Newton solve. g_i are the (unnormalized, peak
+/// height 1) Gaussian kernel values at each event; normG is the kernel's
+/// integral over all space; volume is the search region's volume (its
+/// background rate contribution). Also returns the standard error on A
+/// from the observed Fisher information.
+void solvePoissonMatchedFilter(const std::vector<double> &g, const std::vector<double> &w, double normG, double volume,
+                               double &A, double &b, double &sigA) {
+  const auto n = g.size();
+
+  auto logLikelihoodGradHess = [&](double a, double bb, double &dA, double &dB, double &dAA, double &dBB, double &dAB) {
+    dA = -normG;
+    dB = -volume;
+    dAA = 0.0;
+    dBB = 0.0;
+    dAB = 0.0;
+    for (size_t i = 0; i < n; ++i) {
+      const auto mu = std::max(a * g[i] + bb, 1e-12);
+      const auto wi = w[i];
+      dA += wi * g[i] / mu;
+      dB += wi / mu;
+      dAA -= wi * g[i] * g[i] / (mu * mu);
+      dBB -= wi / (mu * mu);
+      dAB -= wi * g[i] / (mu * mu);
+    }
+  };
+
+  // seed from crude percentile-free estimates: total weight split evenly
+  // between a peak (using the largest kernel value seen) and a flat
+  // background over the search volume
+  double sumW = 0.0, gMax = 0.0;
+  for (size_t i = 0; i < n; ++i) {
+    sumW += w[i];
+    gMax = std::max(gMax, g[i]);
+  }
+  b = volume > 0 ? std::max(0.5 * sumW / volume, 1e-10) : 1e-10;
+  A = gMax > 0 ? std::max(0.5 * sumW / (gMax * normG > 0 ? normG : 1.0), 1e-10) : 1e-10;
+
+  for (int iter = 0; iter < 100; ++iter) {
+    double dA, dB, dAA, dBB, dAB;
+    logLikelihoodGradHess(A, b, dA, dB, dAA, dBB, dAB);
+
+    const auto det = dAA * dBB - dAB * dAB;
+    if (std::abs(det) < 1e-300)
+      break;
+
+    const auto deltaA = -(dBB * dA - dAB * dB) / det;
+    const auto deltaB = -(-dAB * dA + dAA * dB) / det;
+
+    // backtrack until both parameters stay non-negative
+    double step = 1.0;
+    double newA = A, newB = b;
+    for (int halving = 0; halving < 30; ++halving) {
+      newA = A + step * deltaA;
+      newB = b + step * deltaB;
+      if (newA >= 0.0 && newB >= 0.0)
+        break;
+      step *= 0.5;
+    }
+    newA = std::max(newA, 0.0);
+    newB = std::max(newB, 0.0);
+
+    const auto converged = std::abs(newA - A) < 1e-12 * (1.0 + A) && std::abs(newB - b) < 1e-12 * (1.0 + b);
+    A = newA;
+    b = newB;
+    if (converged)
+      break;
+  }
+
+  double dA, dB, dAA, dBB, dAB;
+  logLikelihoodGradHess(A, b, dA, dB, dAA, dBB, dAB);
+  sigA = dAA < 0.0 ? std::sqrt(-1.0 / dAA) : std::numeric_limits<double>::infinity();
+}
+
+/// Solve the 3x3 linear system H*x = -g via Cramer's rule, used for the
+/// Gauss-Newton center-refinement step. Returns false (x left unchanged) if
+/// H is singular.
+bool solve3x3(const double H[3][3], const double g[3], double x[3]) {
+  const auto det = H[0][0] * (H[1][1] * H[2][2] - H[1][2] * H[2][1]) -
+                   H[0][1] * (H[1][0] * H[2][2] - H[1][2] * H[2][0]) +
+                   H[0][2] * (H[1][0] * H[2][1] - H[1][1] * H[2][0]);
+  if (std::abs(det) < 1e-300)
+    return false;
+
+  for (int col = 0; col < 3; ++col) {
+    double M[3][3];
+    for (int r = 0; r < 3; ++r)
+      for (int c = 0; c < 3; ++c)
+        M[r][c] = (c == col) ? -g[r] : H[r][c];
+    const auto colDet = M[0][0] * (M[1][1] * M[2][2] - M[1][2] * M[2][1]) -
+                        M[0][1] * (M[1][0] * M[2][2] - M[1][2] * M[2][0]) +
+                        M[0][2] * (M[1][0] * M[2][1] - M[1][1] * M[2][0]);
+    x[col] = colDet / det;
+  }
+  return true;
+}
+} // namespace
+
 /**
  * Integrate a peak using a fixed ellipsoidal shape, rather than fitting one
  * from the events themselves. The shape's directions and radii (peak and
@@ -301,6 +403,149 @@ void Integrate3DEvents::integrateUsingShape(const PeakShapeEllipsoid &shape, con
 
   inti = peak.first - ratio * backgrd.first;
   sigi = sqrt(peak.second + ratio * ratio * backgrd.second);
+}
+
+/**
+ * Integrate a peak using a fixed ellipsoidal shape by maximizing the
+ * (weighted) Poisson log-likelihood of an unbinned point process
+ * lambda(q) = A*gaussian(q-c) + b over the raw events within m_radius of
+ * peak_q, instead of counting events inside/outside ellipsoidal
+ * boundaries. The shape's peak radii are interpreted as the Gaussian's
+ * standard deviations (1-sigma) along its principal axes. The Gaussian's
+ * mass outside the m_radius search sphere is assumed negligible.
+ *
+ * @param shape        The ellipsoid shape (directions and peak radii,
+ *                     interpreted as standard deviations) to integrate
+ *                     with. Background radii are unused: the background
+ *                     rate is fit directly instead.
+ * @param peak_q       Q-vector at which to center the shape.
+ * @param adjustCenter If true, also refine the center c (initially 0, i.e.
+ *                     peak_q) by bounded coordinate-ascent Gauss-Newton
+ *                     steps, capped at one standard deviation total shift.
+ * @param inti         Returns the fitted (background-subtracted) integrated
+ *                     intensity.
+ * @param sigi         Returns the standard deviation of inti.
+ */
+void Integrate3DEvents::integrateUsingShapeProfileFit(const PeakShapeEllipsoid &shape, const V3D &peak_q,
+                                                      bool adjustCenter, double &inti, double &sigi) {
+  inti = 0.0;
+  sigi = 0.0;
+
+  auto result = getEvents(peak_q);
+  if (!result || result->empty())
+    return;
+
+  const auto &events = *result;
+
+  const auto &directions = shape.directions();
+  const auto &sigmas = shape.abcRadii();
+
+  // apply the ellipsoid's inverse-covariance to v, via its spectral (axis) form
+  auto applyInvS = [&](const V3D &v) {
+    V3D out;
+    for (size_t k = 0; k < 3; ++k)
+      out += directions[k] * (v.scalar_prod(directions[k]) / (sigmas[k] * sigmas[k]));
+    return out;
+  };
+
+  // kernel value and inv_S*(event-c) (needed for the center gradient) for
+  // every event, at center offset c from peak_q
+  auto computeKernel = [&](const V3D &c, std::vector<double> &g, std::vector<double> &w, std::vector<V3D> &invSq) {
+    g.clear();
+    w.clear();
+    invSq.clear();
+    g.reserve(events.size());
+    w.reserve(events.size());
+    invSq.reserve(events.size());
+    for (const auto &event : events) {
+      const V3D qOff = event.second - c;
+      const auto Sq = applyInvS(qOff);
+      g.push_back(exp(-0.5 * qOff.scalar_prod(Sq)));
+      w.push_back(event.first.first);
+      invSq.push_back(Sq);
+    }
+  };
+
+  // sum(g) over all space is translation-invariant, so normG does not
+  // depend on the center offset c
+  const auto normG = pow(2.0 * M_PI, 1.5) * sigmas[0] * sigmas[1] * sigmas[2];
+  const auto volume = (4.0 / 3.0) * M_PI * m_radius * m_radius * m_radius;
+
+  auto logLikelihood = [&](const V3D &c, double A, double b) {
+    double ll = -(A * normG + b * volume);
+    for (const auto &event : events) {
+      const V3D qOff = event.second - c;
+      const auto gi = exp(-0.5 * qOff.scalar_prod(applyInvS(qOff)));
+      ll += event.first.first * log(std::max(A * gi + b, 1e-12));
+    }
+    return ll;
+  };
+
+  V3D center;
+  std::vector<double> g, w;
+  std::vector<V3D> invSq;
+  computeKernel(center, g, w, invSq);
+
+  double A = 0.0, b = 0.0, sigA = 0.0;
+  solvePoissonMatchedFilter(g, w, normG, volume, A, b, sigA);
+
+  if (adjustCenter) {
+    const auto maxShift = *std::min_element(sigmas.begin(), sigmas.end());
+
+    for (int outer = 0; outer < 20; ++outer) {
+      // Gauss-Newton step in the center, holding A, b fixed
+      double grad[3] = {0.0, 0.0, 0.0};
+      double hess[3][3] = {{0.0}};
+      for (size_t i = 0; i < g.size(); ++i) {
+        const auto mu = std::max(A * g[i] + b, 1e-12);
+        const auto factor = w[i] * g[i] / mu;
+        const auto factor2 = w[i] * g[i] * g[i] / (mu * mu);
+        const double Sq[3] = {invSq[i].X(), invSq[i].Y(), invSq[i].Z()};
+        for (int r = 0; r < 3; ++r) {
+          grad[r] += A * factor * Sq[r];
+          for (int c = 0; c < 3; ++c)
+            hess[r][c] -= A * A * factor2 * Sq[r] * Sq[c];
+        }
+      }
+
+      double deltaC[3];
+      if (!solve3x3(hess, grad, deltaC))
+        break;
+
+      V3D step(deltaC[0], deltaC[1], deltaC[2]);
+      if (step.norm() > 0.25 * maxShift)
+        step *= (0.25 * maxShift / step.norm());
+
+      auto clampToMaxShift = [&](V3D c) {
+        if (c.norm() > maxShift)
+          c *= (maxShift / c.norm());
+        return c;
+      };
+
+      const auto llOld = logLikelihood(center, A, b);
+      V3D newCenter = clampToMaxShift(center + step);
+      auto llNew = logLikelihood(newCenter, A, b);
+
+      double localStep = 1.0;
+      while (llNew < llOld && localStep > 1e-4) {
+        localStep *= 0.5;
+        newCenter = clampToMaxShift(center + step * localStep);
+        llNew = logLikelihood(newCenter, A, b);
+      }
+
+      const auto converged = (newCenter - center).norm() < 1e-8 * (1.0 + maxShift);
+      center = newCenter;
+
+      computeKernel(center, g, w, invSq);
+      solvePoissonMatchedFilter(g, w, normG, volume, A, b, sigA);
+
+      if (converged)
+        break;
+    }
+  }
+
+  inti = A * normG;
+  sigi = sigA * normG;
 }
 
 double Integrate3DEvents::estimateSignalToNoiseRatio(const IntegrationParameters &params, const V3D &center,

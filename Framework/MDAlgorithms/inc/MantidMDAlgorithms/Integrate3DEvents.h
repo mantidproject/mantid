@@ -92,9 +92,23 @@ public:
                                                                double &sigi);
 
   /// Integrate a peak using a shape supplied by the caller (e.g. from an
-  /// already-integrated PeaksWorkspace) instead of one fit from the events
+  /// already-integrated PeaksWorkspace) instead of one fit from the events,
+  /// used exactly as supplied and centered on peak_q.
   void integrateUsingShape(const Mantid::DataObjects::PeakShapeEllipsoid &shape, const Mantid::Kernel::V3D &peak_q,
                            double &inti, double &sigi);
+
+  /// Integrate a peak using a shape supplied by the caller, by maximizing
+  /// the Poisson log-likelihood of a Gaussian peak (amplitude fit) plus a
+  /// flat background rate against the raw events, instead of counting
+  /// events inside/outside ellipsoidal boundaries. The shape's peak radii
+  /// are interpreted as the Gaussian's standard deviations (1-sigma) along
+  /// its principal axes; the shape's background radii are not used, since
+  /// the background rate is fit directly instead. If adjustCenter is true,
+  /// also refines the center by a bounded, coordinate-ascent Gauss-Newton
+  /// step (capped at one standard deviation from peak_q) -- a slight
+  /// correction, not a free centroid search.
+  void integrateUsingShapeProfileFit(const Mantid::DataObjects::PeakShapeEllipsoid &shape,
+                                     const Mantid::Kernel::V3D &peak_q, bool adjustCenter, double &inti, double &sigi);
 
   double estimateSignalToNoiseRatio(const IntegrationParameters &params, const Mantid::Kernel::V3D &center,
                                     bool forceSpherical = false, double sphericityTol = 0.02);

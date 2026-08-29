@@ -69,6 +69,20 @@ void IntegratePeaksShapeMD::init() {
                   "If this options is enabled, then the top 1% of the background will be "
                   "removed before the background subtraction.");
 
+  declareProperty("ProfileFit", false,
+                  "If true, integrate by maximizing the Poisson log-likelihood of a Gaussian "
+                  "peak plus a flat background rate fit against the raw events, instead of "
+                  "counting events inside/outside ellipsoidal boundaries. In this mode the "
+                  "peak radii are interpreted as the Gaussian's standard deviations (1-sigma), "
+                  "and the background radii are unused.");
+
+  declareProperty("AdjustCenter", false,
+                  "Only used if ProfileFit is true. If true, also refine each peak's center by "
+                  "a bounded Gauss-Newton correction (capped at one standard deviation from the "
+                  "peak's stored Q) as part of the profile fit, instead of keeping it fixed at "
+                  "the peak's stored Q. The peak's stored Q is not modified; the correction is "
+                  "used only for this integration.");
+
   declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
                   "with the peaks' integrated intensities.");
@@ -135,13 +149,20 @@ void IntegratePeaksShapeMD::exec() {
     qListFromHistoWS(integrator, prog, histoWS);
   }
 
+  const bool profileFit = getProperty("ProfileFit");
+  const bool adjustCenter = getProperty("AdjustCenter");
+
   for (size_t i = 0; i < n_peaks; i++) {
     auto &peak = peaks[i];
     const auto *shape = dynamic_cast<const PeakShapeEllipsoid *>(&peak.getPeakShape());
 
     double inti = 0.0;
     double sigi = 0.0;
-    integrator.integrateUsingShape(*shape, peak.getQLabFrame(), inti, sigi);
+    if (profileFit) {
+      integrator.integrateUsingShapeProfileFit(*shape, peak.getQLabFrame(), adjustCenter, inti, sigi);
+    } else {
+      integrator.integrateUsingShape(*shape, peak.getQLabFrame(), inti, sigi);
+    }
 
     peak.setIntensity(inti);
     peak.setSigmaIntensity(sigi);
