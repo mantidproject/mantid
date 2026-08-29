@@ -42,9 +42,14 @@ protected:
   void findIntergratedDimensions(const std::vector<coord_t> &otherDimValues, bool &skipNormalization);
   void cacheDimensionXValues();
   void calculateNormalization(const std::vector<coord_t> &otherValues, uint16_t expInfoIndex);
+  void calculateNormalization(const std::vector<coord_t> &otherValues, const Geometry::SymmetryOperation &so,
+                              uint16_t expInfoIndex);
   void calculateNormContinuous(const std::vector<coord_t> &otherValues, uint16_t expInfoIndex);
   void calculateNormInner(const API::SpectrumInfo &spectrumInfo, const std::vector<coord_t> &otherValues,
-                          const double protonCharge);
+                          const double protonCharge, const double protonChargeBkgd = 0.0,
+                          const DblMatrix &Qtransform = DblMatrix(1, 1),
+                          const std::vector<double> lowValues = std::vector<double>(),
+                          const std::vector<double> highValues = std::vector<double>());
 
   void calcIntegralsForIntersections(const std::vector<double> &xValues, const API::MatrixWorkspace &integrFlux,
                                      size_t sp, std::vector<double> &yValues) const;
@@ -94,6 +99,9 @@ protected:
   std::unique_ptr<API::Progress> m_progress;
   /// internal array to accumulate signals to avoid copying (serial) each loop
   std::vector<std::atomic<signal_t>> m_signalArray;
+  std::vector<std::atomic<signal_t>> m_bkgdSignalArray;
+  /// Flag to accumulate normalization
+  bool m_accumulate;
 };
 
 } // namespace Mantid::MDAlgorithms

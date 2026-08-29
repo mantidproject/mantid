@@ -38,7 +38,6 @@ private:
   std::string QDimensionName(std::vector<double> projection);
   std::string QDimensionNameQSample(int i);
   std::map<std::string, std::string> getBinParameters();
-  void createNormalizationWS(const DataObjects::MDHistoWorkspace &dataWS);
   void createBackgroundNormalizationWS(const DataObjects::MDHistoWorkspace &dataWS);
 
   /// Bin(MD) input MDE workspace
@@ -70,18 +69,6 @@ private:
 
   std::vector<coord_t> getValuesFromOtherDimensions(bool &skipNormalization, uint16_t expInfoIndex = 0) const;
 
-  void calculateNormalization(const std::vector<coord_t> &otherValues, const Geometry::SymmetryOperation &so,
-                              uint16_t expInfoIndex, size_t soIndex);
-
-  void calcDiffractionIntersectionIntegral(std::vector<std::array<double, 4>> &intersections,
-                                           std::vector<double> &xValues, std::vector<double> &yValues,
-                                           const API::MatrixWorkspace &integrFlux, const size_t &wsIdx);
-
-  void calcSingleDetectorNorm(const std::vector<std::array<double, 4>> &intersections, const double &solid,
-                              std::vector<double> &yValues, const size_t &vmdDims, std::vector<coord_t> &pos,
-                              std::vector<coord_t> &posNew, std::vector<std::atomic<signal_t>> &signalArray,
-                              const double &solidBkgd, std::vector<std::atomic<signal_t>> &bkgdSignalArray);
-
   API::IMDWorkspace_sptr divideMD(const API::IMDHistoWorkspace_sptr &lhs, const API::IMDHistoWorkspace_sptr &rhs,
                                   const std::string &outputwsname, const double &startProgress,
                                   const double &endProgress);
@@ -95,8 +82,6 @@ private:
   /// Flag indicating a pre-computed MonoSCDNormalizationWorkspace was provided
   /// (monochromatic single crystal diffraction, e.g. WAND, DEMAND)
   bool m_monochromatic;
-  /// Flag to accumulate normalization
-  bool m_accumulate;
 };
 
 } // namespace MDAlgorithms

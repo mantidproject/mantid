@@ -138,7 +138,13 @@ void MDNormDirectSC::exec() {
     }
     m_progress->report();
   }
-  std::copy(m_signalArray.cbegin(), m_signalArray.cend(), m_normWS->mutableSignalArray());
+  if (m_accumulate) {
+    std::transform(m_signalArray.cbegin(), m_signalArray.cend(), m_normWS->getSignalArray(),
+                   m_normWS->mutableSignalArray(),
+                   [](const std::atomic<signal_t> &a, const signal_t &b) { return a + b; });
+  } else {
+    std::copy(m_signalArray.cbegin(), m_signalArray.cend(), m_normWS->mutableSignalArray());
+  }
 
   // Set the display normalization based on the input workspace
   outputWS->setDisplayNormalization(m_inputWS->displayNormalizationHisto());

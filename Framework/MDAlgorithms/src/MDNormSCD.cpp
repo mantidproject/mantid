@@ -128,7 +128,13 @@ void MDNormSCD::exec() {
                     "Not applying normalization.");
     }
   }
-  std::copy(m_signalArray.cbegin(), m_signalArray.cend(), m_normWS->mutableSignalArray());
+  if (m_accumulate) {
+    std::transform(m_signalArray.cbegin(), m_signalArray.cend(), m_normWS->getSignalArray(),
+                   m_normWS->mutableSignalArray(),
+                   [](const std::atomic<signal_t> &a, const signal_t &b) { return a + b; });
+  } else {
+    std::copy(m_signalArray.cbegin(), m_signalArray.cend(), m_normWS->mutableSignalArray());
+  }
 }
 
 /**

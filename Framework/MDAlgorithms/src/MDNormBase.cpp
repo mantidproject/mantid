@@ -33,7 +33,8 @@ MDNormBase::MDNormBase()
     : m_hmin(0.0f), m_hmax(0.0f), m_kmin(0.0f), m_kmax(0.0f), m_lmin(0.0f), m_lmax(0.0f), m_dEmin(0.f), m_dEmax(0.f),
       m_Ei(0.), m_ki(0.), m_kfmin(0.), m_kfmax(0.), m_hIntegrated(true), m_kIntegrated(true), m_lIntegrated(true),
       m_dEIntegrated(true), m_UB(3, 3, true), m_W(3, 3, true), m_rubw(3, 3), m_hIdx(-1), m_kIdx(-1), m_lIdx(-1),
-      m_eIdx(-1), m_hX(), m_kX(), m_lX(), m_eX(), m_samplePos(), m_beamDir(), m_diffraction(true), m_isMDNorm(false) {}
+      m_eIdx(-1), m_hX(), m_kX(), m_lX(), m_eX(), m_samplePos(), m_beamDir(), m_diffraction(true), m_isMDNorm(false),
+      m_accumulate(false) {}
 
 /**
  * Currently looks for the ConvertToMD algorithm in the history
@@ -94,6 +95,9 @@ void MDNormBase::createNormalizationWS(const MDHistoWorkspace &dataWS) {
   if (!m_normWS) {
     m_normWS = dataWS.clone();
     m_normWS->setTo(0., 0., 0.);
+  } else {
+    // Temp is given.  Accumulation mode is on
+    m_accumulate = true;
   }
 }
 
@@ -284,6 +288,37 @@ void MDNormBase::calculateNormalization(const std::vector<coord_t> &otherValues,
 }
 
 /**
+ * Computed the normalization for the input workspace (for MDNorm). Results are stored in
+ * m_normWS
+ * @param otherValues - values for dimensions other than Q or DeltaE
+ * @param so - symmetry operation
+ * @param expInfoIndex - current experiment info index
+ * @param soIndex - the index of symmetry operation (for progress purposes only)
+ */
+void MDNormBase::calculateNormalization(const std::vector<coord_t> &otherValues, const Geometry::SymmetryOperation &so,
+                                        uint16_t expInfoIndex) {
+  const auto &currentExptInfo = *(m_inputWS->getExperimentInfo(expInfoIndex));
+  std::vector<double> lowValues, highValues;
+  auto *lowValuesLog = dynamic_cast<VectorDoubleProperty *>(currentExptInfo.getLog("MDNorm_low"));
+  lowValues = (*lowValuesLog)();
+  auto *highValuesLog = dynamic_cast<VectorDoubleProperty *>(currentExptInfo.getLog("MDNorm_high"));
+  highValues = (*highValuesLog)();
+
+  // calculate Q transformation matrix (R * UB * SymmetryOperation * m_W)^-1
+  // in order to calculate intersections
+  Kernel::DblMatrix Qtransform = calQTransform(currentExptInfo, so);
+
+  // get proton charges
+  const double protonCharge = currentExptInfo.run().getProtonCharge();
+  const double protonChargeBkgd =
+      (m_backgroundWS != nullptr) ? m_backgroundWS->getExperimentInfo(0)->run().getProtonCharge() : 0;
+
+  const auto &spectrumInfo = currentExptInfo.spectrumInfo();
+
+  calculateNormInner(spectrumInfo, otherValues, protonCharge, protonChargeBkgd, Qtransform, lowValues, highValues);
+}
+
+/**
  * Computes the normalization for the input workspace for the case of a continous rotation
  * @param otherValues non HKLE dimensions
  * @param expInfoIndex current experiment info index
@@ -392,7 +427,9 @@ void MDNormBase::calculateNormContinuous(const std::vector<coord_t> &otherValues
 }
 
 void MDNormBase::calculateNormInner(const API::SpectrumInfo &spectrumInfo, const std::vector<coord_t> &otherValues,
-                                    const double protonCharge) {
+                                    const double protonCharge, const double protonChargeBkgd,
+                                    const Kernel::DblMatrix &Qtransform, const std::vector<double> lowValues,
+                                    const std::vector<double> highValues) {
   // Mapping
   const auto ndets = static_cast<int64_t>(spectrumInfo.size());
   bool haveSA = false;
@@ -408,9 +445,15 @@ void MDNormBase::calculateNormInner(const API::SpectrumInfo &spectrumInfo, const
     solidAngDetToIdx = solidAngleWS->getDetectorIDToWorkspaceIndexMap();
   }
 
-  const size_t vmdDims = 4;
+  const size_t vmdDims = (m_isMDNorm && m_diffraction) ? 3 : 4;
+  size_t numNPoints = (m_backgroundWS) ? m_bkgdNormWS->getNPoints() : 0;
+  if (m_backgroundWS && numNPoints != m_normWS->getNPoints()) {
+    throw std::runtime_error("N points are different");
+  }
 
-  PRAGMA_OMP(parallel for)
+  bool thread_safe = m_diffraction ? Kernel::threadSafe(*integrFlux) : true;
+
+  PRAGMA_OMP(parallel for if (thread_safe))
   for (int64_t i = 0; i < ndets; i++) {
     PARALLEL_START_INTERRUPT_REGION
 
@@ -423,15 +466,37 @@ void MDNormBase::calculateNormInner(const API::SpectrumInfo &spectrumInfo, const
     // If the detector is a group, this should be the ID of the first detector
     const auto detID = detector.getID();
 
+    // Get the flux spectrum spectrum number for diffraction
+    size_t wsIdx = 0;
+    if (m_diffraction) {
+      if (auto index = fluxDetToIdx.find(detID); index != fluxDetToIdx.end()) {
+        wsIdx = index->second;
+      } else { // masked detector in flux, but not in input workspace
+        continue;
+      }
+    }
+
     // Intersections
     std::vector<std::array<double, 4>> intersections;
     std::vector<coord_t> pos, posNew;
-    this->calculateIntersections(intersections, theta, phi);
+    if (m_isMDNorm) {
+      this->calculateIntersections(intersections, theta, phi, Qtransform, lowValues[i], highValues[i]);
+    } else {
+      this->calculateIntersections(intersections, theta, phi);
+    }
+    // No need to do normalization calculation if there is no intersection
     if (intersections.empty())
       continue;
 
     // Get solid angle for this contribution
     double solid = protonCharge;
+    double bkgdSolid = protonChargeBkgd;
+    if (haveSA) {
+      double solid_angle_factor = solidAngleWS->y(solidAngDetToIdx.find(detID)->second)[0];
+      solid = solid_angle_factor * protonCharge;
+      bkgdSolid = solid_angle_factor * protonChargeBkgd;
+    }
+
     if (haveSA) {
       solid = solidAngleWS->y(solidAngDetToIdx.find(detID)->second)[0] * protonCharge;
     }
@@ -440,8 +505,6 @@ void MDNormBase::calculateNormInner(const API::SpectrumInfo &spectrumInfo, const
     // momentum values at intersections
     std::vector<double> yValues;
     if (m_diffraction) {
-      // get the flux spetrum number
-      size_t wsIdx = fluxDetToIdx.find(detID)->second;
       // copy momenta to xValues
       std::vector<double> xValues(intersections.size());
       yValues.resize(intersections.size());
@@ -464,7 +527,8 @@ void MDNormBase::calculateNormInner(const API::SpectrumInfo &spectrumInfo, const
       const auto &curIntSec = *it;
       const auto &prevIntSec = *(it - 1);
       // the full vector isn't used so compute only what is necessary
-      double delta = (curIntSec[3] * curIntSec[3] - prevIntSec[3] * prevIntSec[3]) / energyToK;
+      double delta = m_diffraction ? (curIntSec[3] - prevIntSec[3]) / 1000. // tolerance is 1e-7
+                                   : (curIntSec[3] * curIntSec[3] - prevIntSec[3] * prevIntSec[3]) / energyToK;
       if (delta < 1e-10)
         continue; // Assume zero contribution if difference is small
 
@@ -488,6 +552,9 @@ void MDNormBase::calculateNormInner(const API::SpectrumInfo &spectrumInfo, const
       }
       // signal = delta * solid = integral between two consecutive intersections * solid angle
       Mantid::Kernel::AtomicOp(m_signalArray[linIndex], delta * solid, std::plus<signal_t>());
+      if (m_backgroundWS) {
+        Mantid::Kernel::AtomicOp(m_bkgdSignalArray[linIndex], delta * bkgdSolid, std::plus<signal_t>());
+      }
     }
     PARALLEL_END_INTERRUPT_REGION
   }
