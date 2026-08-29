@@ -14,7 +14,13 @@ ellipsoidal peak shape already stored on each peak in the input
 *PeaksWorkspace*, instead of fitting a new shape from the events around each
 peak. It sums the raw or weighted events inside that fixed ellipsoid and
 subtracts a background estimate from the ellipsoidal shell already defined by
-the shape's *BackgroundInnerSize* and *BackgroundOuterSize*.
+the shape's own background inner and outer radii -- unlike
+:ref:`algm-IntegrateEllipsoidsTwoStep`, this algorithm has no *PeakSize*,
+*BackgroundInnerSize* or *BackgroundOuterSize* properties of its own; every
+peak's ellipsoid is used exactly as stored. This also differs from
+:ref:`algm-IntegratePeaksMD`, which always integrates with a spherical
+(not ellipsoidal) region computed from user-specified radii rather than a
+shape stored on the peak.
 
 The *PeaksWorkspace* must already have an ellipsoidal shape set on every peak
 to be integrated, for example from a previous run of
