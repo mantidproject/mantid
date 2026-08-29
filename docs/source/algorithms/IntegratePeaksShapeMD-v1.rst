@@ -37,6 +37,44 @@ If *UseOnePercentBackgroundCorrection* is enabled (the default), the top 1% of
 the background events are removed before background subtraction, to reduce
 sensitivity to intensity spikes from nearby peaks.
 
+Integration method
+###################
+
+By default (*ProfileFit* = False) each peak is integrated by counting raw
+or weighted events inside the peak ellipsoid, and subtracting a background
+estimate from the ellipsoidal shell, the same approach used by
+:ref:`algm-IntegrateEllipsoidsTwoStep`.
+
+If *ProfileFit* is enabled, each peak is instead integrated by directly
+maximizing the (weighted) Poisson log-likelihood of an unbinned point
+process, fitting a Gaussian peak amplitude and a flat background rate
+against the raw events within *RegionRadius* of the peak. In this mode the
+peak radii are interpreted as the Gaussian's standard deviations (1-sigma)
+along its principal axes rather than as hard integration boundaries, and
+the background radii are not used since the background rate is fit
+directly instead. This can make better use of the available events for weak
+peaks than a simple ellipsoidal count, at the cost of assuming the peak
+profile is well described by a Gaussian and that essentially all of its
+intensity falls within *RegionRadius*.
+
+Any scaling or mosaic-broadening correction to a peak's shape (e.g. derived
+from a resolution model, or refined per-sample) is expected to be applied
+by the caller before running this algorithm, by writing the corrected
+radii directly into the *PeaksWorkspace*'s stored shapes -- this algorithm
+always uses the shape it is given exactly as supplied, with no adjustment
+of its own.
+
+By default the peak center used is always the peak's own stored Q-vector;
+neither integration method refines or re-centers it, matching
+:ref:`algm-IntegrateEllipsoidsTwoStep`, which also never adjusts a peak's
+center (weak peaks borrow a strong peak's *shape*, but stay centered at
+their own stored Q). If *ProfileFit* and *AdjustCenter* are both enabled,
+the center is additionally refined by a bounded Gauss-Newton correction as
+part of the same fit, capped at one standard deviation of shift from the
+peak's stored Q -- a slight correction, not a free centroid search. This
+correction is only used for this integration; it is not written back to
+the peak's stored position.
+
 Usage
 -----
 
