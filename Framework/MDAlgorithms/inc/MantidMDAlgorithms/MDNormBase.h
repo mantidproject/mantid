@@ -44,19 +44,19 @@ protected:
   void calculateNormalization(const std::vector<coord_t> &otherValues, uint16_t expInfoIndex);
   void calculateNormalization(const std::vector<coord_t> &otherValues, const Geometry::SymmetryOperation &so,
                               uint16_t expInfoIndex);
-  void calculateNormContinuous(const std::vector<coord_t> &otherValues, uint16_t expInfoIndex);
+  void calculateNormContinuous(const std::vector<coord_t> &otherValues, uint16_t expInfoIndex,
+                               const Geometry::SymmetryOperation *so = nullptr);
   void calculateNormInner(const API::SpectrumInfo &spectrumInfo, const std::vector<coord_t> &otherValues,
-                          const double protonCharge, const double protonChargeBkgd = 0.0,
-                          const DblMatrix &Qtransform = DblMatrix(1, 1),
+                          const double protonCharge, const double protonChargeBkgd, const DblMatrix &Qtransform,
                           const std::vector<double> lowValues = std::vector<double>(),
                           const std::vector<double> highValues = std::vector<double>());
 
   void calcIntegralsForIntersections(const std::vector<double> &xValues, const API::MatrixWorkspace &integrFlux,
                                      size_t sp, std::vector<double> &yValues) const;
   void calculateIntersections(std::vector<std::array<double, 4>> &intersections, const double theta, const double phi,
-                              const DblMatrix &transform = DblMatrix(1, 1), double lowvalue = 0, double highvalue = 0);
-  Mantid::Kernel::DblMatrix calQTransform(const Mantid::API::ExperimentInfo &currentExpInfo,
-                                          const Mantid::Geometry::SymmetryOperation &so);
+                              const DblMatrix &transform, double lowvalue = std::nan(""), double highvalue = 0);
+  Mantid::Kernel::DblMatrix calQTransform(const Kernel::DblMatrix &R, const Mantid::Geometry::SymmetryOperation &so,
+                                          bool doInvert = true);
 
   /// Input workspace
   API::IMDEventWorkspace_sptr m_inputWS;
@@ -75,8 +75,6 @@ protected:
   Mantid::Kernel::DblMatrix m_UB;
   /// W matrix
   Mantid::Kernel::DblMatrix m_W;
-  /// (2*PiRUBW)^-1
-  Mantid::Kernel::DblMatrix m_rubw;
   /// matrix for transforming from intersections to positions in the normalization workspace
   Mantid::Kernel::Matrix<coord_t> m_transformation;
   /// index of h,k,l, dE dimensions in the output workspaces
@@ -93,15 +91,13 @@ protected:
   uint16_t m_numExptInfos;
   /// Flag indicating if the input workspace is from diffraction
   bool m_diffraction;
-  /// Flag indicating if calling algorithm is MDNorm
-  bool m_isMDNorm;
+  /// Flag to accumulate normalization
+  bool m_accumulate;
   /// Progress bar
   std::unique_ptr<API::Progress> m_progress;
   /// internal array to accumulate signals to avoid copying (serial) each loop
   std::vector<std::atomic<signal_t>> m_signalArray;
   std::vector<std::atomic<signal_t>> m_bkgdSignalArray;
-  /// Flag to accumulate normalization
-  bool m_accumulate;
 };
 
 } // namespace Mantid::MDAlgorithms

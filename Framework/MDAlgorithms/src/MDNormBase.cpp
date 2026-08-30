@@ -32,9 +32,8 @@ const std::string LOG_CHARGE_NAME("proton_charge");
 MDNormBase::MDNormBase()
     : m_hmin(0.0f), m_hmax(0.0f), m_kmin(0.0f), m_kmax(0.0f), m_lmin(0.0f), m_lmax(0.0f), m_dEmin(0.f), m_dEmax(0.f),
       m_Ei(0.), m_ki(0.), m_kfmin(0.), m_kfmax(0.), m_hIntegrated(true), m_kIntegrated(true), m_lIntegrated(true),
-      m_dEIntegrated(true), m_UB(3, 3, true), m_W(3, 3, true), m_rubw(3, 3), m_hIdx(-1), m_kIdx(-1), m_lIdx(-1),
-      m_eIdx(-1), m_hX(), m_kX(), m_lX(), m_eX(), m_samplePos(), m_beamDir(), m_diffraction(true), m_isMDNorm(false),
-      m_accumulate(false) {}
+      m_dEIntegrated(true), m_UB(3, 3, true), m_W(3, 3, true), m_hIdx(-1), m_kIdx(-1), m_lIdx(-1), m_eIdx(-1),
+      m_samplePos(), m_beamDir(), m_diffraction(true), m_accumulate(false) {}
 
 /**
  * Currently looks for the ConvertToMD algorithm in the history
@@ -209,21 +208,21 @@ void MDNormBase::findIntergratedDimensions(const std::vector<coord_t> &otherDimV
 void MDNormBase::cacheDimensionXValues() {
   if (!m_hIntegrated) {
     auto &hDim = *m_normWS->getDimension(m_hIdx);
-    m_hX.resize(hDim.getNBoundaries());
+    m_hX = std::vector<double>(hDim.getNBoundaries());
     for (size_t i = 0; i < m_hX.size(); ++i) {
       m_hX[i] = hDim.getX(i);
     }
   }
   if (!m_kIntegrated) {
     auto &kDim = *m_normWS->getDimension(m_kIdx);
-    m_kX.resize(kDim.getNBoundaries());
+    m_kX = std::vector<double>(kDim.getNBoundaries());
     for (size_t i = 0; i < m_kX.size(); ++i) {
       m_kX[i] = kDim.getX(i);
     }
   }
   if (!m_lIntegrated) {
     auto &lDim = *m_normWS->getDimension(m_lIdx);
-    m_lX.resize(lDim.getNBoundaries());
+    m_lX = std::vector<double>(lDim.getNBoundaries());
     for (size_t i = 0; i < m_lX.size(); ++i) {
       m_lX[i] = lDim.getX(i);
     }
@@ -231,7 +230,7 @@ void MDNormBase::cacheDimensionXValues() {
   if ((!m_diffraction) && (!m_dEIntegrated)) {
     // NOTE: store k final instead
     auto &eDim = *m_normWS->getDimension(m_eIdx);
-    m_eX.resize(eDim.getNBoundaries());
+    m_eX = std::vector<double>(eDim.getNBoundaries());
     for (size_t i = 0; i < m_eX.size(); ++i) {
       double temp = m_Ei - eDim.getX(i);
       temp = std::max(temp, 0.);
@@ -246,10 +245,9 @@ void MDNormBase::cacheDimensionXValues() {
  * @param so
  * @return
  */
-Mantid::Kernel::DblMatrix MDNormBase::calQTransform(const ExperimentInfo &currentExpInfo,
-                                                    const Geometry::SymmetryOperation &so) {
+Mantid::Kernel::DblMatrix MDNormBase::calQTransform(const DblMatrix &R, const Geometry::SymmetryOperation &so,
+                                                    bool doInvert) {
   // Make it to a method!
-  DblMatrix R = currentExpInfo.run().getGoniometerMatrix();
   DblMatrix soMatrix(3, 3);
   auto v = so.transformHKL(V3D(1, 0, 0));
   soMatrix.setColumn(0, v);
@@ -259,7 +257,8 @@ Mantid::Kernel::DblMatrix MDNormBase::calQTransform(const ExperimentInfo &curren
   soMatrix.setColumn(2, v);
   soMatrix.Invert();
   DblMatrix Qtransform = R * m_UB * soMatrix * m_W;
-  Qtransform.Invert();
+  if (doInvert)
+    Qtransform.Invert();
 
   return Qtransform;
 }
@@ -277,14 +276,13 @@ void MDNormBase::calculateNormalization(const std::vector<coord_t> &otherValues,
   if (!rubwLog) {
     throw std::runtime_error("Wokspace does not contain a log entry for the RUBW matrix."
                              "Cannot continue.");
-  } else {
-    Kernel::DblMatrix rubwValue((*rubwLog)()); // includes the 2*pi factor but not goniometer for now :)
-    m_rubw = currentExptInfo.run().getGoniometerMatrix() * rubwValue;
-    m_rubw.Invert();
   }
+  Kernel::DblMatrix Qtransform((*rubwLog)()); // includes the 2*pi factor but not goniometer for now :)
+  Qtransform = currentExptInfo.run().getGoniometerMatrix() * Qtransform;
+  Qtransform.Invert();
   const double protonCharge = currentExptInfo.run().getProtonCharge();
 
-  calculateNormInner(spectrumInfo, otherValues, protonCharge);
+  calculateNormInner(spectrumInfo, otherValues, protonCharge, 0., Qtransform);
 }
 
 /**
@@ -306,7 +304,7 @@ void MDNormBase::calculateNormalization(const std::vector<coord_t> &otherValues,
 
   // calculate Q transformation matrix (R * UB * SymmetryOperation * m_W)^-1
   // in order to calculate intersections
-  Kernel::DblMatrix Qtransform = calQTransform(currentExptInfo, so);
+  Kernel::DblMatrix Qtransform = calQTransform(currentExptInfo.run().getGoniometerMatrix(), so);
 
   // get proton charges
   const double protonCharge = currentExptInfo.run().getProtonCharge();
@@ -323,12 +321,27 @@ void MDNormBase::calculateNormalization(const std::vector<coord_t> &otherValues,
  * @param otherValues non HKLE dimensions
  * @param expInfoIndex current experiment info index
  */
-void MDNormBase::calculateNormContinuous(const std::vector<coord_t> &otherValues, uint16_t expInfoIndex) {
+void MDNormBase::calculateNormContinuous(const std::vector<coord_t> &otherValues, uint16_t expInfoIndex,
+                                         const Geometry::SymmetryOperation *so) {
   const auto &currentExptInfo = *(m_inputWS->getExperimentInfo(expInfoIndex));
   const auto &spectrumInfo = currentExptInfo.spectrumInfo();
-  auto *rubwLog = dynamic_cast<VectorDoubleProperty *>(currentExptInfo.getLog("RUBW_MATRIX"));
-  Kernel::DblMatrix rubwValue((*rubwLog)()); // includes the 2*pi factor but not goniometer for now :)
-
+  bool isMDNorm = false;
+  std::vector<double> lowValues, highValues;
+  DblMatrix UBWSymm; // Symmetrised matrix (UB * symm * W) converting from lab to crystal frame
+  if (so == nullptr) {
+    auto *rubwLog = dynamic_cast<VectorDoubleProperty *>(currentExptInfo.getLog("RUBW_MATRIX"));
+    UBWSymm = (*rubwLog)(); // includes the 2*pi factor but not goniometer for now :)
+  } else {
+    if (m_backgroundWS != nullptr) {
+      throw std::runtime_error("Continuous rotation and background workspace not yet implemented.");
+    }
+    isMDNorm = true;
+    UBWSymm = calQTransform(DblMatrix(3, 3, true), *so, false);
+    auto *lowValuesLog = dynamic_cast<VectorDoubleProperty *>(currentExptInfo.getLog("MDNorm_low"));
+    lowValues = (*lowValuesLog)();
+    auto *highValuesLog = dynamic_cast<VectorDoubleProperty *>(currentExptInfo.getLog("MDNorm_high"));
+    highValues = (*highValuesLog)();
+  }
   // MDEventWS was created with the "useLogTimes" option: should be only a single expInfo, but
   // gonios vary with time - we now coarse-bin it to compute the normalisation.
   const Run &run = currentExptInfo.run();
@@ -386,9 +399,13 @@ void MDNormBase::calculateNormContinuous(const std::vector<coord_t> &otherValues
       }
       auto nn = static_cast<double>(n);
       gonio.setRotationAngle(movingGonioIndex[0], nn * GONIOBINSTEP + *min);
-      m_rubw = gonio.getR() * rubwValue;
-      m_rubw.Invert();
-      calculateNormInner(spectrumInfo, otherValues, gonioCharge[n] / normfac);
+      DblMatrix Qtransform = gonio.getR() * UBWSymm;
+      Qtransform.Invert();
+      if (isMDNorm) {
+        calculateNormInner(spectrumInfo, otherValues, gonioCharge[n] / normfac, 0., Qtransform, lowValues, highValues);
+      } else {
+        calculateNormInner(spectrumInfo, otherValues, gonioCharge[n] / normfac, 0., Qtransform);
+      }
       m_progress->report();
     }
   } else {
@@ -411,9 +428,13 @@ void MDNormBase::calculateNormContinuous(const std::vector<coord_t> &otherValues
           gonio.setRotationAngle(gAx, logval);
         }
         if (!skipIter) {
-          m_rubw = gonio.getR() * rubwValue;
-          m_rubw.Invert();
-          calculateNormInner(spectrumInfo, otherValues, chargeSum / normfac);
+          DblMatrix Qtrans = gonio.getR() * UBWSymm;
+          Qtrans.Invert();
+          if (isMDNorm) {
+            calculateNormInner(spectrumInfo, otherValues, chargeSum / normfac, 0., Qtrans, lowValues, highValues);
+          } else {
+            calculateNormInner(spectrumInfo, otherValues, chargeSum / normfac, 0., Qtrans);
+          }
         }
         chargeSum = 0;
         i0 = n;
@@ -435,25 +456,27 @@ void MDNormBase::calculateNormInner(const API::SpectrumInfo &spectrumInfo, const
   bool haveSA = false;
   API::MatrixWorkspace_const_sptr integrFlux, solidAngleWS = getProperty("SolidAngleWorkspace");
   detid2index_map fluxDetToIdx, solidAngDetToIdx;
+  bool thread_safe = true;
   if (m_diffraction) {
     integrFlux = getProperty("FluxWorkspace"); // FluxWorkspace is mandatory for diffraction
     integrFlux->getXMinMax(m_kfmin, m_kfmax);
     fluxDetToIdx = integrFlux->getDetectorIDToWorkspaceIndexMap();
+    thread_safe = Kernel::threadSafe(*integrFlux);
   }
   if (solidAngleWS != nullptr) {
     haveSA = true;
     solidAngDetToIdx = solidAngleWS->getDetectorIDToWorkspaceIndexMap();
   }
 
-  const size_t vmdDims = (m_isMDNorm && m_diffraction) ? 3 : 4;
+  const size_t vmdDims = m_diffraction ? 3 : 4;
   size_t numNPoints = (m_backgroundWS) ? m_bkgdNormWS->getNPoints() : 0;
   if (m_backgroundWS && numNPoints != m_normWS->getNPoints()) {
     throw std::runtime_error("N points are different");
   }
 
-  bool thread_safe = m_diffraction ? Kernel::threadSafe(*integrFlux) : true;
+  bool isMDNorm = !lowValues.empty();
 
-  PRAGMA_OMP(parallel for if (thread_safe))
+  PRAGMA_OMP(parallel for if(thread_safe))
   for (int64_t i = 0; i < ndets; i++) {
     PARALLEL_START_INTERRUPT_REGION
 
@@ -479,10 +502,10 @@ void MDNormBase::calculateNormInner(const API::SpectrumInfo &spectrumInfo, const
     // Intersections
     std::vector<std::array<double, 4>> intersections;
     std::vector<coord_t> pos, posNew;
-    if (m_isMDNorm) {
+    if (isMDNorm) {
       this->calculateIntersections(intersections, theta, phi, Qtransform, lowValues[i], highValues[i]);
     } else {
-      this->calculateIntersections(intersections, theta, phi);
+      this->calculateIntersections(intersections, theta, phi, Qtransform);
     }
     // No need to do normalization calculation if there is no intersection
     if (intersections.empty())
@@ -650,7 +673,8 @@ void MDNormBase::calculateIntersections(std::vector<std::array<double, 4>> &inte
                                         double highvalue) {
   V3D qin, qout;
   double kfmin, kfmax, kimin, kimax;
-  if (m_isMDNorm) {
+  bool isMDNorm = !std::isnan(lowvalue);
+  if (isMDNorm) {
     qout = V3D(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta));
     qin = V3D(0., 0., 1.);
     if (m_diffraction) {
@@ -681,13 +705,8 @@ void MDNormBase::calculateIntersections(std::vector<std::array<double, 4>> &inte
     }
   }
 
-  if (transform.Ssize() == 1) {
-    qout = m_rubw * qout;
-    qin = m_rubw * qin;
-  } else {
-    qout = transform * qout;
-    qin = transform * qin;
-  }
+  qout = transform * qout;
+  qin = transform * qin;
   if (m_convention == "Crystallography") {
     qout *= -1;
     qin *= -1;
@@ -723,7 +742,7 @@ void MDNormBase::calculateIntersections(std::vector<std::array<double, 4>> &inte
         }
       }
     }
-    if (!m_isMDNorm) {
+    if (!isMDNorm) {
       double momhMin = fmom * (m_hmin - hStart) + kfmin;
       if ((momhMin - kfmin) * (momhMin - kfmax) < 0) // kfmin>kfmax
       {
@@ -766,7 +785,7 @@ void MDNormBase::calculateIntersections(std::vector<std::array<double, 4>> &inte
         }
       }
     }
-    if (!m_isMDNorm) {
+    if (!isMDNorm) {
       double momkMin = fmom * (m_kmin - kStart) + kfmin;
       if ((momkMin - kfmin) * (momkMin - kfmax) < 0) {
         // hkmin and lkmin
@@ -808,7 +827,7 @@ void MDNormBase::calculateIntersections(std::vector<std::array<double, 4>> &inte
         }
       }
     }
-    if (!m_isMDNorm) {
+    if (!isMDNorm) {
       double momlMin = fmom * (m_lmin - lStart) + kfmin;
       if ((momlMin - kfmin) * (momlMin - kfmax) <= 0) {
         // hlmin and klmin

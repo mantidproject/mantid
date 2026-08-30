@@ -496,7 +496,6 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
 void MDNorm::exec() {
   m_convention = Kernel::ConfigService::Instance().getString("Q.convention");
   m_hIntegrated = m_kIntegrated = m_lIntegrated = false;
-  m_isMDNorm = true;
   // symmetry operations
   std::string symOps = this->getProperty("SymmetryOperations");
   std::vector<Geometry::SymmetryOperation> symmetryOps;
@@ -582,6 +581,7 @@ void MDNorm::exec() {
     // trajectories (TOF only; for monochromatic input, m_normWS was already binned above)
     m_progress->resetNumSteps(m_numExptInfos * m_numSymmOps, 0.3, 0.9);
     for (uint16_t expInfoIndex = 0; expInfoIndex < m_numExptInfos; expInfoIndex++) {
+      const auto &currentExptInfo = *(m_inputWS->getExperimentInfo(expInfoIndex));
       // Check for other dimensions if we could measure anything in the original
       // data
       bool skipNormalization = false;
@@ -591,7 +591,11 @@ void MDNorm::exec() {
 
       if (!skipNormalization) {
         for (const auto &so : symmetryOps) {
-          calculateNormalization(otherValues, so, expInfoIndex);
+          if (currentExptInfo.run().hasProperty("useLogTimes")) {
+            calculateNormContinuous(otherValues, expInfoIndex, &so);
+          } else {
+            calculateNormalization(otherValues, so, expInfoIndex);
+          }
           m_progress->report();
         }
       } else {
