@@ -1,0 +1,1 @@
+- Fixed :ref:`algm-HFIRPowderReduction` producing incorrect results when SampleBackgroundFilename was supplied. The sample background was subtracted without being normalised to monitor or time, and ``SampleBackgroundScaleFactor`` was ignored.
