@@ -138,7 +138,6 @@ std::vector<coord_t> MDNormBase::getValuesFromOtherDimensions(bool &skipNormaliz
  * @param otherDimValues Values from non-HKL dimensions
  * @param skipNormalization [InOut] Sets the flag true if normalization values
  * are outside of original inputs
- * @return Affine trasform matrix
  */
 void MDNormBase::findIntergratedDimensions(const std::vector<coord_t> &otherDimValues, bool &skipNormalization) {
   // Get indices of the original dimensions in the output workspace,
@@ -241,9 +240,10 @@ void MDNormBase::cacheDimensionXValues() {
 
 /**
  * Calculate QTransform = (R * UB * SymmetryOperation * m_W)^-1
- * @param currentExpInfo
- * @param so
- * @return
+ * @param R - the goniometers transformation matrix
+ * @param so - symmetry operation
+ * @param doInvert - (default: true) returns the inverse or not
+ * @return the transformation matrix or its inverse
  */
 Mantid::Kernel::DblMatrix MDNormBase::calQTransform(const DblMatrix &R, const Geometry::SymmetryOperation &so,
                                                     bool doInvert) {
@@ -291,7 +291,6 @@ void MDNormBase::calculateNormalization(const std::vector<coord_t> &otherValues,
  * @param otherValues - values for dimensions other than Q or DeltaE
  * @param so - symmetry operation
  * @param expInfoIndex - current experiment info index
- * @param soIndex - the index of symmetry operation (for progress purposes only)
  */
 void MDNormBase::calculateNormalization(const std::vector<coord_t> &otherValues, const Geometry::SymmetryOperation &so,
                                         uint16_t expInfoIndex) {
@@ -320,6 +319,7 @@ void MDNormBase::calculateNormalization(const std::vector<coord_t> &otherValues,
  * Computes the normalization for the input workspace for the case of a continous rotation
  * @param otherValues non HKLE dimensions
  * @param expInfoIndex current experiment info index
+ * @param so - (default: nullptr) symmetry operation (only when called by MDNorm)
  */
 void MDNormBase::calculateNormContinuous(const std::vector<coord_t> &otherValues, uint16_t expInfoIndex,
                                          const Geometry::SymmetryOperation *so) {
@@ -667,6 +667,9 @@ void MDNormBase::calcIntegralsForIntersections(const std::vector<double> &xValue
  * @param intersections A list of intersections in HKL space
  * @param theta Polar angle with detector
  * @param phi Azimuthal angle with detector
+ * @param transform Transformation matrix from lab (angular) coordinates to Q
+ * @param lowvalue lower limit of Q (MDNorm only)
+ * @param highvalue upper limit of Q (MDNorm only)
  */
 void MDNormBase::calculateIntersections(std::vector<std::array<double, 4>> &intersections, const double theta,
                                         const double phi, const Kernel::DblMatrix &transform, double lowvalue,
