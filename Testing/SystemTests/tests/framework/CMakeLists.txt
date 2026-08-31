@@ -57,6 +57,7 @@ set(SYSTEST_NAMES
     FilteredLoadvsLoadThenFilter.py
     FilterEventsWithHighFirstIndexSplitter.py
     FindSatellitePeaksTest.py
+    FindUBFromConventionalCellTest.py
     FittingDocumentationTest.py
     FlatPlatePaalmanPingsCorrectionTest.py
     GenerateLogbookTest.py
