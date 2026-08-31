@@ -113,27 +113,40 @@ class HFIRGoniometerIndependentBackground(PythonAlgorithm):
     @staticmethod
     def _global_percentile(signal, error_squared, percentile):
         """Return a percentile and the error variance of the value it selected."""
-        order = np.argsort(signal, axis=2)
-        sorted_signal = np.take_along_axis(signal, order, axis=2)
-        sorted_error_squared = np.take_along_axis(error_squared, order, axis=2)
-
         position = (signal.shape[2] - 1) * percentile / 100.0
         lower = int(np.floor(position))
         upper = int(np.ceil(position))
         weight = position - lower
 
-        value = (1.0 - weight) * sorted_signal[:, :, lower] + weight * sorted_signal[:, :, upper]
-        error = (1.0 - weight) * sorted_error_squared[:, :, lower] + weight * sorted_error_squared[:, :, upper]
+        value = np.empty(signal.shape[:2], dtype=signal.dtype)
+        error = np.empty(error_squared.shape[:2], dtype=error_squared.dtype)
+
+        # Process one detector row at a time, and rank only the two values the percentile interpolates
+        # between, to avoid sorting the whole rotation axis of every detector at once.
+        for row in range(signal.shape[0]):
+            order = np.argpartition(signal[row], (lower, upper), axis=-1)[:, [lower, upper]]
+            ranked_signal = np.take_along_axis(signal[row], order, axis=-1)
+            ranked_error_squared = np.take_along_axis(error_squared[row], order, axis=-1)
+            value[row] = (1.0 - weight) * ranked_signal[:, 0] + weight * ranked_signal[:, 1]
+            error[row] = (1.0 - weight) * ranked_error_squared[:, 0] + weight * ranked_error_squared[:, 1]
         return value, error
 
     @staticmethod
-    def _windowed_percentile(signal, error_squared, percentile, window_size, filter_mode):
+    def _window_rank(percentile, window_size):
+        """Return the rank a percentile selects within a window.
+
+        scipy.ndimage.percentile_filter selects a ranked value rather than linearly interpolating it, so the
+        windowed branch reports the value at this rank rather than the requested percentile itself.
+        """
+        return min(int(window_size * percentile / 100.0), window_size - 1)
+
+    @classmethod
+    def _windowed_percentile(cls, signal, error_squared, percentile, window_size, filter_mode):
         """Return windowed percentiles and the error variance of each value they selected."""
         pad_before = window_size // 2
         pad_after = window_size - 1 - pad_before
         mode = "edge" if filter_mode == "nearest" else "wrap"
-        # scipy.ndimage.percentile_filter selects a ranked value rather than linearly interpolating it.
-        rank = min(int(window_size * percentile / 100.0), window_size - 1)
+        rank = cls._window_rank(percentile, window_size)
         selected = np.empty_like(signal)
         selected_error = np.empty_like(error_squared)
 
@@ -149,7 +162,7 @@ class HFIRGoniometerIndependentBackground(PythonAlgorithm):
         return selected, selected_error
 
     @staticmethod
-    def _estimator_variance_scale(percentile, n_samples):
+    def _estimator_variance_scale(percentile, n_samples, rank=None):
         """Return the factor converting a selected value's variance into the percentile estimator's variance.
 
         The percentile is not a measurement but an estimator built from ``n_samples`` rotation steps, so it is
@@ -158,9 +171,17 @@ class HFIRGoniometerIndependentBackground(PythonAlgorithm):
         ``p (1 - p) / phi(z_p)**2 * sigma**2 / n_samples``, where ``z_p`` is the standard normal quantile at
         ``p`` and ``phi`` its density. The leading factor is pi/2 for the median.
 
+        ``rank`` is the position selected within a window of ``n_samples`` values, and is given for the
+        windowed branch only. That branch reports the value at a fixed rank instead of interpolating at the
+        requested percentile, so the estimator's precision follows the percentile that rank represents.
+
         The asymptotic result does not hold for the smallest or largest value, or for a single sample, so those
         cases fall back to the variance of the selected value itself, which is a conservative upper bound.
         """
+        if rank is not None:
+            if rank == 0 or rank == n_samples - 1:
+                return 1.0
+            percentile = 100.0 * (rank + 0.5) / n_samples
         p = percentile / 100.0
         if not 0.0 < p < 1.0 or n_samples < 2:
             return 1.0
@@ -187,18 +208,20 @@ class HFIRGoniometerIndependentBackground(PythonAlgorithm):
 
         if bkg_size == Property.EMPTY_INT:
             n_samples = signal.shape[2]
+            rank = None
             percent, percent_error_squared = self._global_percentile(signal, error_squared, bkg_level)
             bkg = np.repeat(percent[:, :, np.newaxis], n_samples, axis=2)
             bkg_error_squared = np.repeat(percent_error_squared[:, :, np.newaxis], n_samples, axis=2)
         else:
             n_samples = bkg_size
+            rank = self._window_rank(bkg_level, bkg_size)
             bkg, bkg_error_squared = self._windowed_percentile(signal, error_squared, bkg_level, bkg_size, filter_mode)
 
         # The selected value's variance is the uncertainty of a single measurement. Rescale it to the
         # uncertainty of the percentile estimator, which averages over n_samples rotation steps. Taking the
         # single-measurement variance at the percentile rather than across the whole window keeps the estimate
         # free of the Bragg peaks that the percentile is chosen to reject.
-        bkg_error_squared *= self._estimator_variance_scale(bkg_level, n_samples)
+        bkg_error_squared *= self._estimator_variance_scale(bkg_level, n_samples, rank)
 
         if not normalize_output:
             bkg *= factors[np.newaxis, np.newaxis, :]

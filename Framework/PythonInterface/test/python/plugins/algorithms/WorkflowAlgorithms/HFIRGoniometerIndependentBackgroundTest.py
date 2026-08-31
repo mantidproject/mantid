@@ -223,6 +223,68 @@ class HFIRGoniometerIndependentBackgroundTest(unittest.TestCase):
         expected = np.full_like(self.workspace.getErrorSquaredArray(), self._estimator_scale(50, window_size))
         np.testing.assert_allclose(outputWS.getErrorSquaredArray(), expected)
 
+    def test_windowed_error_follows_the_percentile_of_the_selected_rank(self):
+        """Verify an even window scales by the percentile its rank represents, not the requested one."""
+        window_size = 4
+
+        outputWS = HFIRGoniometerIndependentBackground(self.workspace, BackgroundLevel=50, BackgroundWindowSize=window_size)
+
+        # A median of 4 values selects the third, so the estimator's precision is that of the 62.5th percentile.
+        expected = np.full_like(self.workspace.getErrorSquaredArray(), self._estimator_scale(62.5, window_size))
+        np.testing.assert_allclose(outputWS.getErrorSquaredArray(), expected)
+
+    def test_windowed_error_keeps_the_selected_value_variance_at_the_window_extremes(self):
+        """Verify a rank at either end of the window falls back to the selected value's variance."""
+        window_size = 10
+
+        # A 5th percentile selects the window minimum and a 90th the window maximum. Both are extreme order
+        # statistics, for which the estimator carries no precision gain over the value it selected.
+        for background_level in (5.0, 90.0):
+            outputWS = HFIRGoniometerIndependentBackground(
+                self.workspace, BackgroundLevel=background_level, BackgroundWindowSize=window_size
+            )
+
+            expected = np.ones_like(self.workspace.getErrorSquaredArray())
+            np.testing.assert_allclose(outputWS.getErrorSquaredArray(), expected)
+
+    def test_filter_mode_matches_the_reference_edge_treatment(self):
+        """Verify the rotation-axis padding reproduces scipy's percentile_filter for both edge treatments."""
+        signal = self.workspace.getSignalArray().copy()
+
+        # An even window makes the two modes disagree at both ends of the rotation axis.
+        for filter_mode in ("nearest", "wrap"):
+            expected = scipy.ndimage.percentile_filter(signal, 50, size=(1, 1, 4), mode=filter_mode)
+
+            outputWS = HFIRGoniometerIndependentBackground(
+                self.workspace, BackgroundLevel=50, BackgroundWindowSize=4, FilterMode=filter_mode
+            )
+
+            np.testing.assert_array_equal(outputWS.getSignalArray(), expected)
+
+    def test_wrap_filter_mode_reaches_across_the_rotation_axis_ends(self):
+        """Verify 'wrap' closes the rotation axis where 'nearest' repeats its edge values."""
+        counts = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
+        workspace = CreateMDHistoWorkspace(
+            SignalInput=counts,
+            ErrorInput=np.sqrt(counts),
+            Dimensionality=3,
+            Extents="0,1,0,1,0,5",
+            Names="x,y,z",
+            NumberOfBins="1,1,5",
+            Units="number,number,number",
+            OutputWorkspace="ramp",
+        )
+
+        # With a window of 3 the median of an unpadded interior triple is the value itself. At the first
+        # rotation 'nearest' pads with 1 and keeps 1, while 'wrap' pads with 5 and returns 2.
+        nearestWS = HFIRGoniometerIndependentBackground(workspace, BackgroundLevel=50, BackgroundWindowSize=3, FilterMode="nearest")
+        np.testing.assert_allclose(nearestWS.getSignalArray().ravel(), [1.0, 2.0, 3.0, 4.0, 5.0])
+
+        wrapWS = HFIRGoniometerIndependentBackground(workspace, BackgroundLevel=50, BackgroundWindowSize=3, FilterMode="wrap")
+        np.testing.assert_allclose(wrapWS.getSignalArray().ravel(), [2.0, 2.0, 3.0, 4.0, 4.0])
+
+        DeleteWorkspace(workspace)
+
     def test_extreme_percentiles_keep_the_selected_value_variance(self):
         """Verify the smallest and largest values fall back to the selected variance, where the estimator has no limit."""
         for background_level in (0.0, 100.0):
