@@ -8,6 +8,8 @@ from mantid.api import mtd, AlgorithmFactory, DataProcessorAlgorithm
 from mantid.kernel import DateAndTime, Direction
 from mantid.simpleapi import AddSampleLog
 
+import re
+
 
 class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
     def category(self):
@@ -122,8 +124,12 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
         return output_ws_group, monitor_ws_group
 
     def _create_name_for_slice_group(self, output_base_name, slice_group):
-        slice_range = "_".join(slice_group[0].name().split("_")[-2:])
-        return f"{output_base_name}_{slice_range}"
+        if self._slice_by_log():
+            regex = re.compile(r"\.From\.(\d+)\.To\.(\d+)")
+        else:
+            regex = re.compile(r"_(\d+)_(\d+)$")
+        start, end = regex.search(slice_group[0].name()).groups()
+        return f"{output_base_name}_{start}_{end}"
 
     def _slice_input_workspace(self, input_ws, output_suffix):
         if self._slice_by_log():
