@@ -175,14 +175,10 @@ class CylinderAbsorptionCWTest(unittest.TestCase):
             AbsorptionCorrectionMethod="Sabine",
             AbsorptionWorkspace="Absorption",
             MultipleScatteringWorkspace="MultipleScattering",
-            MultipleScattering=False,
         )
 
         # Check absorption
         np.testing.assert_allclose(result.AbsorptionWorkspace.extractY()[:, 0], [0.54520177, 0.55782039, 0.570439, 0.55782039])
-
-        # Check multiple scattering, should be 0 since we set MultipleScattering=False
-        self.assertEqual(result.MultipleScatteringWorkspace.extractY()[0][0], 0)
 
     def testSabineLargeZ(self):
         """When z is large, the algorithm should use the asymptotic expansion of I_n(z) - L_n(z) to avoid numerical overflow."""
@@ -200,7 +196,6 @@ class CylinderAbsorptionCWTest(unittest.TestCase):
             AbsorptionCorrectionMethod="Sabine",
             AbsorptionWorkspace="Absorption",
             MultipleScatteringWorkspace="MultipleScattering",
-            MultipleScattering=False,
         )
 
         # Check absorption
@@ -227,7 +222,6 @@ class CylinderAbsorptionCWTest(unittest.TestCase):
             AbsorptionCorrectionMethod="Sabine",
             AbsorptionWorkspace="Absorption",
             MultipleScatteringWorkspace="MultipleScattering",
-            MultipleScattering=False,
         )
 
         spectrum_info = ws.spectrumInfo()

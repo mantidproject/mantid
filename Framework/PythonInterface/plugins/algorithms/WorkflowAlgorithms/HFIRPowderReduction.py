@@ -141,11 +141,6 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             doc="If True, apply sample attenuation (absorption) correction using CylinderAbsorptionCW",
         )
         self.declareProperty(
-            "DoMultipleScatteringCorrection",
-            False,
-            doc="If True, calculate and apply multiple scattering correction for the sample",
-        )
-        self.declareProperty(
             "AbsoluteIntensityUnits",
             False,
             doc="If True, output in absolute intensity units (mb/sr/f.u.)",
@@ -755,12 +750,8 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
 
         # Validate sample absorption correction properties
         doAttenuation = self.getProperty("DoAttenuationCorrection").value
-        doMS = self.getProperty("DoMultipleScatteringCorrection").value
         absoluteUnits = self.getProperty("AbsoluteIntensityUnits").value
         sampleHeight = self.getProperty("SampleHeight").value
-
-        if doMS and sampleHeight <= 0:
-            issues["SampleHeight"] = "SampleHeight must be provided when DoMultipleScatteringCorrection is True"
 
         if absoluteUnits:
             if vanadiumDiameter == Property.EMPTY_DBL or vanadiumDiameter <= 0:
@@ -1285,7 +1276,6 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         needs detector 2theta angles from the instrument geometry.
         """
         fB = self.getProperty("SampleBackgroundScaleFactor").value
-        do_ms = self.getProperty("DoMultipleScatteringCorrection").value
         wavelength = self.getProperty("Wavelength").value
         sample_formula = self.getProperty("SampleChemicalFormula").value
         crystal_density = self.getProperty("SampleCrystalDensity").value
@@ -1330,13 +1320,12 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
                 Radius=sample_radius,
                 Height=sample_height if sample_height > 0 else 3.0,
                 Wavelength=wavelength,
-                MultipleScattering=do_ms,
                 AbsorptionCorrectionMethod="Sabine",
                 AbsorptionWorkspace="__sample_absorption",
                 MultipleScatteringWorkspace="__sample_ms",
             )
 
-            delta_S = mtd["__sample_ms"].extractY()[0][0] if do_ms else 0.0
+            delta_S = mtd["__sample_ms"].extractY()[0][0]
 
             logger.information(f"Sample absorption correction for {ws_name}: ΔS = {delta_S:.6f}")
 
