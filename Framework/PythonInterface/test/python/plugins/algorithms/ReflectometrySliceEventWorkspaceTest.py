@@ -19,8 +19,8 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
         self.__class__._monitor_ws = self._create_monitor_workspace()
         self.__class__._monitor_ws_group = self._create_monitor_workspace_group()
         self._default_args = {
-            "InputWorkspace": "input_ws",
-            "MonitorWorkspace": "monitor_ws",
+            "InputWorkspaceName": "input_ws",
+            "MonitorWorkspaceName": "monitor_ws",
             "OutputWorkspace": "output",
             "UseNewFilterAlgorithm": True,
         }
@@ -32,10 +32,10 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
         self._assert_run_algorithm_throws()
 
     def test_missing_monitors(self):
-        self._assert_run_algorithm_throws({"InputWorkspace": "input_ws"})
+        self._assert_run_algorithm_throws({"InputWorkspaceName": "input_ws"})
 
     def test_missing_output_ws(self):
-        self._assert_run_algorithm_throws({"InputWorkspace": "input_ws", "MonitorWorkspace": "monitor_ws"})
+        self._assert_run_algorithm_throws({"InputWorkspaceName": "input_ws", "MonitorWorkspaceName": "monitor_ws"})
 
     def test_default_inputs_return_single_slice(self):
         output = self._assert_run_algorithm_succeeds(self._default_args)
@@ -271,125 +271,54 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
 
     def test_when_input_is_a_workspace_group(self):
         args = self._default_args
-        args["TimeInterval"] = 600
-        args["InputWorkspace"] = "input_ws_group"
-        group = self._assert_run_algorithm_succeeds(args)
-        self.assertEqual(group.getNumberOfEntries(), 3)
-        output = group[0]
-        self._check_slices(
-            output,
-            [
-                "ws1_monitor_ws_output_0_600",
-                "ws1_monitor_ws_output_600_1200",
-                "ws1_monitor_ws_output_1200_1800",
-                "ws1_monitor_ws_output_1800_2400",
-                "ws1_monitor_ws_output_2400_3000",
-                "ws1_monitor_ws_output_3000_3600",
-                "ws1_monitor_ws_output_3600_4200",
-            ],
-        )
-        self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[2, 6, 1])
-        self._check_y(output, child=1, spec=3, expected_bins=101, expected_values=[2, 3, 2])
-        self._check_y(output, child=2, spec=3, expected_bins=101, expected_values=[0, 3, 0])
-        self._check_y(output, child=3, spec=3, expected_bins=101, expected_values=[4, 2, 2])
-        self._check_y(output, child=4, spec=3, expected_bins=101, expected_values=[4, 1, 2])
-        self._check_y(output, child=5, spec=3, expected_bins=101, expected_values=[2, 1, 1])
-        self._check_y(output, child=6, spec=3, expected_bins=101, expected_values=[0, 0, 0])
+        time_interval = 600
+        args["TimeInterval"] = time_interval
+        args["InputWorkspaceName"] = "input_ws_group"
+        self._assert_run_algorithm_succeeds(args, len(mtd["input_ws_group"]))
+        self._check_group(time_interval, ["ws1", "ws2", "ws3"], ["monitor_ws"] * 3)
 
     def test_when_input_is_a_workspace_group_FilterByTime(self):
         args = self._default_args
+        time_interval = 600
         args["TimeInterval"] = 600
-        args["InputWorkspace"] = "input_ws_group"
+        args["InputWorkspaceName"] = "input_ws_group"
         args["UseNewFilterAlgorithm"] = False
-        group = self._assert_run_algorithm_succeeds(args)
-        self.assertEqual(group.getNumberOfEntries(), 3)
-        output = group[0]
-        self._check_slices(
-            output,
-            [
-                "ws1_monitor_ws_output_0_600.0",
-                "ws1_monitor_ws_output_600.0_1200.0",
-                "ws1_monitor_ws_output_1200.0_1800.0",
-                "ws1_monitor_ws_output_1800.0_2400.0",
-                "ws1_monitor_ws_output_2400.0_3000.0",
-                "ws1_monitor_ws_output_3000.0_3600.0",
-            ],
-        )
-        self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[2, 6, 1])
-        self._check_y(output, child=1, spec=3, expected_bins=101, expected_values=[2, 3, 2])
-        self._check_y(output, child=2, spec=3, expected_bins=101, expected_values=[0, 3, 0])
-        self._check_y(output, child=3, spec=3, expected_bins=101, expected_values=[4, 2, 2])
-        self._check_y(output, child=4, spec=3, expected_bins=101, expected_values=[4, 1, 2])
-        self._check_y(output, child=5, spec=3, expected_bins=101, expected_values=[2, 1, 1])
+        self._assert_run_algorithm_succeeds(args, True)
+        self._check_FilterByTime_group(time_interval, ["ws1", "ws2", "ws3"], ["monitor_ws"] * 3)
 
     def test_when_input_and_monitors_are_both_workspace_groups(self):
         args = self._default_args
-        args["TimeInterval"] = 600
-        args["InputWorkspace"] = "input_ws_group"
-        args["MonitorWorkspace"] = "monitor_ws_group"
-        group = self._assert_run_algorithm_succeeds(args)
-        self.assertEqual(group.getNumberOfEntries(), 3)
-        output = group[0]
-        self._check_slices(
-            output,
-            [
-                "ws1_mon1_output_0_600",
-                "ws1_mon1_output_600_1200",
-                "ws1_mon1_output_1200_1800",
-                "ws1_mon1_output_1800_2400",
-                "ws1_mon1_output_2400_3000",
-                "ws1_mon1_output_3000_3600",
-                "ws1_mon1_output_3600_4200",
-            ],
-        )
-        self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[2, 6, 1])
-        self._check_y(output, child=1, spec=3, expected_bins=101, expected_values=[2, 3, 2])
-        self._check_y(output, child=2, spec=3, expected_bins=101, expected_values=[0, 3, 0])
-        self._check_y(output, child=3, spec=3, expected_bins=101, expected_values=[4, 2, 2])
-        self._check_y(output, child=4, spec=3, expected_bins=101, expected_values=[4, 1, 2])
-        self._check_y(output, child=5, spec=3, expected_bins=101, expected_values=[2, 1, 1])
-        self._check_y(output, child=6, spec=3, expected_bins=101, expected_values=[0, 0, 0])
+        time_interval = 600
+        args["TimeInterval"] = time_interval
+        args["InputWorkspaceName"] = "input_ws_group"
+        args["MonitorWorkspaceName"] = "monitor_ws_group"
+        self._assert_run_algorithm_succeeds(args, len(mtd["input_ws_group"]))
+        self._check_group(time_interval, ["ws1", "ws2", "ws3"], ["mon1", "mon2", "mon3"])
 
     def test_when_input_and_monitors_are_both_workspace_groups_FilterByTime(self):
         args = self._default_args
-        args["TimeInterval"] = 600
-        args["InputWorkspace"] = "input_ws_group"
-        args["MonitorWorkspace"] = "monitor_ws_group"
+        time_interval = 600
+        args["TimeInterval"] = time_interval
+        args["InputWorkspaceName"] = "input_ws_group"
+        args["MonitorWorkspaceName"] = "monitor_ws_group"
         args["UseNewFilterAlgorithm"] = False
-        group = self._assert_run_algorithm_succeeds(args)
-        self.assertEqual(group.getNumberOfEntries(), 3)
-        output = group[0]
-        self._check_slices(
-            output,
-            [
-                "ws1_mon1_output_0_600.0",
-                "ws1_mon1_output_600.0_1200.0",
-                "ws1_mon1_output_1200.0_1800.0",
-                "ws1_mon1_output_1800.0_2400.0",
-                "ws1_mon1_output_2400.0_3000.0",
-                "ws1_mon1_output_3000.0_3600.0",
-            ],
-        )
-        self._check_y(output, child=0, spec=3, expected_bins=101, expected_values=[2, 6, 1])
-        self._check_y(output, child=1, spec=3, expected_bins=101, expected_values=[2, 3, 2])
-        self._check_y(output, child=2, spec=3, expected_bins=101, expected_values=[0, 3, 0])
-        self._check_y(output, child=3, spec=3, expected_bins=101, expected_values=[4, 2, 2])
-        self._check_y(output, child=4, spec=3, expected_bins=101, expected_values=[4, 1, 2])
-        self._check_y(output, child=5, spec=3, expected_bins=101, expected_values=[2, 1, 1])
+        self._assert_run_algorithm_succeeds(args, True)
+        self._check_FilterByTime_group(time_interval, ["ws1", "ws2", "ws3"], ["mon1", "mon2", "mon3"])
 
     def test_fails_when_input_groups_are_different_sizes(self):
         self._create_monitor_workspace_group_with_two_members()
         args = self._default_args
         args["TimeInterval"] = 600
-        args["InputWorkspace"] = "input_ws_group"
-        args["MonitorWorkspace"] = "test_monitor_ws_group"
-        self._assert_run_algorithm_fails(args)
+        args["InputWorkspaceName"] = "input_ws_group"
+        args["MonitorWorkspaceName"] = "test_monitor_ws_group"
+        self._assert_run_algorithm_throws(args)
         mtd.remove("test_monitor_ws_group")
 
     def test_validation_fails_when_workspace_has_zero_counts(self):
         input_ws = Workspace2D()
+        mtd.addOrReplace("test_ws", input_ws)
         args = self._default_args
-        args["InputWorkspace"] = input_ws
+        args["InputWorkspaceName"] = input_ws.name()
         self._assert_run_algorithm_throws(args)
 
     def _create_test_workspace(self):
@@ -439,10 +368,17 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
         mtd.addOrReplace("test_monitor_ws_group", group)
         return group
 
-    def _assert_run_algorithm_succeeds(self, args):
+    """
+    Does not return the output workspaces when groups have been used as the input.
+    The resulting groups need to be selected manually in the main test methods.
+    """
+
+    def _assert_run_algorithm_succeeds(self, args, is_group=False):
         """Run the algorithm with the given args and check it succeeds"""
         alg = create_algorithm("ReflectometrySliceEventWorkspace", **args)
         assertRaisesNothing(self, alg.execute)
+        if is_group:
+            return
         self.assertEqual(mtd.doesExist("output"), True)
         return mtd["output"]
 
@@ -461,6 +397,53 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
         except:
             throws = True
         self.assertEqual(throws, True)
+
+    def _check_group(self, time_interval, expected_ws_names, expected_monitor_names):
+        expected_values_set = [[2, 6, 1], [2, 3, 2], [0, 3, 0], [4, 2, 2], [4, 1, 2], [2, 1, 1], [0, 0, 0]]
+        # Check for the 3 workspaces contained in each slice group.
+        for i, expected_values in zip(range(7), expected_values_set):
+            self.assertTrue(mtd.doesExist(f"output_{i * time_interval}_{(i + 1) * time_interval}"))
+            slice_group = mtd.retrieve(f"output_{i * time_interval}_{(i + 1) * time_interval}")
+            self.assertEqual(slice_group.getNumberOfEntries(), 3)
+            self._check_slices(
+                slice_group,
+                [
+                    f"{expected_ws_names[0]}_{expected_monitor_names[0]}_output_0_{i * time_interval}_{(i + 1) * time_interval}",
+                    f"{expected_ws_names[1]}_{expected_monitor_names[1]}_output_1_{i * time_interval}_{(i + 1) * time_interval}",
+                    f"{expected_ws_names[2]}_{expected_monitor_names[2]}_output_2_{i * time_interval}_{(i + 1) * time_interval}",
+                ],
+            )
+            self._check_y(slice_group, child=0, spec=3, expected_bins=101, expected_values=expected_values)
+
+    def _check_FilterByTime_group(self, time_interval, expected_ws_names, expected_monitor_names):
+        # 0 case has a special name as the 0 does not have a decimal point.
+        self.assertTrue(mtd.doesExist("output_0_600.0"))
+        slice_group = mtd.retrieve("output_0_600.0")
+        self.assertEqual(slice_group.getNumberOfEntries(), 3)
+        self._check_slices(
+            slice_group,
+            [
+                f"{expected_ws_names[0]}_{expected_monitor_names[0]}_output_0_600.0",
+                f"{expected_ws_names[1]}_{expected_monitor_names[1]}_output_0_600.0",
+                f"{expected_ws_names[2]}_{expected_monitor_names[2]}_output_0_600.0",
+            ],
+        )
+        self._check_y(slice_group, child=0, spec=3, expected_bins=101, expected_values=[2, 6, 1])
+
+        expected_values_set = [[2, 3, 2], [0, 3, 0], [4, 2, 2], [4, 1, 2], [2, 1, 1]]
+        for i, expected_values in zip(range(1, 5), expected_values_set):
+            self.assertTrue(mtd.doesExist(f"output_{i * time_interval}.0_{(i + 1) * time_interval}.0"))
+            slice_group = mtd.retrieve(f"output_{i * time_interval}.0_{(i + 1) * time_interval}.0")
+            self.assertEqual(slice_group.getNumberOfEntries(), 3)
+            self._check_slices(
+                slice_group,
+                [
+                    f"{expected_ws_names[0]}_{expected_monitor_names[0]}_output_{i * time_interval}.0_{(i + 1) * time_interval}.0",
+                    f"{expected_ws_names[1]}_{expected_monitor_names[1]}_output_{i * time_interval}.0_{(i + 1) * time_interval}.0",
+                    f"{expected_ws_names[2]}_{expected_monitor_names[2]}_output_{i * time_interval}.0_{(i + 1) * time_interval}.0",
+                ],
+            )
+            self._check_y(slice_group, child=0, spec=3, expected_bins=101, expected_values=expected_values)
 
     def _check_slices(self, workspace_group, expected_names):
         number_of_slices = workspace_group.getNumberOfEntries()
