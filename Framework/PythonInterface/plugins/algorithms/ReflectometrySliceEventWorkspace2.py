@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import mtd, AlgorithmFactory, DataProcessorAlgorithm, WorkspaceGroupProperty
+from mantid.api import mtd, AlgorithmFactory, DataProcessorAlgorithm
 from mantid.kernel import DateAndTime, Direction
 from mantid.simpleapi import AddSampleLog
 
@@ -51,9 +51,7 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
             direction=Direction.Input,
             doc="The name of the input monitor workspace or group of monitor workspaces.",
         )
-        self.declareProperty(
-            WorkspaceGroupProperty("OutputWorkspace", "", direction=Direction.Output), doc="Group name for the output workspace(s)."
-        )
+        self.declareProperty("OutputWorkspaceName", "", direction=Direction.Output, doc="(Base)Name for the output workspace(s).")
         self.declareProperty("UseNewFilterAlgorithm", True, doc="If true, use the new FilterEvents algorithm instead of FilterByTime.")
 
     def validateInputs(self):
@@ -90,7 +88,7 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
     def PyExec(self):
         input_ws = mtd.retrieve(self.getPropertyValue("InputWorkspaceName"))
         input_monitor_ws = mtd.retrieve(self.getPropertyValue("MonitorWorkspaceName"))
-        output_ws_base_name = self.getPropertyValue("OutputWorkspace")
+        output_ws_base_name = self.getPropertyValue("OutputWorkspaceName")
 
         if input_ws.isGroup():
             if not input_monitor_ws.isGroup():
@@ -106,11 +104,13 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
             for i, slice in enumerate(zip(*sliced_workspaces)):
                 slice_group = self._group_workspaces(list(slice))
                 mtd.addOrReplace(self._create_name_for_slice_group(output_ws_base_name, slice_group), slice_group)
+            for ws in sliced_workspaces:
+                self._ungroup_ws(ws)
         else:
             self._output_ws_group_name = output_ws_base_name
             output_ws_group, monitor_ws_group = self._exec_single_workspace(input_ws, input_monitor_ws)
             self._clean_up(monitor_ws_group)
-            self.setProperty("OutputWorkspace", output_ws_group)
+            mtd.addOrReplace(output_ws_group.name(), output_ws_group)
 
     def _exec_single_workspace(self, input_ws, input_monitor_ws, output_workspace_suffix=""):
         output_ws_group = self._slice_input_workspace(input_ws, output_workspace_suffix)
@@ -316,12 +316,15 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
         alg.setProperty("MergeLogs", False)
         alg.execute()
 
+    def _ungroup_ws(self, ws_group):
+        alg = self.createChildAlgorithm("UnGroupWorkspace")
+        alg.setProperty("InputWorkspace", ws_group.name())
+        alg.execute()
+
     def _clean_up(self, monitor_ws_group):
         """Remove worspaces added to the ADS"""
         monitor_ws_names = [ws.name() for ws in monitor_ws_group]
-        alg = self.createChildAlgorithm("UnGroupWorkspace")
-        alg.setProperty("InputWorkspace", monitor_ws_group.name())
-        alg.execute()
+        self._ungroup_ws(monitor_ws_group)
         for ws_name in monitor_ws_names:
             mtd.remove(ws_name)
 
