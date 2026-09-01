@@ -253,6 +253,12 @@ if(BUILD_MANTIDFRAMEWORK
   add_subdirectory(tools)
 endif()
 
+# Automated UI tests. Registered under their own CTest label, so adding them here does not put them in any pipeline -
+# they have to be asked for with `ctest -L AutomatedUITest`.
+if(ENABLE_WORKBENCH)
+  add_subdirectory(Testing/AutomatedUITests)
+endif()
+
 if(COVERAGE)
   get_property(ALL_SRCS GLOBAL PROPERTY COVERAGE_SRCS)
   set(SRCS_FILE "")

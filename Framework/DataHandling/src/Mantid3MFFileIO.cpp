@@ -305,7 +305,7 @@ void Mantid3MFFileIO::writeMeshObject(const Geometry::MeshObject &mantidMeshObje
  * being written out to a .3mf format file
  * @return RGB colour value
  */
-int Mantid3MFFileIO ::generateRandomColor() {
+int Mantid3MFFileIO::generateRandomColor() {
 
   int rColor = (rand() % 256) << 16;
   int gColor = (rand() % 256) << 8;
