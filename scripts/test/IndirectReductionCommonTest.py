@@ -18,6 +18,7 @@ from IndirectReductionCommon import (
     group_spectra_of,
     remove_edge_pixels,
     get_minimum_calibration_factor,
+    exclude_low_calibration_spectra,
     _excluded_detector_ids,
     _get_x_range_when_bins_vary,
 )
@@ -173,6 +174,26 @@ class MinimumCalibrationFactorTest(unittest.TestCase):
         ws_name = "__test_iris_min_calib_default"
         LoadEmptyInstrument(InstrumentName="IRIS", OutputWorkspace=ws_name)
         self.assertEqual(get_minimum_calibration_factor(ws_name), 0.0)
+        DeleteWorkspace(ws_name)
+
+    def test_excludes_low_silicon_calibration_without_affecting_graphite_spectra(self):
+        ws_name = "__test_osiris_min_calib_filter"
+        LoadEmptyInstrument(InstrumentName="OSIRIS", OutputWorkspace=ws_name)
+        workspace = mtd[ws_name]
+
+        def workspace_index(spectrum_number):
+            return workspace.getIndexFromSpectrumNumber(spectrum_number)
+
+        workspace.dataY(workspace_index(963))[0] = 0.1
+        workspace.dataY(workspace_index(1005))[0] = 1.0
+        workspace.dataY(workspace_index(1006))[0] = 10.0
+
+        exclude_low_calibration_spectra(ws_name)
+
+        remaining = {mtd[ws_name].getSpectrum(i).getSpectrumNo() for i in range(mtd[ws_name].getNumberHistograms())}
+        self.assertIn(963, remaining)
+        self.assertNotIn(1005, remaining)
+        self.assertIn(1006, remaining)
         DeleteWorkspace(ws_name)
 
 
