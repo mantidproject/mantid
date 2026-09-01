@@ -172,7 +172,9 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         self.btn_tutorial = QPushButton()
         self.btn_tutorial.setIcon(get_icon("mdi.school", "black", 1.2))
         self.btn_tutorial.setToolTip("Guided tutorial")
-        self.toolbar.addWidget(self.btn_tutorial)
+        # the action, not the button, is what controls visibility here: a toolbar re-shows the
+        # widget of any visible action, so hiding the button alone does not stick
+        self._tutorial_action = self.toolbar.addWidget(self.btn_tutorial)
         self.btn_settings = QPushButton()
         self.btn_settings.setIcon(get_icon("mdi.settings", "black", 1.2))
         self.btn_settings.setToolTip("Settings")
@@ -186,7 +188,7 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         self.btn_tutorial.clicked.connect(slot)
 
     def set_tutorial_button_visible(self, visible: bool) -> None:
-        self.btn_tutorial.setVisible(visible)
+        self._tutorial_action.setVisible(visible)
 
     def set_on_close(self, slot: Callable) -> None:
         self._on_close = slot
