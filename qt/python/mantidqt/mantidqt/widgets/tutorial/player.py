@@ -5,21 +5,24 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
-"""Runs a tour: performs each step, points at it, says what it is, moves on.
+"""Runs a tour: performs each step, points at it, says what it is, and waits.
 
-Every delay is a timer rather than a wait. A step's action runs, the interface is given
-``settle_ms`` to catch up, the spotlight and caption are placed, and ``dwell_ms`` later the next
-step begins - and between each of those the player returns to the event loop, so the interface
-keeps painting and its buttons keep working. A player that waited instead would freeze the very
+**The tour advances only when the user asks it to.** There is no timer counting down behind the
+caption, because there is no interval that is right: a step someone already understands is a wait,
+and a step they do not is a race. They press Next when they have finished reading.
+
+What is still on a timer is the interface catching up. A step's action runs, the interface is given
+``settle_ms`` to lay out before the spotlight is measured, and a step that waits on real work polls
+for it - and between each of those the player returns to the event loop, so the interface keeps
+painting and its controls keep working. A player that waited by blocking would freeze the
 demonstration it is giving.
 
 Two things follow from the tour driving a real interface:
 
 * **Back does not undo.** It re-shows the previous step's caption and spotlight without re-running
-  its action. Replaying an action would double it - pressing "Add orientation" twice adds two -
-  and unwinding one is not something a step can be asked to describe. So Back is for re-reading,
-  and starting a chapter over is done by rebuilding the interface (which the session, not the
-  player, owns).
+  its action. Replaying an action would double it - pressing "Add orientation" twice adds two - and
+  unwinding one is not something a step can be asked to describe. So Back is for re-reading, and
+  starting a chapter over is done by rebuilding the interface, which the session owns.
 * **A step that fails does not kill the tour.** The interface has moved under it, which is worth
   reporting, but stranding the user mid-tour with a dead window helps nobody. The step is skipped
   and its failure emitted.
@@ -38,9 +41,9 @@ FAST_FORWARD_SETTLE_MS = 30
 class TutorialPlayer(QObject):
     """Plays ``chapters`` against ``context``, drawing on ``overlay`` and ``bubble``.
 
-    The player owns sequencing and nothing else. It does not build or tear down the interface it
-    is touring, and it does not decide what the buttons mean - a session does both, and calls
-    ``next_step`` / ``back_step`` / ``set_paused`` in response.
+    The player owns sequencing and nothing else. It does not build or tear down the interface it is
+    touring, and it does not decide what the controls mean - a session does both, and calls
+    ``next_step`` / ``back_step`` in response.
     """
 
     #: the whole tour reached its end
@@ -49,6 +52,8 @@ class TutorialPlayer(QObject):
     step_changed = Signal(int, int)
     #: a step could not be performed; carries the step's label and the reason
     step_failed = Signal(str, str)
+    #: the tour is waiting on the interface and should not be advanced; carries a message
+    busy_changed = Signal(bool, str)
 
     def __init__(self, chapters, context, overlay, bubble, parent=None):
         super().__init__(parent)
@@ -61,8 +66,9 @@ class TutorialPlayer(QObject):
 
         self._chapter_index = 0
         self._step_index = 0
-        self._paused = False
         self._running = False
+        self._busy = False
+        self._busy_message = ""
         self._pending = None  # the QTimer for whatever happens next, so it can be cancelled
         self._waiter = None  # the QTimer polling a step's await_, likewise
 
@@ -77,8 +83,10 @@ class TutorialPlayer(QObject):
         return self._running
 
     @property
-    def is_paused(self):
-        return self._paused
+    def is_busy(self):
+        """True while a step is waiting on the interface, when advancing would run the next step's
+        action against something that has not finished reacting to this one."""
+        return self._busy
 
     def current_chapter(self):
         return self._chapters[self._chapter_index]
@@ -86,16 +94,21 @@ class TutorialPlayer(QObject):
     def current_step(self):
         return self.current_chapter()[self._step_index]
 
+    def at_start(self):
+        return self._chapter_index == 0 and self._step_index == 0
+
+    def at_end(self):
+        return self._chapter_index == len(self._chapters) - 1 and self._step_index == len(self.current_chapter()) - 1
+
     # ------------------------------------------------------------------ running
 
     def start(self, chapter_index=0, fast_forward=False):
         """Begin at ``chapter_index``.
 
-        With ``fast_forward``, the actions of every earlier chapter are performed first, silently
-        and without dwelling. Chapters are cumulative - there is nothing to add an orientation to
-        until a sample has been loaded - so starting partway through means catching the interface
-        up first. It is only sound on a freshly built interface, which is why the session rebuilds
-        before asking for it.
+        With ``fast_forward``, the actions of every earlier chapter are performed first, silently.
+        Chapters are cumulative - there is nothing to add an orientation to until a sample has been
+        loaded - so starting partway through means catching the interface up first. It is only
+        sound on a freshly built interface, which is why the session rebuilds before asking for it.
         """
         if not 0 <= chapter_index < len(self._chapters):
             raise IndexError(f"no chapter {chapter_index}; the tour has {len(self._chapters)}")
@@ -112,26 +125,22 @@ class TutorialPlayer(QObject):
         """End the tour without emitting ``finished``. Safe to call at any point, including from
         inside a step."""
         self._running = False
+        self._set_busy(False)
         self._cancel_pending()
         self._overlay.set_target(None)
         self._overlay.hide()
 
-    def set_paused(self, paused):
-        """Stop or resume automatic advancing. Pausing leaves the current step on screen; the
-        navigation buttons keep working throughout."""
-        self._paused = bool(paused)
-        if self._paused:
-            self._cancel_pending()
-        elif self._running:
-            self._schedule(self._advance, self.current_step().dwell_ms)
-
     def next_step(self):
-        """Move on now, whether or not the current step has finished dwelling."""
+        """Move to the next step. Ignored while the tour is waiting on the interface."""
+        if self._busy:
+            return
         self._cancel_pending()
         self._advance()
 
     def back_step(self):
         """Re-show the previous step. Does not undo anything - see the module docstring."""
+        if self._busy:
+            return
         self._cancel_pending()
         if self._step_index > 0:
             self._step_index -= 1
@@ -149,6 +158,12 @@ class TutorialPlayer(QObject):
             return
         step = self.current_step()
 
+        # busy from the moment the action starts until the step is on screen. Without this, Next
+        # pressed during the settle would cancel the pending narration and move on, so the step's
+        # action would have run but its caption would never have been shown. No message: this lasts
+        # a couple of hundred milliseconds and should not flash text into the controls.
+        self._set_busy(True)
+
         if step.action is not None:
             try:
                 step.action(self._context)
@@ -156,10 +171,11 @@ class TutorialPlayer(QObject):
                 # the interface has moved under the tour. Worth reporting, not worth stranding the
                 # user in a half-run tour for
                 self.step_failed.emit(step.label, str(error))
-                self._schedule(self._advance, 0)
+                self._narrate(step)
                 return
 
         if step.await_ is not None:
+            self._set_busy(True, step.await_text)
             self._bubble.show_waiting(step.await_text)
             self._bubble.place_beside(self._spotlight_rect())
             self._waiter = wait_for(
@@ -184,7 +200,7 @@ class TutorialPlayer(QObject):
         self._narrate(step)
 
     def _narrate(self, step):
-        """Point at the step's target and say what it is.
+        """Point at the step's target and say what it is, then wait for the user.
 
         Deliberately separate from running the action: Back comes straight here, which is the whole
         of what makes Back safe to press.
@@ -202,20 +218,10 @@ class TutorialPlayer(QObject):
             target = None
 
         self._overlay.set_target(target)
-        chapter = self.current_chapter()
-        self._bubble.show_step(
-            text=step.text,
-            title=step.title,
-            chapter_name=chapter.name,
-            step_number=self._step_index + 1,
-            step_count=len(chapter),
-        )
+        self._bubble.show_step(text=step.text, title=step.title)
         self._bubble.place_beside(self._spotlight_rect())
-        self._bubble.set_navigation_enabled(back=not self._at_start(), next_=True)
+        self._set_busy(False)
         self.step_changed.emit(self._chapter_index, self._step_index)
-
-        if not self._paused:
-            self._schedule(self._advance, step.dwell_ms)
 
     def _advance(self):
         if not self._running:
@@ -234,26 +240,25 @@ class TutorialPlayer(QObject):
     # ------------------------------------------------------------------ fast forward
 
     def _fast_forward_to(self, chapter_index):
-        """Run every action before ``chapter_index`` with no narration and no dwelling.
+        """Run every action before ``chapter_index`` with no narration.
 
         Deliberately synchronous over the actions but never over a wait: a step that awaits
         something is awaited through ``wait_for`` and the rest of the fast-forward continues from
         its callback, so even this stays off the blocking path.
         """
-        self._bubble.show_waiting("Setting the interface up for this chapter…")
+        message = "Setting the interface up for this chapter…"
+        self._set_busy(True, message)
+        self._bubble.show_waiting(message)
         self._bubble.place_beside(None)
-        preceding = [
-            (chapter_number, step)
-            for chapter_number, _step_number, _chapter, step in walk(self._chapters)
-            if chapter_number < chapter_index
-        ]
-        self._replay(iter([step for _chapter_number, step in preceding]))
+        preceding = [step for chapter_number, _step_number, _chapter, step in walk(self._chapters) if chapter_number < chapter_index]
+        self._replay(iter(preceding))
 
     def _replay(self, steps):
         if not self._running:
             return
         step = next(steps, None)
         if step is None:
+            self._set_busy(False)
             self._run_current_step()
             return
 
@@ -277,8 +282,12 @@ class TutorialPlayer(QObject):
 
     # ------------------------------------------------------------------ plumbing
 
-    def _at_start(self):
-        return self._chapter_index == 0 and self._step_index == 0
+    def _set_busy(self, busy, message=""):
+        if busy == self._busy and message == self._busy_message:
+            return
+        self._busy = busy
+        self._busy_message = message
+        self.busy_changed.emit(busy, message)
 
     def _spotlight_rect(self):
         target_rect = getattr(self._overlay, "target_rect", None)
@@ -287,8 +296,8 @@ class TutorialPlayer(QObject):
     def _schedule(self, call, delay_ms):
         """Do something after a delay, keeping the timer so it can be cancelled.
 
-        One pending action at a time: scheduling replaces whatever was pending, which is what lets
-        Next interrupt a dwell without the interrupted one firing later and skipping a step.
+        One pending action at a time: scheduling replaces whatever was pending, so an interrupted
+        settle cannot fire later and narrate a step the tour has already left.
         """
         self._cancel_pending()
         timer = QTimer(self)

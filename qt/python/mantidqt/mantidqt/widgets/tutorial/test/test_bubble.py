@@ -8,7 +8,7 @@
 import unittest
 
 from qtpy.QtCore import QRect
-from qtpy.QtWidgets import QWidget
+from qtpy.QtWidgets import QAbstractButton, QWidget
 
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.widgets.tutorial import interaction
@@ -24,7 +24,7 @@ class TutorialBubbleTest(unittest.TestCase):
         interaction.process_events(3)
 
         self.bubble = TutorialBubble(self.window)
-        self.bubble.show_step("Some explanation of a control.", title="A step", chapter_name="Setup", step_number=2, step_count=5)
+        self.bubble.show_step("Some explanation of a control.", title="A step")
         self.bubble.show()
         interaction.process_events(3)
 
@@ -38,72 +38,24 @@ class TutorialBubbleTest(unittest.TestCase):
 
     # ------------------------------------------------------------------ content
 
-    def test_it_shows_the_step_and_its_position_in_the_chapter(self):
+    def test_it_shows_the_step(self):
         self.assertEqual(self._text_of("tutorial_bubble_title"), "A step")
         self.assertEqual(self._text_of("tutorial_bubble_text"), "Some explanation of a control.")
-        self.assertEqual(self._text_of("tutorial_bubble_chapter"), "Setup — step 2 of 5")
 
     def test_an_untitled_step_hides_the_title_rather_than_leaving_a_gap(self):
-        self.bubble.show_step("Just narrating.", chapter_name="Setup", step_number=1, step_count=3)
+        self.bubble.show_step("Just narrating.")
         interaction.process_events()
         self.assertFalse(self.window.findChild(QWidget, "tutorial_bubble_title").isVisible())
-
-    def test_a_message_with_no_step_number_hides_the_progress_line(self):
-        self.bubble.show_step("A closing remark.")
-        interaction.process_events()
-        self.assertFalse(self.window.findChild(QWidget, "tutorial_bubble_chapter").isVisible())
 
     def test_show_waiting_replaces_only_the_text(self):
         self.bubble.show_waiting("Calculating transmission…")
         self.assertEqual(self._text_of("tutorial_bubble_text"), "Calculating transmission…")
         self.assertEqual(self._text_of("tutorial_bubble_title"), "A step")
 
-    # ------------------------------------------------------------------ controls
-
-    def test_each_button_emits_its_signal(self):
-        for button, signal_name in (
-            (self.bubble.btn_back, "back_requested"),
-            (self.bubble.btn_next, "next_requested"),
-            (self.bubble.btn_chapters, "chapters_requested"),
-            (self.bubble.btn_close, "close_requested"),
-        ):
-            with self.subTest(button=button.text()):
-                fired = []
-                getattr(self.bubble, signal_name).connect(lambda: fired.append(True))
-                button.click()
-                interaction.process_events()
-                self.assertEqual(fired, [True])
-
-    def test_pause_reports_its_new_state_and_renames_itself(self):
-        states = []
-        self.bubble.pause_toggled.connect(states.append)
-
-        self.bubble.btn_pause.click()
-        interaction.process_events()
-        self.assertEqual(states, [True])
-        self.assertEqual(self.bubble.btn_pause.text(), "Resume")
-
-        self.bubble.btn_pause.click()
-        interaction.process_events()
-        self.assertEqual(states, [True, False])
-        self.assertEqual(self.bubble.btn_pause.text(), "Pause")
-
-    def test_set_paused_does_not_echo_back_to_the_player(self):
-        # the player calls this to reflect its own state; emitting would drive it back round
-        states = []
-        self.bubble.pause_toggled.connect(states.append)
-
-        self.bubble.set_paused(True)
-        interaction.process_events()
-
-        self.assertEqual(states, [])
-        self.assertTrue(self.bubble.btn_pause.isChecked())
-        self.assertEqual(self.bubble.btn_pause.text(), "Resume")
-
-    def test_navigation_can_be_disabled_at_the_ends_of_the_tour(self):
-        self.bubble.set_navigation_enabled(back=False, next_=True)
-        self.assertFalse(self.bubble.btn_back.isEnabled())
-        self.assertTrue(self.bubble.btn_next.isEnabled())
+    def test_it_carries_no_controls(self):
+        # the caption moves with the highlight, so a button on it would be somewhere different on
+        # every step. Navigation lives in the shell, which stays put.
+        self.assertEqual(self.bubble.findChildren(QAbstractButton), [])
 
     # ------------------------------------------------------------------ placement
 

@@ -16,9 +16,11 @@ class TutorialStepTest(unittest.TestCase):
             with self.subTest(text=repr(empty)):
                 self.assertRaises(ValueError, TutorialStep, text=empty)
 
-    def test_negative_delays_are_rejected(self):
-        self.assertRaises(ValueError, TutorialStep, text="hello", dwell_ms=-1)
+    def test_a_negative_settle_is_rejected(self):
         self.assertRaises(ValueError, TutorialStep, text="hello", settle_ms=-1)
+
+    def test_a_step_has_no_dwell_because_the_tour_never_advances_on_its_own(self):
+        self.assertRaises(TypeError, TutorialStep, text="hello", dwell_ms=1000)
 
     def test_awaiting_with_a_non_positive_timeout_is_rejected(self):
         self.assertRaises(ValueError, TutorialStep, text="hello", await_=lambda _ctx: True, await_timeout_s=0)
