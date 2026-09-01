@@ -23,7 +23,7 @@ Two conventions worth knowing before adding a step:
 
 from mantid.simpleapi import SetSampleMaterial
 
-from mantidqt.widgets.tutorial.interaction import click, select_tab, set_check_state, set_spin_box, set_text
+from mantidqt.widgets.tutorial.interaction import click, select_combo, select_tab, set_check_state, set_spin_box, set_text
 from mantidqt.widgets.tutorial.step import TutorialChapter, TutorialStep
 
 # the tour's sample material: deliberately not the interface's default, so the "Current material"
@@ -196,4 +196,172 @@ SAMPLE_SETUP = TutorialChapter(
 )
 
 
-CHAPTERS = (SAMPLE_SETUP,)
+# ------------------------------------------------------------------------------------------------
+# chapter 2 - experimental setup
+# ------------------------------------------------------------------------------------------------
+
+
+# how many orientations the tour builds. Enough to make a pole figure and a table worth looking at,
+# few enough that the per-orientation absorption calculation in the next chapter stays quick.
+DEMO_ORIENTATION_COUNT = 3
+
+DEMO_GROUP = "Texture20"
+DEMO_GAUGE_VOLUME = "4mmCube"
+
+
+def _add_orientations(sandbox):
+    for _ in range(DEMO_ORIENTATION_COUNT):
+        click(sandbox.view.addOrientation)
+
+
+EXPERIMENTAL_SETUP = TutorialChapter(
+    name="Experimental setup",
+    description="Choose the instrument, the gauge volume, and the goniometer moves to measure.",
+    steps=[
+        TutorialStep(
+            title="Now the instrument",
+            text=(
+                "The second tab describes the measurement rather than the sample: which instrument, "
+                "which detector grouping, what part of the sample the beam sees, and how you will "
+                "rotate it."
+            ),
+            target=lambda s: s.view.tabSetup,
+            action=lambda s: select_tab(s.view.tabSetup, "Experimental Setup"),
+            settle_ms=300,
+            dwell_ms=4500,
+        ),
+        TutorialStep(
+            title="Pick an instrument",
+            text=(
+                "Choosing an instrument loads its detector geometry. Picking <b>Custom</b> instead lets "
+                "you name any instrument definition Mantid can find, and supply your own grouping file."
+            ),
+            target=lambda s: s.view.cmbInstr,
+            dwell_ms=4500,
+        ),
+        TutorialStep(
+            title="…and a detector grouping",
+            text=(
+                "Texture measurements group detectors into banks that each look at the sample from a "
+                "different direction — every group becomes one point per orientation on the pole figure. "
+                f"The tutorial is selecting <b>{DEMO_GROUP}</b>."
+            ),
+            target=lambda s: s.view.cmbGroup,
+            action=lambda s: select_combo(s.view.cmbGroup, DEMO_GROUP),
+            settle_ms=300,
+            dwell_ms=5000,
+        ),
+        TutorialStep(
+            title="Apply the selection",
+            text=(
+                "Nothing is rebuilt until <b>Update Instrument</b> is pressed — and it stays disabled "
+                "until the instrument and grouping together make sense. That keeps the interface out of "
+                "half-applied states."
+            ),
+            target=lambda s: s.view.btnUpdateInstr,
+            action=lambda s: click(s.view.btnUpdateInstr),
+            settle_ms=800,
+            dwell_ms=5000,
+        ),
+        TutorialStep(
+            title="The gauge volume",
+            text=(
+                "The gauge volume is the region where the incident and scattered beams overlap — the "
+                "part of the sample you are actually measuring. It decides the scattering centre, and "
+                "with it the path lengths through the sample."
+            ),
+            target=lambda s: s.view.grpGaugeVol,
+            action=lambda s: set_check_state(s.view.grpGaugeVol, True),
+            settle_ms=400,
+            dwell_ms=5500,
+        ),
+        TutorialStep(
+            title="Choose a preset or your own shape",
+            text=(
+                f"<b>{DEMO_GAUGE_VOLUME}</b> is a preset; <b>Custom Shape</b> takes an XML shape file of "
+                "your own, and <b>No Gauge Volume</b> treats the whole sample as illuminated."
+            ),
+            target=lambda s: s.view.combo_shapeMethod,
+            action=lambda s: select_combo(s.view.combo_shapeMethod, DEMO_GAUGE_VOLUME),
+            settle_ms=300,
+            dwell_ms=5000,
+        ),
+        TutorialStep(
+            title="Set it",
+            text="<b>Set Gauge Volume</b> applies it and moves the scattering centre to match.",
+            target=lambda s: s.view.setGV,
+            action=lambda s: click(s.view.setGV),
+            settle_ms=800,
+            dwell_ms=4000,
+        ),
+        TutorialStep(
+            title="Describe your goniometer",
+            text=(
+                "This is how the sample can be moved. Set the number of axes, then give each one a "
+                "rotation vector and a sense — the tutorial is setting up two axes."
+            ),
+            target=lambda s: s.view.grpGoniometer,
+            action=lambda s: set_spin_box(s.view.spnNumAxes, 2),
+            settle_ms=500,
+            dwell_ms=5000,
+        ),
+        TutorialStep(
+            title="An axis is a vector and a sense",
+            text=(
+                "The vector is the axis of rotation in the lab frame; the sense says which way a positive "
+                "angle turns. Axes beyond the number you asked for are greyed out."
+            ),
+            target=lambda s: s.view.axis0,
+            action=lambda s: (set_text(s.view.edtVec0, "0,1,0"), select_combo(s.view.cmbSense0, "Counterclockwise")),
+            settle_ms=500,
+            dwell_ms=5500,
+        ),
+        TutorialStep(
+            title="The step size",
+            text=(
+                "The step size sets how far each angle spin box moves per click, so you can walk through "
+                "a scan in even increments rather than typing every angle."
+            ),
+            target=lambda s: s.view.spnStepSize,
+            action=lambda s: set_spin_box(s.view.spnStepSize, 30.0),
+            settle_ms=400,
+            dwell_ms=4500,
+        ),
+        TutorialStep(
+            title="Dial in an orientation",
+            text=(
+                "Set the angles for each axis and the lab view updates as you go, so you can see where "
+                "the sample ends up before committing to it."
+            ),
+            target=lambda s: s.view.spnAngle0,
+            action=lambda s: set_spin_box(s.view.spnAngle0, 30.0),
+            settle_ms=700,
+            dwell_ms=5000,
+        ),
+        TutorialStep(
+            title="Add it to the list",
+            text=(
+                "<b>Add Orientation</b> records the current angles as one measurement position. The "
+                f"tutorial is adding {DEMO_ORIENTATION_COUNT} of them so there is something to look at."
+            ),
+            target=lambda s: s.view.addOrientation,
+            action=_add_orientations,
+            settle_ms=1000,
+            dwell_ms=5000,
+        ),
+        TutorialStep(
+            title="Move between them",
+            text=(
+                "The index selector steps through the orientations you have added. Whichever one is "
+                "selected is the one drawn in the lab view and highlighted on the pole figure."
+            ),
+            target=lambda s: s.view.spnIndex,
+            action=lambda s: set_spin_box(s.view.spnIndex, 1),
+            settle_ms=700,
+            dwell_ms=5000,
+        ),
+    ],
+)
+
+
+CHAPTERS = (SAMPLE_SETUP, EXPERIMENTAL_SETUP)
