@@ -189,6 +189,14 @@ class TutorialChaptersTest(unittest.TestCase):
             with self.subTest(target=target.objectName() or type(target).__name__):
                 self.assertIsInstance(target, QWidget)
 
+    def test_the_tour_really_exports_a_file(self):
+        # the export step goes through the interface's own export path, so a tour that stopped
+        # actually producing anything would otherwise still look like it was working
+        self._play(_hurried_chapters())
+
+        written = os.listdir(self.sandbox.data.save_directory)
+        self.assertTrue(written, "the export chapter should have written a real file to the demo directory")
+
     def test_every_step_was_narrated_in_order(self):
         chapters = _hurried_chapters()
         self._play(chapters)

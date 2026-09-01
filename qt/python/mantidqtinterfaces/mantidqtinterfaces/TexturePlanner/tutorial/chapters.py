@@ -364,4 +364,159 @@ EXPERIMENTAL_SETUP = TutorialChapter(
 )
 
 
-CHAPTERS = (SAMPLE_SETUP, EXPERIMENTAL_SETUP)
+# ------------------------------------------------------------------------------------------------
+# chapter 3 - reading the results
+# ------------------------------------------------------------------------------------------------
+
+
+RESULTS = TutorialChapter(
+    name="Reading the results",
+    description="The lab view, the pole figure, transmission, and the orientation table.",
+    steps=[
+        TutorialStep(
+            title="The lab view",
+            text=(
+                "The sample as the instrument sees it, in the currently selected orientation, together "
+                "with the beam and the detector directions. This is the sanity check that your sample "
+                "really is where you think it is."
+            ),
+            target=lambda s: s.view.grpSampleFigure,
+            dwell_ms=5500,
+        ),
+        TutorialStep(
+            title="The pole figure",
+            text=(
+                "Every detector group, for every orientation you added, projected into the sample's own "
+                "frame. Gaps here are directions your planned measurement never samples — which is the "
+                "whole reason for planning before beam time."
+            ),
+            target=lambda s: s.view.grpPoleFigure,
+            dwell_ms=6000,
+        ),
+        TutorialStep(
+            title="Transmission",
+            text=(
+                "Ticking this estimates how much of the beam survives the path through the sample for "
+                "each point, by Monte Carlo simulation, and colours the pole figure by it. It is the "
+                "slowest thing the interface does — the tutorial has turned the statistics right down."
+            ),
+            target=lambda s: s.view.chkTransmission,
+            dwell_ms=6000,
+        ),
+        TutorialStep(
+            title="Now with absorption",
+            text=(
+                "Dark points are directions where the beam has a long path through the sample, so they "
+                "will need longer counting times — or a different sample orientation."
+            ),
+            target=lambda s: s.view.grpPoleFigure,
+            action=lambda s: set_check_state(s.view.chkTransmission, True),
+            settle_ms=1200,
+            dwell_ms=6000,
+        ),
+        TutorialStep(
+            title="The orientation table",
+            text=(
+                "One row per orientation, with the goniometer angles that produce it. <b>Include</b> "
+                "controls whether an orientation is exported; <b>Select</b> is for the buttons below."
+            ),
+            target=lambda s: s.view.grpDynamicTable,
+            dwell_ms=5500,
+        ),
+        TutorialStep(
+            title="Selecting rows",
+            text=(
+                "<b>Select All</b> and <b>Deselect All</b> work on the selection column, and "
+                "<b>Delete Selected</b> removes those rows from the plan — useful once the pole figure "
+                "shows an orientation is not earning its beam time."
+            ),
+            target=lambda s: s.view.selectAll,
+            action=lambda s: (click(s.view.selectAll), click(s.view.deselectAll)),
+            settle_ms=700,
+            dwell_ms=5500,
+        ),
+    ],
+)
+
+
+# ------------------------------------------------------------------------------------------------
+# chapter 4 - exporting, and where the rest lives
+# ------------------------------------------------------------------------------------------------
+
+
+DEMO_EXPORT_FORMAT = "Sscanss2 Angles"
+
+
+EXPORT = TutorialChapter(
+    name="Exporting",
+    description="Write the plan out, and where the remaining options live.",
+    steps=[
+        TutorialStep(
+            title="Where to write it",
+            text=(
+                "The output section takes a directory and a file name. The tutorial is pointing it at a "
+                "temporary folder, so the file it writes in a moment is a real export that disappears "
+                "with this window."
+            ),
+            target=lambda s: s.view.finder_save_dir,
+            action=lambda s: _set_finder(s.view.finder_save_dir, s.data.save_directory),
+            await_=lambda s: _finder_ready(s.view.finder_save_dir),
+            await_timeout_s=FINDER_TIMEOUT_S,
+            await_text="Checking the output directory…",
+            settle_ms=400,
+            dwell_ms=5000,
+        ),
+        TutorialStep(
+            title="And what to call it",
+            text="Export stays disabled until both a directory and a file name are given.",
+            target=lambda s: s.view.saveFileLine,
+            action=lambda s: set_text(s.view.saveFileLine, s.data.save_filename),
+            settle_ms=400,
+            dwell_ms=4500,
+        ),
+        TutorialStep(
+            title="Pick a format",
+            text=(
+                "<b>Sscanss2 Angles</b> feeds the plan straight into SScanSS-2. There are also Euler and "
+                "matrix orientation files, a <b>Reference Workspace</b> that the Engineering Diffraction "
+                "interface can load, and — once transmission has been estimated — a set of counting-time "
+                "weightings."
+            ),
+            target=lambda s: s.view.cmbExportFormat,
+            action=lambda s: select_combo(s.view.cmbExportFormat, DEMO_EXPORT_FORMAT),
+            settle_ms=400,
+            dwell_ms=6000,
+        ),
+        TutorialStep(
+            title="Write it out",
+            text="Only the orientations ticked as <b>Include</b> in the table are written.",
+            target=lambda s: s.view.btnExport,
+            action=lambda s: click(s.view.btnExport),
+            settle_ms=800,
+            dwell_ms=4500,
+        ),
+        TutorialStep(
+            title="Everything else is in Settings",
+            text=(
+                "The cog holds the options the tour has skipped: how STL files are scaled and rotated on "
+                "load, which axes Euler angles are written about, the Monte Carlo statistics, and the "
+                "wavelength the attenuation is quoted at. They are remembered between sessions."
+            ),
+            target=lambda s: s.view.btn_settings,
+            dwell_ms=6500,
+        ),
+        TutorialStep(
+            title="That is the whole workflow",
+            text=(
+                "Describe the sample, describe the instrument and how you will move it, read the pole "
+                "figure, export the plan.<br><br>"
+                "The full documentation is under <b>Help → Mantid Help</b>. Close this window whenever "
+                "you like — nothing here has touched your own session."
+            ),
+            dwell_ms=8000,
+        ),
+    ],
+)
+
+
+CHAPTERS = (SAMPLE_SETUP, EXPERIMENTAL_SETUP, RESULTS, EXPORT)
