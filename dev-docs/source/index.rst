@@ -238,6 +238,7 @@ GUI Development
    BalsamiqWireframes
    MantidUsedIconsTable
    ISISReflectometryInterface
+   ISISReflectometryPlottingTab
 
 :doc:`MVPDesign`
    Gives some guidelines to consider when developing a new graphical user interface.
@@ -256,6 +257,9 @@ GUI Development
 
 :doc:`ISISReflectometryInterface`
    An example of a complex C++ interface that uses MVP.
+
+:doc:`ISISReflectometryPlottingTab`
+   Describes the architecture and execution flow of the ISIS Reflectometry Plotting tab.
 
 =========
 Workbench

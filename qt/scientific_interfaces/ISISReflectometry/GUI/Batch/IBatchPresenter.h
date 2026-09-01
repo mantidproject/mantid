@@ -55,6 +55,7 @@ public:
   virtual void notifyBatchLoaded() = 0;
   virtual void notifyRowContentChanged(Row &changedRow) = 0;
   virtual void notifyGroupNameChanged(Group &changedGroup) = 0;
+  virtual void notifyRunsTableChanged() = 0;
   virtual void notifyRunsTransferred() = 0;
   virtual void notifyPreviewApplyRequested() = 0;
 
