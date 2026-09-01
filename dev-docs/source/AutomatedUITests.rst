@@ -1,0 +1,279 @@
+.. _AutomatedUITests:
+
+===================
+Automated UI Tests
+===================
+
+.. contents::
+  :local:
+
+Overview
+########
+
+Automated UI tests drive a real Qt interface. They build the genuine view, presenter and model,
+click real widgets with ``QTest``, run real algorithms and inspect the workspaces and files that
+come out. The only things mocked are the ones that would otherwise block waiting for a user: modal
+error popups, confirmation prompts and generated algorithm dialogs.
+
+They exist to replace the manual test guides in :ref:`Testing`. A guide section that a developer
+used to work through by hand before a release becomes one test method, with one ``subTest`` per
+observation the guide asked for.
+
+The code lives in ``Testing/AutomatedUITests``:
+
+.. code-block:: none
+
+   Testing/AutomatedUITests/
+     automated_ui_test_base.py    the harness - settings isolation, waiting, dialog patching
+     qt_interaction_helpers.py    free functions for driving widgets (click, combo, table, wait)
+     Example/ExampleUITest.py     a worked example, which is also the smoke test for the harness
+     <Interface>/                 one directory per interface
+
+How they relate to the other test suites
+########################################
+
+Automated UI tests are neither unit tests nor system tests, and they are deliberately kept out of
+both pipelines. They are slow, they drive a GUI, and a flaky one must not be able to block a pull
+request or a nightly package.
+
++---------------------+-------------------------+-------------------------------------------------+
+| Suite               | CTest label             | When it runs                                    |
++=====================+=========================+=================================================+
+| Unit tests          | ``UnitTest``            | every pull request, every nightly               |
++---------------------+-------------------------+-------------------------------------------------+
+| System tests        | ``SystemTest``          | every pull request (Linux), every nightly, via  |
+|                     |                         | ``runSystemTests.py`` rather than CTest         |
++---------------------+-------------------------+-------------------------------------------------+
+| Automated UI tests  | ``AutomatedUITest``     | weekly, report-only                             |
++---------------------+-------------------------+-------------------------------------------------+
+
+Three things keep them off the critical path, and a change to any one of them would put them back
+on it:
+
+* the ``AutomatedUITest`` CTest label. CI selects unit tests with ``ctest -L UnitTest``, so a test
+  with any other label is invisible to it;
+* the location. ``runSystemTests.py`` collects by walking ``Testing/SystemTests/tests/framework``
+  and ``Testing/SystemTests/tests/qt``, so a suite under either of those would be run by the
+  nightly whatever label it carried. ``Testing/AutomatedUITests`` is outside both;
+* ``.github/workflows/weekly_ui_tests.yml``, which has no ``pull_request`` trigger, marks its test
+  step ``continue-on-error`` and publishes the results as a check run rather than gating on them.
+  It must not be added to the repository's required status checks.
+
+macOS is not currently covered: there is no self-hosted macOS GitHub Actions runner. The workflow's
+matrix has a placeholder for one.
+
+Running them
+############
+
+The suite is only added to the build when ``ENABLE_WORKBENCH`` is on, which is the default;
+configure with it enabled or CTest will not know about these tests at all. From the build
+directory:
+
+.. code-block:: sh
+
+   # the data the suites load, once - CTest builds nothing itself, so this has to be asked for
+   cmake --build . --target AutomatedUITestData
+
+   # everything
+   ctest -L AutomatedUITest --output-on-failure
+
+   # one interface
+   ctest -R AutomatedUITest.EngineeringDiffraction --output-on-failure
+
+   # one module
+   ctest -R AutomatedUITest.Example.ExampleUITest --output-on-failure
+
+Most suites need data from the ExternalData store, which is what the ``AutomatedUITestData`` target
+above downloads (it is nothing more than ``StandardTestData`` and ``SystemTestData`` together);
+without it the tests that need a file report a skip rather than a failure. Tests run offscreen (the
+harness *defaults* ``QT_QPA_PLATFORM`` to ``offscreen`` and ``MPLBACKEND`` to ``Agg`` on import, leaving
+either alone if it is already set), so nothing appears on screen and no display is needed. Set
+``QT_QPA_PLATFORM`` yourself if you want to watch a test run.
+
+The data directories are named by ``PYUNITTEST_DATA_DIRS`` in
+``Testing/AutomatedUITests/CMakeLists.txt``, passed to each test as ``MANTID_TEST_DATA_DIRS`` and
+added to Mantid's search path in ``setUp`` - the built properties file lists only
+``Testing/Data/UnitTest`` and ``Testing/Data/DocTest``, and a manual test guide typically uses the
+SystemTest set. The search path is restored in ``tearDown``.
+
+A module is an ordinary ``unittest`` file, so it can also be run directly for debugging - which is
+usually easier, because you get a normal traceback. It still needs the environment CTest would have
+given it: the build's ``bin`` and the harness directory on ``PYTHONPATH``, the configured ``QT_API``,
+and ``MANTID_TEST_DATA_DIRS`` if the test calls ``require_files``. From the source directory, with
+``$BUILD`` the build directory:
+
+.. code-block:: sh
+
+   export PYTHONPATH=$BUILD/bin:$PWD/Testing/AutomatedUITests:$PYTHONPATH
+   export QT_API=pyqt6
+   export MANTID_TEST_DATA_DIRS=$BUILD/ExternalData/Testing/Data/SystemTest:$BUILD/ExternalData/Testing/Data/DocTest:$BUILD/ExternalData/Testing/Data/UnitTest
+
+   python Testing/AutomatedUITests/Example/ExampleUITest.py ExampleUITest.test_tables
+
+``ctest -R AutomatedUITest.Example.ExampleUITest -V -N`` prints the exact command and environment
+that CTest uses, which is the reference if any of the above has moved.
+
+Writing a test
+##############
+
+Start from ``Testing/AutomatedUITests/Example/ExampleUITest.py``. It drives a widget defined in its
+own module, so it depends on no interface and no data - if it fails, the harness is broken rather
+than the code under test.
+
+The shape is:
+
+.. code-block:: python
+
+   from automated_ui_test_base import AutomatedUITestBase
+   from qt_interaction_helpers import click, process_events, select_combo
+
+   class MyInterfaceTest(AutomatedUITestBase):
+       def setUp(self):
+           super(MyInterfaceTest, self).setUp()
+           self.require_files("SOMEDATA00001.nxs")   # skip cleanly if the data is not there
+           self.patch_error_messages(("some.module.that.pops.a.dialog",))
+           self.gui = MyInterface()
+           self.gui.show()
+           process_events(2)
+
+       def tearDown(self):
+           self.gui.close()
+           process_events(2)
+           super(MyInterfaceTest, self).tearDown()
+
+       def test_the_guide_section_this_replaces(self):
+           select_combo(self.gui.combo_instrument, "ENGINX")
+           click(self.gui.button_run)
+
+           with self.subTest("Guide step 4 / the output workspace is created"):
+               self.assertTrue(ADS.doesExist("output"))
+           with self.subTest("Guide step 5 / it is in d-spacing"):
+               self.assertEqual(ADS.retrieve("output").getAxis(0).getUnit().unitID(), "dSpacing")
+
+Points worth knowing before you write one:
+
+**One ``test_`` method per scenario, not per observation.** Building an interface is expensive, and
+a scenario in a manual test guide is a sequence - calibrate, then focus, then look at what was
+written. Split by guide section, not by assertion.
+
+**Use** :py:meth:`unittest.TestCase.subTest` **for observations.** A failed observation inside
+``with self.subTest(label)`` is reported against its label and the ones after it still run. A test
+that stopped at the first failure would need as many weekly runs as there are regressions. Use a
+plain ``self.assertX`` for preconditions - "the run number resolved", "the worker finished" - where
+carrying on would only produce a cascade of meaningless failures.
+
+**What goes inside a** ``subTest`` **block is a decision, not a formatting choice.** Most of the
+helpers assert for themselves: ``select_radio`` raises if the button did not become checked,
+``set_group_box``, ``set_line_edit`` and ``set_spin_box`` likewise. Inside a block that raise is
+recorded as a failed observation and the next block still runs; outside one it propagates and ends
+the test there and then. So put a call **inside** when the selection or setting is itself the thing
+under test, and **outside** when it is only getting the interface into the state a later check
+needs - a broken fixture makes the remaining observations meaningless, whereas a failed observation
+should let the others still fire. Note that the block is also the blast radius: a failure skips the
+rest of *that* block too, so only put setup inside a block whose remaining lines you are content to
+lose.
+
+**Never sleep or join.** Anything that finishes on a background thread reports back through a
+queued - sometimes *blocking* queued - Qt connection, which cannot be delivered unless the calling
+thread is running its event loop. Use ``wait_until`` from ``qt_interaction_helpers`` or
+``self.wait_for_async_task(worker)`` from the base class; a bare ``worker.join()`` deadlocks both
+threads. Both default to a short timeout, so a wait on something genuinely slow has to pass a
+longer ``timeout`` explicitly rather than every wait in the suite inheriting one long enough to
+hide a hang.
+
+**Neutralise anything modal before the first click.** An unattended test that pops a modal message
+box hangs until the suite times out. ``patch_error_messages``, ``patch_confirmation_box`` and
+``algorithm_dialog_runs`` on the base class cover three common cases that come up.
+
+**Go through the interface, not around it.** Where possible use ``add_data_search_dir`` and let the
+interface's own file finder resolve a run, rather than reaching past the view to inject a workspace -
+what is being tested is the path a user takes.
+
+**Do not create a ``QApplication`` at module scope.** The base class creates one lazily in ``setUp``
+via ``ensure_qapp()``. Settings are isolated per test into a temporary ini file, so a test can never
+read or write the real one.
+
+**The base class must stay uncollected.** ``unittest``'s loader picks up every ``TestCase`` subclass
+visible in a module, imported ones included, and falls back to a ``runTest`` method when a class has
+no ``test_*`` methods. ``AutomatedUITestBase`` therefore defines neither. Keep it that way, and give
+any per-interface base class you add the same treatment.
+
+The helpers
+###########
+
+``qt_interaction_helpers`` holds free functions for driving widgets. They have no dependency on the
+harness, so an ordinary unit test can use them too. Each one exists because the obvious Qt call does
+something other than what a test wants - usually failing silently rather than loudly.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 70
+
+   * - Widget
+     - Helpers
+   * - Anything
+     - ``click``, ``process_events``, ``wait_until``, ``top_level_widget_names`` - ``click``
+       aims at the dependable hot-spot for the widget's kind, which for a check box or a radio
+       button is the *indicator* rather than the label
+   * - ``QCheckBox``
+     - ``set_checkbox`` - reach a known state without knowing the current one
+   * - ``QRadioButton``
+     - ``select_radio``, ``radio_buttons`` - by label, from a widget or a ``QButtonGroup``
+   * - ``QGroupBox`` (checkable)
+     - ``set_group_box``
+   * - ``QComboBox``
+     - ``combo_items``, ``select_combo``
+   * - ``QLineEdit``
+     - ``set_line_edit`` - replays keystrokes, so ``editingFinished`` fires and any validator applies
+   * - ``QSpinBox`` / ``QDoubleSpinBox``
+     - ``set_spin_box`` - checks the value was not clamped away
+   * - ``QTabWidget``
+     - ``select_tab`` - by title, because indices move
+   * - ``QListWidget``
+     - ``list_items``, ``select_list_item``
+   * - ``QTableWidget``
+     - ``table_column``, ``cell_widget``, ``table_checkbox``, ``cell_button``, ``cell_combo``,
+       ``cell_line_edit``, ``cell_spin_box``, ``item_check_state``, ``set_item_checked``
+   * - ``QTableView`` / ``QTreeView`` / ``QListView``
+     - ``model_row_count``, ``model_column_count``, ``model_index``, ``model_cell``,
+       ``model_column``, ``index_check_state``, ``click_index``, ``double_click_index``,
+       ``edit_index``, ``select_index``, ``click_row_header``, ``click_column_header``,
+       ``tree_rows``
+   * - ``FileFinderWidget``
+     - ``set_finder_text``, ``wait_for_file_finder`` - both wait out the background search
+   * - matplotlib
+     - ``figure_numbers``, ``close_all_figures`` (pyplot-managed figures only)
+
+Two things are worth knowing before reaching for one of them.
+
+**The two table families are not interchangeable.** ``table_*`` works on a ``QTableWidget``, which
+owns its cells through ``item()`` and ``cellWidget()``. Anything backed by a ``QAbstractItemModel``
+- ``QTableView``, ``QTreeView``, ``QListView`` - has neither method, and needs the ``model_*`` and
+``*_index`` helpers instead. Several Mantid interfaces are model-backed, so check which kind of view
+you have before writing the assertion.
+
+**A click on an item view has to go to its viewport.** The view is only a frame; the cells are drawn
+by delegates inside ``view.viewport()``, so ``click(view)`` does nothing at all. ``click_index``
+handles this - and scrolls the index into sight first, because ``visualRect`` is an empty rectangle
+for a row that is not currently drawn, which would send the click to the top-left corner and select
+the wrong thing.
+
+A few widgets are best not driven with ``QTest`` at all. ``FunctionBrowser`` and
+``FitPropertyBrowser`` are Qt property browsers whose cells are nested editors; use their Python API
+(``setFunction``, ``getParameter``, ``loadFunction``) instead.
+
+Adding a new interface
+######################
+
+Create ``Testing/AutomatedUITests/<Interface>/`` with a ``CMakeLists.txt``:
+
+.. code-block:: cmake
+
+   set(TEST_NAMES MyInterfaceTest.py)
+
+   pyunittest_add_test_ui(${CMAKE_CURRENT_SOURCE_DIR} AutomatedUITest.MyInterface ${TEST_NAMES})
+
+and add ``add_subdirectory(<Interface>)`` to ``Testing/AutomatedUITests/CMakeLists.txt``. The parent
+directory puts the shared harness on ``PYTHONPATH``, sets the Qt API and raises the test timeout, so
+nothing further is needed. Anything shared between the modules of one interface goes in a
+non-test module in that directory, next to them.

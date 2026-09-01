@@ -187,6 +187,7 @@ Testing
    Gatekeeping
    WritingPerformanceTests
    SystemTests
+   AutomatedUITests
    DataFilesForTesting
    TestingUtilities
    RunningSanitizers
@@ -212,6 +213,9 @@ Testing
 
 :doc:`SystemTests`
    Guidance on working with the system tests.
+
+:doc:`AutomatedUITests`
+   Guidance on working with the automated UI tests, which drive a real Qt interface.
 
 :doc:`DataFilesForTesting`
    How to work with test data files in the mantid repository.

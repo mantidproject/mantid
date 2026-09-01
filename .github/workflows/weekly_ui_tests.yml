@@ -1,0 +1,176 @@
+name: Weekly Automated UI Tests
+
+# The automated UI tests drive real Qt interfaces (see dev-docs/source/AutomatedUITests.rst).
+# They are slow and GUI-driven, so they are kept out of the pull request and nightly pipelines
+# entirely and run here instead, once a week, purely to report what they found.
+#
+# Three separate things keep this off the critical path, and all three have to stay true:
+#   * there is no `pull_request` trigger, so this never runs against a PR;
+#   * the tests carry the AutomatedUITest CTest label, which neither `ctest -L UnitTest` in the
+#     pull request build nor runSystemTests.py in the nightly selects;
+#   * the test step is continue-on-error, and a separate job publishes results rather than gating
+#     on them.
+# This workflow must not be added to the repository's required status checks.
+
+on:
+  schedule:
+    # 02:00 UTC on Sundays
+    - cron: '0 2 * * 0'
+
+  workflow_dispatch:
+    inputs:
+      RUNNER_LABEL:
+        description: 'Match Runner Label'
+        required: false
+        type: string
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  automated-ui-tests:
+    # scheduled runs on a fork would only queue against runners that do not exist there
+    if: ${{ github.repository_owner == 'mantidproject' }}
+    permissions:
+      contents: read
+
+    strategy:
+      # a failure on one platform must not cancel the others - the point of the run is the
+      # comparison between them
+      fail-fast: false
+      matrix:
+        include:
+          - os: Linux
+            cmake_preset: linux-64-ci
+          - os: Windows
+            cmake_preset: win-64-ci
+          # macOS is missing because there is no self-hosted macOS GitHub Actions runner; osx-arm64
+          # exists only as a Jenkins agent. Add an {os: macOS, cmake_preset: osx-arm64-ci} entry here
+          # once one is available.
+
+    runs-on:
+      - ${{ (inputs.RUNNER_LABEL == '' && 'self-hosted') || inputs.RUNNER_LABEL }}
+      - self-hosted
+      - ${{ matrix.os }}
+      - X64
+
+    defaults:
+      run:
+        shell: bash
+
+    env:
+      CMAKE_PRESET: ${{ matrix.cmake_preset }}
+      EXTRA_CMAKE_FLAGS: "-DENABLE_PRECOMMIT=OFF"
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # Needed to fetch the tags for versioningit
+          fetch-depth: 100
+          fetch-tags: true
+          # nothing here pushes, and the checkout is reused by long build and test steps on a
+          # self-hosted runner - do not leave the job token in the checkout's git config
+          persist-credentials: false
+
+      - name: Install pixi
+        uses: ./.github/actions/setup-pixi
+
+      - name: Clean build tree
+        run: ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/clean-builder ${GITHUB_WORKSPACE}
+
+      # JOB_NAME is deliberately left unset: it is what tells the Jenkins scripts to configure with
+      # -DPR_JOB=True and to exclude the slower tests, and neither applies to a weekly run.
+      - name: Build code
+        run: |
+          cd ${GITHUB_WORKSPACE}
+          echo "::add-matcher::.github/matchers/gcc.json"
+          # DOCS DEV_DOCS BUILD_CODE UNIT_TESTS SYSTEM_TESTS DOC_TESTS
+          # UNIT_TESTS and SYSTEM_TESTS are true only to build the AllTests, StandardTestData and
+          # SystemTestData targets, which is what the UI tests need. Neither suite is run below.
+          pixi run --frozen bash -ex ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/build ${GITHUB_WORKSPACE} $CMAKE_PRESET false false true true true false $EXTRA_CMAKE_FLAGS
+          echo "::remove-matcher owner=gcc-problem-matcher::"
+
+      - name: Run automated UI tests
+        id: testui
+        # reporting only - a failing UI test must never fail this job
+        continue-on-error: true
+        run: |
+          cd ${GITHUB_WORKSPACE}
+          if [[ "${{ matrix.os }}" == "Linux" ]]; then
+            BUILD_THREADS="$(grep -c ^processor /proc/cpuinfo)"
+          else
+            BUILD_THREADS=4
+          fi
+          # bool flags for this are
+          # SYSTEM_TESTS UNIT_TESTS DOCS DOC_TESTS <threads> UI_TESTS
+          pixi run --frozen bash -ex ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/run-tests ${GITHUB_WORKSPACE} false false false false ${BUILD_THREADS} true
+
+      - name: Archive automated UI test output
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: junit-automated-ui-${{ matrix.os }}
+          if-no-files-found: warn
+          path: ${{ github.workspace }}/build/Testing/junit-uitest.xml
+
+      - name: Upload build and test log artifacts
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: test_logs_${{ matrix.os }}
+          if-no-files-found: ignore
+          path: ${{ github.workspace }}/build/test_logs/**
+
+      - name: Summarise
+        if: always()
+        run: |
+          if [[ "${{ steps.testui.outcome }}" == "success" ]]; then
+            echo ":white_check_mark: Automated UI tests passed on ${{ matrix.os }}." >> $GITHUB_STEP_SUMMARY
+          else
+            echo ":warning: Automated UI tests reported failures on ${{ matrix.os }}. See the \`junit-automated-ui-${{ matrix.os }}\` artifact." >> $GITHUB_STEP_SUMMARY
+          fi
+
+  publish-results:
+    # Separate from the test job, and GitHub-hosted, because the publish action is a Docker
+    # container action: the self-hosted builders above are not guaranteed to have a usable Docker
+    # daemon, and a report-only workflow must not go red over that. This is the same split
+    # publish_test_results.yml already uses - the results come from the uploaded JUnit artifacts
+    # rather than from a build tree, so one Linux runner can report both platforms.
+    needs: automated-ui-tests
+    if: ${{ always() && github.repository_owner == 'mantidproject' }}
+    runs-on: ubuntu-latest
+    permissions:
+      checks: write
+
+    steps:
+      - name: Download JUnit results
+        uses: actions/download-artifact@v8
+        # nothing to publish is a normal outcome here, e.g. if every build failed
+        continue-on-error: true
+        with:
+          pattern: junit-automated-ui-*
+          path: artifacts
+
+      - name: Publish results (Linux)
+        uses: EnricoMi/publish-unit-test-result-action/linux@v2
+        if: ${{ hashFiles('artifacts/junit-automated-ui-Linux/junit-uitest.xml') != '' }}
+        with:
+          check_name: "Automated UI test results (Linux)"
+          check_run_annotations: skipped tests
+          comment_mode: "off"
+          files: artifacts/junit-automated-ui-Linux/junit-uitest.xml
+          # a failing UI test is something to look at on Monday, not a broken workflow
+          action_fail: false
+          action_fail_on_inconclusive: false
+
+      - name: Publish results (Windows)
+        uses: EnricoMi/publish-unit-test-result-action/linux@v2
+        if: ${{ hashFiles('artifacts/junit-automated-ui-Windows/junit-uitest.xml') != '' }}
+        with:
+          check_name: "Automated UI test results (Windows)"
+          check_run_annotations: skipped tests
+          comment_mode: "off"
+          files: artifacts/junit-automated-ui-Windows/junit-uitest.xml
+          action_fail: false
+          action_fail_on_inconclusive: false
