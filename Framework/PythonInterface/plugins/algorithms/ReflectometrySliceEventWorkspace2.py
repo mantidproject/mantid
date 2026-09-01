@@ -52,7 +52,9 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
             doc="The name of the input monitor workspace or group of monitor workspaces.",
         )
         self.declareProperty("OutputWorkspaceName", "", direction=Direction.Output, doc="(Base)Name for the output workspace(s).")
-        self.declareProperty("UseNewFilterAlgorithm", True, doc="If true, use the new FilterEvents algorithm instead of FilterByTime.")
+        self.declareProperty(
+            "FilterByLogValue", False, doc="If true, filter events via the FilterByLogValue algorithm. Uses FilterEvents otherwise."
+        )
 
     def validateInputs(self):
         issues = {}
@@ -70,12 +72,10 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
         if input_ws.isGroup():
             return self._validate_group_inputs(input_ws, monitor_ws, issues)
         if monitor_ws.isGroup():
-            issues["MonitorWorkspaceName"] = "Monitor and Input workspace groups must be the same size."
+            issues["MonitorWorkspaceName"] = "A monitor workspace group may only be provided alongside an eqivalent input workspace group."
         return self._validate_single_workspace(input_ws, issues)
 
     def _validate_single_workspace(self, workspace, issues):
-        if not workspace:
-            return issues
         if workspace.run().getProtonCharge() < 1e-9:
             issues["InputWorkspaceName"] = "Cannot slice workspace with zero proton charge"
         return issues
@@ -96,7 +96,6 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
             if not input_monitor_ws.isGroup():
                 input_monitor_ws = [input_monitor_ws] * len(input_ws)
             sliced_workspaces = []
-            # do something else with it
             for i, (input_ws, monitor_ws) in enumerate(zip(input_ws, input_monitor_ws)):
                 self._output_ws_group_name = f"{input_ws.name()}_{monitor_ws.name()}_{output_ws_base_name}"
                 output_ws_group, monitor_ws_group = self._exec_single_workspace(input_ws, monitor_ws, output_workspace_suffix=f"_{i}")
@@ -127,16 +126,14 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
         return f"{output_base_name}_{slice_range}"
 
     def _slice_input_workspace(self, input_ws, output_suffix):
-        if self.getProperty("UseNewFilterAlgorithm").value:
-            return self._slice_input_workspace_with_filter_events(input_ws, output_suffix)
-        elif self._slice_by_log():
+        if self._slice_by_log():
             return self._slice_input_workspace_with_filter_by_log_value(input_ws, output_suffix)
         else:
-            return self._slice_input_workspace_with_filter_by_time(input_ws, output_suffix)
+            return self._slice_input_workspace_with_filter_events(input_ws, output_suffix)
 
     def _slice_by_log(self):
         """Return true if we are slicing by log value"""
-        return self._property_set("LogName")
+        return self._property_set("LogName") and self.getProperty("FilterByLogValue").value
 
     def _property_set(self, property_name):
         """Return true if the given property is set"""
@@ -181,44 +178,6 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
         _split_ws = alg.getProperty("OutputWorkspace").value
         _info_ws = alg.getProperty("InformationWorkspace").value
         return _split_ws, _info_ws
-
-    def _slice_input_workspace_with_filter_by_time(self, input_ws, output_suffix=""):
-        # Get the start/stop times, or use the run start/stop times if they are not provided
-        run_start = DateAndTime(input_ws.run().startTime())
-        run_stop = DateAndTime(input_ws.run().endTime())
-        start_time = self._get_property_or_default_as_datetime("StartTime", default_value=run_start, relative_start=run_start)
-        stop_time = self._get_property_or_default_as_datetime("StopTime", default_value=run_stop, relative_start=run_start)
-        # Get the time interval, or use the total interval if it's not provided
-        total_interval = (stop_time - start_time).total_seconds()
-        time_interval = self._get_interval_as_float("TimeInterval", total_interval)
-        # Calculate start/stop times in seconds relative to the start of the run
-        relative_start_time = (start_time - run_start).total_seconds()
-        relative_stop_time = relative_start_time + total_interval
-        # Loop through each slice
-        slice_names = list()
-        slice_start_time = relative_start_time
-        while slice_start_time < relative_stop_time:
-            slice_stop_time = slice_start_time + time_interval
-            slice_name = self._output_ws_group_name + "_" + str(slice_start_time) + "_" + str(slice_stop_time)
-            slice_names.append(slice_name)
-            alg = self.createChildAlgorithm("FilterByTime")
-            alg.setProperty("InputWorkspace", input_ws)
-            alg.setProperty("OutputWorkspace", slice_name)
-            alg.setProperty("StartTime", str(slice_start_time))
-            alg.setProperty("StopTime", str(slice_stop_time))
-            alg.execute()
-            sliced_workspace = alg.getProperty("OutputWorkspace").value
-            mtd.addOrReplace(slice_name, sliced_workspace)
-            # Proceed to the next interval
-            slice_start_time = slice_stop_time
-        # Group the sliced workspaces
-        group = self._group_workspaces(slice_names)
-        mtd.addOrReplace(self._output_ws_group_name + output_suffix, group)
-        # Ensure the run number for the child workspaces is stored in the
-        # sample logs as a string (FilterEvents converts it to a double).
-        for ws in group:
-            self._copy_run_number_to_sample_log(ws, ws)
-        return group
 
     def _slice_input_workspace_with_filter_by_log_value(self, input_ws, output_suffix=""):
         # Get the min/max log value, or use the values from the sample logs if they're not provided
@@ -367,7 +326,7 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
         value_as_string = self.getPropertyValue(property_name)
         value_as_list = value_as_string.split(",")
         if len(value_as_list) > 1:
-            raise RuntimeError("Multiple intervals are not currently supported if UseNewFilterAlgorithm is False")
+            raise RuntimeError("Multiple intervals are not supported if using FilterByLogValue.")
         if len(value_as_list) < 1:
             raise RuntimeError("Interval was not specified")
         return float(value_as_list[0])
