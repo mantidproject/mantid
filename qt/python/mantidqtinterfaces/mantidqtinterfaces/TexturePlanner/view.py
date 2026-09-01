@@ -70,7 +70,10 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
     # algorithm worker thread) to hop back onto the GUI thread before touching workspaces/plots
     sig_material_set = QtCore.Signal()
 
-    def __init__(self, parent=None, presenter=None):
+    def __init__(self, parent=None, presenter=None, register_usage: bool = True):
+        """:param register_usage: whether to count this window as a use of the interface. False for
+        the throwaway copy the tutorial drives, which is Mantid opening the interface rather than
+        the user, and would otherwise double every real launch in the usage figures."""
         super().__init__(parent)
         self.setupUi(self)
         self.presenter = presenter
@@ -160,7 +163,8 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         self._setup_settings_toolbar()
 
         # register startup
-        UsageService.registerFeatureUsage(FeatureType.Interface, "TexturePlanner", False)
+        if register_usage:
+            UsageService.registerFeatureUsage(FeatureType.Interface, "TexturePlanner", False)
 
     def _setup_settings_toolbar(self) -> None:
         toolbar = QToolBar("Main Toolbar", self)
