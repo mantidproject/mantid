@@ -1,0 +1,2 @@
+- A new property `CheckMantidVersion.NotifyUpdateOnStartup` has been added to the Mantid.properties file.
+- This property introduces a more persuasive prompt on the startup to update mantid workbench. This feature is disabled by default, and can be enabled by setting with one value out from `1`, `On`, `true`, `True` in your Mantid.properties file.
