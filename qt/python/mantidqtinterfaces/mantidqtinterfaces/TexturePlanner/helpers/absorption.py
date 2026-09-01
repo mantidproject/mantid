@@ -41,7 +41,7 @@ class AbsorptionCalculator:
     def calc_for_index(self, index: int) -> None:
         wsm = self._model.workspaces
         # create a workspace to run the absorption calculation on
-        mc_ws = self._create_mc_ws(wsm)
+        mc_ws = self._create_mc_ws()
 
         # extract goniometer for run index
         R = self._model.orientations[index].R
@@ -60,9 +60,15 @@ class AbsorptionCalculator:
             transmission = [0] * len(self._model.geometry.spec_inds)
         self._model.orientations.set_transmission_at_index(transmission, index)
 
-    @staticmethod
-    def _create_mc_ws(wsm: WorkspaceManager) -> MatrixWorkspace:
-        mc_ws = ConvertUnits(InputWorkspace=wsm.wsname, Target="Wavelength", OutputWorkspace=wsm.WS_MC_INPUT)
+    def _create_mc_ws(self) -> MatrixWorkspace:
+        wsm = self._model.workspaces
+        # create a ws with params binned around the evaluation point
+        src_ws = wsm.create_simulation_workspace(
+            wsm.WS_MC_INPUT,
+            unit=wsm.attenuation_kwargs["unit"],
+            bin_params=wsm.create_bin_params_around_point(wsm.attenuation_kwargs["point"]),
+        )
+        mc_ws = ConvertUnits(InputWorkspace=src_ws, Target="Wavelength", OutputWorkspace=wsm.WS_MC_INPUT)
         mc_ws.run().getGoniometer().setR(np.eye(3))
         return mc_ws
 

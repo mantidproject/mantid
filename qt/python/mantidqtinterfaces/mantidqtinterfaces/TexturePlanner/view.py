@@ -4,11 +4,23 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from qtpy.QtWidgets import QMainWindow, QHeaderView, QTableWidgetItem, QCheckBox, QWidget, QHBoxLayout, QPushButton, QToolBar, QGroupBox
+from qtpy.QtWidgets import (
+    QMainWindow,
+    QHeaderView,
+    QTableWidgetItem,
+    QCheckBox,
+    QWidget,
+    QHBoxLayout,
+    QPushButton,
+    QToolBar,
+    QGroupBox,
+    QLineEdit,
+)
 from qtpy import QtCore
 from qtpy.QtGui import QCloseEvent
 from mantidqt.utils.qt import load_ui
 from mantidqt.icons import get_icon
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.direction_fields import autosize_direction_fields
 from mantid.kernel import FeatureType
 from mantid import UsageService
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -17,7 +29,7 @@ from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 from qtpy.QtWidgets import QVBoxLayout
 from functools import partial
-from typing import Callable, List, Tuple
+from typing import Callable, List, Sequence
 
 Ui_texplan, _ = load_ui(__file__, "texture_planner.ui")
 
@@ -105,6 +117,19 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         self.gonio_senses = (self.cmbSense0, self.cmbSense1, self.cmbSense2, self.cmbSense3, self.cmbSense4, self.cmbSense5)
         self.gonio_vecs = (self.edtVec0, self.edtVec1, self.edtVec2, self.edtVec3, self.edtVec4, self.edtVec5)
         self.init_angles = (self.spnInitX, self.spnInitY, self.spnInitZ)
+        self.direction_fields = (
+            self.lineedit_RD0,
+            self.lineedit_RD1,
+            self.lineedit_RD2,
+            self.lineedit_ND0,
+            self.lineedit_ND1,
+            self.lineedit_ND2,
+            self.lineedit_TD0,
+            self.lineedit_TD1,
+            self.lineedit_TD2,
+        )
+        # the sample-frame values are held to full precision, so a fixed narrow box would hide them
+        autosize_direction_fields(self.direction_fields)
 
         self._setup_pf_plot()
         self._setup_lab_plot()
@@ -228,6 +253,15 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         )
         self.chkTransmission.setToolTip(
             "Show estimated transmission values per virtual detector (Monte Carlo) instead of pole figure coverage."
+        )
+
+        self.chkTransformDirs.setToolTip(
+            "Apply Orientation to the provided Sample Direction Vectors (useful if the shape is misaligned in the beam)"
+        )
+
+        self.chkLabDirs.setToolTip(
+            "View the Sample Texture Directions in terms of the Lab Reference Frame "
+            "(currently they can only be updated in terms of the Sample Reference Frame)"
         )
 
         # Orientation table
@@ -358,6 +392,12 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
     def set_on_show_transmission_toggled(self, slot: Callable) -> None:
         self.chkTransmission.toggled.connect(slot)
 
+    def set_on_transform_dirs_toggled(self, slot: Callable) -> None:
+        self.chkTransformDirs.toggled.connect(slot)
+
+    def set_on_lab_dirs_toggled(self, slot: Callable) -> None:
+        self.chkLabDirs.toggled.connect(slot)
+
     def set_on_init_x_changed(self, slot: Callable) -> None:
         self.spnInitX.valueChanged.connect(slot)
 
@@ -487,6 +527,12 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
     def get_show_transmission(self) -> bool:
         return self.chkTransmission.isChecked()
 
+    def get_transform_dirs(self) -> bool:
+        return self.chkTransformDirs.isChecked()
+
+    def get_lab_dirs(self) -> bool:
+        return self.chkLabDirs.isChecked()
+
     def get_init_x(self) -> float:
         return self.spnInitX.value()
 
@@ -522,20 +568,24 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
     def set_td_name(self, text: str) -> None:
         self.lineedit_TD.setText(text)
 
-    def set_rd_dir(self, vec: Tuple[int | float, int | float, int | float]) -> None:
-        self.lineedit_RD0.setText(str(vec[0]))
-        self.lineedit_RD1.setText(str(vec[1]))
-        self.lineedit_RD2.setText(str(vec[2]))
+    def _set_dir_fields(self, fields: Sequence[QLineEdit], vec: Sequence[int | float]) -> None:
+        """Populate one direction row.
 
-    def set_td_dir(self, vec: Tuple[int | float, int | float, int | float]) -> None:
-        self.lineedit_TD0.setText(str(vec[0]))
-        self.lineedit_TD1.setText(str(vec[1]))
-        self.lineedit_TD2.setText(str(vec[2]))
+        The lab-frame values are derived and shown read-only, so they are rounded for legibility.
+        The sample-frame values are editable and are read straight back into the model on Update,
+        so they must keep their full precision - rounding them would quietly rewrite the frame the
+        user entered."""
+        for field, component in zip(fields, vec):
+            field.setText(str(round(component, 2) if self.get_lab_dirs() else component))
 
-    def set_nd_dir(self, vec: Tuple[int | float, int | float, int | float]) -> None:
-        self.lineedit_ND0.setText(str(vec[0]))
-        self.lineedit_ND1.setText(str(vec[1]))
-        self.lineedit_ND2.setText(str(vec[2]))
+    def set_rd_dir(self, vec: Sequence[int | float]) -> None:
+        self._set_dir_fields((self.lineedit_RD0, self.lineedit_RD1, self.lineedit_RD2), vec)
+
+    def set_td_dir(self, vec: Sequence[int | float]) -> None:
+        self._set_dir_fields((self.lineedit_TD0, self.lineedit_TD1, self.lineedit_TD2), vec)
+
+    def set_nd_dir(self, vec: Sequence[int | float]) -> None:
+        self._set_dir_fields((self.lineedit_ND0, self.lineedit_ND1, self.lineedit_ND2), vec)
 
     def set_max_ind(self, ind: int) -> None:
         self.spnIndex.setMaximum(ind)
@@ -583,6 +633,12 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
 
     def set_show_transmission(self, check: bool) -> None:
         self.chkTransmission.setChecked(check)
+
+    def set_transform_dirs(self, check: bool) -> None:
+        self.chkTransformDirs.setChecked(check)
+
+    def set_lab_dirs(self, check: bool) -> None:
+        self.chkLabDirs.setChecked(check)
 
     def _setup_pf_plot(self) -> None:
         self.pf_figure = Figure(layout="constrained")
@@ -778,6 +834,19 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
 
     def set_set_gauge_vol_enabled(self, enabled: bool) -> None:
         self.setGV.setEnabled(enabled)
+
+    def set_texture_directions_enabled(self, enabled: bool) -> None:
+        self.lineedit_RD0.setEnabled(enabled)
+        self.lineedit_RD1.setEnabled(enabled)
+        self.lineedit_RD2.setEnabled(enabled)
+
+        self.lineedit_TD0.setEnabled(enabled)
+        self.lineedit_TD1.setEnabled(enabled)
+        self.lineedit_TD2.setEnabled(enabled)
+
+        self.lineedit_ND0.setEnabled(enabled)
+        self.lineedit_ND1.setEnabled(enabled)
+        self.lineedit_ND2.setEnabled(enabled)
 
     def set_on_clear_gauge_volume_clicked(self, slot: Callable) -> None:
         self.clearGV.clicked.connect(slot)
