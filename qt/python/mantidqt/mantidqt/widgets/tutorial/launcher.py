@@ -18,13 +18,13 @@ makes starting a chapter partway through possible - the interface is rebuilt and
 than unwound.
 """
 
-from qtpy.QtCore import QObject, QSettings, Qt, Signal
-from qtpy.QtWidgets import QDialog, QDialogButtonBox, QLabel, QListWidget, QListWidgetItem, QVBoxLayout
+from qtpy.QtCore import QObject, QSettings, Signal
 
 from mantidqt.utils.qt.qsettings_change_aware import QSettingsChangeAware
 from mantidqt.widgets.tutorial.bubble import TutorialBubble
 from mantidqt.widgets.tutorial.overlay import TutorialOverlay
 from mantidqt.widgets.tutorial.player import TutorialPlayer
+from mantidqt.widgets.tutorial.shell import TutorialShell
 
 # tutorial preferences live beside the interfaces' own settings, under their own key, so an
 # interface's tutorial state is stored the same way as the rest of its state
@@ -73,43 +73,6 @@ def mark_seen(settings_key, settings=None):
 
 
 # ------------------------------------------------------------------------------------------------
-# chapter picker
-# ------------------------------------------------------------------------------------------------
-
-
-class ChapterPicker(QDialog):
-    """Lets the user choose where to start. Modal, because the tour behind it is about to be
-    rebuilt underneath whatever they pick."""
-
-    def __init__(self, chapters, parent=None, current=0):
-        super().__init__(parent)
-        self.setWindowTitle("Tutorial chapters")
-        self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
-        self.setModal(True)
-
-        self._list = QListWidget()
-        for chapter in chapters:
-            item = QListWidgetItem(chapter.name)
-            if chapter.description:
-                item.setToolTip(chapter.description)
-            self._list.addItem(item)
-        self._list.setCurrentRow(max(0, min(current, len(chapters) - 1)))
-        self._list.itemDoubleClicked.connect(lambda _item: self.accept())
-
-        buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
-        buttons.accepted.connect(self.accept)
-        buttons.rejected.connect(self.reject)
-
-        layout = QVBoxLayout(self)
-        layout.addWidget(QLabel("Start the tutorial from:"))
-        layout.addWidget(self._list)
-        layout.addWidget(buttons)
-
-    def chosen_chapter(self):
-        return self._list.currentRow()
-
-
-# ------------------------------------------------------------------------------------------------
 # the session
 # ------------------------------------------------------------------------------------------------
 
@@ -124,14 +87,16 @@ class TutorialSession(QObject):
 
     finished = Signal()
 
-    def __init__(self, sandbox_factory, chapters, parent=None, settings_key=None):
+    def __init__(self, sandbox_factory, chapters, parent=None, settings_key=None, title=""):
         super().__init__(parent)
         self._factory = sandbox_factory
         self._chapters = tuple(chapters)
         self._parent = parent
         self._settings_key = settings_key
+        self._title = title
 
         self._sandbox = None
+        self._shell = None
         self._overlay = None
         self._bubble = None
         self._player = None
@@ -149,7 +114,13 @@ class TutorialSession(QObject):
         return self._player
 
     @property
+    def shell(self):
+        """The tutorial window: the interface framed by the chapter tabs and navigation."""
+        return self._shell
+
+    @property
     def window(self):
+        """The interface being toured. Its window is the shell around it - see ``shell``."""
         return None if self._sandbox is None else self._sandbox.window
 
     def start(self, chapter_index=0):
@@ -158,14 +129,23 @@ class TutorialSession(QObject):
     # ------------------------------------------------------------------ building and tearing down
 
     def _build(self, chapter_index, fast_forward):
+        geometry = self._shell.geometry() if self._shell is not None else None
         self._tear_down_sandbox()
 
         self._sandbox = self._factory()
-        window = self._sandbox.window
-        window.show()
+        interface = self._sandbox.window
 
-        self._overlay = TutorialOverlay(window)
-        self._bubble = TutorialBubble(window)
+        # the shell takes the interface as a child, so it must be built before anything is shown -
+        # the overlay measures against an interface that is already in its final place
+        self._shell = TutorialShell(self._chapters, interface, parent=self._parent, title=self._title)
+        if geometry is not None:
+            # a chapter jump rebuilds everything; reusing the geometry keeps the window where the
+            # user put it instead of snapping back on every tab click
+            self._shell.setGeometry(geometry)
+        self._shell.show()
+
+        self._overlay = TutorialOverlay(interface)
+        self._bubble = TutorialBubble(interface)
         self._overlay.show()
         self._bubble.show()
         self._bubble.raise_()
@@ -173,17 +153,18 @@ class TutorialSession(QObject):
         self._player = TutorialPlayer(self._chapters, self._sandbox, self._overlay, self._bubble, parent=self)
         self._player.finished.connect(self._on_player_finished)
         self._player.step_failed.connect(self._on_step_failed)
+        self._player.step_changed.connect(self._on_step_changed)
+        self._player.busy_changed.connect(self._on_busy_changed)
 
-        self._bubble.next_requested.connect(self._player.next_step)
-        self._bubble.back_requested.connect(self._player.back_step)
-        self._bubble.pause_toggled.connect(self._player.set_paused)
-        self._bubble.chapters_requested.connect(self._choose_chapter)
-        self._bubble.close_requested.connect(self.close)
+        self._shell.next_requested.connect(self._player.next_step)
+        self._shell.back_requested.connect(self._player.back_step)
+        self._shell.chapter_selected.connect(self._on_chapter_selected)
+        self._shell.close_requested.connect(self.close)
 
-        # the user closing the sandbox window is the same as ending the tour: there would be
-        # nothing left to point at
-        window.destroyed.connect(self._on_window_destroyed)
+        # the user closing the tutorial window is the same as ending the tour
+        self._shell.destroyed.connect(self._on_window_destroyed)
 
+        self._shell.set_current_chapter(chapter_index)
         self._player.start(chapter_index, fast_forward=fast_forward)
 
     def _tear_down_sandbox(self):
@@ -198,26 +179,30 @@ class TutorialSession(QObject):
                 decoration.setParent(None)
                 decoration.deleteLater()
         self._overlay = self._bubble = None
+        if self._shell is not None:
+            shell, self._shell = self._shell, None
+            # stop listening to the shell being discarded before discarding it. Deletion is
+            # deferred, so on a chapter jump the old shell's ``destroyed`` would arrive *after* the
+            # replacement was built and would tear the whole session down again
+            try:
+                shell.destroyed.disconnect(self._on_window_destroyed)
+            except (RuntimeError, TypeError):
+                pass  # already disconnected, or the shell is gone
+            # hand the interface back before the shell goes, or destroying the shell would take its
+            # child with it and the closeEvent that cleans the interface up would never run
+            shell.release_interface()
+            shell.close()
+            shell.deleteLater()
         if self._sandbox is not None:
             sandbox, self._sandbox = self._sandbox, None
             sandbox.teardown()
 
     # ------------------------------------------------------------------ user actions
 
-    def _choose_chapter(self):
-        if self._player is not None:
-            self._player.set_paused(True)
-            self._bubble.set_paused(True)
-        picker = ChapterPicker(self._chapters, parent=self.window, current=self._player.position[0])
-        if picker.exec_() != QDialog.Accepted:
-            if self._player is not None:
-                self._player.set_paused(False)
-                self._bubble.set_paused(False)
-            return
-        chosen = picker.chosen_chapter()
+    def _on_chapter_selected(self, chapter_index):
         # always rebuilt, even going forwards: a chapter's steps assume the state the chapters
         # before it leave behind, and only a fresh run produces that reliably
-        self._build(chosen, fast_forward=chosen > 0)
+        self._build(chapter_index, fast_forward=chapter_index > 0)
 
     def close(self):
         """End the tour and close the interface it was touring."""
@@ -229,27 +214,44 @@ class TutorialSession(QObject):
 
     # ------------------------------------------------------------------ player callbacks
 
+    def _on_step_changed(self, chapter_index, step_index):
+        if self._shell is None:
+            return
+        chapter = self._chapters[chapter_index]
+        self._shell.show_position(chapter_index, step_index + 1, len(chapter))
+        self._shell.set_navigation_enabled(
+            back=not self._player.at_start(),
+            next_=True,
+        )
+
+    def _on_busy_changed(self, busy, message):
+        if self._shell is not None:
+            self._shell.set_busy(busy, message)
+
     def _on_player_finished(self):
         if self._bubble is not None:
             self._bubble.show_step(
-                "That is the end of the tutorial. Close this window to return to your own session — nothing done here has touched it.",
+                "That is the end of the tutorial. Close this window to return to your own session — nothing done here has touched it. "
+                "Use the tabs above to revisit a chapter.",
                 title="Finished",
             )
             self._bubble.place_beside(None)
-            self._bubble.set_navigation_enabled(back=True, next_=False)
         if self._overlay is not None:
             self._overlay.set_target(None)
+        if self._shell is not None:
+            self._shell.show_finished()
 
     def _on_step_failed(self, label, reason):
         self._failures.append((label, reason))
 
     def _on_window_destroyed(self, *_args):
         # the window has already gone, so there is nothing left to tear down but the bookkeeping
+        self._shell = None
         self._sandbox = None
         self.close()
 
 
-def run_tutorial(sandbox_factory, chapters, parent=None, settings_key=None, mark_as_seen=False):
+def run_tutorial(sandbox_factory, chapters, parent=None, settings_key=None, mark_as_seen=False, title=""):
     """Start a tutorial and return its session.
 
     :param sandbox_factory: called with no arguments; must return an object with a ``window``
@@ -261,12 +263,13 @@ def run_tutorial(sandbox_factory, chapters, parent=None, settings_key=None, mark
     :param settings_key: the interface's settings key, e.g. ``"TexturePlanner"``.
     :param mark_as_seen: record that the tutorial has now been offered. True when it appeared by
         itself on startup; False when the user asked for it, which should not change anything.
+    :param title: window title for the tutorial.
 
     Keep the returned session alive for as long as the tour runs - it owns the sandbox window, and
     letting it be collected would take the tour down with it.
     """
     if mark_as_seen and settings_key:
         mark_seen(settings_key)
-    session = TutorialSession(sandbox_factory, chapters, parent=parent, settings_key=settings_key)
+    session = TutorialSession(sandbox_factory, chapters, parent=parent, settings_key=settings_key, title=title)
     session.start()
     return session

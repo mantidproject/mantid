@@ -14,7 +14,7 @@ from qtpy.QtWidgets import QPushButton, QVBoxLayout, QWidget
 
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.widgets.tutorial import interaction
-from mantidqt.widgets.tutorial.launcher import ChapterPicker, TutorialSession, mark_seen, run_tutorial, should_show_on_startup
+from mantidqt.widgets.tutorial.launcher import TutorialSession, mark_seen, run_tutorial, should_show_on_startup
 from mantidqt.widgets.tutorial.step import TutorialChapter, TutorialStep
 
 
@@ -94,13 +94,13 @@ class TutorialSessionTest(unittest.TestCase):
             TutorialChapter(
                 name="Setup",
                 steps=[
-                    TutorialStep(text="first", action=record("load"), target=lambda s: s.button, dwell_ms=1, settle_ms=1),
-                    TutorialStep(text="second", action=record("material"), dwell_ms=1, settle_ms=1),
+                    TutorialStep(text="first", action=record("load"), target=lambda s: s.button, settle_ms=1),
+                    TutorialStep(text="second", action=record("material"), settle_ms=1),
                 ],
             ),
             TutorialChapter(
                 name="Results",
-                steps=[TutorialStep(text="third", action=record("plot"), dwell_ms=1, settle_ms=1)],
+                steps=[TutorialStep(text="third", action=record("plot"), settle_ms=1)],
             ),
         )
 
@@ -119,6 +119,25 @@ class TutorialSessionTest(unittest.TestCase):
             waited += 5
         return predicate()
 
+    def _wait_ready(self, session):
+        """Wait until the tour is showing a step and will accept navigation.
+
+        ``session.player`` is briefly None during a chapter jump, while the old interface has been
+        torn down and the new one not yet built, so this has to tolerate that rather than assume a
+        player is always there.
+        """
+        self.assertTrue(self._pump_until(lambda: session.player is not None and not session.player.is_busy))
+
+    def _play_to_the_end(self, session):
+        """Press Next until the tour finishes. Nothing advances on its own any more, so a test
+        that wants the end of the tour has to walk there like a user."""
+        for _ in range(60):
+            if not session.player.is_running:
+                return True
+            self._wait_ready(session)
+            session.shell.btn_next.click()
+        return not session.player.is_running
+
     def test_it_builds_and_shows_a_sandbox_rather_than_touching_anything_of_the_users(self):
         session = self._session()
         session.start()
@@ -131,7 +150,7 @@ class TutorialSessionTest(unittest.TestCase):
         session = self._session()
         session.start()
 
-        self.assertTrue(self._pump_until(lambda: not session.player.is_running))
+        self.assertTrue(self._play_to_the_end(session))
         self.assertEqual(self.performed, ["load", "material", "plot"])
         self.assertEqual(session.failures, [])
 
@@ -157,44 +176,87 @@ class TutorialSessionTest(unittest.TestCase):
         session = self._session()
         session.start(chapter_index=1)
 
-        self.assertTrue(self._pump_until(lambda: not session.player.is_running))
+        self._wait_ready(session)
         # the earlier chapter's actions still ran, so the chapter is played against the state it
         # expects rather than an empty interface
         self.assertEqual(self.performed, ["load", "material", "plot"])
 
-    def test_the_bubble_buttons_drive_the_player(self):
-        chapters = (
-            TutorialChapter(
-                name="Setup",
-                steps=[
-                    TutorialStep(text="first", dwell_ms=100000, settle_ms=1),
-                    TutorialStep(text="second", dwell_ms=100000, settle_ms=1),
-                ],
-            ),
-        )
-        session = self._session(chapters)
+    def test_the_shell_buttons_drive_the_player(self):
+        session = self._session()
         session.start()
-        self.assertTrue(self._pump_until(lambda: session.player.position == (0, 0)))
+        self._wait_ready(session)
 
-        session._bubble.btn_next.click()
+        session.shell.btn_next.click()
         self.assertTrue(self._pump_until(lambda: session.player.position == (0, 1)))
 
-        session._bubble.btn_pause.click()
-        interaction.process_events(3)
-        self.assertTrue(session.player.is_paused)
-
-        session._bubble.btn_back.click()
+        self._wait_ready(session)
+        session.shell.btn_back.click()
         interaction.process_events(3)
         self.assertEqual(session.player.position, (0, 0))
+
+    def test_the_shell_frames_the_interface_being_toured(self):
+        session = self._session()
+        session.start()
+
+        self.assertIs(session.window.parentWidget(), session.shell)
+        self.assertTrue(session.shell.isVisible())
+
+    def test_the_shell_tracks_which_step_the_tour_is_on(self):
+        from qtpy.QtWidgets import QLabel
+
+        session = self._session()
+        session.start()
+        self._wait_ready(session)
+
+        position = session.shell.findChild(QLabel, "tutorial_position")
+        self.assertEqual(position.text(), "Step 1 of 2")
+        self.assertFalse(session.shell.btn_back.isEnabled(), "there is nothing before the first step")
+
+        session.shell.btn_next.click()
+        self._wait_ready(session)
+        self.assertEqual(session.player.position, (0, 1))
+        self.assertEqual(position.text(), "Step 2 of 2")
+        self.assertTrue(session.shell.btn_back.isEnabled())
+
+    def test_choosing_a_chapter_tab_rebuilds_the_interface_and_jumps_to_it(self):
+        session = self._session()
+        session.start()
+        self._wait_ready(session)
+        self.assertEqual(len(self.built), 1)
+        first_sandbox = self.built[0]
+        self.performed.clear()
+
+        session.shell._tabs.setCurrentIndex(1)
+        self.assertTrue(self._pump_until(lambda: len(self.built) == 2))
+        self._wait_ready(session)
+
+        self.assertTrue(first_sandbox.torn_down, "the chapter jump should discard the old interface")
+        self.assertEqual(session.player.position, (1, 0))
+        # the earlier chapter's actions were replayed so the chapter starts from the right state
+        self.assertEqual(self.performed, ["load", "material", "plot"])
+
+    def test_a_chapter_jump_keeps_the_window_where_the_user_put_it(self):
+        session = self._session()
+        session.start()
+        self._wait_ready(session)
+        session.shell.resize(1000, 720)
+        interaction.process_events(3)
+        geometry = session.shell.geometry()
+
+        session.shell._tabs.setCurrentIndex(1)
+        self.assertTrue(self._pump_until(lambda: len(self.built) == 2))
+
+        self.assertEqual(session.shell.geometry(), geometry)
 
     def test_the_end_of_the_tour_says_the_users_session_was_untouched(self):
         session = self._session()
         session.start()
-        self.assertTrue(self._pump_until(lambda: not session.player.is_running))
+        self.assertTrue(self._play_to_the_end(session))
 
         interaction.process_events(3)
         text = session._bubble.findChild(QWidget, "tutorial_bubble_text").text()
         self.assertIn("has touched it", text)
+        self.assertFalse(session.shell.btn_next.isEnabled(), "there is nowhere left to go")
 
     def test_a_failing_step_is_collected_rather_than_ending_the_tour(self):
         def explode(_sandbox):
@@ -204,15 +266,15 @@ class TutorialSessionTest(unittest.TestCase):
             TutorialChapter(
                 name="Setup",
                 steps=[
-                    TutorialStep(text="broken", title="Broken", action=explode, dwell_ms=1, settle_ms=1),
-                    TutorialStep(text="fine", dwell_ms=1, settle_ms=1),
+                    TutorialStep(text="broken", title="Broken", action=explode, settle_ms=1),
+                    TutorialStep(text="fine", settle_ms=1),
                 ],
             ),
         )
         session = self._session(chapters)
         session.start()
 
-        self.assertTrue(self._pump_until(lambda: not session.player.is_running))
+        self.assertTrue(self._play_to_the_end(session))
         self.assertEqual(session.failures, [("Broken", "gone")])
 
     def _isolate_default_qsettings(self):
@@ -259,25 +321,6 @@ class TutorialSessionTest(unittest.TestCase):
         self.sessions.append(session)
 
         self.assertTrue(should_show_on_startup("TexturePlanner"))
-
-
-@start_qapplication
-class ChapterPickerTest(unittest.TestCase):
-    def setUp(self):
-        self.chapters = (
-            TutorialChapter(name="Setup", steps=[TutorialStep(text="a")], description="Load a sample"),
-            TutorialChapter(name="Results", steps=[TutorialStep(text="b")]),
-        )
-
-    def test_it_lists_every_chapter_and_starts_on_the_current_one(self):
-        picker = ChapterPicker(self.chapters, current=1)
-        self.addCleanup(picker.deleteLater)
-        self.assertEqual(picker.chosen_chapter(), 1)
-
-    def test_a_current_chapter_out_of_range_is_clamped_rather_than_crashing(self):
-        picker = ChapterPicker(self.chapters, current=99)
-        self.addCleanup(picker.deleteLater)
-        self.assertEqual(picker.chosen_chapter(), 1)
 
 
 if __name__ == "__main__":

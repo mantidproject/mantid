@@ -28,10 +28,6 @@ model as readily as its widgets.
 from dataclasses import dataclass, field
 from typing import Any, Callable, Optional, Sequence, Tuple
 
-# A step with no explicit dwell pauses for this long once its action has run and the spotlight has
-# moved. Long enough to read a sentence or two without the tour feeling stalled.
-DEFAULT_DWELL_MS = 2500
-
 # ``settle`` default. A step's action usually triggers a repaint, a replot or a queued signal, and
 # the spotlight is positioned from the target's geometry - so the geometry has to have caught up
 # before it is measured.
@@ -48,7 +44,6 @@ class TutorialStep:
     :param action: ``context -> None``, performed *before* the step is narrated, so the user reads
         the caption while looking at the result. Must not block: see ``await_``.
     :param title: short heading for the bubble. Falls back to the chapter name when empty.
-    :param dwell_ms: how long to hold this step before advancing while playing.
     :param settle_ms: how long to let the interface repaint after ``action`` before the target is
         measured and spotlighted.
     :param await_: ``context -> bool``, polled after ``action`` until it holds; the step is not
@@ -66,7 +61,6 @@ class TutorialStep:
     target: Optional[Callable[[Any], Any]] = None
     action: Optional[Callable[[Any], None]] = None
     title: str = ""
-    dwell_ms: int = DEFAULT_DWELL_MS
     settle_ms: int = DEFAULT_SETTLE_MS
     await_: Optional[Callable[[Any], bool]] = None
     await_timeout_s: float = 10.0
@@ -75,7 +69,7 @@ class TutorialStep:
     def __post_init__(self) -> None:
         if not self.text.strip():
             raise ValueError("a tutorial step must say something; 'text' is empty")
-        if self.dwell_ms < 0 or self.settle_ms < 0:
+        if self.settle_ms < 0:
             raise ValueError(f"'{self.label}' has a negative delay")
         if self.await_ is not None and self.await_timeout_s <= 0:
             raise ValueError(f"'{self.label}' waits on a predicate with a non-positive timeout")
