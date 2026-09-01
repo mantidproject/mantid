@@ -10,7 +10,7 @@
 
 namespace Mantid::MDAlgorithms {
 
-/** MDNormSCD : Generate MD normalization for single crystal diffraction
+/** MDNormDirectSC : Generate MD normalization for single crystal direct geometry inelastic
  */
 class MANTID_MDALGORITHMS_DLL MDNormDirectSC : public MDNormBase {
 public:

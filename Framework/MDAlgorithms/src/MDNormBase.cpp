@@ -191,7 +191,7 @@ void MDNormBase::findIntergratedDimensions(const std::vector<coord_t> &otherDimV
     for (size_t col = lastCol; col < ncm1; col++) // affine matrix, ignore last column
     {
       if (m_transformation[row][col] == 1.) {
-        double val = otherDimValues.at(col - 3);
+        double val = otherDimValues.at(col - lastCol);
         if (val > dimMax || val < dimMin) {
           skipNormalization = true;
         }
@@ -417,10 +417,10 @@ void MDNormBase::calculateNormContinuous(const std::vector<coord_t> &otherValues
     for (size_t n = 0; n < protonCharge.size(); n++) {
       chargeSum += protonCharge[n];
       if (chargeSum > CHARGEBINSIZE) {
-        size_t mid = static_cast<int>(floor(static_cast<double>(n - i0) / 2.));
+        size_t index = static_cast<int>(floor(static_cast<double>(n - i0) / 2.));
         skipIter = false;
         for (size_t gAx = 0; gAx < gonio.getNumberAxes(); gAx++) {
-          double logval = logs[gAx]->getSingleValue(protonTimes[mid]);
+          double logval = logs[gAx]->getSingleValue(protonTimes[index]);
           if (std::isnan(logval)) {
             skipIter = true;
             continue;
@@ -449,8 +449,8 @@ void MDNormBase::calculateNormContinuous(const std::vector<coord_t> &otherValues
 
 void MDNormBase::calculateNormInner(const API::SpectrumInfo &spectrumInfo, const std::vector<coord_t> &otherValues,
                                     const double protonCharge, const double protonChargeBkgd,
-                                    const Kernel::DblMatrix &Qtransform, const std::vector<double> lowValues,
-                                    const std::vector<double> highValues) {
+                                    const Kernel::DblMatrix &Qtransform, const std::vector<double> &lowValues,
+                                    const std::vector<double> &highValues) {
   // Mapping
   const auto ndets = static_cast<int64_t>(spectrumInfo.size());
   bool haveSA = false;
@@ -475,6 +475,14 @@ void MDNormBase::calculateNormInner(const API::SpectrumInfo &spectrumInfo, const
   }
 
   bool isMDNorm = !lowValues.empty();
+  if (isMDNorm) {
+    m_hmin = static_cast<coord_t>(m_hX[0]);
+    m_kmin = static_cast<coord_t>(m_kX[0]);
+    m_lmin = static_cast<coord_t>(m_lX[0]);
+    m_hmax = static_cast<coord_t>(m_hX.back());
+    m_kmax = static_cast<coord_t>(m_kX.back());
+    m_lmax = static_cast<coord_t>(m_lX.back());
+  }
 
   PRAGMA_OMP(parallel for if(thread_safe))
   for (int64_t i = 0; i < ndets; i++) {
@@ -518,10 +526,6 @@ void MDNormBase::calculateNormInner(const API::SpectrumInfo &spectrumInfo, const
       double solid_angle_factor = solidAngleWS->y(solidAngDetToIdx.find(detID)->second)[0];
       solid = solid_angle_factor * protonCharge;
       bkgdSolid = solid_angle_factor * protonChargeBkgd;
-    }
-
-    if (haveSA) {
-      solid = solidAngleWS->y(solidAngDetToIdx.find(detID)->second)[0] * protonCharge;
     }
 
     // -- calculate integrals for the intersection --
@@ -688,12 +692,6 @@ void MDNormBase::calculateIntersections(std::vector<std::array<double, 4>> &inte
       kfmin = std::sqrt(energyToK * (m_Ei - highvalue));
       kfmax = std::sqrt(energyToK * (m_Ei - lowvalue));
     }
-    m_hmin = static_cast<coord_t>(m_hX[0]);
-    m_kmin = static_cast<coord_t>(m_kX[0]);
-    m_lmin = static_cast<coord_t>(m_lX[0]);
-    m_hmax = static_cast<coord_t>(m_hX.back());
-    m_kmax = static_cast<coord_t>(m_kX.back());
-    m_lmax = static_cast<coord_t>(m_lX.back());
   } else {
     if (m_diffraction) {
       qin = qout = V3D(-sin(theta) * cos(phi), -sin(theta) * sin(phi), 1. - cos(theta));

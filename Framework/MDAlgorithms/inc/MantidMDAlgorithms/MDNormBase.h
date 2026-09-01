@@ -48,8 +48,8 @@ protected:
                                const Geometry::SymmetryOperation *so = nullptr);
   void calculateNormInner(const API::SpectrumInfo &spectrumInfo, const std::vector<coord_t> &otherValues,
                           const double protonCharge, const double protonChargeBkgd, const DblMatrix &Qtransform,
-                          const std::vector<double> lowValues = std::vector<double>(),
-                          const std::vector<double> highValues = std::vector<double>());
+                          const std::vector<double> &lowValues = std::vector<double>(),
+                          const std::vector<double> &highValues = std::vector<double>());
 
   void calcIntegralsForIntersections(const std::vector<double> &xValues, const API::MatrixWorkspace &integrFlux,
                                      size_t sp, std::vector<double> &yValues) const;
