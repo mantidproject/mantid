@@ -28,7 +28,7 @@ using namespace Mantid::PythonInterface::Converters;
 namespace {
 
 PyObject *convertWsToObj(const Workspace_sptr &ws) {
-  if (Mantid ::API::AnalysisDataService::Instance().doesExist(ws->getName())) {
+  if (Mantid::API::AnalysisDataService::Instance().doesExist(ws->getName())) {
     // Decay to weak ptr so the ADS manages lifetime
     using PtrT = std::weak_ptr<Workspace>;
     PtrT weak_ptr = ws;
