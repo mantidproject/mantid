@@ -32,10 +32,10 @@ from mantidqt.widgets.tutorial.step import walk
 from mantidqtinterfaces.TexturePlanner.tutorial.chapters import CHAPTERS
 from mantidqtinterfaces.TexturePlanner.tutorial.sandbox import TutorialSandbox
 
-# the tour dwells for seconds at a time so it can be read; played at that speed the test would take
-# minutes. Every delay is overridden to the minimum, which exercises the same steps in the same
-# order without the reading time.
-FAST = {"dwell_ms": 1, "settle_ms": 1}
+# the tour waits for the user at every step; a test drives it by pressing Next as fast as each
+# step becomes ready. The settle is cut to the minimum, which exercises the same steps in the same
+# order without the pauses that only exist to let a layout catch up on screen.
+FAST = {"settle_ms": 1}
 
 PLAY_TIMEOUT_MS = 300000
 
@@ -66,19 +66,13 @@ class RecordingBubble:
     def __init__(self):
         self.shown = []
 
-    def show_step(self, text, title="", chapter_name="", step_number=0, step_count=0):
-        self.shown.append((chapter_name, title, text))
+    def show_step(self, text, title=""):
+        self.shown.append((title, text))
 
     def show_waiting(self, message):
         pass
 
     def place_beside(self, _spotlight):
-        pass
-
-    def set_navigation_enabled(self, back=True, next_=True):
-        pass
-
-    def set_paused(self, paused):
         pass
 
 
@@ -131,6 +125,12 @@ class TutorialChaptersTest(unittest.TestCase):
         self.assertEqual(leaked, [], "the tutorial's workspaces must not outlive its window")
 
     def _play(self, chapters, chapter_index=0, fast_forward=False):
+        """Play from ``chapter_index`` to the end, pressing Next the way a user would.
+
+        Nothing advances on its own, so the test has to walk the tour. Each Next waits for the step
+        to be on screen first: the player ignores navigation while a step is still settling or
+        waiting on the interface, so clicking early would simply spin.
+        """
         player = TutorialPlayer(chapters, self.sandbox, self.overlay, self.bubble, parent=self.sandbox.window)
         player.step_failed.connect(lambda label, reason: self.failures.append((label, reason)))
         player.finished.connect(lambda: self.finished.append(True))
@@ -138,8 +138,11 @@ class TutorialChaptersTest(unittest.TestCase):
 
         waited = 0
         while not self.finished and waited < PLAY_TIMEOUT_MS:
-            QTest.qWait(10)
-            waited += 10
+            if player.is_busy:
+                QTest.qWait(10)
+                waited += 10
+                continue
+            player.next_step()
         self.assertTrue(self.finished, f"the tour did not finish within {PLAY_TIMEOUT_MS / 1000}s")
         return player
 
@@ -151,7 +154,7 @@ class TutorialChaptersTest(unittest.TestCase):
             with self.subTest(chapter=chapter.name):
                 self.failures = []
                 self.finished = []
-                # rebuilt for each chapter, exactly as the chapter picker does it
+                # rebuilt for each chapter, exactly as choosing its tab does it
                 self._teardown_and_rebuild()
                 self._play(chapters, chapter_index=index, fast_forward=index > 0)
                 self.assertEqual(self.failures, [], f"steps failed in '{chapter.name}'")
@@ -201,7 +204,7 @@ class TutorialChaptersTest(unittest.TestCase):
         chapters = _hurried_chapters()
         self._play(chapters)
 
-        expected = [(chapter.name, step.title, step.text) for _c, _s, chapter, step in walk(chapters)]
+        expected = [(step.title, step.text) for _c, _s, _chapter, step in walk(chapters)]
         self.assertEqual(self.bubble.shown, expected)
 
 
