@@ -367,7 +367,7 @@ class SofQWMomentsScan(DataProcessorAlgorithm):
         self._data_files = self.getProperty("InputFiles").value
         self._sum_files = False
         self._load_logs = self.getProperty("LoadLogFiles").value
-        self._calibration_ws = self.getPropertyValue("CalibrationWorkspace")
+        self._calibration_ws = ""
 
         self._instrument_name = self.getPropertyValue("Instrument")
         self._analyser = self.getPropertyValue("Analyser")
