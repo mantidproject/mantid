@@ -539,8 +539,8 @@ std::vector<std::shared_ptr<HistogramData::HistogramX>> LoadRawHelper::getTimeCh
 
 bool LoadRawHelper::shouldRewriteOsirisSiliconSpectraMap(const std::string &instrumentID,
                                                          const DataObjects::Workspace2D_sptr &localWorkspace) const {
-  // Temporary OSIRIS silicon commissioning workaround: the current Si RAW files
-  // carry old UDET mappings, while the Si IDF uses spectra/detector IDs 1005-2564.
+  // OSIRIS silicon RAW files carry hardware UDET mappings. Replace these with the
+  // IDF spectra/detector mapping, which uses IDs 1005-2564.
   if (instrumentID != "OSIRIS" || !localWorkspace || localWorkspace->getNumberHistograms() == 0)
     return false;
 

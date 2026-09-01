@@ -250,8 +250,8 @@ void LoadRaw3::exec() {
       separateMonitors(file, period, monitorSpecList, localWorkspace, monitorWorkspace);
     }
 
-    // Re-update spectra etc. The OSIRIS silicon RAW commissioning data has an
-    // old UDET map, so keep the IDF spectra mapping loaded by LoadInstrument.
+    // Re-update spectra etc. OSIRIS silicon RAW files use hardware UDET mappings,
+    // so retain the IDF spectra mapping loaded by LoadInstrument.
     if (localWorkspace &&
         !shouldRewriteOsirisSiliconSpectraMap(localWorkspace->getInstrument()->getName(), localWorkspace))
       localWorkspace->updateSpectraUsing(detectorMapping);
