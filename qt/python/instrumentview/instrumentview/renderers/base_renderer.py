@@ -24,13 +24,6 @@ class InstrumentRenderer(ABC):
     # mistaken for either.
     _PICKED_HIGHLIGHT_COLOUR: ClassVar[str] = "magenta"
 
-    # Opacity transfer function for the pickable overlay, as [unpicked, picked].
-    # The picked entry is fully transparent: the magenta marker drawn by
-    # update_picked_highlight marks the selection instead, and a tinted fill on
-    # top of it only muddied the colour and hid the detector's counts.  The
-    # overlay actor itself is still needed — it is the pick target.
-    _PICKED_FILL_OPACITY: ClassVar[list[float]] = [0.0, 0.0]
-
     def __init__(self) -> None:
         super().__init__()
         self._mouse_move_observer_id = None
@@ -68,23 +61,6 @@ class InstrumentRenderer(ABC):
         """
 
     @abstractmethod
-    def build_pickable_mesh(self, positions: np.ndarray, flip_beam: bool) -> pv.PolyData:
-        """Build the mesh used for interactive picking / selection highlighting.
-
-        Parameters
-        ----------
-        positions : np.ndarray
-            (N, 3) detector centre positions.
-        flip_beam : bool
-            If True, mirror the projection along the beam axis, i.e. reflect the projection in the plane with the beam axis as its normal.
-
-        Returns
-        -------
-        pv.PolyData
-            The pickable mesh.
-        """
-
-    @abstractmethod
     def build_masked_mesh(self, positions: np.ndarray, flip_beam: bool, model) -> pv.PolyData:
         """Build the mesh for masked detectors.
 
@@ -107,11 +83,10 @@ class InstrumentRenderer(ABC):
     def add_detector_mesh_to_plotter(
         self, plotter: BackgroundPlotter, mesh: pv.PolyData, scalars: Optional[str] = None, show_scalar_bar: bool = True
     ) -> None:
-        """Add the detector mesh to the plotter with appropriate visual settings."""
+        """Add the detector mesh to the plotter with appropriate visual settings.
 
-    @abstractmethod
-    def add_pickable_mesh_to_plotter(self, plotter: BackgroundPlotter, mesh: pv.PolyData, scalars) -> None:
-        """Add the pickable overlay mesh to the plotter."""
+        This is also what clicks are picked against.
+        """
 
     @abstractmethod
     def add_masked_mesh_to_plotter(self, plotter: BackgroundPlotter, mesh: pv.PolyData) -> None:
@@ -145,20 +120,6 @@ class InstrumentRenderer(ABC):
             Scalar array name.
         """
 
-    @abstractmethod
-    def set_pickable_scalars(self, mesh: pv.PolyData, visibility: np.ndarray, label: str) -> None:
-        """Update the visibility/pick scalars on the pickable mesh.
-
-        Parameters
-        ----------
-        mesh : pv.PolyData
-            The pickable mesh.
-        visibility : np.ndarray
-            Per-detector visibility flags.
-        label : str
-            Scalar array name.
-        """
-
     # ------------------------------------------------------- picked highlight
     def create_picked_highlight_actor(self, plotter: BackgroundPlotter) -> None:
         """Create the (initially hidden) actor that marks picked detectors.
@@ -182,10 +143,10 @@ class InstrumentRenderer(ABC):
     def update_picked_highlight(self, plotter: BackgroundPlotter, mesh: Optional[pv.PolyData], visibility: np.ndarray) -> None:
         """Update the high-visibility marker to match the current selection.
 
-        The translucent fill driven by ``set_pickable_scalars`` scales with the
-        detector's size on screen, so it disappears when zoomed out on a large
-        instrument.  This marker is drawn in screen-space units instead (line
-        width / point size), so it stays legible at any zoom level.
+        This is the only thing that shows the selection.  It is drawn in
+        screen-space units (line width / point size) rather than by tinting the
+        detectors, which scales with their size on screen and so disappears
+        when zoomed out on a large instrument.
 
         Must be called on the Qt thread: it mutates VTK state and renders.  The
         persistent actor (see ``create_picked_highlight_actor``) keeps that
@@ -198,7 +159,7 @@ class InstrumentRenderer(ABC):
         plotter : BackgroundPlotter
             The PyVista plotter holding the current actors.
         mesh : pv.PolyData or None
-            The pickable mesh, already transformed into display coordinates.
+            The detector mesh, already transformed into display coordinates.
         visibility : np.ndarray
             Per-pickable-detector flags; non-zero entries are picked.
         """

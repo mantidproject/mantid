@@ -76,8 +76,6 @@ class ShapeRenderer(InstrumentRenderer):
         # Built during ``build_detector_mesh``:
         self._cell_to_detector: np.ndarray | None = None  # (total_cells,) → detector idx
         self._faces_per_detector: np.ndarray | None = None  # (N,)
-        # Reference to the most recently built detector surface mesh
-        self._detector_mesh_ref: pv.PolyData | None = None
         # Sorted detector-ID arrays for O(M log N) lookup in _resolve_detector_indices
         self._sorted_det_ids: np.ndarray | None = None  # sorted detector IDs
         self._sorted_det_info_indices: np.ndarray | None = None  # detectorInfo index for each sorted ID
@@ -92,9 +90,11 @@ class ShapeRenderer(InstrumentRenderer):
         self._outline_push: float = 0.0
         self._outline_push_camera = None
         self._outline_push_observer: tuple | None = None
-        # Detector indices behind the pickable mesh, in its own cell order, so
-        # the picked cells can be traced back to the shapes they were built from.
-        self._pickable_det_indices: np.ndarray | None = None
+        # The detector each entry of the mesh was built from, so a picked cell
+        # can be traced back to the shape it belongs to.  Left unset by the
+        # side-by-side renderer, where the outline needs no lift because the
+        # detectors are laid out flat with nothing in front of them.
+        self._mesh_det_indices: np.ndarray | None = None
 
     # -----------------------------------------------------------------
     # Pre-computation: fetch shape meshes and detector transforms once
@@ -217,24 +217,10 @@ class ShapeRenderer(InstrumentRenderer):
             projection=model.active_projection,
             flip_beam=flip_beam,
         )
-        self._pickable_det_indices = indices
+        self._mesh_det_indices = indices
         self._cell_to_detector = c2d
         self._faces_per_detector = fpd
-        self._detector_mesh_ref = mesh
         return mesh
-
-    def build_pickable_mesh(self, positions: np.ndarray, flip_beam: bool) -> pv.PolyData:
-        """Return a copy of the detector shape mesh for picking and highlighting.
-
-        Cell-based picking on this mesh lets the user click anywhere on
-        a detector's surface to select it, using ``_cell_to_detector``
-        to map the picked cell back to a detector index.
-        """
-        if self._detector_mesh_ref is not None and self._detector_mesh_ref.number_of_cells > 0:
-            return self._detector_mesh_ref.copy(deep=True)
-        if flip_beam:
-            positions = reflect_points_in_axis(positions, axis=self._beam_axis)
-        return pv.PolyData(positions)
 
     def build_masked_mesh(self, positions: np.ndarray, flip_beam: bool, model) -> pv.PolyData:
         if len(positions) == 0:
@@ -261,7 +247,7 @@ class ShapeRenderer(InstrumentRenderer):
         )
         plotter.add_mesh(
             mesh,
-            pickable=False,
+            pickable=True,
             scalars=scalars,
             show_edges=False,
             scalar_bar_args=scalar_bar_args,
@@ -270,25 +256,6 @@ class ShapeRenderer(InstrumentRenderer):
 
         if plotter.off_screen:
             return
-
-    def add_pickable_mesh_to_plotter(self, plotter: BackgroundPlotter, mesh: pv.PolyData, scalars) -> None:
-        if mesh.number_of_cells == 0:
-            return
-
-        actor = plotter.add_mesh(
-            mesh,
-            scalars=scalars,
-            opacity=self._PICKED_FILL_OPACITY,
-            clim=[0, 1],
-            show_scalar_bar=False,
-            pickable=True,
-            cmap="Oranges",
-            show_edges=False,
-        )
-        # Polygon offset so highlight renders in front of the detector surface
-        mapper = actor.mapper
-        mapper.SetResolveCoincidentTopologyToPolygonOffset()
-        mapper.SetResolveCoincidentTopologyPolygonOffsetParameters(-1, -1)
 
     def add_masked_mesh_to_plotter(self, plotter: BackgroundPlotter, mesh: pv.PolyData) -> None:
         if mesh.number_of_cells == 0:
@@ -382,9 +349,9 @@ class ShapeRenderer(InstrumentRenderer):
         largest, so that one outsized shape somewhere in the instrument does not
         set the lift for every detector in it.
         """
-        if self._pickable_det_indices is None or self._det_shape_keys is None or not self._shape_depths:
+        if self._mesh_det_indices is None or self._det_shape_keys is None or not self._shape_depths:
             return 0.0
-        det_indices = np.unique(self._pickable_det_indices[picked_detectors])
+        det_indices = np.unique(self._mesh_det_indices[picked_detectors])
         keys = np.unique(self._det_shape_keys[det_indices])
         depth = max(self._shape_depths.get(int(key), 0.0) for key in keys)
         scale = float(np.max(np.abs(self._det_scales[det_indices]))) if self._det_scales is not None else 1.0
@@ -561,13 +528,6 @@ class ShapeRenderer(InstrumentRenderer):
         else:
             # Fallback: try assigning directly
             mesh.cell_data[label] = counts
-
-    def set_pickable_scalars(self, mesh: pv.PolyData, visibility: np.ndarray, label: str) -> None:
-        if self._cell_to_detector is not None and len(visibility) > 0:
-            mesh.cell_data[label] = visibility[self._cell_to_detector]
-        else:
-            # No shape mesh available — fall back to point data
-            mesh.point_data[label] = visibility
 
     def _resolve_detector_indices(self, detector_ids: np.ndarray) -> np.ndarray:
         """Return indices into ``self._all_positions_3d`` for the detectors

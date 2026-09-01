@@ -288,15 +288,10 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._model._detector_ids = np.array([1, 2, 3])
         self._model.picked_detectors_info_text = MagicMock(return_value=["a", "a"])
         self._model.extract_spectra_for_line_plot = MagicMock()
-        self._presenter._pickable_mesh = MagicMock()
-        self._presenter._pickable_mesh.point_data = {}
-        self._presenter._renderer.set_pickable_scalars.side_effect = lambda m, visibility, label: m.point_data.update({label: visibility})
+        self._presenter._detector_mesh = MagicMock()
         self._mock_view.current_selected_lineplot_unit.return_value = "TOF"
         self._mock_view.sum_spectra_selected.return_value = True
         self._presenter.update_picked_detectors_on_view()
-        np.testing.assert_allclose(
-            self._presenter._pickable_mesh.point_data[self._presenter._visible_label], self._model._detector_is_picked
-        )
         self._mock_view.show_plot_for_detectors.assert_called_once_with(self._model.line_plot_workspace, self._model.lineplot_limits)
         self._mock_view.set_selected_detector_info.assert_called_once_with(["a", "a"])
         self._model.extract_spectra_for_line_plot.assert_called_once_with("TOF", True)
@@ -313,7 +308,6 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         renderer = self._presenter._renderer
         for expected in (
             renderer.add_detector_mesh_to_plotter,
-            renderer.add_pickable_mesh_to_plotter,
             renderer.add_masked_mesh_to_plotter,
             renderer.create_picked_highlight_actor,
             renderer.update_picked_highlight,
@@ -330,7 +324,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._model._detector_ids = np.array([1, 2, 3])
         self._model.picked_detectors_info_text = MagicMock(return_value=["a"])
         self._model.extract_spectra_for_line_plot = MagicMock()
-        self._presenter._pickable_mesh = MagicMock()
+        self._presenter._detector_mesh = MagicMock()
 
         self._presenter.update_picked_detectors_on_view()
 
@@ -338,7 +332,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         renderer.update_picked_highlight.assert_called_once()
         args = renderer.update_picked_highlight.call_args[0]
         self.assertIs(args[0], self._mock_view.main_plotter)
-        self.assertIs(args[1], self._presenter._pickable_mesh)
+        self.assertIs(args[1], self._presenter._detector_mesh)
         np.testing.assert_array_equal(args[2], self._model._detector_is_picked)
 
         # This path is reached from the callback worker thread, so the highlight update

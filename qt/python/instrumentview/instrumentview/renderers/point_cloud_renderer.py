@@ -22,7 +22,6 @@ class PointCloudRenderer(InstrumentRenderer):
     """
 
     _DETECTOR_POINT_SIZE = 15
-    _PICKABLE_POINT_SIZE = 30
     _MASKED_COLOUR = (0.25, 0.25, 0.25)
     _DEFAULT_PICKING_TOLERANCE = 0.01
     # Larger than _DETECTOR_POINT_SIZE so the picked detector reads as a bigger,
@@ -43,9 +42,6 @@ class PointCloudRenderer(InstrumentRenderer):
     def build_detector_mesh(self, positions: np.ndarray, flip_beam: bool, model=None) -> pv.PolyData:
         return pv.PolyData(positions)
 
-    def build_pickable_mesh(self, positions: np.ndarray, flip_beam: bool) -> pv.PolyData:
-        return pv.PolyData(positions)
-
     def build_masked_mesh(self, positions: np.ndarray, flip_beam: bool, model=None) -> pv.PolyData:
         return pv.PolyData(positions)
 
@@ -60,7 +56,7 @@ class PointCloudRenderer(InstrumentRenderer):
         )
         plotter.add_mesh(
             mesh,
-            pickable=False,
+            pickable=True,
             scalars=scalars,
             render_points_as_spheres=True,
             point_size=self._DETECTOR_POINT_SIZE,
@@ -70,19 +66,6 @@ class PointCloudRenderer(InstrumentRenderer):
 
         if plotter.off_screen:
             return
-
-    def add_pickable_mesh_to_plotter(self, plotter: BackgroundPlotter, mesh: pv.PolyData, scalars) -> None:
-        plotter.add_mesh(
-            mesh,
-            scalars=scalars,
-            opacity=self._PICKED_FILL_OPACITY,
-            clim=[0, 1],
-            show_scalar_bar=False,
-            pickable=True,
-            cmap="Oranges",
-            point_size=self._PICKABLE_POINT_SIZE,
-            render_points_as_spheres=True,
-        )
 
     def add_masked_mesh_to_plotter(self, plotter: BackgroundPlotter, mesh: pv.PolyData) -> None:
         if mesh.number_of_points == 0:
@@ -189,6 +172,3 @@ class PointCloudRenderer(InstrumentRenderer):
     # -------------------------------------------------------------- scalars
     def set_detector_scalars(self, mesh: pv.PolyData, counts: np.ndarray, label: str) -> None:
         mesh.point_data[label] = counts
-
-    def set_pickable_scalars(self, mesh: pv.PolyData, visibility: np.ndarray, label: str) -> None:
-        mesh.point_data[label] = visibility

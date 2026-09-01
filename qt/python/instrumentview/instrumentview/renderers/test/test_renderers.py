@@ -46,11 +46,6 @@ class TestPointCloudRenderer(unittest.TestCase):
         self.assertIsInstance(mesh, pv.PolyData)
         self.assertEqual(mesh.number_of_points, 3)
 
-    def test_build_pickable_mesh_returns_polydata(self):
-        mesh = self.renderer.build_pickable_mesh(self.positions, False)
-        self.assertIsInstance(mesh, pv.PolyData)
-        self.assertEqual(mesh.number_of_points, 3)
-
     def test_build_masked_mesh_returns_polydata(self):
         mesh = self.renderer.build_masked_mesh(self.positions, False)
         self.assertIsInstance(mesh, pv.PolyData)
@@ -62,12 +57,6 @@ class TestPointCloudRenderer(unittest.TestCase):
         self.renderer.set_detector_scalars(mesh, counts, "Counts")
         np.testing.assert_array_equal(mesh.point_data["Counts"], counts)
 
-    def test_set_pickable_scalars_sets_point_data(self):
-        mesh = self.renderer.build_pickable_mesh(self.positions, False)
-        vis = np.array([0, 1, 0])
-        self.renderer.set_pickable_scalars(mesh, vis, "Visible")
-        np.testing.assert_array_equal(mesh.point_data["Visible"], vis)
-
     def test_add_detector_mesh_to_plotter_calls_add_mesh(self):
         plotter = MagicMock()
         plotter.off_screen = True
@@ -78,16 +67,13 @@ class TestPointCloudRenderer(unittest.TestCase):
         self.assertTrue(call_kwargs["render_points_as_spheres"])
         self.assertEqual(call_kwargs["point_size"], 15)
 
-    def test_add_pickable_mesh_to_plotter_calls_add_mesh(self):
+    def test_detector_mesh_is_the_pick_target(self):
+        """There is no separate invisible overlay: VTK skips props of zero opacity."""
         plotter = MagicMock()
-        mesh = self.renderer.build_pickable_mesh(self.positions, False)
-        self.renderer.add_pickable_mesh_to_plotter(plotter, mesh, scalars="Vis")
-        plotter.add_mesh.assert_called_once()
-        call_kwargs = plotter.add_mesh.call_args[1]
-        self.assertTrue(call_kwargs["render_points_as_spheres"])
-        self.assertTrue(call_kwargs["pickable"])
-        # The overlay is a pick target only — the magenta marker shows the selection.
-        self.assertEqual(list(call_kwargs["opacity"]), [0.0, 0.0])
+        plotter.off_screen = True
+        mesh = self.renderer.build_detector_mesh(self.positions, False)
+        self.renderer.add_detector_mesh_to_plotter(plotter, mesh, scalars="Counts")
+        self.assertTrue(plotter.add_mesh.call_args[1]["pickable"])
 
     def test_add_masked_mesh_empty_does_not_add(self):
         plotter = MagicMock()
@@ -232,13 +218,13 @@ class TestPointCloudRenderer(unittest.TestCase):
 
     def test_update_picked_highlight_hides_actor_when_nothing_picked(self):
         plotter = self._build_highlight_plotter()
-        mesh = self.renderer.build_pickable_mesh(self.positions, False)
+        mesh = self.renderer.build_detector_mesh(self.positions, False)
         self.renderer.update_picked_highlight(plotter, mesh, np.array([0, 0, 0]))
         self.renderer._picked_highlight_actor.SetVisibility.assert_called_once_with(False)
 
     def test_update_picked_highlight_shows_halo_at_picked_points(self):
         plotter = self._build_highlight_plotter()
-        mesh = self.renderer.build_pickable_mesh(self.positions, False)
+        mesh = self.renderer.build_detector_mesh(self.positions, False)
         self.renderer.update_picked_highlight(plotter, mesh, np.array([0, 1, 1]))
 
         self.renderer._picked_highlight_actor.SetVisibility.assert_called_once_with(True)
@@ -247,7 +233,7 @@ class TestPointCloudRenderer(unittest.TestCase):
     def test_update_picked_highlight_reuses_the_same_actor(self):
         """Removing an actor releases graphics resources, which is not thread safe."""
         plotter = self._build_highlight_plotter()
-        mesh = self.renderer.build_pickable_mesh(self.positions, False)
+        mesh = self.renderer.build_detector_mesh(self.positions, False)
         actor = self.renderer._picked_highlight_actor
 
         self.renderer.update_picked_highlight(plotter, mesh, np.array([1, 0, 0]))
@@ -607,38 +593,18 @@ class TestShapeRenderer(unittest.TestCase):
         self.assertGreater(mesh.number_of_points, 0)
         self.assertGreater(mesh.number_of_cells, 0)
 
-    def test_build_pickable_mesh_returns_shape_copy(self):
-        """build_pickable_mesh should return a shape mesh copy (not a point cloud)
-        so that cell picking works on the full detector surface."""
-
+    def test_detector_mesh_is_the_pick_target(self):
+        """Cell picking runs on the detector surface itself."""
         model = self._create_mock_model(self._workspace, n_pickable=4)
         positions = np.array([[0, 0, 0], [1, 0, 0], [0, 1, 0], [1, 1, 0]], dtype=np.float64)
-        self.renderer.build_detector_mesh(positions, False, model)
+        mesh = self.renderer.build_detector_mesh(positions, False, model)
+        plotter = self._make_shape_mock_plotter()
 
-        pickable = self.renderer.build_pickable_mesh(positions, False)
-        self.assertIsInstance(pickable, pv.PolyData)
-        # Must have cells (shape faces), not just points
-        self.assertGreater(pickable.number_of_cells, 0)
-        # Same cell count as the detector mesh
-        self.assertEqual(pickable.number_of_cells, self.renderer._detector_mesh_ref.number_of_cells)
+        self.renderer.add_detector_mesh_to_plotter(plotter, mesh, scalars="Counts")
 
-    def test_set_pickable_scalars_sets_cell_data(self):
-        """Visibility should be set as cell data via _cell_to_detector."""
-        workspace = self._refresh_render_with_mock_workspace(n_detectors=2)
-
-        model = self._create_mock_model(workspace, n_pickable=2)
-        positions = np.array([[0, 0, 0], [1, 0, 0]], dtype=np.float64)
-        self.renderer.build_detector_mesh(positions, False, model)
-        pickable = self.renderer.build_pickable_mesh(positions, False)
-
-        vis = np.array([0, 1])
-        self.renderer.set_pickable_scalars(pickable, vis, "Visible")
-
-        cell_vis = pickable.cell_data["Visible"]
-        c2d = self.renderer._cell_to_detector
-        # Cells for detector 0 should have value 0, detector 1 should have value 1
-        for det_idx, expected in enumerate(vis):
-            np.testing.assert_array_equal(cell_vis[c2d == det_idx], expected)
+        self.assertTrue(plotter.add_mesh.call_args[1]["pickable"])
+        self.assertGreater(mesh.number_of_cells, 0)
+        self.assertEqual(len(self.renderer._cell_to_detector), mesh.number_of_cells)
 
     def test_cell_to_detector_mapping(self):
         """Verify that each cell in the assembled mesh maps to a valid detector index."""
@@ -698,31 +664,29 @@ class TestShapeRenderer(unittest.TestCase):
         # Shape renderer should NOT use render_points_as_spheres
         self.assertNotIn("render_points_as_spheres", call_kwargs)
 
-    def test_set_pickable_scalars_after_rebuild_with_fewer_detectors(self):
+    def test_set_detector_scalars_after_rebuild_with_fewer_detectors(self):
         """Rebuilding the detector mesh with fewer detectors should not cause
-        an array shape mismatch in set_pickable_scalars.
+        an array shape mismatch in set_detector_scalars.
+
+        The scalars are spread over cells through _cell_to_detector, so a map
+        left over from the larger mesh would produce an array too long for it.
         """
         workspace = self._refresh_render_with_mock_workspace(n_detectors=6, same_shape=True)
 
         # First render: 6 detectors
         model_6 = self._create_mock_model(workspace, n_pickable=6)
         positions_6 = np.array([[i, 0, 0] for i in range(6)], dtype=np.float64)
-        self.renderer.build_detector_mesh(positions_6, False, model_6)
-        pickable_6 = self.renderer.build_pickable_mesh(positions_6, False)
-        vis_6 = np.zeros(6)
-        self.renderer.set_pickable_scalars(pickable_6, vis_6, "Visible Picked")
+        mesh_6 = self.renderer.build_detector_mesh(positions_6, False, model_6)
+        self.renderer.set_detector_scalars(mesh_6, np.zeros(6), "Integrated Counts")
 
         # Second render: only 4 pickable detectors (e.g. 2 were masked)
         model_4 = self._create_mock_model(workspace, n_pickable=4)
         positions_4 = np.array([[i, 0, 0] for i in range(4)], dtype=np.float64)
-        self.renderer.build_detector_mesh(positions_4, False, model_4)
+        mesh_4 = self.renderer.build_detector_mesh(positions_4, False, model_4)
 
-        # build_pickable_mesh returns a shape copy matching the 4-detector mesh
-        pickable_4 = self.renderer.build_pickable_mesh(positions_4, False)
-        vis_4 = np.zeros(4)
         # This must not raise despite the mesh having fewer cells than before
-        self.renderer.set_pickable_scalars(pickable_4, vis_4, "Visible Picked")
-        self.assertEqual(len(pickable_4.cell_data["Visible Picked"]), pickable_4.number_of_cells)
+        self.renderer.set_detector_scalars(mesh_4, np.zeros(4), "Integrated Counts")
+        self.assertEqual(len(mesh_4.cell_data["Integrated Counts"]), mesh_4.number_of_cells)
 
     def test_build_detector_mesh_projects_shape_vertices_for_cylindrical_projection(self):
         workspace = self._refresh_render_with_mock_workspace(n_detectors=1)
@@ -772,34 +736,6 @@ class TestShapeRenderer(unittest.TestCase):
 
         x_span = float(np.max(mesh.points[:, 0]) - np.min(mesh.points[:, 0]))
         self.assertLess(x_span, 0.1)
-
-    def test_build_pickable_mesh_flip_beam_negates_z_in_point_cloud_fallback(self):
-        """When no detector mesh ref exists, build_pickable_mesh should negate
-        z-coordinates when flip_beam=True (falls back to a plain point cloud)."""
-        positions = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, -6.0]])
-        mesh = self.renderer.build_pickable_mesh(positions, flip_beam=True)
-        np.testing.assert_allclose(mesh.points[:, 2], [-3.0, 6.0])
-
-    def test_build_pickable_mesh_no_flip_beam_unchanged_in_point_cloud_fallback(self):
-        """When no detector mesh ref exists, z-coordinates should be unchanged
-        when flip_beam=False."""
-        positions = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, -6.0]])
-        mesh = self.renderer.build_pickable_mesh(positions, flip_beam=False)
-        np.testing.assert_allclose(mesh.points[:, 2], [3.0, -6.0])
-
-    def test_build_pickable_mesh_flip_beam_ignored_when_detector_mesh_ref_exists(self):
-        """When _detector_mesh_ref has been built, build_pickable_mesh should
-        return a shape mesh copy regardless of flip_beam — the flip is already
-        baked into the detector mesh vertices."""
-        workspace = self._refresh_render_with_mock_workspace(n_detectors=2)
-        model = self._create_mock_model(workspace, n_pickable=2)
-        positions = np.array([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0]], dtype=np.float64)
-        ref_mesh = self.renderer.build_detector_mesh(positions, False, model)
-
-        # flip_beam=True should still return the shape mesh copy (not a point cloud)
-        pickable = self.renderer.build_pickable_mesh(positions, flip_beam=True)
-        self.assertGreater(pickable.number_of_cells, 0)
-        self.assertEqual(pickable.number_of_cells, ref_mesh.number_of_cells)
 
     def test_build_detector_mesh_flip_beam_negates_world_z_before_projection(self):
         """In cylindrical projections, flip_beam=True must negate the world-space
@@ -883,21 +819,11 @@ class TestShapeRenderer(unittest.TestCase):
         np.testing.assert_allclose(z_flip, -z_no_flip)
 
     def _build_two_detector_mesh(self):
-        """Build a 2-detector mesh and return its pickable copy."""
+        """Build and return a 2-detector mesh."""
         workspace = self._refresh_render_with_mock_workspace(n_detectors=2)
         model = self._create_mock_model(workspace, n_pickable=2)
         positions = np.array([[0, 0, 0], [1, 0, 0]], dtype=np.float64)
-        self.renderer.build_detector_mesh(positions, False, model)
-        return self.renderer.build_pickable_mesh(positions, False)
-
-    def test_add_pickable_mesh_uses_fully_transparent_fill(self):
-        """The overlay is a pick target only — the magenta outline shows the selection."""
-        mesh = self._build_two_detector_mesh()
-        plotter = self._make_shape_mock_plotter()
-        self.renderer.add_pickable_mesh_to_plotter(plotter, mesh, scalars="Vis")
-        call_kwargs = plotter.add_mesh.call_args[1]
-        self.assertTrue(call_kwargs["pickable"])
-        self.assertEqual(list(call_kwargs["opacity"]), [0.0, 0.0])
+        return self.renderer.build_detector_mesh(positions, False, model)
 
     def test_build_picked_highlight_mesh_none_when_nothing_picked(self):
         mesh = self._build_two_detector_mesh()
@@ -928,9 +854,13 @@ class TestShapeRenderer(unittest.TestCase):
         self.assertEqual(highlight.n_verts, 0)
 
     def test_build_picked_highlight_mesh_carries_no_scalar_data(self):
-        """Scalars inherited from the pickable mesh would override the solid highlight colour."""
+        """Scalars inherited from the pickable mesh would override the solid highlight colour.
+
+        The pickable mesh is a copy of the detector mesh, so it carries that
+        mesh's counts.
+        """
         mesh = self._build_two_detector_mesh()
-        self.renderer.set_pickable_scalars(mesh, np.array([0, 1]), "Visible Picked")
+        self.renderer.set_detector_scalars(mesh, np.array([10.0, 20.0]), "Integrated Counts")
         outline = self.renderer._build_picked_highlight_mesh(mesh, np.array([0, 1]))
         self.assertEqual(len(outline.cell_data.keys()), 0)
         self.assertEqual(len(outline.point_data.keys()), 0)
@@ -962,7 +892,7 @@ class TestShapeRenderer(unittest.TestCase):
     def test_marker_fallback_carries_no_scalar_data(self):
         """The markers share the highlight mesh with the outline, so inherited scalars would recolour them."""
         mesh = self._build_two_detector_mesh()
-        self.renderer.set_pickable_scalars(mesh, np.array([1, 1]), "Visible Picked")
+        self.renderer.set_detector_scalars(mesh, np.array([10.0, 20.0]), "Integrated Counts")
         self.renderer._MAX_OUTLINE_CELLS = 1
 
         markers = self.renderer._build_picked_highlight_mesh(mesh, np.array([1, 1]))
@@ -1051,7 +981,7 @@ class TestShapeRenderer(unittest.TestCase):
         """Not from the instrument's largest shape, which would lift every outline too far."""
         self._pick_one_detector_facing_the_camera()
 
-        detector = self.renderer._pickable_det_indices[1]
+        detector = self.renderer._mesh_det_indices[1]
         key = int(self.renderer._det_shape_keys[detector])
         scale = float(np.max(np.abs(self.renderer._det_scales[detector])))
         self.assertAlmostEqual(self.renderer._outline_push, self.renderer._shape_depths[key] * scale)
