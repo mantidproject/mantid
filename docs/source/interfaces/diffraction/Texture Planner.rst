@@ -55,6 +55,19 @@ Settings
     interface behaviour that might otherwise clutter the main window. See
     :ref:`Settings Menu <Texture_Planner_settings-ref>` for the full set of options.
 
+Tutorial
+    The mortarboard icon beside the cog runs a guided tutorial, which walks
+    through the whole workflow — loading a sample, setting up the instrument and
+    goniometer, reading the pole figure, and exporting the result — highlighting
+    each control and using it as it goes. It appears automatically the first time
+    the interface is opened, and can be re-run from the button at any time.
+
+    The tutorial runs in a **separate window containing its own copy of the
+    interface**, loaded with a small demo sample. Nothing it does affects the
+    session you are working in, and everything it creates is removed when its
+    window is closed. Use *Pause* to stop and look around, *Back* to re-read a
+    step, and *Chapters…* to jump to a particular part of the workflow.
+
 .. _Texture_Planner_sample-setup-ref:
 
 Sample Setup Options
