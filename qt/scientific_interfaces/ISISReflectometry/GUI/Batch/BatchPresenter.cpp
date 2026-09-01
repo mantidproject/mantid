@@ -10,6 +10,7 @@
 #include "GUI/Experiment/IExperimentPresenter.h"
 #include "GUI/Instrument/IInstrumentPresenter.h"
 #include "GUI/MainWindow/IMainWindowPresenter.h"
+#include "GUI/Plotting/presenter/IPlottingPresenter.h"
 #include "GUI/Runs/IRunsPresenter.h"
 #include "GUI/Save/ISavePresenter.h"
 #include "IBatchView.h"
@@ -38,18 +39,21 @@ using API::IConfiguredAlgorithm_sptr;
  * @param instrumentPresenter :: [input] A pointer to the 'Instrument' tab
  * presenter
  * @param savePresenter :: [input] A pointer to the 'Save' tab presenter
+ * @param plottingPresenter :: [input] A pointer to the 'Plotting' tab presenter
  */
 BatchPresenter::BatchPresenter(
     IBatchView *view, std::unique_ptr<IBatch> model, std::unique_ptr<API::IJobRunner> jobRunner,
     std::unique_ptr<IRunsPresenter> runsPresenter, std::unique_ptr<IEventPresenter> eventPresenter,
     std::unique_ptr<IExperimentPresenter> experimentPresenter,
     std::unique_ptr<IInstrumentPresenter> instrumentPresenter, std::unique_ptr<ISavePresenter> savePresenter,
-    std::unique_ptr<IPreviewPresenter> previewPresenter, MantidQt::MantidWidgets::IMessageHandler *messageHandler)
-    : m_view(view), m_model(std::move(model)), m_runsPresenter(std::move(runsPresenter)),
+    std::unique_ptr<IPreviewPresenter> previewPresenter, std::unique_ptr<IPlottingPresenter> plottingPresenter,
+    MantidQt::MantidWidgets::IMessageHandler *messageHandler)
+    : m_view(view), m_model(std::move(model)), m_mainPresenter(), m_runsPresenter(std::move(runsPresenter)),
       m_eventPresenter(std::move(eventPresenter)), m_experimentPresenter(std::move(experimentPresenter)),
       m_instrumentPresenter(std::move(instrumentPresenter)), m_savePresenter(std::move(savePresenter)),
-      m_previewPresenter(std::move(previewPresenter)), m_unsavedBatchFlag(false), m_jobRunner(std::move(jobRunner)),
-      m_messageHandler(messageHandler), m_jobManager(std::make_unique<BatchJobManager>(*m_model)) {
+      m_previewPresenter(std::move(previewPresenter)), m_plottingPresenter(std::move(plottingPresenter)),
+      m_unsavedBatchFlag(false), m_jobRunner(std::move(jobRunner)), m_messageHandler(messageHandler),
+      m_jobManager(std::make_unique<BatchJobManager>(*m_model)) {
 
   m_jobRunner->subscribe(this);
 
@@ -60,6 +64,7 @@ BatchPresenter::BatchPresenter(
   m_instrumentPresenter->acceptMainPresenter(this);
   m_runsPresenter->acceptMainPresenter(this);
   m_previewPresenter->acceptMainPresenter(this);
+  m_plottingPresenter->acceptMainPresenter(this);
 
   m_unsavedBatchFlag = false;
 
@@ -94,6 +99,7 @@ void BatchPresenter::notifyInstrumentChanged(const std::string &instrumentName) 
   m_runsPresenter->notifyInstrumentChanged(instrumentName);
   m_experimentPresenter->notifyInstrumentChanged(instrumentName);
   m_instrumentPresenter->notifyInstrumentChanged(instrumentName);
+  m_plottingPresenter->notifyInstrumentChanged(instrumentName);
 }
 
 void BatchPresenter::notifyUpdateInstrumentRequested() { mainPresenter().notifyUpdateInstrumentRequested(); }
@@ -146,6 +152,7 @@ void BatchPresenter::notifyAlgorithmComplete(IConfiguredAlgorithm_sptr &algorith
   }
   m_jobManager->algorithmComplete(algorithm);
   m_runsPresenter->notifyRowModelChanged(item.value());
+  updatePlottingWorkspaces();
   /// TODO Longer term it would probably be better if algorithms took care
   /// of saving their outputs so we could remove this callback
   if (m_savePresenter->shouldAutosave()) {
@@ -173,6 +180,7 @@ void BatchPresenter::notifyAlgorithmError(IConfiguredAlgorithm_sptr &algorithm, 
   }
   m_jobManager->algorithmError(algorithm, message);
   m_runsPresenter->notifyRowModelChanged(item.value());
+  updatePlottingWorkspaces();
 }
 
 /** Start processing the next batch of algorithms.
@@ -215,6 +223,7 @@ void BatchPresenter::notifyReductionResumed() {
   m_instrumentPresenter->notifyReductionResumed();
   m_runsPresenter->notifyReductionResumed();
   mainPresenter().notifyAnyBatchReductionResumed();
+  m_plottingPresenter->notifyReductionResumed();
 }
 
 void BatchPresenter::pauseReduction() { m_jobRunner->cancelAlgorithmQueue(); }
@@ -230,6 +239,7 @@ void BatchPresenter::notifyReductionPaused() {
   m_instrumentPresenter->notifyReductionPaused();
   m_runsPresenter->notifyReductionPaused();
   mainPresenter().notifyAnyBatchReductionPaused();
+  m_plottingPresenter->notifyReductionPaused();
   // If autoreducing, notify
   if (isAutoreducing())
     notifyAutoreductionCompleted();
@@ -261,6 +271,7 @@ void BatchPresenter::notifyAutoreductionResumed() {
   m_experimentPresenter->notifyAutoreductionResumed();
   m_instrumentPresenter->notifyAutoreductionResumed();
   m_runsPresenter->notifyAutoreductionResumed();
+  m_plottingPresenter->notifyAutoreductionResumed();
 
   m_runsPresenter->notifyRowStateChanged();
   mainPresenter().notifyAnyBatchAutoreductionResumed();
@@ -283,6 +294,7 @@ void BatchPresenter::notifyAutoreductionPaused() {
   m_experimentPresenter->notifyAutoreductionPaused();
   m_instrumentPresenter->notifyAutoreductionPaused();
   m_runsPresenter->notifyAutoreductionPaused();
+  m_plottingPresenter->notifyAutoreductionPaused();
 
   mainPresenter().notifyAnyBatchAutoreductionPaused();
 }
@@ -300,15 +312,30 @@ void BatchPresenter::notifyAnyBatchAutoreductionResumed() { m_runsPresenter->not
 
 void BatchPresenter::notifyAnyBatchAutoreductionPaused() { m_runsPresenter->notifyAnyBatchAutoreductionPaused(); }
 
-void BatchPresenter::notifyBatchLoaded() { m_runsPresenter->notifyBatchLoaded(); }
+void BatchPresenter::notifyBatchLoaded() {
+  m_runsPresenter->notifyBatchLoaded();
+  updatePlottingWorkspaces();
+}
 
-void BatchPresenter::notifyRowContentChanged(Row &changedRow) { m_model->updateLookupIndex(changedRow); }
+void BatchPresenter::notifyRowContentChanged(Row &changedRow) {
+  m_model->updateLookupIndex(changedRow);
+  updatePlottingWorkspaces();
+}
 
-void BatchPresenter::notifyGroupNameChanged(Group &changedGroup) { m_model->updateLookupIndexesOfGroup(changedGroup); }
+void BatchPresenter::notifyGroupNameChanged(Group &changedGroup) {
+  m_model->updateLookupIndexesOfGroup(changedGroup);
+  updatePlottingWorkspaces();
+}
+
+void BatchPresenter::notifyRunsTableChanged() {
+  m_model->updateLookupIndexesOfTable();
+  updatePlottingWorkspaces();
+}
 
 void BatchPresenter::notifyRunsTransferred() {
   m_model->updateLookupIndexesOfTable();
   m_runsPresenter->notifyRowModelChanged();
+  updatePlottingWorkspaces();
 }
 
 Mantid::Geometry::Instrument_const_sptr BatchPresenter::instrument() const { return mainPresenter().instrument(); }
@@ -319,7 +346,10 @@ void BatchPresenter::settingsChanged() {
   setBatchUnsaved();
   m_model->updateLookupIndexesOfTable();
   m_runsPresenter->settingsChanged();
+  updatePlottingWorkspaces();
 }
+
+void BatchPresenter::updatePlottingWorkspaces() { m_plottingPresenter->notifyRunsTableChanged(m_model->runsTable()); }
 
 /**
    Checks whether or not data is currently being processed in this batch
@@ -384,16 +414,19 @@ std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> BatchPresenter::rowProcessi
 void BatchPresenter::postDeleteHandle(const std::string &wsName) {
   auto const item = m_jobManager->notifyWorkspaceDeleted(wsName);
   m_runsPresenter->notifyRowModelChanged(item);
+  updatePlottingWorkspaces();
 }
 
 void BatchPresenter::renameHandle(const std::string &oldName, const std::string &newName) {
   auto const item = m_jobManager->notifyWorkspaceRenamed(oldName, newName);
   m_runsPresenter->notifyRowModelChanged(item);
+  updatePlottingWorkspaces();
 }
 
 void BatchPresenter::clearADSHandle() {
   m_jobManager->notifyAllWorkspacesDeleted();
   m_runsPresenter->notifyRowModelChanged();
+  updatePlottingWorkspaces();
 }
 
 void BatchPresenter::notifyPreviewApplyRequested() {

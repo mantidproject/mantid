@@ -16,6 +16,7 @@ RunsTablePresenterFactory::RunsTablePresenterFactory(std::vector<std::string> in
     : m_instruments(std::move(instruments)), m_thetaTolerance(thetaTolerance), m_plotter(std::move(plotter)) {}
 
 std::unique_ptr<IRunsTablePresenter> RunsTablePresenterFactory::operator()(IRunsTableView *view) const {
-  return std::make_unique<RunsTablePresenter>(view, m_instruments, m_thetaTolerance, ReductionJobs(), m_plotter);
+  return std::make_unique<RunsTablePresenter>(view, m_instruments, m_thetaTolerance, ReductionJobs(), m_plotter,
+                                              m_plotOptionsProvider);
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
