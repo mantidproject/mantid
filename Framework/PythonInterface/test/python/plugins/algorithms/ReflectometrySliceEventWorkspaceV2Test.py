@@ -21,7 +21,7 @@ class ReflectometrySliceEventWorkspaceV2Test(unittest.TestCase):
         self._default_args = {
             "InputWorkspaceName": "input_ws",
             "MonitorWorkspaceName": "monitor_ws",
-            "OutputWorkspace": "output",
+            "OutputWorkspaceName": "output",
             "UseNewFilterAlgorithm": True,
         }
 

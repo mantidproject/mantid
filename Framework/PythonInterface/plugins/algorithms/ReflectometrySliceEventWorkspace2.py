@@ -56,6 +56,8 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
 
     def validateInputs(self):
         issues = {}
+        if not self.getPropertyValue("OutputWorkspaceName"):
+            issues["OutputWorkspaceName"] = "A base name for the output workspace must be provided."
         if not mtd.doesExist(self.getPropertyValue("InputWorkspaceName")):
             issues["InputWorkspaceName"] = "The input workspace must be present in the ADS."
         if not mtd.doesExist(self.getPropertyValue("MonitorWorkspaceName")):
