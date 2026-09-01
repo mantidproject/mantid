@@ -18,7 +18,7 @@ DECLARE_CATALOG(FakeCatalog)
 
 FakeCatalog::FakeCatalog() = default;
 
-FakeCatalog ::~FakeCatalog() = default;
+FakeCatalog::~FakeCatalog() = default;
 
 API::CatalogSession_sptr FakeCatalog::login(std::string const &username, std::string const &password,
                                             std::string const &endPoint, std::string const &facility) {

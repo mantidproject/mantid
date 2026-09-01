@@ -66,7 +66,7 @@ private:
   void importLoadedData(const std::string &workspaceName);
   void importBaselineData(const std::string &workspaceName);
   void importPeakData(const std::string &workspaceName);
-  void externallyPlotWorkspace(Mantid::API ::MatrixWorkspace_sptr &data, std::string const &workspaceName,
+  void externallyPlotWorkspace(Mantid::API::MatrixWorkspace_sptr &data, std::string const &workspaceName,
                                std::string const &workspaceIndices, bool errorBars,
                                std::optional<QHash<QString, QVariant>> const &kwargs);
   void externallyPlotWorkspaces(Mantid::API::MatrixWorkspace_sptr &data, std::vector<std::string> const &workspaceNames,
