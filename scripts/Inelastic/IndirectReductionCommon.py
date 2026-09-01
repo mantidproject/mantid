@@ -1381,34 +1381,47 @@ def remove_edge_pixels(workspace):
 
 def get_minimum_calibration_factor(workspace):
     """
-    Reads the silicon component's 'Workflow.MinimumCalibrationFactor' parameter, or 0.0 if absent.
+    Reads the silicon component's 'Workflow.MinimumCalibrationFactor' parameter when the workspace contains silicon
+    spectra, or 0.0 otherwise.
 
     :param workspace:   The name of a workspace in the ADS.
     """
-    component = mtd[workspace].getInstrument().getComponentByName("silicon")
+    ws = mtd[workspace]
+    if not _silicon_spectrum_indices(ws):
+        return 0.0
+    component = ws.getInstrument().getComponentByName("silicon")
     if component is None:
         return 0.0
     values = component.getNumberParameter("Workflow.MinimumCalibrationFactor")
     return values[0] if values else 0.0
 
 
+def _silicon_spectrum_indices(workspace):
+    """Returns workspace indices for the OSIRIS silicon spectra defined by the IDF."""
+    return [i for i in range(workspace.getNumberHistograms()) if 1005 <= workspace.getSpectrum(i).getSpectrumNo() <= 2564]
+
+
 def exclude_low_calibration_spectra(workspace):
     """
-    Removes spectra with a calibration factor below get_minimum_calibration_factor() times the mean.
+    Removes silicon spectra with a calibration factor below get_minimum_calibration_factor() times the mean.
 
     :param workspace:   The name of a calibration workspace in the ADS to remove spectra from.
     """
+    ws = mtd[workspace]
+    silicon_indices = _silicon_spectrum_indices(ws)
+    if not silicon_indices:
+        return
     threshold_factor = get_minimum_calibration_factor(workspace)
     if threshold_factor <= 0.0:
         return
-    values = mtd[workspace].extractY().flatten()
+    values = np.array([ws.readY(i)[0] for i in silicon_indices])
     nonzero = values[values > 0.0]
     if nonzero.size == 0:
         return
-    low_indices = np.where(values < threshold_factor * nonzero.mean())[0].tolist()
+    low_indices = [index for index, value in zip(silicon_indices, values) if value < threshold_factor * nonzero.mean()]
     if not low_indices:
         return
-    spec_nos = [mtd[workspace].getSpectrum(i).getSpectrumNo() for i in low_indices]
+    spec_nos = [ws.getSpectrum(i).getSpectrumNo() for i in low_indices]
     logger.warning(f"Excluding {len(low_indices)} low-calibration spectra: {spec_nos}")
     RemoveSpectra(InputWorkspace=workspace, OutputWorkspace=workspace, WorkspaceIndices=low_indices)
 
