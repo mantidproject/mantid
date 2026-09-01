@@ -177,21 +177,26 @@ def process_events(rounds=1):
 
 
 def click(button):
-    """Press a button, visibly. **Completes asynchronously.**
+    """Press a button, visibly, and synchronously.
 
-    ``animateClick`` rather than ``click`` because a tutorial is watched: it draws the button held
-    down for about 100 ms, so the user sees *which* button the tour pressed rather than only its
-    consequences. The cost is that ``clicked`` is emitted at the end of that animation, so nothing
-    the press causes has happened when this returns. Steps absorb that in ``settle_ms``; anything
-    that must observe the result should go through ``wait_for``.
+    The button is drawn held down and the display flushed before the click is delivered, so the
+    user sees *which* button the tour pressed rather than only its consequences.
 
-    Use ``set_check_state`` for a button whose *state* matters - it cannot afford this delay.
+    Deliberately not ``animateClick``, which looks better and is not safe here: it releases the
+    button from a timer about 100 ms later, so the press can still be pending after the tour has
+    moved on - or after the tour has ended and the interface it belonged to has been torn down.
+    The handler then runs against workspaces that no longer exist. Everything the tour does has to
+    have finished happening by the time the step is over, and a deferred click does not.
     """
     if not isinstance(button, QAbstractButton):
         raise TypeError(f"click expects a button, got {type(button).__name__}")
     if not button.isEnabled():
         raise RuntimeError(f"'{button.objectName() or button.text()}' is disabled, so the tutorial cannot press it")
-    button.animateClick()
+    button.setDown(True)
+    button.repaint()
+    process_events()
+    button.setDown(False)
+    button.click()
     process_events()
 
 
