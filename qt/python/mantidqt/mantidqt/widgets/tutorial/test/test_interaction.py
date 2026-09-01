@@ -65,12 +65,11 @@ class InteractionTest(unittest.TestCase):
         button.show()
 
         interaction.click(button)
-        # animateClick holds the button down for ~100ms, so nothing has been emitted yet - this is
-        # the asynchrony the docstring warns callers about
-        self.assertEqual(pressed, [])
 
-        self.assertTrue(self._pump_until(lambda: bool(pressed)))
+        # synchronous on purpose: a press still pending when the tour ends would fire against an
+        # interface that had already been torn down
         self.assertEqual(pressed, [True])
+        self.assertFalse(button.isDown(), "the button must not be left held down")
 
     def test_click_refuses_a_non_button(self):
         self.assertRaises(TypeError, interaction.click, self._keep(QLabel("not a button")))
