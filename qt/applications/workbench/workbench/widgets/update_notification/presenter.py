@@ -9,6 +9,12 @@ class _UpdateSignalBridge(QObject):
 
 
 class UpdateNotificationObserver(AlgorithmObserver):
+    """
+    This class is a bridge to allow the AlgorithmObserver to emit a Qt signal when an update is available.
+    The AlgorithmObserver is not a QObject and cannot emit signals directly, so we use this bridge to
+    communicate between the observer and the presenter.
+    """
+
     def __init__(self, bridge: _UpdateSignalBridge):
         super().__init__()
         self._bridge = bridge
@@ -18,14 +24,19 @@ class UpdateNotificationObserver(AlgorithmObserver):
         self.alg = alg
 
     def finishHandle(self):
-        # if not self.alg.getProperty("IsNewVersionAvailable").value:
-        #     return
-        # latest = self.alg.getPropertyValue("MostRecentVersion")
-        latest = "7.0.0"
+        if not self.alg.getProperty("IsNewVersionAvailable").value:
+            return
+        latest = self.alg.getPropertyValue("MostRecentVersion")
         self._bridge.updateAvailable.emit(latest)
 
 
 class UpdateNotificationPresenter:
+    """
+    This class is responsible for checking for updates and showing a notification to the user if an update is available.
+    It uses the UpdateNotificationObserver to observe the CheckMantidVersion algorithm and emit a signal if
+    an update is available. The presenter then shows a QMessageBox to the user with the option to update now or remind later.
+    """
+
     def __init__(self, parent):
         self._parent = parent
         self._bridge = _UpdateSignalBridge()
