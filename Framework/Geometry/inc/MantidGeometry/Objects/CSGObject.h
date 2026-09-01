@@ -75,6 +75,12 @@ public:
   /// Return the top rule
   const Rule *topRule() const { return m_topRule.get(); }
   void setID(const std::string &id) override { m_id = id; }
+
+  const Kernel::Matrix<double> &getAppliedRotation() const override { return m_appliedRotation; }
+  /// Record the goniometer rotation baked into this shape's definition. Record-only: the surfaces
+  /// are already rotated by the time this is called, so it rotates nothing itself. Set by
+  /// ShapeFactory from the shape XML, which is also how it survives a Nexus round trip.
+  void setAppliedGoniometerRotation(const Kernel::Matrix<double> &rotation) { m_appliedRotation = rotation; }
   const std::string &id() const override { return m_id; }
 
   void setName(const int objNum) { m_objNum = objNum; } ///< Set Name
@@ -236,6 +242,8 @@ private:
   mutable std::unique_ptr<Kernel::Material> m_material;
   /// Whether or not the object geometry is finite
   bool m_isFiniteGeometry = true;
+  /// Rotation already applied to the shape definition, from a "goniometer" tag in the XML
+  Kernel::Matrix<double> m_appliedRotation{3, 3, true};
 
 protected:
   std::vector<const Surface *> m_surList; ///< Full surfaces (make a map

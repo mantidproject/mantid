@@ -16,8 +16,10 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidGeometry/Objects/ShapeRotation.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Rasterize.h"
 #include "MantidHistogramData/Interpolate.h"
@@ -382,16 +384,27 @@ void PaalmanPingsAbsorptionCorrection::retrieveBaseProperties() {
 }
 
 /// Create the sample object using the Geometry classes, or use the existing one
-void PaalmanPingsAbsorptionCorrection::constructSample(API::Sample &sample) {
-  m_sampleObject = &sample.getShape();
+void PaalmanPingsAbsorptionCorrection::constructSample(const API::Sample &sample) {
   m_containerObject = &(sample.getEnvironment().getContainer());
 
   // Check there is one, and fail if not
-  if (!m_sampleObject->hasValidShape()) {
+  if (!sample.getShape().hasValidShape()) {
     const std::string mess("No shape has been defined for the sample in the input workspace");
     g_log.error(mess);
     throw std::invalid_argument(mess);
   }
+
+  // The gauge volume, the beam and the detector positions are all described in the lab frame, but
+  // the sample shape is only there if something has already rotated it - CopySample bakes the
+  // destination goniometer in, while SetGoniometer alone leaves the shape in its own frame. Ask the
+  // shape which frame it is in and move it the rest of the way, so the quadrature intersects a
+  // lab-frame region with a shape that is actually there. This is a no-op for an unrotated
+  // workspace, which is every workspace that reaches here today.
+  //
+  // The container is deliberately left alone: it is never goniometer-rotated anywhere in Mantid, so
+  // rotating the sample inside a fixed can is what the assembly is meant to describe.
+  m_labFrameSampleShape = Geometry::getLabFrameShape(sample.getShape(), m_inputWS->run().getGoniometer().getR());
+  m_sampleObject = m_labFrameSampleShape.get();
   // Check there is one, and fail if not
   if (!m_containerObject->hasValidShape()) {
     const std::string mess("No shape has been defined for the container in the input workspace");

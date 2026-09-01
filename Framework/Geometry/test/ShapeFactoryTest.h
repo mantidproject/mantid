@@ -916,7 +916,276 @@ public:
     TS_ASSERT(!sliceRotateAll_sptr->isValid(pointRotate));
   }
 
+  /// <goniometer> rotates the surfaces, and with no <applied-goniometer> beside it the whole of it
+  /// is taken to be a bake into the lab frame - how shapes written before the second tag existed
+  /// have to keep reading.
+  void testGoniometerTagAloneIsTakenToBeAllBake() {
+    const Matrix<double> rotation(std::vector<double>{0, -1, 0, 1, 0, 0, 0, 0, 1});
+    const std::string plain = "<sphere id=\"s\"><centre x=\"1.0\" y=\"0\" z=\"0\"/><radius val=\"0.5\"/></sphere>"
+                              "<algebra val=\"s\"/> ";
+    auto shape = ShapeFactory().createShape(ShapeFactory().addGoniometerTag(rotation, plain));
+
+    TS_ASSERT_EQUALS(shape->getAppliedRotation(), rotation);
+    // and the surfaces moved: the sphere sat at +x, so a 90 degree turn about z puts it at +y
+    TS_ASSERT(shape->isValid(V3D(0.0, 1.0, 0.0)));
+    TS_ASSERT(!shape->isValid(V3D(1.0, 0.0, 0.0)));
+  }
+
+  /// <applied-goniometer> is metadata only: it says how much of <goniometer> was a bake, and must
+  /// not rotate anything itself.
+  void testAppliedGoniometerTagRecordsWithoutRotating() {
+    const Matrix<double> total(std::vector<double>{0, -1, 0, 1, 0, 0, 0, 0, 1});
+    const Matrix<double> bake(3, 3, true);
+    const std::string plain = "<sphere id=\"s\"><centre x=\"1.0\" y=\"0\" z=\"0\"/><radius val=\"0.5\"/></sphere>"
+                              "<algebra val=\"s\"/> ";
+    auto xml = ShapeFactory().addGoniometerTag(total, plain);
+    xml = ShapeFactory().addAppliedGoniometerTag(bake, xml);
+    auto shape = ShapeFactory().createShape(xml);
+
+    // the shape reports itself as still in its own frame, even though its surfaces have turned
+    TS_ASSERT_EQUALS(shape->getAppliedRotation(), bake);
+    TS_ASSERT(shape->isValid(V3D(0.0, 1.0, 0.0)));
+    TS_ASSERT(!shape->isValid(V3D(1.0, 0.0, 0.0)));
+  }
+
+  /// The two tags are independent: rewriting one must leave the other alone. "<goniometer" cannot
+  /// match inside "<applied-goniometer", and neither rewrite may leave a stray '>' behind.
+  void testRewritingOneTagLeavesTheOtherIntact() {
+    const Matrix<double> first(std::vector<double>{0, -1, 0, 1, 0, 0, 0, 0, 1});
+    const Matrix<double> bake(std::vector<double>{1, 0, 0, 0, 0, -1, 0, 1, 0});
+    const Matrix<double> second(std::vector<double>{-1, 0, 0, 0, -1, 0, 0, 0, 1});
+    const std::string plain = "<sphere id=\"s\"><centre x=\"1.0\" y=\"0\" z=\"0\"/><radius val=\"0.5\"/></sphere>"
+                              "<algebra val=\"s\"/> ";
+
+    auto xml = ShapeFactory().addGoniometerTag(first, plain);
+    xml = ShapeFactory().addAppliedGoniometerTag(bake, xml);
+    xml = ShapeFactory().addGoniometerTag(second, xml);
+
+    TS_ASSERT_EQUALS(ShapeFactory::goniometerFromXML(xml), second);
+    TS_ASSERT_EQUALS(ShapeFactory().createShape(xml)->getAppliedRotation(), bake);
+    // exactly one of each tag, and no orphaned bracket from the erase
+    TS_ASSERT_EQUALS(countOccurrences(xml, "<goniometer"), 1);
+    TS_ASSERT_EQUALS(countOccurrences(xml, "<applied-goniometer"), 1);
+    TS_ASSERT_EQUALS(countOccurrences(xml, "/>>"), 0);
+  }
+
+  /// Rebasing swaps which bake is recorded while leaving the definition-frame rotation in place.
+  void testRebakeGoniometerPreservesTheDefinitionFrameRotation() {
+    const Matrix<double> definition(std::vector<double>{0, -1, 0, 1, 0, 0, 0, 0, 1});
+    const Matrix<double> oldBake(std::vector<double>{1, 0, 0, 0, 0, -1, 0, 1, 0});
+    const Matrix<double> newBake(std::vector<double>{-1, 0, 0, 0, -1, 0, 0, 0, 1});
+    const std::string plain = "<sphere id=\"s\"><centre x=\"1.0\" y=\"0\" z=\"0\"/><radius val=\"0.5\"/></sphere>"
+                              "<algebra val=\"s\"/> ";
+
+    auto xml = ShapeFactory().addGoniometerTag(oldBake * definition, plain);
+    xml = ShapeFactory().addAppliedGoniometerTag(oldBake, xml);
+
+    const auto rebaked = ShapeFactory().rebakeGoniometer(newBake, xml, oldBake);
+
+    TS_ASSERT_EQUALS(ShapeFactory().createShape(rebaked)->getAppliedRotation(), newBake);
+    // the definition-frame part survived: the total is the new bake wrapped around the same D
+    assertMatrixDelta(ShapeFactory::goniometerFromXML(rebaked), newBake * definition);
+  }
+
+  /// An applied tag with no goniometer tag describes nothing, so it is warned about and ignored.
+  void testAppliedGoniometerWithoutGoniometerIsIgnored() {
+    const Matrix<double> bake(std::vector<double>{0, -1, 0, 1, 0, 0, 0, 0, 1});
+    const std::string plain = "<sphere id=\"s\"><centre x=\"1.0\" y=\"0\" z=\"0\"/><radius val=\"0.5\"/></sphere>"
+                              "<algebra val=\"s\"/> ";
+    auto shape = ShapeFactory().createShape(ShapeFactory().addAppliedGoniometerTag(bake, plain));
+
+    TS_ASSERT_EQUALS(shape->getAppliedRotation(), Matrix<double>(3, 3, true));
+  }
+
+  /// The tags have to be readable back off a shape that has been rebuilt.
+  ///
+  /// createShape re-serialises the XML through Poco's writer, so what comes back out is not
+  /// character-for-character what was written in - the quoting style in particular is not ours to
+  /// choose. Anything composing onto an existing rotation reads the tag off a rebuilt shape, so
+  /// this is the path that matters rather than the raw string.
+  void testTagsSurviveAShapeXMLRoundTrip() {
+    const Matrix<double> total(std::vector<double>{0, -1, 0, 1, 0, 0, 0, 0, 1});
+    const Matrix<double> bake(std::vector<double>{1, 0, 0, 0, 0, -1, 0, 1, 0});
+    const std::string plain = "<sphere id=\"s\"><centre x=\"1.0\" y=\"0\" z=\"0\"/><radius val=\"0.5\"/></sphere>"
+                              "<algebra val=\"s\"/> ";
+    auto xml = ShapeFactory().addGoniometerTag(total, plain);
+    xml = ShapeFactory().addAppliedGoniometerTag(bake, xml);
+
+    const auto rebuilt = ShapeFactory().createShape(xml)->getShapeXML();
+
+    assertMatrixDelta(ShapeFactory::goniometerFromXML(rebuilt), total);
+    TS_ASSERT_EQUALS(ShapeFactory().createShape(rebuilt)->getAppliedRotation(), bake);
+  }
+
+  /// rotate-all turns the surfaces but is a definition-frame rotation, so it is never recorded as
+  /// a bake. An IDF-defined rotated shape must not look like it is already in the lab frame.
+  void testRotateAllIsNotRecordedAsABake() {
+    const std::string xml = "<sphere id=\"s\"><centre x=\"0\" y=\"10.0\" z=\"0\"/><radius val=\"1.0\"/></sphere>"
+                            "<algebra val=\"s\"/> <rotate-all x=\"90\" y=\"0\" z=\"0\" /> ";
+    auto shape = ShapeFactory().createShape(xml);
+
+    TS_ASSERT_EQUALS(shape->getAppliedRotation(), Matrix<double>(3, 3, true));
+    // but the surfaces did move
+    TS_ASSERT(shape->isValid(V3D(0.0, 0.0, 10.0)));
+  }
+
+  /// A rotated shape's ShapeInfo has to move with its surfaces.
+  ///
+  /// createShape reads the XML twice: once through the parse* functions, which build the surfaces the
+  /// CSG tests points against, and once through createGeometryHandler, which builds the ShapeInfo the
+  /// bounding box, the rendered mesh and the volume all come from. Only the first applied the
+  /// automatic rotations, so a rotated shape was described in two places at once and its bounding box
+  /// enclosed where it used to be.
+  ///
+  /// Checked against the same shape written out with its centre and axis already rotated, which
+  /// carries no tag and so cannot be affected by whether the tags are honoured. Cuboids are exempt
+  /// because createGeometryHandler builds their ShapeInfo from the shared parseCuboid.
+  void testRotatedShapeInfoFollowsTheSurfaces() {
+    const std::string rotateAll = "<rotate-all x=\"90\" y=\"0\" z=\"0\" /> ";
+
+    // sphere: 1.0 radius centred 10 along +y, so rotating about x takes it to 10 along +z
+    assertShapeInfoIsRotated("<sphere id=\"s\"><centre x=\"0\" y=\"10.0\" z=\"0\"/><radius val=\"1.0\"/></sphere>"
+                             "<algebra val=\"s\"/> ",
+                             "<sphere id=\"s\"><centre x=\"0\" y=\"0\" z=\"10.0\"/><radius val=\"1.0\"/></sphere>"
+                             "<algebra val=\"s\"/> ",
+                             rotateAll);
+
+    // cylinder: base 10 along +y with its axis along +y, so both the base and the axis move
+    assertShapeInfoIsRotated("<cylinder id=\"c\"><centre-of-bottom-base x=\"0\" y=\"10.0\" z=\"0\"/>"
+                             "<axis x=\"0\" y=\"1\" z=\"0\"/><radius val=\"1.0\"/><height val=\"2.0\"/></cylinder>"
+                             "<algebra val=\"c\"/> ",
+                             "<cylinder id=\"c\"><centre-of-bottom-base x=\"0\" y=\"0\" z=\"10.0\"/>"
+                             "<axis x=\"0\" y=\"0\" z=\"1\"/><radius val=\"1.0\"/><height val=\"2.0\"/></cylinder>"
+                             "<algebra val=\"c\"/> ",
+                             rotateAll);
+
+    // cone: the case that exposed this, since a cone's ShapeInfo is built by re-parsing the XML
+    assertShapeInfoIsRotated("<cone id=\"k\"><tip-point x=\"0\" y=\"10.0\" z=\"0\"/>"
+                             "<axis x=\"0\" y=\"1\" z=\"0\"/><angle val=\"20\"/><height val=\"2.0\"/></cone>"
+                             "<algebra val=\"k\"/> ",
+                             "<cone id=\"k\"><tip-point x=\"0\" y=\"0\" z=\"10.0\"/>"
+                             "<axis x=\"0\" y=\"0\" z=\"1\"/><angle val=\"20\"/><height val=\"2.0\"/></cone>"
+                             "<algebra val=\"k\"/> ",
+                             rotateAll);
+  }
+
+  /// A per-primitive <rotate> has to move a shape's ShapeInfo and its surfaces together.
+  ///
+  /// <rotate> turns a shape about its own centre, which for a cylinder is the midpoint of its axis and
+  /// not the centre of the bottom base it is defined by. createGeometryHandler rotated that base
+  /// directly, swinging the cylinder about its end while parseCylinder held the midpoint still, and
+  /// parseCone ignored <rotate> altogether even though the cone's ShapeInfo honoured it. Either way the
+  /// surfaces and the metadata described the shape in two different places.
+  void testRotateTagMovesShapeInfoAndSurfacesTogether() {
+    // a per-primitive <rotate> sits inside the shape element, unlike <rotate-all>
+    const std::string rotate = "<rotate x=\"90\" y=\"0\" z=\"0\" /> ";
+
+    // cylinder: base 10 along +y with its axis along +y, so its midpoint is 11 along +y and stays
+    // there while the axis turns onto +z, leaving the base a half-height below it along -z
+    assertShapesMatch("<cylinder id=\"c\"><centre-of-bottom-base x=\"0\" y=\"10.0\" z=\"0\"/>"
+                      "<axis x=\"0\" y=\"1\" z=\"0\"/><radius val=\"1.0\"/><height val=\"2.0\"/>" +
+                          rotate + "</cylinder><algebra val=\"c\"/> ",
+                      "<cylinder id=\"c\"><centre-of-bottom-base x=\"0\" y=\"11.0\" z=\"-1.0\"/>"
+                      "<axis x=\"0\" y=\"0\" z=\"1\"/><radius val=\"1.0\"/><height val=\"2.0\"/></cylinder>"
+                      "<algebra val=\"c\"/> ");
+
+    assertShapesMatch("<hollow-cylinder id=\"h\"><centre-of-bottom-base x=\"0\" y=\"10.0\" z=\"0\"/>"
+                      "<axis x=\"0\" y=\"1\" z=\"0\"/><inner-radius val=\"0.5\"/><outer-radius val=\"1.0\"/>"
+                      "<height val=\"2.0\"/>" +
+                          rotate + "</hollow-cylinder><algebra val=\"h\"/> ",
+                      "<hollow-cylinder id=\"h\"><centre-of-bottom-base x=\"0\" y=\"11.0\" z=\"-1.0\"/>"
+                      "<axis x=\"0\" y=\"0\" z=\"1\"/><inner-radius val=\"0.5\"/><outer-radius val=\"1.0\"/>"
+                      "<height val=\"2.0\"/></hollow-cylinder><algebra val=\"h\"/> ");
+
+    // cone: a cone turns about its tip, so only the axis moves
+    assertShapesMatch("<cone id=\"k\"><tip-point x=\"0\" y=\"10.0\" z=\"0\"/>"
+                      "<axis x=\"0\" y=\"1\" z=\"0\"/><angle val=\"20\"/><height val=\"2.0\"/>" +
+                          rotate + "</cone><algebra val=\"k\"/> ",
+                      "<cone id=\"k\"><tip-point x=\"0\" y=\"10.0\" z=\"0\"/>"
+                      "<axis x=\"0\" y=\"0\" z=\"1\"/><angle val=\"20\"/><height val=\"2.0\"/></cone>"
+                      "<algebra val=\"k\"/> ");
+  }
+
 private:
+  static size_t countOccurrences(const std::string &haystack, const std::string &needle) {
+    size_t count = 0;
+    for (size_t at = haystack.find(needle); at != std::string::npos; at = haystack.find(needle, at + 1)) {
+      ++count;
+    }
+    return count;
+  }
+
+  static void assertMatrixDelta(const Matrix<double> &actual, const Matrix<double> &expected) {
+    for (size_t i = 0; i < 3; ++i) {
+      for (size_t j = 0; j < 3; ++j) {
+        TS_ASSERT_DELTA(actual[i][j], expected[i][j], 1e-12);
+      }
+    }
+  }
+
+  /// Assert that `xml`, which carries a rotation tag, describes the same shape as `preRotatedXML`,
+  /// which has the rotation written into it by hand, both in its ShapeInfo - where the bounding box,
+  /// the rendered mesh and the volume come from - and in the points it contains, which come from the
+  /// CSG surfaces. The ShapeInfo is read directly rather than through the bounding box because a
+  /// hollow cylinder has no bounding box of its own to read it back from.
+  void assertShapesMatch(const std::string &xml, const std::string &preRotatedXML) {
+    const auto tagged = getObject(xml);
+    const auto byHand = getObject(preRotatedXML);
+
+    assertShapeInfoEquals(*tagged, *byHand);
+
+    // Walk the centres of a grid of cells spanning the shape's box, so surfaces left behind in the
+    // unrotated frame show up as a disagreement about which points are inside. Cell centres rather
+    // than corners keeps the samples off the surfaces themselves, where the two shapes may round
+    // differently.
+    constexpr int cells = 8;
+    const auto byHandBox = byHand->getBoundingBox();
+    const V3D min = byHandBox.minPoint();
+    const V3D step = (byHandBox.maxPoint() - min) / static_cast<double>(cells);
+    for (int i = 0; i < cells; ++i) {
+      for (int j = 0; j < cells; ++j) {
+        for (int k = 0; k < cells; ++k) {
+          const V3D point(min.X() + (i + 0.5) * step.X(), min.Y() + (j + 0.5) * step.Y(),
+                          min.Z() + (k + 0.5) * step.Z());
+          TS_ASSERT_EQUALS(tagged->isValid(point), byHand->isValid(point));
+        }
+      }
+    }
+  }
+
+  /// Assert that two shapes carry the same ShapeInfo: same primitive, same defining points, same sizes.
+  void assertShapeInfoEquals(const CSGObject &actual, const CSGObject &expected) {
+    detail::ShapeInfo::GeometryShape actualType, expectedType;
+    double actualInner(0.0), actualRadius(0.0), actualHeight(0.0);
+    double expectedInner(0.0), expectedRadius(0.0), expectedHeight(0.0);
+    std::vector<V3D> actualPoints, expectedPoints;
+    actual.GetObjectGeom(actualType, actualPoints, actualInner, actualRadius, actualHeight);
+    expected.GetObjectGeom(expectedType, expectedPoints, expectedInner, expectedRadius, expectedHeight);
+
+    TS_ASSERT_EQUALS(actualType, expectedType);
+    TS_ASSERT_DELTA(actualInner, expectedInner, 1e-9);
+    TS_ASSERT_DELTA(actualRadius, expectedRadius, 1e-9);
+    TS_ASSERT_DELTA(actualHeight, expectedHeight, 1e-9);
+    TS_ASSERT_EQUALS(actualPoints.size(), expectedPoints.size());
+    for (size_t i = 0; i < std::min(actualPoints.size(), expectedPoints.size()); ++i) {
+      for (size_t axis = 0; axis < 3; ++axis) {
+        TS_ASSERT_DELTA(actualPoints[i][axis], expectedPoints[i][axis], 1e-9);
+      }
+    }
+  }
+
+  /// Assert that `xml` plus `rotationTag` describes the same bounding box as `preRotatedXML`, which
+  /// has the rotation written into it by hand and carries no tag.
+  void assertShapeInfoIsRotated(const std::string &xml, const std::string &preRotatedXML,
+                                const std::string &rotationTag) {
+    const auto tagged = getObject(xml + rotationTag)->getBoundingBox();
+    const auto byHand = getObject(preRotatedXML)->getBoundingBox();
+    for (size_t axis = 0; axis < 3; ++axis) {
+      TS_ASSERT_DELTA(tagged.minPoint()[axis], byHand.minPoint()[axis], 1e-9);
+      TS_ASSERT_DELTA(tagged.maxPoint()[axis], byHand.maxPoint()[axis], 1e-9);
+    }
+  }
+
   void compareMatrix(const std::vector<double> &vectorToMatch, const Matrix<double> &rotationMatrix) {
     auto checkVector = rotationMatrix.getVector();
     for (size_t i = 0; i < 9; ++i) {

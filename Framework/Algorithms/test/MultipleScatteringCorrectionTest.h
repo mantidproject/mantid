@@ -19,6 +19,9 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/UnitFactory.h"
+#include "SampleFrameEquivalence.h"
+
+#include <array>
 
 using Mantid::Algorithms::MultipleScatteringCorrection;
 using Mantid::API::AnalysisDataService;
@@ -77,6 +80,36 @@ public:
     TS_ASSERT_DELTA(rst_ms->y(1)[1], 0.182175, 1e-3);
   }
 
+  void test_both_ways_of_orienting_the_sample_agree() {
+    // A sample in its own frame with the goniometer on the run, and the same sample already rotated
+    // into the lab frame, describe the same experiment and must correct identically.
+    const auto rotation = SampleFrameEquivalence::rotationY(30.0);
+    const auto ownFrame = runPlateCorrection("ms_own", rotation, false);
+    const auto labFrame = runPlateCorrection("ms_lab", rotation, true);
+
+    TS_ASSERT_DELTA(ownFrame[0], labFrame[0], 1e-9);
+    TS_ASSERT_DELTA(ownFrame[1], labFrame[1], 1e-9);
+    // and the rotation actually mattered - otherwise the assertions above prove nothing
+    const auto unrotated = runPlateCorrection("ms_flat", Mantid::Kernel::Matrix<double>(3, 3, true), false);
+    TS_ASSERT(std::abs(ownFrame[0] - unrotated[0]) > 1e-6);
+  }
+
+  void test_both_ways_of_orienting_the_sample_agree_with_a_container() {
+    // Same invariant as above, for the other Method. The container is not goniometer-rotated by
+    // anything in Mantid, so only the sample moves - but it must move, and by the same amount
+    // whichever frame it arrived in.
+    const auto rotation = SampleFrameEquivalence::rotationX(60.0);
+    const auto ownFrame = runSampleAndContainerCorrection("msc_own", rotation, false);
+    const auto labFrame = runSampleAndContainerCorrection("msc_lab", rotation, true);
+
+    TS_ASSERT_DELTA(ownFrame[0], labFrame[0], 1e-9);
+    TS_ASSERT_DELTA(ownFrame[1], labFrame[1], 1e-9);
+    // and the rotation actually mattered - otherwise the assertions above prove nothing
+    const auto unrotated =
+        runSampleAndContainerCorrection("msc_flat", Mantid::Kernel::Matrix<double>(3, 3, true), false);
+    TS_ASSERT(std::abs(ownFrame[0] - unrotated[0]) > 1e-6);
+  }
+
   void test_sampleAndContainer() {
     // Create a workspace with vanadium data
     const std::string ws_name = "mstest";
@@ -125,6 +158,101 @@ public:
   }
 
 private:
+  /// Correct a plate sample held in the given frame and return the two spectra values. A plate is
+  /// used rather than the vanadium cylinder because tilting a plate about y changes how much
+  /// material the beam crosses, so the sample's orientation is visible in the answer.
+  std::array<double, 2> runPlateCorrection(std::string const &name, const Mantid::Kernel::Matrix<double> &rotation,
+                                           const bool baked) {
+    MakeSampleWorkspace(name);
+    auto unitsAlg = Mantid::API::AlgorithmManager::Instance().create("ConvertUnits");
+    unitsAlg->initialize();
+    unitsAlg->setPropertyValue("InputWorkspace", name);
+    unitsAlg->setProperty("Target", "Wavelength");
+    unitsAlg->setPropertyValue("OutputWorkspace", name + "_wl");
+    unitsAlg->execute();
+
+    auto ws = AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(name + "_wl");
+    if (baked) {
+      SampleFrameEquivalence::setSampleInLabFrame(*ws, rotation);
+    } else {
+      SampleFrameEquivalence::setSampleInOwnFrame(*ws, rotation);
+    }
+
+    MultipleScatteringCorrection msAlg;
+    msAlg.initialize();
+    msAlg.setPropertyValue("InputWorkspace", name + "_wl");
+    msAlg.setPropertyValue("Method", "SampleOnly");
+    // mm. Must be comfortably smaller than the 4 mm plate thickness or the unrotated case dices to
+    // nothing, while the rotated one still fits elements into its larger bounding box.
+    msAlg.setProperty("ElementSize", 2.0);
+    msAlg.setPropertyValue("OutputWorkspace", name + "_rst");
+    msAlg.execute();
+    TS_ASSERT(msAlg.isExecuted());
+
+    auto rst = AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(name + "_rst_sampleOnly");
+    return {rst->y(0)[0], rst->y(1)[0]};
+  }
+
+  /// Correct a rod sample sitting inside a hollow cylinder can, with the sample held in the given
+  /// frame, and return the two spectra values. A rod standing along y is used because tilting it
+  /// about x turns it towards the beam and changes how much material the beam crosses; it is small
+  /// enough that a 60 degree tilt still leaves it inside the can's bore.
+  std::array<double, 2> runSampleAndContainerCorrection(std::string const &name,
+                                                        const Mantid::Kernel::Matrix<double> &rotation,
+                                                        const bool baked) {
+    MakeSampleWorkspace(name);
+
+    auto setSampleAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("SetSample");
+    setSampleAlg->setRethrows(true);
+    setSampleAlg->initialize();
+    setSampleAlg->setPropertyValue("InputWorkspace", name);
+    setSampleAlg->setPropertyValue("Material", R"({"ChemicalFormula":"V", "SampleNumberDensity": 0.0721})");
+    setSampleAlg->setPropertyValue("Geometry",
+                                   R"({"Shape": "Cylinder", "Height": 0.6, "Radius": 0.15, "Center": [0., 0., 0.]})");
+    setSampleAlg->setPropertyValue("ContainerMaterial", R"({"ChemicalFormula":"V", "SampleNumberDensity": 0.0721})");
+    setSampleAlg->setPropertyValue(
+        "ContainerGeometry",
+        R"({"Shape": "HollowCylinder", "Height": 0.8, "InnerRadius": 0.4, "OuterRadius": 0.5, "Center": [0., 0., 0.]})");
+    TS_ASSERT_THROWS_NOTHING(setSampleAlg->execute());
+
+    auto unitsAlg = Mantid::API::AlgorithmManager::Instance().create("ConvertUnits");
+    unitsAlg->initialize();
+    unitsAlg->setPropertyValue("InputWorkspace", name);
+    unitsAlg->setProperty("Target", "Wavelength");
+    unitsAlg->setPropertyValue("OutputWorkspace", name + "_wl");
+    unitsAlg->execute();
+
+    // Replace only the sample shape, leaving the environment SetSample built in place. The rod is
+    // given in metres, matching the 0.6 cm height and 0.15 cm radius set above.
+    const std::string rodXML = "<cylinder id=\"rod\">"
+                               "<centre-of-bottom-base x=\"0.0\" y=\"-0.003\" z=\"0.0\"/>"
+                               "<axis x=\"0.0\" y=\"1.0\" z=\"0.0\"/>"
+                               "<radius val=\"0.0015\"/>"
+                               "<height val=\"0.006\"/>"
+                               "</cylinder>";
+    auto ws = AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(name + "_wl");
+    const auto material = ws->sample().getShape().material();
+    if (baked) {
+      SampleFrameEquivalence::setSampleInLabFrame(*ws, rotation, material, rodXML);
+    } else {
+      SampleFrameEquivalence::setSampleInOwnFrame(*ws, rotation, material, rodXML);
+    }
+
+    MultipleScatteringCorrection msAlg;
+    msAlg.initialize();
+    msAlg.setPropertyValue("InputWorkspace", name + "_wl");
+    msAlg.setPropertyValue("Method", "SampleAndContainer");
+    msAlg.setProperty("ElementSize", 0.5);          // mm, comfortably below the 3 mm rod diameter
+    msAlg.setProperty("ContainerElementSize", 1.5); // mm, coarser - the can only has to be present
+    msAlg.setPropertyValue("OutputWorkspace", name + "_rst");
+    msAlg.execute();
+    TS_ASSERT(msAlg.isExecuted());
+
+    auto rst =
+        AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(name + "_rst_sampleAndContainer");
+    return {rst->y(0)[0], rst->y(1)[0]};
+  }
+
   /**
    * @brief generate a workspace and register in ADS with given name
    *

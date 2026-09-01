@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidDataHandling/RotateSampleShape.h"
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
@@ -151,6 +152,36 @@ public:
     return ws;
   }
 
+  void test_rotating_a_mesh_does_not_disturb_a_workspace_sharing_it() {
+    // Sample's copy constructor shares the shape pointer, so a workspace copied from another holds
+    // the very same mesh. Rotating one used to turn the other's sample with it, because the mesh
+    // branch mutated the vertices where they lay while the CSG branch replaced the pointer.
+    auto cube = createCube(2.0, V3D(0.0, 0.0, 0.0));
+    Workspace2D_sptr ws = getWsWithMeshSampleShape(cube, "RotSampleShapeTest_ws");
+    Workspace2D_sptr sharer = WorkspaceCreationHelper::create2DWorkspace(10, 10);
+    sharer->mutableSample() = ws->sample();
+    TS_ASSERT_EQUALS(sharer->sample().getShapePtr(), ws->sample().getShapePtr());
+
+    const std::vector<V3D> before =
+        std::dynamic_pointer_cast<const MeshObject>(sharer->sample().getShapePtr())->getV3Ds();
+
+    RotateSampleShape alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Workspace", "RotSampleShapeTest_ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Axis0", "90,0,0,1,1"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // the rotated workspace got a new shape rather than a turned one
+    TS_ASSERT_DIFFERS(ws->sample().getShapePtr(), sharer->sample().getShapePtr());
+    const std::vector<V3D> after =
+        std::dynamic_pointer_cast<const MeshObject>(sharer->sample().getShapePtr())->getV3Ds();
+    TS_ASSERT_EQUALS(before, after);
+    // and the workspace that was asked for a rotation did get one
+    const std::vector<V3D> rotated = std::dynamic_pointer_cast<const MeshObject>(ws->sample().getShapePtr())->getV3Ds();
+    TS_ASSERT_DIFFERS(rotated, after);
+  }
+
   std::unique_ptr<MeshObject> createCube(const double size, const V3D &centre) {
     /**
      * Create cube of side length size with specified centre,
@@ -201,5 +232,123 @@ public:
                                                         {"Axis3", "30 , 4.0, 5.0,6.0, -1"},
                                                         {"Axis5", "10 , 1.0, 0.0 , 0.0,  1 "}};
     assert_rotatesample_runs_with_mesh_shape(cuboidMeshShape, algProperties);
+  }
+
+  // ~~~~ What the algorithm actually does to the geometry ~~~~
+  //
+  // Everything above asserts only that the algorithm ran, that a <goniometer> tag appeared and that
+  // the shape is still of the type it started as. Nothing checked that a point moved, so a sign
+  // error or a swapped axis order would pass the whole suite. The tests below pin the geometry.
+
+  static Mantid::Kernel::Matrix<double> ninetyAboutZ() {
+    return Mantid::Kernel::Matrix<double>(std::vector<double>{0, -1, 0, 1, 0, 0, 0, 0, 1});
+  }
+
+  /// Rotate a sphere centred on +x, so that where it ends up says what rotation was applied.
+  Workspace2D_sptr rotateSphere(const std::string &wsName, const std::string &axis,
+                                const Mantid::Kernel::Matrix<double> &runGoniometer) {
+    auto shapeXML = ComponentCreationHelper::sphereXML(0.5, V3D(1.0, 0.0, 0.0), "sphere");
+    Workspace2D_sptr ws = getWsWithCSGSampleShape(shapeXML, wsName);
+    ws->mutableRun().mutableGoniometer().setR(runGoniometer);
+    runRotateSampleShape(wsName, axis);
+    return ws;
+  }
+
+  void runRotateSampleShape(const std::string &wsName, const std::string &axis) {
+    RotateSampleShape alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Workspace", wsName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Axis0", axis));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+  }
+
+  void test_csg_surfaces_are_actually_rotated() {
+    // a sphere centred on +x, turned 90 degrees anticlockwise about z, has to end up on +y
+    auto ws = rotateSphere("RotSampleShapeTest_geom", "90,0,0,1,1", Mantid::Kernel::Matrix<double>(3, 3, true));
+
+    const auto &shape = ws->sample().getShape();
+    TS_ASSERT(shape.isValid(V3D(0.0, 1.0, 0.0)));
+    TS_ASSERT(!shape.isValid(V3D(1.0, 0.0, 0.0)));
+  }
+
+  void test_run_goniometer_is_ignored() {
+    // The algorithm applies the rotation it was asked for and nothing else. A 90 degree request
+    // against a 90 degree run goniometer turns the sphere 90 degrees, not 180: enacting the run's
+    // orientation is a separate job belonging to whoever consumes the shape.
+    auto ws = rotateSphere("RotSampleShapeTest_gonio", "90,0,0,1,1", ninetyAboutZ());
+
+    const auto &shape = ws->sample().getShape();
+    TS_ASSERT(shape.isValid(V3D(0.0, 1.0, 0.0)));
+    TS_ASSERT(!shape.isValid(V3D(-1.0, 0.0, 0.0)));
+    // and it is left on the run untouched, for that consumer to apply
+    TS_ASSERT_EQUALS(ws->run().getGoniometer().getR(), ninetyAboutZ());
+  }
+
+  void test_two_calls_compose() {
+    // Two 90 degree turns leave the sphere on -x. The CSG branch used to replace the tag, so the
+    // second call discarded the first; it now composes, which is what a mesh has always done and
+    // the only thing a mesh can do, since its vertices are the sole record of how far it turned.
+    auto ws = rotateSphere("RotSampleShapeTest_twice", "90,0,0,1,1", Mantid::Kernel::Matrix<double>(3, 3, true));
+    runRotateSampleShape("RotSampleShapeTest_twice", "90,0,0,1,1");
+
+    const auto &shape = ws->sample().getShape();
+    TS_ASSERT(shape.isValid(V3D(-1.0, 0.0, 0.0)));
+    TS_ASSERT(!shape.isValid(V3D(0.0, 1.0, 0.0)));
+  }
+
+  void test_two_calls_compose_for_a_mesh_shape_too() {
+    // the same pair of turns carries an offset cube spanning x = 4..6 round to x = -6..-4
+    auto cube = createCube(2, V3D(5.0, 0.0, 0.0));
+    Workspace2D_sptr ws = getWsWithMeshSampleShape(cube, "RotSampleShapeTest_mesh_twice");
+
+    runRotateSampleShape("RotSampleShapeTest_mesh_twice", "90,0,0,1,1");
+    runRotateSampleShape("RotSampleShapeTest_mesh_twice", "90,0,0,1,1");
+
+    const auto &box = ws->sample().getShape().getBoundingBox();
+    TS_ASSERT_DELTA(box.xMin(), -6.0, 1e-8);
+    TS_ASSERT_DELTA(box.xMax(), -4.0, 1e-8);
+  }
+
+  void test_mesh_shape_ignores_the_run_goniometer() {
+    // an offset cube spanning x = 4..6 turns 90 degrees onto y, not 180 degrees back onto -x
+    auto cube = createCube(2, V3D(5.0, 0.0, 0.0));
+    Workspace2D_sptr ws = getWsWithMeshSampleShape(cube, "RotSampleShapeTest_mesh_gonio");
+    ws->mutableRun().mutableGoniometer().setR(ninetyAboutZ());
+
+    runRotateSampleShape("RotSampleShapeTest_mesh_gonio", "90,0,0,1,1");
+
+    const auto &box = ws->sample().getShape().getBoundingBox();
+    TS_ASSERT_DELTA(box.yMin(), 4.0, 1e-8);
+    TS_ASSERT_DELTA(box.yMax(), 6.0, 1e-8);
+  }
+
+  void test_rotating_does_not_claim_the_shape_has_been_baked() {
+    // The defect this change exists to fix. A rotation the user asked for re-expresses the shape
+    // within its own frame, so the frame marker has to stay identity for both shape types - the
+    // CSG branch keeps that true by pinning <applied-goniometer> alongside the total it writes.
+    auto ws = rotateSphere("RotSampleShapeTest_marker", "90,0,0,1,1", Mantid::Kernel::Matrix<double>(3, 3, true));
+    TS_ASSERT_EQUALS(ws->sample().getShape().getAppliedRotation(), Mantid::Kernel::Matrix<double>(3, 3, true));
+
+    auto cube = createCube(2, V3D(5.0, 0.0, 0.0));
+    Workspace2D_sptr meshWs = getWsWithMeshSampleShape(cube, "RotSampleShapeTest_mesh_marker");
+    runRotateSampleShape("RotSampleShapeTest_mesh_marker", "90,0,0,1,1");
+    TS_ASSERT_EQUALS(meshWs->sample().getShape().getAppliedRotation(), Mantid::Kernel::Matrix<double>(3, 3, true));
+  }
+
+  void test_a_baked_rotation_survives_a_user_rotation() {
+    // A shape that really was moved into the lab frame keeps saying so afterwards. The user's turn
+    // goes on top of the total, but the record of how much of that total is a bake is unchanged.
+    auto shapeXML = ComponentCreationHelper::sphereXML(0.5, V3D(1.0, 0.0, 0.0), "sphere");
+    ShapeFactory factory;
+    auto baked = factory.rebakeGoniometer(ninetyAboutZ(), shapeXML, Mantid::Kernel::Matrix<double>(3, 3, true));
+    Workspace2D_sptr ws = getWsWithCSGSampleShape(baked, "RotSampleShapeTest_baked");
+    TS_ASSERT_EQUALS(ws->sample().getShape().getAppliedRotation(), ninetyAboutZ());
+
+    runRotateSampleShape("RotSampleShapeTest_baked", "90,0,0,1,1");
+
+    TS_ASSERT_EQUALS(ws->sample().getShape().getAppliedRotation(), ninetyAboutZ());
+    // the bake and the user rotation together carry the sphere from +x round to -x
+    TS_ASSERT(ws->sample().getShape().isValid(V3D(-1.0, 0.0, 0.0)));
   }
 };

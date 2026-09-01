@@ -5,8 +5,10 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -15,12 +17,14 @@
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/InstrumentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/DeltaEMode.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
+#include "SampleFrameEquivalence.h"
 
 #include <cmath>
 #include <cxxtest/TestSuite.h>
@@ -268,6 +272,59 @@ public:
       TS_ASSERT_DELTA(doubleScatterResult->y(SPECTRUMINDEXTOTEST)[0], 0.0019967315, delta);
       Mantid::API::AnalysisDataService::Instance().deepRemoveGroup("MuscatResults");
     }
+  }
+
+  void test_both_ways_of_orienting_the_sample_agree() {
+    // A sample in its own frame with the goniometer on the run, and the same sample already rotated
+    // into the lab frame by CopySample, describe the same experiment and must scatter identically.
+    const auto rotation = SampleFrameEquivalence::rotationY(30.0);
+    const double ownFrame = singleScatterOverTiltedPlate(rotation, false);
+    const double labFrame = singleScatterOverTiltedPlate(rotation, true);
+
+    TS_ASSERT_DELTA(ownFrame, labFrame, 1e-9);
+    // and the rotation actually mattered - otherwise the assertion above proves nothing
+    const double unrotated = singleScatterOverTiltedPlate(Mantid::Kernel::Matrix<double>(3, 3, true), false);
+    TS_ASSERT(std::abs(ownFrame - unrotated) > 1e-6);
+  }
+
+  /// Single-scatter result for the flat plate held in the given frame. A plate is used because
+  /// tilting it about y changes how much material the neutrons cross.
+  double singleScatterOverTiltedPlate(const Mantid::Kernel::Matrix<double> &rotation, const bool baked) {
+    const double THICKNESS = 0.001; // metres
+    auto inputWorkspace = SetupFlatPlateWorkspace(46, 1, 1.0, 1, 0.5, 1.0, 10 * THICKNESS, 10 * THICKNESS, THICKNESS);
+    inputWorkspace->mutableRun().mutableGoniometer().setR(rotation);
+
+    if (baked) {
+      // Bake through the real CopySample, so this test cannot pass by agreeing with the helper it
+      // is checking. Copying from an untouched twin leaves the shape rotated by this run's
+      // goniometer, which is the state CopySample gives a user.
+      auto source = SetupFlatPlateWorkspace(46, 1, 1.0, 1, 0.5, 1.0, 10 * THICKNESS, 10 * THICKNESS, THICKNESS);
+      auto copyAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("CopySample");
+      copyAlg->setRethrows(true);
+      copyAlg->initialize();
+      copyAlg->setChild(true);
+      copyAlg->setProperty("InputWorkspace", source);
+      copyAlg->setProperty("OutputWorkspace", inputWorkspace);
+      copyAlg->setProperty("CopyName", false);
+      copyAlg->setProperty("CopyEnvironment", false);
+      copyAlg->setProperty("CopyLattice", false);
+      TS_ASSERT_THROWS_NOTHING(copyAlg->execute());
+    }
+
+    auto alg = createAlgorithm();
+    alg->setProperty("InputWorkspace", inputWorkspace);
+    alg->setProperty("NumberScatterings", 1);
+    alg->setProperty("NeutronPathsSingle", 2000);
+    alg->setProperty("SeedValue", 123456789);
+    alg->execute();
+    TS_ASSERT(alg->isExecuted());
+
+    auto output = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>("MuscatResults");
+    auto singleScatter =
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(output->getItem("MuscatResults_Scatter_1"));
+    const double result = singleScatter->y(1)[0];
+    Mantid::API::AnalysisDataService::Instance().deepRemoveGroup("MuscatResults");
+    return result;
   }
 
   void test_flat_plate_sample_multiple_scatter_without_importance_sampling() {

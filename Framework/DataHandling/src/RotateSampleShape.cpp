@@ -83,13 +83,29 @@ void RotateSampleShape::exec() {
     return;
   }
 
-  const auto &oldRotation = ei->run().getGoniometer().getR();
-  auto newSampleShapeRot = sampleShapeRotation * oldRotation;
+  // Rotate the shape within its own frame, and leave the run's goniometer to whoever consumes it.
+  // Folding the run's rotation in here as well made a deliberate reorientation of the sample
+  // indistinguishable from a shape that had been moved into the lab frame.
   if (isMeshShape) {
-    auto meshShape = std::dynamic_pointer_cast<MeshObject>(ei->sample().getShapePtr());
-    meshShape->rotate(newSampleShapeRot);
+    // Rotate a copy and put that on the sample, rather than turning the vertices where they lie.
+    // Sample's copy constructor shares the shape pointer, so every workspace cloned from this one
+    // holds the same mesh, and rotating in place turned all of their samples too. The CSG branch
+    // below has always replaced the pointer; this makes the mesh branch behave the same way. The
+    // clone carries its own applied rotation across, so it keeps the frame it was in.
+    auto meshShape = std::dynamic_pointer_cast<MeshObject>(std::shared_ptr<IObject>(ei->sample().getShape().clone()));
+    meshShape->rotate(sampleShapeRotation);
+    ei->mutableSample().setShape(meshShape);
   } else {
-    shapeXML = Geometry::ShapeFactory().addGoniometerTag(newSampleShapeRot, shapeXML);
+    // Pin the bake before touching <goniometer>: without an <applied-goniometer> tag already in
+    // place, growing the total would leave the whole of it looking like a bake.
+    const auto bakedRotation = ei->sample().getShape().getAppliedRotation();
+    shapeXML = Geometry::ShapeFactory().addAppliedGoniometerTag(bakedRotation, shapeXML);
+
+    // Compose, rather than replace, so that repeated calls accumulate the way the mesh branch
+    // always has. A mesh cannot do anything else - its vertices are the only record of how far it
+    // has been turned - so composing is what lets the two shape types agree.
+    const auto total = Geometry::ShapeFactory::goniometerFromXML(shapeXML);
+    shapeXML = Geometry::ShapeFactory().addGoniometerTag(sampleShapeRotation * total, shapeXML);
     Mantid::DataHandling::CreateSampleShape::setSampleShape(*ei, shapeXML, false);
   }
 }

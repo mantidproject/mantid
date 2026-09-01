@@ -119,8 +119,7 @@ class OrientationExporter:
     def _build_reference_ws(self, ref_wsname):
         ref_ws = LoadEmptyInstrument(InstrumentName=self._model.instrument.get_instrument(), OutputWorkspace=ref_wsname)
         # Source from updated_mesh_ws (always identity goniometer) rather than wsname (which carries
-        # the current orientation R on its goniometer). copy_sample_preserving_initial_rotation keeps
-        # the baked-in initial rotation - which a plain CopySample would strip from a CSG shape - and
+        # the current orientation R on its goniometer). The copy keeps the initial rotation and
         # leaves the reference ws at an identity goniometer, i.e. already in its initial orientation
         # ready to save.
         self._model.workspaces.copy_sample_preserving_initial_rotation(self._model.workspaces.updated_mesh_ws, ref_ws)

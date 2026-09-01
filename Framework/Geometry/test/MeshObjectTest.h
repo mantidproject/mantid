@@ -888,6 +888,80 @@ public:
     auto rotated = lShape->getVertices();
     TS_ASSERT_DELTA(rotated, checkVector, 1e-8);
   }
+  void testCloneKeepsTheRotationAlreadyApplied()
+  /* A clone holds the rotated vertices, so it has to report the same rotation as the mesh it came
+   * from - otherwise it claims to still sit in the frame the vertices were defined in, and anything
+   * working out how much further to rotate it applies the same rotation a second time. */
+  {
+    auto lShape = createLShape();
+    const Kernel::Matrix<double> rotation(std::vector<double>{0, -1, 0, 1, 0, 0, 0, 0, 1});
+    lShape->bakeGoniometerRotation(rotation);
+    // compare against the matrix itself, not against the source's getter - otherwise a mesh that
+    // failed to record the bake would still pass by reporting identity on both sides
+    TS_ASSERT_EQUALS(lShape->getAppliedRotation(), rotation);
+
+    std::unique_ptr<IObject> cloned(lShape->clone());
+    TS_ASSERT_EQUALS(cloned->getAppliedRotation(), rotation);
+
+    std::unique_ptr<IObject> clonedWithMaterial(lShape->cloneWithMaterial(Kernel::Material()));
+    TS_ASSERT_EQUALS(clonedWithMaterial->getAppliedRotation(), rotation);
+  }
+
+  void testRotateLeavesTheAppliedRotationIdentity()
+  /* A plain rotate re-expresses the shape within its own frame rather than moving it into the lab
+   * frame, so it must not be recorded. LoadSampleShape's xDegrees, the sample environment spec's
+   * rotation and RotateSampleShape all arrive here; recording them would make a caller believe the
+   * goniometer had already been applied and skip it. */
+  {
+    auto lShape = createLShape();
+    const Kernel::Matrix<double> rotation(std::vector<double>{0, -1, 0, 1, 0, 0, 0, 0, 1});
+
+    lShape->rotate(rotation);
+
+    TS_ASSERT_EQUALS(lShape->getAppliedRotation(), Kernel::Matrix<double>(3, 3, true));
+  }
+
+  void testBakeGoniometerRotationRecordsAndComposes()
+  /* Baking does move the shape into the lab frame, so it is recorded, each bake composing onto the
+   * one before it. */
+  {
+    auto lShape = createLShape();
+    const auto original = lShape->getV3Ds();
+    const Kernel::Matrix<double> first(std::vector<double>{0, -1, 0, 1, 0, 0, 0, 0, 1});
+    const Kernel::Matrix<double> second(std::vector<double>{1, 0, 0, 0, 0, -1, 0, 1, 0});
+    const Kernel::Matrix<double> combined = second * first;
+
+    lShape->bakeGoniometerRotation(first);
+    lShape->bakeGoniometerRotation(second);
+
+    // the later bake goes on the outside, pinning the multiplication order
+    TS_ASSERT_EQUALS(lShape->getAppliedRotation(), combined);
+
+    // and the vertices agree with what is reported
+    const auto rotated = lShape->getV3Ds();
+    TS_ASSERT_EQUALS(rotated.size(), original.size());
+    for (size_t i = 0; i < original.size(); ++i) {
+      V3D expected = original[i];
+      expected.rotate(combined);
+      TS_ASSERT_DELTA(rotated[i].X(), expected.X(), 1e-8);
+      TS_ASSERT_DELTA(rotated[i].Y(), expected.Y(), 1e-8);
+      TS_ASSERT_DELTA(rotated[i].Z(), expected.Z(), 1e-8);
+    }
+  }
+
+  void testMultiplyLeavesTheAppliedRotationIdentity()
+  /* A general affine may scale, shear or translate, so it cannot be expressed as a goniometer bake
+   * at all - multiply never records one. */
+  {
+    auto lShape = createLShape();
+    Kernel::Matrix<double> transform(4, 4, true);
+    transform[0][3] = 1.0; // a translation along x
+
+    lShape->multiply(transform);
+
+    TS_ASSERT_EQUALS(lShape->getAppliedRotation(), Kernel::Matrix<double>(3, 3, true));
+  }
+
   void testTranslation()
   /* Test Translating a mesh */
   {

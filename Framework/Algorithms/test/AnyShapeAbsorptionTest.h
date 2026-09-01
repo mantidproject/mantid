@@ -17,6 +17,9 @@
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/UnitFactory.h"
+#include "SampleFrameEquivalence.h"
+
+#include <cmath>
 
 using Mantid::API::AlgorithmManager;
 using Mantid::API::AnalysisDataService;
@@ -371,6 +374,50 @@ public:
     TS_ASSERT(asaAlgo.isExecuted());
   }
 
+  void test_both_ways_of_orienting_the_sample_agree() {
+    // A sample in its own frame with the rotation on the run, and the same sample already rotated
+    // into the lab frame, describe the same experiment and must correct identically.
+    const auto rotation = SampleFrameEquivalence::rotationY(30.0);
+    const double ownFrame = runPlateCorrection("anyshape_own", rotation, false);
+    const double labFrame = runPlateCorrection("anyshape_lab", rotation, true);
+
+    TS_ASSERT_DELTA(ownFrame, labFrame, 1e-9);
+    // and the rotation actually mattered - otherwise the assertion above proves nothing
+    const double unrotated = runPlateCorrection("anyshape_flat", Mantid::Kernel::Matrix<double>(3, 3, true), false);
+    TS_ASSERT(std::abs(ownFrame - unrotated) > 1e-6);
+  }
+
 private:
+  /// Absorption-correct a plate sample held in the given frame and return the first attenuation
+  /// factor. A plate is used rather than a cylinder because tilting it about y changes how much
+  /// material a beam travelling along z has to cross, so the orientation is visible in the answer.
+  ///
+  /// No cross sections are set, so the material comes from the shape the fixture attached and the
+  /// shape is not replaced on the way through retrieveBaseProperties.
+  double runPlateCorrection(const std::string &name, const Mantid::Kernel::Matrix<double> &rotation, const bool baked) {
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 10);
+    ws->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
+    if (baked) {
+      SampleFrameEquivalence::setSampleInLabFrame(*ws, rotation);
+    } else {
+      SampleFrameEquivalence::setSampleInOwnFrame(*ws, rotation);
+    }
+
+    Mantid::Algorithms::AnyShapeAbsorption alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", ws);
+    alg.setPropertyValue("OutputWorkspace", name);
+    // mm. Comfortably smaller than the 4 mm plate thickness, or the unrotated case dices to nothing.
+    alg.setProperty("ElementSize", 2.0);
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
+
+    auto result = AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(name);
+    const double value = result->y(0).front();
+    AnalysisDataService::Instance().remove(name);
+    return value;
+  }
+
   Mantid::Algorithms::AnyShapeAbsorption atten;
 };

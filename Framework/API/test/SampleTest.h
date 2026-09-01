@@ -78,6 +78,9 @@ public:
   void validateMeshShape(const MeshObject &loadedMesh, const MeshObject &originalMesh) {
     TS_ASSERT_EQUALS(loadedMesh.getVertices(), originalMesh.getVertices());
     TS_ASSERT_EQUALS(loadedMesh.getTriangles(), originalMesh.getTriangles());
+    // the vertices are saved already rotated, so a mesh that came back reporting its own frame
+    // would be rotated a second time by anything applying the run's goniometer
+    TS_ASSERT_EQUALS(loadedMesh.getAppliedRotation(), originalMesh.getAppliedRotation());
   }
 
   void validateCSGShape(const CSGObject &loadedShape, const CSGObject &originalShape) {
@@ -399,6 +402,44 @@ public:
 
     validateMeshShape(dynamic_cast<const MeshObject &>(loaded.getShape()),
                       dynamic_cast<const MeshObject &>(sample.getShape()));
+  }
+
+  void test_nexus_with_mesh_shape_carrying_a_baked_rotation() {
+    NexusTestHelper th(true);
+    th.createFile("SampleTestMeshBaked.nxs");
+
+    auto meshShape = std::dynamic_pointer_cast<MeshObject>(getSimpleMesh());
+    const Mantid::Kernel::Matrix<double> baked(std::vector<double>{0, -1, 0, 1, 0, 0, 0, 0, 1});
+    meshShape->bakeGoniometerRotation(baked);
+
+    Sample sample;
+    sample.setShape(meshShape);
+    sample.saveNexus(th.file.get(), "sample");
+    th.reopenFile();
+
+    Sample loaded;
+    loaded.loadNexus(th.file.get(), "sample");
+
+    const auto &loadedMesh = dynamic_cast<const MeshObject &>(loaded.getShape());
+    TS_ASSERT_EQUALS(loadedMesh.getAppliedRotation(), baked);
+    validateMeshShape(loadedMesh, *meshShape);
+  }
+
+  void test_nexus_with_mesh_shape_in_its_own_frame_loads_as_unrotated() {
+    // nothing is written for an unrotated mesh, which is also what a file saved before the rotation
+    // was recorded looks like - both have to come back reporting the shape's own frame
+    NexusTestHelper th(true);
+    th.createFile("SampleTestMeshOwnFrame.nxs");
+
+    Sample sample;
+    sample.setShape(getSimpleMesh());
+    sample.saveNexus(th.file.get(), "sample");
+    th.reopenFile();
+
+    Sample loaded;
+    loaded.loadNexus(th.file.get(), "sample");
+
+    TS_ASSERT_EQUALS(loaded.getShape().getAppliedRotation(), Mantid::Kernel::Matrix<double>(3, 3, true));
   }
 
   void test_load_nexus_with_square_faces() {

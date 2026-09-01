@@ -9,6 +9,7 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/SolidAngleParams.h"
 #include "MantidGeometry/Rendering/ShapeInfo.h"
+#include "MantidKernel/Matrix.h"
 #include <map>
 #include <memory>
 #include <optional>
@@ -47,6 +48,35 @@ public:
   virtual bool isFiniteGeometry() const { return true; }
   virtual void setFiniteGeometryFlag(bool) {}
   virtual bool hasValidShape() const = 0;
+
+  /** The goniometer rotation baked into this shape.
+   *
+   * A shape may be stored either in its own frame or already rotated into the lab frame -
+   * CopySample bakes the destination workspace's goniometer in, while SetGoniometer alone leaves
+   * the shape untouched. Both produce a workspace whose run carries a goniometer, so the matrix is
+   * the only way to tell which frame the shape is in and avoid rotating it a second time.
+   *
+   * This reports which frame the shape is in, NOT every rotation it has ever had. Definition-frame
+   * rotations - the file-load orientation of LoadSampleShape and the sample environment spec,
+   * "rotate-all" and per-primitive "rotate" tags, and RotateSampleShape - re-express the shape
+   * within its own frame and are deliberately excluded. Only a genuine move into the lab frame
+   * counts.
+   *
+   * Identity therefore means the shape is expressed in its own frame, however much its definition
+   * has been rotated within that frame.
+   *
+   * More precisely, this is the ordered product of the goniometer bakes the shape has been given.
+   * That is outermost among the bakes, but not necessarily the outermost rotation overall: a
+   * definition-frame rotation applied after a bake - RotateSampleShape on a shape CopySample has
+   * already baked - ends up outside it. A mesh cannot record anything else, its vertices being the
+   * only account of how far it has been turned, and the CSG side composes to match so that the two
+   * agree. Re-baking such a shape is still correct: stripping the old bake and applying the new one
+   * conjugates that later rotation into the new frame, which is where it belongs.
+   */
+  virtual const Kernel::Matrix<double> &getAppliedRotation() const {
+    static const Kernel::Matrix<double> identity(3, 3, true);
+    return identity;
+  }
   virtual IObject *clone() const = 0;
   virtual IObject *cloneWithMaterial(const Kernel::Material &material) const = 0;
 

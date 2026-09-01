@@ -733,11 +733,20 @@ void SetSample::setSampleShape(API::ExperimentInfo &experiment, const Kernel::Pr
     const auto refFrame = experiment.getInstrument()->getReferenceFrame();
     auto xml = tryCreateXMLFromArgsOnly(*args, *refFrame);
     if (!xml.empty()) {
-      Kernel::Matrix<double> rotationMatrix = experiment.run().getGoniometer().getR();
-      if (rotationMatrix != Kernel::Matrix<double>(3, 3, true) && !sampleEnv) {
-        // Only add goniometer tag if rotationMatrix is not the Identity,
-        // and this shape is not defined within a sample environment
-        xml = Geometry::ShapeFactory().addGoniometerTag(rotationMatrix, xml);
+      const Kernel::Matrix<double> rotationMatrix = experiment.run().getGoniometer().getR();
+      // Bake the goniometer in only when there is no sample environment. The container is never
+      // goniometer-rotated anywhere in Mantid, so turning the sample while the can stays put would
+      // describe an assembly that cannot exist - the sample poking out through its own container -
+      // and the absorption algorithms trace the two as one object. Both environment paths below
+      // decline to bake for the same reason.
+      const bool bakeRunGoniometer = rotationMatrix != Kernel::Matrix<double>(3, 3, true) && !sampleEnv;
+      if (bakeRunGoniometer) {
+        // A CSG string handed straight through by the user can already carry a bake - shape XML read
+        // back off a sample that CopySample rotated, say. Rebaking against that replaces it; passing
+        // identity here would compose the two and rotate the shape twice. The generated shapes have
+        // no rotation of their own, so this is identity for them.
+        const auto currentBake = Geometry::ShapeFactory::appliedGoniometerFromXML(xml);
+        xml = Geometry::ShapeFactory().rebakeGoniometer(rotationMatrix, xml, currentBake);
       }
       CreateSampleShape::setSampleShape(experiment, xml);
       return;
@@ -757,6 +766,8 @@ void SetSample::setSampleShape(API::ExperimentInfo &experiment, const Kernel::Pr
           shapeArgs.emplace(boost::algorithm::to_lower_copy(prop->name()), val * 0.01);
         }
       }
+      // The <samplegeometry> form of a can's sample shape, which is built through ShapeFactory and
+      // so is always a CSGObject. The run's goniometer is deliberately not baked in - see above.
       auto shapeObject = can.createSampleShape(shapeArgs);
       // Given that the object is a CSG object, set the object
       // directly on the sample ensuring we preserve the
@@ -771,17 +782,15 @@ void SetSample::setSampleShape(API::ExperimentInfo &experiment, const Kernel::Pr
         throw std::runtime_error("The can has a fixed sample shape that cannot "
                                  "be adjusted using the Geometry parameter.");
       }
-      auto shapeObject = can.getSampleShape();
-
-      // apply Goniometer rotation
-      // Rotate only implemented on mesh objects so far
-      if (typeid(shapeObject) == typeid(std::shared_ptr<Geometry::MeshObject>)) {
-        const std::vector<double> rotationMatrix = experiment.run().getGoniometer().getR();
-        std::dynamic_pointer_cast<Geometry::MeshObject>(shapeObject)->rotate(rotationMatrix);
-      }
-
+      // The <samplestlfile> form, which is a MeshObject. This is the same feature as the branch
+      // above for the other shape type, and likewise does not bake the run's goniometer in.
+      //
+      // Take a copy rather than using the container's shape directly. getSampleShape hands back the
+      // container's own pointer, and sample environment specs live in a process-wide cache, so
+      // setting the material on it would change the cached definition for every later SetSample in
+      // the session.
       const auto mat = experiment.sample().getMaterial();
-      shapeObject->setMaterial(mat);
+      auto shapeObject = std::shared_ptr<Geometry::IObject>(can.getSampleShape()->cloneWithMaterial(mat));
 
       experiment.mutableSample().setShape(shapeObject);
     } else {

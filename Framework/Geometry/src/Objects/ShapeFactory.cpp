@@ -34,6 +34,10 @@
 #include "boost/make_shared.hpp"
 
 #include <algorithm>
+#include <iomanip>
+#include <limits>
+#include <optional>
+#include <sstream>
 
 using Poco::XML::Document;
 using Poco::XML::DOMParser;
@@ -125,17 +129,32 @@ std::shared_ptr<CSGObject> ShapeFactory::createShape(Poco::XML::Element *pElem) 
     return retVal;
   }
 
+  // <goniometer> is the TOTAL rotation applied to the surfaces below as they are parsed.
   Poco::AutoPtr<NodeList> pNL_gonio = pElem->getElementsByTagName("goniometer");
   auto *pElemGonio = static_cast<Element *>(pNL_gonio->item(0));
   m_gonioRotateMatrix.identityMatrix();
   if (pElemGonio) {
-    // Parse the rotate matrix, defined in units of radians
-    for (size_t i = 0; i < 3; ++i) {
-      for (size_t j = 0; j < 3; ++j) {
-        m_gonioRotateMatrix[i][j] = getDoubleAttribute(pElemGonio, "a" + std::to_string(i + 1) + std::to_string(j + 1));
-      }
-    }
+    m_gonioRotateMatrix = parseMatrixElement(pElemGonio);
   }
+
+  // <applied-goniometer> says how much of that total is a bake into the lab frame, as opposed to a
+  // rotation of the shape within its own frame. It is pure metadata and rotates nothing: once the
+  // surfaces are parsed nothing else in the shape says which frame it ended up in, and a caller
+  // that also has a goniometer on the run needs this to avoid applying the rotation twice.
+  Poco::AutoPtr<NodeList> pNL_applied = pElem->getElementsByTagName("applied-goniometer");
+  auto *pElemApplied = static_cast<Element *>(pNL_applied->item(0));
+  Kernel::Matrix<double> bakedRotation(3, 3, true);
+  if (pElemApplied && !pElemGonio) {
+    g_log.warning() << "An <applied-goniometer> tag was given without a <goniometer> tag. There is "
+                    << "no rotation for it to describe, so it is ignored.\n";
+  } else if (pElemApplied) {
+    bakedRotation = parseMatrixElement(pElemApplied);
+  } else {
+    // Shapes written before the tag existed used <goniometer> only for a bake, so treat the whole
+    // of it as one. This keeps XML saved by earlier versions reading back the way it used to.
+    bakedRotation = m_gonioRotateMatrix;
+  }
+  retVal->setAppliedGoniometerRotation(bakedRotation);
 
   Poco::AutoPtr<NodeList> pNL_rotate_all = pElem->getElementsByTagName("rotate-all");
   auto *pElemRotateAll = static_cast<Element *>(pNL_rotate_all->item(0));
@@ -684,6 +703,19 @@ CuboidCorners ShapeFactory::parseCuboid(Poco::XML::Element *pElem) {
     result.lft = parsePosition(pElem_lft);
     result.lbb = parsePosition(pElem_lbb);
     result.rfb = parsePosition(pElem_rfb);
+
+    // The automatic rotations apply here just as they do to the alternate syntax below. They were
+    // previously missed, so a \<goniometer\> or \<rotate-all\> tag was silently dropped for a cuboid
+    // written as four corners - the form ComponentCreationHelper and FlatPlateAbsorption emit -
+    // leaving the shape unrotated while everything else on the workspace assumed it had been
+    // rotated. The corners are absolute positions, so they rotate about the origin, which is what
+    // the goniometer describes.
+    if (m_rotateAllMatrix != Kernel::Matrix<double>(3, 3, true)) {
+      result.rotatePoints(m_rotateAllMatrix);
+    }
+    if (m_gonioRotateMatrix != Kernel::Matrix<double>(3, 3, true)) {
+      result.rotatePoints(m_gonioRotateMatrix);
+    }
   } else if (usingAlternateSyntax && !usingPointSyntax) {
     if (usedPointSyntaxField)
       throw std::invalid_argument(SYNTAX_ERROR_MSG);
@@ -851,14 +883,25 @@ std::string ShapeFactory::parseInfiniteCone(Poco::XML::Element *pElem, std::map<
   Element *pElemAxis = getShapeElement(pElem, "axis");
   Element *pElemAngle = getShapeElement(pElem, "angle");
 
-  const V3D normVec = normalize(parsePosition(pElemAxis));
+  V3D normVec = normalize(parsePosition(pElemAxis));
+  V3D tipPoint = parsePosition(pElemTipPoint);
 
   // getDoubleAttribute can throw - put the calls above any new
   const double angle = getDoubleAttribute(pElemAngle, "val");
 
+  // Rotate the tip and the axis by the rotate-all and goniometer tags, as for the other primitives
+  if (m_rotateAllMatrix != Kernel::Matrix<double>(3, 3, true)) {
+    tipPoint.rotate(m_rotateAllMatrix);
+    normVec.rotate(m_rotateAllMatrix);
+  }
+  if (m_gonioRotateMatrix != Kernel::Matrix<double>(3, 3, true)) {
+    tipPoint.rotate(m_gonioRotateMatrix);
+    normVec.rotate(m_gonioRotateMatrix);
+  }
+
   // add infinite double cone
   auto pCone = std::make_shared<Cone>();
-  pCone->setCentre(parsePosition(pElemTipPoint));
+  pCone->setCentre(tipPoint);
   pCone->setNorm(normVec);
   pCone->setAngle(angle);
   prim[l_id] = pCone;
@@ -869,7 +912,7 @@ std::string ShapeFactory::parseInfiniteCone(Poco::XML::Element *pElem, std::map<
 
   // plane top cut of top part of double cone
   auto pPlaneBottom = std::make_shared<Plane>();
-  pPlaneBottom->setPlane(parsePosition(pElemTipPoint), normVec);
+  pPlaneBottom->setPlane(tipPoint, normVec);
   prim[l_id] = pPlaneBottom;
   retAlgebraMatch << "-" << l_id << ")";
   l_id++;
@@ -895,15 +938,18 @@ std::string ShapeFactory::parseCone(Poco::XML::Element *pElem, std::map<int, std
   Element *pElemAngle = getShapeElement(pElem, "angle");
   Element *pElemHeight = getShapeElement(pElem, "height");
 
-  const V3D normVec = normalize(parsePosition(pElemAxis));
-
   // getDoubleAttribute can throw - put the calls above any new
   const double angle = getDoubleAttribute(pElemAngle, "val");
   const double height = getDoubleAttribute(pElemHeight, "val");
 
+  // Rotate the tip and the axis exactly as createGeometryHandler rotates the ShapeInfo it builds from
+  // the same XML, so the surfaces and the metadata cannot describe the cone in two different places
+  const auto [tipPoint, normVec] =
+      applyShapeRotations(pElem, parsePosition(pElemTipPoint), normalize(parsePosition(pElemAxis)));
+
   // add infinite double cone
   auto pCone = std::make_shared<Cone>();
-  pCone->setCentre(parsePosition(pElemTipPoint));
+  pCone->setCentre(tipPoint);
   pCone->setNorm(normVec);
   pCone->setAngle(angle);
   prim[l_id] = pCone;
@@ -914,7 +960,7 @@ std::string ShapeFactory::parseCone(Poco::XML::Element *pElem, std::map<int, std
 
   // Plane to cut off cone from below
   auto pPlaneTop = std::make_shared<Plane>();
-  V3D pointInPlane = parsePosition(pElemTipPoint);
+  V3D pointInPlane = tipPoint;
   pointInPlane -= (normVec * height);
   pPlaneTop->setPlane(pointInPlane, normVec);
   prim[l_id] = pPlaneTop;
@@ -923,7 +969,7 @@ std::string ShapeFactory::parseCone(Poco::XML::Element *pElem, std::map<int, std
 
   // plane top cut of top part of double cone
   auto pPlaneBottom = std::make_shared<Plane>();
-  pPlaneBottom->setPlane(parsePosition(pElemTipPoint), normVec);
+  pPlaneBottom->setPlane(tipPoint, normVec);
   prim[l_id] = pPlaneBottom;
   retAlgebraMatch << "-" << l_id << ")";
   l_id++;
@@ -1530,6 +1576,56 @@ std::shared_ptr<CSGObject> ShapeFactory::createHexahedralShape(double xlb, doubl
 }
 
 /// create a special geometry handler for the known finite primitives
+/** Apply to a primitive's centre and axis every rotation its surfaces will have had applied to them.
+ *
+ * Three tags contribute and they do not all act on the same things. A per-primitive \<rotate\> turns
+ * the shape about its own centre, so it moves the axis and leaves the centre alone. \<rotate-all\> and
+ * the automatic \<goniometer\> reorient the whole shape about the origin, so they move both.
+ *
+ * This exists so that createGeometryHandler and the parse* functions cannot disagree. They read the
+ * same XML separately - one to build the surfaces the CSG tests against, the other to build the
+ * ShapeInfo that the bounding box, the rendered mesh and the volume come from - and when only one of
+ * them rotated, a rotated shape ended up described in two different places at once.
+ *
+ * @param pElem :: the primitive's XML element, read for an optional \<rotate\> tag
+ * @param centre :: the primitive's centre, tip or base
+ * @param axis :: the primitive's axis; pass anything for a shape that has none, and ignore the result
+ * @return the rotated centre and axis
+ */
+std::pair<V3D, V3D> ShapeFactory::applyShapeRotations(Poco::XML::Element *pElem, V3D centre, V3D axis) {
+  if (Element *pElemRotate = getOptionalShapeElement(pElem, "rotate")) {
+    const std::vector<double> rotateAngles = DegreesToRadians(parsePosition(pElemRotate));
+    axis.rotate(generateMatrix(rotateAngles[0], rotateAngles[1], rotateAngles[2]));
+  }
+  for (const auto &automaticRotation : {m_rotateAllMatrix, m_gonioRotateMatrix}) {
+    if (automaticRotation != Kernel::Matrix<double>(3, 3, true)) {
+      centre.rotate(automaticRotation);
+      axis.rotate(automaticRotation);
+    }
+  }
+  return {centre, axis};
+}
+
+/** Apply the same rotations to a cylinder's base and axis that parseCylinder applies to its surfaces.
+ *
+ * A cylinder is given by the centre of its bottom base, but a per-primitive \<rotate\> turns it about
+ * its own centre, which is the midpoint of its axis rather than that base. parseCylinder and
+ * parseHollowCylinder build their surfaces around that midpoint, so the base has to be recovered from
+ * the rotated midpoint and the rotated axis - rotating the base directly would swing the cylinder
+ * about its end and put the ShapeInfo somewhere the surfaces are not.
+ *
+ * @param pElem :: the primitive's XML element, read for an optional \<rotate\> tag
+ * @param base :: the centre of the cylinder's bottom base
+ * @param axis :: the cylinder's normalised axis
+ * @param height :: the cylinder's height
+ * @return the rotated base and axis
+ */
+std::pair<V3D, V3D> ShapeFactory::rotatedCylinderBase(Poco::XML::Element *pElem, const V3D &base, const V3D &axis,
+                                                      const double height) {
+  const auto [midpoint, normVec] = applyShapeRotations(pElem, base + axis * (0.5 * height), axis);
+  return {midpoint - normVec * (0.5 * height), normVec};
+}
+
 void ShapeFactory::createGeometryHandler(Poco::XML::Element *pElem, const std::shared_ptr<CSGObject> &Obj) {
 
   auto geomHandler = std::make_shared<GeometryHandler>(Obj);
@@ -1549,36 +1645,41 @@ void ShapeFactory::createGeometryHandler(Poco::XML::Element *pElem, const std::s
     V3D centre;
     if (pElemCentre)
       centre = parsePosition(pElemCentre);
+    // parseSphere deliberately ignores <rotate> - turning a sphere about its own centre is a no-op -
+    // so only the centre is taken from here, leaving the discarded axis to absorb it
+    centre = applyShapeRotations(pElem, centre, V3D()).first;
     shapeInfo.setSphere(centre, std::stod(pElemRadius->getAttribute("val")));
   } else if (pElem->tagName() == "cylinder") {
     Element *pElemCentre = getShapeElement(pElem, "centre-of-bottom-base");
     Element *pElemAxis = getShapeElement(pElem, "axis");
     Element *pElemRadius = getShapeElement(pElem, "radius");
     Element *pElemHeight = getShapeElement(pElem, "height");
-    const V3D normVec = normalize(parsePosition(pElemAxis));
-    shapeInfo.setCylinder(parsePosition(pElemCentre), normVec, std::stod(pElemRadius->getAttribute("val")),
-                          std::stod(pElemHeight->getAttribute("val")));
+    const double height = std::stod(pElemHeight->getAttribute("val"));
+    const auto [base, normVec] =
+        rotatedCylinderBase(pElem, parsePosition(pElemCentre), normalize(parsePosition(pElemAxis)), height);
+    shapeInfo.setCylinder(base, normVec, std::stod(pElemRadius->getAttribute("val")), height);
   } else if (pElem->tagName() == "hollow-cylinder") {
     Element *pElemCentre = getShapeElement(pElem, "centre-of-bottom-base");
     Element *pElemAxis = getShapeElement(pElem, "axis");
     Element *pElemInnerRadius = getShapeElement(pElem, "inner-radius");
     Element *pElemOuterRadius = getShapeElement(pElem, "outer-radius");
     Element *pElemHeight = getShapeElement(pElem, "height");
-    V3D normVec = parsePosition(pElemAxis);
-    normVec.normalize();
-    shapeInfo.setHollowCylinder(parsePosition(pElemCentre), normVec, std::stod(pElemInnerRadius->getAttribute("val")),
-                                std::stod(pElemOuterRadius->getAttribute("val")),
-                                std::stod(pElemHeight->getAttribute("val")));
+    const double height = std::stod(pElemHeight->getAttribute("val"));
+    const auto [base, normVec] =
+        rotatedCylinderBase(pElem, parsePosition(pElemCentre), normalize(parsePosition(pElemAxis)), height);
+    shapeInfo.setHollowCylinder(base, normVec, std::stod(pElemInnerRadius->getAttribute("val")),
+                                std::stod(pElemOuterRadius->getAttribute("val")), height);
   } else if (pElem->tagName() == "cone") {
     Element *pElemTipPoint = getShapeElement(pElem, "tip-point");
     Element *pElemAxis = getShapeElement(pElem, "axis");
     Element *pElemAngle = getShapeElement(pElem, "angle");
     Element *pElemHeight = getShapeElement(pElem, "height");
 
-    const V3D normVec = normalize(parsePosition(pElemAxis));
+    const auto [tipPoint, normVec] =
+        applyShapeRotations(pElem, parsePosition(pElemTipPoint), normalize(parsePosition(pElemAxis)));
     const double height = std::stod(pElemHeight->getAttribute("val"));
     const double radius = height * tan(M_PI * std::stod(pElemAngle->getAttribute("val")) / 180.0);
-    shapeInfo.setCone(parsePosition(pElemTipPoint), normVec, radius, height);
+    shapeInfo.setCone(tipPoint, normVec, radius, height);
   }
 
   geomHandler->setShapeInfo(std::move(shapeInfo));
@@ -1636,41 +1737,162 @@ Kernel::Matrix<double> ShapeFactory::generateZRotation(double zrotate) {
   return Kernel::Matrix<double>(matrixList);
 }
 
-std::string ShapeFactory::addGoniometerTag(const Kernel::Matrix<double> &rotateMatrix, std::string xml) {
+/**
+ * Read a 3x3 matrix held as a11..a33 attributes on an XML element
+ * @param pElem The element carrying the attributes
+ * @return The matrix
+ */
+Kernel::Matrix<double> ShapeFactory::parseMatrixElement(Poco::XML::Element *pElem) {
+  Kernel::Matrix<double> matrix(3, 3, true);
+  for (size_t i = 0; i < 3; ++i) {
+    for (size_t j = 0; j < 3; ++j) {
+      matrix[i][j] = getDoubleAttribute(pElem, "a" + std::to_string(i + 1) + std::to_string(j + 1));
+    }
+  }
+  return matrix;
+}
 
-  // Delete previous goniometer from xml
-  std::size_t foundGonioTag = xml.find("<goniometer");
-  if (foundGonioTag != std::string::npos) {
-    std::size_t gonioTagLength = xml.find(">", foundGonioTag + 1) - foundGonioTag;
-    xml.erase(foundGonioTag, gonioTagLength);
+/**
+ * Replace, or insert, a tag holding a 3x3 matrix as a11..a33 attributes.
+ * @param tagName The element name, without angle brackets
+ * @param matrix The matrix to write
+ * @param xml The shape XML to edit
+ * @return The edited XML
+ */
+std::string ShapeFactory::insertMatrixTag(const std::string &tagName, const Kernel::Matrix<double> &matrix,
+                                          std::string xml) {
+  const std::string openTag = "<" + tagName;
+
+  // Delete any previous tag of this name. The closing bracket is part of the tag, so erase it too -
+  // leaving it behind drops a stray '>' into the character data on every rewrite, which is legal
+  // XML and so goes unnoticed until the tags are rewritten repeatedly.
+  const std::size_t foundTag = xml.find(openTag);
+  if (foundTag != std::string::npos) {
+    const std::size_t tagLength = xml.find(">", foundTag + 1) - foundTag + 1;
+    xml.erase(foundTag, tagLength);
   }
 
-  // Put goniometer tag in correct place in xml
-  std::size_t gonioPlace;
-  std::size_t foundType = xml.find("</type>");
-  std::size_t foundSampleGeometry = xml.find("</samplegeometry");
+  // Put the tag in the correct place in the xml
+  std::size_t tagPlace;
+  const std::size_t foundType = xml.find("</type>");
+  const std::size_t foundSampleGeometry = xml.find("</samplegeometry");
 
   if (foundType != std::string::npos) {
-    // Add goniometer BEFORE Type end tag
-    gonioPlace = foundType;
+    // Add BEFORE Type end tag
+    tagPlace = foundType;
   } else if (foundSampleGeometry != std::string::npos) {
-    // If no type tag, add goniometer BEFORE SampleGeometry end tag
-    gonioPlace = foundSampleGeometry;
+    // If no type tag, add BEFORE SampleGeometry end tag
+    tagPlace = foundSampleGeometry;
   } else {
-    // If no Type or SampleGeometry tag, add goniometer to the end
-    gonioPlace = xml.size();
+    // If no Type or SampleGeometry tag, add to the end
+    tagPlace = xml.size();
   }
 
   const std::vector<std::string> matrixElementNames = {"a11", "a12", "a13", "a21", "a22", "a23", "a31", "a32", "a33"};
-  std::string goniometerRotate = " <goniometer ";
-  for (size_t i = 0; i < rotateMatrix.numRows(); ++i) {
-    for (size_t j = 0; j < rotateMatrix.numCols(); ++j) {
-      goniometerRotate += matrixElementNames[3 * i + j] + " = '" + std::to_string(rotateMatrix[i][j]) + "' ";
+  // Full precision: these matrices are now composed rather than overwritten, so rounding here
+  // accumulates over repeated CopySample and RotateSampleShape calls.
+  std::ostringstream tag;
+  tag << std::setprecision(std::numeric_limits<double>::max_digits10);
+  tag << " " << openTag << " ";
+  for (size_t i = 0; i < matrix.numRows(); ++i) {
+    for (size_t j = 0; j < matrix.numCols(); ++j) {
+      tag << matrixElementNames[3 * i + j] << " = '" << matrix[i][j] << "' ";
     }
   }
-  goniometerRotate += "/>";
-  xml.insert(gonioPlace, goniometerRotate);
+  tag << "/>";
+  xml.insert(tagPlace, tag.str());
 
   return xml;
+}
+
+std::string ShapeFactory::addGoniometerTag(const Kernel::Matrix<double> &rotateMatrix, std::string xml) {
+  // "<goniometer" cannot match inside "<applied-goniometer" - the character before the name is '-',
+  // not '<' - so replacing one tag never disturbs the other.
+  return insertMatrixTag("goniometer", rotateMatrix, std::move(xml));
+}
+
+std::string ShapeFactory::addAppliedGoniometerTag(const Kernel::Matrix<double> &bakedRotation, std::string xml) {
+  return insertMatrixTag("applied-goniometer", bakedRotation, std::move(xml));
+}
+
+namespace {
+/// The matrix held in the named tag of a shape XML string, or nullopt when the tag is absent. The
+/// name is matched with its opening '<' attached, so "goniometer" cannot match "applied-goniometer".
+std::optional<Kernel::Matrix<double>> matrixFromXMLTag(const std::string &xml, const std::string &tagName) {
+  Kernel::Matrix<double> total(3, 3, true);
+  const std::size_t foundTag = xml.find("<" + tagName);
+  if (foundTag == std::string::npos) {
+    return std::nullopt;
+  }
+  const std::size_t tagEnd = xml.find(">", foundTag + 1);
+  const std::string tag = xml.substr(foundTag, tagEnd - foundTag);
+  for (size_t i = 0; i < 3; ++i) {
+    for (size_t j = 0; j < 3; ++j) {
+      const std::string name = "a" + std::to_string(i + 1) + std::to_string(j + 1);
+      const std::size_t attr = tag.find(name);
+      if (attr == std::string::npos) {
+        continue;
+      }
+      // Accept either quote character. This tag is written here with single quotes, but the XML
+      // goes back through Poco's writer every time createShape rebuilds a shape from it, and the
+      // quoting style that comes back out is not ours to assume.
+      const std::size_t equals = tag.find("=", attr + name.size());
+      if (equals == std::string::npos) {
+        continue;
+      }
+      const std::size_t open = tag.find_first_of("'\"", equals);
+      if (open == std::string::npos) {
+        continue;
+      }
+      const std::size_t close = tag.find(tag[open], open + 1);
+      if (close == std::string::npos) {
+        continue;
+      }
+      total[i][j] = std::stod(tag.substr(open + 1, close - open - 1));
+    }
+  }
+  return total;
+}
+} // namespace
+
+Kernel::Matrix<double> ShapeFactory::goniometerFromXML(const std::string &xml) {
+  return matrixFromXMLTag(xml, "goniometer").value_or(Kernel::Matrix<double>(3, 3, true));
+}
+
+Kernel::Matrix<double> ShapeFactory::appliedGoniometerFromXML(const std::string &xml) {
+  // Mirrors how createShape reads the pair, so a shape rebuilt from this XML reports what is
+  // returned here through getAppliedRotation.
+  if (const auto applied = matrixFromXMLTag(xml, "applied-goniometer")) {
+    // The tag only describes a rotation when there is a <goniometer> for it to describe; on its own
+    // createShape ignores it, so nothing has been baked.
+    if (matrixFromXMLTag(xml, "goniometer")) {
+      return *applied;
+    }
+    return Kernel::Matrix<double>(3, 3, true);
+  }
+  // Shapes written before <applied-goniometer> existed used <goniometer> only for a bake, so the
+  // whole of it is the bake. Identity when there is no rotation at all.
+  return goniometerFromXML(xml);
+}
+
+std::string ShapeFactory::rebakeGoniometer(const Kernel::Matrix<double> &newBake, std::string xml,
+                                           const Kernel::Matrix<double> &currentBake) {
+  // Strip the old bake off the total, leaving the definition-frame rotation, then put the new bake
+  // on the outside of it. These are orthonormal so the transpose is the exact inverse.
+  const Kernel::Matrix<double> total = goniometerFromXML(xml);
+
+  // When the whole of the total is the bake there is no definition-frame rotation to preserve and
+  // the answer is just the new bake. Taking that shortcut is not only cheaper, it is exact: going
+  // the long way round would multiply by the old bake and its transpose, and the result of that is
+  // identity only to within rounding. Those last bits are visible - they reorder the triangles of
+  // the rendered mesh - and they would accumulate over repeated copies.
+  if (total == currentBake) {
+    xml = addGoniometerTag(newBake, std::move(xml));
+    return addAppliedGoniometerTag(newBake, std::move(xml));
+  }
+
+  const Kernel::Matrix<double> newTotal = newBake * currentBake.Tprime() * total;
+  xml = addGoniometerTag(newTotal, std::move(xml));
+  return addAppliedGoniometerTag(newBake, std::move(xml));
 }
 } // namespace Mantid::Geometry
