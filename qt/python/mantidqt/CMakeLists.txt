@@ -194,6 +194,7 @@ set(PYTHON_WIDGET_WORKBENCH_ONLY_TESTS
     mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_view.py
     mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_io.py
     mantidqt/widgets/workspacewidget/test/test_workspacetreewidget.py
+    mantidqt/widgets/tutorial/test/test_bubble.py
     mantidqt/widgets/tutorial/test/test_interaction.py
     mantidqt/widgets/tutorial/test/test_overlay.py
     mantidqt/widgets/tutorial/test/test_step.py
