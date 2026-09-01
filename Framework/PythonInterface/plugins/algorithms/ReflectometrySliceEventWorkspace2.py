@@ -104,7 +104,13 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
                 sliced_workspaces.append(output_ws_group)
                 self._clean_up(monitor_ws_group)
             # Transform the workspace groups so that each slice has a workspace group with the same shape as the original input workspace.
-            for i, slice in enumerate(zip(*sliced_workspaces)):
+            if not all(len(sliced_workspaces[0]) == len(ws) for ws in sliced_workspaces[1:]):
+                raise RuntimeError(
+                    f"All input workspaces must produce the same number of workspaces when sliced."
+                    f"FilterEvents will silently produce fewer than the prescribed number of slices if those slices would be empty."
+                    f"Check your slicing parameters and try again. Slices per input: {str([len(ws) for ws in sliced_workspaces])}"
+                )
+            for slice in zip(*sliced_workspaces):
                 slice_group = self._group_workspaces(list(slice))
                 mtd.addOrReplace(self._create_name_for_slice_group(output_ws_base_name, slice_group), slice_group)
             for ws in sliced_workspaces:
