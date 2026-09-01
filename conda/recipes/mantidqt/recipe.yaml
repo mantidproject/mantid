@@ -54,7 +54,7 @@ requirements:
     - matplotlib ${{ matplotlib }}
     - qscintilla2 ${{ qscintilla2 }}
     - qtpy ${{ qtpy }}
-    - python
+    - python ${{ python }}
     - ${{ pin_compatible("qt6-main", upper_bound="x.x") }}
     - if: linux
       then:

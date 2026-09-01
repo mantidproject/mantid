@@ -260,16 +260,58 @@ For example, to convert all loops classified as *risky* or above, we would appen
 
 clang-tidy does not have a concept of c++ standards it should use and leaves it to the developer to know which to turn on and off.
 
-Cmake chart of target dependencies
+CMake chart of target dependencies
 ----------------------------------
 
-Cmake has the ability to make graphviz dot files of the dependencies for targets in mantid.
-This is useful for understanding why compilation will wait for individual libraries to link before compiling more files.
+CMake can generate Graphviz DOT files
+showing the link dependencies between executable and library targets.
+These target-level graphs are useful
+for understanding direct and transitive dependencies
+without the source files
+and individual object files shown in a file-level build graph.
 
-.. code:: sh
+Use the following options
+to include only Mantid-owned executable and library targets.
+Download :download:`CMakeGraphVizOptions.cmake <CMakeGraphVizOptions.cmake>`
+and place it in the root of the CMake build directory.
+CMake searches the build directory for this file
+when generating the graphs.
 
-    cmake --graphviz=dependencies.dot .
-    dot -O -Tsvg dependencies.dot.WorkflowAlgorithms
+.. literalinclude:: CMakeGraphVizOptions.cmake
+   :language: cmake
 
+From the root of the build directory,
+generate the overall graph and a graph for each target
+in a dedicated subdirectory:
 
-`Cmake reference <https://cmake.org/cmake/help/latest/module/CMakeGraphVizOptions.html>`_ for configuring the tool options.
+.. code-block:: sh
+
+   mkdir -p graphviz
+   cmake --graphviz="$PWD/graphviz/mantid-targets.dot" .
+
+The overall graph is written to ``graphviz/mantid-targets.dot``.
+Each target graph appends the target name to that filename;
+for example,
+the dependencies needed to link ``APITest``
+are written to ``graphviz/mantid-targets.dot.APITest``.
+Render that graph as SVG
+and automatically name the output after the input file with:
+
+.. code-block:: sh
+
+   dot -Tsvg -O graphviz/mantid-targets.dot.APITest
+
+This writes ``graphviz/mantid-targets.dot.APITest.svg``.
+The ``-O`` option also accepts multiple input files
+and automatically names each output:
+
+.. code-block:: sh
+
+   dot -Tsvg -O graphviz/mantid-targets.dot.APITest graphviz/mantid-targets.dot.API
+
+See the CMake documentation for
+`generating Graphviz dependency graphs <https://cmake.org/cmake/help/latest/manual/cmake.1.html#cmdoption-cmake-graphviz>`_
+and configuring the available
+`Graphviz options <https://cmake.org/cmake/help/latest/module/CMakeGraphVizOptions.html>`_.
+See the `dot documentation <https://graphviz.org/documentation/>`_
+for more options on converting the diagrams to something more easily viewed.

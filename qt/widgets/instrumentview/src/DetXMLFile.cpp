@@ -10,6 +10,7 @@
 #include <QTemporaryFile>
 
 #include <fstream>
+#include <stdexcept>
 
 namespace MantidQt::MantidWidgets {
 /**
@@ -48,7 +49,10 @@ DetXMLFile::DetXMLFile(const std::vector<int> &dets, Option opt, const QString &
 
   if (fname.isEmpty()) {
     QTemporaryFile mapFile;
-    mapFile.open();
+    // Opened only to reserve a unique name; the grouping is written to a sibling ".xml" path.
+    if (!mapFile.open()) {
+      throw std::runtime_error("Failed to create a temporary file for the detector grouping");
+    }
     m_fileName = mapFile.fileName() + ".xml";
     mapFile.close();
     m_delete = true;

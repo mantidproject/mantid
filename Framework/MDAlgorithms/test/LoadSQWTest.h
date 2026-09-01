@@ -77,8 +77,8 @@ class ExposedLoadSQW : public LoadSQW {
 public:
   ExposedLoadSQW() : LoadSQW() {}
   void exec() override {
-    std::runtime_error("Don't use this method, use setup instead, or the "
-                       "full-blown LoadSQW type.");
+    throw std::runtime_error("Don't use this method, use setup instead, or the "
+                             "full-blown LoadSQW type.");
   }
   // Call instead of execute to set-up.
   virtual void setup() {

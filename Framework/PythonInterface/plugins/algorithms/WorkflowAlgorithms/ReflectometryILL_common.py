@@ -130,11 +130,11 @@ def detector_angle(run: Union[str, list]) -> float:
     try:
         with h5py.File(run, "r") as nexus:
             if nexus.get("entry0/instrument/DAN") is not None:
-                return float(numpy.array(nexus.get("entry0/instrument/DAN/value"), dtype="float"))
+                return numpy.asarray(nexus.get("entry0/instrument/DAN/value"), dtype=float).item()
             elif nexus.get("entry0/instrument/dan") is not None:
-                return float(numpy.array(nexus.get("entry0/instrument/dan/value"), dtype="float"))
+                return numpy.asarray(nexus.get("entry0/instrument/dan/value"), dtype=float).item()
             elif nexus.get("entry0/instrument/VirtualAxis/DAN_actual_angle") is not None:
-                return float(numpy.array(nexus.get("entry0/instrument/VirtualAxis/DAN_actual_angle"), dtype="float"))
+                return numpy.asarray(nexus.get("entry0/instrument/VirtualAxis/DAN_actual_angle"), dtype=float).item()
             else:
                 raise RuntimeError("Cannot retrieve detector angle from Nexus file {}.".format(run))
     except OSError:
@@ -178,9 +178,9 @@ def sample_angle(run: Union[str, list]) -> float:
     try:
         with h5py.File(run, "r") as nexus:
             if nexus.get("entry0/instrument/SAN") is not None:
-                return float(numpy.array(nexus.get("entry0/instrument/SAN/value"), dtype="float"))
+                return numpy.asarray(nexus.get("entry0/instrument/SAN/value"), dtype="float").item()
             elif nexus.get("entry0/instrument/san") is not None:
-                return float(numpy.array(nexus.get("entry0/instrument/san/value"), dtype="float"))
+                return numpy.asarray(nexus.get("entry0/instrument/san/value"), dtype="float").item()
             else:
                 raise RuntimeError("Cannot retrieve sample angle from Nexus file {}.".format(run))
     except OSError:

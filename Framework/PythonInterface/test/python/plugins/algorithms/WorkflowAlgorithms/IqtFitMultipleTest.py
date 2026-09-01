@@ -86,7 +86,7 @@ class IqtFitMultipleTest(unittest.TestCase):
         self.assertEqual("Diff", text_axis.label(2))
 
         # Check bin units
-        self.assertEqual("ns", str(sub_ws.getAxis(0).getUnit().symbol()))
+        self.assertEqual("ns", sub_ws.getAxis(0).getUnit().symbol().ascii())
 
     def _validate_table_values(self, tableWS):
         # Check column data

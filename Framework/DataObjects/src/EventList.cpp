@@ -13,6 +13,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/TimeROI.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #ifdef _MSC_VER
 // qualifier applied to function type has no meaning; ignored
@@ -1269,8 +1270,11 @@ EventSortType EventList::getSortType() const { return this->order; }
  * Does nothing if sorted otherwise or unsorted.
  * */
 void EventList::reverse() {
-  // reverse the histogram bin parameters
-  MantidVec &x = dataX();
+  // reverse the histogram bin parameters. Changing X invalidates any histogram cached in the MRU,
+  // so drop it first -- this is what the deprecated dataX() used to do implicitly.
+  if (mru)
+    mru->deleteIndex(this);
+  auto &x = mutableX();
   std::reverse(x.begin(), x.end());
 
   // flip the events if they are tof sorted
@@ -1386,12 +1390,19 @@ void EventList::setX(const Kernel::cow_ptr<HistogramData::HistogramX> &X) {
 MantidVec &EventList::dataX() {
   if (mru)
     mru->deleteIndex(this);
+  // Handing out a mutable MantidVec would allow the length to be changed, so
+  // FixedLengthVector::mutableRawData() is protected and Histogram is its only friend. The
+  // deprecated legacy accessor is therefore the only way to express this.
+  GNU_DIAG_OFF("deprecated-declarations")
+  MSVC_DIAG_OFF(4996)
   return m_histogram.dataX();
+  MSVC_DIAG_ON(4996)
+  GNU_DIAG_ON("deprecated-declarations")
 }
 
 /** Deprecated, use x() instead. Returns a const reference to the x data.
  *  @return a reference to the X (bin) vector. */
-const MantidVec &EventList::dataX() const { return m_histogram.dataX(); }
+const MantidVec &EventList::dataX() const { return m_histogram.x().rawData(); }
 
 /// Deprecated, use x() instead. Returns the x data const
 const MantidVec &EventList::readX() const { return m_histogram.x().rawData(); }
@@ -1400,11 +1411,15 @@ const MantidVec &EventList::readX() const { return m_histogram.x().rawData(); }
 Kernel::cow_ptr<HistogramData::HistogramX> EventList::ptrX() const { return m_histogram.sharedX(); }
 
 /// Deprecated, use mutableDx() instead.
+GNU_DIAG_OFF("deprecated-declarations")
+MSVC_DIAG_OFF(4996)
 MantidVec &EventList::dataDx() { return m_histogram.dataDx(); }
+MSVC_DIAG_ON(4996)
+GNU_DIAG_ON("deprecated-declarations")
 /// Deprecated, use dx() instead.
-const MantidVec &EventList::dataDx() const { return m_histogram.dataDx(); }
+const MantidVec &EventList::dataDx() const { return m_histogram.dx().rawData(); }
 /// Deprecated, use dx() instead.
-const MantidVec &EventList::readDx() const { return m_histogram.readDx(); }
+const MantidVec &EventList::readDx() const { return m_histogram.dx().rawData(); }
 
 // ==============================================================================================
 // --- Return Data Vectors --------------------------------------------------
@@ -1419,7 +1434,7 @@ MantidVec *EventList::makeDataY() const {
   auto Y = new MantidVec();
   MantidVec E;
   // Generate the Y histogram while skipping the E if possible.
-  generateHistogram(readX(), *Y, E, true);
+  generateHistogram(x().rawData(), *Y, E, true);
   return Y;
 }
 
@@ -1431,7 +1446,7 @@ MantidVec *EventList::makeDataY() const {
 MantidVec *EventList::makeDataE() const {
   MantidVec Y;
   auto E = new MantidVec();
-  generateHistogram(readX(), Y, *E);
+  generateHistogram(x().rawData(), Y, *E);
   // Y is unused.
   return E;
 }
@@ -1489,7 +1504,7 @@ Kernel::cow_ptr<HistogramData::HistogramY> EventList::sharedY() const {
   if (!yData) {
     MantidVec Y;
     MantidVec E;
-    this->generateHistogram(readX(), Y, E);
+    this->generateHistogram(x().rawData(), Y, E);
 
     // Create the MRU object
     yData = Kernel::make_cow<HistogramData::HistogramY>(std::move(Y));
@@ -1520,7 +1535,7 @@ Kernel::cow_ptr<HistogramData::HistogramE> EventList::sharedE() const {
     // Now use that to get E -- Y values are generated from another function
     MantidVec Y_ignored;
     MantidVec E;
-    this->generateHistogram(readX(), Y_ignored, E);
+    this->generateHistogram(x().rawData(), Y_ignored, E);
     eData = Kernel::make_cow<HistogramData::HistogramE>(std::move(E));
 
     // Lets save it in the MRU
@@ -2856,8 +2871,11 @@ void EventList::integrate(const double minX, const double maxX, const bool entir
  * positive = unchanged, negative = reverse.
  */
 void EventList::convertTof(std::function<double(double)> func, const int sorting) {
-  // fix the histogram parameter
-  MantidVec &x = dataX();
+  // fix the histogram parameter. Changing X invalidates any histogram cached in the MRU, so drop
+  // it first -- this is what the deprecated dataX() used to do implicitly.
+  if (mru)
+    mru->deleteIndex(this);
+  auto &x = mutableX();
   transform(x.cbegin(), x.cend(), x.begin(), func);
 
   // do nothing if sorting > 0

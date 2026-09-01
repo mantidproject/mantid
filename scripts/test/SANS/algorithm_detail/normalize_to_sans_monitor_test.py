@@ -21,10 +21,9 @@ def get_expected_for_spectrum_1_case(monitor_workspace, selected_detector):
     # The first bin should have 0 + abs(3.2-4.0)/abs(3.2 - 4.7)*90
     # The second bin should have abs(4.0-4.7)/abs(3.2 - 4.7)*90 + abs(4.7-6.0)/abs(4.7 - 6.3)*90
     # The third bin should have abs(6.0-6.3)/abs(4.7 - 6.3)*90 + 90
-    instrument = monitor_workspace.getInstrument()
-    source = instrument.getSource()
-    detector = monitor_workspace.getDetector(selected_detector)
-    distance_source_detector = detector.getDistance(source)
+    source_position = monitor_workspace.componentInfo().sourcePosition()
+    detector_position = monitor_workspace.spectrumInfo().position(selected_detector)
+    distance_source_detector = detector_position.distance(source_position)
     h = 6.62606896e-34
     mass = 1.674927211e-27
     times = monitor_workspace.x(0)

@@ -356,3 +356,6 @@ performancelog.write = Off
 
 # SANS ISIS Command Interface
 sans.deprecated_command_interface = Off
+
+# URL prefix of the ISIS journal
+isisjournal.url_prefix = http://data.isis.rl.ac.uk/journals/ndx

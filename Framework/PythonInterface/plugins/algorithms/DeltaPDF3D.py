@@ -365,8 +365,8 @@ class DeltaPDF3D(PythonAlgorithm):
         Input dataset (dset) and window width (x)
         Input an odd window or the window will be asymmetric and stuff breaks
         """
-        med = ndimage.filters.median_filter(signal, size=width, mode="nearest")  # Get median of input data set
-        mad = ndimage.filters.median_filter(np.abs(signal - med), size=width, mode="nearest")  # Get median absolute deviation (MAD)
+        med = ndimage.median_filter(signal, size=width, mode="nearest")  # Get median of input data set
+        mad = ndimage.median_filter(np.abs(signal - med), size=width, mode="nearest")  # Get median absolute deviation (MAD)
         asigma = np.abs(mad * 3 * 1.4826)  # Absolute value of approximate sigma
         mask = np.logical_or(signal < (med - asigma), signal > (med + asigma))  # Check if value is outlier based on MAD
         signal[mask] = (med + 2.2 * mad)[mask]  # Return median+2.2*MAD if value is outlier

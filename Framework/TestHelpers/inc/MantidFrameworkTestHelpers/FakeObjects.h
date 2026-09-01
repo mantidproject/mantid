@@ -40,6 +40,7 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidKernel/cow_ptr.h"
 
 using namespace Mantid::API;
@@ -70,17 +71,22 @@ public:
   void copyDataFrom(const ISpectrum &other) override { other.copyDataInto(*this); }
 
   void setX(const Mantid::Kernel::cow_ptr<Mantid::HistogramData::HistogramX> &X) override { m_histogram.setSharedX(X); }
+  // The mutable legacy accessors below require Histogram's legacy interface
+  GNU_DIAG_OFF("deprecated-declarations")
+  MSVC_DIAG_OFF(4996)
   MantidVec &dataX() override { return m_histogram.dataX(); }
+  MantidVec &dataDx() override { return m_histogram.dataDx(); }
+  MantidVec &dataY() override { return m_histogram.dataY(); }
+  MantidVec &dataE() override { return m_histogram.dataE(); }
+  MSVC_DIAG_ON(4996)
+  GNU_DIAG_ON("deprecated-declarations")
+
   const MantidVec &dataX() const override { return m_histogram.x().rawData(); }
   const MantidVec &readX() const override { return m_histogram.x().rawData(); }
   Mantid::Kernel::cow_ptr<Mantid::HistogramData::HistogramX> ptrX() const override { return m_histogram.sharedX(); }
 
-  MantidVec &dataDx() override { return m_histogram.dataDx(); }
-  const MantidVec &dataDx() const override { return m_histogram.dataDx(); }
-  const MantidVec &readDx() const override { return m_histogram.readDx(); }
-
-  MantidVec &dataY() override { return m_histogram.dataY(); }
-  MantidVec &dataE() override { return m_histogram.dataE(); }
+  const MantidVec &dataDx() const override { return m_histogram.dx().rawData(); }
+  const MantidVec &readDx() const override { return m_histogram.dx().rawData(); }
 
   const MantidVec &dataY() const override { return m_histogram.y().rawData(); }
   const MantidVec &dataE() const override { return m_histogram.e().rawData(); }

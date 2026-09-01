@@ -39,10 +39,10 @@ std::pair<double, double> ISpectrum::getXDataRange() const {
 }
 
 /// Deprecated, use y() instead. Returns the y data const
-const MantidVec &ISpectrum::readY() const { return this->dataY(); }
+const MantidVec &ISpectrum::readY() const { return y().rawData(); }
 
 /// Deprecated, use e() instead. Returns the y error data const
-const MantidVec &ISpectrum::readE() const { return this->dataE(); }
+const MantidVec &ISpectrum::readE() const { return e().rawData(); }
 
 /** Add a detector ID to the set of detector IDs
  *

@@ -225,11 +225,11 @@ class ModelFittingModelTest(unittest.TestCase):
         self.assertTrue(not check_if_workspace_exist("Result1; A1 vs A1"))
 
         unit_test_ws = retrieve_ws("Result1; Lambda vs Sigma")
-        self.assertTrue(str(unit_test_ws.getAxis(0).getUnit().symbol()) == "\\mu s^{-1}")
+        self.assertTrue(unit_test_ws.getAxis(0).getUnit().symbol().ascii() == "\\mu s^{-1}")
         self.assertTrue(str(unit_test_ws.YUnit()) == "Lambda ($\\mu$ $s^{-1}$)")
 
         unit_test_ws = retrieve_ws("Result1; f1.Lambda vs f1.Sigma")
-        self.assertTrue(str(unit_test_ws.getAxis(0).getUnit().symbol()) == "\\mu s^{-1}")
+        self.assertTrue(unit_test_ws.getAxis(0).getUnit().symbol().ascii() == "\\mu s^{-1}")
         self.assertTrue(str(unit_test_ws.YUnit()) == "f1.Lambda ($\\mu$ $s^{-1}$)")
 
 

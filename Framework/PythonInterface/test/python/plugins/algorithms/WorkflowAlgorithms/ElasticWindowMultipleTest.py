@@ -96,25 +96,25 @@ class ElasticWindowMultipleTest(unittest.TestCase):
         q_x = self.q.getAxis(0).getUnit()
         q_y = self.q.getAxis(1).getUnit()
         self.assertEqual(q_x.unitID(), "MomentumTransfer")
-        self.assertEqual(str(q_x.symbol()), "Angstrom^-1")
+        self.assertEqual(q_x.symbol().ascii(), "Angstrom^-1")
         self.assertEqual(q_y.unitID(), "Label")
-        self.assertEqual(str(q_y.symbol()), "")
+        self.assertEqual(q_y.symbol().ascii(), "")
 
     def test_ElasticWindowMultiple_returns_a_q2_workspace_with_the_expected_axis_labels_and_units(self):
         q2_x = self.q2.getAxis(0).getUnit()
         q2_y = self.q2.getAxis(1).getUnit()
         self.assertEqual(q2_x.unitID(), "QSquared")
-        self.assertEqual(str(q2_x.symbol()), "Angstrom^-2")
+        self.assertEqual(q2_x.symbol().ascii(), "Angstrom^-2")
         self.assertEqual(q2_y.unitID(), "Label")
-        self.assertEqual(str(q2_y.symbol()), "")
+        self.assertEqual(q2_y.symbol().ascii(), "")
 
     def test_ElasticWindowMultiple_returns_an_elf_workspace_with_the_expected_axis_labels_and_units(self):
         elf_x = self.elf.getAxis(0).getUnit()
         elf_y = self.elf.getAxis(1).getUnit()
         self.assertEqual(elf_x.unitID(), "Label")
-        self.assertEqual(str(elf_x.symbol()), "")
+        self.assertEqual(elf_x.symbol().ascii(), "")
         self.assertEqual(elf_y.unitID(), "MomentumTransfer")
-        self.assertEqual(str(elf_y.symbol()), "Angstrom^-1")
+        self.assertEqual(elf_y.symbol().ascii(), "Angstrom^-1")
 
     def test_ElasticWindowMultiple_returns_integration_sample_logs(self):
         run_q = self.q.getRun()
