@@ -160,22 +160,33 @@ class TexturePlannerView(QMainWindow, Ui_texplan):
         self.make_box_toggleable(self.grpOrientationFile)  # finder widget has some hidden features that toggling messes with
         self.make_box_toggleable(self.grpGaugeVol, self.set_gauge_vol_visible)
 
-        self._setup_settings_toolbar()
+        self._setup_bottom_toolbar()
 
         # register startup
         if register_usage:
             UsageService.registerFeatureUsage(FeatureType.Interface, "TexturePlanner", False)
 
-    def _setup_settings_toolbar(self) -> None:
-        toolbar = QToolBar("Main Toolbar", self)
+    def _setup_bottom_toolbar(self) -> None:
+        # kept as an attribute rather than a local so the tutorial can point at the toolbar itself
+        self.toolbar = QToolBar("Main Toolbar", self)
+        self.btn_tutorial = QPushButton()
+        self.btn_tutorial.setIcon(get_icon("mdi.school", "black", 1.2))
+        self.btn_tutorial.setToolTip("Guided tutorial")
+        self.toolbar.addWidget(self.btn_tutorial)
         self.btn_settings = QPushButton()
         self.btn_settings.setIcon(get_icon("mdi.settings", "black", 1.2))
         self.btn_settings.setToolTip("Settings")
-        toolbar.addWidget(self.btn_settings)
-        self.addToolBar(QtCore.Qt.BottomToolBarArea, toolbar)
+        self.toolbar.addWidget(self.btn_settings)
+        self.addToolBar(QtCore.Qt.BottomToolBarArea, self.toolbar)
 
     def set_on_settings_clicked(self, slot: Callable) -> None:
         self.btn_settings.clicked.connect(slot)
+
+    def set_on_tutorial_clicked(self, slot: Callable) -> None:
+        self.btn_tutorial.clicked.connect(slot)
+
+    def set_tutorial_button_visible(self, visible: bool) -> None:
+        self.btn_tutorial.setVisible(visible)
 
     def set_on_close(self, slot: Callable) -> None:
         self._on_close = slot
