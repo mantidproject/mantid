@@ -79,7 +79,7 @@ InstrumentDefinitionParser::InstrumentDefinitionParser(const std::string &filena
                                                        const std::string &xmlText)
     : m_xmlFile(std::make_shared<NullIDFObject>()), m_cacheFile(std::make_shared<NullIDFObject>()), m_pDoc(nullptr),
       m_hasParameterElement_beenSet(false), m_haveDefaultFacing(false), m_deltaOffsets(false), m_angleConvertConst(1.0),
-      m_indirectPositions(false), m_cachingOption(NoneApplied) {
+      m_indirectPositions(false), m_mixedNeutronicPositions(false), m_cachingOption(NoneApplied) {
   initialise(filename, instName, xmlText, "");
 }
 
@@ -96,7 +96,7 @@ InstrumentDefinitionParser::InstrumentDefinitionParser(const IDFObject_const_spt
                                                        const std::string &instName, const std::string &xmlText)
     : m_xmlFile(std::make_shared<NullIDFObject>()), m_cacheFile(std::make_shared<NullIDFObject>()), m_pDoc(nullptr),
       m_hasParameterElement_beenSet(false), m_haveDefaultFacing(false), m_deltaOffsets(false), m_angleConvertConst(1.0),
-      m_indirectPositions(false), m_cachingOption(NoneApplied) {
+      m_indirectPositions(false), m_mixedNeutronicPositions(false), m_cachingOption(NoneApplied) {
   initialise(xmlFile->getFileFullPathStr(), instName, xmlText, expectedCacheFile->getFileFullPathStr());
 
   m_cacheFile = expectedCacheFile;
