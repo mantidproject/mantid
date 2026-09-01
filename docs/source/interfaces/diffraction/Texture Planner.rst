@@ -65,8 +65,12 @@ Tutorial
     The tutorial runs in a **separate window containing its own copy of the
     interface**, loaded with a small demo sample. Nothing it does affects the
     session you are working in, and everything it creates is removed when its
-    window is closed. Use *Pause* to stop and look around, *Back* to re-read a
-    step, and *Chapters…* to jump to a particular part of the workflow.
+    window is closed.
+
+    Nothing moves on its own: press *Next* at the bottom of the window when you
+    have finished reading a step, or *Back* to re-read the previous one. The tabs
+    along the top jump to a chapter — the interface is rebuilt and brought up to
+    that point, so a chapter always starts from the state it expects.
 
 .. _Texture_Planner_sample-setup-ref:
 

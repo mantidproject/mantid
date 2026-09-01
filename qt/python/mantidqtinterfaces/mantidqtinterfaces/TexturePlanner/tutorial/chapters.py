@@ -82,10 +82,9 @@ SAMPLE_SETUP = TutorialChapter(
             text=(
                 "This is a working copy of the interface, loaded with a demo sample. Everything the "
                 "tutorial does happens here — your own session is untouched.<br><br>"
-                "Use <b>Pause</b> to stop and look around, <b>Back</b> to re-read a step, or "
-                "<b>Chapters…</b> to skip to a part you care about."
+                "Press <b>Next</b> below when you have finished reading each step; nothing moves on "
+                "its own. <b>Back</b> re-reads a step, and the tabs above jump to a chapter."
             ),
-            dwell_ms=6000,
         ),
         TutorialStep(
             title="Two setup tabs",
@@ -96,7 +95,6 @@ SAMPLE_SETUP = TutorialChapter(
             ),
             target=lambda s: s.view.tabSetup,
             action=lambda s: select_tab(s.view.tabSetup, "Sample Setup"),
-            dwell_ms=4500,
         ),
         TutorialStep(
             title="Load a sample shape",
@@ -110,7 +108,6 @@ SAMPLE_SETUP = TutorialChapter(
             await_=lambda s: _finder_ready(s.view.finder_xml),
             await_timeout_s=FINDER_TIMEOUT_S,
             await_text="Looking for the sample file…",
-            dwell_ms=4500,
         ),
         TutorialStep(
             title="Load it",
@@ -122,7 +119,6 @@ SAMPLE_SETUP = TutorialChapter(
             target=lambda s: s.view.btnXML,
             action=lambda s: click(s.view.btnXML),
             settle_ms=600,
-            dwell_ms=4500,
         ),
         TutorialStep(
             title="Give the sample a material",
@@ -134,7 +130,6 @@ SAMPLE_SETUP = TutorialChapter(
             target=lambda s: s.view.btnSetMaterial,
             action=_apply_material,
             settle_ms=400,
-            dwell_ms=5000,
         ),
         TutorialStep(
             title="The material is shown here",
@@ -143,7 +138,6 @@ SAMPLE_SETUP = TutorialChapter(
                 "tell at a glance whether the transmission estimates later on mean anything."
             ),
             target=lambda s: s.view.lblCurrentMaterialValue,
-            dwell_ms=4000,
         ),
         TutorialStep(
             title="How the sample sits in its own frame",
@@ -155,7 +149,6 @@ SAMPLE_SETUP = TutorialChapter(
             target=lambda s: s.view.initOrientation,
             action=lambda s: set_spin_box(s.view.spnInitX, 30.0),
             settle_ms=500,
-            dwell_ms=5000,
         ),
         TutorialStep(
             title="And where it sits in the beam",
@@ -167,7 +160,6 @@ SAMPLE_SETUP = TutorialChapter(
             target=lambda s: s.view.initPosition,
             action=lambda s: set_spin_box(s.view.spnInitPZ, 0.005),
             settle_ms=500,
-            dwell_ms=5000,
         ),
         TutorialStep(
             title="Name your sample directions",
@@ -179,7 +171,6 @@ SAMPLE_SETUP = TutorialChapter(
             target=lambda s: s.view.grpDirectionWidgets,
             action=lambda s: set_check_state(s.view.grpDirectionWidgets, True),
             settle_ms=400,
-            dwell_ms=5500,
         ),
         TutorialStep(
             title="Apply the directions",
@@ -190,7 +181,6 @@ SAMPLE_SETUP = TutorialChapter(
             target=lambda s: s.view.updateDirs,
             action=lambda s: (set_text(s.view.lineedit_RD, "Rolling"), click(s.view.updateDirs)),
             settle_ms=600,
-            dwell_ms=5000,
         ),
     ],
 )
@@ -228,7 +218,6 @@ EXPERIMENTAL_SETUP = TutorialChapter(
             target=lambda s: s.view.tabSetup,
             action=lambda s: select_tab(s.view.tabSetup, "Experimental Setup"),
             settle_ms=300,
-            dwell_ms=4500,
         ),
         TutorialStep(
             title="Pick an instrument",
@@ -237,7 +226,6 @@ EXPERIMENTAL_SETUP = TutorialChapter(
                 "you name any instrument definition Mantid can find, and supply your own grouping file."
             ),
             target=lambda s: s.view.cmbInstr,
-            dwell_ms=4500,
         ),
         TutorialStep(
             title="…and a detector grouping",
@@ -249,7 +237,6 @@ EXPERIMENTAL_SETUP = TutorialChapter(
             target=lambda s: s.view.cmbGroup,
             action=lambda s: select_combo(s.view.cmbGroup, DEMO_GROUP),
             settle_ms=300,
-            dwell_ms=5000,
         ),
         TutorialStep(
             title="Apply the selection",
@@ -261,7 +248,6 @@ EXPERIMENTAL_SETUP = TutorialChapter(
             target=lambda s: s.view.btnUpdateInstr,
             action=lambda s: click(s.view.btnUpdateInstr),
             settle_ms=800,
-            dwell_ms=5000,
         ),
         TutorialStep(
             title="The gauge volume",
@@ -273,7 +259,6 @@ EXPERIMENTAL_SETUP = TutorialChapter(
             target=lambda s: s.view.grpGaugeVol,
             action=lambda s: set_check_state(s.view.grpGaugeVol, True),
             settle_ms=400,
-            dwell_ms=5500,
         ),
         TutorialStep(
             title="Choose a preset or your own shape",
@@ -284,7 +269,6 @@ EXPERIMENTAL_SETUP = TutorialChapter(
             target=lambda s: s.view.combo_shapeMethod,
             action=lambda s: select_combo(s.view.combo_shapeMethod, DEMO_GAUGE_VOLUME),
             settle_ms=300,
-            dwell_ms=5000,
         ),
         TutorialStep(
             title="Set it",
@@ -292,7 +276,6 @@ EXPERIMENTAL_SETUP = TutorialChapter(
             target=lambda s: s.view.setGV,
             action=lambda s: click(s.view.setGV),
             settle_ms=800,
-            dwell_ms=4000,
         ),
         TutorialStep(
             title="Describe your goniometer",
@@ -303,7 +286,6 @@ EXPERIMENTAL_SETUP = TutorialChapter(
             target=lambda s: s.view.grpGoniometer,
             action=lambda s: set_spin_box(s.view.spnNumAxes, 2),
             settle_ms=500,
-            dwell_ms=5000,
         ),
         TutorialStep(
             title="An axis is a vector and a sense",
@@ -314,7 +296,6 @@ EXPERIMENTAL_SETUP = TutorialChapter(
             target=lambda s: s.view.axis0,
             action=lambda s: (set_text(s.view.edtVec0, "0,1,0"), select_combo(s.view.cmbSense0, "Counterclockwise")),
             settle_ms=500,
-            dwell_ms=5500,
         ),
         TutorialStep(
             title="The step size",
@@ -325,7 +306,6 @@ EXPERIMENTAL_SETUP = TutorialChapter(
             target=lambda s: s.view.spnStepSize,
             action=lambda s: set_spin_box(s.view.spnStepSize, 30.0),
             settle_ms=400,
-            dwell_ms=4500,
         ),
         TutorialStep(
             title="Dial in an orientation",
@@ -336,7 +316,6 @@ EXPERIMENTAL_SETUP = TutorialChapter(
             target=lambda s: s.view.spnAngle0,
             action=lambda s: set_spin_box(s.view.spnAngle0, 30.0),
             settle_ms=700,
-            dwell_ms=5000,
         ),
         TutorialStep(
             title="Add it to the list",
@@ -347,7 +326,6 @@ EXPERIMENTAL_SETUP = TutorialChapter(
             target=lambda s: s.view.addOrientation,
             action=_add_orientations,
             settle_ms=1000,
-            dwell_ms=5000,
         ),
         TutorialStep(
             title="Move between them",
@@ -358,7 +336,6 @@ EXPERIMENTAL_SETUP = TutorialChapter(
             target=lambda s: s.view.spnIndex,
             action=lambda s: set_spin_box(s.view.spnIndex, 1),
             settle_ms=700,
-            dwell_ms=5000,
         ),
     ],
 )
@@ -381,7 +358,6 @@ RESULTS = TutorialChapter(
                 "really is where you think it is."
             ),
             target=lambda s: s.view.grpSampleFigure,
-            dwell_ms=5500,
         ),
         TutorialStep(
             title="The pole figure",
@@ -391,7 +367,6 @@ RESULTS = TutorialChapter(
                 "whole reason for planning before beam time."
             ),
             target=lambda s: s.view.grpPoleFigure,
-            dwell_ms=6000,
         ),
         TutorialStep(
             title="Transmission",
@@ -401,7 +376,6 @@ RESULTS = TutorialChapter(
                 "slowest thing the interface does — the tutorial has turned the statistics right down."
             ),
             target=lambda s: s.view.chkTransmission,
-            dwell_ms=6000,
         ),
         TutorialStep(
             title="Now with absorption",
@@ -412,7 +386,6 @@ RESULTS = TutorialChapter(
             target=lambda s: s.view.grpPoleFigure,
             action=lambda s: set_check_state(s.view.chkTransmission, True),
             settle_ms=1200,
-            dwell_ms=6000,
         ),
         TutorialStep(
             title="The orientation table",
@@ -421,7 +394,6 @@ RESULTS = TutorialChapter(
                 "controls whether an orientation is exported; <b>Select</b> is for the buttons below."
             ),
             target=lambda s: s.view.grpDynamicTable,
-            dwell_ms=5500,
         ),
         TutorialStep(
             title="Selecting rows",
@@ -433,7 +405,6 @@ RESULTS = TutorialChapter(
             target=lambda s: s.view.selectAll,
             action=lambda s: (click(s.view.selectAll), click(s.view.deselectAll)),
             settle_ms=700,
-            dwell_ms=5500,
         ),
     ],
 )
@@ -464,7 +435,6 @@ EXPORT = TutorialChapter(
             await_timeout_s=FINDER_TIMEOUT_S,
             await_text="Checking the output directory…",
             settle_ms=400,
-            dwell_ms=5000,
         ),
         TutorialStep(
             title="And what to call it",
@@ -472,7 +442,6 @@ EXPORT = TutorialChapter(
             target=lambda s: s.view.saveFileLine,
             action=lambda s: set_text(s.view.saveFileLine, s.data.save_filename),
             settle_ms=400,
-            dwell_ms=4500,
         ),
         TutorialStep(
             title="Pick a format",
@@ -485,7 +454,6 @@ EXPORT = TutorialChapter(
             target=lambda s: s.view.cmbExportFormat,
             action=lambda s: select_combo(s.view.cmbExportFormat, DEMO_EXPORT_FORMAT),
             settle_ms=400,
-            dwell_ms=6000,
         ),
         TutorialStep(
             title="Write it out",
@@ -493,7 +461,6 @@ EXPORT = TutorialChapter(
             target=lambda s: s.view.btnExport,
             action=lambda s: click(s.view.btnExport),
             settle_ms=800,
-            dwell_ms=4500,
         ),
         TutorialStep(
             title="Everything else is in Settings",
@@ -503,7 +470,6 @@ EXPORT = TutorialChapter(
                 "wavelength the attenuation is quoted at. They are remembered between sessions."
             ),
             target=lambda s: s.view.btn_settings,
-            dwell_ms=6500,
         ),
         TutorialStep(
             title="That is the whole workflow",
@@ -513,7 +479,6 @@ EXPORT = TutorialChapter(
                 "The full documentation is under <b>Help → Mantid Help</b>. Close this window whenever "
                 "you like — nothing here has touched your own session."
             ),
-            dwell_ms=8000,
         ),
     ],
 )

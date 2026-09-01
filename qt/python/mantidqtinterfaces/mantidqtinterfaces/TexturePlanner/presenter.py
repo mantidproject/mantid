@@ -35,6 +35,9 @@ if TYPE_CHECKING:
 # other settings.
 TUTORIAL_SETTINGS_KEY = "TexturePlanner"
 
+# Title of the tutorial window, which frames a throwaway copy of this interface.
+TUTORIAL_WINDOW_TITLE = "Texture Planner — Tutorial"
+
 
 class TexturePlannerPresenter(AlgorithmObserver):
     def __init__(self, model: TexturePlannerModel, view: TexturePlannerView, offer_tutorial: bool = True):
@@ -162,6 +165,7 @@ class TexturePlannerPresenter(AlgorithmObserver):
             parent=self.view,
             settings_key=TUTORIAL_SETTINGS_KEY,
             mark_as_seen=mark_as_seen,
+            title=TUTORIAL_WINDOW_TITLE,
         )
         self._tutorial_session.finished.connect(self._on_tutorial_finished)
 

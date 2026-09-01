@@ -10,9 +10,13 @@ GUI Tutorial Framework
 Overview
 ########
 
-``mantidqt.widgets.tutorial`` runs a guided, automated walkthrough of a Qt interface: it dims the
-window, spotlights one widget at a time, explains what it does, and **performs the interaction
-itself** so the user watches a real workflow run rather than reading about one.
+``mantidqt.widgets.tutorial`` runs a guided walkthrough of a Qt interface: it dims the window,
+spotlights one widget at a time, explains what it does, and **performs the interaction itself** so
+the user watches a real workflow run rather than reading about one.
+
+The tour never advances on its own. The user presses Next when they have finished reading, because
+there is no interval that is right for everyone: a step someone already understands is a wait, and
+a step they do not is a race.
 
 An interface supplies two things — a factory that builds a copy of itself, and a list of steps.
 Everything else is handled by the framework.
@@ -88,7 +92,6 @@ A tour is a sequence of ``TutorialChapter``, each a sequence of ``TutorialStep``
                 await_=lambda sandbox: not sandbox.view.finder_xml.isSearching(),
                 await_timeout_s=60.0,
                 await_text="Looking for the sample file…",
-                dwell_ms=4500,
             ),
         ],
     )
@@ -102,6 +105,30 @@ chapter is replayed against a freshly built interface whenever the user jumps to
 work without blocking. Give it an explicit ``await_timeout_s``: how long is reasonable depends
 entirely on what is being waited for, and a default would only ever be wrong in the direction that
 hides a hang.
+
+Where the controls live
+#######################
+
+Two pieces of chrome, and the split between them matters:
+
+* ``TutorialShell`` wraps the interface. Chapter tabs along the top, ``Back`` / ``Next`` / ``End
+  tutorial`` and a step counter along the bottom, with the interface reparented in between. It
+  does not move.
+* ``TutorialBubble`` is the caption beside the highlight, and carries **no controls at all**. It
+  chases whatever is being spotlighted, so a button on it would be somewhere different on every
+  step - the one control the user has to press would be the one they had to hunt for.
+
+Because the interface becomes a child of the shell, the dimming overlay covers only the interface:
+the tabs and buttons stay bright and usable while everything they act on is dimmed.
+
+Choosing a chapter tab **rebuilds the sandbox** and fast-forwards through the earlier chapters'
+actions. That is what lets a chapter be entered at all - its steps assume the state the chapters
+before it leave behind - and it is only possible because the tour drives a throwaway interface.
+
+Navigation is refused while a step is settling or waiting on the interface (``busy_changed``).
+Without that, Next pressed mid-search would run the following step's action against an interface
+that had not finished reacting to this one - and Next pressed during the settle would skip the
+step's caption while its action had already run.
 
 Never block
 ###########
@@ -182,8 +209,8 @@ Testing a tour
 
 A tour is written against widget names and presenter methods, so it drifts the moment either is
 renamed — silently, because nothing else imports it. Write a test that plays every chapter against
-a real interface, overriding the delays so it runs at full speed, and assert that no step failed
-and that every step found what it points at. See
+a real interface, pressing Next as each step becomes ready and cutting ``settle_ms`` to the
+minimum, and assert that no step failed and that every step found what it points at. See
 ``mantidqtinterfaces/TexturePlanner/tutorial/test/test_chapters.py``.
 
 Put each step's observation in its own ``subTest`` so one broken step does not hide the rest, and

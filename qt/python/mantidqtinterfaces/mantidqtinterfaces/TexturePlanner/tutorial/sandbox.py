@@ -21,14 +21,10 @@ This object is also the context every tutorial step receives, which is why it ex
 the presenter and the model rather than only the window.
 """
 
-from qtpy.QtCore import Qt
-
 from mantidqtinterfaces.TexturePlanner.model import TexturePlannerModel
 from mantidqtinterfaces.TexturePlanner.presenter import TexturePlannerPresenter
 from mantidqtinterfaces.TexturePlanner.tutorial.demo_data import DemoData
 from mantidqtinterfaces.TexturePlanner.view import TexturePlannerView
-
-WINDOW_TITLE = "Texture Planner — Tutorial"
 
 # The tour ticks "show transmission", which runs MonteCarloAbsorption for every orientation
 # *synchronously*, on the GUI thread. At the interface's default 50 events per point that is long
@@ -52,11 +48,8 @@ class TutorialSandbox:
         # from inside one, and on a first-ever open would launch a second tour recursively
         self.presenter = TexturePlannerPresenter(self.model, self.view, offer_tutorial=False)
 
-        # a window in its own right rather than a panel inside the user's planner, but still owned
-        # by it so it stays in front and goes away with it
-        self.view.setWindowFlags(Qt.Window)
-        self.view.setWindowTitle(WINDOW_TITLE)
-
+        # deliberately not given window flags or a title: the tutorial shell takes this view as a
+        # child and is itself the window, so anything set here would never be seen
         self.model.absorption.mc_kwargs["EventsPerPoint"] = DEMO_MC_EVENTS_PER_POINT
 
         self._torn_down = False
