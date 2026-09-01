@@ -613,7 +613,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
     def _runSliceAlgorithm(self, input_workspace, output_workspace):
         """Run the child algorithm to perform the slicing"""
         self.log().information("Running ReflectometrySliceEventWorkspace")
-        alg = self.createChildAlgorithm("ReflectometrySliceEventWorkspace")
+        alg = self.createChildAlgorithm("ReflectometrySliceEventWorkspace", version=1)
         for property in self._slice_properties:
             alg.setProperty(property, self.getPropertyValue(property))
         alg.setProperty("OutputWorkspace", output_workspace)
